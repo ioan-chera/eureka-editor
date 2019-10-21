@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -39,6 +39,20 @@
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
 
+misc_info_t      Misc_info;
+port_features_t  Features;
+
+
+// all the game and port definitions and previously loaded
+static std::map<std::string, GameInfo_c *> loaded_game_defs;
+static std::map<std::string, PortInfo_c *> loaded_port_defs;
+
+// the information being loaded for PURPOSE_GameInfo / PortInfo
+// TODO : move into parser_state_c
+static GameInfo_c *loading_Game;
+static PortInfo_c *loading_Port;
+
+
 std::map<char, linegroup_t *>    line_groups;
 std::map<char, thinggroup_t *>   thing_groups;
 std::map<char, texturegroup_t *> texture_groups;
@@ -51,15 +65,49 @@ std::map<std::string, char> texture_assigns;
 std::map<std::string, char> flat_assigns;
 
 
-game_info_t  game_info;  // contains sky_color (etc)
-
-
+//
+// BOOM Generalized Lines
+//
 generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
 
 int num_gen_linetypes;
 
 // variables which are "set" in def files
 static std::map< std::string, std::string > parse_vars;
+
+
+GameInfo_c::GameInfo_c(std::string _name) :
+	name(_name), base_game()
+{ }
+
+GameInfo_c::~GameInfo_c()
+{ }
+
+
+PortInfo_c::PortInfo_c(std::string _name) :
+	name(_name),
+	formats(0),
+	supported_games(),
+	udmf_namespace()
+{ }
+
+PortInfo_c::~PortInfo_c()
+{ }
+
+void PortInfo_c::AddSupportedGame(const char *game)
+{
+	if (! SupportsGame(game))
+		supported_games.push_back(std::string(game));
+}
+
+bool PortInfo_c::SupportsGame(const char *game) const
+{
+	for (size_t i = 0 ; i < supported_games.size() ; i++)
+		if (y_stricmp(supported_games[i].c_str(), game) == 0)
+			return true;
+
+	return false;
+}
 
 
 static void M_FreeAllDefinitions()
@@ -87,21 +135,23 @@ void M_ClearAllDefinitions()
 {
 	M_FreeAllDefinitions();
 
-	// reset game information
-	memset(&game_info, 0, sizeof(game_info));
+	memset(&Misc_info, 0, sizeof(Misc_info));
+	memset(&Features,  0, sizeof(Features));
 
-	game_info.player_r = 16;
-	game_info.player_h = 56;
-	game_info.view_height = 41;
-
-	game_info.min_dm_starts = 4;
-	game_info.max_dm_starts = 10;
+	Misc_info.player_r = 16;
+	Misc_info.player_h = 56;
+	Misc_info.view_height = 41;
+	Misc_info.min_dm_starts = 4;
+	Misc_info.max_dm_starts = 10;
 
 	// reset generalized types
 	memset(gen_linetypes, 0, sizeof(gen_linetypes));
 	num_gen_linetypes = 0;
+}
 
-	// clear the parse variables, pre-set a few vars
+
+void M_PrepareConfigVariables()
+{
 	parse_vars.clear();
 
 	switch (Level_format)
@@ -114,9 +164,35 @@ void M_ClearAllDefinitions()
 			parse_vars[std::string("$MAP_FORMAT")] = std::string("HEXEN");
 			break;
 
+		case MAPF_UDMF:
+			parse_vars[std::string("$MAP_FORMAT")] = std::string("UDMF");
+			break;
+
 		default: break;
 	}
+
+	if (! Udmf_namespace.empty())
+	{
+		parse_vars[std::string("$UDMF_NAMESPACE")] = Udmf_namespace;
+	}
+
+	if (Game_name)
+	{
+		parse_vars[std::string("$GAME_NAME")] = std::string(Game_name);
+
+		if (M_CanLoadDefinitions("games", Game_name))
+		{
+			const char *base_game = M_GetBaseGame(Game_name);
+			parse_vars[std::string("$BASE_GAME")] = std::string(base_game);
+		}
+	}
+
+	if (Port_name)
+	{
+		parse_vars[std::string("$PORT_NAME")] = std::string(Port_name);
+	}
 }
+
 
 
 static short ParseThingdefFlags(const char *s)
@@ -138,34 +214,34 @@ static void ParseColorDef(char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
-		game_info.sky_color = atoi(argv[1]);
+		Misc_info.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "wall") == 0)
 	{
-		game_info.wall_colors[0] = atoi(argv[1]);
-		game_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		Misc_info.wall_colors[0] = atoi(argv[1]);
+		Misc_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "floor") == 0)
 	{
-		game_info.floor_colors[0] = atoi(argv[1]);
-		game_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		Misc_info.floor_colors[0] = atoi(argv[1]);
+		Misc_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "invis") == 0)
 	{
-		game_info.invis_colors[0] = atoi(argv[1]);
-		game_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		Misc_info.invis_colors[0] = atoi(argv[1]);
+		Misc_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{
-		game_info.missing_color = atoi(argv[1]);
+		Misc_info.missing_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_tex") == 0)
 	{
-		game_info.unknown_tex = atoi(argv[1]);
+		Misc_info.unknown_tex = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_flat") == 0)
 	{
-		game_info.unknown_flat = atoi(argv[1]);
+		Misc_info.unknown_flat = atoi(argv[1]);
 	}
 	else
 	{
@@ -185,6 +261,9 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 
 		else if (y_stricmp(argv[0], "HEXEN") == 0)
 			result |= (1 << MAPF_Hexen);
+
+		else if (y_stricmp(argv[0], "UDMF") == 0)
+			result |= (1 << MAPF_UDMF);
 
 		else
 			FatalError("Unknown map format '%s' in definition file.\n", argv[0]);
@@ -229,59 +308,59 @@ static void ParseFeatureDef(char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "gen_types") == 0)
 	{
-		game_info.gen_types = atoi(argv[1]);
+		Features.gen_types = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "gen_sectors") == 0)
 	{
-		game_info.gen_sectors = atoi(argv[1]);
+		Features.gen_sectors = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "img_png") == 0)
 	{
-		game_info.img_png = atoi(argv[1]);
+		Features.img_png = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "tx_start") == 0)
 	{
-		game_info.tx_start = atoi(argv[1]);
+		Features.tx_start = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "coop_dm_flags") == 0)
 	{
-		game_info.coop_dm_flags = atoi(argv[1]);
+		Features.coop_dm_flags = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "friend_flag") == 0)
 	{
-		game_info.friend_flag = atoi(argv[1]);
+		Features.friend_flag = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "pass_through") == 0)
 	{
-		game_info.pass_through = atoi(argv[1]);
+		Features.pass_through = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "3d_midtex") == 0)
 	{
-		game_info.midtex_3d = atoi(argv[1]);
+		Features.midtex_3d = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "strife_flags") == 0)
 	{
-		game_info.strife_flags = atoi(argv[1]);
+		Features.strife_flags = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "medusa_fixed") == 0)
 	{
-		game_info.medusa_fixed = atoi(argv[1]);
+		Features.medusa_fixed = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "lax_sprites") == 0)
 	{
-		game_info.lax_sprites = atoi(argv[1]);
+		Features.lax_sprites = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "no_need_players") == 0)
 	{
-		game_info.no_need_players = atoi(argv[1]);
+		Features.no_need_players = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "tag_666") == 0)
 	{
-		game_info.tag_666 = atoi(argv[1]);
+		Features.tag_666 = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "mix_textures_flats") == 0)
 	{
-		game_info.mix_textures_flats = atoi(argv[1]);
+		Features.mix_textures_flats = atoi(argv[1]);
 	}
 	else
 	{
@@ -332,7 +411,6 @@ void M_LoadDefinitions(const char *folder, const char *name)
 {
 	// this is for error messages & debugging
 	char prettyname[256];
-
 	sprintf(prettyname, "%s/%s.ugh", folder, name);
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
@@ -354,7 +432,20 @@ typedef enum
 	PCOND_Reading	= 1,
 	PCOND_Skipping	= 2
 
-} parsing_cond_state_e;
+} parsing_condition_e;
+
+typedef struct
+{
+	parsing_condition_e cond;
+	int start_line;
+
+public:
+	void Toggle()
+	{
+		cond = (cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
+	}
+
+} parsing_cond_state_t;
 
 
 #define MAX_TOKENS  30   /* tokens per line */
@@ -381,8 +472,7 @@ public:
 	char * argv[MAX_TOKENS];
 
 	// state for handling if/else/endif
-	parsing_cond_state_e cond;
-	int cond_lineno;
+	std::vector<parsing_cond_state_t> cond_stack;
 
 	// BOOM generalized linedef stuff
 	int current_gen_line;
@@ -390,11 +480,20 @@ public:
 public:
 	parser_state_c() :
 		lineno(0), fname(NULL), argc(0),
-		cond(PCOND_NONE), cond_lineno(),
+		cond_stack(),
 		current_gen_line(-1)
 	{
 		memset(readbuf, 0, sizeof(readbuf));
 		memset(argv,    0, sizeof(argv));
+	}
+
+	bool HaveAnySkipping() const
+	{
+		for (size_t i = 0 ; i < cond_stack.size() ; i++)
+			if (cond_stack[i].cond == PCOND_Skipping)
+				return true;
+
+		return false;
 	}
 };
 
@@ -474,10 +573,11 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	int    nargs = pst->argc - 1;
 
 
-	// these are handled by other passes (like PURPOSE_GameCheck)
-	if (y_stricmp(argv[0], "variant_of") == 0 ||
+	// these are handled by other passes
+	if (y_stricmp(argv[0], "base_game") == 0 ||
+		y_stricmp(argv[0], "map_formats") == 0 ||
 		y_stricmp(argv[0], "supported_games") == 0 ||
-		y_stricmp(argv[0], "map_formats") == 0)
+		y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
 		return;
 	}
@@ -488,30 +588,27 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 3)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		game_info.player_r    = atoi(argv[1]);
-		game_info.player_h    = atoi(argv[2]);
-		game_info.view_height = atoi(argv[3]);
+		Misc_info.player_r    = atoi(argv[1]);
+		Misc_info.player_h    = atoi(argv[2]);
+		Misc_info.view_height = atoi(argv[3]);
 	}
-
 	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
 	{
 		if (nargs != 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		game_info.sky_color = atoi(argv[1]);
+		Misc_info.sky_color = atoi(argv[1]);
 	}
-
 	else if (y_stricmp(argv[0], "sky_flat") == 0)
 	{
 		if (nargs != 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		if (strlen(argv[1]) >= sizeof(game_info.sky_flat))
+		if (strlen(argv[1]) >= sizeof(Misc_info.sky_flat))
 			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
 
-		strcpy(game_info.sky_flat, argv[1]);
+		strcpy(Misc_info.sky_flat, argv[1]);
 	}
-
 	else if (y_stricmp(argv[0], "color") == 0)
 	{
 		if (nargs < 2)
@@ -519,7 +616,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		ParseColorDef(pst->argv + 1, nargs);
 	}
-
 	else if (y_stricmp(argv[0], "feature") == 0)
 	{
 		if (nargs < 2)
@@ -527,12 +623,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		ParseFeatureDef(pst->argv + 1, nargs);
 	}
-
-	else if (y_stricmp(argv[0], "default_port") == 0)
-	{
-		/* ignored for backwards compability */
-	}
-
 	else if (y_stricmp(argv[0], "default_textures") == 0)
 	{
 		if (nargs != 3)
@@ -542,7 +632,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		default_floor_tex	= StringDup(argv[2]);
 		default_ceil_tex	= StringDup(argv[3]);
 	}
-
 	else if (y_stricmp(argv[0], "default_thing") == 0)
 	{
 		if (nargs != 1)
@@ -550,7 +639,6 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		default_thing = atoi(argv[1]);
 	}
-
 	else if (y_stricmp(argv[0], "linegroup") == 0 ||
 			 y_stricmp(argv[0], "spec_group") == 0)
 	{
@@ -765,84 +853,85 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			field->keywords[i] = StringDup(argv[5 + i]);
 		}
 	}
-
-	// these are ignored for backwards compability
-	else if (y_stricmp(argv[0], "level_name") == 0 ||
-			 y_stricmp(argv[0], "exclude_game") == 0)
-	{
-		return;
-	}
-
 	else if (y_stricmp(argv[0], "clear") == 0)
 	{
-		if (nargs < 2)
+		if (nargs < 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		ParseClearKeywords(pst->argv + 1, nargs);
 	}
+
+/*  FIXME
 
 	else
 	{
 		FatalError("%s(%d): unknown directive: %.32s\n",
 				   pst->fname, pst->lineno, argv[0]);
 	}
+*/
 }
 
 
-static void M_ParseGameCheckLine(parser_state_c *pst, parse_check_info_t *check_info)
+static void M_ParseGameInfoLine(parser_state_c *pst)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
 
-	SYS_ASSERT(check_info);
+	if (y_stricmp(argv[0], "map_formats") == 0 ||
+		y_stricmp(argv[0], "supported_games") == 0 ||
+		y_stricmp(argv[0], "udmf_namespace") == 0)
+	{
+		FatalError("%s(%d): %s can only be used in port definitions\n",
+			pst->fname, pst->lineno, argv[0]);
+	}
+
+	if (y_stricmp(argv[0], "base_game") == 0)
+	{
+		if (nargs < 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		// TODO memory leak
+		loading_Game->base_game = StringLower(argv[1]);
+	}
+}
+
+
+static void M_ParsePortInfoLine(parser_state_c *pst)
+{
+	char **argv  = pst->argv;
+	int    nargs = pst->argc - 1;
+
+	if (y_stricmp(argv[0], "base_game") == 0)
+	{
+		FatalError("%s(%d): %s can only be used in game definitions\n",
+			pst->fname, pst->lineno, argv[0]);
+	}
 
 	if (y_stricmp(argv[0], "supported_games") == 0)
-		FatalError("%s(%d): supported_game can only be used in port definitions\n", pst->fname, pst->lineno);
-
-	else if (y_stricmp(argv[0], "variant_of") == 0)
-	{
-		snprintf(check_info->variant_name, sizeof(check_info->variant_name), "%s", pst->argv[1]);
-	}
-
-	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		check_info->formats = ParseMapFormats(argv + 1, nargs);
-	}
-}
-
-
-static void M_ParsePortCheckLine(parser_state_c *pst, parse_check_info_t *check_info)
-{
-	char **argv  = pst->argv;
-	int    nargs = pst->argc - 1;
-
-	SYS_ASSERT(check_info);
-
-	if (y_stricmp(argv[0], "variant_of") == 0)
-		FatalError("%s(%d): variant_of can only be used in game definitions\n", pst->fname, pst->lineno);
-
-	else if (y_stricmp(argv[0], "supported_games") == 0)
-	{
-		argv++;
-
-		check_info->supports_game = 0;
-
-		for ( ; nargs > 0 ; argv++, nargs--)
+		for (argv++ ; nargs > 0 ; argv++, nargs--)
 		{
-			if (y_stricmp(check_info->variant_name, *argv) == 0)
-				check_info->supports_game = 1;
+			// TODO memory leak
+			loading_Port->AddSupportedGame(StringLower(*argv));
 		}
 	}
-
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
 			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		check_info->formats = ParseMapFormats(argv + 1, nargs);
+		loading_Port->formats = ParseMapFormats(argv + 1, nargs);
+	}
+	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
+	{
+		if (nargs != 1)
+			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+
+		// want to preserve the case here
+		loading_Port->udmf_namespace = argv[1];
 	}
 }
 
@@ -854,7 +943,10 @@ static bool M_ParseConditional(parser_state_c *pst)
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
 
-	if (nargs == 3 && y_stricmp(argv[1], "is") == 0)
+	bool op_is  = (nargs >= 3 && y_stricmp(argv[1], "is")  == 0);
+	bool op_not = (nargs >= 3 && y_stricmp(argv[1], "not") == 0);
+
+	if (op_is || op_not)
 	{
 		if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 			FatalError("%s(%d): expected variable in if statement\n",
@@ -865,7 +957,12 @@ static bool M_ParseConditional(parser_state_c *pst)
 
 		std::string var_value = parse_vars[std::string(argv[0])];
 
-		return (y_stricmp(var_value.c_str(), argv[2]) == 0);
+		// test multiple values, only need one to succeed
+		for (int i = 2 ; i < nargs ; i++)
+			if (y_stricmp(var_value.c_str(), argv[i]) == 0)
+				return op_is;
+
+		return op_not;
 	}
 
 	FatalError("%s(%d): syntax error in if statement\n", pst->fname, pst->lineno);
@@ -895,7 +992,7 @@ void M_ParseSetVar(parser_state_c *pst)
 //
 //  this is main function for parsing a definition file.
 //
-//  when purpose is PURPOSE_GameCheck or PURPOSE_PortCheck, then
+//  when purpose is PURPOSE_GameInfo or PURPOSE_PortInfo, then
 //  only minimal parsing occurs, in particular the "include", "set"
 //  and "if".."endif" directives are NOT handled.
 //
@@ -903,7 +1000,6 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
 						   const char *prettyname,
-						   parse_check_info_t * check_info,
 						   int include_level)
 {
 	if (! folder)
@@ -940,50 +1036,39 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		int nargs = pst->argc - 1;
 
 
-		// handle the special game or port checks
-		if (purpose == PURPOSE_GameCheck)
-		{
-			M_ParseGameCheckLine(pst, check_info);
-			continue;
-		}
-		else if (purpose == PURPOSE_PortCheck)
-		{
-			M_ParsePortCheckLine(pst, check_info);
-			continue;
-		}
-
-
 		// handle conditionals: if...else...endif
 
 		if (y_stricmp(pst->argv[0], "if") == 0)
 		{
-			if (pst->cond != PCOND_NONE)
-				FatalError("%s(%d,%d): cannot nest if/endif\n", pst->fname, pst->cond_lineno, pst->lineno);
+			parsing_cond_state_t cst;
 
-			pst->cond = M_ParseConditional(pst) ? PCOND_Reading : PCOND_Skipping;
-			pst->cond_lineno = pst->lineno;
+			cst.cond = M_ParseConditional(pst) ? PCOND_Reading : PCOND_Skipping;
+			cst.start_line = pst->lineno;
+
+			pst->cond_stack.push_back(cst);
 			continue;
 		}
 		else if (y_stricmp(pst->argv[0], "else") == 0)
 		{
-			if (pst->cond == PCOND_NONE)
+			if (pst->cond_stack.empty())
 				FatalError("%s(%d): else without if\n", pst->fname, pst->lineno);
 
 			// toggle the mode
-			pst->cond = (pst->cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
+			pst->cond_stack.back().Toggle();
 			continue;
 		}
 		else if (y_stricmp(pst->argv[0], "endif") == 0)
 		{
-			if (pst->cond == PCOND_NONE)
+			if (pst->cond_stack.empty())
 				FatalError("%s(%d): endif without if\n", pst->fname, pst->lineno);
 
-			pst->cond = PCOND_NONE;
+			pst->cond_stack.pop_back();
 			continue;
 		}
 
 
-		if (pst->cond == PCOND_Skipping)
+		// skip lines when ANY if statement is in skip mode
+		if (pst->HaveAnySkipping())
 			continue;
 
 
@@ -1021,7 +1106,19 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 			M_ParseDefinitionFile(purpose, new_name, new_folder,
 								  NULL /* prettyname */,
-								  check_info, include_level + 1);
+								  include_level + 1);
+			continue;
+		}
+
+
+		if (purpose == PURPOSE_GameInfo)
+		{
+			M_ParseGameInfoLine(pst);
+			continue;
+		}
+		else if (purpose == PURPOSE_PortInfo)
+		{
+			M_ParsePortInfoLine(pst);
 			continue;
 		}
 
@@ -1031,12 +1128,68 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	}
 
 	// check for an unterminated conditional
-	if (pst->cond != PCOND_NONE)
+	if (! pst->cond_stack.empty())
 	{
-		FatalError("%s(%d): Missing endif statement\n", pst->fname, pst->cond_lineno);
+		FatalError("%s(%d): Missing endif statement\n", pst->fname,
+			pst->cond_stack.back().start_line);
 	}
 
 	fclose(fp);
+}
+
+
+GameInfo_c * M_LoadGameInfo(const char *game)
+{
+	// already loaded?
+	std::map<std::string, GameInfo_c *>::iterator IT;
+	IT = loaded_game_defs.find(std::string(game));
+
+	if (IT != loaded_game_defs.end())
+		return IT->second;
+
+	const char * filename = FindDefinitionFile("games", game);
+	if (! filename)
+		return NULL;
+
+	loading_Game = new GameInfo_c(game);
+
+	M_ParseDefinitionFile(PURPOSE_GameInfo, filename, "games", NULL);
+
+	if (loading_Game->base_game.empty())
+	{
+		FatalError("Game definition for '%s' does not set base_game\n", game);
+	}
+
+	loaded_game_defs[game] = loading_Game;
+	return loading_Game;
+}
+
+
+PortInfo_c * M_LoadPortInfo(const char *port)
+{
+	std::map<std::string, PortInfo_c *>::iterator IT;
+	IT = loaded_port_defs.find(std::string(port));
+
+	if (IT != loaded_port_defs.end())
+		return IT->second;
+
+	const char * filename = FindDefinitionFile("ports", port);
+	if (! filename)
+		return NULL;
+
+	loading_Port = new PortInfo_c(port);
+
+	M_ParseDefinitionFile(PURPOSE_PortInfo, filename, "ports", NULL);
+
+	// default is to support both Doom and Doom2
+	if (loading_Port->supported_games.empty())
+	{
+		loading_Port->supported_games.push_back(std::string("doom"));
+		loading_Port->supported_games.push_back(std::string("doom2"));
+	}
+
+	loaded_port_defs[port] = loading_Port;
+	return loading_Port;
 }
 
 
@@ -1100,53 +1253,30 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 }
 
 
-const char * M_VariantForGame(const char *game)
+const char * M_GetBaseGame(const char *game)
 {
-	// static so we can return the char[] inside it
-	static parse_check_info_t info;
+	GameInfo_c *ginfo = M_LoadGameInfo(game);
+	SYS_ASSERT(ginfo);
 
-	// when no "variant_of" lines exist, result is just input name
-	strcpy(info.variant_name, game);
-
-	const char * filename = FindDefinitionFile("games", game);
-	SYS_ASSERT(filename);
-
-	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
-						  NULL /* prettyname */, &info);
-
-	SYS_ASSERT(info.variant_name[0]);
-
-	return info.variant_name;
+	return ginfo->base_game.c_str();
 }
 
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 {
-	parse_check_info_t info;
+	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	if (pinfo && pinfo->formats != 0)
+		return pinfo->formats;
 
-	info.formats = (1 << MAPF_Doom);
+	// a bit hacky, maybe should do it a better way...
+	if (strcmp(game, "hexen") == 0)
+		return (1 << MAPF_Hexen);
 
-	const char * filename = FindDefinitionFile("games", game);
-	SYS_ASSERT(filename);
-
-	M_ParseDefinitionFile(PURPOSE_GameCheck, filename, "games",
-						  NULL /* prettyname */, &info);
-
-	// for Vanilla, only the game itself is checked
-	if (strcmp(port, "vanilla") != 0)
-	{
-		filename = FindDefinitionFile("ports", port);
-		SYS_ASSERT(filename);
-
-		M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
-							  NULL /* prettyname */, &info);
-	}
-
-	return info.formats;
+	return (1 << MAPF_Doom);
 }
 
 
-bool M_CheckPortSupportsGame(const char *var_game, const char *port)
+bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 {
 	if (strcmp(port, "vanilla") == 0)
 	{
@@ -1155,32 +1285,15 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 		return true;
 	}
 
-	parse_check_info_t info;
-
-	snprintf(info.variant_name, sizeof(info.variant_name), "%s", var_game);
-
-	// default is to support "doom" and "doom2"
-	info.supports_game = 0;
-
-	if (y_stricmp(var_game, "doom")  == 0 ||
-	    y_stricmp(var_game, "doom2") == 0)
-	{
-		info.supports_game = 1;
-	}
-
-	const char *filename = FindDefinitionFile("ports", port);
-
-	if (! filename)
+	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	if (! pinfo)
 		return false;
 
-	M_ParseDefinitionFile(PURPOSE_PortCheck, filename, "ports",
-						  NULL /* prettyname */, &info);
-
-	return (info.supports_game > 0);
+	return pinfo->SupportsGame(base_game);
 }
 
 
-// find all the ports which support the given game variant.
+// find all the ports which support the given base game..
 //
 // result will be '|' separated (ready for Fl_Choice::add)
 // returns the empty string when nothing found.
@@ -1189,7 +1302,7 @@ bool M_CheckPortSupportsGame(const char *var_game, const char *port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name)
+const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
 {
 	std::vector<const char *> list;
 
@@ -1212,7 +1325,7 @@ const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const c
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(var_game, list[i]))
+		if (! M_CheckPortSupportsGame(base_game, list[i]))
 			continue;
 
 		if (result[0])
@@ -1237,7 +1350,7 @@ const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const c
 
 bool is_sky(const char *flat)
 {
-	return (y_stricmp(game_info.sky_flat, flat) == 0);
+	return (y_stricmp(Misc_info.sky_flat, flat) == 0);
 }
 
 bool is_null_tex(const char *tex)

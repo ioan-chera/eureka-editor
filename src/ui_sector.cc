@@ -335,7 +335,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == 2)
 	{
-		new_tex = BA_InternaliseString(game_info.sky_flat);
+		new_tex = BA_InternaliseString(Misc_info.sky_flat);
 
 		goto change_it;
 	}
@@ -444,7 +444,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	int mask  = 65535;
 	int value = atoi(box->type->value());
 
-	int gen_mask = (game_info.gen_sectors == 2) ? 255 : 31;
+	int gen_mask = (Features.gen_sectors == 2) ? 255 : 31;
 
 	// when generalize sectors active, typing a low value (which does
 	// not touch any bitflags) should just update the TYPE part, and
@@ -456,7 +456,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		// update the WHOLE sector type.  If generalized sectors are
 		// active, then the panel will reinterpret the typed value.
 	}
-	else if (game_info.gen_sectors)
+	else if (Features.gen_sectors)
 	{
 		// Boom and ZDoom generalized sectors
 
@@ -488,7 +488,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		{
 			mask = gen_mask;
 		}
-		else if (game_info.gen_sectors == 2)
+		else if (Features.gen_sectors == 2)
 		{
 			// for ZDoom in Hexen mode, shift up 3 bits
 			mask  <<= 3;
@@ -533,9 +533,9 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 	// when generalize sectors in effect, the name should just
 	// show the TYPE part of the sector type.
 
-	if (game_info.gen_sectors)
+	if (Features.gen_sectors)
 	{
-		int gen_mask = (game_info.gen_sectors == 2) ? 255 : 31;
+		int gen_mask = (Features.gen_sectors == 2) ? 255 : 31;
 
 		value &= gen_mask;
 	}
@@ -766,17 +766,17 @@ void UI_SectorBox::UpdateField(int field)
 		if (is_sector(obj))
 		{
 			int value = Sectors[obj]->type;
-			int mask  = (game_info.gen_sectors == 2) ? 255 :
-						(game_info.gen_sectors) ? 31 : 65535;
+			int mask  = (Features.gen_sectors == 2) ? 255 :
+						(Features.gen_sectors) ? 31 : 65535;
 
 			type->value(Int_TmpStr(value & mask));
 
 			const sectortype_t *info = M_GetSectorType(value & mask);
 			desc->value(info->desc);
 
-			if (game_info.gen_sectors)
+			if (Features.gen_sectors)
 			{
-				if (game_info.gen_sectors == 2)
+				if (Features.gen_sectors == 2)
 					value >>= 3;
 
 				bm_damage->value((value >> 5) & 3);
@@ -934,7 +934,7 @@ bool UI_SectorBox::ClipboardOp(char op)
 
 		case 'd':
 			// we abuse the delete function to turn sector ceilings into sky
-			CB_Paste(BA_InternaliseString(game_info.sky_flat));
+			CB_Paste(BA_InternaliseString(Misc_info.sky_flat));
 			break;
 	}
 
@@ -971,9 +971,9 @@ void UI_SectorBox::UpdateTotal()
 
 void UI_SectorBox::UpdateGameInfo()
 {
-	if (game_info.gen_sectors)
+	if (Features.gen_sectors)
 	{
-		if (game_info.gen_sectors == 2)
+		if (Features.gen_sectors == 2)
 			bm_title->label("ZDoom flags:");
 		else
 			bm_title->label("Boom flags:");

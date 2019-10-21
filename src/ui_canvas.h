@@ -45,28 +45,28 @@ private:
 
 	// split-able line state
 	int split_ld;
-	int split_x;
-	int split_y;
+	double split_x;
+	double split_y;
 
 	// sel-box state
-	int  selbox_x1, selbox_y1;  // map coords
-	int  selbox_x2, selbox_y2;
+	double selbox_x1, selbox_y1;  // map coords
+	double selbox_x2, selbox_y2;
 
 	// dragging state
-	int  drag_start_x, drag_start_y;
-	int  drag_focus_x, drag_focus_y;
-	int  drag_cur_x,   drag_cur_y;
+	double drag_start_x, drag_start_y;
+	double drag_focus_x, drag_focus_y;
+	double drag_cur_x,   drag_cur_y;
 	selection_c drag_lines;
 
 	// scaling/rotating state
-	int   trans_start_x,  trans_start_y;
+	double trans_start_x,  trans_start_y;
 	transform_keyword_e trans_mode;
 	transform_t trans_param;
 	selection_c trans_lines;
 
 	// drawing state only
-	int map_lx, map_ly;
-	int map_hx, map_hy;
+	double map_lx, map_ly;
+	double map_hx, map_hy;
 
 	bitvec_c seen_sectors;
 
@@ -93,26 +93,26 @@ public:
 	void HighlightSet(Objid& obj);
 	void HighlightForget();
 
-	void SplitLineSet(int ld, int new_x, int new_y);
+	void SplitLineSet(int ld, double new_x, double new_y);
 	void SplitLineForget();
 
 	void DrawSelection(selection_c *list);
-	void DrawSectorSelection(selection_c *list, int dx, int dy);
+	void DrawSectorSelection(selection_c *list, double dx, double dy);
 	void DrawHighlight(int objtype, int objnum,
-	                   bool skip_lines = false, int dx=0, int dy=0);
+	                   bool skip_lines = false, double dx=0, double dy=0);
 	void DrawHighlightTransform(int objtype, int objnum);
 	void DrawTagged(int objtype, int objnum);
 
-	void SelboxBegin(int map_x, int map_y);
-	void SelboxUpdate(int map_x, int map_y);
-	void SelboxFinish(int *x1, int *y1, int *x2, int *y2);
+	void SelboxBegin(double map_x, double map_y);
+	void SelboxUpdate(double map_x, double map_y);
+	void SelboxFinish(double *x1, double *y1, double *x2, double *y2);
 
-	void DragBegin(int focus_x, int focus_y, int map_x, int map_y);
-	void DragUpdate(int map_x, int map_y);
-	void DragFinish(int *dx, int *dy);
+	void DragBegin(double focus_x, double focus_y, double map_x, double map_y);
+	void DragUpdate(double map_x, double map_y);
+	void DragFinish(double *dx, double *dy);
 
-	void TransformBegin(int map_x, int map_y, int middle_x, int middle_y, transform_keyword_e mode);
-	void TransformUpdate(int map_x, int map_y);
+	void TransformBegin(double map_x, double map_y, double middle_x, double middle_y, transform_keyword_e mode);
+	void TransformUpdate(double map_x, double map_y);
 	void TransformFinish(transform_t& param);
 
 	void PointerPos(bool in_event = false);
@@ -137,16 +137,16 @@ private:
 	void DrawThingBodies();
 	void DrawThingSprites();
 
-	void DrawMapLine(float map_x1, float map_y1, float map_x2, float map_y2);
-	void DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2);
-	void DrawMapArrow(int map_x1, int map_y1, int r, int angle);
+	void DrawMapLine(double map_x1, double map_y1, double map_x2, double map_y2);
+	void DrawMapVector(double map_x1, double map_y1, double map_x2, double map_y2);
+	void DrawMapArrow(double map_x1, double map_y1, int r, int angle);
 
-	void DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2, bool reverse = false);
-	void DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2);
-	void DrawSplitPoint(int map_x, int map_y);
-	void DrawVertex(int map_x, int map_y, int r);
-	void DrawThing(int map_x, int map_y, int r, int angle, bool big_arrow);
-	void DrawSprite(int map_x, int map_y, Img_c *img, float scale);
+	void DrawKnobbyLine(double map_x1, double map_y1, double map_x2, double map_y2, bool reverse = false);
+	void DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2);
+	void DrawSplitPoint(double map_x, double map_y);
+	void DrawVertex(double map_x, double map_y, int r);
+	void DrawThing(double map_x, double map_y, int r, int angle, bool big_arrow);
+	void DrawSprite(double map_x, double map_y, Img_c *img, float scale);
 	void DrawCamera();
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
@@ -158,36 +158,36 @@ private:
 
 	void SelboxDraw();
 
-	void DragDelta(int *dx, int *dy);
+	void DragDelta(double *dx, double *dy);
 
 	// calc screen-space normal of a line
-	int NORMALX(int len, int dx, int dy);
-	int NORMALY(int len, int dx, int dy);
+	int NORMALX(int len, double dx, double dy);
+	int NORMALY(int len, double dx, double dy);
 
 #ifdef NO_OPENGL
 	// convert screen coordinates to map coordinates
-	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
-	inline float MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
+	inline double MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
+	inline double MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
 
 	// convert map coordinates to screen coordinates
-	inline int SCREENX(float mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-	inline int SCREENY(float my) const { return (y() + h()/2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+	inline int SCREENX(double mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
+	inline int SCREENY(double my) const { return (y() + h()/2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
 #else
 	// convert GL coordinates to map coordinates
-	inline float MAPX(int sx) const { return grid.orig_x + (sx - w()/2) / grid.Scale; }
-	inline float MAPY(int sy) const { return grid.orig_y + (sy - h()/2) / grid.Scale; }
+	inline double MAPX(int sx) const { return grid.orig_x + (sx - w()/2) / grid.Scale; }
+	inline double MAPY(int sy) const { return grid.orig_y + (sy - h()/2) / grid.Scale; }
 
 	// convert map coordinates to GL coordinates
-	inline int SCREENX(float mx) const { return (w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-	inline int SCREENY(float my) const { return (h()/2 + I_ROUND((my - grid.orig_y) * grid.Scale)); }
+	inline int SCREENX(double mx) const { return (w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
+	inline int SCREENY(double my) const { return (h()/2 + I_ROUND((my - grid.orig_y) * grid.Scale)); }
 #endif
 
-	inline bool Vis(int x, int y, int r) const
+	inline bool Vis(double x, double y, int r) const
 	{
 		return (x+r >= map_lx) && (x-r <= map_hx) &&
 		       (y+r >= map_ly) && (y-r <= map_hy);
 	}
-	inline bool Vis(int x1, int y1, int x2, int y2) const
+	inline bool Vis(double x1, double y1, double x2, double y2) const
 	{
 		return (x2 >= map_lx) && (x1 <= map_hx) &&
 		       (y2 >= map_ly) && (y1 <= map_hy);

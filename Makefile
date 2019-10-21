@@ -82,6 +82,7 @@ OBJS = \
 	$(OBJ_DIR)/m_select.o  \
 	$(OBJ_DIR)/m_strings.o  \
 	$(OBJ_DIR)/m_testmap.o  \
+	$(OBJ_DIR)/m_udmf.o  \
 	$(OBJ_DIR)/r_grid.o  \
 	$(OBJ_DIR)/r_render.o  \
 	$(OBJ_DIR)/r_opengl.o  \

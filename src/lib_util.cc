@@ -153,6 +153,17 @@ char *StringUpper(const char *name)
 }
 
 
+char *StringLower(const char *name)
+{
+	char *copy = StringDup(name);
+
+	for (char *p = copy; *p; p++)
+		*p = tolower(*p);
+
+	return copy;
+}
+
+
 char *StringPrintf(const char *str, ...)
 {
 	// Algorithm: keep doubling the allocated buffer size

@@ -34,11 +34,11 @@ void FlipLineDefGroup(selection_c& flip);
 void LineDefs_SetLength(int new_len);
 
 bool LineDefAlreadyExists(int v1, int v2);
-bool LineDefWouldOverlap(int v1, int x2, int y2);
+bool LineDefWouldOverlap(int v1, double x2, double y2);
 
 int SplitLineDefAtVertex(int ld, int v_idx);
 
-void MoveCoordOntoLineDef(int ld, int *x, int *y);
+void MoveCoordOntoLineDef(int ld, double *x, double *y);
 
 void LD_AddSecondSideDef(int ld, int new_sd, int other_sd);
 void LD_RemoveSideDef(int ld, int ld_side);

@@ -41,11 +41,11 @@
 #include <algorithm>
 
 
-int Vertex_FindExact(int x, int y)
+int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
 {
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		if (Vertices[i]->x == x && Vertices[i]->y == y)
+		if (Vertices[i]->Matches(fx, fy))
 			return i;
 	}
 
@@ -230,17 +230,13 @@ void Vertex_MergeList(selection_c *verts)
 
 	int v = verts->find_first();
 
-	int new_x, new_y;
-
 #if 0
+	double new_x, new_y;
 	Objs_CalcMiddle(verts, &new_x, &new_y);
-#else
-	new_x = Vertices[v]->x;
-	new_y = Vertices[v]->y;
-#endif
 
-	BA_ChangeVT(v, Vertex::F_X, new_x);
-	BA_ChangeVT(v, Vertex::F_Y, new_y);
+	BA_ChangeVT(v, Vertex::F_X, MakeValidCoord(new_x));
+	BA_ChangeVT(v, Vertex::F_Y, MakeValidCoord(new_y));
+#endif
 
 	verts->clear(v);
 
@@ -302,8 +298,8 @@ bool Vertex_TryFixDangler(int v_num)
 		if (i == v_num)
 			continue;
 
-		int dx = Vertices[v_num]->x - Vertices[i]->x;
-		int dy = Vertices[v_num]->y - Vertices[i]->y;
+		double dx = Vertices[v_num]->x() - Vertices[i]->x();
+		double dy = Vertices[v_num]->y() - Vertices[i]->y();
 
 		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
 			! LineDefAlreadyExists(v_num, v_other))
@@ -398,12 +394,12 @@ bool Vertex_TryFixDangler(int v_num)
 }
 
 
-static void CalcDisconnectCoord(const LineDef *L, int v_num, int *x, int *y)
+static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y)
 {
 	const Vertex * V = Vertices[v_num];
 
-	int dx = L->End()->x - L->Start()->x;
-	int dy = L->End()->y - L->Start()->y;
+	double dx = L->End()->x() - L->Start()->x();
+	double dy = L->End()->y() - L->Start()->y();
 
 	if (L->end == v_num)
 	{
@@ -432,8 +428,8 @@ static void CalcDisconnectCoord(const LineDef *L, int v_num, int *x, int *y)
 		dy = (dy < 0) ? -8 : 8;
 	}
 
-	*x = V->x + dx;
-	*y = V->y + dy;
+	*x = V->x() + dx;
+	*y = V->y() + dy;
 }
 
 
@@ -447,8 +443,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 
 		if (L->start == v_num || L->end == v_num)
 		{
-			int new_x, new_y;
-
+			double new_x, new_y;
 			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
 
 			// the _LAST_ linedef keeps the current vertex, the rest
@@ -457,8 +452,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			{
 				int new_v = BA_New(OBJ_VERTICES);
 
-				Vertices[new_v]->x = new_x;
-				Vertices[new_v]->y = new_y;
+				Vertices[new_v]->SetRawXY(new_x, new_y);
 
 				if (L->start == v_num)
 					BA_ChangeLD(n, LineDef::F_START, new_v);
@@ -467,8 +461,8 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			}
 			else
 			{
-				BA_ChangeVT(v_num, Vertex::F_X, new_x);
-				BA_ChangeVT(v_num, Vertex::F_Y, new_y);
+				BA_ChangeVT(v_num, Vertex::F_X, MakeValidCoord(new_x));
+				BA_ChangeVT(v_num, Vertex::F_Y, MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -550,14 +544,12 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 	if (! touches_non_sel)
 		return;
 
-	int new_x, new_y;
-
+	double new_x, new_y;
 	CalcDisconnectCoord(LineDefs[ld], v_num, &new_x, &new_y);
 
 	int new_v = BA_New(OBJ_VERTICES);
 
-	Vertices[new_v]->x = new_x;
-	Vertices[new_v]->y = new_y;
+	Vertices[new_v]->SetRawXY(new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
 
@@ -753,10 +745,10 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 }
 
 
-static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy)
+static void DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx, double * dy)
 {
-	int det_mid_x, sec_mid_x;
-	int det_mid_y, sec_mid_y;
+	double det_mid_x, sec_mid_x;
+	double det_mid_y, sec_mid_y;
 
 	Objs_CalcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
 	Objs_CalcMiddle(edit.Selected, &sec_mid_x, &sec_mid_y);
@@ -781,7 +773,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, int * dx, int * dy
 	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	int mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
+	double mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;
@@ -826,8 +818,7 @@ void CMD_SEC_Disconnect(void)
 
 
 	// determine vector to move the detach coords
-	int move_dx, move_dy;
-
+	double move_dx, move_dy;
 	DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
@@ -898,8 +889,8 @@ void CMD_SEC_Disconnect(void)
 	{
 		const Vertex * V = Vertices[*it];
 
-		BA_ChangeVT(*it, Vertex::F_X, V->x + move_dx);
-		BA_ChangeVT(*it, Vertex::F_Y, V->y + move_dy);
+		BA_ChangeVT(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+		BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 	}
 
 	BA_End();
@@ -914,20 +905,20 @@ void CMD_SEC_Disconnect(void)
 //------------------------------------------------------------------------
 
 
-static double WeightForVertex(const Vertex *V, /* bbox: */ int x1, int y1, int x2, int y2,
-							  int width, int height, int side)
+static double WeightForVertex(const Vertex *V, /* bbox: */ double x1, double y1, double x2, double y2,
+							  double width, double height, int side)
 {
 	double dist;
 	double extent;
 
 	if (width >= height)
 	{
-		dist = (side < 0) ? (V->x - x1) : (x2 - V->x);
+		dist = (side < 0) ? (V->x() - x1) : (x2 - V->x());
 		extent = width;
 	}
 	else
 	{
-		dist = (side < 0) ? (V->y - y1) : (y2 - V->y);
+		dist = (side < 0) ? (V->y() - y1) : (y2 - V->y());
 		extent = height;
 	}
 
@@ -971,12 +962,11 @@ void CMD_VT_ShapeLine(void)
 
 	// determine orientation and position of the line
 
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
-	int width  = x2 - x1;
-	int height = y2 - y1;
+	double width  = x2 - x1;
+	double height = y2 - y1;
 
 	if (width < 4 && height < 4)
 	{
@@ -1007,8 +997,8 @@ void CMD_VT_ShapeLine(void)
 
 		if (weight > 0)
 		{
-			ax += V->x * weight;
-			ay += V->y * weight;
+			ax += V->x() * weight;
+			ay += V->y() * weight;
 
 			a_total += weight;
 		}
@@ -1017,8 +1007,8 @@ void CMD_VT_ShapeLine(void)
 
 		if (weight > 0)
 		{
-			bx += V->x * weight;
-			by += V->y * weight;
+			bx += V->x() * weight;
+			by += V->y() * weight;
 
 			b_total += weight;
 		}
@@ -1059,7 +1049,7 @@ void CMD_VT_ShapeLine(void)
 	{
 		const Vertex *V = Vertices[*it];
 
-		vert_along_t ALONG(*it, AlongDist(V->x, V->y, ax,ay, bx,by));
+		vert_along_t ALONG(*it, AlongDist(V->x(), V->y(), ax,ay, bx,by));
 
 		along_list.push_back(ALONG);
 	}
@@ -1076,11 +1066,11 @@ void CMD_VT_ShapeLine(void)
 
 	if ((true) /* don't move first and last vertices */)
 	{
-		ax = V1->x;
-		ay = V1->y;
+		ax = V1->x();
+		ay = V1->y();
 
-		bx = V2->x;
-		by = V2->y;
+		bx = V2->x();
+		by = V2->y();
 	}
 	else
 	{
@@ -1110,8 +1100,8 @@ void CMD_VT_ShapeLine(void)
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		BA_ChangeVT(along_list[i].vert_num, Thing::F_X, I_ROUND(nx));
-		BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, I_ROUND(ny));
+		BA_ChangeVT(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
+		BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
 
 	BA_End();
@@ -1180,13 +1170,13 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			BA_ChangeVT(along_list[k].vert_num, Thing::F_X, I_ROUND(new_x));
-			BA_ChangeVT(along_list[k].vert_num, Thing::F_Y, I_ROUND(new_y));
+			BA_ChangeVT(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
+			BA_ChangeVT(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
 		}
 		else
 		{
-			double dx = new_x - V->x;
-			double dy = new_y - V->y;
+			double dx = new_x - V->x();
+			double dy = new_y - V->y();
 
 			cost = cost + (dx*dx + dy*dy);
 		}
@@ -1223,12 +1213,11 @@ void CMD_VT_ShapeArc(void)
 
 
 	// determine middle point for circle
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
-	int width  = x2 - x1;
-	int height = y2 - y1;
+	double width  = x2 - x1;
+	double height = y2 - y1;
 
 	if (width < 4 && height < 4)
 	{
@@ -1256,8 +1245,8 @@ void CMD_VT_ShapeArc(void)
 	{
 		const Vertex *V = Vertices[*it];
 
-		double dx = V->x - mid_x;
-		double dy = V->y - mid_y;
+		double dx = V->x() - mid_x;
+		double dy = V->y() - mid_y;
 
 		double dist = hypot(dx, dy);
 
@@ -1299,7 +1288,7 @@ void CMD_VT_ShapeArc(void)
 	const Vertex * start_V = Vertices[along_list[start_idx].vert_num];
 	const Vertex * end_V   = Vertices[along_list[  end_idx].vert_num];
 
-	double start_end_dist = hypot(end_V->x - start_V->x, end_V->y - start_V->y);
+	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 
 
 	// compute new mid-point and radius (except for a full circle)
@@ -1310,8 +1299,8 @@ void CMD_VT_ShapeArc(void)
 
 	if (arc_deg < 360)
 	{
-		mid_x = (start_V->x + end_V->x) * 0.5;
-		mid_y = (start_V->y + end_V->y) * 0.5;
+		mid_x = (start_V->x() + end_V->x()) * 0.5;
+		mid_y = (start_V->y() + end_V->y()) * 0.5;
 
 		r = start_end_dist * 0.5;
 
@@ -1333,7 +1322,7 @@ void CMD_VT_ShapeArc(void)
 
 		r = hypot(r, away);
 
-		best_offset = atan2(start_V->y - mid_y, start_V->x - mid_x);
+		best_offset = atan2(start_V->y() - mid_y, start_V->x() - mid_x);
 	}
 	else
 	{

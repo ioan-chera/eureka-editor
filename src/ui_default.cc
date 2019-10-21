@@ -435,13 +435,13 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 
 	if (sel_pics & 1)
 	{
-		f_tex->value(game_info.sky_flat);
+		f_tex->value(Misc_info.sky_flat);
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(game_info.sky_flat);
+		c_tex->value(Misc_info.sky_flat);
 		c_tex->do_callback();
 	}
 }

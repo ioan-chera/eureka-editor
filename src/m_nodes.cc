@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2016 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,8 +20,10 @@
 
 #include "main.h"
 #include "m_loadsave.h"
+#include "e_main.h"
 #include "w_wad.h"
 
+#include "r_render.h"	// Render3D_ClearSelection
 #include "ui_window.h"
 
 #include "bsp.h"
@@ -317,7 +319,6 @@ static void PrepareInfo(nodebuildinfo_t *info)
 
 	info->total_failed_maps		= 0;
 	info->total_warnings		= 0;
-	info->total_minor_issues	= 0;
 
 	// clear cancelled flag
 	info->cancelled = false;
@@ -344,6 +345,9 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	// loop over each level in the wad
 	for (int n = 0 ; n < num_levels ; n++)
 	{
+		// load level
+		LoadLevelNum(edit_wad, n);
+
 		ret = AJBSP_BuildLevel(info, n);
 
 		// don't fail on maps with overflows
@@ -367,9 +371,14 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	if (ret == BUILD_OK)
 	{
 		GB_PrintMsg("\n");
-		GB_PrintMsg("Total failed maps: %d\n", info->total_failed_maps);
-		GB_PrintMsg("Total warnings: %d serious, %d minor\n", info->total_warnings,
-					info->total_minor_issues);
+
+		if (info->total_failed_maps == 0)
+			GB_PrintMsg("All maps built successfully, %d warnings\n",
+						info->total_warnings);
+		else
+			GB_PrintMsg("%d failed maps, %d warnings\n",
+						info->total_failed_maps,
+						info->total_warnings);
 	}
 	else if (ret == BUILD_Cancelled)
 	{
@@ -449,6 +458,18 @@ void CMD_BuildAllNodes()
 	}
 
 
+	// remember current level
+	std::string CurLevel(Level_name);
+
+	// reset various editor state
+	Editor_ClearAction();
+	Selection_InvalidateLast();
+	Render3D_ClearSelection();
+
+	edit.Selected->clear_all();
+	edit.highlight.clear();
+
+
 	dialog = new UI_NodeDialog();
 
 	dialog->set_modal();
@@ -463,23 +484,19 @@ void CMD_BuildAllNodes()
 
 	build_result_e ret = BuildAllNodes(nb_info);
 
-
 	if (ret == BUILD_OK)
 	{
 		dialog->Finish_OK();
-
 		Status_Set("Built nodes OK");
 	}
 	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
-
 		Status_Set("Cancelled");
 	}
 	else
 	{
 		dialog->Finish_Error();
-
 		Status_Set("Error building nodes");
 	}
 
@@ -492,7 +509,8 @@ void CMD_BuildAllNodes()
 	delete dialog;  dialog = NULL;
 
 
-	return;
+	// reload the previous level
+	LoadLevel(edit_wad, CurLevel.c_str());
 }
 
 

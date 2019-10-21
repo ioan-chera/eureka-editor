@@ -103,7 +103,7 @@ void Render_View_t::FindGroundZ()
 	}
 
 	if (max_floor != INT_MIN)
-		z = max_floor + game_info.view_height;
+		z = max_floor + Misc_info.view_height;
 }
 
 void Render_View_t::CalcAspect()
@@ -150,7 +150,7 @@ void Render_View_t::FindThingSectors()
 	{
 		Objid obj;
 
-		GetNearObject(obj, OBJ_SECTORS, Things[i]->x, Things[i]->y);
+		GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
 
 		thing_sectors[i] = obj.num;
 	}
@@ -570,12 +570,12 @@ void Render3D_Setup()
 		player = FindPlayer(r_view.p_type);
 	}
 
-	if (player && (r_view.px != player->x || r_view.py != player->y))
+	if (player && !(r_view.px == player->x() && r_view.py == player->y()))
 	{
 		// if player moved, re-create view parameters
 
-		r_view.x = r_view.px = player->x;
-		r_view.y = r_view.py = player->y;
+		r_view.x = r_view.px = player->x();
+		r_view.y = r_view.py = player->y();
 
 		r_view.FindGroundZ();
 
@@ -977,7 +977,7 @@ static void Render3D_Delete()
 
 	if (type == OB3D_Floor || type == OB3D_Ceil)
 	{
-		r_view.StoreTextureTo3DSel(BA_InternaliseString(game_info.sky_flat));
+		r_view.StoreTextureTo3DSel(BA_InternaliseString(Misc_info.sky_flat));
 		return;
 	}
 
@@ -1072,7 +1072,7 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 }
 
 
-void Render3D_SetCameraPos(int new_x, int new_y)
+void Render3D_SetCameraPos(double new_x, double new_y)
 {
 	r_view.x = new_x;
 	r_view.y = new_y;
@@ -1081,7 +1081,7 @@ void Render3D_SetCameraPos(int new_x, int new_y)
 }
 
 
-void Render3D_GetCameraPos(int *x, int *y, float *angle)
+void Render3D_GetCameraPos(double *x, double *y, float *angle)
 {
 	*x = r_view.x;
 	*y = r_view.y;

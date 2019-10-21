@@ -56,7 +56,7 @@ public:
 void Subdiv_InvalidateAll();
 
 
-bool Subdiv_SectorOnScreen(int num, int map_lx, int map_ly, int map_hx, int map_hy);
+bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy);
 
 sector_subdivision_c *Subdiv_PolygonsForSector(int num);
 

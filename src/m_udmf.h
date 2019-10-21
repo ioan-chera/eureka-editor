@@ -1,11 +1,10 @@
 //------------------------------------------------------------------------
-//  VERTEX STUFF
+//  UDMF PARSING / WRITING
 //------------------------------------------------------------------------
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,34 +17,16 @@
 //  GNU General Public License for more details.
 //
 //------------------------------------------------------------------------
-//
-//  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
-//
-//------------------------------------------------------------------------
 
-#ifndef __EUREKA_E_VERTEX_H__
-#define __EUREKA_E_VERTEX_H__
+#ifndef __EUREKA_M_UDMF_H__
+#define __EUREKA_M_UDMF_H__
 
-int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy);
-int Vertex_HowManyLineDefs(int v_num);
+void UDMF_LoadLevel();
+void UDMF_SaveLevel();
 
-void Vertex_MergeList(selection_c *list);
-bool Vertex_TryFixDangler(int v_num);
+void UDMF_SwitchEngine();
 
-/* commands */
-
-void CMD_VT_Merge(void);
-
-void CMD_VT_Disconnect(void);
-
-void CMD_LIN_Disconnect(void);
-void CMD_SEC_Disconnect(void);
-
-void CMD_VT_ShapeLine(void);
-void CMD_VT_ShapeArc (void);
-
-#endif  /* __EUREKA_E_VERTEX_H__ */
+#endif  /* __EUREKA_M_UDMF_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

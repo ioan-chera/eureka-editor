@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -38,15 +38,15 @@
 extern int vertex_radius(double scale);
 
 
-float ApproxDistToLineDef(const LineDef * L, float x, float y)
+double ApproxDistToLineDef(const LineDef * L, double x, double y)
 {
-	int x1 = L->Start()->x;
-	int y1 = L->Start()->y;
-	int x2 = L->End()->x;
-	int y2 = L->End()->y;
+	double x1 = L->Start()->x();
+	double y1 = L->Start()->y();
+	double x2 = L->End()->x();
+	double y2 = L->End()->y();
 
-	int dx = x2 - x1;
-	int dy = y2 - y1;
+	double dx = x2 - x1;
+	double dy = y2 - y1;
 
 	if (abs(dx) > abs(dy))
 	{
@@ -66,7 +66,7 @@ float ApproxDistToLineDef(const LineDef * L, float x, float y)
 
 		// case 3: x is in-between (and not equal to) both vertices
 		//         hence use slope formula to get intersection point
-		float y3 = y1 + (x - x1) * (float)dy / (float)dx;
+		double y3 = y1 + (x - x1) * dy / dx;
 
 		return fabs(y3 - y);
 	}
@@ -82,35 +82,38 @@ float ApproxDistToLineDef(const LineDef * L, float x, float y)
 			return hypot(x - (dy > 0 ? x2 : x1),
 						 y - (dy > 0 ? y2 : y1));
 
-		float x3 = x1 + (y - y1) * (float)dx / (float)dy;
+		double x3 = x1 + (y - y1) * dx / dy;
 
 		return fabs(x3 - x);
 	}
 }
 
 
-int ClosestLine_CastingHoriz(int x, int y, int *side)
+int ClosestLine_CastingHoriz(double x, double y, int *side)
 {
-	int   best_match = -1;
-	float best_dist  = 9e9;
+	int    best_match = -1;
+	double best_dist  = 9e9;
+
+	// most lines have integral Y coords, look in-between
+	y += 0.4;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int ly1 = LineDefs[n]->Start()->y;
-		int ly2 = LineDefs[n]->End()->y;
+		double ly1 = LineDefs[n]->Start()->y();
+		double ly2 = LineDefs[n]->End()->y();
 
 		// ignore purely horizontal lines
 		if (ly1 == ly2)
 			continue;
 
 		// does the linedef cross the horizontal ray?
-		if (MIN(ly1, ly2) >= y + 1 || MAX(ly1, ly2) <= y)
+		if (MIN(ly1, ly2) >= y || MAX(ly1, ly2) <= y)
 			continue;
 
-		int lx1 = LineDefs[n]->Start()->x;
-		int lx2 = LineDefs[n]->End()->x;
+		double lx1 = LineDefs[n]->Start()->x();
+		double lx2 = LineDefs[n]->End()->x();
 
-		float dist = lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1);
+		double dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (ly2 - ly1);
 
 		if (fabs(dist) < best_dist)
 		{
@@ -133,28 +136,31 @@ int ClosestLine_CastingHoriz(int x, int y, int *side)
 }
 
 
-int ClosestLine_CastingVert(int x, int y, int *side)
+int ClosestLine_CastingVert(double x, double y, int *side)
 {
-	int   best_match = -1;
-	float best_dist  = 9e9;
+	int    best_match = -1;
+	double best_dist  = 9e9;
+
+	// most lines have integral X coords, try in the middle
+	x += 0.4;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int lx1 = LineDefs[n]->Start()->x;
-		int lx2 = LineDefs[n]->End()->x;
+		double lx1 = LineDefs[n]->Start()->x();
+		double lx2 = LineDefs[n]->End()->x();
 
 		// ignore purely vertical lines
 		if (lx1 == lx2)
 			continue;
 
 		// does the linedef cross the vertical ray?
-		if (MIN(lx1, lx2) >= x + 1 || MAX(lx1, lx2) <= x)
+		if (MIN(lx1, lx2) >= x || MAX(lx1, lx2) <= x)
 			continue;
 
-		int ly1 = LineDefs[n]->Start()->y;
-		int ly2 = LineDefs[n]->End()->y;
+		double ly1 = LineDefs[n]->Start()->y();
+		double ly2 = LineDefs[n]->End()->y();
 
-		float dist = ly1 - (y + 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1);
+		double dist = ly1 - y + (ly2 - ly1) * (x - lx1) / (lx2 - lx1);
 
 		if (fabs(dist) < best_dist)
 		{
@@ -177,10 +183,10 @@ int ClosestLine_CastingVert(int x, int y, int *side)
 }
 
 
-int ClosestLine_CastAtAngle(int x, int y, float radians)
+int ClosestLine_CastAtAngle(double x, double y, float radians)
 {
-	int   best_match = -1;
-	float best_dist  = 9e9;
+	int    best_match = -1;
+	double best_dist  = 9e9;
 
 	double x2 = x + 256 * cos(radians);
 	double y2 = y + 256 * sin(radians);
@@ -189,17 +195,17 @@ int ClosestLine_CastAtAngle(int x, int y, float radians)
 	{
 		const LineDef *L = LineDefs[n];
 
-		float a = PerpDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
-		float b = PerpDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		double a = PerpDist(L->Start()->x(), L->Start()->y(),  x, y, x2, y2);
+		double b = PerpDist(L->  End()->x(), L->  End()->y(),  x, y, x2, y2);
 
 		// completely on one side of the vector?
 		if (a > 0 && b > 0) continue;
 		if (a < 0 && b < 0) continue;
 
-		float c = AlongDist(L->Start()->x, L->Start()->y,  x, y, x2, y2);
-		float d = AlongDist(L->  End()->x, L->  End()->y,  x, y, x2, y2);
+		double c = AlongDist(L->Start()->x(), L->Start()->y(),  x, y, x2, y2);
+		double d = AlongDist(L->  End()->x(), L->  End()->y(),  x, y, x2, y2);
 
-		float dist;
+		double dist;
 
 		if (fabs(a) < 1 && fabs(b) < 1)
 			dist = MIN(c, d);
@@ -209,7 +215,7 @@ int ClosestLine_CastAtAngle(int x, int y, float radians)
 			dist = d;
 		else
 		{
-			float factor = a / (a - b);
+			double factor = a / (a - b);
 			dist = c * (1 - factor) + d * factor;
 		}
 
@@ -227,22 +233,26 @@ int ClosestLine_CastAtAngle(int x, int y, float radians)
 }
 
 
-bool PointOutsideOfMap(int x, int y)
+bool PointOutsideOfMap(double x, double y)
 {
 	// this keeps track of directions tested
 	int dirs = 0;
 
+	// most end-points will be integral, so look in-between
+	double x2 = x + 0.4;
+	double y2 = y + 0.4;
+
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int lx1 = LineDefs[n]->Start()->x;
-		int ly1 = LineDefs[n]->Start()->y;
-		int lx2 = LineDefs[n]->End()->x;
-		int ly2 = LineDefs[n]->End()->y;
+		double lx1 = LineDefs[n]->Start()->x();
+		double ly1 = LineDefs[n]->Start()->y();
+		double lx2 = LineDefs[n]->End()->x();
+		double ly2 = LineDefs[n]->End()->y();
 
 		// does the linedef cross the horizontal ray?
-		if (MIN(ly1, ly2) <= y && MAX(ly1, ly2) >= y + 1)
+		if (MIN(ly1, ly2) < y2 && MAX(ly1, ly2) > y2)
 		{
-			float dist = lx1 - (x + 0.5) + (lx2 - lx1) * (y + 0.5 - ly1) / (float)(ly2 - ly1);
+			double dist = lx1 - x + (lx2 - lx1) * (y2 - ly1) / (ly2 - ly1);
 
 			dirs |= (dist < 0) ? 1 : 2;
 
@@ -250,9 +260,9 @@ bool PointOutsideOfMap(int x, int y)
 		}
 
 		// does the linedef cross the vertical ray?
-		if (MIN(lx1, lx2) <= x && MAX(lx1, lx2) >= x + 1)
+		if (MIN(lx1, lx2) < x2 && MAX(lx1, lx2) > x2)
 		{
-			float dist = ly1 - (y - 0.5) + (ly2 - ly1) * (x + 0.5 - lx1) / (float)(lx2 - lx1);
+			double dist = ly1 - y + (ly2 - ly1) * (x2 - lx1) / (lx2 - lx1);
 
 			dirs |= (dist < 0) ? 4 : 8;
 
@@ -276,15 +286,16 @@ typedef struct
 
 	int * result_side;
 
-	int dx, dy;
+	double dx, dy;
 
 	// origin of casting line
-	float x, y;
+	double x, y;
 
-	bool is_horizontal;
+	// casting line is horizontal?
+	bool cast_horizontal;
 
-	int   best_match;
-	float best_dist;
+	int    best_match;
+	double best_dist;
 
 public:
 	void ComputeCastOrigin()
@@ -295,24 +306,24 @@ public:
 
 		const LineDef * L = LineDefs[ld];
 
-		dx = L->End()->x - L->Start()->x;
-		dy = L->End()->y - L->Start()->y;
+		dx = L->End()->x() - L->Start()->x();
+		dy = L->End()->y() - L->Start()->y();
 
-		is_horizontal = abs(dy) >= abs(dx);
+		cast_horizontal = abs(dy) >= abs(dx);
 
-		x = L->Start()->x + dx * 0.5;
-		y = L->Start()->y + dy * 0.5;
+		x = L->Start()->x() + dx * 0.5;
+		y = L->Start()->y() + dy * 0.5;
 
-		if (is_horizontal && (dy & 1) == 0 && abs(dy) > 0)
+		if (cast_horizontal && abs(dy) > 0)
 		{
-			y = y + 0.5;
-			x = x + 0.5 * dx / (float)dy;
+			y = y + 0.4;
+			x = x + 0.4 * dx / dy;
 		}
 
-		if (!is_horizontal && (dx & 1) == 0 && abs(dx) > 0)
+		if (!cast_horizontal && abs(dx) > 0)
 		{
-			x = x + 0.5;
-			y = y + 0.5 * dy / (float)dx;
+			x = x + 0.4;
+			y = y + 0.4 * dy / dx;
 		}
 	}
 
@@ -321,12 +332,12 @@ public:
 		if (ld == n)  // ignore input line
 			return;
 
-		int nx1 = LineDefs[n]->Start()->x;
-		int ny1 = LineDefs[n]->Start()->y;
-		int nx2 = LineDefs[n]->End()->x;
-		int ny2 = LineDefs[n]->End()->y;
+		double nx1 = LineDefs[n]->Start()->x();
+		double ny1 = LineDefs[n]->Start()->y();
+		double nx2 = LineDefs[n]->End()->x();
+		double ny2 = LineDefs[n]->End()->y();
 
-		if (is_horizontal)
+		if (cast_horizontal)
 		{
 			if (ny1 == ny2)
 				return;
@@ -334,7 +345,7 @@ public:
 			if (MIN(ny1, ny2) > y || MAX(ny1, ny2) < y)
 				return;
 
-			float dist = nx1 + (nx2 - nx1) * (y - ny1) / (float)(ny2 - ny1) - x;
+			double dist = nx1 + (nx2 - nx1) * (y - ny1) / (ny2 - ny1) - x;
 
 			if ( (dy < 0) == (ld_side > 0) )
 				dist = -dist;
@@ -361,7 +372,7 @@ public:
 			if (MIN(nx1, nx2) > x || MAX(nx1, nx2) < x)
 				return;
 
-			float dist = ny1 + (ny2 - ny1) * (x - nx1) / (float)(nx2 - nx1) - y;
+			double dist = ny1 + (ny2 - ny1) * (x - nx1) / (nx2 - nx1) - y;
 
 			if ( (dx > 0) == (ld_side > 0) )
 				dist = -dist;
@@ -413,6 +424,17 @@ public:
 		delete hi_child;
 	}
 
+private:
+	void Subdivide()
+	{
+		if (hi - lo <= FASTOPP_DIST)
+			return;
+
+		lo_child = new fastopp_node_c(lo, mid);
+		hi_child = new fastopp_node_c(mid, hi);
+	}
+
+public:
 	/* horizontal tree */
 
 	void AddLine_X(int ld, int x1, int x2)
@@ -438,13 +460,14 @@ public:
 	{
 		const LineDef *L = LineDefs[ld];
 
-		int x1 = MIN(L->Start()->x, L->End()->x);
-		int x2 = MAX(L->Start()->x, L->End()->x);
-
 		// can ignore purely vertical lines
-		if (x1 == x2) return;
+		if (L->IsVertical())
+			return;
 
-		AddLine_X(ld, x1, x2);
+		double x1 = MIN(L->Start()->x(), L->End()->x());
+		double x2 = MAX(L->Start()->x(), L->End()->x());
+
+		AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
 	}
 
 	/* vertical tree */
@@ -472,16 +495,17 @@ public:
 	{
 		const LineDef *L = LineDefs[ld];
 
-		int y1 = MIN(L->Start()->y, L->End()->y);
-		int y2 = MAX(L->Start()->y, L->End()->y);
-
 		// can ignore purely horizonal lines
-		if (y1 == y2) return;
+		if (L->IsHorizontal())
+			return;
 
-		AddLine_Y(ld, y1, y2);
+		double y1 = MIN(L->Start()->y(), L->End()->y());
+		double y2 = MAX(L->Start()->y(), L->End()->y());
+
+		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
 	}
 
-	void Process(opp_test_state_t& test, float coord)
+	void Process(opp_test_state_t& test, double coord)
 	{
 		for (unsigned int k = 0 ; k < lines.size() ; k++)
 			test.ProcessLine(lines[k]);
@@ -495,20 +519,10 @@ public:
 		//
 		// hence we never need to recurse down BOTH sides here.
 
-		if (coord < mid)
+		if (coord < (double)mid)
 			lo_child->Process(test, coord);
 		else
 			hi_child->Process(test, coord);
-	}
-
-private:
-	void Subdivide()
-	{
-		if (hi - lo <= FASTOPP_DIST)
-			return;
-
-		lo_child = new fastopp_node_c(lo, mid);
-		hi_child = new fastopp_node_c(mid, hi);
 	}
 };
 
@@ -565,7 +579,7 @@ int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_line
 
 		SYS_ASSERT(ignore_lines == NULL);
 
-		if (test.is_horizontal)
+		if (test.cast_horizontal)
 			fastopp_Y_tree->Process(test, test.y);
 		else
 			fastopp_X_tree->Process(test, test.x);
@@ -602,12 +616,12 @@ int OppositeSector(int ld, int ld_side)
 
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
-int PointOnLineSide(int x, int y, int lx1, int ly1, int lx2, int ly2)
+int PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2)
 {
 	x   -= lx1; y   -= ly1;
 	lx2 -= lx1; ly2 -= ly1;
 
-	int tmp = (x * ly2 - y * lx2);
+	double tmp = (x * ly2 - y * lx2);
 
 	return (tmp < 0) ? -1 : (tmp > 0) ? +1 : 0;
 }
@@ -648,34 +662,34 @@ public:
 //
 // determine which linedef is under the pointer
 //
-static Objid NearestLineDef(float x, float y)
+static Objid NearestLineDef(double x, double y)
 {
 	// slack in map units
-	float mapslack = 2 + 16.0f / grid.Scale;
+	double mapslack = 2.5 + 16.0f / grid.Scale;
 
-	int lx = floor(x - mapslack);
-	int ly = floor(y - mapslack);
-	int hx =  ceil(x + mapslack);
-	int hy =  ceil(y + mapslack);
+	double lx = x - mapslack;
+	double ly = y - mapslack;
+	double hx = x + mapslack;
+	double hy = y + mapslack;
 
 	int    best = -1;
 	double best_dist = 9e9;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int x1 = LineDefs[n]->Start()->x;
-		int y1 = LineDefs[n]->Start()->y;
-		int x2 = LineDefs[n]->End()->x;
-		int y2 = LineDefs[n]->End()->y;
+		double x1 = LineDefs[n]->Start()->x();
+		double y1 = LineDefs[n]->Start()->y();
+		double x2 = LineDefs[n]->End()->x();
+		double y2 = LineDefs[n]->End()->y();
 
 		// Skip all lines of which all points are more than <mapslack>
-		// units away from (x,y). In a typical level, this test will
+		// units away from (x,y).  In a typical level, this test will
 		// filter out all the linedefs but a handful.
 		if (MAX(x1,x2) < lx || MIN(x1,x2) > hx ||
 		    MAX(y1,y2) < ly || MIN(y1,y2) > hy)
 			continue;
 
-		float dist = ApproxDistToLineDef(LineDefs[n], x, y);
+		double dist = ApproxDistToLineDef(LineDefs[n], x, y);
 
 		if (dist > mapslack)
 			continue;
@@ -701,15 +715,15 @@ static Objid NearestLineDef(float x, float y)
 // determine which linedef would be split if a new vertex were
 // added at the given coordinates.
 //
-static Objid NearestSplitLine(int x, int y, int ignore_vert)
+static Objid NearestSplitLine(double x, double y, int ignore_vert)
 {
 	// slack in map units
-	int mapslack = 1 + (int)ceil(8.0f / grid.Scale);
+	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
 
-	int lx = x - mapslack;
-	int ly = y - mapslack;
-	int hx = x + mapslack;
-	int hy = y + mapslack;
+	double lx = x - mapslack;
+	double ly = y - mapslack;
+	double hx = x + mapslack;
+	double hy = y + mapslack;
 
 	int    best = -1;
 	double best_dist = 9e9;
@@ -721,22 +735,21 @@ static Objid NearestSplitLine(int x, int y, int ignore_vert)
 		if (L->start == ignore_vert || L->end == ignore_vert)
 			continue;
 
-		int x1 = L->Start()->x;
-		int y1 = L->Start()->y;
-		int x2 = L->End()->x;
-		int y2 = L->End()->y;
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
 
 		if (MAX(x1,x2) < lx || MIN(x1,x2) > hx ||
 		    MAX(y1,y2) < ly || MIN(y1,y2) > hy)
 			continue;
 
-		// skip linedef if point matches a vertex
+		// skip linedef if given point matches a vertex
 		if (x == x1 && y == y1) continue;
 		if (x == x2 && y == y2) continue;
 
 		// skip linedef if too small to split
-		if (abs(L->Start()->x - L->End()->x) < 4 &&
-			abs(L->Start()->y - L->End()->y) < 4)
+		if (fabs(x2 - x1) < 4.0 && fabs(y2 - y1) < 4.0)
 			continue;
 
 		double dist = ApproxDistToLineDef(L, x, y);
@@ -762,7 +775,7 @@ static Objid NearestSplitLine(int x, int y, int ignore_vert)
 //
 //  determine which sector is under the pointer
 //
-static Objid NearestSector(int x, int y)
+static Objid NearestSector(double x, double y)
 {
 	/* hack, hack...  I look for the first LineDef crossing
 	   an horizontal half-line drawn from the cursor */
@@ -806,24 +819,24 @@ static Objid NearestSector(int x, int y)
 //
 // determine which thing is under the mouse pointer
 //
-static Objid NearestThing(float x, float y)
+static Objid NearestThing(double x, double y)
 {
-	float mapslack = 1 + 16.0f / grid.Scale;
+	double mapslack = 1 + 16.0f / grid.Scale;
 
-	int max_radius = MAX_RADIUS + ceil(mapslack);
+	double max_radius = MAX_RADIUS + ceil(mapslack);
 
-	int lx = x - max_radius;
-	int ly = y - max_radius;
-	int hx = x + max_radius;
-	int hy = y + max_radius;
+	double lx = x - max_radius;
+	double ly = y - max_radius;
+	double hx = x + max_radius;
+	double hy = y + max_radius;
 
 	int best = -1;
 	thing_comparer_t best_comp;
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		int tx = Things[n]->x;
-		int ty = Things[n]->y;
+		double tx = Things[n]->x();
+		double ty = Things[n]->y();
 
 		// filter out things that are outside the search bbox.
 		// this search box is enlarged by MAX_RADIUS.
@@ -833,7 +846,7 @@ static Objid NearestThing(float x, float y)
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
 		// more accurate bbox test using the real radius
-		int r = info->radius + mapslack;
+		double r = info->radius + mapslack;
 
 		if (x < tx - r - mapslack || x > tx + r + mapslack ||
 			y < ty - r - mapslack || y > ty + r + mapslack)
@@ -842,7 +855,7 @@ static Objid NearestThing(float x, float y)
 		thing_comparer_t th_comp;
 
 		th_comp.distance = hypot(x - tx, y - ty);
-		th_comp.radius   = r;
+		th_comp.radius   = (int)r;
 		th_comp.inside   = (x > tx - r && x < tx + r && y > ty - r && y < ty + r);
 
 		if (best < 0 || th_comp <= best_comp)
@@ -863,28 +876,28 @@ static Objid NearestThing(float x, float y)
 //
 // determine which vertex is under the pointer
 //
-static Objid NearestVertex(float x, float y)
+static Objid NearestVertex(double x, double y)
 {
 	const int screen_pix = vertex_radius(grid.Scale);
 
-	float mapslack = 1 + (4 + screen_pix) / grid.Scale;
+	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
 
 	// workaround for overly zealous highlighting when zoomed in far
 	if (grid.Scale >= 15.0) mapslack *= 0.7;
 	if (grid.Scale >= 31.0) mapslack *= 0.5;
 
-	int lx = floor(x - mapslack);
-	int ly = floor(y - mapslack);
-	int hx =  ceil(x + mapslack);
-	int hy =  ceil(y + mapslack);
+	double lx = x - mapslack - 0.5;
+	double ly = y - mapslack - 0.5;
+	double hx = x + mapslack + 0.5;
+	double hy = y + mapslack + 0.5;
 
 	int    best = -1;
 	double best_dist = 9e9;
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		int vx = Vertices[n]->x;
-		int vy = Vertices[n]->y;
+		double vx = Vertices[n]->x();
+		double vy = Vertices[n]->y();
 
 		// filter out vertices that are outside the search bbox
 		if (vx < lx || vx > hx || vy < ly || vy > hy)
@@ -917,7 +930,7 @@ static Objid NearestVertex(float x, float y)
 //  coordinates.  when several objects are close, the smallest
 //  is chosen.
 //
-void GetNearObject(Objid& o, obj_type_e objtype, float x, float y)
+void GetNearObject(Objid& o, obj_type_e objtype, double x, double y)
 {
 	switch (objtype)
 	{
@@ -952,7 +965,7 @@ void GetNearObject(Objid& o, obj_type_e objtype, float x, float y)
 }
 
 
-void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
+void GetSplitLineDef(Objid& o, double x, double y, int drag_vert)
 {
 	o = NearestSplitLine(x, y, drag_vert);
 
@@ -962,13 +975,18 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 
 	if (o.valid() && grid.snap)
 	{
-		int snap_x = grid.SnapX(x);
-		int snap_y = grid.SnapY(y);
+		int snap_x = grid.ForceSnapX(x);
+		int snap_y = grid.ForceSnapY(y);
 
 		const LineDef * L = LineDefs[o.num];
 
-		if ( (L->Start()->x == snap_x && L->Start()->y == snap_y) ||
-			 (L->  End()->x == snap_x && L->  End()->y == snap_y) )
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End()->x();
+		double y2 = L->End()->y();
+
+		if ( (I_ROUND(x1) == snap_x && I_ROUND(y1) == snap_y) ||
+			 (I_ROUND(x2) == snap_x && I_ROUND(y2) == snap_y))
 		{
 			o.clear();
 		}
@@ -976,8 +994,8 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 		// also require snap coordinate be not TOO FAR from the line
 		double len = L->CalcLength();
 
-		double along = AlongDist(snap_x, snap_y, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-		double  perp =  PerpDist(snap_x, snap_y, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+		double along = AlongDist(snap_x, snap_y, x1, y1, x2, y2);
+		double  perp =  PerpDist(snap_x, snap_y, x1, y1, x2, y2);
 
 		if (along <= 0 || along >= len || fabs(perp) > len * 0.2)
 		{
@@ -989,12 +1007,14 @@ void GetSplitLineDef(Objid& o, int x, int y, int drag_vert)
 
 void GetSplitLineForDangler(Objid& o, int v_num)
 {
-	o = NearestSplitLine(Vertices[v_num]->x, Vertices[v_num]->y, v_num);
+	o = NearestSplitLine(Vertices[v_num]->x(), Vertices[v_num]->y(), v_num);
 }
 
 
 //------------------------------------------------------------------------
 
+
+// FIXME FOR DOUBLE COORDS
 
 crossing_state_c::crossing_state_c() : points()
 { }
@@ -1016,14 +1036,14 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.x    = Vertices[v]->x;
-	pt.y    = Vertices[v]->y;
+	pt.x    = Vertices[v]->x();
+	pt.y    = Vertices[v]->y();
 	pt.dist = dist;
 
 	points.push_back(pt);
 }
 
-void crossing_state_c::add_line(int ld, int new_x, int new_y, double dist)
+void crossing_state_c::add_line(int ld, double new_x, double new_y, double dist)
 {
 	cross_point_t pt;
 
@@ -1072,8 +1092,7 @@ void crossing_state_c::SplitAllLines()
 
 			Vertex *V = Vertices[points[i].vert];
 
-			V->x = points[i].x;
-			V->y = points[i].y;
+			V->SetRawXY(points[i].x, points[i].y);
 
 			SplitLineDefAtVertex(points[i].ld, points[i].vert);
 		}
@@ -1130,16 +1149,21 @@ bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
 #endif
 
 
-#define CROSSING_EPSILON  0.8
-#define    ALONG_EPSILON  0.4
+#define CROSSING_EPSILON  0.4
+#define    ALONG_EPSILON  0.04
 
 
 static void FindCrossingLines(crossing_state_c& cross,
-						int x1, int y1, int possible_v1,
-						int x2, int y2, int possible_v2)
+						double x1, double y1, int possible_v1,
+						double x2, double y2, int possible_v2)
 {
+	fixcoord_t fx1 = TO_COORD(x1);
+	fixcoord_t fy1 = TO_COORD(y1);
+	fixcoord_t fx2 = TO_COORD(x2);
+	fixcoord_t fy2 = TO_COORD(y2);
+
 	// this could happen when two vertices are overlapping
-	if (x1 == x2 && y1 == y2)
+	if (fx1 == fx2 && fy1 == fy2)
 		return;
 
 	// distances along the WHOLE original line
@@ -1147,21 +1171,21 @@ static void FindCrossingLines(crossing_state_c& cross,
 	double along2 = AlongDist(x2, y2,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 
 	// bounding box
-	int bbox_x1 = MIN(x1, x2);
-	int bbox_y1 = MIN(y1, y2);
+	double bbox_x1 = MIN(x1, x2) - 0.25;
+	double bbox_y1 = MIN(y1, y2) - 0.25;
 
-	int bbox_x2 = MAX(x1, x2);
-	int bbox_y2 = MAX(y1, y2);
+	double bbox_x2 = MAX(x1, x2) + 0.25;
+	double bbox_y2 = MAX(y1, y2) + 0.25;
 
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
 		const LineDef * L = LineDefs[ld];
 
-		int lx1 = L->Start()->x;
-		int ly1 = L->Start()->y;
-		int lx2 = L->End()->x;
-		int ly2 = L->End()->y;
+		double lx1 = L->Start()->x();
+		double ly1 = L->Start()->y();
+		double lx2 = L->End()->x();
+		double ly2 = L->End()->y();
 
 		// bbox test -- eliminate most lines from consideration
 		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
@@ -1170,16 +1194,16 @@ static void FindCrossingLines(crossing_state_c& cross,
 			continue;
 		}
 
-		if (L->isZeroLength())
+		if (L->IsZeroLength())
 			continue;
 
 		// skip linedef if an end-point is one of the vertices already
 		// in the crossing state (including the very start or very end).
-		if (L->TouchesCoord(x1, y1) || L->TouchesCoord(x2, y2))
+		if (L->TouchesCoord(fx1, fy1) || L->TouchesCoord(fx2, fy2))
 			continue;
 
-		if (L->TouchesCoord(cross.start_x, cross.start_y) ||
-			L->TouchesCoord(cross.  end_x, cross.  end_y))
+		if (L->TouchesCoord(TO_COORD(cross.start_x), TO_COORD(cross.start_y)) ||
+			L->TouchesCoord(TO_COORD(cross.  end_x), TO_COORD(cross.  end_y)))
 			continue;
 
 		if (cross.HasLine(ld))
@@ -1203,17 +1227,12 @@ static void FindCrossingLines(crossing_state_c& cross,
 		// compute intersection point
 		double l_along = a / (a - b);
 
-		double ix = (double)lx1 + l_along * (lx2 - lx1);
-		double iy = (double)ly1 + l_along * (ly2 - ly1);
-
-		int new_x = I_ROUND(ix);
-		int new_y = I_ROUND(iy);
+		double new_x = (double)lx1 + l_along * (lx2 - lx1);
+		double new_y = (double)ly1 + l_along * (ly2 - ly1);
 
 		// ensure new vertex does not match the start or end points
-		if (new_x == x1 && new_y == y1) continue;
-		if (new_x == x2 && new_y == y2) continue;
-
-		if (L->TouchesCoord(new_x, new_y)) continue;
+		if (fabs(new_x - x1) < 0.1 && fabs(new_y - y1) < 0.1) continue;
+		if (fabs(new_x - x2) < 0.1 && fabs(new_y - y2) < 0.1) continue;
 
 		double along = AlongDist(new_x, new_y,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 
@@ -1226,8 +1245,8 @@ static void FindCrossingLines(crossing_state_c& cross,
 
 
 void FindCrossingPoints(crossing_state_c& cross,
-						int x1, int y1, int possible_v1,
-						int x2, int y2, int possible_v2)
+						double x1, double y1, int possible_v1,
+						double x2, double y2, int possible_v2)
 {
 	cross.clear();
 
@@ -1243,14 +1262,14 @@ void FindCrossingPoints(crossing_state_c& cross,
 	close_dist = CLAMP(1.0, close_dist, 12.0);
 
 
-	int dx = x2 - x1;
-	int dy = y2 - y1;
-
-	// same coords?  (sanity check)
-	if (dx == 0 && dy == 0)
-		return;
+	double dx = x2 - x1;
+	double dy = y2 - y1;
 
 	double length = hypot(dx, dy);
+
+	// same coords?  (sanity check)
+	if (length < 0.01)
+		return;
 
 
 	/* must do all vertices FIRST */
@@ -1263,16 +1282,17 @@ void FindCrossingPoints(crossing_state_c& cross,
 		const Vertex * VC = Vertices[v];
 
 		// ignore vertices ar same coordinates as v1 or v2
-		if (VC->Matches(x1, y1) || VC->Matches(x2, y2))
+		if (VC->Matches(TO_COORD(x1), TO_COORD(y1)) ||
+			VC->Matches(TO_COORD(x2), TO_COORD(y2)))
 			continue;
 
 		// is this vertex sitting on the line?
-		double perp = PerpDist(VC->x, VC->y, x1,y1, x2,y2);
+		double perp = PerpDist(VC->x(), VC->y(), x1,y1, x2,y2);
 
 		if (fabs(perp) > close_dist)
 			continue;
 
-		double along = AlongDist(VC->x, VC->y, x1,y1, x2,y2);
+		double along = AlongDist(VC->x(), VC->y(), x1,y1, x2,y2);
 
 		if (along > ALONG_EPSILON && along < length - ALONG_EPSILON)
 		{
@@ -1285,9 +1305,9 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 	/* process each pair of adjacent vertices to find split lines */
 
-	int cur_x1 = x1;
-	int cur_y1 = y1;
-	int cur_v  = possible_v1;
+	double cur_x1 = x1;
+	double cur_y1 = y1;
+	int    cur_v  = possible_v1;
 
 	// grab number of points now, since we will adding split points
 	// (and we assume those new points get added at the end).

@@ -386,7 +386,7 @@ void UI_3DInfoBar::draw()
 	{
 		IB_Number(cx, cy, "x", I_ROUND(r_view.x), 5);
 		IB_Number(cx, cy, "y", I_ROUND(r_view.y), 5);
-		IB_Number(cx, cy, "z", I_ROUND(r_view.z) - game_info.view_height, 4);
+		IB_Number(cx, cy, "z", I_ROUND(r_view.z) - Misc_info.view_height, 4);
 
 		int ang = I_ROUND(r_view.angle * 180 / M_PI);
 		if (ang < 0) ang += 360;

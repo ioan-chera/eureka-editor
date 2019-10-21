@@ -97,7 +97,7 @@ public:
 		return (int)num;
 	}
 
-	void CentreOfThings(int *cx, int *cy)
+	void CentreOfThings(double *cx, double *cy)
 	{
 		*cx = *cy = 0;
 
@@ -109,39 +109,18 @@ public:
 
 		for (unsigned int i = 0 ; i < things.size() ; i++)
 		{
-			sum_x += things[i]->x;
-			sum_y += things[i]->y;
+			sum_x += things[i]->x();
+			sum_y += things[i]->y();
 		}
 
 		sum_x /= (double)things.size();
 		sum_y /= (double)things.size();
 
-		*cx = I_ROUND(sum_x);
-		*cy = I_ROUND(sum_y);
-
-#if 0
-		// find closest thing to this point
-		double best_dist = 9e9;
-
-		for (unsigned int k = 0 ; k < things.size() ; k++)
-		{
-			double dx = things[k]->x - sum_x;
-			double dy = things[k]->y - sum_y;
-
-			double dist = dx*dx + dy*dy;
-
-			if (dist < best_dist)
-			{
-				*cx = things[k]->x;
-				*cy = things[k]->y;
-
-				best_dist = dist;
-			}
-		}
-#endif
+		*cx = sum_x;
+		*cy = sum_y;
 	}
 
-	void CentreOfVertices(int *cx, int *cy)
+	void CentreOfVertices(double *cx, double *cy)
 	{
 		*cx = *cy = 0;
 
@@ -153,36 +132,15 @@ public:
 
 		for (unsigned int i = 0 ; i < verts.size() ; i++)
 		{
-			sum_x += verts[i]->x;
-			sum_y += verts[i]->y;
+			sum_x += verts[i]->x();
+			sum_y += verts[i]->y();
 		}
 
 		sum_x /= (double)verts.size();
 		sum_y /= (double)verts.size();
 
-		*cx = I_ROUND(sum_x);
-		*cy = I_ROUND(sum_y);
-
-#if 0
-		// find closest vertex to this point
-		double best_dist = 9e9;
-
-		for (unsigned int k = 0 ; k < verts.size() ; k++)
-		{
-			double dx = verts[k]->x - sum_x;
-			double dy = verts[k]->y - sum_y;
-
-			double dist = dx*dx + dy*dy;
-
-			if (dist < best_dist)
-			{
-				*cx = verts[k]->x;
-				*cy = verts[k]->y;
-
-				best_dist = dist;
-			}
-		}
-#endif
+		*cx = sum_x;
+		*cy = sum_y;
 	}
 
 	bool HasSectorRefs(int s1, int s2)
@@ -494,9 +452,9 @@ static bool Clipboard_DoCopy()
 //------------------------------------------------------------------------
 
 
-static void PasteGroupOfObjects(int pos_x, int pos_y)
+static void PasteGroupOfObjects(double pos_x, double pos_y)
 {
-	int cx, cy;
+	double cx, cy;
 	clip_board->CentreOfVertices(&cx, &cy);
 
 	// these hold the mapping from clipboard index --> real index
@@ -515,8 +473,8 @@ static void PasteGroupOfObjects(int pos_x, int pos_y)
 
 		V->RawCopy(clip_board->verts[i]);
 
-		V->x += pos_x - cx;
-		V->y += pos_y - cy;
+		V->SetRawX(V->x() + pos_x - cx);
+		V->SetRawY(V->y() + pos_y - cy);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
@@ -598,8 +556,8 @@ static void PasteGroupOfObjects(int pos_x, int pos_y)
 
 		T->RawCopy(clip_board->things[i]);
 
-		T->x += pos_x - cx;
-		T->y += pos_y - cy;
+		T->SetRawX(T->x() + pos_x - cx);
+		T->SetRawY(T->y() + pos_y - cy);
 	}
 }
 
@@ -674,13 +632,13 @@ static bool Clipboard_DoPaste()
 		return false;
 
 	// figure out where to put stuff
-	int pos_x = edit.map_x;
-	int pos_y = edit.map_y;
+	double pos_x = edit.map_x;
+	double pos_y = edit.map_y;
 
 	if (! edit.pointer_in_window)
 	{
-		pos_x = I_ROUND(grid.orig_x);
-		pos_y = I_ROUND(grid.orig_y);
+		pos_x = grid.orig_x;
+		pos_y = grid.orig_y;
 	}
 
 	// honor the grid snapping setting
@@ -697,7 +655,7 @@ static bool Clipboard_DoPaste()
 	{
 		case OBJ_THINGS:
 		{
-			int cx, cy;
+			double cx, cy;
 			clip_board->CentreOfThings(&cx, &cy);
 
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
@@ -707,8 +665,8 @@ static bool Clipboard_DoPaste()
 
 				T->RawCopy(clip_board->things[i]);
 
-				T->x += pos_x - cx;
-				T->y += pos_y - cy;
+				T->SetRawX(T->x() + pos_x - cx);
+				T->SetRawY(T->y() + pos_y - cy);
 
 				recent_things.insert_number(T->type);
 			}
@@ -717,7 +675,7 @@ static bool Clipboard_DoPaste()
 
 		case OBJ_VERTICES:
 		{
-			int cx, cy;
+			double cx, cy;
 			clip_board->CentreOfVertices(&cx, &cy);
 
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
@@ -727,8 +685,8 @@ static bool Clipboard_DoPaste()
 
 				V->RawCopy(clip_board->verts[i]);
 
-				V->x += pos_x - cx;
-				V->y += pos_y - cy;
+				V->SetRawX(V->x() + pos_x - cx);
+				V->SetRawY(V->y() + pos_y - cy);
 			}
 			break;
 		}

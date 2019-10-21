@@ -28,34 +28,29 @@
 #define __EUREKA_OBJECTS_H__
 
 
-void SelectObjectsInBox(selection_c *list, int, int, int, int, int);
-void HighlightObject(int, int, int);
-
-void MoveObjects(selection_c * list, int delta_x, int delta_y, int delta_z = 0);
-void DragSingleObject(int obj_num, int delta_x, int delta_y, int delta_z = 0);
+void MoveObjects(selection_c * list, double delta_x, double delta_y, double delta_z = 0);
+void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_z = 0);
 
 void DeleteObjects(selection_c * list);
 
-bool LineTouchesBox(int, int, int, int, int);
+bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1);
 
-void GetDragFocus(int *x, int *y, int map_x, int map_y);
+void GetDragFocus(double *x, double *y, double map_x, double map_y);
 
 
 struct transform_t
 {
 public:
-	int mid_x, mid_y;
-
-	float scale_x, scale_y;
-
-	float skew_x, skew_y;
+	double mid_x, mid_y;
+	double scale_x, scale_y;
+	double skew_x, skew_y;
 
 	int rotate;  // 16 bits (65536 = 360 degrees)
 
 public:
 	void Clear();
 
-	void Apply(int *x, int *y) const;
+	void Apply(double *x, double *y) const;
 };
 
 
@@ -70,16 +65,16 @@ typedef enum
 } transform_keyword_e;
 
 
-void Objs_CalcMiddle(selection_c * list, int *x, int *y);
-void Objs_CalcBBox(selection_c * list, int *x1, int *y1, int *x2, int *y2);
+void Objs_CalcMiddle(selection_c * list, double *x, double *y);
+void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, double *y2);
 
 void TransformObjects(transform_t& param);
 
-void ScaleObjects3(double scale_x, double scale_y, int pos_x, int pos_y);
+void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y);
 void ScaleObjects4(double scale_x, double scale_y, double scale_z,
-                   int pos_x, int pos_y, int pos_z);
+                   double pos_x, double pos_y, double pos_z);
 
-void RotateObjects3(double deg, int pos_x, int pos_y);
+void RotateObjects3(double deg, double pos_x, double pos_y);
 
 
 /* commands */

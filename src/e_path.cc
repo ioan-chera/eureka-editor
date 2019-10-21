@@ -275,7 +275,7 @@ static bool GrowContiguousSectors(selection_c &seen)
 			int f_max = MAX(S1->floorh, S2->floorh);
 			int c_min = MIN(S1-> ceilh, S2-> ceilh);
 
-			if (c_min - f_max < game_info.player_h)
+			if (c_min - f_max < Misc_info.player_h)
 			{
 				// ... but allow doors
 				if (! (allow_doors && (S1->floorh == S1->ceilh || S2->floorh == S2->ceilh)))
@@ -360,12 +360,11 @@ void CMD_SEC_SelectGroup(void)
 
 void GoToSelection()
 {
-	int x1, y1, x2, y2;
-
+	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
-	int mid_x = (x1 + x2) / 2;
-	int mid_y = (y1 + y2) / 2;
+	double mid_x = (x1 + x2) / 2;
+	double mid_y = (y1 + y2) / 2;
 
 	grid.MoveTo(mid_x, mid_y);
 

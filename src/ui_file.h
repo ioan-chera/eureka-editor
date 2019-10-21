@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2018 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -147,6 +147,7 @@ private:
 	Fl_Choice *game_choice;
 	Fl_Choice *port_choice;
 	Fl_Choice *format_choice;
+	Fl_Choice *namespace_choice;
 
 	Fl_Output *res_name[RES_NUM];
 
@@ -169,9 +170,10 @@ private:
 	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
 	static void format_callback(Fl_Choice*, void*);
-	static void   find_callback(Fl_Button*, void*);
-	static void  setup_callback(Fl_Button*, void*);
+	static void namespace_callback(Fl_Choice*, void*);
 
+	static void  find_callback(Fl_Button*, void*);
+	static void setup_callback(Fl_Button*, void*);
 	static void  kill_callback(Fl_Button*, void*);
 	static void  load_callback(Fl_Button*, void*);
 
@@ -181,6 +183,7 @@ private:
 	void PopulateIWADs();
 	void PopulatePort();
 	void PopulateMapFormat();
+	void PopulateNamespaces();
 	void PopulateResources();
 
 public:
@@ -191,6 +194,7 @@ public:
 	const char * port;
 
 	map_format_e map_format;
+	std::string  name_space;
 
 	const char * res[RES_NUM];
 

@@ -59,29 +59,34 @@ bool LineDefAlreadyExists(int v1, int v2)
 // existing line.  By "overlap" I mean parallel and sitting on top
 // (this does NOT test for lines crossing each other).
 //
-bool LineDefWouldOverlap(int v1, int x2, int y2)
+bool LineDefWouldOverlap(int v1, double x2, double y2)
 {
-	int x1 = Vertices[v1]->x;
-	int y1 = Vertices[v1]->y;
+	double x1 = Vertices[v1]->x();
+	double y1 = Vertices[v1]->y();
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		LineDef *L = LineDefs[n];
 
 		// zero-length lines should not exist, but don't get stroppy if they do
-		if (L->isZeroLength())
+		if (L->IsZeroLength())
 			continue;
+
+		double lx1 = L->Start()->x();
+		double ly1 = L->Start()->y();
+		double lx2 = L->End()->x();
+		double ly2 = L->End()->y();
 
 		double a, b;
 
-		a = PerpDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-		b = PerpDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+		a = PerpDist(x1, y1, lx1, ly1, lx2, ly2);
+		b = PerpDist(x2, y2, lx1, ly1, lx2, ly2);
 
 		if (fabs(a) >= 2.0 || fabs(b) >= 2.0)
 			continue;
 
-		a = AlongDist(x1, y1, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
-		b = AlongDist(x2, y2, L->Start()->x, L->Start()->y, L->End()->x, L->End()->y);
+		a = AlongDist(x1, y1, lx1, ly1, lx2, ly2);
+		b = AlongDist(x2, y2, lx1, ly1, lx2, ly2);
 
 		double len = L->CalcLength();
 
@@ -367,7 +372,7 @@ static void DetermineAdjoiner(Obj3d_t& result,
 		if (N == L)
 			continue;
 
-		if (N->isZeroLength())
+		if (N->IsZeroLength())
 			continue;
 
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
@@ -911,12 +916,12 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	// compute lengths (to update sidedef X offsets)
 	int orig_length = (int)ComputeDist(
-			L->Start()->x - L->End()->x,
-			L->Start()->y - L->End()->y);
+			L->Start()->x() - L->End()->x(),
+			L->Start()->y() - L->End()->y());
 
 	int new_length = (int)ComputeDist(
-			L->Start()->x - V->x,
-			L->Start()->y - V->y);
+			L->Start()->x() - V->x(),
+			L->Start()->y() - V->y());
 
 	// update sidedefs
 
@@ -950,20 +955,19 @@ static bool DoSplitLineDef(int ld)
 {
 	LineDef * L = LineDefs[ld];
 
-	int new_x = (L->Start()->x + L->End()->x) / 2;
-	int new_y = (L->Start()->y + L->End()->y) / 2;
-
 	// prevent creating tiny lines (especially zero-length)
-	if (abs(L->Start()->x - L->End()->x) < 4 &&
-	    abs(L->Start()->y - L->End()->y) < 4)
+	if (abs(L->Start()->x() - L->End()->x()) < 4 &&
+	    abs(L->Start()->y() - L->End()->y()) < 4)
 		return false;
+
+	double new_x = (L->Start()->x() + L->End()->x()) / 2;
+	double new_y = (L->Start()->y() + L->End()->y()) / 2;
 
 	int new_v = BA_New(OBJ_VERTICES);
 
 	Vertex * V = Vertices[new_v];
 
-	V->x = new_x;
-	V->y = new_y;
+	V->SetRawXY(new_x, new_y);
 
 	SplitLineDefAtVertex(ld, new_v);
 
@@ -1232,14 +1236,14 @@ void CMD_LIN_MergeTwo(void)
 }
 
 
-void MoveCoordOntoLineDef(int ld, int *x, int *y)
+void MoveCoordOntoLineDef(int ld, double *x, double *y)
 {
 	const LineDef *L = LineDefs[ld];
 
-	double x1 = L->Start()->x;
-	double y1 = L->Start()->y;
-	double x2 = L->End()->x;
-	double y2 = L->End()->y;
+	double x1 = L->Start()->x();
+	double y1 = L->Start()->y();
+	double x2 = L->End()->x();
+	double y2 = L->End()->y();
 
 	double dx = x2 - x1;
 	double dy = y2 - y1;
@@ -1252,11 +1256,8 @@ void MoveCoordOntoLineDef(int ld, int *x, int *y)
 	double along = (*x - x1) * dx + (*y - y1) * dy;
 
 	// result = start + along * line unit vector
-	double new_x = x1 + along * dx / len_squared;
-	double new_y = y1 + along * dy / len_squared;
-
-	*x = I_ROUND(new_x);
-	*y = I_ROUND(new_y);
+	*x = x1 + along * dx / len_squared;
+	*y = y1 + along * dy / len_squared;
 }
 
 
@@ -1341,13 +1342,13 @@ static void LD_SetLength(int ld, int new_len, int angle)
 
 	if (new_len < 0)
 	{
-		BA_ChangeVT(L->start, Vertex::F_X, L->End()->x - idx);
-		BA_ChangeVT(L->start, Vertex::F_Y, L->End()->y - idy);
+		BA_ChangeVT(L->start, Vertex::F_X, L->End()->raw_x - INT_TO_COORD(idx));
+		BA_ChangeVT(L->start, Vertex::F_Y, L->End()->raw_y - INT_TO_COORD(idy));
 	}
 	else
 	{
-		BA_ChangeVT(L->end, Vertex::F_X, L->Start()->x + idx);
-		BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->y + idy);
+		BA_ChangeVT(L->end, Vertex::F_X, L->Start()->raw_x + INT_TO_COORD(idx));
+		BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->raw_y + INT_TO_COORD(idy));
 	}
 }
 
@@ -1369,8 +1370,8 @@ void LineDefs_SetLength(int new_len)
 	{
 		const LineDef *L = LineDefs[n];
 
-		angles[n] = ComputeAngle(L->End()->x - L->Start()->x,
-								 L->End()->y - L->Start()->y);
+		angles[n] = ComputeAngle(L->End()->x() - L->Start()->x(),
+								 L->End()->y() - L->Start()->y());
 	}
 
 	BA_Begin();
@@ -1419,11 +1420,11 @@ void LD_FixForLostSide(int ld)
 //
 double LD_AngleBetweenLines(int A, int B, int C)
 {
-	int a_dx = Vertices[B]->x - Vertices[A]->x;
-	int a_dy = Vertices[B]->y - Vertices[A]->y;
+	double a_dx = Vertices[B]->x() - Vertices[A]->x();
+	double a_dy = Vertices[B]->y() - Vertices[A]->y();
 
-	int c_dx = Vertices[B]->x - Vertices[C]->x;
-	int c_dy = Vertices[B]->y - Vertices[C]->y;
+	double c_dx = Vertices[B]->x() - Vertices[C]->x();
+	double c_dy = Vertices[B]->y() - Vertices[C]->y();
 
 	double AB_angle = (a_dx == 0) ? (a_dy >= 0 ? 90 : -90) : atan2(a_dy, a_dx) * 180 / M_PI;
 	double CB_angle = (c_dx == 0) ? (c_dy >= 0 ? 90 : -90) : atan2(c_dy, c_dx) * 180 / M_PI;

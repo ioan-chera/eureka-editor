@@ -82,6 +82,7 @@ const char *Port_name;
 const char *Level_name;
 
 map_format_e Level_format;
+std::string  Udmf_namespace;
 
 
 //
@@ -429,7 +430,7 @@ static void DeterminePort()
 		return;
 	}
 
-	const char *var_game = M_VariantForGame(Game_name);
+	const char *base_game = M_GetBaseGame(Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (! (default_port && default_port[0]))
@@ -443,7 +444,7 @@ static void DeterminePort()
 				default_port);
 		default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(var_game, default_port))
+	else if (! M_CheckPortSupportsGame(base_game, default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
 				default_port, Game_name);
@@ -834,10 +835,10 @@ static void ReadPortInfo()
 
 	SYS_ASSERT(Port_name);
 
-	const char *var_game = M_VariantForGame(Game_name);
+	const char *base_game = M_GetBaseGame(Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(var_game, Port_name))
+	if (! M_CheckPortSupportsGame(base_game, Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 				Port_name, Game_name);
@@ -862,11 +863,11 @@ static void ReadPortInfo()
 	M_LoadDefinitions("ports", Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
-	if (game_info.strife_flags)
+	if (Features.strife_flags)
 	{
-		game_info.pass_through = 0;
-		game_info.coop_dm_flags = 0;
-		game_info.friend_flag = 0;
+		Features.pass_through = 0;
+		Features.coop_dm_flags = 0;
+		Features.friend_flag = 0;
 	}
 }
 
@@ -883,8 +884,10 @@ void Main_LoadResources()
 
 	M_ClearAllDefinitions();
 
-	ReadGameInfo();
+	// clear the parse variables, pre-set a few vars
+	M_PrepareConfigVariables();
 
+	ReadGameInfo();
 	ReadPortInfo();
 
 	// reset the master directory
@@ -1116,27 +1119,24 @@ int main(int argc, char *argv[])
 
 	DeterminePort();
 
-
 	// temporarily load the iwad, the following few functions need it.
-	// it gets loaded again in Main_LoadResources().
+	// it will get loaded again in Main_LoadResources().
 	Main_LoadIWAD();
-
-	Level_name = DetermineLevel();
-
-	// config file parsing can depend on the map format, so get it now
-	GetLevelFormat(edit_wad ? edit_wad : game_wad, Level_name);
-
-	Main_LoadResources();
 
 
 	// load the initial level
+	Level_name = DetermineLevel();
+
 	LogPrintf("Loading initial map : %s\n", Level_name);
 
 	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
 
+	// do this *after* loading the level, since config file parsing
+	// can depend on the map format and UDMF namespace.
+	Main_LoadResources();
+
 
 	Main_Loop();
-
 
 quit:
 	/* that's all folks! */

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2012-2018 Andrew Apted
+//  Copyright (C) 2012-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -672,9 +672,10 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 
 
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
-	UI_Escapable_Window(400, is_startup ? 200 : 400, new_project ? "New Project" : "Manage Project"),
+	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	game(NULL), port(NULL), map_format(MAPF_INVALID)
+	game(NULL), port(NULL),
+	map_format(MAPF_INVALID), name_space()
 {
 	callback(close_callback, this);
 
@@ -705,27 +706,35 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		o->callback((Fl_Callback*)find_callback, this);
 	}
 
-	port_choice = new Fl_Choice(140, by+60, 150, 29, "Source Port: ");
+	port_choice = new Fl_Choice(140, by+62, 150, 29, "Source Port: ");
 	port_choice->labelfont(FL_HELVETICA_BOLD);
 	port_choice->down_box(FL_BORDER_BOX);
 	port_choice->callback((Fl_Callback*)port_callback, this);
 
 	{
-		Fl_Button* o = new Fl_Button(305, by+60, 75, 25, "Setup");
+		Fl_Button* o = new Fl_Button(305, by+64, 75, 25, "Setup");
 		o->callback((Fl_Callback*)setup_callback, this);
 
 		if (is_startup)
 			o->hide();
 	}
 
-	format_choice = new Fl_Choice(140, by+95, 150, 29, "Map Type: ");
+	format_choice = new Fl_Choice(140, by+99, 150, 29, "Map Type: ");
 	format_choice->labelfont(FL_HELVETICA_BOLD);
 	format_choice->down_box(FL_BORDER_BOX);
 	format_choice->callback((Fl_Callback*)format_callback, this);
 
+#if 0  // Disabled for now
+	namespace_choice = new Fl_Choice(140, by+140, 150, 29, "Namespace: ");
+	namespace_choice->labelfont(FL_HELVETICA_BOLD);
+	namespace_choice->down_box(FL_BORDER_BOX);
+	namespace_choice->callback((Fl_Callback*)namespace_callback, this);
+	namespace_choice->hide();
+#endif
+
 	if (is_startup)
 	{
-		  port_choice->hide();
+		port_choice->hide();
 		format_choice->hide();
 	}
 
@@ -733,7 +742,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	if (! is_startup)
 	{
-		Fl_Box *res_title = new Fl_Box(15, by+135, 185, 35, "Resource Files:");
+		Fl_Box *res_title = new Fl_Box(15, by+190, 185, 30, "Resource Files:");
 		res_title->labelfont(FL_HELVETICA_BOLD);
 		res_title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	}
@@ -745,7 +754,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		if (is_startup)
 			continue;
 
-		int cy = by + 172 + r * 35;
+		int cy = by + 220 + r * 35;
 
 		char res_label[64];
 		sprintf(res_label, "%d. ", 1 + r);
@@ -763,7 +772,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	// bottom buttons
 	{
-		by += is_startup ? 80 : 340;
+		by += is_startup ? 80 : 375;
 
 		Fl_Group *g = new Fl_Group(0, by, 400, h() - by);
 		g->box(FL_FLAT_BOX);
@@ -870,21 +879,21 @@ void UI_ProjectSetup::PopulatePort()
 		return;
 
 
-	const char *var_game = NULL;
+	const char *base_game = NULL;
 
 	if (game_choice->mvalue())
-		var_game = M_VariantForGame(game_choice->mvalue()->text);
+		base_game = M_GetBaseGame(game_choice->mvalue()->text);
 	else if (Game_name)
-		var_game = M_VariantForGame(Game_name);
+		base_game = M_GetBaseGame(Game_name);
 
-	if (! var_game)
-		var_game = "doom2";
+	if (! base_game)
+		base_game = "doom2";
 
 
 	const char *menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectPortsForMenu(var_game, &menu_value, prev_port);
+	menu_string = M_CollectPortsForMenu(base_game, &menu_value, prev_port);
 
 	if (menu_string[0])
 	{
@@ -898,24 +907,21 @@ void UI_ProjectSetup::PopulatePort()
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	map_format_e prev_fmt = Level_format;
+	map_format_e prev_fmt = map_format;
 
-	if (format_choice->mvalue())
-	{
-		if (strstr(format_choice->mvalue()->text, "Hexen"))
-			prev_fmt = MAPF_Hexen;
-		else
-			prev_fmt = MAPF_Doom;
-	}
+	if (prev_fmt == MAPF_INVALID)
+		prev_fmt = Level_format;
 
-
-	map_format = MAPF_Doom;
 
 	format_choice->clear();
 
 	// if no game, format doesn't matter
 	if (! game)
+	{
+		map_format = MAPF_Doom;
+		name_space = "";
 		return;
+	}
 
 
 	// determine the usable formats, from current game and port
@@ -934,16 +940,12 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 
 	// reconstruct the menu
-	char menu_string[256];
-	int  menu_value = 0;
-
-	menu_string[0] = 0;
-
+	int menu_value = 0;
 	int entry_id = 0;
 
 	if (usable_formats & (1 << MAPF_Doom))
 	{
-		strcat(menu_string, "Doom Format");
+		format_choice->add("Doom Format");
 		entry_id++;
 	}
 
@@ -952,24 +954,85 @@ void UI_ProjectSetup::PopulateMapFormat()
 		if (prev_fmt == MAPF_Hexen)
 			menu_value = entry_id;
 
-		if (menu_string[0])
-			strcat(menu_string, "|");
-
-		strcat(menu_string, "Hexen Format");
+		format_choice->add("Hexen Format");
 		entry_id++;
 	}
 
-	format_choice->add  (menu_string);
+	if (usable_formats & (1 << MAPF_UDMF))
+	{
+		if (prev_fmt == MAPF_UDMF)
+			menu_value = entry_id;
+
+		format_choice->add("UDMF");
+		entry_id++;
+	}
+
 	format_choice->value(menu_value);
 
-	if (usable_formats & (1 << MAPF_Hexen))
+	// set map_format field based on current menu entry.
+	format_callback(format_choice, (void *)this);
+
+
+	// determine the UDMF namespace
+	name_space = "";
+
+	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
+	if (pinfo)
+		name_space = pinfo->udmf_namespace;
+
+	// don't leave namespace as "" when chosen format is UDMF.
+	// [ this is to handle broken config files somewhat sanely ]
+	if (name_space.empty() && map_format == MAPF_UDMF)
+		name_space = "Hexen";
+}
+
+
+void UI_ProjectSetup::PopulateNamespaces()
+{
+#if 0  // Disabled for now
+
+	if (map_format != MAPF_UDMF)
 	{
-		if (prev_fmt == MAPF_Hexen ||
-			(usable_formats & (1 << MAPF_Doom)) == 0)
-		{
-			map_format = MAPF_Hexen;
-		}
+		namespace_choice->hide();
+		return;
 	}
+
+	namespace_choice->show();
+
+	// get previous value
+	const char *prev_ns = name_space.c_str();
+
+	if (prev_ns[0] == 0)
+		prev_ns = Udmf_namespace.c_str();
+
+
+	namespace_choice->clear();
+
+	if (! port_choice->mvalue())
+		return;
+
+	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
+	if (! pinfo)
+		return;
+
+	int menu_value = 0;
+
+	for (int i = 0 ; i < (int)pinfo->namespaces.size() ; i++)
+	{
+		const char * ns = pinfo->namespaces[i].c_str();
+
+		namespace_choice->add(ns);
+
+		// keep same entry as before, when possible
+		if (strcmp(prev_ns, ns) == 0)
+			menu_value = i;
+	}
+
+	namespace_choice->value(menu_value);
+
+	if (menu_value < (int)pinfo->namespaces.size())
+		name_space = pinfo->namespaces[menu_value];
+#endif
 }
 
 
@@ -1052,10 +1115,22 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 
 	const char * fmt_str = w->mvalue()->text;
 
-	if (strstr(fmt_str, "Hexen"))
+	if (strstr(fmt_str, "UDMF"))
+		that->map_format = MAPF_UDMF;
+	else if (strstr(fmt_str, "Hexen"))
 		that->map_format = MAPF_Hexen;
 	else
 		that->map_format = MAPF_Doom;
+
+	that->PopulateNamespaces();
+}
+
+
+void UI_ProjectSetup::namespace_callback(Fl_Choice *w, void *data)
+{
+	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
+
+	that->name_space = w->mvalue()->text;
 }
 
 

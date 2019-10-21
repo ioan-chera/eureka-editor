@@ -112,7 +112,7 @@ public:
 
 		if (is_sky(fname))
 		{
-			col = game_info.sky_color;
+			col = Misc_info.sky_color;
 			fullbright = true;
 			return;
 		}
@@ -132,9 +132,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (r_view.lighting)
-			col = game_info.floor_colors[1];
+			col = Misc_info.floor_colors[1];
 		else
-			col = HashedPalColor(fname, game_info.floor_colors);
+			col = HashedPalColor(fname, Misc_info.floor_colors);
 	}
 
 	void FindTex(const char * tname, LineDef *ld)
@@ -163,9 +163,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (r_view.lighting)
-			col = game_info.wall_colors[1];
+			col = Misc_info.wall_colors[1];
 		else
-			col = HashedPalColor(tname, game_info.wall_colors);
+			col = HashedPalColor(tname, Misc_info.wall_colors);
 	}
 };
 
@@ -249,13 +249,13 @@ public:
 
 			if (A_other >= 0)
 			{
-				int ax = Vertices[A_other]->x;
-				int ay = Vertices[A_other]->y;
+				int ax = Vertices[A_other]->x();
+				int ay = Vertices[A_other]->y();
 
-				int bx1 = B->ld->Start()->x;
-				int by1 = B->ld->Start()->y;
-				int bx2 = B->ld->End()->x;
-				int by2 = B->ld->End()->y;
+				int bx1 = B->ld->Start()->x();
+				int by1 = B->ld->Start()->y();
+				int bx2 = B->ld->End()->x();
+				int by2 = B->ld->End()->y();
 
 				int cx = (int)r_view.x;  // camera
 				int cy = (int)r_view.y;
@@ -272,7 +272,7 @@ public:
 			const Thing *const TA = Things[A->th];
 			const Thing *const TB = Things[B->th];
 
-			if (TA->x == TB->x && TA->y == TB->y)
+			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
 		}
 
@@ -652,10 +652,10 @@ public:
 		if (! ld->Right())
 			return;
 
-		float x1 = ld->Start()->x - r_view.x;
-		float y1 = ld->Start()->y - r_view.y;
-		float x2 = ld->End()->x - r_view.x;
-		float y2 = ld->End()->y - r_view.y;
+		float x1 = ld->Start()->x() - r_view.x;
+		float y1 = ld->Start()->y() - r_view.y;
+		float x2 = ld->End()->x() - r_view.x;
+		float y2 = ld->End()->y() - r_view.y;
 
 		float tx1 = x1 * r_view.Sin - y1 * r_view.Cos;
 		float ty1 = x1 * r_view.Cos + y1 * r_view.Sin;
@@ -771,9 +771,9 @@ public:
 		dw->wall_light = dw->sec->light;
 
 		// add "fake constrast" for axis-aligned walls
-		if (ld->Start()->x == ld->End()->x)
+		if (ld->IsVertical())
 			dw->wall_light += 16;
-		else if (ld->Start()->y == ld->End()->y)
+		else if (ld->IsHorizontal())
 			dw->wall_light -= 16;
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
@@ -799,8 +799,8 @@ public:
 
 		const thingtype_t *info = M_GetThingType(th->type);
 
-		float x = th->x - r_view.x;
-		float y = th->y - r_view.y;
+		float x = th->x() - r_view.x;
+		float y = th->y() - r_view.y;
 
 		float tx = x * r_view.Sin - y * r_view.Cos;
 		float ty = x * r_view.Cos + y * r_view.Sin;
@@ -848,12 +848,12 @@ public:
 		if (info && (info->flags & THINGDEF_CEIL))
 		{
 			// IOANCH 9/2015: also add z
-			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->z;
+			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->h();
 			h1 = h2 - sprite->height() * scale;
 		}
 		else
 		{
-			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->z;
+			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->h();
 			h2 = h1 + sprite->height() * scale;
 		}
 

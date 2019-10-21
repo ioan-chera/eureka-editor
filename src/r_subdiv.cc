@@ -148,8 +148,8 @@ struct sector_extra_info_t
 	int last_line;
 
 	// these are random junk when sector has no lines
-	int bound_x1, bound_x2;
-	int bound_y1, bound_y2;
+	double bound_x1, bound_x2;
+	double bound_y1, bound_y2;
 
 	sector_subdivision_c sub;
 
@@ -181,11 +181,11 @@ struct sector_extra_info_t
 
 	void AddVertex(const Vertex *V)
 	{
-		bound_x1 = MIN(bound_x1, V->x);
-		bound_y1 = MIN(bound_y1, V->y);
+		bound_x1 = MIN(bound_x1, V->x());
+		bound_y1 = MIN(bound_y1, V->y());
 
-		bound_x2 = MAX(bound_x2, V->x);
-		bound_y2 = MAX(bound_y2, V->y);
+		bound_x2 = MAX(bound_x2, V->x());
+		bound_y2 = MAX(bound_y2, V->y());
 	}
 };
 
@@ -277,10 +277,10 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 		sector_edge_t edge;
 
-		edge.x1 = L->Start()->x;
-		edge.y1 = L->Start()->y;
-		edge.x2 = L->End()->x;
-		edge.y2 = L->End()->y;
+		edge.x1 = L->Start()->x();
+		edge.y1 = L->Start()->y();
+		edge.x2 = L->End()->x();
+		edge.y2 = L->End()->y();
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)
@@ -451,7 +451,7 @@ void Subdiv_InvalidateAll()
 }
 
 
-bool Subdiv_SectorOnScreen(int num, int map_lx, int map_ly, int map_hx, int map_hy)
+bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy)
 {
 	sector_info_cache.Update();
 

@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C)      2015 Ioan Chera
 //  Copyright (C) 1997-2003 André Majorel et al
 //
@@ -36,6 +36,7 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "m_nodes.h"
+#include "m_udmf.h"
 #include "r_render.h"	// Render3D_ClearSelection
 #include "w_rawdef.h"
 #include "w_wad.h"
@@ -100,8 +101,8 @@ static void FreshLevel()
 		Vertex *v = new Vertex;
 		Vertices.push_back(v);
 
-		v->x = (i >= 2) ? 256 : -256;
-		v->y = (i==1 || i==2) ? 256 :-256;
+		v->SetRawX((i >= 2) ? 256 : -256);
+		v->SetRawY((i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
 		SideDefs.push_back(sd);
@@ -124,8 +125,9 @@ static void FreshLevel()
 
 		th->type  = pl;
 		th->angle = 90;
-		th->x = (pl == 1) ? 0 : (pl - 3) * 48;
-		th->y = (pl == 1) ? 48 : (pl == 3) ? -48 : 0;
+
+		th->SetRawX((pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY((pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
 	CalculateLevelBounds();
@@ -191,6 +193,8 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 	SYS_ASSERT(Iwad_name);
 
 	Level_format = dialog->map_format;
+	Udmf_namespace = dialog->name_space;
+
 	SYS_ASSERT(Level_format != MAPF_INVALID);
 
 	Resource_list.clear();
@@ -394,7 +398,8 @@ void CMD_FreshMap()
 
 static Wad_file * load_wad;
 
-static short loading_level;
+// TODO ideally static, but needed by m_udmf.cc too
+short loading_level;
 
 static int bad_linedef_count;
 
@@ -412,7 +417,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-static Lump_c * Load_LookupAndSeek(const char *name)
+Lump_c * Load_LookupAndSeek(const char *name)
 {
 	short idx = load_wad->LevelLookupLump(loading_level, name);
 
@@ -453,8 +458,8 @@ static void LoadVertices()
 
 		Vertex *vert = new Vertex;
 
-		vert->x = LE_S16(raw.x);
-		vert->y = LE_S16(raw.y);
+		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
+		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
 		Vertices.push_back(vert);
 	}
@@ -513,7 +518,6 @@ static void CreateFallbackSector()
 	Sectors.push_back(sec);
 }
 
-
 static void CreateFallbackSideDef()
 {
 	// we need a valid sector too!
@@ -527,6 +531,81 @@ static void CreateFallbackSideDef()
 	sd->SetDefaults(false);
 
 	SideDefs.push_back(sd);
+}
+
+static void CreateFallbackVertices()
+{
+	LogPrintf("Creating two fallback vertices.\n");
+
+	Vertex *v1 = new Vertex;
+	Vertex *v2 = new Vertex;
+
+	v1->raw_x = INT_TO_COORD(-777);
+	v1->raw_y = INT_TO_COORD(-777);
+
+	v2->raw_x = INT_TO_COORD(555);
+	v2->raw_y = INT_TO_COORD(555);
+
+	Vertices.push_back(v1);
+	Vertices.push_back(v2);
+}
+
+
+void ValidateSidedefRefs(LineDef * ld, int num)
+{
+	if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
+	{
+		LogPrintf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
+				  num, ld->right, ld->left);
+
+		bad_sidedef_refs++;
+
+		// ensure we have a usable sidedef
+		if (NumSideDefs == 0)
+			CreateFallbackSideDef();
+
+		if (ld->right >= NumSideDefs)
+			ld->right = 0;
+
+		if (ld->left >= NumSideDefs)
+			ld->left = 0;
+	}
+}
+
+void ValidateVertexRefs(LineDef *ld, int num)
+{
+	if (ld->start >= NumVertices || ld->end >= NumVertices ||
+	    ld->start == ld->end)
+	{
+		LogPrintf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
+		          num, ld->start, ld->end);
+
+		bad_linedef_count++;
+
+		// ensure we have a valid vertex
+		if (NumVertices < 2)
+			CreateFallbackVertices();
+
+		ld->start = 0;
+		ld->end   = NumVertices - 1;
+	}
+}
+
+void ValidateSectorRef(SideDef *sd, int num)
+{
+	if (sd->sector >= NumSectors)
+	{
+		LogPrintf("WARNING: sidedef #%d has invalid sector (%d)\n",
+		          num, sd->sector);
+
+		bad_sector_refs++;
+
+		// ensure we have a valid sector
+		if (NumSectors == 0)
+			CreateFallbackSector();
+
+		sd->sector = 0;
+	}
 }
 
 
@@ -608,8 +687,8 @@ static void LoadThings()
 
 		Thing *th = new Thing;
 
-		th->x = LE_S16(raw.x);
-		th->y = LE_S16(raw.y);
+		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
+		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
@@ -643,9 +722,9 @@ static void LoadThings_Hexen()
 		Thing *th = new Thing;
 
 		th->tid = LE_S16(raw.tid);
-		th->x = LE_S16(raw.x);
-		th->y = LE_S16(raw.y);
-		th->z = LE_S16(raw.height);
+		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
+		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
+		th->raw_h = INT_TO_COORD(LE_S16(raw.height));
 
 		th->angle = LE_U16(raw.angle);
 		th->type = LE_U16(raw.type);
@@ -702,47 +781,9 @@ static void LoadSideDefs()
 
 		sd->sector = LE_U16(raw.sector);
 
-		if (sd->sector >= NumSectors)
-		{
-			LogPrintf("WARNING: sidedef #%d has bad sector ref (%d)\n",
-			          i, sd->sector);
-
-			bad_sector_refs++;
-
-			// ensure we have a valid sector
-			if (NumSectors == 0)
-				CreateFallbackSector();
-
-			sd->sector = 0;
-		}
+		ValidateSectorRef(sd, i);
 
 		SideDefs.push_back(sd);
-	}
-}
-
-
-static void ValidateSidedefs(LineDef * ld)
-{
-	if (ld->right == 0xFFFF) ld->right = -1;
-	if (ld-> left == 0xFFFF) ld-> left = -1;
-
-	// validate sidedefs
-	if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
-	{
-		LogPrintf("WARNING: linedef #%d has bad sidedef ref (%d, %d)\n",
-				  ld->right, ld->left);
-
-		bad_sidedef_refs++;
-
-		// ensure we have a usable sidedef
-		if (NumSideDefs == 0)
-			CreateFallbackSideDef();
-
-		if (ld->right >= NumSideDefs)
-			ld->right = 0;
-
-		if (ld->left >= NumSideDefs)
-			ld->left = 0;
 	}
 }
 
@@ -774,21 +815,6 @@ static void LoadLineDefs()
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
 
-		// validate vertices
-		if (ld->start >= NumVertices || ld->end >= NumVertices ||
-		    ld->start == ld->end)
-		{
-			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-			          i, ld->start, ld->end);
-
-			bad_linedef_count++;
-
-			// forget it
-			delete ld;
-
-			continue;
-		}
-
 		ld->flags = LE_U16(raw.flags);
 		ld->type  = LE_U16(raw.type);
 		ld->tag   = LE_S16(raw.tag);
@@ -796,7 +822,11 @@ static void LoadLineDefs()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		ValidateSidedefs(ld);
+		if (ld->right == 0xFFFF) ld->right = -1;
+		if (ld-> left == 0xFFFF) ld-> left = -1;
+
+		ValidateVertexRefs(ld, i);
+		ValidateSidedefRefs(ld, i);
 
 		LineDefs.push_back(ld);
 	}
@@ -831,21 +861,6 @@ static void LoadLineDefs_Hexen()
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
 
-		// validate vertices
-		if (ld->start >= NumVertices || ld->end >= NumVertices ||
-			ld->start == ld->end)
-		{
-			LogPrintf("WARNING: linedef #%d has bad vertex ref (%d, %d)\n",
-					  i, ld->start, ld->end);
-
-			bad_linedef_count++;
-
-			// forget it
-			delete ld;
-
-			continue;
-		}
-
 		ld->flags = LE_U16(raw.flags);
 		ld->type = raw.type;
 		ld->tag  = raw.args[0];
@@ -857,7 +872,11 @@ static void LoadLineDefs_Hexen()
 		ld->right = LE_U16(raw.right);
 		ld->left  = LE_U16(raw.left);
 
-		ValidateSidedefs(ld);
+		if (ld->right == 0xFFFF) ld->right = -1;
+		if (ld-> left == 0xFFFF) ld-> left = -1;
+
+		ValidateVertexRefs(ld, i);
+		ValidateSidedefRefs(ld, i);
 
 		LineDefs.push_back(ld);
 	}
@@ -899,7 +918,7 @@ static void RemoveUnusedVerticesAtEnd()
 static void ShowLoadProblem()
 {
 	LogPrintf("Map load problems:\n");
-	LogPrintf("   %d linedefs with bad vertex refs (removed)\n", bad_linedef_count);
+	LogPrintf("   %d linedefs with bad vertex refs\n", bad_linedef_count);
 	LogPrintf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
 	LogPrintf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
 
@@ -908,7 +927,7 @@ static void ShowLoadProblem()
 	if (bad_linedef_count > 0)
 	{
 		sprintf(message, "Found %d linedefs with bad vertex references.\n"
-		                 "These linedefs have been removed.",
+		                 "These references have been replaced.",
 		        bad_linedef_count);
 	}
 	else
@@ -940,62 +959,15 @@ void GetLevelFormat(Wad_file *wad, const char *level)
 
 void LoadLevel(Wad_file *wad, const char *level)
 {
-	GetLevelFormat(wad, level);
+	short lev_num = wad->LevelFind(level);
 
-	load_wad = wad;
-
-	loading_level = load_wad->LevelFind(level);
-	if (loading_level < 0)
+	if (lev_num < 0)
 		FatalError("No such map: %s\n", level);
 
-	BA_ClearAll();
-
-	bad_linedef_count = 0;
-	bad_sector_refs   = 0;
-	bad_sidedef_refs  = 0;
-
-	LoadHeader();
-
-	if (Level_format == MAPF_Hexen)
-		LoadThings_Hexen();
-	else
-		LoadThings();
-
-	LoadVertices();
-	LoadSectors();
-	LoadSideDefs();
-
-	if (Level_format == MAPF_Hexen)
-	{
-		LoadLineDefs_Hexen();
-
-		LoadBehavior();
-		LoadScripts();
-	}
-	else
-	{
-		LoadLineDefs();
-	}
-
-	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
-	{
-		ShowLoadProblem();
-	}
-
-
-	// Node builders create a lot of new vertices for segs.
-	// However they just get in the way for editing, so remove them.
-	RemoveUnusedVerticesAtEnd();
-
-	SideDefs_Unpack(true);
-
-	CalculateLevelBounds();
-
+	LoadLevelNum(wad, lev_num);
 
 	// reset various editor state
-
 	Editor_ClearAction();
-
 	Selection_InvalidateLast();
 	Render3D_ClearSelection();
 
@@ -1007,16 +979,9 @@ void LoadLevel(Wad_file *wad, const char *level)
 	main_win->InvalidatePanelObj();
 	main_win->redraw();
 
-	MadeChanges = 0;
-
-
-	Level_name = StringUpper(level);
-
-	Status_Set("Loaded %s", Level_name);
-
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, load_wad->IsReadOnly());
+		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -1029,7 +994,71 @@ void LoadLevel(Wad_file *wad, const char *level)
 		}
 	}
 
+	Level_name = StringUpper(level);
+
+	Status_Set("Loaded %s", Level_name);
+
 	RedrawMap();
+}
+
+
+void LoadLevelNum(Wad_file *wad, short lev_num)
+{
+	load_wad = wad;
+	loading_level = lev_num;
+
+	Level_format = load_wad->LevelFormat(loading_level);
+
+	BA_ClearAll();
+
+	bad_linedef_count = 0;
+	bad_sector_refs   = 0;
+	bad_sidedef_refs  = 0;
+
+	LoadHeader();
+
+	if (Level_format == MAPF_UDMF)
+	{
+		UDMF_LoadLevel();
+	}
+	else
+	{
+		if (Level_format == MAPF_Hexen)
+			LoadThings_Hexen();
+		else
+			LoadThings();
+
+		LoadVertices();
+		LoadSectors();
+		LoadSideDefs();
+
+		if (Level_format == MAPF_Hexen)
+		{
+			LoadLineDefs_Hexen();
+
+			LoadBehavior();
+			LoadScripts();
+		}
+		else
+		{
+			LoadLineDefs();
+		}
+	}
+
+	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
+	{
+		ShowLoadProblem();
+	}
+
+	// Node builders create a lot of new vertices for segs.
+	// However they just get in the way for editing, so remove them.
+	RemoveUnusedVerticesAtEnd();
+
+	SideDefs_Unpack(true);
+
+	CalculateLevelBounds();
+
+	MadeChanges = 0;
 }
 
 
@@ -1375,12 +1404,12 @@ static void SaveVertices()
 
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		Vertex *vert = Vertices[i];
+		const Vertex *vert = Vertices[i];
 
 		raw_vertex_t raw;
 
-		raw.x = LE_S16(vert->x);
-		raw.y = LE_S16(vert->y);
+		raw.x = LE_S16(COORD_TO_INT(vert->raw_x));
+		raw.y = LE_S16(COORD_TO_INT(vert->raw_y));
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1397,7 +1426,7 @@ static void SaveSectors()
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
-		Sector *sec = Sectors[i];
+		const Sector *sec = Sectors[i];
 
 		raw_sector_t raw;
 
@@ -1426,12 +1455,12 @@ static void SaveThings()
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
-		Thing *th = Things[i];
+		const Thing *th = Things[i];
 
 		raw_thing_t raw;
 
-		raw.x = LE_S16(th->x);
-		raw.y = LE_S16(th->y);
+		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
+		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1453,15 +1482,15 @@ static void SaveThings_Hexen()
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
-		Thing *th = Things[i];
+		const Thing *th = Things[i];
 
 		raw_hexen_thing_t raw;
 
 		raw.tid = LE_S16(th->tid);
 
-		raw.x = LE_S16(th->x);
-		raw.y = LE_S16(th->y);
-		raw.height = LE_S16(th->z);
+		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
+		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
+		raw.height = LE_S16(COORD_TO_INT(th->raw_h));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1489,7 +1518,7 @@ static void SaveSideDefs()
 
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
-		SideDef *side = SideDefs[i];
+		const SideDef *side = SideDefs[i];
 
 		raw_sidedef_t raw;
 
@@ -1517,7 +1546,7 @@ static void SaveLineDefs()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		LineDef *ld = LineDefs[i];
+		const LineDef *ld = LineDefs[i];
 
 		raw_linedef_t raw;
 
@@ -1547,7 +1576,7 @@ static void SaveLineDefs_Hexen()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		LineDef *ld = LineDefs[i];
+		const LineDef *ld = LineDefs[i];
 
 		raw_hexen_linedef_t raw;
 
@@ -1605,34 +1634,41 @@ static void SaveLevel(const char *level)
 
 	SaveHeader(level);
 
-	// IOANCH 9/2015: save Hexen format maps
-	if (Level_format == MAPF_Hexen)
+	if (Level_format == MAPF_UDMF)
 	{
-		SaveThings_Hexen();
-		SaveLineDefs_Hexen();
+		UDMF_SaveLevel();
 	}
 	else
 	{
-		SaveThings();
-		SaveLineDefs();
-	}
+		// IOANCH 9/2015: save Hexen format maps
+		if (Level_format == MAPF_Hexen)
+		{
+			SaveThings_Hexen();
+			SaveLineDefs_Hexen();
+		}
+		else
+		{
+			SaveThings();
+			SaveLineDefs();
+		}
 
-	SaveSideDefs();
-	SaveVertices();
+		SaveSideDefs();
+		SaveVertices();
 
-	EmptyLump("SEGS");
-	EmptyLump("SSECTORS");
-	EmptyLump("NODES");
+		EmptyLump("SEGS");
+		EmptyLump("SSECTORS");
+		EmptyLump("NODES");
 
-	SaveSectors();
+		SaveSectors();
 
-	EmptyLump("REJECT");
-	EmptyLump("BLOCKMAP");
+		EmptyLump("REJECT");
+		EmptyLump("BLOCKMAP");
 
-	if (Level_format == MAPF_Hexen)
-	{
-		SaveBehavior();
-		SaveScripts();
+		if (Level_format == MAPF_Hexen)
+		{
+			SaveBehavior();
+			SaveScripts();
+		}
 	}
 
 	// write out the new directory

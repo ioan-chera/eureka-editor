@@ -556,7 +556,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeTH(*it, Thing::F_X, new_x);
+			BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 
 		BA_MessageForSel("edited X of", &list);
 		BA_End();
@@ -577,7 +577,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeTH(*it, Thing::F_Y, new_y);
+			BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		BA_MessageForSel("edited Y of", &list);
 		BA_End();
@@ -588,7 +588,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-	int new_z = atoi(box->pos_z->value());
+	int new_h = atoi(box->pos_z->value());
 
 	selection_c list;
 	selection_iterator_c it;
@@ -598,7 +598,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 
 		for (list.begin(&it); !it.at_end(); ++it)
-			BA_ChangeTH(*it, Thing::F_Z, new_z);
+			BA_ChangeTH(*it, Thing::F_H, INT_TO_COORD(new_h));
 
 		BA_MessageForSel("edited Z of", &list);
 		BA_End();
@@ -757,7 +757,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 			exfloor->value("");
 	}
 
-	if (game_info.strife_flags)
+	if (Features.strife_flags)
 	{
 		o_sf_ambush->value((options & MTF_Strife_Ambush) ? 1 : 0);
 		o_sf_friend->value((options & MTF_Strife_Friend) ? 1 : 0);
@@ -776,7 +776,7 @@ int UI_ThingBox::CalcOptions() const
 	if (o_medium->value()) options |= MTF_Medium;
 	if (o_hard  ->value()) options |= MTF_Hard;
 
-	if (game_info.strife_flags)
+	if (Features.strife_flags)
 	{
 		if (o_sf_ambush->value()) options |= MTF_Strife_Ambush;
 		if (o_sf_friend->value()) options |= MTF_Strife_Friend;
@@ -801,7 +801,7 @@ int UI_ThingBox::CalcOptions() const
 
 		if (o_dormant->value()) options |= MTF_Hexen_Dormant;
 	}
-	else if (game_info.coop_dm_flags)
+	else if (Features.coop_dm_flags)
 	{
 		if (0 == o_sp  ->value()) options |= MTF_Not_SP;
 		if (0 == o_coop->value()) options |= MTF_Not_COOP;
@@ -814,7 +814,7 @@ int UI_ThingBox::CalcOptions() const
 
 	if (Level_format != MAPF_Hexen)
 	{
-		if (game_info.friend_flag && o_friend->value())
+		if (Features.friend_flag && o_friend->value())
 			options |= MTF_Friend;
 
 #if 0
@@ -833,17 +833,19 @@ int UI_ThingBox::CalcOptions() const
 
 void UI_ThingBox::UpdateField(int field)
 {
-	if (field < 0 || field == Thing::F_X || field == Thing::F_Y
-		|| field == Thing::F_Z)
+	if (field < 0 ||
+		field == Thing::F_X ||
+		field == Thing::F_Y ||
+		field == Thing::F_H)
 	{
 		if (is_thing(obj))
 		{
 			const Thing *T = Things[obj];
 
-			pos_x->value(Int_TmpStr(T->x));
-			pos_y->value(Int_TmpStr(T->y));
-			pos_z->value(Int_TmpStr(T->z));
-
+			// @@ FIXME show decimals in UDMF
+			pos_x->value(Int_TmpStr(T->x()));
+			pos_y->value(Int_TmpStr(T->y()));
+			pos_z->value(Int_TmpStr(T->h()));
 		}
 		else
 		{
@@ -968,7 +970,7 @@ void UI_ThingBox::UpdateTotal()
 
 void UI_ThingBox::UpdateGameInfo()
 {
-	if (game_info.coop_dm_flags || Level_format == MAPF_Hexen)
+	if (Features.coop_dm_flags || Level_format == MAPF_Hexen)
 	{
 		o_sp  ->show();
 		o_coop->show();
@@ -987,13 +989,13 @@ void UI_ThingBox::UpdateGameInfo()
 		o_dm  ->hide();
 	}
 
-	if (game_info.friend_flag && !game_info.strife_flags)
+	if (Features.friend_flag && !Features.strife_flags)
 		o_friend->show();
 	else
 		o_friend->hide();
 
 
-	if (game_info.strife_flags)
+	if (Features.strife_flags)
 	{
 		o_ambush->hide();
 

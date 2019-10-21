@@ -219,30 +219,30 @@ void UI_Canvas::gl_draw_string(const char *s, int x, int y)
 }
 
 
-int UI_Canvas::NORMALX(int len, int dx, int dy)
+int UI_Canvas::NORMALX(int len, double dx, double dy)
 {
 #ifdef NO_OPENGL
-	float res = -dy;
+	double res = -dy;
 #else
-	float res = dy;
+	double res = dy;
 #endif
 
-	float got_len = hypotf(dx, dy);
+	double got_len = hypotf(dx, dy);
 	if (got_len < 0.01)
 		return 0;
 
 	return I_ROUND(res * len / got_len);
 }
 
-int UI_Canvas::NORMALY(int len, int dx, int dy)
+int UI_Canvas::NORMALY(int len, double dx, double dy)
 {
 #ifdef NO_OPENGL
-	float res = dx;
+	double res = dx;
 #else
-	float res = -dx;
+	double res = -dx;
 #endif
 
-	float got_len = hypotf(dx, dy);
+	double got_len = hypotf(dx, dy);
 	if (got_len < 0.01)
 		return 0;
 
@@ -323,8 +323,8 @@ void UI_Canvas::DrawEverything()
 
 	if (edit.action == ACT_DRAG && edit.drag_single_obj >= 0)
 	{
-		int dx = 0;
-		int dy = 0;
+		double dx = 0;
+		double dy = 0;
 		DragDelta(&dx, &dy);
 
 		if (edit.mode == OBJ_VERTICES)
@@ -433,7 +433,6 @@ void UI_Canvas::DrawGrid_Normal()
 {
 	float pixels_1 = grid.step * grid.Scale;
 
-
 	if (pixels_1 < 1.6)
 	{
 		gl_color(DarkerColor(DarkerColor(normal_main_col)));
@@ -461,12 +460,12 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 	else
 	{
-		int gx = (map_lx / flat_step) * flat_step;
+		int gx = floor(map_lx / flat_step) * flat_step;
 
 		for (; gx <= map_hx; gx += flat_step)
 			DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / flat_step) * flat_step;
+		int gy = floor(map_ly / flat_step) * flat_step;
 
 		for (; gy <= map_hy; gy += flat_step)
 			DrawMapLine(map_lx, gy, map_hx, gy);
@@ -483,13 +482,13 @@ void UI_Canvas::DrawGrid_Normal()
 	gl_color(main_col);
 
 	{
-		int gx = (map_lx / grid.step) * grid.step;
+		int gx = floor(map_lx / grid.step) * grid.step;
 
 		for (; gx <= map_hx; gx += grid.step)
 			if ((grid.step >= 64 || (gx & 63) != 0) && (gx != 0))
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / grid.step) * grid.step;
+		int gy = floor(map_ly / grid.step) * grid.step;
 
 		for (; gy <= map_hy; gy += grid.step)
 			if ((grid.step >= 64 || (gy & 63) != 0) && (gy != 0))
@@ -522,14 +521,14 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	gl_color(dotty_major_col);
 	{
-		int gx = (map_lx / grid_step_3) * grid_step_3;
+		int gx = floor(map_lx / grid_step_3) * grid_step_3;
 
 		for (; gx <= map_hx; gx += grid_step_3)
 			DrawMapLine(gx, map_ly-2, gx, map_hy+2);
 
-		int gy = (map_ly / grid_step_3) * grid_step_3;
+		int gy = floor(map_ly / grid_step_3) * grid_step_3;
 
-		for (; gy <=  map_hy; gy += grid_step_3)
+		for (; gy <= map_hy; gy += grid_step_3)
 			DrawMapLine(map_lx, gy, map_hx, gy);
 	}
 
@@ -539,13 +538,13 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	gl_color(dotty_minor_col);
 	{
-		int gx = (map_lx / grid_step_2) * grid_step_2;
+		int gx = floor(map_lx / grid_step_2) * grid_step_2;
 
 		for (; gx <= map_hx; gx += grid_step_2)
 			if (gx % grid_step_3 != 0)
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = (map_ly / grid_step_2) * grid_step_2;
+		int gy = floor(map_ly / grid_step_2) * grid_step_2;
 
 		for (; gy <= map_hy; gy += grid_step_2)
 			if (gy % grid_step_3 != 0)
@@ -559,8 +558,8 @@ void UI_Canvas::DrawGrid_Dotty()
 		gl_color(dotty_point_col);
 
 	{
-		int gx = (map_lx / grid_step_1) * grid_step_1;
-		int gy = (map_ly / grid_step_1) * grid_step_1;
+		int gx = floor(map_lx / grid_step_1) * grid_step_1;
+		int gy = floor(map_ly / grid_step_1) * grid_step_1;
 
 		for (int ny = gy; ny <= map_hy; ny += grid_step_1)
 		for (int nx = gx; nx <= map_hx; nx += grid_step_1)
@@ -616,7 +615,7 @@ int vertex_radius(double scale)
 //
 //  draw the vertices, and possibly their numbers
 //
-void UI_Canvas::DrawVertex(int map_x, int map_y, int r)
+void UI_Canvas::DrawVertex(double map_x, double map_y, int r)
 {
 	int scrx = SCREENX(map_x);
 	int scry = SCREENY(map_y);
@@ -646,8 +645,8 @@ void UI_Canvas::DrawVertices()
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		int x = Vertices[n]->x;
-		int y = Vertices[n]->y;
+		double x = Vertices[n]->x();
+		double y = Vertices[n]->y();
 
 		if (Vis(x, y, r))
 		{
@@ -659,8 +658,8 @@ void UI_Canvas::DrawVertices()
 	{
 		for (int n = 0 ; n < NumVertices ; n++)
 		{
-			int x = Vertices[n]->x;
-			int y = Vertices[n]->y;
+			double x = Vertices[n]->x();
+			double y = Vertices[n]->y();
 
 			if (! Vis(x, y, r))
 				continue;
@@ -713,10 +712,10 @@ void UI_Canvas::DrawLinedefs()
 		{
 			const LineDef *L = LineDefs[n];
 
-			int x1 = L->Start()->x;
-			int y1 = L->Start()->y;
-			int x2 = L->End  ()->x;
-			int y2 = L->End  ()->y;
+			double x1 = L->Start()->x();
+			double y1 = L->Start()->y();
+			double x2 = L->End  ()->x();
+			double y2 = L->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
@@ -879,10 +878,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			int x1 = LineDefs[n]->Start()->x;
-			int y1 = LineDefs[n]->Start()->y;
-			int x2 = LineDefs[n]->End  ()->x;
-			int y2 = LineDefs[n]->End  ()->y;
+			double x1 = LineDefs[n]->Start()->x();
+			double y1 = LineDefs[n]->Start()->y();
+			double x2 = LineDefs[n]->End  ()->x();
+			double y2 = LineDefs[n]->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
@@ -893,7 +892,7 @@ void UI_Canvas::DrawLinedefs()
 }
 
 
-void UI_Canvas::DrawThing(int x, int y, int r, int angle, bool big_arrow)
+void UI_Canvas::DrawThing(double x, double y, int r, int angle, bool big_arrow)
 {
 	DrawMapLine(x-r, y-r, x-r, y+r);
 	DrawMapLine(x-r, y+r, x+r, y+r);
@@ -937,8 +936,8 @@ void UI_Canvas::DrawThings()
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		int x = Things[n]->x;
-		int y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
@@ -973,8 +972,8 @@ void UI_Canvas::DrawThings()
 	{
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			int x = Things[n]->x;
-			int y = Things[n]->y;
+			double x = Things[n]->x();
+			double y = Things[n]->y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
@@ -1006,8 +1005,8 @@ void UI_Canvas::DrawThingBodies()
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		int x = Things[n]->x;
-		int y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
@@ -1052,8 +1051,8 @@ void UI_Canvas::DrawThingSprites()
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		int x = Things[n]->x;
-		int y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
@@ -1075,7 +1074,7 @@ void UI_Canvas::DrawThingSprites()
 }
 
 
-void UI_Canvas::DrawSprite(int map_x, int map_y, Img_c *img, float scale)
+void UI_Canvas::DrawSprite(double map_x, double map_y, Img_c *img, float scale)
 {
 	int W = img->width();
 	int H = img->height();
@@ -1291,7 +1290,7 @@ void UI_Canvas::HighlightForget()
 }
 
 
-void UI_Canvas::SplitLineSet(int ld, int new_x, int new_y)
+void UI_Canvas::SplitLineSet(int ld, double new_x, double new_y)
 {
 	if (split_ld == ld && split_x == new_x && split_y == new_y)
 		return;
@@ -1318,8 +1317,8 @@ void UI_Canvas::SplitLineForget()
 //
 //  draw the given object in highlight color
 //
-void UI_Canvas::DrawHighlight(int objtype, int objnum,
-                              bool skip_lines, int dx, int dy)
+void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
+							  double dx, double dy)
 {
 	// gl_color() and gl_line_width() has been done by caller
 
@@ -1329,8 +1328,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 	{
 		case OBJ_THINGS:
 		{
-			int x = dx + Things[objnum]->x;
-			int y = dy + Things[objnum]->y;
+			double x = dx + Things[objnum]->x();
+			double y = dy + Things[objnum]->y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
@@ -1350,10 +1349,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 
 		case OBJ_LINEDEFS:
 		{
-			int x1 = dx + LineDefs[objnum]->Start()->x;
-			int y1 = dy + LineDefs[objnum]->Start()->y;
-			int x2 = dx + LineDefs[objnum]->End  ()->x;
-			int y2 = dy + LineDefs[objnum]->End  ()->y;
+			double x1 = dx + LineDefs[objnum]->Start()->x();
+			double y1 = dy + LineDefs[objnum]->Start()->y();
+			double x2 = dx + LineDefs[objnum]->End  ()->x();
+			double y2 = dy + LineDefs[objnum]->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				break;
@@ -1364,8 +1363,8 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 
 		case OBJ_VERTICES:
 		{
-			int x = dx + Vertices[objnum]->x;
-			int y = dy + Vertices[objnum]->y;
+			double x = dx + Vertices[objnum]->x();
+			double y = dy + Vertices[objnum]->y();
 
 			int vert_r = vertex_radius(grid.Scale);
 
@@ -1413,10 +1412,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum,
 						reverse = true;
 				}
 
-				int x1 = dx + L->Start()->x;
-				int y1 = dy + L->Start()->y;
-				int x2 = dx + L->End  ()->x;
-				int y2 = dy + L->End  ()->y;
+				double x1 = dx + L->Start()->x();
+				double y1 = dy + L->Start()->y();
+				double x2 = dx + L->End  ()->x();
+				double y2 = dy + L->End  ()->y();
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1440,8 +1439,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 	{
 		case OBJ_THINGS:
 		{
-			int x = Things[objnum]->x;
-			int y = Things[objnum]->y;
+			double x = Things[objnum]->x();
+			double y = Things[objnum]->y();
 
 			trans_param.Apply(&x, &y);
 
@@ -1458,8 +1457,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 		case OBJ_VERTICES:
 		{
-			int x = Vertices[objnum]->x;
-			int y = Vertices[objnum]->y;
+			double x = Vertices[objnum]->x();
+			double y = Vertices[objnum]->y();
 
 			int vert_r = vertex_radius(grid.Scale);
 
@@ -1486,10 +1485,10 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 		case OBJ_LINEDEFS:
 		{
-			int x1 = LineDefs[objnum]->Start()->x;
-			int y1 = LineDefs[objnum]->Start()->y;
-			int x2 = LineDefs[objnum]->End  ()->x;
-			int y2 = LineDefs[objnum]->End  ()->y;
+			double x1 = LineDefs[objnum]->Start()->x();
+			double y1 = LineDefs[objnum]->Start()->y();
+			double x2 = LineDefs[objnum]->End  ()->x();
+			double y2 = LineDefs[objnum]->End  ()->y();
 
 			trans_param.Apply(&x1, &y1);
 			trans_param.Apply(&x2, &y2);
@@ -1508,10 +1507,10 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 				if (! LineDefs[n]->TouchesSector(objnum))
 					continue;
 
-				int x1 = LineDefs[n]->Start()->x;
-				int y1 = LineDefs[n]->Start()->y;
-				int x2 = LineDefs[n]->End  ()->x;
-				int y2 = LineDefs[n]->End  ()->y;
+				double x1 = LineDefs[n]->Start()->x();
+				double y1 = LineDefs[n]->Start()->y();
+				double x2 = LineDefs[n]->End  ()->x();
+				double y2 = LineDefs[n]->End  ()->y();
 
 				trans_param.Apply(&x1, &y1);
 				trans_param.Apply(&x2, &y2);
@@ -1549,7 +1548,7 @@ void UI_Canvas::DrawTagged(int objtype, int objnum)
 }
 
 
-void UI_Canvas::DrawSectorSelection(selection_c *list, int dx, int dy)
+void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 {
 	// gl_color() and gl_line_width() has been done by caller
 
@@ -1557,10 +1556,10 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, int dx, int dy)
 	{
 		const LineDef *L = LineDefs[n];
 
-		int x1 = dx + L->Start()->x;
-		int y1 = dy + L->Start()->y;
-		int x2 = dx + L->End  ()->x;
-		int y2 = dy + L->End  ()->y;
+		double x1 = dx + L->Start()->x();
+		double y1 = dy + L->Start()->y();
+		double x2 = dx + L->End  ()->x();
+		double y2 = dy + L->End  ()->y();
 
 		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 			continue;
@@ -1616,8 +1615,8 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		return;
 	}
 
-	int dx = 0;
-	int dy = 0;
+	double dx = 0;
+	double dy = 0;
 
 	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
 	{
@@ -1659,7 +1658,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 //
 //  draw a plain line at the given map coords
 //
-void UI_Canvas::DrawMapLine(float map_x1, float map_y1, float map_x2, float map_y2)
+void UI_Canvas::DrawMapLine(double map_x1, double map_y1, double map_x2, double map_y2)
 {
     gl_line(SCREENX(map_x1), SCREENY(map_y1),
             SCREENX(map_x2), SCREENY(map_y2));
@@ -1669,7 +1668,7 @@ void UI_Canvas::DrawMapLine(float map_x1, float map_y1, float map_x2, float map_
 //
 //  draw a line with a "knob" showing the right (front) side
 //
-void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
+void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, double map_y2,
                                bool reverse)
 {
 	// gl_color() has been done by caller
@@ -1704,7 +1703,7 @@ void UI_Canvas::DrawKnobbyLine(int map_x1, int map_y1, int map_x2, int map_y2,
 }
 
 
-void UI_Canvas::DrawSplitPoint(int map_x, int map_y)
+void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 {
 	int sx = SCREENX(map_x);
 	int sy = SCREENY(map_y);
@@ -1727,7 +1726,7 @@ void UI_Canvas::DrawSplitPoint(int map_x, int map_y)
 }
 
 
-void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
+void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2)
 {
 	// show how and where the line will be split
 
@@ -1761,7 +1760,7 @@ void UI_Canvas::DrawSplitLine(int map_x1, int map_y1, int map_x2, int map_y2)
 // draw a bolder linedef with an arrow on the end
 // (used for highlighted / selected lines)
 //
-void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
+void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, double map_y2)
 {
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
@@ -1804,7 +1803,7 @@ void UI_Canvas::DrawMapVector(int map_x1, int map_y1, int map_x2, int map_y2)
 //
 //  draw an arrow
 //
-void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
+void UI_Canvas::DrawMapArrow(double map_x1, double map_y1, int r, int angle)
 {
 	float dx = r * cos(angle * M_PI / 180.0);
 	float dy = r * sin(angle * M_PI / 180.0);
@@ -1829,7 +1828,7 @@ void UI_Canvas::DrawMapArrow(int map_x1, int map_y1, int r, int angle)
 
 void UI_Canvas::DrawCamera()
 {
-	int map_x, map_y;
+	double map_x, map_y;
 	float angle;
 
 	Render3D_GetCameraPos(&map_x, &map_y, &angle);
@@ -1884,16 +1883,16 @@ void UI_Canvas::DrawCurrentLine()
 	if (edit.drawing_from < 0)
 		return;
 
-	int new_x = grid.SnapX(edit.map_x);
-	int new_y = grid.SnapY(edit.map_y);
+	double new_x = grid.SnapX(edit.map_x);
+	double new_y = grid.SnapY(edit.map_y);
 
 	// should draw a vertex?
 	if (highlight.valid())
 	{
 		SYS_ASSERT(highlight.type == OBJ_VERTICES);
 
-		new_x = Vertices[highlight.num]->x;
-		new_y = Vertices[highlight.num]->y;
+		new_x = Vertices[highlight.num]->x();
+		new_y = Vertices[highlight.num]->y();
 	}
 	else if (split_ld >= 0)
 	{
@@ -1911,23 +1910,23 @@ void UI_Canvas::DrawCurrentLine()
 
 	const Vertex * v = Vertices[edit.drawing_from];
 
-	DrawKnobbyLine(v->x, v->y, new_x, new_y);
+	DrawKnobbyLine(v->x(), v->y(), new_x, new_y);
 
-	int dx = v->x - new_x;
-	int dy = v->y - new_y;
+	double dx = v->x() - new_x;
+	double dy = v->y() - new_y;
 
 	if (dx || dy)
 	{
 		float length = sqrt(dx * dx + dy * dy);
 
-		DrawLineNumber(v->x, v->y, new_x, new_y, 0, I_ROUND(length));
+		DrawLineNumber(v->x(), v->y(), new_x, new_y, 0, I_ROUND(length));
 	}
 
 	// draw all the crossing points
 	crossing_state_c cross;
 
 	FindCrossingPoints(cross,
-					   v->x, v->y, edit.drawing_from,
+					   v->x(), v->y(), edit.drawing_from,
 					   new_x, new_y, highlight.valid() ? highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
@@ -1942,13 +1941,13 @@ void UI_Canvas::DrawCurrentLine()
 }
 
 
-void UI_Canvas::SelboxBegin(int map_x, int map_y)
+void UI_Canvas::SelboxBegin(double map_x, double map_y)
 {
 	selbox_x1 = selbox_x2 = map_x;
 	selbox_y1 = selbox_y2 = map_y;
 }
 
-void UI_Canvas::SelboxUpdate(int map_x, int map_y)
+void UI_Canvas::SelboxUpdate(double map_x, double map_y)
 {
 	selbox_x2 = map_x;
 	selbox_y2 = map_y;
@@ -1956,7 +1955,7 @@ void UI_Canvas::SelboxUpdate(int map_x, int map_y)
 	redraw();
 }
 
-void UI_Canvas::SelboxFinish(int *x1, int *y1, int *x2, int *y2)
+void UI_Canvas::SelboxFinish(double *x1, double *y1, double *x2, double *y2)
 {
 	*x1 = MIN(selbox_x1, selbox_x2);
 	*y1 = MIN(selbox_y1, selbox_y2);
@@ -1977,11 +1976,11 @@ void UI_Canvas::SelboxFinish(int *x1, int *y1, int *x2, int *y2)
 
 void UI_Canvas::SelboxDraw()
 {
-	int x1 = MIN(selbox_x1, selbox_x2);
-	int x2 = MAX(selbox_x1, selbox_x2);
+	double x1 = MIN(selbox_x1, selbox_x2);
+	double x2 = MAX(selbox_x1, selbox_x2);
 
-	int y1 = MIN(selbox_y1, selbox_y2);
-	int y2 = MAX(selbox_y1, selbox_y2);
+	double y1 = MIN(selbox_y1, selbox_y2);
+	double y2 = MAX(selbox_y1, selbox_y2);
 
 	gl_color(FL_CYAN);
 
@@ -1992,7 +1991,7 @@ void UI_Canvas::SelboxDraw()
 }
 
 
-void UI_Canvas::DragBegin(int focus_x, int focus_y, int map_x, int map_y)
+void UI_Canvas::DragBegin(double focus_x, double focus_y, double map_x, double map_y)
 {
 	drag_start_x = map_x;
 	drag_start_y = map_y;
@@ -2011,14 +2010,14 @@ void UI_Canvas::DragBegin(int focus_x, int focus_y, int map_x, int map_y)
 	}
 }
 
-void UI_Canvas::DragFinish(int *dx, int *dy)
+void UI_Canvas::DragFinish(double *dx, double *dy)
 {
 	drag_lines.clear_all();
 
 	DragDelta(dx, dy);
 }
 
-void UI_Canvas::DragUpdate(int map_x, int map_y)
+void UI_Canvas::DragUpdate(double map_x, double map_y)
 {
 	drag_cur_x = map_x;
 	drag_cur_y = map_y;
@@ -2026,15 +2025,15 @@ void UI_Canvas::DragUpdate(int map_x, int map_y)
 	redraw();
 }
 
-void UI_Canvas::DragDelta(int *dx, int *dy)
+void UI_Canvas::DragDelta(double *dx, double *dy)
 {
 	*dx = drag_cur_x - drag_start_x;
 	*dy = drag_cur_y - drag_start_y;
 
 	if (grid.snap)
 	{
-		int focus_x = drag_focus_x + *dx;
-		int focus_y = drag_focus_y + *dy;
+		double focus_x = drag_focus_x + *dx;
+		double focus_y = drag_focus_y + *dy;
 
 		*dx = grid.SnapX(focus_x) - drag_focus_x;
 		*dy = grid.SnapY(focus_y) - drag_focus_y;
@@ -2042,7 +2041,7 @@ void UI_Canvas::DragDelta(int *dx, int *dy)
 }
 
 
-void UI_Canvas::TransformBegin(int map_x, int map_y, int middle_x, int middle_y,
+void UI_Canvas::TransformBegin(double map_x, double map_y, double middle_x, double middle_y,
 							   transform_keyword_e mode)
 {
 	trans_start_x = map_x;
@@ -2070,13 +2069,13 @@ void UI_Canvas::TransformFinish(transform_t& param)
 	param = trans_param;
 }
 
-void UI_Canvas::TransformUpdate(int map_x, int map_y)
+void UI_Canvas::TransformUpdate(double map_x, double map_y)
 {
-	int dx1 = map_x - trans_param.mid_x;
-	int dy1 = map_y - trans_param.mid_y;
+	double dx1 = map_x - trans_param.mid_x;
+	double dy1 = map_y - trans_param.mid_y;
 
-	int dx0 = trans_start_x - trans_param.mid_x;
-	int dy0 = trans_start_y - trans_param.mid_y;
+	double dx0 = trans_start_x - trans_param.mid_x;
+	double dy0 = trans_start_y - trans_param.mid_y;
 
 	trans_param.scale_x = trans_param.scale_y = 1;
 	trans_param.skew_x  = trans_param.skew_y  = 0;
@@ -2180,7 +2179,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (is_sky(tex_name))
 		{
-			gl_color(palette[game_info.sky_color]);
+			gl_color(palette[Misc_info.sky_color]);
 		}
 		else
 		{

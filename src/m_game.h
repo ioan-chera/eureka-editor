@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@
 
 #include "im_color.h"
 
-#include <string>
+#include <map>
 
 
 /*
@@ -134,7 +134,12 @@ typedef struct
 	int min_dm_starts;
 	int max_dm_starts;
 
-	/* port features */
+} misc_info_t;
+
+
+typedef struct
+{
+	// NOTE: values here are generally 0 or 1, but some can be higher
 
 	int gen_types;		// BOOM generalized linedef types
 	int gen_sectors;    // BOOM and ZDoom sector flags (damage, secret, ...)
@@ -156,10 +161,46 @@ typedef struct
 	int no_need_players;	// having no players is OK (Things checker)
 	int tag_666;			// game uses tag 666 and 667 for special FX
 
-} game_info_t;
+} port_features_t;
 
-extern game_info_t  game_info;
 
+extern misc_info_t      Misc_info;
+extern port_features_t  Features;
+
+
+class GameInfo_c
+{
+public:
+	std::string name;
+	std::string base_game;
+
+public:
+	GameInfo_c(std::string _name);
+	~GameInfo_c();
+};
+
+
+class PortInfo_c
+{
+public:
+	std::string name;
+
+	map_format_bitset_t formats; // 0 if not specified
+
+	std::vector<std::string> supported_games;
+	std::string udmf_namespace;
+
+public:
+	PortInfo_c(std::string _name);
+	~PortInfo_c();
+
+	bool SupportsGame(const char *game) const;
+
+	void AddSupportedGame(const char *game);
+};
+
+
+//------------------------------------------------------------------------
 
 /* Boom generalized types */
 
@@ -207,6 +248,7 @@ extern int num_gen_linetypes;
 //------------------------------------------------------------------------
 
 void M_ClearAllDefinitions();
+void M_PrepareConfigVariables();
 
 void M_LoadDefinitions(const char *folder, const char *name);
 
@@ -214,41 +256,29 @@ bool M_CanLoadDefinitions(const char *folder, const char *name);
 
 typedef enum
 {
-	PURPOSE_Normal = 0,		// normal loading
+	PURPOSE_Normal = 0,		// normal loading, update everything
 	PURPOSE_Resource,		// as a resource file
-	PURPOSE_GameCheck,		// check game's variant name and map formats
-	PURPOSE_PortCheck,		// check if port supports game
+	PURPOSE_GameInfo,		// load a GameInfo_c
+	PURPOSE_PortInfo,		// load a PortInfo_c
 
 } parse_purpose_e;
-
-typedef struct
-{
-	// set when "map_formats" is found, otherwise left unchanged
-	map_format_bitset_t formats;
-
-	// set when "variant_of" is found, otherwise left unchanged
-	char variant_name[256];
-
-	// when "supported_games" is found, check if variant_name is in
-	// the list and set this to 0 or 1, otherwise left unchanged
-	int supports_game;
-
-} parse_check_info_t;
 
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder = NULL,
 						   const char *prettyname = NULL,
-						   parse_check_info_t *check_info = NULL,
                            int include_level = 0);
+
+GameInfo_c * M_LoadGameInfo(const char *game);
+PortInfo_c * M_LoadPortInfo(const char *port);
 
 void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list);
 
-bool M_CheckPortSupportsGame(const char *var_game, const char *port);
+bool M_CheckPortSupportsGame(const char *base_game, const char *port);
 
-const char * M_CollectPortsForMenu(const char *var_game, int *exist_val, const char *exist_name);
+const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
-const char * M_VariantForGame(const char *game);
+const char * M_GetBaseGame(const char *game);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 

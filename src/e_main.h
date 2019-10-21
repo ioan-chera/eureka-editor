@@ -61,7 +61,7 @@ struct Editor_State_t
 	bool is_navigating;  // user is holding down a navigation key
 
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
-	float map_x, map_y;      // map coordinates of pointer
+	double map_x, map_y;     // map coordinates of pointer
 
 
 	selection_c *Selected;    // all selected objects (usually empty)
@@ -69,8 +69,8 @@ struct Editor_State_t
 	Objid highlight;   // the highlighted object
 
 	Objid split_line;  // linedef which would be split by a new vertex
-	int split_x;
-	int split_y;
+	double split_x;
+	double split_y;
 
 	// the object that was under the pointer when ACT_Click occurred
 	Objid clicked;
@@ -118,10 +118,10 @@ void RedrawMap();
 void ZoomWholeMap();
 
 
-extern int Map_bound_x1;   /* minimum X value of map */
-extern int Map_bound_y1;   /* minimum Y value of map */
-extern int Map_bound_x2;   /* maximum X value of map */
-extern int Map_bound_y2;   /* maximum Y value of map */
+extern double Map_bound_x1;   /* minimum X value of map */
+extern double Map_bound_y1;   /* minimum Y value of map */
+extern double Map_bound_x2;   /* maximum X value of map */
+extern double Map_bound_y2;   /* maximum Y value of map */
 
 void CalculateLevelBounds();
 
@@ -156,6 +156,8 @@ int Selection_FirstLine(selection_c *list);
 void Selection_Clear(bool no_save = false);
 void Selection_Push();
 void Selection_InvalidateLast();
+
+void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2);
 
 
 /* commands */

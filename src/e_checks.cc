@@ -276,7 +276,7 @@ struct vertex_X_CMP_pred
 		const Vertex *V1 = Vertices[A];
 		const Vertex *V2 = Vertices[B];
 
-		return V1->x < V2->x;
+		return V1->raw_x < V2->raw_x;
 	}
 };
 
@@ -306,9 +306,9 @@ void Vertex_FindOverlaps(selection_c& sel)
 
 	for (int k = 0 ; k < NumVertices ; k++)
 	{
-		for (int n = k + 1 ; n < NumVertices && VERT_N->x == VERT_K->x ; n++)
+		for (int n = k + 1 ; n < NumVertices && VERT_N->raw_x == VERT_K->raw_x ; n++)
 		{
-			if (VERT_N->y == VERT_K->y)
+			if (VERT_N->raw_y == VERT_K->raw_y)
 			{
 				sel.set(sorted_list[k]);
 			}
@@ -728,7 +728,7 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	list.change_type(OBJ_SECTORS);
 
-	int max_type = (game_info.gen_sectors == 2) ? 8191 : 2047;
+	int max_type = (Features.gen_sectors == 2) ? 8191 : 2047;
 
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
@@ -746,9 +746,9 @@ void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 		}
 
 		// Boom and ZDoom generalized sectors
-		if (game_info.gen_sectors == 2)
+		if (Features.gen_sectors == 2)
 			type_num &= 255;
-		else if (game_info.gen_sectors)
+		else if (Features.gen_sectors)
 			type_num &= 31;
 
 		const sectortype_t *info = M_GetSectorType(type_num);
@@ -1419,8 +1419,8 @@ void Things_FindInVoid(selection_c& list)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		int x = Things[n]->x;
-		int y = Things[n]->y;
+		double x = Things[n]->x();
+		double y = Things[n]->y();
 
 		Objid obj;
 
@@ -1440,8 +1440,8 @@ void Things_FindInVoid(selection_c& list)
 
 		for (int corner = 0 ; corner < 4 ; corner++)
 		{
-			int x2 = x + ((corner & 1) ? -4 : +4);
-			int y2 = y + ((corner & 2) ? -4 : +4);
+			double x2 = x + ((corner & 1) ? -4 : +4);
+			double y2 = y + ((corner & 2) ? -4 : +4);
 
 			GetNearObject(obj, OBJ_SECTORS, x2, y2);
 
@@ -1528,7 +1528,7 @@ void Things_FindDuds(selection_c& list)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
-		else if (game_info.coop_dm_flags)
+		else if (Features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
@@ -1589,7 +1589,7 @@ void Things_FixDuds()
 			if (modes == 0)
 				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 		}
-		else if (game_info.coop_dm_flags)
+		else if (Features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 
@@ -1680,11 +1680,11 @@ static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
 	else if (info2->group == 'm' && info1->group != 'p')
 		r2 = MAX(4, r2 - MONSTER_STEP_DIST);
 
-	if (T1->x - r1 >= T2->x + r2) return false;
-	if (T1->y - r1 >= T2->y + r2) return false;
+	if (T1->x() - r1 >= T2->x() + r2) return false;
+	if (T1->y() - r1 >= T2->y() + r2) return false;
 
-	if (T1->x + r1 <= T2->x - r2) return false;
-	if (T1->y + r1 <= T2->y - r2) return false;
+	if (T1->x() + r1 <= T2->x() - r2) return false;
+	if (T1->y() + r1 <= T2->y() - r2) return false;
 
 	// teleporters and DM starts can safely overlap moving actors
 	if ((info1->flags & THINGDEF_TELEPT) && is_actor2) return false;
@@ -1761,10 +1761,10 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 	// bounding box, not just touch it.
 	r = r - 1;
 
-	int x1 = T->x - r;
-	int y1 = T->y - r;
-	int x2 = T->x + r;
-	int y2 = T->y + r;
+	double x1 = T->x() - r;
+	double y1 = T->y() - r;
+	double x2 = T->x() + r;
+	double y2 = T->y() + r;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1966,7 +1966,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 		mask = Things_FindStarts(&dm_num);
 
-		if (game_info.no_need_players)
+		if (Features.no_need_players)
 			dialog->AddLine("Player starts not needed, no check done");
 		else if (! (mask & 1))
 			dialog->AddLine("Player 1 start is missing!", 2);
@@ -1979,7 +1979,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		else
 			dialog->AddLine("Found all 4 player starts");
 
-		if (game_info.no_need_players)
+		if (Features.no_need_players)
 		{
 			// leave a blank space
 		}
@@ -1987,16 +1987,16 @@ check_result_e CHECK_Things(int min_severity = 0)
 		{
 			dialog->AddLine("Map is missing deathmatch starts", 1);
 		}
-		else if (dm_num < game_info.min_dm_starts)
+		else if (dm_num < Misc_info.min_dm_starts)
 		{
 			sprintf(check_message, "Found %d deathmatch starts -- need at least %d", dm_num,
-			        game_info.min_dm_starts);
+			        Misc_info.min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
-		else if (dm_num > game_info.max_dm_starts)
+		else if (dm_num > Misc_info.max_dm_starts)
 		{
 			sprintf(check_message, "Found %d deathmatch starts -- maximum is %d", dm_num,
-			        game_info.max_dm_starts);
+			        Misc_info.max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
@@ -2038,7 +2038,7 @@ void LineDefs_FindZeroLen(selection_c& lines)
 	lines.change_type(OBJ_LINEDEFS);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (LineDefs[n]->isZeroLength())
+		if (LineDefs[n]->IsZeroLength())
 			lines.set(n);
 }
 
@@ -2049,7 +2049,7 @@ void LineDefs_RemoveZeroLen()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		if (LineDefs[n]->isZeroLength())
+		if (LineDefs[n]->IsZeroLength())
 			lines.set(n);
 	}
 
@@ -2287,7 +2287,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 		const linetype_t *info = M_GetLineType(type_num);
 
 		// Boom generalized line type?
-		if (game_info.gen_types && is_genline(type_num))
+		if (Features.gen_types && is_genline(type_num))
 			continue;
 
 		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
@@ -2362,15 +2362,15 @@ static int linedef_pos_cmp(int A, int B)
 	const LineDef *AL = LineDefs[A];
 	const LineDef *BL = LineDefs[B];
 
-	int A_x1 = AL->Start()->x;
-	int A_y1 = AL->Start()->y;
-	int A_x2 = AL->End()->x;
-	int A_y2 = AL->End()->y;
+	int A_x1 = AL->Start()->x();
+	int A_y1 = AL->Start()->y();
+	int A_x2 = AL->End()->x();
+	int A_y2 = AL->End()->y();
 
-	int B_x1 = BL->Start()->x;
-	int B_y1 = BL->Start()->y;
-	int B_x2 = BL->End()->x;
-	int B_y2 = BL->End()->y;
+	int B_x1 = BL->Start()->x();
+	int B_y1 = BL->Start()->y();
+	int B_x2 = BL->End()->x();
+	int B_y2 = BL->End()->y();
 
 	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
 	{
@@ -2413,10 +2413,10 @@ struct linedef_minx_CMP_pred
 		const LineDef *AL = LineDefs[A];
 		const LineDef *BL = LineDefs[B];
 
-		int A_x1 = MIN(AL->Start()->x, AL->End()->x);
-		int B_x1 = MIN(BL->Start()->x, BL->End()->x);
+		fixcoord_t A_x = MIN(AL->Start()->raw_x, AL->End()->raw_x);
+		fixcoord_t B_x = MIN(BL->Start()->raw_x, BL->End()->raw_x);
 
-		return A_x1 < B_x1;
+		return A_x < B_x;
 	}
 };
 
@@ -2447,7 +2447,7 @@ void LineDefs_FindOverlaps(selection_c& lines)
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (LineDefs[ld2]->isZeroLength())
+		if (LineDefs[ld2]->IsZeroLength())
 			continue;
 
 		// only the second (or third, etc) linedef is stored
@@ -2504,7 +2504,7 @@ static int CheckLinesCross(int A, int B)
 	const LineDef *BL = LineDefs[B];
 
 	// ignore zero-length lines
-	if (AL->isZeroLength() || BL->isZeroLength())
+	if (AL->IsZeroLength() || BL->IsZeroLength())
 		return 0;
 
 	// ignore directly overlapping here
@@ -2517,14 +2517,14 @@ static int CheckLinesCross(int A, int B)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (MIN(AL->Start()->y, AL->End()->y) >
-	    MAX(BL->Start()->y, BL->End()->y))
+	if (MIN(AL->Start()->raw_y, AL->End()->raw_y) >
+	    MAX(BL->Start()->raw_y, BL->End()->raw_y))
 	{
 		return 0;
 	}
 
-	if (MIN(BL->Start()->y, BL->End()->y) >
-	    MAX(AL->Start()->y, AL->End()->y))
+	if (MIN(BL->Start()->raw_y, BL->End()->raw_y) >
+	    MAX(AL->Start()->raw_y, AL->End()->raw_y))
 	{
 		return 0;
 	}
@@ -2532,15 +2532,15 @@ static int CheckLinesCross(int A, int B)
 
 	// precise (but slower) intersection test
 
-	int ax1 = AL->Start()->x;
-	int ay1 = AL->Start()->y;
-	int ax2 = AL->End()->x;
-	int ay2 = AL->End()->y;
+	double ax1 = AL->Start()->x();
+	double ay1 = AL->Start()->y();
+	double ax2 = AL->End()->x();
+	double ay2 = AL->End()->y();
 
-	int bx1 = BL->Start()->x;
-	int by1 = BL->Start()->y;
-	int bx2 = BL->End()->x;
-	int by2 = BL->End()->y;
+	double bx1 = BL->Start()->x();
+	double by1 = BL->Start()->y();
+	double bx2 = BL->End()->x();
+	double by2 = BL->End()->y();
 
 	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
 	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
@@ -2636,7 +2636,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 		const LineDef *L1 = LineDefs[n2];
 
-		int max_x = MAX(L1->Start()->x, L1->End()->x);
+		fixcoord_t max_x = MAX(L1->Start()->raw_x, L1->End()->raw_x);
 
 		for (int k = n + 1 ; k < NumLineDefs ; k++)
 		{
@@ -2644,7 +2644,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 			const LineDef *L2 = LineDefs[k2];
 
-			int min_x = MIN(L2->Start()->x, L2->End()->x);
+			fixcoord_t min_x = MIN(L2->Start()->raw_x, L2->End()->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)
@@ -2968,7 +2968,7 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 		int tag = Sectors[i]->tag;
 
 		// ignore special tags
-		if (game_info.tag_666 && (tag == 666 || tag == 667))
+		if (Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
 		if (tag > 0)
@@ -3109,7 +3109,7 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 
 		// DOOM and Heretic use tag #666 to open doors (etc) on the
 		// death of boss monsters.
-		if (game_info.tag_666 && (tag == 666 || tag == 667))
+		if (Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
 		if (! LD_tag_exists(tag))
@@ -3205,7 +3205,7 @@ void Tags_ShowMissingTags()
 
 static bool SEC_check_beast_mark(int tag)
 {
-	if (! game_info.tag_666)
+	if (! Features.tag_666)
 		return true;
 
 	if (tag == 667)
@@ -3217,7 +3217,7 @@ static bool SEC_check_beast_mark(int tag)
 	if (tag == 666)
 	{
 		// for Heretic, the map must be an end-of-episode map: ExM8
-		if (game_info.tag_666 == 2)
+		if (Features.tag_666 == 2)
 		{
 			if (strlen(Level_name) != 4)
 				return false;
@@ -4301,7 +4301,7 @@ check_result_e CHECK_Textures(int min_severity)
 		}
 
 
-		if (! game_info.medusa_fixed)
+		if (! Features.medusa_fixed)
 		{
 			Textures_FindMedusa(sel, names);
 

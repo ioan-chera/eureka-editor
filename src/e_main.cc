@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -44,10 +44,10 @@
 Editor_State_t  edit;
 
 
-int Map_bound_x1 =  32767;   /* minimum X value of map */
-int Map_bound_y1 =  32767;   /* minimum Y value of map */
-int Map_bound_x2 = -32767;   /* maximum X value of map */
-int Map_bound_y2 = -32767;   /* maximum Y value of map */
+double Map_bound_x1 =  32767;   /* minimum X value of map */
+double Map_bound_y1 =  32767;   /* minimum Y value of map */
+double Map_bound_x2 = -32767;   /* maximum X value of map */
+double Map_bound_y2 = -32767;   /* maximum Y value of map */
 
 int MadeChanges;
 
@@ -84,10 +84,10 @@ static void zoom_fit()
 	int ScrMaxY = main_win->canvas->h();
 
 	if (Map_bound_x1 < Map_bound_x2)
-		xzoom = ScrMaxX / (double)(Map_bound_x2 - Map_bound_x1);
+		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
 
 	if (Map_bound_y1 < Map_bound_y2)
-		yzoom = ScrMaxY / (double)(Map_bound_y2 - Map_bound_y1);
+		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
@@ -178,7 +178,7 @@ static void UpdatePanel()
 }
 
 
-static void UpdateSplitLine(int map_x, int map_y)
+static void UpdateSplitLine(double map_x, double map_y)
 {
 	edit.split_line.clear();
 
@@ -245,10 +245,10 @@ void UpdateHighlight()
 		edit.action == ACT_DRAW_LINE &&
 		edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int new_x = grid.SnapX(edit.map_x);
-		int new_y = grid.SnapY(edit.map_y);
+		double new_x = grid.SnapX(edit.map_x);
+		double new_y = grid.SnapY(edit.map_y);
 
-		int near_vert = Vertex_FindExact(new_x, new_y);
+		int near_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		if (near_vert >= 0)
 		{
@@ -379,11 +379,11 @@ void UpdateLevelBounds(int start_vert)
 	{
 		const Vertex * V = Vertices[i];
 
-		if (V->x < Map_bound_x1) Map_bound_x1 = V->x;
-		if (V->y < Map_bound_y1) Map_bound_y1 = V->y;
+		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
+		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
 
-		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
-		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
+		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
+		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
 	}
 }
 
@@ -396,8 +396,8 @@ void CalculateLevelBounds()
 		return;
 	}
 
-	Map_bound_x1 = 999999; Map_bound_x2 = -999999;
-	Map_bound_y1 = 999999; Map_bound_y2 = -999999;
+	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
+	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
 
 	UpdateLevelBounds(0);
 }
@@ -445,11 +445,11 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 
 		const Vertex * V = Vertices[objnum];
 
-		if (V->x < Map_bound_x1) Map_bound_x1 = V->x;
-		if (V->y < Map_bound_y1) Map_bound_y1 = V->y;
+		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
+		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
 
-		if (V->x > Map_bound_x2) Map_bound_x2 = V->x;
-		if (V->y > Map_bound_y2) Map_bound_y2 = V->y;
+		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
+		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -667,7 +667,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 			// if (! thing_touches_bbox(T->x, T->y, 128, bbox))
 			//    continue;
 
-			Objid obj;  GetNearObject(obj, OBJ_SECTORS, T->x, T->y);
+			Objid obj;
+			GetNearObject(obj, OBJ_SECTORS, T->x(), T->y());
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{
@@ -838,17 +839,13 @@ int Selection_FirstLine(selection_c *list)
 //
 // select all objects inside a given box
 //
-void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, int y2)
+void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2)
 {
 	if (x2 < x1)
-	{
-		int tmp = x1; x1 = x2; x2 = tmp;
-	}
+		std::swap(x1, x2);
 
 	if (y2 < y1)
-	{
-		int tmp = y1; y1 = y2; y2 = tmp;
-	}
+		std::swap(y1, y2);
 
 	switch (objtype)
 	{
@@ -857,8 +854,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 			{
 				const Thing *T = Things[n];
 
-				if (x1 <= T->x && T->x <= x2 &&
-				    y1 <= T->y && T->y <= y2)
+				double tx = T->x();
+				double ty = T->y();
+
+				if (x1 <= tx && tx <= x2 && y1 <= ty && ty <= y2)
 				{
 					list->toggle(n);
 				}
@@ -870,8 +869,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 			{
 				const Vertex *V = Vertices[n];
 
-				if (x1 <= V->x && V->x <= x2 &&
-				    y1 <= V->y && V->y <= y2)
+				double vx = V->x();
+				double vy = V->y();
+
+				if (x1 <= vx && vx <= x2 && y1 <= vy && vy <= y2)
 				{
 					list->toggle(n);
 				}
@@ -884,10 +885,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 				const LineDef *L = LineDefs[n];
 
 				/* the two ends of the line must be in the box */
-				if (x1 <= L->Start()->x && L->Start()->x <= x2 &&
-				    y1 <= L->Start()->y && L->Start()->y <= y2 &&
-				    x1 <= L->End()->x   && L->End()->x <= x2 &&
-				    y1 <= L->End()->y   && L->End()->y <= y2)
+				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
+				    y1 <= L->Start()->y() && L->Start()->y() <= y2 &&
+				    x1 <= L->End()->x()   && L->End()->x() <= x2 &&
+				    y1 <= L->End()->y()   && L->End()->y() <= y2)
 				{
 					list->toggle(n);
 				}
@@ -907,10 +908,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, int x1, int y1, int x2, 
 				int s1 = L->Right() ? L->Right()->sector : -1;
 				int s2 = L->Left( ) ? L->Left() ->sector : -1;
 
-				if (x1 <= L->Start()->x && L->Start()->x <= x2 &&
-				    y1 <= L->Start()->y && L->Start()->y <= y2 &&
-				    x1 <= L->End()->x   && L->End()->x <= x2 &&
-				    y1 <= L->End()->y   && L->End()->y <= y2)
+				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
+				    y1 <= L->Start()->y() && L->Start()->y() <= y2 &&
+				    x1 <= L->End()->x()   && L->End()->x() <= x2 &&
+				    y1 <= L->End()->y()   && L->End()->y() <= y2)
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);
@@ -1063,7 +1064,7 @@ void render_clipboard_c::SetTex(const char *new_tex)
 {
 	snprintf(tex, sizeof(tex), "%s", new_tex);
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 		snprintf(flat, sizeof(flat), "%s", new_tex);
 }
 
@@ -1071,7 +1072,7 @@ void render_clipboard_c::SetFlat(const char *new_flat)
 {
 	snprintf(flat, sizeof(flat), "%s", new_flat);
 
-	if (game_info.mix_textures_flats)
+	if (Features.mix_textures_flats)
 		snprintf(tex, sizeof(tex), "%s", new_flat);
 }
 

@@ -1371,7 +1371,7 @@ UI_Generalized_Box::~UI_Generalized_Box()
 
 void UI_Generalized_Box::Populate()
 {
-	if (! game_info.gen_types)
+	if (! Features.gen_types)
 	{
 		no_boom->show();
 
