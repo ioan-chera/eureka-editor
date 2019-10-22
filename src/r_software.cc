@@ -965,46 +965,94 @@ public:
 #endif
 	}
 
-	void Highlight_Sector(int part, int sec_num, int sel_mode)
+	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-#if 0  // FIXME !!!
-		int sec_h;
+		const Sector *S = Sectors[sec_index];
 
-		if (part == OB3D_Floor)
-		{
-			sec_h = Sectors[sec_num]->floorh;
+		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
-			if (sec_h >= r_view.z)
-				return;
-		}
-		else  /* OB3D_Ceil */
-		{
-			sec_h = Sectors[sec_num]->ceilh;
+		// check that plane faces the camera
+		if (part == PART_FLOOR && (r_view.z < z + 0.2))
+			return;
+		if (part == PART_CEIL && (r_view.z > z - 0.2))
+			return;
 
-			if (sec_h <= r_view.z)
-				return;
-		}
+		int sy1 = DistToY(dw->iz1, z);
+		int sy2 = DistToY(dw->iz2, z);
 
+		// workaround for crappy line clipping in X windows
+		if (sy1 < -5000 || sy2 < -5000 ||
+			sy1 >  5000 || sy2 >  5000)
+			return;
+
+		DrawHighlightLine(dw->sx1, sy1, dw->sx2, sy2);
+	}
+
+	void HighlightSectors(int sec_index, int parts)
+	{
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
 			const DrawWall *dw = (*S);
+			if (! dw->ld)
+				continue;
 
-			if (dw->ld && dw->ld->TouchesSector(sec_num))
+			if (sec_index >= 0)
 			{
-				int sy1 = DistToY(dw->iz1, sec_h);
-				int sy2 = DistToY(dw->iz2, sec_h);
-
-				// workaround for crappy line clipping in X windows
-				if (sy1 < -5000 || sy2 < -5000 ||
-					sy1 >  5000 || sy2 >  5000)
+				if (! dw->ld->TouchesSector(sec_index))
 					continue;
 
-				AddHighlightLine(dw->sx1, sy1, dw->sx2, sy2, sel_mode);
+				// Note: hl_color already set by caller
+
+				if (parts == 0 || (parts & PART_FLOOR))
+					HighlightSectorBit(dw, sec_index, PART_FLOOR);
+
+				if (parts == 0 || (parts & PART_CEIL))
+					HighlightSectorBit(dw, sec_index, PART_CEIL);
+
+				continue;
+			}
+
+			/* doing the selection */
+
+			for (int what_side = 0 ; what_side < 2 ; what_side++)
+			{
+				const SideDef *sd_front = dw->ld->Right();
+				const SideDef *sd_back  = dw->ld->Left();
+
+				if (sd_front && sd_back && sd_front == sd_back)
+					break;
+
+				if (what_side == 1)
+					std::swap(sd_front, sd_back);
+
+				if (sd_front == NULL)
+					continue;
+
+				int sec2 = sd_front->sector;
+
+				parts = edit.Selected->get_ext(sec2);
+				if (parts == 0)
+					continue;
+
+				if (parts == 1)
+				{
+					parts = PART_FLOOR | PART_CEIL;
+					hl_color = SEL_COL;
+				}
+				else
+				{
+					hl_color = SEL3D_COL;
+				}
+
+				if (parts & PART_FLOOR)
+					HighlightSectorBit(dw, sec2, PART_FLOOR);
+
+				if (parts & PART_CEIL)
+					HighlightSectorBit(dw, sec2, PART_CEIL);
 			}
 		}
-#endif
 	}
 
 	void HighlightThings(int th)
@@ -1044,30 +1092,12 @@ public:
 		}
 	}
 
-	inline void Highlight_Object(Objid& obj, int sel_mode)
-	{
-#if 0  // FIXME !!!
-		if (obj.isThing())
-		{
-			Highlight_Thing(obj.num, sel_mode);
-		}
-		else if (obj.isSector())
-		{
-			Highlight_Sector(obj.type, obj.num, sel_mode);
-		}
-		else if (obj.isLine())
-		{
-			Highlight_Line(obj.type, obj.num, obj.side, sel_mode);
-		}
-#endif
-	}
-
 	void Highlight(int ox, int oy)
 	{
 		hl_ox = ox;
 		hl_oy = oy;
 
-		hl_thick = 1;
+		hl_thick = 2;
 
 		switch (edit.mode)
 		{
@@ -1083,6 +1113,20 @@ public:
 
 				HighlightThings(edit.highlight.num);
 			}
+			break;
+
+		case OBJ_SECTORS:
+			HighlightSectors(-1, -1);
+
+			hl_color = HI_COL;
+			if (edit.highlight.valid())
+			{
+				if (edit.Selected->get(edit.highlight.num))
+					hl_color = HI_AND_SEL_COL;
+
+				HighlightSectors(edit.highlight.num, edit.highlight.parts);
+			}
+			break;
 
 		default: break;
 		}
