@@ -62,8 +62,7 @@ Render_View_t::Render_View_t() :
 	thsec_invalidated(false),
 	is_scrolling(false),
 	nav_time(0),
-
-	hl(), sel(),
+	current_hl(),
 	adjust_sides(), adjust_lines(),
 	saved_x_offsets(), saved_y_offsets()
 { }
@@ -188,10 +187,11 @@ bool Render_View_t::SelectIsCompat(obj3d_type_e new_type) const
 
 bool Render_View_t::SelectEmpty() const
 {
+#if 0
 	for (unsigned int k = 0 ; k < sel.size() ; k++)
 		if (sel[k].valid())
 			return false;
-
+#endif
 	return true;
 }
 
@@ -209,10 +209,9 @@ bool Render_View_t::SelectGet(const Objid& obj) const
 void Render_View_t::SelectToggle(const Objid& obj)
 {
 	// when type of surface is radically different, clear selection
-#if 0
+#if 0  // FIXME
 	if (! sel.empty() && ! SelectIsCompat(obj.type))
 		sel.clear();
-#endif
 
 	if (sel.empty())
 	{
@@ -233,6 +232,7 @@ void Render_View_t::SelectToggle(const Objid& obj)
 	}
 
 	sel.push_back(obj);
+#endif
 }
 
 int Render_View_t::GrabClipboard()
@@ -740,6 +740,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 //??				return;
 //??			}
 
+#if 0  // FIXME
 			for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
 			{
 				const Objid& obj = r_view.sel[k];
@@ -747,9 +748,11 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 				if (obj.type == OBJ_LINEDEFS)
 					r_view.AddAdjustSide(obj);
 			}
+#endif
 		}
 		else  // no selection, use the highlight
 		{
+#if 0  // FIXME
 			if (! r_view.hl.valid())
 			{
 				Beep("nothing to adjust");
@@ -762,6 +765,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 			}
 
 			r_view.AddAdjustSide(r_view.hl);
+#endif
 		}
 
 		if (r_view.adjust_sides.empty())  // WTF?
@@ -857,30 +861,30 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	Objid old_hl(r_view.hl);
+	Objid old_hl(r_view.current_hl);
 
-	Render3D_Query(r_view.hl, x, y);
+	Render3D_Query(r_view.current_hl, x, y);
 
-	if (old_hl == r_view.hl)
-		return;
-
-	main_win->canvas->redraw();
-	main_win->scroll->info3d->redraw();
+	if (r_view.current_hl != old_hl)
+	{
+		UpdateHighlight();
+///---		main_win->canvas->redraw();
+///---		main_win->scroll->info3d->redraw();
+	}
 }
 
 
 void Render3D_UpdateHighlight()
 {
-	// this is mainly to clear the highlight when mouse pointer
-	// leaves the 3D viewport.
+	// TODO : REVIEW HOW/WHEN pointer_in_window is set
 
-	if (r_view.hl.valid() && ! edit.pointer_in_window)
-	{
-		r_view.hl.clear();
+	if (! edit.pointer_in_window)
+		r_view.current_hl.clear();
 
-		main_win->canvas->redraw();
-		main_win->scroll->info3d->redraw();
-	}
+	edit.highlight = r_view.current_hl;
+
+	main_win->canvas->redraw();
+	main_win->scroll->info3d->redraw();
 }
 
 
@@ -1060,12 +1064,12 @@ void Render3D_ClearSelection()
 
 void Render3D_SaveHighlight()
 {
-	r_view.saved_hl = r_view.hl;
+	// FIXME review if this is necessary
+	//       [ it is only used by the Operation menu code... ]
 }
 
 void Render3D_RestoreHighlight()
 {
-	r_view.hl = r_view.saved_hl;
 }
 
 
@@ -1201,6 +1205,8 @@ void Render3D_WriteUser(FILE *fp)
 
 void R3D_Click()
 {
+#if 0  // FIXME !!!!  R3D_Click
+
 	if (! r_view.hl.valid())
 	{
 		Beep("nothing there");
@@ -1216,6 +1222,7 @@ void R3D_Click()
 	main_win->UnselectPics();
 
 	RedrawMap();
+#endif
 }
 
 
@@ -1678,6 +1685,8 @@ void R3D_Align()
 	// (and clear it when we are done).
 	bool did_select = false;
 
+#if 0 // FIXME !!!
+
 	if (r_view.SelectEmpty())
 	{
 		if (! r_view.hl.valid())
@@ -1719,6 +1728,7 @@ void R3D_Align()
 		r_view.sel.clear();
 
 	RedrawMap();
+#endif
 }
 
 

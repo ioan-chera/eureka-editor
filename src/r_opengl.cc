@@ -1212,6 +1212,7 @@ public:
 
 		/* do the selection */
 
+#if 0  // FIXME !!!
 		bool saw_hl = false;
 
 		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
@@ -1238,6 +1239,7 @@ public:
 
 			HighlightObject(r_view.hl);
 		}
+#endif
 
 		glLineWidth(1);
 	}

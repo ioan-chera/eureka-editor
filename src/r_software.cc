@@ -874,7 +874,7 @@ public:
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
-		else if (r_view.hl.type == OBJ_THINGS && th_index == r_view.hl.num)
+		else if (edit.highlight.type == OBJ_THINGS && th_index == edit.highlight.num)
 			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
@@ -1068,6 +1068,7 @@ public:
 
 		bool saw_hl = false;
 
+#if 0  // FIXME !!!
 		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
 		{
 			if (! r_view.sel[k].valid())
@@ -1088,6 +1089,7 @@ public:
 
 		if (! saw_hl)
 			Highlight_Object(r_view.hl, 2);
+#endif
 	}
 
 	void ClipSolids()

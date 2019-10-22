@@ -457,6 +457,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 {
 	char buffer[256];
 
+#if 0  // FIXME !!!
 	if (! r_view.hl.valid())
 	{
 		fl_color(INFO_DIM_COL);
@@ -497,6 +498,7 @@ void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
 	fl_draw(buffer, cx, cy);
 
 	cx = cx + fl_width(buffer);
+#endif
 }
 
 //--- editor settings ---

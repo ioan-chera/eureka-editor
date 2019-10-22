@@ -75,13 +75,7 @@ public:
 	/* r_editing_info_t stuff */
 
 	// current highlighted wotsit
-	Objid hl;
-
-	// current selection
-	std::vector< Objid > sel;
-
-	// a remembered highlight (for operation menu)
-	Objid saved_hl;
+	Objid current_hl;
 
 	// state for adjusting offsets via the mouse
 	std::vector<int> adjust_sides;

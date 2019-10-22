@@ -114,10 +114,8 @@ void RedrawMap()
 	UpdateHighlight();
 
 	main_win->scroll->UpdateRenderMode();
+	main_win->scroll->info3d->redraw();
 	main_win->canvas->redraw();
-
-	if (edit.render3d)
-		main_win->scroll->info3d->redraw();
 }
 
 
@@ -217,6 +215,14 @@ static void UpdateSplitLine(double map_x, double map_y)
 
 void UpdateHighlight()
 {
+	if (edit.render3d)
+	{
+		Render3D_UpdateHighlight();
+		UpdatePanel();
+		return;
+	}
+
+
 	bool dragging = (edit.action == ACT_DRAG);
 
 
@@ -266,8 +272,6 @@ void UpdateHighlight()
 	else
 		main_win->canvas->HighlightForget();
 
-
-	Render3D_UpdateHighlight();
 
 	UpdatePanel();
 }
