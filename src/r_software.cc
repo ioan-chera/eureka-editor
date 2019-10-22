@@ -899,70 +899,122 @@ public:
 		}
 	}
 
-	void Highlight_WallPart(int part, const DrawWall *dw, int sel_mode)
+	void HighlightWallBit(const DrawWall *dw, int ld_index, int part)
 	{
-#if 0  // FIXME !!!
-		int h1, h2;
+		// check the part is on the side facing the camera
+		int p_side = (part & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+		if (dw->side != p_side)
+			return;
 
-		if (! dw->ld->TwoSided())
-		{
-			h1 = dw->sd->SecRef()->floorh;
-			h2 = dw->sd->SecRef()->ceilh;
-		}
-		else
+		int z1, z2;
+
+		if (dw->ld->TwoSided())
 		{
 			const Sector *front = dw->ld->Right()->SecRef();
 			const Sector *back  = dw->ld-> Left()->SecRef();
 
-			if (part == OB3D_Lower)
+			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				h1 = MIN(front->floorh, back->floorh);
-				h2 = MAX(front->floorh, back->floorh);
+				z1 = MIN(front->floorh, back->floorh);
+				z2 = MAX(front->floorh, back->floorh);
 			}
-			else  /* part == OB3D_Upper */
+			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				h1 = MIN(front->ceilh, back->ceilh);
-				h2 = MAX(front->ceilh, back->ceilh);
+				z1 = MIN(front->ceilh, back->ceilh);
+				z2 = MAX(front->ceilh, back->ceilh);
+			}
+			else
+			{
+				// TODO railings
+				return;
 			}
 		}
+		else
+		{
+			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
+				return;
 
-		int x1 = dw->sx1 - 1;
+			z1 = dw->sd->SecRef()->floorh;
+			z2 = dw->sd->SecRef()->ceilh;
+		}
+
+		int x1 = dw->sx1;
 		int x2 = dw->sx2 + 1;
 
-		int ly1 = DistToY(dw->iz1, h2);
-		int ly2 = DistToY(dw->iz1, h1);
+		int ly1 = DistToY(dw->iz1, z2);
+		int ly2 = DistToY(dw->iz1, z1);
 
-		int ry1 = DistToY(dw->iz2, h2);
-		int ry2 = DistToY(dw->iz2, h1);
+		int ry1 = DistToY(dw->iz2, z2);
+		int ry2 = DistToY(dw->iz2, z1);
 
 		// workaround for crappy line clipping in X windows
 		if (ly1 < -5000 || ly2 < -5000 || ly1 >  5000 || ly2 >  5000 ||
 			ry1 < -5000 || ry2 < -5000 || ry1 >  5000 || ry2 >  5000)
 			return;
 
-		// keep the lines thin, makes aligning textures easier
-		AddHighlightLine(x1, ly1, x1, ly2, sel_mode);
-		AddHighlightLine(x2, ry1, x2, ry2, sel_mode);
-		AddHighlightLine(x1, ly1, x2, ry1, sel_mode);
-		AddHighlightLine(x1, ly2, x2, ry2, sel_mode);
-#endif
+		DrawHighlightLine(x1, ly1, x1, ly2);
+		DrawHighlightLine(x2, ry1, x2, ry2);
+		DrawHighlightLine(x1, ly1, x2, ry1);
+		DrawHighlightLine(x1, ly2, x2, ry2);
 	}
 
-	void Highlight_Line(int part, int ld, int side, int sel_mode)
+	void HighlightLines(int ld_index, int parts)
 	{
-#if 0  // FIXME !!!
-		const LineDef *L = LineDefs[ld];
-
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
 			const DrawWall *dw = (*S);
+			if (! dw->ld)
+				continue;
 
-			if (dw->ld == L && dw->side == side)
-				Highlight_WallPart(part, dw, sel_mode);
+			int line2  = ld_index;
+			int parts2 = parts;
+
+			if (ld_index >= 0)
+			{
+				if (dw->ld_index != ld_index)
+					continue;
+			}
+			else
+			{
+				line2  = dw->ld_index;
+				parts2 = edit.Selected->get_ext(line2);
+
+				if (parts2 == 0)
+					continue;
+
+				if (parts2 == 1)
+				{
+					parts2 = 0;
+					hl_color = SEL_COL;
+				}
+				else
+				{
+					hl_color = SEL3D_COL;
+				}
+			}
+
+			/* right side */
+			if (parts2 == 0 || (parts2 & PART_RT_LOWER))
+				HighlightWallBit(dw, line2, PART_RT_LOWER);
+
+			if (parts2 == 0 || (parts2 & PART_RT_UPPER))
+				HighlightWallBit(dw, line2, PART_RT_UPPER);
+
+			if (parts2 & PART_RT_RAIL)
+				HighlightWallBit(dw, line2, PART_RT_RAIL);
+
+			/* left side */
+			if (parts2 == 0 || (parts2 & PART_LF_LOWER))
+				HighlightWallBit(dw, line2, PART_LF_LOWER);
+
+			if (parts2 == 0 || (parts2 & PART_LF_UPPER))
+				HighlightWallBit(dw, line2, PART_LF_UPPER);
+
+			if (parts2 & PART_LF_RAIL)
+				HighlightWallBit(dw, line2, PART_LF_RAIL);
 		}
-#endif
 	}
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
@@ -1125,6 +1177,19 @@ public:
 					hl_color = HI_AND_SEL_COL;
 
 				HighlightSectors(edit.highlight.num, edit.highlight.parts);
+			}
+			break;
+
+		case OBJ_LINEDEFS:
+			HighlightLines(-1, -1);
+
+			hl_color = HI_COL;
+			if (edit.highlight.valid())
+			{
+				if (edit.Selected->get(edit.highlight.num))
+					hl_color = HI_AND_SEL_COL;
+
+				HighlightLines(edit.highlight.num, edit.highlight.parts);
 			}
 			break;
 
