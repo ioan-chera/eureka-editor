@@ -641,7 +641,11 @@ static void ACT_Click_release(void)
 void CMD_ACT_Click()
 {
 	if (edit.render3d)
+	{
+		Selection_Toggle(edit.highlight);
+		RedrawMap();
 		return;
+	}
 
 	if (! EXEC_CurKey)
 		return;

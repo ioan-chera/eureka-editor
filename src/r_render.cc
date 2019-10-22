@@ -1205,29 +1205,6 @@ void Render3D_WriteUser(FILE *fp)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
-void R3D_Click()
-{
-#if 0  // FIXME !!!!  R3D_Click
-
-	if (! r_view.hl.valid())
-	{
-		Beep("nothing there");
-		return;
-	}
-
-	if (r_view.hl.type == OBJ_THINGS)
-		return;
-
-	r_view.SelectToggle(r_view.hl);
-
-	// unselect any texture boxes in the panel
-	main_win->UnselectPics();
-
-	RedrawMap();
-#endif
-}
-
-
 void R3D_Forward()
 {
 	float dist = atof(EXEC_Param[0]);
@@ -1763,13 +1740,11 @@ void R3D_WHEEL_Move()
 
 //------------------------------------------------------------------------
 
+extern void CMD_ACT_Click();
+
 
 static editor_command_t  render_commands[] =
 {
-	{	"3D_Click", NULL,
-		&R3D_Click
-	},
-
 	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
@@ -1861,6 +1836,11 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_NAV_MouseMove", NULL,
 		&R3D_NAV_MouseMove
+	},
+
+	// backwards compatibility
+	{	"3D_Click", NULL,
+		&CMD_ACT_Click
 	},
 
 	// end of command list
