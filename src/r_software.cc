@@ -497,6 +497,8 @@ public:
 
 	// these used by Highlight()
 	int hl_ox, hl_oy;
+	int hl_thick;
+	Fl_Color hl_color;
 
 private:
 	static void DeleteWall(DrawWall *P)
@@ -526,7 +528,7 @@ public:
 		std::fill_n(depth_x.begin(), width, 0);
 	}
 
-	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
+	void DrawHighlightLine(int sx1, int sy1, int sx2, int sy2)
 	{
 		if (! render_high_detail)
 		{
@@ -534,23 +536,15 @@ public:
 			sx2 *= 2;  sy2 *= 2;
 		}
 
-		fl_color(color);
+		fl_color(hl_color);
 
-		if (thick)
+		if (hl_thick)
 			fl_line_style(FL_SOLID, 2);
 
 		fl_line(hl_ox + sx1, hl_oy + sy1, hl_ox + sx2, hl_oy + sy2);
 
-		if (thick)
+		if (hl_thick)
 			fl_line_style(0);
-	}
-
-	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, int sel_mode)
-	{
-		AddHighlightLine(sx1, sy1, sx2, sy2,
-				(sel_mode & 1) ? 2 : 0,
-				(sel_mode == 3) ? HI_AND_SEL_COL :
-				(sel_mode == 2) ? HI_COL : SEL_COL);
 	}
 
 	static inline float PointToAngle(float x, float y)
@@ -1013,16 +1007,26 @@ public:
 #endif
 	}
 
-	void Highlight_Thing(int th, int sel_mode)
+	void HighlightThings(int th)
 	{
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
 			const DrawWall *dw = (*S);
-
-			if (! (dw->th >= 0 && dw->th == th))
+			if (dw->th < 0)
 				continue;
+
+			if (th >= 0)
+			{
+				if (dw->th != th)
+					continue;
+			}
+			else
+			{
+				if (! edit.Selected->get(dw->th))
+					continue;
+			}
 
 			int h1 = dw->ceil.h1 - 1;
 			int h2 = dw->ceil.h2 + 1;
@@ -1033,11 +1037,10 @@ public:
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			AddHighlightLine(x1, y1, x1, y2, sel_mode);
-			AddHighlightLine(x2, y1, x2, y2, sel_mode);
-			AddHighlightLine(x1, y1, x2, y1, sel_mode);
-			AddHighlightLine(x1, y2, x2, y2, sel_mode);
-			break;
+			DrawHighlightLine(x1, y1, x1, y2);
+			DrawHighlightLine(x2, y1, x2, y2);
+			DrawHighlightLine(x1, y1, x2, y1);
+			DrawHighlightLine(x1, y2, x2, y2);
 		}
 	}
 
@@ -1064,32 +1067,25 @@ public:
 		hl_ox = ox;
 		hl_oy = oy;
 
-		/* do the selection */
+		hl_thick = 1;
 
-		bool saw_hl = false;
-
-#if 0  // FIXME !!!
-		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		switch (edit.mode)
 		{
-			if (! r_view.sel[k].valid())
-				continue;
+		case OBJ_THINGS:
+			hl_color = SEL_COL;
+			HighlightThings(-1);
 
-			int sel_mode = 1;
-
-			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+			hl_color = HI_COL;
+			if (edit.highlight.valid())
 			{
-				sel_mode |= 2;
-				saw_hl = true;
+				if (edit.Selected->get(edit.highlight.num))
+					hl_color = HI_AND_SEL_COL;
+
+				HighlightThings(edit.highlight.num);
 			}
 
-			Highlight_Object(r_view.sel[k], sel_mode);
+		default: break;
 		}
-
-		/* do the highlight */
-
-		if (! saw_hl)
-			Highlight_Object(r_view.hl, 2);
-#endif
 	}
 
 	void ClipSolids()
