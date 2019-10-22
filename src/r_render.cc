@@ -175,66 +175,6 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 
 /* r_editing_info_t stuff */
 
-#if 0
-
-bool Render_View_t::SelectIsCompat(obj3d_type_e new_type) const
-{
-	return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
-		   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
-		   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
-}
-#endif
-
-bool Render_View_t::SelectEmpty() const
-{
-#if 0
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-		if (sel[k].valid())
-			return false;
-#endif
-	return true;
-}
-
-bool Render_View_t::SelectGet(const Objid& obj) const
-{
-#if 0  // FIXME
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-		if (sel[k] == obj)
-			return true;
-#endif
-
-	return false;
-}
-
-void Render_View_t::SelectToggle(const Objid& obj)
-{
-	// when type of surface is radically different, clear selection
-#if 0  // FIXME
-	if (! sel.empty() && ! SelectIsCompat(obj.type))
-		sel.clear();
-
-	if (sel.empty())
-	{
-///--		sel_type = obj.type;
-		sel.push_back(obj);
-		return;
-	}
-
-	// if object already selected, unselect it
-	// [ we are lazy and leave a NIL object in the vector ]
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-	{
-		if (sel[k] == obj)
-		{
-			sel[k].num = NIL_OBJ;
-			return;
-		}
-	}
-
-	sel.push_back(obj);
-#endif
-}
-
 int Render_View_t::GrabClipboard()
 {
 #if 0 // FIXME
@@ -732,7 +672,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 		r_view.adjust_dy = 0;
 
 		// find the sidedefs to adjust
-		if (! r_view.SelectEmpty())
+		if (! edit.Selected->empty())
 		{
 //??			if (r_view.sel_type < OB3D_Lower)
 //??			{
@@ -1080,7 +1020,7 @@ bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
 	// do not check the highlight here, as mouse pointer will be
 	// over an item in the browser.
 
-	if (r_view.SelectEmpty())
+	if (edit.Selected->empty())
 		return false;
 
 	if (kind == 'F')

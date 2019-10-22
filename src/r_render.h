@@ -103,11 +103,6 @@ public:
 
 	/* r_editing_info_t stuff */
 
-//FIXME	bool SelectIsCompat(obj3d_type_e new_type) const;
-	bool SelectEmpty() const;
-	bool SelectGet(const Objid& obj) const;
-	void SelectToggle(const Objid& obj);
-
 	int GrabClipboard();
 	void StoreClipboard(int new_val);
 	void AddAdjustSide(const Objid& obj);
