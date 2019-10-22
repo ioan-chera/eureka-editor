@@ -1037,6 +1037,13 @@ void Selection_Toggle(Objid& obj)
 
 	byte cur = edit.Selected->get_ext(obj.num);
 
+	// if object was simply selected, then just clear it
+	if (cur == 1)
+	{
+		edit.Selected->clear(obj.num);
+		return;
+	}
+
 	cur = 1 | (cur ^ obj.parts);
 
 	// if we toggled off all the parts, then unset the object itself
