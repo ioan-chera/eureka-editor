@@ -1202,7 +1202,7 @@ public:
 		glEnd();
 	}
 
-	inline void HighlightObject(Objid& obj)
+	void HighlightObject(Objid& obj)
 	{
 		if (!obj.valid())
 			return;
@@ -1255,32 +1255,41 @@ public:
 
 		bool saw_hl = false;
 
-#if 0  // FIXME !!!
-		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		selection_iterator_c it;
+
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (! r_view.sel[k].valid())
-				continue;
-
-			gl_color(SEL_COL);
-
-			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+			if (edit.highlight.valid() && *it == edit.highlight.num)
 			{
-				gl_color(HI_AND_SEL_COL);
 				saw_hl = true;
+
+				// can skip drawing twice for things, but not other stuff
+				if (edit.mode == OBJ_THINGS)
+					continue;
 			}
 
-			HighlightObject(r_view.sel[k]);
+			byte parts = edit.Selected->get_ext(*it);
+
+			if (parts > 1)
+			{
+				gl_color(SEL3D_COL);
+			}
+			else
+			{
+				gl_color(SEL_COL);
+				parts = 0;
+			}
+
+			Objid obj(edit.mode, *it, parts & ~1);
+
+			HighlightObject(obj);
 		}
-#endif
 
 		/* do the highlight */
 
-		if (! saw_hl)
-		{
-			gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
+		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-			HighlightObject(edit.highlight);
-		}
+		HighlightObject(edit.highlight);
 
 		glLineWidth(1);
 	}
