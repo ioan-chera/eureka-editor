@@ -1334,7 +1334,7 @@ public:
 
 		if (query_mode)
 		{
-			if (y1 <= query_sy && query_sy <= y2)
+			if (y1 <= query_sy && query_sy <= y2 && edit.mode == OBJ_THINGS)
 			{
 				query_result = Objid(OBJ_THINGS, dw->th);
 			}

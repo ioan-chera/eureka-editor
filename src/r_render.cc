@@ -878,10 +878,12 @@ void Render3D_UpdateHighlight()
 {
 	// TODO : REVIEW HOW/WHEN pointer_in_window is set
 
-	if (! edit.pointer_in_window)
-		r_view.current_hl.clear();
+	edit.highlight.clear();
 
-	edit.highlight = r_view.current_hl;
+	if (r_view.current_hl.type == edit.mode && edit.pointer_in_window)
+	{
+		edit.highlight = r_view.current_hl;
+	}
 
 	main_win->canvas->redraw();
 	main_win->scroll->info3d->redraw();

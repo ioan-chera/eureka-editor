@@ -29,6 +29,7 @@
 #include "FL/gl.h"
 
 #include "e_main.h"
+#include "e_hover.h"  // PointOnLineSide
 #include "m_game.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
@@ -1059,44 +1060,58 @@ public:
 		glEnd();
 	}
 
-	void HighlightLine(int part, int ld, int side)
+	void HighlightLine(int ld_index, int part)
 	{
-		const LineDef *L = LineDefs[ld];
+		const LineDef *L = LineDefs[ld_index];
 
-		const SideDef *sd_front = L->Right();
-		const SideDef *sd_back  = L->Left();
+		int side = (part & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
 
-		if (side == SIDE_LEFT)
-		{
-			std::swap(sd_front, sd_back);
-		}
-
-		if (sd_front == NULL)
+		const SideDef *sd = (side < 0) ? L->Left() : L->Right();
+		if (sd == NULL)
 			return;
-
-		const Sector *front = sd_front->SecRef();
-		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
 
 		float x1 = L->Start()->x();
 		float y1 = L->Start()->y();
 		float x2 = L->End()->x();
 		float y2 = L->End()->y();
 
-		float z1 = front->floorh;
-		float z2 = front->ceilh;
+		// check that this side is facing the camera
+		int cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
+		if (cam_side != side)
+			return;
+
+		const SideDef *sd_back = (side < 0) ? L->Right() : L->Left();
+
+		const Sector *front = sd->SecRef();
+		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
+
+		float z1, z2;
 
 		if (L->TwoSided())
 		{
-			if (part == PART_RT_LOWER)
+			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
 				z1 = MIN(front->floorh, back->floorh);
 				z2 = MAX(front->floorh, back->floorh);
 			}
-			else  /* part == PART_RT_UPPER */
+			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
 				z1 = MIN(front->ceilh, back->ceilh);
 				z2 = MAX(front->ceilh, back->ceilh);
 			}
+			else
+			{
+				// TODO railings [ need texture height and Y offset ]
+				return;
+			}
+		}
+		else  // one-sided line
+		{
+			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
+				return;
+
+			z1 = front->floorh;
+			z2 = front->ceilh;
 		}
 
 		glBegin(GL_LINE_LOOP);
@@ -1109,17 +1124,23 @@ public:
 		glEnd();
 	}
 
-	void HighlightSector(int part, int sec_num)
+	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = Sectors[sec_num];
+		const Sector *sec = Sectors[sec_index];
 
 		float z = (part == PART_CEIL) ? sec->ceilh : sec->floorh;
+
+		// check that plane faces the camera
+		if (part == PART_FLOOR && (r_view.z < z + 0.2))
+			return;
+		if (part == PART_CEIL && (r_view.z > z - 0.2))
+			return;
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
 			const LineDef *L = LineDefs[n];
 
-			if (L->TouchesSector(sec_num))
+			if (L->TouchesSector(sec_index))
 			{
 				float x1 = L->Start()->x();
 				float y1 = L->Start()->y();
@@ -1192,13 +1213,33 @@ public:
 		}
 		else if (obj.type == OBJ_SECTORS)
 		{
-			HighlightSector(PART_FLOOR, obj.num);
-			HighlightSector(PART_CEIL,  obj.num);
+			if (obj.parts == 0 || (obj.parts & PART_FLOOR))
+				HighlightSector(obj.num, PART_FLOOR);
+
+			if (obj.parts == 0 || (obj.parts & PART_CEIL))
+				HighlightSector(obj.num, PART_CEIL);
 		}
 		else if (obj.type == OBJ_LINEDEFS)
 		{
-			HighlightLine(PART_RT_LOWER, obj.num, 0 /* side */);
-			HighlightLine(PART_RT_LOWER, obj.num, 1 /* side */);
+			/* right side */
+			if (obj.parts == 0 || (obj.parts & PART_RT_LOWER))
+				HighlightLine(obj.num, PART_RT_LOWER);
+
+			if (obj.parts == 0 || (obj.parts & PART_RT_UPPER))
+				HighlightLine(obj.num, PART_RT_UPPER);
+
+			if (obj.parts & PART_RT_RAIL)
+				HighlightLine(obj.num, PART_RT_RAIL);
+
+			/* left side */
+			if (obj.parts == 0 || (obj.parts & PART_LF_LOWER))
+				HighlightLine(obj.num, PART_LF_LOWER);
+
+			if (obj.parts == 0 || (obj.parts & PART_LF_UPPER))
+				HighlightLine(obj.num, PART_LF_UPPER);
+
+			if (obj.parts & PART_LF_RAIL)
+				HighlightLine(obj.num, PART_LF_RAIL);
 		}
 	}
 
@@ -1212,9 +1253,9 @@ public:
 
 		/* do the selection */
 
-#if 0  // FIXME !!!
 		bool saw_hl = false;
 
+#if 0  // FIXME !!!
 		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
 		{
 			if (! r_view.sel[k].valid())
@@ -1230,16 +1271,16 @@ public:
 
 			HighlightObject(r_view.sel[k]);
 		}
+#endif
 
 		/* do the highlight */
 
 		if (! saw_hl)
 		{
-			gl_color(HI_COL);
+			gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-			HighlightObject(r_view.hl);
+			HighlightObject(edit.highlight);
 		}
-#endif
 
 		glLineWidth(1);
 	}
