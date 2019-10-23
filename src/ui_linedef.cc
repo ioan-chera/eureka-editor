@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_checks.h"
+#include "e_cutpaste.h"
 #include "e_linedef.h"
 #include "e_main.h"
 #include "e_things.h"
@@ -479,7 +480,7 @@ void UI_LineBox::CB_Copy()
 		}
 	}
 
-	r_clipboard.SetTex(name);
+	Texboard_SetTex(name);
 
 	Status_Set("Copied %s", name);
 }
@@ -560,7 +561,7 @@ bool UI_LineBox::ClipboardOp(char op)
 			break;
 
 		case 'v':
-			CB_Paste(r_clipboard.GetTexNum());
+			CB_Paste(Texboard_GetTexNum());
 			break;
 
 		case 'x':	// Cut

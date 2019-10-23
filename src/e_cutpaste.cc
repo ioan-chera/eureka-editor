@@ -287,6 +287,72 @@ void Clipboard_NotifyChange(obj_type_e type, int objnum, int field)
 }
 
 
+//----------------------------------------------------------------------
+//  Texture Clipboard
+//----------------------------------------------------------------------
+
+namespace tex_clipboard
+{
+	std::string tex;
+	std::string flat;
+
+	int thing;
+};
+
+
+void Texboard_Clear()
+{
+	tex_clipboard::tex.clear();
+	tex_clipboard::flat.clear();
+	tex_clipboard::thing = 0;
+}
+
+int Texboard_GetTexNum()
+{
+	if (tex_clipboard::tex.empty())
+		tex_clipboard::tex = default_wall_tex;
+
+	return BA_InternaliseString(tex_clipboard::tex.c_str());
+}
+
+int Texboard_GetFlatNum()
+{
+	if (tex_clipboard::flat.empty())
+		tex_clipboard::flat = default_floor_tex;
+
+	return BA_InternaliseString(tex_clipboard::flat.c_str());
+}
+
+int Texboard_GetThing()
+{
+	if (tex_clipboard::thing == 0)
+		return default_thing;
+
+	return tex_clipboard::thing;
+}
+
+void Texboard_SetTex(const char *new_tex)
+{
+	tex_clipboard::tex = new_tex;
+
+	if (Features.mix_textures_flats)
+		tex_clipboard::flat = new_tex;
+}
+
+void Texboard_SetFlat(const char *new_flat)
+{
+	tex_clipboard::flat = new_flat;
+
+	if (Features.mix_textures_flats)
+		tex_clipboard::tex = new_flat;
+}
+
+void Texboard_SetThing(int new_id)
+{
+	tex_clipboard::thing = new_id;
+}
+
+
 //------------------------------------------------------------------------
 
 static void CopyGroupOfObjects(selection_c *list)

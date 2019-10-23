@@ -50,7 +50,7 @@ void CMD_Clipboard_Paste();
 //  Texture Clipboard
 //----------------------------------------------------------------------
 
-int Texboard_Clear();
+void Texboard_Clear();
 
 int Texboard_GetTexNum();
 int Texboard_GetFlatNum();

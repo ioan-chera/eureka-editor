@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_checks.h"
+#include "e_cutpaste.h"
 #include "e_main.h"
 #include "e_sector.h"
 #include "e_things.h"
@@ -842,7 +843,7 @@ void UI_SectorBox::CB_Copy()
 		name = f_tex->value();
 	}
 
-	r_clipboard.SetFlat(name);
+	Texboard_SetFlat(name);
 
 	Status_Set("Copied %s", name);
 }
@@ -925,7 +926,7 @@ bool UI_SectorBox::ClipboardOp(char op)
 			break;
 
 		case 'v':
-			CB_Paste(r_clipboard.GetFlatNum());
+			CB_Paste(Texboard_GetFlatNum());
 			break;
 
 		case 'x':

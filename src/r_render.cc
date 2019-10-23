@@ -186,8 +186,9 @@ int Render_View_t::GrabClipboard()
 	if (type == OB3D_Floor || type == OB3D_Ceil)
 		return r_clipboard.GetFlatNum();
 
-#endif
 	return r_clipboard.GetTexNum();
+#endif
+	return 0;
 }
 
 void Render_View_t::StoreClipboard(int new_val)
@@ -1048,9 +1049,6 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (r_clipboard.ParseUser(tokens, num_tok))
-		return true;
-
 	return false;
 }
 
@@ -1070,8 +1068,6 @@ void Render3D_WriteUser(FILE *fp)
 
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
-
-	r_clipboard.WriteUser(fp);
 }
 
 
