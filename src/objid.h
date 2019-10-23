@@ -83,18 +83,19 @@ public:
 		parts = 0;
 	}
 
-	bool operator== (const Objid& other) const
-	{
-		return (other.type == type) && (other.num == num);
-	}
-
-	bool operator!= (const Objid& other) const
-	{
-		return (other.type != type) || (other.num != num);
-	}
-
 	bool valid()  const { return num >= 0; }
 	bool is_nil() const { return num <  0; }
+
+	bool operator== (const Objid& other) const
+	{
+		return  (other.type  == type) &&
+				(other.num   == num) &&
+				(other.parts == parts);
+	}
+
+private:
+	// not generally available
+	bool operator!= (const Objid& other) const { return false; }
 };
 
 

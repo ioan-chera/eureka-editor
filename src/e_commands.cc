@@ -618,18 +618,14 @@ static void ACT_Click_release(void)
 	if (edit.action != ACT_CLICK)
 		return;
 
-
 	if (click_check_select && click_obj.valid())
 	{
-		// check if pointing at the same object as before
+		// only toggle selection if it's the same object as before
 		Objid near_obj;
-
 		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
 
-		if (near_obj == click_obj)
-		{
-			edit.Selected->toggle(click_obj.num);
-		}
+		if (near_obj.num == click_obj.num)
+			Selection_Toggle(click_obj);
 	}
 
 	Editor_ClearAction();

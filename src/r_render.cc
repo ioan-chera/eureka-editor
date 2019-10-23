@@ -805,11 +805,9 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	Render3D_Query(r_view.current_hl, x, y);
 
-	if (r_view.current_hl != old_hl)
+	if (! (r_view.current_hl == old_hl))
 	{
 		UpdateHighlight();
-///---		main_win->canvas->redraw();
-///---		main_win->scroll->info3d->redraw();
 	}
 }
 
