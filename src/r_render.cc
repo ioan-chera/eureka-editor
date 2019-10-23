@@ -887,10 +887,14 @@ void Render3D_Navigate()
 }
 
 
-static void Render3D_Cut()
+void Render3D_CB_Cut()
 {
-#if 0  // FIXME!!!
-	// this is equivalent to setting the default texture
+	// this is equivalent to setting the default texture or thing
+	// [ AND copying the old one ]
+
+#if 0
+	Render3D_CB_Copy();
+
 
 	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
 
@@ -911,7 +915,7 @@ static void Render3D_Cut()
 }
 
 
-static void Render3D_Copy()
+void Render3D_CB_Copy()
 {
 #if 0  // FIXME!!!
 	int new_tex = r_view.GrabTextureFrom3DSel();
@@ -928,7 +932,7 @@ static void Render3D_Copy()
 }
 
 
-static void Render3D_Paste()
+void Render3D_CB_Paste()
 {
 #if 0  // FIXME!!!
 	int new_tex = r_view.GrabClipboard();
@@ -937,32 +941,6 @@ static void Render3D_Paste()
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
 #endif
-}
-
-
-bool Render3D_ClipboardOp(char op)
-{
-#if 0  // FIXME!!!
-	if (r_view.SelectEmpty() && ! r_view.hl.valid())
-		return false;
-
-	switch (op)
-	{
-		case 'c':
-			Render3D_Copy();
-			break;
-
-		case 'v':
-			Render3D_Paste();
-			break;
-
-		case 'x':
-			Render3D_Cut();
-			break;
-	}
-
-#endif
-	return true;
 }
 
 

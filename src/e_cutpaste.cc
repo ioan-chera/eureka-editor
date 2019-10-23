@@ -805,7 +805,7 @@ void CMD_Clipboard_Cut()
 
 	if (edit.render3d)
 	{
-		Render3D_ClipboardOp('x');
+		Render3D_CB_Cut();
 		return;
 	}
 
@@ -826,7 +826,7 @@ void CMD_Clipboard_Copy()
 
 	if (edit.render3d)
 	{
-		Render3D_ClipboardOp('c');
+		Render3D_CB_Copy();
 		return;
 	}
 
@@ -845,7 +845,7 @@ void CMD_Clipboard_Paste()
 
 	if (edit.render3d)
 	{
-		Render3D_ClipboardOp('v');
+		Render3D_CB_Paste();
 		return;
 	}
 

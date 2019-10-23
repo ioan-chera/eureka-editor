@@ -143,7 +143,9 @@ void Render3D_UpdateHighlight();
 void Render3D_SaveHighlight();
 void Render3D_RestoreHighlight();
 
-bool Render3D_ClipboardOp(char op);
+void Render3D_CB_Cut();
+void Render3D_CB_Copy();
+void Render3D_CB_Paste();
 
 void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);
