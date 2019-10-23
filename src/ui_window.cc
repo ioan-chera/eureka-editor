@@ -435,8 +435,6 @@ void UI_MainWindow::ToggleFullscreen()
 
 bool UI_MainWindow::ClipboardOp(char op)
 {
-	// Note : this is for the panels, we don't handle the 3D view here
-
 	if (props_box->visible())
 	{
 		return props_box->ClipboardOp(op);

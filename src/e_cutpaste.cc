@@ -1139,12 +1139,6 @@ void CMD_Delete()
 	if (main_win->ClipboardOp('d'))
 		return;
 
-	if (edit.render3d)
-	{
-		Render3D_ClipboardOp('d');
-		return;
-	}
-
 	selection_c list;
 
 	if (! GetCurrentObjects(&list))
@@ -1183,6 +1177,7 @@ success:
 
 	Selection_Clear();
 
+	r_view.current_hl.clear();
 	edit.highlight.clear();
 	edit.split_line.clear();
 

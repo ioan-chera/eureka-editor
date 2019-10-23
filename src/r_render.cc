@@ -940,27 +940,6 @@ static void Render3D_Paste()
 }
 
 
-static void Render3D_Delete()
-{
-#if 0  // FIXME!!!
-	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
-
-	if (type == OB3D_Thing)
-		return;
-
-	if (type == OB3D_Floor || type == OB3D_Ceil)
-	{
-		r_view.StoreTextureTo3DSel(BA_InternaliseString(Misc_info.sky_flat));
-		return;
-	}
-
-	r_view.StoreTextureTo3DSel(BA_InternaliseString("-"));
-
-	Status_Set("Removed textures");
-#endif
-}
-
-
 bool Render3D_ClipboardOp(char op)
 {
 #if 0  // FIXME!!!
@@ -979,10 +958,6 @@ bool Render3D_ClipboardOp(char op)
 
 		case 'x':
 			Render3D_Cut();
-			break;
-
-		case 'd':
-			Render3D_Delete();
 			break;
 	}
 
