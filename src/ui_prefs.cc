@@ -700,6 +700,8 @@ public:
 	Fl_Check_Button *rend_high_detail;
 	Fl_Check_Button *rend_lock_grav;
 
+	Fl_Choice *rend_far_clip;
+
 	/* Nodes Tab */
 
 	Fl_Check_Button *nod_on_save;
@@ -1021,6 +1023,12 @@ UI_Preferences::UI_Preferences() :
 		{ rend_high_detail = new Fl_Check_Button(50, 155, 360, 30, " High detail -- slower but looks better");
 #ifndef NO_OPENGL
 		  rend_high_detail->hide();
+#endif
+		}
+		{ rend_far_clip = new Fl_Choice(195, 160, 100, 30, "Far clip distance: ");
+		  rend_far_clip->add("32768|8192|4096|2048|1024");
+#ifdef NO_OPENGL
+		  rend_far_clip->hide();
 #endif
 		}
 
@@ -1478,6 +1486,17 @@ void UI_Preferences::LoadValues()
 	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 
+	if (render_far_clip > 16384)
+		rend_far_clip->value(0);
+	else if (render_far_clip > 6000)
+		rend_far_clip->value(1);
+	else if (render_far_clip > 3000)
+		rend_far_clip->value(2);
+	else if (render_far_clip > 1500)
+		rend_far_clip->value(3);
+	else
+		rend_far_clip->value(4);
+
 	/* Nodes Tab */
 
 	nod_on_save->value(bsp_on_save ? 1 : 0);
@@ -1620,7 +1639,7 @@ void UI_Preferences::SaveValues()
 
 	render_high_detail  = rend_high_detail->value() ? true : false;
 	render_lock_gravity = rend_lock_grav->value() ? true : false;
-
+	render_far_clip     = atoi(rend_far_clip->mvalue()->text);
 }
 
 

@@ -29,6 +29,7 @@
 #include "FL/gl.h"
 
 #include "e_main.h"
+#include "e_hover.h"
 #include "m_game.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
@@ -44,6 +45,7 @@ extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
 extern int  render_pixel_aspect;
+extern int  render_far_clip;
 
 
 // convert from our coordinate system (looking along +X)
@@ -520,6 +522,27 @@ public:
 					   tx1, ty1, tx2, ty2, r, g, b, level);
 	}
 
+	inline bool IsPolygonClipped(const sector_polygon_t *poly)
+	{
+		int p;
+		for (p = 0 ; p < poly->count ; p++)
+		{
+			float px = poly->mx[p];
+			float py = poly->my[p];
+
+			double dist = (py - r_view.y) * r_view.Sin + (px - r_view.x) * r_view.Cos;
+
+			if (dist < render_far_clip + 1)
+				break;
+		}
+
+		// whole polygon was beyond the far clip?
+		if (p == poly->count)
+			return true;
+
+		return false;
+	}
+
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
 		float z, const char *fname)
 	{
@@ -533,8 +556,13 @@ public:
 
 		for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 		{
-			sector_polygon_t *poly = &subdiv->polygons[i];
+			const sector_polygon_t *poly = &subdiv->polygons[i];
 
+			// not sure this is worth it, just let OpenGL clip it
+#if 0
+			if (IsPolygonClipped(poly))
+				continue;
+#endif
 			if (r_view.lighting && !fullbright)
 			{
 				float ax = poly->mx[0];
@@ -806,6 +834,10 @@ public:
 		if (ty1 <= 0 && ty2 <= 0)
 			return;
 
+		// too far away?
+		if (MIN(ty1, ty2) > render_far_clip)
+			return;
+
 		float angle1 = PointToAngle(tx1, ty1);
 		float angle2 = PointToAngle(tx2, ty2);
 		float span = angle1 - angle2;
@@ -973,6 +1005,9 @@ public:
 
 		// sprite is complete behind viewplane?
 		if (ty < 4)
+			return;
+
+		if (render_far_clip > 0 && ty > render_far_clip)
 			return;
 
 		bool fullbright = false;
@@ -1237,9 +1272,21 @@ public:
 		glLineWidth(1);
 	}
 
+	void MarkCameraSector()
+	{
+		Objid obj;
+		GetNearObject(obj, OBJ_SECTORS, r_view.x, r_view.y);
+
+		if (obj.valid())
+			seen_sectors.set(obj.num);
+	}
+
 	void Render()
 	{
 		r_view.SaveOffsets();
+
+		// always draw the sector the camera is in
+		MarkCameraSector();
 
 		for (int i=0 ; i < NumLineDefs ; i++)
 			DrawLine(i);
@@ -1302,7 +1349,7 @@ public:
 		// [ currently it is important since we use the S/W path
 		//   for querying what the mouse is pointing at ]
 		float z_near = x_slope;
-		float z_far  = 32767.0;
+		float z_far  = render_far_clip - 8.0;
 
 		glLoadIdentity();
 		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, z_near, z_far);

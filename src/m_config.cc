@@ -656,6 +656,15 @@ static const opt_desc_t options[] =
 		&render_pixel_aspect
 	},
 
+	{	"render_far_clip",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Distance of far clip plane for 3D rendering",
+		NULL,
+		&render_far_clip
+	},
+
 	{	"render_high_detail",
 		0,
 		OPT_BOOLEAN,

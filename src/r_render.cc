@@ -45,6 +45,8 @@ bool render_lock_gravity   = false;
 bool render_missing_bright = true;
 bool render_unknown_bright = true;
 
+int  render_far_clip = 32768;
+
 // in original DOOM pixels were 20% taller than wide, giving 0.83
 // as the pixel aspect ratio.
 int  render_pixel_aspect = 83;  //  100 * width / height
