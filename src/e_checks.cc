@@ -3037,42 +3037,33 @@ void CMD_ApplyTag()
 	}
 
 
-	bool unselect = false;
-
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		if (edit.highlight.is_nil())
-		{
-			Beep("ApplyTag: nothing selected");
-			return;
-		}
-
-		Selection_Add(edit.highlight);
-		unselect = true;
+		Beep("ApplyTag: nothing selected");
+		return;
 	}
-
 
 	int min_tag, max_tag;
 
 	Tags_UsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + (do_last ? 0 : 1);
-
 	if (new_tag <= 0)
 	{
 		Beep("No last tag");
-		return;
 	}
 	else if (new_tag > 32767)
 	{
 		Beep("Out of tag numbers");
-		return;
+	}
+	else
+	{
+		Tags_ApplyNewValue(new_tag);
 	}
 
-	Tags_ApplyNewValue(new_tag);
-
-	if (unselect)
-		Selection_Clear(true);
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 

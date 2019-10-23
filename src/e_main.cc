@@ -827,6 +827,26 @@ int Selection_FirstLine(selection_c *list)
 
 
 //
+// This is a helper to handle performing an operation on the
+// selection if it is non-empty, otherwise the highlight.
+// Returns false if both selection and highlight are empty.
+//
+soh_type_e Selection_Or_Highlight()
+{
+	if (! edit.Selected->empty())
+		return SOH_OK;
+
+	if (edit.highlight.valid())
+	{
+		Selection_Add(edit.highlight);
+		return SOH_Unselect;
+	}
+
+	return SOH_Empty;
+}
+
+
+//
 // select all objects inside a given box
 //
 void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2)

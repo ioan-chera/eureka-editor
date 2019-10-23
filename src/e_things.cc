@@ -147,15 +147,11 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 //
 void CMD_TH_Disconnect(void)
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		if (edit.highlight.is_nil())
-		{
-			Beep("No vertices to disconnect");
-			return;
-		}
-
-		Selection_Add(edit.highlight);
+		Beep("No vertices to disconnect");
+		return;
 	}
 
 	BA_Begin();

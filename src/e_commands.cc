@@ -983,7 +983,7 @@ void CMD_PlaceCamera()
 {
 	if (edit.render3d)
 	{
-		Beep("Not supported in 3D view");
+		Beep("Not supported in 3D view");  // FIXME
 		return;
 	}
 
@@ -1011,7 +1011,8 @@ void CMD_PlaceCamera()
 
 void CMD_MoveObjects_Dialog()
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to move");
 		return;
@@ -1022,12 +1023,16 @@ void CMD_MoveObjects_Dialog()
 	dialog->Run();
 
 	delete dialog;
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_ScaleObjects_Dialog()
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to scale");
 		return;
@@ -1038,12 +1043,16 @@ void CMD_ScaleObjects_Dialog()
 	dialog->Run();
 
 	delete dialog;
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_RotateObjects_Dialog()
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to rotate");
 		return;
@@ -1054,6 +1063,9 @@ void CMD_RotateObjects_Dialog()
 	dialog->Run();
 
 	delete dialog;
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
