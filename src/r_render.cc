@@ -565,7 +565,6 @@ void Render3D_Setup()
 void Render3D_Enable(bool _enable)
 {
 	Editor_ClearAction();
-	Render3D_ClearSelection();
 
 	edit.render3d = _enable;
 
@@ -964,17 +963,6 @@ bool Render3D_ClipboardOp(char op)
 
 #endif
 	return true;
-}
-
-
-void Render3D_ClearSelection()
-{
-#if 0  // FIXME!!!
-	if (! r_view.SelectEmpty())
-		RedrawMap();
-
-	r_view.sel.clear();
-#endif
 }
 
 

@@ -231,8 +231,6 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 		pic->Selected(! pic->Selected());
 
-		Render3D_ClearSelection();
-
 		if (pic->Selected())
 			main_win->BrowserMode('T');
 
@@ -258,8 +256,6 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-
-		Render3D_ClearSelection();
 
 		if (pic->Selected())
 			main_win->BrowserMode('F');

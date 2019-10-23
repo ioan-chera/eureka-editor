@@ -562,22 +562,18 @@ void ObjectBox_NotifyEnd()
 //------------------------------------------------------------------------
 
 static bool invalidated_selection;
-static bool invalidated_3d_selection;
 static bool invalidated_last_sel;
 
 
 void Selection_NotifyBegin()
 {
 	invalidated_selection = false;
-	invalidated_3d_selection = false;
 	invalidated_last_sel  = false;
 }
 
 
 void Selection_NotifyInsert(obj_type_e type, int objnum)
 {
-	invalidated_3d_selection = true;
-
 	if (type == edit.Selected->what_type() &&
 		objnum <= edit.Selected->max_obj())
 	{
@@ -595,8 +591,6 @@ void Selection_NotifyInsert(obj_type_e type, int objnum)
 
 void Selection_NotifyDelete(obj_type_e type, int objnum)
 {
-	invalidated_3d_selection = true;
-
 	if (objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
@@ -624,9 +618,6 @@ void Selection_NotifyEnd()
 		// this clears AND RESIZES the selection_c object
 		edit.Selected->change_type(edit.mode);
 	}
-
-	if (invalidated_3d_selection)
-		Render3D_ClearSelection();
 
 	if (invalidated_last_sel)
 		Selection_InvalidateLast();
@@ -968,8 +959,6 @@ void Selection_Clear(bool no_save)
 	edit.Selected->change_type(edit.mode);
 
 	edit.error_mode = false;
-
-	Render3D_ClearSelection();
 
 	RedrawMap();
 }

@@ -23,7 +23,6 @@
 #include "e_main.h"
 #include "w_wad.h"
 
-#include "r_render.h"	// Render3D_ClearSelection
 #include "ui_window.h"
 
 #include "bsp.h"
@@ -464,7 +463,6 @@ void CMD_BuildAllNodes()
 	// reset various editor state
 	Editor_ClearAction();
 	Selection_InvalidateLast();
-	Render3D_ClearSelection();
 
 	edit.Selected->clear_all();
 	edit.highlight.clear();

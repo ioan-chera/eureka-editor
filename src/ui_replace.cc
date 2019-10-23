@@ -1081,8 +1081,6 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 			box->find_pic->Selected(false);
 		}
 	}
-
-	Render3D_ClearSelection();
 }
 
 
