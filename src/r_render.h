@@ -145,7 +145,6 @@ void Render3D_SaveHighlight();
 void Render3D_RestoreHighlight();
 
 bool Render3D_ClipboardOp(char op);
-bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state);
 
 void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);

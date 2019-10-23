@@ -467,12 +467,6 @@ void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_s
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
 
-	if (edit.render3d)
-	{
-		if (Render3D_BrowsedItem(kind, number, name, e_state))
-			return;	 // ate it
-	}
-
 	if (props_box->visible())
 	{
 		props_box->BrowsedItem(kind, number, name, e_state);
