@@ -50,6 +50,9 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 						int *ld1, int *side1,
 						int *ld2, int *side2);
 
+bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
+					const Sector *front, const Sector *back);
+
 typedef enum
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset

@@ -1517,6 +1517,34 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 }
 
 
+bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
+					const Sector *front, const Sector *back)
+{
+	const char *rail_tex = sd->MidTex();
+	if (is_null_tex(rail_tex))
+		return false;
+
+	z1 = MAX(front->floorh, back->floorh);
+	z2 = MIN(front->ceilh,  back->ceilh);
+
+	if (z2 <= z1)
+		return false;
+
+	int img_h = W_GetTextureHeight(rail_tex);
+
+	if (L->flags & MLF_LowerUnpegged)
+	{
+		z1 = z1 + sd->y_offset;
+		z2 = z1 + img_h;
+	}
+	else
+	{
+		z2 = z2 + sd->y_offset;
+		z1 = z2 - img_h;
+	}
+
+	return true;
+}
 
 
 //  SideDef packing logic -- raw from glBSP

@@ -31,6 +31,7 @@
 #include "im_color.h"
 #include "im_img.h"
 #include "e_hover.h"
+#include "e_linedef.h"
 #include "e_main.h"
 #include "m_game.h"
 #include "w_rawdef.h"
@@ -925,8 +926,8 @@ public:
 			}
 			else
 			{
-				// TODO railings
-				return;
+				if (! LD_RailHeights(z1, z2, dw->ld, dw->sd, front, back))
+					return;
 			}
 		}
 		else
@@ -1509,9 +1510,6 @@ public:
 		if (! surf.img)
 			return;
 
-		if (query_mode)
-			return;
-
 		int y1 = DistToY(dw->cur_iz, surf.h2);
 		int y2 = DistToY(dw->cur_iz, surf.h1) - 1;
 
@@ -1523,6 +1521,16 @@ public:
 
 		if (y1 > y2)
 			return;
+
+		if (query_mode)
+		{
+			if (y1 <= query_sy && query_sy <= y2 && edit.mode == OBJ_LINEDEFS)
+			{
+				int part = (dw->side < 0) ? PART_LF_RAIL : PART_RT_RAIL;
+				query_result = Objid(OBJ_LINEDEFS, dw->ld_index, part);
+			}
+			return;
+		}
 
 		/* fill pixels */
 

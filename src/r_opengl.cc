@@ -30,6 +30,7 @@
 
 #include "e_main.h"
 #include "e_hover.h"  // PointOnLineSide
+#include "e_linedef.h"  // LD_RailHeights
 #include "m_game.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
@@ -1101,8 +1102,12 @@ public:
 			}
 			else
 			{
-				// TODO railings [ need texture height and Y offset ]
-				return;
+				int zi1, zi2;
+
+				if (! LD_RailHeights(zi1, zi2, L, sd, front, back))
+					return;
+
+				z1 = zi1; z2 = zi2;
 			}
 		}
 		else  // one-sided line
