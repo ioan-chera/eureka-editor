@@ -488,6 +488,9 @@ public:
 	int query_sy;
 
 	Objid query_result;
+	float query_map_x;
+	float query_map_y;
+	float query_map_z;
 
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
@@ -898,6 +901,37 @@ public:
 			if ((*S)->ld)
 				(*S)->ComputeWallSurface();
 		}
+	}
+
+	void QueryCalcCoord(const DrawWall *dw, obj_type_e what, int part)
+	{
+		float dist = 1.0 / dw->cur_iz;
+
+		if (what == OBJ_SECTORS)
+		{
+			// sky surfaces require a check on Z height
+			if (part == PART_CEIL && dw->sec->ceilh > r_view.z + 1)
+				dist = YToDist(query_sy, dw->sec->ceilh);
+			else if (part == PART_FLOOR && dw->sec->floorh < r_view.z - 1)
+				dist = YToDist(query_sy, dw->sec->floorh);
+		}
+
+		if (dist < 4.0)
+			dist = 4.0;
+
+		float ang = XToAngle(query_sx);
+		float modv = cos(ang - M_PI/2);
+
+		float t_cos = cos(M_PI + -r_view.angle + ang) / modv;
+		float t_sin = sin(M_PI + -r_view.angle + ang) / modv;
+
+		query_map_x = r_view.x - t_sin * dist;
+		query_map_y = r_view.y - t_cos * dist;
+		query_map_z = YToSecH(query_sy, 1.0 / dist);
+
+		// ensure we never produce X == 0
+		if (query_map_x == 0)
+			query_map_x = 0.01;
 	}
 
 	void HighlightWallBit(const DrawWall *dw, int ld_index, int part)
@@ -1403,7 +1437,11 @@ public:
 					query_result = Objid(what, dw->ld_index, part);
 				}
 				else if (dw->sd != NULL)
+				{
 					query_result = Objid(what, dw->sd->sector, part);
+				}
+
+				QueryCalcCoord(dw, what, part);
 			}
 			return;
 		}
@@ -1843,6 +1881,9 @@ public:
 		query_sx = qx;
 		query_sy = qy;
 		query_result.clear();
+		query_map_x = 0;
+		query_map_y = 0;
+		query_map_z = 0;
 
 		Render();
 
