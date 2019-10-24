@@ -28,6 +28,7 @@
 #include "FL/gl.h"
 #endif
 
+#include "e_basis.h"
 #include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
@@ -950,6 +951,88 @@ static void StoreSelectedThing(int new_type)
 }
 
 
+static int SEC_GrabFlat(const Sector *S, int part)
+{
+	if (part & PART_CEIL)
+		return S->ceil_tex;
+
+	if (part & PART_FLOOR)
+		return S->floor_tex;
+
+	return S->floor_tex;
+}
+
+
+// returns -1 if nothing in selection or highlight, -2 if multiple
+// sectors are selected and they have different flats.
+static int GrabSelectedFlat()
+{
+	if (edit.Selected->empty())
+	{
+		if (edit.highlight.is_nil())
+		{
+			Beep("no sectors for copy/cut flat");
+			return -1;
+		}
+
+		const Sector *S = Sectors[edit.highlight.num];
+		return SEC_GrabFlat(S, edit.highlight.parts);
+	}
+
+	int res_tex = -1;
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Sector *S = Sectors[*it];
+		byte parts = edit.Selected->get_ext(*it);
+
+		int tex = SEC_GrabFlat(S, parts & ~1);
+
+		if (res_tex >= 0 && tex != res_tex)
+		{
+			Beep("multiple flats present");
+			return -2;
+		}
+
+		res_tex = tex;
+	}
+
+	return res_tex;
+}
+
+
+static void StoreSelectedFlat(int new_tex)
+{
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no things for paste type");
+		return;
+	}
+
+	BA_Begin();
+	BA_MessageForSel("pasted flat to", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		byte parts = edit.Selected->get_ext(*it);
+
+		if (parts == 1 || (parts & PART_FLOOR))
+			BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+
+		if (parts == 1 || (parts & PART_CEIL))
+			BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+}
+
+
 void Render3D_CB_Cut()
 {
 	// this is equivalent to setting the default texture or thing
@@ -991,7 +1074,9 @@ void Render3D_CB_Copy()
 		break;
 
 	case OBJ_SECTORS:
-		// TODO
+		num = GrabSelectedFlat();
+		if (num >= 0)
+			Texboard_SetFlat(BA_GetString(num));
 		break;
 
 	case OBJ_LINEDEFS:
@@ -1026,7 +1111,7 @@ void Render3D_CB_Paste()
 		break;
 
 	case OBJ_SECTORS:
-		// TODO
+		StoreSelectedFlat(Texboard_GetFlatNum());
 		break;
 
 	case OBJ_LINEDEFS:
