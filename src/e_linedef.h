@@ -28,7 +28,7 @@
 #define __EUREKA_E_LINEDEF_H__
 
 void FlipLineDef(int ld);
-void FlipLineDefGroup(selection_c& flip);
+void FlipLineDefGroup(selection_c *flip);
 
 
 void LineDefs_SetLength(int new_len);

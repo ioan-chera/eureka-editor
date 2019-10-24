@@ -832,11 +832,11 @@ void FlipLineDef_safe(int ld)
 }
 
 
-void FlipLineDefGroup(selection_c& flip)
+void FlipLineDefGroup(selection_c *flip)
 {
 	selection_iterator_c it;
 
-	for (flip.begin(&it) ; !it.at_end() ; ++it)
+	for (flip->begin(&it) ; !it.at_end() ; ++it)
 	{
 		FlipLineDef(*it);
 	}

@@ -1008,7 +1008,7 @@ static void DetermineNewTextures(lineloop_c& loop,
 //
 void DoAssignSector(int ld, int side, int new_sec,
 					int new_lower, int new_upper,
-					selection_c& flip)
+					selection_c *flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
@@ -1029,7 +1029,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 
 	if (side < 0 && other_sd < 0)
 	{
-		flip.set(ld);
+		flip->set(ld);
 	}
 
 	SYS_ASSERT(new_lower >= 0);
@@ -1071,7 +1071,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 }
 
 
-void lineloop_c::AssignSector(int new_sec, selection_c& flip)
+void lineloop_c::AssignSector(int new_sec, selection_c *flip)
 {
 	std::vector<int> lower_texs(lines.size());
 	std::vector<int> upper_texs(lines.size());
@@ -1195,9 +1195,9 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 
 	loop.GetAllSectors(&unused);
 
-	loop.AssignSector(new_sec, flip);
+	loop.AssignSector(new_sec, &flip);
 
-	FlipLineDefGroup(flip);
+	FlipLineDefGroup(&flip);
 
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < NumLineDefs ; n++)
