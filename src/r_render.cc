@@ -178,41 +178,6 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 
 /* r_editing_info_t stuff */
 
-// FIXME REMOVE THIS?
-#if 0
-int Render_View_t::GrabClipboard()
-{
-	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
-
-	if (type == OB3D_Thing)
-		return r_clipboard.GetThing();
-
-	if (type == OB3D_Floor || type == OB3D_Ceil)
-		return r_clipboard.GetFlatNum();
-
-	return r_clipboard.GetTexNum();
-	return 0;
-}
-
-void Render_View_t::StoreClipboard(int new_val)
-{
-	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
-
-	if (type == OB3D_Thing)
-	{
-		r_clipboard.SetThing(new_val);
-		return;
-	}
-
-	const char *name = BA_GetString(new_val);
-
-	if (type == OB3D_Floor || type == OB3D_Ceil)
-		r_clipboard.SetFlat(name);
-	else
-		r_clipboard.SetTex(name);
-}
-#endif
-
 void Render_View_t::AddAdjustSide(const Objid& obj)
 {
 #if 0 // FIXME
@@ -289,166 +254,6 @@ void Render_View_t::RestoreOffsets()
 		SD->y_offset = saved_y_offsets[k];
 	}
 }
-
-
-#if 0
-int Render_View_t::GrabTextureFromObject(const Objid& obj)
-{
-	if (obj.type == OB3D_Floor)
-		return Sectors[obj.num]->floor_tex;
-
-	if (obj.type == OB3D_Ceil)
-		return Sectors[obj.num]->ceil_tex;
-
-	if (! obj.isLine())
-		return -1;
-
-	const LineDef *LD = LineDefs[obj.num];
-
-	if (LD->OneSided())
-	{
-		return LD->Right()->mid_tex;
-	}
-
-	const SideDef *SD = (obj.side == SIDE_RIGHT) ? LD->Right() : LD->Left();
-
-	if (! SD)
-		return -1;
-
-	switch (obj.type)
-	{
-		case OB3D_Lower:
-			return SD->lower_tex;
-
-		case OB3D_Upper:
-			return SD->upper_tex;
-
-		case OB3D_Rail:
-			return SD->mid_tex;
-
-		default:
-			return -1;
-	}
-	return -1;
-}
-#endif
-
-
-//
-// grab the texture or flat (as offset into string table) from the
-// current 3D selection.  returns -1 if selection is empty, -2 if
-// there multiple selected and some were different.
-//
-#if 0  // FIXME !!
-int Render_View_t::GrabTextureFrom3DSel()
-{
-	if (SelectEmpty())
-	{
-		return GrabTextureFromObject(hl);
-	}
-
-	int result = -1;
-
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-	{
-		const Objid& obj = sel[k];
-
-		if (! obj.valid())
-			continue;
-
-		int cur_tex = GrabTextureFromObject(obj);
-		if (cur_tex < 0)
-			continue;
-
-		// more than one distinct texture?
-		if (result >= 0 && result != cur_tex)
-			return -2;
-
-		result = cur_tex;
-	}
-
-	return result;
-}
-#endif
-
-
-#if 0  // FIXME !!
-void Render_View_t::StoreTextureToObject(const Objid& obj, int new_tex)
-{
-	if (obj.type == OB3D_Floor)
-	{
-		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
-		return;
-	}
-	else if (obj.type == OB3D_Ceil)
-	{
-		BA_ChangeSEC(obj.num, Sector::F_CEIL_TEX, new_tex);
-		return;
-	}
-
-	if (! obj.isLine())
-		return;
-
-	const LineDef *LD = LineDefs[obj.num];
-
-	int sd = LD->WhatSideDef(obj.side);
-
-	if (sd < 0)
-		return;
-
-	if (LD->OneSided())
-	{
-		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
-		return;
-	}
-
-	switch (obj.type)
-	{
-		case OB3D_Lower:
-			BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
-			break;
-
-		case OB3D_Upper:
-			BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
-			break;
-
-		case OB3D_Rail:
-			BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
-			break;
-
-		// shut the compiler up
-		default: break;
-	}
-}
-#endif
-
-
-#if 0  // FIXME !!
-void Render_View_t::StoreTextureTo3DSel(int new_tex)
-{
-	BA_Begin();
-
-	if (SelectEmpty())
-	{
-		StoreTextureToObject(hl, new_tex);
-	}
-	else
-	{
-		for (unsigned int k = 0 ; k < sel.size() ; k++)
-		{
-			const Objid& obj = sel[k];
-
-			if (! obj.valid())
-				continue;
-
-			StoreTextureToObject(obj, new_tex);
-		}
-	}
-
-	BA_Message("pasted texture: %s", BA_GetString(new_tex));
-	BA_End();
-}
-#endif
 
 
 Render_View_t r_view;
@@ -892,6 +697,8 @@ void Render3D_Navigate()
 // things are selected and they have different types.
 static int GrabSelectedThing()
 {
+	int result = -1;
+
 	if (edit.Selected->empty())
 	{
 		if (edit.highlight.is_nil())
@@ -900,24 +707,25 @@ static int GrabSelectedThing()
 			return -1;
 		}
 
-		const Thing *T = Things[edit.highlight.num];
-		return T->type;
+		result = Things[edit.highlight.num]->type;
 	}
-
-	int result = -1;
-
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	else
 	{
-		const Thing *T = Things[*it];
-		if (result >= 0 && T->type != result)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			Beep("multiple thing types");
-			return -2;
-		}
+			const Thing *T = Things[*it];
+			if (result >= 0 && T->type != result)
+			{
+				Beep("multiple thing types");
+				return -2;
+			}
 
-		result = T->type;
+			result = T->type;
+		}
 	}
+
+	Status_Set("Copied type %d", result);
 
 	return result;
 }
@@ -948,6 +756,8 @@ static void StoreSelectedThing(int new_type)
 
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
+
+	Status_Set("Pasted type %d", new_type);
 }
 
 
@@ -967,6 +777,8 @@ static int SEC_GrabFlat(const Sector *S, int part)
 // sectors are selected and they have different flats.
 static int GrabSelectedFlat()
 {
+	int result = -1;
+
 	if (edit.Selected->empty())
 	{
 		if (edit.highlight.is_nil())
@@ -976,27 +788,30 @@ static int GrabSelectedFlat()
 		}
 
 		const Sector *S = Sectors[edit.highlight.num];
-		return SEC_GrabFlat(S, edit.highlight.parts);
+
+		result = SEC_GrabFlat(S, edit.highlight.parts);
 	}
-
-	int result = -1;
-
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	else
 	{
-		const Sector *S = Sectors[*it];
-		byte parts = edit.Selected->get_ext(*it);
-
-		int tex = SEC_GrabFlat(S, parts & ~1);
-
-		if (result >= 0 && tex != result)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			Beep("multiple flats present");
-			return -2;
-		}
+			const Sector *S = Sectors[*it];
+			byte parts = edit.Selected->get_ext(*it);
 
-		result = tex;
+			int tex = SEC_GrabFlat(S, parts & ~1);
+
+			if (result >= 0 && tex != result)
+			{
+				Beep("multiple flats present");
+				return -2;
+			}
+
+			result = tex;
+		}
 	}
+
+	Status_Set("Copied %s", BA_GetString(result));
 
 	return result;
 }
@@ -1030,6 +845,8 @@ static void StoreSelectedFlat(int new_tex)
 
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
+
+	Status_Set("Pasted %s", BA_GetString(new_tex));
 }
 
 
@@ -1064,6 +881,8 @@ static void StoreDefaultedFlats()
 
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
+
+	Status_Set("Defaulted flats");
 }
 
 
@@ -1106,6 +925,8 @@ static int LD_GrabTex(const LineDef *L, int part)
 // linedefs are selected and they have different textures.
 static int GrabSelectedTexture()
 {
+	int result = -1;
+
 	if (edit.Selected->empty())
 	{
 		if (edit.highlight.is_nil())
@@ -1115,27 +936,30 @@ static int GrabSelectedTexture()
 		}
 
 		const LineDef *L = LineDefs[edit.highlight.num];
-		return LD_GrabTex(L, edit.highlight.parts);
+
+		result = LD_GrabTex(L, edit.highlight.parts);
 	}
-
-	int result = -1;
-
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	else
 	{
-		const LineDef *L = LineDefs[*it];
-		byte parts = edit.Selected->get_ext(*it);
-
-		int tex = LD_GrabTex(L, parts & ~1);
-
-		if (result >= 0 && tex != result)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			Beep("multiple textures present");
-			return -2;
-		}
+			const LineDef *L = LineDefs[*it];
+			byte parts = edit.Selected->get_ext(*it);
 
-		result = tex;
+			int tex = LD_GrabTex(L, parts & ~1);
+
+			if (result >= 0 && tex != result)
+			{
+				Beep("multiple textures present");
+				return -2;
+			}
+
+			result = tex;
+		}
 	}
+
+	Status_Set("Copied %s", BA_GetString(result));
 
 	return result;
 }
@@ -1193,8 +1017,9 @@ static void StoreSelectedTexture(int new_tex)
 
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
-}
 
+	Status_Set("Pasted %s", BA_GetString(new_tex));
+}
 
 
 void Render3D_CB_Copy()
@@ -1224,19 +1049,6 @@ void Render3D_CB_Copy()
 	default:
 		break;
 	}
-
-#if 0
-	int new_tex = r_view.GrabTextureFrom3DSel();
-	if (new_tex < 0)
-	{
-		Beep("multiple textures present");
-		return;
-	}
-
-	r_view.StoreClipboard(new_tex);
-
-	Status_Set("Copied %s", BA_GetString(new_tex));
-#endif
 }
 
 
@@ -1259,14 +1071,6 @@ void Render3D_CB_Paste()
 	default:
 		break;
 	}
-
-#if 0  // FIXME!!!
-	int new_tex = r_view.GrabClipboard();
-
-	r_view.StoreTextureTo3DSel(new_tex);
-
-	Status_Set("Pasted %s", BA_GetString(new_tex));
-#endif
 }
 
 
@@ -1291,26 +1095,6 @@ void Render3D_CB_Cut()
 	default:
 		break;
 	}
-
-#if 0
-	Render3D_CB_Copy();
-
-
-	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
-
-	if (type == OB3D_Thing)
-		return;
-
-	const char *name = default_wall_tex;
-
-	if (type == OB3D_Floor)
-		name = default_floor_tex;
-	else if (type == OB3D_Ceil)
-		name = default_ceil_tex;
-
-	r_view.StoreTextureTo3DSel(BA_InternaliseString(name));
-
-#endif
 }
 
 
