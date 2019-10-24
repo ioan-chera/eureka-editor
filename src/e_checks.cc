@@ -2988,25 +2988,23 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 
 void Tags_ApplyNewValue(int new_tag)
 {
-	selection_c list;
+	// uses the current selection (caller must set it up)
+
 	selection_iterator_c it;
 
-	if (GetCurrentObjects(&list))
+	BA_Begin();
+
+	BA_MessageForSel("new tag for", edit.Selected);
+
+	for (edit.Selected->begin(&it); !it.at_end(); ++it)
 	{
-		BA_Begin();
-
-		BA_MessageForSel("new tag for", &list);
-
-		for (list.begin(&it); !it.at_end(); ++it)
-		{
-			if (edit.mode == OBJ_LINEDEFS)
-				BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
-			else if (edit.mode == OBJ_SECTORS)
-				BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
-		}
-
-		BA_End();
+		if (edit.mode == OBJ_LINEDEFS)
+			BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
+		else if (edit.mode == OBJ_SECTORS)
+			BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
 	}
+
+	BA_End();
 }
 
 

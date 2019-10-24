@@ -598,7 +598,8 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 
 	new_tag = CLAMP(-32767, new_tag, 32767);
 
-	Tags_ApplyNewValue(new_tag);
+	if (! edit.Selected->empty())
+		Tags_ApplyNewValue(new_tag);
 }
 
 
@@ -619,7 +620,8 @@ void UI_SectorBox::FreshTag()
 		return;
 	}
 
-	Tags_ApplyNewValue(new_tag);
+	if (! edit.Selected->empty())
+		Tags_ApplyNewValue(new_tag);
 }
 
 

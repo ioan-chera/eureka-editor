@@ -596,7 +596,8 @@ void UI_LineBox::tag_callback(Fl_Widget *w, void *data)
 
 	int new_tag = atoi(box->tag->value());
 
-	Tags_ApplyNewValue(new_tag);
+	if (! edit.Selected->empty())
+		Tags_ApplyNewValue(new_tag);
 }
 
 
