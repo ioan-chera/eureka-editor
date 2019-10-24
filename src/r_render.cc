@@ -28,6 +28,7 @@
 #include "FL/gl.h"
 #endif
 
+#include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
@@ -173,11 +174,13 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 		FindGroundZ();
 }
 
+
 /* r_editing_info_t stuff */
 
+// FIXME REMOVE THIS?
+#if 0
 int Render_View_t::GrabClipboard()
 {
-#if 0 // FIXME
 	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
 
 	if (type == OB3D_Thing)
@@ -187,13 +190,11 @@ int Render_View_t::GrabClipboard()
 		return r_clipboard.GetFlatNum();
 
 	return r_clipboard.GetTexNum();
-#endif
 	return 0;
 }
 
 void Render_View_t::StoreClipboard(int new_val)
 {
-#if 0 // FIXME
 	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
 
 	if (type == OB3D_Thing)
@@ -208,8 +209,8 @@ void Render_View_t::StoreClipboard(int new_val)
 		r_clipboard.SetFlat(name);
 	else
 		r_clipboard.SetTex(name);
-#endif
 }
+#endif
 
 void Render_View_t::AddAdjustSide(const Objid& obj)
 {
@@ -289,9 +290,9 @@ void Render_View_t::RestoreOffsets()
 }
 
 
+#if 0
 int Render_View_t::GrabTextureFromObject(const Objid& obj)
 {
-#if 0  // FIXME !!
 	if (obj.type == OB3D_Floor)
 		return Sectors[obj.num]->floor_tex;
 
@@ -327,9 +328,9 @@ int Render_View_t::GrabTextureFromObject(const Objid& obj)
 		default:
 			return -1;
 	}
-#endif
 	return -1;
 }
+#endif
 
 
 //
@@ -337,9 +338,9 @@ int Render_View_t::GrabTextureFromObject(const Objid& obj)
 // current 3D selection.  returns -1 if selection is empty, -2 if
 // there multiple selected and some were different.
 //
+#if 0  // FIXME !!
 int Render_View_t::GrabTextureFrom3DSel()
 {
-#if 0  // FIXME !!
 	if (SelectEmpty())
 	{
 		return GrabTextureFromObject(hl);
@@ -366,14 +367,13 @@ int Render_View_t::GrabTextureFrom3DSel()
 	}
 
 	return result;
-#endif
-	return -1;
 }
+#endif
 
 
+#if 0  // FIXME !!
 void Render_View_t::StoreTextureToObject(const Objid& obj, int new_tex)
 {
-#if 0  // FIXME !!
 	if (obj.type == OB3D_Floor)
 	{
 		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
@@ -418,13 +418,13 @@ void Render_View_t::StoreTextureToObject(const Objid& obj, int new_tex)
 		// shut the compiler up
 		default: break;
 	}
-#endif
 }
+#endif
 
 
+#if 0  // FIXME !!
 void Render_View_t::StoreTextureTo3DSel(int new_tex)
 {
-#if 0  // FIXME !!
 	BA_Begin();
 
 	if (SelectEmpty())
@@ -446,8 +446,8 @@ void Render_View_t::StoreTextureTo3DSel(int new_tex)
 
 	BA_Message("pasted texture: %s", BA_GetString(new_tex));
 	BA_End();
-#endif
 }
+#endif
 
 
 Render_View_t r_view;
@@ -887,6 +887,69 @@ void Render3D_Navigate()
 }
 
 
+// returns -1 if nothing in selection or highlight, -2 if multiple
+// things are selected and they have different types.
+static int GrabSelectedThing()
+{
+	if (edit.Selected->empty())
+	{
+		if (edit.highlight.is_nil())
+		{
+			Beep("no things for copy/cut type");
+			return -1;
+		}
+
+		const Thing *T = Things[edit.highlight.num];
+		return T->type;
+	}
+
+	int res_type = -1;
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const Thing *T = Things[*it];
+		if (res_type >= 0 && T->type != res_type)
+		{
+			Beep("multiple thing types");
+			return -2;
+		}
+
+		res_type = T->type;
+	}
+
+	return res_type;
+}
+
+
+static void StoreSelectedThing(int new_type)
+{
+	// this code is similar to code in UI_Thing::type_callback(),
+	// but here we must handle a highlighted object.
+
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no things for paste type");
+		return;
+	}
+
+	BA_Begin();
+	BA_MessageForSel("pasted type of", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		BA_ChangeTH(*it, Thing::F_TYPE, new_type);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+}
+
+
 void Render3D_CB_Cut()
 {
 	// this is equivalent to setting the default texture or thing
@@ -917,7 +980,29 @@ void Render3D_CB_Cut()
 
 void Render3D_CB_Copy()
 {
-#if 0  // FIXME!!!
+	int num;
+
+	switch (edit.mode)
+	{
+	case OBJ_THINGS:
+		num = GrabSelectedThing();
+		if (num >= 0)
+			Texboard_SetThing(num);
+		break;
+
+	case OBJ_SECTORS:
+		// TODO
+		break;
+
+	case OBJ_LINEDEFS:
+		// TODO
+		break;
+
+	default:
+		break;
+	}
+
+#if 0
 	int new_tex = r_view.GrabTextureFrom3DSel();
 	if (new_tex < 0)
 	{
@@ -934,6 +1019,24 @@ void Render3D_CB_Copy()
 
 void Render3D_CB_Paste()
 {
+	switch (edit.mode)
+	{
+	case OBJ_THINGS:
+		StoreSelectedThing(Texboard_GetThing());
+		break;
+
+	case OBJ_SECTORS:
+		// TODO
+		break;
+
+	case OBJ_LINEDEFS:
+		// TODO
+		break;
+
+	default:
+		break;
+	}
+
 #if 0  // FIXME!!!
 	int new_tex = r_view.GrabClipboard();
 

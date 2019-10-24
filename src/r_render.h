@@ -103,17 +103,11 @@ public:
 
 	/* r_editing_info_t stuff */
 
-	int GrabClipboard();
-	void StoreClipboard(int new_val);
 	void AddAdjustSide(const Objid& obj);
 	float AdjustDistFactor(float view_x, float view_y);
+
 	void SaveOffsets();
 	void RestoreOffsets();
-
-	int GrabTextureFromObject(const Objid& obj);
-	int GrabTextureFrom3DSel();
-	void StoreTextureToObject(const Objid& obj, int new_tex);
-	void StoreTextureTo3DSel(int new_tex);
 };
 
 
