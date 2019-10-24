@@ -115,17 +115,17 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 	int new_x = atoi(box->pos_x->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_Message("edited X of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		{
 			BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
+		}
 
-		BA_Message("edited X of", &list);
 		BA_End();
 	}
 }
@@ -136,17 +136,17 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 	int new_y = atoi(box->pos_y->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_Message("edited Y of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		{
 			BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
+		}
 
-		BA_Message("edited Y of", &list);
 		BA_End();
 	}
 }
@@ -173,17 +173,16 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 	else if (mod & MOD_COMMAND)
 		step = vertex_bump_large;
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		fixcoord_t fdx = MakeValidCoord(dx * step);
 		fixcoord_t fdy = MakeValidCoord(dy * step);
 
 		BA_Begin();
+		BA_Message("adjusted", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			const Vertex *V = Vertices[*it];
 
@@ -191,7 +190,6 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 			BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + fdy);
 		}
 
-		BA_Message("adjusted", &list);
 		BA_End();
 	}
 }

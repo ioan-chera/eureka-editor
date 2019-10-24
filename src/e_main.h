@@ -111,7 +111,6 @@ void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
 void Editor_ChangeMode_Raw(obj_type_e new_mode);
 
-bool GetCurrentObjects(selection_c *list);
 void UpdateHighlight();
 
 void RedrawMap();

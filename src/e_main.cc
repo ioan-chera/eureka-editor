@@ -277,28 +277,6 @@ void UpdateHighlight()
 }
 
 
-bool GetCurrentObjects(selection_c *list)
-{
-	// returns false when there are no objects at all
-
-	list->change_type(edit.mode);  // this also clears it
-
-	if (edit.Selected->notempty())
-	{
-		list->merge(*edit.Selected);
-		return true;
-	}
-
-	if (edit.highlight.valid())
-	{
-		list->set(edit.highlight.num);
-		return true;
-	}
-
-	return false;
-}
-
-
 void Editor_ClearErrorMode()
 {
 	if (edit.error_mode)

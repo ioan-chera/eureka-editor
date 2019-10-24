@@ -242,19 +242,17 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 	// support hexadecimal
 	int new_type = (int)strtol(box->type->value(), NULL, 0);
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited type of", edit.Selected);
 
-		for (list.begin(&it) ; !it.at_end() ; ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeLD(*it, LineDef::F_TYPE, new_type);
 		}
 
-		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 
@@ -407,19 +405,17 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 	// let the widget(s) get updated.  That's because we do different
 	// things depending on whether the line is one-sided or two-sided.
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited texture on", edit.Selected);
 
-		for (list.begin(&it) ; !it.at_end() ; ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
 			SetTexOnLine(*it, new_tex, e_state, front_pics, back_pics);
 		}
 
-		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 	}
 
@@ -491,15 +487,14 @@ void UI_LineBox::CB_Paste(int new_tex)
 	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
 
 	// iterate over selected linedefs
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	if (edit.Selected->empty())
 		return;
 
 	BA_Begin();
+	BA_Message("Pasted %s", BA_GetString(new_tex));
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const LineDef *L = LineDefs[*it];
 
@@ -533,7 +528,6 @@ void UI_LineBox::CB_Paste(int new_tex)
 		}
 	}
 
-	BA_Message("Pasted %s", BA_GetString(new_tex));
 	BA_End();
 
 	UpdateField();
@@ -610,14 +604,13 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 	int mask = l_f_c->mask;
 	int new_flags = box->CalcFlags();
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited flags of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -626,7 +619,6 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			BA_ChangeLD(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
 		}
 
-		BA_MessageForSel("edited flags of", &list);
 		BA_End();
 	}
 }
@@ -643,19 +635,17 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 	new_value = CLAMP(0, new_value, 255);
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited args of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
 		}
 
-		BA_MessageForSel("edited args of", &list);
 		BA_End();
 	}
 }
