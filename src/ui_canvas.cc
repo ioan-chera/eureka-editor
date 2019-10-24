@@ -252,11 +252,11 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 
 void UI_Canvas::PointerPos(bool in_event)
 {
-	// read current position outside of FLTK's event propagation.
-	// this is a bit harder, and a bit slower in X-windows
+	if (edit.render3d)
+		return;
 
+	// we read current position outside of FLTK's event propagation.
 	int raw_x, raw_y;
-
 	Fl::get_mouse(raw_x, raw_y);
 
 #ifdef NO_OPENGL
@@ -273,6 +273,9 @@ void UI_Canvas::PointerPos(bool in_event)
 	edit.map_x = MAPX(raw_x);
 	edit.map_y = MAPY(h() - 1 - raw_y);
 #endif
+
+	// no Z coord with the 2D map view
+	edit.map_z = -1;
 }
 
 

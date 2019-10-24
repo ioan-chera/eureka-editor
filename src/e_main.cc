@@ -1312,6 +1312,7 @@ void Editor_Init()
 	edit.pointer_in_window = false;
 	edit.map_x = 0;
 	edit.map_y = 0;
+	edit.map_z = -1;
 
 	edit.Selected = new selection_c(edit.mode, true /* extended */);
 

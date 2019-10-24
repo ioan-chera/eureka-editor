@@ -1973,6 +1973,13 @@ bool SW_QueryPoint(Objid& hl, int qx, int qy)
 	// this runs the renderer, but *no* drawing is done
 	rend.Query(qx, qy);
 
+	if (rend.query_map_x != 0)
+	{
+		edit.map_x = rend.query_map_x;
+		edit.map_y = rend.query_map_y;
+		edit.map_z = rend.query_map_z;
+	}
+
 	if (! rend.query_result.valid())
 	{
 		// nothing was hit

@@ -61,7 +61,7 @@ struct Editor_State_t
 	bool is_navigating;  // user is holding down a navigation key
 
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
-	double map_x, map_y;     // map coordinates of pointer
+	double map_x, map_y, map_z;  // map coordinates of pointer (no Z in 2D)
 
 
 	selection_c *Selected;    // all selected objects (usually empty)

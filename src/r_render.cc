@@ -609,6 +609,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	Objid old_hl(r_view.current_hl);
 
+	// this also updates edit.map_x/y/z
 	Render3D_Query(r_view.current_hl, x, y);
 
 	if (! (r_view.current_hl == old_hl))
