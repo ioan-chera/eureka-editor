@@ -904,22 +904,22 @@ static int GrabSelectedThing()
 		return T->type;
 	}
 
-	int res_type = -1;
+	int result = -1;
 
 	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing *T = Things[*it];
-		if (res_type >= 0 && T->type != res_type)
+		if (result >= 0 && T->type != result)
 		{
 			Beep("multiple thing types");
 			return -2;
 		}
 
-		res_type = T->type;
+		result = T->type;
 	}
 
-	return res_type;
+	return result;
 }
 
 
@@ -979,7 +979,7 @@ static int GrabSelectedFlat()
 		return SEC_GrabFlat(S, edit.highlight.parts);
 	}
 
-	int res_tex = -1;
+	int result = -1;
 
 	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
@@ -989,16 +989,16 @@ static int GrabSelectedFlat()
 
 		int tex = SEC_GrabFlat(S, parts & ~1);
 
-		if (res_tex >= 0 && tex != res_tex)
+		if (result >= 0 && tex != result)
 		{
 			Beep("multiple flats present");
 			return -2;
 		}
 
-		res_tex = tex;
+		result = tex;
 	}
 
-	return res_tex;
+	return result;
 }
 
 
@@ -1007,7 +1007,7 @@ static void StoreSelectedFlat(int new_tex)
 	soh_type_e unselect = Selection_Or_Highlight();
 	if (unselect == SOH_Empty)
 	{
-		Beep("no things for paste type");
+		Beep("no sectors for paste flat");
 		return;
 	}
 
@@ -1031,6 +1031,136 @@ static void StoreSelectedFlat(int new_tex)
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 }
+
+
+static int LD_GrabTex(const LineDef *L, int part)
+{
+	if (L->NoSided())
+		return BA_InternaliseString(default_wall_tex);
+
+	if (L->OneSided())
+		return L->Right()->mid_tex;
+
+	if (part & PART_RT_LOWER) return L->Right()->lower_tex;
+	if (part & PART_RT_UPPER) return L->Right()->upper_tex;
+
+	if (part & PART_LF_LOWER) return L->Left()->lower_tex;
+	if (part & PART_LF_UPPER) return L->Left()->upper_tex;
+
+	if (part & PART_RT_RAIL)  return L->Right()->mid_tex;
+	if (part & PART_LF_RAIL)  return L->Left() ->mid_tex;
+
+	// pick something reasonable for a simply selected line
+	if (L->Left()->SecRef()->floorh > L->Right()->SecRef()->floorh)
+		return L->Right()->lower_tex;
+
+	if (L->Left()->SecRef()->ceilh < L->Right()->SecRef()->ceilh)
+		return L->Right()->upper_tex;
+
+	if (L->Left()->SecRef()->floorh < L->Right()->SecRef()->floorh)
+		return L->Left()->lower_tex;
+
+	if (L->Left()->SecRef()->ceilh > L->Right()->SecRef()->ceilh)
+		return L->Left()->upper_tex;
+
+	// emergency fallback
+	return L->Right()->lower_tex;
+}
+
+
+// returns -1 if nothing in selection or highlight, -2 if multiple
+// linedefs are selected and they have different textures.
+static int GrabSelectedTexture()
+{
+	if (edit.Selected->empty())
+	{
+		if (edit.highlight.is_nil())
+		{
+			Beep("no linedefs for copy/cut tex");
+			return -1;
+		}
+
+		const LineDef *L = LineDefs[edit.highlight.num];
+		return LD_GrabTex(L, edit.highlight.parts);
+	}
+
+	int result = -1;
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+		byte parts = edit.Selected->get_ext(*it);
+
+		int tex = LD_GrabTex(L, parts & ~1);
+
+		if (result >= 0 && tex != result)
+		{
+			Beep("multiple textures present");
+			return -2;
+		}
+
+		result = tex;
+	}
+
+	return result;
+}
+
+
+static void StoreSelectedTexture(int new_tex)
+{
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no linedefs for paste tex");
+		return;
+	}
+
+	BA_Begin();
+	BA_MessageForSel("pasted flat to", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+		byte parts = edit.Selected->get_ext(*it);
+
+		if (L->NoSided())
+			continue;
+
+		if (L->OneSided())
+		{
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+			continue;
+		}
+
+		/* right side */
+		if (parts == 1 || (parts & PART_RT_LOWER))
+			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
+
+		if (parts == 1 || (parts & PART_RT_UPPER))
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+
+		if (parts & PART_RT_RAIL)
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+
+		/* left side */
+		if (parts == 1 || (parts & PART_LF_LOWER))
+			BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
+
+		if (parts == 1 || (parts & PART_LF_UPPER))
+			BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+
+		if (parts & PART_LF_RAIL)
+			BA_ChangeSD(L->left, SideDef::F_MID_TEX, new_tex);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+}
+
 
 
 void Render3D_CB_Cut()
@@ -1080,7 +1210,9 @@ void Render3D_CB_Copy()
 		break;
 
 	case OBJ_LINEDEFS:
-		// TODO
+		num = GrabSelectedTexture();
+		if (num >= 0)
+			Texboard_SetTex(BA_GetString(num));
 		break;
 
 	default:
@@ -1115,7 +1247,7 @@ void Render3D_CB_Paste()
 		break;
 
 	case OBJ_LINEDEFS:
-		// TODO
+		StoreSelectedTexture(Texboard_GetTexNum());
 		break;
 
 	default:

@@ -346,6 +346,11 @@ public:
 
 	bool TouchesSector(int sec_num) const;
 
+	bool NoSided() const
+	{
+		return (right < 0) && (left < 0);
+	}
+
 	bool OneSided() const
 	{
 		return (right >= 0) && (left < 0);
