@@ -56,10 +56,8 @@ void CMD_TH_SpinThings(void)
 	if (! degrees)
 		degrees = +45;
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No things to spin");
 		return;
@@ -67,18 +65,22 @@ void CMD_TH_SpinThings(void)
 
 	BA_Begin();
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	BA_MessageForSel("spun", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing *T = Things[*it];
 
 		BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
 
-	BA_MessageForSel("spun", &list);
-
 	BA_End();
 
 	main_win->thing_box->UpdateField(Thing::F_ANGLE);
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 

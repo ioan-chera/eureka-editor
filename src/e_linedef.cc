@@ -701,15 +701,6 @@ void Line_AlignGroup(std::vector<Objid> & group, int align_flags)
 
 void CMD_LIN_Align()
 {
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("no lines to align");
-		return;
-	}
-
-
 	// parse the flags
 	bool do_X = Exec_HasFlag("/x");
 	bool do_Y = Exec_HasFlag("/y");
@@ -734,13 +725,20 @@ void CMD_LIN_Align()
 	if (do_clear) align_flags |= LINALIGN_Clear;
 
 
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no lines to align");
+		return;
+	}
+
 	// convert selection to group of surfaces
+	// FIXME : handle parts from selection in 3D
 
 	std::vector< Objid > group;
 
 	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		Objid obj(OBJ_LINEDEFS, *it);
 
@@ -773,6 +771,8 @@ void CMD_LIN_Align()
 	if (group.empty())
 	{
 		Beep("no visible surfaces");
+		if (unselect == SOH_Unselect)
+			Selection_Clear(true /* nosave */);
 		return;
 	}
 
@@ -786,11 +786,13 @@ void CMD_LIN_Align()
 		BA_Message("aligned offsets");
 
 	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 //------------------------------------------------------------------------
-
 
 static void FlipLine_verts(int ld)
 {
@@ -846,9 +848,8 @@ void FlipLineDefGroup(selection_c& flip)
 //
 void CMD_LIN_Flip()
 {
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No lines to flip");
 		return;
@@ -857,10 +858,10 @@ void CMD_LIN_Flip()
 	bool force_it = Exec_HasFlag("/force");
 
 	BA_Begin();
+	BA_MessageForSel("flipped", edit.Selected);
 
 	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		if (force_it)
 			FlipLineDef(*it);
@@ -868,34 +869,35 @@ void CMD_LIN_Flip()
 			FlipLineDef_safe(*it);
 	}
 
-	BA_MessageForSel("flipped", &list);
-
 	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_LIN_SwapSides()
 {
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No lines to swap sides");
 		return;
 	}
 
 	BA_Begin();
+	BA_MessageForSel("swapped sides on", edit.Selected);
 
 	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		FlipLine_sides(*it);
 	}
 
-	BA_MessageForSel("swapped sides on", &list);
-
 	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -984,46 +986,38 @@ static bool DoSplitLineDef(int ld)
 //
 void CMD_LIN_SplitHalf(void)
 {
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No lines to split");
 		return;
 	}
-
-	bool was_selected = edit.Selected->notempty();
-
-	// clear current selection, since the size needs to grow due to
-	// new linedefs being added to the map.
-	Selection_Clear(true);
 
 	int new_first = NumLineDefs;
 	int new_count = 0;
 
 	BA_Begin();
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		if (DoSplitLineDef(*it))
 			new_count++;
 	}
 
-	BA_MessageForSel("halved", &list);
-
+	BA_Message("halved %d lines", new_count);
 	BA_End();
 
 	// Hmmmmm -- should abort early if some lines are too short??
-	if (new_count < list.count_obj())
+	if (new_count < edit.Selected->count_obj())
 		Beep("Some lines were too short!");
 
-	if (was_selected && new_count > 0)
+	if (unselect == SOH_Unselect)
 	{
-		// reselect the old _and_ new linedefs
-		for (list.begin(&it) ; !it.at_end() ; ++it)
-			edit.Selected->set(*it);
-
+		Selection_Clear(true /* nosave */);
+	}
+	else if (new_count > 0)
+	{
 		edit.Selected->frob_range(new_first, new_first + new_count - 1, BOP_ADD);
 	}
 }
@@ -1359,13 +1353,14 @@ static void LD_SetLength(int ld, int new_len, int angle)
 
 void LineDefs_SetLength(int new_len)
 {
-	selection_c list;
+	// this works on the current selection (caller must set it up)
 
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("No lines to extend");
+	// use a copy of the selection
+	selection_c list(OBJ_LINEDEFS);
+	ConvertSelection(edit.Selected, &list);
+
+	if (list.empty())
 		return;
-	}
 
 	// remember angles
 	std::vector<int> angles(NumLineDefs);
@@ -1379,7 +1374,6 @@ void LineDefs_SetLength(int new_len)
 	}
 
 	BA_Begin();
-
 	BA_MessageForSel("set length of", &list);
 
 	while (! list.empty())
