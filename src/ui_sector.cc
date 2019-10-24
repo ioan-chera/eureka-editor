@@ -327,14 +327,11 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	bool is_pic   = (w == box->f_pic || w == box->c_pic);
 	bool is_floor = (w == box->f_pic || w == box->f_tex);
 
-	int new_tex;
-
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == 2)
 	{
-		new_tex = BA_InternaliseString(Misc_info.sky_flat);
-
-		goto change_it;
+		box->SetFlat(Misc_info.sky_flat, PART_CEIL);
+		return;
 	}
 
 	// LMB on the flat image just selects/unselects it (red border)
@@ -349,22 +346,25 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
+	const char *new_flat;
+
 	// right click sets to default value
 	// [ Note the 'is_pic' check prevents a bug when using RMB in browser ]
 	if (is_pic && Fl::event_button() == 3)
-	{
-		new_tex = BA_InternaliseString(is_floor ? default_floor_tex : default_ceil_tex);
-	}
+		new_flat = is_floor ? default_floor_tex : default_ceil_tex;
 	else if (is_floor)
-	{
-		new_tex = BA_InternaliseString(NormalizeTex(box->f_tex->value()));
-	}
+		new_flat = NormalizeTex(box->f_tex->value());
 	else
-	{
-		new_tex = BA_InternaliseString(NormalizeTex(box->c_tex->value()));
-	}
+		new_flat = NormalizeTex(box->c_tex->value());
 
-change_it:
+	box->InstallFlat(new_flat, is_floor ? PART_FLOOR : PART_CEIL);
+}
+
+
+void UI_SectorBox::InstallFlat(const char *name, int filter_parts)
+{
+	int tex_num = BA_InternaliseString(name);
+
 	if (! edit.Selected->empty())
 	{
 		BA_Begin();
@@ -373,16 +373,21 @@ change_it:
 		selection_iterator_c it;
 		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (is_floor)
-				BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
-			else
-				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
+			int parts = edit.Selected->get_ext(*it);
+			if (parts == 1)
+				parts = filter_parts;
+
+			if (parts & filter_parts & PART_FLOOR)
+				BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, tex_num);
+
+			if (parts & filter_parts & parts & PART_CEIL)
+				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, tex_num);
 		}
 
 		BA_End();
-
-		box->UpdateField();
 	}
+
+	UpdateField();
 }
 
 
@@ -406,27 +411,15 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_SectorBox::SetFlat(const char *name, int e_state)
+void UI_SectorBox::SetFlat(const char *name, int parts)
 {
-	if (obj < 0)
-		return;
-
-	int sel_pics = GetSelectedPics();
-
-	if (sel_pics == 0)
-		sel_pics = (e_state & FL_BUTTON3) ? 2 : 1;
-
-	if (sel_pics & 1)
-	{
+	if (parts & PART_FLOOR)
 		f_tex->value(name);
-		f_tex->do_callback();
-	}
 
-	if (sel_pics & 2)
-	{
+	if (parts & PART_CEIL)
 		c_tex->value(name);
-		c_tex->do_callback();
-	}
+
+	InstallFlat(name, parts);
 }
 
 
@@ -453,7 +446,6 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	{
 		// Boom and ZDoom generalized sectors
 
-		// we fix this shortly...
 		mask = 0;
 
 		if (w == box->bm_damage)
@@ -489,6 +481,12 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		}
 	}
 
+	box->InstallSectorType(mask, value);
+}
+
+
+void UI_SectorBox::InstallSectorType(int mask, int value)
+{
 	value &= mask;
 
 	if (! edit.Selected->empty())
@@ -508,7 +506,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	}
 
 	// update the description
-	box->UpdateField(Sector::F_TYPE);
+	UpdateField(Sector::F_TYPE);
 }
 
 
@@ -547,7 +545,11 @@ void UI_SectorBox::SetSectorType(int new_type)
 	sprintf(buffer, "%d", new_type);
 
 	type->value(buffer);
-	type->do_callback();
+
+	int mask = (Features.gen_sectors == 2) ? 255 :
+			   (Features.gen_sectors == 1) ? 31  : 65535;
+
+	InstallSectorType(mask, new_type);
 }
 
 
@@ -802,20 +804,20 @@ void UI_SectorBox::UpdateField(int field)
 
 int UI_SectorBox::GetSelectedPics() const
 {
-	return	(f_pic->Selected() ? 1 : 0) |
-			(c_pic->Selected() ? 2 : 0);
+	return	(f_pic->Selected() ? PART_FLOOR : 0) |
+			(c_pic->Selected() ? PART_CEIL  : 0);
 }
 
 int UI_SectorBox::GetHighlightedPics() const
 {
-	return	(f_pic->Highlighted() ? 1 : 0) |
-			(c_pic->Highlighted() ? 2 : 0);
+	return	(f_pic->Highlighted() ? PART_FLOOR : 0) |
+			(c_pic->Highlighted() ? PART_CEIL  : 0);
 }
 
 
 void UI_SectorBox::CB_Copy()
 {
-	if (GetSelectedPics() == 3)
+	if (GetSelectedPics() == (PART_FLOOR | PART_CEIL))
 	{
 		Beep("multiple textures");
 		return;
@@ -823,7 +825,7 @@ void UI_SectorBox::CB_Copy()
 
 	const char *name = NULL;
 
-	if (GetSelectedPics() == 2 ||
+	if (GetSelectedPics() == PART_CEIL ||
 		(GetSelectedPics() == 0 && c_pic->Highlighted()))
 	{
 		name = c_tex->value();
@@ -841,10 +843,10 @@ void UI_SectorBox::CB_Copy()
 
 void UI_SectorBox::CB_Paste(int new_tex)
 {
-	int sel_pics = GetSelectedPics();
+	int parts = GetSelectedPics();
 
-	if (sel_pics == 0)
-		sel_pics = GetHighlightedPics();
+	if (parts == 0)
+		parts = GetHighlightedPics();
 
 	if (! edit.Selected->empty())
 	{
@@ -854,8 +856,8 @@ void UI_SectorBox::CB_Paste(int new_tex)
 		selection_iterator_c it;
 		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
-			if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
+			if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+			if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
 		}
 
 		BA_End();
@@ -867,10 +869,10 @@ void UI_SectorBox::CB_Paste(int new_tex)
 
 void UI_SectorBox::CB_Cut()
 {
-	int sel_pics = GetSelectedPics();
+	int parts = GetSelectedPics();
 
-	if (sel_pics == 0)
-		sel_pics = GetHighlightedPics();
+	if (parts == 0)
+		parts = GetHighlightedPics();
 
 	int new_floor = BA_InternaliseString(default_floor_tex);
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
@@ -883,8 +885,8 @@ void UI_SectorBox::CB_Cut()
 		selection_iterator_c it;
 		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (sel_pics & 1) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
-			if (sel_pics & 2) BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
+			if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
+			if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
 		}
 
 		BA_End();
@@ -931,9 +933,26 @@ bool UI_SectorBox::ClipboardOp(char op)
 
 void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
+	if (obj < 0)
+		return;
+
 	if (kind == 'F' || kind == 'T')
 	{
-		SetFlat(name, e_state);
+		int parts = GetSelectedPics();
+
+		if (parts == 0)
+		{
+			if (edit.render3d)
+				parts = PART_FLOOR | PART_CEIL;
+			else if (edit.sector_render_mode == SREND_Ceiling)
+				parts = PART_CEIL;
+			else if (e_state & FL_BUTTON3)
+				parts = PART_CEIL;
+			else
+				parts = PART_FLOOR;
+		}
+
+		SetFlat(name, parts);
 	}
 	else if (kind == 'S')
 	{
