@@ -134,8 +134,6 @@ void Render3D_Navigate();
 void Render3D_ClearNav();
 
 void Render3D_UpdateHighlight();
-void Render3D_SaveHighlight();
-void Render3D_RestoreHighlight();
 
 void Render3D_CB_Cut();
 void Render3D_CB_Copy();

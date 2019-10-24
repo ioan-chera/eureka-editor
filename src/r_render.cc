@@ -1264,17 +1264,6 @@ void Render3D_CB_Paste()
 }
 
 
-void Render3D_SaveHighlight()
-{
-	// FIXME review if this is necessary
-	//       [ it is only used by the Operation menu code... ]
-}
-
-void Render3D_RestoreHighlight()
-{
-}
-
-
 void Render3D_SetCameraPos(double new_x, double new_y)
 {
 	r_view.x = new_x;

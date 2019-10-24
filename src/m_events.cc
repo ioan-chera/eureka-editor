@@ -777,8 +777,6 @@ static void operation_callback_func(Fl_Widget *w, void *data)
 	// restore the highlight object
 	edit.highlight = op_saved_highlight;
 
-	Render3D_RestoreHighlight();
-
 	// TODO : support more than 4 parameters
 
 	ExecuteCommand(info->cmd, info->param[0], info->param[1],
@@ -962,8 +960,6 @@ void CMD_OperationMenu()
 	// save the highlight object, because the pop-up menu will cause
 	// an FL_LEAVE event on the canvas which resets the highlight.
 	op_saved_highlight = edit.highlight;
-
-	Render3D_SaveHighlight();
 
 	menu->popup();
 }
