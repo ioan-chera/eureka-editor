@@ -1396,7 +1396,12 @@ public:
 			if (y1 <= query_sy && query_sy <= y2)
 			{
 				if (what == OBJ_LINEDEFS)
+				{
+					if (dw->side < 0)
+						part <<= 4;
+
 					query_result = Objid(what, dw->ld_index, part);
+				}
 				else if (dw->sd != NULL)
 					query_result = Objid(what, dw->sd->sector, part);
 			}
