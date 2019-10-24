@@ -1033,6 +1033,40 @@ static void StoreSelectedFlat(int new_tex)
 }
 
 
+static void StoreDefaultedFlats()
+{
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no sectors for default");
+		return;
+	}
+
+	int floor_tex = BA_InternaliseString(default_floor_tex);
+	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
+
+	BA_Begin();
+	BA_MessageForSel("defaulted flat in", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		byte parts = edit.Selected->get_ext(*it);
+
+		if (parts == 1 || (parts & PART_FLOOR))
+			BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, floor_tex);
+
+		if (parts == 1 || (parts & PART_CEIL))
+			BA_ChangeSEC(*it, Sector::F_CEIL_TEX, ceil_tex);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+}
+
+
 static int LD_GrabTex(const LineDef *L, int part)
 {
 	if (L->NoSided())
@@ -1163,34 +1197,6 @@ static void StoreSelectedTexture(int new_tex)
 
 
 
-void Render3D_CB_Cut()
-{
-	// this is equivalent to setting the default texture or thing
-	// [ AND copying the old one ]
-
-#if 0
-	Render3D_CB_Copy();
-
-
-	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
-
-	if (type == OB3D_Thing)
-		return;
-
-	const char *name = default_wall_tex;
-
-	if (type == OB3D_Floor)
-		name = default_floor_tex;
-	else if (type == OB3D_Ceil)
-		name = default_ceil_tex;
-
-	r_view.StoreTextureTo3DSel(BA_InternaliseString(name));
-
-	Status_Set("Cut texture to default");
-#endif
-}
-
-
 void Render3D_CB_Copy()
 {
 	int num;
@@ -1260,6 +1266,50 @@ void Render3D_CB_Paste()
 	r_view.StoreTextureTo3DSel(new_tex);
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
+#endif
+}
+
+
+void Render3D_CB_Cut()
+{
+	// this is repurposed to set the default texture/thing
+
+	switch (edit.mode)
+	{
+	case OBJ_THINGS:
+		StoreSelectedThing(default_thing);
+		break;
+
+	case OBJ_SECTORS:
+		StoreDefaultedFlats();
+		break;
+
+	case OBJ_LINEDEFS:
+		StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
+		break;
+
+	default:
+		break;
+	}
+
+#if 0
+	Render3D_CB_Copy();
+
+
+	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
+
+	if (type == OB3D_Thing)
+		return;
+
+	const char *name = default_wall_tex;
+
+	if (type == OB3D_Floor)
+		name = default_floor_tex;
+	else if (type == OB3D_Ceil)
+		name = default_ceil_tex;
+
+	r_view.StoreTextureTo3DSel(BA_InternaliseString(name));
+
 #endif
 }
 
