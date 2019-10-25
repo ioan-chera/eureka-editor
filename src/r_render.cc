@@ -258,7 +258,7 @@ public:
 		for (size_t i = 0 ; i < fields.size() ; i++)
 		{
 			if (fields[i].field == field)
-				RawSet(fields[i].obj, fields[i].field, fields[i].value + delta);
+				RawSet(fields[i].obj, field, fields[i].value + delta);
 		}
 	}
 
@@ -268,6 +268,7 @@ public:
 		{
 			if (fields[i].field == field)
 			{
+				BA_Change(type, fields[i].obj, (byte)field, fields[i].value + delta);
 			}
 		}
 	}
@@ -352,47 +353,23 @@ float Render_View_t::AdjustDistFactor(float view_x, float view_y)
 	return total / (double)adjust_lines.size();
 }
 
-void Render_View_t::SaveOffsets()
-{
-	unsigned int total = static_cast<unsigned>(adjust_sides.size());
-
-	if (total == 0)
-		return;
-
-	if (saved_x_offsets.size() != total)
-	{
-		saved_x_offsets.resize(total);
-		saved_y_offsets.resize(total);
-	}
-
-	for (unsigned int k = 0 ; k < total ; k++)
-	{
-		SideDef *SD = SideDefs[adjust_sides[k]];
-
-		saved_x_offsets[k] = SD->x_offset;
-		saved_y_offsets[k] = SD->y_offset;
-
-		// change it temporarily (just for the render)
-		SD->x_offset += (int)adjust_dx;
-		SD->y_offset += (int)adjust_dy;
-	}
-}
-
-void Render_View_t::RestoreOffsets()
-{
-	unsigned int total = static_cast<unsigned>(adjust_sides.size());
-
-	for (unsigned int k = 0 ; k < total ; k++)
-	{
-		SideDef *SD = SideDefs[adjust_sides[k]];
-
-		SD->x_offset = saved_x_offsets[k];
-		SD->y_offset = saved_y_offsets[k];
-	}
-}
-
 #endif
 
+
+static void AdjustOfs_Add(int ld_num, int part)
+{
+	const LineDef *L = LineDefs[ld_num];
+
+	// ignore invalid sides (sanity check)
+	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
+	if (sd_num < 0)
+		return;
+
+	// TODO : UDMF ports can allow full control over each part
+
+	xyofs_bucket->Save(sd_num, SideDef::F_X_OFFSET);
+	xyofs_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
+}
 
 static void AdjustOfs_Begin()
 {
@@ -401,62 +378,61 @@ static void AdjustOfs_Begin()
 
 	xyofs_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
 
-	// FIXME: save initial offsets
-#if 0
-	r_view.adjust_sides.clear();
-	r_view.adjust_lines.clear();
-
-	r_view.adjust_dx = 0;
-	r_view.adjust_dy = 0;
+	int total_lines = 0;
 
 	// find the sidedefs to adjust
 	if (! edit.Selected->empty())
 	{
-//??			if (r_view.sel_type < OB3D_Lower)
-//??			{
-//??				Beep("cannot adjust that");
-//??				return;
-//??			}
-
-#if 0  // FIXME
-		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			const Objid& obj = r_view.sel[k];
+			int ld_num = *it;
+			byte parts = edit.Selected->get_ext(ld_num);
 
-			if (obj.type == OBJ_LINEDEFS)
-				r_view.AddAdjustSide(obj);
+			// ignore "simply selected" linedefs
+			if (parts <= 1)
+				continue;
+
+			total_lines++;
+
+			if (parts & PART_RT_LOWER) AdjustOfs_Add(ld_num, PART_RT_LOWER);
+			if (parts & PART_RT_UPPER) AdjustOfs_Add(ld_num, PART_RT_UPPER);
+			if (parts & PART_RT_RAIL)  AdjustOfs_Add(ld_num, PART_RT_RAIL);
+
+			if (parts & PART_LF_LOWER) AdjustOfs_Add(ld_num, PART_LF_LOWER);
+			if (parts & PART_LF_UPPER) AdjustOfs_Add(ld_num, PART_LF_UPPER);
+			if (parts & PART_LF_RAIL)  AdjustOfs_Add(ld_num, PART_LF_RAIL);
 		}
-#endif
 	}
-	else  // no selection, use the highlight
+	else if (edit.highlight.valid())
 	{
-#if 0  // FIXME
-		if (! r_view.hl.valid())
-		{
-			Beep("nothing to adjust");
-			return;
-		}
-		else if (r_view.hl.type != OBJ_LINEDEFS)
-		{
-			Beep("cannot adjust that");
-			return;
-		}
+		int  ld_num = edit.highlight.num;
+		byte parts  = edit.highlight.parts;
 
-		r_view.AddAdjustSide(r_view.hl);
-#endif
+		if (parts >= 2)
+		{
+			AdjustOfs_Add(ld_num, parts);
+			total_lines++;
+		}
 	}
 
-	if (r_view.adjust_sides.empty())  // WTF?
+	if (total_lines == 0)
+	{
+		Beep("nothing to adjust");
 		return;
+	}
 
-	float dist = r_view.AdjustDistFactor(r_view.x, r_view.y);
-	dist = CLAMP(20, dist, 1000);
+/* FIXME !!!
+	float dist = AdjustOfs_DistFactor(r_view.x, r_view.y);
 
 	r_view.adjust_dx_factor = dist / r_view.aspect_sw;
 	r_view.adjust_dy_factor = dist / r_view.aspect_sh;
+*/
+
+	r_view.adjust_dx = 0;
+	r_view.adjust_dy = 0;
 
 	Editor_SetAction(ACT_ADJUST_OFS);
-#endif
 }
 
 static void AdjustOfs_Finish()
@@ -464,36 +440,19 @@ static void AdjustOfs_Finish()
 	if (! xyofs_bucket)
 		return;
 
-	// FIXME: apply the final result
-#if 0
-	int dx = (int)r_view.adjust_dx;
-	int dy = (int)r_view.adjust_dy;
+	int dx = I_ROUND(r_view.adjust_dx);
+	int dy = I_ROUND(r_view.adjust_dy);
 
 	if (dx || dy)
 	{
 		BA_Begin();
 		BA_Message("adjusted offsets");
 
-		xyofs_bucket->ApplyToBasis(SideDef::F_X_OFFSET, r_view.adjust_dx);
-		xyofs_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, r_view.adjust_dy);
-
-		for (unsigned int k = 0 ; k < r_view.adjust_sides.size() ; k++)
-		{
-			int sd = r_view.adjust_sides[k];
-
-			const SideDef * SD = SideDefs[sd];
-
-			BA_ChangeSD(sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
-			BA_ChangeSD(sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
-		}
+		xyofs_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
+		xyofs_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dx);
 
 		BA_End();
 	}
-
-	r_view.adjust_sides.clear();
-	r_view.adjust_lines.clear();
-
-#endif
 
 	if (xyofs_bucket)
 	{
@@ -540,8 +499,12 @@ void AdjustOfs_RenderAnte()
 {
 	if (edit.action == ACT_ADJUST_OFS && xyofs_bucket)
 	{
-		xyofs_bucket->ApplyTemp(SideDef::F_X_OFFSET, r_view.adjust_dx);
-		xyofs_bucket->ApplyTemp(SideDef::F_Y_OFFSET, r_view.adjust_dy);
+		int dx = I_ROUND(r_view.adjust_dx);
+		int dy = I_ROUND(r_view.adjust_dy);
+
+		// change it temporarily (just for the render)
+		xyofs_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
+		xyofs_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
 	}
 }
 
@@ -1654,10 +1617,16 @@ void R3D_ACT_AdjustOfs()
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
+		return;
+
+	if (edit.mode != OBJ_LINEDEFS)
 	{
-		AdjustOfs_Begin();
+		Beep("not in linedef mode");
+		return;
 	}
+
+	AdjustOfs_Begin();
 }
 
 
