@@ -510,8 +510,8 @@ static int mouse_button1_x;
 static int mouse_button1_y;
 
 // map location when LMB was pressed
-static int button1_map_x;
-static int button1_map_y;
+static double button1_map_x;
+static double button1_map_y;
 
 static bool click_check_drag;
 static bool click_check_select;
