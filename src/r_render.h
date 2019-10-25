@@ -122,8 +122,6 @@ void Render3D_Draw(int ox, int oy, int ow, int oh);
 bool Render3D_Query(Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
-void Render3D_AdjustOffsets(int mode, int dx = 0, int dy = 0);
-
 void Render3D_Navigate();
 void Render3D_ClearNav();
 

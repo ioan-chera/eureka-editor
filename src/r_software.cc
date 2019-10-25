@@ -1857,8 +1857,6 @@ public:
 
 		InitDepthBuf(r_view.screen_w);
 
-		r_view.SaveOffsets();
-
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
@@ -1871,8 +1869,6 @@ public:
 		ComputeSurfaces();
 
 		RenderWalls();
-
-		r_view.RestoreOffsets();
 	}
 
 	void Query(int qx, int qy)

@@ -253,6 +253,25 @@ public:
 		}
 	}
 
+	void ApplyTemp(int field, int delta)
+	{
+		for (size_t i = 0 ; i < fields.size() ; i++)
+		{
+			if (fields[i].field == field)
+				RawSet(fields[i].obj, fields[i].field, fields[i].value + delta);
+		}
+	}
+
+	void ApplyToBasis(int field, int delta)
+	{
+		for (size_t i = 0 ; i < fields.size() ; i++)
+		{
+			if (fields[i].field == field)
+			{
+			}
+		}
+	}
+
 private:
 	int * RawObjPointer(int objnum)
 	{
@@ -293,8 +312,7 @@ private:
 };
 
 
-/* r_editing_info_t stuff */
-
+static SaveBucket_c * xyofs_bucket;
 
 #if 0   // FIXME !!!
 
@@ -376,6 +394,166 @@ void Render_View_t::RestoreOffsets()
 #endif
 
 
+static void AdjustOfs_Begin()
+{
+	if (xyofs_bucket)
+		delete xyofs_bucket;
+
+	xyofs_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
+
+	// FIXME: save initial offsets
+#if 0
+	r_view.adjust_sides.clear();
+	r_view.adjust_lines.clear();
+
+	r_view.adjust_dx = 0;
+	r_view.adjust_dy = 0;
+
+	// find the sidedefs to adjust
+	if (! edit.Selected->empty())
+	{
+//??			if (r_view.sel_type < OB3D_Lower)
+//??			{
+//??				Beep("cannot adjust that");
+//??				return;
+//??			}
+
+#if 0  // FIXME
+		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		{
+			const Objid& obj = r_view.sel[k];
+
+			if (obj.type == OBJ_LINEDEFS)
+				r_view.AddAdjustSide(obj);
+		}
+#endif
+	}
+	else  // no selection, use the highlight
+	{
+#if 0  // FIXME
+		if (! r_view.hl.valid())
+		{
+			Beep("nothing to adjust");
+			return;
+		}
+		else if (r_view.hl.type != OBJ_LINEDEFS)
+		{
+			Beep("cannot adjust that");
+			return;
+		}
+
+		r_view.AddAdjustSide(r_view.hl);
+#endif
+	}
+
+	if (r_view.adjust_sides.empty())  // WTF?
+		return;
+
+	float dist = r_view.AdjustDistFactor(r_view.x, r_view.y);
+	dist = CLAMP(20, dist, 1000);
+
+	r_view.adjust_dx_factor = dist / r_view.aspect_sw;
+	r_view.adjust_dy_factor = dist / r_view.aspect_sh;
+
+	Editor_SetAction(ACT_ADJUST_OFS);
+#endif
+}
+
+static void AdjustOfs_Finish()
+{
+	if (! xyofs_bucket)
+		return;
+
+	// FIXME: apply the final result
+#if 0
+	int dx = (int)r_view.adjust_dx;
+	int dy = (int)r_view.adjust_dy;
+
+	if (dx || dy)
+	{
+		BA_Begin();
+		BA_Message("adjusted offsets");
+
+		xyofs_bucket->ApplyToBasis(SideDef::F_X_OFFSET, r_view.adjust_dx);
+		xyofs_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, r_view.adjust_dy);
+
+		for (unsigned int k = 0 ; k < r_view.adjust_sides.size() ; k++)
+		{
+			int sd = r_view.adjust_sides[k];
+
+			const SideDef * SD = SideDefs[sd];
+
+			BA_ChangeSD(sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
+			BA_ChangeSD(sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
+		}
+
+		BA_End();
+	}
+
+	r_view.adjust_sides.clear();
+	r_view.adjust_lines.clear();
+
+#endif
+
+	if (xyofs_bucket)
+	{
+		delete xyofs_bucket;
+		xyofs_bucket = NULL;
+	}
+
+	Editor_ClearAction();
+}
+
+static void AdjustOfs_Delta(int dx, int dy)
+{
+	if (! xyofs_bucket)
+		return;
+
+	if (dx == 0 && dy == 0)
+		return;
+
+	bool force_one_dir = true;
+
+	if (force_one_dir)
+	{
+		if (abs(dx) >= abs(dy))
+			dy = 0;
+		else
+			dx = 0;
+	}
+
+	keycode_t mod = M_ReadLaxModifiers();
+
+	float factor = (mod & MOD_SHIFT) ? 0.5 : 2.0;
+
+	if (!render_high_detail)
+		factor = factor * 0.5;
+
+	r_view.adjust_dx -= dx * factor * r_view.adjust_dx_factor;
+	r_view.adjust_dy -= dy * factor * r_view.adjust_dy_factor;
+
+	RedrawMap();
+}
+
+
+void AdjustOfs_RenderAnte()
+{
+	if (edit.action == ACT_ADJUST_OFS && xyofs_bucket)
+	{
+		xyofs_bucket->ApplyTemp(SideDef::F_X_OFFSET, r_view.adjust_dx);
+		xyofs_bucket->ApplyTemp(SideDef::F_Y_OFFSET, r_view.adjust_dy);
+	}
+}
+
+void AdjustOfs_RenderPost()
+{
+	if (edit.action == ACT_ADJUST_OFS && xyofs_bucket)
+	{
+		xyofs_bucket->RestoreAll();
+	}
+}
+
+
 //------------------------------------------------------------------------
 
 static Thing *player;
@@ -385,11 +563,15 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 {
 	r_view.PrepareToRender(ow, oh);
 
+	AdjustOfs_RenderAnte();
+
 #ifdef NO_OPENGL
 	SW_RenderWorld(ox, oy, ow, oh);
 #else
 	RGL_RenderWorld(ox, oy, ow, oh);
 #endif
+
+	AdjustOfs_RenderPost();
 }
 
 
@@ -571,137 +753,6 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 }
 
 
-void Render3D_AdjustOffsets(int mode, int dx, int dy)
-{
-#if 0  // FIXME
-
-	// started?
-	if (mode < 0)
-	{
-		r_view.adjust_sides.clear();
-		r_view.adjust_lines.clear();
-
-		r_view.adjust_dx = 0;
-		r_view.adjust_dy = 0;
-
-		// find the sidedefs to adjust
-		if (! edit.Selected->empty())
-		{
-//??			if (r_view.sel_type < OB3D_Lower)
-//??			{
-//??				Beep("cannot adjust that");
-//??				return;
-//??			}
-
-#if 0  // FIXME
-			for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
-			{
-				const Objid& obj = r_view.sel[k];
-
-				if (obj.type == OBJ_LINEDEFS)
-					r_view.AddAdjustSide(obj);
-			}
-#endif
-		}
-		else  // no selection, use the highlight
-		{
-#if 0  // FIXME
-			if (! r_view.hl.valid())
-			{
-				Beep("nothing to adjust");
-				return;
-			}
-			else if (r_view.hl.type != OBJ_LINEDEFS)
-			{
-				Beep("cannot adjust that");
-				return;
-			}
-
-			r_view.AddAdjustSide(r_view.hl);
-#endif
-		}
-
-		if (r_view.adjust_sides.empty())  // WTF?
-			return;
-
-		float dist = r_view.AdjustDistFactor(r_view.x, r_view.y);
-		dist = CLAMP(20, dist, 1000);
-
-		r_view.adjust_dx_factor = dist / r_view.aspect_sw;
-		r_view.adjust_dy_factor = dist / r_view.aspect_sh;
-
-		Editor_SetAction(ACT_ADJUST_OFS);
-		return;
-	}
-
-
-	if (edit.action != ACT_ADJUST_OFS)
-		return;
-
-
-	// finished?
-	if (mode > 0)
-	{
-		// apply the offset deltas now
-		dx = (int)r_view.adjust_dx;
-		dy = (int)r_view.adjust_dy;
-
-		if (dx || dy)
-		{
-			BA_Begin();
-
-			for (unsigned int k = 0 ; k < r_view.adjust_sides.size() ; k++)
-			{
-				int sd = r_view.adjust_sides[k];
-
-				const SideDef * SD = SideDefs[sd];
-
-				BA_ChangeSD(sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
-				BA_ChangeSD(sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
-			}
-
-			BA_Message("adjusted offsets");
-			BA_End();
-		}
-
-		r_view.adjust_sides.clear();
-		r_view.adjust_lines.clear();
-
-		Editor_ClearAction();
-		return;
-	}
-
-
-	if (dx == 0 && dy == 0)
-		return;
-
-
-	bool force_one_dir = true;
-
-	if (force_one_dir)
-	{
-		if (abs(dx) >= abs(dy))
-			dy = 0;
-		else
-			dx = 0;
-	}
-
-
-	keycode_t mod = M_ReadLaxModifiers();
-
-	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
-
-	if (render_high_detail)
-		factor = factor * 2.0;
-
-	r_view.adjust_dx -= dx * factor * r_view.adjust_dx_factor;
-	r_view.adjust_dy -= dy * factor * r_view.adjust_dy_factor;
-#endif
-
-	RedrawMap();
-}
-
-
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	if (r_view.is_scrolling)
@@ -711,7 +762,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 	else if (edit.action == ACT_ADJUST_OFS)
 	{
-		Render3D_AdjustOffsets(0, dx, dy);
+		AdjustOfs_Delta(dx, dy);
 		return;
 	}
 
@@ -1589,14 +1640,13 @@ void R3D_NAV_MouseMove()
 }
 
 
-
 static void ACT_AdjustOfs_release(void)
 {
 	// check if cancelled or overridden
 	if (edit.action != ACT_ADJUST_OFS)
 		return;
 
-	Render3D_AdjustOffsets(+1);
+	AdjustOfs_Finish();
 }
 
 void R3D_ACT_AdjustOfs()
@@ -1606,7 +1656,7 @@ void R3D_ACT_AdjustOfs()
 
 	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
 	{
-		Render3D_AdjustOffsets(-1);
+		AdjustOfs_Begin();
 	}
 }
 
