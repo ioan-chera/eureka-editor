@@ -1998,6 +1998,7 @@ void UI_Canvas::DragBegin(double focus_x, double focus_y, double map_x, double m
 	drag_start_x = map_x;
 	drag_start_y = map_y;
 
+	// the focus is only used when grid snapping is on
 	drag_focus_x = focus_x;
 	drag_focus_y = focus_y;
 
@@ -2034,6 +2035,17 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 
 	if (grid.snap)
 	{
+		float pixel_dx = *dx * grid.Scale;
+		float pixel_dy = *dy * grid.Scale;
+
+		// check that we have moved far enough from the start position,
+		// giving the user the option to select the original place.
+		if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels*2)
+		{
+			*dx = *dy = 0;
+			return;
+		}
+
 		double focus_x = drag_focus_x + *dx;
 		double focus_y = drag_focus_y + *dy;
 

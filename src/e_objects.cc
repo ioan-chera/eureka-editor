@@ -1215,9 +1215,9 @@ static void Drag_CountOnGrid(int *count, int *total)
 }
 
 
-static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y,
-                                  double *best_dist, double map_x, double map_y,
-								  bool only_grid)
+static void Drag_UpdateCurrentDist(int obj_type, int objnum, double *x, double *y,
+								   double *best_dist, double ptr_x, double ptr_y,
+								   bool only_grid)
 {
 	double x2, y2;
 
@@ -1237,11 +1237,11 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 			{
 				LineDef *L = LineDefs[objnum];
 
-				Drag_UpdateObjectDist(OBJ_VERTICES, L->start, x, y, best_dist,
-									  map_x, map_y, only_grid);
+				Drag_UpdateCurrentDist(OBJ_VERTICES, L->start, x, y, best_dist,
+									   ptr_x, ptr_y, only_grid);
 
-				Drag_UpdateObjectDist(OBJ_VERTICES, L->end,   x, y, best_dist,
-				                      map_x, map_y, only_grid);
+				Drag_UpdateCurrentDist(OBJ_VERTICES, L->end,   x, y, best_dist,
+				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
 
@@ -1257,8 +1257,8 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 				if (! L->TouchesSector(objnum))
 					continue;
 
-				Drag_UpdateObjectDist(OBJ_LINEDEFS, n, x, y, best_dist,
-				                      map_x, map_y, only_grid);
+				Drag_UpdateCurrentDist(OBJ_LINEDEFS, n, x, y, best_dist,
+				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
 
@@ -1268,10 +1268,10 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 
 	// handle OBJ_THINGS and OBJ_VERTICES
 
-	if (only_grid && ! grid.OnGrid(x2, y2))
+	if (only_grid && !grid.OnGrid(x2, y2))
 		return;
 
-	double dist = hypot(x2 - map_x, y2 - map_y);
+	double dist = hypot(x2 - ptr_x, y2 - ptr_y);
 
 	if (dist < *best_dist)
 	{
@@ -1282,7 +1282,13 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 }
 
 
-void GetDragFocus(double *x, double *y, double map_x, double map_y)
+//
+// Determine the focus coordinate for dragging multiple objects.
+// The focus only has an effect when grid snapping is on, and
+// allows a mostly-grid-snapped set of objects to stay snapped
+// to the grid.
+//
+void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y)
 {
 	*x = 0;
 	*y = 0;
@@ -1303,14 +1309,22 @@ void GetDragFocus(double *x, double *y, double map_x, double map_y)
 			only_grid = true;
 	}
 
+	// determine object which is closest to mouse pointer AND which
+	// honors the 'only_grid' property (when set).
 	double best_dist = 9e9;
 
-	selection_iterator_c it;
+	if (edit.dragged.valid())  // a single object
+	{
+		Drag_UpdateCurrentDist(edit.mode, edit.dragged.num, x, y, &best_dist,
+							   ptr_x, ptr_y, only_grid);
+		return;
+	}
 
+	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		Drag_UpdateObjectDist(edit.mode, *it, x, y, &best_dist,
-		                      map_x, map_y, only_grid);
+		Drag_UpdateCurrentDist(edit.mode, *it, x, y, &best_dist,
+							   ptr_x, ptr_y, only_grid);
 	}
 }
 

@@ -507,7 +507,10 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 
 	// begin dragging?
-	CheckBeginDrag();
+	if (edit.action == ACT_CLICK)
+	{
+		CheckBeginDrag();
+	}
 
 	// in general, just update the highlight, split-line (etc)
 	UpdateHighlight();

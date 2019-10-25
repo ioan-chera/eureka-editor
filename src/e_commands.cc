@@ -532,9 +532,9 @@ void CheckBeginDrag()
 		Editor_SetAction(ACT_DRAG);
 
 		// if highlighted object is in selection, we drag the selection,
-		// otherwise we drag just this one object
+		// otherwise we drag just this one object.
 
-		if (click_force_single || ! edit.Selected->get(edit.clicked.num))
+		if (click_force_single || !edit.Selected->get(edit.clicked.num))
 			edit.dragged = edit.clicked;
 		else
 			edit.dragged.clear();
@@ -755,13 +755,14 @@ void CMD_ACT_Drag()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
 		return;
 
+	// we only drag the selection, never a single object
+	edit.dragged.clear();
+
 	double focus_x, focus_y;
 	GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
 
 	Editor_SetAction(ACT_DRAG);
 	main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
-
-	edit.dragged.clear();
 
 	RedrawMap();
 }
