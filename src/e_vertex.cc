@@ -370,22 +370,20 @@ bool Vertex_TryFixDangler(int v_num)
 
 	// see if vertex is sitting on a line
 
-	Objid line_ob;
+	Objid line_obj;
+	FindSplitLineForDangler(line_obj, v_num);
 
-	GetSplitLineForDangler(line_ob, v_num);
-
-	if (! line_ob.valid())
+	if (! line_obj.valid())
 		return false;
 
 #if 0 // DEBUG
-	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
+	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_obj.num, v_num);
 #endif
 
 	BA_Begin();
+	BA_Message("split linedef #%d\n", line_obj.num);
 
-	SplitLineDefAtVertex(line_ob.num, v_num);
-
-	BA_Message("split linedef #%d\n", line_ob.num);
+	SplitLineDefAtVertex(line_obj.num, v_num);
 
 	BA_End();
 

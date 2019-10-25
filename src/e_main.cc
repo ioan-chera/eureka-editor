@@ -191,23 +191,15 @@ static void UpdateSplitLine(double map_x, double map_y)
 		edit.pointer_in_window && !edit.render3d &&
 	    edit.highlight.is_nil())
 	{
-		GetSplitLineDef(edit.split_line, map_x, map_y, edit.dragged.num);
+		FindSplitLine(edit.split_line, edit.split_x, edit.split_y,
+					  map_x, map_y, edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
 	}
 
 	if (edit.split_line.valid())
-	{
-		edit.split_x = grid.SnapX(map_x);
-		edit.split_y = grid.SnapY(map_y);
-
-		// in FREE mode, ensure the new vertex is directly on the linedef
-		if (! grid.snap)
-			MoveCoordOntoLineDef(edit.split_line.num, &edit.split_x, &edit.split_y);
-
 		main_win->canvas->SplitLineSet(edit.split_line.num, edit.split_x, edit.split_y);
-	}
 	else
 		main_win->canvas->SplitLineForget();
 }

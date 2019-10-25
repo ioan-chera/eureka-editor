@@ -965,49 +965,73 @@ void GetNearObject(Objid& o, obj_type_e objtype, double x, double y)
 }
 
 
-void GetSplitLineDef(Objid& o, double x, double y, int drag_vert)
+void FindSplitLine(Objid& out, double& out_x, double& out_y,
+				   double ptr_x, double ptr_y, int drag_vert)
 {
-	o = NearestSplitLine(x, y, drag_vert);
+	out_x = out_y = 0;
+
+	out = NearestSplitLine(ptr_x, ptr_y, drag_vert);
+
+	if (! out.valid())
+		return;
+
+	const LineDef * L = LineDefs[out.num];
+
+	double x1 = L->Start()->x();
+	double y1 = L->Start()->y();
+	double x2 = L->End()->x();
+	double y2 = L->End()->y();
+
+	double len = hypot(x2 - x1, y2 - y1);
 
 	// don't highlight the line if the new vertex would snap onto
 	// the same coordinate as the start or end of the linedef.
-	// [ I tried a bbox test here, but it's bad for axis-aligned lines ]
+	// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
 
-	if (o.valid() && grid.snap)
+	if (grid.snap)
 	{
-		int snap_x = grid.ForceSnapX(x);
-		int snap_y = grid.ForceSnapY(y);
+		out_x = grid.ForceSnapX(ptr_x);
+		out_y = grid.ForceSnapY(ptr_y);
 
-		const LineDef * L = LineDefs[o.num];
-
-		double x1 = L->Start()->x();
-		double y1 = L->Start()->y();
-		double x2 = L->End()->x();
-		double y2 = L->End()->y();
-
-		if ( (I_ROUND(x1) == snap_x && I_ROUND(y1) == snap_y) ||
-			 (I_ROUND(x2) == snap_x && I_ROUND(y2) == snap_y))
+		// snapped onto an end point?
+		if (L->TouchesCoord(TO_COORD(out_x), TO_COORD(out_y)))
 		{
-			o.clear();
+			out.clear();
+			return;
 		}
 
-		// also require snap coordinate be not TOO FAR from the line
-		double len = L->CalcLength();
+		// require snap coordinate be not TOO FAR from the line
+		double perp = PerpDist(out_x, out_y, x1, y1, x2, y2);
 
-		double along = AlongDist(snap_x, snap_y, x1, y1, x2, y2);
-		double  perp =  PerpDist(snap_x, snap_y, x1, y1, x2, y2);
-
-		if (along <= 0 || along >= len || fabs(perp) > len * 0.2)
+		if (fabs(perp) > len * 0.2)
 		{
-			o.clear();
+			out.clear();
+			return;
 		}
+	}
+	else
+	{
+		// in FREE mode, ensure split point is directly on the linedef
+		out_x = ptr_x;
+		out_y = ptr_y;
+
+		MoveCoordOntoLineDef(out.num, &out_x, &out_y);
+	}
+
+	// always ensure result is along the linedef (not off the ends)
+	double along = AlongDist(out_x, out_y, x1, y1, x2, y2);
+
+	if (along < 0.05 || along > len - 0.05)
+	{
+		out.clear();
+		return;
 	}
 }
 
 
-void GetSplitLineForDangler(Objid& o, int v_num)
+void FindSplitLineForDangler(Objid& out, int v_num)
 {
-	o = NearestSplitLine(Vertices[v_num]->x(), Vertices[v_num]->y(), v_num);
+	out = NearestSplitLine(Vertices[v_num]->x(), Vertices[v_num]->y(), v_num);
 }
 
 
