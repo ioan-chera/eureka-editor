@@ -1712,7 +1712,7 @@ void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 
 	int size = (grid.Scale >= 5.0) ? 9 : (grid.Scale >= 1.0) ? 7 : 5;
 
-	gl_color(HI_AND_SEL_COL);
+	// color set by caller
 
 #ifdef NO_OPENGL
 	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
@@ -1753,6 +1753,8 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, len1);
 		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
 	}
+
+	gl_color(HI_AND_SEL_COL);
 
 	DrawSplitPoint(split_x, split_y);
 }
@@ -1936,7 +1938,12 @@ void UI_Canvas::DrawCurrentLine()
 		cross_point_t& point = cross.points[k];
 
 		if (point.ld >= 0 && point.ld == split_ld)
-			return;
+			return;  // FIXME why return?
+
+		if (point.vert >= 0)
+			gl_color(FL_GREEN);
+		else
+			gl_color(HI_AND_SEL_COL);
 
 		DrawSplitPoint(point.x, point.y);
 	}
