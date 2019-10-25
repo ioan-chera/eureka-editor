@@ -78,14 +78,8 @@ public:
 	Objid current_hl;
 
 	// state for adjusting offsets via the mouse
-	std::vector<int> adjust_sides;
-	std::vector<int> adjust_lines;
-
 	float adjust_dx, adjust_dx_factor;
 	float adjust_dy, adjust_dy_factor;
-
-	std::vector<int> saved_x_offsets;
-	std::vector<int> saved_y_offsets;
 
 public:
 	Render_View_t();
@@ -106,8 +100,8 @@ public:
 	void AddAdjustSide(const Objid& obj);
 	float AdjustDistFactor(float view_x, float view_y);
 
-	void SaveOffsets();
-	void RestoreOffsets();
+	void SaveOffsets()     { /* FIXME */ }
+	void RestoreOffsets()  { /* FIXME */ }
 };
 
 

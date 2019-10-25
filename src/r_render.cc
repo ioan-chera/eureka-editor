@@ -64,9 +64,7 @@ Render_View_t::Render_View_t() :
 	thsec_invalidated(false),
 	is_scrolling(false),
 	nav_time(0),
-	current_hl(),
-	adjust_sides(), adjust_lines(),
-	saved_x_offsets(), saved_y_offsets()
+	current_hl()
 { }
 
 Render_View_t::~Render_View_t()
@@ -176,11 +174,132 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 }
 
 
+Render_View_t r_view;
+
+
+static Thing *FindPlayer(int typenum)
+{
+	// need to search backwards (to handle Voodoo dolls properly)
+
+	for (int i = NumThings-1 ; i >= 0 ; i--)
+		if (Things[i]->type == typenum)
+			return Things[i];
+
+	return NULL;  // not found
+}
+
+
+//------------------------------------------------------------------------
+
+class save_obj_field_c
+{
+public:
+	int obj;    // object number (edit.mode is implicit type)
+	int field;  // e.g. Thing::F_X
+	int value;  // the saved value
+
+public:
+	save_obj_field_c(int _obj, int _field, int _value) :
+		obj(_obj), field(_field), value(_value)
+	{ }
+
+	~save_obj_field_c()
+	{ }
+};
+
+
+class SaveBucket_c
+{
+private:
+	obj_type_e type;
+
+	std::vector< save_obj_field_c > fields;
+
+public:
+	SaveBucket_c(obj_type_e _type) : type(_type), fields()
+	{ }
+
+	~SaveBucket_c()
+	{ }
+
+	void Clear()
+	{
+		fields.clear();
+	}
+
+	void Clear(obj_type_e _type)
+	{
+		type = _type;
+		fields.clear();
+	}
+
+	void Save(int obj, int field)
+	{
+		// is it already saved?
+		for (size_t i = 0 ; i < fields.size() ; i++)
+			if (fields[i].obj == obj && fields[i].field == field)
+				return;
+
+		int value = RawGet(obj, field);
+
+		fields.push_back(save_obj_field_c(obj, field, value));
+	}
+
+	void RestoreAll()
+	{
+		for (size_t i = 0 ; i < fields.size() ; i++)
+		{
+			RawSet(fields[i].obj, fields[i].field, fields[i].value);
+		}
+	}
+
+private:
+	int * RawObjPointer(int objnum)
+	{
+		switch (type)
+		{
+			case OBJ_THINGS:
+				return (int*) Things[objnum];
+
+			case OBJ_VERTICES:
+				return (int*) Vertices[objnum];
+
+			case OBJ_SECTORS:
+				return (int*) Sectors[objnum];
+
+			case OBJ_SIDEDEFS:
+				return (int*) SideDefs[objnum];
+
+			case OBJ_LINEDEFS:
+				return (int*) LineDefs[objnum];
+
+			default:
+				BugError("SaveBucket with bad mode\n");
+				return NULL; /* NOT REACHED */
+		}
+	}
+
+	int RawGet(int objnum, int field)
+	{
+		int *ptr = RawObjPointer(objnum) + field;
+		return *ptr;
+	}
+
+	void RawSet(int objnum, int field, int value)
+	{
+		int *ptr = RawObjPointer(objnum) + field;
+		*ptr = value;
+	}
+};
+
+
 /* r_editing_info_t stuff */
+
+
+#if 0   // FIXME !!!
 
 void Render_View_t::AddAdjustSide(const Objid& obj)
 {
-#if 0 // FIXME
 	const LineDef *L = LineDefs[obj.num];
 
 	int sd = (obj.side < 0) ? L->left : L->right;
@@ -197,7 +316,6 @@ void Render_View_t::AddAdjustSide(const Objid& obj)
 
 	adjust_sides.push_back(sd);
 	adjust_lines.push_back(obj.num);
-#endif
 }
 
 float Render_View_t::AdjustDistFactor(float view_x, float view_y)
@@ -255,20 +373,7 @@ void Render_View_t::RestoreOffsets()
 	}
 }
 
-
-Render_View_t r_view;
-
-
-static Thing *FindPlayer(int typenum)
-{
-	// need to search backwards (to handle Voodoo dolls properly)
-
-	for (int i = NumThings-1 ; i >= 0 ; i--)
-		if (Things[i]->type == typenum)
-			return Things[i];
-
-	return NULL;  // not found
-}
+#endif
 
 
 //------------------------------------------------------------------------
@@ -468,6 +573,8 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 
 void Render3D_AdjustOffsets(int mode, int dx, int dy)
 {
+#if 0  // FIXME
+
 	// started?
 	if (mode < 0)
 	{
@@ -589,6 +696,7 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 	r_view.adjust_dx -= dx * factor * r_view.adjust_dx_factor;
 	r_view.adjust_dy -= dy * factor * r_view.adjust_dy_factor;
+#endif
 
 	RedrawMap();
 }
