@@ -823,13 +823,12 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 }
 
 
-void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_z)
+void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z)
 {
 	if (edit.mode != OBJ_VERTICES)
 	{
 		selection_c list(edit.mode);
-
-		list.set(obj_num);
+		list.set(obj.num);
 
 		MoveObjects(&list, delta_x, delta_y, delta_z);
 		return;
@@ -844,14 +843,14 @@ void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_
 	// handle a single vertex merging onto an existing one
 	if (edit.highlight.valid())
 	{
-		BA_Message("merge vertex #%d", obj_num);
+		BA_Message("merge vertex #%d", obj.num);
 
-		SYS_ASSERT(obj_num != edit.highlight.num);
+		SYS_ASSERT(obj.num != edit.highlight.num);
 
 		selection_c verts(OBJ_VERTICES);
 
 		verts.set(edit.highlight.num);	// keep the highlight
-		verts.set(obj_num);
+		verts.set(obj.num);
 
 		Vertex_MergeList(&verts);
 
@@ -864,14 +863,14 @@ void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_
 	{
 		did_split_line = edit.split_line.num;
 
-		SplitLineDefAtVertex(edit.split_line.num, obj_num);
+		SplitLineDefAtVertex(edit.split_line.num, obj.num);
 
 		// now move the vertex!
 	}
 
 	selection_c list(edit.mode);
 
-	list.set(obj_num);
+	list.set(obj.num);
 
 	DoMoveObjects(&list, delta_x, delta_y, delta_z);
 

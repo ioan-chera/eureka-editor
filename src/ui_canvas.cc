@@ -319,12 +319,12 @@ void UI_Canvas::DrawEverything()
 
 	DrawSelection(edit.Selected);
 
-	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0 && ! drag_lines.empty())
+	if (edit.action == ACT_DRAG && !edit.dragged.valid() && !drag_lines.empty())
 		DrawSelection(&drag_lines);
 	else if (edit.action == ACT_TRANSFORM && ! trans_lines.empty())
 		DrawSelection(&trans_lines);
 
-	if (edit.action == ACT_DRAG && edit.drag_single_obj >= 0)
+	if (edit.action == ACT_DRAG && edit.dragged.valid())
 	{
 		double dx = 0;
 		double dy = 0;
@@ -338,8 +338,7 @@ void UI_Canvas::DrawEverything()
 		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
 			gl_line_width(2);
 
-		DrawHighlight(edit.mode, edit.drag_single_obj,
-		              false /* skip_lines */, dx, dy);
+		DrawHighlight(edit.mode, edit.dragged.num, false /* skip_lines */, dx, dy);
 
 		if (edit.mode == OBJ_VERTICES && highlight.valid())
 		{
@@ -1621,7 +1620,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	double dx = 0;
 	double dy = 0;
 
-	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
+	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
 	{
 		DragDelta(&dx, &dy);
 	}

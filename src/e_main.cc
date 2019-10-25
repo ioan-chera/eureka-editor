@@ -181,7 +181,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 	edit.split_line.clear();
 
 	// usually disabled while dragging stuff
-	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
+	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
 		return;
 
 	// in vertex mode, see if there is a linedef which would be split by
@@ -191,7 +191,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 		edit.pointer_in_window && !edit.render3d &&
 	    edit.highlight.is_nil())
 	{
-		GetSplitLineDef(edit.split_line, map_x, map_y, edit.drag_single_obj);
+		GetSplitLineDef(edit.split_line, map_x, map_y, edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -230,13 +230,13 @@ void UpdateHighlight()
 	edit.highlight.clear();
 
 	if (edit.pointer_in_window && !edit.render3d &&
-	    (!dragging || (edit.mode == OBJ_VERTICES && edit.drag_single_obj >= 0)))
+	    (!dragging || (edit.mode == OBJ_VERTICES && edit.dragged.valid()) ))
 	{
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.drag_single_obj >= 0 && edit.highlight.valid() &&
-			edit.drag_single_obj == edit.highlight.num)
+		if (edit.dragged.valid() && edit.highlight.valid() &&
+			edit.dragged.num == edit.highlight.num)
 		{
 			edit.highlight.clear();
 		}
@@ -1335,8 +1335,8 @@ void Editor_DefaultState()
 	edit.sticky_mod = 0;
 	edit.is_scrolling = false;
 
+	edit.dragged.clear();
 	edit.drawing_from = -1;
-	edit.drag_single_obj = -1;
 
 	edit.error_mode = false;
 	edit.show_object_numbers = false;

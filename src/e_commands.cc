@@ -535,9 +535,9 @@ void CheckBeginDrag()
 		// otherwise we drag just this one object
 
 		if (click_force_single || ! edit.Selected->get(edit.clicked.num))
-			edit.drag_single_obj = edit.clicked.num;
+			edit.dragged = edit.clicked;
 		else
-			edit.drag_single_obj = -1;
+			edit.dragged.clear();
 
 		double focus_x, focus_y;
 		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
@@ -583,13 +583,13 @@ static void ACT_Drag_release(void)
 
 	if (dx || dy)
 	{
-		if (edit.drag_single_obj >= 0)
-			DragSingleObject(edit.drag_single_obj, dx, dy);
+		if (edit.dragged.valid())
+			DragSingleObject(edit.dragged, dx, dy);
 		else
 			MoveObjects(edit.Selected, dx, dy);
 	}
 
-	edit.drag_single_obj = -1;
+	edit.dragged.clear();
 
 	RedrawMap();
 }
@@ -761,7 +761,7 @@ void CMD_ACT_Drag()
 	Editor_SetAction(ACT_DRAG);
 	main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
 
-	edit.drag_single_obj = -1;
+	edit.dragged.clear();
 
 	RedrawMap();
 }
