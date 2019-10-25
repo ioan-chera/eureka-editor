@@ -1315,7 +1315,6 @@ void UI_Canvas::SplitLineForget()
 }
 
 
-
 //
 //  draw the given object in highlight color
 //
@@ -1937,8 +1936,9 @@ void UI_Canvas::DrawCurrentLine()
 	{
 		cross_point_t& point = cross.points[k];
 
+		// ignore current split line (what new vertex is sitting on)
 		if (point.ld >= 0 && point.ld == split_ld)
-			return;  // FIXME why return?
+			continue;
 
 		if (point.vert >= 0)
 			gl_color(FL_GREEN);

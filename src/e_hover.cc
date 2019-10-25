@@ -1014,8 +1014,6 @@ void GetSplitLineForDangler(Objid& o, int v_num)
 //------------------------------------------------------------------------
 
 
-// FIXME FOR DOUBLE COORDS
-
 crossing_state_c::crossing_state_c() : points()
 { }
 
@@ -1100,77 +1098,23 @@ void crossing_state_c::SplitAllLines()
 }
 
 
-#if 0
-static void find_closest_cross_handler(int x, int y, double dist, int v, int ld, void *data)
-{
-	cross_state_t *cross = (cross_state_t *)data;
-
-	if (dist >= cross->distance)
-		return;
-
-	cross->distance = dist;
-
-	if (v >= 0)
-	{
-		cross->vert = v;
-		cross->line = -1;
-
-		cross->x = x;
-		cross->y = y;
-
-	}
-	else
-	{
-		cross->vert = -1;
-		cross->line = ld;
-
-		cross->x = x;
-		cross->y = y;
-	}
-}
-
-
-bool FindClosestCrossPoint(int v1, int v2, cross_state_t *cross)
-{
-	SYS_ASSERT(v1 != v2);
-
-	cross->vert = -1;
-	cross->line = -1;
-	cross->distance = 9e9;
-
-	const Vertex *VA = Vertices[v1];
-	const Vertex *VB = Vertices[v2];
-
-	FindAllCrossPoints(VA->x, VA->y, v1, VB->x, VB->y, v2,
-					   find_closest_cross_handler, cross);
-
-	return (cross->vert >= 0) || (cross->line >= 0);
-}
-#endif
-
-
-#define CROSSING_EPSILON  0.4
-#define    ALONG_EPSILON  0.04
+#define CROSSING_EPSILON  0.2
+#define    ALONG_EPSILON  0.1
 
 
 static void FindCrossingLines(crossing_state_c& cross,
 						double x1, double y1, int possible_v1,
 						double x2, double y2, int possible_v2)
 {
-	fixcoord_t fx1 = TO_COORD(x1);
-	fixcoord_t fy1 = TO_COORD(y1);
-	fixcoord_t fx2 = TO_COORD(x2);
-	fixcoord_t fy2 = TO_COORD(y2);
-
 	// this could happen when two vertices are overlapping
-	if (fx1 == fx2 && fy1 == fy2)
+	if (fabs(x1 - x2) < ALONG_EPSILON && fabs(y1 - y2) < ALONG_EPSILON)
 		return;
 
-	// distances along the WHOLE original line
+	// distances along WHOLE original line for this segment
 	double along1 = AlongDist(x1, y1,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 	double along2 = AlongDist(x2, y2,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 
-	// bounding box
+	// bounding box of segment
 	double bbox_x1 = MIN(x1, x2) - 0.25;
 	double bbox_y1 = MIN(y1, y2) - 0.25;
 
@@ -1197,18 +1141,11 @@ static void FindCrossingLines(crossing_state_c& cross,
 		if (L->IsZeroLength())
 			continue;
 
-		// skip linedef if an end-point is one of the vertices already
-		// in the crossing state (including the very start or very end).
-		if (L->TouchesCoord(fx1, fy1) || L->TouchesCoord(fx2, fy2))
-			continue;
-
-		if (L->TouchesCoord(TO_COORD(cross.start_x), TO_COORD(cross.start_y)) ||
-			L->TouchesCoord(TO_COORD(cross.  end_x), TO_COORD(cross.  end_y)))
-			continue;
-
 		if (cross.HasLine(ld))
 			continue;
 
+		// skip linedef if an end-point is one of the vertices already
+		// in the crossing state (including the very start or very end).
 		if (cross.HasVertex(L->start) || cross.HasVertex(L->end))
 			continue;
 
@@ -1227,15 +1164,12 @@ static void FindCrossingLines(crossing_state_c& cross,
 		// compute intersection point
 		double l_along = a / (a - b);
 
-		double new_x = (double)lx1 + l_along * (lx2 - lx1);
-		double new_y = (double)ly1 + l_along * (ly2 - ly1);
-
-		// ensure new vertex does not match the start or end points
-		if (fabs(new_x - x1) < 0.1 && fabs(new_y - y1) < 0.1) continue;
-		if (fabs(new_x - x2) < 0.1 && fabs(new_y - y2) < 0.1) continue;
+		double new_x = lx1 + l_along * (lx2 - lx1);
+		double new_y = ly1 + l_along * (ly2 - ly1);
 
 		double along = AlongDist(new_x, new_y,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 
+		// ensure new vertex lies within this segment (and not too close to ends)
 		if (along > along1 + ALONG_EPSILON && along < along2 - ALONG_EPSILON)
 		{
 			cross.add_line(ld, new_x, new_y, along);
@@ -1281,7 +1215,7 @@ void FindCrossingPoints(crossing_state_c& cross,
 
 		const Vertex * VC = Vertices[v];
 
-		// ignore vertices ar same coordinates as v1 or v2
+		// ignore vertices at same coordinates as v1 or v2
 		if (VC->Matches(TO_COORD(x1), TO_COORD(y1)) ||
 			VC->Matches(TO_COORD(x2), TO_COORD(y2)))
 			continue;
@@ -1310,23 +1244,24 @@ void FindCrossingPoints(crossing_state_c& cross,
 	int    cur_v  = possible_v1;
 
 	// grab number of points now, since we will adding split points
-	// (and we assume those new points get added at the end).
-	unsigned int num_verts = static_cast<unsigned>(cross.points.size());
+	// (at the end) and we only want vertices here.
+	size_t num_verts = cross.points.size();
 
-	for (unsigned int k = 0 ; k < num_verts ; k++)
+	for (size_t k = 0 ; k < num_verts ; k++)
 	{
-		cross_point_t& next_p = cross.points[k];
+		double next_x2 = cross.points[k].x;
+		double next_y2 = cross.points[k].y;
+		double next_v  = cross.points[k].vert;
 
 		FindCrossingLines(cross, cur_x1, cur_y1, cur_v,
-						  next_p.x, next_p.y, next_p.vert);
+						  next_x2, next_y2, next_v);
 
-		cur_x1 = next_p.x;
-		cur_y1 = next_p.y;
-		cur_v  = next_p.vert;
+		cur_x1 = next_x2;
+		cur_y1 = next_y2;
+		cur_v  = next_v;
 	}
 
-	FindCrossingLines(cross, cur_x1, cur_y1, cur_v,
-	                  x2, y2, possible_v2);
+	FindCrossingLines(cross, cur_x1, cur_y1, cur_v, x2, y2, possible_v2);
 
 	cross.Sort();
 }
