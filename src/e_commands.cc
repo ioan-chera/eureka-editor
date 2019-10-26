@@ -960,6 +960,9 @@ void CMD_Zoom()
 
 void CMD_ZoomWholeMap()
 {
+	if (edit.render3d)
+		Render3D_Enable(false);
+
 	ZoomWholeMap();
 }
 
@@ -978,9 +981,10 @@ void CMD_ZoomSelection()
 
 void CMD_GoToCamera()
 {
-	double x, y;
-	float angle;
+	if (edit.render3d)
+		Render3D_Enable(false);
 
+	double x, y; float angle;
 	Render3D_GetCameraPos(&x, &y, &angle);
 
 	grid.MoveTo(x, y);
@@ -993,7 +997,7 @@ void CMD_PlaceCamera()
 {
 	if (edit.render3d)
 	{
-		Beep("Not supported in 3D view");  // FIXME
+		Beep("Not supported in 3D view");
 		return;
 	}
 

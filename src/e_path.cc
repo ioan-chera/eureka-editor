@@ -32,6 +32,7 @@
 #include "e_path.h"
 #include "m_game.h"
 #include "r_grid.h"
+#include "r_render.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -360,6 +361,9 @@ void CMD_SEC_SelectGroup(void)
 
 void GoToSelection()
 {
+	if (edit.render3d)
+		Render3D_Enable(false);
+
 	double x1, y1, x2, y2;
 	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
