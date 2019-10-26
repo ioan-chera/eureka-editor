@@ -72,9 +72,9 @@ struct Editor_State_t
 	double split_x;
 	double split_y;
 
-	Objid clicked;     // the object under the pointer when ACT_Click occurred
-	Objid dragged;     // ACT_DRAG: the object we are dragging, or is_nil() for selection
-	int drawing_from;  // ACT_DRAW_LINE: the vertex we are drawing a line from
+	Objid clicked;    // ACT_CLICK: object under the pointer when ACT_Click occurred
+	Objid dragged;    // ACT_DRAG: the object we are dragging, or is_nil() for selection
+	Objid from_vert;  // ACT_DRAW_LINE: the vertex we are drawing a line from
 
 
 	/* rendering stuff */

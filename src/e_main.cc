@@ -402,7 +402,7 @@ void MapStuff_NotifyDelete(obj_type_e type, int objnum)
 		recalc_map_bounds = true;
 
 		if (edit.action == ACT_DRAW_LINE &&
-			edit.drawing_from == objnum)
+			edit.from_vert.num == objnum)
 		{
 			Editor_ClearAction();
 		}
@@ -1328,7 +1328,7 @@ void Editor_DefaultState()
 	edit.is_scrolling = false;
 
 	edit.dragged.clear();
-	edit.drawing_from = -1;
+	edit.from_vert.clear();
 
 	edit.error_mode = false;
 	edit.show_object_numbers = false;

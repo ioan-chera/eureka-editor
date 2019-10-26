@@ -1883,7 +1883,7 @@ void UI_Canvas::DrawCamera()
 
 void UI_Canvas::DrawCurrentLine()
 {
-	if (edit.drawing_from < 0)
+	if (edit.from_vert.is_nil())
 		return;
 
 	double new_x = grid.SnapX(edit.map_x);
@@ -1911,7 +1911,7 @@ void UI_Canvas::DrawCurrentLine()
 
 	gl_color(RED);
 
-	const Vertex * v = Vertices[edit.drawing_from];
+	const Vertex * v = Vertices[edit.from_vert.num];
 
 	DrawKnobbyLine(v->x(), v->y(), new_x, new_y);
 
@@ -1929,7 +1929,7 @@ void UI_Canvas::DrawCurrentLine()
 	crossing_state_c cross;
 
 	FindCrossingPoints(cross,
-					   v->x(), v->y(), edit.drawing_from,
+					   v->x(), v->y(), edit.from_vert.num,
 					   new_x, new_y, highlight.valid() ? highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)

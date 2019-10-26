@@ -412,7 +412,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 	// are we drawing a line?
 	if (edit.action == ACT_DRAW_LINE)
-		old_vert = edit.drawing_from;
+		old_vert = edit.from_vert.num;
 
 	// a linedef which we are splitting (usually none)
 	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
@@ -480,7 +480,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			if (LineDefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				edit.drawing_from = new_vert;
+				edit.from_vert = Objid(OBJ_VERTICES, new_vert);
 				edit.Selected->set(new_vert);
 				return;
 			}
@@ -512,8 +512,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		V->SetRawXY(new_x, new_y);
 
+		edit.from_vert = Objid(OBJ_VERTICES, new_vert);
 		edit.Selected->set(new_vert);
-		edit.drawing_from = new_vert;
 
 		// splitting an existing line?
 		if (split_ld >= 0)
@@ -552,8 +552,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		BA_Message("added linedef");
 
+		edit.from_vert = Objid(OBJ_VERTICES, new_vert);
 		edit.Selected->set(new_vert);
-		edit.drawing_from = new_vert;
 	}
 
 
@@ -567,10 +567,10 @@ begin_drawing:
 	{
 		Selection_Clear();
 
+		edit.from_vert = Objid(OBJ_VERTICES, old_vert);
 		edit.Selected->set(old_vert);
 
 		Editor_SetAction(ACT_DRAW_LINE);
-		edit.drawing_from = old_vert;
 	}
 
 	// stop drawing mode?
