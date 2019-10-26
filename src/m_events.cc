@@ -94,21 +94,6 @@ void Editor_SetAction(editor_action_e  new_action)
 }
 
 
-// FIXME : this was being called by CMD_Scroll, but smells very hacky
-#if 0
-void Editor_UpdateFromScroll()
-{
-	if (edit.action == ACT_SELBOX || edit.action == ACT_DRAW_LINE ||
-		edit.action == ACT_DRAG)
-	{
-		int mod = Fl::event_state() & MOD_ALL_MASK;
-
-		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, 0, 0);
-	}
-}
-#endif
-
-
 void Editor_Zoom(int delta, int mid_x, int mid_y)
 {
     float S1 = grid.Scale;
