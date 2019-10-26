@@ -1718,109 +1718,6 @@ void R3D_Toggle()
 }
 
 
-//
-// Align texture on sidedef(s)
-//
-// Parameter:
-//     x : align X offset
-//     y : align Y offset
-//    xy : align both X and Y
-//
-// Flags:
-//    /clear : clear offset(s) instead of aligning
-//    /right : align to line on the right of this one (instead of left)
-//
-void R3D_Align()
-{
-	if (! edit.render3d)
-	{
-		Beep("3D mode required");
-		return;
-	}
-
-	// parse the flags
-	bool do_X = Exec_HasFlag("/x");
-	bool do_Y = Exec_HasFlag("/y");
-
-	// this is for backwards compatibility
-	{
-		const char *param = EXEC_Param[0];
-
-		if (strchr(param, 'x')) do_X = true;
-		if (strchr(param, 'y')) do_Y = true;
-	}
-
-	if (! (do_X || do_Y))
-	{
-		Beep("3D_Align: need x or y flag");
-		return;
-	}
-
-	bool do_clear = Exec_HasFlag("/clear");
-	bool do_right = Exec_HasFlag("/right");
-	bool do_unpeg = true;
-
-	int align_flags = 0;
-
-	if (do_X) align_flags = align_flags | LINALIGN_X;
-	if (do_Y) align_flags = align_flags | LINALIGN_Y;
-
-	if (do_right) align_flags |= LINALIGN_Right;
-	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
-	if (do_clear) align_flags |= LINALIGN_Clear;
-
-
-	// if selection is empty, add the highlight to it
-	// (and clear it when we are done).
-	bool did_select = false;
-
-#if 0 // FIXME !!!
-
-	if (r_view.SelectEmpty())
-	{
-		if (! r_view.hl.valid())
-		{
-			Beep("nothing to align");
-			return;
-		}
-		else if (r_view.hl.type != OBJ_LINEDEFS)
-		{
-			Beep("cannot align that");
-			return;
-		}
-
-		r_view.SelectToggle(r_view.hl);
-		did_select = true;
-	}
-	else
-	{
-//??		if (r_view.sel_type < OB3D_Lower)
-//??		{
-//??			Beep("cannot align that");
-//??			return;
-//??		}
-	}
-
-
-	BA_Begin();
-
-	Line_AlignGroup(r_view.sel, align_flags);
-
-	if (do_clear)
-		BA_Message("cleared offsets");
-	else
-		BA_Message("aligned offsets");
-
-	BA_End();
-
-	if (did_select)
-		r_view.sel.clear();
-
-	RedrawMap();
-#endif
-}
-
-
 void R3D_WHEEL_Move()
 {
 	float dx = Fl::event_dx();
@@ -1865,11 +1762,6 @@ static editor_command_t  render_commands[] =
 		&R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
-	},
-
-	{	"3D_Align", NULL,
-		&R3D_Align,
-		/* flags */ "/x /y /right /clear"
 	},
 
 	{	"3D_Forward", NULL,
@@ -1951,6 +1843,12 @@ static editor_command_t  render_commands[] =
 	// backwards compatibility
 	{	"3D_Click", NULL,
 		&CMD_ACT_Click
+	},
+
+	// backwards compatibility
+	{	"3D_Align", NULL,
+		&CMD_LIN_Align,
+		/* flags */ "/x /y /right /clear"
 	},
 
 	// end of command list
