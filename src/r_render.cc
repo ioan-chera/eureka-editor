@@ -315,46 +315,48 @@ private:
 
 static SaveBucket_c * xyofs_bucket;
 
-#if 0   // FIXME !!!
+static struct { float x1, y1, x2, y2; } xyofs_line_bbox;
 
-void Render_View_t::AddAdjustSide(const Objid& obj)
+
+static void AdjustOfs_UpdateBBox(int ld_num)
 {
-	const LineDef *L = LineDefs[obj.num];
+	const LineDef *L = LineDefs[ld_num];
 
-	int sd = (obj.side < 0) ? L->left : L->right;
+	float lx1 = L->Start()->x();
+	float ly1 = L->Start()->y();
+	float lx2 = L->End()->x();
+	float ly2 = L->End()->y();
 
-	// this should not happen
-	if (sd < 0)
-		return;
+	if (lx1 > lx2) std::swap(lx1, lx2);
+	if (ly1 > ly2) std::swap(ly1, ly2);
 
-	// ensure it is not already there
-	// (e.g. when a line's upper and lower are both selected)
-	for (unsigned int k = 0 ; k < adjust_sides.size() ; k++)
-		if (adjust_sides[k] == sd)
-			return;
-
-	adjust_sides.push_back(sd);
-	adjust_lines.push_back(obj.num);
+	xyofs_line_bbox.x1 = MIN(xyofs_line_bbox.x1, lx1);
+	xyofs_line_bbox.y1 = MIN(xyofs_line_bbox.y1, ly1);
+	xyofs_line_bbox.x2 = MAX(xyofs_line_bbox.x2, lx2);
+	xyofs_line_bbox.y2 = MAX(xyofs_line_bbox.y2, ly2);
 }
 
-float Render_View_t::AdjustDistFactor(float view_x, float view_y)
+void AdjustOfs_CalcDistFactor()
 {
-	if (adjust_lines.empty())
-		return 128.0;
+	// this computes how far to move the offsets for each screen pixel
+	// the mouse moves.  we want it to appear as though each texture
+	// is being dragged by the mouse, e.g. if you click on the middle
+	// of a switch, that switch follows the mouse pointer around.
+	// such an effect can only be approximate though.
 
-	double total = 0;
+	float dx = (r_view.x < xyofs_line_bbox.x1) ? (xyofs_line_bbox.x1 - r_view.x) :
+			   (r_view.x > xyofs_line_bbox.x2) ? (r_view.x - xyofs_line_bbox.x2) : 0;
 
-	for (unsigned int k = 0 ; k < adjust_lines.size() ; k++)
-	{
-		const LineDef *L = LineDefs[adjust_lines[k]];
-		total += ApproxDistToLineDef(L, view_x, view_y);
-	}
+	float dy = (r_view.y < xyofs_line_bbox.y1) ? (xyofs_line_bbox.y1 - r_view.y) :
+			   (r_view.y > xyofs_line_bbox.y2) ? (r_view.y - xyofs_line_bbox.y2) : 0;
 
-	return total / (double)adjust_lines.size();
+	float dist = hypot(dx, dy);
+
+	dist = CLAMP(20, dist, 1000);
+
+	r_view.adjust_dx_factor = dist / r_view.aspect_sw;
+	r_view.adjust_dy_factor = dist / r_view.aspect_sh;
 }
-
-#endif
-
 
 static void AdjustOfs_Add(int ld_num, int part)
 {
@@ -380,6 +382,10 @@ static void AdjustOfs_Begin()
 
 	int total_lines = 0;
 
+	// we will compute the bbox of selected lines
+	xyofs_line_bbox.x1 = xyofs_line_bbox.y1 = +9e9;
+	xyofs_line_bbox.x2 = xyofs_line_bbox.y2 = -9e9;
+
 	// find the sidedefs to adjust
 	if (! edit.Selected->empty())
 	{
@@ -394,6 +400,7 @@ static void AdjustOfs_Begin()
 				continue;
 
 			total_lines++;
+			AdjustOfs_UpdateBBox(ld_num);
 
 			if (parts & PART_RT_LOWER) AdjustOfs_Add(ld_num, PART_RT_LOWER);
 			if (parts & PART_RT_UPPER) AdjustOfs_Add(ld_num, PART_RT_UPPER);
@@ -412,6 +419,7 @@ static void AdjustOfs_Begin()
 		if (parts >= 2)
 		{
 			AdjustOfs_Add(ld_num, parts);
+			AdjustOfs_UpdateBBox(ld_num);
 			total_lines++;
 		}
 	}
@@ -421,13 +429,6 @@ static void AdjustOfs_Begin()
 		Beep("nothing to adjust");
 		return;
 	}
-
-/* FIXME !!!
-	float dist = AdjustOfs_DistFactor(r_view.x, r_view.y);
-
-	r_view.adjust_dx_factor = dist / r_view.aspect_sw;
-	r_view.adjust_dy_factor = dist / r_view.aspect_sh;
-*/
 
 	r_view.adjust_dx = 0;
 	r_view.adjust_dy = 0;
@@ -449,7 +450,7 @@ static void AdjustOfs_Finish()
 		BA_Message("adjusted offsets");
 
 		xyofs_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
-		xyofs_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dx);
+		xyofs_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
 
 		BA_End();
 	}
@@ -487,6 +488,8 @@ static void AdjustOfs_Delta(int dx, int dy)
 
 	if (!render_high_detail)
 		factor = factor * 0.5;
+
+	AdjustOfs_CalcDistFactor();
 
 	r_view.adjust_dx -= dx * factor * r_view.adjust_dx_factor;
 	r_view.adjust_dy -= dy * factor * r_view.adjust_dy_factor;
