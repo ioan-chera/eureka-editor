@@ -808,7 +808,7 @@ void CMD_Clipboard_Cut()
 	if (main_win->ClipboardOp('x'))
 		return;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
 		Render3D_CB_Cut();
 		return;
@@ -829,7 +829,7 @@ void CMD_Clipboard_Copy()
 	if (main_win->ClipboardOp('c'))
 		return;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
 		Render3D_CB_Copy();
 		return;
@@ -848,7 +848,7 @@ void CMD_Clipboard_Paste()
 	if (main_win->ClipboardOp('v'))
 		return;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
 		Render3D_CB_Paste();
 		return;
