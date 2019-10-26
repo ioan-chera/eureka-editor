@@ -622,7 +622,10 @@ static void ACT_Click_release(void)
 	{
 		// only toggle selection if it's the same object as before
 		Objid near_obj;
-		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
+		if (edit.render3d)
+			near_obj = edit.highlight;
+		else
+			GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
 
 		if (near_obj.num == click_obj.num)
 			Selection_Toggle(click_obj);
@@ -636,15 +639,13 @@ static void ACT_Click_release(void)
 
 void CMD_ACT_Click()
 {
-	if (edit.render3d)
-	{
-		Selection_Toggle(edit.highlight);
-		RedrawMap();
-		return;
-	}
-
 	if (! EXEC_CurKey)
 		return;
+
+	// require a highlighted object in 3D mode
+	if (edit.render3d)
+		if (edit.highlight.is_nil())
+			return;
 
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
@@ -661,6 +662,14 @@ void CMD_ACT_Click()
 
 		button1_map_x = edit.map_x;
 		button1_map_y = edit.map_y;
+	}
+
+	// handle 3D mode, skip stuff below which only makes sense in 2D
+	if (edit.render3d)
+	{
+		edit.clicked = edit.highlight;
+		Editor_SetAction(ACT_CLICK);
+		return;
 	}
 
 	// check for splitting a line, and ensure we can drag the vertex
