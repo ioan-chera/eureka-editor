@@ -872,8 +872,6 @@ public:
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
-		else if (edit.highlight.type == OBJ_THINGS && th_index == edit.highlight.num)
-			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
 
