@@ -127,6 +127,8 @@ void Render3D_Navigate();
 void Render3D_ClearNav();
 
 void Render3D_UpdateHighlight();
+
+void Render3D_DragThings();
 void Render3D_DragSectors();
 
 void Render3D_CB_Cut();

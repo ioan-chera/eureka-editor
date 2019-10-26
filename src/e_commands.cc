@@ -588,9 +588,13 @@ static void ACT_Drag_release(void)
 		return;
 	}
 
-	if (edit.render3d && edit.mode == OBJ_SECTORS)
+	if (edit.render3d)
 	{
-		Render3D_DragSectors();
+		if (edit.mode == OBJ_THINGS)
+			Render3D_DragThings();
+
+		if (edit.mode == OBJ_SECTORS)
+			Render3D_DragSectors();
 	}
 
 	Objid dragged(edit.dragged);
@@ -601,7 +605,7 @@ static void ACT_Drag_release(void)
 	double dx, dy;
 	main_win->canvas->DragFinish(&dx, &dy);
 
-	if (edit.render3d && edit.mode == OBJ_SECTORS)
+	if (edit.render3d)
 	{
 		RedrawMap();
 		return;
@@ -613,10 +617,6 @@ static void ACT_Drag_release(void)
 			DragSingleObject(dragged, dx, dy);
 		else
 			MoveObjects(edit.Selected, dx, dy);
-
-		// for things in 3D mode, recompute their sectors
-		if (edit.render3d && edit.mode == OBJ_THINGS)
-			r_view.FindThingSectors();
 	}
 
 	RedrawMap();

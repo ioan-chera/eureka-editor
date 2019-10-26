@@ -795,6 +795,43 @@ void Render3D_DragSectors()
 }
 
 
+static void DragThings_Update()
+{
+	// TODO DragThings_Update
+}
+
+static void DragOneThing(int th_index, int dz)
+{
+	// TODO DragOneThing
+}
+
+void Render3D_DragThings()
+{
+	int dz = I_ROUND(r_view.adjust_dz);
+
+	BA_Begin();
+	BA_Message("dragged things");
+
+	if (edit.dragged.valid())
+	{
+		DragOneThing(edit.dragged.num, dz);
+	}
+	else
+	{
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			DragOneThing(*it, dz);
+		}
+	}
+
+	BA_End();
+
+	// need to recompute their sectors
+	r_view.FindThingSectors();
+}
+
+
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	if (r_view.is_scrolling)
@@ -823,6 +860,9 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 			DragSectors_Update(y);
 		else
 			main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+
+		if (edit.mode == OBJ_THINGS)
+			r_view.adjust_dz = (mouse_button1_y - y) / r_view.aspect_sh;
 
 		// if dragging a single vertex, update the possible split_line
 		UpdateHighlight();

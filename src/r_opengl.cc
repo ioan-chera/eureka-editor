@@ -1179,15 +1179,25 @@ public:
 		float tx = th->x();
 		float ty = th->y();
 
+		float drag_dz = 0;
+
 		if (edit.action == ACT_DRAG &&
 			(!edit.dragged.valid() || edit.dragged.num == th_index))
 		{
+			// vertical positioning in Hexen and UDMF formats
+			if (grid.snap && Level_format != MAPF_Doom)
+			{
+				float dist = hypot(tx - r_view.x, ty - r_view.y);
+				drag_dz = 1.6 * r_view.adjust_dz * CLAMP(20, dist, 1000);
+			}
+
 			double dx = 0;
 			double dy = 0;
 			main_win->canvas->DragDelta(&dx, &dy);
 
 			tx += dx;
 			ty += dy;
+
 		}
 
 		const thingtype_t *info = M_GetThingType(th->type);
@@ -1198,7 +1208,7 @@ public:
 		if (! img)
 			img = IM_UnknownSprite();
 
-		float scale_w = img->width() * scale;
+		float scale_w = img->width()  * scale;
 		float scale_h = img->height() * scale;
 
 		// choose X/Y coordinates so quad faces the camera
@@ -1209,26 +1219,29 @@ public:
 
 		int sec_num = r_view.thing_sectors[th_index];
 
-		float h1, h2;
+		float z1, z2;
 
 		if (info->flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
-			h1 = h2 - scale_h;
+			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
+			z1 = z2 - scale_h;
 		}
 		else
 		{
-			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
-			h2 = h1 + scale_h;
+			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
+			z2 = z1 + scale_h;
 		}
+
+		z1 += drag_dz;
+		z2 += drag_dz;
 
 		glBegin(GL_LINE_LOOP);
 
-		glVertex3f(x1, y1, h1);
-		glVertex3f(x1, y1, h2);
-		glVertex3f(x2, y2, h2);
-		glVertex3f(x2, y2, h1);
+		glVertex3f(x1, y1, z1);
+		glVertex3f(x1, y1, z2);
+		glVertex3f(x2, y2, z2);
+		glVertex3f(x2, y2, z1);
 
 		glEnd();
 	}
