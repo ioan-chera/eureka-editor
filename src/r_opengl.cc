@@ -38,6 +38,8 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 
+#include "ui_window.h"
+
 
 extern rgb_color_t transparent_col;
 
@@ -1163,6 +1165,19 @@ public:
 	void HighlightThing(int th_index)
 	{
 		Thing *th = Things[th_index];
+		float tx = th->x();
+		float ty = th->y();
+
+		if (edit.action == ACT_DRAG &&
+			(!edit.dragged.valid() || edit.dragged.num == th_index))
+		{
+			double dx = 0;
+			double dy = 0;
+			main_win->canvas->DragDelta(&dx, &dy);
+
+			tx += dx;
+			ty += dy;
+		}
 
 		const thingtype_t *info = M_GetThingType(th->type);
 
@@ -1176,10 +1191,10 @@ public:
 		float scale_h = img->height() * scale;
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = th->x() - r_view.Sin * scale_w * 0.5;
-		float y1 = th->y() + r_view.Cos * scale_w * 0.5;
-		float x2 = th->x() + r_view.Sin * scale_w * 0.5;
-		float y2 = th->y() - r_view.Cos * scale_w * 0.5;
+		float x1 = tx - r_view.Sin * scale_w * 0.5;
+		float y1 = ty + r_view.Cos * scale_w * 0.5;
+		float x2 = tx + r_view.Sin * scale_w * 0.5;
+		float y2 = ty - r_view.Cos * scale_w * 0.5;
 
 		int sec_num = r_view.thing_sectors[th_index];
 
@@ -1294,7 +1309,10 @@ public:
 
 		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-		HighlightObject(edit.highlight);
+		if (edit.highlight.is_nil() && edit.dragged.valid())
+			HighlightObject(edit.dragged);
+		else
+			HighlightObject(edit.highlight);
 
 		glLineWidth(1);
 	}

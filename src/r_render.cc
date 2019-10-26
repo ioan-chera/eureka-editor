@@ -524,6 +524,8 @@ void AdjustOfs_RenderPost()
 
 static Thing *player;
 
+extern void CheckBeginDrag();
+
 
 void Render3D_Draw(int ox, int oy, int ow, int oh)
 {
@@ -737,6 +739,19 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	// this also updates edit.map_x/y/z
 	Render3D_Query(r_view.current_hl, x, y);
 
+	if (edit.action == ACT_CLICK)
+	{
+		CheckBeginDrag();
+	}
+	else if (edit.action == ACT_DRAG)
+	{
+		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+
+		// if dragging a single vertex, update the possible split_line
+		UpdateHighlight();
+		return;
+	}
+
 	if (! (r_view.current_hl == old_hl))
 	{
 		UpdateHighlight();
@@ -750,7 +765,9 @@ void Render3D_UpdateHighlight()
 
 	edit.highlight.clear();
 
-	if (r_view.current_hl.type == edit.mode && edit.pointer_in_window)
+	if (r_view.current_hl.type == edit.mode &&
+		edit.pointer_in_window &&
+		!(edit.action == ACT_DRAG || edit.dragged.valid()))
 	{
 		edit.highlight = r_view.current_hl;
 	}

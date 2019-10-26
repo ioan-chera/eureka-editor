@@ -110,6 +110,7 @@ public:
 	void DragBegin(double focus_x, double focus_y, double map_x, double map_y);
 	void DragUpdate(double map_x, double map_y);
 	void DragFinish(double *dx, double *dy);
+	void DragDelta(double *dx, double *dy);
 
 	void TransformBegin(double map_x, double map_y, double middle_x, double middle_y, transform_keyword_e mode);
 	void TransformUpdate(double map_x, double map_y);
@@ -157,8 +158,6 @@ private:
 	void RenderSector(int num);
 
 	void SelboxDraw();
-
-	void DragDelta(double *dx, double *dy);
 
 	// calc screen-space normal of a line
 	int NORMALX(int len, double dx, double dy);

@@ -523,6 +523,10 @@ void CheckBeginDrag()
 	if (! click_check_drag)
 		return;
 
+	// can only drag things in 3D mode [ FIXME do sector planes too ]
+	if (edit.render3d && edit.mode != OBJ_THINGS)
+		return;
+
 	int pixel_dx = Fl::event_x() - mouse_button1_x;
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
@@ -587,6 +591,10 @@ static void ACT_Drag_release(void)
 			DragSingleObject(edit.dragged, dx, dy);
 		else
 			MoveObjects(edit.Selected, dx, dy);
+
+		// for things in 3D mode, recompute sectors
+		if (edit.render3d && edit.mode == OBJ_THINGS)
+			r_view.FindThingSectors();
 	}
 
 	edit.dragged.clear();
@@ -749,9 +757,6 @@ void CMD_ACT_SelectBox()
 
 void CMD_ACT_Drag()
 {
-	if (edit.render3d)
-		return;
-
 	if (! EXEC_CurKey)
 		return;
 
