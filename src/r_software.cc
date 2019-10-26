@@ -1058,11 +1058,22 @@ public:
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
-		// check that plane faces the camera
-		if (part == PART_FLOOR && (r_view.z < z + 0.2))
-			return;
-		if (part == PART_CEIL && (r_view.z > z - 0.2))
-			return;
+		// are we dragging this surface?
+		if (edit.action == ACT_DRAG &&
+			(!edit.dragged.valid() ||
+			 (edit.dragged.num == sec_index &&
+			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
+		{
+			z = z + (int)r_view.adjust_dz;
+		}
+		else
+		{
+			// check that plane faces the camera
+			if (part == PART_FLOOR && (r_view.z < z + 0.2))
+				return;
+			if (part == PART_CEIL && (r_view.z > z - 0.2))
+				return;
+		}
 
 		int sy1 = DistToY(dw->iz1, z);
 		int sy2 = DistToY(dw->iz2, z);
@@ -1142,7 +1153,7 @@ public:
 		}
 	}
 
-	void HighlightThings(int th)
+	void HighlightThings(int th_index)
 	{
 		DrawWall::vec_t::iterator S;
 
@@ -1152,9 +1163,9 @@ public:
 			if (dw->th < 0)
 				continue;
 
-			if (th >= 0)
+			if (th_index >= 0)
 			{
-				if (dw->th != th)
+				if (dw->th != th_index)
 					continue;
 			}
 			else
@@ -1171,6 +1182,17 @@ public:
 
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
+
+			if (edit.action == ACT_DRAG &&
+				(!edit.dragged.valid() || edit.dragged.num == th_index))
+			{
+				// FIXME get delta from screen coords
+				int dx = 16;
+				int dy = 4;
+
+				x1 += dx; x2 += dx;
+				y1 += dy; y2 += dy;
+			}
 
 			DrawHighlightLine(x1, y1, x1, y2);
 			DrawHighlightLine(x2, y1, x2, y2);
@@ -1193,7 +1215,11 @@ public:
 			HighlightThings(-1);
 
 			hl_color = HI_COL;
-			if (edit.highlight.valid())
+			if (edit.dragged.valid())
+			{
+				HighlightThings(edit.dragged.num);
+			}
+			else if (edit.highlight.valid())
 			{
 				if (edit.Selected->get(edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;
@@ -1206,7 +1232,11 @@ public:
 			HighlightSectors(-1, -1);
 
 			hl_color = HI_COL;
-			if (edit.highlight.valid())
+			if (edit.dragged.valid())
+			{
+				HighlightSectors(edit.dragged.num, edit.dragged.parts);
+			}
+			else if (edit.highlight.valid())
 			{
 				if (edit.Selected->get(edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;
