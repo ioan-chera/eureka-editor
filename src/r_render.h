@@ -80,6 +80,7 @@ public:
 	// state for adjusting offsets via the mouse
 	float adjust_dx, adjust_dx_factor;
 	float adjust_dy, adjust_dy_factor;
+	float adjust_dz;
 
 public:
 	Render_View_t();
@@ -126,6 +127,7 @@ void Render3D_Navigate();
 void Render3D_ClearNav();
 
 void Render3D_UpdateHighlight();
+void Render3D_DragSectors();
 
 void Render3D_CB_Cut();
 void Render3D_CB_Copy();

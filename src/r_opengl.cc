@@ -1137,11 +1137,22 @@ public:
 
 		float z = (part == PART_CEIL) ? sec->ceilh : sec->floorh;
 
-		// check that plane faces the camera
-		if (part == PART_FLOOR && (r_view.z < z + 0.2))
-			return;
-		if (part == PART_CEIL && (r_view.z > z - 0.2))
-			return;
+		// are we dragging this surface?
+		if (edit.action == ACT_DRAG &&
+			(!edit.dragged.valid() ||
+			 (edit.dragged.num == sec_index &&
+			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
+		{
+			z = z + r_view.adjust_dz;
+		}
+		else
+		{
+			// check that plane faces the camera
+			if (part == PART_FLOOR && (r_view.z < z + 0.2))
+				return;
+			if (part == PART_CEIL && (r_view.z > z - 0.2))
+				return;
+		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{

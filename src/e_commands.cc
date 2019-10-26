@@ -506,16 +506,19 @@ void CMD_NAV_MouseScroll()
 
 
 // screen position when LMB was pressed
-static int mouse_button1_x;
-static int mouse_button1_y;
+int mouse_button1_x;
+int mouse_button1_y;
 
 // map location when LMB was pressed
 static double button1_map_x;
 static double button1_map_y;
+static double button1_map_z;
 
 static bool click_check_drag;
 static bool click_check_select;
 static bool click_force_single;
+
+float drag_point_dist;
 
 
 void CheckBeginDrag()
@@ -524,7 +527,7 @@ void CheckBeginDrag()
 		return;
 
 	// can only drag things in 3D mode [ FIXME do sector planes too ]
-	if (edit.render3d && edit.mode != OBJ_THINGS)
+	if (edit.render3d && !(edit.mode == OBJ_THINGS || edit.mode == OBJ_SECTORS))
 		return;
 
 	int pixel_dx = Fl::event_x() - mouse_button1_x;
@@ -542,6 +545,8 @@ void CheckBeginDrag()
 			edit.dragged = edit.clicked;
 		else
 			edit.dragged.clear();
+
+		edit.clicked.clear();
 
 		double focus_x, focus_y;
 		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
@@ -578,26 +583,41 @@ static void ACT_Drag_release(void)
 {
 	// check if cancelled or overridden
 	if (edit.action != ACT_DRAG)
+	{
+		edit.dragged.clear();
 		return;
+	}
+
+	if (edit.render3d && edit.mode == OBJ_SECTORS)
+	{
+		Render3D_DragSectors();
+	}
+
+	Objid dragged(edit.dragged);
+	edit.dragged.clear();
 
 	Editor_ClearAction();
 
 	double dx, dy;
 	main_win->canvas->DragFinish(&dx, &dy);
 
+	if (edit.render3d && edit.mode == OBJ_SECTORS)
+	{
+		RedrawMap();
+		return;
+	}
+
 	if (dx || dy)
 	{
-		if (edit.dragged.valid())
-			DragSingleObject(edit.dragged, dx, dy);
+		if (dragged.valid())
+			DragSingleObject(dragged, dx, dy);
 		else
 			MoveObjects(edit.Selected, dx, dy);
 
-		// for things in 3D mode, recompute sectors
+		// for things in 3D mode, recompute their sectors
 		if (edit.render3d && edit.mode == OBJ_THINGS)
 			r_view.FindThingSectors();
 	}
-
-	edit.dragged.clear();
 
 	RedrawMap();
 }
@@ -670,6 +690,9 @@ void CMD_ACT_Click()
 
 		button1_map_x = edit.map_x;
 		button1_map_y = edit.map_y;
+		button1_map_z = edit.map_z;
+
+		drag_point_dist = hypot(edit.map_x - r_view.x, edit.map_y - r_view.y);
 	}
 
 	// handle 3D mode, skip stuff below which only makes sense in 2D

@@ -629,6 +629,10 @@ void Render3D_Enable(bool _enable)
 
 	edit.render3d = _enable;
 
+	edit.highlight.clear();
+	edit.clicked.clear();
+	edit.dragged.clear();
+
 	// give keyboard focus to the appropriate large widget
 	Fl::focus(main_win->canvas);
 
@@ -721,6 +725,76 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 }
 
 
+extern int mouse_button1_y;
+extern float drag_point_dist;
+
+
+static void DragSectors_Update(int sy)
+{
+	float factor = CLAMP(20, drag_point_dist, 1000) / r_view.aspect_sh;
+	float map_dz = (mouse_button1_y - sy) * factor;
+
+	if (true)  ///REVIEW  if (grid.snap)
+	{
+		// snap to 8 unit grid [ FIXME : take a "focus_z" value into account ]
+		if (map_dz > 2.0)
+			r_view.adjust_dz = 8 * (int)ceil(map_dz / 8.0);
+		else if (map_dz < -2.0)
+			r_view.adjust_dz = 8 * (int)floor(map_dz / 8.0);
+		else
+			r_view.adjust_dz = 0;
+	}
+	else
+	{
+		r_view.adjust_dz = map_dz;
+	}
+}
+
+void Render3D_DragSectors()
+{
+	int dz = I_ROUND(r_view.adjust_dz);
+	if (dz == 0)
+		return;
+
+	BA_Begin();
+
+	if (dz > 0)
+		BA_Message("raised sectors");
+	else
+		BA_Message("lowered sectors");
+
+	if (edit.dragged.valid())
+	{
+		const Sector *S = Sectors[edit.dragged.num];
+		int parts = edit.dragged.parts;
+
+		if (parts == 0 || (parts & PART_FLOOR))
+			BA_ChangeSEC(edit.dragged.num, Sector::F_FLOORH, S->floorh + dz);
+
+		if (parts == 0 || (parts & PART_CEIL))
+			BA_ChangeSEC(edit.dragged.num, Sector::F_CEILH, S->ceilh + dz);
+	}
+	else
+	{
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			const Sector *S = Sectors[*it];
+			int parts = edit.Selected->get_ext(*it);
+			parts &= ~1;
+
+			if (parts == 0 || (parts & PART_FLOOR))
+				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + dz);
+
+			if (parts == 0 || (parts & PART_CEIL))
+				BA_ChangeSEC(*it, Sector::F_CEILH, S->ceilh + dz);
+		}
+	}
+
+	BA_End();
+}
+
+
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	if (r_view.is_scrolling)
@@ -745,7 +819,10 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 	else if (edit.action == ACT_DRAG)
 	{
-		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+		if (edit.mode == OBJ_SECTORS)
+			DragSectors_Update(y);
+		else
+			main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
 
 		// if dragging a single vertex, update the possible split_line
 		UpdateHighlight();
