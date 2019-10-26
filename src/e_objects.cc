@@ -659,9 +659,9 @@ void CMD_Insert()
 	bool force_cont;
 	bool no_fill;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
-		Beep("Insert: not usable in 3D view");
+		Beep("Cannot insert in this mode");
 		return;
 	}
 
