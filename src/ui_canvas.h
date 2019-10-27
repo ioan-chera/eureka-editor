@@ -48,10 +48,6 @@ private:
 	double split_x;
 	double split_y;
 
-	// sel-box state
-	double selbox_x1, selbox_y1;  // map coords
-	double selbox_x2, selbox_y2;
-
 	// dragging state
 	double drag_start_x, drag_start_y;
 	double drag_focus_x, drag_focus_y;
@@ -103,9 +99,8 @@ public:
 	void DrawHighlightTransform(int objtype, int objnum);
 	void DrawTagged(int objtype, int objnum);
 
-	void SelboxBegin(double map_x, double map_y);
-	void SelboxUpdate(double map_x, double map_y);
-	void SelboxFinish(double *x1, double *y1, double *x2, double *y2);
+	// returns true if ok, false if box was very small
+	bool SelboxGet(double& x1, double& y1, double& x2, double& y2);
 
 	void DragBegin(double focus_x, double focus_y, double map_x, double map_y);
 	void DragUpdate(double map_x, double map_y);

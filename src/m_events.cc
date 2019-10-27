@@ -482,7 +482,10 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_SELBOX)
 	{
-		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
+		edit.selbox_x2 = edit.map_x;
+		edit.selbox_y2 = edit.map_y;
+
+		main_win->canvas->redraw();
 		return;
 	}
 

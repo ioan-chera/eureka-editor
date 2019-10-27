@@ -1950,46 +1950,30 @@ void UI_Canvas::DrawCurrentLine()
 }
 
 
-void UI_Canvas::SelboxBegin(double map_x, double map_y)
+bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 {
-	selbox_x1 = selbox_x2 = map_x;
-	selbox_y1 = selbox_y2 = map_y;
+	x1 = MIN(edit.selbox_x1, edit.selbox_x2);
+	y1 = MIN(edit.selbox_y1, edit.selbox_y2);
+	x2 = MAX(edit.selbox_x1, edit.selbox_x2);
+	y2 = MAX(edit.selbox_y1, edit.selbox_y2);
+
+	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
+	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
+
+	// small boxes should be ignored (treated as a click + release)
+	if (scr_dx < 5 && scr_dy < 5)
+		return false;
+
+	return true; // Ok
 }
 
-void UI_Canvas::SelboxUpdate(double map_x, double map_y)
-{
-	selbox_x2 = map_x;
-	selbox_y2 = map_y;
-
-	redraw();
-}
-
-void UI_Canvas::SelboxFinish(double *x1, double *y1, double *x2, double *y2)
-{
-	*x1 = MIN(selbox_x1, selbox_x2);
-	*y1 = MIN(selbox_y1, selbox_y2);
-
-	*x2 = MAX(selbox_x1, selbox_x2);
-	*y2 = MAX(selbox_y1, selbox_y2);
-
-	int scr_dx = SCREENX(*x2) - SCREENX(*x1);
-	int scr_dy = SCREENY(*y1) - SCREENY(*y2);
-
-	// small boxes should be treated as a click/release
-	if (scr_dx < 10 && scr_dy < 10)  // TODO: CONFIG ITEM
-	{
-		*x2 = *x1;
-		*y2 = *y1;
-	}
-}
 
 void UI_Canvas::SelboxDraw()
 {
-	double x1 = MIN(selbox_x1, selbox_x2);
-	double x2 = MAX(selbox_x1, selbox_x2);
-
-	double y1 = MIN(selbox_y1, selbox_y2);
-	double y2 = MAX(selbox_y1, selbox_y2);
+	double x1 = MIN(edit.selbox_x1, edit.selbox_x2);
+	double x2 = MAX(edit.selbox_x1, edit.selbox_x2);
+	double y1 = MIN(edit.selbox_y1, edit.selbox_y2);
+	double y2 = MAX(edit.selbox_y1, edit.selbox_y2);
 
 	gl_color(FL_CYAN);
 

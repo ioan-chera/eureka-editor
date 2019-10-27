@@ -566,15 +566,15 @@ static void ACT_SelectBox_release(void)
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
-	double x1, y1, x2, y2;
-	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
-
 	// a mere click and release will unselect everything
-	if (x1 == x2 && y1 == y2)
+	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+	if (! main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	{
 		ExecuteCommand("UnselectAll");
-	else
-		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+		return;
+	}
 
+	SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 	RedrawMap();
 }
 
@@ -750,9 +750,10 @@ void CMD_ACT_Click()
 	// clicking on an empty space starts a new selection box
 	if (click_check_select && edit.clicked.is_nil())
 	{
-		Editor_SetAction(ACT_SELBOX);
+		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
+		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+		Editor_SetAction(ACT_SELBOX);
 		return;
 	}
 
@@ -772,9 +773,10 @@ void CMD_ACT_SelectBox()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
 		return;
 
-	Editor_SetAction(ACT_SELBOX);
+	edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
+	edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-	main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+	Editor_SetAction(ACT_SELBOX);
 }
 
 

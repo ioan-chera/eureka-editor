@@ -104,6 +104,13 @@ struct Editor_State_t
 	float nav_turn_L, nav_turn_R;
 
 	float panning_speed;
+
+
+	/* selection-box stuff (ACT_SELBOX) */
+
+	double selbox_x1, selbox_y1;  // map coords
+	double selbox_x2, selbox_y2;
+
 };
 
 
