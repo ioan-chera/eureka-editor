@@ -135,10 +135,11 @@ struct Editor_State_t
 
 	double drag_start_x, drag_start_y, drag_start_z;
 	double drag_focus_x, drag_focus_y, drag_focus_z;
-	double drag_cur_x,   drag_cur_y;
+	double drag_cur_x,   drag_cur_y,   drag_cur_z;
 
 	float drag_point_dist;
 	float drag_sector_dz;
+	int   drag_thing_num;
 
 	selection_c *drag_lines;
 

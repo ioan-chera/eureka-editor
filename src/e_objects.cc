@@ -804,6 +804,7 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 		return;
 
 	BA_Begin();
+	BA_MessageForSel("moved", list);
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -817,8 +818,6 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 	}
 
 	DoMoveObjects(list, delta_x, delta_y, delta_z);
-
-	BA_MessageForSel("moved", list);
 
 	BA_End();
 }

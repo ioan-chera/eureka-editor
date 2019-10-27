@@ -1184,12 +1184,11 @@ public:
 			if (edit.action == ACT_DRAG &&
 				(!edit.dragged.valid() || edit.dragged.num == th_index))
 			{
-				// FIXME get delta from screen coords
-				int dx = 16;
-				int dy = 4;
+				x1 += edit.drag_screen_dx;
+				x2 += edit.drag_screen_dx;
 
-				x1 += dx; x2 += dx;
-				y1 += dy; y2 += dy;
+				y1 += edit.drag_screen_dy;
+				y2 += edit.drag_screen_dy;
 			}
 
 			DrawHighlightLine(x1, y1, x1, y2);

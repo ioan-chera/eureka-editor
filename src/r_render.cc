@@ -787,38 +787,100 @@ void Render3D_DragSectors()
 
 static void DragThings_Update()
 {
-	// TODO DragThings_Update
-}
+	float dist = edit.drag_point_dist;
 
-static void DragOneThing(int th_index, int dz)
-{
-	// TODO DragOneThing
+	if (edit.drag_thing_num >= 0)
+	{
+		// FIXME determine dist of focus thing to view plane
+	}
+
+	float factor = CLAMP(20, dist, 1000) / r_view.aspect_sh;
+	factor *= 1.6;  // FIXME temp fudge, review calc
+
+	if (! (grid.snap || Level_format == MAPF_Doom))
+	{
+		// vertical positioning in Hexen and UDMF formats
+		float map_dz = -edit.drag_screen_dy * factor;
+
+		// final result is in drag_cur_x/y/z
+		edit.drag_cur_x = edit.drag_start_x;
+		edit.drag_cur_y = edit.drag_start_y;
+		edit.drag_cur_z = edit.drag_start_z + map_dz;
+		return;
+	}
+
+	/* move thing around XY plane */
+
+	edit.drag_cur_z = edit.drag_start_z;
+
+	// vectors for view camera
+	double fwd_vx = r_view.Cos;
+	double fwd_vy = r_view.Sin;
+
+	double side_vx = -fwd_vy;
+	double side_vy =  fwd_vx;
+
+#if 0
+	// this generally shouldn't happen....
+	if (edit.drag_thing_num < 0)
+#endif
+	{
+		double dx = edit.drag_screen_dx * factor;
+		double dy = edit.drag_screen_dy * factor;
+
+		edit.drag_cur_x = edit.drag_start_x - dy * fwd_vx - dx * side_vx;
+		edit.drag_cur_y = edit.drag_start_y - dy * fwd_vy - dx * side_vy;
+		return;
+	}
+
+	const Thing *T = Things[edit.drag_thing_num];
+
+	float old_x = T->x();
+	float old_y = T->y();
+
+	float new_x = old_x + 123.0; //FIXME
+	float new_y = old_y + 5.0;
+
+	// handle a change in floor height
+	Objid old_sec;
+	GetNearObject(old_sec, OBJ_SECTORS, old_x, old_y);
+
+	Objid new_sec;
+	GetNearObject(old_sec, OBJ_SECTORS, new_x, new_y);
+
+	if (old_sec.valid() && new_sec.valid())
+	{
+		float old_z = Sectors[old_sec.num]->floorh;
+		float new_z = Sectors[old_sec.num]->floorh;
+
+		edit.drag_cur_z += (new_z - old_z);
+	}
+
+	// FIXME set edit.drag_cur_x/y
 }
 
 void Render3D_DragThings()
 {
-	int dz = I_ROUND(edit.adjust_dz);
-
-	BA_Begin();
-	BA_Message("dragged things");
+	double dx = edit.drag_cur_x - edit.drag_start_x;
+	double dy = edit.drag_cur_y - edit.drag_start_y;
+	double dz = edit.drag_cur_z - edit.drag_start_z;
 
 	if (edit.dragged.valid())
 	{
-		DragOneThing(edit.dragged.num, dz);
+		selection_c sel(OBJ_THINGS);
+		sel.set(edit.dragged.num);
+
+		MoveObjects(&sel, dx, dy, dz);
 	}
 	else
 	{
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
-		{
-			DragOneThing(*it, dz);
-		}
+		MoveObjects(edit.Selected, dx, dy, dz);
 	}
-
-	BA_End();
 
 	// need to recompute their sectors
 	r_view.FindThingSectors();
+
+	RedrawMap();
 }
 
 

@@ -1184,19 +1184,10 @@ public:
 		if (edit.action == ACT_DRAG &&
 			(!edit.dragged.valid() || edit.dragged.num == th_index))
 		{
-			// vertical positioning in Hexen and UDMF formats
-			if (grid.snap && Level_format != MAPF_Doom)
-			{
-				float dist = hypot(tx - r_view.x, ty - r_view.y);
-				drag_dz = 1.6 * edit.adjust_dz * CLAMP(20, dist, 1000);
-			}
+			tx += (edit.drag_cur_x - edit.drag_start_x);
+			ty += (edit.drag_cur_y - edit.drag_start_y);
 
-			double dx = 0;
-			double dy = 0;
-			main_win->canvas->DragDelta(&dx, &dy);
-
-			tx += dx;
-			ty += dy;
+			drag_dz = edit.drag_cur_z - edit.drag_start_z;
 		}
 
 		const thingtype_t *info = M_GetThingType(th->type);
