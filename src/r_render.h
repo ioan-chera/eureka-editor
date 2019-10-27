@@ -64,11 +64,6 @@ public:
 	// last queried highlight object
 	Objid current_hl;
 
-	// state for adjusting offsets via the mouse
-	float adjust_dx, adjust_dx_factor;
-	float adjust_dy, adjust_dy_factor;
-	float adjust_dz;
-
 public:
 	Render_View_t();
 	~Render_View_t();

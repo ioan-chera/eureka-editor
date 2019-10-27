@@ -1143,7 +1143,7 @@ public:
 			 (edit.dragged.num == sec_index &&
 			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
 		{
-			z = z + r_view.adjust_dz;
+			z = z + edit.adjust_dz;  // FIXME call it drag_dz
 		}
 		else
 		{
@@ -1188,7 +1188,7 @@ public:
 			if (grid.snap && Level_format != MAPF_Doom)
 			{
 				float dist = hypot(tx - r_view.x, ty - r_view.y);
-				drag_dz = 1.6 * r_view.adjust_dz * CLAMP(20, dist, 1000);
+				drag_dz = 1.6 * edit.adjust_dz * CLAMP(20, dist, 1000);
 			}
 
 			double dx = 0;

@@ -60,18 +60,27 @@ struct Editor_State_t
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
 	double map_x, map_y, map_z;  // map coordinates of pointer (no Z in 2D)
 
-
 	selection_c *Selected;    // all selected objects (usually empty)
 
 	Objid highlight;   // the highlighted object
+
+	Objid clicked;    // ACT_CLICK: object under the pointer when ACT_Click occurred
+	Objid from_vert;  // ACT_DRAW_LINE: the vertex we are drawing a line from
 
 	Objid split_line;  // linedef which would be split by a new vertex
 	double split_x;
 	double split_y;
 
-	Objid clicked;    // ACT_CLICK: object under the pointer when ACT_Click occurred
-	Objid dragged;    // ACT_DRAG: the object we are dragging, or is_nil() for selection
-	Objid from_vert;  // ACT_DRAW_LINE: the vertex we are drawing a line from
+
+	/* dragging state (ACT_DRAG) */
+
+	Objid dragged;    // the object we are dragging, or nil for whole selection
+
+
+	/* adjusting state (ACT_ADJUST_OFS) */
+
+	float adjust_dx, adjust_dy;
+	float adjust_dz;  // FIXME remove this one
 
 
 	/* rendering stuff */

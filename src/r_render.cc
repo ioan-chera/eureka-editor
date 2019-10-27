@@ -334,7 +334,7 @@ static void AdjustOfs_UpdateBBox(int ld_num)
 	xyofs_line_bbox.y2 = MAX(xyofs_line_bbox.y2, ly2);
 }
 
-void AdjustOfs_CalcDistFactor()
+void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 {
 	// this computes how far to move the offsets for each screen pixel
 	// the mouse moves.  we want it to appear as though each texture
@@ -352,8 +352,8 @@ void AdjustOfs_CalcDistFactor()
 
 	dist = CLAMP(20, dist, 1000);
 
-	r_view.adjust_dx_factor = dist / r_view.aspect_sw;
-	r_view.adjust_dy_factor = dist / r_view.aspect_sh;
+	dx_factor = dist / r_view.aspect_sw;
+	dy_factor = dist / r_view.aspect_sh;
 }
 
 static void AdjustOfs_Add(int ld_num, int part)
@@ -428,8 +428,8 @@ static void AdjustOfs_Begin()
 		return;
 	}
 
-	r_view.adjust_dx = 0;
-	r_view.adjust_dy = 0;
+	edit.adjust_dx = 0;
+	edit.adjust_dy = 0;
 
 	Editor_SetAction(ACT_ADJUST_OFS);
 }
@@ -439,8 +439,8 @@ static void AdjustOfs_Finish()
 	if (! xyofs_bucket)
 		return;
 
-	int dx = I_ROUND(r_view.adjust_dx);
-	int dy = I_ROUND(r_view.adjust_dy);
+	int dx = I_ROUND(edit.adjust_dx);
+	int dy = I_ROUND(edit.adjust_dy);
 
 	if (dx || dy)
 	{
@@ -487,10 +487,11 @@ static void AdjustOfs_Delta(int dx, int dy)
 	if (!render_high_detail)
 		factor = factor * 0.5;
 
-	AdjustOfs_CalcDistFactor();
+	float dx_factor, dy_factor;
+	AdjustOfs_CalcDistFactor(dx_factor, dy_factor);
 
-	r_view.adjust_dx -= dx * factor * r_view.adjust_dx_factor;
-	r_view.adjust_dy -= dy * factor * r_view.adjust_dy_factor;
+	edit.adjust_dx -= dx * factor * dx_factor;
+	edit.adjust_dy -= dy * factor * dy_factor;
 
 	RedrawMap();
 }
@@ -500,8 +501,8 @@ void AdjustOfs_RenderAnte()
 {
 	if (edit.action == ACT_ADJUST_OFS && xyofs_bucket)
 	{
-		int dx = I_ROUND(r_view.adjust_dx);
-		int dy = I_ROUND(r_view.adjust_dy);
+		int dx = I_ROUND(edit.adjust_dx);
+		int dy = I_ROUND(edit.adjust_dy);
 
 		// change it temporarily (just for the render)
 		xyofs_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
@@ -736,21 +737,21 @@ static void DragSectors_Update(int sy)
 	{
 		// snap to 8 unit grid [ FIXME : take a "focus_z" value into account ]
 		if (map_dz > 2.0)
-			r_view.adjust_dz = 8 * (int)ceil(map_dz / 8.0);
+			edit.adjust_dz = 8 * (int)ceil(map_dz / 8.0);
 		else if (map_dz < -2.0)
-			r_view.adjust_dz = 8 * (int)floor(map_dz / 8.0);
+			edit.adjust_dz = 8 * (int)floor(map_dz / 8.0);
 		else
-			r_view.adjust_dz = 0;
+			edit.adjust_dz = 0;
 	}
 	else
 	{
-		r_view.adjust_dz = map_dz;
+		edit.adjust_dz = map_dz;
 	}
 }
 
 void Render3D_DragSectors()
 {
-	int dz = I_ROUND(r_view.adjust_dz);
+	int dz = I_ROUND(edit.adjust_dz);
 	if (dz == 0)
 		return;
 
@@ -805,7 +806,7 @@ static void DragOneThing(int th_index, int dz)
 
 void Render3D_DragThings()
 {
-	int dz = I_ROUND(r_view.adjust_dz);
+	int dz = I_ROUND(edit.adjust_dz);
 
 	BA_Begin();
 	BA_Message("dragged things");
@@ -860,7 +861,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 			main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
 
 		if (edit.mode == OBJ_THINGS)
-			r_view.adjust_dz = (mouse_button1_y - y) / r_view.aspect_sh;
+			edit.adjust_dz = (mouse_button1_y - y) / r_view.aspect_sh;
 
 		// if dragging a single vertex, update the possible split_line
 		UpdateHighlight();

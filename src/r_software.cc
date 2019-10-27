@@ -1062,7 +1062,7 @@ public:
 			 (edit.dragged.num == sec_index &&
 			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
 		{
-			z = z + (int)r_view.adjust_dz;
+			z = z + (int)edit.adjust_dz;
 		}
 		else
 		{
