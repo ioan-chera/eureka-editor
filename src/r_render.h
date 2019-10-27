@@ -78,6 +78,8 @@ public:
 	void UpdateScreen(int ow, int oh);
 	void PrepareToRender(int ow, int oh);
 
+	double DistToViewPlane(double map_x, double map_y);
+
 	/* r_editing_info_t stuff */
 
 	void AddAdjustSide(const Objid& obj);

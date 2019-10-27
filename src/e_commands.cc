@@ -690,9 +690,8 @@ void CMD_ACT_Click()
 		return;
 
 	// require a highlighted object in 3D mode
-	if (edit.render3d)
-		if (edit.highlight.is_nil())
-			return;
+	if (edit.render3d && edit.highlight.is_nil())
+		return;
 
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
@@ -701,22 +700,27 @@ void CMD_ACT_Click()
 	edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
 	edit.click_force_single = false;
 
-	if (edit.click_check_drag)
-	{
-		// remember some state (for drag detection)
-		edit.click_screen_x = Fl::event_x();
-		edit.click_screen_y = Fl::event_y();
+	// remember some state (for drag detection)
+	edit.click_screen_x = Fl::event_x();
+	edit.click_screen_y = Fl::event_y();
 
-		edit.click_map_x = edit.map_x;
-		edit.click_map_y = edit.map_y;
-		edit.click_map_z = edit.map_z;
-
-		edit.drag_point_dist = hypot(edit.map_x - r_view.x, edit.map_y - r_view.y);
-	}
+	edit.click_map_x = edit.map_x;
+	edit.click_map_y = edit.map_y;
+	edit.click_map_z = edit.map_z;
 
 	// handle 3D mode, skip stuff below which only makes sense in 2D
 	if (edit.render3d)
 	{
+		if (edit.highlight.type == OBJ_THINGS)
+		{
+			const Thing *T = Things[edit.highlight.num];
+			edit.drag_point_dist = r_view.DistToViewPlane(T->x(), T->y());
+		}
+		else
+		{
+			edit.drag_point_dist = r_view.DistToViewPlane(edit.map_x, edit.map_y);
+		}
+
 		edit.clicked = edit.highlight;
 		Editor_SetAction(ACT_CLICK);
 		return;

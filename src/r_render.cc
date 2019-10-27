@@ -52,6 +52,9 @@ bool render_unknown_bright = true;
 int  render_pixel_aspect = 83;  //  100 * width / height
 
 
+Render_View_t r_view;
+
+
 Render_View_t::Render_View_t() :
 	p_type(0), px(), py(),
 	x(), y(), z(),
@@ -108,6 +111,14 @@ void Render_View_t::CalcAspect()
 	aspect_sw = screen_w;	 // things break if these are different
 
 	aspect_sh = screen_w / (render_pixel_aspect / 100.0);
+}
+
+double Render_View_t::DistToViewPlane(double map_x, double map_y)
+{
+	map_x -= r_view.x;
+	map_y -= r_view.y;
+
+	return map_x * r_view.Cos + map_y * r_view.Sin;
 }
 
 void Render_View_t::UpdateScreen(int ow, int oh)
@@ -170,9 +181,6 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 	if (gravity)
 		FindGroundZ();
 }
-
-
-Render_View_t r_view;
 
 
 static Thing *FindPlayer(int typenum)
@@ -726,8 +734,10 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 
 static void DragSectors_Update()
 {
-	float factor = CLAMP(20, edit.drag_point_dist, 1000) / r_view.aspect_sh;
+	float ow = main_win->canvas->w();
+	float x_slope = 100.0 / render_pixel_aspect;
 
+	float factor = CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5);
 	float map_dz = -edit.drag_screen_dy * factor;
 
 	float step = 8.0;  // TODO config item
@@ -787,20 +797,21 @@ void Render3D_DragSectors()
 
 static void DragThings_Update()
 {
-	float dist = edit.drag_point_dist;
+	float ow = main_win->canvas->w();
+	float oh = main_win->canvas->h();
 
-	if (edit.drag_thing_num >= 0)
-	{
-		// FIXME determine dist of focus thing to view plane
-	}
+	float x_slope = 100.0 / render_pixel_aspect;
+	float y_slope = (float)oh / (float)ow;
 
-	float factor = CLAMP(20, dist, 1000) / r_view.aspect_sh;
-	factor *= 1.6;  // FIXME temp fudge, review calc
+	float dist = CLAMP(20, edit.drag_point_dist, 1000);
+
+	float x_factor = dist / (ow * 0.5);
+	float y_factor = dist / (ow * x_slope * 0.5);
 
 	if (! (grid.snap || Level_format == MAPF_Doom))
 	{
 		// vertical positioning in Hexen and UDMF formats
-		float map_dz = -edit.drag_screen_dy * factor;
+		float map_dz = -edit.drag_screen_dy * y_factor;
 
 		// final result is in drag_cur_x/y/z
 		edit.drag_cur_x = edit.drag_start_x;
@@ -821,12 +832,12 @@ static void DragThings_Update()
 	double side_vy =  fwd_vx;
 
 #if 0
-	// this generally shouldn't happen....
+	// this generally won't happen, but is a reasonable fallback...
 	if (edit.drag_thing_num < 0)
 #endif
 	{
-		double dx = edit.drag_screen_dx * factor;
-		double dy = edit.drag_screen_dy * factor;
+		double dx = edit.drag_screen_dx * x_factor;
+		double dy = edit.drag_screen_dy * y_factor * 2.0;
 
 		edit.drag_cur_x = edit.drag_start_x - dy * fwd_vx - dx * side_vx;
 		edit.drag_cur_y = edit.drag_start_y - dy * fwd_vy - dx * side_vy;
