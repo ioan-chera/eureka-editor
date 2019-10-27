@@ -740,13 +740,13 @@ bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 }
 
 
-
 static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
 {
 	selection_iterator_c it;
 
 	fixcoord_t fdx = MakeValidCoord(delta_x);
 	fixcoord_t fdy = MakeValidCoord(delta_y);
+	fixcoord_t fdz = MakeValidCoord(delta_z);
 
 	switch (list->what_type())
 	{
@@ -757,6 +757,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 
 				BA_ChangeTH(*it, Thing::F_X, T->raw_x + fdx);
 				BA_ChangeTH(*it, Thing::F_Y, T->raw_y + fdy);
+				BA_ChangeTH(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
 			}
 			break;
 
@@ -812,7 +813,7 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 		selection_c thing_sel(OBJ_THINGS);
 		ConvertSelection(list, &thing_sel);
 
-		DoMoveObjects(&thing_sel, delta_x, delta_y, delta_z);
+		DoMoveObjects(&thing_sel, delta_x, delta_y, 0);
 	}
 
 	DoMoveObjects(list, delta_x, delta_y, delta_z);

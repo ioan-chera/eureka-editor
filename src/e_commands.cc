@@ -1156,7 +1156,12 @@ void CMD_MoveObjects_Dialog()
 		return;
 	}
 
-	UI_MoveDialog * dialog = new UI_MoveDialog();
+	bool want_dz = (edit.mode == OBJ_SECTORS);
+	// can move things vertically in Hexen/UDMF formats
+	if (edit.mode == OBJ_THINGS && Level_format != MAPF_Doom)
+		want_dz = true;
+
+	UI_MoveDialog * dialog = new UI_MoveDialog(want_dz);
 
 	dialog->Run();
 
