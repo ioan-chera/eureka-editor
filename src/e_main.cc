@@ -138,6 +138,10 @@ static void UpdatePanel()
 	int obj_idx   = edit.highlight.num;
 	int obj_count = edit.Selected->count_obj();
 
+	// the highlight is usually turned off when dragging, so compensate
+	if (obj_idx < 0)
+		obj_idx = edit.dragged.num;
+
 	if (obj_idx >= 0)
 	{
 		if (! edit.Selected->get(obj_idx))
@@ -145,13 +149,12 @@ static void UpdatePanel()
 	}
 	else if (obj_count > 0)
 	{
-		// in linedef mode, we want a two-sided linedef to show
+		// in linedef mode, we prefer showing a two-sided linedef
 		if (edit.mode == OBJ_LINEDEFS && obj_count > 1)
 			obj_idx = Selection_FirstLine(edit.Selected);
 		else
 			obj_idx = edit.Selected->find_first();
 	}
-
 
 	switch (edit.mode)
 	{
