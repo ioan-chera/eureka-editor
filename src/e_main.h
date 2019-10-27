@@ -72,17 +72,6 @@ struct Editor_State_t
 	double split_y;
 
 
-	/* dragging state (ACT_DRAG) */
-
-	Objid dragged;    // the object we are dragging, or nil for whole selection
-
-
-	/* adjusting state (ACT_ADJUST_OFS) */
-
-	float adjust_dx, adjust_dy;
-	float adjust_dz;  // FIXME remove this one
-
-
 	/* rendering stuff */
 
 	bool error_mode;   // draw selection in red?
@@ -111,6 +100,32 @@ struct Editor_State_t
 	double selbox_x1, selbox_y1;  // map coords
 	double selbox_x2, selbox_y2;
 
+
+	/* transforming state (ACT_TRANSFORM) */
+
+	double trans_start_x;
+	double trans_start_y;
+	transform_keyword_e trans_mode;
+	transform_t trans_param;
+
+	selection_c *trans_lines;
+
+
+	/* dragging state (ACT_DRAG) */
+
+	Objid dragged;    // the object we are dragging, or nil for whole selection
+
+	double drag_start_x, drag_start_y, drag_start_z;
+	double drag_focus_x, drag_focus_y, drag_focus_z;
+	double drag_cur_x,   drag_cur_y;
+
+	selection_c *drag_lines;
+
+
+	/* adjusting state (ACT_ADJUST_OFS) */
+
+	float adjust_dx, adjust_dy;
+	float adjust_dz;  // FIXME remove this one
 };
 
 

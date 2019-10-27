@@ -413,6 +413,7 @@ int wheel_dx;
 int wheel_dy;
 
 extern void CheckBeginDrag();
+extern void Transform_Update();
 
 
 static void EV_EnterWindow()
@@ -470,7 +471,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y);
+		Transform_Update();
 		return;
 	}
 
@@ -491,10 +492,14 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_DRAG)
 	{
-		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+		edit.drag_cur_x = edit.map_x;
+		edit.drag_cur_y = edit.map_y;
 
 		// if dragging a single vertex, update the possible split_line
-		UpdateHighlight();
+		if (edit.mode == OBJ_VERTICES && edit.dragged.valid())
+			UpdateHighlight();
+
+		main_win->canvas->redraw();
 		return;
 	}
 

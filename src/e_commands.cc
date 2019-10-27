@@ -520,40 +520,64 @@ static bool click_force_single;
 
 float drag_point_dist;
 
+static void DoBeginDrag();
+
 
 void CheckBeginDrag()
 {
 	if (! click_check_drag)
 		return;
 
-	// can only drag things in 3D mode [ FIXME do sector planes too ]
+	// can drag things and sector planes in 3D mode
 	if (edit.render3d && !(edit.mode == OBJ_THINGS || edit.mode == OBJ_SECTORS))
+		return;
+
+	if (! edit.clicked.valid())
 		return;
 
 	int pixel_dx = Fl::event_x() - mouse_button1_x;
 	int pixel_dy = Fl::event_y() - mouse_button1_y;
 
-	if (edit.clicked.valid() &&
-		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
-	{
-		Editor_SetAction(ACT_DRAG);
-
-		// if highlighted object is in selection, we drag the selection,
-		// otherwise we drag just this one object.
-
-		if (click_force_single || !edit.Selected->get(edit.clicked.num))
-			edit.dragged = edit.clicked;
-		else
-			edit.dragged.clear();
-
-		edit.clicked.clear();
-
-		double focus_x, focus_y;
-		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
-
-		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
+	if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels)
 		return;
+
+	// if highlighted object is in selection, we drag the selection,
+	// otherwise we drag just this one object.
+
+	if (click_force_single || !edit.Selected->get(edit.clicked.num))
+		edit.dragged = edit.clicked;
+	else
+		edit.dragged.clear();
+
+	edit.clicked.clear();
+
+	DoBeginDrag();
+}
+
+static void DoBeginDrag()
+{
+	// the focus is only used when grid snapping is on
+	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, button1_map_x, button1_map_y);
+
+	edit.drag_start_x = edit.drag_cur_x = button1_map_x;
+	edit.drag_start_y = edit.drag_cur_y = button1_map_y;
+
+	// in vertex mode, show all the connected lines too
+	if (edit.drag_lines)
+	{
+		delete edit.drag_lines;
+		edit.drag_lines = NULL;
 	}
+
+	if (edit.mode == OBJ_VERTICES)
+	{
+		edit.drag_lines = new selection_c(OBJ_LINEDEFS);
+		ConvertSelection(edit.Selected, edit.drag_lines);
+	}
+
+	Editor_SetAction(ACT_DRAG);
+
+	main_win->canvas->redraw();
 }
 
 
@@ -600,24 +624,21 @@ static void ACT_Drag_release(void)
 	Objid dragged(edit.dragged);
 	edit.dragged.clear();
 
-	Editor_ClearAction();
+	if (edit.drag_lines)
+		edit.drag_lines->clear_all();
 
 	double dx, dy;
-	main_win->canvas->DragFinish(&dx, &dy);
+	main_win->canvas->DragDelta(&dx, &dy);
 
-	if (edit.render3d)
-	{
-		RedrawMap();
-		return;
-	}
-
-	if (dx || dy)
+	if (! edit.render3d && (dx || dy))
 	{
 		if (dragged.valid())
 			DragSingleObject(dragged, dx, dy);
 		else
 			MoveObjects(edit.Selected, dx, dy);
 	}
+
+	Editor_ClearAction();
 
 	RedrawMap();
 }
@@ -797,13 +818,68 @@ void CMD_ACT_Drag()
 	// we only drag the selection, never a single object
 	edit.dragged.clear();
 
-	double focus_x, focus_y;
-	GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
+	DoBeginDrag();
+}
 
-	Editor_SetAction(ACT_DRAG);
-	main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
 
-	RedrawMap();
+void Transform_Update()
+{
+	double dx1 = edit.map_x - edit.trans_param.mid_x;
+	double dy1 = edit.map_y - edit.trans_param.mid_y;
+
+	double dx0 = edit.trans_start_x - edit.trans_param.mid_x;
+	double dy0 = edit.trans_start_y - edit.trans_param.mid_y;
+
+	edit.trans_param.scale_x = edit.trans_param.scale_y = 1;
+	edit.trans_param.skew_x  = edit.trans_param.skew_y  = 0;
+	edit.trans_param.rotate  = 0;
+
+	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
+	{
+		int angle1 = (int)ComputeAngle(dx1, dy1);
+		int angle0 = (int)ComputeAngle(dx0, dy0);
+
+		edit.trans_param.rotate = angle1 - angle0;
+
+//		fprintf(stderr, "angle diff : %1.2f\n", edit.trans_rotate * 360.0 / 65536.0);
+	}
+
+	switch (edit.trans_mode)
+	{
+		case TRANS_K_Scale:
+		case TRANS_K_RotScale:
+			dx1 = MAX(abs(dx1), abs(dy1));
+			dx0 = MAX(abs(dx0), abs(dy0));
+
+			if (dx0)
+			{
+				edit.trans_param.scale_x = dx1 / (float)dx0;
+				edit.trans_param.scale_y = edit.trans_param.scale_x;
+			}
+			break;
+
+		case TRANS_K_Stretch:
+			if (dx0) edit.trans_param.scale_x = dx1 / (float)dx0;
+			if (dy0) edit.trans_param.scale_y = dy1 / (float)dy0;
+			break;
+
+		case TRANS_K_Rotate:
+			// already done
+			break;
+
+		case TRANS_K_Skew:
+			if (abs(dx0) >= abs(dy0))
+			{
+				if (dx0) edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+			}
+			else
+			{
+				if (dy0) edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+			}
+			break;
+	}
+
+	main_win->canvas->redraw();
 }
 
 
@@ -813,13 +889,12 @@ static void ACT_Transform_release(void)
 	if (edit.action != ACT_TRANSFORM)
 		return;
 
+	if (edit.trans_lines)
+		edit.trans_lines->clear_all();
+
+	TransformObjects(edit.trans_param);
+
 	Editor_ClearAction();
-
-	transform_t param;
-
-	main_win->canvas->TransformFinish(param);
-
-	TransformObjects(param);
 
 	RedrawMap();
 }
@@ -880,7 +955,25 @@ void CMD_ACT_Transform()
 	double middle_x, middle_y;
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
 
-	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y, mode);
+	edit.trans_mode = mode;
+	edit.trans_start_x = edit.map_x;
+	edit.trans_start_y = edit.map_y;
+
+	edit.trans_param.Clear();
+	edit.trans_param.mid_x = middle_x;
+	edit.trans_param.mid_y = middle_y;
+
+	if (edit.trans_lines)
+	{
+		delete edit.trans_lines;
+		edit.trans_lines = NULL;
+	}
+
+	if (edit.mode == OBJ_VERTICES)
+	{
+		edit.trans_lines = new selection_c(OBJ_LINEDEFS);
+		ConvertSelection(edit.Selected, edit.trans_lines);
+	}
 
 	Editor_SetAction(ACT_TRANSFORM);
 }

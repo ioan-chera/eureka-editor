@@ -855,16 +855,16 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 	else if (edit.action == ACT_DRAG)
 	{
+		edit.drag_cur_x = edit.map_x;
+		edit.drag_cur_y = edit.map_y;
+
 		if (edit.mode == OBJ_SECTORS)
 			DragSectors_Update(y);
-		else
-			main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
 
 		if (edit.mode == OBJ_THINGS)
 			edit.adjust_dz = (mouse_button1_y - y) / r_view.aspect_sh;
 
-		// if dragging a single vertex, update the possible split_line
-		UpdateHighlight();
+		main_win->canvas->redraw();
 		return;
 	}
 

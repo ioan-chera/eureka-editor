@@ -41,24 +41,14 @@ class UI_Canvas : public Fl_Gl_Window
 #endif
 {
 private:
+	// this mirrors edit.highlight, used to detect real changes
+	// [ to prevent unnecessary redraws ]
 	Objid highlight;
 
-	// split-able line state
+	// this mirrors edit.split_line (etc), used to detect changes
 	int split_ld;
 	double split_x;
 	double split_y;
-
-	// dragging state
-	double drag_start_x, drag_start_y;
-	double drag_focus_x, drag_focus_y;
-	double drag_cur_x,   drag_cur_y;
-	selection_c drag_lines;
-
-	// scaling/rotating state
-	double trans_start_x,  trans_start_y;
-	transform_keyword_e trans_mode;
-	transform_t trans_param;
-	selection_c trans_lines;
 
 	// drawing state only
 	double map_lx, map_ly;
@@ -102,14 +92,7 @@ public:
 	// returns true if ok, false if box was very small
 	bool SelboxGet(double& x1, double& y1, double& x2, double& y2);
 
-	void DragBegin(double focus_x, double focus_y, double map_x, double map_y);
-	void DragUpdate(double map_x, double map_y);
-	void DragFinish(double *dx, double *dy);
 	void DragDelta(double *dx, double *dy);
-
-	void TransformBegin(double map_x, double map_y, double middle_x, double middle_y, transform_keyword_e mode);
-	void TransformUpdate(double map_x, double map_y);
-	void TransformFinish(transform_t& param);
 
 	void PointerPos(bool in_event = false);
 
