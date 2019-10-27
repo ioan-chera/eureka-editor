@@ -492,6 +492,9 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_DRAG)
 	{
+		edit.drag_screen_dx = dx;
+		edit.drag_screen_dy = dy;
+
 		edit.drag_cur_x = edit.map_x;
 		edit.drag_cur_y = edit.map_y;
 

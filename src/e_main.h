@@ -64,9 +64,6 @@ struct Editor_State_t
 
 	Objid highlight;   // the highlighted object
 
-	Objid clicked;    // ACT_CLICK: object under the pointer when ACT_Click occurred
-	Objid from_vert;  // ACT_DRAW_LINE: the vertex we are drawing a line from
-
 	Objid split_line;  // linedef which would be split by a new vertex
 	double split_x;
 	double split_y;
@@ -95,6 +92,24 @@ struct Editor_State_t
 	float panning_speed;
 
 
+	/* click stuff (ACT_CLICK) */
+
+	Objid clicked;    // object under the pointer when ACT_Click occurred
+
+	int click_screen_x, click_screen_y;  // screen coord of the click
+
+	double click_map_x, click_map_y, click_map_z;  // location of the click
+
+	bool click_check_drag;
+	bool click_check_select;
+	bool click_force_single;
+
+
+	/* line drawing stuff (ACT_DRAW_LINE) */
+
+	Objid from_vert;  // the vertex we are drawing a line from
+
+
 	/* selection-box stuff (ACT_SELBOX) */
 
 	double selbox_x1, selbox_y1;  // map coords
@@ -105,6 +120,7 @@ struct Editor_State_t
 
 	double trans_start_x;
 	double trans_start_y;
+
 	transform_keyword_e trans_mode;
 	transform_t trans_param;
 
@@ -115,9 +131,13 @@ struct Editor_State_t
 
 	Objid dragged;    // the object we are dragging, or nil for whole selection
 
+	int drag_screen_dx, drag_screen_dy;
+
 	double drag_start_x, drag_start_y, drag_start_z;
 	double drag_focus_x, drag_focus_y, drag_focus_z;
 	double drag_cur_x,   drag_cur_y;
+
+	float drag_point_dist;
 
 	selection_c *drag_lines;
 

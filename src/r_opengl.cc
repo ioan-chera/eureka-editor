@@ -1197,7 +1197,6 @@ public:
 
 			tx += dx;
 			ty += dy;
-
 		}
 
 		const thingtype_t *info = M_GetThingType(th->type);

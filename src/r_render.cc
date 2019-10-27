@@ -724,14 +724,10 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 }
 
 
-extern int mouse_button1_y;
-extern float drag_point_dist;
-
-
 static void DragSectors_Update(int sy)
 {
-	float factor = CLAMP(20, drag_point_dist, 1000) / r_view.aspect_sh;
-	float map_dz = (mouse_button1_y - sy) * factor;
+	float factor = CLAMP(20, edit.drag_point_dist, 1000) / r_view.aspect_sh;
+	float map_dz = (edit.click_screen_y - sy) * factor;
 
 	if (true)  ///REVIEW  if (grid.snap)
 	{
@@ -855,6 +851,9 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 	else if (edit.action == ACT_DRAG)
 	{
+		edit.drag_screen_dx = dx;
+		edit.drag_screen_dy = dy;
+
 		edit.drag_cur_x = edit.map_x;
 		edit.drag_cur_y = edit.map_y;
 
@@ -862,7 +861,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 			DragSectors_Update(y);
 
 		if (edit.mode == OBJ_THINGS)
-			edit.adjust_dz = (mouse_button1_y - y) / r_view.aspect_sh;
+			edit.adjust_dz = (edit.click_screen_y - y) / r_view.aspect_sh;
 
 		main_win->canvas->redraw();
 		return;

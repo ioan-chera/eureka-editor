@@ -505,27 +505,12 @@ void CMD_NAV_MouseScroll()
 }
 
 
-// screen position when LMB was pressed
-int mouse_button1_x;
-int mouse_button1_y;
-
-// map location when LMB was pressed
-static double button1_map_x;
-static double button1_map_y;
-static double button1_map_z;
-
-static bool click_check_drag;
-static bool click_check_select;
-static bool click_force_single;
-
-float drag_point_dist;
-
 static void DoBeginDrag();
 
 
 void CheckBeginDrag()
 {
-	if (! click_check_drag)
+	if (! edit.click_check_drag)
 		return;
 
 	// can drag things and sector planes in 3D mode
@@ -535,8 +520,8 @@ void CheckBeginDrag()
 	if (! edit.clicked.valid())
 		return;
 
-	int pixel_dx = Fl::event_x() - mouse_button1_x;
-	int pixel_dy = Fl::event_y() - mouse_button1_y;
+	int pixel_dx = Fl::event_x() - edit.click_screen_x;
+	int pixel_dy = Fl::event_y() - edit.click_screen_y;
 
 	if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels)
 		return;
@@ -544,7 +529,7 @@ void CheckBeginDrag()
 	// if highlighted object is in selection, we drag the selection,
 	// otherwise we drag just this one object.
 
-	if (click_force_single || !edit.Selected->get(edit.clicked.num))
+	if (edit.click_force_single || !edit.Selected->get(edit.clicked.num))
 		edit.dragged = edit.clicked;
 	else
 		edit.dragged.clear();
@@ -557,10 +542,12 @@ void CheckBeginDrag()
 static void DoBeginDrag()
 {
 	// the focus is only used when grid snapping is on
-	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, button1_map_x, button1_map_y);
+	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
 
-	edit.drag_start_x = edit.drag_cur_x = button1_map_x;
-	edit.drag_start_y = edit.drag_cur_y = button1_map_y;
+	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
+	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
+
+	edit.drag_screen_dx = edit.drag_screen_dy = 0;
 
 	// in vertex mode, show all the connected lines too
 	if (edit.drag_lines)
@@ -649,7 +636,7 @@ static void ACT_Click_release(void)
 	Objid click_obj(edit.clicked);
 	edit.clicked.clear();
 
-	click_check_drag = false;
+	edit.click_check_drag = false;
 
 
 	if (edit.action == ACT_SELBOX)
@@ -667,7 +654,7 @@ static void ACT_Click_release(void)
 	if (edit.action != ACT_CLICK)
 		return;
 
-	if (click_check_select && click_obj.valid())
+	if (edit.click_check_select && click_obj.valid())
 	{
 		// only toggle selection if it's the same object as before
 		Objid near_obj;
@@ -699,21 +686,21 @@ void CMD_ACT_Click()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
 
-	click_check_select = ! Exec_HasFlag("/noselect");
-	click_check_drag   = ! Exec_HasFlag("/nodrag");
-	click_force_single = false;
+	edit.click_check_select = ! Exec_HasFlag("/noselect");
+	edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
+	edit.click_force_single = false;
 
-	if (click_check_drag)
+	if (edit.click_check_drag)
 	{
 		// remember some state (for drag detection)
-		mouse_button1_x = Fl::event_x();
-		mouse_button1_y = Fl::event_y();
+		edit.click_screen_x = Fl::event_x();
+		edit.click_screen_y = Fl::event_y();
 
-		button1_map_x = edit.map_x;
-		button1_map_y = edit.map_y;
-		button1_map_z = edit.map_z;
+		edit.click_map_x = edit.map_x;
+		edit.click_map_y = edit.map_y;
+		edit.click_map_z = edit.map_z;
 
-		drag_point_dist = hypot(edit.map_x - r_view.x, edit.map_y - r_view.y);
+		edit.drag_point_dist = hypot(edit.map_x - r_view.x, edit.map_y - r_view.y);
 	}
 
 	// handle 3D mode, skip stuff below which only makes sense in 2D
@@ -732,8 +719,8 @@ void CMD_ACT_Click()
 	{
 		int split_ld = edit.split_line.num;
 
-		click_force_single = true;   // if drag vertex, force single-obj mode
-		click_check_select = false;  // do NOT select the new vertex
+		edit.click_force_single = true;   // if drag vertex, force single-obj mode
+		edit.click_check_select = false;  // do NOT select the new vertex
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
@@ -769,7 +756,7 @@ void CMD_ACT_Click()
 	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box
-	if (click_check_select && edit.clicked.is_nil())
+	if (edit.click_check_select && edit.clicked.is_nil())
 	{
 		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
 		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
