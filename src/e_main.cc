@@ -1325,7 +1325,7 @@ void Editor_DefaultState()
 {
 	edit.action = ACT_NOTHING;
 	edit.sticky_mod = 0;
-	edit.is_scrolling = false;
+	edit.is_panning = false;
 
 	edit.dragged.clear();
 	edit.from_vert.clear();

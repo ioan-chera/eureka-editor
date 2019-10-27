@@ -61,20 +61,7 @@ public:
 	int thsec_sector_num;
 	bool thsec_invalidated;
 
-	// navigation loop info
-	bool is_scrolling;
-	float scroll_speed;
-
-	unsigned int nav_time;
-
-	float nav_fwd, nav_back;
-	float nav_left, nav_right;
-	float nav_up, nav_down;
-	float nav_turn_L, nav_turn_R;
-
-	/* r_editing_info_t stuff */
-
-	// current highlighted wotsit
+	// last queried highlight object
 	Objid current_hl;
 
 	// state for adjusting offsets via the mouse
@@ -124,7 +111,6 @@ bool Render3D_Query(Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_Navigate();
-void Render3D_ClearNav();
 
 void Render3D_UpdateHighlight();
 

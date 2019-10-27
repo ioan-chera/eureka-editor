@@ -62,8 +62,6 @@ Render_View_t::Render_View_t() :
 	thing_sectors(),
 	thsec_sector_num(0),
 	thsec_invalidated(false),
-	is_scrolling(false),
-	nav_time(0),
 	current_hl()
 { }
 
@@ -657,7 +655,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	// started?
 	if (mode < 0)
 	{
-		r_view.is_scrolling = true;
+		edit.is_panning = true;
 		main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
@@ -665,7 +663,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	// finished?
 	if (mode > 0)
 	{
-		r_view.is_scrolling = false;
+		edit.is_panning = false;
 		main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
@@ -692,7 +690,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	if (mod & MOD_SHIFT)   mod_factor = 0.4;
 	if (mod & MOD_COMMAND) mod_factor = 2.5;
 
-	float speed = r_view.scroll_speed * mod_factor;
+	float speed = edit.panning_speed * mod_factor;
 
 	if (is_strafe)
 	{
@@ -834,7 +832,7 @@ void Render3D_DragThings()
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
-	if (r_view.is_scrolling)
+	if (edit.is_panning)
 	{
 		Render3D_RBScroll(0, dx, dy, mod);
 		return;
@@ -894,16 +892,6 @@ void Render3D_UpdateHighlight()
 }
 
 
-void Render3D_ClearNav()
-{
-	r_view.nav_fwd  = r_view.nav_back  = 0;
-	r_view.nav_left = r_view.nav_right = 0;
-	r_view.nav_up   = r_view.nav_down  = 0;
-
-	r_view.nav_turn_L = r_view.nav_turn_R = 0;
-}
-
-
 void Render3D_Navigate()
 {
 	float delay_ms = Nav_TimeDiff();
@@ -916,10 +904,10 @@ void Render3D_Navigate()
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;
 	if (mod & MOD_COMMAND) mod_factor = 2.0;
 
-	if (r_view.nav_fwd || r_view.nav_back || r_view.nav_right || r_view.nav_left)
+	if (edit.nav_fwd || edit.nav_back || edit.nav_right || edit.nav_left)
 	{
-		float fwd   = r_view.nav_fwd   - r_view.nav_back;
-		float right = r_view.nav_right - r_view.nav_left;
+		float fwd   = edit.nav_fwd   - edit.nav_back;
+		float right = edit.nav_right - edit.nav_left;
 
 		float dx = r_view.Cos * fwd + r_view.Sin * right;
 		float dy = r_view.Sin * fwd - r_view.Cos * right;
@@ -931,16 +919,16 @@ void Render3D_Navigate()
 		r_view.y += dy * delay_ms;
 	}
 
-	if (r_view.nav_up || r_view.nav_down)
+	if (edit.nav_up || edit.nav_down)
 	{
-		float dz = (r_view.nav_up - r_view.nav_down);
+		float dz = (edit.nav_up - edit.nav_down);
 
 		r_view.z += dz * mod_factor * delay_ms;
 	}
 
-	if (r_view.nav_turn_L || r_view.nav_turn_R)
+	if (edit.nav_turn_L || edit.nav_turn_R)
 	{
-		float dang = (r_view.nav_turn_L - r_view.nav_turn_R);
+		float dang = (edit.nav_turn_L - edit.nav_turn_R);
 
 		dang = dang * mod_factor * delay_ms;
 		dang = CLAMP(-90, dang, 90);
@@ -1546,7 +1534,7 @@ void R3D_DropToFloor()
 
 static void R3D_NAV_Forward_release()
 {
-	r_view.nav_fwd = 0;
+	edit.nav_fwd = 0;
 }
 
 void R3D_NAV_Forward()
@@ -1555,9 +1543,9 @@ void R3D_NAV_Forward()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_fwd = atof(EXEC_Param[0]);
+	edit.nav_fwd = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
 }
@@ -1565,7 +1553,7 @@ void R3D_NAV_Forward()
 
 static void R3D_NAV_Back_release(void)
 {
-	r_view.nav_back = 0;
+	edit.nav_back = 0;
 }
 
 void R3D_NAV_Back()
@@ -1574,9 +1562,9 @@ void R3D_NAV_Back()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_back = atof(EXEC_Param[0]);
+	edit.nav_back = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
 }
@@ -1584,7 +1572,7 @@ void R3D_NAV_Back()
 
 static void R3D_NAV_Right_release(void)
 {
-	r_view.nav_right = 0;
+	edit.nav_right = 0;
 }
 
 void R3D_NAV_Right()
@@ -1593,9 +1581,9 @@ void R3D_NAV_Right()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_right = atof(EXEC_Param[0]);
+	edit.nav_right = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
 }
@@ -1603,7 +1591,7 @@ void R3D_NAV_Right()
 
 static void R3D_NAV_Left_release(void)
 {
-	r_view.nav_left = 0;
+	edit.nav_left = 0;
 }
 
 void R3D_NAV_Left()
@@ -1612,9 +1600,9 @@ void R3D_NAV_Left()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_left = atof(EXEC_Param[0]);
+	edit.nav_left = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
 }
@@ -1622,7 +1610,7 @@ void R3D_NAV_Left()
 
 static void R3D_NAV_Up_release(void)
 {
-	r_view.nav_up = 0;
+	edit.nav_up = 0;
 }
 
 void R3D_NAV_Up()
@@ -1639,9 +1627,9 @@ void R3D_NAV_Up()
 	r_view.gravity = false;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_up = atof(EXEC_Param[0]);
+	edit.nav_up = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
 }
@@ -1649,7 +1637,7 @@ void R3D_NAV_Up()
 
 static void R3D_NAV_Down_release(void)
 {
-	r_view.nav_down = 0;
+	edit.nav_down = 0;
 }
 
 void R3D_NAV_Down()
@@ -1666,9 +1654,9 @@ void R3D_NAV_Down()
 	r_view.gravity = false;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_down = atof(EXEC_Param[0]);
+	edit.nav_down = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
 }
@@ -1676,7 +1664,7 @@ void R3D_NAV_Down()
 
 static void R3D_NAV_TurnLeft_release(void)
 {
-	r_view.nav_turn_L = 0;
+	edit.nav_turn_L = 0;
 }
 
 void R3D_NAV_TurnLeft()
@@ -1685,12 +1673,12 @@ void R3D_NAV_TurnLeft()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
 	float turn = atof(EXEC_Param[0]);
 
 	// convert to radians
-	r_view.nav_turn_L = turn * M_PI / 180.0;
+	edit.nav_turn_L = turn * M_PI / 180.0;
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
 }
@@ -1698,7 +1686,7 @@ void R3D_NAV_TurnLeft()
 
 static void R3D_NAV_TurnRight_release(void)
 {
-	r_view.nav_turn_R = 0;
+	edit.nav_turn_R = 0;
 }
 
 void R3D_NAV_TurnRight()
@@ -1707,12 +1695,12 @@ void R3D_NAV_TurnRight()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
 	float turn = atof(EXEC_Param[0]);
 
 	// convert to radians
-	r_view.nav_turn_R = turn * M_PI / 180.0;
+	edit.nav_turn_R = turn * M_PI / 180.0;
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
@@ -1728,7 +1716,7 @@ void R3D_NAV_MouseMove()
 	if (! EXEC_CurKey)
 		return;
 
-	r_view.scroll_speed = atof(EXEC_Param[0]);
+	edit.panning_speed = atof(EXEC_Param[0]);
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();

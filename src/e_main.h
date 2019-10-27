@@ -57,9 +57,6 @@ struct Editor_State_t
 
 	keycode_t sticky_mod;  // if != 0, waiting for next key  (fake meta)
 
-	bool is_scrolling;   // user is scrolling the map (or moving in 3D view)
-	bool is_navigating;  // user is holding down a navigation key
-
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
 	double map_x, map_y, map_z;  // map coordinates of pointer (no Z in 2D)
 
@@ -86,14 +83,18 @@ struct Editor_State_t
 
 	bool show_object_numbers;
 
-	/* private navigation stuff */
 
-	float nav_scroll_left;
-	float nav_scroll_right;
-	float nav_scroll_up;
-	float nav_scroll_down;
+	/* navigation stuff */
 
-	float scroll_speed;
+	bool is_navigating;  // user is holding down a navigation key
+	bool is_panning;     // user is panning the map (turning in 3D) via RMB
+
+	float nav_fwd,    nav_back;
+	float nav_left,   nav_right;
+	float nav_up,     nav_down;
+	float nav_turn_L, nav_turn_R;
+
+	float panning_speed;
 };
 
 

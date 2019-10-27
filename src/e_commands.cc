@@ -398,7 +398,7 @@ void CMD_Scroll()
 
 static void NAV_Scroll_Left_release(void)
 {
-	edit.nav_scroll_left = 0;
+	edit.nav_left = 0;
 }
 
 void CMD_NAV_Scroll_Left()
@@ -411,7 +411,7 @@ void CMD_NAV_Scroll_Left()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_left = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_left = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release);
 }
@@ -419,7 +419,7 @@ void CMD_NAV_Scroll_Left()
 
 static void NAV_Scroll_Right_release(void)
 {
-	edit.nav_scroll_right = 0;
+	edit.nav_right = 0;
 }
 
 void CMD_NAV_Scroll_Right()
@@ -432,7 +432,7 @@ void CMD_NAV_Scroll_Right()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_right = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_right = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release);
 }
@@ -440,7 +440,7 @@ void CMD_NAV_Scroll_Right()
 
 static void NAV_Scroll_Up_release(void)
 {
-	edit.nav_scroll_up = 0;
+	edit.nav_up = 0;
 }
 
 void CMD_NAV_Scroll_Up()
@@ -453,7 +453,7 @@ void CMD_NAV_Scroll_Up()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_up = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_up = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release);
 }
@@ -461,7 +461,7 @@ void CMD_NAV_Scroll_Up()
 
 static void NAV_Scroll_Down_release(void)
 {
-	edit.nav_scroll_down = 0;
+	edit.nav_down = 0;
 }
 
 void CMD_NAV_Scroll_Down()
@@ -474,7 +474,7 @@ void CMD_NAV_Scroll_Down()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_down = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_down = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release);
 }
@@ -493,7 +493,7 @@ void CMD_NAV_MouseScroll()
 	if (! EXEC_CurKey)
 		return;
 
-	edit.scroll_speed = atof(EXEC_Param[0]);
+	edit.panning_speed = atof(EXEC_Param[0]);
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
