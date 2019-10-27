@@ -138,6 +138,7 @@ struct Editor_State_t
 	double drag_cur_x,   drag_cur_y;
 
 	float drag_point_dist;
+	float drag_sector_dz;
 
 	selection_c *drag_lines;
 

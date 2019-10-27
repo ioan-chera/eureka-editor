@@ -1143,7 +1143,7 @@ public:
 			 (edit.dragged.num == sec_index &&
 			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
 		{
-			z = z + edit.adjust_dz;  // FIXME call it drag_dz
+			z = z + edit.drag_sector_dz;
 		}
 		else
 		{

@@ -724,30 +724,25 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 }
 
 
-static void DragSectors_Update(int sy)
+static void DragSectors_Update()
 {
 	float factor = CLAMP(20, edit.drag_point_dist, 1000) / r_view.aspect_sh;
-	float map_dz = (edit.click_screen_y - sy) * factor;
 
-	if (true)  ///REVIEW  if (grid.snap)
-	{
-		// snap to 8 unit grid [ FIXME : take a "focus_z" value into account ]
-		if (map_dz > 2.0)
-			edit.adjust_dz = 8 * (int)ceil(map_dz / 8.0);
-		else if (map_dz < -2.0)
-			edit.adjust_dz = 8 * (int)floor(map_dz / 8.0);
-		else
-			edit.adjust_dz = 0;
-	}
+	float map_dz = -edit.drag_screen_dy * factor;
+
+	float step = 8.0;  // TODO config item
+
+	if (map_dz > step*0.25)
+		edit.drag_sector_dz = step * (int)ceil(map_dz / step);
+	else if (map_dz < step*-0.25)
+		edit.drag_sector_dz = step * (int)floor(map_dz / step);
 	else
-	{
-		edit.adjust_dz = map_dz;
-	}
+		edit.drag_sector_dz = 0;
 }
 
 void Render3D_DragSectors()
 {
-	int dz = I_ROUND(edit.adjust_dz);
+	int dz = I_ROUND(edit.drag_sector_dz);
 	if (dz == 0)
 		return;
 
@@ -851,17 +846,17 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 	else if (edit.action == ACT_DRAG)
 	{
-		edit.drag_screen_dx = dx;
-		edit.drag_screen_dy = dy;
+		edit.drag_screen_dx = x - edit.click_screen_x;
+		edit.drag_screen_dy = y - edit.click_screen_y;
 
 		edit.drag_cur_x = edit.map_x;
 		edit.drag_cur_y = edit.map_y;
 
 		if (edit.mode == OBJ_SECTORS)
-			DragSectors_Update(y);
+			DragSectors_Update();
 
 		if (edit.mode == OBJ_THINGS)
-			edit.adjust_dz = (edit.click_screen_y - y) / r_view.aspect_sh;
+			DragThings_Update();
 
 		main_win->canvas->redraw();
 		return;

@@ -510,14 +510,14 @@ static void DoBeginDrag();
 
 void CheckBeginDrag()
 {
+	if (! edit.clicked.valid())
+		return;
+
 	if (! edit.click_check_drag)
 		return;
 
 	// can drag things and sector planes in 3D mode
 	if (edit.render3d && !(edit.mode == OBJ_THINGS || edit.mode == OBJ_SECTORS))
-		return;
-
-	if (! edit.clicked.valid())
 		return;
 
 	int pixel_dx = Fl::event_x() - edit.click_screen_x;
@@ -541,13 +541,27 @@ void CheckBeginDrag()
 
 static void DoBeginDrag()
 {
+	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
+	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
+	edit.drag_start_z = edit.click_map_z;
+
+	edit.drag_screen_dx = edit.drag_screen_dy = 0;
+
 	// the focus is only used when grid snapping is on
 	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
 
-	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
-	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
+	if (edit.render3d)
+	{
+		if (edit.mode == OBJ_SECTORS)
+		{
+			edit.drag_sector_dz = 0;
+		}
 
-	edit.drag_screen_dx = edit.drag_screen_dy = 0;
+		if (edit.mode == OBJ_THINGS)
+		{
+			// TODO
+		}
+	}
 
 	// in vertex mode, show all the connected lines too
 	if (edit.drag_lines)
