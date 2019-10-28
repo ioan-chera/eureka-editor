@@ -157,7 +157,6 @@ void Render_View_t::FindThingSectors()
 	for (int i = 0 ; i < NumThings ; i++)
 	{
 		Objid obj;
-
 		GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
 
 		thing_sectors[i] = obj.num;
@@ -828,46 +827,76 @@ static void DragThings_Update()
 	double fwd_vx = r_view.Cos;
 	double fwd_vy = r_view.Sin;
 
-	double side_vx = -fwd_vy;
-	double side_vy =  fwd_vx;
+	double side_vx =  fwd_vy;
+	double side_vy = -fwd_vx;
 
-#if 0
-	// this generally won't happen, but is a reasonable fallback...
+	double dx =  edit.drag_screen_dx * x_factor;
+	double dy = -edit.drag_screen_dy * y_factor * 2.0;
+
+	// this usually won't happen, but is a reasonable fallback...
 	if (edit.drag_thing_num < 0)
-#endif
 	{
-		double dx = edit.drag_screen_dx * x_factor;
-		double dy = edit.drag_screen_dy * y_factor * 2.0;
-
-		edit.drag_cur_x = edit.drag_start_x - dy * fwd_vx - dx * side_vx;
-		edit.drag_cur_y = edit.drag_start_y - dy * fwd_vy - dx * side_vy;
+		edit.drag_cur_x = edit.drag_start_x + dx * side_vx + dy * fwd_vx;
+		edit.drag_cur_y = edit.drag_start_y + dx * side_vy + dy * fwd_vy;
 		return;
 	}
+
+	// old code for depth calculation, works well in certain cases
+	// but very poorly in other cases.
+#if 0
+	int sy1 = edit.click_screen_y;
+	int sy2 = sy1 + edit.drag_screen_dy;
+
+	if (sy1 >= oh/2 && sy2 >= oh/2)
+	{
+		double d1 = (edit.drag_thing_floorh - r_view.z) / (oh - sy1*2.0);
+		double d2 = (edit.drag_thing_floorh - r_view.z) / (oh - sy2*2.0);
+
+		d1 = d1 * ow;
+		d2 = d2 * ow;
+
+		dy = (d2 - d1) * 0.5;
+	}
+#endif
 
 	const Thing *T = Things[edit.drag_thing_num];
 
 	float old_x = T->x();
 	float old_y = T->y();
 
-	float new_x = old_x + 123.0; //FIXME
-	float new_y = old_y + 5.0;
+	float new_x = old_x + dx * side_vx;
+	float new_y = old_y + dx * side_vy;
+
+	// recompute forward/back vector
+	fwd_vx = new_x - r_view.x;
+	fwd_vy = new_y - r_view.y;
+
+	double fwd_len = hypot(fwd_vx, fwd_vy);
+	if (fwd_len < 1)
+		fwd_len = 1;
+
+	new_x = new_x + dy * fwd_vx / fwd_len;
+	new_y = new_y + dy * fwd_vy / fwd_len;
 
 	// handle a change in floor height
 	Objid old_sec;
 	GetNearObject(old_sec, OBJ_SECTORS, old_x, old_y);
 
 	Objid new_sec;
-	GetNearObject(old_sec, OBJ_SECTORS, new_x, new_y);
+	GetNearObject(new_sec, OBJ_SECTORS, new_x, new_y);
 
 	if (old_sec.valid() && new_sec.valid())
 	{
 		float old_z = Sectors[old_sec.num]->floorh;
-		float new_z = Sectors[old_sec.num]->floorh;
+		float new_z = Sectors[new_sec.num]->floorh;
 
+		// intent here is to show proper position, NOT raise/lower things.
+		// [ perhaps add a new variable? ]
 		edit.drag_cur_z += (new_z - old_z);
 	}
 
-	// FIXME set edit.drag_cur_x/y
+	edit.drag_cur_x = edit.drag_start_x + new_x - old_x;
+	edit.drag_cur_y = edit.drag_start_y + new_y - old_y;
 }
 
 void Render3D_DragThings()
@@ -875,6 +904,10 @@ void Render3D_DragThings()
 	double dx = edit.drag_cur_x - edit.drag_start_x;
 	double dy = edit.drag_cur_y - edit.drag_start_y;
 	double dz = edit.drag_cur_z - edit.drag_start_z;
+
+	// for movement in XY plane, ensure we don't raise/lower things
+	if (grid.snap || Level_format == MAPF_Doom)
+		dz = 0.0;
 
 	if (edit.dragged.valid())
 	{

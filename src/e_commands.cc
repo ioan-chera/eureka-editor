@@ -555,7 +555,22 @@ static void DoBeginDrag()
 			edit.drag_sector_dz = 0;
 
 		if (edit.mode == OBJ_THINGS)
+		{
 			edit.drag_thing_num = edit.clicked.num;
+			edit.drag_thing_floorh = edit.drag_start_z;
+
+			// get thing's floor
+			if (edit.drag_thing_num >= 0)
+			{
+				const Thing *T = Things[edit.drag_thing_num];
+
+				Objid sec;
+				GetNearObject(sec, OBJ_SECTORS, T->x(), T->y());
+
+				if (sec.valid())
+					edit.drag_thing_floorh = Sectors[sec.num]->floorh;
+			}
+		}
 	}
 
 	// in vertex mode, show all the connected lines too
