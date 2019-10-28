@@ -74,11 +74,11 @@ private:
 
 //------------------------------------------------------------------------
 
-class UI_3DInfoBar : public Fl_Widget
+class UI_StatusBar : public Fl_Widget
 {
 public:
-	UI_3DInfoBar(int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_3DInfoBar();
+	UI_StatusBar(int X, int Y, int W, int H, const char *label = NULL);
+	virtual ~UI_StatusBar();
 
 public:
 	// FLTK methods

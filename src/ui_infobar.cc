@@ -236,7 +236,7 @@ void UI_InfoBar::SetMouse(double mx, double my)
 {
 	// TODO this method should go away
 
-	main_win->scroll->info3d->redraw();
+	main_win->status_bar->redraw();
 }
 
 
@@ -350,24 +350,24 @@ void Status_Clear()
 #define INFO_DIM_COL	fl_rgb_color(128, 128, 128)
 
 
-UI_3DInfoBar::UI_3DInfoBar(int X, int Y, int W, int H, const char *label) :
+UI_StatusBar::UI_StatusBar(int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label)
 {
 	box(FL_NO_BOX);
 }
 
-UI_3DInfoBar::~UI_3DInfoBar()
+UI_StatusBar::~UI_StatusBar()
 {
 }
 
 
-int UI_3DInfoBar::handle(int event)
+int UI_StatusBar::handle(int event)
 {
 	// this never handles any events
 	return 0;
 }
 
-void UI_3DInfoBar::draw()
+void UI_StatusBar::draw()
 {
 	fl_color(fl_rgb_color(64, 64, 64));
 	fl_rectf(x(), y(), w(), h());
@@ -423,7 +423,7 @@ void UI_3DInfoBar::draw()
 }
 
 
-void UI_3DInfoBar::IB_Number(int& cx, int& cy, const char *label, int value, int size)
+void UI_StatusBar::IB_Number(int& cx, int& cy, const char *label, int value, int size)
 {
 	char buffer[256];
 
@@ -441,7 +441,7 @@ void UI_3DInfoBar::IB_Number(int& cx, int& cy, const char *label, int value, int
 }
 
 
-void UI_3DInfoBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
+void UI_StatusBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off)
 {
 	const char *label = value ? label_on : label_off;
 
@@ -453,7 +453,7 @@ void UI_3DInfoBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, c
 }
 
 
-void UI_3DInfoBar::IB_Highlight(int& cx, int& cy)
+void UI_StatusBar::IB_Highlight(int& cx, int& cy)
 {
 	char buffer[256];
 

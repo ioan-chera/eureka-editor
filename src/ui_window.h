@@ -67,6 +67,7 @@ public:
 	UI_Browser *browser;
 
 	UI_InfoBar *info_bar;
+	UI_StatusBar *status_bar;
 
 	UI_ThingBox  *thing_box;
 	UI_LineBox   *line_box;

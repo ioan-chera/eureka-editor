@@ -91,7 +91,9 @@ UI_MainWindow::UI_MainWindow() :
 
 	scroll = new UI_CanvasScroll(0, cy, cw, ch);
 
+	// UI_CanvasScroll creates these, we mirror them for easier access
 	canvas = scroll->canvas;
+	status_bar = scroll->status;
 
 	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
 

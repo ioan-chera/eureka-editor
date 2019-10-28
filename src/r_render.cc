@@ -986,7 +986,7 @@ void Render3D_UpdateHighlight()
 	}
 
 	main_win->canvas->redraw();
-	main_win->scroll->info3d->redraw();
+	main_win->status_bar->redraw();
 }
 
 

@@ -327,7 +327,7 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	resizable(canvas);
 
 
-	info3d = new UI_3DInfoBar(X, Y, W, INFO_BAR_H);
+	status = new UI_StatusBar(X, Y, W, INFO_BAR_H);
 
 	end();
 }
@@ -342,7 +342,7 @@ void UI_CanvasScroll::UpdateRenderMode()
 	int old_bars = enable_bars ? 1 : 0;
 	int new_bars = map_scroll_bars && !edit.render3d ? 1 : 0;
 
-	int old_rend = info3d->visible() ? 1 : 0;
+	int old_rend = status->visible() ? 1 : 0;
 	int new_rend = edit.render3d ? 1 : 0;
 
 	// nothing changed?
@@ -370,9 +370,9 @@ void UI_CanvasScroll::UpdateRenderMode()
 	}
 
 	if (show_info)
-		info3d->show();
+		status->show();
 	else
-		info3d->hide();
+		status->hide();
 
 	init_sizes();
 }

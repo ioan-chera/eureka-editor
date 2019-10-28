@@ -94,7 +94,7 @@ class UI_CanvasScroll : public Fl_Group
 public:
 	UI_Canvas * canvas;
 
-	UI_3DInfoBar * info3d;
+	UI_StatusBar * status;
 
 private:
 	Fl_Scrollbar * horiz;
