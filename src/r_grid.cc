@@ -142,8 +142,17 @@ double Grid_State_c::SnapY(double map_y) const
 void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 							   double start_x, double start_y) const
 {
-	double dx = fabs(var_x - start_x);
-	double dy = fabs(var_y - start_y);
+	// snap first, otherwise we lose the ratio
+	var_x = grid.SnapX(var_x);
+	var_y = grid.SnapY(var_y);
+
+	double dx = var_x - start_x;
+	double dy = var_y - start_y;
+
+	double len = MAX(abs(dx), abs(dy));
+
+	int sign_x = (dx >= 0) ? +1 : -1;
+	int sign_y = (dy >= 0) ? +1 : -1;
 
 	switch (0)
 	{
@@ -151,19 +160,82 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		break;
 
 	case 1: // axis aligned
-		if (dx < dy)
+		if (fabs(dx) < fabs(dy))
 			var_x = start_x;
 		else
 			var_y = start_y;
 		break;
 
-	case 2:
-		// todo
-		return;
-	}
+	case 2: // 1:1 (45 degrees)
+		var_x = start_x + sign_x * len;
+		var_y = start_y + sign_y * len;
+		break;
 
-	var_x = grid.SnapX(var_x);
-	var_y = grid.SnapY(var_y);
+	case 3: // 2:1
+		if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len * 0.5;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len * 0.5;
+		}
+		break;
+
+	case 4: // 4:1
+		if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len * 0.25;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len * 0.25;
+		}
+		break;
+
+	case 5: // 8:1
+		if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len * 0.125;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len * 0.125;
+		}
+		break;
+
+	case 6: // 5:4
+		if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len * 0.8;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len * 0.8;
+		}
+		break;
+
+	case 7: // 7:4
+		if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len * 4 / 7;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len * 4 / 7;
+		}
+		break;
+	}
 }
 
 
