@@ -1026,7 +1026,7 @@ UI_Preferences::UI_Preferences() :
 #endif
 		}
 		{ rend_far_clip = new Fl_Choice(195, 160, 100, 30, "Far clip distance: ");
-		  rend_far_clip->add("32768|8192|4096|2048|1024");
+		  rend_far_clip->add("32768|16384|8192|4096|2048|1024");
 #ifdef NO_OPENGL
 		  rend_far_clip->hide();
 #endif
@@ -1486,16 +1486,18 @@ void UI_Preferences::LoadValues()
 	rend_high_detail->value(render_high_detail ? 1 : 0);
 	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
 
-	if (render_far_clip > 16384)
+	if (render_far_clip > 24000)
 		rend_far_clip->value(0);
-	else if (render_far_clip > 6000)
+	else if (render_far_clip > 12000)
 		rend_far_clip->value(1);
-	else if (render_far_clip > 3000)
+	else if (render_far_clip > 6000)
 		rend_far_clip->value(2);
-	else if (render_far_clip > 1500)
+	else if (render_far_clip > 3000)
 		rend_far_clip->value(3);
-	else
+	else if (render_far_clip > 1500)
 		rend_far_clip->value(4);
+	else
+		rend_far_clip->value(5);
 
 	/* Nodes Tab */
 
