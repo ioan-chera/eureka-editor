@@ -31,6 +31,7 @@
 #include "im_color.h"
 #include "im_img.h"
 #include "e_hover.h"
+#include "e_linedef.h"
 #include "e_main.h"
 #include "m_game.h"
 #include "w_rawdef.h"
@@ -186,6 +187,9 @@ public:
 	// which side this wall faces (SIDE_LEFT or SIDE_RIGHT)
 	// for sprites: a copy of the thinginfo flags
 	int side;
+
+	// the linedef index
+	int ld_index;
 
 	// lighting for wall, adjusted for N/S and E/W walls
 	int wall_light;
@@ -483,8 +487,10 @@ public:
 	int query_sx;
 	int query_sy;
 
-	DrawWall     *query_wall;  // the hit wall
-	obj3d_type_e  query_part;  // the part of the hit wall
+	Objid query_result;
+	float query_map_x;
+	float query_map_y;
+	float query_map_z;
 
 	// inverse distances over X range, 0 when empty.
 	std::vector<double> depth_x;
@@ -495,6 +501,8 @@ public:
 
 	// these used by Highlight()
 	int hl_ox, hl_oy;
+	int hl_thick;
+	Fl_Color hl_color;
 
 private:
 	static void DeleteWall(DrawWall *P)
@@ -524,7 +532,7 @@ public:
 		std::fill_n(depth_x.begin(), width, 0);
 	}
 
-	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, short thick, Fl_Color color)
+	void DrawHighlightLine(int sx1, int sy1, int sx2, int sy2)
 	{
 		if (! render_high_detail)
 		{
@@ -532,23 +540,15 @@ public:
 			sx2 *= 2;  sy2 *= 2;
 		}
 
-		fl_color(color);
+		fl_color(hl_color);
 
-		if (thick)
+		if (hl_thick)
 			fl_line_style(FL_SOLID, 2);
 
 		fl_line(hl_ox + sx1, hl_oy + sy1, hl_ox + sx2, hl_oy + sy2);
 
-		if (thick)
+		if (hl_thick)
 			fl_line_style(0);
-	}
-
-	void AddHighlightLine(int sx1, int sy1, int sx2, int sy2, int sel_mode)
-	{
-		AddHighlightLine(sx1, sy1, sx2, sy2,
-				(sel_mode & 1) ? 2 : 0,
-				(sel_mode == 3) ? HI_AND_SEL_COL :
-				(sel_mode == 2) ? HI_COL : SEL_COL);
 	}
 
 	static inline float PointToAngle(float x, float y)
@@ -763,9 +763,10 @@ public:
 
 		dw->th = -1;
 		dw->ld = ld;
+		dw->ld_index = ld_index;
+
 		dw->sd = sd;
 		dw->sec = sd->SecRef();
-
 		dw->side = side;
 
 		dw->wall_light = dw->sec->light;
@@ -862,6 +863,7 @@ public:
 		DrawWall *dw = new DrawWall;
 
 		dw->th  = th_index;
+		dw->ld_index = -1;
 		dw->ld  = NULL;
 		dw->sd  = NULL;
 		dw->sec = NULL;
@@ -869,8 +871,6 @@ public:
 		dw->side = info ? info->flags : 0;
 
 		if (is_unknown && render_unknown_bright)
-			dw->side |= THINGDEF_LIT;
-		else if (r_view.hl.isThing() && th_index == r_view.hl.num)
 			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
@@ -901,150 +901,339 @@ public:
 		}
 	}
 
-	void Highlight_WallPart(obj3d_type_e part, const DrawWall *dw,
-							int sel_mode)
+	void QueryCalcCoord(const DrawWall *dw, obj_type_e what, int part)
 	{
-		int h1, h2;
+		float dist = 1.0 / dw->cur_iz;
 
-		if (! dw->ld->TwoSided())
+		if (what == OBJ_SECTORS)
 		{
-			h1 = dw->sd->SecRef()->floorh;
-			h2 = dw->sd->SecRef()->ceilh;
+			// sky surfaces require a check on Z height
+			if (part == PART_CEIL && dw->sec->ceilh > r_view.z + 1)
+				dist = YToDist(query_sy, dw->sec->ceilh);
+			else if (part == PART_FLOOR && dw->sec->floorh < r_view.z - 1)
+				dist = YToDist(query_sy, dw->sec->floorh);
 		}
-		else
+
+		if (dist < 4.0)
+			dist = 4.0;
+
+		float ang = XToAngle(query_sx);
+		float modv = cos(ang - M_PI/2);
+
+		float t_cos = cos(M_PI + -r_view.angle + ang) / modv;
+		float t_sin = sin(M_PI + -r_view.angle + ang) / modv;
+
+		query_map_x = r_view.x - t_sin * dist;
+		query_map_y = r_view.y - t_cos * dist;
+		query_map_z = YToSecH(query_sy, 1.0 / dist);
+
+		// ensure we never produce X == 0
+		if (query_map_x == 0)
+			query_map_x = 0.01;
+	}
+
+	void HighlightWallBit(const DrawWall *dw, int ld_index, int part)
+	{
+		// check the part is on the side facing the camera
+		int p_side = (part & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+		if (dw->side != p_side)
+			return;
+
+		int z1, z2;
+
+		if (dw->ld->TwoSided())
 		{
 			const Sector *front = dw->ld->Right()->SecRef();
 			const Sector *back  = dw->ld-> Left()->SecRef();
 
-			if (part == OB3D_Lower)
+			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				h1 = MIN(front->floorh, back->floorh);
-				h2 = MAX(front->floorh, back->floorh);
+				z1 = MIN(front->floorh, back->floorh);
+				z2 = MAX(front->floorh, back->floorh);
 			}
-			else  /* part == OB3D_Upper */
+			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				h1 = MIN(front->ceilh, back->ceilh);
-				h2 = MAX(front->ceilh, back->ceilh);
+				z1 = MIN(front->ceilh, back->ceilh);
+				z2 = MAX(front->ceilh, back->ceilh);
+			}
+			else
+			{
+				if (! LD_RailHeights(z1, z2, dw->ld, dw->sd, front, back))
+					return;
 			}
 		}
+		else
+		{
+			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
+				return;
 
-		int x1 = dw->sx1 - 1;
+			z1 = dw->sd->SecRef()->floorh;
+			z2 = dw->sd->SecRef()->ceilh;
+		}
+
+		int x1 = dw->sx1;
 		int x2 = dw->sx2 + 1;
 
-		int ly1 = DistToY(dw->iz1, h2);
-		int ly2 = DistToY(dw->iz1, h1);
+		int ly1 = DistToY(dw->iz1, z2);
+		int ly2 = DistToY(dw->iz1, z1);
 
-		int ry1 = DistToY(dw->iz2, h2);
-		int ry2 = DistToY(dw->iz2, h1);
+		int ry1 = DistToY(dw->iz2, z2);
+		int ry2 = DistToY(dw->iz2, z1);
 
 		// workaround for crappy line clipping in X windows
 		if (ly1 < -5000 || ly2 < -5000 || ly1 >  5000 || ly2 >  5000 ||
 			ry1 < -5000 || ry2 < -5000 || ry1 >  5000 || ry2 >  5000)
 			return;
 
-		// keep the lines thin, makes aligning textures easier
-		AddHighlightLine(x1, ly1, x1, ly2, sel_mode);
-		AddHighlightLine(x2, ry1, x2, ry2, sel_mode);
-		AddHighlightLine(x1, ly1, x2, ry1, sel_mode);
-		AddHighlightLine(x1, ly2, x2, ry2, sel_mode);
+		DrawHighlightLine(x1, ly1, x1, ly2);
+		DrawHighlightLine(x2, ry1, x2, ry2);
+		DrawHighlightLine(x1, ly1, x2, ry1);
+		DrawHighlightLine(x1, ly2, x2, ry2);
 	}
 
-	void Highlight_Line(obj3d_type_e part, int ld, int side, int sel_mode)
+	void HighlightLines(int ld_index, int parts)
 	{
-		const LineDef *L = LineDefs[ld];
-
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
 			const DrawWall *dw = (*S);
+			if (! dw->ld)
+				continue;
 
-			if (dw->ld == L && dw->side == side)
-				Highlight_WallPart(part, dw, sel_mode);
-		}
-	}
+			int line2  = ld_index;
+			int parts2 = parts;
 
-	void Highlight_Sector(obj3d_type_e part, int sec_num, int sel_mode)
-	{
-		int sec_h;
-
-		if (part == OB3D_Floor)
-		{
-			sec_h = Sectors[sec_num]->floorh;
-
-			if (sec_h >= r_view.z)
-				return;
-		}
-		else  /* OB3D_Ceil */
-		{
-			sec_h = Sectors[sec_num]->ceilh;
-
-			if (sec_h <= r_view.z)
-				return;
-		}
-
-		DrawWall::vec_t::iterator S;
-
-		for (S = walls.begin() ; S != walls.end() ; S++)
-		{
-			const DrawWall *dw = (*S);
-
-			if (dw->ld && dw->ld->TouchesSector(sec_num))
+			if (ld_index >= 0)
 			{
-				int sy1 = DistToY(dw->iz1, sec_h);
-				int sy2 = DistToY(dw->iz2, sec_h);
+				if (dw->ld_index != ld_index)
+					continue;
+			}
+			else
+			{
+				line2  = dw->ld_index;
+				parts2 = edit.Selected->get_ext(line2);
 
-				// workaround for crappy line clipping in X windows
-				if (sy1 < -5000 || sy2 < -5000 ||
-					sy1 >  5000 || sy2 >  5000)
+				if (parts2 == 0)
 					continue;
 
-				AddHighlightLine(dw->sx1, sy1, dw->sx2, sy2, sel_mode);
+				if (parts2 == 1)
+				{
+					parts2 = 0;
+					hl_color = SEL_COL;
+				}
+				else
+				{
+					hl_color = SEL3D_COL;
+				}
+			}
+
+			/* right side */
+			if (parts2 == 0 || (parts2 & PART_RT_LOWER))
+				HighlightWallBit(dw, line2, PART_RT_LOWER);
+
+			if (parts2 == 0 || (parts2 & PART_RT_UPPER))
+				HighlightWallBit(dw, line2, PART_RT_UPPER);
+
+			if (parts2 & PART_RT_RAIL)
+				HighlightWallBit(dw, line2, PART_RT_RAIL);
+
+			/* left side */
+			if (parts2 == 0 || (parts2 & PART_LF_LOWER))
+				HighlightWallBit(dw, line2, PART_LF_LOWER);
+
+			if (parts2 == 0 || (parts2 & PART_LF_UPPER))
+				HighlightWallBit(dw, line2, PART_LF_UPPER);
+
+			if (parts2 & PART_LF_RAIL)
+				HighlightWallBit(dw, line2, PART_LF_RAIL);
+		}
+	}
+
+	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
+	{
+		const Sector *S = Sectors[sec_index];
+
+		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
+
+		// are we dragging this surface?
+		if (edit.action == ACT_DRAG &&
+			(!edit.dragged.valid() ||
+			 (edit.dragged.num == sec_index &&
+			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
+		{
+			z = z + (int)edit.drag_sector_dz;
+		}
+		else
+		{
+			// check that plane faces the camera
+			if (part == PART_FLOOR && (r_view.z < z + 0.2))
+				return;
+			if (part == PART_CEIL && (r_view.z > z - 0.2))
+				return;
+		}
+
+		int sy1 = DistToY(dw->iz1, z);
+		int sy2 = DistToY(dw->iz2, z);
+
+		// workaround for crappy line clipping in X windows
+		if (sy1 < -5000 || sy2 < -5000 ||
+			sy1 >  5000 || sy2 >  5000)
+			return;
+
+		DrawHighlightLine(dw->sx1, sy1, dw->sx2, sy2);
+	}
+
+	void HighlightSectors(int sec_index, int parts)
+	{
+		DrawWall::vec_t::iterator S;
+
+		for (S = walls.begin() ; S != walls.end() ; S++)
+		{
+			const DrawWall *dw = (*S);
+			if (! dw->ld)
+				continue;
+
+			if (sec_index >= 0)
+			{
+				if (! dw->ld->TouchesSector(sec_index))
+					continue;
+
+				// Note: hl_color already set by caller
+
+				if (parts == 0 || (parts & PART_FLOOR))
+					HighlightSectorBit(dw, sec_index, PART_FLOOR);
+
+				if (parts == 0 || (parts & PART_CEIL))
+					HighlightSectorBit(dw, sec_index, PART_CEIL);
+
+				continue;
+			}
+
+			/* doing the selection */
+
+			for (int what_side = 0 ; what_side < 2 ; what_side++)
+			{
+				const SideDef *sd_front = dw->ld->Right();
+				const SideDef *sd_back  = dw->ld->Left();
+
+				if (sd_front && sd_back && sd_front == sd_back)
+					break;
+
+				if (what_side == 1)
+					std::swap(sd_front, sd_back);
+
+				if (sd_front == NULL)
+					continue;
+
+				int sec2 = sd_front->sector;
+
+				parts = edit.Selected->get_ext(sec2);
+				if (parts == 0)
+					continue;
+
+				if (parts == 1)
+				{
+					parts = PART_FLOOR | PART_CEIL;
+					hl_color = SEL_COL;
+				}
+				else
+				{
+					hl_color = SEL3D_COL;
+				}
+
+				if (parts & PART_FLOOR)
+					HighlightSectorBit(dw, sec2, PART_FLOOR);
+
+				if (parts & PART_CEIL)
+					HighlightSectorBit(dw, sec2, PART_CEIL);
 			}
 		}
 	}
 
-	void Highlight_Thing(int th, int sel_mode)
+	void HighlightThings(int th_index)
 	{
 		DrawWall::vec_t::iterator S;
 
 		for (S = walls.begin() ; S != walls.end() ; S++)
 		{
 			const DrawWall *dw = (*S);
-
-			if (! (dw->th >= 0 && dw->th == th))
+			if (dw->th < 0)
 				continue;
 
-			int h1 = dw->ceil.h1 - 1;
-			int h2 = dw->ceil.h2 + 1;
+			if (th_index >= 0)
+			{
+				if (dw->th != th_index)
+					continue;
+			}
+			else
+			{
+				if (! edit.Selected->get(dw->th))
+					continue;
+			}
 
 			int x1 = dw->sx1 - 1;
 			int x2 = dw->sx2 + 1;
 
+			int h1 = dw->ceil.h1 - 1;
+			int h2 = dw->ceil.h2 + 1;
+
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			AddHighlightLine(x1, y1, x1, y2, sel_mode);
-			AddHighlightLine(x2, y1, x2, y2, sel_mode);
-			AddHighlightLine(x1, y1, x2, y1, sel_mode);
-			AddHighlightLine(x1, y2, x2, y2, sel_mode);
-			break;
-		}
-	}
+			if (edit.action == ACT_DRAG &&
+				(!edit.dragged.valid() || edit.dragged.num == th_index))
+			{
+				// re-project thing onto the viewplane
+				float dx = edit.drag_cur_x - edit.drag_start_x;
+				float dy = edit.drag_cur_y - edit.drag_start_y;
+				float dz = edit.drag_cur_z - edit.drag_start_z;
 
-	inline void Highlight_Object(Obj3d_t& obj, int sel_mode)
-	{
-		if (obj.isThing())
-		{
-			Highlight_Thing(obj.num, sel_mode);
-		}
-		else if (obj.isSector())
-		{
-			Highlight_Sector(obj.type, obj.num, sel_mode);
-		}
-		else if (obj.isLine())
-		{
-			Highlight_Line(obj.type, obj.num, obj.side, sel_mode);
+				const Thing *T = Things[dw->th];
+
+				float x = T->x() + dx - r_view.x;
+				float y = T->y() + dy - r_view.y;
+
+				float tx = x * r_view.Sin - y * r_view.Cos;
+				float ty = x * r_view.Cos + y * r_view.Sin;
+
+				if (ty < 1) ty = 1;
+
+				float scale   = dw->normal;
+				Img_c *sprite = dw->ceil.img;
+
+				float tx1 = tx - sprite->width() * scale / 2.0;
+				float tx2 = tx + sprite->width() * scale / 2.0;
+
+				double iz = 1 / ty;
+
+				x1 = DeltaToX(iz, tx1) - 1;
+				x2 = DeltaToX(iz, tx2) + 1;
+
+				int thsec = r_view.thing_sectors[th_index];
+
+				if (dw->side & THINGDEF_CEIL)
+				{
+					h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - T->h();
+					h1 = h2 - sprite->height() * scale;
+				}
+				else
+				{
+					h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + T->h();
+					h2 = h1 + sprite->height() * scale;
+				}
+
+				h1 = h1 + dz - 1;
+				h2 = h2 + dz + 1;
+
+				y1 = DistToY(iz, h2);
+				y2 = DistToY(iz, h1);
+			}
+
+			DrawHighlightLine(x1, y1, x1, y2);
+			DrawHighlightLine(x2, y1, x2, y2);
+			DrawHighlightLine(x1, y1, x2, y1);
+			DrawHighlightLine(x1, y2, x2, y2);
 		}
 	}
 
@@ -1053,30 +1242,60 @@ public:
 		hl_ox = ox;
 		hl_oy = oy;
 
-		/* do the selection */
+		hl_thick = 2;
 
-		bool saw_hl = false;
-
-		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		switch (edit.mode)
 		{
-			if (! r_view.sel[k].valid())
-				continue;
+		case OBJ_THINGS:
+			hl_color = SEL_COL;
+			HighlightThings(-1);
 
-			int sel_mode = 1;
-
-			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+			hl_color = HI_COL;
+			if (edit.dragged.valid())
 			{
-				sel_mode |= 2;
-				saw_hl = true;
+				HighlightThings(edit.dragged.num);
 			}
+			else if (edit.highlight.valid())
+			{
+				if (edit.Selected->get(edit.highlight.num))
+					hl_color = HI_AND_SEL_COL;
 
-			Highlight_Object(r_view.sel[k], sel_mode);
+				HighlightThings(edit.highlight.num);
+			}
+			break;
+
+		case OBJ_SECTORS:
+			HighlightSectors(-1, -1);
+
+			hl_color = HI_COL;
+			if (edit.dragged.valid())
+			{
+				HighlightSectors(edit.dragged.num, edit.dragged.parts);
+			}
+			else if (edit.highlight.valid())
+			{
+				if (edit.Selected->get(edit.highlight.num))
+					hl_color = HI_AND_SEL_COL;
+
+				HighlightSectors(edit.highlight.num, edit.highlight.parts);
+			}
+			break;
+
+		case OBJ_LINEDEFS:
+			HighlightLines(-1, -1);
+
+			hl_color = HI_COL;
+			if (edit.highlight.valid())
+			{
+				if (edit.Selected->get(edit.highlight.num))
+					hl_color = HI_AND_SEL_COL;
+
+				HighlightLines(edit.highlight.num, edit.highlight.parts);
+			}
+			break;
+
+		default: break;
 		}
-
-		/* do the highlight */
-
-		if (! saw_hl)
-			Highlight_Object(r_view.hl, 2);
 	}
 
 	void ClipSolids()
@@ -1245,8 +1464,7 @@ public:
 		}
 	}
 
-	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x,
-								  obj3d_type_e part)
+	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x, obj_type_e what, int part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1277,8 +1495,19 @@ public:
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
-				query_wall = dw;
-				query_part = part;
+				if (what == OBJ_LINEDEFS)
+				{
+					if (dw->side < 0)
+						part <<= 4;
+
+					query_result = Objid(what, dw->ld_index, part);
+				}
+				else if (dw->sd != NULL)
+				{
+					query_result = Objid(what, dw->sd->sector, part);
+				}
+
+				QueryCalcCoord(dw, what, part);
 			}
 			return;
 		}
@@ -1320,10 +1549,9 @@ public:
 
 		if (query_mode)
 		{
-			if (y1 <= query_sy && query_sy <= y2)
+			if (y1 <= query_sy && query_sy <= y2 && edit.mode == OBJ_THINGS)
 			{
-				query_wall = dw;
-				query_part = OB3D_Thing;
+				query_result = Objid(OBJ_THINGS, dw->th);
 			}
 			return;
 		}
@@ -1391,9 +1619,6 @@ public:
 		if (! surf.img)
 			return;
 
-		if (query_mode)
-			return;
-
 		int y1 = DistToY(dw->cur_iz, surf.h2);
 		int y2 = DistToY(dw->cur_iz, surf.h1) - 1;
 
@@ -1405,6 +1630,16 @@ public:
 
 		if (y1 > y2)
 			return;
+
+		if (query_mode)
+		{
+			if (y1 <= query_sy && query_sy <= y2 && edit.mode == OBJ_LINEDEFS)
+			{
+				int part = (dw->side < 0) ? PART_LF_RAIL : PART_RT_RAIL;
+				query_result = Objid(OBJ_LINEDEFS, dw->ld_index, part);
+			}
+			return;
+		}
 
 		/* fill pixels */
 
@@ -1642,11 +1877,11 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x, OB3D_Ceil);
-				RenderWallSurface(dw, dw->floor, x, OB3D_Floor);
+				RenderWallSurface(dw, dw->ceil,  x, OBJ_SECTORS, PART_CEIL);
+				RenderWallSurface(dw, dw->floor, x, OBJ_SECTORS, PART_FLOOR);
 
-				RenderWallSurface(dw, dw->upper, x, OB3D_Upper);
-				RenderWallSurface(dw, dw->lower, x, OB3D_Lower);
+				RenderWallSurface(dw, dw->upper, x, OBJ_LINEDEFS, PART_RT_UPPER);
+				RenderWallSurface(dw, dw->lower, x, OBJ_LINEDEFS, PART_RT_LOWER);
 
 				if (open_y1 > open_y2)
 					break;
@@ -1688,8 +1923,6 @@ public:
 
 		InitDepthBuf(r_view.screen_w);
 
-		r_view.SaveOffsets();
-
 		for (int i=0 ; i < NumLineDefs ; i++)
 			AddLine(i);
 
@@ -1702,16 +1935,17 @@ public:
 		ComputeSurfaces();
 
 		RenderWalls();
-
-		r_view.RestoreOffsets();
 	}
 
 	void Query(int qx, int qy)
 	{
 		query_mode = 1;
-		query_wall = NULL;
 		query_sx = qx;
 		query_sy = qy;
+		query_result.clear();
+		query_map_x = 0;
+		query_map_y = 0;
+		query_map_z = 0;
 
 		Render();
 
@@ -1788,7 +2022,7 @@ void SW_RenderWorld(int ox, int oy, int ow, int oh)
 }
 
 
-bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
+bool SW_QueryPoint(Objid& hl, int qx, int qy)
 {
 	if (! render_high_detail)
 	{
@@ -1801,36 +2035,21 @@ bool SW_QueryPoint(Obj3d_t& hl, int qx, int qy)
 	// this runs the renderer, but *no* drawing is done
 	rend.Query(qx, qy);
 
-	if (! rend.query_wall)
+	if (rend.query_map_x != 0)
+	{
+		edit.map_x = rend.query_map_x;
+		edit.map_y = rend.query_map_y;
+		edit.map_z = rend.query_map_z;
+	}
+
+	if (! rend.query_result.valid())
 	{
 		// nothing was hit
 		return false;
 	}
 
-	hl.type = rend.query_part;
-
-	if (hl.type == OB3D_Thing)
-	{
-		hl.num = rend.query_wall->th;
-	}
-	else if (hl.type == OB3D_Floor || hl.type == OB3D_Ceil)
-	{
-		// ouch -- fix?
-		for (int n = 0 ; n < NumSectors ; n++)
-			if (rend.query_wall->sec == Sectors[n])
-				hl.num = n;
-	}
-	else
-	{
-		hl.side = rend.query_wall->side;
-
-		// ouch -- fix?
-		for (int n = 0 ; n < NumLineDefs ; n++)
-			if (rend.query_wall->ld == LineDefs[n])
-				hl.num = n;
-	}
-
-	return hl.valid();
+	hl = rend.query_result;
+	return true;
 }
 
 //--- editor settings ---

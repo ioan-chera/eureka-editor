@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_main.h"
+#include "e_cutpaste.h"
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "r_render.h"
@@ -230,8 +231,6 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 		pic->Selected(! pic->Selected());
 
-		Render3D_ClearSelection();
-
 		if (pic->Selected())
 			main_win->BrowserMode('T');
 
@@ -257,8 +256,6 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		UI_Pic * pic = (UI_Pic *) w;
 
 		pic->Selected(! pic->Selected());
-
-		Render3D_ClearSelection();
 
 		if (pic->Selected())
 			main_win->BrowserMode('F');
@@ -401,9 +398,9 @@ void UI_DefaultProps::CB_Copy(int sel_pics)
 	}
 
 	if (sel_pics & 4)
-		r_clipboard.SetTex(name);
+		Texboard_SetTex(name);
 	else
-		r_clipboard.SetFlat(name);
+		Texboard_SetFlat(name);
 }
 
 
@@ -411,19 +408,19 @@ void UI_DefaultProps::CB_Paste(int sel_pics)
 {
 	if (sel_pics & 1)
 	{
-		f_tex->value(BA_GetString(r_clipboard.GetFlatNum()));
+		f_tex->value(BA_GetString(Texboard_GetFlatNum()));
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(BA_GetString(r_clipboard.GetFlatNum()));
+		c_tex->value(BA_GetString(Texboard_GetFlatNum()));
 		c_tex->do_callback();
 	}
 
 	if (sel_pics & 4)
 	{
-		w_tex->value(BA_GetString(r_clipboard.GetTexNum()));
+		w_tex->value(BA_GetString(Texboard_GetTexNum()));
 		w_tex->do_callback();
 	}
 }

@@ -162,8 +162,6 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 		pic->Selected(! pic->Selected());
 
-		Render3D_ClearSelection();
-
 		if (pic->Selected())
 			main_win->BrowserMode('T');
 		return;
@@ -190,14 +188,13 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	}
 
 	// iterate over selected linedefs
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited texture on", edit.Selected);
 
-		for (list.begin(&it) ; !it.at_end() ; ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -227,7 +224,6 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 			}
 		}
 
-		BA_MessageForSel("edited texture on", &list);
 		BA_End();
 
 		box->UpdateField();
@@ -367,14 +363,17 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 	int new_y_ofs = atoi(box->y_ofs->value());
 
 	// iterate over selected linedefs
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		if (w == box->x_ofs)
+			BA_MessageForSel("edited X offset on", edit.Selected);
+		else
+			BA_MessageForSel("edited Y offset on", edit.Selected);
+
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -388,11 +387,6 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 					BA_ChangeSD(sd, SideDef::F_Y_OFFSET, new_y_ofs);
 			}
 		}
-
-		if (w == box->x_ofs)
-			BA_MessageForSel("edited X offset on", &list);
-		else
-			BA_MessageForSel("edited Y offset on", &list);
 
 		BA_End();
 	}
@@ -408,14 +402,13 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 	new_sec = CLAMP(0, new_sec, NumSectors-1);
 
 	// iterate over selected linedefs
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited sector-ref on", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -425,7 +418,6 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 				BA_ChangeSD(sd, SideDef::F_SECTOR, new_sec);
 		}
 
-		BA_MessageForSel("edited sector-ref on", &list);
 		BA_End();
 	}
 }

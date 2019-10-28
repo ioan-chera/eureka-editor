@@ -114,10 +114,8 @@ void RedrawMap()
 	UpdateHighlight();
 
 	main_win->scroll->UpdateRenderMode();
+	main_win->scroll->info3d->redraw();
 	main_win->canvas->redraw();
-
-	if (edit.render3d)
-		main_win->scroll->info3d->redraw();
 }
 
 
@@ -140,6 +138,10 @@ static void UpdatePanel()
 	int obj_idx   = edit.highlight.num;
 	int obj_count = edit.Selected->count_obj();
 
+	// the highlight is usually turned off when dragging, so compensate
+	if (obj_idx < 0)
+		obj_idx = edit.dragged.num;
+
 	if (obj_idx >= 0)
 	{
 		if (! edit.Selected->get(obj_idx))
@@ -147,13 +149,12 @@ static void UpdatePanel()
 	}
 	else if (obj_count > 0)
 	{
-		// in linedef mode, we want a two-sided linedef to show
+		// in linedef mode, we prefer showing a two-sided linedef
 		if (edit.mode == OBJ_LINEDEFS && obj_count > 1)
 			obj_idx = Selection_FirstLine(edit.Selected);
 		else
 			obj_idx = edit.Selected->find_first();
 	}
-
 
 	switch (edit.mode)
 	{
@@ -183,7 +184,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 	edit.split_line.clear();
 
 	// usually disabled while dragging stuff
-	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
+	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
 		return;
 
 	// in vertex mode, see if there is a linedef which would be split by
@@ -193,23 +194,15 @@ static void UpdateSplitLine(double map_x, double map_y)
 		edit.pointer_in_window && !edit.render3d &&
 	    edit.highlight.is_nil())
 	{
-		GetSplitLineDef(edit.split_line, map_x, map_y, edit.drag_single_obj);
+		FindSplitLine(edit.split_line, edit.split_x, edit.split_y,
+					  map_x, map_y, edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
 	}
 
 	if (edit.split_line.valid())
-	{
-		edit.split_x = grid.SnapX(map_x);
-		edit.split_y = grid.SnapY(map_y);
-
-		// in FREE mode, ensure the new vertex is directly on the linedef
-		if (! grid.snap)
-			MoveCoordOntoLineDef(edit.split_line.num, &edit.split_x, &edit.split_y);
-
 		main_win->canvas->SplitLineSet(edit.split_line.num, edit.split_x, edit.split_y);
-	}
 	else
 		main_win->canvas->SplitLineForget();
 }
@@ -217,6 +210,14 @@ static void UpdateSplitLine(double map_x, double map_y)
 
 void UpdateHighlight()
 {
+	if (edit.render3d)
+	{
+		Render3D_UpdateHighlight();
+		UpdatePanel();
+		return;
+	}
+
+
 	bool dragging = (edit.action == ACT_DRAG);
 
 
@@ -224,13 +225,13 @@ void UpdateHighlight()
 	edit.highlight.clear();
 
 	if (edit.pointer_in_window && !edit.render3d &&
-	    (!dragging || (edit.mode == OBJ_VERTICES && edit.drag_single_obj >= 0)))
+	    (!dragging || (edit.mode == OBJ_VERTICES && edit.dragged.valid()) ))
 	{
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.drag_single_obj >= 0 && edit.highlight.valid() &&
-			edit.drag_single_obj == edit.highlight.num)
+		if (edit.dragged.valid() && edit.highlight.valid() &&
+			edit.dragged.num == edit.highlight.num)
 		{
 			edit.highlight.clear();
 		}
@@ -267,31 +268,7 @@ void UpdateHighlight()
 		main_win->canvas->HighlightForget();
 
 
-	Render3D_UpdateHighlight();
-
 	UpdatePanel();
-}
-
-
-bool GetCurrentObjects(selection_c *list)
-{
-	// returns false when there are no objects at all
-
-	list->change_type(edit.mode);  // this also clears it
-
-	if (edit.Selected->notempty())
-	{
-		list->merge(*edit.Selected);
-		return true;
-	}
-
-	if (edit.highlight.valid())
-	{
-		list->set(edit.highlight.num);
-		return true;
-	}
-
-	return false;
 }
 
 
@@ -349,7 +326,7 @@ void Editor_ChangeMode(char mode_char)
 
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode);
+		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
@@ -428,7 +405,7 @@ void MapStuff_NotifyDelete(obj_type_e type, int objnum)
 		recalc_map_bounds = true;
 
 		if (edit.action == ACT_DRAW_LINE &&
-			edit.drawing_from == objnum)
+			edit.from_vert.num == objnum)
 		{
 			Editor_ClearAction();
 		}
@@ -558,22 +535,18 @@ void ObjectBox_NotifyEnd()
 //------------------------------------------------------------------------
 
 static bool invalidated_selection;
-static bool invalidated_3d_selection;
 static bool invalidated_last_sel;
 
 
 void Selection_NotifyBegin()
 {
 	invalidated_selection = false;
-	invalidated_3d_selection = false;
 	invalidated_last_sel  = false;
 }
 
 
 void Selection_NotifyInsert(obj_type_e type, int objnum)
 {
-	invalidated_3d_selection = true;
-
 	if (type == edit.Selected->what_type() &&
 		objnum <= edit.Selected->max_obj())
 	{
@@ -591,8 +564,6 @@ void Selection_NotifyInsert(obj_type_e type, int objnum)
 
 void Selection_NotifyDelete(obj_type_e type, int objnum)
 {
-	invalidated_3d_selection = true;
-
 	if (objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
@@ -620,9 +591,6 @@ void Selection_NotifyEnd()
 		// this clears AND RESIZES the selection_c object
 		edit.Selected->change_type(edit.mode);
 	}
-
-	if (invalidated_3d_selection)
-		Render3D_ClearSelection();
 
 	if (invalidated_last_sel)
 		Selection_InvalidateLast();
@@ -658,14 +626,9 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	if (src->what_type() == OBJ_SECTORS && dest->what_type() == OBJ_THINGS)
 	{
-		// FIXME: get bbox of selection, skip things outside it
-
 		for (int t = 0 ; t < NumThings ; t++)
 		{
 			const Thing *T = Things[t];
-
-			// if (! thing_touches_bbox(T->x, T->y, 128, bbox))
-			//    continue;
 
 			Objid obj;
 			GetNearObject(obj, OBJ_SECTORS, T->x(), T->y());
@@ -837,6 +800,26 @@ int Selection_FirstLine(selection_c *list)
 
 
 //
+// This is a helper to handle performing an operation on the
+// selection if it is non-empty, otherwise the highlight.
+// Returns false if both selection and highlight are empty.
+//
+soh_type_e Selection_Or_Highlight()
+{
+	if (! edit.Selected->empty())
+		return SOH_OK;
+
+	if (edit.highlight.valid())
+	{
+		Selection_Add(edit.highlight);
+		return SOH_Unselect;
+	}
+
+	return SOH_Empty;
+}
+
+
+//
 // select all objects inside a given box
 //
 void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2)
@@ -936,7 +919,8 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 
 void Selection_InvalidateLast()
 {
-	delete last_Sel; last_Sel = NULL;
+	delete last_Sel;
+	last_Sel = NULL;
 }
 
 
@@ -953,7 +937,7 @@ void Selection_Push()
 	if (last_Sel)
 		delete last_Sel;
 
-	last_Sel = new selection_c(edit.Selected->what_type());
+	last_Sel = new selection_c(edit.Selected->what_type(), true);
 
 	last_Sel->merge(*edit.Selected);
 }
@@ -969,9 +953,86 @@ void Selection_Clear(bool no_save)
 
 	edit.error_mode = false;
 
-	Render3D_ClearSelection();
-
 	RedrawMap();
+}
+
+
+void Selection_Add(Objid& obj)
+{
+	// validate the mode is correct
+	if (obj.type != edit.mode)
+		return;
+
+	if (obj.parts == 0)
+	{
+		// ignore the add if object is already set.
+		// [ since the selection may have parts, and we don't want to
+		//   forget those parts ]
+		if (! edit.Selected->get(obj.num))
+			edit.Selected->set(obj.num);
+		return;
+	}
+
+	byte cur = edit.Selected->get_ext(obj.num);
+
+	cur = 1 | obj.parts;
+
+	edit.Selected->set_ext(obj.num, cur);
+}
+
+
+void Selection_Remove(Objid& obj)
+{
+	if (obj.type != edit.mode)
+		return;
+
+	if (obj.parts == 0)
+	{
+		edit.Selected->clear(obj.num);
+		return;
+	}
+
+	byte cur = edit.Selected->get_ext(obj.num);
+	if (cur == 0)
+		return;
+
+	cur = 1 | (cur & ~obj.parts);
+
+	// if we unset all the parts, then unset the object itself
+	if (cur == 1)
+		cur = 0;
+
+	edit.Selected->set_ext(obj.num, cur);
+}
+
+
+void Selection_Toggle(Objid& obj)
+{
+	if (obj.type != edit.mode)
+		return;
+
+	if (obj.parts == 0)
+	{
+		edit.Selected->toggle(obj.num);
+		return;
+	}
+
+	byte cur = edit.Selected->get_ext(obj.num);
+
+	// if object was simply selected, then just clear it
+	if (cur == 1)
+	{
+		edit.Selected->clear(obj.num);
+		return;
+	}
+
+	cur = 1 | (cur ^ obj.parts);
+
+	// if we toggled off all the parts, then unset the object itself
+	if (cur == 1)
+		cur = 0;
+
+	edit.Selected->set_ext(obj.num, cur);
 }
 
 
@@ -1014,96 +1075,6 @@ void CMD_LastSelection()
 		GoToSelection();
 
 	RedrawMap();
-}
-
-
-//----------------------------------------------------------------------
-//  3D CLIPBOARD
-//----------------------------------------------------------------------
-
-render_clipboard_c  r_clipboard;
-
-
-render_clipboard_c::render_clipboard_c() :
-	thing(0)
-{
-	tex [0] = 0;
-	flat[0] = 0;
-}
-
-render_clipboard_c::~render_clipboard_c()
-{ }
-
-
-int render_clipboard_c::GetTexNum()
-{
-	if (tex[0] == 0)
-		SetTex(default_wall_tex);
-
-	return BA_InternaliseString(tex);
-}
-
-int render_clipboard_c::GetFlatNum()
-{
-	if (flat[0] == 0)
-		SetFlat(default_floor_tex);
-
-	return BA_InternaliseString(flat);
-}
-
-int render_clipboard_c::GetThing()
-{
-	if (thing == 0)
-		thing = default_thing;
-
-	return thing;
-}
-
-
-void render_clipboard_c::SetTex(const char *new_tex)
-{
-	snprintf(tex, sizeof(tex), "%s", new_tex);
-
-	if (Features.mix_textures_flats)
-		snprintf(flat, sizeof(flat), "%s", new_tex);
-}
-
-void render_clipboard_c::SetFlat(const char *new_flat)
-{
-	snprintf(flat, sizeof(flat), "%s", new_flat);
-
-	if (Features.mix_textures_flats)
-		snprintf(tex, sizeof(tex), "%s", new_flat);
-}
-
-void render_clipboard_c::SetThing(int new_id)
-{
-	thing = new_id;
-}
-
-
-bool render_clipboard_c::ParseUser(const char ** tokens, int num_tok)
-{
-	if (strcmp(tokens[0], "r_clipboard") != 0)
-		return false;
-
-	if (strcmp(tokens[1], "tex") == 0)
-		SetTex(tokens[2]);
-
-	if (strcmp(tokens[1], "flat") == 0)
-		SetFlat(tokens[2]);
-
-	if (strcmp(tokens[1], "thing") == 0)
-		thing = atoi(tokens[2]);
-
-	return true;
-}
-
-void render_clipboard_c::WriteUser(FILE *fp)
-{
-	fprintf(fp, "r_clipboard tex \"%s\"\n",  StringTidy(tex,  "\""));
-	fprintf(fp, "r_clipboard flat \"%s\"\n", StringTidy(flat, "\""));
-	fprintf(fp, "r_clipboard thing %d\n",    thing);
 }
 
 
@@ -1336,8 +1307,9 @@ void Editor_Init()
 	edit.pointer_in_window = false;
 	edit.map_x = 0;
 	edit.map_y = 0;
+	edit.map_z = -1;
 
-	edit.Selected = new selection_c(edit.mode);
+	edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 	edit.highlight.clear();
 	edit.split_line.clear();
@@ -1356,10 +1328,10 @@ void Editor_DefaultState()
 {
 	edit.action = ACT_NOTHING;
 	edit.sticky_mod = 0;
-	edit.is_scrolling = false;
+	edit.is_panning = false;
 
-	edit.drawing_from = -1;
-	edit.drag_single_obj = -1;
+	edit.dragged.clear();
+	edit.from_vert.clear();
 
 	edit.error_mode = false;
 	edit.show_object_numbers = false;

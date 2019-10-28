@@ -28,6 +28,8 @@
 #include "FL/gl.h"
 #endif
 
+#include "e_basis.h"
+#include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
@@ -52,6 +54,9 @@ int  render_far_clip = 32768;
 int  render_pixel_aspect = 83;  //  100 * width / height
 
 
+Render_View_t r_view;
+
+
 Render_View_t::Render_View_t() :
 	p_type(0), px(), py(),
 	x(), y(), z(),
@@ -62,12 +67,7 @@ Render_View_t::Render_View_t() :
 	thing_sectors(),
 	thsec_sector_num(0),
 	thsec_invalidated(false),
-	is_scrolling(false),
-	nav_time(0),
-
-	hl(), sel(), sel_type(OB3D_Thing),
-	adjust_sides(), adjust_lines(),
-	saved_x_offsets(), saved_y_offsets()
+	current_hl()
 { }
 
 Render_View_t::~Render_View_t()
@@ -115,6 +115,14 @@ void Render_View_t::CalcAspect()
 	aspect_sh = screen_w / (render_pixel_aspect / 100.0);
 }
 
+double Render_View_t::DistToViewPlane(double map_x, double map_y)
+{
+	map_x -= r_view.x;
+	map_y -= r_view.y;
+
+	return map_x * r_view.Cos + map_y * r_view.Sin;
+}
+
 void Render_View_t::UpdateScreen(int ow, int oh)
 {
 	// in low detail mode, setup size so that expansion always covers
@@ -151,7 +159,6 @@ void Render_View_t::FindThingSectors()
 	for (int i = 0 ; i < NumThings ; i++)
 	{
 		Objid obj;
-
 		GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
 
 		thing_sectors[i] = obj.num;
@@ -176,321 +183,6 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 		FindGroundZ();
 }
 
-/* r_editing_info_t stuff */
-
-bool Render_View_t::SelectIsCompat(obj3d_type_e new_type) const
-{
-	return (sel_type <= OB3D_Floor && new_type <= OB3D_Floor) ||
-		   (sel_type == OB3D_Thing && new_type == OB3D_Thing) ||
-		   (sel_type >= OB3D_Lower && new_type >= OB3D_Lower);
-}
-
-// this needed since we allow invalid objects in sel
-bool Render_View_t::SelectEmpty() const
-{
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-		if (sel[k].valid())
-			return false;
-
-	return true;
-}
-
-bool Render_View_t::SelectGet(const Obj3d_t& obj) const
-{
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-		if (sel[k] == obj)
-			return true;
-
-	return false;
-}
-
-void Render_View_t::SelectToggle(const Obj3d_t& obj)
-{
-	// when type of surface is radically different, clear selection
-	if (! sel.empty() && ! SelectIsCompat(obj.type))
-		sel.clear();
-
-	if (sel.empty())
-	{
-		sel_type = obj.type;
-		sel.push_back(obj);
-		return;
-	}
-
-	// if object already selected, unselect it
-	// [ we are lazy and leave a NIL object in the vector ]
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-	{
-		if (sel[k] == obj)
-		{
-			sel[k].num = NIL_OBJ;
-			return;
-		}
-	}
-
-	sel.push_back(obj);
-}
-
-int Render_View_t::GrabClipboard()
-{
-	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
-
-	if (type == OB3D_Thing)
-		return r_clipboard.GetThing();
-
-	if (type == OB3D_Floor || type == OB3D_Ceil)
-		return r_clipboard.GetFlatNum();
-
-	return r_clipboard.GetTexNum();
-}
-
-void Render_View_t::StoreClipboard(int new_val)
-{
-	obj3d_type_e type = SelectEmpty() ? hl.type : sel_type;
-
-	if (type == OB3D_Thing)
-	{
-		r_clipboard.SetThing(new_val);
-		return;
-	}
-
-	const char *name = BA_GetString(new_val);
-
-	if (type == OB3D_Floor || type == OB3D_Ceil)
-		r_clipboard.SetFlat(name);
-	else
-		r_clipboard.SetTex(name);
-}
-
-void Render_View_t::AddAdjustSide(const Obj3d_t& obj)
-{
-	const LineDef *L = LineDefs[obj.num];
-
-	int sd = (obj.side < 0) ? L->left : L->right;
-
-	// this should not happen
-	if (sd < 0)
-		return;
-
-	// ensure it is not already there
-	// (e.g. when a line's upper and lower are both selected)
-	for (unsigned int k = 0 ; k < adjust_sides.size() ; k++)
-		if (adjust_sides[k] == sd)
-			return;
-
-	adjust_sides.push_back(sd);
-	adjust_lines.push_back(obj.num);
-}
-
-float Render_View_t::AdjustDistFactor(float view_x, float view_y)
-{
-	if (adjust_lines.empty())
-		return 128.0;
-
-	double total = 0;
-
-	for (unsigned int k = 0 ; k < adjust_lines.size() ; k++)
-	{
-		const LineDef *L = LineDefs[adjust_lines[k]];
-		total += ApproxDistToLineDef(L, view_x, view_y);
-	}
-
-	return total / (double)adjust_lines.size();
-}
-
-void Render_View_t::SaveOffsets()
-{
-	unsigned int total = static_cast<unsigned>(adjust_sides.size());
-
-	if (total == 0)
-		return;
-
-	if (saved_x_offsets.size() != total)
-	{
-		saved_x_offsets.resize(total);
-		saved_y_offsets.resize(total);
-	}
-
-	for (unsigned int k = 0 ; k < total ; k++)
-	{
-		SideDef *SD = SideDefs[adjust_sides[k]];
-
-		saved_x_offsets[k] = SD->x_offset;
-		saved_y_offsets[k] = SD->y_offset;
-
-		// change it temporarily (just for the render)
-		SD->x_offset += (int)adjust_dx;
-		SD->y_offset += (int)adjust_dy;
-	}
-}
-
-void Render_View_t::RestoreOffsets()
-{
-	unsigned int total = static_cast<unsigned>(adjust_sides.size());
-
-	for (unsigned int k = 0 ; k < total ; k++)
-	{
-		SideDef *SD = SideDefs[adjust_sides[k]];
-
-		SD->x_offset = saved_x_offsets[k];
-		SD->y_offset = saved_y_offsets[k];
-	}
-}
-
-
-int Render_View_t::GrabTextureFromObject(const Obj3d_t& obj)
-{
-	if (obj.type == OB3D_Floor)
-		return Sectors[obj.num]->floor_tex;
-
-	if (obj.type == OB3D_Ceil)
-		return Sectors[obj.num]->ceil_tex;
-
-	if (! obj.isLine())
-		return -1;
-
-	const LineDef *LD = LineDefs[obj.num];
-
-	if (LD->OneSided())
-	{
-		return LD->Right()->mid_tex;
-	}
-
-	const SideDef *SD = (obj.side == SIDE_RIGHT) ? LD->Right() : LD->Left();
-
-	if (! SD)
-		return -1;
-
-	switch (obj.type)
-	{
-		case OB3D_Lower:
-			return SD->lower_tex;
-
-		case OB3D_Upper:
-			return SD->upper_tex;
-
-		case OB3D_Rail:
-			return SD->mid_tex;
-
-		default:
-			return -1;
-	}
-}
-
-
-//
-// grab the texture or flat (as offset into string table) from the
-// current 3D selection.  returns -1 if selection is empty, -2 if
-// there multiple selected and some were different.
-//
-int Render_View_t::GrabTextureFrom3DSel()
-{
-	if (SelectEmpty())
-	{
-		return GrabTextureFromObject(hl);
-	}
-
-	int result = -1;
-
-	for (unsigned int k = 0 ; k < sel.size() ; k++)
-	{
-		const Obj3d_t& obj = sel[k];
-
-		if (! obj.valid())
-			continue;
-
-		int cur_tex = GrabTextureFromObject(obj);
-		if (cur_tex < 0)
-			continue;
-
-		// more than one distinct texture?
-		if (result >= 0 && result != cur_tex)
-			return -2;
-
-		result = cur_tex;
-	}
-
-	return result;
-}
-
-
-void Render_View_t::StoreTextureToObject(const Obj3d_t& obj, int new_tex)
-{
-	if (obj.type == OB3D_Floor)
-	{
-		BA_ChangeSEC(obj.num, Sector::F_FLOOR_TEX, new_tex);
-		return;
-	}
-	else if (obj.type == OB3D_Ceil)
-	{
-		BA_ChangeSEC(obj.num, Sector::F_CEIL_TEX, new_tex);
-		return;
-	}
-
-	if (! obj.isLine())
-		return;
-
-	const LineDef *LD = LineDefs[obj.num];
-
-	int sd = LD->WhatSideDef(obj.side);
-
-	if (sd < 0)
-		return;
-
-	if (LD->OneSided())
-	{
-		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
-		return;
-	}
-
-	switch (obj.type)
-	{
-		case OB3D_Lower:
-			BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
-			break;
-
-		case OB3D_Upper:
-			BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
-			break;
-
-		case OB3D_Rail:
-			BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
-			break;
-
-		// shut the compiler up
-		default: break;
-	}
-}
-
-
-void Render_View_t::StoreTextureTo3DSel(int new_tex)
-{
-	BA_Begin();
-
-	if (SelectEmpty())
-	{
-		StoreTextureToObject(hl, new_tex);
-	}
-	else
-	{
-		for (unsigned int k = 0 ; k < sel.size() ; k++)
-		{
-			const Obj3d_t& obj = sel[k];
-
-			if (! obj.valid())
-				continue;
-
-			StoreTextureToObject(obj, new_tex);
-		}
-	}
-
-	BA_Message("pasted texture: %s", BA_GetString(new_tex));
-	BA_End();
-}
-
-
-Render_View_t r_view;
-
 
 static Thing *FindPlayer(int typenum)
 {
@@ -506,22 +198,355 @@ static Thing *FindPlayer(int typenum)
 
 //------------------------------------------------------------------------
 
+class save_obj_field_c
+{
+public:
+	int obj;    // object number (edit.mode is implicit type)
+	int field;  // e.g. Thing::F_X
+	int value;  // the saved value
+
+public:
+	save_obj_field_c(int _obj, int _field, int _value) :
+		obj(_obj), field(_field), value(_value)
+	{ }
+
+	~save_obj_field_c()
+	{ }
+};
+
+
+class SaveBucket_c
+{
+private:
+	obj_type_e type;
+
+	std::vector< save_obj_field_c > fields;
+
+public:
+	SaveBucket_c(obj_type_e _type) : type(_type), fields()
+	{ }
+
+	~SaveBucket_c()
+	{ }
+
+	void Clear()
+	{
+		fields.clear();
+	}
+
+	void Clear(obj_type_e _type)
+	{
+		type = _type;
+		fields.clear();
+	}
+
+	void Save(int obj, int field)
+	{
+		// is it already saved?
+		for (size_t i = 0 ; i < fields.size() ; i++)
+			if (fields[i].obj == obj && fields[i].field == field)
+				return;
+
+		int value = RawGet(obj, field);
+
+		fields.push_back(save_obj_field_c(obj, field, value));
+	}
+
+	void RestoreAll()
+	{
+		for (size_t i = 0 ; i < fields.size() ; i++)
+		{
+			RawSet(fields[i].obj, fields[i].field, fields[i].value);
+		}
+	}
+
+	void ApplyTemp(int field, int delta)
+	{
+		for (size_t i = 0 ; i < fields.size() ; i++)
+		{
+			if (fields[i].field == field)
+				RawSet(fields[i].obj, field, fields[i].value + delta);
+		}
+	}
+
+	void ApplyToBasis(int field, int delta)
+	{
+		for (size_t i = 0 ; i < fields.size() ; i++)
+		{
+			if (fields[i].field == field)
+			{
+				BA_Change(type, fields[i].obj, (byte)field, fields[i].value + delta);
+			}
+		}
+	}
+
+private:
+	int * RawObjPointer(int objnum)
+	{
+		switch (type)
+		{
+			case OBJ_THINGS:
+				return (int*) Things[objnum];
+
+			case OBJ_VERTICES:
+				return (int*) Vertices[objnum];
+
+			case OBJ_SECTORS:
+				return (int*) Sectors[objnum];
+
+			case OBJ_SIDEDEFS:
+				return (int*) SideDefs[objnum];
+
+			case OBJ_LINEDEFS:
+				return (int*) LineDefs[objnum];
+
+			default:
+				BugError("SaveBucket with bad mode\n");
+				return NULL; /* NOT REACHED */
+		}
+	}
+
+	int RawGet(int objnum, int field)
+	{
+		int *ptr = RawObjPointer(objnum) + field;
+		return *ptr;
+	}
+
+	void RawSet(int objnum, int field, int value)
+	{
+		int *ptr = RawObjPointer(objnum) + field;
+		*ptr = value;
+	}
+};
+
+
+static void AdjustOfs_UpdateBBox(int ld_num)
+{
+	const LineDef *L = LineDefs[ld_num];
+
+	float lx1 = L->Start()->x();
+	float ly1 = L->Start()->y();
+	float lx2 = L->End()->x();
+	float ly2 = L->End()->y();
+
+	if (lx1 > lx2) std::swap(lx1, lx2);
+	if (ly1 > ly2) std::swap(ly1, ly2);
+
+	edit.adjust_bbox.x1 = MIN(edit.adjust_bbox.x1, lx1);
+	edit.adjust_bbox.y1 = MIN(edit.adjust_bbox.y1, ly1);
+	edit.adjust_bbox.x2 = MAX(edit.adjust_bbox.x2, lx2);
+	edit.adjust_bbox.y2 = MAX(edit.adjust_bbox.y2, ly2);
+}
+
+void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
+{
+	// this computes how far to move the offsets for each screen pixel
+	// the mouse moves.  we want it to appear as though each texture
+	// is being dragged by the mouse, e.g. if you click on the middle
+	// of a switch, that switch follows the mouse pointer around.
+	// such an effect can only be approximate though.
+
+	float dx = (r_view.x < edit.adjust_bbox.x1) ? (edit.adjust_bbox.x1 - r_view.x) :
+			   (r_view.x > edit.adjust_bbox.x2) ? (r_view.x - edit.adjust_bbox.x2) : 0;
+
+	float dy = (r_view.y < edit.adjust_bbox.y1) ? (edit.adjust_bbox.y1 - r_view.y) :
+			   (r_view.y > edit.adjust_bbox.y2) ? (r_view.y - edit.adjust_bbox.y2) : 0;
+
+	float dist = hypot(dx, dy);
+
+	dist = CLAMP(20, dist, 1000);
+
+	dx_factor = dist / r_view.aspect_sw;
+	dy_factor = dist / r_view.aspect_sh;
+}
+
+static void AdjustOfs_Add(int ld_num, int part)
+{
+	const LineDef *L = LineDefs[ld_num];
+
+	// ignore invalid sides (sanity check)
+	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
+	if (sd_num < 0)
+		return;
+
+	// TODO : UDMF ports can allow full control over each part
+
+	edit.adjust_bucket->Save(sd_num, SideDef::F_X_OFFSET);
+	edit.adjust_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
+}
+
+static void AdjustOfs_Begin()
+{
+	if (edit.adjust_bucket)
+		delete edit.adjust_bucket;
+
+	edit.adjust_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
+
+	int total_lines = 0;
+
+	// we will compute the bbox of selected lines
+	edit.adjust_bbox.x1 = edit.adjust_bbox.y1 = +9e9;
+	edit.adjust_bbox.x2 = edit.adjust_bbox.y2 = -9e9;
+
+	// find the sidedefs to adjust
+	if (! edit.Selected->empty())
+	{
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			int ld_num = *it;
+			byte parts = edit.Selected->get_ext(ld_num);
+
+			// ignore "simply selected" linedefs
+			if (parts <= 1)
+				continue;
+
+			total_lines++;
+			AdjustOfs_UpdateBBox(ld_num);
+
+			if (parts & PART_RT_LOWER) AdjustOfs_Add(ld_num, PART_RT_LOWER);
+			if (parts & PART_RT_UPPER) AdjustOfs_Add(ld_num, PART_RT_UPPER);
+			if (parts & PART_RT_RAIL)  AdjustOfs_Add(ld_num, PART_RT_RAIL);
+
+			if (parts & PART_LF_LOWER) AdjustOfs_Add(ld_num, PART_LF_LOWER);
+			if (parts & PART_LF_UPPER) AdjustOfs_Add(ld_num, PART_LF_UPPER);
+			if (parts & PART_LF_RAIL)  AdjustOfs_Add(ld_num, PART_LF_RAIL);
+		}
+	}
+	else if (edit.highlight.valid())
+	{
+		int  ld_num = edit.highlight.num;
+		byte parts  = edit.highlight.parts;
+
+		if (parts >= 2)
+		{
+			AdjustOfs_Add(ld_num, parts);
+			AdjustOfs_UpdateBBox(ld_num);
+			total_lines++;
+		}
+	}
+
+	if (total_lines == 0)
+	{
+		Beep("nothing to adjust");
+		return;
+	}
+
+	edit.adjust_dx = 0;
+	edit.adjust_dy = 0;
+
+	Editor_SetAction(ACT_ADJUST_OFS);
+}
+
+static void AdjustOfs_Finish()
+{
+	if (! edit.adjust_bucket)
+		return;
+
+	int dx = I_ROUND(edit.adjust_dx);
+	int dy = I_ROUND(edit.adjust_dy);
+
+	if (dx || dy)
+	{
+		BA_Begin();
+		BA_Message("adjusted offsets");
+
+		edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
+		edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
+
+		BA_End();
+	}
+
+	if (edit.adjust_bucket)
+	{
+		delete edit.adjust_bucket;
+		edit.adjust_bucket = NULL;
+	}
+
+	Editor_ClearAction();
+}
+
+static void AdjustOfs_Delta(int dx, int dy)
+{
+	if (! edit.adjust_bucket)
+		return;
+
+	if (dx == 0 && dy == 0)
+		return;
+
+	bool force_one_dir = true;
+
+	if (force_one_dir)
+	{
+		if (abs(dx) >= abs(dy))
+			dy = 0;
+		else
+			dx = 0;
+	}
+
+	keycode_t mod = M_ReadLaxModifiers();
+
+	float factor = (mod & MOD_SHIFT) ? 0.5 : 2.0;
+
+	if (!render_high_detail)
+		factor = factor * 0.5;
+
+	float dx_factor, dy_factor;
+	AdjustOfs_CalcDistFactor(dx_factor, dy_factor);
+
+	edit.adjust_dx -= dx * factor * dx_factor;
+	edit.adjust_dy -= dy * factor * dy_factor;
+
+	RedrawMap();
+}
+
+
+void AdjustOfs_RenderAnte()
+{
+	if (edit.action == ACT_ADJUST_OFS && edit.adjust_bucket)
+	{
+		int dx = I_ROUND(edit.adjust_dx);
+		int dy = I_ROUND(edit.adjust_dy);
+
+		// change it temporarily (just for the render)
+		edit.adjust_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
+		edit.adjust_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
+	}
+}
+
+void AdjustOfs_RenderPost()
+{
+	if (edit.action == ACT_ADJUST_OFS && edit.adjust_bucket)
+	{
+		edit.adjust_bucket->RestoreAll();
+	}
+}
+
+
+//------------------------------------------------------------------------
+
 static Thing *player;
+
+extern void CheckBeginDrag();
 
 
 void Render3D_Draw(int ox, int oy, int ow, int oh)
 {
 	r_view.PrepareToRender(ow, oh);
 
+	AdjustOfs_RenderAnte();
+
 #ifdef NO_OPENGL
 	SW_RenderWorld(ox, oy, ow, oh);
 #else
 	RGL_RenderWorld(ox, oy, ow, oh);
 #endif
+
+	AdjustOfs_RenderPost();
 }
 
 
-bool Render3D_Query(Obj3d_t& hl, int sx, int sy)
+bool Render3D_Query(Objid& hl, int sx, int sy)
 {
 	int ow = main_win->canvas->w();
 	int oh = main_win->canvas->h();
@@ -604,9 +629,12 @@ void Render3D_Setup()
 void Render3D_Enable(bool _enable)
 {
 	Editor_ClearAction();
-	Render3D_ClearSelection();
 
 	edit.render3d = _enable;
+
+	edit.highlight.clear();
+	edit.clicked.clear();
+	edit.dragged.clear();
 
 	// give keyboard focus to the appropriate large widget
 	Fl::focus(main_win->canvas);
@@ -632,7 +660,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	// started?
 	if (mode < 0)
 	{
-		r_view.is_scrolling = true;
+		edit.is_panning = true;
 		main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
@@ -640,7 +668,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	// finished?
 	if (mode > 0)
 	{
-		r_view.is_scrolling = false;
+		edit.is_panning = false;
 		main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
@@ -667,7 +695,7 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 	if (mod & MOD_SHIFT)   mod_factor = 0.4;
 	if (mod & MOD_COMMAND) mod_factor = 2.5;
 
-	float speed = r_view.scroll_speed * mod_factor;
+	float speed = edit.panning_speed * mod_factor;
 
 	if (is_strafe)
 	{
@@ -700,125 +728,198 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 }
 
 
-void Render3D_AdjustOffsets(int mode, int dx, int dy)
+static void DragSectors_Update()
 {
-	// started?
-	if (mode < 0)
+	float ow = main_win->canvas->w();
+	float x_slope = 100.0 / render_pixel_aspect;
+
+	float factor = CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5);
+	float map_dz = -edit.drag_screen_dy * factor;
+
+	float step = 8.0;  // TODO config item
+
+	if (map_dz > step*0.25)
+		edit.drag_sector_dz = step * (int)ceil(map_dz / step);
+	else if (map_dz < step*-0.25)
+		edit.drag_sector_dz = step * (int)floor(map_dz / step);
+	else
+		edit.drag_sector_dz = 0;
+}
+
+void Render3D_DragSectors()
+{
+	int dz = I_ROUND(edit.drag_sector_dz);
+	if (dz == 0)
+		return;
+
+	BA_Begin();
+
+	if (dz > 0)
+		BA_Message("raised sectors");
+	else
+		BA_Message("lowered sectors");
+
+	if (edit.dragged.valid())
 	{
-		r_view.adjust_sides.clear();
-		r_view.adjust_lines.clear();
+		const Sector *S = Sectors[edit.dragged.num];
+		int parts = edit.dragged.parts;
 
-		r_view.adjust_dx = 0;
-		r_view.adjust_dy = 0;
+		if (parts == 0 || (parts & PART_FLOOR))
+			BA_ChangeSEC(edit.dragged.num, Sector::F_FLOORH, S->floorh + dz);
 
-		// find the sidedefs to adjust
-		if (! r_view.SelectEmpty())
+		if (parts == 0 || (parts & PART_CEIL))
+			BA_ChangeSEC(edit.dragged.num, Sector::F_CEILH, S->ceilh + dz);
+	}
+	else
+	{
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (r_view.sel_type < OB3D_Lower)
-			{
-				Beep("cannot adjust that");
-				return;
-			}
+			const Sector *S = Sectors[*it];
+			int parts = edit.Selected->get_ext(*it);
+			parts &= ~1;
 
-			for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
-			{
-				const Obj3d_t& obj = r_view.sel[k];
+			if (parts == 0 || (parts & PART_FLOOR))
+				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + dz);
 
-				if (obj.isLine())
-					r_view.AddAdjustSide(obj);
-			}
+			if (parts == 0 || (parts & PART_CEIL))
+				BA_ChangeSEC(*it, Sector::F_CEILH, S->ceilh + dz);
 		}
-		else  // no selection, use the highlight
-		{
-			if (! r_view.hl.valid())
-			{
-				Beep("nothing to adjust");
-				return;
-			}
-			else if (! r_view.hl.isLine())
-			{
-				Beep("cannot adjust that");
-				return;
-			}
+	}
 
-			r_view.AddAdjustSide(r_view.hl);
-		}
+	BA_End();
+}
 
-		if (r_view.adjust_sides.empty())  // WTF?
-			return;
 
-		float dist = r_view.AdjustDistFactor(r_view.x, r_view.y);
-		dist = CLAMP(20, dist, 1000);
+static void DragThings_Update()
+{
+	float ow = main_win->canvas->w();
+	float oh = main_win->canvas->h();
 
-		r_view.adjust_dx_factor = dist / r_view.aspect_sw;
-		r_view.adjust_dy_factor = dist / r_view.aspect_sh;
+	float x_slope = 100.0 / render_pixel_aspect;
+	float y_slope = (float)oh / (float)ow;
 
-		Editor_SetAction(ACT_ADJUST_OFS);
+	float dist = CLAMP(20, edit.drag_point_dist, 1000);
+
+	float x_factor = dist / (ow * 0.5);
+	float y_factor = dist / (ow * x_slope * 0.5);
+
+	if (edit.drag_thing_up_down)
+	{
+		// vertical positioning in Hexen and UDMF formats
+		float map_dz = -edit.drag_screen_dy * y_factor;
+
+		// final result is in drag_cur_x/y/z
+		edit.drag_cur_x = edit.drag_start_x;
+		edit.drag_cur_y = edit.drag_start_y;
+		edit.drag_cur_z = edit.drag_start_z + map_dz;
 		return;
 	}
 
+	/* move thing around XY plane */
 
-	if (edit.action != ACT_ADJUST_OFS)
-		return;
+	edit.drag_cur_z = edit.drag_start_z;
 
+	// vectors for view camera
+	double fwd_vx = r_view.Cos;
+	double fwd_vy = r_view.Sin;
 
-	// finished?
-	if (mode > 0)
+	double side_vx =  fwd_vy;
+	double side_vy = -fwd_vx;
+
+	double dx =  edit.drag_screen_dx * x_factor;
+	double dy = -edit.drag_screen_dy * y_factor * 2.0;
+
+	// this usually won't happen, but is a reasonable fallback...
+	if (edit.drag_thing_num < 0)
 	{
-		// apply the offset deltas now
-		dx = (int)r_view.adjust_dx;
-		dy = (int)r_view.adjust_dy;
-
-		if (dx || dy)
-		{
-			BA_Begin();
-
-			for (unsigned int k = 0 ; k < r_view.adjust_sides.size() ; k++)
-			{
-				int sd = r_view.adjust_sides[k];
-
-				const SideDef * SD = SideDefs[sd];
-
-				BA_ChangeSD(sd, SideDef::F_X_OFFSET, SD->x_offset + dx);
-				BA_ChangeSD(sd, SideDef::F_Y_OFFSET, SD->y_offset + dy);
-			}
-
-			BA_Message("adjusted offsets");
-			BA_End();
-		}
-
-		r_view.adjust_sides.clear();
-		r_view.adjust_lines.clear();
-
-		Editor_ClearAction();
+		edit.drag_cur_x = edit.drag_start_x + dx * side_vx + dy * fwd_vx;
+		edit.drag_cur_y = edit.drag_start_y + dx * side_vy + dy * fwd_vy;
 		return;
 	}
 
+	// old code for depth calculation, works well in certain cases
+	// but very poorly in other cases.
+#if 0
+	int sy1 = edit.click_screen_y;
+	int sy2 = sy1 + edit.drag_screen_dy;
 
-	if (dx == 0 && dy == 0)
-		return;
-
-
-	bool force_one_dir = true;
-
-	if (force_one_dir)
+	if (sy1 >= oh/2 && sy2 >= oh/2)
 	{
-		if (abs(dx) >= abs(dy))
-			dy = 0;
-		else
-			dx = 0;
+		double d1 = (edit.drag_thing_floorh - r_view.z) / (oh - sy1*2.0);
+		double d2 = (edit.drag_thing_floorh - r_view.z) / (oh - sy2*2.0);
+
+		d1 = d1 * ow;
+		d2 = d2 * ow;
+
+		dy = (d2 - d1) * 0.5;
+	}
+#endif
+
+	const Thing *T = Things[edit.drag_thing_num];
+
+	float old_x = T->x();
+	float old_y = T->y();
+
+	float new_x = old_x + dx * side_vx;
+	float new_y = old_y + dx * side_vy;
+
+	// recompute forward/back vector
+	fwd_vx = new_x - r_view.x;
+	fwd_vy = new_y - r_view.y;
+
+	double fwd_len = hypot(fwd_vx, fwd_vy);
+	if (fwd_len < 1)
+		fwd_len = 1;
+
+	new_x = new_x + dy * fwd_vx / fwd_len;
+	new_y = new_y + dy * fwd_vy / fwd_len;
+
+	// handle a change in floor height
+	Objid old_sec;
+	GetNearObject(old_sec, OBJ_SECTORS, old_x, old_y);
+
+	Objid new_sec;
+	GetNearObject(new_sec, OBJ_SECTORS, new_x, new_y);
+
+	if (old_sec.valid() && new_sec.valid())
+	{
+		float old_z = Sectors[old_sec.num]->floorh;
+		float new_z = Sectors[new_sec.num]->floorh;
+
+		// intent here is to show proper position, NOT raise/lower things.
+		// [ perhaps add a new variable? ]
+		edit.drag_cur_z += (new_z - old_z);
 	}
 
+	edit.drag_cur_x = edit.drag_start_x + new_x - old_x;
+	edit.drag_cur_y = edit.drag_start_y + new_y - old_y;
+}
 
-	keycode_t mod = M_ReadLaxModifiers();
+void Render3D_DragThings()
+{
+	double dx = edit.drag_cur_x - edit.drag_start_x;
+	double dy = edit.drag_cur_y - edit.drag_start_y;
+	double dz = edit.drag_cur_z - edit.drag_start_z;
 
-	float factor = (mod & MOD_SHIFT) ? 0.25 : 1.0;
+	// for movement in XY plane, ensure we don't raise/lower things
+	if (! edit.drag_thing_up_down)
+		dz = 0.0;
 
-	if (render_high_detail)
-		factor = factor * 2.0;
+	if (edit.dragged.valid())
+	{
+		selection_c sel(OBJ_THINGS);
+		sel.set(edit.dragged.num);
 
-	r_view.adjust_dx -= dx * factor * r_view.adjust_dx_factor;
-	r_view.adjust_dy -= dy * factor * r_view.adjust_dy_factor;
+		MoveObjects(&sel, dx, dy, dz);
+	}
+	else
+	{
+		MoveObjects(edit.Selected, dx, dy, dz);
+	}
+
+	// need to recompute their sectors
+	r_view.FindThingSectors();
 
 	RedrawMap();
 }
@@ -826,51 +927,66 @@ void Render3D_AdjustOffsets(int mode, int dx, int dy)
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
-	if (r_view.is_scrolling)
+	if (edit.is_panning)
 	{
 		Render3D_RBScroll(0, dx, dy, mod);
 		return;
 	}
 	else if (edit.action == ACT_ADJUST_OFS)
 	{
-		Render3D_AdjustOffsets(0, dx, dy);
+		AdjustOfs_Delta(dx, dy);
 		return;
 	}
 
-	Obj3d_t old_hl(r_view.hl);
+	Objid old_hl(r_view.current_hl);
 
-	Render3D_Query(r_view.hl, x, y);
+	// this also updates edit.map_x/y/z
+	Render3D_Query(r_view.current_hl, x, y);
 
-	if (old_hl == r_view.hl)
+	if (edit.action == ACT_CLICK)
+	{
+		CheckBeginDrag();
+	}
+	else if (edit.action == ACT_DRAG)
+	{
+		edit.drag_screen_dx = x - edit.click_screen_x;
+		edit.drag_screen_dy = y - edit.click_screen_y;
+
+		edit.drag_cur_x = edit.map_x;
+		edit.drag_cur_y = edit.map_y;
+
+		if (edit.mode == OBJ_SECTORS)
+			DragSectors_Update();
+
+		if (edit.mode == OBJ_THINGS)
+			DragThings_Update();
+
+		main_win->canvas->redraw();
 		return;
+	}
 
-	main_win->canvas->redraw();
-	main_win->scroll->info3d->redraw();
+	if (! (r_view.current_hl == old_hl))
+	{
+		UpdateHighlight();
+	}
 }
 
 
 void Render3D_UpdateHighlight()
 {
-	// this is mainly to clear the highlight when mouse pointer
-	// leaves the 3D viewport.
+	// TODO : REVIEW HOW/WHEN pointer_in_window is set
 
-	if (r_view.hl.valid() && ! edit.pointer_in_window)
+	edit.highlight.clear();
+
+	if (r_view.current_hl.type == edit.mode &&
+		edit.pointer_in_window &&
+		!(edit.action == ACT_DRAG || edit.dragged.valid()))
 	{
-		r_view.hl.clear();
-
-		main_win->canvas->redraw();
-		main_win->scroll->info3d->redraw();
+		edit.highlight = r_view.current_hl;
 	}
-}
 
-
-void Render3D_ClearNav()
-{
-	r_view.nav_fwd  = r_view.nav_back  = 0;
-	r_view.nav_left = r_view.nav_right = 0;
-	r_view.nav_up   = r_view.nav_down  = 0;
-
-	r_view.nav_turn_L = r_view.nav_turn_R = 0;
+	main_win->canvas->redraw();
+	main_win->scroll->info3d->redraw();
 }
 
 
@@ -886,10 +1002,10 @@ void Render3D_Navigate()
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;
 	if (mod & MOD_COMMAND) mod_factor = 2.0;
 
-	if (r_view.nav_fwd || r_view.nav_back || r_view.nav_right || r_view.nav_left)
+	if (edit.nav_fwd || edit.nav_back || edit.nav_right || edit.nav_left)
 	{
-		float fwd   = r_view.nav_fwd   - r_view.nav_back;
-		float right = r_view.nav_right - r_view.nav_left;
+		float fwd   = edit.nav_fwd   - edit.nav_back;
+		float right = edit.nav_right - edit.nav_left;
 
 		float dx = r_view.Cos * fwd + r_view.Sin * right;
 		float dy = r_view.Sin * fwd - r_view.Cos * right;
@@ -901,16 +1017,16 @@ void Render3D_Navigate()
 		r_view.y += dy * delay_ms;
 	}
 
-	if (r_view.nav_up || r_view.nav_down)
+	if (edit.nav_up || edit.nav_down)
 	{
-		float dz = (r_view.nav_up - r_view.nav_down);
+		float dz = (edit.nav_up - edit.nav_down);
 
 		r_view.z += dz * mod_factor * delay_ms;
 	}
 
-	if (r_view.nav_turn_L || r_view.nav_turn_R)
+	if (edit.nav_turn_L || edit.nav_turn_R)
 	{
-		float dang = (r_view.nav_turn_L - r_view.nav_turn_R);
+		float dang = (edit.nav_turn_L - edit.nav_turn_R);
 
 		dang = dang * mod_factor * delay_ms;
 		dang = CLAMP(-90, dang, 90);
@@ -923,154 +1039,408 @@ void Render3D_Navigate()
 }
 
 
-static void Render3D_Cut()
+// returns -1 if nothing in selection or highlight, -2 if multiple
+// things are selected and they have different types.
+static int GrabSelectedThing()
 {
-	// this is equivalent to setting the default texture
+	int result = -1;
 
-	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
+	if (edit.Selected->empty())
+	{
+		if (edit.highlight.is_nil())
+		{
+			Beep("no things for copy/cut type");
+			return -1;
+		}
 
-	if (type == OB3D_Thing)
-		return;
+		result = Things[edit.highlight.num]->type;
+	}
+	else
+	{
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			const Thing *T = Things[*it];
+			if (result >= 0 && T->type != result)
+			{
+				Beep("multiple thing types");
+				return -2;
+			}
 
-	const char *name = default_wall_tex;
+			result = T->type;
+		}
+	}
 
-	if (type == OB3D_Floor)
-		name = default_floor_tex;
-	else if (type == OB3D_Ceil)
-		name = default_ceil_tex;
+	Status_Set("Copied type %d", result);
 
-	r_view.StoreTextureTo3DSel(BA_InternaliseString(name));
-
-	Status_Set("Cut texture to default");
+	return result;
 }
 
 
-static void Render3D_Copy()
+static void StoreSelectedThing(int new_type)
 {
-	int new_tex = r_view.GrabTextureFrom3DSel();
-	if (new_tex < 0)
+	// this code is similar to code in UI_Thing::type_callback(),
+	// but here we must handle a highlighted object.
+
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		Beep("multiple textures present");
+		Beep("no things for paste type");
 		return;
 	}
 
-	r_view.StoreClipboard(new_tex);
+	BA_Begin();
+	BA_MessageForSel("pasted type of", edit.Selected);
 
-	Status_Set("Copied %s", BA_GetString(new_tex));
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		BA_ChangeTH(*it, Thing::F_TYPE, new_type);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+
+	Status_Set("Pasted type %d", new_type);
 }
 
 
-static void Render3D_Paste()
+static int SEC_GrabFlat(const Sector *S, int part)
 {
-	int new_tex = r_view.GrabClipboard();
+	if (part & PART_CEIL)
+		return S->ceil_tex;
 
-	r_view.StoreTextureTo3DSel(new_tex);
+	if (part & PART_FLOOR)
+		return S->floor_tex;
+
+	return S->floor_tex;
+}
+
+
+// returns -1 if nothing in selection or highlight, -2 if multiple
+// sectors are selected and they have different flats.
+static int GrabSelectedFlat()
+{
+	int result = -1;
+
+	if (edit.Selected->empty())
+	{
+		if (edit.highlight.is_nil())
+		{
+			Beep("no sectors for copy/cut flat");
+			return -1;
+		}
+
+		const Sector *S = Sectors[edit.highlight.num];
+
+		result = SEC_GrabFlat(S, edit.highlight.parts);
+	}
+	else
+	{
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			const Sector *S = Sectors[*it];
+			byte parts = edit.Selected->get_ext(*it);
+
+			int tex = SEC_GrabFlat(S, parts & ~1);
+
+			if (result >= 0 && tex != result)
+			{
+				Beep("multiple flats present");
+				return -2;
+			}
+
+			result = tex;
+		}
+	}
+
+	Status_Set("Copied %s", BA_GetString(result));
+
+	return result;
+}
+
+
+static void StoreSelectedFlat(int new_tex)
+{
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no sectors for paste flat");
+		return;
+	}
+
+	BA_Begin();
+	BA_MessageForSel("pasted flat to", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		byte parts = edit.Selected->get_ext(*it);
+
+		if (parts == 1 || (parts & PART_FLOOR))
+			BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+
+		if (parts == 1 || (parts & PART_CEIL))
+			BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 
 	Status_Set("Pasted %s", BA_GetString(new_tex));
 }
 
 
-static void Render3D_Delete()
+static void StoreDefaultedFlats()
 {
-	obj3d_type_e type = r_view.SelectEmpty() ? r_view.hl.type : r_view.sel_type;
-
-	if (type == OB3D_Thing)
-		return;
-
-	if (type == OB3D_Floor || type == OB3D_Ceil)
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		r_view.StoreTextureTo3DSel(BA_InternaliseString(Misc_info.sky_flat));
+		Beep("no sectors for default");
 		return;
 	}
 
-	r_view.StoreTextureTo3DSel(BA_InternaliseString("-"));
+	int floor_tex = BA_InternaliseString(default_floor_tex);
+	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
-	Status_Set("Removed textures");
-}
+	BA_Begin();
+	BA_MessageForSel("defaulted flat in", edit.Selected);
 
-
-bool Render3D_ClipboardOp(char op)
-{
-	if (r_view.SelectEmpty() && ! r_view.hl.valid())
-		return false;
-
-	switch (op)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		case 'c':
-			Render3D_Copy();
-			break;
+		byte parts = edit.Selected->get_ext(*it);
 
-		case 'v':
-			Render3D_Paste();
-			break;
+		if (parts == 1 || (parts & PART_FLOOR))
+			BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, floor_tex);
 
-		case 'x':
-			Render3D_Cut();
-			break;
-
-		case 'd':
-			Render3D_Delete();
-			break;
+		if (parts == 1 || (parts & PART_CEIL))
+			BA_ChangeSEC(*it, Sector::F_CEIL_TEX, ceil_tex);
 	}
 
-	return true;
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+
+	Status_Set("Defaulted flats");
 }
 
 
-void Render3D_ClearSelection()
+static int LD_GrabTex(const LineDef *L, int part)
 {
-	if (! r_view.SelectEmpty())
-		RedrawMap();
+	if (L->NoSided())
+		return BA_InternaliseString(default_wall_tex);
 
-	r_view.sel.clear();
+	if (L->OneSided())
+		return L->Right()->mid_tex;
+
+	if (part & PART_RT_LOWER) return L->Right()->lower_tex;
+	if (part & PART_RT_UPPER) return L->Right()->upper_tex;
+
+	if (part & PART_LF_LOWER) return L->Left()->lower_tex;
+	if (part & PART_LF_UPPER) return L->Left()->upper_tex;
+
+	if (part & PART_RT_RAIL)  return L->Right()->mid_tex;
+	if (part & PART_LF_RAIL)  return L->Left() ->mid_tex;
+
+	// pick something reasonable for a simply selected line
+	if (L->Left()->SecRef()->floorh > L->Right()->SecRef()->floorh)
+		return L->Right()->lower_tex;
+
+	if (L->Left()->SecRef()->ceilh < L->Right()->SecRef()->ceilh)
+		return L->Right()->upper_tex;
+
+	if (L->Left()->SecRef()->floorh < L->Right()->SecRef()->floorh)
+		return L->Left()->lower_tex;
+
+	if (L->Left()->SecRef()->ceilh > L->Right()->SecRef()->ceilh)
+		return L->Left()->upper_tex;
+
+	// emergency fallback
+	return L->Right()->lower_tex;
 }
 
 
-void Render3D_SaveHighlight()
+// returns -1 if nothing in selection or highlight, -2 if multiple
+// linedefs are selected and they have different textures.
+static int GrabSelectedTexture()
 {
-	r_view.saved_hl = r_view.hl;
-}
+	int result = -1;
 
-void Render3D_RestoreHighlight()
-{
-	r_view.hl = r_view.saved_hl;
-}
-
-
-bool Render3D_BrowsedItem(char kind, int number, const char *name, int e_state)
-{
-	// do not check the highlight here, as mouse pointer will be
-	// over an item in the browser.
-
-	if (r_view.SelectEmpty())
-		return false;
-
-	if (kind == 'F')
-		kind = 'T';
-
-	if (kind == 'O' && r_view.sel_type == OB3D_Thing)
+	if (edit.Selected->empty())
 	{
-		r_view.StoreTextureTo3DSel(number);
-		return true;
+		if (edit.highlight.is_nil())
+		{
+			Beep("no linedefs for copy/cut tex");
+			return -1;
+		}
+
+		const LineDef *L = LineDefs[edit.highlight.num];
+
+		result = LD_GrabTex(L, edit.highlight.parts);
 	}
-	else if (kind == 'T' && r_view.sel_type <= OB3D_Floor)
+	else
 	{
-		int new_flat = BA_InternaliseString(name);
-		r_view.StoreTextureTo3DSel(new_flat);
-		return true;
-	}
-	else if (kind == 'T' && r_view.sel_type >= OB3D_Lower)
-	{
-		int new_tex = BA_InternaliseString(name);
-		r_view.StoreTextureTo3DSel(new_tex);
-		return true;
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		{
+			const LineDef *L = LineDefs[*it];
+			byte parts = edit.Selected->get_ext(*it);
+
+			int tex = LD_GrabTex(L, parts & ~1);
+
+			if (result >= 0 && tex != result)
+			{
+				Beep("multiple textures present");
+				return -2;
+			}
+
+			result = tex;
+		}
 	}
 
-	// mismatched usage
-	fl_beep();
+	Status_Set("Copied %s", BA_GetString(result));
 
-	// we still eat it
-	return true;
+	return result;
+}
+
+
+static void StoreSelectedTexture(int new_tex)
+{
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("no linedefs for paste tex");
+		return;
+	}
+
+	BA_Begin();
+	BA_MessageForSel("pasted flat to", edit.Selected);
+
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	{
+		const LineDef *L = LineDefs[*it];
+		byte parts = edit.Selected->get_ext(*it);
+
+		if (L->NoSided())
+			continue;
+
+		if (L->OneSided())
+		{
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+			continue;
+		}
+
+		/* right side */
+		if (parts == 1 || (parts & PART_RT_LOWER))
+			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
+
+		if (parts == 1 || (parts & PART_RT_UPPER))
+			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+
+		if (parts & PART_RT_RAIL)
+			BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+
+		/* left side */
+		if (parts == 1 || (parts & PART_LF_LOWER))
+			BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
+
+		if (parts == 1 || (parts & PART_LF_UPPER))
+			BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+
+		if (parts & PART_LF_RAIL)
+			BA_ChangeSD(L->left, SideDef::F_MID_TEX, new_tex);
+	}
+
+	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+
+	Status_Set("Pasted %s", BA_GetString(new_tex));
+}
+
+
+void Render3D_CB_Copy()
+{
+	int num;
+
+	switch (edit.mode)
+	{
+	case OBJ_THINGS:
+		num = GrabSelectedThing();
+		if (num >= 0)
+			Texboard_SetThing(num);
+		break;
+
+	case OBJ_SECTORS:
+		num = GrabSelectedFlat();
+		if (num >= 0)
+			Texboard_SetFlat(BA_GetString(num));
+		break;
+
+	case OBJ_LINEDEFS:
+		num = GrabSelectedTexture();
+		if (num >= 0)
+			Texboard_SetTex(BA_GetString(num));
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+void Render3D_CB_Paste()
+{
+	switch (edit.mode)
+	{
+	case OBJ_THINGS:
+		StoreSelectedThing(Texboard_GetThing());
+		break;
+
+	case OBJ_SECTORS:
+		StoreSelectedFlat(Texboard_GetFlatNum());
+		break;
+
+	case OBJ_LINEDEFS:
+		StoreSelectedTexture(Texboard_GetTexNum());
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+void Render3D_CB_Cut()
+{
+	// this is repurposed to set the default texture/thing
+
+	switch (edit.mode)
+	{
+	case OBJ_THINGS:
+		StoreSelectedThing(default_thing);
+		break;
+
+	case OBJ_SECTORS:
+		StoreDefaultedFlats();
+		break;
+
+	case OBJ_LINEDEFS:
+		StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
+		break;
+
+	default:
+		break;
+	}
 }
 
 
@@ -1134,9 +1504,6 @@ bool Render3D_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (r_clipboard.ParseUser(tokens, num_tok))
-		return true;
-
 	return false;
 }
 
@@ -1156,34 +1523,12 @@ void Render3D_WriteUser(FILE *fp)
 
 	fprintf(fp, "gamma %d\n",
 	        usegamma);
-
-	r_clipboard.WriteUser(fp);
 }
 
 
 //------------------------------------------------------------------------
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
-
-void R3D_Click()
-{
-	if (! r_view.hl.valid())
-	{
-		Beep("nothing there");
-		return;
-	}
-
-	if (r_view.hl.type == OB3D_Thing)
-		return;
-
-	r_view.SelectToggle(r_view.hl);
-
-	// unselect any texture boxes in the panel
-	main_win->UnselectPics();
-
-	RedrawMap();
-}
-
 
 void R3D_Forward()
 {
@@ -1287,7 +1632,7 @@ void R3D_DropToFloor()
 
 static void R3D_NAV_Forward_release()
 {
-	r_view.nav_fwd = 0;
+	edit.nav_fwd = 0;
 }
 
 void R3D_NAV_Forward()
@@ -1296,9 +1641,9 @@ void R3D_NAV_Forward()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_fwd = atof(EXEC_Param[0]);
+	edit.nav_fwd = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
 }
@@ -1306,7 +1651,7 @@ void R3D_NAV_Forward()
 
 static void R3D_NAV_Back_release(void)
 {
-	r_view.nav_back = 0;
+	edit.nav_back = 0;
 }
 
 void R3D_NAV_Back()
@@ -1315,9 +1660,9 @@ void R3D_NAV_Back()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_back = atof(EXEC_Param[0]);
+	edit.nav_back = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
 }
@@ -1325,7 +1670,7 @@ void R3D_NAV_Back()
 
 static void R3D_NAV_Right_release(void)
 {
-	r_view.nav_right = 0;
+	edit.nav_right = 0;
 }
 
 void R3D_NAV_Right()
@@ -1334,9 +1679,9 @@ void R3D_NAV_Right()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_right = atof(EXEC_Param[0]);
+	edit.nav_right = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
 }
@@ -1344,7 +1689,7 @@ void R3D_NAV_Right()
 
 static void R3D_NAV_Left_release(void)
 {
-	r_view.nav_left = 0;
+	edit.nav_left = 0;
 }
 
 void R3D_NAV_Left()
@@ -1353,9 +1698,9 @@ void R3D_NAV_Left()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_left = atof(EXEC_Param[0]);
+	edit.nav_left = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
 }
@@ -1363,7 +1708,7 @@ void R3D_NAV_Left()
 
 static void R3D_NAV_Up_release(void)
 {
-	r_view.nav_up = 0;
+	edit.nav_up = 0;
 }
 
 void R3D_NAV_Up()
@@ -1380,9 +1725,9 @@ void R3D_NAV_Up()
 	r_view.gravity = false;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_up = atof(EXEC_Param[0]);
+	edit.nav_up = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
 }
@@ -1390,7 +1735,7 @@ void R3D_NAV_Up()
 
 static void R3D_NAV_Down_release(void)
 {
-	r_view.nav_down = 0;
+	edit.nav_down = 0;
 }
 
 void R3D_NAV_Down()
@@ -1407,9 +1752,9 @@ void R3D_NAV_Down()
 	r_view.gravity = false;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
-	r_view.nav_down = atof(EXEC_Param[0]);
+	edit.nav_down = atof(EXEC_Param[0]);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
 }
@@ -1417,7 +1762,7 @@ void R3D_NAV_Down()
 
 static void R3D_NAV_TurnLeft_release(void)
 {
-	r_view.nav_turn_L = 0;
+	edit.nav_turn_L = 0;
 }
 
 void R3D_NAV_TurnLeft()
@@ -1426,12 +1771,12 @@ void R3D_NAV_TurnLeft()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
 	float turn = atof(EXEC_Param[0]);
 
 	// convert to radians
-	r_view.nav_turn_L = turn * M_PI / 180.0;
+	edit.nav_turn_L = turn * M_PI / 180.0;
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
 }
@@ -1439,7 +1784,7 @@ void R3D_NAV_TurnLeft()
 
 static void R3D_NAV_TurnRight_release(void)
 {
-	r_view.nav_turn_R = 0;
+	edit.nav_turn_R = 0;
 }
 
 void R3D_NAV_TurnRight()
@@ -1448,12 +1793,12 @@ void R3D_NAV_TurnRight()
 		return;
 
 	if (! edit.is_navigating)
-		Render3D_ClearNav();
+		Editor_ClearNav();
 
 	float turn = atof(EXEC_Param[0]);
 
 	// convert to radians
-	r_view.nav_turn_R = turn * M_PI / 180.0;
+	edit.nav_turn_R = turn * M_PI / 180.0;
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
@@ -1469,7 +1814,7 @@ void R3D_NAV_MouseMove()
 	if (! EXEC_CurKey)
 		return;
 
-	r_view.scroll_speed = atof(EXEC_Param[0]);
+	edit.panning_speed = atof(EXEC_Param[0]);
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
@@ -1481,14 +1826,13 @@ void R3D_NAV_MouseMove()
 }
 
 
-
 static void ACT_AdjustOfs_release(void)
 {
 	// check if cancelled or overridden
 	if (edit.action != ACT_ADJUST_OFS)
 		return;
 
-	Render3D_AdjustOffsets(+1);
+	AdjustOfs_Finish();
 }
 
 void R3D_ACT_AdjustOfs()
@@ -1496,10 +1840,16 @@ void R3D_ACT_AdjustOfs()
 	if (! EXEC_CurKey)
 		return;
 
-	if (Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
+		return;
+
+	if (edit.mode != OBJ_LINEDEFS)
 	{
-		Render3D_AdjustOffsets(-1);
+		Beep("not in linedef mode");
+		return;
 	}
+
+	AdjustOfs_Begin();
 }
 
 
@@ -1588,106 +1938,6 @@ void R3D_Toggle()
 }
 
 
-//
-// Align texture on sidedef(s)
-//
-// Parameter:
-//     x : align X offset
-//     y : align Y offset
-//    xy : align both X and Y
-//
-// Flags:
-//    /clear : clear offset(s) instead of aligning
-//    /right : align to line on the right of this one (instead of left)
-//
-void R3D_Align()
-{
-	if (! edit.render3d)
-	{
-		Beep("3D mode required");
-		return;
-	}
-
-	// parse the flags
-	bool do_X = Exec_HasFlag("/x");
-	bool do_Y = Exec_HasFlag("/y");
-
-	// this is for backwards compatibility
-	{
-		const char *param = EXEC_Param[0];
-
-		if (strchr(param, 'x')) do_X = true;
-		if (strchr(param, 'y')) do_Y = true;
-	}
-
-	if (! (do_X || do_Y))
-	{
-		Beep("3D_Align: need x or y flag");
-		return;
-	}
-
-	bool do_clear = Exec_HasFlag("/clear");
-	bool do_right = Exec_HasFlag("/right");
-	bool do_unpeg = true;
-
-	int align_flags = 0;
-
-	if (do_X) align_flags = align_flags | LINALIGN_X;
-	if (do_Y) align_flags = align_flags | LINALIGN_Y;
-
-	if (do_right) align_flags |= LINALIGN_Right;
-	if (do_unpeg) align_flags |= LINALIGN_Unpeg;
-	if (do_clear) align_flags |= LINALIGN_Clear;
-
-
-	// if selection is empty, add the highlight to it
-	// (and clear it when we are done).
-	bool did_select = false;
-
-	if (r_view.SelectEmpty())
-	{
-		if (! r_view.hl.valid())
-		{
-			Beep("nothing to align");
-			return;
-		}
-		else if (! r_view.hl.isLine())
-		{
-			Beep("cannot align that");
-			return;
-		}
-
-		r_view.SelectToggle(r_view.hl);
-		did_select = true;
-	}
-	else
-	{
-		if (r_view.sel_type < OB3D_Lower)
-		{
-			Beep("cannot align that");
-			return;
-		}
-	}
-
-
-	BA_Begin();
-
-	Line_AlignGroup(r_view.sel, align_flags);
-
-	if (do_clear)
-		BA_Message("cleared offsets");
-	else
-		BA_Message("aligned offsets");
-
-	BA_End();
-
-	if (did_select)
-		r_view.sel.clear();
-
-	RedrawMap();
-}
-
-
 void R3D_WHEEL_Move()
 {
 	float dx = Fl::event_dx();
@@ -1717,13 +1967,11 @@ void R3D_WHEEL_Move()
 
 //------------------------------------------------------------------------
 
+extern void CMD_ACT_Click();
+
 
 static editor_command_t  render_commands[] =
 {
-	{	"3D_Click", NULL,
-		&R3D_Click
-	},
-
 	{	"3D_Set", NULL,
 		&R3D_Set,
 		/* flags */ NULL,
@@ -1734,11 +1982,6 @@ static editor_command_t  render_commands[] =
 		&R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
-	},
-
-	{	"3D_Align", NULL,
-		&R3D_Align,
-		/* flags */ "/x /y /right /clear"
 	},
 
 	{	"3D_Forward", NULL,
@@ -1815,6 +2058,17 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_NAV_MouseMove", NULL,
 		&R3D_NAV_MouseMove
+	},
+
+	// backwards compatibility
+	{	"3D_Click", NULL,
+		&CMD_ACT_Click
+	},
+
+	// backwards compatibility
+	{	"3D_Align", NULL,
+		&CMD_LIN_Align,
+		/* flags */ "/x /y /right /clear"
 	},
 
 	// end of command list

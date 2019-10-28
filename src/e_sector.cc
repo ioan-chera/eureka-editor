@@ -51,20 +51,18 @@ void CMD_SEC_Floor(void)
 		return;
 	}
 
-
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No sectors to move");
 		return;
 	}
 
-
 	BA_Begin();
+	BA_MessageForSel(diff < 0 ? "lowered floor of" : "raised floor of", edit.Selected);
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
 
@@ -73,11 +71,12 @@ void CMD_SEC_Floor(void)
 		BA_ChangeSEC(*it, Sector::F_FLOORH, new_h);
 	}
 
-	BA_MessageForSel(diff < 0 ? "lowered floor of" : "raised floor of", &list);
-
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -91,19 +90,18 @@ void CMD_SEC_Ceil(void)
 		return;
 	}
 
-
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No sectors to move");
 		return;
 	}
 
 	BA_Begin();
+	BA_MessageForSel(diff < 0 ? "lowered ceil of" : "raised ceil of", edit.Selected);
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
 
@@ -112,11 +110,12 @@ void CMD_SEC_Ceil(void)
 		BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
 	}
 
-	BA_MessageForSel(diff < 0 ? "lowered ceil of" : "raised ceil of", &list);
-
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_CEILH);
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -143,18 +142,16 @@ static int light_add_delta(int level, int delta)
 
 void SectorsAdjustLight(int delta)
 {
-	selection_c list;
-	selection_iterator_c it;
+	// this uses the current selection (caller must set it up)
 
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("No sectors to adjust light");
+	if (edit.Selected->empty())
 		return;
-	}
 
 	BA_Begin();
+	BA_MessageForSel(delta < 0 ? "darkened" : "brightened", edit.Selected);
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
 
@@ -162,8 +159,6 @@ void SectorsAdjustLight(int delta)
 
 		BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
 	}
-
-	BA_MessageForSel(delta < 0 ? "darkened" : "brightened", &list);
 
 	BA_End();
 
@@ -181,24 +176,34 @@ void CMD_SEC_Light(void)
 		return;
 	}
 
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("No sectors to adjust light");
+		return;
+	}
+
 	SectorsAdjustLight(diff);
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_SEC_SwapFlats()
 {
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No sectors to swap");
 		return;
 	}
 
 	BA_Begin();
+	BA_MessageForSel("swapped flats in", edit.Selected);
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector *S = Sectors[*it];
 
@@ -209,12 +214,13 @@ void CMD_SEC_SwapFlats()
 		BA_ChangeSEC(*it, Sector::F_CEIL_TEX, floor_tex);
 	}
 
-	BA_MessageForSel("swapped flats in", &list);
-
 	BA_End();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
 	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -255,7 +261,7 @@ void CMD_SEC_Merge(void)
 	// need a selection
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	if (edit.Selected->count_obj() < 2)
@@ -1002,7 +1008,7 @@ static void DetermineNewTextures(lineloop_c& loop,
 //
 void DoAssignSector(int ld, int side, int new_sec,
 					int new_lower, int new_upper,
-					selection_c& flip)
+					selection_c *flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
@@ -1023,7 +1029,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 
 	if (side < 0 && other_sd < 0)
 	{
-		flip.set(ld);
+		flip->set(ld);
 	}
 
 	SYS_ASSERT(new_lower >= 0);
@@ -1065,7 +1071,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 }
 
 
-void lineloop_c::AssignSector(int new_sec, selection_c& flip)
+void lineloop_c::AssignSector(int new_sec, selection_c *flip)
 {
 	std::vector<int> lower_texs(lines.size());
 	std::vector<int> upper_texs(lines.size());
@@ -1189,9 +1195,9 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 
 	loop.GetAllSectors(&unused);
 
-	loop.AssignSector(new_sec, flip);
+	loop.AssignSector(new_sec, &flip);
 
-	FlipLineDefGroup(flip);
+	FlipLineDefGroup(&flip);
 
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < NumLineDefs ; n++)

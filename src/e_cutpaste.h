@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2009-2012 Andrew Apted
+//  Copyright (C) 2009-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -44,6 +44,22 @@ void CMD_CopyAndPaste();
 void CMD_Clipboard_Cut();
 void CMD_Clipboard_Copy();
 void CMD_Clipboard_Paste();
+
+
+//----------------------------------------------------------------------
+//  Texture Clipboard
+//----------------------------------------------------------------------
+
+void Texboard_Clear();
+
+int Texboard_GetTexNum();
+int Texboard_GetFlatNum();
+int Texboard_GetThing();
+
+void Texboard_SetTex(const char *new_tex);
+void Texboard_SetFlat(const char *new_flat);
+void Texboard_SetThing(int new_id);
+
 
 #endif  /* __EUREKA_E_CUTPASTE_H__ */
 

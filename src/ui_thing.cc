@@ -360,19 +360,17 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 	box->desc->value(info->desc);
 	box->sprite->GetSprite(new_type, FL_DARK2);
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited type of", edit.Selected);
 
-		for (list.begin(&it) ; !it.at_end() ; ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
 		}
 
-		BA_MessageForSel("edited type of", &list);
 		BA_End();
 	}
 }
@@ -407,19 +405,17 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 	else
 		box->spec_desc->value(info->desc);
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited special of", edit.Selected);
 
-		for (list.begin(&it) ; !it.at_end() ; ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
 		}
 
-		BA_MessageForSel("edited special of", &list);
 		BA_End();
 	}
 }
@@ -499,19 +495,17 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 	int new_ang = atoi(box->angle->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited angle of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_ANGLE, new_ang);
 		}
 
-		BA_MessageForSel("edited angle of", &list);
 		BA_End();
 	}
 }
@@ -524,19 +518,17 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 	int new_tid = atoi(box->tid->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited TID of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_TID, new_tid);
 		}
 
-		BA_MessageForSel("edited TID of", &list);
 		BA_End();
 	}
 }
@@ -548,17 +540,15 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 
 	int new_x = atoi(box->pos_x->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited X of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 
-		BA_MessageForSel("edited X of", &list);
 		BA_End();
 	}
 }
@@ -569,17 +559,15 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 
 	int new_y = atoi(box->pos_y->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited Y of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
-		BA_MessageForSel("edited Y of", &list);
 		BA_End();
 	}
 }
@@ -590,17 +578,15 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 
 	int new_h = atoi(box->pos_z->value());
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited Z of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 			BA_ChangeTH(*it, Thing::F_H, INT_TO_COORD(new_h));
 
-		BA_MessageForSel("edited Z of", &list);
 		BA_End();
 	}
 }
@@ -615,14 +601,13 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	int mask = ocb->mask;
 	int new_opts = box->CalcOptions();
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited flags of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			const Thing *T = Things[*it];
 
@@ -631,7 +616,6 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 			BA_ChangeTH(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
 		}
 
-		BA_MessageForSel("edited flags of", &list);
 		BA_End();
 	}
 }
@@ -681,19 +665,17 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 	new_value = CLAMP(0, new_value, 255);
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (GetCurrentObjects(&list))
+	if (! edit.Selected->empty())
 	{
 		BA_Begin();
+		BA_MessageForSel("edited args of", edit.Selected);
 
-		for (list.begin(&it); !it.at_end(); ++it)
+		selection_iterator_c it;
+		for (edit.Selected->begin(&it); !it.at_end(); ++it)
 		{
 			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}
 
-		BA_MessageForSel("edited args of", &list);
 		BA_End();
 	}
 }

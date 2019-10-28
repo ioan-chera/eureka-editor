@@ -101,10 +101,7 @@ void CMD_Select()
 		return;
 	}
 
-	int obj_num = edit.highlight.num;
-
-	edit.Selected->toggle(obj_num);
-
+	Selection_Toggle(edit.highlight);
 	RedrawMap();
 }
 
@@ -151,7 +148,7 @@ void CMD_InvertSelection()
 	{
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode);
+		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 		ConvertSelection(prev_sel, edit.Selected);
 		delete prev_sel;
@@ -401,7 +398,7 @@ void CMD_Scroll()
 
 static void NAV_Scroll_Left_release(void)
 {
-	edit.nav_scroll_left = 0;
+	edit.nav_left = 0;
 }
 
 void CMD_NAV_Scroll_Left()
@@ -414,7 +411,7 @@ void CMD_NAV_Scroll_Left()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_left = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_left = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release);
 }
@@ -422,7 +419,7 @@ void CMD_NAV_Scroll_Left()
 
 static void NAV_Scroll_Right_release(void)
 {
-	edit.nav_scroll_right = 0;
+	edit.nav_right = 0;
 }
 
 void CMD_NAV_Scroll_Right()
@@ -435,7 +432,7 @@ void CMD_NAV_Scroll_Right()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_right = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_right = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release);
 }
@@ -443,7 +440,7 @@ void CMD_NAV_Scroll_Right()
 
 static void NAV_Scroll_Up_release(void)
 {
-	edit.nav_scroll_up = 0;
+	edit.nav_up = 0;
 }
 
 void CMD_NAV_Scroll_Up()
@@ -456,7 +453,7 @@ void CMD_NAV_Scroll_Up()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_up = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_up = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release);
 }
@@ -464,7 +461,7 @@ void CMD_NAV_Scroll_Up()
 
 static void NAV_Scroll_Down_release(void)
 {
-	edit.nav_scroll_down = 0;
+	edit.nav_down = 0;
 }
 
 void CMD_NAV_Scroll_Down()
@@ -477,7 +474,7 @@ void CMD_NAV_Scroll_Down()
 
 	float perc = atof(EXEC_Param[0]);
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_scroll_down = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_down = perc * base_size / 100.0 / grid.Scale;
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release);
 }
@@ -496,7 +493,7 @@ void CMD_NAV_MouseScroll()
 	if (! EXEC_CurKey)
 		return;
 
-	edit.scroll_speed = atof(EXEC_Param[0]);
+	edit.panning_speed = atof(EXEC_Param[0]);
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
@@ -508,46 +505,93 @@ void CMD_NAV_MouseScroll()
 }
 
 
-// screen position when LMB was pressed
-static int mouse_button1_x;
-static int mouse_button1_y;
-
-// map location when LMB was pressed
-static int button1_map_x;
-static int button1_map_y;
-
-static bool click_check_drag;
-static bool click_check_select;
-static bool click_force_single;
+static void DoBeginDrag();
 
 
 void CheckBeginDrag()
 {
-	if (! click_check_drag)
+	if (! edit.clicked.valid())
 		return;
 
-	int pixel_dx = Fl::event_x() - mouse_button1_x;
-	int pixel_dy = Fl::event_y() - mouse_button1_y;
+	if (! edit.click_check_drag)
+		return;
 
-	if (edit.clicked.valid() &&
-		MAX(abs(pixel_dx), abs(pixel_dy)) >= minimum_drag_pixels)
+	// can drag things and sector planes in 3D mode
+	if (edit.render3d && !(edit.mode == OBJ_THINGS || edit.mode == OBJ_SECTORS))
+		return;
+
+	int pixel_dx = Fl::event_x() - edit.click_screen_x;
+	int pixel_dy = Fl::event_y() - edit.click_screen_y;
+
+	if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels)
+		return;
+
+	// if highlighted object is in selection, we drag the selection,
+	// otherwise we drag just this one object.
+
+	if (edit.click_force_single || !edit.Selected->get(edit.clicked.num))
+		edit.dragged = edit.clicked;
+	else
+		edit.dragged.clear();
+
+	DoBeginDrag();
+}
+
+static void DoBeginDrag()
+{
+	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
+	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
+	edit.drag_start_z = edit.drag_cur_z = edit.click_map_z;
+
+	edit.drag_screen_dx = edit.drag_screen_dy = 0;
+	edit.drag_thing_num = -1;
+
+	// the focus is only used when grid snapping is on
+	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
+
+	if (edit.render3d)
 	{
-		Editor_SetAction(ACT_DRAG);
+		if (edit.mode == OBJ_SECTORS)
+			edit.drag_sector_dz = 0;
 
-		// if highlighted object is in selection, we drag the selection,
-		// otherwise we drag just this one object
+		if (edit.mode == OBJ_THINGS)
+		{
+			edit.drag_thing_num = edit.clicked.num;
+			edit.drag_thing_floorh = edit.drag_start_z;
+			edit.drag_thing_up_down = (Level_format != MAPF_Doom && !grid.snap);
 
-		if (click_force_single || ! edit.Selected->get(edit.clicked.num))
-			edit.drag_single_obj = edit.clicked.num;
-		else
-			edit.drag_single_obj = -1;
+			// get thing's floor
+			if (edit.drag_thing_num >= 0)
+			{
+				const Thing *T = Things[edit.drag_thing_num];
 
-		double focus_x, focus_y;
-		GetDragFocus(&focus_x, &focus_y, button1_map_x, button1_map_y);
+				Objid sec;
+				GetNearObject(sec, OBJ_SECTORS, T->x(), T->y());
 
-		main_win->canvas->DragBegin(focus_x, focus_y, button1_map_x, button1_map_y);
-		return;
+				if (sec.valid())
+					edit.drag_thing_floorh = Sectors[sec.num]->floorh;
+			}
+		}
 	}
+
+	// in vertex mode, show all the connected lines too
+	if (edit.drag_lines)
+	{
+		delete edit.drag_lines;
+		edit.drag_lines = NULL;
+	}
+
+	if (edit.mode == OBJ_VERTICES)
+	{
+		edit.drag_lines = new selection_c(OBJ_LINEDEFS);
+		ConvertSelection(edit.Selected, edit.drag_lines);
+	}
+
+	edit.clicked.clear();
+
+	Editor_SetAction(ACT_DRAG);
+
+	main_win->canvas->redraw();
 }
 
 
@@ -560,15 +604,15 @@ static void ACT_SelectBox_release(void)
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
-	double x1, y1, x2, y2;
-	main_win->canvas->SelboxFinish(&x1, &y1, &x2, &y2);
-
 	// a mere click and release will unselect everything
-	if (x1 == x2 && y1 == y2)
+	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+	if (! main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	{
 		ExecuteCommand("UnselectAll");
-	else
-		SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+		return;
+	}
 
+	SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
 	RedrawMap();
 }
 
@@ -577,22 +621,38 @@ static void ACT_Drag_release(void)
 {
 	// check if cancelled or overridden
 	if (edit.action != ACT_DRAG)
+	{
+		edit.dragged.clear();
 		return;
+	}
 
-	Editor_ClearAction();
+	if (edit.render3d)
+	{
+		if (edit.mode == OBJ_THINGS)
+			Render3D_DragThings();
+
+		if (edit.mode == OBJ_SECTORS)
+			Render3D_DragSectors();
+	}
+
+	Objid dragged(edit.dragged);
+	edit.dragged.clear();
+
+	if (edit.drag_lines)
+		edit.drag_lines->clear_all();
 
 	double dx, dy;
-	main_win->canvas->DragFinish(&dx, &dy);
+	main_win->canvas->DragDelta(&dx, &dy);
 
-	if (dx || dy)
+	if (! edit.render3d && (dx || dy))
 	{
-		if (edit.drag_single_obj >= 0)
-			DragSingleObject(edit.drag_single_obj, dx, dy);
+		if (dragged.valid())
+			DragSingleObject(dragged, dx, dy);
 		else
 			MoveObjects(edit.Selected, dx, dy);
 	}
 
-	edit.drag_single_obj = -1;
+	Editor_ClearAction();
 
 	RedrawMap();
 }
@@ -603,7 +663,7 @@ static void ACT_Click_release(void)
 	Objid click_obj(edit.clicked);
 	edit.clicked.clear();
 
-	click_check_drag = false;
+	edit.click_check_drag = false;
 
 
 	if (edit.action == ACT_SELBOX)
@@ -621,18 +681,17 @@ static void ACT_Click_release(void)
 	if (edit.action != ACT_CLICK)
 		return;
 
-
-	if (click_check_select && click_obj.valid())
+	if (edit.click_check_select && click_obj.valid())
 	{
-		// check if pointing at the same object as before
+		// only toggle selection if it's the same object as before
 		Objid near_obj;
+		if (edit.render3d)
+			near_obj = edit.highlight;
+		else
+			GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
 
-		GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
-
-		if (near_obj == click_obj)
-		{
-			edit.Selected->toggle(click_obj.num);
-		}
+		if (near_obj.num == click_obj.num)
+			Selection_Toggle(click_obj);
 	}
 
 	Editor_ClearAction();
@@ -643,27 +702,44 @@ static void ACT_Click_release(void)
 
 void CMD_ACT_Click()
 {
-	if (edit.render3d)
+	if (! EXEC_CurKey)
 		return;
 
-	if (! EXEC_CurKey)
+	// require a highlighted object in 3D mode
+	if (edit.render3d && edit.highlight.is_nil())
 		return;
 
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
 
-	click_check_select = ! Exec_HasFlag("/noselect");
-	click_check_drag   = ! Exec_HasFlag("/nodrag");
-	click_force_single = false;
+	edit.click_check_select = ! Exec_HasFlag("/noselect");
+	edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
+	edit.click_force_single = false;
 
-	if (click_check_drag)
+	// remember some state (for drag detection)
+	edit.click_screen_x = Fl::event_x();
+	edit.click_screen_y = Fl::event_y();
+
+	edit.click_map_x = edit.map_x;
+	edit.click_map_y = edit.map_y;
+	edit.click_map_z = edit.map_z;
+
+	// handle 3D mode, skip stuff below which only makes sense in 2D
+	if (edit.render3d)
 	{
-		// remember some state (for drag detection)
-		mouse_button1_x = Fl::event_x();
-		mouse_button1_y = Fl::event_y();
+		if (edit.highlight.type == OBJ_THINGS)
+		{
+			const Thing *T = Things[edit.highlight.num];
+			edit.drag_point_dist = r_view.DistToViewPlane(T->x(), T->y());
+		}
+		else
+		{
+			edit.drag_point_dist = r_view.DistToViewPlane(edit.map_x, edit.map_y);
+		}
 
-		button1_map_x = edit.map_x;
-		button1_map_y = edit.map_y;
+		edit.clicked = edit.highlight;
+		Editor_SetAction(ACT_CLICK);
+		return;
 	}
 
 	// check for splitting a line, and ensure we can drag the vertex
@@ -674,8 +750,8 @@ void CMD_ACT_Click()
 	{
 		int split_ld = edit.split_line.num;
 
-		click_force_single = true;   // if drag vertex, force single-obj mode
-		click_check_select = false;  // do NOT select the new vertex
+		edit.click_force_single = true;   // if drag vertex, force single-obj mode
+		edit.click_check_select = false;  // do NOT select the new vertex
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
@@ -711,11 +787,12 @@ void CMD_ACT_Click()
 	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box
-	if (click_check_select && edit.clicked.is_nil())
+	if (edit.click_check_select && edit.clicked.is_nil())
 	{
-		Editor_SetAction(ACT_SELBOX);
+		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
+		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-		main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+		Editor_SetAction(ACT_SELBOX);
 		return;
 	}
 
@@ -735,17 +812,15 @@ void CMD_ACT_SelectBox()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
 		return;
 
-	Editor_SetAction(ACT_SELBOX);
+	edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
+	edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-	main_win->canvas->SelboxBegin(edit.map_x, edit.map_y);
+	Editor_SetAction(ACT_SELBOX);
 }
 
 
 void CMD_ACT_Drag()
 {
-	if (edit.render3d)
-		return;
-
 	if (! EXEC_CurKey)
 		return;
 
@@ -758,15 +833,71 @@ void CMD_ACT_Drag()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
 		return;
 
-	double focus_x, focus_y;
-	GetDragFocus(&focus_x, &focus_y, edit.map_x, edit.map_y);
+	// we only drag the selection, never a single object
+	edit.dragged.clear();
 
-	Editor_SetAction(ACT_DRAG);
-	main_win->canvas->DragBegin(focus_x, focus_y, edit.map_x, edit.map_y);
+	DoBeginDrag();
+}
 
-	edit.drag_single_obj = -1;
 
-	RedrawMap();
+void Transform_Update()
+{
+	double dx1 = edit.map_x - edit.trans_param.mid_x;
+	double dy1 = edit.map_y - edit.trans_param.mid_y;
+
+	double dx0 = edit.trans_start_x - edit.trans_param.mid_x;
+	double dy0 = edit.trans_start_y - edit.trans_param.mid_y;
+
+	edit.trans_param.scale_x = edit.trans_param.scale_y = 1;
+	edit.trans_param.skew_x  = edit.trans_param.skew_y  = 0;
+	edit.trans_param.rotate  = 0;
+
+	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
+	{
+		int angle1 = (int)ComputeAngle(dx1, dy1);
+		int angle0 = (int)ComputeAngle(dx0, dy0);
+
+		edit.trans_param.rotate = angle1 - angle0;
+
+//		fprintf(stderr, "angle diff : %1.2f\n", edit.trans_rotate * 360.0 / 65536.0);
+	}
+
+	switch (edit.trans_mode)
+	{
+		case TRANS_K_Scale:
+		case TRANS_K_RotScale:
+			dx1 = MAX(abs(dx1), abs(dy1));
+			dx0 = MAX(abs(dx0), abs(dy0));
+
+			if (dx0)
+			{
+				edit.trans_param.scale_x = dx1 / (float)dx0;
+				edit.trans_param.scale_y = edit.trans_param.scale_x;
+			}
+			break;
+
+		case TRANS_K_Stretch:
+			if (dx0) edit.trans_param.scale_x = dx1 / (float)dx0;
+			if (dy0) edit.trans_param.scale_y = dy1 / (float)dy0;
+			break;
+
+		case TRANS_K_Rotate:
+			// already done
+			break;
+
+		case TRANS_K_Skew:
+			if (abs(dx0) >= abs(dy0))
+			{
+				if (dx0) edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+			}
+			else
+			{
+				if (dy0) edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+			}
+			break;
+	}
+
+	main_win->canvas->redraw();
 }
 
 
@@ -776,13 +907,12 @@ static void ACT_Transform_release(void)
 	if (edit.action != ACT_TRANSFORM)
 		return;
 
+	if (edit.trans_lines)
+		edit.trans_lines->clear_all();
+
+	TransformObjects(edit.trans_param);
+
 	Editor_ClearAction();
-
-	transform_t param;
-
-	main_win->canvas->TransformFinish(param);
-
-	TransformObjects(param);
 
 	RedrawMap();
 }
@@ -843,7 +973,25 @@ void CMD_ACT_Transform()
 	double middle_x, middle_y;
 	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
 
-	main_win->canvas->TransformBegin(edit.map_x, edit.map_y, middle_x, middle_y, mode);
+	edit.trans_mode = mode;
+	edit.trans_start_x = edit.map_x;
+	edit.trans_start_y = edit.map_y;
+
+	edit.trans_param.Clear();
+	edit.trans_param.mid_x = middle_x;
+	edit.trans_param.mid_y = middle_y;
+
+	if (edit.trans_lines)
+	{
+		delete edit.trans_lines;
+		edit.trans_lines = NULL;
+	}
+
+	if (edit.mode == OBJ_VERTICES)
+	{
+		edit.trans_lines = new selection_c(OBJ_LINEDEFS);
+		ConvertSelection(edit.Selected, edit.trans_lines);
+	}
 
 	Editor_SetAction(ACT_TRANSFORM);
 }
@@ -953,6 +1101,9 @@ void CMD_Zoom()
 
 void CMD_ZoomWholeMap()
 {
+	if (edit.render3d)
+		Render3D_Enable(false);
+
 	ZoomWholeMap();
 }
 
@@ -971,9 +1122,10 @@ void CMD_ZoomSelection()
 
 void CMD_GoToCamera()
 {
-	double x, y;
-	float angle;
+	if (edit.render3d)
+		Render3D_Enable(false);
 
+	double x, y; float angle;
 	Render3D_GetCameraPos(&x, &y, &angle);
 
 	grid.MoveTo(x, y);
@@ -1014,23 +1166,33 @@ void CMD_PlaceCamera()
 
 void CMD_MoveObjects_Dialog()
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to move");
 		return;
 	}
 
-	UI_MoveDialog * dialog = new UI_MoveDialog();
+	bool want_dz = (edit.mode == OBJ_SECTORS);
+	// can move things vertically in Hexen/UDMF formats
+	if (edit.mode == OBJ_THINGS && Level_format != MAPF_Doom)
+		want_dz = true;
+
+	UI_MoveDialog * dialog = new UI_MoveDialog(want_dz);
 
 	dialog->Run();
 
 	delete dialog;
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_ScaleObjects_Dialog()
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to scale");
 		return;
@@ -1041,12 +1203,16 @@ void CMD_ScaleObjects_Dialog()
 	dialog->Run();
 
 	delete dialog;
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_RotateObjects_Dialog()
 {
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to rotate");
 		return;
@@ -1057,6 +1223,9 @@ void CMD_RotateObjects_Dialog()
 	dialog->Run();
 
 	delete dialog;
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 

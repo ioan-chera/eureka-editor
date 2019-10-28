@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2009-2016 Andrew Apted
+//  Copyright (C) 2009-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -287,6 +287,72 @@ void Clipboard_NotifyChange(obj_type_e type, int objnum, int field)
 }
 
 
+//----------------------------------------------------------------------
+//  Texture Clipboard
+//----------------------------------------------------------------------
+
+namespace tex_clipboard
+{
+	std::string tex;
+	std::string flat;
+
+	int thing;
+};
+
+
+void Texboard_Clear()
+{
+	tex_clipboard::tex.clear();
+	tex_clipboard::flat.clear();
+	tex_clipboard::thing = 0;
+}
+
+int Texboard_GetTexNum()
+{
+	if (tex_clipboard::tex.empty())
+		tex_clipboard::tex = default_wall_tex;
+
+	return BA_InternaliseString(tex_clipboard::tex.c_str());
+}
+
+int Texboard_GetFlatNum()
+{
+	if (tex_clipboard::flat.empty())
+		tex_clipboard::flat = default_floor_tex;
+
+	return BA_InternaliseString(tex_clipboard::flat.c_str());
+}
+
+int Texboard_GetThing()
+{
+	if (tex_clipboard::thing == 0)
+		return default_thing;
+
+	return tex_clipboard::thing;
+}
+
+void Texboard_SetTex(const char *new_tex)
+{
+	tex_clipboard::tex = new_tex;
+
+	if (Features.mix_textures_flats)
+		tex_clipboard::flat = new_tex;
+}
+
+void Texboard_SetFlat(const char *new_flat)
+{
+	tex_clipboard::flat = new_flat;
+
+	if (Features.mix_textures_flats)
+		tex_clipboard::tex = new_flat;
+}
+
+void Texboard_SetThing(int new_id)
+{
+	tex_clipboard::thing = new_id;
+}
+
+
 //------------------------------------------------------------------------
 
 static void CopyGroupOfObjects(selection_c *list)
@@ -404,22 +470,24 @@ static void CopyGroupOfObjects(selection_c *list)
 
 static bool Clipboard_DoCopy()
 {
-	selection_c list;
 	selection_iterator_c it;
 
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 		return false;
 
 	// create storage for the copied objects
 	if (clip_board)
 		delete clip_board;
 
+	bool result = true;
+
 	clip_board = new clipboard_data_c(edit.mode);
 
 	switch (edit.mode)
 	{
 		case OBJ_THINGS:
-			for (list.begin(&it) ; !it.at_end() ; ++it)
+			for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 			{
 				Thing * T = new Thing;
 				T->RawCopy(Things[*it]);
@@ -428,7 +496,7 @@ static bool Clipboard_DoCopy()
 			break;
 
 		case OBJ_VERTICES:
-			for (list.begin(&it) ; !it.at_end() ; ++it)
+			for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 			{
 				Vertex * V = new Vertex;
 				V->RawCopy(Vertices[*it]);
@@ -438,19 +506,22 @@ static bool Clipboard_DoCopy()
 
 		case OBJ_LINEDEFS:
 		case OBJ_SECTORS:
-			CopyGroupOfObjects(&list);
+			CopyGroupOfObjects(edit.Selected);
 			break;
 
 		default:
-			return false;
+			result = false;
+			break;
 	}
 
-	return true;
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
+
+	return result;
 }
 
 
 //------------------------------------------------------------------------
-
 
 static void PasteGroupOfObjects(double pos_x, double pos_y)
 {
@@ -737,9 +808,9 @@ void CMD_Clipboard_Cut()
 	if (main_win->ClipboardOp('x'))
 		return;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
-		Render3D_ClipboardOp('x');
+		Render3D_CB_Cut();
 		return;
 	}
 
@@ -758,9 +829,9 @@ void CMD_Clipboard_Copy()
 	if (main_win->ClipboardOp('c'))
 		return;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
-		Render3D_ClipboardOp('c');
+		Render3D_CB_Copy();
 		return;
 	}
 
@@ -777,9 +848,9 @@ void CMD_Clipboard_Paste()
 	if (main_win->ClipboardOp('v'))
 		return;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
-		Render3D_ClipboardOp('v');
+		Render3D_CB_Paste();
 		return;
 	}
 
@@ -1139,15 +1210,8 @@ void CMD_Delete()
 	if (main_win->ClipboardOp('d'))
 		return;
 
-	if (edit.render3d)
-	{
-		Render3D_ClipboardOp('d');
-		return;
-	}
-
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("Nothing to delete");
 		return;
@@ -1157,9 +1221,9 @@ void CMD_Delete()
 
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
-	if (edit.mode == OBJ_VERTICES && list.count_obj() == 1)
+	if (edit.mode == OBJ_VERTICES && edit.Selected->count_obj() == 1)
 	{
-		int v_num = list.find_first();
+		int v_num = edit.Selected->find_first();
 		SYS_ASSERT(v_num >= 0);
 
 		if (Vertex_HowManyLineDefs(v_num) == 2)
@@ -1172,17 +1236,19 @@ void CMD_Delete()
 	}
 
 	BA_Begin();
-	BA_MessageForSel("deleted", &list);
+	BA_MessageForSel("deleted", edit.Selected);
 
-	DeleteObjects_WithUnused(&list, keep, false /* keep_verts */, keep);
+	DeleteObjects_WithUnused(edit.Selected, keep, false /* keep_verts */, keep);
 
 	BA_End();
 
 success:
 	Editor_ClearAction();
 
+	// always clear the selection (deleting objects invalidates it)
 	Selection_Clear();
 
+	r_view.current_hl.clear();
 	edit.highlight.clear();
 	edit.split_line.clear();
 

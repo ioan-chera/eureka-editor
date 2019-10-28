@@ -127,8 +127,9 @@ inline int R_DoomLightingEquation(int L, float dist)
 #define SECTOR_TYPE     fl_rgb_color(0x00, 0x80, 0xff)
 
 #define SEL_COL         fl_rgb_color(128,192,255)
+#define SEL3D_COL       fl_rgb_color(128,255,128)
 #define HI_COL          fl_rgb_color(255,255,0)
-#define HI_AND_SEL_COL  fl_rgb_color(255,192,128)
+#define HI_AND_SEL_COL  fl_rgb_color(255,128,0)
 
 #define THING_MODE_COL  fl_rgb_color(255,64,255)
 #define LINE_MODE_COL   fl_rgb_color(0,160,255)

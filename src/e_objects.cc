@@ -184,7 +184,7 @@ static int Sector_New(int model = -1, int model2 = -1, int model3 = -1)
 }
 
 
-static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c& flip)
+static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 {
 	// returns true if we assigned a sector (so drawing should stop)
 
@@ -355,9 +355,9 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	{
 		selection_c flip(OBJ_LINEDEFS);
 
-		CheckClosedLoop(new_ld, v1, v2, flip);
+		CheckClosedLoop(new_ld, v1, v2, &flip);
 
-		FlipLineDefGroup(flip);
+		FlipLineDefGroup(&flip);
 	}
 }
 
@@ -412,7 +412,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 	// are we drawing a line?
 	if (edit.action == ACT_DRAW_LINE)
-		old_vert = edit.drawing_from;
+		old_vert = edit.from_vert.num;
 
 	// a linedef which we are splitting (usually none)
 	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
@@ -480,7 +480,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			if (LineDefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				edit.drawing_from = new_vert;
+				edit.from_vert = Objid(OBJ_VERTICES, new_vert);
 				edit.Selected->set(new_vert);
 				return;
 			}
@@ -512,8 +512,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		V->SetRawXY(new_x, new_y);
 
+		edit.from_vert = Objid(OBJ_VERTICES, new_vert);
 		edit.Selected->set(new_vert);
-		edit.drawing_from = new_vert;
 
 		// splitting an existing line?
 		if (split_ld >= 0)
@@ -552,8 +552,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		BA_Message("added linedef");
 
+		edit.from_vert = Objid(OBJ_VERTICES, new_vert);
 		edit.Selected->set(new_vert);
-		edit.drawing_from = new_vert;
 	}
 
 
@@ -567,10 +567,10 @@ begin_drawing:
 	{
 		Selection_Clear();
 
+		edit.from_vert = Objid(OBJ_VERTICES, old_vert);
 		edit.Selected->set(old_vert);
 
 		Editor_SetAction(ACT_DRAW_LINE);
-		edit.drawing_from = old_vert;
 	}
 
 	// stop drawing mode?
@@ -659,9 +659,9 @@ void CMD_Insert()
 	bool force_cont;
 	bool no_fill;
 
-	if (edit.render3d)
+	if (edit.render3d && edit.mode != OBJ_THINGS)
 	{
-		Beep("Insert: not usable in 3D view");
+		Beep("Cannot insert in this mode");
 		return;
 	}
 
@@ -740,13 +740,13 @@ bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 }
 
 
-
 static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
 {
 	selection_iterator_c it;
 
 	fixcoord_t fdx = MakeValidCoord(delta_x);
 	fixcoord_t fdy = MakeValidCoord(delta_y);
+	fixcoord_t fdz = MakeValidCoord(delta_z);
 
 	switch (list->what_type())
 	{
@@ -757,6 +757,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 
 				BA_ChangeTH(*it, Thing::F_X, T->raw_x + fdx);
 				BA_ChangeTH(*it, Thing::F_Y, T->raw_y + fdy);
+				BA_ChangeTH(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
 			}
 			break;
 
@@ -785,7 +786,6 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 		case OBJ_LINEDEFS:
 			{
 				selection_c verts(OBJ_VERTICES);
-
 				ConvertSelection(list, &verts);
 
 				DoMoveObjects(&verts, delta_x, delta_y, delta_z);
@@ -804,6 +804,7 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 		return;
 
 	BA_Begin();
+	BA_MessageForSel("moved", list);
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -811,27 +812,23 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 	if (edit.mode == OBJ_SECTORS)
 	{
 		selection_c thing_sel(OBJ_THINGS);
-
 		ConvertSelection(list, &thing_sel);
 
-		DoMoveObjects(&thing_sel, delta_x, delta_y, delta_z);
+		DoMoveObjects(&thing_sel, delta_x, delta_y, 0);
 	}
 
 	DoMoveObjects(list, delta_x, delta_y, delta_z);
-
-	BA_MessageForSel("moved", list);
 
 	BA_End();
 }
 
 
-void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_z)
+void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z)
 {
 	if (edit.mode != OBJ_VERTICES)
 	{
 		selection_c list(edit.mode);
-
-		list.set(obj_num);
+		list.set(obj.num);
 
 		MoveObjects(&list, delta_x, delta_y, delta_z);
 		return;
@@ -846,14 +843,14 @@ void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_
 	// handle a single vertex merging onto an existing one
 	if (edit.highlight.valid())
 	{
-		BA_Message("merge vertex #%d", obj_num);
+		BA_Message("merge vertex #%d", obj.num);
 
-		SYS_ASSERT(obj_num != edit.highlight.num);
+		SYS_ASSERT(obj.num != edit.highlight.num);
 
 		selection_c verts(OBJ_VERTICES);
 
 		verts.set(edit.highlight.num);	// keep the highlight
-		verts.set(obj_num);
+		verts.set(obj.num);
 
 		Vertex_MergeList(&verts);
 
@@ -866,14 +863,14 @@ void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_
 	{
 		did_split_line = edit.split_line.num;
 
-		SplitLineDefAtVertex(edit.split_line.num, obj_num);
+		SplitLineDefAtVertex(edit.split_line.num, obj.num);
 
 		// now move the vertex!
 	}
 
 	selection_c list(edit.mode);
 
-	list.set(obj_num);
+	list.set(obj.num);
 
 	DoMoveObjects(&list, delta_x, delta_y, delta_z);
 
@@ -1218,9 +1215,9 @@ static void Drag_CountOnGrid(int *count, int *total)
 }
 
 
-static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y,
-                                  double *best_dist, double map_x, double map_y,
-								  bool only_grid)
+static void Drag_UpdateCurrentDist(int obj_type, int objnum, double *x, double *y,
+								   double *best_dist, double ptr_x, double ptr_y,
+								   bool only_grid)
 {
 	double x2, y2;
 
@@ -1240,11 +1237,11 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 			{
 				LineDef *L = LineDefs[objnum];
 
-				Drag_UpdateObjectDist(OBJ_VERTICES, L->start, x, y, best_dist,
-									  map_x, map_y, only_grid);
+				Drag_UpdateCurrentDist(OBJ_VERTICES, L->start, x, y, best_dist,
+									   ptr_x, ptr_y, only_grid);
 
-				Drag_UpdateObjectDist(OBJ_VERTICES, L->end,   x, y, best_dist,
-				                      map_x, map_y, only_grid);
+				Drag_UpdateCurrentDist(OBJ_VERTICES, L->end,   x, y, best_dist,
+				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
 
@@ -1260,8 +1257,8 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 				if (! L->TouchesSector(objnum))
 					continue;
 
-				Drag_UpdateObjectDist(OBJ_LINEDEFS, n, x, y, best_dist,
-				                      map_x, map_y, only_grid);
+				Drag_UpdateCurrentDist(OBJ_LINEDEFS, n, x, y, best_dist,
+				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
 
@@ -1271,10 +1268,10 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 
 	// handle OBJ_THINGS and OBJ_VERTICES
 
-	if (only_grid && ! grid.OnGrid(x2, y2))
+	if (only_grid && !grid.OnGrid(x2, y2))
 		return;
 
-	double dist = hypot(x2 - map_x, y2 - map_y);
+	double dist = hypot(x2 - ptr_x, y2 - ptr_y);
 
 	if (dist < *best_dist)
 	{
@@ -1285,7 +1282,13 @@ static void Drag_UpdateObjectDist(int obj_type, int objnum, double *x, double *y
 }
 
 
-void GetDragFocus(double *x, double *y, double map_x, double map_y)
+//
+// Determine the focus coordinate for dragging multiple objects.
+// The focus only has an effect when grid snapping is on, and
+// allows a mostly-grid-snapped set of objects to stay snapped
+// to the grid.
+//
+void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y)
 {
 	*x = 0;
 	*y = 0;
@@ -1306,14 +1309,22 @@ void GetDragFocus(double *x, double *y, double map_x, double map_y)
 			only_grid = true;
 	}
 
+	// determine object which is closest to mouse pointer AND which
+	// honors the 'only_grid' property (when set).
 	double best_dist = 9e9;
 
-	selection_iterator_c it;
+	if (edit.dragged.valid())  // a single object
+	{
+		Drag_UpdateCurrentDist(edit.mode, edit.dragged.num, x, y, &best_dist,
+							   ptr_x, ptr_y, only_grid);
+		return;
+	}
 
+	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
-		Drag_UpdateObjectDist(edit.mode, *it, x, y, &best_dist,
-		                      map_x, map_y, only_grid);
+		Drag_UpdateCurrentDist(edit.mode, *it, x, y, &best_dist,
+							   ptr_x, ptr_y, only_grid);
 	}
 }
 
@@ -1408,7 +1419,6 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 		default:
 		{
 			selection_c verts(OBJ_VERTICES);
-
 			ConvertSelection(list, &verts);
 
 			Objs_CalcMiddle(&verts, x, y);
@@ -1482,7 +1492,6 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 		default:
 		{
 			selection_c verts(OBJ_VERTICES);
-
 			ConvertSelection(list, &verts);
 
 			Objs_CalcBBox(&verts, x1, y1, x2, y2);
@@ -1495,14 +1504,14 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 }
 
 
-static void DoMirrorThings(selection_c& list, bool is_vert, double mid_x, double mid_y)
+static void DoMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y)
 {
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
 	selection_iterator_c it;
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -1526,17 +1535,15 @@ static void DoMirrorThings(selection_c& list, bool is_vert, double mid_x, double
 }
 
 
-static void DoMirrorVertices(selection_c& list, bool is_vert, double mid_x, double mid_y)
+static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y)
 {
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
 	selection_c verts(OBJ_VERTICES);
-
-	ConvertSelection(&list, &verts);
+	ConvertSelection(list, &verts);
 
 	selection_iterator_c it;
-
 	for (verts.begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Vertex * V = Vertices[*it];
@@ -1549,7 +1556,6 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, double mid_x, doub
 
 	// flip linedefs too !!
 	selection_c lines(OBJ_LINEDEFS);
-
 	ConvertSelection(&verts, &lines);
 
 	for (lines.begin(&it) ; !it.at_end() ; ++it)
@@ -1565,7 +1571,7 @@ static void DoMirrorVertices(selection_c& list, bool is_vert, double mid_x, doub
 }
 
 
-static void DoMirrorStuff(selection_c& list, bool is_vert, double mid_x, double mid_y)
+static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y)
 {
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -1579,10 +1585,9 @@ static void DoMirrorStuff(selection_c& list, bool is_vert, double mid_x, double 
 	{
 		// handle things in Sectors mode too
 		selection_c things(OBJ_THINGS);
+		ConvertSelection(list, &things);
 
-		ConvertSelection(&list, &things);
-
-		DoMirrorThings(things, is_vert, mid_x, mid_y);
+		DoMirrorThings(&things, is_vert, mid_x, mid_y);
 	}
 
 	DoMirrorVertices(list, is_vert, mid_x, mid_y);
@@ -1591,9 +1596,8 @@ static void DoMirrorStuff(selection_c& list, bool is_vert, double mid_x, double 
 
 void CMD_Mirror()
 {
-	selection_c list;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No objects to mirror");
 		return;
@@ -1605,20 +1609,21 @@ void CMD_Mirror()
 		is_vert = true;
 
 	double mid_x, mid_y;
-
-	Objs_CalcMiddle(&list, &mid_x, &mid_y);
+	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	BA_Begin();
+	BA_MessageForSel("mirrored", edit.Selected, is_vert ? " vertically" : " horizontally");
 
-	BA_MessageForSel("mirrored", &list, is_vert ? " vertically" : " horizontally");
-
-	DoMirrorStuff(list, is_vert, mid_x, mid_y);
+	DoMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
 	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
-static void DoRotate90Things(selection_c& list, bool anti_clockwise,
+static void DoRotate90Things(selection_c *list, bool anti_clockwise,
 							 double mid_x, double mid_y)
 {
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
@@ -1626,7 +1631,7 @@ static void DoRotate90Things(selection_c& list, bool anti_clockwise,
 
 	selection_iterator_c it;
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -1661,25 +1666,22 @@ void CMD_Rotate90()
 
 	bool anti_clockwise = (tolower(EXEC_Param[0][0]) == 'a');
 
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
 		Beep("No objects to rotate");
 		return;
 	}
 
 	double mid_x, mid_y;
-	Objs_CalcMiddle(&list, &mid_x, &mid_y);
+	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	BA_Begin();
-
-	BA_MessageForSel("rotated", &list, anti_clockwise ? " anti-clockwise" : " clockwise");
+	BA_MessageForSel("rotated", edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
 	if (edit.mode == OBJ_THINGS)
 	{
-		DoRotate90Things(list, anti_clockwise, mid_x, mid_y);
+		DoRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
 	}
 	else
 	{
@@ -1687,20 +1689,19 @@ void CMD_Rotate90()
 		if (edit.mode == OBJ_SECTORS)
 		{
 			selection_c things(OBJ_THINGS);
+			ConvertSelection(edit.Selected, &things);
 
-			ConvertSelection(&list, &things);
-
-			DoRotate90Things(things, anti_clockwise, mid_x, mid_y);
+			DoRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 		}
 
 		// everything else just rotates the vertices
 		selection_c verts(OBJ_VERTICES);
-
-		ConvertSelection(&list, &verts);
+		ConvertSelection(edit.Selected, &verts);
 
 		fixcoord_t fix_mx = MakeValidCoord(mid_x);
 		fixcoord_t fix_my = MakeValidCoord(mid_y);
 
+		selection_iterator_c it;
 		for (verts.begin(&it) ; !it.at_end() ; ++it)
 		{
 			const Vertex * V = Vertices[*it];
@@ -1722,14 +1723,17 @@ void CMD_Rotate90()
 	}
 
 	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
-static void DoScaleTwoThings(selection_c& list, transform_t& param)
+static void DoScaleTwoThings(selection_c *list, transform_t& param)
 {
 	selection_iterator_c it;
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -1753,11 +1757,10 @@ static void DoScaleTwoThings(selection_c& list, transform_t& param)
 }
 
 
-static void DoScaleTwoVertices(selection_c& list, transform_t& param)
+static void DoScaleTwoVertices(selection_c *list, transform_t& param)
 {
 	selection_c verts(OBJ_VERTICES);
-
-	ConvertSelection(&list, &verts);
+	ConvertSelection(list, &verts);
 
 	selection_iterator_c it;
 
@@ -1776,7 +1779,7 @@ static void DoScaleTwoVertices(selection_c& list, transform_t& param)
 }
 
 
-static void DoScaleTwoStuff(selection_c& list, transform_t& param)
+static void DoScaleTwoStuff(selection_c *list, transform_t& param)
 {
 	if (edit.mode == OBJ_THINGS)
 	{
@@ -1790,10 +1793,9 @@ static void DoScaleTwoStuff(selection_c& list, transform_t& param)
 	{
 		// handle things in Sectors mode too
 		selection_c things(OBJ_THINGS);
+		ConvertSelection(list, &things);
 
-		ConvertSelection(&list, &things);
-
-		DoScaleTwoThings(things, param);
+		DoScaleTwoThings(&things, param);
 	}
 
 	DoScaleTwoVertices(list, param);
@@ -1807,24 +1809,21 @@ void TransformObjects(transform_t& param)
 	SYS_ASSERT(edit.Selected->notempty());
 
 	BA_Begin();
-
 	BA_MessageForSel("scaled", edit.Selected);
 
 	if (param.scale_x < 0)
 	{
 		param.scale_x = -param.scale_x;
-
-		DoMirrorStuff(*edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
+		DoMirrorStuff(edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
 	}
 
 	if (param.scale_y < 0)
 	{
 		param.scale_y = -param.scale_y;
-
-		DoMirrorStuff(*edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
+		DoMirrorStuff(edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
 	}
 
-	DoScaleTwoStuff(*edit.Selected, param);
+	DoScaleTwoStuff(edit.Selected, param);
 
 	BA_End();
 }
@@ -1875,23 +1874,22 @@ void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y)
 	BA_Begin();
 	BA_MessageForSel("scaled", edit.Selected);
 	{
-		DoScaleTwoStuff(*edit.Selected, param);
+		DoScaleTwoStuff(edit.Selected, param);
 	}
 	BA_End();
 }
 
 
-static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
+static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 {
-	SYS_ASSERT(! list.empty());
-
-	selection_iterator_c it;
+	SYS_ASSERT(! list->empty());
 
 	// determine Z range and origin
 	int lz = +99999;
 	int hz = -99999;
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	selection_iterator_c it;
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector * S = Sectors[*it];
 
@@ -1910,7 +1908,7 @@ static void DoScaleSectorHeights(selection_c& list, double scale_z, int pos_z)
 
 	// apply the scaling
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Sector * S = Sectors[*it];
 
@@ -1939,8 +1937,8 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 	BA_Begin();
 	BA_MessageForSel("scaled", edit.Selected);
 	{
-		DoScaleTwoStuff(*edit.Selected, param);
-		DoScaleSectorHeights(*edit.Selected, scale_z, pos_z);
+		DoScaleTwoStuff(edit.Selected, param);
+		DoScaleSectorHeights(edit.Selected, scale_z, pos_z);
 	}
 	BA_End();
 }
@@ -1959,7 +1957,7 @@ void RotateObjects3(double deg, double pos_x, double pos_y)
 	BA_Begin();
 	BA_MessageForSel("rotated", edit.Selected);
 	{
-		DoScaleTwoStuff(*edit.Selected, param);
+		DoScaleTwoStuff(edit.Selected, param);
 	}
 	BA_End();
 }
@@ -1990,15 +1988,7 @@ static bool SpotInUse(obj_type_e obj_type, int x, int y)
 
 static void DoEnlargeOrShrink(bool do_shrink)
 {
-	selection_c list;
-	selection_iterator_c it;
-
-	if (! GetCurrentObjects(&list))
-	{
-		Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");
-		return;
-	}
-
+	// setup transform parameters...
 	float mul = 2.0;
 
 	if (EXEC_Param[0][0])
@@ -2015,7 +2005,6 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	if (do_shrink)
 		mul = 1.0 / mul;
 
-
 	transform_t param;
 
 	param.Clear();
@@ -2023,27 +2012,37 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	param.scale_x = mul;
 	param.scale_y = mul;
 
+
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
+	{
+		Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");
+		return;
+	}
+
 	// TODO: CONFIG ITEM (or FLAG)
 	if ((true))
 	{
-		Objs_CalcMiddle(&list, &param.mid_x, &param.mid_y);
+		Objs_CalcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
 	}
 	else
 	{
 		double lx, ly, hx, hy;
-		Objs_CalcBBox(&list, &lx, &ly, &hx, &hy);
+		Objs_CalcBBox(edit.Selected, &lx, &ly, &hx, &hy);
 
 		param.mid_x = lx + (hx - lx) / 2;
 		param.mid_y = ly + (hy - ly) / 2;
 	}
 
 	BA_Begin();
-
 	BA_MessageForSel(do_shrink ? "shrunk" : "enlarged", edit.Selected);
 
-	DoScaleTwoStuff(list, param);
+	DoScaleTwoStuff(edit.Selected, param);
 
 	BA_End();
+
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -2058,15 +2057,14 @@ void CMD_Shrink()
 }
 
 
-static void Quantize_Things(selection_c& list)
+static void Quantize_Things(selection_c *list)
 {
 	// remember the things which we moved
 	// (since we cannot modify the selection while we iterate over it)
-	selection_c moved(list.what_type());
+	selection_c moved(list->what_type());
 
 	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Thing * T = Things[*it];
 
@@ -2092,14 +2090,14 @@ static void Quantize_Things(selection_c& list)
 		}
 	}
 
-	list.unmerge(moved);
+	list->unmerge(moved);
 
-	if (list.notempty())
-		Beep("Quantize: could not move %d things", list.count_obj());
+	if (! list->empty())
+		Beep("Quantize: could not move %d things", list->count_obj());
 }
 
 
-static void Quantize_Vertices(selection_c& list)
+static void Quantize_Vertices(selection_c *list)
 {
 	// first : do an analysis pass, remember vertices that are part
 	// of a horizontal or vertical line (and both in the selection)
@@ -2121,7 +2119,7 @@ static void Quantize_Vertices(selection_c& list)
 		const LineDef *L = LineDefs[n];
 
 		// require both vertices of the linedef to be in the selection
-		if (! (list.get(L->start) && list.get(L->end)))
+		if (! (list->get(L->start) && list->get(L->end)))
 			continue;
 
 		// IDEA: make this a method of LineDef
@@ -2154,11 +2152,11 @@ static void Quantize_Vertices(selection_c& list)
 
 	// remember the vertices which we moved
 	// (since we cannot modify the selection while we iterate over it)
-	selection_c moved(list.what_type());
+	selection_c moved(list->what_type());
 
 	selection_iterator_c it;
 
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (list->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -2200,10 +2198,10 @@ static void Quantize_Vertices(selection_c& list)
 
 	delete[] vert_modes;
 
-	list.unmerge(moved);
+	list->unmerge(moved);
 
-	if (list.notempty())
-		Beep("Quantize: could not move %d vertices", list.count_obj());
+	if (list->notempty())
+		Beep("Quantize: could not move %d vertices", list->count_obj());
 }
 
 
@@ -2217,7 +2215,7 @@ void CMD_Quantize()
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	BA_Begin();
@@ -2227,21 +2225,20 @@ void CMD_Quantize()
 	switch (edit.mode)
 	{
 		case OBJ_THINGS:
-			Quantize_Things(*edit.Selected);
+			Quantize_Things(edit.Selected);
 			break;
 
 		case OBJ_VERTICES:
-			Quantize_Vertices(*edit.Selected);
+			Quantize_Vertices(edit.Selected);
 			break;
 
 		// everything else merely quantizes vertices
 		default:
 		{
 			selection_c verts(OBJ_VERTICES);
-
 			ConvertSelection(edit.Selected, &verts);
 
-			Quantize_Vertices(verts);
+			Quantize_Vertices(&verts);
 
 			Selection_Clear();
 			break;

@@ -26,7 +26,7 @@
 #include "ui_misc.h"
 
 
-UI_MoveDialog::UI_MoveDialog() :
+UI_MoveDialog::UI_MoveDialog(bool want_dz) :
 	UI_Escapable_Window(360, 205, "Move Objects"),
 	want_close(false)
 {
@@ -41,6 +41,9 @@ UI_MoveDialog::UI_MoveDialog() :
 	delta_x->value("0");
 	delta_y->value("0");
 	delta_z->value("0");
+
+	if (! want_dz)
+		delta_z->hide();
 
 	Fl_Group * grp = new Fl_Group(0, h() - 70, w(), 70);
 	grp->box(FL_FLAT_BOX);
@@ -65,17 +68,11 @@ UI_MoveDialog::UI_MoveDialog() :
 
 
 UI_MoveDialog::~UI_MoveDialog()
-{
-}
+{ }
 
 
 void UI_MoveDialog::Run()
 {
-	if (edit.mode != OBJ_SECTORS)
-	{
-		delta_z->hide();
-	}
-
 	set_modal();
 
 	show();

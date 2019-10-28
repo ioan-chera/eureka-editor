@@ -34,7 +34,7 @@ private:
 	bool want_close;
 
 public:
-	UI_MoveDialog();
+	UI_MoveDialog(bool want_dz);
 	virtual ~UI_MoveDialog();
 
 	void Run();

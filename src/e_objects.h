@@ -28,14 +28,14 @@
 #define __EUREKA_OBJECTS_H__
 
 
-void MoveObjects(selection_c * list, double delta_x, double delta_y, double delta_z = 0);
-void DragSingleObject(int obj_num, double delta_x, double delta_y, double delta_z = 0);
+void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z = 0);
+void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z = 0);
 
 void DeleteObjects(selection_c * list);
 
 bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1);
 
-void GetDragFocus(double *x, double *y, double map_x, double map_y);
+void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y);
 
 
 struct transform_t

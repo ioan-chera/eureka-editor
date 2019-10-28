@@ -94,21 +94,6 @@ void Editor_SetAction(editor_action_e  new_action)
 }
 
 
-// FIXME : this was being called by CMD_Scroll, but smells very hacky
-#if 0
-void Editor_UpdateFromScroll()
-{
-	if (edit.action == ACT_SELBOX || edit.action == ACT_DRAW_LINE ||
-		edit.action == ACT_DRAG)
-	{
-		int mod = Fl::event_state() & MOD_ALL_MASK;
-
-		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, 0, 0);
-	}
-}
-#endif
-
-
 void Editor_Zoom(int delta, int mid_x, int mid_y)
 {
     float S1 = grid.Scale;
@@ -125,7 +110,7 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 	// started?
 	if (mode < 0)
 	{
-		edit.is_scrolling = true;
+		edit.is_panning = true;
 		main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
@@ -133,12 +118,12 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 	// finished?
 	if (mode > 0)
 	{
-		edit.is_scrolling = false;
+		edit.is_panning = false;
 		main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
 
-	float speed = edit.scroll_speed / grid.Scale;
+	float speed = edit.panning_speed / grid.Scale;
 
 	//??		 if (mod & MOD_COMMAND) speed *= 2.0;
 	//??	else if (mod & MOD_SHIFT)   speed *= 0.5;
@@ -152,14 +137,19 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 
 void Editor_ClearNav()
 {
-	edit.nav_scroll_left  = 0;
-	edit.nav_scroll_right = 0;
-	edit.nav_scroll_up    = 0;
-	edit.nav_scroll_down  = 0;
+	edit.nav_left  = 0;
+	edit.nav_right = 0;
+	edit.nav_up    = 0;
+	edit.nav_down  = 0;
+
+	edit.nav_fwd    = 0;
+	edit.nav_back   = 0;
+	edit.nav_turn_L = 0;
+	edit.nav_turn_R = 0;
 }
 
 
-static void Editor_Navigate()
+static void Navigate2D()
 {
 	float delay_ms = Nav_TimeDiff();
 
@@ -171,11 +161,11 @@ static void Editor_Navigate()
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;
 	if (mod & MOD_COMMAND) mod_factor = 2.0;
 
-	if (edit.nav_scroll_left || edit.nav_scroll_right ||
-		edit.nav_scroll_up   || edit.nav_scroll_down)
+	if (edit.nav_left || edit.nav_right ||
+		edit.nav_up   || edit.nav_down)
 	{
-		float delta_x = (edit.nav_scroll_right - edit.nav_scroll_left);
-		float delta_y = (edit.nav_scroll_up    - edit.nav_scroll_down);
+		float delta_x = (edit.nav_right - edit.nav_left);
+		float delta_y = (edit.nav_up    - edit.nav_down);
 
 		delta_x = delta_x * mod_factor * delay_ms;
 		delta_y = delta_y * mod_factor * delay_ms;
@@ -215,8 +205,7 @@ static unsigned int nav_time;
 
 void Nav_Clear()
 {
-	  Editor_ClearNav();
-	Render3D_ClearNav();
+	Editor_ClearNav();
 
 	memset(nav_actives, 0, sizeof(nav_actives));
 
@@ -229,7 +218,7 @@ void Nav_Navigate()
 	if (edit.render3d)
 		Render3D_Navigate();
 	else
-		Editor_Navigate();
+		Navigate2D();
 }
 
 
@@ -424,6 +413,7 @@ int wheel_dx;
 int wheel_dy;
 
 extern void CheckBeginDrag();
+extern void Transform_Update();
 
 
 static void EV_EnterWindow()
@@ -471,7 +461,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 //  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
 
-	if (edit.is_scrolling)
+	if (edit.is_panning)
 	{
 		Editor_ScrollMap(0, dx, dy);
 		return;
@@ -481,7 +471,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		main_win->canvas->TransformUpdate(edit.map_x, edit.map_y);
+		Transform_Update();
 		return;
 	}
 
@@ -493,21 +483,34 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_SELBOX)
 	{
-		main_win->canvas->SelboxUpdate(edit.map_x, edit.map_y);
+		edit.selbox_x2 = edit.map_x;
+		edit.selbox_y2 = edit.map_y;
+
+		main_win->canvas->redraw();
 		return;
 	}
 
 	if (edit.action == ACT_DRAG)
 	{
-		main_win->canvas->DragUpdate(edit.map_x, edit.map_y);
+		edit.drag_screen_dx = x - edit.click_screen_x;
+		edit.drag_screen_dy = y - edit.click_screen_y;
+
+		edit.drag_cur_x = edit.map_x;
+		edit.drag_cur_y = edit.map_y;
 
 		// if dragging a single vertex, update the possible split_line
-		UpdateHighlight();
+		if (edit.mode == OBJ_VERTICES && edit.dragged.valid())
+			UpdateHighlight();
+
+		main_win->canvas->redraw();
 		return;
 	}
 
 	// begin dragging?
-	CheckBeginDrag();
+	if (edit.action == ACT_CLICK)
+	{
+		CheckBeginDrag();
+	}
 
 	// in general, just update the highlight, split-line (etc)
 	UpdateHighlight();
@@ -777,8 +780,6 @@ static void operation_callback_func(Fl_Widget *w, void *data)
 	// restore the highlight object
 	edit.highlight = op_saved_highlight;
 
-	Render3D_RestoreHighlight();
-
 	// TODO : support more than 4 parameters
 
 	ExecuteCommand(info->cmd, info->param[0], info->param[1],
@@ -962,8 +963,6 @@ void CMD_OperationMenu()
 	// save the highlight object, because the pop-up menu will cause
 	// an FL_LEAVE event on the canvas which resets the highlight.
 	op_saved_highlight = edit.highlight;
-
-	Render3D_SaveHighlight();
 
 	menu->popup();
 }

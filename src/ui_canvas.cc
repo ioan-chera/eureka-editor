@@ -81,9 +81,8 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 #else
 	Fl_Gl_Window(X, Y, W, H),
 #endif
-	highlight(), split_ld(-1),
-	drag_lines(),
-	trans_lines(),
+	highlight(),
+	split_ld(-1),
 	seen_sectors()
 { }
 
@@ -252,11 +251,11 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 
 void UI_Canvas::PointerPos(bool in_event)
 {
-	// read current position outside of FLTK's event propagation.
-	// this is a bit harder, and a bit slower in X-windows
+	if (edit.render3d)
+		return;
 
+	// we read current position outside of FLTK's event propagation.
 	int raw_x, raw_y;
-
 	Fl::get_mouse(raw_x, raw_y);
 
 #ifdef NO_OPENGL
@@ -273,6 +272,9 @@ void UI_Canvas::PointerPos(bool in_event)
 	edit.map_x = MAPX(raw_x);
 	edit.map_y = MAPY(h() - 1 - raw_y);
 #endif
+
+	// no Z coord with the 2D map view
+	edit.map_z = -1;
 }
 
 
@@ -316,12 +318,12 @@ void UI_Canvas::DrawEverything()
 
 	DrawSelection(edit.Selected);
 
-	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0 && ! drag_lines.empty())
-		DrawSelection(&drag_lines);
-	else if (edit.action == ACT_TRANSFORM && ! trans_lines.empty())
-		DrawSelection(&trans_lines);
+	if (edit.action == ACT_DRAG && !edit.dragged.valid() && edit.drag_lines != NULL)
+		DrawSelection(edit.drag_lines);
+	else if (edit.action == ACT_TRANSFORM && edit.trans_lines != NULL)
+		DrawSelection(edit.trans_lines);
 
-	if (edit.action == ACT_DRAG && edit.drag_single_obj >= 0)
+	if (edit.action == ACT_DRAG && edit.dragged.valid())
 	{
 		double dx = 0;
 		double dy = 0;
@@ -335,8 +337,7 @@ void UI_Canvas::DrawEverything()
 		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
 			gl_line_width(2);
 
-		DrawHighlight(edit.mode, edit.drag_single_obj,
-		              false /* skip_lines */, dx, dy);
+		DrawHighlight(edit.mode, edit.dragged.num, false /* skip_lines */, dx, dy);
 
 		if (edit.mode == OBJ_VERTICES && highlight.valid())
 		{
@@ -1313,7 +1314,6 @@ void UI_Canvas::SplitLineForget()
 }
 
 
-
 //
 //  draw the given object in highlight color
 //
@@ -1442,7 +1442,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			double x = Things[objnum]->x();
 			double y = Things[objnum]->y();
 
-			trans_param.Apply(&x, &y);
+			edit.trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
@@ -1462,7 +1462,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 			int vert_r = vertex_radius(grid.Scale);
 
-			trans_param.Apply(&x, &y);
+			edit.trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, vert_r))
 				break;
@@ -1490,8 +1490,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			double x2 = LineDefs[objnum]->End  ()->x();
 			double y2 = LineDefs[objnum]->End  ()->y();
 
-			trans_param.Apply(&x1, &y1);
-			trans_param.Apply(&x2, &y2);
+			edit.trans_param.Apply(&x1, &y1);
+			edit.trans_param.Apply(&x2, &y2);
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				break;
@@ -1512,8 +1512,8 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 				double x2 = LineDefs[n]->End  ()->x();
 				double y2 = LineDefs[n]->End  ()->y();
 
-				trans_param.Apply(&x1, &y1);
-				trans_param.Apply(&x2, &y2);
+				edit.trans_param.Apply(&x1, &y1);
+				edit.trans_param.Apply(&x2, &y2);
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1618,7 +1618,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	double dx = 0;
 	double dy = 0;
 
-	if (edit.action == ACT_DRAG && edit.drag_single_obj < 0)
+	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
 	{
 		DragDelta(&dx, &dy);
 	}
@@ -1710,7 +1710,7 @@ void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 
 	int size = (grid.Scale >= 5.0) ? 9 : (grid.Scale >= 1.0) ? 7 : 5;
 
-	gl_color(HI_AND_SEL_COL);
+	// color set by caller
 
 #ifdef NO_OPENGL
 	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
@@ -1751,6 +1751,8 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, len1);
 		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
 	}
+
+	gl_color(HI_AND_SEL_COL);
 
 	DrawSplitPoint(split_x, split_y);
 }
@@ -1880,7 +1882,7 @@ void UI_Canvas::DrawCamera()
 
 void UI_Canvas::DrawCurrentLine()
 {
-	if (edit.drawing_from < 0)
+	if (edit.from_vert.is_nil())
 		return;
 
 	double new_x = grid.SnapX(edit.map_x);
@@ -1908,7 +1910,7 @@ void UI_Canvas::DrawCurrentLine()
 
 	gl_color(RED);
 
-	const Vertex * v = Vertices[edit.drawing_from];
+	const Vertex * v = Vertices[edit.from_vert.num];
 
 	DrawKnobbyLine(v->x(), v->y(), new_x, new_y);
 
@@ -1926,61 +1928,51 @@ void UI_Canvas::DrawCurrentLine()
 	crossing_state_c cross;
 
 	FindCrossingPoints(cross,
-					   v->x(), v->y(), edit.drawing_from,
+					   v->x(), v->y(), edit.from_vert.num,
 					   new_x, new_y, highlight.valid() ? highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{
 		cross_point_t& point = cross.points[k];
 
+		// ignore current split line (what new vertex is sitting on)
 		if (point.ld >= 0 && point.ld == split_ld)
-			return;
+			continue;
+
+		if (point.vert >= 0)
+			gl_color(FL_GREEN);
+		else
+			gl_color(HI_AND_SEL_COL);
 
 		DrawSplitPoint(point.x, point.y);
 	}
 }
 
 
-void UI_Canvas::SelboxBegin(double map_x, double map_y)
+bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 {
-	selbox_x1 = selbox_x2 = map_x;
-	selbox_y1 = selbox_y2 = map_y;
+	x1 = MIN(edit.selbox_x1, edit.selbox_x2);
+	y1 = MIN(edit.selbox_y1, edit.selbox_y2);
+	x2 = MAX(edit.selbox_x1, edit.selbox_x2);
+	y2 = MAX(edit.selbox_y1, edit.selbox_y2);
+
+	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
+	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
+
+	// small boxes should be ignored (treated as a click + release)
+	if (scr_dx < 5 && scr_dy < 5)
+		return false;
+
+	return true; // Ok
 }
 
-void UI_Canvas::SelboxUpdate(double map_x, double map_y)
-{
-	selbox_x2 = map_x;
-	selbox_y2 = map_y;
-
-	redraw();
-}
-
-void UI_Canvas::SelboxFinish(double *x1, double *y1, double *x2, double *y2)
-{
-	*x1 = MIN(selbox_x1, selbox_x2);
-	*y1 = MIN(selbox_y1, selbox_y2);
-
-	*x2 = MAX(selbox_x1, selbox_x2);
-	*y2 = MAX(selbox_y1, selbox_y2);
-
-	int scr_dx = SCREENX(*x2) - SCREENX(*x1);
-	int scr_dy = SCREENY(*y1) - SCREENY(*y2);
-
-	// small boxes should be treated as a click/release
-	if (scr_dx < 10 && scr_dy < 10)  // TODO: CONFIG ITEM
-	{
-		*x2 = *x1;
-		*y2 = *y1;
-	}
-}
 
 void UI_Canvas::SelboxDraw()
 {
-	double x1 = MIN(selbox_x1, selbox_x2);
-	double x2 = MAX(selbox_x1, selbox_x2);
-
-	double y1 = MIN(selbox_y1, selbox_y2);
-	double y2 = MAX(selbox_y1, selbox_y2);
+	double x1 = MIN(edit.selbox_x1, edit.selbox_x2);
+	double x2 = MAX(edit.selbox_x1, edit.selbox_x2);
+	double y1 = MIN(edit.selbox_y1, edit.selbox_y2);
+	double y2 = MAX(edit.selbox_y1, edit.selbox_y2);
 
 	gl_color(FL_CYAN);
 
@@ -1991,142 +1983,30 @@ void UI_Canvas::SelboxDraw()
 }
 
 
-void UI_Canvas::DragBegin(double focus_x, double focus_y, double map_x, double map_y)
-{
-	drag_start_x = map_x;
-	drag_start_y = map_y;
-
-	drag_focus_x = focus_x;
-	drag_focus_y = focus_y;
-
-	drag_cur_x = drag_start_x;
-	drag_cur_y = drag_start_y;
-
-	if (edit.mode == OBJ_VERTICES)
-	{
-		drag_lines.change_type(OBJ_LINEDEFS);
-
-		ConvertSelection(edit.Selected, &drag_lines);
-	}
-}
-
-void UI_Canvas::DragFinish(double *dx, double *dy)
-{
-	drag_lines.clear_all();
-
-	DragDelta(dx, dy);
-}
-
-void UI_Canvas::DragUpdate(double map_x, double map_y)
-{
-	drag_cur_x = map_x;
-	drag_cur_y = map_y;
-
-	redraw();
-}
-
 void UI_Canvas::DragDelta(double *dx, double *dy)
 {
-	*dx = drag_cur_x - drag_start_x;
-	*dy = drag_cur_y - drag_start_y;
+	*dx = edit.drag_cur_x - edit.drag_start_x;
+	*dy = edit.drag_cur_y - edit.drag_start_y;
 
 	if (grid.snap)
 	{
-		double focus_x = drag_focus_x + *dx;
-		double focus_y = drag_focus_y + *dy;
+		float pixel_dx = *dx * grid.Scale;
+		float pixel_dy = *dy * grid.Scale;
 
-		*dx = grid.SnapX(focus_x) - drag_focus_x;
-		*dy = grid.SnapY(focus_y) - drag_focus_y;
+		// check that we have moved far enough from the start position,
+		// giving the user the option to select the original place.
+		if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels*2)
+		{
+			*dx = *dy = 0;
+			return;
+		}
+
+		double focus_x = edit.drag_focus_x + *dx;
+		double focus_y = edit.drag_focus_y + *dy;
+
+		*dx = grid.SnapX(focus_x) - edit.drag_focus_x;
+		*dy = grid.SnapY(focus_y) - edit.drag_focus_y;
 	}
-}
-
-
-void UI_Canvas::TransformBegin(double map_x, double map_y, double middle_x, double middle_y,
-							   transform_keyword_e mode)
-{
-	trans_start_x = map_x;
-	trans_start_y = map_y;
-
-	trans_mode = mode;
-
-	trans_param.Clear();
-
-	trans_param.mid_x = middle_x;
-	trans_param.mid_y = middle_y;
-
-	if (edit.mode == OBJ_VERTICES)
-	{
-		trans_lines.change_type(OBJ_LINEDEFS);
-
-		ConvertSelection(edit.Selected, &trans_lines);
-	}
-}
-
-void UI_Canvas::TransformFinish(transform_t& param)
-{
-	trans_lines.clear_all();
-
-	param = trans_param;
-}
-
-void UI_Canvas::TransformUpdate(double map_x, double map_y)
-{
-	double dx1 = map_x - trans_param.mid_x;
-	double dy1 = map_y - trans_param.mid_y;
-
-	double dx0 = trans_start_x - trans_param.mid_x;
-	double dy0 = trans_start_y - trans_param.mid_y;
-
-	trans_param.scale_x = trans_param.scale_y = 1;
-	trans_param.skew_x  = trans_param.skew_y  = 0;
-	trans_param.rotate  = 0;
-
-	if (trans_mode == TRANS_K_Rotate || trans_mode == TRANS_K_RotScale)
-	{
-		int angle1 = (int)ComputeAngle(dx1, dy1);
-		int angle0 = (int)ComputeAngle(dx0, dy0);
-
-		trans_param.rotate = angle1 - angle0;
-
-//		fprintf(stderr, "angle diff : %1.2f\n", trans_rotate * 360.0 / 65536.0);
-	}
-
-	switch (trans_mode)
-	{
-		case TRANS_K_Scale:
-		case TRANS_K_RotScale:
-			dx1 = MAX(abs(dx1), abs(dy1));
-			dx0 = MAX(abs(dx0), abs(dy0));
-
-			if (dx0)
-			{
-				trans_param.scale_x = dx1 / (float)dx0;
-				trans_param.scale_y = trans_param.scale_x;
-			}
-			break;
-
-		case TRANS_K_Stretch:
-			if (dx0) trans_param.scale_x = dx1 / (float)dx0;
-			if (dy0) trans_param.scale_y = dy1 / (float)dy0;
-			break;
-
-		case TRANS_K_Rotate:
-			// already done
-			break;
-
-		case TRANS_K_Skew:
-			if (abs(dx0) >= abs(dy0))
-			{
-				if (dx0) trans_param.skew_y = (dy1 - dy0) / (float)dx0;
-			}
-			else
-			{
-				if (dy0) trans_param.skew_x = (dx1 - dx0) / (float)dy0;
-			}
-			break;
-	}
-
-	redraw();
 }
 
 

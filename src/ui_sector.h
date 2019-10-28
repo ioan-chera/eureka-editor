@@ -92,10 +92,6 @@ public:
 	bool ClipboardOp(char op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
-	// returns a bitmask: 1 for floor, 2 for ceiling
-	int GetSelectedPics() const;
-	int GetHighlightedPics() const;
-
 	void UnselectPics();
 
 private:
@@ -103,8 +99,15 @@ private:
 	void CB_Paste(int new_tex);
 	void CB_Cut();
 
-	void SetFlat(const char *name, int e_state);
+	// returns either zero or a combination of PART_FLOOR and PART_CEIL
+	int GetSelectedPics() const;
+	int GetHighlightedPics() const;
+
+	void SetFlat(const char *name, int parts);
 	void SetSectorType(int new_type);
+
+	void InstallFlat(const char *name, int parts);
+	void InstallSectorType(int mask, int value);
 
 	void FreshTag();
 

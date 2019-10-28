@@ -2988,25 +2988,23 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 
 void Tags_ApplyNewValue(int new_tag)
 {
-	selection_c list;
+	// uses the current selection (caller must set it up)
+
 	selection_iterator_c it;
 
-	if (GetCurrentObjects(&list))
+	BA_Begin();
+
+	BA_MessageForSel("new tag for", edit.Selected);
+
+	for (edit.Selected->begin(&it); !it.at_end(); ++it)
 	{
-		BA_Begin();
-
-		BA_MessageForSel("new tag for", &list);
-
-		for (list.begin(&it); !it.at_end(); ++it)
-		{
-			if (edit.mode == OBJ_LINEDEFS)
-				BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
-			else if (edit.mode == OBJ_SECTORS)
-				BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
-		}
-
-		BA_End();
+		if (edit.mode == OBJ_LINEDEFS)
+			BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
+		else if (edit.mode == OBJ_SECTORS)
+			BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
 	}
+
+	BA_End();
 }
 
 
@@ -3037,42 +3035,33 @@ void CMD_ApplyTag()
 	}
 
 
-	bool unselect = false;
-
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		if (edit.highlight.is_nil())
-		{
-			Beep("ApplyTag: nothing selected");
-			return;
-		}
-
-		edit.Selected->set(edit.highlight.num);
-		unselect = true;
+		Beep("ApplyTag: nothing selected");
+		return;
 	}
-
 
 	int min_tag, max_tag;
 
 	Tags_UsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + (do_last ? 0 : 1);
-
 	if (new_tag <= 0)
 	{
 		Beep("No last tag");
-		return;
 	}
 	else if (new_tag > 32767)
 	{
 		Beep("Out of tag numbers");
-		return;
+	}
+	else
+	{
+		Tags_ApplyNewValue(new_tag);
 	}
 
-	Tags_ApplyNewValue(new_tag);
-
-	if (unselect)
-		Selection_Clear(true);
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 

@@ -29,13 +29,16 @@
 #include "FL/gl.h"
 
 #include "e_main.h"
-#include "e_hover.h"
+#include "e_hover.h"  // PointOnLineSide
+#include "e_linedef.h"  // LD_RailHeights
 #include "m_game.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+
+#include "ui_window.h"
 
 
 extern rgb_color_t transparent_col;
@@ -1094,44 +1097,62 @@ public:
 		glEnd();
 	}
 
-	void HighlightLine(obj3d_type_e part, int ld, int side)
+	void HighlightLine(int ld_index, int part)
 	{
-		const LineDef *L = LineDefs[ld];
+		const LineDef *L = LineDefs[ld_index];
 
-		const SideDef *sd_front = L->Right();
-		const SideDef *sd_back  = L->Left();
+		int side = (part & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
 
-		if (side == SIDE_LEFT)
-		{
-			std::swap(sd_front, sd_back);
-		}
-
-		if (sd_front == NULL)
+		const SideDef *sd = (side < 0) ? L->Left() : L->Right();
+		if (sd == NULL)
 			return;
-
-		const Sector *front = sd_front->SecRef();
-		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
 
 		float x1 = L->Start()->x();
 		float y1 = L->Start()->y();
 		float x2 = L->End()->x();
 		float y2 = L->End()->y();
 
-		float z1 = front->floorh;
-		float z2 = front->ceilh;
+		// check that this side is facing the camera
+		int cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
+		if (cam_side != side)
+			return;
+
+		const SideDef *sd_back = (side < 0) ? L->Right() : L->Left();
+
+		const Sector *front = sd->SecRef();
+		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
+
+		float z1, z2;
 
 		if (L->TwoSided())
 		{
-			if (part == OB3D_Lower)
+			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
 				z1 = MIN(front->floorh, back->floorh);
 				z2 = MAX(front->floorh, back->floorh);
 			}
-			else  /* part == OB3D_Upper */
+			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
 				z1 = MIN(front->ceilh, back->ceilh);
 				z2 = MAX(front->ceilh, back->ceilh);
 			}
+			else
+			{
+				int zi1, zi2;
+
+				if (! LD_RailHeights(zi1, zi2, L, sd, front, back))
+					return;
+
+				z1 = zi1; z2 = zi2;
+			}
+		}
+		else  // one-sided line
+		{
+			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
+				return;
+
+			z1 = front->floorh;
+			z2 = front->ceilh;
 		}
 
 		glBegin(GL_LINE_LOOP);
@@ -1144,17 +1165,34 @@ public:
 		glEnd();
 	}
 
-	void HighlightSector(obj3d_type_e part, int sec_num)
+	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = Sectors[sec_num];
+		const Sector *sec = Sectors[sec_index];
 
-		float z = (part == OB3D_Floor) ? sec->floorh : sec->ceilh;
+		float z = (part == PART_CEIL) ? sec->ceilh : sec->floorh;
+
+		// are we dragging this surface?
+		if (edit.action == ACT_DRAG &&
+			(!edit.dragged.valid() ||
+			 (edit.dragged.num == sec_index &&
+			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
+		{
+			z = z + edit.drag_sector_dz;
+		}
+		else
+		{
+			// check that plane faces the camera
+			if (part == PART_FLOOR && (r_view.z < z + 0.2))
+				return;
+			if (part == PART_CEIL && (r_view.z > z - 0.2))
+				return;
+		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
 			const LineDef *L = LineDefs[n];
 
-			if (L->TouchesSector(sec_num))
+			if (L->TouchesSector(sec_index))
 			{
 				float x1 = L->Start()->x();
 				float y1 = L->Start()->y();
@@ -1172,6 +1210,19 @@ public:
 	void HighlightThing(int th_index)
 	{
 		Thing *th = Things[th_index];
+		float tx = th->x();
+		float ty = th->y();
+
+		float drag_dz = 0;
+
+		if (edit.action == ACT_DRAG &&
+			(!edit.dragged.valid() || edit.dragged.num == th_index))
+		{
+			tx += (edit.drag_cur_x - edit.drag_start_x);
+			ty += (edit.drag_cur_y - edit.drag_start_y);
+
+			drag_dz = edit.drag_cur_z - edit.drag_start_z;
+		}
 
 		const thingtype_t *info = M_GetThingType(th->type);
 
@@ -1181,54 +1232,82 @@ public:
 		if (! img)
 			img = IM_UnknownSprite();
 
-		float scale_w = img->width() * scale;
+		float scale_w = img->width()  * scale;
 		float scale_h = img->height() * scale;
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = th->x() - r_view.Sin * scale_w * 0.5;
-		float y1 = th->y() + r_view.Cos * scale_w * 0.5;
-		float x2 = th->x() + r_view.Sin * scale_w * 0.5;
-		float y2 = th->y() - r_view.Cos * scale_w * 0.5;
+		float x1 = tx - r_view.Sin * scale_w * 0.5;
+		float y1 = ty + r_view.Cos * scale_w * 0.5;
+		float x2 = tx + r_view.Sin * scale_w * 0.5;
+		float y2 = ty - r_view.Cos * scale_w * 0.5;
 
 		int sec_num = r_view.thing_sectors[th_index];
 
-		float h1, h2;
+		float z1, z2;
 
 		if (info->flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			h2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
-			h1 = h2 - scale_h;
+			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
+			z1 = z2 - scale_h;
 		}
 		else
 		{
-			h1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
-			h2 = h1 + scale_h;
+			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
+			z2 = z1 + scale_h;
 		}
+
+		z1 += drag_dz;
+		z2 += drag_dz;
 
 		glBegin(GL_LINE_LOOP);
 
-		glVertex3f(x1, y1, h1);
-		glVertex3f(x1, y1, h2);
-		glVertex3f(x2, y2, h2);
-		glVertex3f(x2, y2, h1);
+		glVertex3f(x1, y1, z1);
+		glVertex3f(x1, y1, z2);
+		glVertex3f(x2, y2, z2);
+		glVertex3f(x2, y2, z1);
 
 		glEnd();
 	}
 
-	inline void HighlightObject(Obj3d_t& obj)
+	void HighlightObject(Objid& obj)
 	{
-		if (obj.isThing())
+		if (!obj.valid())
+			return;
+
+		if (obj.type == OBJ_THINGS)
 		{
 			HighlightThing(obj.num);
 		}
-		else if (obj.isSector())
+		else if (obj.type == OBJ_SECTORS)
 		{
-			HighlightSector(obj.type, obj.num);
+			if (obj.parts == 0 || (obj.parts & PART_FLOOR))
+				HighlightSector(obj.num, PART_FLOOR);
+
+			if (obj.parts == 0 || (obj.parts & PART_CEIL))
+				HighlightSector(obj.num, PART_CEIL);
 		}
-		else if (obj.isLine())
+		else if (obj.type == OBJ_LINEDEFS)
 		{
-			HighlightLine(obj.type, obj.num, obj.side);
+			/* right side */
+			if (obj.parts == 0 || (obj.parts & PART_RT_LOWER))
+				HighlightLine(obj.num, PART_RT_LOWER);
+
+			if (obj.parts == 0 || (obj.parts & PART_RT_UPPER))
+				HighlightLine(obj.num, PART_RT_UPPER);
+
+			if (obj.parts & PART_RT_RAIL)
+				HighlightLine(obj.num, PART_RT_RAIL);
+
+			/* left side */
+			if (obj.parts == 0 || (obj.parts & PART_LF_LOWER))
+				HighlightLine(obj.num, PART_LF_LOWER);
+
+			if (obj.parts == 0 || (obj.parts & PART_LF_UPPER))
+				HighlightLine(obj.num, PART_LF_UPPER);
+
+			if (obj.parts & PART_LF_RAIL)
+				HighlightLine(obj.num, PART_LF_RAIL);
 		}
 	}
 
@@ -1244,30 +1323,44 @@ public:
 
 		bool saw_hl = false;
 
-		for (unsigned int k = 0 ; k < r_view.sel.size() ; k++)
+		selection_iterator_c it;
+
+		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
-			if (! r_view.sel[k].valid())
-				continue;
-
-			gl_color(SEL_COL);
-
-			if (r_view.hl.valid() && r_view.hl == r_view.sel[k])
+			if (edit.highlight.valid() && *it == edit.highlight.num)
 			{
-				gl_color(HI_AND_SEL_COL);
 				saw_hl = true;
+
+				// can skip drawing twice for things, but not other stuff
+				if (edit.mode == OBJ_THINGS)
+					continue;
 			}
 
-			HighlightObject(r_view.sel[k]);
+			byte parts = edit.Selected->get_ext(*it);
+
+			if (parts > 1)
+			{
+				gl_color(SEL3D_COL);
+			}
+			else
+			{
+				gl_color(SEL_COL);
+				parts = 0;
+			}
+
+			Objid obj(edit.mode, *it, parts & ~1);
+
+			HighlightObject(obj);
 		}
 
 		/* do the highlight */
 
-		if (! saw_hl)
-		{
-			gl_color(HI_COL);
+		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-			HighlightObject(r_view.hl);
-		}
+		if (edit.highlight.is_nil() && edit.dragged.valid())
+			HighlightObject(edit.dragged);
+		else
+			HighlightObject(edit.highlight);
 
 		glLineWidth(1);
 	}
@@ -1283,8 +1376,6 @@ public:
 
 	void Render()
 	{
-		r_view.SaveOffsets();
-
 		// always draw the sector the camera is in
 		MarkCameraSector();
 
@@ -1302,8 +1393,6 @@ public:
 		if (r_view.sprites)
 			for (int t=0 ; t < NumThings ; t++)
 				DrawThing(t);
-
-		r_view.RestoreOffsets();
 	}
 
 	void Begin(int ow, int oh)
@@ -1313,7 +1402,6 @@ public:
 
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_ALPHA_TEST);
 		glEnable(GL_ALPHA_TEST);
 
 		glDisable(GL_CULL_FACE);

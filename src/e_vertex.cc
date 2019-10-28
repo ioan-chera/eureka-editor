@@ -267,7 +267,7 @@ void CMD_VT_Merge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	if (edit.Selected->count_obj() < 2)
@@ -370,22 +370,20 @@ bool Vertex_TryFixDangler(int v_num)
 
 	// see if vertex is sitting on a line
 
-	Objid line_ob;
+	Objid line_obj;
+	FindSplitLineForDangler(line_obj, v_num);
 
-	GetSplitLineForDangler(line_ob, v_num);
-
-	if (! line_ob.valid())
+	if (! line_obj.valid())
 		return false;
 
 #if 0 // DEBUG
-	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_ob.num, v_num);
+	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_obj.num, v_num);
 #endif
 
 	BA_Begin();
+	BA_Message("split linedef #%d\n", line_obj.num);
 
-	SplitLineDefAtVertex(line_ob.num, v_num);
-
-	BA_Message("split linedef #%d\n", line_ob.num);
+	SplitLineDefAtVertex(line_obj.num, v_num);
 
 	BA_End();
 
@@ -481,7 +479,7 @@ void CMD_VT_Disconnect(void)
 			return;
 		}
 
-		edit.Selected->set(edit.highlight.num);
+		Selection_Add(edit.highlight);
 	}
 
 	bool seen_one = false;
@@ -579,18 +577,11 @@ void CMD_LIN_Disconnect(void)
 	//
 	// Hence need separate code for this.
 
-	bool unselect = false;
-
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		if (edit.highlight.is_nil())
-		{
-			Beep("Nothing to disconnect");
-			return;
-		}
-
-		edit.Selected->set(edit.highlight.num);
-		unselect = true;
+		Beep("Nothing to disconnect");
+		return;
 	}
 
 	bool seen_one = false;
@@ -612,7 +603,7 @@ void CMD_LIN_Disconnect(void)
 	if (! seen_one)
 		Beep("Nothing was disconnected");
 
-	if (unselect)
+	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* no save */);
 }
 
@@ -788,21 +779,14 @@ void CMD_SEC_Disconnect(void)
 		return;
 	}
 
-	int n;
-	bool unselect = false;
-
-	if (edit.Selected->empty())
+	soh_type_e unselect = Selection_Or_Highlight();
+	if (unselect == SOH_Empty)
 	{
-		if (edit.highlight.is_nil())
-		{
-			Beep("No sectors to disconnect");
-			return;
-		}
-
-		edit.Selected->set(edit.highlight.num);
-		unselect = true;
+		Beep("No sectors to disconnect");
+		return;
 	}
 
+	int n;
 
 	// collect all vertices which need to be detached
 	selection_c detach_verts(OBJ_VERTICES);
@@ -813,6 +797,8 @@ void CMD_SEC_Disconnect(void)
 	if (detach_verts.empty())
 	{
 		Beep("Already disconnected");
+		if (unselect == SOH_Unselect)
+			Selection_Clear(true /* nosave */);
 		return;
 	}
 
@@ -895,8 +881,8 @@ void CMD_SEC_Disconnect(void)
 
 	BA_End();
 
-	if (unselect)
-		Selection_Clear(true);
+	if (unselect == SOH_Unselect)
+		Selection_Clear(true /* nosave */);
 }
 
 

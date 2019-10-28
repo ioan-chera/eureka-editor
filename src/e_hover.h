@@ -34,8 +34,10 @@ class bitvec_c;
 
 void GetNearObject(Objid& o, obj_type_e objtype, double x, double y);
 
-void GetSplitLineDef(Objid& o, double x, double y, int drag_vert = -1);
-void GetSplitLineForDangler(Objid& o, int v_num);
+void FindSplitLine(Objid& out, double& out_x, double& out_y,
+				   double ptr_x, double ptr_y, int drag_vert = -1);
+
+void FindSplitLineForDangler(Objid& out, int v_num);
 
 double ApproxDistToLineDef(const LineDef * L, double x, double y);
 

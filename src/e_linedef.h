@@ -28,7 +28,7 @@
 #define __EUREKA_E_LINEDEF_H__
 
 void FlipLineDef(int ld);
-void FlipLineDefGroup(selection_c& flip);
+void FlipLineDefGroup(selection_c *flip);
 
 
 void LineDefs_SetLength(int new_len);
@@ -50,6 +50,9 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 						int *ld1, int *side1,
 						int *ld2, int *side2);
 
+bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
+					const Sector *front, const Sector *back);
+
 typedef enum
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset
@@ -60,9 +63,9 @@ typedef enum
 }
 linedef_align_flag_e;
 
-bool Line_AlignOffsets(const Obj3d_t& obj, int align_flags);
+bool Line_AlignOffsets(const Objid& obj, int align_flags);
 
-void Line_AlignGroup(std::vector<Obj3d_t> & group, int align_flags);
+void Line_AlignGroup(std::vector<Objid> & group, int align_flags);
 
 
 /* commands */

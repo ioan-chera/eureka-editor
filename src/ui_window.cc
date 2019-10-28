@@ -435,8 +435,6 @@ void UI_MainWindow::ToggleFullscreen()
 
 bool UI_MainWindow::ClipboardOp(char op)
 {
-	// Note : this is for the panels, we don't handle the 3D view here
-
 	if (props_box->visible())
 	{
 		return props_box->ClipboardOp(op);
@@ -466,12 +464,6 @@ bool UI_MainWindow::ClipboardOp(char op)
 void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_state)
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
-
-	if (edit.render3d)
-	{
-		if (Render3D_BrowsedItem(kind, number, name, e_state))
-			return;	 // ate it
-	}
 
 	if (props_box->visible())
 	{

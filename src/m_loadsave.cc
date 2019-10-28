@@ -37,7 +37,6 @@
 #include "m_loadsave.h"
 #include "m_nodes.h"
 #include "m_udmf.h"
-#include "r_render.h"	// Render3D_ClearSelection
 #include "w_rawdef.h"
 #include "w_wad.h"
 
@@ -969,7 +968,6 @@ void LoadLevel(Wad_file *wad, const char *level)
 	// reset various editor state
 	Editor_ClearAction();
 	Selection_InvalidateLast();
-	Render3D_ClearSelection();
 
 	edit.Selected->clear_all();
 	edit.highlight.clear();
