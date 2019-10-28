@@ -412,11 +412,15 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 	// are we drawing a line?
 	if (edit.action == ACT_DRAW_LINE)
-		old_vert = edit.from_vert.num;
+	{
+		old_vert = edit.draw_from.num;
+
+		new_x = edit.draw_to_x;
+		new_y = edit.draw_to_y;
+	}
 
 	// a linedef which we are splitting (usually none)
 	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
-
 
 	if (split_ld >= 0)
 	{
@@ -480,7 +484,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			if (LineDefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				edit.from_vert = Objid(OBJ_VERTICES, new_vert);
+				edit.draw_from = Objid(OBJ_VERTICES, new_vert);
 				edit.Selected->set(new_vert);
 				return;
 			}
@@ -491,10 +495,8 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 
 	// would we create a new vertex on top of an existing one?
-	// @@ FIXME REVIEW THIS
 	if (new_vert < 0 && old_vert >= 0 &&
-		new_x == Vertices[old_vert]->x() &&
-		new_y == Vertices[old_vert]->y())
+		Vertices[old_vert]->Matches(MakeValidCoord(new_x), MakeValidCoord(new_y)))
 	{
 		edit.Selected->set(old_vert);
 		return;
@@ -512,7 +514,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		V->SetRawXY(new_x, new_y);
 
-		edit.from_vert = Objid(OBJ_VERTICES, new_vert);
+		edit.draw_from = Objid(OBJ_VERTICES, new_vert);
 		edit.Selected->set(new_vert);
 
 		// splitting an existing line?
@@ -552,7 +554,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		BA_Message("added linedef");
 
-		edit.from_vert = Objid(OBJ_VERTICES, new_vert);
+		edit.draw_from = Objid(OBJ_VERTICES, new_vert);
 		edit.Selected->set(new_vert);
 	}
 
@@ -567,8 +569,11 @@ begin_drawing:
 	{
 		Selection_Clear();
 
-		edit.from_vert = Objid(OBJ_VERTICES, old_vert);
+		edit.draw_from = Objid(OBJ_VERTICES, old_vert);
 		edit.Selected->set(old_vert);
+
+		edit.draw_to_x = Vertices[old_vert]->x();
+		edit.draw_to_y = Vertices[old_vert]->y();
 
 		Editor_SetAction(ACT_DRAW_LINE);
 	}

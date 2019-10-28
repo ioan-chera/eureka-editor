@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -109,7 +109,9 @@ struct Editor_State_t
 
 	/* line drawing stuff (ACT_DRAW_LINE) */
 
-	Objid from_vert;  // the vertex we are drawing a line from
+	Objid draw_from;  // the vertex we are drawing a line from
+
+	double draw_to_x, draw_to_y;  // target coordinate of current line
 
 
 	/* selection-box stuff (ACT_SELBOX) */

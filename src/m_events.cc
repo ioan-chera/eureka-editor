@@ -477,6 +477,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_DRAW_LINE)
 	{
+		// this calls UpdateHighlight() which updates edit.draw_to_x/y
 		RedrawMap();
 		return;
 	}

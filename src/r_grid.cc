@@ -139,6 +139,34 @@ double Grid_State_c::SnapY(double map_y) const
 }
 
 
+void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
+							   double start_x, double start_y) const
+{
+	double dx = fabs(var_x - start_x);
+	double dy = fabs(var_y - start_y);
+
+	switch (0)
+	{
+	case 0: // no change
+		break;
+
+	case 1: // axis aligned
+		if (dx < dy)
+			var_x = start_x;
+		else
+			var_y = start_y;
+		break;
+
+	case 2:
+		// todo
+		return;
+	}
+
+	var_x = grid.SnapX(var_x);
+	var_y = grid.SnapY(var_y);
+}
+
+
 int Grid_State_c::QuantSnapX(double map_x, bool want_furthest, int *dir) const
 {
 	if (OnGridX(map_x))

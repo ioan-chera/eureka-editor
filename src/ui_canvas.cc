@@ -349,7 +349,7 @@ void UI_Canvas::DrawEverything()
 	}
 	else if (highlight.valid())
 	{
-		if (edit.Selected->get(highlight.num))
+		if (edit.action != ACT_DRAW_LINE && edit.Selected->get(highlight.num))
 			gl_color(HI_AND_SEL_COL);
 		else
 			gl_color(HI_COL);
@@ -359,10 +359,11 @@ void UI_Canvas::DrawEverything()
 
 		DrawHighlight(highlight.type, highlight.num);
 
-		gl_color(LIGHTRED);
-
 		if (! edit.error_mode)
+		{
+			gl_color(LIGHTRED);
 			DrawTagged(highlight.type, highlight.num);
+		}
 
 		gl_line_width(1);
 	}
@@ -1882,26 +1883,16 @@ void UI_Canvas::DrawCamera()
 
 void UI_Canvas::DrawCurrentLine()
 {
-	if (edit.from_vert.is_nil())
+	if (edit.draw_from.is_nil())
 		return;
 
-	double new_x = grid.SnapX(edit.map_x);
-	double new_y = grid.SnapY(edit.map_y);
+	const Vertex * V = Vertices[edit.draw_from.num];
+
+	double new_x = edit.draw_to_x;
+	double new_y = edit.draw_to_y;
 
 	// should draw a vertex?
-	if (highlight.valid())
-	{
-		SYS_ASSERT(highlight.type == OBJ_VERTICES);
-
-		new_x = Vertices[highlight.num]->x();
-		new_y = Vertices[highlight.num]->y();
-	}
-	else if (split_ld >= 0)
-	{
-		new_x = split_x;
-		new_y = split_y;
-	}
-	else
+	if (! (highlight.valid() || split_ld >= 0))
 	{
 		gl_color(FL_GREEN);
 
@@ -1910,25 +1901,23 @@ void UI_Canvas::DrawCurrentLine()
 
 	gl_color(RED);
 
-	const Vertex * v = Vertices[edit.from_vert.num];
+	DrawKnobbyLine(V->x(), V->y(), new_x, new_y);
 
-	DrawKnobbyLine(v->x(), v->y(), new_x, new_y);
+	double dx = V->x() - new_x;
+	double dy = V->y() - new_y;
 
-	double dx = v->x() - new_x;
-	double dy = v->y() - new_y;
+	float length = sqrt(dx * dx + dy * dy);
 
-	if (dx || dy)
-	{
-		float length = sqrt(dx * dx + dy * dy);
+	if (length < 0.1)
+		return;
 
-		DrawLineNumber(v->x(), v->y(), new_x, new_y, 0, I_ROUND(length));
-	}
+	DrawLineNumber(V->x(), V->y(), new_x, new_y, 0, I_ROUND(length));
 
 	// draw all the crossing points
 	crossing_state_c cross;
 
 	FindCrossingPoints(cross,
-					   v->x(), v->y(), edit.from_vert.num,
+					   V->x(), V->y(), edit.draw_from.num,
 					   new_x, new_y, highlight.valid() ? highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)

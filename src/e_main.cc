@@ -179,19 +179,66 @@ static void UpdatePanel()
 }
 
 
+void UpdateDrawLine()
+{
+	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
+		return;
+
+	double new_x = edit.map_x;
+	double new_y = edit.map_y;
+
+	if (edit.highlight.valid())
+	{
+		new_x = Vertices[edit.highlight.num]->x();
+		new_y = Vertices[edit.highlight.num]->y();
+	}
+	else if (edit.split_line.valid())
+	{
+		new_x = edit.split_x;
+		new_y = edit.split_y;
+	}
+	else
+	{
+		const Vertex *V = Vertices[edit.draw_from.num];
+
+		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
+	}
+
+	edit.draw_to_x = new_x;
+	edit.draw_to_y = new_y;
+
+	// when drawing mode, highlight a vertex at the snap position
+	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
+	{
+		int near_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
+		if (near_vert >= 0)
+		{
+			edit.highlight = Objid(OBJ_VERTICES, near_vert);
+		}
+	}
+
+	// never highlight the vertex we are drawing from
+	if (edit.draw_from.valid() &&
+		edit.draw_from == edit.highlight)
+	{
+		edit.highlight.clear();
+	}
+}
+
+
 static void UpdateSplitLine(double map_x, double map_y)
 {
 	edit.split_line.clear();
 
-	// usually disabled while dragging stuff
+	// splitting usually disabled while dragging stuff, EXCEPT a single vertex
 	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
-		return;
+		goto done;
 
 	// in vertex mode, see if there is a linedef which would be split by
-	// adding a new vertex
+	// adding a new vertex.
 
 	if (edit.mode == OBJ_VERTICES &&
-		edit.pointer_in_window && !edit.render3d &&
+		edit.pointer_in_window &&
 	    edit.highlight.is_nil())
 	{
 		FindSplitLine(edit.split_line, edit.split_x, edit.split_y,
@@ -201,6 +248,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 		//       (that case is handled by Insert_Vertex)
 	}
 
+done:
 	if (edit.split_line.valid())
 		main_win->canvas->SplitLineSet(edit.split_line.num, edit.split_x, edit.split_y);
 	else
@@ -217,15 +265,12 @@ void UpdateHighlight()
 		return;
 	}
 
-
-	bool dragging = (edit.action == ACT_DRAG);
-
-
 	// find the object to highlight
 	edit.highlight.clear();
 
-	if (edit.pointer_in_window && !edit.render3d &&
-	    (!dragging || (edit.mode == OBJ_VERTICES && edit.dragged.valid()) ))
+	// don't highlight when dragging, EXCEPT when dragging a single vertex
+	if (edit.pointer_in_window &&
+	    (edit.action != ACT_DRAG || (edit.mode == OBJ_VERTICES && edit.dragged.valid()) ))
 	{
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
@@ -237,36 +282,13 @@ void UpdateHighlight()
 		}
 	}
 
-
 	UpdateSplitLine(edit.map_x, edit.map_y);
-
-
-	// in drawing mode, highlight extends to a vertex at the snap position
-	if (edit.mode == OBJ_VERTICES && grid.snap &&
-		edit.action == ACT_DRAW_LINE &&
-		edit.highlight.is_nil() && edit.split_line.is_nil())
-	{
-		double new_x = grid.SnapX(edit.map_x);
-		double new_y = grid.SnapY(edit.map_y);
-
-		int near_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
-
-		if (near_vert >= 0)
-		{
-			edit.highlight = Objid(OBJ_VERTICES, near_vert);
-		}
-		else
-		{
-			UpdateSplitLine(new_x, new_y);
-		}
-	}
-
+	UpdateDrawLine();
 
 	if (edit.highlight.valid())
 		main_win->canvas->HighlightSet(edit.highlight);
 	else
 		main_win->canvas->HighlightForget();
-
 
 	UpdatePanel();
 }
@@ -405,7 +427,7 @@ void MapStuff_NotifyDelete(obj_type_e type, int objnum)
 		recalc_map_bounds = true;
 
 		if (edit.action == ACT_DRAW_LINE &&
-			edit.from_vert.num == objnum)
+			edit.draw_from.num == objnum)
 		{
 			Editor_ClearAction();
 		}
@@ -1331,7 +1353,7 @@ void Editor_DefaultState()
 	edit.is_panning = false;
 
 	edit.dragged.clear();
-	edit.from_vert.clear();
+	edit.draw_from.clear();
 
 	edit.error_mode = false;
 	edit.show_object_numbers = false;

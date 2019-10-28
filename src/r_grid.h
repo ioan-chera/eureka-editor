@@ -95,6 +95,10 @@ public:
 	int ForceSnapX(double map_x) const;
 	int ForceSnapY(double map_y) const;
 
+	// snap X/Y coordinate to ratio lock
+	// (unchanged is the ratio snapping is off)
+	void RatioSnapXY(double& var_x, double& var_y, double start_x, double start_y) const;
+
 	// quantization snap, can pick coordinate on other side
 	int QuantSnapX(double map_x, bool want_furthest, int *dir = NULL) const;
 	int QuantSnapY(double map_y, bool want_furthest, int *dir = NULL) const;
