@@ -35,15 +35,11 @@ private:
 
 	Fl_Toggle_Button *grid_snap;
 
-	Fl_Box *status;
-
 public:
 	// FLTK virtual method for handling input events.
 	int handle(int event);
 
 public:
-	void SetStatus(const char *str);
-
 	void NewEditMode(obj_type_e new_mode);
 
 	void SetMouse(double mx, double my);
@@ -76,6 +72,9 @@ private:
 
 class UI_StatusBar : public Fl_Widget
 {
+private:
+	std::string status;
+
 public:
 	UI_StatusBar(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_StatusBar();
@@ -85,10 +84,12 @@ public:
 	void draw();
 	int handle(int event);
 
+	// this only used by Status_Set() and Status_Clear()
+	void SetStatus(const char *str);
+
 private:
 	void IB_Number(int& cx, int& cy, const char *label, int value, int size);
 	void IB_Flag(int& cx, int& cy, bool value, const char *label_on, const char *label_off);
-	void IB_Highlight(int& cx, int& cy);
 };
 
 #endif  /* __EUREKA_UI_INFOBAR_H__ */

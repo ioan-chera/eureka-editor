@@ -136,14 +136,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	X += 10;
 
 
-	status = new Fl_Box(FL_FLAT_BOX, X, Y-4, W - 4 - X, H+4, "Ready");
-	status->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT | FL_ALIGN_CLIP);
-	status->labelfont(FL_HELVETICA_BOLD);
-
-
-	// ---- resizable ----
-
- 	resizable(status);
+	resizable(NULL);
 
 	end();
 }
@@ -152,8 +145,8 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 // UI_InfoBar Destructor
 //
 UI_InfoBar::~UI_InfoBar()
-{
-}
+{ }
+
 
 int UI_InfoBar::handle(int event)
 {
@@ -240,17 +233,6 @@ void UI_InfoBar::SetMouse(double mx, double my)
 }
 
 
-void UI_InfoBar::SetStatus(const char *str)
-{
-	status->copy_label(str);
-
-	if (!str || !str[0])
-		status->tooltip(NULL);
-	else
-		status->copy_tooltip(str);
-}
-
-
 void UI_InfoBar::SetScale(double new_scale)
 {
 	double perc = new_scale * 100.0;
@@ -315,34 +297,6 @@ void UI_InfoBar::UpdateSnapText()
 }
 
 
-void Status_Set(const char *fmt, ...)
-{
-	if (! main_win)
-		return;
-
-	va_list arg_ptr;
-
-	static char buffer[MSG_BUF_LEN];
-
-	va_start(arg_ptr, fmt);
-	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
-	va_end(arg_ptr);
-
-	buffer[MSG_BUF_LEN-1] = 0;
-
-	main_win->info_bar->SetStatus(buffer);
-}
-
-
-void Status_Clear()
-{
-	if (! main_win)
-		return;
-
-	main_win->info_bar->SetStatus("");
-}
-
-
 //------------------------------------------------------------------------
 
 
@@ -351,14 +305,14 @@ void Status_Clear()
 
 
 UI_StatusBar::UI_StatusBar(int X, int Y, int W, int H, const char *label) :
-    Fl_Widget(X, Y, W, H, label)
+    Fl_Widget(X, Y, W, H, label),
+	status()
 {
 	box(FL_NO_BOX);
 }
 
 UI_StatusBar::~UI_StatusBar()
-{
-}
+{ }
 
 
 int UI_StatusBar::handle(int event)
@@ -398,26 +352,30 @@ void UI_StatusBar::draw()
 
 		IB_Number(cx, cy, "gamma", usegamma, 1);
 		cx += 10;
-
-		IB_Flag(cx, cy, true, "|", "|");
-		IB_Highlight(cx, cy);
 	}
-	else
+	else  // 2D view
 	{
-		int mx = I_ROUND(edit.map_x);
-		int my = I_ROUND(edit.map_y);
+		int mx = I_ROUND(grid.SnapX(edit.map_x));
+		int my = I_ROUND(grid.SnapX(edit.map_y));
 
 		mx = CLAMP(-32767, mx, 32767);
 		my = CLAMP(-32767, my, 32767);
 
 		IB_Number(cx, cy, "x", mx, 5);
 		IB_Number(cx, cy, "y", my, 5);
-
-		cx += 200;
+		cx += 10;
 
 		IB_Number(cx, cy, "gamma", usegamma, 1);
 		cx += 10;
 	}
+
+	/* status message */
+
+	IB_Flag(cx, cy, true, "|", "|");
+
+	fl_color(INFO_TEXT_COL);
+
+	fl_draw(status.c_str(), cx, cy);
 
 	fl_pop_clip();
 }
@@ -453,52 +411,39 @@ void UI_StatusBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, c
 }
 
 
-void UI_StatusBar::IB_Highlight(int& cx, int& cy)
+void UI_StatusBar::SetStatus(const char *str)
 {
-	char buffer[256];
+	status = str;
 
-#if 0  // FIXME !!!
-	if (! r_view.hl.valid())
-	{
-		fl_color(INFO_DIM_COL);
+	redraw();
+}
 
-		strcpy(buffer, "no highlight");
-	}
-	else
-	{
-		fl_color(INFO_TEXT_COL);
 
-		if (r_view.hl.type == OBJ_THINGS)
-		{
-			const Thing *th = Things[r_view.hl.num];
-			const thingtype_t *info = M_GetThingType(th->type);
+void Status_Set(const char *fmt, ...)
+{
+	if (! main_win)
+		return;
 
-			snprintf(buffer, sizeof(buffer), "thing #%d  %s",
-					 r_view.hl.num, info->desc);
+	va_list arg_ptr;
 
-		}
-		else if (r_view.hl.type == OBJ_SECTORS)
-		{
-			int tex = r_view.GrabTextureFromObject(r_view.hl);
+	static char buffer[MSG_BUF_LEN];
 
-			snprintf(buffer, sizeof(buffer), " sect #%d  %-8s",
-					 r_view.hl.num,
-					 (tex < 0) ? "??????" : BA_GetString(tex));
-		}
-		else if (r_view.hl.type == OBJ_LINEDEFS)
-		{
-			int tex = r_view.GrabTextureFromObject(r_view.hl);
+	va_start(arg_ptr, fmt);
+	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+	va_end(arg_ptr);
 
-			snprintf(buffer, sizeof(buffer), " line #%d  %-8s",
-					 r_view.hl.num,
-					 (tex < 0) ? "??????" : BA_GetString(tex));
-		}
-	}
+	buffer[MSG_BUF_LEN-1] = 0;
 
-	fl_draw(buffer, cx, cy);
+	main_win->status_bar->SetStatus(buffer);
+}
 
-	cx = cx + fl_width(buffer);
-#endif
+
+void Status_Clear()
+{
+	if (! main_win)
+		return;
+
+	main_win->status_bar->SetStatus("");
 }
 
 //--- editor settings ---
