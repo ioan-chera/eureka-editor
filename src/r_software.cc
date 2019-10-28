@@ -1172,11 +1172,11 @@ public:
 					continue;
 			}
 
-			int h1 = dw->ceil.h1 - 1;
-			int h2 = dw->ceil.h2 + 1;
-
 			int x1 = dw->sx1 - 1;
 			int x2 = dw->sx2 + 1;
+
+			int h1 = dw->ceil.h1 - 1;
+			int h2 = dw->ceil.h2 + 1;
 
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
@@ -1184,11 +1184,50 @@ public:
 			if (edit.action == ACT_DRAG &&
 				(!edit.dragged.valid() || edit.dragged.num == th_index))
 			{
-				x1 += edit.drag_screen_dx;
-				x2 += edit.drag_screen_dx;
+				// re-project thing onto the viewplane
+				float dx = edit.drag_cur_x - edit.drag_start_x;
+				float dy = edit.drag_cur_y - edit.drag_start_y;
+				float dz = edit.drag_cur_z - edit.drag_start_z;
 
-				y1 += edit.drag_screen_dy;
-				y2 += edit.drag_screen_dy;
+				const Thing *T = Things[dw->th];
+
+				float x = T->x() + dx - r_view.x;
+				float y = T->y() + dy - r_view.y;
+
+				float tx = x * r_view.Sin - y * r_view.Cos;
+				float ty = x * r_view.Cos + y * r_view.Sin;
+
+				if (ty < 1) ty = 1;
+
+				float scale   = dw->normal;
+				Img_c *sprite = dw->ceil.img;
+
+				float tx1 = tx - sprite->width() * scale / 2.0;
+				float tx2 = tx + sprite->width() * scale / 2.0;
+
+				double iz = 1 / ty;
+
+				x1 = DeltaToX(iz, tx1) - 1;
+				x2 = DeltaToX(iz, tx2) + 1;
+
+				int thsec = r_view.thing_sectors[th_index];
+
+				if (dw->side & THINGDEF_CEIL)
+				{
+					h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - T->h();
+					h1 = h2 - sprite->height() * scale;
+				}
+				else
+				{
+					h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + T->h();
+					h2 = h1 + sprite->height() * scale;
+				}
+
+				h1 = h1 + dz - 1;
+				h2 = h2 + dz + 1;
+
+				y1 = DistToY(iz, h2);
+				y2 = DistToY(iz, h1);
 			}
 
 			DrawHighlightLine(x1, y1, x1, y2);

@@ -141,8 +141,10 @@ struct Editor_State_t
 
 	float drag_point_dist;
 	float drag_sector_dz;
+
 	int   drag_thing_num;
 	float drag_thing_floorh;
+	bool  drag_thing_up_down;
 
 	selection_c *drag_lines;
 

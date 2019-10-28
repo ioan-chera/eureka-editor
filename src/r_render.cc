@@ -802,7 +802,7 @@ static void DragThings_Update()
 	float x_factor = dist / (ow * 0.5);
 	float y_factor = dist / (ow * x_slope * 0.5);
 
-	if (! (grid.snap || Level_format == MAPF_Doom))
+	if (edit.drag_thing_up_down)
 	{
 		// vertical positioning in Hexen and UDMF formats
 		float map_dz = -edit.drag_screen_dy * y_factor;
@@ -901,7 +901,7 @@ void Render3D_DragThings()
 	double dz = edit.drag_cur_z - edit.drag_start_z;
 
 	// for movement in XY plane, ensure we don't raise/lower things
-	if (grid.snap || Level_format == MAPF_Doom)
+	if (! edit.drag_thing_up_down)
 		dz = 0.0;
 
 	if (edit.dragged.valid())

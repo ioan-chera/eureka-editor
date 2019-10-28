@@ -558,6 +558,7 @@ static void DoBeginDrag()
 		{
 			edit.drag_thing_num = edit.clicked.num;
 			edit.drag_thing_floorh = edit.drag_start_z;
+			edit.drag_thing_up_down = (Level_format != MAPF_Doom && !grid.snap);
 
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
