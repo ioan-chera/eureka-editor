@@ -713,7 +713,7 @@ void CMD_LIN_Align()
 
 	bool do_clear = Exec_HasFlag("/clear");
 	bool do_right = Exec_HasFlag("/right");
-	bool do_unpeg = true;
+	bool do_unpeg = true;  // TODO a flag to disable
 
 	int align_flags = 0;
 
@@ -732,18 +732,39 @@ void CMD_LIN_Align()
 		return;
 	}
 
-	// convert selection to group of surfaces
-	// FIXME : handle parts from selection in 3D
+	/* convert selection to group of surfaces */
 
 	std::vector< Objid > group;
 
 	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
+		int parts = edit.Selected->get_ext(*it);
+		parts &= ~1;
+
+		const LineDef *L = LineDefs[*it];
+
+		// safety check
+		if (L->left  < 0) parts &= ~PART_LF_ALL;
+		if (L->right < 0) parts &= ~PART_RT_ALL;
+
 		Objid obj(OBJ_LINEDEFS, *it);
 
-		const LineDef *L = LineDefs[obj.num];
+		// handle lines with individual parts selected
+		if (parts != 0)
+		{
+			for (int bit = 0x02 ; bit <= 0x80 ; bit <<= 1)
+			{
+				if (parts & bit)
+				{
+					obj.parts = parts & bit;
+					group.push_back(obj);
+				}
+			}
+			continue;
+		}
 
+		// handle "simply selected" lines, determine parts to use
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
 			int where = pass ? SIDE_LEFT : SIDE_RIGHT;
@@ -752,7 +773,7 @@ void CMD_LIN_Align()
 				continue;
 
 			// decide whether to use upper or lower
-			// TODO : this could be smarter....
+			// WISH : this could be smarter....
 
 			bool lower_vis = PartIsVisible(obj, 'l');
 			bool upper_vis = PartIsVisible(obj, 'u');
