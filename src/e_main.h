@@ -32,6 +32,8 @@
 #include "m_events.h"
 #include "e_things.h"
 
+class SaveBucket_c;
+
 
 typedef enum
 {
@@ -148,7 +150,10 @@ struct Editor_State_t
 	/* adjusting state (ACT_ADJUST_OFS) */
 
 	float adjust_dx, adjust_dy;
-	float adjust_dz;  // FIXME remove this one
+
+	SaveBucket_c * adjust_bucket;
+
+	struct { float x1, y1, x2, y2; } adjust_bbox;
 };
 
 

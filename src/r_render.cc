@@ -318,11 +318,6 @@ private:
 };
 
 
-static SaveBucket_c * xyofs_bucket;
-
-static struct { float x1, y1, x2, y2; } xyofs_line_bbox;
-
-
 static void AdjustOfs_UpdateBBox(int ld_num)
 {
 	const LineDef *L = LineDefs[ld_num];
@@ -335,10 +330,10 @@ static void AdjustOfs_UpdateBBox(int ld_num)
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
 
-	xyofs_line_bbox.x1 = MIN(xyofs_line_bbox.x1, lx1);
-	xyofs_line_bbox.y1 = MIN(xyofs_line_bbox.y1, ly1);
-	xyofs_line_bbox.x2 = MAX(xyofs_line_bbox.x2, lx2);
-	xyofs_line_bbox.y2 = MAX(xyofs_line_bbox.y2, ly2);
+	edit.adjust_bbox.x1 = MIN(edit.adjust_bbox.x1, lx1);
+	edit.adjust_bbox.y1 = MIN(edit.adjust_bbox.y1, ly1);
+	edit.adjust_bbox.x2 = MAX(edit.adjust_bbox.x2, lx2);
+	edit.adjust_bbox.y2 = MAX(edit.adjust_bbox.y2, ly2);
 }
 
 void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
@@ -349,11 +344,11 @@ void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 	// of a switch, that switch follows the mouse pointer around.
 	// such an effect can only be approximate though.
 
-	float dx = (r_view.x < xyofs_line_bbox.x1) ? (xyofs_line_bbox.x1 - r_view.x) :
-			   (r_view.x > xyofs_line_bbox.x2) ? (r_view.x - xyofs_line_bbox.x2) : 0;
+	float dx = (r_view.x < edit.adjust_bbox.x1) ? (edit.adjust_bbox.x1 - r_view.x) :
+			   (r_view.x > edit.adjust_bbox.x2) ? (r_view.x - edit.adjust_bbox.x2) : 0;
 
-	float dy = (r_view.y < xyofs_line_bbox.y1) ? (xyofs_line_bbox.y1 - r_view.y) :
-			   (r_view.y > xyofs_line_bbox.y2) ? (r_view.y - xyofs_line_bbox.y2) : 0;
+	float dy = (r_view.y < edit.adjust_bbox.y1) ? (edit.adjust_bbox.y1 - r_view.y) :
+			   (r_view.y > edit.adjust_bbox.y2) ? (r_view.y - edit.adjust_bbox.y2) : 0;
 
 	float dist = hypot(dx, dy);
 
@@ -374,22 +369,22 @@ static void AdjustOfs_Add(int ld_num, int part)
 
 	// TODO : UDMF ports can allow full control over each part
 
-	xyofs_bucket->Save(sd_num, SideDef::F_X_OFFSET);
-	xyofs_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
+	edit.adjust_bucket->Save(sd_num, SideDef::F_X_OFFSET);
+	edit.adjust_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
 }
 
 static void AdjustOfs_Begin()
 {
-	if (xyofs_bucket)
-		delete xyofs_bucket;
+	if (edit.adjust_bucket)
+		delete edit.adjust_bucket;
 
-	xyofs_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
+	edit.adjust_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
 
 	int total_lines = 0;
 
 	// we will compute the bbox of selected lines
-	xyofs_line_bbox.x1 = xyofs_line_bbox.y1 = +9e9;
-	xyofs_line_bbox.x2 = xyofs_line_bbox.y2 = -9e9;
+	edit.adjust_bbox.x1 = edit.adjust_bbox.y1 = +9e9;
+	edit.adjust_bbox.x2 = edit.adjust_bbox.y2 = -9e9;
 
 	// find the sidedefs to adjust
 	if (! edit.Selected->empty())
@@ -443,7 +438,7 @@ static void AdjustOfs_Begin()
 
 static void AdjustOfs_Finish()
 {
-	if (! xyofs_bucket)
+	if (! edit.adjust_bucket)
 		return;
 
 	int dx = I_ROUND(edit.adjust_dx);
@@ -454,16 +449,16 @@ static void AdjustOfs_Finish()
 		BA_Begin();
 		BA_Message("adjusted offsets");
 
-		xyofs_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
-		xyofs_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
+		edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
+		edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
 
 		BA_End();
 	}
 
-	if (xyofs_bucket)
+	if (edit.adjust_bucket)
 	{
-		delete xyofs_bucket;
-		xyofs_bucket = NULL;
+		delete edit.adjust_bucket;
+		edit.adjust_bucket = NULL;
 	}
 
 	Editor_ClearAction();
@@ -471,7 +466,7 @@ static void AdjustOfs_Finish()
 
 static void AdjustOfs_Delta(int dx, int dy)
 {
-	if (! xyofs_bucket)
+	if (! edit.adjust_bucket)
 		return;
 
 	if (dx == 0 && dy == 0)
@@ -506,22 +501,22 @@ static void AdjustOfs_Delta(int dx, int dy)
 
 void AdjustOfs_RenderAnte()
 {
-	if (edit.action == ACT_ADJUST_OFS && xyofs_bucket)
+	if (edit.action == ACT_ADJUST_OFS && edit.adjust_bucket)
 	{
 		int dx = I_ROUND(edit.adjust_dx);
 		int dy = I_ROUND(edit.adjust_dy);
 
 		// change it temporarily (just for the render)
-		xyofs_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
-		xyofs_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
+		edit.adjust_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
+		edit.adjust_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
 	}
 }
 
 void AdjustOfs_RenderPost()
 {
-	if (edit.action == ACT_ADJUST_OFS && xyofs_bucket)
+	if (edit.action == ACT_ADJUST_OFS && edit.adjust_bucket)
 	{
-		xyofs_bucket->RestoreAll();
+		edit.adjust_bucket->RestoreAll();
 	}
 }
 
