@@ -110,8 +110,8 @@ inline int R_DoomLightingEquation(int L, float dist)
 #define YELLOW          fl_rgb_color(255,255,0)
 #define WHITE           FL_WHITE
 
-#define LIGHTGREY       fl_rgb_color(160,160,160)
-#define DARKGREY        fl_rgb_color(96,96,96)
+#define LIGHTGREY       fl_rgb_color(144,144,144)
+#define DARKGREY        fl_rgb_color(80,80,80)
 
 #define LIGHTBLUE       fl_rgb_color(128,128,255)
 #define LIGHTGREEN      fl_rgb_color(128,255,128)
