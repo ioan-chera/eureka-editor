@@ -41,10 +41,6 @@
 
 UI_MainWindow *main_win;
 
-// Kromulent Factor crud
-int KF;
-int KF_fonth;
-
 
 //
 // MainWin Constructor
@@ -65,11 +61,11 @@ UI_MainWindow::UI_MainWindow() :
 	int cy = 0;
 	int ey = h();
 
-	panel_W = 276 + KF * 32;
+	panel_W = 308;
 
 	/* ---- Menu bar ---- */
 	{
-		menu_bar = Menu_Create(0, 0, w()-3 - panel_W, 28+KF*3);
+		menu_bar = Menu_Create(0, 0, w()-3 - panel_W, 31);
 		add(menu_bar);
 
 #ifndef __APPLE__
@@ -78,7 +74,7 @@ UI_MainWindow::UI_MainWindow() :
 	}
 
 
-	info_bar = new UI_InfoBar(0, ey - (28+KF*3), w(), 28+KF*3);
+	info_bar = new UI_InfoBar(0, ey - 31, w(), 31);
 	add(info_bar);
 
 	ey = ey - info_bar->h();

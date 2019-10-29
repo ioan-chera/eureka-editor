@@ -68,40 +68,40 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	Fl_Box *mode_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Mode:");
 	mode_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	mode_lab->labelsize(KF_fonth);
+	mode_lab->labelsize(16);
 
 
 	mode = new Fl_Menu_Button(X+54, Y, 96, H, "Things");
 	mode->align(FL_ALIGN_INSIDE);
 	mode->add("Things|Linedefs|Sectors|Vertices");
 	mode->callback(mode_callback, this);
-	mode->labelsize(KF_fonth);
+	mode->labelsize(16);
 
 	X = mode->x() + mode->w() + 10;
 
 
 	Fl_Box *rend_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Rend:");
 	rend_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	rend_lab->labelsize(KF_fonth);
+	rend_lab->labelsize(16);
 
 	sec_rend = new Fl_Menu_Button(X+54, Y, 96, H, "PLAIN");
 	sec_rend->align(FL_ALIGN_INSIDE);
 	sec_rend->add("PLAIN|Floors|Ceiling|Lighting|Sound|3D VIEW");
 	sec_rend->callback(rend_callback, this);
-	sec_rend->labelsize(KF_fonth);
+	sec_rend->labelsize(16);
 
 	X = sec_rend->x() + mode->w() + 10;
 
 
 	Fl_Box *scale_lab = new Fl_Box(FL_NO_BOX, X, Y, 58, H, "Scale:");
 	scale_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	scale_lab->labelsize(KF_fonth);
+	scale_lab->labelsize(16);
 
 	scale = new Fl_Menu_Button(X+60+26, Y, 78, H, "100%");
 	scale->align(FL_ALIGN_INSIDE);
 	scale->add(scale_options_str);
 	scale->callback(scale_callback, this);
-	scale->labelsize(KF_fonth);
+	scale->labelsize(16);
 
 	Fl_Button *sc_minus, *sc_plus;
 
@@ -120,14 +120,14 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	Fl_Box *gs_lab = new Fl_Box(FL_NO_BOX, X, Y, 42, H, "Grid:");
 	gs_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	gs_lab->labelsize(KF_fonth);
+	gs_lab->labelsize(16);
 
 	grid_size = new Fl_Menu_Button(X+44, Y, 72, H, "OFF");
 
 	grid_size->align(FL_ALIGN_INSIDE);
 	grid_size->add(grid_options_str);
 	grid_size->callback(grid_callback, this);
-	grid_size->labelsize(KF_fonth);
+	grid_size->labelsize(16);
 
 	X = grid_size->x() + grid_size->w() + 12;
 
@@ -137,7 +137,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	grid_snap->color(FREE_COLOR);
 	grid_snap->selection_color(SNAP_COLOR);
 	grid_snap->callback(snap_callback, this);
-	grid_snap->labelsize(KF_fonth);
+	grid_snap->labelsize(16);
 
 	UpdateSnapText();
 
@@ -146,13 +146,13 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	Fl_Box *ratio_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Ratio:");
 	ratio_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	ratio_lab->labelsize(KF_fonth);
+	ratio_lab->labelsize(16);
 
 	ratio_lock = new Fl_Menu_Button(X+54, Y, 106, H, "UNLOCKED");
 	ratio_lock->align(FL_ALIGN_INSIDE);
 	ratio_lock->add("UNLOCKED|Axis Align|1:1|2:1|4:1|8:1|5:4|7:4");
 	ratio_lock->callback(ratio_callback, this);
-	ratio_lock->labelsize(KF_fonth);
+	ratio_lock->labelsize(16);
 
 
 	resizable(NULL);

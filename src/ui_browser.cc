@@ -149,7 +149,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 
 	button->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
   	button->labelfont(FL_COURIER);
-	button->labelsize(12 + KF * 2);
+	button->labelsize(14);
 	button->when(FL_WHEN_CHANGED);
 
 	add(button);
@@ -254,11 +254,11 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	strcpy(cat_letters, "*");
 
 
-	int cx = X + 80 + KF * 8;
+	int cx = X + 88;
 	int cy = Y + 4;
 
-	Fl_Box *title = new Fl_Box(X + 34, cy, W - 90, 22+KF*4, label);
-	title->labelsize(20+KF*4);
+	Fl_Box *title = new Fl_Box(X + 34, cy, W - 90, 26, label);
+	title->labelsize(24);
 	add(title);
 
 	Fl_Button *hide_button = new Fl_Button(X + 8, cy+2, 22, 22, "X");
@@ -273,8 +273,8 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 	category->align(FL_ALIGN_LEFT);
 	category->add("ALL");
 	category->value(0);
-	category->labelsize(KF_fonth);
-	category->textsize(KF_fonth);
+	category->labelsize(16);
+	category->textsize(16);
 	category->callback(category_callback, this);
 
 	add(category);
@@ -1327,8 +1327,8 @@ UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *l
 
 	Y += 10;
 
-	Fl_Box *title = new Fl_Box(X + 30, Y, W - 114, 22+KF*4, label);
-	title->labelsize(20+KF*4);
+	Fl_Box *title = new Fl_Box(X + 30, Y, W - 114, 26, label);
+	title->labelsize(24);
 
 
 	Fl_Button *hide_button = new Fl_Button(X + 8, Y+2, 22, 22, "X");

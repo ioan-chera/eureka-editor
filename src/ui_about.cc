@@ -159,7 +159,7 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	// the very informative text
 
-	int pad = 20 + KF * 6;
+	int pad = 26;
 
 	box = new Fl_Box(FL_NO_BOX, pad, cy, W-pad-pad, 44, Text1);
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_CENTER);
@@ -188,8 +188,8 @@ UI_About::UI_About(int W, int H, const char *label) :
 
 	// finally add an "OK" button
 
-	int bw = 60 + KF * 10;
-	int bh = 30 + KF * 3;
+	int bw = 70;
+	int bh = 33;
 
 	cy += (H - cy - bh) / 2 - 6;
 

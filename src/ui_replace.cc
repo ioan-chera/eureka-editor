@@ -294,7 +294,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		Fl_Box *title = new Fl_Box(X + 60, Y + 10, W - 70, 30, "Find and Replace");
 		title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
-		title->labelsize(18+KF*4);
+		title->labelsize(22);
 
 
 		what = new Fl_Choice(X+60, Y+46, W - 120, 33);

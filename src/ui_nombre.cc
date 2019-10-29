@@ -41,7 +41,7 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
 	color(NOMBRBACK_COL);
 
 	labelfont(FL_COURIER_BOLD);
-	labelsize(16 + KF*3);
+	labelsize(19);
 
 	Update();
 }

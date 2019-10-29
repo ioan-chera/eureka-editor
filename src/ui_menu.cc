@@ -741,7 +741,7 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
 #ifndef __APPLE__
-	bar->textsize(KF_fonth);
+	bar->textsize(16);
 #endif
 
 	Fl_Menu_Item *items = menu_items;

@@ -31,7 +31,7 @@ UI_MoveDialog::UI_MoveDialog(bool want_dz) :
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the offset to move objects:");
-	title->labelsize(KF_fonth);
+	title->labelsize(16);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	delta_x = new Fl_Int_Input(95, 55, 65, 25,  "delta x:");
@@ -114,7 +114,7 @@ UI_ScaleDialog::UI_ScaleDialog() :
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the scale amount:");
-	title->labelsize(KF_fonth);
+	title->labelsize(16);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	scale_x = new Fl_Input( 95,  55, 85, 25, "scale x:");
@@ -267,7 +267,7 @@ UI_RotateDialog::UI_RotateDialog() :
 	want_close(false)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter # of degrees to rotate objects:");
-	title->labelsize(KF_fonth);
+	title->labelsize(16);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	angle = new Fl_Float_Input(95, 55, 65, 25,  "angle:");
@@ -365,7 +365,7 @@ UI_JumpToDialog::UI_JumpToDialog(const char *_objname, int _limit) :
 
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, NULL);
 	title->copy_label(descript);
-	title->labelsize(KF_fonth);
+	title->labelsize(16);
 	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 
 	input = new Fl_Int_Input(145, 55, 90, 25,  "index: ");

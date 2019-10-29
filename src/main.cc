@@ -619,15 +619,6 @@ static void Main_SetupFLTK()
 	int screen_h = Fl::h();
 
 	LogPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
-
-	KF = 1;
-#if 0  // TODO
-	KF = 0;
-	if (screen_w >= 1000) KF = 1;
-	if (screen_w >= 1180) KF = 2;
-#endif
-
-	KF_fonth = (14 + KF * 2);
 }
 
 
