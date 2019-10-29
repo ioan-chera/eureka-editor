@@ -66,31 +66,17 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	H -= 4;
 
 
-	Fl_Box *mode_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Mode:");
+	Fl_Box *mode_lab = new Fl_Box(FL_NO_BOX, X, Y, 56, H, "Mode:");
 	mode_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
 	mode_lab->labelsize(16);
 
-
-	mode = new Fl_Menu_Button(X+54, Y, 96, H, "Things");
+	mode = new Fl_Menu_Button(X+58, Y, 96, H, "Things");
 	mode->align(FL_ALIGN_INSIDE);
 	mode->add("Things|Linedefs|Sectors|Vertices");
 	mode->callback(mode_callback, this);
 	mode->labelsize(16);
 
 	X = mode->x() + mode->w() + 10;
-
-
-	Fl_Box *rend_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Rend:");
-	rend_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	rend_lab->labelsize(16);
-
-	sec_rend = new Fl_Menu_Button(X+54, Y, 96, H, "PLAIN");
-	sec_rend->align(FL_ALIGN_INSIDE);
-	sec_rend->add("PLAIN|Floors|Ceiling|Lighting|Sound|3D VIEW");
-	sec_rend->callback(rend_callback, this);
-	sec_rend->labelsize(16);
-
-	X = sec_rend->x() + mode->w() + 10;
 
 
 	Fl_Box *scale_lab = new Fl_Box(FL_NO_BOX, X, Y, 58, H, "Scale:");
@@ -154,6 +140,21 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	ratio_lock->callback(ratio_callback, this);
 	ratio_lock->labelsize(16);
 
+	X = ratio_lock->x() + ratio_lock->w() + 12;
+
+
+	Fl_Box *rend_lab = new Fl_Box(FL_FLAT_BOX, X, Y, 56, H, "Rend:");
+	rend_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+	rend_lab->labelsize(16);
+
+	sec_rend = new Fl_Menu_Button(X+58, Y, 96, H, "PLAIN");
+	sec_rend->align(FL_ALIGN_INSIDE);
+	sec_rend->add("PLAIN|Floors|Ceiling|Lighting|Sound|3D VIEW");
+	sec_rend->callback(rend_callback, this);
+	sec_rend->labelsize(16);
+
+	X = sec_rend->x() + rend_lab->w() + 10;
+
 
 	resizable(NULL);
 
@@ -209,7 +210,7 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 	if (sec_rend->value() == 4 && edit.mode != OBJ_SECTORS)
 		Editor_ChangeMode('s');
 
-	main_win->redraw();
+	RedrawMap();
 }
 
 
