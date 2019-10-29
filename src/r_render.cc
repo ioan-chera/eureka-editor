@@ -962,6 +962,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 			DragThings_Update();
 
 		main_win->canvas->redraw();
+		main_win->status_bar->redraw();
 		return;
 	}
 

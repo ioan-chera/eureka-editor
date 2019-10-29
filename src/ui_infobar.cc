@@ -378,9 +378,49 @@ void UI_StatusBar::draw()
 
 	fl_color(INFO_TEXT_COL);
 
-	fl_draw(status.c_str(), cx, cy);
+	switch (edit.action)
+	{
+	case ACT_DRAG:
+		IB_DragDelta(cx, cy);
+		break;
+
+	default:
+		fl_draw(status.c_str(), cx, cy);
+		break;
+	}
 
 	fl_pop_clip();
+}
+
+
+void UI_StatusBar::IB_DragDelta(int cx, int cy)
+{
+	if (edit.render3d && edit.mode == OBJ_SECTORS)
+	{
+		IB_Number(cx, cy, "raise delta", I_ROUND(edit.drag_sector_dz), 4);
+		return;
+	}
+	if (edit.render3d && edit.mode == OBJ_THINGS && edit.drag_thing_up_down)
+	{
+		double dz = edit.drag_cur_z - edit.drag_start_z;
+		IB_Number(cx, cy, "raise delta", I_ROUND(dz), 4);
+		return;
+	}
+
+	double dx, dy;
+
+	if (edit.render3d)
+	{
+		dx = edit.drag_cur_x - edit.drag_start_x;
+		dy = edit.drag_cur_y - edit.drag_start_y;
+	}
+	else
+	{
+		main_win->canvas->DragDelta(&dx, &dy);
+	}
+
+	IB_Coord(cx, cy, "dragging delta x", dx);
+	IB_Coord(cx, cy,                "y", dy);
 }
 
 
