@@ -1298,18 +1298,12 @@ void Beep(const char *fmt, ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	if (buffer[0])
-	{
-		Status_Set("%s", buffer);
-
-		LogPrintf("BEEP: %s\n", buffer);
-	}
-	else
-		Status_Set("Problem occurred");
-
-	EXEC_Errno = 1;
+	Status_Set("%s", buffer);
+	LogPrintf("BEEP: %s\n", buffer);
 
 	fl_beep();
+
+	EXEC_Errno = 1;
 }
 
 //--- editor settings ---

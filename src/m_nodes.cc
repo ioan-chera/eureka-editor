@@ -490,7 +490,7 @@ void CMD_BuildAllNodes()
 	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
-		Status_Set("Cancelled");
+		Status_Set("Cancelled building nodes");
 	}
 	else
 	{

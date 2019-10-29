@@ -280,7 +280,6 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		Sectors[new_sec]->SetDefaults();
 	}
 
-
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 	{
 		const LineDef *L = LineDefs[*it];

@@ -842,7 +842,10 @@ void BA_End()
 	if (cur_group->Empty())
 		delete cur_group;
 	else
+	{
 		undo_history.push_front(cur_group);
+		Status_Set("%s", cur_group->GetMsg());
+	}
 
 	cur_group = NULL;
 
@@ -1044,7 +1047,7 @@ bool BA_Undo()
 	undo_group_c * grp = undo_history.front();
 	undo_history.pop_front();
 
-	Status_Set("Undo: %s", grp->GetMsg());
+	Status_Set("UNDO: %s", grp->GetMsg());
 
 	grp->ReApply();
 

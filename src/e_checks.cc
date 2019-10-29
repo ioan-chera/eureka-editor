@@ -850,8 +850,6 @@ void Sectors_RemoveUnused()
 	DeleteObjects(&sel);
 
 	BA_End();
-
-//??	Status_Set("Removed %d vertices", sel.count_obj());
 }
 
 
@@ -933,8 +931,6 @@ void SideDefs_RemoveUnused()
 	DeleteObjects(&sel);
 
 	BA_End();
-
-//??	Status_Set("Removed %d vertices", sel.count_obj());
 }
 
 
@@ -1056,7 +1052,9 @@ void SideDefs_Unpack(bool is_after_load)
 	}
 
 	if (is_after_load)
+	{
 		BA_Abort(true /* keep changes */);
+	}
 	else
 	{
 		BA_Message("unpacked all sidedefs");
@@ -2993,7 +2991,6 @@ void Tags_ApplyNewValue(int new_tag)
 	selection_iterator_c it;
 
 	BA_Begin();
-
 	BA_MessageForSel("new tag for", edit.Selected);
 
 	for (edit.Selected->begin(&it); !it.at_end(); ++it)

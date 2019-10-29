@@ -64,7 +64,6 @@ void CMD_TH_SpinThings(void)
 	}
 
 	BA_Begin();
-
 	BA_MessageForSel("spun", edit.Selected);
 
 	selection_iterator_c it;
@@ -157,7 +156,6 @@ void CMD_TH_Disconnect(void)
 	}
 
 	BA_Begin();
-
 	BA_MessageForSel("disconnected", edit.Selected);
 
 	while (! edit.Selected->empty())
@@ -211,7 +209,6 @@ void CMD_TH_Merge(void)
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	BA_Begin();
-
 	BA_MessageForSel("merged", edit.Selected);
 
 	selection_iterator_c it;

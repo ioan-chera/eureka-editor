@@ -717,7 +717,6 @@ static bool Clipboard_DoPaste()
 	pos_y = grid.SnapY(pos_y);
 
 	BA_Begin();
-
 	BA_Message("pasted %d objects", clip_board->TotalSize());
 
 	clip_doing_paste = true;
@@ -1090,7 +1089,6 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 
 
 	BA_Begin();
-
 	BA_Message("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)

@@ -1250,7 +1250,6 @@ void CMD_LIN_MergeTwo(void)
 	DeleteObjects_WithUnused(&del_line);
 
 	BA_Message("merged two linedefs");
-
 	BA_End();
 }
 

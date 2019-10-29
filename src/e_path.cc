@@ -533,14 +533,11 @@ void CMD_PruneUnused(void)
 	}
 
 	BA_Begin();
+	BA_Message("pruned %d objects", num_secs + num_sides + num_verts);
 
 	DeleteObjects(&used_sides);
 	DeleteObjects(&used_secs);
 	DeleteObjects(&used_verts);
-
-	BA_Message("pruned %d objects", num_secs + num_sides + num_verts);
-
-	Status_Set("Pruned %d SEC - %d Side - %d Vert", num_secs, num_sides, num_verts);
 
 	BA_End();
 }

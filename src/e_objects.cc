@@ -157,7 +157,6 @@ static void Insert_Thing()
 	recent_things.insert_number(T->type);
 
 	BA_Message("added thing #%d", new_t);
-
 	BA_End();
 
 
@@ -614,6 +613,7 @@ static void Insert_Sector()
 	if (PointOutsideOfMap(edit.map_x, edit.map_y))
 	{
 		BA_Begin();
+		BA_Message("added sector (outside map)");
 
 		int model = -1;
 		if (sel_count > 0)
@@ -621,9 +621,7 @@ static void Insert_Sector()
 
 		CreateSquare(model);
 
-		BA_Message("added sector (outside map)");
 		BA_End();
-
 		return;
 	}
 
@@ -1099,6 +1097,7 @@ void CMD_CopyProperties()
 			return;
 
 		BA_Begin();
+		BA_Message("copied properties");
 
 		switch (edit.mode)
 		{
@@ -1117,8 +1116,6 @@ void CMD_CopyProperties()
 			default: break;
 		}
 
-		BA_Message("copied properties");
-
 		BA_End();
 
 	}
@@ -1135,6 +1132,7 @@ void CMD_CopyProperties()
 		selection_iterator_c it;
 
 		BA_Begin();
+		BA_Message("copied properties");
 
 		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
 		{
@@ -1155,16 +1153,13 @@ void CMD_CopyProperties()
 					TransferLinedefProperties(source, *it, true /* do_tex */);
 					break;
 
-				default: break;  // fuck you, compiler
+				default: break;
 			}
 		}
-
-		BA_Message("copied properties");
 
 		BA_End();
 	}
 }
-
 
 
 static void Drag_CountOnGrid_Worker(int obj_type, int objnum, int *count, int *total)
@@ -2224,7 +2219,6 @@ void CMD_Quantize()
 	}
 
 	BA_Begin();
-
 	BA_MessageForSel("quantized", edit.Selected);
 
 	switch (edit.mode)

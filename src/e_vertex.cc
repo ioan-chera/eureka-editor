@@ -485,7 +485,6 @@ void CMD_VT_Disconnect(void)
 	bool seen_one = false;
 
 	BA_Begin();
-
 	BA_MessageForSel("disconnected", edit.Selected);
 
 	selection_iterator_c it;
@@ -587,6 +586,7 @@ void CMD_LIN_Disconnect(void)
 	bool seen_one = false;
 
 	BA_Begin();
+	BA_MessageForSel("disconnected", edit.Selected);
 
 	selection_iterator_c it;
 
@@ -595,8 +595,6 @@ void CMD_LIN_Disconnect(void)
 		DoDisconnectLineDef(*it, 0, &seen_one);
 		DoDisconnectLineDef(*it, 1, &seen_one);
 	}
-
-	BA_MessageForSel("disconnected", edit.Selected);
 
 	BA_End();
 
@@ -809,7 +807,6 @@ void CMD_SEC_Disconnect(void)
 
 
 	BA_Begin();
-
 	BA_MessageForSel("disconnected", edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
@@ -1069,7 +1066,6 @@ void CMD_VT_ShapeLine(void)
 
 
 	BA_Begin();
-
 	BA_Message("shaped %d vertices", (int)along_list.size());
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
@@ -1334,7 +1330,6 @@ void CMD_VT_ShapeArc(void)
 	// actually move stuff now
 
 	BA_Begin();
-
 	BA_Message("shaped %d vertices", (int)along_list.size());
 
 	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,

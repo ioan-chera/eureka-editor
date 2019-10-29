@@ -289,7 +289,6 @@ void CMD_SEC_Merge(void)
 	selection_c unused_secs (OBJ_SECTORS);
 
 	BA_Begin();
-
 	BA_MessageForSel("merged", edit.Selected);
 
 	// keep the properties of the first selected sector
