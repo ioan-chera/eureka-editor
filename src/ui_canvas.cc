@@ -273,6 +273,8 @@ void UI_Canvas::PointerPos(bool in_event)
 	edit.map_y = MAPY(h() - 1 - raw_y);
 #endif
 
+	grid.NaturalSnapXY(edit.map_x, edit.map_y);
+
 	// no Z coord with the 2D map view
 	edit.map_z = -1;
 }

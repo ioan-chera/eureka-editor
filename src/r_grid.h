@@ -103,6 +103,9 @@ public:
 	int QuantSnapX(double map_x, bool want_furthest, int *dir = NULL) const;
 	int QuantSnapY(double map_y, bool want_furthest, int *dir = NULL) const;
 
+	// snap to the natural resolution of canvas
+	void NaturalSnapXY(double& var_x, double& var_y) const;
+
 	// check if the X/Y coordinate is on a grid point
 	bool OnGridX(double map_x) const;
 	bool OnGridY(double map_y) const;

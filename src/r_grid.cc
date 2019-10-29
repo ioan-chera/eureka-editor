@@ -275,6 +275,23 @@ int Grid_State_c::QuantSnapY(double map_y, bool want_furthest, int *dir) const
 }
 
 
+void Grid_State_c::NaturalSnapXY(double& var_x, double& var_y) const
+{
+	// this is only used by UI_Canvas::PointerPos()
+
+	double nat_step = 1.0;
+
+	while (nat_step * 2.0 <= Scale)
+		nat_step = nat_step * 2.0;
+
+	while (nat_step * 0.5 >= Scale)
+		nat_step = nat_step * 0.5;
+
+	var_x = round(var_x * nat_step) / nat_step;
+	var_y = round(var_y * nat_step) / nat_step;
+}
+
+
 bool Grid_State_c::OnGridX(double map_x) const
 {
 	if (map_x < 0)
