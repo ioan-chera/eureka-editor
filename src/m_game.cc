@@ -61,8 +61,8 @@ std::map<int, linetype_t *>   line_types;
 std::map<int, sectortype_t *> sector_types;
 std::map<int, thingtype_t *>  thing_types;
 
-std::map<std::string, char> texture_assigns;
-std::map<std::string, char> flat_assigns;
+std::map<std::string, char> texture_categories;
+std::map<std::string, char> flat_categories;
 
 
 //
@@ -122,8 +122,8 @@ static void M_FreeAllDefinitions()
     thing_types.clear();
 
 	texture_groups.clear();
-	texture_assigns.clear();
-	flat_assigns.clear();
+	texture_categories.clear();
+	flat_categories.clear();
 }
 
 
@@ -294,9 +294,9 @@ static void ParseClearKeywords(char ** argv, int argc)
 		else if (y_stricmp(argv[0], "textures") == 0)
 		{
 			texture_groups.clear();
-			texture_assigns.clear();
+			texture_categories.clear();
 
-			flat_assigns.clear();
+			flat_categories.clear();
 		}
 		else
 			FatalError("Unknown clear keyword '%s' in definition file.\n", argv[0]);
@@ -777,7 +777,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 					  pst->fname, pst->lineno, group);
 		}
 		else
-			texture_assigns[name] = group;
+			texture_categories[name] = group;
 	}
 
 	else if (y_stricmp(argv[0], "flat") == 0)
@@ -794,7 +794,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 						pst->fname, pst->lineno, group);
 		}
 		else
-			flat_assigns[name] = group;
+			flat_categories[name] = group;
 	}
 
 	else if (y_stricmp(argv[0], "gen_line") == 0)
@@ -1424,9 +1424,9 @@ char M_GetTextureType(const char *name)
 {
 	std::map<std::string, char>::iterator TI;
 
-	TI = texture_assigns.find(name);
+	TI = texture_categories.find(name);
 
-	if (TI != texture_assigns.end())
+	if (TI != texture_categories.end())
 		return TI->second;
 
 	return '-';  // the OTHER category
@@ -1437,9 +1437,9 @@ char M_GetFlatType(const char *name)
 {
 	std::map<std::string, char>::iterator TI;
 
-	TI = flat_assigns.find(name);
+	TI = flat_categories.find(name);
 
-	if (TI != flat_assigns.end())
+	if (TI != flat_categories.end())
 		return TI->second;
 
 	return '-';  // the OTHER category
@@ -1480,7 +1480,7 @@ static bool TextureCategory_IsUsed(char group)
 {
 	std::map<std::string, char>::iterator IT;
 
-	for (IT = texture_assigns.begin() ; IT != texture_assigns.end() ; IT++)
+	for (IT = texture_categories.begin() ; IT != texture_categories.end() ; IT++)
 		if (IT->second == group)
 			return true;
 
@@ -1492,7 +1492,7 @@ static bool FlatCategory_IsUsed(char group)
 {
 	std::map<std::string, char>::iterator IT;
 
-	for (IT = flat_assigns.begin() ; IT != flat_assigns.end() ; IT++)
+	for (IT = flat_categories.begin() ; IT != flat_categories.end() ; IT++)
 		if (IT->second == group)
 			return true;
 
