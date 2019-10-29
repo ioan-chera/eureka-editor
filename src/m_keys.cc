@@ -1169,8 +1169,6 @@ static void DoExecuteCommand(const editor_command_t *cmd)
 
 bool ExecuteKey(keycode_t key, key_context_e context)
 {
-	Status_Clear();
-
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{
 		EXEC_Param[p] = "";
@@ -1241,8 +1239,6 @@ bool ExecuteCommand(const editor_command_t *cmd,
 					const char *param1, const char *param2,
                     const char *param3, const char *param4)
 {
-	Status_Clear();
-
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{
 		EXEC_Param[p] = "";
