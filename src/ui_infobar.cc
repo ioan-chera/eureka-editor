@@ -357,14 +357,14 @@ void UI_StatusBar::draw()
 	}
 	else  // 2D view
 	{
-		int mx = I_ROUND(grid.SnapX(edit.map_x));
-		int my = I_ROUND(grid.SnapX(edit.map_y));
+		float mx = grid.SnapX(edit.map_x);
+		float my = grid.SnapX(edit.map_y);
 
 		mx = CLAMP(-32767, mx, 32767);
 		my = CLAMP(-32767, my, 32767);
 
-		IB_Number(cx, cy, "x", mx, 5);
-		IB_Number(cx, cy, "y", my, 5);
+		IB_Coord(cx, cy, "x", mx);
+		IB_Coord(cx, cy, "y", my);
 		cx += 10;
 #if 0
 		IB_Number(cx, cy, "gamma", usegamma, 1);
@@ -395,7 +395,18 @@ void UI_StatusBar::IB_Number(int& cx, int& cy, const char *label, int value, int
 		sprintf(buffer, "%s:%-*d ", label, size, value);
 
 	fl_color(INFO_TEXT_COL);
+	fl_draw(buffer, cx, cy);
 
+	cx = cx + fl_width(buffer);
+}
+
+
+void UI_StatusBar::IB_Coord(int& cx, int& cy, const char *label, float value)
+{
+	char buffer[256];
+	sprintf(buffer, "%s:%-8.2f ", label, value);
+
+	fl_color(INFO_TEXT_COL);
 	fl_draw(buffer, cx, cy);
 
 	cx = cx + fl_width(buffer);
@@ -416,6 +427,9 @@ void UI_StatusBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, c
 
 void UI_StatusBar::SetStatus(const char *str)
 {
+	if (status == str)
+		return;
+
 	status = str;
 
 	redraw();
