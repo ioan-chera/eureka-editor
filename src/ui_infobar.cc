@@ -396,6 +396,10 @@ void UI_StatusBar::draw()
 		IB_ShowOffsets(cx, cy);
 		break;
 
+	case ACT_DRAW_LINE:
+		IB_ShowDrawLine(cx, cy);
+		break;
+
 	default:
 		fl_draw(status.c_str(), cx, cy);
 		break;
@@ -519,6 +523,64 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 }
 
 
+void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
+{
+	if (! edit.draw_from.valid())
+		return;
+
+	const Vertex *V = Vertices[edit.draw_from.num];
+
+	double dx = edit.draw_to_x - V->x();
+	double dy = edit.draw_to_y - V->y();
+
+	IB_Coord(cx, cy, "delta x", dx);
+	IB_Coord(cx, cy,       "y", dy);
+
+	// show a ratio value
+	int idx = I_ROUND(fabs(dx) * 4096);
+	int idy = I_ROUND(fabs(dy) * 4096);
+
+	if (idy == 0)
+	{
+		IB_String(cx, cy, "horizontal");
+		return;
+	}
+	else if (idx == 0)
+	{
+		IB_String(cx, cy, "vertical");
+		return;
+	}
+	else if (idx == idy)
+	{
+		IB_String(cx, cy, "ratio 1:1");
+		return;
+	}
+
+	// compute the greatest common divisor
+	int a = idx;
+	int b = idy;
+	int gcd = 1;
+
+	for (;;)
+	{
+		if (a > b)
+			a -= b;
+		else if (b > a)
+			b -= a;
+		else
+		{
+			gcd = a;
+			break;
+		}
+	}
+
+	char buffer[256];
+	snprintf(buffer, sizeof(buffer), "ratio %d:%d", idx/gcd, idy/gcd);
+
+	IB_String(cx, cy, buffer);
+}
+
+
 void UI_StatusBar::IB_Number(int& cx, int& cy, const char *label, int value, int size)
 {
 	char buffer[256];
@@ -545,6 +607,14 @@ void UI_StatusBar::IB_Coord(int& cx, int& cy, const char *label, float value)
 	fl_draw(buffer, cx, cy);
 
 	cx = cx + fl_width(buffer);
+}
+
+
+void UI_StatusBar::IB_String(int& cx, int& cy, const char *str)
+{
+	fl_draw(str, cx, cy);
+
+	cx = cx + fl_width(str);
 }
 
 
