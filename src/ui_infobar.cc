@@ -388,6 +388,10 @@ void UI_StatusBar::draw()
 		IB_ShowDrag(cx, cy);
 		break;
 
+	case ACT_TRANSFORM:
+		IB_ShowTransform(cx, cy);
+		break;
+
 	case ACT_ADJUST_OFS:
 		IB_ShowOffsets(cx, cy);
 		break;
@@ -429,6 +433,38 @@ void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 
 	IB_Coord(cx, cy, "dragging delta x", dx);
 	IB_Coord(cx, cy,                "y", dy);
+}
+
+
+void UI_StatusBar::IB_ShowTransform(int cx, int cy)
+{
+	int rot_degrees;
+
+	switch (edit.trans_mode)
+	{
+	case TRANS_K_Scale:
+		IB_Coord(cx, cy, "scale by", edit.trans_param.scale_x);
+		break;
+
+	case TRANS_K_Stretch:
+		IB_Coord(cx, cy, "stretch x", edit.trans_param.scale_x);
+		IB_Coord(cx, cy,         "y", edit.trans_param.scale_y);
+		break;
+
+	case TRANS_K_Rotate:
+	case TRANS_K_RotScale:
+		rot_degrees = edit.trans_param.rotate * 90 / 16384;
+		IB_Number(cx, cy, "rotate by", rot_degrees, 3);
+		break;
+
+	case TRANS_K_Skew:
+		IB_Coord(cx, cy, "skew x", edit.trans_param.skew_x);
+		IB_Coord(cx, cy,      "y", edit.trans_param.skew_y);
+		break;
+	}
+
+	if (edit.trans_mode == TRANS_K_RotScale)
+		IB_Coord(cx, cy, "scale", edit.trans_param.scale_x);
 }
 
 
