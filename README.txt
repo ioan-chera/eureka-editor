@@ -179,6 +179,7 @@ SPACE
 
 d : disconnect all linedefs at the selected vertices
 m : merge selected vertices into a single one
+u : unlock any current ratio lock
 
 I : reshape selected vertices into a line
 O : reshape selected vertices into a circle
