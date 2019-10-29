@@ -342,16 +342,20 @@ void UI_StatusBar::draw()
 		IB_Number(cx, cy, "y", I_ROUND(r_view.y), 5);
 		IB_Number(cx, cy, "z", I_ROUND(r_view.z) - Misc_info.view_height, 4);
 
-		int ang = I_ROUND(r_view.angle * 180 / M_PI);
-		if (ang < 0) ang += 360;
+		// use less space when an action is occurring
+		if (edit.action == ACT_NOTHING)
+		{
+			int ang = I_ROUND(r_view.angle * 180 / M_PI);
+			if (ang < 0) ang += 360;
 
-		IB_Number(cx, cy, "ang", ang, 3);
-		cx += 2;
+			IB_Number(cx, cy, "ang", ang, 3);
+			cx += 2;
 
-		IB_Flag(cx, cy, r_view.gravity, "GRAV", "grav");
+			IB_Flag(cx, cy, r_view.gravity, "GRAV", "grav");
 #if 0
-		IB_Number(cx, cy, "gamma", usegamma, 1);
+			IB_Number(cx, cy, "gamma", usegamma, 1);
 #endif
+		}
 
 		cx += 4;
 	}
@@ -381,7 +385,11 @@ void UI_StatusBar::draw()
 	switch (edit.action)
 	{
 	case ACT_DRAG:
-		IB_DragDelta(cx, cy);
+		IB_ShowDrag(cx, cy);
+		break;
+
+	case ACT_ADJUST_OFS:
+		IB_ShowOffsets(cx, cy);
 		break;
 
 	default:
@@ -393,7 +401,7 @@ void UI_StatusBar::draw()
 }
 
 
-void UI_StatusBar::IB_DragDelta(int cx, int cy)
+void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 {
 	if (edit.render3d && edit.mode == OBJ_SECTORS)
 	{
@@ -421,6 +429,57 @@ void UI_StatusBar::IB_DragDelta(int cx, int cy)
 
 	IB_Coord(cx, cy, "dragging delta x", dx);
 	IB_Coord(cx, cy,                "y", dy);
+}
+
+
+void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
+{
+	int dx = I_ROUND(edit.adjust_dx);
+	int dy = I_ROUND(edit.adjust_dy);
+
+	Objid hl = edit.highlight;
+
+	if (! edit.Selected->empty())
+	{
+		if (edit.Selected->count_obj() == 1)
+		{
+			int first = edit.Selected->find_first();
+			int parts = edit.Selected->get_ext(first);
+
+			hl = Objid(edit.mode, first, parts);
+		}
+		else
+		{
+			hl.clear();
+		}
+	}
+
+	if (hl.valid() && hl.parts >= 2)
+	{
+		const LineDef *L = LineDefs[edit.highlight.num];
+
+		int x_offset = 0;
+		int y_offset = 0;
+
+		const SideDef *SD = NULL;
+
+		if (hl.parts & PART_LF_ALL)
+			SD = L->Left();
+		else
+			SD = L->Right();
+
+		if (SD != NULL)
+		{
+			x_offset = SD->x_offset;
+			y_offset = SD->y_offset;
+
+			IB_Number(cx, cy, "new ofs x", x_offset + dx, 4);
+			IB_Number(cx, cy,         "y", y_offset + dy, 4);
+		}
+	}
+
+	IB_Number(cx, cy, "delta x", dx, 4);
+	IB_Number(cx, cy,       "y", dy, 4);
 }
 
 

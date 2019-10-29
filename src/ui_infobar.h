@@ -88,7 +88,8 @@ public:
 	void SetStatus(const char *str);
 
 private:
-	void IB_DragDelta(int cx, int cy);
+	void IB_ShowDrag(int cx, int cy);
+	void IB_ShowOffsets(int cx, int cy);
 
 	void IB_Number(int& cx, int& cy, const char *label, int value, int size);
 	void IB_Coord (int& cx, int& cy, const char *label, float value);
