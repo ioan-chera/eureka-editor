@@ -38,7 +38,7 @@ SUPPORTED GAMES
 REQUIREMENTS
 
 -  128 MB of computer memory
--  800x600 or higher screen resolution
+-  1024x720 or higher screen resolution
 -  a keyboard and a two-button mouse
 -  the data (iwad) file from a supported game
 

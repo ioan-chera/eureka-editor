@@ -36,8 +36,8 @@
 
 
 
-#define MAIN_WINDOW_W  (800 - 32)
-#define MAIN_WINDOW_H  (600 - 40)
+#define WINDOW_MIN_W  928
+#define WINDOW_MIN_H  672
 
 UI_MainWindow *main_win;
 
@@ -46,13 +46,13 @@ UI_MainWindow *main_win;
 // MainWin Constructor
 //
 UI_MainWindow::UI_MainWindow() :
-	Fl_Double_Window(MAIN_WINDOW_W + 64, MAIN_WINDOW_H, EUREKA_TITLE),
+	Fl_Double_Window(WINDOW_MIN_W, WINDOW_MIN_H, EUREKA_TITLE),
 	cursor_shape(FL_CURSOR_DEFAULT),
 	last_x(0), last_y(0), last_w(0), last_h(0)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
-	size_range(MAIN_WINDOW_W, MAIN_WINDOW_H);
+	size_range(WINDOW_MIN_W, WINDOW_MIN_H);
 
 	callback((Fl_Callback *) quit_callback);
 
