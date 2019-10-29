@@ -31,6 +31,8 @@
 #define SNAP_COLOR  (gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))
 #define FREE_COLOR  (gui_scheme == 2 ? fl_rgb_color(0,192,0) : fl_rgb_color(128, 255, 128))
 
+#define RATIO_COLOR  FL_YELLOW
+
 
 const char *UI_InfoBar::scale_options_str =
 	"  6%| 12%| 25%| 33%| 50%|100%|200%|400%|800%";
@@ -142,6 +144,17 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	X = grid_snap->x() + grid_snap->w() + 12;
 
 
+	Fl_Box *ratio_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Ratio:");
+	ratio_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+	ratio_lab->labelsize(KF_fonth);
+
+	ratio_lock = new Fl_Menu_Button(X+54, Y, 106, H, "UNLOCKED");
+	ratio_lock->align(FL_ALIGN_INSIDE);
+	ratio_lock->add("UNLOCKED|Axis Align|1:1|2:1|4:1|8:1|5:4|7:4");
+	ratio_lock->callback(ratio_callback, this);
+	ratio_lock->labelsize(KF_fonth);
+
+
 	resizable(NULL);
 
 	end();
@@ -243,6 +256,15 @@ void UI_InfoBar::snap_callback(Fl_Widget *w, void *data)
 }
 
 
+void UI_InfoBar::ratio_callback(Fl_Widget *w, void *data)
+{
+	Fl_Menu_Button *ratio_lock = (Fl_Menu_Button *)w;
+
+	grid.ratio = ratio_lock->value();
+	main_win->info_bar->UpdateRatio();
+}
+
+
 //------------------------------------------------------------------------
 
 void UI_InfoBar::NewEditMode(obj_type_e new_mode)
@@ -322,6 +344,17 @@ void UI_InfoBar::UpdateSecRend()
 	case SREND_SoundProp: sec_rend->label("Sound");    break;
 	default:              sec_rend->label("PLAIN");    break;
 	}
+}
+
+
+void UI_InfoBar::UpdateRatio()
+{
+	ratio_lock->copy_label(ratio_lock->text(grid.ratio));
+
+	if (grid.ratio == 0)
+		ratio_lock->color(FL_BACKGROUND_COLOR);
+	else
+		ratio_lock->color(RATIO_COLOR);
 }
 
 

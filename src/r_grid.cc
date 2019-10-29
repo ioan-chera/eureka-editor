@@ -43,9 +43,10 @@ bool grid_hide_in_free_mode = false;
 
 
 Grid_State_c::Grid_State_c() :
-	 step(16 /* dummy */),
-	 snap(true), shown(true),
-     orig_x(0.0), orig_y(0.0), Scale(1.0)
+	step(64 /* dummy */), snap(true),
+	ratio(0), shown(true),
+	orig_x(0.0), orig_y(0.0),
+	Scale(1.0)
 { }
 
 Grid_State_c::~Grid_State_c()
@@ -154,7 +155,7 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 	int sign_x = (dx >= 0) ? +1 : -1;
 	int sign_y = (dy >= 0) ? +1 : -1;
 
-	switch (0)
+	switch (ratio)
 	{
 	case 0: // no change
 		break;

@@ -33,6 +33,9 @@ public:
 	// if true, new and moved objects are forced to be on the grid
 	bool snap;
 
+	// if non-zero, new lines will be forced to have a certain ratio
+	int ratio;
+
 	// whether the grid is being displayed or not.
 	bool shown;
 
