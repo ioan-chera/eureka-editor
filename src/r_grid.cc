@@ -518,14 +518,7 @@ void Grid_State_c::RawSetShown(bool new_value)
 	}
 
 	// update the info-bar
-	for (int i = 0 ; i < NUM_GRID_VALUES-1 ; i++)
-	{
-		if (grid_values[i] == step)
-		{
-			main_win->info_bar->SetGrid(i);
-			break;
-		}
-	}
+	main_win->info_bar->SetGrid(step);
 
 	RedrawMap();
 }

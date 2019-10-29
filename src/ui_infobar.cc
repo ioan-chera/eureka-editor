@@ -189,12 +189,12 @@ void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 {
 	Fl_Menu_Button *gsize = (Fl_Menu_Button *)w;
 
-	int new_grid = grid_amounts[gsize->value()];
+	int new_step = grid_amounts[gsize->value()];
 
-	if (new_grid < 0)
+	if (new_step < 0)
 		grid.SetShown(false);
 	else
-		grid.ForceStep(new_grid);
+		grid.ForceStep(new_step);
 }
 
 
@@ -247,16 +247,16 @@ void UI_InfoBar::SetScale(double new_scale)
 	scale->copy_label(buffer);
 }
 
-void UI_InfoBar::SetGrid(int new_grid)
+void UI_InfoBar::SetGrid(int new_step)
 {
-	if (new_grid < 0)
+	if (new_step < 0)
 	{
 		grid_size->label("OFF");
 	}
 	else
 	{
 		char buffer[64];
-		sprintf(buffer, "%d", new_grid);
+		sprintf(buffer, "%d", new_step);
 		grid_size->copy_label(buffer);
 	}
 }

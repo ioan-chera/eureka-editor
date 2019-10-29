@@ -45,7 +45,7 @@ public:
 	void SetMouse(double mx, double my);
 
 	void SetScale(double new_scale);
-	void SetGrid(int new_grid);
+	void SetGrid(int new_step);
 
 	void UpdateSnap();
 
