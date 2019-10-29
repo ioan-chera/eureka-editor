@@ -345,13 +345,15 @@ void UI_StatusBar::draw()
 		int ang = I_ROUND(r_view.angle * 180 / M_PI);
 		if (ang < 0) ang += 360;
 
-		IB_Number(cx, cy, "angle", ang, 3);
-		cx += 8;
+		IB_Number(cx, cy, "ang", ang, 3);
+		cx += 2;
 
-		IB_Flag(cx, cy, r_view.gravity, "GRAVITY", "gravity");
-
+		IB_Flag(cx, cy, r_view.gravity, "GRAV", "grav");
+#if 0
 		IB_Number(cx, cy, "gamma", usegamma, 1);
-		cx += 10;
+#endif
+
+		cx += 4;
 	}
 	else  // 2D view
 	{
@@ -364,9 +366,10 @@ void UI_StatusBar::draw()
 		IB_Number(cx, cy, "x", mx, 5);
 		IB_Number(cx, cy, "y", my, 5);
 		cx += 10;
-
+#if 0
 		IB_Number(cx, cy, "gamma", usegamma, 1);
 		cx += 10;
+#endif
 	}
 
 	/* status message */
