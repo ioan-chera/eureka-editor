@@ -489,7 +489,7 @@ void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_s
 	}
 	else
 	{
-		fl_beep();
+		Beep("no target for browsed item");
 	}
 }
 

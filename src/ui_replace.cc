@@ -903,7 +903,7 @@ char UI_FindAndReplace::GetKind()
 
 bool UI_FindAndReplace::ClipboardOp(char op)
 {
-	// hmmm, review this
+	// FIXME handle cut'n'paste
 	fl_beep();
 	return true;
 }
@@ -922,7 +922,6 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 		}
 		else
 		{
-			fl_beep();
 			return;
 		}
 	}

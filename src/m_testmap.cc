@@ -415,7 +415,7 @@ void CMD_TestMap()
 	// this generally can't happen, but we check anyway...
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		fl_beep();
+		Beep("invalid path to executable");
 		return;
 	}
 

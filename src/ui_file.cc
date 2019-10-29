@@ -190,7 +190,7 @@ void UI_ChooseMap::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseMap * that = (UI_ChooseMap *)data;
 
-	// santify check
+	// sanity check
 	if (ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
@@ -548,7 +548,7 @@ void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
-	// santify check
+	// sanity check
 	if (that->using_wad && ValidateMapName(that->map_name->value()))
 		that->action = ACT_ACCEPT;
 	else
@@ -1088,8 +1088,6 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 	{
 		that->game = NULL;
 		that->ok_but->deactivate();
-
-		fl_beep();
 	}
 
 	that->PopulatePort();
@@ -1252,8 +1250,6 @@ void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 
 		that->res_name[r]->value("");
 	}
-	else
-		fl_beep();
 }
 
 

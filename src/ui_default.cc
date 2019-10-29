@@ -492,10 +492,7 @@ void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e
 	}
 
 	if (! (kind == 'T' || kind == 'F'))
-	{
-		fl_beep();
 		return;
-	}
 
 	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
 					(c_pic->Selected() ? 2 : 0) |

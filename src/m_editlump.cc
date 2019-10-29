@@ -283,7 +283,7 @@ void UI_ChooseTextLump::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_ChooseTextLump * win = (UI_ChooseTextLump *)data;
 
-	// santify check
+	// sanity check
 	if (ValidLumpToEdit(win->lump_name->value()))
 		win->action = ACT_ACCEPT;
 	else

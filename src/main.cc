@@ -517,7 +517,7 @@ int Main_key_handler(int event)
 
 	if (Fl::event_key() == FL_Escape)
 	{
-		fl_beep();
+		Beep("there is no escape!");
 		return 1;
 	}
 
