@@ -202,7 +202,7 @@ static void SetGamma(int new_val)
 	if (main_win && main_win->canvas)
 		main_win->canvas->DeleteContext();
 
-	Status_Set("Gamma level %d", usegamma);
+	Status_Set("gamma level %d", usegamma);
 
 	RedrawMap();
 }
