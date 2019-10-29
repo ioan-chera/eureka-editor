@@ -1368,7 +1368,7 @@ void transform_t::Apply(double *x, double *y) const
 	}
 
 	*x = mid_x + x0 * scale_x;
-	*y = mid_y + y0 * scale_x;
+	*y = mid_y + y0 * scale_y;
 }
 
 
