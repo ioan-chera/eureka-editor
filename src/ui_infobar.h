@@ -51,7 +51,7 @@ public:
 
 private:
 	static const char  *scale_options_str;
-	static const double scale_amounts[8];
+	static const double scale_amounts[9];
 
 	static const char *grid_options_str;
 	static const int   grid_amounts[12];

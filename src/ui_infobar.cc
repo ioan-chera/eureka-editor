@@ -33,11 +33,11 @@
 
 
 const char *UI_InfoBar::scale_options_str =
-	"400%|200%|100%| 50%| 33%| 25%| 12%|  6%";
+	"  6%| 12%| 25%| 33%| 50%|100%|200%|400%|800%";
 
-const double UI_InfoBar::scale_amounts[8] =
+const double UI_InfoBar::scale_amounts[9] =
 {
-	4.0, 2.0, 1.0, 0.5, 0.33333, 0.25, 0.125, 0.0625
+	0.0625, 0.125, 0.25, 0.33333, 0.5, 1.0, 2.0, 4.0, 8.0
 };
 
 const char *UI_InfoBar::grid_options_str =
@@ -93,7 +93,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	sc_minus = new Fl_Button(X+52, Y+1, 24, H-2, "-");
 	sc_minus->callback(sc_minus_callback, this);
 	sc_minus->labelfont(FL_HELVETICA_BOLD);
-	sc_minus->labelsize(16);
+	sc_minus->labelsize(KF_fonth);
 
 	sc_plus = new Fl_Button(X+52+26+80, Y+1, 24, H-2, "+");
 	sc_plus->callback(sc_plus_callback, this);
