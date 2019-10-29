@@ -114,6 +114,7 @@ void RedrawMap()
 	UpdateHighlight();
 
 	main_win->scroll->UpdateRenderMode();
+	main_win->info_bar->UpdateSecRend();
 	main_win->status_bar->redraw();
 	main_win->canvas->redraw();
 }

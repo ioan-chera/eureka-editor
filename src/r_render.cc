@@ -640,6 +640,7 @@ void Render3D_Enable(bool _enable)
 	Fl::focus(main_win->canvas);
 
 	main_win->scroll->UpdateRenderMode();
+	main_win->info_bar->UpdateSecRend();
 
 	if (edit.render3d)
 	{

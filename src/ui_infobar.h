@@ -32,6 +32,8 @@ private:
 	Fl_Menu_Button *mode;
 	Fl_Menu_Button *scale;
 	Fl_Menu_Button *grid_size;
+	Fl_Menu_Button *sec_rend;
+	Fl_Menu_Button *ratio;
 
 	Fl_Toggle_Button *grid_snap;
 
@@ -48,6 +50,7 @@ public:
 	void SetGrid(int new_step);
 
 	void UpdateSnap();
+	void UpdateSecRend();
 
 private:
 	static const char  *scale_options_str;
@@ -60,6 +63,7 @@ private:
 	void UpdateSnapText();
 
 	static void mode_callback(Fl_Widget *, void *);
+	static void rend_callback(Fl_Widget *, void *);
 	static void scale_callback(Fl_Widget *, void *);
 	static void sc_minus_callback(Fl_Widget *, void *);
 	static void sc_plus_callback(Fl_Widget *, void *);

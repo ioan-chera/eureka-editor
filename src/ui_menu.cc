@@ -232,24 +232,6 @@ static void view_do_gamma(Fl_Widget *w, void * data)
 	ExecuteCommand("Toggle", "gamma");
 }
 
-static void view_do_sector_render(Fl_Widget *w, void * data)
-{
-	const Fl_Menu_Item *item = ((Fl_Menu_*)w)->mvalue();
-
-	if (strcmp(item->text, "Floors") == 0)
-		edit.sector_render_mode = SREND_Floor;
-	else if (strcmp(item->text, "Ceilings") == 0)
-		edit.sector_render_mode = SREND_Ceiling;
-	else if (strcmp(item->text, "Lighting") == 0)
-		edit.sector_render_mode = SREND_Lighting;
-	else if (strcmp(item->text, "Sound") == 0)
-		edit.sector_render_mode = SREND_SoundProp;
-	else
-		edit.sector_render_mode = SREND_Nothing;
-
-	main_win->redraw();
-}
-
 static void view_do_default_props(Fl_Widget *w, void * data)
 {
 	ExecuteCommand("DefaultProps");
@@ -499,20 +481,9 @@ static Fl_Menu_Item menu_items[] =
 		// Note: FL_Tab cannot be used as a shortcut here, as it
 		//       invokes FLTK's hard-coded navigation stuff.
 
-		{ "Toggle &3D View",           0, FCAL view_do_toggle_3d },
 		{ "Toggle S&prites",     FL_F+10, FCAL view_do_sprites },
 		{ "Toggle &Gamma",       FL_F+11, FCAL view_do_gamma },
 		{ "Toggle Object Nums",  FL_F+12, FCAL view_do_object_nums },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
-		{ "Sector Rendering", 0, 0, 0, FL_SUBMENU },
-			{ "Nothing",   0, FCAL view_do_sector_render },
-			{ "Floors",    0, FCAL view_do_sector_render },
-			{ "Ceilings",  0, FCAL view_do_sector_render },
-			{ "Lighting",  0, FCAL view_do_sector_render },
-			{ "Sound",     0, FCAL view_do_sector_render },
-			{ 0 },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
@@ -524,6 +495,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Default Props  ",  FL_COMMAND + 'd', FCAL view_do_default_props },
+		{ "Toggle &3D View",  0, FCAL view_do_toggle_3d },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

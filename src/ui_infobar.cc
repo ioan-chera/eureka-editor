@@ -64,25 +64,38 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	H -= 4;
 
 
-	Fl_Box *mode_lab = new Fl_Box(FL_NO_BOX, X, Y, 56, H, "Mode:");
+	Fl_Box *mode_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Mode:");
 	mode_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
 	mode_lab->labelsize(KF_fonth);
 
 
-	mode = new Fl_Menu_Button(X+58, Y, 96, H, "Things");
+	mode = new Fl_Menu_Button(X+54, Y, 96, H, "Things");
 	mode->align(FL_ALIGN_INSIDE);
 	mode->add("Things|Linedefs|Sectors|Vertices");
 	mode->callback(mode_callback, this);
 	mode->labelsize(KF_fonth);
 
-	X = mode->x() + mode->w() + 12;
+	X = mode->x() + mode->w() + 10;
 
 
-	Fl_Box *scale_lab = new Fl_Box(FL_NO_BOX, X, Y, 50, H, "Scale:");
+	Fl_Box *rend_lab = new Fl_Box(FL_NO_BOX, X, Y, 52, H, "Rend:");
+	rend_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
+	rend_lab->labelsize(KF_fonth);
+
+	sec_rend = new Fl_Menu_Button(X+54, Y, 96, H, "PLAIN");
+	sec_rend->align(FL_ALIGN_INSIDE);
+	sec_rend->add("PLAIN|Floors|Ceiling|Lighting|Sound|3D VIEW");
+	sec_rend->callback(rend_callback, this);
+	sec_rend->labelsize(KF_fonth);
+
+	X = sec_rend->x() + mode->w() + 10;
+
+
+	Fl_Box *scale_lab = new Fl_Box(FL_NO_BOX, X, Y, 58, H, "Scale:");
 	scale_lab->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
 	scale_lab->labelsize(KF_fonth);
 
-	scale = new Fl_Menu_Button(X+52+26, Y, 78, H, "100%");
+	scale = new Fl_Menu_Button(X+60+26, Y, 78, H, "100%");
 	scale->align(FL_ALIGN_INSIDE);
 	scale->add(scale_options_str);
 	scale->callback(scale_callback, this);
@@ -90,12 +103,12 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	Fl_Button *sc_minus, *sc_plus;
 
-	sc_minus = new Fl_Button(X+52, Y+1, 24, H-2, "-");
+	sc_minus = new Fl_Button(X+60, Y+1, 24, H-2, "-");
 	sc_minus->callback(sc_minus_callback, this);
 	sc_minus->labelfont(FL_HELVETICA_BOLD);
-	sc_minus->labelsize(KF_fonth);
+	sc_minus->labelsize(16);
 
-	sc_plus = new Fl_Button(X+52+26+80, Y+1, 24, H-2, "+");
+	sc_plus = new Fl_Button(X+60+26+80, Y+1, 24, H-2, "+");
 	sc_plus->callback(sc_plus_callback, this);
 	sc_plus->labelfont(FL_HELVETICA_BOLD);
 	sc_plus->labelsize(16);
@@ -113,7 +126,6 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 	grid_size->add(grid_options_str);
 	grid_size->callback(grid_callback, this);
 	grid_size->labelsize(KF_fonth);
-	grid_size->textsize(KF_fonth);
 
 	X = grid_size->x() + grid_size->w() + 12;
 
@@ -127,13 +139,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	UpdateSnapText();
 
-	X = grid_snap->x() + grid_snap->w() + 14;
-
-
-	Fl_Box *div = new Fl_Box(FL_FLAT_BOX, X, Y-4, 3, H+4, NULL);
-	div->color(WINDOW_BG, WINDOW_BG);
-
-	X += 10;
+	X = grid_snap->x() + grid_snap->w() + 12;
 
 
 	resizable(NULL);
@@ -161,6 +167,36 @@ void UI_InfoBar::mode_callback(Fl_Widget *w, void *data)
 	static const char *mode_keys = "tlsvr";
 
 	Editor_ChangeMode(mode_keys[mode->value()]);
+}
+
+
+void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
+{
+	Fl_Menu_Button *sec_rend = (Fl_Menu_Button *)w;
+
+	if (sec_rend->value() == 5)
+	{
+		Render3D_Enable(true);
+		return;
+	}
+
+	switch (sec_rend->value())
+	{
+	case 1: edit.sector_render_mode = SREND_Floor;      break;
+	case 2: edit.sector_render_mode = SREND_Ceiling;    break;
+	case 3: edit.sector_render_mode = SREND_Lighting;   break;
+	case 4: edit.sector_render_mode = SREND_SoundProp;  break;
+	default: edit.sector_render_mode = SREND_Nothing;   break;
+	}
+
+	if (edit.render3d)
+		Render3D_Enable(false);
+
+	// need sectors mode for sound propagation display
+	if (sec_rend->value() == 4 && edit.mode != OBJ_SECTORS)
+		Editor_ChangeMode('s');
+
+	main_win->redraw();
 }
 
 
@@ -267,6 +303,25 @@ void UI_InfoBar::UpdateSnap()
    grid_snap->value(grid.snap ? 1 : 0);
 
    UpdateSnapText();
+}
+
+
+void UI_InfoBar::UpdateSecRend()
+{
+	if (edit.render3d)
+	{
+		sec_rend->label("3D VIEW");
+		return;
+	}
+
+	switch (edit.sector_render_mode)
+	{
+	case SREND_Floor:     sec_rend->label("Floors");   break;
+	case SREND_Ceiling:   sec_rend->label("Ceilings"); break;
+	case SREND_Lighting:  sec_rend->label("Lighting"); break;
+	case SREND_SoundProp: sec_rend->label("Sound");    break;
+	default:              sec_rend->label("PLAIN");    break;
+	}
 }
 
 
