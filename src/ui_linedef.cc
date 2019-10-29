@@ -478,7 +478,7 @@ void UI_LineBox::CB_Copy()
 
 	Texboard_SetTex(name);
 
-	Status_Set("Copied %s", name);
+	Status_Set("copied %s", name);
 }
 
 
@@ -491,7 +491,7 @@ void UI_LineBox::CB_Paste(int new_tex)
 		return;
 
 	BA_Begin();
-	BA_Message("Pasted %s", BA_GetString(new_tex));
+	BA_Message("pasted %s", BA_GetString(new_tex));
 
 	selection_iterator_c it;
 	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)

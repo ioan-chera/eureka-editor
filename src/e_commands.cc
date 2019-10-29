@@ -1312,7 +1312,7 @@ void CMD_BR_Scroll()
 
 	if (! EXEC_Param[0][0])
 	{
-		Beep("Missing parameter to BR_Scroll");
+		Beep("BR_Scroll: missing value");
 		return;
 	}
 

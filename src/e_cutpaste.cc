@@ -97,6 +97,39 @@ public:
 		return (int)num;
 	}
 
+	void Paste_BA_Message() const
+	{
+		size_t t = things.size();
+		size_t v = verts.size();
+		size_t s = sectors.size();
+		size_t l = lines.size();
+
+		if (s > 0)
+		{
+			const char *name = (s == 1) ? "sector" : "sectors";
+			BA_Message("pasted %d %s", s, name);
+		}
+		else if (l > 0)
+		{
+			const char *name = (l == 1) ? "linedef" : "linedefs";
+			BA_Message("pasted %d %s", l, name);
+		}
+		else if (t > 0)
+		{
+			const char *name = (t == 1) ? "thing" : "things";
+			BA_Message("pasted %d %s", t, name);
+		}
+		else if (v > 0)
+		{
+			const char *name = (v == 1) ? "vertex" : "vertices";
+			BA_Message("pasted %d %s", v, name);
+		}
+		else
+		{
+			BA_Message("pasted something");
+		}
+	}
+
 	void CentreOfThings(double *cx, double *cy)
 	{
 		*cx = *cy = 0;
@@ -514,6 +547,12 @@ static bool Clipboard_DoCopy()
 			break;
 	}
 
+	int total = edit.Selected->count_obj();
+	if (total == 1)
+		Status_Set("copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
+	else
+		Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
+
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
@@ -717,7 +756,7 @@ static bool Clipboard_DoPaste()
 	pos_y = grid.SnapY(pos_y);
 
 	BA_Begin();
-	BA_Message("pasted %d objects", clip_board->TotalSize());
+	clip_board->Paste_BA_Message();
 
 	clip_doing_paste = true;
 

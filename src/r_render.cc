@@ -1071,7 +1071,7 @@ static int GrabSelectedThing()
 		}
 	}
 
-	Status_Set("Copied type %d", result);
+	Status_Set("copied type %d", result);
 
 	return result;
 }
@@ -1103,7 +1103,7 @@ static void StoreSelectedThing(int new_type)
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
-	Status_Set("Pasted type %d", new_type);
+	Status_Set("pasted type %d", new_type);
 }
 
 
@@ -1157,7 +1157,7 @@ static int GrabSelectedFlat()
 		}
 	}
 
-	Status_Set("Copied %s", BA_GetString(result));
+	Status_Set("copied %s", BA_GetString(result));
 
 	return result;
 }
@@ -1192,7 +1192,7 @@ static void StoreSelectedFlat(int new_tex)
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
-	Status_Set("Pasted %s", BA_GetString(new_tex));
+	Status_Set("pasted %s", BA_GetString(new_tex));
 }
 
 
@@ -1228,7 +1228,7 @@ static void StoreDefaultedFlats()
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
-	Status_Set("Defaulted flats");
+	Status_Set("defaulted flats");
 }
 
 
@@ -1305,7 +1305,7 @@ static int GrabSelectedTexture()
 		}
 	}
 
-	Status_Set("Copied %s", BA_GetString(result));
+	Status_Set("copied %s", BA_GetString(result));
 
 	return result;
 }
@@ -1364,7 +1364,7 @@ static void StoreSelectedTexture(int new_tex)
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
-	Status_Set("Pasted %s", BA_GetString(new_tex));
+	Status_Set("pasted %s", BA_GetString(new_tex));
 }
 
 

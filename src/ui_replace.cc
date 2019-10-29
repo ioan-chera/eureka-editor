@@ -1147,7 +1147,7 @@ bool UI_FindAndReplace::FindNext()
 
 			GoToObject(cur_obj);
 
-			Status_Set("Found #%d", idx);
+			Status_Set("found #%d", idx);
 			return true;
 		}
 	}
@@ -1315,7 +1315,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (count == 0)
 		Beep("Nothing found");
 	else
-		Status_Set("Found %d objects", count);
+		Status_Set("found %d objects", count);
 
 	if (replace)
 	{
