@@ -265,6 +265,12 @@ void CMD_SetVar()
 	{
 		SetGamma(int_val);
 	}
+	else if (y_stricmp(var_name, "ratio") == 0)
+	{
+		grid.ratio = CLAMP(0, int_val, 7);
+		main_win->info_bar->UpdateRatio();
+		RedrawMap();
+	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
 		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
@@ -1372,7 +1378,7 @@ static editor_command_t  command_table[] =
 	{	"Set", "Misc",
 		&CMD_SetVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser gamma grid obj_nums sec_render snap sprites"
+		/* keywords */ "3d browser gamma grid obj_nums ratio sec_render snap sprites"
 	},
 
 	{	"Toggle", "Misc",
