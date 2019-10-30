@@ -658,200 +658,158 @@ void UI_Canvas::DrawVertices()
 //
 void UI_Canvas::DrawLinedefs()
 {
-	// we perform 5 passes over the lines.  the first four use a single
-	// color specific to the pass (stored in colors[] array).  the 5th
-	// pass is for all other colors.
-	//
-	// the REASON for this complexity is because fl_color() under X windows
-	// is very very slow, and was causing a massive slow down of this code.
-	// even detecting the same color as last time and inhibiting the call
-	// did not help.
-
-	Fl_Color colors[4];
-
-	colors[0] = LIGHTGREY;
-	colors[1] = LIGHTMAGENTA;
-	colors[2] = LIGHTGREEN;
-	colors[3] = WHITE;
-
-	if (edit.mode == OBJ_SECTORS)
+	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		colors[1] = SECTOR_TAG;
-		colors[2] = SECTOR_TYPE;
+		const LineDef *L = LineDefs[n];
 
-		if (edit.sector_render_mode == SREND_SoundProp)
-			colors[1] = FL_MAGENTA;
-	}
+		double x1 = L->Start()->x();
+		double y1 = L->Start()->y();
+		double x2 = L->End  ()->x();
+		double y2 = L->End  ()->y();
 
-	for (int pass = 0 ; pass < 5 ; pass++)
-	{
-		if (pass < 4)
-			gl_color(colors[pass]);
+		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+			continue;
 
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		bool one_sided = (! L->Left());
+
+		Fl_Color col = LIGHTGREY;
+
+		// 'p' for plain, 'k' for knobbly, 's' for split
+		char line_kind = 'p';
+
+		switch (edit.mode)
 		{
-			const LineDef *L = LineDefs[n];
-
-			double x1 = L->Start()->x();
-			double y1 = L->Start()->y();
-			double x2 = L->End  ()->x();
-			double y2 = L->End  ()->y();
-
-			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
-				continue;
-
-			bool one_sided = (! L->Left());
-
-			Fl_Color col = LIGHTGREY;
-
-			// 'p' for plain, 'k' for knobbly, 's' for split
-			char line_kind = 'p';
-
-			switch (edit.mode)
+			case OBJ_VERTICES:
 			{
-				case OBJ_VERTICES:
-				{
-					if (n == split_ld)
-						col = HI_AND_SEL_COL;
-					else if (edit.error_mode)
-						col = LIGHTGREY;
-					else if (L->right < 0)
-						col = RED;
-					else if (one_sided)
-						col = WHITE;
+				if (n == split_ld)
+					col = HI_AND_SEL_COL;
+				else if (edit.error_mode)
+					col = LIGHTGREY;
+				else if (L->right < 0)
+					col = RED;
+				else if (one_sided)
+					col = WHITE;
 
-					if (n == split_ld)
-						line_kind = 's';
-					else
-						line_kind = 'k';
-
-					if (pass==4 && n != split_ld && n >= (NumLineDefs - 3) && !edit.show_object_numbers)
-					{
-						DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
-					}
-				}
-				break;
-
-				case OBJ_LINEDEFS:
-				{
-					if (edit.error_mode)
-						col = LIGHTGREY;
-					else if (! L->Right()) // no first sidedef?
-						col = RED;
-					else if (L->type != 0)
-					{
-						if (L->tag != 0)
-							col = LIGHTMAGENTA;
-						else
-							col = LIGHTGREEN;
-					}
-					else if (one_sided)
-						col = WHITE;
-					else if (L->flags & MLF_Blocking)
-						col = FL_CYAN;
-
+				if (n == split_ld)
+					line_kind = 's';
+				else
 					line_kind = 'k';
-				}
-				break;
 
-				case OBJ_SECTORS:
+				// show length of last four added lines
+				if (n != split_ld && n >= (NumLineDefs - 3) && !edit.show_object_numbers)
 				{
-					int sd1 = L->right;
-					int sd2 = L->left;
+					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
+				}
+			}
+			break;
 
-					int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
-					int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
-
-					if (edit.error_mode)
-						col = LIGHTGREY;
-					else if (sd1 < 0)
-						col = RED;
-					else if (edit.sector_render_mode == SREND_SoundProp)
-					{
-						if (L->flags & MLF_SoundBlock)
-							col = FL_MAGENTA;
-						else if (one_sided)
-							col = WHITE;
-					}
+			case OBJ_LINEDEFS:
+			{
+				if (edit.error_mode)
+					col = LIGHTGREY;
+				else if (! L->Right()) // no first sidedef?
+					col = RED;
+				else if (L->type != 0)
+				{
+					if (L->tag != 0)
+						col = LIGHTMAGENTA;
 					else
-					{
-						bool have_tag  = false;
-						bool have_type = false;
-
-						if (Sectors[s1]->tag != 0)
-							have_tag = true;
-						if (Sectors[s1]->type != 0)
-							have_type = true;
-
-						if (s2 >= 0)
-						{
-							if (Sectors[s2]->tag != 0)
-								have_tag = true;
-
-							if (Sectors[s2]->type != 0)
-								have_type = true;
-						}
-
-						if (have_tag && have_type)
-							col = SECTOR_TAGTYPE;
-						else if (have_tag)
-							col = SECTOR_TAG;
-						else if (have_type)
-							col = SECTOR_TYPE;
-						else if (one_sided)
-							col = WHITE;
-					}
-
-					if (pass==4 && edit.show_object_numbers)
-					{
-						if (s1 != NIL_OBJ)
-							DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
-
-						if (s2 != NIL_OBJ)
-							DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
-					}
+						col = LIGHTGREEN;
 				}
-				break;
+				else if (one_sided)
+					col = WHITE;
+				else if (L->flags & MLF_Blocking)
+					col = FL_CYAN;
 
-				// OBJ_THINGS
-				default:
+				line_kind = 'k';
+			}
+			break;
+
+			case OBJ_SECTORS:
+			{
+				int sd1 = L->right;
+				int sd2 = L->left;
+
+				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
+				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
+
+				if (edit.error_mode)
+					col = LIGHTGREY;
+				else if (sd1 < 0)
+					col = RED;
+				else if (edit.sector_render_mode == SREND_SoundProp)
 				{
-					if (one_sided && ! edit.error_mode)
+					if (L->flags & MLF_SoundBlock)
+						col = FL_MAGENTA;
+					else if (one_sided)
 						col = WHITE;
 				}
+				else
+				{
+					bool have_tag  = false;
+					bool have_type = false;
+
+					if (Sectors[s1]->tag != 0)
+						have_tag = true;
+					if (Sectors[s1]->type != 0)
+						have_type = true;
+
+					if (s2 >= 0)
+					{
+						if (Sectors[s2]->tag != 0)
+							have_tag = true;
+
+						if (Sectors[s2]->type != 0)
+							have_type = true;
+					}
+
+					if (have_tag && have_type)
+						col = SECTOR_TAGTYPE;
+					else if (have_tag)
+						col = SECTOR_TAG;
+					else if (have_type)
+						col = SECTOR_TYPE;
+					else if (one_sided)
+						col = WHITE;
+				}
+
+				if (edit.show_object_numbers)
+				{
+					if (s1 != NIL_OBJ)
+						DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
+
+					if (s2 != NIL_OBJ)
+						DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+				}
+			}
+			break;
+
+			// OBJ_THINGS
+			default:
+			{
+				if (one_sided && ! edit.error_mode)
+					col = WHITE;
+			}
+			break;
+		}
+
+		gl_color(col);
+
+		switch (line_kind)
+		{
+			case 'p':
+				DrawMapLine(x1, y1, x2, y2);
 				break;
-			}
 
-			if (pass < 4)
-			{
-				if (col != colors[pass])
-					continue;
-			}
-			else
-			{
-				if (col == colors[0] || col == colors[1] ||
-					col == colors[2] || col == colors[3])
-					continue;
+			case 'k':
+				DrawKnobbyLine(x1, y1, x2, y2);
+				break;
 
-				gl_color(col);
-			}
-
-			switch (line_kind)
-			{
-				case 'p':
-					DrawMapLine(x1, y1, x2, y2);
-					break;
-
-				case 'k':
-					DrawKnobbyLine(x1, y1, x2, y2);
-					break;
-
-				case 's':
-					DrawSplitLine(x1, y1, x2, y2);
-					break;
-			}
-		} // n
-	} // pass
+			case 's':
+				DrawSplitLine(x1, y1, x2, y2);
+				break;
+		}
+	}
 
 	// draw the linedef numbers
 	if (edit.mode == OBJ_LINEDEFS && edit.show_object_numbers)
@@ -907,13 +865,7 @@ void UI_Canvas::DrawThings()
 		gl_color(DARKGREY);
 	else if (edit.error_mode)
 		gl_color(LIGHTGREY);
-	else
-		gl_color((Fl_Color)0xFF000000);
 
-	// see notes in DrawLinedefs() on why we perform multiple passes.
-	// here first pass is bright red, second pass is everything else.
-
-	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		double x = Things[n]->x();
@@ -927,19 +879,7 @@ void UI_Canvas::DrawThings()
 		if (edit.mode == OBJ_THINGS && !edit.error_mode)
 		{
 			Fl_Color col = (Fl_Color)info->color;
-
-			if (pass == 0)
-			{
-				if (col != 0xFF000000)
-					continue;
-			}
-			else
-			{
-				if (col == 0xFF000000)
-					continue;
-
-				gl_color(col);
-			}
+			gl_color(col);
 		}
 
 		int r = info->radius;
@@ -977,12 +917,6 @@ void UI_Canvas::DrawThingBodies()
 	if (edit.error_mode)
 		return;
 
-	// see notes in DrawLinedefs() on why we perform multiple passes.
-	// here first pass is dark red, second pass is everything else.
-
-	gl_color(DarkerColor(DarkerColor((Fl_Color)0xFF000000)));
-
-	for (int pass = 0 ; pass < 2 ; pass++)
 	for (int n = 0 ; n < NumThings ; n++)
 	{
 		double x = Things[n]->x();
@@ -993,22 +927,10 @@ void UI_Canvas::DrawThingBodies()
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
-		int r = info->radius;
-
 		Fl_Color col = (Fl_Color)info->color;
+		gl_color(DarkerColor(DarkerColor(col)));
 
-		if (pass == 0)
-		{
-			if (col != 0xFF000000)
-				continue;
-		}
-		else
-		{
-			if (col == 0xFF000000)
-				continue;
-
-			gl_color(DarkerColor(DarkerColor(col)));
-		}
+		int r = info->radius;
 
 		int sx1 = SCREENX(x - r);
 		int sy1 = SCREENY(y + r);
