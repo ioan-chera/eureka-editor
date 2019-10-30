@@ -96,6 +96,10 @@ public:
 	UI_MainWindow();
 	virtual ~UI_MainWindow();
 
+	// FLTK methods
+	int handle(int event);
+	void draw();
+
 public:
 	void SetTitle(const char *wad_name, const char *map_name, bool read_only);
 

@@ -551,6 +551,28 @@ void UI_MainWindow::UpdateGameInfo()
 }
 
 
+// draw() and handle() are overridden here merely to prevent fatal
+// errors becoming infinite loops.  That can happen because we use
+// FLTK to show a dialog with the error message, and the same code
+// which triggered the fatal error can be re-entered.
+
+int UI_MainWindow::handle(int event)
+{
+	if (in_fatal_error)
+		return 0;
+
+	return Fl_Double_Window::handle(event);
+}
+
+void UI_MainWindow::draw()
+{
+	if (in_fatal_error)
+		return;
+
+	return Fl_Double_Window::draw();
+}
+
+
 //------------------------------------------------------------------------
 
 
