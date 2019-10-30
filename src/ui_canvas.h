@@ -170,16 +170,18 @@ private:
 		       (y2 >= map_ly) && (y1 <= map_hy);
 	}
 
-	void gl_line_width(int w);
-	void gl_draw_string(const char *s, int x, int y);
-
 #ifdef NO_OPENGL
 	void gl_color(Fl_Color c);
+	void gl_rectf(int rx, int ry, int rw, int rh);
+
 	void PrepareToDraw();
 	void Blit();
 #else
 	void gl_line(int x1, int y1, int x2, int y2);
 #endif
+
+	void gl_line_width(int w);
+	void gl_draw_string(const char *s, int x, int y);
 };
 
 

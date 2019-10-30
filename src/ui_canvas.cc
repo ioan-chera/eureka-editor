@@ -62,7 +62,6 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 // compatibility defines for software rendering
 #ifdef NO_OPENGL
-#define gl_rectf    fl_rectf
 #define gl_line     fl_line
 #define gl_font     fl_font
 #define gl_width    fl_width
@@ -2220,9 +2219,12 @@ void UI_Canvas::RenderSector(int num)
 
 
 //------------------------------------------------------------------------
+//  CUSTOM S/W DRAWING CODE
+//------------------------------------------------------------------------
 
 // TODO move into UI_Canvas class
 static byte *rgb_buf;
+static int rgb_x, rgb_y;
 static int rgb_w, rgb_h;
 
 static struct { byte r, g, b; } cur_col;
@@ -2230,6 +2232,9 @@ static struct { byte r, g, b; } cur_col;
 
 void UI_Canvas::PrepareToDraw()
 {
+	rgb_x = x();
+	rgb_y = y();
+
 	if (rgb_w != w() || rgb_h != h())
 	{
 		if (rgb_buf)
@@ -2240,6 +2245,9 @@ void UI_Canvas::PrepareToDraw()
 
 		rgb_buf = new byte[rgb_w * rgb_h * 3];
 	}
+
+//	rgb_x2 = rgb_x + rgb_w;
+//	rgb_y2 = rgb_y + rgb_h;
 }
 
 
@@ -2252,6 +2260,64 @@ void UI_Canvas::Blit()
 void UI_Canvas::gl_color(Fl_Color c)
 {
 	Fl::get_color(c, cur_col.r, cur_col.g, cur_col.b);
+}
+
+
+void UI_Canvas::gl_rectf(int rx, int ry, int rw, int rh)
+{
+	rx -= rgb_x;
+	ry -= rgb_y;
+
+	// clip to screen
+	if (rx + rw > rgb_w)
+	{
+		rw = rgb_w - rx;
+	}
+	if (rx < 0)
+	{
+		rw += rx;
+		rx = 0;
+	}
+	if (rw <= 0)
+		return;
+
+	if (ry + rh > rgb_h)
+	{
+		rh = rgb_h - ry;
+	}
+	if (ry < 0)
+	{
+		rh += ry;
+		ry = 0;
+	}
+	if (rh <= 0)
+		return;
+
+	// fast method for greyscale (especially BLACK)
+	if (cur_col.r == cur_col.g && cur_col.g == cur_col.b)
+	{
+		byte *dest = rgb_buf + (ry * rgb_w * 3) + (rx * 3);
+
+		for ( ; rh > 0 ; rh--, dest += (rgb_w * 3))
+			memset(dest, cur_col.r, rw * 3);
+
+		return;
+	}
+
+	// slower method for all other colors
+	byte *base = rgb_buf + (ry * rgb_w * 3) + (rx * 3);
+
+	for ( ; rh > 0 ; rh--, base += (rgb_w * 3))
+	{
+		byte *dest = base;
+
+		for (int w2 = rw ; w2 > 0 ; w2--)
+		{
+			*dest++ = cur_col.r;
+			*dest++ = cur_col.g;
+			*dest++ = cur_col.b;
+		}
+	}
 }
 
 //--- editor settings ---
