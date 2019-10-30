@@ -139,6 +139,9 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 Img_c * IM_CreateDogSprite();
 Img_c * IM_CreateLightSprite();
 
+Img_c * IM_DigitFont_11x14();
+Img_c * IM_DigitFont_14x19();
+
 Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H);
 

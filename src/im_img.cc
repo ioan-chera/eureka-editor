@@ -29,11 +29,9 @@
 #include "im_img.h"
 #include "m_game.h"
 
-#ifdef WIN32
 #ifndef NO_OPENGL
 // need this for GL_UNSIGNED_INT_8_8_8_8_REV
 #include "GL/glext.h"
-#endif
 #endif
 
 
@@ -46,6 +44,11 @@ static Img_c * missing_tex_image;
 static Img_c * unknown_tex_image;
 static Img_c * unknown_flat_image;
 static Img_c * unknown_sprite_image;
+
+static Img_c * digit_font_11x14;
+static Img_c * digit_font_14x19;
+
+#define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
 
 inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
@@ -447,6 +450,12 @@ void IM_UnloadDummyTextures()
 
 	if (unknown_sprite_image)
 		unknown_sprite_image->unload_gl(can_delete);
+
+	if (digit_font_11x14)
+		digit_font_11x14->unload_gl(can_delete);
+
+	if (digit_font_14x19)
+		digit_font_14x19->unload_gl(can_delete);
 }
 
 
@@ -607,6 +616,40 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 	}
 
 	delete[] conv_palette;
+
+	return result;
+}
+
+
+static Img_c * IM_CreateFont(int W, int H, const char **text,
+							 const int *intensities, int ity_size,
+							 rgb_color_t color)
+{
+	Img_c *result = new Img_c(W, H);
+
+	result->clear();
+
+	int ity_divide = (ity_size - 1) * 8;
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		int ch = text[y][x] & 0x7f;
+
+		if (ch == ' ')
+			continue;  // leave transparent
+
+		if (ch < 'a' || ch >= 'a' + ity_size)
+			BugError("Bad character (dec #%d) in built-in font.\n", ch);
+
+		int ity = intensities[ch - 'a'];
+
+		int r = RGB_RED(color)   * ity / ity_divide;
+		int g = RGB_GREEN(color) * ity / ity_divide;
+		int b = RGB_BLUE(color)  * ity / ity_divide;
+
+		result->wbuf() [y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
+	}
 
 	return result;
 }
@@ -965,7 +1008,7 @@ static const int digit_font_intensities[] =
 };
 
 
-static const char *small_font_text[] =
+static const char *digit_11x14_text[] =
 {
 	"                                                                                                                                               ",
 	"  aaaaaaa    aaaaaa     aaaaaaaa    aaaaaaa     aaaaa    aaaaaaa     aaaaaa    aaaaaaaa   aaaaaaa    aaaaaaa                                   ",
@@ -984,7 +1027,7 @@ static const char *small_font_text[] =
 };
 
 
-static const char *medium_font_text[] =
+static const char *digit_14x19_text[] =
 {
 	"                                                                                                                                                                                      ",
 	"    aaaaaa         aaaaa       aaaaaaa       aaaaaaa          aaaaa     aaaaaaaaa        aaaaaa     aaaaaaaaaa      aaaaaa        aaaaaa                                              ",
@@ -1007,6 +1050,28 @@ static const char *medium_font_text[] =
 	"                                                                                                                                                                                      ",
 };
 
+
+Img_c * IM_DigitFont_11x14()
+{
+	if (! digit_font_11x14)
+	{
+		digit_font_11x14 = IM_CreateFont(11*13, 14, digit_11x14_text,
+										 digit_font_intensities, 20,
+										 DIGIT_FONT_COLOR);
+	}
+	return digit_font_11x14;
+}
+
+Img_c * IM_DigitFont_14x19()
+{
+	if (! digit_font_14x19)
+	{
+		digit_font_14x19 = IM_CreateFont(14*13, 19, digit_14x19_text,
+										 digit_font_intensities, 20,
+										 DIGIT_FONT_COLOR);
+	}
+	return digit_font_11x14;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
