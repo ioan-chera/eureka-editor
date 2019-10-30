@@ -62,7 +62,6 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 // compatibility defines for software rendering
 #ifdef NO_OPENGL
-#define gl_color    fl_color
 #define gl_rectf    fl_rectf
 #define gl_line     fl_line
 #define gl_font     fl_font
@@ -166,7 +165,11 @@ void UI_Canvas::draw()
 	                (grid.Scale < 1.9) ? 14 : 18;
 	gl_font(FL_COURIER, font_size);
 
+	PrepareToDraw();
+
 	DrawEverything();
+
+	Blit();
 
 #ifdef NO_OPENGL
 	fl_pop_clip();
@@ -2213,6 +2216,42 @@ void UI_Canvas::RenderSector(int num)
 		glDisable(GL_ALPHA_TEST);
 	}
 #endif
+}
+
+
+//------------------------------------------------------------------------
+
+// TODO move into UI_Canvas class
+static byte *rgb_buf;
+static int rgb_w, rgb_h;
+
+static struct { byte r, g, b; } cur_col;
+
+
+void UI_Canvas::PrepareToDraw()
+{
+	if (rgb_w != w() || rgb_h != h())
+	{
+		if (rgb_buf)
+			delete[] rgb_buf;
+
+		rgb_w = w();
+		rgb_h = h();
+
+		rgb_buf = new byte[rgb_w * rgb_h * 3];
+	}
+}
+
+
+void UI_Canvas::Blit()
+{
+	fl_draw_image(rgb_buf, x(), y(), w(), h());
+}
+
+
+void UI_Canvas::gl_color(Fl_Color c)
+{
+	Fl::get_color(c, cur_col.r, cur_col.g, cur_col.b);
 }
 
 //--- editor settings ---
