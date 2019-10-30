@@ -62,7 +62,6 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 // compatibility defines for software rendering
 #ifdef NO_OPENGL
-#define gl_line     fl_line
 #define gl_font     fl_font
 #define gl_width    fl_width
 #define gl_height   fl_height
@@ -182,41 +181,6 @@ int UI_Canvas::handle(int event)
 		return 1;
 
 	return Fl_Widget::handle(event);
-}
-
-
-#ifndef NO_OPENGL
-void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
-{
-	glBegin(GL_LINE_STRIP);
-	glVertex2i(x1, y1);
-	glVertex2i(x2, y2);
-	glEnd();
-}
-#endif
-
-
-void UI_Canvas::gl_line_width(int w)
-{
-#ifdef NO_OPENGL
-	// apparently 0 produces nicer results than 1
-	if (w == 1)
-		w = 0;
-
-	fl_line_style(FL_SOLID, w);
-#else
-	glLineWidth(w);
-#endif
-}
-
-
-void UI_Canvas::gl_draw_string(const char *s, int x, int y)
-{
-#ifdef NO_OPENGL
-	fl_draw(s, x, y);
-#else
-	gl_draw(s, x, y);
-#endif
 }
 
 
@@ -2226,6 +2190,7 @@ void UI_Canvas::RenderSector(int num)
 static byte *rgb_buf;
 static int rgb_x, rgb_y;
 static int rgb_w, rgb_h;
+static int line_width;
 
 static struct { byte r, g, b; } cur_col;
 
@@ -2318,6 +2283,218 @@ void UI_Canvas::gl_rectf(int rx, int ry, int rw, int rh)
 			*dest++ = cur_col.b;
 		}
 	}
+}
+
+
+void UI_Canvas::gl_line_width(int w)
+{
+#ifndef NO_OPENGL
+	glLineWidth(w);
+#else
+	line_width = (w < 2) ? 1 : 2;
+#endif
+}
+
+
+enum outcode_flags_e
+{
+	O_TOP    = 1,
+	O_BOTTOM = 2,
+	O_LEFT   = 4,
+	O_RIGHT  = 8,
+};
+
+int UI_Canvas::Calc_Outcode(int x, int y)
+{
+	return
+		((y < 0)      ? O_TOP    : 0) |
+		((y >= rgb_h) ? O_BOTTOM : 0) |
+		((x < 0)      ? O_LEFT   : 0) |
+		((x >= rgb_w) ? O_RIGHT  : 0);
+}
+
+// TODO inline this
+void UI_Canvas::raw_pixel(int rx, int ry)
+{
+	byte *dest = rgb_buf + (rx + ry * rgb_w) * 3;
+
+	dest[0] = cur_col.r;
+	dest[1] = cur_col.g;
+	dest[2] = cur_col.b;
+}
+
+void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
+{
+#ifndef NO_OPENGL
+	glBegin(GL_LINE_STRIP);
+	glVertex2i(x1, y1);
+	glVertex2i(x2, y2);
+	glEnd();
+#else
+	// software line drawing
+	if (x1 == x2)
+	{
+		if (y1 > y2)
+			std::swap(y1, y2);
+
+		gl_rectf(x1, y1, line_width, y2 - y1 + line_width);
+		return;
+	}
+	if (y1 == y2)
+	{
+		if (x1 > x2)
+			std::swap(x1, x2);
+
+		gl_rectf(x1, y1, x2 - x1 + line_width, line_width);
+		return;
+	}
+
+
+	// completely off the screen?
+	x1 -= rgb_x; y1 -= rgb_y;
+	x2 -= rgb_x; y2 -= rgb_y;
+
+	int out1 = Calc_Outcode(x1, y1);
+	int out2 = Calc_Outcode(x2, y2);
+
+	if (out1 & out2)
+		return;
+
+
+	// clip diagonal line to the map
+	// (this is the Cohen-Sutherland clipping algorithm)
+
+	while (out1 | out2)
+	{
+		// may be partially inside box, find an outside point
+		int outside = (out1 ? out1 : out2);
+
+		int dx = x2 - x1;
+		int dy = y2 - y1;
+
+		// this almost certainly cannot happen, but for the sake of
+		// robustness we check anyway (just in case)
+		if (dx == 0 && dy == 0)
+			return;
+
+		int new_x, new_y;
+
+		// clip to each side
+		if (outside & O_TOP)
+		{
+			new_y = 0;
+			new_x = x1 + dx * (new_y - y1) / dy;
+		}
+		else if (outside & O_BOTTOM)
+		{
+			new_y = rgb_h-1;
+			new_x = x1 + dx * (new_y - y1) / dy;
+		}
+		else if (outside & O_LEFT)
+		{
+			new_x = 0;
+			new_y = y1 + dy * (new_x - x1) / dx;
+		}
+		else
+		{
+			SYS_ASSERT(outside & O_RIGHT);
+
+			new_x = rgb_w-1;
+			new_y = y1 + dy * (new_x - x1) / dx;
+		}
+
+		if (out1)
+		{
+			x1 = new_x;
+			y1 = new_y;
+
+			out1 = Calc_Outcode(x1, y1);
+		}
+		else
+		{
+			SYS_ASSERT(out2);
+
+			x2 = new_x;
+			y2 = new_y;
+
+			out2 = Calc_Outcode(x2, y2);
+		}
+
+		if (out1 & out2)
+			return;
+	}
+
+
+	// this is the Bresenham line drawing algorithm
+	// (based on code from am_map.c in the GPL DOOM source)
+
+	int dx = x2 - x1;
+	int dy = y2 - y1;
+
+	int ax = 2 * (dx < 0 ? -dx : dx);
+	int ay = 2 * (dy < 0 ? -dy : dy);
+
+	int sx = dx < 0 ? -1 : 1;
+	int sy = dy < 0 ? -1 : 1;
+
+	int x = x1;
+	int y = y1;
+
+	if (ax > ay)  // horizontal stepping
+	{
+		int d = ay - ax/2;
+
+		raw_pixel(x, y);
+		if (line_width == 2 && y+1 < rgb_h) raw_pixel(x, y+1);
+
+		while (x != x2)
+		{
+			if (d>=0)
+			{
+				y += sy;
+				d -= ax;
+			}
+
+			x += sx;
+			d += ay;
+
+			raw_pixel(x, y);
+			if (line_width == 2 && y+1 < rgb_h) raw_pixel(x, y+1);
+		}
+	}
+	else   // vertical stepping
+	{
+		int d = ax - ay/2;
+
+		raw_pixel(x, y);
+		if (line_width == 2 && x+1 < rgb_w) raw_pixel(x+1, y);
+
+		while (y != y2)
+		{
+			if (d >= 0)
+			{
+				x += sx;
+				d -= ay;
+			}
+
+			y += sy;
+			d += ax;
+
+			raw_pixel(x, y);
+			if (line_width == 2 && x+1 < rgb_w) raw_pixel(x+1, y);
+		}
+	}
+#endif
+}
+
+
+void UI_Canvas::gl_draw_string(const char *s, int x, int y)
+{
+#ifndef NO_OPENGL
+	gl_draw(s, x, y);
+#else
+	// FIXME S/W version of draw_string
+#endif
 }
 
 //--- editor settings ---
