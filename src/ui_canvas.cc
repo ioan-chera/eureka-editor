@@ -68,6 +68,16 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 #define gl_descent  fl_descent
 #endif
 
+// TODO move into UI_Canvas class
+static byte *rgb_buf;
+static int rgb_x, rgb_y;
+static int rgb_w, rgb_h;
+static int line_width;
+
+static struct { byte r, g, b; } cur_col;
+
+
+
 
 int vertex_radius(double scale);
 
@@ -1072,20 +1082,11 @@ void UI_Canvas::DrawSprite(double map_x, double map_y, Img_c *img, float scale)
 	if (sy2 <= sy1 || sx2 <= sx1)
 		return;
 
-	// collect batches of pixels, it can greatly speed up rendering
-	const int BATCH_MAX_LEN = 128;
-
-	u8_t batch_rgb[BATCH_MAX_LEN * 3];
-	u8_t *batch_dest = NULL;
-
-	int  batch_len = 0;
-	int  batch_sx  = 0;
-
 	for (int sy = sy1 ; sy <= sy2 ; sy++)
 	{
-		batch_len = 0;
+		byte *dest = rgb_buf + 3 * ((sx1 - rgb_x) + (sy - rgb_y) * rgb_w);
 
-		for (int sx = sx1 ; sx <= sx2 ; sx++)
+		for (int sx = sx1 ; sx <= sx2 ; sx++, dest += 3)
 		{
 			int ix = W * (sx - bx1) / (bx2 - bx1);
 			int iy = H * (sy - by1) / (by2 - by1);
@@ -1095,37 +1096,10 @@ void UI_Canvas::DrawSprite(double map_x, double map_y, Img_c *img, float scale)
 
 			img_pixel_t pix = img->buf()[iy * W + ix];
 
-			if (pix == TRANS_PIXEL)
+			if (pix != TRANS_PIXEL)
 			{
-				if (batch_len > 0)
-				{
-					fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
-					batch_len = 0;
-				}
-				continue;
+				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
-
-			if (batch_len >= BATCH_MAX_LEN)
-			{
-				fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
-				batch_len = 0;
-			}
-
-			if (batch_len == 0)
-			{
-				batch_sx = sx;
-				batch_dest = batch_rgb;
-			}
-
-			IM_DecodePixel(pix, batch_dest[0], batch_dest[1], batch_dest[2]);
-
-			batch_len++;
-			batch_dest += 3;
-		}
-
-		if (batch_len > 0)
-		{
-			fl_draw_image(batch_rgb, batch_sx, sy, batch_len, 1);
 		}
 	}
 
@@ -2035,8 +2009,6 @@ void UI_Canvas::RenderSector(int num)
 #ifdef NO_OPENGL
 	const img_pixel_t *src_pix = img ? img->buf() : NULL;
 
-	u8_t * line_rgb = new u8_t[3 * (w() + 4)];
-
 	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 	{
 		sector_polygon_t *poly = &subdiv->polygons[i];
@@ -2107,8 +2079,8 @@ void UI_Canvas::RenderSector(int num)
 			int x = sx1;
 			int span_w = sx2 - sx1 + 1;
 
-			u8_t *dest = line_rgb;
-			u8_t *dest_end = line_rgb + span_w * 3;
+			u8_t *dest = rgb_buf + ((x - rgb_x) + (y - rgb_y) * rgb_w) * 3;
+			u8_t *dest_end = dest + span_w * 3;
 
 			// the logic here for non-64x64 textures matches the software
 			// 3D renderer, but is different than ZDoom (which scales them).
@@ -2122,12 +2094,8 @@ void UI_Canvas::RenderSector(int num)
 
 				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
-
-			fl_draw_image(line_rgb, sx1, y, span_w, 1);
 		}
 	}
-
-	delete[] line_rgb;
 
 #else // OpenGL
 	if (img)
@@ -2185,15 +2153,6 @@ void UI_Canvas::RenderSector(int num)
 //------------------------------------------------------------------------
 //  CUSTOM S/W DRAWING CODE
 //------------------------------------------------------------------------
-
-// TODO move into UI_Canvas class
-static byte *rgb_buf;
-static int rgb_x, rgb_y;
-static int rgb_w, rgb_h;
-static int line_width;
-
-static struct { byte r, g, b; } cur_col;
-
 
 void UI_Canvas::PrepareToDraw()
 {
