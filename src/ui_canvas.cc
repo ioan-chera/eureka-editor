@@ -34,12 +34,12 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_path.h"	  // SoundPropagation
+#include "im_color.h"
+#include "im_img.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "r_subdiv.h"
-#include "im_color.h"
-#include "im_img.h"
 #include "r_render.h"
 #include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
@@ -173,13 +173,15 @@ void UI_Canvas::draw()
 	                (grid.Scale < 1.9) ? 14 : 18;
 	gl_font(FL_COURIER, font_size);
 
+#ifdef NO_OPENGL
 	PrepareToDraw();
+#endif
 
 	DrawEverything();
 
+#ifdef NO_OPENGL
 	Blit();
 
-#ifdef NO_OPENGL
 	fl_pop_clip();
 #endif
 }
@@ -647,7 +649,7 @@ void UI_Canvas::DrawVertices()
 			int sx = SCREENX(x) + r * 3;
 			int sy = SCREENY(y) + r * 3;
 
-			DrawObjNum(sx, sy, n);
+			DrawNumber(sx, sy, n);
 		}
 	}
 }
@@ -903,7 +905,7 @@ void UI_Canvas::DrawThings()
 			x += info->radius + 8;
 			y += info->radius + 8;
 
-			DrawObjNum(SCREENX(x), SCREENY(y), n);
+			DrawNumber(SCREENX(x), SCREENY(y), n);
 		}
 	}
 }
@@ -1096,14 +1098,14 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
 
-	DrawObjNum(sx, sy, n);
+	DrawNumber(sx, sy, n);
 }
 
 
 //
 //  draw a number centered at screen coordinate (x, y)
 //
-void UI_Canvas::DrawObjNum(int x, int y, int num)
+void UI_Canvas::DrawNumber(int x, int y, int num)
 {
 	char buffer[64];
 	sprintf(buffer, "%d", num);
@@ -1121,18 +1123,7 @@ void UI_Canvas::DrawObjNum(int x, int y, int num)
 	y -= gl_height() / 2;
 #endif
 
-	gl_color(FL_BLACK);
-
-	gl_draw_string(buffer, x - 2, y);
-	gl_draw_string(buffer, x - 1, y);
-	gl_draw_string(buffer, x + 1, y);
-	gl_draw_string(buffer, x + 2, y);
-	gl_draw_string(buffer, x,     y + 1);
-	gl_draw_string(buffer, x,     y - 1);
-
-	gl_color(OBJECT_NUM_COL);
-
-	gl_draw_string(buffer, x, y);
+	gl_number_string(buffer, x, y);
 }
 
 
@@ -2076,6 +2067,7 @@ void UI_Canvas::RenderSector(int num)
 //  CUSTOM S/W DRAWING CODE
 //------------------------------------------------------------------------
 
+#ifdef NO_OPENGL
 void UI_Canvas::PrepareToDraw()
 {
 	rgb_x = x();
@@ -2165,6 +2157,7 @@ void UI_Canvas::gl_rectf(int rx, int ry, int rw, int rh)
 		}
 	}
 }
+#endif // NO_OPENGL
 
 
 void UI_Canvas::gl_line_width(int w)
@@ -2177,6 +2170,7 @@ void UI_Canvas::gl_line_width(int w)
 }
 
 
+#ifdef NO_OPENGL
 enum outcode_flags_e
 {
 	O_TOP    = 1,
@@ -2203,6 +2197,8 @@ void UI_Canvas::raw_pixel(int rx, int ry)
 	dest[1] = cur_col.g;
 	dest[2] = cur_col.b;
 }
+#endif // NO_OPENGL
+
 
 void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 {
@@ -2369,12 +2365,109 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 }
 
 
-void UI_Canvas::gl_draw_string(const char *s, int x, int y)
+void UI_Canvas::gl_number_string(const char *s, int x, int y)
+{
+	// NOTE: string is limited to the digits '0' to '9', spaces,
+	//       and the characters '-', '.' and ':'.
+
+#ifndef NO_OPENGL
+	// TODO use the built-in digit fonts
+	//      [ re-use some of the logic below in S/W version ]
+
+	gl_color(FL_BLACK);
+
+	gl_draw(s, x - 2, y);
+	gl_draw(s, x - 1, y);
+	gl_draw(s, x + 1, y);
+	gl_draw(s, x + 2, y);
+	gl_draw(s, x,     y + 1);
+	gl_draw(s, x,     y - 1);
+
+	gl_color(OBJECT_NUM_COL);
+
+	gl_draw(s, x, y);
+
+#else
+	// software drawing method
+
+	Img_c *font_img;
+	int font_cw;
+	int font_ch;
+	int font_step;
+
+	// FIXME pick properly
+	if (true)
+	{
+		font_img  = IM_DigitFont_11x14();
+		font_cw   = 11;
+		font_ch   = 14;
+		font_step = font_cw - 2;
+	}
+	else
+	{
+		font_img  = IM_DigitFont_14x19();
+		font_cw   = 14;
+		font_ch   = 19;
+		font_step = font_cw - 2;
+	}
+
+	for ( ; *s ; s++, x += font_step)
+	{
+		int ch = (*s & 0x7f);
+		if (ch == ' ')
+			continue;
+
+		if ('0' <= ch && ch <= '9')
+			ch -= '0';
+		else if (ch == ':')
+			ch = 10;
+		else if (ch == '.')
+			ch = 11;
+		else
+			ch = 12;
+
+		gl_image_part(x, y, font_img, ch * font_cw, 0, font_cw, font_ch);
+	}
+#endif
+}
+
+
+void UI_Canvas::gl_image_part(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih)
 {
 #ifndef NO_OPENGL
-	gl_draw(s, x, y);
+
 #else
-	// FIXME S/W version of draw_string
+	// software rendering
+
+	rx -= rgb_x;
+	ry -= rgb_y;
+
+	// clip to screen
+	int sx1 = MAX(rx, 0);
+	int sy1 = MAX(ry, 0);
+
+	int sx2 = MIN(rx + iw, rgb_w) - 1;
+	int sy2 = MIN(ry + ih, rgb_h) - 1;
+
+	if (sx1 >= sx2 || sy1 >= sy2)
+		return;
+
+	for (int sy = sy1 ; sy <= sy2 ; sy++, iy++)
+	{
+		const img_pixel_t *src = img->buf() + (ix + iy * img->width());
+
+		byte *dest = rgb_buf + 3 * (sx1 + sy * rgb_w);
+
+		for (int sx = sx1 ; sx <= sx2 ; sx++, dest += 3)
+		{
+			img_pixel_t pix = *src++;
+
+			if (pix != TRANS_PIXEL)
+			{
+				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+			}
+		}
+	}
 #endif
 }
 

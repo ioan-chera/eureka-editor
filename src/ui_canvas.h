@@ -130,7 +130,7 @@ private:
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
-	void DrawObjNum(int x, int y, int num);
+	void DrawNumber(int x, int y, int num);
 	void DrawCurrentLine();
 
 	void RenderSector(int num);
@@ -182,7 +182,8 @@ private:
 
 	void gl_line(int x1, int y1, int x2, int y2);
 	void gl_line_width(int w);
-	void gl_draw_string(const char *s, int x, int y);
+	void gl_number_string(const char *s, int x, int y);
+	void gl_image_part(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih);
 };
 
 

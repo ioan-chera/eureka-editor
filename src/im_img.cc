@@ -629,8 +629,6 @@ static Img_c * IM_CreateFont(int W, int H, const char **text,
 
 	result->clear();
 
-	int ity_divide = (ity_size - 1) * 8;
-
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
 	{
@@ -644,9 +642,9 @@ static Img_c * IM_CreateFont(int W, int H, const char **text,
 
 		int ity = intensities[ch - 'a'];
 
-		int r = RGB_RED(color)   * ity / ity_divide;
-		int g = RGB_GREEN(color) * ity / ity_divide;
-		int b = RGB_BLUE(color)  * ity / ity_divide;
+		int r = (RGB_RED(color)   * ity) >> 11;
+		int g = (RGB_GREEN(color) * ity) >> 11;
+		int b = (RGB_BLUE(color)  * ity) >> 11;
 
 		result->wbuf() [y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
 	}
@@ -1070,7 +1068,7 @@ Img_c * IM_DigitFont_14x19()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_11x14;
+	return digit_font_14x19;
 }
 
 //--- editor settings ---

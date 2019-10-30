@@ -70,17 +70,17 @@ public:
 	 Img_c(int width, int height, bool _dummy = false);
 	~Img_c();
 
-	bool is_null() const
+	inline bool is_null() const
 	{
 		return (! pixels);
 	}
 
-	int width() const
+	inline int width() const
 	{
 		return w;
 	}
 
-	int height() const
+	inline int height() const
 	{
 		return h;
 	}
