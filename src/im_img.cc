@@ -951,5 +951,62 @@ Img_c * IM_CreateLightSprite()
 	return result;
 }
 
+
+//------------------------------------------------------------------------
+
+/* a digit-only font, in two sizes */
+
+static const int digit_font_intensities[] =
+{
+	0x00, 0x16, 0x24, 0x32, 0x3f,
+	0x4c, 0x58, 0x65, 0x72, 0x7e,
+	0x8b, 0x98, 0xa4, 0xb0, 0xbc,
+	0xc9, 0xd6, 0xe2, 0xef, 0xfc,
+};
+
+
+static const char *small_font_text[] =
+{
+	"                                                                                                                                               ",
+	"  aaaaaaa    aaaaaa     aaaaaaaa    aaaaaaa     aaaaa    aaaaaaa     aaaaaa    aaaaaaaa   aaaaaaa    aaaaaaa                                   ",
+	"  agqspda    alprga     aeorsoca    apsspfa    aalrga    aprrrka    aanssna    afrrrrqa   ajrsqha   aajrspca                                   ",
+	" aaqogqoa    aontha     ahojirna    amiiqpa    aertha    asmkkga   aanrjika    adkkkpqa  aasnfora   adsmgqoa     aaaa                          ",
+	" afteaitaa   aaatha     aaaaamqa    aaaakra   aaomtha    ashaaaa   absiaaaa    aaaaarma  adtcahta   aksaajsaa    ahfa                          ",
+	" ajsaaatga     atha        aaooa     ahjqna   ahratha    asrqmaa   agtmrpfa       agtea  aarnhopa   akraajtda    arma                          ",
+	" akraaatha     atha       aajtha     aqssha  aaqjathaa   ankmsna   ajtqjpraa      anqaa  aaktssiaa  aftjaptga    ajga                 aaaaaa   ",
+	" aksaaatga     atha      aagskaa     aaanra  akqeetiba   aaaalsa   ajthactga     aarla   aftialsba  aalstotca    aaaa                 amrrla   ",
+	" agtcagtba     atha     aaermaa    aaaaagta  antttttka  aaaaajsa   afteaatha     ahtca   aksaaatga   aaaajsaa    aaaa       aaaa      agjjfa   ",
+	" aarlanqaa   aaathaa    acroaaaa   afhaanra  aaaaathaa  aegacpqa   aarmaksba     aopaa   agthaktba   agadrna     amia       anha      aaaaaa   ",
+	"  ajtssha    aqtttsa    ajttttra   ahtstsia      atha   ahtstrga    aisrtlaa     aska    aantrtmaa   arstpba     arma       aska               ",
+	"  aadhcaa    aaaaaaa    aaaaaaaa   aabhgaaa      aaaa   aachfaaa    aachcaa      aaaa     aadhdaa    abhfaaa     aaaa       aaaa               ",
+	"   aaaaa                            aaaaa                aaaaa       aaaaa                 aaaaa     aaaaa                                     ",
+	"                                                                                                                                               "
+};
+
+
+static const char *medium_font_text[] =
+{
+	"                                                                                                                                                                                      ",
+	"    aaaaaa         aaaaa       aaaaaaa       aaaaaaa          aaaaa     aaaaaaaaa        aaaaaa     aaaaaaaaaa      aaaaaa        aaaaaa                                              ",
+	"   aadklgaa     aaaafhca      aacjlkeaa     aadjlkfaa         adhga     adhhhhhhaa      aagllhaa    afhhhhhhga     aafklhaaa     aaglleaa                                             ",
+	"  aajstttnaa    agqsttja      ansttttlaa    altttttoaa       aaqtra     akttttttda     aaottttna    aqttttttsa    aanttttqda    aaottttlaa                                            ",
+	"  adssjgqtja    ajtrrtja      arqlilstia    alokikrtma      aakttra     aktommmmba    aaotpjjnma    akmmmmntpa    aktrigotoa    altqhirtha                                            ",
+	"  amtkaaetqa    acbamtja      afaaaajtoa    aaaaaaetqa      acsosra     aktjaaaaaa    ahtpaaaaaa    aaaaaamtka    aotgaaarsa    arsdaaftpa      aaaaa                                 ",
+	"  aqtbaaaqtaa   aaaamtja      aaa  actpa         aasqa     aansdsra     aktjaaaa      anthaaaaa         aarsba    aptcaaarsa    atqaaaarsaa     adlia                                 ",
+	"  arraaaaotga      amtja           aitna      aaaamtma     aftmasra     aktpqpkaa     aqsfoqohaa        agtpaa    aktmaahtpa    atqaaaartea     agtpa                                 ",
+	"  asqa  antia      amtja          aaqtga      aorstnaa    aapraasra     aktssttqaa    arsssrttja        antja     aantrqsqda    assaaadstha     afsoa                                 ",
+	"  asqa  amtja      amtja         aantnaa      aorstqda    ajtjaasra     agiaafqtma    astrdaissaa      aarsaa     aanssstqea    aotoabpttia     aaaaa                     aaaaaaaa    ",
+	"  asqa  antia      amtja        aaltpaa       aaaaltpa   aarpaaasraaa   aaaaaaetra    astjaaaotia      ahtoa      antnaaisqaa   adrttttqtga                               ahqqqqda    ",
+	"  arraaaaotga      amtja       aajtrca           aaqsa   aitqppptspja        aarsa    artea amtka      aotia      arsaaaaotfa   aablongptba                               airrrrda    ",
+	"  aptcaaaqsaa      amtja      aahsreaa      aaa  aaqta   aisssssttsma   aaa  aassa    aotga antka     aassaa      asraaaantia    aaaaaasraa     aaaaa         aaaaa       aaaaaaaa    ",
+	"  altlaaftqa     aaamtjaaa    afssgaaaaa    abaaaaessa   aaaaaaasraaa   abaaaajtpa    aktmaaaqtea     aitoa       arseaaaqtfa   aaaaaamtma      ackha         aekga                   ",
+	"  abssljrtia     aooqtpona    aqtqooooma    aqpmknstma         asra     aqplknttia    aartmjotpaa     aotha       amtrkjotqaa   aiplkotraa      agtpa         aktna                   ",
+	"  aahstttlaa     attttttra    arttttttqa    apttttsmaa         asra     apttttskaa     agrtttpda      asraa       aaottttqfa    aittttpea       agtpa         aktna                   ",
+	"   aaaijdaa      aaaaaaaaa    aaaaaaaaaa    aadijibaa          aaaa     aadijhaaa      aaahjfaaa      aaaa         aadjjfaaa    aacijfaaa       aaaaa         aaaaa                   ",
+	"     aaaaa                                   aaaaaaa                     aaaaaa          aaaaa                      aaaaaa       aaaaaa                                               ",
+	"                                                                                                                                                                                      ",
+};
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
