@@ -1656,7 +1656,7 @@ void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 	// color set by caller
 
 #ifdef NO_OPENGL
-	fl_pie(sx - size/2, sy - size/2, size, size, 0, 360);
+	gl_rectf(sx - size/2, sy - size/2, size, size);
 #else
 	glPointSize(size);
 
