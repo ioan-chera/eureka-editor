@@ -2338,26 +2338,6 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 	// NOTE: string is limited to the digits '0' to '9', spaces,
 	//       and the characters '-', '.' and ':'.
 
-#ifndef NO_OPENGL
-	// TODO use the built-in digit fonts
-	//      [ re-use some of the logic below in S/W version ]
-
-	gl_color(FL_BLACK);
-
-	gl_draw(s, x - 2, y);
-	gl_draw(s, x - 1, y);
-	gl_draw(s, x + 1, y);
-	gl_draw(s, x + 2, y);
-	gl_draw(s, x,     y + 1);
-	gl_draw(s, x,     y - 1);
-
-	gl_color(OBJECT_NUM_COL);
-
-	gl_draw(s, x, y);
-
-#else
-	// software drawing method
-
 	Img_c *font_img;
 	int font_cw;
 	int font_ch;
@@ -2377,6 +2357,16 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 		font_ch   = 19;
 		font_step = font_cw - 2;
 	}
+
+#ifndef NO_OPENGL
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_ALPHA_TEST);
+
+	glAlphaFunc(GL_GREATER, 0.5);
+
+	// bind the sprite image (upload it to OpenGL if needed)
+	font_img->bind_gl();
+#endif
 
 	// compute total size
 	int total_w = strlen(s) * font_step + 2;
@@ -2402,15 +2392,17 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 
 		RenderFontChar(x, y, font_img, ch * font_cw, 0, font_cw, font_ch);
 	}
+
+#ifndef NO_OPENGL
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_TEXTURE_2D);
 #endif
 }
 
 
 void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih)
 {
-#ifndef NO_OPENGL
-
-#else
+#ifdef NO_OPENGL
 	// software rendering
 
 	rx -= rgb_x;
@@ -2442,6 +2434,29 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 			}
 		}
 	}
+
+#else // OpenGL
+	int rx2 = rx + iw;
+	int ry2 = ry + ih;
+
+	int pow2_width  = RoundPOW2(img->width());
+	int pow2_height = RoundPOW2(img->height());
+
+	float tx1 = (float)ix / (float)pow2_width;
+	float ty1 = (float)iy / (float)pow2_height;
+	float tx2 = (float)(ix + iw) / (float)pow2_width;
+	float ty2 = (float)(iy + ih) / (float)pow2_height;
+
+	glColor3f(1, 1, 1);
+
+	glBegin(GL_QUADS);
+
+	glTexCoord2f(tx1, ty1); glVertex2i(rx,  ry);
+	glTexCoord2f(tx1, ty2); glVertex2i(rx,  ry2);
+	glTexCoord2f(tx2, ty2); glVertex2i(rx2, ry2);
+	glTexCoord2f(tx2, ty1); glVertex2i(rx2, ry);
+
+	glEnd();
 #endif
 }
 
