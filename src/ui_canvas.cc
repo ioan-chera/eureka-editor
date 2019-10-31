@@ -968,7 +968,10 @@ void UI_Canvas::DrawThingSprites()
 		if (! sprite)
 			sprite = IM_UnknownSprite();
 
-		DrawSprite(x, y, sprite, info->scale);
+		int sx = SCREENX(x);
+		int sy = SCREENY(y);
+
+		RenderSprite(sx, sy, info->scale * grid.Scale, sprite);
 	}
 
 #ifndef NO_OPENGL
@@ -978,7 +981,7 @@ void UI_Canvas::DrawThingSprites()
 }
 
 
-void UI_Canvas::DrawSprite(double map_x, double map_y, Img_c *img, float scale)
+void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 {
 	int W = img->width();
 	int H = img->height();
@@ -986,34 +989,36 @@ void UI_Canvas::DrawSprite(double map_x, double map_y, Img_c *img, float scale)
 	scale = scale * 0.5;
 
 #ifdef NO_OPENGL
-	int bx1 = SCREENX(map_x - W * scale);
-	int bx2 = SCREENX(map_x + W * scale);
+	// software rendering
 
-	int by1 = SCREENY(map_y + H * scale);
-	int by2 = SCREENY(map_y - H * scale);
+	int bx1 = sx + (int)floor(-W * scale) - rgb_x;
+	int bx2 = sx + (int)ceil ( W * scale) - rgb_x;
+
+	int by1 = sy + (int)floor(-H * scale) - rgb_y;
+	int by2 = sy + (int)ceil ( H * scale) - rgb_y;
 
 	// prevent division by zero
 	if (bx2 <= bx1) bx2 = bx1 + 1;
 	if (by2 <= by1) by2 = by1 + 1;
 
 	// clip to screen
-	int sx1 = MAX(bx1, x());
-	int sy1 = MAX(by1, y());
+	int rx1 = MAX(bx1, 0);
+	int ry1 = MAX(by1, 0);
 
-	int sx2 = MIN(bx2, x() + w());
-	int sy2 = MIN(by2, y() + h());
+	int rx2 = MIN(bx2, rgb_w) - 1;
+	int ry2 = MIN(by2, rgb_h) - 1;
 
-	if (sy2 <= sy1 || sx2 <= sx1)
+	if (rx1 >= rx2 || ry1 >= ry2)
 		return;
 
-	for (int sy = sy1 ; sy <= sy2 ; sy++)
+	for (int ry = ry1 ; ry <= ry2 ; ry++)
 	{
-		byte *dest = rgb_buf + 3 * ((sx1 - rgb_x) + (sy - rgb_y) * rgb_w);
+		byte *dest = rgb_buf + 3 * (rx1 + ry * rgb_w);
 
-		for (int sx = sx1 ; sx <= sx2 ; sx++, dest += 3)
+		for (int rx = rx1 ; rx <= rx2 ; rx++, dest += 3)
 		{
-			int ix = W * (sx - bx1) / (bx2 - bx1);
-			int iy = H * (sy - by1) / (by2 - by1);
+			int ix = W * (rx - bx1) / (bx2 - bx1);
+			int iy = H * (ry - by1) / (by2 - by1);
 
 			ix = CLAMP(0, ix, W - 1);
 			iy = CLAMP(0, iy, H - 1);
@@ -1028,11 +1033,11 @@ void UI_Canvas::DrawSprite(double map_x, double map_y, Img_c *img, float scale)
 	}
 
 #else // OpenGL
-	int bx1 = SCREENX(map_x - W * scale);
-	int bx2 = SCREENX(map_x + W * scale);
+	int bx1 = sx + (int)floor(-W * scale);
+	int bx2 = sx + (int)ceil ( W * scale);
 
-	int by1 = SCREENY(map_y - H * scale);
-	int by2 = SCREENY(map_y + H * scale);
+	int by1 = sy + (int)floor(-H * scale);
+	int by2 = sy + (int)ceil ( H * scale);
 
 	// don't make too small
 	if (bx2 <= bx1) bx2 = bx1 + 1;

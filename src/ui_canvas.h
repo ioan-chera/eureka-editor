@@ -125,7 +125,6 @@ private:
 	void DrawSplitPoint(double map_x, double map_y);
 	void DrawVertex(double map_x, double map_y, int r);
 	void DrawThing(double map_x, double map_y, int r, int angle, bool big_arrow);
-	void DrawSprite(double map_x, double map_y, Img_c *img, float scale);
 	void DrawCamera();
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
@@ -133,6 +132,7 @@ private:
 	void DrawNumber(int x, int y, int num);
 	void DrawCurrentLine();
 
+	void RenderSprite(int sx, int sy, float scale, Img_c *img);
 	void RenderSector(int num);
 
 	void SelboxDraw();
