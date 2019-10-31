@@ -272,9 +272,9 @@ public:
 
 UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
+	cur_obj(),
 	find_numbers(new number_group_c),
-	 tag_numbers(new number_group_c),
-	cur_obj(OBJ_THINGS, -1)
+	 tag_numbers(new number_group_c)
 {
 	box(FL_FLAT_BOX);
 

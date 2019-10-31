@@ -28,8 +28,12 @@ class UI_TripleCheckButton;
 class UI_FindAndReplace : public Fl_Group
 {
 private:
-	// main thing we are finding / replacing
+	// object kind we are finding / replacing
 	Fl_Choice *what;
+
+	// current (found) object
+	Objid cur_obj;
+
 
 	// --- FIND AREA ---
 
@@ -42,6 +46,7 @@ private:
 	// for numeric types, this contains the number(s) to match
 	number_group_c *find_numbers;
 
+
 	// --- REPLACE AREA ---
 
 	Fl_Input  *rep_value;
@@ -49,6 +54,7 @@ private:
 	Fl_Output *rep_desc;
 	Fl_Button *apply_but;
 	Fl_Button *replace_all_but;
+
 
 	// --- FILTER AREA ---
 
@@ -87,9 +93,6 @@ private:
 
 	Fl_Check_Button *o_one_sided;
 	Fl_Check_Button *o_two_sided;
-
-	// current (found) object
-	Objid cur_obj;
 
 public:
 	UI_FindAndReplace(int X, int Y, int W, int H);
