@@ -71,6 +71,7 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 #endif
 	highlight(),
 	split_ld(-1),
+	snap_x(-1), snap_y(-1),
 	seen_sectors()
 { }
 
@@ -355,6 +356,9 @@ void UI_Canvas::DrawMap()
 
 	if (edit.mode != OBJ_THINGS)
 		DrawThings();
+
+	if (grid.snap && grid_snap_indicator)
+		DrawSnapPoint();
 
 	DrawLinedefs();
 
@@ -1093,6 +1097,24 @@ void UI_Canvas::DrawNumber(int x, int y, int num)
 }
 
 
+void UI_Canvas::CheckGridSnap()
+{
+	if (!grid.snap || !grid_snap_indicator)
+		return;
+
+	double new_snap_x = grid.SnapX(edit.map_x);
+	double new_snap_y = grid.SnapY(edit.map_y);
+
+	if (snap_x == new_snap_x && snap_y == new_snap_y)
+		return;
+
+	snap_x = new_snap_x;
+	snap_y = new_snap_y;
+
+	redraw();
+}
+
+
 void UI_Canvas::HighlightSet(Objid& obj)
 {
 	if (highlight == obj)
@@ -1699,6 +1721,28 @@ void UI_Canvas::DrawCamera()
 				mx + dy * 0.4, my - dx * 0.4);
 
 	RenderThickness(1);
+}
+
+
+void UI_Canvas::DrawSnapPoint()
+{
+	// don't draw if an action is occurring
+	if (edit.action != ACT_NOTHING)
+		return;
+
+	if (split_ld >= 0)
+		return;
+
+	if (! Vis(snap_x, snap_y, 10))
+		return;
+
+	RenderColor(FL_CYAN);
+
+	int sx = SCREENX(snap_x);
+	int sy = SCREENY(snap_y);
+
+	RenderRect(sx,   sy-2, 2, 6);
+	RenderRect(sx-2, sy,   6, 2);
 }
 
 

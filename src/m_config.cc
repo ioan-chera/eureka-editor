@@ -476,6 +476,15 @@ static const opt_desc_t options[] =
 		&grid_hide_in_free_mode
 	},
 
+	{	"grid_snap_indicator",
+		0,
+		OPT_BOOLEAN,
+		"v",
+		"show a cross at the grid-snapped location",
+		NULL,
+		&grid_snap_indicator
+	},
+
 	{	"grid_style",
 		0,
 		OPT_INTEGER,

@@ -291,6 +291,8 @@ void UpdateHighlight()
 	else
 		main_win->canvas->HighlightForget();
 
+	main_win->canvas->CheckGridSnap();
+
 	UpdatePanel();
 }
 

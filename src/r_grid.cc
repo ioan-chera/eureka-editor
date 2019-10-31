@@ -40,6 +40,7 @@ int  grid_default_mode = 0;  // off
 
 int  grid_style;  // 0 = squares, 1 = dotty
 bool grid_hide_in_free_mode = false;
+bool grid_snap_indicator = true;
 
 
 Grid_State_c::Grid_State_c() :

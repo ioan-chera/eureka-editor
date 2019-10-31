@@ -50,6 +50,9 @@ private:
 	double split_x;
 	double split_y;
 
+	// this is the cached grid-snap position
+	double snap_x, snap_y;
+
 	// drawing state only
 	double map_lx, map_ly;
 	double map_hx, map_hy;
@@ -91,6 +94,8 @@ public:
 
 	void SplitLineSet(int ld, double new_x, double new_y);
 	void SplitLineForget();
+
+	void CheckGridSnap();
 
 	void DrawSelection(selection_c *list);
 	void DrawSectorSelection(selection_c *list, double dx, double dy);
@@ -141,6 +146,7 @@ private:
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawNumber(int x, int y, int num);
 	void DrawCurrentLine();
+	void DrawSnapPoint();
 
 	void SelboxDraw();
 
