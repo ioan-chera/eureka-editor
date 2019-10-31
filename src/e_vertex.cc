@@ -53,6 +53,28 @@ int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
 }
 
 
+int Vertex_FindDragOther(int v_num)
+{
+	// we always return the START of a linedef if possible, but
+	// if that doesn't occur then return the END of a linedef.
+
+	int fallback = -1;
+
+	for (int i = 0 ; i < NumLineDefs ; i++)
+	{
+		const LineDef *L = LineDefs[i];
+
+		if (L->end == v_num)
+			return L->start;
+
+		if (L->start == v_num && fallback < 0)
+			fallback = L->end;
+	}
+
+	return fallback;
+}
+
+
 int Vertex_HowManyLineDefs(int v_num)
 {
 	int count = 0;

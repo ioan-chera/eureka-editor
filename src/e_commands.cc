@@ -549,8 +549,9 @@ static void DoBeginDrag()
 	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
 	edit.drag_start_z = edit.drag_cur_z = edit.click_map_z;
 
-	edit.drag_screen_dx = edit.drag_screen_dy = 0;
-	edit.drag_thing_num = -1;
+	edit.drag_screen_dx  = edit.drag_screen_dy = 0;
+	edit.drag_thing_num  = -1;
+	edit.drag_other_vert = -1;
 
 	// the focus is only used when grid snapping is on
 	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
@@ -591,6 +592,10 @@ static void DoBeginDrag()
 	{
 		edit.drag_lines = new selection_c(OBJ_LINEDEFS);
 		ConvertSelection(edit.Selected, edit.drag_lines);
+
+		// find opposite end-point when dragging a single vertex
+		if (edit.dragged.valid())
+			edit.drag_other_vert = Vertex_FindDragOther(edit.dragged.num);
 	}
 
 	edit.clicked.clear();
@@ -641,14 +646,15 @@ static void ACT_Drag_release(void)
 			Render3D_DragSectors();
 	}
 
+	// note: DragDelta needs edit.dragged
+	double dx, dy;
+	main_win->canvas->DragDelta(&dx, &dy);
+
 	Objid dragged(edit.dragged);
 	edit.dragged.clear();
 
 	if (edit.drag_lines)
 		edit.drag_lines->clear_all();
-
-	double dx, dy;
-	main_win->canvas->DragDelta(&dx, &dy);
 
 	if (! edit.render3d && (dx || dy))
 	{

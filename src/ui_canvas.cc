@@ -296,6 +296,16 @@ void UI_Canvas::DrawEverything()
 		}
 
 		RenderThickness(1);
+
+		// when ratio lock is on, want to see the new line
+		if (edit.mode == OBJ_VERTICES && grid.ratio > 0 && edit.drag_other_vert >= 0)
+		{
+			const Vertex *v0 = Vertices[edit.drag_other_vert];
+			const Vertex *v1 = Vertices[edit.dragged.num];
+
+			RenderColor(RED);
+			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy);
+		}
 	}
 	else if (highlight.valid())
 	{
@@ -1840,7 +1850,23 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	*dx = edit.drag_cur_x - edit.drag_start_x;
 	*dy = edit.drag_cur_y - edit.drag_start_y;
 
-	if (grid.snap)
+	// handle ratio-lock of a single dragged vertex
+	if (edit.mode == OBJ_VERTICES && grid.ratio > 0 && edit.drag_other_vert >= 0)
+	{
+		const Vertex *v0 = Vertices[edit.drag_other_vert];
+		const Vertex *v1 = Vertices[edit.dragged.num];
+
+		double new_x = edit.drag_cur_x;
+		double new_y = edit.drag_cur_y;
+
+		grid.RatioSnapXY(new_x, new_y, v0->x(), v0->y());
+
+		*dx = new_x - v1->x();
+		*dy = new_y - v1->y();
+		return;
+	}
+
+	if (grid.snap && edit.drag_other_vert < 0)
 	{
 		float pixel_dx = *dx * grid.Scale;
 		float pixel_dy = *dy * grid.Scale;

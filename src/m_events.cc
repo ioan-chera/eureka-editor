@@ -499,7 +499,8 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		edit.drag_cur_x = edit.map_x;
 		edit.drag_cur_y = edit.map_y;
 
-		// if dragging a single vertex, update the possible split_line
+		// if dragging a single vertex, update the possible split_line.
+		// Note: ratio-lock is handled in UI_Canvas::DragDelta
 		if (edit.mode == OBJ_VERTICES && edit.dragged.valid())
 			UpdateHighlight();
 
