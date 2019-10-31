@@ -1531,6 +1531,58 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 }
 
 
+std::string LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
+{
+	idx = abs(idx);
+	idy = abs(idy);
+
+	if (idx == 0 && idy == 0)
+	{
+		if (number_only)
+			return "0:0";
+		else
+			return "zero-len";
+	}
+	else if (idx == 0)
+	{
+		if (number_only)
+			return "1:0";
+		else
+			return "vertical";
+	}
+	else if (idy == 0)
+	{
+		if (number_only)
+			return "0:1";
+		else
+			return "horizontal";
+	}
+
+	// compute the greatest common divisor
+	int a = idx;
+	int b = idy;
+	int gcd = 1;
+
+	for (;;)
+	{
+		if (a > b)
+			a -= b;
+		else if (b > a)
+			b -= a;
+		else
+		{
+			gcd = a;
+			break;
+		}
+	}
+
+	char buffer[256];
+	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx/gcd, idy/gcd);
+
+	return std::string(buffer);
+}
+
+
 bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
 					const Sector *front, const Sector *back)
 {

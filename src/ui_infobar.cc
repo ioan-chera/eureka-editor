@@ -22,6 +22,7 @@
 #include "ui_window.h"
 
 #include "e_main.h"
+#include "e_linedef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "r_grid.h"
@@ -622,51 +623,19 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	double dx = edit.draw_to_x - V->x();
 	double dy = edit.draw_to_y - V->y();
 
+	// show a ratio value
+	fixcoord_t fdx = TO_COORD(dx);
+	fixcoord_t fdy = TO_COORD(dy);
+
+	std::string ratio_name = LD_RatioName(fdx, fdy, false);
+
+	int old_cx = cx;
+	IB_String(cx, cy, ratio_name.c_str());
+
+	cx = MAX(cx+12, old_cx + 170);
+
 	IB_Coord(cx, cy, "delta x", dx);
 	IB_Coord(cx, cy,       "y", dy);
-
-	// show a ratio value
-	int idx = I_ROUND(fabs(dx) * 4096);
-	int idy = I_ROUND(fabs(dy) * 4096);
-
-	if (idy == 0)
-	{
-		IB_String(cx, cy, "horizontal");
-		return;
-	}
-	else if (idx == 0)
-	{
-		IB_String(cx, cy, "vertical");
-		return;
-	}
-	else if (idx == idy)
-	{
-		IB_String(cx, cy, "ratio 1:1");
-		return;
-	}
-
-	// compute the greatest common divisor
-	int a = idx;
-	int b = idy;
-	int gcd = 1;
-
-	for (;;)
-	{
-		if (a > b)
-			a -= b;
-		else if (b > a)
-			b -= a;
-		else
-		{
-			gcd = a;
-			break;
-		}
-	}
-
-	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "ratio %d:%d", idx/gcd, idy/gcd);
-
-	IB_String(cx, cy, buffer);
 }
 
 
