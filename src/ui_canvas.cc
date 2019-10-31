@@ -72,10 +72,9 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 static byte *rgb_buf;
 static int rgb_x, rgb_y;
 static int rgb_w, rgb_h;
-static int line_width;
+static int thickness;
 
 static struct { byte r, g, b; } cur_col;
-
 
 
 
@@ -162,11 +161,8 @@ void UI_Canvas::draw()
 	ortho();
 #endif
 
-	gl_color(FL_WHITE);
-
-	// must always set the line style *after* the color.
-	// [ see FLTK docs for details ]
-	gl_line_width(1);
+	RenderColor(FL_WHITE);
+	RenderThickness(1);
 
 	// default font (for showing object numbers)
 	int font_size = (grid.Scale < 0.4) ? 10 :
@@ -310,42 +306,42 @@ void UI_Canvas::DrawEverything()
 		DragDelta(&dx, &dy);
 
 		if (edit.mode == OBJ_VERTICES)
-			gl_color(HI_AND_SEL_COL);
+			RenderColor(HI_AND_SEL_COL);
 		else
-			gl_color(HI_COL);
+			RenderColor(HI_COL);
 
 		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
-			gl_line_width(2);
+			RenderThickness(2);
 
 		DrawHighlight(edit.mode, edit.dragged.num, false /* skip_lines */, dx, dy);
 
 		if (edit.mode == OBJ_VERTICES && highlight.valid())
 		{
-			gl_color(HI_COL);
+			RenderColor(HI_COL);
 			DrawHighlight(highlight.type, highlight.num);
 		}
 
-		gl_line_width(1);
+		RenderThickness(1);
 	}
 	else if (highlight.valid())
 	{
 		if (edit.action != ACT_DRAW_LINE && edit.Selected->get(highlight.num))
-			gl_color(HI_AND_SEL_COL);
+			RenderColor(HI_AND_SEL_COL);
 		else
-			gl_color(HI_COL);
+			RenderColor(HI_COL);
 
 		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
-			gl_line_width(2);
+			RenderThickness(2);
 
 		DrawHighlight(highlight.type, highlight.num);
 
 		if (! edit.error_mode)
 		{
-			gl_color(LIGHTRED);
+			RenderColor(LIGHTRED);
 			DrawTagged(highlight.type, highlight.num);
 		}
 
-		gl_line_width(1);
+		RenderThickness(1);
 	}
 
 	if (edit.action == ACT_SELBOX)
@@ -361,8 +357,8 @@ void UI_Canvas::DrawEverything()
 //
 void UI_Canvas::DrawMap()
 {
-	gl_color(FL_BLACK);
-	gl_rectf(xx, yy, w(), h());
+	RenderColor(FL_BLACK);
+	RenderRect(xx, yy, w(), h());
 
 	if (edit.sector_render_mode && ! edit.error_mode)
 	{
@@ -417,8 +413,8 @@ void UI_Canvas::DrawGrid_Normal()
 
 	if (pixels_1 < 1.6)
 	{
-		gl_color(DarkerColor(DarkerColor(normal_main_col)));
-		gl_rectf(xx, yy, w(), h());
+		RenderColor(DarkerColor(DarkerColor(normal_main_col)));
+		RenderRect(xx, yy, w(), h());
 
 		DrawAxes(normal_axis_col);
 		return;
@@ -434,11 +430,11 @@ void UI_Canvas::DrawGrid_Normal()
 	if (pixels_2 < 2.2)
 		flat_col = DarkerColor(flat_col);
 
-	gl_color(flat_col);
+	RenderColor(flat_col);
 
 	if (pixels_2 < 1.6)
 	{
-		gl_rectf(xx, yy, w(), h());
+		RenderRect(xx, yy, w(), h());
 	}
 	else
 	{
@@ -461,7 +457,7 @@ void UI_Canvas::DrawGrid_Normal()
 	if (pixels_3 < 4.2)
 		main_col = DarkerColor(main_col);
 
-	gl_color(main_col);
+	RenderColor(main_col);
 
 	{
 		int gx = floor(map_lx / grid.step) * grid.step;
@@ -493,15 +489,15 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	if (pixels_1 < 1.6)
 	{
-		gl_color(DarkerColor(DarkerColor(dotty_point_col)));
-		gl_rectf(xx, yy, w(), h());
+		RenderColor(DarkerColor(DarkerColor(dotty_point_col)));
+		RenderRect(xx, yy, w(), h());
 
 		DrawAxes(dotty_axis_col);
 		return;
 	}
 
 
-	gl_color(dotty_major_col);
+	RenderColor(dotty_major_col);
 	{
 		int gx = floor(map_lx / grid_step_3) * grid_step_3;
 
@@ -518,7 +514,7 @@ void UI_Canvas::DrawGrid_Dotty()
 	DrawAxes(dotty_axis_col);
 
 
-	gl_color(dotty_minor_col);
+	RenderColor(dotty_minor_col);
 	{
 		int gx = floor(map_lx / grid_step_2) * grid_step_2;
 
@@ -535,9 +531,9 @@ void UI_Canvas::DrawGrid_Dotty()
 
 
 	if (pixels_1 < 4.02)
-		gl_color(DarkerColor(dotty_point_col));
+		RenderColor(DarkerColor(dotty_point_col));
 	else
-		gl_color(dotty_point_col);
+		RenderColor(dotty_point_col);
 
 	{
 		int gx = floor(map_lx / grid_step_1) * grid_step_1;
@@ -550,9 +546,9 @@ void UI_Canvas::DrawGrid_Dotty()
 			int sy = SCREENY(ny);
 
 			if (pixels_1 < 24.1)
-				gl_rectf(sx, sy, 1, 1);
+				RenderRect(sx, sy, 1, 1);
 			else
-				gl_rectf(sx, sy, 2, 2);
+				RenderRect(sx, sy, 2, 2);
 		}
 	}
 }
@@ -560,17 +556,16 @@ void UI_Canvas::DrawGrid_Dotty()
 
 void UI_Canvas::DrawAxes(Fl_Color col)
 {
-	gl_color(col);
+	RenderColor(col);
 
 	DrawMapLine(0, map_ly, 0, map_hy);
-
 	DrawMapLine(map_lx, 0, map_hx, 0);
 }
 
 
 void UI_Canvas::DrawMapBounds()
 {
-	gl_color(FL_RED);
+	RenderColor(FL_RED);
 
 	DrawMapLine(Map_bound_x1, Map_bound_y1, Map_bound_x2, Map_bound_y1);
 	DrawMapLine(Map_bound_x1, Map_bound_y2, Map_bound_x2, Map_bound_y2);
@@ -604,17 +599,17 @@ void UI_Canvas::DrawVertex(double map_x, double map_y, int r)
 
 // BLOBBY TEST
 #if 0
-	gl_line(scrx - 1, scry - 2, scrx + 1, scry - 2);
-	gl_line(scrx - 2, scry - 1, scrx + 2, scry - 1);
-	gl_line(scrx - 2, scry + 0, scrx + 2, scry + 0);
-	gl_line(scrx - 2, scry + 1, scrx + 2, scry + 1);
-	gl_line(scrx - 1, scry + 2, scrx + 1, scry + 2);
+	RenderLine(scrx - 1, scry - 2, scrx + 1, scry - 2);
+	RenderLine(scrx - 2, scry - 1, scrx + 2, scry - 1);
+	RenderLine(scrx - 2, scry + 0, scrx + 2, scry + 0);
+	RenderLine(scrx - 2, scry + 1, scrx + 2, scry + 1);
+	RenderLine(scrx - 1, scry + 2, scrx + 1, scry + 2);
 #else
-	gl_line(scrx - r, scry - r, scrx + r, scry + r);
-	gl_line(scrx + r, scry - r, scrx - r, scry + r);
+	RenderLine(scrx - r, scry - r, scrx + r, scry + r);
+	RenderLine(scrx + r, scry - r, scrx - r, scry + r);
 
-	gl_line(scrx - 1, scry, scrx + 1, scry);
-	gl_line(scrx, scry - 1, scrx, scry + 1);
+	RenderLine(scrx - 1, scry, scrx + 1, scry);
+	RenderLine(scrx, scry - 1, scrx, scry + 1);
 #endif
 }
 
@@ -623,7 +618,7 @@ void UI_Canvas::DrawVertices()
 {
 	const int r = vertex_radius(grid.Scale);
 
-	gl_color(FL_GREEN);
+	RenderColor(FL_GREEN);
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
@@ -795,7 +790,7 @@ void UI_Canvas::DrawLinedefs()
 			break;
 		}
 
-		gl_color(col);
+		RenderColor(col);
 
 		switch (line_kind)
 		{
@@ -864,9 +859,9 @@ void UI_Canvas::DrawThing(double x, double y, int r, int angle, bool big_arrow)
 void UI_Canvas::DrawThings()
 {
 	if (edit.mode != OBJ_THINGS)
-		gl_color(DARKGREY);
+		RenderColor(DARKGREY);
 	else if (edit.error_mode)
-		gl_color(LIGHTGREY);
+		RenderColor(LIGHTGREY);
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
@@ -881,7 +876,7 @@ void UI_Canvas::DrawThings()
 		if (edit.mode == OBJ_THINGS && !edit.error_mode)
 		{
 			Fl_Color col = (Fl_Color)info->color;
-			gl_color(col);
+			RenderColor(col);
 		}
 
 		int r = info->radius;
@@ -930,7 +925,7 @@ void UI_Canvas::DrawThingBodies()
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
 
 		Fl_Color col = (Fl_Color)info->color;
-		gl_color(DarkerColor(DarkerColor(col)));
+		RenderColor(DarkerColor(DarkerColor(col)));
 
 		int r = info->radius;
 
@@ -939,7 +934,7 @@ void UI_Canvas::DrawThingBodies()
 		int sx2 = SCREENX(x + r);
 		int sy2 = SCREENY(y - r);
 
-		gl_rectf(sx1, sy1, sx2 - sx1 + 1, sy2 - sy1 + 1);
+		RenderRect(sx1, sy1, sx2 - sx1 + 1, sy2 - sy1 + 1);
 	}
 }
 
@@ -1128,7 +1123,7 @@ void UI_Canvas::DrawNumber(int x, int y, int num)
 	y -= gl_height() / 2;
 #endif
 
-	gl_number_string(buffer, x, y);
+	RenderNumString(buffer, x, y);
 }
 
 
@@ -1181,7 +1176,7 @@ void UI_Canvas::SplitLineForget()
 void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 							  double dx, double dy)
 {
-	// gl_color() and gl_line_width() has been done by caller
+	// color and line thickness have been set by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
 
@@ -1241,10 +1236,10 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 			int sx2 = SCREENX(x) + r;
 			int sy2 = SCREENY(y) + r;
 
-			gl_line(sx1, sy1, sx2, sy1);
-			gl_line(sx2, sy1, sx2, sy2);
-			gl_line(sx2, sy2, sx1, sy2);
-			gl_line(sx1, sy2, sx1, sy1);
+			RenderLine(sx1, sy1, sx2, sy1);
+			RenderLine(sx2, sy1, sx2, sy2);
+			RenderLine(sx2, sy2, sx1, sy2);
+			RenderLine(sx1, sy2, sx1, sy1);
 		}
 		break;
 
@@ -1294,7 +1289,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 
 void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 {
-	// gl_color() and gl_line_width() has been done by caller
+	// color and line thickness have been set by caller
 
 	switch (objtype)
 	{
@@ -1337,10 +1332,10 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			int sx2 = SCREENX(x) + r;
 			int sy2 = SCREENY(y) + r;
 
-			gl_line(sx1, sy1, sx2, sy1);
-			gl_line(sx2, sy1, sx2, sy2);
-			gl_line(sx2, sy2, sx1, sy2);
-			gl_line(sx1, sy2, sx1, sy1);
+			RenderLine(sx1, sy1, sx2, sy1);
+			RenderLine(sx2, sy1, sx2, sy2);
+			RenderLine(sx2, sy2, sx1, sy2);
+			RenderLine(sx1, sy2, sx1, sy1);
 		}
 		break;
 
@@ -1389,7 +1384,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 
 void UI_Canvas::DrawTagged(int objtype, int objnum)
 {
-	// gl_color has been done by caller
+	// color has been set by caller
 
 	// handle tagged linedefs : show matching sector(s)
 	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
@@ -1411,7 +1406,7 @@ void UI_Canvas::DrawTagged(int objtype, int objnum)
 
 void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 {
-	// gl_color() and gl_line_width() has been done by caller
+	// color and line thickness have been set by caller
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1462,17 +1457,17 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		gl_color(SEL_COL);
+		RenderColor(SEL_COL);
 
 		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
-			gl_line_width(2);
+			RenderThickness(2);
 
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
 			DrawHighlightTransform(list->what_type(), *it);
 		}
 
-		gl_line_width(1);
+		RenderThickness(1);
 		return;
 	}
 
@@ -1484,10 +1479,10 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		DragDelta(&dx, &dy);
 	}
 
-	gl_color(edit.error_mode ? FL_RED : SEL_COL);
+	RenderColor(edit.error_mode ? FL_RED : SEL_COL);
 
 	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
-		gl_line_width(2);
+		RenderThickness(2);
 
 	// special case when we have many sectors
 	if (list->what_type() == OBJ_SECTORS && list->count_obj() > MAX_STORE_SEL)
@@ -1504,7 +1499,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	if (! edit.error_mode && dx == 0 && dy == 0)
 	{
-		gl_color(LIGHTRED);
+		RenderColor(LIGHTRED);
 
 		for (list->begin(&it) ; !it.at_end() ; ++it)
 		{
@@ -1512,7 +1507,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		}
 	}
 
-	gl_line_width(1);
+	RenderThickness(1);
 }
 
 
@@ -1521,7 +1516,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 //
 void UI_Canvas::DrawMapLine(double map_x1, double map_y1, double map_x2, double map_y2)
 {
-    gl_line(SCREENX(map_x1), SCREENY(map_y1),
+    RenderLine(SCREENX(map_x1), SCREENY(map_y1),
             SCREENX(map_x2), SCREENY(map_y2));
 }
 
@@ -1532,7 +1527,7 @@ void UI_Canvas::DrawMapLine(double map_x1, double map_y1, double map_x2, double 
 void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, double map_y2,
                                bool reverse)
 {
-	// gl_color() has been done by caller
+	// color and thickness has been set by caller
 
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
@@ -1545,7 +1540,7 @@ void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, doub
 		std::swap(y1, y2);
 	}
 
-    gl_line(x1, y1, x2, y2);
+    RenderLine(x1, y1, x2, y2);
 
 	// indicate direction of line
    	int mx = (x1 + x2) / 2;
@@ -1559,7 +1554,7 @@ void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, doub
 
 	if (! (dx == 0 && dy == 0))
 	{
-		gl_line(mx, my, mx + dx, my + dy);
+		RenderLine(mx, my, mx + dx, my + dy);
 	}
 }
 
@@ -1574,7 +1569,7 @@ void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 	// color set by caller
 
 #ifdef NO_OPENGL
-	gl_rectf(sx - size/2, sy - size/2, size, size);
+	RenderRect(sx - size/2, sy - size/2, size, size);
 #else
 	glPointSize(size);
 
@@ -1591,7 +1586,7 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 {
 	// show how and where the line will be split
 
-	// gl_color() has been done by caller
+	// color has been set by caller
 
 	int scr_x1 = SCREENX(map_x1);
 	int scr_y1 = SCREENY(map_y1);
@@ -1601,8 +1596,8 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 	int scr_mx = SCREENX(split_x);
 	int scr_my = SCREENY(split_y);
 
-	gl_line(scr_x1, scr_y1, scr_mx, scr_my);
-	gl_line(scr_x2, scr_y2, scr_mx, scr_my);
+	RenderLine(scr_x1, scr_y1, scr_mx, scr_my);
+	RenderLine(scr_x2, scr_y2, scr_mx, scr_my);
 
 	if (! edit.show_object_numbers)
 	{
@@ -1613,7 +1608,7 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
 	}
 
-	gl_color(HI_AND_SEL_COL);
+	RenderColor(HI_AND_SEL_COL);
 
 	DrawSplitPoint(split_x, split_y);
 }
@@ -1630,7 +1625,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	int x2 = SCREENX(map_x2);
 	int y2 = SCREENY(map_y2);
 
-	gl_line(x1, y1, x2, y2);
+	RenderLine(x1, y1, x2, y2);
 
 	// knob
 	int mx = (x1 + x2) / 2;
@@ -1642,7 +1637,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	int kx = NORMALX(want_len, x2 - x1, y2 - y1);
 	int ky = NORMALY(want_len, x2 - x1, y2 - y1);
 
-	gl_line(mx, my, mx + kx, my + ky);
+	RenderLine(mx, my, mx + kx, my + ky);
 
 	// arrow
 	double r2 = hypot((double) (x1 - x2), (double) (y1 - y2));
@@ -1658,8 +1653,8 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	x1 = x2 + 2 * dx;
 	y1 = y2 + 2 * dy;
 
-	gl_line(x1 - dy, y1 + dx, x2, y2);
-	gl_line(x1 + dy, y1 - dx, x2, y2);
+	RenderLine(x1 - dy, y1 + dx, x2, y2);
+	RenderLine(x1 + dy, y1 - dx, x2, y2);
 }
 
 
@@ -1711,8 +1706,8 @@ void UI_Canvas::DrawCamera()
 	float x2 = mx + dx;
 	float y2 = my + dy;
 
-	gl_color(CAMERA_COLOR);
-	gl_line_width(1);
+	RenderColor(CAMERA_COLOR);
+	RenderThickness(1);
 
 	DrawMapLine(x1, y1, x2, y2);
 
@@ -1737,7 +1732,7 @@ void UI_Canvas::DrawCamera()
 	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
 				mx + dy * 0.4, my - dx * 0.4);
 
-	gl_line_width(1);
+	RenderThickness(1);
 }
 
 
@@ -1754,13 +1749,11 @@ void UI_Canvas::DrawCurrentLine()
 	// should draw a vertex?
 	if (! (highlight.valid() || split_ld >= 0))
 	{
-		gl_color(FL_GREEN);
-
+		RenderColor(FL_GREEN);
 		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
 	}
 
-	gl_color(RED);
-
+	RenderColor(RED);
 	DrawKnobbyLine(V->x(), V->y(), new_x, new_y);
 
 	double dx = V->x() - new_x;
@@ -1789,9 +1782,9 @@ void UI_Canvas::DrawCurrentLine()
 			continue;
 
 		if (point.vert >= 0)
-			gl_color(FL_GREEN);
+			RenderColor(FL_GREEN);
 		else
-			gl_color(HI_AND_SEL_COL);
+			RenderColor(HI_AND_SEL_COL);
 
 		DrawSplitPoint(point.x, point.y);
 	}
@@ -1823,7 +1816,7 @@ void UI_Canvas::SelboxDraw()
 	double y1 = MIN(edit.selbox_y1, edit.selbox_y2);
 	double y2 = MAX(edit.selbox_y1, edit.selbox_y2);
 
-	gl_color(FL_CYAN);
+	RenderColor(FL_CYAN);
 
 	DrawMapLine(x1, y1, x2, y1);
 	DrawMapLine(x2, y1, x2, y2);
@@ -1882,7 +1875,7 @@ void UI_Canvas::RenderSector(int num)
 
 	if (edit.sector_render_mode == SREND_Lighting)
 	{
-		gl_color(light_col);
+		RenderColor(light_col);
 	}
 	else if (edit.sector_render_mode == SREND_SoundProp)
 	{
@@ -1894,9 +1887,9 @@ void UI_Canvas::RenderSector(int num)
 		switch ((propagate_level_e) prop[num])
 		{
 			case PGL_Never:   return;
-			case PGL_Maybe:   gl_color(fl_rgb_color(64,64,192)); break;
-			case PGL_Level_1: gl_color(fl_rgb_color(192,32,32)); break;
-			case PGL_Level_2: gl_color(fl_rgb_color(192,96,32)); break;
+			case PGL_Maybe:   RenderColor(fl_rgb_color(64,64,192)); break;
+			case PGL_Level_1: RenderColor(fl_rgb_color(192,32,32)); break;
+			case PGL_Level_2: RenderColor(fl_rgb_color(192,96,32)); break;
 		}
 	}
 	else
@@ -1908,7 +1901,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (is_sky(tex_name))
 		{
-			gl_color(palette[Misc_info.sky_color]);
+			RenderColor(palette[Misc_info.sky_color]);
 		}
 		else
 		{
@@ -1990,7 +1983,7 @@ void UI_Canvas::RenderSector(int num)
 			// solid color?
 			if (! img)
 			{
-				gl_rectf(sx1, y, sx2 - sx1 + 1, 1);
+				RenderRect(sx1, y, sx2 - sx1 + 1, 1);
 				continue;
 			}
 
@@ -2098,16 +2091,26 @@ void UI_Canvas::Blit()
 {
 	fl_draw_image(rgb_buf, x(), y(), w(), h());
 }
+#endif // NO_OPENGL
 
 
-void UI_Canvas::gl_color(Fl_Color c)
+void UI_Canvas::RenderColor(Fl_Color c)
 {
+#ifdef NO_OPENGL
 	Fl::get_color(c, cur_col.r, cur_col.g, cur_col.b);
+#else
+	gl_color(c);
+#endif
 }
 
 
-void UI_Canvas::gl_rectf(int rx, int ry, int rw, int rh)
+void UI_Canvas::RenderRect(int rx, int ry, int rw, int rh)
 {
+#ifndef NO_OPENGL
+	gl_rectf(rx, ry, rw, rh);
+
+#else
+	// software version
 	rx -= rgb_x;
 	ry -= rgb_y;
 
@@ -2161,16 +2164,17 @@ void UI_Canvas::gl_rectf(int rx, int ry, int rw, int rh)
 			*dest++ = cur_col.b;
 		}
 	}
+#endif
 }
-#endif // NO_OPENGL
 
 
-void UI_Canvas::gl_line_width(int w)
+void UI_Canvas::RenderThickness(int w)
 {
-#ifndef NO_OPENGL
-	glLineWidth(w);
+#ifdef NO_OPENGL
+	// software
+	thickness = (w < 2) ? 1 : 2;
 #else
-	line_width = (w < 2) ? 1 : 2;
+	glLineWidth(w);
 #endif
 }
 
@@ -2205,7 +2209,7 @@ void UI_Canvas::raw_pixel(int rx, int ry)
 #endif // NO_OPENGL
 
 
-void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
+void UI_Canvas::RenderLine(int x1, int y1, int x2, int y2)
 {
 #ifndef NO_OPENGL
 	glBegin(GL_LINE_STRIP);
@@ -2219,7 +2223,7 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 		if (y1 > y2)
 			std::swap(y1, y2);
 
-		gl_rectf(x1, y1, line_width, y2 - y1 + line_width);
+		RenderRect(x1, y1, thickness, y2 - y1 + thickness);
 		return;
 	}
 	if (y1 == y2)
@@ -2227,7 +2231,7 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 		if (x1 > x2)
 			std::swap(x1, x2);
 
-		gl_rectf(x1, y1, x2 - x1 + line_width, line_width);
+		RenderRect(x1, y1, x2 - x1 + thickness, thickness);
 		return;
 	}
 
@@ -2327,7 +2331,7 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 		int d = ay - ax/2;
 
 		raw_pixel(x, y);
-		if (line_width == 2 && y+1 < rgb_h) raw_pixel(x, y+1);
+		if (thickness == 2 && y+1 < rgb_h) raw_pixel(x, y+1);
 
 		while (x != x2)
 		{
@@ -2341,7 +2345,7 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 			d += ay;
 
 			raw_pixel(x, y);
-			if (line_width == 2 && y+1 < rgb_h) raw_pixel(x, y+1);
+			if (thickness == 2 && y+1 < rgb_h) raw_pixel(x, y+1);
 		}
 	}
 	else   // vertical stepping
@@ -2349,7 +2353,7 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 		int d = ax - ay/2;
 
 		raw_pixel(x, y);
-		if (line_width == 2 && x+1 < rgb_w) raw_pixel(x+1, y);
+		if (thickness == 2 && x+1 < rgb_w) raw_pixel(x+1, y);
 
 		while (y != y2)
 		{
@@ -2363,14 +2367,14 @@ void UI_Canvas::gl_line(int x1, int y1, int x2, int y2)
 			d += ax;
 
 			raw_pixel(x, y);
-			if (line_width == 2 && x+1 < rgb_w) raw_pixel(x+1, y);
+			if (thickness == 2 && x+1 < rgb_w) raw_pixel(x+1, y);
 		}
 	}
 #endif
 }
 
 
-void UI_Canvas::gl_number_string(const char *s, int x, int y)
+void UI_Canvas::RenderNumString(const char *s, int x, int y)
 {
 	// NOTE: string is limited to the digits '0' to '9', spaces,
 	//       and the characters '-', '.' and ':'.
@@ -2431,13 +2435,13 @@ void UI_Canvas::gl_number_string(const char *s, int x, int y)
 		else
 			ch = 12;
 
-		gl_image_part(x, y, font_img, ch * font_cw, 0, font_cw, font_ch);
+		RenderFontChar(x, y, font_img, ch * font_cw, 0, font_cw, font_ch);
 	}
 #endif
 }
 
 
-void UI_Canvas::gl_image_part(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih)
+void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih)
 {
 #ifndef NO_OPENGL
 

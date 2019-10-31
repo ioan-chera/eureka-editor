@@ -170,20 +170,34 @@ private:
 		       (y2 >= map_ly) && (y1 <= map_hy);
 	}
 
+
+	void RenderColor(Fl_Color c);
+	void RenderThickness(int w);
+
+	void RenderLine(int x1, int y1, int x2, int y2);
+	void RenderRect(int rx, int ry, int rw, int rh);
+
+	void RenderNumString(const char *s, int x, int y);
+	void RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih);
+
 #ifdef NO_OPENGL
-	void gl_color(Fl_Color c);
-	void gl_rectf(int rx, int ry, int rw, int rh);
+	void PrepareToDraw();
+	void Blit();
+
+	int  Calc_Outcode(int x, int y);
 	void raw_pixel(int rx, int ry);
 
-	void PrepareToDraw();
-	int  Calc_Outcode(int x, int y);
-	void Blit();
-#endif
+#if 0 // TODO
+	inline void raw_pixel(int rx, int ry)
+	{
+		byte *dest = rgb_buf + (rx + ry * rgb_w) * 3;
 
-	void gl_line(int x1, int y1, int x2, int y2);
-	void gl_line_width(int w);
-	void gl_number_string(const char *s, int x, int y);
-	void gl_image_part(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih);
+		dest[0] = cur_col.r;
+		dest[1] = cur_col.g;
+		dest[2] = cur_col.b;
+	}
+#endif
+#endif
 };
 
 
