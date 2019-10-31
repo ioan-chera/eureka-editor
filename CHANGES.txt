@@ -4,13 +4,18 @@ RECENT CHANGES
 
 (Since version 1.24)
 
++ rudimentary support for the UDMF map format
+
 + use OpenGL for faster rendering of 2D and 3D views
 
-+ rudimentary support for the UDMF map format
++ improved software drawing of 2D view, faster in Linux
 
 + support mixing textures and flats for ports that allow it
 
-+ preference to combine flats and textures in a single browser
++ improved 3D mode, can move things and sector surfaces
+
+
+- preference to combine flats and textures in a single browser
 
 - info bar for the 2D map view
 
