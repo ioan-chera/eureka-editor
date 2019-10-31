@@ -60,14 +60,6 @@ rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 
-// compatibility defines for software rendering
-#ifdef NO_OPENGL
-#define gl_width    fl_width
-#define gl_height   fl_height
-#define gl_descent  fl_descent
-#endif
-
-
 int vertex_radius(double scale);
 
 
@@ -1092,19 +1084,12 @@ void UI_Canvas::DrawNumber(int x, int y, int num)
 	sprintf(buffer, "%d", num);
 
 #if 0 /* DEBUG */
-	gl_color(FL_RED);
-	gl_rectf(x - 1, y - 1, 3, 3);
+	RenderColor(FL_RED);
+	RenderRect(x - 1, y - 1, 3, 3);
 	return;
 #endif
-	x -= gl_width(buffer) / 2;
 
-#ifdef NO_OPENGL
-	y += gl_height() / 2;
-#else
-	y -= gl_height() / 2;
-#endif
-
-	RenderNumString(buffer, x, y);
+	RenderNumString(x, y, buffer);
 }
 
 
@@ -2348,7 +2333,7 @@ void UI_Canvas::RenderLine(int x1, int y1, int x2, int y2)
 }
 
 
-void UI_Canvas::RenderNumString(const char *s, int x, int y)
+void UI_Canvas::RenderNumString(int x, int y, const char *s)
 {
 	// NOTE: string is limited to the digits '0' to '9', spaces,
 	//       and the characters '-', '.' and ':'.
@@ -2392,6 +2377,13 @@ void UI_Canvas::RenderNumString(const char *s, int x, int y)
 		font_ch   = 19;
 		font_step = font_cw - 2;
 	}
+
+	// compute total size
+	int total_w = strlen(s) * font_step + 2;
+
+	// center the string at the given coordinate
+	x -= total_w / 2;
+	y -= font_ch / 2;
 
 	for ( ; *s ; s++, x += font_step)
 	{

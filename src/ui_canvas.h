@@ -188,7 +188,7 @@ private:
 	void RenderLine(int x1, int y1, int x2, int y2);
 	void RenderRect(int rx, int ry, int rw, int rh);
 
-	void RenderNumString(const char *s, int x, int y);
+	void RenderNumString(int x, int y, const char *s);
 	void RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih);
 
 	void RenderSprite(int sx, int sy, float scale, Img_c *img);
