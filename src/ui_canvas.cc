@@ -1850,6 +1850,17 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	*dx = edit.drag_cur_x - edit.drag_start_x;
 	*dy = edit.drag_cur_y - edit.drag_start_y;
 
+	float pixel_dx = *dx * grid.Scale;
+	float pixel_dy = *dy * grid.Scale;
+
+	// check that we have moved far enough from the start position,
+	// giving the user the option to select the original place.
+	if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels*2)
+	{
+		*dx = *dy = 0;
+		return;
+	}
+
 	// handle ratio-lock of a single dragged vertex
 	if (edit.mode == OBJ_VERTICES && grid.ratio > 0 && edit.drag_other_vert >= 0)
 	{
@@ -1868,17 +1879,6 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 
 	if (grid.snap && edit.drag_other_vert < 0)
 	{
-		float pixel_dx = *dx * grid.Scale;
-		float pixel_dy = *dy * grid.Scale;
-
-		// check that we have moved far enough from the start position,
-		// giving the user the option to select the original place.
-		if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels*2)
-		{
-			*dx = *dy = 0;
-			return;
-		}
-
 		double focus_x = edit.drag_focus_x + *dx;
 		double focus_y = edit.drag_focus_y + *dy;
 
@@ -1950,10 +1950,10 @@ void UI_Canvas::RenderSector(int num)
 		}
 	}
 
+#ifdef NO_OPENGL
 	int tw = img ? img->width()  : 1;
 	int th = img ? img->height() : 1;
 
-#ifdef NO_OPENGL
 	const img_pixel_t *src_pix = img ? img->buf() : NULL;
 
 	for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
