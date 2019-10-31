@@ -904,8 +904,7 @@ char UI_FindAndReplace::GetKind()
 bool UI_FindAndReplace::ClipboardOp(char op)
 {
 	// FIXME handle cut'n'paste
-	fl_beep();
-	return true;
+	return false;
 }
 
 
