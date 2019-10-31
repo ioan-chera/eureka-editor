@@ -68,15 +68,6 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 #define gl_descent  fl_descent
 #endif
 
-// TODO move into UI_Canvas class
-static byte *rgb_buf;
-static int rgb_x, rgb_y;
-static int rgb_w, rgb_h;
-static int thickness;
-
-static struct { byte r, g, b; } cur_col;
-
-
 
 int vertex_radius(double scale);
 
@@ -140,8 +131,6 @@ void UI_Canvas::draw()
 	xx = x();
 	yy = y();
 
-	fl_push_clip(x(), y(), w(), h());
-
 	map_lx = floor(MAPX(xx));
 	map_ly = floor(MAPY(yy + h()));
 
@@ -169,17 +158,11 @@ void UI_Canvas::draw()
 	                (grid.Scale < 1.9) ? 14 : 18;
 	gl_font(FL_COURIER, font_size);
 
-#ifdef NO_OPENGL
 	PrepareToDraw();
-#endif
 
 	DrawEverything();
 
-#ifdef NO_OPENGL
 	Blit();
-
-	fl_pop_clip();
-#endif
 }
 
 
@@ -2065,9 +2048,9 @@ void UI_Canvas::RenderSector(int num)
 //  CUSTOM S/W DRAWING CODE
 //------------------------------------------------------------------------
 
-#ifdef NO_OPENGL
 void UI_Canvas::PrepareToDraw()
 {
+#ifdef NO_OPENGL
 	rgb_x = x();
 	rgb_y = y();
 
@@ -2081,17 +2064,16 @@ void UI_Canvas::PrepareToDraw()
 
 		rgb_buf = new byte[rgb_w * rgb_h * 3];
 	}
-
-//	rgb_x2 = rgb_x + rgb_w;
-//	rgb_y2 = rgb_y + rgb_h;
+#endif
 }
 
 
 void UI_Canvas::Blit()
 {
+#ifdef NO_OPENGL
 	fl_draw_image(rgb_buf, x(), y(), w(), h());
+#endif
 }
-#endif // NO_OPENGL
 
 
 void UI_Canvas::RenderColor(Fl_Color c)
@@ -2171,7 +2153,6 @@ void UI_Canvas::RenderRect(int rx, int ry, int rw, int rh)
 void UI_Canvas::RenderThickness(int w)
 {
 #ifdef NO_OPENGL
-	// software
 	thickness = (w < 2) ? 1 : 2;
 #else
 	glLineWidth(w);
@@ -2195,16 +2176,6 @@ int UI_Canvas::Calc_Outcode(int x, int y)
 		((y >= rgb_h) ? O_BOTTOM : 0) |
 		((x < 0)      ? O_LEFT   : 0) |
 		((x >= rgb_w) ? O_RIGHT  : 0);
-}
-
-// TODO inline this
-void UI_Canvas::raw_pixel(int rx, int ry)
-{
-	byte *dest = rgb_buf + (rx + ry * rgb_w) * 3;
-
-	dest[0] = cur_col.r;
-	dest[1] = cur_col.g;
-	dest[2] = cur_col.b;
 }
 #endif // NO_OPENGL
 
