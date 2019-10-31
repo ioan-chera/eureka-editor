@@ -62,7 +62,6 @@ rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
 // compatibility defines for software rendering
 #ifdef NO_OPENGL
-#define gl_font     fl_font
 #define gl_width    fl_width
 #define gl_height   fl_height
 #define gl_descent  fl_descent
@@ -150,15 +149,14 @@ void UI_Canvas::draw()
 	ortho();
 #endif
 
+	PrepareToDraw();
+
 	RenderColor(FL_WHITE);
 	RenderThickness(1);
 
 	// default font (for showing object numbers)
-	int font_size = (grid.Scale < 0.4) ? 10 :
-	                (grid.Scale < 1.9) ? 14 : 18;
-	gl_font(FL_COURIER, font_size);
-
-	PrepareToDraw();
+	int font_size = (grid.Scale < 0.9) ? 14 : 19;
+	RenderFontSize(font_size);
 
 	DrawEverything();
 
@@ -2085,6 +2083,21 @@ void UI_Canvas::RenderColor(Fl_Color c)
 #endif
 }
 
+void UI_Canvas::RenderFontSize(int size)
+{
+	cur_font = size;
+}
+
+
+void UI_Canvas::RenderThickness(int w)
+{
+#ifdef NO_OPENGL
+	thickness = (w < 2) ? 1 : 2;
+#else
+	glLineWidth(w);
+#endif
+}
+
 
 void UI_Canvas::RenderRect(int rx, int ry, int rw, int rh)
 {
@@ -2146,16 +2159,6 @@ void UI_Canvas::RenderRect(int rx, int ry, int rw, int rh)
 			*dest++ = cur_col.b;
 		}
 	}
-#endif
-}
-
-
-void UI_Canvas::RenderThickness(int w)
-{
-#ifdef NO_OPENGL
-	thickness = (w < 2) ? 1 : 2;
-#else
-	glLineWidth(w);
 #endif
 }
 
@@ -2375,8 +2378,7 @@ void UI_Canvas::RenderNumString(const char *s, int x, int y)
 	int font_ch;
 	int font_step;
 
-	// FIXME pick properly
-	if (true)
+	if (cur_font < 17)
 	{
 		font_img  = IM_DigitFont_11x14();
 		font_cw   = 11;

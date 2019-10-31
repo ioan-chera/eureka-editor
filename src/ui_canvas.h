@@ -67,6 +67,7 @@ private:
 	int thickness;
 	struct { byte r, g, b; } cur_col;
 #endif
+	int cur_font;  // 14 or 19
 
 public:
 	UI_Canvas(int X, int Y, int W, int H, const char *label = NULL);
@@ -182,6 +183,7 @@ private:
 
 	void RenderColor(Fl_Color c);
 	void RenderThickness(int w);
+	void RenderFontSize(int size);
 
 	void RenderLine(int x1, int y1, int x2, int y2);
 	void RenderRect(int rx, int ry, int rw, int rh);
