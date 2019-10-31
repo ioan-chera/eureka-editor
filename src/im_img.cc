@@ -29,11 +29,9 @@
 #include "im_img.h"
 #include "m_game.h"
 
-#ifdef WIN32
 #ifndef NO_OPENGL
 // need this for GL_UNSIGNED_INT_8_8_8_8_REV
 #include "GL/glext.h"
-#endif
 #endif
 
 
@@ -46,6 +44,11 @@ static Img_c * missing_tex_image;
 static Img_c * unknown_tex_image;
 static Img_c * unknown_flat_image;
 static Img_c * unknown_sprite_image;
+
+static Img_c * digit_font_11x14;
+static Img_c * digit_font_14x19;
+
+#define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
 
 inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
@@ -447,6 +450,12 @@ void IM_UnloadDummyTextures()
 
 	if (unknown_sprite_image)
 		unknown_sprite_image->unload_gl(can_delete);
+
+	if (digit_font_11x14)
+		digit_font_11x14->unload_gl(can_delete);
+
+	if (digit_font_14x19)
+		digit_font_14x19->unload_gl(can_delete);
 }
 
 
@@ -607,6 +616,38 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 	}
 
 	delete[] conv_palette;
+
+	return result;
+}
+
+
+static Img_c * IM_CreateFont(int W, int H, const char **text,
+							 const int *intensities, int ity_size,
+							 rgb_color_t color)
+{
+	Img_c *result = new Img_c(W, H);
+
+	result->clear();
+
+	for (int y = 0 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		int ch = text[y][x] & 0x7f;
+
+		if (ch == ' ')
+			continue;  // leave transparent
+
+		if (ch < 'a' || ch >= 'a' + ity_size)
+			BugError("Bad character (dec #%d) in built-in font.\n", ch);
+
+		int ity = intensities[ch - 'a'];
+
+		int r = (RGB_RED(color)   * ity) >> 11;
+		int g = (RGB_GREEN(color) * ity) >> 11;
+		int b = (RGB_BLUE(color)  * ity) >> 11;
+
+		result->wbuf() [y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
+	}
 
 	return result;
 }
@@ -949,6 +990,85 @@ Img_c * IM_CreateLightSprite()
 	}
 
 	return result;
+}
+
+
+//------------------------------------------------------------------------
+
+/* a digit-only font, in two sizes */
+
+static const int digit_font_intensities[] =
+{
+	0x00, 0x16, 0x24, 0x32, 0x3f,
+	0x4c, 0x58, 0x65, 0x72, 0x7e,
+	0x8b, 0x98, 0xa4, 0xb0, 0xbc,
+	0xc9, 0xd6, 0xe2, 0xef, 0xfc,
+};
+
+
+static const char *digit_11x14_text[] =
+{
+	"                                                                                                                                               ",
+	"  aaaaaaa    aaaaaa     aaaaaaaa    aaaaaaa     aaaaa    aaaaaaa     aaaaaa    aaaaaaaa   aaaaaaa    aaaaaaa                                   ",
+	"  agqspda    alprga     aeorsoca    apsspfa    aalrga    aprrrka    aanssna    afrrrrqa   ajrsqha   aajrspca                                   ",
+	" aaqogqoa    aontha     ahojirna    amiiqpa    aertha    asmkkga   aanrjika    adkkkpqa  aasnfora   adsmgqoa     aaaa                          ",
+	" afteaitaa   aaatha     aaaaamqa    aaaakra   aaomtha    ashaaaa   absiaaaa    aaaaarma  adtcahta   aksaajsaa    ahfa                          ",
+	" ajsaaatga     atha        aaooa     ahjqna   ahratha    asrqmaa   agtmrpfa       agtea  aarnhopa   akraajtda    arma                          ",
+	" akraaatha     atha       aajtha     aqssha  aaqjathaa   ankmsna   ajtqjpraa      anqaa  aaktssiaa  aftjaptga    ajga                 aaaaaa   ",
+	" aksaaatga     atha      aagskaa     aaanra  akqeetiba   aaaalsa   ajthactga     aarla   aftialsba  aalstotca    aaaa                 amrrla   ",
+	" agtcagtba     atha     aaermaa    aaaaagta  antttttka  aaaaajsa   afteaatha     ahtca   aksaaatga   aaaajsaa    aaaa       aaaa      agjjfa   ",
+	" aarlanqaa   aaathaa    acroaaaa   afhaanra  aaaaathaa  aegacpqa   aarmaksba     aopaa   agthaktba   agadrna     amia       anha      aaaaaa   ",
+	"  ajtssha    aqtttsa    ajttttra   ahtstsia      atha   ahtstrga    aisrtlaa     aska    aantrtmaa   arstpba     arma       aska               ",
+	"  aadhcaa    aaaaaaa    aaaaaaaa   aabhgaaa      aaaa   aachfaaa    aachcaa      aaaa     aadhdaa    abhfaaa     aaaa       aaaa               ",
+	"   aaaaa                            aaaaa                aaaaa       aaaaa                 aaaaa     aaaaa                                     ",
+	"                                                                                                                                               "
+};
+
+
+static const char *digit_14x19_text[] =
+{
+	"                                                                                                                                                                                      ",
+	"    aaaaaa         aaaaa       aaaaaaa       aaaaaaa          aaaaa     aaaaaaaaa        aaaaaa     aaaaaaaaaa      aaaaaa        aaaaaa                                              ",
+	"   aadklgaa     aaaafhca      aacjlkeaa     aadjlkfaa         adhga     adhhhhhhaa      aagllhaa    afhhhhhhga     aafklhaaa     aaglleaa                                             ",
+	"  aajstttnaa    agqsttja      ansttttlaa    altttttoaa       aaqtra     akttttttda     aaottttna    aqttttttsa    aanttttqda    aaottttlaa                                            ",
+	"  adssjgqtja    ajtrrtja      arqlilstia    alokikrtma      aakttra     aktommmmba    aaotpjjnma    akmmmmntpa    aktrigotoa    altqhirtha                                            ",
+	"  amtkaaetqa    acbamtja      afaaaajtoa    aaaaaaetqa      acsosra     aktjaaaaaa    ahtpaaaaaa    aaaaaamtka    aotgaaarsa    arsdaaftpa      aaaaa                                 ",
+	"  aqtbaaaqtaa   aaaamtja      aaa  actpa         aasqa     aansdsra     aktjaaaa      anthaaaaa         aarsba    aptcaaarsa    atqaaaarsaa     adlia                                 ",
+	"  arraaaaotga      amtja           aitna      aaaamtma     aftmasra     aktpqpkaa     aqsfoqohaa        agtpaa    aktmaahtpa    atqaaaartea     agtpa                                 ",
+	"  asqa  antia      amtja          aaqtga      aorstnaa    aapraasra     aktssttqaa    arsssrttja        antja     aantrqsqda    assaaadstha     afsoa                                 ",
+	"  asqa  amtja      amtja         aantnaa      aorstqda    ajtjaasra     agiaafqtma    astrdaissaa      aarsaa     aanssstqea    aotoabpttia     aaaaa                     aaaaaaaa    ",
+	"  asqa  antia      amtja        aaltpaa       aaaaltpa   aarpaaasraaa   aaaaaaetra    astjaaaotia      ahtoa      antnaaisqaa   adrttttqtga                               ahqqqqda    ",
+	"  arraaaaotga      amtja       aajtrca           aaqsa   aitqppptspja        aarsa    artea amtka      aotia      arsaaaaotfa   aablongptba                               airrrrda    ",
+	"  aptcaaaqsaa      amtja      aahsreaa      aaa  aaqta   aisssssttsma   aaa  aassa    aotga antka     aassaa      asraaaantia    aaaaaasraa     aaaaa         aaaaa       aaaaaaaa    ",
+	"  altlaaftqa     aaamtjaaa    afssgaaaaa    abaaaaessa   aaaaaaasraaa   abaaaajtpa    aktmaaaqtea     aitoa       arseaaaqtfa   aaaaaamtma      ackha         aekga                   ",
+	"  abssljrtia     aooqtpona    aqtqooooma    aqpmknstma         asra     aqplknttia    aartmjotpaa     aotha       amtrkjotqaa   aiplkotraa      agtpa         aktna                   ",
+	"  aahstttlaa     attttttra    arttttttqa    apttttsmaa         asra     apttttskaa     agrtttpda      asraa       aaottttqfa    aittttpea       agtpa         aktna                   ",
+	"   aaaijdaa      aaaaaaaaa    aaaaaaaaaa    aadijibaa          aaaa     aadijhaaa      aaahjfaaa      aaaa         aadjjfaaa    aacijfaaa       aaaaa         aaaaa                   ",
+	"     aaaaa                                   aaaaaaa                     aaaaaa          aaaaa                      aaaaaa       aaaaaa                                               ",
+	"                                                                                                                                                                                      ",
+};
+
+
+Img_c * IM_DigitFont_11x14()
+{
+	if (! digit_font_11x14)
+	{
+		digit_font_11x14 = IM_CreateFont(11*13, 14, digit_11x14_text,
+										 digit_font_intensities, 20,
+										 DIGIT_FONT_COLOR);
+	}
+	return digit_font_11x14;
+}
+
+Img_c * IM_DigitFont_14x19()
+{
+	if (! digit_font_14x19)
+	{
+		digit_font_14x19 = IM_CreateFont(14*13, 19, digit_14x19_text,
+										 digit_font_intensities, 20,
+										 DIGIT_FONT_COLOR);
+	}
+	return digit_font_14x19;
 }
 
 //--- editor settings ---

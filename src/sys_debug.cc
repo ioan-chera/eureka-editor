@@ -97,7 +97,7 @@ void LogPrintf(const char *str, ...)
 		fflush(log_fp);
 	}
 
-	if (log_window_open)
+	if (log_window_open && !in_fatal_error)
 		LogViewer_AddLine(buffer);
 	else
 		kept_messages.push_back(StringDup(buffer));

@@ -62,6 +62,7 @@
 
 bool want_quit = false;
 bool app_has_focus = false;
+bool in_fatal_error = false;
 
 const char *config_file = NULL;
 const char *log_file;
@@ -141,6 +142,19 @@ void FatalError(const char *fmt, ...)
 	va_end(arg_ptr);
 
 	buffer[MSG_BUF_LEN-1] = 0;
+
+	// re-entered here? ouch!
+	if (in_fatal_error)
+	{
+		fprintf(stderr, "\nERROR LOOP DETECTED!\n");
+		fflush(stderr);
+
+		LogClose();
+		exit(4);
+	}
+
+	// minimise chance of a infinite loop of errors
+	in_fatal_error = true;
 
 	if (init_progress < 1 || Quiet || log_file)
 	{

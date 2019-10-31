@@ -59,6 +59,16 @@ private:
 	// a copy of x() and y() for software renderer, 0 for OpenGL
 	int xx, yy;
 
+	// state for the custom S/W rendering code
+#ifdef NO_OPENGL
+	byte *rgb_buf;
+	int rgb_x, rgb_y;
+	int rgb_w, rgb_h;
+	int thickness;
+	struct { byte r, g, b; } cur_col;
+#endif
+	int cur_font;  // 14 or 19
+
 public:
 	UI_Canvas(int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_Canvas();
@@ -125,15 +135,12 @@ private:
 	void DrawSplitPoint(double map_x, double map_y);
 	void DrawVertex(double map_x, double map_y, int r);
 	void DrawThing(double map_x, double map_y, int r, int angle, bool big_arrow);
-	void DrawSprite(double map_x, double map_y, Img_c *img, float scale);
 	void DrawCamera();
 
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
-	void DrawObjNum(int x, int y, int num);
+	void DrawNumber(int x, int y, int num);
 	void DrawCurrentLine();
-
-	void RenderSector(int num);
 
 	void SelboxDraw();
 
@@ -170,11 +177,35 @@ private:
 		       (y2 >= map_ly) && (y1 <= map_hy);
 	}
 
-	void gl_line_width(int w);
-	void gl_draw_string(const char *s, int x, int y);
 
-#ifndef NO_OPENGL
-	void gl_line(int x1, int y1, int x2, int y2);
+	void PrepareToDraw();
+	void Blit();
+
+	void RenderColor(Fl_Color c);
+	void RenderThickness(int w);
+	void RenderFontSize(int size);
+
+	void RenderLine(int x1, int y1, int x2, int y2);
+	void RenderRect(int rx, int ry, int rw, int rh);
+
+	void RenderNumString(int x, int y, const char *s);
+	void RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int iw, int ih);
+
+	void RenderSprite(int sx, int sy, float scale, Img_c *img);
+	void RenderSector(int num);
+
+#ifdef NO_OPENGL
+	int Calc_Outcode(int x, int y);
+
+	// this is raw, it does no checking!
+	inline void raw_pixel(int rx, int ry) const
+	{
+		byte *dest = rgb_buf + (rx + ry * rgb_w) * 3;
+
+		dest[0] = cur_col.r;
+		dest[1] = cur_col.g;
+		dest[2] = cur_col.b;
+	}
 #endif
 };
 
