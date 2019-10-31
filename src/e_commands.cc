@@ -267,7 +267,7 @@ void CMD_SetVar()
 	}
 	else if (y_stricmp(var_name, "ratio") == 0)
 	{
-		grid.ratio = CLAMP(0, int_val, 7);
+		grid.ratio = CLAMP(0, int_val, 8);
 		main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
@@ -329,6 +329,16 @@ void CMD_ToggleVar()
 	else if (y_stricmp(var_name, "gamma") == 0)
 	{
 		SetGamma((usegamma >= 4) ? 0 : usegamma + 1);
+	}
+	else if (y_stricmp(var_name, "ratio") == 0)
+	{
+		if (grid.ratio >= 8)
+			grid.ratio = 0;
+		else
+			grid.ratio++;
+
+		main_win->info_bar->UpdateRatio();
+		RedrawMap();
 	}
 	else if (y_stricmp(var_name, "sec_render") == 0)
 	{
@@ -1394,7 +1404,7 @@ static editor_command_t  command_table[] =
 	{	"Toggle", "Misc",
 		&CMD_ToggleVar,
 		/* flags */ NULL,
-		/* keywords */ "3d browser gamma grid obj_nums sec_render snap recent sprites"
+		/* keywords */ "3d browser gamma grid obj_nums ratio sec_render snap recent sprites"
 	},
 
 	{	"MetaKey", "Misc",

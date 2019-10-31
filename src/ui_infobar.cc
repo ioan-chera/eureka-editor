@@ -137,7 +137,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	ratio_lock = new Fl_Menu_Button(X+54, Y, 106, H, "UNLOCKED");
 	ratio_lock->align(FL_ALIGN_INSIDE);
-	ratio_lock->add("UNLOCKED|Axis Align|1:1|2:1|4:1|8:1|5:4|7:4");
+	ratio_lock->add("UNLOCKED|Axis Align|1:1|2:1|3:1|4:1|8:1|5:4|7:4");
 	ratio_lock->callback(ratio_callback, this);
 	ratio_lock->labelsize(16);
 

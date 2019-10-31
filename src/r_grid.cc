@@ -158,7 +158,7 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 
 	switch (ratio)
 	{
-	case 0: // no change
+	case 0: // unlocked
 		break;
 
 	case 1: // axis aligned
@@ -186,7 +186,20 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 4: // 4:1
+	case 4: // 3:1
+		if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len / 3.0;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len / 3.0;
+		}
+		break;
+
+	case 5: // 4:1
 		if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.25;
@@ -199,7 +212,7 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 5: // 8:1
+	case 6: // 8:1
 		if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.125;
@@ -212,7 +225,7 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 6: // 5:4
+	case 7: // 5:4
 		if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.8;
@@ -225,7 +238,7 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 7: // 7:4
+	case 8: // 7:4
 		if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 4 / 7;

@@ -14,6 +14,8 @@ RECENT CHANGES
 
 + improved 3D mode, can move things and sector surfaces
 
++ ratio lock, makes producing lines at certain angles easier
+
 
 - preference to combine flats and textures in a single browser
 
@@ -28,6 +30,7 @@ RECENT CHANGES
 - fixed not remembering test-in-game EXE when port is "vanilla"
 
 - fixed the 'Online Docs' command in the Help menu
+
 
 - added portal specials 156 and 107 to the ZDOOM port
 
