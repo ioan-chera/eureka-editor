@@ -31,6 +31,7 @@
 #include "m_events.h"
 #include "e_main.h"
 #include "e_hover.h"
+#include "e_linedef.h"
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_path.h"	  // SoundPropagation
@@ -323,6 +324,11 @@ void UI_Canvas::DrawEverything()
 		{
 			RenderColor(LIGHTRED);
 			DrawTagged(highlight.type, highlight.num);
+		}
+
+		if (edit.mode == OBJ_LINEDEFS && !edit.show_object_numbers)
+		{
+			DrawLineRatio(edit.highlight.num);
 		}
 
 		RenderThickness(1);
@@ -1089,13 +1095,43 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 }
 
 
+void UI_Canvas::DrawLineRatio(int ld_num)
+{
+	const LineDef *L = LineDefs[ld_num];
+
+	fixcoord_t idx = L->End()->raw_x - L->Start()->raw_x;
+	fixcoord_t idy = L->End()->raw_y - L->Start()->raw_y;
+
+	if (idx == 0 || idy == 0)
+		return;
+
+	int x1 = SCREENX(L->Start()->x());
+	int y1 = SCREENY(L->Start()->y());
+	int x2 = SCREENX(L->End()->x());
+	int y2 = SCREENY(L->End()->y());
+
+	int sx = (x1 + x2) / 2;
+	int sy = (y1 + y2) / 2;
+
+	// back of line is best place, no knob getting in the way
+	int want_len = -16 * CLAMP(0.25, grid.Scale, 1.0);
+
+	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
+	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
+
+	std::string ratio_name = LD_RatioName(idx, idy, true);
+
+	RenderNumString(sx, sy, ratio_name.c_str());
+}
+
+
 //
 //  draw a number centered at screen coordinate (x, y)
 //
 void UI_Canvas::DrawNumber(int x, int y, int num)
 {
 	char buffer[64];
-	sprintf(buffer, "%d", num);
+	snprintf(buffer, sizeof(buffer), "%d", num);
 
 #if 0 /* DEBUG */
 	RenderColor(FL_RED);

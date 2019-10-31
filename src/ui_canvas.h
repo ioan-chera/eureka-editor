@@ -142,8 +142,9 @@ private:
 	void DrawThing(double map_x, double map_y, int r, int angle, bool big_arrow);
 	void DrawCamera();
 
-	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
+	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
+	void DrawLineRatio(int ld_num);
 	void DrawNumber(int x, int y, int num);
 	void DrawCurrentLine();
 	void DrawSnapPoint();
