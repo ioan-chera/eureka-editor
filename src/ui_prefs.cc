@@ -682,6 +682,7 @@ public:
 	Fl_Check_Button *grid_hide_free;
 	Fl_Check_Button *grid_flatrender;
 	Fl_Check_Button *grid_spriterend;
+	Fl_Check_Button *grid_indicator;
 
 	Fl_Button *dotty_axis;
 	Fl_Button *dotty_major;
@@ -930,18 +931,20 @@ UI_Preferences::UI_Preferences() :
 		}
 		{ grid_enabled = new Fl_Check_Button(50, 125, 95, 25, " default grid to ON");
 		}
-		{ grid_snap = new Fl_Check_Button(50, 155, 235, 25, " default SNAP mode");
+		{ grid_snap = new Fl_Check_Button(50, 155, 235, 25, " default snap to ON");
 		}
-		{ grid_flatrender = new Fl_Check_Button(50, 185, 270, 25, " default sector rendering to ON");
+		{ grid_flatrender = new Fl_Check_Button(50, 185, 270, 25, " default sector-render to ON");
 		}
-		{ grid_spriterend = new Fl_Check_Button(50, 215, 270, 25, " default sprite rendering to ON");
+		{ grid_spriterend = new Fl_Check_Button(50, 215, 270, 25, " default sprites to ON");
 		}
-		{ grid_size = new Fl_Choice(400, 90, 95, 25, "default grid size ");
+		{ grid_size = new Fl_Choice(420, 90, 95, 25, "default grid size ");
 		  grid_size->add("1024|512|256|192|128|64|32|16|8|4|2");
 		}
-		{ gen_scrollbars = new Fl_Check_Button(277, 125, 245, 25, " enable scroll-bars for map view");
+		{ gen_scrollbars = new Fl_Check_Button(300, 125, 245, 25, " enable scroll-bars for map view");
 		}
-		{ grid_hide_free = new Fl_Check_Button(277, 155, 245, 25, " hide grid in FREE mode");
+		{ grid_indicator = new Fl_Check_Button(300, 155, 245, 25, " enable snap-pos indicator");
+		}
+		{ grid_hide_free = new Fl_Check_Button(300, 185, 245, 25, " hide grid in FREE mode");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 270, 355, 30, "Grid Colors");
@@ -1462,6 +1465,7 @@ void UI_Preferences::LoadValues()
 	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
 	grid_flatrender->value(sector_render_default ? 1 : 0);
 	grid_spriterend->value(thing_render_default ? 1 : 0);
+	grid_indicator->value(grid_snap_indicator ? 1 : 0);
 
 	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
 
@@ -1601,6 +1605,7 @@ void UI_Preferences::SaveValues()
 	grid_default_snap = grid_snap->value() ? true : false;
 	grid_default_size = atoi(grid_size->mvalue()->text);
 	grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
+	grid_snap_indicator    = grid_indicator ->value() ? true : false;
 	sector_render_default  = grid_flatrender->value() ? 1 : 0;
 	thing_render_default   = grid_spriterend->value() ? 1 : 0;
 
