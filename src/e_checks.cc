@@ -363,14 +363,12 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 void Vertex_MergeOverlaps()
 {
 	selection_c verts;
-	selection_iterator_c it;
-
 	Vertex_FindOverlaps(verts);
 
 	BA_Begin();
 	BA_Message("merged overlapping vertices");
 
-	for (verts.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
 		Vertex_MergeOne(*it, verts);
 	}
@@ -804,12 +802,10 @@ void Sectors_ClearUnknown()
 
 	Sectors_FindUnknown(sel, types);
 
-	selection_iterator_c it;
-
 	BA_Begin();
 	BA_Message("cleared unknown sector types");
 
-	for (sel.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(sel) ; !it.done() ; it.next())
 		BA_ChangeSEC(*it, Sector::F_TYPE, 0);
 
 	BA_End();
@@ -2340,12 +2336,10 @@ void LineDefs_ClearUnknown()
 
 	LineDefs_FindUnknown(sel, types);
 
-	selection_iterator_c it;
-
 	BA_Begin();
 	BA_Message("cleared unknown line types");
 
-	for (sel.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(sel) ; !it.done() ; it.next())
 		BA_ChangeLD(*it, LineDef::F_TYPE, 0);
 
 	BA_End();
@@ -2626,7 +2620,6 @@ void LineDefs_FindCrossings(selection_c& lines)
 		sorted_list[n] = n;
 
 	std::sort(sorted_list.begin(), sorted_list.end(), linedef_minx_CMP_pred());
-
 
 	for (n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2988,12 +2981,10 @@ void Tags_ApplyNewValue(int new_tag)
 {
 	// uses the current selection (caller must set it up)
 
-	selection_iterator_c it;
-
 	BA_Begin();
 	BA_MessageForSel("new tag for", edit.Selected);
 
-	for (edit.Selected->begin(&it); !it.at_end(); ++it)
+	for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 	{
 		if (edit.mode == OBJ_LINEDEFS)
 			BA_ChangeLD(*it, LineDef::F_TAG, new_tag);

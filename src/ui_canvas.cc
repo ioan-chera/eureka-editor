@@ -1487,8 +1487,6 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	if (! list || list->empty())
 		return;
 
-	selection_iterator_c it;
-
 	if (edit.action == ACT_TRANSFORM)
 	{
 		RenderColor(SEL_COL);
@@ -1496,7 +1494,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
 			RenderThickness(2);
 
-		for (list->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(list) ; !it.done() ; it.next())
 		{
 			DrawHighlightTransform(list->what_type(), *it);
 		}
@@ -1525,7 +1523,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	}
 	else
 	{
-		for (list->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(list) ; !it.done() ; it.next())
 		{
 			DrawHighlight(list->what_type(), *it, true /* skip_lines */, dx, dy);
 		}
@@ -1535,7 +1533,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	{
 		RenderColor(LIGHTRED);
 
-		for (list->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(list) ; !it.done() ; it.next())
 		{
 			DrawTagged(list->what_type(), *it);
 		}

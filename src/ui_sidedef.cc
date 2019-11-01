@@ -193,8 +193,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited texture on", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -266,7 +265,6 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		return;
 
 	// iterate over selected linedefs
-	selection_iterator_c it;
 
 	int field = box->is_front ? LineDef::F_RIGHT : LineDef::F_LEFT;
 
@@ -280,7 +278,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		Sectors[new_sec]->SetDefaults();
 	}
 
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 
@@ -328,11 +326,9 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		return;
 
 	// iterate over selected linedefs
-	selection_iterator_c it;
-
 	BA_Begin();
 
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 
@@ -371,8 +367,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 		else
 			BA_MessageForSel("edited Y offset on", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -406,8 +401,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited sector-ref on", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			const LineDef *L = LineDefs[*it];
 

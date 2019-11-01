@@ -631,9 +631,7 @@ void DumpSelection(selection_c * list)
 
 	printf("Selection:");
 
-	selection_iterator_c it;
-
-	for (list->begin(&it); ! it.at_end(); ++it)
+	for (sel_iter_c it(list); ! it.done(); it.next())
 		printf(" %d", *it);
 
 	printf("\n");
@@ -702,9 +700,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	if (src->what_type() == OBJ_LINEDEFS && dest->what_type() == OBJ_SIDEDEFS)
 	{
-		selection_iterator_c it;
-
-		for (src->begin(&it); ! it.at_end(); ++it)
+		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -729,9 +725,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	if (src->what_type() == OBJ_LINEDEFS && dest->what_type() == OBJ_VERTICES)
 	{
-		selection_iterator_c it;
-
-		for (src->begin(&it); ! it.at_end(); ++it)
+		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -809,9 +803,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 //
 int Selection_FirstLine(selection_c *list)
 {
-	selection_iterator_c it;
-
-	for (list->begin(&it); ! it.at_end(); ++it)
+	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 

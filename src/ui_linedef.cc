@@ -247,8 +247,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited type of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			BA_ChangeLD(*it, LineDef::F_TYPE, new_type);
 		}
@@ -410,8 +409,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 		BA_Begin();
 		BA_MessageForSel("edited texture on", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			SetTexOnLine(*it, new_tex, e_state, front_pics, back_pics);
 		}
@@ -493,8 +491,7 @@ void UI_LineBox::CB_Paste(int new_tex)
 	BA_Begin();
 	BA_Message("pasted %s", BA_GetString(new_tex));
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 
@@ -609,8 +606,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited flags of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			const LineDef *L = LineDefs[*it];
 
@@ -640,8 +636,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited args of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
 		}

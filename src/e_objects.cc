@@ -66,8 +66,7 @@ void DeleteObjects(selection_c *list)
 
 	std::vector<int> objnums;
 
-	selection_iterator_c it;
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 		objnums.push_back(*it);
 
 	std::sort(objnums.begin(), objnums.end());
@@ -745,8 +744,6 @@ bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 
 static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
 {
-	selection_iterator_c it;
-
 	fixcoord_t fdx = MakeValidCoord(delta_x);
 	fixcoord_t fdy = MakeValidCoord(delta_y);
 	fixcoord_t fdz = MakeValidCoord(delta_z);
@@ -754,7 +751,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 	switch (list->what_type())
 	{
 		case OBJ_THINGS:
-			for (list->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Thing * T = Things[*it];
 
@@ -765,7 +762,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			break;
 
 		case OBJ_VERTICES:
-			for (list->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Vertex * V = Vertices[*it];
 
@@ -776,7 +773,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 
 		case OBJ_SECTORS:
 			// apply the Z delta first
-			for (list->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Sector * S = Sectors[*it];
 
@@ -1129,12 +1126,10 @@ void CMD_CopyProperties()
 
 		int source = edit.highlight.num;
 
-		selection_iterator_c it;
-
 		BA_Begin();
 		BA_Message("copied properties");
 
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			if (*it == source)
 				continue;
@@ -1206,9 +1201,7 @@ static void Drag_CountOnGrid(int *count, int *total)
 	// Note: the results are approximate, vertices can be counted two
 	//       or more times.
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		Drag_CountOnGrid_Worker(edit.mode, *it, count, total);
 	}
@@ -1320,8 +1313,7 @@ void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y)
 		return;
 	}
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		Drag_UpdateCurrentDist(edit.mode, *it, x, y, &best_dist,
 							   ptr_x, ptr_y, only_grid);
@@ -1386,8 +1378,6 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 	if (list->empty())
 		return;
 
-	selection_iterator_c it;
-
 	double sum_x = 0;
 	double sum_y = 0;
 
@@ -1397,7 +1387,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 	{
 		case OBJ_THINGS:
 		{
-			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
+			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
 				sum_x += Things[*it]->x();
 				sum_y += Things[*it]->y();
@@ -1407,7 +1397,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 
 		case OBJ_VERTICES:
 		{
-			for (list->begin(&it) ; !it.at_end() ; ++it, ++count)
+			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
 				sum_x += Vertices[*it]->x();
 				sum_y += Vertices[*it]->y();
@@ -1449,13 +1439,11 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 	*x1 = *y1 = +9e9;
 	*x2 = *y2 = -9e9;
 
-	selection_iterator_c it;
-
 	switch (list->what_type())
 	{
 		case OBJ_THINGS:
 		{
-			for (list->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Thing *T = Things[*it];
 				double Tx = T->x();
@@ -1474,7 +1462,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 
 		case OBJ_VERTICES:
 		{
-			for (list->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Vertex *V = Vertices[*it];
 				double Vx = V->x();
@@ -1509,9 +1497,7 @@ static void DoMirrorThings(selection_c *list, bool is_vert, double mid_x, double
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
-	selection_iterator_c it;
-
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Thing * T = Things[*it];
 
@@ -1543,8 +1529,7 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 	selection_c verts(OBJ_VERTICES);
 	ConvertSelection(list, &verts);
 
-	selection_iterator_c it;
-	for (verts.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -1558,7 +1543,7 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 	selection_c lines(OBJ_LINEDEFS);
 	ConvertSelection(&verts, &lines);
 
-	for (lines.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
 		LineDef * L = LineDefs[*it];
 
@@ -1629,9 +1614,7 @@ static void DoRotate90Things(selection_c *list, bool anti_clockwise,
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
-	selection_iterator_c it;
-
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Thing * T = Things[*it];
 
@@ -1701,8 +1684,7 @@ void CMD_Rotate90()
 		fixcoord_t fix_mx = MakeValidCoord(mid_x);
 		fixcoord_t fix_my = MakeValidCoord(mid_y);
 
-		selection_iterator_c it;
-		for (verts.begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
 			const Vertex * V = Vertices[*it];
 
@@ -1731,9 +1713,7 @@ void CMD_Rotate90()
 
 static void DoScaleTwoThings(selection_c *list, transform_t& param)
 {
-	selection_iterator_c it;
-
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Thing * T = Things[*it];
 
@@ -1762,9 +1742,7 @@ static void DoScaleTwoVertices(selection_c *list, transform_t& param)
 	selection_c verts(OBJ_VERTICES);
 	ConvertSelection(list, &verts);
 
-	selection_iterator_c it;
-
-	for (verts.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -1888,8 +1866,7 @@ static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 	int lz = +99999;
 	int hz = -99999;
 
-	selection_iterator_c it;
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Sector * S = Sectors[*it];
 
@@ -1908,7 +1885,7 @@ static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 
 	// apply the scaling
 
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Sector * S = Sectors[*it];
 
@@ -2063,8 +2040,7 @@ static void Quantize_Things(selection_c *list)
 	// (since we cannot modify the selection while we iterate over it)
 	selection_c moved(list->what_type());
 
-	selection_iterator_c it;
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Thing * T = Things[*it];
 
@@ -2154,9 +2130,7 @@ static void Quantize_Vertices(selection_c *list)
 	// (since we cannot modify the selection while we iterate over it)
 	selection_c moved(list->what_type());
 
-	selection_iterator_c it;
-
-	for (list->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Vertex * V = Vertices[*it];
 

@@ -29,14 +29,14 @@
 
 #include "m_bitvec.h"
 
-class selection_iterator_c;
+class sel_iter_c;
 
 
 #define MAX_STORE_SEL  24
 
 class selection_c
 {
-friend class selection_iterator_c;
+friend class sel_iter_c;
 
 private:
 	obj_type_e type;
@@ -90,8 +90,9 @@ public:
 	void toggle(int n);
 
 	// in extended mode, we can read and write 8-bits per object.
-	// using these on normal selections is not guaranteed to do
-	// anything useful.
+	// using set_ext() with zero value is equivalent to a clear().
+	// NOTE: using these on normal selections is not guaranteed
+	// to do anything useful.
 	byte get_ext(int n) const;
 	void set_ext(int n, byte value);
 
@@ -113,11 +114,6 @@ public:
 	int find_first()  const;
 	int find_second() const;
 
-	// sets up the passed iterator for iterating over all the
-	// object numbers contained in this selection.
-	// Modifying the set is NOT ALLOWED during a traversal.
-	void begin(selection_iterator_c * it) const;
-
 private:
 	void ConvertToBitvec();
 	void RecomputeMaxObj();
@@ -125,7 +121,7 @@ private:
 };
 
 
-class selection_iterator_c
+class sel_iter_c
 {
 friend class selection_c;
 
@@ -138,13 +134,19 @@ private:
 	int pos;
 
 public:
-	selection_iterator_c();
+	sel_iter_c();
+	sel_iter_c(const sel_iter_c& other);
 
-	bool at_end() const;
+	// creates an iterator object for iterating over all the
+	// object numbers contained in the given selection.
+	// NOTE: modifying the selection is NOT ALLOWED during a traversal.
+	sel_iter_c(const selection_c *_sel);
+	sel_iter_c(const selection_c& _sel);
+
+	bool done() const;
+	void next();
 
 	int operator* () const;
-
-	selection_iterator_c& operator++ ();
 };
 
 

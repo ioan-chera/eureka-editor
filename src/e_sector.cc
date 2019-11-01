@@ -61,8 +61,7 @@ void CMD_SEC_Floor(void)
 	BA_Begin();
 	BA_MessageForSel(diff < 0 ? "lowered floor of" : "raised floor of", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = Sectors[*it];
 
@@ -100,8 +99,7 @@ void CMD_SEC_Ceil(void)
 	BA_Begin();
 	BA_MessageForSel(diff < 0 ? "lowered ceil of" : "raised ceil of", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = Sectors[*it];
 
@@ -150,8 +148,7 @@ void SectorsAdjustLight(int delta)
 	BA_Begin();
 	BA_MessageForSel(delta < 0 ? "darkened" : "brightened", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = Sectors[*it];
 
@@ -202,8 +199,7 @@ void CMD_SEC_SwapFlats()
 	BA_Begin();
 	BA_MessageForSel("swapped flats in", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = Sectors[*it];
 
@@ -278,9 +274,7 @@ void CMD_SEC_Merge(void)
 	// select the wrong sector afterwards (due to renumbering).
 	int new_sec = edit.Selected->max_obj();
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		new_sec = MIN(new_sec, *it);
 	}
@@ -306,7 +300,7 @@ void CMD_SEC_Merge(void)
 		BA_ChangeSEC(new_sec, Sector::F_TAG,   ref->tag);
 	}
 
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		int old_sec = *it;
 

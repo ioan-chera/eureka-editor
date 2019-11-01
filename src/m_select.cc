@@ -332,9 +332,7 @@ bool selection_c::test_equal(const selection_c& other)
 
 	// the quick tests have passed, now perform the expensive one
 
-	selection_iterator_c it;
-
-	for (begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(this) ; !it.done() ; it.next())
 		if (! other.get(*it))
 			return false;
 
@@ -428,19 +426,17 @@ int selection_c::find_first() const
 		return first_obj;
 	}
 
-	selection_iterator_c it;
-	begin(&it);
+	sel_iter_c it(this);
 
-	return it.at_end() ? -1 : *it;
+	return it.done() ? -1 : *it;
 }
 
 
 int selection_c::find_second() const
 {
-	selection_iterator_c it;
-	begin(&it);
+	sel_iter_c it(this);
 
-	if (it.at_end())
+	if (it.done())
 		return -1;
 
 	// the logic here is trickier than it looks.
@@ -451,9 +447,9 @@ int selection_c::find_second() const
 	if (first_obj >= 0 && *it != first_obj)
 		return *it;
 
-	++it;
+	it.next();
 
-	return it.at_end() ? -1 : *it;
+	return it.done() ? -1 : *it;
 }
 
 
@@ -461,31 +457,49 @@ int selection_c::find_second() const
 //  ITERATOR STUFF
 //------------------------------------------------------------------------
 
-void selection_c::begin(selection_iterator_c *it) const
+sel_iter_c::sel_iter_c()
 {
-	it->sel = this;
-	it->pos = 0;
-
-	if (bv || extended)
-	{
-		// for bit vector, need to find the first one bit
-		// Note: this logic is rather hacky
-		it->pos = -1;
-
-		++ (*it);
-	}
-}
-
-
-selection_iterator_c::selection_iterator_c()
-{
-	// dummy values -- cannot use the iterator without begin() above
+	// dummy values -- cannot use a bare iterator
 	sel = NULL;
 	pos = -777777;
 }
 
 
-bool selection_iterator_c::at_end() const
+sel_iter_c::sel_iter_c(const sel_iter_c& other)
+{
+	sel = other.sel;
+	pos = other.pos;
+}
+
+
+sel_iter_c::sel_iter_c(const selection_c *_sel)
+{
+	sel = _sel;
+	pos = 0;
+
+	if (sel->bv || sel->extended)
+	{
+		// for bit vector, need to find the first one bit.
+		// Note: this logic is slightly hacky...
+
+		pos = -1; next();
+	}
+}
+
+
+sel_iter_c::sel_iter_c(const selection_c& _sel)
+{
+	sel = &_sel;
+	pos = 0;
+
+	if (sel->bv || sel->extended)
+	{
+		pos = -1; next();
+	}
+}
+
+
+bool sel_iter_c::done() const
 {
 	SYS_ASSERT(sel);
 
@@ -498,7 +512,7 @@ bool selection_iterator_c::at_end() const
 }
 
 
-int selection_iterator_c::operator* () const
+int sel_iter_c::operator* () const
 {
 	SYS_ASSERT(sel);
 
@@ -509,7 +523,7 @@ int selection_iterator_c::operator* () const
 }
 
 
-selection_iterator_c& selection_iterator_c::operator++ ()
+void sel_iter_c::next()
 {
 	SYS_ASSERT(sel);
 
@@ -526,8 +540,6 @@ selection_iterator_c& selection_iterator_c::operator++ ()
 		while (pos < sel->bv->size() && !sel->bv->get(pos))
 			pos++;
 	}
-
-	return *this;
 }
 
 

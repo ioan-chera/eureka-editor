@@ -120,8 +120,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_Message("edited X of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
 		}
@@ -141,8 +140,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_Message("edited Y of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
 		}
@@ -181,8 +179,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_Message("adjusted", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			const Vertex *V = Vertices[*it];
 

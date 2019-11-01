@@ -395,8 +395,6 @@ static void CopyGroupOfObjects(selection_c *list)
 
 	bool is_sectors = (list->what_type() == OBJ_SECTORS) ? true : false;
 
-	selection_iterator_c it;
-
 	selection_c vert_sel(OBJ_VERTICES);
 	selection_c side_sel(OBJ_SIDEDEFS);
 	selection_c line_sel(OBJ_LINEDEFS);
@@ -405,7 +403,7 @@ static void CopyGroupOfObjects(selection_c *list)
 	ConvertSelection(&line_sel, &vert_sel);
 
 	// determine needed sidedefs
-	for (line_sel.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
 		LineDef *L = LineDefs[*it];
 
@@ -420,7 +418,7 @@ static void CopyGroupOfObjects(selection_c *list)
 	std::map<int, int> side_map;
 
 
-	for (vert_sel.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(vert_sel) ; !it.done() ; it.next())
 	{
 		vert_map[*it] = (int)clip_board->verts.size();
 
@@ -431,7 +429,7 @@ static void CopyGroupOfObjects(selection_c *list)
 
 	if (is_sectors)
 	{
-		for (list->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(list) ; !it.done() ; it.next())
 		{
 			sector_map[*it] = (int)clip_board->sectors.size();
 
@@ -441,7 +439,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		}
 	}
 
-	for (side_sel.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(side_sel) ; !it.done() ; it.next())
 	{
 		side_map[*it] = (int)clip_board->sides.size();
 
@@ -457,7 +455,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		}
 	}
 
-	for (line_sel.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
 		LineDef * L = new LineDef;
 		L->RawCopy(LineDefs[*it]);
@@ -491,7 +489,7 @@ static void CopyGroupOfObjects(selection_c *list)
 
 		ConvertSelection(list, &thing_sel);
 
-		for (thing_sel.begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
 			Thing * T = new Thing;
 			T->RawCopy(Things[*it]);
@@ -503,8 +501,6 @@ static void CopyGroupOfObjects(selection_c *list)
 
 static bool Clipboard_DoCopy()
 {
-	selection_iterator_c it;
-
 	soh_type_e unselect = Selection_Or_Highlight();
 	if (unselect == SOH_Empty)
 		return false;
@@ -520,7 +516,7 @@ static bool Clipboard_DoCopy()
 	switch (edit.mode)
 	{
 		case OBJ_THINGS:
-			for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
 				T->RawCopy(Things[*it]);
@@ -529,7 +525,7 @@ static bool Clipboard_DoCopy()
 			break;
 
 		case OBJ_VERTICES:
-			for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
 				V->RawCopy(Vertices[*it]);
@@ -1040,9 +1036,7 @@ void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 
 static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 {
-	selection_iterator_c it;
-
-	for (lines->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 

@@ -1323,9 +1323,7 @@ public:
 
 		bool saw_hl = false;
 
-		selection_iterator_c it;
-
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			if (edit.highlight.valid() && *it == edit.highlight.num)
 			{

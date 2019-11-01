@@ -263,12 +263,11 @@ void Vertex_MergeList(selection_c *verts)
 	verts->clear(v);
 
 	selection_c del_lines(OBJ_LINEDEFS);
-	selection_iterator_c it;
 
 	// this prevents unnecessary sandwich mergers
 	ConvertSelection(verts, &del_lines);
 
-	for (verts->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
 		DoMergeVertex(*it, v, del_lines);
 	}
@@ -509,9 +508,7 @@ void CMD_VT_Disconnect(void)
 	BA_Begin();
 	BA_MessageForSel("disconnected", edit.Selected);
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		int v_num = *it;
 
@@ -571,10 +568,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 	Vertices[new_v]->SetRawXY(new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
-
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		LineDef *L2 = LineDefs[*it];
 
@@ -610,9 +604,7 @@ void CMD_LIN_Disconnect(void)
 	BA_Begin();
 	BA_MessageForSel("disconnected", edit.Selected);
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		DoDisconnectLineDef(*it, 0, &seen_one);
 		DoDisconnectLineDef(*it, 1, &seen_one);
@@ -810,8 +802,6 @@ void CMD_SEC_Disconnect(void)
 
 	// collect all vertices which need to be detached
 	selection_c detach_verts(OBJ_VERTICES);
-	selection_iterator_c it;
-
 	VerticesOfDetachableSectors(detach_verts);
 
 	if (detach_verts.empty())
@@ -838,7 +828,7 @@ void CMD_SEC_Disconnect(void)
 	for (n = 0 ; n < NumVertices ; n++)
 		mapping[n] = -1;
 
-	for (detach_verts.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 	{
 		int new_v = BA_New(OBJ_VERTICES);
 
@@ -890,7 +880,7 @@ void CMD_SEC_Disconnect(void)
 
 	ConvertSelection(edit.Selected, &all_verts);
 
-	for (all_verts.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 	{
 		const Vertex * V = Vertices[*it];
 
@@ -992,9 +982,7 @@ void CMD_VT_ShapeLine(void)
 	double by = 0;
 	double b_total = 0;
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Vertex *V = Vertices[*it];
 
@@ -1050,7 +1038,7 @@ void CMD_VT_ShapeLine(void)
 
 	std::vector< vert_along_t > along_list;
 
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Vertex *V = Vertices[*it];
 
@@ -1243,9 +1231,7 @@ void CMD_VT_ShapeArc(void)
 
 	std::vector< vert_along_t > along_list;
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Vertex *V = Vertices[*it];
 

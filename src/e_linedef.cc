@@ -736,8 +736,7 @@ void CMD_LIN_Align()
 
 	std::vector< Objid > group;
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		int parts = edit.Selected->get_ext(*it);
 		parts &= ~1;
@@ -855,9 +854,7 @@ void FlipLineDef_safe(int ld)
 
 void FlipLineDefGroup(selection_c *flip)
 {
-	selection_iterator_c it;
-
-	for (flip->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(flip) ; !it.done() ; it.next())
 	{
 		FlipLineDef(*it);
 	}
@@ -881,8 +878,7 @@ void CMD_LIN_Flip()
 	BA_Begin();
 	BA_MessageForSel("flipped", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		if (force_it)
 			FlipLineDef(*it);
@@ -909,8 +905,7 @@ void CMD_LIN_SwapSides()
 	BA_Begin();
 	BA_MessageForSel("swapped sides on", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		FlipLine_sides(*it);
 	}
@@ -1019,8 +1014,7 @@ void CMD_LIN_SplitHalf(void)
 
 	BA_Begin();
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		if (DoSplitLineDef(*it))
 			new_count++;
@@ -1281,9 +1275,7 @@ void MoveCoordOntoLineDef(int ld, double *x, double *y)
 
 static bool LD_StartWillBeMoved(int ld, selection_c& list)
 {
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 
@@ -1297,9 +1289,7 @@ static bool LD_StartWillBeMoved(int ld, selection_c& list)
 
 static bool LD_EndWillBeMoved(int ld, selection_c& list)
 {
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const LineDef *L = LineDefs[*it];
 
@@ -1316,9 +1306,7 @@ static int PickLineDefToExtend(selection_c& list, bool moving_start)
 	// We want a line whose new length is not going to be wrecked
 	// by a change to a later linedef.  However we must handle loops!
 
-	selection_iterator_c it;
-
-	for (list.begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		if (moving_start)
 		{

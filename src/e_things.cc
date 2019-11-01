@@ -66,8 +66,7 @@ void CMD_TH_SpinThings(void)
 	BA_Begin();
 	BA_MessageForSel("spun", edit.Selected);
 
-	selection_iterator_c it;
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Thing *T = Things[*it];
 
@@ -169,17 +168,14 @@ void CMD_TH_Disconnect(void)
 
 
 		int total = overlaps.count_obj();
-		int n;
-
 		if (total < 2)
 			continue;
 
 		double mid_x, mid_y;
 		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
 
-		selection_iterator_c it;
-
-		for (n = 0, overlaps.begin(&it) ; !it.at_end() ; ++it, ++n)
+		int n = 0;
+		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
 		{
 			MoveOverlapThing(*it, mid_x, mid_y, n, total);
 		}
@@ -211,9 +207,7 @@ void CMD_TH_Merge(void)
 	BA_Begin();
 	BA_MessageForSel("merged", edit.Selected);
 
-	selection_iterator_c it;
-
-	for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(mid_x));
 		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(mid_y));

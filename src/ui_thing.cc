@@ -365,8 +365,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited type of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
 		}
@@ -410,8 +409,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited special of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
 		}
@@ -500,8 +498,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited angle of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeTH(*it, Thing::F_ANGLE, new_ang);
 		}
@@ -523,8 +520,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited TID of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeTH(*it, Thing::F_TID, new_tid);
 		}
@@ -545,8 +541,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited X of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 			BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 
 		BA_End();
@@ -564,8 +559,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited Y of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 			BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		BA_End();
@@ -583,8 +577,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited Z of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 			BA_ChangeTH(*it, Thing::F_H, INT_TO_COORD(new_h));
 
 		BA_End();
@@ -606,8 +599,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited flags of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			const Thing *T = Things[*it];
 
@@ -670,8 +662,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited args of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}

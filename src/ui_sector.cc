@@ -263,8 +263,7 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 		else
 			BA_MessageForSel("edited ceiling of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			if (w == box->floor_h)
 				BA_ChangeSEC(*it, Sector::F_FLOORH, f_h);
@@ -300,8 +299,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited headroom of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			int new_h = Sectors[*it]->floorh + room;
 
@@ -370,8 +368,7 @@ void UI_SectorBox::InstallFlat(const char *name, int filter_parts)
 		BA_Begin();
 		BA_MessageForSel("edited texture on", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			int parts = edit.Selected->get_ext(*it);
 			if (parts == 1)
@@ -494,8 +491,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 		BA_Begin();
 		BA_MessageForSel("edited type of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			int old_type = Sectors[*it]->type;
 
@@ -571,8 +567,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 		BA_Begin();
 		BA_MessageForSel("edited light of", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it); !it.at_end(); ++it)
+		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
 		}
@@ -853,8 +848,7 @@ void UI_SectorBox::CB_Paste(int new_tex)
 		BA_Begin();
 		BA_Message("pasted %s", BA_GetString(new_tex));
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
 			if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
@@ -882,8 +876,7 @@ void UI_SectorBox::CB_Cut()
 		BA_Begin();
 		BA_MessageForSel("cut texture on", edit.Selected);
 
-		selection_iterator_c it;
-		for (edit.Selected->begin(&it) ; !it.at_end() ; ++it)
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
 			if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
