@@ -412,6 +412,10 @@ static void help_do_about(Fl_Widget *w, void * data)
 #undef FCAL
 #define FCAL  (Fl_Callback *)
 
+// Note that the spaces at end of some menu strings are there to
+// prevent FLTK drawing the key binding hard against the item's
+// text.
+
 static Fl_Menu_Item menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
@@ -426,8 +430,6 @@ static Fl_Menu_Item menu_items[] =
 			{ 0 },
 		{ M_RECENT_FILES, 0, 0, 0, FL_SUBMENU|FL_MENU_INACTIVE },
 			{ 0 },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Save Map",    FL_COMMAND + 's', FCAL file_do_save },
 		{ "&Export Map",  FL_COMMAND + 'e', FCAL file_do_export },
@@ -579,7 +581,7 @@ static Fl_Menu_Item menu_items[] =
 
 //
 // allow the hard-coded menu shortcuts to be bind to other functions
-// by the user, hence we remove those shortcuts when this happens. 
+// by the user, hence we remove those shortcuts when this happens.
 //
 static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 {
@@ -603,6 +605,50 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 
 		if (M_IsKeyBound(key, KCTX_General))
 			items[i].shortcut_ = 0;
+	}
+}
+
+
+//
+// remove the blank menu items with FL_MENU_DIVIDER flag, and
+// setting the flag on the previous item.  this is needed to
+// make the system menu bar on MacOS look normal.
+//
+void Menu_PackForMac(Fl_Menu_Item *src)
+{
+	int depth = 0;
+
+	Fl_Menu_Item *dest = src;
+
+	for (;;)
+	{
+		if (src->text == NULL)
+		{
+			*dest++ = *src++;
+
+			if (depth == 0)
+				break;
+
+			depth--;
+			continue;
+		}
+
+		if (src->flags & FL_SUBMENU)
+		{
+			*dest++ = *src++;
+
+			depth++;
+			continue;
+		}
+
+		if (src->text[0] == 0 && (src->flags & FL_MENU_DIVIDER))
+		{
+			dest[-1].flags |= FL_MENU_DIVIDER;
+			src++;
+			continue;
+		}
+
+		*dest++ = *src++;
 	}
 }
 
@@ -740,11 +786,13 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
-#ifndef __APPLE__
+	Fl_Menu_Item *items = menu_items;
+
+#ifdef __APPLE__
+	Menu_PackForMac(items);
+#else
 	bar->textsize(16);
 #endif
-
-	Fl_Menu_Item *items = menu_items;
 
 	Menu_RemovedBoundKeys(items);
 
