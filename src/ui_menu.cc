@@ -550,16 +550,15 @@ static Fl_Menu_Item menu_items[] =
 
 	{ "&Tools", 0, 0, 0, FL_SUBMENU },
 
+#ifndef __APPLE__	// for macOS it will be in the app menu
 		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
+#endif
 		{ "&View Logs",          0,  FCAL tools_do_view_logs },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 
 		{ "&Test in Game",       FL_COMMAND + 't', FCAL tools_do_test_map },
 		{ "&Build All Nodes  ",  FL_COMMAND + 'b', FCAL tools_do_build_nodes },
-
-		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
-
 		{ "&Edit Text Lump  ",    0, FCAL tools_do_lump_editor },
 		{ "&Add BEHAVIOR Lump  ", 0, FCAL tools_do_add_behavior },
 		{ 0 },
@@ -611,8 +610,9 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 
 //
 // remove the blank menu items with FL_MENU_DIVIDER flag, and
-// setting the flag on the previous item.  this is needed to
-// make the system menu bar on MacOS look normal.
+// setting the flag on the previous item.  those blank lines
+// make for nicer looking menus in Windows/Linux, but are not
+// needed for the MacOS system menu bar.
 //
 void Menu_PackForMac(Fl_Menu_Item *src)
 {
@@ -800,6 +800,14 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 	items = Menu_PopulateRecentFiles(items, FCAL file_do_load_recent);
 
 	bar->menu(items);
+
+	// for macOS, the preferences shall be in the app menu
+#ifdef __APPLE__
+	static const Fl_Menu_Item macPreferencesItem = {
+		"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
+	};
+	Fl_Mac_App_Menu::custom_application_menu_items(&macPreferencesItem);
+#endif
 
 	return bar;
 }
