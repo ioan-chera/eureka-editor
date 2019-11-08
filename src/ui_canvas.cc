@@ -1911,7 +1911,7 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 		return;
 	}
 
-	if (grid.snap && edit.drag_other_vert < 0)
+	if (grid.snap)
 	{
 		double focus_x = edit.drag_focus_x + *dx;
 		double focus_y = edit.drag_focus_y + *dy;
