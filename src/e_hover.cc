@@ -48,7 +48,7 @@ double ApproxDistToLineDef(const LineDef * L, double x, double y)
 	double dx = x2 - x1;
 	double dy = y2 - y1;
 
-	if (abs(dx) > abs(dy))
+	if (fabs(dx) > fabs(dy))
 	{
 		// The linedef is rather horizontal
 
@@ -94,8 +94,9 @@ int ClosestLine_CastingHoriz(double x, double y, int *side)
 	int    best_match = -1;
 	double best_dist  = 9e9;
 
-	// most lines have integral Y coords, look in-between
-	y += 0.4;
+	// most lines have integral X coords, so offset slightly to
+	// avoid hitting vertices.
+	y += 0.04;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -122,7 +123,7 @@ int ClosestLine_CastingHoriz(double x, double y, int *side)
 
 			if (side)
 			{
-				if (best_dist < 0.2)
+				if (best_dist < 0.01)
 					*side = 0;  // on the line
 				else if ( (ly1 > ly2) == (dist > 0))
 					*side = 1;  // right side
@@ -141,8 +142,9 @@ int ClosestLine_CastingVert(double x, double y, int *side)
 	int    best_match = -1;
 	double best_dist  = 9e9;
 
-	// most lines have integral X coords, try in the middle
-	x += 0.4;
+	// most lines have integral X coords, so offset slightly to
+	// avoid hitting vertices.
+	x += 0.04;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -169,7 +171,7 @@ int ClosestLine_CastingVert(double x, double y, int *side)
 
 			if (side)
 			{
-				if (best_dist < 0.2)
+				if (best_dist < 0.01)
 					*side = 0;  // on the line
 				else if ( (lx1 > lx2) == (dist < 0))
 					*side = 1;  // right side
@@ -239,8 +241,8 @@ bool PointOutsideOfMap(double x, double y)
 	int dirs = 0;
 
 	// most end-points will be integral, so look in-between
-	double x2 = x + 0.4;
-	double y2 = y + 0.4;
+	double x2 = x + 0.04;
+	double y2 = y + 0.04;
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -309,21 +311,25 @@ public:
 		dx = L->End()->x() - L->Start()->x();
 		dy = L->End()->y() - L->Start()->y();
 
-		cast_horizontal = abs(dy) >= abs(dx);
+		cast_horizontal = fabs(dy) >= fabs(dx);
 
 		x = L->Start()->x() + dx * 0.5;
 		y = L->Start()->y() + dy * 0.5;
 
-		if (cast_horizontal && abs(dy) > 0)
+		if (cast_horizontal && fabs(dy) > 0)
 		{
-			y = y + 0.4;
-			x = x + 0.4 * dx / dy;
+			if (fabs(dy) >= 2.0) {
+				y = y + 0.4;
+				x = x + 0.4 * dx / dy;
+			}
 		}
 
-		if (!cast_horizontal && abs(dx) > 0)
+		if (!cast_horizontal && fabs(dx) > 0)
 		{
-			x = x + 0.4;
-			y = y + 0.4 * dy / dx;
+			if (fabs(dx) >= 2.0) {
+				x = x + 0.4;
+				y = y + 0.4 * dy / dx;
+			}
 		}
 	}
 
@@ -350,7 +356,7 @@ public:
 			if ( (dy < 0) == (ld_side > 0) )
 				dist = -dist;
 
-			if (dist > 0.2 && dist < best_dist)
+			if (dist > 0 && dist < best_dist)
 			{
 				best_match = n;
 				best_dist  = dist;
@@ -377,7 +383,7 @@ public:
 			if ( (dx > 0) == (ld_side > 0) )
 				dist = -dist;
 
-			if (dist > 0.2 && dist < best_dist)
+			if (dist > 0 && dist < best_dist)
 			{
 				best_match = n;
 				best_dist  = dist;
