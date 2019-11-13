@@ -74,6 +74,7 @@ private:
 
 		key_name->color(FL_YELLOW, FL_YELLOW);
 		key_name->value("<\077\077\077>");
+		key_name->textcolor(FL_FOREGROUND_COLOR);
 		grab_but->deactivate();
 
 		Fl::focus(this);
@@ -106,6 +107,9 @@ private:
 				if (key)
 					key_name->value(M_KeyToString(key));
 
+				// if previous key was invalid, need to re-enable OK button
+				validate_callback(this, this);
+
 				return 1;
 			}
 
@@ -121,6 +125,9 @@ private:
 
 					key = new_key;
 					key_name->value(M_KeyToString(key));
+
+					// if previous key was invalid, need to re-enable OK button
+					validate_callback(this, this);
 
 					return 1;
 				}

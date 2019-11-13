@@ -31,6 +31,8 @@ RECENT CHANGES
 
 - fixed the 'Online Docs' command in the Help menu
 
+- fixed Re-bind in key binding dialog to show new key as valid
+
 
 - support SHIFT and CTRL when using mouse-wheel to move in 3D view
 
