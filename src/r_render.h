@@ -58,8 +58,6 @@ public:
 	bool gravity;  // when true, walk on ground
 
 	std::vector<int> thing_sectors;
-	int thsec_sector_num;
-	bool thsec_invalidated;
 
 	// last queried highlight object
 	Objid current_hl;
@@ -71,7 +69,6 @@ public:
 	void SetAngle(float new_ang);
 	void FindGroundZ();
 	void CalcAspect();
-	void FindThingSectors();
 
 	img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel);
 
@@ -123,6 +120,12 @@ void Render3D_GetCameraPos(double *x, double *y, float *angle);
 
 bool Render3D_ParseUser(const char ** tokens, int num_tok);
 void Render3D_WriteUser(FILE *fp);
+
+void Render3D_NotifyBegin();
+void Render3D_NotifyInsert(obj_type_e type, int objnum);
+void Render3D_NotifyDelete(obj_type_e type, int objnum);
+void Render3D_NotifyChange(obj_type_e type, int objnum, int field);
+void Render3D_NotifyEnd();
 
 
 /* API for rendering a scene (etc) */

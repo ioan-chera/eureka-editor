@@ -54,6 +54,32 @@ int  render_far_clip = 32768;
 int  render_pixel_aspect = 83;  //  100 * width / height
 
 
+namespace thing_sec_cache
+{
+	int invalid_low, invalid_high;
+
+	void ResetRange()
+	{
+		invalid_low  = 999999999;
+		invalid_high = -1;
+	}
+
+	void InvalidateThing(int th)
+	{
+		invalid_low  = MIN(invalid_low,  th);
+		invalid_high = MAX(invalid_high, th);
+	}
+
+	void InvalidateAll()
+	{
+		invalid_low  = 0;
+		invalid_high = NumThings - 1;
+	}
+
+	void Update();
+};
+
+
 Render_View_t r_view;
 
 
@@ -65,8 +91,6 @@ Render_View_t::Render_View_t() :
 	texturing(false), sprites(false), lighting(false),
 	gravity(true),
 	thing_sectors(),
-	thsec_sector_num(0),
-	thsec_invalidated(false),
 	current_hl()
 { }
 
@@ -152,30 +176,9 @@ void Render_View_t::UpdateScreen(int ow, int oh)
 	CalcAspect();
 }
 
-void Render_View_t::FindThingSectors()
-{
-	thing_sectors.resize(NumThings);
-
-	for (int i = 0 ; i < NumThings ; i++)
-	{
-		Objid obj;
-		GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
-
-		thing_sectors[i] = obj.num;
-	}
-
-	thsec_sector_num  = NumSectors;
-	thsec_invalidated = false;
-}
-
 void Render_View_t::PrepareToRender(int ow, int oh)
 {
-	if (thsec_invalidated || screen_w == 0 ||
-		NumThings  != (int)thing_sectors.size() ||
-		NumSectors != thsec_sector_num)
-	{
-		FindThingSectors();
-	}
+	thing_sec_cache::Update();
 
 	UpdateScreen(ow, oh);
 
@@ -193,6 +196,68 @@ static Thing *FindPlayer(int typenum)
 			return Things[i];
 
 	return NULL;  // not found
+}
+
+
+//------------------------------------------------------------------------
+
+namespace thing_sec_cache
+{
+	void Update()
+	{
+		// guarantee that thing_sectors has the correct size.
+		// [ prevent a potential crash ]
+		if (NumThings != (int)r_view.thing_sectors.size())
+		{
+			r_view.thing_sectors.resize(NumThings);
+			thing_sec_cache::InvalidateAll();
+		}
+
+		// nothing changed?
+		if (invalid_low > invalid_high)
+			return;
+
+		for (int i = invalid_low ; i <= invalid_high ; i++)
+		{
+			Objid obj;
+			GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
+
+			r_view.thing_sectors[i] = obj.num;
+		}
+
+		thing_sec_cache::ResetRange();
+	}
+}
+
+void Render3D_NotifyBegin()
+{
+	thing_sec_cache::ResetRange();
+}
+
+void Render3D_NotifyInsert(obj_type_e type, int objnum)
+{
+	if (type == OBJ_THINGS)
+		thing_sec_cache::InvalidateThing(objnum);
+}
+
+void Render3D_NotifyDelete(obj_type_e type, int objnum)
+{
+	if (type == OBJ_THINGS || type == OBJ_SECTORS)
+		thing_sec_cache::InvalidateAll();
+}
+
+void Render3D_NotifyChange(obj_type_e type, int objnum, int field)
+{
+	if (type == OBJ_THINGS &&
+		(field == Thing::F_X || field == Thing::F_Y))
+	{
+		thing_sec_cache::InvalidateThing(objnum);
+	}
+}
+
+void Render3D_NotifyEnd()
+{
+	thing_sec_cache::Update();
 }
 
 
@@ -580,6 +645,9 @@ bool Render3D_Query(Objid& hl, int sx, int sy)
 
 void Render3D_Setup()
 {
+	thing_sec_cache::InvalidateAll();
+	r_view.thing_sectors.resize(0);
+
 	if (! r_view.p_type)
 	{
 		r_view.p_type = THING_PLAYER1;
@@ -793,10 +861,10 @@ void Render3D_DragSectors()
 static void DragThings_Update()
 {
 	float ow = main_win->canvas->w();
-	float oh = main_win->canvas->h();
+//	float oh = main_win->canvas->h();
 
 	float x_slope = 100.0 / render_pixel_aspect;
-	float y_slope = (float)oh / (float)ow;
+//	float y_slope = (float)oh / (float)ow;
 
 	float dist = CLAMP(20, edit.drag_point_dist, 1000);
 
@@ -916,9 +984,6 @@ void Render3D_DragThings()
 	{
 		MoveObjects(edit.Selected, dx, dy, dz);
 	}
-
-	// need to recompute their sectors
-	r_view.FindThingSectors();
 
 	RedrawMap();
 }
@@ -1874,7 +1939,6 @@ void R3D_Set()
 	else if (y_stricmp(var_name, "obj") == 0)
 	{
 		r_view.sprites = bool_val;
-		r_view.thsec_invalidated = true;
 	}
 	else if (y_stricmp(var_name, "light") == 0)
 	{
@@ -1911,7 +1975,6 @@ void R3D_Toggle()
 	else if (y_stricmp(var_name, "obj") == 0)
 	{
 		r_view.sprites = ! r_view.sprites;
-		r_view.thsec_invalidated = true;
 	}
 	else if (y_stricmp(var_name, "light") == 0)
 	{

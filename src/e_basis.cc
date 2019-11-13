@@ -41,6 +41,7 @@
 // need these for the XXX_Notify() prototypes
 #include "e_cutpaste.h"
 #include "e_objects.h"
+#include "r_render.h"
 
 
 std::vector<Thing *>   Things;
@@ -111,6 +112,7 @@ static void DoClearChangeStatus()
 	Clipboard_NotifyBegin();
 	Selection_NotifyBegin();
 	 MapStuff_NotifyBegin();
+	 Render3D_NotifyBegin();
 	ObjectBox_NotifyBegin();
 }
 
@@ -125,6 +127,7 @@ static void DoProcessChangeStatus()
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();
 	 MapStuff_NotifyEnd();
+	 Render3D_NotifyEnd();
 	ObjectBox_NotifyEnd();
 }
 
@@ -425,6 +428,7 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 	Clipboard_NotifyInsert(objtype, objnum);
 	Selection_NotifyInsert(objtype, objnum);
 	 MapStuff_NotifyInsert(objtype, objnum);
+	 Render3D_NotifyInsert(objtype, objnum);
 	ObjectBox_NotifyInsert(objtype, objnum);
 
 	switch (objtype)
@@ -563,6 +567,7 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 	Clipboard_NotifyDelete(objtype, objnum);
 	Selection_NotifyDelete(objtype, objnum);
 	 MapStuff_NotifyDelete(objtype, objnum);
+	 Render3D_NotifyDelete(objtype, objnum);
 	ObjectBox_NotifyDelete(objtype, objnum);
 
 	switch (objtype)
@@ -644,6 +649,7 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 	Clipboard_NotifyChange(objtype, objnum, field);
 	Selection_NotifyChange(objtype, objnum, field);
 	 MapStuff_NotifyChange(objtype, objnum, field);
+	 Render3D_NotifyChange(objtype, objnum, field);
 	ObjectBox_NotifyChange(objtype, objnum, field);
 }
 
