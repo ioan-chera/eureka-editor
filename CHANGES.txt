@@ -32,6 +32,8 @@ RECENT CHANGES
 - fixed the 'Online Docs' command in the Help menu
 
 
+- support SHIFT and CTRL when using mouse-wheel to move in 3D view
+
 - added portal specials 156 and 107 to the ZDOOM port
 
 - support the FreeDM iwad
