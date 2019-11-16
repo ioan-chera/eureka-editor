@@ -41,6 +41,47 @@
 #include "ui_window.h"
 
 
+// this function ensures that sector won't get floor > ceil
+void SEC_SafeRaiseLower(int sec, int parts, int dz)
+{
+	if (parts == 0)
+		parts = PART_FLOOR | PART_CEIL;
+
+	int f = Sectors[sec]->floorh;
+	int c = Sectors[sec]->ceilh;
+
+	if ((parts & PART_FLOOR) != 0 && (parts & PART_CEIL) != 0)
+	{
+		f += dz;
+		c += dz;
+
+		// this won't usually happen, only if original sector was bad
+		if (f > c)
+			f = c;
+	}
+	else if (parts & PART_FLOOR)
+	{
+		f += dz;
+
+		if (f > c)
+			f = c;
+	}
+	else if (parts & PART_CEIL)
+	{
+		c += dz;
+
+		if (c < f)
+			c = f;
+	}
+
+	if (parts & PART_FLOOR)
+		BA_ChangeSEC(sec, Sector::F_FLOORH, f);
+
+	if (parts & PART_CEIL)
+		BA_ChangeSEC(sec, Sector::F_CEILH, c);
+}
+
+
 void CMD_SEC_Floor(void)
 {
 	int diff = atoi(EXEC_Param[0]);

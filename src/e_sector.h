@@ -110,6 +110,8 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec = -1, int model
 
 void SectorsAdjustLight(int delta);
 
+void SEC_SafeRaiseLower(int sec, int parts, int dz);
+
 
 /* commands */
 

@@ -32,6 +32,7 @@
 #include "e_cutpaste.h"
 #include "e_hover.h"
 #include "e_linedef.h"
+#include "e_sector.h"
 #include "e_main.h"
 #include "m_game.h"
 #include "m_events.h"
@@ -829,28 +830,18 @@ void Render3D_DragSectors()
 
 	if (edit.dragged.valid())
 	{
-		const Sector *S = Sectors[edit.dragged.num];
 		int parts = edit.dragged.parts;
 
-		if (parts == 0 || (parts & PART_FLOOR))
-			BA_ChangeSEC(edit.dragged.num, Sector::F_FLOORH, S->floorh + dz);
-
-		if (parts == 0 || (parts & PART_CEIL))
-			BA_ChangeSEC(edit.dragged.num, Sector::F_CEILH, S->ceilh + dz);
+		SEC_SafeRaiseLower(edit.dragged.num, parts, dz);
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = Sectors[*it];
 			int parts = edit.Selected->get_ext(*it);
 			parts &= ~1;
 
-			if (parts == 0 || (parts & PART_FLOOR))
-				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + dz);
-
-			if (parts == 0 || (parts & PART_CEIL))
-				BA_ChangeSEC(*it, Sector::F_CEILH, S->ceilh + dz);
+			SEC_SafeRaiseLower(*it, parts, dz);
 		}
 	}
 
