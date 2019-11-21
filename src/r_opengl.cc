@@ -93,7 +93,7 @@ static float DoomLightToFloat(int light, float dist)
 }
 
 
-struct RendInfo
+struct RendInfo3D
 {
 public:
 	// we don't test the visibility of sectors directly, instead we
@@ -102,10 +102,10 @@ public:
 	bitvec_c seen_sectors;
 
 public:
-	RendInfo() : seen_sectors(NumSectors + 1)
+	RendInfo3D() : seen_sectors(NumSectors + 1)
 	{ }
 
-	~RendInfo()
+	~RendInfo3D()
 	{ }
 
 	static inline float PointToAngle(float x, float y)
@@ -1460,7 +1460,7 @@ public:
 
 void RGL_RenderWorld(int ox, int oy, int ow, int oh)
 {
-	RendInfo rend;
+	RendInfo3D rend;
 
 	rend.Begin(ow, oh);
 	rend.Render();
