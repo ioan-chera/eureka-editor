@@ -237,7 +237,7 @@ void selection_c::set_ext(int n, byte value)
 		first_obj = n;
 
 	// need to resize the array?
-	while (n > ext_size)
+	while (n >= ext_size)
 	{
 		ResizeExtended(ext_size * 2);
 	}
