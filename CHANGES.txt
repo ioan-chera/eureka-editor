@@ -21,6 +21,8 @@ RECENT CHANGES
 
 - info bar for the 2D map view
 
+- render sectors in the 2D view with both lighting and texturing
+
 - snap position indicator for 2D view (a light-blue cross)
 
 - added scale '-' and '+' buttons, show scale as percentage
