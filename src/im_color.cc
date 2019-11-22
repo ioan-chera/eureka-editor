@@ -253,17 +253,12 @@ rgb_color_t SectorLightColor(int light)
 {
 	int lt = light;
 
-	// below 96 causes the computed distance value below to go
-	// awry and produce bad results, so just use a linear dropoff.
-	if (lt < 96)
-	{
-		lt = lt / 3;
-	}
-	else
-	{
-		lt = R_DoomLightingEquation(light, light * light / 64);
-		lt = (31 - lt) * 255 / 31;
-	}
+	// sample three distances, produce average
+	lt = R_DoomLightingEquation(light,  60.0) +
+		 R_DoomLightingEquation(light, 160.0) +
+		 R_DoomLightingEquation(light, 560.0);
+
+	lt = (93 - lt) * 255 / 93;
 
 	// need to gamma-correct the light level
 	if (usegamma > 0)
