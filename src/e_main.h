@@ -90,8 +90,10 @@ struct Editor_State_t
 	float nav_left,   nav_right;
 	float nav_up,     nav_down;
 	float nav_turn_L, nav_turn_R;
+	bool  nav_lax;
 
 	float panning_speed;
+	bool  panning_lax;
 
 
 	/* click stuff (ACT_CLICK) */
@@ -155,6 +157,7 @@ struct Editor_State_t
 	/* adjusting state (ACT_ADJUST_OFS) */
 
 	float adjust_dx, adjust_dy;
+	bool  adjust_lax;
 
 	SaveBucket_c * adjust_bucket;
 

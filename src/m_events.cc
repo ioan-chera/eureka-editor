@@ -125,9 +125,6 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 
 	float speed = edit.panning_speed / grid.Scale;
 
-	//??		 if (mod & MOD_COMMAND) speed *= 2.0;
-	//??	else if (mod & MOD_SHIFT)   speed *= 0.5;
-
 	double delta_x = ((double) -dx * speed);
 	double delta_y = ((double)  dy * speed);
 
@@ -146,6 +143,8 @@ void Editor_ClearNav()
 	edit.nav_back   = 0;
 	edit.nav_turn_L = 0;
 	edit.nav_turn_R = 0;
+
+	edit.nav_lax = false;
 }
 
 
@@ -155,7 +154,10 @@ static void Navigate2D()
 
 	delay_ms = delay_ms / 1000.0;
 
-	keycode_t mod = M_ReadLaxModifiers();
+	keycode_t mod = 0;
+
+	if (edit.nav_lax)
+		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;
@@ -230,7 +232,8 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 
 	keycode_t lax_mod = 0;
 
-	if (Exec_HasFlag("/LAX"))
+	edit.nav_lax = Exec_HasFlag("/LAX");
+	if (edit.nav_lax)
 		lax_mod = MOD_SHIFT | MOD_COMMAND;
 
 	edit.is_navigating = true;

@@ -447,6 +447,7 @@ static void AdjustOfs_Begin()
 		delete edit.adjust_bucket;
 
 	edit.adjust_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
+	edit.adjust_lax = Exec_HasFlag("/LAX");
 
 	int total_lines = 0;
 
@@ -500,6 +501,8 @@ static void AdjustOfs_Begin()
 	edit.adjust_dx = 0;
 	edit.adjust_dy = 0;
 
+	edit.adjust_lax = Exec_HasFlag("/LAX");
+
 	Editor_SetAction(ACT_ADJUST_OFS);
 }
 
@@ -549,7 +552,7 @@ static void AdjustOfs_Delta(int dx, int dy)
 			dx = 0;
 	}
 
-	keycode_t mod = M_ReadLaxModifiers();
+	keycode_t mod = edit.adjust_lax ? M_ReadLaxModifiers() : 0;
 
 	float factor = (mod & MOD_SHIFT) ? 0.5 : 2.0;
 
@@ -744,6 +747,9 @@ void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
 
 	if (dx == 0 && dy == 0)
 		return;
+
+	if (! edit.panning_lax)
+		mod = 0;
 
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
@@ -1052,7 +1058,10 @@ void Render3D_Navigate()
 
 	delay_ms = delay_ms / 1000.0;
 
-	keycode_t mod = M_ReadLaxModifiers();
+	keycode_t mod = 0;
+
+	if (edit.nav_lax)
+		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & MOD_SHIFT)   mod_factor = 0.5;
@@ -1864,6 +1873,7 @@ void R3D_NAV_MouseMove()
 		return;
 
 	edit.panning_speed = atof(EXEC_Param[0]);
+	edit.panning_lax = Exec_HasFlag("/LAX");
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();

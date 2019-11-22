@@ -510,6 +510,7 @@ void CMD_NAV_MouseScroll()
 		return;
 
 	edit.panning_speed = atof(EXEC_Param[0]);
+	edit.panning_lax = Exec_HasFlag("/LAX");
 
 	if (! edit.is_navigating)
 		Editor_ClearNav();
