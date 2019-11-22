@@ -297,7 +297,7 @@ private:
 
 		const char * tokens[32];
 
-		int num_tok = M_ParseLine(list, tokens, 32, false);
+		int num_tok = M_ParseLine(list, tokens, 32, 0 /* do_strings */);
 
 		if (num_tok < 1)	// shouldn't happen
 		{

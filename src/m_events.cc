@@ -871,7 +871,7 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
 		if (num_tok == 0)
 			continue;
 

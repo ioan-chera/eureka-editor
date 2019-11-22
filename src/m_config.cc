@@ -1400,8 +1400,10 @@ int M_WriteConfigFile()
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_strings)
+int M_ParseLine(const char *line, const char ** tokens, int max_tok, int do_strings)
 {
+	// when do_strings == 2, string tokens keep their quotes.
+
 	int num_tok = 0;
 
 	char tokenbuf[256];
@@ -1441,7 +1443,9 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 			if (ch == '"' && do_strings)
 			{
 				in_string = true;
-				continue;
+
+				if (do_strings != 2)
+					continue;
 			}
 
 			// begin a normal token
@@ -1453,6 +1457,9 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, bool do_str
 		{
 			// end of string
 			in_string = false;
+
+			if (do_strings == 2)
+				tokenbuf[tokenlen++] = ch;
 		}
 		else if (ch == 0 || ch == '\n')
 		{
@@ -1536,7 +1543,7 @@ bool M_LoadUserState()
 
 	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, true /* do_strings */);
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
 
 		if (num_tok == 0)
 			continue;

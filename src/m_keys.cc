@@ -142,6 +142,7 @@ typedef struct
 static const key_mapping_t key_map[] =
 {
 	{ ' ',			"SPACE" },
+	{ '"',			"DBLQUOTE" },
 	{ FL_BackSpace,	"BS" },
 	{ FL_Tab,		"TAB" },
 	{ FL_Enter,		"ENTER" },
@@ -282,7 +283,7 @@ static const char * BareKeyName(keycode_t key)
 {
 	static char buffer[200];
 
-	if (key < 127 && key > 32 && isprint(key))
+	if (key < 127 && key > 32 && isprint(key) && key != '"')
 	{
 		buffer[0] = (char) key;
 		buffer[1] = 0;
@@ -602,7 +603,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 		StringRemoveCRLF(line);
 
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, false /* do_strings */);
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 2 /* do_strings, keep quotes */);
 
 		if (num_tok == 0)
 			continue;
@@ -988,7 +989,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	const char * tokens[MAX_TOKENS];
 
-	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, false /* do_strings */);
+	int num_tok = M_ParseLine(buffer, tokens, MAX_TOKENS, 2 /* do_strings, keep quotes */);
 
 	if (num_tok <= 0)
 		return "Missing function name";
