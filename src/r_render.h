@@ -70,8 +70,6 @@ public:
 	void FindGroundZ();
 	void CalcAspect();
 
-	img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel);
-
 	void UpdateScreen(int ow, int oh);
 	void PrepareToRender(int ow, int oh);
 

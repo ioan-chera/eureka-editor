@@ -251,13 +251,25 @@ rgb_color_t ParseColor(const char *str)
 
 rgb_color_t SectorLightColor(int light)
 {
-	float lt = CLAMP(0, (light | 15), 256) / 256.0;
+	int lt = light;
 
-	lt = pow(lt, 1.5);
+	// below 96 causes the computed distance value below to go
+	// awry and produce bad results, so just use a linear dropoff.
+	if (lt < 96)
+	{
+		lt = lt / 3;
+	}
+	else
+	{
+		lt = R_DoomLightingEquation(light, light * light / 64);
+		lt = (31 - lt) * 255 / 31;
+	}
 
-	light = CLAMP(48, (int)(lt * 256), 255);
+	// need to gamma-correct the light level
+	if (usegamma > 0)
+		lt = gammatable[usegamma][lt];
 
-	return RGB_MAKE(light, light, light);
+	return RGB_MAKE(lt, lt, lt);
 }
 
 
