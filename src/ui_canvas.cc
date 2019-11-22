@@ -1896,6 +1896,18 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 		return;
 	}
 
+	if (grid.ratio > 0)
+	{
+		double new_x = edit.drag_cur_x;
+		double new_y = edit.drag_cur_y;
+
+		grid.RatioSnapXY(new_x, new_y, edit.drag_start_x, edit.drag_start_y);
+
+		*dx = new_x - edit.drag_start_x;
+		*dy = new_y - edit.drag_start_y;
+		return;
+	}
+
 	if (grid.snap)
 	{
 		double focus_x = edit.drag_focus_x + *dx;
