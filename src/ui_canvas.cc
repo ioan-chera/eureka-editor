@@ -2057,13 +2057,35 @@ void UI_Canvas::RenderSector(int num)
 			// 3D renderer, but is different than ZDoom (which scales them).
 			int ty = (0 - (int)MAPY(y)) & (th - 1);
 
-			for (; dest < dest_end ; dest += 3, x++)
+			if (light_and_tex)
 			{
-				int tx = (int)MAPX(x) & (tw - 1);
+				int r = RGB_RED(light_col)   * 0x101;
+				int g = RGB_GREEN(light_col) * 0x101;
+				int b = RGB_BLUE(light_col)  * 0x101;
 
-				img_pixel_t pix = src_pix[ty * tw + tx];
+				for (; dest < dest_end ; dest += 3, x++)
+				{
+					int tx = (int)MAPX(x) & (tw - 1);
 
-				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+					img_pixel_t pix = src_pix[ty * tw + tx];
+
+					IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+
+					dest[0] = ((int)dest[0] * r) >> 16;
+					dest[1] = ((int)dest[1] * g) >> 16;
+					dest[2] = ((int)dest[2] * b) >> 16;
+				}
+			}
+			else  // fullbright version
+			{
+				for (; dest < dest_end ; dest += 3, x++)
+				{
+					int tx = (int)MAPX(x) & (tw - 1);
+
+					img_pixel_t pix = src_pix[ty * tw + tx];
+
+					IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+				}
 			}
 		}
 	}
