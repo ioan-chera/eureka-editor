@@ -673,6 +673,7 @@ public:
 	Fl_Check_Button *edit_autoadjustX;
 	Fl_Check_Button *edit_add_del;
 	Fl_Int_Input    *edit_sectorsize;
+	Fl_Input        *edit_userratio;
 
 	Fl_Check_Button *brow_smalltex;
 	Fl_Check_Button *brow_combo;
@@ -909,6 +910,8 @@ UI_Preferences::UI_Preferences() :
 		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
+		}
+		{ edit_userratio = new Fl_Input(440, 150, 105, 25, "user ratio:");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
@@ -1457,6 +1460,10 @@ void UI_Preferences::LoadValues()
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
 	brow_combo->value(browser_combine_tex ? 1 : 0);
 
+	char ratio_buf[256];
+	snprintf(ratio_buf, sizeof(ratio_buf), "%d:%d", grid_ratio_high, grid_ratio_low);
+	edit_userratio->value(ratio_buf);
+
 	/* Grid Tab */
 
 	if (grid_style < 0 || grid_style > 1)
@@ -1604,6 +1611,17 @@ void UI_Preferences::SaveValues()
 
 		main_win->browser->Populate();
 	}
+
+	// decode the user ratio
+	grid_ratio_low = grid_ratio_high = -1;
+	sscanf(edit_userratio->value(), "%d:%d", &grid_ratio_high, &grid_ratio_low);
+	if (grid_ratio_high < 1) grid_ratio_high = 3;
+	if (grid_ratio_low  < 1) grid_ratio_low  = 1;
+
+	if (grid_ratio_low > grid_ratio_high)
+		std::swap(grid_ratio_low, grid_ratio_high);
+
+	main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 

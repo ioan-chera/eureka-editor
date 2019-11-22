@@ -65,6 +65,8 @@ extern bool grid_default_snap;
 extern int  grid_default_size;
 extern bool grid_hide_in_free_mode;
 extern bool grid_snap_indicator;
+extern int  grid_ratio_high;
+extern int  grid_ratio_low;
 
 extern rgb_color_t dotty_axis_col;
 extern rgb_color_t dotty_major_col;

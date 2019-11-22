@@ -42,7 +42,7 @@ int  grid_style;  // 0 = squares, 1 = dotty
 bool grid_hide_in_free_mode = false;
 bool grid_snap_indicator = true;
 
-int  grid_ratio_high = 3;  // custom ratio (high must be > low)
+int  grid_ratio_high = 3;  // custom ratio (high must be >= low)
 int  grid_ratio_low  = 1;  // (low must be > 0)
 
 
@@ -295,6 +295,11 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		break;
 
 	default: // USER SETTING
+		if (grid_ratio_low < 1)
+			grid_ratio_low = 1;
+		if (grid_ratio_high < grid_ratio_low)
+			grid_ratio_high = grid_ratio_low;
+
 		custom = (double)grid_ratio_low / (double)grid_ratio_high;
 
 		if (custom > 0.1 && fabs(dx) < fabs(dy) * custom * 0.3)

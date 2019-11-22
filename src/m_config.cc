@@ -476,6 +476,24 @@ static const opt_desc_t options[] =
 		&grid_hide_in_free_mode
 	},
 
+	{	"grid_ratio_high",
+		0,
+		OPT_INTEGER,
+		"v",
+		"custom grid ratio : high value (numerator)",
+		NULL,
+		&grid_ratio_high
+	},
+
+	{	"grid_ratio_low",
+		0,
+		OPT_INTEGER,
+		"v",
+		"custom grid ratio : low value (denominator)",
+		NULL,
+		&grid_ratio_low
+	},
+
 	{	"grid_snap_indicator",
 		0,
 		OPT_BOOLEAN,
