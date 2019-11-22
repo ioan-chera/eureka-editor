@@ -74,7 +74,9 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 	split_ld(-1),
 	snap_x(-1), snap_y(-1),
 	seen_sectors()
-{ }
+{
+	rgb_buf = NULL;
+}
 
 
 UI_Canvas::~UI_Canvas()
