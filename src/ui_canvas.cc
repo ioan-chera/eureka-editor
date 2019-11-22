@@ -1921,6 +1921,7 @@ void UI_Canvas::RenderSector(int num)
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
 	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
+	bool light_and_tex = false;
 
 	const char * tex_name = NULL;
 
@@ -1947,7 +1948,11 @@ void UI_Canvas::RenderSector(int num)
 	}
 	else
 	{
-		if (edit.sector_render_mode == SREND_Ceiling)
+		if (edit.sector_render_mode <= SREND_Ceiling)
+			light_and_tex = true;
+
+		if (edit.sector_render_mode == SREND_Ceiling ||
+			edit.sector_render_mode == SREND_CeilBright)
 			tex_name = Sectors[num]->CeilTex();
 		else
 			tex_name = Sectors[num]->FloorTex();
@@ -2064,7 +2069,10 @@ void UI_Canvas::RenderSector(int num)
 #else // OpenGL
 	if (img)
 	{
-		glColor3f(1, 1, 1);
+		if (light_and_tex)
+			RenderColor(light_col);
+		else
+			glColor3f(1, 1, 1);
 
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_ALPHA_TEST);

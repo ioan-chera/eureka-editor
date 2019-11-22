@@ -150,7 +150,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	sec_rend = new Fl_Menu_Button(X+58, Y, 96, H, "PLAIN");
 	sec_rend->align(FL_ALIGN_INSIDE);
-	sec_rend->add("PLAIN|Floors|Ceiling|Lighting|Sound|3D VIEW");
+	sec_rend->add("PLAIN|Floor|Ceiling|Lighting|Floor Bright|Ceil Bright|Sound|3D VIEW");
 	sec_rend->callback(rend_callback, this);
 	sec_rend->labelsize(16);
 
@@ -189,7 +189,8 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 {
 	Fl_Menu_Button *sec_rend = (Fl_Menu_Button *)w;
 
-	if (sec_rend->value() == 5)
+	// last option is 3D mode
+	if (sec_rend->value() > SREND_SoundProp)
 	{
 		Render3D_Enable(true);
 		return;
@@ -197,11 +198,13 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 
 	switch (sec_rend->value())
 	{
-	case 1: edit.sector_render_mode = SREND_Floor;      break;
-	case 2: edit.sector_render_mode = SREND_Ceiling;    break;
-	case 3: edit.sector_render_mode = SREND_Lighting;   break;
-	case 4: edit.sector_render_mode = SREND_SoundProp;  break;
-	default: edit.sector_render_mode = SREND_Nothing;   break;
+	case 1: edit.sector_render_mode = SREND_Floor; break;
+	case 2: edit.sector_render_mode = SREND_Ceiling; break;
+	case 3: edit.sector_render_mode = SREND_Lighting; break;
+	case 4: edit.sector_render_mode = SREND_FloorBright; break;
+	case 5: edit.sector_render_mode = SREND_CeilBright; break;
+	case 6: edit.sector_render_mode = SREND_SoundProp; break;
+	default: edit.sector_render_mode = SREND_Nothing; break;
 	}
 
 	if (edit.render3d)
@@ -340,11 +343,13 @@ void UI_InfoBar::UpdateSecRend()
 
 	switch (edit.sector_render_mode)
 	{
-	case SREND_Floor:     sec_rend->label("Floors");   break;
-	case SREND_Ceiling:   sec_rend->label("Ceilings"); break;
-	case SREND_Lighting:  sec_rend->label("Lighting"); break;
-	case SREND_SoundProp: sec_rend->label("Sound");    break;
-	default:              sec_rend->label("PLAIN");    break;
+	case SREND_Floor:       sec_rend->label("Floor");   break;
+	case SREND_Ceiling:     sec_rend->label("Ceiling"); break;
+	case SREND_Lighting:    sec_rend->label("Lighting"); break;
+	case SREND_FloorBright: sec_rend->label("Floor Brt"); break;
+	case SREND_CeilBright:  sec_rend->label("Ceil Brt"); break;
+	case SREND_SoundProp:   sec_rend->label("Sound");    break;
+	default:                sec_rend->label("PLAIN");    break;
 	}
 }
 

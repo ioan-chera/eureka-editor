@@ -41,6 +41,8 @@ typedef enum
 	SREND_Floor,
 	SREND_Ceiling,
 	SREND_Lighting,
+	SREND_FloorBright,
+	SREND_CeilBright,
 	SREND_SoundProp
 
 } sector_rendering_mode_e;
