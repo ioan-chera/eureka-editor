@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2013-2018 Andrew Apted
+//  Copyright (C) 2013-2019 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1167,17 +1167,9 @@ static void DoExecuteCommand(const editor_command_t *cmd)
 }
 
 
-bool ExecuteKey(keycode_t key, key_context_e context)
+static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
 {
-	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-	{
-		EXEC_Param[p] = "";
-		EXEC_Flags[p] = "";
-	}
-
-	EXEC_Errno = 0;
-
-	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	for (int i = 0 ; i < (int)all_bindings.size() ; i++)
 	{
 		key_binding_t& bind = all_bindings[i];
 
@@ -1188,6 +1180,9 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 
 		// match modifiers "loosely" for certain commands (esp. NAV_xxx)
 		bool is_lax = (bind.key & MOD_LAX_SHIFTCTRL) ? true : false;
+
+		if (lax_only != is_lax)
+			continue;
 
 		keycode_t key1 = key;
 		keycode_t key2 = bind.key;
@@ -1201,37 +1196,65 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 		if (key1 != key2)
 			continue;
 
-		// found a match!
-
-		int p_idx = 0;
-		int f_idx = 0;
-
-		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		{
-			if (! bind.param[p][0])
-				break;
-
-			// separate flags from normal parameters
-			if (bind.param[p][0] == '/')
-				EXEC_Flags[f_idx++] = bind.param[p];
-			else
-				EXEC_Param[p_idx++] = bind.param[p];
-		}
-
-		EXEC_CurKey = key;
-
-		// commands can test for LAX mode via a special flag
-		if (is_lax && f_idx < MAX_EXEC_PARAM)
-		{
-			EXEC_Flags[f_idx++] = "/LAX";
-		}
-
-		DoExecuteCommand(bind.cmd);
-
-		return true;
+		// found a match
+		return i;
 	}
 
-	return false;
+	// not found
+	return -1;
+}
+
+
+bool ExecuteKey(keycode_t key, key_context_e context)
+{
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+	{
+		EXEC_Param[p] = "";
+		EXEC_Flags[p] = "";
+	}
+
+	EXEC_Errno = 0;
+
+	// this logic means we only use a LAX binding if an exact match
+	// could not be found.
+	int idx = FindBinding(key, context, false);
+
+	if (idx < 0)
+		idx = FindBinding(key, context, true);
+
+	if (idx < 0)
+		return false;
+
+	key_binding_t& bind = all_bindings[idx];
+
+	int p_idx = 0;
+	int f_idx = 0;
+
+	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
+	{
+		if (! bind.param[p][0])
+			break;
+
+		// separate flags from normal parameters
+		if (bind.param[p][0] == '/')
+			EXEC_Flags[f_idx++] = bind.param[p];
+		else
+			EXEC_Param[p_idx++] = bind.param[p];
+	}
+
+	EXEC_CurKey = key;
+
+	// commands can test for LAX mode via a special flag
+	bool is_lax = (bind.key & MOD_LAX_SHIFTCTRL) ? true : false;
+
+	if (is_lax && f_idx < MAX_EXEC_PARAM)
+	{
+		EXEC_Flags[f_idx++] = "/LAX";
+	}
+
+	DoExecuteCommand(bind.cmd);
+
+	return true;
 }
 
 
