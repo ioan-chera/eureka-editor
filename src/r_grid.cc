@@ -42,6 +42,9 @@ int  grid_style;  // 0 = squares, 1 = dotty
 bool grid_hide_in_free_mode = false;
 bool grid_snap_indicator = true;
 
+int  grid_ratio_high = 3;  // custom ratio (high must be > low)
+int  grid_ratio_low  = 1;  // (low must be > 0)
+
 
 Grid_State_c::Grid_State_c() :
 	step(64 /* dummy */), snap(true),
@@ -156,6 +159,8 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 	int sign_x = (dx >= 0) ? +1 : -1;
 	int sign_y = (dy >= 0) ? +1 : -1;
 
+	double custom;
+
 	switch (ratio)
 	{
 	case 0: // unlocked
@@ -168,13 +173,32 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 			var_y = start_y;
 		break;
 
-	case 2: // 1:1 (45 degrees)
-		var_x = start_x + sign_x * len;
-		var_y = start_y + sign_y * len;
+	case 2: // 1:1 (45 degrees) + axis aligned
+		if (fabs(dx) * 2 < fabs(dy))
+		{
+			var_x = start_x;
+		}
+		else if (fabs(dy) * 2 < fabs(dx))
+		{
+			var_y = start_y;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len;
+		}
 		break;
 
-	case 3: // 2:1
-		if (fabs(dx) < fabs(dy))
+	case 3: // 2:1 + axis aligned
+		if (fabs(dx) * 4 < fabs(dy))
+		{
+			var_x = start_x;
+		}
+		else if (fabs(dy) * 4 < fabs(dx))
+		{
+			var_y = start_y;
+		}
+		else if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.5;
 			var_y = start_y + sign_y * len;
@@ -186,21 +210,16 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 4: // 3:1
-		if (fabs(dx) < fabs(dy))
+	case 4: // 4:1 + axis aligned
+		if (fabs(dx) * 8 < fabs(dy))
 		{
-			var_x = start_x + sign_x * len / 3.0;
-			var_y = start_y + sign_y * len;
+			var_x = start_x;
 		}
-		else
+		else if (fabs(dy) * 8 < fabs(dx))
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len / 3.0;
+			var_y = start_y;
 		}
-		break;
-
-	case 5: // 4:1
-		if (fabs(dx) < fabs(dy))
+		else if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.25;
 			var_y = start_y + sign_y * len;
@@ -212,8 +231,16 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 6: // 8:1
-		if (fabs(dx) < fabs(dy))
+	case 5: // 8:1 + axis aligned
+		if (fabs(dx) * 16 < fabs(dy))
+		{
+			var_x = start_x;
+		}
+		else if (fabs(dy) * 16 < fabs(dx))
+		{
+			var_y = start_y;
+		}
+		else if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.125;
 			var_y = start_y + sign_y * len;
@@ -225,8 +252,16 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 7: // 5:4
-		if (fabs(dx) < fabs(dy))
+	case 6: // 5:4 + axis aligned
+		if (fabs(dx) * 3 < fabs(dy))
+		{
+			var_x = start_x;
+		}
+		else if (fabs(dy) * 3 < fabs(dx))
+		{
+			var_y = start_y;
+		}
+		else if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 0.8;
 			var_y = start_y + sign_y * len;
@@ -238,8 +273,16 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		}
 		break;
 
-	case 8: // 7:4
-		if (fabs(dx) < fabs(dy))
+	case 7: // 7:4 + axis aligned
+		if (fabs(dx) * 3 < fabs(dy))
+		{
+			var_x = start_x;
+		}
+		else if (fabs(dy) * 3 < fabs(dx))
+		{
+			var_y = start_y;
+		}
+		else if (fabs(dx) < fabs(dy))
 		{
 			var_x = start_x + sign_x * len * 4 / 7;
 			var_y = start_y + sign_y * len;
@@ -250,6 +293,28 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 			var_y = start_y + sign_y * len * 4 / 7;
 		}
 		break;
+
+	default: // USER SETTING
+		custom = (double)grid_ratio_low / (double)grid_ratio_high;
+
+		if (custom > 0.1 && fabs(dx) < fabs(dy) * custom * 0.3)
+		{
+			var_x = start_x;
+		}
+		else if (custom > 0.1 && fabs(dy) < fabs(dx) * custom * 0.3)
+		{
+			var_y = start_y;
+		}
+		else if (fabs(dx) < fabs(dy))
+		{
+			var_x = start_x + sign_x * len * custom;
+			var_y = start_y + sign_y * len;
+		}
+		else
+		{
+			var_x = start_x + sign_x * len;
+			var_y = start_y + sign_y * len * custom;
+		}
 	}
 }
 
