@@ -250,10 +250,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 	}
 
 done:
-	if (edit.split_line.valid())
-		main_win->canvas->SplitLineSet(edit.split_line.num, edit.split_x, edit.split_y);
-	else
-		main_win->canvas->SplitLineForget();
+	main_win->canvas->UpdateHighlight();
 }
 
 
@@ -286,11 +283,7 @@ void UpdateHighlight()
 	UpdateSplitLine(edit.map_x, edit.map_y);
 	UpdateDrawLine();
 
-	if (edit.highlight.valid())
-		main_win->canvas->HighlightSet(edit.highlight);
-	else
-		main_win->canvas->HighlightForget();
-
+	main_win->canvas->UpdateHighlight();
 	main_win->canvas->CheckGridSnap();
 
 	UpdatePanel();

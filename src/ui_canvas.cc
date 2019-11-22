@@ -1161,46 +1161,28 @@ void UI_Canvas::CheckGridSnap()
 }
 
 
-void UI_Canvas::HighlightSet(Objid& obj)
+void UI_Canvas::UpdateHighlight()
 {
-	if (highlight == obj)
-		return;
+	bool changes = false;
 
-	highlight = obj;
-	redraw();
-}
+	if (! (highlight == edit.highlight))
+	{
+		highlight = edit.highlight;
+		changes   = true;
+	}
 
+	int new_ld = edit.split_line.valid() ? edit.split_line.num : -1;
 
-void UI_Canvas::HighlightForget()
-{
-	if (highlight.is_nil())
-		return;
+	if (! (split_ld != new_ld && split_x == edit.split_x && split_y == edit.split_y))
+	{
+		split_ld = new_ld;
+		split_x  = edit.split_x;
+		split_y  = edit.split_y;
+		changes  = true;
+	}
 
-	highlight.clear();
-	redraw();
-}
-
-
-void UI_Canvas::SplitLineSet(int ld, double new_x, double new_y)
-{
-	if (split_ld == ld && split_x == new_x && split_y == new_y)
-		return;
-
-	split_ld = ld;
-	split_x  = new_x;
-	split_y  = new_y;
-
-	redraw();
-}
-
-
-void UI_Canvas::SplitLineForget()
-{
-	if (split_ld < 0)
-		return;
-
-	split_ld = -1;
-	redraw();
+	if (changes)
+		redraw();
 }
 
 

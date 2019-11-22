@@ -89,11 +89,7 @@ public:
 
 	void DrawEverything();
 
-	void HighlightSet(Objid& obj);
-	void HighlightForget();
-
-	void SplitLineSet(int ld, double new_x, double new_y);
-	void SplitLineForget();
+	void UpdateHighlight();
 
 	void CheckGridSnap();
 
