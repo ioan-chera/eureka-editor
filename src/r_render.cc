@@ -1042,6 +1042,7 @@ void Render3D_UpdateHighlight()
 	// TODO : REVIEW HOW/WHEN pointer_in_window is set
 
 	edit.highlight.clear();
+	edit.split_line.clear();
 
 	if (r_view.current_hl.type == edit.mode &&
 		edit.pointer_in_window &&

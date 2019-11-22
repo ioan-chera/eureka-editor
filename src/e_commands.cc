@@ -799,7 +799,6 @@ void CMD_ACT_Click()
 			edit.Selected->set(new_vert);
 
 		edit.clicked = Objid(OBJ_VERTICES, new_vert);
-
 		Editor_SetAction(ACT_CLICK);
 
 		RedrawMap();
@@ -821,7 +820,6 @@ void CMD_ACT_Click()
 
 	Editor_SetAction(ACT_CLICK);
 }
-
 
 
 void CMD_ACT_SelectBox()

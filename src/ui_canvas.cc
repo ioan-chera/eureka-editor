@@ -1896,7 +1896,8 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	}
 
 	// handle ratio-lock of a single dragged vertex
-	if (edit.mode == OBJ_VERTICES && grid.ratio > 0 && edit.drag_other_vert >= 0)
+	if (edit.mode == OBJ_VERTICES && grid.ratio > 0 &&
+		edit.dragged.num >= 0 && edit.drag_other_vert >= 0)
 	{
 		const Vertex *v0 = Vertices[edit.drag_other_vert];
 		const Vertex *v1 = Vertices[edit.dragged.num];

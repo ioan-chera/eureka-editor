@@ -140,7 +140,7 @@ static void UpdatePanel()
 	int obj_count = edit.Selected->count_obj();
 
 	// the highlight is usually turned off when dragging, so compensate
-	if (obj_idx < 0)
+	if (obj_idx < 0 && edit.action == ACT_DRAG)
 		obj_idx = edit.dragged.num;
 
 	if (obj_idx >= 0)
