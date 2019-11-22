@@ -211,7 +211,7 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 		Render3D_Enable(false);
 
 	// need sectors mode for sound propagation display
-	if (sec_rend->value() == 4 && edit.mode != OBJ_SECTORS)
+	if (edit.sector_render_mode == SREND_SoundProp && edit.mode != OBJ_SECTORS)
 		Editor_ChangeMode('s');
 
 	RedrawMap();
