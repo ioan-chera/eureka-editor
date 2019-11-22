@@ -33,6 +33,8 @@ RECENT CHANGES
 
 - fixed Re-bind in key binding dialog to show new key as valid
 
+- fixed window title not showing correct map name
+
 
 - support SHIFT and CTRL when using mouse-wheel to move in 3D view
 
