@@ -463,9 +463,12 @@ static void AdjustOfs_Begin()
 			int ld_num = *it;
 			byte parts = edit.Selected->get_ext(ld_num);
 
-			// ignore "simply selected" linedefs
+			// handle "simply selected" linedefs
 			if (parts <= 1)
-				continue;
+			{
+				parts |= PART_RT_LOWER | PART_RT_UPPER;
+				parts |= PART_LF_LOWER | PART_LF_UPPER;
+			}
 
 			total_lines++;
 			AdjustOfs_UpdateBBox(ld_num);
