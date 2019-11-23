@@ -128,11 +128,11 @@ UI_MainWindow::UI_MainWindow() :
 
 	// create bare-bone operation menu widgets
 	// [ they are fleshed out by M_LoadOperationMenus ]
-	op_thing  = new Fl_Menu_Button(0, 0, 99, 99, "Thing Operations");
-	op_line   = new Fl_Menu_Button(0, 0, 99, 99, "Line Operations");
-	op_sector = new Fl_Menu_Button(0, 0, 99, 99, "Sector Operations");
-	op_vertex = new Fl_Menu_Button(0, 0, 99, 99, "Vertex Operations");
-	op_render = new Fl_Menu_Button(0, 0, 99, 99, "3D Operations");
+	op_thing  = new Fl_Menu_Button(0, 0, 99, 99, "");
+	op_line   = new Fl_Menu_Button(0, 0, 99, 99, "");
+	op_sector = new Fl_Menu_Button(0, 0, 99, 99, "");
+	op_vertex = new Fl_Menu_Button(0, 0, 99, 99, "");
+	op_render = new Fl_Menu_Button(0, 0, 99, 99, "");
 
 	op_thing ->hide();
 	op_line  ->hide();

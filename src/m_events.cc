@@ -795,18 +795,18 @@ static void operation_callback_func(Fl_Widget *w, void *data)
 static void ParseOperationLine(const char ** tokens, int num_tok,
 							   Fl_Menu_Button *menu)
 {
-	if (num_tok < 2)
-		FatalError("Bad operations menu : missing description.\n");
-
 	// just a spacer?
-	if (tokens[1][0] == '_')
+	if (y_stricmp(tokens[0], "divider") == 0)
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
 		return;
 	}
 
+	if (num_tok < 2)
+		FatalError("operations.cfg: entry missing description.\n");
+
 	if (num_tok < 3)
-		FatalError("Bad operations menu : missing command name.\n");
+		FatalError("operations.cfg: entry missing command name.\n");
 
 	// parse the command and its parameters...
 	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
@@ -869,6 +869,8 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	static char line[FL_PATH_MAX];
 	const  char * tokens[MAX_TOKENS];
 
+	bool in_menu = false;
+
 	while (M_ReadTextLine(line, sizeof(line), fp))
 	{
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
@@ -881,11 +883,27 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 			continue;
 		}
 
-		// first word is the context, require a match
-		if (y_stricmp(tokens[0], context) != 0)
-			continue;
+		if (y_stricmp(tokens[0], "menu") == 0)
+		{
+			in_menu = false;
 
-		ParseOperationLine(tokens, num_tok, menu);
+			if (num_tok < 3)
+			{
+				LogPrintf("operations.cfg: bad menu line\n");
+				continue;
+			}
+
+			if (y_stricmp(tokens[1], context) != 0)
+				continue;
+
+			in_menu = true;
+
+			menu->copy_label(tokens[2]);
+			continue;
+		}
+
+		if (in_menu)
+			ParseOperationLine(tokens, num_tok, menu);
 	}
 
 	fclose(fp);
@@ -893,7 +911,7 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 
 	if (menu->size() < 2)
 	{
-		FatalError("Bad operations menu : no %s items.\n", context);
+		FatalError("operations.cfg: no %s items.\n", context);
 		return;
 	}
 
