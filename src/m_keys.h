@@ -93,6 +93,8 @@ const char * M_KeyToString(keycode_t key);
 
 keycode_t M_TranslateKey(int key, int state);
 
+int M_KeyToShortcut(keycode_t key);
+
 key_context_e M_ModeToKeyContext(obj_type_e mode);
 
 

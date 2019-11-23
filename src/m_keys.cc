@@ -1122,6 +1122,18 @@ keycode_t M_TranslateKey(int key, int state)
 }
 
 
+int M_KeyToShortcut(keycode_t key)
+{
+	int shortcut = key & FL_KEY_MASK;
+
+	     if (key & MOD_COMMAND) shortcut |= MOD_COMMAND;
+	else if (key & MOD_ALT)     shortcut |= MOD_ALT;
+	else if (key & MOD_SHIFT)   shortcut |= MOD_SHIFT;
+
+	return shortcut;
+}
+
+
 key_context_e M_ModeToKeyContext(obj_type_e mode)
 {
 	switch (mode)

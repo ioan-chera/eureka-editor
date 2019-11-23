@@ -798,20 +798,30 @@ static void operation_callback_func(Fl_Widget *w, void *data)
 static void ParseOperationLine(const char ** tokens, int num_tok,
 							   Fl_Menu_Button *menu)
 {
-	// just a spacer?
+	// just a divider?
 	if (y_stricmp(tokens[0], "divider") == 0)
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
 		return;
 	}
 
+	// parse the key
+	int shortcut = 0;
+
+	if (y_stricmp(tokens[0], "UNBOUND") != 0)
+	{
+		keycode_t key = M_ParseKeyString(tokens[0]);
+		if (key != 0)
+			shortcut = M_KeyToShortcut(key);
+	}
+
+	// parse the command and its parameters...
 	if (num_tok < 2)
 		FatalError("operations.cfg: entry missing description.\n");
 
 	if (num_tok < 3)
 		FatalError("operations.cfg: entry missing command name.\n");
 
-	// parse the command and its parameters...
 	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
 
 	if (! cmd)
@@ -831,7 +841,7 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 		if (num_tok >= 4 + p)
 			strncpy(info->param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
 
-	menu->add(tokens[1], 0 /* shortcut */, &operation_callback_func,
+	menu->add(tokens[1], shortcut, &operation_callback_func,
 			  (void *)info, 0 /* flags */);
 }
 
