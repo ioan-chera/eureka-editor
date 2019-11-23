@@ -137,7 +137,7 @@ UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
 
 	ratio_lock = new Fl_Menu_Button(X+54, Y, 106, H, "UNLOCK");
 	ratio_lock->align(FL_ALIGN_INSIDE);
-	ratio_lock->add("UNLOCK|Axis Align|1:1|2:1|4:1|8:1|5:4|7:4|User Value");
+	ratio_lock->add("UNLOCK|1:1|2:1|4:1|8:1|5:4|7:4|User Value");
 	ratio_lock->callback(ratio_callback, this);
 	ratio_lock->labelsize(16);
 
@@ -361,7 +361,7 @@ void UI_InfoBar::UpdateRatio()
 	else
 		ratio_lock->color(RATIO_COLOR);
 
-	if (grid.ratio == 8)
+	if (grid.ratio == 7)
 	{
 		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "Usr %d:%d", grid_ratio_high, grid_ratio_low);

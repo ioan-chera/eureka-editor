@@ -267,7 +267,7 @@ void CMD_SetVar()
 	}
 	else if (y_stricmp(var_name, "ratio") == 0)
 	{
-		grid.ratio = CLAMP(0, int_val, 8);
+		grid.ratio = CLAMP(0, int_val, 7);
 		main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
@@ -332,7 +332,7 @@ void CMD_ToggleVar()
 	}
 	else if (y_stricmp(var_name, "ratio") == 0)
 	{
-		if (grid.ratio >= 8)
+		if (grid.ratio >= 7)
 			grid.ratio = 0;
 		else
 			grid.ratio++;
