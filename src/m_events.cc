@@ -769,6 +769,9 @@ static bool no_operation_cfg;
 static Objid op_saved_highlight;
 
 
+static std::map< std::string, Fl_Menu_Button* > op_all_menus;
+
+
 typedef struct
 {
 	const editor_command_t *cmd;
@@ -835,7 +838,7 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 
 #define MAX_TOKENS  30
 
-static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
+static void M_ParseOperationFile(const char *context)
 {
 	// open the file and build the menu from all line whose first
 	// keyword matches the given 'context'.
@@ -860,6 +863,9 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 		no_operation_cfg = true;
 		return;
 	}
+
+
+	Fl_Menu_Button *menu = new Fl_Menu_Button(0, 0, 99, 99, "");
 
 	menu->clear();
 
@@ -930,6 +936,12 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	// NOTE: we cannot show() this menu, as that will interfere with
 	// mouse motion events [ canvas will get FL_LEAVE when the mouse
 	// enters this menu's bbox ]
+
+	menu->hide();
+
+	op_all_menus[context] = menu;
+
+	main_win->add(menu);
 }
 
 
@@ -939,11 +951,11 @@ void M_LoadOperationMenus()
 
 	no_operation_cfg = false;
 
-	M_ParseOperationFile("thing",  main_win->op_thing);
-	M_ParseOperationFile("line",   main_win->op_line);
-	M_ParseOperationFile("sector", main_win->op_sector);
-	M_ParseOperationFile("vertex", main_win->op_vertex);
-	M_ParseOperationFile("render", main_win->op_render);
+	M_ParseOperationFile("thing");
+	M_ParseOperationFile("line");
+	M_ParseOperationFile("sector");
+	M_ParseOperationFile("vertex");
+	M_ParseOperationFile("render");
 
 	if (no_operation_cfg)
 		DLG_Notify("Installation problem: cannot find \"operaitons.cfg\" file!");
@@ -959,16 +971,16 @@ void CMD_OperationMenu()
 
 	if (edit.render3d)
 	{
-		menu = main_win->op_render;
+		menu = op_all_menus["render"];
 	}
 	else
 	{
 		switch (edit.mode)
 		{
-			case OBJ_THINGS:	menu = main_win->op_thing;  break;
-			case OBJ_LINEDEFS:	menu = main_win->op_line;   break;
-			case OBJ_SECTORS:	menu = main_win->op_sector; break;
-			case OBJ_VERTICES:	menu = main_win->op_vertex; break;
+			case OBJ_THINGS:	menu = op_all_menus["thing"];  break;
+			case OBJ_LINEDEFS:	menu = op_all_menus["line"];   break;
+			case OBJ_SECTORS:	menu = op_all_menus["sector"]; break;
+			case OBJ_VERTICES:	menu = op_all_menus["vertex"]; break;
 
 			default:
 				Beep("a strange case indeed!");
