@@ -964,25 +964,33 @@ void CMD_OperationMenu()
 	if (no_operation_cfg)
 		return;
 
-	Fl_Menu_Button *menu = NULL;
+	const char *context = EXEC_Param[0];
 
-	if (edit.render3d)
+	// if no context given, pick one based on editing mode
+	if (! context[0])
 	{
-		menu = op_all_menus["render"];
-	}
-	else
-	{
-		switch (edit.mode)
+		if (edit.render3d)
 		{
-			case OBJ_THINGS:	menu = op_all_menus["thing"];  break;
-			case OBJ_LINEDEFS:	menu = op_all_menus["line"];   break;
-			case OBJ_SECTORS:	menu = op_all_menus["sector"]; break;
-			case OBJ_VERTICES:	menu = op_all_menus["vertex"]; break;
-
-			default:
-				Beep("a strange case indeed!");
-				return;
+			context = "render";
 		}
+		else
+		{
+			switch (edit.mode)
+			{
+			case OBJ_LINEDEFS:	context = "line";   break;
+			case OBJ_SECTORS:	context = "sector"; break;
+			case OBJ_VERTICES:	context = "vertex"; break;
+			default: context = "thing";
+			}
+		}
+	}
+
+	Fl_Menu_Button *menu = op_all_menus[context];
+
+	if (menu == NULL)
+	{
+		Beep("no such menu: %s", context);
+		return;
 	}
 
 	SYS_ASSERT(menu);
