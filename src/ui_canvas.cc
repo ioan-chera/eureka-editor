@@ -75,7 +75,9 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 	snap_x(-1), snap_y(-1),
 	seen_sectors()
 {
+#ifdef NO_OPENGL
 	rgb_buf = NULL;
+#endif
 }
 
 
