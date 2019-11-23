@@ -510,7 +510,7 @@ void UI_SideBox::UpdateLabel()
 
 	char buffer[200];
 
-	sprintf(buffer, "   %s Sidedef: #%d\n",
+	snprintf(buffer, sizeof(buffer), "   %s Sidedef: #%d\n",
 			is_front ? "Front" : "Back", obj);
 
 	copy_label(buffer);

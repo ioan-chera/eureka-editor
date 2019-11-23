@@ -467,18 +467,18 @@ short Wad_file::LevelFindByNumber(int number)
 	if (number <= 0 || number > 99)
 		return -1;
 
-	char buffer[10];
+	char buffer[16];
 	short index;
 
 	 // try MAP## first
-	sprintf(buffer, "MAP%02d", number);
+	snprintf(buffer, sizeof(buffer), "MAP%02d", number);
 
 	index = LevelFind(buffer);
 	if (index >= 0)
 		return index;
 
 	// otherwise try E#M#
-	sprintf(buffer, "E%dM%d", MAX(1, number / 10), number % 10);
+	snprintf(buffer, sizeof(buffer), "E%dM%d", MAX(1, number / 10), number % 10);
 
 	index = LevelFind(buffer);
 	if (index >= 0)
@@ -1303,7 +1303,7 @@ void Wad_file::WriteDirectory()
 
 	raw_wad_header_t header;
 
-	strncpy(header.ident, (kind == 'I') ? "IWAD" : "PWAD", 4);
+	memcpy(header.ident, (kind == 'I') ? "IWAD" : "PWAD", 4);
 
 	header.dir_start   = LE_U32(dir_start);
 	header.num_entries = LE_U32(dir_count);

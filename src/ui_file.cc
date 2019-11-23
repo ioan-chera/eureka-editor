@@ -123,7 +123,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 			if (map > 9)
 				continue;
 
-			sprintf(name_buf, "E%dM%d", epi, map);
+			snprintf(name_buf, sizeof(name_buf), "E%dM%d", epi, map);
 		}
 		else
 		{
@@ -138,7 +138,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 			if (map < 1 || map > 32)
 				continue;
 
-			sprintf(name_buf, "MAP%02d", map);
+			snprintf(name_buf, sizeof(name_buf), "MAP%02d", map);
 		}
 
 		Fl_Button * but = new Fl_Button(cx, cy, 60, 20);
@@ -757,7 +757,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 		int cy = by + 220 + r * 35;
 
 		char res_label[64];
-		sprintf(res_label, "%d. ", 1 + r);
+		snprintf(res_label, sizeof(res_label), "%d. ", 1 + r);
 
 		res_name[r] = new Fl_Output(55, cy, 205, 25);
 		res_name[r]->copy_label(res_label);

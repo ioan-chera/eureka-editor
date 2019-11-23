@@ -184,7 +184,7 @@ void UI_DefaultProps::hide_callback(Fl_Widget *w, void *data)
 void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 {
 	char buffer[64];
-	sprintf(buffer, "%d", value);
+	snprintf(buffer, sizeof(buffer), "%d", value);
 	w->value(buffer);
 }
 

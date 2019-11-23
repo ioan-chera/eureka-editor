@@ -357,7 +357,7 @@ const char *Int_TmpStr(int value)
 {
 	static char buffer[200];
 
-	sprintf(buffer, "%d", value);
+	snprintf(buffer, sizeof(buffer), "%d", value);
 
 	return buffer;
 }

@@ -1130,7 +1130,7 @@ int Recently_used::find_number(int val)
 {
 	char buffer[64];
 
-	sprintf(buffer, "%d", val);
+	snprintf(buffer, sizeof(buffer), "%d", val);
 
 	return find(buffer);
 }
@@ -1167,7 +1167,7 @@ void Recently_used::insert_number(int val)
 {
 	char buffer[64];
 
-	sprintf(buffer, "%d", val);
+	snprintf(buffer, sizeof(buffer), "%d", val);
 
 	insert(buffer);
 }

@@ -567,7 +567,7 @@ void UI_TextEditor::SaveMemory(std::vector<byte> &buf)
 
 void UI_TextEditor::SetTitle(const char *lump_name)
 {
-	static char title_buf[FL_PATH_MAX];
+	static char title_buf[256];
 
 	const char *suffix = "";
 
@@ -576,7 +576,7 @@ void UI_TextEditor::SetTitle(const char *lump_name)
 	else if (read_only)
 		suffix = " [Read-Only]";
 
-	sprintf(title_buf, "Editing '%s' lump%s", lump_name, suffix);
+	snprintf(title_buf, sizeof(title_buf), "Editing '%s' lump%s", lump_name, suffix);
 
 	copy_label(title_buf);
 }

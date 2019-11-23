@@ -1000,9 +1000,8 @@ void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const char *name)
 
 void UI_FindAndReplace::InsertNumber(Fl_Input *inp, char append, int number)
 {
-	char buf[256];
-
-	sprintf(buf, "%d", number);
+	char buf[64];
+	snprintf(buf, sizeof(buf), "%d", number);
 
 	InsertName(inp, append, buf);
 }

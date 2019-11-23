@@ -788,7 +788,7 @@ void UI_Browser_Box::Populate_Sprites()
 			continue;
 
 		if (alpha->value() == 0)
-			sprintf(full_desc, "%d", TI->first);
+			snprintf(full_desc, sizeof(full_desc), "%d", TI->first);
 		else
 			snprintf(full_desc, sizeof(full_desc), "%s", info->sprite);
 

@@ -380,7 +380,7 @@ static const char * FindDefinitionFile(const char *folder, const char *name)
 		if (! base_dir)
 			continue;
 
-		sprintf(filename, "%s/%s/%s.ugh", base_dir, folder, name);
+		snprintf(filename, sizeof(filename), "%s/%s/%s.ugh", base_dir, folder, name);
 
 		DebugPrintf("  trying: %s\n", filename);
 
@@ -411,7 +411,7 @@ void M_LoadDefinitions(const char *folder, const char *name)
 {
 	// this is for error messages & debugging
 	char prettyname[256];
-	sprintf(prettyname, "%s/%s.ugh", folder, name);
+	snprintf(prettyname, sizeof(prettyname), "%s/%s.ugh", folder, name);
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
 
@@ -1228,10 +1228,10 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 
 //	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
 
-	sprintf(path, "%s/%s", install_dir, folder);
+	snprintf(path, sizeof(path), "%s/%s", install_dir, folder);
 	ScanDirectory(path, scanner_add_file, & temp_list);
 
-	sprintf(path, "%s/%s", home_dir, folder);
+	snprintf(path, sizeof(path), "%s/%s", home_dir, folder);
 	ScanDirectory(path, scanner_add_file, & temp_list);
 
 	std::sort(temp_list.begin(), temp_list.end(), DefName_CMP_pred());

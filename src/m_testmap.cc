@@ -132,7 +132,7 @@ public:
 	{
 		char message_buf[256];
 
-		sprintf(message_buf, "Setting up location of the executable (EXE) for %s.", port_name);
+		snprintf(message_buf, sizeof(message_buf), "Setting up location of the executable (EXE) for %s.", port_name);
 
 		Fl_Box *header = new Fl_Box(FL_NO_BOX, 20, 20, w() - 40, 30, "");
 		header->copy_label(message_buf);
@@ -268,7 +268,7 @@ static const char * CalcWarpString()
 		while (*p == '0' && isdigit(p[1]))
 			p++;
 
-		sprintf(buffer, "-warp %s", p);
+		snprintf(buffer, sizeof(buffer), "-warp %s", p);
 		return buffer;
 	}
 
@@ -278,7 +278,7 @@ static const char * CalcWarpString()
 		! isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
 		! isdigit(Level_name[2]) && isdigit(Level_name[3]))
 	{
-		sprintf(buffer, "-warp %c %s", Level_name[1], Level_name + 3);
+		snprintf(buffer, sizeof(buffer), "-warp %c %s", Level_name[1], Level_name + 3);
 		return buffer;
 	}
 
@@ -292,7 +292,7 @@ static const char * CalcWarpString()
 
 	if (*p)
 	{
-		sprintf(buffer, "-warp %s", p);
+		snprintf(buffer, sizeof(buffer), "-warp %s", p);
 		return buffer;
 	}
 

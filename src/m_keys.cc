@@ -293,13 +293,13 @@ static const char * BareKeyName(keycode_t key)
 
 	if (FL_F < key && key <= FL_F_Last)
 	{
-		sprintf(buffer, "F%d", key - FL_F);
+		snprintf(buffer, sizeof(buffer), "F%d", key - FL_F);
 		return buffer;
 	}
 
 	if (is_mouse_button(key))
 	{
-		sprintf(buffer, "MOUSE%d", key - FL_Button);
+		snprintf(buffer, sizeof(buffer), "MOUSE%d", key - FL_Button);
 		return buffer;
 	}
 
@@ -310,14 +310,13 @@ static const char * BareKeyName(keycode_t key)
 
 	if (FL_KP + 33 <= key && key <= FL_KP_Last)
 	{
-		sprintf(buffer, "KP_%c", (char)(key & 127));
+		snprintf(buffer, sizeof(buffer), "KP_%c", (char)(key & 127));
 		return buffer;
 	}
 
 	// fallback : hex code
 
-	sprintf(buffer, "0x%04x", key);
-
+	snprintf(buffer, sizeof(buffer), "0x%04x", key);
 	return buffer;
 }
 
@@ -365,13 +364,12 @@ const char * M_KeyToString(keycode_t key)
 		(key & FL_KEY_MASK)  <  127 &&
 		isalpha(key & FL_KEY_MASK))
 	{
-		sprintf(buffer, "%c", toupper(key & FL_KEY_MASK));
+		snprintf(buffer, sizeof(buffer), "%c", toupper(key & FL_KEY_MASK));
 		return buffer;
 	}
 
-	strcpy(buffer, ModName_Dash(key));
-
-	strcat(buffer, BareKeyName(key & FL_KEY_MASK));
+	snprintf(buffer, sizeof(buffer), "%s%s", ModName_Dash(key),
+		BareKeyName(key & FL_KEY_MASK));
 
 	return buffer;
 }
@@ -576,7 +574,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/bindings.cfg", path);
+	snprintf(filename, sizeof(filename), "%s/bindings.cfg", path);
 
 	FILE *fp = fopen(filename, "r");
 
@@ -689,7 +687,7 @@ void M_SaveBindings()
 {
 	static char filename[FL_PATH_MAX];
 
-	sprintf(filename, "%s/bindings.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/bindings.cfg", home_dir);
 
 	FILE *fp = fopen(filename, "w");
 
@@ -890,7 +888,7 @@ void M_DetectConflictingBinds()
 
 const char * M_StringForFunc(int index)
 {
-	static char buffer[300];
+	static char buffer[2048];
 
 	key_binding_t& bind = pref_binds[index];
 
@@ -943,7 +941,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 		tempk = toupper(tempk & FL_KEY_MASK);
 	}
 
-	sprintf(buffer, "%s%6.6s%-10.10s %-9.9s %.32s",
+	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
 			bind.is_duplicate ? "@C1" : "",
 			changing_key ? "<?"     : ModName_Space(tempk),
 			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),
@@ -998,7 +996,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	if (! cmd)
 	{
-		sprintf(error_msg, "Unknown function name: %s", tokens[0]);
+		snprintf(error_msg, sizeof(error_msg), "Unknown function name: %s", tokens[0]);
 		return error_msg;
 	}
 
@@ -1009,7 +1007,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	{
 		char *mode = StringUpper(M_KeyContextString(cmd->req_context));
 
-		sprintf(error_msg, "%s can only be used in %s mode",
+		snprintf(error_msg, sizeof(error_msg), "%s can only be used in %s mode",
 		        tokens[0], mode);
 
 		StringFree(mode);

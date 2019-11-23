@@ -925,15 +925,17 @@ static void ShowLoadProblem()
 
 	if (bad_linedef_count > 0)
 	{
-		sprintf(message, "Found %d linedefs with bad vertex references.\n"
-		                 "These references have been replaced.",
-		        bad_linedef_count);
+		snprintf(message, sizeof(message),
+			"Found %d linedefs with bad vertex references.\n"
+			"These references have been replaced.",
+			bad_linedef_count);
 	}
 	else
 	{
-		sprintf(message, "Found %d bad sector refs, %d bad sidedef refs.\n"
-		                 "These references have been replaced.",
-		        bad_sector_refs, bad_sidedef_refs);
+		snprintf(message, sizeof(message),
+			"Found %d bad sector refs, %d bad sidedef refs.\n"
+			"These references have been replaced.",
+			bad_sector_refs, bad_sidedef_refs);
 	}
 
 	DLG_Notify("Map validation report:\n\n%s", message);

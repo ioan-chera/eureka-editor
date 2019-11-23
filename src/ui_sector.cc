@@ -537,8 +537,7 @@ void UI_SectorBox::SetSectorType(int new_type)
 		return;
 
 	char buffer[64];
-
-	sprintf(buffer, "%d", new_type);
+	snprintf(buffer, sizeof(buffer), "%d", new_type);
 
 	type->value(buffer);
 

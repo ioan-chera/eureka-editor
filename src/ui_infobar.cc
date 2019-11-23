@@ -303,9 +303,9 @@ void UI_InfoBar::SetScale(double new_scale)
 	char buffer[64];
 
 	if (perc < 10.0)
-		sprintf(buffer, "%1.1f%%", perc);
+		snprintf(buffer, sizeof(buffer), "%1.1f%%", perc);
 	else
-		sprintf(buffer, "%3d%%", (int)perc);
+		snprintf(buffer, sizeof(buffer), "%3d%%", (int)perc);
 
 	scale->copy_label(buffer);
 }
@@ -319,7 +319,7 @@ void UI_InfoBar::SetGrid(int new_step)
 	else
 	{
 		char buffer[64];
-		sprintf(buffer, "%d", new_step);
+		snprintf(buffer, sizeof(buffer), "%d", new_step);
 		grid_size->copy_label(buffer);
 	}
 }
@@ -664,9 +664,9 @@ void UI_StatusBar::IB_Number(int& cx, int& cy, const char *label, int value, int
 
 	// negative size means we require a sign
 	if (size < 0)
-		sprintf(buffer, "%s:%-+*d ", label, -size + 1, value);
+		snprintf(buffer, sizeof(buffer), "%s:%-+*d ", label, -size + 1, value);
 	else
-		sprintf(buffer, "%s:%-*d ", label, size, value);
+		snprintf(buffer, sizeof(buffer), "%s:%-*d ", label, size, value);
 
 	fl_color(INFO_TEXT_COL);
 	fl_draw(buffer, cx, cy);
@@ -678,7 +678,7 @@ void UI_StatusBar::IB_Number(int& cx, int& cy, const char *label, int value, int
 void UI_StatusBar::IB_Coord(int& cx, int& cy, const char *label, float value)
 {
 	char buffer[256];
-	sprintf(buffer, "%s:%-8.2f ", label, value);
+	snprintf(buffer, sizeof(buffer), "%s:%-8.2f ", label, value);
 
 	fl_color(INFO_TEXT_COL);
 	fl_draw(buffer, cx, cy);
