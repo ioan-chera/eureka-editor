@@ -836,85 +836,8 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 }
 
 
-#define MAX_TOKENS  30
-
-static void M_ParseOperationFile(const char *context)
+static void M_AddOperationMenu(std::string context, Fl_Menu_Button *menu)
 {
-	// open the file and build the menu from all line whose first
-	// keyword matches the given 'context'.
-
-	static char filename[FL_PATH_MAX];
-
-	// look in user's $HOME directory first
-	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
-
-	FILE *fp = fopen(filename, "r");
-
-	// otherwise load it from the installation directory
-	if (! fp)
-	{
-		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
-
-		fp = fopen(filename, "r");
-	}
-
-	if (! fp)
-	{
-		no_operation_cfg = true;
-		return;
-	}
-
-
-	Fl_Menu_Button *menu = new Fl_Menu_Button(0, 0, 99, 99, "");
-
-	menu->clear();
-
-
-	// parse each line
-
-	static char line[FL_PATH_MAX];
-	const  char * tokens[MAX_TOKENS];
-
-	bool in_menu = false;
-
-	while (M_ReadTextLine(line, sizeof(line), fp))
-	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
-		if (num_tok == 0)
-			continue;
-
-		if (num_tok < 0)
-		{
-			LogPrintf("operations.cfg: failed parsing a line\n");
-			continue;
-		}
-
-		if (y_stricmp(tokens[0], "menu") == 0)
-		{
-			in_menu = false;
-
-			if (num_tok < 3)
-			{
-				LogPrintf("operations.cfg: bad menu line\n");
-				continue;
-			}
-
-			if (y_stricmp(tokens[1], context) != 0)
-				continue;
-
-			in_menu = true;
-
-			menu->copy_label(tokens[2]);
-			continue;
-		}
-
-		if (in_menu)
-			ParseOperationLine(tokens, num_tok, menu);
-	}
-
-	fclose(fp);
-
-
 	if (menu->size() < 2)
 	{
 		FatalError("operations.cfg: no %s items.\n", context);
@@ -945,20 +868,94 @@ static void M_ParseOperationFile(const char *context)
 }
 
 
+#define MAX_TOKENS  30
+
+static bool M_ParseOperationFile()
+{
+	// open the file and build all the menus it contains.
+
+	static char filename[FL_PATH_MAX];
+
+	// look in user's $HOME directory first
+	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
+
+	FILE *fp = fopen(filename, "r");
+
+	// otherwise load it from the installation directory
+	if (! fp)
+	{
+		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
+
+		fp = fopen(filename, "r");
+	}
+
+	if (! fp)
+		return false;
+
+
+	// parse each line
+
+	static char line[FL_PATH_MAX];
+	const  char * tokens[MAX_TOKENS];
+
+	Fl_Menu_Button *menu = NULL;
+
+	std::string context;
+
+	while (M_ReadTextLine(line, sizeof(line), fp))
+	{
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
+		if (num_tok == 0)
+			continue;
+
+		if (num_tok < 0)
+		{
+			LogPrintf("operations.cfg: failed parsing a line\n");
+			continue;
+		}
+
+		if (y_stricmp(tokens[0], "menu") == 0)
+		{
+			if (num_tok < 3)
+			{
+				LogPrintf("operations.cfg: bad menu line\n");
+				continue;
+			}
+
+			if (menu != NULL)
+				M_AddOperationMenu(context, menu);
+
+			// create new menu
+			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
+			menu->copy_label(tokens[2]);
+			menu->clear();
+
+			context = tokens[1];
+			continue;
+		}
+
+		if (menu != NULL)
+			ParseOperationLine(tokens, num_tok, menu);
+	}
+
+	fclose(fp);
+
+	if (menu != NULL)
+		M_AddOperationMenu(context, menu);
+
+	return true;
+}
+
+
 void M_LoadOperationMenus()
 {
 	LogPrintf("Loading Operation menus...\n");
 
-	no_operation_cfg = false;
-
-	M_ParseOperationFile("thing");
-	M_ParseOperationFile("line");
-	M_ParseOperationFile("sector");
-	M_ParseOperationFile("vertex");
-	M_ParseOperationFile("render");
-
-	if (no_operation_cfg)
+	if (! M_ParseOperationFile())
+	{
+		no_operation_cfg = true;
 		DLG_Notify("Installation problem: cannot find \"operaitons.cfg\" file!");
+	}
 }
 
 
