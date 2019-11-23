@@ -415,6 +415,8 @@ unsigned int Nav_TimeDiff()
 int wheel_dx;
 int wheel_dy;
 
+static bool in_operation_menu;
+
 extern void CheckBeginDrag();
 extern void Transform_Update();
 
@@ -443,6 +445,11 @@ static void EV_EnterWindow()
 
 static void EV_LeaveWindow()
 {
+	// ignore FL_LEAVE event when doing a popup operation menu,
+	// otherwise we lose the highlight and kill drawing mode.
+	if (in_operation_menu)
+		return;
+
 	edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
@@ -765,10 +772,6 @@ int EV_HandleEvent(int event)
 
 static bool no_operation_cfg;
 
-// the value of edit.highlight before the menu was opened
-static Objid op_saved_highlight;
-
-
 static std::map< std::string, Fl_Menu_Button* > op_all_menus;
 
 
@@ -779,20 +782,6 @@ typedef struct
 	char param[MAX_EXEC_PARAM][MAX_BIND_LENGTH];
 
 } operation_command_t;
-
-
-static void operation_callback_func(Fl_Widget *w, void *data)
-{
-	operation_command_t *info = (operation_command_t *)data;
-
-	// restore the highlight object
-	edit.highlight = op_saved_highlight;
-
-	// TODO : support more than 4 parameters
-
-	ExecuteCommand(info->cmd, info->param[0], info->param[1],
-				   info->param[2], info->param[3]);
-}
 
 
 static void ParseOperationLine(const char ** tokens, int num_tok,
@@ -841,8 +830,7 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 		if (num_tok >= 4 + p)
 			strncpy(info->param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
 
-	menu->add(tokens[1], shortcut, &operation_callback_func,
-			  (void *)info, 0 /* flags */);
+	menu->add(tokens[1], shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
 }
 
 
@@ -1010,11 +998,23 @@ void CMD_OperationMenu()
 	// especially if the last command was destructive.
 	menu->value((const Fl_Menu_Item *)NULL);
 
-	// save the highlight object, because the pop-up menu will cause
-	// an FL_LEAVE event on the canvas which resets the highlight.
-	op_saved_highlight = edit.highlight;
+	// the pop-up menu will cause an FL_LEAVE event on the canvas,
+	// which we need to ignore to prevent forgetting the current
+	// highlight or killing line drawing mode.
+	in_operation_menu = true;
 
-	menu->popup();
+	const Fl_Menu_Item *item = menu->popup();
+
+	in_operation_menu = false;
+
+	if (item)
+	{
+		operation_command_t *info = (operation_command_t *)item->user_data();
+		SYS_ASSERT(info);
+
+		ExecuteCommand(info->cmd, info->param[0], info->param[1],
+					   info->param[2], info->param[3]);
+	}
 }
 
 
