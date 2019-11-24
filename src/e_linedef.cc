@@ -726,7 +726,7 @@ void CMD_LIN_Align()
 
 
 	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	if (edit.mode != OBJ_LINEDEFS || unselect == SOH_Empty)
 	{
 		Beep("no lines to align");
 		return;
