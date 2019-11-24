@@ -29,6 +29,8 @@ RECENT CHANGES
 
 - added scale '-' and '+' buttons, show scale as percentage
 
+- ability to highlight/select railings in 3D view
+
 - fixed mode menu disappearing into Window's task bar when maximized
 
 - fixed not remembering test-in-game EXE when port is "vanilla"
