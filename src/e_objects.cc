@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2019 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -258,34 +258,28 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 	// it is probably impossible for both loops to face outward, so
 	// we only need to handle two cases: both innie, or innie + outie.
 
-	bool filled_outie = false;
-
 	if (left.loop.faces_outward && left.sec >= 0)
 	{
 		left.loop.AssignSector(left.sec, flip);
-		filled_outie = true;
 	}
 	else if (right.loop.faces_outward && right.sec >= 0)
 	{
 		right.loop.AssignSector(right.sec, flip);
-		filled_outie = true;
+	}
+
+	// create a void island when drawing anti-clockwise inside an
+	// existing sector, unless new island surrounds other islands.
+	if (right.loop.faces_outward && right.sec >= 0 &&
+		left.loop.AllBare() && left.loop.islands.empty())
+	{
+		return true;
 	}
 
 	if (left.loop.faces_outward || right.loop.faces_outward)
 	{
 		lineloop_c& innie = left.loop.faces_outward ? right.loop : left.loop;
 
-		// always fill a loop created out in the void.
-		// also fill a created island, unless the option is disabled AND
-		// the new island does not surround other islands.
-		if (filled_outie && new_islands_are_void &&
-			innie.AllBare() && innie.islands.empty())
-		{
-			return true;
-		}
-
 		// TODO : REVIEW NeighboringSector(), it's a bit random what we get
-
 		int new_sec = Sector_New(innie.NeighboringSector());
 
 		innie.AssignSector(new_sec, flip);
