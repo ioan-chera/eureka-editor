@@ -53,6 +53,7 @@ void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
 /* raw input handling */
 
 int EV_HandleEvent(int event);
+void EV_EscapeKey();
 
 void ClearStickyMod();
 

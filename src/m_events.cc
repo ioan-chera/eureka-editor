@@ -474,6 +474,23 @@ static void EV_LeaveWindow()
 }
 
 
+void EV_EscapeKey()
+{
+	Nav_Clear();
+	ClearStickyMod();
+	Editor_ClearAction();
+	Status_Clear();
+
+	edit.clicked.clear();
+	edit.dragged.clear();
+	edit.split_line.clear();
+	edit.draw_from.clear();
+
+	UpdateHighlight();
+	RedrawMap();
+}
+
+
 void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	// this is probably redundant, as we generally shouldn't get here

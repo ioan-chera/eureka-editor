@@ -38,6 +38,8 @@ RECENT CHANGES
 - fixed window title not showing correct map name
 
 
+- support ESC key to cancel a current action (e.g. dragging)
+
 - support SHIFT and CTRL when using mouse-wheel to move in 3D view
 
 - added portal specials 156 and 107 to the ZDOOM port

@@ -523,7 +523,7 @@ static const char * DetermineLevel()
 }
 
 
-// this is only to prevent ESCAPE key from quitting
+// this is mainly to prevent ESCAPE key from quitting
 int Main_key_handler(int event)
 {
 	if (event != FL_SHORTCUT)
@@ -531,7 +531,7 @@ int Main_key_handler(int event)
 
 	if (Fl::event_key() == FL_Escape)
 	{
-		Beep("there is no escape!");
+		EV_EscapeKey();
 		return 1;
 	}
 
