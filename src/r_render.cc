@@ -1024,7 +1024,7 @@ void Render3D_UpdateHighlight()
 
 	if (r_view.current_hl.type == edit.mode &&
 		edit.pointer_in_window &&
-		!(edit.action == ACT_DRAG || edit.dragged.valid()))
+		edit.action != ACT_DRAG)
 	{
 		edit.highlight = r_view.current_hl;
 	}

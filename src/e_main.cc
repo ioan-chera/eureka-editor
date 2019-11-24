@@ -273,8 +273,8 @@ void UpdateHighlight()
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.dragged.valid() && edit.highlight.valid() &&
-			edit.dragged.num == edit.highlight.num)
+		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
+			edit.highlight.valid() && edit.dragged.num == edit.highlight.num)
 		{
 			edit.highlight.clear();
 		}

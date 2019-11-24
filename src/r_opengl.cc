@@ -1355,7 +1355,7 @@ public:
 
 		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-		if (edit.highlight.is_nil() && edit.dragged.valid())
+		if (edit.action == ACT_DRAG && edit.dragged.valid())
 			HighlightObject(edit.dragged);
 		else
 			HighlightObject(edit.highlight);

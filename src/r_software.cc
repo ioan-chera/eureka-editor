@@ -1251,7 +1251,7 @@ public:
 			HighlightThings(-1);
 
 			hl_color = HI_COL;
-			if (edit.dragged.valid())
+			if (edit.action == ACT_DRAG && edit.dragged.valid())
 			{
 				HighlightThings(edit.dragged.num);
 			}
@@ -1268,7 +1268,7 @@ public:
 			HighlightSectors(-1, -1);
 
 			hl_color = HI_COL;
-			if (edit.dragged.valid())
+			if (edit.action == ACT_DRAG && edit.dragged.valid())
 			{
 				HighlightSectors(edit.dragged.num, edit.dragged.parts);
 			}
@@ -1285,7 +1285,7 @@ public:
 			HighlightLines(-1, -1);
 
 			hl_color = HI_COL;
-			if (edit.highlight.valid())
+			if (edit.action == ACT_DRAG && edit.dragged.valid())
 			{
 				if (edit.Selected->get(edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;
