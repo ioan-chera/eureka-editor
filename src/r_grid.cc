@@ -495,6 +495,9 @@ void Grid_State_c::ForceStep(int new_step)
 	if (main_win)
 		main_win->info_bar->SetGrid(step);
 
+	if (grid_hide_in_free_mode)
+		SetSnap(shown);
+
 	RedrawMap();
 }
 

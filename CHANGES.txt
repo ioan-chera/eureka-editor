@@ -35,6 +35,8 @@ RECENT CHANGES
 
 - fixed Re-bind in key binding dialog to show new key as valid
 
+- fixed grid getting out-of-sync with the "hide in FREE mode".
+
 - fixed window title not showing correct map name
 
 
