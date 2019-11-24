@@ -19,9 +19,11 @@ RECENT CHANGES
 
 - preference to combine flats and textures in a single browser
 
-- info bar for the 2D map view
+- a single status bar for both 2D and 3D views
 
 - render sectors in the 2D view with both lighting and texturing
+
+- drawing lines anti-clockwise can create void islands
 
 - snap position indicator for 2D view (a light-blue cross)
 
