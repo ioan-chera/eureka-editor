@@ -1424,7 +1424,7 @@ static editor_command_t  command_table[] =
 		/* keywords */ "thing line sector vertex"
 	},
 
-	{	"OperationMenu",  "Misc",
+	{	"OpMenu",  "Misc",
 		&CMD_OperationMenu
 	},
 

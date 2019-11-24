@@ -154,7 +154,7 @@ static void edit_do_last_sel(Fl_Widget *w, void * data)
 
 static void edit_do_op_menu(Fl_Widget *w, void * data)
 {
-	ExecuteCommand("OperationMenu");
+	ExecuteCommand("OpMenu");
 }
 
 static void edit_do_move(Fl_Widget *w, void * data)

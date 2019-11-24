@@ -2121,12 +2121,8 @@ static editor_command_t  render_commands[] =
 		&R3D_NAV_MouseMove
 	},
 
-	// backwards compatibility
-	{	"3D_Click", NULL,
-		&CMD_ACT_Click
-	},
-
-	// backwards compatibility
+	// backwards compatibility.
+	// [ we cannot remap this in FindEditorCommand, it fails the context check ]
 	{	"3D_Align", NULL,
 		&CMD_LIN_Align,
 		/* flags */ "/x /y /right /clear"
