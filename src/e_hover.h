@@ -35,7 +35,7 @@ class bitvec_c;
 void GetNearObject(Objid& o, obj_type_e objtype, double x, double y);
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,
-				   double ptr_x, double ptr_y, int drag_vert = -1);
+				   double ptr_x, double ptr_y, int ignore_vert = -1);
 
 void FindSplitLineForDangler(Objid& out, int v_num);
 

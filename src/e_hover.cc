@@ -734,6 +734,8 @@ static Objid NearestSplitLine(double x, double y, int ignore_vert)
 	int    best = -1;
 	double best_dist = 9e9;
 
+	double too_small = (Level_format == MAPF_UDMF) ? 0.2 : 4.0;
+
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		LineDef *L = LineDefs[n];
@@ -755,7 +757,7 @@ static Objid NearestSplitLine(double x, double y, int ignore_vert)
 		if (x == x2 && y == y2) continue;
 
 		// skip linedef if too small to split
-		if (fabs(x2 - x1) < 4.0 && fabs(y2 - y1) < 4.0)
+		if (fabs(x2 - x1) < too_small && fabs(y2 - y1) < too_small)
 			continue;
 
 		double dist = ApproxDistToLineDef(L, x, y);
@@ -972,11 +974,11 @@ void GetNearObject(Objid& o, obj_type_e objtype, double x, double y)
 
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,
-				   double ptr_x, double ptr_y, int drag_vert)
+				   double ptr_x, double ptr_y, int ignore_vert)
 {
 	out_x = out_y = 0;
 
-	out = NearestSplitLine(ptr_x, ptr_y, drag_vert);
+	out = NearestSplitLine(ptr_x, ptr_y, ignore_vert);
 
 	if (! out.valid())
 		return;
@@ -990,12 +992,49 @@ void FindSplitLine(Objid& out, double& out_x, double& out_y,
 
 	double len = hypot(x2 - x1, y2 - y1);
 
-	// don't highlight the line if the new vertex would snap onto
-	// the same coordinate as the start or end of the linedef.
-	// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
-
-	if (grid.snap)
+	if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE)
 	{
+		Vertex *V = Vertices[edit.draw_from.num];
+
+		// convert ratio into a vector, use it to intersect the linedef
+		double px1 = V->x();
+		double py1 = V->y();
+
+		double px2 = ptr_x;
+		double py2 = ptr_y;
+
+		grid.RatioSnapXY(px2, py2, px1, py1);
+
+		if (fabs(px1 - px2) < 0.1 && fabs(py1 - py2) < 0.1)
+		{
+			out.clear();
+			return;
+		}
+
+		// compute intersection point
+		double c = PerpDist(x1, y1,  px1, py1, px2, py2);
+		double d = PerpDist(x2, y2,  px1, py1, px2, py2);
+
+		int c_side = (c < -0.02) ? -1 : (c > 0.02) ? +1 : 0;
+		int d_side = (d < -0.02) ? -1 : (d > 0.02) ? +1 : 0;
+
+		if (c_side * d_side >= 0)
+		{
+			out.clear();
+			return;
+		}
+
+		c = c / (c - d);
+
+		out_x = x1 + c * (x2 - x1);
+		out_y = y1 + c * (y2 - y1);
+	}
+	else if (grid.snap)
+	{
+		// don't highlight the line if the new vertex would snap onto
+		// the same coordinate as the start or end of the linedef.
+		// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
+
 		out_x = grid.ForceSnapX(ptr_x);
 		out_y = grid.ForceSnapY(ptr_y);
 
