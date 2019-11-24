@@ -23,8 +23,6 @@ Most Likely
 
 -  BOOM deep water in 3D view
 
--  a scripting language
-
 -  can import DWD (DoomEd) format maps
 
 -  can import UDMF format maps
@@ -33,6 +31,8 @@ Most Likely
 
 Slightly Possible
 -----------------
+
+-  a scripting language
 
 -  allow Game/Port definitions to specify the linedef/thing flags
    which can be used  (rather than hard-coding them)
@@ -44,10 +44,6 @@ Slightly Possible
 -  Preferences window:
    -  backup_max_files / backup_max_space
    -  floor_bump_xxx values
-
--  a proper "curve" tool for making a circle arc or bezier curve,
-   and new vertices would be constrained to that curve, and you can
-   move existing vertices onto the curve
 
 -  linedef mode: '[' and ']' to adjust length of current line
 
@@ -97,15 +93,6 @@ Slightly Possible
 
 -  a key to copy properties TO defaults (e.g. 'y' for yank)
 
--  ability to highlight/select railings in 3D view
-
--  support selecting things in 3D view, use browser to change
-   their type, and Copy/Paste too
-
-   - raise/lower floors
-   - move things on a 2D plane
-   - move things vertically (for Hexen format)
-
 -  feature "tile_nonpow2"  [ emulate tutti frutti when absent ]
 
 -  draw the sky texture in 3D view
@@ -123,11 +110,7 @@ Slightly Possible
 Rejected Ideas
 --------------
 
-NO:  UDMF support
-
 NO:  a toolbar
-
-NO:  use OpenGL for rendering 2D and/or 3D views
 
 NO:  Restore last window position and maximized state
 
@@ -151,6 +134,10 @@ NO:  when one vertex of a linedef is moved (and not the other)
 NO:  support SPACE/INSERT in linedef mode (and line is highlighted or selected)
      split the line and put vertex where mouse is
      [ can do this in vertex mode easily enough ]
+
+NO:  a proper "curve" tool for making a circle arc or bezier curve,
+     and new vertices would be constrained to that curve, and you can
+     move existing vertices onto the curve
 
 NO:  merge vertex and linedef modes
 
