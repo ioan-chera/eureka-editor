@@ -611,15 +611,6 @@ static const opt_desc_t options[] =
 		&minimum_drag_pixels
 	},
 
-	{	"new_islands_are_void",
-		0,
-		OPT_BOOLEAN,
-		"v",
-		"Islands created inside a sector will get a void interior",
-		NULL,
-		&new_islands_are_void
-	},
-
 	{	"new_sector_size",
 		0,
 		OPT_INTEGER,

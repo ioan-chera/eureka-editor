@@ -668,7 +668,6 @@ public:
 	Fl_Input  *edit_def_port;
 	Fl_Choice *edit_def_mode;
 
-	Fl_Check_Button *edit_newislands;
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
 	Fl_Check_Button *edit_add_del;
@@ -900,8 +899,6 @@ UI_Preferences::UI_Preferences() :
 		{ edit_def_mode = new Fl_Choice(440, 85, 105, 25, "default edit mode: ");
 		  edit_def_mode->align(FL_ALIGN_LEFT);
 		  edit_def_mode->add("Things|Linedefs|Sectors|Vertices");
-		}
-		{ edit_newislands = new Fl_Check_Button(50, 120, 265, 30, " new islands have void interior");
 		}
 		{ edit_autoadjustX = new Fl_Check_Button(50, 150, 260, 30, " auto-adjust X offsets");
 		}
@@ -1452,7 +1449,6 @@ void UI_Preferences::LoadValues()
 	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
-	edit_newislands->value(new_islands_are_void ? 1 : 0);
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
@@ -1595,7 +1591,6 @@ void UI_Preferences::SaveValues()
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(4, new_sector_size, 8192);
 
-	new_islands_are_void = edit_newislands->value() ? true : false;
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;

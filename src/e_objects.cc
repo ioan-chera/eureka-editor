@@ -43,7 +43,6 @@
 
 
 // config items
-bool new_islands_are_void = false;
 int  new_sector_size = 128;
 
 bool select_verts_of_new_sectors = true;
