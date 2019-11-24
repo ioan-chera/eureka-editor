@@ -415,6 +415,8 @@ unsigned int Nav_TimeDiff()
 int wheel_dx;
 int wheel_dy;
 
+static bool in_operation_menu;
+
 extern void CheckBeginDrag();
 extern void Transform_Update();
 
@@ -443,6 +445,11 @@ static void EV_EnterWindow()
 
 static void EV_LeaveWindow()
 {
+	// ignore FL_LEAVE event when doing a popup operation menu,
+	// otherwise we lose the highlight and kill drawing mode.
+	if (in_operation_menu)
+		return;
+
 	edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
@@ -765,8 +772,7 @@ int EV_HandleEvent(int event)
 
 static bool no_operation_cfg;
 
-// the value of edit.highlight before the menu was opened
-static Objid op_saved_highlight;
+static std::map< std::string, Fl_Menu_Button* > op_all_menus;
 
 
 typedef struct
@@ -778,37 +784,33 @@ typedef struct
 } operation_command_t;
 
 
-static void operation_callback_func(Fl_Widget *w, void *data)
-{
-	operation_command_t *info = (operation_command_t *)data;
-
-	// restore the highlight object
-	edit.highlight = op_saved_highlight;
-
-	// TODO : support more than 4 parameters
-
-	ExecuteCommand(info->cmd, info->param[0], info->param[1],
-				   info->param[2], info->param[3]);
-}
-
-
 static void ParseOperationLine(const char ** tokens, int num_tok,
 							   Fl_Menu_Button *menu)
 {
-	if (num_tok < 2)
-		FatalError("Bad operations menu : missing description.\n");
-
-	// just a spacer?
-	if (tokens[1][0] == '_')
+	// just a divider?
+	if (y_stricmp(tokens[0], "divider") == 0)
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
 		return;
 	}
 
-	if (num_tok < 3)
-		FatalError("Bad operations menu : missing command name.\n");
+	// parse the key
+	int shortcut = 0;
+
+	if (y_stricmp(tokens[0], "UNBOUND") != 0)
+	{
+		keycode_t key = M_ParseKeyString(tokens[0]);
+		if (key != 0)
+			shortcut = M_KeyToShortcut(key);
+	}
 
 	// parse the command and its parameters...
+	if (num_tok < 2)
+		FatalError("operations.cfg: entry missing description.\n");
+
+	if (num_tok < 3)
+		FatalError("operations.cfg: entry missing command name.\n");
+
 	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
 
 	if (! cmd)
@@ -828,72 +830,15 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 		if (num_tok >= 4 + p)
 			strncpy(info->param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
 
-	menu->add(tokens[1], 0 /* shortcut */, &operation_callback_func,
-			  (void *)info, 0 /* flags */);
+	menu->add(tokens[1], shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
 }
 
 
-#define MAX_TOKENS  30
-
-static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
+static void M_AddOperationMenu(std::string context, Fl_Menu_Button *menu)
 {
-	// open the file and build the menu from all line whose first
-	// keyword matches the given 'context'.
-
-	static char filename[FL_PATH_MAX];
-
-	// look in user's $HOME directory first
-	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
-
-	FILE *fp = fopen(filename, "r");
-
-	// otherwise load it from the installation directory
-	if (! fp)
-	{
-		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
-
-		fp = fopen(filename, "r");
-	}
-
-	if (! fp)
-	{
-		no_operation_cfg = true;
-		return;
-	}
-
-	menu->clear();
-
-
-	// parse each line
-
-	static char line[FL_PATH_MAX];
-	const  char * tokens[MAX_TOKENS];
-
-	while (M_ReadTextLine(line, sizeof(line), fp))
-	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
-		if (num_tok == 0)
-			continue;
-
-		if (num_tok < 0)
-		{
-			LogPrintf("operations.cfg: failed parsing a line\n");
-			continue;
-		}
-
-		// first word is the context, require a match
-		if (y_stricmp(tokens[0], context) != 0)
-			continue;
-
-		ParseOperationLine(tokens, num_tok, menu);
-	}
-
-	fclose(fp);
-
-
 	if (menu->size() < 2)
 	{
-		FatalError("Bad operations menu : no %s items.\n", context);
+		FatalError("operations.cfg: no %s items.\n", context);
 		return;
 	}
 
@@ -912,6 +857,91 @@ static void M_ParseOperationFile(const char *context, Fl_Menu_Button *menu)
 	// NOTE: we cannot show() this menu, as that will interfere with
 	// mouse motion events [ canvas will get FL_LEAVE when the mouse
 	// enters this menu's bbox ]
+
+	menu->hide();
+
+	op_all_menus[context] = menu;
+
+	main_win->add(menu);
+}
+
+
+#define MAX_TOKENS  30
+
+static bool M_ParseOperationFile()
+{
+	// open the file and build all the menus it contains.
+
+	static char filename[FL_PATH_MAX];
+
+	// look in user's $HOME directory first
+	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
+
+	FILE *fp = fopen(filename, "r");
+
+	// otherwise load it from the installation directory
+	if (! fp)
+	{
+		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
+
+		fp = fopen(filename, "r");
+	}
+
+	if (! fp)
+		return false;
+
+
+	// parse each line
+
+	static char line[FL_PATH_MAX];
+	const  char * tokens[MAX_TOKENS];
+
+	Fl_Menu_Button *menu = NULL;
+
+	std::string context;
+
+	while (M_ReadTextLine(line, sizeof(line), fp))
+	{
+		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
+		if (num_tok == 0)
+			continue;
+
+		if (num_tok < 0)
+		{
+			LogPrintf("operations.cfg: failed parsing a line\n");
+			continue;
+		}
+
+		if (y_stricmp(tokens[0], "menu") == 0)
+		{
+			if (num_tok < 3)
+			{
+				LogPrintf("operations.cfg: bad menu line\n");
+				continue;
+			}
+
+			if (menu != NULL)
+				M_AddOperationMenu(context, menu);
+
+			// create new menu
+			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
+			menu->copy_label(tokens[2]);
+			menu->clear();
+
+			context = tokens[1];
+			continue;
+		}
+
+		if (menu != NULL)
+			ParseOperationLine(tokens, num_tok, menu);
+	}
+
+	fclose(fp);
+
+	if (menu != NULL)
+		M_AddOperationMenu(context, menu);
+
+	return true;
 }
 
 
@@ -919,16 +949,11 @@ void M_LoadOperationMenus()
 {
 	LogPrintf("Loading Operation menus...\n");
 
-	no_operation_cfg = false;
-
-	M_ParseOperationFile("thing",  main_win->op_thing);
-	M_ParseOperationFile("line",   main_win->op_line);
-	M_ParseOperationFile("sector", main_win->op_sector);
-	M_ParseOperationFile("vertex", main_win->op_vertex);
-	M_ParseOperationFile("render", main_win->op_render);
-
-	if (no_operation_cfg)
+	if (! M_ParseOperationFile())
+	{
+		no_operation_cfg = true;
 		DLG_Notify("Installation problem: cannot find \"operaitons.cfg\" file!");
+	}
 }
 
 
@@ -937,25 +962,33 @@ void CMD_OperationMenu()
 	if (no_operation_cfg)
 		return;
 
-	Fl_Menu_Button *menu = NULL;
+	const char *context = EXEC_Param[0];
 
-	if (edit.render3d)
+	// if no context given, pick one based on editing mode
+	if (! context[0])
 	{
-		menu = main_win->op_render;
-	}
-	else
-	{
-		switch (edit.mode)
+		if (edit.render3d)
 		{
-			case OBJ_THINGS:	menu = main_win->op_thing;  break;
-			case OBJ_LINEDEFS:	menu = main_win->op_line;   break;
-			case OBJ_SECTORS:	menu = main_win->op_sector; break;
-			case OBJ_VERTICES:	menu = main_win->op_vertex; break;
-
-			default:
-				Beep("a strange case indeed!");
-				return;
+			context = "render";
 		}
+		else
+		{
+			switch (edit.mode)
+			{
+			case OBJ_LINEDEFS:	context = "line";   break;
+			case OBJ_SECTORS:	context = "sector"; break;
+			case OBJ_VERTICES:	context = "vertex"; break;
+			default: context = "thing";
+			}
+		}
+	}
+
+	Fl_Menu_Button *menu = op_all_menus[context];
+
+	if (menu == NULL)
+	{
+		Beep("no such menu: %s", context);
+		return;
 	}
 
 	SYS_ASSERT(menu);
@@ -965,11 +998,23 @@ void CMD_OperationMenu()
 	// especially if the last command was destructive.
 	menu->value((const Fl_Menu_Item *)NULL);
 
-	// save the highlight object, because the pop-up menu will cause
-	// an FL_LEAVE event on the canvas which resets the highlight.
-	op_saved_highlight = edit.highlight;
+	// the pop-up menu will cause an FL_LEAVE event on the canvas,
+	// which we need to ignore to prevent forgetting the current
+	// highlight or killing line drawing mode.
+	in_operation_menu = true;
 
-	menu->popup();
+	const Fl_Menu_Item *item = menu->popup();
+
+	in_operation_menu = false;
+
+	if (item)
+	{
+		operation_command_t *info = (operation_command_t *)item->user_data();
+		SYS_ASSERT(info);
+
+		ExecuteCommand(info->cmd, info->param[0], info->param[1],
+					   info->param[2], info->param[3]);
+	}
 }
 
 

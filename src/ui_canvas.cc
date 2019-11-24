@@ -2520,7 +2520,9 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 			ch = 10;
 		else if (ch == '.')
 			ch = 11;
-		else
+		else if (ch == '^')
+			ch = 13;
+		else // '-'
 			ch = 12;
 
 		RenderFontChar(x, y, font_img, ch * font_cw, 0, font_cw, font_ch);

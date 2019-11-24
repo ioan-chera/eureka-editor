@@ -40,15 +40,14 @@ keycode_t EXEC_CurKey;
 static std::vector< editor_command_t * > all_commands;
 
 
-static key_context_e ContextFromName(const char *name)
+static key_context_e RequiredContextFromName(const char *name)
 {
 	if (strncmp(name, "LIN_", 4) == 0) return KCTX_Line;
 	if (strncmp(name, "SEC_", 4) == 0) return KCTX_Sector;
 	if (strncmp(name, "TH_",  3) == 0) return KCTX_Thing;
 	if (strncmp(name, "VT_",  3) == 0) return KCTX_Vertex;
-	if (strncmp(name, "3D_",  3) == 0) return KCTX_Render;
 
-	// we don't need anything for KCTX_Browser
+	// we don't need anything for KCTX_Browser or KCTX_Render
 
 	return KCTX_NONE;
 }
@@ -76,32 +75,13 @@ static const char * CalcGroupName(const char *given, key_context_e ctx)
 //
 // this should only be called during startup
 //
-void M_RegisterCommand(const char *name, command_func_t func, const char *group_name)
-{
-	editor_command_t *cmd = new editor_command_t;
-
-	cmd->name = name;
-	cmd->func = func;
-	cmd->flag_list = NULL;
-	cmd->keyword_list = NULL;
-
-	cmd->req_context = ContextFromName(name);
-	cmd->group_name  = CalcGroupName(group_name, cmd->req_context);
-
-	all_commands.push_back(cmd);
-}
-
-
-//
-// this should only be called during startup
-//
 void M_RegisterCommandList(editor_command_t * list)
 {
 	// the structures are used directly
 
 	for ( ; list->name ; list++)
 	{
-		list->req_context = ContextFromName(list->name);
+		list->req_context = RequiredContextFromName(list->name);
 		list->group_name  = CalcGroupName(list->group_name, list->req_context);
 
 		all_commands.push_back(list);
@@ -111,6 +91,16 @@ void M_RegisterCommandList(editor_command_t * list)
 
 const editor_command_t * FindEditorCommand(const char *name)
 {
+	// backwards compatibility
+	if (y_stricmp(name, "GRID_Step") == 0)
+		name = "GRID_Bump";
+	else if (y_stricmp(name, "Check") == 0)
+		name = "MapCheck";
+	else if (y_stricmp(name, "3D_Click") == 0)
+		name = "ACT_Click";
+	else if (y_stricmp(name, "OperationMenu") == 0)
+		name = "OpMenu";
+
 	for (unsigned int i = 0 ; i < all_commands.size() ; i++)
 		if (y_stricmp(all_commands[i]->name, name) == 0)
 			return all_commands[i];
@@ -528,17 +518,7 @@ fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0]);
 		return;
 	}
 
-
 	temp.cmd = FindEditorCommand(tokens[2]);
-
-	// backwards compatibility
-	if (! temp.cmd)
-	{
-		if (y_stricmp(tokens[2], "GRID_Step") == 0)
-			temp.cmd = FindEditorCommand("GRID_Bump");
-		else if (y_stricmp(tokens[2], "Check") == 0)
-			temp.cmd = FindEditorCommand("MapCheck");
-	}
 
 	if (! temp.cmd)
 	{
@@ -1119,6 +1099,18 @@ keycode_t M_TranslateKey(int key, int state)
 	else if (state & MOD_SHIFT)   key |= MOD_SHIFT;
 
 	return key;
+}
+
+
+int M_KeyToShortcut(keycode_t key)
+{
+	int shortcut = key & FL_KEY_MASK;
+
+	     if (key & MOD_COMMAND) shortcut |= MOD_COMMAND;
+	else if (key & MOD_ALT)     shortcut |= MOD_ALT;
+	else if (key & MOD_SHIFT)   shortcut |= MOD_SHIFT;
+
+	return shortcut;
 }
 
 

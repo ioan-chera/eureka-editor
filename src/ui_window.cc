@@ -124,27 +124,6 @@ UI_MainWindow::UI_MainWindow() :
 	find_box = new UI_FindAndReplace(w() - panel_W, BY, panel_W, BH);
 	find_box->hide();
 	add(find_box);
-
-
-	// create bare-bone operation menu widgets
-	// [ they are fleshed out by M_LoadOperationMenus ]
-	op_thing  = new Fl_Menu_Button(0, 0, 99, 99, "Thing Operations");
-	op_line   = new Fl_Menu_Button(0, 0, 99, 99, "Line Operations");
-	op_sector = new Fl_Menu_Button(0, 0, 99, 99, "Sector Operations");
-	op_vertex = new Fl_Menu_Button(0, 0, 99, 99, "Vertex Operations");
-	op_render = new Fl_Menu_Button(0, 0, 99, 99, "3D Operations");
-
-	op_thing ->hide();
-	op_line  ->hide();
-	op_sector->hide();
-	op_vertex->hide();
-	op_render->hide();
-
-	add(op_thing);
-	add(op_line);
-	add(op_sector);
-	add(op_vertex);
-	add(op_render);
 }
 
 

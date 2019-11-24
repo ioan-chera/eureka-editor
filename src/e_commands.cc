@@ -275,6 +275,14 @@ void CMD_SetVar()
 	{
 		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
 		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
+
+		if (edit.render3d)
+			Render3D_Enable(false);
+
+		// need sectors mode for sound propagation display
+		if (edit.sector_render_mode == SREND_SoundProp && edit.mode != OBJ_SECTORS)
+			Editor_ChangeMode('s');
+
 		RedrawMap();
 	}
 	else
@@ -1416,7 +1424,7 @@ static editor_command_t  command_table[] =
 		/* keywords */ "thing line sector vertex"
 	},
 
-	{	"OperationMenu",  "Misc",
+	{	"OpMenu",  "Misc",
 		&CMD_OperationMenu
 	},
 
