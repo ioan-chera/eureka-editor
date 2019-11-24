@@ -33,11 +33,13 @@ RECENT CHANGES
 
 - fixed the 'Online Docs' command in the Help menu
 
+- fixed window title not showing correct map name
+
 - fixed Re-bind in key binding dialog to show new key as valid
 
-- fixed grid getting out-of-sync with the "hide in FREE mode".
+- fixed grid getting out-of-sync with the "hide in FREE mode"
 
-- fixed window title not showing correct map name
+- fixed needless line flips when drawing clockwise within a sector
 
 
 - support ESC key to cancel a current action (e.g. dragging)

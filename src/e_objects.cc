@@ -234,13 +234,17 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 
 #ifdef DEBUG_LOOP
-	fprintf(stderr, "--> %s + %s\n",
+	fprintf(stderr, "--> %s / %s\n",
 			 left.loop.faces_outward ? "OUTIE" : "innie",
 			right.loop.faces_outward ? "OUTIE" : "innie");
 #endif
 
 	 left.sec =  left.loop.DetermineSector();
 	right.sec = right.loop.DetermineSector();
+
+#ifdef DEBUG_LOOP
+	fprintf(stderr, "sec %d / %d\n", left.sec, right.sec);
+#endif
 
 	 left.length =  left.loop.TotalLength();
 	right.length = right.loop.TotalLength();

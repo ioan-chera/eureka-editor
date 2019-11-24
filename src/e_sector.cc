@@ -1047,8 +1047,8 @@ void DoAssignSector(int ld, int side, int new_sec,
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
 
-	int sd_num   = (side > 0) ? L->right : L->left;
-	int other_sd = (side > 0) ? L->left  : L->right;
+	int sd_num   = (side == SIDE_RIGHT) ? L->right : L->left;
+	int other_sd = (side == SIDE_RIGHT) ? L->left  : L->right;
 
 	if (sd_num >= 0)
 	{
@@ -1061,10 +1061,10 @@ void DoAssignSector(int ld, int side, int new_sec,
 	// Thus we don't end up with invalid lines -- i.e. ones with a
 	// left side but no right side.
 
-	if (side < 0 && other_sd < 0)
-	{
+	if (side == SIDE_LEFT && other_sd < 0)
 		flip->set(ld);
-	}
+	else
+		flip->clear(ld);
 
 	SYS_ASSERT(new_lower >= 0);
 	SYS_ASSERT(new_upper >= 0);
