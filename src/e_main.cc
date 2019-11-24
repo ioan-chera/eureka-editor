@@ -185,10 +185,16 @@ void UpdateDrawLine()
 	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
 		return;
 
+	const Vertex *V = Vertices[edit.draw_from.num];
+
 	double new_x = edit.map_x;
 	double new_y = edit.map_y;
 
-	if (edit.highlight.valid())
+	if (grid.ratio > 0)
+	{
+		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
+	}
+	else if (edit.highlight.valid())
 	{
 		new_x = Vertices[edit.highlight.num]->x();
 		new_y = Vertices[edit.highlight.num]->y();
@@ -200,9 +206,8 @@ void UpdateDrawLine()
 	}
 	else
 	{
-		const Vertex *V = Vertices[edit.draw_from.num];
-
-		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
+		new_x = grid.SnapX(new_x);
+		new_y = grid.SnapY(new_y);
 	}
 
 	edit.draw_to_x = new_x;
@@ -277,6 +282,26 @@ void UpdateHighlight()
 			edit.highlight.valid() && edit.dragged.num == edit.highlight.num)
 		{
 			edit.highlight.clear();
+		}
+
+		// if drawing a line and ratio lock is ON, only highlight a
+		// vertex if it is *exactly* the right ratio.
+		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
+			edit.mode == OBJ_VERTICES && edit.highlight.valid())
+		{
+			const Vertex *V = Vertices[edit.highlight.num];
+			const Vertex *S = Vertices[edit.draw_from.num];
+
+			double vx = V->x();
+			double vy = V->y();
+
+			grid.RatioSnapXY(vx, vy, S->x(), S->y());
+
+			if (MakeValidCoord(vx) != V->raw_x ||
+				MakeValidCoord(vy) != V->raw_y)
+			{
+				edit.highlight.clear();
+			}
 		}
 	}
 
