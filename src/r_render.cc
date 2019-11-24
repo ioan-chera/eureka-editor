@@ -730,30 +730,8 @@ void Render3D_Enable(bool _enable)
 }
 
 
-void Render3D_RBScroll(int mode, int dx = 0, int dy = 0, keycode_t mod = 0)
+void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 {
-	// started?
-	if (mode < 0)
-	{
-		edit.is_panning = true;
-		main_win->SetCursor(FL_CURSOR_HAND);
-		return;
-	}
-
-	// finished?
-	if (mode > 0)
-	{
-		edit.is_panning = false;
-		main_win->SetCursor(FL_CURSOR_DEFAULT);
-		return;
-	}
-
-	if (dx == 0 && dy == 0)
-		return;
-
-	if (! edit.panning_lax)
-		mod = 0;
-
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
 
@@ -993,7 +971,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	if (edit.is_panning)
 	{
-		Render3D_RBScroll(0, dx, dy, mod);
+		Editor_ScrollMap(0, dx, dy, mod);
 		return;
 	}
 	else if (edit.action == ACT_ADJUST_OFS)
@@ -1866,29 +1844,6 @@ void R3D_NAV_TurnRight()
 }
 
 
-static void R3D_NAV_MouseMove_release(void)
-{
-	Render3D_RBScroll(+1);
-}
-
-void R3D_NAV_MouseMove()
-{
-	if (! EXEC_CurKey)
-		return;
-
-	edit.panning_speed = atof(EXEC_Param[0]);
-	edit.panning_lax = Exec_HasFlag("/LAX");
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	if (Nav_SetKey(EXEC_CurKey, &R3D_NAV_MouseMove_release))
-	{
-		Render3D_RBScroll(-1);
-	}
-}
-
-
 static void ACT_AdjustOfs_release(void)
 {
 	// check if cancelled or overridden
@@ -2115,10 +2070,6 @@ static editor_command_t  render_commands[] =
 
 	{	"3D_NAV_TurnRight", NULL,
 		&R3D_NAV_TurnRight
-	},
-
-	{	"3D_NAV_MouseMove", NULL,
-		&R3D_NAV_MouseMove
 	},
 
 	// backwards compatibility.

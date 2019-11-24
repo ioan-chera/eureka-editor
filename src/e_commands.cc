@@ -511,9 +511,6 @@ static void NAV_MouseScroll_release(void)
 
 void CMD_NAV_MouseScroll()
 {
-	if (edit.render3d)
-		return;
-
 	if (! EXEC_CurKey)
 		return;
 
@@ -525,6 +522,7 @@ void CMD_NAV_MouseScroll()
 
 	if (Nav_SetKey(EXEC_CurKey, &NAV_MouseScroll_release))
 	{
+		// begin
 		Editor_ScrollMap(-1);
 	}
 }

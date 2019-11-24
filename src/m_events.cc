@@ -105,7 +105,7 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 
 
 // this is only used for mouse scrolling
-void Editor_ScrollMap(int mode, int dx, int dy)
+void Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 {
 	// started?
 	if (mode < 0)
@@ -123,12 +123,25 @@ void Editor_ScrollMap(int mode, int dx, int dy)
 		return;
 	}
 
-	float speed = edit.panning_speed / grid.Scale;
+	if (! edit.panning_lax)
+		mod = 0;
 
-	double delta_x = ((double) -dx * speed);
-	double delta_y = ((double)  dy * speed);
+	if (dx == 0 && dy == 0)
+		return;
 
-	grid.Scroll(delta_x, delta_y);
+	if (edit.render3d)
+	{
+		Render3D_ScrollMap(dx, dy, mod);
+	}
+	else
+	{
+		float speed = edit.panning_speed / grid.Scale;
+
+		double delta_x = ((double) -dx * speed);
+		double delta_y = ((double)  dy * speed);
+
+		grid.Scroll(delta_x, delta_y);
+	}
 }
 
 
@@ -473,7 +486,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.is_panning)
 	{
-		Editor_ScrollMap(0, dx, dy);
+		Editor_ScrollMap(0, dx, dy, mod);
 		return;
 	}
 

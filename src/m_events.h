@@ -48,7 +48,7 @@ void Editor_SetAction(editor_action_e new_action);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 void Editor_UpdateFromScroll();
-void Editor_ScrollMap(int mode, int dx = 0, int dy = 0);
+void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
 
 /* raw input handling */
 

@@ -98,6 +98,8 @@ const editor_command_t * FindEditorCommand(const char *name)
 		name = "MapCheck";
 	else if (y_stricmp(name, "3D_Click") == 0)
 		name = "ACT_Click";
+	else if (y_stricmp(name, "3D_NAV_MouseMove") == 0)
+		name = "NAV_MouseScroll";
 	else if (y_stricmp(name, "OperationMenu") == 0)
 		name = "OpMenu";
 
