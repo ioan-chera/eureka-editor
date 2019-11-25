@@ -692,11 +692,11 @@ void UI_Canvas::DrawLinedefs()
 				else
 					line_kind = 'k';
 
-				// show length of last four added lines
-				if (n != split_ld && n >= (NumLineDefs - 3) &&
-					!edit.show_object_numbers && n != edit.highlight.num)
+				// show info of last four added lines
+				if (n != split_ld && n >= (NumLineDefs - 4) &&
+					!edit.show_object_numbers)
 				{
-					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
+					DrawLineInfo(x1, y1, x2, y2, false);
 				}
 			}
 			break;
