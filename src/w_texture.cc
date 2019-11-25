@@ -576,10 +576,10 @@ const char *NormalizeTex(const char *name)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	strncpy(buffer, name, WAD_TEX_NAME);
-
-	for (int i = 0 ; i < WAD_TEX_NAME ; i++)
+	for (size_t i = 0 ; i < WAD_TEX_NAME && name[i]; i++)
 	{
+		buffer[i] = name[i];
+
 		// remove double quotes
 		if (buffer[i] == '"')
 			buffer[i] = '_';

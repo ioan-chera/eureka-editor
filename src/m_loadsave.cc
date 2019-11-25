@@ -1433,8 +1433,8 @@ static void SaveSectors()
 		raw.floorh = LE_S16(sec->floorh);
 		raw.ceilh  = LE_S16(sec->ceilh);
 
-		strncpy(raw.floor_tex, sec->FloorTex(), sizeof(raw.floor_tex));
-		strncpy(raw.ceil_tex,  sec->CeilTex(),  sizeof(raw.ceil_tex));
+		W_StoreString(raw.floor_tex, sec->FloorTex(), sizeof(raw.floor_tex));
+		W_StoreString(raw.ceil_tex,  sec->CeilTex(),  sizeof(raw.ceil_tex));
 
 		raw.light = LE_U16(sec->light);
 		raw.type  = LE_U16(sec->type);
@@ -1525,9 +1525,9 @@ static void SaveSideDefs()
 		raw.x_offset = LE_S16(side->x_offset);
 		raw.y_offset = LE_S16(side->y_offset);
 
-		strncpy(raw.upper_tex, side->UpperTex(), sizeof(raw.upper_tex));
-		strncpy(raw.lower_tex, side->LowerTex(), sizeof(raw.lower_tex));
-		strncpy(raw.mid_tex,   side->MidTex(),   sizeof(raw.mid_tex));
+		W_StoreString(raw.upper_tex, side->UpperTex(), sizeof(raw.upper_tex));
+		W_StoreString(raw.lower_tex, side->LowerTex(), sizeof(raw.lower_tex));
+		W_StoreString(raw.mid_tex,   side->MidTex(),   sizeof(raw.mid_tex));
 
 		raw.sector = LE_U16(side->sector);
 

@@ -86,7 +86,7 @@ Lump_c::~Lump_c()
 
 void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 {
-	strncpy(entry->name, name, 8);
+	W_StoreString(entry->name, name, sizeof(entry->name));
 
 	entry->pos  = LE_U32(l_start);
 	entry->size = LE_U32(l_length);
@@ -1446,6 +1446,15 @@ int W_FilenameAbsCompare(const char *A, const char *B)
 	fl_filename_absolute(B_buffer, sizeof(B_buffer), B);
 
 	return y_stricmp(A_buffer, B_buffer);
+}
+
+
+void W_StoreString(char *buf, const char *str, size_t buflen)
+{
+	memset(buf, 0, buflen);
+
+	for (size_t i = 0 ; i < buflen && str[i] ; i++)
+		buf[i] = str[i];
 }
 
 
