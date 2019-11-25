@@ -310,6 +310,8 @@ void UI_Canvas::DrawEverything()
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy);
+
+			DrawLineInfo(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy, true);
 		}
 	}
 	else if (highlight.valid())
@@ -332,7 +334,8 @@ void UI_Canvas::DrawEverything()
 
 		if (edit.mode == OBJ_LINEDEFS && !edit.show_object_numbers)
 		{
-			DrawLineRatio(edit.highlight.num);
+			const LineDef *L = LineDefs[edit.highlight.num];
+			DrawLineInfo(L->Start()->x(), L->Start()->y(), L->End()->x(), L->End()->y(), false);
 		}
 
 		RenderThickness(1);
@@ -690,7 +693,8 @@ void UI_Canvas::DrawLinedefs()
 					line_kind = 'k';
 
 				// show length of last four added lines
-				if (n != split_ld && n >= (NumLineDefs - 3) && !edit.show_object_numbers)
+				if (n != split_ld && n >= (NumLineDefs - 3) &&
+					!edit.show_object_numbers && n != edit.highlight.num)
 				{
 					DrawLineNumber(x1, y1, x2, y2, 0, I_ROUND(L->CalcLength()));
 				}
@@ -1099,20 +1103,16 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 }
 
 
-void UI_Canvas::DrawLineRatio(int ld_num)
+void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double map_y2,
+							 bool force_ratio)
 {
-	const LineDef *L = LineDefs[ld_num];
+	fixcoord_t idx = MakeValidCoord(map_x2) - MakeValidCoord(map_x1);
+	fixcoord_t idy = MakeValidCoord(map_y2) - MakeValidCoord(map_y1);
 
-	fixcoord_t idx = L->End()->raw_x - L->Start()->raw_x;
-	fixcoord_t idy = L->End()->raw_y - L->Start()->raw_y;
-
-	if (idx == 0 || idy == 0)
-		return;
-
-	int x1 = SCREENX(L->Start()->x());
-	int y1 = SCREENY(L->Start()->y());
-	int x2 = SCREENX(L->End()->x());
-	int y2 = SCREENY(L->End()->y());
+	int x1 = SCREENX(map_x1);
+	int y1 = SCREENY(map_y1);
+	int x2 = SCREENX(map_x2);
+	int y2 = SCREENY(map_y2);
 
 	int sx = (x1 + x2) / 2;
 	int sy = (y1 + y2) / 2;
@@ -1123,9 +1123,28 @@ void UI_Canvas::DrawLineRatio(int ld_num)
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
 
-	std::string ratio_name = LD_RatioName(idx, idy, true);
+	/* length */
 
-	RenderNumString(sx, sy, ratio_name.c_str());
+	double length = hypot(FROM_COORD(idx), FROM_COORD(idy));
+
+	if (length > 0.1)
+	{
+		char buffer[64];
+		snprintf(buffer, sizeof(buffer), "%1.1f", length);
+
+		RenderNumString(sx, sy, buffer);
+
+		sy = sy - cur_font;
+	}
+
+	/* ratio */
+
+	if (idx != 0 && idy != 0)
+	{
+		std::string ratio_name = LD_RatioName(idx, idy, true);
+
+		RenderNumString(sx, sy, ratio_name.c_str());
+	}
 }
 
 
@@ -1796,15 +1815,7 @@ void UI_Canvas::DrawCurrentLine()
 	RenderColor(RED);
 	DrawKnobbyLine(V->x(), V->y(), new_x, new_y);
 
-	double dx = V->x() - new_x;
-	double dy = V->y() - new_y;
-
-	float length = sqrt(dx * dx + dy * dy);
-
-	if (length < 0.1)
-		return;
-
-	DrawLineNumber(V->x(), V->y(), new_x, new_y, 0, I_ROUND(length));
+	DrawLineInfo(V->x(), V->y(), new_x, new_y, grid.ratio > 0);
 
 	// draw all the crossing points
 	crossing_state_c cross;

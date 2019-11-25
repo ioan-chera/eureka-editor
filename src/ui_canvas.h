@@ -140,7 +140,7 @@ private:
 
 	void DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n);
 	void DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n);
-	void DrawLineRatio(int ld_num);
+	void DrawLineInfo(double map_x1, double map_y1, double map_x2, double map_y2, bool force_ratio);
 	void DrawNumber(int x, int y, int num);
 	void DrawCurrentLine();
 	void DrawSnapPoint();
