@@ -367,15 +367,17 @@ public:
 		}
 	}
 
-	void Format(char *buffer, int index) const
+	std::string Format(int index) const
 	{
 		SYS_ASSERT(index < size);
 
 		const char *name = fl_filename_name(filenames[index]);
-		// const char *map  = map_names[index];
 
+		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
 				(index < 9) ? "&" : "", 1+index, name);
+
+		return std::string(buffer);
 	}
 
 	void Lookup(int index, const char ** file_v, const char ** map_v)
@@ -513,9 +515,9 @@ int M_RecentCount()
 	return recent_files.getSize();
 }
 
-void M_RecentShortName(int index, char *name_buf)
+std::string M_RecentShortName(int index)
 {
-	recent_files.Format(name_buf, index);
+	return recent_files.Format(index);
 }
 
 void * M_RecentData(int index)

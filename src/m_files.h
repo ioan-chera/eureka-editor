@@ -31,8 +31,8 @@ void M_OpenRecentFromMenu(void *priv_data);
 bool M_TryOpenMostRecent();
 
 // these three only for menu code
-int    M_RecentCount();
-void   M_RecentShortName(int index, char *name_buf);
+int M_RecentCount();
+std::string M_RecentShortName(int index);
 void * M_RecentData(int index);
 
 

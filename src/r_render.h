@@ -79,9 +79,6 @@ public:
 
 	void AddAdjustSide(const Objid& obj);
 	float AdjustDistFactor(float view_x, float view_y);
-
-	void SaveOffsets()     { /* FIXME */ }
-	void RestoreOffsets()  { /* FIXME */ }
 };
 
 

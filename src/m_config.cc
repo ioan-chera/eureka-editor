@@ -991,10 +991,9 @@ static int parse_a_config_file(FILE *fp, const char *filename)
 
 static const char * default_config_file()
 {
-	static char filename[FL_PATH_MAX];
-
 	SYS_ASSERT(home_dir);
 
+	static char filename[FL_PATH_MAX];
 	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir);
 
 	return StringDup(filename);

@@ -766,13 +766,11 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		char name_buf[256];
-
-		M_RecentShortName(k, name_buf);
+		std::string name = M_RecentShortName(k);
 
 		void *data = M_RecentData(k);
 
-		Menu_AddItem(pos, StringDup(name_buf), cb, data, 0);
+		Menu_AddItem(pos, StringDup(name.c_str()), cb, data, 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)
