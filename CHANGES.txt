@@ -4,7 +4,7 @@ RECENT CHANGES
 
 (Since version 1.24)
 
-+ rudimentary support for the UDMF map format
++ beginnings of support for the UDMF map format
 
 + use OpenGL for faster rendering of 2D and 3D views
 
@@ -23,7 +23,7 @@ RECENT CHANGES
 
 - render sectors in the 2D view with both lighting and texturing
 
-- drawing lines anti-clockwise can create void islands
+- create void islands by drawing lines anti-clockwise in a sector
 
 - snap position indicator for 2D view (a light-blue cross)
 
