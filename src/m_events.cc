@@ -868,7 +868,7 @@ static void M_AddOperationMenu(std::string context, Fl_Menu_Button *menu)
 {
 	if (menu->size() < 2)
 	{
-		FatalError("operations.cfg: no %s items.\n", context);
+		FatalError("operations.cfg: no %s items.\n", context.c_str());
 		return;
 	}
 
