@@ -35,8 +35,10 @@ LIBS += -lz -lm
 # CXXFLAGS += -DNO_OPENGL
 
 # FLTK flags (this assumes a system-wide FLTK installation)
-CXXFLAGS += $(shell fltk-config --use-images --use-gl --cxxflags)
-LDFLAGS  += $(shell fltk-config --use-images --use-gl  --ldflags)
+FLTK_CONFIG ?= fltk-config
+
+CXXFLAGS += $(shell $(FLTK_CONFIG) --use-images --use-gl --cxxflags)
+LDFLAGS  += $(shell $(FLTK_CONFIG) --use-images --use-gl  --ldflags)
 
 # NOTE: the following is commented out since it does not work as expected.
 #       the --libs option gives us static libraries, but --ldflags option
