@@ -1,10 +1,8 @@
 
-RECENT CHANGES
-==============
+CHANGES IN Eureka 1.27
+======================
 
 (Since version 1.24)
-
-+ beginnings of support for the UDMF map format
 
 + use OpenGL for faster rendering of 2D and 3D views
 
@@ -30,6 +28,9 @@ RECENT CHANGES
 - added scale '-' and '+' buttons, show scale as percentage
 
 - ability to highlight/select railings in 3D view
+
+- beginning of support for UDMF maps (not usable yet...)
+
 
 - fixed mode menu disappearing into Window's task bar when maximized
 

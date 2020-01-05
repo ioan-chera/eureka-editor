@@ -637,9 +637,10 @@ void Wad_file::DetectLevels()
 		// check for UDMF levels
 		if (y_stricmp(directory[k+1]->name, "TEXTMAP") == 0)
 		{
+#if 0  // UDMF IS CURRENTLY DISABLED
 			levels.push_back(k);
-
 			DebugPrintf("Detected level : %s (UDMF)\n", directory[k]->name);
+#endif
 			continue;
 		}
 

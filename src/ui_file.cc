@@ -958,6 +958,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 		entry_id++;
 	}
 
+#if 0  // UDMF IS CURRENTLY DISABLED
 	if (usable_formats & (1 << MAPF_UDMF))
 	{
 		if (prev_fmt == MAPF_UDMF)
@@ -966,6 +967,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 		format_choice->add("UDMF");
 		entry_id++;
 	}
+#endif
 
 	format_choice->value(menu_value);
 
