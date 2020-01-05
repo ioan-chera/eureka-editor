@@ -263,7 +263,7 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
-  Copyright (C) 2001-2018 Andrew Apted, et al
+  Copyright (C) 2001-2020 Andrew Apted, et al
   Copyright (C) 2014-2017 Ioan Chera
   Copyright (C) 1997-2003 Andre Majorel et al
 

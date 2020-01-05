@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2018 Andrew Apted
+//  Copyright (C) 2001-2020 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -944,7 +944,7 @@ void Main_LoadResources()
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2018 Andrew Apted, et al ***\n"
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 Andrew Apted, et al ***\n"
 			"\n");
 
 	printf(	"Eureka is free software, under the terms of the GNU General\n"
@@ -1028,7 +1028,7 @@ int main(int argc, char *argv[])
 
 
 	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2018 Andrew Apted, et al ***\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 Andrew Apted, et al ***\n");
 	LogPrintf("\n");
 
 	// sanity checks type sizes (useful when porting)
