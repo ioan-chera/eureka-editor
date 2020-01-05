@@ -1201,7 +1201,8 @@ static int GrabSelectedFlat()
 		}
 	}
 
-	Status_Set("copied %s", BA_GetString(result));
+	if (result >= 0)
+		Status_Set("copied %s", BA_GetString(result));
 
 	return result;
 }
@@ -1346,7 +1347,8 @@ static int GrabSelectedTexture()
 		}
 	}
 
-	Status_Set("copied %s", BA_GetString(result));
+	if (result >= 0)
+		Status_Set("copied %s", BA_GetString(result));
 
 	return result;
 }
@@ -1362,7 +1364,7 @@ static void StoreSelectedTexture(int new_tex)
 	}
 
 	BA_Begin();
-	BA_MessageForSel("pasted flat to", edit.Selected);
+	BA_MessageForSel("pasted tex to", edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
