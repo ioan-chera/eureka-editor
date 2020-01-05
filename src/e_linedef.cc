@@ -1564,8 +1564,15 @@ std::string LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 		}
 	}
 
+	idx /= gcd;
+	idy /= gcd;
+
+	// if ratio is really complex, it isn't worth showing
+	if (idx > 999 || idy > 999)
+		return std::string("---");
+
 	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx/gcd, idy/gcd);
+	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx, idy);
 
 	return std::string(buffer);
 }
