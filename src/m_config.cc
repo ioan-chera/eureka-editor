@@ -557,6 +557,15 @@ static const opt_desc_t options[] =
 		&gui_custom_fg
 	},
 
+	{	"highlight_line_info",
+		0,
+		OPT_INTEGER,
+		"v",
+		"Info drawn near a highlighted line (0 = nothing)",
+		NULL,
+		&highlight_line_info
+	},
+
 	{	"leave_offsets_alone",
 		0,
 		OPT_BOOLEAN,

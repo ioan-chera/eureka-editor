@@ -8,8 +8,6 @@ Most Likely
 
 -  a dialog to restore a map from a backup
 
--  a way to see angle of lines
-
 -  support PNG/JPEG/TGA for patches, flats, sprites
    -->  feature png ??
 
@@ -73,8 +71,6 @@ Slightly Possible
    self-referencing linedefs
 
 -  in Find/Replace panel, can filter things by CATEGORY
-
--  way to set uppers/lowers on certain 1S lines (e.g. MBF sky transfer)
 
 -  extrafloors in 3D view
    -  create a DrawWall for their floor/ceil and sides

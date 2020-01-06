@@ -49,6 +49,18 @@
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)
 
 
+typedef enum
+{
+	LINFO_Nothing = 0,
+	LINFO_Length,
+	LINFO_Angle,
+	LINFO_Ratio,
+	LINFO_Length_Angle,
+	LINFO_Length_Ratio
+
+} line_info_mode_e;
+
+
 // config items
 rgb_color_t dotty_axis_col  = RGB_MAKE(0, 128, 255);
 rgb_color_t dotty_major_col = RGB_MAKE(0, 0, 238);
@@ -59,6 +71,8 @@ rgb_color_t normal_axis_col  = RGB_MAKE(0, 128, 255);
 rgb_color_t normal_main_col  = RGB_MAKE(0, 0, 238);
 rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
+
+int highlight_line_info = (int)LINFO_Length;
 
 
 int vertex_radius(double scale);
@@ -1106,6 +1120,11 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double map_y2,
 							 bool force_ratio)
 {
+	line_info_mode_e info = (line_info_mode_e)highlight_line_info;
+
+	if (info == LINFO_Nothing)
+		return;
+
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
@@ -1152,25 +1171,48 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	fixcoord_t idx = MakeValidCoord(map_x2) - MakeValidCoord(map_x1);
 	fixcoord_t idy = MakeValidCoord(map_y2) - MakeValidCoord(map_y1);
 
-	double length = hypot(FROM_COORD(idx), FROM_COORD(idy));
-
-	if (length > 0.1)
+	if (info == LINFO_Length || info >= LINFO_Length_Angle)
 	{
+		double length = hypot(FROM_COORD(idx), FROM_COORD(idy));
+
+		if (length > 0.1)
+		{
+			char buffer[64];
+			snprintf(buffer, sizeof(buffer), "%1.1f", length);
+
+			RenderNumString(sx, sy, buffer);
+
+			sy = sy - cur_font;
+		}
+	}
+
+	/* angle */
+
+	if (info == LINFO_Angle || info == LINFO_Length_Angle)
+	{
+		double dx = FROM_COORD(idx);
+		double dy = FROM_COORD(idy);
+
+		int degrees = (int)round(atan2(dy, dx) * 180.0 / M_PI);
+		if (degrees < 0)
+			degrees += 360;
+
 		char buffer[64];
-		snprintf(buffer, sizeof(buffer), "%1.1f", length);
+		snprintf(buffer, sizeof(buffer), "%d^", degrees);
 
 		RenderNumString(sx, sy, buffer);
-
-		sy = sy - cur_font;
 	}
 
 	/* ratio */
 
-	if (idx != 0 && idy != 0)
+	if (info == LINFO_Ratio || info == LINFO_Length_Ratio)
 	{
-		std::string ratio_name = LD_RatioName(idx, idy, true);
+		if (idx != 0 && idy != 0)
+		{
+			std::string ratio_name = LD_RatioName(idx, idy, true);
 
-		RenderNumString(sx, sy, ratio_name.c_str());
+			RenderNumString(sx, sy, ratio_name.c_str());
+		}
 	}
 }
 

@@ -54,6 +54,7 @@ extern rgb_color_t gui_custom_fg;
 extern int panel_gamma;
 
 extern int  minimum_drag_pixels;
+extern int  highlight_line_info;
 extern int  new_sector_size;
 extern int  sector_render_default;
 extern int   thing_render_default;

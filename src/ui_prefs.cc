@@ -674,6 +674,7 @@ public:
 	Fl_Check_Button *edit_full_1S;
 	Fl_Int_Input    *edit_sectorsize;
 	Fl_Input        *edit_userratio;
+	Fl_Choice       *edit_lineinfo;
 
 	Fl_Check_Button *brow_smalltex;
 	Fl_Check_Button *brow_combo;
@@ -912,6 +913,9 @@ UI_Preferences::UI_Preferences() :
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
 		{ edit_userratio = new Fl_Input(440, 150, 105, 25, "user ratio:");
+		}
+		{ edit_lineinfo = new Fl_Choice(440, 180, 105, 25, "line info:");
+		  edit_lineinfo->add("NONE|Length|Angle|Ratio|Len+Ang|Len+Ratio");
 		}
 
 		{ Fl_Box* o = new Fl_Box(25, 295, 355, 30, "Browser Options");
@@ -1450,6 +1454,7 @@ void UI_Preferences::LoadValues()
 
 	edit_def_port->value(default_port);
 	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
+	edit_lineinfo->value(CLAMP(0, highlight_line_info, 5));
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
@@ -1591,6 +1596,7 @@ void UI_Preferences::SaveValues()
 
 	default_port = StringDup(edit_def_port->value());
 	default_edit_mode = edit_def_mode->value();
+	highlight_line_info = edit_lineinfo->value();
 
 	new_sector_size = atoi(edit_sectorsize->value());
 	new_sector_size = CLAMP(4, new_sector_size, 8192);

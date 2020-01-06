@@ -15,10 +15,6 @@ CHANGES IN Eureka 1.27
 + ratio lock, makes producing lines at certain angles easier
 
 
-- preference to combine flats and textures in a single browser
-
-- preference to show all textures on a one-sided linedef
-
 - a single status bar for both 2D and 3D views
 
 - render sectors in the 2D view with both lighting and texturing
@@ -48,6 +44,12 @@ CHANGES IN Eureka 1.27
 
 - fixed needless line flips when drawing clockwise within a sector
 
+
+- preference to combine flats and textures in a single browser
+
+- preference to show all textures on a one-sided linedef
+
+- preference for linedef information (Length, Angle, Ratio)
 
 - support ESC key to cancel a current action (e.g. dragging)
 
