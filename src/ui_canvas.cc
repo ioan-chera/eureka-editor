@@ -1106,9 +1106,6 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double map_y2,
 							 bool force_ratio)
 {
-	fixcoord_t idx = MakeValidCoord(map_x2) - MakeValidCoord(map_x1);
-	fixcoord_t idy = MakeValidCoord(map_y2) - MakeValidCoord(map_y1);
-
 	int x1 = SCREENX(map_x1);
 	int y1 = SCREENY(map_y1);
 	int x2 = SCREENX(map_x2);
@@ -1117,6 +1114,33 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	int sx = (x1 + x2) / 2;
 	int sy = (y1 + y2) / 2;
 
+	// if midpoint is off the screen, try to find a better one
+	double mx = (map_x1 + map_x2) / 2.0;
+	double my = (map_y1 + map_y2) / 2.0;
+
+	if (mx < map_lx + 4 || mx > map_hx - 4 ||
+		my < map_ly + 4 || my > map_hy - 4)
+	{
+		double best_dist = 9e9;
+
+		for (double p = 0.1 ; p < 0.91 ; p += 0.1)
+		{
+			mx = map_x1 + (map_x2 - map_x1) * p;
+			my = map_y1 + (map_y2 - map_y1) * p;
+
+			double dist_x = mx * 2.0 - (map_lx + map_hx);
+			double dist_y = my * 2.0 - (map_ly + map_hy);
+			double dist = hypot(dist_x, dist_y);
+
+			if (dist < best_dist)
+			{
+				sx = x1 + (x2 - x1) * p;
+				sy = y1 + (y2 - y1) * p;
+				best_dist = dist;
+			}
+		}
+	}
+
 	// back of line is best place, no knob getting in the way
 	int want_len = -16 * CLAMP(0.25, grid.Scale, 1.0);
 
@@ -1124,6 +1148,9 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
 
 	/* length */
+
+	fixcoord_t idx = MakeValidCoord(map_x2) - MakeValidCoord(map_x1);
+	fixcoord_t idy = MakeValidCoord(map_y2) - MakeValidCoord(map_y1);
 
 	double length = hypot(FROM_COORD(idx), FROM_COORD(idy));
 
