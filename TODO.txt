@@ -6,31 +6,32 @@ Eureka TODO / WISHLIST
 Most Likely
 -----------
 
--  a dialog to restore a map from a backup
+-  linedef mode: '[' and ']' to adjust length of current line
+
+-  show purple '?' for texture names beginning with '#'
+
+-  a way to clear the Browser recent lists
 
 -  support PNG/JPEG/TGA for patches, flats, sprites
    -->  feature png ??
 
--  assume texture names beginning with '#' are special
-   (The texture checker ignores them -- what else is needed ??)
-   (perhaps have a special purple '?' for the UI_PIC)
+-  Tools/Make Door
+-  Tools/Make Lift
 
 -  slopes in 3D view
 
--  BOOM colormaps in 3D view
+-  3D floors in 3D view (OpenGL only)
 
 -  BOOM deep water in 3D view
-
--  can import DWD (DoomEd) format maps
-
--  can import UDMF format maps
 
 
 
 Slightly Possible
 -----------------
 
--  a scripting language
+-  a dialog to restore a map from a backup
+
+-  can import DWD (DoomEd) format maps
 
 -  allow Game/Port definitions to specify the linedef/thing flags
    which can be used  (rather than hard-coding them)
@@ -42,8 +43,6 @@ Slightly Possible
 -  Preferences window:
    -  backup_max_files / backup_max_space
    -  floor_bump_xxx values
-
--  linedef mode: '[' and ']' to adjust length of current line
 
 -  ability to autosave to a hidden file, and if Eureka crashes or
    power fails, can detect it and allow user to restore from it
@@ -72,10 +71,6 @@ Slightly Possible
 
 -  in Find/Replace panel, can filter things by CATEGORY
 
--  extrafloors in 3D view
-   -  create a DrawWall for their floor/ceil and sides
-   -  distance is slightly closer than normal wall segment
-
 -  PRINT key makes a screenshot of 2D or 3D view
 
 -  a sector rendering mode that shows floors which are same texture
@@ -97,9 +92,9 @@ Slightly Possible
 
 -  when browser opened by a click, jump to the texture/etc clicked on
 
--  a way to clear the Browser recent lists
-
 -  MMB on sidedef/sector tex : open RECENT browser
+
+-  BOOM colormaps in 3D view
 
 
 
@@ -107,6 +102,8 @@ Rejected Ideas
 --------------
 
 NO:  a toolbar
+
+NO:  a scripting language
 
 NO:  Restore last window position and maximized state
 
