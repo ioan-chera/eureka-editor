@@ -5,63 +5,36 @@ CHANGES IN Eureka 1.27
 (Since version 1.24)
 
 + use OpenGL for faster rendering of 2D and 3D views
-
-+ improved software drawing of 2D view, faster in Linux
-
++ improved non-GL drawing of 2D view, much faster in Linux
 + support mixing textures and flats for ports that allow it
-
 + improved 3D mode, can move things and sector surfaces
-
 + ratio lock, makes producing lines at certain angles easier
 
-
 - a single status bar for both 2D and 3D views
-
 - render sectors in the 2D view with both lighting and texturing
-
 - create void islands by drawing lines anti-clockwise in a sector
-
 - snap position indicator for 2D view (a light-blue cross)
-
 - added scale '-' and '+' buttons, show scale as percentage
-
 - ability to highlight/select railings in 3D view
-
 - beginning of support for UDMF maps (not usable yet...)
 
-
-- fixed mode menu disappearing into Window's task bar when maximized
-
-- fixed not remembering test-in-game EXE when port is "vanilla"
-
-- fixed the 'Online Docs' command in the Help menu
-
-- fixed window title not showing correct map name
-
-- fixed Re-bind in key binding dialog to show new key as valid
-
-- fixed grid getting out-of-sync with the "hide in FREE mode"
-
-- fixed needless line flips when drawing clockwise within a sector
-
-
 - preference to combine flats and textures in a single browser
-
 - preference to show all textures on a one-sided linedef
-
 - preference for linedef information (Length, Angle, Ratio)
 
 - support ESC key to cancel a current action (e.g. dragging)
-
 - support SHIFT and CTRL when using mouse-wheel to move in 3D view
-
-- added portal specials 156 and 107 to the ZDOOM port
-
 - support the FreeDM iwad
-
 - support TNT and Plutonia textures in FreeDoom2 iwad
-
+- added portal specials 156 and 107 to the ZDOOM port
 - improvements to the Makefile
-
 - improvements to the MacOS build files
+
+- fixed mode menu disappearing into Window's task bar when maximized
+- fixed not remembering test-in-game EXE when port is "vanilla"
+- fixed the 'Online Docs' command in the Help menu
+- fixed window title not showing correct map name
+- fixed Re-bind in key binding dialog to show new key as valid
+- fixed grid getting out-of-sync with the "hide in FREE mode"
+- fixed needless line flips when drawing clockwise within a sector
 
