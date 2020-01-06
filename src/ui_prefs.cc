@@ -671,6 +671,7 @@ public:
 	Fl_Check_Button *edit_samemode;
 	Fl_Check_Button *edit_autoadjustX;
 	Fl_Check_Button *edit_add_del;
+	Fl_Check_Button *edit_full_1S;
 	Fl_Int_Input    *edit_sectorsize;
 	Fl_Input        *edit_userratio;
 
@@ -905,6 +906,8 @@ UI_Preferences::UI_Preferences() :
 		{ edit_samemode = new Fl_Check_Button(50, 180, 270, 30, " same mode key will clear selection");
 		}
 		{ edit_add_del = new Fl_Check_Button(50, 210, 270, 30, " enable sidedef ADD / DEL buttons");
+		}
+		{ edit_full_1S = new Fl_Check_Button(50, 240, 270, 30, " show all textures on a one-sided linedef");
 		}
 		{ edit_sectorsize = new Fl_Int_Input(440, 120, 105, 25, "new sector size:");
 		}
@@ -1451,6 +1454,7 @@ void UI_Preferences::LoadValues()
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
+	edit_full_1S->value(show_full_one_sided ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
@@ -1593,6 +1597,7 @@ void UI_Preferences::SaveValues()
 
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
 	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
+	show_full_one_sided = edit_full_1S->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 
 	// changing this requires re-populating the browser

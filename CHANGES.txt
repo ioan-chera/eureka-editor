@@ -17,6 +17,8 @@ CHANGES IN Eureka 1.27
 
 - preference to combine flats and textures in a single browser
 
+- preference to show all textures on a one-sided linedef
+
 - a single status bar for both 2D and 3D views
 
 - render sectors in the 2D view with both lighting and texturing
