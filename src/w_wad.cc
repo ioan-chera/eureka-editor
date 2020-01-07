@@ -267,7 +267,13 @@ retry:
 	if (w->total_size < 0)
 		FatalError("Error determining WAD size.\n");
 
-	w->ReadDirectory();
+	if (! w->ReadDirectory())
+	{
+		delete w;
+		LogPrintf("Open wad failed (reading directory)\n");
+		return NULL;
+	}
+
 	w->DetectLevels();
 	w->ProcessNamespaces();
 
@@ -556,18 +562,17 @@ Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 }
 
 
-void Wad_file::ReadDirectory()
+bool Wad_file::ReadDirectory()
 {
-	// TODO: no fatal errors
-
 	rewind(fp);
 
 	raw_wad_header_t header;
 
 	if (fread(&header, sizeof(header), 1, fp) != 1)
-		FatalError("Error reading WAD header.\n");
-
-	// TODO: check ident for PWAD or IWAD
+	{
+		LogPrintf("Error reading WAD header.\n");
+		return false;
+	}
 
 	kind = header.ident[0];
 
@@ -575,19 +580,28 @@ void Wad_file::ReadDirectory()
 	dir_count = LE_S32(header.num_entries);
 
 	if (dir_count < 0 || dir_count > 32000)
-		FatalError("Bad WAD header, too many entries (%d)\n", dir_count);
+	{
+		LogPrintf("Bad WAD header, too many entries (%d)\n", dir_count);
+		return false;
+	}
 
 	crc32_c checksum;
 
 	if (fseek(fp, dir_start, SEEK_SET) != 0)
-		FatalError("Error seeking to WAD directory.\n");
+	{
+		LogPrintf("Error seeking to WAD directory.\n");
+		return false;
+	}
 
 	for (short i = 0 ; i < dir_count ; i++)
 	{
 		raw_wad_entry_t entry;
 
 		if (fread(&entry, sizeof(entry), 1, fp) != 1)
-			FatalError("Error reading WAD directory.\n");
+		{
+			LogPrintf("Error reading entry in WAD directory.\n");
+			return false;
+		}
 
 		// update the checksum with each _RAW_ entry
 		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
@@ -619,6 +633,7 @@ void Wad_file::ReadDirectory()
 	dir_crc = checksum.raw;
 
 	DebugPrintf("Loaded directory. crc = %08x\n", dir_crc);
+	return true;
 }
 
 

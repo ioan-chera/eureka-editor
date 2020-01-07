@@ -159,6 +159,7 @@ public:
 
 	const char *PathName() const { return filename; }
 	bool IsReadOnly() const { return mode == 'r'; }
+	bool IsIWAD() const { return kind == 'I'; }
 
 	int TotalSize() const { return total_size; }
 
@@ -245,7 +246,7 @@ private:
 	static Wad_file * Create(const char *filename, char mode);
 
 	// read the existing directory.
-	void ReadDirectory();
+	bool ReadDirectory();
 
 	void DetectLevels();
 	void ProcessNamespaces();
