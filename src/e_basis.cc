@@ -618,22 +618,27 @@ static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
 	switch (objtype)
 	{
 		case OBJ_THINGS:
+			SYS_ASSERT(0 <= objnum && objnum < NumThings);
 			pos = (int*) Things[objnum];
 			break;
 
 		case OBJ_VERTICES:
+			SYS_ASSERT(0 <= objnum && objnum < NumVertices);
 			pos = (int*) Vertices[objnum];
 			break;
 
 		case OBJ_SECTORS:
+			SYS_ASSERT(0 <= objnum && objnum < NumSectors);
 			pos = (int*) Sectors[objnum];
 			break;
 
 		case OBJ_SIDEDEFS:
+			SYS_ASSERT(0 <= objnum && objnum < NumSideDefs);
 			pos = (int*) SideDefs[objnum];
 			break;
 
 		case OBJ_LINEDEFS:
+			SYS_ASSERT(0 <= objnum && objnum < NumLineDefs);
 			pos = (int*) LineDefs[objnum];
 			break;
 
