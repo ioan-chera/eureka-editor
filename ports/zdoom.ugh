@@ -181,7 +181,6 @@ include "hexen_sectors"
 special 0 - "NOTHING"
 
 # Floors
-special 200 f "Generic_Floor"              tag  speed  dist  target_type  flags
 special  22 f "Floor_LowerToNearest"       tag  speed
 special  21 f "Floor_LowerToLowest"        tag  speed
 special 241 f "Floor_LowerToLowestTxTy"    tag  speed
@@ -207,8 +206,6 @@ special 235 f "Floor_TransferTrigger"      tag
 special 236 f "Floor_TransferNumeric"      tag
 
 # Ceilings
-special 201 c "Generic_Ceiling"              tag  speed  dist  target_type  flags
-special 205 c "Generic_Crusher"              tag  down_speed  up_speed  silent?   damage
 special 169 c "Generic_Crusher2"             tag  down_speed  up_speed  silent?   damage
 special 253 c "Ceiling_LowerToLowest"        tag  speed
 special 254 c "Ceiling_LowerToFloor"         tag  speed
@@ -236,16 +233,16 @@ special 255 c "Ceiling_CrushRaiseAndStaySilA"  tag  speed  speed  damage  crush_
 special  44 c "Ceiling_CrushStop"            tag
 
 # Doors
-special 202 d "Generic_Door"          tag  speed  door_kind  delay  lock
 special  12 d "Door_Raise"            tag  speed  delay  light_tag
 special  13 d "Door_LockedRaise"      tag  speed  delay  lock  light_tag
 special  11 d "Door_Open"             tag  speed  light_tag
 special  10 d "Door_Close"            tag  speed  light_tag
+special 105 d "Door_WaitRaise"        tag  speed  delay  wait  light_tag
+special 106 d "Door_WaitClose"        tag  speed  delay  wait  light_tag
 special 249 d "Door_CloseWaitOpen"    tag  speed  delay  light_tag
 special  14 d "Door_Animated"         tag  speed  delay  lock
 
 # Lifts
-special 203 g "Generic_Lift"                 tag  speed  delay_octics  lift_type  type0_height
 special  62 g "Plat_DownWaitUpStay"          tag  speed  delay
 special 206 g "Plat_DownWaitUpStayLip"       tag  speed  delay  lip  sound_type
 special  63 g "Plat_DownByValue"             tag  speed  delay  dist_x8
@@ -271,7 +268,6 @@ special  29 e "Pillar_Build"               tag  speed  dist
 special  94 e "Pillar_BuildAndCrush"       tag  speed  dist  damage  crush_mode
 
 # Stairs
-special 204 q "Generic_Stairs"             tag  speed  height  flags  reset_delay
 special  26 q "Stairs_BuildDown"           tag  speed  height  delay  reset_delay
 special  31 q "Stairs_BuildDownSync"       tag  speed  height  reset_delay
 special  27 q "Stairs_BuildUp"             tag  speed  height  delay  reset_delay
@@ -332,6 +328,7 @@ special 215 u "Teleport_Line"          source_line_id  dest_line_id  flip_180?
 special  39 u "Teleport_ZombieChanger"  tid  tag
 
 # Things
+special 130 t "Thing_Activate"          tid
 special 131 t "Thing_Deactivate"        tid
 special  17 t "Thing_Raise"             tid
 special 135 t "Thing_Spawn"             tid  type_id  angle  new_id
@@ -432,6 +429,15 @@ special  81 k "ACS_Suspend"             script  map
 special  82 k "ACS_Terminate"           script  map
 special 158 k "FraggleScript"           script  front_only?  lock  remote_msg?
 
+# Boom Compatibility
+special 200 f "Generic_Floor"           tag  speed  dist  target_type  flags
+special 201 c "Generic_Ceiling"         tag  speed  dist  target_type  flags
+special 202 d "Generic_Door"            tag  speed  door_kind  delay  lock
+special 203 g "Generic_Lift"            tag  speed  delay_octics  lift_type  type0_height
+special 204 q "Generic_Stairs"          tag  speed  height  flags  reset_delay
+special 205 c "Generic_Crusher"         tag  down_speed  up_speed  silent?   damage
+
+# Miscellaneous
 special 191 - "SetPlayerProperty"       all_players?  turn_on?  property
 special 237 - "ChangeCamera"            tid  all_players?  move_cancels?
 special  15 - "Autosave"
