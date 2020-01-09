@@ -428,6 +428,9 @@ void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 
 static void AdjustOfs_Add(int ld_num, int part)
 {
+	if (! edit.adjust_bucket)
+		return;
+
 	const LineDef *L = LineDefs[ld_num];
 
 	// ignore invalid sides (sanity check)
@@ -512,7 +515,10 @@ static void AdjustOfs_Begin()
 static void AdjustOfs_Finish()
 {
 	if (! edit.adjust_bucket)
+	{
+		Editor_ClearAction();
 		return;
+	}
 
 	int dx = I_ROUND(edit.adjust_dx);
 	int dy = I_ROUND(edit.adjust_dy);
@@ -528,11 +534,8 @@ static void AdjustOfs_Finish()
 		BA_End();
 	}
 
-	if (edit.adjust_bucket)
-	{
-		delete edit.adjust_bucket;
-		edit.adjust_bucket = NULL;
-	}
+	delete edit.adjust_bucket;
+	edit.adjust_bucket = NULL;
 
 	Editor_ClearAction();
 }
