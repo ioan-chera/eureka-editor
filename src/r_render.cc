@@ -267,7 +267,7 @@ void Render3D_NotifyEnd()
 class save_obj_field_c
 {
 public:
-	int obj;    // object number (edit.mode is implicit type)
+	int obj;    // object number (SaveBucket::type is the type)
 	int field;  // e.g. Thing::F_X
 	int value;  // the saved value
 
