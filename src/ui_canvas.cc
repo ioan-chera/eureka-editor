@@ -2121,8 +2121,8 @@ void UI_Canvas::RenderSector(int num)
 			float lx = lx1 + (lx2 - lx1) * (map_y - py1) / (py2 - py1);
 			float rx = rx1 + (rx2 - rx1) * (map_y - py1) / (py2 - py1);
 
-			int sx1 = SCREENX(floor(lx));
-			int sx2 = SCREENX(ceil(rx));
+			int sx1 = SCREENX(lx);
+			int sx2 = SCREENX(rx);
 
 			// clip span to screen
 			sx1 = MAX(sx1, x());
