@@ -355,6 +355,9 @@ feature strife_flags 0
 feature gen_lines 0
 feature gen_sectors 2
 
+include "hexen_groups"
+include "hexen_sectors"
+
 special 0 - "NOTHING"
 
 # Floors
