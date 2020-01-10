@@ -475,6 +475,10 @@ void UI_SideBox::UpdateField()
 		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
 			u_pic->MarkMissing();
 
+		if (is_special_tex(lower)) l_pic->MarkSpecial();
+		if (is_special_tex(upper)) u_pic->MarkSpecial();
+		if (is_special_tex(rail))  r_pic->MarkSpecial();
+
 		l_pic->AllowHighlight(true);
 		u_pic->AllowHighlight(true);
 		r_pic->AllowHighlight(true);

@@ -113,6 +113,21 @@ void UI_Pic::MarkMissing()
 	redraw();
 }
 
+void UI_Pic::MarkSpecial()
+{
+	Clear();
+
+	special = SP_Special;
+
+	color(fl_rgb_color(192, 0, 192));
+	labelcolor(FL_WHITE);
+	labelsize(40);
+
+	label("?");
+
+	redraw();
+}
+
 
 void UI_Pic::GetFlat(const char * fname)
 {
@@ -124,7 +139,12 @@ void UI_Pic::GetFlat(const char * fname)
 
 void UI_Pic::GetTex(const char * tname)
 {
-	if (is_null_tex(tname))
+	if (is_special_tex(tname))
+	{
+		MarkSpecial();
+		return;
+	}
+	else if (is_null_tex(tname))
 	{
 		Clear();
 		return;

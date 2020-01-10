@@ -132,6 +132,7 @@ void IM_UnloadDummyTextures();
 
 Img_c * IM_MissingTex();
 Img_c * IM_UnknownTex();
+Img_c * IM_SpecialTex();
 Img_c * IM_UnknownFlat();
 Img_c * IM_UnknownSprite();
 

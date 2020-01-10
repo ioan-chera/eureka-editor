@@ -150,6 +150,11 @@ public:
 				fullbright = render_missing_bright;
 				return;
 			}
+			else if (is_special_tex(tname))
+			{
+				img = IM_SpecialTex();
+				return;
+			}
 
 			img = W_GetTexture(tname);
 

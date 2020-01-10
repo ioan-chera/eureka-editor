@@ -37,11 +37,13 @@
 
 static int missing_tex_color;
 static int unknown_tex_color;
+static int special_tex_color;
 static int unknown_flat_color;
 static int unknown_sprite_color;
 
 static Img_c * missing_tex_image;
 static Img_c * unknown_tex_image;
+static Img_c * special_tex_image;
 static Img_c * unknown_flat_image;
 static Img_c * unknown_sprite_image;
 
@@ -430,6 +432,7 @@ void IM_ResetDummyTextures()
 {
 	missing_tex_color  = -1;
 	unknown_tex_color  = -1;
+	special_tex_color  = -1;
 	unknown_flat_color = -1;
 	unknown_sprite_color = -1;
 }
@@ -444,6 +447,9 @@ void IM_UnloadDummyTextures()
 
 	if (unknown_tex_image)
 		unknown_tex_image->unload_gl(can_delete);
+
+	if (special_tex_image)
+		special_tex_image->unload_gl(can_delete);
 
 	if (unknown_flat_image)
 		unknown_flat_image->unload_gl(can_delete);
@@ -546,6 +552,27 @@ Img_c * IM_UnknownTex()
 	}
 
 	return unknown_tex_image;
+}
+
+
+Img_c * IM_SpecialTex()
+{
+	if (special_tex_color < 0)
+	{
+		special_tex_color = W_FindPaletteColor(192, 0, 192);
+
+		if (special_tex_image)
+		{
+			delete special_tex_image;
+			special_tex_image = NULL;
+		}
+	}
+
+	if (! special_tex_image)
+		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
+			W_FindPaletteColor(255, 255, 255));
+
+	return special_tex_image;
 }
 
 

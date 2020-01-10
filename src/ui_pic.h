@@ -35,6 +35,7 @@ private:
 		SP_None = 0,
 		SP_Unknown,   // texture name is not found
 		SP_Missing,   // texture is '-' but should be present
+		SP_Special,   // texture begins with '#'
 	};
 
 	int special;
@@ -59,6 +60,7 @@ public:
 
 	void MarkUnknown();
 	void MarkMissing();
+	void MarkSpecial();
 
 	void GetFlat(const char * fname);
 	void GetTex (const char * tname);
