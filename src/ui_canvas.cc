@@ -1707,11 +1707,11 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 
 	if (! edit.show_object_numbers)
 	{
-		int len1 = ComputeDist(map_x1 - split_x, map_y1 - split_y);
-		int len2 = ComputeDist(map_x2 - split_x, map_y2 - split_y);
+		double len1 = hypot(map_x1 - split_x, map_y1 - split_y);
+		double len2 = hypot(map_x2 - split_x, map_y2 - split_y);
 
-		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, len1);
-		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, len2);
+		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, I_ROUND(len1));
+		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);

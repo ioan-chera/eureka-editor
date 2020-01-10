@@ -937,13 +937,8 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	BA_ChangeLD(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
-	int orig_length = (int)ComputeDist(
-			L->Start()->x() - L->End()->x(),
-			L->Start()->y() - L->End()->y());
-
-	int new_length = (int)ComputeDist(
-			L->Start()->x() - V->x(),
-			L->Start()->y() - V->y());
+	int orig_length = I_ROUND(L->CalcLength());
+	int new_length  = I_ROUND(hypot(L->Start()->x() - V->x(), L->Start()->y() - V->y()));
 
 	// update sidedefs
 
