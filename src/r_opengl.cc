@@ -1024,6 +1024,7 @@ public:
 		{
 			img = IM_UnknownSprite();
 			fullbright = true;
+			scale = 0.5;
 		}
 
 		float scale_w = img->width() * scale;
@@ -1230,7 +1231,10 @@ public:
 
 		Img_c *img = W_GetSprite(th->type);
 		if (! img)
+		{
 			img = IM_UnknownSprite();
+			scale = 0.5;
+		}
 
 		float scale_w = img->width()  * scale;
 		float scale_h = img->height() * scale;

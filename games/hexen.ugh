@@ -307,8 +307,8 @@ thing 91    n c   4   ICT3 "Ice Stalactite Small"
 thing 92    n c   4   ICT4 "Ice Stalactite Tiny"
 
 thing 118   - -   32  NULL "Bridge"
-thing 9001  - n   20  NULL "Map spot"
-thing 9013  - n   20  NULL "Map spot /gravity"
+thing 9001  - n   20  _MSP "Map spot"
+thing 9013  - n   20  _MSP "Map spot /gravity"
 
 thing 3000  - nv 8 NULL "Polyobject anchor"
 thing 3001  - nv 8 NULL "Polyobject spot"

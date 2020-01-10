@@ -138,6 +138,7 @@ Img_c * IM_UnknownSprite();
 Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
 Img_c * IM_CreateDogSprite();
 Img_c * IM_CreateLightSprite();
+Img_c * IM_CreateMapSpotSprite();
 
 Img_c * IM_DigitFont_11x14();
 Img_c * IM_DigitFont_14x19();

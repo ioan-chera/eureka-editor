@@ -993,6 +993,45 @@ Img_c * IM_CreateLightSprite()
 }
 
 
+Img_c * IM_CreateMapSpotSprite()
+{
+	int W = 32;
+	int H = 32;
+
+	Img_c *result = new Img_c(W, H);
+
+	result->clear();
+
+	for (int y = 4 ; y < H ; y++)
+	for (int x = 0 ; x < W ; x++)
+	{
+		byte pix = TRANS_PIXEL;
+
+		int cx1 = y/2;
+		int cx2 = W - y/2;
+
+		if (cx1 <= x && x <= cx2)
+		{
+			float dx = MIN(x - cx1, cx2 - x);
+			//float dy = MIN(abs(y - 4), abs(y - W));
+
+			float ity = 0.3 + dx / 14.0;
+			if (ity > 1.0) ity = 1.0;
+
+			int r =   0 * ity;
+			int g = 255 * ity;
+			int b =   0 * ity;
+
+			pix = W_FindPaletteColor(r, g, b);
+		}
+
+		result->wbuf() [ y * W + x ] = pix;
+	}
+
+	return result;
+}
+
+
 //------------------------------------------------------------------------
 
 /* a digit-only font, in two sizes */

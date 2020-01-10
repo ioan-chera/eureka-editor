@@ -842,6 +842,10 @@ Img_c * W_GetSprite(int type)
 	{
 		result = IM_CreateLightSprite();
 	}
+	else if (y_stricmp(info->sprite, "_MSP") == 0)
+	{
+		result = IM_CreateMapSpotSprite();
+	}
 	else if (y_stricmp(info->sprite, "NULL") != 0)
 	{
 		Lump_c *lump = Sprite_loc_by_root(info->sprite);

@@ -819,6 +819,7 @@ public:
 		{
 			sprite = IM_UnknownSprite();
 			is_unknown = true;
+			scale = 0.5;
 		}
 
 		float tx1 = tx - sprite->width() * scale / 2.0;
