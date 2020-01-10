@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2015-2018 Andrew Apted
+//  Copyright (C) 2015-2020 Andrew Apted
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -21,6 +21,7 @@
 #include "main.h"
 #include "ui_window.h"
 
+#include "e_cutpaste.h"  // Texboard_XX
 #include "e_path.h"  // GoToObject
 #include "e_main.h"  // Selection_Clear
 #include "m_config.h"	// gui_scheme
@@ -314,7 +315,8 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		find_pic = new UI_Pic(X+225, Y+95, 64, 64, "Choose");
 		find_pic->callback((Fl_Callback *)choose_callback, this);
-///		find_pic->AllowHighlight(true);
+		// NOTE: no point allowing highlight when copy'n'paste don't work
+		// find_pic->AllowHighlight(true);
 
 		find_but = new Fl_Button(X+50, Y+165, 90, 30, "Find");
 		find_but->labelfont(FL_HELVETICA_BOLD);
@@ -339,7 +341,7 @@ UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
 
 		rep_pic = new UI_Pic(X+225, Y+230, 64, 64, "Choose");
 		rep_pic->callback((Fl_Callback *)choose_callback, this);
-///		rep_pic->AllowHighlight(true);
+		// rep_pic->AllowHighlight(true);
 
 		apply_but = new Fl_Button(X+45, Y+300, 90, 30, "Replace");
 		apply_but->labelfont(FL_HELVETICA_BOLD);
@@ -903,8 +905,117 @@ char UI_FindAndReplace::GetKind()
 
 bool UI_FindAndReplace::ClipboardOp(char op)
 {
-	// FIXME handle cut'n'paste
+	// NOTE: the logic below is disabled since texture copy'n'paste
+	//       simply does not work properly when an input widget has
+	//       the focus (especially paste).
+
+#if 1
 	return false;
+#else
+	// current mode must be Line Textures or Sector Flats
+	if (what->value() < 1 || what->value() > 2)
+		return false;
+
+	bool is_replace = false;
+
+	// a highlighted pic overrides any selected one
+	if (find_pic->Highlighted())
+		is_replace = false;
+	else if (rep_pic->Highlighted())
+		is_replace = true;
+	else if (find_pic->Selected())
+		is_replace = false;
+	else if (rep_pic->Selected())
+		is_replace = true;
+	else
+		return false;
+
+	switch (op)
+	{
+	case 'c':
+		CB_Copy(is_replace);
+		break;
+
+	case 'v':
+		CB_Paste(is_replace);
+		break;
+
+	case 'x':
+		Beep("cannot cut that");
+		break;
+
+	case 'd':
+		CB_Delete(is_replace);
+		break;
+	}
+
+	return true;
+#endif
+}
+
+
+void UI_FindAndReplace::CB_Copy(bool is_replace)
+{
+	const char *tex_name = is_replace ? rep_value->value() : find_match->value();
+
+	// check for a valid, single name
+	if (strchr(tex_name, ',') != NULL)
+		tex_name = "";
+
+	if (is_null_tex(tex_name))
+		tex_name = "";
+
+	if (tex_name[0])
+	{
+		bool is_known = (what->value() == 1) ?
+			W_TextureIsKnown(tex_name) : W_FlatIsKnown(tex_name);
+
+		if (!is_known)
+			tex_name = "";
+	}
+
+	if (tex_name[0] == 0)
+	{
+		Beep("invalid texture name");
+		return;
+	}
+
+	if (what->value() == 1)
+		Texboard_SetTex(tex_name);
+	else
+		Texboard_SetFlat(tex_name);
+}
+
+
+void UI_FindAndReplace::CB_Paste(bool is_replace)
+{
+	Fl_Input *inp = is_replace ? rep_value : find_match;
+
+	int tex_num = (what->value() == 1) ?
+		Texboard_GetTexNum() : Texboard_GetFlatNum();
+
+	const char *tex_name = BA_GetString(tex_num);
+
+	InsertName(inp, false /* append */, tex_name);
+}
+
+
+void UI_FindAndReplace::CB_Delete(bool is_replace)
+{
+	if (!is_replace)
+	{
+		find_match->value("");
+		find_pic->Selected(false);
+
+		find_match_callback(find_match, this);
+	}
+	else
+	{
+		rep_value->value("");
+		rep_pic->Selected(false);
+
+		rep_value_callback(rep_value, this);
+	}
 }
 
 

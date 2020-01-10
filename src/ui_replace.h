@@ -160,6 +160,11 @@ private:
 	void Replace_Sector(int idx, int new_tex);
 	void Replace_SectorType(int idx);
 
+	// clipboard stuff
+	void CB_Copy(bool is_replace);
+	void CB_Paste(bool is_replace);
+	void CB_Delete(bool is_replace);
+
 private:
 	static void      hide_callback(Fl_Widget *w, void *data);
 	static void what_kind_callback(Fl_Widget *w, void *data);
