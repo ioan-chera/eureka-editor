@@ -26,7 +26,9 @@ CHANGES IN Eureka 1.27
 - support SHIFT and CTRL when using mouse-wheel to move in 3D view
 - support the FreeDM iwad
 - support TNT and Plutonia textures in FreeDoom2 iwad
+- support Hexen map format in the ETERNITY port
 - added portal specials 156 and 107 to the ZDOOM port
+- added missing specials 105, 106 and 130 to the ZDOOM port
 - improvements to the Makefile
 - improvements to the MacOS build files
 
