@@ -53,7 +53,7 @@
 #endif
 
 #ifndef I_ROUND
-#define I_ROUND(x)  ((int) (((x) < 0.0f) ? ((x) - 0.5f) : ((x) + 0.5f)))
+#define I_ROUND(x)  ((int)round(x))
 #endif
 
 #ifndef CLAMP
