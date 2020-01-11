@@ -37,6 +37,7 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 
 
 extern rgb_color_t transparent_col;
@@ -330,6 +331,39 @@ public:
 
 	/* methods */
 
+	Sector *Boom242Sector(Sector *real, Sector *temp, const Sector *dummy)
+	{
+		*temp = *real;
+
+		temp->floorh = dummy->floorh;
+		temp->ceilh  = dummy->ceilh;
+
+		if (dummy->floorh > real->floorh && r_view.z < dummy->floorh)
+		{
+			// space C : underwater
+			temp->floorh    =  real->floorh;
+			temp->ceilh     = dummy->floorh;
+
+			temp->floor_tex = dummy->floor_tex;
+			temp->ceil_tex  = dummy->ceil_tex;
+		}
+		else if (dummy->ceilh < real->ceilh && r_view.z > dummy->ceilh)
+		{
+			// space A : head above ceiling
+			temp->floorh    = dummy->ceilh;
+			temp->ceilh     =  real->ceilh;
+
+			temp->floor_tex = dummy->floor_tex;
+			temp->ceil_tex  = dummy->ceil_tex;
+		}
+		else
+		{
+			// space B : normal
+		}
+
+		return temp;
+	}
+
 	void ComputeWallSurface()
 	{
 		Sector *front = sec;
@@ -338,6 +372,27 @@ public:
 		SideDef *back_sd = (side == SIDE_LEFT) ? ld->Right() : ld->Left();
 		if (back_sd)
 			back = Sectors[back_sd->sector];
+
+		// support for BOOM's 242 "transfer heights" line type
+		Sector temp_front;
+		Sector temp_back;
+
+		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd->sector);
+		if (exfloor->heightsec >= 0)
+		{
+			const Sector *dummy = Sectors[exfloor->heightsec];
+			front = Boom242Sector(front, &temp_front, dummy);
+		}
+
+		if (back != NULL)
+		{
+			exfloor = Subdiv_3DFloorsForSector(back_sd->sector);
+			if (exfloor->heightsec >= 0)
+			{
+				const Sector *dummy = Sectors[exfloor->heightsec];
+				back = Boom242Sector(back, &temp_back, dummy);
+			}
+		}
 
 		bool sky_upper = back && is_sky(front->CeilTex()) && is_sky(back->CeilTex());
 		bool self_ref  = (front == back) ? true : false;
@@ -433,6 +488,9 @@ public:
 		rail.FindTex(sd->MidTex(), ld);
 		if (! rail.img)
 			return;
+
+		front = sec;
+		back  = Sectors[back_sd->sector];
 
 		int c_h = MIN(front->ceilh,  back->ceilh);
 		int f_h = MAX(front->floorh, back->floorh);
