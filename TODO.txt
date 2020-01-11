@@ -8,10 +8,6 @@ Most Likely
 
 -  linedef mode: '[' and ']' to adjust length of current line
 
--  show purple '?' for texture names beginning with '#'
-
--  a way to clear the Browser recent lists
-
 -  support PNG/JPEG/TGA for patches, flats, sprites
    -->  feature png ??
 
@@ -28,6 +24,8 @@ Most Likely
 
 Slightly Possible
 -----------------
+
+-  a way to clear the Browser recent lists
 
 -  a dialog to restore a map from a backup
 
