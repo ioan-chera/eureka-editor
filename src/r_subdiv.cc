@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "e_basis.h"
+#include "m_game.h"
 #include "r_subdiv.h"
 
 
@@ -153,6 +154,8 @@ struct sector_extra_info_t
 
 	sector_subdivision_c sub;
 
+	sector_3dfloors_c floors;
+
 	// true when polygons have been built for this sector.
 	bool built;
 
@@ -166,6 +169,7 @@ struct sector_extra_info_t
 		bound_y2 = -32767;
 
 		sub.Clear();
+		floors.Clear();
 
 		built = false;
 	}
@@ -228,6 +232,8 @@ public:
 		{
 			const LineDef *L = LineDefs[n];
 
+			CheckBoom242(L);
+
 			for (int side = 0 ; side < 2 ; side++)
 			{
 				int sd_num = side ? L->left : L->right;
@@ -244,6 +250,27 @@ public:
 				info.AddVertex(L->Start());
 				info.AddVertex(L->End());
 			}
+		}
+	}
+
+	void CheckBoom242(const LineDef *L)
+	{
+		if (Features.gen_types && L->type == 242)
+		{ /* ok */ }
+		else if (Level_format != MAPF_Doom && L->type == 209)
+		{ /* ok */ }
+		else
+			return;
+
+		if (L->tag <= 0 || L->right < 0)
+			return;
+
+		int dummy_sec = L->Right()->sector;
+
+		for (int n = 0 ; n < NumSectors ; n++)
+		{
+			if (Sectors[n]->tag == L->tag)
+				infos[n].floors.heightsec = dummy_sec;
 		}
 	}
 };
@@ -481,6 +508,34 @@ sector_subdivision_c *Subdiv_PolygonsForSector(int num)
 	}
 
 	return &exinfo.sub;
+}
+
+
+//------------------------------------------------------------------------
+//  3D Floor and Slope stuff
+//------------------------------------------------------------------------
+
+sector_3dfloors_c::sector_3dfloors_c() :
+	heightsec(-1)
+{ }
+
+sector_3dfloors_c::~sector_3dfloors_c()
+{ }
+
+
+void sector_3dfloors_c::Clear()
+{
+	heightsec = -1;
+}
+
+
+sector_3dfloors_c *Subdiv_3DFloorsForSector(int num)
+{
+	sector_info_cache.Update();
+
+	sector_extra_info_t& exinfo = sector_info_cache.infos[num];
+
+	return &exinfo.floors;
 }
 
 //--- editor settings ---

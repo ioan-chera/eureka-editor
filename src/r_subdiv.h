@@ -61,6 +61,24 @@ bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx,
 sector_subdivision_c *Subdiv_PolygonsForSector(int num);
 
 
+class sector_3dfloors_c
+{
+public:
+	// this is -1 or a sector number of a BOOM 242 dummy sector
+	int heightsec;
+
+	// TODO 3D floor list
+
+public:
+	sector_3dfloors_c();
+	~sector_3dfloors_c();
+
+	void Clear();
+};
+
+sector_3dfloors_c *Subdiv_3DFloorsForSector(int num);
+
+
 #endif  /* __EUREKA_R_SUBDIV_H__ */
 
 //--- editor settings ---
