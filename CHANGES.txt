@@ -22,6 +22,10 @@ CHANGES IN Eureka 1.27
 - preference to show all textures on a one-sided linedef
 - preference for linedef information (Length, Angle, Ratio)
 
+- render BOOM's deep water effect (linetype 242)
+- render Hexen map-spots with a special sprite
+- render unknown things with a smaller '?' sprite
+
 - support ESC key to cancel a current action (e.g. dragging)
 - support SHIFT and CTRL when using mouse-wheel to move in 3D view
 - support the FreeDM iwad

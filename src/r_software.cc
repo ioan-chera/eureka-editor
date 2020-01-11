@@ -908,6 +908,24 @@ public:
 
 		int thsec = r_view.thing_sectors[th_index];
 
+		// check if thing is hidden by BOOM deep water
+		if (is_sector(thsec))
+		{
+			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(thsec);
+			if (is_sector(exfloor->heightsec))
+			{
+				const Sector *real  = Sectors[thsec];
+				const Sector *dummy = Sectors[exfloor->heightsec];
+
+				if (dummy->floorh > real->floorh &&
+					r_view.z > dummy->floorh &&
+					!(info && (info->flags & THINGDEF_CEIL)))
+				{
+					return;
+				}
+			}
+		}
+
 		int h1, h2;
 
 		if (info && (info->flags & THINGDEF_CEIL))
