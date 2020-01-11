@@ -960,7 +960,17 @@ public:
 
 			bool sky_upper = is_sky(front->CeilTex()) && is_sky(back->CeilTex());
 
-			if (back->floorh > front->floorh && !self_ref)
+			// check for BOOM 242 "transfer heights" and invisible platform
+			bool invis_floor = false;
+			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd_back->sector);
+			if (exfloor->heightsec >= 0)
+			{
+				const Sector *dummy = Sectors[exfloor->heightsec];
+				if (dummy->floorh < back->floorh)
+					invis_floor = true;
+			}
+
+			if (back->floorh > front->floorh && !self_ref && !invis_floor)
 				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
 					ld_len, x1, y1, front->floorh, x2, y2, back->floorh);
 
@@ -982,18 +992,68 @@ public:
 			return;
 
 		const Sector *sec = Sectors[sec_index];
+		const Sector *dummy = NULL;
+
+		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sec_index);
 
 		glColor3f(1, 1, 1);
 
-		if (r_view.z > sec->floorh)
+		// support for BOOM's 242 "transfer heights" line type
+		if (exfloor->heightsec >= 0)
 		{
-			DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
+			dummy = Sectors[exfloor->heightsec];
+
+			if (dummy->floorh > sec->floorh && r_view.z < dummy->floorh)
+			{
+				// space C : underwater
+				DrawSectorPolygons(sec, subdiv, dummy->floorh, dummy->CeilTex());
+
+				if (r_view.z > sec->floorh)
+					DrawSectorPolygons(sec, subdiv, sec->floorh, dummy->FloorTex());
+
+				// this helps the view to not look weird when clipping around
+				if (r_view.z < dummy->ceilh && dummy->ceilh > sec->floorh)
+					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
+			}
+			else if (dummy->ceilh < sec->ceilh && r_view.z > dummy->ceilh)
+			{
+				// space A : head over ceiling
+				DrawSectorPolygons(sec, subdiv, dummy->ceilh, dummy->FloorTex());
+
+				if (r_view.z < sec->ceilh)
+					DrawSectorPolygons(sec, subdiv, sec->ceilh, dummy->CeilTex());
+
+				if (r_view.z > dummy->floorh && dummy->floorh < sec->ceilh)
+					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
+			}
+			else if (dummy->floorh < sec->floorh)
+			{
+				// invisible platform
+				if (r_view.z > dummy->floorh)
+					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
+
+				if (r_view.z < dummy->ceilh)
+					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
+			}
+			else
+			{
+				// space B : normal
+				if (r_view.z > dummy->floorh)
+					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
+
+				if (r_view.z < dummy->ceilh)
+					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
+			}
+
+			return;
 		}
 
+		// normal sector
+		if (r_view.z > sec->floorh)
+			DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
+
 		if (r_view.z < sec->ceilh)
-		{
 			DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
-		}
 	}
 
 	void DrawThing(int th_index)
