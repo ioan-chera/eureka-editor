@@ -30,6 +30,7 @@ endif
 
 feature tx_start 1
 feature mix_textures_flats 1
+feature extra_floors 1
 
 
 #---- EDGE THINGS ----------

@@ -142,7 +142,7 @@ typedef struct
 	// NOTE: values here are generally 0 or 1, but some can be higher
 
 	int gen_types;		// BOOM generalized linedef types
-	int gen_sectors;    // BOOM and ZDoom sector flags (damage, secret, ...)
+	int gen_sectors;	// BOOM and ZDoom sector flags (damage, secret, ...)
 
 	int tx_start;		// textures in TX_START .. TX_END
 	int img_png;		// PNG format for various graphics
@@ -160,6 +160,7 @@ typedef struct
 
 	int no_need_players;	// having no players is OK (Things checker)
 	int tag_666;			// game uses tag 666 and 667 for special FX
+	int extra_floors;		// bitmask: +1 for EDGE, +2 for Legacy, +4 for ZDoom
 
 } port_features_t;
 

@@ -28,6 +28,8 @@ if $ALLOW_BOOM is 1
   include "mbf"
 endif
 
+feature extra_floors 2
+
 
 #---- LEGACY THINGS -------------
 
