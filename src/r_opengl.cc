@@ -948,6 +948,9 @@ public:
 
 		const Sector *front = sd ? sd->SecRef() : NULL;
 
+		bool sky_front = is_sky(front->CeilTex());
+		bool sky_upper = false;
+
 		if (ld->OneSided())
 		{
 			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
@@ -958,7 +961,7 @@ public:
 			const SideDef *sd_back = (side == SIDE_LEFT) ? ld->Right() : ld->Left();
 			const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
 
-			bool sky_upper = is_sky(front->CeilTex()) && is_sky(back->CeilTex());
+			sky_upper = sky_front && is_sky(back->CeilTex());
 
 			// check for BOOM 242 "transfer heights" and invisible platform
 			bool invis_floor = false;
@@ -974,13 +977,29 @@ public:
 				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
 					ld_len, x1, y1, front->floorh, x2, y2, back->floorh);
 
-			if (back->ceilh < front->ceilh && !self_ref)
+			if (back->ceilh < front->ceilh && !self_ref && !sky_upper)
 				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
 					ld_len, x1, y1, back->ceilh, x2, y2, front->ceilh);
 
 			if (!is_null_tex(sd->MidTex()) && r_view.texturing)
 				DrawMidMasker(ld, sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
+		}
+
+		/* EMULATE VANILLA SKIES */
+
+		// we don't draw the skies as polygons, nor do we draw the upper
+		// of a linedef which has sky on both sides.  instead we draw a
+		// very tall quad (like a wall part) above a solid wall where it
+		// meets a sky sector.
+
+		if (sky_front && !sky_upper)
+		{
+			float z1 = front->ceilh;
+			float z2 = z1 + 16384.0;
+
+			DrawSide('U', ld, sd, "-", front, NULL, true /* sky_upper */,
+				ld_len, x1, y1, z1, x2, y2, z2);
 		}
 	}
 
@@ -1032,7 +1051,7 @@ public:
 				if (r_view.z > dummy->floorh)
 					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
 
-				if (r_view.z < dummy->ceilh)
+				if (r_view.z < dummy->ceilh && !is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
 			}
 			else
@@ -1041,7 +1060,7 @@ public:
 				if (r_view.z > dummy->floorh)
 					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
 
-				if (r_view.z < dummy->ceilh)
+				if (r_view.z < dummy->ceilh && !is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
 			}
 
@@ -1052,7 +1071,7 @@ public:
 		if (r_view.z > sec->floorh)
 			DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
 
-		if (r_view.z < sec->ceilh)
+		if (r_view.z < sec->ceilh && !is_sky(sec->CeilTex()))
 			DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
 	}
 
