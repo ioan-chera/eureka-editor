@@ -635,6 +635,7 @@ public:
 	//   - 'W' for one-sided wall
 	//   - 'L' for lower
 	//   - 'U' for upper
+	//   - 'E' for extrafloor side
 	void DrawSide(char where, const LineDef *ld, const SideDef *sd,
 		const char *texname, const Sector *front, const Sector *back,
 		bool sky_upper, float ld_length,
@@ -715,7 +716,7 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
-			int light = sd->SecRef()->light;
+			int light = front->light;
 
 			// add "fake constrast" for axis-aligned walls
 			if (ld->IsVertical())
@@ -963,22 +964,22 @@ public:
 
 			sky_upper = sky_front && is_sky(back->CeilTex());
 
-			// check for BOOM 242 "transfer heights" and invisible platform
+			// check for BOOM 242 invisible platforms
 			bool invis_back = false;
 			const Sector *dummy = NULL;
-			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd_back->sector);
-			if (exfloor->heightsec >= 0)
+			sector_3dfloors_c *b_ex = Subdiv_3DFloorsForSector(sd_back->sector);
+			if (b_ex->heightsec >= 0)
 			{
-				dummy = Sectors[exfloor->heightsec];
+				dummy = Sectors[b_ex->heightsec];
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
 
 			int f_floorh = front->floorh;
-			exfloor = Subdiv_3DFloorsForSector(sd->sector);
-			if (exfloor->heightsec >= 0)
+			sector_3dfloors_c *f_ex = Subdiv_3DFloorsForSector(sd->sector);
+			if (f_ex->heightsec >= 0)
 			{
-				dummy = Sectors[exfloor->heightsec];
+				dummy = Sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 					f_floorh = dummy->floorh;
 			}
@@ -994,6 +995,40 @@ public:
 			if (!is_null_tex(sd->MidTex()) && r_view.texturing)
 				DrawMidMasker(ld, sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
+
+			// draw sides of extrafloors
+			if (front->tag != back->tag)
+			{
+				for (size_t k = 0 ; k < b_ex->floors.size() ; k++)
+				{
+					const extrafloor_c& EF = b_ex->floors[k];
+					const SideDef *ef_sd = SideDefs[EF.sd];
+					const Sector *dummy = Sectors[ef_sd->sector];
+
+					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
+						continue;
+
+					int top_h = dummy->ceilh;
+					int bottom_h = dummy->floorh;
+
+					if (EF.flags & EXFL_VAVOOM)
+						std::swap(top_h, bottom_h);
+
+					if (top_h <= bottom_h)
+						continue;
+
+					const char *tex = "-";
+					if (EF.flags & EXFL_UPPER)
+						tex = sd->UpperTex();
+					else if (EF.flags & EXFL_LOWER)
+						tex = sd->LowerTex();
+					else
+						tex = ef_sd->MidTex();
+
+					DrawSide('E', ld, sd, tex, front, back, false,
+						ld_len, x1, y1, bottom_h, x2, y2, top_h);
+				}
+			}
 		}
 
 		/* EMULATE VANILLA SKIES */
@@ -1090,8 +1125,10 @@ public:
 			const extrafloor_c& EF = exfloor->floors[k];
 			const Sector *dummy = Sectors[SideDefs[EF.sd]->sector];
 
-			// TODO: support this
+			// TODO: supporting translucent surfaces is non-trivial and needs
+			//       to be done in separate pass with a depth sort.
 			bool is_trans = (EF.flags & EXFL_TRANSLUC) != 0;
+			(void) is_trans;
 
 			int top_h = dummy->ceilh;
 			int bottom_h = dummy->floorh;
