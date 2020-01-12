@@ -964,18 +964,28 @@ public:
 			sky_upper = sky_front && is_sky(back->CeilTex());
 
 			// check for BOOM 242 "transfer heights" and invisible platform
-			bool invis_floor = false;
+			bool invis_back = false;
+			const Sector *dummy = NULL;
 			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd_back->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const Sector *dummy = Sectors[exfloor->heightsec];
+				dummy = Sectors[exfloor->heightsec];
 				if (dummy->floorh < back->floorh)
-					invis_floor = true;
+					invis_back = true;
 			}
 
-			if (back->floorh > front->floorh && !self_ref && !invis_floor)
+			int f_floorh = front->floorh;
+			exfloor = Subdiv_3DFloorsForSector(sd->sector);
+			if (exfloor->heightsec >= 0)
+			{
+				dummy = Sectors[exfloor->heightsec];
+				if (dummy->floorh < front->floorh)
+					f_floorh = dummy->floorh;
+			}
+
+			if (back->floorh > f_floorh && !self_ref && !invis_back)
 				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
-					ld_len, x1, y1, front->floorh, x2, y2, back->floorh);
+					ld_len, x1, y1, f_floorh, x2, y2, back->floorh);
 
 			if (back->ceilh < front->ceilh && !self_ref && !sky_upper)
 				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
