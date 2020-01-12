@@ -364,7 +364,7 @@ static void ParseFeatureDef(char ** argv, int argc)
 	}
 	else if (y_stricmp(argv[0], "extra_floors") == 0)
 	{
-		Features.midtex_3d = atoi(argv[1]);
+		Features.extra_floors = atoi(argv[1]);
 	}
 	else
 	{

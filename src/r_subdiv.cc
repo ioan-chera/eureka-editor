@@ -233,6 +233,7 @@ public:
 			const LineDef *L = LineDefs[n];
 
 			CheckBoom242(L);
+			CheckExtraFloor(L, n);
 
 			for (int side = 0 ; side < 2 ; side++)
 			{
@@ -255,7 +256,7 @@ public:
 
 	void CheckBoom242(const LineDef *L)
 	{
-		if (Features.gen_types && L->type == 242)
+		if (Features.gen_types && (L->type == 242 || L->type == 280))
 		{ /* ok */ }
 		else if (Level_format != MAPF_Doom && L->type == 209)
 		{ /* ok */ }
@@ -271,6 +272,83 @@ public:
 		{
 			if (Sectors[n]->tag == L->tag)
 				infos[n].floors.heightsec = dummy_sec;
+		}
+	}
+
+	void CheckExtraFloor(const LineDef *L, int ld_num)
+	{
+		if (L->tag <= 0 || L->right < 0)
+			return;
+
+		int flags = -1;
+
+		// EDGE style
+		if (Level_format == MAPF_Doom && (Features.extra_floors & 1))
+		{
+			switch (L->type)
+			{
+			case 400: flags = 0; break;
+			case 401: flags = EXFL_UPPER; break;
+			case 402: flags = EXFL_LOWER; break;
+
+			case 403: case 404: case 405: case 406: case 407: case 408:
+				flags = EXFL_THIN;  // liquid
+				break;
+
+			case 413: case 414: case 415: case 416: case 417:
+				flags = EXFL_THIN;
+				break;
+
+			default: break;
+			}
+		}
+
+		// Legacy style
+		if (Level_format == MAPF_Doom && (Features.extra_floors & 2))
+		{
+			switch (L->type)
+			{
+			case 281: flags = 0; break;
+			case 289: flags = 0; break;
+			case 300: flags = 0; break;
+			case 301: flags = EXFL_THIN; break; // liquid
+			case 304: flags = EXFL_THIN; break; // liquid
+			case 306: flags = 0; break;  // invisible floor
+
+			default: break;
+			}
+		}
+
+		// ZDoom style
+		if (Level_format != MAPF_Doom && (Features.extra_floors & 4))
+		{
+			if (L->type != 160)
+				return;
+
+			flags = 0;
+
+			if ((L->arg2 & 3) == 0)
+				flags |= EXFL_VAVOOM;
+
+			if (L->arg3 & 8)  flags |= EXFL_THIN;
+			if (L->arg3 & 16) flags |= EXFL_UPPER;
+			if (L->arg3 & 32) flags |= EXFL_LOWER;
+		}
+
+		if (flags < 0)
+			return;
+
+		extrafloor_c EF;
+
+		EF.ld = ld_num;
+		EF.sd = L->right;
+		EF.flags = flags;
+
+		// find all matching sectors
+		for (int n = 0 ; n < NumSectors ; n++)
+		{
+			if (Sectors[n]->tag == L->tag)
+				infos[n].floors.extra_floors.push_back(EF);
 		}
 	}
 };
@@ -526,7 +604,15 @@ sector_3dfloors_c::~sector_3dfloors_c()
 void sector_3dfloors_c::Clear()
 {
 	heightsec = -1;
+	extra_floors.clear();
 }
+
+
+extrafloor_c::extrafloor_c() : ld(-1), sd(-1), flags(0)
+{ }
+
+extrafloor_c::~extrafloor_c()
+{ }
 
 
 sector_3dfloors_c *Subdiv_3DFloorsForSector(int num)

@@ -61,13 +61,36 @@ bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx,
 sector_subdivision_c *Subdiv_PolygonsForSector(int num);
 
 
+class extrafloor_c
+{
+public:
+	int ld;     // linedef in the dummy sector
+	int sd;     // first sidedef of that line
+	int flags;  // bitmask of EXFL_XXX values
+
+public:
+	extrafloor_c();
+	~extrafloor_c();
+};
+
+
+// vavoom style, dummy sector has floorh > ceilh
+#define EXFL_VAVOOM		(1 << 0)
+// a single surface visible from underneath and over
+#define EXFL_THIN		(1 << 1)
+// side texture is from upper on sidedef (not middle tex)
+#define EXFL_UPPER		(1 << 2)
+// side texture is from lower on sidedef (not middle tex)
+#define EXFL_LOWER		(1 << 3)
+
+
 class sector_3dfloors_c
 {
 public:
 	// this is -1 or a sector number of a BOOM 242 dummy sector
 	int heightsec;
 
-	// TODO 3D floor list
+	std::vector< extrafloor_c > extra_floors;
 
 public:
 	sector_3dfloors_c();
