@@ -290,13 +290,12 @@ public:
 			case 400: flags = 0; break;
 			case 401: flags = EXFL_UPPER; break;
 			case 402: flags = EXFL_LOWER; break;
+			case 403: flags = EXFL_BOTTOM; break; // liquid
+			case 413: flags = EXFL_BOTTOM; break; // thin and solid
 
-			case 403: case 404: case 405: case 406: case 407: case 408:
-				flags = EXFL_THIN;  // liquid
-				break;
-
-			case 413: case 414: case 415: case 416: case 417:
-				flags = EXFL_THIN;
+			case 404: case 405: case 406: case 407: case 408:  // liquid
+			case 414: case 415: case 416: case 417:  // thin and solid
+				flags = EXFL_BOTTOM | EXFL_TRANSLUC;
 				break;
 
 			default: break;
@@ -310,10 +309,10 @@ public:
 			{
 			case 281: flags = 0; break;
 			case 289: flags = 0; break;
-			case 300: flags = 0; break;
-			case 301: flags = EXFL_THIN; break; // liquid
-			case 304: flags = EXFL_THIN; break; // liquid
-			case 306: flags = 0; break;  // invisible floor
+			case 300: flags = EXFL_TRANSLUC; break;
+			case 301: flags = EXFL_TRANSLUC; break;
+			case 304: flags = 0; break;
+			case 306: flags = EXFL_TRANSLUC; break; // invisible floor
 
 			default: break;
 			}
@@ -330,7 +329,7 @@ public:
 			if ((L->arg2 & 3) == 0)
 				flags |= EXFL_VAVOOM;
 
-			if (L->arg3 & 8)  flags |= EXFL_THIN;
+			if (L->arg3 & 8)  flags |= EXFL_TOP;
 			if (L->arg3 & 16) flags |= EXFL_UPPER;
 			if (L->arg3 & 32) flags |= EXFL_LOWER;
 		}
@@ -348,7 +347,7 @@ public:
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
 			if (Sectors[n]->tag == L->tag)
-				infos[n].floors.extra_floors.push_back(EF);
+				infos[n].floors.floors.push_back(EF);
 		}
 	}
 };
@@ -604,7 +603,7 @@ sector_3dfloors_c::~sector_3dfloors_c()
 void sector_3dfloors_c::Clear()
 {
 	heightsec = -1;
-	extra_floors.clear();
+	floors.clear();
 }
 
 

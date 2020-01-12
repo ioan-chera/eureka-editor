@@ -76,12 +76,16 @@ public:
 
 // vavoom style, dummy sector has floorh > ceilh
 #define EXFL_VAVOOM		(1 << 0)
-// a single surface visible from underneath and over
-#define EXFL_THIN		(1 << 1)
+// only draw a single surface (the ceiling of dummy sector)
+#define EXFL_TOP		(1 << 1)
+// only draw a single surface (the floor of dummy sector)
+#define EXFL_BOTTOM		(1 << 2)
 // side texture is from upper on sidedef (not middle tex)
-#define EXFL_UPPER		(1 << 2)
+#define EXFL_UPPER		(1 << 3)
 // side texture is from lower on sidedef (not middle tex)
-#define EXFL_LOWER		(1 << 3)
+#define EXFL_LOWER		(1 << 4)
+// the 3D floor is translucent
+#define EXFL_TRANSLUC	(1 << 5)
 
 
 class sector_3dfloors_c
@@ -90,7 +94,7 @@ public:
 	// this is -1 or a sector number of a BOOM 242 dummy sector
 	int heightsec;
 
-	std::vector< extrafloor_c > extra_floors;
+	std::vector< extrafloor_c > floors;
 
 public:
 	sector_3dfloors_c();

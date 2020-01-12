@@ -1083,6 +1083,38 @@ public:
 
 		if (r_view.z < sec->ceilh && !is_sky(sec->CeilTex()))
 			DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
+
+		// draw planes of 3D floors
+		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
+		{
+			const extrafloor_c& EF = exfloor->floors[k];
+			const Sector *dummy = Sectors[SideDefs[EF.sd]->sector];
+
+			// TODO: support this
+			bool is_trans = (EF.flags & EXFL_TRANSLUC) != 0;
+
+			int top_h = dummy->ceilh;
+			int bottom_h = dummy->floorh;
+
+			const char *top_tex = dummy->CeilTex();
+			const char *bottom_tex = dummy->FloorTex();
+
+			if (EF.flags & EXFL_TOP)
+				bottom_h = top_h;
+			else if (EF.flags & EXFL_BOTTOM)
+				top_h = bottom_h;
+			else if (EF.flags & EXFL_VAVOOM)
+			{
+				std::swap(top_h, bottom_h);
+				std::swap(top_tex, bottom_tex);
+			}
+
+			if (r_view.z > top_h)
+				DrawSectorPolygons(sec, subdiv, top_h, top_tex);
+
+			if (r_view.z < bottom_h)
+				DrawSectorPolygons(sec, subdiv, bottom_h, bottom_tex);
+		}
 	}
 
 	void DrawThing(int th_index)
