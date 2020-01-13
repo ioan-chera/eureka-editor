@@ -47,6 +47,7 @@ udmf_namespace Eternity
 feature 3d_midtex 1
 feature tx_start 1
 feature mix_textures_flats 1
+feature slopes 10
 
 #TODO:  thing flag 512 "Dormant" - like in Hexen
 

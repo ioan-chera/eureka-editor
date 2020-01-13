@@ -366,6 +366,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		Features.extra_floors = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "slopes") == 0)
+	{
+		Features.slopes = atoi(argv[1]);
+	}
 	else
 	{
 		LogPrintf("unknown feature keyword: '%s'\n", argv[0]);

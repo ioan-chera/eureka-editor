@@ -48,6 +48,7 @@ feature medusa_fixed 1
 feature lax_sprites 1
 feature mix_textures_flats 1
 feature extra_floors 7
+feature slopes 28
 
 
 #---- ZDOOM THINGS ------------

@@ -23,6 +23,9 @@ if $ALLOW_BOOM is 1
 endif
 
 
+feature slopes 4
+
+
 #---- ODAMEX THINGS ----------
 
 thing 4001 p -  16 PLAYA1 "Player 5 start"

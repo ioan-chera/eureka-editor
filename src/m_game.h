@@ -160,8 +160,9 @@ typedef struct
 
 	int no_need_players;	// having no players is OK (Things checker)
 	int tag_666;			// game uses tag 666 and 667 for special FX
-	int extra_floors;		// bitmask: +1 for EDGE, +2 for Legacy, +4 for ZDoom
-
+	int extra_floors;		// bitmask: +1 EDGE, +2 Legacy, +4 for ZDoom in Hexen format
+	int slopes;				// bitmask: +1 EDGE, +2 Eternity, +4 Odamex,
+							//          +8 for ZDoom in Hexen format, +16 ZDoom things
 } port_features_t;
 
 
