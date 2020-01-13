@@ -1108,16 +1108,15 @@ public:
 				if (r_view.z < dummy->ceilh && !is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
 			}
+		} else {
 
-			return;
+			// normal sector
+			if (r_view.z > sec->floorh)
+				DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
+
+			if (r_view.z < sec->ceilh && !is_sky(sec->CeilTex()))
+				DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
 		}
-
-		// normal sector
-		if (r_view.z > sec->floorh)
-			DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
-
-		if (r_view.z < sec->ceilh && !is_sky(sec->CeilTex()))
-			DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
 
 		// draw planes of 3D floors
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)

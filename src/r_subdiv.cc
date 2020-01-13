@@ -310,9 +310,9 @@ public:
 			case 281: flags = 0; break;
 			case 289: flags = 0; break;
 			case 300: flags = EXFL_TRANSLUC; break;
-			case 301: flags = EXFL_TRANSLUC; break;
-			case 304: flags = 0; break;
-			case 306: flags = EXFL_TRANSLUC; break; // invisible floor
+			case 301: flags = EXFL_TOP | EXFL_TRANSLUC; break;
+			case 304: flags = EXFL_TOP; break;
+			case 306: flags = EXFL_TOP | EXFL_TRANSLUC; break; // invisible floor
 
 			default: break;
 			}
