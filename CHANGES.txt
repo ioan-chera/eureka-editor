@@ -23,6 +23,7 @@ CHANGES IN Eureka 1.27
 - preference for linedef information (Length, Angle, Ratio)
 
 - render BOOM's deep water effect (linetype 242)
+- render 3D Floors for EDGE, LEGACY and ZDOOM ports
 - render Hexen map-spots with a special sprite
 - render unknown things with a smaller '?' sprite
 
