@@ -88,6 +88,24 @@ public:
 #define EXFL_TRANSLUC	(1 << 5)
 
 
+class slope_plane_c
+{
+public:
+	bool sloped;  // if false, no slope is active
+
+	float xm, ym, zadd;
+
+public:
+	slope_plane_c();
+	~slope_plane_c();
+
+	inline double SlopeZ(double x, double y) const
+	{
+		return (x * xm) + (y * ym) + zadd;
+	}
+};
+
+
 class sector_3dfloors_c
 {
 public:
@@ -95,6 +113,9 @@ public:
 	int heightsec;
 
 	std::vector< extrafloor_c > floors;
+
+	slope_plane_c f_plane;
+	slope_plane_c c_plane;
 
 public:
 	sector_3dfloors_c();

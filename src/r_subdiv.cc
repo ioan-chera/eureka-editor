@@ -604,6 +604,8 @@ void sector_3dfloors_c::Clear()
 {
 	heightsec = -1;
 	floors.clear();
+	f_plane.sloped = false;
+	c_plane.sloped = false;
 }
 
 
@@ -611,6 +613,13 @@ extrafloor_c::extrafloor_c() : ld(-1), sd(-1), flags(0)
 { }
 
 extrafloor_c::~extrafloor_c()
+{ }
+
+
+slope_plane_c::slope_plane_c() : sloped(false), xm(0), ym(0), zadd(0)
+{ }
+
+slope_plane_c::~slope_plane_c()
 { }
 
 
