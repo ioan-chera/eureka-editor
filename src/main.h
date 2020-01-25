@@ -164,10 +164,6 @@ extern int   show_help;		// Print usage message and exit.
 extern int   show_version;	// Print version info and exit.
 
 
-extern int KF;  // Kromulent Factor
-extern int KF_fonth;  // default font size
-
-
 extern int MadeChanges;
 
 
