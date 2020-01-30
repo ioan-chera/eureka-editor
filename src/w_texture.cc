@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2019 Andrew Apted
+//  Copyright (C) 2001-2020 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -29,8 +29,6 @@
 #include <map>
 #include <algorithm>
 #include <string>
-
-#include "lib_tga.h"
 
 #include "m_game.h"      /* yg_picture_format */
 #include "w_loadpic.h"
@@ -168,7 +166,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 		Lump_c *lump = W_FindPatchLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
+			! LoadPicture(*img, lump, picname, xofs, yofs))
 		{
 			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -244,7 +242,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		Lump_c *lump = W_FindPatchLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs, 0, 0))
+			! LoadPicture(*img, lump, picname, xofs, yofs))
 		{
 			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -311,103 +309,6 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 }
 
 
-static void LoadTexture_SinglePatch(const char *name, Lump_c *lump)
-{
-	Img_c *img = new Img_c();
-
-	if (! LoadPicture(*img, lump, name, 0, 0))
-	{
-		delete img;
-
-		return;
-	}
-
-	W_AddTexture(name, img, false /* is_medusa */);
-}
-
-
-static void LoadTexture_PNG(const char *name, Lump_c *lump, char img_fmt)
-{
-	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
-
-	// pass it to FLTK for decoding
-	Fl_PNG_Image fltk_img(NULL, tex_data, tex_length);
-
-	W_FreeLumpData(&tex_data);
-
-	if (fltk_img.w() <= 0)
-	{
-		// failed to decode
-		LogPrintf("Failed to decode PNG image in '%s' lump.\n", name);
-		return;
-	}
-
-	// convert it
-	Img_c *img = IM_ConvertRGBImage(&fltk_img);
-
-	W_AddTexture(name, img, false /* is_medusa */);
-}
-
-
-static void LoadTexture_JPEG(const char *name, Lump_c *lump, char img_fmt)
-{
-	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
-
-	(void) tex_length;
-
-	// pass it to FLTK for decoding
-	Fl_JPEG_Image fltk_img(NULL, tex_data);
-
-	W_FreeLumpData(&tex_data);
-
-	if (fltk_img.w() <= 0)
-	{
-		// failed to decode
-		LogPrintf("Failed to decode JPEG image in '%s' lump.\n", name);
-		return;
-	}
-
-	// convert it
-	Img_c *img = IM_ConvertRGBImage(&fltk_img);
-
-	W_AddTexture(name, img, false /* is_medusa */);
-}
-
-
-static void LoadTexture_TGA(const char *name, Lump_c *lump, char img_fmt)
-{
-	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
-
-	// decode it
-	int width;
-	int height;
-
-	rgba_color_t * rgba = TGA_DecodeImage(tex_data, (size_t)tex_length, width, height);
-
-	W_FreeLumpData(&tex_data);
-
-	if (! rgba)
-	{
-		// failed to decode
-		LogPrintf("Failed to decode TGA image in '%s' lump.\n", name);
-		return;
-	}
-
-	// convert it
-	Img_c *img = IM_ConvertTGAImage(rgba, width, height);
-
-	W_AddTexture(name, img, false /* is_medusa */);
-
-	TGA_FreeImage(rgba);
-}
-
-
 void W_LoadTextures_TX_START(Wad_file *wf)
 {
 	for (int k = 0 ; k < (int)wf->tx_tex.size() ; k++)
@@ -415,34 +316,47 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 		Lump_c *lump = wf->GetLump(wf->tx_tex[k]);
 
 		char img_fmt = W_DetectImageFormat(lump);
+		const char *name = lump->Name();
+		Img_c *img = NULL;
 
-		DebugPrintf("TX_TEX %d : '%s' type=%c\n", k, lump->Name(), img_fmt ? img_fmt : '?');
+		DebugPrintf("TX_TEX %d : '%s' type=%c\n", k, name, img_fmt ? img_fmt : '?');
 
 		switch (img_fmt)
 		{
 			case 'd': /* Doom patch */
-				LoadTexture_SinglePatch(lump->Name(), lump);
+				img = new Img_c();
+				if (! LoadPicture(*img, lump, name, 0, 0))
+				{
+					delete img;
+					img = NULL;
+				}
 				break;
 
 			case 'p': /* PNG */
-				LoadTexture_PNG(lump->Name(), lump, img_fmt);
+				img = LoadImage_PNG(lump, name);
 				break;
 
 			case 't': /* TGA */
-				LoadTexture_TGA(lump->Name(), lump, img_fmt);
+				img = LoadImage_TGA(lump, name);
 				break;
 
 			case 'j': /* JPEG */
-				LoadTexture_JPEG(lump->Name(), lump, img_fmt);
+				img = LoadImage_JPEG(lump, name);
 				break;
 
 			case 0:
-				LogPrintf("Unknown texture format in '%s' lump\n", lump->Name());
+				LogPrintf("Unknown texture format in '%s' lump\n", name);
 				break;
 
 			default:
 				LogPrintf("Unsupported texture format in '%s' lump\n", lump->Name());
 				break;
+		}
+
+		// if we successfully loaded the texture, add it
+		if (img)
+		{
+			W_AddTexture(name, img, false /* is_medusa */);
 		}
 	}
 }
@@ -851,14 +765,14 @@ Img_c * W_GetSprite(int type)
 		Lump_c *lump = Sprite_loc_by_root(info->sprite);
 		if (! lump)
 		{
-			LogPrintf("Sprite not found: '%s'\n", info->sprite);
-
 			// for the MBF dog, create our own sprite for it, since
 			// it is defined in the Boom definition file and the
 			// missing sprite looks ugly in the thing browser.
 
 			if (y_stricmp(info->sprite, "DOGS") == 0)
 				result = IM_CreateDogSprite();
+			else
+				LogPrintf("Sprite not found: '%s'\n", info->sprite);
 		}
 		else
 		{

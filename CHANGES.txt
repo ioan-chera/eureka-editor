@@ -32,6 +32,7 @@ CHANGES IN Eureka 1.27
 - support the FreeDM iwad
 - support TNT and Plutonia textures in FreeDoom2 iwad
 - support Hexen map format in the ETERNITY port
+- support PNG, JPEG and TGA images in sprite/flat/patch lumps
 - added portal specials 156 and 107 to the ZDOOM port
 - added missing specials 105, 106 and 130 to the ZDOOM port
 - improvements to the Makefile

@@ -102,6 +102,10 @@ public:
 
 	void resize(int new_width, int new_height);
 
+	// paste a copy of another image into this one, but skip any
+	// transparent pixels.
+	void compose(Img_c *other, int x, int y);
+
 	Img_c * spectrify() const;
 
 	Img_c * scale_img(double scale) const;

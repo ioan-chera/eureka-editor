@@ -169,6 +169,36 @@ void Img_c::resize(int new_width, int new_height)
 }
 
 
+void Img_c::compose(Img_c *other, int x, int y)
+{
+	int W = width();
+	int H = height();
+
+	int OW = other->width();
+	int OH = other->height();
+
+	for (int oy = 0 ; oy < OH ; oy++)
+	{
+		int iy = y + oy;
+		if (iy < 0 || iy >= H)
+			continue;
+
+		const img_pixel_t *src = other->buf() + oy * OW;
+		img_pixel_t *dest = wbuf() + iy * W;
+
+		for (int ox = 0 ; ox < OW ; ox++, src++)
+		{
+			int ix = x + ox;
+			if (ix < 0 || ix >= W)
+				continue;
+
+			if (*src != TRANS_PIXEL)
+				dest[ix] = *src;
+		}
+	}
+}
+
+
 //
 // make a game image look vaguely like a spectre
 //

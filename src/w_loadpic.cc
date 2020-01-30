@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2016 Andrew Apted
+//  Copyright (C) 2001-2020 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -28,6 +28,8 @@
 
 #include "im_color.h"  /* trans_replace */
 #include "im_img.h"
+
+#include "lib_tga.h"
 
 #include "w_loadpic.h"
 #include "w_rawdef.h"
@@ -95,6 +97,113 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 }
 
 
+Img_c * LoadImage_PNG(Lump_c *lump, const char *name)
+{
+	// load the raw data
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	// pass it to FLTK for decoding
+	Fl_PNG_Image fltk_img(NULL, tex_data, tex_length);
+
+	W_FreeLumpData(&tex_data);
+
+	if (fltk_img.w() <= 0)
+	{
+		// failed to decode
+		LogPrintf("Failed to decode PNG image in '%s' lump.\n", name);
+		return NULL;
+	}
+
+	// convert it
+	Img_c *img = IM_ConvertRGBImage(&fltk_img);
+
+	return img;
+}
+
+
+Img_c * LoadImage_JPEG(Lump_c *lump, const char *name)
+{
+	// load the raw data
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	(void) tex_length;
+
+	// pass it to FLTK for decoding
+	Fl_JPEG_Image fltk_img(NULL, tex_data);
+
+	W_FreeLumpData(&tex_data);
+
+	if (fltk_img.w() <= 0)
+	{
+		// failed to decode
+		LogPrintf("Failed to decode JPEG image in '%s' lump.\n", name);
+		return NULL;
+	}
+
+	// convert it
+	Img_c *img = IM_ConvertRGBImage(&fltk_img);
+
+	return img;
+}
+
+
+Img_c * LoadImage_TGA(Lump_c *lump, const char *name)
+{
+	// load the raw data
+	byte *tex_data;
+	int tex_length = W_LoadLumpData(lump, &tex_data);
+
+	// decode it
+	int width;
+	int height;
+
+	rgba_color_t * rgba = TGA_DecodeImage(tex_data, (size_t)tex_length, width, height);
+
+	W_FreeLumpData(&tex_data);
+
+	if (! rgba)
+	{
+		// failed to decode
+		LogPrintf("Failed to decode TGA image in '%s' lump.\n", name);
+		return NULL;
+	}
+
+	// convert it
+	Img_c *img = IM_ConvertTGAImage(rgba, width, height);
+
+	TGA_FreeImage(rgba);
+
+	return img;
+}
+
+
+static bool ComposePicture(Img_c& dest, Img_c *sub,
+	int pic_x_offset, int pic_y_offset,
+	int *pic_width, int *pic_height)
+{
+	if (sub == NULL)
+		return false;
+
+	int width  = sub->width();
+	int height = sub->height();
+
+	if (pic_width)  *pic_width  = width;
+	if (pic_height) *pic_height = height;
+
+	if (dest.is_null())
+	{
+		// our new image will be completely transparent
+		dest.resize (width, height);
+	}
+
+	dest.compose(sub, pic_x_offset, pic_y_offset);
+
+	return true;
+}
+
+
 //
 //  LoadPicture - read a picture from a wad file into an Img_c object
 //
@@ -110,10 +219,7 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 //
 //  Return true on success, false on failure.
 //
-//  If pic_x_offset == INT_MIN, the picture is centred horizontally.
-//  If pic_y_offset == INT_MIN, the picture is centred vertically.
-//
-bool LoadPicture(Img_c& img,      // image to load picture into
+bool LoadPicture(Img_c& dest,      // image to load picture into
 	Lump_c *lump,
 	const char *pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
@@ -121,6 +227,38 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 	int *pic_width,    // To return the size of the picture
 	int *pic_height)   // (can be NULL)
 {
+	char img_fmt = W_DetectImageFormat(lump);
+	Img_c *sub;
+
+	switch (img_fmt)
+	{
+	case 'd':
+		// use the code below to load/compose the DOOM format
+		break;
+
+	case 'p':
+		sub = LoadImage_PNG(lump, pic_name);
+		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+
+	case 'j':
+		sub = LoadImage_JPEG(lump, pic_name);
+		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+
+	case 't':
+		sub = LoadImage_TGA(lump, pic_name);
+		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+
+	case 0:
+		LogPrintf("Unknown image format in '%s' lump\n", pic_name);
+		return false;
+
+	default:
+		LogPrintf("Unsupported image format in '%s' lump\n", pic_name);
+		return false;
+	}
+
+	/* DOOM format */
+
 	byte *raw_data;
 	W_LoadLumpData(lump, &raw_data);
 
@@ -136,17 +274,11 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 	if (pic_width)  *pic_width  = width;
 	if (pic_height) *pic_height = height;
 
-	if (img.is_null())
+	if (dest.is_null())
 	{
 		// our new image will be completely transparent
-		img.resize (width, height);
+		dest.resize (width, height);
 	}
-
-	// Centre the picture?
-	if (pic_x_offset == INT_MIN)
-		pic_x_offset = (img.width() - width) / 2;
-	if (pic_y_offset == INT_MIN)
-		pic_y_offset = (img.height() - height) / 2;
 
 	for (int x = 0 ; x < width ; x++)
 	{
@@ -161,7 +293,7 @@ bool LoadPicture(Img_c& img,      // image to load picture into
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
-		DrawColumn(img, column, pic_x_offset + x, pic_y_offset);
+		DrawColumn(dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
 	W_FreeLumpData(&raw_data);
