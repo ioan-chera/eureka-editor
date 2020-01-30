@@ -49,7 +49,6 @@ bool LoadPicture(Img_c& img,
 //
 //    'j'  : JPEG
 //    'g'  : GIF
-//    'b'  : BMP
 //    's'  : DDS
 //
 //    NUL  : unrecognized

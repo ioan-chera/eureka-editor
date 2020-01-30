@@ -186,40 +186,35 @@ char W_DetectImageFormat(Lump_c *lump)
 
 	// PNG is clearly marked in the header, so check it first.
 
-	if (header[0] == 0x89 &&
-		header[1] == 'P'  &&
-		header[2] == 'N'  &&
-		header[3] == 'G')
+	if (header[0] == 0x89 && header[1] == 'P' &&
+		header[2] == 'N'  && header[3] == 'G' &&
+		header[4] == 0x0D && header[5] == 0x0A)
 	{
 		return 'p'; /* PNG */
 	}
 
 	// check some other common image formats....
 
-	if (header[0] == 0xFF &&
-		header[1] == 0xD8)
+	if (header[0] == 0xFF && header[1] == 0xD8 &&
+		header[2] == 0xFF && header[3] >= 0xE0 &&
+		((header[6] == 'J' && header[7] == 'F') ||
+		 (header[6] == 'E' && header[7] == 'x')))
 	{
 		return 'j'; /* JPEG */
 	}
 
-	if (header[0] == 'G' &&
-		header[1] == 'I' &&
-		header[2] == 'F' &&
-		header[3] == '8')
+	if (header[0] == 'G' && header[1] == 'I' &&
+		header[2] == 'F' && header[3] == '8' &&
+		header[4] >= '7' && header[4] <= '9' &&
+		header[5] == 'a')
 	{
 		return 'g'; /* GIF */
 	}
 
-	if (header[0] == 'B' &&
-		header[1] == 'M')
-	{
-		return 'b'; /* BMP */
-	}
-
-	if (header[0] == 'D' &&
-		header[1] == 'D' &&
-		header[2] == 'S' &&
-		header[3] == 0x20)
+	if (header[0] == 'D' && header[1] == 'D'  &&
+		header[2] == 'S' && header[3] == 0x20 &&
+		header[4] == 124 && header[5] == 0    &&
+		header[6] == 0)
 	{
 		return 's'; /* DDS (DirectDraw Surface) */
 	}
