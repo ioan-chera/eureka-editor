@@ -363,19 +363,19 @@ public:
 	void CheckLineSlope(const LineDef *L)
 	{
 		// EDGE style
-		if (Level_format == MAPF_Doom && (Features.extra_floors & 1))
+		if (Level_format == MAPF_Doom && (Features.slopes & 1))
 		{
 			switch (L->type)
 			{
-			case 567: PlaneAlign(L, 1, 0); break;
-			case 568: PlaneAlign(L, 0, 1); break;
-			case 569: PlaneAlign(L, 1, 1); break;
+			case 567: PlaneAlign(L, 2, 0); break;
+			case 568: PlaneAlign(L, 0, 2); break;
+			case 569: PlaneAlign(L, 2, 2); break;
 			default: break;
 			}
 		}
 
 		// Eternity style
-		if (Level_format == MAPF_Doom && (Features.extra_floors & 2))
+		if (Level_format == MAPF_Doom && (Features.slopes & 2))
 		{
 			switch (L->type)
 			{
@@ -392,7 +392,7 @@ public:
 		}
 
 		// Odamex and ZDoom style
-		if (Level_format == MAPF_Doom && (Features.extra_floors & 4))
+		if (Level_format == MAPF_Doom && (Features.slopes & 4))
 		{
 			switch (L->type)
 			{
@@ -409,7 +409,7 @@ public:
 		}
 
 		// ZDoom (in hexen format)
-		if (Level_format == MAPF_Hexen && (Features.extra_floors & 8))
+		if (Level_format == MAPF_Hexen && (Features.slopes & 8))
 		{
 			if (L->type == 181)
 				PlaneAlign(L, L->tag, L->arg2);
@@ -419,7 +419,7 @@ public:
 	void CheckPlaneCopy(const LineDef *L)
 	{
 		// Eternity style
-		if (Level_format == MAPF_Doom && (Features.extra_floors & 2))
+		if (Level_format == MAPF_Doom && (Features.slopes & 2))
 		{
 			switch (L->type)
 			{
@@ -431,7 +431,7 @@ public:
 		}
 
 		// ZDoom (in hexen format)
-		if (Level_format == MAPF_Hexen && (Features.extra_floors & 8))
+		if (Level_format == MAPF_Hexen && (Features.slopes & 8))
 		{
 			if (L->type == 118)
 				PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
@@ -468,7 +468,7 @@ public:
 
 		// find a vertex belonging to sector and is far from the line
 		const Vertex *v = NULL;
-		double best_dist = 0;
+		double best_dist = 0.1;
 
 		double lx1 = L->Start()->x();
 		double ly1 = L->Start()->y();
@@ -500,15 +500,23 @@ public:
 		if (v == NULL)
 			return;
 
+		// compute point at 90 degrees to the linedef
+		double ldx = (ly2 - ly1);
+		double ldy = (lx1 - lx2);
+		double ldh = hypot(ldx, ldy);
+
+		double vx = lx1 + ldx * best_dist / ldh;
+		double vy = ly1 + ldy * best_dist / ldh;
+
 		if (plane > 0)
 		{   // ceiling
 			SlopeFromLine(infos[sec_num].floors.c_plane,
-				lx1, ly1, back->ceilh, v->x(), v->y(), front->floorh);
+				lx1, ly1, back->ceilh, vx, vy, front->ceilh);
 		}
 		else
 		{   // floor
 			SlopeFromLine(infos[sec_num].floors.f_plane,
-				lx1, ly1, back->floorh, v->x(), v->y(), front->floorh);
+				lx1, ly1, back->floorh, vx, vy, front->floorh);
 		}
 	}
 
