@@ -100,6 +100,7 @@ cursor keys : scroll the map
 F1 : operation menu
 
 TAB : toggle the 3D preview on or off
+ESC : cancel the current operation
 
 t : enter Thing mode 
 l : enter Linedef mode 
@@ -147,6 +148,11 @@ CTRL-R : rotate the selected objects (with the mouse)
 K : skew (shear) the selected objects
 
 \ : toggle the RECENT category in the Browser
+
+u  : popup menu to set ratio lock
+z  : popup menu to set current scale
+B  : popup menu to set browser mode
+F8 : popup menu to set sector rendering mode
 
 ; : make the next key pressed META
 
@@ -213,6 +219,8 @@ d : disconnect sector(s) from their neighbors
 m : merge all selected sectors into a single one
 
 w : swap floor and ceiling textures
+i : increase light level
+I : decrease light level
 
 e : select sectors with same floor height 
 E : select sectors with same floor texture
@@ -238,11 +246,12 @@ wheel : move camera forwards or backwards
 PGUP and PGDN : move camera up and down
 
 g : toggle gravity (i.e. as if the player was on the ground)
-v : drop to the ground
-
-l : toggle lighting on or off
-t : toggle texturing on or off
+e : popup menu to set edit mode
 o : toggle objects on or off
+
+META-v : drop to the ground
+META-l : toggle lighting on or off
+META-t : toggle texturing on or off
 
 F11 : increase brightness (gamma)
 
