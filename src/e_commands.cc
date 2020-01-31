@@ -42,6 +42,7 @@
 #include "m_loadsave.h"
 #include "m_nodes.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 #include "ui_window.h"
 #include "ui_about.h"
 #include "ui_misc.h"
@@ -1367,6 +1368,12 @@ void CMD_FindNext()
 }
 
 
+void CMD_RecalcSectors()
+{
+	Subdiv_InvalidateAll();
+}
+
+
 void CMD_LogViewer()
 {
 	LogViewer_Open();
@@ -1662,6 +1669,10 @@ static editor_command_t  command_table[] =
 
 	{	"TestMap",  "Tools",
 		&CMD_TestMap
+	},
+
+	{	"RecalcSectors",  "Tools",
+		&CMD_RecalcSectors
 	},
 
 	{	"BuildAllNodes",  "Tools",

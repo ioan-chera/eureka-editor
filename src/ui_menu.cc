@@ -387,6 +387,11 @@ static void tools_do_view_logs(Fl_Widget *w, void * data)
 	ExecuteCommand("LogViewer");
 }
 
+static void tools_do_recalc_sectors(Fl_Widget *w, void * data)
+{
+	ExecuteCommand("RecalcSectors");
+}
+
 
 //------------------------------------------------------------------------
 //  HELP MENU
@@ -554,6 +559,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Preferences",        FL_COMMAND + 'p', FCAL tools_do_preferences },
 #endif
 		{ "&View Logs",          0,  FCAL tools_do_view_logs },
+		{ "&Recalc Sectors",     0,  FCAL tools_do_recalc_sectors },
 
 		{ "", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE },
 

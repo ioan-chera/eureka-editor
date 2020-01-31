@@ -337,10 +337,6 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 
 	edit.highlight.clear();
 	edit.split_line.clear();
-
-	// this is not strictly necessary, but provides a way for the
-	// user to "re-sync" the sector subdivision cache.
-	Subdiv_InvalidateAll();
 }
 
 
