@@ -234,6 +234,7 @@ public:
 
 			CheckBoom242(L);
 			CheckExtraFloor(L, n);
+			CheckLineSlope(L);
 
 			for (int side = 0 ; side < 2 ; side++)
 			{
@@ -251,6 +252,14 @@ public:
 				info.AddVertex(L->Start());
 				info.AddVertex(L->End());
 			}
+		}
+
+		// TODO slope things
+		// TODO slope copy things
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			CheckPlaneCopy(LineDefs[n]);
 		}
 	}
 
@@ -349,6 +358,197 @@ public:
 			if (Sectors[n]->tag == L->tag)
 				infos[n].floors.floors.push_back(EF);
 		}
+	}
+
+	void CheckLineSlope(const LineDef *L)
+	{
+		// EDGE style
+		if (Level_format == MAPF_Doom && (Features.extra_floors & 1))
+		{
+			switch (L->type)
+			{
+			case 567: PlaneAlign(L, 1, 0); break;
+			case 568: PlaneAlign(L, 0, 1); break;
+			case 569: PlaneAlign(L, 1, 1); break;
+			default: break;
+			}
+		}
+
+		// Eternity style
+		if (Level_format == MAPF_Doom && (Features.extra_floors & 2))
+		{
+			switch (L->type)
+			{
+			case 386: PlaneAlign(L, 1, 0); break;
+			case 387: PlaneAlign(L, 0, 1); break;
+			case 388: PlaneAlign(L, 1, 1); break;
+			case 389: PlaneAlign(L, 2, 0); break;
+			case 390: PlaneAlign(L, 0, 2); break;
+			case 391: PlaneAlign(L, 2, 2); break;
+			case 392: PlaneAlign(L, 2, 1); break;
+			case 393: PlaneAlign(L, 1, 2); break;
+			default: break;
+			}
+		}
+
+		// Odamex and ZDoom style
+		if (Level_format == MAPF_Doom && (Features.extra_floors & 4))
+		{
+			switch (L->type)
+			{
+			case 340: PlaneAlign(L, 1, 0); break;
+			case 341: PlaneAlign(L, 0, 1); break;
+			case 342: PlaneAlign(L, 1, 1); break;
+			case 343: PlaneAlign(L, 2, 0); break;
+			case 344: PlaneAlign(L, 0, 2); break;
+			case 345: PlaneAlign(L, 2, 2); break;
+			case 346: PlaneAlign(L, 2, 1); break;
+			case 347: PlaneAlign(L, 1, 2); break;
+			default: break;
+			}
+		}
+
+		// ZDoom (in hexen format)
+		if (Level_format == MAPF_Hexen && (Features.extra_floors & 8))
+		{
+			if (L->type == 181)
+				PlaneAlign(L, L->tag, L->arg2);
+		}
+	}
+
+	void CheckPlaneCopy(const LineDef *L)
+	{
+		// Eternity style
+		if (Level_format == MAPF_Doom && (Features.extra_floors & 2))
+		{
+			switch (L->type)
+			{
+			case 394: PlaneCopy(L, L->tag, 0, 0, 0, 0); break;
+			case 395: PlaneCopy(L, 0, L->tag, 0, 0, 0); break;
+			case 396: PlaneCopy(L, L->tag, L->tag, 0, 0, 0); break;
+			default: break;
+			}
+		}
+
+		// ZDoom (in hexen format)
+		if (Level_format == MAPF_Hexen && (Features.extra_floors & 8))
+		{
+			if (L->type == 118)
+				PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
+		}
+	}
+
+	void PlaneAlign(const LineDef *L, int floor_mode, int ceil_mode)
+	{
+		if (L->left < 0 || L->right < 0)
+			return;
+
+		// support undocumented special case from ZDoom
+		if (ceil_mode == 0 && (floor_mode & 0x0C) != 0)
+			ceil_mode = (floor_mode >> 2);
+
+		switch (floor_mode & 3)
+		{
+		case 1: PlaneAlignPart(L, SIDE_RIGHT, 0 /* floor */); break;
+		case 2: PlaneAlignPart(L, SIDE_LEFT,  0); break;
+		}
+
+		switch (ceil_mode & 3)
+		{
+		case 1: PlaneAlignPart(L, SIDE_RIGHT, 1 /* ceil */); break;
+		case 2: PlaneAlignPart(L, SIDE_LEFT,  1); break;
+		}
+	}
+
+	void PlaneAlignPart(const LineDef *L, int side, int plane)
+	{
+		int sec_num = L->WhatSector(side);
+		const Sector *front = Sectors[L->WhatSector(side)];
+		const Sector *back  = Sectors[L->WhatSector(-side)];
+
+		// find a vertex belonging to sector and is far from the line
+		const Vertex *v = NULL;
+		double best_dist = 0;
+
+		double lx1 = L->Start()->x();
+		double ly1 = L->Start()->y();
+		double lx2 = L->End()->x();
+		double ly2 = L->End()->y();
+
+		if (side < 0)
+		{
+			std::swap(lx1, lx2);
+			std::swap(ly1, ly2);
+		}
+
+		for (int n = 0 ; n < NumLineDefs ; n++)
+		{
+			const LineDef *L2 = LineDefs[n];
+			if (L2->TouchesSector(sec_num))
+			{
+				const Vertex *v2 = L2->Start();
+				double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
+
+				if (dist > best_dist)
+				{
+					v = v2;
+					best_dist = dist;
+				}
+			}
+		}
+
+		if (v == NULL)
+			return;
+
+		if (plane > 0)
+		{   // ceiling
+			SlopeFromLine(infos[sec_num].floors.c_plane,
+				lx1, ly1, back->ceilh, v->x(), v->y(), front->floorh);
+		}
+		else
+		{   // floor
+			SlopeFromLine(infos[sec_num].floors.f_plane,
+				lx1, ly1, back->floorh, v->x(), v->y(), front->floorh);
+		}
+	}
+
+	void PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share)
+	{
+		// TODO
+	}
+
+	void SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,
+			double x2, double y2, double z2)
+	{
+		double dx = x2 - x1;
+		double dy = y2 - y1;
+		double dz = z2 - z1;
+
+		if (fabs(dz) < 0.5)
+			return;
+
+		// make (dx dy) be a unit vector
+		double dlen = hypot(dx, dy);
+		dx /= dlen;
+		dy /= dlen;
+
+		// we want SlopeZ() to compute z1 at (x1 y1) and z2 at (x2 y2).
+		// assume xm = (dx * A) and ym = (dy * A) and zadd = B
+		// that leads to two simultaneous equations:
+		//    x1 * dx * A + y1 * dy * A + B = z1
+		//    x2 * dx * A + y2 * dy * A + B = z2
+		// which we need to solve for A and B....
+
+		double E = (x1 * dx + y1 * dy);
+		double F = (x2 * dx + y2 * dy);
+
+		double A = (z2 -z1) / (F - E);
+		double B = z1 - A * E;
+
+		pl.xm = dx * A;
+		pl.ym = dy * A;
+		pl.zadd = B;
+		pl.sloped = true;
 	}
 };
 
