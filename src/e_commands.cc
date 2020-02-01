@@ -1371,6 +1371,7 @@ void CMD_FindNext()
 void CMD_RecalcSectors()
 {
 	Subdiv_InvalidateAll();
+	RedrawMap();
 }
 
 
