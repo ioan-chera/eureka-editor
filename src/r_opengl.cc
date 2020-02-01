@@ -758,7 +758,9 @@ public:
 
 		glDisable(GL_ALPHA_TEST);
 
-		r /= 255.0; g /= 255.0; b /= 255.0;
+		double r0 = (double)r / 255.0;
+		double g0 = (double)g / 255.0;
+		double b0 = (double)b / 255.0;
 
 		if (r_view.lighting && !fullbright)
 		{
@@ -771,12 +773,12 @@ public:
 				light -= 16;
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
-							 where, r,g,b, light);
+							 where, r0,g0,b0, light);
 		}
 		else
 		{
 			RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
-							where, r,g,b, 1.0);
+							where, r0,g0,b0, 1.0);
 		}
 	}
 
@@ -828,7 +830,9 @@ public:
 		slope_plane_c p1; p1.Init(z1);
 		slope_plane_c p2; p2.Init(z2);
 
-		r /= 255.0; g /= 255.0; b /= 255.0;
+		double r0 = (double)r / 255.0;
+		double g0 = (double)g / 255.0;
+		double b0 = (double)b / 255.0;
 
 		float tex_scale = 1.0 / img_th;
 
@@ -843,12 +847,12 @@ public:
 				light -= 16;
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
-							 'R', r,g,b, light);
+							 'R', r0,g0,b0, light);
 		}
 		else
 		{
 			RawClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
-							'R', r,g,b, 1.0);
+							'R', r0,g0,b0, 1.0);
 		}
 	}
 
