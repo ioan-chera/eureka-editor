@@ -3,27 +3,13 @@ Eureka TODO / WISHLIST
 ======================
 
 
-Most Likely
------------
+Slightly Possible
+-----------------
 
 -  linedef mode: '[' and ']' to adjust length of current line
 
--  support PNG/JPEG/TGA for patches, flats, sprites
-   -->  feature png ??
-
 -  Tools/Make Door
 -  Tools/Make Lift
-
--  slopes in 3D view
-
--  3D floors in 3D view (OpenGL only)
-
--  BOOM deep water in 3D view
-
-
-
-Slightly Possible
------------------
 
 -  a way to clear the Browser recent lists
 
