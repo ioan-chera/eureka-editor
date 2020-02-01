@@ -31,7 +31,7 @@ CXXFLAGS += $(CXX_DIALECT)
 LIBS += -lGLU -lGL
 LIBS += -lz -lm
 
-# add this for software rendering, remove '--use-gl' below, remove -lGL from LIBS
+# add this for software rendering, remove '--use-gl' below, remove -lGL and -lGLU from LIBS
 # CXXFLAGS += -DNO_OPENGL
 
 # FLTK flags (this assumes a system-wide FLTK installation)
