@@ -4,7 +4,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2001-2019 Andrew Apted
+//  Copyright (C) 2001-2020 Andrew Apted
 //  Copyright (C) 1997-2003 André Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
@@ -455,7 +455,7 @@ public:
 
 	void RawClippedQuad(float x1, float y1, const slope_plane_c *p1,
 						float x2, float y2, const slope_plane_c *p2,
-						float tx1, float ty1, float tx2, float ty2,
+						float tx1, float tx2, float tex_top, float tex_scale,
 						char where, float r, float g, float b, float level)
 	{
 		float za1 = p1->SlopeZ(x1, y1);
@@ -487,17 +487,17 @@ public:
 
 		glBegin(GL_QUADS);
 
-		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, za1);
-		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, za2);
-		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, zb2);
-		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, zb1);
+		glTexCoord2f(tx1, (za1 - tex_top) * tex_scale); glVertex3f(x1, y1, za1);
+		glTexCoord2f(tx1, (za2 - tex_top) * tex_scale); glVertex3f(x1, y1, za2);
+		glTexCoord2f(tx2, (zb2 - tex_top) * tex_scale); glVertex3f(x2, y2, zb2);
+		glTexCoord2f(tx2, (zb1 - tex_top) * tex_scale); glVertex3f(x2, y2, zb1);
 
 		glEnd();
 	}
 
 	void LightClippedQuad(double x1, double y1, const slope_plane_c *p1,
 						  double x2, double y2, const slope_plane_c *p2,
-						  float tx1, float ty1, float tx2, float ty2,
+						  float tx1, float tx2, float tex_top, float tex_scale,
 						  char where, float r, float g, float b, int light)
 	{
 		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
@@ -542,20 +542,23 @@ public:
 				// and keep going with the piece on the NEAR side.
 				if (cat2 > 0)
 				{
-					RawClippedQuad(ix,iy,p1, x2,y2,p2, itx,ty1,tx2,ty2, where, r,g,b, level);
+					RawClippedQuad(ix,iy,p1, x2,y2,p2, itx,tx2,tex_top,tex_scale,
+									where, r,g,b, level);
 
 					x2 = ix; y2 = iy; tx2 = itx;
 				}
 				else
 				{
-					RawClippedQuad(x1,y1,p1, ix,iy,p2, tx1,ty1,itx,ty2, where, r,g,b, level);
+					RawClippedQuad(x1,y1,p1, ix,iy,p2, tx1,itx,tex_top,tex_scale,
+									where, r,g,b, level);
 
 					x1 = ix; y1 = iy; tx1 = itx;
 				}
 			}
 		}
 
-		RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,ty1,tx2,ty2, where, r,g,b, level);
+		RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
+						where, r,g,b, level);
 	}
 
 	inline bool IsPolygonClipped(const sector_polygon_t *poly)
@@ -685,9 +688,6 @@ public:
 		float x1, float y1, const slope_plane_c *p1,
 		float x2, float y2, const slope_plane_c *p2)
 	{
-double z1 = 0; //!!!! FIXME TEX COORDS
-double z2 = 256;
-
 		byte r, g, b;
 		bool fullbright = true;
 		Img_c *img = NULL;
@@ -704,9 +704,10 @@ double z2 = 256;
 
 		// compute texture coords
 		float tx1 = 0.0;
-		float ty1 = 0.0;
 		float tx2 = 1.0;
-		float ty2 = 1.0;
+
+		float tex_top = 0;
+		float tex_scale = 1.0 / 128.0;
 
 		if (img)
 		{
@@ -719,44 +720,40 @@ double z2 = 256;
 			tx1 = 0;
 			tx2 = tx1 + ld_length;
 
-			// the common case: top of texture is at z2
-			ty2 = img_h;
-			ty1 = ty2 - (z2 - z1);
+			tex_top = front->ceilh;
 
 			if (where == 'W' && (ld->flags & MLF_LowerUnpegged))
 			{
-				ty1 = 0;
-				ty2 = ty1 + (z2 - z1);
+				tex_top = front->floorh + img_h;
 			}
 
-			if (where == 'L' && (ld->flags & MLF_LowerUnpegged))
+			if (where == 'L')
 			{
-				// note "sky_upper" here, this matches original DOOM behavior
-				if (sky_upper)
+				if (0 == (ld->flags & MLF_LowerUnpegged))
 				{
-					ty2 = img_h - (back->ceilh - z2);
-					ty1 = ty2 - (z2 - z1);
+					tex_top = back->floorh;
 				}
 				else
 				{
-					// this makes an unpegged lower align with a normal 1S wall
-					ty2 = img_h - (front->ceilh - z2);
-					ty1 = ty2 - (z2 - z1);
+					// an unpegged lower will align with a normal 1S wall,
+					// unless both front/back ceilings are sky....
+
+					tex_top = sky_upper ? back->ceilh : front->ceilh;
 				}
 			}
 
-			if (where == 'U' && (! (ld->flags & MLF_UpperUnpegged)))
+			if (where == 'U' && (0 == (ld->flags & MLF_UpperUnpegged)))
 			{
-				// when unpegged, ty1 is at bottom of texture
-				ty1 = 0;
-				ty2 = ty1 + (z2 - z1);
+				tex_top = back->ceilh + img_h;
 			}
 
 			tx1 = (tx1 + sd->x_offset) / img_tw;
 			tx2 = (tx2 + sd->x_offset) / img_tw;
 
-			ty1 = (ty1 - sd->y_offset) / img_th;
-			ty2 = (ty2 - sd->y_offset) / img_th;
+			tex_top  += (img_th - img_h);
+			tex_top  += sd->y_offset;
+
+			tex_scale = 1.0 / img_th;
 		}
 
 		glDisable(GL_ALPHA_TEST);
@@ -773,11 +770,13 @@ double z2 = 256;
 			else if (ld->IsHorizontal())
 				light -= 16;
 
-			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,ty1,tx2,ty2, where, r,g,b, light);
+			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
+							 where, r,g,b, light);
 		}
 		else
 		{
-			RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,ty1,tx2,ty2, where, r,g,b, 1.0);
+			RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
+							where, r,g,b, 1.0);
 		}
 	}
 
@@ -813,9 +812,6 @@ double z2 = 256;
 		tx1 = (tx1 + sd->x_offset) / img_tw;
 		tx2 = (tx2 + sd->x_offset) / img_tw;
 
-		float ty1 = 0.0;
-		float ty2 = img_h / img_th;
-
 		if (ld->flags & MLF_LowerUnpegged)
 		{
 			z1 = z1 + sd->y_offset;
@@ -830,9 +826,11 @@ double z2 = 256;
 		glEnable(GL_ALPHA_TEST);
 
 		slope_plane_c p1; p1.Init(z1);
-		slope_plane_c p2; p1.Init(z2);
+		slope_plane_c p2; p2.Init(z2);
 
 		r /= 255.0; g /= 255.0; b /= 255.0;
+
+		float tex_scale = 1.0 / img_th;
 
 		if (r_view.lighting && !fullbright)
 		{
@@ -844,11 +842,13 @@ double z2 = 256;
 			else if (ld->IsHorizontal())
 				light -= 16;
 
-			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,ty1,tx2,ty2, 'M', r,g,b, light);
+			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
+							 'R', r,g,b, light);
 		}
 		else
 		{
-			RawClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,ty1,tx2,ty2, 'M', r,g,b, 1.0);
+			RawClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
+							'R', r,g,b, 1.0);
 		}
 	}
 
