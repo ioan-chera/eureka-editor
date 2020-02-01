@@ -37,6 +37,7 @@
 #include "e_main.h"
 #include "m_events.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 
 #include "w_rawdef.h"
 #include "w_texture.h"
@@ -922,6 +923,9 @@ void Main_LoadResources()
 
 	LogPrintf("--- DONE ---\n");
 	LogPrintf("\n");
+
+	// reset sector info (for slopes and 3D floors)
+	Subdiv_InvalidateAll();
 
 	if (main_win)
 	{

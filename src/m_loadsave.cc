@@ -37,6 +37,7 @@
 #include "m_loadsave.h"
 #include "m_nodes.h"
 #include "m_udmf.h"
+#include "r_subdiv.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 
@@ -1057,6 +1058,7 @@ void LoadLevelNum(Wad_file *wad, short lev_num)
 	SideDefs_Unpack(true);
 
 	CalculateLevelBounds();
+	Subdiv_InvalidateAll();
 
 	MadeChanges = 0;
 }
