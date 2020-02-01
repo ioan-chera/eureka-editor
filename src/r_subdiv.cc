@@ -226,7 +226,13 @@ public:
 		int sec;
 
 		for (sec = 0 ; sec < total ; sec++)
+		{
+			const Sector *S = Sectors[sec];
+
 			infos[sec].Clear();
+			infos[sec].floors.f_plane.Init(S->floorh);
+			infos[sec].floors.c_plane.Init(S->ceilh);
+		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -812,8 +818,8 @@ void sector_3dfloors_c::Clear()
 {
 	heightsec = -1;
 	floors.clear();
-	f_plane.sloped = false;
-	c_plane.sloped = false;
+	f_plane.Init(-2);
+	c_plane.Init(-1);
 }
 
 
@@ -829,6 +835,13 @@ slope_plane_c::slope_plane_c() : sloped(false), xm(0), ym(0), zadd(0)
 
 slope_plane_c::~slope_plane_c()
 { }
+
+void slope_plane_c::Init(float height)
+{
+	sloped = false;
+	xm = ym = 0;
+	zadd = height;
+}
 
 
 sector_3dfloors_c *Subdiv_3DFloorsForSector(int num)

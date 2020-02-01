@@ -99,6 +99,8 @@ public:
 	slope_plane_c();
 	~slope_plane_c();
 
+	void Init(float height);
+
 	inline double SlopeZ(double x, double y) const
 	{
 		return (x * xm) + (y * ym) + zadd;
@@ -122,6 +124,24 @@ public:
 	~sector_3dfloors_c();
 
 	void Clear();
+
+	inline double FloorZ(double x, double y) const
+	{
+		return f_plane.SlopeZ(x, y);
+	}
+
+	inline double CeilZ(double x, double y) const
+	{
+		return c_plane.SlopeZ(x, y);
+	}
+
+	inline double PlaneZ(int znormal, double x, double y) const
+	{
+		if (znormal > 0)
+			return f_plane.SlopeZ(x, y);
+		else
+			return c_plane.SlopeZ(x, y);
+	}
 };
 
 sector_3dfloors_c *Subdiv_3DFloorsForSector(int num);
