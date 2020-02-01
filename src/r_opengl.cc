@@ -236,27 +236,26 @@ public:
 		return img;
 	}
 
-	void RawClippedTriangle(float ax, float ay, float atx, float aty,
-							float bx, float by, float btx, float bty,
-							float cx, float cy, float ctx, float cty,
-							float z, float r, float g, float b, float level)
+	void RawClippedTriangle(float ax, float ay, float az, float atx, float aty,
+							float bx, float by, float bz, float btx, float bty,
+							float cx, float cy, float cz, float ctx, float cty,
+							float r, float g, float b, float level)
 	{
 		glColor3f(level * r, level * g, level * b);
 
 		glBegin(GL_POLYGON);
 
-		glTexCoord2f(atx, aty); glVertex3f(ax, ay, z);
-		glTexCoord2f(btx, bty); glVertex3f(bx, by, z);
-		glTexCoord2f(ctx, cty); glVertex3f(cx, cy, z);
+		glTexCoord2f(atx, aty); glVertex3f(ax, ay, az);
+		glTexCoord2f(btx, bty); glVertex3f(bx, by, bz);
+		glTexCoord2f(ctx, cty); glVertex3f(cx, cy, cz);
 
 		glEnd();
 	}
 
-	void LightClippedTriangle(double ax, double ay, float atx, float aty,
-							  double bx, double by, float btx, float bty,
-							  double cx, double cy, float ctx, float cty,
-							  int clip, float z,
-							  float r, float g, float b, int light)
+	void LightClippedTriangle(double ax, double ay, float az, float atx, float aty,
+							  double bx, double by, float bz, float btx, float bty,
+							  double cx, double cy, float cz, float ctx, float cty,
+							  int clip, float r, float g, float b, int light)
 	{
 		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
 
@@ -301,12 +300,13 @@ public:
 				{
 					float _x = cx;
 					float _y = cy;
+					float _z = cz;
 					float _tx = ctx;
 					float _ty = cty;
 
-					cx = ax; cy = ay; ctx = atx; cty = aty;
-					ax = bx; ay = by; atx = btx; aty = bty;
-					bx = _x; by = _y; btx = _tx; bty = _ty;
+					cx = ax; cy = ay; cz = az; ctx = atx; cty = aty;
+					ax = bx; ay = by; az = bz; atx = btx; aty = bty;
+					bx = _x; by = _y; bz = _z; btx = _tx; bty = _ty;
 
 					p1 = p2; p2 = p3; cat1 = cat2;
 				}
@@ -314,12 +314,13 @@ public:
 				{
 					float _x = cx;
 					float _y = cy;
+					float _z = cz;
 					float _tx = ctx;
 					float _ty = cty;
 
-					cx = bx; cy = by; ctx = btx; cty = bty;
-					bx = ax; by = ay; btx = atx; bty = aty;
-					ax = _x; ay = _y; atx = _tx; aty = _ty;
+					cx = bx; cy = by; cz = bz; ctx = btx; cty = bty;
+					bx = ax; by = ay; bz = az; btx = atx; bty = aty;
+					ax = _x; ay = _y; az = _z; atx = _tx; aty = _ty;
 
 					p2 = p1; p1 = p3; cat1 = cat3;
 				}
@@ -329,6 +330,7 @@ public:
 
 				double ix = ax + (bx - ax) * along;
 				double iy = ay + (by - ay) * along;
+				double iz = az + (bz - az) * along;
 				float itx = atx + (btx - atx) * along;
 				float ity = aty + (bty - aty) * along;
 
@@ -336,21 +338,21 @@ public:
 				// and keep going with the piece on the NEAR side.
 				if (cat1 > 0)
 				{
-					RawClippedTriangle(ix, iy, itx, ity,
-									   cx, cy, ctx, cty,
-									   ax, ay, atx, aty,
-									   z, r, g, b, level);
+					RawClippedTriangle(ix, iy, iz, itx, ity,
+									   cx, cy, cz, ctx, cty,
+									   ax, ay, az, atx, aty,
+									   r, g, b, level);
 
-					ax = ix; ay = iy; atx = itx; aty = ity;
+					ax = ix; ay = iy; az = iz; atx = itx; aty = ity;
 				}
 				else
 				{
-					RawClippedTriangle(ix, iy, itx, ity,
-									   cx, cy, ctx, cty,
-									   bx, by, btx, bty,
-									   z, r, g, b, level);
+					RawClippedTriangle(ix, iy, iz, itx, ity,
+									   cx, cy, cz, ctx, cty,
+									   bx, by, bz, btx, bty,
+									   r, g, b, level);
 
-					bx = ix; by = iy; btx = itx; bty = ity;
+					bx = ix; by = iy; bz = iz; btx = itx; bty = ity;
 				}
 
 				continue;
@@ -367,25 +369,27 @@ public:
 			{
 				float _x = cx;
 				float _y = cy;
+				float _z = cz;
 				float _tx = ctx;
 				float _ty = cty;
 				double _p = p3;
 
-				cx = ax; cy = ay; ctx = atx; cty = aty; p3 = p1;
-				ax = bx; ay = by; atx = btx; aty = bty; p1 = p2;
-				bx = _x; by = _y; btx = _tx; bty = _ty; p2 = _p;
+				cx = ax; cy = ay; cz = az; ctx = atx; cty = aty; p3 = p1;
+				ax = bx; ay = by; az = bz; atx = btx; aty = bty; p1 = p2;
+				bx = _x; by = _y; bz = _z; btx = _tx; bty = _ty; p2 = _p;
 			}
 			else if (combo == 2 || combo == 5)
 			{
 				float _x = cx;
 				float _y = cy;
+				float _z = cz;
 				float _tx = ctx;
 				float _ty = cty;
 				double _p = p3;
 
-				cx = bx; cy = by; ctx = btx; cty = bty; p3 = p2;
-				bx = ax; by = ay; btx = atx; bty = aty; p2 = p1;
-				ax = _x; ay = _y; atx = _tx; aty = _ty; p1 = _p;
+				cx = bx; cy = by; cz = bz; ctx = btx; cty = bty; p3 = p2;
+				bx = ax; by = ay; bz = az; btx = atx; bty = aty; p2 = p1;
+				ax = _x; ay = _y; az = _z; atx = _tx; aty = _ty; p1 = _p;
 			}
 
 			// compute intersection points
@@ -394,8 +398,11 @@ public:
 
 			double ac_x = ax + (cx - ax) * ac_along;
 			double ac_y = ay + (cy - ay) * ac_along;
+			double ac_z = az + (cz - az) * ac_along;
+
 			double bc_x = bx + (cx - bx) * bc_along;
 			double bc_y = by + (cy - by) * bc_along;
+			double bc_z = bz + (cz - bz) * bc_along;
 
 			float ac_tx = atx + (ctx - atx) * ac_along;
 			float ac_ty = aty + (cty - aty) * ac_along;
@@ -405,18 +412,18 @@ public:
 			// handle cases where triangle piece is on NEAR side.
 			if (combo == 3 || combo == 5 || combo == 6)
 			{
-				RawClippedTriangle(ax, ay, atx, aty,
-								   bx, by, btx, bty,
-								   ac_x, ac_y, ac_tx, ac_ty,
-								   z, r, g, b, level);
+				RawClippedTriangle(ax, ay, az, atx, aty,
+								   bx, by, bz, btx, bty,
+								   ac_x, ac_y, ac_z, ac_tx, ac_ty,
+								   r, g, b, level);
 
-				RawClippedTriangle(bx, by, btx, bty,
-								   bc_x, bc_y, bc_tx, bc_ty,
-								   ac_x, ac_y, ac_tx, ac_ty,
-								   z, r, g, b, level);
+				RawClippedTriangle(bx, by, bz, btx, bty,
+								   bc_x, bc_y, bc_z, bc_tx, bc_ty,
+								   ac_x, ac_y, ac_z, ac_tx, ac_ty,
+								   r, g, b, level);
 
-				ax = ac_x; ay = ac_y; atx = ac_tx; aty = ac_ty;
-				bx = bc_x; by = bc_y; btx = bc_tx; bty = bc_ty;
+				ax = ac_x; ay = ac_y; az = ac_z; atx = ac_tx; aty = ac_ty;
+				bx = bc_x; by = bc_y; bz = bc_z; btx = bc_tx; bty = bc_ty;
 
 				continue;
 			}
@@ -425,25 +432,25 @@ public:
 			// these cases require recursion to deal with the
 			// quadrilateral on the near side.
 			{
-				RawClippedTriangle(cx, cy, ctx, cty,
-								   ac_x, ac_y, ac_tx, ac_ty,
-								   bc_x, bc_y, bc_tx, bc_ty,
-								   z, r, g, b, level);
+				RawClippedTriangle(cx, cy, cz, ctx, cty,
+								   ac_x, ac_y, ac_z, ac_tx, ac_ty,
+								   bc_x, bc_y, bc_z, bc_tx, bc_ty,
+								   r, g, b, level);
 
 				// recurse!
-				LightClippedTriangle(ax, ay, atx, aty,
-									 ac_x, ac_y, ac_tx, ac_ty,
-									 bc_x, bc_y, bc_tx, bc_ty,
-									 (clip + 1), z, r, g, b, light);
+				LightClippedTriangle(ax, ay, az, atx, aty,
+									 ac_x, ac_y, ac_z, ac_tx, ac_ty,
+									 bc_x, bc_y, bc_z, bc_tx, bc_ty,
+									 (clip + 1), r, g, b, light);
 
-				cx = bc_x; cy = bc_y; ctx = bc_tx; cty = bc_ty;
+				cx = bc_x; cy = bc_y; cz = bc_z; ctx = bc_tx; cty = bc_ty;
 			}
 		}
 
-		RawClippedTriangle(ax, ay, atx, aty,
-						   bx, by, btx, bty,
-						   cx, cy, ctx, cty,
-						   z, r, g, b, level);
+		RawClippedTriangle(ax, ay, az, atx, aty,
+						   bx, by, bz, btx, bty,
+						   cx, cy, cz, ctx, cty,
+						   r, g, b, level);
 	}
 
 	void RawClippedQuad(float x1, float y1, float z1,
@@ -551,8 +558,17 @@ public:
 	}
 
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
-		float z, const char *fname)
+			const slope_plane_c *plane, int znormal, float z, const char *fname)
 	{
+		bool is_slope = plane && plane->sloped;
+
+		// check if camera is behind plane
+		if (! is_slope)
+		{
+			if (znormal > 0 && r_view.z < z) return;
+			if (znormal < 0 && r_view.z > z) return;
+		}
+
 		byte r0, g0, b0;
 		bool fullbright;
 		Img_c *img = FindFlat(fname, r0, g0, b0, fullbright);
@@ -574,35 +590,39 @@ public:
 			{
 				float ax = poly->mx[0];
 				float ay = poly->my[0];
+				float az = plane ? plane->SlopeZ(ax, ay) : z;
 				float atx = ax / 64.0;  // see note below
 				float aty = ay / 64.0;
 
 				float bx = poly->mx[1];
 				float by = poly->my[1];
+				float bz = plane ? plane->SlopeZ(bx, by) : z;
 				float btx = bx / 64.0;  // see note below
 				float bty = by / 64.0;
 
 				float cx = poly->mx[2];
 				float cy = poly->my[2];
+				float cz = plane ? plane->SlopeZ(cx, cy) : z;
 				float ctx = cx / 64.0;
 				float cty = cy / 64.0;
 
-				LightClippedTriangle(ax, ay, atx, aty,
-									 bx, by, btx, bty,
-									 cx, cy, ctx, cty,
-									 0, z, r, g, b, sec->light);
+				LightClippedTriangle(ax, ay, az, atx, aty,
+									 bx, by, bz, btx, bty,
+									 cx, cy, cz, ctx, cty,
+									 0, r, g, b, sec->light);
 
 				if (poly->count == 4)
 				{
 					float dx = poly->mx[3];
 					float dy = poly->my[3];
+					float dz = plane ? plane->SlopeZ(dx, dy) : z;
 					float dtx = dx / 64.0;
 					float dty = dy / 64.0;
 
-					LightClippedTriangle(ax, ay, atx, aty,
-										 cx, cy, ctx, cty,
-										 dx, dy, dtx, dty,
-										 0, z, r, g, b, sec->light);
+					LightClippedTriangle(ax, ay, az, atx, aty,
+										 cx, cy, cz, ctx, cty,
+										 dx, dy, dz, dtx, dty,
+										 0, r, g, b, sec->light);
 				}
 			}
 			else
@@ -614,6 +634,7 @@ public:
 				{
 					float px = poly->mx[p];
 					float py = poly->my[p];
+					float pz = plane ? plane->SlopeZ(px, py) : z;
 
 					if (img)
 					{
@@ -623,7 +644,7 @@ public:
 						glTexCoord2f(px / 64.0, py / 64.0);
 					}
 
-					glVertex3f(px, py, z);
+					glVertex3f(px, py, pz);
 				}
 
 				glEnd();
@@ -1070,52 +1091,45 @@ public:
 			if (dummy->floorh > sec->floorh && r_view.z < dummy->floorh)
 			{
 				// space C : underwater
-				DrawSectorPolygons(sec, subdiv, dummy->floorh, dummy->CeilTex());
-
-				if (r_view.z > sec->floorh)
-					DrawSectorPolygons(sec, subdiv, sec->floorh, dummy->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->floorh, dummy->CeilTex());
+				DrawSectorPolygons(sec, subdiv, NULL, +1, sec->floorh, dummy->FloorTex());
 
 				// this helps the view to not look weird when clipping around
-				if (r_view.z < dummy->ceilh && dummy->ceilh > sec->floorh)
-					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
+				if (dummy->ceilh > sec->floorh)
+					DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, sec->CeilTex());
 			}
 			else if (dummy->ceilh < sec->ceilh && r_view.z > dummy->ceilh)
 			{
 				// space A : head over ceiling
-				DrawSectorPolygons(sec, subdiv, dummy->ceilh, dummy->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, dummy->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, -1, sec->ceilh, dummy->CeilTex());
 
-				if (r_view.z < sec->ceilh)
-					DrawSectorPolygons(sec, subdiv, sec->ceilh, dummy->CeilTex());
-
-				if (r_view.z > dummy->floorh && dummy->floorh < sec->ceilh)
-					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
+				if (dummy->floorh < sec->ceilh)
+					DrawSectorPolygons(sec, subdiv, NULL, +1, dummy->floorh, sec->FloorTex());
 			}
 			else if (dummy->floorh < sec->floorh)
 			{
 				// invisible platform
-				if (r_view.z > dummy->floorh)
-					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, +1, dummy->floorh, sec->FloorTex());
 
-				if (r_view.z < dummy->ceilh && !is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
+				if (!is_sky(sec->CeilTex()))
+					DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, sec->CeilTex());
 			}
 			else
 			{
 				// space B : normal
-				if (r_view.z > dummy->floorh)
-					DrawSectorPolygons(sec, subdiv, dummy->floorh, sec->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, +1, dummy->floorh, sec->FloorTex());
 
-				if (r_view.z < dummy->ceilh && !is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, dummy->ceilh, sec->CeilTex());
+				if (!is_sky(sec->CeilTex()))
+					DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, sec->CeilTex());
 			}
 		} else {
 
 			// normal sector
-			if (r_view.z > sec->floorh)
-				DrawSectorPolygons(sec, subdiv, sec->floorh, sec->FloorTex());
+			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, sec->floorh, sec->FloorTex());
 
-			if (r_view.z < sec->ceilh && !is_sky(sec->CeilTex()))
-				DrawSectorPolygons(sec, subdiv, sec->ceilh, sec->CeilTex());
+			if (!is_sky(sec->CeilTex()))
+				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, sec->ceilh, sec->CeilTex());
 		}
 
 		// draw planes of 3D floors
@@ -1145,11 +1159,8 @@ public:
 				std::swap(top_tex, bottom_tex);
 			}
 
-			if (r_view.z > top_h)
-				DrawSectorPolygons(sec, subdiv, top_h, top_tex);
-
-			if (r_view.z < bottom_h)
-				DrawSectorPolygons(sec, subdiv, bottom_h, bottom_tex);
+			DrawSectorPolygons(sec, subdiv, NULL, +1, top_h, top_tex);
+			DrawSectorPolygons(sec, subdiv, NULL, -1, bottom_h, bottom_tex);
 		}
 	}
 
