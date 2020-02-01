@@ -36,6 +36,7 @@
 #include "r_grid.h"
 #include "r_render.h"
 #include "e_main.h"	  // RecUsed_xxx
+#include "w_wad.h"
 
 #include "ui_window.h"  // Browser_xxx, Props_xxx
 
@@ -86,6 +87,7 @@ typedef struct
 	// '<' : print extra newline after this option (when dumping)
 	// 'v' : a real variable (preference setting)
 	// 'w' : warp hack -- accept two numeric args
+	// 'H' : hide option from --help display
 
 	const char *desc;   // Description of the option
 	const char *arg_desc;  // Description of the argument (NULL --> none or default)
@@ -220,6 +222,15 @@ static const opt_desc_t options[] =
 		"Select level to edit",
 		"<map>",
 		&Level_name
+	},
+
+	{	"udmftest",
+		0,
+		OPT_BOOLEAN,
+		"H",
+		"Enable the unfinished UDMF support",
+		NULL,
+		&udmf_testing
 	},
 
 	/* ------------ Preferences ------------ */
@@ -1265,7 +1276,7 @@ void M_PrintCommandLineOptions(FILE *fp)
 	{
 		int len;
 
-		if (strchr(o->flags, 'v'))
+		if (strchr(o->flags, 'v') || strchr(o->flags, 'H'))
 			continue;
 
 		if (o->long_name)
@@ -1284,7 +1295,7 @@ void M_PrintCommandLineOptions(FILE *fp)
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
-		if (strchr(o->flags, 'v'))
+		if (strchr(o->flags, 'v') || strchr(o->flags, 'H'))
 			continue;
 
 		if ((strchr(o->flags, '1') ? 1 : 0) != pass)

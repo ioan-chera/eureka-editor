@@ -340,6 +340,9 @@ bool MasterDir_HaveFilename(const char *chk_path);
 void MasterDir_CloseAll();
 
 
+extern bool udmf_testing;
+
+
 #endif  /* __EUREKA_W_WAD_H__ */
 
 //--- editor settings ---
