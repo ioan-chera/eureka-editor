@@ -476,6 +476,9 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 
 	if (type == OBJ_LINEDEFS && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
 		Subdiv_InvalidateAll();
+
+	if (type == OBJ_SECTORS && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
+		Subdiv_InvalidateAll();
 }
 
 void MapStuff_NotifyEnd()
