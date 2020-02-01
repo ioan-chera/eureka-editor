@@ -453,27 +453,52 @@ public:
 						   r, g, b, level);
 	}
 
-	void RawClippedQuad(float x1, float y1, float z1,
-						float x2, float y2, float z2,
+	void RawClippedQuad(float x1, float y1, const slope_plane_c *p1,
+						float x2, float y2, const slope_plane_c *p2,
 						float tx1, float ty1, float tx2, float ty2,
-						float r, float g, float b, float level)
+						char where, float r, float g, float b, float level)
 	{
+		float za1 = p1->SlopeZ(x1, y1);
+		float za2 = p2->SlopeZ(x1, y1);
+		float zb1 = p1->SlopeZ(x2, y2);
+		float zb2 = p2->SlopeZ(x2, y2);
+
+		// check heights [ for sides of slopes ]
+		if (za2 <= za1 && zb2 <= zb1)
+		{
+			return;
+		}
+		else if (za2 < za1)
+		{
+			if (where == 'U')
+				za2 = za1;
+			else
+				za1 = za2;
+		}
+		else if (zb2 < zb1)
+		{
+			if (where == 'U')
+				zb2 = zb1;
+			else
+				zb1 = zb2;
+		}
+
 		glColor3f(level * r, level * g, level * b);
 
 		glBegin(GL_QUADS);
 
-		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
-		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
-		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
-		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
+		glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, za1);
+		glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, za2);
+		glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, zb2);
+		glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, zb1);
 
 		glEnd();
 	}
 
-	void LightClippedQuad(double x1, double y1, float z1,
-						  double x2, double y2, float z2,
+	void LightClippedQuad(double x1, double y1, const slope_plane_c *p1,
+						  double x2, double y2, const slope_plane_c *p2,
 						  float tx1, float ty1, float tx2, float ty2,
-						  float r, float g, float b, int light)
+						  char where, float r, float g, float b, int light)
 	{
 		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
 
@@ -492,11 +517,11 @@ public:
 			float c_dy = - r_view.Cos;
 
 			// check which side the start/end point is on
-			double p1 = (y1 - c_y) * c_dx - (x1 - c_x) * c_dy;
-			double p2 = (y2 - c_y) * c_dx - (x2 - c_x) * c_dy;
+			double n1 = (y1 - c_y) * c_dx - (x1 - c_x) * c_dy;
+			double n2 = (y2 - c_y) * c_dx - (x2 - c_x) * c_dy;
 
-			int cat1 = (p1 < -0.1) ? -1 : (p1 > 0.1) ? +1 : 0;
-			int cat2 = (p2 < -0.1) ? -1 : (p2 > 0.1) ? +1 : 0;
+			int cat1 = (n1 < -0.1) ? -1 : (n1 > 0.1) ? +1 : 0;
+			int cat2 = (n2 < -0.1) ? -1 : (n2 > 0.1) ? +1 : 0;
 
 			// completely on far side?
 			if (cat1 >= 0 && cat2 >= 0)
@@ -506,7 +531,7 @@ public:
 			if ((cat1 < 0 && cat2 > 0) || (cat1 > 0 && cat2 < 0))
 			{
 				// compute intersection point
-				double along = p1 / (p1 - p2);
+				double along = n1 / (n1 - n2);
 
 				double ix = x1 + (x2 - x1) * along;
 				double iy = y1 + (y2 - y1) * along;
@@ -517,23 +542,20 @@ public:
 				// and keep going with the piece on the NEAR side.
 				if (cat2 > 0)
 				{
-					RawClippedQuad(ix, iy, z1, x2, y2, z2,
-								   itx, ty1, tx2, ty2, r, g, b, level);
+					RawClippedQuad(ix,iy,p1, x2,y2,p2, itx,ty1,tx2,ty2, where, r,g,b, level);
 
 					x2 = ix; y2 = iy; tx2 = itx;
 				}
 				else
 				{
-					RawClippedQuad(x1, y1, z1, ix, iy, z2,
-								   tx1, ty1, itx, ty2, r, g, b, level);
+					RawClippedQuad(x1,y1,p1, ix,iy,p2, tx1,ty1,itx,ty2, where, r,g,b, level);
 
 					x1 = ix; y1 = iy; tx1 = itx;
 				}
 			}
 		}
 
-		RawClippedQuad(x1, y1, z1, x2, y2, z2,
-					   tx1, ty1, tx2, ty2, r, g, b, level);
+		RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,ty1,tx2,ty2, where, r,g,b, level);
 	}
 
 	inline bool IsPolygonClipped(const sector_polygon_t *poly)
@@ -660,8 +682,12 @@ public:
 	void DrawSide(char where, const LineDef *ld, const SideDef *sd,
 		const char *texname, const Sector *front, const Sector *back,
 		bool sky_upper, float ld_length,
-		float x1, float y1, float z1, float x2, float y2, float z2)
+		float x1, float y1, const slope_plane_c *p1,
+		float x2, float y2, const slope_plane_c *p2)
 	{
+double z1 = 0; //!!!! FIXME TEX COORDS
+double z2 = 256;
+
 		byte r, g, b;
 		bool fullbright = true;
 		Img_c *img = NULL;
@@ -735,6 +761,8 @@ public:
 
 		glDisable(GL_ALPHA_TEST);
 
+		r /= 255.0; g /= 255.0; b /= 255.0;
+
 		if (r_view.lighting && !fullbright)
 		{
 			int light = front->light;
@@ -745,21 +773,11 @@ public:
 			else if (ld->IsHorizontal())
 				light -= 16;
 
-			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
-							 r / 255.0, g / 255.0, b / 255.0, light);
+			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,ty1,tx2,ty2, where, r,g,b, light);
 		}
 		else
 		{
-			glColor3f(r / 255.0, g / 255.0, b / 255.0);
-
-			glBegin(GL_QUADS);
-
-			glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
-			glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
-			glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
-			glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
-
-			glEnd();
+			RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,ty1,tx2,ty2, where, r,g,b, 1.0);
 		}
 	}
 
@@ -811,6 +829,11 @@ public:
 
 		glEnable(GL_ALPHA_TEST);
 
+		slope_plane_c p1; p1.Init(z1);
+		slope_plane_c p2; p1.Init(z2);
+
+		r /= 255.0; g /= 255.0; b /= 255.0;
+
 		if (r_view.lighting && !fullbright)
 		{
 			int light = sd->SecRef()->light;
@@ -821,21 +844,11 @@ public:
 			else if (ld->IsHorizontal())
 				light -= 16;
 
-			LightClippedQuad(x1, y1, z1, x2, y2, z2, tx1, ty1, tx2, ty2,
-							 r / 255.0, g / 255.0, b / 255.0, light);
+			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,ty1,tx2,ty2, 'M', r,g,b, light);
 		}
 		else
 		{
-			glColor3f(r / 255.0, g / 255.0, b / 255.0);
-
-			glBegin(GL_QUADS);
-
-			glTexCoord2f(tx1, ty1); glVertex3f(x1, y1, z1);
-			glTexCoord2f(tx1, ty2); glVertex3f(x1, y1, z2);
-			glTexCoord2f(tx2, ty2); glVertex3f(x2, y2, z2);
-			glTexCoord2f(tx2, ty1); glVertex3f(x2, y2, z1);
-
-			glEnd();
+			RawClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,ty1,tx2,ty2, 'M', r,g,b, 1.0);
 		}
 	}
 
@@ -975,8 +988,10 @@ public:
 
 		if (ld->OneSided())
 		{
+			sector_3dfloors_c *ex = Subdiv_3DFloorsForSector(sd->sector);
+
 			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
-				ld_len, x1, y1, front->floorh, x2, y2, front->ceilh);
+				ld_len, x1, y1, &ex->f_plane, x2, y2, &ex->c_plane);
 		}
 		else
 		{
@@ -996,23 +1011,34 @@ public:
 					invis_back = true;
 			}
 
-			int f_floorh = front->floorh;
 			sector_3dfloors_c *f_ex = Subdiv_3DFloorsForSector(sd->sector);
+			slope_plane_c *f_floorp = &f_ex->f_plane;
+			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
 				dummy = Sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
-					f_floorh = dummy->floorh;
+				{
+					dummy_fp.Init(dummy->floorh);
+					f_floorp = &dummy_fp;
+				}
 			}
 
-			if (back->floorh > f_floorh && !self_ref && !invis_back)
+			// we skip height check for slopes, but RawClippedQuad will handle it
+			bool f_sloped = f_ex->f_plane.sloped || b_ex->f_plane.sloped;
+			bool c_sloped = f_ex->c_plane.sloped || b_ex->c_plane.sloped;
+
+			// lower part
+			if ((back->floorh > front->floorh || f_sloped) && !self_ref && !invis_back)
 				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
-					ld_len, x1, y1, f_floorh, x2, y2, back->floorh);
+					ld_len, x1, y1, f_floorp, x2, y2, &b_ex->f_plane);
 
-			if (back->ceilh < front->ceilh && !self_ref && !sky_upper)
+			// upper part
+			if ((back->ceilh < front->ceilh || c_sloped) && !self_ref && !sky_upper)
 				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
-					ld_len, x1, y1, back->ceilh, x2, y2, front->ceilh);
+					ld_len, x1, y1, &b_ex->c_plane, x2, y2, &f_ex->c_plane);
 
+			// railing tex
 			if (!is_null_tex(sd->MidTex()) && r_view.texturing)
 				DrawMidMasker(ld, sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
@@ -1046,8 +1072,11 @@ public:
 					else
 						tex = ef_sd->MidTex();
 
+					slope_plane_c p1; p1.Init(bottom_h);
+					slope_plane_c p2; p2.Init(top_h);
+
 					DrawSide('E', ld, sd, tex, front, back, false,
-						ld_len, x1, y1, bottom_h, x2, y2, top_h);
+						ld_len, x1, y1, &p1, x2, y2, &p2);
 				}
 			}
 		}
@@ -1061,11 +1090,11 @@ public:
 
 		if (sky_front && !sky_upper)
 		{
-			float z1 = front->ceilh;
-			float z2 = z1 + 16384.0;
+			slope_plane_c p1; p1.Init(front->ceilh);
+			slope_plane_c p2; p2.Init(front->ceilh + 16384.0);
 
 			DrawSide('U', ld, sd, "-", front, NULL, true /* sky_upper */,
-				ld_len, x1, y1, z1, x2, y2, z2);
+				ld_len, x1, y1, &p1, x2, y2, &p2);
 		}
 	}
 
