@@ -37,6 +37,7 @@
 #include "m_game.h"
 #include "m_events.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 #include "ui_window.h"
 
 
@@ -116,20 +117,34 @@ void Render_View_t::FindGroundZ()
 	// test a grid of points on the player's bounding box, and
 	// use the maximum floor of all contacted sectors.
 
-	int max_floor = INT_MIN;
+	double max_floor = -9e9;
+	bool hit_something = false;
 
 	for (int dx = -2 ; dx <= 2 ; dx++)
 	for (int dy = -2 ; dy <= 2 ; dy++)
 	{
+		double test_x = x + dx * 8;
+		double test_y = y + dy * 8;
+
 		Objid o;
 
-		GetNearObject(o, OBJ_SECTORS, int(x + dx*8), int(y + dy*8));
+		GetNearObject(o, OBJ_SECTORS, test_x, test_y);
 
 		if (o.num >= 0)
-			max_floor = MAX(max_floor, Sectors[o.num]->floorh);
+		{
+			double z = Sectors[o.num]->floorh;
+			{
+				sector_3dfloors_c *ex = Subdiv_3DFloorsForSector(o.num);
+				if (ex->f_plane.sloped)
+					z = ex->f_plane.SlopeZ(test_x, test_y);
+			}
+
+			max_floor = MAX(max_floor, z);
+			hit_something = true;
+		}
 	}
 
-	if (max_floor != INT_MIN)
+	if (hit_something)
 		z = max_floor + Misc_info.view_height;
 }
 
