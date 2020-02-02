@@ -126,6 +126,7 @@ typedef struct
 	int missing_color;
 	int unknown_tex;
 	int unknown_flat;
+	int unknown_thing;
 
 	int player_r;
 	int player_h;

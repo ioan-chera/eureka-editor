@@ -972,16 +972,20 @@ void UI_Canvas::DrawThingSprites()
 			continue;
 
 		const thingtype_t *info = M_GetThingType(Things[n]->type);
+		float scale = info->scale;
 
 		Img_c *sprite = W_GetSprite(Things[n]->type);
 
 		if (! sprite)
+		{
 			sprite = IM_UnknownSprite();
+			scale = 0.66;
+		}
 
 		int sx = SCREENX(x);
 		int sy = SCREENY(y);
 
-		RenderSprite(sx, sy, info->scale * grid.Scale, sprite);
+		RenderSprite(sx, sy, scale * grid.Scale, sprite);
 	}
 
 #ifndef NO_OPENGL

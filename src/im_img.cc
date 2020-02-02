@@ -624,9 +624,13 @@ Img_c * IM_UnknownFlat()
 
 Img_c * IM_UnknownSprite()
 {
-	if (! unknown_sprite_image || unknown_sprite_color != Misc_info.unknown_tex)
+	int unk_col = Misc_info.unknown_thing;
+	if (unk_col == 0)
+		unk_col = Misc_info.unknown_tex;
+
+	if (! unknown_sprite_image || unknown_sprite_color != unk_col)
 	{
-		unknown_sprite_color = Misc_info.unknown_tex;
+		unknown_sprite_color = unk_col;
 
 		if (unknown_sprite_image)
 			delete unknown_sprite_image;
@@ -1050,7 +1054,7 @@ Img_c * IM_CreateLightSprite()
 }
 
 
-Img_c * IM_CreateMapSpotSprite()
+Img_c * IM_CreateMapSpotSprite(int base_r, int base_g, int base_b)
 {
 	int W = 32;
 	int H = 32;
@@ -1075,9 +1079,9 @@ Img_c * IM_CreateMapSpotSprite()
 			float ity = 0.3 + dx / 14.0;
 			if (ity > 1.0) ity = 1.0;
 
-			int r =   0 * ity;
-			int g = 255 * ity;
-			int b =   0 * ity;
+			int r = base_r * ity;
+			int g = base_g * ity;
+			int b = base_b * ity;
 
 			pix = W_FindPaletteColor(r, g, b);
 		}

@@ -1229,7 +1229,7 @@ public:
 		{
 			img = IM_UnknownSprite();
 			fullbright = true;
-			scale = 0.5;
+			scale = 0.33;
 		}
 
 		float scale_w = img->width() * scale;
@@ -1438,7 +1438,7 @@ public:
 		if (! img)
 		{
 			img = IM_UnknownSprite();
-			scale = 0.5;
+			scale = 0.33;
 		}
 
 		float scale_w = img->width()  * scale;

@@ -158,8 +158,6 @@ void UI_Pic::GetTex(const char * tname)
 
 void UI_Pic::GetSprite(int type, Fl_Color back_color)
 {
-	//  color(FL_GRAY0 + 2);
-
 	Clear();
 
 	Img_c *img = W_GetSprite(type);

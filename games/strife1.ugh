@@ -46,8 +46,9 @@ color invis   21  31
 
 color missing  231
 
-color unknown_tex   150
-color unknown_flat  105
+color unknown_tex    150
+color unknown_flat   105
+color unknown_thing  172
 
 
 #---- THING TYPES ---------------

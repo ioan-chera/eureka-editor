@@ -243,6 +243,10 @@ static void ParseColorDef(char ** argv, int argc)
 	{
 		Misc_info.unknown_flat = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "unknown_thing") == 0)
+	{
+		Misc_info.unknown_thing = atoi(argv[1]);
+	}
 	else
 	{
 		LogPrintf("unknown color keyword: '%s'\n", argv[0]);

@@ -45,8 +45,9 @@ color invis   14  24
 
 color missing  39
 
-color unknown_tex   241
-color unknown_flat  250
+color unknown_tex    241
+color unknown_flat   250
+color unknown_thing  117
 
 
 #---- THINGS ----------------

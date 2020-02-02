@@ -26,6 +26,7 @@ color invis  102  111
 
 color missing  215
 
-color unknown_tex   194
-color unknown_flat  112
+color unknown_tex    196
+color unknown_flat   116
+color unknown_thing  253
 
