@@ -725,7 +725,7 @@ void UI_LineBox::UpdateField(int field)
 
 			const linetype_t *info = M_GetLineType(L->type);
 
-			if (Level_format == MAPF_Hexen)
+			if (Level_format != MAPF_Doom)
 			{
 				for (int a = 0 ; a < 5 ; a++)
 				{
@@ -851,7 +851,7 @@ void UI_LineBox::CalcLength()
 void UI_LineBox::FlagsFromInt(int lineflags)
 {
 	// compute activation
-	if (Level_format == MAPF_Hexen)
+	if (Level_format != MAPF_Doom)
 	{
 		int new_act = (lineflags & MLF_Activation) >> 9;
 
@@ -907,7 +907,7 @@ int UI_LineBox::CalcFlags() const
 	if (f_mons->value())  lineflags |= MLF_BlockMonsters;
 	if (f_sound->value()) lineflags |= MLF_SoundBlock;
 
-	if (Level_format == MAPF_Hexen)
+	if (Level_format != MAPF_Doom)
 	{
 		int actval = actkind->value();
 		if (actval >= 12) actval = 0;
@@ -983,7 +983,7 @@ void UI_LineBox::UpdateGameInfo()
 {
 	choose->label("Choose");
 
-	if (Level_format == MAPF_Hexen)
+	if (Level_format != MAPF_Doom)
 	{
 		tag->hide();
 		length->hide();
@@ -1036,7 +1036,7 @@ void UI_LineBox::UpdateGameInfo()
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		if (Level_format == MAPF_Hexen)
+		if (Level_format != MAPF_Doom)
 			args[a]->show();
 		else
 			args[a]->hide();

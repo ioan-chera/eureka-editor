@@ -422,7 +422,7 @@ public:
 		}
 
 		// ZDoom (in hexen format)
-		if (Level_format == MAPF_Hexen && (Features.slopes & 8))
+		if (Level_format != MAPF_Doom && (Features.slopes & 8))
 		{
 			if (L->type == 181)
 				PlaneAlign(L, L->tag, L->arg2);
@@ -444,7 +444,7 @@ public:
 		}
 
 		// ZDoom (in hexen format)
-		if (Level_format == MAPF_Hexen && (Features.slopes & 8))
+		if (Level_format != MAPF_Doom && (Features.slopes & 8))
 		{
 			if (L->type == 118)
 				PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
@@ -453,7 +453,7 @@ public:
 
 	void CheckSlopeThing(const Thing *T)
 	{
-		if (Level_format == MAPF_Hexen && (Features.slopes & 16))
+		if (Level_format != MAPF_Doom && (Features.slopes & 16))
 		{
 			// TODO
 		}
@@ -461,7 +461,7 @@ public:
 
 	void CheckSlopeCopyThing(const Thing *T)
 	{
-		if (Level_format == MAPF_Hexen && (Features.slopes & 16))
+		if (Level_format != MAPF_Doom && (Features.slopes & 16))
 		{
 			switch (T->type)
 			{

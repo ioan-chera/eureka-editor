@@ -451,7 +451,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	if (test) (w)->show(); else (w)->hide();
 
 	// common stuff
-	if (x == 0 && Level_format != MAPF_Hexen)
+	if (x == 0 && Level_format == MAPF_Doom)
 	{
 		tag_input->deactivate();
 		tag_input->value("");
@@ -486,7 +486,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 #undef SHOW_WIDGET_IF
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == 0 && ! Features.coop_dm_flags && Level_format != MAPF_Hexen)
+	if (x == 0 && ! Features.coop_dm_flags && Level_format == MAPF_Doom)
 	{
 		  o_sp->hide();
 		o_coop->hide();

@@ -142,7 +142,7 @@ static void Insert_Thing()
 		T->type = default_thing;
 		T->options = MTF_Easy | MTF_Medium | MTF_Hard;
 
-		if (Level_format == MAPF_Hexen)
+		if (Level_format != MAPF_Doom)
 		{
 			T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 			T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
