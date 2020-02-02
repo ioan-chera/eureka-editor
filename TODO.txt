@@ -6,6 +6,8 @@ Eureka TODO / WISHLIST
 Slightly Possible
 -----------------
 
++  support resources in PK3 files
+
 -  linedef mode: '[' and ']' to adjust length of current line
 
 -  Tools/Make Door
@@ -196,8 +198,6 @@ NO:  able to drag stuff around in 3D view, raise/lower floors
 
 NO:  large font mode, more readable on 1920x1080 monitors
 
-
-NO:  support ZDoom PK3 for textures (etc)
 
 NO:  support DECORATE as (or in) a resource file
 
