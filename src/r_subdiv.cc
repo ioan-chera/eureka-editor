@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "e_basis.h"
+#include "e_hover.h"
 #include "m_game.h"
 #include "r_subdiv.h"
 
@@ -260,8 +261,14 @@ public:
 			}
 		}
 
-		// TODO slope things
-		// TODO slope copy things
+		for (int n = 0 ; n < NumThings ; n++)
+		{
+			CheckSlopeThing(Things[n]);
+		}
+		for (int n = 0 ; n < NumThings ; n++)
+		{
+			CheckSlopeCopyThing(Things[n]);
+		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -444,6 +451,26 @@ public:
 		}
 	}
 
+	void CheckSlopeThing(const Thing *T)
+	{
+		if (Level_format == MAPF_Hexen && (Features.slopes & 16))
+		{
+			// TODO
+		}
+	}
+
+	void CheckSlopeCopyThing(const Thing *T)
+	{
+		if (Level_format == MAPF_Hexen && (Features.slopes & 16))
+		{
+			switch (T->type)
+			{
+			case 9510: PlaneCopyFromThing(T, 0); break;
+			case 9511: PlaneCopyFromThing(T, 1); break;
+			}
+		}
+	}
+
 	void PlaneAlign(const LineDef *L, int floor_mode, int ceil_mode)
 	{
 		if (L->left < 0 || L->right < 0)
@@ -568,6 +595,32 @@ public:
 			{
 			case 4: infos[ back_sec].floors.c_plane.Copy(infos[front_sec].floors.c_plane); break;
 			case 8: infos[front_sec].floors.c_plane.Copy(infos[ back_sec].floors.c_plane); break;
+			}
+		}
+	}
+
+	void PlaneCopyFromThing(const Thing *T, int plane)
+	{
+		if (T->arg1 == 0)
+			return;
+
+		// find sector containing the thing
+		Objid o;
+		GetNearObject(o, OBJ_SECTORS, T->x(), T->y());
+
+		if (o.num < 0)
+			return;
+
+		for (int n = 0 ; n < NumSectors ; n++)
+		{
+			if (Sectors[n]->tag == T->arg1)
+			{
+				if (plane > 0)
+					infos[o.num].floors.c_plane.Copy(infos[n].floors.c_plane);
+				else
+					infos[o.num].floors.f_plane.Copy(infos[n].floors.f_plane);
+
+				return;
 			}
 		}
 	}
