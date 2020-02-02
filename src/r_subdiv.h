@@ -100,6 +100,7 @@ public:
 	~slope_plane_c();
 
 	void Init(float height);
+	void Copy(const slope_plane_c& other);
 
 	inline double SlopeZ(double x, double y) const
 	{

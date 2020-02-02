@@ -528,7 +528,48 @@ public:
 
 	void PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share)
 	{
-		// TODO
+		for (int n = 0 ; n < NumSectors ; n++)
+		{
+			if (f1_tag > 0 && Sectors[n]->tag == f1_tag && L->Right())
+			{
+				infos[L->Right()->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+				f1_tag = 0;
+			}
+			if (c1_tag > 0 && Sectors[n]->tag == c1_tag && L->Right())
+			{
+				infos[L->Right()->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+				c1_tag = 0;
+			}
+
+			if (f2_tag > 0 && Sectors[n]->tag == f2_tag && L->Left())
+			{
+				infos[L->Left()->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+				f2_tag = 0;
+			}
+			if (c2_tag > 0 && Sectors[n]->tag == c2_tag && L->Left())
+			{
+				infos[L->Left()->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+				c2_tag = 0;
+			}
+		}
+
+		if (L->left >= 0 && L->right >= 0)
+		{
+			int front_sec = L->Right()->sector;
+			int  back_sec = L->Left()->sector;
+
+			switch (share & 3)
+			{
+			case 1: infos[ back_sec].floors.f_plane.Copy(infos[front_sec].floors.f_plane); break;
+			case 2: infos[front_sec].floors.f_plane.Copy(infos[ back_sec].floors.f_plane); break;
+			}
+
+			switch (share & 12)
+			{
+			case 4: infos[ back_sec].floors.c_plane.Copy(infos[front_sec].floors.c_plane); break;
+			case 8: infos[front_sec].floors.c_plane.Copy(infos[ back_sec].floors.c_plane); break;
+			}
+		}
 	}
 
 	void SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,
@@ -841,6 +882,14 @@ void slope_plane_c::Init(float height)
 	sloped = false;
 	xm = ym = 0;
 	zadd = height;
+}
+
+void slope_plane_c::Copy(const slope_plane_c& other)
+{
+	sloped = other.sloped;
+	xm = other.xm;
+	ym = other.ym;
+	zadd = other.zadd;
 }
 
 
