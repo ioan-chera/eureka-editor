@@ -391,14 +391,9 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 }
 
 
-void UI_LineBox::SetTexture(const char *tex_name, int e_state)
+void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 {
 	int new_tex = BA_InternaliseString(tex_name);
-
-	int front_pics = front->GetSelectedPics();
-	int  back_pics =  back->GetSelectedPics();
-
-	int parts = front_pics | (back_pics << 4);
 
 	// this works a bit differently than other ways, we don't modify a
 	// widget and let it update the map, instead we update the map and
@@ -567,7 +562,13 @@ void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_stat
 {
 	if (kind == 'T' || kind == 'F')
 	{
-		SetTexture(name, e_state);
+		int front_pics = front->GetSelectedPics();
+		int  back_pics =  back->GetSelectedPics();
+
+		// this can be zero, invoking special behavior (based on mouse button)
+		int parts = front_pics | (back_pics << 4);
+
+		SetTexture(name, e_state, parts);
 	}
 	else if (kind == 'L')
 	{

@@ -97,7 +97,7 @@ private:
 	void CB_Copy(int parts);
 	void CB_Paste(int parts, int new_tex);
 
-	void SetTexture(const char *tex_name, int e_state);
+	void SetTexture(const char *tex_name, int e_state, int parts);
 	void SetTexOnLine(int ld, int new_tex, int e_state, int parts);
 	void SetLineType(int new_type);
 
