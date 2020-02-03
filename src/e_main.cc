@@ -987,6 +987,9 @@ void Selection_Clear(bool no_save)
 
 	edit.error_mode = false;
 
+	if (main_win)
+		main_win->UnselectPics();
+
 	RedrawMap();
 }
 

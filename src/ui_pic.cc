@@ -334,9 +334,12 @@ int UI_Pic::handle(int event)
 			return 1;
 
 		case FL_LEAVE:
-			main_win->SetCursor(FL_CURSOR_DEFAULT);
-			highlighted = false;
-			redraw();
+			if (highlighted)
+			{
+				main_win->SetCursor(FL_CURSOR_DEFAULT);
+				highlighted = false;
+				redraw();
+			}
 			return 1;
 
 		case FL_PUSH:
@@ -397,6 +400,12 @@ void UI_Pic::Selected(bool _val)
 		redraw();
 
 	selected = _val;
+}
+
+
+void UI_Pic::Unhighlight()
+{
+	handle(FL_LEAVE);
 }
 
 

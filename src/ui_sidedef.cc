@@ -581,6 +581,12 @@ void UI_SideBox::UpdateHiding()
 
 			u_pic->hide();
 			r_pic->hide();
+
+			u_pic->Unhighlight();
+			r_pic->Unhighlight();
+
+			u_pic->Selected(false);
+			r_pic->Selected(false);
 		}
 	}
 }
@@ -607,6 +613,10 @@ int UI_SideBox::GetHighlightedPics() const
 
 void UI_SideBox::UnselectPics()
 {
+	l_pic->Unhighlight();
+	u_pic->Unhighlight();
+	r_pic->Unhighlight();
+
 	l_pic->Selected(false);
 	u_pic->Selected(false);
 	r_pic->Selected(false);

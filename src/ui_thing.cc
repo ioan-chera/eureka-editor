@@ -1044,5 +1044,12 @@ void UI_ThingBox::UpdateGameInfo()
 }
 
 
+void UI_ThingBox::UnselectPics()
+{
+	sprite->Unhighlight();
+	sprite->Selected(false);
+}
+
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

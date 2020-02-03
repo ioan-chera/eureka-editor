@@ -330,6 +330,7 @@ void UI_MainWindow::UnselectPics()
 {
 	 line_box->UnselectPics();
 	  sec_box->UnselectPics();
+	thing_box->UnselectPics();
 	props_box->UnselectPics();
 }
 

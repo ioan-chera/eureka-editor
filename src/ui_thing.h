@@ -103,6 +103,7 @@ public:
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UpdateGameInfo();
+	void UnselectPics();
 
 private:
 	void SetThingType(int new_type);

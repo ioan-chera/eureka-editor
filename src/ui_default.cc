@@ -524,6 +524,10 @@ void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e
 
 void UI_DefaultProps::UnselectPics()
 {
+	w_pic->Unhighlight();
+	f_pic->Unhighlight();
+	c_pic->Unhighlight();
+
 	w_pic->Selected(false);
 	f_pic->Selected(false);
 	c_pic->Selected(false);

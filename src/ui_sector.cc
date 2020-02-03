@@ -942,6 +942,9 @@ void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_st
 
 void UI_SectorBox::UnselectPics()
 {
+	f_pic->Unhighlight();
+	c_pic->Unhighlight();
+
 	f_pic->Selected(false);
 	c_pic->Selected(false);
 }

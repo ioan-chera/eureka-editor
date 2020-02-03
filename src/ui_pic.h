@@ -67,8 +67,8 @@ public:
 	void GetSprite(int type, Fl_Color back_color);
 
 	void AllowHighlight(bool enable) { allow_hl = enable; redraw(); }
-
 	bool Highlighted() const { return allow_hl && highlighted; }
+	void Unhighlight();
 
 	bool Selected() const { return selected; }
 	void Selected(bool _val);
