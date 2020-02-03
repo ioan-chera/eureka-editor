@@ -1269,7 +1269,7 @@ void UI_Canvas::UpdateHighlight()
 
 	int new_ld = edit.split_line.valid() ? edit.split_line.num : -1;
 
-	if (! (split_ld != new_ld && split_x == edit.split_x && split_y == edit.split_y))
+	if (! (split_ld == new_ld && split_x == edit.split_x && split_y == edit.split_y))
 	{
 		split_ld = new_ld;
 		split_x  = edit.split_x;
