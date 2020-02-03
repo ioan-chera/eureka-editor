@@ -195,9 +195,9 @@ void UI_MainWindow::BrowserMode(char kind)
 		else
 			tile->HideRight();
 
-		// hiding the browser also clears any pic selection
-		if (! want_visible)
-			UnselectPics();
+//??	// hiding the browser also clears any pic selection
+//??	if (! want_visible)
+//??		UnselectPics();
 	}
 
 	if (kind != 0 && kind != '/')
