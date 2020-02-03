@@ -11,7 +11,7 @@ CHANGES IN Eureka 1.27
 + ratio lock, makes producing lines at certain angles easier
 
 - a single status bar for both 2D and 3D views
-- new popup menus to set edit mode, browser mode, scaling.
+- new popup menus to set edit mode, browser mode, scaling
 - render sectors in the 2D view with both lighting and texturing
 - create void islands by drawing lines anti-clockwise in a sector
 - snap position indicator for 2D view (a light-blue cross)
