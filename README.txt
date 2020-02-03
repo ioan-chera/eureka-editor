@@ -1,10 +1,10 @@
 
-Eureka 1.24 README
+Eureka 1.27 README
 ==================
 
 by Andrew Apted  <ajapted@users.sf.net>
 
-August 2018
+February 2020
 
 
 INTRODUCTION
@@ -17,7 +17,7 @@ Linux (and other Unix-likes), Windows and MacOS X.
 FEATURES
 
 -  Undo/Redo (multiple levels)
--  3D preview
+-  3D view with good lighting emulation
 -  Editable panels for things, linedefs, sectors (etc)
 -  Browser for textures, flats, things (etc)
 -  Key binding system
@@ -39,6 +39,7 @@ REQUIREMENTS
 
 -  128 MB of computer memory
 -  1024x720 or higher screen resolution
+-  3D accelerated graphics card
 -  a keyboard and a two-button mouse
 -  the data (iwad) file from a supported game
 
@@ -232,8 +233,8 @@ D : select sectors with same ceiling texture
 ] and } : raise ceiling heights
 
 
-3D Preview
-----------
+3D View
+-------
 
 (cursor keys will move forward and back, turn left and right)
 (the WASD keys can also be used to move the camera)
