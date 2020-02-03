@@ -407,7 +407,14 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			SetTexOnLine(*it, new_tex, e_state, parts);
+			int p2 = edit.Selected->get_ext(*it);
+
+			// only use parts explicitly selected in 3D view when no
+			// parts in the linedef panel are selected.
+			if (! (parts == 0 && p2 > 1))
+				p2 = parts;
+
+			SetTexOnLine(*it, new_tex, e_state, p2);
 		}
 
 		BA_End();
