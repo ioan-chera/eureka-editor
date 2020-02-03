@@ -809,9 +809,9 @@ int UI_SectorBox::GetHighlightedPics() const
 }
 
 
-void UI_SectorBox::CB_Copy()
+void UI_SectorBox::CB_Copy(int parts)
 {
-	if (GetSelectedPics() == (PART_FLOOR | PART_CEIL))
+	if (parts == (PART_FLOOR | PART_CEIL))
 	{
 		Beep("multiple textures");
 		return;
@@ -819,15 +819,10 @@ void UI_SectorBox::CB_Copy()
 
 	const char *name = NULL;
 
-	if (GetSelectedPics() == PART_CEIL ||
-		(GetSelectedPics() == 0 && c_pic->Highlighted()))
-	{
+	if (parts == PART_CEIL)
 		name = c_tex->value();
-	}
 	else
-	{
 		name = f_tex->value();
-	}
 
 	Texboard_SetFlat(name);
 
@@ -835,38 +830,28 @@ void UI_SectorBox::CB_Copy()
 }
 
 
-void UI_SectorBox::CB_Paste(int new_tex)
+void UI_SectorBox::CB_Paste(int parts, int new_tex)
 {
-	int parts = GetSelectedPics();
+	if (edit.Selected->empty())
+		return;
 
-	if (parts == 0)
-		parts = GetHighlightedPics();
+	BA_Begin();
+	BA_Message("pasted %s", BA_GetString(new_tex));
 
-	if (! edit.Selected->empty())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		BA_Begin();
-		BA_Message("pasted %s", BA_GetString(new_tex));
-
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-		{
-			if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
-			if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
-		}
-
-		BA_End();
-
-		UpdateField();
+		if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+		if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
 	}
+
+	BA_End();
+
+	UpdateField();
 }
 
 
-void UI_SectorBox::CB_Cut()
+void UI_SectorBox::CB_Cut(int parts)
 {
-	int parts = GetSelectedPics();
-
-	if (parts == 0)
-		parts = GetHighlightedPics();
-
 	int new_floor = BA_InternaliseString(default_floor_tex);
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
@@ -893,29 +878,31 @@ bool UI_SectorBox::ClipboardOp(char op)
 	if (obj < 0)
 		return false;
 
-	if (!  (f_pic->Selected() || f_pic->Highlighted() ||
-			c_pic->Selected() || c_pic->Highlighted()))
-	{
+	int parts = GetSelectedPics();
+
+	if (parts == 0)
+		parts = GetHighlightedPics();
+
+	if (parts == 0)
 		return false;
-	}
 
 	switch (op)
 	{
 		case 'c':
-			CB_Copy();
+			CB_Copy(parts);
 			break;
 
 		case 'v':
-			CB_Paste(Texboard_GetFlatNum());
+			CB_Paste(parts, Texboard_GetFlatNum());
 			break;
 
 		case 'x':
-			CB_Cut();
+			CB_Cut(parts);
 			break;
 
 		case 'd':
-			// we abuse the delete function to turn sector ceilings into sky
-			CB_Paste(BA_InternaliseString(Misc_info.sky_flat));
+			// abuse the delete function to turn sector ceilings into sky
+			CB_Paste(parts, BA_InternaliseString(Misc_info.sky_flat));
 			break;
 	}
 

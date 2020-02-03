@@ -72,7 +72,7 @@ public:
 
 	void UpdateField();
 
-	// returns a bitmask: 1 for lower, 2 for upper, 4 for rail
+	// returns a bitmask of PART_RT_XXX values.
 	int GetSelectedPics() const;
 	int GetHighlightedPics() const;
 

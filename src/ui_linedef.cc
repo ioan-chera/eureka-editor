@@ -286,36 +286,35 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state,
-                              int front_pics, int back_pics)
+void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 {
 	bool opposite = (e_state & FL_SHIFT);
 
 	LineDef *L = LineDefs[ld];
 
 	// handle the selected texture boxes
-	if (front_pics || back_pics)
+	if (parts != 0)
 	{
 		if (L->OneSided())
 		{
-			if (front_pics & 1) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (front_pics & 2) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_LOWER) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_UPPER) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
 		}
 
 		if (L->Right())
 		{
-			if (front_pics & 1) BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (front_pics & 2) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
-			if (front_pics & 4) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_LOWER) BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_RT_UPPER) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_RAIL)  BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
 		if (L->Left())
 		{
-			if (back_pics & 1) BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (back_pics & 2) BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
-			if (back_pics & 4) BA_ChangeSD(L->left, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_LF_LOWER) BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_LF_UPPER) BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_LF_RAIL)  BA_ChangeSD(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
 	}
@@ -399,6 +398,8 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 	int front_pics = front->GetSelectedPics();
 	int  back_pics =  back->GetSelectedPics();
 
+	int parts = front_pics | (back_pics << 4);
+
 	// this works a bit differently than other ways, we don't modify a
 	// widget and let it update the map, instead we update the map and
 	// let the widget(s) get updated.  That's because we do different
@@ -411,7 +412,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			SetTexOnLine(*it, new_tex, e_state, front_pics, back_pics);
+			SetTexOnLine(*it, new_tex, e_state, parts);
 		}
 
 		BA_End();
@@ -440,22 +441,20 @@ void UI_LineBox::SetLineType(int new_type)
 }
 
 
-void UI_LineBox::CB_Copy()
+void UI_LineBox::CB_Copy(int parts)
 {
 	// determine which sidedef texture to grab from
 	const char *name = NULL;
-
-	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
 		UI_SideBox *SD = (pass == 0) ? front : back;
 
-		int sel_pics = use_hl ? SD->GetHighlightedPics() : SD->GetSelectedPics();
-
 		for (int b = 0 ; b < 3 ; b++)
 		{
-			if ((sel_pics & (1 << b)) == 0)
+			int try_part = PART_RT_LOWER << (b + pass * 4);
+
+			if ((parts & try_part) == 0)
 				continue;
 
 			const char *b_name = (b == 0) ? SD->l_tex->value() :
@@ -479,10 +478,8 @@ void UI_LineBox::CB_Copy()
 }
 
 
-void UI_LineBox::CB_Paste(int new_tex)
+void UI_LineBox::CB_Paste(int parts, int new_tex)
 {
-	bool use_hl = (front->GetSelectedPics() == 0 && back->GetSelectedPics() == 0);
-
 	// iterate over selected linedefs
 	if (edit.Selected->empty())
 		return;
@@ -497,28 +494,25 @@ void UI_LineBox::CB_Paste(int new_tex)
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
 			int sd = (pass == 0) ? L->right : L->left;
-
 			if (sd < 0)
 				continue;
 
-			UI_SideBox *SD = (pass == 0) ? front : back;
-
-			int sel_pics = use_hl ? SD->GetHighlightedPics() : SD->GetSelectedPics();
+			int parts2 = pass ? (parts >> 4) : parts;
 
 			if (L->TwoSided())
 			{
-				if (sel_pics & 1)
+				if (parts2 & PART_RT_LOWER)
 					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
 
-				if (sel_pics & 2)
+				if (parts2 & PART_RT_UPPER)
 					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
 
-				if (sel_pics & 4)
+				if (parts2 & PART_RT_RAIL)
 					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
 			}
 			else  // one-sided line
 			{
-				if (sel_pics & 1)
+				if (parts2 & PART_RT_LOWER)
 					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
 			}
 		}
@@ -538,28 +532,30 @@ bool UI_LineBox::ClipboardOp(char op)
 	if (obj < 0)
 		return false;
 
-	if (front->GetSelectedPics() == 0 && front->GetHighlightedPics() == 0 &&
-		 back->GetSelectedPics() == 0 &&  back->GetHighlightedPics() == 0)
-	{
+	int parts = front->GetSelectedPics() | (back->GetSelectedPics() << 4);
+
+	if (parts == 0)
+		parts = front->GetHighlightedPics() | (back->GetHighlightedPics() << 4);
+
+	if (parts == 0)
 		return false;
-	}
 
 	switch (op)
 	{
 		case 'c':
-			CB_Copy();
+			CB_Copy(parts);
 			break;
 
 		case 'v':
-			CB_Paste(Texboard_GetTexNum());
+			CB_Paste(parts, Texboard_GetTexNum());
 			break;
 
 		case 'x':	// Cut
-			CB_Paste(BA_InternaliseString(default_wall_tex));
+			CB_Paste(parts, BA_InternaliseString(default_wall_tex));
 			break;
 
 		case 'd': // Delete
-			CB_Paste(BA_InternaliseString("-"));
+			CB_Paste(parts, BA_InternaliseString("-"));
 			break;
 	}
 

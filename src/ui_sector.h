@@ -95,9 +95,9 @@ public:
 	void UnselectPics();
 
 private:
-	void CB_Copy();
-	void CB_Paste(int new_tex);
-	void CB_Cut();
+	void CB_Copy(int parts);
+	void CB_Paste(int parts, int new_tex);
+	void CB_Cut(int parts);
 
 	// returns either zero or a combination of PART_FLOOR and PART_CEIL
 	int GetSelectedPics() const;
