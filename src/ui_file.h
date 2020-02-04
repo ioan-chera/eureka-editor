@@ -147,7 +147,6 @@ private:
 	Fl_Choice *game_choice;
 	Fl_Choice *port_choice;
 	Fl_Choice *format_choice;
-	Fl_Choice *namespace_choice;
 
 	Fl_Output *res_name[RES_NUM];
 

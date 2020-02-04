@@ -895,6 +895,7 @@ static void GetVertices(void)
 }
 
 
+#if 0
 static inline SideDef *SafeLookupSidedef(u16_t num)
 {
 	if (num == 0xFFFF)
@@ -905,6 +906,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 
 	return SideDefs[num];
 }
+#endif
 
 
 static inline int VanillaSegDist(const seg_t *seg)
