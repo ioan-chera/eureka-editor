@@ -375,8 +375,8 @@ char W_DetectImageFormat(Lump_c *lump)
 	 width = (int)header[0] + (int)(header[1] << 8);
 	height = (int)header[2] + (int)(header[3] << 8);
 
-	int ofs_x = (int)header[4] + (int)(header[5] << 8);
-	int ofs_y = (int)header[6] + (int)(header[7] << 8);
+	int ofs_x = (int)header[4] + (int)((signed char)header[5] * 256);
+	int ofs_y = (int)header[6] + (int)((signed char)header[7] * 256);
 
 	if (width  > 0 && width  <= 2048 && abs(ofs_x) <= 2048 &&
 		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
