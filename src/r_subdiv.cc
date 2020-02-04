@@ -519,13 +519,16 @@ public:
 			const LineDef *L2 = LineDefs[n];
 			if (L2->TouchesSector(sec_num))
 			{
-				const Vertex *v2 = L2->Start();
-				double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
-
-				if (dist > best_dist)
+				for (int pass = 0 ; pass < 2 ; pass++)
 				{
-					v = v2;
-					best_dist = dist;
+					const Vertex *v2 = pass ? L2->End() : L2->Start();
+					double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
+
+					if (dist > best_dist)
+					{
+						v = v2;
+						best_dist = dist;
+					}
 				}
 			}
 		}
