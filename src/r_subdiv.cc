@@ -246,7 +246,6 @@ public:
 			for (int side = 0 ; side < 2 ; side++)
 			{
 				int sd_num = side ? L->left : L->right;
-
 				if (sd_num < 0)
 					continue;
 
@@ -455,7 +454,16 @@ public:
 	{
 		if (Level_format != MAPF_Doom && (Features.slopes & 16))
 		{
-			// TODO
+			switch (T->type)
+			{
+			// TODO 1500, 1501 Vavoom style
+			// TODO 1504, 1505 Vertex height (triangle sectors)
+			// TODO 9500, 9501 Line slope things
+
+			case 9502: PlaneTiltByThing(T, 0); break;
+			case 9503: PlaneTiltByThing(T, 1); break;
+			default: break;
+			}
 		}
 	}
 
@@ -467,6 +475,7 @@ public:
 			{
 			case 9510: PlaneCopyFromThing(T, 0); break;
 			case 9511: PlaneCopyFromThing(T, 1); break;
+			default: break;
 			}
 		}
 	}
@@ -484,12 +493,14 @@ public:
 		{
 		case 1: PlaneAlignPart(L, SIDE_RIGHT, 0 /* floor */); break;
 		case 2: PlaneAlignPart(L, SIDE_LEFT,  0); break;
+		default: break;
 		}
 
 		switch (ceil_mode & 3)
 		{
 		case 1: PlaneAlignPart(L, SIDE_RIGHT, 1 /* ceil */); break;
 		case 2: PlaneAlignPart(L, SIDE_LEFT,  1); break;
+		default: break;
 		}
 	}
 
@@ -592,12 +603,14 @@ public:
 			{
 			case 1: infos[ back_sec].floors.f_plane.Copy(infos[front_sec].floors.f_plane); break;
 			case 2: infos[front_sec].floors.f_plane.Copy(infos[ back_sec].floors.f_plane); break;
+			default: break;
 			}
 
 			switch (share & 12)
 			{
 			case 4: infos[ back_sec].floors.c_plane.Copy(infos[front_sec].floors.c_plane); break;
 			case 8: infos[front_sec].floors.c_plane.Copy(infos[ back_sec].floors.c_plane); break;
+			default: break;
 			}
 		}
 	}
@@ -611,7 +624,7 @@ public:
 		Objid o;
 		GetNearObject(o, OBJ_SECTORS, T->x(), T->y());
 
-		if (o.num < 0)
+		if (!o.valid())
 			return;
 
 		for (int n = 0 ; n < NumSectors ; n++)
@@ -626,6 +639,58 @@ public:
 				return;
 			}
 		}
+	}
+
+	void PlaneTiltByThing(const Thing *T, int plane)
+	{
+		double tx = T->x();
+		double ty = T->y();
+
+		// find sector containing the thing
+		Objid o;
+		GetNearObject(o, OBJ_SECTORS, tx, ty);
+
+		if (!o.valid())
+			return;
+
+		sector_3dfloors_c *ex = &infos[o.num].floors;
+
+		double tz = ex->PlaneZ(plane ? -1 : +1, tx, ty) + T->h();
+
+		// vector for direction of thing
+		double tdx = cos(T->angle * M_PI / 180.0);
+		double tdy = sin(T->angle * M_PI / 180.0);
+
+		// get slope angle.
+		// when arg1 < 90, a point on plane in front of thing has lower Z.
+		int slope_ang = T->arg1 - 90;
+		slope_ang = CLAMP(-89, slope_ang, 89);
+
+		double az = sin(slope_ang * M_PI / 180.0);
+
+		// FIXME support tilting an existing slope
+#if 1
+		tdx *= 128.0;
+		tdy *= 128.0;
+		az  *= 128.0;
+
+		if (plane > 0)
+			SlopeFromLine(ex->c_plane, tx,ty,tz, tx+tdx, ty+tdy, tz+az);
+		else
+			SlopeFromLine(ex->f_plane, tx,ty,tz, tx+tdx, ty+tdy, tz+az);
+#else
+		// get normal of existing plane
+		double nx, ny, nz;
+		if (plane == 0)
+		{
+			ex->f_plane.GetNormal(nx, ny, nz);
+		}
+		else
+		{
+			ex->c_plane.GetNormal(nx, ny, nz);
+			nx = -nx; ny = -ny; nz = -nz;
+		}
+#endif
 	}
 
 	void SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,

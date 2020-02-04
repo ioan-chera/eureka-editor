@@ -21,7 +21,7 @@ CHANGES IN Eureka 1.27
 
 - render BOOM's deep water effect (linetype 242)
 - render 3D Floors for EDGE, LEGACY and ZDOOM ports
-- render slopes for EDGE, ETERNITY, ODAMEX and ZDOOM ports
+- render basic slopes for EDGE, ETERNITY, ODAMEX and ZDOOM
 - render things with a NULL sprite as a blue triangle
 - render Hexen map-spots as a green triangle
 - render unknown things with a smaller '?' sprite

@@ -106,6 +106,8 @@ public:
 	{
 		return (x * xm) + (y * ym) + zadd;
 	}
+
+	void GetNormal(double& nx, double& ny, double& nz) const;
 };
 
 
