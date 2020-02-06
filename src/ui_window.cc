@@ -37,7 +37,7 @@
 
 
 #define WINDOW_MIN_W  928
-#define WINDOW_MIN_H  672
+#define WINDOW_MIN_H  640
 
 UI_MainWindow *main_win;
 
