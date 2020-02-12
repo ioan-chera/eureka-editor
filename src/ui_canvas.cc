@@ -2586,7 +2586,7 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 #endif
 
 	// compute total size
-	int total_w = strlen(s) * font_step + 2;
+	int total_w = static_cast<int>(strlen(s) * font_step + 2);
 
 	// center the string at the given coordinate
 	x -= total_w / 2;

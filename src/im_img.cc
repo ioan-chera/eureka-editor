@@ -31,7 +31,11 @@
 
 #ifndef NO_OPENGL
 // need this for GL_UNSIGNED_INT_8_8_8_8_REV
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#else
 #include "GL/glext.h"
+#endif
 #endif
 
 
