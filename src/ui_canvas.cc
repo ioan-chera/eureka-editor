@@ -158,7 +158,15 @@ void UI_Canvas::draw()
 	map_hy = ceil(MAPY(h()));
 
 	// setup projection matrix for 2D drawing
-	ortho();
+
+	// Note: this crud is a workaround for retina displays on MacOS
+	Fl::use_high_res_GL(true);
+	int pix = I_ROUND(main_win->canvas->pixels_per_unit());
+	Fl::use_high_res_GL(false);
+
+	glLoadIdentity();
+	glViewport(0, 0, w() * pix, h() * pix);
+	glOrtho(0, w(), 0, h(), -1, 1);
 #endif
 
 	PrepareToDraw();

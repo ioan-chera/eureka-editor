@@ -1617,7 +1617,12 @@ public:
 
 		// setup projection
 
-		glViewport(0, 0, ow, oh);
+		// Note: this crud is a workaround for retina displays on MacOS
+		Fl::use_high_res_GL(true);
+		int pix = I_ROUND(main_win->canvas->pixels_per_unit());
+		Fl::use_high_res_GL(false);
+
+		glViewport(0, 0, ow * pix, oh * pix);
 
 		GLdouble angle = r_view.angle * 180.0 / M_PI;
 
