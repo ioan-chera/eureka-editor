@@ -279,7 +279,7 @@ special 217 q "Stairs_BuildUpDoom"         tag  speed  height  delay  reset_dela
 # Sector
 special 181 s "Plane_Align"                floor_side  ceil_side  line_id
 special 118 s "Plane_Copy"                 front_floor_tag  front_ceil_tag  back_floor_tag  back_ceil_tag  share_flags
-special 160 s "Sector_Set3DFloor"          tag  type  flags  opacity  line_id
+special 160 s "Sector_Set3DFloor"          tag  type  flags  opacity  tag_hi
 special  51 s "Sector_SetLink"             control_tag  tag  ceiling?  move_flags
 special 190 s "Static_Init"                line_id  property  ceil_flip?  move_flags
 special  54 s "Sector_ChangeFlags"         tag  set_flags  clear_flags

@@ -302,6 +302,7 @@ public:
 			return;
 
 		int flags = -1;
+		int sec_tag = L->tag;
 
 		// EDGE style
 		if (Level_format == MAPF_Doom && (Features.extra_floors & 1))
@@ -353,6 +354,9 @@ public:
 			if (L->arg3 & 8)  flags |= EXFL_TOP;
 			if (L->arg3 & 16) flags |= EXFL_UPPER;
 			if (L->arg3 & 32) flags |= EXFL_LOWER;
+
+			if ((L->arg2 & 8) == 0)
+				sec_tag |= (L->arg5 << 8);
 		}
 
 		if (flags < 0)
@@ -367,7 +371,7 @@ public:
 		// find all matching sectors
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
-			if (Sectors[n]->tag == L->tag)
+			if (Sectors[n]->tag == sec_tag)
 				infos[n].floors.floors.push_back(EF);
 		}
 	}
