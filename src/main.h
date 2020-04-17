@@ -30,7 +30,7 @@
 
 #define EUREKA_TITLE  "Eureka DOOM Editor"
 
-#define EUREKA_VERSION  "1.27"
+#define EUREKA_VERSION  "1.27b"
 
 #define EUREKA_LUMP  "__EUREKA"
 
