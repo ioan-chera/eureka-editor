@@ -84,8 +84,9 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 #else
 	Fl_Gl_Window(X, Y, W, H),
 #endif
-	highlight(),
-	split_ld(-1),
+	last_highlight(),
+	last_splitter(-1),
+	last_split_x(), last_split_y(),
 	snap_x(-1), snap_y(-1),
 	seen_sectors()
 {
@@ -316,10 +317,10 @@ void UI_Canvas::DrawEverything()
 
 		DrawHighlight(edit.mode, edit.dragged.num, false /* skip_lines */, dx, dy);
 
-		if (edit.mode == OBJ_VERTICES && highlight.valid())
+		if (edit.mode == OBJ_VERTICES && edit.highlight.valid())
 		{
 			RenderColor(HI_COL);
-			DrawHighlight(highlight.type, highlight.num);
+			DrawHighlight(edit.highlight.type, edit.highlight.num);
 		}
 
 		RenderThickness(1);
@@ -336,22 +337,22 @@ void UI_Canvas::DrawEverything()
 			DrawLineInfo(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy, true);
 		}
 	}
-	else if (highlight.valid())
+	else if (edit.highlight.valid())
 	{
-		if (edit.action != ACT_DRAW_LINE && edit.Selected->get(highlight.num))
+		if (edit.action != ACT_DRAW_LINE && edit.Selected->get(edit.highlight.num))
 			RenderColor(HI_AND_SEL_COL);
 		else
 			RenderColor(HI_COL);
 
-		if (highlight.type == OBJ_LINEDEFS || highlight.type == OBJ_SECTORS)
+		if (edit.highlight.type == OBJ_LINEDEFS || edit.highlight.type == OBJ_SECTORS)
 			RenderThickness(2);
 
-		DrawHighlight(highlight.type, highlight.num);
+		DrawHighlight(edit.highlight.type, edit.highlight.num);
 
 		if (! edit.error_mode)
 		{
 			RenderColor(LIGHTRED);
-			DrawTagged(highlight.type, highlight.num);
+			DrawTagged(edit.highlight.type, edit.highlight.num);
 		}
 
 		if (edit.mode == OBJ_LINEDEFS && !edit.show_object_numbers)
@@ -700,7 +701,7 @@ void UI_Canvas::DrawLinedefs()
 		{
 			case OBJ_VERTICES:
 			{
-				if (n == split_ld)
+				if (n == edit.split_line.num)
 					col = HI_AND_SEL_COL;
 				else if (edit.error_mode)
 					col = LIGHTGREY;
@@ -709,13 +710,13 @@ void UI_Canvas::DrawLinedefs()
 				else if (one_sided)
 					col = WHITE;
 
-				if (n == split_ld)
+				if (n == edit.split_line.num)
 					line_kind = 's';
 				else
 					line_kind = 'k';
 
 				// show info of last four added lines
-				if (n != split_ld && n >= (NumLineDefs - 4) &&
+				if (n != edit.split_line.num && n >= (NumLineDefs - 4) &&
 					!edit.show_object_numbers)
 				{
 					DrawLineInfo(x1, y1, x2, y2, false);
@@ -1269,20 +1270,20 @@ void UI_Canvas::UpdateHighlight()
 {
 	bool changes = false;
 
-	if (! (highlight == edit.highlight))
+	if (! (last_highlight == edit.highlight))
 	{
-		highlight = edit.highlight;
-		changes   = true;
+		last_highlight = edit.highlight;
+		changes = true;
 	}
 
 	int new_ld = edit.split_line.valid() ? edit.split_line.num : -1;
 
-	if (! (split_ld == new_ld && split_x == edit.split_x && split_y == edit.split_y))
+	if (! (last_splitter == new_ld && last_split_x == edit.split_x && last_split_y == edit.split_y))
 	{
-		split_ld = new_ld;
-		split_x  = edit.split_x;
-		split_y  = edit.split_y;
-		changes  = true;
+		last_splitter = new_ld;
+		last_split_x  = edit.split_x;
+		last_split_y  = edit.split_y;
+		changes = true;
 	}
 
 	if (changes)
@@ -1711,24 +1712,24 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 	int scr_x2 = SCREENX(map_x2);
 	int scr_y2 = SCREENY(map_y2);
 
-	int scr_mx = SCREENX(split_x);
-	int scr_my = SCREENY(split_y);
+	int scr_mx = SCREENX(edit.split_x);
+	int scr_my = SCREENY(edit.split_y);
 
 	RenderLine(scr_x1, scr_y1, scr_mx, scr_my);
 	RenderLine(scr_x2, scr_y2, scr_mx, scr_my);
 
 	if (! edit.show_object_numbers)
 	{
-		double len1 = hypot(map_x1 - split_x, map_y1 - split_y);
-		double len2 = hypot(map_x2 - split_x, map_y2 - split_y);
+		double len1 = hypot(map_x1 - edit.split_x, map_y1 - edit.split_y);
+		double len2 = hypot(map_x2 - edit.split_x, map_y2 - edit.split_y);
 
-		DrawLineNumber(map_x1, map_y1, split_x, split_y, 0, I_ROUND(len1));
-		DrawLineNumber(map_x2, map_y2, split_x, split_y, 0, I_ROUND(len2));
+		DrawLineNumber(map_x1, map_y1, edit.split_x, edit.split_y, 0, I_ROUND(len1));
+		DrawLineNumber(map_x2, map_y2, edit.split_x, edit.split_y, 0, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);
 
-	DrawSplitPoint(split_x, split_y);
+	DrawSplitPoint(edit.split_x, edit.split_y);
 }
 
 
@@ -1860,7 +1861,7 @@ void UI_Canvas::DrawSnapPoint()
 	if (edit.action != ACT_NOTHING)
 		return;
 
-	if (split_ld >= 0)
+	if (edit.split_line.valid())
 		return;
 
 	if (! Vis(snap_x, snap_y, 10))
@@ -1887,7 +1888,7 @@ void UI_Canvas::DrawCurrentLine()
 	double new_y = edit.draw_to_y;
 
 	// should draw a vertex?
-	if (! (highlight.valid() || split_ld >= 0))
+	if (! (edit.highlight.valid() || edit.split_line.valid()))
 	{
 		RenderColor(FL_GREEN);
 		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
@@ -1903,14 +1904,14 @@ void UI_Canvas::DrawCurrentLine()
 
 	FindCrossingPoints(cross,
 					   V->x(), V->y(), edit.draw_from.num,
-					   new_x, new_y, highlight.valid() ? highlight.num : -1);
+					   new_x, new_y, edit.highlight.valid() ? edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{
 		cross_point_t& point = cross.points[k];
 
 		// ignore current split line (what new vertex is sitting on)
-		if (point.ld >= 0 && point.ld == split_ld)
+		if (point.ld >= 0 && point.ld == edit.split_line.num)
 			continue;
 
 		if (point.vert >= 0)

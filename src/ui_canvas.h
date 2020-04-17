@@ -41,14 +41,15 @@ class UI_Canvas : public Fl_Gl_Window
 #endif
 {
 private:
-	// this mirrors edit.highlight, used to detect real changes
+	// this is used to detect changes in edit.highlight
 	// [ to prevent unnecessary redraws ]
-	Objid highlight;
+	Objid last_highlight;
 
-	// this mirrors edit.split_line (etc), used to detect changes
-	int split_ld;
-	double split_x;
-	double split_y;
+	// this is used to detect changes in edit.split_line (etc)
+	// [ to prevent unnecessary redraws ]
+	int last_splitter;
+	double last_split_x;
+	double last_split_y;
 
 	// this is the cached grid-snap position
 	double snap_x, snap_y;
