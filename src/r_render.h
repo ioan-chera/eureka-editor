@@ -59,8 +59,8 @@ public:
 
 	std::vector<int> thing_sectors;
 
-	// last queried highlight object
-	Objid current_hl;
+	// current mouse coords (in window), invalid if -1
+	int mouse_x, mouse_y;
 
 public:
 	Render_View_t();

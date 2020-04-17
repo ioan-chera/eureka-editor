@@ -1279,7 +1279,6 @@ success:
 	// always clear the selection (deleting objects invalidates it)
 	Selection_Clear();
 
-	r_view.current_hl.clear();
 	edit.highlight.clear();
 	edit.split_line.clear();
 

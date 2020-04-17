@@ -93,7 +93,7 @@ Render_View_t::Render_View_t() :
 	texturing(false), sprites(false), lighting(false),
 	gravity(true),
 	thing_sectors(),
-	current_hl()
+	mouse_x(-1), mouse_y(-1)
 { }
 
 Render_View_t::~Render_View_t()
@@ -737,6 +737,9 @@ void Render3D_Enable(bool _enable)
 	if (edit.render3d)
 	{
 		main_win->info_bar->SetMouse(r_view.x, r_view.y);
+
+		// TODO: ideally query this, like code in PointerPos
+		r_view.mouse_x = r_view.mouse_y = -1;
 	}
 	else
 	{
@@ -987,6 +990,12 @@ void Render3D_DragThings()
 
 void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
+	edit.pointer_in_window = true;
+
+	// save position for Render3D_UpdateHighlight
+	r_view.mouse_x = x;
+	r_view.mouse_y = y;
+
 	if (edit.is_panning)
 	{
 		Editor_ScrollMap(0, dx, dy, mod);
@@ -998,17 +1007,16 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	Objid old_hl(r_view.current_hl);
-
-	// this also updates edit.map_x/y/z
-	Render3D_Query(r_view.current_hl, x, y);
-
 	if (edit.action == ACT_CLICK)
 	{
 		CheckBeginDrag();
 	}
 	else if (edit.action == ACT_DRAG)
 	{
+		// get the latest map_x/y/z coordinates
+		Objid unused_hl;
+		Render3D_Query(unused_hl, x, y);
+
 		edit.drag_screen_dx = x - edit.click_screen_x;
 		edit.drag_screen_dy = y - edit.click_screen_y;
 
@@ -1026,28 +1034,30 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	if (! (r_view.current_hl == old_hl))
-	{
-		UpdateHighlight();
-	}
+	UpdateHighlight();
 }
 
 
 void Render3D_UpdateHighlight()
 {
-	// TODO : REVIEW HOW/WHEN pointer_in_window is set
-
 	edit.highlight.clear();
 	edit.split_line.clear();
 
-	if (r_view.current_hl.type == edit.mode &&
-		edit.pointer_in_window &&
+	if (edit.pointer_in_window && r_view.mouse_x >= 0 &&
 		edit.action != ACT_DRAG)
 	{
-		edit.highlight = r_view.current_hl;
+		Objid current_hl;
+
+		// this also updates edit.map_x/y/z
+		Render3D_Query(current_hl, r_view.mouse_x, r_view.mouse_y);
+
+		if (current_hl.type == edit.mode)
+			edit.highlight = current_hl;
 	}
 
+	main_win->canvas->UpdateHighlight();
 	main_win->canvas->redraw();
+
 	main_win->status_bar->redraw();
 }
 
