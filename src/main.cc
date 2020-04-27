@@ -948,7 +948,7 @@ void Main_LoadResources()
 static void ShowHelp()
 {
 	printf(	"\n"
-			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 Andrew Apted, et al ***\n"
+			"*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n"
 			"\n");
 
 	printf(	"Eureka is free software, under the terms of the GNU General\n"
@@ -1032,7 +1032,7 @@ int main(int argc, char *argv[])
 
 
 	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 Andrew Apted, et al ***\n");
+	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n");
 	LogPrintf("\n");
 
 	// sanity checks type sizes (useful when porting)
