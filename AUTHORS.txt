@@ -2,17 +2,23 @@
 EUREKA AUTHORS
 ==============
 
-DEVELOPER:
+CREATOR:
 
 Andrew Apted  <ajapted@users.sf.net>
 
-I created Eureka (based on an existing program) and continue to develop it.
+Created this map editor (based on an existing program), and
+developed it up to version 1.27.  No longer active.
+
+
+DEVELOPER:
+
+Ioan Chera
+
+Ported the program to MacOS, and is the current developer of
+the project.
 
 
 CONTRIBUTORS:
-
-Ioan Chera
-  * MacOS X port
 
 Fabian Greffrath
   * Debian packager

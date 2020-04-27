@@ -2,16 +2,17 @@
 Eureka 1.27 README
 ==================
 
-by Andrew Apted  <ajapted@users.sf.net>
-
-February 2020
-
 
 INTRODUCTION
 
 Eureka is a map editor for the classic DOOM games, and a few related
 games such as Heretic and Hexen.  The supported operating systems are
 Linux (and other Unix-likes), Windows and MacOS X.
+
+
+WEB SITE
+
+http://eureka-editor.sourceforge.net/
 
 
 FEATURES
@@ -273,8 +274,8 @@ COPYRIGHT and LICENSE
 
   Eureka DOOM Editor
 
+  Copyright (C) 2014-2020 Ioan Chera
   Copyright (C) 2001-2020 Andrew Apted, et al
-  Copyright (C) 2014-2017 Ioan Chera
   Copyright (C) 1997-2003 Andre Majorel et al
 
   Eureka is free software; you can redistribute it and/or modify
@@ -286,12 +287,4 @@ COPYRIGHT and LICENSE
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
-
-
-
-CONTACT DETAILS
-
-  Web: http://eureka-editor.sourceforge.net/
-
-  Email: <ajapted@users.sf.net>
 
