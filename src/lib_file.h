@@ -33,6 +33,7 @@
 bool HasExtension(const char *filename);
 bool MatchExtension(const char *filename, const char *ext);
 char *ReplaceExtension(const char *filename, const char *ext);
+std::string ReplaceExtension_s(const char *filename, const char *ext);
 const char *FindBaseName(const char *filename);
 bool FilenameIsBare(const char *filename);
 const char *FilenameReposition(const char *filename, const char *othername);

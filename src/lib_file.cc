@@ -153,7 +153,13 @@ char *ReplaceExtension(const char *filename, const char *ext)
 
 	return buffer;
 }
-
+std::string ReplaceExtension_s(const char *filename, const char *ext)
+{
+	char *str = ReplaceExtension(filename, ext);
+	std::string result(str ? str : "");
+	StringFree(str);
+	return result;
+}
 
 const char *FindBaseName(const char *filename)
 {
