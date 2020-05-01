@@ -97,7 +97,7 @@ PortInfo_c::~PortInfo_c()
 void PortInfo_c::AddSupportedGame(const char *game)
 {
 	if (! SupportsGame(game))
-		supported_games.push_back(std::string(game));
+		supported_games.push_back(game);
 }
 
 bool PortInfo_c::SupportsGame(const char *game) const
@@ -917,10 +917,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-		{
-			// TODO memory leak
-			loading_Port->AddSupportedGame(StringLower(*argv));
-		}
+			loading_Port->AddSupportedGame(StringLower_s(*argv).c_str());
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
@@ -1000,7 +997,7 @@ void M_ParseSetVar(parser_state_c *pst)
 //  only minimal parsing occurs, in particular the "include", "set"
 //  and "if".."endif" directives are NOT handled.
 //
-void M_ParseDefinitionFile(parse_purpose_e purpose,
+void M_ParseDefinitionFile(const parse_purpose_e purpose,
 						   const char *filename,
 						   const char *folder,
 						   const char *prettyname,
@@ -1172,7 +1169,7 @@ GameInfo_c * M_LoadGameInfo(const char *game)
 PortInfo_c * M_LoadPortInfo(const char *port)
 {
 	std::map<std::string, PortInfo_c *>::iterator IT;
-	IT = loaded_port_defs.find(std::string(port));
+	IT = loaded_port_defs.find(port);
 
 	if (IT != loaded_port_defs.end())
 		return IT->second;
@@ -1188,8 +1185,8 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 	// default is to support both Doom and Doom2
 	if (loading_Port->supported_games.empty())
 	{
-		loading_Port->supported_games.push_back(std::string("doom"));
-		loading_Port->supported_games.push_back(std::string("doom2"));
+		loading_Port->supported_games.push_back("doom");
+		loading_Port->supported_games.push_back("doom2");
 	}
 
 	loaded_port_defs[port] = loading_Port;

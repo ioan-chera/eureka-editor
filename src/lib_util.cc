@@ -163,6 +163,13 @@ char *StringLower(const char *name)
 	return copy;
 }
 
+std::string StringLower_s(const char *name)
+{
+	std::string copy(name ? name : "");
+	for(char &c : copy)
+		c = tolower(c);
+	return copy;
+}
 
 char *StringPrintf(const char *str, ...)
 {

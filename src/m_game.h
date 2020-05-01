@@ -257,14 +257,13 @@ void M_LoadDefinitions(const char *folder, const char *name);
 
 bool M_CanLoadDefinitions(const char *folder, const char *name);
 
-typedef enum
+enum parse_purpose_e
 {
 	PURPOSE_Normal = 0,		// normal loading, update everything
 	PURPOSE_Resource,		// as a resource file
 	PURPOSE_GameInfo,		// load a GameInfo_c
 	PURPOSE_PortInfo,		// load a PortInfo_c
-
-} parse_purpose_e;
+};
 
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *filename,
