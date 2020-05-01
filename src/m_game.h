@@ -279,7 +279,7 @@ std::vector<std::string> M_CollectKnownDefs(const char *folder);
 
 bool M_CheckPortSupportsGame(const char *base_game, const char *port);
 
-const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
+std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
 const char * M_GetBaseGame(const char *game);
 

@@ -1297,12 +1297,12 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
+std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
 {
 	std::vector<std::string> list = M_CollectKnownDefs("ports");
 
 	if (list.empty())
-		return StringDup("");
+		return "";
 
 	// determine final length
 	int length = 2 + (int)list.size();
@@ -1334,7 +1334,9 @@ const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const 
 
 //	DebugPrintf( "RESULT = '%s'\n", result);
 
-	return result;
+	std::string s(result);
+	StringFree(result);
+	return s;
 }
 
 

@@ -890,14 +890,13 @@ void UI_ProjectSetup::PopulatePort()
 		base_game = "doom2";
 
 
-	const char *menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectPortsForMenu(base_game, &menu_value, prev_port);
+	std::string menu_string = M_CollectPortsForMenu(base_game, &menu_value, prev_port);
 
-	if (menu_string[0])
+	if (!menu_string.empty())
 	{
-		port_choice->add  (menu_string);
+		port_choice->add  (menu_string.c_str());
 		port_choice->value(menu_value);
 
 		port = StringDup(port_choice->mvalue()->text);
