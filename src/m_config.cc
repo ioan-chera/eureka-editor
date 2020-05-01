@@ -846,6 +846,27 @@ bool M_ReadTextLine(char *buf, size_t size, FILE *fp)
 	return true;
 }
 
+//
+// Opens the file
+//
+bool LineFile::open(const char *path)
+{
+	close();
+	fp = fopen(path, "rt");
+	return !!fp;
+}
+
+//
+// Close if out of scope
+//
+void LineFile::close()
+{
+	if(fp)
+	{
+		fclose(fp);
+		fp = nullptr;
+	}
+}
 
 static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 {
@@ -1539,9 +1560,8 @@ bool M_LoadUserState()
 
 	char *filename = PersistFilename(crc);
 
-	FILE *fp = fopen(filename, "r");
-
-	if (! fp)
+	LineFile file(filename);
+	if (! file)
 		return false;
 
 	LogPrintf("Loading user state from: %s\n", filename);
@@ -1551,7 +1571,7 @@ bool M_LoadUserState()
 
 	const char * tokens[MAX_TOKENS];
 
-	while (M_ReadTextLine(line, sizeof(line), fp))
+	while (file.readLine(line, sizeof(line)))
 	{
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
 
@@ -1579,7 +1599,7 @@ bool M_LoadUserState()
 		}
 	}
 
-	fclose(fp);
+	file.close();
 
 	Props_LoadValues();
 

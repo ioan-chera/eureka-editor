@@ -1035,11 +1035,11 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 	// read the definition file, line by line
 
-	FILE *fp = fopen(filename, "r");
-	if (! fp)
+	LineFile file(filename);
+	if (! file)
 		ThrowException("Cannot open %s: %s\n", filename, strerror(errno));
 
-	while (M_ReadTextLine(pst->readbuf, sizeof(pst->readbuf), fp))
+	while (file.readLine(pst->readbuf, sizeof(pst->readbuf)))
 	{
 		pst->lineno += 1;
 
@@ -1149,8 +1149,6 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		FatalError("%s(%d): Missing endif statement\n", pst->fname,
 			pst->cond_stack.back().start_line);
 	}
-
-	fclose(fp);
 }
 
 

@@ -628,9 +628,9 @@ void UI_TextEditor::InsertFile()
 	//       quantity of invalid UTF-8 sequences.
 
 	// open file in binary mode (we handle CR/LF ourselves)
-	FILE * fp = fopen(filename, "rb");
+	LineFile file(filename);
 
-	if (fp == NULL)
+	if (!file)
 	{
 		snprintf(line, sizeof(line), "%s", strerror(errno));
 		DLG_Notify("Unable to open text file:\n\n%s", line);
@@ -641,7 +641,7 @@ void UI_TextEditor::InsertFile()
 
 	int pos = ted->insert_position();
 
-	while (M_ReadTextLine(line, sizeof(line), fp))
+	while (file.readLine(line, sizeof(line)))
 	{
 		tbuf->insert(pos, line);
 		pos += strlen(line);
@@ -649,8 +649,6 @@ void UI_TextEditor::InsertFile()
 		tbuf->insert(pos, "\n");
 		pos += 1;
 	}
-
-	fclose(fp);
 }
 
 

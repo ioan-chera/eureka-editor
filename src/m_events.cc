@@ -907,17 +907,17 @@ static bool M_ParseOperationFile()
 	// look in user's $HOME directory first
 	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
 
-	FILE *fp = fopen(filename, "r");
+	LineFile file(filename);
 
 	// otherwise load it from the installation directory
-	if (! fp)
+	if (! file)
 	{
 		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
 
-		fp = fopen(filename, "r");
+		file.open(filename);
 	}
 
-	if (! fp)
+	if (! file)
 		return false;
 
 
@@ -930,7 +930,7 @@ static bool M_ParseOperationFile()
 
 	std::string context;
 
-	while (M_ReadTextLine(line, sizeof(line), fp))
+	while (file.readLine(line, sizeof(line)))
 	{
 		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
 		if (num_tok == 0)
@@ -966,7 +966,7 @@ static bool M_ParseOperationFile()
 			ParseOperationLine(tokens, num_tok, menu);
 	}
 
-	fclose(fp);
+	file.close();
 
 	if (menu != NULL)
 		M_AddOperationMenu(context, menu);

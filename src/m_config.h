@@ -128,6 +128,43 @@ void M_PrintCommandLineOptions(FILE *fp);
 // returns true if ok, false on EOF or error
 bool M_ReadTextLine(char *buf, size_t size, FILE *fp);
 
+//
+// File to be read by line (encapsulated)
+//
+class LineFile
+{
+public:
+	//
+	// Read one line
+	//
+	bool readLine(char *buf, size_t size)
+	{
+		return M_ReadTextLine(buf, size, fp);
+	}
+
+	bool open(const char *path);
+	void close();
+	LineFile() = default;
+	explicit LineFile(const char *path)
+	{
+		open(path);
+	}
+	~LineFile()
+	{
+		close();
+	}
+
+	//
+	// Easy check
+	//
+	operator bool() const
+	{
+		return !!fp;
+	}
+private:
+	FILE *fp = nullptr;
+};
+
 
 // returns number of tokens, zero for comment, negative on error
 int M_ParseLine(const char *line, const char ** tokens, int max_tok, int do_strings);
