@@ -55,7 +55,7 @@ typedef int fixcoord_t;
 #define  FROM_COORD(fx)  ((double)(fx) / 4096.0)
 #define    TO_COORD(db)  ((fixcoord_t) I_ROUND((db) * 4096.0))
 
-#define INT_TO_COORD(i)  ((fixcoord_t) ((i) << 12))
+#define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
 #define COORD_TO_INT(i)  ((int) ((i) / 4096))
 
 fixcoord_t MakeValidCoord(double x);
