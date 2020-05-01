@@ -821,7 +821,7 @@ static const opt_desc_t options[] =
 
 // this automatically strips CR/LF from the line.
 // returns true if ok, false on EOF or error.
-bool M_ReadTextLine(char *buf, size_t size, FILE *fp)
+bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept
 {
 	if (! fgets(buf, static_cast<int>(size), fp))
 	{
@@ -849,7 +849,7 @@ bool M_ReadTextLine(char *buf, size_t size, FILE *fp)
 //
 // Opens the file
 //
-bool LineFile::open(const char *path)
+bool LineFile::open(const char *path) noexcept
 {
 	close();
 	fp = fopen(path, "rt");
@@ -859,7 +859,7 @@ bool LineFile::open(const char *path)
 //
 // Close if out of scope
 //
-void LineFile::close()
+void LineFile::close() noexcept
 {
 	if(fp)
 	{

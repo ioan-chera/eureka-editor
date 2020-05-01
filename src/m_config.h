@@ -126,7 +126,7 @@ void M_PrintCommandLineOptions(FILE *fp);
 
 
 // returns true if ok, false on EOF or error
-bool M_ReadTextLine(char *buf, size_t size, FILE *fp);
+bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept;
 
 //
 // File to be read by line (encapsulated)
@@ -137,19 +137,19 @@ public:
 	//
 	// Read one line
 	//
-	bool readLine(char *buf, size_t size)
+	bool readLine(char *buf, size_t size) noexcept
 	{
 		return M_ReadTextLine(buf, size, fp);
 	}
 
-	bool open(const char *path);
-	void close();
+	bool open(const char *path) noexcept;
+	void close() noexcept;
 	LineFile() = default;
-	explicit LineFile(const char *path)
+	explicit LineFile(const char *path) noexcept
 	{
 		open(path);
 	}
-	~LineFile()
+	~LineFile() noexcept
 	{
 		close();
 	}
@@ -157,7 +157,7 @@ public:
 	//
 	// Easy check
 	//
-	operator bool() const
+	operator bool() const noexcept
 	{
 		return !!fp;
 	}
