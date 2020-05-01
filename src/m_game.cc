@@ -270,7 +270,7 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 			result |= (1 << MAPF_UDMF);
 
 		else
-			FatalError("Unknown map format '%s' in definition file.\n", argv[0]);
+			ThrowException("Unknown map format '%s' in definition file.\n", argv[0]);
 	}
 
 	return result;
@@ -303,7 +303,7 @@ static void ParseClearKeywords(char ** argv, int argc)
 			flat_categories.clear();
 		}
 		else
-			FatalError("Unknown clear keyword '%s' in definition file.\n", argv[0]);
+			ThrowException("Unknown clear keyword '%s' in definition file.\n", argv[0]);
 	}
 }
 
@@ -434,7 +434,7 @@ void M_LoadDefinitions(const char *folder, const char *name)
 	std::string filename = FindDefinitionFile(folder, name);
 
 	if (filename.empty())
-		FatalError("Cannot find definition file: %s\n", prettyname);
+		ThrowException("Cannot find definition file: %s\n", prettyname);
 
 	DebugPrintf("  found at: %s\n", filename.c_str());
 
@@ -602,7 +602,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	if (y_stricmp(argv[0], "player_size") == 0)
 	{
 		if (nargs != 3)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		Misc_info.player_r    = atoi(argv[1]);
 		Misc_info.player_h    = atoi(argv[2]);
@@ -611,38 +611,38 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
 	{
 		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		Misc_info.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "sky_flat") == 0)
 	{
 		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		if (strlen(argv[1]) >= sizeof(Misc_info.sky_flat))
-			FatalError("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
+			ThrowException("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
 
 		strcpy(Misc_info.sky_flat, argv[1]);
 	}
 	else if (y_stricmp(argv[0], "color") == 0)
 	{
 		if (nargs < 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		ParseColorDef(pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "feature") == 0)
 	{
 		if (nargs < 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		ParseFeatureDef(pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "default_textures") == 0)
 	{
 		if (nargs != 3)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
 		default_wall_tex	= StringDup(argv[1]);
 		default_floor_tex	= StringDup(argv[2]);
@@ -651,7 +651,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "default_thing") == 0)
 	{
 		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		default_thing = atoi(argv[1]);
 	}
@@ -659,7 +659,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			 y_stricmp(argv[0], "spec_group") == 0)
 	{
 		if (nargs != 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		linegroup_t * lg = new linegroup_t;
 
@@ -673,7 +673,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			 y_stricmp(argv[0], "special") == 0)
 	{
 		if (nargs < 3)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
 		linetype_t * info = new linetype_t;
 
@@ -703,7 +703,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "sector") == 0)
 	{
 		if (nargs != 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		int number = atoi(argv[1]);
 
@@ -717,7 +717,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "thinggroup") == 0)
 	{
 		if (nargs != 3)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
 		thinggroup_t * tg = new thinggroup_t;
 
@@ -731,7 +731,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "thing") == 0)
 	{
 		if (nargs < 6)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 6);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 6);
 
 		thingtype_t * info = new thingtype_t;
 
@@ -769,7 +769,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "texturegroup") == 0)
 	{
 		if (nargs != 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		texturegroup_t * tg = new texturegroup_t;
 
@@ -782,7 +782,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "texture") == 0)
 	{
 		if (nargs != 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		char group = argv[1][0];
 		std::string name = std::string(argv[2]);
@@ -799,7 +799,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "flat") == 0)
 	{
 		if (nargs != 2)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		char group = argv[1][0];
 		std::string name = std::string(argv[2]);
@@ -816,13 +816,13 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "gen_line") == 0)
 	{
 		if (nargs != 4)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 4);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 4);
 
 		pst->current_gen_line = num_gen_linetypes;
 		num_gen_linetypes++;
 
 		if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
-			FatalError("%s(%d): too many gen_line definitions\n", pst->fname, pst->lineno);
+			ThrowException("%s(%d): too many gen_line definitions\n", pst->fname, pst->lineno);
 
 		generalized_linetype_t *def = &gen_linetypes[pst->current_gen_line];
 
@@ -839,10 +839,10 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "gen_field") == 0)
 	{
 		if (nargs < 5)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 5);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 5);
 
 		if (pst->current_gen_line < 0)
-			FatalError("%s(%d): gen_field used outside of a gen_line definition\n", pst->fname, pst->lineno);
+			ThrowException("%s(%d): gen_field used outside of a gen_line definition\n", pst->fname, pst->lineno);
 
 		generalized_linetype_t *def = &gen_linetypes[pst->current_gen_line];
 
@@ -850,7 +850,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		def->num_fields++;
 		if (def->num_fields > MAX_GEN_NUM_FIELDS)
-			FatalError("%s(%d): too many fields in gen_line definition\n", pst->fname, pst->lineno);
+			ThrowException("%s(%d): too many fields in gen_line definition\n", pst->fname, pst->lineno);
 
 		field->bits  = atoi(argv[1]);
 		field->shift = atoi(argv[2]);
@@ -872,7 +872,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "clear") == 0)
 	{
 		if (nargs < 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		ParseClearKeywords(pst->argv + 1, nargs);
 	}
@@ -897,14 +897,14 @@ static void M_ParseGameInfoLine(parser_state_c *pst)
 		y_stricmp(argv[0], "supported_games") == 0 ||
 		y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
-		FatalError("%s(%d): %s can only be used in port definitions\n",
+		ThrowException("%s(%d): %s can only be used in port definitions\n",
 			pst->fname, pst->lineno, argv[0]);
 	}
 
 	if (y_stricmp(argv[0], "base_game") == 0)
 	{
 		if (nargs < 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		// TODO memory leak
 		loading_Game->base_game = StringLower(argv[1]);
@@ -919,14 +919,14 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 
 	if (y_stricmp(argv[0], "base_game") == 0)
 	{
-		FatalError("%s(%d): %s can only be used in game definitions\n",
+		ThrowException("%s(%d): %s can only be used in game definitions\n",
 			pst->fname, pst->lineno, argv[0]);
 	}
 
 	if (y_stricmp(argv[0], "supported_games") == 0)
 	{
 		if (nargs < 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
 		{
@@ -937,14 +937,14 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		loading_Port->formats = ParseMapFormats(argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
 		if (nargs != 1)
-			FatalError(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
+			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		// want to preserve the case here
 		loading_Port->udmf_namespace = argv[1];
@@ -965,8 +965,8 @@ static bool M_ParseConditional(parser_state_c *pst)
 	if (op_is || op_not)
 	{
 		if (strlen(argv[0]) < 2 || argv[0][0] != '$')
-			FatalError("%s(%d): expected variable in if statement\n",
-						pst->fname, pst->lineno, argv[2]);
+			ThrowException("%s(%d): expected variable in if statement\n",
+						   pst->fname, pst->lineno, argv[2]);
 
 		// tokens are stored in pst->tokenbuf, so this is OK
 		y_strupr(argv[0]);
@@ -981,7 +981,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 		return op_not;
 	}
 
-	FatalError("%s(%d): syntax error in if statement\n", pst->fname, pst->lineno);
+	ThrowException("%s(%d): syntax error in if statement\n", pst->fname, pst->lineno);
 	return false;
 }
 
@@ -992,11 +992,11 @@ void M_ParseSetVar(parser_state_c *pst)
 	int    nargs = pst->argc - 1;
 
 	if (nargs != 2)
-		FatalError(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
+		ThrowException(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
 
 	if (strlen(argv[0]) < 2 || argv[0][0] != '$')
-		FatalError("%s(%d): variable name too short or lacks '$' prefix\n",
-					pst->fname, pst->lineno);
+		ThrowException("%s(%d): variable name too short or lacks '$' prefix\n",
+					   pst->fname, pst->lineno);
 
 	// tokens are stored in pst->tokenbuf, so this is OK
 	y_strupr(argv[0]);
@@ -1067,7 +1067,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		else if (y_stricmp(pst->argv[0], "else") == 0)
 		{
 			if (pst->cond_stack.empty())
-				FatalError("%s(%d): else without if\n", pst->fname, pst->lineno);
+				ThrowException("%s(%d): else without if\n", pst->fname, pst->lineno);
 
 			// toggle the mode
 			pst->cond_stack.back().Toggle();
@@ -1076,7 +1076,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		else if (y_stricmp(pst->argv[0], "endif") == 0)
 		{
 			if (pst->cond_stack.empty())
-				FatalError("%s(%d): endif without if\n", pst->fname, pst->lineno);
+				ThrowException("%s(%d): endif without if\n", pst->fname, pst->lineno);
 
 			pst->cond_stack.pop_back();
 			continue;
@@ -1100,10 +1100,10 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 		if (y_stricmp(pst->argv[0], "include") == 0)
 		{
 			if (nargs != 1)
-				FatalError(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
+				ThrowException(bad_arg_count, pst->fname, pst->lineno, pst->argv[0], 1);
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
-				FatalError("%s(%d): Too many includes (check for a loop)\n",
+				ThrowException("%s(%d): Too many includes (check for a loop)\n",
 							pst->fname, pst->lineno);
 
 			const char * new_folder = folder;
@@ -1117,8 +1117,8 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 			}
 
 			if (new_name.empty())
-				FatalError("%s(%d): Cannot find include file: %s.ugh\n",
-							pst->fname, pst->lineno, pst->argv[1]);
+				ThrowException("%s(%d): Cannot find include file: %s.ugh\n",
+							   pst->fname, pst->lineno, pst->argv[1]);
 
 			M_ParseDefinitionFile(purpose, new_name.c_str(), new_folder,
 								  NULL /* prettyname */,
@@ -1146,7 +1146,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	// check for an unterminated conditional
 	if (! pst->cond_stack.empty())
 	{
-		FatalError("%s(%d): Missing endif statement\n", pst->fname,
+		ThrowException("%s(%d): Missing endif statement\n", pst->fname,
 			pst->cond_stack.back().start_line);
 	}
 }
@@ -1171,7 +1171,7 @@ GameInfo_c * M_LoadGameInfo(const char *game)
 
 	if (loading_Game->base_game.empty())
 	{
-		FatalError("Game definition for '%s' does not set base_game\n", game);
+		ThrowException("Game definition for '%s' does not set base_game\n", game);
 	}
 
 	loaded_game_defs[game] = loading_Game;
