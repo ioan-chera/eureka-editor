@@ -200,6 +200,18 @@ void FatalError(const char *fmt, ...)
 	exit(2);
 }
 
+//
+// Throw an exception using format
+//
+void ThrowException(const char *fmt, ...)
+{
+	char message[256];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(message, sizeof(message), fmt, ap);
+	va_end(ap);
+	throw std::runtime_error(message);
+}
 
 static void CreateHomeDirs()
 {

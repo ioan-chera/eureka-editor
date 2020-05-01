@@ -178,6 +178,7 @@ void Main_Quit();
 __attribute__((noreturn))
 #endif
 void FatalError(const char *fmt, ...);
+void ThrowException(const char *fmt, ...);
 
 #define BugError  FatalError
 

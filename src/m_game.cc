@@ -554,8 +554,8 @@ static void M_TokenizeLine(parser_state_c *pst)
 		if (!in_token && (quoted || !isspace(*src)))
 		{
 			if (pst->argc >= MAX_TOKENS)
-				FatalError("%s(%d): more than %d tokens on the line\n",
-							pst->fname, pst->lineno, MAX_TOKENS);
+				ThrowException("%s(%d): more than %d tokens on the line\n",
+							   pst->fname, pst->lineno, MAX_TOKENS);
 
 			in_token = true;
 
@@ -579,7 +579,7 @@ static void M_TokenizeLine(parser_state_c *pst)
 	}
 
 	if (quoted)
-		FatalError("%s(%d): unmatched double quote\n", pst->fname, pst->lineno);
+		ThrowException("%s(%d): unmatched double quote\n", pst->fname, pst->lineno);
 }
 
 
@@ -1037,7 +1037,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 
 	FILE *fp = fopen(filename, "r");
 	if (! fp)
-		FatalError("Cannot open %s: %s\n", filename, strerror(errno));
+		ThrowException("Cannot open %s: %s\n", filename, strerror(errno));
 
 	while (M_ReadTextLine(pst->readbuf, sizeof(pst->readbuf), fp))
 	{
