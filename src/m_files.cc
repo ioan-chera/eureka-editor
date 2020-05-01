@@ -755,9 +755,7 @@ void M_LookForIWADs()
 {
 	LogPrintf("Looking for IWADs....\n");
 
-	string_list_t  game_list;
-
-	M_CollectKnownDefs("games", game_list);
+	string_list_t  game_list = M_CollectKnownDefs("games");
 
 	for (unsigned int i = 0 ; i < game_list.size() ; i++)
 	{

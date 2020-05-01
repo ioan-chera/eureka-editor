@@ -1207,7 +1207,7 @@ struct DefName_CMP_pred
 	}
 };
 
-void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
+std::vector<const char *> M_CollectKnownDefs(const char *folder)
 {
 	std::vector<const char *> temp_list;
 
@@ -1234,6 +1234,8 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 	// transfer to passed list, removing duplicates as we go
 	unsigned int pos;
 
+	std::vector<const char *> list;
+	list.reserve(temp_list.size());
 	for (pos = 0 ; pos < temp_list.size() ; pos++)
 	{
 		if (pos + 1 < temp_list.size() &&
@@ -1245,6 +1247,7 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 
 		list.push_back(temp_list[pos]);
 	}
+	return list;
 }
 
 
@@ -1299,9 +1302,7 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 
 const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
 {
-	std::vector<const char *> list;
-
-	M_CollectKnownDefs("ports", list);
+	std::vector<const char *> list = M_CollectKnownDefs("ports");
 
 	if (list.empty())
 		return StringDup("");
