@@ -475,6 +475,7 @@ const char * FileFindInPath(const char *paths, const char *base_name)
 //
 int ScanDirectory(const char *path, const std::function<void(const char *, int)> &func)
 {
+	SYS_ASSERT(!!path);
 	int count = 0;
 
 #ifdef WIN32
@@ -557,19 +558,15 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 				strcmp(fdata->d_name, "..") == 0)
 			continue;
 
-
-		const char *full_name = StringPrintf("%s/%s", path, fdata->d_name);
+		std::string full_name = StringPrintf_s("%s/%s", path, fdata->d_name);
 
 		struct stat finfo;
 
-		if (stat(full_name, &finfo) != 0)
+		if (stat(full_name.c_str(), &finfo) != 0)
 		{
 			DebugPrintf(".... stat failed: %s\n", strerror(errno));
-			StringFree(full_name);
 			continue;
 		}
-
-		StringFree(full_name);
 
 
 		int flags = 0;
