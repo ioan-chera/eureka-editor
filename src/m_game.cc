@@ -381,10 +381,9 @@ static void ParseFeatureDef(char ** argv, int argc)
 }
 
 
-static const char * FindDefinitionFile(const char *folder, const char *name)
+static std::string FindDefinitionFile(const char *folder, const char *name)
 {
-	static char filename[FL_PATH_MAX];
-
+	SYS_ASSERT(folder && name);
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
 		const char *base_dir = (pass == 0) ? home_dir : install_dir;
@@ -392,23 +391,28 @@ static const char * FindDefinitionFile(const char *folder, const char *name)
 		if (! base_dir)
 			continue;
 
-		snprintf(filename, sizeof(filename), "%s/%s/%s.ugh", base_dir, folder, name);
+		std::string filename = base_dir;
+		filename += '/';
+		filename += folder;
+		filename += '/';
+		filename += name;
+		filename += ".ugh";
 
-		DebugPrintf("  trying: %s\n", filename);
+		DebugPrintf("  trying: %s\n", filename.c_str());
 
-		if (FileExists(filename))
+		if (FileExists(filename.c_str()))
 			return filename;
 	}
 
-	return NULL;
+	return "";
 }
 
 
 bool M_CanLoadDefinitions(const char *folder, const char *name)
 {
-	const char * filename = FindDefinitionFile(folder, name);
+	std::string filename = FindDefinitionFile(folder, name);
 
-	return (filename != NULL);
+	return !filename.empty();
 }
 
 
@@ -427,14 +431,14 @@ void M_LoadDefinitions(const char *folder, const char *name)
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
 
-	const char * filename = FindDefinitionFile(folder, name);
+	std::string filename = FindDefinitionFile(folder, name);
 
-	if (! filename)
+	if (filename.empty())
 		FatalError("Cannot find definition file: %s\n", prettyname);
 
-	DebugPrintf("  found at: %s\n", filename);
+	DebugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(PURPOSE_Normal, filename, folder, prettyname);
+	M_ParseDefinitionFile(PURPOSE_Normal, filename.c_str(), folder, prettyname);
 }
 
 
@@ -1103,20 +1107,20 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 							pst->fname, pst->lineno);
 
 			const char * new_folder = folder;
-			const char * new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+			std::string new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
-			if (! new_name && strcmp(folder, "common") != 0)
+			if (new_name.empty() && strcmp(folder, "common") != 0)
 			{
 				new_folder = "common";
 				new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 			}
 
-			if (! new_name)
+			if (new_name.empty())
 				FatalError("%s(%d): Cannot find include file: %s.ugh\n",
 							pst->fname, pst->lineno, pst->argv[1]);
 
-			M_ParseDefinitionFile(purpose, new_name, new_folder,
+			M_ParseDefinitionFile(purpose, new_name.c_str(), new_folder,
 								  NULL /* prettyname */,
 								  include_level + 1);
 			continue;
@@ -1159,13 +1163,13 @@ GameInfo_c * M_LoadGameInfo(const char *game)
 	if (IT != loaded_game_defs.end())
 		return IT->second;
 
-	const char * filename = FindDefinitionFile("games", game);
-	if (! filename)
+	std::string filename = FindDefinitionFile("games", game);
+	if (filename.empty())
 		return NULL;
 
 	loading_Game = new GameInfo_c(game);
 
-	M_ParseDefinitionFile(PURPOSE_GameInfo, filename, "games", NULL);
+	M_ParseDefinitionFile(PURPOSE_GameInfo, filename.c_str(), "games", NULL);
 
 	if (loading_Game->base_game.empty())
 	{
@@ -1185,13 +1189,13 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 	if (IT != loaded_port_defs.end())
 		return IT->second;
 
-	const char * filename = FindDefinitionFile("ports", port);
-	if (! filename)
+	std::string filename = FindDefinitionFile("ports", port);
+	if (filename.empty())
 		return NULL;
 
 	loading_Port = new PortInfo_c(port);
 
-	M_ParseDefinitionFile(PURPOSE_PortInfo, filename, "ports", NULL);
+	M_ParseDefinitionFile(PURPOSE_PortInfo, filename.c_str(), "ports", NULL);
 
 	// default is to support both Doom and Doom2
 	if (loading_Port->supported_games.empty())
