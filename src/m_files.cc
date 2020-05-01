@@ -1022,8 +1022,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 	lump->Printf("# Eureka project info\n");
 
-	if (Game_name)
-		lump->Printf("game %s\n", Game_name);
+	if (!Game_name.empty())
+		lump->Printf("game %s\n", Game_name.c_str());
 
 	if (Port_name)
 		lump->Printf("port %s\n", Port_name);

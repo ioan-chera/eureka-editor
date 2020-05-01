@@ -830,7 +830,7 @@ void UI_ProjectSetup::PopulateIWADs()
 
 	const char *prev_game = game;
 
-	if (! prev_game) prev_game = Game_name;
+	if (! prev_game) prev_game = Game_name.c_str();
 	if (! prev_game) prev_game = "doom2";
 
 
@@ -883,8 +883,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (game_choice->mvalue())
 		base_game = M_GetBaseGame(game_choice->mvalue()->text);
-	else if (Game_name)
-		base_game = M_GetBaseGame(Game_name);
+	else if (!Game_name.empty())
+		base_game = M_GetBaseGame(Game_name.c_str());
 
 	if (! base_game)
 		base_game = "doom2";

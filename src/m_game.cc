@@ -168,7 +168,8 @@ void M_PrepareConfigVariables()
 			parse_vars["$MAP_FORMAT"] = "UDMF";
 			break;
 
-		default: break;
+		default:
+			break;
 	}
 
 	if (! Udmf_namespace.empty())
@@ -176,13 +177,13 @@ void M_PrepareConfigVariables()
 		parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
 	}
 
-	if (Game_name)
+	if (!Game_name.empty())
 	{
 		parse_vars["$GAME_NAME"] = Game_name;
 
-		if (M_CanLoadDefinitions("games", Game_name))
+		if (M_CanLoadDefinitions("games", Game_name.c_str()))
 		{
-			const char *base_game = M_GetBaseGame(Game_name);
+			const char *base_game = M_GetBaseGame(Game_name.c_str());
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
@@ -1119,7 +1120,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 			M_ParseGameInfoLine(pst);
 			continue;
 		}
-		else if (purpose == PURPOSE_PortInfo)
+		if (purpose == PURPOSE_PortInfo)
 		{
 			M_ParsePortInfoLine(pst);
 			continue;

@@ -79,7 +79,7 @@ const char *Pwad_name = NULL;
 std::vector< const char * > Pwad_list;
 std::vector< const char * > Resource_list;
 
-const char *Game_name;
+std::string Game_name;
 const char *Port_name;
 const char *Level_name;
 
@@ -464,7 +464,7 @@ static void DeterminePort()
 		return;
 	}
 
-	const char *base_game = M_GetBaseGame(Game_name);
+	const char *base_game = M_GetBaseGame(Game_name.c_str());
 
 	// ensure the 'default_port' value is OK
 	if (! (default_port && default_port[0]))
@@ -481,7 +481,7 @@ static void DeterminePort()
 	else if (! M_CheckPortSupportsGame(base_game, default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
-				default_port, Game_name);
+				  default_port, Game_name.c_str());
 		default_port = "vanilla";
 	}
 
@@ -845,10 +845,10 @@ static void ReadGameInfo()
 {
 	Game_name = GameNameFromIWAD(Iwad_name);
 
-	LogPrintf("Game name: '%s'\n", Game_name);
+	LogPrintf("Game name: '%s'\n", Game_name.c_str());
 	LogPrintf("IWAD file: '%s'\n", Iwad_name);
 
-	M_LoadDefinitions("games", Game_name);
+	M_LoadDefinitions("games", Game_name.c_str());
 }
 
 
@@ -860,13 +860,13 @@ static void ReadPortInfo()
 
 	SYS_ASSERT(Port_name);
 
-	const char *base_game = M_GetBaseGame(Game_name);
+	const char *base_game = M_GetBaseGame(Game_name.c_str());
 
 	// warn user if this port is incompatible with the game
 	if (! M_CheckPortSupportsGame(base_game, Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-				Port_name, Game_name);
+				  Port_name, Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -875,7 +875,7 @@ static void ReadPortInfo()
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-						Port_name, Game_name);
+							  Port_name, Game_name.c_str());
 
 		if (res == 0)
 		{

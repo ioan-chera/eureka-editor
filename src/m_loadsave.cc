@@ -184,12 +184,12 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
 	// grab the new information
 
-	Game_name = StringDup(dialog->game);
+	Game_name = dialog->game;
 	Port_name = StringDup(dialog->port);
 
-	SYS_ASSERT(Game_name);
+	SYS_ASSERT(!Game_name.empty());
 
-	Iwad_name = StringDup(M_QueryKnownIWAD(Game_name));
+	Iwad_name = StringDup(M_QueryKnownIWAD(Game_name.c_str()));
 	SYS_ASSERT(Iwad_name);
 
 	Level_format = dialog->map_format;
@@ -327,10 +327,10 @@ bool MissingIWAD_Dialog()
 
 	if (ok)
 	{
-		Game_name = StringDup(dialog->game);
-		SYS_ASSERT(Game_name);
+		Game_name = dialog->game;
+		SYS_ASSERT(!Game_name.empty());
 
-		Iwad_name = StringDup(M_QueryKnownIWAD(Game_name));
+		Iwad_name = StringDup(M_QueryKnownIWAD(Game_name.c_str()));
 		SYS_ASSERT(Iwad_name);
 	}
 
