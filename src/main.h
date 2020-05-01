@@ -124,7 +124,6 @@ typedef int map_format_bitset_t;
  *  Interfile global variables
  */
 
-extern int  init_progress;
 extern bool want_quit;
 extern bool app_has_focus;
 extern bool in_fatal_error;

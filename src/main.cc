@@ -109,7 +109,14 @@ rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
 //    1 = read early options, set up logging
 //    2 = parsed all options, inited FLTK
 //    3 = opened the main window
-int  init_progress;
+enum ProgressStatus
+{
+	ProgressStatus_nothing,
+	ProgressStatus_early,
+	ProgressStatus_loaded,
+	ProgressStatus_window
+};
+static ProgressStatus init_progress;
 
 int show_help     = 0;
 int show_version  = 0;
@@ -157,23 +164,23 @@ void FatalError(const char *fmt, ...)
 	// minimise chance of a infinite loop of errors
 	in_fatal_error = true;
 
-	if (init_progress < 1 || Quiet || log_file)
+	if (init_progress == ProgressStatus_nothing || Quiet || log_file)
 	{
 		fprintf(stderr, "\nFATAL ERROR: %s", buffer);
 	}
 
-	if (init_progress >= 1)
+	if (init_progress >= ProgressStatus_early)
 	{
 		LogPrintf("\nFATAL ERROR: %s", buffer);
 	}
 
-	if (init_progress >= 2)
+	if (init_progress >= ProgressStatus_loaded)
 	{
 		RemoveSingleNewlines(buffer);
 
 		DLG_ShowError("%s", buffer);
 
-		init_progress = 1;
+		init_progress = ProgressStatus_early;
 	}
 #ifdef WIN32
 	else
@@ -184,7 +191,7 @@ void FatalError(const char *fmt, ...)
 	}
 #endif
 
-	init_progress = 0;
+	init_progress = ProgressStatus_nothing;
 	app_has_focus = false;
 
 	MasterDir_CloseAll();
@@ -1010,7 +1017,7 @@ static void ShowTime()
 //
 int main(int argc, char *argv[])
 {
-	init_progress = 0;
+	init_progress = ProgressStatus_nothing;
 
 
 	// a quick pass through the command line arguments
@@ -1028,7 +1035,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	init_progress = 1;
+	init_progress = ProgressStatus_early;
 
 
 	LogPrintf("\n");
@@ -1061,7 +1068,7 @@ int main(int argc, char *argv[])
 
 	Main_SetupFLTK();
 
-	init_progress = 2;
+	init_progress = ProgressStatus_loaded;
 
 
 	M_LoadRecent();
@@ -1071,7 +1078,7 @@ int main(int argc, char *argv[])
 
 	Main_OpenWindow();
 
-	init_progress = 3;
+	init_progress = ProgressStatus_window;
 
 	M_LoadOperationMenus();
 
@@ -1152,7 +1159,7 @@ quit:
 
 	LogPrintf("Quit\n");
 
-	init_progress = 0;
+	init_progress = ProgressStatus_nothing;
 	app_has_focus = false;
 
 	MasterDir_CloseAll();
