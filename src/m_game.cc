@@ -1028,7 +1028,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 	parser_state_c parser_state;
 
 	// this is a bit silly, but makes it easier to move code around
-	parser_state_c *pst = &parser_state;
+	parser_state_c *const pst = &parser_state;
 
 	pst->fname = prettyname;
 
