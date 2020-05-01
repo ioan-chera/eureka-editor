@@ -1006,6 +1006,8 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   const char *prettyname,
 						   int include_level)
 {
+	SYS_ASSERT(!!filename);
+
 	if (! folder)
 		folder = "common";
 
