@@ -442,15 +442,14 @@ void M_LoadDefinitions(const char *folder, const char *name)
 }
 
 
-typedef enum
+enum parsing_condition_e
 {
 	PCOND_NONE		= 0,
 	PCOND_Reading	= 1,
 	PCOND_Skipping	= 2
+};
 
-} parsing_condition_e;
-
-typedef struct
+struct parsing_cond_state_t
 {
 	parsing_condition_e cond;
 	int start_line;
@@ -461,7 +460,7 @@ public:
 		cond = (cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
 	}
 
-} parsing_cond_state_t;
+};
 
 
 #define MAX_TOKENS  30   /* tokens per line */
