@@ -464,7 +464,10 @@ const char * FileFindInPath(const char *paths, const char *base_name)
 
 //------------------------------------------------------------------------
 
-int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
+//
+// Scan a directory
+//
+int ScanDirectory(const char *path, const std::function<void(const char *, int)> &func)
 {
 	int count = 0;
 
@@ -516,7 +519,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 		}
 		else
 		{
-			(* func)(fdata.cFileName, flags, priv_dat);
+			func(fdata.cFileName, flags);
 
 			count++;
 		}
@@ -574,7 +577,7 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 		if (fdata->d_name[0] == '.' && isalpha(fdata->d_name[1]))
 			flags |= SCAN_F_Hidden;
 
-		(* func)(fdata->d_name, flags, priv_dat);
+		func(fdata->d_name, flags);
 
 		count++;
 	}
@@ -585,6 +588,13 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 	return count;
 }
 
+int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
+{
+	return ScanDirectory(path, [func, priv_dat](const char *name, int flags)
+						 {
+		func(name, flags, priv_dat);
+	});
+}
 
 //------------------------------------------------------------------------
 

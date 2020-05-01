@@ -1199,23 +1199,6 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 
 //------------------------------------------------------------------------
 
-
-static void scanner_add_file(const char *name, int flags, void *priv_dat)
-{
-	std::vector<const char*> * list = (std::vector<const char*> *) priv_dat;
-
-//	DebugPrintf("  file [%s] flags:%d\n", name, flags);
-
-	if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
-		return;
-
-	if (! MatchExtension(name, "ugh"))
-		return;
-
-	list->push_back(ReplaceExtension(name, NULL));
-}
-
-
 struct DefName_CMP_pred
 {
 	inline bool operator() (const char *A, const char *B) const
@@ -1231,12 +1214,20 @@ void M_CollectKnownDefs(const char *folder, std::vector<const char *> & list)
 	static char path[FL_PATH_MAX];
 
 //	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
+	auto scanner_add_file = [&temp_list](const char *name, int flags)
+	{
+		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
+			return;
+		if (! MatchExtension(name, "ugh"))
+			return;
+		temp_list.push_back(ReplaceExtension(name, NULL));
+	};
 
 	snprintf(path, sizeof(path), "%s/%s", install_dir, folder);
-	ScanDirectory(path, scanner_add_file, & temp_list);
+	ScanDirectory(path, scanner_add_file);
 
 	snprintf(path, sizeof(path), "%s/%s", home_dir, folder);
-	ScanDirectory(path, scanner_add_file, & temp_list);
+	ScanDirectory(path, scanner_add_file);
 
 	std::sort(temp_list.begin(), temp_list.end(), DefName_CMP_pred());
 
