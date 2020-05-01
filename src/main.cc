@@ -1017,155 +1017,162 @@ static void ShowTime()
 //
 int main(int argc, char *argv[])
 {
-	init_progress = ProgressStatus_nothing;
-
-
-	// a quick pass through the command line arguments
-	// to handle special options, like --help, --install, --config
-	M_ParseCommandLine(argc - 1, argv + 1, 1);
-
-	if (show_help)
+	try
 	{
-		ShowHelp();
-		return 0;
-	}
-	else if (show_version)
-	{
-		ShowVersion();
-		return 0;
-	}
-
-	init_progress = ProgressStatus_early;
+		init_progress = ProgressStatus_nothing;
 
 
-	LogPrintf("\n");
-	LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n");
-	LogPrintf("\n");
+		// a quick pass through the command line arguments
+		// to handle special options, like --help, --install, --config
+		M_ParseCommandLine(argc - 1, argv + 1, 1);
 
-	// sanity checks type sizes (useful when porting)
-	CheckTypeSizes();
-
-	ShowTime();
-
-
-	Determine_InstallPath(argv[0]);
-	Determine_HomeDir(argv[0]);
-
-	LogOpenFile(log_file);
-
-
-	// load all the config settings
-	M_ParseConfigFile();
-
-	// environment variables can override them
-	M_ParseEnvironmentVars();
-
-	// and command line arguments will override both
-	M_ParseCommandLine(argc - 1, argv + 1, 2);
-
-
-	Editor_Init();
-
-	Main_SetupFLTK();
-
-	init_progress = ProgressStatus_loaded;
-
-
-	M_LoadRecent();
-	M_LoadBindings();
-
-	M_LookForIWADs();
-
-	Main_OpenWindow();
-
-	init_progress = ProgressStatus_window;
-
-	M_LoadOperationMenus();
-
-
-	// open a specified PWAD now
-	// [ the map is loaded later.... ]
-
-	if (Pwad_list.size() > 0)
-	{
-		// this fatal errors on any missing file
-		// [ hence the Open() below is very unlikely to fail ]
-		M_ValidateGivenFiles();
-
-		Pwad_name = Pwad_list[0];
-
-		edit_wad = Wad_file::Open(Pwad_name, 'a');
-		if (! edit_wad)
-			FatalError("Cannot load pwad: %s\n", Pwad_name);
-
-		// Note: the Main_LoadResources() call will ensure this gets
-		//       placed at the correct spot (at the end)
-		MasterDir_Add(edit_wad);
-	}
-	// don't auto-load when --iwad or --warp was used on the command line
-	else if (auto_load_recent && ! (Iwad_name || Level_name))
-	{
-		if (M_TryOpenMostRecent())
+		if (show_help)
 		{
+			ShowHelp();
+			return 0;
+		}
+		else if (show_version)
+		{
+			ShowVersion();
+			return 0;
+		}
+
+		init_progress = ProgressStatus_early;
+
+
+		LogPrintf("\n");
+		LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n");
+		LogPrintf("\n");
+
+		// sanity checks type sizes (useful when porting)
+		CheckTypeSizes();
+
+		ShowTime();
+
+
+		Determine_InstallPath(argv[0]);
+		Determine_HomeDir(argv[0]);
+
+		LogOpenFile(log_file);
+
+
+		// load all the config settings
+		M_ParseConfigFile();
+
+		// environment variables can override them
+		M_ParseEnvironmentVars();
+
+		// and command line arguments will override both
+		M_ParseCommandLine(argc - 1, argv + 1, 2);
+
+
+		Editor_Init();
+
+		Main_SetupFLTK();
+
+		init_progress = ProgressStatus_loaded;
+
+
+		M_LoadRecent();
+		M_LoadBindings();
+
+		M_LookForIWADs();
+
+		Main_OpenWindow();
+
+		init_progress = ProgressStatus_window;
+
+		M_LoadOperationMenus();
+
+
+		// open a specified PWAD now
+		// [ the map is loaded later.... ]
+
+		if (Pwad_list.size() > 0)
+		{
+			// this fatal errors on any missing file
+			// [ hence the Open() below is very unlikely to fail ]
+			M_ValidateGivenFiles();
+
+			Pwad_name = Pwad_list[0];
+
+			edit_wad = Wad_file::Open(Pwad_name, 'a');
+			if (! edit_wad)
+				FatalError("Cannot load pwad: %s\n", Pwad_name);
+
+			// Note: the Main_LoadResources() call will ensure this gets
+			//       placed at the correct spot (at the end)
 			MasterDir_Add(edit_wad);
 		}
-	}
-
-
-	// Handle the '__EUREKA' lump.  It is almost equivalent to using the
-	// -iwad, -merge and -port command line options, but with extra
-	// checks (to allow editing a wad containing dud information).
-	//
-	// Note: there is logic in M_ParseEurekaLump() to ensure that command
-	// line arguments can override the EUREKA_LUMP values.
-
-	if (edit_wad)
-	{
-		if (! M_ParseEurekaLump(edit_wad, true /* keep_cmd_line_args */))
+		// don't auto-load when --iwad or --warp was used on the command line
+		else if (auto_load_recent && ! (Iwad_name || Level_name))
 		{
-			// user cancelled the load
-			RemoveEditWad();
+			if (M_TryOpenMostRecent())
+			{
+				MasterDir_Add(edit_wad);
+			}
 		}
+
+
+		// Handle the '__EUREKA' lump.  It is almost equivalent to using the
+		// -iwad, -merge and -port command line options, but with extra
+		// checks (to allow editing a wad containing dud information).
+		//
+		// Note: there is logic in M_ParseEurekaLump() to ensure that command
+		// line arguments can override the EUREKA_LUMP values.
+
+		if (edit_wad)
+		{
+			if (! M_ParseEurekaLump(edit_wad, true /* keep_cmd_line_args */))
+			{
+				// user cancelled the load
+				RemoveEditWad();
+			}
+		}
+
+
+		// determine which IWAD to use
+		if (! DetermineIWAD())
+			goto quit;
+
+		DeterminePort();
+
+		// temporarily load the iwad, the following few functions need it.
+		// it will get loaded again in Main_LoadResources().
+		Main_LoadIWAD();
+
+
+		// load the initial level
+		Level_name = DetermineLevel();
+
+		LogPrintf("Loading initial map : %s\n", Level_name);
+
+		LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
+
+		// do this *after* loading the level, since config file parsing
+		// can depend on the map format and UDMF namespace.
+		Main_LoadResources();
+
+
+		Main_Loop();
+
+	quit:
+		/* that's all folks! */
+
+		LogPrintf("Quit\n");
+
+		init_progress = ProgressStatus_nothing;
+		app_has_focus = false;
+
+		MasterDir_CloseAll();
+		LogClose();
+
+		return 0;
 	}
-
-
-	// determine which IWAD to use
-	if (! DetermineIWAD())
-		goto quit;
-
-	DeterminePort();
-
-	// temporarily load the iwad, the following few functions need it.
-	// it will get loaded again in Main_LoadResources().
-	Main_LoadIWAD();
-
-
-	// load the initial level
-	Level_name = DetermineLevel();
-
-	LogPrintf("Loading initial map : %s\n", Level_name);
-
-	LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
-
-	// do this *after* loading the level, since config file parsing
-	// can depend on the map format and UDMF namespace.
-	Main_LoadResources();
-
-
-	Main_Loop();
-
-quit:
-	/* that's all folks! */
-
-	LogPrintf("Quit\n");
-
-	init_progress = ProgressStatus_nothing;
-	app_has_focus = false;
-
-	MasterDir_CloseAll();
-	LogClose();
-
-	return 0;
+	catch(const std::exception &e)
+	{
+		FatalError("%s\n", e.what());
+	}
 }
 
 
