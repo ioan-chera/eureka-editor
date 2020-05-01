@@ -454,12 +454,10 @@ struct parsing_cond_state_t
 	parsing_condition_e cond;
 	int start_line;
 
-public:
 	void Toggle()
 	{
 		cond = (cond == PCOND_Reading) ? PCOND_Skipping : PCOND_Reading;
 	}
-
 };
 
 
@@ -471,37 +469,28 @@ class parser_state_c
 {
 public:
 	// current line number
-	int lineno;
+	int lineno = 0;
 
 	// filename for error messages (lacks the directory)
-	const char *fname;
+	const char *fname = nullptr;
 
 	// buffer containing the raw line
-	char readbuf [512];
+	char readbuf [512] = {};
 
 	// buffer storing the tokens
 	char tokenbuf[512];
 
 	// the line parsed into tokens
-	int    argc;
-	char * argv[MAX_TOKENS];
+	int    argc = 0;
+	char * argv[MAX_TOKENS] = {};
 
 	// state for handling if/else/endif
 	std::vector<parsing_cond_state_t> cond_stack;
 
 	// BOOM generalized linedef stuff
-	int current_gen_line;
+	int current_gen_line = -1;
 
 public:
-	parser_state_c() :
-		lineno(0), fname(NULL), argc(0),
-		cond_stack(),
-		current_gen_line(-1)
-	{
-		memset(readbuf, 0, sizeof(readbuf));
-		memset(argv,    0, sizeof(argv));
-	}
-
 	bool HaveAnySkipping() const
 	{
 		for (size_t i = 0 ; i < cond_stack.size() ; i++)
