@@ -275,7 +275,7 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 GameInfo_c * M_LoadGameInfo(const char *game);
 PortInfo_c * M_LoadPortInfo(const char *port);
 
-std::vector<const char *> M_CollectKnownDefs(const char *folder);
+std::vector<std::string> M_CollectKnownDefs(const char *folder);
 
 bool M_CheckPortSupportsGame(const char *base_game, const char *port);
 

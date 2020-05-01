@@ -755,21 +755,19 @@ void M_LookForIWADs()
 {
 	LogPrintf("Looking for IWADs....\n");
 
-	string_list_t  game_list = M_CollectKnownDefs("games");
+	std::vector<std::string> game_list = M_CollectKnownDefs("games");
 
-	for (unsigned int i = 0 ; i < game_list.size() ; i++)
+	for (const std::string &game : game_list)
 	{
-		const char *game = game_list[i];
-
 		// already have it?
-		if (M_QueryKnownIWAD(game))
+		if (M_QueryKnownIWAD(game.c_str()))
 			continue;
 
-		const char *path = SearchForIWAD(game);
+		const char *path = SearchForIWAD(game.c_str());
 
 		if (path)
 		{
-			LogPrintf("Found '%s' IWAD file: %s\n", game, path);
+			LogPrintf("Found '%s' IWAD file: %s\n", game.c_str(), path);
 
 			M_AddKnownIWAD(path);
 		}

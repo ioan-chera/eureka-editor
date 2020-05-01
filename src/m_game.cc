@@ -1199,57 +1199,54 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 
 //------------------------------------------------------------------------
 
-struct DefName_CMP_pred
+//
+// Collect known definitions from folder
+//
+std::vector<std::string> M_CollectKnownDefs(const char *folder)
 {
-	inline bool operator() (const char *A, const char *B) const
-	{
-		return y_stricmp(A, B) < 0;
-	}
-};
+	SYS_ASSERT(!!folder);
 
-std::vector<const char *> M_CollectKnownDefs(const char *folder)
-{
-	std::vector<const char *> temp_list;
+	std::vector<std::string> temp_list;
+	std::string path;
 
-	static char path[FL_PATH_MAX];
-
-//	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
+	//	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
 	auto scanner_add_file = [&temp_list](const char *name, int flags)
 	{
 		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
 			return;
 		if (! MatchExtension(name, "ugh"))
 			return;
-		temp_list.push_back(ReplaceExtension(name, NULL));
+		temp_list.push_back(ReplaceExtension_s(name, NULL));
 	};
+	path = StringPrintf_s("%s/%s", install_dir, folder);
+	ScanDirectory(path.c_str(), scanner_add_file);
+	path = StringPrintf_s("%s/%s", home_dir, folder);
+	ScanDirectory(path.c_str(), scanner_add_file);
 
-	snprintf(path, sizeof(path), "%s/%s", install_dir, folder);
-	ScanDirectory(path, scanner_add_file);
-
-	snprintf(path, sizeof(path), "%s/%s", home_dir, folder);
-	ScanDirectory(path, scanner_add_file);
-
-	std::sort(temp_list.begin(), temp_list.end(), DefName_CMP_pred());
+	std::sort(temp_list.begin(), temp_list.end(), [](const std::string &a, const std::string &b)
+			  {
+		return y_stricmp(a.c_str(), b.c_str()) < 0;
+	});
 
 	// transfer to passed list, removing duplicates as we go
-	unsigned int pos;
+	size_t pos;
 
-	std::vector<const char *> list;
+	// FIXME: use some <algorithm> thing here
+	std::vector<std::string> list;
 	list.reserve(temp_list.size());
 	for (pos = 0 ; pos < temp_list.size() ; pos++)
 	{
 		if (pos + 1 < temp_list.size() &&
-			y_stricmp(temp_list[pos], temp_list[pos + 1]) == 0)
+			y_stricmp(temp_list[pos].c_str(), temp_list[pos + 1].c_str()) == 0)
 		{
-			StringFree(temp_list[pos]);
 			continue;
 		}
 
 		list.push_back(temp_list[pos]);
 	}
 	return list;
-}
 
+}
 
 const char * M_GetBaseGame(const char *game)
 {
@@ -1302,7 +1299,7 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 
 const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
 {
-	std::vector<const char *> list = M_CollectKnownDefs("ports");
+	std::vector<std::string> list = M_CollectKnownDefs("ports");
 
 	if (list.empty())
 		return StringDup("");
@@ -1312,7 +1309,7 @@ const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const 
 	unsigned int i;
 
 	for (i = 0 ; i < list.size() ; i++)
-		length += strlen(list[i]);
+		length += list[i].length();
 
 	char * result = StringNew(length);
 	result[0] = 0;
@@ -1321,15 +1318,15 @@ const char * M_CollectPortsForMenu(const char *base_game, int *exist_val, const 
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(base_game, list[i]))
+		if (! M_CheckPortSupportsGame(base_game, list[i].c_str()))
 			continue;
 
 		if (result[0])
 			strcat(result, "|");
 
-		strcat(result, list[i]);
+		strcat(result, list[i].c_str());
 
-		if (y_stricmp(list[i], exist_name) == 0)
+		if (y_stricmp(list[i].c_str(), exist_name) == 0)
 			*exist_val = entry_id;
 
 		entry_id++;
