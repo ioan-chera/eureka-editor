@@ -59,22 +59,20 @@ const char *GetExecutablePath(const char *argv0);
 // directory functions
 bool PathIsDirectory(const char *path);
 
-typedef enum
+enum scan_flags_e
 {
 	SCAN_F_IsDir    = (1 << 0),
 	SCAN_F_Hidden   = (1 << 1),
 	SCAN_F_ReadOnly = (1 << 2),
-}
-scan_flags_e;
+};
 
-typedef enum
+enum scan_error_e
 {
 	SCAN_ERROR = -1,  // general catch-all
 
 	SCAN_ERR_NoExist  = -2,  // could not find given path
 	SCAN_ERR_NotDir   = -3,  // path was not a directory
-}
-scan_error_e;
+};
 
 typedef void (* directory_iter_f)(const char *name, int flags, void *priv_dat);
 
