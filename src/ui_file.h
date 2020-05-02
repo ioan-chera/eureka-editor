@@ -190,7 +190,7 @@ public:
 	 * current state
 	 */
 	std::string game;
-	const char * port;
+	std::string port;
 
 	map_format_e map_format;
 	std::string  name_space;
