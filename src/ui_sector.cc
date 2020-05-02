@@ -525,9 +525,9 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 		value &= gen_mask;
 	}
 
-	const sectortype_t *info = M_GetSectorType(value);
+	const sectortype_t &info = M_GetSectorType(value);
 
-	box->desc->value(info->desc);
+	box->desc->value(info.desc.c_str());
 }
 
 
@@ -758,8 +758,8 @@ void UI_SectorBox::UpdateField(int field)
 
 			type->value(Int_TmpStr(value & mask));
 
-			const sectortype_t *info = M_GetSectorType(value & mask);
-			desc->value(info->desc);
+			const sectortype_t &info = M_GetSectorType(value & mask);
+			desc->value(info.desc.c_str());
 
 			if (Features.gen_sectors)
 			{

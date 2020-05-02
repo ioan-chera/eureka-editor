@@ -43,7 +43,7 @@ extern std::map<char, linegroup_t>  line_groups;
 extern std::map<char, thinggroup_t> thing_groups;
 
 extern std::map<int, linetype_t>   line_types;
-extern std::map<int, sectortype_t *> sector_types;
+extern std::map<int, sectortype_t> sector_types;
 extern std::map<int, thingtype_t *>  thing_types;
 
 
@@ -871,7 +871,7 @@ void UI_Browser_Box::Populate_LineTypes()
 
 void UI_Browser_Box::Populate_SectorTypes()
 {
-	std::map<int, sectortype_t *>::iterator TI;
+	std::map<int, sectortype_t>::iterator TI;
 
 	int y = scroll->y();
 
@@ -882,9 +882,9 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 	for (TI = sector_types.begin() ; TI != sector_types.end() ; TI++)
 	{
-		sectortype_t *info = TI->second;
+		const sectortype_t &info = TI->second;
 
-		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info->desc);
+		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info.desc.c_str());
 
 		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
 											  TI->first, kind, 0 /* cat */);

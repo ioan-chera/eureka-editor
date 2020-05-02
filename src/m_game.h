@@ -54,11 +54,10 @@ struct linetype_t
 
 
 // sector <number> <description>
-typedef struct
+struct sectortype_t
 {
-	const char *desc;
-}
-sectortype_t;
+	std::string desc;
+};
 
 
 // thinggroup <letter> <colour> <description>
@@ -288,7 +287,7 @@ bool is_null_tex(const char *tex);		// the "-" texture
 bool is_special_tex(const char *tex);	// begins with "#"
 
 
-const sectortype_t * M_GetSectorType(int type);
+const sectortype_t & M_GetSectorType(int type);
 const linetype_t   & M_GetLineType(int type);
 const thingtype_t  * M_GetThingType(int type);
 
