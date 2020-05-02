@@ -188,12 +188,12 @@ Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
 	levels(), patches(), sprites(), flats(), tx_tex(),
 	begun_write(false), insert_point(-1)
 {
-	filename = StringDup(_name);
+	filename = _name;
 }
 
 Wad_file::~Wad_file()
 {
-	LogPrintf("Closing WAD file: %s\n", filename);
+	LogPrintf("Closing WAD file: %s\n", filename.c_str());
 
 	fclose(fp);
 
@@ -202,8 +202,6 @@ Wad_file::~Wad_file()
 		delete directory[k];
 
 	directory.clear();
-
-	StringFree(filename);
 }
 
 
