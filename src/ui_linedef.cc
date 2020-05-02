@@ -278,8 +278,8 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	}
 	else
 	{
-		const linetype_t *info = M_GetLineType(new_type);
-		box->desc->value(info->desc);
+		const linetype_t &info = M_GetLineType(new_type);
+		box->desc->value(info.desc.c_str());
 	}
 
 	main_win->browser->UpdateGenType(new_type);
@@ -727,7 +727,7 @@ void UI_LineBox::UpdateField(int field)
 
 			tag->value(Int_TmpStr(LineDefs[obj]->tag));
 
-			const linetype_t *info = M_GetLineType(L->type);
+			const linetype_t &info = M_GetLineType(L->type);
 
 			if (Level_format != MAPF_Doom)
 			{
@@ -739,8 +739,8 @@ void UI_LineBox::UpdateField(int field)
 						args[a]->value(Int_TmpStr(arg_val));
 
 					// set the tooltip
-					if (info->args[a])
-						args[a]->copy_tooltip(info->args[a]);
+					if (!info.args[a].empty())
+						args[a]->copy_tooltip(info.args[a].c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}
@@ -788,8 +788,8 @@ void UI_LineBox::UpdateField(int field)
 			}
 			else
 			{
-				const linetype_t *info = M_GetLineType(type_num);
-				desc->value(info->desc);
+				const linetype_t &info = M_GetLineType(type_num);
+				desc->value(info.desc.c_str());
 			}
 
 			main_win->browser->UpdateGenType(type_num);

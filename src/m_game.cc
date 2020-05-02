@@ -53,11 +53,11 @@ static GameInfo_c *loading_Game;
 static PortInfo_c *loading_Port;
 
 
-std::map<char, linegroup_t *>    line_groups;
-std::map<char, thinggroup_t *>   thing_groups;
-std::map<char, texturegroup_t *> texture_groups;
+std::map<char, linegroup_t>    line_groups;
+std::map<char, thinggroup_t>   thing_groups;
+std::map<char, texturegroup_t> texture_groups;
 
-std::map<int, linetype_t *>   line_types;
+std::map<int, linetype_t>   line_types;
 std::map<int, sectortype_t *> sector_types;
 std::map<int, thingtype_t *>  thing_types;
 
@@ -645,12 +645,12 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 2)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		linegroup_t * lg = new linegroup_t;
+		linegroup_t lg = {};
 
-		lg->group = argv[1][0];
-		lg->desc  = StringDup(argv[2]);
+		lg.group = argv[1][0];
+		lg.desc  = argv[2];
 
-		line_groups[lg->group] = lg;
+		line_groups[lg.group] = lg;
 	}
 
 	else if (y_stricmp(argv[0], "line") == 0 ||
@@ -659,26 +659,24 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs < 3)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
-		linetype_t * info = new linetype_t;
-
-		memset(info->args, 0, sizeof(info->args));
+		linetype_t info = {};
 
 		int number = atoi(argv[1]);
 
-		info->group = argv[2][0];
-		info->desc  = StringDup(argv[3]);
+		info.group = argv[2][0];
+		info.desc  = argv[3];
 
 		int arg_count = MIN(nargs - 3, 5);
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
-				info->args[i] = StringDup(argv[4 + i]);
+				info.args[i] = argv[4 + i];
 		}
 
-		if (line_groups.find( info->group) == line_groups.end())
+		if (line_groups.find( info.group) == line_groups.end())
 		{
 			LogPrintf("%s(%d): unknown line group '%c'\n",
-					pst->fname, pst->lineno,  info->group);
+					  pst->fname, pst->lineno,  info.group);
 		}
 		else
 			line_types[number] = info;
@@ -703,13 +701,13 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 3)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 3);
 
-		thinggroup_t * tg = new thinggroup_t;
+		thinggroup_t tg = {};
 
-		tg->group = argv[1][0];
-		tg->color = ParseColor(argv[2]);
-		tg->desc  = StringDup(argv[3]);
+		tg.group = argv[1][0];
+		tg.color = ParseColor(argv[2]);
+		tg.desc  = argv[3];
 
-		thing_groups[tg->group] = tg;
+		thing_groups[tg.group] = tg;
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)
@@ -744,7 +742,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		}
 		else
 		{
-			info->color = thing_groups[info->group]->color;
+			info->color = thing_groups[info->group].color;
 
 			thing_types[number] = info;
 		}
@@ -755,12 +753,12 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 2)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
-		texturegroup_t * tg = new texturegroup_t;
+		texturegroup_t tg = {};
 
-		tg->group = argv[1][0];
-		tg->desc  = StringDup(argv[2]);
+		tg.group = argv[1][0];
+		tg.desc  = argv[2];
 
-		texture_groups[tg->group] = tg;
+		texture_groups[tg.group] = tg;
 	}
 
 	else if (y_stricmp(argv[0], "texture") == 0)
@@ -1370,9 +1368,9 @@ const sectortype_t * M_GetSectorType(int type)
 }
 
 
-const linetype_t * M_GetLineType(int type)
+const linetype_t & M_GetLineType(int type)
 {
-	std::map<int, linetype_t *>::iterator LI;
+	std::map<int, linetype_t>::iterator LI;
 
 	LI = line_types.find(type);
 
@@ -1384,7 +1382,7 @@ const linetype_t * M_GetLineType(int type)
 		0, "UNKNOWN TYPE"
 	};
 
-	return &dummy_type;
+	return dummy_type;
 }
 
 
@@ -1436,12 +1434,12 @@ char M_GetFlatType(const char *name)
 
 static bool LineCategory_IsUsed(char group)
 {
-	std::map<int, linetype_t *>::iterator IT;
+	std::map<int, linetype_t>::iterator IT;
 
 	for (IT = line_types.begin() ; IT != line_types.end() ; IT++)
 	{
-		linetype_t *info = IT->second;
-		if (info->group == group)
+		const linetype_t &info = IT->second;
+		if (info.group == group)
 			return true;
 	}
 
@@ -1499,22 +1497,22 @@ std::string M_LineCategoryString(char *letters)
 	buffer = "ALL";
 	letters[L_index++] = '*';
 
-	std::map<char, linegroup_t *>::iterator IT;
+	std::map<char, linegroup_t>::iterator IT;
 
 	for (IT = line_groups.begin() ; IT != line_groups.end() ; IT++)
 	{
-		linegroup_t *G = IT->second;
+		const linegroup_t &G = IT->second;
 
 		// the "Other" category is always at the end
-		if (G->group == '-')
+		if (G.group == '-')
 			continue;
 
-		if (! LineCategory_IsUsed(G->group))
+		if (! LineCategory_IsUsed(G.group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
 		buffer += '|';
-		buffer += G->desc;
+		buffer += G.desc;
 
 		letters[L_index++] = IT->first;
 	}
@@ -1540,21 +1538,21 @@ std::string M_ThingCategoryString(char *letters)
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
-	std::map<char, thinggroup_t *>::iterator IT;
+	std::map<char, thinggroup_t>::iterator IT;
 
 	for (IT = thing_groups.begin() ; IT != thing_groups.end() ; IT++)
 	{
-		thinggroup_t *G = IT->second;
+		const thinggroup_t &G = IT->second;
 
 		// the "Other" category is always at the end
-		if (G->group == '-')
+		if (G.group == '-')
 			continue;
 
-		if (! ThingCategory_IsUsed(G->group))
+		if (! ThingCategory_IsUsed(G.group))
 			continue;
 
 		buffer += '|';
-		buffer += G->desc;
+		buffer += G.desc;
 
 		letters[L_index++] = IT->first;
 	}
@@ -1580,24 +1578,24 @@ std::string M_TextureCategoryString(char *letters, bool do_flats)
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
-	std::map<char, texturegroup_t *>::iterator IT;
+	std::map<char, texturegroup_t>::iterator IT;
 
 	for (IT = texture_groups.begin() ; IT != texture_groups.end() ; IT++)
 	{
-		texturegroup_t *G = IT->second;
+		const texturegroup_t &G = IT->second;
 
 		// the "Other" category is always at the end
-		if (G->group == '-')
+		if (G.group == '-')
 			continue;
 
-		if (do_flats && !FlatCategory_IsUsed(G->group))
+		if (do_flats && !FlatCategory_IsUsed(G.group))
 			continue;
 
-		if (!do_flats && !TextureCategory_IsUsed(G->group))
+		if (!do_flats && !TextureCategory_IsUsed(G.group))
 			continue;
 
 		buffer += '|';
-		buffer += G->desc;
+		buffer += G.desc;
 
 		letters[L_index++] = IT->first;
 	}

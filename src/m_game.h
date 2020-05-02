@@ -37,22 +37,20 @@
  */
 
 // linegroup <letter> <description>
-typedef struct
+struct linegroup_t
 {
 	char group;
-	const char *desc;
-}
-linegroup_t;
+	std::string desc;
+};
 
 
 // line <number> <group> <description>  [ arg1 .. arg5 ]
-typedef struct
+struct linetype_t
 {
 	char group;
-	const char *desc;
-	const char *args[5];
-}
-linetype_t;
+	std::string desc;
+	std::string args[5];
+};
 
 
 // sector <number> <description>
@@ -64,13 +62,12 @@ sectortype_t;
 
 
 // thinggroup <letter> <colour> <description>
-typedef struct
+struct thinggroup_t
 {
 	char group;         // group letter
 	rgb_color_t color;  // RGB colour
-	const char *desc;   // Description of thing group
-}
-thinggroup_t;
+	std::string desc;   // Description of thing group
+};
 
 
 // thing <number> <group> <flags> <radius> <description> [<sprite>]  [ arg1..arg5 ]
@@ -102,12 +99,11 @@ thingdef_flags_e;
 
 
 // texturegroup <letter> <description>
-typedef struct
+struct texturegroup_t
 {
 	char group;
-	const char *desc;
-}
-texturegroup_t;
+	std::string desc;
+};
 
 
 /*
@@ -293,7 +289,7 @@ bool is_special_tex(const char *tex);	// begins with "#"
 
 
 const sectortype_t * M_GetSectorType(int type);
-const linetype_t   * M_GetLineType(int type);
+const linetype_t   & M_GetLineType(int type);
 const thingtype_t  * M_GetThingType(int type);
 
 char M_GetTextureType(const char *name);
