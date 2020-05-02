@@ -70,7 +70,11 @@ typedef enum
 
 	// List of strings
 	// Receptacle is of type: std::vector< const char * >
-	OPT_STRING_LIST
+	OPT_STRING_LIST,
+
+	// String (not leaking)
+	// Receptacle is of type: std::string
+	OPT_STRING_S,
 }
 opt_type_t;
 
@@ -980,6 +984,10 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			*((char **) opt->data_ptr) = StringDup(value);
 			break;
 
+		case OPT_STRING_S:
+			*static_cast<std::string *>(opt->data_ptr) = value;
+			break;
+
 		case OPT_STRING_LIST:
 			while (*value != 0)
 			{
@@ -1254,6 +1262,32 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 
 				break;
 
+			case OPT_STRING_S:
+				if (argc < 2)
+				{
+					FatalError("missing argument after '%s'\n", argv[0]);
+					/* NOT REACHED */
+				}
+				argv++;
+				argc--;
+				if(!ignore)
+					*static_cast<std::string *>(o->data_ptr) = argv[0];
+				// support two numeric values after -warp
+				if (strchr(o->flags, 'w') && isdigit(argv[0][0]) &&
+					argc > 1 && isdigit(argv[1][0]))
+				{
+					if (! ignore)
+					{
+						*static_cast<std::string *>(o->data_ptr) = StringPrintf_s("%s%s", argv[0], argv[1]);
+					}
+
+					argv++;
+					argc--;
+				}
+
+				break;
+
+
 			case OPT_STRING_LIST:
 				if (argc < 2)
 				{
@@ -1341,6 +1375,7 @@ void M_PrintCommandLineOptions(FILE *fp)
 			case OPT_COLOR:         fprintf (fp, "<color>     "); break;
 
 			case OPT_STRING:        fprintf (fp, "<string>    "); break;
+			case OPT_STRING_S:      fprintf (fp, "<string>    "); break;
 			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
@@ -1393,7 +1428,12 @@ int M_WriteConfigFile()
 				fprintf(fp, "%s", (str && str[0]) ? str : "''");
 				break;
 			}
-
+			case OPT_STRING_S:
+			{
+				const std::string *str = static_cast<std::string *>(o->data_ptr);
+				fprintf(fp, "%s", str ? str->c_str() : "''");
+				break;
+			}
 			case OPT_INTEGER:
 				fprintf(fp, "%d", *((int *) o->data_ptr));
 				break;
