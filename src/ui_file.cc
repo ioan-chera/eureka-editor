@@ -748,7 +748,7 @@ UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 
 	for (int r = 0 ; r < RES_NUM ; r++)
 	{
-		res[r] = NULL;
+		res[r].clear();
 
 		if (is_startup)
 			continue;
@@ -1050,9 +1050,9 @@ void UI_ProjectSetup::PopulateResources()
 
 		if (r < (int)Resource_list.size())
 		{
-			res[r] = StringDup(Resource_list[r].c_str());
+			res[r] = Resource_list[r];
 
-			res_name[r]->value(fl_filename_name(res[r]));
+			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}
 	}
 }
@@ -1227,12 +1227,9 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 			break;  // OK
 	}
 
-	if (that->res[r])
-		StringFree(that->res[r]);
+	that->res[r] = chooser.filename();
 
-	that->res[r] = StringDup(chooser.filename());
-
-	that->res_name[r]->value(fl_filename_name(that->res[r]));
+	that->res_name[r]->value(fl_filename_name(that->res[r].c_str()));
 }
 
 
@@ -1244,10 +1241,9 @@ void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 	UI_ProjectSetup * that = _instance;
 	SYS_ASSERT(that);
 
-	if (that->res[r])
+	if (!that->res[r].empty())
 	{
-		StringFree(that->res[r]);
-		that->res[r] = NULL;
+		that->res[r].clear();
 
 		that->res_name[r]->value("");
 	}
