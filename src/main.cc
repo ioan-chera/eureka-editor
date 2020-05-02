@@ -74,7 +74,7 @@ std::string cache_dir;
 
 
 std::string Iwad_name;
-const char *Pwad_name = NULL;
+std::string Pwad_name;
 
 std::vector<std::string> Pwad_list;
 std::vector<std::string> Resource_list;
@@ -755,9 +755,9 @@ const char * Main_FileOpFolder()
 {
 	static char folder[FL_PATH_MAX];
 
-	if (Pwad_name)
+	if (!Pwad_name.empty())
 	{
-		FilenameGetPath(folder, sizeof(folder), Pwad_name);
+		FilenameGetPath(folder, sizeof(folder), Pwad_name.c_str());
 
 		if (folder[0])
 			return folder;
@@ -1104,11 +1104,11 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			Pwad_name = Pwad_list[0].c_str();
+			Pwad_name = Pwad_list[0];
 
-			edit_wad = Wad_file::Open(Pwad_name, 'a');
+			edit_wad = Wad_file::Open(Pwad_name.c_str(), 'a');
 			if (! edit_wad)
-				FatalError("Cannot load pwad: %s\n", Pwad_name);
+				FatalError("Cannot load pwad: %s\n", Pwad_name.c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)

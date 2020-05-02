@@ -71,7 +71,7 @@ void RemoveEditWad()
 	delete edit_wad;
 
 	edit_wad  = NULL;
-	Pwad_name = NULL;
+	Pwad_name.clear();
 }
 
 
