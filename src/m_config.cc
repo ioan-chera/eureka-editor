@@ -64,17 +64,13 @@ typedef enum
 	// Receptacle is of type: rgb_color_t
 	OPT_COLOR,
 
-	// List of strings
-	// Receptacle is of type: std::vector< const char * >
-	OPT_STRING_LIST,
-
 	// String (not leaking)
 	// Receptacle is of type: std::string
 	OPT_STRING,
 
 	// List of strings (not leaking)
 	// Receptacle is of type: std::vector<std::string>
-	OPT_STRING_LIST_S,
+	OPT_STRING_LIST,
 }
 opt_type_t;
 
@@ -185,7 +181,7 @@ static const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-		OPT_STRING_LIST_S,
+		OPT_STRING_LIST,
 		"",
 		"Wad file(s) to edit",
 		"<file>...",
@@ -194,7 +190,7 @@ static const opt_desc_t options[] =
 
 	{	"merge",
 		"m",
-		OPT_STRING_LIST_S,
+		OPT_STRING_LIST,
 		"",
 		"Resource file(s) to load",
 		"<file>...",
@@ -987,23 +983,6 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 				while (*v != 0 && ! isspace ((unsigned char) *v))
 					v++;
 
-				string_list_t * list = (string_list_t *)opt->data_ptr;
-
-				list->push_back(StringDup(value, (int)(v - value)));
-
-				while (isspace (*v))
-					v++;
-				value = v;
-			}
-			break;
-
-		case OPT_STRING_LIST_S:
-			while (*value != 0)
-			{
-				char *v = value;
-				while (*v != 0 && ! isspace ((unsigned char) *v))
-					v++;
-
 				auto list = static_cast<std::vector<std::string> *>(opt->data_ptr);
 
 				list->push_back(std::string(value, (int)(v - value)));
@@ -1280,25 +1259,6 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 
 					if (! ignore)
 					{
-						string_list_t * list = (string_list_t *) o->data_ptr;
-						list->push_back(StringDup(argv[0]));
-					}
-				}
-				break;
-
-			case OPT_STRING_LIST_S:
-				if (argc < 2)
-				{
-					FatalError("missing argument after '%s'\n", argv[0]);
-					/* NOT REACHED */
-				}
-				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
-				{
-					argv++;
-					argc--;
-
-					if (! ignore)
-					{
 						auto list = static_cast<std::vector<std::string> *>(o->data_ptr);
 						list->push_back(argv[0]);
 					}
@@ -1374,7 +1334,6 @@ void M_PrintCommandLineOptions(FILE *fp)
 
 			case OPT_STRING:      fprintf (fp, "<string>    "); break;
 			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
-			case OPT_STRING_LIST_S:   fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
 
@@ -1435,16 +1394,6 @@ int M_WriteConfigFile()
 				break;
 
 			case OPT_STRING_LIST:
-			{
-				string_list_t *list = (string_list_t *)o->data_ptr;
-
-				if (list->empty())
-					fprintf(fp, "{}");
-				else for (unsigned int i = 0 ; i < list->size() ; i++)
-					fprintf(fp, "%s ", list->at(i));
-			}
-
-			case OPT_STRING_LIST_S:
 			{
 				auto list = static_cast<std::vector<std::string> *>(o->data_ptr);
 
