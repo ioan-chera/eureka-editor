@@ -64,17 +64,13 @@ typedef enum
 	// Receptacle is of type: rgb_color_t
 	OPT_COLOR,
 
-	// String
-	// Receptacle is of type: const char *
-	OPT_STRING,
-
 	// List of strings
 	// Receptacle is of type: std::vector< const char * >
 	OPT_STRING_LIST,
 
 	// String (not leaking)
 	// Receptacle is of type: std::string
-	OPT_STRING_S,
+	OPT_STRING,
 }
 opt_type_t;
 
@@ -109,7 +105,7 @@ static const opt_desc_t options[] =
 
 	{	"home",
 		0,
-		OPT_STRING_S,
+		OPT_STRING,
 		"1",
 		"Home directory",
 		"<dir>",
@@ -118,7 +114,7 @@ static const opt_desc_t options[] =
 
 	{	"install",
 		0,
-		OPT_STRING_S,
+		OPT_STRING,
 		"1",
 		"Installation directory",
 		"<dir>",
@@ -127,7 +123,7 @@ static const opt_desc_t options[] =
 
 	{	"log",
 		0,
-		OPT_STRING_S,
+		OPT_STRING,
 		"1",
 		"Log messages to specified file",
 		"<file>",
@@ -136,7 +132,7 @@ static const opt_desc_t options[] =
 
 	{	"config",
 		0,
-		OPT_STRING_S,
+		OPT_STRING,
 		"1<",
 		"Config file to load / save",
 		"<file>",
@@ -203,7 +199,7 @@ static const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-		OPT_STRING_S,
+		OPT_STRING,
 		"",
 		"The name of the IWAD (game data)",
 		"<file>",
@@ -212,7 +208,7 @@ static const opt_desc_t options[] =
 
 	{	"port",
 		"p",
-		OPT_STRING_S,
+		OPT_STRING,
 		"",
 		"Port (engine) name",
 		"<name>",
@@ -221,7 +217,7 @@ static const opt_desc_t options[] =
 
 	{	"warp",
 		"w",
-		OPT_STRING_S,
+		OPT_STRING,
 		"w<",
 		"Select level to edit",
 		"<map>",
@@ -385,7 +381,7 @@ static const opt_desc_t options[] =
 
 	{	"default_port",
 		0,
-		OPT_STRING_S,
+		OPT_STRING,
 		"v",
 		"Default port (engine) name",
 		NULL,
@@ -977,14 +973,6 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			break;
 
 		case OPT_STRING:
-			// handle empty string
-			if (strcmp(value, "''") == 0)
-				*value = 0;
-
-			*((char **) opt->data_ptr) = StringDup(value);
-			break;
-
-		case OPT_STRING_S:
 			*static_cast<std::string *>(opt->data_ptr) = value;
 			break;
 
@@ -1238,36 +1226,6 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 					FatalError("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
-
-				argv++;
-				argc--;
-
-				if (! ignore)
-				{
-					*((const char **) o->data_ptr) = StringDup(argv[0]);
-				}
-
-				// support two numeric values after -warp
-				if (strchr(o->flags, 'w') && isdigit(argv[0][0]) &&
-					argc > 1 && isdigit(argv[1][0]))
-				{
-					if (! ignore)
-					{
-						*((const char **) o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
-					}
-
-					argv++;
-					argc--;
-				}
-
-				break;
-
-			case OPT_STRING_S:
-				if (argc < 2)
-				{
-					FatalError("missing argument after '%s'\n", argv[0]);
-					/* NOT REACHED */
-				}
 				argv++;
 				argc--;
 				if(!ignore)
@@ -1374,8 +1332,7 @@ void M_PrintCommandLineOptions(FILE *fp)
 			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
 			case OPT_COLOR:         fprintf (fp, "<color>     "); break;
 
-			case OPT_STRING:        fprintf (fp, "<string>    "); break;
-			case OPT_STRING_S:      fprintf (fp, "<string>    "); break;
+			case OPT_STRING:      fprintf (fp, "<string>    "); break;
 			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
@@ -1423,12 +1380,6 @@ int M_WriteConfigFile()
 				break;
 
 			case OPT_STRING:
-			{
-				const char *str = *((const char **) o->data_ptr);
-				fprintf(fp, "%s", (str && str[0]) ? str : "''");
-				break;
-			}
-			case OPT_STRING_S:
 			{
 				const std::string *str = static_cast<std::string *>(o->data_ptr);
 				fprintf(fp, "%s", str ? str->c_str() : "''");
