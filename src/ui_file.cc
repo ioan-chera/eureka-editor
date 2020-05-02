@@ -839,14 +839,14 @@ void UI_ProjectSetup::PopulateIWADs()
 	game_choice->clear();
 
 
-	const char *menu_string;
+	std::string menu_string;
 	int menu_value = 0;
 
 	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str());
 
-	if (menu_string[0])
+	if (!menu_string.empty())
 	{
-		game_choice->add(menu_string);
+		game_choice->add(menu_string.c_str());
 		game_choice->value(menu_value);
 
 		game = game_choice->mvalue()->text;

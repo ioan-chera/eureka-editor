@@ -154,7 +154,7 @@ public:
 	{ }
 
 	// returns lump name on success, NULL on cancel
-	const char * Run();
+	std::string Run();
 
 private:
 	void CheckInput();
@@ -351,7 +351,7 @@ void UI_ChooseTextLump::button_callback(Fl_Widget *w, void *data)
 }
 
 
-const char * UI_ChooseTextLump::Run()
+std::string UI_ChooseTextLump::Run()
 {
 	set_modal();
 	show();
@@ -362,15 +362,15 @@ const char * UI_ChooseTextLump::Run()
 	}
 
 	if (action == ACT_CLOSE)
-		return NULL;
+		return "";
 
 	const char *name = lump_name->value();
 
 	if (name[0] == 0)
-		return NULL;
+		return "";
 
 	// return a copy of the name
-	return StringDup(name);
+	return name;
 }
 
 
@@ -378,7 +378,7 @@ const char * UI_ChooseTextLump::Run()
 
 void CMD_EditLump()
 {
-	const char *lump_name = EXEC_Param[0];
+	std::string lump_name = EXEC_Param[0];
 
 	if (Exec_HasFlag("/header"))
 	{
@@ -398,11 +398,11 @@ void CMD_EditLump()
 
 		delete dialog;
 
-		if (lump_name == NULL)
+		if (lump_name.empty())
 			return;
 
 		// check if user typed name of current level
-		if (y_stricmp(lump_name, Level_name.c_str()) == 0)
+		if (y_stricmp(lump_name.c_str(), Level_name.c_str()) == 0)
 			lump_name = EDLUMP_HEADER;
 	}
 
@@ -410,27 +410,26 @@ void CMD_EditLump()
 	//       (1) EDLUMP_HEADER  --> edit the HeaderData buffer
 	//       (2) EDLUMP_SCRIPTS --> edit the ScriptsData buffer
 
-	bool special =	(strcmp(lump_name, EDLUMP_HEADER) == 0) ||
-					(strcmp(lump_name, EDLUMP_SCRIPTS) == 0);
+	bool special =lump_name == EDLUMP_HEADER || lump_name == EDLUMP_SCRIPTS;
 
 	// uppercase the lump name
 	// [ another small memory leak ]
 	if (!special)
-		lump_name = StringUpper(lump_name);
+		lump_name = StringUpper(lump_name.c_str());
 
 	// only create a per-level SCRIPTS lump in a Hexen map
 	// [ the UI_ChooseTextLump already prevents this, but we need to
 	//   handle the /scripts option of the EditLump command ]
-	if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0 && Level_format != MAPF_Hexen)
+	if (lump_name == EDLUMP_SCRIPTS && Level_format != MAPF_Hexen)
 	{
 		DLG_Notify("A per-level SCRIPTS lump can only be created "
 					"on a Hexen format map.");
 		return;
 	}
 
-	if (!special && ! ValidLumpToEdit(lump_name))
+	if (!special && ! ValidLumpToEdit(lump_name.c_str()))
 	{
-		Beep("Invalid lump: '%s'", lump_name);
+		Beep("Invalid lump: '%s'", lump_name.c_str());
 		return;
 	}
 
@@ -443,25 +442,25 @@ void CMD_EditLump()
 		editor->SetReadOnly();
 
 	// if lump exists, load the contents
-	if (strcmp(lump_name, EDLUMP_HEADER) == 0)
+	if (lump_name == EDLUMP_HEADER)
 	{
 		editor->LoadMemory(HeaderData);
 		editor->SetTitle(Level_name.c_str());
 	}
-	else if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0)
+	else if (lump_name == EDLUMP_SCRIPTS)
 	{
 		editor->LoadMemory(ScriptsData);
 		editor->SetTitle("SCRIPTS");
 	}
 	else
 	{
-		if (! editor->LoadLump(wad, lump_name))
+		if (! editor->LoadLump(wad, lump_name.c_str()))
 		{
 			// something went wrong
 			delete editor;
 			return;
 		}
-		editor->SetTitle(lump_name);
+		editor->SetTitle(lump_name.c_str());
 	}
 
 	// run the text editor
@@ -474,19 +473,19 @@ void CMD_EditLump()
 
 		SYS_ASSERT(wad == edit_wad);
 
-		if (strcmp(lump_name, EDLUMP_HEADER) == 0)
+		if (lump_name == EDLUMP_HEADER)
 		{
 			editor->SaveMemory(HeaderData);
 			MadeChanges = 1;
 		}
-		else if (strcmp(lump_name, EDLUMP_SCRIPTS) == 0)
+		else if (lump_name == EDLUMP_SCRIPTS)
 		{
 			editor->SaveMemory(ScriptsData);
 			MadeChanges = 1;
 		}
 		else
 		{
-			editor->SaveLump(wad, lump_name);
+			editor->SaveLump(wad, lump_name.c_str());
 		}
 	}
 
