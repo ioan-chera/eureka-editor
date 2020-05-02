@@ -208,11 +208,11 @@ void UI_DefaultProps::SetThing(int number)
 }
 
 
-const char * UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
+std::string UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
 {
-	const char *normalized = StringDup(NormalizeTex(w->value()));
+	std::string normalized = NormalizeTex(w->value());
 
-	w->value(normalized);
+	w->value(normalized.c_str());
 
 	return normalized;
 }
@@ -361,9 +361,9 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 void UI_DefaultProps::LoadValues()
 {
-	w_tex->value(default_wall_tex);
-	f_tex->value(default_floor_tex);
-	c_tex->value(default_ceil_tex);
+	w_tex->value(default_wall_tex.c_str());
+	f_tex->value(default_floor_tex.c_str());
+	c_tex->value(default_ceil_tex.c_str());
 
 	w_pic->GetTex (w_tex->value());
 	f_pic->GetFlat(f_tex->value());
@@ -559,13 +559,13 @@ bool Props_ParseUser(const char ** tokens, int num_tok)
 		default_thing = atoi(tokens[2]);
 
 	if (strcmp(tokens[1], "floor_tex") == 0)
-		default_floor_tex = StringDup(tokens[2]);
+		default_floor_tex = tokens[2];
 
 	if (strcmp(tokens[1], "ceil_tex") == 0)
-		default_ceil_tex = StringDup(tokens[2]);
+		default_ceil_tex = tokens[2];
 
 	if (strcmp(tokens[1], "mid_tex") == 0)
-		default_wall_tex = StringDup(tokens[2]);
+		default_wall_tex = tokens[2];
 
 	return true;
 }
@@ -580,9 +580,9 @@ void Props_WriteUser(FILE *fp)
 	fprintf(fp, "default light_level %d\n",  default_light_level);
 	fprintf(fp, "default thing %d\n",  default_thing);
 
-	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\""));
-	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\""));
-	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\""));
+	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex.c_str(),  "\""));
+	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex.c_str(), "\""));
+	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex.c_str(),  "\""));
 }
 
 

@@ -175,7 +175,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		if (w == box->r_pic)
 			new_tex = BA_InternaliseString("-");
 		else
-			new_tex = BA_InternaliseString(default_wall_tex);
+			new_tex = BA_InternaliseString(default_wall_tex.c_str());
 	}
 	else
 	{

@@ -909,7 +909,7 @@ static void DetermineNewTextures(lineloop_c& loop,
 
 	int null_tex  = BA_InternaliseString("-");
 
-	int def_lower = BA_InternaliseString(default_wall_tex);
+	int def_lower = BA_InternaliseString(default_wall_tex.c_str());
 	int def_upper = def_lower;
 
 	unsigned int k;

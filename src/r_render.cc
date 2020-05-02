@@ -1277,8 +1277,8 @@ static void StoreDefaultedFlats()
 		return;
 	}
 
-	int floor_tex = BA_InternaliseString(default_floor_tex);
-	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
+	int floor_tex = BA_InternaliseString(default_floor_tex.c_str());
+	int ceil_tex  = BA_InternaliseString(default_ceil_tex.c_str());
 
 	BA_Begin();
 	BA_MessageForSel("defaulted flat in", edit.Selected);
@@ -1306,7 +1306,7 @@ static void StoreDefaultedFlats()
 static int LD_GrabTex(const LineDef *L, int part)
 {
 	if (L->NoSided())
-		return BA_InternaliseString(default_wall_tex);
+		return BA_InternaliseString(default_wall_tex.c_str());
 
 	if (L->OneSided())
 		return L->Right()->mid_tex;
@@ -1505,7 +1505,7 @@ void Render3D_CB_Cut()
 		break;
 
 	case OBJ_LINEDEFS:
-		StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
+			StoreSelectedTexture(BA_InternaliseString(default_wall_tex.c_str()));
 		break;
 
 	default:

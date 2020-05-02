@@ -60,9 +60,9 @@ int default_ceil_h		= 128;
 int default_light_level	= 176;
 int default_thing		= 2001;
 
-const char * default_wall_tex	= "GRAY1";
-const char * default_floor_tex	= "FLAT1";
-const char * default_ceil_tex	= "FLAT1";
+std::string default_wall_tex	= "GRAY1";
+std::string default_floor_tex	= "FLAT1";
+std::string default_ceil_tex	= "FLAT1";
 
 
 static bool did_make_changes;
@@ -177,8 +177,8 @@ void Sector::SetDefaults()
 	floorh = default_floor_h;
 	 ceilh = default_ceil_h;
 
-	floor_tex = BA_InternaliseString(default_floor_tex);
-	 ceil_tex = BA_InternaliseString(default_ceil_tex);
+	floor_tex = BA_InternaliseString(default_floor_tex.c_str());
+	 ceil_tex = BA_InternaliseString(default_ceil_tex.c_str());
 
 	light = default_light_level;
 }
@@ -202,7 +202,7 @@ const char * SideDef::LowerTex() const
 void SideDef::SetDefaults(bool two_sided, int new_tex)
 {
 	if (new_tex < 0)
-		new_tex = BA_InternaliseString(default_wall_tex);
+		new_tex = BA_InternaliseString(default_wall_tex.c_str());
 
 	lower_tex = new_tex;
 	upper_tex = new_tex;

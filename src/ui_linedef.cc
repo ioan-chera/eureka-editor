@@ -553,7 +553,7 @@ bool UI_LineBox::ClipboardOp(char op)
 			break;
 
 		case 'x':	// Cut
-			CB_Paste(parts, BA_InternaliseString(default_wall_tex));
+			CB_Paste(parts, BA_InternaliseString(default_wall_tex.c_str()));
 			break;
 
 		case 'd': // Delete

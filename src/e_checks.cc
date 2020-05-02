@@ -3488,7 +3488,7 @@ void Textures_ShowMissing()
 
 void Textures_FixMissing()
 {
-	int new_wall = BA_InternaliseString(default_wall_tex);
+	int new_wall = BA_InternaliseString(default_wall_tex.c_str());
 
 	BA_Begin();
 	BA_Message("fixed missing textures");
@@ -3611,7 +3611,7 @@ void Textures_ShowTransparent()
 
 void Textures_FixTransparent()
 {
-	const char *new_tex = default_wall_tex;
+	const char *new_tex = default_wall_tex.c_str();
 
 	// do something reasonable if default wall is transparent
 	if (is_transparent(new_tex))
@@ -3902,7 +3902,7 @@ void Textures_LogUnknown(bool do_flat)
 
 void Textures_FixUnknownTex()
 {
-	int new_wall = BA_InternaliseString(default_wall_tex);
+	int new_wall = BA_InternaliseString(default_wall_tex.c_str());
 
 	int null_tex = BA_InternaliseString("-");
 
@@ -3941,8 +3941,8 @@ void Textures_FixUnknownTex()
 
 void Textures_FixUnknownFlat()
 {
-	int new_floor = BA_InternaliseString(default_floor_tex);
-	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+	int new_floor = BA_InternaliseString(default_floor_tex.c_str());
+	int new_ceil  = BA_InternaliseString(default_ceil_tex.c_str());
 
 	BA_Begin();
 	BA_Message("fixed unknown flats");
@@ -4018,7 +4018,7 @@ void Textures_FixDupSwitches()
 {
 	int null_tex = BA_InternaliseString("-");
 
-	const char *new_tex = default_wall_tex;
+	const char *new_tex = default_wall_tex.c_str();
 
 	// do something reasonable if default wall is a switch
 	if (is_switch_tex(new_tex))
