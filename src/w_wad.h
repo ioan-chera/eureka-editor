@@ -37,7 +37,7 @@ friend class Wad_file;
 private:
 	Wad_file *parent;
 
-	const char *name;
+	std::string name;
 
 	int l_start;
 	int l_length;
@@ -49,9 +49,7 @@ private:
 	void MakeEntry(struct raw_wad_entry_s *entry);
 
 public:
-	~Lump_c();
-
-	const char *Name() const { return name; }
+	const char *Name() const { return name.c_str(); }
 	int Length() const { return l_length; }
 
 	// do not call this directly, use Wad_file::RenameLump()
