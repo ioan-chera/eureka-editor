@@ -377,7 +377,7 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-const char * GameNameFromIWAD(const char *iwad_name)
+std::string GameNameFromIWAD(const char *iwad_name)
 {
 	static char game_name[FL_PATH_MAX];
 
@@ -387,7 +387,7 @@ const char * GameNameFromIWAD(const char *iwad_name)
 
 	y_strlowr(game_name);
 
-	return StringDup(game_name);
+	return game_name;
 }
 
 
@@ -423,9 +423,9 @@ static bool DetermineIWAD()
 		if (! Wad_file::Validate(Iwad_name.c_str()))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
 
-		const char *game = GameNameFromIWAD(Iwad_name.c_str());
+		std::string game = GameNameFromIWAD(Iwad_name.c_str());
 
-		if (! M_CanLoadDefinitions("games", game))
+		if (! M_CanLoadDefinitions("games", game.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
 		M_AddKnownIWAD(Iwad_name.c_str());

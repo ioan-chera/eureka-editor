@@ -1158,9 +1158,9 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	const char *game = GameNameFromIWAD(chooser.filename());
+	std::string game = GameNameFromIWAD(chooser.filename());
 
-	if (! M_CanLoadDefinitions("games", game))
+	if (! M_CanLoadDefinitions("games", game.c_str()))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
