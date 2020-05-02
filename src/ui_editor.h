@@ -44,7 +44,7 @@ private:
 	Fl_Text_Buffer *tbuf;
 
 	// use SetFindString() to set this
-	const char *find_string;
+	std::string find_string;
 
 public:
 	UI_TextEditor();
