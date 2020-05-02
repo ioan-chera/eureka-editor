@@ -185,7 +185,7 @@ static const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-		OPT_STRING_LIST,
+		OPT_STRING_LIST_S,
 		"",
 		"Wad file(s) to edit",
 		"<file>...",
@@ -1129,7 +1129,7 @@ void M_ParseEnvironmentVars()
 
 void M_AddPwadName(const char *filename)
 {
-	Pwad_list.push_back(StringDup(filename));
+	Pwad_list.push_back(filename);
 }
 
 

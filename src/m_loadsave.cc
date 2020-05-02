@@ -1261,7 +1261,7 @@ void CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(Pwad_list[index], NULL);
+	OpenFileMap(Pwad_list[index].c_str(), NULL);
 }
 
 

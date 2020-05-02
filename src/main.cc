@@ -76,7 +76,7 @@ const char *cache_dir;
 std::string Iwad_name;
 const char *Pwad_name = NULL;
 
-std::vector< const char * > Pwad_list;
+std::vector<std::string> Pwad_list;
 std::vector< const char * > Resource_list;
 
 std::string Game_name;
@@ -1098,13 +1098,13 @@ int main(int argc, char *argv[])
 		// open a specified PWAD now
 		// [ the map is loaded later.... ]
 
-		if (Pwad_list.size() > 0)
+		if (!Pwad_list.empty())
 		{
 			// this fatal errors on any missing file
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			Pwad_name = Pwad_list[0];
+			Pwad_name = Pwad_list[0].c_str();
 
 			edit_wad = Wad_file::Open(Pwad_name, 'a');
 			if (! edit_wad)
