@@ -3188,7 +3188,7 @@ static bool SEC_check_beast_mark(int tag)
 	if (tag == 667)
 	{
 		// tag #667 can only be used on MAP07
-		return (y_stricmp(Level_name, "MAP07") == 0);
+		return (y_stricmp(Level_name.c_str(), "MAP07") == 0);
 	}
 
 	if (tag == 666)
@@ -3196,7 +3196,7 @@ static bool SEC_check_beast_mark(int tag)
 		// for Heretic, the map must be an end-of-episode map: ExM8
 		if (Features.tag_666 == 2)
 		{
-			if (strlen(Level_name) != 4)
+			if (Level_name.length() != 4)
 				return false;
 
 			return (Level_name[3] == '8');
@@ -3204,10 +3204,10 @@ static bool SEC_check_beast_mark(int tag)
 
 		// for Doom, either need a particular map, or the presence
 		// of a KEEN thing.
-		if (y_stricmp(Level_name, "E1M8")  == 0 ||
-			y_stricmp(Level_name, "E4M6")  == 0 ||
-			y_stricmp(Level_name, "E4M8")  == 0 ||
-			y_stricmp(Level_name, "MAP07") == 0)
+		if (y_stricmp(Level_name.c_str(), "E1M8")  == 0 ||
+			y_stricmp(Level_name.c_str(), "E4M6")  == 0 ||
+			y_stricmp(Level_name.c_str(), "E4M8")  == 0 ||
+			y_stricmp(Level_name.c_str(), "MAP07") == 0)
 		{
 			return true;
 		}

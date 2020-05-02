@@ -221,7 +221,7 @@ static const opt_desc_t options[] =
 
 	{	"warp",
 		"w",
-		OPT_STRING,
+		OPT_STRING_S,
 		"w<",
 		"Select level to edit",
 		"<map>",

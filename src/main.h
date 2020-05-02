@@ -133,7 +133,7 @@ extern const char *cache_dir;    // for caches and backups, can be same as home_
 
 extern std::string Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern std::string Port_name;   // Name of source port "vanilla", "boom", ...
-extern const char *Level_name;  // Name of map lump we are editing
+extern std::string Level_name;  // Name of map lump we are editing
 
 extern map_format_e Level_format;   // format of current map
 extern std::string  Udmf_namespace; // for UDMF, the current namespace
