@@ -188,7 +188,7 @@ void M_PrepareConfigVariables()
 		}
 	}
 
-	if (Port_name)
+	if (!Port_name.empty())
 	{
 		parse_vars["$PORT_NAME"] = Port_name;
 	}

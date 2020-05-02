@@ -27,7 +27,7 @@
 #include "ui_window.h"
 
 
-static const char * QueryName(const char *port = Port_name, const char *game = Game_name.c_str())
+static const char * QueryName(const char *port = Port_name.c_str(), const char *game = Game_name.c_str())
 {
 	SYS_ASSERT(port);
 
@@ -345,7 +345,7 @@ static const char * GrabWadNames(const port_path_info_t *info)
 	// see if we should use the "-merge" parameter, which is
 	// required for Chocolate-Doom and derivates like Crispy Doom.
 	// TODO : is there a better way to do this?
-	if (y_stricmp(Port_name, "vanilla") == 0)
+	if (y_stricmp(Port_name.c_str(), "vanilla") == 0)
 	{
 		use_merge = 1;
 	}
@@ -406,7 +406,7 @@ void CMD_TestMap()
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(Port_name, Game_name.c_str()))
+		if (! M_PortSetupDialog(Port_name.c_str(), Game_name.c_str()))
 			return;
 
 		info = M_QueryPortPath(QueryName());

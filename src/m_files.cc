@@ -992,7 +992,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	if (new_port)
 	{
-		if (! (keep_cmd_line_args && Port_name))
+		if (! (keep_cmd_line_args && !Port_name.empty()))
 			Port_name = new_port;
 	}
 
@@ -1025,8 +1025,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (!Game_name.empty())
 		lump->Printf("game %s\n", Game_name.c_str());
 
-	if (Port_name)
-		lump->Printf("port %s\n", Port_name);
+	if (!Port_name.empty())
+		lump->Printf("port %s\n", Port_name.c_str());
 
 	for (unsigned int i = 0 ; i < Resource_list.size() ; i++)
 	{

@@ -867,7 +867,7 @@ void UI_ProjectSetup::PopulatePort()
 	if (port_choice->mvalue())
 		prev_port = StringDup(port_choice->mvalue()->text);
 
-	if (! prev_port) prev_port = Port_name;
+	if (! prev_port) prev_port = Port_name.c_str();
 	if (! prev_port) prev_port = "vanilla";
 
 

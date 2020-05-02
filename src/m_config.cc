@@ -212,7 +212,7 @@ static const opt_desc_t options[] =
 
 	{	"port",
 		"p",
-		OPT_STRING,
+		OPT_STRING_S,
 		"",
 		"Port (engine) name",
 		"<name>",

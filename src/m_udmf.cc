@@ -913,7 +913,7 @@ void UDMF_SwitchEngine()
 	char *namespace_l = StringLower(Udmf_namespace.c_str());
 
 	// already set?
-	if (y_stricmp(Port_name, namespace_l) == 0)
+	if (y_stricmp(Port_name.c_str(), namespace_l) == 0)
 	{
 		StringFree(namespace_l);
 		return;
