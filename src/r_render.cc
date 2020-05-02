@@ -1533,42 +1533,42 @@ void Render3D_GetCameraPos(double *x, double *y, float *angle)
 }
 
 
-bool Render3D_ParseUser(const char ** tokens, int num_tok)
+bool Render3D_ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "camera") == 0 && num_tok >= 5)
+	if (tokens[0] == "camera" && tokens.size() >= 5)
 	{
-		r_view.x = atof(tokens[1]);
-		r_view.y = atof(tokens[2]);
-		r_view.z = atof(tokens[3]);
+		r_view.x = atof(tokens[1].c_str());
+		r_view.y = atof(tokens[2].c_str());
+		r_view.z = atof(tokens[3].c_str());
 
-		r_view.SetAngle(atof(tokens[4]));
+		r_view.SetAngle(atof(tokens[4].c_str()));
 		return true;
 	}
 
-	if (strcmp(tokens[0], "r_modes") == 0 && num_tok >= 4)
+	if (tokens[0] == "r_modes" && tokens.size() >= 4)
 	{
-		r_view.texturing = atoi(tokens[1]) ? true : false;
-		r_view.sprites   = atoi(tokens[2]) ? true : false;
-		r_view.lighting  = atoi(tokens[3]) ? true : false;
+		r_view.texturing = atoi(tokens[1].c_str()) ? true : false;
+		r_view.sprites   = atoi(tokens[2].c_str()) ? true : false;
+		r_view.lighting  = atoi(tokens[3].c_str()) ? true : false;
 
 		return true;
 	}
 
-	if (strcmp(tokens[0], "r_gravity") == 0 && num_tok >= 2)
+	if (tokens[0] == "r_gravity" && tokens.size() >= 2)
 	{
-		r_view.gravity = atoi(tokens[1]) ? true : false;
+		r_view.gravity = atoi(tokens[1].c_str()) ? true : false;
 		return true;
 	}
 
-	if (strcmp(tokens[0], "low_detail") == 0 && num_tok >= 2)
+	if (tokens[0] == "low_detail" && tokens.size() >= 2)
 	{
 		// ignored for compatibility
 		return true;
 	}
 
-	if (strcmp(tokens[0], "gamma") == 0 && num_tok >= 2)
+	if (tokens[0] == "gamma" && tokens.size() >= 2)
 	{
-		usegamma = MAX(0, atoi(tokens[1])) % 5;
+		usegamma = MAX(0, atoi(tokens[1].c_str())) % 5;
 
 		W_UpdateGamma();
 		return true;

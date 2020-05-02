@@ -1419,16 +1419,16 @@ int M_WriteConfigFile()
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, const char ** tokens, int max_tok, int do_strings)
+int M_ParseLine(const char *line, std::vector<std::string> &tokens, int do_strings)
 {
 	// when do_strings == 2, string tokens keep their quotes.
-
-	int num_tok = 0;
 
 	char tokenbuf[256];
 	int  tokenlen = -1;
 
 	bool in_string = false;
+
+	tokens.clear();
 
 	// skip leading whitespace
 	while (isspace(*line))
@@ -1494,36 +1494,21 @@ int M_ParseLine(const char *line, const char ** tokens, int max_tok, int do_stri
 			continue;
 		}
 
-		if (num_tok >= max_tok)  // ERROR: too many tokens
-			return -2;
-
 		if (in_string)  // ERROR: non-terminated string
 			return -3;
 
 		tokenbuf[tokenlen] = 0;
 		tokenlen = -1;
 
-		tokens[num_tok++] = StringDup(tokenbuf);
+		tokens.push_back(tokenbuf);
 
 		// end of line?  if yes, we are done
 		if (ch == 0 || ch == '\n')
 			break;
 	}
 
-	return num_tok;
+	return static_cast<int>(tokens.size());
 }
-
-
-void M_FreeLine(const char ** tokens, int num_tok)
-{
-	for (int i = 0 ; i < num_tok ; i++)
-	{
-		StringFree(tokens[i]);
-
-		tokens[i] = NULL;
-	}
-}
-
 
 
 char * PersistFilename(const crc32_c& crc)
@@ -1557,11 +1542,11 @@ bool M_LoadUserState()
 
 	static char line[FL_PATH_MAX];
 
-	const char * tokens[MAX_TOKENS];
+	std::vector<std::string> tokens;
 
 	while (file.readLine(line, sizeof(line)))
 	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
+		int num_tok = M_ParseLine(line, tokens, 1 /* do_strings */);
 
 		if (num_tok == 0)
 			continue;
@@ -1572,12 +1557,12 @@ bool M_LoadUserState()
 			continue;
 		}
 
-		if (  Editor_ParseUser(tokens, num_tok) ||
-		        Grid_ParseUser(tokens, num_tok) ||
-		    Render3D_ParseUser(tokens, num_tok) ||
-		     Browser_ParseUser(tokens, num_tok) ||
-		       Props_ParseUser(tokens, num_tok) ||
-		     RecUsed_ParseUser(tokens, num_tok))
+		if (  Editor_ParseUser(tokens) ||
+		        Grid_ParseUser(tokens) ||
+		    Render3D_ParseUser(tokens) ||
+		     Browser_ParseUser(tokens) ||
+		       Props_ParseUser(tokens) ||
+		     RecUsed_ParseUser(tokens))
 		{
 			// Ok
 		}

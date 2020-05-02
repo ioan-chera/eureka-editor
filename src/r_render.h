@@ -114,7 +114,7 @@ void Render3D_CB_Paste();
 void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);
 
-bool Render3D_ParseUser(const char ** tokens, int num_tok);
+bool Render3D_ParseUser(const std::vector<std::string> &tokens);
 void Render3D_WriteUser(FILE *fp);
 
 void Render3D_NotifyBegin();

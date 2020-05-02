@@ -1777,57 +1777,56 @@ void UI_Browser::UpdateGenType(int line_type)
 //------------------------------------------------------------------------
 
 
-bool UI_Browser_Box::ParseUser(const char ** tokens, int num_tok)
+bool UI_Browser_Box::ParseUser(const std::vector<std::string> &tokens)
 {
 	// syntax is: browser <kind> <keyword> <args...>
 
-	if (num_tok < 3)
+	if (tokens.size() < 3)
 		return false;
 
-	if (strcmp(tokens[0], "browser") != 0)
+	if (tokens[0] != "browser")
 		return false;
 
 	if (tokens[1][0] != kind)
 		return false;
 
-	tokens  += 2;
-	num_tok -= 2;
+	size_t num_tok = tokens.size() - 2;
 
-	if (strcmp(tokens[0], "cat") == 0 && num_tok >= 2)
+	if (tokens[2] == "cat" && num_tok >= 2)
 	{
-		CategoryByLetter(tokens[1][0]);
+		CategoryByLetter(tokens[3][0]);
 		return true;
 	}
 
-	if (strcmp(tokens[0], "sort") == 0 && num_tok >= 2 && alpha)
+	if (tokens[2] == "sort" && num_tok >= 2 && alpha)
 	{
-		alpha->value(atoi(tokens[1]) ? 0 : 1);
+		alpha->value(atoi(tokens[3].c_str()) ? 0 : 1);
 		Sort();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "search") == 0 && num_tok >= 2)
+	if (tokens[2] == "search" && num_tok >= 2)
 	{
-		search->value(tokens[1]);
+		search->value(tokens[3].c_str());
 		Filter();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "pics") == 0 && num_tok >= 2 && pics)
+	if (tokens[2] == "pics" && num_tok >= 2 && pics)
 	{
-		pics->value(atoi(tokens[1]) ? 1 : 0);
+		pics->value(atoi(tokens[3].c_str()) ? 1 : 0);
 		return true;
 	}
 
-	if (strcmp(tokens[0], "do_flats") == 0 && num_tok >= 2 && do_flats)
+	if (tokens[2] == "do_flats" && num_tok >= 2 && do_flats)
 	{
-		do_flats->value(atoi(tokens[1]) ? 1 : 0);
+		do_flats->value(atoi(tokens[3].c_str()) ? 1 : 0);
 		return true;
 	}
 
-	if (strcmp(tokens[0], "do_tex") == 0 && num_tok >= 2 && do_tex)
+	if (tokens[2] == "do_tex" && num_tok >= 2 && do_tex)
 	{
-		do_tex->value(atoi(tokens[1]) ? 1 : 0);
+		do_tex->value(atoi(tokens[3].c_str()) ? 1 : 0);
 		Filter();
 		return true;
 	}
@@ -1859,9 +1858,9 @@ void UI_Browser_Box::WriteUser(FILE *fp)
 }
 
 
-bool UI_Browser::ParseUser(const char ** tokens, int num_tok)
+bool UI_Browser::ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "open_browser") == 0 && num_tok >= 2)
+	if (tokens[0] == "open_browser" && tokens.size() >= 2)
 	{
 		main_win->BrowserMode(tokens[1][0]);
 		return true;
@@ -1869,7 +1868,7 @@ bool UI_Browser::ParseUser(const char ** tokens, int num_tok)
 
 	for (int i = 0 ; i < 5 ; i++)
 	{
-		if (browsers[i]->ParseUser(tokens, num_tok))
+		if (browsers[i]->ParseUser(tokens))
 			return true;
 	}
 
@@ -1895,14 +1894,14 @@ void UI_Browser::WriteUser(FILE *fp)
 }
 
 
-bool Browser_ParseUser(const char ** tokens, int num_tok)
+bool Browser_ParseUser(const std::vector<std::string> &tokens)
 {
 	if (main_win)
 	{
-		if (main_win->tile->ParseUser(tokens, num_tok))
+		if (main_win->tile->ParseUser(tokens))
 			return true;
 
-		if (main_win->browser->ParseUser(tokens, num_tok))
+		if (main_win->browser->ParseUser(tokens))
 			return true;
 	}
 

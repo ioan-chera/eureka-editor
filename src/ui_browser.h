@@ -119,7 +119,7 @@ public:
 
 	void RecentUpdate();
 
-	bool ParseUser(const char ** tokens, int num_tok);
+	bool ParseUser(const std::vector<std::string> &tokens);
 	void WriteUser(FILE *fp);
 
 private:
@@ -243,7 +243,7 @@ public:
 	// for the generalized box
 	void UpdateGenType(int line_type);
 
-	bool ParseUser(const char ** tokens, int num_tok);
+	bool ParseUser(const std::vector<std::string> &tokens);
 	void WriteUser(FILE *fp);
 
 private:
@@ -251,7 +251,7 @@ private:
 };
 
 
-bool Browser_ParseUser(const char ** tokens, int num_tok);
+bool Browser_ParseUser(const std::vector<std::string> &tokens);
 void Browser_WriteUser(FILE *fp);
 
 #endif  /* __EUREKA_UI_BROWSER_H__ */

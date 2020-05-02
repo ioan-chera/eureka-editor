@@ -537,35 +537,35 @@ void UI_DefaultProps::UnselectPics()
 //------------------------------------------------------------------------
 
 
-bool Props_ParseUser(const char ** tokens, int num_tok)
+bool Props_ParseUser(const std::vector<std::string> &tokens)
 {
 	// syntax is:  default  <prop>  <value>
-	if (num_tok < 3)
+	if (tokens.size() < 3)
 		return false;
 
-	if (strcmp(tokens[0], "default") != 0)
+	if (tokens[0] != "default")
 		return false;
 
-	if (strcmp(tokens[1], "floor_h") == 0)
-		default_floor_h = atoi(tokens[2]);
+	if (tokens[1] == "floor_h")
+		default_floor_h = atoi(tokens[2].c_str());
 
-	if (strcmp(tokens[1], "ceil_h") == 0)
-		default_ceil_h = atoi(tokens[2]);
+	if (tokens[1] == "ceil_h")
+		default_ceil_h = atoi(tokens[2].c_str());
 
-	if (strcmp(tokens[1], "light_level") == 0)
-		default_light_level = atoi(tokens[2]);
+	if (tokens[1] == "light_level")
+		default_light_level = atoi(tokens[2].c_str());
 
-	if (strcmp(tokens[1], "thing") == 0)
-		default_thing = atoi(tokens[2]);
+	if (tokens[1] == "thing")
+		default_thing = atoi(tokens[2].c_str());
 
-	if (strcmp(tokens[1], "floor_tex") == 0)
-		default_floor_tex = tokens[2];
+	if (tokens[1] == "floor_tex")
+		default_floor_tex = tokens[2].c_str();
 
-	if (strcmp(tokens[1], "ceil_tex") == 0)
-		default_ceil_tex = tokens[2];
+	if (tokens[1] == "ceil_tex")
+		default_ceil_tex = tokens[2].c_str();
 
-	if (strcmp(tokens[1], "mid_tex") == 0)
-		default_wall_tex = tokens[2];
+	if (tokens[1] == "mid_tex")
+		default_wall_tex = tokens[2].c_str();
 
 	return true;
 }

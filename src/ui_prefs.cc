@@ -295,9 +295,9 @@ private:
 			return;
 		}
 
-		const char * tokens[32];
+		std::vector<std::string> tokens;
 
-		int num_tok = M_ParseLine(list, tokens, 32, 0 /* do_strings */);
+		int num_tok = M_ParseLine(list, tokens, 0 /* do_strings */);
 
 		if (num_tok < 1)	// shouldn't happen
 		{
@@ -306,9 +306,7 @@ private:
 		}
 
 		for (int i = 0 ; i < num_tok ; i++)
-			menu->add(tokens[i]);
-
-		M_FreeLine(tokens, num_tok);
+			menu->add(tokens[i].c_str());
 
 		menu->activate();
 	}

@@ -1277,33 +1277,33 @@ void RecUsed_WriteUser(FILE *fp)
 }
 
 
-bool RecUsed_ParseUser(const char ** tokens, int num_tok)
+bool RecUsed_ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "recent_used") != 0 || num_tok < 2)
+	if (tokens[0] != "recent_used" || tokens.size() < 2)
 		return false;
 
-	if (strcmp(tokens[1], "clear") == 0)
+	if (tokens[1] == "clear")
 	{
 		RecUsed_ClearAll();
 		return true;
 	}
 
 	// syntax is:  recent_used  <kind>  <name>
-	if (num_tok < 3)
+	if (tokens.size() < 3)
 		return false;
 
 	switch (tokens[1][0])
 	{
 		case 'T':
-			recent_textures.insert(tokens[2]);
+			recent_textures.insert(tokens[2].c_str());
 			break;
 
 		case 'F':
-			recent_flats.insert(tokens[2]);
+			recent_flats.insert(tokens[2].c_str());
 			break;
 
 		case 'O':
-			recent_things.insert(tokens[2]);
+			recent_things.insert(tokens[2].c_str());
 			break;
 
 		default:
@@ -1378,38 +1378,38 @@ void Editor_DefaultState()
 }
 
 
-bool Editor_ParseUser(const char ** tokens, int num_tok)
+bool Editor_ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "edit_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "edit_mode" && tokens.size() >= 2)
 	{
 		Editor_ChangeMode(tokens[1][0]);
 		return true;
 	}
 
-	if (strcmp(tokens[0], "render_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "render_mode" && tokens.size() >= 2)
 	{
-		edit.render3d = atoi(tokens[1]);
+		edit.render3d = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "sector_render_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "sector_render_mode" && tokens.size() >= 2)
 	{
-		edit.sector_render_mode = atoi(tokens[1]);
+		edit.sector_render_mode = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "thing_render_mode") == 0 && num_tok >= 2)
+	if (tokens[0] == "thing_render_mode" && tokens.size() >= 2)
 	{
-		edit.thing_render_mode = atoi(tokens[1]);
+		edit.thing_render_mode = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}
 
-	if (strcmp(tokens[0], "show_object_numbers") == 0 && num_tok >= 2)
+	if (tokens[0] == "show_object_numbers" && tokens.size() >= 2)
 	{
-		edit.show_object_numbers = atoi(tokens[1]);
+		edit.show_object_numbers = atoi(tokens[1].c_str());
 		RedrawMap();
 		return true;
 	}

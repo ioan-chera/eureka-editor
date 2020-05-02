@@ -674,16 +674,16 @@ void Grid_State_c::NearestScale(double want_scale)
 }
 
 
-bool Grid_ParseUser(const char ** tokens, int num_tok)
+bool Grid_ParseUser(const std::vector<std::string> &tokens)
 {
-	if (strcmp(tokens[0], "map_pos") == 0 && num_tok >= 4)
+	if (tokens[0] == "map_pos" && tokens.size() >= 4)
 	{
-		double x = atof(tokens[1]);
-		double y = atof(tokens[2]);
+		double x = atof(tokens[1].c_str());
+		double y = atof(tokens[2].c_str());
 
 		grid.MoveTo(x, y);
 
-		double new_scale = atof(tokens[3]);
+		double new_scale = atof(tokens[3].c_str());
 
 		grid.NearestScale(new_scale);
 
@@ -691,11 +691,11 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (strcmp(tokens[0], "grid") == 0 && num_tok >= 4)
+	if (tokens[0] == "grid" && tokens.size() >= 4)
 	{
-		bool t_shown = atoi(tokens[1]) ? true : false;
+		bool t_shown = atoi(tokens[1].c_str()) ? true : false;
 
-		grid.step = atoi(tokens[3]);
+		grid.step = atoi(tokens[3].c_str());
 
 		// tokens[2] was grid.mode, currently unused
 
@@ -706,9 +706,9 @@ bool Grid_ParseUser(const char ** tokens, int num_tok)
 		return true;
 	}
 
-	if (strcmp(tokens[0], "snap") == 0 && num_tok >= 2)
+	if (tokens[0] == "snap" && tokens.size() >= 2)
 	{
-		grid.snap = atoi(tokens[1]) ? true : false;
+		grid.snap = atoi(tokens[1].c_str()) ? true : false;
 
 		if (main_win)
 			main_win->info_bar->UpdateSnap();

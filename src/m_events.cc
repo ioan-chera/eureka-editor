@@ -814,11 +814,10 @@ typedef struct
 } operation_command_t;
 
 
-static void ParseOperationLine(const char ** tokens, int num_tok,
-							   Fl_Menu_Button *menu)
+static void ParseOperationLine(const std::vector<std::string> &tokens, Fl_Menu_Button *menu)
 {
 	// just a divider?
-	if (y_stricmp(tokens[0], "divider") == 0)
+	if (y_stricmp(tokens[0].c_str(), "divider") == 0)
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
 		return;
@@ -827,25 +826,25 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 	// parse the key
 	int shortcut = 0;
 
-	if (y_stricmp(tokens[0], "UNBOUND") != 0)
+	if (y_stricmp(tokens[0].c_str(), "UNBOUND") != 0)
 	{
-		keycode_t key = M_ParseKeyString(tokens[0]);
+		keycode_t key = M_ParseKeyString(tokens[0].c_str());
 		if (key != 0)
 			shortcut = M_KeyToShortcut(key);
 	}
 
 	// parse the command and its parameters...
-	if (num_tok < 2)
+	if (tokens.size() < 2)
 		FatalError("operations.cfg: entry missing description.\n");
 
-	if (num_tok < 3)
+	if (tokens.size() < 3)
 		FatalError("operations.cfg: entry missing command name.\n");
 
-	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
+	const editor_command_t *cmd = FindEditorCommand(tokens[2].c_str());
 
 	if (! cmd)
 	{
-		LogPrintf("operations.cfg: unknown function: %s\n", tokens[2]);
+		LogPrintf("operations.cfg: unknown function: %s\n", tokens[2].c_str());
 		return;
 	}
 
@@ -857,10 +856,10 @@ static void ParseOperationLine(const char ** tokens, int num_tok,
 	info->cmd = cmd;
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		if (num_tok >= 4 + p)
-			strncpy(info->param[p], tokens[3 + p], MAX_BIND_LENGTH-1);
+		if ((int)tokens.size() >= 4 + p)
+			strncpy(info->param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
 
-	menu->add(tokens[1], shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
+	menu->add(tokens[1].c_str(), shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
 }
 
 
@@ -924,7 +923,7 @@ static bool M_ParseOperationFile()
 	// parse each line
 
 	static char line[FL_PATH_MAX];
-	const  char * tokens[MAX_TOKENS];
+	std::vector<std::string> tokens;
 
 	Fl_Menu_Button *menu = NULL;
 
@@ -932,7 +931,7 @@ static bool M_ParseOperationFile()
 
 	while (file.readLine(line, sizeof(line)))
 	{
-		int num_tok = M_ParseLine(line, tokens, MAX_TOKENS, 1 /* do_strings */);
+		int num_tok = M_ParseLine(line, tokens, 1 /* do_strings */);
 		if (num_tok == 0)
 			continue;
 
@@ -942,7 +941,7 @@ static bool M_ParseOperationFile()
 			continue;
 		}
 
-		if (y_stricmp(tokens[0], "menu") == 0)
+		if (y_stricmp(tokens[0].c_str(), "menu") == 0)
 		{
 			if (num_tok < 3)
 			{
@@ -955,7 +954,7 @@ static bool M_ParseOperationFile()
 
 			// create new menu
 			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
-			menu->copy_label(tokens[2]);
+			menu->copy_label(tokens[2].c_str());
 			menu->clear();
 
 			context = tokens[1];
@@ -963,7 +962,7 @@ static bool M_ParseOperationFile()
 		}
 
 		if (menu != NULL)
-			ParseOperationLine(tokens, num_tok, menu);
+			ParseOperationLine(tokens, menu);
 	}
 
 	file.close();

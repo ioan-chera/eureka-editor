@@ -167,8 +167,7 @@ private:
 
 
 // returns number of tokens, zero for comment, negative on error
-int M_ParseLine(const char *line, const char ** tokens, int max_tok, int do_strings);
-void M_FreeLine(const char ** tokens, int num_tok);
+int M_ParseLine(const char *line, std::vector<std::string> &tokens, int do_strings);
 
 // user state persistence (stuff like camera pos, grid settings, ...)
 bool M_LoadUserState();
