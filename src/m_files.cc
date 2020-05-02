@@ -986,7 +986,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	if (new_iwad)
 	{
-		if (! (keep_cmd_line_args && Iwad_name))
+		if (! (keep_cmd_line_args && !Iwad_name.empty()))
 			Iwad_name = new_iwad;
 	}
 

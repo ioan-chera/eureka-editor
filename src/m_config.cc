@@ -203,7 +203,7 @@ static const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-		OPT_STRING,
+		OPT_STRING_S,
 		"",
 		"The name of the IWAD (game data)",
 		"<file>",
