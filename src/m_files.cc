@@ -842,10 +842,10 @@ const char * M_PickDefaultIWAD()
 static void M_AddResource_Unique(const char * filename)
 {
 	// check if base filename (without path) already exists
-	for (unsigned int k = 0 ; k < Resource_list.size() ; k++)
+	for (const std::string &resource : Resource_list)
 	{
 		const char *A = fl_filename_name(filename);
-		const char *B = fl_filename_name(Resource_list[k]);
+		const char *B = fl_filename_name(resource.c_str());
 
 		if (y_stricmp(A, B) == 0)
 			return;		// found it
@@ -1028,10 +1028,10 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (!Port_name.empty())
 		lump->Printf("port %s\n", Port_name.c_str());
 
-	for (unsigned int i = 0 ; i < Resource_list.size() ; i++)
+	for (const std::string &resource : Resource_list)
 	{
 		char absolute_name[FL_PATH_MAX];
-		fl_filename_absolute(absolute_name, Resource_list[i]);
+		fl_filename_absolute(absolute_name, resource.c_str());
 
 		lump->Printf("resource %s\n", absolute_name);
 	}

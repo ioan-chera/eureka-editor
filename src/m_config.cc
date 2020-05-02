@@ -194,7 +194,7 @@ static const opt_desc_t options[] =
 
 	{	"merge",
 		"m",
-		OPT_STRING_LIST,
+		OPT_STRING_LIST_S,
 		"",
 		"Resource file(s) to load",
 		"<file>...",

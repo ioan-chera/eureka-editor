@@ -202,7 +202,7 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 	for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
 	{
 		if (dialog->res[i])
-			Resource_list.push_back(StringDup(dialog->res[i]));
+			Resource_list.push_back(dialog->res[i]);
 	}
 
 	Fl::wait(0.1);

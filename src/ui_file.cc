@@ -1049,7 +1049,7 @@ void UI_ProjectSetup::PopulateResources()
 
 		if (r < (int)Resource_list.size())
 		{
-			res[r] = StringDup(Resource_list[r]);
+			res[r] = StringDup(Resource_list[r].c_str());
 
 			res_name[r]->value(fl_filename_name(res[r]));
 		}
