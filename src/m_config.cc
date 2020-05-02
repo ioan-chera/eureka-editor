@@ -385,7 +385,7 @@ static const opt_desc_t options[] =
 
 	{	"default_port",
 		0,
-		OPT_STRING,
+		OPT_STRING_S,
 		"v",
 		"Default port (engine) name",
 		NULL,
