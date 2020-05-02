@@ -407,9 +407,9 @@ static bool DetermineIWAD()
 		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
-		const char * path = M_QueryKnownIWAD(Iwad_name.c_str());
+		std::string path = M_QueryKnownIWAD(Iwad_name.c_str());
 
-		if (! path)
+		if (path.empty())
 			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name.c_str());
 
 		Iwad_name = path;

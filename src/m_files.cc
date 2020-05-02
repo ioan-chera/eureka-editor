@@ -44,16 +44,16 @@ void M_AddKnownIWAD(const char *path)
 }
 
 
-const char * M_QueryKnownIWAD(const char *game)
+std::string M_QueryKnownIWAD(const char *game)
 {
 	std::map<std::string, std::string>::iterator KI;
 
 	KI = known_iwads.find(game);
 
 	if (KI != known_iwads.end())
-		return KI->second.c_str();
+		return KI->second;
 	else
-		return NULL;
+		return "";
 }
 
 
@@ -241,14 +241,12 @@ private:
 	int size;
 
 	// newest is at index [0]
-	const char * filenames[MAX_RECENT];
-	const char * map_names[MAX_RECENT];
+	std::string filenames[MAX_RECENT];
+	std::string map_names[MAX_RECENT];
 
 public:
 	RecentFiles_c() : size(0)
 	{
-		memset(filenames, 0, sizeof(filenames));
-		memset(map_names, 0, sizeof(map_names));
 	}
 
 	~RecentFiles_c()
@@ -263,7 +261,7 @@ public:
 	{
 		SYS_ASSERT(0 <= index && index < size);
 
-		return new recent_file_data_c(filenames[index], map_names[index]);
+		return new recent_file_data_c(filenames[index].c_str(), map_names[index].c_str());
 	}
 
 	void clear()
@@ -275,8 +273,8 @@ public:
 			StringFree(map_names[k]);
 #endif
 
-			filenames[k] = NULL;
-			map_names[k] = NULL;
+			filenames[k].clear();
+			map_names[k].clear();
 		}
 
 		size = 0;
@@ -289,12 +287,12 @@ public:
 
 		for (int k = 0 ; k < size ; k++)
 		{
-			const char *B = fl_filename_name(filenames[k]);
+			const char *B = fl_filename_name(filenames[k].c_str());
 
 			if (y_stricmp(A, B) != 0)
 				continue;
 
-			if (! map || y_stricmp(map_names[k], map) == 0)
+			if (! map || y_stricmp(map_names[k].c_str(), map) == 0)
 				return k;
 		}
 
@@ -320,8 +318,8 @@ public:
 			map_names[index] = map_names[index + 1];
 		}
 
-		filenames[index] = NULL;
-		map_names[index] = NULL;
+		filenames[index].clear();
+		map_names[index].clear();
 	}
 
 	void push_front(const char *file, const char *map)
@@ -338,8 +336,8 @@ public:
 			map_names[k + 1] = map_names[k];
 		}
 
-		filenames[0] = StringDup(file);
-		map_names[0] = StringDup(map);
+		filenames[0] = file;
+		map_names[0] = map;
 
 		size++;
 	}
@@ -363,7 +361,7 @@ public:
 
 		for (int k = size - 1 ; k >= 0 ; k--)
 		{
-			fprintf(fp, "recent %s %s\n", map_names[k], filenames[k]);
+			fprintf(fp, "recent %s %s\n", map_names[k].c_str(), filenames[k].c_str());
 		}
 	}
 
@@ -371,7 +369,7 @@ public:
 	{
 		SYS_ASSERT(index < size);
 
-		const char *name = fl_filename_name(filenames[index]);
+		const char *name = fl_filename_name(filenames[index].c_str());
 
 		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
@@ -385,8 +383,8 @@ public:
 		SYS_ASSERT(index >= 0);
 		SYS_ASSERT(index < size);
 
-		*file_v = filenames[index];
-		*map_v  = map_names[index];
+		*file_v = filenames[index].c_str();
+		*map_v  = map_names[index].c_str();
 	}
 };
 
@@ -647,7 +645,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 }
 
 
-static const char * SearchDirForIWAD(const char *dir_name, const char *game)
+static std::string SearchDirForIWAD(const char *dir_name, const char *game)
 {
 	char name_buf[FL_PATH_MAX];
 
@@ -656,7 +654,7 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 	DebugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
-		return StringDup(name_buf);
+		return name_buf;
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
 
@@ -665,13 +663,13 @@ static const char * SearchDirForIWAD(const char *dir_name, const char *game)
 	DebugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
-		return StringDup(name_buf);
+		return name_buf;
 
-	return NULL;
+	return "";
 }
 
 
-static const char * SearchForIWAD(const char *game)
+static std::string SearchForIWAD(const char *game)
 {
 	DebugPrintf("Searching for '%s' IWAD\n", game);
 
@@ -682,8 +680,8 @@ static const char * SearchForIWAD(const char *game)
 	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir.c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
-	const char * path = SearchDirForIWAD(dir_name, game);
-	if (path)
+	std::string path = SearchDirForIWAD(dir_name, game);
+	if (!path.empty())
 		return path;
 
 	// 2. look in $DOOMWADPATH
@@ -697,7 +695,7 @@ static const char * SearchForIWAD(const char *game)
 				break;
 
 			path = SearchDirForIWAD(dir_name, game);
-			if (path)
+			if (!path.empty())
 				return path;
 		}
 	}
@@ -707,8 +705,8 @@ static const char * SearchForIWAD(const char *game)
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(StringDup(doomwaddir), game);
-		if (path)
+		path = SearchDirForIWAD(std::string(doomwaddir).c_str(), game);
+		if (!path.empty())
 			return path;
 	}
 
@@ -734,17 +732,17 @@ static const char * SearchForIWAD(const char *game)
 	for (int i = 0 ; standard_iwad_places[i] ; i++)
 	{
 		path = SearchDirForIWAD(standard_iwad_places[i], game);
-		if (path)
+		if (!path.empty())
 			return path;
 	}
 
 	// 5. last resort : the current directory
 
 	path = SearchDirForIWAD(".", game);
-	if (path)
+	if (!path.empty())
 		return path;
 
-	return NULL;  // not found
+	return "";  // not found
 }
 
 
@@ -760,16 +758,16 @@ void M_LookForIWADs()
 	for (const std::string &game : game_list)
 	{
 		// already have it?
-		if (M_QueryKnownIWAD(game.c_str()))
+		if (!M_QueryKnownIWAD(game.c_str()).empty())
 			continue;
 
-		const char *path = SearchForIWAD(game.c_str());
+		std::string path = SearchForIWAD(game.c_str());
 
-		if (path)
+		if (!path.empty())
 		{
-			LogPrintf("Found '%s' IWAD file: %s\n", game.c_str(), path);
+			LogPrintf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
 
-			M_AddKnownIWAD(path);
+			M_AddKnownIWAD(path.c_str());
 		}
 	}
 
@@ -777,7 +775,7 @@ void M_LookForIWADs()
 }
 
 
-const char * M_PickDefaultIWAD()
+std::string M_PickDefaultIWAD()
 {
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
@@ -802,10 +800,10 @@ const char * M_PickDefaultIWAD()
 
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	const char *result;
+	std::string result;
 
-	result = StringDup(M_QueryKnownIWAD(default_game));
-	if (result)
+	result = M_QueryKnownIWAD(default_game);
+	if (!result.empty())
 		return result;
 
 	// try FreeDoom
@@ -817,8 +815,8 @@ const char * M_PickDefaultIWAD()
 
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	result = StringDup(M_QueryKnownIWAD(default_game));
-	if (result)
+	result = M_QueryKnownIWAD(default_game);
+	if (!result.empty())
 		return result;
 
 	// try any known iwad
@@ -830,12 +828,12 @@ const char * M_PickDefaultIWAD()
 	KI = known_iwads.begin();
 
 	if (KI != known_iwads.end())
-		return StringDup(KI->second.c_str());
+		return KI->second;
 
 	// nothing left to try
 	DebugPrintf("pick default iwad failed.\n");
 
-	return NULL;
+	return "";
 }
 
 
@@ -877,10 +875,10 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	}
 
 
-	const char * new_iwad = NULL;
-	const char * new_port = NULL;
+	std::string new_iwad;
+	std::string new_port;
 
-	std::vector< const char * > new_resources;
+	std::vector<std::string> new_resources;
 
 
 	static char line[FL_PATH_MAX];
@@ -917,9 +915,9 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			}
 			else
 			{
-				new_iwad = StringDup(M_QueryKnownIWAD(pos));
+				new_iwad = M_QueryKnownIWAD(pos);
 
-				if (! new_iwad)
+				if (new_iwad.empty())
 				{
 					int res = DLG_Confirm("&Ignore|&Cancel Load",
 					                      "Warning: the pwad specifies an IWAD "
@@ -943,14 +941,14 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 				LogPrintf("  trying: %s\n", res);
 			}
 
-			if (! FileExists(res) && new_iwad)
+			if (! FileExists(res) && !new_iwad.empty())
 			{
-				res = FilenameReposition(pos, new_iwad);
+				res = FilenameReposition(pos, new_iwad.c_str());
 				LogPrintf("  trying: %s\n", res);
 			}
 
 			if (FileExists(res))
-				new_resources.push_back(StringDup(res));
+				new_resources.push_back(res);
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
@@ -960,7 +958,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		else if (strcmp(line, "port") == 0)
 		{
 			if (M_CanLoadDefinitions("ports", pos))
-				new_port = StringDup(pos);
+				new_port = pos;
 			else
 			{
 				LogPrintf("  unknown port: %s\n", pos);
@@ -984,13 +982,13 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	// Resources are trickier, we merge the EUREKA_LUMP resources into the ones
 	// supplied on the command line, ensuring that we don't get any duplicates.
 
-	if (new_iwad)
+	if (!new_iwad.empty())
 	{
 		if (! (keep_cmd_line_args && !Iwad_name.empty()))
 			Iwad_name = new_iwad;
 	}
 
-	if (new_port)
+	if (!new_port.empty())
 	{
 		if (! (keep_cmd_line_args && !Port_name.empty()))
 			Port_name = new_port;
@@ -999,9 +997,9 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	if (! keep_cmd_line_args)
 		Resource_list.clear();
 
-	for (unsigned int i = 0 ; i < new_resources.size() ; i++)
+	for (const std::string &resource : new_resources)
 	{
-		M_AddResource_Unique(new_resources[i]);
+		M_AddResource_Unique(resource.c_str());
 	}
 
 	return true;
