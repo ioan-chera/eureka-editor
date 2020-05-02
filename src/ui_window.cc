@@ -679,9 +679,9 @@ int UI_LogViewer::CountSelectedLines() const
 }
 
 
-char * UI_LogViewer::GetSelectedText() const
+std::string UI_LogViewer::GetSelectedText() const
 {
-	char *buf = StringDup("");
+	std::string buf;
 
 	for (int i = 1 ; i <= browser->size() ; i++)
 	{
@@ -694,20 +694,10 @@ char * UI_LogViewer::GetSelectedText() const
 
 		// append current line onto previous ones
 
-		int new_len = (int)strlen(buf) + (int)strlen(line_text);
+		std::string new_buf = buf + line_text;
 
-		char *new_buf = StringNew(new_len + 1 /* newline */ );
-
-		strcpy(new_buf, buf);
-		strcat(new_buf, line_text);
-
-		if (new_len > 0 && new_buf[new_len - 1] != '\n')
-		{
-			new_buf[new_len++] = '\n';
-			new_buf[new_len]   = 0;
-		}
-
-		StringFree(buf);
+		if (!new_buf.empty() && new_buf.back() != '\n')
+			new_buf.push_back('\n');
 
 		buf = new_buf;
 	}
@@ -770,14 +760,12 @@ void UI_LogViewer::copy_callback(Fl_Widget *w, void *data)
 {
 	UI_LogViewer *that = (UI_LogViewer *)data;
 
-	const char *text = that->GetSelectedText();
+	std::string text = that->GetSelectedText();
 
-	if (text[0])
+	if (!text.empty())
 	{
-		Fl::copy(text, (int)strlen(text), 1);
+		Fl::copy(text.c_str(), (int)text.length(), 1);
 	}
-
-	StringFree(text);
 }
 
 

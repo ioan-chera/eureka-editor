@@ -192,7 +192,7 @@ public:
 private:
 	int CountSelectedLines() const;
 
-	char * GetSelectedText() const;
+	std::string GetSelectedText() const;
 
 	static void     ok_callback(Fl_Widget *, void *);
 	static void  clear_callback(Fl_Widget *, void *);
