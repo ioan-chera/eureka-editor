@@ -127,7 +127,7 @@ static const opt_desc_t options[] =
 
 	{	"log",
 		0,
-		OPT_STRING,
+		OPT_STRING_S,
 		"1",
 		"Log messages to specified file",
 		"<file>",
@@ -136,7 +136,7 @@ static const opt_desc_t options[] =
 
 	{	"config",
 		0,
-		OPT_STRING,
+		OPT_STRING_S,
 		"1<",
 		"Config file to load / save",
 		"<file>",
@@ -1056,14 +1056,14 @@ static const char * default_config_file()
 //
 int M_ParseConfigFile()
 {
-	if (! config_file)
+	if (config_file.empty())
 	{
 		config_file = default_config_file();
 	}
 
-	FILE * fp = fopen(config_file, "r");
+	FILE * fp = fopen(config_file.c_str(), "r");
 
-	LogPrintf("Reading config file: %s\n", config_file);
+	LogPrintf("Reading config file: %s\n", config_file.c_str());
 
 	if (fp == NULL)
 	{
@@ -1071,7 +1071,7 @@ int M_ParseConfigFile()
 		return -1;
 	}
 
-	int rc = parse_a_config_file(fp, config_file);
+	int rc = parse_a_config_file(fp, config_file.c_str());
 
 	fclose(fp);
 
@@ -1390,11 +1390,11 @@ void M_PrintCommandLineOptions(FILE *fp)
 
 int M_WriteConfigFile()
 {
-	SYS_ASSERT(config_file);
+	SYS_ASSERT(!config_file.empty());
 
-	LogPrintf("Writing config file: %s\n", config_file);
+	LogPrintf("Writing config file: %s\n", config_file.c_str());
 
-	FILE * fp = fopen(config_file, "w");
+	FILE * fp = fopen(config_file.c_str(), "w");
 
 	if (! fp)
 	{
