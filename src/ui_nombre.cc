@@ -35,7 +35,7 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
     Fl_Box(FL_FLAT_BOX, X, Y, W, H, ""),
     index(-1), total(0), selected(0)
 {
-	type_name = StringDup(what);
+	type_name = what;
 
 	align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 	color(NOMBRBACK_COL);
@@ -46,26 +46,16 @@ UI_Nombre::UI_Nombre(int X, int Y, int W, int H, const char *what) :
 	Update();
 }
 
-//
-// UI_Nombre Destructor
-//
-UI_Nombre::~UI_Nombre()
-{
-	StringFree(type_name);
-	type_name = NULL;
-}
-
-
 void UI_Nombre::Update()
 {
 	char buffer[256];
 
 	if (index < 0)
-		snprintf(buffer, sizeof(buffer), "No %s    / %d\n", type_name, total);
+		snprintf(buffer, sizeof(buffer), "No %s    / %d\n", type_name.c_str(), total);
 	else if (selected > 1)
-		snprintf(buffer, sizeof(buffer), "%s #%-4d + %d more\n", type_name, index, selected-1);
+		snprintf(buffer, sizeof(buffer), "%s #%-4d + %d more\n", type_name.c_str(), index, selected-1);
 	else
-		snprintf(buffer, sizeof(buffer), "%s #%-4d / %d\n", type_name, index, total);
+		snprintf(buffer, sizeof(buffer), "%s #%-4d / %d\n", type_name.c_str(), index, total);
 
 	if (index < 0 || total == 0)
 		labelcolor(FL_DARK1);
