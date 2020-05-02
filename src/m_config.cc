@@ -109,7 +109,7 @@ static const opt_desc_t options[] =
 
 	{	"home",
 		0,
-		OPT_STRING,
+		OPT_STRING_S,
 		"1",
 		"Home directory",
 		"<dir>",
@@ -1040,10 +1040,10 @@ static int parse_a_config_file(FILE *fp, const char *filename)
 
 static const char * default_config_file()
 {
-	SYS_ASSERT(home_dir);
+	SYS_ASSERT(!home_dir.empty());
 
 	static char filename[FL_PATH_MAX];
-	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir.c_str());
 
 	return StringDup(filename);
 }

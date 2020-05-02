@@ -69,7 +69,7 @@ const char *config_file = NULL;
 const char *log_file;
 
 const char *install_dir;
-const char *home_dir;
+std::string home_dir;
 const char *cache_dir;
 
 
@@ -215,7 +215,7 @@ void ThrowException(const char *fmt, ...)
 
 static void CreateHomeDirs()
 {
-	SYS_ASSERT(home_dir);
+	SYS_ASSERT(!home_dir.empty());
 
 	static char dir_name[FL_PATH_MAX];
 
@@ -232,7 +232,7 @@ static void CreateHomeDirs()
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(home_dir);
+	FileMakeDir(home_dir.c_str());
 	FileMakeDir(cache_dir);
 
 	static const char *const subdirs[] =
@@ -248,7 +248,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir : home_dir, subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir : home_dir.c_str(), subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -259,7 +259,7 @@ static void CreateHomeDirs()
 static void Determine_HomeDir(const char *argv0)
 {
 	// already set by cmd-line option?
-	if (! home_dir)
+	if (home_dir.empty())
 	{
 #if defined(WIN32)
 	// get the %APPDATA% location
@@ -271,13 +271,13 @@ static void Determine_HomeDir(const char *argv0)
 	{
 		strcat(path, "\\EurekaEditor");
 
-		home_dir = StringDup(path);
+		home_dir = path;
 	}
 	else
 	{
 		SYS_ASSERT(install_dir);
 
-		home_dir = StringPrintf("%s\\app_data", install_dir);
+		home_dir = StringPrintf_s("%s\\app_data", install_dir);
 	}
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
@@ -293,7 +293,7 @@ static void Determine_HomeDir(const char *argv0)
 	char * path = StringNew(FL_PATH_MAX + 4);
 
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibAppSupportDir, "eureka-editor"));
-   home_dir = StringDup(path);
+   home_dir = path;
 
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibCacheDir, "eureka-editor"));
    cache_dir = StringDup(path);
@@ -308,20 +308,20 @@ static void Determine_HomeDir(const char *argv0)
 #endif
 	}
 
-	if (! home_dir)
+	if (home_dir.empty())
 		FatalError("Unable to find home directory!\n");
 
 	if (! cache_dir)
-		cache_dir = home_dir;
+		cache_dir = home_dir.c_str();
 
-	LogPrintf("Home  dir: %s\n", home_dir);
+	LogPrintf("Home  dir: %s\n", home_dir.c_str());
 	LogPrintf("Cache dir: %s\n", cache_dir);
 
 	// create cache directory (etc)
 	CreateHomeDirs();
 
 	// determine log filename
-	log_file = StringPrintf("%s/logs.txt", home_dir);
+	log_file = StringPrintf("%s/logs.txt", home_dir.c_str());
 }
 
 

@@ -459,7 +459,7 @@ void M_LoadRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir.c_str());
 
 	FILE *fp = fopen(filename, "r");
 
@@ -485,7 +485,7 @@ void M_SaveRecent()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir.c_str());
 
 	FILE *fp = fopen(filename, "w");
 
@@ -679,7 +679,7 @@ static const char * SearchForIWAD(const char *game)
 
 	// 1. look in ~/.eureka/iwads first
 
-	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir);
+	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir.c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
 	const char * path = SearchDirForIWAD(dir_name, game);

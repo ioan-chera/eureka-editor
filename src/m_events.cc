@@ -905,7 +905,7 @@ static bool M_ParseOperationFile()
 	static char filename[FL_PATH_MAX];
 
 	// look in user's $HOME directory first
-	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir);
+	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir.c_str());
 
 	LineFile file(filename);
 
