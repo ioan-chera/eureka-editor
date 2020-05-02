@@ -1026,14 +1026,11 @@ static int parse_a_config_file(FILE *fp, const char *filename)
 }
 
 
-static const char * default_config_file()
+inline static std::string default_config_file()
 {
 	SYS_ASSERT(!home_dir.empty());
 
-	static char filename[FL_PATH_MAX];
-	snprintf(filename, sizeof(filename), "%s/config.cfg", home_dir.c_str());
-
-	return StringDup(filename);
+	return home_dir + "/config.cfg";
 }
 
 
