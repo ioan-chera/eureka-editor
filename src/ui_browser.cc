@@ -1585,17 +1585,17 @@ void UI_Browser::Populate()
 
 	char letters[64];
 
-	const char *tex_cats = M_TextureCategoryString(letters, false);
-	browsers[0]->SetCategories(tex_cats, letters);
+	std::string tex_cats = M_TextureCategoryString(letters, false);
+	browsers[0]->SetCategories(tex_cats.c_str(), letters);
 
-	const char *flat_cats = M_TextureCategoryString(letters, true);
-	browsers[1]->SetCategories(flat_cats, letters);
+	std::string flat_cats = M_TextureCategoryString(letters, true);
+	browsers[1]->SetCategories(flat_cats.c_str(), letters);
 
-	const char *thing_cats = M_ThingCategoryString(letters);
-	browsers[2]->SetCategories(thing_cats, letters);
+	std::string thing_cats = M_ThingCategoryString(letters);
+	browsers[2]->SetCategories(thing_cats.c_str(), letters);
 
-	const char *line_cats = M_LineCategoryString(letters);
-	browsers[3]->SetCategories(line_cats, letters);
+	std::string line_cats = M_LineCategoryString(letters);
+	browsers[3]->SetCategories(line_cats.c_str(), letters);
 
 	// TODO: sector_cats
 

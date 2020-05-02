@@ -1488,14 +1488,15 @@ static bool FlatCategory_IsUsed(char group)
 }
 
 
-const char *M_LineCategoryString(char *letters)
+std::string M_LineCategoryString(char *letters)
 {
-	static char buffer[2000];
+	std::string buffer;
+	buffer.reserve(2000);
 
 	int L_index = 0;
 
 	// the "ALL" category is always first
-	strcpy(buffer, "ALL");
+	buffer = "ALL";
 	letters[L_index++] = '*';
 
 	std::map<char, linegroup_t *>::iterator IT;
@@ -1512,13 +1513,13 @@ const char *M_LineCategoryString(char *letters)
 			continue;
 
 		// FIXME: potential for buffer overflow here
-		strcat(buffer, "|");
-		strcat(buffer, G->desc);
+		buffer += '|';
+		buffer += G->desc;
 
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|Other");
+	buffer += "|Other";
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
@@ -1527,14 +1528,15 @@ const char *M_LineCategoryString(char *letters)
 }
 
 
-const char *M_ThingCategoryString(char *letters)
+std::string M_ThingCategoryString(char *letters)
 {
-	static char buffer[2000];
+	std::string buffer;
+	buffer.reserve(2000);
 
 	int L_index = 0;
 
 	// these common categories are always first
-	strcpy(buffer, "ALL|RECENT");
+	buffer = "ALL|RECENT";
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
@@ -1551,14 +1553,13 @@ const char *M_ThingCategoryString(char *letters)
 		if (! ThingCategory_IsUsed(G->group))
 			continue;
 
-		// FIXME: potential for buffer overflow here
-		strcat(buffer, "|");
-		strcat(buffer, G->desc);
+		buffer += '|';
+		buffer += G->desc;
 
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|Other");
+	buffer += "|Other";
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
@@ -1567,14 +1568,15 @@ const char *M_ThingCategoryString(char *letters)
 }
 
 
-const char *M_TextureCategoryString(char *letters, bool do_flats)
+std::string M_TextureCategoryString(char *letters, bool do_flats)
 {
-	static char buffer[2000];
+	std::string buffer;
+	buffer.reserve(2000);
 
 	int L_index = 0;
 
 	// these common categories are always first
-	strcpy(buffer, "ALL|RECENT");
+	buffer = "ALL|RECENT";
 	letters[L_index++] = '*';
 	letters[L_index++] = '^';
 
@@ -1594,14 +1596,13 @@ const char *M_TextureCategoryString(char *letters, bool do_flats)
 		if (!do_flats && !TextureCategory_IsUsed(G->group))
 			continue;
 
-		// FIXME: potential for buffer overflow here
-		strcat(buffer, "|");
-		strcat(buffer, G->desc);
+		buffer += '|';
+		buffer += G->desc;
 
 		letters[L_index++] = IT->first;
 	}
 
-	strcat(buffer, "|Other");
+	buffer += "|Other";
 
 	letters[L_index++] = '-';
 	letters[L_index++] = 0;
