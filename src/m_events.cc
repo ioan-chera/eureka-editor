@@ -912,7 +912,7 @@ static bool M_ParseOperationFile()
 	// otherwise load it from the installation directory
 	if (! file)
 	{
-		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir);
+		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir.c_str());
 
 		file.open(filename);
 	}

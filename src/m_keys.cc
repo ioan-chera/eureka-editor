@@ -656,7 +656,7 @@ void M_LoadBindings()
 {
 	all_bindings.clear();
 
-	LoadBindingsFromPath(install_dir, true /* required */);
+	LoadBindingsFromPath(install_dir.c_str(), true /* required */);
 
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();

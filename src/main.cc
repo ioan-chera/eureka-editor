@@ -68,7 +68,7 @@ bool in_fatal_error = false;
 const char *config_file = NULL;
 const char *log_file;
 
-const char *install_dir;
+std::string install_dir;
 std::string home_dir;
 const char *cache_dir;
 
@@ -275,9 +275,9 @@ static void Determine_HomeDir(const char *argv0)
 	}
 	else
 	{
-		SYS_ASSERT(install_dir);
+		SYS_ASSERT(!install_dir.empty());
 
-		home_dir = StringPrintf_s("%s\\app_data", install_dir);
+		home_dir = install_dir + "\\app_data";
 	}
 
 	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
@@ -328,7 +328,7 @@ static void Determine_HomeDir(const char *argv0)
 static void Determine_InstallPath(const char *argv0)
 {
 	// already set by cmd-line option?
-	if (! install_dir)
+	if (install_dir.empty())
 	{
 #ifdef WIN32
 	install_dir = GetExecutablePath(argv0);
@@ -344,11 +344,11 @@ static void Determine_InstallPath(const char *argv0)
 
 	for (int i = 0 ; prefixes[i] ; i++)
 	{
-		install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
+		install_dir = StringPrintf_s("%s/share/eureka", prefixes[i]);
 
-		const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir);
+		const char *filename = StringPrintf("%s/games/doom2.ugh", install_dir.c_str());
 
-		DebugPrintf("Trying install path: %s\n", install_dir);
+		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
 		DebugPrintf("   looking for file: %s\n", filename);
 
 		bool exists = FileExists(filename);
@@ -358,23 +358,22 @@ static void Determine_InstallPath(const char *argv0)
 		if (exists)
 			break;
 
-		StringFree(install_dir);
-		install_dir = NULL;
+		install_dir.clear();
 	}
 #endif
 	}
 
 	// fallback : look in current directory
-	if (! install_dir)
+	if (install_dir.empty())
 	{
 		if (FileExists("./games/doom2.ugh"))
 			install_dir = ".";
 	}
 
-	if (! install_dir)
+	if (install_dir.empty())
 		FatalError("Unable to find install directory!\n");
 
-	LogPrintf("Install dir: %s\n", install_dir);
+	LogPrintf("Install dir: %s\n", install_dir.c_str());
 }
 
 

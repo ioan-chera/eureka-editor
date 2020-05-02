@@ -118,7 +118,7 @@ static const opt_desc_t options[] =
 
 	{	"install",
 		0,
-		OPT_STRING,
+		OPT_STRING_S,
 		"1",
 		"Installation directory",
 		"<dir>",
@@ -1083,7 +1083,7 @@ int M_ParseDefaultConfigFile()
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir);
+	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir.c_str());
 
 	FILE * fp = fopen(filename, "r");
 

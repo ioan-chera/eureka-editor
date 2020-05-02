@@ -387,17 +387,12 @@ static std::string FindDefinitionFile(const char *folder, const char *name)
 	SYS_ASSERT(folder && name);
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const char *base_dir = (pass == 0) ? home_dir.c_str() : install_dir;
+		std::string base_dir = (pass == 0) ? home_dir : install_dir;
 
-		if (! base_dir)
+		if (base_dir.empty())
 			continue;
 
-		std::string filename = base_dir;
-		filename += '/';
-		filename += folder;
-		filename += '/';
-		filename += name;
-		filename += ".ugh";
+		std::string filename = base_dir + "/" + folder + "/" + name + ".ugh";
 
 		DebugPrintf("  trying: %s\n", filename.c_str());
 
@@ -1216,7 +1211,7 @@ std::vector<std::string> M_CollectKnownDefs(const char *folder)
 			return;
 		temp_list.push_back(ReplaceExtension_s(name, NULL));
 	};
-	path = StringPrintf_s("%s/%s", install_dir, folder);
+	path = install_dir + "/" + folder;
 	ScanDirectory(path.c_str(), scanner_add_file);
 	path = home_dir + "/" + folder;
 	ScanDirectory(path.c_str(), scanner_add_file);
