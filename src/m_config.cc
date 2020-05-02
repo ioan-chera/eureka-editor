@@ -1534,7 +1534,7 @@ char * PersistFilename(const crc32_c& crc)
 	static char filename[FL_PATH_MAX];
 
 	snprintf(filename, sizeof(filename), "%s/cache/%08X%08X.dat",
-			cache_dir, crc.extra, crc.raw);
+			 cache_dir.c_str(), crc.extra, crc.raw);
 
 	return filename;
 }

@@ -1120,7 +1120,7 @@ void M_BackupWad(Wad_file *wad)
 
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir, fl_filename_name(wad->PathName()));
+	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir.c_str(), fl_filename_name(wad->PathName()));
 
 	char * dir_name = ReplaceExtension(filename, NULL);
 
