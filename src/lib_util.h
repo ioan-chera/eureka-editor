@@ -38,8 +38,7 @@ char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 std::string StringUpper(const char *name);
 std::string StringLower(const char *name);
-char *StringPrintf(const char *str, ...);
-std::string StringPrintf_s(const char *str, ...);
+std::string StringPrintf(const char *str, ...);
 void StringFree(const char *str);
 
 void StringRemoveCRLF(char *str);

@@ -149,7 +149,7 @@ angle_g UtilComputeAngle(double dx, double dy)
 }
 
 
-char *UtilTimeString(void)
+std::string UtilTimeString(void)
 {
 #ifdef WIN32
 

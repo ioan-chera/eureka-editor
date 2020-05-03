@@ -434,37 +434,6 @@ bool PathIsDirectory(const char *path)
 #endif
 }
 
-
-const char * FileFindInPath(const char *paths, const char *base_name)
-{
-	// search through the path list (separated by ';') to find the file.
-	// If found, the complete filename is returned (which must be freed
-	// using StringFree).  If not found, NULL is returned.
-
-	for (;;)
-	{
-		const char *sep = strchr(paths, ';');
-		size_t len = sep ? (sep - paths) : strlen(paths);
-
-		SYS_ASSERT(len > 0);
-
-		const char *filename = StringPrintf("%.*s/%s", (int)len, paths, base_name);
-
-		//  fprintf(stderr, "Trying data file: [%s]\n", filename);
-
-		if (FileExists(filename))
-			return filename;
-
-		StringFree(filename);
-
-		if (! sep)
-			return NULL;  // not found
-
-		paths = sep + 1;
-	}
-}
-
-
 //------------------------------------------------------------------------
 
 //
@@ -555,7 +524,7 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 				strcmp(fdata->d_name, "..") == 0)
 			continue;
 
-		std::string full_name = StringPrintf_s("%s/%s", path, fdata->d_name);
+		std::string full_name = StringPrintf("%s/%s", path, fdata->d_name);
 
 		struct stat finfo;
 

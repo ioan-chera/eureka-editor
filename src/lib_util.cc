@@ -159,42 +159,10 @@ std::string StringLower(const char *name)
 	return copy;
 }
 
-char *StringPrintf(const char *str, ...)
-{
-	// Algorithm: keep doubling the allocated buffer size
-	// until the output fits. Based on code by Darren Salt.
-
-	char *buf = NULL;
-	int buf_size = 128;
-
-	for (;;)
-	{
-		va_list args;
-		int out_len;
-
-		buf_size *= 2;
-
-		buf = (char*)realloc(buf, buf_size);
-		if (!buf)
-			FatalError("Out of memory (formatting string)\n");
-
-		va_start(args, str);
-		out_len = vsnprintf(buf, buf_size, str, args);
-		va_end(args);
-
-		// old versions of vsnprintf() simply return -1 when
-		// the output doesn't fit.
-		if (out_len < 0 || out_len >= buf_size)
-			continue;
-
-		return buf;
-	}
-}
-
 //
 // Non-leaking version
 //
-std::string StringPrintf_s(const char *str, ...)
+std::string StringPrintf(const char *str, ...)
 {
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.

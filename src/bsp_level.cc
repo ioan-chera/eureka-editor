@@ -1919,12 +1919,11 @@ void UpdateGLMarker(Lump_c *marker)
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
 	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
 
-	char *time_str = UtilTimeString();
+	std::string time_str = UtilTimeString();
 
-	if (time_str)
+	if (!time_str.empty())
 	{
-		marker->Printf("TIME=%s\n", time_str);
-		StringFree(time_str);
+		marker->Printf("TIME=%s\n", time_str.c_str());
 	}
 
 	marker->Printf("CHECKSUM=0x%08x\n", crc);
