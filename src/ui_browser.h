@@ -92,7 +92,7 @@ private:
 
 	bool pic_mode;
 
-	char cat_letters[64];
+	std::string cat_letters;
 
 public:
 	UI_Browser_Box(int X, int Y, int W, int H, const char *label, char _kind);

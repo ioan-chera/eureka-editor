@@ -291,9 +291,9 @@ const thingtype_t  & M_GetThingType(int type);
 char M_GetTextureType(const char *name);
 char M_GetFlatType(const char *name);
 
-std::string M_LineCategoryString(char *letters);
-std::string M_ThingCategoryString(char *letters);
-std::string M_TextureCategoryString(char *letters, bool do_flats);
+std::string M_LineCategoryString(std::string &letters);
+std::string M_ThingCategoryString(std::string &letters);
+std::string M_TextureCategoryString(std::string &letters, bool do_flats);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

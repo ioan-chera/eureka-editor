@@ -1450,20 +1450,19 @@ static bool Category_IsUsed(const std::map<std::string, char> &categories, char 
 // Produces the category menu string and its associated letters
 //
 template<typename Group, typename Categories>
-static std::string M_CategoryString(char *letters, bool recent, const std::map<char, Group> &groups, const Categories &categories)
+static std::string M_CategoryString(std::string &letters, bool recent, const std::map<char, Group> &groups, const Categories &categories)
 {
 	std::string buffer;
 	buffer.reserve(2000);
 
-	int L_index = 0;
-
 	// the "ALL" category is always first
 	buffer = "ALL";
-	letters[L_index++] = '*';
+	letters = "*";
+	letters.reserve(64);
 	if(recent)
 	{
 		buffer += "|RECENT";
-		letters[L_index++] = '^';
+		letters.push_back('^');
 	}
 
 	typename std::map<char, Group>::const_iterator IT;
@@ -1483,30 +1482,29 @@ static std::string M_CategoryString(char *letters, bool recent, const std::map<c
 		buffer += '|';
 		buffer += G.desc;
 
-		letters[L_index++] = IT->first;
+		letters.push_back(IT->first);
 	}
 
 	buffer += "|Other";
 
-	letters[L_index++] = '-';
-	letters[L_index++] = 0;
+	letters.push_back('-');
 
 	return buffer;
 }
 
-std::string M_LineCategoryString(char *letters)
+std::string M_LineCategoryString(std::string &letters)
 {
 	return M_CategoryString(letters, false, line_groups, line_types);
 }
 
 
-std::string M_ThingCategoryString(char *letters)
+std::string M_ThingCategoryString(std::string &letters)
 {
 	return M_CategoryString(letters, true, thing_groups, thing_types);
 }
 
 
-std::string M_TextureCategoryString(char *letters, bool do_flats)
+std::string M_TextureCategoryString(std::string &letters, bool do_flats)
 {
 	return M_CategoryString(letters, true, texture_groups, do_flats ? flat_categories : texture_categories);
 }

@@ -250,9 +250,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 
 	color(BROWBACK_COL, BROWBACK_COL);
 
-
-	strcpy(cat_letters, "*");
-
+	cat_letters = "*";
 
 	int cx = X + 88;
 	int cy = Y + 4;
@@ -966,7 +964,7 @@ void UI_Browser_Box::Populate()
 
 void UI_Browser_Box::SetCategories(const char *cats, const char *letters)
 {
-	StringCopy(cat_letters, sizeof(cat_letters), letters);
+	cat_letters = letters;
 
 	category->clear();
 	category->add(cats);
@@ -1582,19 +1580,19 @@ void UI_Browser::Populate()
 
 	// setup the categories
 
-	char letters[64];
+	std::string letters;
 
 	std::string tex_cats = M_TextureCategoryString(letters, false);
-	browsers[0]->SetCategories(tex_cats.c_str(), letters);
+	browsers[0]->SetCategories(tex_cats.c_str(), letters.c_str());
 
 	std::string flat_cats = M_TextureCategoryString(letters, true);
-	browsers[1]->SetCategories(flat_cats.c_str(), letters);
+	browsers[1]->SetCategories(flat_cats.c_str(), letters.c_str());
 
 	std::string thing_cats = M_ThingCategoryString(letters);
-	browsers[2]->SetCategories(thing_cats.c_str(), letters);
+	browsers[2]->SetCategories(thing_cats.c_str(), letters.c_str());
 
 	std::string line_cats = M_LineCategoryString(letters);
-	browsers[3]->SetCategories(line_cats.c_str(), letters);
+	browsers[3]->SetCategories(line_cats.c_str(), letters.c_str());
 
 	// TODO: sector_cats
 
