@@ -1446,8 +1446,11 @@ static bool Category_IsUsed(const std::map<std::string, char> &categories, char 
 	return false;
 }
 
-template<typename T, typename U, typename V>
-static std::string M_CategoryString(char *letters, bool recent, const std::map<char, T> &groups, const std::map<U, V> &categories)
+//
+// Produces the category menu string and its associated letters
+//
+template<typename Group, typename Categories>
+static std::string M_CategoryString(char *letters, bool recent, const std::map<char, Group> &groups, const Categories &categories)
 {
 	std::string buffer;
 	buffer.reserve(2000);
@@ -1463,11 +1466,11 @@ static std::string M_CategoryString(char *letters, bool recent, const std::map<c
 		letters[L_index++] = '^';
 	}
 
-	typename std::map<char, T>::const_iterator IT;
+	typename std::map<char, Group>::const_iterator IT;
 
 	for (IT = groups.begin() ; IT != groups.end() ; IT++)
 	{
-		const T &G = IT->second;
+		const Group &G = IT->second;
 
 		// the "Other" category is always at the end
 		if (G.group == '-')
