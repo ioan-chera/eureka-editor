@@ -1258,7 +1258,7 @@ void Recently_used::WriteUser(FILE *fp, char letter)
 {
 	for (int i = 0 ; i < size ; i++)
 	{
-		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i].c_str()));
+		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i].c_str()).c_str());
 	}
 }
 
