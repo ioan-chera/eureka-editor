@@ -1423,8 +1423,9 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 {
 	// when do_strings == 2, string tokens keep their quotes.
 
-	char tokenbuf[256];
-	int  tokenlen = -1;
+	std::string tokenbuf;
+	tokenbuf.reserve(256);
+	bool nexttoken = true;
 
 	bool in_string = false;
 
@@ -1440,12 +1441,9 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 
 	for (;;)
 	{
-		if (tokenlen > 250)  // ERROR: token too long
-			return -1;
+		char ch = *line++;
 
-		int ch = *line++;
-
-		if (tokenlen < 0)  // looking for a new token
+		if (nexttoken)  // looking for a new token
 		{
 			SYS_ASSERT(!in_string);
 
@@ -1456,7 +1454,7 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 			if (isspace(ch))
 				continue;
 
-			tokenlen = 0;
+			nexttoken = false;
 
 			// begin a string?
 			if (ch == '"' && options != ParseOptions_noStrings)
@@ -1466,9 +1464,8 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 				if (options != ParseOptions_haveStringsKeepQuotes)
 					continue;
 			}
-
 			// begin a normal token
-			tokenbuf[tokenlen++] = ch;
+			tokenbuf.push_back(ch);
 			continue;
 		}
 
@@ -1478,7 +1475,7 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 			in_string = false;
 
 			if (options == ParseOptions_haveStringsKeepQuotes)
-				tokenbuf[tokenlen++] = ch;
+				tokenbuf.push_back(ch);
 		}
 		else if (ch == 0 || ch == '\n')
 		{
@@ -1490,15 +1487,14 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 		}
 		else
 		{
-			tokenbuf[tokenlen++] = ch;
+			tokenbuf.push_back(ch);
 			continue;
 		}
 
 		if (in_string)  // ERROR: non-terminated string
 			return -3;
 
-		tokenbuf[tokenlen] = 0;
-		tokenlen = -1;
+		nexttoken = true;
 
 		tokens.push_back(tokenbuf);
 
