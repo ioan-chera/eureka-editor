@@ -929,25 +929,25 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (strcmp(line, "resource") == 0)
 		{
-			const char *res = pos;
+			std::string res = pos;
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (! FileExists(res))
+			if (! FileExists(res.c_str()))
 			{
 				LogPrintf("  file not found: %s\n", pos);
 
 				res = FilenameReposition(pos, wad->PathName());
-				LogPrintf("  trying: %s\n", res);
+				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (! FileExists(res) && !new_iwad.empty())
+			if (! FileExists(res.c_str()) && !new_iwad.empty())
 			{
 				res = FilenameReposition(pos, new_iwad.c_str());
-				LogPrintf("  trying: %s\n", res);
+				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (FileExists(res))
+			if (FileExists(res.c_str()))
 				new_resources.push_back(res);
 			else
 			{
