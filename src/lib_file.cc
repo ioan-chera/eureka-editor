@@ -110,55 +110,38 @@ bool MatchExtension(const char *filename, const char *ext)
 //
 // Returned string is a COPY.
 //
-char *ReplaceExtension(const char *filename, const char *ext)
+std::string ReplaceExtension(const char *filename, const char *ext)
 {
 	SYS_ASSERT(filename[0] != 0);
 
 	size_t total_len = strlen(filename) + (ext ? strlen(ext) : 0);
 
-	char *buffer = StringNew((int)total_len + 10);
+	std::string buffer;
+	buffer.reserve(total_len + 10);
+	buffer = filename;
 
-	strcpy(buffer, filename);
-
-	char *dot_pos = buffer + strlen(buffer) - 1;
-
-	for (; dot_pos >= buffer && *dot_pos != '.' ; dot_pos--)
-	{
-		if (*dot_pos == '/')
-			break;
-
+	size_t dot_pos;
 #ifdef WIN32
-		if (*dot_pos == '\\' || *dot_pos == ':')
-			break;
+	dot_pos = buffer.find_last_of("./\\:");
+#else
+	dot_pos = buffer.find_last_of("./");
 #endif
-	}
 
-	if (dot_pos < buffer || *dot_pos != '.')
-		dot_pos = NULL;
-
+	if(dot_pos != std::string::npos && buffer[dot_pos] != '.')
+		dot_pos = std::string::npos;
 	if (! ext)
 	{
-		if (dot_pos)
-			dot_pos[0] = 0;
-
+		if(dot_pos != std::string::npos)
+			buffer.erase(dot_pos);
 		return buffer;
 	}
 
-	if (dot_pos)
-		dot_pos[1] = 0;
+	if (dot_pos != std::string::npos && dot_pos != buffer.length() - 1)
+		buffer.erase(dot_pos + 1);
 	else
-		strcat(buffer, ".");
-
-	strcat(buffer, ext);
-
+		buffer += '.';
+	buffer += ext;
 	return buffer;
-}
-std::string ReplaceExtension_s(const char *filename, const char *ext)
-{
-	char *str = ReplaceExtension(filename, ext);
-	std::string result(str ? str : "");
-	StringFree(str);
-	return result;
 }
 
 const char *FindBaseName(const char *filename)

@@ -1205,7 +1205,7 @@ std::vector<std::string> M_CollectKnownDefs(const char *folder)
 			return;
 		if (! MatchExtension(name, "ugh"))
 			return;
-		temp_list.push_back(ReplaceExtension_s(name, NULL));
+		temp_list.push_back(ReplaceExtension(name, NULL));
 	};
 	path = install_dir + "/" + folder;
 	ScanDirectory(path.c_str(), scanner_add_file);

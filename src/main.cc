@@ -418,7 +418,7 @@ static bool DetermineIWAD()
 	{
 		// if extension is missing, add ".wad"
 		if (! HasExtension(Iwad_name.c_str()))
-			Iwad_name = ReplaceExtension_s(Iwad_name.c_str(), "wad");
+			Iwad_name = ReplaceExtension(Iwad_name.c_str(), "wad");
 
 		if (! Wad_file::Validate(Iwad_name.c_str()))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
