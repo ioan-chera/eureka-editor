@@ -263,7 +263,7 @@ private:
 	int size;
 	int keep_num;
 
-	const char *name_set[RECENTLY_USED_MAX];
+	std::string name_set[RECENTLY_USED_MAX];
 
 public:
 	 Recently_used();
