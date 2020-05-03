@@ -740,16 +740,11 @@ class undo_group_c
 private:
 	std::vector<edit_op_c> ops;
 
-	int dir;
+	int dir = +1;
 
-	char message[MAX_UNDO_MESSAGE];
+	std::string message = "[something]";
 
 public:
-	undo_group_c() : ops(), dir(+1)
-	{
-		strcpy(message, "[something]");
-	}
-
 	~undo_group_c()
 	{
 		for (int i = (int)ops.size() - 1 ; i >= 0 ; i--)
@@ -792,13 +787,12 @@ public:
 
 	void SetMsg(const char *buf)
 	{
-		strncpy(message, buf, sizeof(message));
-		message[sizeof(message) - 1] = 0;
+		message = buf;
 	}
 
 	const char *GetMsg() const
 	{
-		return message;
+		return message.c_str();
 	}
 };
 
