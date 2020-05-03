@@ -70,8 +70,8 @@ bool Texture_MatchPattern(const char *tex, const char *pattern)
 {
 	// Note: an empty pattern matches NOTHING
 
-	char local_pat[256];
-	local_pat[0] = 0;
+	std::string local_pat;
+	local_pat.reserve(256);
 
 
 	// add '*' to the start and end of the pattern
@@ -87,21 +87,21 @@ bool Texture_MatchPattern(const char *tex, const char *pattern)
 	if (pattern[0] == '^')
 		pattern++;
 	else
-		strcpy(local_pat, "*");
+		local_pat = "*";
 
-	strcat(local_pat, pattern);
+	local_pat += pattern;
 
-	size_t len = strlen(local_pat);
+	size_t len = local_pat.length();
 
 	if (len == 0)
 		return false;
 
-	if (local_pat[len-1] == '$')
-		local_pat[len-1] = 0;
+	if (local_pat.back() == '$')
+		local_pat.pop_back();
 	else
-		strcat(local_pat, "*");
+		local_pat += '*';
 
-	bool result = fl_filename_match(tex, local_pat) ? true : false;
+	bool result = !!fl_filename_match(tex, local_pat.c_str());
 
 	return negated ? !result : result;
 }

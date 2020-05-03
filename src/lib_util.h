@@ -40,6 +40,7 @@ std::string StringUpper(const char *name);
 std::string StringLower(const char *name);
 std::string StringPrintf(const char *str, ...);
 void StringFree(const char *str);
+void StringCopy(char *buffer, size_t size, const char *source);
 
 void StringRemoveCRLF(char *str);
 std::string StringTidy(const char *str, const char *bad_chars = "");

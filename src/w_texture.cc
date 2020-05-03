@@ -681,28 +681,27 @@ Lump_c * Sprite_loc_by_root (const char *name)
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
 
-	char buffer[16];
+	std::string buffer;
+	buffer.reserve(16);
+	buffer = name;
+	if(buffer.length() == 4)
+		buffer += 'A';
+	if(buffer.length() == 5)
+		buffer += '0';
 
-	strcpy(buffer, name);
-
-	if (strlen(buffer) == 4)
-		strcat(buffer, "A");
-
-	if (strlen(buffer) == 5)
-		strcat(buffer, "0");
-
-	Lump_c *lump = W_FindSpriteLump(buffer);
+	Lump_c *lump = W_FindSpriteLump(buffer.c_str());
 
 	if (! lump)
 	{
-		buffer[5] = '1';
-		lump = W_FindSpriteLump(buffer);
+		if(buffer.length() >= 6)
+			buffer[5] = '1';
+		lump = W_FindSpriteLump(buffer.c_str());
 	}
 
 	if (! lump)
 	{
-		strcat(buffer, "D1");
-		lump = W_FindSpriteLump(buffer);
+		buffer += "D1";
+		lump = W_FindSpriteLump(buffer.c_str());
 	}
 
 	if (lump)
@@ -713,20 +712,19 @@ Lump_c * Sprite_loc_by_root (const char *name)
 	if (! Features.lax_sprites)
 		return NULL;
 
-	strcpy(buffer, name);
+	buffer = name;
+	if(buffer.length() == 4)
+		buffer += 'A';
+	if(buffer.length() == 5)
+		buffer += '0';
 
-	if (strlen(buffer) == 4)
-		strcat(buffer, "A");
-
-	if (strlen(buffer) == 5)
-		strcat(buffer, "0");
-
-	lump = W_FindLump(buffer);
+	lump = W_FindLump(buffer.c_str());
 
 	if (! lump)
 	{
-		buffer[5] = '1';
-		lump = W_FindLump(buffer);
+		if(buffer.length() >= 6)
+			buffer[5] = '1';
+		lump = W_FindLump(buffer.c_str());
 	}
 
 	// TODO: verify lump is OK (size etc)

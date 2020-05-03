@@ -268,11 +268,6 @@ public:
 	{
 		for (int k = 0 ; k < size ; k++)
 		{
-#ifdef FREE_RECENT_FILES
-			StringFree(filenames[k]);
-			StringFree(map_names[k]);
-#endif
-
 			filenames[k].clear();
 			map_names[k].clear();
 		}
@@ -302,11 +297,6 @@ public:
 	void erase(int index)
 	{
 		SYS_ASSERT(0 <= index && index < MAX_RECENT);
-
-#ifdef FREE_RECENT_FILES
-		StringFree(filenames[index]);
-		StringFree(map_names[index]);
-#endif
 
 		size--;
 

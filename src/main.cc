@@ -379,9 +379,8 @@ static void Determine_InstallPath(const char *argv0)
 
 std::string GameNameFromIWAD(const char *iwad_name)
 {
-	static char game_name[FL_PATH_MAX];
-
-	strcpy(game_name, fl_filename_name(iwad_name));
+	char game_name[FL_PATH_MAX];
+	StringCopy(game_name, sizeof(game_name), fl_filename_name(iwad_name));
 
 	fl_filename_setext(game_name, "");
 

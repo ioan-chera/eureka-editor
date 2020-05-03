@@ -205,6 +205,16 @@ void StringFree(const char *str)
 	}
 }
 
+//
+// Safe, cross-platform version of strncpy
+//
+void StringCopy(char *buffer, size_t size, const char *source)
+{
+	if(!size)
+		return;	// trivial
+	strncpy(buffer, source, size);
+	buffer[size - 1] = 0;
+}
 
 void StringRemoveCRLF(char *str)
 {

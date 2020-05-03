@@ -2233,23 +2233,23 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 
 Lump_c * CreateGLMarker()
 {
-	char name_buf[64];
+	std::string name_buf;
 
 	if (strlen(lev_current_name) <= 5)
 	{
-		snprintf(name_buf, sizeof(name_buf), "GL_%s", lev_current_name);
+		name_buf = StringPrintf("GL_%s", lev_current_name);
 	}
 	else
 	{
 		// names longer than 5 chars use "GL_LEVEL" as marker name
-		strcpy(name_buf, "GL_LEVEL");
+		name_buf = "GL_LEVEL";
 	}
 
 	short last_idx = edit_wad->LevelLastLump(lev_current_idx);
 
 	edit_wad->InsertPoint(last_idx + 1);
 
-	Lump_c *marker = edit_wad->AddLump(name_buf);
+	Lump_c *marker = edit_wad->AddLump(name_buf.c_str());
 
 	marker->Finish();
 
