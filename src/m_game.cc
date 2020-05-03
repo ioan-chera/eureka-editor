@@ -1427,62 +1427,27 @@ char M_GetFlatType(const char *name)
 	return '-';  // the OTHER category
 }
 
-
-static bool LineCategory_IsUsed(char group)
+//
+// Generic for types
+//
+template<typename T>
+static bool Category_IsUsed(const std::map<int, T> &types, char group)
 {
-	std::map<int, linetype_t>::iterator IT;
-
-	for (IT = line_types.begin() ; IT != line_types.end() ; IT++)
-	{
-		const linetype_t &info = IT->second;
-		if (info.group == group)
+	for (const auto &type : types)
+		if(type.second.group == group)
 			return true;
-	}
-
+	return false;
+}
+static bool Category_IsUsed(const std::map<std::string, char> &categories, char group)
+{
+	for (const auto &category : categories)
+		if(category.second == group)
+			return true;
 	return false;
 }
 
-
-static bool ThingCategory_IsUsed(char group)
-{
-	std::map<int, thingtype_t>::iterator IT;
-
-	for (IT = thing_types.begin() ; IT != thing_types.end() ; IT++)
-	{
-		const thingtype_t &info = IT->second;
-		if (info.group == group)
-			return true;
-	}
-
-	return false;
-}
-
-
-static bool TextureCategory_IsUsed(char group)
-{
-	std::map<std::string, char>::iterator IT;
-
-	for (IT = texture_categories.begin() ; IT != texture_categories.end() ; IT++)
-		if (IT->second == group)
-			return true;
-
-	return false;
-}
-
-
-static bool FlatCategory_IsUsed(char group)
-{
-	std::map<std::string, char>::iterator IT;
-
-	for (IT = flat_categories.begin() ; IT != flat_categories.end() ; IT++)
-		if (IT->second == group)
-			return true;
-
-	return false;
-}
-
-
-std::string M_LineCategoryString(char *letters)
+template<typename T, typename U, typename V>
+static std::string M_CategoryString(char *letters, bool recent, const std::map<char, T> &groups, const std::map<U, V> &categories)
 {
 	std::string buffer;
 	buffer.reserve(2000);
@@ -1492,18 +1457,23 @@ std::string M_LineCategoryString(char *letters)
 	// the "ALL" category is always first
 	buffer = "ALL";
 	letters[L_index++] = '*';
-
-	std::map<char, linegroup_t>::iterator IT;
-
-	for (IT = line_groups.begin() ; IT != line_groups.end() ; IT++)
+	if(recent)
 	{
-		const linegroup_t &G = IT->second;
+		buffer += "|RECENT";
+		letters[L_index++] = '^';
+	}
+
+	typename std::map<char, T>::const_iterator IT;
+
+	for (IT = groups.begin() ; IT != groups.end() ; IT++)
+	{
+		const T &G = IT->second;
 
 		// the "Other" category is always at the end
 		if (G.group == '-')
 			continue;
 
-		if (! LineCategory_IsUsed(G.group))
+		if (! Category_IsUsed(categories, G.group))
 			continue;
 
 		// FIXME: potential for buffer overflow here
@@ -1521,89 +1491,22 @@ std::string M_LineCategoryString(char *letters)
 	return buffer;
 }
 
+std::string M_LineCategoryString(char *letters)
+{
+	return M_CategoryString(letters, false, line_groups, line_types);
+}
+
 
 std::string M_ThingCategoryString(char *letters)
 {
-	std::string buffer;
-	buffer.reserve(2000);
-
-	int L_index = 0;
-
-	// these common categories are always first
-	buffer = "ALL|RECENT";
-	letters[L_index++] = '*';
-	letters[L_index++] = '^';
-
-	std::map<char, thinggroup_t>::iterator IT;
-
-	for (IT = thing_groups.begin() ; IT != thing_groups.end() ; IT++)
-	{
-		const thinggroup_t &G = IT->second;
-
-		// the "Other" category is always at the end
-		if (G.group == '-')
-			continue;
-
-		if (! ThingCategory_IsUsed(G.group))
-			continue;
-
-		buffer += '|';
-		buffer += G.desc;
-
-		letters[L_index++] = IT->first;
-	}
-
-	buffer += "|Other";
-
-	letters[L_index++] = '-';
-	letters[L_index++] = 0;
-
-	return buffer;
+	return M_CategoryString(letters, true, thing_groups, thing_types);
 }
 
 
 std::string M_TextureCategoryString(char *letters, bool do_flats)
 {
-	std::string buffer;
-	buffer.reserve(2000);
-
-	int L_index = 0;
-
-	// these common categories are always first
-	buffer = "ALL|RECENT";
-	letters[L_index++] = '*';
-	letters[L_index++] = '^';
-
-	std::map<char, texturegroup_t>::iterator IT;
-
-	for (IT = texture_groups.begin() ; IT != texture_groups.end() ; IT++)
-	{
-		const texturegroup_t &G = IT->second;
-
-		// the "Other" category is always at the end
-		if (G.group == '-')
-			continue;
-
-		if (do_flats && !FlatCategory_IsUsed(G.group))
-			continue;
-
-		if (!do_flats && !TextureCategory_IsUsed(G.group))
-			continue;
-
-		buffer += '|';
-		buffer += G.desc;
-
-		letters[L_index++] = IT->first;
-	}
-
-	buffer += "|Other";
-
-	letters[L_index++] = '-';
-	letters[L_index++] = 0;
-
-	return buffer;
+	return M_CategoryString(letters, true, texture_groups, do_flats ? flat_categories : texture_categories);
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
