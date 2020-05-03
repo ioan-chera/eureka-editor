@@ -107,7 +107,7 @@ void M_ApplyBindings();
 int  M_NumBindings();
 void M_DetectConflictingBinds();
 
-const char * M_StringForFunc(int index);
+std::string M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
 void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context);

@@ -266,21 +266,18 @@ private:
 		params->value(str);
 	}
 
-	const char * Encode()
+	std::string Encode()
 	{
-		static char buffer[1024];
+		std::string buffer;
+		buffer.reserve(1024);
 
 		// should not happen
 		if (! cur_cmd)
 			return "ERROR";
 
-		strcpy(buffer, cur_cmd->name);
-
-		if (strlen(buffer) + strlen(params->value()) + 10 >= sizeof(buffer))
-			return "OVERFLOW";
-
-		strcat(buffer, ": ");
-		strcat(buffer, params->value());
+		buffer = cur_cmd->name;
+		buffer += ": ";
+		buffer += params->value();
 
 		return buffer;
 	}
@@ -538,11 +535,11 @@ public:
 
 
 	bool Run(keycode_t *key_v, key_context_e *ctx_v,
-			 const char **func_v, bool start_grabbed)
+			 std::string *func_v, bool start_grabbed)
 	{
 		*key_v  = 0;
 		*ctx_v  = KCTX_NONE;
-		*func_v = NULL;
+		func_v->clear();
 
 		// check the initial state
 		validate_callback(this, this);
@@ -1230,7 +1227,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	keycode_t     new_key  = 0;
 	key_context_e new_context = KCTX_General;
-	const char *  new_func = "Nothing";
+	std::string  new_func = "Nothing";
 
 
 	int bind_idx = -1;
@@ -1257,7 +1254,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	bool start_grabbed = false;  //???  is_add || is_copy;
 
-	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func);
+	UI_EditKey *dialog = new UI_EditKey(new_key, new_context, new_func.c_str());
 
 	bool was_ok = dialog->Run(&new_key, &new_context, &new_func, start_grabbed);
 
@@ -1267,7 +1264,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 		if (is_add || is_copy)
 		{
-			M_AddLocalBinding(bind_idx, new_key, new_context, new_func);
+			M_AddLocalBinding(bind_idx, new_key, new_context, new_func.c_str());
 
 			if (is_copy)
 				bind_idx++;
@@ -1276,7 +1273,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		}
 		else
 		{
-			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
+			M_SetLocalBinding(bind_idx, new_key, new_context, new_func.c_str());
 		}
 	}
 

@@ -868,17 +868,18 @@ void M_DetectConflictingBinds()
 }
 
 
-const char * M_StringForFunc(int index)
+std::string M_StringForFunc(int index)
 {
-	static char buffer[2048];
+	std::string buffer;
+	buffer.reserve(2048);
 
+	SYS_ASSERT(index >= 0 && index < pref_binds.size());
 	key_binding_t& bind = pref_binds[index];
 
-	strcpy(buffer, bind.cmd->name);
+	SYS_ASSERT(!!bind.cmd);
+	buffer = bind.cmd->name;
 
 	// add the parameters
-
-	char *pos = buffer;
 
 	for (int k = 0 ; k < MAX_EXEC_PARAM ; k++)
 	{
@@ -887,14 +888,11 @@ const char * M_StringForFunc(int index)
 		if (! param[0])
 			break;
 
-		pos = buffer + strlen(buffer);
-
 		if (k == 0)
-			*pos++ = ':';
+			buffer.push_back(':');
 
-		*pos++ = ' ';
-
-		sprintf(pos, "%.30s", param);
+		buffer.push_back(' ');
+		buffer += StringPrintf("%.30s", param);
 	}
 
 	return buffer;
@@ -928,7 +926,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 			changing_key ? "<?"     : ModName_Space(tempk),
 			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),
 			ctx_name,
-			M_StringForFunc(index) );
+			 M_StringForFunc(index).c_str() );
 
 	return buffer;
 }
