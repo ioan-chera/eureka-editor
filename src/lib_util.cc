@@ -152,6 +152,14 @@ char *StringUpper(const char *name)
 	return copy;
 }
 
+std::string StringUpper_s(const char *name)
+{
+	std::string copy(name ? name : "");
+	for(char &c : copy)
+		c = toupper(c);
+	return copy;
+}
+
 
 char *StringLower(const char *name)
 {
