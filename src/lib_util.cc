@@ -151,17 +151,7 @@ std::string StringUpper(const char *name)
 }
 
 
-char *StringLower(const char *name)
-{
-	char *copy = StringDup(name);
-
-	for (char *p = copy; *p; p++)
-		*p = tolower(*p);
-
-	return copy;
-}
-
-std::string StringLower_s(const char *name)
+std::string StringLower(const char *name)
 {
 	std::string copy(name ? name : "");
 	for(char &c : copy)

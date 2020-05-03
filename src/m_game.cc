@@ -887,7 +887,6 @@ static void M_ParseGameInfoLine(parser_state_c *pst)
 		if (nargs < 1)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		// TODO memory leak
 		loading_Game->base_game = StringLower(argv[1]);
 	}
 }
@@ -910,7 +909,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-			loading_Port->AddSupportedGame(StringLower_s(*argv).c_str());
+			loading_Port->AddSupportedGame(StringLower(*argv).c_str());
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{

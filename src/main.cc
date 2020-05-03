@@ -402,7 +402,7 @@ static bool DetermineIWAD()
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		Iwad_name = StringLower_s(Iwad_name.c_str());
+		Iwad_name = StringLower(Iwad_name.c_str());
 
 		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());

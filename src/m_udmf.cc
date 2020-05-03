@@ -910,16 +910,15 @@ void UDMF_SwitchEngine()
 		return;
 
 	// convert to lowercase
-	char *namespace_l = StringLower(Udmf_namespace.c_str());
+	std::string namespace_l = StringLower(Udmf_namespace.c_str());
 
 	// already set?
-	if (y_stricmp(Port_name.c_str(), namespace_l) == 0)
+	if (y_stricmp(Port_name.c_str(), namespace_l.c_str()) == 0)
 	{
-		StringFree(namespace_l);
 		return;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(namespace_l);
+	PortInfo_c *pinfo = M_LoadPortInfo(namespace_l.c_str());
 
 	if (pinfo)
 	{
@@ -927,8 +926,6 @@ void UDMF_SwitchEngine()
 	}
 
 	// TODO
-
-	StringFree(namespace_l);
 }
 
 //--- editor settings ---
