@@ -1148,13 +1148,13 @@ public:
 	{
 		char label_buf[256];
 
-		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name);
+		snprintf(label_buf, sizeof(label_buf), "%s: ", field->name.c_str());
 
 		copy_label(label_buf);
 
 		for (int i = 0 ; i < field->num_keywords ; i++)
 		{
-			add(field->keywords[i]);
+			add(field->keywords[i].c_str());
 		}
 
 		Reset();
@@ -1229,7 +1229,7 @@ public:
 
 		for (int i = 0 ; i < num_items ; i++)
 		{
-			bool is_change = (y_stricmp(info->fields[i].name, "Change") == 0);
+			bool is_change = (y_stricmp(info->fields[i].name.c_str(), "Change") == 0);
 
 			if (is_change)
 				Y += 10;
@@ -1421,7 +1421,7 @@ void UI_Generalized_Box::CreatePages()
 	{
 		const generalized_linetype_t *info = &gen_linetypes[i];
 
-		category->add(info->name);
+		category->add(info->name.c_str());
 
 		pages[i] = new UI_Generalized_Page(X + 10, y() + 100, 230, 300, info);
 		pages[i]->callback(edit_callback, this);

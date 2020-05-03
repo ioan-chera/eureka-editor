@@ -1067,9 +1067,9 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 			if (info->num_fields < 1 || info->fields[0].num_keywords < 8)
 				return NULL;
 
-			const char *trigger = info->fields[0].keywords[type_num & 7];
+			const char *trigger = info->fields[0].keywords[type_num & 7].c_str();
 
-			snprintf(desc_buffer, sizeof(desc_buffer), "%s GENTYPE: %s", trigger, info->name);
+			snprintf(desc_buffer, sizeof(desc_buffer), "%s GENTYPE: %s", trigger, info->name.c_str());
 			return desc_buffer;
 		}
 	}

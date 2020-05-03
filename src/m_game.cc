@@ -145,7 +145,8 @@ void M_ClearAllDefinitions()
 	Misc_info.max_dm_starts = 10;
 
 	// reset generalized types
-	memset(gen_linetypes, 0, sizeof(gen_linetypes));
+	for(generalized_linetype_t &type : gen_linetypes)
+		type = {};
 	num_gen_linetypes = 0;
 }
 
@@ -812,7 +813,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		def->base   = static_cast<int>(strtol(argv[2], NULL, 0));
 		def->length = static_cast<int>(strtol(argv[3], NULL, 0));
 
-		def->name = StringDup(argv[4]);
+		def->name = argv[4];
 		def->num_fields = 0;
 	}
 
@@ -839,14 +840,14 @@ static void M_ParseNormalLine(parser_state_c *pst)
 
 		field->default_val = atoi(argv[3]);
 
-		field->name = StringDup(argv[4]);
+		field->name = argv[4];
 
 		// grab the keywords
 		field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
 
 		for (int i = 0 ; i < field->num_keywords ; i++)
 		{
-			field->keywords[i] = StringDup(argv[5 + i]);
+			field->keywords[i] = argv[5 + i];
 		}
 	}
 	else if (y_stricmp(argv[0], "clear") == 0)

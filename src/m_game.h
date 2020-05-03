@@ -207,7 +207,7 @@ public:
 #define MAX_GEN_NUM_FIELDS	16
 #define MAX_GEN_NUM_TYPES	16
 
-typedef struct
+struct generalized_field_t
 {
 	int bits;	//
 	int mask;	//	the bit-field info
@@ -215,27 +215,25 @@ typedef struct
 
 	int default_val;
 
-	const char *name;
+	std::string name;
 
-	const char *keywords[MAX_GEN_FIELD_KEYWORDS];
+	std::string keywords[MAX_GEN_FIELD_KEYWORDS];
 	int num_keywords;
-}
-generalized_field_t;
+};
 
 
-typedef struct
+struct generalized_linetype_t
 {
 	char key;
 
 	int base;
 	int length;
 
-	const char *name;
+	std::string name;
 
 	generalized_field_t fields[MAX_GEN_NUM_FIELDS];
 	int num_fields;
-}
-generalized_linetype_t;
+};
 
 
 extern generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
