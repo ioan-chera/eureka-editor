@@ -1446,8 +1446,8 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 				double Tx = T->x();
 				double Ty = T->y();
 
-				const thingtype_t *info = M_GetThingType(T->type);
-				int r = info->radius;
+				const thingtype_t &info = M_GetThingType(T->type);
+				int r = info.radius;
 
 				if (Tx - r < *x1) *x1 = Tx - r;
 				if (Ty - r < *y1) *y1 = Ty - r;

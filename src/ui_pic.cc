@@ -158,11 +158,11 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		return;
 	}
 
-	const thingtype_t *info = M_GetThingType(type);
+	const thingtype_t &info = M_GetThingType(type);
 
 	bool new_img = false;
 
-	if (info->flags & THINGDEF_INVIS)
+	if (info.flags & THINGDEF_INVIS)
 	{
 		img = img->spectrify();
 		new_img = true;
@@ -177,7 +177,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	int nw = w();
 	int nh = h();
 
-	float scale = info->scale;
+	float scale = info.scale;
 
 	float fit_x = iw * scale / (float)nw;
 	float fit_y = ih * scale / (float)nh;

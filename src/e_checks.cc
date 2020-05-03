@@ -1315,9 +1315,9 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 		{
 			bump_unknown_type(types, Things[n]->type);
 
@@ -1424,9 +1424,9 @@ void Things_FindInVoid(selection_c& list)
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-		if (info->flags & THINGDEF_VOID)
+		if (info.flags & THINGDEF_VOID)
 			continue;
 
 		// check more coords around the thing's centre, to be sure
@@ -1479,7 +1479,7 @@ void Things_RemoveInVoid()
 // (i.e. the skill-flags and mode-flags are ignored).
 static bool TH_always_spawned(int type)
 {
-	const thingtype_t *info = M_GetThingType(type);
+	const thingtype_t &info = M_GetThingType(type);
 
 	// a player?
 	if (1 <= type && type <= 4)
@@ -1490,13 +1490,14 @@ static bool TH_always_spawned(int type)
 		return true;
 
 	// Polyobject things
-	if (strstr(info->desc, "Polyobj") != NULL ||
-		strstr(info->desc, "PolyObj") != NULL)
+	if (info.desc.find("Polyobj") != std::string::npos ||
+		info.desc.find("PolyObj") != std::string::npos)
+	{
 		return true;
+	}
 
 	// ambient sounds in Heretic and Hexen
-	if (strstr(info->desc, "Snd") != NULL ||
-		strstr(info->desc, "Sound") != NULL)
+	if (info.desc.find("Snd") != std::string::npos || info.desc.find("Sound") != std::string::npos)
 		return true;
 
 	return false;
@@ -1618,19 +1619,19 @@ static void CollectBlockingThings(std::vector<int>& list,
 	{
 		const Thing *T = Things[n];
 
-		const thingtype_t *info = M_GetThingType(T->type);
+		const thingtype_t &info = M_GetThingType(T->type);
 
-		if (info->flags & THINGDEF_PASS)
+		if (info.flags & THINGDEF_PASS)
 			continue;
 
 		// ignore unknown things
-		if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 			continue;
 
 		// TODO: config option: treat ceiling things as non-blocking
 
 		 list.push_back(n);
-		sizes.push_back(info->radius);
+		sizes.push_back(info.radius);
 	}
 }
 
@@ -1788,18 +1789,18 @@ void Things_FindStuckies(selection_c& list)
 	{
 		const Thing *T = Things[blockers[n]];
 
-		const thingtype_t *info = M_GetThingType(T->type);
+		const thingtype_t &info = M_GetThingType(T->type);
 
-		if (ThingStuckInWall(T, info->radius, info->group))
+		if (ThingStuckInWall(T, info.radius, info.group))
 			list.set(blockers[n]);
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
 			const Thing *T2 = Things[blockers[n2]];
 
-			const thingtype_t *info2 = M_GetThingType(T2->type);
+			const thingtype_t &info2 = M_GetThingType(T2->type);
 
-			if (ThingStuckInThing(T, info, T2, info2))
+			if (ThingStuckInThing(T, &info, T2, &info2))
 				list.set(blockers[n]);
 		}
 	}
@@ -3214,9 +3215,9 @@ static bool SEC_check_beast_mark(int tag)
 
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			const thingtype_t *info = M_GetThingType(Things[n]->type);
+			const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-			if (y_stricmp(info->desc, "Commander Keen") == 0)
+			if (y_stricmp(info.desc.c_str(), "Commander Keen") == 0)
 				return true;
 		}
 

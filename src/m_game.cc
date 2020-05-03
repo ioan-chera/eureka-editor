@@ -59,7 +59,7 @@ std::map<char, texturegroup_t> texture_groups;
 
 std::map<int, linetype_t>   line_types;
 std::map<int, sectortype_t> sector_types;
-std::map<int, thingtype_t *>  thing_types;
+std::map<int, thingtype_t>  thing_types;
 
 std::map<std::string, char> texture_categories;
 std::map<std::string, char> flat_categories;
@@ -715,34 +715,32 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs < 6)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 6);
 
-		thingtype_t * info = new thingtype_t;
+		thingtype_t info = {};
 
 		int number = atoi(argv[1]);
 
-		info->group  = argv[2][0];
-		info->flags  = ParseThingdefFlags(argv[3]);
-		info->radius = atoi(argv[4]);
-		info->sprite = StringDup(argv[5]);
-		info->desc   = StringDup(argv[6]);
-		info->scale  = (nargs >= 7) ? atof(argv[7]) : 1.0;
-
-		memset(info->args, 0, sizeof(info->args));
+		info.group  = argv[2][0];
+		info.flags  = ParseThingdefFlags(argv[3]);
+		info.radius = atoi(argv[4]);
+		info.sprite = argv[5];
+		info.desc   = argv[6];
+		info.scale  = (nargs >= 7) ? atof(argv[7]) : 1.0;
 
 		int arg_count = MIN(nargs - 7, 5);
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[8 + i][0] != '-')
-				info->args[i] = StringDup(argv[8 + i]);
+				info.args[i] = argv[8 + i];
 		}
 
-		if (thing_groups.find(info->group) == thing_groups.end())
+		if (thing_groups.find(info.group) == thing_groups.end())
 		{
 			LogPrintf("%s(%d): unknown thing group '%c'\n",
-					pst->fname, pst->lineno, info->group);
+					  pst->fname, pst->lineno, info.group);
 		}
 		else
 		{
-			info->color = thing_groups[info->group].color;
+			info.color = thing_groups[info.group].color;
 
 			thing_types[number] = info;
 		}
@@ -1386,9 +1384,9 @@ const linetype_t & M_GetLineType(int type)
 }
 
 
-const thingtype_t * M_GetThingType(int type)
+const thingtype_t & M_GetThingType(int type)
 {
-	std::map<int, thingtype_t *>::iterator TI;
+	std::map<int, thingtype_t>::iterator TI;
 
 	TI = thing_types.find(type);
 
@@ -1402,7 +1400,7 @@ const thingtype_t * M_GetThingType(int type)
 		UNKNOWN_THING_COLOR
 	};
 
-	return &dummy_type;
+	return dummy_type;
 }
 
 
@@ -1449,12 +1447,12 @@ static bool LineCategory_IsUsed(char group)
 
 static bool ThingCategory_IsUsed(char group)
 {
-	std::map<int, thingtype_t *>::iterator IT;
+	std::map<int, thingtype_t>::iterator IT;
 
 	for (IT = thing_types.begin() ; IT != thing_types.end() ; IT++)
 	{
-		thingtype_t *info = IT->second;
-		if (info->group == group)
+		const thingtype_t &info = IT->second;
+		if (info.group == group)
 			return true;
 	}
 

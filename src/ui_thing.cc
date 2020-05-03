@@ -355,9 +355,9 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->type->value());
 
-	const thingtype_t *info = M_GetThingType(new_type);
+	const thingtype_t &info = M_GetThingType(new_type);
 
-	box->desc->value(info->desc);
+	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(new_type, FL_DARK2);
 
 	if (! edit.Selected->empty())
@@ -384,9 +384,9 @@ void UI_ThingBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->type->value());
 
-	const thingtype_t *info = M_GetThingType(value);
+	const thingtype_t &info = M_GetThingType(value);
 
-	box->desc->value(info->desc);
+	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(value, FL_DARK2);
 }
 
@@ -846,8 +846,8 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (is_thing(obj))
 		{
-			const thingtype_t *info = M_GetThingType(Things[obj]->type);
-			desc->value(info->desc);
+			const thingtype_t &info = M_GetThingType(Things[obj]->type);
+			desc->value(info.desc.c_str());
 			type->value(Int_TmpStr(Things[obj]->type));
 			sprite->GetSprite(Things[obj]->type, FL_DARK2);
 		}
@@ -898,7 +898,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const Thing *T = Things[obj];
 
-			const thingtype_t *info = M_GetThingType(T->type);
+			const thingtype_t &info = M_GetThingType(T->type);
 			const linetype_t  &spec = M_GetLineType (T->special);
 
 			// set argument values and tooltips
@@ -918,11 +918,11 @@ void UI_ThingBox::UpdateField(int field)
 				else
 				{
 					// spawn arguments
-					if (arg_val || info->args[a])
+					if (arg_val || !info.args[a].empty())
 						args[a]->value(Int_TmpStr(arg_val));
 
-					if (info->args[a])
-						args[a]->copy_tooltip(info->args[a]);
+					if (!info.args[a].empty())
+						args[a]->copy_tooltip(info.args[a].c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}

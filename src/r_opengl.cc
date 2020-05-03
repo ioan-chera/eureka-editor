@@ -1201,7 +1201,7 @@ public:
 	{
 		Thing *th = Things[th_index];
 
-		const thingtype_t *info = M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(th->type);
 
 		// project sprite to check if it is off-screen
 
@@ -1219,10 +1219,10 @@ public:
 			return;
 
 		bool fullbright = false;
-		if (info->flags & THINGDEF_LIT)
+		if (info.flags & THINGDEF_LIT)
 			fullbright = true;
 
-		float scale = info->scale;
+		float scale = info.scale;
 
 		Img_c *img = W_GetSprite(th->type);
 		if (! img)
@@ -1260,7 +1260,7 @@ public:
 
 		float z1, z2;
 
-		if (info->flags & THINGDEF_CEIL)
+		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
 			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
@@ -1430,9 +1430,9 @@ public:
 			drag_dz = edit.drag_cur_z - edit.drag_start_z;
 		}
 
-		const thingtype_t *info = M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(th->type);
 
-		float scale = info->scale;
+		float scale = info.scale;
 
 		Img_c *img = W_GetSprite(th->type);
 		if (! img)
@@ -1454,7 +1454,7 @@ public:
 
 		float z1, z2;
 
-		if (info->flags & THINGDEF_CEIL)
+		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
 			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();

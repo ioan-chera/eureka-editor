@@ -851,10 +851,10 @@ static Objid NearestThing(double x, double y)
 		if (tx < lx || tx > hx || ty < ly || ty > hy)
 			continue;
 
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
 		// more accurate bbox test using the real radius
-		double r = info->radius + mapslack;
+		double r = info.radius + mapslack;
 
 		if (x < tx - r - mapslack || x > tx + r + mapslack ||
 			y < ty - r - mapslack || y > ty + r + mapslack)

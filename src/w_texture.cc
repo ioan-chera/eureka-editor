@@ -748,45 +748,45 @@ Img_c * W_GetSprite(int type)
 
 	// sprite not in the list yet.  Add it.
 
-	const thingtype_t *info = M_GetThingType(type);
+	const thingtype_t &info = M_GetThingType(type);
 
 	Img_c *result = NULL;
 
-	if (strncmp(info->desc, "UNKNOWN", 7) == 0)
+	if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
 	{
 		// leave as NULL
 	}
-	else if (y_stricmp(info->sprite, "_LYT") == 0)
+	else if (y_stricmp(info.sprite.c_str(), "_LYT") == 0)
 	{
 		result = IM_CreateLightSprite();
 	}
-	else if (y_stricmp(info->sprite, "_MSP") == 0)
+	else if (y_stricmp(info.sprite.c_str(), "_MSP") == 0)
 	{
 		result = IM_CreateMapSpotSprite(0, 255, 0);
 	}
-	else if (y_stricmp(info->sprite, "NULL") == 0)
+	else if (y_stricmp(info.sprite.c_str(), "NULL") == 0)
 	{
 		result = IM_CreateMapSpotSprite(70, 70, 255);
 	}
 	else
 	{
-		Lump_c *lump = Sprite_loc_by_root(info->sprite);
+		Lump_c *lump = Sprite_loc_by_root(info.sprite.c_str());
 		if (! lump)
 		{
 			// for the MBF dog, create our own sprite for it, since
 			// it is defined in the Boom definition file and the
 			// missing sprite looks ugly in the thing browser.
 
-			if (y_stricmp(info->sprite, "DOGS") == 0)
+			if (y_stricmp(info.sprite.c_str(), "DOGS") == 0)
 				result = IM_CreateDogSprite();
 			else
-				LogPrintf("Sprite not found: '%s'\n", info->sprite);
+				LogPrintf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
 		else
 		{
 			result = new Img_c();
 
-			if (! LoadPicture(*result, lump, info->sprite, 0, 0))
+			if (! LoadPicture(*result, lump, info.sprite.c_str(), 0, 0))
 			{
 				delete result;
 				result = NULL;
@@ -796,7 +796,7 @@ Img_c * W_GetSprite(int type)
 
 	// player color remapping
 	// [ FIXME : put colors into game definition file ]
-	if (result && info->group == 'p')
+	if (result && info.group == 'p')
 	{
 		Img_c *new_img = NULL;
 

@@ -895,15 +895,15 @@ void UI_Canvas::DrawThings()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
 		if (edit.mode == OBJ_THINGS && !edit.error_mode)
 		{
-			Fl_Color col = (Fl_Color)info->color;
+			Fl_Color col = (Fl_Color)info.color;
 			RenderColor(col);
 		}
 
-		int r = info->radius;
+		int r = info.radius;
 
 		DrawThing(x, y, r, Things[n]->angle, false);
 	}
@@ -919,10 +919,10 @@ void UI_Canvas::DrawThings()
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
 
-			const thingtype_t *info = M_GetThingType(Things[n]->type);
+			const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-			x += info->radius + 8;
-			y += info->radius + 8;
+			x += info.radius + 8;
+			y += info.radius + 8;
 
 			DrawNumber(SCREENX(x), SCREENY(y), n);
 		}
@@ -946,12 +946,12 @@ void UI_Canvas::DrawThingBodies()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-		Fl_Color col = (Fl_Color)info->color;
+		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
 
-		int r = info->radius;
+		int r = info.radius;
 
 		int sx1 = SCREENX(x - r);
 		int sy1 = SCREENY(y + r);
@@ -980,8 +980,8 @@ void UI_Canvas::DrawThingSprites()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t *info = M_GetThingType(Things[n]->type);
-		float scale = info->scale;
+		const thingtype_t &info = M_GetThingType(Things[n]->type);
+		float scale = info.scale;
 
 		Img_c *sprite = W_GetSprite(Things[n]->type);
 
@@ -1311,9 +1311,9 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
+			const thingtype_t &info = M_GetThingType(Things[objnum]->type);
 
-			int r = info->radius;
+			int r = info.radius;
 
 			if (edit.error_mode)
 				DrawThing(x, y, r, Things[objnum]->angle, false /* big_arrow */);
@@ -1424,9 +1424,9 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t *info = M_GetThingType(Things[objnum]->type);
+			const thingtype_t &info = M_GetThingType(Things[objnum]->type);
 
-			int r = info->radius;
+			int r = info.radius;
 
 			DrawThing(x, y, r * 3 / 2, Things[objnum]->angle, true);
 		}

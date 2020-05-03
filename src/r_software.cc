@@ -861,7 +861,7 @@ public:
 	{
 		Thing *th = Things[th_index];
 
-		const thingtype_t *info = M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(th->type);
 
 		float x = th->x() - r_view.x;
 		float y = th->y() - r_view.y;
@@ -875,7 +875,7 @@ public:
 
 		bool is_unknown = false;
 
-		float scale = info->scale;
+		float scale = info.scale;
 
 		Img_c *sprite = W_GetSprite(th->type);
 		if (! sprite)
@@ -919,7 +919,7 @@ public:
 
 				if (dummy->floorh > real->floorh &&
 					r_view.z > dummy->floorh &&
-					!(info && (info->flags & THINGDEF_CEIL)))
+					!(info.flags & THINGDEF_CEIL))
 				{
 					return;
 				}
@@ -928,7 +928,7 @@ public:
 
 		int h1, h2;
 
-		if (info && (info->flags & THINGDEF_CEIL))
+		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
 			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->h();
@@ -950,7 +950,7 @@ public:
 		dw->sd  = NULL;
 		dw->sec = NULL;
 
-		dw->side = info ? info->flags : 0;
+		dw->side = info.flags;
 
 		if (is_unknown && render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
