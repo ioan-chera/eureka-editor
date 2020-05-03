@@ -433,7 +433,7 @@ const char * M_KeyContextString(key_context_e context)
 
 //------------------------------------------------------------------------
 
-typedef struct
+struct key_binding_t
 {
 	keycode_t key;
 
@@ -445,8 +445,7 @@ typedef struct
 
 	// this field ONLY used by M_DetectConflictingBinds()
 	bool is_duplicate;
-
-} key_binding_t;
+};
 
 
 static std::vector<key_binding_t> all_bindings;
@@ -488,10 +487,8 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
 
 static void ParseKeyBinding(const std::vector<std::string> &tokens)
 {
-	key_binding_t temp;
-
 	// this ensures all parameters are NUL terminated
-	memset(&temp, 0, sizeof(temp));
+	key_binding_t temp = {};
 
 	temp.key = M_ParseKeyString(tokens[1].c_str());
 
@@ -558,14 +555,14 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 	snprintf(filename, sizeof(filename), "%s/bindings.cfg", path);
 
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = fopen(filename, "rt");
 
 	if (! fp)
 	{
 		if (! required)
 			return false;
 
-		FatalError("Missing key bindings file:\n\n%s\n", filename);
+		ThrowException("Missing key bindings file:\n\n%s\n", filename);
 	}
 
 	LogPrintf("Reading key bindings from: %s\n", filename);
@@ -583,7 +580,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 		StringRemoveCRLF(line);
 
-		int num_tok = M_ParseLine(line, tokens, 2 /* do_strings, keep quotes */);
+		int num_tok = M_ParseLine(line, tokens, ParseOptions_haveStringsKeepQuotes);
 
 		if (num_tok == 0)
 			continue;
@@ -967,7 +964,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	std::vector<std::string> tokens;
 
-	int num_tok = M_ParseLine(buffer, tokens, 2 /* do_strings, keep quotes */);
+	int num_tok = M_ParseLine(buffer, tokens, ParseOptions_haveStringsKeepQuotes);
 
 	if (num_tok <= 0)
 		return "Missing function name";
@@ -1036,11 +1033,8 @@ const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
 const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
                        const char *func_str)
 {
-	key_binding_t temp;
-
 	// this ensures the parameters are NUL terminated
-	memset(&temp, 0, sizeof(temp));
-
+	key_binding_t temp = {};
 	temp.key = key;
 	temp.context = context;
 

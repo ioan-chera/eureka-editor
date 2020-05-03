@@ -1419,7 +1419,7 @@ int M_WriteConfigFile()
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, std::vector<std::string> &tokens, int do_strings)
+int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions options)
 {
 	// when do_strings == 2, string tokens keep their quotes.
 
@@ -1459,11 +1459,11 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, int do_strin
 			tokenlen = 0;
 
 			// begin a string?
-			if (ch == '"' && do_strings)
+			if (ch == '"' && options != ParseOptions_noStrings)
 			{
 				in_string = true;
 
-				if (do_strings != 2)
+				if (options != ParseOptions_haveStringsKeepQuotes)
 					continue;
 			}
 
@@ -1477,7 +1477,7 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, int do_strin
 			// end of string
 			in_string = false;
 
-			if (do_strings == 2)
+			if (options == ParseOptions_haveStringsKeepQuotes)
 				tokenbuf[tokenlen++] = ch;
 		}
 		else if (ch == 0 || ch == '\n')
@@ -1546,7 +1546,7 @@ bool M_LoadUserState()
 
 	while (file.readLine(line, sizeof(line)))
 	{
-		int num_tok = M_ParseLine(line, tokens, 1 /* do_strings */);
+		int num_tok = M_ParseLine(line, tokens, ParseOptions_haveStrings);
 
 		if (num_tok == 0)
 			continue;
