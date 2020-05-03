@@ -55,21 +55,19 @@ public:
 	Fl_Button *cancel_but;
 
 	// the chosen EXE name, or NULL if cancelled
-	char *exe_name;
+	std::string exe_name;
 
 	bool want_close;
 
 public:
 	void SetEXE(const char *newbie)
 	{
-		StringFree(exe_name);
-
-		exe_name = StringDup(newbie);
+		exe_name = newbie;
 
 		// NULL is ok here
-		exe_display->value(exe_name);
+		exe_display->value(exe_name.c_str());
 
-		if (exe_name && FileExists(exe_name))
+		if (!exe_name.empty() && FileExists(exe_name.c_str()))
 			ok_but->activate();
 		else
 			ok_but->deactivate();
@@ -128,7 +126,7 @@ public:
 public:
 	UI_PortPathDialog(const char *port_name) :
 		UI_Escapable_Window(560, 250, "Port Settings"),
-		exe_name(NULL), want_close(false)
+		want_close(false)
 	{
 		char message_buf[256];
 
@@ -184,7 +182,7 @@ public:
 		while (! want_close)
 			Fl::wait(0.2);
 
-		return exe_name ? true : false;
+		return !exe_name.empty();
 	}
 };
 
@@ -224,7 +222,7 @@ bool M_PortSetupDialog(const char *port, const char *game)
 		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
 		// FIXME: check result??
-		fl_filename_absolute(info->exe_filename, sizeof(info->exe_filename), dialog->exe_name);
+		fl_filename_absolute(info->exe_filename, sizeof(info->exe_filename), dialog->exe_name.c_str());
 
 		M_SaveRecent();
 	}
