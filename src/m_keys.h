@@ -132,9 +132,9 @@ void M_RemoveBinding(keycode_t key, key_context_e context);
 
 typedef void (* command_func_t)(void);
 
-typedef struct
+struct editor_command_t
 {
-	const char *name;
+	const char *const name;
 
 	// used in the Key binding preferences
 	// when NULL, will be computed from 'req_context'
@@ -142,13 +142,13 @@ typedef struct
 
 	command_func_t func;
 
-	const char *flag_list;
-	const char *keyword_list;
+	const char *const flag_list;
+	const char *const keyword_list;
 
 	// this value is computed when registering
 	key_context_e req_context;
 
-} editor_command_t;
+};
 
 
 void M_RegisterCommandList(editor_command_t * list);
