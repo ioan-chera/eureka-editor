@@ -36,8 +36,7 @@ void y_strlowr (char *str);
 
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
-char *StringUpper(const char *name);
-std::string StringUpper_s(const char *name);
+std::string StringUpper(const char *name);
 char *StringLower(const char *name);
 std::string StringLower_s(const char *name);
 char *StringPrintf(const char *str, ...);

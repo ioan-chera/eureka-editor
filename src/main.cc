@@ -500,7 +500,7 @@ static std::string DetermineLevel()
 	if (!Level_name.empty())
 	{
 		if (! isdigit(Level_name[0]))
-			return StringUpper_s(Level_name.c_str());
+			return StringUpper(Level_name.c_str());
 
 		level_number = atoi(Level_name.c_str());
 	}

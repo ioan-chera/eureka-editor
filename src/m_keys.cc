@@ -987,12 +987,10 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	if (cmd->req_context != KCTX_NONE &&
 	    bind.context != cmd->req_context)
 	{
-		char *mode = StringUpper(M_KeyContextString(cmd->req_context));
+		std::string mode = StringUpper(M_KeyContextString(cmd->req_context));
 
 		snprintf(error_msg, sizeof(error_msg), "%s can only be used in %s mode",
-				 tokens[0].c_str(), mode);
-
-		StringFree(mode);
+				 tokens[0].c_str(), mode.c_str());
 
 		return error_msg;
 	}

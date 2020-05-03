@@ -142,17 +142,7 @@ char *StringDup(const char *orig, int limit)
 }
 
 
-char *StringUpper(const char *name)
-{
-	char *copy = StringDup(name);
-
-	for (char *p = copy; *p; p++)
-		*p = toupper(*p);
-
-	return copy;
-}
-
-std::string StringUpper_s(const char *name)
+std::string StringUpper(const char *name)
 {
 	std::string copy(name ? name : "");
 	for(char &c : copy)
