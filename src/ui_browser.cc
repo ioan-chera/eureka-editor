@@ -966,8 +966,7 @@ void UI_Browser_Box::Populate()
 
 void UI_Browser_Box::SetCategories(const char *cats, const char *letters)
 {
-	strncpy(cat_letters, letters, sizeof(cat_letters));
-	cat_letters[sizeof(cat_letters) - 1] = 0;
+	StringCopy(cat_letters, sizeof(cat_letters), letters);
 
 	category->clear();
 	category->add(cats);
