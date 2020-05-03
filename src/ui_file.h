@@ -52,7 +52,7 @@ public:
 	void PopulateButtons(char format, Wad_file *test_wad = NULL);
 
 	// returns map name on success, NULL on cancel
-	const char * Run();
+	std::string Run();
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);

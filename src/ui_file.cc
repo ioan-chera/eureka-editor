@@ -160,7 +160,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 }
 
 
-const char * UI_ChooseMap::Run()
+std::string UI_ChooseMap::Run()
 {
 	set_modal();
 
@@ -172,9 +172,9 @@ const char * UI_ChooseMap::Run()
 	}
 
 	if (action == ACT_CANCEL)
-		return NULL;
+		return "";
 
-	return StringUpper(map_name->value());
+	return StringUpper_s(map_name->value());
 }
 
 

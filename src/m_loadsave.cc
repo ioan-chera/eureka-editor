@@ -362,16 +362,16 @@ void CMD_FreshMap()
 
 	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
-	const char *map_name = dialog->Run();
+	std::string map_name = dialog->Run();
 
 	delete dialog;
 
 	// cancelled?
-	if (! map_name)
+	if (map_name.empty())
 		return;
 
 	// would this replace an existing map?
-	if (edit_wad->LevelFind(map_name) >= 0)
+	if (edit_wad->LevelFind(map_name.c_str()) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "current") <= 0)
@@ -383,12 +383,12 @@ void CMD_FreshMap()
 
 	M_BackupWad(edit_wad);
 
-	LogPrintf("Created NEW map : %s\n", map_name);
+	LogPrintf("Created NEW map : %s\n", map_name.c_str());
 
 	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(map_name);
+	SaveLevel(map_name.c_str());
 }
 
 
@@ -1830,13 +1830,13 @@ bool M_ExportMap()
 
 	dialog->PopulateButtons(toupper(Level_name[0]), wad);
 
-	const char *map_name = dialog->Run();
+	std::string map_name = dialog->Run();
 
 	delete dialog;
 
 
 	// cancelled?
-	if (! map_name)
+	if (map_name.empty())
 	{
 		delete wad;
 		return false;
@@ -1846,7 +1846,7 @@ bool M_ExportMap()
 	// we will write into the chosen wad.
 	// however if the level already exists, get confirmation first
 
-	if (exists && wad->LevelFind(map_name) >= 0)
+	if (exists && wad->LevelFind(map_name.c_str()) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "selected") <= 0)
@@ -1863,12 +1863,12 @@ bool M_ExportMap()
 	}
 
 
-	LogPrintf("Exporting Map : %s in %s\n", map_name, wad->PathName());
+	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName());
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
 
-	SaveLevel(map_name);
+	SaveLevel(map_name.c_str());
 
 	// do this after the save (in case it fatal errors)
 	Main_LoadResources();
@@ -1913,26 +1913,26 @@ void CMD_CopyMap()
 
 	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
-	const char *new_name = dialog->Run();
+	std::string new_name = dialog->Run();
 
 	delete dialog;
 
 	// cancelled?
-	if (! new_name)
+	if (new_name.empty())
 		return;
 
 	// sanity check that the name is different
 	// (should be prevented by the choose-map dialog)
-	if (y_stricmp(new_name, Level_name.c_str()) == 0)
+	if (y_stricmp(new_name.c_str(), Level_name.c_str()) == 0)
 	{
 		Beep("Name is same!?!");
 		return;
 	}
 
 	// perform the copy (just a save)
-	LogPrintf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name);
+	LogPrintf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name.c_str());
 
-	SaveLevel(new_name);
+	SaveLevel(new_name.c_str());
 
 	Status_Set("Copied to %s", Level_name.c_str());
 }
@@ -1973,17 +1973,17 @@ void CMD_RenameMap()
 
 	dialog->PopulateButtons(format, edit_wad);
 
-	const char *new_name = dialog->Run();
+	std::string new_name = dialog->Run();
 
 	delete dialog;
 
 	// cancelled?
-	if (! new_name)
+	if (new_name.empty())
 		return;
 
 	// sanity check that the name is different
 	// (should be prevented by the choose-map dialog)
-	if (y_stricmp(new_name, Level_name.c_str()) == 0)
+	if (y_stricmp(new_name.c_str(), Level_name.c_str()) == 0)
 	{
 		Beep("Name is same!?!");
 		return;
@@ -1998,11 +1998,11 @@ void CMD_RenameMap()
 		short level_lump = edit_wad->LevelHeader(lev_num);
 
 		edit_wad->BeginWrite();
-		edit_wad->RenameLump(level_lump, new_name);
+		edit_wad->RenameLump(level_lump, new_name.c_str());
 		edit_wad->EndWrite();
 	}
 
-	Level_name = StringUpper(new_name);
+	Level_name = StringUpper_s(new_name.c_str());
 
 	main_win->SetTitle(edit_wad->PathName(), Level_name.c_str(), false);
 
