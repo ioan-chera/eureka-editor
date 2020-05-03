@@ -305,6 +305,8 @@ static void Determine_HomeDir(const char *argv0)
 
 	if (fl_filename_expand(path, "$HOME/.eureka"))
 		home_dir = path;
+
+		StringFree(path);
 #endif
 	}
 

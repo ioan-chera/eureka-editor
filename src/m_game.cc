@@ -1300,8 +1300,8 @@ std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const c
 	for (i = 0 ; i < list.size() ; i++)
 		length += list[i].length();
 
-	char * result = StringNew(length);
-	result[0] = 0;
+	std::string result;
+	result.reserve(length);
 
 	int entry_id = 0;
 
@@ -1311,9 +1311,9 @@ std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const c
 			continue;
 
 		if (result[0])
-			strcat(result, "|");
+			result += '|';
 
-		strcat(result, list[i].c_str());
+		result += list[i];
 
 		if (y_stricmp(list[i].c_str(), exist_name) == 0)
 			*exist_val = entry_id;
@@ -1323,9 +1323,7 @@ std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const c
 
 //	DebugPrintf( "RESULT = '%s'\n", result);
 
-	std::string s(result);
-	StringFree(result);
-	return s;
+	return result;
 }
 
 
