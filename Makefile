@@ -26,19 +26,26 @@ CPPFLAGS ?=
 LDFLAGS ?= $(OPTIMISE)
 LIBS ?=
 
+# set this to 0 to use software rendering instead of OpenGL
+OPENGL = 1
+
 # general things needed by Eureka
 CXXFLAGS += $(CXX_DIALECT)
-LIBS += -lGLU -lGL
 LIBS += -lz -lm
+FLTK_CONFIG_FLAGS =
 
-# add this for software rendering, remove '--use-gl' below, remove -lGL and -lGLU from LIBS
-# CXXFLAGS += -DNO_OPENGL
+ifeq ($(OPENGL),1)
+LIBS += -lGLU -lGL
+FLTK_CONFIG_FLAGS += --use-gl
+else
+CXXFLAGS += -DNO_OPENGL
+endif
 
 # FLTK flags (this assumes a system-wide FLTK installation)
 FLTK_CONFIG ?= fltk-config
 
-CXXFLAGS += $(shell $(FLTK_CONFIG) --use-images --use-gl --cxxflags)
-LDFLAGS  += $(shell $(FLTK_CONFIG) --use-images --use-gl  --ldflags)
+CXXFLAGS += $(shell $(FLTK_CONFIG) --use-images --cxxflags $(FLTK_CONFIG_FLAGS))
+LDFLAGS  += $(shell $(FLTK_CONFIG) --use-images --ldflags $(FLTK_CONFIG_FLAGS))
 
 # NOTE: the following is commented out since it does not work as expected.
 #       the --libs option gives us static libraries, but --ldflags option
