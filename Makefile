@@ -158,6 +158,7 @@ stripped: all
 INSTALL_DIR=$(DESTDIR)$(PREFIX)/share/eureka
 
 install: all
+	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 755 $(PROGRAM) $(DESTDIR)$(PREFIX)/bin/
 	install -d $(INSTALL_DIR)/games
 	install -d $(INSTALL_DIR)/common
