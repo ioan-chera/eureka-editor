@@ -522,19 +522,19 @@ Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 	{
 		case 'P':
 			for (k = 0 ; k < (short)patches.size() ; k++)
-				if (y_stricmp(directory[patches[k]]->name.c_str(), name) == 0)
+				if (directory[patches[k]]->name.noCaseEqual(name))
 					return directory[patches[k]];
 			break;
 
 		case 'S':
 			for (k = 0 ; k < (short)sprites.size() ; k++)
-				if (y_stricmp(directory[sprites[k]]->name.c_str(), name) == 0)
+				if (directory[sprites[k]]->name.noCaseEqual(name))
 					return directory[sprites[k]];
 			break;
 
 		case 'F':
 			for (k = 0 ; k < (short)flats.size() ; k++)
-				if (y_stricmp(directory[flats[k]]->name.c_str(), name) == 0)
+				if (directory[flats[k]]->name.noCaseEqual(name))
 					return directory[flats[k]];
 			break;
 
