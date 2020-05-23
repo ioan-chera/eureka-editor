@@ -270,7 +270,7 @@ thing  214 g c 20 TNK5C "Tank 5 (acolyte)"
 thing  229 g c 20 TNK6C "Tank 6 (spectre)"
 
 # actual radius may be smaller, but limited to 10 for usability
-thing   24 l ln 10 KLAXB  "Klaxon Warning"
+thing   24 l lnc 10 KLAXB  "Klaxon Warning"
 thing   28 l lnc 20 CAGEA "Cage Light"
 thing   34 l ln 20 CNDLA  "Candle"
 thing   35 l l  16 CLBRA  "Candelabra"

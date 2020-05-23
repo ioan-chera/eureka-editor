@@ -1,0 +1,9 @@
+Changes for 2.0
+===============
+
+dd.mm.yyyy
+
+---------------
+23.05.2020
+
+* Fixed the Strife klaxon things to hang from ceiling.
