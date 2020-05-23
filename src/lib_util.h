@@ -27,7 +27,7 @@
 #ifndef __EUREKA_LIB_UTIL_H__
 #define __EUREKA_LIB_UTIL_H__
 
-#include "m_strings.h"
+class SString;
 
 int y_stricmp (const char *s1, const char *s2);
 int y_strnicmp (const char *s1, const char *s2, size_t len);
@@ -156,6 +156,180 @@ inline bool y_isprint (char c)
   return (c & 0x60) && (c != 0x7f);
 }
 
+//
+// Safe string: doesn't crash if given NULL (can happen due to refactoring old "char *" code.
+//
+class SString
+{
+public:
+	SString() = default;
+
+	SString(const char *c) : data(c ? c : "")
+	{
+	}
+
+	SString(const char *s, size_t len) : data(s ? s : "", s ? len : 0)
+	{
+	}
+
+	SString(const char *s, size_t pos, size_t len) : data(s ? s : "", s ? pos : 0, s ? len : 0)
+	{
+	}
+
+	SString(const SString &other, size_t pos, size_t len) : data(other.data, pos, len)
+	{
+	}
+
+	bool empty() const
+	{
+		return data.empty();
+	}
+
+	bool noCaseEqual(const char *c) const
+	{
+		return !y_stricmp(data.c_str(), c ? c : "");
+	}
+
+	bool operator != (const char *c) const
+	{
+		return data != (c ? c : "");
+	}
+
+	bool operator == (const char *c) const
+	{
+		return data == (c ? c : "");
+	}
+
+	bool operator < (const SString &other) const
+	{
+		return data < other.data;
+	}
+
+	char operator[](int n) const
+	{
+		return data[n];
+	}
+
+	char &operator[](int n)
+	{
+		return data[n];
+	}
+
+	char back() const
+	{
+		return data.back();
+	}
+
+	char &back()
+	{
+		return data.back();
+	}
+
+	const char *c_str() const
+	{
+		return data.c_str();
+	}
+
+	size_t find(const char *s) const
+	{
+		return data.find(s ? s : "");
+	}
+
+	size_t find_last_of(const char *s) const
+	{
+		return data.find_last_of(s ? s : "");
+	}
+
+	size_t length() const noexcept
+	{
+		return data.length();
+	}
+
+	size_t size() const noexcept
+	{
+		return data.size();
+	}
+
+	SString operator + (const char *s) const
+	{
+		SString result;
+		result.data = data + (s ? s : "");
+		return result;
+	}
+
+	SString &operator += (char c)
+	{
+		data += c;
+		return *this;
+	}
+
+	SString &operator += (const char *c)
+	{
+		data += (c ? c : "");
+		return *this;
+	}
+
+	SString &operator += (const SString &other)
+	{
+		data += other.data;
+		return *this;
+	}
+
+	void assign(const char *c, size_t n)
+	{
+		data.assign(c ? c : "", c ? n : 0);
+	}
+
+	void clear() noexcept
+	{
+		data.clear();
+	}
+
+	void erase(size_t n)
+	{
+		data.erase(n);
+	}
+
+	void pop_back()
+	{
+		data.pop_back();
+	}
+
+	void push_back(char c)
+	{
+		data.push_back(c);
+	}
+
+	void reserve(size_t n)
+	{
+		data.reserve(n);
+	}
+
+	const char *begin() const
+	{
+		return &*data.begin();
+	}
+	char *begin()
+	{
+		return &*data.begin();
+	}
+	const char *end() const
+	{
+		return &*data.end();
+	}
+	char *end()
+	{
+		return &*data.end();
+	}
+
+	enum
+	{
+		npos = std::string::npos
+	};
+
+private:
+	std::string data;
+};
 
 #endif  /* __EUREKA_YUTIL_H__ */
 

@@ -676,7 +676,7 @@ void W_ClearSprites()
 
 
 // find sprite by prefix
-Lump_c * Sprite_loc_by_root (const char *name)
+Lump_c * Sprite_loc_by_root (const SString &name)
 {
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
@@ -689,19 +689,19 @@ Lump_c * Sprite_loc_by_root (const char *name)
 	if(buffer.length() == 5)
 		buffer += '0';
 
-	Lump_c *lump = W_FindSpriteLump(buffer.c_str());
+	Lump_c *lump = W_FindSpriteLump(buffer);
 
 	if (! lump)
 	{
 		if(buffer.length() >= 6)
 			buffer[5] = '1';
-		lump = W_FindSpriteLump(buffer.c_str());
+		lump = W_FindSpriteLump(buffer);
 	}
 
 	if (! lump)
 	{
 		buffer += "D1";
-		lump = W_FindSpriteLump(buffer.c_str());
+		lump = W_FindSpriteLump(buffer);
 	}
 
 	if (lump)
@@ -709,28 +709,35 @@ Lump_c * Sprite_loc_by_root (const char *name)
 
 	// check outside of the sprite namespace...
 
-	if (! Features.lax_sprites)
-		return NULL;
-
-	buffer = name;
-	if(buffer.length() == 4)
-		buffer += 'A';
-	if(buffer.length() == 5)
-		buffer += '0';
-
-	lump = W_FindLump(buffer.c_str());
-
-	if (! lump)
+	if (Features.lax_sprites)
 	{
-		if(buffer.length() >= 6)
-			buffer[5] = '1';
+		buffer = name;
+		if(buffer.length() == 4)
+			buffer += 'A';
+		if(buffer.length() == 5)
+			buffer += '0';
+
 		lump = W_FindLump(buffer.c_str());
+
+		if (! lump)
+		{
+			if(buffer.length() >= 6)
+				buffer[5] = '1';
+			lump = W_FindLump(buffer.c_str());
+		}
+
+		// TODO: verify lump is OK (size etc)
+		if (lump)
+		{
+			LogPrintf("WARNING: using sprite '%s' outside of S_START..S_END\n", name.c_str());
+		}
 	}
 
-	// TODO: verify lump is OK (size etc)
-	if (lump)
+	if (!lump)
 	{
-		LogPrintf("WARNING: using sprite '%s' outside of S_START..S_END\n", name);
+		// Still no lump? Try direct lookup
+		// TODO: verify lump is OK (size etc)
+		lump = W_FindLump(name.c_str());
 	}
 
 	return lump;
@@ -754,28 +761,28 @@ Img_c * W_GetSprite(int type)
 	{
 		// leave as NULL
 	}
-	else if (y_stricmp(info.sprite.c_str(), "_LYT") == 0)
+	else if (info.sprite.noCaseEqual("_LYT"))
 	{
 		result = IM_CreateLightSprite();
 	}
-	else if (y_stricmp(info.sprite.c_str(), "_MSP") == 0)
+	else if (info.sprite.noCaseEqual("_MSP"))
 	{
 		result = IM_CreateMapSpotSprite(0, 255, 0);
 	}
-	else if (y_stricmp(info.sprite.c_str(), "NULL") == 0)
+	else if (info.sprite.noCaseEqual("NULL"))
 	{
 		result = IM_CreateMapSpotSprite(70, 70, 255);
 	}
 	else
 	{
-		Lump_c *lump = Sprite_loc_by_root(info.sprite.c_str());
+		Lump_c *lump = Sprite_loc_by_root(info.sprite);
 		if (! lump)
 		{
 			// for the MBF dog, create our own sprite for it, since
 			// it is defined in the Boom definition file and the
 			// missing sprite looks ugly in the thing browser.
 
-			if (y_stricmp(info.sprite.c_str(), "DOGS") == 0)
+			if (info.sprite.noCaseEqual("DOGS"))
 				result = IM_CreateDogSprite();
 			else
 				LogPrintf("Sprite not found: '%s'\n", info.sprite.c_str());

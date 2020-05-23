@@ -1339,11 +1339,11 @@ Lump_c * W_FindLump(const char *name)
 }
 
 
-Lump_c * W_FindSpriteLump(const char *name)
+Lump_c * W_FindSpriteLump(const SString &name)
 {
 	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, 'S');
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name.c_str(), 'S');
 		if (L)
 			return L;
 	}

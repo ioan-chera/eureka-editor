@@ -318,7 +318,7 @@ Lump_c * W_FindLump(const char *name);
 
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
-Lump_c * W_FindSpriteLump(const char *name);
+Lump_c * W_FindSpriteLump(const SString &name);
 Lump_c * W_FindPatchLump(const char *name);
 
 // load the lump into memory, returning the size
