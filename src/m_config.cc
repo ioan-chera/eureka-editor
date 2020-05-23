@@ -1497,6 +1497,7 @@ int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions
 		nexttoken = true;
 
 		tokens.push_back(tokenbuf);
+		tokenbuf.clear();
 
 		// end of line?  if yes, we are done
 		if (ch == 0 || ch == '\n')
