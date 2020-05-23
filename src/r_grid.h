@@ -24,7 +24,7 @@
 
 class Grid_State_c
 {
-friend bool Grid_ParseUser(const std::vector<std::string> &tokens);
+friend bool Grid_ParseUser(const std::vector<SString> &tokens);
 
 public:
 	// the actual grid step (64, 128, etc)
@@ -131,7 +131,7 @@ private:
 extern Grid_State_c grid;
 
 
-bool Grid_ParseUser(const std::vector<std::string> &tokens);
+bool Grid_ParseUser(const std::vector<SString> &tokens);
 void Grid_WriteUser(FILE *fp);
 
 

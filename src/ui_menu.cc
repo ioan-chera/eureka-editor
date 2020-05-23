@@ -727,7 +727,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		std::string short_name = fl_filename_name(Pwad_list[k].c_str());
+		SString short_name = fl_filename_name(Pwad_list[k].c_str());
 
 		short_name = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
 									(k < 9) ? "&" : "", 1+k, short_name.c_str());
@@ -772,7 +772,7 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		std::string name = M_RecentShortName(k);
+		SString name = M_RecentShortName(k);
 
 		void *data = M_RecentData(k);
 

@@ -172,7 +172,7 @@ extern Editor_State_t  edit;
 
 void Editor_Init();
 void Editor_DefaultState();
-bool Editor_ParseUser(const std::vector<std::string> &tokens);
+bool Editor_ParseUser(const std::vector<SString> &tokens);
 void Editor_WriteUser(FILE *fp);
 
 void Editor_ClearErrorMode();
@@ -263,7 +263,7 @@ private:
 	int size;
 	int keep_num;
 
-	std::string name_set[RECENTLY_USED_MAX];
+	SString name_set[RECENTLY_USED_MAX];
 
 public:
 	 Recently_used();
@@ -290,7 +290,7 @@ extern Recently_used  recent_things;
 
 void RecUsed_ClearAll();
 void RecUsed_WriteUser(FILE *fp);
-bool RecUsed_ParseUser(const std::vector<std::string> &tokens);
+bool RecUsed_ParseUser(const std::vector<SString> &tokens);
 
 
 #endif  /* __EUREKA_LEVELS_H__ */

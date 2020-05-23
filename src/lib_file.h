@@ -32,10 +32,10 @@
 // filename functions
 bool HasExtension(const char *filename);
 bool MatchExtension(const char *filename, const char *ext);
-std::string ReplaceExtension(const char *filename, const char *ext);
+SString ReplaceExtension(const char *filename, const char *ext);
 const char *FindBaseName(const char *filename);
 bool FilenameIsBare(const char *filename);
-std::string FilenameReposition(const char *filename, const char *othername);
+SString FilenameReposition(const char *filename, const char *othername);
 void FilenameGetPath(char *dest, size_t maxsize, const char *filename);
 
 // file utilities
@@ -50,7 +50,7 @@ u8_t *FileLoad(const char *filename, int *length);
 void FileFree(u8_t *mem);
 
 // miscellanous
-std::string GetExecutablePath(const char *argv0);
+SString GetExecutablePath(const char *argv0);
 
 //------------------------------------------------------------------------
 

@@ -29,7 +29,7 @@ private:
 	int total;
 	int selected;
 
-	std::string type_name;
+	SString type_name;
 
 	void Update();
 

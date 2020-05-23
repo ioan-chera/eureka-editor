@@ -1222,7 +1222,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	{
 		if (idx != 0 && idy != 0)
 		{
-			std::string ratio_name = LD_RatioName(idx, idy, true);
+			SString ratio_name = LD_RatioName(idx, idy, true);
 
 			RenderNumString(sx, sy, ratio_name.c_str());
 		}

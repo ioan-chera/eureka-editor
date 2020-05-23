@@ -362,7 +362,7 @@ void CMD_FreshMap()
 
 	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
-	std::string map_name = dialog->Run();
+	SString map_name = dialog->Run();
 
 	delete dialog;
 
@@ -1154,7 +1154,7 @@ void CMD_OpenMap()
 
 	UI_OpenMap * dialog = new UI_OpenMap();
 
-	std::string map_name;
+	SString map_name;
 	bool did_load = false;
 
 	Wad_file *wad = dialog->Run(&map_name, &did_load);
@@ -1830,7 +1830,7 @@ bool M_ExportMap()
 
 	dialog->PopulateButtons(toupper(Level_name[0]), wad);
 
-	std::string map_name = dialog->Run();
+	SString map_name = dialog->Run();
 
 	delete dialog;
 
@@ -1913,7 +1913,7 @@ void CMD_CopyMap()
 
 	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
 
-	std::string new_name = dialog->Run();
+	SString new_name = dialog->Run();
 
 	delete dialog;
 
@@ -1973,7 +1973,7 @@ void CMD_RenameMap()
 
 	dialog->PopulateButtons(format, edit_wad);
 
-	std::string new_name = dialog->Run();
+	SString new_name = dialog->Run();
 
 	delete dialog;
 

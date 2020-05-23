@@ -46,7 +46,7 @@ static void dialog_button_callback(Fl_Widget *w, void *data)
 
 static int DialogShowAndRun(char icon_type, const char *message, const char *title,
 		const char *link_title = NULL, const char *link_url = NULL,
-		std::vector<std::string> *labels = NULL)
+		std::vector<SString> *labels = NULL)
 {
 	dialog_result = -1;
 
@@ -235,7 +235,7 @@ static void ParseHyperLink(char *buffer, unsigned int buf_len,
 
 
 static void ParseButtons(const char *buttons,
-                         std::vector<std::string>& labels)
+                         std::vector<SString>& labels)
 {
 	for (;;)
 	{
@@ -250,7 +250,7 @@ static void ParseButtons(const char *buttons,
 		int len = (int)(p - buttons);
 		SYS_ASSERT(len > 0);
 
-		labels.push_back(std::string(buttons, len));
+		labels.push_back(SString(buttons, len));
 
 		buttons = p + 1;
 	}
@@ -306,7 +306,7 @@ int DLG_Confirm(const char *buttons, const char *msg, ...)
 
 	dialog_buffer[MSG_BUF_LEN-1] = 0;
 
-	std::vector<std::string> labels;
+	std::vector<SString> labels;
 
 	ParseButtons(buttons, labels);
 

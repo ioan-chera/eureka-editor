@@ -65,11 +65,11 @@ typedef enum
 	OPT_COLOR,
 
 	// String (not leaking)
-	// Receptacle is of type: std::string
+	// Receptacle is of type: SString
 	OPT_STRING,
 
 	// List of strings (not leaking)
-	// Receptacle is of type: std::vector<std::string>
+	// Receptacle is of type: std::vector<SString>
 	OPT_STRING_LIST,
 }
 opt_type_t;
@@ -973,7 +973,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 			break;
 
 		case OPT_STRING:
-			*static_cast<std::string *>(opt->data_ptr) = value;
+			*static_cast<SString *>(opt->data_ptr) = value;
 			break;
 
 		case OPT_STRING_LIST:
@@ -983,9 +983,9 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 				while (*v != 0 && ! isspace ((unsigned char) *v))
 					v++;
 
-				auto list = static_cast<std::vector<std::string> *>(opt->data_ptr);
+				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
 
-				list->push_back(std::string(value, (int)(v - value)));
+				list->push_back(SString(value, (int)(v - value)));
 
 				while (isspace (*v))
 					v++;
@@ -1026,7 +1026,7 @@ static int parse_a_config_file(FILE *fp, const char *filename)
 }
 
 
-inline static std::string default_config_file()
+inline static SString default_config_file()
 {
 	SYS_ASSERT(!home_dir.empty());
 
@@ -1226,14 +1226,14 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				argv++;
 				argc--;
 				if(!ignore)
-					*static_cast<std::string *>(o->data_ptr) = argv[0];
+					*static_cast<SString *>(o->data_ptr) = argv[0];
 				// support two numeric values after -warp
 				if (strchr(o->flags, 'w') && isdigit(argv[0][0]) &&
 					argc > 1 && isdigit(argv[1][0]))
 				{
 					if (! ignore)
 					{
-						*static_cast<std::string *>(o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
+						*static_cast<SString *>(o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
 					}
 
 					argv++;
@@ -1256,7 +1256,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 
 					if (! ignore)
 					{
-						auto list = static_cast<std::vector<std::string> *>(o->data_ptr);
+						auto list = static_cast<std::vector<SString> *>(o->data_ptr);
 						list->push_back(argv[0]);
 					}
 				}
@@ -1378,7 +1378,7 @@ int M_WriteConfigFile()
 
 			case OPT_STRING:
 			{
-				const std::string *str = static_cast<std::string *>(o->data_ptr);
+				const SString *str = static_cast<SString *>(o->data_ptr);
 				fprintf(fp, "%s", str ? str->c_str() : "''");
 				break;
 			}
@@ -1392,11 +1392,11 @@ int M_WriteConfigFile()
 
 			case OPT_STRING_LIST:
 			{
-				auto list = static_cast<std::vector<std::string> *>(o->data_ptr);
+				auto list = static_cast<std::vector<SString> *>(o->data_ptr);
 
 				if (list->empty())
 					fprintf(fp, "{}");
-				else for (const std::string &item : *list)
+				else for (const SString &item : *list)
 					fprintf(fp, "%s ", item.c_str());
 			}
 
@@ -1419,11 +1419,11 @@ int M_WriteConfigFile()
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions options)
+int M_ParseLine(const char *line, std::vector<SString> &tokens, ParseOptions options)
 {
 	// when do_strings == 2, string tokens keep their quotes.
 
-	std::string tokenbuf;
+	SString tokenbuf;
 	tokenbuf.reserve(256);
 	bool nexttoken = true;
 
@@ -1539,7 +1539,7 @@ bool M_LoadUserState()
 
 	static char line[FL_PATH_MAX];
 
-	std::vector<std::string> tokens;
+	std::vector<SString> tokens;
 
 	while (file.readLine(line, sizeof(line)))
 	{

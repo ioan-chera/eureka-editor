@@ -326,8 +326,8 @@ void Clipboard_NotifyChange(obj_type_e type, int objnum, int field)
 
 namespace tex_clipboard
 {
-	std::string tex;
-	std::string flat;
+	SString tex;
+	SString flat;
 
 	int thing;
 };

@@ -45,7 +45,7 @@ private:
 	bool highlighted;
 	bool selected;
 
-	std::string what_text;
+	SString what_text;
 	Fl_Color    what_color;
 
 public:

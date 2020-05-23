@@ -458,7 +458,7 @@ void CMD_BuildAllNodes()
 
 
 	// remember current level
-	std::string CurLevel(Level_name);
+	SString CurLevel(Level_name);
 
 	// reset various editor state
 	Editor_ClearAction();

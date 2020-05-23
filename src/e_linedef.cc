@@ -1514,7 +1514,7 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 }
 
 
-std::string LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
+SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 {
 	idx = abs(idx);
 	idy = abs(idy);
@@ -1564,12 +1564,12 @@ std::string LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 
 	// if ratio is really complex, it isn't worth showing
 	if (idx > 999 || idy > 999)
-		return std::string("---");
+		return SString("---");
 
 	char buffer[256];
 	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx, idy);
 
-	return std::string(buffer);
+	return SString(buffer);
 }
 
 

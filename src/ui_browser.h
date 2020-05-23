@@ -33,8 +33,8 @@ class Browser_Item : public Fl_Group
 private:
 
 public:
-	std::string desc;
-	std::string real_name;	// for textures and flats only
+	SString desc;
+	SString real_name;	// for textures and flats only
 
 	int number;
 
@@ -92,7 +92,7 @@ private:
 
 	bool pic_mode;
 
-	std::string cat_letters;
+	SString cat_letters;
 
 public:
 	UI_Browser_Box(int X, int Y, int W, int H, const char *label, char _kind);
@@ -119,7 +119,7 @@ public:
 
 	void RecentUpdate();
 
-	bool ParseUser(const std::vector<std::string> &tokens);
+	bool ParseUser(const std::vector<SString> &tokens);
 	void WriteUser(FILE *fp);
 
 private:
@@ -131,7 +131,7 @@ private:
 
 	bool SearchMatch(Browser_Item *item) const;
 
-	void Populate_Images(char imkind, std::map<std::string, Img_c *> & img_list);
+	void Populate_Images(char imkind, std::map<SString, Img_c *> & img_list);
 	void Populate_Sprites();
 
 	void Populate_ThingTypes();
@@ -243,7 +243,7 @@ public:
 	// for the generalized box
 	void UpdateGenType(int line_type);
 
-	bool ParseUser(const std::vector<std::string> &tokens);
+	bool ParseUser(const std::vector<SString> &tokens);
 	void WriteUser(FILE *fp);
 
 private:
@@ -251,7 +251,7 @@ private:
 };
 
 
-bool Browser_ParseUser(const std::vector<std::string> &tokens);
+bool Browser_ParseUser(const std::vector<SString> &tokens);
 void Browser_WriteUser(FILE *fp);
 
 #endif  /* __EUREKA_UI_BROWSER_H__ */

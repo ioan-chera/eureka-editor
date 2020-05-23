@@ -66,7 +66,7 @@ private:
 	void CB_Paste (int sel_pics);
 	void CB_Delete(int sel_pics);
 
-	static std::string Normalize_and_Dup(UI_DynInput *w);
+	static SString Normalize_and_Dup(UI_DynInput *w);
 
 private:
 	static void   hide_callback(Fl_Widget *w, void *data);
@@ -81,7 +81,7 @@ private:
 };
 
 
-bool Props_ParseUser(const std::vector<std::string> &tokens);
+bool Props_ParseUser(const std::vector<SString> &tokens);
 void Props_WriteUser(FILE *fp);
 void Props_LoadValues();
 

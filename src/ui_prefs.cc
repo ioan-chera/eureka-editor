@@ -266,9 +266,9 @@ private:
 		params->value(str);
 	}
 
-	std::string Encode()
+	SString Encode()
 	{
-		std::string buffer;
+		SString buffer;
 		buffer.reserve(1024);
 
 		// should not happen
@@ -292,7 +292,7 @@ private:
 			return;
 		}
 
-		std::vector<std::string> tokens;
+		std::vector<SString> tokens;
 
 		int num_tok = M_ParseLine(list, tokens, ParseOptions_noStrings);
 
@@ -535,7 +535,7 @@ public:
 
 
 	bool Run(keycode_t *key_v, key_context_e *ctx_v,
-			 std::string *func_v, bool start_grabbed)
+			 SString *func_v, bool start_grabbed)
 	{
 		*key_v  = 0;
 		*ctx_v  = KCTX_NONE;
@@ -1227,7 +1227,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 	keycode_t     new_key  = 0;
 	key_context_e new_context = KCTX_General;
-	std::string  new_func = "Nothing";
+	SString  new_func = "Nothing";
 
 
 	int bind_idx = -1;

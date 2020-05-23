@@ -44,8 +44,8 @@ port_features_t  Features;
 
 
 // all the game and port definitions and previously loaded
-static std::map<std::string, GameInfo_c *> loaded_game_defs;
-static std::map<std::string, PortInfo_c *> loaded_port_defs;
+static std::map<SString, GameInfo_c *> loaded_game_defs;
+static std::map<SString, PortInfo_c *> loaded_port_defs;
 
 // the information being loaded for PURPOSE_GameInfo / PortInfo
 // TODO : move into parser_state_c
@@ -61,8 +61,8 @@ std::map<int, linetype_t>   line_types;
 std::map<int, sectortype_t> sector_types;
 std::map<int, thingtype_t>  thing_types;
 
-std::map<std::string, char> texture_categories;
-std::map<std::string, char> flat_categories;
+std::map<SString, char> texture_categories;
+std::map<SString, char> flat_categories;
 
 
 //
@@ -73,10 +73,10 @@ generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
 int num_gen_linetypes;
 
 // variables which are "set" in def files
-static std::map< std::string, std::string > parse_vars;
+static std::map< SString, SString > parse_vars;
 
 
-GameInfo_c::GameInfo_c(std::string _name) :
+GameInfo_c::GameInfo_c(SString _name) :
 	name(_name), base_game()
 { }
 
@@ -84,7 +84,7 @@ GameInfo_c::~GameInfo_c()
 { }
 
 
-PortInfo_c::PortInfo_c(std::string _name) :
+PortInfo_c::PortInfo_c(SString _name) :
 	name(_name),
 	formats(0),
 	supported_games(),
@@ -383,17 +383,17 @@ static void ParseFeatureDef(char ** argv, int argc)
 }
 
 
-static std::string FindDefinitionFile(const char *folder, const char *name)
+static SString FindDefinitionFile(const char *folder, const char *name)
 {
 	SYS_ASSERT(folder && name);
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		std::string base_dir = (pass == 0) ? home_dir : install_dir;
+		SString base_dir = (pass == 0) ? home_dir : install_dir;
 
 		if (base_dir.empty())
 			continue;
 
-		std::string filename = base_dir + "/" + folder + "/" + name + ".ugh";
+		SString filename = base_dir + "/" + folder + "/" + name + ".ugh";
 
 		DebugPrintf("  trying: %s\n", filename.c_str());
 
@@ -407,7 +407,7 @@ static std::string FindDefinitionFile(const char *folder, const char *name)
 
 bool M_CanLoadDefinitions(const char *folder, const char *name)
 {
-	std::string filename = FindDefinitionFile(folder, name);
+	SString filename = FindDefinitionFile(folder, name);
 
 	return !filename.empty();
 }
@@ -428,7 +428,7 @@ void M_LoadDefinitions(const char *folder, const char *name)
 
 	LogPrintf("Loading Definitions : %s\n", prettyname);
 
-	std::string filename = FindDefinitionFile(folder, name);
+	SString filename = FindDefinitionFile(folder, name);
 
 	if (filename.empty())
 		ThrowException("Cannot find definition file: %s\n", prettyname);
@@ -766,7 +766,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		char group = argv[1][0];
-		std::string name = std::string(argv[2]);
+		SString name = SString(argv[2]);
 
 		if (texture_groups.find(tolower(group)) == texture_groups.end())
 		{
@@ -783,7 +783,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 2);
 
 		char group = argv[1][0];
-		std::string name = std::string(argv[2]);
+		SString name = SString(argv[2]);
 
 		if (texture_groups.find(tolower(group)) == texture_groups.end())
 		{
@@ -948,7 +948,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 		// tokens are stored in pst->tokenbuf, so this is OK
 		y_strupr(argv[0]);
 
-		std::string var_value = parse_vars[argv[0]];
+		SString var_value = parse_vars[argv[0]];
 
 		// test multiple values, only need one to succeed
 		for (int i = 2 ; i < nargs ; i++)
@@ -1086,7 +1086,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 							pst->fname, pst->lineno);
 
 			const char * new_folder = folder;
-			std::string new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+			SString new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (new_name.empty() && strcmp(folder, "common") != 0)
@@ -1134,13 +1134,13 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 GameInfo_c * M_LoadGameInfo(const char *game)
 {
 	// already loaded?
-	std::map<std::string, GameInfo_c *>::iterator IT;
-	IT = loaded_game_defs.find(std::string(game));
+	std::map<SString, GameInfo_c *>::iterator IT;
+	IT = loaded_game_defs.find(SString(game));
 
 	if (IT != loaded_game_defs.end())
 		return IT->second;
 
-	std::string filename = FindDefinitionFile("games", game);
+	SString filename = FindDefinitionFile("games", game);
 	if (filename.empty())
 		return NULL;
 
@@ -1160,13 +1160,13 @@ GameInfo_c * M_LoadGameInfo(const char *game)
 
 PortInfo_c * M_LoadPortInfo(const char *port)
 {
-	std::map<std::string, PortInfo_c *>::iterator IT;
+	std::map<SString, PortInfo_c *>::iterator IT;
 	IT = loaded_port_defs.find(port);
 
 	if (IT != loaded_port_defs.end())
 		return IT->second;
 
-	std::string filename = FindDefinitionFile("ports", port);
+	SString filename = FindDefinitionFile("ports", port);
 	if (filename.empty())
 		return NULL;
 
@@ -1191,12 +1191,12 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 //
 // Collect known definitions from folder
 //
-std::vector<std::string> M_CollectKnownDefs(const char *folder)
+std::vector<SString> M_CollectKnownDefs(const char *folder)
 {
 	SYS_ASSERT(!!folder);
 
-	std::vector<std::string> temp_list;
-	std::string path;
+	std::vector<SString> temp_list;
+	SString path;
 
 	//	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
 	auto scanner_add_file = [&temp_list](const char *name, int flags)
@@ -1212,7 +1212,7 @@ std::vector<std::string> M_CollectKnownDefs(const char *folder)
 	path = home_dir + "/" + folder;
 	ScanDirectory(path.c_str(), scanner_add_file);
 
-	std::sort(temp_list.begin(), temp_list.end(), [](const std::string &a, const std::string &b)
+	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
 		return y_stricmp(a.c_str(), b.c_str()) < 0;
 	});
@@ -1221,7 +1221,7 @@ std::vector<std::string> M_CollectKnownDefs(const char *folder)
 	size_t pos;
 
 	// FIXME: use some <algorithm> thing here
-	std::vector<std::string> list;
+	std::vector<SString> list;
 	list.reserve(temp_list.size());
 	for (pos = 0 ; pos < temp_list.size() ; pos++)
 	{
@@ -1286,9 +1286,9 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
+SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
 {
-	std::vector<std::string> list = M_CollectKnownDefs("ports");
+	std::vector<SString> list = M_CollectKnownDefs("ports");
 
 	if (list.empty())
 		return "";
@@ -1300,7 +1300,7 @@ std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const c
 	for (i = 0 ; i < list.size() ; i++)
 		length += list[i].length();
 
-	std::string result;
+	SString result;
 	result.reserve(length);
 
 	int entry_id = 0;
@@ -1404,7 +1404,7 @@ const thingtype_t & M_GetThingType(int type)
 
 char M_GetTextureType(const char *name)
 {
-	std::map<std::string, char>::iterator TI;
+	std::map<SString, char>::iterator TI;
 
 	TI = texture_categories.find(name);
 
@@ -1417,7 +1417,7 @@ char M_GetTextureType(const char *name)
 
 char M_GetFlatType(const char *name)
 {
-	std::map<std::string, char>::iterator TI;
+	std::map<SString, char>::iterator TI;
 
 	TI = flat_categories.find(name);
 
@@ -1438,7 +1438,7 @@ static bool Category_IsUsed(const std::map<int, T> &types, char group)
 			return true;
 	return false;
 }
-static bool Category_IsUsed(const std::map<std::string, char> &categories, char group)
+static bool Category_IsUsed(const std::map<SString, char> &categories, char group)
 {
 	for (const auto &category : categories)
 		if(category.second == group)
@@ -1450,9 +1450,9 @@ static bool Category_IsUsed(const std::map<std::string, char> &categories, char 
 // Produces the category menu string and its associated letters
 //
 template<typename Group, typename Categories>
-static std::string M_CategoryString(std::string &letters, bool recent, const std::map<char, Group> &groups, const Categories &categories)
+static SString M_CategoryString(SString &letters, bool recent, const std::map<char, Group> &groups, const Categories &categories)
 {
-	std::string buffer;
+	SString buffer;
 	buffer.reserve(2000);
 
 	// the "ALL" category is always first
@@ -1492,19 +1492,19 @@ static std::string M_CategoryString(std::string &letters, bool recent, const std
 	return buffer;
 }
 
-std::string M_LineCategoryString(std::string &letters)
+SString M_LineCategoryString(SString &letters)
 {
 	return M_CategoryString(letters, false, line_groups, line_types);
 }
 
 
-std::string M_ThingCategoryString(std::string &letters)
+SString M_ThingCategoryString(SString &letters)
 {
 	return M_CategoryString(letters, true, thing_groups, thing_types);
 }
 
 
-std::string M_TextureCategoryString(std::string &letters, bool do_flats)
+SString M_TextureCategoryString(SString &letters, bool do_flats)
 {
 	return M_CategoryString(letters, true, texture_groups, do_flats ? flat_categories : texture_categories);
 }

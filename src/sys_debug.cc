@@ -30,7 +30,7 @@ static FILE * log_fp;
 // need to keep an in-memory copy of logs until the log viewer is open
 static bool log_window_open;
 
-static std::vector<std::string> kept_messages;
+static std::vector<SString> kept_messages;
 
 
 // hack here to avoid bringing in ui_window.h and FLTK headers
@@ -48,7 +48,7 @@ void LogOpenFile(const char *filename)
 
 	// add all messages saved so far
 
-	for (const std::string &message : kept_messages)
+	for (const SString &message : kept_messages)
 		fputs(message.c_str(), log_fp);
 }
 
@@ -59,7 +59,7 @@ void LogOpenWindow()
 
 	// retrieve all messages saved so far
 
-	for (const std::string &message : kept_messages)
+	for (const SString &message : kept_messages)
 		LogViewer_AddLine(message.c_str());
 }
 

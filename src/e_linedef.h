@@ -50,7 +50,7 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 						int *ld1, int *side1,
 						int *ld2, int *side2);
 
-std::string LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);
+SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);
 
 bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
 					const Sector *front, const Sector *back);

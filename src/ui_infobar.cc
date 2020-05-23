@@ -646,7 +646,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	fixcoord_t fdx = TO_COORD(dx);
 	fixcoord_t fdy = TO_COORD(dy);
 
-	std::string ratio_name = LD_RatioName(fdx, fdy, false);
+	SString ratio_name = LD_RatioName(fdx, fdy, false);
 
 	int old_cx = cx;
 	IB_String(cx, cy, ratio_name.c_str());

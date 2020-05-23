@@ -1533,7 +1533,7 @@ void Render3D_GetCameraPos(double *x, double *y, float *angle)
 }
 
 
-bool Render3D_ParseUser(const std::vector<std::string> &tokens)
+bool Render3D_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "camera" && tokens.size() >= 5)
 	{

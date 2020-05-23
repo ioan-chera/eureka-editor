@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #include <time.h>
 
+#include "m_strings.h"
 #include "w_rawdef.h"
 
 
@@ -142,18 +143,18 @@ char *StringDup(const char *orig, int limit)
 }
 
 
-std::string StringUpper(const char *name)
+SString StringUpper(const char *name)
 {
-	std::string copy(name ? name : "");
+	SString copy(name ? name : "");
 	for(char &c : copy)
 		c = toupper(c);
 	return copy;
 }
 
 
-std::string StringLower(const char *name)
+SString StringLower(const char *name)
 {
-	std::string copy(name ? name : "");
+	SString copy(name ? name : "");
 	for(char &c : copy)
 		c = tolower(c);
 	return copy;
@@ -162,7 +163,7 @@ std::string StringLower(const char *name)
 //
 // Non-leaking version
 //
-std::string StringPrintf(const char *str, ...)
+SString StringPrintf(const char *str, ...)
 {
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.
@@ -190,7 +191,7 @@ std::string StringPrintf(const char *str, ...)
 		if (out_len < 0 || out_len >= buf_size)
 			continue;
 
-		std::string result(buf);
+		SString result(buf);
 		free(buf);
 		return result;
 	}
@@ -228,9 +229,9 @@ void StringRemoveCRLF(char *str)
 }
 
 
-std::string StringTidy(const char *str, const char *bad_chars)
+SString StringTidy(const char *str, const char *bad_chars)
 {
-	std::string buf;
+	SString buf;
 	buf.reserve(strlen(str) + 2);
 
 	for ( ; *str ; str++)

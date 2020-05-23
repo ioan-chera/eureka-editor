@@ -27,6 +27,7 @@
 #ifndef __EUREKA_LIB_UTIL_H__
 #define __EUREKA_LIB_UTIL_H__
 
+#include "m_strings.h"
 
 int y_stricmp (const char *s1, const char *s2);
 int y_strnicmp (const char *s1, const char *s2, size_t len);
@@ -36,14 +37,14 @@ void y_strlowr (char *str);
 
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
-std::string StringUpper(const char *name);
-std::string StringLower(const char *name);
-std::string StringPrintf(const char *str, ...);
+SString StringUpper(const char *name);
+SString StringLower(const char *name);
+SString StringPrintf(const char *str, ...);
 void StringFree(const char *str);
 void StringCopy(char *buffer, size_t size, const char *source);
 
 void StringRemoveCRLF(char *str);
-std::string StringTidy(const char *str, const char *bad_chars = "");
+SString StringTidy(const char *str, const char *bad_chars = "");
 
 void CheckTypeSizes();
 

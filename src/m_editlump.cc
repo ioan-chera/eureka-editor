@@ -154,7 +154,7 @@ public:
 	{ }
 
 	// returns lump name on success, NULL on cancel
-	std::string Run();
+	SString Run();
 
 private:
 	void CheckInput();
@@ -351,7 +351,7 @@ void UI_ChooseTextLump::button_callback(Fl_Widget *w, void *data)
 }
 
 
-std::string UI_ChooseTextLump::Run()
+SString UI_ChooseTextLump::Run()
 {
 	set_modal();
 	show();
@@ -378,7 +378,7 @@ std::string UI_ChooseTextLump::Run()
 
 void CMD_EditLump()
 {
-	std::string lump_name = EXEC_Param[0];
+	SString lump_name = EXEC_Param[0];
 
 	if (Exec_HasFlag("/header"))
 	{

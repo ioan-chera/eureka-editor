@@ -36,8 +36,8 @@
 #include "w_texture.h"
 
 
-extern std::map<std::string, Img_c *> flats;
-extern std::map<std::string, Img_c *> textures;
+extern std::map<SString, Img_c *> flats;
+extern std::map<SString, Img_c *> textures;
 
 extern std::map<char, linegroup_t>  line_groups;
 extern std::map<char, thinggroup_t> thing_groups;
@@ -70,7 +70,7 @@ bool Texture_MatchPattern(const char *tex, const char *pattern)
 {
 	// Note: an empty pattern matches NOTHING
 
-	std::string local_pat;
+	SString local_pat;
 	local_pat.reserve(256);
 
 
@@ -685,7 +685,7 @@ const char * TidyLineDesc(const char *name)
 }
 
 
-void UI_Browser_Box::Populate_Images(char imkind, std::map<std::string, Img_c *> & img_list)
+void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
@@ -695,7 +695,7 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<std::string, Img_c *>
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
 
-	std::map<std::string, Img_c *>::iterator TI;
+	std::map<SString, Img_c *>::iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
@@ -1580,18 +1580,18 @@ void UI_Browser::Populate()
 
 	// setup the categories
 
-	std::string letters;
+	SString letters;
 
-	std::string tex_cats = M_TextureCategoryString(letters, false);
+	SString tex_cats = M_TextureCategoryString(letters, false);
 	browsers[0]->SetCategories(tex_cats.c_str(), letters.c_str());
 
-	std::string flat_cats = M_TextureCategoryString(letters, true);
+	SString flat_cats = M_TextureCategoryString(letters, true);
 	browsers[1]->SetCategories(flat_cats.c_str(), letters.c_str());
 
-	std::string thing_cats = M_ThingCategoryString(letters);
+	SString thing_cats = M_ThingCategoryString(letters);
 	browsers[2]->SetCategories(thing_cats.c_str(), letters.c_str());
 
-	std::string line_cats = M_LineCategoryString(letters);
+	SString line_cats = M_LineCategoryString(letters);
 	browsers[3]->SetCategories(line_cats.c_str(), letters.c_str());
 
 	// TODO: sector_cats
@@ -1774,7 +1774,7 @@ void UI_Browser::UpdateGenType(int line_type)
 //------------------------------------------------------------------------
 
 
-bool UI_Browser_Box::ParseUser(const std::vector<std::string> &tokens)
+bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 {
 	// syntax is: browser <kind> <keyword> <args...>
 
@@ -1855,7 +1855,7 @@ void UI_Browser_Box::WriteUser(FILE *fp)
 }
 
 
-bool UI_Browser::ParseUser(const std::vector<std::string> &tokens)
+bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "open_browser" && tokens.size() >= 2)
 	{
@@ -1891,7 +1891,7 @@ void UI_Browser::WriteUser(FILE *fp)
 }
 
 
-bool Browser_ParseUser(const std::vector<std::string> &tokens)
+bool Browser_ParseUser(const std::vector<SString> &tokens)
 {
 	if (main_win)
 	{

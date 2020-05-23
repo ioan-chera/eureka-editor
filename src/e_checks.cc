@@ -1490,14 +1490,14 @@ static bool TH_always_spawned(int type)
 		return true;
 
 	// Polyobject things
-	if (info.desc.find("Polyobj") != std::string::npos ||
-		info.desc.find("PolyObj") != std::string::npos)
+	if (info.desc.find("Polyobj") != SString::npos ||
+		info.desc.find("PolyObj") != SString::npos)
 	{
 		return true;
 	}
 
 	// ambient sounds in Heretic and Hexen
-	if (info.desc.find("Snd") != std::string::npos || info.desc.find("Sound") != std::string::npos)
+	if (info.desc.find("Snd") != SString::npos || info.desc.find("Sound") != SString::npos)
 		return true;
 
 	return false;
@@ -3421,10 +3421,10 @@ check_result_e CHECK_Tags(int min_severity)
 //------------------------------------------------------------------------
 
 
-static void bump_unknown_name(std::map<std::string, int>& list,
+static void bump_unknown_name(std::map<SString, int>& list,
                               const char *name)
 {
-	std::string t_name = name;
+	SString t_name = name;
 
 	int count = 0;
 
@@ -3551,7 +3551,7 @@ static bool is_transparent(const char *tex)
 
 
 static int check_transparent(const char *tex,
-                             std::map<std::string, int>& names)
+                             std::map<SString, int>& names)
 {
 	if (is_transparent(tex))
 	{
@@ -3564,7 +3564,7 @@ static int check_transparent(const char *tex,
 
 
 void Textures_FindTransparent(selection_c& lines,
-                              std::map<std::string, int>& names)
+                              std::map<SString, int>& names)
 {
 	lines.change_type(OBJ_LINEDEFS);
 
@@ -3602,7 +3602,7 @@ void Textures_ShowTransparent()
 	if (edit.mode != OBJ_LINEDEFS)
 		Editor_ChangeMode('l');
 
-	std::map<std::string, int> names;
+	std::map<SString, int> names;
 
 	Textures_FindTransparent(*edit.Selected, names);
 
@@ -3668,8 +3668,8 @@ void Textures_LogTransparent()
 {
 	selection_c sel;
 
-	std::map<std::string, int> names;
-	std::map<std::string, int>::iterator IT;
+	std::map<SString, int> names;
+	std::map<SString, int>::iterator IT;
 
 	Textures_FindTransparent(sel, names);
 
@@ -3687,7 +3687,7 @@ void Textures_LogTransparent()
 
 
 static int check_medusa(const char *tex,
-                        std::map<std::string, int>& names)
+                        std::map<SString, int>& names)
 {
 	if (is_null_tex(tex) || is_special_tex(tex))
 		return 0;
@@ -3701,7 +3701,7 @@ static int check_medusa(const char *tex,
 
 
 void Textures_FindMedusa(selection_c& lines,
-                         std::map<std::string, int>& names)
+                         std::map<SString, int>& names)
 {
 	lines.change_type(OBJ_LINEDEFS);
 
@@ -3728,7 +3728,7 @@ void Textures_ShowMedusa()
 	if (edit.mode != OBJ_LINEDEFS)
 		Editor_ChangeMode('l');
 
-	std::map<std::string, int> names;
+	std::map<SString, int> names;
 
 	Textures_FindMedusa(*edit.Selected, names);
 
@@ -3740,7 +3740,7 @@ void Textures_RemoveMedusa()
 {
 	int null_tex = BA_InternaliseString("-");
 
-	std::map<std::string, int> names;
+	std::map<SString, int> names;
 
 	BA_Begin();
 	BA_Message("fixed medusa textures");
@@ -3771,8 +3771,8 @@ void Textures_LogMedusa()
 {
 	selection_c sel;
 
-	std::map<std::string, int> names;
-	std::map<std::string, int>::iterator IT;
+	std::map<SString, int> names;
+	std::map<SString, int>::iterator IT;
 
 	Textures_FindMedusa(sel, names);
 
@@ -3790,7 +3790,7 @@ void Textures_LogMedusa()
 
 
 void Textures_FindUnknownTex(selection_c& lines,
-                             std::map<std::string, int>& names)
+                             std::map<SString, int>& names)
 {
 	lines.change_type(OBJ_LINEDEFS);
 
@@ -3825,7 +3825,7 @@ void Textures_FindUnknownTex(selection_c& lines,
 
 
 void Textures_FindUnknownFlat(selection_c& secs,
-                              std::map<std::string, int>& names)
+                              std::map<SString, int>& names)
 {
 	secs.change_type(OBJ_SECTORS);
 
@@ -3855,7 +3855,7 @@ void Textures_ShowUnknownTex()
 	if (edit.mode != OBJ_LINEDEFS)
 		Editor_ChangeMode('l');
 
-	std::map<std::string, int> names;
+	std::map<SString, int> names;
 
 	Textures_FindUnknownTex(*edit.Selected, names);
 
@@ -3868,7 +3868,7 @@ void Textures_ShowUnknownFlat()
 	if (edit.mode != OBJ_SECTORS)
 		Editor_ChangeMode('s');
 
-	std::map<std::string, int> names;
+	std::map<SString, int> names;
 
 	Textures_FindUnknownFlat(*edit.Selected, names);
 
@@ -3880,8 +3880,8 @@ void Textures_LogUnknown(bool do_flat)
 {
 	selection_c sel;
 
-	std::map<std::string, int> names;
-	std::map<std::string, int>::iterator IT;
+	std::map<SString, int> names;
+	std::map<SString, int>::iterator IT;
 
 	if (do_flat)
 		Textures_FindUnknownFlat(sel, names);
@@ -4245,7 +4245,7 @@ check_result_e CHECK_Textures(int min_severity)
 
 	selection_c  sel;
 
-	std::map<std::string, int> names;
+	std::map<SString, int> names;
 
 	for (;;)
 	{

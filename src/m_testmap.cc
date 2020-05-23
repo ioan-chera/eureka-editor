@@ -55,7 +55,7 @@ public:
 	Fl_Button *cancel_but;
 
 	// the chosen EXE name, or NULL if cancelled
-	std::string exe_name;
+	SString exe_name;
 
 	bool want_close;
 
@@ -84,7 +84,7 @@ public:
 	{
 		UI_PortPathDialog * that = (UI_PortPathDialog *)data;
 
-		that->SetEXE(NULL);
+		that->SetEXE("");
 
 		that->want_close = true;
 	}

@@ -674,7 +674,7 @@ void Grid_State_c::NearestScale(double want_scale)
 }
 
 
-bool Grid_ParseUser(const std::vector<std::string> &tokens)
+bool Grid_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "map_pos" && tokens.size() >= 4)
 	{

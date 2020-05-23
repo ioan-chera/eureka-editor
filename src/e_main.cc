@@ -1236,7 +1236,7 @@ void Recently_used::clear()
 {
 	size = 0;
 
-	for(std::string &name : name_set)
+	for(SString &name : name_set)
 		name.clear();
 }
 
@@ -1274,7 +1274,7 @@ void RecUsed_WriteUser(FILE *fp)
 }
 
 
-bool RecUsed_ParseUser(const std::vector<std::string> &tokens)
+bool RecUsed_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] != "recent_used" || tokens.size() < 2)
 		return false;
@@ -1375,7 +1375,7 @@ void Editor_DefaultState()
 }
 
 
-bool Editor_ParseUser(const std::vector<std::string> &tokens)
+bool Editor_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "edit_mode" && tokens.size() >= 2)
 	{

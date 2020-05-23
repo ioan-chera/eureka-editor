@@ -1919,7 +1919,7 @@ void UpdateGLMarker(Lump_c *marker)
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
 	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
 
-	std::string time_str = UtilTimeString();
+	SString time_str = UtilTimeString();
 
 	if (!time_str.empty())
 	{
@@ -2233,7 +2233,7 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 
 Lump_c * CreateGLMarker()
 {
-	std::string name_buf;
+	SString name_buf;
 
 	if (strlen(lev_current_name) <= 5)
 	{

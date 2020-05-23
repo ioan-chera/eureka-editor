@@ -208,9 +208,9 @@ void UI_DefaultProps::SetThing(int number)
 }
 
 
-std::string UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
+SString UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
 {
-	std::string normalized = NormalizeTex(w->value());
+	SString normalized = NormalizeTex(w->value());
 
 	w->value(normalized.c_str());
 
@@ -537,7 +537,7 @@ void UI_DefaultProps::UnselectPics()
 //------------------------------------------------------------------------
 
 
-bool Props_ParseUser(const std::vector<std::string> &tokens)
+bool Props_ParseUser(const std::vector<SString> &tokens)
 {
 	// syntax is:  default  <prop>  <value>
 	if (tokens.size() < 3)

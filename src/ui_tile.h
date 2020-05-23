@@ -53,7 +53,7 @@ public:
 	void MinimiseRight();
 	void MaximiseRight();
 
-	bool ParseUser(const std::vector<std::string> &tokens);
+	bool ParseUser(const std::vector<SString> &tokens);
 	void WriteUser(FILE *fp);
 
 private:

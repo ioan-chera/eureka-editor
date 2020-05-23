@@ -52,7 +52,7 @@ public:
 	void PopulateButtons(char format, Wad_file *test_wad = NULL);
 
 	// returns map name on success, NULL on cancel
-	std::string Run();
+	SString Run();
 
 private:
 	static void     ok_callback(Fl_Widget *, void *);
@@ -113,7 +113,7 @@ public:
 	// "did_load" is true when the user loaded a new pwad and this
 	// method returned it.  It should become the next edit_wad.
 	//
-	Wad_file * Run(std::string* map_v, bool * did_load);
+	Wad_file * Run(SString* map_v, bool * did_load);
 
 private:
 	void Populate();
@@ -189,13 +189,13 @@ public:
 	/*
 	 * current state
 	 */
-	std::string game;
-	std::string port;
+	SString game;
+	SString port;
 
 	map_format_e map_format;
-	std::string  name_space;
+	SString  name_space;
 
-	std::string res[RES_NUM];
+	SString res[RES_NUM];
 
 public:
 	UI_ProjectSetup(bool new_project = false, bool is_startup = false);

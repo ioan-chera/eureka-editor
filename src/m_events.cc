@@ -802,7 +802,7 @@ int EV_HandleEvent(int event)
 
 static bool no_operation_cfg;
 
-static std::map< std::string, Fl_Menu_Button* > op_all_menus;
+static std::map< SString, Fl_Menu_Button* > op_all_menus;
 
 
 typedef struct
@@ -814,7 +814,7 @@ typedef struct
 } operation_command_t;
 
 
-static void ParseOperationLine(const std::vector<std::string> &tokens, Fl_Menu_Button *menu)
+static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
 {
 	// just a divider?
 	if (y_stricmp(tokens[0].c_str(), "divider") == 0)
@@ -863,7 +863,7 @@ static void ParseOperationLine(const std::vector<std::string> &tokens, Fl_Menu_B
 }
 
 
-static void M_AddOperationMenu(std::string context, Fl_Menu_Button *menu)
+static void M_AddOperationMenu(SString context, Fl_Menu_Button *menu)
 {
 	if (menu->size() < 2)
 	{
@@ -923,11 +923,11 @@ static bool M_ParseOperationFile()
 	// parse each line
 
 	static char line[FL_PATH_MAX];
-	std::vector<std::string> tokens;
+	std::vector<SString> tokens;
 
 	Fl_Menu_Button *menu = NULL;
 
-	std::string context;
+	SString context;
 
 	while (file.readLine(line, sizeof(line)))
 	{

@@ -40,7 +40,7 @@
 struct linegroup_t
 {
 	char group;
-	std::string desc;
+	SString desc;
 };
 
 
@@ -48,15 +48,15 @@ struct linegroup_t
 struct linetype_t
 {
 	char group;
-	std::string desc;
-	std::string args[5];
+	SString desc;
+	SString args[5];
 };
 
 
 // sector <number> <description>
 struct sectortype_t
 {
-	std::string desc;
+	SString desc;
 };
 
 
@@ -65,7 +65,7 @@ struct thinggroup_t
 {
 	char group;         // group letter
 	rgb_color_t color;  // RGB colour
-	std::string desc;   // Description of thing group
+	SString desc;   // Description of thing group
 };
 
 
@@ -77,10 +77,10 @@ struct thingtype_t
 	short radius;    // radius of thing
 	float scale;	 // scaling (1.0 is normal)
 
-	std::string desc;    // short description of the thing
-	std::string sprite;  // name of sprite (frame and rot are optional)
+	SString desc;    // short description of the thing
+	SString sprite;  // name of sprite (frame and rot are optional)
 	rgb_color_t color;   // RGB color (from group)
-	std::string args[5]; // args used when spawned (Hexen)
+	SString args[5]; // args used when spawned (Hexen)
 };
 
 
@@ -100,7 +100,7 @@ thingdef_flags_e;
 struct texturegroup_t
 {
 	char group;
-	std::string desc;
+	SString desc;
 };
 
 
@@ -168,11 +168,11 @@ extern port_features_t  Features;
 class GameInfo_c
 {
 public:
-	std::string name;
-	std::string base_game;
+	SString name;
+	SString base_game;
 
 public:
-	GameInfo_c(std::string _name);
+	GameInfo_c(SString _name);
 	~GameInfo_c();
 };
 
@@ -180,15 +180,15 @@ public:
 class PortInfo_c
 {
 public:
-	std::string name;
+	SString name;
 
 	map_format_bitset_t formats; // 0 if not specified
 
-	std::vector<std::string> supported_games;
-	std::string udmf_namespace;
+	std::vector<SString> supported_games;
+	SString udmf_namespace;
 
 public:
-	PortInfo_c(std::string _name);
+	PortInfo_c(SString _name);
 	~PortInfo_c();
 
 	bool SupportsGame(const char *game) const;
@@ -215,9 +215,9 @@ struct generalized_field_t
 
 	int default_val;
 
-	std::string name;
+	SString name;
 
-	std::string keywords[MAX_GEN_FIELD_KEYWORDS];
+	SString keywords[MAX_GEN_FIELD_KEYWORDS];
 	int num_keywords;
 };
 
@@ -229,7 +229,7 @@ struct generalized_linetype_t
 	int base;
 	int length;
 
-	std::string name;
+	SString name;
 
 	generalized_field_t fields[MAX_GEN_NUM_FIELDS];
 	int num_fields;
@@ -266,11 +266,11 @@ void M_ParseDefinitionFile(parse_purpose_e purpose,
 GameInfo_c * M_LoadGameInfo(const char *game);
 PortInfo_c * M_LoadPortInfo(const char *port);
 
-std::vector<std::string> M_CollectKnownDefs(const char *folder);
+std::vector<SString> M_CollectKnownDefs(const char *folder);
 
 bool M_CheckPortSupportsGame(const char *base_game, const char *port);
 
-std::string M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
+SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
 const char * M_GetBaseGame(const char *game);
 
@@ -291,9 +291,9 @@ const thingtype_t  & M_GetThingType(int type);
 char M_GetTextureType(const char *name);
 char M_GetFlatType(const char *name);
 
-std::string M_LineCategoryString(std::string &letters);
-std::string M_ThingCategoryString(std::string &letters);
-std::string M_TextureCategoryString(std::string &letters, bool do_flats);
+SString M_LineCategoryString(SString &letters);
+SString M_ThingCategoryString(SString &letters);
+SString M_TextureCategoryString(SString &letters, bool do_flats);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

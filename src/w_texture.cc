@@ -41,14 +41,14 @@
 //----------------------------------------------------------------------
 
 
-std::map<std::string, Img_c *> textures;
-std::map<std::string, Img_c *> flats;
+std::map<SString, Img_c *> textures;
+std::map<SString, Img_c *> flats;
 
 // textures which can cause the Medusa Effect in vanilla/chocolate DOOM
-static std::map<std::string, int> medusa_textures;
+static std::map<SString, int> medusa_textures;
 
 
-static void DeleteTex(const std::map<std::string, Img_c *>::value_type& P)
+static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
 {
 	delete P.second;
 }
@@ -67,9 +67,9 @@ static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
 {
 	// free any existing one with the same name
 
-	std::string tex_str = name;
+	SString tex_str = name;
 
-	std::map<std::string, Img_c *>::iterator P = textures.find(tex_str);
+	std::map<SString, Img_c *>::iterator P = textures.find(tex_str);
 
 	if (P != textures.end())
 	{
@@ -411,8 +411,8 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 	if (strlen(name) == 0)
 		return NULL;
 
-	std::string t_str = name;
-	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
+	SString t_str = name;
+	std::map<SString, Img_c *>::iterator P = textures.find(t_str);
 
 	if (P != textures.end())
 		return P->second;
@@ -424,7 +424,7 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
+		std::map<SString, Img_c *>::iterator P = flats.find(t_str);
 
 		if (P != flats.end())
 			return P->second;
@@ -453,15 +453,15 @@ bool W_TextureIsKnown(const char *name)
 	if (strlen(name) == 0)
 		return false;
 
-	std::string t_str = name;
-	std::map<std::string, Img_c *>::iterator P = textures.find(t_str);
+	SString t_str = name;
+	std::map<SString, Img_c *>::iterator P = textures.find(t_str);
 
 	if (P != textures.end())
 		return true;
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<std::string, Img_c *>::iterator P = flats.find(t_str);
+		std::map<SString, Img_c *>::iterator P = flats.find(t_str);
 
 		if (P != flats.end())
 			return true;
@@ -473,9 +473,9 @@ bool W_TextureIsKnown(const char *name)
 
 bool W_TextureCausesMedusa(const char *name)
 {
-	std::string t_str = name;
+	SString t_str = name;
 
-	std::map<std::string, int>::iterator P = medusa_textures.find(t_str);
+	std::map<SString, int>::iterator P = medusa_textures.find(t_str);
 
 	return (P != medusa_textures.end() && P->second > 0);
 }
@@ -509,7 +509,7 @@ const char *NormalizeTex(const char *name)
 //    FLAT HANDLING
 //----------------------------------------------------------------------
 
-static void DeleteFlat(const std::map<std::string, Img_c *>::value_type& P)
+static void DeleteFlat(const std::map<SString, Img_c *>::value_type& P)
 {
 	delete P.second;
 }
@@ -527,9 +527,9 @@ static void W_AddFlat(const char *name, Img_c *img)
 {
 	// find any existing one with same name, and free it
 
-	std::string flat_str = name;
+	SString flat_str = name;
 
-	std::map<std::string, Img_c *>::iterator P = flats.find(flat_str);
+	std::map<SString, Img_c *>::iterator P = flats.find(flat_str);
 
 	if (P != flats.end())
 	{
@@ -600,15 +600,15 @@ void W_LoadFlats()
 
 Img_c * W_GetFlat(const char *name, bool try_uppercase)
 {
-	std::string f_str = name;
-	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
+	SString f_str = name;
+	std::map<SString, Img_c *>::iterator P = flats.find(f_str);
 
 	if (P != flats.end())
 		return P->second;
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
+		std::map<SString, Img_c *>::iterator P = textures.find(f_str);
 
 		if (P != textures.end())
 			return P->second;
@@ -632,15 +632,15 @@ bool W_FlatIsKnown(const char *name)
 	if (strlen(name) == 0)
 		return false;
 
-	std::string f_str = name;
-	std::map<std::string, Img_c *>::iterator P = flats.find(f_str);
+	SString f_str = name;
+	std::map<SString, Img_c *>::iterator P = flats.find(f_str);
 
 	if (P != flats.end())
 		return true;
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<std::string, Img_c *>::iterator P = textures.find(f_str);
+		std::map<SString, Img_c *>::iterator P = textures.find(f_str);
 
 		if (P != textures.end())
 			return true;
@@ -681,7 +681,7 @@ Lump_c * Sprite_loc_by_root (const char *name)
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
 
-	std::string buffer;
+	SString buffer;
 	buffer.reserve(16);
 	buffer = name;
 	if(buffer.length() == 4)
@@ -842,13 +842,13 @@ Img_c * W_GetSprite(int type)
 
 //----------------------------------------------------------------------
 
-static void UnloadTex(const std::map<std::string, Img_c *>::value_type& P)
+static void UnloadTex(const std::map<SString, Img_c *>::value_type& P)
 {
 	if (P.second != NULL)
 		P.second->unload_gl(false);
 }
 
-static void UnloadFlat(const std::map<std::string, Img_c *>::value_type& P)
+static void UnloadFlat(const std::map<SString, Img_c *>::value_type& P)
 {
 	if (P.second != NULL)
 		P.second->unload_gl(false);

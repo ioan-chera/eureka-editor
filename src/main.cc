@@ -65,26 +65,26 @@ bool want_quit = false;
 bool app_has_focus = false;
 bool in_fatal_error = false;
 
-std::string config_file;
-std::string log_file;
+SString config_file;
+SString log_file;
 
-std::string install_dir;
-std::string home_dir;
-std::string cache_dir;
+SString install_dir;
+SString home_dir;
+SString cache_dir;
 
 
-std::string Iwad_name;
-std::string Pwad_name;
+SString Iwad_name;
+SString Pwad_name;
 
-std::vector<std::string> Pwad_list;
-std::vector<std::string> Resource_list;
+std::vector<SString> Pwad_list;
+std::vector<SString> Resource_list;
 
-std::string Game_name;
-std::string Port_name;
-std::string Level_name;
+SString Game_name;
+SString Port_name;
+SString Level_name;
 
 map_format_e Level_format;
-std::string  Udmf_namespace;
+SString  Udmf_namespace;
 
 
 //
@@ -94,7 +94,7 @@ bool auto_load_recent = false;
 bool begin_maximized  = false;
 bool map_scroll_bars  = true;
 
-std::string default_port = "vanilla";
+SString default_port = "vanilla";
 
 int gui_scheme    = 1;  // gtk+
 int gui_color_set = 1;  // bright
@@ -348,7 +348,7 @@ static void Determine_InstallPath(const char *argv0)
 	{
 		install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
 
-		std::string filename = StringPrintf("%s/games/doom2.ugh", install_dir.c_str());
+		SString filename = StringPrintf("%s/games/doom2.ugh", install_dir.c_str());
 
 		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
 		DebugPrintf("   looking for file: %s\n", filename.c_str());
@@ -377,7 +377,7 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-std::string GameNameFromIWAD(const char *iwad_name)
+SString GameNameFromIWAD(const char *iwad_name)
 {
 	char game_name[FL_PATH_MAX];
 	StringCopy(game_name, sizeof(game_name), fl_filename_name(iwad_name));
@@ -406,7 +406,7 @@ static bool DetermineIWAD()
 		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
-		std::string path = M_QueryKnownIWAD(Iwad_name.c_str());
+		SString path = M_QueryKnownIWAD(Iwad_name.c_str());
 
 		if (path.empty())
 			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name.c_str());
@@ -422,7 +422,7 @@ static bool DetermineIWAD()
 		if (! Wad_file::Validate(Iwad_name.c_str()))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
 
-		std::string game = GameNameFromIWAD(Iwad_name.c_str());
+		SString game = GameNameFromIWAD(Iwad_name.c_str());
 
 		if (! M_CanLoadDefinitions("games", game.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
@@ -486,7 +486,7 @@ static void DeterminePort()
 }
 
 
-static std::string DetermineLevel()
+static SString DetermineLevel()
 {
 	// most of the logic here is to handle a numeric level number
 	// e.g. -warp 15
@@ -921,7 +921,7 @@ void Main_LoadResources()
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (const std::string &resource : Resource_list)
+	for (const SString &resource : Resource_list)
 	{
 		LoadResourceFile(resource.c_str());
 	}

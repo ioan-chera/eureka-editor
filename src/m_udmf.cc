@@ -41,7 +41,7 @@ class Udmf_Token
 {
 private:
 	// empty means EOF
-	std::string text;
+	SString text;
 
 public:
 	Udmf_Token(const char *str) : text(str)
@@ -90,15 +90,15 @@ public:
 		return atof(text.c_str());
 	}
 
-	std::string DecodeString() const
+	SString DecodeString() const
 	{
 		if (! IsString() || text.size() < 2)
 		{
 			// TODO warning
-			return std::string();
+			return SString();
 		}
 
-		return std::string(text, 1, text.size() - 2);
+		return SString(text, 1, text.size() - 2);
 	}
 
 	fixcoord_t DecodeCoord() const
@@ -910,7 +910,7 @@ void UDMF_SwitchEngine()
 		return;
 
 	// convert to lowercase
-	std::string namespace_l = StringLower(Udmf_namespace.c_str());
+	SString namespace_l = StringLower(Udmf_namespace.c_str());
 
 	// already set?
 	if (y_stricmp(Port_name.c_str(), namespace_l.c_str()) == 0)

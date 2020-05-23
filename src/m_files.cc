@@ -30,7 +30,7 @@
 
 // list of known iwads (mapping GAME name --> PATH)
 
-static std::map<std::string, std::string> known_iwads;
+static std::map<SString, SString> known_iwads;
 
 
 void M_AddKnownIWAD(const char *path)
@@ -38,15 +38,15 @@ void M_AddKnownIWAD(const char *path)
 	char absolute_name[FL_PATH_MAX];
 	fl_filename_absolute(absolute_name, path);
 
-	std::string game = GameNameFromIWAD(path);
+	SString game = GameNameFromIWAD(path);
 
 	known_iwads[game] = absolute_name;
 }
 
 
-std::string M_QueryKnownIWAD(const char *game)
+SString M_QueryKnownIWAD(const char *game)
 {
-	std::map<std::string, std::string>::iterator KI;
+	std::map<SString, SString>::iterator KI;
 
 	KI = known_iwads.find(game);
 
@@ -60,11 +60,11 @@ std::string M_QueryKnownIWAD(const char *game)
 // returns a string, with each name separated by a '|' character,
 // hence directly usable with the FL_Choice::add() method.
 //
-std::string M_CollectGamesForMenu(int *exist_val, const char *exist_name)
+SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 {
-	std::map<std::string, std::string>::iterator KI;
+	std::map<SString, SString>::iterator KI;
 
-	std::string result;
+	SString result;
 	result.reserve(2000);
 
 	int index = 0;
@@ -88,7 +88,7 @@ std::string M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 
 void M_WriteKnownIWADs(FILE *fp)
 {
-	std::map<std::string, std::string>::iterator KI;
+	std::map<SString, SString>::iterator KI;
 
 	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
 	{
@@ -99,7 +99,7 @@ void M_WriteKnownIWADs(FILE *fp)
 
 void M_ValidateGivenFiles()
 {
-	for (const std::string &pwad : Pwad_list)
+	for (const SString &pwad : Pwad_list)
 	{
 		if (! Wad_file::Validate(pwad.c_str()))
 			FatalError("Given pwad does not exist or is invalid: %s\n",
@@ -124,12 +124,12 @@ int M_FindGivenFile(const char *filename)
 
 // the set of all known source port paths
 
-static std::map<std::string, port_path_info_t> port_paths;
+static std::map<SString, port_path_info_t> port_paths;
 
 
 port_path_info_t * M_QueryPortPath(const char *name, bool create_it)
 {
-	std::map<std::string, port_path_info_t>::iterator IT;
+	std::map<SString, port_path_info_t>::iterator IT;
 
 	IT = port_paths.find(name);
 
@@ -195,7 +195,7 @@ void M_ParsePortPath(const char *name, char *line)
 
 void M_WritePortPaths(FILE *fp)
 {
-	std::map<std::string, port_path_info_t>::iterator IT;
+	std::map<SString, port_path_info_t>::iterator IT;
 
 	for (IT = port_paths.begin() ; IT != port_paths.end() ; IT++)
 	{
@@ -241,8 +241,8 @@ private:
 	int size;
 
 	// newest is at index [0]
-	std::string filenames[MAX_RECENT];
-	std::string map_names[MAX_RECENT];
+	SString filenames[MAX_RECENT];
+	SString map_names[MAX_RECENT];
 
 public:
 	RecentFiles_c() : size(0)
@@ -355,7 +355,7 @@ public:
 		}
 	}
 
-	std::string Format(int index) const
+	SString Format(int index) const
 	{
 		SYS_ASSERT(index < size);
 
@@ -365,7 +365,7 @@ public:
 		snprintf(buffer, sizeof(buffer), "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
 				(index < 9) ? "&" : "", 1+index, name);
 
-		return std::string(buffer);
+		return SString(buffer);
 	}
 
 	void Lookup(int index, const char ** file_v, const char ** map_v)
@@ -426,7 +426,7 @@ static void ParseMiscConfig(FILE * fp)
 			if (y_stricmp(map, "freedoom") == 0)
 				LogPrintf("  ignoring for compatibility: %s\n", pos);
 			else if (Wad_file::Validate(pos))
-				known_iwads[map] = std::string(pos);
+				known_iwads[map] = SString(pos);
 			else
 				LogPrintf("  no longer exists: %s\n", pos);
 		}
@@ -503,7 +503,7 @@ int M_RecentCount()
 	return recent_files.getSize();
 }
 
-std::string M_RecentShortName(int index)
+SString M_RecentShortName(int index)
 {
 	return recent_files.Format(index);
 }
@@ -635,7 +635,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 }
 
 
-static std::string SearchDirForIWAD(const char *dir_name, const char *game)
+static SString SearchDirForIWAD(const char *dir_name, const char *game)
 {
 	char name_buf[FL_PATH_MAX];
 
@@ -659,7 +659,7 @@ static std::string SearchDirForIWAD(const char *dir_name, const char *game)
 }
 
 
-static std::string SearchForIWAD(const char *game)
+static SString SearchForIWAD(const char *game)
 {
 	DebugPrintf("Searching for '%s' IWAD\n", game);
 
@@ -670,7 +670,7 @@ static std::string SearchForIWAD(const char *game)
 	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir.c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
-	std::string path = SearchDirForIWAD(dir_name, game);
+	SString path = SearchDirForIWAD(dir_name, game);
 	if (!path.empty())
 		return path;
 
@@ -695,7 +695,7 @@ static std::string SearchForIWAD(const char *game)
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(std::string(doomwaddir).c_str(), game);
+		path = SearchDirForIWAD(SString(doomwaddir).c_str(), game);
 		if (!path.empty())
 			return path;
 	}
@@ -743,15 +743,15 @@ void M_LookForIWADs()
 {
 	LogPrintf("Looking for IWADs....\n");
 
-	std::vector<std::string> game_list = M_CollectKnownDefs("games");
+	std::vector<SString> game_list = M_CollectKnownDefs("games");
 
-	for (const std::string &game : game_list)
+	for (const SString &game : game_list)
 	{
 		// already have it?
 		if (!M_QueryKnownIWAD(game.c_str()).empty())
 			continue;
 
-		std::string path = SearchForIWAD(game.c_str());
+		SString path = SearchForIWAD(game.c_str());
 
 		if (!path.empty())
 		{
@@ -765,7 +765,7 @@ void M_LookForIWADs()
 }
 
 
-std::string M_PickDefaultIWAD()
+SString M_PickDefaultIWAD()
 {
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
@@ -790,7 +790,7 @@ std::string M_PickDefaultIWAD()
 
 	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	std::string result;
+	SString result;
 
 	result = M_QueryKnownIWAD(default_game);
 	if (!result.empty())
@@ -813,7 +813,7 @@ std::string M_PickDefaultIWAD()
 
 	DebugPrintf("pick default iwad, trying first known iwad...\n");
 
-	std::map<std::string, std::string>::iterator KI;
+	std::map<SString, SString>::iterator KI;
 
 	KI = known_iwads.begin();
 
@@ -830,7 +830,7 @@ std::string M_PickDefaultIWAD()
 static void M_AddResource_Unique(const char * filename)
 {
 	// check if base filename (without path) already exists
-	for (const std::string &resource : Resource_list)
+	for (const SString &resource : Resource_list)
 	{
 		const char *A = fl_filename_name(filename);
 		const char *B = fl_filename_name(resource.c_str());
@@ -865,10 +865,10 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	}
 
 
-	std::string new_iwad;
-	std::string new_port;
+	SString new_iwad;
+	SString new_port;
 
-	std::vector<std::string> new_resources;
+	std::vector<SString> new_resources;
 
 
 	static char line[FL_PATH_MAX];
@@ -919,7 +919,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (strcmp(line, "resource") == 0)
 		{
-			std::string res = pos;
+			SString res = pos;
 
 			// if not found at absolute location, try same place as PWAD
 
@@ -987,7 +987,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	if (! keep_cmd_line_args)
 		Resource_list.clear();
 
-	for (const std::string &resource : new_resources)
+	for (const SString &resource : new_resources)
 	{
 		M_AddResource_Unique(resource.c_str());
 	}
@@ -1016,7 +1016,7 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (!Port_name.empty())
 		lump->Printf("port %s\n", Port_name.c_str());
 
-	for (const std::string &resource : Resource_list)
+	for (const SString &resource : Resource_list)
 	{
 		char absolute_name[FL_PATH_MAX];
 		fl_filename_absolute(absolute_name, resource.c_str());
@@ -1110,7 +1110,7 @@ void M_BackupWad(Wad_file *wad)
 
 	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir.c_str(), fl_filename_name(wad->PathName()));
 
-	std::string dir_name = ReplaceExtension(filename, NULL);
+	SString dir_name = ReplaceExtension(filename, NULL);
 
 	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
 

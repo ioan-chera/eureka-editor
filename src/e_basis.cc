@@ -60,9 +60,9 @@ int default_ceil_h		= 128;
 int default_light_level	= 176;
 int default_thing		= 2001;
 
-std::string default_wall_tex	= "GRAY1";
-std::string default_floor_tex	= "FLAT1";
-std::string default_ceil_tex	= "FLAT1";
+SString default_wall_tex	= "GRAY1";
+SString default_floor_tex	= "FLAT1";
+SString default_ceil_tex	= "FLAT1";
 
 
 static bool did_make_changes;
@@ -139,7 +139,7 @@ int BA_InternaliseString(const char *str)
 
 int BA_InternaliseShortStr(const char *str, int max_len)
 {
-	std::string goodie(str, max_len);
+	SString goodie(str, max_len);
 
 	int result = BA_InternaliseString(goodie.c_str());
 
@@ -742,7 +742,7 @@ private:
 
 	int dir = +1;
 
-	std::string message = "[something]";
+	SString message = "[something]";
 
 public:
 	~undo_group_c()

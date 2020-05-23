@@ -79,7 +79,7 @@ private:
 class UI_StatusBar : public Fl_Widget
 {
 private:
-	std::string status;
+	SString status;
 
 public:
 	UI_StatusBar(int X, int Y, int W, int H, const char *label = NULL);

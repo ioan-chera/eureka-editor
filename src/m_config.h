@@ -31,7 +31,7 @@
 
 /* ==== CONFIG VARIABLES ==================== */
 
-extern std::string default_port;
+extern SString default_port;
 extern int default_edit_mode;
 
 extern bool auto_load_recent;
@@ -176,7 +176,7 @@ enum ParseOptions
 };
 
 // returns number of tokens, zero for comment, negative on error
-int M_ParseLine(const char *line, std::vector<std::string> &tokens, ParseOptions options);
+int M_ParseLine(const char *line, std::vector<SString> &tokens, ParseOptions options);
 
 // user state persistence (stuff like camera pos, grid settings, ...)
 bool M_LoadUserState();

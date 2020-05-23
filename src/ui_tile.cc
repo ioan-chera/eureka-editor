@@ -153,7 +153,7 @@ void UI_Tile::MaximiseRight()
 }
 
 
-bool UI_Tile::ParseUser(const std::vector<std::string> &tokens)
+bool UI_Tile::ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "br_width" && tokens.size() >= 2)
 	{

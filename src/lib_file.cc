@@ -110,13 +110,13 @@ bool MatchExtension(const char *filename, const char *ext)
 //
 // Returned string is a COPY.
 //
-std::string ReplaceExtension(const char *filename, const char *ext)
+SString ReplaceExtension(const char *filename, const char *ext)
 {
 	SYS_ASSERT(filename[0] != 0);
 
 	size_t total_len = strlen(filename) + (ext ? strlen(ext) : 0);
 
-	std::string buffer;
+	SString buffer;
 	buffer.reserve(total_len + 10);
 	buffer = filename;
 
@@ -127,16 +127,16 @@ std::string ReplaceExtension(const char *filename, const char *ext)
 	dot_pos = buffer.find_last_of("./");
 #endif
 
-	if(dot_pos != std::string::npos && buffer[dot_pos] != '.')
-		dot_pos = std::string::npos;
+	if(dot_pos != SString::npos && buffer[(int)dot_pos] != '.')
+		dot_pos = SString::npos;
 	if (! ext)
 	{
-		if(dot_pos != std::string::npos)
+		if(dot_pos != SString::npos)
 			buffer.erase(dot_pos);
 		return buffer;
 	}
 
-	if (dot_pos != std::string::npos && dot_pos != buffer.length() - 1)
+	if (dot_pos != SString::npos && dot_pos != buffer.length() - 1)
 		buffer.erase(dot_pos + 1);
 	else
 		buffer += '.';
@@ -211,7 +211,7 @@ void FilenameStripBase(char *buffer)
 // takes the basename in 'filename' and prepends the path from 'othername'.
 // returns a newly allocated string.
 //
-std::string FilenameReposition(const char *filename, const char *othername)
+SString FilenameReposition(const char *filename, const char *othername)
 {
 	filename = fl_filename_name(filename);
 
@@ -223,7 +223,7 @@ std::string FilenameReposition(const char *filename, const char *othername)
 	size_t dir_len = op - othername;
 	size_t len = strlen(filename) + dir_len;
 
-	std::string result;
+	SString result;
 	result.reserve(len + 10);
 	result.assign(othername, dir_len);
 	result += filename;
@@ -507,7 +507,7 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 				strcmp(fdata->d_name, "..") == 0)
 			continue;
 
-		std::string full_name = StringPrintf("%s/%s", path, fdata->d_name);
+		SString full_name = StringPrintf("%s/%s", path, fdata->d_name);
 
 		struct stat finfo;
 
@@ -550,9 +550,9 @@ int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
 
 //------------------------------------------------------------------------
 
-std::string GetExecutablePath(const char *argv0)
+SString GetExecutablePath(const char *argv0)
 {
-	std::string path;
+	SString path;
 
 #ifdef WIN32
 	char rawpath[PATH_MAX+2];

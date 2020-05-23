@@ -160,7 +160,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 }
 
 
-std::string UI_ChooseMap::Run()
+SString UI_ChooseMap::Run()
 {
 	set_modal();
 
@@ -327,7 +327,7 @@ UI_OpenMap::~UI_OpenMap()
 { }
 
 
-Wad_file * UI_OpenMap::Run(std::string* map_v, bool * did_load)
+Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 {
 	map_v->clear();
 	*did_load = false;
@@ -475,14 +475,14 @@ void UI_OpenMap::PopulateButtons()
 
 	button_grp->label("");
 
-	std::map<std::string, int> level_names;
-	std::map<std::string, int>::iterator IT;
+	std::map<SString, int> level_names;
+	std::map<SString, int>::iterator IT;
 
 	for (int lev = 0 ; lev < num_levels ; lev++)
 	{
 		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
-		level_names[std::string(lump->Name())] = 1;
+		level_names[SString(lump->Name())] = 1;
 	}
 
 	int cx_base = button_grp->x() + 25;
@@ -827,7 +827,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	// the user has found a new iwad.  For the latter case, we want
 	// to show the newly found game.
 
-	std::string prev_game = game;
+	SString prev_game = game;
 
 	if (prev_game.empty())
 		prev_game = Game_name;
@@ -839,7 +839,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	game_choice->clear();
 
 
-	std::string menu_string;
+	SString menu_string;
 	int menu_value = 0;
 
 	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str());
@@ -861,7 +861,7 @@ void UI_ProjectSetup::PopulateIWADs()
 
 void UI_ProjectSetup::PopulatePort()
 {
-	std::string prev_port;
+	SString prev_port;
 
 	if (port_choice->mvalue())
 		prev_port = port_choice->mvalue()->text;
@@ -894,7 +894,7 @@ void UI_ProjectSetup::PopulatePort()
 
 	int menu_value = 0;
 
-	std::string menu_string = M_CollectPortsForMenu(base_game, &menu_value, prev_port.c_str());
+	SString menu_string = M_CollectPortsForMenu(base_game, &menu_value, prev_port.c_str());
 
 	if (!menu_string.empty())
 	{
@@ -1159,7 +1159,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	std::string game = GameNameFromIWAD(chooser.filename());
+	SString game = GameNameFromIWAD(chooser.filename());
 
 	if (! M_CanLoadDefinitions("games", game.c_str()))
 	{

@@ -127,25 +127,25 @@ extern bool want_quit;
 extern bool app_has_focus;
 extern bool in_fatal_error;
 
-extern std::string install_dir;  // install dir (e.g. /usr/share/eureka)
-extern std::string home_dir;     // home dir (e.g. $HOME/.eureka)
-extern std::string cache_dir;    // for caches and backups, can be same as home_dir
+extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
+extern SString home_dir;     // home dir (e.g. $HOME/.eureka)
+extern SString cache_dir;    // for caches and backups, can be same as home_dir
 
-extern std::string Game_name;   // Name of game "doom", "doom2", "heretic", ...
-extern std::string Port_name;   // Name of source port "vanilla", "boom", ...
-extern std::string Level_name;  // Name of map lump we are editing
+extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
+extern SString Port_name;   // Name of source port "vanilla", "boom", ...
+extern SString Level_name;  // Name of map lump we are editing
 
 extern map_format_e Level_format;   // format of current map
-extern std::string  Udmf_namespace; // for UDMF, the current namespace
+extern SString  Udmf_namespace; // for UDMF, the current namespace
 
-extern std::string config_file; // Name of the configuration file, or NULL
-extern std::string log_file;    // Name of log file, or NULL
+extern SString config_file; // Name of the configuration file, or NULL
+extern SString log_file;    // Name of log file, or NULL
 
-extern std::string Iwad_name;   // Filename of the iwad
-extern std::string Pwad_name;   // Filename of current wad, or NULL
+extern SString Iwad_name;   // Filename of the iwad
+extern SString Pwad_name;   // Filename of current wad, or NULL
 
-extern std::vector<std::string> Pwad_list;
-extern std::vector<std::string> Resource_list;
+extern std::vector<SString> Pwad_list;
+extern std::vector<SString> Resource_list;
 
 
 extern int	default_floor_h;
@@ -153,9 +153,9 @@ extern int	default_ceil_h;
 extern int	default_light_level;
 extern int	default_thing;
 
-extern std::string default_wall_tex;
-extern std::string default_floor_tex;
-extern std::string default_ceil_tex;
+extern SString default_wall_tex;
+extern SString default_floor_tex;
+extern SString default_ceil_tex;
 
 
 extern int   show_help;		// Print usage message and exit.
@@ -186,7 +186,7 @@ void DLG_ShowError(const char *msg, ...);
 void DLG_Notify(const char *msg, ...);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
-std::string GameNameFromIWAD(const char *iwad_name);
+SString GameNameFromIWAD(const char *iwad_name);
 
 const char * Main_FileOpFolder();
 

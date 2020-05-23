@@ -163,7 +163,7 @@ void UtilFree(void *data);
 
 // return an allocated string for the current data and time,
 // or NULL if an error occurred.
-std::string UtilTimeString(void);
+SString UtilTimeString(void);
 
 // compute angle of line from (0,0) to (dx,dy)
 angle_g UtilComputeAngle(double dx, double dy);

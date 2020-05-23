@@ -485,7 +485,7 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
 }
 
 
-static void ParseKeyBinding(const std::vector<std::string> &tokens)
+static void ParseKeyBinding(const std::vector<SString> &tokens)
 {
 	// this ensures all parameters are NUL terminated
 	key_binding_t temp = {};
@@ -569,7 +569,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 	static char line_buf[FL_PATH_MAX];
 
-	std::vector<std::string> tokens;
+	std::vector<SString> tokens;
 
 	while (! feof(fp))
 	{
@@ -865,9 +865,9 @@ void M_DetectConflictingBinds()
 }
 
 
-std::string M_StringForFunc(int index)
+SString M_StringForFunc(int index)
 {
-	std::string buffer;
+	SString buffer;
 	buffer.reserve(2048);
 
 	SYS_ASSERT(index >= 0 && index < pref_binds.size());
@@ -962,7 +962,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 		if (buffer[k] == ',' || buffer[k] == ':')
 			buffer[k] = ' ';
 
-	std::vector<std::string> tokens;
+	std::vector<SString> tokens;
 
 	int num_tok = M_ParseLine(buffer, tokens, ParseOptions_haveStringsKeepQuotes);
 
@@ -982,7 +982,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	if (cmd->req_context != KCTX_NONE &&
 	    bind.context != cmd->req_context)
 	{
-		std::string mode = StringUpper(M_KeyContextString(cmd->req_context));
+		SString mode = StringUpper(M_KeyContextString(cmd->req_context));
 
 		snprintf(error_msg, sizeof(error_msg), "%s can only be used in %s mode",
 				 tokens[0].c_str(), mode.c_str());

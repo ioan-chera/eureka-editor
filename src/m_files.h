@@ -32,15 +32,15 @@ bool M_TryOpenMostRecent();
 
 // these three only for menu code
 int M_RecentCount();
-std::string M_RecentShortName(int index);
+SString M_RecentShortName(int index);
 void * M_RecentData(int index);
 
 
 void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
-std::string M_QueryKnownIWAD(const char *game);
-std::string M_CollectGamesForMenu(int *exist_val, const char *exist_name);
-std::string M_PickDefaultIWAD();
+SString M_QueryKnownIWAD(const char *game);
+SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
+SString M_PickDefaultIWAD();
 
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const char *filename);
