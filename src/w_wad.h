@@ -29,6 +29,18 @@
 
 class Wad_file;
 
+//
+// Wad namespace
+//
+enum WadNamespace
+{
+	WadNamespace_Global,
+	WadNamespace_Flats,
+	WadNamespace_Sprites,
+	WadNamespace_TextureLumps
+};
+
+const char *WadNamespaceString(WadNamespace ns);
 
 class Lump_c
 {
@@ -186,7 +198,7 @@ public:
 	Lump_c * FindLump(const char *name);
 	int FindLumpNum(const char *name);
 
-	Lump_c * FindLumpInNamespace(const char *name, char group);
+	Lump_c * FindLumpInNamespace(const char *name, WadNamespace group);
 
 	int LevelCount() const
 	{

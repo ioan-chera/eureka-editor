@@ -44,6 +44,26 @@ bool udmf_testing = false;
 
 #define MAX_LUMPS_IN_A_LEVEL	21
 
+//
+// Wad namespace string
+//
+const char *WadNamespaceString(WadNamespace ns)
+{
+	switch(ns)
+	{
+		case WadNamespace_Flats:
+			return "F";
+		case WadNamespace_Global:
+			return "(global)";
+		case WadNamespace_Sprites:
+			return "S";
+		case WadNamespace_TextureLumps:
+			return "TX";
+		default:
+			return "(invalid)";
+	}
+}
+
 
 //------------------------------------------------------------------------
 //  LUMP Handling
@@ -511,29 +531,29 @@ map_format_e Wad_file::LevelFormat(int lev_num)
 }
 
 
-Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
+Lump_c * Wad_file::FindLumpInNamespace(const char *name, WadNamespace group)
 {
 	int k;
 
 	switch (group)
 	{
-		case 'S':
+		case WadNamespace_Sprites:
 			for (k = 0 ; k < (int)sprites.size() ; k++)
 				if (directory[sprites[k]]->name.noCaseEqual(name))
 					return directory[sprites[k]];
 			break;
 
-		case 'F':
+		case WadNamespace_Flats:
 			for (k = 0 ; k < flats.size() ; k++)
 				if (directory[flats[k]]->name.noCaseEqual(name))
 					return directory[flats[k]];
 			break;
 
 		default:
-			BugError("FindLumpInNamespace: bad group '%c'\n", group);
+			BugError("FindLumpInNamespace: bad group '%s'\n", WadNamespaceString(group));
 	}
 
-	return NULL; // not found!
+	return nullptr; // not found!
 }
 
 
@@ -672,21 +692,21 @@ void Wad_file::SortLevels()
 }
 
 
-static bool IsDummyMarker(const char *name)
+static bool IsDummyMarker(const SString &name)
 {
 	// matches P1_START, F3_END etc...
 
-	if (strlen(name) < 3)
+	if (name.length() < 3)
 		return false;
 
-	if (! strchr("PSF", toupper(name[0])))
+	if (! strchr("SF", toupper(name[0])))
 		return false;
 
 	if (! isdigit(name[1]))
 		return false;
 
-	if (y_stricmp(name+2, "_START") == 0 ||
-	    y_stricmp(name+2, "_END") == 0)
+	if (y_stricmp(name.c_str()+2, "_START") == 0 ||
+		y_stricmp(name.c_str()+2, "_END") == 0)
 		return true;
 
 	return false;
@@ -695,81 +715,64 @@ static bool IsDummyMarker(const char *name)
 
 void Wad_file::ProcessNamespaces()
 {
-	char active = 0;
+	WadNamespace active = WadNamespace_Global;
 
 	for (int k = 0 ; k < NumLumps() ; k++)
 	{
-		const char *name = directory[k]->name.c_str();
+		const SString &name = directory[k]->name;
 
 		// skip the sub-namespace markers
 		if (IsDummyMarker(name))
 			continue;
 
-		if (y_stricmp(name, "P_START") == 0 || y_stricmp(name, "PP_START") == 0)
+		if (name.noCaseEqual("S_START") || name.noCaseEqual("SS_START"))
 		{
-			if (active && active != 'P')
-				LogPrintf("WARNING: missing %c_END marker.\n", active);
+			if (active && active != WadNamespace_Sprites)
+				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
-			active = 'P';
+			active = WadNamespace_Sprites;
 			continue;
 		}
-		else if (y_stricmp(name, "P_END") == 0 || y_stricmp(name, "PP_END") == 0)
+		else if (name.noCaseEqual("S_END") || name.noCaseEqual("SS_END"))
 		{
-			if (active != 'P')
-				LogPrintf("WARNING: stray P_END marker found.\n");
-
-			active = 0;
-			continue;
-		}
-
-		if (y_stricmp(name, "S_START") == 0 || y_stricmp(name, "SS_START") == 0)
-		{
-			if (active && active != 'S')
-				LogPrintf("WARNING: missing %c_END marker.\n", active);
-
-			active = 'S';
-			continue;
-		}
-		else if (y_stricmp(name, "S_END") == 0 || y_stricmp(name, "SS_END") == 0)
-		{
-			if (active != 'S')
+			if (active != WadNamespace_Sprites)
 				LogPrintf("WARNING: stray S_END marker found.\n");
 
-			active = 0;
+			active = WadNamespace_Global;
 			continue;
 		}
 
-		if (y_stricmp(name, "F_START") == 0 || y_stricmp(name, "FF_START") == 0)
+		if (name.noCaseEqual("F_START") || name.noCaseEqual("FF_START"))
 		{
-			if (active && active != 'F')
-				LogPrintf("WARNING: missing %c_END marker.\n", active);
+			if (active && active != WadNamespace_Flats)
+				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
-			active = 'F';
+			active = WadNamespace_Flats;
 			continue;
 		}
-		else if (y_stricmp(name, "F_END") == 0 || y_stricmp(name, "FF_END") == 0)
+		else if (name.noCaseEqual("F_END") || name.noCaseEqual("FF_END"))
 		{
-			if (active != 'F')
+			if (active != WadNamespace_Flats)
 				LogPrintf("WARNING: stray F_END marker found.\n");
 
-			active = 0;
+			active = WadNamespace_Global;
 			continue;
 		}
 
-		if (y_stricmp(name, "TX_START") == 0)
+		if (name.noCaseEqual("TX_START"))
 		{
-			if (active && active != 'T')
-				LogPrintf("WARNING: missing %c_END marker.\n", active);
+			if (active && active != WadNamespace_TextureLumps)
+				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
-			active = 'T';
+			active = WadNamespace_TextureLumps;
 			continue;
 		}
-		else if (y_stricmp(name, "TX_END") == 0)
+		else if (name.noCaseEqual("TX_END"))
 		{
-			if (active != 'T')
+			if (active != WadNamespace_TextureLumps)
 				LogPrintf("WARNING: stray TX_END marker found.\n");
 
-			active = 0;
+			active = WadNamespace_Global;
 			continue;
 		}
 
@@ -777,8 +780,8 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (directory[k]->Length() == 0)
 			{
-				LogPrintf("WARNING: skipping empty lump %s in %c_START\n",
-						  name, active);
+				LogPrintf("WARNING: skipping empty lump %s in %s_START\n",
+						  name.c_str(), WadNamespaceString(active));
 				continue;
 			}
 
@@ -786,9 +789,15 @@ void Wad_file::ProcessNamespaces()
 
 			switch (active)
 			{
-				case 'S': sprites.push_back(k); break;
-				case 'F': flats.  push_back(k); break;
-				case 'T': tx_tex. push_back(k); break;
+				case WadNamespace_Sprites:
+					sprites.push_back(k);
+					break;
+				case WadNamespace_Flats:
+					flats.push_back(k);
+					break;
+				case WadNamespace_TextureLumps:
+					tx_tex.push_back(k);
+					break;
 
 				default:
 					BugError("ProcessNamespaces: active = 0x%02x\n", (int)active);
@@ -797,7 +806,7 @@ void Wad_file::ProcessNamespaces()
 	}
 
 	if (active)
-		LogPrintf("WARNING: Missing %c_END marker (at EOF)\n", active);
+		LogPrintf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
 }
 
 
@@ -1326,7 +1335,7 @@ Lump_c * W_FindSpriteLump(const SString &name)
 {
 	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name.c_str(), 'S');
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name.c_str(), WadNamespace_Sprites);
 		if (L)
 			return L;
 	}
