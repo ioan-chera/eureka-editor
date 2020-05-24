@@ -163,7 +163,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = W_FindLump(picname);
+		Lump_c *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -239,7 +239,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		picname[8] = 0;
 
 //DebugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = W_FindLump(picname);
+		Lump_c *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -370,9 +370,9 @@ void W_LoadTextures()
 	{
 		LogPrintf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = master_dir[i]->FindLump("PNAMES");
-		Lump_c *texture1 = master_dir[i]->FindLump("TEXTURE1");
-		Lump_c *texture2 = master_dir[i]->FindLump("TEXTURE2");
+		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace_Global);
+		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace_Global);
+		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace_Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -717,13 +717,13 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = W_FindLump(buffer.c_str());
+		lump = W_FindGlobalLump(buffer.c_str());
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = W_FindLump(buffer.c_str());
+			lump = W_FindGlobalLump(buffer.c_str());
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -737,7 +737,7 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = W_FindLump(name.c_str());
+		lump = W_FindGlobalLump(name.c_str());
 	}
 
 	return lump;

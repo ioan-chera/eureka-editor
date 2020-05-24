@@ -540,6 +540,25 @@ Lump_c * Wad_file::FindLumpInNamespace(const char *name, WadNamespace group)
 					return directory[flats[k]];
 			break;
 
+		case WadNamespace_Global:
+			for (auto it = directory.rbegin(); it != directory.rend(); ++it)
+			{
+				if ((*it)->name.noCaseEqual(name))
+				{
+					const std::vector<int> *groups[] = { &sprites, &flats, &tx_tex };
+
+					// Look if in a namespace. Then skip if so
+					for(auto group : groups)
+						for(int index : *group)
+							if(directory[index] == *it)
+								goto nextDir;
+					return *it;
+				}
+			nextDir:
+				;
+			}
+			break;
+
 		default:
 			BugError("FindLumpInNamespace: bad group '%s'\n", WadNamespaceString(group));
 	}
@@ -1309,11 +1328,11 @@ bool Wad_file::Backup(const char *new_filename)
 //------------------------------------------------------------------------
 
 
-Lump_c * W_FindLump(const char *name)
+Lump_c * W_FindGlobalLump(const char *name)
 {
 	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLump(name);
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace_Global);
 		if (L)
 			return L;
 	}

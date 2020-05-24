@@ -85,7 +85,7 @@ void W_UpdateGamma()
 
 void W_LoadPalette()
 {
-	Lump_c *lump = W_FindLump("PLAYPAL");
+	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
 
 	if (! lump)
 	{
@@ -117,7 +117,7 @@ void W_LoadPalette()
 
 void W_LoadColormap()
 {
-	Lump_c *lump = W_FindLump("COLORMAP");
+	Lump_c *lump = W_FindGlobalLump("COLORMAP");
 
 	if (! lump)
 	{

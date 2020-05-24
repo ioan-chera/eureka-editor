@@ -365,7 +365,7 @@ extern std::vector<Wad_file *> master_dir;
 
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
-Lump_c * W_FindLump(const char *name);
+Lump_c * W_FindGlobalLump(const char *name);
 
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
