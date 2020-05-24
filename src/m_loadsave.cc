@@ -298,7 +298,7 @@ void CMD_NewProject()
 	LogPrintf("Creating New File : %s in %s\n", map_name, filename);
 
 
-	Wad_file * wad = Wad_file::Open(filename, 'w');
+	Wad_file * wad = Wad_file::Open(filename, WadOpenMode_write);
 
 	if (! wad)
 	{
@@ -1079,7 +1079,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
 	{
-		wad = Wad_file::Open(filename, 'a');
+		wad = Wad_file::Open(filename, WadOpenMode_append);
 	}
 
 	if (! wad)
@@ -1791,7 +1791,7 @@ bool M_ExportMap()
 
 	if (exists)
 	{
-		wad = Wad_file::Open(filename, 'a');
+		wad = Wad_file::Open(filename, WadOpenMode_append);
 
 		if (wad && wad->IsReadOnly())
 		{
@@ -1813,7 +1813,7 @@ bool M_ExportMap()
 	}
 	else
 	{
-		wad = Wad_file::Open(filename, 'w');
+		wad = Wad_file::Open(filename, WadOpenMode_write);
 	}
 
 	if (! wad)

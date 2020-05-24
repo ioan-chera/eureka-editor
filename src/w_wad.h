@@ -40,6 +40,13 @@ enum WadNamespace
 	WadNamespace_TextureLumps
 };
 
+enum WadOpenMode
+{
+	WadOpenMode_read,
+	WadOpenMode_write,
+	WadOpenMode_append
+};
+
 const char *WadNamespaceString(WadNamespace ns);
 
 class Lump_c
@@ -122,7 +129,7 @@ friend void W_LoadTextures_TX_START(Wad_file *wf);
 private:
 	SString filename;
 
-	char mode;  // mode value passed to ::Open()
+	WadOpenMode mode;  // mode value passed to ::Open()
 
 	FILE * fp;
 
@@ -152,7 +159,7 @@ private:
 	int insert_point;
 
 	// constructor is private
-	Wad_file(const char *_name, char _mode, FILE * _fp);
+	Wad_file(const char *_name, WadOpenMode _mode, FILE * _fp);
 
 public:
 	~Wad_file();
@@ -167,7 +174,7 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static Wad_file * Open(const char *filename, char mode = 'a');
+	static Wad_file * Open(const char *filename, WadOpenMode mode = WadOpenMode_append);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const char *filename);
@@ -178,7 +185,7 @@ public:
 	}
 	bool IsReadOnly() const
 	{
-		return mode == 'r';
+		return mode == WadOpenMode_read;
 	}
 	bool IsIWAD() const
 	{
@@ -276,7 +283,7 @@ public:
 	void InsertPoint(int index = -1);
 
 private:
-	static Wad_file * Create(const char *filename, char mode);
+	static Wad_file * Create(const char *filename, WadOpenMode mode);
 
 	// read the existing directory.
 	bool ReadDirectory();

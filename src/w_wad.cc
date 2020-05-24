@@ -201,7 +201,7 @@ bool Lump_c::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
+Wad_file::Wad_file(const char *_name, WadOpenMode _mode, FILE * _fp) :
 	mode(_mode), fp(_fp), kind('P'),
 	total_size(0),
 	dir_start(0), dir_count(0), dir_crc(0),
@@ -224,11 +224,11 @@ Wad_file::~Wad_file()
 }
 
 
-Wad_file * Wad_file::Open(const char *filename, char mode)
+Wad_file * Wad_file::Open(const char *filename, WadOpenMode mode)
 {
-	SYS_ASSERT(mode == 'r' || mode == 'w' || mode == 'a');
+	SYS_ASSERT(mode == WadOpenMode_read || mode == WadOpenMode_write || mode == WadOpenMode_append);
 
-	if (mode == 'w')
+	if (mode == WadOpenMode_write)
 		return Create(filename, mode);
 
 	LogPrintf("Opening WAD file: %s\n", filename);
@@ -236,19 +236,19 @@ Wad_file * Wad_file::Open(const char *filename, char mode)
 	FILE *fp = NULL;
 
 retry:
-	fp = fopen(filename, (mode == 'r' ? "rb" : "r+b"));
+	fp = fopen(filename, (mode == WadOpenMode_read ? "rb" : "r+b"));
 
 	if (! fp)
 	{
 		// mimic the fopen() semantics
-		if (mode == 'a' && errno == ENOENT)
+		if (mode == WadOpenMode_append && errno == ENOENT)
 			return Create(filename, mode);
 
 		// if file is read-only, open in 'r' mode instead
-		if (mode == 'a' && (errno == EACCES || errno == EROFS))
+		if (mode == WadOpenMode_append && (errno == EACCES || errno == EROFS))
 		{
 			LogPrintf("Open r/w failed, trying again in read mode...\n");
-			mode = 'r';
+			mode = WadOpenMode_read;
 			goto retry;
 		}
 
@@ -284,7 +284,7 @@ retry:
 }
 
 
-Wad_file * Wad_file::Create(const char *filename, char mode)
+Wad_file * Wad_file::Create(const char *filename, WadOpenMode mode)
 {
 	LogPrintf("Creating new WAD file: %s\n", filename);
 
@@ -856,7 +856,7 @@ bool Wad_file::WasExternallyModified()
 
 void Wad_file::BeginWrite()
 {
-	if (mode == 'r')
+	if (mode == WadOpenMode_read)
 		BugError("Wad_file::BeginWrite() called on read-only file\n");
 
 	if (begun_write)

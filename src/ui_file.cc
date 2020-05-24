@@ -624,7 +624,7 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	Wad_file * wad = Wad_file::Open(chooser.filename(), 'a');
+	Wad_file * wad = Wad_file::Open(chooser.filename(), WadOpenMode_append);
 
 	if (! wad)
 	{
