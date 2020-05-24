@@ -201,15 +201,6 @@ bool Lump_c::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-Wad_file::Wad_file(const char *_name, WadOpenMode _mode, FILE * _fp) :
-	mode(_mode), fp(_fp), kind('P'),
-	total_size(0),
-	dir_start(0), dir_count(0), dir_crc(0),
-	begun_write(false), insert_point(-1)
-{
-	filename = _name;
-}
-
 Wad_file::~Wad_file()
 {
 	LogPrintf("Closing WAD file: %s\n", filename.c_str());
@@ -261,14 +252,14 @@ retry:
 
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
-		FatalError("Error determining WAD size.\n");
+		ThrowException("Error determining WAD size.\n");
 
 	w->total_size = (int)ftell(fp);
 
 	DebugPrintf("total_size = %d\n", w->total_size);
 
 	if (w->total_size < 0)
-		FatalError("Error determining WAD size.\n");
+		ThrowException("Error determining WAD size.\n");
 
 	if (! w->ReadDirectory())
 	{
@@ -569,14 +560,14 @@ bool Wad_file::ReadDirectory()
 		return false;
 	}
 
-	kind = header.ident[0];
+	kind = header.ident[0] == 'I' ? WadKind_IWAD : WadKind_PWAD;
 
 	dir_start = LE_S32(header.dir_start);
 	dir_count = LE_S32(header.num_entries);
 
-	if (dir_count < 0 || dir_count > 32000)
+	if (dir_count < 0)
 	{
-		LogPrintf("Bad WAD header, too many entries (%d)\n", dir_count);
+		LogPrintf("Bad WAD header, invalid number of entries (%d)\n", dir_count);
 		return false;
 	}
 
@@ -1273,7 +1264,7 @@ void Wad_file::WriteDirectory()
 		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
 
 		if (fwrite(&entry, sizeof(entry), 1, fp) != 1)
-			FatalError("Error writing WAD directory.\n");
+			ThrowException("Error writing WAD directory.\n");
 	}
 
 	dir_crc = checksum.raw;
@@ -1285,7 +1276,7 @@ void Wad_file::WriteDirectory()
 	DebugPrintf("total_size: %d\n", total_size);
 
 	if (total_size < 0)
-		FatalError("Error determining WAD size.\n");
+		ThrowException("Error determining WAD size.\n");
 
 	// update header at start of file
 
@@ -1293,13 +1284,13 @@ void Wad_file::WriteDirectory()
 
 	raw_wad_header_t header;
 
-	memcpy(header.ident, (kind == 'I') ? "IWAD" : "PWAD", 4);
+	memcpy(header.ident, (kind == WadKind_IWAD) ? "IWAD" : "PWAD", 4);
 
 	header.dir_start   = LE_U32(dir_start);
 	header.num_entries = LE_U32(dir_count);
 
 	if (fwrite(&header, sizeof(header), 1, fp) != 1)
-		FatalError("Error writing WAD header.\n");
+		ThrowException("Error writing WAD header.\n");
 
 	fflush(fp);
 }

@@ -47,6 +47,12 @@ enum WadOpenMode
 	WadOpenMode_append
 };
 
+enum WadKind
+{
+	WadKind_PWAD,
+	WadKind_IWAD
+};
+
 const char *WadNamespaceString(WadNamespace ns);
 
 class Lump_c
@@ -133,18 +139,18 @@ private:
 
 	FILE * fp;
 
-	char kind;  // 'P' for PWAD, 'I' for IWAD
+	WadKind kind = WadKind_PWAD;  // 'P' for PWAD, 'I' for IWAD
 
 	// zero means "currently unknown", which only occurs after a
 	// call to BeginWrite() and before any call to AddLump() or
 	// the finalizing EndWrite().
-	int total_size;
+	int total_size = 0;
 
 	std::vector<Lump_c *> directory;
 
-	int dir_start;
-	int dir_count;
-	u32_t dir_crc;
+	int dir_start = 0;
+	int dir_count = 0;
+	u32_t dir_crc = 0;
 
 	// these are lump indices (into 'directory' vector)
 	std::vector<int> levels;
@@ -152,14 +158,17 @@ private:
 	std::vector<int> flats;
 	std::vector<int> tx_tex;
 
-	bool begun_write;
+	bool begun_write = false;
 	int  begun_max_size;
 
 	// when >= 0, the next added lump is placed _before_ this
-	int insert_point;
+	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const char *_name, WadOpenMode _mode, FILE * _fp);
+	Wad_file(const char *_name, WadOpenMode _mode, FILE * _fp) :
+	   filename(_name), mode(_mode), fp(_fp)
+	{
+	}
 
 public:
 	~Wad_file();
@@ -189,7 +198,7 @@ public:
 	}
 	bool IsIWAD() const
 	{
-		return kind == 'I';
+		return kind == WadKind_IWAD;
 	}
 
 	int TotalSize() const
