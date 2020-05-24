@@ -311,15 +311,15 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 
 void W_LoadTextures_TX_START(Wad_file *wf)
 {
-	for (int k = 0 ; k < (int)wf->tx_tex.size() ; k++)
+	for(const LumpRef &lumpRef : wf->directory)
 	{
-		Lump_c *lump = wf->GetLump(wf->tx_tex[k]);
+		if(lumpRef.ns != WadNamespace_TextureLumps)
+			continue;
+		Lump_c *lump = lumpRef.lump;
 
 		char img_fmt = W_DetectImageFormat(lump);
 		const char *name = lump->Name();
 		Img_c *img = NULL;
-
-		DebugPrintf("TX_TEX %d : '%s' type=%c\n", k, name, img_fmt ? img_fmt : '?');
 
 		switch (img_fmt)
 		{
@@ -581,13 +581,13 @@ void W_LoadFlats()
 	{
 		LogPrintf("Loading Flats from WAD #%d\n", i+1);
 
-		Wad_file *wf = master_dir[i];
+		const Wad_file *wf = master_dir[i];
 
-		for (int k = 0 ; k < (int)wf->flats.size() ; k++)
+		for(const LumpRef &lumpRef : wf->directory)
 		{
-			Lump_c *lump = wf->GetLump(wf->flats[k]);
-
-			DebugPrintf("  Flat %d : '%s'\n", k, lump->Name());
+			if(lumpRef.ns != WadNamespace_Flats)
+				continue;
+			Lump_c *lump = lumpRef.lump;
 
 			Img_c * img = LoadFlatImage(lump->Name(), lump);
 

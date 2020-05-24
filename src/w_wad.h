@@ -125,6 +125,12 @@ private:
 
 //------------------------------------------------------------------------
 
+struct LumpRef
+{
+	Lump_c *lump;
+	WadNamespace ns;
+};
+
 
 class Wad_file
 {
@@ -146,7 +152,7 @@ private:
 	// the finalizing EndWrite().
 	int total_size = 0;
 
-	std::vector<Lump_c *> directory;
+	std::vector<LumpRef> directory;
 
 	int dir_start = 0;
 	int dir_count = 0;
@@ -154,9 +160,6 @@ private:
 
 	// these are lump indices (into 'directory' vector)
 	std::vector<int> levels;
-	std::vector<int> sprites;
-	std::vector<int> flats;
-	std::vector<int> tx_tex;
 
 	bool begun_write = false;
 	int  begun_max_size;
@@ -210,7 +213,7 @@ public:
 	{
 		return static_cast<int>(directory.size());
 	}
-	Lump_c * GetLump(int index);
+	Lump_c * GetLump(int index) const;
 	Lump_c * FindLump(const char *name);
 	int FindLumpNum(const char *name);
 
@@ -324,7 +327,7 @@ private:
 	// (including the CRC).
 	void WriteDirectory();
 
-	void FixGroup(std::vector<int>& group, int index, int num_added, int num_removed);
+	void FixLevelGroup(int index, int num_added, int num_removed);
 
 private:
 	// deliberately don't implement these
@@ -344,8 +347,8 @@ private:
 
 		inline bool operator() (const int A, const int B) const
 		{
-			const Lump_c *L1 = wad->directory[A];
-			const Lump_c *L2 = wad->directory[B];
+			const Lump_c *L1 = wad->directory[A].lump;
+			const Lump_c *L2 = wad->directory[B].lump;
 
 			return (strcmp(L1->Name(), L2->Name()) < 0);
 		}
