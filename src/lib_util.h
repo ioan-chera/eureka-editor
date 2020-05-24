@@ -190,6 +190,11 @@ public:
 		return !y_stricmp(data.c_str(), c ? c : "");
 	}
 
+	bool noCaseStartsWith(const char *c) const
+	{
+		return !y_strnicmp(data.c_str(), c ? c : "", c ? strlen(c) : 0);
+	}
+
 	bool operator != (const char *c) const
 	{
 		return data != (c ? c : "");

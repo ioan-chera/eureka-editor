@@ -395,7 +395,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 }
 
 
-void BuildNodesAfterSave(short lev_idx)
+void BuildNodesAfterSave(int lev_idx)
 {
 	dialog = NULL;
 

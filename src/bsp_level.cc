@@ -779,8 +779,8 @@ void PutReject()
 
 const char *lev_current_name;
 
-short lev_current_idx;
-short lev_current_start;
+int lev_current_idx;
+int lev_current_start;
 
 int lev_overflows;
 
@@ -1936,7 +1936,7 @@ static void AddMissingLump(const char *name, const char *after)
 	if (edit_wad->LevelLookupLump(lev_current_idx, name) >= 0)
 		return;
 
-	short exist = edit_wad->LevelLookupLump(lev_current_idx, after);
+	int exist = edit_wad->LevelLookupLump(lev_current_idx, after);
 
 	// if this happens, the level structure is very broken
 	if (exist < 0)
@@ -2195,7 +2195,7 @@ void ZLibFinishLump(void)
 
 Lump_c * FindLevelLump(const char *name)
 {
-	short idx = edit_wad->LevelLookupLump(lev_current_idx, name);
+	int idx = edit_wad->LevelLookupLump(lev_current_idx, name);
 
 	if (idx < 0)
 		return NULL;
@@ -2215,7 +2215,7 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 	}
 	else
 	{
-		short last_idx = edit_wad->LevelLastLump(lev_current_idx);
+		int last_idx = edit_wad->LevelLastLump(lev_current_idx);
 
 		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
 		// after the last known lump of the level.
@@ -2245,7 +2245,7 @@ Lump_c * CreateGLMarker()
 		name_buf = "GL_LEVEL";
 	}
 
-	short last_idx = edit_wad->LevelLastLump(lev_current_idx);
+	int last_idx = edit_wad->LevelLastLump(lev_current_idx);
 
 	edit_wad->InsertPoint(last_idx + 1);
 
@@ -2264,7 +2264,7 @@ Lump_c * CreateGLMarker()
 nodebuildinfo_t * cur_info = NULL;
 
 
-build_result_e BuildLevel(nodebuildinfo_t *info, short lev_idx)
+build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 {
 	cur_info = info;
 
@@ -2331,7 +2331,7 @@ build_result_e BuildLevel(nodebuildinfo_t *info, short lev_idx)
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, short lev_idx)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx)
 {
 	return ajbsp::BuildLevel(info, lev_idx);
 }

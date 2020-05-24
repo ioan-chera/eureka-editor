@@ -29,7 +29,7 @@
 #include "ui_window.h"
 
 
-extern short loading_level;
+extern int loading_level;
 extern Lump_c * Load_LookupAndSeek(const char *name);
 
 extern void ValidateSidedefRefs(LineDef * ld, int num);

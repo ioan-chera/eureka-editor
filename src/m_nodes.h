@@ -21,7 +21,7 @@
 #ifndef __EUREKA_E_NODES_H__
 #define __EUREKA_E_NODES_H__
 
-void BuildNodesAfterSave(short lev_idx);
+void BuildNodesAfterSave(int lev_idx);
 
 void CMD_BuildAllNodes();
 

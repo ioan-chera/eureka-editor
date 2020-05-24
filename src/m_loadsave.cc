@@ -287,7 +287,7 @@ void CMD_NewProject()
 	// determine map name (same as first level in the IWAD)
 	const char *map_name = "MAP01";
 
-	short idx = game_wad->LevelFindFirst();
+	int idx = game_wad->LevelFindFirst();
 
 	if (idx >= 0)
 	{
@@ -399,7 +399,7 @@ void CMD_FreshMap()
 static Wad_file * load_wad;
 
 // TODO ideally static, but needed by m_udmf.cc too
-short loading_level;
+int loading_level;
 
 static int bad_linedef_count;
 
@@ -419,7 +419,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 
 Lump_c * Load_LookupAndSeek(const char *name)
 {
-	short idx = load_wad->LevelLookupLump(loading_level, name);
+	int idx = load_wad->LevelLookupLump(loading_level, name);
 
 	if (idx < 0)
 		return NULL;
@@ -961,7 +961,7 @@ void GetLevelFormat(Wad_file *wad, const char *level)
 
 void LoadLevel(Wad_file *wad, const char *level)
 {
-	short lev_num = wad->LevelFind(level);
+	int lev_num = wad->LevelFind(level);
 
 	if (lev_num < 0)
 		FatalError("No such map: %s\n", level);
@@ -1003,7 +1003,7 @@ void LoadLevel(Wad_file *wad, const char *level)
 }
 
 
-void LoadLevelNum(Wad_file *wad, short lev_num)
+void LoadLevelNum(Wad_file *wad, int lev_num)
 {
 	load_wad = wad;
 	loading_level = lev_num;
@@ -1133,7 +1133,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 
 	// always grab map_name from the actual level
 	{
-		short idx = edit_wad->LevelHeader(lev_num);
+		int idx = edit_wad->LevelHeader(lev_num);
 		map_name  = edit_wad->GetLump(idx)->Name();
 	}
 
@@ -1337,7 +1337,7 @@ void CMD_FlipMap()
 	SYS_ASSERT(lev_idx <= max_idx);
 
 
-	short lump_idx = wad->LevelHeader(lev_idx);
+	int lump_idx = wad->LevelHeader(lev_idx);
 	Lump_c * lump  = wad->GetLump(lump_idx);
 	const char *map_name = lump->Name();
 
@@ -1351,7 +1351,7 @@ void CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-static short saving_level;
+static int saving_level;
 
 
 static void SaveHeader(const char *level)
@@ -1961,7 +1961,7 @@ void CMD_RenameMap()
 	// [ user may be trying to rename map after changing the IWAD ]
 	char format = 'M';
 	{
-		short idx = game_wad->LevelFindFirst();
+		int idx = game_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
@@ -1991,11 +1991,11 @@ void CMD_RenameMap()
 
 
 	// perform the rename
-	short lev_num = edit_wad->LevelFind(Level_name.c_str());
+	int lev_num = edit_wad->LevelFind(Level_name.c_str());
 
 	if (lev_num >= 0)
 	{
-		short level_lump = edit_wad->LevelHeader(lev_num);
+		int level_lump = edit_wad->LevelHeader(lev_num);
 
 		edit_wad->BeginWrite();
 		edit_wad->RenameLump(level_lump, new_name.c_str());
@@ -2041,7 +2041,7 @@ void CMD_DeleteMap()
 
 	LogPrintf("Deleting Map : %s...\n", Level_name.c_str());
 
-	short lev_num = edit_wad->LevelFind(Level_name.c_str());
+	int lev_num = edit_wad->LevelFind(Level_name.c_str());
 
 	if (lev_num < 0)
 	{
@@ -2061,7 +2061,7 @@ void CMD_DeleteMap()
 		if (lev_num >= edit_wad->LevelCount())
 			lev_num =  edit_wad->LevelCount() - 1;
 
-		short lump_idx = edit_wad->LevelHeader(lev_num);
+		int lump_idx = edit_wad->LevelHeader(lev_num);
 		Lump_c * lump  = edit_wad->GetLump(lump_idx);
 		const char *map_name = lump->Name();
 

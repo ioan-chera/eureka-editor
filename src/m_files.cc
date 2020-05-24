@@ -776,7 +776,7 @@ SString M_PickDefaultIWAD()
 	}
 	else if (edit_wad)
 	{
-		short idx = edit_wad->LevelFindFirst();
+		int idx = edit_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{

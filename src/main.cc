@@ -511,7 +511,7 @@ static SString DetermineLevel()
 		if (! wad)
 			continue;
 
-		short lev_num;
+		int lev_num;
 
 		if (level_number > 0)
 		{
@@ -527,7 +527,7 @@ static SString DetermineLevel()
 				FatalError("No levels found in the %s!\n", (pass == 0) ? "PWAD" : "IWAD");
 		}
 
-		short idx = wad->LevelHeader(lev_num);
+		int idx = wad->LevelHeader(lev_num);
 
 		Lump_c *lump = wad->GetLump(idx);
 		SYS_ASSERT(lump);

@@ -109,7 +109,7 @@ typedef enum
 build_result_e;
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, short lev_idx);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx);
 
 
 //======================================================================

@@ -183,9 +183,8 @@ bool Lump_c::Finish()
 
 Wad_file::Wad_file(const char *_name, char _mode, FILE * _fp) :
 	mode(_mode), fp(_fp), kind('P'),
-	total_size(0), directory(),
+	total_size(0),
 	dir_start(0), dir_count(0), dir_crc(0),
-	levels(), patches(), sprites(), flats(), tx_tex(),
 	begun_write(false), insert_point(-1)
 {
 	filename = _name;
@@ -198,8 +197,8 @@ Wad_file::~Wad_file()
 	fclose(fp);
 
 	// free the directory
-	for (short k = 0 ; k < NumLumps() ; k++)
-		delete directory[k];
+	for (Lump_c *lump : directory)
+		delete lump;
 
 	directory.clear();
 }
@@ -319,39 +318,37 @@ bool Wad_file::Validate(const char *filename)
 }
 
 
-static int WhatLevelPart(const char *name)
+static int WhatLevelPart(const SString &name)
 {
-	if (y_stricmp(name, "THINGS")   == 0) return 1;
-	if (y_stricmp(name, "LINEDEFS") == 0) return 2;
-	if (y_stricmp(name, "SIDEDEFS") == 0) return 3;
-	if (y_stricmp(name, "VERTEXES") == 0) return 4;
-	if (y_stricmp(name, "SECTORS")  == 0) return 5;
+	if (name.noCaseEqual("THINGS")) return 1;
+	if (name.noCaseEqual("LINEDEFS")) return 2;
+	if (name.noCaseEqual("SIDEDEFS")) return 3;
+	if (name.noCaseEqual("VERTEXES")) return 4;
+	if (name.noCaseEqual("SECTORS")) return 5;
 
 	return 0;
 }
 
-static bool IsLevelLump(const char *name)
+static bool IsLevelLump(const SString &name)
 {
-	if (y_stricmp(name, "SEGS")     == 0) return true;
-	if (y_stricmp(name, "SSECTORS") == 0) return true;
-	if (y_stricmp(name, "NODES")    == 0) return true;
-	if (y_stricmp(name, "REJECT")   == 0) return true;
-	if (y_stricmp(name, "BLOCKMAP") == 0) return true;
-	if (y_stricmp(name, "BEHAVIOR") == 0) return true;
-	if (y_stricmp(name, "SCRIPTS")  == 0) return true;
+	if (name.noCaseEqual("SEGS")) return true;
+	if (name.noCaseEqual("SSECTORS")) return true;
+	if (name.noCaseEqual("NODES")) return true;
+	if (name.noCaseEqual("REJECT")) return true;
+	if (name.noCaseEqual("BLOCKMAP")) return true;
+	if (name.noCaseEqual("BEHAVIOR")) return true;
+	if (name.noCaseEqual("SCRIPTS")) return true;
 
 	return WhatLevelPart(name) != 0;
 }
 
-static bool IsGLNodeLump(const char *name)
+inline static bool IsGLNodeLump(const SString &name)
 {
-	if (y_strnicmp(name, "GL_", 3) == 0 ) return true;
-
-	return false;
+	return name.noCaseStartsWith("GL_");
 }
 
 
-Lump_c * Wad_file::GetLump(short index)
+Lump_c * Wad_file::GetLump(int index)
 {
 	SYS_ASSERT(0 <= index && index < NumLumps());
 	SYS_ASSERT(directory[index]);
@@ -362,35 +359,35 @@ Lump_c * Wad_file::GetLump(short index)
 
 Lump_c * Wad_file::FindLump(const char *name)
 {
-	for (short k = 0 ; k < NumLumps() ; k++)
-		if (y_stricmp(directory[k]->name.c_str(), name) == 0)
-			return directory[k];
+	for (Lump_c *lump : directory)
+		if (lump->name.noCaseEqual(name))
+			return lump;
 
-	return NULL;  // not found
+	return nullptr;  // not found
 }
 
-short Wad_file::FindLumpNum(const char *name)
+int Wad_file::FindLumpNum(const char *name)
 {
-	for (short k = 0 ; k < NumLumps() ; k++)
-		if (y_stricmp(directory[k]->name.c_str(), name) == 0)
+	for (int k = 0 ; k < NumLumps() ; k++)
+		if (directory[k]->name.noCaseEqual(name))
 			return k;
 
 	return -1;  // not found
 }
 
 
-short Wad_file::LevelLookupLump(short lev_num, const char *name)
+int Wad_file::LevelLookupLump(int lev_num, const char *name)
 {
-	short start = LevelHeader(lev_num);
+	int start = LevelHeader(lev_num);
 
 	// determine how far past the level marker (MAP01 etc) to search
-	short finish = LevelLastLump(lev_num);
+	int finish = LevelLastLump(lev_num);
 
-	for (short k = start+1 ; k <= finish ; k++)
+	for (int k = start+1 ; k <= finish ; k++)
 	{
 		SYS_ASSERT(0 <= k && k < NumLumps());
 
-		if (y_stricmp(directory[k]->name.c_str(), name) == 0)
+		if (directory[k]->name.noCaseEqual(name))
 			return k;
 	}
 
@@ -398,16 +395,16 @@ short Wad_file::LevelLookupLump(short lev_num, const char *name)
 }
 
 
-short Wad_file::LevelFind(const char *name)
+int Wad_file::LevelFind(const char *name)
 {
-	for (short k = 0 ; k < (int)levels.size() ; k++)
+	for (int k = 0 ; k < (int)levels.size() ; k++)
 	{
-		short index = levels[k];
+		int index = levels[k];
 
 		SYS_ASSERT(0 <= index && index < NumLumps());
 		SYS_ASSERT(directory[index]);
 
-		if (y_stricmp(directory[index]->name.c_str(), name) == 0)
+		if (directory[index]->name.noCaseEqual(name))
 			return k;
 	}
 
@@ -415,18 +412,18 @@ short Wad_file::LevelFind(const char *name)
 }
 
 
-short Wad_file::LevelLastLump(short lev_num)
+int Wad_file::LevelLastLump(int lev_num)
 {
-	short start = LevelHeader(lev_num);
+	int start = LevelHeader(lev_num);
 
 	int count = 1;
 
 	// UDMF level?
-	if (y_stricmp(directory[start+1]->name.c_str(), "TEXTMAP") == 0)
+	if (directory[start + 1]->name.noCaseEqual("TEXTMAP"))
 	{
 		while (count < MAX_LUMPS_IN_A_LEVEL && start+count < NumLumps())
 		{
-			if (y_stricmp(directory[start+count]->name.c_str(), "ENDMAP") == 0)
+			if (directory[start+count]->name.noCaseEqual("ENDMAP"))
 			{
 				count++;
 				break;
@@ -441,8 +438,8 @@ short Wad_file::LevelLastLump(short lev_num)
 	// standard DOOM or HEXEN format
 	while (count < MAX_LUMPS_IN_A_LEVEL &&
 		   start+count < NumLumps() &&
-		   (IsLevelLump(directory[start+count]->name.c_str()) ||
-			IsGLNodeLump(directory[start+count]->name.c_str())) )
+		   (IsLevelLump(directory[start+count]->name) ||
+			IsGLNodeLump(directory[start+count]->name)) )
 	{
 		count++;
 	}
@@ -451,14 +448,14 @@ short Wad_file::LevelLastLump(short lev_num)
 }
 
 
-short Wad_file::LevelFindByNumber(int number)
+int Wad_file::LevelFindByNumber(int number)
 {
 	// sanity check
 	if (number <= 0 || number > 99)
 		return -1;
 
 	char buffer[16];
-	short index;
+	int index;
 
 	 // try MAP## first
 	snprintf(buffer, sizeof(buffer), "MAP%02d", number);
@@ -478,7 +475,7 @@ short Wad_file::LevelFindByNumber(int number)
 }
 
 
-short Wad_file::LevelFindFirst()
+int Wad_file::LevelFindFirst()
 {
 	if (levels.size() > 0)
 		return 0;
@@ -487,7 +484,7 @@ short Wad_file::LevelFindFirst()
 }
 
 
-short Wad_file::LevelHeader(short lev_num)
+int Wad_file::LevelHeader(int lev_num)
 {
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
@@ -495,14 +492,14 @@ short Wad_file::LevelHeader(short lev_num)
 }
 
 
-map_format_e Wad_file::LevelFormat(short lev_num)
+map_format_e Wad_file::LevelFormat(int lev_num)
 {
 	int start = LevelHeader(lev_num);
 
-	if (y_stricmp(directory[start+1]->name.c_str(), "TEXTMAP") == 0)
+	if (directory[start+1]->name.noCaseEqual("TEXTMAP"))
 		return MAPF_UDMF;
 
-	if (start + LL_BEHAVIOR < (int)NumLumps())
+	if (start + LL_BEHAVIOR < NumLumps())
 	{
 		const char *name = GetLump(start + LL_BEHAVIOR)->Name();
 
@@ -516,24 +513,24 @@ map_format_e Wad_file::LevelFormat(short lev_num)
 
 Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 {
-	short k;
+	int k;
 
 	switch (group)
 	{
 		case 'P':
-			for (k = 0 ; k < (short)patches.size() ; k++)
-				if (directory[patches[k]]->name.noCaseEqual(name))
-					return directory[patches[k]];
+			for (int patch : patches)
+				if (directory[patch]->name.noCaseEqual(name))
+					return directory[patch];
 			break;
 
 		case 'S':
-			for (k = 0 ; k < (short)sprites.size() ; k++)
+			for (k = 0 ; k < (int)sprites.size() ; k++)
 				if (directory[sprites[k]]->name.noCaseEqual(name))
 					return directory[sprites[k]];
 			break;
 
 		case 'F':
-			for (k = 0 ; k < (short)flats.size() ; k++)
+			for (k = 0 ; k < flats.size() ; k++)
 				if (directory[flats[k]]->name.noCaseEqual(name))
 					return directory[flats[k]];
 			break;
@@ -577,7 +574,7 @@ bool Wad_file::ReadDirectory()
 		return false;
 	}
 
-	for (short i = 0 ; i < dir_count ; i++)
+	for (int _ = 0 ; _ < dir_count ; _++)
 	{
 		raw_wad_entry_t entry;
 
@@ -628,13 +625,13 @@ void Wad_file::DetectLevels()
 	// vector.  The test here is rather lax, as I'm told certain
 	// wads exist with a non-standard ordering of level lumps.
 
-	for (short k = 0 ; k+1 < NumLumps() ; k++)
+	for (int k = 0 ; k+1 < NumLumps() ; k++)
 	{
 		int part_mask  = 0;
 		int part_count = 0;
 
 		// check for UDMF levels
-		if (udmf_testing && y_stricmp(directory[k+1]->name.c_str(), "TEXTMAP") == 0)
+		if (udmf_testing && directory[k+1]->name.noCaseEqual("TEXTMAP"))
 		{
 			levels.push_back(k);
 			DebugPrintf("Detected level : %s (UDMF)\n", directory[k]->name.c_str());
@@ -642,12 +639,12 @@ void Wad_file::DetectLevels()
 		}
 
 		// check whether the next four lumps are level lumps
-		for (short i = 1 ; i <= 4 ; i++)
+		for (int i = 1 ; i <= 4 ; i++)
 		{
-			if (k+i >= NumLumps())
+			if (k + i >= NumLumps())
 				break;
 
-			int part = WhatLevelPart(directory[k+i]->name.c_str());
+			int part = WhatLevelPart(directory[k+i]->name);
 
 			if (part == 0)
 				break;
@@ -706,7 +703,7 @@ void Wad_file::ProcessNamespaces()
 {
 	char active = 0;
 
-	for (short k = 0 ; k < NumLumps() ; k++)
+	for (int k = 0 ; k < NumLumps() ; k++)
 	{
 		const char *name = directory[k]->name.c_str();
 
@@ -834,7 +831,7 @@ bool Wad_file::WasExternallyModified()
 
 	crc32_c checksum;
 
-	for (short i = 0 ; i < dir_count ; i++)
+	for (int _ = 0 ; _ < dir_count ; _++)
 	{
 		raw_wad_entry_t entry;
 
@@ -884,7 +881,7 @@ void Wad_file::EndWrite()
 }
 
 
-void Wad_file::RenameLump(short index, const char *new_name)
+void Wad_file::RenameLump(int index, const char *new_name)
 {
 	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= index && index < NumLumps());
@@ -896,13 +893,13 @@ void Wad_file::RenameLump(short index, const char *new_name)
 }
 
 
-void Wad_file::RemoveLumps(short index, short count)
+void Wad_file::RemoveLumps(int index, int count)
 {
 	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= index && index < NumLumps());
 	SYS_ASSERT(directory[index]);
 
-	short i;
+	int i;
 
 	for (i = 0 ; i < count ; i++)
 	{
@@ -926,13 +923,13 @@ void Wad_file::RemoveLumps(short index, short count)
 }
 
 
-void Wad_file::RemoveLevel(short lev_num)
+void Wad_file::RemoveLevel(int lev_num)
 {
 	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
-	short start  = LevelHeader(lev_num);
-	short finish = LevelLastLump(lev_num);
+	int start  = LevelHeader(lev_num);
+	int finish = LevelLastLump(lev_num);
 
 	// NOTE: FixGroup() will remove the entry in levels[]
 
@@ -940,26 +937,26 @@ void Wad_file::RemoveLevel(short lev_num)
 }
 
 
-void Wad_file::RemoveGLNodes(short lev_num)
+void Wad_file::RemoveGLNodes(int lev_num)
 {
 	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
-	short start  = LevelHeader(lev_num);
-	short finish = LevelLastLump(lev_num);
+	int start  = LevelHeader(lev_num);
+	int finish = LevelLastLump(lev_num);
 
 	start++;
 
 	while (start <= finish &&
-		   IsLevelLump(directory[start]->name.c_str()))
+		   IsLevelLump(directory[start]->name))
 	{
 		start++;
 	}
 
-	short count = 0;
+	int count = 0;
 
 	while (start+count <= finish &&
-		   IsGLNodeLump(directory[start+count]->name.c_str()))
+		   IsGLNodeLump(directory[start+count]->name))
 	{
 		count++;
 	}
@@ -969,17 +966,17 @@ void Wad_file::RemoveGLNodes(short lev_num)
 }
 
 
-void Wad_file::RemoveZNodes(short lev_num)
+void Wad_file::RemoveZNodes(int lev_num)
 {
 	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
-	short start  = LevelHeader(lev_num);
-	short finish = LevelLastLump(lev_num);
+	int start  = LevelHeader(lev_num);
+	int finish = LevelLastLump(lev_num);
 
 	for ( ; start <= finish ; start++)
 	{
-		if (y_stricmp(directory[start]->name.c_str(), "ZNODES") == 0)
+		if (directory[start]->name.noCaseEqual("ZNODES"))
 		{
 			RemoveLumps(start, 1);
 			break;
@@ -988,12 +985,12 @@ void Wad_file::RemoveZNodes(short lev_num)
 }
 
 
-void Wad_file::FixGroup(std::vector<short>& group, short index,
-                        short num_added, short num_removed)
+void Wad_file::FixGroup(std::vector<int>& group, int index,
+                        int num_added, int num_removed)
 {
 	bool did_remove = false;
 
-	for (short k = 0 ; k < (short)group.size() ; k++)
+	for (int k = 0 ; k < (int)group.size() ; k++)
 	{
 		if (group[k] < index)
 			continue;
@@ -1011,8 +1008,8 @@ void Wad_file::FixGroup(std::vector<short>& group, short index,
 
 	if (did_remove)
 	{
-		std::vector<short>::iterator ENDP;
-		ENDP = std::remove(group.begin(), group.end(), (short)-1);
+		std::vector<int>::iterator ENDP;
+		ENDP = std::remove(group.begin(), group.end(), -1);
 		group.erase(ENDP, group.end());
 	}
 }
@@ -1067,7 +1064,7 @@ void Wad_file::RecreateLump(Lump_c *lump, int max_size)
 }
 
 
-Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_num)
+Lump_c * Wad_file::AddLevel(const char *name, int max_size, int *lev_num)
 {
 	int actual_point = insert_point;
 
@@ -1078,7 +1075,7 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_num)
 
 	if (lev_num)
 	{
-		*lev_num = (short)levels.size();
+		*lev_num = (int)levels.size();
 	}
 
 	levels.push_back(actual_point);
@@ -1087,7 +1084,7 @@ Lump_c * Wad_file::AddLevel(const char *name, int max_size, short *lev_num)
 }
 
 
-void Wad_file::InsertPoint(short index)
+void Wad_file::InsertPoint(int index)
 {
 	// this is validated on usage
 	insert_point = index;
@@ -1098,10 +1095,8 @@ int Wad_file::HighWaterMark()
 {
 	int offset = (int)sizeof(raw_wad_header_t);
 
-	for (short k = 0 ; k < NumLumps() ; k++)
+	for (Lump_c *lump : directory)
 	{
-		Lump_c *lump = directory[k];
-
 		// ignore zero-length lumps (their offset could be anything)
 		if (lump->Length() <= 0)
 			continue;
@@ -1125,10 +1120,8 @@ int Wad_file::FindFreeSpace(int length)
 	// collect non-zero length lumps and sort by their offset
 	std::vector<Lump_c *> sorted_dir;
 
-	for (short k = 0 ; k < NumLumps() ; k++)
+	for (Lump_c *lump : directory)
 	{
-		Lump_c *lump = directory[k];
-
 		if (lump->Length() > 0)
 			sorted_dir.push_back(lump);
 	}
@@ -1268,9 +1261,8 @@ void Wad_file::WriteDirectory()
 
 	crc32_c checksum;
 
-	for (short k = 0 ; k < dir_count ; k++)
+	for (Lump_c *lump : directory)
 	{
-		Lump_c *lump = directory[k];
 		SYS_ASSERT(lump);
 
 		raw_wad_entry_t entry;
@@ -1328,7 +1320,7 @@ bool Wad_file::Backup(const char *new_filename)
 
 Lump_c * W_FindLump(const char *name)
 {
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
 		Lump_c *L = master_dir[i]->FindLump(name);
 		if (L)
@@ -1341,7 +1333,7 @@ Lump_c * W_FindLump(const char *name)
 
 Lump_c * W_FindSpriteLump(const SString &name)
 {
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
 		Lump_c *L = master_dir[i]->FindLumpInNamespace(name.c_str(), 'S');
 		if (L)
@@ -1354,7 +1346,7 @@ Lump_c * W_FindSpriteLump(const SString &name)
 
 Lump_c * W_FindPatchLump(const char *name)
 {
-	for (short i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
 		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, 'P');
 		if (L)
