@@ -163,7 +163,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = W_FindPatchLump(picname);
+		Lump_c *lump = W_FindLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -239,7 +239,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		picname[8] = 0;
 
 //DebugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = W_FindPatchLump(picname);
+		Lump_c *lump = W_FindLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))

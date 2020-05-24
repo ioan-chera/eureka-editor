@@ -359,16 +359,16 @@ Lump_c * Wad_file::GetLump(int index)
 
 Lump_c * Wad_file::FindLump(const char *name)
 {
-	for (Lump_c *lump : directory)
-		if (lump->name.noCaseEqual(name))
-			return lump;
+	for (auto it = directory.rbegin(); it != directory.rend(); ++it)
+		if ((*it)->name.noCaseEqual(name))
+			return *it;
 
 	return nullptr;  // not found
 }
 
 int Wad_file::FindLumpNum(const char *name)
 {
-	for (int k = 0 ; k < NumLumps() ; k++)
+	for (int k = NumLumps() - 1 ; k >= 0 ; k--)
 		if (directory[k]->name.noCaseEqual(name))
 			return k;
 
@@ -517,12 +517,6 @@ Lump_c * Wad_file::FindLumpInNamespace(const char *name, char group)
 
 	switch (group)
 	{
-		case 'P':
-			for (int patch : patches)
-				if (directory[patch]->name.noCaseEqual(name))
-					return directory[patch];
-			break;
-
 		case 'S':
 			for (k = 0 ; k < (int)sprites.size() ; k++)
 				if (directory[sprites[k]]->name.noCaseEqual(name))
@@ -792,7 +786,6 @@ void Wad_file::ProcessNamespaces()
 
 			switch (active)
 			{
-				case 'P': patches.push_back(k); break;
 				case 'S': sprites.push_back(k); break;
 				case 'F': flats.  push_back(k); break;
 				case 'T': tx_tex. push_back(k); break;
@@ -913,7 +906,6 @@ void Wad_file::RemoveLumps(int index, int count)
 
 	// fix various arrays containing lump indices
 	FixGroup(levels,  index, 0, count);
-	FixGroup(patches, index, 0, count);
 	FixGroup(sprites, index, 0, count);
 	FixGroup(flats,   index, 0, count);
 	FixGroup(tx_tex,  index, 0, count);
@@ -1033,7 +1025,6 @@ Lump_c * Wad_file::AddLump(const char *name, int max_size)
 	{
 		// fix various arrays containing lump indices
 		FixGroup(levels,  insert_point, 1, 0);
-		FixGroup(patches, insert_point, 1, 0);
 		FixGroup(sprites, insert_point, 1, 0);
 		FixGroup(flats,   insert_point, 1, 0);
 		FixGroup(tx_tex,  insert_point, 1, 0);
@@ -1339,26 +1330,6 @@ Lump_c * W_FindSpriteLump(const SString &name)
 		if (L)
 			return L;
 	}
-
-	return NULL;  // not found
-}
-
-
-Lump_c * W_FindPatchLump(const char *name)
-{
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
-	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, 'P');
-		if (L)
-			return L;
-	}
-
-	// Fallback: try free-standing lumps
-	Lump_c *L = W_FindLump(name);
-
-	// TODO: verify lump is OK (size etc)
-	if (L)
-		return L;
 
 	return NULL;  // not found
 }

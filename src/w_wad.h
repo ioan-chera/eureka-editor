@@ -129,7 +129,6 @@ private:
 
 	// these are lump indices (into 'directory' vector)
 	std::vector<int> levels;
-	std::vector<int> patches;
 	std::vector<int> sprites;
 	std::vector<int> flats;
 	std::vector<int> tx_tex;
@@ -343,7 +342,6 @@ Lump_c * W_FindLump(const char *name);
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
 Lump_c * W_FindSpriteLump(const SString &name);
-Lump_c * W_FindPatchLump(const char *name);
 
 // load the lump into memory, returning the size
 int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
