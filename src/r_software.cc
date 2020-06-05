@@ -2038,7 +2038,7 @@ public:
 
 static void BlitHires(int ox, int oy, int ow, int oh)
 {
-	u8_t line_rgb[r_view.screen_w * 3];
+	u8_t *line_rgb = new u8_t[r_view.screen_w * 3];
 
 	for (int ry = 0 ; ry < r_view.screen_h ; ry++)
 	{
@@ -2054,13 +2054,14 @@ static void BlitHires(int ox, int oy, int ow, int oh)
 
 		fl_draw_image(line_rgb, ox, oy+ry, r_view.screen_w, 1);
 	}
+	delete[] line_rgb;
 }
 
 
 static void BlitLores(int ox, int oy, int ow, int oh)
 {
 	// if destination width is odd, we store an extra pixel here
-	u8_t line_rgb[(ow + 1) * 3];
+	u8_t *line_rgb = new u8_t[(ow + 1) * 3];
 
 	for (int ry = 0 ; ry < r_view.screen_h ; ry++)
 	{
@@ -2082,6 +2083,7 @@ static void BlitLores(int ox, int oy, int ow, int oh)
 			fl_draw_image(line_rgb, ox, oy + ry*2 + 1, ow, 1);
 		}
 	}
+	delete[] line_rgb;
 }
 
 

@@ -21,6 +21,8 @@
 #ifndef __LIB_FILE_H__
 #define __LIB_FILE_H__
 
+#include <functional>
+
 #ifdef WIN32
 #define DIR_SEP_CH   '\\'
 #define DIR_SEP_STR  "\\"

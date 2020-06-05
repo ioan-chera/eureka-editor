@@ -26,7 +26,9 @@
 
 #include "main.h"
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <time.h>
 
 #include "m_strings.h"

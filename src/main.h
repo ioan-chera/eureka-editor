@@ -64,6 +64,13 @@
 
 #ifndef WIN32
 #include <unistd.h>
+#else
+
+#ifdef _MSC_VER
+#include <direct.h>
+#define getcwd _getcwd
+#endif
+
 #endif
 
 #include <algorithm>

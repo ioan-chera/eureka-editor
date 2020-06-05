@@ -33,7 +33,7 @@ extern int loading_level;
 extern Lump_c * Load_LookupAndSeek(const char *name);
 
 extern void ValidateSidedefRefs(LineDef * ld, int num);
-extern bool ValidateVertexRefs(LineDef *ld, int num);
+extern void ValidateVertexRefs(LineDef *ld, int num);
 extern void ValidateSectorRef(SideDef *sd, int num);
 
 

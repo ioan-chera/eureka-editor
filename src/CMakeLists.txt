@@ -1,11 +1,34 @@
-# TODO: configure to get the version header
 # TODO: update the main header file to include version
+# TODO: move these to where they can be reached by Visual Studio
+configure_file(main.rc.in main.rc)
+configure_file(version.h.in version.h)
+
+set(lookout_dir ${PROJECT_SOURCE_DIR}/prereqs)
+
+find_package(OpenGL REQUIRED)
+find_package(FLTK)
+if(NOT FLTK_FOUND)
+    if(WIN32)
+        message("FLTK not found in standard location; looking in ${lookout_dir}/lib/x86")
+        set(FLTK_LIBRARIES ${lookout_dir}/lib/x86/fltk.lib
+                        ${lookout_dir}/lib/x86/fltkforms.lib
+                        ${lookout_dir}/lib/x86/fltkgl.lib
+                        ${lookout_dir}/lib/x86/fltkimages.lib
+                        ${lookout_dir}/lib/x86/fltkjpeg.lib
+                        ${lookout_dir}/lib/x86/fltkpng.lib
+                        ${lookout_dir}/lib/x86/fltkzlib.lib
+                        )
+        set(FLTK_INCLUDE_DIR ${lookout_dir}/include)
+    endif()
+endif()
 
 set(source_base
     hdr_fltk.h
     main.cc
     main.h
+    main.rc
     objid.h
+    version.h
 )
 
 set(source_bsp
@@ -177,6 +200,19 @@ add_executable(
     ${source_ui}
     ${source_w}
 )
+
+target_link_libraries(eureka PRIVATE
+    ${FLTK_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    )
+target_include_directories(eureka PRIVATE ${PROJECT_SOURCE_DIR}
+    ${FLTK_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIR}
+    )
+
+if(MSVC)
+    target_compile_options(eureka PRIVATE "/MP")
+endif()
 
 source_group(bsp FILES ${source_bsp})
 source_group("e_ source" FILES ${source_e})

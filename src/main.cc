@@ -27,6 +27,7 @@
 #include "main.h"
 
 #include <time.h>
+#include <stdexcept>
 
 #include "im_color.h"
 #include "m_config.h"
