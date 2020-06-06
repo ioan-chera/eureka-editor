@@ -195,7 +195,7 @@ set(source_w
 )
 
 target_sources(
-    ${executable_name} PRIVATE
+    eureka PRIVATE
     ${source_base}
     ${source_bsp}
     ${source_e}
@@ -215,28 +215,28 @@ if(APPLE)
     string(REPLACE "libpng.dylib" "libpng.a" PNG_LIBRARIES "${PNG_LIBRARIES}" )
 endif()
 
-target_link_libraries(${executable_name} PRIVATE
+target_link_libraries(eureka PRIVATE
     ${FLTK_LIBRARIES}
     ${OPENGL_LIBRARIES}
 )
 if(APPLE)
-    target_link_libraries(${executable_name} PRIVATE
+    target_link_libraries(eureka PRIVATE
         ${JPEG_LIBRARIES}
         ${PNG_LIBRARIES}
     )
 endif()
 
-target_include_directories(${executable_name} PRIVATE ${PROJECT_SOURCE_DIR}
+target_include_directories(eureka PRIVATE ${PROJECT_SOURCE_DIR}
     ${FLTK_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
 )
 
 # May be needed by files from other projects to find headers here
-target_include_directories(${executable_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_include_directories(${executable_name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(eureka PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(eureka PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(MSVC)
-    target_compile_options(${executable_name} PRIVATE "/MP")
+    target_compile_options(eureka PRIVATE "/MP")
 endif()
 
 source_group(bsp FILES ${source_bsp})

@@ -6,11 +6,9 @@ project(eureka-editor VERSION 2.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(executable_name eureka)
-
-add_executable(${executable_name} MACOSX_BUNDLE)
+add_executable(eureka MACOSX_BUNDLE)
 if(APPLE)
-    set_target_properties(${executable_name} PROPERTIES OUTPUT_NAME "Eureka Doom Editor")
+    set_target_properties(eureka PROPERTIES OUTPUT_NAME "Eureka Doom Editor")
 endif()
 
 if(APPLE)
