@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(executable_name eureka)
 
 add_executable(${executable_name} MACOSX_BUNDLE)
+if(APPLE)
+    set_target_properties(${executable_name} PROPERTIES OUTPUT_NAME "Eureka Doom Editor")
+endif()
 
 if(APPLE)
     add_subdirectory(osx)
