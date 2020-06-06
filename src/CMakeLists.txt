@@ -233,6 +233,7 @@ target_include_directories(${executable_name} PRIVATE ${PROJECT_SOURCE_DIR}
 
 # May be needed by files from other projects to find headers here
 target_include_directories(${executable_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(${executable_name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(MSVC)
     target_compile_options(${executable_name} PRIVATE "/MP")
