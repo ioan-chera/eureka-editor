@@ -8,7 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(eureka MACOSX_BUNDLE)
 if(APPLE)
-    set_target_properties(eureka PROPERTIES OUTPUT_NAME "Eureka Doom Editor")
+    set(exe_display_name "Eureka Doom Editor")
+    set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
+else()
+    set(exe_display_name "eureka")
 endif()
 
 if(APPLE)
