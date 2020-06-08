@@ -3,11 +3,11 @@ set(source_mac
     AppDelegate.mm
     OSXCalls.h
     OSXCalls.mm
-    "Eureka Doom EditorIcon.icns"
 )
 
 target_sources(eureka PRIVATE ${source_mac})
 
+target_sources(eureka PRIVATE ${resource_mac})
 source_group(macOS FILES ${source_mac})
 
 # May be needed by files from other projects to find headers here
@@ -31,3 +31,4 @@ set_target_properties(eureka PROPERTIES
     MACOSX_BUNDLE_ICON_FILE "Eureka Doom EditorIcon"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
 )
+
