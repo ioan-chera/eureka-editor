@@ -8,9 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(resource_common
     bindings.cfg
+    common
     defaults.cfg
+    games
     misc/about_logo.png
     operations.cfg
+    ports
 )
 
 add_executable(eureka MACOSX_BUNDLE ${resource_common})
