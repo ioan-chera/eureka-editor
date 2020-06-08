@@ -1191,16 +1191,16 @@ static void ChecksumVertex(crc32_c& crc, const Vertex * V)
 	crc += V->raw_y;
 }
 
-static void ChecksumSector(crc32_c& crc, const Sector * SEC)
+static void ChecksumSector(crc32_c& crc, const Sector * sector)
 {
-	crc += SEC->floorh;
-	crc += SEC->ceilh;
-	crc += SEC->light;
-	crc += SEC->type;
-	crc += SEC->tag;
+	crc += sector->floorh;
+	crc += sector->ceilh;
+	crc += sector->light;
+	crc += sector->type;
+	crc += sector->tag;
 
-	crc += SEC->FloorTex();
-	crc += SEC->CeilTex();
+	crc += sector->FloorTex();
+	crc += sector->CeilTex();
 }
 
 static void ChecksumSideDef(crc32_c& crc, const SideDef * S)

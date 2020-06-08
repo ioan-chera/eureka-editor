@@ -901,16 +901,16 @@ static void TransferThingProperties(int src_thing, int dest_thing)
 
 static void TransferSectorProperties(int src_sec, int dest_sec)
 {
-	const Sector * SEC = Sectors[src_sec];
+	const Sector * sector = Sectors[src_sec];
 
-	BA_ChangeSEC(dest_sec, Sector::F_FLOORH,    SEC->floorh);
-	BA_ChangeSEC(dest_sec, Sector::F_FLOOR_TEX, SEC->floor_tex);
-	BA_ChangeSEC(dest_sec, Sector::F_CEILH,     SEC->ceilh);
-	BA_ChangeSEC(dest_sec, Sector::F_CEIL_TEX,  SEC->ceil_tex);
+	BA_ChangeSEC(dest_sec, Sector::F_FLOORH,    sector->floorh);
+	BA_ChangeSEC(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
+	BA_ChangeSEC(dest_sec, Sector::F_CEILH,     sector->ceilh);
+	BA_ChangeSEC(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
 
-	BA_ChangeSEC(dest_sec, Sector::F_LIGHT,  SEC->light);
-	BA_ChangeSEC(dest_sec, Sector::F_TYPE,   SEC->type);
-	BA_ChangeSEC(dest_sec, Sector::F_TAG,    SEC->tag);
+	BA_ChangeSEC(dest_sec, Sector::F_LIGHT,  sector->light);
+	BA_ChangeSEC(dest_sec, Sector::F_TYPE,   sector->type);
+	BA_ChangeSEC(dest_sec, Sector::F_TAG,    sector->tag);
 }
 
 

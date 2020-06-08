@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+08.06.2020
+* Fixed failure to compile on SmartOS.
+
+----------
 24.05.2020
 * Fixed failure to locate a patch if an equally named flat exists.
 
