@@ -6,7 +6,17 @@ project(eureka-editor VERSION 2.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(eureka MACOSX_BUNDLE)
+set(resource_common
+    bindings.cfg
+    defaults.cfg
+    misc/about_logo.png
+    operations.cfg
+)
+
+add_executable(eureka MACOSX_BUNDLE ${resource_common})
+
+set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
 if(APPLE)
     set(exe_display_name "Eureka Doom Editor")
     set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
