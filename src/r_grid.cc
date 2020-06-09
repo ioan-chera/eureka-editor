@@ -118,12 +118,12 @@ void Grid_State_c::Scroll(double delta_x, double delta_y)
 
 int Grid_State_c::ForceSnapX(double map_x) const
 {
-	return grid.step * round(map_x / (double)grid.step);
+	return static_cast<int>(grid.step * round(map_x / (double)grid.step));
 }
 
 int Grid_State_c::ForceSnapY(double map_y) const
 {
-	return grid.step * round(map_y / (double)grid.step);
+	return static_cast<int>(grid.step * round(map_y / (double)grid.step));
 }
 
 
@@ -323,7 +323,7 @@ int Grid_State_c::QuantSnapX(double map_x, bool want_furthest, int *dir) const
 	{
 		if (dir)
 			*dir = 0;
-		return map_x;
+		return static_cast<int>(map_x);
 	}
 
 	int new_x = ForceSnapX(map_x);

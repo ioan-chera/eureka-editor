@@ -470,8 +470,8 @@ void UI_StatusBar::draw()
 	}
 	else  // 2D view
 	{
-		float mx = grid.SnapX(edit.map_x);
-		float my = grid.SnapX(edit.map_y);
+		float mx = static_cast<float>(grid.SnapX(edit.map_x));
+		float my = static_cast<float>(grid.SnapX(edit.map_y));
 
 		mx = CLAMP(-32767, mx, 32767);
 		my = CLAMP(-32767, my, 32767);
@@ -544,8 +544,8 @@ void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 		main_win->canvas->DragDelta(&dx, &dy);
 	}
 
-	IB_Coord(cx, cy, "dragging delta x", dx);
-	IB_Coord(cx, cy,                "y", dy);
+	IB_Coord(cx, cy, "dragging delta x", static_cast<float>(dx));
+	IB_Coord(cx, cy,                "y", static_cast<float>(dy));
 }
 
 
@@ -556,12 +556,12 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 	switch (edit.trans_mode)
 	{
 	case TRANS_K_Scale:
-		IB_Coord(cx, cy, "scale by", edit.trans_param.scale_x);
+		IB_Coord(cx, cy, "scale by", static_cast<float>(edit.trans_param.scale_x));
 		break;
 
 	case TRANS_K_Stretch:
-		IB_Coord(cx, cy, "stretch x", edit.trans_param.scale_x);
-		IB_Coord(cx, cy,         "y", edit.trans_param.scale_y);
+		IB_Coord(cx, cy, "stretch x", static_cast<float>(edit.trans_param.scale_x));
+		IB_Coord(cx, cy,         "y", static_cast<float>(edit.trans_param.scale_y));
 		break;
 
 	case TRANS_K_Rotate:
@@ -571,13 +571,13 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 		break;
 
 	case TRANS_K_Skew:
-		IB_Coord(cx, cy, "skew x", edit.trans_param.skew_x);
-		IB_Coord(cx, cy,      "y", edit.trans_param.skew_y);
+		IB_Coord(cx, cy, "skew x", static_cast<float>(edit.trans_param.skew_x));
+		IB_Coord(cx, cy,      "y", static_cast<float>(edit.trans_param.skew_y));
 		break;
 	}
 
 	if (edit.trans_mode == TRANS_K_RotScale)
-		IB_Coord(cx, cy, "scale", edit.trans_param.scale_x);
+		IB_Coord(cx, cy, "scale", static_cast<float>(edit.trans_param.scale_x));
 }
 
 
@@ -653,8 +653,8 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 
 	cx = MAX(cx+12, old_cx + 170);
 
-	IB_Coord(cx, cy, "delta x", dx);
-	IB_Coord(cx, cy,       "y", dy);
+	IB_Coord(cx, cy, "delta x", static_cast<float>(dx));
+	IB_Coord(cx, cy,       "y", static_cast<float>(dy));
 }
 
 
@@ -671,7 +671,7 @@ void UI_StatusBar::IB_Number(int& cx, int& cy, const char *label, int value, int
 	fl_color(INFO_TEXT_COL);
 	fl_draw(buffer, cx, cy);
 
-	cx = cx + fl_width(buffer);
+	cx = static_cast<int>(cx + fl_width(buffer));
 }
 
 
@@ -683,7 +683,7 @@ void UI_StatusBar::IB_Coord(int& cx, int& cy, const char *label, float value)
 	fl_color(INFO_TEXT_COL);
 	fl_draw(buffer, cx, cy);
 
-	cx = cx + fl_width(buffer);
+	cx = static_cast<int>(cx + fl_width(buffer));
 }
 
 
@@ -691,7 +691,7 @@ void UI_StatusBar::IB_String(int& cx, int& cy, const char *str)
 {
 	fl_draw(str, cx, cy);
 
-	cx = cx + fl_width(str);
+	cx = static_cast<int>(cx + fl_width(str));
 }
 
 
@@ -703,7 +703,7 @@ void UI_StatusBar::IB_Flag(int& cx, int& cy, bool value, const char *label_on, c
 
 	fl_draw(label, cx, cy);
 
-	cx = cx + fl_width(label) + 20;
+	cx = static_cast<int>(cx + fl_width(label) + 20);
 }
 
 

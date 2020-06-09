@@ -870,7 +870,7 @@ SString M_StringForFunc(int index)
 	SString buffer;
 	buffer.reserve(2048);
 
-	SYS_ASSERT(index >= 0 && index < pref_binds.size());
+	SYS_ASSERT(index >= 0 && index < static_cast<int>(pref_binds.size()));
 	key_binding_t& bind = pref_binds[index];
 
 	SYS_ASSERT(!!bind.cmd);

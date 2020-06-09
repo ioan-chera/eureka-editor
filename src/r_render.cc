@@ -150,9 +150,9 @@ void Render_View_t::FindGroundZ()
 
 void Render_View_t::CalcAspect()
 {
-	aspect_sw = screen_w;	 // things break if these are different
+	aspect_sw = static_cast<float>(screen_w);	 // things break if these are different
 
-	aspect_sh = screen_w / (render_pixel_aspect / 100.0);
+	aspect_sh = screen_w / (render_pixel_aspect / 100.0f);
 }
 
 double Render_View_t::DistToViewPlane(double map_x, double map_y)
@@ -405,10 +405,10 @@ static void AdjustOfs_UpdateBBox(int ld_num)
 {
 	const LineDef *L = LineDefs[ld_num];
 
-	float lx1 = L->Start()->x();
-	float ly1 = L->Start()->y();
-	float lx2 = L->End()->x();
-	float ly2 = L->End()->y();
+	float lx1 = static_cast<float>(L->Start()->x());
+	float ly1 = static_cast<float>(L->Start()->y());
+	float lx2 = static_cast<float>(L->End()->x());
+	float ly2 = static_cast<float>(L->End()->y());
 
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
@@ -427,11 +427,11 @@ void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 	// of a switch, that switch follows the mouse pointer around.
 	// such an effect can only be approximate though.
 
-	float dx = (r_view.x < edit.adjust_bbox.x1) ? (edit.adjust_bbox.x1 - r_view.x) :
-			   (r_view.x > edit.adjust_bbox.x2) ? (r_view.x - edit.adjust_bbox.x2) : 0;
+	float dx = static_cast<float>((r_view.x < edit.adjust_bbox.x1) ? (edit.adjust_bbox.x1 - r_view.x) :
+			   (r_view.x > edit.adjust_bbox.x2) ? (r_view.x - edit.adjust_bbox.x2) : 0);
 
-	float dy = (r_view.y < edit.adjust_bbox.y1) ? (edit.adjust_bbox.y1 - r_view.y) :
-			   (r_view.y > edit.adjust_bbox.y2) ? (r_view.y - edit.adjust_bbox.y2) : 0;
+	float dy = static_cast<float>((r_view.y < edit.adjust_bbox.y1) ? (edit.adjust_bbox.y1 - r_view.y) :
+			   (r_view.y > edit.adjust_bbox.y2) ? (r_view.y - edit.adjust_bbox.y2) : 0);
 
 	float dist = hypot(dx, dy);
 
@@ -470,8 +470,8 @@ static void AdjustOfs_Begin()
 	int total_lines = 0;
 
 	// we will compute the bbox of selected lines
-	edit.adjust_bbox.x1 = edit.adjust_bbox.y1 = +9e9;
-	edit.adjust_bbox.x2 = edit.adjust_bbox.y2 = -9e9;
+	edit.adjust_bbox.x1 = edit.adjust_bbox.y1 = static_cast<float>(+9e9);
+	edit.adjust_bbox.x2 = edit.adjust_bbox.y2 = static_cast<float>(-9e9);
 
 	// find the sidedefs to adjust
 	if (! edit.Selected->empty())
@@ -575,10 +575,10 @@ static void AdjustOfs_Delta(int dx, int dy)
 
 	keycode_t mod = edit.adjust_lax ? M_ReadLaxModifiers() : 0;
 
-	float factor = (mod & MOD_SHIFT) ? 0.5 : 2.0;
+	float factor = (mod & MOD_SHIFT) ? 0.5f : 2.0f;
 
 	if (!render_high_detail)
-		factor = factor * 0.5;
+		factor = factor * 0.5f;
 
 	float dx_factor, dy_factor;
 	AdjustOfs_CalcDistFactor(dx_factor, dy_factor);
@@ -698,7 +698,7 @@ void Render3D_Setup()
 
 		r_view.FindGroundZ();
 
-		r_view.SetAngle(player->angle * M_PI / 180.0);
+		r_view.SetAngle(static_cast<float>(player->angle * M_PI / 180.0));
 	}
 	else
 	{
@@ -769,8 +769,8 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 	bool is_strafe = (mod & MOD_ALT) ? true : false;
 
 	float mod_factor = 1.0;
-	if (mod & MOD_SHIFT)   mod_factor = 0.4;
-	if (mod & MOD_COMMAND) mod_factor = 2.5;
+	if (mod & MOD_SHIFT)   mod_factor = 0.4f;
+	if (mod & MOD_COMMAND) mod_factor = 2.5f;
 
 	float speed = edit.panning_speed * mod_factor;
 
@@ -783,7 +783,7 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 	{
 		double d_ang = dx * speed * M_PI / 480.0;
 
-		r_view.SetAngle(r_view.angle - d_ang);
+		r_view.SetAngle(static_cast<float>(r_view.angle - d_ang));
 	}
 
 	dy = -dy;  //TODO CONFIG ITEM
@@ -807,10 +807,10 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 
 static void DragSectors_Update()
 {
-	float ow = main_win->canvas->w();
-	float x_slope = 100.0 / render_pixel_aspect;
+	float ow = static_cast<float>(main_win->canvas->w());
+	float x_slope = 100.0f / render_pixel_aspect;
 
-	float factor = CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5);
+	float factor = static_cast<float>(CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
 	float map_dz = -edit.drag_screen_dy * factor;
 
 	float step = 8.0;  // TODO config item
@@ -859,16 +859,16 @@ void Render3D_DragSectors()
 
 static void DragThings_Update()
 {
-	float ow = main_win->canvas->w();
+	float ow = static_cast<float>(main_win->canvas->w());
 //	float oh = main_win->canvas->h();
 
-	float x_slope = 100.0 / render_pixel_aspect;
+	float x_slope = 100.0f / render_pixel_aspect;
 //	float y_slope = (float)oh / (float)ow;
 
 	float dist = CLAMP(20, edit.drag_point_dist, 1000);
 
-	float x_factor = dist / (ow * 0.5);
-	float y_factor = dist / (ow * x_slope * 0.5);
+	float x_factor = dist / (ow * 0.5f);
+	float y_factor = dist / (ow * x_slope * 0.5f);
 
 	if (edit.drag_thing_up_down)
 	{
@@ -924,11 +924,11 @@ static void DragThings_Update()
 
 	const Thing *T = Things[edit.drag_thing_num];
 
-	float old_x = T->x();
-	float old_y = T->y();
+	float old_x = static_cast<float>(T->x());
+	float old_y = static_cast<float>(T->y());
 
-	float new_x = old_x + dx * side_vx;
-	float new_y = old_y + dx * side_vy;
+	float new_x = static_cast<float>(old_x + dx * side_vx);
+	float new_y = static_cast<float>(old_y + dx * side_vy);
 
 	// recompute forward/back vector
 	fwd_vx = new_x - r_view.x;
@@ -938,8 +938,8 @@ static void DragThings_Update()
 	if (fwd_len < 1)
 		fwd_len = 1;
 
-	new_x = new_x + dy * fwd_vx / fwd_len;
-	new_y = new_y + dy * fwd_vy / fwd_len;
+	new_x = static_cast<float>(new_x + dy * fwd_vx / fwd_len);
+	new_y = static_cast<float>(new_y + dy * fwd_vy / fwd_len);
 
 	// handle a change in floor height
 	Objid old_sec;
@@ -950,8 +950,8 @@ static void DragThings_Update()
 
 	if (old_sec.valid() && new_sec.valid())
 	{
-		float old_z = Sectors[old_sec.num]->floorh;
-		float new_z = Sectors[new_sec.num]->floorh;
+		float old_z = static_cast<float>(Sectors[old_sec.num]->floorh);
+		float new_z = static_cast<float>(Sectors[new_sec.num]->floorh);
 
 		// intent here is to show proper position, NOT raise/lower things.
 		// [ perhaps add a new variable? ]
@@ -1064,9 +1064,9 @@ void Render3D_UpdateHighlight()
 
 void Render3D_Navigate()
 {
-	float delay_ms = Nav_TimeDiff();
+	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
-	delay_ms = delay_ms / 1000.0;
+	delay_ms = delay_ms / 1000.0f;
 
 	keycode_t mod = 0;
 
@@ -1082,8 +1082,8 @@ void Render3D_Navigate()
 		float fwd   = edit.nav_fwd   - edit.nav_back;
 		float right = edit.nav_right - edit.nav_left;
 
-		float dx = r_view.Cos * fwd + r_view.Sin * right;
-		float dy = r_view.Sin * fwd - r_view.Cos * right;
+		float dx = static_cast<float>(r_view.Cos * fwd + r_view.Sin * right);
+		float dy = static_cast<float>(r_view.Sin * fwd - r_view.Cos * right);
 
 		dx = dx * mod_factor * mod_factor;
 		dy = dy * mod_factor * mod_factor;
@@ -1106,7 +1106,7 @@ void Render3D_Navigate()
 		dang = dang * mod_factor * delay_ms;
 		dang = CLAMP(-90, dang, 90);
 
-		r_view.SetAngle(r_view.angle + dang);
+		r_view.SetAngle(static_cast<float>(r_view.angle + dang));
 	}
 
 	main_win->info_bar->SetMouse(r_view.x, r_view.y);
@@ -1529,7 +1529,7 @@ void Render3D_GetCameraPos(double *x, double *y, float *angle)
 	*y = r_view.y;
 
 	// convert angle from radians to degrees
-	*angle = r_view.angle * 180.0 / M_PI;
+	*angle = static_cast<float>(r_view.angle * 180.0 / M_PI);
 }
 
 
@@ -1541,7 +1541,7 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens)
 		r_view.y = atof(tokens[2].c_str());
 		r_view.z = atof(tokens[3].c_str());
 
-		r_view.SetAngle(atof(tokens[4].c_str()));
+		r_view.SetAngle(static_cast<float>(atof(tokens[4].c_str())));
 		return true;
 	}
 
@@ -1602,7 +1602,7 @@ void Render3D_WriteUser(FILE *fp)
 
 void R3D_Forward()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x += r_view.Cos * dist;
 	r_view.y += r_view.Sin * dist;
@@ -1613,7 +1613,7 @@ void R3D_Forward()
 
 void R3D_Backward()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x -= r_view.Cos * dist;
 	r_view.y -= r_view.Sin * dist;
@@ -1624,7 +1624,7 @@ void R3D_Backward()
 
 void R3D_Left()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x -= r_view.Sin * dist;
 	r_view.y += r_view.Cos * dist;
@@ -1635,7 +1635,7 @@ void R3D_Left()
 
 void R3D_Right()
 {
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x += r_view.Sin * dist;
 	r_view.y -= r_view.Cos * dist;
@@ -1654,7 +1654,7 @@ void R3D_Up()
 
 	r_view.gravity = false;
 
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.z += dist;
 
@@ -1671,7 +1671,7 @@ void R3D_Down()
 
 	r_view.gravity = false;
 
-	float dist = atof(EXEC_Param[0]);
+	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.z -= dist;
 
@@ -1681,12 +1681,12 @@ void R3D_Down()
 
 void R3D_Turn()
 {
-	float angle = atof(EXEC_Param[0]);
+	float angle = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	angle = angle * M_PI / 180.0;
+	angle = static_cast<float>(angle * M_PI / 180.0);
 
-	r_view.SetAngle(r_view.angle + angle);
+	r_view.SetAngle(static_cast<float>(r_view.angle + angle));
 
 	RedrawMap();
 }
@@ -1713,7 +1713,7 @@ void R3D_NAV_Forward()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_fwd = atof(EXEC_Param[0]);
+	edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Forward_release);
 }
@@ -1732,7 +1732,7 @@ void R3D_NAV_Back()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_back = atof(EXEC_Param[0]);
+	edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Back_release);
 }
@@ -1751,7 +1751,7 @@ void R3D_NAV_Right()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_right = atof(EXEC_Param[0]);
+	edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Right_release);
 }
@@ -1770,7 +1770,7 @@ void R3D_NAV_Left()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_left = atof(EXEC_Param[0]);
+	edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Left_release);
 }
@@ -1797,7 +1797,7 @@ void R3D_NAV_Up()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_up = atof(EXEC_Param[0]);
+	edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Up_release);
 }
@@ -1824,7 +1824,7 @@ void R3D_NAV_Down()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_down = atof(EXEC_Param[0]);
+	edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_Down_release);
 }
@@ -1843,10 +1843,10 @@ void R3D_NAV_TurnLeft()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float turn = atof(EXEC_Param[0]);
+	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	edit.nav_turn_L = turn * M_PI / 180.0;
+	edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnLeft_release);
 }
@@ -1865,10 +1865,10 @@ void R3D_NAV_TurnRight()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float turn = atof(EXEC_Param[0]);
+	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	edit.nav_turn_R = turn * M_PI / 180.0;
+	edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
 
 	Nav_SetKey(EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
@@ -1986,12 +1986,12 @@ void R3D_Toggle()
 
 void R3D_WHEEL_Move()
 {
-	float dx = Fl::event_dx();
-	float dy = Fl::event_dy();
+	float dx = static_cast<float>(Fl::event_dx());
+	float dy = static_cast<float>(Fl::event_dy());
 
 	dy = 0 - dy;
 
-	float speed = atof(EXEC_Param[0]);
+	float speed = static_cast<float>(atof(EXEC_Param[0]));
 
 	if (Exec_HasFlag("/LAX"))
 	{

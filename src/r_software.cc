@@ -259,13 +259,13 @@ public:
 
 			if (A_other >= 0)
 			{
-				int ax = Vertices[A_other]->x();
-				int ay = Vertices[A_other]->y();
+				int ax = static_cast<int>(Vertices[A_other]->x());
+				int ay = static_cast<int>(Vertices[A_other]->y());
 
-				int bx1 = B->ld->Start()->x();
-				int by1 = B->ld->Start()->y();
-				int bx2 = B->ld->End()->x();
-				int by2 = B->ld->End()->y();
+				int bx1 = static_cast<int>(B->ld->Start()->x());
+				int by1 = static_cast<int>(B->ld->Start()->y());
+				int bx2 = static_cast<int>(B->ld->End()->x());
+				int by2 = static_cast<int>(B->ld->End()->y());
 
 				int cx = (int)r_view.x;  // camera
 				int cy = (int)r_view.y;
@@ -617,19 +617,19 @@ public:
 	static inline float PointToAngle(float x, float y)
 	{
 		if (-0.01 < x && x < 0.01)
-			return (y > 0) ? M_PI/2 : (3 * M_PI/2);
+			return static_cast<float>((y > 0) ? M_PI/2 : (3 * M_PI/2));
 
 		float angle = atan2(y, x);
 
 		if (angle < 0)
-			angle += 2*M_PI;
+			angle += static_cast<float>(2*M_PI);
 
 		return angle;
 	}
 
 	static inline int AngleToX(float ang)
 	{
-		float t = tan(M_PI/2 - ang);
+		float t = static_cast<float>(tan(M_PI/2 - ang));
 
 		int x = int(r_view.aspect_sw * t);
 
@@ -647,12 +647,12 @@ public:
 	{
 		x = x * 2 - r_view.screen_w;
 
-		float ang = M_PI/2 + atan(x / r_view.aspect_sw);
+		float ang = static_cast<float>(M_PI/2 + atan(x / r_view.aspect_sw));
 
 		if (ang < 0)
 			ang = 0;
 		else if (ang > M_PI)
-			ang = M_PI;
+			ang = static_cast<float>(M_PI);
 
 		return ang;
 	}
@@ -670,7 +670,7 @@ public:
 	{
 		x = x * 2 - r_view.screen_w;
 
-		float tx = x / iz / r_view.aspect_sw;
+		float tx = static_cast<float>(x / iz / r_view.aspect_sw);
 
 		return tx;
 	}
@@ -695,14 +695,14 @@ public:
 		if (y == 0)
 			return 999999;
 
-		return r_view.aspect_sh * (sec_h - r_view.z) / y;
+		return static_cast<float>(r_view.aspect_sh * (sec_h - r_view.z) / y);
 	}
 
 	static inline float YToSecH(int y, double iz)
 	{
 		y = y * 2 - r_view.screen_h;
 
-		return r_view.z - (float(y) / r_view.aspect_sh / iz);
+		return static_cast<float>(r_view.z - (float(y) / r_view.aspect_sh / iz));
 	}
 
 	void AddLine(int ld_index)
@@ -715,15 +715,15 @@ public:
 		if (! ld->Right())
 			return;
 
-		float x1 = ld->Start()->x() - r_view.x;
-		float y1 = ld->Start()->y() - r_view.y;
-		float x2 = ld->End()->x() - r_view.x;
-		float y2 = ld->End()->y() - r_view.y;
+		float x1 = static_cast<float>(ld->Start()->x() - r_view.x);
+		float y1 = static_cast<float>(ld->Start()->y() - r_view.y);
+		float x2 = static_cast<float>(ld->End()->x() - r_view.x);
+		float y2 = static_cast<float>(ld->End()->y() - r_view.y);
 
-		float tx1 = x1 * r_view.Sin - y1 * r_view.Cos;
-		float ty1 = x1 * r_view.Cos + y1 * r_view.Sin;
-		float tx2 = x2 * r_view.Sin - y2 * r_view.Cos;
-		float ty2 = x2 * r_view.Cos + y2 * r_view.Sin;
+		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
+		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
+		float tx2 = static_cast<float>(x2 * r_view.Sin - y2 * r_view.Cos);
+		float ty2 = static_cast<float>(x2 * r_view.Cos + y2 * r_view.Sin);
 
 		// reject line if complete behind viewplane
 		if (ty1 <= 0 && ty2 <= 0)
@@ -734,7 +734,7 @@ public:
 		float span = angle1 - angle2;
 
 		if (span < 0)
-			span += 2*M_PI;
+			span += static_cast<float>(2*M_PI);
 
 		int side = SIDE_RIGHT;
 
@@ -758,14 +758,14 @@ public:
 
 		float base_ang = angle1;
 
-		float leftclip  = (3 * M_PI / 4);
-		float rightclip = M_PI / 4;
+		float leftclip  = static_cast<float>(3 * M_PI / 4);
+		float rightclip = static_cast<float>(M_PI / 4);
 
 		float tspan1 = angle1 - rightclip;
 		float tspan2 = leftclip - angle2;
 
-		if (tspan1 < 0) tspan1 += 2*M_PI;
-		if (tspan2 < 0) tspan2 += 2*M_PI;
+		if (tspan1 < 0) tspan1 += static_cast<float>(2*M_PI);
+		if (tspan2 < 0) tspan2 += static_cast<float>(2*M_PI);
 
 		if (tspan1 > M_PI/2)
 		{
@@ -863,11 +863,11 @@ public:
 
 		const thingtype_t &info = M_GetThingType(th->type);
 
-		float x = th->x() - r_view.x;
-		float y = th->y() - r_view.y;
+		float x = static_cast<float>(th->x() - r_view.x);
+		float y = static_cast<float>(th->y() - r_view.y);
 
-		float tx = x * r_view.Sin - y * r_view.Cos;
-		float ty = x * r_view.Cos + y * r_view.Sin;
+		float tx = static_cast<float>(x * r_view.Sin - y * r_view.Cos);
+		float ty = static_cast<float>(x * r_view.Cos + y * r_view.Sin);
 
 		// reject sprite if complete behind viewplane
 		if (ty < 4)
@@ -882,11 +882,11 @@ public:
 		{
 			sprite = IM_UnknownSprite();
 			is_unknown = true;
-			scale = 0.33;
+			scale = 0.33f;
 		}
 
-		float tx1 = tx - sprite->width() * scale / 2.0;
-		float tx2 = tx + sprite->width() * scale / 2.0;
+		float tx1 = tx - sprite->width() * scale / 2.0f;
+		float tx2 = tx + sprite->width() * scale / 2.0f;
 
 		double iz = 1 / ty;
 
@@ -931,13 +931,13 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
-			h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->h();
-			h1 = h2 - sprite->height() * scale;
+			h2 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->h());
+			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
-			h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->h();
-			h2 = h1 + sprite->height() * scale;
+			h1 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->h());
+			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
 		// create drawwall structure
@@ -985,7 +985,7 @@ public:
 
 	void QueryCalcCoord(const DrawWall *dw, obj_type_e what, int part)
 	{
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		if (what == OBJ_SECTORS)
 		{
@@ -1000,18 +1000,18 @@ public:
 			dist = 4.0;
 
 		float ang = XToAngle(query_sx);
-		float modv = cos(ang - M_PI/2);
+		float modv = static_cast<float>(cos(ang - M_PI/2));
 
-		float t_cos = cos(M_PI + -r_view.angle + ang) / modv;
-		float t_sin = sin(M_PI + -r_view.angle + ang) / modv;
+		float t_cos = static_cast<float>(cos(M_PI + -r_view.angle + ang) / modv);
+		float t_sin = static_cast<float>(sin(M_PI + -r_view.angle + ang) / modv);
 
-		query_map_x = r_view.x - t_sin * dist;
-		query_map_y = r_view.y - t_cos * dist;
+		query_map_x = static_cast<float>(r_view.x - t_sin * dist);
+		query_map_y = static_cast<float>(r_view.y - t_cos * dist);
 		query_map_z = YToSecH(query_sy, 1.0 / dist);
 
 		// ensure we never produce X == 0
 		if (query_map_x == 0)
-			query_map_x = 0.01;
+			query_map_x = 0.01f;
 	}
 
 	void HighlightWallBit(const DrawWall *dw, int ld_index, int part)
@@ -1267,25 +1267,25 @@ public:
 				(!edit.dragged.valid() || edit.dragged.num == th_index))
 			{
 				// re-project thing onto the viewplane
-				float dx = edit.drag_cur_x - edit.drag_start_x;
-				float dy = edit.drag_cur_y - edit.drag_start_y;
-				float dz = edit.drag_cur_z - edit.drag_start_z;
+				float dx = static_cast<float>(edit.drag_cur_x - edit.drag_start_x);
+				float dy = static_cast<float>(edit.drag_cur_y - edit.drag_start_y);
+				float dz = static_cast<float>(edit.drag_cur_z - edit.drag_start_z);
 
 				const Thing *T = Things[dw->th];
 
-				float x = T->x() + dx - r_view.x;
-				float y = T->y() + dy - r_view.y;
+				float x = static_cast<float>(T->x() + dx - r_view.x);
+				float y = static_cast<float>(T->y() + dy - r_view.y);
 
-				float tx = x * r_view.Sin - y * r_view.Cos;
-				float ty = x * r_view.Cos + y * r_view.Sin;
+				float tx = static_cast<float>(x * r_view.Sin - y * r_view.Cos);
+				float ty = static_cast<float>(x * r_view.Cos + y * r_view.Sin);
 
 				if (ty < 1) ty = 1;
 
 				float scale   = dw->normal;
 				Img_c *sprite = dw->ceil.img;
 
-				float tx1 = tx - sprite->width() * scale / 2.0;
-				float tx2 = tx + sprite->width() * scale / 2.0;
+				float tx1 = static_cast<float>(tx - sprite->width() * scale / 2.0);
+				float tx2 = static_cast<float>(tx + sprite->width() * scale / 2.0);
 
 				double iz = 1 / ty;
 
@@ -1296,17 +1296,17 @@ public:
 
 				if (dw->side & THINGDEF_CEIL)
 				{
-					h2 = (is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - T->h();
-					h1 = h2 - sprite->height() * scale;
+					h2 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - T->h());
+					h1 = static_cast<int>(h2 - sprite->height() * scale);
 				}
 				else
 				{
-					h1 = (is_sector(thsec) ? Sectors[thsec]->floorh : 0) + T->h();
-					h2 = h1 + sprite->height() * scale;
+					h1 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->floorh : 0) + T->h());
+					h2 = static_cast<int>(h1 + sprite->height() * scale);
 				}
 
-				h1 = h1 + dz - 1;
-				h2 = h2 + dz + 1;
+				h1 = static_cast<int>(h1 + dz - 1);
+				h2 = static_cast<int>(h2 + dz + 1);
 
 				y1 = DistToY(iz, h2);
 				y2 = DistToY(iz, h1);
@@ -1435,10 +1435,10 @@ public:
 		int th = surf.img->height();
 
 		float ang = XToAngle(x);
-		float modv = cos(ang - M_PI/2);
+		float modv = static_cast<float>(cos(ang - M_PI/2));
 
-		float t_cos = cos(M_PI + -r_view.angle + ang) / modv;
-		float t_sin = sin(M_PI + -r_view.angle + ang) / modv;
+		float t_cos = static_cast<float>(cos(M_PI + -r_view.angle + ang) / modv);
+		float t_sin = static_cast<float>(sin(M_PI + -r_view.angle + ang) / modv);
 
 		dest += x + y1 * r_view.screen_w;
 
@@ -1469,7 +1469,7 @@ public:
 		int th = surf.img->height();
 
 		int  light = dw->wall_light;
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* compute texture X coord */
 
@@ -1485,7 +1485,7 @@ public:
 		float dh = surf.tex_h - YToSecH(y2, dw->cur_iz);
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
-		hh += 0.2;
+		hh += 0.2f;
 
 		src  += tx;
 		dest += x + y1 * r_view.screen_w;
@@ -1531,7 +1531,7 @@ public:
 	void SolidTexColumn(DrawWall *dw, DrawSurf& surf, int x, int y1, int y2)
 	{
 		int  light = dw->wall_light;
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		img_pixel_t *dest = r_view.screen;
 
@@ -1655,7 +1655,7 @@ public:
 
 		int thsec = r_view.thing_sectors[dw->th];
 		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
-		float dist = 1.0 / dw->cur_iz;
+		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* fill pixels */
 

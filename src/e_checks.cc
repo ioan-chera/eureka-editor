@@ -2355,15 +2355,15 @@ static int linedef_pos_cmp(int A, int B)
 	const LineDef *AL = LineDefs[A];
 	const LineDef *BL = LineDefs[B];
 
-	int A_x1 = AL->Start()->x();
-	int A_y1 = AL->Start()->y();
-	int A_x2 = AL->End()->x();
-	int A_y2 = AL->End()->y();
+	int A_x1 = static_cast<int>(AL->Start()->x());
+	int A_y1 = static_cast<int>(AL->Start()->y());
+	int A_x2 = static_cast<int>(AL->End()->x());
+	int A_y2 = static_cast<int>(AL->End()->y());
 
-	int B_x1 = BL->Start()->x();
-	int B_y1 = BL->Start()->y();
-	int B_x2 = BL->End()->x();
-	int B_y2 = BL->End()->y();
+	int B_x1 = static_cast<int>(BL->Start()->x());
+	int B_y1 = static_cast<int>(BL->Start()->y());
+	int B_x2 = static_cast<int>(BL->End()->x());
+	int B_y2 = static_cast<int>(BL->End()->y());
 
 	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
 	{

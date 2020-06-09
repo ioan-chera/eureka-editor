@@ -403,8 +403,8 @@ void CMD_BrowserMode()
 void CMD_Scroll()
 {
 	// these are percentages
-	float delta_x = atof(EXEC_Param[0]);
-	float delta_y = atof(EXEC_Param[1]);
+	float delta_x = static_cast<float>(atof(EXEC_Param[0]));
+	float delta_y = static_cast<float>(atof(EXEC_Param[1]));
 
 	if (delta_x == 0 && delta_y == 0)
 	{
@@ -414,8 +414,8 @@ void CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta_x = delta_x * base_size / 100.0 / grid.Scale;
-	delta_y = delta_y * base_size / 100.0 / grid.Scale;
+	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
+	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
 
 	grid.Scroll(delta_x, delta_y);
 }
@@ -434,9 +434,9 @@ void CMD_NAV_Scroll_Left()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_left = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release);
 }
@@ -455,9 +455,9 @@ void CMD_NAV_Scroll_Right()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_right = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release);
 }
@@ -476,9 +476,9 @@ void CMD_NAV_Scroll_Up()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_up = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release);
 }
@@ -497,9 +497,9 @@ void CMD_NAV_Scroll_Down()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	float perc = atof(EXEC_Param[0]);
+	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_down = perc * base_size / 100.0 / grid.Scale;
+	edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release);
 }
@@ -515,7 +515,7 @@ void CMD_NAV_MouseScroll()
 	if (! EXEC_CurKey)
 		return;
 
-	edit.panning_speed = atof(EXEC_Param[0]);
+	edit.panning_speed = static_cast<float>(atof(EXEC_Param[0]));
 	edit.panning_lax = Exec_HasFlag("/LAX");
 
 	if (! edit.is_navigating)
@@ -582,7 +582,7 @@ static void DoBeginDrag()
 		if (edit.mode == OBJ_THINGS)
 		{
 			edit.drag_thing_num = edit.clicked.num;
-			edit.drag_thing_floorh = edit.drag_start_z;
+			edit.drag_thing_floorh = static_cast<float>(edit.drag_start_z);
 			edit.drag_thing_up_down = (Level_format != MAPF_Doom && !grid.snap);
 
 			// get thing's floor
@@ -594,7 +594,7 @@ static void DoBeginDrag()
 				GetNearObject(sec, OBJ_SECTORS, T->x(), T->y());
 
 				if (sec.valid())
-					edit.drag_thing_floorh = Sectors[sec.num]->floorh;
+					edit.drag_thing_floorh = static_cast<float>(Sectors[sec.num]->floorh);
 			}
 		}
 	}
@@ -760,11 +760,11 @@ void CMD_ACT_Click()
 		if (edit.highlight.type == OBJ_THINGS)
 		{
 			const Thing *T = Things[edit.highlight.num];
-			edit.drag_point_dist = r_view.DistToViewPlane(T->x(), T->y());
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
 		}
 		else
 		{
-			edit.drag_point_dist = r_view.DistToViewPlane(edit.map_x, edit.map_y);
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(edit.map_x, edit.map_y));
 		}
 
 		edit.clicked = edit.highlight;
@@ -882,8 +882,8 @@ void Transform_Update()
 
 	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
 	{
-		int angle1 = (int)ComputeAngle(dx1, dy1);
-		int angle0 = (int)ComputeAngle(dx0, dy0);
+		int angle1 = (int)ComputeAngle(static_cast<int>(dx1), static_cast<int>(dy1));
+		int angle0 = (int)ComputeAngle(static_cast<int>(dx0), static_cast<int>(dy0));
 
 		edit.trans_param.rotate = angle1 - angle0;
 
@@ -1027,7 +1027,7 @@ void CMD_ACT_Transform()
 
 void CMD_WHEEL_Scroll()
 {
-	float speed = atof(EXEC_Param[0]);
+	float speed = static_cast<float>(atof(EXEC_Param[0]));
 
 	if (Exec_HasFlag("/LAX"))
 	{
@@ -1039,12 +1039,12 @@ void CMD_WHEEL_Scroll()
 			speed *= 3.0;
 	}
 
-	float delta_x =     wheel_dx;
-	float delta_y = 0 - wheel_dy;
+	float delta_x = static_cast<float>(wheel_dx);
+	float delta_y = static_cast<float>(0 - wheel_dy);
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	speed = speed * base_size / 100.0 / grid.Scale;
+	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
 	grid.Scroll(delta_x * speed, delta_y * speed);
 }
@@ -1114,8 +1114,8 @@ void CMD_Zoom()
 		return;
 	}
 
-	int mid_x = edit.map_x;
-	int mid_y = edit.map_y;
+	int mid_x = static_cast<int>(edit.map_x);
+	int mid_y = static_cast<int>(edit.map_y);
 
 	if (Exec_HasFlag("/center"))
 	{
@@ -1296,7 +1296,7 @@ void CMD_GRID_Zoom()
 	if (scale < 0)
 		scale = -1.0 / scale;
 
-	float S1 = grid.Scale;
+	float S1 = static_cast<float>(grid.Scale);
 
 	grid.NearestScale(scale);
 

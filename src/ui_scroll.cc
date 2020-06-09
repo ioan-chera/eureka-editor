@@ -393,13 +393,13 @@ void UI_CanvasScroll::UpdateBounds_X()
 		return;
 	}
 
-	last_bounds[0] = Map_bound_x1;
-	last_bounds[1] = Map_bound_x2;
+	last_bounds[0] = static_cast<int>(Map_bound_x1);
+	last_bounds[1] = static_cast<int>(Map_bound_x2);
 
-	int expand = 512 + (Map_bound_x2 - Map_bound_x1) / 8;
+	int expand = static_cast<int>(512 + (Map_bound_x2 - Map_bound_x1) / 8);
 
-	bound_x1 = Map_bound_x1 - expand;
-	bound_x2 = Map_bound_x2 + expand;
+	bound_x1 = static_cast<int>(Map_bound_x1 - expand);
+	bound_x2 = static_cast<int>(Map_bound_x2 + expand);
 
 	Adjust_X();
 }
@@ -413,13 +413,13 @@ void UI_CanvasScroll::UpdateBounds_Y()
 		return;
 	}
 
-	last_bounds[2] = Map_bound_y1;
-	last_bounds[3] = Map_bound_y2;
+	last_bounds[2] = static_cast<int>(Map_bound_y1);
+	last_bounds[3] = static_cast<int>(Map_bound_y2);
 
-	int expand = 512 + (Map_bound_y2 - Map_bound_y1) / 8;
+	int expand = static_cast<int>(512 + (Map_bound_y2 - Map_bound_y1) / 8);
 
-	bound_y1 = Map_bound_y1 - expand;
-	bound_y2 = Map_bound_y2 + expand;
+	bound_y1 = static_cast<int>(Map_bound_y1 - expand);
+	bound_y2 = static_cast<int>(Map_bound_y2 + expand);
 
 	Adjust_Y();
 }
@@ -437,7 +437,7 @@ void UI_CanvasScroll::Adjust_X()
 	int cw = canvas->w();
 
 	int map_w = I_ROUND(cw / grid.Scale);
-	int map_x = grid.orig_x - map_w / 2;
+	int map_x = static_cast<int>(grid.orig_x - map_w / 2);
 
 	if (map_x > bound_x2 - map_w) map_x = bound_x2 - map_w;
 	if (map_x < bound_x1) map_x = bound_x1;
@@ -451,7 +451,7 @@ void UI_CanvasScroll::Adjust_Y()
 	int ch = canvas->h();
 
 	int map_h = I_ROUND(ch / grid.Scale);
-	int map_y = grid.orig_y - map_h / 2;
+	int map_y = static_cast<int>(grid.orig_y - map_h / 2);
 
 	// invert, since screen coords are the reverse of map coords
 	map_y = bound_y2 - map_h - (map_y - bound_y1);

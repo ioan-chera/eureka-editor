@@ -231,8 +231,8 @@ public:
 			const Sector *S = Sectors[sec];
 
 			infos[sec].Clear();
-			infos[sec].floors.f_plane.Init(S->floorh);
-			infos[sec].floors.c_plane.Init(S->ceilh);
+			infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
+			infos[sec].floors.c_plane.Init(static_cast<float>(S->ceilh));
 		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
@@ -725,9 +725,9 @@ public:
 		double A = (z2 -z1) / (F - E);
 		double B = z1 - A * E;
 
-		pl.xm = dx * A;
-		pl.ym = dy * A;
-		pl.zadd = B;
+		pl.xm = static_cast<float>(dx * A);
+		pl.ym = static_cast<float>(dy * A);
+		pl.zadd = static_cast<float>(B);
 		pl.sloped = true;
 	}
 };
@@ -761,10 +761,10 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 		sector_edge_t edge;
 
-		edge.x1 = L->Start()->x();
-		edge.y1 = L->Start()->y();
-		edge.x2 = L->End()->x();
-		edge.y2 = L->End()->y();
+		edge.x1 = static_cast<int>(L->Start()->x());
+		edge.y1 = static_cast<int>(L->Start()->y());
+		edge.x2 = static_cast<int>(L->End()->x());
+		edge.y2 = static_cast<int>(L->End()->y());
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)
@@ -873,7 +873,7 @@ fprintf(stderr, "  active_num:%d  low_y:%d  high_y:%d\n", active_num, low_y, hig
 		}
 
 		// compute a comparison X coordinate for each active edge
-		float mid_y = low_y + (high_y - low_y) * 0.5;
+		float mid_y = low_y + (high_y - low_y) * 0.5f;
 
 		for (unsigned int k = 0 ; k < active_edges.size() ; k++)
 		{
@@ -913,13 +913,13 @@ fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 			if (E1->line->right < 0) continue;
 			if (E2->line->right < 0) continue;
 
-			float lx1 = E1->CalcX(low_y);
-			float hx1 = E1->CalcX(high_y);
+			float lx1 = static_cast<float>(E1->CalcX(static_cast<float>(low_y)));
+			float hx1 = static_cast<float>(E1->CalcX(static_cast<float>(high_y)));
 
-			float lx2 = E2->CalcX(low_y);
-			float hx2 = E2->CalcX(high_y);
+			float lx2 = static_cast<float>(E2->CalcX(static_cast<float>(low_y)));
+			float hx2 = static_cast<float>(E2->CalcX(static_cast<float>(high_y)));
 
-			exinfo.sub.AddPolygon(lx1, lx2, low_y, hx1, hx2, high_y);
+			exinfo.sub.AddPolygon(lx1, lx2, static_cast<float>(low_y), hx1, hx2, static_cast<float>(high_y));
 		}
 
 		// ok, repeat process for next row

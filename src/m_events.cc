@@ -96,7 +96,7 @@ void Editor_SetAction(editor_action_e  new_action)
 
 void Editor_Zoom(int delta, int mid_x, int mid_y)
 {
-    float S1 = grid.Scale;
+    float S1 = static_cast<float>(grid.Scale);
 
     grid.AdjustScale(delta);
 
@@ -135,7 +135,7 @@ void Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 	}
 	else
 	{
-		float speed = edit.panning_speed / grid.Scale;
+		float speed = static_cast<float>(edit.panning_speed / grid.Scale);
 
 		double delta_x = ((double) -dx * speed);
 		double delta_y = ((double)  dy * speed);
@@ -163,9 +163,9 @@ void Editor_ClearNav()
 
 static void Navigate2D()
 {
-	float delay_ms = Nav_TimeDiff();
+	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
-	delay_ms = delay_ms / 1000.0;
+	delay_ms = delay_ms / 1000.0f;
 
 	keycode_t mod = 0;
 

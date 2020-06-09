@@ -725,7 +725,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		info.radius = atoi(argv[4]);
 		info.sprite = argv[5];
 		info.desc   = argv[6];
-		info.scale  = (nargs >= 7) ? atof(argv[7]) : 1.0;
+		info.scale  = static_cast<float>((nargs >= 7) ? atof(argv[7]) : 1.0);
 
 		int arg_count = MIN(nargs - 7, 5);
 		for (int i = 0 ; i < arg_count ; i++)

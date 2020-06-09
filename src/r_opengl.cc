@@ -89,7 +89,7 @@ static float DoomLightToFloat(int light, float dist)
 	if (usegamma > 0)
 		level = gammatable[usegamma][level];
 
-	return level / 255.0;
+	return level / 255.0f;
 }
 
 
@@ -111,19 +111,19 @@ public:
 	static inline float PointToAngle(float x, float y)
 	{
 		if (-0.01 < x && x < 0.01)
-			return (y > 0) ? M_PI/2 : (3 * M_PI/2);
+			return static_cast<float>((y > 0) ? M_PI/2 : (3 * M_PI/2));
 
 		float angle = atan2(y, x);
 
 		if (angle < 0)
-			angle += 2*M_PI;
+			angle += static_cast<float>(2*M_PI);
 
 		return angle;
 	}
 
 	static inline int AngleToX(float ang)
 	{
-		float t = tan(M_PI/2 - ang);
+		float t = static_cast<float>(tan(M_PI/2 - ang));
 
 		int x = int(r_view.aspect_sw * t);
 
@@ -257,21 +257,21 @@ public:
 							  double cx, double cy, float cz, float ctx, float cty,
 							  int clip, float r, float g, float b, int light)
 	{
-		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
+		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0f);
 
 		for ( ; clip < LCLIP_NUM ; clip++)
 		{
 			float cdist = light_clip_dists[clip];
 
-			level = DoomLightToFloat(light, cdist + 2.0);
+			level = DoomLightToFloat(light, cdist + 2.0f);
 
 			// coordinates of an infinite clipping line
-			float c_x = r_view.x + r_view.Cos * cdist;
-			float c_y = r_view.y + r_view.Sin * cdist;
+			float c_x = static_cast<float>(r_view.x + r_view.Cos * cdist);
+			float c_y = static_cast<float>(r_view.y + r_view.Sin * cdist);
 
 			// vector of clipping line (if camera is north, this is east)
-			float c_dx = r_view.Sin;
-			float c_dy = - r_view.Cos;
+			float c_dx = static_cast<float>(r_view.Sin);
+			float c_dy = static_cast<float>(- r_view.Cos);
 
 			// check which side the triangle points are on
 			double p1 = (ay - c_y) * c_dx - (ax - c_x) * c_dy;
@@ -298,8 +298,8 @@ public:
 				// and the edge AB is crossing the partition.
 				if (cat1 == 0)
 				{
-					float _x = cx;
-					float _y = cy;
+					float _x = static_cast<float>(cx);
+					float _y = static_cast<float>(cy);
 					float _z = cz;
 					float _tx = ctx;
 					float _ty = cty;
@@ -312,8 +312,8 @@ public:
 				}
 				else if (cat2 == 0)
 				{
-					float _x = cx;
-					float _y = cy;
+					float _x = static_cast<float>(cx);
+					float _y = static_cast<float>(cy);
 					float _z = cz;
 					float _tx = ctx;
 					float _ty = cty;
@@ -331,28 +331,28 @@ public:
 				double ix = ax + (bx - ax) * along;
 				double iy = ay + (by - ay) * along;
 				double iz = az + (bz - az) * along;
-				float itx = atx + (btx - atx) * along;
-				float ity = aty + (bty - aty) * along;
+				float itx = static_cast<float>(atx + (btx - atx) * along);
+				float ity = static_cast<float>(aty + (bty - aty) * along);
 
 				// draw the piece on FAR side of the clipping line,
 				// and keep going with the piece on the NEAR side.
 				if (cat1 > 0)
 				{
-					RawClippedTriangle(ix, iy, iz, itx, ity,
-									   cx, cy, cz, ctx, cty,
-									   ax, ay, az, atx, aty,
+					RawClippedTriangle(static_cast<float>(ix), static_cast<float>(iy), static_cast<float>(iz), itx, ity,
+						static_cast<float>(cx), static_cast<float>(cy), cz, ctx, cty,
+						static_cast<float>(ax), static_cast<float>(ay), az, atx, aty,
 									   r, g, b, level);
 
-					ax = ix; ay = iy; az = iz; atx = itx; aty = ity;
+					ax = ix; ay = iy; az = static_cast<float>(iz); atx = itx; aty = ity;
 				}
 				else
 				{
-					RawClippedTriangle(ix, iy, iz, itx, ity,
-									   cx, cy, cz, ctx, cty,
-									   bx, by, bz, btx, bty,
+					RawClippedTriangle(static_cast<float>(ix), static_cast<float>(iy), static_cast<float>(iz), itx, ity,
+						static_cast<float>(cx), static_cast<float>(cy), cz, ctx, cty,
+						static_cast<float>(bx), static_cast<float>(by), bz, btx, bty,
 									   r, g, b, level);
 
-					bx = ix; by = iy; bz = iz; btx = itx; bty = ity;
+					bx = ix; by = iy; bz = static_cast<float>(iz); btx = itx; bty = ity;
 				}
 
 				continue;
@@ -367,8 +367,8 @@ public:
 			// rotate triangle so that C is the tip of the triangle piece.
 			if (combo == 1 || combo == 6)
 			{
-				float _x = cx;
-				float _y = cy;
+				float _x = static_cast<float>(cx);
+				float _y = static_cast<float>(cy);
 				float _z = cz;
 				float _tx = ctx;
 				float _ty = cty;
@@ -380,8 +380,8 @@ public:
 			}
 			else if (combo == 2 || combo == 5)
 			{
-				float _x = cx;
-				float _y = cy;
+				float _x = static_cast<float>(cx);
+				float _y = static_cast<float>(cy);
 				float _z = cz;
 				float _tx = ctx;
 				float _ty = cty;
@@ -404,26 +404,26 @@ public:
 			double bc_y = by + (cy - by) * bc_along;
 			double bc_z = bz + (cz - bz) * bc_along;
 
-			float ac_tx = atx + (ctx - atx) * ac_along;
-			float ac_ty = aty + (cty - aty) * ac_along;
-			float bc_tx = btx + (ctx - btx) * bc_along;
-			float bc_ty = bty + (cty - bty) * bc_along;
+			float ac_tx = static_cast<float>(atx + (ctx - atx) * ac_along);
+			float ac_ty = static_cast<float>(aty + (cty - aty) * ac_along);
+			float bc_tx = static_cast<float>(btx + (ctx - btx) * bc_along);
+			float bc_ty = static_cast<float>(bty + (cty - bty) * bc_along);
 
 			// handle cases where triangle piece is on NEAR side.
 			if (combo == 3 || combo == 5 || combo == 6)
 			{
-				RawClippedTriangle(ax, ay, az, atx, aty,
-								   bx, by, bz, btx, bty,
-								   ac_x, ac_y, ac_z, ac_tx, ac_ty,
+				RawClippedTriangle(static_cast<float>(ax), static_cast<float>(ay), az, atx, aty,
+					static_cast<float>(bx), static_cast<float>(by), bz, btx, bty,
+					static_cast<float>(ac_x), static_cast<float>(ac_y), static_cast<float>(ac_z), ac_tx, ac_ty,
 								   r, g, b, level);
 
-				RawClippedTriangle(bx, by, bz, btx, bty,
-								   bc_x, bc_y, bc_z, bc_tx, bc_ty,
-								   ac_x, ac_y, ac_z, ac_tx, ac_ty,
+				RawClippedTriangle(static_cast<float>(bx), static_cast<float>(by), bz, btx, bty,
+					static_cast<float>(bc_x), static_cast<float>(bc_y), static_cast<float>(bc_z), bc_tx, bc_ty,
+					static_cast<float>(ac_x), static_cast<float>(ac_y), static_cast<float>(ac_z), ac_tx, ac_ty,
 								   r, g, b, level);
 
-				ax = ac_x; ay = ac_y; az = ac_z; atx = ac_tx; aty = ac_ty;
-				bx = bc_x; by = bc_y; bz = bc_z; btx = bc_tx; bty = bc_ty;
+				ax = ac_x; ay = ac_y; az = static_cast<float>(ac_z); atx = ac_tx; aty = ac_ty;
+				bx = bc_x; by = bc_y; bz = static_cast<float>(bc_z); btx = bc_tx; bty = bc_ty;
 
 				continue;
 			}
@@ -432,24 +432,24 @@ public:
 			// these cases require recursion to deal with the
 			// quadrilateral on the near side.
 			{
-				RawClippedTriangle(cx, cy, cz, ctx, cty,
-								   ac_x, ac_y, ac_z, ac_tx, ac_ty,
-								   bc_x, bc_y, bc_z, bc_tx, bc_ty,
+				RawClippedTriangle(static_cast<float>(cx), static_cast<float>(cy), cz, ctx, cty,
+					static_cast<float>(ac_x), static_cast<float>(ac_y), static_cast<float>(ac_z), ac_tx, ac_ty,
+					static_cast<float>(bc_x), static_cast<float>(bc_y), static_cast<float>(bc_z), bc_tx, bc_ty,
 								   r, g, b, level);
 
 				// recurse!
 				LightClippedTriangle(ax, ay, az, atx, aty,
-									 ac_x, ac_y, ac_z, ac_tx, ac_ty,
-									 bc_x, bc_y, bc_z, bc_tx, bc_ty,
+									 ac_x, ac_y, static_cast<float>(ac_z), ac_tx, ac_ty,
+									 bc_x, bc_y, static_cast<float>(bc_z), bc_tx, bc_ty,
 									 (clip + 1), r, g, b, light);
 
-				cx = bc_x; cy = bc_y; cz = bc_z; ctx = bc_tx; cty = bc_ty;
+				cx = bc_x; cy = bc_y; cz = static_cast<float>(bc_z); ctx = bc_tx; cty = bc_ty;
 			}
 		}
 
-		RawClippedTriangle(ax, ay, az, atx, aty,
-						   bx, by, bz, btx, bty,
-						   cx, cy, cz, ctx, cty,
+		RawClippedTriangle(static_cast<float>(ax), static_cast<float>(ay), az, atx, aty,
+			static_cast<float>(bx), static_cast<float>(by), bz, btx, bty,
+			static_cast<float>(cx), static_cast<float>(cy), cz, ctx, cty,
 						   r, g, b, level);
 	}
 
@@ -458,10 +458,10 @@ public:
 						float tx1, float tx2, float tex_top, float tex_scale,
 						char where, float r, float g, float b, float level)
 	{
-		float za1 = p1->SlopeZ(x1, y1);
-		float za2 = p2->SlopeZ(x1, y1);
-		float zb1 = p1->SlopeZ(x2, y2);
-		float zb2 = p2->SlopeZ(x2, y2);
+		float za1 = static_cast<float>(p1->SlopeZ(x1, y1));
+		float za2 = static_cast<float>(p2->SlopeZ(x1, y1));
+		float zb1 = static_cast<float>(p1->SlopeZ(x2, y2));
+		float zb2 = static_cast<float>(p2->SlopeZ(x2, y2));
 
 		// check heights [ for sides of slopes ]
 		if (za2 <= za1 && zb2 <= zb1)
@@ -500,21 +500,21 @@ public:
 						  float tx1, float tx2, float tex_top, float tex_scale,
 						  char where, float r, float g, float b, int light)
 	{
-		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0);
+		float level = DoomLightToFloat(light, light_clip_dists[LCLIP_NUM-1] + 2.0f);
 
 		for (int clip = 0 ; clip < LCLIP_NUM ; clip++)
 		{
 			float cdist = light_clip_dists[clip];
 
-			level = DoomLightToFloat(light, cdist + 2.0);
+			level = DoomLightToFloat(light, cdist + 2.0f);
 
 			// coordinates of an infinite clipping line
-			float c_x = r_view.x + r_view.Cos * cdist;
-			float c_y = r_view.y + r_view.Sin * cdist;
+			float c_x = static_cast<float>(r_view.x + r_view.Cos * cdist);
+			float c_y = static_cast<float>(r_view.y + r_view.Sin * cdist);
 
 			// vector of clipping line (if camera is north, this is east)
-			float c_dx = r_view.Sin;
-			float c_dy = - r_view.Cos;
+			float c_dx = static_cast<float>(r_view.Sin);
+			float c_dy = static_cast<float>(- r_view.Cos);
 
 			// check which side the start/end point is on
 			double n1 = (y1 - c_y) * c_dx - (x1 - c_x) * c_dy;
@@ -536,20 +536,20 @@ public:
 				double ix = x1 + (x2 - x1) * along;
 				double iy = y1 + (y2 - y1) * along;
 
-				float itx = tx1 + (tx2 - tx1) * along;
+				float itx = static_cast<float>(tx1 + (tx2 - tx1) * along);
 
 				// draw the piece on FAR side of the clipping line,
 				// and keep going with the piece on the NEAR side.
 				if (cat2 > 0)
 				{
-					RawClippedQuad(ix,iy,p1, x2,y2,p2, itx,tx2,tex_top,tex_scale,
+					RawClippedQuad(static_cast<float>(ix), static_cast<float>(iy),p1, static_cast<float>(x2), static_cast<float>(y2),p2, itx,tx2,tex_top,tex_scale,
 									where, r,g,b, level);
 
 					x2 = ix; y2 = iy; tx2 = itx;
 				}
 				else
 				{
-					RawClippedQuad(x1,y1,p1, ix,iy,p2, tx1,itx,tex_top,tex_scale,
+					RawClippedQuad(static_cast<float>(x1), static_cast<float>(y1),p1, static_cast<float>(ix), static_cast<float>(iy),p2, tx1,itx,tex_top,tex_scale,
 									where, r,g,b, level);
 
 					x1 = ix; y1 = iy; tx1 = itx;
@@ -557,7 +557,7 @@ public:
 			}
 		}
 
-		RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
+		RawClippedQuad(static_cast<float>(x1), static_cast<float>(y1),p1, static_cast<float>(x2), static_cast<float>(y2),p2, tx1,tx2,tex_top,tex_scale,
 						where, r,g,b, level);
 	}
 
@@ -598,9 +598,9 @@ public:
 		bool fullbright;
 		Img_c *img = FindFlat(fname, r0, g0, b0, fullbright);
 
-		float r = r0 / 255.0;
-		float g = g0 / 255.0;
-		float b = b0 / 255.0;
+		float r = r0 / 255.0f;
+		float g = g0 / 255.0f;
+		float b = b0 / 255.0f;
 
 		for (unsigned int i = 0 ; i < subdiv->polygons.size() ; i++)
 		{
@@ -615,21 +615,21 @@ public:
 			{
 				float ax = poly->mx[0];
 				float ay = poly->my[0];
-				float az = plane ? plane->SlopeZ(ax, ay) : z;
-				float atx = ax / 64.0;  // see note below
-				float aty = ay / 64.0;
+				float az = static_cast<float>(plane ? plane->SlopeZ(ax, ay) : z);
+				float atx = ax / 64.0f;  // see note below
+				float aty = ay / 64.0f;
 
 				float bx = poly->mx[1];
 				float by = poly->my[1];
-				float bz = plane ? plane->SlopeZ(bx, by) : z;
-				float btx = bx / 64.0;  // see note below
-				float bty = by / 64.0;
+				float bz = static_cast<float>(plane ? plane->SlopeZ(bx, by) : z);
+				float btx = bx / 64.0f;  // see note below
+				float bty = by / 64.0f;
 
 				float cx = poly->mx[2];
 				float cy = poly->my[2];
-				float cz = plane ? plane->SlopeZ(cx, cy) : z;
-				float ctx = cx / 64.0;
-				float cty = cy / 64.0;
+				float cz = static_cast<float>(plane ? plane->SlopeZ(cx, cy) : z);
+				float ctx = cx / 64.0f;
+				float cty = cy / 64.0f;
 
 				LightClippedTriangle(ax, ay, az, atx, aty,
 									 bx, by, bz, btx, bty,
@@ -640,9 +640,9 @@ public:
 				{
 					float dx = poly->mx[3];
 					float dy = poly->my[3];
-					float dz = plane ? plane->SlopeZ(dx, dy) : z;
-					float dtx = dx / 64.0;
-					float dty = dy / 64.0;
+					float dz = static_cast<float>(plane ? plane->SlopeZ(dx, dy) : z);
+					float dtx = dx / 64.0f;
+					float dty = dy / 64.0f;
 
 					LightClippedTriangle(ax, ay, az, atx, aty,
 										 cx, cy, cz, ctx, cty,
@@ -659,14 +659,14 @@ public:
 				{
 					float px = poly->mx[p];
 					float py = poly->my[p];
-					float pz = plane ? plane->SlopeZ(px, py) : z;
+					float pz = static_cast<float>(plane ? plane->SlopeZ(px, py) : z);
 
 					if (img)
 					{
 						// this logic follows ZDoom, which scales large flats to
 						// occupy a 64x64 unit area.  I presume wall textures
 						// used on floors or ceilings is the same....
-						glTexCoord2f(px / 64.0, py / 64.0);
+						glTexCoord2f(px / 64.0f, py / 64.0f);
 					}
 
 					glVertex3f(px, py, pz);
@@ -711,16 +711,16 @@ public:
 
 		if (img)
 		{
-			float img_w  = img->width();
-			float img_tw = RoundPOW2(img_w);
+			float img_w  = static_cast<float>(img->width());
+			float img_tw = static_cast<float>(RoundPOW2(static_cast<int>(img_w)));
 
-			float img_h  = img->height();
-			float img_th = RoundPOW2(img_h);
+			float img_h  = static_cast<float>(img->height());
+			float img_th = static_cast<float>(RoundPOW2(static_cast<int>(img_h)));
 
 			tx1 = 0;
 			tx2 = tx1 + ld_length;
 
-			tex_top = front->ceilh;
+			tex_top = static_cast<float>(front->ceilh);
 
 			if (where == 'W' && (ld->flags & MLF_LowerUnpegged))
 			{
@@ -731,14 +731,14 @@ public:
 			{
 				if (0 == (ld->flags & MLF_LowerUnpegged))
 				{
-					tex_top = back->floorh;
+					tex_top = static_cast<float>(back->floorh);
 				}
 				else
 				{
 					// an unpegged lower will align with a normal 1S wall,
 					// unless both front/back ceilings are sky....
 
-					tex_top = sky_upper ? back->ceilh : front->ceilh;
+					tex_top = static_cast<float>(sky_upper ? back->ceilh : front->ceilh);
 				}
 			}
 
@@ -753,7 +753,7 @@ public:
 			tex_top  += (img_th - img_h);
 			tex_top  += sd->y_offset;
 
-			tex_scale = 1.0 / img_th;
+			tex_scale = 1.0f / img_th;
 		}
 
 		glDisable(GL_ALPHA_TEST);
@@ -773,12 +773,12 @@ public:
 				light -= 16;
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
-							 where, r0,g0,b0, light);
+							 where, static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), light);
 		}
 		else
 		{
 			RawClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
-							where, r0,g0,b0, 1.0);
+							where, static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), 1.0);
 		}
 	}
 
@@ -795,15 +795,15 @@ public:
 		if (img == NULL)
 			return;
 
-		float img_w  = img->width();
-		float img_tw = RoundPOW2(img_w);
+		float img_w  = static_cast<float>(img->width());
+		float img_tw = static_cast<float>(RoundPOW2(static_cast<int>(img_w)));
 
-		float img_h  = img->height();
-		float img_th = RoundPOW2(img_h);
+		float img_h  = static_cast<float>(img->height());
+		float img_th = static_cast<float>(RoundPOW2(static_cast<int>(img_h)));
 
 		// compute Z coords and texture coords
-		float z1 = MAX(front->floorh, back->floorh);
-		float z2 = MIN(front->ceilh,  back->ceilh);
+		float z1 = static_cast<float>(MAX(front->floorh, back->floorh));
+		float z2 = static_cast<float>(MIN(front->ceilh,  back->ceilh));
 
 		if (z2 <= z1)
 			return;
@@ -834,7 +834,7 @@ public:
 		double g0 = (double)g / 255.0;
 		double b0 = (double)b / 255.0;
 
-		float tex_scale = 1.0 / img_th;
+		float tex_scale = 1.0f / img_th;
 
 		if (r_view.lighting && !fullbright)
 		{
@@ -847,12 +847,12 @@ public:
 				light -= 16;
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
-							 'R', r0,g0,b0, light);
+							 'R', static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), light);
 		}
 		else
 		{
 			RawClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
-							'R', r0,g0,b0, 1.0);
+							'R', static_cast<float>(r0), static_cast<float>(g0), static_cast<float>(b0), 1.0);
 		}
 	}
 
@@ -866,15 +866,15 @@ public:
 		if (! ld->Right())
 			return;
 
-		float x1 = ld->Start()->x() - r_view.x;
-		float y1 = ld->Start()->y() - r_view.y;
-		float x2 = ld->End()->x() - r_view.x;
-		float y2 = ld->End()->y() - r_view.y;
+		float x1 = static_cast<float>(ld->Start()->x() - r_view.x);
+		float y1 = static_cast<float>(ld->Start()->y() - r_view.y);
+		float x2 = static_cast<float>(ld->End()->x() - r_view.x);
+		float y2 = static_cast<float>(ld->End()->y() - r_view.y);
 
-		float tx1 = x1 * r_view.Sin - y1 * r_view.Cos;
-		float ty1 = x1 * r_view.Cos + y1 * r_view.Sin;
-		float tx2 = x2 * r_view.Sin - y2 * r_view.Cos;
-		float ty2 = x2 * r_view.Cos + y2 * r_view.Sin;
+		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
+		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
+		float tx2 = static_cast<float>(x2 * r_view.Sin - y2 * r_view.Cos);
+		float ty2 = static_cast<float>(x2 * r_view.Cos + y2 * r_view.Sin);
 
 		// reject line if complete behind viewplane
 		if (ty1 <= 0 && ty2 <= 0)
@@ -889,7 +889,7 @@ public:
 		float span = angle1 - angle2;
 
 		if (span < 0)
-			span += 2*M_PI;
+			span += static_cast<float>(2*M_PI);
 
 		int side = SIDE_RIGHT;
 
@@ -911,14 +911,14 @@ public:
 
 		// clip angles to view volume
 
-		float leftclip  = (3 * M_PI / 4);
-		float rightclip = M_PI / 4;
+		float leftclip  = static_cast<float>((3 * M_PI / 4));
+		float rightclip = static_cast<float>(M_PI / 4);
 
 		float tspan1 = angle1 - rightclip;
 		float tspan2 = leftclip - angle2;
 
-		if (tspan1 < 0) tspan1 += 2*M_PI;
-		if (tspan2 < 0) tspan2 += 2*M_PI;
+		if (tspan1 < 0) tspan1 += static_cast<float>(2*M_PI);
+		if (tspan2 < 0) tspan2 += static_cast<float>(2*M_PI);
 
 		if (tspan1 > M_PI/2)
 		{
@@ -972,10 +972,10 @@ public:
 
 		/* actually draw it... */
 
-		x1 = ld->Start()->x();
-		y1 = ld->Start()->y();
-		x2 = ld->End()->x();
-		y2 = ld->End()->y();
+		x1 = static_cast<float>(ld->Start()->x());
+		y1 = static_cast<float>(ld->Start()->y());
+		x2 = static_cast<float>(ld->End()->x());
+		y2 = static_cast<float>(ld->End()->y());
 
 		if (side == SIDE_LEFT)
 		{
@@ -1023,7 +1023,7 @@ public:
 				dummy = Sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 				{
-					dummy_fp.Init(dummy->floorh);
+					dummy_fp.Init(static_cast<float>(dummy->floorh));
 					f_floorp = &dummy_fp;
 				}
 			}
@@ -1076,8 +1076,8 @@ public:
 					else
 						tex = ef_sd->MidTex();
 
-					slope_plane_c p1; p1.Init(bottom_h);
-					slope_plane_c p2; p2.Init(top_h);
+					slope_plane_c p1; p1.Init(static_cast<float>(bottom_h));
+					slope_plane_c p2; p2.Init(static_cast<float>(top_h));
 
 					DrawSide('E', ld, sd, tex, front, back, false,
 						ld_len, x1, y1, &p1, x2, y2, &p2);
@@ -1094,8 +1094,8 @@ public:
 
 		if (sky_front && !sky_upper)
 		{
-			slope_plane_c p1; p1.Init(front->ceilh);
-			slope_plane_c p2; p2.Init(front->ceilh + 16384.0);
+			slope_plane_c p1; p1.Init(static_cast<float>(front->ceilh));
+			slope_plane_c p2; p2.Init(static_cast<float>(front->ceilh + 16384.0));
 
 			DrawSide('U', ld, sd, "-", front, NULL, true /* sky_upper */,
 				ld_len, x1, y1, &p1, x2, y2, &p2);
@@ -1124,45 +1124,45 @@ public:
 			if (dummy->floorh > sec->floorh && r_view.z < dummy->floorh)
 			{
 				// space C : underwater
-				DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->floorh, dummy->CeilTex());
-				DrawSectorPolygons(sec, subdiv, NULL, +1, sec->floorh, dummy->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
+				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(sec->floorh), dummy->FloorTex());
 
 				// this helps the view to not look weird when clipping around
 				if (dummy->ceilh > sec->floorh)
-					DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, sec->CeilTex());
+					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else if (dummy->ceilh < sec->ceilh && r_view.z > dummy->ceilh)
 			{
 				// space A : head over ceiling
-				DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, dummy->FloorTex());
-				DrawSectorPolygons(sec, subdiv, NULL, -1, sec->ceilh, dummy->CeilTex());
+				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(sec->ceilh), dummy->CeilTex());
 
 				if (dummy->floorh < sec->ceilh)
-					DrawSectorPolygons(sec, subdiv, NULL, +1, dummy->floorh, sec->FloorTex());
+					DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 			}
 			else if (dummy->floorh < sec->floorh)
 			{
 				// invisible platform
-				DrawSectorPolygons(sec, subdiv, NULL, +1, dummy->floorh, sec->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
 				if (!is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, sec->CeilTex());
+					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else
 			{
 				// space B : normal
-				DrawSectorPolygons(sec, subdiv, NULL, +1, dummy->floorh, sec->FloorTex());
+				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
 				if (!is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, NULL, -1, dummy->ceilh, sec->CeilTex());
+					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 		} else {
 
 			// normal sector
-			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, sec->floorh, sec->FloorTex());
+			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
 
 			if (!is_sky(sec->CeilTex()))
-				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, sec->ceilh, sec->CeilTex());
+				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
 		}
 
 		// draw planes of 3D floors
@@ -1192,8 +1192,8 @@ public:
 				std::swap(top_tex, bottom_tex);
 			}
 
-			DrawSectorPolygons(sec, subdiv, NULL, +1, top_h, top_tex);
-			DrawSectorPolygons(sec, subdiv, NULL, -1, bottom_h, bottom_tex);
+			DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
+			DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
 		}
 	}
 
@@ -1205,11 +1205,11 @@ public:
 
 		// project sprite to check if it is off-screen
 
-		float x = th->x() - r_view.x;
-		float y = th->y() - r_view.y;
+		float x = static_cast<float>(th->x() - r_view.x);
+		float y = static_cast<float>(th->y() - r_view.y);
 
-		float tx = x * r_view.Sin - y * r_view.Cos;
-		float ty = x * r_view.Cos + y * r_view.Sin;
+		float tx = static_cast<float>(x * r_view.Sin - y * r_view.Cos);
+		float ty = static_cast<float>(x * r_view.Cos + y * r_view.Sin);
 
 		// sprite is complete behind viewplane?
 		if (ty < 4)
@@ -1229,14 +1229,14 @@ public:
 		{
 			img = IM_UnknownSprite();
 			fullbright = true;
-			scale = 0.33;
+			scale = 0.33f;
 		}
 
 		float scale_w = img->width() * scale;
 		float scale_h = img->height() * scale;
 
-		float tx1 = tx - scale_w * 0.5;
-		float tx2 = tx + scale_w * 0.5;
+		float tx1 = tx - scale_w * 0.5f;
+		float tx2 = tx + scale_w * 0.5f;
 		float ty1, ty2;
 
 		double iz = 1 / ty;
@@ -1250,11 +1250,11 @@ public:
 		// sprite is potentially visible, so draw it
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = th->x() - r_view.Sin * scale_w * 0.5;
-		float y1 = th->y() + r_view.Cos * scale_w * 0.5;
+		float x1 = static_cast<float>(th->x() - r_view.Sin * scale_w * 0.5);
+		float y1 = static_cast<float>(th->y() + r_view.Cos * scale_w * 0.5);
 
-		float x2 = th->x() + r_view.Sin * scale_w * 0.5;
-		float y2 = th->y() - r_view.Cos * scale_w * 0.5;
+		float x2 = static_cast<float>(th->x() + r_view.Sin * scale_w * 0.5);
+		float y2 = static_cast<float>(th->y() - r_view.Cos * scale_w * 0.5);
 
 		int sec_num = r_view.thing_sectors[th_index];
 
@@ -1263,12 +1263,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
+			z2 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
+			z1 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1313,10 +1313,10 @@ public:
 		if (sd == NULL)
 			return;
 
-		float x1 = L->Start()->x();
-		float y1 = L->Start()->y();
-		float x2 = L->End()->x();
-		float y2 = L->End()->y();
+		float x1 = static_cast<float>(L->Start()->x());
+		float y1 = static_cast<float>(L->Start()->y());
+		float x2 = static_cast<float>(L->End()->x());
+		float y2 = static_cast<float>(L->End()->y());
 
 		// check that this side is facing the camera
 		int cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
@@ -1334,13 +1334,13 @@ public:
 		{
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				z1 = MIN(front->floorh, back->floorh);
-				z2 = MAX(front->floorh, back->floorh);
+				z1 = static_cast<float>(MIN(front->floorh, back->floorh));
+				z2 = static_cast<float>(MAX(front->floorh, back->floorh));
 			}
 			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				z1 = MIN(front->ceilh, back->ceilh);
-				z2 = MAX(front->ceilh, back->ceilh);
+				z1 = static_cast<float>(MIN(front->ceilh, back->ceilh));
+				z2 = static_cast<float>(MAX(front->ceilh, back->ceilh));
 			}
 			else
 			{
@@ -1349,7 +1349,7 @@ public:
 				if (! LD_RailHeights(zi1, zi2, L, sd, front, back))
 					return;
 
-				z1 = zi1; z2 = zi2;
+				z1 = static_cast<float>(zi1); z2 = static_cast<float>(zi2);
 			}
 		}
 		else  // one-sided line
@@ -1357,8 +1357,8 @@ public:
 			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
 				return;
 
-			z1 = front->floorh;
-			z2 = front->ceilh;
+			z1 = static_cast<float>(front->floorh);
+			z2 = static_cast<float>(front->ceilh);
 		}
 
 		glBegin(GL_LINE_LOOP);
@@ -1375,7 +1375,7 @@ public:
 	{
 		const Sector *sec = Sectors[sec_index];
 
-		float z = (part == PART_CEIL) ? sec->ceilh : sec->floorh;
+		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
 		// are we dragging this surface?
 		if (edit.action == ACT_DRAG &&
@@ -1400,10 +1400,10 @@ public:
 
 			if (L->TouchesSector(sec_index))
 			{
-				float x1 = L->Start()->x();
-				float y1 = L->Start()->y();
-				float x2 = L->End()->x();
-				float y2 = L->End()->y();
+				float x1 = static_cast<float>(L->Start()->x());
+				float y1 = static_cast<float>(L->Start()->y());
+				float x2 = static_cast<float>(L->End()->x());
+				float y2 = static_cast<float>(L->End()->y());
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);
@@ -1416,18 +1416,18 @@ public:
 	void HighlightThing(int th_index)
 	{
 		Thing *th = Things[th_index];
-		float tx = th->x();
-		float ty = th->y();
+		float tx = static_cast<float>(th->x());
+		float ty = static_cast<float>(th->y());
 
 		float drag_dz = 0;
 
 		if (edit.action == ACT_DRAG &&
 			(!edit.dragged.valid() || edit.dragged.num == th_index))
 		{
-			tx += (edit.drag_cur_x - edit.drag_start_x);
-			ty += (edit.drag_cur_y - edit.drag_start_y);
+			tx += static_cast<float>(edit.drag_cur_x - edit.drag_start_x);
+			ty += static_cast<float>(edit.drag_cur_y - edit.drag_start_y);
 
-			drag_dz = edit.drag_cur_z - edit.drag_start_z;
+			drag_dz = static_cast<float>(edit.drag_cur_z - edit.drag_start_z);
 		}
 
 		const thingtype_t &info = M_GetThingType(th->type);
@@ -1438,17 +1438,17 @@ public:
 		if (! img)
 		{
 			img = IM_UnknownSprite();
-			scale = 0.33;
+			scale = 0.33f;
 		}
 
 		float scale_w = img->width()  * scale;
 		float scale_h = img->height() * scale;
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = tx - r_view.Sin * scale_w * 0.5;
-		float y1 = ty + r_view.Cos * scale_w * 0.5;
-		float x2 = tx + r_view.Sin * scale_w * 0.5;
-		float y2 = ty - r_view.Cos * scale_w * 0.5;
+		float x1 = static_cast<float>(tx - r_view.Sin * scale_w * 0.5);
+		float y1 = static_cast<float>(ty + r_view.Cos * scale_w * 0.5);
+		float x2 = static_cast<float>(tx + r_view.Sin * scale_w * 0.5);
+		float y2 = static_cast<float>(ty - r_view.Cos * scale_w * 0.5);
 
 		int sec_num = r_view.thing_sectors[th_index];
 
@@ -1457,12 +1457,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = (is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h();
+			z2 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = (is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h();
+			z1 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1642,14 +1642,14 @@ public:
 		// the projection matrix creates the 3D perspective
 		glMatrixMode(GL_PROJECTION);
 
-		float x_slope = 100.0 / render_pixel_aspect;
+		float x_slope = 100.0f / render_pixel_aspect;
 		float y_slope = (float)oh / (float)ow;
 
 		// this matches behavior of S/W renderer.
 		// [ currently it is important since we use the S/W path
 		//   for querying what the mouse is pointing at ]
 		float z_near = x_slope;
-		float z_far  = render_far_clip - 8.0;
+		float z_far  = render_far_clip - 8.0f;
 
 		glLoadIdentity();
 		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, z_near, z_far);

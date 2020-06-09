@@ -188,7 +188,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 	// enlarge if too small
 	if (fit_x < 0.4 && fit_y < 0.4)
-		scale = scale / (2.5 * MAX(fit_x, fit_y));
+		scale = scale / (2.5f * MAX(fit_x, fit_y));
 
 
 	uchar *buf = new uchar[nw * nh * 3];
@@ -207,8 +207,8 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 			continue;
 		}
 
-		int ix = x / scale - (nw / scale - iw) / 2;
-		int iy = y / scale - (nh / scale - ih) / 2;
+		int ix = static_cast<int>(x / scale - (nw / scale - iw) / 2);
+		int iy = static_cast<int>(y / scale - (nh / scale - ih) / 2);
 
 		img_pixel_t pix = TRANS_PIXEL;
 

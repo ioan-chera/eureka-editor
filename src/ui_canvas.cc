@@ -202,7 +202,7 @@ int UI_Canvas::NORMALX(int len, double dx, double dy)
 	double res = dy;
 #endif
 
-	double got_len = hypotf(dx, dy);
+	double got_len = hypot(dx, dy);
 	if (got_len < 0.01)
 		return 0;
 
@@ -217,7 +217,7 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 	double res = -dx;
 #endif
 
-	double got_len = hypotf(dx, dy);
+	double got_len = hypot(dx, dy);
 	if (got_len < 0.01)
 		return 0;
 
@@ -432,7 +432,7 @@ void UI_Canvas::DrawMap()
 //
 void UI_Canvas::DrawGrid_Normal()
 {
-	float pixels_1 = grid.step * grid.Scale;
+	float pixels_1 = static_cast<float>(grid.step * grid.Scale);
 
 	if (pixels_1 < 1.6)
 	{
@@ -446,7 +446,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	int flat_step = 64;
 
-	float pixels_2 = flat_step * grid.Scale;
+	float pixels_2 = static_cast<float>(flat_step * grid.Scale);
 
 	Fl_Color flat_col = (grid.step < 64) ? normal_main_col : normal_flat_col;
 
@@ -461,12 +461,12 @@ void UI_Canvas::DrawGrid_Normal()
 	}
 	else
 	{
-		int gx = floor(map_lx / flat_step) * flat_step;
+		int gx = static_cast<int>(floor(map_lx / flat_step) * flat_step);
 
 		for (; gx <= map_hx; gx += flat_step)
 			DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = floor(map_ly / flat_step) * flat_step;
+		int gy = static_cast<int>(floor(map_ly / flat_step) * flat_step);
 
 		for (; gy <= map_hy; gy += flat_step)
 			DrawMapLine(map_lx, gy, map_hx, gy);
@@ -475,7 +475,7 @@ void UI_Canvas::DrawGrid_Normal()
 
 	Fl_Color main_col = (grid.step < 64) ? normal_small_col : normal_main_col;
 
-	float pixels_3 = grid.step * grid.Scale;
+	float pixels_3 = static_cast<float>(grid.step * grid.Scale);
 
 	if (pixels_3 < 4.2)
 		main_col = DarkerColor(main_col);
@@ -483,13 +483,13 @@ void UI_Canvas::DrawGrid_Normal()
 	RenderColor(main_col);
 
 	{
-		int gx = floor(map_lx / grid.step) * grid.step;
+		int gx = static_cast<int>(floor(map_lx / grid.step) * grid.step);
 
 		for (; gx <= map_hx; gx += grid.step)
 			if ((grid.step >= 64 || (gx & 63) != 0) && (gx != 0))
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = floor(map_ly / grid.step) * grid.step;
+		int gy = static_cast<int>(floor(map_ly / grid.step) * grid.step);
 
 		for (; gy <= map_hy; gy += grid.step)
 			if ((grid.step >= 64 || (gy & 63) != 0) && (gy != 0))
@@ -507,7 +507,7 @@ void UI_Canvas::DrawGrid_Dotty()
 	int grid_step_2 = 8 * grid_step_1;  // Map units between dim lines
 	int grid_step_3 = 8 * grid_step_2;  // Map units between bright lines
 
-	float pixels_1 = grid.step * grid.Scale;
+	float pixels_1 = static_cast<float>(grid.step * grid.Scale);
 
 
 	if (pixels_1 < 1.6)
@@ -522,12 +522,12 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	RenderColor(dotty_major_col);
 	{
-		int gx = floor(map_lx / grid_step_3) * grid_step_3;
+		int gx = static_cast<int>(floor(map_lx / grid_step_3) * grid_step_3);
 
 		for (; gx <= map_hx; gx += grid_step_3)
 			DrawMapLine(gx, map_ly-2, gx, map_hy+2);
 
-		int gy = floor(map_ly / grid_step_3) * grid_step_3;
+		int gy = static_cast<int>(floor(map_ly / grid_step_3) * grid_step_3);
 
 		for (; gy <= map_hy; gy += grid_step_3)
 			DrawMapLine(map_lx, gy, map_hx, gy);
@@ -539,13 +539,13 @@ void UI_Canvas::DrawGrid_Dotty()
 
 	RenderColor(dotty_minor_col);
 	{
-		int gx = floor(map_lx / grid_step_2) * grid_step_2;
+		int gx = static_cast<int>(floor(map_lx / grid_step_2) * grid_step_2);
 
 		for (; gx <= map_hx; gx += grid_step_2)
 			if (gx % grid_step_3 != 0)
 				DrawMapLine(gx, map_ly, gx, map_hy);
 
-		int gy = floor(map_ly / grid_step_2) * grid_step_2;
+		int gy = static_cast<int>(floor(map_ly / grid_step_2) * grid_step_2);
 
 		for (; gy <= map_hy; gy += grid_step_2)
 			if (gy % grid_step_3 != 0)
@@ -559,8 +559,8 @@ void UI_Canvas::DrawGrid_Dotty()
 		RenderColor(dotty_point_col);
 
 	{
-		int gx = floor(map_lx / grid_step_1) * grid_step_1;
-		int gy = floor(map_ly / grid_step_1) * grid_step_1;
+		int gx = static_cast<int>(floor(map_lx / grid_step_1) * grid_step_1);
+		int gy = static_cast<int>(floor(map_ly / grid_step_1) * grid_step_1);
 
 		for (int ny = gy; ny <= map_hy; ny += grid_step_1)
 		for (int nx = gx; nx <= map_hx; nx += grid_step_1)
@@ -603,7 +603,7 @@ void UI_Canvas::DrawMapBounds()
 //
 int vertex_radius(double scale)
 {
-	int r = 6 * (0.26 + scale / 2);
+	int r = static_cast<int>(6 * (0.26 + scale / 2));
 
 	if (r > 12) r = 12;
 
@@ -797,10 +797,10 @@ void UI_Canvas::DrawLinedefs()
 				if (edit.show_object_numbers)
 				{
 					if (s1 != NIL_OBJ)
-						DrawSectorNum(x1, y1, x2, y2, SIDE_RIGHT, s1);
+						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), SIDE_RIGHT, s1);
 
 					if (s2 != NIL_OBJ)
-						DrawSectorNum(x1, y1, x2, y2, SIDE_LEFT,  s2);
+						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), SIDE_LEFT,  s2);
 				}
 			}
 			break;
@@ -845,7 +845,7 @@ void UI_Canvas::DrawLinedefs()
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
 
-			DrawLineNumber(x1, y1, x2, y2, 0, n);
+			DrawLineNumber(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), 0, n);
 		}
 	}
 }
@@ -988,13 +988,13 @@ void UI_Canvas::DrawThingSprites()
 		if (! sprite)
 		{
 			sprite = IM_UnknownSprite();
-			scale = 0.66;
+			scale = 0.66f;
 		}
 
 		int sx = SCREENX(x);
 		int sy = SCREENY(y);
 
-		RenderSprite(sx, sy, scale * grid.Scale, sprite);
+		RenderSprite(sx, sy, static_cast<float>(scale * grid.Scale), sprite);
 	}
 
 #ifndef NO_OPENGL
@@ -1009,7 +1009,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	int W = img->width();
 	int H = img->height();
 
-	scale = scale * 0.5;
+	scale = scale * 0.5f;
 
 #ifdef NO_OPENGL
 	// software rendering
@@ -1112,12 +1112,12 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	int sy = (y1 + y2) / 2;
 
 	// normally draw line numbers on back of line
-	int want_len = -16 * CLAMP(0.25, grid.Scale, 1.0);
+	int want_len = static_cast<int>(-16 * CLAMP(0.25, grid.Scale, 1.0));
 
 	// for sectors, draw closer and on sector side
 	if (side != 0)
 	{
-		want_len = 2 + 12 * CLAMP(0.25, grid.Scale, 1.0);
+		want_len = static_cast<int>(2 + 12 * CLAMP(0.25, grid.Scale, 1.0));
 
 		if (side == SIDE_LEFT)
 			want_len = -want_len;
@@ -1166,15 +1166,15 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 			if (dist < best_dist)
 			{
-				sx = x1 + (x2 - x1) * p;
-				sy = y1 + (y2 - y1) * p;
+				sx = static_cast<int>(x1 + (x2 - x1) * p);
+				sy = static_cast<int>(y1 + (y2 - y1) * p);
 				best_dist = dist;
 			}
 		}
 	}
 
 	// back of line is best place, no knob getting in the way
-	int want_len = -16 * CLAMP(0.25, grid.Scale, 1.0);
+	int want_len = static_cast<int>(-16 * CLAMP(0.25, grid.Scale, 1.0));
 
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
@@ -1690,7 +1690,7 @@ void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 #ifdef NO_OPENGL
 	RenderRect(sx - size/2, sy - size/2, size, size);
 #else
-	glPointSize(size);
+	glPointSize(static_cast<GLfloat>(size));
 
 	glBegin(GL_POINTS);
 	glVertex2i(sx, sy);
@@ -1723,8 +1723,8 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		double len1 = hypot(map_x1 - edit.split_x, map_y1 - edit.split_y);
 		double len2 = hypot(map_x2 - edit.split_x, map_y2 - edit.split_y);
 
-		DrawLineNumber(map_x1, map_y1, edit.split_x, edit.split_y, 0, I_ROUND(len1));
-		DrawLineNumber(map_x2, map_y2, edit.split_x, edit.split_y, 0, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), 0, I_ROUND(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), 0, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);
@@ -1782,22 +1782,22 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 //
 void UI_Canvas::DrawMapArrow(double map_x1, double map_y1, int r, int angle)
 {
-	float dx = r * cos(angle * M_PI / 180.0);
-	float dy = r * sin(angle * M_PI / 180.0);
+	float dx = static_cast<float>(r * cos(angle * M_PI / 180.0));
+	float dy = static_cast<float>(r * sin(angle * M_PI / 180.0));
 
-	float map_x2 = map_x1 + dx;
-	float map_y2 = map_y1 + dy;
+	float map_x2 = static_cast<float>(map_x1 + dx);
+	float map_y2 = static_cast<float>(map_y1 + dy);
 
 	DrawMapLine(map_x1, map_y1, map_x2, map_y2);
 
 	// arrow head
-	float x3 = map_x2 - dx * 0.3 + dy * 0.3;
-	float y3 = map_y2 - dy * 0.3 - dx * 0.3;
+	float x3 = static_cast<float>(map_x2 - dx * 0.3 + dy * 0.3);
+	float y3 = static_cast<float>(map_y2 - dy * 0.3 - dx * 0.3);
 
 	DrawMapLine(map_x2, map_y2, x3, y3);
 
-	x3 = map_x2 - dx * 0.3 - dy * 0.3;
-	y3 = map_y2 - dy * 0.3 + dx * 0.3;
+	x3 = map_x2 - dx * 0.3f - dy * 0.3f;
+	y3 = map_y2 - dy * 0.3f + dx * 0.3f;
 
 	DrawMapLine(map_x2, map_y2, x3, y3);
 }
@@ -1810,13 +1810,13 @@ void UI_Canvas::DrawCamera()
 
 	Render3D_GetCameraPos(&map_x, &map_y, &angle);
 
-	float mx = map_x;
-	float my = map_y;
+	float mx = static_cast<float>(map_x);
+	float my = static_cast<float>(map_y);
 
-	float r = 40.0 / sqrt(grid.Scale);
+	float r = static_cast<float>(40.0 / sqrt(grid.Scale));
 
-	float dx = r * cos(angle * M_PI / 180.0);
-	float dy = r * sin(angle * M_PI / 180.0);
+	float dx = static_cast<float>(r * cos(angle * M_PI / 180.0));
+	float dy = static_cast<float>(r * sin(angle * M_PI / 180.0));
 
 	// arrow body
 	float x1 = mx - dx;
@@ -1831,13 +1831,13 @@ void UI_Canvas::DrawCamera()
 	DrawMapLine(x1, y1, x2, y2);
 
 	// arrow head
-	float x3 = x2 - dx * 0.6 + dy * 0.4;
-	float y3 = y2 - dy * 0.6 - dx * 0.4;
+	float x3 = static_cast<float>(x2 - dx * 0.6 + dy * 0.4);
+	float y3 = static_cast<float>(y2 - dy * 0.6 - dx * 0.4);
 
 	DrawMapLine(x2, y2, x3, y3);
 
-	x3 = x2 - dx * 0.6 - dy * 0.4;
-	y3 = y2 - dy * 0.6 + dx * 0.4;
+	x3 = static_cast<float>(x2 - dx * 0.6 - dy * 0.4);
+	y3 = static_cast<float>(y2 - dy * 0.6 + dx * 0.4);
 
 	DrawMapLine(x2, y2, x3, y3);
 
@@ -1845,8 +1845,8 @@ void UI_Canvas::DrawCamera()
 	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
 				mx + dy * 0.4, my - dx * 0.4);
 
-	mx = mx - dx * 0.2;
-	my = my - dy * 0.2;
+	mx = static_cast<float>(mx - dx * 0.2);
+	my = static_cast<float>(my - dy * 0.2);
 
 	DrawMapLine(mx - dy * 0.4, my + dx * 0.4,
 				mx + dy * 0.4, my - dx * 0.4);
@@ -1963,8 +1963,8 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	*dx = edit.drag_cur_x - edit.drag_start_x;
 	*dy = edit.drag_cur_y - edit.drag_start_y;
 
-	float pixel_dx = *dx * grid.Scale;
-	float pixel_dy = *dy * grid.Scale;
+	float pixel_dx = static_cast<float>(*dx * grid.Scale);
+	float pixel_dy = static_cast<float>(*dy * grid.Scale);
 
 	// check that we have moved far enough from the start position,
 	// giving the user the option to select the original place.
@@ -2235,7 +2235,7 @@ void UI_Canvas::RenderSector(int num)
 				// this logic follows ZDoom, which scales large flats to
 				// occupy a 64x64 unit area.  I presume wall textures are
 				// handled similarily....
-				glTexCoord2f(poly->mx[p] / 64.0, poly->my[p] / 64.0);
+				glTexCoord2f(poly->mx[p] / 64.0f, poly->my[p] / 64.0f);
 			}
 
 			glVertex2i(sx, sy);
@@ -2305,7 +2305,7 @@ void UI_Canvas::RenderThickness(int w)
 #ifdef NO_OPENGL
 	thickness = (w < 2) ? 1 : 2;
 #else
-	glLineWidth(w);
+	glLineWidth(static_cast<GLfloat>(w));
 #endif
 }
 
