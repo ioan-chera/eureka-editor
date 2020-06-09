@@ -123,12 +123,12 @@ static void CollectOverlapGroup(selection_c& list)
 
 static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 {
-	float angle = n * 360 / total;
+	float angle = static_cast<float>(n * 360 / total);
 
-	float vec_x = cos(angle * M_PI / 180.0);
-	float vec_y = sin(angle * M_PI / 180.0);
+	float vec_x = static_cast<float>(cos(angle * M_PI / 180.0));
+	float vec_y = static_cast<float>(sin(angle * M_PI / 180.0));
 
-	float dist = 8 + 6 * MIN(100, total);
+	float dist = static_cast<float>(8 + 6 * MIN(100, total));
 
 	fixcoord_t fdx = MakeValidCoord(vec_x * dist);
 	fixcoord_t fdy = MakeValidCoord(vec_y * dist);
@@ -177,7 +177,7 @@ void CMD_TH_Disconnect(void)
 		int n = 0;
 		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
 		{
-			MoveOverlapThing(*it, mid_x, mid_y, n, total);
+			MoveOverlapThing(*it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
 		}
 	}
 

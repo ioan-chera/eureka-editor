@@ -281,7 +281,7 @@ bool PointOutsideOfMap(double x, double y)
 #define FASTOPP_DIST  320
 
 
-typedef struct
+struct opp_test_state_t
 {
 	int ld;
 	int ld_side;   // a SIDE_XXX value
@@ -399,7 +399,7 @@ public:
 		}
 	}
 
-} opp_test_state_t;
+};
 
 
 class fastopp_node_c
@@ -541,8 +541,8 @@ void FastOpposite_Begin()
 {
 	CalculateLevelBounds();
 
-	fastopp_X_tree = new fastopp_node_c(Map_bound_x1 - 8, Map_bound_x2 + 8);
-	fastopp_Y_tree = new fastopp_node_c(Map_bound_y1 - 8, Map_bound_y2 + 8);
+	fastopp_X_tree = new fastopp_node_c(static_cast<int>(Map_bound_x1 - 8), static_cast<int>(Map_bound_x2 + 8));
+	fastopp_Y_tree = new fastopp_node_c(static_cast<int>(Map_bound_y1 - 8), static_cast<int>(Map_bound_y2 + 8));
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -1322,12 +1322,12 @@ void FindCrossingPoints(crossing_state_c& cross,
 		double next_y2 = cross.points[k].y;
 		double next_v  = cross.points[k].vert;
 
-		FindCrossingLines(cross, cur_x1, cur_y1, cur_v,
-						  next_x2, next_y2, next_v);
+		FindCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
+						  next_x2, next_y2, static_cast<int>(next_v));
 
 		cur_x1 = next_x2;
 		cur_y1 = next_y2;
-		cur_v  = next_v;
+		cur_v  = static_cast<int>(next_v);
 	}
 
 	FindCrossingLines(cross, cur_x1, cur_y1, cur_v, x2, y2, possible_v2);

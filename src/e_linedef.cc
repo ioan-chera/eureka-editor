@@ -1372,8 +1372,8 @@ void LineDefs_SetLength(int new_len)
 	{
 		const LineDef *L = LineDefs[n];
 
-		angles[n] = ComputeAngle(L->End()->x() - L->Start()->x(),
-								 L->End()->y() - L->Start()->y());
+		angles[n] = ComputeAngle(static_cast<int>(L->End()->x() - L->Start()->x()),
+			static_cast<int>(L->End()->y() - L->Start()->y()));
 	}
 
 	BA_Begin();

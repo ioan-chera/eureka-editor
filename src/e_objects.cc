@@ -1722,9 +1722,9 @@ static void DoScaleTwoThings(selection_c *list, transform_t& param)
 		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
-		float rot1 = param.rotate / 8192.0;
+		float rot1 = static_cast<float>(param.rotate / 8192.0);
 
-		int ang_diff = I_ROUND(rot1) * 45.0;
+		int ang_diff = static_cast<int>(I_ROUND(rot1) * 45.0);
 
 		if (ang_diff)
 		{
@@ -1912,7 +1912,7 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 	BA_MessageForSel("scaled", edit.Selected);
 	{
 		DoScaleTwoStuff(edit.Selected, param);
-		DoScaleSectorHeights(edit.Selected, scale_z, pos_z);
+		DoScaleSectorHeights(edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
 	BA_End();
 }
@@ -1967,7 +1967,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 
 	if (EXEC_Param[0][0])
 	{
-		mul = atof(EXEC_Param[0]);
+		mul = static_cast<float>(atof(EXEC_Param[0]));
 
 		if (mul < 0.02 || mul > 50)
 		{
@@ -1977,7 +1977,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	}
 
 	if (do_shrink)
-		mul = 1.0 / mul;
+		mul = 1.0f / mul;
 
 	transform_t param;
 
@@ -2156,7 +2156,7 @@ static void Quantize_Vertices(selection_c *list)
 
 			// TODO: keep diagonal lines diagonal...
 
-			if (! SpotInUse(OBJ_VERTICES, new_x, new_y))
+			if (! SpotInUse(OBJ_VERTICES, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
 				BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
 				BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
