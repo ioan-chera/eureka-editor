@@ -215,18 +215,13 @@ if(APPLE)
     string(REPLACE "libpng.dylib" "libpng.a" PNG_LIBRARIES "${PNG_LIBRARIES}" )
 endif()
 
-target_link_libraries(eureka PRIVATE
-    ${FLTK_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-)
+target_link_libraries(eureka PRIVATE ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 if(APPLE)
-    target_link_libraries(eureka PRIVATE
-        ${JPEG_LIBRARIES}
-        ${PNG_LIBRARIES}
-    )
+    target_link_libraries(eureka PRIVATE ${JPEG_LIBRARIES} ${PNG_LIBRARIES})
 endif()
 
-target_include_directories(eureka PRIVATE ${PROJECT_SOURCE_DIR}
+target_include_directories(eureka PRIVATE
+    ${PROJECT_SOURCE_DIR}
     ${FLTK_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
 )
@@ -239,6 +234,7 @@ if(MSVC)
     target_compile_options(eureka PRIVATE "/MP")
 endif()
 
+# FIXME: this doesn't work when in this file I only have "target_sources"
 source_group(bsp FILES ${source_bsp})
 source_group("e_ source" FILES ${source_e})
 source_group("im_ source" FILES ${source_im})
