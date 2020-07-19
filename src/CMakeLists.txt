@@ -5,7 +5,15 @@ configure_file(version.h.in version.h)
 
 set(lookout_dir ${PROJECT_SOURCE_DIR}/prereqs)
 
-find_package(OpenGL REQUIRED)
+option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
+
+if(ENABLE_OPENGL)
+    find_package(OpenGL REQUIRED)
+else()
+    set(FLTK_SKIP_OPENGL TRUE)
+    target_compile_definitions(eureka PRIVATE NO_OPENGL)
+endif()
+
 find_package(ZLIB REQUIRED)
 
 find_package(FLTK)
