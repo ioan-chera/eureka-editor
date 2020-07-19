@@ -6,6 +6,8 @@ configure_file(version.h.in version.h)
 set(lookout_dir ${PROJECT_SOURCE_DIR}/prereqs)
 
 find_package(OpenGL REQUIRED)
+find_package(ZLIB REQUIRED)
+
 find_package(FLTK)
 if(NOT FLTK_FOUND)
     if(WIN32)
@@ -215,7 +217,7 @@ if(APPLE)
     string(REPLACE "libpng.dylib" "libpng.a" PNG_LIBRARIES "${PNG_LIBRARIES}" )
 endif()
 
-target_link_libraries(eureka PRIVATE ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(eureka PRIVATE ${FLTK_LIBRARIES} ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES})
 if(APPLE)
     target_link_libraries(eureka PRIVATE ${JPEG_LIBRARIES} ${PNG_LIBRARIES})
 endif()
@@ -223,6 +225,7 @@ endif()
 target_include_directories(eureka PRIVATE
     ${PROJECT_SOURCE_DIR}
     ${FLTK_INCLUDE_DIR}
+    ${ZLIB_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
 )
 
