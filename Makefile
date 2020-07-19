@@ -13,8 +13,7 @@ PREFIX ?= /usr/local
 # CXX=clang++-6.0
 
 # flags controlling the dialect of C++
-# [ the code is old-school C++ without modern features ]
-CXX_DIALECT=-std=c++03 -fno-strict-aliasing -fwrapv
+CXX_DIALECT=-std=c++17 -fno-strict-aliasing -fwrapv
 
 WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
 OPTIMISE=-O2 -g
