@@ -427,13 +427,11 @@ void CMD_TestMap()
 	}
 
 	// change working directory to be same as the executable
-	static char folder[FL_PATH_MAX];
+	SString folder = FilenameGetPath(info->exe_filename);
 
-	FilenameGetPath(folder, sizeof(folder), info->exe_filename);
+	LogPrintf("Changing current dir to: %s\n", folder.c_str());
 
-	LogPrintf("Changing current dir to: %s\n", folder);
-
-	if (! FileChangeDir(folder))
+	if (! FileChangeDir(folder.c_str()))
 	{
 		// FIXME : a notify dialog
 		Beep("chdir failed!");

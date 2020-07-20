@@ -38,7 +38,6 @@ SString ReplaceExtension(const char *filename, const char *ext);
 const char *FindBaseName(const char *filename);
 bool FilenameIsBare(const char *filename);
 SString FilenameReposition(const char *filename, const char *othername);
-void FilenameGetPath(char *dest, size_t maxsize, const char *filename);
 SString FilenameGetPath(const char *filename);
 
 // file utilities

@@ -288,34 +288,8 @@ SString FilenameReposition(const char *filename, const char *othername)
 	return result;
 }
 
-
-void FilenameGetPath(char *dest, size_t maxsize, const char *filename)
-{
-	size_t len = (size_t)(FindBaseName(filename) - filename);
-
-	// remove trailing slash (except when following "C:" or similar)
-	if (len >= 1 &&
-		(filename[len - 1] == '/' || filename[len - 1] == '\\') &&
-		! (len >= 2 && filename[len - 2] == ':'))
-	{
-		len--;
-	}
-
-	if (len == 0)
-	{
-		strcpy(dest, ".");
-		return;
-	}
-
-	if (len >= maxsize)
-		len =  maxsize - 1;
-
-	strncpy(dest, filename, len);
-	dest[len] = 0;
-}
-
 //
-// Better way to get path
+// Get path
 //
 SString FilenameGetPath(const char *filename)
 {
@@ -386,6 +360,7 @@ bool FileRename(const char *old_name, const char *new_name)
 bool FileDelete(const char *filename)
 {
 #ifdef WIN32
+	// TODO: set wide character here
 	return (::DeleteFile(filename) != 0);
 
 #else // UNIX or MACOSX
@@ -398,6 +373,7 @@ bool FileDelete(const char *filename)
 bool FileChangeDir(const char *dir_name)
 {
 #ifdef WIN32
+	// TODO: set wide character here
 	return (::SetCurrentDirectory(dir_name) != 0);
 
 #else // UNIX or MACOSX
