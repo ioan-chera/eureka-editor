@@ -138,7 +138,7 @@ static void FreshLevel()
 }
 
 
-static bool Project_AskFile(char *filename)
+static bool Project_AskFile(SString &filename)
 {
 	// this returns false if user cancelled
 
@@ -169,12 +169,11 @@ static bool Project_AskFile(char *filename)
 	}
 
 	// if extension is missing, add ".wad"
+	filename = chooser.filename();
 
-	strcpy(filename, chooser.filename());
-
-	char *pos = (char *)fl_filename_ext(filename);
-	if (! *pos)
-		strcat(filename, ".wad");
+	const char *pos = fl_filename_ext(filename.c_str());
+	if(!*pos)
+		filename += ".wad";
 
 	return true;
 }
@@ -236,7 +235,7 @@ void CMD_NewProject()
 
 	/* first, ask for the output file */
 
-	char filename[FL_PATH_MAX];
+	SString filename;
 
 	if (! Project_AskFile(filename))
 		return;
@@ -259,11 +258,11 @@ void CMD_NewProject()
 	   [ the file chooser should have asked for confirmation ]
 	 */
 
-	if (FileExists(filename))
+	if (FileExists(filename.c_str()))
 	{
 		// TODO??  M_BackupWad(wad);
 
-		if (! FileDelete(filename))
+		if (! FileDelete(filename.c_str()))
 		{
 			DLG_Notify("Unable to delete the existing file.");
 
@@ -295,10 +294,10 @@ void CMD_NewProject()
 		map_name = game_wad->GetLump(idx)->Name();
 	}
 
-	LogPrintf("Creating New File : %s in %s\n", map_name, filename);
+	LogPrintf("Creating New File : %s in %s\n", map_name, filename.c_str());
 
 
-	Wad_file * wad = Wad_file::Open(filename, WadOpenMode_write);
+	Wad_file * wad = Wad_file::Open(filename.c_str(), WadOpenMode_write);
 
 	if (! wad)
 	{
