@@ -327,6 +327,14 @@ public:
 		return &*data.end();
 	}
 
+	//
+	// Convenience operator
+	//
+	operator bool() const
+	{
+		return !empty();
+	}
+
 	enum
 	{
 		npos = std::string::npos
