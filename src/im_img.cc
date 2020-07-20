@@ -1037,16 +1037,16 @@ Img_c * IM_CreateLightSprite()
 
 			float dist = sqrt((dx) * (dx) + (dy) * (dy));
 
-			float ity = 1.0 / (dist + 0.5) / (dist + 0.5);
+			float ity = 1.0f / (dist + 0.5f) / (dist + 0.5f);
 
 			if (ity < 0.5)
 				continue;
 
-			ity = (ity - 0.4) / (1.0 - 0.4);
+			ity = (ity - 0.4f) / (1.0f - 0.4f);
 
-			int r = 255 * ity;
-			int g = 235 * ity;
-			int b = 90  * ity;
+			int r = static_cast<int>(255 * ity);
+			int g = static_cast<int>(235 * ity);
+			int b = static_cast<int>(90  * ity);
 
 			pix = W_FindPaletteColor(r, g, b);
 		}
@@ -1077,15 +1077,15 @@ Img_c * IM_CreateMapSpotSprite(int base_r, int base_g, int base_b)
 
 		if (cx1 <= x && x <= cx2)
 		{
-			float dx = MIN(x - cx1, cx2 - x);
+			float dx = static_cast<float>(MIN(x - cx1, cx2 - x));
 			//float dy = MIN(abs(y - 4), abs(y - W));
 
-			float ity = 0.3 + dx / 14.0;
+			float ity = 0.3f + dx / 14.0f;
 			if (ity > 1.0) ity = 1.0;
 
-			int r = base_r * ity;
-			int g = base_g * ity;
-			int b = base_b * ity;
+			int r = static_cast<int>(base_r * ity);
+			int g = static_cast<int>(base_g * ity);
+			int b = static_cast<int>(base_b * ity);
 
 			pix = W_FindPaletteColor(r, g, b);
 		}
