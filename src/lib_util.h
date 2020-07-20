@@ -310,6 +310,11 @@ public:
 		data.reserve(n);
 	}
 
+	size_t rfind(char c) const
+	{
+		return data.rfind(c);
+	}
+
 	const char *begin() const
 	{
 		return &*data.begin();

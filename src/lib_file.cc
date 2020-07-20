@@ -22,6 +22,7 @@
 
 #ifdef WIN32
 #include <io.h>
+#include "m_strings.h"
 #else // UNIX or MACOSX
 #include <dirent.h>
 #include <unistd.h>
@@ -204,6 +205,55 @@ void FilenameStripBase(char *buffer)
 		*pos = 0;
 	else
 		strcpy(buffer, ".");
+}
+
+//
+// Clears the basename
+//
+static void FilenameStripBase(SString &path)
+{
+	if(!path)
+	{
+		path = ".";
+		return;
+	}
+
+#ifdef _WIN32
+	size_t seppos = path.find_last_of("\\/");
+	size_t colonpos = path.rfind(':');
+	if(seppos != SString::npos)
+	{
+		if(colonpos != SString::npos && colonpos > seppos)
+		{
+			if(colonpos < path.size() - 1)
+				path.erase(colonpos + 1);
+			return;
+		}
+		if(seppos == 0)
+		{
+			path = "\\";
+			return;
+		}
+		path.erase(seppos);
+		return;
+	}
+	path = ".";
+	return;
+#else
+	size_t seppos = path.find_last_of("/");
+	if(seppos != SString::npos)
+	{
+		if(seppos == 0)
+		{
+			path = "/";
+			return;
+		}
+		path.erase(seppos);
+		return;
+	}
+	path = ".";
+	return;
+#endif
 }
 
 
@@ -555,16 +605,15 @@ SString GetExecutablePath(const char *argv0)
 	SString path;
 
 #ifdef WIN32
-	char rawpath[PATH_MAX+2];
-
-	int length = GetModuleFileName(GetModuleHandle(NULL), rawpath, PATH_MAX);
-
-	if (length > 0 && length < PATH_MAX)
+	wchar_t wpath[PATH_MAX / 2 + 1];
+	DWORD length = GetModuleFileNameW(GetModuleHandleW(nullptr), wpath, _countof(wpath));
+	if(length > 0 && length < PATH_MAX / 2)
 	{
-		if (access(rawpath, 0) == 0)  // sanity check
+		if(_waccess(wpath, 0) == 0)
 		{
-			FilenameStripBase(rawpath);
-			return rawpath;
+			SString retpath = WideToUTF8(wpath);
+			FilenameStripBase(retpath);
+			return retpath;
 		}
 	}
 
@@ -614,11 +663,7 @@ SString GetExecutablePath(const char *argv0)
 	// FIXME: check if _inside_ the .app folder
 #endif
 
-	char *rawpath2 = new char[path.length() + 1];
-	strcpy(rawpath2, path.c_str());
-	FilenameStripBase(rawpath2);
-	path = rawpath2;
-	delete []rawpath2;
+	FilenameStripBase(path);
 	return path;
 }
 
