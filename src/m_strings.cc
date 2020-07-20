@@ -214,5 +214,45 @@ int string_table_c::add_huge(const char *str, int len)
 	return -(int)huge_ones.size();
 }
 
+#ifdef _WIN32
+//
+// Fail safe so we avoid failures
+//
+static SString FailSafeWideToUTF8(const wchar_t *text)
+{
+	size_t len = wcslen(text);
+	SString result;
+	result.reserve(len);
+	for(size_t i = 0; i < len; ++i)
+	{
+		result.push_back(static_cast<char>(text[i]));
+	}
+	return result;
+}
+
+//
+// Converts wide characters to UTF8. Mainly for Windows
+//
+SString WideToUTF8(const wchar_t *text)
+{
+	char *buffer;
+	int n = WideCharToMultiByte(CP_UTF8, 0, text, -1, nullptr, 0, nullptr, nullptr);
+	if(!n)
+	{
+		return FailSafeWideToUTF8(text);
+	}
+	buffer = new char[n];
+	n = WideCharToMultiByte(CP_UTF8, 0, text, -1, buffer, n, nullptr, nullptr);
+	if(!n)
+	{
+		delete[] buffer;
+		return FailSafeWideToUTF8(text);
+	}
+	SString result = buffer;
+	delete[] buffer;
+	return result;
+}
+#endif
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

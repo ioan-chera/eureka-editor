@@ -61,6 +61,9 @@ private:
 	int add_huge(const char *str, int len);
 };
 
+#ifdef _WIN32
+SString WideToUTF8(const wchar_t *text);
+#endif
 
 #endif  /* __EUREKA_M_STRINGS_H__ */
 
