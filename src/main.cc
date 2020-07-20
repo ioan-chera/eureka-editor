@@ -37,6 +37,7 @@
 
 #include "e_main.h"
 #include "m_events.h"
+#include "m_strings.h"
 #include "r_render.h"
 #include "r_subdiv.h"
 
@@ -266,29 +267,23 @@ static void Determine_HomeDir(const char *argv0)
 	// get the %APPDATA% location
 	// if that fails, use a folder at the EXE location
 
-	TCHAR * path = StringNew(MAX_PATH);
-
-	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, path)))
-	{
-		strcat(path, "\\EurekaEditor");
-
-		home_dir = path;
-	}
-	else
-	{
-		SYS_ASSERT(!install_dir.empty());
-
-		home_dir = install_dir + "\\app_data";
-	}
-
-	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path)))
-	{
-		strcat(path, "\\EurekaEditor");
-
-		cache_dir = path;
-	}
-
-	StringFree(path);
+		wchar_t *wpath = nullptr;
+		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &wpath)))
+		{
+			home_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			CoTaskMemFree(wpath);
+		}
+		else
+		{
+			SYS_ASSERT(install_dir);
+			home_dir = install_dir + "\\app_data";
+		}
+		wpath = nullptr;
+		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wpath)))
+		{
+			cache_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			CoTaskMemFree(wpath);
+		}
 
 #elif defined(__APPLE__)
 	char * path = StringNew(FL_PATH_MAX + 4);
