@@ -744,8 +744,8 @@ static void LoadThings_Hexen()
 static void LoadSideDefs()
 {
 	Lump_c *lump = Load_LookupAndSeek("SIDEDEFS");
-	if (! lump)
-		FatalError("No sidedefs lump!\n");
+	if(!lump)
+		ThrowException("No sidedefs lump!\n");
 
 	int count = lump->Length() / sizeof(raw_sidedef_t);
 
@@ -758,17 +758,12 @@ static void LoadSideDefs()
 		raw_sidedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading sidedefs.\n");
+			ThrowException("Error reading sidedefs.\n");
 
 		SideDef *sd = new SideDef;
 
 		sd->x_offset = LE_S16(raw.x_offset);
 		sd->y_offset = LE_S16(raw.y_offset);
-
-		// convert empty names to the "-" null texture
-		if (raw.upper_tex[0] == 0) strcpy(raw.upper_tex, "-");
-		if (raw.lower_tex[0] == 0) strcpy(raw.lower_tex, "-");
-		if (raw.  mid_tex[0] == 0) strcpy(raw.  mid_tex, "-");
 
 		UpperCaseShortStr(raw.upper_tex, 8);
 		UpperCaseShortStr(raw.lower_tex, 8);
