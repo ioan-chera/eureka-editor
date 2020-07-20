@@ -507,7 +507,7 @@ void CMD_AddBehaviorLump()
 
 	chooser.title("Pick bytecode file to insert");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.directory(Main_FileOpFolder());
+	chooser.directory(Main_FileOpFolder().c_str());
 
 	switch (chooser.show())
 	{

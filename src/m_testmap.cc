@@ -103,7 +103,7 @@ public:
 
 		// FIXME : if we have an exe_filename already, and folder exists, go there
 		//         [ especially for vanilla -- look in path of Iwad_name ]
-		chooser.directory(Main_FileOpFolder());
+		chooser.directory(Main_FileOpFolder().c_str());
 
 		switch (chooser.show())
 		{

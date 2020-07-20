@@ -195,7 +195,7 @@ int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
 SString GameNameFromIWAD(const char *iwad_name);
 
-const char * Main_FileOpFolder();
+SString Main_FileOpFolder();
 
 
 void Beep(const char *msg, ...);

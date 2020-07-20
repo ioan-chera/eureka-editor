@@ -180,8 +180,12 @@ bool FilenameIsBare(const char *filename)
 }
 
 
-void FilenameStripBase(char *buffer)
+static void FilenameStripBase(char *buffer)
 {
+	if(!*buffer)
+	{
+		return;	// empty buffer, can't do much
+	}
 	char *pos = buffer + strlen(buffer) - 1;
 
 	for (; pos > buffer ; pos--)
@@ -204,7 +208,11 @@ void FilenameStripBase(char *buffer)
 	if (pos > buffer)
 		*pos = 0;
 	else
-		strcpy(buffer, ".");
+	{
+		// At this point it's guaranteed not to be empty
+		buffer[0] = '.';
+		buffer[1] = 0;
+	}
 }
 
 //
@@ -287,8 +295,8 @@ void FilenameGetPath(char *dest, size_t maxsize, const char *filename)
 
 	// remove trailing slash (except when following "C:" or similar)
 	if (len >= 1 &&
-		(filename[len-1] == '/' || filename[len-1] == '\\') &&
-		! (len >= 2 && filename[len-2] == ':'))
+		(filename[len - 1] == '/' || filename[len - 1] == '\\') &&
+		! (len >= 2 && filename[len - 2] == ':'))
 	{
 		len--;
 	}
@@ -304,6 +312,27 @@ void FilenameGetPath(char *dest, size_t maxsize, const char *filename)
 
 	strncpy(dest, filename, len);
 	dest[len] = 0;
+}
+
+//
+// Better way to get path
+//
+SString FilenameGetPath(const char *filename)
+{
+	size_t len = (size_t)(FindBaseName(filename) - filename);
+
+	// remove trailing slash (except when following "C:" or similar)
+	if(len >= 1 &&
+		(filename[len - 1] == '/' || filename[len - 1] == '\\') &&
+		!(len >= 2 && filename[len - 2] == ':'))
+	{
+		len--;
+	}
+
+	if(len == 0)
+		return ".";
+	
+	return SString(filename, len);
 }
 
 
