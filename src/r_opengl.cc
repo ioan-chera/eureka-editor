@@ -712,10 +712,19 @@ public:
 		if (img)
 		{
 			float img_w  = static_cast<float>(img->width());
-			float img_tw = static_cast<float>(RoundPOW2(static_cast<int>(img_w)));
-
 			float img_h  = static_cast<float>(img->height());
-			float img_th = static_cast<float>(RoundPOW2(static_cast<int>(img_h)));
+			float img_tw, img_th;
+
+			if (use_npot_textures)
+			{
+				img_tw = img_w;
+				img_th = img_h;
+			}
+			else
+			{
+				img_tw = static_cast<float>(RoundPOW2(static_cast<int>(img_w)));
+				img_th = static_cast<float>(RoundPOW2(static_cast<int>(img_h)));
+			}
 
 			tx1 = 0;
 			tx2 = tx1 + ld_length;
@@ -796,10 +805,19 @@ public:
 			return;
 
 		float img_w  = static_cast<float>(img->width());
-		float img_tw = static_cast<float>(RoundPOW2(static_cast<int>(img_w)));
-
 		float img_h  = static_cast<float>(img->height());
-		float img_th = static_cast<float>(RoundPOW2(static_cast<int>(img_h)));
+		float img_tw, img_th;
+
+		if (use_npot_textures)
+		{
+			img_tw = img_w;
+			img_th = img_h;
+		}
+		else
+		{
+			img_tw = static_cast<float>(RoundPOW2(static_cast<int>(img_w)));
+			img_th = static_cast<float>(RoundPOW2(static_cast<int>(img_h)));
+		}
 
 		// compute Z coords and texture coords
 		float z1 = static_cast<float>(MAX(front->floorh, back->floorh));
@@ -1278,8 +1296,17 @@ public:
 		// choose texture coords based on image size
 		tx1 = 0.0;
 		ty1 = 0.0;
-		tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
-		ty2 = (float)img->height() / (float)RoundPOW2(img->height());
+
+		if (use_npot_textures)
+		{
+			tx2 = 1.0;
+			ty2 = 1.0;
+		}
+		else
+		{
+			tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
+			ty2 = (float)img->height() / (float)RoundPOW2(img->height());
+		}
 
 		// lighting
 		float L = 1.0;

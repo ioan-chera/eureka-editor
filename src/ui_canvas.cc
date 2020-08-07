@@ -24,6 +24,7 @@
 
 #ifndef NO_OPENGL
 #include "FL/gl.h"
+#include "FL/glu.h"
 #endif
 
 #include "ui_window.h"
@@ -131,6 +132,11 @@ void UI_Canvas::draw()
 		// hence refer to textures which no longer exist.
 		W_UnloadAllTextures();
 	}
+
+	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
+
+	if (strExt)
+		use_npot_textures = gluCheckExtension((const GLubyte*) "GL_ARB_texture_non_power_of_two", strExt) == GLU_TRUE;
 #endif
 
 	if (edit.render3d)
@@ -1072,8 +1078,18 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	// choose texture coords based on image size
 	float tx1 = 0.0;
 	float ty1 = 0.0;
-	float tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
-	float ty2 = (float)img->height() / (float)RoundPOW2(img->height());
+	float tx2, ty2;
+
+	if (use_npot_textures)
+	{
+		tx2 = 1.0;
+		ty2 = 1.0;
+	}
+	else
+	{
+		tx2 = (float)img->width()  / (float)RoundPOW2(img->width());
+		ty2 = (float)img->height() / (float)RoundPOW2(img->height());
+	}
 
 	glColor3f(1, 1, 1);
 
@@ -2667,13 +2683,23 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 	int rx2 = rx + iw;
 	int ry2 = ry + ih;
 
-	int pow2_width  = RoundPOW2(img->width());
-	int pow2_height = RoundPOW2(img->height());
+	int img_w, img_h;
 
-	float tx1 = (float)ix / (float)pow2_width;
-	float ty1 = (float)iy / (float)pow2_height;
-	float tx2 = (float)(ix + iw) / (float)pow2_width;
-	float ty2 = (float)(iy + ih) / (float)pow2_height;
+	if (use_npot_textures)
+	{
+		img_w = img->width();
+		img_h = img->height();
+	}
+	else
+	{
+		img_w = RoundPOW2(img->width());
+		img_h = RoundPOW2(img->height());
+	}
+
+	float tx1 = (float)ix / (float)img_w;
+	float ty1 = (float)iy / (float)img_h;
+	float tx2 = (float)(ix + iw) / (float)img_w;
+	float ty2 = (float)(iy + ih) / (float)img_h;
 
 	glColor3f(1, 1, 1);
 

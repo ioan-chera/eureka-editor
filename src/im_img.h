@@ -33,6 +33,7 @@
 typedef unsigned int GLuint;
 #else
 #include "FL/gl.h"
+extern bool use_npot_textures;
 #endif
 
 // this is a 16-bit value:

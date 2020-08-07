@@ -36,6 +36,7 @@
 #else
 #include "GL/glext.h"
 #endif
+bool use_npot_textures = false;
 #endif
 
 
@@ -376,8 +377,17 @@ void Img_c::load_gl()
 	glBindTexture(GL_TEXTURE_2D, gl_tex);
 
 	// construct a power-of-two sized bottom-up RGBA image
-	int tw = RoundPOW2(w);
-	int th = RoundPOW2(h);
+	int tw, th;
+	if (use_npot_textures)
+	{
+		tw = w;
+		th = h;
+	}
+	else
+	{
+		tw = RoundPOW2(w);
+		th = RoundPOW2(h);
+	}
 
 	byte *rgba = new byte[tw * th * 4];
 
