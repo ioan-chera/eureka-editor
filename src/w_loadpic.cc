@@ -30,6 +30,7 @@
 #include "im_img.h"
 
 #include "lib_tga.h"
+#include "m_game.h"
 
 #include "w_loadpic.h"
 #include "w_rawdef.h"
@@ -74,7 +75,13 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 
 		if (top < 0)
 		{
-			count += top;
+			// The original DOOM did not honor negative y-offsets for
+			// patches but some ports like ZDoom do.
+			if (Features.neg_patch_offsets)
+				src -= top;
+			else
+				count += top;
+
 			top = 0;
 		}
 

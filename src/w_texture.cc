@@ -219,15 +219,6 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		int yofs = LE_S16(patdef->y_origin);
 		int pname_idx = LE_U16(patdef->pname);
 
-		// AYM 1998-08-08: Yes, that's weird but that's what Doom
-		// does. Without these two lines, the few textures that have
-		// patches with negative y-offsets (BIGDOOR7, SKY1, TEKWALL1,
-		// TEKWALL5 and a few others) would not look in the texture
-		// viewer quite like in Doom. This should be mentioned in
-		// the UDS, by the way.
-		if (yofs < 0)
-			yofs = 0;
-
 		if (pname_idx >= pname_size)
 		{
 			LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
