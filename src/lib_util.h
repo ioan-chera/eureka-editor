@@ -315,21 +315,21 @@ public:
 		return data.rfind(c);
 	}
 
-	const char *begin() const
+	std::string::iterator begin() noexcept
 	{
-		return &*data.begin();
+		return data.begin();
 	}
-	char *begin()
+	std::string::const_iterator begin() const noexcept
 	{
-		return &*data.begin();
+		return data.begin();
 	}
-	const char *end() const
+	std::string::iterator end() noexcept
 	{
-		return &*data.end();
+		return data.end();
 	}
-	char *end()
+	std::string::const_iterator end() const noexcept
 	{
-		return &*data.end();
+		return data.end();
 	}
 
 	//
