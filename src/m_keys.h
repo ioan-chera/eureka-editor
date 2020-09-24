@@ -63,7 +63,7 @@ bool is_mouse_wheel (keycode_t key);
 bool is_mouse_button(keycode_t key);
 
 
-typedef enum
+enum key_context_e
 {
 	KCTX_NONE = 0,  /* INVALID */
 
@@ -76,8 +76,7 @@ typedef enum
 	KCTX_Line,
 
 	KCTX_General
-
-} key_context_e;
+};
 
 
 /* --- general manipulation --- */
@@ -111,7 +110,6 @@ SString M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
 void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context);
-bool M_IsBindingFuncValid(key_context_e context, const char * func_str);
 
 void M_ChangeBindingKey(int index, keycode_t key);
 const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,

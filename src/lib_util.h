@@ -190,9 +190,9 @@ public:
 		return !y_stricmp(data.c_str(), c ? c : "");
 	}
 
-	bool noCaseStartsWith(const char *c) const
+	bool noCaseStartsWith(const char *c, int pos = 0) const
 	{
-		return !y_strnicmp(data.c_str(), c ? c : "", c ? strlen(c) : 0);
+		return !y_strnicmp(data.c_str() + pos, c ? c : "", c ? strlen(c) : 0);
 	}
 
 	bool operator != (const char *c) const

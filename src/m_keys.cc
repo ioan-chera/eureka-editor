@@ -996,18 +996,6 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	return NULL;
 }
 
-
-bool M_IsBindingFuncValid(key_context_e context, const char * func_str)
-{
-	key_binding_t temp;
-
-	temp.key = 'a';  // dummy key
-	temp.context = context;
-
-	return (DoParseBindingFunc(temp, func_str) == NULL);
-}
-
-
 // returns an error message, or NULL if OK
 const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
                        const char *func_str)
