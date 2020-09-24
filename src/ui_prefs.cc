@@ -294,7 +294,7 @@ private:
 
 		std::vector<SString> tokens;
 
-		int num_tok = M_ParseLine(list, tokens, ParseOptions_noStrings);
+		int num_tok = M_ParseLine(list, tokens, ParseOptions::noStrings);
 
 		if (num_tok < 1)	// shouldn't happen
 		{

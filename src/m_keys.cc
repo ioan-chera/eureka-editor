@@ -569,14 +569,13 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 	LogPrintf("Reading key bindings from: %s\n", filename.c_str());
 
-	std::vector<SString> tokens;
-
 	while (! fp.eof())
 	{
 		SString line;
 		std::getline(fp, line.get());
 
-		int num_tok = M_ParseLine(line.c_str(), tokens, ParseOptions_haveStringsKeepQuotes);
+		std::vector<SString> tokens;
+		int num_tok = M_ParseLine(line.c_str(), tokens, ParseOptions::haveStringsKeepQuotes);
 
 		if (num_tok == 0)
 			continue;
@@ -958,7 +957,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	std::vector<SString> tokens;
 
-	int num_tok = M_ParseLine(buffer, tokens, ParseOptions_haveStringsKeepQuotes);
+	int num_tok = M_ParseLine(buffer, tokens, ParseOptions::haveStringsKeepQuotes);
 
 	if (num_tok <= 0)
 		return "Missing function name";

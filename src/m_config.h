@@ -168,11 +168,11 @@ private:
 //
 // Options for M_ParseLine
 //
-enum ParseOptions
+enum class ParseOptions
 {
-	ParseOptions_noStrings,
-	ParseOptions_haveStrings,
-	ParseOptions_haveStringsKeepQuotes,
+	noStrings,
+	haveStrings,
+	haveStringsKeepQuotes,
 };
 
 // returns number of tokens, zero for comment, negative on error

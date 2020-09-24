@@ -1457,11 +1457,11 @@ int M_ParseLine(const char *line, std::vector<SString> &tokens, ParseOptions opt
 			nexttoken = false;
 
 			// begin a string?
-			if (ch == '"' && options != ParseOptions_noStrings)
+			if (ch == '"' && options != ParseOptions::noStrings)
 			{
 				in_string = true;
 
-				if (options != ParseOptions_haveStringsKeepQuotes)
+				if (options != ParseOptions::haveStringsKeepQuotes)
 					continue;
 			}
 			// begin a normal token
@@ -1474,7 +1474,7 @@ int M_ParseLine(const char *line, std::vector<SString> &tokens, ParseOptions opt
 			// end of string
 			in_string = false;
 
-			if (options == ParseOptions_haveStringsKeepQuotes)
+			if (options == ParseOptions::haveStringsKeepQuotes)
 				tokenbuf.push_back(ch);
 		}
 		else if (ch == 0 || ch == '\n')
@@ -1543,7 +1543,7 @@ bool M_LoadUserState()
 
 	while (file.readLine(line, sizeof(line)))
 	{
-		int num_tok = M_ParseLine(line, tokens, ParseOptions_haveStrings);
+		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStrings);
 
 		if (num_tok == 0)
 			continue;

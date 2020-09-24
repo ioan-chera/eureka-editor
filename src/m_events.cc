@@ -931,7 +931,7 @@ static bool M_ParseOperationFile()
 
 	while (file.readLine(line, sizeof(line)))
 	{
-		int num_tok = M_ParseLine(line, tokens, ParseOptions_haveStrings);
+		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStrings);
 		if (num_tok == 0)
 			continue;
 
