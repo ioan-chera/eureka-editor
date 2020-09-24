@@ -345,6 +345,15 @@ public:
 		npos = std::string::npos
 	};
 
+	std::string &get()
+	{
+		return data;
+	}
+	const std::string &get() const
+	{
+		return data;
+	}
+
 private:
 	std::string data;
 };

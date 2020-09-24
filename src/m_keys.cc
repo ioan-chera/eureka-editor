@@ -123,15 +123,14 @@ const editor_command_t * LookupEditorCommand(int idx)
 //------------------------------------------------------------------------
 
 
-typedef struct
+struct key_mapping_t
 {
 	keycode_t key;
 	const char * name;
+};
 
-} key_mapping_t;
 
-
-static const key_mapping_t key_map[] =
+static const key_mapping_t s_key_map[] =
 {
 	{ ' ',			"SPACE" },
 	{ '"',			"DBLQUOTE" },
@@ -220,27 +219,33 @@ keycode_t M_ParseKeyString(const char *str)
 
 	if (y_strnicmp(str, "CMD-", 4) == 0)
 	{
-		key |= MOD_COMMAND;  str += 4;
+		key |= MOD_COMMAND;
+		str += 4;
 	}
 	else if (y_strnicmp(str, "CTRL-", 5) == 0)
 	{
-		key |= MOD_COMMAND;  str += 5;
+		key |= MOD_COMMAND;
+		str += 5;
 	}
 	else if (y_strnicmp(str, "META-", 5) == 0)
 	{
-		key |= MOD_META;  str += 5;
+		key |= MOD_META;
+		str += 5;
 	}
 	else if (y_strnicmp(str, "ALT-", 4) == 0)
 	{
-		key |= MOD_ALT;  str += 4;
+		key |= MOD_ALT;
+		str += 4;
 	}
 	else if (y_strnicmp(str, "SHIFT-", 6) == 0)
 	{
-		key |= MOD_SHIFT;  str += 6;
+		key |= MOD_SHIFT;
+		str += 6;
 	}
 	else if (y_strnicmp(str, "LAX-", 4) == 0)
 	{
-		key |= MOD_LAX_SHIFTCTRL;  str += 4;
+		key |= MOD_LAX_SHIFTCTRL;
+		str += 4;
 	}
 
 	// convert uppercase letter --> lowercase + MOD_SHIFT
@@ -257,9 +262,9 @@ keycode_t M_ParseKeyString(const char *str)
 		return key | (FL_Button + atoi(str + 5));
 
 	// find name in mapping table
-	for (int k = 0 ; key_map[k].name ; k++)
-		if (y_stricmp(str, key_map[k].name) == 0)
-			return key | key_map[k].key;
+	for (int k = 0 ; s_key_map[k].name ; k++)
+		if (y_stricmp(str, s_key_map[k].name) == 0)
+			return key | s_key_map[k].key;
 
 	if (y_strnicmp(str, "KP_", 3) == 0 && 33 < str[3] && (FL_KP + str[3]) <= FL_KP_Last)
 		return key | (FL_KP + str[3]);
@@ -296,9 +301,9 @@ static const char * BareKeyName(keycode_t key)
 	}
 
 	// find key in mapping table
-	for (int k = 0 ; key_map[k].name ; k++)
-		if (key == key_map[k].key)
-			return key_map[k].name;
+	for (int k = 0 ; s_key_map[k].name ; k++)
+		if (key == s_key_map[k].key)
+			return s_key_map[k].name;
 
 	if (FL_KP + 33 <= key && key <= FL_KP_Last)
 	{
@@ -551,50 +556,39 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 static bool LoadBindingsFromPath(const char *path, bool required)
 {
-	static char filename[FL_PATH_MAX];
+	SString filename = SString(path) + "/bindings.cfg";
 
-	snprintf(filename, sizeof(filename), "%s/bindings.cfg", path);
-
-	FILE *fp = fopen(filename, "rt");
-
-	if (! fp)
+	std::ifstream fp(filename.c_str());
+	if(!fp.is_open())
 	{
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename);
+		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
 	}
 
-	LogPrintf("Reading key bindings from: %s\n", filename);
-
-	static char line_buf[FL_PATH_MAX];
+	LogPrintf("Reading key bindings from: %s\n", filename.c_str());
 
 	std::vector<SString> tokens;
 
-	while (! feof(fp))
+	while (! fp.eof())
 	{
-		char *line = fgets(line_buf, FL_PATH_MAX, fp);
+		SString line;
+		std::getline(fp, line.get());
 
-		if (! line)
-			break;
-
-		StringRemoveCRLF(line);
-
-		int num_tok = M_ParseLine(line, tokens, ParseOptions_haveStringsKeepQuotes);
+		int num_tok = M_ParseLine(line.c_str(), tokens, ParseOptions_haveStringsKeepQuotes);
 
 		if (num_tok == 0)
 			continue;
 
 		if (num_tok < 3)
 		{
-			LogPrintf("Syntax error in bindings: %s\n", line);
+			LogPrintf("Syntax error in bindings: %s\n", line.c_str());
 			continue;
 		}
 
 		ParseKeyBinding(tokens);
 	}
-
-	fclose(fp);
 
 	return true;
 }
