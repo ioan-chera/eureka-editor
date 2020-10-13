@@ -368,6 +368,10 @@ static void ParseFeatureDef(char ** argv, int argc)
 	{
 		Features.mix_textures_flats = atoi(argv[1]);
 	}
+	else if (y_stricmp(argv[0], "neg_patch_offsets") == 0)
+	{
+		Features.neg_patch_offsets = atoi(argv[1]);
+	}
 	else if (y_stricmp(argv[0], "extra_floors") == 0)
 	{
 		Features.extra_floors = atoi(argv[1]);
