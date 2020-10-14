@@ -26,6 +26,7 @@
 #include "e_main.h"
 #include "e_sector.h"
 #include "e_things.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "r_render.h"
 #include "w_rawdef.h"
@@ -33,13 +34,13 @@
 
 
 // config items
-int floor_bump_small  = 1;
-int floor_bump_medium = 8;
-int floor_bump_large  = 64;
+int config::floor_bump_small  = 1;
+int config::floor_bump_medium = 8;
+int config::floor_bump_large  = 64;
 
-int light_bump_small  = 4;
-int light_bump_medium = 16;
-int light_bump_large  = 64;
+int config::light_bump_small  = 4;
+int config::light_bump_medium = 16;
+int config::light_bump_large  = 64;
 
 
 //TODO make these configurable
@@ -629,12 +630,12 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
 
-	int lt_step = light_bump_medium;
+	int lt_step = config::light_bump_medium;
 
 	if (mod & MOD_SHIFT)
-		lt_step = light_bump_small;
+		lt_step = config::light_bump_small;
 	else if (mod & MOD_COMMAND)
-		lt_step = light_bump_large;
+		lt_step = config::light_bump_large;
 
 	if (w == box->lt_up)
 	{
@@ -647,12 +648,12 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	int mv_step = floor_bump_medium;
+	int mv_step = config::floor_bump_medium;
 
 	if (mod & MOD_SHIFT)
-		mv_step = floor_bump_small;
+		mv_step = config::floor_bump_small;
 	else if (mod & MOD_COMMAND)
-		mv_step = floor_bump_large;
+		mv_step = config::floor_bump_large;
 
 	if (w == box->ce_up)
 	{

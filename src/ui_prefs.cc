@@ -1457,8 +1457,8 @@ void UI_Preferences::LoadValues()
 	edit_full_1S->value(config::show_full_one_sided ? 1 : 0);
 	edit_autoadjustX->value(config::leave_offsets_alone ? 0 : 1);
 
-	brow_smalltex->value(browser_small_tex ? 1 : 0);
-	brow_combo->value(browser_combine_tex ? 1 : 0);
+	brow_smalltex->value(config::browser_small_tex ? 1 : 0);
+	brow_combo->value(config::browser_combine_tex ? 1 : 0);
 
 	char ratio_buf[256];
 	snprintf(ratio_buf, sizeof(ratio_buf), "%d:%d", config::grid_ratio_high,
@@ -1609,10 +1609,10 @@ void UI_Preferences::SaveValues()
 	bool new_small_tex = brow_smalltex->value() ? true : false;
 	bool new_combo = brow_combo->value() ? true : false;
 
-	if (new_small_tex != browser_small_tex || new_combo != browser_combine_tex)
+	if (new_small_tex != config::browser_small_tex || new_combo != config::browser_combine_tex)
 	{
-		browser_small_tex = new_small_tex;
-		browser_combine_tex = new_combo;
+		config::browser_small_tex = new_small_tex;
+		config::browser_combine_tex = new_combo;
 
 		main_win->browser->Populate();
 	}

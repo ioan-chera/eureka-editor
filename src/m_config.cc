@@ -259,7 +259,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Maximum copies to make when backing up a wad",
 		NULL,
-		&backup_max_files
+		&config::backup_max_files
 	},
 
 	{	"backup_max_space",
@@ -268,7 +268,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Maximum space to use (in MB) when backing up a wad",
 		NULL,
-		&backup_max_space
+		&config::backup_max_space
 	},
 
 	{	"browser_combine_tex",
@@ -277,7 +277,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Combine flats and textures in a single browser",
 		NULL,
-		&browser_combine_tex
+		&config::browser_combine_tex
 	},
 
 	{	"browser_small_tex",
@@ -286,7 +286,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Show smaller (more compact) textures in the browser",
 		NULL,
-		&browser_small_tex
+		&config::browser_small_tex
 	},
 
 	{	"bsp_on_save",
@@ -430,7 +430,7 @@ static const opt_desc_t options[] =
 		"v",
 		"distance for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
-		&floor_bump_small
+		&config::floor_bump_small
 	},
 
 	{	"floor_bump_medium",
@@ -439,7 +439,7 @@ static const opt_desc_t options[] =
 		"v",
 		"distance for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
-		&floor_bump_medium
+		&config::floor_bump_medium
 	},
 
 	{	"floor_bump_large",
@@ -448,7 +448,7 @@ static const opt_desc_t options[] =
 		"v",
 		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
-		&floor_bump_large
+		&config::floor_bump_large
 	},
 
 	{	"grid_default_mode",
@@ -592,7 +592,7 @@ static const opt_desc_t options[] =
 		"v",
 		"light step for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
-		&light_bump_small
+		&config::light_bump_small
 	},
 
 	{	"light_bump_medium",
@@ -601,7 +601,7 @@ static const opt_desc_t options[] =
 		"v",
 		"light step for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
-		&light_bump_medium
+		&config::light_bump_medium
 	},
 
 	{	"light_bump_large",
@@ -610,7 +610,7 @@ static const opt_desc_t options[] =
 		"v",
 		"light step for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
-		&light_bump_large
+		&config::light_bump_large
 	},
 
 	{	"map_scroll_bars",

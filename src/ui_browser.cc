@@ -51,8 +51,8 @@ extern std::map<int, thingtype_t>  thing_types;
 
 
 // config items
-bool browser_small_tex = false;
-bool browser_combine_tex = false;
+bool config::browser_small_tex = false;
+bool config::browser_combine_tex = false;
 
 
 // sort methods
@@ -338,7 +338,7 @@ UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, ch
 		add(do_tex);
 		add(do_flats);
 
-		if (! browser_combine_tex)
+		if (! config::browser_combine_tex)
 		{
 			do_tex->hide();
 			do_flats->hide();
@@ -497,7 +497,7 @@ bool UI_Browser_Box::Filter(bool force_update)
 
 bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 {
-	if (browser_combine_tex && kind == 'T')
+	if (config::browser_combine_tex && kind == 'T')
 	{
 		if (item->kind == 'T' && !do_tex->value())
 			return false;
@@ -717,7 +717,7 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
 		int pic_h = (kind == 'F') ? 64 : MIN(128, MAX(4, image->height()));
 
-		if (browser_small_tex && imkind == 'T')
+		if (config::browser_small_tex && imkind == 'T')
 		{
 			pic_w = 64;
 			pic_h = MIN(64, MAX(4, image->height()));
@@ -907,7 +907,7 @@ void UI_Browser_Box::Populate()
 	// handle changes to combine-tex preference
 	if (kind == 'T')
 	{
-		if (browser_combine_tex)
+		if (config::browser_combine_tex)
 		{
 			do_tex->show();
 			do_flats->show();
@@ -924,7 +924,7 @@ void UI_Browser_Box::Populate()
 	switch (kind)
 	{
 		case 'T':
-			if (browser_combine_tex)
+			if (config::browser_combine_tex)
 				Populate_Images('F', flats);
 
 			Populate_Images('T', textures);
@@ -932,7 +932,7 @@ void UI_Browser_Box::Populate()
 
 		case 'F':
 			// the flat browser is never used when combine-tex is enabled
-			if (! browser_combine_tex)
+			if (! config::browser_combine_tex)
 				Populate_Images('F', flats);
 			break;
 
@@ -1643,7 +1643,7 @@ char UI_Browser::GetMode() const
 
 void UI_Browser::ChangeMode(char new_mode)
 {
-	if (browser_combine_tex && new_mode == 'F')
+	if (config::browser_combine_tex && new_mode == 'F')
 		new_mode = 'T';
 
 	switch (new_mode)
@@ -1676,7 +1676,7 @@ void UI_Browser::NewEditMode(obj_type_e edit_mode)
 			// if on SECTOR TYPES, stay there
 			// otherwise go to FLATS
 			if (active != 4)
-				SetActive(browser_combine_tex ? 0 : 1);
+				SetActive(config::browser_combine_tex ? 0 : 1);
 			break;
 
 		case OBJ_THINGS:

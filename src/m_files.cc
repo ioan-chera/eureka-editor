@@ -1036,8 +1036,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 
 // config variables
-int backup_max_files = 30;
-int backup_max_space = 60;  // MB
+int config::backup_max_files = 30;
+int config::backup_max_space = 60;  // MB
 
 
 typedef struct
@@ -1086,10 +1086,10 @@ static void Backup_Prune(const char *dir_name, int b_low, int b_high, int wad_si
 	// do calculations in KB units
 	wad_size = wad_size / 1024 + 1;
 
-	int backup_num = 2 + backup_max_space * 1024 / wad_size;
+	int backup_num = 2 + config::backup_max_space * 1024 / wad_size;
 
-	if (backup_num > backup_max_files)
-		backup_num = backup_max_files;
+	if (backup_num > config::backup_max_files)
+		backup_num = config::backup_max_files;
 
 	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
@@ -1101,7 +1101,7 @@ static void Backup_Prune(const char *dir_name, int b_low, int b_high, int wad_si
 void M_BackupWad(Wad_file *wad)
 {
 	// disabled ?
-	if (backup_max_files <= 0 || backup_max_space <= 0)
+	if (config::backup_max_files <= 0 || config::backup_max_space <= 0)
 		return;
 
 	// convert wad filename to a directory name in $cache_dir/backups
