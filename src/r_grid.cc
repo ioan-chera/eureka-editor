@@ -28,22 +28,23 @@
 
 #include "r_grid.h"
 #include "e_main.h"
+#include "m_config.h"
 #include "ui_window.h"
 
 
 Grid_State_c  grid;
 
 // config items
-int  grid_default_size = 64;
-bool grid_default_snap = false;
-int  grid_default_mode = 0;  // off
+int  config::grid_default_size = 64;
+bool config::grid_default_snap = false;
+int  config::grid_default_mode = 0;  // off
 
-int  grid_style;  // 0 = squares, 1 = dotty
-bool grid_hide_in_free_mode = false;
-bool grid_snap_indicator = true;
+int  config::grid_style;  // 0 = squares, 1 = dotty
+bool config::grid_hide_in_free_mode = false;
+bool config::grid_snap_indicator = true;
 
-int  grid_ratio_high = 3;  // custom ratio (high must be >= low)
-int  grid_ratio_low  = 1;  // (low must be > 0)
+int  config::grid_ratio_high = 3;  // custom ratio (high must be >= low)
+int  config::grid_ratio_low  = 1;  // (low must be > 0)
 
 
 Grid_State_c::Grid_State_c() :
@@ -59,7 +60,7 @@ Grid_State_c::~Grid_State_c()
 
 void Grid_State_c::Init()
 {
-	step = grid_default_size;
+	step = config::grid_default_size;
 
 	if (step < 1)
 		step = 1;
@@ -71,7 +72,7 @@ void Grid_State_c::Init()
 
 	AdjustStep(+1);
 
-	if (grid_default_mode == 0)
+	if (config::grid_default_mode == 0)
 	{
 		shown = false;
 
@@ -83,7 +84,7 @@ void Grid_State_c::Init()
 		shown = true;
 	}
 
-	snap = grid_default_snap;
+	snap = config::grid_default_snap;
 
 	if (main_win)
 		main_win->info_bar->UpdateSnap();
@@ -288,12 +289,12 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 		break;
 
 	default: // USER SETTING
-		if (grid_ratio_low < 1)
-			grid_ratio_low = 1;
-		if (grid_ratio_high < grid_ratio_low)
-			grid_ratio_high = grid_ratio_low;
+		if (config::grid_ratio_low < 1)
+			config::grid_ratio_low = 1;
+		if (config::grid_ratio_high < config::grid_ratio_low)
+			config::grid_ratio_high = config::grid_ratio_low;
 
-		custom = (double)grid_ratio_low / (double)grid_ratio_high;
+		custom = (double)config::grid_ratio_low / (double)config::grid_ratio_high;
 
 		if (custom > 0.1 && fabs(dx) < fabs(dy) * custom * 0.3)
 		{
@@ -480,7 +481,7 @@ void Grid_State_c::RawSetStep(int i)
 			main_win->info_bar->SetGrid(step);
 	}
 
-	if (grid_hide_in_free_mode)
+	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
 	RedrawMap();
@@ -495,7 +496,7 @@ void Grid_State_c::ForceStep(int new_step)
 	if (main_win)
 		main_win->info_bar->SetGrid(step);
 
-	if (grid_hide_in_free_mode)
+	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
 	RedrawMap();
@@ -626,7 +627,7 @@ void Grid_State_c::SetShown(bool enable)
 {
 	RawSetShown(enable);
 
-	if (grid_hide_in_free_mode)
+	if (config::grid_hide_in_free_mode)
 		SetSnap(enable);
 }
 
@@ -643,7 +644,7 @@ void Grid_State_c::SetSnap(bool enable)
 
 	snap = enable;
 
-	if (grid_hide_in_free_mode && snap != shown)
+	if (config::grid_hide_in_free_mode && snap != shown)
 		SetShown(snap);
 
 	if (main_win)
@@ -729,7 +730,7 @@ void Grid_WriteUser(FILE *fp)
 
 	fprintf(fp, "grid %d %d %d\n",
 			grid.shown ? 1 : 0,
-			grid_style ? 0 : 1,  /* was grid.mode, now unused */
+			config::grid_style ? 0 : 1,  /* was grid.mode, now unused */
 			grid.step);
 
 	fprintf(fp, "snap %d\n",

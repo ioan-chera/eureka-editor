@@ -47,7 +47,7 @@ extern std::map<int, sectortype_t> sector_types;
 extern std::map<int, thingtype_t>  thing_types;
 
 
-#define  BROWBACK_COL  (gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
+#define  BROWBACK_COL  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 
 
 // config items

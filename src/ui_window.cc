@@ -599,7 +599,7 @@ UI_LogViewer::UI_LogViewer() :
 		Fl_Group *o = new Fl_Group(0, ey, w(), h() - ey);
 		o->box(FL_FLAT_BOX);
 
-		if (gui_color_set == 2)
+		if (config::gui_color_set == 2)
 			o->color(fl_gray_ramp(4));
 		else
 			o->color(WINDOW_BG);

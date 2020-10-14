@@ -34,6 +34,7 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_vertex.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "r_grid.h"
@@ -43,7 +44,7 @@
 
 
 // config items
-int  new_sector_size = 128;
+int  config::new_sector_size = 128;
 
 bool select_verts_of_new_sectors = true;
 
@@ -89,8 +90,8 @@ static void CreateSquare(int model)
 	double x1 = grid.QuantSnapX(edit.map_x, false);
 	double y1 = grid.QuantSnapX(edit.map_y, false);
 
-	double x2 = x1 + new_sector_size;
-	double y2 = y1 + new_sector_size;
+	double x2 = x1 + config::new_sector_size;
+	double y2 = y1 + config::new_sector_size;
 
 	for (int i = 0 ; i < 4 ; i++)
 	{

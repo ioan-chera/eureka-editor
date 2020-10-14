@@ -457,7 +457,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
-		&grid_default_mode
+		&config::grid_default_mode
 	},
 
 	{	"grid_default_size",
@@ -466,7 +466,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default grid size",
 		NULL,
-		&grid_default_size
+		&config::grid_default_size
 	},
 
 	{	"grid_default_snap",
@@ -475,7 +475,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default grid snapping",
 		NULL,
-		&grid_default_snap
+		&config::grid_default_snap
 	},
 
 	{	"grid_hide_in_free_mode",
@@ -484,7 +484,7 @@ static const opt_desc_t options[] =
 		"v",
 		"hide the grid in FREE mode",
 		NULL,
-		&grid_hide_in_free_mode
+		&config::grid_hide_in_free_mode
 	},
 
 	{	"grid_ratio_high",
@@ -493,7 +493,7 @@ static const opt_desc_t options[] =
 		"v",
 		"custom grid ratio : high value (numerator)",
 		NULL,
-		&grid_ratio_high
+		&config::grid_ratio_high
 	},
 
 	{	"grid_ratio_low",
@@ -502,7 +502,7 @@ static const opt_desc_t options[] =
 		"v",
 		"custom grid ratio : low value (denominator)",
 		NULL,
-		&grid_ratio_low
+		&config::grid_ratio_low
 	},
 
 	{	"grid_snap_indicator",
@@ -511,7 +511,7 @@ static const opt_desc_t options[] =
 		"v",
 		"show a cross at the grid-snapped location",
 		NULL,
-		&grid_snap_indicator
+		&config::grid_snap_indicator
 	},
 
 	{	"grid_style",
@@ -520,7 +520,7 @@ static const opt_desc_t options[] =
 		"v",
 		"grid style : 0 = squares, 1 = dotty",
 		NULL,
-		&grid_style
+		&config::grid_style
 	},
 
 	{	"gui_theme",
@@ -529,7 +529,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
 		NULL,
-		&gui_scheme
+		&config::gui_scheme
 	},
 
 	{	"gui_color_set",
@@ -538,7 +538,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
 		NULL,
-		&gui_color_set
+		&config::gui_color_set
 	},
 
 	{	"gui_custom_bg",
@@ -547,7 +547,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI custom background color",
 		NULL,
-		&gui_custom_bg
+		&config::gui_custom_bg
 	},
 
 	{	"gui_custom_ig",
@@ -556,7 +556,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI custom input color",
 		NULL,
-		&gui_custom_ig
+		&config::gui_custom_ig
 	},
 
 	{	"gui_custom_fg",
@@ -565,7 +565,7 @@ static const opt_desc_t options[] =
 		"v",
 		"GUI custom foreground (text) color",
 		NULL,
-		&gui_custom_fg
+		&config::gui_custom_fg
 	},
 
 	{	"highlight_line_info",
@@ -574,7 +574,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Info drawn near a highlighted line (0 = nothing)",
 		NULL,
-		&highlight_line_info
+		&config::highlight_line_info
 	},
 
 	{	"leave_offsets_alone",
@@ -583,7 +583,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
-		&leave_offsets_alone
+		&config::leave_offsets_alone
 	},
 
 	{	"light_bump_small",
@@ -619,7 +619,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Enable scroll-bars for the map view",
 		NULL,
-		&map_scroll_bars
+		&config::map_scroll_bars
 	},
 
 	{	"minimum_drag_pixels",
@@ -628,7 +628,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Minimum distance to move mouse to drag an object (in pixels)",
 		NULL,
-		&minimum_drag_pixels
+		&config::minimum_drag_pixels
 	},
 
 	{	"new_sector_size",
@@ -637,7 +637,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Size of sector rectangles created outside of the map",
 		NULL,
-		&new_sector_size
+		&config::new_sector_size
 	},
 
 	{	"normal_axis_col",
@@ -682,7 +682,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Gamma for images in the panels and the browser (0..4)",
 		NULL,
-		&panel_gamma
+		&config::panel_gamma
 	},
 
 	{	"render_pix_aspect",
@@ -745,7 +745,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Clear the selection when entering the same mode",
 		NULL,
-		&same_mode_clears_selection
+		&config::same_mode_clears_selection
 	},
 
 	{	"sector_render_default",
@@ -754,7 +754,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default sector rendering mode: 0 = NONE, 1 = floor, 2 = ceiling",
 		NULL,
-		&sector_render_default
+		&config::sector_render_default
 	},
 
 	{	"show_full_one_sided",
@@ -763,7 +763,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Show all textures on one-sided lines in the Linedef panel",
 		NULL,
-		&show_full_one_sided
+		&config::show_full_one_sided
 	},
 
 	{	"sidedef_add_del_buttons",
@@ -781,7 +781,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default thing rendering mode: 0 = boxes, 1 = sprites",
 		NULL,
-		&thing_render_default
+		&config::thing_render_default
 	},
 
 	{	"transparent_col",
@@ -799,7 +799,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Swap upper and lower sidedefs in the Linedef panel",
 		NULL,
-		&swap_sidedefs
+		&config::swap_sidedefs
 	},
 
 	//

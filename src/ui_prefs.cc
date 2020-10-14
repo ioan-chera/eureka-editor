@@ -736,7 +736,7 @@ UI_Preferences::UI_Preferences() :
 	  key_sort_mode('k'), key_sort_rev(false),
 	  awaiting_line(0)
 {
-	if (gui_color_set == 2)
+	if (config::gui_color_set == 2)
 		color(fl_gray_ramp(4));
 	else
 		color(WINDOW_BG);
@@ -1421,67 +1421,68 @@ void UI_Preferences::LoadValues()
 {
 	/* Theme stuff */
 
-	switch (gui_scheme)
+	switch (config::gui_scheme)
 	{
 		case 0: theme_FLTK->value(1); break;
 		case 1: theme_GTK->value(1); break;
 		case 2: theme_plastic->value(1); break;
 	}
 
-	switch (gui_color_set)
+	switch (config::gui_color_set)
 	{
 		case 0: cols_default->value(1); break;
 		case 1: cols_bright->value(1); break;
 		case 2: cols_custom->value(1); break;
 	}
 
-	bg_colorbox->color(gui_custom_bg);
-	ig_colorbox->color(gui_custom_ig);
-	fg_colorbox->color(gui_custom_fg);
+	bg_colorbox->color(config::gui_custom_bg);
+	ig_colorbox->color(config::gui_custom_ig);
+	fg_colorbox->color(config::gui_custom_fg);
 
 	/* General Tab */
 
 	gen_autoload   ->value(auto_load_recent ? 1 : 0);
 	gen_maximized  ->value(begin_maximized  ? 1 : 0);
-	gen_swapsides  ->value(swap_sidedefs    ? 1 : 0);
+	gen_swapsides  ->value(config::swap_sidedefs    ? 1 : 0);
 
 	/* Edit Tab */
 
 	edit_def_port->value(default_port.c_str());
 	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
-	edit_lineinfo->value(CLAMP(0, highlight_line_info, 5));
+	edit_lineinfo->value(CLAMP(0, config::highlight_line_info, 5));
 
-	edit_sectorsize->value(Int_TmpStr(new_sector_size));
-	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
+	edit_sectorsize->value(Int_TmpStr(config::new_sector_size));
+	edit_samemode->value(config::same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(config::sidedef_add_del_buttons ? 1 : 0);
-	edit_full_1S->value(show_full_one_sided ? 1 : 0);
-	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
+	edit_full_1S->value(config::show_full_one_sided ? 1 : 0);
+	edit_autoadjustX->value(config::leave_offsets_alone ? 0 : 1);
 
 	brow_smalltex->value(browser_small_tex ? 1 : 0);
 	brow_combo->value(browser_combine_tex ? 1 : 0);
 
 	char ratio_buf[256];
-	snprintf(ratio_buf, sizeof(ratio_buf), "%d:%d", grid_ratio_high, grid_ratio_low);
+	snprintf(ratio_buf, sizeof(ratio_buf), "%d:%d", config::grid_ratio_high,
+			 config::grid_ratio_low);
 	edit_userratio->value(ratio_buf);
 
 	/* Grid Tab */
 
-	if (grid_style < 0 || grid_style > 1)
-		grid_style = 1;
+	if (config::grid_style < 0 || config::grid_style > 1)
+		config::grid_style = 1;
 
-	if (grid_default_mode < 0 || grid_default_mode > 1)
-		grid_default_mode = 1;
+	if (config::grid_default_mode < 0 || config::grid_default_mode > 1)
+		config::grid_default_mode = 1;
 
-	grid_cur_style->value(grid_style);
-	grid_enabled->value(grid_default_mode);
-	grid_snap->value(grid_default_snap ? 1 : 0);
-	grid_size->value(GridSizeToChoice(grid_default_size));
-	grid_hide_free ->value(grid_hide_in_free_mode ? 1 : 0);
-	grid_flatrender->value(sector_render_default ? 1 : 0);
-	grid_spriterend->value(thing_render_default ? 1 : 0);
-	grid_indicator->value(grid_snap_indicator ? 1 : 0);
+	grid_cur_style->value(config::grid_style);
+	grid_enabled->value(config::grid_default_mode);
+	grid_snap->value(config::grid_default_snap ? 1 : 0);
+	grid_size->value(GridSizeToChoice(config::grid_default_size));
+	grid_hide_free ->value(config::grid_hide_in_free_mode ? 1 : 0);
+	grid_flatrender->value(config::sector_render_default ? 1 : 0);
+	grid_spriterend->value(config::thing_render_default ? 1 : 0);
+	grid_indicator->value(config::grid_snap_indicator ? 1 : 0);
 
-	gen_scrollbars ->value(map_scroll_bars ? 1 : 0);
+	gen_scrollbars ->value(config::map_scroll_bars ? 1 : 0);
 
 	dotty_axis ->color(dotty_axis_col);
 	dotty_major->color(dotty_major_col);
@@ -1545,26 +1546,26 @@ void UI_Preferences::SaveValues()
 	/* Theme stuff */
 
 	if (theme_FLTK->value())
-		gui_scheme = 0;
+		config::gui_scheme = 0;
 	else if (theme_GTK->value())
-		gui_scheme = 1;
+		config::gui_scheme = 1;
 	else
-		gui_scheme = 2;
+		config::gui_scheme = 2;
 
 	if (cols_default->value())
-		gui_color_set = 0;
+		config::gui_color_set = 0;
 	else if (cols_bright->value())
-		gui_color_set = 1;
+		config::gui_color_set = 1;
 	else
-		gui_color_set = 2;
+		config::gui_color_set = 2;
 
-	gui_custom_bg = (rgb_color_t) bg_colorbox->color();
-	gui_custom_ig = (rgb_color_t) ig_colorbox->color();
-	gui_custom_fg = (rgb_color_t) fg_colorbox->color();
+	config::gui_custom_bg = (rgb_color_t) bg_colorbox->color();
+	config::gui_custom_ig = (rgb_color_t) ig_colorbox->color();
+	config::gui_custom_fg = (rgb_color_t) fg_colorbox->color();
 
 	// update the colors
 	// FIXME: how to reset the "default" colors??
-	if (gui_color_set == 1)
+	if (config::gui_color_set == 1)
 	{
 		Fl::background(236, 232, 228);
 		Fl::background2(255, 255, 255);
@@ -1572,11 +1573,14 @@ void UI_Preferences::SaveValues()
 
 		main_win->redraw();
 	}
-	else if (gui_color_set == 2)
+	else if (config::gui_color_set == 2)
 	{
-		Fl::background (RGB_RED(gui_custom_bg), RGB_GREEN(gui_custom_bg), RGB_BLUE(gui_custom_bg));
-		Fl::background2(RGB_RED(gui_custom_ig), RGB_GREEN(gui_custom_ig), RGB_BLUE(gui_custom_ig));
-		Fl::foreground (RGB_RED(gui_custom_fg), RGB_GREEN(gui_custom_fg), RGB_BLUE(gui_custom_fg));
+		Fl::background (RGB_RED(config::gui_custom_bg), RGB_GREEN(config::gui_custom_bg),
+						RGB_BLUE(config::gui_custom_bg));
+		Fl::background2(RGB_RED(config::gui_custom_ig), RGB_GREEN(config::gui_custom_ig),
+						RGB_BLUE(config::gui_custom_ig));
+		Fl::foreground (RGB_RED(config::gui_custom_fg), RGB_GREEN(config::gui_custom_fg),
+						RGB_BLUE(config::gui_custom_fg));
 
 		main_win->redraw();
 	}
@@ -1585,21 +1589,21 @@ void UI_Preferences::SaveValues()
 
 	auto_load_recent  = gen_autoload   ->value() ? true : false;
 	begin_maximized   = gen_maximized  ->value() ? true : false;
-	swap_sidedefs     = gen_swapsides  ->value() ? true : false;
+	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
 
 	default_port = edit_def_port->value();
 	default_edit_mode = edit_def_mode->value();
-	highlight_line_info = edit_lineinfo->value();
+	config::highlight_line_info = edit_lineinfo->value();
 
-	new_sector_size = atoi(edit_sectorsize->value());
-	new_sector_size = CLAMP(4, new_sector_size, 8192);
+	config::new_sector_size = atoi(edit_sectorsize->value());
+	config::new_sector_size = CLAMP(4, config::new_sector_size, 8192);
 
-	same_mode_clears_selection = edit_samemode->value() ? true : false;
+	config::same_mode_clears_selection = edit_samemode->value() ? true : false;
 	config::sidedef_add_del_buttons = !!edit_add_del->value();
-	show_full_one_sided = edit_full_1S->value() ? true : false;
-	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
+	config::show_full_one_sided = edit_full_1S->value() ? true : false;
+	config::leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 
 	// changing this requires re-populating the browser
 	bool new_small_tex = brow_smalltex->value() ? true : false;
@@ -1614,28 +1618,28 @@ void UI_Preferences::SaveValues()
 	}
 
 	// decode the user ratio
-	grid_ratio_low = grid_ratio_high = -1;
-	sscanf(edit_userratio->value(), "%d:%d", &grid_ratio_high, &grid_ratio_low);
-	if (grid_ratio_high < 1) grid_ratio_high = 3;
-	if (grid_ratio_low  < 1) grid_ratio_low  = 1;
+	config::grid_ratio_low = config::grid_ratio_high = -1;
+	sscanf(edit_userratio->value(), "%d:%d", &config::grid_ratio_high, &config::grid_ratio_low);
+	if (config::grid_ratio_high < 1) config::grid_ratio_high = 3;
+	if (config::grid_ratio_low  < 1) config::grid_ratio_low  = 1;
 
-	if (grid_ratio_low > grid_ratio_high)
-		std::swap(grid_ratio_low, grid_ratio_high);
+	if (config::grid_ratio_low > config::grid_ratio_high)
+		std::swap(config::grid_ratio_low, config::grid_ratio_high);
 
 	main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 
-	grid_style        = grid_cur_style->value();
-	grid_default_mode = grid_enabled->value();
-	grid_default_snap = grid_snap->value() ? true : false;
-	grid_default_size = atoi(grid_size->mvalue()->text);
-	grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
-	grid_snap_indicator    = grid_indicator ->value() ? true : false;
-	sector_render_default  = grid_flatrender->value() ? 1 : 0;
-	thing_render_default   = grid_spriterend->value() ? 1 : 0;
+	config::grid_style        = grid_cur_style->value();
+	config::grid_default_mode = grid_enabled->value();
+	config::grid_default_snap = grid_snap->value() ? true : false;
+	config::grid_default_size = atoi(grid_size->mvalue()->text);
+	config::grid_hide_in_free_mode = grid_hide_free ->value() ? true : false;
+	config::grid_snap_indicator    = grid_indicator ->value() ? true : false;
+	config::sector_render_default  = grid_flatrender->value() ? 1 : 0;
+	config::thing_render_default   = grid_spriterend->value() ? 1 : 0;
 
-	map_scroll_bars = gen_scrollbars ->value() ? true : false;
+	config::map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
 	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
 	dotty_major_col = (rgb_color_t) dotty_major->color();

@@ -73,7 +73,7 @@ rgb_color_t normal_main_col  = RGB_MAKE(0, 0, 238);
 rgb_color_t normal_flat_col  = RGB_MAKE(60, 60, 120);
 rgb_color_t normal_small_col = RGB_MAKE(60, 60, 120);
 
-int highlight_line_info = (int)LINFO_Length;
+int config::highlight_line_info = (int)LINFO_Length;
 
 
 int vertex_radius(double scale);
@@ -395,7 +395,7 @@ void UI_Canvas::DrawMap()
 	// draw the grid first since it's in the background
 	if (grid.shown)
 	{
-		if (grid_style == 0)
+		if (config::grid_style == 0)
 			DrawGrid_Normal();
 		else
 			DrawGrid_Dotty();
@@ -409,7 +409,7 @@ void UI_Canvas::DrawMap()
 	if (edit.mode != OBJ_THINGS)
 		DrawThings();
 
-	if (grid.snap && grid_snap_indicator)
+	if (grid.snap && config::grid_snap_indicator)
 		DrawSnapPoint();
 
 	DrawLinedefs();
@@ -1149,7 +1149,7 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double map_y2,
 							 bool force_ratio)
 {
-	line_info_mode_e info = (line_info_mode_e)highlight_line_info;
+	line_info_mode_e info = (line_info_mode_e)config::highlight_line_info;
 
 	if (info == LINFO_Nothing)
 		return;
@@ -1266,7 +1266,7 @@ void UI_Canvas::DrawNumber(int x, int y, int num)
 
 void UI_Canvas::CheckGridSnap()
 {
-	if (!grid.snap || !grid_snap_indicator)
+	if (!grid.snap || !config::grid_snap_indicator)
 		return;
 
 	double new_snap_x = grid.SnapX(edit.map_x);
@@ -1984,7 +1984,7 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 
 	// check that we have moved far enough from the start position,
 	// giving the user the option to select the original place.
-	if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels*2)
+	if (MAX(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels*2)
 	{
 		*dx = *dy = 0;
 		return;

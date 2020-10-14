@@ -29,8 +29,8 @@
 #include "r_render.h"
 
 
-#define SNAP_COLOR  (gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))
-#define FREE_COLOR  (gui_scheme == 2 ? fl_rgb_color(0,192,0) : fl_rgb_color(128, 255, 128))
+#define SNAP_COLOR  (config::gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))
+#define FREE_COLOR  (config::gui_scheme == 2 ? fl_rgb_color(0,192,0) : fl_rgb_color(128, 255, 128))
 
 #define RATIO_COLOR  FL_YELLOW
 
@@ -364,7 +364,7 @@ void UI_InfoBar::UpdateRatio()
 	if (grid.ratio == 7)
 	{
 		char buffer[256];
-		snprintf(buffer, sizeof(buffer), "Usr %d:%d", grid_ratio_high, grid_ratio_low);
+		snprintf(buffer, sizeof(buffer), "Usr %d:%d", config::grid_ratio_high, config::grid_ratio_low);
 
 		// drop the "Usr" part when overly long
 		if (strlen(buffer) > 9)

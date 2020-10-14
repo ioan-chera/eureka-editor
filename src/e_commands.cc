@@ -50,7 +50,7 @@
 
 
 // config items
-int minimum_drag_pixels = 5;
+int config::minimum_drag_pixels = 5;
 
 
 void CMD_Nothing()
@@ -547,7 +547,7 @@ void CheckBeginDrag()
 	int pixel_dx = Fl::event_x() - edit.click_screen_x;
 	int pixel_dy = Fl::event_y() - edit.click_screen_y;
 
-	if (MAX(abs(pixel_dx), abs(pixel_dy)) < minimum_drag_pixels)
+	if (MAX(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
 		return;
 
 	// if highlighted object is in selection, we drag the selection,

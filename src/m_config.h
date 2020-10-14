@@ -36,6 +36,9 @@ extern int default_edit_mode;
 
 extern bool auto_load_recent;
 extern bool begin_maximized;
+
+namespace config
+{
 extern bool map_scroll_bars;
 
 extern bool leave_offsets_alone;
@@ -43,10 +46,7 @@ extern bool same_mode_clears_selection;
 
 extern bool swap_sidedefs;
 extern bool show_full_one_sided;
-namespace config
-{
 extern bool sidedef_add_del_buttons;
-}
 
 extern int gui_scheme;
 extern int gui_color_set;
@@ -70,6 +70,8 @@ extern bool grid_hide_in_free_mode;
 extern bool grid_snap_indicator;
 extern int  grid_ratio_high;
 extern int  grid_ratio_low;
+}
+
 
 extern rgb_color_t dotty_axis_col;
 extern rgb_color_t dotty_major_col;

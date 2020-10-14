@@ -94,16 +94,16 @@ SString  Udmf_namespace;
 //
 bool auto_load_recent = false;
 bool begin_maximized  = false;
-bool map_scroll_bars  = true;
+bool config::map_scroll_bars  = true;
 
 SString default_port = "vanilla";
 
-int gui_scheme    = 1;  // gtk+
-int gui_color_set = 1;  // bright
+int config::gui_scheme    = 1;  // gtk+
+int config::gui_color_set = 1;  // bright
 
-rgb_color_t gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
-rgb_color_t gui_custom_ig = RGB_MAKE(255, 255, 255);
-rgb_color_t gui_custom_fg = RGB_MAKE(0, 0, 0);
+rgb_color_t config::gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
+rgb_color_t config::gui_custom_ig = RGB_MAKE(255, 255, 255);
+rgb_color_t config::gui_custom_fg = RGB_MAKE(0, 0, 0);
 
 
 // Progress during initialisation:
@@ -600,11 +600,11 @@ static void Main_SetupFLTK()
 	// user interface, especially TAB key for toggling the 3D view.
 	Fl::option(Fl::OPTION_VISIBLE_FOCUS, false);
 
-	if (gui_color_set == 0)
+	if (config::gui_color_set == 0)
 	{
 		// use default colors
 	}
-	else if (gui_color_set == 1)
+	else if (config::gui_color_set == 1)
 	{
 		Fl::background(236, 232, 228);
 		Fl::background2(255, 255, 255);
@@ -613,16 +613,19 @@ static void Main_SetupFLTK()
 	else
 	{
 		// custom colors
-		Fl::background (RGB_RED(gui_custom_bg), RGB_GREEN(gui_custom_bg), RGB_BLUE(gui_custom_bg));
-		Fl::background2(RGB_RED(gui_custom_ig), RGB_GREEN(gui_custom_ig), RGB_BLUE(gui_custom_ig));
-		Fl::foreground (RGB_RED(gui_custom_fg), RGB_GREEN(gui_custom_fg), RGB_BLUE(gui_custom_fg));
+		Fl::background (RGB_RED(config::gui_custom_bg), RGB_GREEN(config::gui_custom_bg),
+						RGB_BLUE(config::gui_custom_bg));
+		Fl::background2(RGB_RED(config::gui_custom_ig), RGB_GREEN(config::gui_custom_ig),
+						RGB_BLUE(config::gui_custom_ig));
+		Fl::foreground (RGB_RED(config::gui_custom_fg), RGB_GREEN(config::gui_custom_fg),
+						RGB_BLUE(config::gui_custom_fg));
 	}
 
-	if (gui_scheme == 0)
+	if (config::gui_scheme == 0)
 	{
 		// use default scheme
 	}
-	else if (gui_scheme == 1)
+	else if (config::gui_scheme == 1)
 	{
 		Fl::scheme("gtk+");
 	}
@@ -674,7 +677,7 @@ static void Main_OpenWindow()
 	}
 
 	// kill the stupid bright background of the "plastic" scheme
-	if (gui_scheme == 2)
+	if (config::gui_scheme == 2)
 	{
 		delete Fl::scheme_bg_;
 		Fl::scheme_bg_ = NULL;
