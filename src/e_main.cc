@@ -62,7 +62,7 @@ extern bool sound_propagation_invalid;
 
 
 // config items
-int default_edit_mode = 3;  // Vertices
+int config::default_edit_mode = 3;  // Vertices
 
 bool config::same_mode_clears_selection = false;
 
@@ -1325,7 +1325,7 @@ void Editor_RegisterCommands();
 
 void Editor_Init()
 {
-	switch (default_edit_mode)
+	switch (config::default_edit_mode)
 	{
 		case 1:  edit.mode = OBJ_LINEDEFS; break;
 		case 2:  edit.mode = OBJ_SECTORS;  break;
