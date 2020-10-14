@@ -241,7 +241,7 @@ static const opt_desc_t options[] =
 		"v",
 		"When no given files, load the most recent one saved",
 		NULL,
-		&auto_load_recent
+		&config::auto_load_recent
 	},
 
 	{	"begin_maximized",
@@ -250,7 +250,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Maximize the window when Eureka starts",
 		NULL,
-		&begin_maximized
+		&config::begin_maximized
 	},
 
 	{	"backup_max_files",
@@ -376,7 +376,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default editing mode: 0..3 = Th / Lin / Sec / Vt",
 		NULL,
-		&default_edit_mode
+		&config::default_edit_mode
 	},
 
 	{	"default_port",
@@ -385,7 +385,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default port (engine) name",
 		NULL,
-		&default_port
+		&config::default_port
 	},
 
 	{	"dotty_axis_col",

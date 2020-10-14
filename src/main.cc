@@ -92,11 +92,11 @@ SString  Udmf_namespace;
 //
 // config items
 //
-bool auto_load_recent = false;
-bool begin_maximized  = false;
+bool config::auto_load_recent = false;
+bool config::begin_maximized  = false;
 bool config::map_scroll_bars  = true;
 
-SString default_port = "vanilla";
+SString config::default_port = "vanilla";
 
 int config::gui_scheme    = 1;  // gtk+
 int config::gui_color_set = 1;  // bright
@@ -460,25 +460,25 @@ static void DeterminePort()
 	const char *base_game = M_GetBaseGame(Game_name.c_str());
 
 	// ensure the 'default_port' value is OK
-	if (default_port.empty())
+	if (config::default_port.empty())
 	{
 		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
-		default_port = "vanilla";
+		config::default_port = "vanilla";
 	}
-	else if (! M_CanLoadDefinitions("ports", default_port.c_str()))
+	else if (! M_CanLoadDefinitions("ports", config::default_port.c_str()))
 	{
 		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n",
-				  default_port.c_str());
-		default_port = "vanilla";
+				  config::default_port.c_str());
+		config::default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(base_game, default_port.c_str()))
+	else if (! M_CheckPortSupportsGame(base_game, config::default_port.c_str()))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
-				  default_port.c_str(), Game_name.c_str());
-		default_port = "vanilla";
+				  config::default_port.c_str(), Game_name.c_str());
+		config::default_port = "vanilla";
 	}
 
-	Port_name = default_port;
+	Port_name = config::default_port;
 }
 
 
@@ -689,7 +689,7 @@ static void Main_OpenWindow()
 
 	InitAboutDialog();
 
-	if (begin_maximized)
+	if (config::begin_maximized)
 		main_win->Maximize();
 
 	log_viewer = new UI_LogViewer();
@@ -1106,7 +1106,7 @@ int main(int argc, char *argv[])
 			MasterDir_Add(edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (auto_load_recent && ! (!Iwad_name.empty() || !Level_name.empty()))
+		else if (config::auto_load_recent && ! (!Iwad_name.empty() || !Level_name.empty()))
 		{
 			if (M_TryOpenMostRecent())
 			{

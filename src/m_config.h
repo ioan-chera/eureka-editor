@@ -31,14 +31,14 @@
 
 /* ==== CONFIG VARIABLES ==================== */
 
+namespace config
+{
 extern SString default_port;
 extern int default_edit_mode;
 
 extern bool auto_load_recent;
 extern bool begin_maximized;
 
-namespace config
-{
 extern bool map_scroll_bars;
 
 extern bool leave_offsets_alone;

@@ -1441,14 +1441,14 @@ void UI_Preferences::LoadValues()
 
 	/* General Tab */
 
-	gen_autoload   ->value(auto_load_recent ? 1 : 0);
-	gen_maximized  ->value(begin_maximized  ? 1 : 0);
+	gen_autoload   ->value(config::auto_load_recent ? 1 : 0);
+	gen_maximized  ->value(config::begin_maximized  ? 1 : 0);
 	gen_swapsides  ->value(config::swap_sidedefs    ? 1 : 0);
 
 	/* Edit Tab */
 
-	edit_def_port->value(default_port.c_str());
-	edit_def_mode->value(CLAMP(0, default_edit_mode, 3));
+	edit_def_port->value(config::default_port.c_str());
+	edit_def_mode->value(CLAMP(0, config::default_edit_mode, 3));
 	edit_lineinfo->value(CLAMP(0, config::highlight_line_info, 5));
 
 	edit_sectorsize->value(Int_TmpStr(config::new_sector_size));
@@ -1587,14 +1587,14 @@ void UI_Preferences::SaveValues()
 
 	/* General Tab */
 
-	auto_load_recent  = gen_autoload   ->value() ? true : false;
-	begin_maximized   = gen_maximized  ->value() ? true : false;
+	config::auto_load_recent  = gen_autoload   ->value() ? true : false;
+	config::begin_maximized   = gen_maximized  ->value() ? true : false;
 	config::swap_sidedefs     = gen_swapsides  ->value() ? true : false;
 
 	/* Edit Tab */
 
-	default_port = edit_def_port->value();
-	default_edit_mode = edit_def_mode->value();
+	config::default_port = edit_def_port->value();
+	config::default_edit_mode = edit_def_mode->value();
 	config::highlight_line_info = edit_lineinfo->value();
 
 	config::new_sector_size = atoi(edit_sectorsize->value());
