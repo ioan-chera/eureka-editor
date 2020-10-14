@@ -772,7 +772,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Show the ADD and DEL buttons in Sidedef panels",
 		NULL,
-		&sidedef_add_del_buttons
+		&config::sidedef_add_del_buttons
 	},
 
 	{	"thing_render_default",

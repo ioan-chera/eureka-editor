@@ -43,7 +43,10 @@ extern bool same_mode_clears_selection;
 
 extern bool swap_sidedefs;
 extern bool show_full_one_sided;
+namespace config
+{
 extern bool sidedef_add_del_buttons;
+}
 
 extern int gui_scheme;
 extern int gui_color_set;

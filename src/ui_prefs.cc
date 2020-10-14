@@ -1453,7 +1453,7 @@ void UI_Preferences::LoadValues()
 
 	edit_sectorsize->value(Int_TmpStr(new_sector_size));
 	edit_samemode->value(same_mode_clears_selection ? 1 : 0);
-	edit_add_del->value(sidedef_add_del_buttons ? 1 : 0);
+	edit_add_del->value(config::sidedef_add_del_buttons ? 1 : 0);
 	edit_full_1S->value(show_full_one_sided ? 1 : 0);
 	edit_autoadjustX->value(leave_offsets_alone ? 0 : 1);
 
@@ -1597,7 +1597,7 @@ void UI_Preferences::SaveValues()
 	new_sector_size = CLAMP(4, new_sector_size, 8192);
 
 	same_mode_clears_selection = edit_samemode->value() ? true : false;
-	sidedef_add_del_buttons = edit_add_del->value() ? true : false;
+	config::sidedef_add_del_buttons = !!edit_add_del->value();
 	show_full_one_sided = edit_full_1S->value() ? true : false;
 	leave_offsets_alone = edit_autoadjustX->value() ? false : true;
 
