@@ -33,7 +33,7 @@
 
 
 // config item
-int usegamma = 2;
+int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
@@ -61,9 +61,9 @@ void W_UpdateGamma()
 		byte g = raw_palette[c][1];
 		byte b = raw_palette[c][2];
 
-		byte r2 = gammatable[usegamma][r];
-		byte g2 = gammatable[usegamma][g];
-		byte b2 = gammatable[usegamma][b];
+		byte r2 = gammatable[config::usegamma][r];
+		byte g2 = gammatable[config::usegamma][g];
+		byte b2 = gammatable[config::usegamma][b];
 
 		palette[c] = fl_rgb_color(r2, g2, b2);
 
@@ -78,7 +78,7 @@ void W_UpdateGamma()
 	{
 		int i = d * 255 / 31;
 
-		rgb555_gamma [d] = gammatable[usegamma][i];
+		rgb555_gamma [d] = gammatable[config::usegamma][i];
 		rgb555_medium[d] = gammatable[config::panel_gamma][i];
 	}
 }
@@ -262,8 +262,8 @@ rgb_color_t SectorLightColor(int light)
 	lt = (93 - lt) * 255 / 93;
 
 	// need to gamma-correct the light level
-	if (usegamma > 0)
-		lt = gammatable[usegamma][lt];
+	if (config::usegamma > 0)
+		lt = gammatable[config::usegamma][lt];
 
 	return RGB_MAKE(lt, lt, lt);
 }

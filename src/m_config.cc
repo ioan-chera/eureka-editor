@@ -367,7 +367,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Default gamma for images and 3D view (0..4)",
 		NULL,
-		&usegamma
+		&config::usegamma
 	},
 
 	{	"default_edit_mode",

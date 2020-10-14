@@ -195,7 +195,7 @@ void CMD_Redo()
 
 static void SetGamma(int new_val)
 {
-	usegamma = CLAMP(0, new_val, 4);
+	config::usegamma = CLAMP(0, new_val, 4);
 
 	W_UpdateGamma();
 
@@ -203,7 +203,7 @@ static void SetGamma(int new_val)
 	if (main_win && main_win->canvas)
 		main_win->canvas->DeleteContext();
 
-	Status_Set("gamma level %d", usegamma);
+	Status_Set("gamma level %d", config::usegamma);
 
 	RedrawMap();
 }
@@ -337,7 +337,7 @@ void CMD_ToggleVar()
 	}
 	else if (y_stricmp(var_name, "gamma") == 0)
 	{
-		SetGamma((usegamma >= 4) ? 0 : usegamma + 1);
+		SetGamma((config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (y_stricmp(var_name, "ratio") == 0)
 	{

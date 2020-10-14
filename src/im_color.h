@@ -43,8 +43,10 @@ typedef u32_t rgba_color_t;
 #define RGBA_ALPHA(col)   ((col) & 255)
 #define RGBA_MAKE(r, g, b, a)  (((r) << 24) | ((g) << 16) | ((b) << 8) | (a))
 
-
+namespace config
+{
 extern int usegamma;
+}
 
 // the palette color closest to what TRANS_PIXEL really is
 extern int trans_replace;

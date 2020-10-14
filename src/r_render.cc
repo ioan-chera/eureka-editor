@@ -1568,7 +1568,7 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[0] == "gamma" && tokens.size() >= 2)
 	{
-		usegamma = MAX(0, atoi(tokens[1].c_str())) % 5;
+		config::usegamma = MAX(0, atoi(tokens[1].c_str())) % 5;
 
 		W_UpdateGamma();
 		return true;
@@ -1592,7 +1592,7 @@ void Render3D_WriteUser(FILE *fp)
 	        r_view.gravity ? 1 : 0);
 
 	fprintf(fp, "gamma %d\n",
-	        usegamma);
+	        config::usegamma);
 }
 
 

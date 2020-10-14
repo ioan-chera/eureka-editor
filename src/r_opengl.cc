@@ -79,8 +79,8 @@ static float DoomLightToFloat(int light, float dist)
 	int level = (31 - map) * 8 + 7;
 
 	// need to gamma-correct the light level
-	if (usegamma > 0)
-		level = gammatable[usegamma][level];
+	if (config::usegamma > 0)
+		level = gammatable[config::usegamma][level];
 
 	return level / 255.0f;
 }
