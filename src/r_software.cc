@@ -33,6 +33,7 @@
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
@@ -41,12 +42,6 @@
 
 
 extern rgb_color_t transparent_col;
-
-extern bool render_high_detail;
-extern bool render_lock_gravity;
-extern bool render_missing_bright;
-extern bool render_unknown_bright;
-
 
 static img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
 {
@@ -126,7 +121,7 @@ public:
 			if (! img)
 			{
 				img = IM_UnknownFlat();
-				fullbright = render_unknown_bright;
+				fullbright = config::render_unknown_bright;
 			}
 
 			return;
@@ -148,7 +143,7 @@ public:
 			if (is_null_tex(tname))
 			{
 				img = IM_MissingTex();
-				fullbright = render_missing_bright;
+				fullbright = config::render_missing_bright;
 				return;
 			}
 			else if (is_special_tex(tname))
@@ -162,7 +157,7 @@ public:
 			if (! img)
 			{
 				img = IM_UnknownTex();
-				fullbright = render_unknown_bright;
+				fullbright = config::render_unknown_bright;
 			}
 
 			return;
@@ -597,7 +592,7 @@ public:
 
 	void DrawHighlightLine(int sx1, int sy1, int sx2, int sy2)
 	{
-		if (! render_high_detail)
+		if (! config::render_high_detail)
 		{
 			sx1 *= 2;  sy1 *= 2;
 			sx2 *= 2;  sy2 *= 2;
@@ -952,7 +947,7 @@ public:
 
 		dw->side = info.flags;
 
-		if (is_unknown && render_unknown_bright)
+		if (is_unknown && config::render_unknown_bright)
 			dw->side |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
@@ -2095,7 +2090,7 @@ void SW_RenderWorld(int ox, int oy, int ow, int oh)
 
 	rend.Render();
 
-	if (render_high_detail)
+	if (config::render_high_detail)
 		BlitHires(ox, oy, ow, oh);
 	else
 		BlitLores(ox, oy, ow, oh);
@@ -2108,7 +2103,7 @@ void SW_RenderWorld(int ox, int oy, int ow, int oh)
 
 bool SW_QueryPoint(Objid& hl, int qx, int qy)
 {
-	if (! render_high_detail)
+	if (! config::render_high_detail)
 	{
 		qx = qx / 2;
 		qy = qy / 2;

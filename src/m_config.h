@@ -70,8 +70,6 @@ extern bool grid_hide_in_free_mode;
 extern bool grid_snap_indicator;
 extern int  grid_ratio_high;
 extern int  grid_ratio_low;
-}
-
 
 extern rgb_color_t dotty_axis_col;
 extern rgb_color_t dotty_major_col;
@@ -82,6 +80,8 @@ extern rgb_color_t normal_axis_col;
 extern rgb_color_t normal_main_col;
 extern rgb_color_t normal_flat_col;
 extern rgb_color_t normal_small_col;
+}
+
 
 extern int backup_max_files;
 extern int backup_max_space;
@@ -97,12 +97,15 @@ extern int light_bump_small;
 extern int light_bump_medium;
 extern int light_bump_large;
 
+namespace config
+{
 extern int  render_pixel_aspect;
 extern int  render_far_clip;
 extern bool render_high_detail;
 extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
+}
 
 extern rgb_color_t transparent_col;
 

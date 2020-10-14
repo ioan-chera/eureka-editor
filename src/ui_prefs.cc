@@ -1484,36 +1484,36 @@ void UI_Preferences::LoadValues()
 
 	gen_scrollbars ->value(config::map_scroll_bars ? 1 : 0);
 
-	dotty_axis ->color(dotty_axis_col);
-	dotty_major->color(dotty_major_col);
-	dotty_minor->color(dotty_minor_col);
-	dotty_point->color(dotty_point_col);
+	dotty_axis ->color(config::dotty_axis_col);
+	dotty_major->color(config::dotty_major_col);
+	dotty_minor->color(config::dotty_minor_col);
+	dotty_point->color(config::dotty_point_col);
 
-	normal_axis ->color(normal_axis_col);
-	normal_main ->color(normal_main_col);
-	normal_flat ->color(normal_flat_col);
-	normal_small->color(normal_small_col);
+	normal_axis ->color(config::normal_axis_col);
+	normal_main ->color(config::normal_main_col);
+	normal_flat ->color(config::normal_flat_col);
+	normal_small->color(config::normal_small_col);
 
 	/* 3D Tab */
 
-	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
+	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
 
 	char aspect_buf[64];
-	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", render_pixel_aspect / 100.0);
+	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", config::render_pixel_aspect / 100.0);
 	rend_aspect->value(aspect_buf);
 
-	rend_high_detail->value(render_high_detail ? 1 : 0);
-	rend_lock_grav->value(render_lock_gravity ? 1 : 0);
+	rend_high_detail->value(config::render_high_detail ? 1 : 0);
+	rend_lock_grav->value(config::render_lock_gravity ? 1 : 0);
 
-	if (render_far_clip > 24000)
+	if (config::render_far_clip > 24000)
 		rend_far_clip->value(0);
-	else if (render_far_clip > 12000)
+	else if (config::render_far_clip > 12000)
 		rend_far_clip->value(1);
-	else if (render_far_clip > 6000)
+	else if (config::render_far_clip > 6000)
 		rend_far_clip->value(2);
-	else if (render_far_clip > 3000)
+	else if (config::render_far_clip > 3000)
 		rend_far_clip->value(3);
-	else if (render_far_clip > 1500)
+	else if (config::render_far_clip > 1500)
 		rend_far_clip->value(4);
 	else
 		rend_far_clip->value(5);
@@ -1641,15 +1641,15 @@ void UI_Preferences::SaveValues()
 
 	config::map_scroll_bars = gen_scrollbars ->value() ? true : false;
 
-	dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
-	dotty_major_col = (rgb_color_t) dotty_major->color();
-	dotty_minor_col = (rgb_color_t) dotty_minor->color();
-	dotty_point_col = (rgb_color_t) dotty_point->color();
+	config::dotty_axis_col  = (rgb_color_t) dotty_axis ->color();
+	config::dotty_major_col = (rgb_color_t) dotty_major->color();
+	config::dotty_minor_col = (rgb_color_t) dotty_minor->color();
+	config::dotty_point_col = (rgb_color_t) dotty_point->color();
 
-	normal_axis_col  = (rgb_color_t) normal_axis ->color();
-	normal_main_col  = (rgb_color_t) normal_main ->color();
-	normal_flat_col  = (rgb_color_t) normal_flat ->color();
-	normal_small_col = (rgb_color_t) normal_small->color();
+	config::normal_axis_col  = (rgb_color_t) normal_axis ->color();
+	config::normal_main_col  = (rgb_color_t) normal_main ->color();
+	config::normal_flat_col  = (rgb_color_t) normal_flat ->color();
+	config::normal_small_col = (rgb_color_t) normal_small->color();
 
 	/* Nodes Tab */
 
@@ -1671,12 +1671,12 @@ void UI_Preferences::SaveValues()
 
 	/* Other Tab */
 
-	render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
-	render_pixel_aspect = CLAMP(25, render_pixel_aspect, 400);
+	config::render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
+	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
 
-	render_high_detail  = rend_high_detail->value() ? true : false;
-	render_lock_gravity = rend_lock_grav->value() ? true : false;
-	render_far_clip     = atoi(rend_far_clip->mvalue()->text);
+	config::render_high_detail  = rend_high_detail->value() ? true : false;
+	config::render_lock_gravity = rend_lock_grav->value() ? true : false;
+	config::render_far_clip     = atoi(rend_far_clip->mvalue()->text);
 }
 
 

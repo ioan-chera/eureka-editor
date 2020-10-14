@@ -34,6 +34,7 @@
 #include "e_linedef.h"
 #include "e_sector.h"
 #include "e_main.h"
+#include "m_config.h"
 #include "m_game.h"
 #include "m_events.h"
 #include "r_render.h"
@@ -44,17 +45,16 @@
 // config items
 rgb_color_t transparent_col = RGB_MAKE(0, 255, 255);
 
-bool render_high_detail    = false;
-bool render_lock_gravity   = false;
-bool render_missing_bright = true;
-bool render_unknown_bright = true;
+bool config::render_high_detail    = false;
+bool config::render_lock_gravity   = false;
+bool config::render_missing_bright = true;
+bool config::render_unknown_bright = true;
 
-int  render_far_clip = 32768;
+int  config::render_far_clip = 32768;
 
 // in original DOOM pixels were 20% taller than wide, giving 0.83
 // as the pixel aspect ratio.
-int  render_pixel_aspect = 83;  //  100 * width / height
-
+int  config::render_pixel_aspect = 83;  //  100 * width / height
 
 namespace thing_sec_cache
 {
@@ -152,7 +152,7 @@ void Render_View_t::CalcAspect()
 {
 	aspect_sw = static_cast<float>(screen_w);	 // things break if these are different
 
-	aspect_sh = screen_w / (render_pixel_aspect / 100.0f);
+	aspect_sh = screen_w / (config::render_pixel_aspect / 100.0f);
 }
 
 double Render_View_t::DistToViewPlane(double map_x, double map_y)
@@ -168,8 +168,8 @@ void Render_View_t::UpdateScreen(int ow, int oh)
 	// in low detail mode, setup size so that expansion always covers
 	// our window (i.e. we draw a bit more than we need).
 
-	int new_sw = render_high_detail ? ow : (ow + 1) / 2;
-	int new_sh = render_high_detail ? oh : (oh + 1) / 2;
+	int new_sw = config::render_high_detail ? ow : (ow + 1) / 2;
+	int new_sh = config::render_high_detail ? oh : (oh + 1) / 2;
 
 	if (!screen || screen_w != new_sw || screen_h != new_sh)
 	{
@@ -577,7 +577,7 @@ static void AdjustOfs_Delta(int dx, int dy)
 
 	float factor = (mod & MOD_SHIFT) ? 0.5f : 2.0f;
 
-	if (!render_high_detail)
+	if (!config::render_high_detail)
 		factor = factor * 0.5f;
 
 	float dx_factor, dy_factor;
@@ -654,7 +654,7 @@ bool Render3D_Query(Objid& hl, int sx, int sy)
 	// force high detail mode for OpenGL, so we don't lose
 	// precision when performing the query.
 #ifndef NO_OPENGL
-	render_high_detail = true;
+	config::render_high_detail = true;
 #endif
 
 	hl.clear();
@@ -793,7 +793,7 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 		r_view.x += r_view.Cos * dy * mod_factor;
 		r_view.y += r_view.Sin * dy * mod_factor;
 	}
-	else if (! (render_lock_gravity && r_view.gravity))
+	else if (! (config::render_lock_gravity && r_view.gravity))
 	{
 		r_view.z += dy * speed * 0.75;
 
@@ -808,7 +808,7 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 static void DragSectors_Update()
 {
 	float ow = static_cast<float>(main_win->canvas->w());
-	float x_slope = 100.0f / render_pixel_aspect;
+	float x_slope = 100.0f / config::render_pixel_aspect;
 
 	float factor = static_cast<float>(CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
 	float map_dz = -edit.drag_screen_dy * factor;
@@ -862,7 +862,7 @@ static void DragThings_Update()
 	float ow = static_cast<float>(main_win->canvas->w());
 //	float oh = main_win->canvas->h();
 
-	float x_slope = 100.0f / render_pixel_aspect;
+	float x_slope = 100.0f / config::render_pixel_aspect;
 //	float y_slope = (float)oh / (float)ow;
 
 	float dist = CLAMP(20, edit.drag_point_dist, 1000);
@@ -1646,7 +1646,7 @@ void R3D_Right()
 
 void R3D_Up()
 {
-	if (r_view.gravity && render_lock_gravity)
+	if (r_view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
@@ -1663,7 +1663,7 @@ void R3D_Up()
 
 void R3D_Down()
 {
-	if (r_view.gravity && render_lock_gravity)
+	if (r_view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
@@ -1786,7 +1786,7 @@ void R3D_NAV_Up()
 	if (! EXEC_CurKey)
 		return;
 
-	if (r_view.gravity && render_lock_gravity)
+	if (r_view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;
@@ -1813,7 +1813,7 @@ void R3D_NAV_Down()
 	if (! EXEC_CurKey)
 		return;
 
-	if (r_view.gravity && render_lock_gravity)
+	if (r_view.gravity && config::render_lock_gravity)
 	{
 		Beep("Gravity is on");
 		return;

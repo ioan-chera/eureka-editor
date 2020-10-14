@@ -394,7 +394,7 @@ static const opt_desc_t options[] =
 		"v",
 		"axis color for the dotty style grid",
 		NULL,
-		&dotty_axis_col
+		&config::dotty_axis_col
 	},
 
 	{	"dotty_major_col",
@@ -403,7 +403,7 @@ static const opt_desc_t options[] =
 		"v",
 		"major color for the dotty style grid",
 		NULL,
-		&dotty_major_col
+		&config::dotty_major_col
 	},
 
 	{	"dotty_minor_col",
@@ -412,7 +412,7 @@ static const opt_desc_t options[] =
 		"v",
 		"minor color for the dotty style grid",
 		NULL,
-		&dotty_minor_col
+		&config::dotty_minor_col
 	},
 
 	{	"dotty_point_col",
@@ -421,7 +421,7 @@ static const opt_desc_t options[] =
 		"v",
 		"point color for the dotty style grid",
 		NULL,
-		&dotty_point_col
+		&config::dotty_point_col
 	},
 
 	{	"floor_bump_small",
@@ -646,7 +646,7 @@ static const opt_desc_t options[] =
 		"v",
 		"axis color for the normal grid",
 		NULL,
-		&normal_axis_col
+		&config::normal_axis_col
 	},
 
 	{	"normal_main_col",
@@ -655,7 +655,7 @@ static const opt_desc_t options[] =
 		"v",
 		"main color for the normal grid",
 		NULL,
-		&normal_main_col
+		&config::normal_main_col
 	},
 
 	{	"normal_flat_col",
@@ -664,7 +664,7 @@ static const opt_desc_t options[] =
 		"v",
 		"flat color for the normal grid",
 		NULL,
-		&normal_flat_col
+		&config::normal_flat_col
 	},
 
 	{	"normal_small_col",
@@ -673,7 +673,7 @@ static const opt_desc_t options[] =
 		"v",
 		"small color for the normal grid",
 		NULL,
-		&normal_small_col
+		&config::normal_small_col
 	},
 
 	{	"panel_gamma",
@@ -691,7 +691,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
-		&render_pixel_aspect
+		&config::render_pixel_aspect
 	},
 
 	{	"render_far_clip",
@@ -700,7 +700,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Distance of far clip plane for 3D rendering",
 		NULL,
-		&render_far_clip
+		&config::render_far_clip
 	},
 
 	{	"render_high_detail",
@@ -709,7 +709,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Use highest detail when rendering 3D view (software mode)",
 		NULL,
-		&render_high_detail
+		&config::render_high_detail
 	},
 
 	{	"render_lock_gravity",
@@ -718,7 +718,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Locked gravity in 3D view -- cannot move up or down",
 		NULL,
-		&render_lock_gravity
+		&config::render_lock_gravity
 	},
 
 	{	"render_missing_bright",
@@ -727,7 +727,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Render the missing texture as fullbright",
 		NULL,
-		&render_missing_bright
+		&config::render_missing_bright
 	},
 
 	{	"render_unknown_bright",
@@ -736,7 +736,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Render the unknown texture as fullbright",
 		NULL,
-		&render_unknown_bright
+		&config::render_unknown_bright
 	},
 
 	{	"same_mode_clears_selection",

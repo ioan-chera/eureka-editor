@@ -31,6 +31,7 @@
 #include "e_main.h"
 #include "e_hover.h"  // PointOnLineSide
 #include "e_linedef.h"  // LD_RailHeights
+#include "m_config.h"
 #include "m_game.h"
 #include "m_bitvec.h"
 #include "w_rawdef.h"
@@ -42,14 +43,6 @@
 
 
 extern rgb_color_t transparent_col;
-
-extern bool render_high_detail;
-extern bool render_lock_gravity;
-extern bool render_missing_bright;
-extern bool render_unknown_bright;
-extern int  render_pixel_aspect;
-extern int  render_far_clip;
-
 
 // convert from our coordinate system (looking along +X)
 // to OpenGL's coordinate system (looking down -Z).
@@ -179,7 +172,7 @@ public:
 		if (! img)
 		{
 			img = IM_UnknownFlat();
-			fullbright = render_unknown_bright;
+			fullbright = config::render_unknown_bright;
 		}
 
 		img->bind_gl();
@@ -213,7 +206,7 @@ public:
 		if (is_null_tex(tname))
 		{
 			img = IM_MissingTex();
-			fullbright = render_missing_bright;
+			fullbright = config::render_missing_bright;
 		}
 		else if (is_special_tex(tname))
 		{
@@ -226,7 +219,7 @@ public:
 			if (! img)
 			{
 				img = IM_UnknownTex();
-				fullbright = render_unknown_bright;
+				fullbright = config::render_unknown_bright;
 			}
 		}
 
@@ -571,7 +564,7 @@ public:
 
 			double dist = (py - r_view.y) * r_view.Sin + (px - r_view.x) * r_view.Cos;
 
-			if (dist < render_far_clip + 1)
+			if (dist < config::render_far_clip + 1)
 				break;
 		}
 
@@ -899,7 +892,7 @@ public:
 			return;
 
 		// too far away?
-		if (MIN(ty1, ty2) > render_far_clip)
+		if (MIN(ty1, ty2) > config::render_far_clip)
 			return;
 
 		float angle1 = PointToAngle(tx1, ty1);
@@ -1233,7 +1226,7 @@ public:
 		if (ty < 4)
 			return;
 
-		if (render_far_clip > 0 && ty > render_far_clip)
+		if (config::render_far_clip > 0 && ty > config::render_far_clip)
 			return;
 
 		bool fullbright = false;
@@ -1669,14 +1662,14 @@ public:
 		// the projection matrix creates the 3D perspective
 		glMatrixMode(GL_PROJECTION);
 
-		float x_slope = 100.0f / render_pixel_aspect;
+		float x_slope = 100.0f / config::render_pixel_aspect;
 		float y_slope = (float)oh / (float)ow;
 
 		// this matches behavior of S/W renderer.
 		// [ currently it is important since we use the S/W path
 		//   for querying what the mouse is pointing at ]
 		float z_near = x_slope;
-		float z_far  = render_far_clip - 8.0f;
+		float z_far  = config::render_far_clip - 8.0f;
 
 		glLoadIdentity();
 		glFrustum(-x_slope, +x_slope, -y_slope, +y_slope, z_near, z_far);
