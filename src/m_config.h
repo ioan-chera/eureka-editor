@@ -101,7 +101,6 @@ extern bool render_high_detail;
 extern bool render_lock_gravity;
 extern bool render_missing_bright;
 extern bool render_unknown_bright;
-}
 
 extern rgb_color_t transparent_col;
 
@@ -114,7 +113,7 @@ extern bool bsp_gl_nodes;
 extern bool bsp_force_v5;
 extern bool bsp_force_zdoom;
 extern bool bsp_compressed;
-
+}
 
 /* ==== FUNCTIONS ==================== */
 

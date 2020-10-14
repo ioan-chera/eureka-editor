@@ -261,7 +261,7 @@ void UI_Pic::TiledImg(Img_c *img)
 		scale = scale * 2;
 
 
-	const u32_t back = transparent_col;
+	const u32_t back = config::transparent_col;
 
 
 	uchar *buf = new uchar[nw * nh * 3];

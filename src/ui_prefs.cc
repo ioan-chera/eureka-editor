@@ -1520,21 +1520,21 @@ void UI_Preferences::LoadValues()
 
 	/* Nodes Tab */
 
-	nod_on_save->value(bsp_on_save ? 1 : 0);
-	nod_fast->value(bsp_fast ? 1 : 0);
-	nod_warn->value(bsp_warnings ? 1 : 0);
+	nod_on_save->value(config::bsp_on_save ? 1 : 0);
+	nod_fast->value(config::bsp_fast ? 1 : 0);
+	nod_warn->value(config::bsp_warnings ? 1 : 0);
 
-	if (bsp_split_factor < 7)
+	if (config::bsp_split_factor < 7)
 		nod_factor->value(2);	// Balanced BSP tree
-	else if (bsp_split_factor > 15)
+	else if (config::bsp_split_factor > 15)
 		nod_factor->value(1);	// Minimize Splits
 	else
 		nod_factor->value(0);	// NORMAL
 
-	nod_gl_nodes->value(bsp_gl_nodes ? 1 : 0);
-	nod_force_v5->value(bsp_force_v5 ? 1 : 0);
-	nod_force_zdoom->value(bsp_force_zdoom ? 1 : 0);
-	nod_compress->value(bsp_compressed ? 1 : 0);
+	nod_gl_nodes->value(config::bsp_gl_nodes ? 1 : 0);
+	nod_force_v5->value(config::bsp_force_v5 ? 1 : 0);
+	nod_force_zdoom->value(config::bsp_force_zdoom ? 1 : 0);
+	nod_compress->value(config::bsp_compressed ? 1 : 0);
 
 	/* Other Tab */
 
@@ -1653,21 +1653,21 @@ void UI_Preferences::SaveValues()
 
 	/* Nodes Tab */
 
-	bsp_on_save = nod_on_save->value() ? true : false;
-	bsp_fast = nod_fast->value() ? true : false;
-	bsp_warnings = nod_warn->value() ? true : false;
+	config::bsp_on_save = nod_on_save->value() ? true : false;
+	config::bsp_fast = nod_fast->value() ? true : false;
+	config::bsp_warnings = nod_warn->value() ? true : false;
 
 	if (nod_factor->value() == 1)			// Minimize Splits
-		bsp_split_factor = 29;
+		config::bsp_split_factor = 29;
 	else if (nod_factor->value() == 2)		// Balanced BSP tree
-		bsp_split_factor = 2;
+		config::bsp_split_factor = 2;
 	else
-		bsp_split_factor = 11;
+		config::bsp_split_factor = 11;
 
-	bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
-	bsp_force_v5 = nod_force_v5->value() ? true : false;
-	bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
-	bsp_compressed = nod_compress->value() ? true : false;
+	config::bsp_gl_nodes = nod_gl_nodes->value() ? true : false;
+	config::bsp_force_v5 = nod_force_v5->value() ? true : false;
+	config::bsp_force_zdoom = nod_force_zdoom->value() ? true : false;
+	config::bsp_compressed = nod_compress->value() ? true : false;
 
 	/* Other Tab */
 

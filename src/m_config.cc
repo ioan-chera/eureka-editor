@@ -295,7 +295,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: always build the nodes after saving",
 		NULL,
-		&bsp_on_save
+		&config::bsp_on_save
 	},
 
 	{	"bsp_fast",
@@ -304,7 +304,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
-		&bsp_fast
+		&config::bsp_fast
 	},
 
 	{	"bsp_warnings",
@@ -313,7 +313,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: show all warning messages",
 		NULL,
-		&bsp_warnings
+		&config::bsp_warnings
 	},
 
 	{	"bsp_split_factor",
@@ -322,7 +322,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: seg splitting factor",
 		NULL,
-		&bsp_split_factor
+		&config::bsp_split_factor
 	},
 
 	{	"bsp_gl_nodes",
@@ -331,7 +331,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: build GL-Nodes",
 		NULL,
-		&bsp_gl_nodes
+		&config::bsp_gl_nodes
 	},
 
 	{	"bsp_force_v5",
@@ -340,7 +340,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: force V5 of GL-Nodes",
 		NULL,
-		&bsp_force_v5
+		&config::bsp_force_v5
 	},
 
 	{	"bsp_force_zdoom",
@@ -349,7 +349,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: force ZDoom format for normal nodes",
 		NULL,
-		&bsp_force_zdoom
+		&config::bsp_force_zdoom
 	},
 
 	{	"bsp_compressed",
@@ -358,7 +358,7 @@ static const opt_desc_t options[] =
 		"v",
 		"Node building: force zlib compression of ZDoom nodes",
 		NULL,
-		&bsp_compressed
+		&config::bsp_compressed
 	},
 
 	{	"default_gamma",
@@ -790,7 +790,7 @@ static const opt_desc_t options[] =
 		"v",
 		"color used to represent transparent pixels in textures",
 		NULL,
-		&transparent_col
+		&config::transparent_col
 	},
 
 	{	"swap_sidedefs",
