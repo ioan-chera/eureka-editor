@@ -30,6 +30,11 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
+enum
+{
+	TEXTURE_TILE_OUTSET = 8
+};
+
 
 // config item
 bool config::swap_sidedefs = false;
@@ -100,6 +105,8 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 		std::swap(UX, LX);
 	}
 
+	m_x_tile_positions[0] = std::min(LX, UX);
+	m_x_tile_positions[1] = MX;
 
 	l_pic = new UI_Pic(LX, Y, 64, 64, "Lower");
 	u_pic = new UI_Pic(UX, Y, 64, 64, "Upper");
@@ -111,10 +118,9 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 	Y += 65;
 
-
-	l_tex = new UI_DynInput(LX-8, Y, 80, 20);
-	u_tex = new UI_DynInput(UX-8, Y, 80, 20);
-	r_tex = new UI_DynInput(MX-8, Y, 80, 20);
+	l_tex = new UI_DynInput(LX - TEXTURE_TILE_OUTSET, Y, 80, 20);
+	u_tex = new UI_DynInput(UX - TEXTURE_TILE_OUTSET, Y, 80, 20);
+	r_tex = new UI_DynInput(MX - TEXTURE_TILE_OUTSET, Y, 80, 20);
 
 	l_tex->textsize(12);
 	u_tex->textsize(12);
@@ -206,8 +212,6 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 				bool upper = (w == box->u_tex || w == box->u_pic);
 				bool rail  = (w == box->r_tex || w == box->r_pic);
 
-				if (L->OneSided())
-					std::swap(lower, rail);
 
 				if (lower)
 				{
@@ -459,9 +463,6 @@ void UI_SideBox::UpdateField()
 		const char *rail  = sd->MidTex();
 		const char *upper = sd->UpperTex();
 
-		if (what_is_solid & SOLID_MID)
-			std::swap(lower, rail);
-
 		l_tex->value(lower);
 		u_tex->value(upper);
 		r_tex->value(rail);
@@ -470,7 +471,7 @@ void UI_SideBox::UpdateField()
 		u_pic->GetTex(upper);
 		r_pic->GetTex(rail);
 
-		if ((what_is_solid & (SOLID_LOWER | SOLID_MID)) && is_null_tex(lower))
+		if ((what_is_solid & SOLID_LOWER) && is_null_tex(lower))
 			l_pic->MarkMissing();
 
 		if ((what_is_solid & SOLID_UPPER) && is_null_tex(upper))
@@ -564,30 +565,36 @@ void UI_SideBox::UpdateHiding()
 		y_ofs->show();
 		  sec->show();
 
-		l_tex->show();
-		l_pic->show();
+		r_tex->show();
+		r_pic->show();
 
 		if (on_2S_line || config::show_full_one_sided)
 		{
-			u_tex->show();
-			r_tex->show();
+			r_pic->position(m_x_tile_positions[1], r_pic->y());
+			r_tex->Fl_Widget::position(m_x_tile_positions[1] - TEXTURE_TILE_OUTSET, r_tex->y());
 
+			l_tex->show();
+			u_tex->show();
+
+			l_pic->show();
 			u_pic->show();
-			r_pic->show();
 		}
 		else
 		{
+			r_pic->position(m_x_tile_positions[0], r_pic->y());
+			r_tex->Fl_Widget::position(m_x_tile_positions[0] - TEXTURE_TILE_OUTSET, r_tex->y());
+
+			l_tex->hide();
 			u_tex->hide();
-			r_tex->hide();
 
+			l_pic->hide();
 			u_pic->hide();
-			r_pic->hide();
 
+			l_pic->Unhighlight();
 			u_pic->Unhighlight();
-			r_pic->Unhighlight();
 
+			l_pic->Selected(false);
 			u_pic->Selected(false);
-			r_pic->Selected(false);
 		}
 	}
 }
