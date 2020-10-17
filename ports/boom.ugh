@@ -30,7 +30,7 @@ supported_games doom doom2
 #---- BOOM FEATURES -------------
 
 feature gen_types 1
-feature gen_sectors 1
+feature gen_sectors boom
 
 feature coop_dm_flags 1
 feature pass_through  1

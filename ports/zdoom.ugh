@@ -176,7 +176,7 @@ clear lines sectors
 feature tag_666 0
 feature strife_flags 0
 feature gen_lines 0
-feature gen_sectors 2
+feature gen_sectors zdoom
 
 include "hexen_groups"
 include "hexen_sectors"

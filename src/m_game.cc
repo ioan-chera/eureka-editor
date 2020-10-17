@@ -316,7 +316,20 @@ struct FeatureMapping
 {
 	const char *const name;
 	int *field;
+	int (*converter)(const char *);
 };
+
+//
+// Text
+//
+static int GenSectorConvert(const char *text)
+{
+	if(!y_stricmp(text, "boom"))
+		return static_cast<int>(GenSectorFamily::boom);
+	if(!y_stricmp(text, "zdoom"))
+		return static_cast<int>(GenSectorFamily::zdoom);
+	return static_cast<int>(GenSectorFamily::none);
+}
 
 //
 // The available feature mappings
@@ -325,7 +338,7 @@ static const FeatureMapping skFeatureMappings[] =
 {
 #define MAPPING(a) { #a, reinterpret_cast<int *>(&Features.a) }
 	MAPPING(gen_types),
-	MAPPING(gen_sectors),
+	{ "gen_sectors", reinterpret_cast<int *>(&Features.gen_sectors), GenSectorConvert },
 	MAPPING(img_png),
 	MAPPING(tx_start),
 	MAPPING(coop_dm_flags),
@@ -353,7 +366,12 @@ static void ParseFeatureDef(char ** argv, int argc)
 	for(const FeatureMapping &mapping : skFeatureMappings)
 		if(!y_stricmp(argv[0], mapping.name))
 		{
-			*mapping.field = atoi(argv[1]);
+			char *endptr = nullptr;
+			long val = strtol(argv[1], &endptr, 10);
+			if(endptr == argv[1] && mapping.converter)
+				*mapping.field = mapping.converter(argv[1]);
+			else
+				*mapping.field = static_cast<int>(val);
 			found = true;
 			break;
 		}
