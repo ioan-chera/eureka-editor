@@ -131,13 +131,22 @@ typedef struct
 
 } misc_info_t;
 
+//
+// Type of generalized sectors for port
+//
+enum class GenSectorFamily : int
+{
+	none,	// not set
+	boom,	// original Boom generalized sectors
+	zdoom	// ZDoom shifted Boom generalized sectors
+};
 
 typedef struct
 {
 	// NOTE: values here are generally 0 or 1, but some can be higher
 
 	int gen_types;		// BOOM generalized linedef types
-	int gen_sectors;	// BOOM and ZDoom sector flags (damage, secret, ...)
+	GenSectorFamily gen_sectors;	// BOOM and ZDoom sector flags (damage, secret, ...)
 
 	int tx_start;		// textures in TX_START .. TX_END
 	int img_png;		// PNG format for various graphics

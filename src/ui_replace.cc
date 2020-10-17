@@ -833,8 +833,8 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 		case 4: // Sectors by Type
 		{
-			int mask = (Features.gen_sectors == 2) ? 255 :
-						(Features.gen_sectors) ? 31 : 65535;
+			int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+						(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 			const sectortype_t & info = M_GetSectorType(type_num & mask);
 			desc->value(info.desc.c_str());
@@ -1554,8 +1554,8 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 {
 	const Sector *sector = Sectors[idx];
 
-	int mask = (Features.gen_sectors == 2) ? 255 :
-				(Features.gen_sectors) ? 31 : 65535;
+	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 	if (! find_numbers->get(sector->type & mask))
 		return false;
@@ -1773,8 +1773,8 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 
 void UI_FindAndReplace::Replace_SectorType(int idx)
 {
-	int mask = (Features.gen_sectors == 2) ? 255 :
-				(Features.gen_sectors) ? 31 : 65535;
+	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 	int old_type = Sectors[idx]->type;
 	int new_type = atoi(rep_value->value());

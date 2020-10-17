@@ -323,7 +323,7 @@ struct FeatureMapping
 //
 static const FeatureMapping skFeatureMappings[] =
 {
-#define MAPPING(a) { #a, &Features.a }
+#define MAPPING(a) { #a, reinterpret_cast<int *>(&Features.a) }
 	MAPPING(gen_types),
 	MAPPING(gen_sectors),
 	MAPPING(img_png),

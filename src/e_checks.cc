@@ -726,7 +726,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	list.change_type(OBJ_SECTORS);
 
-	int max_type = (Features.gen_sectors == 2) ? 8191 : 2047;
+	int max_type = (Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
 
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
@@ -744,9 +744,9 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 		}
 
 		// Boom and ZDoom generalized sectors
-		if (Features.gen_sectors == 2)
+		if (Features.gen_sectors == GenSectorFamily::zdoom)
 			type_num &= 255;
-		else if (Features.gen_sectors)
+		else if (Features.gen_sectors != GenSectorFamily::none)
 			type_num &= 31;
 
 		const sectortype_t &info = M_GetSectorType(type_num);
