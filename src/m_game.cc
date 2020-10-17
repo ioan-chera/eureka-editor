@@ -309,81 +309,56 @@ static void ParseClearKeywords(char ** argv, int argc)
 	}
 }
 
+//
+// Mapping from UGH to value
+//
+struct FeatureMapping
+{
+	const char *const name;
+	int *field;
+};
 
+//
+// The available feature mappings
+//
+static const FeatureMapping skFeatureMappings[] =
+{
+#define MAPPING(a) { #a, &Features.a }
+	MAPPING(gen_types),
+	MAPPING(gen_sectors),
+	MAPPING(img_png),
+	MAPPING(tx_start),
+	MAPPING(coop_dm_flags),
+	MAPPING(friend_flag),
+	MAPPING(pass_through),
+	{ "3d_midtex", &Features.midtex_3d },
+	MAPPING(strife_flags),
+	MAPPING(medusa_fixed),
+	MAPPING(lax_sprites),
+	MAPPING(no_need_players),
+	MAPPING(tag_666),
+	MAPPING(mix_textures_flats),
+	MAPPING(neg_patch_offsets),
+	MAPPING(extra_floors),
+	MAPPING(slopes),
+#undef MAPPING
+};
+
+//
+// Parses features
+//
 static void ParseFeatureDef(char ** argv, int argc)
 {
-	if (y_stricmp(argv[0], "gen_types") == 0)
-	{
-		Features.gen_types = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "gen_sectors") == 0)
-	{
-		Features.gen_sectors = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "img_png") == 0)
-	{
-		Features.img_png = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "tx_start") == 0)
-	{
-		Features.tx_start = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "coop_dm_flags") == 0)
-	{
-		Features.coop_dm_flags = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "friend_flag") == 0)
-	{
-		Features.friend_flag = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "pass_through") == 0)
-	{
-		Features.pass_through = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "3d_midtex") == 0)
-	{
-		Features.midtex_3d = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "strife_flags") == 0)
-	{
-		Features.strife_flags = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "medusa_fixed") == 0)
-	{
-		Features.medusa_fixed = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "lax_sprites") == 0)
-	{
-		Features.lax_sprites = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "no_need_players") == 0)
-	{
-		Features.no_need_players = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "tag_666") == 0)
-	{
-		Features.tag_666 = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "mix_textures_flats") == 0)
-	{
-		Features.mix_textures_flats = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "neg_patch_offsets") == 0)
-	{
-		Features.neg_patch_offsets = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "extra_floors") == 0)
-	{
-		Features.extra_floors = atoi(argv[1]);
-	}
-	else if (y_stricmp(argv[0], "slopes") == 0)
-	{
-		Features.slopes = atoi(argv[1]);
-	}
-	else
-	{
+	bool found = false;
+	for(const FeatureMapping &mapping : skFeatureMappings)
+		if(!y_stricmp(argv[0], mapping.name))
+		{
+			*mapping.field = atoi(argv[1]);
+			found = true;
+			break;
+		}
+	if(!found)
 		LogPrintf("unknown feature keyword: '%s'\n", argv[0]);
-	}
 }
 
 
