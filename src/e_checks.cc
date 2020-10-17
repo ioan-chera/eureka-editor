@@ -760,7 +760,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 }
 
 
-void Sectors_ShowUnknown()
+static void Sectors_ShowUnknown()
 {
 	if (edit.mode != OBJ_SECTORS)
 		Editor_ChangeMode('s');
