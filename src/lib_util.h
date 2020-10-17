@@ -358,6 +358,17 @@ private:
 	std::string data;
 };
 
+namespace std
+{
+	template <> struct hash<SString>
+	{
+		size_t operator()(const SString & x) const
+		{
+			return hash<std::string>()(x.get());
+		}
+	};
+}
+
 #endif  /* __EUREKA_YUTIL_H__ */
 
 //--- editor settings ---
