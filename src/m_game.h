@@ -199,14 +199,15 @@ class PortInfo_c
 public:
 	SString name;
 
-	map_format_bitset_t formats; // 0 if not specified
+	map_format_bitset_t formats = 0; // 0 if not specified
 
 	std::vector<SString> supported_games;
 	SString udmf_namespace;
 
 public:
-	PortInfo_c(SString _name);
-	~PortInfo_c();
+	PortInfo_c(SString _name) : name(_name)
+	{
+	}
 
 	bool SupportsGame(const char *game) const;
 

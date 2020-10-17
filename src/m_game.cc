@@ -75,17 +75,6 @@ int num_gen_linetypes;
 // variables which are "set" in def files
 static std::map< SString, SString > parse_vars;
 
-
-PortInfo_c::PortInfo_c(SString _name) :
-	name(_name),
-	formats(0),
-	supported_games(),
-	udmf_namespace()
-{ }
-
-PortInfo_c::~PortInfo_c()
-{ }
-
 void PortInfo_c::AddSupportedGame(const char *game)
 {
 	if (! SupportsGame(game))
@@ -94,8 +83,8 @@ void PortInfo_c::AddSupportedGame(const char *game)
 
 bool PortInfo_c::SupportsGame(const char *game) const
 {
-	for (size_t i = 0 ; i < supported_games.size() ; i++)
-		if (y_stricmp(supported_games[i].c_str(), game) == 0)
+	for (const SString &supportedGame : supported_games)
+		if (supportedGame.noCaseEqual(game))
 			return true;
 
 	return false;
