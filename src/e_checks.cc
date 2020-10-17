@@ -720,7 +720,7 @@ static void bump_unknown_type(std::map<int, int>& t_map, int type)
 }
 
 
-void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
+static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 {
 	types.clear();
 
