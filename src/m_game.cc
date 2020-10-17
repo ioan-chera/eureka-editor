@@ -1245,16 +1245,16 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-bool M_CheckPortSupportsGame(const char *base_game, const char *port)
+bool M_CheckPortSupportsGame(const char *base_game, const SString &port)
 {
-	if (strcmp(port, "vanilla") == 0)
+	if (port == "vanilla")
 	{
 		// Vanilla means the engine that comes with the game, hence
 		// it supports everything.
 		return true;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	PortInfo_c *pinfo = M_LoadPortInfo(port.c_str());
 	if (! pinfo)
 		return false;
 
@@ -1292,7 +1292,7 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(base_game, list[i].c_str()))
+		if (! M_CheckPortSupportsGame(base_game, list[i]))
 			continue;
 
 		if (result[0])

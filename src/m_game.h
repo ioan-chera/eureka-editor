@@ -285,7 +285,7 @@ PortInfo_c * M_LoadPortInfo(const char *port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
-bool M_CheckPortSupportsGame(const char *base_game, const char *port);
+bool M_CheckPortSupportsGame(const char *base_game, const SString &port);
 
 SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
