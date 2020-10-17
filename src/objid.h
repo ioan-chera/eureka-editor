@@ -29,15 +29,14 @@
 
 
 // main kinds of objects
-typedef enum
+enum obj_type_e
 {
 	OBJ_THINGS,
 	OBJ_LINEDEFS,
 	OBJ_SIDEDEFS,
 	OBJ_VERTICES,
 	OBJ_SECTORS,
-}
-obj_type_e;
+};
 
 
 // special object number for "NONE"
