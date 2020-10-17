@@ -174,18 +174,25 @@ typedef struct
 extern misc_info_t      Misc_info;
 extern port_features_t  Features;
 
-
-class GameInfo_c
+//
+// Game info
+//
+struct GameInfo
 {
-public:
 	SString name;
-	SString base_game;
+	SString baseGame;
 
-public:
-	GameInfo_c(SString _name);
-	~GameInfo_c();
+	GameInfo() = default;
+
+	GameInfo(const char *name): name(name)
+	{
+	}
+
+	operator bool() const
+	{
+		return name && baseGame;
+	}
 };
-
 
 class PortInfo_c
 {
@@ -263,17 +270,17 @@ enum parse_purpose_e
 {
 	PURPOSE_Normal = 0,		// normal loading, update everything
 	PURPOSE_Resource,		// as a resource file
-	PURPOSE_GameInfo,		// load a GameInfo_c
+	PURPOSE_GameInfo,		// load a GameInfo
 	PURPOSE_PortInfo,		// load a PortInfo_c
 };
 
 void M_ParseDefinitionFile(parse_purpose_e purpose,
+						   void *purposeTarget,
 						   const char *filename,
 						   const char *folder = NULL,
 						   const char *prettyname = NULL,
                            int include_level = 0);
 
-GameInfo_c * M_LoadGameInfo(const char *game);
 PortInfo_c * M_LoadPortInfo(const char *port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
@@ -282,7 +289,7 @@ bool M_CheckPortSupportsGame(const char *base_game, const char *port);
 
 SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
-const char * M_GetBaseGame(const char *game);
+SString M_GetBaseGame(const char *game);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 

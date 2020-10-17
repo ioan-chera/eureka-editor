@@ -881,7 +881,7 @@ void UI_ProjectSetup::PopulatePort()
 		return;
 
 
-	const char *base_game = NULL;
+	SString base_game;
 
 	if (game_choice->mvalue())
 		base_game = M_GetBaseGame(game_choice->mvalue()->text);
@@ -894,7 +894,7 @@ void UI_ProjectSetup::PopulatePort()
 
 	int menu_value = 0;
 
-	SString menu_string = M_CollectPortsForMenu(base_game, &menu_value, prev_port.c_str());
+	SString menu_string = M_CollectPortsForMenu(base_game.c_str(), &menu_value, prev_port.c_str());
 
 	if (!menu_string.empty())
 	{

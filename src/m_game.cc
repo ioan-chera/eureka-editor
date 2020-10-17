@@ -28,6 +28,7 @@
 
 #include <map>
 #include <algorithm>
+#include <unordered_map>
 
 #include "im_color.h"
 #include "m_config.h"
@@ -44,12 +45,11 @@ port_features_t  Features;
 
 
 // all the game and port definitions and previously loaded
-static std::map<SString, GameInfo_c *> loaded_game_defs;
+static std::unordered_map<SString, GameInfo> sLoadedGameDefs;
 static std::map<SString, PortInfo_c *> loaded_port_defs;
 
 // the information being loaded for PURPOSE_GameInfo / PortInfo
 // TODO : move into parser_state_c
-static GameInfo_c *loading_Game;
 static PortInfo_c *loading_Port;
 
 
@@ -74,14 +74,6 @@ int num_gen_linetypes;
 
 // variables which are "set" in def files
 static std::map< SString, SString > parse_vars;
-
-
-GameInfo_c::GameInfo_c(SString _name) :
-	name(_name), base_game()
-{ }
-
-GameInfo_c::~GameInfo_c()
-{ }
 
 
 PortInfo_c::PortInfo_c(SString _name) :
@@ -184,7 +176,7 @@ void M_PrepareConfigVariables()
 
 		if (M_CanLoadDefinitions("games", Game_name.c_str()))
 		{
-			const char *base_game = M_GetBaseGame(Game_name.c_str());
+			SString base_game = M_GetBaseGame(Game_name.c_str());
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
@@ -432,7 +424,7 @@ void M_LoadDefinitions(const char *folder, const char *name)
 
 	DebugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(PURPOSE_Normal, filename.c_str(), folder, prettyname);
+	M_ParseDefinitionFile(PURPOSE_Normal, nullptr, filename.c_str(), folder, prettyname);
 }
 
 
@@ -866,7 +858,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 }
 
 
-static void M_ParseGameInfoLine(parser_state_c *pst)
+static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -884,7 +876,7 @@ static void M_ParseGameInfoLine(parser_state_c *pst)
 		if (nargs < 1)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		loading_Game->base_game = StringLower(argv[1]);
+		loadingGame.baseGame = StringLower(argv[1]);
 	}
 }
 
@@ -960,7 +952,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 }
 
 
-void M_ParseSetVar(parser_state_c *pst)
+static void M_ParseSetVar(parser_state_c *pst)
 {
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
@@ -987,6 +979,7 @@ void M_ParseSetVar(parser_state_c *pst)
 //  and "if".."endif" directives are NOT handled.
 //
 void M_ParseDefinitionFile(const parse_purpose_e purpose,
+						   void *target,
 						   const char *filename,
 						   const char *folder,
 						   const char *prettyname,
@@ -1040,7 +1033,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 			pst->cond_stack.push_back(cst);
 			continue;
 		}
-		else if (y_stricmp(pst->argv[0], "else") == 0)
+		if (y_stricmp(pst->argv[0], "else") == 0)
 		{
 			if (pst->cond_stack.empty())
 				ThrowException("%s(%d): else without if\n", pst->fname, pst->lineno);
@@ -1049,7 +1042,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 			pst->cond_stack.back().Toggle();
 			continue;
 		}
-		else if (y_stricmp(pst->argv[0], "endif") == 0)
+		if (y_stricmp(pst->argv[0], "endif") == 0)
 		{
 			if (pst->cond_stack.empty())
 				ThrowException("%s(%d): endif without if\n", pst->fname, pst->lineno);
@@ -1096,7 +1089,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 				ThrowException("%s(%d): Cannot find include file: %s.ugh\n",
 							   pst->fname, pst->lineno, pst->argv[1]);
 
-			M_ParseDefinitionFile(purpose, new_name.c_str(), new_folder,
+			M_ParseDefinitionFile(purpose, target, new_name.c_str(), new_folder,
 								  NULL /* prettyname */,
 								  include_level + 1);
 			continue;
@@ -1105,7 +1098,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 
 		if (purpose == PURPOSE_GameInfo)
 		{
-			M_ParseGameInfoLine(pst);
+			M_ParseGameInfoLine(pst, *static_cast<GameInfo *>(target));
 			continue;
 		}
 		if (purpose == PURPOSE_PortInfo)
@@ -1127,31 +1120,26 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 	}
 }
 
-
-GameInfo_c * M_LoadGameInfo(const char *game)
+//
+// Load game info
+//
+static GameInfo M_LoadGameInfo(const char *game)
 {
 	// already loaded?
-	std::map<SString, GameInfo_c *>::iterator IT;
-	IT = loaded_game_defs.find(SString(game));
-
-	if (IT != loaded_game_defs.end())
-		return IT->second;
+	auto it = sLoadedGameDefs.find(game);
+	if(it != sLoadedGameDefs.end())
+		return it->second;
 
 	SString filename = FindDefinitionFile("games", game);
-	if (filename.empty())
-		return NULL;
-
-	loading_Game = new GameInfo_c(game);
-
-	M_ParseDefinitionFile(PURPOSE_GameInfo, filename.c_str(), "games", NULL);
-
-	if (loading_Game->base_game.empty())
-	{
+	if(!filename)
+		return {};
+	GameInfo loadingGame = GameInfo(game);
+	M_ParseDefinitionFile(PURPOSE_GameInfo, &loadingGame, filename.c_str(), "games", nullptr);
+	if(!loadingGame.baseGame)
 		ThrowException("Game definition for '%s' does not set base_game\n", game);
-	}
 
-	loaded_game_defs[game] = loading_Game;
-	return loading_Game;
+	sLoadedGameDefs[game] = loadingGame;
+	return loadingGame;
 }
 
 
@@ -1169,7 +1157,7 @@ PortInfo_c * M_LoadPortInfo(const char *port)
 
 	loading_Port = new PortInfo_c(port);
 
-	M_ParseDefinitionFile(PURPOSE_PortInfo, filename.c_str(), "ports", NULL);
+	M_ParseDefinitionFile(PURPOSE_PortInfo, nullptr, filename.c_str(), "ports", NULL);
 
 	// default is to support both Doom and Doom2
 	if (loading_Port->supported_games.empty())
@@ -1234,12 +1222,12 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 
 }
 
-const char * M_GetBaseGame(const char *game)
+SString M_GetBaseGame(const char *game)
 {
-	GameInfo_c *ginfo = M_LoadGameInfo(game);
+	GameInfo ginfo = M_LoadGameInfo(game);
 	SYS_ASSERT(ginfo);
 
-	return ginfo->base_game.c_str();
+	return ginfo.baseGame;
 }
 
 
