@@ -297,42 +297,27 @@ static const char * CalcWarpString()
 }
 
 
-static void AppendWadName(char *buf, size_t maxsize, const char *name, const char *parm = NULL)
+static void AppendWadName(SString &str, const char *name, const char *parm = NULL)
 {
 	static char abs_name[FL_PATH_MAX];
 
 	// FIXME: check result??
 	fl_filename_absolute(abs_name, sizeof(abs_name), name);
 
-	// ensure we don't overflow the 'wad_names' buffer
-	size_t new_len = strlen(buf);
-
-	if (parm)
-		new_len += strlen(parm);
-
-	new_len += strlen(abs_name);
-	new_len += 4; /* spaces + breathing room */;
-
-	if (new_len >= maxsize)
-	{
-		// overflow! -- do something?
-		return;
-	}
-
 	if (parm)
 	{
-		strcat(buf, parm);
-		strcat(buf, " ");
+		str += parm;
+		str += ' ';
 	}
 
-	strcat(buf, abs_name);
-	strcat(buf, " ");
+	str += abs_name;
+	str += ' ';
 }
 
 
-static const char * GrabWadNames(const port_path_info_t *info)
+static SString GrabWadNames(const port_path_info_t *info)
 {
-	static char wad_names[FL_PATH_MAX * 3];
+	SString wad_names;
 
 	bool has_file = false;
 
@@ -346,11 +331,8 @@ static const char * GrabWadNames(const port_path_info_t *info)
 		use_merge = 1;
 	}
 
-	// begin with empty string
-	wad_names[0] = 0;
-
 	// always specify the iwad
-	AppendWadName(wad_names, sizeof(wad_names), game_wad->PathName(), "-iwad");
+	AppendWadName(wad_names, game_wad->PathName(), "-iwad");
 
 	// add any resource wads
 	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
@@ -360,9 +342,8 @@ static const char * GrabWadNames(const port_path_info_t *info)
 		if (wad == game_wad || wad == edit_wad)
 			continue;
 
-		AppendWadName(wad_names, sizeof(wad_names), wad->PathName(),
-					  (use_merge == 1) ? "-merge" :
-					  (use_merge == 0 && !has_file) ? "-file" : NULL);
+		AppendWadName(wad_names, wad->PathName(),
+					  (use_merge == 1) ? "-merge" : (use_merge == 0 && !has_file) ? "-file" : NULL);
 
 		if (use_merge)
 			use_merge++;
@@ -372,10 +353,7 @@ static const char * GrabWadNames(const port_path_info_t *info)
 
 	// the current PWAD, if exists, must be last
 	if (edit_wad)
-	{
-		AppendWadName(wad_names, sizeof(wad_names), edit_wad->PathName(),
-					  !has_file ? "-file" : NULL);
-	}
+		AppendWadName(wad_names, edit_wad->PathName(), !has_file ? "-file" : NULL);
 
 	return wad_names;
 }
@@ -441,7 +419,7 @@ void CMD_TestMap()
 	static char cmd_buffer[FL_PATH_MAX * 4];
 
 	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
-			 CalcEXEName(info), GrabWadNames(info), CalcWarpString());
+			 CalcEXEName(info), GrabWadNames(info).c_str(), CalcWarpString());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer);
