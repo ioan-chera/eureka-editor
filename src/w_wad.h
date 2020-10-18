@@ -102,7 +102,7 @@ public:
 	bool Write(const void *data, int len);
 
 	// write some text to the lump
-	void Printf(const char *msg, ...);
+	void Printf(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 
 	// mark the lump as finished (after writing data to it).
 	bool Finish();

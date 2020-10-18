@@ -171,7 +171,7 @@ bool Lump_c::Write(const void *data, int len)
 }
 
 
-void Lump_c::Printf(const char *msg, ...)
+void Lump_c::Printf(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	static char buffer[FL_PATH_MAX];
 
