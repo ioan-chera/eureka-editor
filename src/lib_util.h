@@ -205,6 +205,11 @@ public:
 		return !y_strnicmp(data.c_str() + pos, c ? c : "", c ? strlen(c) : 0);
 	}
 
+	bool startsWith(const char *c) const
+	{
+		return !strncmp(data.c_str(), c ? c : "", c ? strlen(c) : 0);
+	}
+
 	bool operator != (const char *c) const
 	{
 		return data != (c ? c : "");

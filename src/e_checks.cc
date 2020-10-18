@@ -751,7 +751,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 		const sectortype_t &info = M_GetSectorType(type_num);
 
-		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
+		if (info.desc.startsWith("UNKNOWN"))
 		{
 			bump_unknown_type(types, type_num);
 			list.set(n);
@@ -1317,7 +1317,7 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 	{
 		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
+		if (info.desc.startsWith("UNKNOWN"))
 		{
 			bump_unknown_type(types, Things[n]->type);
 
@@ -1625,7 +1625,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 			continue;
 
 		// ignore unknown things
-		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
+		if (info.desc.startsWith("UNKNOWN"))
 			continue;
 
 		// TODO: config option: treat ceiling things as non-blocking
@@ -2285,7 +2285,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 		if (Features.gen_types && is_genline(type_num))
 			continue;
 
-		if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
+		if (info.desc.startsWith("UNKNOWN"))
 		{
 			bung_unknown_type(types, type_num);
 
@@ -3189,7 +3189,7 @@ static bool SEC_check_beast_mark(int tag)
 	if (tag == 667)
 	{
 		// tag #667 can only be used on MAP07
-		return (y_stricmp(Level_name.c_str(), "MAP07") == 0);
+		return Level_name.noCaseEqual("MAP07");
 	}
 
 	if (tag == 666)
@@ -3205,10 +3205,8 @@ static bool SEC_check_beast_mark(int tag)
 
 		// for Doom, either need a particular map, or the presence
 		// of a KEEN thing.
-		if (y_stricmp(Level_name.c_str(), "E1M8")  == 0 ||
-			y_stricmp(Level_name.c_str(), "E4M6")  == 0 ||
-			y_stricmp(Level_name.c_str(), "E4M8")  == 0 ||
-			y_stricmp(Level_name.c_str(), "MAP07") == 0)
+		if (Level_name.noCaseEqual("E1M8") || Level_name.noCaseEqual("E4M6") || 
+			Level_name.noCaseEqual("E4M8") || Level_name.noCaseEqual("MAP07"))
 		{
 			return true;
 		}
@@ -3217,7 +3215,7 @@ static bool SEC_check_beast_mark(int tag)
 		{
 			const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-			if (y_stricmp(info.desc.c_str(), "Commander Keen") == 0)
+			if (info.desc.noCaseEqual("Commander Keen"))
 				return true;
 		}
 
