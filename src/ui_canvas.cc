@@ -133,10 +133,12 @@ void UI_Canvas::draw()
 		W_UnloadAllTextures();
 	}
 
+#ifndef _WIN32	// TODO: #56: reenable this for Windows
 	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
 
 	if (strExt)
 		use_npot_textures = gluCheckExtension((const GLubyte*) "GL_ARB_texture_non_power_of_two", strExt) == GLU_TRUE;
+#endif
 #endif
 
 	if (edit.render3d)
