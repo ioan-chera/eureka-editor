@@ -94,7 +94,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>../../prereqs/lib/x86/fltk.lib;../../prereqs/lib/x86/fltkgl.lib;../../prereqs/lib/x86/fltkimages.lib;../../prereqs/lib/x86/fltkjpeg.lib;../../prereqs/lib/x86/fltkpng.lib;../../prereqs/lib/x86/zlib.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
+      <AdditionalDependencies>../../prereqs/lib/x86/fltk.lib;../../prereqs/lib/x86/fltkgl.lib;../../prereqs/lib/x86/fltkimages.lib;../../prereqs/lib/x86/fltkjpeg.lib;../../prereqs/lib/x86/fltkpng.lib;../../prereqs/lib/x86/zlibstatic.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -113,7 +113,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>../../prereqs/lib/x86/fltk.lib;../../prereqs/lib/x86/fltkgl.lib;../../prereqs/lib/x86/fltkimages.lib;../../prereqs/lib/x86/fltkjpeg.lib;../../prereqs/lib/x86/fltkpng.lib;../../prereqs/lib/x86/zlib.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
+      <AdditionalDependencies>../../prereqs/lib/x86/fltk.lib;../../prereqs/lib/x86/fltkgl.lib;../../prereqs/lib/x86/fltkimages.lib;../../prereqs/lib/x86/fltkjpeg.lib;../../prereqs/lib/x86/fltkpng.lib;../../prereqs/lib/x86/zlibstatic.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
