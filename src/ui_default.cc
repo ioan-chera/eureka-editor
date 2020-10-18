@@ -547,25 +547,25 @@ bool Props_ParseUser(const std::vector<SString> &tokens)
 		return false;
 
 	if (tokens[1] == "floor_h")
-		default_floor_h = atoi(tokens[2].c_str());
+		default_floor_h = atoi(tokens[2]);
 
 	if (tokens[1] == "ceil_h")
-		default_ceil_h = atoi(tokens[2].c_str());
+		default_ceil_h = atoi(tokens[2]);
 
 	if (tokens[1] == "light_level")
-		default_light_level = atoi(tokens[2].c_str());
+		default_light_level = atoi(tokens[2]);
 
 	if (tokens[1] == "thing")
-		default_thing = atoi(tokens[2].c_str());
+		default_thing = atoi(tokens[2]);
 
 	if (tokens[1] == "floor_tex")
-		default_floor_tex = tokens[2].c_str();
+		default_floor_tex = tokens[2];
 
 	if (tokens[1] == "ceil_tex")
-		default_ceil_tex = tokens[2].c_str();
+		default_ceil_tex = tokens[2];
 
 	if (tokens[1] == "mid_tex")
-		default_wall_tex = tokens[2].c_str();
+		default_wall_tex = tokens[2];
 
 	return true;
 }

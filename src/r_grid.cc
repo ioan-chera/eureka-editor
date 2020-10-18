@@ -679,12 +679,12 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "map_pos" && tokens.size() >= 4)
 	{
-		double x = atof(tokens[1].c_str());
-		double y = atof(tokens[2].c_str());
+		double x = atof(tokens[1]);
+		double y = atof(tokens[2]);
 
 		grid.MoveTo(x, y);
 
-		double new_scale = atof(tokens[3].c_str());
+		double new_scale = atof(tokens[3]);
 
 		grid.NearestScale(new_scale);
 
@@ -694,9 +694,9 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[0] == "grid" && tokens.size() >= 4)
 	{
-		bool t_shown = atoi(tokens[1].c_str()) ? true : false;
+		bool t_shown = atoi(tokens[1]) ? true : false;
 
-		grid.step = atoi(tokens[3].c_str());
+		grid.step = atoi(tokens[3]);
 
 		// tokens[2] was grid.mode, currently unused
 
@@ -709,7 +709,7 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[0] == "snap" && tokens.size() >= 2)
 	{
-		grid.snap = atoi(tokens[1].c_str()) ? true : false;
+		grid.snap = atoi(tokens[1]) ? true : false;
 
 		if (main_win)
 			main_win->info_bar->UpdateSnap();

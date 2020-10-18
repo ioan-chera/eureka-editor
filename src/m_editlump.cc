@@ -402,7 +402,7 @@ void CMD_EditLump()
 			return;
 
 		// check if user typed name of current level
-		if (y_stricmp(lump_name.c_str(), Level_name.c_str()) == 0)
+		if (lump_name.noCaseEqual(Level_name))
 			lump_name = EDLUMP_HEADER;
 	}
 
@@ -410,7 +410,7 @@ void CMD_EditLump()
 	//       (1) EDLUMP_HEADER  --> edit the HeaderData buffer
 	//       (2) EDLUMP_SCRIPTS --> edit the ScriptsData buffer
 
-	bool special =lump_name == EDLUMP_HEADER || lump_name == EDLUMP_SCRIPTS;
+	bool special = lump_name == EDLUMP_HEADER || lump_name == EDLUMP_SCRIPTS;
 
 	// uppercase the lump name
 	// [ another small memory leak ]

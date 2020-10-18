@@ -1537,26 +1537,26 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "camera" && tokens.size() >= 5)
 	{
-		r_view.x = atof(tokens[1].c_str());
-		r_view.y = atof(tokens[2].c_str());
-		r_view.z = atof(tokens[3].c_str());
+		r_view.x = atof(tokens[1]);
+		r_view.y = atof(tokens[2]);
+		r_view.z = atof(tokens[3]);
 
-		r_view.SetAngle(static_cast<float>(atof(tokens[4].c_str())));
+		r_view.SetAngle(static_cast<float>(atof(tokens[4])));
 		return true;
 	}
 
 	if (tokens[0] == "r_modes" && tokens.size() >= 4)
 	{
-		r_view.texturing = atoi(tokens[1].c_str()) ? true : false;
-		r_view.sprites   = atoi(tokens[2].c_str()) ? true : false;
-		r_view.lighting  = atoi(tokens[3].c_str()) ? true : false;
+		r_view.texturing = atoi(tokens[1]) ? true : false;
+		r_view.sprites   = atoi(tokens[2]) ? true : false;
+		r_view.lighting  = atoi(tokens[3]) ? true : false;
 
 		return true;
 	}
 
 	if (tokens[0] == "r_gravity" && tokens.size() >= 2)
 	{
-		r_view.gravity = atoi(tokens[1].c_str()) ? true : false;
+		r_view.gravity = atoi(tokens[1]) ? true : false;
 		return true;
 	}
 
@@ -1568,7 +1568,7 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[0] == "gamma" && tokens.size() >= 2)
 	{
-		config::usegamma = MAX(0, atoi(tokens[1].c_str())) % 5;
+		config::usegamma = MAX(0, atoi(tokens[1])) % 5;
 
 		W_UpdateGamma();
 		return true;
@@ -1903,16 +1903,16 @@ void R3D_ACT_AdjustOfs()
 
 void R3D_Set()
 {
-	const char *var_name = EXEC_Param[0];
-	const char *value    = EXEC_Param[1];
+	SString var_name = EXEC_Param[0];
+	SString value    = EXEC_Param[1];
 
-	if (! var_name[0])
+	if (! var_name)
 	{
 		Beep("3D_Set: missing var name");
 		return;
 	}
 
-	if (! value[0])
+	if (! value)
 	{
 		Beep("3D_Set: missing value");
 		return;
@@ -1922,25 +1922,25 @@ void R3D_Set()
 	bool bool_val = (int_val > 0);
 
 
-	if (y_stricmp(var_name, "tex") == 0)
+	if (var_name.noCaseEqual("tex"))
 	{
 		r_view.texturing = bool_val;
 	}
-	else if (y_stricmp(var_name, "obj") == 0)
+	else if (var_name.noCaseEqual("obj"))
 	{
 		r_view.sprites = bool_val;
 	}
-	else if (y_stricmp(var_name, "light") == 0)
+	else if (var_name.noCaseEqual("light"))
 	{
 		r_view.lighting = bool_val;
 	}
-	else if (y_stricmp(var_name, "grav") == 0)
+	else if (var_name.noCaseEqual("grav"))
 	{
 		r_view.gravity = bool_val;
 	}
 	else
 	{
-		Beep("3D_Set: unknown var: %s", var_name);
+		Beep("3D_Set: unknown var: %s", var_name.c_str());
 		return;
 	}
 
@@ -1950,33 +1950,33 @@ void R3D_Set()
 
 void R3D_Toggle()
 {
-	const char *var_name = EXEC_Param[0];
+	SString var_name = EXEC_Param[0];
 
-	if (! var_name[0])
+	if (! var_name)
 	{
 		Beep("3D_Toggle: missing var name");
 		return;
 	}
 
-	if (y_stricmp(var_name, "tex") == 0)
+	if (var_name.noCaseEqual("tex"))
 	{
 		r_view.texturing = ! r_view.texturing;
 	}
-	else if (y_stricmp(var_name, "obj") == 0)
+	else if (var_name.noCaseEqual("obj"))
 	{
 		r_view.sprites = ! r_view.sprites;
 	}
-	else if (y_stricmp(var_name, "light") == 0)
+	else if (var_name.noCaseEqual("light"))
 	{
 		r_view.lighting = ! r_view.lighting;
 	}
-	else if (y_stricmp(var_name, "grav") == 0)
+	else if (var_name.noCaseEqual("grav"))
 	{
 		r_view.gravity = ! r_view.gravity;
 	}
 	else
 	{
-		Beep("3D_Toggle: unknown var: %s", var_name);
+		Beep("3D_Toggle: unknown var: %s", var_name.c_str());
 		return;
 	}
 

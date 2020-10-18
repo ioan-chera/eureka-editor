@@ -1799,7 +1799,7 @@ bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[2] == "sort" && num_tok >= 2 && alpha)
 	{
-		alpha->value(atoi(tokens[3].c_str()) ? 0 : 1);
+		alpha->value(atoi(tokens[3]) ? 0 : 1);
 		Sort();
 		return true;
 	}
@@ -1813,19 +1813,19 @@ bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[2] == "pics" && num_tok >= 2 && pics)
 	{
-		pics->value(atoi(tokens[3].c_str()) ? 1 : 0);
+		pics->value(atoi(tokens[3]) ? 1 : 0);
 		return true;
 	}
 
 	if (tokens[2] == "do_flats" && num_tok >= 2 && do_flats)
 	{
-		do_flats->value(atoi(tokens[3].c_str()) ? 1 : 0);
+		do_flats->value(atoi(tokens[3]) ? 1 : 0);
 		return true;
 	}
 
 	if (tokens[2] == "do_tex" && num_tok >= 2 && do_tex)
 	{
-		do_tex->value(atoi(tokens[3].c_str()) ? 1 : 0);
+		do_tex->value(atoi(tokens[3]) ? 1 : 0);
 		Filter();
 		return true;
 	}

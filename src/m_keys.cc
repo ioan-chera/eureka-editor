@@ -24,8 +24,8 @@
 #include <algorithm>
 
 
-const char * EXEC_Param[MAX_EXEC_PARAM];
-const char * EXEC_Flags[MAX_EXEC_PARAM];
+SString EXEC_Param[MAX_EXEC_PARAM];
+SString EXEC_Flags[MAX_EXEC_PARAM];
 
 int EXEC_Errno;
 
@@ -446,7 +446,7 @@ struct key_binding_t
 
 	const editor_command_t *cmd;
 
-	char param[MAX_EXEC_PARAM][MAX_BIND_LENGTH];
+	SString param[MAX_EXEC_PARAM];
 
 	// this field ONLY used by M_DetectConflictingBinds()
 	bool is_duplicate;
@@ -461,7 +461,7 @@ bool M_IsKeyBound(keycode_t key, key_context_e context)
 {
 	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 	{
-		key_binding_t& bind = all_bindings[i];
+		const key_binding_t& bind = all_bindings[i];
 
 		if (bind.key == key && bind.context == context)
 			return true;
@@ -539,8 +539,8 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 	}
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		if ((int)tokens.size() >= 4 + p)
-			strncpy(temp.param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
+		if((int)tokens.size() >= 4 + p)
+			temp.param[p] = tokens[3 + p];
 
 #if 0  // DEBUG
 	fprintf(stderr, "ADDED BINDING key:%04x --> %s\n", temp.key, tokens[2].c_str());
@@ -604,12 +604,12 @@ static void CopyInstallBindings()
 }
 
 
-static bool BindingExists(std::vector<key_binding_t>& list, key_binding_t& bind,
+static bool BindingExists(std::vector<key_binding_t>& list, const key_binding_t& bind,
                           bool full_match)
 {
 	for (unsigned int i = 0 ; i < list.size() ; i++)
 	{
-		key_binding_t& other = list[i];
+		const key_binding_t& other = list[i];
 
 		if (bind.key != other.key)
 			continue;
@@ -627,7 +627,7 @@ static bool BindingExists(std::vector<key_binding_t>& list, key_binding_t& bind,
 
 		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		{
-			if (strcmp(bind.param[p], other.param[p]) != 0)
+			if (bind.param[p] != other.param[p])
 			{
 				same_params = false;
 				break;
@@ -683,7 +683,7 @@ void M_SaveBindings()
 
 		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
 		{
-			key_binding_t& bind = all_bindings[i];
+			const key_binding_t& bind = all_bindings[i];
 
 			if (bind.context != (key_context_e)ctx)
 				continue;
@@ -697,8 +697,8 @@ void M_SaveBindings()
 
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 			{
-				if (bind.param[p][0])
-					fprintf(fp, "\t%s", bind.param[p]);
+				if (bind.param[p])
+					fprintf(fp, "\t%s", bind.param[p].c_str());
 			}
 
 			fprintf(fp, "\n");
@@ -709,7 +709,7 @@ void M_SaveBindings()
 
 		for (unsigned int i = 0 ; i < install_binds.size() ; i++)
 		{
-			key_binding_t& bind = install_binds[i];
+			const key_binding_t& bind = install_binds[i];
 
 			if (bind.context != ctx)
 				continue;
@@ -798,7 +798,7 @@ public:
 
 		for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		{
-			int cmp = y_stricmp(k1.param[p], k2.param[p]);
+			int cmp = k1.param[p].noCaseCompare(k2.param[p]);
 
 			if (cmp != 0)
 				return cmp < 0;
@@ -864,7 +864,7 @@ SString M_StringForFunc(int index)
 	buffer.reserve(2048);
 
 	SYS_ASSERT(index >= 0 && index < static_cast<int>(pref_binds.size()));
-	key_binding_t& bind = pref_binds[index];
+	const key_binding_t& bind = pref_binds[index];
 
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
@@ -873,16 +873,16 @@ SString M_StringForFunc(int index)
 
 	for (int k = 0 ; k < MAX_EXEC_PARAM ; k++)
 	{
-		const char *param = bind.param[k];
+		const SString &param = bind.param[k];
 
-		if (! param[0])
+		if (! param)
 			break;
 
 		if (k == 0)
 			buffer.push_back(':');
 
 		buffer.push_back(' ');
-		buffer += StringPrintf("%.30s", param);
+		buffer += StringPrintf("%.30s", param.c_str());
 	}
 
 	return buffer;
@@ -893,7 +893,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 {
 	SYS_ASSERT(index < (int)pref_binds.size());
 
-	key_binding_t& bind = pref_binds[index];
+	const key_binding_t& bind = pref_binds[index];
 
 	static char buffer[600];
 
@@ -986,11 +986,12 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 	bind.cmd = cmd;
 
-	memset(bind.param, 0, sizeof(bind.param));
+	for(SString &param : bind.param)
+		param.clear();
 
-	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
-		if (num_tok >= 2 + p)
-			strncpy(bind.param[p], tokens[1 + p].c_str(), MAX_BIND_LENGTH-1);
+	for(int p = 0; p < MAX_EXEC_PARAM; p++)
+		if(num_tok >= 2 + p)
+			bind.param[p] = tokens[1 + p];
 
 	return NULL;
 }
@@ -1108,10 +1109,10 @@ bool Exec_HasFlag(const char *flag)
 
 	for (int i = 0 ; i < MAX_EXEC_PARAM ; i++)
 	{
-		if (! EXEC_Flags[i][0])
+		if (! EXEC_Flags[i])
 			break;
 
-		if (y_stricmp(EXEC_Flags[i], flag) == 0)
+		if (EXEC_Flags[i].noCaseEqual(flag))
 			return true;
 	}
 
@@ -1134,7 +1135,7 @@ static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
 {
 	for (int i = 0 ; i < (int)all_bindings.size() ; i++)
 	{
-		key_binding_t& bind = all_bindings[i];
+		const key_binding_t& bind = all_bindings[i];
 
 		SYS_ASSERT(bind.cmd);
 
@@ -1172,8 +1173,8 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 {
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{
-		EXEC_Param[p] = "";
-		EXEC_Flags[p] = "";
+		EXEC_Param[p].clear();
+		EXEC_Flags[p].clear();
 	}
 
 	EXEC_Errno = 0;
@@ -1227,8 +1228,8 @@ bool ExecuteCommand(const editor_command_t *cmd,
 {
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{
-		EXEC_Param[p] = "";
-		EXEC_Flags[p] = "";
+		EXEC_Param[p].clear();
+		EXEC_Flags[p].clear();
 	}
 
 	// separate flags from normal parameters
@@ -1272,7 +1273,7 @@ bool ExecuteCommand(const char *name,
 //
 //  play a fascinating tune
 //
-void Beep(const char *fmt, ...)
+void Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list arg_ptr;
 

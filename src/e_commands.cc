@@ -79,7 +79,7 @@ void CMD_EditMode()
 
 	if (! mode || ! strchr("lstvr", mode))
 	{
-		Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0]);
+		Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -211,16 +211,16 @@ static void SetGamma(int new_val)
 
 void CMD_SetVar()
 {
-	const char *var_name = EXEC_Param[0];
-	const char *value    = EXEC_Param[1];
+	SString var_name = EXEC_Param[0];
+	SString value    = EXEC_Param[1];
 
-	if (! var_name[0])
+	if (! var_name)
 	{
 		Beep("Set: missing var name");
 		return;
 	}
 
-	if (! value[0])
+	if (! value)
 	{
 		Beep("Set: missing value");
 		return;
@@ -230,11 +230,11 @@ void CMD_SetVar()
 	bool bool_val = (int_val > 0);
 
 
-	if (y_stricmp(var_name, "3d") == 0)
+	if (var_name.noCaseEqual("3d"))
 	{
 		Render3D_Enable(bool_val);
 	}
-	else if (y_stricmp(var_name, "browser") == 0)
+	else if (var_name.noCaseEqual("browser"))
 	{
 		Editor_ClearAction();
 
@@ -244,35 +244,35 @@ void CMD_SetVar()
 		if (want_vis != is_visible)
 			main_win->BrowserMode('/');
 	}
-	else if (y_stricmp(var_name, "grid") == 0)
+	else if (var_name.noCaseEqual("grid"))
 	{
 		grid.SetShown(bool_val);
 	}
-	else if (y_stricmp(var_name, "snap") == 0)
+	else if (var_name.noCaseEqual("snap"))
 	{
 		grid.SetSnap(bool_val);
 	}
-	else if (y_stricmp(var_name, "sprites") == 0)
+	else if (var_name.noCaseEqual("sprites"))
 	{
 		edit.thing_render_mode = int_val;
 		RedrawMap();
 	}
-	else if (y_stricmp(var_name, "obj_nums") == 0)
+	else if (var_name.noCaseEqual("obj_nums"))
 	{
 		edit.show_object_numbers = bool_val;
 		RedrawMap();
 	}
-	else if (y_stricmp(var_name, "gamma") == 0)
+	else if (var_name.noCaseEqual("gamma"))
 	{
 		SetGamma(int_val);
 	}
-	else if (y_stricmp(var_name, "ratio") == 0)
+	else if (var_name.noCaseEqual("ratio"))
 	{
 		grid.ratio = CLAMP(0, int_val, 7);
 		main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
-	else if (y_stricmp(var_name, "sec_render") == 0)
+	else if (var_name.noCaseEqual("sec_render"))
 	{
 		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
 		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
@@ -288,58 +288,58 @@ void CMD_SetVar()
 	}
 	else
 	{
-		Beep("Set: unknown var: %s", var_name);
+		Beep("Set: unknown var: %s", var_name.c_str());
 	}
 }
 
 
 void CMD_ToggleVar()
 {
-	const char *var_name = EXEC_Param[0];
+	SString var_name = EXEC_Param[0];
 
-	if (! var_name[0])
+	if (! var_name)
 	{
 		Beep("Toggle: missing var name");
 		return;
 	}
 
-	if (y_stricmp(var_name, "3d") == 0)
+	if (var_name.noCaseEqual("3d"))
 	{
 		Render3D_Enable(! edit.render3d);
 	}
-	else if (y_stricmp(var_name, "browser") == 0)
+	else if (var_name.noCaseEqual("browser"))
 	{
 		Editor_ClearAction();
 
 		main_win->BrowserMode('/');
 	}
-	else if (y_stricmp(var_name, "recent") == 0)
+	else if (var_name.noCaseEqual("recent"))
 	{
 		main_win->browser->ToggleRecent();
 	}
-	else if (y_stricmp(var_name, "grid") == 0)
+	else if (var_name.noCaseEqual("grid"))
 	{
 		grid.ToggleShown();
 	}
-	else if (y_stricmp(var_name, "snap") == 0)
+	else if (var_name.noCaseEqual("snap"))
 	{
 		grid.ToggleSnap();
 	}
-	else if (y_stricmp(var_name, "sprites") == 0)
+	else if (var_name.noCaseEqual("sprites"))
 	{
 		edit.thing_render_mode = ! edit.thing_render_mode;
 		RedrawMap();
 	}
-	else if (y_stricmp(var_name, "obj_nums") == 0)
+	else if (var_name.noCaseEqual("obj_nums"))
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
 		RedrawMap();
 	}
-	else if (y_stricmp(var_name, "gamma") == 0)
+	else if (var_name.noCaseEqual("gamma"))
 	{
 		SetGamma((config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
-	else if (y_stricmp(var_name, "ratio") == 0)
+	else if (var_name.noCaseEqual("ratio"))
 	{
 		if (grid.ratio >= 7)
 			grid.ratio = 0;
@@ -349,7 +349,7 @@ void CMD_ToggleVar()
 		main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
-	else if (y_stricmp(var_name, "sec_render") == 0)
+	else if (var_name.noCaseEqual("sec_render"))
 	{
 		if (edit.sector_render_mode >= SREND_SoundProp)
 			edit.sector_render_mode = SREND_Nothing;
@@ -359,14 +359,14 @@ void CMD_ToggleVar()
 	}
 	else
 	{
-		Beep("Toggle: unknown var: %s", var_name);
+		Beep("Toggle: unknown var: %s", var_name.c_str());
 	}
 }
 
 
 void CMD_BrowserMode()
 {
-	if (! EXEC_Param[0][0])
+	if (! EXEC_Param[0])
 	{
 		Beep("BrowserMode: missing mode");
 		return;
@@ -377,7 +377,7 @@ void CMD_BrowserMode()
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
 	       mode == 'T' || mode == 'F' || mode == 'G'))
 	{
-		Beep("Unknown browser mode: %s", EXEC_Param[0]);
+		Beep("Unknown browser mode: %s", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -408,7 +408,7 @@ void CMD_Scroll()
 
 	if (delta_x == 0 && delta_y == 0)
 	{
-		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0], EXEC_Param[1]);
+		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
 		return;
 	}
 
@@ -959,37 +959,37 @@ void CMD_ACT_Transform()
 		return;
 	}
 
-	const char *keyword = EXEC_Param[0];
+	SString keyword = EXEC_Param[0];
 	transform_keyword_e  mode;
 
-	if (! keyword[0])
+	if (! keyword)
 	{
 		Beep("ACT_Transform: missing keyword");
 		return;
 	}
-	else if (y_stricmp(keyword, "scale") == 0)
+	else if (keyword.noCaseEqual("scale"))
 	{
 		mode = TRANS_K_Scale;
 	}
-	else if (y_stricmp(keyword, "stretch") == 0)
+	else if (keyword.noCaseEqual("stretch"))
 	{
 		mode = TRANS_K_Stretch;
 	}
-	else if (y_stricmp(keyword, "rotate") == 0)
+	else if (keyword.noCaseEqual("rotate"))
 	{
 		mode = TRANS_K_Rotate;
 	}
-	else if (y_stricmp(keyword, "rotscale") == 0)
+	else if (keyword.noCaseEqual("rotscale"))
 	{
 		mode = TRANS_K_RotScale;
 	}
-	else if (y_stricmp(keyword, "skew") == 0)
+	else if (keyword.noCaseEqual("skew"))
 	{
 		mode = TRANS_K_Skew;
 	}
 	else
 	{
-		Beep("ACT_Transform: unknown keyword: %s", keyword);
+		Beep("ACT_Transform: unknown keyword: %s", keyword.c_str());
 		return;
 	}
 
@@ -1338,7 +1338,7 @@ void CMD_BR_Scroll()
 		return;
 	}
 
-	if (! EXEC_Param[0][0])
+	if (! EXEC_Param[0])
 	{
 		Beep("BR_Scroll: missing value");
 		return;

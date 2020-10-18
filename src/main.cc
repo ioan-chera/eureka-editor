@@ -497,7 +497,7 @@ static SString DetermineLevel()
 		if (! isdigit(Level_name[0]))
 			return StringUpper(Level_name.c_str());
 
-		level_number = atoi(Level_name.c_str());
+		level_number = atoi(Level_name);
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)

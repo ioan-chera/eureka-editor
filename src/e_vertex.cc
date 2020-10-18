@@ -1180,7 +1180,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 void CMD_VT_ShapeArc(void)
 {
-	if (! EXEC_Param[0][0])
+	if (! EXEC_Param[0])
 	{
 		Beep("VT_ShapeArc: missing angle parameter");
 		return;
@@ -1190,7 +1190,7 @@ void CMD_VT_ShapeArc(void)
 
 	if (arc_deg < 30 || arc_deg > 360)
 	{
-		Beep("VT_ShapeArc: bad angle: %s", EXEC_Param[0]);
+		Beep("VT_ShapeArc: bad angle: %s", EXEC_Param[0].c_str());
 		return;
 	}
 

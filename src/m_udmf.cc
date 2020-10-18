@@ -82,12 +82,12 @@ public:
 
 	int DecodeInt() const
 	{
-		return atoi(text.c_str());
+		return atoi(text);
 	}
 
 	double DecodeFloat() const
 	{
-		return atof(text.c_str());
+		return atof(text);
 	}
 
 	SString DecodeString() const

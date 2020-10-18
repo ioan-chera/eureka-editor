@@ -1378,28 +1378,28 @@ bool Editor_ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[0] == "render_mode" && tokens.size() >= 2)
 	{
-		edit.render3d = atoi(tokens[1].c_str());
+		edit.render3d = atoi(tokens[1]);
 		RedrawMap();
 		return true;
 	}
 
 	if (tokens[0] == "sector_render_mode" && tokens.size() >= 2)
 	{
-		edit.sector_render_mode = atoi(tokens[1].c_str());
+		edit.sector_render_mode = atoi(tokens[1]);
 		RedrawMap();
 		return true;
 	}
 
 	if (tokens[0] == "thing_render_mode" && tokens.size() >= 2)
 	{
-		edit.thing_render_mode = atoi(tokens[1].c_str());
+		edit.thing_render_mode = atoi(tokens[1]);
 		RedrawMap();
 		return true;
 	}
 
 	if (tokens[0] == "show_object_numbers" && tokens.size() >= 2)
 	{
-		edit.show_object_numbers = atoi(tokens[1].c_str());
+		edit.show_object_numbers = atoi(tokens[1]);
 		RedrawMap();
 		return true;
 	}

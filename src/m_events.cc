@@ -991,10 +991,10 @@ void CMD_OperationMenu()
 	if (no_operation_cfg)
 		return;
 
-	const char *context = EXEC_Param[0];
+	SString context = EXEC_Param[0];
 
 	// if no context given, pick one based on editing mode
-	if (! context[0])
+	if (! context)
 	{
 		if (edit.render3d)
 		{
@@ -1016,7 +1016,7 @@ void CMD_OperationMenu()
 
 	if (menu == NULL)
 	{
-		Beep("no such menu: %s", context);
+		Beep("no such menu: %s", context.c_str());
 		return;
 	}
 

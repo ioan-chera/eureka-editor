@@ -162,7 +162,7 @@ bool UI_Tile::ParseUser(const std::vector<SString> &tokens)
 		if (was_visible)
 			HideRight();
 
-		right_W = atoi(tokens[1].c_str());
+		right_W = atoi(tokens[1]);
 
 		if (was_visible)
 			ShowRight();

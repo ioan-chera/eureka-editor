@@ -160,8 +160,8 @@ const editor_command_t * LookupEditorCommand(int index);
 #define MAX_EXEC_PARAM   16
 #define MAX_BIND_LENGTH  64
 
-extern const char * EXEC_Param[MAX_EXEC_PARAM];
-extern const char * EXEC_Flags[MAX_EXEC_PARAM];
+extern SString EXEC_Param[MAX_EXEC_PARAM];
+extern SString EXEC_Flags[MAX_EXEC_PARAM];
 
 // result from command function, 0 is OK
 extern int EXEC_Errno;

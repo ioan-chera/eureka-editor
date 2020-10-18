@@ -3007,13 +3007,13 @@ void CMD_ApplyTag()
 
 	bool do_last = false;
 
-	const char *mode = EXEC_Param[0];
+	SString mode = EXEC_Param[0];
 
-	if (mode[0] == 0 || y_stricmp(mode, "fresh") == 0)
+	if (!mode || mode.noCaseEqual("fresh"))
 	{
 		// fresh tag
 	}
-	else if (y_stricmp(mode, "last") == 0)
+	else if (mode.noCaseEqual("last"))
 	{
 		do_last = true;
 	}
@@ -4410,38 +4410,38 @@ void CHECK_All(bool major_stuff)
 
 void CMD_MapCheck()
 {
-	const char *what = EXEC_Param[0];
+	SString what = EXEC_Param[0];
 
-	if (! what[0])
+	if (! what)
 	{
 		Beep("MapCheck: missing keyword");
 		return;
 	}
-	else if (y_stricmp(what, "all") == 0)
+	else if (what.noCaseEqual("all"))
 	{
 		CHECK_All(false);
 	}
-	else if (y_stricmp(what, "major") == 0)
+	else if (what.noCaseEqual("major"))
 	{
 		CHECK_All(true);
 	}
-	else if (y_stricmp(what, "vertices") == 0)
+	else if (what.noCaseEqual("vertices"))
 	{
 		CHECK_Vertices();
 	}
-	else if (y_stricmp(what, "sectors") == 0)
+	else if (what.noCaseEqual("sectors"))
 	{
 		CHECK_Sectors();
 	}
-	else if (y_stricmp(what, "linedefs") == 0)
+	else if (what.noCaseEqual("linedefs"))
 	{
 		CHECK_LineDefs();
 	}
-	else if (y_stricmp(what, "things") == 0)
+	else if (what.noCaseEqual("things"))
 	{
 		CHECK_Things();
 	}
-	else if (y_stricmp(what, "current") == 0)  // current editing mode
+	else if (what.noCaseEqual("current"))  // current editing mode
 	{
 		switch (edit.mode)
 		{
@@ -4466,17 +4466,17 @@ void CMD_MapCheck()
 				break;
 		}
 	}
-	else if (y_stricmp(what, "textures") == 0)
+	else if (what.noCaseEqual("textures"))
 	{
 		CHECK_Textures();
 	}
-	else if (y_stricmp(what, "tags") == 0)
+	else if (what.noCaseEqual("tags"))
 	{
 		CHECK_Tags();
 	}
 	else
 	{
-		Beep("MapCheck: unknown keyword: %s\n", what);
+		Beep("MapCheck: unknown keyword: %s\n", what.c_str());
 	}
 }
 

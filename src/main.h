@@ -226,7 +226,7 @@ SString GameNameFromIWAD(const char *iwad_name);
 SString Main_FileOpFolder();
 
 
-void Beep(const char *msg, ...);
+void Beep(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 
 void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 void Status_Clear();

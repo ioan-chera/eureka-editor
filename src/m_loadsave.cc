@@ -1215,33 +1215,33 @@ void CMD_OpenMap()
 
 void CMD_GivenFile()
 {
-	const char *mode = EXEC_Param[0];
+	SString mode = EXEC_Param[0];
 
 	int index = last_given_file;
 
-	if (! mode[0] || y_stricmp(mode, "current") == 0)
+	if (! mode || mode.noCaseEqual("current"))
 	{
 		// index = index + 0;
 	}
-	else if (y_stricmp(mode, "next") == 0)
+	else if (mode.noCaseEqual("next"))
 	{
 		index = index + 1;
 	}
-	else if (y_stricmp(mode, "prev") == 0)
+	else if (mode.noCaseEqual("prev"))
 	{
 		index = index - 1;
 	}
-	else if (y_stricmp(mode, "first") == 0)
+	else if (mode.noCaseEqual("first"))
 	{
 		index = 0;
 	}
-	else if (y_stricmp(mode, "last") == 0)
+	else if (mode.noCaseEqual("last"))
 	{
 		index = (int)Pwad_list.size() - 1;
 	}
 	else
 	{
-		Beep("GivenFile: unknown keyword: %s", mode);
+		Beep("GivenFile: unknown keyword: %s", mode.c_str());
 		return;
 	}
 
@@ -1261,9 +1261,9 @@ void CMD_GivenFile()
 
 void CMD_FlipMap()
 {
-	const char *mode = EXEC_Param[0];
+	SString mode = EXEC_Param[0];
 
-	if (! mode[0])
+	if (! mode)
 	{
 		Beep("FlipMap: missing keyword");
 		return;
@@ -1289,7 +1289,7 @@ void CMD_FlipMap()
 	SYS_ASSERT(lev_idx <= max_idx);
 
 
-	if (y_stricmp(mode, "next") == 0)
+	if (mode.noCaseEqual("next"))
 	{
 		if (lev_idx < 0)
 			lev_idx = 0;
@@ -1301,7 +1301,7 @@ void CMD_FlipMap()
 			return;
 		}
 	}
-	else if (y_stricmp(mode, "prev") == 0)
+	else if (mode.noCaseEqual("prev"))
 	{
 		if (lev_idx < 0)
 			lev_idx = max_idx;
@@ -1313,17 +1313,17 @@ void CMD_FlipMap()
 			return;
 		}
 	}
-	else if (y_stricmp(mode, "first") == 0)
+	else if (mode.noCaseEqual("first"))
 	{
 		lev_idx = 0;
 	}
-	else if (y_stricmp(mode, "last") == 0)
+	else if (mode.noCaseEqual("last"))
 	{
 		lev_idx = max_idx;
 	}
 	else
 	{
-		Beep("FlipMap: unknown keyword: %s", mode);
+		Beep("FlipMap: unknown keyword: %s", mode.c_str());
 		return;
 	}
 

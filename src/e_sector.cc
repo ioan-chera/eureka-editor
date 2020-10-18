@@ -88,7 +88,7 @@ void CMD_SEC_Floor(void)
 
 	if (diff == 0)
 	{
-		Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0]);
+		Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -126,7 +126,7 @@ void CMD_SEC_Ceil(void)
 
 	if (diff == 0)
 	{
-		Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0]);
+		Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -210,7 +210,7 @@ void CMD_SEC_Light(void)
 
 	if (diff == 0)
 	{
-		Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0]);
+		Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 

@@ -195,6 +195,11 @@ public:
 		return !y_stricmp(data.c_str(), c ? c : "");
 	}
 
+	int noCaseCompare(const SString &other) const
+	{
+		return y_stricmp(data.c_str(), other.c_str());
+	}
+
 	bool noCaseStartsWith(const char *c, int pos = 0) const
 	{
 		return !y_strnicmp(data.c_str() + pos, c ? c : "", c ? strlen(c) : 0);
@@ -372,6 +377,18 @@ namespace std
 			return hash<std::string>()(x.get());
 		}
 	};
+}
+
+//
+// Convenience
+//
+inline static int atoi(const SString &string)
+{
+	return atoi(string.c_str());
+}
+inline static double atof(const SString &string)
+{
+	return atof(string.c_str());
 }
 
 #endif  /* __EUREKA_YUTIL_H__ */
