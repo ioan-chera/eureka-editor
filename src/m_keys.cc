@@ -948,8 +948,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	// line tokeniser.
 
 	static char buffer[600];
-	strncpy(buffer, func_str, sizeof(buffer));
-	buffer[sizeof(buffer) - 1] = 0;
+	StringCopy(buffer, sizeof(buffer), func_str);
 
 	for (unsigned int k = 0 ; buffer[k] ; k++)
 		if (buffer[k] == ',' || buffer[k] == ':')
