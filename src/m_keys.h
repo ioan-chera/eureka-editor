@@ -174,8 +174,8 @@ bool Exec_HasFlag(const char *flag);
 bool ExecuteKey(keycode_t key, key_context_e context);
 
 bool ExecuteCommand(const editor_command_t *cmd,
-					const char *param1 = "", const char *param2 = "",
-                    const char *param3 = "", const char *param4 = "");
+					const SString &param1 = "", const SString &param2 = "",
+                    const SString &param3 = "", const SString &param4 = "");
 
 bool ExecuteCommand(const char *name,
 					const char *param1 = "", const char *param2 = "",

@@ -809,7 +809,7 @@ typedef struct
 {
 	const editor_command_t *cmd;
 
-	char param[MAX_EXEC_PARAM][MAX_BIND_LENGTH];
+	SString param[MAX_EXEC_PARAM];
 
 } operation_command_t;
 
@@ -857,7 +857,7 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 		if ((int)tokens.size() >= 4 + p)
-			strncpy(info->param[p], tokens[3 + p].c_str(), MAX_BIND_LENGTH-1);
+			info->param[p] = tokens[3 + p];
 
 	menu->add(tokens[1].c_str(), shortcut, 0 /* callback */, (void *)info, 0 /* flags */);
 }
