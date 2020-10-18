@@ -124,13 +124,13 @@ public:
 	}
 
 public:
-	UI_PortPathDialog(const char *port_name) :
+	UI_PortPathDialog(const SString &port_name) :
 		UI_Escapable_Window(560, 250, "Port Settings"),
 		want_close(false)
 	{
 		char message_buf[256];
 
-		snprintf(message_buf, sizeof(message_buf), "Setting up location of the executable (EXE) for %s.", port_name);
+		snprintf(message_buf, sizeof(message_buf), "Setting up location of the executable (EXE) for %s.", port_name.c_str());
 
 		Fl_Box *header = new Fl_Box(FL_NO_BOX, 20, 20, w() - 40, 30, "");
 		header->copy_label(message_buf);
@@ -189,20 +189,18 @@ public:
 
 bool M_PortSetupDialog(const char *port, const char *game)
 {
-	char name_buf[256];
+	SString name_buf;
 
 	if (y_stricmp(port, "vanilla") == 0)
 	{
-		snprintf(name_buf, sizeof(name_buf), "Vanilla %s\n", game);
+		name_buf = StringPrintf("Vanilla %s\n", game);
 		name_buf[8] = toupper(name_buf[8]);
 	}
 	else if (y_stricmp(port, "mbf") == 0)	// temp hack for aesthetics
-	{
-		strcpy(name_buf, "MBF");
-	}
+		name_buf = "MBF";
 	else
 	{
-		snprintf(name_buf, sizeof(name_buf), "%s", port);
+		name_buf = port;
 		name_buf[0] = toupper(name_buf[0]);
 	}
 
