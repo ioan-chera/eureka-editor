@@ -381,7 +381,7 @@ void W_FreeLumpData(byte ** buf_ptr);
 
 int W_FilenameAbsCompare(const char *A, const char *B);
 
-void W_StoreString(char *buf, const char *str, size_t buflen);
+void W_StoreString(char *buf, const SString &str, size_t buflen);
 
 
 void MasterDir_Add   (Wad_file *wad);

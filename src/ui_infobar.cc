@@ -718,7 +718,7 @@ void UI_StatusBar::SetStatus(const char *str)
 }
 
 
-void Status_Set(const char *fmt, ...)
+void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	if (! main_win)
 		return;

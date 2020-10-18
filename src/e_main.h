@@ -269,10 +269,10 @@ public:
 	 Recently_used();
 	~Recently_used();
 
-	int find(const char *name);
+	int find(const SString &name);
 	int find_number(int val);
 
-	void insert(const char *name);
+	void insert(const SString &name);
 	void insert_number(int val);
 
 	void clear();
@@ -281,7 +281,7 @@ public:
 
 private:
 	void erase(int index);
-	void push_front(const char *name);
+	void push_front(const SString &name);
 };
 
 extern Recently_used  recent_textures;

@@ -50,12 +50,12 @@ public:
 public:
 	// this constructor makes a simple text button
 	Browser_Item(int X, int Y, int W, int H,
-	             const char *_desc, const char *_realname,
+	             const SString &_desc, const SString &_realname,
 				 int _num, char _kind, char _category);
 
 	// this constructor makes a picture with a text label below it
 	Browser_Item(int X, int Y, int W, int H,
-	             const char * _desc, const char *_realname,
+				 const SString &_desc, const SString &_realname,
 				 int _num, char _kind, char _category,
 	             int pic_w, int pic_h, UI_Pic *_pic);
 

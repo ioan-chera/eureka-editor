@@ -394,12 +394,12 @@ void W_LoadTextures()
 }
 
 
-Img_c * W_GetTexture(const char *name, bool try_uppercase)
+Img_c * W_GetTexture(const SString &name, bool try_uppercase)
 {
 	if (is_null_tex(name))
 		return NULL;
 
-	if (strlen(name) == 0)
+	if (!name)
 		return NULL;
 
 	SString t_str = name;
@@ -425,7 +425,7 @@ Img_c * W_GetTexture(const char *name, bool try_uppercase)
 }
 
 
-int W_GetTextureHeight(const char *name)
+int W_GetTextureHeight(const SString &name)
 {
 	Img_c *img = W_GetTexture(name);
 
@@ -436,23 +436,22 @@ int W_GetTextureHeight(const char *name)
 }
 
 
-bool W_TextureIsKnown(const char *name)
+bool W_TextureIsKnown(const SString &name)
 {
 	if (is_null_tex(name) || is_special_tex(name))
 		return true;
 
-	if (strlen(name) == 0)
+	if (!name)
 		return false;
 
-	SString t_str = name;
-	std::map<SString, Img_c *>::iterator P = textures.find(t_str);
+	std::map<SString, Img_c *>::iterator P = textures.find(name);
 
 	if (P != textures.end())
 		return true;
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::iterator P = flats.find(t_str);
+		std::map<SString, Img_c *>::iterator P = flats.find(name);
 
 		if (P != flats.end())
 			return true;
@@ -462,17 +461,15 @@ bool W_TextureIsKnown(const char *name)
 }
 
 
-bool W_TextureCausesMedusa(const char *name)
+bool W_TextureCausesMedusa(const SString &name)
 {
-	SString t_str = name;
-
-	std::map<SString, int>::iterator P = medusa_textures.find(t_str);
+	std::map<SString, int>::iterator P = medusa_textures.find(name);
 
 	return (P != medusa_textures.end() && P->second > 0);
 }
 
 
-const char *NormalizeTex(const char *name)
+const char *NormalizeTex(const SString &name)
 {
 	if (name[0] == 0)
 		return "-";
@@ -589,17 +586,16 @@ void W_LoadFlats()
 }
 
 
-Img_c * W_GetFlat(const char *name, bool try_uppercase)
+Img_c * W_GetFlat(const SString &name, bool try_uppercase)
 {
-	SString f_str = name;
-	std::map<SString, Img_c *>::iterator P = flats.find(f_str);
+	std::map<SString, Img_c *>::iterator P = flats.find(name);
 
 	if (P != flats.end())
 		return P->second;
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::iterator P = textures.find(f_str);
+		std::map<SString, Img_c *>::iterator P = textures.find(name);
 
 		if (P != textures.end())
 			return P->second;
@@ -614,24 +610,23 @@ Img_c * W_GetFlat(const char *name, bool try_uppercase)
 }
 
 
-bool W_FlatIsKnown(const char *name)
+bool W_FlatIsKnown(const SString &name)
 {
 	// sectors do not support "-" (but our code can make it)
 	if (is_null_tex(name))
 		return false;
 
-	if (strlen(name) == 0)
+	if (!name)
 		return false;
 
-	SString f_str = name;
-	std::map<SString, Img_c *>::iterator P = flats.find(f_str);
+	std::map<SString, Img_c *>::iterator P = flats.find(name);
 
 	if (P != flats.end())
 		return true;
 
 	if (Features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::iterator P = textures.find(f_str);
+		std::map<SString, Img_c *>::iterator P = textures.find(name);
 
 		if (P != textures.end())
 			return true;

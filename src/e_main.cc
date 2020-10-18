@@ -1143,10 +1143,10 @@ Recently_used::~Recently_used()
 }
 
 
-int Recently_used::find(const char *name)
+int Recently_used::find(const SString &name)
 {
 	for (int k = 0 ; k < size ; k++)
-		if (y_stricmp(name_set[k].c_str(), name) == 0)
+		if (name_set[k].noCaseEqual(name))
 			return k;
 
 	return -1;	// not found
@@ -1154,22 +1154,18 @@ int Recently_used::find(const char *name)
 
 int Recently_used::find_number(int val)
 {
-	char buffer[64];
-
-	snprintf(buffer, sizeof(buffer), "%d", val);
-
-	return find(buffer);
+	return find(StringPrintf("%d", val));
 }
 
 
-void Recently_used::insert(const char *name)
+void Recently_used::insert(const SString &name)
 {
 	// ignore '-' texture
 	if (is_null_tex(name))
 		return;
 
 	// ignore empty strings to prevent potential problems
-	if (strlen(name) == 0)
+	if (!name)
 		return;
 
 	int idx = find(name);
@@ -1191,11 +1187,7 @@ void Recently_used::insert(const char *name)
 
 void Recently_used::insert_number(int val)
 {
-	char buffer[64];
-
-	snprintf(buffer, sizeof(buffer), "%d", val);
-
-	insert(buffer);
+	insert(StringPrintf("%d", val));
 }
 
 
@@ -1214,7 +1206,7 @@ void Recently_used::erase(int index)
 }
 
 
-void Recently_used::push_front(const char *name)
+void Recently_used::push_front(const SString &name)
 {
 	if (size >= keep_num)
 	{
@@ -1293,15 +1285,15 @@ bool RecUsed_ParseUser(const std::vector<SString> &tokens)
 	switch (tokens[1][0])
 	{
 		case 'T':
-			recent_textures.insert(tokens[2].c_str());
+			recent_textures.insert(tokens[2]);
 			break;
 
 		case 'F':
-			recent_flats.insert(tokens[2].c_str());
+			recent_flats.insert(tokens[2]);
 			break;
 
 		case 'O':
-			recent_things.insert(tokens[2].c_str());
+			recent_things.insert(tokens[2]);
 			break;
 
 		default:

@@ -296,18 +296,18 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
 
 // is this flat a sky?
-bool is_sky(const char *flat);
+bool is_sky(const SString &flat);
 
-bool is_null_tex(const char *tex);		// the "-" texture
-bool is_special_tex(const char *tex);	// begins with "#"
+bool is_null_tex(const SString &tex);		// the "-" texture
+bool is_special_tex(const SString &tex);	// begins with "#"
 
 
 const sectortype_t & M_GetSectorType(int type);
 const linetype_t   & M_GetLineType(int type);
 const thingtype_t  & M_GetThingType(int type);
 
-char M_GetTextureType(const char *name);
-char M_GetFlatType(const char *name);
+char M_GetTextureType(const SString &name);
+char M_GetFlatType(const SString &name);
 
 SString M_LineCategoryString(SString &letters);
 SString M_ThingCategoryString(SString &letters);

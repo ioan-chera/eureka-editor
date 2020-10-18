@@ -135,7 +135,7 @@ public:
 /* text item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
-	                       const char *_desc, const char *_realname,
+						   const SString &_desc, const SString &_realname,
 						   int _num, char _kind, char _category) :
 	Fl_Group(X, Y, W, H, ""),
 	desc(_desc), real_name(_realname),
@@ -159,7 +159,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 /* image item */
 
 Browser_Item::Browser_Item(int X, int Y, int W, int H,
-	                       const char *_desc, const char *_realname,
+						   const SString &_desc, const SString &_realname,
 						   int _num, char _kind, char _category,
 						   int pic_w, int pic_h, UI_Pic *_pic) :
 	Fl_Group(X, Y, W, H, ""),
@@ -542,15 +542,15 @@ bool UI_Browser_Box::Recent_UpdateItem(Browser_Item *item)
 	switch (item->kind)
 	{
 		case 'T':
-			new_idx = recent_textures.find(item->real_name.c_str());
+			new_idx = recent_textures.find(item->real_name);
 			if (new_idx < 0)
-				new_idx = recent_flats.find(item->real_name.c_str());
+				new_idx = recent_flats.find(item->real_name);
 			break;
 
 		case 'F':
-			new_idx = recent_flats.find(item->real_name.c_str());
+			new_idx = recent_flats.find(item->real_name);
 			if (new_idx < 0)
-				new_idx = recent_textures.find(item->real_name.c_str());
+				new_idx = recent_textures.find(item->real_name);
 			break;
 
 		case 'O':
@@ -704,15 +704,15 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 
 	for (TI = img_list.begin() ; TI != img_list.end() ; TI++)
 	{
-		const char *name = TI->first.c_str();
+		const SString &name = TI->first;
 
 		Img_c *image = TI->second;
 
 		if ((false)) /* NO PICS */
-			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name,
+			snprintf(full_desc, sizeof(full_desc), "%-8s : %3dx%d", name.c_str(),
 					 image->width(), image->height());
 		else
-			snprintf(full_desc, sizeof(full_desc), "%-8s", name);
+			snprintf(full_desc, sizeof(full_desc), "%-8s", name.c_str());
 
 		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
 		int pic_h = (kind == 'F') ? 64 : MIN(128, MAX(4, image->height()));
@@ -739,14 +739,16 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 		if (imkind == 'F')
 		{
 			pic->GetFlat(name);
-			pic->callback(Browser_Item::flat_callback, (void *)name);
+			// FIXME: #57 possible dangling pointer!
+			pic->callback(Browser_Item::flat_callback, (void *)name.c_str());
 
 			item_cat = M_GetFlatType(name);
 		}
 		else if (imkind == 'T')
 		{
 			pic->GetTex(name);
-			pic->callback(Browser_Item::texture_callback, (void *)name);
+			// FIXME: #57 possible dangling pointer!
+			pic->callback(Browser_Item::texture_callback, (void *)name.c_str());
 
 			item_cat = M_GetTextureType(name);
 		}

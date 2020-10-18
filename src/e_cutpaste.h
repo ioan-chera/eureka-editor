@@ -56,8 +56,8 @@ int Texboard_GetTexNum();
 int Texboard_GetFlatNum();
 int Texboard_GetThing();
 
-void Texboard_SetTex(const char *new_tex);
-void Texboard_SetFlat(const char *new_flat);
+void Texboard_SetTex(const SString &new_tex);
+void Texboard_SetFlat(const SString &new_flat);
 void Texboard_SetThing(int new_id);
 
 

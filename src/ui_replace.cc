@@ -994,7 +994,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 	int tex_num = (what->value() == 1) ?
 		Texboard_GetTexNum() : Texboard_GetFlatNum();
 
-	const char *tex_name = BA_GetString(tex_num);
+	SString tex_name = BA_GetString(tex_num);
 
 	InsertName(inp, false /* append */, tex_name);
 }
@@ -1079,7 +1079,7 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 }
 
 
-void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const char *name)
+void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const SString &name)
 {
 	if (append)
 	{
@@ -1096,11 +1096,11 @@ void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const char *name)
 			len += 1;
 		}
 
-		inp->replace(len, len, name);
+		inp->replace(len, len, name.c_str());
 	}
 	else
 	{
-		inp->value(name);
+		inp->value(name.c_str());
 	}
 
 	inp->do_callback();
@@ -1111,10 +1111,7 @@ void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const char *name)
 
 void UI_FindAndReplace::InsertNumber(Fl_Input *inp, char append, int number)
 {
-	char buf[64];
-	snprintf(buf, sizeof(buf), "%d", number);
-
-	InsertName(inp, append, buf);
+	InsertName(inp, append, StringPrintf("%d", number));
 }
 
 
@@ -1485,9 +1482,9 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 		if (! SD)
 			continue;
 
-		const char *L_tex = SD->LowerTex();
-		const char *U_tex = SD->UpperTex();
-		const char *R_tex = SD->MidTex();
+		SString L_tex = SD->LowerTex();
+		SString U_tex = SD->UpperTex();
+		SString R_tex = SD->MidTex();
 
 		if (! L->TwoSided())
 		{
@@ -1525,7 +1522,7 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 		if (Pattern_Match(sector->FloorTex(), pattern))
 			return true;
 
-	const char *ceil_tex = sector->CeilTex();
+	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
 								|| ( is_sky(ceil_tex) && o_skies->value()) )
@@ -1645,20 +1642,20 @@ void UI_FindAndReplace::ComputeFlagMask()
 }
 
 
-bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern, bool is_rail)
+bool UI_FindAndReplace::Pattern_Match(const SString &tex, const SString &pattern, bool is_rail)
 {
 	// allow multiple names (simple patterns) separated by commas.
 	// they can include '*' as a wildcard.
 
-	char local_pat[256];
-	int ofs = 0;
+	SString local_pat;
+
+	int patternIndex = 0;
 
 	for (;;)
 	{
-		if (*pattern == 0 || *pattern == ',' || *pattern == '/' || *pattern == '|')
+		char patternChar = pattern[patternIndex];
+		if (patternChar == 0 || patternChar == ',' || patternChar == '/' || patternChar == '|')
 		{
-			local_pat[ofs] = 0;
-
 			// do not match the empty rail texture against the "*" wildcard.
 			// [ this is debatable, but I think this prevents making changes
 			//   which the user really didn't want or expect ]
@@ -1668,23 +1665,20 @@ bool UI_FindAndReplace::Pattern_Match(const char *tex, const char *pattern, bool
 			}
 			else
 			{
-				if (fl_filename_match(tex, local_pat))
+				if (fl_filename_match(tex.c_str(), local_pat.c_str()))
 					return true;
 			}
 
-			if (*pattern == 0)
+			if (patternChar == 0)
 				return false;
 
 			// begin new part, skip comma
-			ofs = 0;
-			pattern++;
+			local_pat.clear();
+			patternIndex++;
 		}
 
-		// prevent overflow of the local buffer
-		if (ofs + 4 > (int)sizeof(local_pat))
-			return false;
-
-		local_pat[ofs++] = *pattern++;
+		local_pat.push_back(patternChar);
+		++patternIndex;
 	}
 }
 
@@ -1716,9 +1710,9 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 		if (! SD)
 			continue;
 
-		const char *L_tex = SD->LowerTex();
-		const char *U_tex = SD->UpperTex();
-		const char *R_tex = SD->MidTex();
+		SString L_tex = SD->LowerTex();
+		SString U_tex = SD->UpperTex();
+		SString R_tex = SD->MidTex();
 
 		if (! L->TwoSided())
 		{
@@ -1754,7 +1748,7 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 		if (Pattern_Match(sector->FloorTex(), pattern))
 			BA_ChangeSEC(idx, Sector::F_FLOOR_TEX, new_tex);
 
-	const char *ceil_tex = sector->CeilTex();
+	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
 								|| ( is_sky(ceil_tex) && o_skies->value()) )

@@ -487,7 +487,7 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 		return;
 
 	BA_Begin();
-	BA_Message("pasted %s", BA_GetString(new_tex));
+	BA_Message("pasted %s", BA_GetString(new_tex).c_str());
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -553,7 +553,7 @@ bool UI_LineBox::ClipboardOp(char op)
 			break;
 
 		case 'x':	// Cut
-			CB_Paste(parts, BA_InternaliseString(default_wall_tex.c_str()));
+			CB_Paste(parts, BA_InternaliseString(default_wall_tex));
 			break;
 
 		case 'd': // Delete

@@ -722,8 +722,8 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (is_sector(obj))
 		{
-			f_tex->value(Sectors[obj]->FloorTex());
-			c_tex->value(Sectors[obj]->CeilTex());
+			f_tex->value(Sectors[obj]->FloorTex().c_str());
+			c_tex->value(Sectors[obj]->CeilTex().c_str());
 
 			f_pic->GetFlat(Sectors[obj]->FloorTex());
 			c_pic->GetFlat(Sectors[obj]->CeilTex());
@@ -837,7 +837,7 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 		return;
 
 	BA_Begin();
-	BA_Message("pasted %s", BA_GetString(new_tex));
+	BA_Message("pasted %s", BA_GetString(new_tex).c_str());
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -853,8 +853,8 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 
 void UI_SectorBox::CB_Cut(int parts)
 {
-	int new_floor = BA_InternaliseString(default_floor_tex.c_str());
-	int new_ceil  = BA_InternaliseString(default_ceil_tex.c_str());
+	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
 	if (! edit.Selected->empty())
 	{

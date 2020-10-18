@@ -61,8 +61,8 @@ public:
 	void MarkMissing();
 	void MarkSpecial();
 
-	void GetFlat(const char * fname);
-	void GetTex (const char * tname);
+	void GetFlat(const SString & fname);
+	void GetTex (const SString & tname);
 	void GetSprite(int type, Fl_Color back_color);
 
 	void AllowHighlight(bool enable) { allow_hl = enable; redraw(); }

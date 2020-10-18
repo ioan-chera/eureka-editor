@@ -1230,7 +1230,7 @@ static int GrabSelectedFlat()
 	}
 
 	if (result >= 0)
-		Status_Set("copied %s", BA_GetString(result));
+		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1264,7 +1264,7 @@ static void StoreSelectedFlat(int new_tex)
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
-	Status_Set("pasted %s", BA_GetString(new_tex));
+	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
@@ -1277,8 +1277,8 @@ static void StoreDefaultedFlats()
 		return;
 	}
 
-	int floor_tex = BA_InternaliseString(default_floor_tex.c_str());
-	int ceil_tex  = BA_InternaliseString(default_ceil_tex.c_str());
+	int floor_tex = BA_InternaliseString(default_floor_tex);
+	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
 	BA_Begin();
 	BA_MessageForSel("defaulted flat in", edit.Selected);
@@ -1306,7 +1306,7 @@ static void StoreDefaultedFlats()
 static int LD_GrabTex(const LineDef *L, int part)
 {
 	if (L->NoSided())
-		return BA_InternaliseString(default_wall_tex.c_str());
+		return BA_InternaliseString(default_wall_tex);
 
 	if (L->OneSided())
 		return L->Right()->mid_tex;
@@ -1376,7 +1376,7 @@ static int GrabSelectedTexture()
 	}
 
 	if (result >= 0)
-		Status_Set("copied %s", BA_GetString(result));
+		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1434,7 +1434,7 @@ static void StoreSelectedTexture(int new_tex)
 	if (unselect == SOH_Unselect)
 		Selection_Clear(true /* nosave */);
 
-	Status_Set("pasted %s", BA_GetString(new_tex));
+	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
@@ -1505,7 +1505,7 @@ void Render3D_CB_Cut()
 		break;
 
 	case OBJ_LINEDEFS:
-			StoreSelectedTexture(BA_InternaliseString(default_wall_tex.c_str()));
+			StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
 		break;
 
 	default:

@@ -345,7 +345,7 @@ int Texboard_GetTexNum()
 	if (tex_clipboard::tex.empty())
 		tex_clipboard::tex = default_wall_tex;
 
-	return BA_InternaliseString(tex_clipboard::tex.c_str());
+	return BA_InternaliseString(tex_clipboard::tex);
 }
 
 int Texboard_GetFlatNum()
@@ -353,7 +353,7 @@ int Texboard_GetFlatNum()
 	if (tex_clipboard::flat.empty())
 		tex_clipboard::flat = default_floor_tex;
 
-	return BA_InternaliseString(tex_clipboard::flat.c_str());
+	return BA_InternaliseString(tex_clipboard::flat);
 }
 
 int Texboard_GetThing()
@@ -364,7 +364,7 @@ int Texboard_GetThing()
 	return tex_clipboard::thing;
 }
 
-void Texboard_SetTex(const char *new_tex)
+void Texboard_SetTex(const SString &new_tex)
 {
 	tex_clipboard::tex = new_tex;
 
@@ -372,7 +372,7 @@ void Texboard_SetTex(const char *new_tex)
 		tex_clipboard::flat = new_tex;
 }
 
-void Texboard_SetFlat(const char *new_flat)
+void Texboard_SetFlat(const SString &new_flat)
 {
 	tex_clipboard::flat = new_flat;
 

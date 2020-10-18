@@ -165,7 +165,7 @@ SString StringLower(const char *name)
 //
 // Non-leaking version
 //
-SString StringPrintf(const char *str, ...)
+SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...)
 {
 	// Algorithm: keep doubling the allocated buffer size
 	// until the output fits. Based on code by Darren Salt.

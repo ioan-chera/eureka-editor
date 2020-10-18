@@ -233,8 +233,8 @@ public:
 		tag    = other->tag;
 	}
 
-	const char *FloorTex() const;
-	const char *CeilTex() const;
+	SString FloorTex() const;
+	SString CeilTex() const;
 
 	int HeadRoom() const
 	{
@@ -272,9 +272,9 @@ public:
 		sector    = other->sector;
 	}
 
-	const char *UpperTex() const;
-	const char *MidTex()   const;
-	const char *LowerTex() const;
+	SString UpperTex() const;
+	SString MidTex()   const;
+	SString LowerTex() const;
 
 	Sector *SecRef() const;
 
@@ -443,7 +443,7 @@ void BA_Abort(bool keep_changes = false);
 
 // assign a message to the current operation.
 // this can be called multiple times.
-void BA_Message(const char *msg = NULL, ...);
+void BA_Message(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 
 void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix = "");
 
@@ -471,11 +471,11 @@ bool BA_Redo();
 
 // add this string to the basis string table (if it doesn't
 // already exist) and return its integer offset.
-int BA_InternaliseString(const char *str);
+int BA_InternaliseString(const SString &str);
 int BA_InternaliseShortStr(const char *str, int max_len);
 
 // get the string from the basis string table.
-const char * BA_GetString(int offset);
+SString BA_GetString(int offset);
 
 // clear everything (before loading a new level).
 void BA_ClearAll();

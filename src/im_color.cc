@@ -269,13 +269,13 @@ rgb_color_t SectorLightColor(int light)
 }
 
 
-int HashedPalColor(const char *name, const int *cols)
+int HashedPalColor(const SString &name, const int *cols)
 {
 	// cols is array of two elements: start and end color.
 	// this returns a palette color somewhere between start
 	// and end, depending on the texture name.
 
-	int len = (int)strlen(name);
+	int len = (int)name.length();
 
 	int hash = name[0]*41;
 

@@ -103,7 +103,7 @@ public:
 	~DrawSurf()
 	{ }
 
-	void FindFlat(const char * fname, Sector *sec)
+	void FindFlat(const SString & fname, Sector *sec)
 	{
 		fullbright = false;
 
@@ -134,7 +134,7 @@ public:
 			col = HashedPalColor(fname, Misc_info.floor_colors);
 	}
 
-	void FindTex(const char * tname, LineDef *ld)
+	void FindTex(const SString & tname, LineDef *ld)
 	{
 		fullbright = false;
 

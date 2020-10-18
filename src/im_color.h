@@ -82,7 +82,7 @@ rgb_color_t ParseColor(const char *str);
 
 rgb_color_t SectorLightColor(int light);
 
-int HashedPalColor(const char *name, const int *cols);
+int HashedPalColor(const SString &name, const int *cols);
 
 
 inline int R_DoomLightingEquation(int L, float dist)

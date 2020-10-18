@@ -1304,19 +1304,19 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 //------------------------------------------------------------------------
 
 
-bool is_sky(const char *flat)
+bool is_sky(const SString &flat)
 {
-	return (y_stricmp(Misc_info.sky_flat, flat) == 0);
+	return flat.noCaseEqual(Misc_info.sky_flat);
 }
 
-bool is_null_tex(const char *tex)
+bool is_null_tex(const SString &tex)
 {
-	return tex[0] == '-';
+	return tex && tex[0] == '-';
 }
 
-bool is_special_tex(const char *tex)
+bool is_special_tex(const SString &tex)
 {
-	return tex[0] == '#';
+	return tex && tex[0] == '#';
 }
 
 
@@ -1376,7 +1376,7 @@ const thingtype_t & M_GetThingType(int type)
 }
 
 
-char M_GetTextureType(const char *name)
+char M_GetTextureType(const SString &name)
 {
 	std::map<SString, char>::iterator TI;
 
@@ -1389,7 +1389,7 @@ char M_GetTextureType(const char *name)
 }
 
 
-char M_GetFlatType(const char *name)
+char M_GetFlatType(const SString &name)
 {
 	std::map<SString, char>::iterator TI;
 

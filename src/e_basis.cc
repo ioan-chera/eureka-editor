@@ -68,7 +68,7 @@ SString default_ceil_tex	= "FLAT1";
 static bool did_make_changes;
 
 
-string_table_c basis_strtab;
+StringTable basis_strtab;
 
 
 int NumObjects(obj_type_e type)
@@ -132,7 +132,7 @@ static void DoProcessChangeStatus()
 }
 
 
-int BA_InternaliseString(const char *str)
+int BA_InternaliseString(const SString &str)
 {
 	return basis_strtab.add(str);
 }
@@ -141,12 +141,12 @@ int BA_InternaliseShortStr(const char *str, int max_len)
 {
 	SString goodie(str, max_len);
 
-	int result = BA_InternaliseString(goodie.c_str());
+	int result = BA_InternaliseString(goodie);
 
 	return result;
 }
 
-const char *BA_GetString(int offset)
+SString BA_GetString(int offset)
 {
 	return basis_strtab.get(offset);
 }
@@ -162,12 +162,12 @@ fixcoord_t MakeValidCoord(double x)
 }
 
 
-const char * Sector::FloorTex() const
+SString Sector::FloorTex() const
 {
 	return basis_strtab.get(floor_tex);
 }
 
-const char * Sector::CeilTex() const
+SString Sector::CeilTex() const
 {
 	return basis_strtab.get(ceil_tex);
 }
@@ -177,24 +177,24 @@ void Sector::SetDefaults()
 	floorh = default_floor_h;
 	 ceilh = default_ceil_h;
 
-	floor_tex = BA_InternaliseString(default_floor_tex.c_str());
-	 ceil_tex = BA_InternaliseString(default_ceil_tex.c_str());
+	floor_tex = BA_InternaliseString(default_floor_tex);
+	 ceil_tex = BA_InternaliseString(default_ceil_tex);
 
 	light = default_light_level;
 }
 
 
-const char * SideDef::UpperTex() const
+SString SideDef::UpperTex() const
 {
 	return basis_strtab.get(upper_tex);
 }
 
-const char * SideDef::MidTex() const
+SString SideDef::MidTex() const
 {
 	return basis_strtab.get(mid_tex);
 }
 
-const char * SideDef::LowerTex() const
+SString SideDef::LowerTex() const
 {
 	return basis_strtab.get(lower_tex);
 }
@@ -202,7 +202,7 @@ const char * SideDef::LowerTex() const
 void SideDef::SetDefaults(bool two_sided, int new_tex)
 {
 	if (new_tex < 0)
-		new_tex = BA_InternaliseString(default_wall_tex.c_str());
+		new_tex = BA_InternaliseString(default_wall_tex);
 
 	lower_tex = new_tex;
 	upper_tex = new_tex;
@@ -879,7 +879,7 @@ void BA_Abort(bool keep_changes)
 }
 
 
-void BA_Message(const char *msg, ...)
+void BA_Message(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	SYS_ASSERT(msg);
 	SYS_ASSERT(cur_group);

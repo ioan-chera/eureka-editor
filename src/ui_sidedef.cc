@@ -182,7 +182,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		if (w == box->r_pic)
 			new_tex = BA_InternaliseString("-");
 		else
-			new_tex = BA_InternaliseString(default_wall_tex.c_str());
+			new_tex = BA_InternaliseString(default_wall_tex);
 	}
 	else
 	{
@@ -459,13 +459,13 @@ void UI_SideBox::UpdateField()
 		y_ofs->value(Int_TmpStr(sd->y_offset));
 		  sec->value(Int_TmpStr(sd->sector));
 
-		const char *lower = sd->LowerTex();
-		const char *rail  = sd->MidTex();
-		const char *upper = sd->UpperTex();
+		SString lower = sd->LowerTex();
+		SString rail  = sd->MidTex();
+		SString upper = sd->UpperTex();
 
-		l_tex->value(lower);
-		u_tex->value(upper);
-		r_tex->value(rail);
+		l_tex->value(lower.c_str());
+		u_tex->value(upper.c_str());
+		r_tex->value(rail.c_str());
 
 		l_pic->GetTex(lower);
 		u_pic->GetTex(upper);

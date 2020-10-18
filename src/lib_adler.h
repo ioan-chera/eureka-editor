@@ -58,6 +58,14 @@ public:
 	crc32_c& operator+= (s32_t value);
 	crc32_c& operator+= (float value);
 	crc32_c& operator+= (bool value);
+	crc32_c &operator+= (const char *value)
+	{
+		return AddCStr(value);
+	}
+	crc32_c &operator+= (const SString &value)
+	{
+		return AddCStr(value.c_str());
+	}
 
 	crc32_c& AddBlock(const u8_t *data, int len);
 	crc32_c& AddCStr(const char *str);

@@ -120,7 +120,7 @@ private:
 
 	void UnselectPics();
 
-	void InsertName  (Fl_Input *inp, char append, const char *name);
+	void InsertName  (Fl_Input *inp, char append, const SString &name);
 	void InsertNumber(Fl_Input *inp, char append, int number);
 
 	bool NeedSeparator(Fl_Input *inp) const;
@@ -139,7 +139,7 @@ private:
 	// this used for Tag number
 	bool CheckNumberInput(Fl_Input *w, number_group_c *num_grp);
 
-	bool Pattern_Match(const char *tex, const char *pattern, bool is_rail = false);
+	bool Pattern_Match(const SString &tex, const SString &pattern, bool is_rail = false);
 
 	// specialized functions for each search modality
 

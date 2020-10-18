@@ -846,11 +846,11 @@ static void UDMF_WriteSideDefs(Lump_c *lump)
 
 		// use NormalizeTex to ensure no double quote
 
-		if (strcmp(side->UpperTex(), "-") != 0)
+		if (side->UpperTex() != "-")
 			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()));
-		if (strcmp(side->LowerTex(), "-") != 0)
+		if (side->LowerTex() != "-")
 			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()));
-		if (strcmp(side->MidTex(), "-") != 0)
+		if (side->MidTex() != "-")
 			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()));
 
 		lump->Printf("}\n\n");

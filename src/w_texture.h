@@ -32,16 +32,16 @@
 void W_LoadTextures();
 
 // accepts "-", "#xxxx" or an existing texture name
-bool W_TextureIsKnown(const char *name);
+bool W_TextureIsKnown(const SString &name);
 
-Img_c * W_GetTexture(const char *name, bool try_uppercase = false);
+Img_c * W_GetTexture(const SString &name, bool try_uppercase = false);
 
-int  W_GetTextureHeight(const char *name);
-bool W_TextureCausesMedusa(const char *name);
+int  W_GetTextureHeight(const SString &name);
+bool W_TextureCausesMedusa(const SString &name);
 
 // this truncates the name to 8 chars, and makes it uppercase.
 // [ result is a static buffer, copy if necessary! ]
-const char *NormalizeTex(const char *name);
+const char *NormalizeTex(const SString &name);
 
 
 /* ---- FLATS ---- */
@@ -49,9 +49,9 @@ const char *NormalizeTex(const char *name);
 void W_LoadFlats();
 
 // checks if the flat exists
-bool W_FlatIsKnown(const char *name);
+bool W_FlatIsKnown(const SString &name);
 
-Img_c * W_GetFlat(const char *name, bool try_uppercase = false);
+Img_c * W_GetFlat(const SString &name, bool try_uppercase = false);
 
 
 /* ---- SPRITES ---- */

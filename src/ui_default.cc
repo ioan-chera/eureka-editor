@@ -405,19 +405,19 @@ void UI_DefaultProps::CB_Paste(int sel_pics)
 {
 	if (sel_pics & 1)
 	{
-		f_tex->value(BA_GetString(Texboard_GetFlatNum()));
+		f_tex->value(BA_GetString(Texboard_GetFlatNum()).c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(BA_GetString(Texboard_GetFlatNum()));
+		c_tex->value(BA_GetString(Texboard_GetFlatNum()).c_str());
 		c_tex->do_callback();
 	}
 
 	if (sel_pics & 4)
 	{
-		w_tex->value(BA_GetString(Texboard_GetTexNum()));
+		w_tex->value(BA_GetString(Texboard_GetTexNum()).c_str());
 		w_tex->do_callback();
 	}
 }

@@ -3422,16 +3422,14 @@ check_result_e CHECK_Tags(int min_severity)
 
 
 static void bump_unknown_name(std::map<SString, int>& list,
-                              const char *name)
+                              const SString &name)
 {
-	SString t_name = name;
-
 	int count = 0;
 
-	if (list.find(t_name) != list.end())
-		count = list[t_name];
+	if (list.find(name) != list.end())
+		count = list[name];
 
-	list[t_name] = count + 1;
+	list[name] = count + 1;
 }
 
 
@@ -3489,7 +3487,7 @@ void Textures_ShowMissing()
 
 void Textures_FixMissing()
 {
-	int new_wall = BA_InternaliseString(default_wall_tex.c_str());
+	int new_wall = BA_InternaliseString(default_wall_tex);
 
 	BA_Begin();
 	BA_Message("fixed missing textures");
@@ -3533,7 +3531,7 @@ void Textures_FixMissing()
 }
 
 
-static bool is_transparent(const char *tex)
+static bool is_transparent(const SString &tex)
 {
 	// ignore lack of texture here
 	// [ technically "-" is the poster-child of transparency,
@@ -3550,7 +3548,7 @@ static bool is_transparent(const char *tex)
 }
 
 
-static int check_transparent(const char *tex,
+static int check_transparent(const SString &tex,
                              std::map<SString, int>& names)
 {
 	if (is_transparent(tex))
@@ -3612,7 +3610,7 @@ void Textures_ShowTransparent()
 
 void Textures_FixTransparent()
 {
-	const char *new_tex = default_wall_tex.c_str();
+	SString new_tex = default_wall_tex;
 
 	// do something reasonable if default wall is transparent
 	if (is_transparent(new_tex))
@@ -3686,7 +3684,7 @@ void Textures_LogTransparent()
 }
 
 
-static int check_medusa(const char *tex,
+static int check_medusa(const SString &tex,
                         std::map<SString, int>& names)
 {
 	if (is_null_tex(tex) || is_special_tex(tex))
@@ -3809,8 +3807,8 @@ void Textures_FindUnknownTex(selection_c& lines,
 
 			for (int part = 0 ; part < 3 ; part++)
 			{
-				const char *tex = (part == 0) ? SD->LowerTex() :
-								  (part == 1) ? SD->UpperTex() : SD->MidTex();
+				SString tex = (part == 0) ? SD->LowerTex() :
+							  (part == 1) ? SD->UpperTex() : SD->MidTex();
 
 				if (! W_TextureIsKnown(tex))
 				{
@@ -3837,7 +3835,7 @@ void Textures_FindUnknownFlat(selection_c& secs,
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
-			const char *flat = part ? S->CeilTex() : S->FloorTex();
+			SString flat = part ? S->CeilTex() : S->FloorTex();
 
 			if (! W_FlatIsKnown(flat))
 			{
@@ -3903,7 +3901,7 @@ void Textures_LogUnknown(bool do_flat)
 
 void Textures_FixUnknownTex()
 {
-	int new_wall = BA_InternaliseString(default_wall_tex.c_str());
+	int new_wall = BA_InternaliseString(default_wall_tex);
 
 	int null_tex = BA_InternaliseString("-");
 
@@ -3942,8 +3940,8 @@ void Textures_FixUnknownTex()
 
 void Textures_FixUnknownFlat()
 {
-	int new_floor = BA_InternaliseString(default_floor_tex.c_str());
-	int new_ceil  = BA_InternaliseString(default_ceil_tex.c_str());
+	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
 	BA_Begin();
 	BA_Message("fixed unknown flats");
@@ -3963,7 +3961,7 @@ void Textures_FixUnknownFlat()
 }
 
 
-static bool is_switch_tex(const char *tex)
+static bool is_switch_tex(const SString &tex)
 {
 	// we only check if the name begins with "SW" and a digit or
 	// an underscore.  that is sufficient for DOOM and Heretic, and
@@ -4019,7 +4017,7 @@ void Textures_FixDupSwitches()
 {
 	int null_tex = BA_InternaliseString("-");
 
-	const char *new_tex = default_wall_tex.c_str();
+	SString new_tex = default_wall_tex;
 
 	// do something reasonable if default wall is a switch
 	if (is_switch_tex(new_tex))

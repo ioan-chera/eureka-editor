@@ -139,7 +139,7 @@ public:
 		return x;
 	}
 
-	Img_c *FindFlat(const char *fname, byte& r, byte& g, byte& b, bool& fullbright)
+	Img_c *FindFlat(const SString &fname, byte& r, byte& g, byte& b, bool& fullbright)
 	{
 		fullbright = false;
 
@@ -181,7 +181,7 @@ public:
 		return img;
 	}
 
-	Img_c *FindTexture(const char *tname, byte& r, byte& g, byte& b, bool& fullbright)
+	Img_c *FindTexture(const SString &tname, byte& r, byte& g, byte& b, bool& fullbright)
 	{
 		fullbright = false;
 
@@ -576,7 +576,7 @@ public:
 	}
 
 	void DrawSectorPolygons(const Sector *sec, sector_subdivision_c *subdiv,
-			const slope_plane_c *plane, int znormal, float z, const char *fname)
+			const slope_plane_c *plane, int znormal, float z, const SString &fname)
 	{
 		bool is_slope = plane && plane->sloped;
 
@@ -676,7 +676,7 @@ public:
 	//   - 'U' for upper
 	//   - 'E' for extrafloor side
 	void DrawSide(char where, const LineDef *ld, const SideDef *sd,
-		const char *texname, const Sector *front, const Sector *back,
+		const SString &texname, const Sector *front, const Sector *back,
 		bool sky_upper, float ld_length,
 		float x1, float y1, const slope_plane_c *p1,
 		float x2, float y2, const slope_plane_c *p2)
@@ -1079,7 +1079,7 @@ public:
 					if (top_h <= bottom_h)
 						continue;
 
-					const char *tex = "-";
+					SString tex = "-";
 					if (EF.flags & EXFL_UPPER)
 						tex = sd->UpperTex();
 					else if (EF.flags & EXFL_LOWER)
@@ -1190,8 +1190,8 @@ public:
 			int top_h = dummy->ceilh;
 			int bottom_h = dummy->floorh;
 
-			const char *top_tex = dummy->CeilTex();
-			const char *bottom_tex = dummy->FloorTex();
+			SString top_tex = dummy->CeilTex();
+			SString bottom_tex = dummy->FloorTex();
 
 			if (EF.flags & EXFL_TOP)
 				bottom_h = top_h;

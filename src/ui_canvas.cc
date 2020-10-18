@@ -2050,7 +2050,7 @@ void UI_Canvas::RenderSector(int num)
 	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
 	bool light_and_tex = false;
 
-	const char * tex_name = NULL;
+	SString tex_name;
 
 	Img_c * img = NULL;
 

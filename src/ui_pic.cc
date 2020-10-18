@@ -119,7 +119,7 @@ void UI_Pic::MarkSpecial()
 }
 
 
-void UI_Pic::GetFlat(const char * fname)
+void UI_Pic::GetFlat(const SString & fname)
 {
 	Img_c *img = W_GetFlat(fname, true /* try_uppercase */);
 
@@ -127,7 +127,7 @@ void UI_Pic::GetFlat(const char * fname)
 }
 
 
-void UI_Pic::GetTex(const char * tname)
+void UI_Pic::GetTex(const SString & tname)
 {
 	if (is_special_tex(tname))
 	{

@@ -98,7 +98,7 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 
 void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 {
-	W_StoreString(entry->name, name.c_str(), sizeof(entry->name));
+	W_StoreString(entry->name, name, sizeof(entry->name));
 
 	entry->pos  = LE_U32(l_start);
 	entry->size = LE_U32(l_length);
@@ -1387,7 +1387,7 @@ int W_FilenameAbsCompare(const char *A, const char *B)
 }
 
 
-void W_StoreString(char *buf, const char *str, size_t buflen)
+void W_StoreString(char *buf, const SString &str, size_t buflen)
 {
 	memset(buf, 0, buflen);
 

@@ -124,7 +124,10 @@ static inline const SideDef * SD_ptr(const Objid& obj)
 // disabled this partial texture comparison, as it can lead to
 // unexpected results.  [ perhaps have an option for it? ]
 #if 1
-#define  PartialTexCmp  y_stricmp
+inline static int PartialTexEqual(const SString &a, const SString &b)
+{
+	return a.noCaseEqual(b);
+}
 #else
 static int PartialTexCmp(const char *A, const char *B)
 {
@@ -263,7 +266,7 @@ static inline int ScoreTextureMatch(const Objid& adj, const Objid& cur)
 		return 2;
 
 
-	const char *adj_tex = NS->MidTex();
+	SString adj_tex = NS->MidTex();
 
 	if (N->TwoSided())
 	{
@@ -276,7 +279,7 @@ static inline int ScoreTextureMatch(const Objid& adj, const Objid& cur)
 	if (is_null_tex(adj_tex))
 		return 3;
 
-	const char *cur_tex = LS->MidTex();
+	SString cur_tex = LS->MidTex();
 
 	if (L->TwoSided())
 	{
@@ -286,7 +289,7 @@ static inline int ScoreTextureMatch(const Objid& adj, const Objid& cur)
 			cur_tex = LS->UpperTex();
 	}
 
-	if (PartialTexCmp(cur_tex, adj_tex) != 0)
+	if (!PartialTexEqual(cur_tex, adj_tex))
 		return 4;
 
 	// return a score based on length of line shared between the
@@ -510,7 +513,7 @@ static void DoAlignY(const Objid& cur,
 		L->TwoSided() &&
 		lower_vis && upper_vis &&
 		(! lower_unpeg || ! upper_unpeg) &&
-	    (PartialTexCmp(SD->LowerTex(), SD->UpperTex()) == 0) &&
+	    PartialTexEqual(SD->LowerTex(), SD->UpperTex()) &&
 	    is_null_tex(SD->MidTex()) /* no rail */)
 	{
 		new_flags |= MLF_LowerUnpegged;
@@ -1103,7 +1106,7 @@ void LD_MergedSecondSideDef(int ld)
 	// use default texture if both sides are empty
 	if (! left_tex)
 	{
-		left_tex = BA_InternaliseString(default_wall_tex.c_str());
+		left_tex = BA_InternaliseString(default_wall_tex);
 		right_tex = left_tex;
 	}
 
@@ -1151,7 +1154,7 @@ void LD_RemoveSideDef(int ld, int ld_side)
 
 	const SideDef *SD = SideDefs[other_sd];
 
-	int new_tex = BA_InternaliseString(default_wall_tex.c_str());
+	int new_tex = BA_InternaliseString(default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -1406,7 +1409,7 @@ void LD_FixForLostSide(int ld)
 	else if (! is_null_tex(L->Right()->UpperTex()))
 		tex = L->Right()->upper_tex;
 	else
-		tex = BA_InternaliseString(default_wall_tex.c_str());
+		tex = BA_InternaliseString(default_wall_tex);
 
 	BA_ChangeSD(L->right, SideDef::F_MID_TEX, tex);
 }
@@ -1577,7 +1580,7 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
 					const Sector *front, const Sector *back)
 {
-	const char *rail_tex = sd->MidTex();
+	SString rail_tex = sd->MidTex();
 	if (is_null_tex(rail_tex))
 		return false;
 
