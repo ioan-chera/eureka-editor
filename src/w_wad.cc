@@ -81,9 +81,8 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 	parent(_par)
 {
 	// handle the entry name, which can lack a terminating NUL
-	char buffer[10];
-	strncpy(buffer, entry->name, 8);
-	buffer[8] = 0;
+	SString buffer;
+	buffer.assign(entry->name, 8);
 
 	name = buffer;
 
