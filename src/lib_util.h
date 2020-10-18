@@ -301,6 +301,12 @@ public:
 		return *this;
 	}
 
+	SString &insert(size_t pos, const char *s)
+	{
+		data.insert(pos, s ? s : "");
+		return *this;
+	}
+
 	void clear() noexcept
 	{
 		data.clear();

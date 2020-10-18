@@ -211,7 +211,7 @@ void Main_Quit();
 #ifdef __GNUC__
 __attribute__((noreturn))
 #endif
-void FatalError(const char *fmt, ...);
+[[noreturn]] void FatalError(const char *fmt, ...);
 void ThrowException(const char *fmt, ...);
 
 #define BugError  FatalError

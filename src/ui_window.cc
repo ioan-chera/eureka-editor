@@ -369,19 +369,17 @@ void UI_MainWindow::UpdateTitle(char want_prefix)
 		return;
 
 
-	static char title_buf[FL_PATH_MAX];
+	SString title_buf;
 
 	const char *src  = label() + (got_prefix ? 1 : 0);
-		  char *dest = title_buf;
 
 	if (want_prefix)
 	{
-		*dest++ = want_prefix;
+		title_buf.push_back(want_prefix);
 	}
+	title_buf.insert(title_buf.length(), src);
 
-	strcpy(dest, src);
-
-	copy_label(title_buf);
+	copy_label(title_buf.c_str());
 }
 
 
