@@ -69,7 +69,7 @@ const char *WadNamespaceString(WadNamespace ns)
 //  LUMP Handling
 //------------------------------------------------------------------------
 
-Lump_c::Lump_c(Wad_file *_par, const char *_nam, int _start, int _len) :
+Lump_c::Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len) :
 	parent(_par), l_start(_start), l_length(_len)
 {
 	// ensure lump name is uppercase
@@ -980,7 +980,7 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 }
 
 
-Lump_c * Wad_file::AddLump(const char *name, int max_size)
+Lump_c * Wad_file::AddLump(const SString &name, int max_size)
 {
 	SYS_ASSERT(begun_write);
 

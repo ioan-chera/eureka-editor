@@ -1994,7 +1994,7 @@ void CMD_RenameMap()
 		edit_wad->EndWrite();
 	}
 
-	Level_name = StringUpper(new_name.c_str());
+	Level_name = StringUpper(new_name);
 
 	main_win->SetTitle(edit_wad->PathName(), Level_name.c_str(), false);
 

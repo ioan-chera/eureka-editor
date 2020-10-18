@@ -415,7 +415,7 @@ void CMD_EditLump()
 	// uppercase the lump name
 	// [ another small memory leak ]
 	if (!special)
-		lump_name = StringUpper(lump_name.c_str());
+		lump_name = StringUpper(lump_name);
 
 	// only create a per-level SCRIPTS lump in a Hexen map
 	// [ the UI_ChooseTextLump already prevents this, but we need to

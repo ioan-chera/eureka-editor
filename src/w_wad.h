@@ -68,7 +68,7 @@ private:
 	int l_length;
 
 	// constructor is private
-	Lump_c(Wad_file *_par, const char *_nam, int _start, int _len);
+	Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len);
 	Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry);
 
 	void MakeEntry(struct raw_wad_entry_s *entry);
@@ -278,7 +278,7 @@ public:
 	// The 'max_size' parameter (if >= 0) specifies the most data
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
-	Lump_c * AddLump (const char *name, int max_size = -1);
+	Lump_c * AddLump (const SString &name, int max_size = -1);
 	Lump_c * AddLevel(const char *name, int max_size = -1, int *lev_num = nullptr);
 
 	// setup lump to write new data to it.

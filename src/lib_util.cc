@@ -145,9 +145,9 @@ char *StringDup(const char *orig, int limit)
 }
 
 
-SString StringUpper(const char *name)
+SString StringUpper(const SString &name)
 {
-	SString copy(name ? name : "");
+	SString copy(name);
 	for(char &c : copy)
 		c = toupper(c);
 	return copy;
