@@ -40,9 +40,10 @@
 #endif
 
 
-bool FileExists(const char *filename)
+bool FileExists(const SString &filename)
 {
-	FILE *fp = fopen(filename, "rb");
+	// TODO: #55 unicode
+	FILE *fp = fopen(filename.c_str(), "rb");
 
 	if (fp)
 	{

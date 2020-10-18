@@ -79,7 +79,7 @@ void LogClose()
 }
 
 
-void LogPrintf(const char *str, ...)
+void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 {
 	static char buffer[MSG_BUF_LEN];
 

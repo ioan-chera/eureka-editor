@@ -32,7 +32,7 @@ void LogClose(void);
 
 void LogSaveTo(FILE *dest_fp);
 
-void LogPrintf(const char *str, ...);
+void LogPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 
 void DebugPrintf(const char *str, ...);
 

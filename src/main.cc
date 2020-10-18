@@ -822,7 +822,7 @@ static void Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	game_wad = Wad_file::Open(Iwad_name.c_str(), WadOpenMode_read);
+	game_wad = Wad_file::Open(Iwad_name, WadOpenMode_read);
 	if (! game_wad)
 		FatalError("Failed to open game IWAD: %s\n", Iwad_name.c_str());
 
@@ -1097,7 +1097,7 @@ int main(int argc, char *argv[])
 
 			Pwad_name = Pwad_list[0];
 
-			edit_wad = Wad_file::Open(Pwad_name.c_str(), WadOpenMode_append);
+			edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
 			if (! edit_wad)
 				FatalError("Cannot load pwad: %s\n", Pwad_name.c_str());
 

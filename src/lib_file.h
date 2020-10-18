@@ -41,7 +41,7 @@ SString FilenameReposition(const char *filename, const char *othername);
 SString FilenameGetPath(const char *filename);
 
 // file utilities
-bool FileExists(const char *filename);
+bool FileExists(const SString &filename);
 bool FileCopy(const char *src_name, const char *dest_name);
 bool FileRename(const char *old_name, const char *new_name);
 bool FileDelete(const char *filename);

@@ -215,19 +215,20 @@ Wad_file::~Wad_file()
 }
 
 
-Wad_file * Wad_file::Open(const char *filename, WadOpenMode mode)
+Wad_file * Wad_file::Open(const SString &filename, WadOpenMode mode)
 {
 	SYS_ASSERT(mode == WadOpenMode_read || mode == WadOpenMode_write || mode == WadOpenMode_append);
 
 	if (mode == WadOpenMode_write)
 		return Create(filename, mode);
 
-	LogPrintf("Opening WAD file: %s\n", filename);
+	LogPrintf("Opening WAD file: %s\n", filename.c_str());
 
 	FILE *fp = NULL;
 
 retry:
-	fp = fopen(filename, (mode == WadOpenMode_read ? "rb" : "r+b"));
+	// TODO: #55 unicode
+	fp = fopen(filename.c_str(), (mode == WadOpenMode_read ? "rb" : "r+b"));
 
 	if (! fp)
 	{
@@ -275,11 +276,12 @@ retry:
 }
 
 
-Wad_file * Wad_file::Create(const char *filename, WadOpenMode mode)
+Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
 {
-	LogPrintf("Creating new WAD file: %s\n", filename);
+	LogPrintf("Creating new WAD file: %s\n", filename.c_str());
 
-	FILE *fp = fopen(filename, "w+b");
+	// TODO: #55 unicode
+	FILE *fp = fopen(filename.c_str(), "w+b");
 	if (! fp)
 		return NULL;
 
@@ -1375,13 +1377,13 @@ void MasterDir_CloseAll()
 }
 
 
-int W_FilenameAbsCompare(const char *A, const char *B)
+int W_FilenameAbsCompare(const SString &A, const SString &B)
 {
 	static char A_buffer[FL_PATH_MAX];
 	static char B_buffer[FL_PATH_MAX];
 
-	fl_filename_absolute(A_buffer, sizeof(A_buffer), A);
-	fl_filename_absolute(B_buffer, sizeof(B_buffer), B);
+	fl_filename_absolute(A_buffer, sizeof(A_buffer), A.c_str());
+	fl_filename_absolute(B_buffer, sizeof(B_buffer), B.c_str());
 
 	return y_stricmp(A_buffer, B_buffer);
 }
@@ -1396,7 +1398,7 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 }
 
 
-bool MasterDir_HaveFilename(const char *chk_path)
+bool MasterDir_HaveFilename(const SString &chk_path)
 {
 	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
 	{

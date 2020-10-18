@@ -258,7 +258,7 @@ void CMD_NewProject()
 	   [ the file chooser should have asked for confirmation ]
 	 */
 
-	if (FileExists(filename.c_str()))
+	if (FileExists(filename))
 	{
 		// TODO??  M_BackupWad(wad);
 
@@ -297,7 +297,7 @@ void CMD_NewProject()
 	LogPrintf("Creating New File : %s in %s\n", map_name, filename.c_str());
 
 
-	Wad_file * wad = Wad_file::Open(filename.c_str(), WadOpenMode_write);
+	Wad_file * wad = Wad_file::Open(filename, WadOpenMode_write);
 
 	if (! wad)
 	{
@@ -1761,13 +1761,11 @@ bool M_ExportMap()
 	}
 
 	// if extension is missing then add ".wad"
-	char filename[FL_PATH_MAX];
+	SString filename = chooser.filename();
 
-	strcpy(filename, chooser.filename());
-
-	char *pos = (char *)fl_filename_ext(filename);
-	if (! *pos)
-		strcat(filename, ".wad");
+	char *pos = (char *)fl_filename_ext(filename.c_str());
+	if(!*pos)
+		filename += ".wad";
 
 
 	// don't export into a file we currently have open

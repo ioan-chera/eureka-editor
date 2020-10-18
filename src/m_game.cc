@@ -375,7 +375,7 @@ static SString FindDefinitionFile(const char *folder, const char *name)
 
 		DebugPrintf("  trying: %s\n", filename.c_str());
 
-		if (FileExists(filename.c_str()))
+		if (FileExists(filename))
 			return filename;
 	}
 

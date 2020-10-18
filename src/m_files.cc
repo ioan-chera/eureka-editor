@@ -923,7 +923,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (! FileExists(res.c_str()))
+			if (! FileExists(res))
 			{
 				LogPrintf("  file not found: %s\n", pos);
 
@@ -931,13 +931,13 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (! FileExists(res.c_str()) && !new_iwad.empty())
+			if (! FileExists(res) && !new_iwad.empty())
 			{
 				res = FilenameReposition(pos, new_iwad.c_str());
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (FileExists(res.c_str()))
+			if (FileExists(res))
 				new_resources.push_back(res);
 			else
 			{

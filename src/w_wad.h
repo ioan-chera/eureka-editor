@@ -168,7 +168,7 @@ private:
 	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const char *_name, WadOpenMode _mode, FILE * _fp) :
+	Wad_file(const SString &_name, WadOpenMode _mode, FILE * _fp) :
 	   filename(_name), mode(_mode), fp(_fp)
 	{
 	}
@@ -186,7 +186,7 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static Wad_file * Open(const char *filename, WadOpenMode mode = WadOpenMode_append);
+	static Wad_file * Open(const SString &filename, WadOpenMode mode = WadOpenMode_append);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const char *filename);
@@ -295,7 +295,7 @@ public:
 	void InsertPoint(int index = -1);
 
 private:
-	static Wad_file * Create(const char *filename, WadOpenMode mode);
+	static Wad_file * Create(const SString &filename, WadOpenMode mode);
 
 	// read the existing directory.
 	bool ReadDirectory();
@@ -379,7 +379,7 @@ int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
 void W_FreeLumpData(byte ** buf_ptr);
 
 
-int W_FilenameAbsCompare(const char *A, const char *B);
+int W_FilenameAbsCompare(const SString &A, const SString &B);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
 
@@ -387,7 +387,7 @@ void W_StoreString(char *buf, const SString &str, size_t buflen);
 void MasterDir_Add   (Wad_file *wad);
 void MasterDir_Remove(Wad_file *wad);
 
-bool MasterDir_HaveFilename(const char *chk_path);
+bool MasterDir_HaveFilename(const SString &chk_path);
 void MasterDir_CloseAll();
 
 
