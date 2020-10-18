@@ -2249,7 +2249,7 @@ Lump_c * CreateGLMarker()
 
 	edit_wad->InsertPoint(last_idx + 1);
 
-	Lump_c *marker = edit_wad->AddLump(name_buf.c_str());
+	Lump_c *marker = edit_wad->AddLump(name_buf);
 
 	marker->Finish();
 

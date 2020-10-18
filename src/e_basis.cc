@@ -790,9 +790,9 @@ public:
 		message = buf;
 	}
 
-	const char *GetMsg() const
+	const SString &GetMsg() const
 	{
-		return message.c_str();
+		return message;
 	}
 };
 
@@ -849,7 +849,7 @@ void BA_End()
 	else
 	{
 		undo_history.push_front(cur_group);
-		Status_Set("%s", cur_group->GetMsg());
+		Status_Set("%s", cur_group->GetMsg().c_str());
 	}
 
 	cur_group = NULL;
@@ -1052,7 +1052,7 @@ bool BA_Undo()
 	undo_group_c * grp = undo_history.front();
 	undo_history.pop_front();
 
-	Status_Set("UNDO: %s", grp->GetMsg());
+	Status_Set("UNDO: %s", grp->GetMsg().c_str());
 
 	grp->ReApply();
 
@@ -1072,7 +1072,7 @@ bool BA_Redo()
 	undo_group_c * grp = redo_future.front();
 	redo_future.pop_front();
 
-	Status_Set("Redo: %s", grp->GetMsg());
+	Status_Set("Redo: %s", grp->GetMsg().c_str());
 
 	grp->ReApply();
 
