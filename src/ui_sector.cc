@@ -345,12 +345,12 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	const char *new_flat;
+	SString new_flat;
 
 	// right click sets to default value
 	// [ Note the 'is_pic' check prevents a bug when using RMB in browser ]
 	if (is_pic && Fl::event_button() == 3)
-		new_flat = is_floor ? default_floor_tex.c_str() : default_ceil_tex.c_str();
+		new_flat = is_floor ? default_floor_tex : default_ceil_tex;
 	else if (is_floor)
 		new_flat = NormalizeTex(box->f_tex->value());
 	else
@@ -360,7 +360,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_SectorBox::InstallFlat(const char *name, int filter_parts)
+void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 {
 	int tex_num = BA_InternaliseString(name);
 
@@ -409,13 +409,13 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_SectorBox::SetFlat(const char *name, int parts)
+void UI_SectorBox::SetFlat(const SString &name, int parts)
 {
 	if (parts & PART_FLOOR)
-		f_tex->value(name);
+		f_tex->value(name.c_str());
 
 	if (parts & PART_CEIL)
-		c_tex->value(name);
+		c_tex->value(name.c_str());
 
 	InstallFlat(name, parts);
 }

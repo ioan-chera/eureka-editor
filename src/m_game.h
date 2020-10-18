@@ -108,28 +108,27 @@ struct texturegroup_t
  *  Global variables that contain game definition data
  */
 
-typedef struct
+struct misc_info_t
 {
-	int  sky_color;
-	char sky_flat[16];
+	int  sky_color = 0;
+	SString sky_flat;
 
-	int  wall_colors[2];
-	int floor_colors[2];
-	int invis_colors[2];
+	int  wall_colors[2] = {};
+	int floor_colors[2] = {};
+	int invis_colors[2] = {};
 
-	int missing_color;
-	int unknown_tex;
-	int unknown_flat;
-	int unknown_thing;
+	int missing_color = 0;
+	int unknown_tex = 0;
+	int unknown_flat = 0;
+	int unknown_thing = 0;
 
-	int player_r;
-	int player_h;
-	int view_height;
+	int player_r = 0;
+	int player_h = 0;
+	int view_height = 0;
 
-	int min_dm_starts;
-	int max_dm_starts;
-
-} misc_info_t;
+	int min_dm_starts = 0;
+	int max_dm_starts = 0;
+};
 
 //
 // Type of generalized sectors for port

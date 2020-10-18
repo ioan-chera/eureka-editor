@@ -116,7 +116,8 @@ void M_ClearAllDefinitions()
 {
 	M_FreeAllDefinitions();
 
-	memset(&Misc_info, 0, sizeof(Misc_info));
+	Misc_info = misc_info_t();
+	// TODO: #58
 	memset(&Features,  0, sizeof(Features));
 
 	Misc_info.player_r = 16;
@@ -583,10 +584,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 1)
 			ThrowException(bad_arg_count, pst->fname, pst->lineno, argv[0], 1);
 
-		if (strlen(argv[1]) >= sizeof(Misc_info.sky_flat))
-			ThrowException("%s(%d): sky_flat name is too long\n", pst->fname, pst->lineno);
-
-		strcpy(Misc_info.sky_flat, argv[1]);
+		Misc_info.sky_flat = argv[1];
 	}
 	else if (y_stricmp(argv[0], "color") == 0)
 	{

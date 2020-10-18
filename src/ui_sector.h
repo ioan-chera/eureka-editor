@@ -103,10 +103,10 @@ private:
 	int GetSelectedPics() const;
 	int GetHighlightedPics() const;
 
-	void SetFlat(const char *name, int parts);
+	void SetFlat(const SString &name, int parts);
 	void SetSectorType(int new_type);
 
-	void InstallFlat(const char *name, int parts);
+	void InstallFlat(const SString &name, int parts);
 	void InstallSectorType(int mask, int value);
 
 	void FreshTag();
