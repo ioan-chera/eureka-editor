@@ -295,6 +295,12 @@ public:
 		data.assign(c ? c : "", c ? n : 0);
 	}
 
+	SString &assign(const SString &other, size_t subpos, size_t sublen)
+	{
+		data.assign(other.get(), subpos, sublen);
+		return *this;
+	}
+
 	void clear() noexcept
 	{
 		data.clear();

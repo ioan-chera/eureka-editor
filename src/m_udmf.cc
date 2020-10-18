@@ -108,12 +108,12 @@ public:
 
 	int DecodeTexture() const
 	{
-		char buffer[16];
+		SString buffer;
 
 		if (! IsString())
 		{
 			// TODO warning
-			strcpy(buffer, "-");
+			buffer = "-";
 		}
 		else
 		{
@@ -121,9 +121,7 @@ public:
 
 			if (text.size() < 10)
 				use_len = (int)text.size() - 2;
-
-			strncpy(buffer, text.c_str() + 1, use_len);
-			buffer[use_len] = 0;
+			buffer.assign(text, 1, use_len);
 		}
 
 		return BA_InternaliseString(NormalizeTex(buffer));
