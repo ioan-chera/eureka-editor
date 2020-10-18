@@ -1,4 +1,4 @@
-eureka
+/eureka
 Eureka.exe
 
 lib_win32
@@ -24,3 +24,6 @@ build/
 prereqs/
 osx/Eureka-Tests/Eureka-Tests.xcodeproj/project.xcworkspace/xcuserdata
 osx/Eureka-Tests/Eureka-Tests.xcodeproj/xcuserdata
+*.vcxproj.user
+.vs/
+Debug/

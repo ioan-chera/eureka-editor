@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{dd2144f2-389b-47b5-a8ed-6bb9250fbbae}</ProjectGuid>
+    <RootNamespace>Eureka</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../prereqs/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>../../prereqs/lib/x86/fltk.lib;../../prereqs/lib/x86/fltkgl.lib;../../prereqs/lib/x86/fltkimages.lib;../../prereqs/lib/x86/fltkjpeg.lib;../../prereqs/lib/x86/fltkpng.lib;../../prereqs/lib/x86/zlib.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../prereqs/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>../../prereqs/lib/x86/fltk.lib;../../prereqs/lib/x86/fltkgl.lib;../../prereqs/lib/x86/fltkimages.lib;../../prereqs/lib/x86/fltkjpeg.lib;../../prereqs/lib/x86/fltkpng.lib;../../prereqs/lib/x86/zlib.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../prereqs/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../prereqs/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);opengl32.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\main.rc">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\bsp_level.cc" />
+    <ClCompile Include="..\..\src\bsp_node.cc" />
+    <ClCompile Include="..\..\src\bsp_util.cc" />
+    <ClCompile Include="..\..\src\e_basis.cc" />
+    <ClCompile Include="..\..\src\e_checks.cc" />
+    <ClCompile Include="..\..\src\e_commands.cc" />
+    <ClCompile Include="..\..\src\e_cutpaste.cc" />
+    <ClCompile Include="..\..\src\e_hover.cc" />
+    <ClCompile Include="..\..\src\e_linedef.cc" />
+    <ClCompile Include="..\..\src\e_main.cc" />
+    <ClCompile Include="..\..\src\e_objects.cc" />
+    <ClCompile Include="..\..\src\e_path.cc" />
+    <ClCompile Include="..\..\src\e_sector.cc" />
+    <ClCompile Include="..\..\src\e_things.cc" />
+    <ClCompile Include="..\..\src\e_vertex.cc" />
+    <ClCompile Include="..\..\src\im_color.cc" />
+    <ClCompile Include="..\..\src\im_img.cc" />
+    <ClCompile Include="..\..\src\lib_adler.cc" />
+    <ClCompile Include="..\..\src\lib_file.cc" />
+    <ClCompile Include="..\..\src\lib_tga.cc" />
+    <ClCompile Include="..\..\src\lib_util.cc" />
+    <ClCompile Include="..\..\src\main.cc" />
+    <ClCompile Include="..\..\src\m_bitvec.cc" />
+    <ClCompile Include="..\..\src\m_config.cc" />
+    <ClCompile Include="..\..\src\m_editlump.cc" />
+    <ClCompile Include="..\..\src\m_events.cc" />
+    <ClCompile Include="..\..\src\m_files.cc" />
+    <ClCompile Include="..\..\src\m_game.cc" />
+    <ClCompile Include="..\..\src\m_keys.cc" />
+    <ClCompile Include="..\..\src\m_loadsave.cc" />
+    <ClCompile Include="..\..\src\m_nodes.cc" />
+    <ClCompile Include="..\..\src\m_select.cc" />
+    <ClCompile Include="..\..\src\m_strings.cc" />
+    <ClCompile Include="..\..\src\m_testmap.cc" />
+    <ClCompile Include="..\..\src\m_udmf.cc" />
+    <ClCompile Include="..\..\src\r_grid.cc" />
+    <ClCompile Include="..\..\src\r_opengl.cc" />
+    <ClCompile Include="..\..\src\r_render.cc" />
+    <ClCompile Include="..\..\src\r_software.cc" />
+    <ClCompile Include="..\..\src\r_subdiv.cc" />
+    <ClCompile Include="..\..\src\sys_debug.cc" />
+    <ClCompile Include="..\..\src\ui_about.cc" />
+    <ClCompile Include="..\..\src\ui_browser.cc" />
+    <ClCompile Include="..\..\src\ui_canvas.cc" />
+    <ClCompile Include="..\..\src\ui_default.cc" />
+    <ClCompile Include="..\..\src\ui_dialog.cc" />
+    <ClCompile Include="..\..\src\ui_editor.cc" />
+    <ClCompile Include="..\..\src\ui_file.cc" />
+    <ClCompile Include="..\..\src\ui_hyper.cc" />
+    <ClCompile Include="..\..\src\ui_infobar.cc" />
+    <ClCompile Include="..\..\src\ui_linedef.cc" />
+    <ClCompile Include="..\..\src\ui_menu.cc" />
+    <ClCompile Include="..\..\src\ui_misc.cc" />
+    <ClCompile Include="..\..\src\ui_nombre.cc" />
+    <ClCompile Include="..\..\src\ui_pic.cc" />
+    <ClCompile Include="..\..\src\ui_prefs.cc" />
+    <ClCompile Include="..\..\src\ui_replace.cc" />
+    <ClCompile Include="..\..\src\ui_scroll.cc" />
+    <ClCompile Include="..\..\src\ui_sector.cc" />
+    <ClCompile Include="..\..\src\ui_sidedef.cc" />
+    <ClCompile Include="..\..\src\ui_thing.cc" />
+    <ClCompile Include="..\..\src\ui_tile.cc" />
+    <ClCompile Include="..\..\src\ui_vertex.cc" />
+    <ClCompile Include="..\..\src\ui_window.cc" />
+    <ClCompile Include="..\..\src\w_loadpic.cc" />
+    <ClCompile Include="..\..\src\w_texture.cc" />
+    <ClCompile Include="..\..\src\w_wad.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\bsp.h" />
+    <ClInclude Include="..\..\src\e_basis.h" />
+    <ClInclude Include="..\..\src\e_checks.h" />
+    <ClInclude Include="..\..\src\e_cutpaste.h" />
+    <ClInclude Include="..\..\src\e_hover.h" />
+    <ClInclude Include="..\..\src\e_linedef.h" />
+    <ClInclude Include="..\..\src\e_main.h" />
+    <ClInclude Include="..\..\src\e_objects.h" />
+    <ClInclude Include="..\..\src\e_path.h" />
+    <ClInclude Include="..\..\src\e_sector.h" />
+    <ClInclude Include="..\..\src\e_things.h" />
+    <ClInclude Include="..\..\src\e_vertex.h" />
+    <ClInclude Include="..\..\src\im_color.h" />
+    <ClInclude Include="..\..\src\im_img.h" />
+    <ClInclude Include="..\..\src\lib_adler.h" />
+    <ClInclude Include="..\..\src\lib_file.h" />
+    <ClInclude Include="..\..\src\lib_tga.h" />
+    <ClInclude Include="..\..\src\lib_util.h" />
+    <ClInclude Include="..\..\src\main.h" />
+    <ClInclude Include="..\..\src\m_bitvec.h" />
+    <ClInclude Include="..\..\src\m_config.h" />
+    <ClInclude Include="..\..\src\m_editlump.h" />
+    <ClInclude Include="..\..\src\m_events.h" />
+    <ClInclude Include="..\..\src\m_files.h" />
+    <ClInclude Include="..\..\src\m_game.h" />
+    <ClInclude Include="..\..\src\m_keys.h" />
+    <ClInclude Include="..\..\src\m_loadsave.h" />
+    <ClInclude Include="..\..\src\m_nodes.h" />
+    <ClInclude Include="..\..\src\m_select.h" />
+    <ClInclude Include="..\..\src\m_strings.h" />
+    <ClInclude Include="..\..\src\m_udmf.h" />
+    <ClInclude Include="..\..\src\r_grid.h" />
+    <ClInclude Include="..\..\src\r_render.h" />
+    <ClInclude Include="..\..\src\r_subdiv.h" />
+    <ClInclude Include="..\..\src\sys_debug.h" />
+    <ClInclude Include="..\..\src\sys_endian.h" />
+    <ClInclude Include="..\..\src\sys_macro.h" />
+    <ClInclude Include="..\..\src\sys_type.h" />
+    <ClInclude Include="..\..\src\ui_about.h" />
+    <ClInclude Include="..\..\src\ui_browser.h" />
+    <ClInclude Include="..\..\src\ui_canvas.h" />
+    <ClInclude Include="..\..\src\ui_default.h" />
+    <ClInclude Include="..\..\src\ui_editor.h" />
+    <ClInclude Include="..\..\src\ui_file.h" />
+    <ClInclude Include="..\..\src\ui_hyper.h" />
+    <ClInclude Include="..\..\src\ui_infobar.h" />
+    <ClInclude Include="..\..\src\ui_linedef.h" />
+    <ClInclude Include="..\..\src\ui_menu.h" />
+    <ClInclude Include="..\..\src\ui_misc.h" />
+    <ClInclude Include="..\..\src\ui_nombre.h" />
+    <ClInclude Include="..\..\src\ui_pic.h" />
+    <ClInclude Include="..\..\src\ui_prefs.h" />
+    <ClInclude Include="..\..\src\ui_replace.h" />
+    <ClInclude Include="..\..\src\ui_scroll.h" />
+    <ClInclude Include="..\..\src\ui_sector.h" />
+    <ClInclude Include="..\..\src\ui_sidedef.h" />
+    <ClInclude Include="..\..\src\ui_thing.h" />
+    <ClInclude Include="..\..\src\ui_tile.h" />
+    <ClInclude Include="..\..\src\ui_vertex.h" />
+    <ClInclude Include="..\..\src\ui_window.h" />
+    <ClInclude Include="..\..\src\w_loadpic.h" />
+    <ClInclude Include="..\..\src\w_rawdef.h" />
+    <ClInclude Include="..\..\src\w_texture.h" />
+    <ClInclude Include="..\..\src\w_wad.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
