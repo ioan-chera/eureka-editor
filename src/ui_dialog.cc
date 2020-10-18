@@ -282,7 +282,7 @@ void DLG_ShowError(const char *msg, ...)
 }
 
 
-void DLG_Notify(const char *msg, ...)
+void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 

@@ -793,21 +793,19 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 
 
 	// add an extension if missing
-	static char filename[FL_PATH_MAX];
+	SString filename = chooser.filename();
 
-	strcpy(filename, chooser.filename());
+	if(!HasExtension(filename))
+		filename += ".txt";
 
-	if (! HasExtension(filename))
-		strcat(filename, ".txt");
-
-
-	FILE *fp = fopen(filename, "w");
+	// TODO: #55
+	FILE *fp = fopen(filename.c_str(), "w");
 
 	if (! fp)
 	{
-		snprintf(filename, sizeof(filename), "%s", strerror(errno));
+		filename = strerror(errno);
 
-		DLG_Notify("Unable to save the log file:\n\n%s", filename);
+		DLG_Notify("Unable to save the log file:\n\n%s", filename.c_str());
 		return;
 	}
 

@@ -412,7 +412,7 @@ static bool DetermineIWAD()
 	else if (!Iwad_name.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad_name.c_str()))
+		if (! HasExtension(Iwad_name))
 			Iwad_name = ReplaceExtension(Iwad_name.c_str(), "wad");
 
 		if (! Wad_file::Validate(Iwad_name.c_str()))

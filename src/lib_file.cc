@@ -55,9 +55,9 @@ bool FileExists(const SString &filename)
 }
 
 
-bool HasExtension(const char *filename)
+bool HasExtension(const SString &filename)
 {
-	int A = (int)strlen(filename) - 1;
+	int A = (int)filename.length() - 1;
 
 	if (A > 0 && filename[A] == '.')
 		return false;

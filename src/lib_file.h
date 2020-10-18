@@ -32,7 +32,7 @@
 #endif
 
 // filename functions
-bool HasExtension(const char *filename);
+bool HasExtension(const SString &filename);
 bool MatchExtension(const char *filename, const char *ext);
 SString ReplaceExtension(const char *filename, const char *ext);
 const char *FindBaseName(const char *filename);

@@ -218,7 +218,7 @@ void ThrowException(const char *fmt, ...);
 
 
 void DLG_ShowError(const char *msg, ...);
-void DLG_Notify(const char *msg, ...);
+void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 int  DLG_Confirm(const char *buttons, const char *msg, ...);
 
 SString GameNameFromIWAD(const char *iwad_name);
