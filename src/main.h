@@ -45,6 +45,12 @@
   #ifndef WIN32
   #define WIN32
   #endif
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #endif
 
 
