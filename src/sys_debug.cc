@@ -110,7 +110,7 @@ void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 }
 
 
-void DebugPrintf(const char *str, ...)
+void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 {
 	if (Debugging && log_fp)
 	{

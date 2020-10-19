@@ -870,14 +870,14 @@ void lineloop_c::FindIslands()
 
 void lineloop_c::Dump() const
 {
-	DebugPrintf("Lineloop %p : %u lines, %u islands\n",
+	DebugPrintf("Lineloop %p : %zu lines, %zu islands\n",
 	            this, lines.size(), islands.size());
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		const LineDef *L = LineDefs[lines[i]];
 
-		DebugPrintf("  %s of line #%d : (%d %d) --> (%d %d)\n",
+		DebugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == SIDE_LEFT ? " LEFT" : "RIGHT",
 					lines[i],
 					L->Start()->x(), L->Start()->y(),
