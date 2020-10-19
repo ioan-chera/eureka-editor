@@ -35,7 +35,7 @@
 bool HasExtension(const SString &filename);
 bool MatchExtension(const char *filename, const char *ext);
 SString ReplaceExtension(const char *filename, const char *ext);
-const char *FindBaseName(const char *filename);
+size_t FindBaseName(const SString &filename);
 bool FilenameIsBare(const SString &filename);
 SString FilenameReposition(const char *filename, const char *othername);
 SString FilenameGetPath(const char *filename);

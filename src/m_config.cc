@@ -868,7 +868,7 @@ void LineFile::close() noexcept
 	}
 }
 
-static int parse_config_line_from_file(char *p, const char *basename, int lnum)
+static int parse_config_line_from_file(char *p, const SString &basename, int lnum)
 {
 	char *name  = NULL;
 	char *value = NULL;
@@ -903,7 +903,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 
 	if (! isspace(*p))
 	{
-		LogPrintf("WARNING: %s(%u): bad line, no space after keyword.\n", basename, lnum);
+		LogPrintf("WARNING: %s(%u): bad line, no space after keyword.\n", basename.c_str(), lnum);
 		return 0;
 	}
 
@@ -915,7 +915,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 
 	if (*p == 0)
 	{
-		LogPrintf("WARNING: %s(%u): bad line, missing option value.\n", basename, lnum);
+		LogPrintf("WARNING: %s(%u): bad line, missing option value.\n", basename.c_str(), lnum);
 		return 0;
 	}
 
@@ -929,7 +929,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 		if (opt->opt_type == OPT_END)
 		{
 			LogPrintf("WARNING: %s(%u): invalid option '%s', skipping\n",
-					  basename, lnum, name);
+					  basename.c_str(), lnum, name);
 			return 0;
 		}
 
@@ -940,7 +940,7 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 		if (strchr(opt->flags, '1'))
 		{
 			LogPrintf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
-			          basename, lnum, name);
+					  basename.c_str(), lnum, name);
 			return 0;
 		}
 
@@ -1007,11 +1007,13 @@ static int parse_config_line_from_file(char *p, const char *basename, int lnum)
 //
 //  Return 0 on success, negative value on failure.
 //
-static int parse_a_config_file(FILE *fp, const char *filename)
+static int parse_a_config_file(FILE *fp, const SString &filename)
 {
 	static char line[1024];
 
-	const char *basename = FindBaseName(filename);
+	size_t basepos = FindBaseName(filename);
+	SString basename;
+	basename.assign(filename, basepos, std::string::npos);
 
 	// handle one line on each iteration
 	for (int lnum = 1 ; M_ReadTextLine(line, sizeof(line), fp) ; lnum++)
@@ -1056,7 +1058,7 @@ int M_ParseConfigFile()
 		return -1;
 	}
 
-	int rc = parse_a_config_file(fp, config_file.c_str());
+	int rc = parse_a_config_file(fp, config_file);
 
 	fclose(fp);
 
@@ -1066,13 +1068,11 @@ int M_ParseConfigFile()
 
 int M_ParseDefaultConfigFile()
 {
-	static char filename[FL_PATH_MAX];
+	SString filename = StringPrintf("%s/defaults.cfg", install_dir.c_str());
 
-	snprintf(filename, sizeof(filename), "%s/defaults.cfg", install_dir.c_str());
+	FILE * fp = fopen(filename.c_str(), "r");
 
-	FILE * fp = fopen(filename, "r");
-
-	LogPrintf("Reading config file: %s\n", filename);
+	LogPrintf("Reading config file: %s\n", filename.c_str());
 
 	if (fp == NULL)
 	{

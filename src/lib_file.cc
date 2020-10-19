@@ -146,27 +146,21 @@ SString ReplaceExtension(const char *filename, const char *ext)
 	return buffer;
 }
 
-const char *FindBaseName(const char *filename)
+size_t FindBaseName(const SString &filename)
 {
 	// Find the base name of the file (i.e. without any path).
 	// The result always points within the given string.
 	//
 	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
 
-	const char *pos = filename + strlen(filename) - 1;
-
-	for (; pos >= filename ; pos--)
-	{
-		if (*pos == '/')
-			return pos + 1;
-
 #ifdef WIN32
-		if (*pos == '\\' || *pos == ':')
-			return pos + 1;
+#error Define for Windows
+#else
+	size_t s = filename.rfind('/');
 #endif
-	}
-
-	return filename;
+	if(s != std::string::npos)
+		return s + 1;
+	return 0;
 }
 
 
@@ -289,7 +283,7 @@ SString FilenameReposition(const char *filename, const char *othername)
 //
 SString FilenameGetPath(const char *filename)
 {
-	size_t len = (size_t)(FindBaseName(filename) - filename);
+	size_t len = FindBaseName(filename);
 
 	// remove trailing slash (except when following "C:" or similar)
 	if(len >= 1 &&
