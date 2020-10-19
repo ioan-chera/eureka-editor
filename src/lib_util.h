@@ -44,7 +44,6 @@ void StringFree(const char *str);
 void StringCopy(char *buffer, size_t size, const char *source);
 
 void StringRemoveCRLF(char *str);
-SString StringTidy(const char *str, const char *bad_chars = "");
 
 void CheckTypeSizes();
 
@@ -428,6 +427,8 @@ inline static double atof(const SString &string)
 {
 	return atof(string.c_str());
 }
+
+SString StringTidy(const SString &str, const SString &bad_chars = "");
 
 #endif  /* __EUREKA_YUTIL_H__ */
 
