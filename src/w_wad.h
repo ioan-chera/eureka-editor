@@ -214,7 +214,7 @@ public:
 		return static_cast<int>(directory.size());
 	}
 	Lump_c * GetLump(int index) const;
-	Lump_c * FindLump(const char *name);
+	Lump_c * FindLump(const SString &name);
 	int FindLumpNum(const char *name);
 
 	Lump_c * FindLumpInNamespace(const char *name, WadNamespace group);

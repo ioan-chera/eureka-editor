@@ -369,7 +369,7 @@ Lump_c * Wad_file::GetLump(int index) const
 }
 
 
-Lump_c * Wad_file::FindLump(const char *name)
+Lump_c * Wad_file::FindLump(const SString &name)
 {
 	for (auto it = directory.rbegin(); it != directory.rend(); ++it)
 		if (it->lump->name.noCaseEqual(name))

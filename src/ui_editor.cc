@@ -447,7 +447,7 @@ void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int
 }
 
 
-bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
+bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 {
 	Lump_c * lump = wad->FindLump(lump_name);
 
@@ -458,18 +458,18 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const char *lump_name)
 		{
 			DLG_Notify("The %s lump does not exist, and it cannot be "
 						"created since the current wad is READ-ONLY.",
-						lump_name);
+					   lump_name.c_str());
 			return false;
 		}
 
 		return true;
 	}
 
-	LogPrintf("Reading '%s' text lump\n", lump_name);
+	LogPrintf("Reading '%s' text lump\n", lump_name.c_str());
 
 	if (! lump->Seek())
 	{
-		DLG_Notify("Read error while loading %s lump.", lump_name);
+		DLG_Notify("Read error while loading %s lump.", lump_name.c_str());
 		return false;
 	}
 
