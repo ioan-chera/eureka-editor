@@ -97,31 +97,30 @@ static const char * common_text_lumps[] =
 };
 
 
-static bool ValidLumpToEdit(const char *p)
+static bool ValidLumpToEdit(const SString &p)
 {
-	size_t len = strlen(p);
+	size_t len = p.length();
 
 	if (len == 0 || len > 8)
 		return false;
 
 	// check known binary lumps
 	for (int i = 0 ; invalid_text_lumps[i] ; i++)
-		if (y_stricmp(p, invalid_text_lumps[i]) == 0)
+		if (p.noCaseEqual(invalid_text_lumps[i]))
 			return false;
 
 	// markers like S_START and FF_END are not allowed
 	if (len >= 4)
 	{
-		if (y_stricmp(p+1, "_START") == 0 || y_stricmp(p+1, "_END") == 0 ||
-			y_stricmp(p+2, "_START") == 0 || y_stricmp(p+2, "_END") == 0)
-		{
+		size_t startFind = p.findNoCase("_START");
+		size_t endFind = p.findNoCase("_END");
+		if(startFind == 1 || endFind == 1 || startFind == 2 || endFind == 2)
 			return false;
-		}
 	}
 
 	// check for bad characters [ p is *invalid* afterwards ]
-	for ( ; *p ; p++)
-		if (! (isalnum(*p) || *p == '_'))
+	for (const char &c : p)
+		if (! (isalnum(c) || c == '_'))
 			return false;
 
 	return true;
@@ -427,7 +426,7 @@ void CMD_EditLump()
 		return;
 	}
 
-	if (!special && ! ValidLumpToEdit(lump_name.c_str()))
+	if (!special && ! ValidLumpToEdit(lump_name))
 	{
 		Beep("Invalid lump: '%s'", lump_name.c_str());
 		return;

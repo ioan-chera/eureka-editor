@@ -204,6 +204,13 @@ public:
 		return !y_strnicmp(data.c_str() + pos, c ? c : "", c ? strlen(c) : 0);
 	}
 
+	size_t findNoCase(const char *c) const
+	{
+		SString upperme = StringUpper(*this);
+		SString upperthem = StringUpper(c);
+		return upperme.find(upperthem);
+	}
+
 	bool startsWith(const char *c) const
 	{
 		return !strncmp(data.c_str(), c ? c : "", c ? strlen(c) : 0);
@@ -263,6 +270,11 @@ public:
 	size_t find(const char *s) const
 	{
 		return data.find(s ? s : "");
+	}
+
+	size_t find(const SString &s) const
+	{
+		return data.find(s.data);
 	}
 
 	size_t find(char c, size_t pos = 0) const
