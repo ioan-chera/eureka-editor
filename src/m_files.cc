@@ -221,7 +221,7 @@ public:
 	SString map;
 
 public:
-	recent_file_data_c(const char *_file, const char *_map) :
+	recent_file_data_c(const SString &_file, const SString &_map) :
 		file(_file), map(_map)
 	{ }
 
@@ -261,7 +261,7 @@ public:
 	{
 		SYS_ASSERT(0 <= index && index < size);
 
-		return new recent_file_data_c(filenames[index].c_str(), map_names[index].c_str());
+		return new recent_file_data_c(filenames[index], map_names[index]);
 	}
 
 	void clear()
