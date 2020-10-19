@@ -287,7 +287,7 @@ public:
 			if (y_stricmp(A, B) != 0)
 				continue;
 
-			if (! map || y_stricmp(map_names[k].c_str(), map) == 0)
+			if (! map || map_names[k].noCaseEqual(map))
 				return k;
 		}
 
@@ -368,13 +368,13 @@ public:
 		return SString(buffer);
 	}
 
-	void Lookup(int index, const char ** file_v, const char ** map_v)
+	void Lookup(int index, SString * file_v, SString * map_v)
 	{
 		SYS_ASSERT(index >= 0);
 		SYS_ASSERT(index < size);
 
-		*file_v = filenames[index].c_str();
-		*map_v  = map_names[index].c_str();
+		*file_v = filenames[index];
+		*map_v  = map_names[index];
 	}
 };
 
@@ -540,8 +540,8 @@ bool M_TryOpenMostRecent()
 	if (recent_files.getSize() == 0)
 		return false;
 
-	const char *filename;
-	const char *map_name;
+	SString filename;
+	SString map_name;
 
 	recent_files.Lookup(0, &filename, &map_name);
 
@@ -552,14 +552,14 @@ bool M_TryOpenMostRecent()
 
 	if (! wad)
 	{
-		LogPrintf("Failed to load most recent pwad: %s\n", filename);
+		LogPrintf("Failed to load most recent pwad: %s\n", filename.c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
 	if (wad->LevelCount() == 0)
 	{
-		LogPrintf("No levels in most recent pwad: %s\n", filename);
+		LogPrintf("No levels in most recent pwad: %s\n", filename.c_str());
 
 		delete wad;
 		return false;
