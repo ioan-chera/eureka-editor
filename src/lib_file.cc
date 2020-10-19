@@ -170,14 +170,9 @@ const char *FindBaseName(const char *filename)
 }
 
 
-bool FilenameIsBare(const char *filename)
+bool FilenameIsBare(const SString &filename)
 {
-	if (strchr(filename, '.')) return false;
-	if (strchr(filename, '/')) return false;
-	if (strchr(filename, '\\')) return false;
-	if (strchr(filename, ':')) return false;
-
-	return true;
+	return filename.find_first_of("./\\:") == std::string::npos;
 }
 
 

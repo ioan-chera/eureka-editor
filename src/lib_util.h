@@ -266,6 +266,16 @@ public:
 		return data.find(s ? s : "");
 	}
 
+	size_t find(char c, size_t pos = 0) const
+	{
+		return data.find(c, pos);
+	}
+
+	size_t find_first_of(const char *s, size_t pos = 0) const
+	{
+		return data.find_first_of(s ? s : "", pos);
+	}
+
 	size_t find_last_of(const char *s) const
 	{
 		return data.find_last_of(s ? s : "");
