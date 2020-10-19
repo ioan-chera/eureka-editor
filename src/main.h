@@ -208,9 +208,6 @@ bool Main_ConfirmQuit(const char *action);
 void Main_LoadResources();
 void Main_Quit();
 
-#ifdef __GNUC__
-__attribute__((noreturn))
-#endif
 [[noreturn]] void FatalError(const char *fmt, ...);
 void ThrowException(const char *fmt, ...);
 

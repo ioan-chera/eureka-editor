@@ -3019,7 +3019,7 @@ void CMD_ApplyTag()
 	}
 	else
 	{
-		Beep("ApplyTag: unknown keyword: %s\n", mode);
+		Beep("ApplyTag: unknown keyword: %s\n", mode.c_str());
 		return;
 	}
 
