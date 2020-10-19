@@ -215,7 +215,7 @@ public:
 	}
 	Lump_c * GetLump(int index) const;
 	Lump_c * FindLump(const SString &name);
-	int FindLumpNum(const char *name);
+	int FindLumpNum(const SString &name);
 
 	Lump_c * FindLumpInNamespace(const char *name, WadNamespace group);
 

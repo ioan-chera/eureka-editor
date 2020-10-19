@@ -58,7 +58,7 @@ public:
 	void SetTitle(const SString &lump_name);
 
 	bool LoadLump(Wad_file *wad, const SString &lump_name);
-	void SaveLump(Wad_file *wad, const char *lump_name);
+	void SaveLump(Wad_file *wad, const SString &lump_name);
 
 	void LoadMemory(std::vector<byte> &buf);
 	void SaveMemory(std::vector<byte> &buf);

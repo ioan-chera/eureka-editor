@@ -453,7 +453,7 @@ void CMD_EditLump()
 	}
 	else
 	{
-		if (! editor->LoadLump(wad, lump_name.c_str()))
+		if (! editor->LoadLump(wad, lump_name))
 		{
 			// something went wrong
 			delete editor;
@@ -484,7 +484,7 @@ void CMD_EditLump()
 		}
 		else
 		{
-			editor->SaveLump(wad, lump_name.c_str());
+			editor->SaveLump(wad, lump_name);
 		}
 	}
 

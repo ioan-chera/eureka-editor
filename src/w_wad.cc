@@ -378,7 +378,7 @@ Lump_c * Wad_file::FindLump(const SString &name)
 	return nullptr;  // not found
 }
 
-int Wad_file::FindLumpNum(const char *name)
+int Wad_file::FindLumpNum(const SString &name)
 {
 	for (int k = NumLumps() - 1 ; k >= 0 ; k--)
 		if (directory[k].lump->name.noCaseEqual(name))

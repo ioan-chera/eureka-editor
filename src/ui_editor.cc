@@ -511,9 +511,9 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 }
 
 
-void UI_TextEditor::SaveLump(Wad_file *wad, const char *lump_name)
+void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 {
-	LogPrintf("Writing '%s' text lump\n", lump_name);
+	LogPrintf("Writing '%s' text lump\n", lump_name.c_str());
 
 	wad->BeginWrite();
 
