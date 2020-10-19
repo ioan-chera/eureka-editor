@@ -55,7 +55,7 @@ public:
 		read_only = true;
 	}
 
-	void SetTitle(const char *lump_name);
+	void SetTitle(const SString &lump_name);
 
 	bool LoadLump(Wad_file *wad, const char *lump_name);
 	void SaveLump(Wad_file *wad, const char *lump_name);

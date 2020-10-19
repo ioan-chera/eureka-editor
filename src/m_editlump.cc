@@ -444,7 +444,7 @@ void CMD_EditLump()
 	if (lump_name == EDLUMP_HEADER)
 	{
 		editor->LoadMemory(HeaderData);
-		editor->SetTitle(Level_name.c_str());
+		editor->SetTitle(Level_name);
 	}
 	else if (lump_name == EDLUMP_SCRIPTS)
 	{
@@ -459,7 +459,7 @@ void CMD_EditLump()
 			delete editor;
 			return;
 		}
-		editor->SetTitle(lump_name.c_str());
+		editor->SetTitle(lump_name);
 	}
 
 	// run the text editor
