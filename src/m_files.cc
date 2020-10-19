@@ -44,7 +44,7 @@ void M_AddKnownIWAD(const char *path)
 }
 
 
-SString M_QueryKnownIWAD(const char *game)
+SString M_QueryKnownIWAD(const SString &game)
 {
 	std::map<SString, SString>::iterator KI;
 
@@ -748,7 +748,7 @@ void M_LookForIWADs()
 	for (const SString &game : game_list)
 	{
 		// already have it?
-		if (!M_QueryKnownIWAD(game.c_str()).empty())
+		if (!M_QueryKnownIWAD(game).empty())
 			continue;
 
 		SString path = SearchForIWAD(game.c_str());

@@ -38,7 +38,7 @@ void * M_RecentData(int index);
 
 void M_LookForIWADs();
 void M_AddKnownIWAD(const char *path);
-SString M_QueryKnownIWAD(const char *game);
+SString M_QueryKnownIWAD(const SString &game);
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
 SString M_PickDefaultIWAD();
 

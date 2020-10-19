@@ -402,7 +402,7 @@ static bool DetermineIWAD()
 		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
-		SString path = M_QueryKnownIWAD(Iwad_name.c_str());
+		SString path = M_QueryKnownIWAD(Iwad_name);
 
 		if (path.empty())
 			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name.c_str());
