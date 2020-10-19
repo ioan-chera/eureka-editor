@@ -141,7 +141,7 @@ static void RemoveSingleNewlines(char *buffer)
 //
 //  show an error message and terminate the program
 //
-void FatalError(const char *fmt, ...)
+void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list arg_ptr;
 

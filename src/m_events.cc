@@ -941,7 +941,7 @@ static bool M_ParseOperationFile()
 			continue;
 		}
 
-		if (y_stricmp(tokens[0].c_str(), "menu") == 0)
+		if (tokens[0].noCaseEqual("menu"))
 		{
 			if (num_tok < 3)
 			{

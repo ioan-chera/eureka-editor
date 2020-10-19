@@ -208,7 +208,7 @@ bool Main_ConfirmQuit(const char *action);
 void Main_LoadResources();
 void Main_Quit();
 
-[[noreturn]] void FatalError(const char *fmt, ...);
+[[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 void ThrowException(const char *fmt, ...);
 
 #define BugError  FatalError

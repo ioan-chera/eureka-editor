@@ -71,14 +71,14 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 
 	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
 	{
-		const char *name = KI->first.c_str();
+		const SString &name = KI->first;
 
 		if (result[0])
 			result += '|';
 
 		result += name;
 
-		if (y_stricmp(name, exist_name) == 0)
+		if (name.noCaseEqual(exist_name))
 			*exist_val = index;
 	}
 
