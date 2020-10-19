@@ -635,11 +635,11 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 }
 
 
-static SString SearchDirForIWAD(const char *dir_name, const char *game)
+static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 {
 	char name_buf[FL_PATH_MAX];
 
-	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name, game);
+	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name.c_str(), game.c_str());
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
@@ -648,7 +648,7 @@ static SString SearchDirForIWAD(const char *dir_name, const char *game)
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
 
-	y_strupr(name_buf + strlen(dir_name) + 1);
+	y_strupr(name_buf + dir_name.length() + 1);
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
@@ -695,7 +695,7 @@ static SString SearchForIWAD(const char *game)
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(SString(doomwaddir).c_str(), game);
+		path = SearchDirForIWAD(SString(doomwaddir), game);
 		if (!path.empty())
 			return path;
 	}
