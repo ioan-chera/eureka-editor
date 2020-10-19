@@ -107,22 +107,22 @@ public:
 		if (s > 0)
 		{
 			const char *name = (s == 1) ? "sector" : "sectors";
-			BA_Message("pasted %d %s", s, name);
+			BA_Message("pasted %zu %s", s, name);
 		}
 		else if (l > 0)
 		{
 			const char *name = (l == 1) ? "linedef" : "linedefs";
-			BA_Message("pasted %d %s", l, name);
+			BA_Message("pasted %zu %s", l, name);
 		}
 		else if (t > 0)
 		{
 			const char *name = (t == 1) ? "thing" : "things";
-			BA_Message("pasted %d %s", t, name);
+			BA_Message("pasted %zu %s", t, name);
 		}
 		else if (v > 0)
 		{
 			const char *name = (v == 1) ? "vertex" : "vertices";
-			BA_Message("pasted %d %s", v, name);
+			BA_Message("pasted %zu %s", v, name);
 		}
 		else
 		{

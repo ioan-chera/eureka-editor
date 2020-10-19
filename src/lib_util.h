@@ -235,6 +235,17 @@ public:
 		return data[n];
 	}
 
+	char operator[](size_t n) const
+	{
+		return data[n];
+	}
+
+	char &operator[](size_t n)
+	{
+		return data[n];
+	}
+
+
 	char back() const
 	{
 		return data.back();

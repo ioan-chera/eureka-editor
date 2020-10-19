@@ -118,7 +118,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 	if (! edit.Selected->empty())
 	{
 		BA_Begin();
-		BA_Message("edited X of", edit.Selected);
+		BA_Message("edited X of"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -138,7 +138,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 	if (! edit.Selected->empty())
 	{
 		BA_Begin();
-		BA_Message("edited Y of", edit.Selected);
+		BA_Message("edited Y of"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -177,7 +177,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		fixcoord_t fdy = MakeValidCoord(dy * step);
 
 		BA_Begin();
-		BA_Message("adjusted", edit.Selected);
+		BA_Message("adjusted"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
