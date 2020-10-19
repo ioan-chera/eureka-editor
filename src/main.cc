@@ -349,7 +349,7 @@ static void Determine_InstallPath(const char *argv0)
 		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
 		DebugPrintf("   looking for file: %s\n", filename.c_str());
 
-		bool exists = FileExists(filename.c_str());
+		bool exists = FileExists(filename);
 
 		if (exists)
 			break;
