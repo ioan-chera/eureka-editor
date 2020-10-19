@@ -46,7 +46,7 @@ bool FileCopy(const char *src_name, const char *dest_name);
 bool FileRename(const char *old_name, const char *new_name);
 bool FileDelete(const char *filename);
 bool FileChangeDir(const char *dir_name);
-bool FileMakeDir(const char *dir_name);
+bool FileMakeDir(const SString &dir_name);
 
 u8_t *FileLoad(const char *filename, int *length);
 void FileFree(u8_t *mem);

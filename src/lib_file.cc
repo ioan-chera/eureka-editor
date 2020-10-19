@@ -384,14 +384,14 @@ bool FileChangeDir(const char *dir_name)
 }
 
 
-bool FileMakeDir(const char *dir_name)
+bool FileMakeDir(const SString &dir_name)
 {
 #ifdef WIN32
-	return (::CreateDirectory(dir_name, NULL) != 0);
+	return (::CreateDirectory(dir_name.c_str(), NULL) != 0);
 
 #else // UNIX or MACOSX
 
-	return (mkdir(dir_name, 0775) == 0);
+	return (mkdir(dir_name.c_str(), 0775) == 0);
 #endif
 }
 

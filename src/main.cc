@@ -234,8 +234,8 @@ static void CreateHomeDirs()
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(home_dir.c_str());
-	FileMakeDir(cache_dir.c_str());
+	FileMakeDir(home_dir);
+	FileMakeDir(cache_dir);
 
 	static const char *const subdirs[] =
 	{
