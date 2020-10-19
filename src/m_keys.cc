@@ -89,22 +89,23 @@ void M_RegisterCommandList(editor_command_t * list)
 }
 
 
-const editor_command_t * FindEditorCommand(const char *name)
+const editor_command_t * FindEditorCommand(const SString &namem)
 {
 	// backwards compatibility
-	if (y_stricmp(name, "GRID_Step") == 0)
+	SString name = namem;
+	if (name.noCaseEqual("GRID_Step"))
 		name = "GRID_Bump";
-	else if (y_stricmp(name, "Check") == 0)
+	else if (name.noCaseEqual("Check"))
 		name = "MapCheck";
-	else if (y_stricmp(name, "3D_Click") == 0)
+	else if (name.noCaseEqual("3D_Click"))
 		name = "ACT_Click";
-	else if (y_stricmp(name, "3D_NAV_MouseMove") == 0)
+	else if (name.noCaseEqual("3D_NAV_MouseMove"))
 		name = "NAV_MouseScroll";
-	else if (y_stricmp(name, "OperationMenu") == 0)
+	else if (name.noCaseEqual("OperationMenu"))
 		name = "OpMenu";
 
 	for (unsigned int i = 0 ; i < all_commands.size() ; i++)
-		if (y_stricmp(all_commands[i]->name, name) == 0)
+		if (name.noCaseEqual(all_commands[i]->name))
 			return all_commands[i];
 
 	return NULL;
@@ -524,7 +525,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 		return;
 	}
 
-	temp.cmd = FindEditorCommand(tokens[2].c_str());
+	temp.cmd = FindEditorCommand(tokens[2]);
 
 	if (! temp.cmd)
 	{
@@ -963,7 +964,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 	if (num_tok <= 0)
 		return "Missing function name";
 
-	const editor_command_t * cmd = FindEditorCommand(tokens[0].c_str());
+	const editor_command_t * cmd = FindEditorCommand(tokens[0]);
 
 	if (! cmd)
 	{

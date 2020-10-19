@@ -840,7 +840,7 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 	if (tokens.size() < 3)
 		FatalError("operations.cfg: entry missing command name.\n");
 
-	const editor_command_t *cmd = FindEditorCommand(tokens[2].c_str());
+	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
 
 	if (! cmd)
 	{
