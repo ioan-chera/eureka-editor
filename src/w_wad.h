@@ -189,7 +189,7 @@ public:
 	static Wad_file * Open(const SString &filename, WadOpenMode mode = WadOpenMode_append);
 
 	// check the given wad file exists and is a WAD file
-	static bool Validate(const char *filename);
+	static bool Validate(const SString &filename);
 
 	const char *PathName() const
 	{

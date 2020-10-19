@@ -1456,7 +1456,7 @@ void SortSegs()
 	// do a sanity check
 	for (int i = 0 ; i < num_segs ; i++)
 		if (lev_segs[i]->index < 0)
-			BugError("Seg %p never reached a subsector!\n", i);
+			BugError("Seg %d never reached a subsector!\n", i);
 
 	// sort segs into ascending index
 	std::sort(lev_segs.begin(), lev_segs.end(), seg_index_CMP_pred());

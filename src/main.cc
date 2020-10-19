@@ -415,7 +415,7 @@ static bool DetermineIWAD()
 		if (! HasExtension(Iwad_name))
 			Iwad_name = ReplaceExtension(Iwad_name.c_str(), "wad");
 
-		if (! Wad_file::Validate(Iwad_name.c_str()))
+		if (! Wad_file::Validate(Iwad_name))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
 
 		SString game = GameNameFromIWAD(Iwad_name.c_str());

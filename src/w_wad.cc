@@ -301,9 +301,9 @@ Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
 }
 
 
-bool Wad_file::Validate(const char *filename)
+bool Wad_file::Validate(const SString &filename)
 {
-	FILE *fp = fopen(filename, "rb");
+	FILE *fp = fopen(filename.c_str(), "rb");
 
 	if (! fp)
 		return false;
