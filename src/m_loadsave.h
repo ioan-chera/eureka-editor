@@ -29,7 +29,7 @@
 
 #include "w_wad.h"
 
-void LoadLevel(Wad_file *wad, const char *level);
+void LoadLevel(Wad_file *wad, const SString &level);
 void LoadLevelNum(Wad_file *wad, int lev_num);
 
 void GetLevelFormat(Wad_file *wad, const char *level);
@@ -38,7 +38,7 @@ void RemoveEditWad();
 
 bool MissingIWAD_Dialog();
 
-void OpenFileMap(const char *filename, const char *map_name = NULL);
+void OpenFileMap(const SString &filename, const SString &map_name = "");
 
 extern int last_given_file;
 

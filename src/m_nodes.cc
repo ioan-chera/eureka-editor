@@ -509,7 +509,7 @@ void CMD_BuildAllNodes()
 
 
 	// reload the previous level
-	LoadLevel(edit_wad, CurLevel.c_str());
+	LoadLevel(edit_wad, CurLevel);
 }
 
 

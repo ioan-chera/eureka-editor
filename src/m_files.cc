@@ -217,8 +217,8 @@ void M_WritePortPaths(FILE *fp)
 class recent_file_data_c
 {
 public:
-	const char *file;
-	const char *map;
+	SString file;
+	SString map;
 
 public:
 	recent_file_data_c(const char *_file, const char *_map) :

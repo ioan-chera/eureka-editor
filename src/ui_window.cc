@@ -335,20 +335,21 @@ void UI_MainWindow::UnselectPics()
 }
 
 
-void UI_MainWindow::SetTitle(const char *wad_name, const char *map_name,
+void UI_MainWindow::SetTitle(const SString &wad_namem, const SString &map_name,
 						  bool read_only)
 {
 	static char title_buf[FL_PATH_MAX];
 
+	SString wad_name(wad_namem);
 	if (wad_name)
 	{
-		wad_name = fl_filename_name(wad_name);
+		wad_name = fl_filename_name(wad_name.c_str());
 		snprintf(title_buf, sizeof(title_buf), "%s (%s)%s",
-				wad_name, map_name, read_only ? " [Read-Only]" : "");
+				 wad_name.c_str(), map_name.c_str(), read_only ? " [Read-Only]" : "");
 	}
 	else
 	{
-		snprintf(title_buf, sizeof(title_buf), "Unsaved %s", map_name);
+		snprintf(title_buf, sizeof(title_buf), "Unsaved %s", map_name.c_str());
 	}
 
 	copy_label(title_buf);

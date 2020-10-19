@@ -1148,7 +1148,7 @@ int main(int argc, char *argv[])
 
 		LogPrintf("Loading initial map : %s\n", Level_name.c_str());
 
-		LoadLevel(edit_wad ? edit_wad : game_wad, Level_name.c_str());
+		LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

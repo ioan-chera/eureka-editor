@@ -370,7 +370,7 @@ void CMD_FreshMap()
 		return;
 
 	// would this replace an existing map?
-	if (edit_wad->LevelFind(map_name.c_str()) >= 0)
+	if (edit_wad->LevelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "current") <= 0)
@@ -953,12 +953,12 @@ void GetLevelFormat(Wad_file *wad, const char *level)
 // Read in the level data
 //
 
-void LoadLevel(Wad_file *wad, const char *level)
+void LoadLevel(Wad_file *wad, const SString &level)
 {
 	int lev_num = wad->LevelFind(level);
 
 	if (lev_num < 0)
-		FatalError("No such map: %s\n", level);
+		FatalError("No such map: %s\n", level.c_str());
 
 	LoadLevelNum(wad, lev_num);
 
@@ -1062,8 +1062,9 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const char *filename, const char *map_name)
+void OpenFileMap(const SString &filename, const SString &map_namem)
 {
+	SString map_name = map_namem;
 	if (! Main_ConfirmQuit("open another map"))
 		return;
 
@@ -1131,7 +1132,7 @@ void OpenFileMap(const char *filename, const char *map_name)
 		map_name  = edit_wad->GetLump(idx)->Name();
 	}
 
-	LogPrintf("Loading Map : %s of %s\n", map_name, edit_wad->PathName());
+	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), edit_wad->PathName());
 
 	LoadLevel(edit_wad, map_name);
 
@@ -1160,7 +1161,7 @@ void CMD_OpenMap()
 
 
 	// this shouldn't happen -- but just in case...
-	if (wad->LevelFind(map_name.c_str()) < 0)
+	if (wad->LevelFind(map_name) < 0)
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 
@@ -1201,7 +1202,7 @@ void CMD_OpenMap()
 
 	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName());
 
-	LoadLevel(wad, map_name.c_str());
+	LoadLevel(wad, map_name);
 
 	if (new_resources)
 	{
@@ -1255,7 +1256,7 @@ void CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(Pwad_list[index].c_str(), NULL);
+	OpenFileMap(Pwad_list[index], NULL);
 }
 
 
@@ -1277,7 +1278,7 @@ void CMD_FlipMap()
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
-	int lev_idx = wad->LevelFind(Level_name.c_str());
+	int lev_idx = wad->LevelFind(Level_name);
 	int max_idx = wad->LevelCount() - 1;
 
 	if (max_idx < 0)
@@ -1690,7 +1691,7 @@ static void SaveLevel(const char *level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(edit_wad->PathName(), Level_name.c_str(), false);
+		main_win->SetTitle(edit_wad->PathName(), Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1838,7 +1839,7 @@ bool M_ExportMap()
 	// we will write into the chosen wad.
 	// however if the level already exists, get confirmation first
 
-	if (exists && wad->LevelFind(map_name.c_str()) >= 0)
+	if (exists && wad->LevelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "selected") <= 0)
@@ -1983,7 +1984,7 @@ void CMD_RenameMap()
 
 
 	// perform the rename
-	int lev_num = edit_wad->LevelFind(Level_name.c_str());
+	int lev_num = edit_wad->LevelFind(Level_name);
 
 	if (lev_num >= 0)
 	{
@@ -1996,7 +1997,7 @@ void CMD_RenameMap()
 
 	Level_name = StringUpper(new_name);
 
-	main_win->SetTitle(edit_wad->PathName(), Level_name.c_str(), false);
+	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
 
 	Status_Set("Renamed to %s", Level_name.c_str());
 }
@@ -2033,7 +2034,7 @@ void CMD_DeleteMap()
 
 	LogPrintf("Deleting Map : %s...\n", Level_name.c_str());
 
-	int lev_num = edit_wad->LevelFind(Level_name.c_str());
+	int lev_num = edit_wad->LevelFind(Level_name);
 
 	if (lev_num < 0)
 	{

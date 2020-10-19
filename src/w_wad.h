@@ -227,7 +227,7 @@ public:
 	int LevelLastLump(int lev_num);
 
 	// these return a level number (0 .. count-1)
-	int LevelFind(const char *name);
+	int LevelFind(const SString &name);
 	int LevelFindByNumber(int number);
 	int LevelFindFirst();
 

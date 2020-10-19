@@ -407,7 +407,7 @@ int Wad_file::LevelLookupLump(int lev_num, const char *name)
 }
 
 
-int Wad_file::LevelFind(const char *name)
+int Wad_file::LevelFind(const SString &name)
 {
 	for (int k = 0 ; k < (int)levels.size() ; k++)
 	{
