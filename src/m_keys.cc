@@ -211,66 +211,68 @@ bool is_mouse_button(keycode_t key)
 //
 // returns zero (an invalid key) if parsing fails
 //
-keycode_t M_ParseKeyString(const char *str)
+keycode_t M_ParseKeyString(const SString &mstr)
 {
 	int key = 0;
 
 	// for MOD_COMMAND, accept both CMD and CTRL prefixes
 
-	if (y_strnicmp(str, "CMD-", 4) == 0)
+	SString str = mstr;
+
+	if (str.noCaseStartsWith("CMD-"))
 	{
 		key |= MOD_COMMAND;
-		str += 4;
+		str.assign(str, 4);
 	}
-	else if (y_strnicmp(str, "CTRL-", 5) == 0)
+	else if (str.noCaseStartsWith("CTRL-"))
 	{
 		key |= MOD_COMMAND;
-		str += 5;
+		str.assign(str, 5);
 	}
-	else if (y_strnicmp(str, "META-", 5) == 0)
+	else if (str.noCaseStartsWith("META-"))
 	{
 		key |= MOD_META;
-		str += 5;
+		str.assign(str, 5);
 	}
-	else if (y_strnicmp(str, "ALT-", 4) == 0)
+	else if (str.noCaseStartsWith("ALT-"))
 	{
 		key |= MOD_ALT;
-		str += 4;
+		str.assign(str, 4);
 	}
-	else if (y_strnicmp(str, "SHIFT-", 6) == 0)
+	else if (str.noCaseStartsWith("SHIFT-"))
 	{
 		key |= MOD_SHIFT;
-		str += 6;
+		str.assign(str, 6);
 	}
-	else if (y_strnicmp(str, "LAX-", 4) == 0)
+	else if (str.noCaseStartsWith("LAX-"))
 	{
 		key |= MOD_LAX_SHIFTCTRL;
-		str += 4;
+		str.assign(str, 4);
 	}
 
 	// convert uppercase letter --> lowercase + MOD_SHIFT
-	if (strlen(str) == 1 && str[0] >= 'A' && str[0] <= 'Z')
+	if (str.length() == 1 && str[0] >= 'A' && str[0] <= 'Z')
 		return MOD_SHIFT | (unsigned char) tolower(str[0]);
 
-	if (strlen(str) == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
+	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
 
-	if (y_strnicmp(str, "F", 1) == 0 && isdigit(str[1]))
-		return key | (FL_F + atoi(str + 1));
+	if (str.noCaseStartsWith("F") && isdigit(str[1]))
+		return key | (FL_F + atoi(str.c_str() + 1));
 
-	if (y_strnicmp(str, "MOUSE", 5) == 0 && isdigit(str[5]))
-		return key | (FL_Button + atoi(str + 5));
+	if (str.noCaseStartsWith("MOUSE") && isdigit(str[5]))
+		return key | (FL_Button + atoi(str.c_str() + 5));
 
 	// find name in mapping table
 	for (int k = 0 ; s_key_map[k].name ; k++)
-		if (y_stricmp(str, s_key_map[k].name) == 0)
+		if (str.noCaseEqual(s_key_map[k].name))
 			return key | s_key_map[k].key;
 
-	if (y_strnicmp(str, "KP_", 3) == 0 && 33 < str[3] && (FL_KP + str[3]) <= FL_KP_Last)
+	if (str.noCaseStartsWith("KP_") && 33 < str[3] && (FL_KP + str[3]) <= FL_KP_Last)
 		return key | (FL_KP + str[3]);
 
 	if (str[0] == '0' && str[1] == 'x')
-		return key | (int)strtol(str, NULL, 0);
+		return key | (int)strtol(str.c_str(), NULL, 0);
 
 	return 0;
 }
@@ -495,7 +497,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 	// this ensures all parameters are NUL terminated
 	key_binding_t temp = {};
 
-	temp.key = M_ParseKeyString(tokens[1].c_str());
+	temp.key = M_ParseKeyString(tokens[1]);
 
 	if (! temp.key)
 	{

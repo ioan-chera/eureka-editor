@@ -817,7 +817,7 @@ typedef struct
 static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
 {
 	// just a divider?
-	if (y_stricmp(tokens[0].c_str(), "divider") == 0)
+	if (tokens[0].noCaseEqual("divider"))
 	{
 		menu->add("", 0, 0, 0, FL_MENU_DIVIDER|FL_MENU_INACTIVE);
 		return;
@@ -826,9 +826,9 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 	// parse the key
 	int shortcut = 0;
 
-	if (y_stricmp(tokens[0].c_str(), "UNBOUND") != 0)
+	if (!tokens[0].noCaseEqual("UNBOUND"))
 	{
-		keycode_t key = M_ParseKeyString(tokens[0].c_str());
+		keycode_t key = M_ParseKeyString(tokens[0]);
 		if (key != 0)
 			shortcut = M_KeyToShortcut(key);
 	}

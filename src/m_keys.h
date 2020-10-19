@@ -86,7 +86,7 @@ int M_KeyCmp(keycode_t A, keycode_t B);
 key_context_e M_ParseKeyContext(const char *str);
 const char * M_KeyContextString(key_context_e context);
 
-keycode_t M_ParseKeyString(const char *str);
+keycode_t M_ParseKeyString(const SString &str);
 const char * M_KeyToString(keycode_t key);
 
 
