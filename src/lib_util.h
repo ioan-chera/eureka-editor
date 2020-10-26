@@ -309,6 +309,13 @@ public:
 		return result;
 	}
 
+	SString operator + (const SString &other) const
+	{
+		SString result;
+		result.data = data + other.data;
+		return result;
+	}
+
 	SString &operator += (char c)
 	{
 		data += c;
