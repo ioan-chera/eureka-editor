@@ -1048,7 +1048,7 @@ typedef struct
 } backup_scan_data_t;
 
 
-static void backup_scan_file(const char *name, int flags, void *priv_dat)
+static void backup_scan_file(const SString &name, int flags, void *priv_dat)
 {
 	backup_scan_data_t * data = (backup_scan_data_t *)priv_dat;
 
@@ -1124,7 +1124,7 @@ void M_BackupWad(Wad_file *wad)
 	scan_data.low  = (1 << 30);
 	scan_data.high = 0;
 
-	if (ScanDirectory(dir_name.c_str(), backup_scan_file, &scan_data) < 0)
+	if (ScanDirectory(dir_name, backup_scan_file, &scan_data) < 0)
 	{
 		// Hmmm, show a dialog ??
 		LogPrintf("WARNING: backup failed (cannot scan dir)\n");

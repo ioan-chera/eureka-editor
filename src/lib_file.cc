@@ -84,13 +84,13 @@ bool HasExtension(const SString &filename)
 //
 // When ext is NULL, checks if the file has no extension.
 //
-bool MatchExtension(const char *filename, const char *ext)
+bool MatchExtension(const SString &filename, const SString &ext)
 {
 	if (! ext)
 		return ! HasExtension(filename);
 
-	int A = (int)strlen(filename) - 1;
-	int B = (int)strlen(ext) - 1;
+	int A = (int)filename.length() - 1;
+	int B = (int)ext.length() - 1;
 
 	for (; B >= 0 ; B--, A--)
 	{
@@ -112,11 +112,11 @@ bool MatchExtension(const char *filename, const char *ext)
 //
 // Returned string is a COPY.
 //
-SString ReplaceExtension(const char *filename, const char *ext)
+SString ReplaceExtension(const SString &filename, const SString &ext)
 {
 	SYS_ASSERT(filename[0] != 0);
 
-	size_t total_len = strlen(filename) + (ext ? strlen(ext) : 0);
+	size_t total_len = filename.length() + (ext ? ext.length() : 0);
 
 	SString buffer;
 	buffer.reserve(total_len + 10);
@@ -467,7 +467,7 @@ bool PathIsDirectory(const char *path)
 //
 // Scan a directory
 //
-int ScanDirectory(const char *path, const std::function<void(const char *, int)> &func)
+int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func)
 {
 	SYS_ASSERT(!!path);
 	int count = 0;
@@ -483,7 +483,7 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 	if (GetCurrentDirectory(MAX_PATH, (LPSTR)old_dir) == FALSE)
 		return SCAN_ERROR;
 
-	if (SetCurrentDirectory(path) == FALSE)
+	if (SetCurrentDirectory(path.c_str()) == FALSE)
 		return SCAN_ERR_NoExist;
 
 	WIN32_FIND_DATA fdata;
@@ -534,7 +534,7 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 
 #else // ---- UNIX ------------------------------------------------
 
-	DIR *handle = opendir(path);
+	DIR *handle = opendir(path.c_str());
 	if (handle == NULL)
 		return SCAN_ERR_NoExist;
 
@@ -552,7 +552,7 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 				strcmp(fdata->d_name, "..") == 0)
 			continue;
 
-		SString full_name = StringPrintf("%s/%s", path, fdata->d_name);
+		SString full_name = StringPrintf("%s/%s", path.c_str(), fdata->d_name);
 
 		struct stat finfo;
 
@@ -585,9 +585,9 @@ int ScanDirectory(const char *path, const std::function<void(const char *, int)>
 	return count;
 }
 
-int ScanDirectory(const char *path, directory_iter_f func, void *priv_dat)
+int ScanDirectory(const SString &path, directory_iter_f func, void *priv_dat)
 {
-	return ScanDirectory(path, [func, priv_dat](const char *name, int flags)
+	return ScanDirectory(path, [func, priv_dat](const SString &name, int flags)
 						 {
 		func(name, flags, priv_dat);
 	});

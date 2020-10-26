@@ -1066,7 +1066,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 			SString new_name = FindDefinitionFile(new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
-			if (new_name.empty() && strcmp(folder.c_str(), "common") != 0)
+			if (new_name.empty() && folder != "common")
 			{
 				new_folder = "common";
 				new_name = FindDefinitionFile(new_folder, pst->argv[1]);
@@ -1171,7 +1171,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 	SString path;
 
 	//	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
-	auto scanner_add_file = [&temp_list](const char *name, int flags)
+	auto scanner_add_file = [&temp_list](const SString &name, int flags)
 	{
 		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
 			return;
@@ -1180,9 +1180,9 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 		temp_list.push_back(ReplaceExtension(name, NULL));
 	};
 	path = install_dir + "/" + folder;
-	ScanDirectory(path.c_str(), scanner_add_file);
+	ScanDirectory(path, scanner_add_file);
 	path = home_dir + "/" + folder;
-	ScanDirectory(path.c_str(), scanner_add_file);
+	ScanDirectory(path, scanner_add_file);
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
