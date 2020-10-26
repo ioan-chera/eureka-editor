@@ -145,10 +145,10 @@ public:
 		return M_ReadTextLine(buf, size, fp);
 	}
 
-	bool open(const char *path) noexcept;
+	bool open(const SString &path) noexcept;
 	void close() noexcept;
 	LineFile() = default;
-	explicit LineFile(const char *path) noexcept
+	explicit LineFile(const SString &path) noexcept
 	{
 		open(path);
 	}

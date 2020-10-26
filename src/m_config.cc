@@ -849,10 +849,10 @@ bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept
 //
 // Opens the file
 //
-bool LineFile::open(const char *path) noexcept
+bool LineFile::open(const SString &path) noexcept
 {
 	close();
-	fp = fopen(path, "rt");
+	fp = fopen(path.c_str(), "rt");
 	return !!fp;
 }
 

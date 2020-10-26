@@ -33,10 +33,10 @@
 static std::map<SString, SString> known_iwads;
 
 
-void M_AddKnownIWAD(const char *path)
+void M_AddKnownIWAD(const SString &path)
 {
 	char absolute_name[FL_PATH_MAX];
-	fl_filename_absolute(absolute_name, path);
+	fl_filename_absolute(absolute_name, path.c_str());
 
 	SString game = GameNameFromIWAD(path);
 
@@ -757,7 +757,7 @@ void M_LookForIWADs()
 		{
 			LogPrintf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
 
-			M_AddKnownIWAD(path.c_str());
+			M_AddKnownIWAD(path);
 		}
 	}
 

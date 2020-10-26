@@ -373,10 +373,10 @@ static void Determine_InstallPath(const char *argv0)
 }
 
 
-SString GameNameFromIWAD(const char *iwad_name)
+SString GameNameFromIWAD(const SString &iwad_name)
 {
 	char game_name[FL_PATH_MAX];
-	StringCopy(game_name, sizeof(game_name), fl_filename_name(iwad_name));
+	StringCopy(game_name, sizeof(game_name), fl_filename_name(iwad_name.c_str()));
 
 	fl_filename_setext(game_name, "");
 
@@ -418,12 +418,12 @@ static bool DetermineIWAD()
 		if (! Wad_file::Validate(Iwad_name))
 			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
 
-		SString game = GameNameFromIWAD(Iwad_name.c_str());
+		SString game = GameNameFromIWAD(Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", game.c_str()))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
-		M_AddKnownIWAD(Iwad_name.c_str());
+		M_AddKnownIWAD(Iwad_name);
 		M_SaveRecent();
 	}
 	else
@@ -439,7 +439,7 @@ static bool DetermineIWAD()
 		}
 	}
 
-	Game_name = GameNameFromIWAD(Iwad_name.c_str());
+	Game_name = GameNameFromIWAD(Iwad_name);
 
 	return true;
 }
@@ -832,12 +832,12 @@ static void Main_LoadIWAD()
 
 static void ReadGameInfo()
 {
-	Game_name = GameNameFromIWAD(Iwad_name.c_str());
+	Game_name = GameNameFromIWAD(Iwad_name);
 
 	LogPrintf("Game name: '%s'\n", Game_name.c_str());
 	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
 
-	M_LoadDefinitions("games", Game_name.c_str());
+	M_LoadDefinitions("games", Game_name);
 }
 
 
@@ -874,7 +874,7 @@ static void ReadPortInfo()
 
 	LogPrintf("Port name: '%s'\n", Port_name.c_str());
 
-	M_LoadDefinitions("ports", Port_name.c_str());
+	M_LoadDefinitions("ports", Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (Features.strife_flags)

@@ -183,7 +183,7 @@ struct GameInfo
 
 	GameInfo() = default;
 
-	GameInfo(const char *name): name(name)
+	GameInfo(const SString &name): name(name)
 	{
 	}
 
@@ -262,7 +262,7 @@ extern int num_gen_linetypes;
 void M_ClearAllDefinitions();
 void M_PrepareConfigVariables();
 
-void M_LoadDefinitions(const char *folder, const char *name);
+void M_LoadDefinitions(const SString &folder, const SString &name);
 
 bool M_CanLoadDefinitions(const char *folder, const char *name);
 
@@ -276,12 +276,12 @@ enum parse_purpose_e
 
 void M_ParseDefinitionFile(parse_purpose_e purpose,
 						   void *purposeTarget,
-						   const char *filename,
-						   const char *folder = NULL,
-						   const char *prettyname = NULL,
+						   const SString &filename,
+						   const SString &folder = NULL,
+						   const SString &prettyname = NULL,
                            int include_level = 0);
 
-PortInfo_c * M_LoadPortInfo(const char *port);
+PortInfo_c * M_LoadPortInfo(const SString &port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
@@ -289,7 +289,7 @@ bool M_CheckPortSupportsGame(const char *base_game, const SString &port);
 
 SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 
-SString M_GetBaseGame(const char *game);
+SString M_GetBaseGame(const SString &game);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
