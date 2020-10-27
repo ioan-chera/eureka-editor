@@ -752,7 +752,7 @@ bool Main_ConfirmQuit(const char *action)
 SString Main_FileOpFolder()
 {
 	if (Pwad_name)
-		return FilenameGetPath(Pwad_name.c_str());
+		return FilenameGetPath(Pwad_name);
 
 	return "";
 }

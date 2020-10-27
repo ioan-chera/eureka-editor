@@ -259,17 +259,17 @@ static void FilenameStripBase(SString &path)
 // takes the basename in 'filename' and prepends the path from 'othername'.
 // returns a newly allocated string.
 //
-SString FilenameReposition(const char *filename, const char *othername)
+SString FilenameReposition(const SString &cfilename, const SString &othername)
 {
-	filename = fl_filename_name(filename);
+	SString filename = fl_filename_name(cfilename.c_str());
 
-	const char *op = fl_filename_name(othername);
+	const char *op = fl_filename_name(othername.c_str());
 
-	if (op <= othername)
+	if (op <= othername.c_str())
 		return filename;
 
-	size_t dir_len = op - othername;
-	size_t len = strlen(filename) + dir_len;
+	size_t dir_len = op - othername.c_str();
+	size_t len = filename.length() + dir_len;
 
 	SString result;
 	result.reserve(len + 10);
@@ -281,7 +281,7 @@ SString FilenameReposition(const char *filename, const char *othername)
 //
 // Get path
 //
-SString FilenameGetPath(const char *filename)
+SString FilenameGetPath(const SString &filename)
 {
 	size_t len = FindBaseName(filename);
 

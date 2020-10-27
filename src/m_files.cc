@@ -933,7 +933,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
-				res = FilenameReposition(pos, new_iwad.c_str());
+				res = FilenameReposition(pos, new_iwad);
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
