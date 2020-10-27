@@ -75,13 +75,13 @@ int num_gen_linetypes;
 // variables which are "set" in def files
 static std::map< SString, SString > parse_vars;
 
-void PortInfo_c::AddSupportedGame(const char *game)
+void PortInfo_c::AddSupportedGame(const SString &game)
 {
 	if (! SupportsGame(game))
 		supported_games.push_back(game);
 }
 
-bool PortInfo_c::SupportsGame(const char *game) const
+bool PortInfo_c::SupportsGame(const SString &game) const
 {
 	for (const SString &supportedGame : supported_games)
 		if (supportedGame.noCaseEqual(game))
@@ -166,7 +166,7 @@ void M_PrepareConfigVariables()
 
 		if (M_CanLoadDefinitions("games", Game_name.c_str()))
 		{
-			SString base_game = M_GetBaseGame(Game_name.c_str());
+			SString base_game = M_GetBaseGame(Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
@@ -885,7 +885,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-			loading_Port->AddSupportedGame(StringLower(*argv).c_str());
+			loading_Port->AddSupportedGame(StringLower(*argv));
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
@@ -1232,7 +1232,7 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-bool M_CheckPortSupportsGame(const char *base_game, const SString &port)
+bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
 {
 	if (port == "vanilla")
 	{
@@ -1241,7 +1241,7 @@ bool M_CheckPortSupportsGame(const char *base_game, const SString &port)
 		return true;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(port.c_str());
+	PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (! pinfo)
 		return false;
 

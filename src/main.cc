@@ -457,7 +457,7 @@ static void DeterminePort()
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(Game_name.c_str());
+	SString base_game = M_GetBaseGame(Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -471,7 +471,7 @@ static void DeterminePort()
 				  config::default_port.c_str());
 		config::default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(base_game.c_str(), config::default_port))
+	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
 				  config::default_port.c_str(), Game_name.c_str());
@@ -849,10 +849,10 @@ static void ReadPortInfo()
 
 	SYS_ASSERT(!Port_name.empty());
 
-	SString base_game = M_GetBaseGame(Game_name.c_str());
+	SString base_game = M_GetBaseGame(Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(base_game.c_str(), Port_name))
+	if (! M_CheckPortSupportsGame(base_game, Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 				  Port_name.c_str(), Game_name.c_str());

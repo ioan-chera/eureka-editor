@@ -208,9 +208,9 @@ public:
 	{
 	}
 
-	bool SupportsGame(const char *game) const;
+	bool SupportsGame(const SString &game) const;
 
-	void AddSupportedGame(const char *game);
+	void AddSupportedGame(const SString &game);
 };
 
 
@@ -285,7 +285,7 @@ PortInfo_c * M_LoadPortInfo(const SString &port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
-bool M_CheckPortSupportsGame(const char *base_game, const SString &port);
+bool M_CheckPortSupportsGame(const SString &base_game, const SString &port);
 
 SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name);
 

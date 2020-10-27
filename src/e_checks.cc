@@ -985,7 +985,7 @@ static int Copy_SideDef(int num)
 }
 
 
-static const char *unpack_confirm_message =
+static const char *const unpack_confirm_message =
 	"This map contains shared sidedefs.  It it recommended to unpack "
 	"them, otherwise it may cause unexpected behavior during editing "
 	"(such as random walls changing their texture).\n\n"

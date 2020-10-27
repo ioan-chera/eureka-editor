@@ -916,7 +916,7 @@ void UDMF_SwitchEngine()
 		return;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(namespace_l.c_str());
+	PortInfo_c *pinfo = M_LoadPortInfo(namespace_l);
 
 	if (pinfo)
 	{
