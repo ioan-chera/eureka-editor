@@ -300,15 +300,15 @@ SString FilenameGetPath(const SString &filename)
 }
 
 
-bool FileCopy(const char *src_name, const char *dest_name)
+bool FileCopy(const SString &src_name, const SString &dest_name)
 {
 	char buffer[1024];
 
-	FILE *src = fopen(src_name, "rb");
+	FILE *src = fopen(src_name.c_str(), "rb");
 	if (! src)
 		return false;
 
-	FILE *dest = fopen(dest_name, "wb");
+	FILE *dest = fopen(dest_name.c_str(), "wb");
 	if (! dest)
 	{
 		fclose(src);
@@ -335,40 +335,40 @@ bool FileCopy(const char *src_name, const char *dest_name)
 }
 
 
-bool FileRename(const char *old_name, const char *new_name)
+bool FileRename(const SString &old_name, const SString &new_name)
 {
 #ifdef WIN32
-	return (::MoveFile(old_name, new_name) != 0);
+	return (::MoveFile(old_name.c_str(), new_name.c_str()) != 0);
 
 #else // UNIX or MACOSX
 
-	return (rename(old_name, new_name) == 0);
+	return (rename(old_name.c_str(), new_name.c_str()) == 0);
 #endif
 }
 
 
-bool FileDelete(const char *filename)
+bool FileDelete(const SString &filename)
 {
 #ifdef WIN32
 	// TODO: set wide character here
-	return (::DeleteFile(filename) != 0);
+	return (::DeleteFile(filename.c_str()) != 0);
 
 #else // UNIX or MACOSX
 
-	return (remove(filename) == 0);
+	return (remove(filename.c_str()) == 0);
 #endif
 }
 
 
-bool FileChangeDir(const char *dir_name)
+bool FileChangeDir(const SString &dir_name)
 {
 #ifdef WIN32
 	// TODO: set wide character here
-	return (::SetCurrentDirectory(dir_name) != 0);
+	return (::SetCurrentDirectory(dir_name.c_str()) != 0);
 
 #else // UNIX or MACOSX
 
-	return (chdir(dir_name) == 0);
+	return (chdir(dir_name.c_str()) == 0);
 #endif
 }
 
@@ -385,11 +385,11 @@ bool FileMakeDir(const SString &dir_name)
 }
 
 
-u8_t * FileLoad(const char *filename, int *length)
+u8_t * FileLoad(const SString &filename, int *length)
 {
 	*length = 0;
 
-	FILE *fp = fopen(filename, "rb");
+	FILE *fp = fopen(filename.c_str(), "rb");
 
 	if (! fp)
 		return NULL;

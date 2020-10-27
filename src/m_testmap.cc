@@ -411,7 +411,7 @@ void CMD_TestMap()
 
 	LogPrintf("Changing current dir to: %s\n", folder.c_str());
 
-	if (! FileChangeDir(folder.c_str()))
+	if (! FileChangeDir(folder))
 	{
 		// FIXME : a notify dialog
 		Beep("chdir failed!");

@@ -262,7 +262,7 @@ void CMD_NewProject()
 	{
 		// TODO??  M_BackupWad(wad);
 
-		if (! FileDelete(filename.c_str()))
+		if (! FileDelete(filename))
 		{
 			DLG_Notify("Unable to delete the existing file.");
 

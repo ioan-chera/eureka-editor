@@ -42,13 +42,13 @@ SString FilenameGetPath(const SString &filename);
 
 // file utilities
 bool FileExists(const SString &filename);
-bool FileCopy(const char *src_name, const char *dest_name);
-bool FileRename(const char *old_name, const char *new_name);
-bool FileDelete(const char *filename);
-bool FileChangeDir(const char *dir_name);
+bool FileCopy(const SString &src_name, const SString &dest_name);
+bool FileRename(const SString &old_name, const SString &new_name);
+bool FileDelete(const SString &filename);
+bool FileChangeDir(const SString &dir_name);
 bool FileMakeDir(const SString &dir_name);
 
-u8_t *FileLoad(const char *filename, int *length);
+u8_t *FileLoad(const SString &filename, int *length);
 void FileFree(u8_t *mem);
 
 // miscellanous
