@@ -104,7 +104,7 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 }
 
 
-Img_c * LoadImage_PNG(Lump_c *lump, const char *name)
+Img_c * LoadImage_PNG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	byte *tex_data;
@@ -118,7 +118,7 @@ Img_c * LoadImage_PNG(Lump_c *lump, const char *name)
 	if (fltk_img.w() <= 0)
 	{
 		// failed to decode
-		LogPrintf("Failed to decode PNG image in '%s' lump.\n", name);
+		LogPrintf("Failed to decode PNG image in '%s' lump.\n", name.c_str());
 		return NULL;
 	}
 
@@ -129,7 +129,7 @@ Img_c * LoadImage_PNG(Lump_c *lump, const char *name)
 }
 
 
-Img_c * LoadImage_JPEG(Lump_c *lump, const char *name)
+Img_c * LoadImage_JPEG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	byte *tex_data;
@@ -145,7 +145,7 @@ Img_c * LoadImage_JPEG(Lump_c *lump, const char *name)
 	if (fltk_img.w() <= 0)
 	{
 		// failed to decode
-		LogPrintf("Failed to decode JPEG image in '%s' lump.\n", name);
+		LogPrintf("Failed to decode JPEG image in '%s' lump.\n", name.c_str());
 		return NULL;
 	}
 
@@ -156,7 +156,7 @@ Img_c * LoadImage_JPEG(Lump_c *lump, const char *name)
 }
 
 
-Img_c * LoadImage_TGA(Lump_c *lump, const char *name)
+Img_c * LoadImage_TGA(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	byte *tex_data;
@@ -173,7 +173,7 @@ Img_c * LoadImage_TGA(Lump_c *lump, const char *name)
 	if (! rgba)
 	{
 		// failed to decode
-		LogPrintf("Failed to decode TGA image in '%s' lump.\n", name);
+		LogPrintf("Failed to decode TGA image in '%s' lump.\n", name.c_str());
 		return NULL;
 	}
 
@@ -228,7 +228,7 @@ static bool ComposePicture(Img_c& dest, Img_c *sub,
 //
 bool LoadPicture(Img_c& dest,      // image to load picture into
 	Lump_c *lump,
-	const char *pic_name,   // picture name (for messages)
+	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
@@ -256,11 +256,11 @@ bool LoadPicture(Img_c& dest,      // image to load picture into
 		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
 	case 0:
-		LogPrintf("Unknown image format in '%s' lump\n", pic_name);
+		LogPrintf("Unknown image format in '%s' lump\n", pic_name.c_str());
 		return false;
 
 	default:
-		LogPrintf("Unsupported image format in '%s' lump\n", pic_name);
+		LogPrintf("Unsupported image format in '%s' lump\n", pic_name.c_str());
 		return false;
 	}
 
@@ -294,7 +294,7 @@ bool LoadPicture(Img_c& dest,      // image to load picture into
 		if (offset < 0 || offset >= lump->Length())
 		{
 			LogPrintf("WARNING: bad image offset 0x%08x in patch [%s]\n",
-			          offset, pic_name);
+			          offset, pic_name.c_str());
 			return false;
 		}
 

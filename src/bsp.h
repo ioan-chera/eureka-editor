@@ -28,7 +28,7 @@ class Lump_c;
 
 /* external funcs */
 
-void GB_PrintMsg(const char *str, ...);
+void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 
 
 // Node Build Information Structure

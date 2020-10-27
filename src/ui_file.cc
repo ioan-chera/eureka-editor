@@ -482,7 +482,7 @@ void UI_OpenMap::PopulateButtons()
 	{
 		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
-		level_names[SString(lump->Name())] = 1;
+		level_names[lump->Name()] = 1;
 	}
 
 	int cx_base = button_grp->x() + 25;

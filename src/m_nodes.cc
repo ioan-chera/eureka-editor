@@ -288,7 +288,7 @@ static const char *build_ErrorString(build_result_e ret)
 }
 
 
-void GB_PrintMsg(const char *str, ...)
+void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...)
 {
 	va_list args;
 

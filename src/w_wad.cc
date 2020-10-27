@@ -513,9 +513,9 @@ map_format_e Wad_file::LevelFormat(int lev_num)
 
 	if (start + LL_BEHAVIOR < NumLumps())
 	{
-		const char *name = GetLump(start + LL_BEHAVIOR)->Name();
+		const SString &name = GetLump(start + LL_BEHAVIOR)->Name();
 
-		if (y_stricmp(name, "BEHAVIOR") == 0)
+		if (name.noCaseEqual("BEHAVIOR"))
 			return MAPF_Hexen;
 	}
 
@@ -1030,7 +1030,7 @@ void Wad_file::RecreateLump(Lump_c *lump, int max_size)
 }
 
 
-Lump_c * Wad_file::AddLevel(const char *name, int max_size, int *lev_num)
+Lump_c * Wad_file::AddLevel(const SString &name, int max_size, int *lev_num)
 {
 	int actual_point = insert_point;
 

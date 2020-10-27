@@ -781,7 +781,7 @@ SString M_PickDefaultIWAD()
 		if (idx >= 0)
 		{
 			idx = edit_wad->LevelHeader(idx);
-			const char *name = edit_wad->GetLump(idx)->Name();
+			const SString &name = edit_wad->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";

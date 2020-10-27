@@ -53,7 +53,7 @@ int last_given_file;
 bool inhibit_node_build;
 
 
-static void SaveLevel(const char *level);
+static void SaveLevel(const SString &level);
 
 static const char * overwrite_message =
 	"The %s PWAD already contains this map.  "
@@ -284,7 +284,7 @@ void CMD_NewProject()
 
 
 	// determine map name (same as first level in the IWAD)
-	const char *map_name = "MAP01";
+	SString map_name = "MAP01";
 
 	int idx = game_wad->LevelFindFirst();
 
@@ -294,7 +294,7 @@ void CMD_NewProject()
 		map_name = game_wad->GetLump(idx)->Name();
 	}
 
-	LogPrintf("Creating New File : %s in %s\n", map_name, filename.c_str());
+	LogPrintf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
 	Wad_file * wad = Wad_file::Open(filename, WadOpenMode_write);
@@ -387,7 +387,7 @@ void CMD_FreshMap()
 	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(map_name.c_str());
+	SaveLevel(map_name);
 }
 
 
@@ -1334,9 +1334,9 @@ void CMD_FlipMap()
 
 	int lump_idx = wad->LevelHeader(lev_idx);
 	Lump_c * lump  = wad->GetLump(lump_idx);
-	const char *map_name = lump->Name();
+	const SString &map_name = lump->Name();
 
-	LogPrintf("Flipping Map to : %s\n", map_name);
+	LogPrintf("Flipping Map to : %s\n", map_name.c_str());
 
 	LoadLevel(wad, map_name);
 }
@@ -1349,7 +1349,7 @@ void CMD_FlipMap()
 static int saving_level;
 
 
-static void SaveHeader(const char *level)
+static void SaveHeader(const SString &level)
 {
 	int size = (int)HeaderData.size();
 
@@ -1609,7 +1609,7 @@ static void EmptyLump(const char *name)
 // Write out the level data
 //
 
-static void SaveLevel(const char *level)
+static void SaveLevel(const SString &level)
 {
 	// set global level name now (for debugging code)
 	Level_name = StringUpper(level);
@@ -1728,7 +1728,7 @@ bool M_SaveMap()
 
 	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName());
 
-	SaveLevel(Level_name.c_str());
+	SaveLevel(Level_name);
 
 	return true;
 }
@@ -1861,7 +1861,7 @@ bool M_ExportMap()
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
 
-	SaveLevel(map_name.c_str());
+	SaveLevel(map_name);
 
 	// do this after the save (in case it fatal errors)
 	Main_LoadResources();
@@ -1925,7 +1925,7 @@ void CMD_CopyMap()
 	// perform the copy (just a save)
 	LogPrintf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name.c_str());
 
-	SaveLevel(new_name.c_str());
+	SaveLevel(new_name);
 
 	Status_Set("Copied to %s", Level_name.c_str());
 }
@@ -1959,7 +1959,7 @@ void CMD_RenameMap()
 		if (idx >= 0)
 		{
 			idx = game_wad->LevelHeader(idx);
-			const char *name = game_wad->GetLump(idx)->Name();
+			const SString &name = game_wad->GetLump(idx)->Name();
 			format = toupper(name[0]);
 		}
 	}
@@ -2056,9 +2056,9 @@ void CMD_DeleteMap()
 
 		int lump_idx = edit_wad->LevelHeader(lev_num);
 		Lump_c * lump  = edit_wad->GetLump(lump_idx);
-		const char *map_name = lump->Name();
+		const SString &map_name = lump->Name();
 
-		LogPrintf("OK.  Loading : %s....\n", map_name);
+		LogPrintf("OK.  Loading : %s....\n", map_name.c_str());
 
 		LoadLevel(edit_wad, map_name);
 	}

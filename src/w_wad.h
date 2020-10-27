@@ -74,9 +74,9 @@ private:
 	void MakeEntry(struct raw_wad_entry_s *entry);
 
 public:
-	const char *Name() const
+	const SString &Name() const
 	{
-		return name.c_str();
+		return name;
 	}
 	int Length() const
 	{
@@ -279,7 +279,7 @@ public:
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
 	Lump_c * AddLump (const SString &name, int max_size = -1);
-	Lump_c * AddLevel(const char *name, int max_size = -1, int *lev_num = nullptr);
+	Lump_c * AddLevel(const SString &name, int max_size = -1, int *lev_num = nullptr);
 
 	// setup lump to write new data to it.
 	// the old contents are lost.
@@ -350,7 +350,7 @@ private:
 			const Lump_c *L1 = wad->directory[A].lump;
 			const Lump_c *L2 = wad->directory[B].lump;
 
-			return (strcmp(L1->Name(), L2->Name()) < 0);
+			return L1->Name() < L2->Name();
 		}
 	};
 };

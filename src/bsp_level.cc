@@ -777,7 +777,7 @@ void PutReject()
 
 // per-level variables
 
-const char *lev_current_name;
+static SString lev_current_name;
 
 int lev_current_idx;
 int lev_current_start;
@@ -1801,7 +1801,7 @@ void LoadLevel()
 	lev_current_name = LEV->Name();
 	lev_overflows = 0;
 
-	GB_PrintMsg("Building nodes on %s\n", lev_current_name);
+	GB_PrintMsg("Building nodes on %s\n", lev_current_name.c_str());
 
 	num_new_vert = 0;
 	num_real_lines = 0;
@@ -1911,9 +1911,9 @@ void UpdateGLMarker(Lump_c *marker)
 	edit_wad->RecreateLump(marker, max_size);
 
 	// when original name is long, need to specify it here
-	if (strlen(lev_current_name) > 5)
+	if (lev_current_name.length() > 5)
 	{
-		marker->Printf("LEVEL=%s\n", lev_current_name);
+		marker->Printf("LEVEL=%s\n", lev_current_name.c_str());
 	}
 
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
@@ -2235,9 +2235,9 @@ Lump_c * CreateGLMarker()
 {
 	SString name_buf;
 
-	if (strlen(lev_current_name) <= 5)
+	if (lev_current_name.length() <= 5)
 	{
-		name_buf = StringPrintf("GL_%s", lev_current_name);
+		name_buf = StringPrintf("GL_%s", lev_current_name.c_str());
 	}
 	else
 	{

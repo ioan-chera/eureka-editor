@@ -63,7 +63,7 @@ static void W_ClearTextures()
 }
 
 
-static void W_AddTexture(const char *name, Img_c *img, bool is_medusa)
+static void W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 {
 	// free any existing one with the same name
 
@@ -309,7 +309,7 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 		Lump_c *lump = lumpRef.lump;
 
 		char img_fmt = W_DetectImageFormat(lump);
-		const char *name = lump->Name();
+		const SString &name = lump->Name();
 		Img_c *img = NULL;
 
 		switch (img_fmt)
@@ -336,11 +336,11 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 				break;
 
 			case 0:
-				LogPrintf("Unknown texture format in '%s' lump\n", name);
+				LogPrintf("Unknown texture format in '%s' lump\n", name.c_str());
 				break;
 
 			default:
-				LogPrintf("Unsupported texture format in '%s' lump\n", lump->Name());
+				LogPrintf("Unsupported texture format in '%s' lump\n", lump->Name().c_str());
 				break;
 		}
 
@@ -511,7 +511,7 @@ static void W_ClearFlats()
 }
 
 
-static void W_AddFlat(const char *name, Img_c *img)
+static void W_AddFlat(const SString &name, Img_c *img)
 {
 	// find any existing one with same name, and free it
 
@@ -532,7 +532,7 @@ static void W_AddFlat(const char *name, Img_c *img)
 }
 
 
-static Img_c * LoadFlatImage(const char *name, Lump_c *lump)
+static Img_c * LoadFlatImage(const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
@@ -777,7 +777,7 @@ Img_c * W_GetSprite(int type)
 		{
 			result = new Img_c();
 
-			if (! LoadPicture(*result, lump, info.sprite.c_str(), 0, 0))
+			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
 			{
 				delete result;
 				result = NULL;
