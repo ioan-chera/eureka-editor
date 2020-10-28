@@ -127,7 +127,7 @@ int M_FindGivenFile(const char *filename)
 static std::map<SString, port_path_info_t> port_paths;
 
 
-port_path_info_t * M_QueryPortPath(const char *name, bool create_it)
+port_path_info_t * M_QueryPortPath(const SString &name, bool create_it)
 {
 	std::map<SString, port_path_info_t>::iterator IT;
 
@@ -275,10 +275,10 @@ public:
 		size = 0;
 	}
 
-	int find(const char *file, const char *map = NULL)
+	int find(const SString &file, const SString &map = NULL)
 	{
 		// ignore the path when matching filenames
-		const char *A = fl_filename_name(file);
+		const char *A = fl_filename_name(file.c_str());
 
 		for (int k = 0 ; k < size ; k++)
 		{
@@ -312,7 +312,7 @@ public:
 		map_names[index].clear();
 	}
 
-	void push_front(const char *file, const char *map)
+	void push_front(const SString &file, const SString &map)
 	{
 		if (size >= MAX_RECENT)
 		{
@@ -332,7 +332,7 @@ public:
 		size++;
 	}
 
-	void insert(const char *file, const char *map)
+	void insert(const SString &file, const SString &map)
 	{
 		// ensure filename (without any path) is unique
 		int f = find(file);
@@ -524,10 +524,10 @@ void M_OpenRecentFromMenu(void *priv_data)
 }
 
 
-void M_AddRecent(const char *filename, const char *map_name)
+void M_AddRecent(const SString &filename, const SString &map_name)
 {
 	char absolute_name[FL_PATH_MAX];
-	fl_filename_absolute(absolute_name, filename);
+	fl_filename_absolute(absolute_name, filename.c_str());
 
 	recent_files.insert(absolute_name, map_name);
 
@@ -1108,7 +1108,7 @@ void M_BackupWad(Wad_file *wad)
 
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir.c_str(), fl_filename_name(wad->PathName()));
+	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir.c_str(), fl_filename_name(wad->PathName().c_str()));
 
 	SString dir_name = ReplaceExtension(filename, NULL);
 

@@ -38,7 +38,7 @@ void y_strlowr (char *str);
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 SString StringUpper(const SString &name);
-SString StringLower(const char *name);
+SString StringLower(const SString &name);
 SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 void StringFree(const char *str);
 void StringCopy(char *buffer, size_t size, const char *source);

@@ -530,9 +530,9 @@ void UI_OpenMap::PopulateButtons()
 }
 
 
-void UI_OpenMap::SetPWAD(const char *name)
+void UI_OpenMap::SetPWAD(const SString &name)
 {
-	pwad_name->value(fl_filename_name(name));
+	pwad_name->value(fl_filename_name(name.c_str()));
 }
 
 
@@ -1181,7 +1181,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 
 // m_testmap.cc
-extern bool M_PortSetupDialog(const char *port, const char *game);
+extern bool M_PortSetupDialog(const SString &port, const SString &game);
 
 
 void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
@@ -1195,7 +1195,7 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	M_PortSetupDialog(that->port.c_str(), that->game.c_str());
+	M_PortSetupDialog(that->port, that->game);
 }
 
 

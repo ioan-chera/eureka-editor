@@ -154,9 +154,9 @@ SString StringUpper(const SString &name)
 }
 
 
-SString StringLower(const char *name)
+SString StringLower(const SString &name)
 {
-	SString copy(name ? name : "");
+	SString copy(name);
 	for(char &c : copy)
 		c = tolower(c);
 	return copy;

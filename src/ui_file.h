@@ -120,7 +120,7 @@ private:
 	void PopulateButtons();
 
 	void LoadFile();
-	void SetPWAD(const char *name);
+	void SetPWAD(const SString &name);
 	void CheckMapName();
 
 private:

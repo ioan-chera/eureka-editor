@@ -1132,7 +1132,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		map_name  = edit_wad->GetLump(idx)->Name();
 	}
 
-	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), edit_wad->PathName());
+	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), edit_wad->PathName().c_str());
 
 	LoadLevel(edit_wad, map_name);
 
@@ -1200,7 +1200,7 @@ void CMD_OpenMap()
 		new_resources = true;
 	}
 
-	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName());
+	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	LoadLevel(wad, map_name);
 
@@ -1685,7 +1685,7 @@ static void SaveLevel(const SString &level)
 
 	M_WriteEurekaLump(edit_wad);
 
-	M_AddRecent(edit_wad->PathName(), Level_name.c_str());
+	M_AddRecent(edit_wad->PathName(), Level_name);
 
 	Status_Set("Saved %s", Level_name.c_str());
 
@@ -1726,7 +1726,7 @@ bool M_SaveMap()
 
 	M_BackupWad(edit_wad);
 
-	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName());
+	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName().c_str());
 
 	SaveLevel(Level_name);
 
@@ -1856,7 +1856,7 @@ bool M_ExportMap()
 	}
 
 
-	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName());
+	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);

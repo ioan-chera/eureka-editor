@@ -27,18 +27,19 @@
 #include "ui_window.h"
 
 
-static const char * QueryName(const char *port = Port_name.c_str(), const char *game = Game_name.c_str())
+static SString QueryName(const SString &port = Port_name, const SString &cgame = Game_name)
 {
 	SYS_ASSERT(port);
 
 	static char buffer[256];
+	SString game = cgame;
 
-	if (y_stricmp(port, "vanilla") == 0)
+	if (port.noCaseEqual("vanilla"))
 	{
 		if (! game)
 			game = "doom2";
 
-		snprintf(buffer, sizeof(buffer), "vanilla_%s", game);
+		snprintf(buffer, sizeof(buffer), "vanilla_%s", game.c_str());
 		return buffer;
 	}
 
@@ -187,16 +188,16 @@ public:
 };
 
 
-bool M_PortSetupDialog(const char *port, const char *game)
+bool M_PortSetupDialog(const SString &port, const SString &game)
 {
 	SString name_buf;
 
-	if (y_stricmp(port, "vanilla") == 0)
+	if (port.noCaseEqual("vanilla"))
 	{
-		name_buf = StringPrintf("Vanilla %s\n", game);
+		name_buf = StringPrintf("Vanilla %s\n", game.c_str());
 		name_buf[8] = toupper(name_buf[8]);
 	}
-	else if (y_stricmp(port, "mbf") == 0)	// temp hack for aesthetics
+	else if (port.noCaseEqual("mbf"))	// temp hack for aesthetics
 		name_buf = "MBF";
 	else
 	{
@@ -301,12 +302,12 @@ static const char * CalcWarpString()
 }
 
 
-static void AppendWadName(SString &str, const char *name, const char *parm = NULL)
+static void AppendWadName(SString &str, const SString &name, const SString &parm = NULL)
 {
 	static char abs_name[FL_PATH_MAX];
 
 	// FIXME: check result??
-	fl_filename_absolute(abs_name, sizeof(abs_name), name);
+	fl_filename_absolute(abs_name, sizeof(abs_name), name.c_str());
 
 	if (parm)
 	{
@@ -384,7 +385,7 @@ void CMD_TestMap()
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(Port_name.c_str(), Game_name.c_str()))
+		if (! M_PortSetupDialog(Port_name, Game_name))
 			return;
 
 		info = M_QueryPortPath(QueryName());

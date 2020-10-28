@@ -26,7 +26,7 @@ class Wad_file;
 void M_LoadRecent();
 void M_SaveRecent();
 
-void M_AddRecent(const char *filename, const char *map_name);
+void M_AddRecent(const SString &filename, const SString &map_name);
 void M_OpenRecentFromMenu(void *priv_data);
 bool M_TryOpenMostRecent();
 
@@ -57,7 +57,7 @@ typedef struct port_path_info_t
 
 } port_path_info_t;
 
-port_path_info_t * M_QueryPortPath(const char *name, bool create_it = false);
+port_path_info_t * M_QueryPortPath(const SString &name, bool create_it = false);
 
 bool M_IsPortPathValid(const port_path_info_t *info);
 

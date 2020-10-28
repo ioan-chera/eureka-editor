@@ -908,10 +908,10 @@ void UDMF_SwitchEngine()
 		return;
 
 	// convert to lowercase
-	SString namespace_l = StringLower(Udmf_namespace.c_str());
+	SString namespace_l = StringLower(Udmf_namespace);
 
 	// already set?
-	if (y_stricmp(Port_name.c_str(), namespace_l.c_str()) == 0)
+	if (Port_name.noCaseEqual(namespace_l))
 	{
 		return;
 	}

@@ -191,9 +191,9 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const SString &filename);
 
-	const char *PathName() const
+	const SString &PathName() const
 	{
-		return filename.c_str();
+		return filename;
 	}
 	bool IsReadOnly() const
 	{

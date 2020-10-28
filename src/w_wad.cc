@@ -1345,7 +1345,7 @@ void W_FreeLumpData(byte ** buf_ptr)
 
 void MasterDir_Add(Wad_file *wad)
 {
-	DebugPrintf("MasterDir: adding '%s'\n", wad->PathName());
+	DebugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
 	master_dir.push_back(wad);
 }
@@ -1353,7 +1353,7 @@ void MasterDir_Add(Wad_file *wad)
 
 void MasterDir_Remove(Wad_file *wad)
 {
-	DebugPrintf("MasterDir: removing '%s'\n", wad->PathName());
+	DebugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
 
 	std::vector<Wad_file *>::iterator ENDP;
 
@@ -1401,7 +1401,7 @@ bool MasterDir_HaveFilename(const SString &chk_path)
 {
 	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
 	{
-		const char *wad_path = master_dir[k]->PathName();
+		const SString &wad_path = master_dir[k]->PathName();
 
 		if (W_FilenameAbsCompare(wad_path, chk_path) == 0)
 			return true;
