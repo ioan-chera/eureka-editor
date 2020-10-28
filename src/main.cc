@@ -399,7 +399,7 @@ static bool DetermineIWAD()
 		// make lowercase
 		Iwad_name = StringLower(Iwad_name.c_str());
 
-		if (! M_CanLoadDefinitions("games", Iwad_name.c_str()))
+		if (! M_CanLoadDefinitions("games", Iwad_name))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
 		SString path = M_QueryKnownIWAD(Iwad_name);
@@ -420,7 +420,7 @@ static bool DetermineIWAD()
 
 		SString game = GameNameFromIWAD(Iwad_name);
 
-		if (! M_CanLoadDefinitions("games", game.c_str()))
+		if (! M_CanLoadDefinitions("games", game))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
 
 		M_AddKnownIWAD(Iwad_name);
@@ -451,7 +451,7 @@ static void DeterminePort()
 	// NOTE: values from the EUREKA_LUMP are already verified.
 	if (!Port_name.empty())
 	{
-		if (! M_CanLoadDefinitions("ports", Port_name.c_str()))
+		if (! M_CanLoadDefinitions("ports", Port_name))
 			FatalError("Unknown port '%s' (no definition file)\n", Port_name.c_str());
 
 		return;
@@ -465,7 +465,7 @@ static void DeterminePort()
 		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
 		config::default_port = "vanilla";
 	}
-	else if (! M_CanLoadDefinitions("ports", config::default_port.c_str()))
+	else if (! M_CanLoadDefinitions("ports", config::default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n",
 				  config::default_port.c_str());

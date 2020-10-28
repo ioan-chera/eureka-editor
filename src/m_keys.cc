@@ -405,16 +405,16 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 //------------------------------------------------------------------------
 
 
-key_context_e M_ParseKeyContext(const char *str)
+key_context_e M_ParseKeyContext(const SString &str)
 {
-	if (y_stricmp(str, "browser") == 0) return KCTX_Browser;
-	if (y_stricmp(str, "render")  == 0) return KCTX_Render;
-	if (y_stricmp(str, "general") == 0) return KCTX_General;
+	if (str.noCaseEqual("browser")) return KCTX_Browser;
+	if (str.noCaseEqual("render")) return KCTX_Render;
+	if (str.noCaseEqual("general")) return KCTX_General;
 
-	if (y_stricmp(str, "line")    == 0) return KCTX_Line;
-	if (y_stricmp(str, "sector")  == 0) return KCTX_Sector;
-	if (y_stricmp(str, "thing")   == 0) return KCTX_Thing;
-	if (y_stricmp(str, "vertex")  == 0) return KCTX_Vertex;
+	if (str.noCaseEqual("line")) return KCTX_Line;
+	if (str.noCaseEqual("sector")) return KCTX_Sector;
+	if (str.noCaseEqual("thing")) return KCTX_Thing;
+	if (str.noCaseEqual("vertex")) return KCTX_Vertex;
 
 	return KCTX_NONE;
 }
@@ -506,7 +506,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 		return;
 	}
 
-	temp.context = M_ParseKeyContext(tokens[0].c_str());
+	temp.context = M_ParseKeyContext(tokens[0]);
 
 	if (temp.context == KCTX_NONE)
 	{
@@ -516,7 +516,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 
 	// handle un-bound keys
-	if (y_stricmp(tokens[2].c_str(), "UNBOUND") == 0)
+	if (tokens[2].noCaseEqual("UNBOUND"))
 	{
 #if 0
 		fprintf(stderr, "REMOVED BINDING key:%04x (%s)\n", temp.key, tokens[0].c_str());
@@ -578,7 +578,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 		std::getline(fp, line.get());
 
 		std::vector<SString> tokens;
-		int num_tok = M_ParseLine(line.c_str(), tokens, ParseOptions::haveStringsKeepQuotes);
+		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStringsKeepQuotes);
 
 		if (num_tok == 0)
 			continue;

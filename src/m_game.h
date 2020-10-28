@@ -264,7 +264,7 @@ void M_PrepareConfigVariables();
 
 void M_LoadDefinitions(const SString &folder, const SString &name);
 
-bool M_CanLoadDefinitions(const char *folder, const char *name);
+bool M_CanLoadDefinitions(const SString &folder, const SString &name);
 
 enum parse_purpose_e
 {

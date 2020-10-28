@@ -1161,7 +1161,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	SString game = GameNameFromIWAD(chooser.filename());
 
-	if (! M_CanLoadDefinitions("games", game.c_str()))
+	if (! M_CanLoadDefinitions("games", game))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");

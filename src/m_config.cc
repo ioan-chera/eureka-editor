@@ -1419,7 +1419,7 @@ int M_WriteConfigFile()
 //------------------------------------------------------------------------
 
 
-int M_ParseLine(const char *line, std::vector<SString> &tokens, ParseOptions options)
+int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions options)
 {
 	// when do_strings == 2, string tokens keep their quotes.
 
@@ -1432,6 +1432,7 @@ int M_ParseLine(const char *line, std::vector<SString> &tokens, ParseOptions opt
 	tokens.clear();
 
 	// skip leading whitespace
+	const char *line = cline.c_str();
 	while (isspace(*line))
 		line++;
 

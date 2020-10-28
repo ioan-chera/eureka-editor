@@ -164,7 +164,7 @@ void M_PrepareConfigVariables()
 	{
 		parse_vars["$GAME_NAME"] = Game_name;
 
-		if (M_CanLoadDefinitions("games", Game_name.c_str()))
+		if (M_CanLoadDefinitions("games", Game_name))
 		{
 			SString base_game = M_GetBaseGame(Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -384,7 +384,7 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 }
 
 
-bool M_CanLoadDefinitions(const char *folder, const char *name)
+bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 {
 	SString filename = FindDefinitionFile(folder, name);
 
@@ -928,7 +928,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 
 		// test multiple values, only need one to succeed
 		for (int i = 2 ; i < nargs ; i++)
-			if (y_stricmp(var_value.c_str(), argv[i]) == 0)
+			if (var_value.noCaseEqual(argv[i]))
 				return op_is;
 
 		return op_not;
@@ -1186,7 +1186,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
-		return y_stricmp(a.c_str(), b.c_str()) < 0;
+		return a.noCaseCompare(b) < 0;
 	});
 
 	// transfer to passed list, removing duplicates as we go
@@ -1197,8 +1197,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 	list.reserve(temp_list.size());
 	for (pos = 0 ; pos < temp_list.size() ; pos++)
 	{
-		if (pos + 1 < temp_list.size() &&
-			y_stricmp(temp_list[pos].c_str(), temp_list[pos + 1].c_str()) == 0)
+		if (pos + 1 < temp_list.size() && temp_list[pos].noCaseEqual(temp_list[pos + 1]))
 		{
 			continue;
 		}
@@ -1287,7 +1286,7 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 
 		result += list[i];
 
-		if (y_stricmp(list[i].c_str(), exist_name) == 0)
+		if (list[i].noCaseEqual(exist_name))
 			*exist_val = entry_id;
 
 		entry_id++;

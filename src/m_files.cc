@@ -659,9 +659,9 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 }
 
 
-static SString SearchForIWAD(const char *game)
+static SString SearchForIWAD(const SString &game)
 {
-	DebugPrintf("Searching for '%s' IWAD\n", game);
+	DebugPrintf("Searching for '%s' IWAD\n", game.c_str());
 
 	static char dir_name[FL_PATH_MAX];
 
@@ -751,7 +751,7 @@ void M_LookForIWADs()
 		if (!M_QueryKnownIWAD(game).empty())
 			continue;
 
-		SString path = SearchForIWAD(game.c_str());
+		SString path = SearchForIWAD(game);
 
 		if (!path.empty())
 		{
@@ -827,12 +827,12 @@ SString M_PickDefaultIWAD()
 }
 
 
-static void M_AddResource_Unique(const char * filename)
+static void M_AddResource_Unique(const SString & filename)
 {
 	// check if base filename (without path) already exists
 	for (const SString &resource : Resource_list)
 	{
-		const char *A = fl_filename_name(filename);
+		const char *A = fl_filename_name(filename.c_str());
 		const char *B = fl_filename_name(resource.c_str());
 
 		if (y_stricmp(A, B) == 0)
@@ -989,7 +989,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	for (const SString &resource : new_resources)
 	{
-		M_AddResource_Unique(resource.c_str());
+		M_AddResource_Unique(resource);
 	}
 
 	return true;
@@ -1068,17 +1068,17 @@ static void backup_scan_file(const SString &name, int flags, void *priv_dat)
 }
 
 
-static const char *Backup_Name(const char *dir_name, int slot)
+static const char *Backup_Name(const SString &dir_name, int slot)
 {
 	static char filename[FL_PATH_MAX];
 
-	snprintf(filename, sizeof(filename), "%s/%d.wad", dir_name, slot);
+	snprintf(filename, sizeof(filename), "%s/%d.wad", dir_name.c_str(), slot);
 
 	return filename;
 }
 
 
-static void Backup_Prune(const char *dir_name, int b_low, int b_high, int wad_size)
+static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad_size)
 {
 	// Note: the logic here for checking space is very crude, it assumes
 	//       all existing backups have the same size as the currrent wad.
@@ -1138,12 +1138,12 @@ void M_BackupWad(Wad_file *wad)
 	{
 		int wad_size = wad->TotalSize();
 
-		Backup_Prune(dir_name.c_str(), b_low, b_high, wad_size);
+		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
 
 	// actually back-up the file
 
-	const char * dest_name = Backup_Name(dir_name.c_str(), b_high + 1);
+	const char * dest_name = Backup_Name(dir_name, b_high + 1);
 
 	if (! wad->Backup(dest_name))
 	{
