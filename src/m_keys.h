@@ -113,7 +113,7 @@ void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context);
 
 void M_ChangeBindingKey(int index, keycode_t key);
 const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
-                               const char *func_str);
+                               const SString &func_str);
 const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
                                const char *func_str);
 void M_DeleteLocalBinding(int index);

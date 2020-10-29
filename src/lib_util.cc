@@ -198,6 +198,37 @@ SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...)
 		return result;
 	}
 }
+SString StringVPrintf(const char *str, va_list ap)
+{
+	// Algorithm: keep doubling the allocated buffer size
+	// until the output fits. Based on code by Darren Salt.
+
+	char *buf = NULL;
+	int buf_size = 128;
+
+	for (;;)
+	{
+		int out_len;
+
+		buf_size *= 2;
+
+		buf = (char*)realloc(buf, buf_size);
+		if (!buf)
+			FatalError("Out of memory (formatting string)\n");
+
+		out_len = vsnprintf(buf, buf_size, str, ap);
+
+		// old versions of vsnprintf() simply return -1 when
+		// the output doesn't fit.
+		if (out_len < 0 || out_len >= buf_size)
+			continue;
+
+		SString result(buf);
+		free(buf);
+		return result;
+	}
+
+}
 
 
 void StringFree(const char *str)
@@ -211,11 +242,11 @@ void StringFree(const char *str)
 //
 // Safe, cross-platform version of strncpy
 //
-void StringCopy(char *buffer, size_t size, const char *source)
+void StringCopy(char *buffer, size_t size, const SString &source)
 {
 	if(!size)
 		return;	// trivial
-	strncpy(buffer, source, size);
+	strncpy(buffer, source.c_str(), size);
 	buffer[size - 1] = 0;
 }
 

@@ -469,18 +469,16 @@ bool W_TextureCausesMedusa(const SString &name)
 }
 
 
-const char *NormalizeTex(const SString &name)
+SString NormalizeTex(const SString &name)
 {
 	if (name[0] == 0)
 		return "-";
 
-	static char buffer[WAD_TEX_NAME+1];
-
-	memset(buffer, 0, sizeof(buffer));
+	SString buffer;
 
 	for (size_t i = 0 ; i < WAD_TEX_NAME && name[i]; i++)
 	{
-		buffer[i] = name[i];
+		buffer.push_back(name[i]);
 
 		// remove double quotes
 		if (buffer[i] == '"')
@@ -703,13 +701,13 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = W_FindGlobalLump(buffer.c_str());
+		lump = W_FindGlobalLump(buffer);
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = W_FindGlobalLump(buffer.c_str());
+			lump = W_FindGlobalLump(buffer);
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -723,7 +721,7 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = W_FindGlobalLump(name.c_str());
+		lump = W_FindGlobalLump(name);
 	}
 
 	return lump;
@@ -743,7 +741,7 @@ Img_c * W_GetSprite(int type)
 
 	Img_c *result = NULL;
 
-	if (strncmp(info.desc.c_str(), "UNKNOWN", 7) == 0)
+	if (info.desc.startsWith("UNKNOWN"))
 	{
 		// leave as NULL
 	}

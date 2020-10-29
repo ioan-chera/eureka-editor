@@ -34,9 +34,6 @@ namespace ajbsp
 
 #define SYS_MSG_BUFLEN  4000
 
-static char message_buf[SYS_MSG_BUFLEN];
-
-
 void PrintDetail(const char *fmt, ...)
 {
 	(void) fmt;
@@ -47,17 +44,18 @@ void Failure(const char *fmt, ...)
 {
 	va_list args;
 
+
 	va_start(args, fmt);
-	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
+	SString message = StringVPrintf(fmt, args);
 	va_end(args);
 
 	if (cur_info->warnings)
-		GB_PrintMsg("Failure: %s", message_buf);
+		GB_PrintMsg("Failure: %s", message.c_str());
 
 	cur_info->total_warnings++;
 
 #if DEBUG_ENABLED
-	DebugPrintf("Failure: %s", message_buf);
+	DebugPrintf("Failure: %s", message.c_str());
 #endif
 }
 
@@ -67,16 +65,16 @@ void Warning(const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	vsnprintf(message_buf, sizeof(message_buf), fmt, args);
+	SString message = StringVPrintf(fmt, args);
 	va_end(args);
 
 	if (cur_info->warnings)
-		GB_PrintMsg("Warning: %s", message_buf);
+		GB_PrintMsg("Warning: %s", message.c_str());
 
 	cur_info->total_warnings++;
 
 #if DEBUG_ENABLED
-	DebugPrintf("Warning: %s", message_buf);
+	DebugPrintf("Warning: %s", message.c_str());
 #endif
 }
 

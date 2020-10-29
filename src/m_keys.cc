@@ -943,19 +943,18 @@ void M_ChangeBindingKey(int index, keycode_t key)
 }
 
 
-static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_str)
+static const char * DoParseBindingFunc(key_binding_t& bind, const SString & func_str)
 {
 	static char error_msg[1024];
 
 	// convert the brackets and commas into spaces and use the
 	// line tokeniser.
 
-	static char buffer[600];
-	StringCopy(buffer, sizeof(buffer), func_str);
+	SString buffer = func_str;
 
-	for (unsigned int k = 0 ; buffer[k] ; k++)
-		if (buffer[k] == ',' || buffer[k] == ':')
-			buffer[k] = ' ';
+	for (char &c : buffer)
+		if (c == ',' || c == ':')
+			c = ' ';
 
 	std::vector<SString> tokens;
 
@@ -1001,7 +1000,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const char * func_st
 
 // returns an error message, or NULL if OK
 const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
-                       const char *func_str)
+							   const SString &func_str)
 {
 	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
 

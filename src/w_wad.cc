@@ -173,17 +173,13 @@ bool Lump_c::Write(const void *data, int len)
 
 void Lump_c::Printf(EUR_FORMAT_STRING(const char *msg), ...)
 {
-	static char buffer[FL_PATH_MAX];
-
 	va_list args;
 
 	va_start(args, msg);
-	vsnprintf(buffer, sizeof(buffer), msg, args);
+	SString buffer = StringVPrintf(msg, args);
 	va_end(args);
 
-	buffer[sizeof(buffer) - 1] = 0;
-
-	Write(buffer, (int)strlen(buffer));
+	Write(buffer.c_str(), (int)buffer.length());
 }
 
 
@@ -523,7 +519,7 @@ map_format_e Wad_file::LevelFormat(int lev_num)
 }
 
 
-Lump_c * Wad_file::FindLumpInNamespace(const char *name, WadNamespace group)
+Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group)
 {
 	for(const LumpRef &lumpRef : directory)
 	{
@@ -1287,7 +1283,7 @@ bool Wad_file::Backup(const char *new_filename)
 //------------------------------------------------------------------------
 
 
-Lump_c * W_FindGlobalLump(const char *name)
+Lump_c * W_FindGlobalLump(const SString &name)
 {
 	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
@@ -1304,7 +1300,7 @@ Lump_c * W_FindSpriteLump(const SString &name)
 {
 	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name.c_str(), WadNamespace_Sprites);
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace_Sprites);
 		if (L)
 			return L;
 	}

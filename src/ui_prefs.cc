@@ -1273,7 +1273,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 		}
 		else
 		{
-			M_SetLocalBinding(bind_idx, new_key, new_context, new_func.c_str());
+			M_SetLocalBinding(bind_idx, new_key, new_context, new_func);
 		}
 	}
 

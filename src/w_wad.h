@@ -217,7 +217,7 @@ public:
 	Lump_c * FindLump(const SString &name);
 	int FindLumpNum(const SString &name);
 
-	Lump_c * FindLumpInNamespace(const char *name, WadNamespace group);
+	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group);
 
 	int LevelCount() const
 	{
@@ -368,7 +368,7 @@ extern std::vector<Wad_file *> master_dir;
 
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
-Lump_c * W_FindGlobalLump(const char *name);
+Lump_c * W_FindGlobalLump(const SString &name);
 
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).

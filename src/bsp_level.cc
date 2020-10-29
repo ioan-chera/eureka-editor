@@ -1888,14 +1888,9 @@ static u32_t CalcGLChecksum(void)
 }
 
 
-static const char *CalcOptionsString()
+inline static SString CalcOptionsString()
 {
-	static char buffer[256];
-
-	snprintf(buffer, sizeof(buffer), "--cost %d%s", cur_info->factor,
-		cur_info->fast ? " --fast" : "");
-
-	return buffer;
+	return StringPrintf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
 }
 
 
@@ -1917,7 +1912,7 @@ void UpdateGLMarker(Lump_c *marker)
 	}
 
 	marker->Printf("BUILDER=%s\n", "Eureka " EUREKA_VERSION);
-	marker->Printf("OPTIONS=%s\n", CalcOptionsString());
+	marker->Printf("OPTIONS=%s\n", CalcOptionsString().c_str());
 
 	SString time_str = UtilTimeString();
 

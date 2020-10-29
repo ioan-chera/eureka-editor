@@ -124,16 +124,15 @@ int show_help     = 0;
 int show_version  = 0;
 
 
-static void RemoveSingleNewlines(char *buffer)
+static void RemoveSingleNewlines(SString &buffer)
 {
-	for (char *p = buffer ; *p ; p++)
+	for (size_t i = 0; i < buffer.length(); ++i)
 	{
-		if (*p == '\n' && p[1] == '\n')
-			while (*p == '\n')
-				p++;
-
-		if (*p == '\n')
-			*p = ' ';
+		if(buffer[i] == '\n' && buffer[i + 1] == '\n')
+			while(buffer[i] == '\n')
+				i++;
+		if(buffer[i] == '\n')
+			buffer[i] = ' ';
 	}
 }
 
@@ -145,13 +144,9 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list arg_ptr;
 
-	static char buffer[MSG_BUF_LEN];
-
 	va_start(arg_ptr, fmt);
-	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+	SString buffer = StringVPrintf(fmt, arg_ptr);
 	va_end(arg_ptr);
-
-	buffer[MSG_BUF_LEN-1] = 0;
 
 	// re-entered here? ouch!
 	if (in_fatal_error)
@@ -168,26 +163,26 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	if (init_progress == ProgressStatus_nothing || Quiet || !log_file.empty())
 	{
-		fprintf(stderr, "\nFATAL ERROR: %s", buffer);
+		fprintf(stderr, "\nFATAL ERROR: %s", buffer.c_str());
 	}
 
 	if (init_progress >= ProgressStatus_early)
 	{
-		LogPrintf("\nFATAL ERROR: %s", buffer);
+		LogPrintf("\nFATAL ERROR: %s", buffer.c_str());
 	}
 
 	if (init_progress >= ProgressStatus_loaded)
 	{
 		RemoveSingleNewlines(buffer);
 
-		DLG_ShowError("%s", buffer);
+		DLG_ShowError("%s", buffer.c_str());
 
 		init_progress = ProgressStatus_early;
 	}
 #ifdef WIN32
 	else
 	{
-		MessageBox(NULL, buffer, "Eureka : Error",
+		MessageBox(NULL, buffer.c_str(), "Eureka : Error",
 		           MB_ICONEXCLAMATION | MB_OK |
 				   MB_SYSTEMMODAL | MB_SETFOREGROUND);
 	}

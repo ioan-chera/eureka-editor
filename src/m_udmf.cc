@@ -845,11 +845,11 @@ static void UDMF_WriteSideDefs(Lump_c *lump)
 		// use NormalizeTex to ensure no double quote
 
 		if (side->UpperTex() != "-")
-			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()));
+			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()).c_str());
 		if (side->LowerTex() != "-")
-			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()));
+			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()).c_str());
 		if (side->MidTex() != "-")
-			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()));
+			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()).c_str());
 
 		lump->Printf("}\n\n");
 	}
@@ -869,8 +869,8 @@ static void UDMF_WriteSectors(Lump_c *lump)
 
 		// use NormalizeTex to ensure no double quote
 
-		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()));
-		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()));
+		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()).c_str());
+		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()).c_str());
 
 		lump->Printf("lightlevel = %d;\n", sec->light);
 		if (sec->type != 0)
