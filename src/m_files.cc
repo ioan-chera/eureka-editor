@@ -459,19 +459,17 @@ void M_LoadRecent()
 
 void M_SaveRecent()
 {
-	static char filename[FL_PATH_MAX];
+	SString filename = home_dir + "/misc.cfg";
 
-	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir.c_str());
-
-	FILE *fp = fopen(filename, "w");
+	FILE *fp = fopen(filename.c_str(), "w");
 
 	if (! fp)
 	{
-		LogPrintf("Failed to save recent list to: %s\n", filename);
+		LogPrintf("Failed to save recent list to: %s\n", filename.c_str());
 		return;
 	}
 
-	LogPrintf("Writing recent list to: %s\n", filename);
+	LogPrintf("Writing recent list to: %s\n", filename.c_str());
 
 	fprintf(fp, "# Eureka miscellaneous stuff\n");
 
