@@ -105,6 +105,8 @@ inline int hextoi (char c)
  *  Intentionally not using isalpha() and co. because I
  *  don't want the results to depend on the locale.
  */
+#define IDENT_SET "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+
 inline bool y_isident (char c)
 {
   switch (c)
@@ -293,6 +295,11 @@ public:
 		return data.find_first_of(s ? s : "", pos);
 	}
 
+	size_t find_first_not_of(const char *s, size_t pos = 0) const
+	{
+		return data.find_first_not_of(s ? s : "", pos);
+	}
+
 	size_t find_last_of(const char *s) const
 	{
 		return data.find_last_of(s ? s : "");
@@ -431,6 +438,9 @@ public:
 	void cutWithSpace(size_t pos, SString *second);
 
 	void trimLeadingSpaces();
+	void trimTrailingSpaces();
+
+	size_t findSpace() const;
 
 private:
 	std::string data;

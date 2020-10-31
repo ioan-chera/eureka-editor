@@ -310,6 +310,30 @@ void SString::trimLeadingSpaces()
 		erase(0, i);
 }
 
+//
+// Trim trailing spaces
+//
+void SString::trimTrailingSpaces()
+{
+	if(!*this)
+		return;
+	while(*this && isspace(data.back()))
+		data.pop_back();
+}
+
+//
+// Finds the first space
+//
+size_t SString::findSpace() const
+{
+	for(size_t i = 0; i < length(); ++i)
+	{
+		if(isspace(data[i]))
+			return i;
+	}
+	return std::string::npos;
+}
+
 SString StringTidy(const SString &str, const SString &bad_chars)
 {
 	SString buf;
