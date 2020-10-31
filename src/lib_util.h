@@ -181,6 +181,10 @@ public:
 	{
 	}
 
+	SString(std::string &&consume) : data(std::move(consume))
+	{
+	}
+
 	bool empty() const
 	{
 		return data.empty();
