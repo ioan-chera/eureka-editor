@@ -660,25 +660,22 @@ void M_LoadBindings()
 
 void M_SaveBindings()
 {
-	static char filename[FL_PATH_MAX];
+	SString filename = home_dir + "/bindings.cfg";
 
-	snprintf(filename, sizeof(filename), "%s/bindings.cfg", home_dir.c_str());
-
-	FILE *fp = fopen(filename, "w");
-
-	if (! fp)
+	std::ofstream os(filename.get(), std::ios::trunc);
+	if (! os.is_open())
 	{
-		LogPrintf("Failed to save key bindings to: %s\n", filename);
+		LogPrintf("Failed to save key bindings to: %s\n", filename.c_str());
 
 		DLG_Notify("Warning: failed to save key bindings\n"
-		           "(filename: %s)", filename);
+		           "(filename: %s)", filename.c_str());
 		return;
 	}
 
-	LogPrintf("Writing key bindings to: %s\n", filename);
+	LogPrintf("Writing key bindings to: %s\n", filename.c_str());
 
-	fprintf(fp, "# Eureka key bindings (local)\n");
-	fprintf(fp, "# vi:ts=16:noexpandtab\n\n");
+	os << "# Eureka key bindings (local)\n";
+	os << "# vi:ts=16:noexpandtab\n\n";
 
 	for (int ctx = KCTX_Browser ; ctx <= KCTX_General ; ctx++)
 	{
@@ -695,16 +692,16 @@ void M_SaveBindings()
 			if (BindingExists(install_binds, bind, true /* full match */))
 				continue;
 
-			fprintf(fp, "%s\t%s\t%s", M_KeyContextString(bind.context),
-					M_KeyToString(bind.key), bind.cmd->name);
+			os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+				bind.cmd->name;
 
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 			{
 				if (bind.param[p])
-					fprintf(fp, "\t%s", bind.param[p].c_str());
+					os << '\t' << bind.param[p];
 			}
 
-			fprintf(fp, "\n");
+			os << '\n';
 			count++;
 		}
 
@@ -719,17 +716,15 @@ void M_SaveBindings()
 
 			if (! BindingExists(all_bindings, bind, false /* full match */))
 			{
-				fprintf(fp, "%s\t%s\t%s\n", M_KeyContextString(bind.context),
-						M_KeyToString(bind.key), "UNBOUND");
+				os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
+					"UNBOUND" << '\n';
 				count++;
 			}
 		}
 
 		if (count > 0)
-			fprintf(fp, "\n");
+			os << '\n';
 	}
-
-	fclose(fp);
 }
 
 

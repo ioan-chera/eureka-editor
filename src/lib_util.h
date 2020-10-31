@@ -487,6 +487,12 @@ inline static SString operator + (const char *cstring, const SString &sstring)
 	return SString(cstring) + sstring;
 }
 
+std::ostream &operator<<(std::ostream &os, const SString &str)
+{
+	os << str.get();
+	return os;
+}
+
 namespace std
 {
 	template <> struct hash<SString>
