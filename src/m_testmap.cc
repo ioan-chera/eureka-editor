@@ -61,7 +61,7 @@ public:
 	bool want_close;
 
 public:
-	void SetEXE(const char *newbie)
+	void SetEXE(const SString &newbie)
 	{
 		exe_name = newbie;
 
