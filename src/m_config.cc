@@ -869,9 +869,9 @@ bool M_ReadTextLine(SString &string, std::istream &is)
 //
 bool LineFile::open(const SString &path) noexcept
 {
-	close();
-	fp = fopen(path.c_str(), "rt");
-	return !!fp;
+	is.close();
+	is.open(path.get());
+	return is.is_open();
 }
 
 //
@@ -879,11 +879,8 @@ bool LineFile::open(const SString &path) noexcept
 //
 void LineFile::close() noexcept
 {
-	if(fp)
-	{
-		fclose(fp);
-		fp = nullptr;
-	}
+	if(is.is_open())
+		is.close();
 }
 
 //
@@ -1532,12 +1529,11 @@ bool M_LoadUserState()
 
 	LogPrintf("Loading user state from: %s\n", filename);
 
-
-	static char line[FL_PATH_MAX];
+	SString line;
 
 	std::vector<SString> tokens;
 
-	while (file.readLine(line, sizeof(line)))
+	while (file.readLine(line))
 	{
 		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStrings);
 
@@ -1546,7 +1542,7 @@ bool M_LoadUserState()
 
 		if (num_tok < 0)
 		{
-			LogPrintf("Error in persistent data: %s\n", line);
+			LogPrintf("Error in persistent data: %s\n", line.c_str());
 			continue;
 		}
 
@@ -1561,7 +1557,7 @@ bool M_LoadUserState()
 		}
 		else
 		{
-			LogPrintf("Unknown persistent data: %s\n", line);
+			LogPrintf("Unknown persistent data: %s\n", line.c_str());
 		}
 	}
 

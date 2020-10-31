@@ -451,7 +451,7 @@ public:
 	SString fname = nullptr;
 
 	// buffer containing the raw line
-	char readbuf [512] = {};
+	SString readstring;
 
 	// buffer storing the tokens
 	char tokenbuf[512];
@@ -487,7 +487,7 @@ static void M_TokenizeLine(parser_state_c *pst)
 	// break the line into whitespace-separated tokens.
 	// whitespace can be enclosed in double quotes.
 
-	const char	*src  = pst->readbuf;
+	size_t srcpos = 0;
 	char		*dest = pst->tokenbuf;
 
 	bool		in_token = false;
@@ -495,27 +495,28 @@ static void M_TokenizeLine(parser_state_c *pst)
 
 	pst->argc = 0;
 
-	for ( ; ; src++)
+	for ( ; ; srcpos++)
 	{
-		if (*src == 0 || *src == '\n')
+		char srcc = pst->readstring[srcpos];
+		if (srcc == 0 || srcc == '\n')
 		{
 			if (in_token)
 				*dest = 0;
 			break;
 		}
 
-		if (*src == '"')
+		if (srcc == '"')
 		{
 			quoted = !quoted;
 			continue;
 		}
 
 		// found a comment?   [ we allow # in the middle of a token ]
-		if (*src == '#' && !in_token && !quoted)
+		if (srcc == '#' && !in_token && !quoted)
 			break;
 
 		// beginning a new token?
-		if (!in_token && (quoted || !isspace(*src)))
+		if (!in_token && (quoted || !isspace(srcc)))
 		{
 			if (pst->argc >= MAX_TOKENS)
 				ThrowException("%s(%d): more than %d tokens on the line\n",
@@ -525,12 +526,12 @@ static void M_TokenizeLine(parser_state_c *pst)
 
 			pst->argv[pst->argc++] = dest;
 
-			*dest++ = *src;
+			*dest++ = srcc;
 			continue;
 		}
 
 		// whitespace will end a token (unless quoted)
-		if (isspace(*src) && in_token && !quoted)
+		if (isspace(srcc) && in_token && !quoted)
 		{
 			in_token = false;
 			*dest++  = 0;
@@ -539,7 +540,7 @@ static void M_TokenizeLine(parser_state_c *pst)
 
 		// normal token character?
 		if (in_token)
-			*dest++ = *src;
+			*dest++ = srcc;
 	}
 
 	if (quoted)
@@ -995,7 +996,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 	if (! file)
 		ThrowException("Cannot open %s: %s\n", filename.c_str(), strerror(errno));
 
-	while (file.readLine(pst->readbuf, sizeof(pst->readbuf)))
+	while (file.readLine(pst->readstring))
 	{
 		pst->lineno += 1;
 

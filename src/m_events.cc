@@ -922,14 +922,14 @@ static bool M_ParseOperationFile()
 
 	// parse each line
 
-	static char line[FL_PATH_MAX];
+	SString line;
 	std::vector<SString> tokens;
 
 	Fl_Menu_Button *menu = NULL;
 
 	SString context;
 
-	while (file.readLine(line, sizeof(line)))
+	while (file.readLine(line))
 	{
 		int num_tok = M_ParseLine(line, tokens, ParseOptions::haveStrings);
 		if (num_tok == 0)

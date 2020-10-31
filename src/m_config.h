@@ -141,9 +141,9 @@ public:
 	//
 	// Read one line
 	//
-	bool readLine(char *buf, size_t size) noexcept
+	bool readLine(SString &line)
 	{
-		return M_ReadTextLine(buf, size, fp);
+		return M_ReadTextLine(line, is);
 	}
 
 	bool open(const SString &path) noexcept;
@@ -163,10 +163,10 @@ public:
 	//
 	operator bool() const noexcept
 	{
-		return !!fp;
+		return is.is_open();
 	}
 private:
-	FILE *fp = nullptr;
+	std::ifstream is;
 };
 
 //

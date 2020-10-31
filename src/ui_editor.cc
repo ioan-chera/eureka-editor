@@ -616,7 +616,7 @@ void UI_TextEditor::InsertFile()
 	// if a selection is active, delete that text
 	tbuf->remove_selection();
 
-	static char line[FL_PATH_MAX];
+	SString line;
 
 	const char *filename = chooser.filename();
 
@@ -629,8 +629,8 @@ void UI_TextEditor::InsertFile()
 
 	if (!file)
 	{
-		snprintf(line, sizeof(line), "%s", strerror(errno));
-		DLG_Notify("Unable to open text file:\n\n%s", line);
+		line = strerror(errno);
+		DLG_Notify("Unable to open text file:\n\n%s", line.c_str());
 		return;
 	}
 
@@ -638,10 +638,10 @@ void UI_TextEditor::InsertFile()
 
 	int pos = ted->insert_position();
 
-	while (file.readLine(line, sizeof(line)))
+	while (file.readLine(line))
 	{
-		tbuf->insert(pos, line);
-		pos += strlen(line);
+		tbuf->insert(pos, line.c_str());
+		pos += line.length();;
 
 		tbuf->insert(pos, "\n");
 		pos += 1;
