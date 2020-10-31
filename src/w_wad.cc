@@ -160,6 +160,29 @@ bool Lump_c::GetLine(char *buffer, size_t buf_size)
 	return true;  // OK
 }
 
+//
+// read a line of text, returns true if OK, false on EOF
+//
+bool Lump_c::GetLine(SString &string)
+{
+	SYS_ASSERT(!!parent->fp);
+	long curPos = ftell(parent->fp);
+	if(curPos < 0)
+		return false;	// EOF
+
+	string.clear();
+	for(; curPos < l_length; ++curPos)
+	{
+		string.push_back(fgetc(parent->fp));
+		if(string.back() == '\n')
+			break;
+		if(ferror(parent->fp))
+			return false;
+		if(feof(parent->fp))
+			break;
+	}
+	return true;	// OK
+}
 
 bool Lump_c::Write(const void *data, int len)
 {

@@ -95,6 +95,7 @@ public:
 
 	// read a line of text, returns true if OK, false on EOF
 	bool GetLine(char *buffer, size_t buf_size);
+	bool GetLine(SString &string);
 
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
