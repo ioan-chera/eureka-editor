@@ -241,28 +241,6 @@ void StringCopy(char *buffer, size_t size, const SString &source)
 	buffer[size - 1] = 0;
 }
 
-void StringRemoveCRLF(char *str)
-{
-	size_t len = strlen(str);
-
-	if (len > 0 && str[len - 1] == '\n')
-		str[--len] = 0;
-
-	if (len > 0 && str[len - 1] == '\r')
-		str[--len] = 0;
-}
-
-//
-// Removes the endline character or sequence from the end
-//
-void StringRemoveCRLF(SString &string)
-{
-	if(string && string.back() == '\n')
-		string.pop_back();
-	if(string && string.back() == '\r')
-		string.pop_back();
-}
-
 //
 // Removes the endline character or sequence from the end
 //

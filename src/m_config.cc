@@ -819,33 +819,9 @@ static const opt_desc_t options[] =
 
 //------------------------------------------------------------------------
 
+//
 // this automatically strips CR/LF from the line.
 // returns true if ok, false on EOF or error.
-bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept
-{
-	if (! fgets(buf, static_cast<int>(size), fp))
-	{
-		buf[0] = 0;
-		return false;
-	}
-
-	// remove a Unicode BOM (byte-order mark)
-	if ((byte)buf[0] == 0xEF &&
-		(byte)buf[1] == 0xBB &&
-		(byte)buf[2] == 0xBF)
-	{
-		size_t len = strlen(buf) - 3;
-
-		memmove(buf, buf+3, len);
-
-		buf[len] = 0;
-	}
-
-	StringRemoveCRLF(buf);
-
-	return true;
-}
-
 //
 // returns true if ok, false on EOF or error
 //

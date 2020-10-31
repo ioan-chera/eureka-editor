@@ -43,9 +43,6 @@ SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 SString StringVPrintf(const char *str, va_list ap);
 void StringCopy(char *buffer, size_t size, const SString &source);
 
-void StringRemoveCRLF(char *str);
-void StringRemoveCRLF(SString &string);
-
 void CheckTypeSizes();
 
 void TimeDelay(unsigned int millies);

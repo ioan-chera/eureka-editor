@@ -473,13 +473,13 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 		return false;
 	}
 
-	static char line_buf[FL_PATH_MAX];
+	SString line;
 
-	while (lump->GetLine(line_buf, sizeof(line_buf)))
+	while (lump->GetLine(line))
 	{
-		StringRemoveCRLF(line_buf);
+		line.removeCRLF();
 
-		tbuf->append(line_buf);
+		tbuf->append(line.c_str());
 		tbuf->append("\n");
 	}
 
