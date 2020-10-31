@@ -421,6 +421,7 @@ public:
 	{
 		return data;
 	}
+	void removeCRLF();
 
 private:
 	std::string data;

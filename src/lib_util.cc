@@ -263,6 +263,17 @@ void StringRemoveCRLF(SString &string)
 		string.pop_back();
 }
 
+//
+// Removes the endline character or sequence from the end
+//
+void SString::removeCRLF()
+{
+	if(*this && back() == '\n')
+		pop_back();
+	if(*this && back() == '\r')
+		pop_back();
+}
+
 SString StringTidy(const SString &str, const SString &bad_chars)
 {
 	SString buf;
