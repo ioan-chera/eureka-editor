@@ -163,6 +163,24 @@ size_t FindBaseName(const SString &filename)
 	return 0;
 }
 
+//
+// Get the basename of a path
+//
+SString GetBaseName(const SString &path)
+{
+	// Find the base name of the file (i.e. without any path).
+	// The result always points within the given string.
+	//
+	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
+#ifdef WIN32
+	size_t s = path.find_last_of("/\\");
+#else
+	size_t s = path.rfind('/');
+#endif
+	if(s != std::string::npos)
+		return path.substr(s + 1);
+	return path;
+}
 
 bool FilenameIsBare(const SString &filename)
 {
