@@ -139,9 +139,6 @@ port_path_info_t * M_QueryPortPath(const SString &name, bool create_it)
 	if (create_it)
 	{
 		port_path_info_t info;
-
-		memset(&info, 0, sizeof(port_path_info_t));
-
 		port_paths[name] = info;
 
 		return M_QueryPortPath(name);
