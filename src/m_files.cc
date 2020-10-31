@@ -869,7 +869,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		if (line[0] == '#')
 			continue;
 
-		StringRemoveCRLF(line);
+		line.removeCRLF();
 
 		size_t pos = line.find(' ');
 
@@ -879,52 +879,53 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			continue;
 		}
 
-		SString words[2] = { SString(line, 0, pos), SString(line, pos + 1) };
+		SString value;
+		line.cutWithSpace(pos, &value);
 
-		if (words[0] == "game")
+		if (line == "game")
 		{
-			if (! M_CanLoadDefinitions("games", words[1]))
+			if (! M_CanLoadDefinitions("games", value))
 			{
-				LogPrintf("  unknown game: %s\n", words[1].c_str() /* show full path */);
+				LogPrintf("  unknown game: %s\n", value.c_str() /* show full path */);
 
 				int res = DLG_Confirm("&Ignore|&Cancel Load",
 				                      "Warning: the pwad specifies an unsupported "
-									  "game:\n\n          %s", words[1].c_str());
+									  "game:\n\n          %s", value.c_str());
 				if (res == 1)
 					return false;
 			}
 			else
 			{
-				new_iwad = M_QueryKnownIWAD(words[1]);
+				new_iwad = M_QueryKnownIWAD(value);
 
 				if (new_iwad.empty())
 				{
 					int res = DLG_Confirm("&Ignore|&Cancel Load",
 					                      "Warning: the pwad specifies an IWAD "
 										  "which cannot be found:\n\n          %s.wad", 
-										  words[1].c_str());
+										  value.c_str());
 					if (res == 1)
 						return false;
 				}
 			}
 		}
-		else if (words[0] == "resource")
+		else if (line == "resource")
 		{
-			SString res = words[1];
+			SString res = value;
 
 			// if not found at absolute location, try same place as PWAD
 
 			if (! FileExists(res))
 			{
-				LogPrintf("  file not found: %s\n", words[1].c_str());
+				LogPrintf("  file not found: %s\n", value.c_str());
 
-				res = FilenameReposition(words[1], wad->PathName());
+				res = FilenameReposition(value, wad->PathName());
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
-				res = FilenameReposition(words[1], new_iwad);
+				res = FilenameReposition(value, new_iwad);
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
@@ -933,23 +934,23 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
-				           "which cannot be found:\n\n%s", words[1].c_str());
+				           "which cannot be found:\n\n%s", value.c_str());
 			}
 		}
-		else if (words[0] == "port")
+		else if (line == "port")
 		{
-			if (M_CanLoadDefinitions("ports", words[1]))
-				new_port = words[1];
+			if (M_CanLoadDefinitions("ports", value))
+				new_port = value;
 			else
 			{
-				LogPrintf("  unknown port: %s\n", words[1].c_str());
+				LogPrintf("  unknown port: %s\n", value.c_str());
 
-				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", words[1].c_str());
+				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", value.c_str());
 			}
 		}
 		else
 		{
-			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", words[0].c_str(), EUREKA_LUMP);
+			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", line.c_str(), EUREKA_LUMP);
 			continue;
 		}
 	}
