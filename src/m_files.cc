@@ -163,30 +163,28 @@ bool M_IsPortPathValid(const port_path_info_t *info)
 }
 
 
-void M_ParsePortPath(const char *name, char *line)
+//
+// Parse port path
+//
+static void M_ParsePortPath(const SString &name, const SString &cpath)
 {
-	while (isspace(*line))
-		line++;
-
-	char *arg_pos = line;
-
-	(void) arg_pos;	 // shut up a warning
-
-	line = strchr(line, '|');
-	if (! line)
+	SString path(cpath);
+	path.trimLeadingSpaces();
+	size_t pos = path.find('|');
+	if(pos == std::string::npos)
 	{
 		// TODO : Warn
 		return;
 	}
 
 	// terminate arguments
-	*line++ = 0;
+	path.erase(0, pos + 1);
 
 	port_path_info_t *info = M_QueryPortPath(name, true);
 	if (! info)	// should not fail!
 		return;
 
-	snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", line);
+	snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", path.c_str());
 
 	// parse any other arguments
 	// [ none needed atm.... ]
@@ -382,57 +380,55 @@ public:
 static RecentFiles_c  recent_files;
 
 
-static void ParseMiscConfig(FILE * fp)
+//
+// Parse miscellaneous config
+//
+static void ParseMiscConfig(std::istream &is)
 {
-	static char line[FL_PATH_MAX];
-	static char * map;
-
-	while (M_ReadTextLine(line, sizeof(line), fp))
+	SString line;
+	while(M_ReadTextLine(line, is))
 	{
 		// comment?
 		if (line[0] == '#')
 			continue;
 
-		char *pos = strchr(line, ' ');
-		if (! pos)
+		size_t pos = line.find(' ');
+		if(pos == std::string::npos)
+		{
+			// FIXME warning
+			continue;
+		}
+		SString map;
+		line.cutWithSpace(pos, &map);
+		pos = map.find(' ');
+		if(pos == std::string::npos)
 		{
 			// FIXME warning
 			continue;
 		}
 
-		*pos++ = 0;
-
-		map = pos;
-
-		pos = strchr(map, ' ');
-		if (! pos)
+		SString path;
+		map.cutWithSpace(pos, &path);
+		if(line == "recent")
 		{
-			// FIXME warning
-			continue;
-		}
-
-		*pos++ = 0;
-
-		if (strcmp(line, "recent") == 0)
-		{
-			if (Wad_file::Validate(pos))
-				recent_files.insert(pos, map);
+			if(Wad_file::Validate(path))
+				recent_files.insert(path, map);
 			else
-				LogPrintf("  no longer exists: %s\n", pos);
+				LogPrintf("  no longer exists: %s\n", path.c_str());
 		}
-		else if (strcmp(line, "known_iwad") == 0)
+		else if(line == "known_iwad")
 		{
 			// ignore plain freedoom.wad (backwards compatibility)
-			if (y_stricmp(map, "freedoom") == 0)
-				LogPrintf("  ignoring for compatibility: %s\n", pos);
-			else if (Wad_file::Validate(pos))
-				known_iwads[map] = SString(pos);
+			if(map.noCaseEqual("freedoom"))
+				LogPrintf("  ignoring for compatibility: %s\n", path.c_str());
+			else if(Wad_file::Validate(path))
+				known_iwads[map] = path;
 			else
-				LogPrintf("  no longer exists: %s\n", pos);
+				LogPrintf("  no longer exists: %s\n", path.c_str());
 		}
-		else if (strcmp(line, "port_path") == 0)
+		else if(line == "port_path")
 		{
-			M_ParsePortPath(map, pos);
+			M_ParsePortPath(map, path);
 		}
 		else
 		{
@@ -447,9 +443,8 @@ void M_LoadRecent()
 {
 	SString filename = home_dir + "/misc.cfg";
 
-	FILE *fp = fopen(filename.c_str(), "r");
-
-	if (! fp)
+	std::ifstream is(filename.get());
+	if(!is.is_open())
 	{
 		LogPrintf("No recent list at: %s\n", filename.c_str());
 		return;
@@ -461,9 +456,7 @@ void M_LoadRecent()
 	 known_iwads.clear();
 	  port_paths.clear();
 
-	ParseMiscConfig(fp);
-
-	fclose(fp);
+	ParseMiscConfig(is);
 }
 
 
