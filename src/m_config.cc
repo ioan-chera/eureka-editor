@@ -886,58 +886,45 @@ void LineFile::close() noexcept
 	}
 }
 
-static int parse_config_line_from_file(char *p, const SString &basename, int lnum)
+//
+// Parse config line from file
+//
+static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum)
 {
-	char *name  = NULL;
-	char *value = NULL;
+	SString line(cline);
 
 	// skip leading whitespace
-	while (isspace (*p))
-		p++;
+	line.trimLeadingSpaces();
 
 	// skip comments
-	if (*p == '#')
+	if(line[0] == '#')
 		return 0;
 
 	// remove trailing newline and whitespace
-	{
-		int len = (int)strlen(p);
-
-		while (len > 0 && isspace(p[len - 1]))
-		{
-			p[len - 1] = 0;
-			len--;
-		}
-	}
+	line.trimTrailingSpaces();
 
 	// skip empty lines
-	if (*p == 0)
+	if(!line)
 		return 0;
 
 	// grab the name
-	name = p;
-	while (y_isident (*p))
-		p++;
-
-	if (! isspace(*p))
+	size_t pos = line.find_first_not_of(IDENT_SET);
+	if(pos == std::string::npos || !isspace(line[pos]))
 	{
 		LogPrintf("WARNING: %s(%u): bad line, no space after keyword.\n", basename.c_str(), lnum);
 		return 0;
 	}
 
-	*p++ = 0;
+	SString value;
+	line.cutWithSpace(pos, &value);
 
 	// find the option value (occupies rest of the line)
-	while (isspace(*p))
-		p++;
-
-	if (*p == 0)
+	value.trimLeadingSpaces();
+	if(!value)
 	{
 		LogPrintf("WARNING: %s(%u): bad line, missing option value.\n", basename.c_str(), lnum);
 		return 0;
 	}
-
-	value = p;
 
 	// find the option keyword
 	const opt_desc_t * opt;
@@ -947,18 +934,18 @@ static int parse_config_line_from_file(char *p, const SString &basename, int lnu
 		if (opt->opt_type == OPT_END)
 		{
 			LogPrintf("WARNING: %s(%u): invalid option '%s', skipping\n",
-					  basename.c_str(), lnum, name);
+					  basename.c_str(), lnum, line.c_str());
 			return 0;
 		}
 
-		if (! opt->long_name || strcmp(name, opt->long_name) != 0)
+		if(!opt->long_name || line != opt->long_name)
 			continue;
 
 		// pre-pass options (like --help) don't make sense in a config file
 		if (strchr(opt->flags, '1'))
 		{
 			LogPrintf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
-					  basename.c_str(), lnum, name);
+					  basename.c_str(), lnum, line.c_str());
 			return 0;
 		}
 
@@ -969,10 +956,8 @@ static int parse_config_line_from_file(char *p, const SString &basename, int lnu
 	switch (opt->opt_type)
 	{
 		case OPT_BOOLEAN:
-			if (y_stricmp(value, "no")    == 0 ||
-				y_stricmp(value, "false") == 0 ||
-				y_stricmp(value, "off")   == 0 ||
-				y_stricmp(value, "0")     == 0)
+			if(value.noCaseEqual("no") || value.noCaseEqual("false") || value.noCaseEqual("off") ||
+			   value.noCaseEqual("0"))
 			{
 				*((bool *) (opt->data_ptr)) = false;
 			}
@@ -995,19 +980,20 @@ static int parse_config_line_from_file(char *p, const SString &basename, int lnu
 			break;
 
 		case OPT_STRING_LIST:
-			while (*value != 0)
+			while(value)
 			{
-				char *v = value;
-				while (*v != 0 && ! isspace ((unsigned char) *v))
-					v++;
-
+				size_t spacepos = value.findSpace();
 				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
-
-				list->push_back(SString(value, (int)(v - value)));
-
-				while (isspace (*v))
-					v++;
-				value = v;
+				if(spacepos == std::string::npos)
+				{
+					list->push_back(value);
+					spacepos = value.length();
+				}
+				else
+					list->push_back(SString(value, spacepos));
+			
+				value.erase(0, spacepos);
+				value.trimLeadingSpaces();
 			}
 			break;
 
@@ -1025,16 +1011,15 @@ static int parse_config_line_from_file(char *p, const SString &basename, int lnu
 //
 //  Return 0 on success, negative value on failure.
 //
-static int parse_a_config_file(FILE *fp, const SString &filename)
+static int parse_a_config_file(std::istream &is, const SString &filename)
 {
-	static char line[1024];
-
 	size_t basepos = FindBaseName(filename);
 	SString basename;
-	basename.assign(filename, basepos, std::string::npos);
+	basename.assign(filename, basepos);
 
 	// handle one line on each iteration
-	for (int lnum = 1 ; M_ReadTextLine(line, sizeof(line), fp) ; lnum++)
+	SString line;
+	for(int lnum = 1; M_ReadTextLine(line, is); lnum++)
 	{
 		int ret = parse_config_line_from_file(line, basename, lnum);
 
@@ -1066,43 +1051,35 @@ int M_ParseConfigFile()
 		config_file = default_config_file();
 	}
 
-	FILE * fp = fopen(config_file.c_str(), "r");
+	std::ifstream is(config_file.get());
 
 	LogPrintf("Reading config file: %s\n", config_file.c_str());
 
-	if (fp == NULL)
+	if (!is.is_open())
 	{
 		LogPrintf("--> %s\n", strerror(errno));
 		return -1;
 	}
 
-	int rc = parse_a_config_file(fp, config_file);
-
-	fclose(fp);
-
-	return rc;
+	return parse_a_config_file(is, config_file);
 }
 
 
 int M_ParseDefaultConfigFile()
 {
-	SString filename = StringPrintf("%s/defaults.cfg", install_dir.c_str());
+	SString filename = install_dir + "/defaults.cfg";
 
-	FILE * fp = fopen(filename.c_str(), "r");
+	std::ifstream is(filename.get());
 
 	LogPrintf("Reading config file: %s\n", filename.c_str());
 
-	if (fp == NULL)
+	if (!is.is_open())
 	{
 		LogPrintf("--> %s\n", strerror(errno));
 		return -1;
 	}
 
-	int rc = parse_a_config_file(fp, filename);
-
-	fclose(fp);
-
-	return rc;
+	return parse_a_config_file(is, filename);
 }
 
 

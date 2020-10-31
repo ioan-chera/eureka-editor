@@ -222,12 +222,13 @@ void W_CreateBrightMap()
 }
 
 
-rgb_color_t ParseColor(const char *str)
+rgb_color_t ParseColor(const SString &cstr)
 {
-	if (*str == '#')
-		 str++;
+	SString str(cstr);
+	if(str[0] == '#')
+		str.erase(0, 1);
 
-	if (strlen(str) >= 6)  // long form #rrggbb
+	if (str.length() >= 6)  // long form #rrggbb
 	{
 		int number = (int)strtol(str, NULL, 16);
 

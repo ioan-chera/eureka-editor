@@ -468,6 +468,10 @@ inline static double atof(const SString &string)
 {
 	return atof(string.c_str());
 }
+inline static long strtol(const SString &string, char **endptr, int radix)
+{
+	return strtol(string.c_str(), endptr, radix);
+}
 
 SString StringTidy(const SString &str, const SString &bad_chars = "");
 

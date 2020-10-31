@@ -78,7 +78,7 @@ void W_CreateBrightMap();
 // make the color darker
 rgb_color_t DarkerColor(rgb_color_t col);
 
-rgb_color_t ParseColor(const char *str);
+rgb_color_t ParseColor(const SString &str);
 
 rgb_color_t SectorLightColor(int light);
 
