@@ -463,6 +463,14 @@ private:
 	std::string data;
 };
 
+//
+// Convenience stuff
+//
+inline static SString operator + (const char *cstring, const SString &sstring)
+{
+	return SString(cstring) + sstring;
+}
+
 namespace std
 {
 	template <> struct hash<SString>
