@@ -374,6 +374,11 @@ public:
 		return *this;
 	}
 
+	SString substr(size_t pos = 0, size_t len = std::string::npos) const
+	{
+		return data.substr(pos, len);
+	}
+
 	void clear() noexcept
 	{
 		data.clear();
