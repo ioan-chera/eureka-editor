@@ -272,10 +272,7 @@ static SString CalcWarpString()
 
 static void AppendWadName(SString &str, const SString &name, const SString &parm = NULL)
 {
-	static char abs_name[FL_PATH_MAX];
-
-	// FIXME: check result??
-	fl_filename_absolute(abs_name, sizeof(abs_name), name.c_str());
+	SString abs_name = GetAbsolutePath(name);
 
 	if (parm)
 	{
@@ -299,7 +296,7 @@ static SString GrabWadNames(const port_path_info_t *info)
 	// see if we should use the "-merge" parameter, which is
 	// required for Chocolate-Doom and derivates like Crispy Doom.
 	// TODO : is there a better way to do this?
-	if (y_stricmp(Port_name.c_str(), "vanilla") == 0)
+	if (Port_name.noCaseEqual("vanilla"))
 	{
 		use_merge = 1;
 	}
@@ -308,10 +305,8 @@ static SString GrabWadNames(const port_path_info_t *info)
 	AppendWadName(wad_names, game_wad->PathName(), "-iwad");
 
 	// add any resource wads
-	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
+	for (const Wad_file *wad : master_dir)
 	{
-		Wad_file *wad = master_dir[k];
-
 		if (wad == game_wad || wad == edit_wad)
 			continue;
 
@@ -389,13 +384,13 @@ void CMD_TestMap()
 
 
 	// build the command string
-	static char cmd_buffer[FL_PATH_MAX * 4];
 
-	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
-			 CalcEXEName(info).c_str(), GrabWadNames(info).c_str(), CalcWarpString().c_str());
+	SString cmd_buffer = StringPrintf("%s %s %s",
+									  CalcEXEName(info).c_str(), GrabWadNames(info).c_str(), 
+									  CalcWarpString().c_str());
 
 	LogPrintf("Testing map using the following command:\n");
-	LogPrintf("--> %s\n", cmd_buffer);
+	LogPrintf("--> %s\n", cmd_buffer.c_str());
 
 	Status_Set("TESTING MAP");
 
@@ -406,7 +401,7 @@ void CMD_TestMap()
 
 	/* Go baby! */
 
-	int status = system(cmd_buffer);
+	int status = system(cmd_buffer.c_str());
 
 	if (status == 0)
 		Status_Set("Result: OK");
