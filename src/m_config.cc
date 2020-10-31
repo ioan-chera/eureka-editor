@@ -847,6 +847,24 @@ bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept
 }
 
 //
+// returns true if ok, false on EOF or error
+//
+bool M_ReadTextLine(SString &string, std::istream &is)
+{
+	std::getline(is, string.get());
+	if(is.eof() || is.bad() || is.fail())
+	{
+		string.clear();
+		return false;
+	}
+	if(string[0] == 0xef && string[1] == 0xbb && string[2] == 0xbf)
+		string.erase(0, 3);
+	string.removeCRLF();
+	return true;
+}
+
+
+//
 // Opens the file
 //
 bool LineFile::open(const SString &path) noexcept

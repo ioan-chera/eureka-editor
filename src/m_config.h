@@ -130,6 +130,7 @@ void M_PrintCommandLineOptions(FILE *fp);
 
 // returns true if ok, false on EOF or error
 bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept;
+bool M_ReadTextLine(SString &string, std::istream &is);
 
 //
 // File to be read by line (encapsulated)
