@@ -154,7 +154,7 @@ size_t FindBaseName(const SString &filename)
 	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
 
 #ifdef WIN32
-	size_t s = filename.find_first_of("/\\");
+	size_t s = filename.find_last_of("/\\");
 #else
 	size_t s = filename.rfind('/');
 #endif
