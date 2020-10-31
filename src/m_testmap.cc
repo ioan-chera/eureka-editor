@@ -31,7 +31,6 @@ static SString QueryName(const SString &port = Port_name, const SString &cgame =
 {
 	SYS_ASSERT(port);
 
-	static char buffer[256];
 	SString game = cgame;
 
 	if (port.noCaseEqual("vanilla"))
@@ -39,8 +38,7 @@ static SString QueryName(const SString &port = Port_name, const SString &cgame =
 		if (! game)
 			game = "doom2";
 
-		snprintf(buffer, sizeof(buffer), "vanilla_%s", game.c_str());
-		return buffer;
+		return "vanilla_" + game;
 	}
 
 	return port;
