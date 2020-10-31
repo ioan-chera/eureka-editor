@@ -358,9 +358,9 @@ public:
 		data.clear();
 	}
 
-	void erase(size_t n)
+	void erase(size_t n, size_t len = std::string::npos)
 	{
-		data.erase(n);
+		data.erase(n, len);
 	}
 
 	void pop_back()
