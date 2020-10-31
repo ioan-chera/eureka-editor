@@ -445,19 +445,17 @@ static void ParseMiscConfig(FILE * fp)
 
 void M_LoadRecent()
 {
-	static char filename[FL_PATH_MAX];
+	SString filename = home_dir + "/misc.cfg";
 
-	snprintf(filename, sizeof(filename), "%s/misc.cfg", home_dir.c_str());
-
-	FILE *fp = fopen(filename, "r");
+	FILE *fp = fopen(filename.c_str(), "r");
 
 	if (! fp)
 	{
-		LogPrintf("No recent list at: %s\n", filename);
+		LogPrintf("No recent list at: %s\n", filename.c_str());
 		return;
 	}
 
-	LogPrintf("Reading recent list from: %s\n", filename);
+	LogPrintf("Reading recent list from: %s\n", filename.c_str());
 
 	recent_files.clear();
 	 known_iwads.clear();
