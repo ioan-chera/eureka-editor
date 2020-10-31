@@ -1316,15 +1316,14 @@ int M_WriteConfigFile()
 
 	LogPrintf("Writing config file: %s\n", config_file.c_str());
 
-	FILE * fp = fopen(config_file.c_str(), "w");
+	std::ofstream os(config_file.get(), std::ios::trunc);
 
-	if (! fp)
+	if (! os.is_open())
 	{
 		LogPrintf("--> %s\n", strerror(errno));
 		return -1;
 	}
-
-	fprintf(fp, "# Eureka configuration (local)\n");
+	os << "# Eureka configuration (local)\n";
 
 	const opt_desc_t *o;
 
@@ -1336,26 +1335,26 @@ int M_WriteConfigFile()
 		if (! o->long_name)
 			continue;
 
-		fprintf(fp, "%s ", o->long_name);
+		os << o->long_name << ' ';
 
 		switch (o->opt_type)
 		{
 			case OPT_BOOLEAN:
-				fprintf(fp, "%s", *((bool *) o->data_ptr) ? "1" : "0");
+				os << (*((bool *)o->data_ptr) ? "1" : "0");
 				break;
 
 			case OPT_STRING:
 			{
 				const SString *str = static_cast<SString *>(o->data_ptr);
-				fprintf(fp, "%s", str ? str->c_str() : "''");
+				os << (str ? *str : "''");
 				break;
 			}
 			case OPT_INTEGER:
-				fprintf(fp, "%d", *((int *) o->data_ptr));
+				os << *((int *)o->data_ptr);
 				break;
 
 			case OPT_COLOR:
-				fprintf(fp, "%06x", *((rgb_color_t *) o->data_ptr) >> 8);
+				os << StringPrintf("%06x", *((rgb_color_t *)o->data_ptr) >> 8);
 				break;
 
 			case OPT_STRING_LIST:
@@ -1363,20 +1362,17 @@ int M_WriteConfigFile()
 				auto list = static_cast<std::vector<SString> *>(o->data_ptr);
 
 				if (list->empty())
-					fprintf(fp, "{}");
+					os << "{}";
 				else for (const SString &item : *list)
-					fprintf(fp, "%s ", item.c_str());
+					os << item << ' ';
 			}
 
 			default:
 				break;
 		}
 
-		fprintf(fp, "\n");
+		os << '\n';
 	}
-
-	fflush(fp);
-	fclose(fp);
 
 	return 0;  // OK
 }
