@@ -191,17 +191,11 @@ bool M_PortSetupDialog(const SString &port, const SString &game)
 	SString name_buf;
 
 	if (port.noCaseEqual("vanilla"))
-	{
-		name_buf = StringPrintf("Vanilla %s\n", game.c_str());
-		name_buf[8] = toupper(name_buf[8]);
-	}
+		name_buf = "Vanilla " + game.asTitle() + '\n';
 	else if (port.noCaseEqual("mbf"))	// temp hack for aesthetics
 		name_buf = "MBF";
 	else
-	{
-		name_buf = port;
-		name_buf[0] = toupper(name_buf[0]);
-	}
+		name_buf = port.asTitle();
 
 	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf);
 
