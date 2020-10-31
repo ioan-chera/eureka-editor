@@ -275,6 +275,11 @@ public:
 		return data.c_str();
 	}
 
+	char *ptr() const
+	{
+		return const_cast<char *>(data.data());
+	}
+
 	size_t find(const char *s) const
 	{
 		return data.find(s ? s : "");
@@ -313,6 +318,11 @@ public:
 	size_t size() const noexcept
 	{
 		return data.size();
+	}
+
+	void resize(size_t n)
+	{
+		data.resize(n);
 	}
 
 	SString operator + (const char *s) const
