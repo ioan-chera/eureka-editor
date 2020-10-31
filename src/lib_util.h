@@ -44,6 +44,7 @@ SString StringVPrintf(const char *str, va_list ap);
 void StringCopy(char *buffer, size_t size, const SString &source);
 
 void StringRemoveCRLF(char *str);
+void StringRemoveCRLF(SString &string);
 
 void CheckTypeSizes();
 
