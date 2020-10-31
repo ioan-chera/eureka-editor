@@ -450,6 +450,8 @@ public:
 	void trimLeadingSpaces();
 	void trimTrailingSpaces();
 
+	SString &trimNullTermination();
+
 	size_t findSpace() const;
 
 private:
