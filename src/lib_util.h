@@ -180,6 +180,10 @@ public:
 	{
 	}
 
+	SString(size_t n, char c) : data(n, c)
+	{
+	}
+
 	SString(std::string &&consume) : data(std::move(consume))
 	{
 	}
@@ -487,7 +491,7 @@ inline static SString operator + (const char *cstring, const SString &sstring)
 	return SString(cstring) + sstring;
 }
 
-std::ostream &operator<<(std::ostream &os, const SString &str)
+inline static std::ostream &operator<<(std::ostream &os, const SString &str)
 {
 	os << str.get();
 	return os;

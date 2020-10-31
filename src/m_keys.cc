@@ -126,8 +126,8 @@ const editor_command_t * LookupEditorCommand(int idx)
 
 struct key_mapping_t
 {
-	keycode_t key;
-	const char * name;
+	const keycode_t key;
+	const char *const name;
 };
 
 
@@ -278,46 +278,23 @@ keycode_t M_ParseKeyString(const SString &mstr)
 	return 0;
 }
 
-
-static const char * BareKeyName(keycode_t key)
+static SString BareKeyName(keycode_t key)
 {
-	static char buffer[200];
-
-	if (key < 127 && key > 32 && isprint(key) && key != '"')
-	{
-		buffer[0] = (char) key;
-		buffer[1] = 0;
-
-		return buffer;
-	}
-
-	if (FL_F < key && key <= FL_F_Last)
-	{
-		snprintf(buffer, sizeof(buffer), "F%d", key - FL_F);
-		return buffer;
-	}
-
-	if (is_mouse_button(key))
-	{
-		snprintf(buffer, sizeof(buffer), "MOUSE%d", key - FL_Button);
-		return buffer;
-	}
-
+	if(key < 127 && key > 32 && isprint(key) && key != '"')
+		return SString(1, (char)key);
+	if(FL_F < key && key <= FL_F_Last)
+		return StringPrintf("F%d", key - FL_F);
+	if(is_mouse_button(key))
+		return StringPrintf("MOUSE%d", key - FL_Button);
 	// find key in mapping table
-	for (int k = 0 ; s_key_map[k].name ; k++)
-		if (key == s_key_map[k].key)
+	for(int k = 0; s_key_map[k].name; k++)
+		if(key == s_key_map[k].key)
 			return s_key_map[k].name;
-
-	if (FL_KP + 33 <= key && key <= FL_KP_Last)
-	{
-		snprintf(buffer, sizeof(buffer), "KP_%c", (char)(key & 127));
-		return buffer;
-	}
+	if(FL_KP + 33 <= key && key <= FL_KP_Last)
+		return StringPrintf("KP_%c", (char)(key & 127));
 
 	// fallback : hex code
-
-	snprintf(buffer, sizeof(buffer), "0x%04x", key);
-	return buffer;
+	return StringPrintf("0x%04x", key);
 }
 
 
@@ -369,7 +346,7 @@ const char * M_KeyToString(keycode_t key)
 	}
 
 	snprintf(buffer, sizeof(buffer), "%s%s", ModName_Dash(key),
-		BareKeyName(key & FL_KEY_MASK));
+		BareKeyName(key & FL_KEY_MASK).c_str());
 
 	return buffer;
 }
@@ -912,7 +889,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 	snprintf(buffer, sizeof(buffer), "%s%6.6s%-10.10s %-9.9s %.32s",
 			bind.is_duplicate ? "@C1" : "",
 			changing_key ? "<?"     : ModName_Space(tempk),
-			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK),
+			changing_key ? "\077?>" : BareKeyName(tempk & FL_KEY_MASK).c_str(),
 			ctx_name,
 			 M_StringForFunc(index).c_str() );
 
