@@ -570,19 +570,18 @@ bool Props_ParseUser(const std::vector<SString> &tokens)
 	return true;
 }
 
-
-void Props_WriteUser(FILE *fp)
+void Props_WriteUser(std::ostream &os)
 {
-	fprintf(fp, "\n");
+	os << '\n';
 
-	fprintf(fp, "default floor_h %d\n", default_floor_h);
-	fprintf(fp, "default ceil_h %d\n",  default_ceil_h);
-	fprintf(fp, "default light_level %d\n",  default_light_level);
-	fprintf(fp, "default thing %d\n",  default_thing);
-
-	fprintf(fp, "default mid_tex \"%s\"\n",   StringTidy(default_wall_tex,  "\"").c_str());
-	fprintf(fp, "default floor_tex \"%s\"\n", StringTidy(default_floor_tex, "\"").c_str());
-	fprintf(fp, "default ceil_tex \"%s\"\n",  StringTidy(default_ceil_tex,  "\"").c_str());
+	os << "default floor_h " << default_floor_h << '\n';
+	os << "default ceil_h " << default_ceil_h << '\n';
+	os << "default light_level " << default_light_level << '\n';
+	os << "default thing " << default_thing << '\n';
+	
+	os << "default mid_tex \"" << StringTidy(default_wall_tex, "\"") << "\"\n";
+	os << "default floor_tex \"" << StringTidy(default_floor_tex, "\"") << "\"\n";
+	os << "default ceil_tex \"" << StringTidy(default_ceil_tex, "\"") << "\"\n";
 }
 
 

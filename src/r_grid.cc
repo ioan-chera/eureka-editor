@@ -720,21 +720,13 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-
-void Grid_WriteUser(FILE *fp)
+void Grid_WriteUser(std::ostream &os)
 {
-	fprintf(fp, "map_pos %1.0f %1.0f %1.6f\n",
-	        grid.orig_x,
-			grid.orig_y,
-			grid.Scale);
-
-	fprintf(fp, "grid %d %d %d\n",
-			grid.shown ? 1 : 0,
-			config::grid_style ? 0 : 1,  /* was grid.mode, now unused */
-			grid.step);
-
-	fprintf(fp, "snap %d\n",
-	        grid.snap ? 1 : 0);
+	os << "map_pos " << StringPrintf("%1.0f %1.0f %1.6f", grid.orig_x, grid.orig_y, grid.Scale) << 
+		'\n';
+	os << "grid " << (grid.shown ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
+		grid.step << '\n';
+	os << "snap " << (grid.snap ? 1 : 0) << '\n';
 }
 
 

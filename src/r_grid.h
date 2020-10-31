@@ -132,8 +132,7 @@ extern Grid_State_c grid;
 
 
 bool Grid_ParseUser(const std::vector<SString> &tokens);
-void Grid_WriteUser(FILE *fp);
-
+void Grid_WriteUser(std::ostream &os);
 
 #endif  /* __EUREKA_R_GRID_H__ */
 

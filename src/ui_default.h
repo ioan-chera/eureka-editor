@@ -82,7 +82,7 @@ private:
 
 
 bool Props_ParseUser(const std::vector<SString> &tokens);
-void Props_WriteUser(FILE *fp);
+void Props_WriteUser(std::ostream &os);
 void Props_LoadValues();
 
 #endif  /* __EUREKA_UI_DEFAULT_H__ */

@@ -104,7 +104,7 @@ public:
 public:
 	void Populate();
 
-	void SetCategories(const char *cats, const char *letters);
+	void SetCategories(const SString &cats, const SString &letters);
 
 	void CycleCategory(int dir);
 	void ToggleRecent(bool force_recent);
@@ -120,7 +120,7 @@ public:
 	void RecentUpdate();
 
 	bool ParseUser(const std::vector<SString> &tokens);
-	void WriteUser(FILE *fp);
+	void WriteUser(std::ostream &os);
 
 private:
 	// adjust the widgets in the Fl_Scroll based on current search
@@ -244,7 +244,7 @@ public:
 	void UpdateGenType(int line_type);
 
 	bool ParseUser(const std::vector<SString> &tokens);
-	void WriteUser(FILE *fp);
+	void WriteUser(std::ostream &os);
 
 private:
 //	static void mode_callback(Fl_Widget *w, void *data);
@@ -252,7 +252,7 @@ private:
 
 
 bool Browser_ParseUser(const std::vector<SString> &tokens);
-void Browser_WriteUser(FILE *fp);
+void Browser_WriteUser(std::ostream &os);
 
 #endif  /* __EUREKA_UI_BROWSER_H__ */
 

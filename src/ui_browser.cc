@@ -964,12 +964,12 @@ void UI_Browser_Box::Populate()
 }
 
 
-void UI_Browser_Box::SetCategories(const char *cats, const char *letters)
+void UI_Browser_Box::SetCategories(const SString &cats, const SString &letters)
 {
 	cat_letters = letters;
 
 	category->clear();
-	category->add(cats);
+	category->add(cats.c_str());
 	category->value(0);
 
 	redraw();
@@ -1585,16 +1585,16 @@ void UI_Browser::Populate()
 	SString letters;
 
 	SString tex_cats = M_TextureCategoryString(letters, false);
-	browsers[0]->SetCategories(tex_cats.c_str(), letters.c_str());
+	browsers[0]->SetCategories(tex_cats, letters);
 
 	SString flat_cats = M_TextureCategoryString(letters, true);
-	browsers[1]->SetCategories(flat_cats.c_str(), letters.c_str());
+	browsers[1]->SetCategories(flat_cats, letters);
 
 	SString thing_cats = M_ThingCategoryString(letters);
-	browsers[2]->SetCategories(thing_cats.c_str(), letters.c_str());
+	browsers[2]->SetCategories(thing_cats, letters);
 
 	SString line_cats = M_LineCategoryString(letters);
-	browsers[3]->SetCategories(line_cats.c_str(), letters.c_str());
+	browsers[3]->SetCategories(line_cats, letters);
 
 	// TODO: sector_cats
 
@@ -1833,26 +1833,20 @@ bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 	return true;
 }
 
-
-void UI_Browser_Box::WriteUser(FILE *fp)
+void UI_Browser_Box::WriteUser(std::ostream &os)
 {
 	char cat = cat_letters[category->value()];
-
-	if (isprint(cat))
-		fprintf(fp, "browser %c cat %c\n", kind, cat);
-
-	if (alpha)
-		fprintf(fp, "browser %c sort %d\n", kind, 1 - alpha->value());
-
-	fprintf(fp, "browser %c search \"%s\"\n", kind, StringTidy(search->value(), "\"").c_str());
-
-	if (pics)
-		fprintf(fp, "browser %c pics %d\n", kind, pics->value());
-
-	if (do_flats)
+	if(isprint(cat))
+		os << "browser " << kind << " cat " << cat << '\n';
+	if(alpha)
+		os << "browser " << kind << " sort " << static_cast<int>(1 - alpha->value()) << '\n';
+	os << "browser " << kind << " search \"" << StringTidy(search->value(), "\"") << "\"\n";
+	if(pics)
+		os << "browser " << kind << " pics " << static_cast<int>(pics->value()) << '\n';
+	if(do_flats)
 	{
-		fprintf(fp, "browser %c do_flats %d\n", kind, do_flats->value());
-		fprintf(fp, "browser %c do_tex %d\n", kind, do_tex->value());
+		os << "browser " << kind << " do_flats " << static_cast<int>(do_flats->value()) << '\n';
+		os << "browser " << kind << " do_tex " << static_cast<int>(do_tex->value()) << '\n';
 	}
 }
 
@@ -1874,19 +1868,13 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-
-void UI_Browser::WriteUser(FILE *fp)
+void UI_Browser::WriteUser(std::ostream &os)
 {
-	fprintf(fp, "\n");
-
-	fprintf(fp, "open_browser %c\n",
-		(! visible()) ? '-' :
-		(active >= ACTIVE_GENERALIZED) ? 'G' :
-		browsers[active]->GetKind());
-
-	for (int i = 0 ; i < 5 ; i++)
+	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' : 
+								browsers[active]->GetKind()) << '\n';
+	for(int i = 0; i < 5; i++)
 	{
-		browsers[i]->WriteUser(fp);
+		browsers[i]->WriteUser(os);
 	}
 
 	// generalized box is not saved (not needed)
@@ -1907,13 +1895,12 @@ bool Browser_ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-
-void Browser_WriteUser(FILE *fp)
+void Browser_WriteUser(std::ostream &os)
 {
 	if (main_win)
 	{
-		main_win->tile   ->WriteUser(fp);
-		main_win->browser->WriteUser(fp);
+		main_win->tile->WriteUser(os);
+		main_win->browser->WriteUser(os);
 	}
 }
 

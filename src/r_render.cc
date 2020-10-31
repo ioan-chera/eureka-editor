@@ -1577,22 +1577,14 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-
-void Render3D_WriteUser(FILE *fp)
+void Render3D_WriteUser(std::ostream &os)
 {
-	fprintf(fp, "camera %1.2f %1.2f %1.2f %1.2f\n",
-	        r_view.x, r_view.y, r_view.z, r_view.angle);
-
-	fprintf(fp, "r_modes %d %d %d\n",
-	        r_view.texturing  ? 1 : 0,
-			r_view.sprites    ? 1 : 0,
-			r_view.lighting   ? 1 : 0);
-
-	fprintf(fp, "r_gravity %d\n",
-	        r_view.gravity ? 1 : 0);
-
-	fprintf(fp, "gamma %d\n",
-	        config::usegamma);
+	os << "camera " << StringPrintf("%1.2f %1.2f %1.2f %1.2f", r_view.x, r_view.y, r_view.z,
+									r_view.angle) << '\n';
+	os << "r_modes " << (r_view.texturing ? 1 : 0) << ' ' << (r_view.sprites ? 1 : 0) << ' ' <<
+		(r_view.lighting ? 1 : 0) << '\n';
+	os << "r_gravity " << (r_view.gravity ? 1 : 0) << '\n';
+	os << "gamma " << config::usegamma << '\n';
 }
 
 

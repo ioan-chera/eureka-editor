@@ -115,7 +115,7 @@ void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);
 
 bool Render3D_ParseUser(const std::vector<SString> &tokens);
-void Render3D_WriteUser(FILE *fp);
+void Render3D_WriteUser(std::ostream &os);
 
 void Render3D_NotifyBegin();
 void Render3D_NotifyInsert(obj_type_e type, int objnum);

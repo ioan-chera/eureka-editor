@@ -1247,23 +1247,22 @@ void RecUsed_ClearAll()
 
 /* --- Save and Restore --- */
 
-void Recently_used::WriteUser(FILE *fp, char letter)
+void Recently_used::WriteUser(std::ostream &os, char letter)
 {
 	for (int i = 0 ; i < size ; i++)
 	{
-		fprintf(fp, "recent_used %c \"%s\"\n", letter, StringTidy(name_set[i]).c_str());
+		os << "recent_used " << letter << " \"" << StringTidy(name_set[i]) << "\"\n";
 	}
 }
 
 
-void RecUsed_WriteUser(FILE *fp)
+void RecUsed_WriteUser(std::ostream &os)
 {
-	fprintf(fp, "\n");
-	fprintf(fp, "recent_used clear\n");
-
-	recent_textures.WriteUser(fp, 'T');
-	recent_flats   .WriteUser(fp, 'F');
-	recent_things  .WriteUser(fp, 'O');
+	os << "\nrecent_used clear\n";
+	
+	recent_textures.WriteUser(os, 'T');
+	recent_flats.WriteUser(os, 'F');
+	recent_things.WriteUser(os, 'O');
 }
 
 
@@ -1407,23 +1406,24 @@ bool Editor_ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-
-void Editor_WriteUser(FILE *fp)
+//
+// Write editor state
+//
+void Editor_WriteUser(std::ostream &os)
 {
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:   fprintf(fp, "edit_mode t\n"); break;
-		case OBJ_LINEDEFS: fprintf(fp, "edit_mode l\n"); break;
-		case OBJ_SECTORS:  fprintf(fp, "edit_mode s\n"); break;
-		case OBJ_VERTICES: fprintf(fp, "edit_mode v\n"); break;
+	case OBJ_THINGS:   os << "edit_mode t\n"; break;
+	case OBJ_LINEDEFS: os << "edit_mode l\n"; break;
+	case OBJ_SECTORS:  os << "edit_mode s\n"; break;
+	case OBJ_VERTICES: os << "edit_mode v\n"; break;
 
 		default: break;
 	}
-
-	fprintf(fp, "render_mode %d\n", edit.render3d ? 1 : 0);
-	fprintf(fp, "sector_render_mode %d\n", edit.sector_render_mode);
-	fprintf(fp, "thing_render_mode %d\n",  edit.thing_render_mode);
-	fprintf(fp, "show_object_numbers %d\n", edit.show_object_numbers ? 1 : 0);
+	os << "render_mode " << (edit.render3d ? 1 : 0) << '\n';
+	os << "sector_render_mode " << edit.sector_render_mode << '\n';
+	os << "thing_render_mode " << edit.thing_render_mode << '\n';
+	os << "show_object_numbers " << (edit.show_object_numbers ? 1 : 0) << '\n';
 }
 
 

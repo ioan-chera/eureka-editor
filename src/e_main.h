@@ -173,7 +173,7 @@ extern Editor_State_t  edit;
 void Editor_Init();
 void Editor_DefaultState();
 bool Editor_ParseUser(const std::vector<SString> &tokens);
-void Editor_WriteUser(FILE *fp);
+void Editor_WriteUser(std::ostream &os);
 
 void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
@@ -277,7 +277,7 @@ public:
 
 	void clear();
 
-	void WriteUser(FILE *fp, char letter);
+	void WriteUser(std::ostream &os, char letter);
 
 private:
 	void erase(int index);
@@ -289,7 +289,7 @@ extern Recently_used  recent_flats;
 extern Recently_used  recent_things;
 
 void RecUsed_ClearAll();
-void RecUsed_WriteUser(FILE *fp);
+void RecUsed_WriteUser(std::ostream &os);
 bool RecUsed_ParseUser(const std::vector<SString> &tokens);
 
 

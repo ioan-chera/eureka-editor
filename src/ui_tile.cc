@@ -173,10 +173,9 @@ bool UI_Tile::ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-
-void UI_Tile::WriteUser(FILE *fp)
+void UI_Tile::WriteUser(std::ostream &os)
 {
-	fprintf(fp, "br_width %d\n", right->visible() ? right->w() : right_W);
+	os << "br_width " << (right->visible() ? right->w() : right_W) << '\n';
 }
 
 

@@ -54,7 +54,7 @@ public:
 	void MaximiseRight();
 
 	bool ParseUser(const std::vector<SString> &tokens);
-	void WriteUser(FILE *fp);
+	void WriteUser(std::ostream &os);
 
 private:
 	void ResizeBoth();

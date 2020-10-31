@@ -1473,14 +1473,9 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions
 }
 
 
-char * PersistFilename(const crc32_c& crc)
+static SString PersistFilename(const crc32_c& crc)
 {
-	static char filename[FL_PATH_MAX];
-
-	snprintf(filename, sizeof(filename), "%s/cache/%08X%08X.dat",
-			 cache_dir.c_str(), crc.extra, crc.raw);
-
-	return filename;
+	return StringPrintf("%s/cache/%08X%08X.dat", cache_dir.c_str(), crc.extra, crc.raw);
 }
 
 
@@ -1493,13 +1488,13 @@ bool M_LoadUserState()
 
 	BA_LevelChecksum(crc);
 
-	char *filename = PersistFilename(crc);
+	SString filename = PersistFilename(crc);
 
 	LineFile file(filename);
 	if (! file)
 		return false;
 
-	LogPrintf("Loading user state from: %s\n", filename);
+	LogPrintf("Loading user state from: %s\n", filename.c_str());
 
 	SString line;
 
@@ -1547,27 +1542,24 @@ bool M_SaveUserState()
 
 	BA_LevelChecksum(crc);
 
+	SString filename = PersistFilename(crc);
 
-	char *filename = PersistFilename(crc);
+	LogPrintf("Save user state to: %s\n", filename.c_str());
 
-	LogPrintf("Save user state to: %s\n", filename);
+	std::ofstream os(filename.get(), std::ios::trunc);
 
-	FILE *fp = fopen(filename, "w");
-
-	if (! fp)
+	if (! os.is_open())
 	{
 		LogPrintf("--> FAILED! (%s)\n", strerror(errno));
 		return false;
 	}
 
-	  Editor_WriteUser(fp);
-	    Grid_WriteUser(fp);
-	Render3D_WriteUser(fp);
-	 Browser_WriteUser(fp);
-	   Props_WriteUser(fp);
-	 RecUsed_WriteUser(fp);
-
-	fclose(fp);
+	  Editor_WriteUser(os);
+	    Grid_WriteUser(os);
+	Render3D_WriteUser(os);
+	 Browser_WriteUser(os);
+	   Props_WriteUser(os);
+	 RecUsed_WriteUser(os);
 
 	return true;
 }
