@@ -233,55 +233,39 @@ static SString CalcEXEName(const port_path_info_t *info)
 	// make the executable name relative, since we chdir() to its folder
 
 	SString basename = GetBaseName(info->exe_filename);
-	return StringPrintf(".%c%s", DIR_SEP_CH, basename.c_str());
+	return SString(".") + DIR_SEP_CH + basename;
 }
 
 
-static const char * CalcWarpString()
+static SString CalcWarpString()
 {
 	SYS_ASSERT(!Level_name.empty());
-
-	static char buffer[128];
-
 	// FIXME : EDGE allows a full name: -warp MAP03
+	//         Eternity too.
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if (Level_name.length() >= 4 &&
-		y_strnicmp(Level_name.c_str(), "MAP", 3) == 0 &&
-		isdigit(Level_name[3]))
+	if(Level_name.length() >= 4 && Level_name.noCaseStartsWith("MAP") && isdigit(Level_name[3]))
 	{
-		const char * p = Level_name.c_str() + 3;
-
-		while (*p == '0' && isdigit(p[1]))
-			p++;
-
-		snprintf(buffer, sizeof(buffer), "-warp %s", p);
-		return buffer;
+		long number = strtol(Level_name.c_str() + 3, nullptr, 10);
+		return StringPrintf("-warp %ld", number);
 	}
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if (Level_name.length() >= 4 &&
-		! isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
-		! isdigit(Level_name[2]) && isdigit(Level_name[3]))
+	if(Level_name.length() >= 4 && !isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
+	   !isdigit(Level_name[2]) && isdigit(Level_name[3]))
 	{
-		snprintf(buffer, sizeof(buffer), "-warp %c %s", Level_name[1], Level_name.c_str() + 3);
-		return buffer;
+		return StringPrintf("-warp %c %s", Level_name[1], Level_name.c_str() + 3);
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	const char *p = Level_name.c_str();
-
-	while (*p && !isdigit(*p))
-		p++;
-
-	if (*p)
+	size_t digitPos = Level_name.findDigit();
+	if(digitPos != std::string::npos)
 	{
-		snprintf(buffer, sizeof(buffer), "-warp %s", p);
-		return buffer;
+		return SString("-warp ") + (Level_name.c_str() + digitPos);
 	}
 
 	// no digits at all, oh shit!
@@ -411,7 +395,7 @@ void CMD_TestMap()
 	static char cmd_buffer[FL_PATH_MAX * 4];
 
 	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
-			 CalcEXEName(info).c_str(), GrabWadNames(info).c_str(), CalcWarpString());
+			 CalcEXEName(info).c_str(), GrabWadNames(info).c_str(), CalcWarpString().c_str());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer);

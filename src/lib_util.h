@@ -476,6 +476,7 @@ public:
 	}
 
 	size_t findSpace() const;
+	size_t findDigit() const;
 
 private:
 	std::string data;

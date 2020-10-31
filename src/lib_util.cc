@@ -345,6 +345,16 @@ size_t SString::findSpace() const
 	return std::string::npos;
 }
 
+size_t SString::findDigit() const
+{
+	for(size_t i = 0; i < length(); ++i)
+	{
+		if(isdigit(data[i]))
+			return i;
+	}
+	return std::string::npos;
+}
+
 SString StringTidy(const SString &str, const SString &bad_chars)
 {
 	SString buf;
