@@ -241,12 +241,12 @@ public:
 
 	char operator[](int n) const
 	{
-		return data[n];
+		return n >= 0 ? data[n] : data[data.length() - abs(n)];
 	}
 
 	char &operator[](int n)
 	{
-		return data[n];
+		return n >= 0 ? data[n] : data[data.length() - abs(n)];
 	}
 
 	char operator[](size_t n) const
