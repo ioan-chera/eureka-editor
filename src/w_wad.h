@@ -379,11 +379,7 @@ Lump_c * W_FindSpriteLump(const SString &name);
 int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
 void W_FreeLumpData(byte ** buf_ptr);
 
-
-int W_FilenameAbsCompare(const SString &A, const SString &B);
-
 void W_StoreString(char *buf, const SString &str, size_t buflen);
-
 
 void MasterDir_Add   (Wad_file *wad);
 void MasterDir_Remove(Wad_file *wad);

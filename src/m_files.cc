@@ -35,10 +35,9 @@ static std::map<SString, SString> known_iwads;
 
 void M_AddKnownIWAD(const SString &path)
 {
-	char absolute_name[FL_PATH_MAX];
-	fl_filename_absolute(absolute_name, path.c_str());
+	const SString &absolute_name = GetAbsolutePath(path);
 
-	SString game = GameNameFromIWAD(path);
+	const SString &game = GameNameFromIWAD(path);
 
 	known_iwads[game] = absolute_name;
 }
@@ -512,8 +511,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 void M_AddRecent(const SString &filename, const SString &map_name)
 {
-	char absolute_name[FL_PATH_MAX];
-	fl_filename_absolute(absolute_name, filename.c_str());
+	const SString &absolute_name = GetAbsolutePath(filename);
 
 	recent_files.insert(absolute_name, map_name);
 
@@ -1005,10 +1003,9 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 	for (const SString &resource : Resource_list)
 	{
-		char absolute_name[FL_PATH_MAX];
-		fl_filename_absolute(absolute_name, resource.c_str());
+		SString absolute_name = GetAbsolutePath(resource);
 
-		lump->Printf("resource %s\n", absolute_name);
+		lump->Printf("resource %s\n", absolute_name.c_str());
 	}
 
 	lump->Finish();

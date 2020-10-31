@@ -1395,15 +1395,11 @@ void MasterDir_CloseAll()
 }
 
 
-int W_FilenameAbsCompare(const SString &A, const SString &B)
+static bool W_FilenameAbsEqual(const SString &A, const SString &B)
 {
-	static char A_buffer[FL_PATH_MAX];
-	static char B_buffer[FL_PATH_MAX];
-
-	fl_filename_absolute(A_buffer, sizeof(A_buffer), A.c_str());
-	fl_filename_absolute(B_buffer, sizeof(B_buffer), B.c_str());
-
-	return y_stricmp(A_buffer, B_buffer);
+	const SString &A_path = GetAbsolutePath(A);
+	const SString &B_path = GetAbsolutePath(B);
+	return A_path.noCaseEqual(B_path);
 }
 
 
@@ -1422,7 +1418,7 @@ bool MasterDir_HaveFilename(const SString &chk_path)
 	{
 		const SString &wad_path = master_dir[k]->PathName();
 
-		if (W_FilenameAbsCompare(wad_path, chk_path) == 0)
+		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;
 	}
 
