@@ -228,10 +228,7 @@ bool M_PortSetupDialog(const SString &port, const SString &game)
 
 static SString CalcEXEName(const port_path_info_t *info)
 {
-	static char exe_name[FL_PATH_MAX];
-
 	// make the executable name relative, since we chdir() to its folder
-
 	SString basename = GetBaseName(info->exe_filename);
 	return SString(".") + DIR_SEP_CH + basename;
 }
