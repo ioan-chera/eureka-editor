@@ -870,10 +870,9 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	std::vector<SString> new_resources;
 
+	SString line;
 
-	static char line[FL_PATH_MAX];
-
-	while (lump->GetLine(line, sizeof(line)))
+	while (lump->GetLine(line))
 	{
 		// comment?
 		if (line[0] == '#')
@@ -881,59 +880,60 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 		StringRemoveCRLF(line);
 
-		char *pos = strchr(line, ' ');
+		size_t pos = line.find(' ');
 
-		if (! pos || pos == line)
+		if(pos == std::string::npos || !pos)
 		{
 			LogPrintf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
 			continue;
 		}
 
-		*pos++ = 0;
+		SString words[2] = { SString(line, 0, pos), SString(line, pos + 1) };
 
-		if (strcmp(line, "game") == 0)
+		if (words[0] == "game")
 		{
-			if (! M_CanLoadDefinitions("games", pos))
+			if (! M_CanLoadDefinitions("games", words[1]))
 			{
-				LogPrintf("  unknown game: %s\n", pos /* show full path */);
+				LogPrintf("  unknown game: %s\n", words[1].c_str() /* show full path */);
 
 				int res = DLG_Confirm("&Ignore|&Cancel Load",
 				                      "Warning: the pwad specifies an unsupported "
-									  "game:\n\n          %s", pos);
+									  "game:\n\n          %s", words[1].c_str());
 				if (res == 1)
 					return false;
 			}
 			else
 			{
-				new_iwad = M_QueryKnownIWAD(pos);
+				new_iwad = M_QueryKnownIWAD(words[1]);
 
 				if (new_iwad.empty())
 				{
 					int res = DLG_Confirm("&Ignore|&Cancel Load",
 					                      "Warning: the pwad specifies an IWAD "
-										  "which cannot be found:\n\n          %s.wad", pos);
+										  "which cannot be found:\n\n          %s.wad", 
+										  words[1].c_str());
 					if (res == 1)
 						return false;
 				}
 			}
 		}
-		else if (strcmp(line, "resource") == 0)
+		else if (words[0] == "resource")
 		{
-			SString res = pos;
+			SString res = words[1];
 
 			// if not found at absolute location, try same place as PWAD
 
 			if (! FileExists(res))
 			{
-				LogPrintf("  file not found: %s\n", pos);
+				LogPrintf("  file not found: %s\n", words[1].c_str());
 
-				res = FilenameReposition(pos, wad->PathName());
+				res = FilenameReposition(words[1], wad->PathName());
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
-				res = FilenameReposition(pos, new_iwad);
+				res = FilenameReposition(words[1], new_iwad);
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
@@ -942,23 +942,23 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
-				           "which cannot be found:\n\n%s", pos);
+				           "which cannot be found:\n\n%s", words[1].c_str());
 			}
 		}
-		else if (strcmp(line, "port") == 0)
+		else if (words[0] == "port")
 		{
-			if (M_CanLoadDefinitions("ports", pos))
-				new_port = pos;
+			if (M_CanLoadDefinitions("ports", words[1]))
+				new_port = words[1];
 			else
 			{
-				LogPrintf("  unknown port: %s\n", pos);
+				LogPrintf("  unknown port: %s\n", words[1].c_str());
 
-				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", pos);
+				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", words[1].c_str());
 			}
 		}
 		else
 		{
-			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", line, EUREKA_LUMP);
+			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", words[0].c_str(), EUREKA_LUMP);
 			continue;
 		}
 	}
