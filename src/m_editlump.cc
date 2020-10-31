@@ -523,35 +523,31 @@ void CMD_AddBehaviorLump()
 			break;
 	}
 
-	const char *filename = chooser.filename();
+	SString filename = chooser.filename();
 
-	int length = 0;
-	u8_t *data = FileLoad(filename, &length);
+	std::vector<u8_t> data;
+	bool success = FileLoad(filename, data);
 
-	if (! data)
+	if (! success)
 	{
 		DLG_Notify("Read error while loading file.");
 		return;
 	}
 
-	if (length < 24 || data[0] != 'A' || data[1] != 'C' || data[2] != 'S')
+	if (data.size() < 24 || data[0] != 'A' || data[1] != 'C' || data[2] != 'S')
 	{
 		const char *reason = "bad header marker";
 
-		if (length == 0)
+		if (data.empty())
 			reason = "file is empty";
-		else if (length < 24)
+		else if (data.size() < 24)
 			reason = "file is too short / truncated";
 
 		DLG_Notify("This file is not valid ACS bytecode.\n(%s)", reason);
 		return;
 	}
 
-	BehaviorData.resize((size_t)length);
-
-	memcpy(& BehaviorData[0], data, (size_t)length);
-
-	FileFree(data);
+	BehaviorData = std::move(data);
 
 	MadeChanges = 1;
 }

@@ -419,55 +419,39 @@ bool FileMakeDir(const SString &dir_name)
 #endif
 }
 
-
-u8_t * FileLoad(const SString &filename, int *length)
+bool FileLoad(const SString &filename, std::vector<u8_t> &data)
 {
-	*length = 0;
-
 	FILE *fp = fopen(filename.c_str(), "rb");
 
-	if (! fp)
-		return NULL;
+	if(!fp)
+		return false;
+
+	long length;
 
 	// determine size of file (via seeking)
 	fseek(fp, 0, SEEK_END);
-	{
-		(*length) = (int)ftell(fp);
-	}
+	length = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	if (ferror(fp) || *length < 0)
+	if(ferror(fp) || length < 0)
 	{
 		fclose(fp);
-		return NULL;
+		return false;
 	}
 
-	u8_t *data = (u8_t *) malloc(*length + 1);
+	data.resize(length);
 
-	if (! data)
-		FatalError("Out of memory (%d bytes for FileLoad)\n", *length);
-
-	// ensure buffer is NUL-terminated
-	data[*length] = 0;
-
-	if (*length > 0 && 1 != fread(data, *length, 1, fp))
+	if(length > 0 && 1 != fread(data.data(), length, 1, fp))
 	{
-		FileFree(data);
+		data.clear();
 		fclose(fp);
-		return NULL;
+		return false;
 	}
 
 	fclose(fp);
 
-	return data;
+	return true;
 }
-
-
-void FileFree(u8_t *mem)
-{
-	free((void*) mem);
-}
-
 
 //
 // Note: returns false when the path doesn't exist.

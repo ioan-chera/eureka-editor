@@ -50,8 +50,7 @@ bool FileDelete(const SString &filename);
 bool FileChangeDir(const SString &dir_name);
 bool FileMakeDir(const SString &dir_name);
 
-u8_t *FileLoad(const SString &filename, int *length);
-void FileFree(u8_t *mem);
+bool FileLoad(const SString &filename, std::vector<u8_t> &data);
 
 // miscellanous
 SString GetExecutablePath(const char *argv0);
