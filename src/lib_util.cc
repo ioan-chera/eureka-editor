@@ -287,6 +287,17 @@ void SString::getCutWithSpace(size_t pos, SString *word0, SString *word1) const
 }
 
 //
+// This one cuts self
+//
+void SString::cutWithSpace(size_t pos, SString *second)
+{
+	SYS_ASSERT(pos < length());
+	if(second)
+		*second = SString(data.substr(pos + 1));
+	erase(pos);
+}
+
+//
 // Trim leading spaces
 //
 void SString::trimLeadingSpaces()

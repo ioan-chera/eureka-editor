@@ -428,6 +428,7 @@ public:
 	void removeCRLF();
 
 	void getCutWithSpace(size_t pos, SString *word0, SString *word1) const;
+	void cutWithSpace(size_t pos, SString *second);
 
 	void trimLeadingSpaces();
 
