@@ -230,15 +230,6 @@ SString StringVPrintf(const char *str, va_list ap)
 
 }
 
-
-void StringFree(const char *str)
-{
-	if (str)
-	{
-		free((void*) str);
-	}
-}
-
 //
 // Safe, cross-platform version of strncpy
 //
