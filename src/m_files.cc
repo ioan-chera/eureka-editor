@@ -153,7 +153,7 @@ port_path_info_t * M_QueryPortPath(const SString &name, bool create_it)
 
 bool M_IsPortPathValid(const port_path_info_t *info)
 {
-	if (strlen(info->exe_filename) < 2)
+	if(info->exe_filename.length() < 2)
 		return false;
 
 	if (! FileExists(info->exe_filename))
@@ -184,7 +184,7 @@ static void M_ParsePortPath(const SString &name, const SString &cpath)
 	if (! info)	// should not fail!
 		return;
 
-	snprintf(info->exe_filename, sizeof(info->exe_filename), "%s", path.c_str());
+	info->exe_filename = path;
 
 	// parse any other arguments
 	// [ none needed atm.... ]
@@ -199,7 +199,7 @@ void M_WritePortPaths(FILE *fp)
 	{
 		port_path_info_t& info = IT->second;
 
-		fprintf(fp, "port_path %s |%s\n", IT->first.c_str(), info.exe_filename);
+		fprintf(fp, "port_path %s |%s\n", IT->first.c_str(), info.exe_filename.c_str());
 	}
 }
 

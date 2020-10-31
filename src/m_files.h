@@ -51,11 +51,10 @@ void M_WriteEurekaLump(Wad_file *wad);
 void M_BackupWad(Wad_file *wad);
 
 
-typedef struct port_path_info_t
+struct port_path_info_t
 {
-	char exe_filename[FL_PATH_MAX];
-
-} port_path_info_t;
+	SString exe_filename;
+};
 
 port_path_info_t * M_QueryPortPath(const SString &name, bool create_it = false);
 

@@ -210,7 +210,7 @@ bool M_PortSetupDialog(const SString &port, const SString &game)
 	// populate the EXE name from existing info, if exists
 	port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
 
-	if (info && strlen(info->exe_filename) > 0)
+	if (info && info->exe_filename)
 		dialog->SetEXE(info->exe_filename);
 
 	bool ok = dialog->Run();
@@ -221,7 +221,7 @@ bool M_PortSetupDialog(const SString &port, const SString &game)
 		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
 		// FIXME: check result??
-		fl_filename_absolute(info->exe_filename, sizeof(info->exe_filename), dialog->exe_name.c_str());
+		info->exe_filename = GetAbsolutePath(dialog->exe_name);
 
 		M_SaveRecent();
 	}
@@ -234,19 +234,14 @@ bool M_PortSetupDialog(const SString &port, const SString &game)
 //------------------------------------------------------------------------
 
 
-static const char *CalcEXEName(const port_path_info_t *info)
+static SString CalcEXEName(const port_path_info_t *info)
 {
 	static char exe_name[FL_PATH_MAX];
 
 	// make the executable name relative, since we chdir() to its folder
 
-	size_t basepos = FindBaseName(info->exe_filename);
-	SString basename;
-	basename = info->exe_filename + basepos;
-
-	snprintf(exe_name, sizeof(exe_name), ".%c%s", DIR_SEP_CH, basename.c_str());
-
-	return exe_name;
+	SString basename = GetBaseName(info->exe_filename);
+	return StringPrintf(".%c%s", DIR_SEP_CH, basename.c_str());
 }
 
 
@@ -424,7 +419,7 @@ void CMD_TestMap()
 	static char cmd_buffer[FL_PATH_MAX * 4];
 
 	snprintf(cmd_buffer, sizeof(cmd_buffer), "%s %s %s",
-			 CalcEXEName(info), GrabWadNames(info).c_str(), CalcWarpString());
+			 CalcEXEName(info).c_str(), GrabWadNames(info).c_str(), CalcWarpString());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer);
