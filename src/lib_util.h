@@ -427,6 +427,10 @@ public:
 	}
 	void removeCRLF();
 
+	void getCutWithSpace(size_t pos, SString *word0, SString *word1) const;
+
+	void trimLeadingSpaces();
+
 private:
 	std::string data;
 };

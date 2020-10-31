@@ -274,6 +274,31 @@ void SString::removeCRLF()
 		pop_back();
 }
 
+//
+// Cuts a string at position "pos", removing the respective character too
+//
+void SString::getCutWithSpace(size_t pos, SString *word0, SString *word1) const
+{
+	SYS_ASSERT(pos < length());
+	if(word0)
+		*word0 = SString(data.substr(0, pos));
+	if(word1)
+		*word1 = SString(data.substr(pos + 1));
+}
+
+//
+// Trim leading spaces
+//
+void SString::trimLeadingSpaces()
+{
+	size_t i = 0;
+	for(i = 0; i < length(); ++i)
+		if(!isspace(data[i]))
+			break;
+	if(i)
+		erase(0, i);
+}
+
 SString StringTidy(const SString &str, const SString &bad_chars)
 {
 	SString buf;
