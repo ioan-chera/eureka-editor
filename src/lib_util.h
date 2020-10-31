@@ -339,6 +339,13 @@ public:
 		return result;
 	}
 
+	SString operator + (char c) const
+	{
+		SString result;
+		result.data = data + c;
+		return result;
+	}
+
 	SString &operator += (char c)
 	{
 		data += c;
@@ -456,6 +463,17 @@ public:
 	void trimTrailingSpaces();
 
 	SString &trimNullTermination();
+
+	//
+	// Capitalizes first letter
+	//
+	SString asTitle() const 
+	{
+		SString result(*this);
+		if(result)
+			result[0] = toupper(result[0]);
+		return result;
+	}
 
 	size_t findSpace() const;
 
