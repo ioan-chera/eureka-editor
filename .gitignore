@@ -27,3 +27,4 @@ osx/Eureka-Tests/Eureka-Tests.xcodeproj/xcuserdata
 *.vcxproj.user
 .vs/
 Debug/
+win/Eureka/Release/
