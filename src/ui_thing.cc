@@ -465,8 +465,10 @@ void UI_ThingBox::SetSpecialType(int new_type)
 	spec_type->do_callback();
 }
 
-
-bool UI_ThingBox::ClipboardOp(char op)
+//
+// Thing box clipboard operation
+//
+bool UI_ThingBox::ClipboardOp(EditCommand op)
 {
 	return false;
 }

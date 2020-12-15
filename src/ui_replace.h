@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_REPLACE_H__
 #define __EUREKA_UI_REPLACE_H__
 
+#include "e_cutpaste.h"
+
 class number_group_c;
 class UI_TripleCheckButton;
 
@@ -105,7 +107,7 @@ public:
 	// called by "Find" button in here, or CTRL-G shortcut
 	bool FindNext();
 
-	bool ClipboardOp(char op);
+	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 private:

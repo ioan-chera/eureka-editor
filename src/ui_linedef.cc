@@ -529,7 +529,7 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 }
 
 
-bool UI_LineBox::ClipboardOp(char op)
+bool UI_LineBox::ClipboardOp(EditCommand op)
 {
 	if (obj < 0)
 		return false;
@@ -544,19 +544,19 @@ bool UI_LineBox::ClipboardOp(char op)
 
 	switch (op)
 	{
-		case 'c':
+		case EditCommand::copy:
 			CB_Copy(parts);
 			break;
 
-		case 'v':
+		case EditCommand::paste:
 			CB_Paste(parts, Texboard_GetTexNum());
 			break;
 
-		case 'x':	// Cut
+		case EditCommand::cut:	// Cut
 			CB_Paste(parts, BA_InternaliseString(default_wall_tex));
 			break;
 
-		case 'd': // Delete
+		case EditCommand::del: // Delete
 			CB_Paste(parts, BA_InternaliseString("-"));
 			break;
 	}

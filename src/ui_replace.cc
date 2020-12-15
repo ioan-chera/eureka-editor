@@ -903,7 +903,7 @@ char UI_FindAndReplace::GetKind()
 }
 
 
-bool UI_FindAndReplace::ClipboardOp(char op)
+bool UI_FindAndReplace::ClipboardOp(EditCommand op)
 {
 	// NOTE: the logic below is disabled since texture copy'n'paste
 	//       simply does not work properly when an input widget has

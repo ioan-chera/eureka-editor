@@ -873,8 +873,10 @@ void UI_SectorBox::CB_Cut(int parts)
 	}
 }
 
-
-bool UI_SectorBox::ClipboardOp(char op)
+//
+// Sector box clipboard operation
+//
+bool UI_SectorBox::ClipboardOp(EditCommand op)
 {
 	if (obj < 0)
 		return false;
@@ -889,19 +891,19 @@ bool UI_SectorBox::ClipboardOp(char op)
 
 	switch (op)
 	{
-		case 'c':
+		case EditCommand::copy:
 			CB_Copy(parts);
 			break;
 
-		case 'v':
+		case EditCommand::paste:
 			CB_Paste(parts, Texboard_GetFlatNum());
 			break;
 
-		case 'x':
+		case EditCommand::cut:
 			CB_Cut(parts);
 			break;
 
-		case 'd':
+		case EditCommand::del:
 			// abuse the delete function to turn sector ceilings into sky
 			CB_Paste(parts, BA_InternaliseString(Misc_info.sky_flat));
 			break;

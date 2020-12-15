@@ -21,6 +21,17 @@
 #ifndef __EUREKA_E_CUTPASTE_H__
 #define __EUREKA_E_CUTPASTE_H__
 
+//
+// Edit menu command
+//
+enum class EditCommand
+{
+	cut,
+	copy,
+	paste,
+	del
+};
+
 void Clipboard_Clear();
 void Clipboard_ClearLocals();
 

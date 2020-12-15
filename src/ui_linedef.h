@@ -21,6 +21,7 @@
 #ifndef __EUREKA_UI_LINEDEF_H__
 #define __EUREKA_UI_LINEDEF_H__
 
+#include "e_cutpaste.h"
 
 class UI_LineBox : public Fl_Group
 {
@@ -81,7 +82,7 @@ public:
 	void UpdateTotal();
 
 	// see ui_window.h for description of these two methods
-	bool ClipboardOp(char op);
+	bool ClipboardOp(EditCommand op);
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 	void UnselectPics();

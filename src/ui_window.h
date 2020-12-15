@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_WINDOW_H__
 #define __EUREKA_UI_WINDOW_H__
 
+#include "e_cutpaste.h"
+
 #include "ui_menu.h"
 #include "ui_canvas.h"
 #include "ui_infobar.h"
@@ -137,7 +139,7 @@ public:
 	// see if one of the panels wants to perform a clipboard op,
 	// because a texture is highlighted or selected (for example).
 	// op == 'c' for copy, 'x' cut, 'v' paste, 'd' delete.
-	bool ClipboardOp(char op);
+	bool ClipboardOp(EditCommand op);
 
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)

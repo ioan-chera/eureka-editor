@@ -440,8 +440,10 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 	}
 }
 
-
-bool UI_DefaultProps::ClipboardOp(char op)
+//
+// Clipboard operation
+//
+bool UI_DefaultProps::ClipboardOp(EditCommand op)
 {
 	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
 					(c_pic->Selected() ? 2 : 0) |
@@ -454,31 +456,30 @@ bool UI_DefaultProps::ClipboardOp(char op)
 					(w_pic->Highlighted() ? 4 : 0);
 	}
 
-	if (sel_pics == 0)
+	if(sel_pics == 0)
 		return false;
 
-	switch (op)
+	switch(op)
 	{
-		case 'c':
+		case EditCommand::copy:
 			CB_Copy(sel_pics);
 			break;
 
-		case 'v':
+		case EditCommand::paste:
 			CB_Paste(sel_pics);
 			break;
 
-		case 'x':
+		case EditCommand::cut:
 			Beep("cannot cut that");
 			break;
 
-		case 'd':
+		case EditCommand::del:
 			CB_Delete(sel_pics);
 			break;
 	}
 
 	return true;
 }
-
 
 void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
 {

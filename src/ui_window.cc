@@ -404,29 +404,22 @@ void UI_MainWindow::ToggleFullscreen()
 }
 */
 
-
-bool UI_MainWindow::ClipboardOp(char op)
+//
+// see if one of the panels wants to perform a clipboard op,
+// because a texture is highlighted or selected (for example).
+//
+bool UI_MainWindow::ClipboardOp(EditCommand op)
 {
-	if (props_box->visible())
-	{
+	if(props_box->visible())
 		return props_box->ClipboardOp(op);
-	}
-	else if (find_box->visible())
-	{
+	if(find_box->visible())
 		return find_box->ClipboardOp(op);
-	}
-	else if (line_box->visible())
-	{
+	if(line_box->visible())
 		return line_box->ClipboardOp(op);
-	}
-	else if (sec_box->visible())
-	{
+	if(sec_box->visible())
 		return sec_box->ClipboardOp(op);
-	}
-	else if (thing_box->visible())
-	{
+	if(thing_box->visible())
 		return thing_box->ClipboardOp(op);
-	}
 
 	// no panel wanted it
 	return false;
