@@ -839,18 +839,18 @@ int Selection_FirstLine(selection_c *list)
 // selection if it is non-empty, otherwise the highlight.
 // Returns false if both selection and highlight are empty.
 //
-soh_type_e Selection_Or_Highlight()
+SelectHighlight SelectionOrHighlight()
 {
-	if (! edit.Selected->empty())
-		return SOH_OK;
+	if(!edit.Selected->empty())
+		return SelectHighlight::ok;
 
 	if (edit.highlight.valid())
 	{
 		Selection_Add(edit.highlight);
-		return SOH_Unselect;
+		return SelectHighlight::unselect;
 	}
 
-	return SOH_Empty;
+	return SelectHighlight::empty;
 }
 
 

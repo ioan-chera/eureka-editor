@@ -1194,8 +1194,8 @@ void CMD_PlaceCamera()
 
 void CMD_MoveObjects_Dialog()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to move");
 		return;
@@ -1212,15 +1212,15 @@ void CMD_MoveObjects_Dialog()
 
 	delete dialog;
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_ScaleObjects_Dialog()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to scale");
 		return;
@@ -1232,15 +1232,15 @@ void CMD_ScaleObjects_Dialog()
 
 	delete dialog;
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_RotateObjects_Dialog()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to rotate");
 		return;
@@ -1252,7 +1252,7 @@ void CMD_RotateObjects_Dialog()
 
 	delete dialog;
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 

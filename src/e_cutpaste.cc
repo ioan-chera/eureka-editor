@@ -501,8 +501,8 @@ static void CopyGroupOfObjects(selection_c *list)
 
 static bool Clipboard_DoCopy()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 		return false;
 
 	// create storage for the copied objects
@@ -549,7 +549,7 @@ static bool Clipboard_DoCopy()
 	else
 		Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 
 	return result;
@@ -1241,8 +1241,8 @@ void CMD_Delete()
 	if (main_win->ClipboardOp(EditCommand::del))
 		return;
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to delete");
 		return;

@@ -3023,9 +3023,8 @@ void CMD_ApplyTag()
 		return;
 	}
 
-
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("ApplyTag: nothing selected");
 		return;
@@ -3049,7 +3048,7 @@ void CMD_ApplyTag()
 		Tags_ApplyNewValue(new_tag);
 	}
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 

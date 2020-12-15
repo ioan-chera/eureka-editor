@@ -729,8 +729,8 @@ void CMD_LIN_Align()
 	if (do_clear) align_flags |= LINALIGN_Clear;
 
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (edit.mode != OBJ_LINEDEFS || unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (edit.mode != OBJ_LINEDEFS || unselect == SelectHighlight::empty)
 	{
 		Beep("no lines to align");
 		return;
@@ -795,7 +795,7 @@ void CMD_LIN_Align()
 	if (group.empty())
 	{
 		Beep("no visible surfaces");
-		if (unselect == SOH_Unselect)
+		if (unselect == SelectHighlight::unselect)
 			Selection_Clear(true /* nosave */);
 		return;
 	}
@@ -811,7 +811,7 @@ void CMD_LIN_Align()
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -870,8 +870,8 @@ void FlipLineDefGroup(selection_c *flip)
 //
 void CMD_LIN_Flip()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No lines to flip");
 		return;
@@ -892,15 +892,15 @@ void CMD_LIN_Flip()
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_LIN_SwapSides()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No lines to swap sides");
 		return;
@@ -916,7 +916,7 @@ void CMD_LIN_SwapSides()
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -1001,8 +1001,8 @@ static bool DoSplitLineDef(int ld)
 //
 void CMD_LIN_SplitHalf(void)
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No lines to split");
 		return;
@@ -1026,7 +1026,7 @@ void CMD_LIN_SplitHalf(void)
 	if (new_count < edit.Selected->count_obj())
 		Beep("Some lines were too short!");
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 	{
 		Selection_Clear(true /* nosave */);
 	}

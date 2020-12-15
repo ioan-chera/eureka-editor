@@ -56,8 +56,8 @@ void CMD_TH_SpinThings(void)
 	if (! degrees)
 		degrees = +45;
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No things to spin");
 		return;
@@ -77,7 +77,7 @@ void CMD_TH_SpinThings(void)
 
 	main_win->thing_box->UpdateField(Thing::F_ANGLE);
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -147,8 +147,8 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 //
 void CMD_TH_Disconnect(void)
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No vertices to disconnect");
 		return;

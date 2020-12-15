@@ -592,8 +592,8 @@ void CMD_LIN_Disconnect(void)
 	//
 	// Hence need separate code for this.
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to disconnect");
 		return;
@@ -615,7 +615,7 @@ void CMD_LIN_Disconnect(void)
 	if (! seen_one)
 		Beep("Nothing was disconnected");
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* no save */);
 }
 
@@ -791,8 +791,8 @@ void CMD_SEC_Disconnect(void)
 		return;
 	}
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to disconnect");
 		return;
@@ -807,7 +807,7 @@ void CMD_SEC_Disconnect(void)
 	if (detach_verts.empty())
 	{
 		Beep("Already disconnected");
-		if (unselect == SOH_Unselect)
+		if (unselect == SelectHighlight::unselect)
 			Selection_Clear(true /* nosave */);
 		return;
 	}
@@ -890,7 +890,7 @@ void CMD_SEC_Disconnect(void)
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 

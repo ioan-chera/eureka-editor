@@ -1156,8 +1156,8 @@ static void StoreSelectedThing(int new_type)
 	// this code is similar to code in UI_Thing::type_callback(),
 	// but here we must handle a highlighted object.
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no things for paste type");
 		return;
@@ -1173,7 +1173,7 @@ static void StoreSelectedThing(int new_type)
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 
 	Status_Set("pasted type %d", new_type);
@@ -1238,8 +1238,8 @@ static int GrabSelectedFlat()
 
 static void StoreSelectedFlat(int new_tex)
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no sectors for paste flat");
 		return;
@@ -1261,7 +1261,7 @@ static void StoreSelectedFlat(int new_tex)
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 
 	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
@@ -1270,8 +1270,8 @@ static void StoreSelectedFlat(int new_tex)
 
 static void StoreDefaultedFlats()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no sectors for default");
 		return;
@@ -1296,7 +1296,7 @@ static void StoreDefaultedFlats()
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 
 	Status_Set("defaulted flats");
@@ -1384,8 +1384,8 @@ static int GrabSelectedTexture()
 
 static void StoreSelectedTexture(int new_tex)
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no linedefs for paste tex");
 		return;
@@ -1431,7 +1431,7 @@ static void StoreSelectedTexture(int new_tex)
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 
 	Status_Set("pasted %s", BA_GetString(new_tex).c_str());

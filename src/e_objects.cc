@@ -1579,8 +1579,8 @@ static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double 
 
 void CMD_Mirror()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No objects to mirror");
 		return;
@@ -1601,7 +1601,7 @@ void CMD_Mirror()
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -1647,8 +1647,8 @@ void CMD_Rotate90()
 
 	bool anti_clockwise = (tolower(EXEC_Param[0][0]) == 'a');
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No objects to rotate");
 		return;
@@ -1704,7 +1704,7 @@ void CMD_Rotate90()
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -1988,8 +1988,8 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	param.scale_y = mul;
 
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");
 		return;
@@ -2016,7 +2016,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 
 	BA_End();
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 

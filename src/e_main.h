@@ -228,14 +228,17 @@ void Selection_Clear(bool no_save = false);
 void Selection_Push();
 void Selection_InvalidateLast();
 
-typedef enum
+//
+// When using editor
+//
+enum class SelectHighlight
 {
-	SOH_OK = 0,       // using selection, nothing else needed
-	SOH_Unselect = 1, // using highlight, must unselect at end
-	SOH_Empty = 2     // both selection or highlight are empty
-} soh_type_e;
+	ok,			// using selection, nothing else needed
+	unselect,	// using highlight, must unselect at end
+	empty		// both selection or highlight are empty
+};
 
-soh_type_e Selection_Or_Highlight();
+SelectHighlight SelectionOrHighlight();
 
 void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2);
 

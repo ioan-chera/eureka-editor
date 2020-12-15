@@ -92,8 +92,8 @@ void CMD_SEC_Floor(void)
 		return;
 	}
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to move");
 		return;
@@ -115,7 +115,7 @@ void CMD_SEC_Floor(void)
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -130,8 +130,8 @@ void CMD_SEC_Ceil(void)
 		return;
 	}
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to move");
 		return;
@@ -153,7 +153,7 @@ void CMD_SEC_Ceil(void)
 
 	main_win->sec_box->UpdateField(Sector::F_CEILH);
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
@@ -214,8 +214,8 @@ void CMD_SEC_Light(void)
 		return;
 	}
 
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to adjust light");
 		return;
@@ -223,15 +223,15 @@ void CMD_SEC_Light(void)
 
 	SectorsAdjustLight(diff);
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
 
 void CMD_SEC_SwapFlats()
 {
-	soh_type_e unselect = Selection_Or_Highlight();
-	if (unselect == SOH_Empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to swap");
 		return;
@@ -256,7 +256,7 @@ void CMD_SEC_SwapFlats()
 	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
 	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
-	if (unselect == SOH_Unselect)
+	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
