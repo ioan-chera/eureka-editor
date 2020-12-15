@@ -209,12 +209,12 @@ void Main_LoadResources();
 void Main_Quit();
 
 [[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
-void ThrowException(const char *fmt, ...);
+[[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 
 #define BugError  FatalError
 
 
-void DLG_ShowError(const char *msg, ...);
+void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 int  DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 

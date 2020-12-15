@@ -200,7 +200,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 //
 // Throw an exception using format
 //
-void ThrowException(const char *fmt, ...)
+void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	char message[256];
 	va_list ap;

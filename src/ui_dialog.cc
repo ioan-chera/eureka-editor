@@ -262,7 +262,7 @@ static void ParseButtons(const char *buttons,
 static char dialog_buffer[MSG_BUF_LEN];
 
 
-void DLG_ShowError(const char *msg, ...)
+void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 
