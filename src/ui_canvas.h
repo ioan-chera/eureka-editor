@@ -96,10 +96,10 @@ public:
 
 	void DrawSelection(selection_c *list);
 	void DrawSectorSelection(selection_c *list, double dx, double dy);
-	void DrawHighlight(int objtype, int objnum,
+	void DrawHighlight(ObjType objtype, int objnum,
 	                   bool skip_lines = false, double dx=0, double dy=0);
-	void DrawHighlightTransform(int objtype, int objnum);
-	void DrawTagged(int objtype, int objnum);
+	void DrawHighlightTransform(ObjType objtype, int objnum);
+	void DrawTagged(ObjType objtype, int objnum);
 
 	// returns true if ok, false if box was very small
 	bool SelboxGet(double& x1, double& y1, double& x2, double& y2);

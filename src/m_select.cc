@@ -35,19 +35,14 @@
 #define INITIAL_BITVEC_SIZE    1024
 #define INITIAL_EXTENDED_SIZE  256
 
-
-selection_c::selection_c(obj_type_e _type, bool _extended) :
-	type(_type),
-	count(0), bv(NULL),
-	extended(NULL), ext_size(0),
-	maxobj(-1), first_obj(-1)
+selection_c::selection_c(ObjType type, bool extended) : type(type)
 {
-	if (_extended)
+	if(extended)
 	{
 		ext_size = INITIAL_EXTENDED_SIZE;
-		extended  = new byte[ext_size];
+		this->extended = new byte[ext_size];
 
-		memset(extended, 0, (size_t)ext_size);
+		memset(this->extended, 0, ext_size);
 	}
 }
 
@@ -61,7 +56,7 @@ selection_c::~selection_c()
 }
 
 
-void selection_c::change_type(obj_type_e new_type)
+void selection_c::change_type(ObjType new_type)
 {
 	type = new_type;
 

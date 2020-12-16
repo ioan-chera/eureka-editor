@@ -140,7 +140,7 @@ void UI_MainWindow::quit_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_MainWindow::NewEditMode(obj_type_e mode)
+void UI_MainWindow::NewEditMode(ObjType mode)
 {
 	UnselectPics();
 
@@ -153,10 +153,10 @@ void UI_MainWindow::NewEditMode(obj_type_e mode)
 
 	switch (mode)
 	{
-		case OBJ_THINGS:  thing_box->show(); break;
-		case OBJ_LINEDEFS: line_box->show(); break;
-		case OBJ_SECTORS:   sec_box->show(); break;
-		case OBJ_VERTICES: vert_box->show(); break;
+		case ObjType::things:  thing_box->show(); break;
+		case ObjType::linedefs: line_box->show(); break;
+		case ObjType::sectors:   sec_box->show(); break;
+		case ObjType::vertices: vert_box->show(); break;
 
 		default: break;
 	}
@@ -214,10 +214,10 @@ void UI_MainWindow::HideSpecialPanel()
 
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:   thing_box->show(); break;
-		case OBJ_LINEDEFS:  line_box->show(); break;
-		case OBJ_VERTICES:  vert_box->show(); break;
-		case OBJ_SECTORS:    sec_box->show(); break;
+		case ObjType::things:   thing_box->show(); break;
+		case ObjType::linedefs:  line_box->show(); break;
+		case ObjType::vertices:  vert_box->show(); break;
+		case ObjType::sectors:    sec_box->show(); break;
 
 		default: break;
 	}
@@ -282,10 +282,10 @@ int UI_MainWindow::GetPanelObjNum() const
 	// FIXME: using 'edit' here feels like a hack or mis-design
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:   return thing_box->GetObj();
-		case OBJ_VERTICES: return  vert_box->GetObj();
-		case OBJ_SECTORS:  return   sec_box->GetObj();
-		case OBJ_LINEDEFS: return  line_box->GetObj();
+		case ObjType::things:   return thing_box->GetObj();
+		case ObjType::vertices: return  vert_box->GetObj();
+		case ObjType::sectors:  return   sec_box->GetObj();
+		case ObjType::linedefs: return  line_box->GetObj();
 
 		default:
 			return -1;

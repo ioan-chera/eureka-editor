@@ -42,7 +42,7 @@ public:
 	int handle(int event);
 
 public:
-	void NewEditMode(obj_type_e new_mode);
+	void NewEditMode(ObjType new_mode);
 
 	void SetMouse(double mx, double my);
 

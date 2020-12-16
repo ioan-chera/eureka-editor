@@ -200,7 +200,7 @@ void CMD_LIN_SelectPath(void)
 	if (!fresh_sel && edit.Selected->get(start_L))
 		unset_them = true;
 
-	selection_c seen(OBJ_LINEDEFS);
+	selection_c seen(ObjType::linedefs);
 
 	seen.set(start_L);
 
@@ -334,7 +334,7 @@ void CMD_SEC_SelectGroup(void)
 	if (!fresh_sel && edit.Selected->get(start_sec))
 		unset_them = true;
 
-	selection_c seen(OBJ_SECTORS);
+	selection_c seen(ObjType::sectors);
 
 	seen.set(start_sec);
 
@@ -494,9 +494,9 @@ void CMD_PrevObject()
 
 void CMD_PruneUnused(void)
 {
-	selection_c used_secs (OBJ_SECTORS);
-	selection_c used_sides(OBJ_SIDEDEFS);
-	selection_c used_verts(OBJ_VERTICES);
+	selection_c used_secs (ObjType::sectors);
+	selection_c used_sides(ObjType::sidedefs);
+	selection_c used_verts(ObjType::vertices);
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{

@@ -152,7 +152,7 @@ static void UpdatePanel()
 	else if (obj_count > 0)
 	{
 		// in linedef mode, we prefer showing a two-sided linedef
-		if (edit.mode == OBJ_LINEDEFS && obj_count > 1)
+		if (edit.mode == ObjType::linedefs && obj_count > 1)
 			obj_idx = Selection_FirstLine(edit.Selected);
 		else
 			obj_idx = edit.Selected->find_first();
@@ -160,19 +160,19 @@ static void UpdatePanel()
 
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			main_win->thing_box->SetObj(obj_idx, obj_count);
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			main_win->line_box->SetObj(obj_idx, obj_count);
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			main_win->sec_box->SetObj(obj_idx, obj_count);
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			main_win->vert_box->SetObj(obj_idx, obj_count);
 			break;
 
@@ -220,7 +220,7 @@ void UpdateDrawLine()
 		int near_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
 		if (near_vert >= 0)
 		{
-			edit.highlight = Objid(OBJ_VERTICES, near_vert);
+			edit.highlight = Objid(ObjType::vertices, near_vert);
 		}
 	}
 
@@ -244,7 +244,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 	// in vertex mode, see if there is a linedef which would be split by
 	// adding a new vertex.
 
-	if (edit.mode == OBJ_VERTICES &&
+	if (edit.mode == ObjType::vertices &&
 		edit.pointer_in_window &&
 	    edit.highlight.is_nil())
 	{
@@ -274,7 +274,7 @@ void UpdateHighlight()
 
 	// don't highlight when dragging, EXCEPT when dragging a single vertex
 	if (edit.pointer_in_window &&
-	    (edit.action != ACT_DRAG || (edit.mode == OBJ_VERTICES && edit.dragged.valid()) ))
+	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
 		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
 
@@ -288,7 +288,7 @@ void UpdateHighlight()
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
 		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
-			edit.mode == OBJ_VERTICES && edit.highlight.valid())
+			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			const Vertex *V = Vertices[edit.highlight.num];
 			const Vertex *S = Vertices[edit.draw_from.num];
@@ -325,7 +325,7 @@ void Editor_ClearErrorMode()
 }
 
 
-void Editor_ChangeMode_Raw(obj_type_e new_mode)
+void Editor_ChangeMode_Raw(ObjType new_mode)
 {
 	// keep selection after a "Find All" and user dismisses panel
 	if (new_mode == edit.mode && main_win->isSpecialPanelShown())
@@ -343,15 +343,15 @@ void Editor_ChangeMode_Raw(obj_type_e new_mode)
 
 void Editor_ChangeMode(char mode_char)
 {
-	obj_type_e  prev_type = edit.mode;
+	ObjType  prev_type = edit.mode;
 
 	// Set the object type according to the new mode.
 	switch (mode_char)
 	{
-		case 't': Editor_ChangeMode_Raw(OBJ_THINGS);   break;
-		case 'l': Editor_ChangeMode_Raw(OBJ_LINEDEFS); break;
-		case 's': Editor_ChangeMode_Raw(OBJ_SECTORS);  break;
-		case 'v': Editor_ChangeMode_Raw(OBJ_VERTICES); break;
+		case 't': Editor_ChangeMode_Raw(ObjType::things);   break;
+		case 'l': Editor_ChangeMode_Raw(ObjType::linedefs); break;
+		case 's': Editor_ChangeMode_Raw(ObjType::sectors);  break;
+		case 'v': Editor_ChangeMode_Raw(ObjType::vertices); break;
 
 		default:
 			Beep("Unknown mode: %c\n", mode_char);
@@ -429,18 +429,18 @@ void MapStuff_NotifyBegin()
 	sound_propagation_invalid = true;
 }
 
-void MapStuff_NotifyInsert(obj_type_e type, int objnum)
+void MapStuff_NotifyInsert(ObjType type, int objnum)
 {
-	if (type == OBJ_VERTICES)
+	if (type == ObjType::vertices)
 	{
 		if (new_vertex_minimum < 0 || objnum < new_vertex_minimum)
 			new_vertex_minimum = objnum;
 	}
 }
 
-void MapStuff_NotifyDelete(obj_type_e type, int objnum)
+void MapStuff_NotifyDelete(ObjType type, int objnum)
 {
-	if (type == OBJ_VERTICES)
+	if (type == ObjType::vertices)
 	{
 		recalc_map_bounds = true;
 
@@ -452,9 +452,9 @@ void MapStuff_NotifyDelete(obj_type_e type, int objnum)
 	}
 }
 
-void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
+void MapStuff_NotifyChange(ObjType type, int objnum, int field)
 {
-	if (type == OBJ_VERTICES)
+	if (type == ObjType::vertices)
 	{
 		// NOTE: for performance reasons we don't recalculate the
 		//       map bounds when only moving a few vertices.
@@ -472,13 +472,13 @@ void MapStuff_NotifyChange(obj_type_e type, int objnum, int field)
 		Subdiv_InvalidateAll();
 	}
 
-	if (type == OBJ_SIDEDEFS && field == SideDef::F_SECTOR)
+	if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
 		Subdiv_InvalidateAll();
 
-	if (type == OBJ_LINEDEFS && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
+	if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
 		Subdiv_InvalidateAll();
 
-	if (type == OBJ_SECTORS && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
+	if (type == ObjType::sectors && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
 		Subdiv_InvalidateAll();
 }
 
@@ -514,7 +514,7 @@ void ObjectBox_NotifyBegin()
 }
 
 
-void ObjectBox_NotifyInsert(obj_type_e type, int objnum)
+void ObjectBox_NotifyInsert(ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
@@ -528,7 +528,7 @@ void ObjectBox_NotifyInsert(obj_type_e type, int objnum)
 }
 
 
-void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
+void ObjectBox_NotifyDelete(ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
@@ -542,7 +542,7 @@ void ObjectBox_NotifyDelete(obj_type_e type, int objnum)
 }
 
 
-void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field)
+void ObjectBox_NotifyChange(ObjType type, int objnum, int field)
 {
 	if (type != edit.mode)
 		return;
@@ -587,8 +587,7 @@ void Selection_NotifyBegin()
 	invalidated_last_sel  = false;
 }
 
-
-void Selection_NotifyInsert(obj_type_e type, int objnum)
+void Selection_NotifyInsert(ObjType type, int objnum)
 {
 	if (type == edit.Selected->what_type() &&
 		objnum <= edit.Selected->max_obj())
@@ -604,8 +603,7 @@ void Selection_NotifyInsert(obj_type_e type, int objnum)
 	}
 }
 
-
-void Selection_NotifyDelete(obj_type_e type, int objnum)
+void Selection_NotifyDelete(ObjType type, int objnum)
 {
 	if (objnum <= edit.Selected->max_obj())
 	{
@@ -621,7 +619,7 @@ void Selection_NotifyDelete(obj_type_e type, int objnum)
 }
 
 
-void Selection_NotifyChange(obj_type_e type, int objnum, int field)
+void Selection_NotifyChange(ObjType type, int objnum, int field)
 {
 	// field changes never affect the current selection
 }
@@ -665,14 +663,14 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	}
 
 
-	if (src->what_type() == OBJ_SECTORS && dest->what_type() == OBJ_THINGS)
+	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::things)
 	{
 		for (int t = 0 ; t < NumThings ; t++)
 		{
 			const Thing *T = Things[t];
 
 			Objid obj;
-			GetNearObject(obj, OBJ_SECTORS, T->x(), T->y());
+			GetNearObject(obj, ObjType::sectors, T->x(), T->y());
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{
@@ -683,7 +681,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	}
 
 
-	if (src->what_type() == OBJ_SECTORS && dest->what_type() == OBJ_LINEDEFS)
+	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::linedefs)
 	{
 		for (int l = 0 ; l < NumLineDefs ; l++)
 		{
@@ -699,7 +697,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	}
 
 
-	if (src->what_type() == OBJ_SECTORS && dest->what_type() == OBJ_VERTICES)
+	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::vertices)
 	{
 		for (int l = 0 ; l < NumLineDefs ; l++)
 		{
@@ -716,7 +714,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	}
 
 
-	if (src->what_type() == OBJ_LINEDEFS && dest->what_type() == OBJ_SIDEDEFS)
+	if (src->what_type() == ObjType::linedefs && dest->what_type() == ObjType::sidedefs)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
@@ -728,7 +726,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 		return;
 	}
 
-	if (src->what_type() == OBJ_SECTORS && dest->what_type() == OBJ_SIDEDEFS)
+	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::sidedefs)
 	{
 		for (int n = 0 ; n < NumSideDefs ; n++)
 		{
@@ -741,7 +739,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	}
 
 
-	if (src->what_type() == OBJ_LINEDEFS && dest->what_type() == OBJ_VERTICES)
+	if (src->what_type() == ObjType::linedefs && dest->what_type() == ObjType::vertices)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
@@ -754,7 +752,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	}
 
 
-	if (src->what_type() == OBJ_VERTICES && dest->what_type() == OBJ_LINEDEFS)
+	if (src->what_type() == ObjType::vertices && dest->what_type() == ObjType::linedefs)
 	{
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < NumLineDefs ; l++)
@@ -771,10 +769,10 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	// remaining conversions are L->S and V->S
 
-	if (dest->what_type() != OBJ_SECTORS)
+	if (dest->what_type() != ObjType::sectors)
 		return;
 
-	if (src->what_type() != OBJ_LINEDEFS && src->what_type() != OBJ_VERTICES)
+	if (src->what_type() != ObjType::linedefs && src->what_type() != ObjType::vertices)
 		return;
 
 
@@ -795,7 +793,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		const LineDef *L = LineDefs[l];
 
-		if (src->what_type() == OBJ_VERTICES)
+		if (src->what_type() == ObjType::vertices)
 		{
 			if (src->get(L->start) && src->get(L->end))
 				continue;
@@ -857,7 +855,7 @@ SelectHighlight SelectionOrHighlight()
 //
 // select all objects inside a given box
 //
-void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2)
+void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2)
 {
 	if (x2 < x1)
 		std::swap(x1, x2);
@@ -867,7 +865,7 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			for (int n = 0 ; n < NumThings ; n++)
 			{
 				const Thing *T = Things[n];
@@ -882,7 +880,7 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 			}
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			for (int n = 0 ; n < NumVertices ; n++)
 			{
 				const Vertex *V = Vertices[n];
@@ -897,7 +895,7 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 			}
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
 				const LineDef *L = LineDefs[n];
@@ -913,10 +911,10 @@ void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, do
 			}
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 		{
-			selection_c  in_sectors(OBJ_SECTORS);
-			selection_c out_sectors(OBJ_SECTORS);
+			selection_c  in_sectors(ObjType::sectors);
+			selection_c out_sectors(ObjType::sectors);
 
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
@@ -1318,10 +1316,10 @@ void Editor_Init()
 {
 	switch (config::default_edit_mode)
 	{
-		case 1:  edit.mode = OBJ_LINEDEFS; break;
-		case 2:  edit.mode = OBJ_SECTORS;  break;
-		case 3:  edit.mode = OBJ_VERTICES; break;
-		default: edit.mode = OBJ_THINGS;   break;
+		case 1:  edit.mode = ObjType::linedefs; break;
+		case 2:  edit.mode = ObjType::sectors;  break;
+		case 3:  edit.mode = ObjType::vertices; break;
+		default: edit.mode = ObjType::things;   break;
 	}
 
 	edit.render3d = false;
@@ -1413,10 +1411,10 @@ void Editor_WriteUser(std::ostream &os)
 {
 	switch (edit.mode)
 	{
-	case OBJ_THINGS:   os << "edit_mode t\n"; break;
-	case OBJ_LINEDEFS: os << "edit_mode l\n"; break;
-	case OBJ_SECTORS:  os << "edit_mode s\n"; break;
-	case OBJ_VERTICES: os << "edit_mode v\n"; break;
+	case ObjType::things:   os << "edit_mode t\n"; break;
+	case ObjType::linedefs: os << "edit_mode l\n"; break;
+	case ObjType::sectors:  os << "edit_mode s\n"; break;
+	case ObjType::vertices: os << "edit_mode v\n"; break;
 
 		default: break;
 	}

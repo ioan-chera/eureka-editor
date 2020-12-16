@@ -281,7 +281,7 @@ void CMD_SetVar()
 			Render3D_Enable(false);
 
 		// need sectors mode for sound propagation display
-		if (edit.sector_render_mode == SREND_SoundProp && edit.mode != OBJ_SECTORS)
+		if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
 			Editor_ChangeMode('s');
 
 		RedrawMap();
@@ -541,7 +541,7 @@ void CheckBeginDrag()
 		return;
 
 	// can drag things and sector planes in 3D mode
-	if (edit.render3d && !(edit.mode == OBJ_THINGS || edit.mode == OBJ_SECTORS))
+	if (edit.render3d && !(edit.mode == ObjType::things || edit.mode == ObjType::sectors))
 		return;
 
 	int pixel_dx = Fl::event_x() - edit.click_screen_x;
@@ -576,10 +576,10 @@ static void DoBeginDrag()
 
 	if (edit.render3d)
 	{
-		if (edit.mode == OBJ_SECTORS)
+		if (edit.mode == ObjType::sectors)
 			edit.drag_sector_dz = 0;
 
-		if (edit.mode == OBJ_THINGS)
+		if (edit.mode == ObjType::things)
 		{
 			edit.drag_thing_num = edit.clicked.num;
 			edit.drag_thing_floorh = static_cast<float>(edit.drag_start_z);
@@ -591,7 +591,7 @@ static void DoBeginDrag()
 				const Thing *T = Things[edit.drag_thing_num];
 
 				Objid sec;
-				GetNearObject(sec, OBJ_SECTORS, T->x(), T->y());
+				GetNearObject(sec, ObjType::sectors, T->x(), T->y());
 
 				if (sec.valid())
 					edit.drag_thing_floorh = static_cast<float>(Sectors[sec.num]->floorh);
@@ -606,9 +606,9 @@ static void DoBeginDrag()
 		edit.drag_lines = NULL;
 	}
 
-	if (edit.mode == OBJ_VERTICES)
+	if (edit.mode == ObjType::vertices)
 	{
-		edit.drag_lines = new selection_c(OBJ_LINEDEFS);
+		edit.drag_lines = new selection_c(ObjType::linedefs);
 		ConvertSelection(edit.Selected, edit.drag_lines);
 
 		// find opposite end-point when dragging a single vertex
@@ -657,10 +657,10 @@ static void ACT_Drag_release(void)
 
 	if (edit.render3d)
 	{
-		if (edit.mode == OBJ_THINGS)
+		if (edit.mode == ObjType::things)
 			Render3D_DragThings();
 
-		if (edit.mode == OBJ_SECTORS)
+		if (edit.mode == ObjType::sectors)
 			Render3D_DragSectors();
 	}
 
@@ -757,7 +757,7 @@ void CMD_ACT_Click()
 	// handle 3D mode, skip stuff below which only makes sense in 2D
 	if (edit.render3d)
 	{
-		if (edit.highlight.type == OBJ_THINGS)
+		if (edit.highlight.type == ObjType::things)
 		{
 			const Thing *T = Things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
@@ -774,7 +774,7 @@ void CMD_ACT_Click()
 
 	// check for splitting a line, and ensure we can drag the vertex
 	if (! Exec_HasFlag("/nosplit") &&
-		edit.mode == OBJ_VERTICES &&
+		edit.mode == ObjType::vertices &&
 		edit.split_line.valid() &&
 		edit.action != ACT_DRAW_LINE)
 	{
@@ -792,7 +792,7 @@ void CMD_ACT_Click()
 		BA_Begin();
 		BA_Message("split linedef #%d", split_ld);
 
-		int new_vert = BA_New(OBJ_VERTICES);
+		int new_vert = BA_New(ObjType::vertices);
 
 		Vertex *V = Vertices[new_vert];
 
@@ -805,7 +805,7 @@ void CMD_ACT_Click()
 		if (want_select)
 			edit.Selected->set(new_vert);
 
-		edit.clicked = Objid(OBJ_VERTICES, new_vert);
+		edit.clicked = Objid(ObjType::vertices, new_vert);
 		Editor_SetAction(ACT_CLICK);
 
 		RedrawMap();
@@ -1015,9 +1015,9 @@ void CMD_ACT_Transform()
 		edit.trans_lines = NULL;
 	}
 
-	if (edit.mode == OBJ_VERTICES)
+	if (edit.mode == ObjType::vertices)
 	{
-		edit.trans_lines = new selection_c(OBJ_LINEDEFS);
+		edit.trans_lines = new selection_c(ObjType::linedefs);
 		ConvertSelection(edit.Selected, edit.trans_lines);
 	}
 
@@ -1054,19 +1054,19 @@ void CMD_Merge()
 {
 	switch (edit.mode)
 	{
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			CMD_VT_Merge();
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			CMD_LIN_MergeTwo();
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			CMD_SEC_Merge();
 			break;
 
-		case OBJ_THINGS:
+		case ObjType::things:
 			CMD_TH_Merge();
 			break;
 
@@ -1081,19 +1081,19 @@ void CMD_Disconnect()
 {
 	switch (edit.mode)
 	{
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			CMD_VT_Disconnect();
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			CMD_LIN_Disconnect();
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			CMD_SEC_Disconnect();
 			break;
 
-		case OBJ_THINGS:
+		case ObjType::things:
 			CMD_TH_Disconnect();
 			break;
 
@@ -1201,9 +1201,9 @@ void CMD_MoveObjects_Dialog()
 		return;
 	}
 
-	bool want_dz = (edit.mode == OBJ_SECTORS);
+	bool want_dz = (edit.mode == ObjType::sectors);
 	// can move things vertically in Hexen/UDMF formats
-	if (edit.mode == OBJ_THINGS && Level_format != MAPF_Doom)
+	if (edit.mode == ObjType::things && Level_format != MAPF_Doom)
 		want_dz = true;
 
 	UI_MoveDialog * dialog = new UI_MoveDialog(want_dz);

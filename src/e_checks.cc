@@ -220,7 +220,7 @@ check_result_e UI_Check_base::Run()
 
 void Vertex_FindDanglers(selection_c& sel)
 {
-	sel.change_type(OBJ_VERTICES);
+	sel.change_type(ObjType::vertices);
 
 	if (NumVertices == 0 || NumLineDefs == 0)
 		return;
@@ -260,7 +260,7 @@ void Vertex_FindDanglers(selection_c& sel)
 
 void Vertex_ShowDanglers()
 {
-	if (edit.mode != OBJ_VERTICES)
+	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
 	Vertex_FindDanglers(*edit.Selected);
@@ -286,7 +286,7 @@ void Vertex_FindOverlaps(selection_c& sel)
 	// NOTE: when two or more vertices share the same coordinates,
 	//       only the second and subsequent ones are stored in 'sel'.
 
-	sel.change_type(OBJ_VERTICES);
+	sel.change_type(ObjType::vertices);
 
 	if (NumVertices < 2)
 		return;
@@ -384,7 +384,7 @@ void Vertex_MergeOverlaps()
 
 void Vertex_ShowOverlaps()
 {
-	if (edit.mode != OBJ_VERTICES)
+	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
 	Vertex_FindOverlaps(*edit.Selected);
@@ -395,7 +395,7 @@ void Vertex_ShowOverlaps()
 
 void Vertex_FindUnused(selection_c& sel)
 {
-	sel.change_type(OBJ_VERTICES);
+	sel.change_type(ObjType::vertices);
 
 	if (NumVertices == 0)
 		return;
@@ -427,7 +427,7 @@ void Vertex_RemoveUnused()
 
 void Vertex_ShowUnused()
 {
-	if (edit.mode != OBJ_VERTICES)
+	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
 	Vertex_FindUnused(*edit.Selected);
@@ -562,8 +562,8 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 
 void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 {
-	 secs.change_type(OBJ_SECTORS);
-	verts.change_type(OBJ_VERTICES);
+	 secs.change_type(ObjType::sectors);
+	verts.change_type(ObjType::vertices);
 
 	if (NumVertices == 0 || NumSectors == 0)
 		return;
@@ -620,14 +620,14 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 }
 
 
-void Sectors_ShowUnclosed(obj_type_e what)
+static void Sectors_ShowUnclosed(ObjType what)
 {
 	if (edit.mode != what)
-		Editor_ChangeMode((what == OBJ_SECTORS) ? 's' : 'v');
+		Editor_ChangeMode((what == ObjType::sectors) ? 's' : 'v');
 
 	selection_c other;
 
-	if (what == OBJ_SECTORS)
+	if (what == ObjType::sectors)
 		Sectors_FindUnclosed(*edit.Selected, other);
 	else
 		Sectors_FindUnclosed(other, *edit.Selected);
@@ -654,8 +654,8 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 	// these ideas, don't forget to credit DEU...  Just a reminder... :-)
 	//
 
-	 secs.change_type(OBJ_SECTORS);
-	lines.change_type(OBJ_LINEDEFS);
+	 secs.change_type(ObjType::sectors);
+	lines.change_type(ObjType::linedefs);
 
 	if (NumLineDefs == 0 || NumSectors == 0)
 		return;
@@ -693,14 +693,14 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 }
 
 
-void Sectors_ShowMismatches(obj_type_e what)
+static void Sectors_ShowMismatches(ObjType what)
 {
 	if (edit.mode != what)
-		Editor_ChangeMode((what == OBJ_SECTORS) ? 's' : 'l');
+		Editor_ChangeMode((what == ObjType::sectors) ? 's' : 'l');
 
 	selection_c other;
 
-	if (what == OBJ_SECTORS)
+	if (what == ObjType::sectors)
 		Sectors_FindMismatches(*edit.Selected, other);
 	else
 		Sectors_FindMismatches(other, *edit.Selected);
@@ -724,7 +724,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 {
 	types.clear();
 
-	list.change_type(OBJ_SECTORS);
+	list.change_type(ObjType::sectors);
 
 	int max_type = (Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
 
@@ -762,7 +762,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 static void Sectors_ShowUnknown()
 {
-	if (edit.mode != OBJ_SECTORS)
+	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	std::map<int, int> types;
@@ -814,7 +814,7 @@ void Sectors_ClearUnknown()
 
 void Sectors_FindUnused(selection_c& sel)
 {
-	sel.change_type(OBJ_SECTORS);
+	sel.change_type(ObjType::sectors);
 
 	if (NumSectors == 0)
 		return;
@@ -851,7 +851,7 @@ void Sectors_RemoveUnused()
 
 void Sectors_FindBadCeil(selection_c& sel)
 {
-	sel.change_type(OBJ_SECTORS);
+	sel.change_type(ObjType::sectors);
 
 	if (NumSectors == 0)
 		return;
@@ -887,7 +887,7 @@ void Sectors_FixBadCeil()
 
 void Sectors_ShowBadCeil()
 {
-	if (edit.mode != OBJ_SECTORS)
+	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	Sectors_FindBadCeil(*edit.Selected);
@@ -898,7 +898,7 @@ void Sectors_ShowBadCeil()
 
 void SideDefs_FindUnused(selection_c& sel)
 {
-	sel.change_type(OBJ_SIDEDEFS);
+	sel.change_type(ObjType::sidedefs);
 
 	if (NumSideDefs == 0)
 		return;
@@ -932,8 +932,8 @@ void SideDefs_RemoveUnused()
 
 void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
 {
-	sides.change_type(OBJ_SIDEDEFS);
-	lines.change_type(OBJ_LINEDEFS);
+	sides.change_type(ObjType::sidedefs);
+	lines.change_type(ObjType::linedefs);
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	for (int k = 0 ; k < i ; k++)
@@ -964,7 +964,7 @@ void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
 
 void SideDefs_ShowPacked()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	selection_c sides;
@@ -977,7 +977,7 @@ void SideDefs_ShowPacked()
 
 static int Copy_SideDef(int num)
 {
-	int sd = BA_New(OBJ_SIDEDEFS);
+	int sd = BA_New(ObjType::sidedefs);
 
 	SideDefs[sd]->RawCopy(SideDefs[num]);
 
@@ -1120,14 +1120,14 @@ public:
 	static void action_show_unclosed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnclosed(OBJ_SECTORS);
+		Sectors_ShowUnclosed(ObjType::sectors);
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_show_un_verts(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnclosed(OBJ_VERTICES);
+		Sectors_ShowUnclosed(ObjType::vertices);
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -1135,14 +1135,14 @@ public:
 	static void action_show_mismatch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowMismatches(OBJ_SECTORS);
+		Sectors_ShowMismatches(ObjType::sectors);
 		dialog->user_action = CKR_Highlight;
 	}
 
 	static void action_show_mis_lines(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowMismatches(OBJ_LINEDEFS);
+		Sectors_ShowMismatches(ObjType::linedefs);
 		dialog->user_action = CKR_Highlight;
 	}
 
@@ -1311,7 +1311,7 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 {
 	types.clear();
 
-	list.change_type(OBJ_THINGS);
+	list.change_type(ObjType::things);
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
@@ -1329,7 +1329,7 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 void Things_ShowUnknown()
 {
-	if (edit.mode != OBJ_THINGS)
+	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
 	std::map<int, int> types;
@@ -1409,7 +1409,7 @@ int Things_FindStarts(int *dm_num)
 
 void Things_FindInVoid(selection_c& list)
 {
-	list.change_type(OBJ_THINGS);
+	list.change_type(ObjType::things);
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
@@ -1418,7 +1418,7 @@ void Things_FindInVoid(selection_c& list)
 
 		Objid obj;
 
-		GetNearObject(obj, OBJ_SECTORS, x, y);
+		GetNearObject(obj, ObjType::sectors, x, y);
 
 		if (! obj.is_nil())
 			continue;
@@ -1437,7 +1437,7 @@ void Things_FindInVoid(selection_c& list)
 			double x2 = x + ((corner & 1) ? -4 : +4);
 			double y2 = y + ((corner & 2) ? -4 : +4);
 
-			GetNearObject(obj, OBJ_SECTORS, x2, y2);
+			GetNearObject(obj, ObjType::sectors, x2, y2);
 
 			if (obj.is_nil())
 				out_count++;
@@ -1451,7 +1451,7 @@ void Things_FindInVoid(selection_c& list)
 
 void Things_ShowInVoid()
 {
-	if (edit.mode != OBJ_THINGS)
+	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
 	Things_FindInVoid(*edit.Selected);
@@ -1506,7 +1506,7 @@ static bool TH_always_spawned(int type)
 
 void Things_FindDuds(selection_c& list)
 {
-	list.change_type(OBJ_THINGS);
+	list.change_type(ObjType::things);
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
@@ -1544,7 +1544,7 @@ void Things_FindDuds(selection_c& list)
 
 void Things_ShowDuds()
 {
-	if (edit.mode != OBJ_THINGS)
+	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
 	Things_FindDuds(*edit.Selected);
@@ -1778,7 +1778,7 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 
 void Things_FindStuckies(selection_c& list)
 {
-	list.change_type(OBJ_THINGS);
+	list.change_type(ObjType::things);
 
 	std::vector<int> blockers;
 	std::vector<int> sizes;
@@ -1809,7 +1809,7 @@ void Things_FindStuckies(selection_c& list)
 
 void Things_ShowStuckies()
 {
-	if (edit.mode != OBJ_THINGS)
+	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
 	Things_FindStuckies(*edit.Selected);
@@ -2030,7 +2030,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 void LineDefs_FindZeroLen(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 		if (LineDefs[n]->IsZeroLength())
@@ -2040,7 +2040,7 @@ void LineDefs_FindZeroLen(selection_c& lines)
 
 void LineDefs_RemoveZeroLen()
 {
-	selection_c lines(OBJ_LINEDEFS);
+	selection_c lines(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2063,7 +2063,7 @@ void LineDefs_RemoveZeroLen()
 
 void LineDefs_ShowZeroLen()
 {
-	if (edit.mode != OBJ_VERTICES)
+	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
 	selection_c sel;
@@ -2078,7 +2078,7 @@ void LineDefs_ShowZeroLen()
 
 void LineDefs_FindMissingRight(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 		if (LineDefs[n]->right < 0)
@@ -2088,7 +2088,7 @@ void LineDefs_FindMissingRight(selection_c& lines)
 
 void LineDefs_ShowMissingRight()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	LineDefs_FindMissingRight(*edit.Selected);
@@ -2101,7 +2101,7 @@ void LineDefs_FindManualDoors(selection_c& lines)
 {
 	// find D1/DR manual doors on one-sided linedefs
 
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2126,7 +2126,7 @@ void LineDefs_FindManualDoors(selection_c& lines)
 
 void LineDefs_ShowManualDoors()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	LineDefs_FindManualDoors(*edit.Selected);
@@ -2162,7 +2162,7 @@ void LineDefs_FixManualDoors()
 
 void LineDefs_FindLackImpass(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2176,7 +2176,7 @@ void LineDefs_FindLackImpass(selection_c& lines)
 
 void LineDefs_ShowLackImpass()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	LineDefs_FindLackImpass(*edit.Selected);
@@ -2208,7 +2208,7 @@ void LineDefs_FixLackImpass()
 
 void LineDefs_FindBad2SFlag(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2225,7 +2225,7 @@ void LineDefs_FindBad2SFlag(selection_c& lines)
 
 void LineDefs_ShowBad2SFlag()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	LineDefs_FindBad2SFlag(*edit.Selected);
@@ -2269,7 +2269,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 {
 	types.clear();
 
-	list.change_type(OBJ_LINEDEFS);
+	list.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2297,7 +2297,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 void LineDefs_ShowUnknown()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<int, int> types;
@@ -2418,7 +2418,7 @@ void LineDefs_FindOverlaps(selection_c& lines)
 {
 	// we only find directly overlapping linedefs here
 
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	if (NumLineDefs < 2)
 		return;
@@ -2452,7 +2452,7 @@ void LineDefs_FindOverlaps(selection_c& lines)
 
 void LineDefs_ShowOverlaps()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	LineDefs_FindOverlaps(*edit.Selected);
@@ -2606,7 +2606,7 @@ static int CheckLinesCross(int A, int B)
 
 void LineDefs_FindCrossings(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	if (NumLineDefs < 2)
 		return;
@@ -2656,7 +2656,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 void LineDefs_ShowCrossings()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	LineDefs_FindCrossings(*edit.Selected);
@@ -2987,9 +2987,9 @@ void Tags_ApplyNewValue(int new_tag)
 
 	for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 	{
-		if (edit.mode == OBJ_LINEDEFS)
+		if (edit.mode == ObjType::linedefs)
 			BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
-		else if (edit.mode == OBJ_SECTORS)
+		else if (edit.mode == ObjType::sectors)
 			BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
 	}
 
@@ -2999,7 +2999,7 @@ void Tags_ApplyNewValue(int new_tag)
 
 void CMD_ApplyTag()
 {
-	if (! (edit.mode == OBJ_SECTORS || edit.mode == OBJ_LINEDEFS))
+	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
 	{
 		Beep("ApplyTag: wrong mode");
 		return;
@@ -3075,7 +3075,7 @@ static bool SEC_tag_exists(int tag)
 
 void Tags_FindUnmatchedSectors(selection_c& secs)
 {
-	secs.change_type(OBJ_SECTORS);
+	secs.change_type(ObjType::sectors);
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
@@ -3097,7 +3097,7 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 
 void Tags_FindUnmatchedLineDefs(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3119,7 +3119,7 @@ void Tags_FindUnmatchedLineDefs(selection_c& lines)
 
 void Tags_ShowUnmatchedSectors()
 {
-	if (edit.mode != OBJ_SECTORS)
+	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	Tags_FindUnmatchedSectors(*edit.Selected);
@@ -3130,7 +3130,7 @@ void Tags_ShowUnmatchedSectors()
 
 void Tags_ShowUnmatchedLineDefs()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	Tags_FindUnmatchedLineDefs(*edit.Selected);
@@ -3141,7 +3141,7 @@ void Tags_ShowUnmatchedLineDefs()
 
 void Tags_FindMissingTags(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3171,7 +3171,7 @@ void Tags_FindMissingTags(selection_c& lines)
 
 void Tags_ShowMissingTags()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	Tags_FindMissingTags(*edit.Selected);
@@ -3227,7 +3227,7 @@ static bool SEC_check_beast_mark(int tag)
 
 void Tags_FindBeastMarks(selection_c& secs)
 {
-	secs.change_type(OBJ_SECTORS);
+	secs.change_type(ObjType::sectors);
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
@@ -3241,7 +3241,7 @@ void Tags_FindBeastMarks(selection_c& secs)
 
 void Tags_ShowBeastMarks()
 {
-	if (edit.mode != OBJ_SECTORS)
+	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	Tags_FindBeastMarks(*edit.Selected);
@@ -3378,7 +3378,7 @@ check_result_e CHECK_Tags(int min_severity)
 			dialog->AddLine(check_buffer);
 		}
 
-		if ((edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS) &&
+		if ((edit.mode == ObjType::linedefs || edit.mode == ObjType::sectors) &&
 		    edit.Selected->notempty())
 		{
 			dialog->fresh_tag = max_tag + 1;
@@ -3432,7 +3432,7 @@ static void bump_unknown_name(std::map<SString, int>& list,
 
 void Textures_FindMissing(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3473,7 +3473,7 @@ void Textures_FindMissing(selection_c& lines)
 
 void Textures_ShowMissing()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	Textures_FindMissing(*edit.Selected);
@@ -3561,7 +3561,7 @@ static int check_transparent(const SString &tex,
 void Textures_FindTransparent(selection_c& lines,
                               std::map<SString, int>& names)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
@@ -3594,7 +3594,7 @@ void Textures_FindTransparent(selection_c& lines,
 
 void Textures_ShowTransparent()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<SString, int> names;
@@ -3698,7 +3698,7 @@ static int check_medusa(const SString &tex,
 void Textures_FindMedusa(selection_c& lines,
                          std::map<SString, int>& names)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
@@ -3720,7 +3720,7 @@ void Textures_FindMedusa(selection_c& lines,
 
 void Textures_ShowMedusa()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<SString, int> names;
@@ -3787,7 +3787,7 @@ void Textures_LogMedusa()
 void Textures_FindUnknownTex(selection_c& lines,
                              std::map<SString, int>& names)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
@@ -3822,7 +3822,7 @@ void Textures_FindUnknownTex(selection_c& lines,
 void Textures_FindUnknownFlat(selection_c& secs,
                               std::map<SString, int>& names)
 {
-	secs.change_type(OBJ_SECTORS);
+	secs.change_type(ObjType::sectors);
 
 	names.clear();
 
@@ -3847,7 +3847,7 @@ void Textures_FindUnknownFlat(selection_c& secs,
 
 void Textures_ShowUnknownTex()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<SString, int> names;
@@ -3860,7 +3860,7 @@ void Textures_ShowUnknownTex()
 
 void Textures_ShowUnknownFlat()
 {
-	if (edit.mode != OBJ_SECTORS)
+	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	std::map<SString, int> names;
@@ -3971,7 +3971,7 @@ static bool is_switch_tex(const SString &tex)
 
 void Textures_FindDupSwitches(selection_c& lines)
 {
-	lines.change_type(OBJ_LINEDEFS);
+	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -4001,7 +4001,7 @@ void Textures_FindDupSwitches(selection_c& lines)
 
 void Textures_ShowDupSwitches()
 {
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	Textures_FindDupSwitches(*edit.Selected);
@@ -4442,19 +4442,19 @@ void CMD_MapCheck()
 	{
 		switch (edit.mode)
 		{
-			case OBJ_VERTICES:
+			case ObjType::vertices:
 				CHECK_Vertices();
 				break;
 
-			case OBJ_SECTORS:
+			case ObjType::sectors:
 				CHECK_Sectors();
 				break;
 
-			case OBJ_LINEDEFS:
+			case ObjType::linedefs:
 				CHECK_LineDefs();
 				break;
 
-			case OBJ_THINGS:
+			case ObjType::things:
 				CHECK_Things();
 				break;
 

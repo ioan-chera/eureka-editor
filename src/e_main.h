@@ -53,7 +53,7 @@ typedef enum
 //
 struct Editor_State_t
 {
-	obj_type_e  mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
+	ObjType mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
 	bool render3d;     // 3D view is active
 
@@ -177,7 +177,7 @@ void Editor_WriteUser(std::ostream &os);
 
 void Editor_ClearErrorMode();
 void Editor_ChangeMode(char mode);
-void Editor_ChangeMode_Raw(obj_type_e new_mode);
+void Editor_ChangeMode_Raw(ObjType new_mode);
 
 void UpdateHighlight();
 
@@ -194,23 +194,23 @@ void CalculateLevelBounds();
 
 
 void MapStuff_NotifyBegin();
-void MapStuff_NotifyInsert(obj_type_e type, int objnum);
-void MapStuff_NotifyDelete(obj_type_e type, int objnum);
-void MapStuff_NotifyChange(obj_type_e type, int objnum, int field);
+void MapStuff_NotifyInsert(ObjType type, int objnum);
+void MapStuff_NotifyDelete(ObjType type, int objnum);
+void MapStuff_NotifyChange(ObjType type, int objnum, int field);
 void MapStuff_NotifyEnd();
 
 
 void ObjectBox_NotifyBegin();
-void ObjectBox_NotifyInsert(obj_type_e type, int objnum);
-void ObjectBox_NotifyDelete(obj_type_e type, int objnum);
-void ObjectBox_NotifyChange(obj_type_e type, int objnum, int field);
+void ObjectBox_NotifyInsert(ObjType type, int objnum);
+void ObjectBox_NotifyDelete(ObjType type, int objnum);
+void ObjectBox_NotifyChange(ObjType type, int objnum, int field);
 void ObjectBox_NotifyEnd();
 
 
 void Selection_NotifyBegin();
-void Selection_NotifyInsert(obj_type_e type, int objnum);
-void Selection_NotifyDelete(obj_type_e type, int objnum);
-void Selection_NotifyChange(obj_type_e type, int objnum, int field);
+void Selection_NotifyInsert(ObjType type, int objnum);
+void Selection_NotifyDelete(ObjType type, int objnum);
+void Selection_NotifyChange(ObjType type, int objnum, int field);
 void Selection_NotifyEnd();
 
 
@@ -240,7 +240,7 @@ enum class SelectHighlight
 
 SelectHighlight SelectionOrHighlight();
 
-void SelectObjectsInBox(selection_c *list, int objtype, double x1, double y1, double x2, double y2);
+void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
 
 
 /* commands */

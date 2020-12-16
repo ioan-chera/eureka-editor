@@ -29,15 +29,50 @@
 
 
 // main kinds of objects
-enum obj_type_e
+enum class ObjType
 {
-	OBJ_THINGS,
-	OBJ_LINEDEFS,
-	OBJ_SIDEDEFS,
-	OBJ_VERTICES,
-	OBJ_SECTORS,
+	things,
+	linedefs,
+	sidedefs,
+	vertices,
+	sectors
 };
 
+inline static ObjType ObjTypeFromInt(int raw)
+{
+	switch(raw)
+	{
+	default:
+	case 0:
+		return ObjType::things;
+	case 1:
+		return ObjType::linedefs;
+	case 2:
+		return ObjType::sidedefs;
+	case 3:
+		return ObjType::vertices;
+	case 4:
+		return ObjType::sectors;
+	}
+}
+
+inline static int IntFromObjType(ObjType type)
+{
+	switch(type)
+	{
+	default:
+	case ObjType::things:
+		return 0;
+	case ObjType::linedefs:
+		return 1;
+	case ObjType::sidedefs:
+		return 2;
+	case ObjType::vertices:
+		return 3;
+	case ObjType::sectors:
+		return 4;
+	}
+}
 
 // special object number for "NONE"
 #define NIL_OBJ		-1
@@ -62,19 +97,23 @@ enum obj_type_e
 class Objid
 {
 public:
-	obj_type_e type;
+	ObjType type = ObjType::things;
 
-	int num;
+	int num = NIL_OBJ;
 
 	// this is some combination of PART_XXX flags, or 0 which
 	// represents the object as a whole.
-	int parts;
+	int parts = 0;
 
 public:
-	Objid() : type(OBJ_THINGS), num(NIL_OBJ), parts(0) { }
-	Objid(obj_type_e t, int n) : type(t), num(n), parts(0) { }
-	Objid(obj_type_e t, int n, int p) : type(t), num(n), parts(p) { }
-	Objid(const Objid& other) : type(other.type), num(other.num), parts(other.parts) { }
+	Objid() = default;
+	Objid(ObjType t, int n) : type(t), num(n) 
+	{
+	}
+	Objid(ObjType t, int n, int p) : type(t), num(n), parts(p) 
+	{
+	}
+	Objid(const Objid &other) = default;
 
 	void clear()
 	{

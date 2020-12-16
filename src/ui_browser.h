@@ -223,7 +223,7 @@ public:
 
 	char GetMode() const;
 	void ChangeMode(char new_mode);
-	void NewEditMode(obj_type_e edit_mode);
+	void NewEditMode(ObjType edit_mode);
 
 	// ensure the given texture or type/special is visible
 	void JumpToTex(const char *tex_name);

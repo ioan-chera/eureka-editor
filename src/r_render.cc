@@ -128,7 +128,7 @@ void Render_View_t::FindGroundZ()
 
 		Objid o;
 
-		GetNearObject(o, OBJ_SECTORS, test_x, test_y);
+		GetNearObject(o, ObjType::sectors, test_x, test_y);
 
 		if (o.num >= 0)
 		{
@@ -236,7 +236,7 @@ namespace thing_sec_cache
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
 			Objid obj;
-			GetNearObject(obj, OBJ_SECTORS, Things[i]->x(), Things[i]->y());
+			GetNearObject(obj, ObjType::sectors, Things[i]->x(), Things[i]->y());
 
 			r_view.thing_sectors[i] = obj.num;
 		}
@@ -250,21 +250,21 @@ void Render3D_NotifyBegin()
 	thing_sec_cache::ResetRange();
 }
 
-void Render3D_NotifyInsert(obj_type_e type, int objnum)
+void Render3D_NotifyInsert(ObjType type, int objnum)
 {
-	if (type == OBJ_THINGS)
+	if (type == ObjType::things)
 		thing_sec_cache::InvalidateThing(objnum);
 }
 
-void Render3D_NotifyDelete(obj_type_e type, int objnum)
+void Render3D_NotifyDelete(ObjType type, int objnum)
 {
-	if (type == OBJ_THINGS || type == OBJ_SECTORS)
+	if (type == ObjType::things || type == ObjType::sectors)
 		thing_sec_cache::InvalidateAll();
 }
 
-void Render3D_NotifyChange(obj_type_e type, int objnum, int field)
+void Render3D_NotifyChange(ObjType type, int objnum, int field)
 {
-	if (type == OBJ_THINGS &&
+	if (type == ObjType::things &&
 		(field == Thing::F_X || field == Thing::F_Y))
 	{
 		thing_sec_cache::InvalidateThing(objnum);
@@ -299,25 +299,20 @@ public:
 class SaveBucket_c
 {
 private:
-	obj_type_e type;
+	ObjType type;
 
 	std::vector< save_obj_field_c > fields;
 
 public:
-	SaveBucket_c(obj_type_e _type) : type(_type), fields()
-	{ }
+	SaveBucket_c(ObjType type) : type(type)
+	{
+	}
 
 	~SaveBucket_c()
 	{ }
 
 	void Clear()
 	{
-		fields.clear();
-	}
-
-	void Clear(obj_type_e _type)
-	{
-		type = _type;
 		fields.clear();
 	}
 
@@ -366,20 +361,20 @@ private:
 	{
 		switch (type)
 		{
-			case OBJ_THINGS:
-				return (int*) Things[objnum];
+			case ObjType::things:
+				return reinterpret_cast<int*>(Things[objnum]);
 
-			case OBJ_VERTICES:
-				return (int*) Vertices[objnum];
+			case ObjType::vertices:
+				return reinterpret_cast<int *>(Vertices[objnum]);
 
-			case OBJ_SECTORS:
-				return (int*) Sectors[objnum];
+			case ObjType::sectors:
+				return reinterpret_cast<int *>(Sectors[objnum]);
 
-			case OBJ_SIDEDEFS:
-				return (int*) SideDefs[objnum];
+			case ObjType::sidedefs:
+				return reinterpret_cast<int *>(SideDefs[objnum]);
 
-			case OBJ_LINEDEFS:
-				return (int*) LineDefs[objnum];
+			case ObjType::linedefs:
+				return reinterpret_cast<int *>(LineDefs[objnum]);
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -464,7 +459,7 @@ static void AdjustOfs_Begin()
 	if (edit.adjust_bucket)
 		delete edit.adjust_bucket;
 
-	edit.adjust_bucket = new SaveBucket_c(OBJ_SIDEDEFS);
+	edit.adjust_bucket = new SaveBucket_c(ObjType::sidedefs);
 	edit.adjust_lax = Exec_HasFlag("/LAX");
 
 	int total_lines = 0;
@@ -943,10 +938,10 @@ static void DragThings_Update()
 
 	// handle a change in floor height
 	Objid old_sec;
-	GetNearObject(old_sec, OBJ_SECTORS, old_x, old_y);
+	GetNearObject(old_sec, ObjType::sectors, old_x, old_y);
 
 	Objid new_sec;
-	GetNearObject(new_sec, OBJ_SECTORS, new_x, new_y);
+	GetNearObject(new_sec, ObjType::sectors, new_x, new_y);
 
 	if (old_sec.valid() && new_sec.valid())
 	{
@@ -974,7 +969,7 @@ void Render3D_DragThings()
 
 	if (edit.dragged.valid())
 	{
-		selection_c sel(OBJ_THINGS);
+		selection_c sel(ObjType::things);
 		sel.set(edit.dragged.num);
 
 		MoveObjects(&sel, dx, dy, dz);
@@ -1023,10 +1018,10 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		edit.drag_cur_x = edit.map_x;
 		edit.drag_cur_y = edit.map_y;
 
-		if (edit.mode == OBJ_SECTORS)
+		if (edit.mode == ObjType::sectors)
 			DragSectors_Update();
 
-		if (edit.mode == OBJ_THINGS)
+		if (edit.mode == ObjType::things)
 			DragThings_Update();
 
 		main_win->canvas->redraw();
@@ -1444,19 +1439,19 @@ void Render3D_CB_Copy()
 
 	switch (edit.mode)
 	{
-	case OBJ_THINGS:
+	case ObjType::things:
 		num = GrabSelectedThing();
 		if (num >= 0)
 			Texboard_SetThing(num);
 		break;
 
-	case OBJ_SECTORS:
+	case ObjType::sectors:
 		num = GrabSelectedFlat();
 		if (num >= 0)
 			Texboard_SetFlat(BA_GetString(num));
 		break;
 
-	case OBJ_LINEDEFS:
+	case ObjType::linedefs:
 		num = GrabSelectedTexture();
 		if (num >= 0)
 			Texboard_SetTex(BA_GetString(num));
@@ -1472,15 +1467,15 @@ void Render3D_CB_Paste()
 {
 	switch (edit.mode)
 	{
-	case OBJ_THINGS:
+	case ObjType::things:
 		StoreSelectedThing(Texboard_GetThing());
 		break;
 
-	case OBJ_SECTORS:
+	case ObjType::sectors:
 		StoreSelectedFlat(Texboard_GetFlatNum());
 		break;
 
-	case OBJ_LINEDEFS:
+	case ObjType::linedefs:
 		StoreSelectedTexture(Texboard_GetTexNum());
 		break;
 
@@ -1496,15 +1491,15 @@ void Render3D_CB_Cut()
 
 	switch (edit.mode)
 	{
-	case OBJ_THINGS:
+	case ObjType::things:
 		StoreSelectedThing(default_thing);
 		break;
 
-	case OBJ_SECTORS:
+	case ObjType::sectors:
 		StoreDefaultedFlats();
 		break;
 
-	case OBJ_LINEDEFS:
+	case ObjType::linedefs:
 			StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
 		break;
 
@@ -1883,7 +1878,7 @@ void R3D_ACT_AdjustOfs()
 	if (! Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
 		return;
 
-	if (edit.mode != OBJ_LINEDEFS)
+	if (edit.mode != ObjType::linedefs)
 	{
 		Beep("not in linedef mode");
 		return;

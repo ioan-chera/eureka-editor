@@ -80,7 +80,7 @@ void DeleteObjects(selection_c *list)
 
 static void CreateSquare(int model)
 {
-	int new_sec = BA_New(OBJ_SECTORS);
+	int new_sec = BA_New(ObjType::sectors);
 
 	if (model >= 0)
 		Sectors[new_sec]->RawCopy(Sectors[model]);
@@ -95,18 +95,18 @@ static void CreateSquare(int model)
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		int new_v = BA_New(OBJ_VERTICES);
+		int new_v = BA_New(ObjType::vertices);
 		Vertex *V = Vertices[new_v];
 
 		V->SetRawX((i >= 2) ? x2 : x1);
 		V->SetRawY((i==1 || i==2) ? y2 : y1);
 
-		int new_sd = BA_New(OBJ_SIDEDEFS);
+		int new_sd = BA_New(ObjType::sidedefs);
 
 		SideDefs[new_sd]->SetDefaults(false);
 		SideDefs[new_sd]->sector = new_sec;
 
-		int new_ld = BA_New(OBJ_LINEDEFS);
+		int new_ld = BA_New(ObjType::linedefs);
 
 		LineDef * L = LineDefs[new_ld];
 
@@ -133,7 +133,7 @@ static void Insert_Thing()
 
 	BA_Begin();
 
-	int new_t = BA_New(OBJ_THINGS);
+	int new_t = BA_New(ObjType::things);
 	Thing *T = Things[new_t];
 
 	if (model >= 0)
@@ -168,7 +168,7 @@ static void Insert_Thing()
 
 static int Sector_New(int model = -1, int model2 = -1, int model3 = -1)
 {
-	int new_sec = BA_New(OBJ_SECTORS);
+	int new_sec = BA_New(ObjType::sectors);
 
 	if (model < 0) model = model2;
 	if (model < 0) model = model3;
@@ -335,7 +335,7 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	if (LineDefAlreadyExists(v1, v2))
 		return;
 
-	int new_ld = BA_New(OBJ_LINEDEFS);
+	int new_ld = BA_New(ObjType::linedefs);
 
 	LineDef * L = LineDefs[new_ld];
 
@@ -349,7 +349,7 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	if (Vertex_HowManyLineDefs(v1) >= 2 &&
 		Vertex_HowManyLineDefs(v2) >= 2)
 	{
-		selection_c flip(OBJ_LINEDEFS);
+		selection_c flip(ObjType::linedefs);
 
 		CheckClosedLoop(new_ld, v1, v2, &flip);
 
@@ -480,7 +480,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			if (LineDefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				edit.draw_from = Objid(OBJ_VERTICES, new_vert);
+				edit.draw_from = Objid(ObjType::vertices, new_vert);
 				edit.Selected->set(new_vert);
 				return;
 			}
@@ -504,13 +504,13 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 	if (new_vert < 0)
 	{
-		new_vert = BA_New(OBJ_VERTICES);
+		new_vert = BA_New(ObjType::vertices);
 
 		Vertex *V = Vertices[new_vert];
 
 		V->SetRawXY(new_x, new_y);
 
-		edit.draw_from = Objid(OBJ_VERTICES, new_vert);
+		edit.draw_from = Objid(ObjType::vertices, new_vert);
 		edit.Selected->set(new_vert);
 
 		// splitting an existing line?
@@ -550,7 +550,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		BA_Message("added linedef");
 
-		edit.draw_from = Objid(OBJ_VERTICES, new_vert);
+		edit.draw_from = Objid(ObjType::vertices, new_vert);
 		edit.Selected->set(new_vert);
 	}
 
@@ -565,7 +565,7 @@ begin_drawing:
 	{
 		Selection_Clear();
 
-		edit.draw_from = Objid(OBJ_VERTICES, old_vert);
+		edit.draw_from = Objid(ObjType::vertices, old_vert);
 		edit.Selected->set(old_vert);
 
 		edit.draw_to_x = Vertices[old_vert]->x();
@@ -584,7 +584,7 @@ begin_drawing:
 	if (select_verts_of_new_sectors && closed_a_loop &&
 		NumSectors > orig_num_sectors)
 	{
-		selection_c sel(OBJ_SECTORS);
+		selection_c sel(ObjType::sectors);
 
 		// more than one sector may have been created, pick the last
 		sel.set(NumSectors - 1);
@@ -659,7 +659,7 @@ void CMD_Insert()
 	bool force_cont;
 	bool no_fill;
 
-	if (edit.render3d && edit.mode != OBJ_THINGS)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
 		Beep("Cannot insert in this mode");
 		return;
@@ -667,17 +667,17 @@ void CMD_Insert()
 
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			Insert_Thing();
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			force_cont = Exec_HasFlag("/continue");
 			no_fill    = Exec_HasFlag("/nofill");
 			Insert_Vertex(force_cont, no_fill);
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			Insert_Sector();
 			break;
 
@@ -748,7 +748,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 
 	switch (list->what_type())
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Thing * T = Things[*it];
@@ -759,7 +759,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			}
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Vertex * V = Vertices[*it];
@@ -769,7 +769,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			}
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
@@ -781,9 +781,9 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 
 			/* FALL-THROUGH !! */
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			{
-				selection_c verts(OBJ_VERTICES);
+				selection_c verts(ObjType::vertices);
 				ConvertSelection(list, &verts);
 
 				DoMoveObjects(&verts, delta_x, delta_y, delta_z);
@@ -807,9 +807,9 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
 	// each thing is in).
-	if (edit.mode == OBJ_SECTORS)
+	if (edit.mode == ObjType::sectors)
 	{
-		selection_c thing_sel(OBJ_THINGS);
+		selection_c thing_sel(ObjType::things);
 		ConvertSelection(list, &thing_sel);
 
 		DoMoveObjects(&thing_sel, delta_x, delta_y, 0);
@@ -823,7 +823,7 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 
 void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z)
 {
-	if (edit.mode != OBJ_VERTICES)
+	if (edit.mode != ObjType::vertices)
 	{
 		selection_c list(edit.mode);
 		list.set(obj.num);
@@ -845,7 +845,7 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 
 		SYS_ASSERT(obj.num != edit.highlight.num);
 
-		selection_c verts(OBJ_VERTICES);
+		selection_c verts(ObjType::vertices);
 
 		verts.set(edit.highlight.num);	// keep the highlight
 		verts.set(obj.num);
@@ -1067,7 +1067,7 @@ void CMD_CopyProperties()
 		Beep("No source for CopyProperties");
 		return;
 	}
-	else if (edit.mode == OBJ_VERTICES)
+	else if (edit.mode == ObjType::vertices)
 	{
 		Beep("No properties to copy");
 		return;
@@ -1096,15 +1096,15 @@ void CMD_CopyProperties()
 
 		switch (edit.mode)
 		{
-			case OBJ_SECTORS:
+			case ObjType::sectors:
 				TransferSectorProperties(source, target);
 				break;
 
-			case OBJ_THINGS:
+			case ObjType::things:
 				TransferThingProperties(source, target);
 				break;
 
-			case OBJ_LINEDEFS:
+			case ObjType::linedefs:
 				TransferLinedefProperties(source, target, true /* do_tex */);
 				break;
 
@@ -1134,15 +1134,15 @@ void CMD_CopyProperties()
 
 			switch (edit.mode)
 			{
-				case OBJ_SECTORS:
+				case ObjType::sectors:
 					TransferSectorProperties(source, *it);
 					break;
 
-				case OBJ_THINGS:
+				case ObjType::things:
 					TransferThingProperties(source, *it);
 					break;
 
-				case OBJ_LINEDEFS:
+				case ObjType::linedefs:
 					TransferLinedefProperties(source, *it, true /* do_tex */);
 					break;
 
@@ -1155,28 +1155,28 @@ void CMD_CopyProperties()
 }
 
 
-static void Drag_CountOnGrid_Worker(int obj_type, int objnum, int *count, int *total)
+static void Drag_CountOnGrid_Worker(ObjType obj_type, int objnum, int *count, int *total)
 {
 	switch (obj_type)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			*total += 1;
 			if (grid.OnGrid(Things[objnum]->x(), Things[objnum]->y()))
 				*count += 1;
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			*total += 1;
 			if (grid.OnGrid(Vertices[objnum]->x(), Vertices[objnum]->y()))
 				*count += 1;
 			break;
 
-		case OBJ_LINEDEFS:
-			Drag_CountOnGrid_Worker(OBJ_VERTICES, LineDefs[objnum]->start, count, total);
-			Drag_CountOnGrid_Worker(OBJ_VERTICES, LineDefs[objnum]->end,   count, total);
+		case ObjType::linedefs:
+			Drag_CountOnGrid_Worker(ObjType::vertices, LineDefs[objnum]->start, count, total);
+			Drag_CountOnGrid_Worker(ObjType::vertices, LineDefs[objnum]->end,   count, total);
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
 				LineDef *L = LineDefs[n];
@@ -1184,7 +1184,7 @@ static void Drag_CountOnGrid_Worker(int obj_type, int objnum, int *count, int *t
 				if (! L->TouchesSector(objnum))
 					continue;
 
-				Drag_CountOnGrid_Worker(OBJ_LINEDEFS, n, count, total);
+				Drag_CountOnGrid_Worker(ObjType::linedefs, n, count, total);
 			}
 			break;
 
@@ -1206,7 +1206,7 @@ static void Drag_CountOnGrid(int *count, int *total)
 }
 
 
-static void Drag_UpdateCurrentDist(int obj_type, int objnum, double *x, double *y,
+static void Drag_UpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,
 								   double *best_dist, double ptr_x, double ptr_y,
 								   bool only_grid)
 {
@@ -1214,29 +1214,29 @@ static void Drag_UpdateCurrentDist(int obj_type, int objnum, double *x, double *
 
 	switch (obj_type)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			x2 = Things[objnum]->x();
 			y2 = Things[objnum]->y();
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			x2 = Vertices[objnum]->x();
 			y2 = Vertices[objnum]->y();
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			{
 				LineDef *L = LineDefs[objnum];
 
-				Drag_UpdateCurrentDist(OBJ_VERTICES, L->start, x, y, best_dist,
+				Drag_UpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
 
-				Drag_UpdateCurrentDist(OBJ_VERTICES, L->end,   x, y, best_dist,
+				Drag_UpdateCurrentDist(ObjType::vertices, L->end,   x, y, best_dist,
 				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			// recursively handle all vertices belonging to the sector
 			// (some vertices can be processed two or more times, that
 			// won't matter though).
@@ -1248,7 +1248,7 @@ static void Drag_UpdateCurrentDist(int obj_type, int objnum, double *x, double *
 				if (! L->TouchesSector(objnum))
 					continue;
 
-				Drag_UpdateCurrentDist(OBJ_LINEDEFS, n, x, y, best_dist,
+				Drag_UpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,
 				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
@@ -1383,7 +1383,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 
 	switch (list->what_type())
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
@@ -1393,7 +1393,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 			break;
 		}
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
@@ -1406,7 +1406,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 		// everything else: just use the vertices
 		default:
 		{
-			selection_c verts(OBJ_VERTICES);
+			selection_c verts(ObjType::vertices);
 			ConvertSelection(list, &verts);
 
 			Objs_CalcMiddle(&verts, x, y);
@@ -1439,7 +1439,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 
 	switch (list->what_type())
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
@@ -1458,7 +1458,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 			break;
 		}
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
@@ -1477,7 +1477,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 		// everything else: just use the vertices
 		default:
 		{
-			selection_c verts(OBJ_VERTICES);
+			selection_c verts(ObjType::vertices);
 			ConvertSelection(list, &verts);
 
 			Objs_CalcBBox(&verts, x1, y1, x2, y2);
@@ -1524,7 +1524,7 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
-	selection_c verts(OBJ_VERTICES);
+	selection_c verts(ObjType::vertices);
 	ConvertSelection(list, &verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
@@ -1538,7 +1538,7 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 	}
 
 	// flip linedefs too !!
-	selection_c lines(OBJ_LINEDEFS);
+	selection_c lines(ObjType::linedefs);
 	ConvertSelection(&verts, &lines);
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
@@ -1556,7 +1556,7 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 
 static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y)
 {
-	if (edit.mode == OBJ_THINGS)
+	if (edit.mode == ObjType::things)
 	{
 		DoMirrorThings(list, is_vert, mid_x, mid_y);
 		return;
@@ -1564,10 +1564,10 @@ static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double 
 
 	// everything else just modifies the vertices
 
-	if (edit.mode == OBJ_SECTORS)
+	if (edit.mode == ObjType::sectors)
 	{
 		// handle things in Sectors mode too
-		selection_c things(OBJ_THINGS);
+		selection_c things(ObjType::things);
 		ConvertSelection(list, &things);
 
 		DoMirrorThings(&things, is_vert, mid_x, mid_y);
@@ -1660,23 +1660,23 @@ void CMD_Rotate90()
 	BA_Begin();
 	BA_MessageForSel("rotated", edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
-	if (edit.mode == OBJ_THINGS)
+	if (edit.mode == ObjType::things)
 	{
 		DoRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
 	}
 	else
 	{
 		// handle things inside sectors
-		if (edit.mode == OBJ_SECTORS)
+		if (edit.mode == ObjType::sectors)
 		{
-			selection_c things(OBJ_THINGS);
+			selection_c things(ObjType::things);
 			ConvertSelection(edit.Selected, &things);
 
 			DoRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 		}
 
 		// everything else just rotates the vertices
-		selection_c verts(OBJ_VERTICES);
+		selection_c verts(ObjType::vertices);
 		ConvertSelection(edit.Selected, &verts);
 
 		fixcoord_t fix_mx = MakeValidCoord(mid_x);
@@ -1737,7 +1737,7 @@ static void DoScaleTwoThings(selection_c *list, transform_t& param)
 
 static void DoScaleTwoVertices(selection_c *list, transform_t& param)
 {
-	selection_c verts(OBJ_VERTICES);
+	selection_c verts(ObjType::vertices);
 	ConvertSelection(list, &verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
@@ -1757,7 +1757,7 @@ static void DoScaleTwoVertices(selection_c *list, transform_t& param)
 
 static void DoScaleTwoStuff(selection_c *list, transform_t& param)
 {
-	if (edit.mode == OBJ_THINGS)
+	if (edit.mode == ObjType::things)
 	{
 		DoScaleTwoThings(list, param);
 		return;
@@ -1765,10 +1765,10 @@ static void DoScaleTwoStuff(selection_c *list, transform_t& param)
 
 	// everything else just modifies the vertices
 
-	if (edit.mode == OBJ_SECTORS)
+	if (edit.mode == ObjType::sectors)
 	{
 		// handle things in Sectors mode too
-		selection_c things(OBJ_THINGS);
+		selection_c things(ObjType::things);
 		ConvertSelection(list, &things);
 
 		DoScaleTwoThings(&things, param);
@@ -1898,7 +1898,7 @@ static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 void ScaleObjects4(double scale_x, double scale_y, double scale_z,
                    double pos_x, double pos_y, double pos_z)
 {
-	SYS_ASSERT(edit.mode == OBJ_SECTORS);
+	SYS_ASSERT(edit.mode == ObjType::sectors);
 
 	transform_t param;
 
@@ -1938,17 +1938,17 @@ void RotateObjects3(double deg, double pos_x, double pos_y)
 }
 
 
-static bool SpotInUse(obj_type_e obj_type, int x, int y)
+static bool SpotInUse(ObjType obj_type, int x, int y)
 {
 	switch (obj_type)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			for (int n = 0 ; n < NumThings ; n++)
 				if (I_ROUND(Things[n]->x()) == x && I_ROUND(Things[n]->y()) == y)
 					return true;
 			return false;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			for (int n = 0 ; n < NumVertices ; n++)
 				if (I_ROUND(Vertices[n]->x()) == x && I_ROUND(Vertices[n]->y()) == y)
 					return true;
@@ -2053,7 +2053,7 @@ static void Quantize_Things(selection_c *list)
 			int new_x = grid.QuantSnapX(T->x(), pass & 1);
 			int new_y = grid.QuantSnapY(T->y(), pass & 2);
 
-			if (! SpotInUse(OBJ_THINGS, new_x, new_y))
+			if (! SpotInUse(ObjType::things, new_x, new_y))
 			{
 				BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 				BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
@@ -2157,7 +2157,7 @@ static void Quantize_Vertices(selection_c *list)
 
 			// TODO: keep diagonal lines diagonal...
 
-			if (! SpotInUse(OBJ_VERTICES, static_cast<int>(new_x), static_cast<int>(new_y)))
+			if (! SpotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
 				BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
 				BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
@@ -2195,18 +2195,18 @@ void CMD_Quantize()
 
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			Quantize_Things(edit.Selected);
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			Quantize_Vertices(edit.Selected);
 			break;
 
 		// everything else merely quantizes vertices
 		default:
 		{
-			selection_c verts(OBJ_VERTICES);
+			selection_c verts(ObjType::vertices);
 			ConvertSelection(edit.Selected, &verts);
 
 			Quantize_Vertices(&verts);

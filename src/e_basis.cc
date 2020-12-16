@@ -70,37 +70,39 @@ static bool did_make_changes;
 
 StringTable basis_strtab;
 
-
-int NumObjects(obj_type_e type)
+int NumObjects(ObjType type)
 {
 	switch (type)
 	{
-		case OBJ_THINGS:   return NumThings;
-		case OBJ_LINEDEFS: return NumLineDefs;
-		case OBJ_SIDEDEFS: return NumSideDefs;
-		case OBJ_VERTICES: return NumVertices;
-		case OBJ_SECTORS:  return NumSectors;
-
-		default:
-			BugError("NumObjects: bad type: %d\n", (int)type);
-			return 0; /* NOT REACHED */
+	case ObjType::things:
+		return NumThings;
+	case ObjType::linedefs:
+		return NumLineDefs;
+	case ObjType::sidedefs:
+		return NumSideDefs;
+	case ObjType::vertices:
+		return NumVertices;
+	case ObjType::sectors:
+		return NumSectors;
+	default:
+		return 0;
 	}
 }
 
 
-const char * NameForObjectType(obj_type_e type, bool plural)
+const char *NameForObjectType(ObjType type, bool plural)
 {
 	switch (type)
 	{
-		case OBJ_THINGS:   return plural ? "things"   : "thing";
-		case OBJ_LINEDEFS: return plural ? "linedefs" : "linedef";
-		case OBJ_SIDEDEFS: return plural ? "sidedefs" : "sidedef";
-		case OBJ_VERTICES: return plural ? "vertices" : "vertex";
-		case OBJ_SECTORS:  return plural ? "sectors"  : "sector";
+	case ObjType::things:   return plural ? "things" : "thing";
+	case ObjType::linedefs: return plural ? "linedefs" : "linedef";
+	case ObjType::sidedefs: return plural ? "sidedefs" : "sidedef";
+	case ObjType::vertices: return plural ? "vertices" : "vertex";
+	case ObjType::sectors:  return plural ? "sectors" : "sector";
 
-		default:
-			BugError("NameForObjectType: bad type: %d\n", (int)type);
-			return "XXX"; /* NOT REACHED */
+	default:
+		BugError("NameForObjectType: bad type: %d\n", (int)type);
+		return "XXX"; /* NOT REACHED */
 	}
 }
 
@@ -421,7 +423,7 @@ static int * RawDeleteThing(int objnum)
 	return result;
 }
 
-static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
+static void RawInsert(ObjType objtype, int objnum, int *ptr)
 {
 	did_make_changes = true;
 
@@ -433,23 +435,23 @@ static void RawInsert(obj_type_e objtype, int objnum, int *ptr)
 
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			RawInsertThing(objnum, ptr);
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			RawInsertVertex(objnum, ptr);
 			break;
 
-		case OBJ_SIDEDEFS:
+		case ObjType::sidedefs:
 			RawInsertSideDef(objnum, ptr);
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			RawInsertSector(objnum, ptr);
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			RawInsertLineDef(objnum, ptr);
 			break;
 
@@ -560,7 +562,7 @@ static int * RawDeleteSector(int objnum)
 	return result;
 }
 
-static int * RawDelete(obj_type_e objtype, int objnum)
+static int * RawDelete(ObjType objtype, int objnum)
 {
 	did_make_changes = true;
 
@@ -572,19 +574,19 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			return RawDeleteThing(objnum);
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			return RawDeleteVertex(objnum);
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			return RawDeleteSector(objnum);
 
-		case OBJ_SIDEDEFS:
+		case ObjType::sidedefs:
 			return RawDeleteSideDef(objnum);
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			return RawDeleteLineDef(objnum);
 
 		default:
@@ -594,16 +596,16 @@ static int * RawDelete(obj_type_e objtype, int objnum)
 }
 
 
-static void DeleteFinally(obj_type_e objtype, int *ptr)
+static void DeleteFinally(ObjType objtype, int *ptr)
 {
 // fprintf(stderr, "DeleteFinally: %p\n", ptr);
 	switch (objtype)
 	{
-		case OBJ_THINGS:   delete (Thing *)   ptr; break;
-		case OBJ_VERTICES: delete (Vertex *)  ptr; break;
-		case OBJ_SECTORS:  delete (Sector *)  ptr; break;
-		case OBJ_SIDEDEFS: delete (SideDef *) ptr; break;
-		case OBJ_LINEDEFS: delete (LineDef *) ptr; break;
+		case ObjType::things:   delete reinterpret_cast<Thing   *>(ptr); break;
+		case ObjType::vertices: delete reinterpret_cast<Vertex  *>(ptr); break;
+		case ObjType::sectors:  delete reinterpret_cast<Sector  *>(ptr); break;
+		case ObjType::sidedefs: delete reinterpret_cast<SideDef *>(ptr); break;
+		case ObjType::linedefs: delete reinterpret_cast<LineDef *>(ptr); break;
 
 		default:
 			BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
@@ -611,33 +613,33 @@ static void DeleteFinally(obj_type_e objtype, int *ptr)
 }
 
 
-static void RawChange(obj_type_e objtype, int objnum, int field, int *value)
+static void RawChange(ObjType objtype, int objnum, int field, int *value)
 {
 	int * pos = NULL;
 
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			SYS_ASSERT(0 <= objnum && objnum < NumThings);
 			pos = (int*) Things[objnum];
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			SYS_ASSERT(0 <= objnum && objnum < NumVertices);
 			pos = (int*) Vertices[objnum];
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			SYS_ASSERT(0 <= objnum && objnum < NumSectors);
 			pos = (int*) Sectors[objnum];
 			break;
 
-		case OBJ_SIDEDEFS:
+		case ObjType::sidedefs:
 			SYS_ASSERT(0 <= objnum && objnum < NumSideDefs);
 			pos = (int*) SideDefs[objnum];
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			SYS_ASSERT(0 <= objnum && objnum < NumLineDefs);
 			pos = (int*) LineDefs[objnum];
 			break;
@@ -698,16 +700,16 @@ public:
 		switch (action)
 		{
 			case OP_CHANGE:
-				RawChange((obj_type_e)objtype, objnum, (int)field, &value);
+				RawChange(ObjTypeFromInt(objtype), objnum, (int)field, &value);
 				return;
 
 			case OP_DELETE:
-				ptr = RawDelete((obj_type_e)objtype, objnum);
+				ptr = RawDelete(ObjTypeFromInt(objtype), objnum);
 				action = OP_INSERT;  // reverse the operation
 				return;
 
 			case OP_INSERT:
-				RawInsert((obj_type_e)objtype, objnum, ptr);
+				RawInsert(ObjTypeFromInt(objtype), objnum, ptr);
 				ptr = NULL;
 				action = OP_DELETE;  // reverse the operation
 				return;
@@ -723,7 +725,7 @@ public:
 		if (action == OP_INSERT)
 		{
 			SYS_ASSERT(ptr);
-			DeleteFinally((obj_type_e) objtype, ptr);
+			DeleteFinally(ObjTypeFromInt(objtype), ptr);
 		}
 		else if (action == OP_DELETE)
 		{
@@ -918,38 +920,38 @@ void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix)
 }
 
 
-int BA_New(obj_type_e type)
+int BA_New(ObjType type)
 {
 	SYS_ASSERT(cur_group);
 
 	edit_op_c op;
 
 	op.action  = OP_INSERT;
-	op.objtype = type;
+	op.objtype = IntFromObjType(type);
 
 	switch (type)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			op.objnum = NumThings;
 			op.ptr = (int*) new Thing;
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			op.objnum = NumVertices;
 			op.ptr = (int*) new Vertex;
 			break;
 
-		case OBJ_SIDEDEFS:
+		case ObjType::sidedefs:
 			op.objnum = NumSideDefs;
 			op.ptr = (int*) new SideDef;
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			op.objnum = NumLineDefs;
 			op.ptr = (int*) new LineDef;
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			op.objnum = NumSectors;
 			op.ptr = (int*) new Sector;
 			break;
@@ -966,19 +968,19 @@ int BA_New(obj_type_e type)
 }
 
 
-void BA_Delete(obj_type_e type, int objnum)
+void BA_Delete(ObjType type, int objnum)
 {
 	SYS_ASSERT(cur_group);
 
 	edit_op_c op;
 
 	op.action  = OP_DELETE;
-	op.objtype = type;
+	op.objtype = IntFromObjType(type);
 	op.objnum  = objnum;
 
 	// this must happen _before_ doing the deletion (otherwise
 	// when we undo, the insertion will mess up the references).
-	if (type == OBJ_SIDEDEFS)
+	if (type == ObjType::sidedefs)
 	{
 		// unbind sidedef from any linedefs using it
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
@@ -992,7 +994,7 @@ void BA_Delete(obj_type_e type, int objnum)
 				BA_ChangeLD(n, LineDef::F_LEFT, -1);
 		}
 	}
-	else if (type == OBJ_VERTICES)
+	else if (type == ObjType::vertices)
 	{
 		// delete any linedefs bound to this vertex
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
@@ -1001,18 +1003,18 @@ void BA_Delete(obj_type_e type, int objnum)
 
 			if (L->start == objnum || L->end == objnum)
 			{
-				BA_Delete(OBJ_LINEDEFS, n);
+				BA_Delete(ObjType::linedefs, n);
 			}
 		}
 	}
-	else if (type == OBJ_SECTORS)
+	else if (type == ObjType::sectors)
 	{
 		// delete the sidedefs bound to this sector
 		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
 		{
 			if (SideDefs[n]->sector == objnum)
 			{
-				BA_Delete(OBJ_SIDEDEFS, n);
+				BA_Delete(ObjType::sidedefs, n);
 			}
 		}
 	}
@@ -1023,14 +1025,14 @@ void BA_Delete(obj_type_e type, int objnum)
 }
 
 
-bool BA_Change(obj_type_e type, int objnum, byte field, int value)
+bool BA_Change(ObjType type, int objnum, byte field, int value)
 {
 	// TODO: optimise, check whether value actually changes
 
 	edit_op_c op;
 
 	op.action  = OP_CHANGE;
-	op.objtype = type;
+	op.objtype = IntFromObjType(type);
 	op.field   = field;
 	op.objnum  = objnum;
 	op.value   = value;
@@ -1123,7 +1125,7 @@ bool BA_ChangeTH(int thing, byte field, int value)
 	if (field == Thing::F_TYPE)
 		recent_things.insert_number(value);
 
-	return BA_Change(OBJ_THINGS, thing, field, value);
+	return BA_Change(ObjType::things, thing, field, value);
 }
 
 bool BA_ChangeVT(int vert, byte field, int value)
@@ -1131,7 +1133,7 @@ bool BA_ChangeVT(int vert, byte field, int value)
 	SYS_ASSERT(is_vertex(vert));
 	SYS_ASSERT(field <= Vertex::F_Y);
 
-	return BA_Change(OBJ_VERTICES, vert, field, value);
+	return BA_Change(ObjType::vertices, vert, field, value);
 }
 
 bool BA_ChangeSEC(int sec, byte field, int value)
@@ -1145,7 +1147,7 @@ bool BA_ChangeSEC(int sec, byte field, int value)
 		recent_flats.insert(BA_GetString(value));
 	}
 
-	return BA_Change(OBJ_SECTORS, sec, field, value);
+	return BA_Change(ObjType::sectors, sec, field, value);
 }
 
 bool BA_ChangeSD(int side, byte field, int value)
@@ -1160,7 +1162,7 @@ bool BA_ChangeSD(int side, byte field, int value)
 		recent_textures.insert(BA_GetString(value));
 	}
 
-	return BA_Change(OBJ_SIDEDEFS, side, field, value);
+	return BA_Change(ObjType::sidedefs, side, field, value);
 }
 
 bool BA_ChangeLD(int line, byte field, int value)
@@ -1168,7 +1170,7 @@ bool BA_ChangeLD(int line, byte field, int value)
 	SYS_ASSERT(is_linedef(line));
 	SYS_ASSERT(field <= LineDef::F_ARG5);
 
-	return BA_Change(OBJ_LINEDEFS, line, field, value);
+	return BA_Change(ObjType::linedefs, line, field, value);
 }
 
 

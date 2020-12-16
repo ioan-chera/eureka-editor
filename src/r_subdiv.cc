@@ -626,7 +626,7 @@ public:
 
 		// find sector containing the thing
 		Objid o;
-		GetNearObject(o, OBJ_SECTORS, T->x(), T->y());
+		GetNearObject(o, ObjType::sectors, T->x(), T->y());
 
 		if (!o.valid())
 			return;
@@ -652,7 +652,7 @@ public:
 
 		// find sector containing the thing
 		Objid o;
-		GetNearObject(o, OBJ_SECTORS, tx, ty);
+		GetNearObject(o, ObjType::sectors, tx, ty);
 
 		if (!o.valid())
 			return;

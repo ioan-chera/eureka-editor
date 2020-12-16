@@ -388,7 +388,7 @@ static void DetermineAdjoiner(Objid& result,
 		{
 			Objid adj;
 
-			adj.type  = OBJ_LINEDEFS;
+			adj.type  = ObjType::linedefs;
 			adj.num   = n;
 			adj.parts = (what == 0) ? PART_RT_LOWER : (what == 1) ? PART_RT_UPPER : PART_RT_RAIL;
 
@@ -730,7 +730,7 @@ void CMD_LIN_Align()
 
 
 	SelectHighlight unselect = SelectionOrHighlight();
-	if (edit.mode != OBJ_LINEDEFS || unselect == SelectHighlight::empty)
+	if (edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
 	{
 		Beep("no lines to align");
 		return;
@@ -751,7 +751,7 @@ void CMD_LIN_Align()
 		if (L->left  < 0) parts &= ~PART_LF_ALL;
 		if (L->right < 0) parts &= ~PART_RT_ALL;
 
-		Objid obj(OBJ_LINEDEFS, *it);
+		Objid obj(ObjType::linedefs, *it);
 
 		// handle lines with individual parts selected
 		if (parts != 0)
@@ -927,7 +927,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	Vertex  * V = Vertices[new_v];
 
 	// create new linedef
-	int new_l = BA_New(OBJ_LINEDEFS);
+	int new_l = BA_New(ObjType::linedefs);
 
 	LineDef * L2 = LineDefs[new_l];
 
@@ -948,7 +948,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	if (L->Right())
 	{
-		L2->right = BA_New(OBJ_SIDEDEFS);
+		L2->right = BA_New(ObjType::sidedefs);
 		L2->Right()->RawCopy(L->Right());
 
 		if (! config::leave_offsets_alone)
@@ -957,7 +957,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	if (L->Left())
 	{
-		L2->left = BA_New(OBJ_SIDEDEFS);
+		L2->left = BA_New(ObjType::sidedefs);
 		L2->Left()->RawCopy(L->Left());
 
 		if (! config::leave_offsets_alone)
@@ -984,7 +984,7 @@ static bool DoSplitLineDef(int ld)
 	double new_x = (L->Start()->x() + L->End()->x()) / 2;
 	double new_y = (L->Start()->y() + L->End()->y()) / 2;
 
-	int new_v = BA_New(OBJ_VERTICES);
+	int new_v = BA_New(ObjType::vertices);
 
 	Vertex * V = Vertices[new_v];
 
@@ -1236,7 +1236,7 @@ void CMD_LIN_MergeTwo(void)
 
 	// delete ld1 and any unused vertices
 
-	selection_c del_line(OBJ_LINEDEFS);
+	selection_c del_line(ObjType::linedefs);
 
 	del_line.set(ld1);
 
@@ -1363,7 +1363,7 @@ void LineDefs_SetLength(int new_len)
 	// this works on the current selection (caller must set it up)
 
 	// use a copy of the selection
-	selection_c list(OBJ_LINEDEFS);
+	selection_c list(ObjType::linedefs);
 	ConvertSelection(edit.Selected, &list);
 
 	if (list.empty())

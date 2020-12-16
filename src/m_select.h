@@ -39,35 +39,35 @@ class selection_c
 friend class sel_iter_c;
 
 private:
-	obj_type_e type;
+	ObjType type;
 
 	// number of objects in the selection
-	int count;
+	int count = 0;
 
-	int objs[MAX_STORE_SEL];
+	int objs[MAX_STORE_SEL] = {};
 
 	// use a bit vector when needed, NULL otherwise
-	bitvec_c * bv;
+	bitvec_c * bv = nullptr;
 
 	// an extended mode selection can access 8-bits per object
-	byte * extended;
-	int    ext_size;
+	byte * extended = nullptr;
+	int    ext_size = 0;
 
 	// the highest object in the selection, or -1
-	int maxobj;
+	int maxobj = -1;
 
 	// the very first object selected, or -1.
 	// NOTE: this is only updated on a set() when selection is empty.
-	int first_obj;
+	int first_obj = -1;
 
 public:
-	 selection_c(obj_type_e _type = OBJ_THINGS, bool _extended = false);
+	 selection_c(ObjType type = ObjType::things, bool extended = false);
 	~selection_c();
 
-	obj_type_e what_type() const { return type; }
+	ObjType what_type() const { return type; }
 
 	// this also clears the selection
-	void change_type(obj_type_e new_type);
+	void change_type(ObjType new_type);
 
 	void clear_all();
 

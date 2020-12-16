@@ -320,8 +320,8 @@ void CMD_SEC_Merge(void)
 		new_sec = MIN(new_sec, *it);
 	}
 
-	selection_c common_lines(OBJ_LINEDEFS);
-	selection_c unused_secs (OBJ_SECTORS);
+	selection_c common_lines(ObjType::linedefs);
+	selection_c unused_secs (ObjType::sectors);
 
 	BA_Begin();
 	BA_MessageForSel("merged", edit.Selected);
@@ -1070,7 +1070,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 	SYS_ASSERT(new_upper >= 0);
 
 	// create new sidedef
-	int new_sd = BA_New(OBJ_SIDEDEFS);
+	int new_sd = BA_New(ObjType::sidedefs);
 
 	SideDef * SD = SideDefs[new_sd];
 
@@ -1127,7 +1127,7 @@ void lineloop_c::AssignSector(int new_sec, selection_c *flip)
 
 static bool GetLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 {
-	selection_c seen_lines(OBJ_LINEDEFS);
+	selection_c seen_lines(ObjType::linedefs);
 
 	int ld, side;
 
@@ -1213,7 +1213,7 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 
 	if (new_sec < 0)
 	{
-		new_sec = BA_New(OBJ_SECTORS);
+		new_sec = BA_New(ObjType::sectors);
 
 		if (model < 0)
 			model = loop.NeighboringSector();
@@ -1224,8 +1224,8 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 			Sectors[new_sec]->RawCopy(Sectors[model]);
 	}
 
-	selection_c   flip(OBJ_LINEDEFS);
-	selection_c unused(OBJ_SECTORS);
+	selection_c   flip(ObjType::linedefs);
+	selection_c unused(ObjType::sectors);
 
 	loop.GetAllSectors(&unused);
 

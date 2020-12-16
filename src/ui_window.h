@@ -103,7 +103,7 @@ public:
 
 	void Maximize();
 
-	void NewEditMode(obj_type_e mode);
+	void NewEditMode(ObjType mode);
 
 	// this is a wrapper around the FLTK cursor() method which
 	// prevents the possibly expensive call when the shape hasn't

@@ -262,7 +262,7 @@ void Vertex_MergeList(selection_c *verts)
 
 	verts->clear(v);
 
-	selection_c del_lines(OBJ_LINEDEFS);
+	selection_c del_lines(ObjType::linedefs);
 
 	// this prevents unnecessary sandwich mergers
 	ConvertSelection(verts, &del_lines);
@@ -356,7 +356,7 @@ bool Vertex_TryFixDangler(int v_num)
 		BA_Begin();
 		BA_Message("merged dangling vertex #%d\n", v_num);
 
-		selection_c list(OBJ_VERTICES);
+		selection_c list(ObjType::vertices);
 
 		list.set(v_other);	// first one is the one kept
 		list.set(v_num);
@@ -469,7 +469,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			// need a new one.
 			if (which != num_lines-1)
 			{
-				int new_v = BA_New(OBJ_VERTICES);
+				int new_v = BA_New(ObjType::vertices);
 
 				Vertices[new_v]->SetRawXY(new_x, new_y);
 
@@ -563,7 +563,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 	double new_x, new_y;
 	CalcDisconnectCoord(LineDefs[ld], v_num, &new_x, &new_y);
 
-	int new_v = BA_New(OBJ_VERTICES);
+	int new_v = BA_New(ObjType::vertices);
 
 	Vertices[new_v]->SetRawXY(new_x, new_y);
 
@@ -682,7 +682,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 {
 	const LineDef * L1 = LineDefs[ld_num];
 
-	int new_ld = BA_New(OBJ_LINEDEFS);
+	int new_ld = BA_New(ObjType::linedefs);
 	int lost_sd;
 
 	LineDef * L2 = LineDefs[new_ld];
@@ -801,7 +801,7 @@ void CMD_SEC_Disconnect(void)
 	int n;
 
 	// collect all vertices which need to be detached
-	selection_c detach_verts(OBJ_VERTICES);
+	selection_c detach_verts(ObjType::vertices);
 	VerticesOfDetachableSectors(detach_verts);
 
 	if (detach_verts.empty())
@@ -830,7 +830,7 @@ void CMD_SEC_Disconnect(void)
 
 	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 	{
-		int new_v = BA_New(OBJ_VERTICES);
+		int new_v = BA_New(ObjType::vertices);
 
 		mapping[*it] = new_v;
 
@@ -876,7 +876,7 @@ void CMD_SEC_Disconnect(void)
 
 	// finally move all vertices of selected sectors
 
-	selection_c all_verts(OBJ_VERTICES);
+	selection_c all_verts(ObjType::vertices);
 
 	ConvertSelection(edit.Selected, &all_verts);
 

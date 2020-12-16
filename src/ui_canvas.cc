@@ -295,7 +295,7 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 void UI_Canvas::DrawEverything()
 {
 	// setup for drawing sector numbers
-	if (edit.show_object_numbers && edit.mode == OBJ_SECTORS)
+	if (edit.show_object_numbers && edit.mode == ObjType::sectors)
 	{
 		seen_sectors.clear_all();
 	}
@@ -315,17 +315,17 @@ void UI_Canvas::DrawEverything()
 		double dy = 0;
 		DragDelta(&dx, &dy);
 
-		if (edit.mode == OBJ_VERTICES)
+		if (edit.mode == ObjType::vertices)
 			RenderColor(HI_AND_SEL_COL);
 		else
 			RenderColor(HI_COL);
 
-		if (edit.mode == OBJ_LINEDEFS || edit.mode == OBJ_SECTORS)
+		if (edit.mode == ObjType::linedefs || edit.mode == ObjType::sectors)
 			RenderThickness(2);
 
 		DrawHighlight(edit.mode, edit.dragged.num, false /* skip_lines */, dx, dy);
 
-		if (edit.mode == OBJ_VERTICES && edit.highlight.valid())
+		if (edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			RenderColor(HI_COL);
 			DrawHighlight(edit.highlight.type, edit.highlight.num);
@@ -334,7 +334,7 @@ void UI_Canvas::DrawEverything()
 		RenderThickness(1);
 
 		// when ratio lock is on, want to see the new line
-		if (edit.mode == OBJ_VERTICES && grid.ratio > 0 && edit.drag_other_vert >= 0)
+		if (edit.mode == ObjType::vertices && grid.ratio > 0 && edit.drag_other_vert >= 0)
 		{
 			const Vertex *v0 = Vertices[edit.drag_other_vert];
 			const Vertex *v1 = Vertices[edit.dragged.num];
@@ -352,7 +352,7 @@ void UI_Canvas::DrawEverything()
 		else
 			RenderColor(HI_COL);
 
-		if (edit.highlight.type == OBJ_LINEDEFS || edit.highlight.type == OBJ_SECTORS)
+		if (edit.highlight.type == ObjType::linedefs || edit.highlight.type == ObjType::sectors)
 			RenderThickness(2);
 
 		DrawHighlight(edit.highlight.type, edit.highlight.num);
@@ -363,7 +363,7 @@ void UI_Canvas::DrawEverything()
 			DrawTagged(edit.highlight.type, edit.highlight.num);
 		}
 
-		if (edit.mode == OBJ_LINEDEFS && !edit.show_object_numbers)
+		if (edit.mode == ObjType::linedefs && !edit.show_object_numbers)
 		{
 			const LineDef *L = LineDefs[edit.highlight.num];
 			DrawLineInfo(L->Start()->x(), L->Start()->y(), L->End()->x(), L->End()->y(), false);
@@ -408,7 +408,7 @@ void UI_Canvas::DrawMap()
 
 	DrawCamera();
 
-	if (edit.mode != OBJ_THINGS)
+	if (edit.mode != ObjType::things)
 		DrawThings();
 
 	if (grid.snap && config::grid_snap_indicator)
@@ -416,10 +416,10 @@ void UI_Canvas::DrawMap()
 
 	DrawLinedefs();
 
-	if (edit.mode == OBJ_VERTICES)
+	if (edit.mode == ObjType::vertices)
 		DrawVertices();
 
-	if (edit.mode == OBJ_THINGS)
+	if (edit.mode == ObjType::things)
 	{
 		if (edit.thing_render_mode > 0)
 		{
@@ -707,7 +707,7 @@ void UI_Canvas::DrawLinedefs()
 
 		switch (edit.mode)
 		{
-			case OBJ_VERTICES:
+			case ObjType::vertices:
 			{
 				if (n == edit.split_line.num)
 					col = HI_AND_SEL_COL;
@@ -732,7 +732,7 @@ void UI_Canvas::DrawLinedefs()
 			}
 			break;
 
-			case OBJ_LINEDEFS:
+			case ObjType::linedefs:
 			{
 				if (edit.error_mode)
 					col = LIGHTGREY;
@@ -754,7 +754,7 @@ void UI_Canvas::DrawLinedefs()
 			}
 			break;
 
-			case OBJ_SECTORS:
+			case ObjType::sectors:
 			{
 				int sd1 = L->right;
 				int sd2 = L->left;
@@ -841,7 +841,7 @@ void UI_Canvas::DrawLinedefs()
 	}
 
 	// draw the linedef numbers
-	if (edit.mode == OBJ_LINEDEFS && edit.show_object_numbers)
+	if (edit.mode == ObjType::linedefs && edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -890,7 +890,7 @@ void UI_Canvas::DrawThing(double x, double y, int r, int angle, bool big_arrow)
 //
 void UI_Canvas::DrawThings()
 {
-	if (edit.mode != OBJ_THINGS)
+	if (edit.mode != ObjType::things)
 		RenderColor(DARKGREY);
 	else if (edit.error_mode)
 		RenderColor(LIGHTGREY);
@@ -905,7 +905,7 @@ void UI_Canvas::DrawThings()
 
 		const thingtype_t &info = M_GetThingType(Things[n]->type);
 
-		if (edit.mode == OBJ_THINGS && !edit.error_mode)
+		if (edit.mode == ObjType::things && !edit.error_mode)
 		{
 			Fl_Color col = (Fl_Color)info.color;
 			RenderColor(col);
@@ -917,7 +917,7 @@ void UI_Canvas::DrawThings()
 	}
 
 	// draw the thing numbers
-	if (edit.mode == OBJ_THINGS && edit.show_object_numbers)
+	if (edit.mode == ObjType::things && edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < NumThings ; n++)
 		{
@@ -1312,7 +1312,7 @@ void UI_Canvas::UpdateHighlight()
 //
 //  draw the given object in highlight color
 //
-void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
+void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 							  double dx, double dy)
 {
 	// color and line thickness have been set by caller
@@ -1321,7 +1321,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 		{
 			double x = dx + Things[objnum]->x();
 			double y = dy + Things[objnum]->y();
@@ -1342,7 +1342,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 		}
 		break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 		{
 			double x1 = dx + LineDefs[objnum]->Start()->x();
 			double y1 = dy + LineDefs[objnum]->Start()->y();
@@ -1356,7 +1356,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 		}
 		break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 		{
 			double x = dx + Vertices[objnum]->x();
 			double y = dy + Vertices[objnum]->y();
@@ -1382,7 +1382,7 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 		}
 		break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 		{
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
@@ -1426,13 +1426,13 @@ void UI_Canvas::DrawHighlight(int objtype, int objnum, bool skip_lines,
 }
 
 
-void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
+void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 {
 	// color and line thickness have been set by caller
 
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 		{
 			double x = Things[objnum]->x();
 			double y = Things[objnum]->y();
@@ -1450,7 +1450,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 		}
 		break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 		{
 			double x = Vertices[objnum]->x();
 			double y = Vertices[objnum]->y();
@@ -1478,7 +1478,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 		}
 		break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 		{
 			double x1 = LineDefs[objnum]->Start()->x();
 			double y1 = LineDefs[objnum]->Start()->y();
@@ -1495,7 +1495,7 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 		}
 		break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 		{
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
@@ -1521,24 +1521,24 @@ void UI_Canvas::DrawHighlightTransform(int objtype, int objnum)
 }
 
 
-void UI_Canvas::DrawTagged(int objtype, int objnum)
+void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 {
 	// color has been set by caller
 
 	// handle tagged linedefs : show matching sector(s)
-	if (objtype == OBJ_LINEDEFS && LineDefs[objnum]->tag > 0)
+	if (objtype == ObjType::linedefs && LineDefs[objnum]->tag > 0)
 	{
 		for (int m = 0 ; m < NumSectors ; m++)
 			if (Sectors[m]->tag == LineDefs[objnum]->tag)
-				DrawHighlight(OBJ_SECTORS, m);
+				DrawHighlight(ObjType::sectors, m);
 	}
 
 	// handle tagged sectors : show matching line(s)
-	if (objtype == OBJ_SECTORS && Sectors[objnum]->tag > 0)
+	if (objtype == ObjType::sectors && Sectors[objnum]->tag > 0)
 	{
 		for (int m = 0 ; m < NumLineDefs ; m++)
 			if (LineDefs[m]->tag == Sectors[objnum]->tag)
-				DrawHighlight(OBJ_LINEDEFS, m);
+				DrawHighlight(ObjType::linedefs, m);
 	}
 }
 
@@ -1596,7 +1596,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	{
 		RenderColor(SEL_COL);
 
-		if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+		if (list->what_type() == ObjType::linedefs || list->what_type() == ObjType::sectors)
 			RenderThickness(2);
 
 		for (sel_iter_c it(list) ; !it.done() ; it.next())
@@ -1618,11 +1618,11 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	RenderColor(edit.error_mode ? FL_RED : SEL_COL);
 
-	if (list->what_type() == OBJ_LINEDEFS || list->what_type() == OBJ_SECTORS)
+	if (list->what_type() == ObjType::linedefs || list->what_type() == ObjType::sectors)
 		RenderThickness(2);
 
 	// special case when we have many sectors
-	if (list->what_type() == OBJ_SECTORS && list->count_obj() > MAX_STORE_SEL)
+	if (list->what_type() == ObjType::sectors && list->count_obj() > MAX_STORE_SEL)
 	{
 		DrawSectorSelection(list, dx, dy);
 	}
@@ -1993,7 +1993,7 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	}
 
 	// handle ratio-lock of a single dragged vertex
-	if (edit.mode == OBJ_VERTICES && grid.ratio > 0 &&
+	if (edit.mode == ObjType::vertices && grid.ratio > 0 &&
 		edit.dragged.num >= 0 && edit.drag_other_vert >= 0)
 	{
 		const Vertex *v0 = Vertices[edit.drag_other_vert];
@@ -2060,7 +2060,7 @@ void UI_Canvas::RenderSector(int num)
 	}
 	else if (edit.sector_render_mode == SREND_SoundProp)
 	{
-		if (edit.mode != OBJ_SECTORS || !edit.highlight.valid())
+		if (edit.mode != ObjType::sectors || !edit.highlight.valid())
 			return;
 
 		const byte * prop = SoundPropagation(edit.highlight.num);

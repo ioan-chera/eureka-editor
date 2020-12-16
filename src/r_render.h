@@ -118,9 +118,9 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens);
 void Render3D_WriteUser(std::ostream &os);
 
 void Render3D_NotifyBegin();
-void Render3D_NotifyInsert(obj_type_e type, int objnum);
-void Render3D_NotifyDelete(obj_type_e type, int objnum);
-void Render3D_NotifyChange(obj_type_e type, int objnum, int field);
+void Render3D_NotifyInsert(ObjType type, int objnum);
+void Render3D_NotifyDelete(ObjType type, int objnum);
+void Render3D_NotifyChange(ObjType type, int objnum, int field);
 void Render3D_NotifyEnd();
 
 

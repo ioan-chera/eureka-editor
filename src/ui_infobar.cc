@@ -211,7 +211,7 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 		Render3D_Enable(false);
 
 	// need sectors mode for sound propagation display
-	if (edit.sector_render_mode == SREND_SoundProp && edit.mode != OBJ_SECTORS)
+	if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	RedrawMap();
@@ -272,14 +272,14 @@ void UI_InfoBar::ratio_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
-void UI_InfoBar::NewEditMode(obj_type_e new_mode)
+void UI_InfoBar::NewEditMode(ObjType new_mode)
 {
 	switch (new_mode)
 	{
-		case OBJ_THINGS:   mode->value(0); break;
-		case OBJ_LINEDEFS: mode->value(1); break;
-		case OBJ_SECTORS:  mode->value(2); break;
-		case OBJ_VERTICES: mode->value(3); break;
+		case ObjType::things:   mode->value(0); break;
+		case ObjType::linedefs: mode->value(1); break;
+		case ObjType::sectors:  mode->value(2); break;
+		case ObjType::vertices: mode->value(3); break;
 
 		default: break;
 	}
@@ -520,12 +520,12 @@ void UI_StatusBar::draw()
 
 void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 {
-	if (edit.render3d && edit.mode == OBJ_SECTORS)
+	if (edit.render3d && edit.mode == ObjType::sectors)
 	{
 		IB_Number(cx, cy, "raise delta", I_ROUND(edit.drag_sector_dz), 4);
 		return;
 	}
-	if (edit.render3d && edit.mode == OBJ_THINGS && edit.drag_thing_up_down)
+	if (edit.render3d && edit.mode == ObjType::things && edit.drag_thing_up_down)
 	{
 		double dz = edit.drag_cur_z - edit.drag_start_z;
 		IB_Number(cx, cy, "raise delta", I_ROUND(dz), 4);

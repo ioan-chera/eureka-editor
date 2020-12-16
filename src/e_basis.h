@@ -414,7 +414,7 @@ extern std::vector<byte>  ScriptsData;
 #define NumSideDefs   ((int)SideDefs.size())
 #define NumLineDefs   ((int)LineDefs.size())
 
-int NumObjects(obj_type_e type);
+int NumObjects(ObjType type);
 
 #define is_thing(n)    ((n) >= 0 && (n) < NumThings  )
 #define is_vertex(n)   ((n) >= 0 && (n) < NumVertices)
@@ -422,7 +422,7 @@ int NumObjects(obj_type_e type);
 #define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
 #define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
 
-const char * NameForObjectType(obj_type_e type, bool plural = false);
+const char *NameForObjectType(ObjType type, bool plural = false);
 
 
 /* BASIS API */
@@ -449,17 +449,17 @@ void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix = 
 
 // create a new object, returning its objnum.  It is safe to
 // directly set the new object's fields after calling BA_New().
-int BA_New(obj_type_e type);
+int BA_New(ObjType type);
 
 // deletes the given object, and in certain cases other types of
 // objects bound to it (e.g. deleting a vertex will cause all
 // bound linedefs to also be deleted).
-void BA_Delete(obj_type_e type, int objnum);
+void BA_Delete(ObjType type, int objnum);
 
 // change a field of an existing object.  If the value was the
 // same as before, nothing happens and false is returned.
 // Otherwise returns true.
-bool BA_Change(obj_type_e type, int objnum, byte field, int value);
+bool BA_Change(ObjType type, int objnum, byte field, int value);
 
 // attempt to undo the last normal or redo operation.  Returns
 // false if the undo history is empty.

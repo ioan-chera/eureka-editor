@@ -544,26 +544,26 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 
 	if (name.Match("thing"))
 	{
-		kind = Objid(OBJ_THINGS, 1);
+		kind = Objid(ObjType::things, 1);
 		new_T = new Thing;
 		new_T->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
 		Things.push_back(new_T);
 	}
 	else if (name.Match("vertex"))
 	{
-		kind = Objid(OBJ_VERTICES, 1);
+		kind = Objid(ObjType::vertices, 1);
 		new_V = new Vertex;
 		Vertices.push_back(new_V);
 	}
 	else if (name.Match("linedef"))
 	{
-		kind = Objid(OBJ_LINEDEFS, 1);
+		kind = Objid(ObjType::linedefs, 1);
 		new_LD = new LineDef;
 		LineDefs.push_back(new_LD);
 	}
 	else if (name.Match("sidedef"))
 	{
-		kind = Objid(OBJ_SIDEDEFS, 1);
+		kind = Objid(ObjType::sidedefs, 1);
 		new_SD = new SideDef;
 		new_SD->mid_tex = BA_InternaliseString("-");
 		new_SD->lower_tex = new_SD->mid_tex;
@@ -572,7 +572,7 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 	}
 	else if (name.Match("sector"))
 	{
-		kind = Objid(OBJ_SECTORS, 1);
+		kind = Objid(ObjType::sectors, 1);
 		new_S = new Sector;
 		new_S->light = 160;
 		Sectors.push_back(new_S);

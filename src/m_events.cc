@@ -541,7 +541,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta
-		if (edit.mode == OBJ_VERTICES && edit.dragged.valid())
+		if (edit.mode == ObjType::vertices && edit.dragged.valid())
 			UpdateHighlight();
 
 		main_win->canvas->redraw();
@@ -1004,9 +1004,9 @@ void CMD_OperationMenu()
 		{
 			switch (edit.mode)
 			{
-			case OBJ_LINEDEFS:	context = "line";   break;
-			case OBJ_SECTORS:	context = "sector"; break;
-			case OBJ_VERTICES:	context = "vertex"; break;
+			case ObjType::linedefs:	context = "line";   break;
+			case ObjType::sectors:	context = "sector"; break;
+			case ObjType::vertices:	context = "vertex"; break;
 			default: context = "thing";
 			}
 		}

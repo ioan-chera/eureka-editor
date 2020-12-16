@@ -978,11 +978,11 @@ public:
 		}
 	}
 
-	void QueryCalcCoord(const DrawWall *dw, obj_type_e what, int part)
+	void QueryCalcCoord(const DrawWall *dw, ObjType what, int part)
 	{
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
-		if (what == OBJ_SECTORS)
+		if (what == ObjType::sectors)
 		{
 			// sky surfaces require a check on Z height
 			if (part == PART_CEIL && dw->sec->ceilh > r_view.z + 1)
@@ -1323,7 +1323,7 @@ public:
 
 		switch (edit.mode)
 		{
-		case OBJ_THINGS:
+		case ObjType::things:
 			hl_color = SEL_COL;
 			HighlightThings(-1);
 
@@ -1341,7 +1341,7 @@ public:
 			}
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			HighlightSectors(-1, -1);
 
 			hl_color = HI_COL;
@@ -1358,7 +1358,7 @@ public:
 			}
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			HighlightLines(-1, -1);
 
 			hl_color = HI_COL;
@@ -1541,7 +1541,7 @@ public:
 		}
 	}
 
-	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x, obj_type_e what, int part)
+	inline void RenderWallSurface(DrawWall *dw, DrawSurf& surf, int x, ObjType what, int part)
 	{
 		if (surf.kind == DrawSurf::K_INVIS)
 			return;
@@ -1572,7 +1572,7 @@ public:
 		{
 			if (y1 <= query_sy && query_sy <= y2)
 			{
-				if (what == OBJ_LINEDEFS)
+				if (what == ObjType::linedefs)
 				{
 					if (dw->side < 0)
 						part <<= 4;
@@ -1626,9 +1626,9 @@ public:
 
 		if (query_mode)
 		{
-			if (y1 <= query_sy && query_sy <= y2 && edit.mode == OBJ_THINGS)
+			if (y1 <= query_sy && query_sy <= y2 && edit.mode == ObjType::things)
 			{
-				query_result = Objid(OBJ_THINGS, dw->th);
+				query_result = Objid(ObjType::things, dw->th);
 			}
 			return;
 		}
@@ -1710,10 +1710,10 @@ public:
 
 		if (query_mode)
 		{
-			if (y1 <= query_sy && query_sy <= y2 && edit.mode == OBJ_LINEDEFS)
+			if (y1 <= query_sy && query_sy <= y2 && edit.mode == ObjType::linedefs)
 			{
 				int part = (dw->side < 0) ? PART_LF_RAIL : PART_RT_RAIL;
-				query_result = Objid(OBJ_LINEDEFS, dw->ld_index, part);
+				query_result = Objid(ObjType::linedefs, dw->ld_index, part);
 			}
 			return;
 		}
@@ -1954,11 +1954,11 @@ public:
 				if (dw->th >= 0)
 					continue;
 
-				RenderWallSurface(dw, dw->ceil,  x, OBJ_SECTORS, PART_CEIL);
-				RenderWallSurface(dw, dw->floor, x, OBJ_SECTORS, PART_FLOOR);
+				RenderWallSurface(dw, dw->ceil,  x, ObjType::sectors, PART_CEIL);
+				RenderWallSurface(dw, dw->floor, x, ObjType::sectors, PART_FLOOR);
 
-				RenderWallSurface(dw, dw->upper, x, OBJ_LINEDEFS, PART_RT_UPPER);
-				RenderWallSurface(dw, dw->lower, x, OBJ_LINEDEFS, PART_RT_LOWER);
+				RenderWallSurface(dw, dw->upper, x, ObjType::linedefs, PART_RT_UPPER);
+				RenderWallSurface(dw, dw->lower, x, ObjType::linedefs, PART_RT_LOWER);
 
 				if (open_y1 > open_y2)
 					break;

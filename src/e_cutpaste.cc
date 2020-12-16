@@ -45,7 +45,7 @@ class clipboard_data_c
 {
 public:
 	// the mode used when the objects were Copied
-	obj_type_e  mode;
+	ObjType mode;
 
 	// NOTE:
 	//
@@ -61,7 +61,7 @@ public:
 	// map (linedefs or sectors) to "fit in" with nearby sections of
 	// the map.
 
-	bool uses_real_sectors;
+	bool uses_real_sectors = false;
 
 	std::vector<Thing *>   things;
 	std::vector<Vertex *>  verts;
@@ -70,12 +70,9 @@ public:
 	std::vector<LineDef *> lines;
 
 public:
-	clipboard_data_c(obj_type_e _mode) :
-		mode(_mode), uses_real_sectors(false),
-		things(), verts(), sectors(),
-		sides(), lines()
+	clipboard_data_c(ObjType mode) : mode(mode)
 	{
-		if (mode == OBJ_LINEDEFS || mode == OBJ_SECTORS)
+		if(mode == ObjType::linedefs || mode == ObjType::sectors)
 			uses_real_sectors = true;
 	}
 
@@ -269,12 +266,12 @@ void Clipboard_NotifyEnd()
 { }
 
 
-void Clipboard_NotifyInsert(obj_type_e type, int objnum)
+void Clipboard_NotifyInsert(ObjType type, int objnum)
 {
 	// this function notifies us that a new sector is about to be
 	// inserted in the map (causing other sectors to be moved).
 
-	if (type != OBJ_SECTORS)
+	if (type != ObjType::sectors)
 		return;
 
 	if (! clip_board)
@@ -297,12 +294,12 @@ void Clipboard_NotifyInsert(obj_type_e type, int objnum)
 }
 
 
-void Clipboard_NotifyDelete(obj_type_e type, int objnum)
+void Clipboard_NotifyDelete(ObjType type, int objnum)
 {
 	// this function notifies us that a sector is about to be deleted
 	// (causing other sectors to be moved).
 
-	if (type != OBJ_SECTORS)
+	if (type != ObjType::sectors)
 		return;
 
 	if (! clip_board)
@@ -314,7 +311,7 @@ void Clipboard_NotifyDelete(obj_type_e type, int objnum)
 }
 
 
-void Clipboard_NotifyChange(obj_type_e type, int objnum, int field)
+void Clipboard_NotifyChange(ObjType type, int objnum, int field)
 {
 	// field changes never affect the clipboard
 }
@@ -393,11 +390,11 @@ static void CopyGroupOfObjects(selection_c *list)
 	// this is used for LineDefs and Sectors, where we need to copy
 	// groups of objects and create internal references between them.
 
-	bool is_sectors = (list->what_type() == OBJ_SECTORS) ? true : false;
+	bool is_sectors = list->what_type() == ObjType::sectors;
 
-	selection_c vert_sel(OBJ_VERTICES);
-	selection_c side_sel(OBJ_SIDEDEFS);
-	selection_c line_sel(OBJ_LINEDEFS);
+	selection_c vert_sel(ObjType::vertices);
+	selection_c side_sel(ObjType::sidedefs);
+	selection_c line_sel(ObjType::linedefs);
 
 	ConvertSelection(list, &line_sel);
 	ConvertSelection(&line_sel, &vert_sel);
@@ -485,7 +482,7 @@ static void CopyGroupOfObjects(selection_c *list)
 	// in sectors mode, copy things too
 	if (is_sectors)
 	{
-		selection_c thing_sel(OBJ_THINGS);
+		selection_c thing_sel(ObjType::things);
 
 		ConvertSelection(list, &thing_sel);
 
@@ -515,7 +512,7 @@ static bool Clipboard_DoCopy()
 
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
@@ -524,7 +521,7 @@ static bool Clipboard_DoCopy()
 			}
 			break;
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
@@ -533,8 +530,8 @@ static bool Clipboard_DoCopy()
 			}
 			break;
 
-		case OBJ_LINEDEFS:
-		case OBJ_SECTORS:
+		case ObjType::linedefs:
+		case ObjType::sectors:
 			CopyGroupOfObjects(edit.Selected);
 			break;
 
@@ -572,7 +569,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
-		int new_v = BA_New(OBJ_VERTICES);
+		int new_v = BA_New(ObjType::vertices);
 		Vertex * V = Vertices[new_v];
 
 		vert_map[i] = new_v;
@@ -585,7 +582,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
-		int new_s = BA_New(OBJ_SECTORS);
+		int new_s = BA_New(ObjType::sectors);
 		Sector * S = Sectors[new_s];
 
 		sector_map[i] = new_s;
@@ -602,7 +599,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 			continue;
 		}
 
-		int new_sd = BA_New(OBJ_SIDEDEFS);
+		int new_sd = BA_New(ObjType::sidedefs);
 		SideDef * SD = SideDefs[new_sd];
 
 		side_map[i] = new_sd;
@@ -619,7 +616,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
-		int new_l = BA_New(OBJ_LINEDEFS);
+		int new_l = BA_New(ObjType::linedefs);
 		LineDef * L = LineDefs[new_l];
 
 		L->RawCopy(clip_board->lines[i]);
@@ -657,7 +654,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
-		int new_t = BA_New(OBJ_THINGS);
+		int new_t = BA_New(ObjType::things);
 		Thing * T = Things[new_t];
 
 		T->RawCopy(clip_board->things[i]);
@@ -673,10 +670,10 @@ static void ReselectGroup()
 	// this assumes all the new objects are at the end of their
 	// array (currently true, but not a guarantee of BA_New).
 
-	if (edit.mode == OBJ_THINGS)
+	if (edit.mode == ObjType::things)
 	{
-		if (clip_board->mode == OBJ_THINGS ||
-		    clip_board->mode == OBJ_SECTORS)
+		if (clip_board->mode == ObjType::things ||
+		    clip_board->mode == ObjType::sectors)
 		{
 			int count = (int)clip_board->things.size();
 
@@ -687,25 +684,25 @@ static void ReselectGroup()
 		return;
 	}
 
-	bool was_mappy = (clip_board->mode == OBJ_VERTICES ||
-			    	  clip_board->mode == OBJ_LINEDEFS ||
-					  clip_board->mode == OBJ_SECTORS);
+	bool was_mappy = (clip_board->mode == ObjType::vertices ||
+			    	  clip_board->mode == ObjType::linedefs ||
+					  clip_board->mode == ObjType::sectors);
 
-	bool is_mappy =  (edit.mode == OBJ_VERTICES ||
-			    	  edit.mode == OBJ_LINEDEFS ||
-					  edit.mode == OBJ_SECTORS);
+	bool is_mappy =  (edit.mode == ObjType::vertices ||
+			    	  edit.mode == ObjType::linedefs ||
+					  edit.mode == ObjType::sectors);
 
 	if (! (was_mappy && is_mappy))
 		return;
 
 	selection_c new_sel(clip_board->mode);
 
-	if (clip_board->mode == OBJ_VERTICES)
+	if (clip_board->mode == ObjType::vertices)
 	{
 		int count = (int)clip_board->verts.size();
 		new_sel.frob_range(NumVertices - count, NumVertices-1, BOP_ADD);
 	}
-	else if (clip_board->mode == OBJ_LINEDEFS)
+	else if (clip_board->mode == ObjType::linedefs)
 	{
 		// Note: this doesn't behave as expected if the editing mode is
 		// SECTORS, because the pasted lines do not completely surround
@@ -716,7 +713,7 @@ static void ReselectGroup()
 	}
 	else
 	{
-		SYS_ASSERT(clip_board->mode == OBJ_SECTORS);
+		SYS_ASSERT(clip_board->mode == ObjType::sectors);
 
 		int count = (int)clip_board->sectors.size();
 		new_sel.frob_range(NumSectors - count, NumSectors-1, BOP_ADD);
@@ -758,14 +755,14 @@ static bool Clipboard_DoPaste()
 
 	switch (clip_board->mode)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 		{
 			double cx, cy;
 			clip_board->CentreOfThings(&cx, &cy);
 
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
-				int new_t = BA_New(OBJ_THINGS);
+				int new_t = BA_New(ObjType::things);
 				Thing * T = Things[new_t];
 
 				T->RawCopy(clip_board->things[i]);
@@ -778,14 +775,14 @@ static bool Clipboard_DoPaste()
 			break;
 		}
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 		{
 			double cx, cy;
 			clip_board->CentreOfVertices(&cx, &cy);
 
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
-				int new_v = BA_New(OBJ_VERTICES);
+				int new_v = BA_New(ObjType::vertices);
 				Vertex * V = Vertices[new_v];
 
 				V->RawCopy(clip_board->verts[i]);
@@ -796,8 +793,8 @@ static bool Clipboard_DoPaste()
 			break;
 		}
 
-		case OBJ_LINEDEFS:
-		case OBJ_SECTORS:
+		case ObjType::linedefs:
+		case ObjType::sectors:
 		{
 			PasteGroupOfObjects(pos_x, pos_y);
 			break;
@@ -842,7 +839,7 @@ void CMD_Clipboard_Cut()
 	if (main_win->ClipboardOp(EditCommand::cut))
 		return;
 
-	if (edit.render3d && edit.mode != OBJ_THINGS)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
 		Render3D_CB_Cut();
 		return;
@@ -863,7 +860,7 @@ void CMD_Clipboard_Copy()
 	if (main_win->ClipboardOp(EditCommand::copy))
 		return;
 
-	if (edit.render3d && edit.mode != OBJ_THINGS)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
 		Render3D_CB_Copy();
 		return;
@@ -882,7 +879,7 @@ void CMD_Clipboard_Paste()
 	if (main_win->ClipboardOp(EditCommand::paste))
 		return;
 
-	if (edit.render3d && edit.mode != OBJ_THINGS)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
 		Render3D_CB_Paste();
 		return;
@@ -900,7 +897,7 @@ void CMD_Clipboard_Paste()
 
 void UnusedVertices(selection_c *lines, selection_c *result)
 {
-	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
+	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
 
 	ConvertSelection(lines, result);
 
@@ -920,7 +917,7 @@ void UnusedVertices(selection_c *lines, selection_c *result)
 
 void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 {
-	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
+	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
 
 	ConvertSelection(lines, result);
 
@@ -948,7 +945,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 
 void UnusedLineDefs(selection_c *sectors, selection_c *result)
 {
-	SYS_ASSERT(sectors->what_type() == OBJ_SECTORS);
+	SYS_ASSERT(sectors->what_type() == ObjType::sectors);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -971,8 +968,8 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 
 void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 {
-	SYS_ASSERT(verts->what_type() == OBJ_VERTICES);
-	SYS_ASSERT(lines->what_type() == OBJ_LINEDEFS);
+	SYS_ASSERT(verts->what_type() == ObjType::vertices);
+	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
 
 	// collect all the sectors that touch a linedef being removed.
 
@@ -1113,8 +1110,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 		return false;
 
 	// see what sidedefs would become unused
-	selection_c line_sel(OBJ_LINEDEFS);
-	selection_c side_sel(OBJ_SIDEDEFS);
+	selection_c line_sel(ObjType::linedefs);
+	selection_c side_sel(ObjType::sidedefs);
 
 	line_sel.set(ld2);
 
@@ -1131,8 +1128,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 
 	// NOT-DO: update X offsets on existing linedef
 
-	BA_Delete(OBJ_LINEDEFS, ld2);
-	BA_Delete(OBJ_VERTICES, v_num);
+	BA_Delete(ObjType::linedefs, ld2);
+	BA_Delete(ObjType::vertices, v_num);
 
 	DeleteObjects(&side_sel);
 
@@ -1145,22 +1142,22 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 							  bool keep_verts, bool keep_lines)
 {
-	selection_c vert_sel(OBJ_VERTICES);
-	selection_c side_sel(OBJ_SIDEDEFS);
-	selection_c line_sel(OBJ_LINEDEFS);
-	selection_c  sec_sel(OBJ_SECTORS);
+	selection_c vert_sel(ObjType::vertices);
+	selection_c side_sel(ObjType::sidedefs);
+	selection_c line_sel(ObjType::linedefs);
+	selection_c  sec_sel(ObjType::sectors);
 
 	switch (list->what_type())
 	{
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 			vert_sel.merge(*list);
 			break;
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			line_sel.merge(*list);
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			sec_sel.merge(*list);
 			break;
 
@@ -1169,7 +1166,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 			return;
 	}
 
-	if (list->what_type() == OBJ_VERTICES)
+	if (list->what_type() == ObjType::vertices)
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
@@ -1180,7 +1177,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 		}
 	}
 
-	if (!keep_lines && list->what_type() == OBJ_SECTORS)
+	if (!keep_lines && list->what_type() == ObjType::sectors)
 	{
 		UnusedLineDefs(&sec_sel, &line_sel);
 
@@ -1193,14 +1190,14 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 		}
 	}
 
-	if (!keep_verts && list->what_type() == OBJ_LINEDEFS)
+	if (!keep_verts && list->what_type() == ObjType::linedefs)
 	{
 		UnusedVertices(&line_sel, &vert_sel);
 	}
 
 	// try to detect sectors that become "dudded", where all the
 	// remaining linedefs of the sector face into the void.
-	if (list->what_type() == OBJ_VERTICES || list->what_type() == OBJ_LINEDEFS)
+	if (list->what_type() == ObjType::vertices || list->what_type() == ObjType::linedefs)
 	{
 		DuddedSectors(&vert_sel, &line_sel, &sec_sel);
 		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
@@ -1209,7 +1206,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 	// delete things from each deleted sector
 	if (!keep_things && sec_sel.notempty())
 	{
-		selection_c thing_sel(OBJ_THINGS);
+		selection_c thing_sel(ObjType::things);
 
 		ConvertSelection(&sec_sel, &thing_sel);
 		DeleteObjects(&thing_sel);
@@ -1218,7 +1215,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 	// perform linedef fixups here (when sectors get removed)
 	if (sec_sel.notempty())
 	{
-		selection_c fixups(OBJ_LINEDEFS);
+		selection_c fixups(ObjType::linedefs);
 
 		ConvertSelection(&sec_sel, &fixups);
 
@@ -1252,7 +1249,7 @@ void CMD_Delete()
 
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
-	if (edit.mode == OBJ_VERTICES && edit.Selected->count_obj() == 1)
+	if (edit.mode == ObjType::vertices && edit.Selected->count_obj() == 1)
 	{
 		int v_num = edit.Selected->find_first();
 		SYS_ASSERT(v_num >= 0);

@@ -278,7 +278,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	// make sure we have a fallback sector to use
 	if (NumSectors == 0)
 	{
-		int new_sec = BA_New(OBJ_SECTORS);
+		int new_sec = BA_New(ObjType::sectors);
 
 		Sectors[new_sec]->SetDefaults();
 	}
@@ -301,7 +301,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			new_sec = NumSectors - 1;
 
 		// create the new sidedef
-		sd = BA_New(OBJ_SIDEDEFS);
+		sd = BA_New(ObjType::sidedefs);
 
 		SideDefs[sd]->SetDefaults(other >= 0);
 		SideDefs[sd]->sector = new_sec;

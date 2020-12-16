@@ -710,7 +710,7 @@ static Objid NearestLineDef(double x, double y)
 	}
 
 	if (best >= 0)
-		return Objid(OBJ_LINEDEFS, best);
+		return Objid(ObjType::linedefs, best);
 
 	// none found
 	return Objid();
@@ -773,7 +773,7 @@ static Objid NearestSplitLine(double x, double y, int ignore_vert)
 	}
 
 	if (best >= 0)
-		return Objid(OBJ_LINEDEFS, best);
+		return Objid(ObjType::linedefs, best);
 
 	// none found
 	return Objid();
@@ -816,7 +816,7 @@ static Objid NearestSector(double x, double y)
 		int sd_num = (side1 < 0) ? LineDefs[line1]->left : LineDefs[line1]->right;
 
 		if (sd_num >= 0)
-			return Objid(OBJ_SECTORS, SideDefs[sd_num]->sector);
+			return Objid(ObjType::sectors, SideDefs[sd_num]->sector);
 	}
 
 	// none found
@@ -874,7 +874,7 @@ static Objid NearestThing(double x, double y)
 	}
 
 	if (best >= 0)
-		return Objid(OBJ_THINGS, best);
+		return Objid(ObjType::things, best);
 
 	// none found
 	return Objid();
@@ -926,7 +926,7 @@ static Objid NearestVertex(double x, double y)
 	}
 
 	if (best >= 0)
-		return Objid(OBJ_VERTICES, best);
+		return Objid(ObjType::vertices, best);
 
 	// none found
 	return Objid();
@@ -938,29 +938,29 @@ static Objid NearestVertex(double x, double y)
 //  coordinates.  when several objects are close, the smallest
 //  is chosen.
 //
-void GetNearObject(Objid& o, obj_type_e objtype, double x, double y)
+void GetNearObject(Objid& o, ObjType objtype, double x, double y)
 {
 	switch (objtype)
 	{
-		case OBJ_THINGS:
+		case ObjType::things:
 		{
 			o = NearestThing(x, y);
 			break;
 		}
 
-		case OBJ_VERTICES:
+		case ObjType::vertices:
 		{
 			o = NearestVertex(x, y);
 			break;
 		}
 
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 		{
 			o = NearestLineDef(x, y);
 			break;
 		}
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 		{
 			o = NearestSector(x, y);
 			break;
@@ -1155,7 +1155,7 @@ void crossing_state_c::SplitAllLines()
 	{
 		if (points[i].ld >= 0)
 		{
-			points[i].vert = BA_New(OBJ_VERTICES);
+			points[i].vert = BA_New(ObjType::vertices);
 
 			Vertex *V = Vertices[points[i].vert];
 

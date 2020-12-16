@@ -523,17 +523,17 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 {
 	UI_FindAndReplace *box = (UI_FindAndReplace *)data;
 
-	obj_type_e prev_type = box->cur_obj.type;
+	ObjType prev_type = box->cur_obj.type;
 
 	bool want_descs = true;
 
 	switch (box->what->value())
 	{
-		case 0: box->cur_obj.type = OBJ_THINGS; break;
-		case 1: box->cur_obj.type = OBJ_LINEDEFS; want_descs = false; break;
-		case 2: box->cur_obj.type = OBJ_SECTORS;  want_descs = false; break;
-		case 3: box->cur_obj.type = OBJ_LINEDEFS; break;
-		case 4: box->cur_obj.type = OBJ_SECTORS; break;
+		case 0: box->cur_obj.type = ObjType::things; break;
+		case 1: box->cur_obj.type = ObjType::linedefs; want_descs = false; break;
+		case 2: box->cur_obj.type = ObjType::sectors;  want_descs = false; break;
+		case 3: box->cur_obj.type = ObjType::linedefs; break;
+		case 4: box->cur_obj.type = ObjType::sectors; break;
 
 		default: break;
 	}
@@ -640,9 +640,9 @@ bool UI_FindAndReplace::WhatFromEditMode()
 {
 	switch (edit.mode)
 	{
-		case OBJ_THINGS:   what->value(0); return true;
-		case OBJ_LINEDEFS: what->value(1); return true;
-		case OBJ_SECTORS:  what->value(2); return true;
+		case ObjType::things:   what->value(0); return true;
+		case ObjType::linedefs: what->value(1); return true;
+		case ObjType::sectors:  what->value(2); return true;
 
 		default: return false;
 	}

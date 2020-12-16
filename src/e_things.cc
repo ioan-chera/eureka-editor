@@ -159,7 +159,7 @@ void CMD_TH_Disconnect(void)
 
 	while (! edit.Selected->empty())
 	{
-		selection_c overlaps(OBJ_THINGS);
+		selection_c overlaps(ObjType::things);
 
 		CollectOverlapGroup(overlaps);
 

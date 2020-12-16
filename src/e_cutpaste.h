@@ -36,9 +36,9 @@ void Clipboard_Clear();
 void Clipboard_ClearLocals();
 
 void Clipboard_NotifyBegin();
-void Clipboard_NotifyInsert(obj_type_e type, int objnum);
-void Clipboard_NotifyDelete(obj_type_e type, int objnum);
-void Clipboard_NotifyChange(obj_type_e type, int objnum, int field);
+void Clipboard_NotifyInsert(ObjType type, int objnum);
+void Clipboard_NotifyDelete(ObjType type, int objnum);
+void Clipboard_NotifyChange(ObjType type, int objnum, int field);
 void Clipboard_NotifyEnd();
 
 void UnusedVertices(selection_c *lines, selection_c *result);

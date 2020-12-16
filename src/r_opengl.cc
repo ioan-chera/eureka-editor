@@ -1504,11 +1504,11 @@ public:
 		if (!obj.valid())
 			return;
 
-		if (obj.type == OBJ_THINGS)
+		if (obj.type == ObjType::things)
 		{
 			HighlightThing(obj.num);
 		}
-		else if (obj.type == OBJ_SECTORS)
+		else if (obj.type == ObjType::sectors)
 		{
 			if (obj.parts == 0 || (obj.parts & PART_FLOOR))
 				HighlightSector(obj.num, PART_FLOOR);
@@ -1516,7 +1516,7 @@ public:
 			if (obj.parts == 0 || (obj.parts & PART_CEIL))
 				HighlightSector(obj.num, PART_CEIL);
 		}
-		else if (obj.type == OBJ_LINEDEFS)
+		else if (obj.type == ObjType::linedefs)
 		{
 			/* right side */
 			if (obj.parts == 0 || (obj.parts & PART_RT_LOWER))
@@ -1559,7 +1559,7 @@ public:
 				saw_hl = true;
 
 				// can skip drawing twice for things, but not other stuff
-				if (edit.mode == OBJ_THINGS)
+				if (edit.mode == ObjType::things)
 					continue;
 			}
 
@@ -1595,7 +1595,7 @@ public:
 	void MarkCameraSector()
 	{
 		Objid obj;
-		GetNearObject(obj, OBJ_SECTORS, r_view.x, r_view.y);
+		GetNearObject(obj, ObjType::sectors, r_view.x, r_view.y);
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);

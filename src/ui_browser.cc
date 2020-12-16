@@ -1663,25 +1663,25 @@ void UI_Browser::ChangeMode(char new_mode)
 }
 
 
-void UI_Browser::NewEditMode(obj_type_e edit_mode)
+void UI_Browser::NewEditMode(ObjType edit_mode)
 {
 	switch (edit_mode)
 	{
-		case OBJ_LINEDEFS:
+		case ObjType::linedefs:
 			// if on LINE TYPES, stay there
 			// otherwise go to TEXTURES
 			if (! (active == 3 || active == ACTIVE_GENERALIZED))
 				SetActive(0);
 			break;
 
-		case OBJ_SECTORS:
+		case ObjType::sectors:
 			// if on SECTOR TYPES, stay there
 			// otherwise go to FLATS
 			if (active != 4)
 				SetActive(config::browser_combine_tex ? 0 : 1);
 			break;
 
-		case OBJ_THINGS:
+		case ObjType::things:
 			SetActive(2);
 			break;
 

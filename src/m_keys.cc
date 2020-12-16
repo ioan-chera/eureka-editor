@@ -1061,14 +1061,14 @@ int M_KeyToShortcut(keycode_t key)
 }
 
 
-key_context_e M_ModeToKeyContext(obj_type_e mode)
+key_context_e M_ModeToKeyContext(ObjType mode)
 {
 	switch (mode)
 	{
-		case OBJ_THINGS:   return KCTX_Thing;
-		case OBJ_LINEDEFS: return KCTX_Line;
-		case OBJ_SECTORS:  return KCTX_Sector;
-		case OBJ_VERTICES: return KCTX_Vertex;
+		case ObjType::things:   return KCTX_Thing;
+		case ObjType::linedefs: return KCTX_Line;
+		case ObjType::sectors:  return KCTX_Sector;
+		case ObjType::vertices: return KCTX_Vertex;
 
 		default: break;
 	}
