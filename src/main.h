@@ -53,27 +53,7 @@
 #endif
 #endif
 
-//
-// Printf detection
-//
-
-#ifndef __GNUC__
-#define EUR_PRINTF(f, a)
-#else
-#define EUR_PRINTF(f, a) __attribute__((format(printf, f, a)))
-#endif
-
-#if _MSC_VER >= 1400 && defined(_DEBUG)
-#include <sal.h>
-#if _MSC_VER > 1400
-#define EUR_FORMAT_STRING(p) _Printf_format_string_ p
-#else
-#define EUR_FORMAT_STRING(p) __format_string p
-#endif
-#else
-#define EUR_FORMAT_STRING(p) p
-#endif
-
+#include "PrintfMacros.h"
 
 /*
  *  Standard headers
