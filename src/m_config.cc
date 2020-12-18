@@ -833,7 +833,7 @@ bool M_ReadTextLine(SString &string, std::istream &is)
 		string.clear();
 		return false;
 	}
-	if(string[0] == 0xef && string[1] == 0xbb && string[2] == 0xbf)
+	if(string.substr(0, 3) == "\xef\xbb\xbf")
 		string.erase(0, 3);
 	string.removeCRLF();
 	return true;
