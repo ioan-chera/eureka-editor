@@ -7,8 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4FCB3A58253B65230038EFEB /* gtest_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FCB3A56253B65230038EFEB /* gtest_main.cc */; };
-		4FCB3A59253B65230038EFEB /* gtest-all.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FCB3A57253B65230038EFEB /* gtest-all.cc */; };
+		4FBC5BC0258D3622005480CA /* gtest_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB6258D3621005480CA /* gtest_main.cc */; };
+		4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB7258D3621005480CA /* gtest-death-test.cc */; };
+		4FBC5BC2258D3622005480CA /* gtest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB8258D3621005480CA /* gtest.cc */; };
+		4FBC5BC3258D3622005480CA /* gtest-filepath.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB9258D3621005480CA /* gtest-filepath.cc */; };
+		4FBC5BC4258D3622005480CA /* gtest-port.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBA258D3621005480CA /* gtest-port.cc */; };
+		4FBC5BC5258D3622005480CA /* gtest-matchers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBC258D3621005480CA /* gtest-matchers.cc */; };
+		4FBC5BC6258D3622005480CA /* gtest-test-part.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBD258D3621005480CA /* gtest-test-part.cc */; };
+		4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBE258D3621005480CA /* gtest-printers.cc */; };
+		4FBC5BC8258D3622005480CA /* gtest-typed-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBF258D3621005480CA /* gtest-typed-test.cc */; };
+		4FBC5BDB258D4191005480CA /* StringTableTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BDA258D4191005480CA /* StringTableTest.cpp */; };
+		4FBC5BE0258D41A2005480CA /* m_strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BDF258D41A2005480CA /* m_strings.cc */; };
+		4FBC5BE9258D45AC005480CA /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BE8258D45AC005480CA /* Errors.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +34,22 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4FBC5BB6258D3621005480CA /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = ../../modules/googletest/googletest/src/gtest_main.cc; sourceTree = "<group>"; };
+		4FBC5BB7258D3621005480CA /* gtest-death-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-death-test.cc"; path = "../../modules/googletest/googletest/src/gtest-death-test.cc"; sourceTree = "<group>"; };
+		4FBC5BB8258D3621005480CA /* gtest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest.cc; path = ../../modules/googletest/googletest/src/gtest.cc; sourceTree = "<group>"; };
+		4FBC5BB9258D3621005480CA /* gtest-filepath.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-filepath.cc"; path = "../../modules/googletest/googletest/src/gtest-filepath.cc"; sourceTree = "<group>"; };
+		4FBC5BBA258D3621005480CA /* gtest-port.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-port.cc"; path = "../../modules/googletest/googletest/src/gtest-port.cc"; sourceTree = "<group>"; };
+		4FBC5BBB258D3621005480CA /* gtest-internal-inl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtest-internal-inl.h"; path = "../../modules/googletest/googletest/src/gtest-internal-inl.h"; sourceTree = "<group>"; };
+		4FBC5BBC258D3621005480CA /* gtest-matchers.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-matchers.cc"; path = "../../modules/googletest/googletest/src/gtest-matchers.cc"; sourceTree = "<group>"; };
+		4FBC5BBD258D3621005480CA /* gtest-test-part.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-test-part.cc"; path = "../../modules/googletest/googletest/src/gtest-test-part.cc"; sourceTree = "<group>"; };
+		4FBC5BBE258D3621005480CA /* gtest-printers.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-printers.cc"; path = "../../modules/googletest/googletest/src/gtest-printers.cc"; sourceTree = "<group>"; };
+		4FBC5BBF258D3621005480CA /* gtest-typed-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-typed-test.cc"; path = "../../modules/googletest/googletest/src/gtest-typed-test.cc"; sourceTree = "<group>"; };
+		4FBC5BCA258D3634005480CA /* gtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest.h; path = ../../modules/googletest/googletest/include/gtest/gtest.h; sourceTree = "<group>"; };
+		4FBC5BDA258D4191005480CA /* StringTableTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StringTableTest.cpp; path = ../../test/StringTableTest.cpp; sourceTree = "<group>"; };
+		4FBC5BDE258D41A2005480CA /* m_strings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_strings.h; path = ../../src/m_strings.h; sourceTree = "<group>"; };
+		4FBC5BDF258D41A2005480CA /* m_strings.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_strings.cc; path = ../../src/m_strings.cc; sourceTree = "<group>"; };
+		4FBC5BE8258D45AC005480CA /* Errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Errors.cpp; path = ../../src/Errors.cpp; sourceTree = "<group>"; };
 		4FCB3A45253B55870038EFEB /* Eureka-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Eureka-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4FCB3A56253B65230038EFEB /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = ../../../modules/googletest/googletest/src/gtest_main.cc; sourceTree = "<group>"; };
-		4FCB3A57253B65230038EFEB /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-all.cc"; path = "../../../modules/googletest/googletest/src/gtest-all.cc"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,10 +63,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4FBC5BB5258D3600005480CA /* google-test */ = {
+			isa = PBXGroup;
+			children = (
+				4FBC5BCA258D3634005480CA /* gtest.h */,
+				4FBC5BB6258D3621005480CA /* gtest_main.cc */,
+				4FBC5BB7258D3621005480CA /* gtest-death-test.cc */,
+				4FBC5BB9258D3621005480CA /* gtest-filepath.cc */,
+				4FBC5BBB258D3621005480CA /* gtest-internal-inl.h */,
+				4FBC5BBC258D3621005480CA /* gtest-matchers.cc */,
+				4FBC5BBA258D3621005480CA /* gtest-port.cc */,
+				4FBC5BBE258D3621005480CA /* gtest-printers.cc */,
+				4FBC5BBD258D3621005480CA /* gtest-test-part.cc */,
+				4FBC5BBF258D3621005480CA /* gtest-typed-test.cc */,
+				4FBC5BB8258D3621005480CA /* gtest.cc */,
+			);
+			name = "google-test";
+			sourceTree = "<group>";
+		};
+		4FBC5BCC258D3648005480CA /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				4FBC5BE8258D45AC005480CA /* Errors.cpp */,
+				4FBC5BDF258D41A2005480CA /* m_strings.cc */,
+				4FBC5BDE258D41A2005480CA /* m_strings.h */,
+				4FBC5BDA258D4191005480CA /* StringTableTest.cpp */,
+			);
+			name = tests;
+			sourceTree = "<group>";
+		};
 		4FCB3A3C253B55870038EFEB = {
 			isa = PBXGroup;
 			children = (
-				4FCB3A47253B55870038EFEB /* Eureka-Tests */,
+				4FBC5BCC258D3648005480CA /* tests */,
+				4FBC5BB5258D3600005480CA /* google-test */,
 				4FCB3A46253B55870038EFEB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,15 +107,6 @@
 				4FCB3A45253B55870038EFEB /* Eureka-Tests */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		4FCB3A47253B55870038EFEB /* Eureka-Tests */ = {
-			isa = PBXGroup;
-			children = (
-				4FCB3A56253B65230038EFEB /* gtest_main.cc */,
-				4FCB3A57253B65230038EFEB /* gtest-all.cc */,
-			);
-			path = "Eureka-Tests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -91,7 +135,7 @@
 		4FCB3A3D253B55870038EFEB /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1160;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Ioan Chera";
 				TargetAttributes = {
 					4FCB3A44253B55870038EFEB = {
@@ -122,8 +166,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4FCB3A58253B65230038EFEB /* gtest_main.cc in Sources */,
-				4FCB3A59253B65230038EFEB /* gtest-all.cc in Sources */,
+				4FBC5BE9258D45AC005480CA /* Errors.cpp in Sources */,
+				4FBC5BC8258D3622005480CA /* gtest-typed-test.cc in Sources */,
+				4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */,
+				4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */,
+				4FBC5BC0258D3622005480CA /* gtest_main.cc in Sources */,
+				4FBC5BC3258D3622005480CA /* gtest-filepath.cc in Sources */,
+				4FBC5BC6258D3622005480CA /* gtest-test-part.cc in Sources */,
+				4FBC5BC2258D3622005480CA /* gtest.cc in Sources */,
+				4FBC5BDB258D4191005480CA /* StringTableTest.cpp in Sources */,
+				4FBC5BC5258D3622005480CA /* gtest-matchers.cc in Sources */,
+				4FBC5BE0258D41A2005480CA /* m_strings.cc in Sources */,
+				4FBC5BC4258D3622005480CA /* gtest-port.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,7 +201,6 @@
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -183,6 +236,7 @@
 				HEADER_SEARCH_PATHS = (
 					../../modules/googletest/googletest/include,
 					../../modules/googletest/googletest,
+					..,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -209,7 +263,6 @@
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -239,6 +292,7 @@
 				HEADER_SEARCH_PATHS = (
 					../../modules/googletest/googletest/include,
 					../../modules/googletest/googletest,
+					..,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
