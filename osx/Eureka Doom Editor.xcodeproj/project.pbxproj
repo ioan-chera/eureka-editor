@@ -705,7 +705,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastTestingUpgradeCheck = 0730;
-				LastUpgradeCheck = 1110;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = ioan;
 				TargetAttributes = {
 					FA5E2C27165B8F860024D6A5 = {
