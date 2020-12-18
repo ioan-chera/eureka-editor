@@ -191,6 +191,7 @@
 		4FB8211D23F4924A0044B1C3 /* m_udmf.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_udmf.cc; path = ../../src/m_udmf.cc; sourceTree = "<group>"; };
 		4FB8211E23F4924A0044B1C3 /* r_subdiv.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = r_subdiv.cc; path = ../../src/r_subdiv.cc; sourceTree = "<group>"; };
 		4FB8212323F4928B0044B1C3 /* libfltk_gl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_gl.a; path = "fltk-1.3.5/lib/libfltk_gl.a"; sourceTree = "<group>"; };
+		4FBC5BD7258D3A42005480CA /* PrintfMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PrintfMacros.h; path = ../../src/PrintfMacros.h; sourceTree = "<group>"; };
 		4FBD7301179FC5ED00937B50 /* about_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = about_logo.png; path = ../misc/about_logo.png; sourceTree = "<group>"; };
 		4FCB3A4F253B559A0038EFEB /* Eureka-Tests.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Eureka-Tests.xcodeproj"; path = "Eureka-Tests/Eureka-Tests.xcodeproj"; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; usesTabs = 1; };
@@ -452,6 +453,7 @@
 				FABBC134165B90350080245F /* e_ */,
 				FABBC096165B90280080245F /* hdr_fltk.h */,
 				FABBC0B3165B90280080245F /* objid.h */,
+				4FBC5BD7258D3A42005480CA /* PrintfMacros.h */,
 			);
 			name = Eureka;
 			sourceTree = "<group>";
