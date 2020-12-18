@@ -31,6 +31,8 @@
 #define DIR_SEP_STR  "/"
 #endif
 
+class SString;
+
 // filename functions
 bool HasExtension(const SString &filename);
 bool MatchExtension(const SString &filename, const SString &ext);
@@ -50,7 +52,7 @@ bool FileDelete(const SString &filename);
 bool FileChangeDir(const SString &dir_name);
 bool FileMakeDir(const SString &dir_name);
 
-bool FileLoad(const SString &filename, std::vector<u8_t> &data);
+bool FileLoad(const SString &filename, std::vector<uint8_t> &data);
 
 // miscellanous
 SString GetExecutablePath(const char *argv0);

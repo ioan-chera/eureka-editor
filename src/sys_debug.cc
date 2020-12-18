@@ -18,8 +18,11 @@
 //
 //------------------------------------------------------------------------
 
-#include "main.h"
-
+#include "Errors.hpp"
+#include "m_strings.h"
+#include "sys_debug.h"
+#include <stdio.h>
+#include <vector>
 
 bool Quiet = false;
 bool Debugging = false;
@@ -42,7 +45,7 @@ void LogOpenFile(const char *filename)
 	log_fp = fopen(filename, "w+");
 
 	if (! log_fp)
-		FatalError("Cannot open log file: %s\n", filename);
+		ThrowException("Cannot open log file: %s\n", filename);
 
 	fprintf(log_fp, "======= START OF LOGS =======\n\n");
 
