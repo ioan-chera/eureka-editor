@@ -44,19 +44,18 @@ void StringCopy(char *buffer, size_t size, const SString &source);
 
 //
 // Safe string: doesn't crash if given NULL (can happen due to refactoring old "char *" code.
+// Also enforces null-terminated strings: can't contain NUL inside the string.
 //
 class SString
 {
 public:
 	SString() = default;
 
-	SString(const char *c) : data(c ? c : "")
+	SString(const char *cstring) : data(cstring ? cstring : "")
 	{
 	}
 
-	SString(const char *s, size_t len) : data(s ? s : "", s ? len : 0)
-	{
-	}
+    SString(const char *buffer, int length);
 
 	SString(const char *s, size_t pos, size_t len) : data(s ? s : "", s ? pos : 0, s ? len : 0)
 	{

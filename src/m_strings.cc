@@ -228,6 +228,25 @@ void StringCopy(char *buffer, size_t size, const SString &source)
 	buffer[size - 1] = 0;
 }
 
+//
+// Constructs a string from a raw buffer with limited length
+// Unlike std::string, this one trims the string at any potential NUL
+//
+SString::SString(const char *buffer, int length)
+{
+    if(!buffer || length <= 0)
+    {
+        data = "";
+        return;
+    }
+    data.reserve(length);
+    for(int i = 0; i < length; ++i)
+    {
+        if(!buffer[i])
+            break;
+        data.push_back(buffer[i]);
+    }
+}
 
 //
 // Removes the endline character or sequence from the end
