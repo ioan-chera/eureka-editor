@@ -16,10 +16,12 @@
 		4FBC5BC6258D3622005480CA /* gtest-test-part.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBD258D3621005480CA /* gtest-test-part.cc */; };
 		4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBE258D3621005480CA /* gtest-printers.cc */; };
 		4FBC5BC8258D3622005480CA /* gtest-typed-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BBF258D3621005480CA /* gtest-typed-test.cc */; };
-		4FBC5BDB258D4191005480CA /* StringTableTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BDA258D4191005480CA /* StringTableTest.cpp */; };
-		4FBC5BE0258D41A2005480CA /* m_strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BDF258D41A2005480CA /* m_strings.cc */; };
-		4FBC5BE9258D45AC005480CA /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BE8258D45AC005480CA /* Errors.cpp */; };
-		4FBC5BEE258D4A64005480CA /* SStringTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BED258D4A64005480CA /* SStringTest.cpp */; };
+		4FBC5C91258D5CCD005480CA /* lib_file.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5C8F258D5CCD005480CA /* lib_file.cc */; };
+		4FBC5C93258D5D18005480CA /* m_strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5C58258D580A005480CA /* m_strings.cc */; };
+		4FBC5C95258D5D1D005480CA /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5C56258D5803005480CA /* Errors.cpp */; };
+		4FBC5C97258D5D1F005480CA /* SStringTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5C5A258D580F005480CA /* SStringTest.cpp */; };
+		4FBC5C99258D5D20005480CA /* StringTableTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5C5B258D5811005480CA /* StringTableTest.cpp */; };
+		4FBC5C9C258D5DED005480CA /* lib_file_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5C9B258D5DED005480CA /* lib_file_test.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,11 +48,14 @@
 		4FBC5BBE258D3621005480CA /* gtest-printers.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-printers.cc"; path = "../../modules/googletest/googletest/src/gtest-printers.cc"; sourceTree = "<group>"; };
 		4FBC5BBF258D3621005480CA /* gtest-typed-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-typed-test.cc"; path = "../../modules/googletest/googletest/src/gtest-typed-test.cc"; sourceTree = "<group>"; };
 		4FBC5BCA258D3634005480CA /* gtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtest.h; path = ../../modules/googletest/googletest/include/gtest/gtest.h; sourceTree = "<group>"; };
-		4FBC5BDA258D4191005480CA /* StringTableTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StringTableTest.cpp; path = ../../test/StringTableTest.cpp; sourceTree = "<group>"; };
-		4FBC5BDE258D41A2005480CA /* m_strings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_strings.h; path = ../../src/m_strings.h; sourceTree = "<group>"; };
-		4FBC5BDF258D41A2005480CA /* m_strings.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_strings.cc; path = ../../src/m_strings.cc; sourceTree = "<group>"; };
-		4FBC5BE8258D45AC005480CA /* Errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Errors.cpp; path = ../../src/Errors.cpp; sourceTree = "<group>"; };
-		4FBC5BED258D4A64005480CA /* SStringTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SStringTest.cpp; path = ../../test/SStringTest.cpp; sourceTree = "<group>"; };
+		4FBC5C56258D5803005480CA /* Errors.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Errors.cpp; path = ../../src/Errors.cpp; sourceTree = "<group>"; };
+		4FBC5C58258D580A005480CA /* m_strings.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = m_strings.cc; path = ../../src/m_strings.cc; sourceTree = "<group>"; };
+		4FBC5C59258D580C005480CA /* m_strings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = m_strings.h; path = ../../src/m_strings.h; sourceTree = "<group>"; };
+		4FBC5C5A258D580F005480CA /* SStringTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SStringTest.cpp; path = ../../test/SStringTest.cpp; sourceTree = "<group>"; };
+		4FBC5C5B258D5811005480CA /* StringTableTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StringTableTest.cpp; path = ../../test/StringTableTest.cpp; sourceTree = "<group>"; };
+		4FBC5C8F258D5CCD005480CA /* lib_file.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lib_file.cc; path = ../../src/lib_file.cc; sourceTree = "<group>"; };
+		4FBC5C90258D5CCD005480CA /* lib_file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lib_file.h; path = ../../src/lib_file.h; sourceTree = "<group>"; };
+		4FBC5C9B258D5DED005480CA /* lib_file_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lib_file_test.cpp; path = ../../test/lib_file_test.cpp; sourceTree = "<group>"; };
 		4FCB3A45253B55870038EFEB /* Eureka-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Eureka-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -86,13 +91,24 @@
 		4FBC5BCC258D3648005480CA /* tests */ = {
 			isa = PBXGroup;
 			children = (
-				4FBC5BE8258D45AC005480CA /* Errors.cpp */,
-				4FBC5BDF258D41A2005480CA /* m_strings.cc */,
-				4FBC5BDE258D41A2005480CA /* m_strings.h */,
-				4FBC5BED258D4A64005480CA /* SStringTest.cpp */,
-				4FBC5BDA258D4191005480CA /* StringTableTest.cpp */,
+				4FBC5C4F258D57E9005480CA /* files */,
 			);
 			name = tests;
+			sourceTree = "<group>";
+		};
+		4FBC5C4F258D57E9005480CA /* files */ = {
+			isa = PBXGroup;
+			children = (
+				4FBC5C56258D5803005480CA /* Errors.cpp */,
+				4FBC5C8F258D5CCD005480CA /* lib_file.cc */,
+				4FBC5C90258D5CCD005480CA /* lib_file.h */,
+				4FBC5C9B258D5DED005480CA /* lib_file_test.cpp */,
+				4FBC5C59258D580C005480CA /* m_strings.h */,
+				4FBC5C58258D580A005480CA /* m_strings.cc */,
+				4FBC5C5A258D580F005480CA /* SStringTest.cpp */,
+				4FBC5C5B258D5811005480CA /* StringTableTest.cpp */,
+			);
+			name = files;
 			sourceTree = "<group>";
 		};
 		4FCB3A3C253B55870038EFEB = {
@@ -169,18 +185,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4FBC5BE9258D45AC005480CA /* Errors.cpp in Sources */,
-				4FBC5BEE258D4A64005480CA /* SStringTest.cpp in Sources */,
 				4FBC5BC8258D3622005480CA /* gtest-typed-test.cc in Sources */,
 				4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */,
 				4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */,
+				4FBC5C91258D5CCD005480CA /* lib_file.cc in Sources */,
+				4FBC5C93258D5D18005480CA /* m_strings.cc in Sources */,
+				4FBC5C99258D5D20005480CA /* StringTableTest.cpp in Sources */,
+				4FBC5C9C258D5DED005480CA /* lib_file_test.cpp in Sources */,
 				4FBC5BC0258D3622005480CA /* gtest_main.cc in Sources */,
+				4FBC5C95258D5D1D005480CA /* Errors.cpp in Sources */,
+				4FBC5C97258D5D1F005480CA /* SStringTest.cpp in Sources */,
 				4FBC5BC3258D3622005480CA /* gtest-filepath.cc in Sources */,
 				4FBC5BC6258D3622005480CA /* gtest-test-part.cc in Sources */,
 				4FBC5BC2258D3622005480CA /* gtest.cc in Sources */,
-				4FBC5BDB258D4191005480CA /* StringTableTest.cpp in Sources */,
 				4FBC5BC5258D3622005480CA /* gtest-matchers.cc in Sources */,
-				4FBC5BE0258D41A2005480CA /* m_strings.cc in Sources */,
 				4FBC5BC4258D3622005480CA /* gtest-port.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
