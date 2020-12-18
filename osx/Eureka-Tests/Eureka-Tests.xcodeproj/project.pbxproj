@@ -19,6 +19,7 @@
 		4FBC5BDB258D4191005480CA /* StringTableTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BDA258D4191005480CA /* StringTableTest.cpp */; };
 		4FBC5BE0258D41A2005480CA /* m_strings.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BDF258D41A2005480CA /* m_strings.cc */; };
 		4FBC5BE9258D45AC005480CA /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BE8258D45AC005480CA /* Errors.cpp */; };
+		4FBC5BEE258D4A64005480CA /* SStringTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BED258D4A64005480CA /* SStringTest.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -49,6 +50,7 @@
 		4FBC5BDE258D41A2005480CA /* m_strings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_strings.h; path = ../../src/m_strings.h; sourceTree = "<group>"; };
 		4FBC5BDF258D41A2005480CA /* m_strings.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_strings.cc; path = ../../src/m_strings.cc; sourceTree = "<group>"; };
 		4FBC5BE8258D45AC005480CA /* Errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Errors.cpp; path = ../../src/Errors.cpp; sourceTree = "<group>"; };
+		4FBC5BED258D4A64005480CA /* SStringTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SStringTest.cpp; path = ../../test/SStringTest.cpp; sourceTree = "<group>"; };
 		4FCB3A45253B55870038EFEB /* Eureka-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Eureka-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -87,6 +89,7 @@
 				4FBC5BE8258D45AC005480CA /* Errors.cpp */,
 				4FBC5BDF258D41A2005480CA /* m_strings.cc */,
 				4FBC5BDE258D41A2005480CA /* m_strings.h */,
+				4FBC5BED258D4A64005480CA /* SStringTest.cpp */,
 				4FBC5BDA258D4191005480CA /* StringTableTest.cpp */,
 			);
 			name = tests;
@@ -167,6 +170,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4FBC5BE9258D45AC005480CA /* Errors.cpp in Sources */,
+				4FBC5BEE258D4A64005480CA /* SStringTest.cpp in Sources */,
 				4FBC5BC8258D3622005480CA /* gtest-typed-test.cc in Sources */,
 				4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */,
 				4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */,
