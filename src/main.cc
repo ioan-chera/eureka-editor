@@ -289,7 +289,7 @@ static void Determine_HomeDir(const char *argv0)
    fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibCacheDir, "eureka-editor"));
    cache_dir = path;
 
-	StringFree(path);
+	free(path);
 
 #else  // UNIX
 	char * path = StringNew(FL_PATH_MAX + 4);
