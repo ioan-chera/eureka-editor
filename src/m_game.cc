@@ -920,7 +920,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 	{
 		if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 			ThrowException("%s(%d): expected variable in if statement\n",
-						   pst->fname.c_str(), pst->lineno, argv[2]);
+						   pst->fname.c_str(), pst->lineno);
 
 		// tokens are stored in pst->tokenbuf, so this is OK
 		y_strupr(argv[0]);
