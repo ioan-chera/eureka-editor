@@ -945,6 +945,8 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 
 			break;
 		}
+		default:
+			break;
 	}
 }
 

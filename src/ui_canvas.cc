@@ -1422,6 +1422,9 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			}
 		}
 		break;
+
+		default:
+			break;
 	}
 }
 
@@ -1517,6 +1520,9 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			}
 		}
 		break;
+
+		default:
+			break;
 	}
 }
 
