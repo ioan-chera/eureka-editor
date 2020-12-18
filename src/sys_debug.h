@@ -21,6 +21,8 @@
 #ifndef __SYS_DEBUG_H__
 #define __SYS_DEBUG_H__
 
+#include "main.h"
+
 #define MSG_BUF_LEN  1024
 
 extern bool Quiet;

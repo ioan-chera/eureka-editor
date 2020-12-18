@@ -21,6 +21,7 @@
 #ifndef __EUREKA_M_KEYS_H__
 #define __EUREKA_M_KEYS_H__
 
+#include "m_strings.h"
 
 /* Key value:
  *   - can be a printable ASCII character, e.g. 'a', '2', ';'
