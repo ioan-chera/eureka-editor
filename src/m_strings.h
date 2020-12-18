@@ -122,6 +122,11 @@ public:
 		return data == (c ? c : "");
 	}
 
+    bool operator == (const SString &other) const
+    {
+        return data == other.data;
+    }
+
 	bool operator < (const SString &other) const
 	{
 		return data < other.data;
