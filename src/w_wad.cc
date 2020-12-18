@@ -28,6 +28,7 @@
 
 #include <algorithm>
 
+#include "Errors.hpp"
 #include "lib_adler.h"
 #include "w_rawdef.h"
 #include "w_wad.h"

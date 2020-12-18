@@ -37,6 +37,7 @@
 // Rewritten again by Andrew Apted (-AJA-), 1999-2000.
 //
 
+#include "Errors.hpp"
 #include "main.h"
 #include "bsp.h"
 

@@ -24,6 +24,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.hpp"
 #include "main.h"
 
 #include <time.h>
@@ -195,19 +196,6 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	LogClose();
 
 	exit(2);
-}
-
-//
-// Throw an exception using format
-//
-void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...)
-{
-	char message[256];
-	va_list ap;
-	va_start(ap, fmt);
-	vsnprintf(message, sizeof(message), fmt, ap);
-	va_end(ap);
-	throw std::runtime_error(message);
 }
 
 static void CreateHomeDirs()

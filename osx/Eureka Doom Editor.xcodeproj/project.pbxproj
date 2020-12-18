@@ -38,6 +38,7 @@
 		4FB8212123F4924A0044B1C3 /* m_udmf.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB8211D23F4924A0044B1C3 /* m_udmf.cc */; };
 		4FB8212223F4924A0044B1C3 /* r_subdiv.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB8211E23F4924A0044B1C3 /* r_subdiv.cc */; };
 		4FB8212423F4928B0044B1C3 /* libfltk_gl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FB8212323F4928B0044B1C3 /* libfltk_gl.a */; };
+		4FBC5BE6258D44EB005480CA /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BE2258D4268005480CA /* Errors.cpp */; };
 		4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4FBD7301179FC5ED00937B50 /* about_logo.png */; };
 		FA1E04EE16689A2900ED41DC /* ui_misc.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA1E04EC16689A2900ED41DC /* ui_misc.cc */; };
 		FA244640166CAA6100C68ED8 /* common in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463A166CAA6100C68ED8 /* common */; };
@@ -192,6 +193,8 @@
 		4FB8211E23F4924A0044B1C3 /* r_subdiv.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = r_subdiv.cc; path = ../../src/r_subdiv.cc; sourceTree = "<group>"; };
 		4FB8212323F4928B0044B1C3 /* libfltk_gl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk_gl.a; path = "fltk-1.3.5/lib/libfltk_gl.a"; sourceTree = "<group>"; };
 		4FBC5BD7258D3A42005480CA /* PrintfMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PrintfMacros.h; path = ../../src/PrintfMacros.h; sourceTree = "<group>"; };
+		4FBC5BE2258D4268005480CA /* Errors.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Errors.cpp; path = ../../src/Errors.cpp; sourceTree = "<group>"; };
+		4FBC5BE3258D4268005480CA /* Errors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Errors.hpp; path = ../../src/Errors.hpp; sourceTree = "<group>"; };
 		4FBD7301179FC5ED00937B50 /* about_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = about_logo.png; path = ../misc/about_logo.png; sourceTree = "<group>"; };
 		4FCB3A4F253B559A0038EFEB /* Eureka-Tests.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Eureka-Tests.xcodeproj"; path = "Eureka-Tests/Eureka-Tests.xcodeproj"; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; usesTabs = 1; };
@@ -451,6 +454,8 @@
 				FABBC137165B905E0080245F /* lib_ */,
 				FABBC136165B90500080245F /* im_ */,
 				FABBC134165B90350080245F /* e_ */,
+				4FBC5BE2258D4268005480CA /* Errors.cpp */,
+				4FBC5BE3258D4268005480CA /* Errors.hpp */,
 				FABBC096165B90280080245F /* hdr_fltk.h */,
 				FABBC0B3165B90280080245F /* objid.h */,
 				4FBC5BD7258D3A42005480CA /* PrintfMacros.h */,
@@ -874,6 +879,7 @@
 				FA85EEEA16936A3A00CA6FC2 /* ui_prefs.cc in Sources */,
 				FA4433D116AD9CB800525112 /* m_keys.cc in Sources */,
 				FADB99F316B017D600A28204 /* AppDelegate.mm in Sources */,
+				4FBC5BE6258D44EB005480CA /* Errors.cpp in Sources */,
 				4F2D365417C96A7E003BEEE9 /* OSXCalls.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

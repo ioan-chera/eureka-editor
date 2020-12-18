@@ -24,6 +24,8 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.hpp"
+
 #include "main.h"
 
 #include "im_color.h"  /* trans_replace */

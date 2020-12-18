@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.hpp"
 #include "main.h"
 #include "m_files.h"
 #include "m_config.h"

@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.hpp"
 #include "main.h"
 #include "m_editlump.h"
 #include "w_wad.h"

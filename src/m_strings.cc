@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.hpp"
 #include "m_strings.h"
 #include "sys_debug.h"
 
@@ -102,7 +103,7 @@ char *StringNew(int length)
 	char *s = (char *) calloc(length + 1, 1);
 
 	if (! s)
-		FatalError("Out of memory (%d bytes for string)\n", length);
+		ThrowException("Out of memory (%d bytes for string)\n", length);
 
 	return s;
 }
@@ -118,7 +119,7 @@ char *StringDup(const char *orig, int limit)
 		char *s = strdup(orig);
 
 		if (! s)
-			FatalError("Out of memory (copy string)\n");
+			ThrowException("Out of memory (copy string)\n");
 
 		return s;
 	}
@@ -168,7 +169,7 @@ SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...)
 
 		buf = (char*)realloc(buf, buf_size);
 		if (!buf)
-			FatalError("Out of memory (formatting string)\n");
+			ThrowException("Out of memory (formatting string)\n");
 
 		va_start(args, str);
 		out_len = vsnprintf(buf, buf_size, str, args);
@@ -200,7 +201,7 @@ SString StringVPrintf(const char *str, va_list ap)
 
 		buf = (char*)realloc(buf, buf_size);
 		if (!buf)
-			FatalError("Out of memory (formatting string)\n");
+			ThrowException("Out of memory (formatting string)\n");
 
 		out_len = vsnprintf(buf, buf_size, str, ap);
 
