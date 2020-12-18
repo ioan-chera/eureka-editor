@@ -47,7 +47,7 @@ public:
 	Udmf_Token(const char *str) : text(str)
 	{ }
 
-	Udmf_Token(const char *str, int len) : text(str, 0, len)
+	Udmf_Token(const char *str, int len) : text(str, len)
 	{ }
 
 	const char *c_str()
