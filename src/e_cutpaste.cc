@@ -978,16 +978,16 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *linedef = LineDefs[n];
 
-		if (lines.get(n) || verts.get(L->start) || verts.get(L->end))
+		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 		{
 			del_lines.set(n);
 
-			if (L->WhatSector(Side::left ) >= 0)
-				result->set(L->WhatSector(Side::left ));
-			if (L->WhatSector(Side::right) >= 0)
-				result->set(L->WhatSector(Side::right));
+			if (linedef->WhatSector(Side::left ) >= 0)
+				result->set(linedef->WhatSector(Side::left ));
+			if (linedef->WhatSector(Side::right) >= 0)
+				result->set(linedef->WhatSector(Side::right));
 		}
 	}
 
@@ -996,16 +996,14 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *linedef = LineDefs[n];
 
-		if (lines.get(n) || verts.get(L->start) || verts.get(L->end))
+		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 			continue;
 
-		for (int pass = 0 ; pass < 2 ; pass++)
+		for (Side what_side : kSides)
 		{
-			Side what_side = pass ? Side::left : Side::right;
-
-			int sec_num = L->WhatSector(what_side);
+			int sec_num = linedef->WhatSector(what_side);
 
 			if (sec_num < 0)
 				continue;
@@ -1025,9 +1023,9 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 			if (opp_ld < 0)
 				continue;
 
-			const LineDef *L2 = LineDefs[opp_ld];
+			const LineDef *oppositeLinedef = LineDefs[opp_ld];
 
-			if (L2->WhatSector(opp_side) == sec_num)
+			if (oppositeLinedef->WhatSector(opp_side) == sec_num)
 				result->clear(sec_num);
 		}
 	}

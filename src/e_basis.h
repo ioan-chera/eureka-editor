@@ -66,6 +66,7 @@ enum class Side
 	left,
 	neither
 };
+static const Side kSides[] = { Side::right, Side::left };
 inline static Side operator - (Side side)
 {
 	if(side == Side::right)
