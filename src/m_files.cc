@@ -863,7 +863,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		if (line[0] == '#')
 			continue;
 
-		line.removeCRLF();
+		line.trimTrailingSpaces();
 
 		size_t pos = line.find(' ');
 

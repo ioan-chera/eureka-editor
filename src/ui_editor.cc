@@ -479,7 +479,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 
 	while (lump->GetLine(line))
 	{
-		line.removeCRLF();
+		line.trimTrailingSpaces();
 
 		tbuf->append(line.c_str());
 		tbuf->append("\n");

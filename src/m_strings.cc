@@ -249,17 +249,6 @@ SString::SString(const char *buffer, int length)
 }
 
 //
-// Removes the endline character or sequence from the end
-//
-void SString::removeCRLF()
-{
-	if(good() && back() == '\n')
-		pop_back();
-	if(good() && back() == '\r')
-		pop_back();
-}
-
-//
 // Cuts a string at position "pos", removing the respective character too
 //
 void SString::getCutWithSpace(size_t pos, SString *word0, SString *word1) const

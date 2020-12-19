@@ -836,7 +836,7 @@ bool M_ReadTextLine(SString &string, std::istream &is)
 	}
 	if(string.substr(0, 3) == "\xef\xbb\xbf")
 		string.erase(0, 3);
-	string.removeCRLF();
+	string.trimTrailingSpaces();
 	return true;
 }
 
