@@ -967,10 +967,10 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 }
 
 
-void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
+void DuddedSectors(const selection_c &verts, const selection_c &lines, selection_c *result)
 {
-	SYS_ASSERT(verts->what_type() == ObjType::vertices);
-	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
+	SYS_ASSERT(verts.what_type() == ObjType::vertices);
+	SYS_ASSERT(lines.what_type() == ObjType::linedefs);
 
 	// collect all the sectors that touch a linedef being removed.
 
@@ -980,12 +980,14 @@ void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (lines->get(n) || verts->get(L->start) || verts->get(L->end))
+		if (lines.get(n) || verts.get(L->start) || verts.get(L->end))
 		{
 			del_lines.set(n);
 
-			if (L->WhatSector(SIDE_LEFT ) >= 0) result->set(L->WhatSector(SIDE_LEFT ));
-			if (L->WhatSector(SIDE_RIGHT) >= 0) result->set(L->WhatSector(SIDE_RIGHT));
+			if (L->WhatSector(Side::left ) >= 0)
+				result->set(L->WhatSector(Side::left ));
+			if (L->WhatSector(Side::right) >= 0)
+				result->set(L->WhatSector(Side::right));
 		}
 	}
 
@@ -996,12 +998,12 @@ void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (lines->get(n) || verts->get(L->start) || verts->get(L->end))
+		if (lines.get(n) || verts.get(L->start) || verts.get(L->end))
 			continue;
 
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
-			int what_side = pass ? SIDE_LEFT : SIDE_RIGHT;
+			Side what_side = pass ? Side::left : Side::right;
 
 			int sec_num = L->WhatSector(what_side);
 
@@ -1017,7 +1019,7 @@ void DuddedSectors(selection_c *verts, selection_c *lines, selection_c *result)
 			// IGNORING any lines being deleted).  when found, we
 			// know that this sector should be kept.
 
-			int opp_side;
+			Side opp_side;
 			int opp_ld = OppositeLineDef(n, what_side, &opp_side, &del_lines);
 
 			if (opp_ld < 0)
@@ -1049,17 +1051,17 @@ static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 
 		if (do_right && do_left)
 		{
-			LD_RemoveSideDef(*it, SIDE_RIGHT);
-			LD_RemoveSideDef(*it, SIDE_LEFT);
+			LD_RemoveSideDef(*it, Side::right);
+			LD_RemoveSideDef(*it, Side::left);
 		}
 		else if (do_right)
 		{
-			LD_RemoveSideDef(*it, SIDE_RIGHT);
+			LD_RemoveSideDef(*it, Side::right);
 			FlipLineDef(*it);
 		}
 		else // do_left
 		{
-			LD_RemoveSideDef(*it, SIDE_LEFT);
+			LD_RemoveSideDef(*it, Side::left);
 		}
 	}
 }
@@ -1200,7 +1202,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 	// remaining linedefs of the sector face into the void.
 	if (list->what_type() == ObjType::vertices || list->what_type() == ObjType::linedefs)
 	{
-		DuddedSectors(&vert_sel, &line_sel, &sec_sel);
+		DuddedSectors(vert_sel, line_sel, &sec_sel);
 		UnusedSideDefs(&line_sel, &sec_sel, &side_sel);
 	}
 

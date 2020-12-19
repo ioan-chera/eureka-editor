@@ -90,7 +90,7 @@ double ApproxDistToLineDef(const LineDef * L, double x, double y)
 }
 
 
-int ClosestLine_CastingHoriz(double x, double y, int *side)
+int ClosestLine_CastingHoriz(double x, double y, Side *side)
 {
 	int    best_match = -1;
 	double best_dist  = 9e9;
@@ -125,11 +125,11 @@ int ClosestLine_CastingHoriz(double x, double y, int *side)
 			if (side)
 			{
 				if (best_dist < 0.01)
-					*side = 0;  // on the line
+					*side = Side::neither;  // on the line
 				else if ( (ly1 > ly2) == (dist > 0))
-					*side = 1;  // right side
+					*side = Side::right;  // right side
 				else
-					*side = -1; // left side
+					*side = Side::left; // left side
 			}
 		}
 	}
@@ -138,7 +138,7 @@ int ClosestLine_CastingHoriz(double x, double y, int *side)
 }
 
 
-int ClosestLine_CastingVert(double x, double y, int *side)
+int ClosestLine_CastingVert(double x, double y, Side *side)
 {
 	int    best_match = -1;
 	double best_dist  = 9e9;
@@ -173,11 +173,11 @@ int ClosestLine_CastingVert(double x, double y, int *side)
 			if (side)
 			{
 				if (best_dist < 0.01)
-					*side = 0;  // on the line
+					*side = Side::neither;  // on the line
 				else if ( (lx1 > lx2) == (dist < 0))
-					*side = 1;  // right side
+					*side = Side::right;  // right side
 				else
-					*side = -1; // left side
+					*side = Side::left; // left side
 			}
 		}
 	}
@@ -285,9 +285,9 @@ bool PointOutsideOfMap(double x, double y)
 struct opp_test_state_t
 {
 	int ld;
-	int ld_side;   // a SIDE_XXX value
+	Side ld_side;   // a SIDE_XXX value
 
-	int * result_side;
+	Side * result_side;
 
 	double dx, dy;
 
@@ -354,7 +354,7 @@ public:
 
 			double dist = nx1 + (nx2 - nx1) * (y - ny1) / (ny2 - ny1) - x;
 
-			if ( (dy < 0) == (ld_side > 0) )
+			if ( (dy < 0) == (ld_side == Side::right) )
 				dist = -dist;
 
 			if (dist > 0 && dist < best_dist)
@@ -381,7 +381,7 @@ public:
 
 			double dist = ny1 + (ny2 - ny1) * (x - nx1) / (nx2 - nx1) - y;
 
-			if ( (dx > 0) == (ld_side > 0) )
+			if ( (dx > 0) == (ld_side == Side::right) )
 				dist = -dist;
 
 			if (dist > 0 && dist < best_dist)
@@ -560,7 +560,7 @@ void FastOpposite_Finish()
 }
 
 
-int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_lines)
+int OppositeLineDef(int ld, Side ld_side, Side *result_side, bitvec_c *ignore_lines)
 {
 	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
 	// result_side uses the same values (never 0).
@@ -608,9 +608,9 @@ int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_line
 }
 
 
-int OppositeSector(int ld, int ld_side)
+int OppositeSector(int ld, Side ld_side)
 {
-	int opp_side;
+	Side opp_side;
 
 	int opp = OppositeLineDef(ld, ld_side, &opp_side);
 
@@ -623,14 +623,14 @@ int OppositeSector(int ld, int ld_side)
 
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
-int PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2)
+Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2)
 {
 	x   -= lx1; y   -= ly1;
 	lx2 -= lx1; ly2 -= ly1;
 
 	double tmp = (x * ly2 - y * lx2);
 
-	return (tmp < 0) ? -1 : (tmp > 0) ? +1 : 0;
+	return (tmp < 0) ? Side::left : (tmp > 0) ? Side::right : Side::neither;
 }
 
 
@@ -793,7 +793,7 @@ static Objid NearestSector(double x, double y)
 	//       grab the closest linedef.  Now it is possible to access
 	//       self-referencing lines, even purely horizontal ones.
 
-	int side1, side2;
+	Side side1, side2;
 
 	int line1 = ClosestLine_CastingHoriz(x, y, &side1);
   	int line2 = ClosestLine_CastingVert (x, y, &side2);
@@ -814,7 +814,7 @@ static Objid NearestSector(double x, double y)
 	// (Note that side1 = +1 for right, -1 for left, 0 for "on").
 	if (line1 >= 0)
 	{
-		int sd_num = (side1 < 0) ? LineDefs[line1]->left : LineDefs[line1]->right;
+		int sd_num = (side1 == Side::left) ? LineDefs[line1]->left : LineDefs[line1]->right;
 
 		if (sd_num >= 0)
 			return Objid(ObjType::sectors, SideDefs[sd_num]->sector);

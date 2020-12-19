@@ -39,7 +39,7 @@ public:
 	// This contains which side of the linedefs in 'lines'.
 	// Guaranteed to be the same size as 'lines'.
 	// Each value is either SIDE_LEFT or SIDE_RIGHT.
-	std::vector< int > sides;
+	std::vector< Side > sides;
 
 	//  true if the lines face outward (average angle > 180 degrees)
 	// false if the lines face  inward (average angle < 180 degrees)
@@ -56,10 +56,10 @@ public:
 
 	void clear();
 
-	void push_back(int ld, int side);
+	void push_back(int ld, Side side);
 
 	// test if the given line/side combo is in the loop
-	bool get(int ld, int side) const;
+	bool get(int ld, Side side) const;
 	bool get_just_line(int ld) const;
 
 	void FindIslands();
@@ -104,7 +104,7 @@ private:
 };
 
 
-bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare = false);
+bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false);
 
 bool AssignSectorToSpace(double map_x, double map_y, int new_sec = -1, int model = -1);
 

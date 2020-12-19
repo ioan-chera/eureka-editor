@@ -314,7 +314,7 @@ public:
 	void Recompute();
 
 	// returns SIDE_LEFT, SIDE_RIGHT or 0 for being "on" the line.
-	int PointOnLineSide(double x, double y) const;
+	Side PointOnLineSide(double x, double y) const;
 
 	// compute the parallel and perpendicular distances from a partition
 	// line to a point.
@@ -449,7 +449,7 @@ public:
 	// returns SIDE_LEFT or SIDE_RIGHT if box is definitively on a
 	// particular side, or 0 if the line intersects/touches the box.
 	//
-	int OnLineSide(const seg_t *part) const;
+	Side OnLineSide(const seg_t *part) const;
 };
 
 

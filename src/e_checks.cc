@@ -239,7 +239,7 @@ void Vertex_FindDanglers(selection_c& sel)
 
 		// dangling vertices are fine for lines setting inside a sector
 		// (i.e. with same sector on both sides)
-		if (L->TwoSided() && (L->WhatSector(SIDE_LEFT) == L->WhatSector(SIDE_RIGHT)))
+		if (L->TwoSided() && (L->WhatSector(Side::left) == L->WhatSector(Side::right)))
 		{
 			line_counts[v1] = line_counts[v2] = 2;
 			continue;
@@ -669,7 +669,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 
 		if (L->right >= 0)
 		{
-			int s = OppositeSector(n, SIDE_RIGHT);
+			int s = OppositeSector(n, Side::right);
 
 			if (s < 0 || L->Right()->sector != s)
 			{
@@ -680,7 +680,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 
 		if (L->left >= 0)
 		{
-			int s = OppositeSector(n, SIDE_LEFT);
+			int s = OppositeSector(n, Side::left);
 
 			if (s < 0 || L->Left()->sector != s)
 			{

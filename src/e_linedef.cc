@@ -114,7 +114,7 @@ static inline const LineDef * LD_ptr(const Objid& obj)
 
 static inline const SideDef * SD_ptr(const Objid& obj)
 {
-	int where = (obj.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+	Side where = (obj.parts & PART_LF_ALL) ? Side::left : Side::right;
 
 	int sd = LD_ptr(obj)->WhatSideDef(where);
 
@@ -482,7 +482,7 @@ static void DoAlignX(const Objid& cur,
 			new_offset = - (-new_offset & 1023);
 	}
 
-	int where = (cur.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+	Side where = (cur.parts & PART_LF_ALL) ? Side::left : Side::right;
 
 	int sd = cur_L->WhatSideDef(where);
 
@@ -537,7 +537,7 @@ static void DoAlignY(const Objid& cur,
 		new_offset &= 255;
 
 
-	int where = (cur.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+	Side where = (cur.parts & PART_LF_ALL) ? Side::left : Side::right;
 
 	int sd = L->WhatSideDef(where);
 
@@ -552,7 +552,7 @@ static void DoAlignY(const Objid& cur,
 
 static void DoClearOfs(const Objid& cur, int align_flags)
 {
-	int where = (cur.parts & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+	Side where = (cur.parts & PART_LF_ALL) ? Side::left : Side::right;
 
 	int sd = LD_ptr(cur)->WhatSideDef(where);
 
@@ -771,7 +771,7 @@ void CMD_LIN_Align()
 		// handle "simply selected" lines, determine parts to use
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
-			int where = pass ? SIDE_LEFT : SIDE_RIGHT;
+			Side where = pass ? Side::left : Side::right;
 
 			if (L->WhatSideDef(where) < 0)
 				continue;
@@ -786,7 +786,7 @@ void CMD_LIN_Align()
 				continue;
 
 			obj.parts = lower_vis ? PART_RT_LOWER : PART_RT_UPPER;
-			if (where < 0)
+			if (where == Side::left)
 				obj.parts = obj.parts << 4;
 
 			group.push_back(obj);
@@ -1122,14 +1122,14 @@ void LD_MergedSecondSideDef(int ld)
 }
 
 
-void LD_RemoveSideDef(int ld, int ld_side)
+void LD_RemoveSideDef(int ld, Side ld_side)
 {
 	const LineDef *L = LineDefs[ld];
 
-	int gone_sd  = (ld_side > 0) ? L->right : L->left;
-	int other_sd = (ld_side > 0) ? L->left : L->right;
+	int gone_sd  = (ld_side == Side::right) ? L->right : L->left;
+	int other_sd = (ld_side == Side::right) ? L->left : L->right;
 
-	if (ld_side > 0)
+	if (ld_side == Side::right)
 		BA_ChangeLD(ld, LineDef::F_RIGHT, -1);
 	else
 		BA_ChangeLD(ld, LineDef::F_LEFT, -1);
@@ -1455,8 +1455,8 @@ double LD_AngleBetweenLines(int A, int B, int C)
 
 
 bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
-						int *ld1, int *side1,
-						int *ld2, int *side2)
+						int *ld1, Side *side1,
+						int *ld2, Side *side2)
 {
 	// find the two linedefs that are neighbors to the new line at
 	// the second vertex (v2).  The first one (ld1) is on new_ld's
@@ -1493,14 +1493,14 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 		if (angle < best_angle1)
 		{
 			*ld1 = n;
-			*side1 = (other_v == L->start) ? SIDE_LEFT : SIDE_RIGHT;
+			*side1 = (other_v == L->start) ? Side::left : Side::right;
 			best_angle1 = angle;
 		}
 
 		if (angle > best_angle2)
 		{
 			*ld2 = n;
-			*side2 = (other_v == L->start) ? SIDE_RIGHT : SIDE_LEFT;
+			*side2 = (other_v == L->start) ? Side::right : Side::left;
 			best_angle2 = angle;
 		}
 	}

@@ -115,8 +115,8 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 		FlipLineDef(ld1);
 	}
 
-	bool same_left  = (L2->WhatSector(SIDE_LEFT)  == L1->WhatSector(SIDE_LEFT));
-	bool same_right = (L2->WhatSector(SIDE_RIGHT) == L1->WhatSector(SIDE_RIGHT));
+	bool same_left  = (L2->WhatSector(Side::left)  == L1->WhatSector(Side::left));
+	bool same_right = (L2->WhatSector(Side::right) == L1->WhatSector(Side::right));
 
 	if (same_left && same_right)
 	{
@@ -679,7 +679,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 }
 
 
-static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
+static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 {
 	const LineDef * L1 = LineDefs[ld_num];
 
@@ -688,7 +688,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, int in_side)
 
 	LineDef * L2 = LineDefs[new_ld];
 
-	if (in_side == SIDE_LEFT)
+	if (in_side == Side::left)
 	{
 		L2->start = end2;
 		L2->end   = start2;
@@ -861,7 +861,7 @@ void CMD_SEC_Disconnect(void)
 
 		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
-			DETSEC_SeparateLine(n, start2, end2, left_in ? SIDE_LEFT : SIDE_RIGHT);
+			DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
 		}
 		else
 		{

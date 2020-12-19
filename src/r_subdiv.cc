@@ -107,7 +107,7 @@ struct sector_edge_t
 	short flipped;
 
 	// what side this edge faces (SIDE_LEFT or SIDE_RIGHT)
-	short side;
+	Side side;
 
 	// comparison for CMP_X
 	float cmp_x;
@@ -497,20 +497,20 @@ public:
 
 		switch (floor_mode & 3)
 		{
-		case 1: PlaneAlignPart(L, SIDE_RIGHT, 0 /* floor */); break;
-		case 2: PlaneAlignPart(L, SIDE_LEFT,  0); break;
+		case 1: PlaneAlignPart(L, Side::right, 0 /* floor */); break;
+		case 2: PlaneAlignPart(L, Side::left,  0); break;
 		default: break;
 		}
 
 		switch (ceil_mode & 3)
 		{
-		case 1: PlaneAlignPart(L, SIDE_RIGHT, 1 /* ceil */); break;
-		case 2: PlaneAlignPart(L, SIDE_LEFT,  1); break;
+		case 1: PlaneAlignPart(L, Side::right, 1 /* ceil */); break;
+		case 2: PlaneAlignPart(L, Side::left,  1); break;
 		default: break;
 		}
 	}
 
-	void PlaneAlignPart(const LineDef *L, int side, int plane)
+	void PlaneAlignPart(const LineDef *L, Side side, int plane)
 	{
 		int sec_num = L->WhatSector(side);
 		const Sector *front = Sectors[L->WhatSector(side)];
@@ -525,7 +525,7 @@ public:
 		double lx2 = L->End()->x();
 		double ly2 = L->End()->y();
 
-		if (side < 0)
+		if (side == Side::left)
 		{
 			std::swap(lx1, lx2);
 			std::swap(ly1, ly2);
@@ -758,7 +758,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 			continue;
 
 		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(SIDE_LEFT) == L->WhatSector(SIDE_RIGHT))
+		if (L->WhatSector(Side::left) == L->WhatSector(Side::right))
 			continue;
 
 		sector_edge_t edge;
@@ -784,12 +784,12 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		}
 
 		// compute side
-		bool is_right = (L->WhatSector(SIDE_RIGHT) == num);
+		bool is_right = (L->WhatSector(Side::right) == num);
 
 		if (edge.flipped)
 			is_right = !is_right;
 
-		edge.side = is_right ? SIDE_RIGHT : SIDE_LEFT;
+		edge.side = is_right ? Side::right : Side::left;
 
 /* DEBUG
 fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%d\n",
@@ -907,7 +907,7 @@ fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 	E1->cmp_x, E1->side, E2->cmp_x, E2->side);
 */
 
-			if (! (E1->side == SIDE_RIGHT && E2->side == SIDE_LEFT))
+			if (! (E1->side == Side::right && E2->side == Side::left))
 				continue;
 
 			// treat lines without a right side as dead

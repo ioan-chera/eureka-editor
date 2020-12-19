@@ -60,14 +60,28 @@ typedef int fixcoord_t;
 
 fixcoord_t MakeValidCoord(double x);
 
-
-typedef enum
+enum class Side
 {
-	SIDE_RIGHT = +1,
-	SIDE_LEFT  = -1
+	right,
+	left,
+	neither
+};
+inline static Side operator - (Side side)
+{
+	if(side == Side::right)
+		return Side::left;
+	if(side == Side::left)
+		return Side::right;
+	return side;
 }
-side_ref_e;
-
+inline static Side operator * (Side side1, Side side2)
+{
+	if(side1 == Side::neither || side2 == Side::neither)
+		return Side::neither;
+	if(side1 != side2)
+		return Side::left;
+	return Side::right;
+}
 
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
@@ -362,8 +376,8 @@ public:
 	}
 
 	// side is either SIDE_LEFT or SIDE_RIGHT
-	int WhatSector(int side) const;
-	int WhatSideDef(int side) const;
+	int WhatSector(Side side) const;
+	int WhatSideDef(Side side) const;
 
 	double CalcLength() const;
 

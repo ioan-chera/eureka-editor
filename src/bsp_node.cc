@@ -356,17 +356,19 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 	switch (tree->OnLineSide(part))
 	{
-	case SIDE_LEFT:
+	case Side::left:
 		info->real_left += tree->real_num;
 		info->mini_left += tree->mini_num;
 
 		return false;
 
-	case SIDE_RIGHT:
+	case Side::right:
 		info->real_right += tree->real_num;
 		info->mini_right += tree->mini_num;
 
 		return false;
+	default:
+		break;
 	}
 
 	/* check partition against all Segs */
@@ -1064,31 +1066,31 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 //
 // Returns SIDE_LEFT, SIDE_RIGHT, or 0 for intersect.
 //
-int seg_t::PointOnLineSide(double x, double y) const
+Side seg_t::PointOnLineSide(double x, double y) const
 {
 	double perp = PerpDist(x, y);
 
 	if (fabs(perp) <= DIST_EPSILON)
-		return 0;
+		return Side::neither;
 
-	return (perp < 0) ? SIDE_LEFT : SIDE_RIGHT;
+	return (perp < 0) ? Side::left : Side::right;
 }
 
 
-int quadtree_c::OnLineSide(const seg_t *part) const
+Side quadtree_c::OnLineSide(const seg_t *part) const
 {
 	double tx1 = (double)x1 - IFFY_LEN;
 	double ty1 = (double)y1 - IFFY_LEN;
 	double tx2 = (double)x2 + IFFY_LEN;
 	double ty2 = (double)y2 + IFFY_LEN;
 
-	int p1, p2;
+	Side p1, p2;
 
 	// handle simple cases (vertical & horizontal lines)
 	if (part->pdx == 0)
 	{
-		p1 = (tx1 > part->psx) ? SIDE_RIGHT : SIDE_LEFT;
-		p2 = (tx2 > part->psx) ? SIDE_RIGHT : SIDE_LEFT;
+		p1 = (tx1 > part->psx) ? Side::right : Side::left;
+		p2 = (tx2 > part->psx) ? Side::right : Side::left;
 
 		if (part->pdy < 0)
 		{
@@ -1098,8 +1100,8 @@ int quadtree_c::OnLineSide(const seg_t *part) const
 	}
 	else if (part->pdy == 0)
 	{
-		p1 = (ty1 < part->psy) ? SIDE_RIGHT : SIDE_LEFT;
-		p2 = (ty2 < part->psy) ? SIDE_RIGHT : SIDE_LEFT;
+		p1 = (ty1 < part->psy) ? Side::right : Side::left;
+		p2 = (ty2 < part->psy) ? Side::right : Side::left;
 
 		if (part->pdx < 0)
 		{
@@ -1121,7 +1123,7 @@ int quadtree_c::OnLineSide(const seg_t *part) const
 
 	// line goes through or touches the box?
 	if (p1 != p2)
-		return 0;
+		return Side::neither;
 
 	return p1;
 }
@@ -1132,10 +1134,10 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 {
 	for (seg_t *seg = list ; seg != NULL ; seg = seg->next)
 	{
-		int p1 = part->PointOnLineSide(seg->psx, seg->psy);
+		Side p1 = part->PointOnLineSide(seg->psx, seg->psy);
 		if (p1 != side) BugError("VerifySide failed.\n");
 
-		int p2 = part->PointOnLineSide(seg->pex, seg->pey);
+		Side p2 = part->PointOnLineSide(seg->pex, seg->pey);
 		if (p2 != side) BugError("VerifySide failed.\n");
 	}
 

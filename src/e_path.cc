@@ -575,8 +575,8 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 			if (! L->TwoSided())
 				continue;
 
-			int sec1 = L->WhatSector(SIDE_RIGHT);
-			int sec2 = L->WhatSector(SIDE_LEFT);
+			int sec1 = L->WhatSector(Side::right);
+			int sec2 = L->WhatSector(Side::left);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);

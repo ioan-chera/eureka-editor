@@ -805,10 +805,10 @@ void UI_Canvas::DrawLinedefs()
 				if (edit.show_object_numbers)
 				{
 					if (s1 != NIL_OBJ)
-						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), SIDE_RIGHT, s1);
+						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), Side::right, s1);
 
 					if (s2 != NIL_OBJ)
-						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), SIDE_LEFT,  s2);
+						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), Side::left,  s2);
 				}
 			}
 			break;
@@ -853,7 +853,7 @@ void UI_Canvas::DrawLinedefs()
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
 
-			DrawLineNumber(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), 0, n);
+			DrawLineNumber(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), Side::neither, n);
 		}
 	}
 }
@@ -1107,7 +1107,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 }
 
 
-void UI_Canvas::DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int n)
+void UI_Canvas::DrawSectorNum(int mx1, int my1, int mx2, int my2, Side side, int n)
 {
 	// only draw a number for the first linedef actually visible
 	if (seen_sectors.get(n))
@@ -1119,7 +1119,7 @@ void UI_Canvas::DrawSectorNum(int mx1, int my1, int mx2, int my2, int side, int 
 }
 
 
-void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int n)
+void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, Side side, int n)
 {
 	int x1 = SCREENX(mx1);
 	int y1 = SCREENY(my1);
@@ -1133,11 +1133,11 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, int side, int
 	int want_len = static_cast<int>(-16 * CLAMP(0.25, grid.Scale, 1.0));
 
 	// for sectors, draw closer and on sector side
-	if (side != 0)
+	if (side != Side::neither)
 	{
 		want_len = static_cast<int>(2 + 12 * CLAMP(0.25, grid.Scale, 1.0));
 
-		if (side == SIDE_LEFT)
+		if (side == Side::left)
 			want_len = -want_len;
 	}
 
@@ -1747,8 +1747,8 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		double len1 = hypot(map_x1 - edit.split_x, map_y1 - edit.split_y);
 		double len2 = hypot(map_x2 - edit.split_x, map_y2 - edit.split_y);
 
-		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), 0, I_ROUND(len1));
-		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), 0, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), Side::neither, I_ROUND(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), Side::neither, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);

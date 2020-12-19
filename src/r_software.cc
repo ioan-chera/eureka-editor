@@ -189,7 +189,8 @@ public:
 
 	// which side this wall faces (SIDE_LEFT or SIDE_RIGHT)
 	// for sprites: a copy of the thinginfo flags
-	int side;
+	Side side;
+	unsigned thingFlags;
 
 	// the linedef index
 	int ld_index;
@@ -267,10 +268,10 @@ public:
 				int cx = (int)r_view.x;  // camera
 				int cy = (int)r_view.y;
 
-				int A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
-				int C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
+				Side A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
+				Side C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
 
-				return (A_side * C_side >= 0);
+				return (A_side * C_side != Side::left);
 			}
 		}
 		else if (A->th >= 0 && B->th >= 0)
@@ -366,7 +367,7 @@ public:
 		Sector *front = sec;
 		Sector *back  = NULL;
 
-		SideDef *back_sd = (side == SIDE_LEFT) ? ld->Right() : ld->Left();
+		SideDef *back_sd = (side == Side::left) ? ld->Right() : ld->Left();
 		if (back_sd)
 			back = Sectors[back_sd->sector];
 
@@ -733,18 +734,18 @@ public:
 		if (span < 0)
 			span += static_cast<float>(2*M_PI);
 
-		int side = SIDE_RIGHT;
+		Side side = Side::right;
 
 		if (span >= M_PI)
-			side = SIDE_LEFT;
+			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == SIDE_LEFT) ? ld->Left() : ld->Right();
+		SideDef *sd = (side == Side::left) ? ld->Left() : ld->Right();
 
 		if (! sd)
 			return;
 
-		if (side == SIDE_LEFT)
+		if (side == Side::left)
 		{
 			float tmp = angle1;
 			angle1 = angle2;
@@ -806,7 +807,7 @@ public:
 		// compute normal of wall (translated coords)
 		float normal;
 
-		if (side == SIDE_LEFT)
+		if (side == Side::left)
 			normal = PointToAngle(ty2 - ty1, tx1 - tx2);
 		else
 			normal = PointToAngle(ty1 - ty2, tx2 - tx1);
@@ -828,6 +829,7 @@ public:
 		dw->sd = sd;
 		dw->sec = sd->SecRef();
 		dw->side = side;
+		dw->thingFlags = 0;
 
 		dw->wall_light = dw->sec->light;
 
@@ -947,10 +949,11 @@ public:
 		dw->sd  = NULL;
 		dw->sec = NULL;
 
-		dw->side = info.flags;
+		dw->side = Side::neither;
+		dw->thingFlags = info.flags;
 
 		if (is_unknown && config::render_unknown_bright)
-			dw->side |= THINGDEF_LIT;
+			dw->thingFlags |= THINGDEF_LIT;
 
 		dw->spr_tx1 = tx1;
 
@@ -1014,7 +1017,7 @@ public:
 	void HighlightWallBit(const DrawWall *dw, int ld_index, int part)
 	{
 		// check the part is on the side facing the camera
-		int p_side = (part & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+		Side p_side = (part & PART_LF_ALL) ? Side::left : Side::right;
 		if (dw->side != p_side)
 			return;
 
@@ -1291,7 +1294,7 @@ public:
 
 				int thsec = r_view.thing_sectors[th_index];
 
-				if (dw->side & THINGDEF_CEIL)
+				if (dw->thingFlags & THINGDEF_CEIL)
 				{
 					h2 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - T->h());
 					h1 = static_cast<int>(h2 - sprite->height() * scale);
@@ -1576,7 +1579,7 @@ public:
 			{
 				if (what == ObjType::linedefs)
 				{
-					if (dw->side < 0)
+					if (dw->side == Side::left)
 						part <<= 4;
 
 					query_result = Objid(what, dw->ld_index, part);
@@ -1674,7 +1677,7 @@ public:
 			if (pix == TRANS_PIXEL)
 				continue;
 
-			if (dw->side & THINGDEF_INVIS)
+			if (dw->thingFlags & THINGDEF_INVIS)
 			{
 				if (*dest & IS_RGB_PIXEL)
 					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
@@ -1685,7 +1688,7 @@ public:
 
 			*dest = pix;
 
-			if (r_view.lighting && ! (dw->side & THINGDEF_LIT))
+			if (r_view.lighting && ! (dw->thingFlags & THINGDEF_LIT))
 				*dest = DoomLightRemap(light, dist, *dest);
 		}
 	}
@@ -1714,7 +1717,7 @@ public:
 		{
 			if (y1 <= query_sy && query_sy <= y2 && edit.mode == ObjType::linedefs)
 			{
-				int part = (dw->side < 0) ? PART_LF_RAIL : PART_RT_RAIL;
+				int part = (dw->side == Side::left) ? PART_LF_RAIL : PART_RT_RAIL;
 				query_result = Objid(ObjType::linedefs, dw->ld_index, part);
 			}
 			return;

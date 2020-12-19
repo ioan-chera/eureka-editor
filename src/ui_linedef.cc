@@ -761,8 +761,8 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const LineDef *L = LineDefs[obj];
 
-			int right_mask = SolidMask(L, SIDE_RIGHT);
-			int  left_mask = SolidMask(L, SIDE_LEFT);
+			int right_mask = SolidMask(L, Side::right);
+			int  left_mask = SolidMask(L, Side::left);
 
 			front->SetObj(L->right, right_mask, L->TwoSided());
 			 back->SetObj(L->left,   left_mask, L->TwoSided());
@@ -954,7 +954,7 @@ void UI_LineBox::UpdateTotal()
 }
 
 
-int UI_LineBox::SolidMask(const LineDef *L, int side) const
+int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 {
 	SYS_ASSERT(L);
 
@@ -967,7 +967,7 @@ int UI_LineBox::SolidMask(const LineDef *L, int side) const
 	Sector *right = L->Right()->SecRef();
 	Sector * left = L->Left ()->SecRef();
 
-	if (side == SIDE_LEFT)
+	if (side == Side::left)
 		std::swap(left, right);
 
 	int mask = 0;

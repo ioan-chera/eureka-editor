@@ -41,12 +41,12 @@ void FindSplitLineForDangler(Objid& out, int v_num);
 
 double ApproxDistToLineDef(const LineDef * L, double x, double y);
 
-int ClosestLine_CastingHoriz(double x, double y, int *side);
-int ClosestLine_CastingVert (double x, double y, int *side);
+int ClosestLine_CastingHoriz(double x, double y, Side *side);
+int ClosestLine_CastingVert (double x, double y, Side *side);
 int ClosestLine_CastAtAngle (double x, double y, float radians);
 
-int OppositeLineDef(int ld, int ld_side, int *result_side, bitvec_c *ignore_lines = NULL);
-int OppositeSector(int ld, int ld_side);
+int OppositeLineDef(int ld, Side ld_side, Side *result_side, bitvec_c *ignore_lines = NULL);
+int OppositeSector(int ld, Side ld_side);
 
 void FastOpposite_Begin();
 void FastOpposite_Finish();
@@ -54,7 +54,7 @@ void FastOpposite_Finish();
 bool PointOutsideOfMap(double x, double y);
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
-int PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2);
+Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2);
 
 
 typedef struct

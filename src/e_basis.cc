@@ -255,14 +255,14 @@ bool LineDef::TouchesSector(int sec_num) const
 }
 
 
-int LineDef::WhatSector(int side) const
+int LineDef::WhatSector(Side side) const
 {
 	switch (side)
 	{
-		case SIDE_LEFT:
+		case Side::left:
 			return Left() ? Left()->sector : -1;
 
-		case SIDE_RIGHT:
+		case Side::right:
 			return Right() ? Right()->sector : -1;
 
 		default:
@@ -272,12 +272,14 @@ int LineDef::WhatSector(int side) const
 }
 
 
-int LineDef::WhatSideDef(int side) const
+int LineDef::WhatSideDef(Side side) const
 {
 	switch (side)
 	{
-		case SIDE_LEFT:  return left;
-		case SIDE_RIGHT: return right;
+		case Side::left:
+			return left;
+		case Side::right:
+			return right;
 
 		default:
 			BugError("bad side : %d\n", side);

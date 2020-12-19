@@ -202,8 +202,8 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 	// trace the loops on either side of the new line
 
-	 left.ok = TraceLineLoop(new_ld, SIDE_LEFT,   left.loop);
-	right.ok = TraceLineLoop(new_ld, SIDE_RIGHT, right.loop);
+	 left.ok = TraceLineLoop(new_ld, Side::left,   left.loop);
+	right.ok = TraceLineLoop(new_ld, Side::right, right.loop);
 
 #ifdef DEBUG_LOOP
 	fprintf(stderr, "CLOSED LOOP : left_ok:%d right_ok:%d\n",

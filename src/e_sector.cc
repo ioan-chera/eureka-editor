@@ -405,14 +405,14 @@ void lineloop_c::clear()
 }
 
 
-void lineloop_c::push_back(int ld, int side)
+void lineloop_c::push_back(int ld, Side side)
 {
 	lines.push_back(ld);
 	sides.push_back(side);
 }
 
 
-bool lineloop_c::get(int ld, int side) const
+bool lineloop_c::get(int ld, Side side) const
 {
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 		if (lines[k] == ld && sides[k] == side)
@@ -532,7 +532,7 @@ int lineloop_c::IslandSector() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		int opp_side;
+		Side opp_side;
 		int opp_ld = OppositeLineDef(lines[i], sides[i], &opp_side);
 
 		// can see "the void" ?
@@ -618,17 +618,17 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 //
 // -AJA- 2001-05-09
 //
-bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
+bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare)
 {
 	int start_ld   = ld;
-	int start_side = side;
+	Side start_side = side;
 
 	loop.clear();
 
 	int   cur_vert;
 	int  prev_vert;
 
-	if (side == SIDE_RIGHT)
+	if (side == Side::right)
 	{
 		cur_vert  = LineDefs[ld]->end;
 		prev_vert = LineDefs[ld]->start;
@@ -657,7 +657,7 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 
 		int next_line = -1;
 		int next_vert = -1;
-		int next_side =  0;
+		Side next_side =  Side::neither;
 
 		double best_angle = 9999;
 
@@ -677,17 +677,17 @@ bool TraceLineLoop(int ld, int side, lineloop_c& loop, bool ignore_bare)
 				continue;
 
 			int other_vert;
-			int which_side;
+			Side which_side;
 
 			if (N->start == cur_vert)
 			{
 				other_vert = N->end;
-				which_side = SIDE_RIGHT;
+				which_side = Side::right;
 			}
 			else  /* (N->end == cur_vert) */
 			{
 				other_vert = N->start;
-				which_side = SIDE_LEFT;
+				which_side = Side::left;
 			}
 
 			double angle;
@@ -788,9 +788,9 @@ bool lineloop_c::LookForIsland()
 
 		for (int where = 0 ; where < 2 ; where++)
 		{
-			int ld_side = where ? SIDE_RIGHT : SIDE_LEFT;
+			Side ld_side = where ? Side::right : Side::left;
 
-			int opp_side;
+			Side opp_side;
 			int opp = OppositeLineDef(ld, ld_side, &opp_side);
 
 			if (opp < 0)
@@ -815,8 +815,8 @@ ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 				Vertex_HowManyLineDefs(LineDefs[ld]->start) == 1 &&
 				Vertex_HowManyLineDefs(LineDefs[ld]->end)   == 1)
 			{
-				island->push_back(ld, SIDE_RIGHT);
-				island->push_back(ld, SIDE_LEFT);
+				island->push_back(ld, Side::right);
+				island->push_back(ld, Side::left);
 
 				islands.push_back(island);
 				count++;
@@ -879,7 +879,7 @@ void lineloop_c::Dump() const
 		const LineDef *L = LineDefs[lines[i]];
 
 		DebugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
-		            sides[i] == SIDE_LEFT ? " LEFT" : "RIGHT",
+		            sides[i] == Side::left ? " LEFT" : "RIGHT",
 					lines[i],
 					L->Start()->x(), L->Start()->y(),
 					L->End  ()->x(), L->End  ()->y());
@@ -887,7 +887,7 @@ void lineloop_c::Dump() const
 }
 
 
-static inline bool WillBeTwoSided(int ld, int side)
+static inline bool WillBeTwoSided(int ld, Side side)
 {
 	const LineDef *L = LineDefs[ld];
 
@@ -922,7 +922,7 @@ static void DetermineNewTextures(lineloop_c& loop,
 		for (k = 0 ; k < total ; k++)
 		{
 			int ld   = loop.lines[k];
-			int side = loop.sides[k];
+			Side side = loop.sides[k];
 
 			// check back sides in *first* pass
 			// (to allow second pass to override)
@@ -1041,15 +1041,15 @@ static void DetermineNewTextures(lineloop_c& loop,
 // update the side on a single linedef, using the given sector
 // reference, and creating a new sidedef if necessary.
 //
-void DoAssignSector(int ld, int side, int new_sec,
-					int new_lower, int new_upper,
-					selection_c *flip)
+static void DoAssignSector(int ld, Side side, int new_sec,
+						   int new_lower, int new_upper,
+						   selection_c *flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = LineDefs[ld];
 
-	int sd_num   = (side == SIDE_RIGHT) ? L->right : L->left;
-	int other_sd = (side == SIDE_RIGHT) ? L->left  : L->right;
+	int sd_num   = (side == Side::right) ? L->right : L->left;
+	int other_sd = (side == Side::right) ? L->left  : L->right;
 
 	if (sd_num >= 0)
 	{
@@ -1062,7 +1062,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 	// Thus we don't end up with invalid lines -- i.e. ones with a
 	// left side but no right side.
 
-	if (side == SIDE_LEFT && other_sd < 0)
+	if (side == Side::left && other_sd < 0)
 		flip->set(ld);
 	else
 		flip->clear(ld);
@@ -1092,7 +1092,7 @@ void DoAssignSector(int ld, int side, int new_sec,
 
 	SD->sector = new_sec;
 
-	if (side > 0)
+	if (side == Side::right)
 		BA_ChangeLD(ld, LineDef::F_RIGHT, new_sd);
 	else
 		BA_ChangeLD(ld, LineDef::F_LEFT, new_sd);
@@ -1130,7 +1130,8 @@ static bool GetLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 {
 	selection_c seen_lines(ObjType::linedefs);
 
-	int ld, side;
+	int ld;
+	Side side;
 
 	ld = ClosestLine_CastingHoriz(map_x, map_y, &side);
 
@@ -1167,7 +1168,7 @@ static bool GetLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 		for (k = 0 ; k < loop.lines.size() ; k++)
 		{
 			int new_ld;
-			int new_side;
+			Side new_side;
 
 			new_ld = OppositeLineDef(loop.lines[k], loop.sides[k], &new_side);
 
@@ -1239,8 +1240,10 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 	{
 		const LineDef *L = LineDefs[n];
 
-		if (L->WhatSector(SIDE_LEFT ) >= 0) unused.clear(L->WhatSector(SIDE_LEFT ));
-		if (L->WhatSector(SIDE_RIGHT) >= 0) unused.clear(L->WhatSector(SIDE_RIGHT));
+		if (L->WhatSector(Side::left ) >= 0)
+			unused.clear(L->WhatSector(Side::left ));
+		if (L->WhatSector(Side::right) >= 0)
+			unused.clear(L->WhatSector(Side::right));
 	}
 
 	DeleteObjects(&unused);

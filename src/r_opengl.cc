@@ -902,18 +902,18 @@ public:
 		if (span < 0)
 			span += static_cast<float>(2*M_PI);
 
-		int side = SIDE_RIGHT;
+		Side side = Side::right;
 
 		if (span >= M_PI)
-			side = SIDE_LEFT;
+			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == SIDE_LEFT) ? ld->Left() : ld->Right();
+		const SideDef *sd = (side == Side::left) ? ld->Left() : ld->Right();
 
 		if (! sd)
 			return;
 
-		if (side == SIDE_LEFT)
+		if (side == Side::left)
 		{
 			float tmp = angle1;
 			angle1 = angle2;
@@ -988,7 +988,7 @@ public:
 		x2 = static_cast<float>(ld->End()->x());
 		y2 = static_cast<float>(ld->End()->y());
 
-		if (side == SIDE_LEFT)
+		if (side == Side::left)
 		{
 			std::swap(x1, x2);
 			std::swap(y1, y2);
@@ -1010,7 +1010,7 @@ public:
 		}
 		else
 		{
-			const SideDef *sd_back = (side == SIDE_LEFT) ? ld->Right() : ld->Left();
+			const SideDef *sd_back = (side == Side::left) ? ld->Right() : ld->Left();
 			const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
 
 			sky_upper = sky_front && is_sky(back->CeilTex());
@@ -1327,9 +1327,9 @@ public:
 	{
 		const LineDef *L = LineDefs[ld_index];
 
-		int side = (part & PART_LF_ALL) ? SIDE_LEFT : SIDE_RIGHT;
+		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
-		const SideDef *sd = (side < 0) ? L->Left() : L->Right();
+		const SideDef *sd = (side == Side::left) ? L->Left() : L->Right();
 		if (sd == NULL)
 			return;
 
@@ -1339,11 +1339,11 @@ public:
 		float y2 = static_cast<float>(L->End()->y());
 
 		// check that this side is facing the camera
-		int cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
+		Side cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
 		if (cam_side != side)
 			return;
 
-		const SideDef *sd_back = (side < 0) ? L->Right() : L->Left();
+		const SideDef *sd_back = (side == Side::left) ? L->Right() : L->Left();
 
 		const Sector *front = sd->SecRef();
 		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;

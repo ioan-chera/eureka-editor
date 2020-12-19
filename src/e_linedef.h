@@ -41,7 +41,7 @@ int SplitLineDefAtVertex(int ld, int v_idx);
 void MoveCoordOntoLineDef(int ld, double *x, double *y);
 
 void LD_AddSecondSideDef(int ld, int new_sd, int other_sd);
-void LD_RemoveSideDef(int ld, int ld_side);
+void LD_RemoveSideDef(int ld, Side ld_side);
 void LD_FixForLostSide(int ld);
 
 double LD_AngleBetweenLines(int A, int B, int C);

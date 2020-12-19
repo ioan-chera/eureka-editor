@@ -295,7 +295,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			continue;
 
 		// determine what sector to use
-		int new_sec = OppositeSector(*it, box->is_front ? SIDE_RIGHT : SIDE_LEFT);
+		int new_sec = OppositeSector(*it, box->is_front ? Side::right : Side::left);
 
 		if (new_sec < 0)
 			new_sec = NumSectors - 1;
@@ -344,7 +344,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 
 		// NOTE WELL: the actual sidedef is not deleted (it might be shared)
 
-		LD_RemoveSideDef(*it, box->is_front ? SIDE_RIGHT : SIDE_LEFT);
+		LD_RemoveSideDef(*it, box->is_front ? Side::right : Side::left);
 	}
 
 	BA_MessageForSel("deleted sidedef from", edit.Selected);
