@@ -328,16 +328,17 @@ SString FilenameGetPath(const SString &filename)
 SString GetAbsolutePath(const SString &path)
 {
 	size_t sz = 64;
-	SString result;
+	std::vector<char> stringBuffer;
 
 	do
 	{
 		sz *= 2;
-		result.resize(sz);
-		fl_filename_absolute(result.ptr(), (int)result.size(), path.c_str());
-	} while(result.back() == 0 && result[-2] != 0);		// repeat until we know it's large enough
+		stringBuffer.resize(sz);
+		fl_filename_absolute(stringBuffer.data(), (int)stringBuffer.size(), path.c_str());
+	} while(stringBuffer.back() == '\0' && stringBuffer[stringBuffer.size() - 2] != 0);
+	// repeat until we know it's large enough
 
-	return result.trimNullTermination();
+	return stringBuffer.data();
 }
 
 bool FileCopy(const SString &src_name, const SString &dest_name)

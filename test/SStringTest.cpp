@@ -171,3 +171,21 @@ TEST(SString, NulBan)
 	name += 't';
 	ASSERT_EQ(name, "Jacksont");
 }
+
+TEST(SString, CutWithSpace)
+{
+	SString name = "Michael Jackson";
+	SString first, last;
+	name.getCutWithSpace(7, &first, &last);
+	ASSERT_EQ(first, "Michael");
+	ASSERT_EQ(last, "Jackson");
+	SString tail;
+	last.cutWithSpace(6, &tail);
+	ASSERT_EQ(last, "Jackso");
+	ASSERT_TRUE(tail.empty());
+
+	SString surname;
+	name.cutWithSpace(7, &surname);
+	ASSERT_EQ(name, "Michael");
+	ASSERT_EQ(surname, "Jackson");
+}

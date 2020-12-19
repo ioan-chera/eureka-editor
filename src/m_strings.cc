@@ -303,17 +303,6 @@ void SString::trimTrailingSet(const char *set)
 }
 
 //
-// Trim null termination. Common to happen if data was written as with C strings
-//
-SString &SString::trimNullTermination()
-{
-	size_t clen = strlen(data.c_str());
-	if(clen != length())
-		resize(clen);
-	return *this;
-}
-
-//
 // Finds the first space
 //
 size_t SString::findSpace() const

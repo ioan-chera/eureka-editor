@@ -341,8 +341,6 @@ public:
 	void trimTrailingSpaces();
 	void trimTrailingSet(const char *set);
 
-	SString &trimNullTermination();
-
 	//
 	// Capitalizes first letter
 	//
