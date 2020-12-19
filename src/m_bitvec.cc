@@ -44,7 +44,6 @@ void bitvec_c::resize(int n_elements)
 	SYS_ASSERT(n_elements > 0);
 
 	int old_elem  = num_elem;
-	int old_total = (num_elem / 8) + 1;
 	int new_total = (n_elements / 8) + 1;
 
 	// don't bother re-allocating unless shrinking by a large amount

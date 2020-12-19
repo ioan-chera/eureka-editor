@@ -27,6 +27,8 @@
 #ifndef __EUREKA_M_BITVEC_H__
 #define __EUREKA_M_BITVEC_H__
 
+#include "sys_type.h"
+#include <vector>
 
 enum class BitOp
 {
