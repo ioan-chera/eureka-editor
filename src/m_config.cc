@@ -991,9 +991,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 //
 static int parse_a_config_file(std::istream &is, const SString &filename)
 {
-	size_t basepos = FindBaseName(filename);
-	SString basename;
-	basename.assign(filename, basepos);
+	SString basename = GetBaseName(filename);
 
 	// handle one line on each iteration
 	SString line;

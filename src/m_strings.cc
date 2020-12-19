@@ -279,7 +279,7 @@ void SString::cutWithSpace(size_t pos, SString *second)
 	SYS_ASSERT(pos < length());
 	if(second)
 		*second = SString(data.substr(pos + 1));
-	erase(pos);
+	erase(pos, npos);
 }
 
 //

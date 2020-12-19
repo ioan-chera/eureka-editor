@@ -124,7 +124,9 @@ public:
 
 			if (text.size() < 10)
 				use_len = (int)text.size() - 2;
-			buffer.assign(text, 1, use_len);
+			buffer = text;
+			buffer.erase(0, 1);
+			buffer.resize(use_len);
 		}
 
 		return BA_InternaliseString(NormalizeTex(buffer));

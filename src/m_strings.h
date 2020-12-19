@@ -254,12 +254,6 @@ public:
 		return *this;
 	}
 
-	SString &assign(const SString &other, size_t subpos, size_t sublen = std::string::npos)
-	{
-		data.assign(other.get(), subpos, sublen);
-		return *this;
-	}
-
 	SString &insert(size_t pos, const char *s)
 	{
 		data.insert(pos, s ? s : "");
@@ -276,7 +270,7 @@ public:
 		data.clear();
 	}
 
-	void erase(size_t n, size_t len = std::string::npos)
+	void erase(size_t n, size_t len)
 	{
 		data.erase(n, len);
 	}

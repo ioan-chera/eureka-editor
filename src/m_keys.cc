@@ -224,32 +224,32 @@ keycode_t M_ParseKeyString(const SString &mstr)
 	if (str.noCaseStartsWith("CMD-"))
 	{
 		key |= MOD_COMMAND;
-		str.assign(str, 4);
+		str.erase(0, 4);
 	}
 	else if (str.noCaseStartsWith("CTRL-"))
 	{
 		key |= MOD_COMMAND;
-		str.assign(str, 5);
+		str.erase(0, 5);
 	}
 	else if (str.noCaseStartsWith("META-"))
 	{
 		key |= MOD_META;
-		str.assign(str, 5);
+		str.erase(0, 5);
 	}
 	else if (str.noCaseStartsWith("ALT-"))
 	{
 		key |= MOD_ALT;
-		str.assign(str, 4);
+		str.erase(0, 4);
 	}
 	else if (str.noCaseStartsWith("SHIFT-"))
 	{
 		key |= MOD_SHIFT;
-		str.assign(str, 6);
+		str.erase(0, 6);
 	}
 	else if (str.noCaseStartsWith("LAX-"))
 	{
 		key |= MOD_LAX_SHIFTCTRL;
-		str.assign(str, 4);
+		str.erase(0, 4);
 	}
 
 	// convert uppercase letter --> lowercase + MOD_SHIFT

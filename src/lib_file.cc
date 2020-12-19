@@ -135,12 +135,12 @@ SString ReplaceExtension(const SString &filename, const SString &ext)
 	if (ext.empty())
 	{
 		if(dot_pos != SString::npos)
-			buffer.erase(dot_pos);
+			buffer.erase(dot_pos, std::string::npos);
 		return buffer;
 	}
 
 	if (dot_pos != SString::npos && dot_pos != buffer.length() - 1)
-		buffer.erase(dot_pos + 1);
+		buffer.erase(dot_pos + 1, SString::npos);
 	else
 		buffer += '.';
 	buffer += ext;
@@ -265,7 +265,7 @@ static void FilenameStripBase(SString &path)
 			path = "/";
 			return;
 		}
-		path.erase(seppos);
+		path.erase(seppos, SString::npos);
 		return;
 	}
 	path = ".";
@@ -288,11 +288,9 @@ SString FilenameReposition(const SString &cfilename, const SString &othername)
 		return filename;
 
 	size_t dir_len = op - othername.c_str();
-	size_t len = filename.length() + dir_len;
 
-	SString result;
-	result.reserve(len + 10);
-	result.assign(othername, dir_len);
+	SString result = othername;
+	result.resize(dir_len);
 	result += filename;
 	return result;
 }
