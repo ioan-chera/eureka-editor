@@ -32,8 +32,6 @@
 
 bitvec_c::bitvec_c(int n_elements) : num_elem(n_elements)
 {
-	SYS_ASSERT(n_elements > 0);
-
 	int total = (num_elem / 8) + 1;
 	data.resize(total);
 	clear_all();

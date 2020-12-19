@@ -43,7 +43,7 @@ TEST(BitVec, Get)
 
 TEST(BitVec, SetClearToggle)
 {
-    bitvec_c vec;
+    bitvec_c vec(0);	// must be okay
     vec.set(100);
 	ASSERT_GE(vec.size(), 100);
 	int lastSize = vec.size();
