@@ -57,11 +57,6 @@ public:
 
     SString(const char *buffer, int length);
 
-	SString(const SString &other, size_t pos, size_t len = std::string::npos) :
-			data(other.data, pos, len)
-	{
-	}
-
 	SString(size_t n, char c) : data(n, c)
 	{
 	}

@@ -961,13 +961,17 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 				if(spacepos == std::string::npos)
 				{
 					list->push_back(value);
-					spacepos = value.length();
+					value.clear();
 				}
 				else
-					list->push_back(SString(value, spacepos));
-			
-				value.erase(0, spacepos);
-				value.trimLeadingSpaces();
+				{
+					SString word = value;
+					word.resize(spacepos);
+					list->push_back(word);
+
+					value.erase(0, spacepos);
+					value.trimLeadingSpaces();
+				}			
 			}
 			break;
 

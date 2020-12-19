@@ -98,7 +98,10 @@ public:
 			return SString();
 		}
 
-		return SString(text, 1, text.size() - 2);
+		SString string = text;
+		string.erase(0, 1);
+		string.pop_back();
+		return string;
 	}
 
 	fixcoord_t DecodeCoord() const
