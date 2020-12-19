@@ -680,7 +680,7 @@ static void ReselectGroup()
 
 			Selection_Clear();
 
-			edit.Selected->frob_range(NumThings - count, NumThings-1, BOP_ADD);
+			edit.Selected->frob_range(NumThings - count, NumThings-1, BitOp::add);
 		}
 		return;
 	}
@@ -701,7 +701,7 @@ static void ReselectGroup()
 	if (clip_board->mode == ObjType::vertices)
 	{
 		int count = (int)clip_board->verts.size();
-		new_sel.frob_range(NumVertices - count, NumVertices-1, BOP_ADD);
+		new_sel.frob_range(NumVertices - count, NumVertices-1, BitOp::add);
 	}
 	else if (clip_board->mode == ObjType::linedefs)
 	{
@@ -710,14 +710,14 @@ static void ReselectGroup()
 		// the sectors (non-pasted lines refer to them too).
 
 		int count = (int)clip_board->lines.size();
-		new_sel.frob_range(NumLineDefs - count, NumLineDefs-1, BOP_ADD);
+		new_sel.frob_range(NumLineDefs - count, NumLineDefs-1, BitOp::add);
 	}
 	else
 	{
 		SYS_ASSERT(clip_board->mode == ObjType::sectors);
 
 		int count = (int)clip_board->sectors.size();
-		new_sel.frob_range(NumSectors - count, NumSectors-1, BOP_ADD);
+		new_sel.frob_range(NumSectors - count, NumSectors-1, BitOp::add);
 	}
 
 	Selection_Clear();

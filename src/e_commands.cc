@@ -116,7 +116,7 @@ void CMD_SelectAll()
 	Selection_Push();
 
 	edit.Selected->change_type(edit.mode);
-	edit.Selected->frob_range(0, total-1, BOP_ADD);
+	edit.Selected->frob_range(0, total-1, BitOp::add);
 
 	RedrawMap();
 }
@@ -155,7 +155,7 @@ void CMD_InvertSelection()
 		delete prev_sel;
 	}
 
-	edit.Selected->frob_range(0, total-1, BOP_TOGGLE);
+	edit.Selected->frob_range(0, total-1, BitOp::toggle);
 
 	RedrawMap();
 }

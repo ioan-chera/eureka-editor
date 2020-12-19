@@ -28,13 +28,12 @@
 #define __EUREKA_M_BITVEC_H__
 
 
-typedef enum
+enum class BitOp
 {
-	BOP_ADD = 0,   // Add to selection
-	BOP_REMOVE,    // Remove from selection
-	BOP_TOGGLE     // If not in selection, add it, else remove it
-}
-sel_op_e;
+	add,		// Add to selection
+	remove,		// Remove from selection
+	toggle		// If not in selection, add it, else remove it
+};
 
 
 class bitvec_c
@@ -68,7 +67,7 @@ public:
 	void clear(int n);		// Set bit <n> to 0
 	void toggle(int n);		// Toggle bit <n>
 
-	void frob(int n, sel_op_e op);
+	void frob(int n, BitOp op);
 
 	void set_all();
 	void clear_all();

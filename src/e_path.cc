@@ -519,9 +519,9 @@ void CMD_PruneUnused(void)
 		}
 	}
 
-	used_secs .frob_range(0, NumSectors -1, BOP_TOGGLE);
-	used_sides.frob_range(0, NumSideDefs-1, BOP_TOGGLE);
-	used_verts.frob_range(0, NumVertices-1, BOP_TOGGLE);
+	used_secs .frob_range(0, NumSectors -1, BitOp::toggle);
+	used_sides.frob_range(0, NumSideDefs-1, BitOp::toggle);
+	used_verts.frob_range(0, NumVertices-1, BitOp::toggle);
 
 	int num_secs  = used_secs .count_obj();
 	int num_sides = used_sides.count_obj();

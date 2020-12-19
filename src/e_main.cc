@@ -1081,7 +1081,7 @@ void Selection_Validate()
 
 	if (edit.Selected->max_obj() >= num_obj)
 	{
-		edit.Selected->frob_range(num_obj, edit.Selected->max_obj(), BOP_REMOVE);
+		edit.Selected->frob_range(num_obj, edit.Selected->max_obj(), BitOp::remove);
 
 		Beep("BUG: invalid selection");
 	}

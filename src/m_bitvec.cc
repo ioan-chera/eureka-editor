@@ -130,12 +130,12 @@ void bitvec_c::toggle(int n)
 }
 
 
-void bitvec_c::frob(int n, sel_op_e op)
+void bitvec_c::frob(int n, BitOp op)
 {
 	switch (op)
 	{
-		case BOP_ADD: set(n); break;
-		case BOP_REMOVE: clear(n); break;
+		case BitOp::add: set(n); break;
+		case BitOp::remove: clear(n); break;
 		default: toggle(n); break;
 	}
 }

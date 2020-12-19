@@ -96,8 +96,8 @@ public:
 	byte get_ext(int n) const;
 	void set_ext(int n, byte value);
 
-	void frob(int n, sel_op_e op);
-	void frob_range(int n1, int n2, sel_op_e op);
+	void frob(int n, BitOp op);
+	void frob_range(int n1, int n2, BitOp op);
 
 	// set all the objects from the other selection
 	void merge(const selection_c& other);

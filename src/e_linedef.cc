@@ -1033,7 +1033,7 @@ void CMD_LIN_SplitHalf(void)
 	}
 	else if (new_count > 0)
 	{
-		edit.Selected->frob_range(new_first, new_first + new_count - 1, BOP_ADD);
+		edit.Selected->frob_range(new_first, new_first + new_count - 1, BitOp::add);
 	}
 }
 

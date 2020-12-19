@@ -246,18 +246,18 @@ void selection_c::set_ext(int n, byte value)
 }
 
 
-void selection_c::frob(int n, sel_op_e op)
+void selection_c::frob(int n, BitOp op)
 {
 	switch (op)
 	{
-		case BOP_ADD: set(n); break;
-		case BOP_REMOVE: clear(n); break;
+		case BitOp::add: set(n); break;
+		case BitOp::remove: clear(n); break;
 		default: toggle(n); break;
 	}
 }
 
 
-void selection_c::frob_range(int n1, int n2, sel_op_e op)
+void selection_c::frob_range(int n1, int n2, BitOp op)
 {
 	for ( ; n1 <= n2 ; n1++)
 	{

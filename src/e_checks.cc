@@ -407,7 +407,7 @@ void Vertex_FindUnused(selection_c& sel)
 		sel.set(LineDefs[i]->end);
 	}
 
-	sel.frob_range(0, NumVertices - 1, BOP_TOGGLE);
+	sel.frob_range(0, NumVertices - 1, BitOp::toggle);
 }
 
 
@@ -831,7 +831,7 @@ void Sectors_FindUnused(selection_c& sel)
 			sel.set(L->Right()->sector);
 	}
 
-	sel.frob_range(0, NumSectors - 1, BOP_TOGGLE);
+	sel.frob_range(0, NumSectors - 1, BitOp::toggle);
 }
 
 
@@ -912,7 +912,7 @@ void SideDefs_FindUnused(selection_c& sel)
 		if (L->right >= 0) sel.set(L->right);
 	}
 
-	sel.frob_range(0, NumSideDefs - 1, BOP_TOGGLE);
+	sel.frob_range(0, NumSideDefs - 1, BitOp::toggle);
 }
 
 
