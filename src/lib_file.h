@@ -22,6 +22,7 @@
 #define __LIB_FILE_H__
 
 #include <functional>
+#include <vector>
 
 #ifdef WIN32
 #define DIR_SEP_CH   '\\'
