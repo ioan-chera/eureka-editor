@@ -300,9 +300,16 @@ void SString::trimLeadingSpaces()
 //
 void SString::trimTrailingSpaces()
 {
-	if(empty())
-		return;
 	while(good() && isspace(data.back()))
+		data.pop_back();
+}
+
+//
+// Trim trailing characters from set
+//
+void SString::trimTrailingSet(const char *set)
+{
+	while(good() && strchr(set, data.back()))
 		data.pop_back();
 }
 

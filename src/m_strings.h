@@ -354,6 +354,7 @@ public:
 
 	void trimLeadingSpaces();
 	void trimTrailingSpaces();
+	void trimTrailingSet(const char *set);
 
 	SString &trimNullTermination();
 
