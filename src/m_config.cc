@@ -966,7 +966,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 				else
 				{
 					SString word = value;
-					word.resize(spacepos);
+					word.erase(spacepos, SString::npos);
 					list->push_back(word);
 
 					value.erase(0, spacepos);

@@ -290,7 +290,7 @@ SString FilenameReposition(const SString &cfilename, const SString &othername)
 	size_t dir_len = op - othername.c_str();
 
 	SString result = othername;
-	result.resize(dir_len);
+	result.erase(dir_len, SString::npos);
 	result += filename;
 	return result;
 }
@@ -303,12 +303,16 @@ SString FilenameGetPath(const SString &filename)
 	size_t baseNamePosition = FindBaseName(filename);
 
 	SString directory = filename;
-	directory.resize(baseNamePosition);
+	directory.erase(baseNamePosition, SString::npos);
 
 	if(directory.empty())
 		return ".";
 
+#ifdef _WIN32
 	directory.trimTrailingSet("/\\");
+#else
+	directory.trimTrailingSet("/");
+#endif
 	if(directory.empty())
 		return DIR_SEP_STR;
 

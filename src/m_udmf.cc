@@ -126,7 +126,7 @@ public:
 				use_len = (int)text.size() - 2;
 			buffer = text;
 			buffer.erase(0, 1);
-			buffer.resize(use_len);
+			buffer.erase(use_len, SString::npos);
 		}
 
 		return BA_InternaliseString(NormalizeTex(buffer));

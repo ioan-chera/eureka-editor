@@ -209,11 +209,6 @@ public:
 		return data.size();
 	}
 
-	void resize(size_t n)
-	{
-		data.resize(n);
-	}
-
 	SString operator + (const char *s) const
 	{
 		SString result;
