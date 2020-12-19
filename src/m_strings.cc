@@ -32,7 +32,7 @@ int y_stricmp(const char *s1, const char *s2)
 	for (;;)
 	{
 		if (tolower(*s1) != tolower(*s2))
-			return (int)(unsigned char)(*s1) - (int)(unsigned char)(*s2);
+			return (int)(unsigned char)(tolower(*s1)) - (int)(unsigned char)(tolower(*s2));
 
 		if (*s1 && *s2)
 		{
@@ -56,7 +56,7 @@ int y_strnicmp(const char *s1, const char *s2, size_t len)
 	while (len-- > 0)
 	{
 		if (tolower(*s1) != tolower(*s2))
-			return (int)(unsigned char)(*s1) - (int)(unsigned char)(*s2);
+			return (int)(unsigned char)(tolower(*s1)) - (int)(unsigned char)(tolower(*s2));
 
 		if (*s1 && *s2)
 		{

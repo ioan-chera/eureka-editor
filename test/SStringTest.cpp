@@ -110,3 +110,54 @@ TEST(SString, TrimTrailingSpaces)
     spaceOnly.trimTrailingSpaces();
     ASSERT_TRUE(spaceOnly.empty());
 }
+
+TEST(SString, NoCaseCheck)
+{
+	ASSERT_TRUE(SString("Michael").noCaseEqual("MiCHaEL"));
+	ASSERT_TRUE(SString("Michael").noCaseEqual(SString("MiCHaEL")));
+	ASSERT_FALSE(SString("Michael").noCaseEqual("Jackson"));
+	ASSERT_TRUE(SString("").noCaseEqual(nullptr));
+
+	ASSERT_LT(SString("jackson").noCaseCompare("Michael"), 0);
+	ASSERT_EQ(SString("jackson").noCaseCompare("JackSON"), 0);
+	ASSERT_GT(SString("Jackson").noCaseCompare("III"), 0);
+
+	ASSERT_TRUE(SString("MICHAEL JACKSON").noCaseStartsWith("mich"));
+	ASSERT_FALSE(SString("MICHAEL JACKSON").noCaseStartsWith("Jack"));
+
+	ASSERT_EQ(SString("Michael Jackson").findNoCase("jack"), 8);
+	ASSERT_EQ(SString("Michael Jackson").findNoCase("ACK"), 9);
+	ASSERT_EQ(SString("Michael Jackson").findNoCase("Jax"), std::string::npos);
+}
+
+TEST(SString, StartsWith)
+{
+	ASSERT_TRUE(SString("Michael Jackson").startsWith("Mich"));
+	ASSERT_FALSE(SString("Michael Jackson").startsWith("mich"));
+	ASSERT_TRUE(SString("Michael Jackson").startsWith(nullptr));
+}
+
+TEST(SString, Operators)
+{
+	ASSERT_NE(SString("Daniel"), SString("daniel"));
+	ASSERT_NE(SString("Daniel"), "daniel");
+	ASSERT_EQ(SString("Daniel"), SString("Daniel"));
+	ASSERT_EQ(SString("Daniel"), "Daniel");
+	ASSERT_LT(SString("Daniel"), SString("Earn"));
+	ASSERT_FALSE(SString("EDaniel") < SString("Darn"));
+}
+
+TEST(SString, Indexing)
+{
+	SString name = "Jackson";
+	ASSERT_EQ(name[0], 'J');
+	ASSERT_EQ(name[1], 'a');
+	ASSERT_EQ(name[2], 'c');
+	ASSERT_EQ(name[-1], 'n');
+	ASSERT_EQ(name[-2], 'o');
+	ASSERT_EQ(name[-3], 's');
+
+	name[-3] = 't';
+	name[1] = 'e';
+	ASSERT_EQ(name, "Jeckton");
+}
