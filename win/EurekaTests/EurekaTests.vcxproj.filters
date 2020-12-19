@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Eureka">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="GoogleTest">
+      <UniqueIdentifier>{cefbdb7d-840d-4c26-a84d-bbbb7487d9c0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest_main.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-death-test.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-filepath.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-matchers.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-port.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-printers.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-test-part.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-typed-test.cc">
+      <Filter>GoogleTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\lib_file_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\SStringTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\StringTableTest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\lib_file.cc">
+      <Filter>Eureka</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\m_strings.cc">
+      <Filter>Eureka</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Errors.cpp">
+      <Filter>Eureka</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\modules\googletest\googletest\src\gtest-internal-inl.h">
+      <Filter>GoogleTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\modules\googletest\googletest\include\gtest\gtest.h">
+      <Filter>GoogleTest</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
