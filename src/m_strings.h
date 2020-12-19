@@ -57,8 +57,9 @@ public:
 
     SString(const char *buffer, int length);
 
-	SString(size_t n, char c) : data(n, c)
+	explicit SString(char c)
 	{
+		data.push_back(c);
 	}
 
 	SString(std::string &&consume) : data(std::move(consume))

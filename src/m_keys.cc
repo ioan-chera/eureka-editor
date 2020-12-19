@@ -282,7 +282,7 @@ keycode_t M_ParseKeyString(const SString &mstr)
 static SString BareKeyName(keycode_t key)
 {
 	if(key < 127 && key > 32 && isprint(key) && key != '"')
-		return SString(1, (char)key);
+		return SString(static_cast<char>(key));
 	if(FL_F < key && key <= FL_F_Last)
 		return StringPrintf("F%d", key - FL_F);
 	if(is_mouse_button(key))
