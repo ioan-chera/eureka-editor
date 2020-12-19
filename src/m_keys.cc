@@ -675,7 +675,7 @@ void M_SaveBindings()
 
 			for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 			{
-				if (bind.param[p])
+				if (bind.param[p].good())
 					os << '\t' << bind.param[p];
 			}
 
@@ -851,7 +851,7 @@ SString M_StringForFunc(int index)
 	{
 		const SString &param = bind.param[k];
 
-		if (! param)
+		if (param.empty())
 			break;
 
 		if (k == 0)
@@ -1084,7 +1084,7 @@ bool Exec_HasFlag(const char *flag)
 
 	for (int i = 0 ; i < MAX_EXEC_PARAM ; i++)
 	{
-		if (! EXEC_Flags[i])
+		if (EXEC_Flags[i].empty())
 			break;
 
 		if (EXEC_Flags[i].noCaseEqual(flag))

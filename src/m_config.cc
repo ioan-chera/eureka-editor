@@ -878,7 +878,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	line.trimTrailingSpaces();
 
 	// skip empty lines
-	if(!line)
+	if(line.empty())
 		return 0;
 
 	// grab the name
@@ -894,7 +894,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 
 	// find the option value (occupies rest of the line)
 	value.trimLeadingSpaces();
-	if(!value)
+	if(value.empty())
 	{
 		LogPrintf("WARNING: %s(%u): bad line, missing option value.\n", basename.c_str(), lnum);
 		return 0;
@@ -954,7 +954,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			break;
 
 		case OPT_STRING_LIST:
-			while(value)
+			while(value.good())
 			{
 				size_t spacepos = value.findSpace();
 				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);

@@ -87,7 +87,7 @@ bool HasExtension(const SString &filename)
 //
 bool MatchExtension(const SString &filename, const SString &ext)
 {
-	if (! ext)
+	if (ext.empty())
 		return ! HasExtension(filename);
 
 	int A = (int)filename.length() - 1;
@@ -117,7 +117,7 @@ SString ReplaceExtension(const SString &filename, const SString &ext)
 {
 	SYS_ASSERT(filename[0] != 0);
 
-	size_t total_len = filename.length() + (ext ? ext.length() : 0);
+	size_t total_len = filename.length() + (ext.good() ? ext.length() : 0);
 
 	SString buffer;
 	buffer.reserve(total_len + 10);
@@ -132,7 +132,7 @@ SString ReplaceExtension(const SString &filename, const SString &ext)
 
 	if(dot_pos != SString::npos && buffer[(int)dot_pos] != '.')
 		dot_pos = SString::npos;
-	if (! ext)
+	if (ext.empty())
 	{
 		if(dot_pos != SString::npos)
 			buffer.erase(dot_pos);
@@ -229,7 +229,7 @@ static void FilenameStripBase(char *buffer)
 //
 static void FilenameStripBase(SString &path)
 {
-	if(!path)
+	if(path.empty())
 	{
 		path = ".";
 		return;
@@ -489,7 +489,7 @@ bool PathIsDirectory(const char *path)
 //
 int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func)
 {
-	SYS_ASSERT(!!path);
+	SYS_ASSERT(path.good());
 	int count = 0;
 
 #ifdef WIN32

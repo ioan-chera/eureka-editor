@@ -995,7 +995,7 @@ void CMD_OperationMenu()
 	SString context = EXEC_Param[0];
 
 	// if no context given, pick one based on editing mode
-	if (! context)
+	if (context.empty())
 	{
 		if (edit.render3d)
 		{

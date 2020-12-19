@@ -1166,7 +1166,7 @@ void Recently_used::insert(const SString &name)
 		return;
 
 	// ignore empty strings to prevent potential problems
-	if (!name)
+	if (name.empty())
 		return;
 
 	int idx = find(name);

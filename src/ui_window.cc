@@ -341,7 +341,7 @@ void UI_MainWindow::SetTitle(const SString &wad_namem, const SString &map_name,
 	static char title_buf[FL_PATH_MAX];
 
 	SString wad_name(wad_namem);
-	if (wad_name)
+	if (wad_name.good())
 	{
 		wad_name = fl_filename_name(wad_name.c_str());
 		snprintf(title_buf, sizeof(title_buf), "%s (%s)%s",

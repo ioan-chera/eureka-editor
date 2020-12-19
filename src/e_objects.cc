@@ -1640,7 +1640,7 @@ static void DoRotate90Things(selection_c *list, bool anti_clockwise,
 
 void CMD_Rotate90()
 {
-	if (!EXEC_Param[0])
+	if (EXEC_Param[0].empty())
 	{
 		Beep("Rotate90: missing keyword");
 		return;
@@ -1967,7 +1967,7 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	// setup transform parameters...
 	float mul = 2.0;
 
-	if (EXEC_Param[0])
+	if (EXEC_Param[0].good())
 	{
 		mul = static_cast<float>(atof(EXEC_Param[0]));
 

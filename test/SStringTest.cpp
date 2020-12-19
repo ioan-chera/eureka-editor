@@ -23,14 +23,13 @@ TEST(SString, Test)
 {
     SString nullString(nullptr);
     ASSERT_EQ(nullString, "");
-    ASSERT_FALSE(nullString);
     ASSERT_TRUE(nullString.empty());
 
     SString aString("str");
     ASSERT_EQ(aString, "str");
     ASSERT_STREQ(aString.c_str(), "str");
     ASSERT_EQ(aString.length(), 3);
-    ASSERT_TRUE(aString);
+    ASSERT_TRUE(aString.good());
     ASSERT_FALSE(aString.empty());
 
     char sizedBuffer[8] = "Flat";
@@ -44,5 +43,5 @@ TEST(SString, Test)
     ASSERT_EQ(goodString.length(), 4);
 
     SString nullStringSized(nullptr, 4);
-    ASSERT_FALSE(nullStringSized);
+    ASSERT_TRUE(nullStringSized.empty());
 }

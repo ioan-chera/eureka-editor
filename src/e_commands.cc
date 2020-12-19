@@ -214,13 +214,13 @@ void CMD_SetVar()
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
 
-	if (! var_name)
+	if (var_name.empty())
 	{
 		Beep("Set: missing var name");
 		return;
 	}
 
-	if (! value)
+	if (value.empty())
 	{
 		Beep("Set: missing value");
 		return;
@@ -297,7 +297,7 @@ void CMD_ToggleVar()
 {
 	SString var_name = EXEC_Param[0];
 
-	if (! var_name)
+	if (var_name.empty())
 	{
 		Beep("Toggle: missing var name");
 		return;
@@ -366,7 +366,7 @@ void CMD_ToggleVar()
 
 void CMD_BrowserMode()
 {
-	if (! EXEC_Param[0])
+	if (EXEC_Param[0].empty())
 	{
 		Beep("BrowserMode: missing mode");
 		return;
@@ -962,7 +962,7 @@ void CMD_ACT_Transform()
 	SString keyword = EXEC_Param[0];
 	transform_keyword_e  mode;
 
-	if (! keyword)
+	if (keyword.empty())
 	{
 		Beep("ACT_Transform: missing keyword");
 		return;
@@ -1338,7 +1338,7 @@ void CMD_BR_Scroll()
 		return;
 	}
 
-	if (! EXEC_Param[0])
+	if (EXEC_Param[0].empty())
 	{
 		Beep("BR_Scroll: missing value");
 		return;

@@ -31,13 +31,13 @@
 
 static SString QueryName(const SString &port = Port_name, const SString &cgame = Game_name)
 {
-	SYS_ASSERT(port);
+	SYS_ASSERT(port.good());
 
 	SString game = cgame;
 
 	if (port.noCaseEqual("vanilla"))
 	{
-		if (! game)
+		if (game.empty())
 			game = "doom2";
 
 		return "vanilla_" + game;
@@ -204,7 +204,7 @@ bool M_PortSetupDialog(const SString &port, const SString &game)
 	// populate the EXE name from existing info, if exists
 	port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
 
-	if (info && info->exe_filename)
+	if (info && info->exe_filename.good())
 		dialog->SetEXE(info->exe_filename);
 
 	bool ok = dialog->Run();
@@ -276,7 +276,7 @@ static void AppendWadName(SString &str, const SString &name, const SString &parm
 {
 	SString abs_name = GetAbsolutePath(name);
 
-	if (parm)
+	if (parm.good())
 	{
 		str += parm;
 		str += ' ';

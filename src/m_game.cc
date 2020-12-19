@@ -365,7 +365,7 @@ static void ParseFeatureDef(char ** argv, int argc)
 
 static SString FindDefinitionFile(const SString &folder, const SString &name)
 {
-	SYS_ASSERT(folder && name);
+	SYS_ASSERT(folder.good() && name.good());
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
 		const SString &base_dir = (pass == 0) ? home_dir : install_dir;
@@ -974,14 +974,14 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 						   const SString &cprettyname,
 						   int include_level)
 {
-	SYS_ASSERT(!!filename);
+	SYS_ASSERT(filename.good());
 
 	SString folder = cfolder;
-	if (! folder)
+	if (folder.empty())
 		folder = "common";
 
 	SString prettyname = cprettyname;
-	if (! prettyname)
+	if (prettyname.empty())
 		prettyname = fl_filename_name(filename.c_str());
 
 	parser_state_c parser_state;
@@ -1120,11 +1120,11 @@ static GameInfo M_LoadGameInfo(const SString &game)
 		return it->second;
 
 	SString filename = FindDefinitionFile("games", game);
-	if(!filename)
+	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
 	M_ParseDefinitionFile(PURPOSE_GameInfo, &loadingGame, filename, "games", nullptr);
-	if(!loadingGame.baseGame)
+	if(loadingGame.baseGame.empty())
 		ThrowException("Game definition for '%s' does not set base_game\n", game.c_str());
 
 	sLoadedGameDefs[game] = loadingGame;
@@ -1310,12 +1310,12 @@ bool is_sky(const SString &flat)
 
 bool is_null_tex(const SString &tex)
 {
-	return tex && tex[0] == '-';
+	return tex.good() && tex[0] == '-';
 }
 
 bool is_special_tex(const SString &tex)
 {
-	return tex && tex[0] == '#';
+	return tex.good() && tex[0] == '#';
 }
 
 

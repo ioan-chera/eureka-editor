@@ -1181,7 +1181,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 void CMD_VT_ShapeArc(void)
 {
-	if (! EXEC_Param[0])
+	if (EXEC_Param[0].empty())
 	{
 		Beep("VT_ShapeArc: missing angle parameter");
 		return;

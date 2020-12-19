@@ -3010,7 +3010,7 @@ void CMD_ApplyTag()
 
 	SString mode = EXEC_Param[0];
 
-	if (!mode || mode.noCaseEqual("fresh"))
+	if (mode.empty() || mode.noCaseEqual("fresh"))
 	{
 		// fresh tag
 	}
@@ -4410,7 +4410,7 @@ void CMD_MapCheck()
 {
 	SString what = EXEC_Param[0];
 
-	if (! what)
+	if (what.empty())
 	{
 		Beep("MapCheck: missing keyword");
 		return;

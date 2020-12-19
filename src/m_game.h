@@ -189,7 +189,7 @@ struct GameInfo
 
 	operator bool() const
 	{
-		return name && baseGame;
+		return name.good() && baseGame.good();
 	}
 };
 

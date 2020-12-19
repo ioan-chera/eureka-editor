@@ -258,7 +258,7 @@ static void Determine_HomeDir(const char *argv0)
 		}
 		else
 		{
-			SYS_ASSERT(install_dir);
+			SYS_ASSERT(install_dir.good());
 			home_dir = install_dir + "\\app_data";
 		}
 		wpath = nullptr;
@@ -734,7 +734,7 @@ bool Main_ConfirmQuit(const char *action)
 //
 SString Main_FileOpFolder()
 {
-	if (Pwad_name)
+	if (Pwad_name.good())
 		return FilenameGetPath(Pwad_name);
 
 	return "";

@@ -1895,13 +1895,13 @@ void R3D_Set()
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
 
-	if (! var_name)
+	if (var_name.empty())
 	{
 		Beep("3D_Set: missing var name");
 		return;
 	}
 
-	if (! value)
+	if (value.empty())
 	{
 		Beep("3D_Set: missing value");
 		return;
@@ -1941,7 +1941,7 @@ void R3D_Toggle()
 {
 	SString var_name = EXEC_Param[0];
 
-	if (! var_name)
+	if (var_name.empty())
 	{
 		Beep("3D_Toggle: missing var name");
 		return;

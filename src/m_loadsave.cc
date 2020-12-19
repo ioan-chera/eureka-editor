@@ -1090,7 +1090,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	// determine which level to use
 	int lev_num = -1;
 
-	if (map_name)
+	if (map_name.good())
 	{
 		lev_num = wad->LevelFind(map_name);
 	}
@@ -1221,7 +1221,7 @@ void CMD_GivenFile()
 
 	int index = last_given_file;
 
-	if (! mode || mode.noCaseEqual("current"))
+	if (mode.empty() || mode.noCaseEqual("current"))
 	{
 		// index = index + 0;
 	}
@@ -1265,7 +1265,7 @@ void CMD_FlipMap()
 {
 	SString mode = EXEC_Param[0];
 
-	if (! mode)
+	if (mode.empty())
 	{
 		Beep("FlipMap: missing keyword");
 		return;

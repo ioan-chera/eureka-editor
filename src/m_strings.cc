@@ -253,9 +253,9 @@ SString::SString(const char *buffer, int length)
 //
 void SString::removeCRLF()
 {
-	if(*this && back() == '\n')
+	if(good() && back() == '\n')
 		pop_back();
-	if(*this && back() == '\r')
+	if(good() && back() == '\r')
 		pop_back();
 }
 
@@ -300,9 +300,9 @@ void SString::trimLeadingSpaces()
 //
 void SString::trimTrailingSpaces()
 {
-	if(!*this)
+	if(empty())
 		return;
-	while(*this && isspace(data.back()))
+	while(good() && isspace(data.back()))
 		data.pop_back();
 }
 

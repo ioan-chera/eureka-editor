@@ -1495,15 +1495,15 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
-			if (L_tex && Pattern_Match(L_tex, pattern))
+			if (L_tex.good() && Pattern_Match(L_tex, pattern))
 				return true;
 
 		if (!filter_toggle->value() || o_uppers->value())
-			if (U_tex && Pattern_Match(U_tex, pattern))
+			if (U_tex.good() && Pattern_Match(U_tex, pattern))
 				return true;
 
 		if (!filter_toggle->value() || o_rails->value())
-			if (R_tex && Pattern_Match(R_tex, pattern, true /* is_rail */))
+			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
 				return true;
 	}
 
@@ -1719,22 +1719,22 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 		if (! L->TwoSided())
 		{
 			if (!filter_toggle->value() || o_lowers->value())
-				if (R_tex && Pattern_Match(R_tex, pattern))
+				if (R_tex.good() && Pattern_Match(R_tex, pattern))
 					BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
-			if (L_tex && Pattern_Match(L_tex, pattern))
+			if (L_tex.good() && Pattern_Match(L_tex, pattern))
 				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_uppers->value())
-			if (U_tex && Pattern_Match(U_tex, pattern))
+			if (U_tex.good() && Pattern_Match(U_tex, pattern))
 				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
-			if (R_tex && Pattern_Match(R_tex, pattern, true /* is_rail */))
+			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
 				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
 	}
 }

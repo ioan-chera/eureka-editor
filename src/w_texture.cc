@@ -399,7 +399,7 @@ Img_c * W_GetTexture(const SString &name, bool try_uppercase)
 	if (is_null_tex(name))
 		return NULL;
 
-	if (!name)
+	if (name.empty())
 		return NULL;
 
 	SString t_str = name;
@@ -441,7 +441,7 @@ bool W_TextureIsKnown(const SString &name)
 	if (is_null_tex(name) || is_special_tex(name))
 		return true;
 
-	if (!name)
+	if (name.empty())
 		return false;
 
 	std::map<SString, Img_c *>::iterator P = textures.find(name);
@@ -614,7 +614,7 @@ bool W_FlatIsKnown(const SString &name)
 	if (is_null_tex(name))
 		return false;
 
-	if (!name)
+	if (name.empty())
 		return false;
 
 	std::map<SString, Img_c *>::iterator P = flats.find(name);

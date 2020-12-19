@@ -890,7 +890,7 @@ void UI_ProjectSetup::PopulatePort()
 	else if (!Game_name.empty())
 		base_game = M_GetBaseGame(Game_name);
 
-	if (! base_game)
+	if (base_game.empty())
 		base_game = "doom2";
 
 

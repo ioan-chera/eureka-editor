@@ -122,6 +122,11 @@ public:
         return data == other.data;
     }
 
+	bool operator != (const SString &other) const
+	{
+		return data != other.data;
+	}
+
 	bool operator < (const SString &other) const
 	{
 		return data < other.data;
@@ -322,9 +327,9 @@ public:
 	}
 
 	//
-	// Convenience operator
+	// Convenience to avoid double negation
 	//
-	operator bool() const
+	bool good() const
 	{
 		return !empty();
 	}
@@ -358,7 +363,7 @@ public:
 	SString asTitle() const
 	{
 		SString result(*this);
-		if(result)
+		if(result.good())
 			result[0] = toupper(result[0]);
 		return result;
 	}

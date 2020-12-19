@@ -282,7 +282,7 @@ public:
 			if (y_stricmp(A, B) != 0)
 				continue;
 
-			if (! map || map_names[k].noCaseEqual(map))
+			if (map.empty() || map_names[k].noCaseEqual(map))
 				return k;
 		}
 
