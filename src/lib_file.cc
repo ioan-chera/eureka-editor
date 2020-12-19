@@ -302,20 +302,26 @@ SString FilenameReposition(const SString &cfilename, const SString &othername)
 //
 SString FilenameGetPath(const SString &filename)
 {
-	size_t len = FindBaseName(filename);
+	size_t baseNamePosition = FindBaseName(filename);
 
-	// remove trailing slash (except when following "C:" or similar)
-	if(len >= 1 &&
-		(filename[len - 1] == '/' || filename[len - 1] == '\\') &&
-		!(len >= 2 && filename[len - 2] == ':'))
-	{
-		len--;
-	}
+	SString directory = filename;
+	directory.resize(baseNamePosition);
 
-	if(len == 0)
+	if(directory.empty())
 		return ".";
-	
-	return SString(filename, len);
+
+	directory.trimTrailingSet("/\\");
+	if(directory.empty())
+		return DIR_SEP_STR;
+
+#ifdef _WIN32
+	if(directory.length() == 2 && directory[1] == ':' && isalpha(directory[0]))
+	{
+		directory.push_back(DIR_SEP_CH);
+	}
+#endif
+
+	return directory;
 }
 
 //
