@@ -35,18 +35,9 @@ bitvec_c::bitvec_c(int n_elements) : num_elem(n_elements)
 	SYS_ASSERT(n_elements > 0);
 
 	int total = (num_elem / 8) + 1;
-
-	d = new byte[total];
-
+	data.resize(total);
 	clear_all();
 }
-
-
-bitvec_c::~bitvec_c()
-{
-	delete[] d;
-}
-
 
 void bitvec_c::resize(int n_elements)
 {
@@ -56,26 +47,15 @@ void bitvec_c::resize(int n_elements)
 	int old_total = (num_elem / 8) + 1;
 	int new_total = (n_elements / 8) + 1;
 
-	byte * old_d = d;
-
 	// don't bother re-allocating unless shrinking by a large amount
-	if (num_elem/2 < n_elements && n_elements < num_elem)
+	if (num_elem / 2 < n_elements && n_elements < num_elem)
 	{
 		num_elem = n_elements;
 		return;
 	}
 
 	num_elem = n_elements;
-
-	d = new byte[new_total];
-
-	// copy existing values
-	memcpy(d, old_d, MIN(old_total, new_total));
-
-	delete[] old_d;
-
-	if (new_total > old_total)
-		memset(d+old_total, 0, new_total - old_total);
+	data.resize(new_total);
 
 	// make sure the bits near the old top are clear
 	for (int i = 0 ; i < 8 ; i++)
@@ -143,32 +123,23 @@ void bitvec_c::frob(int n, BitOp op)
 
 void bitvec_c::set_all()
 {
-	int total = (num_elem / 8) + 1;
-
 	// Note: this will set some extra bits (over num_elem).
 	//       the get() functions (etc) make sure to never use them.
 
-	memset(d, 0xFF, total);
+	memset(data.data(), 0xff, data.size());
 }
 
 
 void bitvec_c::clear_all()
 {
-	int total = (num_elem / 8) + 1;
-
-	memset(d, 0, total);
+	memset(data.data(), 0, data.size());
 }
 
 
 void bitvec_c::toggle_all()
 {
-	int total = (num_elem / 8) + 1;
-
-	byte *pos   = d;
-	byte *p_end = d + total;
-
-	while (pos < p_end)
-		*pos++ ^= 0xFF;
+	for(byte &b : data)
+		b ^= 0xff;
 }
 
 

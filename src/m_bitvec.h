@@ -45,21 +45,16 @@ class bitvec_c
 	//
 
 private:
+	std::vector<byte> data;
 	int num_elem;
 
-	byte *d;
-
 public:
-	 bitvec_c(int n_elements = 64);
-	~bitvec_c();
+	explicit bitvec_c(int n_elements = 64);
 
 	inline int size() const
 	{
 		return num_elem;
 	}
-
-	// this preserves existing elements
-	void resize(int n_elements);
 
 	bool get(int n) const;	// Get bit <n>
 
@@ -74,31 +69,35 @@ public:
 	void toggle_all();
 
 private:
-	// deliberately don't implement copying
-	bitvec_c(const bitvec_c& other);
-
-private:
 	/* NOTE : these functions do no range checking! */
 
 	inline bool raw_get(int n) const
 	{
-		return (d[n >> 3] & (1 << (n & 7))) ? true : false;
+		return !!(data[n >> 3] & (1 << (n & 7)));
 	}
 
 	inline void raw_set(int n)
 	{
-		d[n >> 3] |= (1 << (n & 7));
+		data[n >> 3] |= (1 << (n & 7));
 	}
 
 	inline void raw_clear(int n)
 	{
-		d[n >> 3] &= ~(1 << (n & 7));
+		data[n >> 3] &= ~(1 << (n & 7));
 	}
 
 	inline void raw_toggle(int n)
 	{
-		d[n >> 3] ^= (1 << (n & 7));
+		data[n >> 3] ^= (1 << (n & 7));
 	}
+
+	inline int getByteCount() const
+	{
+		return num_elem / 8 + 1;
+	}
+
+	// this preserves existing elements
+	void resize(int n_elements);
 };
 
 
