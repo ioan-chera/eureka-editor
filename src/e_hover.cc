@@ -560,7 +560,7 @@ void FastOpposite_Finish()
 }
 
 
-int OppositeLineDef(int ld, Side ld_side, Side *result_side, bitvec_c *ignore_lines)
+int OppositeLineDef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines)
 {
 	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
 	// result_side uses the same values (never 0).

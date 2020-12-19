@@ -45,7 +45,7 @@ int ClosestLine_CastingHoriz(double x, double y, Side *side);
 int ClosestLine_CastingVert (double x, double y, Side *side);
 int ClosestLine_CastAtAngle (double x, double y, float radians);
 
-int OppositeLineDef(int ld, Side ld_side, Side *result_side, bitvec_c *ignore_lines = NULL);
+int OppositeLineDef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines = NULL);
 int OppositeSector(int ld, Side ld_side);
 
 void FastOpposite_Begin();
