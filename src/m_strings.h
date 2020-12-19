@@ -237,7 +237,8 @@ public:
 
 	SString &operator += (char c)
 	{
-		data += c;
+		if(c)	// disallow NULL addition!
+			data += c;
 		return *this;
 	}
 
@@ -251,11 +252,6 @@ public:
 	{
 		data += other.data;
 		return *this;
-	}
-
-	void assign(const char *c, size_t n)
-	{
-		data.assign(c ? c : "", c ? n : 0);
 	}
 
 	SString &assign(const SString &other, size_t subpos, size_t sublen = std::string::npos)

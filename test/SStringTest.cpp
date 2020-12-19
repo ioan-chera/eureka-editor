@@ -161,3 +161,13 @@ TEST(SString, Indexing)
 	name[1] = 'e';
 	ASSERT_EQ(name, "Jeckton");
 }
+
+TEST(SString, NulBan)
+{
+	SString name = "Jackson";
+	name += '\0';
+	ASSERT_EQ(name, "Jackson");
+	ASSERT_EQ(name.length(), 7);
+	name += 't';
+	ASSERT_EQ(name, "Jacksont");
+}
