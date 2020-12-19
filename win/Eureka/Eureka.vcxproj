@@ -162,6 +162,7 @@
     <ClCompile Include="..\..\src\bsp_level.cc" />
     <ClCompile Include="..\..\src\bsp_node.cc" />
     <ClCompile Include="..\..\src\bsp_util.cc" />
+    <ClCompile Include="..\..\src\Errors.cpp" />
     <ClCompile Include="..\..\src\e_basis.cc" />
     <ClCompile Include="..\..\src\e_checks.cc" />
     <ClCompile Include="..\..\src\e_commands.cc" />
@@ -229,6 +230,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\bsp.h" />
+    <ClInclude Include="..\..\src\Errors.hpp" />
     <ClInclude Include="..\..\src\e_basis.h" />
     <ClInclude Include="..\..\src\e_checks.h" />
     <ClInclude Include="..\..\src\e_cutpaste.h" />

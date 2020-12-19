@@ -243,6 +243,9 @@
     <ClCompile Include="..\..\src\bsp_util.cc">
       <Filter>Code\BSP_</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Errors.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\e_basis.h">
@@ -436,6 +439,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\bsp.h">
       <Filter>Code\BSP_</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Errors.hpp">
+      <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
