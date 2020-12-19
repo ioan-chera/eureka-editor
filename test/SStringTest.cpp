@@ -45,3 +45,18 @@ TEST(SString, Test)
     SString nullStringSized(nullptr, 4);
     ASSERT_TRUE(nullStringSized.empty());
 }
+
+TEST(SString, TrimTrailingSet)
+{
+    SString string = "//\\//Maglev//\\\\///";
+    string.trimTrailingSet("/\\");
+    ASSERT_EQ(string, "//\\//Maglev");
+
+    SString emptyString = "";
+    emptyString.trimTrailingSet("a");
+    ASSERT_TRUE(emptyString.empty());
+
+    SString fullRemoval = "jackson";
+    fullRemoval.trimTrailingSet("acjknos");
+    ASSERT_TRUE(fullRemoval.empty());
+}

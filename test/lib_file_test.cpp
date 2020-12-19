@@ -37,4 +37,19 @@ int fl_filename_absolute(char *to, int tolen, const char *from)
 TEST(LibFile, FilenameGetPath)
 {
     ASSERT_EQ(FilenameGetPath("path/to/file"), "path/to");
+    ASSERT_EQ(FilenameGetPath("path/to" DIR_SEP_STR DIR_SEP_STR "file"), "path/to");
+    ASSERT_EQ(FilenameGetPath("file"), ".");
+    ASSERT_EQ(FilenameGetPath(DIR_SEP_STR "file"), DIR_SEP_STR);
+#ifdef _WIN32
+    ASSERT_EQ(FilenameGetPath("C:" DIR_SEP_STR "file"), "C:" DIR_SEP_STR);
+#endif
+}
+
+TEST(LibFile, FindBaseName)
+{
+    ASSERT_EQ(FindBaseName("path/to///file"), 10);
+    ASSERT_EQ(FindBaseName("path/to/file"), 8);
+    ASSERT_EQ(FindBaseName("/file"), 1);
+    ASSERT_EQ(FindBaseName("//file"), 2);
+    ASSERT_EQ(FindBaseName("file"), 0);
 }
