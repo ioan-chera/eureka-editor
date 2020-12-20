@@ -32,12 +32,17 @@
     <ClCompile Include="..\..\src\lib_file.cc" />
     <ClCompile Include="..\..\src\m_strings.cc" />
     <ClCompile Include="..\..\test\lib_file_test.cpp" />
+    <ClCompile Include="..\..\test\m_bitvec_test.cpp" />
     <ClCompile Include="..\..\test\SStringTest.cpp" />
     <ClCompile Include="..\..\test\StringTableTest.cpp" />
+    <ClCompile Include="..\..\test\testUtils\FatalHandler.cpp" />
+    <ClCompile Include="..\..\test\testUtils\TempDirContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\modules\googletest\googletest\include\gtest\gtest.h" />
     <ClInclude Include="..\..\modules\googletest\googletest\src\gtest-internal-inl.h" />
+    <ClInclude Include="..\..\test\testUtils\FatalHandler.hpp" />
+    <ClInclude Include="..\..\test\testUtils\TempDirContext.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

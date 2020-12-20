@@ -16,6 +16,9 @@
     <Filter Include="GoogleTest">
       <UniqueIdentifier>{cefbdb7d-840d-4c26-a84d-bbbb7487d9c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="testUtils">
+      <UniqueIdentifier>{ac560e86-f86f-4293-8408-d4713a7c15d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\modules\googletest\googletest\src\gtest.cc">
@@ -63,6 +66,15 @@
     <ClCompile Include="..\..\src\Errors.cpp">
       <Filter>Eureka</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\testUtils\FatalHandler.cpp">
+      <Filter>testUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\testUtils\TempDirContext.cpp">
+      <Filter>testUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\m_bitvec_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\modules\googletest\googletest\src\gtest-internal-inl.h">
@@ -70,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="..\..\modules\googletest\googletest\include\gtest\gtest.h">
       <Filter>GoogleTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\testUtils\FatalHandler.hpp">
+      <Filter>testUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\testUtils\TempDirContext.hpp">
+      <Filter>testUtils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
