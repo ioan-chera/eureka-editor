@@ -273,17 +273,15 @@ static void FilenameStripBase(SString &path)
 //
 SString FilenameReposition(const SString &cfilename, const SString &othername)
 {
-	SString filename = fl_filename_name(cfilename.c_str());
+	SString filename = GetBaseName(cfilename);
 
-	const char *op = fl_filename_name(othername.c_str());
+	size_t otherBaseNameLoc = FindBaseName(othername);
 
-	if (op <= othername.c_str())
+	if (otherBaseNameLoc == 0 || otherBaseNameLoc == SString::npos)
 		return filename;
 
-	size_t dir_len = op - othername.c_str();
-
 	SString result = othername;
-	result.erase(dir_len, SString::npos);
+	result.erase(otherBaseNameLoc, SString::npos);
 	result += filename;
 	return result;
 }

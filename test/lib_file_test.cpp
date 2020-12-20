@@ -144,3 +144,16 @@ TEST(LibFile, FilenameIsBare)
 	ASSERT_FALSE(FilenameIsBare("C:\\doom"));
 	ASSERT_FALSE(FilenameIsBare("\\doom"));
 }
+
+TEST(LibFile, FilenameReposition)
+{
+	ASSERT_EQ(FilenameReposition("/doom/doom.wad", "doom2/"), "doom2/doom.wad");
+	ASSERT_EQ(FilenameReposition("/wherever/doom.wad", "/"), "/doom.wad");
+	ASSERT_EQ(FilenameReposition("doom.wad", "/"), "/doom.wad");
+	ASSERT_EQ(FilenameReposition("/drag/doom.wad", nullptr), "doom.wad");
+	ASSERT_EQ(FilenameReposition("doom.wad", "lamb/"), "lamb/doom.wad");
+	ASSERT_EQ(FilenameReposition("", "lamb/"), "lamb/");
+	ASSERT_EQ(FilenameReposition(nullptr, nullptr), "");
+	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "lamb"), "doom.wad");
+	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "/abc/def/lamb"), "/abc/def/doom.wad");
+}
