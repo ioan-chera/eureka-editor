@@ -668,53 +668,47 @@ static void RawChange(ObjType objtype, int objnum, int field, int *value)
 //  BASIS API IMPLEMENTATION
 //------------------------------------------------------------------------
 
-
-enum
+enum class EditOp
 {
-	OP_CHANGE = 'c',
-	OP_INSERT = 'i',
-	OP_DELETE = 'd',
+	none,
+	change,
+	insert,
+	del
 };
 
 
 class edit_op_c
 {
 public:
-	char action;
+	EditOp action = EditOp::none;
 
-	byte objtype;
-	byte field;
-	byte _pad;
+	byte objtype = 0;
+	byte field = 0;
+	byte _pad = 0;
 
-	int objnum;
+	int objnum = 0;
 
-	int *ptr;
-	int value;
+	int *ptr = nullptr;
+	int value = 0;
 
 public:
-	edit_op_c() : action(0), objtype(0), field(0), _pad(0), objnum(0), ptr(NULL), value(0)
-	{ }
-
-	~edit_op_c()
-	{ }
-
 	void Apply()
 	{
 		switch (action)
 		{
-			case OP_CHANGE:
+			case EditOp::change:
 				RawChange(ObjTypeFromInt(objtype), objnum, (int)field, &value);
 				return;
 
-			case OP_DELETE:
+			case EditOp::del:
 				ptr = RawDelete(ObjTypeFromInt(objtype), objnum);
-				action = OP_INSERT;  // reverse the operation
+				action = EditOp::insert;  // reverse the operation
 				return;
 
-			case OP_INSERT:
+			case EditOp::insert:
 				RawInsert(ObjTypeFromInt(objtype), objnum, ptr);
 				ptr = NULL;
-				action = OP_DELETE;  // reverse the operation
+				action = EditOp::del;  // reverse the operation
 				return;
 
 			default:
@@ -725,12 +719,12 @@ public:
 	void Destroy()
 	{
 // fprintf(stderr, "edit_op_c::Destroy %p action = '%c'\n", this, (action == 0) ? ' ' : action);
-		if (action == OP_INSERT)
+		if (action == EditOp::insert)
 		{
 			SYS_ASSERT(ptr);
 			DeleteFinally(ObjTypeFromInt(objtype), ptr);
 		}
-		else if (action == OP_DELETE)
+		else if (action == EditOp::del)
 		{
 			SYS_ASSERT(! ptr);
 		}
@@ -929,7 +923,7 @@ int BA_New(ObjType type)
 
 	edit_op_c op;
 
-	op.action  = OP_INSERT;
+	op.action  = EditOp::insert;
 	op.objtype = IntFromObjType(type);
 
 	switch (type)
@@ -977,7 +971,7 @@ void BA_Delete(ObjType type, int objnum)
 
 	edit_op_c op;
 
-	op.action  = OP_DELETE;
+	op.action  = EditOp::del;
 	op.objtype = IntFromObjType(type);
 	op.objnum  = objnum;
 
@@ -1034,7 +1028,7 @@ bool BA_Change(ObjType type, int objnum, byte field, int value)
 
 	edit_op_c op;
 
-	op.action  = OP_CHANGE;
+	op.action  = EditOp::change;
 	op.objtype = IntFromObjType(type);
 	op.field   = field;
 	op.objnum  = objnum;
