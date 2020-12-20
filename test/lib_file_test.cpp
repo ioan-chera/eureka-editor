@@ -115,7 +115,7 @@ TEST(LibFile, FilenameGetPath)
 	ASSERT_EQ(FilenameGetPath(""), ".");
     ASSERT_EQ(FilenameGetPath(DIR_SEP_STR "file"), DIR_SEP_STR);
 	ASSERT_EQ(FilenameGetPath("/doom/"), "/doom");
-	ASSERT_EQ(FilenameGetPath("///doom.wad"), "/");
+	ASSERT_TRUE(FilenameGetPath("///doom.wad") == "/" || FilenameGetPath("///doom.wad") == "\\");
 #ifdef _WIN32
     ASSERT_EQ(FilenameGetPath("C:" DIR_SEP_STR "file"), "C:" DIR_SEP_STR);
 #endif
