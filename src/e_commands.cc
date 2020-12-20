@@ -588,13 +588,13 @@ static void DoBeginDrag()
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const Thing *T = Things[edit.drag_thing_num];
+				const Thing *T = gDocument.things[edit.drag_thing_num];
 
 				Objid sec;
 				GetNearObject(sec, ObjType::sectors, T->x(), T->y());
 
 				if (sec.valid())
-					edit.drag_thing_floorh = static_cast<float>(Sectors[sec.num]->floorh);
+					edit.drag_thing_floorh = static_cast<float>(gDocument.sectors[sec.num]->floorh);
 			}
 		}
 	}
@@ -759,7 +759,7 @@ void CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const Thing *T = Things[edit.highlight.num];
+			const Thing *T = gDocument.things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
 		}
 		else
@@ -785,7 +785,7 @@ void CMD_ACT_Click()
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const LineDef *L = LineDefs[split_ld];
+		const LineDef *L = gDocument.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 
@@ -794,7 +794,7 @@ void CMD_ACT_Click()
 
 		int new_vert = BA_New(ObjType::vertices);
 
-		Vertex *V = Vertices[new_vert];
+		Vertex *V = gDocument.vertices[new_vert];
 
 		V->SetRawXY(edit.split_x, edit.split_y);
 

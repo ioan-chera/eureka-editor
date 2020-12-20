@@ -187,7 +187,7 @@ void UpdateDrawLine()
 	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
 		return;
 
-	const Vertex *V = Vertices[edit.draw_from.num];
+	const Vertex *V = gDocument.vertices[edit.draw_from.num];
 
 	double new_x = edit.map_x;
 	double new_y = edit.map_y;
@@ -198,8 +198,8 @@ void UpdateDrawLine()
 	}
 	else if (edit.highlight.valid())
 	{
-		new_x = Vertices[edit.highlight.num]->x();
-		new_y = Vertices[edit.highlight.num]->y();
+		new_x = gDocument.vertices[edit.highlight.num]->x();
+		new_y = gDocument.vertices[edit.highlight.num]->y();
 	}
 	else if (edit.split_line.valid())
 	{
@@ -291,8 +291,8 @@ void UpdateHighlight()
 		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = Vertices[edit.highlight.num];
-			const Vertex *S = Vertices[edit.draw_from.num];
+			const Vertex *V = gDocument.vertices[edit.highlight.num];
+			const Vertex *S = gDocument.vertices[edit.draw_from.num];
 
 			double vx = V->x();
 			double vy = V->y();
@@ -395,7 +395,7 @@ void UpdateLevelBounds(int start_vert)
 {
 	for (int i = start_vert ; i < NumVertices ; i++)
 	{
-		const Vertex * V = Vertices[i];
+		const Vertex * V = gDocument.vertices[i];
 
 		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
 		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
@@ -461,7 +461,7 @@ void MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = Vertices[objnum];
+		const Vertex * V = gDocument.vertices[objnum];
 
 		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
 		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
@@ -668,7 +668,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		for (int t = 0 ; t < NumThings ; t++)
 		{
-			const Thing *T = Things[t];
+			const Thing *T = gDocument.things[t];
 
 			Objid obj;
 			GetNearObject(obj, ObjType::sectors, T->x(), T->y());
@@ -686,7 +686,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		for (int l = 0 ; l < NumLineDefs ; l++)
 		{
-			const LineDef *L = LineDefs[l];
+			const LineDef *L = gDocument.linedefs[l];
 
 			if ( (L->Right() && src->get(L->Right()->sector)) ||
 				 (L->Left()  && src->get(L->Left()->sector)) )
@@ -702,7 +702,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		for (int l = 0 ; l < NumLineDefs ; l++)
 		{
-			const LineDef *L = LineDefs[l];
+			const LineDef *L = gDocument.linedefs[l];
 
 			if ( (L->Right() && src->get(L->Right()->sector)) ||
 				 (L->Left()  && src->get(L->Left()->sector)) )
@@ -719,7 +719,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 
 			if (L->Right()) dest->set(L->right);
 			if (L->Left())  dest->set(L->left);
@@ -731,7 +731,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		for (int n = 0 ; n < NumSideDefs ; n++)
 		{
-			const SideDef * SD = SideDefs[n];
+			const SideDef * SD = gDocument.sidedefs[n];
 
 			if (src->get(SD->sector))
 				dest->set(n);
@@ -744,7 +744,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 
 			dest->set(L->start);
 			dest->set(L->end);
@@ -758,7 +758,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < NumLineDefs ; l++)
 		{
-			const LineDef *L = LineDefs[l];
+			const LineDef *L = gDocument.linedefs[l];
 
 			if (src->get(L->start) && src->get(L->end))
 			{
@@ -782,7 +782,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	for (l = 0 ; l < NumLineDefs ; l++)
 	{
-		const LineDef *L = LineDefs[l];
+		const LineDef *L = gDocument.linedefs[l];
 
 		if (L->Right()) dest->set(L->Right()->sector);
 		if (L->Left())  dest->set(L->Left()->sector);
@@ -792,7 +792,7 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 
 	for (l = 0 ; l < NumLineDefs ; l++)
 	{
-		const LineDef *L = LineDefs[l];
+		const LineDef *L = gDocument.linedefs[l];
 
 		if (src->what_type() == ObjType::vertices)
 		{
@@ -822,7 +822,7 @@ int Selection_FirstLine(selection_c *list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
 		if (L->TwoSided())
 			return *it;
@@ -869,7 +869,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 		case ObjType::things:
 			for (int n = 0 ; n < NumThings ; n++)
 			{
-				const Thing *T = Things[n];
+				const Thing *T = gDocument.things[n];
 
 				double tx = T->x();
 				double ty = T->y();
@@ -884,7 +884,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 		case ObjType::vertices:
 			for (int n = 0 ; n < NumVertices ; n++)
 			{
-				const Vertex *V = Vertices[n];
+				const Vertex *V = gDocument.vertices[n];
 
 				double vx = V->x();
 				double vy = V->y();
@@ -899,7 +899,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 		case ObjType::linedefs:
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
-				const LineDef *L = LineDefs[n];
+				const LineDef *L = gDocument.linedefs[n];
 
 				/* the two ends of the line must be in the box */
 				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
@@ -919,7 +919,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
-				const LineDef *L = LineDefs[n];
+				const LineDef *L = gDocument.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
 				int s1 = L->Right() ? L->Right()->sector : -1;

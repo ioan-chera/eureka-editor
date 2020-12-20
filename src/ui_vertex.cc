@@ -181,7 +181,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const Vertex *V = Vertices[*it];
+			const Vertex *V = gDocument.vertices[*it];
 
 			BA_ChangeVT(*it, Vertex::F_X, V->raw_x + fdx);
 			BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + fdy);
@@ -215,8 +215,8 @@ void UI_VertexBox::UpdateField()
 	if (is_vertex(obj))
 	{
 		// @@ FIXME show decimals in UDMF
-		pos_x->value(SString(static_cast<int>(Vertices[obj]->x())).c_str());
-		pos_y->value(SString(static_cast<int>(Vertices[obj]->y())).c_str());
+		pos_x->value(SString(static_cast<int>(gDocument.vertices[obj]->x())).c_str());
+		pos_y->value(SString(static_cast<int>(gDocument.vertices[obj]->y())).c_str());
 	}
 	else
 	{

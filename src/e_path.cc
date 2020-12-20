@@ -52,8 +52,8 @@ select_lines_in_path_flag_e;
 
 static bool MatchingTextures(int index1, int index2)
 {
-	LineDef *L1 = LineDefs[index1];
-	LineDef *L2 = LineDefs[index2];
+	LineDef *L1 = gDocument.linedefs[index1];
+	LineDef *L2 = gDocument.linedefs[index2];
 
 	// lines with no sidedefs only match each other
 	if (! L1->Right() || ! L2->Right())
@@ -112,13 +112,13 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 		if (n == L)
 			continue;
 
-		if ((match & SLP_OneSided) && ! LineDefs[n]->OneSided())
+		if ((match & SLP_OneSided) && !gDocument.linedefs[n]->OneSided())
 			continue;
 
 		for (int k = 0 ; k < 2 ; k++)
 		{
-			int v1 = LineDefs[n]->start;
-			int v2 = LineDefs[n]->end;
+			int v1 = gDocument.linedefs[n]->start;
+			int v2 = gDocument.linedefs[n]->end;
 
 			if (k == 1)
 				std::swap(v1, v2);
@@ -193,7 +193,7 @@ void CMD_LIN_SelectPath(void)
 
 	int start_L = edit.highlight.num;
 
-	if ((match & SLP_OneSided) && ! LineDefs[start_L]->OneSided())
+	if ((match & SLP_OneSided) && !gDocument.linedefs[start_L]->OneSided())
 		return;
 
 	bool unset_them = false;
@@ -205,8 +205,8 @@ void CMD_LIN_SelectPath(void)
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(start_L, LineDefs[start_L]->start, seen, match);
-	SelectLinesInHalfPath(start_L, LineDefs[start_L]->end,   seen, match);
+	SelectLinesInHalfPath(start_L, gDocument.linedefs[start_L]->start, seen, match);
+	SelectLinesInHalfPath(start_L, gDocument.linedefs[start_L]->end,   seen, match);
 
 	Editor_ClearErrorMode();
 
@@ -246,7 +246,7 @@ static bool GrowContiguousSectors(selection_c &seen)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
+		LineDef *L = gDocument.linedefs[n];
 
 		if (! L->TwoSided())
 			continue;
@@ -257,8 +257,8 @@ static bool GrowContiguousSectors(selection_c &seen)
 		if (sec1 == sec2)
 			continue;
 
-		Sector *S1 = Sectors[sec1];
-		Sector *S2 = Sectors[sec2];
+		Sector *S1 = gDocument.sectors[sec1];
+		Sector *S2 = gDocument.sectors[sec2];
 
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
@@ -501,7 +501,7 @@ void CMD_PruneUnused(void)
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef * L = LineDefs[i];
+		const LineDef * L = gDocument.linedefs[i];
 
 		used_verts.set(L->start);
 		used_verts.set(L->end);
@@ -570,7 +570,7 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			const LineDef *L = LineDefs[n];
+			const LineDef *L = gDocument.linedefs[n];
 
 			if (! L->TwoSided())
 				continue;
@@ -583,8 +583,8 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 
 			// check for doors
 			if (!ignore_doors &&
-				(MIN(Sectors[sec1]->ceilh,  Sectors[sec2]->ceilh) <=
-				 MAX(Sectors[sec1]->floorh, Sectors[sec2]->floorh)))
+				(MIN(gDocument.sectors[sec1]->ceilh, gDocument.sectors[sec2]->ceilh) <=
+				 MAX(gDocument.sectors[sec1]->floorh, gDocument.sectors[sec2]->floorh)))
 			{
 				continue;
 			}

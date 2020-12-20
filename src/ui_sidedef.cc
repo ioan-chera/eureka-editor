@@ -202,7 +202,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -280,12 +280,12 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	{
 		int new_sec = BA_New(ObjType::sectors);
 
-		Sectors[new_sec]->SetDefaults();
+		gDocument.sectors[new_sec]->SetDefaults();
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
 		int sd    = box->is_front ? L->right : L->left;
 		int other = box->is_front ? L->left : L->right;
@@ -303,8 +303,8 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		// create the new sidedef
 		sd = BA_New(ObjType::sidedefs);
 
-		SideDefs[sd]->SetDefaults(other >= 0);
-		SideDefs[sd]->sector = new_sec;
+		gDocument.sidedefs[sd]->SetDefaults(other >= 0);
+		gDocument.sidedefs[sd]->sector = new_sec;
 
 		BA_ChangeLD(*it, field, sd);
 
@@ -335,7 +335,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
 		int sd = box->is_front ? L->right : L->left;
 
@@ -374,7 +374,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -408,7 +408,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -453,7 +453,7 @@ void UI_SideBox::UpdateField()
 {
 	if (is_sidedef(obj))
 	{
-		const SideDef *sd = SideDefs[obj];
+		const SideDef *sd = gDocument.sidedefs[obj];
 
 		x_ofs->value(SString(sd->x_offset).c_str());
 		y_ofs->value(SString(sd->y_offset).c_str());

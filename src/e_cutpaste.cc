@@ -403,7 +403,7 @@ static void CopyGroupOfObjects(selection_c *list)
 	// determine needed sidedefs
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
-		LineDef *L = LineDefs[*it];
+		LineDef *L = gDocument.linedefs[*it];
 
 		if (L->right >= 0) side_sel.set(L->right);
 		if (L->left  >= 0) side_sel.set(L->left);
@@ -421,7 +421,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		vert_map[*it] = (int)clip_board->verts.size();
 
 		Vertex * SD = new Vertex;
-		SD->RawCopy(Vertices[*it]);
+		SD->RawCopy(gDocument.vertices[*it]);
 		clip_board->verts.push_back(SD);
 	}
 
@@ -432,7 +432,7 @@ static void CopyGroupOfObjects(selection_c *list)
 			sector_map[*it] = (int)clip_board->sectors.size();
 
 			Sector * S = new Sector;
-			S->RawCopy(Sectors[*it]);
+			S->RawCopy(gDocument.sectors[*it]);
 			clip_board->sectors.push_back(S);
 		}
 	}
@@ -442,7 +442,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		side_map[*it] = (int)clip_board->sides.size();
 
 		SideDef * SD = new SideDef;
-		SD->RawCopy(SideDefs[*it]);
+		SD->RawCopy(gDocument.sidedefs[*it]);
 		clip_board->sides.push_back(SD);
 
 		// adjust sector references, if needed
@@ -456,7 +456,7 @@ static void CopyGroupOfObjects(selection_c *list)
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
 		LineDef * L = new LineDef;
-		L->RawCopy(LineDefs[*it]);
+		L->RawCopy(gDocument.linedefs[*it]);
 		clip_board->lines.push_back(L);
 
 		// adjust vertex references
@@ -490,7 +490,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
 			Thing * T = new Thing;
-			T->RawCopy(Things[*it]);
+			T->RawCopy(gDocument.things[*it]);
 			clip_board->things.push_back(T);
 		}
 	}
@@ -517,7 +517,7 @@ static bool Clipboard_DoCopy()
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
-				T->RawCopy(Things[*it]);
+				T->RawCopy(gDocument.things[*it]);
 				clip_board->things.push_back(T);
 			}
 			break;
@@ -526,7 +526,7 @@ static bool Clipboard_DoCopy()
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
-				V->RawCopy(Vertices[*it]);
+				V->RawCopy(gDocument.vertices[*it]);
 				clip_board->verts.push_back(V);
 			}
 			break;
@@ -571,7 +571,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = BA_New(ObjType::vertices);
-		Vertex * V = Vertices[new_v];
+		Vertex * V = gDocument.vertices[new_v];
 
 		vert_map[i] = new_v;
 
@@ -584,7 +584,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = BA_New(ObjType::sectors);
-		Sector * S = Sectors[new_s];
+		Sector * S = gDocument.sectors[new_s];
 
 		sector_map[i] = new_s;
 
@@ -601,7 +601,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 		}
 
 		int new_sd = BA_New(ObjType::sidedefs);
-		SideDef * SD = SideDefs[new_sd];
+		SideDef * SD = gDocument.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
@@ -618,7 +618,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
 		int new_l = BA_New(ObjType::linedefs);
-		LineDef * L = LineDefs[new_l];
+		LineDef * L = gDocument.linedefs[new_l];
 
 		L->RawCopy(clip_board->lines[i]);
 
@@ -656,7 +656,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = BA_New(ObjType::things);
-		Thing * T = Things[new_t];
+		Thing * T = gDocument.things[new_t];
 
 		T->RawCopy(clip_board->things[i]);
 
@@ -764,7 +764,7 @@ static bool Clipboard_DoPaste()
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
 				int new_t = BA_New(ObjType::things);
-				Thing * T = Things[new_t];
+				Thing * T = gDocument.things[new_t];
 
 				T->RawCopy(clip_board->things[i]);
 
@@ -784,7 +784,7 @@ static bool Clipboard_DoPaste()
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
 				int new_v = BA_New(ObjType::vertices);
-				Vertex * V = Vertices[new_v];
+				Vertex * V = gDocument.vertices[new_v];
 
 				V->RawCopy(clip_board->verts[i]);
 
@@ -908,7 +908,7 @@ void UnusedVertices(selection_c *lines, selection_c *result)
 		if (lines->get(n))
 			continue;
 
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		result->clear(L->start);
 		result->clear(L->end);
@@ -928,7 +928,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 		if (lines->get(n))
 			continue;
 
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->Right()) result->clear(L->right);
 		if (L->Left())  result->clear(L->left);
@@ -936,7 +936,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
-		const SideDef *SD = SideDefs[i];
+		const SideDef *SD = gDocument.sidedefs[i];
 
 		if (secs && secs->get(SD->sector))
 			result->set(i);
@@ -950,7 +950,7 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		// check if touches a to-be-deleted sector
 		//    -1 : no side
@@ -978,7 +978,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *linedef = LineDefs[n];
+		const LineDef *linedef = gDocument.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 		{
@@ -996,7 +996,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *linedef = LineDefs[n];
+		const LineDef *linedef = gDocument.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))
 			continue;
@@ -1023,7 +1023,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 			if (opp_ld < 0)
 				continue;
 
-			const LineDef *oppositeLinedef = LineDefs[opp_ld];
+			const LineDef *oppositeLinedef = gDocument.linedefs[opp_ld];
 
 			if (oppositeLinedef->WhatSector(opp_side) == sec_num)
 				result->clear(sec_num);
@@ -1036,7 +1036,7 @@ static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 {
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
 		// the logic is ugly here mainly to handle flipping (in particular,
 		// not to flip the line when _both_ sides are unlinked).
@@ -1076,7 +1076,7 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
@@ -1092,8 +1092,8 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	SYS_ASSERT(ld1 >= 0);
 	SYS_ASSERT(ld2 >= 0);
 
-	LineDef *L1 = LineDefs[ld1];
-	LineDef *L2 = LineDefs[ld2];
+	LineDef *L1 = gDocument.linedefs[ld1];
+	LineDef *L2 = gDocument.linedefs[ld2];
 
 	// we merge L2 into L1, unless L1 is significantly shorter
 	if (L1->CalcLength() < L2->CalcLength() * 0.7)
@@ -1171,7 +1171,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			const LineDef *L = LineDefs[n];
+			const LineDef *L = gDocument.linedefs[n];
 
 			if (list->get(L->start) || list->get(L->end))
 				line_sel.set(n);

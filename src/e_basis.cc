@@ -44,12 +44,7 @@
 #include "e_objects.h"
 #include "r_render.h"
 
-
-std::vector<Thing *>   Things;
-std::vector<Vertex *>  Vertices;
-std::vector<Sector *>  Sectors;
-std::vector<SideDef *> SideDefs;
-std::vector<LineDef *> LineDefs;
+Document gDocument;	// currently a singleton.
 
 std::vector<byte>  HeaderData;
 std::vector<byte>  BehaviorData;
@@ -219,36 +214,36 @@ void SideDef::SetDefaults(bool two_sided, int new_tex)
 
 Sector * SideDef::SecRef() const
 {
-	return Sectors[sector];
+	return gDocument.sectors[sector];
 }
 
 Vertex * LineDef::Start() const
 {
-	return Vertices[start];
+	return gDocument.vertices[start];
 }
 
 Vertex * LineDef::End() const
 {
-	return Vertices[end];
+	return gDocument.vertices[end];
 }
 
 SideDef * LineDef::Right() const
 {
-	return (right >= 0) ? SideDefs[right] : NULL;
+	return (right >= 0) ? gDocument.sidedefs[right] : nullptr;
 }
 
 SideDef * LineDef::Left() const
 {
-	return (left >= 0) ? SideDefs[left] : NULL;
+	return (left >= 0) ? gDocument.sidedefs[left] : nullptr;
 }
 
 
 bool LineDef::TouchesSector(int sec_num) const
 {
-	if (right >= 0 && SideDefs[right]->sector == sec_num)
+	if (right >= 0 && gDocument.sidedefs[right]->sector == sec_num)
 		return true;
 
-	if (left >= 0 && SideDefs[left]->sector == sec_num)
+	if (left >= 0 && gDocument.sidedefs[left]->sector == sec_num)
 		return true;
 
 	return false;
@@ -291,7 +286,7 @@ int LineDef::WhatSideDef(Side side) const
 bool LineDef::IsSelfRef() const
 {
 	return (left >= 0) && (right >= 0) &&
-			SideDefs[left]->sector == SideDefs[right]->sector;
+		gDocument.sidedefs[left]->sector == gDocument.sidedefs[right]->sector;
 }
 
 
@@ -311,36 +306,36 @@ static void RawInsertThing(int objnum, int *ptr)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= NumThings);
 
-	Things.push_back(NULL);
+	gDocument.things.push_back(NULL);
 
 	for (int n = NumThings-1 ; n > objnum ; n--)
-		Things[n] = Things[n - 1];
+		gDocument.things[n] = gDocument.things[n - 1];
 
-	Things[objnum] = (Thing*) ptr;
+	gDocument.things[objnum] = reinterpret_cast<Thing*>(ptr);
 }
 
 static void RawInsertLineDef(int objnum, int *ptr)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= NumLineDefs);
 
-	LineDefs.push_back(NULL);
+	gDocument.linedefs.push_back(NULL);
 
 	for (int n = NumLineDefs-1 ; n > objnum ; n--)
-		LineDefs[n] = LineDefs[n - 1];
+		gDocument.linedefs[n] = gDocument.linedefs[n - 1];
 
-	LineDefs[objnum] = (LineDef*) ptr;
+	gDocument.linedefs[objnum] = reinterpret_cast<LineDef*>(ptr);
 }
 
 static void RawInsertVertex(int objnum, int *ptr)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= NumVertices);
 
-	Vertices.push_back(NULL);
+	gDocument.vertices.push_back(NULL);
 
 	for (int n = NumVertices-1 ; n > objnum ; n--)
-		Vertices[n] = Vertices[n - 1];
+		gDocument.vertices[n] = gDocument.vertices[n - 1];
 
-	Vertices[objnum] = (Vertex*) ptr;
+	gDocument.vertices[objnum] = reinterpret_cast<Vertex*>(ptr);
 
 	// fix references in linedefs
 
@@ -348,7 +343,7 @@ static void RawInsertVertex(int objnum, int *ptr)
 	{
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 		{
-			LineDef *L = LineDefs[n];
+			LineDef *L = gDocument.linedefs[n];
 
 			if (L->start >= objnum)
 				L->start++;
@@ -363,12 +358,12 @@ static void RawInsertSideDef(int objnum, int *ptr)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= NumSideDefs);
 
-	SideDefs.push_back(NULL);
+	gDocument.sidedefs.push_back(NULL);
 
 	for (int n = NumSideDefs-1 ; n > objnum ; n--)
-		SideDefs[n] = SideDefs[n - 1];
+		gDocument.sidedefs[n] = gDocument.sidedefs[n - 1];
 
-	SideDefs[objnum] = (SideDef*) ptr;
+	gDocument.sidedefs[objnum] = reinterpret_cast<SideDef*>(ptr);
 
 	// fix the linedefs references
 
@@ -376,7 +371,7 @@ static void RawInsertSideDef(int objnum, int *ptr)
 	{
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 		{
-			LineDef *L = LineDefs[n];
+			LineDef *L = gDocument.linedefs[n];
 
 			if (L->right >= objnum)
 				L->right++;
@@ -391,12 +386,12 @@ static void RawInsertSector(int objnum, int *ptr)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= NumSectors);
 
-	Sectors.push_back(NULL);
+	gDocument.sectors.push_back(NULL);
 
 	for (int n = NumSectors-1 ; n > objnum ; n--)
-		Sectors[n] = Sectors[n - 1];
+		gDocument.sectors[n] = gDocument.sectors[n - 1];
 
-	Sectors[objnum] = (Sector*) ptr;
+	gDocument.sectors[objnum] = reinterpret_cast<Sector*>(ptr);
 
 	// fix all sidedef references
 
@@ -404,7 +399,7 @@ static void RawInsertSector(int objnum, int *ptr)
 	{
 		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
 		{
-			SideDef *S = SideDefs[n];
+			SideDef *S = gDocument.sidedefs[n];
 
 			if (S->sector >= objnum)
 				S->sector++;
@@ -416,12 +411,12 @@ static int * RawDeleteThing(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumThings);
 
-	int * result = reinterpret_cast<int*>(Things[objnum]);
+	int * result = reinterpret_cast<int*>(gDocument.things[objnum]);
 
 	for (int n = objnum ; n < NumThings-1 ; n++)
-		Things[n] = Things[n + 1];
+		gDocument.things[n] = gDocument.things[n + 1];
 
-	Things.pop_back();
+	gDocument.things.pop_back();
 
 	return result;
 }
@@ -468,12 +463,12 @@ static int * RawDeleteLineDef(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumLineDefs);
 
-	int * result = (int*) LineDefs[objnum];
+	int * result = reinterpret_cast<int*>(gDocument.linedefs[objnum]);
 
 	for (int n = objnum ; n < NumLineDefs-1 ; n++)
-		LineDefs[n] = LineDefs[n + 1];
+		gDocument.linedefs[n] = gDocument.linedefs[n + 1];
 
-	LineDefs.pop_back();
+	gDocument.linedefs.pop_back();
 
 	return result;
 }
@@ -482,12 +477,12 @@ static int * RawDeleteVertex(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumVertices);
 
-	int * result = (int*) Vertices[objnum];
+	int * result = reinterpret_cast<int*>(gDocument.vertices[objnum]);
 
 	for (int n = objnum ; n < NumVertices-1 ; n++)
-		Vertices[n] = Vertices[n + 1];
+		gDocument.vertices[n] = gDocument.vertices[n + 1];
 
-	Vertices.pop_back();
+	gDocument.vertices.pop_back();
 
 	// fix the linedef references
 
@@ -495,7 +490,7 @@ static int * RawDeleteVertex(int objnum)
 	{
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 		{
-			LineDef *L = LineDefs[n];
+			LineDef *L = gDocument.linedefs[n];
 
 			if (L->start > objnum)
 				L->start--;
@@ -512,12 +507,12 @@ static int * RawDeleteSideDef(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumSideDefs);
 
-	int * result = (int*) SideDefs[objnum];
+	int * result = reinterpret_cast<int*>(gDocument.sidedefs[objnum]);
 
 	for (int n = objnum ; n < NumSideDefs-1 ; n++)
-		SideDefs[n] = SideDefs[n + 1];
+		gDocument.sidedefs[n] = gDocument.sidedefs[n + 1];
 
-	SideDefs.pop_back();
+	gDocument.sidedefs.pop_back();
 
 	// fix the linedefs references
 
@@ -525,7 +520,7 @@ static int * RawDeleteSideDef(int objnum)
 	{
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 		{
-			LineDef *L = LineDefs[n];
+			LineDef *L = gDocument.linedefs[n];
 
 			if (L->right > objnum)
 				L->right--;
@@ -542,12 +537,12 @@ static int * RawDeleteSector(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumSectors);
 
-	int * result = (int*) Sectors[objnum];
+	int * result = reinterpret_cast<int*>(gDocument.sectors[objnum]);
 
 	for (int n = objnum ; n < NumSectors-1 ; n++)
-		Sectors[n] = Sectors[n + 1];
+		gDocument.sectors[n] = gDocument.sectors[n + 1];
 
-	Sectors.pop_back();
+	gDocument.sectors.pop_back();
 
 	// fix sidedef references
 
@@ -555,7 +550,7 @@ static int * RawDeleteSector(int objnum)
 	{
 		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
 		{
-			SideDef *S = SideDefs[n];
+			SideDef *S = gDocument.sidedefs[n];
 
 			if (S->sector > objnum)
 				S->sector--;
@@ -624,27 +619,27 @@ static void RawChange(ObjType objtype, int objnum, int field, int *value)
 	{
 		case ObjType::things:
 			SYS_ASSERT(0 <= objnum && objnum < NumThings);
-			pos = (int*) Things[objnum];
+			pos = reinterpret_cast<int*>(gDocument.things[objnum]);
 			break;
 
 		case ObjType::vertices:
 			SYS_ASSERT(0 <= objnum && objnum < NumVertices);
-			pos = (int*) Vertices[objnum];
+			pos = reinterpret_cast<int*>(gDocument.vertices[objnum]);
 			break;
 
 		case ObjType::sectors:
 			SYS_ASSERT(0 <= objnum && objnum < NumSectors);
-			pos = (int*) Sectors[objnum];
+			pos = reinterpret_cast<int*>(gDocument.sectors[objnum]);
 			break;
 
 		case ObjType::sidedefs:
 			SYS_ASSERT(0 <= objnum && objnum < NumSideDefs);
-			pos = (int*) SideDefs[objnum];
+			pos = reinterpret_cast<int*>(gDocument.sidedefs[objnum]);
 			break;
 
 		case ObjType::linedefs:
 			SYS_ASSERT(0 <= objnum && objnum < NumLineDefs);
-			pos = (int*) LineDefs[objnum];
+			pos = reinterpret_cast<int*>(gDocument.linedefs[objnum]);
 			break;
 
 		default:
@@ -981,7 +976,7 @@ void BA_Delete(ObjType type, int objnum)
 		// unbind sidedef from any linedefs using it
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 		{
-			LineDef *L = LineDefs[n];
+			LineDef *L = gDocument.linedefs[n];
 
 			if (L->right == objnum)
 				BA_ChangeLD(n, LineDef::F_RIGHT, -1);
@@ -995,7 +990,7 @@ void BA_Delete(ObjType type, int objnum)
 		// delete any linedefs bound to this vertex
 		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
 		{
-			LineDef *L = LineDefs[n];
+			LineDef *L = gDocument.linedefs[n];
 
 			if (L->start == objnum || L->end == objnum)
 			{
@@ -1008,7 +1003,7 @@ void BA_Delete(ObjType type, int objnum)
 		// delete the sidedefs bound to this sector
 		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
 		{
-			if (SideDefs[n]->sector == objnum)
+			if (gDocument.sidedefs[n]->sector == objnum)
 			{
 				BA_Delete(ObjType::sidedefs, n);
 			}
@@ -1085,17 +1080,22 @@ void BA_ClearAll()
 {
 	int i;
 
-	for (i = 0 ; i < NumThings   ; i++) delete Things[i];
-	for (i = 0 ; i < NumVertices ; i++) delete Vertices[i];
-	for (i = 0 ; i < NumSectors  ; i++) delete Sectors[i];
-	for (i = 0 ; i < NumSideDefs ; i++) delete SideDefs[i];
-	for (i = 0 ; i < NumLineDefs ; i++) delete LineDefs[i];
+	for (i = 0 ; i < NumThings   ; i++) 
+		delete gDocument.things[i];
+	for (i = 0 ; i < NumVertices ; i++) 
+		delete gDocument.vertices[i];
+	for (i = 0 ; i < NumSectors  ; i++) 
+		delete gDocument.sectors[i];
+	for (i = 0 ; i < NumSideDefs ; i++) 
+		delete gDocument.sidedefs[i];
+	for (i = 0 ; i < NumLineDefs ; i++) 
+		delete gDocument.linedefs[i];
 
-	Things.clear();
-	Vertices.clear();
-	Sectors.clear();
-	SideDefs.clear();
-	LineDefs.clear();
+	gDocument.things.clear();
+	gDocument.vertices.clear();
+	gDocument.sectors.clear();
+	gDocument.sidedefs.clear();
+	gDocument.linedefs.clear();
 
 	HeaderData.clear();
 	BehaviorData.clear();
@@ -1240,10 +1240,10 @@ void BA_LevelChecksum(crc32_c& crc)
 	int i;
 
 	for (i = 0 ; i < NumThings ; i++)
-		ChecksumThing(crc, Things[i]);
+		ChecksumThing(crc, gDocument.things[i]);
 
 	for (i = 0 ; i < NumLineDefs ; i++)
-		ChecksumLineDef(crc, LineDefs[i]);
+		ChecksumLineDef(crc, gDocument.linedefs[i]);
 }
 
 

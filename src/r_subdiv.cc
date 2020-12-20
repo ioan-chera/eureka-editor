@@ -230,7 +230,7 @@ public:
 
 		for (sec = 0 ; sec < total ; sec++)
 		{
-			const Sector *S = Sectors[sec];
+			const Sector *S = gDocument.sectors[sec];
 
 			infos[sec].Clear();
 			infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
@@ -239,7 +239,7 @@ public:
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			const LineDef *L = LineDefs[n];
+			const LineDef *L = gDocument.linedefs[n];
 
 			CheckBoom242(L);
 			CheckExtraFloor(L, n);
@@ -251,7 +251,7 @@ public:
 				if (sd_num < 0)
 					continue;
 
-				sec = SideDefs[sd_num]->sector;
+				sec = gDocument.sidedefs[sd_num]->sector;
 
 				sector_extra_info_t& info = infos[sec];
 
@@ -264,16 +264,16 @@ public:
 
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			CheckSlopeThing(Things[n]);
+			CheckSlopeThing(gDocument.things[n]);
 		}
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			CheckSlopeCopyThing(Things[n]);
+			CheckSlopeCopyThing(gDocument.things[n]);
 		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			CheckPlaneCopy(LineDefs[n]);
+			CheckPlaneCopy(gDocument.linedefs[n]);
 		}
 	}
 
@@ -293,7 +293,7 @@ public:
 
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
-			if (Sectors[n]->tag == L->tag)
+			if (gDocument.sectors[n]->tag == L->tag)
 				infos[n].floors.heightsec = dummy_sec;
 		}
 	}
@@ -373,7 +373,7 @@ public:
 		// find all matching sectors
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
-			if (Sectors[n]->tag == sec_tag)
+			if (gDocument.sectors[n]->tag == sec_tag)
 				infos[n].floors.floors.push_back(EF);
 		}
 	}
@@ -513,8 +513,8 @@ public:
 	void PlaneAlignPart(const LineDef *L, Side side, int plane)
 	{
 		int sec_num = L->WhatSector(side);
-		const Sector *front = Sectors[L->WhatSector(side)];
-		const Sector *back  = Sectors[L->WhatSector(-side)];
+		const Sector *front = gDocument.sectors[L->WhatSector(side)];
+		const Sector *back  = gDocument.sectors[L->WhatSector(-side)];
 
 		// find a vertex belonging to sector and is far from the line
 		const Vertex *v = NULL;
@@ -533,7 +533,7 @@ public:
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			const LineDef *L2 = LineDefs[n];
+			const LineDef *L2 = gDocument.linedefs[n];
 			if (L2->TouchesSector(sec_num))
 			{
 				for (int pass = 0 ; pass < 2 ; pass++)
@@ -577,23 +577,23 @@ public:
 	{
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
-			if (f1_tag > 0 && Sectors[n]->tag == f1_tag && L->Right())
+			if (f1_tag > 0 && gDocument.sectors[n]->tag == f1_tag && L->Right())
 			{
 				infos[L->Right()->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 				f1_tag = 0;
 			}
-			if (c1_tag > 0 && Sectors[n]->tag == c1_tag && L->Right())
+			if (c1_tag > 0 && gDocument.sectors[n]->tag == c1_tag && L->Right())
 			{
 				infos[L->Right()->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 				c1_tag = 0;
 			}
 
-			if (f2_tag > 0 && Sectors[n]->tag == f2_tag && L->Left())
+			if (f2_tag > 0 && gDocument.sectors[n]->tag == f2_tag && L->Left())
 			{
 				infos[L->Left()->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 				f2_tag = 0;
 			}
-			if (c2_tag > 0 && Sectors[n]->tag == c2_tag && L->Left())
+			if (c2_tag > 0 && gDocument.sectors[n]->tag == c2_tag && L->Left())
 			{
 				infos[L->Left()->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 				c2_tag = 0;
@@ -635,7 +635,7 @@ public:
 
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
-			if (Sectors[n]->tag == T->arg1)
+			if (gDocument.sectors[n]->tag == T->arg1)
 			{
 				if (plane > 0)
 					infos[o.num].floors.c_plane.Copy(infos[n].floors.c_plane);
@@ -752,7 +752,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (! L->TouchesSector(num))
 			continue;

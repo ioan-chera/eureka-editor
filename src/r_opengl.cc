@@ -869,7 +869,7 @@ public:
 
 	void DrawLine(int ld_index)
 	{
-		const LineDef *ld = LineDefs[ld_index];
+		const LineDef *ld = gDocument.linedefs[ld_index];
 
 		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
 			return;
@@ -1021,7 +1021,7 @@ public:
 			sector_3dfloors_c *b_ex = Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
-				dummy = Sectors[b_ex->heightsec];
+				dummy = gDocument.sectors[b_ex->heightsec];
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
@@ -1031,7 +1031,7 @@ public:
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
-				dummy = Sectors[f_ex->heightsec];
+				dummy = gDocument.sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 				{
 					dummy_fp.Init(static_cast<float>(dummy->floorh));
@@ -1064,8 +1064,8 @@ public:
 				for (size_t k = 0 ; k < b_ex->floors.size() ; k++)
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
-					const SideDef *ef_sd = SideDefs[EF.sd];
-					const Sector *dummy = Sectors[ef_sd->sector];
+					const SideDef *ef_sd = gDocument.sidedefs[EF.sd];
+					const Sector *dummy = gDocument.sectors[ef_sd->sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1120,7 +1120,7 @@ public:
 		if (! subdiv)
 			return;
 
-		const Sector *sec = Sectors[sec_index];
+		const Sector *sec = gDocument.sectors[sec_index];
 		const Sector *dummy = NULL;
 
 		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sec_index);
@@ -1130,7 +1130,7 @@ public:
 		// support for BOOM's 242 "transfer heights" line type
 		if (exfloor->heightsec >= 0)
 		{
-			dummy = Sectors[exfloor->heightsec];
+			dummy = gDocument.sectors[exfloor->heightsec];
 
 			if (dummy->floorh > sec->floorh && r_view.z < dummy->floorh)
 			{
@@ -1180,7 +1180,7 @@ public:
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const Sector *dummy = Sectors[SideDefs[EF.sd]->sector];
+			const Sector *dummy = gDocument.sectors[gDocument.sidedefs[EF.sd]->sector];
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.
@@ -1210,7 +1210,7 @@ public:
 
 	void DrawThing(int th_index)
 	{
-		Thing *th = Things[th_index];
+		Thing *th = gDocument.things[th_index];
 
 		const thingtype_t &info = M_GetThingType(th->type);
 
@@ -1274,12 +1274,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1306,7 +1306,7 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
-			int light = is_sector(sec_num) ? Sectors[sec_num]->light : 255;
+			int light = is_sector(sec_num) ? gDocument.sectors[sec_num]->light : 255;
 
 			L = DoomLightToFloat(light, ty /* dist */);
 		}
@@ -1325,7 +1325,7 @@ public:
 
 	void HighlightLine(int ld_index, int part)
 	{
-		const LineDef *L = LineDefs[ld_index];
+		const LineDef *L = gDocument.linedefs[ld_index];
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
@@ -1393,7 +1393,7 @@ public:
 
 	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = Sectors[sec_index];
+		const Sector *sec = gDocument.sectors[sec_index];
 
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
@@ -1416,7 +1416,7 @@ public:
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			const LineDef *L = LineDefs[n];
+			const LineDef *L = gDocument.linedefs[n];
 
 			if (L->TouchesSector(sec_index))
 			{
@@ -1435,7 +1435,7 @@ public:
 
 	void HighlightThing(int th_index)
 	{
-		Thing *th = Things[th_index];
+		Thing *th = gDocument.things[th_index];
 		float tx = static_cast<float>(th->x());
 		float ty = static_cast<float>(th->y());
 
@@ -1477,12 +1477,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((is_sector(sec_num) ? Sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 

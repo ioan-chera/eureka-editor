@@ -292,7 +292,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 {
 	bool opposite = (e_state & FL_SHIFT);
 
-	LineDef *L = LineDefs[ld];
+	LineDef *L = gDocument.linedefs[ld];
 
 	// handle the selected texture boxes
 	if (parts != 0)
@@ -377,7 +377,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		SideDef *S = SideDefs[sd1];
+		SideDef *S = gDocument.sidedefs[sd1];
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).
@@ -493,7 +493,7 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
@@ -613,7 +613,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
@@ -725,9 +725,9 @@ void UI_LineBox::UpdateField(int field)
 
 		if (is_linedef(obj))
 		{
-			const LineDef *L = LineDefs[obj];
+			const LineDef *L = gDocument.linedefs[obj];
 
-			tag->value(SString(LineDefs[obj]->tag).c_str());
+			tag->value(SString(gDocument.linedefs[obj]->tag).c_str());
 
 			const linetype_t &info = M_GetLineType(L->type);
 
@@ -759,7 +759,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (is_linedef(obj))
 		{
-			const LineDef *L = LineDefs[obj];
+			const LineDef *L = gDocument.linedefs[obj];
 
 			int right_mask = SolidMask(L, Side::right);
 			int  left_mask = SolidMask(L, Side::left);
@@ -778,7 +778,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (is_linedef(obj))
 		{
-			int type_num = LineDefs[obj]->type;
+			int type_num = gDocument.linedefs[obj]->type;
 
 			type->value(SString(type_num).c_str());
 
@@ -812,7 +812,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			actkind->activate();
 
-			FlagsFromInt(LineDefs[obj]->flags);
+			FlagsFromInt(gDocument.linedefs[obj]->flags);
 		}
 		else
 		{
@@ -845,7 +845,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(LineDefs[n]->CalcLength());
+	float len_f = static_cast<float>(gDocument.linedefs[n]->CalcLength());
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);

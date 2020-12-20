@@ -46,7 +46,7 @@ bool LineDefAlreadyExists(int v1, int v2)
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
+		LineDef *L = gDocument.linedefs[n];
 
 		if (L->start == v1 && L->end == v2) return true;
 		if (L->start == v2 && L->end == v1) return true;
@@ -63,12 +63,12 @@ bool LineDefAlreadyExists(int v1, int v2)
 //
 bool LineDefWouldOverlap(int v1, double x2, double y2)
 {
-	double x1 = Vertices[v1]->x();
-	double y1 = Vertices[v1]->y();
+	double x1 = gDocument.vertices[v1]->x();
+	double y1 = gDocument.vertices[v1]->y();
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
+		LineDef *L = gDocument.linedefs[n];
 
 		// zero-length lines should not exist, but don't get stroppy if they do
 		if (L->IsZeroLength())
@@ -109,7 +109,7 @@ bool LineDefWouldOverlap(int v1, double x2, double y2)
 
 static inline const LineDef * LD_ptr(const Objid& obj)
 {
-	return LineDefs[obj.num];
+	return gDocument.linedefs[obj.num];
 }
 
 static inline const SideDef * SD_ptr(const Objid& obj)
@@ -118,7 +118,7 @@ static inline const SideDef * SD_ptr(const Objid& obj)
 
 	int sd = LD_ptr(obj)->WhatSideDef(where);
 
-	return (sd >= 0) ? SideDefs[sd] : NULL;
+	return (sd >= 0) ? gDocument.sidedefs[sd] : nullptr;
 }
 
 
@@ -373,7 +373,7 @@ static void DetermineAdjoiner(Objid& result,
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *N = LineDefs[n];
+		const LineDef *N = gDocument.linedefs[n];
 
 		if (N == L)
 			continue;
@@ -615,16 +615,16 @@ static bool Align_CheckAdjacent(std::vector<Objid> & group,
 	int vj = 0;
 
 	if (((ob_j.parts & PART_LF_ALL) ? 0 : 1) == (do_right ? 1 : 0))
-		vj = LineDefs[ob_j.num]->end;
+		vj = gDocument.linedefs[ob_j.num]->end;
 	else
-		vj = LineDefs[ob_j.num]->start;
+		vj = gDocument.linedefs[ob_j.num]->start;
 
 	int vk = 0;
 
 	if (((ob_k.parts & PART_LF_ALL) ? 0 : 1) == (do_right ? 1 : 0))
-		vk = LineDefs[ob_k.num]->start;
+		vk = gDocument.linedefs[ob_k.num]->start;
 	else
-		vk = LineDefs[ob_k.num]->end;
+		vk = gDocument.linedefs[ob_k.num]->end;
 
 	return (vj == vk);
 }
@@ -746,7 +746,7 @@ void CMD_LIN_Align()
 		int parts = edit.Selected->get_ext(*it);
 		parts &= ~1;
 
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
 		// safety check
 		if (L->left  < 0) parts &= ~PART_LF_ALL;
@@ -821,8 +821,8 @@ void CMD_LIN_Align()
 
 static void FlipLine_verts(int ld)
 {
-	int old_start = LineDefs[ld]->start;
-	int old_end   = LineDefs[ld]->end;
+	int old_start = gDocument.linedefs[ld]->start;
+	int old_end   = gDocument.linedefs[ld]->end;
 
 	BA_ChangeLD(ld, LineDef::F_START, old_end);
 	BA_ChangeLD(ld, LineDef::F_END, old_start);
@@ -831,8 +831,8 @@ static void FlipLine_verts(int ld)
 
 static void FlipLine_sides(int ld)
 {
-	int old_right = LineDefs[ld]->right;
-	int old_left  = LineDefs[ld]->left;
+	int old_right = gDocument.linedefs[ld]->right;
+	int old_left  = gDocument.linedefs[ld]->left;
 
 	BA_ChangeLD(ld, LineDef::F_RIGHT, old_left);
 	BA_ChangeLD(ld, LineDef::F_LEFT, old_right);
@@ -852,7 +852,7 @@ void FlipLineDef_safe(int ld)
 
 	FlipLine_verts(ld);
 
-	if (! LineDefs[ld]->OneSided())
+	if (!gDocument.linedefs[ld]->OneSided())
 		FlipLine_sides(ld);
 }
 
@@ -924,13 +924,13 @@ void CMD_LIN_SwapSides()
 
 int SplitLineDefAtVertex(int ld, int new_v)
 {
-	LineDef * L = LineDefs[ld];
-	Vertex  * V = Vertices[new_v];
+	LineDef * L = gDocument.linedefs[ld];
+	Vertex  * V = gDocument.vertices[new_v];
 
 	// create new linedef
 	int new_l = BA_New(ObjType::linedefs);
 
-	LineDef * L2 = LineDefs[new_l];
+	LineDef * L2 = gDocument.linedefs[new_l];
 
 	// it is OK to directly set fields of newly created objects
 	L2->RawCopy(L);
@@ -975,7 +975,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 static bool DoSplitLineDef(int ld)
 {
-	LineDef * L = LineDefs[ld];
+	LineDef * L = gDocument.linedefs[ld];
 
 	// prevent creating tiny lines (especially zero-length)
 	if (abs(L->Start()->x() - L->End()->x()) < 4 &&
@@ -987,7 +987,7 @@ static bool DoSplitLineDef(int ld)
 
 	int new_v = BA_New(ObjType::vertices);
 
-	Vertex * V = Vertices[new_v];
+	Vertex * V = gDocument.vertices[new_v];
 
 	V->SetRawXY(new_x, new_y);
 
@@ -1040,8 +1040,8 @@ void CMD_LIN_SplitHalf(void)
 
 void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 {
-	LineDef * L  = LineDefs[ld];
-	SideDef * SD = SideDefs[new_sd];
+	LineDef * L  = gDocument.linedefs[ld];
+	SideDef * SD = gDocument.sidedefs[new_sd];
 
 	int new_flags = L->flags;
 
@@ -1053,7 +1053,7 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
 
-	const SideDef *other = SideDefs[other_sd];
+	const SideDef *other = gDocument.sidedefs[other_sd];
 
 	if (! is_null_tex(other->MidTex()))
 	{
@@ -1077,7 +1077,7 @@ void LD_MergedSecondSideDef(int ld)
 {
 	// similar to above, but with existing sidedefs
 
-	LineDef * L = LineDefs[ld];
+	LineDef * L = gDocument.linedefs[ld];
 
 	SYS_ASSERT(L->TwoSided());
 
@@ -1124,7 +1124,7 @@ void LD_MergedSecondSideDef(int ld)
 
 void LD_RemoveSideDef(int ld, Side ld_side)
 {
-	const LineDef *L = LineDefs[ld];
+	const LineDef *L = gDocument.linedefs[ld];
 
 	int gone_sd  = (ld_side == Side::right) ? L->right : L->left;
 	int other_sd = (ld_side == Side::right) ? L->left : L->right;
@@ -1153,7 +1153,7 @@ void LD_RemoveSideDef(int ld, Side ld_side)
 
 	// FIXME: if sidedef is shared, either don't modify it _OR_ duplicate it
 
-	const SideDef *SD = SideDefs[other_sd];
+	const SideDef *SD = gDocument.sidedefs[other_sd];
 
 	int new_tex = BA_InternaliseString(default_wall_tex);
 
@@ -1164,7 +1164,7 @@ void LD_RemoveSideDef(int ld, Side ld_side)
 		new_tex = SD->upper_tex;
 	else if (gone_sd >= 0)
 	{
-		SD = SideDefs[gone_sd];
+		SD = gDocument.sidedefs[gone_sd];
 
 		if (! is_null_tex(SD->LowerTex()))
 			new_tex = SD->lower_tex;
@@ -1194,8 +1194,8 @@ void CMD_LIN_MergeTwo(void)
 	int ld2 = edit.Selected->find_first();
 	int ld1 = edit.Selected->find_second();
 
-	const LineDef * L1 = LineDefs[ld1];
-	const LineDef * L2 = LineDefs[ld2];
+	const LineDef * L1 = gDocument.linedefs[ld1];
+	const LineDef * L2 = gDocument.linedefs[ld2];
 
 	if (! (L1->OneSided() && L2->OneSided()))
 	{
@@ -1222,7 +1222,7 @@ void CMD_LIN_MergeTwo(void)
 		if (n == ld1 || n == ld2)
 			continue;
 
-		const LineDef * L = LineDefs[n];
+		const LineDef * L = gDocument.linedefs[n];
 
 		if (L->start == L1->start)
 			BA_ChangeLD(n, LineDef::F_START, L2->end);
@@ -1250,7 +1250,7 @@ void CMD_LIN_MergeTwo(void)
 
 void MoveCoordOntoLineDef(int ld, double *x, double *y)
 {
-	const LineDef *L = LineDefs[ld];
+	const LineDef *L = gDocument.linedefs[ld];
 
 	double x1 = L->Start()->x();
 	double y1 = L->Start()->y();
@@ -1277,9 +1277,9 @@ static bool LD_StartWillBeMoved(int ld, selection_c& list)
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
-		if (*it != ld && L->end == LineDefs[ld]->start)
+		if (*it != ld && L->end == gDocument.linedefs[ld]->start)
 			return true;
 	}
 
@@ -1291,9 +1291,9 @@ static bool LD_EndWillBeMoved(int ld, selection_c& list)
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 
-		if (*it != ld && L->start == LineDefs[ld]->end)
+		if (*it != ld && L->start == gDocument.linedefs[ld]->end)
 			return true;
 	}
 
@@ -1329,7 +1329,7 @@ static void LD_SetLength(int ld, int new_len, double angle)
 	// the 'new_len' parameter can be negative, which means move
 	// the start vertex instead of the end vertex.
 
-	const LineDef *L = LineDefs[ld];
+	const LineDef *L = gDocument.linedefs[ld];
 
 	double dx = abs(new_len) * cos(angle);
 	double dy = abs(new_len) * sin(angle);
@@ -1375,7 +1375,7 @@ void LineDefs_SetLength(int new_len)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		angles[n] = atan2(L->End()->y() - L->Start()->y(), L->End()->x() - L->Start()->x());
 	}
@@ -1398,7 +1398,7 @@ void LineDefs_SetLength(int new_len)
 
 void LD_FixForLostSide(int ld)
 {
-	LineDef * L = LineDefs[ld];
+	LineDef * L = gDocument.linedefs[ld];
 
 	SYS_ASSERT(L->Right());
 
@@ -1425,11 +1425,11 @@ void LD_FixForLostSide(int ld)
 //
 double LD_AngleBetweenLines(int A, int B, int C)
 {
-	double a_dx = Vertices[B]->x() - Vertices[A]->x();
-	double a_dy = Vertices[B]->y() - Vertices[A]->y();
+	double a_dx = gDocument.vertices[B]->x() - gDocument.vertices[A]->x();
+	double a_dy = gDocument.vertices[B]->y() - gDocument.vertices[A]->y();
 
-	double c_dx = Vertices[B]->x() - Vertices[C]->x();
-	double c_dy = Vertices[B]->y() - Vertices[C]->y();
+	double c_dx = gDocument.vertices[B]->x() - gDocument.vertices[C]->x();
+	double c_dy = gDocument.vertices[B]->y() - gDocument.vertices[C]->y();
 
 	double AB_angle = (a_dx == 0) ? (a_dy >= 0 ? 90 : -90) : atan2(a_dy, a_dx) * 180 / M_PI;
 	double CB_angle = (c_dx == 0) ? (c_dy >= 0 ? 90 : -90) : atan2(c_dy, c_dx) * 180 / M_PI;
@@ -1472,7 +1472,7 @@ bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
 		if (n == new_ld)
 			continue;
 
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		int other_v;
 

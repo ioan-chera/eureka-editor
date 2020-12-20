@@ -552,19 +552,19 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		kind = Objid(ObjType::things, 1);
 		new_T = new Thing;
 		new_T->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
-		Things.push_back(new_T);
+		gDocument.things.push_back(new_T);
 	}
 	else if (name.Match("vertex"))
 	{
 		kind = Objid(ObjType::vertices, 1);
 		new_V = new Vertex;
-		Vertices.push_back(new_V);
+		gDocument.vertices.push_back(new_V);
 	}
 	else if (name.Match("linedef"))
 	{
 		kind = Objid(ObjType::linedefs, 1);
 		new_LD = new LineDef;
-		LineDefs.push_back(new_LD);
+		gDocument.linedefs.push_back(new_LD);
 	}
 	else if (name.Match("sidedef"))
 	{
@@ -573,14 +573,14 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		new_SD->mid_tex = BA_InternaliseString("-");
 		new_SD->lower_tex = new_SD->mid_tex;
 		new_SD->upper_tex = new_SD->mid_tex;
-		SideDefs.push_back(new_SD);
+		gDocument.sidedefs.push_back(new_SD);
 	}
 	else if (name.Match("sector"))
 	{
 		kind = Objid(ObjType::sectors, 1);
 		new_S = new Sector;
 		new_S->light = 160;
-		Sectors.push_back(new_S);
+		gDocument.sectors.push_back(new_S);
 	}
 
 	if (!kind.valid())
@@ -638,12 +638,12 @@ static void ValidateLevel_UDMF()
 {
 	for (int n = 0 ; n < NumSideDefs ; n++)
 	{
-		ValidateSectorRef(SideDefs[n], n);
+		ValidateSectorRef(gDocument.sidedefs[n], n);
 	}
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
+		LineDef *L = gDocument.linedefs[n];
 
 		ValidateVertexRefs(L, n);
 		ValidateSidedefRefs(L, n);
@@ -720,7 +720,7 @@ static void UDMF_WriteThings(Lump_c *lump)
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");
 
-		const Thing *th = Things[i];
+		const Thing *th = gDocument.things[i];
 
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
@@ -764,7 +764,7 @@ static void UDMF_WriteVertices(Lump_c *lump)
 		lump->Printf("vertex // %d\n", i);
 		lump->Printf("{\n");
 
-		const Vertex *vert = Vertices[i];
+		const Vertex *vert = gDocument.vertices[i];
 
 		lump->Printf("x = %1.3f;\n", vert->x());
 		lump->Printf("y = %1.3f;\n", vert->y());
@@ -780,7 +780,7 @@ static void UDMF_WriteLineDefs(Lump_c *lump)
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const LineDef *ld = LineDefs[i];
+		const LineDef *ld = gDocument.linedefs[i];
 
 		lump->Printf("v1 = %d;\n", ld->start);
 		lump->Printf("v2 = %d;\n", ld->end);
@@ -838,7 +838,7 @@ static void UDMF_WriteSideDefs(Lump_c *lump)
 		lump->Printf("sidedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const SideDef *side = SideDefs[i];
+		const SideDef *side = gDocument.sidedefs[i];
 
 		lump->Printf("sector = %d;\n", side->sector);
 
@@ -867,7 +867,7 @@ static void UDMF_WriteSectors(Lump_c *lump)
 		lump->Printf("sector // %d\n", i);
 		lump->Printf("{\n");
 
-		const Sector *sec = Sectors[i];
+		const Sector *sec = gDocument.sectors[i];
 
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);

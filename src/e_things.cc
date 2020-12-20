@@ -68,7 +68,7 @@ void CMD_TH_SpinThings(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Thing *T = Things[*it];
+		const Thing *T = gDocument.things[*it];
 
 		BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
@@ -84,8 +84,8 @@ void CMD_TH_SpinThings(void)
 
 bool ThingsOverlap(int th1, int th2)
 {
-	const Thing *T1 = Things[th1];
-	const Thing *T2 = Things[th2];
+	const Thing *T1 = gDocument.things[th1];
+	const Thing *T2 = gDocument.things[th2];
 
 	int r1 = M_GetThingType(T1->type).radius;
 	int r2 = M_GetThingType(T2->type).radius;
@@ -99,8 +99,8 @@ bool ThingsOverlap(int th1, int th2)
 
 bool ThingsAtSameLoc(int th1, int th2)
 {
-	const Thing *T1 = Things[th1];
-	const Thing *T2 = Things[th2];
+	const Thing *T1 = gDocument.things[th1];
+	const Thing *T2 = gDocument.things[th2];
 
 	double dx = abs(T1->x() - T2->x());
 	double dy = abs(T1->y() - T2->y());
@@ -133,7 +133,7 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 	fixcoord_t fdx = MakeValidCoord(vec_x * dist);
 	fixcoord_t fdy = MakeValidCoord(vec_y * dist);
 
-	const Thing *T = Things[th];
+	const Thing *T = gDocument.things[th];
 
 	BA_ChangeTH(th, Thing::F_X, T->raw_x + fdx);
 	BA_ChangeTH(th, Thing::F_Y, T->raw_y + fdy);

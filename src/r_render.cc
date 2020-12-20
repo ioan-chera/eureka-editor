@@ -134,7 +134,7 @@ void Render_View_t::FindGroundZ()
 
 		if (o.num >= 0)
 		{
-			double z = Sectors[o.num]->floorh;
+			double z = gDocument.sectors[o.num]->floorh;
 			{
 				sector_3dfloors_c *ex = Subdiv_3DFloorsForSector(o.num);
 				if (ex->f_plane.sloped)
@@ -210,8 +210,8 @@ static Thing *FindPlayer(int typenum)
 	// need to search backwards (to handle Voodoo dolls properly)
 
 	for (int i = NumThings-1 ; i >= 0 ; i--)
-		if (Things[i]->type == typenum)
-			return Things[i];
+		if (gDocument.things[i]->type == typenum)
+			return gDocument.things[i];
 
 	return NULL;  // not found
 }
@@ -238,7 +238,7 @@ namespace thing_sec_cache
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
 			Objid obj;
-			GetNearObject(obj, ObjType::sectors, Things[i]->x(), Things[i]->y());
+			GetNearObject(obj, ObjType::sectors, gDocument.things[i]->x(), gDocument.things[i]->y());
 
 			r_view.thing_sectors[i] = obj.num;
 		}
@@ -364,19 +364,19 @@ private:
 		switch (type)
 		{
 			case ObjType::things:
-				return reinterpret_cast<int*>(Things[objnum]);
+				return reinterpret_cast<int*>(gDocument.things[objnum]);
 
 			case ObjType::vertices:
-				return reinterpret_cast<int *>(Vertices[objnum]);
+				return reinterpret_cast<int *>(gDocument.vertices[objnum]);
 
 			case ObjType::sectors:
-				return reinterpret_cast<int *>(Sectors[objnum]);
+				return reinterpret_cast<int *>(gDocument.sectors[objnum]);
 
 			case ObjType::sidedefs:
-				return reinterpret_cast<int *>(SideDefs[objnum]);
+				return reinterpret_cast<int *>(gDocument.sidedefs[objnum]);
 
 			case ObjType::linedefs:
-				return reinterpret_cast<int *>(LineDefs[objnum]);
+				return reinterpret_cast<int *>(gDocument.linedefs[objnum]);
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -400,7 +400,7 @@ private:
 
 static void AdjustOfs_UpdateBBox(int ld_num)
 {
-	const LineDef *L = LineDefs[ld_num];
+	const LineDef *L = gDocument.linedefs[ld_num];
 
 	float lx1 = static_cast<float>(L->Start()->x());
 	float ly1 = static_cast<float>(L->Start()->y());
@@ -443,7 +443,7 @@ static void AdjustOfs_Add(int ld_num, int part)
 	if (! edit.adjust_bucket)
 		return;
 
-	const LineDef *L = LineDefs[ld_num];
+	const LineDef *L = gDocument.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
 	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
@@ -919,7 +919,7 @@ static void DragThings_Update()
 	}
 #endif
 
-	const Thing *T = Things[edit.drag_thing_num];
+	const Thing *T = gDocument.things[edit.drag_thing_num];
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -947,8 +947,8 @@ static void DragThings_Update()
 
 	if (old_sec.valid() && new_sec.valid())
 	{
-		float old_z = static_cast<float>(Sectors[old_sec.num]->floorh);
-		float new_z = static_cast<float>(Sectors[new_sec.num]->floorh);
+		float old_z = static_cast<float>(gDocument.sectors[old_sec.num]->floorh);
+		float new_z = static_cast<float>(gDocument.sectors[new_sec.num]->floorh);
 
 		// intent here is to show proper position, NOT raise/lower things.
 		// [ perhaps add a new variable? ]
@@ -1125,13 +1125,13 @@ static int GrabSelectedThing()
 			return -1;
 		}
 
-		result = Things[edit.highlight.num]->type;
+		result = gDocument.things[edit.highlight.num]->type;
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = Things[*it];
+			const Thing *T = gDocument.things[*it];
 			if (result >= 0 && T->type != result)
 			{
 				Beep("multiple thing types");
@@ -1203,7 +1203,7 @@ static int GrabSelectedFlat()
 			return -1;
 		}
 
-		const Sector *S = Sectors[edit.highlight.num];
+		const Sector *S = gDocument.sectors[edit.highlight.num];
 
 		result = SEC_GrabFlat(S, edit.highlight.parts);
 	}
@@ -1211,7 +1211,7 @@ static int GrabSelectedFlat()
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = Sectors[*it];
+			const Sector *S = gDocument.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			int tex = SEC_GrabFlat(S, parts & ~1);
@@ -1349,7 +1349,7 @@ static int GrabSelectedTexture()
 			return -1;
 		}
 
-		const LineDef *L = LineDefs[edit.highlight.num];
+		const LineDef *L = gDocument.linedefs[edit.highlight.num];
 
 		result = LD_GrabTex(L, edit.highlight.parts);
 	}
@@ -1357,7 +1357,7 @@ static int GrabSelectedTexture()
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = LineDefs[*it];
+			const LineDef *L = gDocument.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			int tex = LD_GrabTex(L, parts & ~1);
@@ -1393,7 +1393,7 @@ static void StoreSelectedTexture(int new_tex)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = LineDefs[*it];
+		const LineDef *L = gDocument.linedefs[*it];
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (L->NoSided())

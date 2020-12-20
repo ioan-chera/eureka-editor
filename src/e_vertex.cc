@@ -46,7 +46,7 @@ int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
 {
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		if (Vertices[i]->Matches(fx, fy))
+		if (gDocument.vertices[i]->Matches(fx, fy))
 			return i;
 	}
 
@@ -63,7 +63,7 @@ int Vertex_FindDragOther(int v_num)
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *L = LineDefs[i];
+		const LineDef *L = gDocument.linedefs[i];
 
 		if (L->end == v_num)
 			return L->start;
@@ -82,7 +82,7 @@ int Vertex_HowManyLineDefs(int v_num)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
+		LineDef *L = gDocument.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 			count++;
@@ -99,8 +99,8 @@ int Vertex_HowManyLineDefs(int v_num)
 //
 static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 {
-	LineDef *L1 = LineDefs[ld1];
-	LineDef *L2 = LineDefs[ld2];
+	LineDef *L1 = gDocument.linedefs[ld1];
+	LineDef *L2 = gDocument.linedefs[ld2];
 
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
@@ -186,7 +186,7 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (! L->TouchesVertex(v1))
 			continue;
@@ -203,7 +203,7 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 			if (k == n)
 				continue;
 
-			const LineDef *K = LineDefs[k];
+			const LineDef *K = gDocument.linedefs[k];
 
 			if ((K->start == v3 && K->end == v2) ||
 				(K->start == v2 && K->end == v3))
@@ -225,7 +225,7 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		// change *ALL* references, this is critical
 		// [ to-be-deleted lines will get start == end, that is OK ]
@@ -320,8 +320,8 @@ bool Vertex_TryFixDangler(int v_num)
 		if (i == v_num)
 			continue;
 
-		double dx = Vertices[v_num]->x() - Vertices[i]->x();
-		double dy = Vertices[v_num]->y() - Vertices[i]->y();
+		double dx = gDocument.vertices[v_num]->x() - gDocument.vertices[i]->x();
+		double dy = gDocument.vertices[v_num]->y() - gDocument.vertices[i]->y();
 
 		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
 			! LineDefAlreadyExists(v_num, v_other))
@@ -416,7 +416,7 @@ bool Vertex_TryFixDangler(int v_num)
 
 static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y)
 {
-	const Vertex * V = Vertices[v_num];
+	const Vertex * V = gDocument.vertices[v_num];
 
 	double dx = L->End()->x() - L->Start()->x();
 	double dy = L->End()->y() - L->Start()->y();
@@ -459,7 +459,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		LineDef *L = LineDefs[n];
+		LineDef *L = gDocument.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
@@ -472,7 +472,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			{
 				int new_v = BA_New(ObjType::vertices);
 
-				Vertices[new_v]->SetRawXY(new_x, new_y);
+				gDocument.vertices[new_v]->SetRawXY(new_x, new_y);
 
 				if (L->start == v_num)
 					BA_ChangeLD(n, LineDef::F_START, new_v);
@@ -535,7 +535,7 @@ void CMD_VT_Disconnect(void)
 
 static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 {
-	LineDef *L = LineDefs[ld];
+	LineDef *L = gDocument.linedefs[ld];
 
 	int v_num = which_vert ? L->end : L->start;
 
@@ -549,7 +549,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 		if (edit.Selected->get(n))
 			continue;
 
-		LineDef *N = LineDefs[n];
+		LineDef *N = gDocument.linedefs[n];
 
 		if (N->start == v_num || N->end == v_num)
 		{
@@ -562,16 +562,16 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 		return;
 
 	double new_x, new_y;
-	CalcDisconnectCoord(LineDefs[ld], v_num, &new_x, &new_y);
+	CalcDisconnectCoord(gDocument.linedefs[ld], v_num, &new_x, &new_y);
 
 	int new_v = BA_New(ObjType::vertices);
 
-	Vertices[new_v]->SetRawXY(new_x, new_y);
+	gDocument.vertices[new_v]->SetRawXY(new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		LineDef *L2 = LineDefs[*it];
+		LineDef *L2 = gDocument.linedefs[*it];
 
 		if (L2->start == v_num)
 			BA_ChangeLD(*it, LineDef::F_START, new_v);
@@ -630,7 +630,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef * L = LineDefs[n];
+		const LineDef * L = gDocument.linedefs[n];
 
 		// only process lines which touch a selected sector
 		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
@@ -681,12 +681,12 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 
 static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 {
-	const LineDef * L1 = LineDefs[ld_num];
+	const LineDef * L1 = gDocument.linedefs[ld_num];
 
 	int new_ld = BA_New(ObjType::linedefs);
 	int lost_sd;
 
-	LineDef * L2 = LineDefs[new_ld];
+	LineDef * L2 = gDocument.linedefs[new_ld];
 
 	if (in_side == Side::left)
 	{
@@ -726,7 +726,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 
 	int tex = BA_InternaliseString(default_wall_tex);
 
-	const SideDef * SD = SideDefs[L1->right];
+	const SideDef * SD = gDocument.sidedefs[L1->right];
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
@@ -738,7 +738,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 
 	// now fix the second line's textures
 
-	SD = SideDefs[lost_sd];
+	SD = gDocument.sidedefs[lost_sd];
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
@@ -835,9 +835,9 @@ void CMD_SEC_Disconnect(void)
 
 		mapping[*it] = new_v;
 
-		Vertex *newbie = Vertices[new_v];
+		Vertex *newbie = gDocument.vertices[new_v];
 
-		newbie->RawCopy(Vertices[*it]);
+		newbie->RawCopy(gDocument.vertices[*it]);
 	}
 
 	// update linedefs, creating new ones where necessary
@@ -845,7 +845,7 @@ void CMD_SEC_Disconnect(void)
 
 	for (n = NumLineDefs-1 ; n >= 0 ; n--)
 	{
-		const LineDef * L = LineDefs[n];
+		const LineDef * L = gDocument.linedefs[n];
 
 		// only process lines which touch a selected sector
 		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
@@ -883,7 +883,7 @@ void CMD_SEC_Disconnect(void)
 
 	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = Vertices[*it];
+		const Vertex * V = gDocument.vertices[*it];
 
 		BA_ChangeVT(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
 		BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
@@ -985,7 +985,7 @@ void CMD_VT_ShapeLine(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = Vertices[*it];
+		const Vertex *V = gDocument.vertices[*it];
 
 		double weight = WeightForVertex(V, x1,y1, x2,y2, width,height, -1);
 
@@ -1041,7 +1041,7 @@ void CMD_VT_ShapeLine(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = Vertices[*it];
+		const Vertex *V = gDocument.vertices[*it];
 
 		vert_along_t ALONG(*it, AlongDist(V->x(), V->y(), ax,ay, bx,by));
 
@@ -1052,8 +1052,8 @@ void CMD_VT_ShapeLine(void)
 
 
 	// compute proper positions for start and end of the line
-	const Vertex *V1 = Vertices[along_list.front().vert_num];
-	const Vertex *V2 = Vertices[along_list. back().vert_num];
+	const Vertex *V1 = gDocument.vertices[along_list.front().vert_num];
+	const Vertex *V2 = gDocument.vertices[along_list. back().vert_num];
 
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
@@ -1152,7 +1152,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 	{
 		unsigned int k = (start_idx + i) % along_list.size();
 
-		const Vertex *V = Vertices[along_list[k].vert_num];
+		const Vertex *V = gDocument.vertices[along_list[k].vert_num];
 
 		double frac = i / (double)(along_list.size() - (partial_circle ? 1 : 0));
 
@@ -1234,7 +1234,7 @@ void CMD_VT_ShapeArc(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = Vertices[*it];
+		const Vertex *V = gDocument.vertices[*it];
 
 		double dx = V->x() - mid_x;
 		double dy = V->y() - mid_y;
@@ -1276,8 +1276,8 @@ void CMD_VT_ShapeArc(void)
 	else
 		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
-	const Vertex * start_V = Vertices[along_list[start_idx].vert_num];
-	const Vertex * end_V   = Vertices[along_list[  end_idx].vert_num];
+	const Vertex * start_V = gDocument.vertices[along_list[start_idx].vert_num];
+	const Vertex * end_V   = gDocument.vertices[along_list[  end_idx].vert_num];
 
 	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 

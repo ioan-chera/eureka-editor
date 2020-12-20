@@ -605,7 +605,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const LineDef *L = LineDefs[edit.highlight.num];
+		const LineDef *L = gDocument.linedefs[edit.highlight.num];
 
 		int x_offset = 0;
 		int y_offset = 0;
@@ -637,7 +637,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! edit.draw_from.valid())
 		return;
 
-	const Vertex *V = Vertices[edit.draw_from.num];
+	const Vertex *V = gDocument.vertices[edit.draw_from.num];
 
 	double dx = edit.draw_to_x - V->x();
 	double dy = edit.draw_to_y - V->y();

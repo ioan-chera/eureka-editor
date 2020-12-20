@@ -48,8 +48,8 @@ void SEC_SafeRaiseLower(int sec, int parts, int dz)
 	if (parts == 0)
 		parts = PART_FLOOR | PART_CEIL;
 
-	int f = Sectors[sec]->floorh;
-	int c = Sectors[sec]->ceilh;
+	int f = gDocument.sectors[sec]->floorh;
+	int c = gDocument.sectors[sec]->ceilh;
 
 	if ((parts & PART_FLOOR) != 0 && (parts & PART_CEIL) != 0)
 	{
@@ -105,7 +105,7 @@ void CMD_SEC_Floor(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = Sectors[*it];
+		const Sector *S = gDocument.sectors[*it];
 
 		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
@@ -143,7 +143,7 @@ void CMD_SEC_Ceil(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = Sectors[*it];
+		const Sector *S = gDocument.sectors[*it];
 
 		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
@@ -192,7 +192,7 @@ void SectorsAdjustLight(int delta)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = Sectors[*it];
+		const Sector *S = gDocument.sectors[*it];
 
 		int new_lt = light_add_delta(S->light, delta);
 
@@ -243,7 +243,7 @@ void CMD_SEC_SwapFlats()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = Sectors[*it];
+		const Sector *S = gDocument.sectors[*it];
 
 		int floor_tex = S->floor_tex;
 		int  ceil_tex = S->ceil_tex;
@@ -266,7 +266,7 @@ static void LineDefsBetweenSectors(selection_c *list, int sec1, int sec2)
 {
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef * L = LineDefs[i];
+		const LineDef * L = gDocument.linedefs[i];
 
 		if (! (L->Left() && L->Right()))
 			continue;
@@ -284,7 +284,7 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 {
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
-		SideDef * sd = SideDefs[i];
+		SideDef * sd = gDocument.sidedefs[i];
 
 		if (sd->sector == old_sec)
 		{
@@ -330,7 +330,7 @@ void CMD_SEC_Merge(void)
 	// keep the properties of the first selected sector
 	if (new_sec != first)
 	{
-		const Sector *ref = Sectors[first];
+		const Sector *ref = gDocument.sectors[first];
 
 		BA_ChangeSEC(new_sec, Sector::F_FLOORH,    ref->floorh);
 		BA_ChangeSEC(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
@@ -448,7 +448,7 @@ double lineloop_c::TotalLength() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		const LineDef *L = LineDefs[lines[k]];
+		const LineDef *L = gDocument.linedefs[lines[k]];
 
 		result += L->CalcLength();
 	}
@@ -463,11 +463,11 @@ bool lineloop_c::SameSector(int *sec_num) const
 
 	SYS_ASSERT(lines.size() > 0);
 
-	int sec = LineDefs[lines[0]]->WhatSector(sides[0]);
+	int sec = gDocument.linedefs[lines[0]]->WhatSector(sides[0]);
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		if (sec != LineDefs[lines[k]]->WhatSector(sides[k]))
+		if (sec != gDocument.linedefs[lines[k]]->WhatSector(sides[k]))
 			return false;
 	}
 
@@ -500,10 +500,10 @@ int lineloop_c::NeighboringSector() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const LineDef *L = LineDefs[lines[i]];
+		const LineDef *L = gDocument.linedefs[lines[i]];
 
 		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
-		int sec = LineDefs[lines[i]]->WhatSector(- sides[i]);
+		int sec = gDocument.linedefs[lines[i]]->WhatSector(- sides[i]);
 
 		if (sec < 0)
 			continue;
@@ -545,7 +545,7 @@ int lineloop_c::IslandSector() const
 		if (get_just_line(opp_ld))
 			continue;
 
-		return LineDefs[opp_ld]->WhatSector(opp_side);
+		return gDocument.linedefs[opp_ld]->WhatSector(opp_side);
 	}
 
 	return -1;
@@ -559,7 +559,7 @@ int lineloop_c::DetermineSector() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = LineDefs[lines[k]]->WhatSector(sides[k]);
+		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k]);
 
 		if (sec >= 0)
 			return sec;
@@ -578,7 +578,7 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const LineDef *L = LineDefs[lines[i]];
+		const LineDef *L = gDocument.linedefs[lines[i]];
 
 		*x1 = MIN(*x1, MIN(L->Start()->x(), L->End()->x()));
 		*y1 = MIN(*y1, MIN(L->Start()->y(), L->End()->y()));
@@ -595,7 +595,7 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = LineDefs[lines[k]]->WhatSector(sides[k]);
+		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k]);
 
 		if (sec >= 0)
 			list->set(sec);
@@ -630,13 +630,13 @@ bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare)
 
 	if (side == Side::right)
 	{
-		cur_vert  = LineDefs[ld]->end;
-		prev_vert = LineDefs[ld]->start;
+		cur_vert  = gDocument.linedefs[ld]->end;
+		prev_vert = gDocument.linedefs[ld]->start;
 	}
 	else
 	{
-		cur_vert  = LineDefs[ld]->start;
-		prev_vert = LineDefs[ld]->end;
+		cur_vert  = gDocument.linedefs[ld]->start;
+		prev_vert = gDocument.linedefs[ld]->end;
 	}
 
 #ifdef DEBUG_LINELOOP
@@ -668,7 +668,7 @@ bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare)
 
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			const LineDef * N = LineDefs[n];
+			const LineDef * N = gDocument.linedefs[n];
 
 			if (! N->TouchesVertex(cur_vert))
 				continue;
@@ -773,7 +773,7 @@ bool lineloop_c::LookForIsland()
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
-		const LineDef * L = LineDefs[ld];
+		const LineDef * L = gDocument.linedefs[ld];
 
 		double x1 = L->Start()->x();
 		double y1 = L->Start()->y();
@@ -812,8 +812,8 @@ ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 
 			// treat isolated linedefs like islands
 			if (! ld_in_path &&
-				Vertex_HowManyLineDefs(LineDefs[ld]->start) == 1 &&
-				Vertex_HowManyLineDefs(LineDefs[ld]->end)   == 1)
+				Vertex_HowManyLineDefs(gDocument.linedefs[ld]->start) == 1 &&
+				Vertex_HowManyLineDefs(gDocument.linedefs[ld]->end)   == 1)
 			{
 				island->push_back(ld, Side::right);
 				island->push_back(ld, Side::left);
@@ -876,7 +876,7 @@ void lineloop_c::Dump() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const LineDef *L = LineDefs[lines[i]];
+		const LineDef *L = gDocument.linedefs[lines[i]];
 
 		DebugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
@@ -889,7 +889,7 @@ void lineloop_c::Dump() const
 
 static inline bool WillBeTwoSided(int ld, Side side)
 {
-	const LineDef *L = LineDefs[ld];
+	const LineDef *L = gDocument.linedefs[ld];
 
 	if (L->WhatSideDef(side) < 0)
 	{
@@ -929,13 +929,13 @@ static void DetermineNewTextures(lineloop_c& loop,
 			if (pass == 0)
 				side = -side;
 
-			int sd = LineDefs[ld]->WhatSideDef(side);
+			int sd = gDocument.linedefs[ld]->WhatSideDef(side);
 			if (sd < 0)
 				continue;
 
-			const SideDef *SD = SideDefs[sd];
+			const SideDef *SD = gDocument.sidedefs[sd];
 
-			if (LineDefs[ld]->TwoSided())
+			if (gDocument.linedefs[ld]->TwoSided())
 			{
 				if (SD->lower_tex == null_tex) continue;
 				if (SD->upper_tex == null_tex) continue;
@@ -962,7 +962,7 @@ static void DetermineNewTextures(lineloop_c& loop,
 	for (k = 0 ; k < total ; k++)
 	{
 		int ld = loop.lines[k];
-		int sd = LineDefs[ld]->WhatSideDef(loop.sides[k]);
+		int sd = gDocument.linedefs[ld]->WhatSideDef(loop.sides[k]);
 
 		if (sd < 0)
 		{
@@ -970,9 +970,9 @@ static void DetermineNewTextures(lineloop_c& loop,
 			continue;
 		}
 
-		const SideDef *SD = SideDefs[sd];
+		const SideDef *SD = gDocument.sidedefs[sd];
 
-		if (LineDefs[ld]->TwoSided())
+		if (gDocument.linedefs[ld]->TwoSided())
 		{
 			lower_texs[k] = SD->lower_tex;
 			upper_texs[k] = SD->upper_tex;
@@ -1046,7 +1046,7 @@ static void DoAssignSector(int ld, Side side, int new_sec,
 						   selection_c *flip)
 {
 // DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
-	const LineDef * L = LineDefs[ld];
+	const LineDef * L = gDocument.linedefs[ld];
 
 	int sd_num   = (side == Side::right) ? L->right : L->left;
 	int other_sd = (side == Side::right) ? L->left  : L->right;
@@ -1073,7 +1073,7 @@ static void DoAssignSector(int ld, Side side, int new_sec,
 	// create new sidedef
 	int new_sd = BA_New(ObjType::sidedefs);
 
-	SideDef * SD = SideDefs[new_sd];
+	SideDef * SD = gDocument.sidedefs[new_sd];
 
 	if (other_sd >= 0)
 	{
@@ -1221,9 +1221,9 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 			model = loop.NeighboringSector();
 
 		if (model < 0)
-			Sectors[new_sec]->SetDefaults();
+			gDocument.sectors[new_sec]->SetDefaults();
 		else
-			Sectors[new_sec]->RawCopy(Sectors[model]);
+			gDocument.sectors[new_sec]->RawCopy(gDocument.sectors[model]);
 	}
 
 	selection_c   flip(ObjType::linedefs);
@@ -1238,7 +1238,7 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->WhatSector(Side::left ) >= 0)
 			unused.clear(L->WhatSector(Side::left ));

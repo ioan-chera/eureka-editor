@@ -302,7 +302,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			int new_h = Sectors[*it]->floorh + room;
+			int new_h = gDocument.sectors[*it]->floorh + room;
 
 			new_h = CLAMP(-32767, new_h, 32767);
 
@@ -494,7 +494,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			int old_type = Sectors[*it]->type;
+			int old_type = gDocument.sectors[*it]->type;
 
 			BA_ChangeSEC(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
@@ -706,9 +706,9 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (is_sector(obj))
 		{
-			floor_h->value(SString(Sectors[obj]->floorh).c_str());
-			ceil_h->value(SString(Sectors[obj]->ceilh).c_str());
-			headroom->value(SString(Sectors[obj]->HeadRoom()).c_str());
+			floor_h->value(SString(gDocument.sectors[obj]->floorh).c_str());
+			ceil_h->value(SString(gDocument.sectors[obj]->ceilh).c_str());
+			headroom->value(SString(gDocument.sectors[obj]->HeadRoom()).c_str());
 		}
 		else
 		{
@@ -722,11 +722,11 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (is_sector(obj))
 		{
-			f_tex->value(Sectors[obj]->FloorTex().c_str());
-			c_tex->value(Sectors[obj]->CeilTex().c_str());
+			f_tex->value(gDocument.sectors[obj]->FloorTex().c_str());
+			c_tex->value(gDocument.sectors[obj]->CeilTex().c_str());
 
-			f_pic->GetFlat(Sectors[obj]->FloorTex());
-			c_pic->GetFlat(Sectors[obj]->CeilTex());
+			f_pic->GetFlat(gDocument.sectors[obj]->FloorTex());
+			c_pic->GetFlat(gDocument.sectors[obj]->CeilTex());
 
 			f_pic->AllowHighlight(true);
 			c_pic->AllowHighlight(true);
@@ -753,7 +753,7 @@ void UI_SectorBox::UpdateField(int field)
 
 		if (is_sector(obj))
 		{
-			int value = Sectors[obj]->type;
+			int value = gDocument.sectors[obj]->type;
 			int mask  = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 						(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
@@ -785,8 +785,8 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (is_sector(obj))
 		{
-			light->value(SString(Sectors[obj]->light).c_str());
-			tag->value(SString(Sectors[obj]->tag).c_str());
+			light->value(SString(gDocument.sectors[obj]->light).c_str());
+			tag->value(SString(gDocument.sectors[obj]->tag).c_str());
 		}
 		else
 		{

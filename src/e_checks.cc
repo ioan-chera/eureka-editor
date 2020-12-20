@@ -232,7 +232,7 @@ void Vertex_FindDanglers(selection_c& sel)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		int v1 = L->start;
 		int v2 = L->end;
@@ -274,8 +274,8 @@ struct vertex_X_CMP_pred
 {
 	inline bool operator() (int A, int B) const
 	{
-		const Vertex *V1 = Vertices[A];
-		const Vertex *V2 = Vertices[B];
+		const Vertex *V1 = gDocument.vertices[A];
+		const Vertex *V2 = gDocument.vertices[B];
 
 		return V1->raw_x < V2->raw_x;
 	}
@@ -302,8 +302,8 @@ void Vertex_FindOverlaps(selection_c& sel)
 
 	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
 
-#define VERT_K  Vertices[sorted_list[k]]
-#define VERT_N  Vertices[sorted_list[n]]
+#define VERT_K  gDocument.vertices[sorted_list[k]]
+#define VERT_N  gDocument.vertices[sorted_list[n]]
 
 	for (int k = 0 ; k < NumVertices ; k++)
 	{
@@ -323,7 +323,7 @@ void Vertex_FindOverlaps(selection_c& sel)
 
 static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 {
-	const Vertex *V = Vertices[idx];
+	const Vertex *V = gDocument.vertices[idx];
 
 	// find the base vertex (the one V is sitting on)
 	for (int n = 0 ; n < NumVertices ; n++)
@@ -335,7 +335,7 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 		if (merge_verts.get(n))
 			continue;
 
-		const Vertex *N = Vertices[n];
+		const Vertex *N = gDocument.vertices[n];
 
 		if (! N->Matches(V))
 			continue;
@@ -344,7 +344,7 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 
 		for (int ld = 0 ; ld < NumLineDefs ; ld++)
 		{
-			LineDef *L = LineDefs[ld];
+			LineDef *L = gDocument.linedefs[ld];
 
 			if (L->start == idx)
 				BA_ChangeLD(ld, LineDef::F_START, n);
@@ -403,8 +403,8 @@ void Vertex_FindUnused(selection_c& sel)
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		sel.set(LineDefs[i]->start);
-		sel.set(LineDefs[i]->end);
+		sel.set(gDocument.linedefs[i]->start);
+		sel.set(gDocument.linedefs[i]->end);
 	}
 
 	sel.frob_range(0, NumVertices - 1, BitOp::toggle);
@@ -582,7 +582,7 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 		// array for its starting vertex, and a "2" for its ending vertex.
 		for (int i = 0 ; i < NumLineDefs ; i++)
 		{
-			const LineDef *L = LineDefs[i];
+			const LineDef *L = gDocument.linedefs[i];
 
 			if (! L->TouchesSector(s))
 				continue;
@@ -665,7 +665,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right >= 0)
 		{
@@ -731,7 +731,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	for (int n = 0 ; n < NumSectors ; n++)
 	{
-		int type_num = Sectors[n]->type;
+		int type_num = gDocument.sectors[n]->type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -822,7 +822,7 @@ void Sectors_FindUnused(selection_c& sel)
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *L = LineDefs[i];
+		const LineDef *L = gDocument.linedefs[i];
 
 		if (L->left >= 0)
 			sel.set(L->Left()->sector);
@@ -859,7 +859,7 @@ void Sectors_FindBadCeil(selection_c& sel)
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
-		if (Sectors[i]->ceilh < Sectors[i]->floorh)
+		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
 			sel.set(i);
 	}
 }
@@ -876,9 +876,9 @@ void Sectors_FixBadCeil()
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
-		if (Sectors[i]->ceilh < Sectors[i]->floorh)
+		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
 		{
-			BA_ChangeSEC(i, Sector::F_CEILH, Sectors[i]->floorh);
+			BA_ChangeSEC(i, Sector::F_CEILH, gDocument.sectors[i]->floorh);
 		}
 	}
 
@@ -906,7 +906,7 @@ void SideDefs_FindUnused(selection_c& sel)
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *L = LineDefs[i];
+		const LineDef *L = gDocument.linedefs[i];
 
 		if (L->left  >= 0) sel.set(L->left);
 		if (L->right >= 0) sel.set(L->right);
@@ -939,8 +939,8 @@ void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	for (int k = 0 ; k < i ; k++)
 	{
-		const LineDef * A = LineDefs[i];
-		const LineDef * B = LineDefs[k];
+		const LineDef * A = gDocument.linedefs[i];
+		const LineDef * B = gDocument.linedefs[k];
 
 		bool AA = (A->left  >= 0 && A->left == A->right);
 
@@ -980,7 +980,7 @@ static int Copy_SideDef(int num)
 {
 	int sd = BA_New(ObjType::sidedefs);
 
-	SideDefs[sd]->RawCopy(SideDefs[num]);
+	gDocument.sidedefs[sd]->RawCopy(gDocument.sidedefs[num]);
 
 	return sd;
 }
@@ -1022,7 +1022,7 @@ void SideDefs_Unpack(bool is_after_load)
 
 		for (first = 0 ; first < NumLineDefs ; first++)
 		{
-			const LineDef *F = LineDefs[first];
+			const LineDef *F = gDocument.linedefs[first];
 
 			if (F->left == sd || F->right == sd)
 				break;
@@ -1032,7 +1032,7 @@ void SideDefs_Unpack(bool is_after_load)
 			continue;
 
 		// handle it when first linedef uses sidedef on both sides
-		if (LineDefs[first]->left == LineDefs[first]->right)
+		if (gDocument.linedefs[first]->left == gDocument.linedefs[first]->right)
 		{
 			BA_ChangeLD(first, LineDef::F_LEFT, Copy_SideDef(sd));
 		}
@@ -1040,10 +1040,10 @@ void SideDefs_Unpack(bool is_after_load)
 		// duplicate any remaining references
 		for (int ld = first + 1 ; ld < NumLineDefs ; ld++)
 		{
-			if (LineDefs[ld]->left == sd)
+			if (gDocument.linedefs[ld]->left == sd)
 				BA_ChangeLD(ld, LineDef::F_LEFT, Copy_SideDef(sd));
 
-			if (LineDefs[ld]->right == sd)
+			if (gDocument.linedefs[ld]->right == sd)
 				BA_ChangeLD(ld, LineDef::F_RIGHT, Copy_SideDef(sd));
 		}
 	}
@@ -1316,11 +1316,11 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		const thingtype_t &info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
-			bump_unknown_type(types, Things[n]->type);
+			bump_unknown_type(types, gDocument.things[n]->type);
 
 			list.set(n);
 		}
@@ -1389,7 +1389,7 @@ int Things_FindStarts(int *dm_num)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		const Thing * T = Things[n];
+		const Thing * T = gDocument.things[n];
 
 		// ideally, these type numbers would not be hard-coded....
 
@@ -1414,8 +1414,8 @@ void Things_FindInVoid(selection_c& list)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x();
-		double y = Things[n]->y();
+		double x = gDocument.things[n]->x();
+		double y = gDocument.things[n]->y();
 
 		Objid obj;
 
@@ -1425,7 +1425,7 @@ void Things_FindInVoid(selection_c& list)
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t &info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
 		if (info.flags & THINGDEF_VOID)
 			continue;
@@ -1511,7 +1511,7 @@ void Things_FindDuds(selection_c& list)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		const Thing *T = Things[n];
+		const Thing *T = gDocument.things[n];
 
 		if (T->type == CAMERA_PEST)
 			continue;
@@ -1561,7 +1561,7 @@ void Things_FixDuds()
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		const Thing *T = Things[n];
+		const Thing *T = gDocument.things[n];
 
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
@@ -1618,7 +1618,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 {
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		const Thing *T = Things[n];
+		const Thing *T = gDocument.things[n];
 
 		const thingtype_t &info = M_GetThingType(T->type);
 
@@ -1764,7 +1764,7 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (! LD_is_blocking(L))
 			continue;
@@ -1788,7 +1788,7 @@ void Things_FindStuckies(selection_c& list)
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const Thing *T = Things[blockers[n]];
+		const Thing *T = gDocument.things[blockers[n]];
 
 		const thingtype_t &info = M_GetThingType(T->type);
 
@@ -1797,7 +1797,7 @@ void Things_FindStuckies(selection_c& list)
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const Thing *T2 = Things[blockers[n2]];
+			const Thing *T2 = gDocument.things[blockers[n2]];
 
 			const thingtype_t &info2 = M_GetThingType(T2->type);
 
@@ -2034,7 +2034,7 @@ void LineDefs_FindZeroLen(selection_c& lines)
 	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (LineDefs[n]->IsZeroLength())
+		if (gDocument.linedefs[n]->IsZeroLength())
 			lines.set(n);
 }
 
@@ -2045,7 +2045,7 @@ void LineDefs_RemoveZeroLen()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		if (LineDefs[n]->IsZeroLength())
+		if (gDocument.linedefs[n]->IsZeroLength())
 			lines.set(n);
 	}
 
@@ -2082,7 +2082,7 @@ void LineDefs_FindMissingRight(selection_c& lines)
 	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (LineDefs[n]->right < 0)
+		if (gDocument.linedefs[n]->right < 0)
 			lines.set(n);
 }
 
@@ -2106,7 +2106,7 @@ void LineDefs_FindManualDoors(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -2143,7 +2143,7 @@ void LineDefs_FixManualDoors()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->type <= 0 || L->left >= 0)
 			continue;
@@ -2167,7 +2167,7 @@ void LineDefs_FindLackImpass(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 			lines.set(n);
@@ -2193,7 +2193,7 @@ void LineDefs_FixLackImpass()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 		{
@@ -2213,7 +2213,7 @@ void LineDefs_FindBad2SFlag(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			lines.set(n);
@@ -2242,7 +2242,7 @@ void LineDefs_FixBad2SFlag()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			BA_ChangeLD(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
@@ -2274,7 +2274,7 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		int type_num = LineDefs[n]->type;
+		int type_num = gDocument.linedefs[n]->type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -2353,8 +2353,8 @@ void LineDefs_ClearUnknown()
 
 static int linedef_pos_cmp(int A, int B)
 {
-	const LineDef *AL = LineDefs[A];
-	const LineDef *BL = LineDefs[B];
+	const LineDef *AL = gDocument.linedefs[A];
+	const LineDef *BL = gDocument.linedefs[B];
 
 	int A_x1 = static_cast<int>(AL->Start()->x());
 	int A_y1 = static_cast<int>(AL->Start()->y());
@@ -2404,8 +2404,8 @@ struct linedef_minx_CMP_pred
 {
 	inline bool operator() (int A, int B) const
 	{
-		const LineDef *AL = LineDefs[A];
-		const LineDef *BL = LineDefs[B];
+		const LineDef *AL = gDocument.linedefs[A];
+		const LineDef *BL = gDocument.linedefs[B];
 
 		fixcoord_t A_x = MIN(AL->Start()->raw_x, AL->End()->raw_x);
 		fixcoord_t B_x = MIN(BL->Start()->raw_x, BL->End()->raw_x);
@@ -2441,7 +2441,7 @@ void LineDefs_FindOverlaps(selection_c& lines)
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (LineDefs[ld2]->IsZeroLength())
+		if (gDocument.linedefs[ld2]->IsZeroLength())
 			continue;
 
 		// only the second (or third, etc) linedef is stored
@@ -2494,8 +2494,8 @@ static int CheckLinesCross(int A, int B)
 
 	SYS_ASSERT(A != B);
 
-	const LineDef *AL = LineDefs[A];
-	const LineDef *BL = LineDefs[B];
+	const LineDef *AL = gDocument.linedefs[A];
+	const LineDef *BL = gDocument.linedefs[B];
 
 	// ignore zero-length lines
 	if (AL->IsZeroLength() || BL->IsZeroLength())
@@ -2627,7 +2627,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 	{
 		int n2 = sorted_list[n];
 
-		const LineDef *L1 = LineDefs[n2];
+		const LineDef *L1 = gDocument.linedefs[n2];
 
 		fixcoord_t max_x = MAX(L1->Start()->raw_x, L1->End()->raw_x);
 
@@ -2635,7 +2635,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 		{
 			int k2 = sorted_list[k];
 
-			const LineDef *L2 = LineDefs[k2];
+			const LineDef *L2 = gDocument.linedefs[k2];
 
 			fixcoord_t min_x = MIN(L2->Start()->raw_x, L2->End()->raw_x);
 
@@ -2947,7 +2947,7 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 
 	for (i = 0 ; i < NumLineDefs ; i++)
 	{
-		int tag = LineDefs[i]->tag;
+		int tag = gDocument.linedefs[i]->tag;
 
 		if (tag > 0)
 		{
@@ -2958,7 +2958,7 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 
 	for (i = 0 ; i < NumSectors ; i++)
 	{
-		int tag = Sectors[i]->tag;
+		int tag = gDocument.sectors[i]->tag;
 
 		// ignore special tags
 		if (Features.tag_666 && (tag == 666 || tag == 667))
@@ -3057,7 +3057,7 @@ void CMD_ApplyTag()
 static bool LD_tag_exists(int tag)
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (LineDefs[n]->tag == tag)
+		if (gDocument.linedefs[n]->tag == tag)
 			return true;
 
 	return false;
@@ -3067,7 +3067,7 @@ static bool LD_tag_exists(int tag)
 static bool SEC_tag_exists(int tag)
 {
 	for (int s = 0 ; s < NumSectors ; s++)
-		if (Sectors[s]->tag == tag)
+		if (gDocument.sectors[s]->tag == tag)
 			return true;
 
 	return false;
@@ -3080,7 +3080,7 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
-		int tag = Sectors[s]->tag;
+		int tag = gDocument.sectors[s]->tag;
 
 		if (tag <= 0)
 			continue;
@@ -3102,7 +3102,7 @@ void Tags_FindUnmatchedLineDefs(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->tag <= 0)
 			continue;
@@ -3146,7 +3146,7 @@ void Tags_FindMissingTags(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -3213,7 +3213,7 @@ static bool SEC_check_beast_mark(int tag)
 
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			const thingtype_t &info = M_GetThingType(Things[n]->type);
+			const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
 			if (info.desc.noCaseEqual("Commander Keen"))
 				return true;
@@ -3232,7 +3232,7 @@ void Tags_FindBeastMarks(selection_c& secs)
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
-		int tag = Sectors[s]->tag;
+		int tag = gDocument.sectors[s]->tag;
 
 		if (! SEC_check_beast_mark(tag))
 			secs.set(s);
@@ -3437,7 +3437,7 @@ void Textures_FindMissing(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right < 0)
 			continue;
@@ -3492,7 +3492,7 @@ void Textures_FixMissing()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right < 0)
 			continue;
@@ -3568,7 +3568,7 @@ void Textures_FindTransparent(selection_c& lines,
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right < 0)
 			continue;
@@ -3630,7 +3630,7 @@ void Textures_FixTransparent()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right < 0)
 			continue;
@@ -3705,7 +3705,7 @@ void Textures_FindMedusa(selection_c& lines,
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
@@ -3743,7 +3743,7 @@ void Textures_RemoveMedusa()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
@@ -3794,7 +3794,7 @@ void Textures_FindUnknownTex(selection_c& lines,
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
@@ -3829,7 +3829,7 @@ void Textures_FindUnknownFlat(selection_c& secs,
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
-		const Sector *S = Sectors[s];
+		const Sector *S = gDocument.sectors[s];
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
@@ -3908,7 +3908,7 @@ void Textures_FixUnknownTex()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		bool two_sided = L->TwoSided();
 
@@ -3919,7 +3919,7 @@ void Textures_FixUnknownTex()
 			if (sd_num < 0)
 				continue;
 
-			const SideDef *SD = SideDefs[sd_num];
+			const SideDef *SD = gDocument.sidedefs[sd_num];
 
 			if (! W_TextureIsKnown(SD->LowerTex()))
 				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_wall);
@@ -3946,7 +3946,7 @@ void Textures_FixUnknownFlat()
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
-		const Sector *S = Sectors[s];
+		const Sector *S = gDocument.sectors[s];
 
 		if (! W_FlatIsKnown(S->FloorTex()))
 			BA_ChangeSEC(s, Sector::F_FLOOR_TEX, new_floor);
@@ -3976,7 +3976,7 @@ void Textures_FindDupSwitches(selection_c& lines)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		// only check lines with a special
 		if (! L->type)
@@ -4037,7 +4037,7 @@ void Textures_FixDupSwitches()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		// only check lines with a special
 		if (! L->type)

@@ -336,8 +336,8 @@ void UI_Canvas::DrawEverything()
 		// when ratio lock is on, want to see the new line
 		if (edit.mode == ObjType::vertices && grid.ratio > 0 && edit.drag_other_vert >= 0)
 		{
-			const Vertex *v0 = Vertices[edit.drag_other_vert];
-			const Vertex *v1 = Vertices[edit.dragged.num];
+			const Vertex *v0 = gDocument.vertices[edit.drag_other_vert];
+			const Vertex *v1 = gDocument.vertices[edit.dragged.num];
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy);
@@ -365,7 +365,7 @@ void UI_Canvas::DrawEverything()
 
 		if (edit.mode == ObjType::linedefs && !edit.show_object_numbers)
 		{
-			const LineDef *L = LineDefs[edit.highlight.num];
+			const LineDef *L = gDocument.linedefs[edit.highlight.num];
 			DrawLineInfo(L->Start()->x(), L->Start()->y(), L->End()->x(), L->End()->y(), false);
 		}
 
@@ -653,8 +653,8 @@ void UI_Canvas::DrawVertices()
 
 	for (int n = 0 ; n < NumVertices ; n++)
 	{
-		double x = Vertices[n]->x();
-		double y = Vertices[n]->y();
+		double x = gDocument.vertices[n]->x();
+		double y = gDocument.vertices[n]->y();
 
 		if (Vis(x, y, r))
 		{
@@ -666,8 +666,8 @@ void UI_Canvas::DrawVertices()
 	{
 		for (int n = 0 ; n < NumVertices ; n++)
 		{
-			double x = Vertices[n]->x();
-			double y = Vertices[n]->y();
+			double x = gDocument.vertices[n]->x();
+			double y = gDocument.vertices[n]->y();
 
 			if (! Vis(x, y, r))
 				continue;
@@ -688,7 +688,7 @@ void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		double x1 = L->Start()->x();
 		double y1 = L->Start()->y();
@@ -759,8 +759,8 @@ void UI_Canvas::DrawLinedefs()
 				int sd1 = L->right;
 				int sd2 = L->left;
 
-				int s1  = (sd1 < 0) ? NIL_OBJ : SideDefs[sd1]->sector;
-				int s2  = (sd2 < 0) ? NIL_OBJ : SideDefs[sd2]->sector;
+				int s1  = (sd1 < 0) ? NIL_OBJ : gDocument.sidedefs[sd1]->sector;
+				int s2  = (sd2 < 0) ? NIL_OBJ : gDocument.sidedefs[sd2]->sector;
 
 				if (edit.error_mode)
 					col = LIGHTGREY;
@@ -778,17 +778,17 @@ void UI_Canvas::DrawLinedefs()
 					bool have_tag  = false;
 					bool have_type = false;
 
-					if (Sectors[s1]->tag != 0)
+					if (gDocument.sectors[s1]->tag != 0)
 						have_tag = true;
-					if (Sectors[s1]->type != 0)
+					if (gDocument.sectors[s1]->type != 0)
 						have_type = true;
 
 					if (s2 >= 0)
 					{
-						if (Sectors[s2]->tag != 0)
+						if (gDocument.sectors[s2]->tag != 0)
 							have_tag = true;
 
-						if (Sectors[s2]->type != 0)
+						if (gDocument.sectors[s2]->type != 0)
 							have_type = true;
 					}
 
@@ -845,10 +845,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			double x1 = LineDefs[n]->Start()->x();
-			double y1 = LineDefs[n]->Start()->y();
-			double x2 = LineDefs[n]->End  ()->x();
-			double y2 = LineDefs[n]->End  ()->y();
+			double x1 = gDocument.linedefs[n]->Start()->x();
+			double y1 = gDocument.linedefs[n]->Start()->y();
+			double x2 = gDocument.linedefs[n]->End  ()->x();
+			double y2 = gDocument.linedefs[n]->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
@@ -897,13 +897,13 @@ void UI_Canvas::DrawThings()
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x();
-		double y = Things[n]->y();
+		double x = gDocument.things[n]->x();
+		double y = gDocument.things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
 		if (edit.mode == ObjType::things && !edit.error_mode)
 		{
@@ -913,7 +913,7 @@ void UI_Canvas::DrawThings()
 
 		int r = info.radius;
 
-		DrawThing(x, y, r, Things[n]->angle, false);
+		DrawThing(x, y, r, gDocument.things[n]->angle, false);
 	}
 
 	// draw the thing numbers
@@ -921,13 +921,13 @@ void UI_Canvas::DrawThings()
 	{
 		for (int n = 0 ; n < NumThings ; n++)
 		{
-			double x = Things[n]->x();
-			double y = Things[n]->y();
+			double x = gDocument.things[n]->x();
+			double y = gDocument.things[n]->y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
 
-			const thingtype_t &info = M_GetThingType(Things[n]->type);
+			const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
 			x += info.radius + 8;
 			y += info.radius + 8;
@@ -948,13 +948,13 @@ void UI_Canvas::DrawThingBodies()
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x();
-		double y = Things[n]->y();
+		double x = gDocument.things[n]->x();
+		double y = gDocument.things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
 		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
@@ -982,16 +982,16 @@ void UI_Canvas::DrawThingSprites()
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double x = Things[n]->x();
-		double y = Things[n]->y();
+		double x = gDocument.things[n]->x();
+		double y = gDocument.things[n]->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(Things[n]->type);
+		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 		float scale = info.scale;
 
-		Img_c *sprite = W_GetSprite(Things[n]->type);
+		Img_c *sprite = W_GetSprite(gDocument.things[n]->type);
 
 		if (! sprite)
 		{
@@ -1323,31 +1323,31 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 	{
 		case ObjType::things:
 		{
-			double x = dx + Things[objnum]->x();
-			double y = dy + Things[objnum]->y();
+			double x = dx + gDocument.things[objnum]->x();
+			double y = dy + gDocument.things[objnum]->y();
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(Things[objnum]->type);
+			const thingtype_t &info = M_GetThingType(gDocument.things[objnum]->type);
 
 			int r = info.radius;
 
 			if (edit.error_mode)
-				DrawThing(x, y, r, Things[objnum]->angle, false /* big_arrow */);
+				DrawThing(x, y, r, gDocument.things[objnum]->angle, false /* big_arrow */);
 
 			r += r / 10 + 4;
 
-			DrawThing(x, y, r, Things[objnum]->angle, true);
+			DrawThing(x, y, r, gDocument.things[objnum]->angle, true);
 		}
 		break;
 
 		case ObjType::linedefs:
 		{
-			double x1 = dx + LineDefs[objnum]->Start()->x();
-			double y1 = dy + LineDefs[objnum]->Start()->y();
-			double x2 = dx + LineDefs[objnum]->End  ()->x();
-			double y2 = dy + LineDefs[objnum]->End  ()->y();
+			double x1 = dx + gDocument.linedefs[objnum]->Start()->x();
+			double y1 = dy + gDocument.linedefs[objnum]->Start()->y();
+			double x2 = dx + gDocument.linedefs[objnum]->End  ()->x();
+			double y2 = dy + gDocument.linedefs[objnum]->End  ()->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				break;
@@ -1358,8 +1358,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::vertices:
 		{
-			double x = dx + Vertices[objnum]->x();
-			double y = dy + Vertices[objnum]->y();
+			double x = dx + gDocument.vertices[objnum]->x();
+			double y = dy + gDocument.vertices[objnum]->y();
 
 			int vert_r = vertex_radius(grid.Scale);
 
@@ -1386,7 +1386,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 		{
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
-				const LineDef *L = LineDefs[n];
+				const LineDef *L = gDocument.linedefs[n];
 
 				if (! L->TouchesSector(objnum))
 					continue;
@@ -1437,26 +1437,26 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 	{
 		case ObjType::things:
 		{
-			double x = Things[objnum]->x();
-			double y = Things[objnum]->y();
+			double x = gDocument.things[objnum]->x();
+			double y = gDocument.things[objnum]->y();
 
 			edit.trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(Things[objnum]->type);
+			const thingtype_t &info = M_GetThingType(gDocument.things[objnum]->type);
 
 			int r = info.radius;
 
-			DrawThing(x, y, r * 3 / 2, Things[objnum]->angle, true);
+			DrawThing(x, y, r * 3 / 2, gDocument.things[objnum]->angle, true);
 		}
 		break;
 
 		case ObjType::vertices:
 		{
-			double x = Vertices[objnum]->x();
-			double y = Vertices[objnum]->y();
+			double x = gDocument.vertices[objnum]->x();
+			double y = gDocument.vertices[objnum]->y();
 
 			int vert_r = vertex_radius(grid.Scale);
 
@@ -1483,10 +1483,10 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::linedefs:
 		{
-			double x1 = LineDefs[objnum]->Start()->x();
-			double y1 = LineDefs[objnum]->Start()->y();
-			double x2 = LineDefs[objnum]->End  ()->x();
-			double y2 = LineDefs[objnum]->End  ()->y();
+			double x1 = gDocument.linedefs[objnum]->Start()->x();
+			double y1 = gDocument.linedefs[objnum]->Start()->y();
+			double x2 = gDocument.linedefs[objnum]->End  ()->x();
+			double y2 = gDocument.linedefs[objnum]->End  ()->y();
 
 			edit.trans_param.Apply(&x1, &y1);
 			edit.trans_param.Apply(&x2, &y2);
@@ -1502,13 +1502,13 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 		{
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
-				if (! LineDefs[n]->TouchesSector(objnum))
+				if (!gDocument.linedefs[n]->TouchesSector(objnum))
 					continue;
 
-				double x1 = LineDefs[n]->Start()->x();
-				double y1 = LineDefs[n]->Start()->y();
-				double x2 = LineDefs[n]->End  ()->x();
-				double y2 = LineDefs[n]->End  ()->y();
+				double x1 = gDocument.linedefs[n]->Start()->x();
+				double y1 = gDocument.linedefs[n]->Start()->y();
+				double x2 = gDocument.linedefs[n]->End  ()->x();
+				double y2 = gDocument.linedefs[n]->End  ()->y();
 
 				edit.trans_param.Apply(&x1, &y1);
 				edit.trans_param.Apply(&x2, &y2);
@@ -1532,18 +1532,18 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 	// color has been set by caller
 
 	// handle tagged linedefs : show matching sector(s)
-	if (objtype == ObjType::linedefs && LineDefs[objnum]->tag > 0)
+	if (objtype == ObjType::linedefs && gDocument.linedefs[objnum]->tag > 0)
 	{
 		for (int m = 0 ; m < NumSectors ; m++)
-			if (Sectors[m]->tag == LineDefs[objnum]->tag)
+			if (gDocument.sectors[m]->tag == gDocument.linedefs[objnum]->tag)
 				DrawHighlight(ObjType::sectors, m);
 	}
 
 	// handle tagged sectors : show matching line(s)
-	if (objtype == ObjType::sectors && Sectors[objnum]->tag > 0)
+	if (objtype == ObjType::sectors && gDocument.sectors[objnum]->tag > 0)
 	{
 		for (int m = 0 ; m < NumLineDefs ; m++)
-			if (LineDefs[m]->tag == Sectors[objnum]->tag)
+			if (gDocument.linedefs[m]->tag == gDocument.sectors[objnum]->tag)
 				DrawHighlight(ObjType::linedefs, m);
 	}
 }
@@ -1555,7 +1555,7 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		const LineDef *L = LineDefs[n];
+		const LineDef *L = gDocument.linedefs[n];
 
 		double x1 = dx + L->Start()->x();
 		double y1 = dy + L->Start()->y();
@@ -1906,7 +1906,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (edit.draw_from.is_nil())
 		return;
 
-	const Vertex * V = Vertices[edit.draw_from.num];
+	const Vertex * V = gDocument.vertices[edit.draw_from.num];
 
 	double new_x = edit.draw_to_x;
 	double new_y = edit.draw_to_y;
@@ -2002,8 +2002,8 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	if (edit.mode == ObjType::vertices && grid.ratio > 0 &&
 		edit.dragged.num >= 0 && edit.drag_other_vert >= 0)
 	{
-		const Vertex *v0 = Vertices[edit.drag_other_vert];
-		const Vertex *v1 = Vertices[edit.dragged.num];
+		const Vertex *v0 = gDocument.vertices[edit.drag_other_vert];
+		const Vertex *v1 = gDocument.vertices[edit.dragged.num];
 
 		double new_x = edit.drag_cur_x;
 		double new_y = edit.drag_cur_y;
@@ -2053,7 +2053,7 @@ void UI_Canvas::RenderSector(int num)
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
-	rgb_color_t light_col = SectorLightColor(Sectors[num]->light);
+	rgb_color_t light_col = SectorLightColor(gDocument.sectors[num]->light);
 	bool light_and_tex = false;
 
 	SString tex_name;
@@ -2086,9 +2086,9 @@ void UI_Canvas::RenderSector(int num)
 
 		if (edit.sector_render_mode == SREND_Ceiling ||
 			edit.sector_render_mode == SREND_CeilBright)
-			tex_name = Sectors[num]->CeilTex();
+			tex_name = gDocument.sectors[num]->CeilTex();
 		else
-			tex_name = Sectors[num]->FloorTex();
+			tex_name = gDocument.sectors[num]->FloorTex();
 
 		if (is_sky(tex_name))
 		{

@@ -411,23 +411,31 @@ public:
 	}
 };
 
+//
+// The document associated with a file. All stuff will go here
+//
+class Document
+{
+public:
+	std::vector<Thing *> things;
+	std::vector<Vertex *> vertices;
+	std::vector<Sector *> sectors;
+	std::vector<SideDef *> sidedefs;
+	std::vector<LineDef *> linedefs;
+};
 
-extern std::vector<Thing *>   Things;
-extern std::vector<Vertex *>  Vertices;
-extern std::vector<Sector *>  Sectors;
-extern std::vector<SideDef *> SideDefs;
-extern std::vector<LineDef *> LineDefs;
+extern Document gDocument;
 
 extern std::vector<byte>  HeaderData;
 extern std::vector<byte>  BehaviorData;
 extern std::vector<byte>  ScriptsData;
 
 
-#define NumThings     ((int)Things.size())
-#define NumVertices   ((int)Vertices.size())
-#define NumSectors    ((int)Sectors.size())
-#define NumSideDefs   ((int)SideDefs.size())
-#define NumLineDefs   ((int)LineDefs.size())
+#define NumThings     ((int)gDocument.things.size())
+#define NumVertices   ((int)gDocument.vertices.size())
+#define NumSectors    ((int)gDocument.sectors.size())
+#define NumSideDefs   ((int)gDocument.sidedefs.size())
+#define NumLineDefs   ((int)gDocument.linedefs.size())
 
 int NumObjects(ObjType type);
 

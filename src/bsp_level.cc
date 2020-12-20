@@ -182,7 +182,7 @@ static void BlockAdd(int blk_num, int line_index)
 
 static void BlockAddLine(int line_index)
 {
-	const LineDef *L = LineDefs[line_index];
+	const LineDef *L = gDocument.linedefs[line_index];
 
 	int x1 = (int) L->Start()->x();
 	int y1 = (int) L->Start()->y();
@@ -259,7 +259,7 @@ static void CreateBlockmap()
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
 		// ignore zero-length lines
-		if (LineDefs[i]->IsZeroLength())
+		if (gDocument.linedefs[i]->IsZeroLength())
 			continue;
 
 		BlockAddLine(i);
@@ -500,7 +500,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
 
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *L = LineDefs[i];
+		const LineDef *L = gDocument.linedefs[i];
 
 		if (! L->IsZeroLength())
 		{
@@ -648,7 +648,7 @@ static void Reject_GroupSectors()
 {
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *L = LineDefs[i];
+		const LineDef *L = gDocument.linedefs[i];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
@@ -886,8 +886,8 @@ static void GetVertices(void)
 	{
 		vertex_t *vert = NewVertex();
 
-		vert->x = Vertices[i]->x();
-		vert->y = Vertices[i]->y();
+		vert->x = gDocument.vertices[i]->x();
+		vert->y = gDocument.vertices[i]->y();
 
 		vert->index = i;
 	}
@@ -912,7 +912,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 
 static inline int VanillaSegDist(const seg_t *seg)
 {
-	const LineDef *L = LineDefs[seg->linedef];
+	const LineDef *L = gDocument.linedefs[seg->linedef];
 
 	double lx = seg->side ? L->End()->x() : L->Start()->x();
 	double ly = seg->side ? L->End()->y() : L->Start()->y();
@@ -1811,7 +1811,7 @@ void LoadLevel()
 
 	for (int ld = 0 ; ld < NumLineDefs ; ld++)
 	{
-		LineDef *L = LineDefs[ld];
+		LineDef *L = gDocument.linedefs[ld];
 
 		if (L->right >= 0 || L->left >= 0)
 			num_real_lines++;
@@ -2319,7 +2319,7 @@ build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 
 	// clear some fake line flags
 	for (int i = 0 ; i < NumLineDefs ; i++)
-		LineDefs[i]->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
+		gDocument.linedefs[i]->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
 }

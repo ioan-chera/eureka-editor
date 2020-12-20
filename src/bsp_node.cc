@@ -422,7 +422,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 		if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
 		{
-			if (check->linedef >= 0 && (LineDefs[check->linedef]->flags & MLF_IS_PRECIOUS))
+			if (check->linedef >= 0 && (gDocument.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
 				info->cost += 40 * factor * PRECIOUS_MULTIPLY;
 		}
 
@@ -490,7 +490,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		// are exhausted.  This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
-		if (check->linedef >= 0 && (LineDefs[check->linedef]->flags & MLF_IS_PRECIOUS))
+		if (check->linedef >= 0 && (gDocument.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
 			info->cost += 100 * factor * PRECIOUS_MULTIPLY;
 		else
 			info->cost += 100 * factor;
@@ -809,7 +809,7 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? LineDefs[seg->linedef]->IsSelfRef() : false;
+	bool self_ref = (seg->linedef >= 0) ? gDocument.linedefs[seg->linedef]->IsSelfRef() : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1151,7 +1151,7 @@ void node_t::SetPartition(const seg_t *part)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const LineDef *part_L = LineDefs[part->linedef];
+	const LineDef *part_L = gDocument.linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
@@ -1320,7 +1320,7 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 {
 	SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = SideDefs[sidedef];
+		sd = gDocument.sidedefs[sidedef];
 
 	// check for bad sidedef
 	if (sd && !is_sector(sd->sector))
@@ -1359,7 +1359,7 @@ seg_t *CreateSegs()
 
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *line = LineDefs[i];
+		const LineDef *line = gDocument.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
@@ -1523,7 +1523,7 @@ void subsec_t::ClockwiseOrder()
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (LineDefs[array[i]->linedef]->IsSelfRef())
+		else if (gDocument.linedefs[array[i]->linedef]->IsSelfRef())
 			cur_score = 2;
 
 		if (cur_score > best_score)

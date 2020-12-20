@@ -601,7 +601,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const Thing *T = Things[*it];
+			const Thing *T = gDocument.things[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
@@ -812,7 +812,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (is_thing(obj))
 		{
-			const Thing *T = Things[obj];
+			const Thing *T = gDocument.things[obj];
 
 			// @@ FIXME show decimals in UDMF
 			pos_x->value(SString(static_cast<int>(T->x())).c_str());
@@ -830,7 +830,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
 		if (is_thing(obj))
-			angle->value(SString(Things[obj]->angle).c_str());
+			angle->value(SString(gDocument.things[obj]->angle).c_str());
 		else
 			angle->value("");
 	}
@@ -839,7 +839,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_TID)
 	{
 		if (is_thing(obj))
-			tid->value(SString(Things[obj]->tid).c_str());
+			tid->value(SString(gDocument.things[obj]->tid).c_str());
 		else
 			tid->value("");
 	}
@@ -848,10 +848,10 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (is_thing(obj))
 		{
-			const thingtype_t &info = M_GetThingType(Things[obj]->type);
+			const thingtype_t &info = M_GetThingType(gDocument.things[obj]->type);
 			desc->value(info.desc.c_str());
-			type->value(SString(Things[obj]->type).c_str());
-			sprite->GetSprite(Things[obj]->type, FL_DARK2);
+			type->value(SString(gDocument.things[obj]->type).c_str());
+			sprite->GetSprite(gDocument.things[obj]->type, FL_DARK2);
 		}
 		else
 		{
@@ -864,7 +864,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_OPTIONS)
 	{
 		if (is_thing(obj))
-			OptionsFromInt(Things[obj]->options);
+			OptionsFromInt(gDocument.things[obj]->options);
 		else
 			OptionsFromInt(0);
 	}
@@ -874,11 +874,11 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_SPECIAL)
 	{
-		if (is_thing(obj) && Things[obj]->special)
+		if (is_thing(obj) && gDocument.things[obj]->special)
 		{
-			const linetype_t &info = M_GetLineType(Things[obj]->special);
+			const linetype_t &info = M_GetLineType(gDocument.things[obj]->special);
 			spec_desc->value(info.desc.c_str());
-			spec_type->value(SString(Things[obj]->special).c_str());
+			spec_type->value(SString(gDocument.things[obj]->special).c_str());
 		}
 		else
 		{
@@ -898,7 +898,7 @@ void UI_ThingBox::UpdateField(int field)
 
 		if (is_thing(obj))
 		{
-			const Thing *T = Things[obj];
+			const Thing *T = gDocument.things[obj];
 
 			const thingtype_t &info = M_GetThingType(T->type);
 			const linetype_t  &spec = M_GetLineType (T->special);

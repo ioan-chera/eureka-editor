@@ -1452,7 +1452,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 bool UI_FindAndReplace::Match_Thing(int idx)
 {
-	const Thing *T = Things[idx];
+	const Thing *T = gDocument.things[idx];
 
 	if (! find_numbers->get(T->type))
 		return false;
@@ -1470,7 +1470,7 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
-	const LineDef *L = LineDefs[idx];
+	const LineDef *L = gDocument.linedefs[idx];
 
 	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
 		return false;
@@ -1513,7 +1513,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
-	const Sector *sector = Sectors[idx];
+	const Sector *sector = gDocument.sectors[idx];
 
 	if (! Filter_Tag(sector->tag))
 		return false;
@@ -1537,7 +1537,7 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 bool UI_FindAndReplace::Match_LineType(int idx)
 {
-	const LineDef *L = LineDefs[idx];
+	const LineDef *L = gDocument.linedefs[idx];
 
 	if (! find_numbers->get(L->type))
 		return false;
@@ -1551,7 +1551,7 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 
 bool UI_FindAndReplace::Match_SectorType(int idx)
 {
-	const Sector *sector = Sectors[idx];
+	const Sector *sector = gDocument.sectors[idx];
 
 	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
@@ -1699,7 +1699,7 @@ void UI_FindAndReplace::Replace_Thing(int idx)
 
 void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 {
-	const LineDef *L = LineDefs[idx];
+	const LineDef *L = gDocument.linedefs[idx];
 
 	const char *pattern = find_match->value();
 
@@ -1742,7 +1742,7 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 
 void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 {
-	const Sector *sector = Sectors[idx];
+	const Sector *sector = gDocument.sectors[idx];
 
 	const char *pattern = find_match->value();
 
@@ -1772,7 +1772,7 @@ void UI_FindAndReplace::Replace_SectorType(int idx)
 	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
-	int old_type = Sectors[idx]->type;
+	int old_type = gDocument.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());
 
 	BA_ChangeSEC(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));

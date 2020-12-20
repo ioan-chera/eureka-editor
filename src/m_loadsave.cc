@@ -93,25 +93,25 @@ static void FreshLevel()
 	BA_ClearAll();
 
 	Sector *sec = new Sector;
-	Sectors.push_back(sec);
+	gDocument.sectors.push_back(sec);
 
 	sec->SetDefaults();
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		Vertex *v = new Vertex;
-		Vertices.push_back(v);
+		gDocument.vertices.push_back(v);
 
 		v->SetRawX((i >= 2) ? 256 : -256);
 		v->SetRawY((i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
-		SideDefs.push_back(sd);
+		gDocument.sidedefs.push_back(sd);
 
 		sd->SetDefaults(false);
 
 		LineDef *ld = new LineDef;
-		LineDefs.push_back(ld);
+		gDocument.linedefs.push_back(ld);
 
 		ld->start = i;
 		ld->end   = (i+1) % 4;
@@ -122,7 +122,7 @@ static void FreshLevel()
 	for (int pl = 1 ; pl <= 4 ; pl++)
 	{
 		Thing *th = new Thing;
-		Things.push_back(th);
+		gDocument.things.push_back(th);
 
 		th->type  = pl;
 		th->angle = 90;
@@ -447,7 +447,7 @@ static void LoadVertices()
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
-	Vertices.reserve(count);
+	gDocument.vertices.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -461,7 +461,7 @@ static void LoadVertices()
 		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
 		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
-		Vertices.push_back(vert);
+		gDocument.vertices.push_back(vert);
 	}
 }
 
@@ -478,7 +478,7 @@ static void LoadSectors()
 	PrintDebug("GetSectors: num = %d\n", count);
 # endif
 
-	Sectors.reserve(count);
+	gDocument.sectors.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -502,7 +502,7 @@ static void LoadSectors()
 		sec->type  = LE_U16(raw.type);
 		sec->tag   = LE_S16(raw.tag);
 
-		Sectors.push_back(sec);
+		gDocument.sectors.push_back(sec);
 	}
 }
 
@@ -515,7 +515,7 @@ static void CreateFallbackSector()
 
 	sec->SetDefaults();
 
-	Sectors.push_back(sec);
+	gDocument.sectors.push_back(sec);
 }
 
 static void CreateFallbackSideDef()
@@ -530,7 +530,7 @@ static void CreateFallbackSideDef()
 
 	sd->SetDefaults(false);
 
-	SideDefs.push_back(sd);
+	gDocument.sidedefs.push_back(sd);
 }
 
 static void CreateFallbackVertices()
@@ -546,8 +546,8 @@ static void CreateFallbackVertices()
 	v2->raw_x = INT_TO_COORD(555);
 	v2->raw_y = INT_TO_COORD(555);
 
-	Vertices.push_back(v1);
-	Vertices.push_back(v2);
+	gDocument.vertices.push_back(v1);
+	gDocument.vertices.push_back(v2);
 }
 
 
@@ -694,7 +694,7 @@ static void LoadThings()
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
 
-		Things.push_back(th);
+		gDocument.things.push_back(th);
 	}
 }
 
@@ -737,7 +737,7 @@ static void LoadThings_Hexen()
 		th->arg4 = raw.args[3];
 		th->arg5 = raw.args[4];
 
-		Things.push_back(th);
+		gDocument.things.push_back(th);
 	}
 }
 
@@ -778,7 +778,7 @@ static void LoadSideDefs()
 
 		ValidateSectorRef(sd, i);
 
-		SideDefs.push_back(sd);
+		gDocument.sidedefs.push_back(sd);
 	}
 }
 
@@ -823,7 +823,7 @@ static void LoadLineDefs()
 		ValidateVertexRefs(ld, i);
 		ValidateSidedefRefs(ld, i);
 
-		LineDefs.push_back(ld);
+		gDocument.linedefs.push_back(ld);
 	}
 }
 
@@ -873,7 +873,7 @@ static void LoadLineDefs_Hexen()
 		ValidateVertexRefs(ld, i);
 		ValidateSidedefRefs(ld, i);
 
-		LineDefs.push_back(ld);
+		gDocument.linedefs.push_back(ld);
 	}
 }
 
@@ -887,8 +887,8 @@ static void RemoveUnusedVerticesAtEnd()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		used_verts.set(LineDefs[i]->start);
-		used_verts.set(LineDefs[i]->end);
+		used_verts.set(gDocument.linedefs[i]->start);
+		used_verts.set(gDocument.linedefs[i]->end);
 	}
 
 	int new_count = NumVertices;
@@ -903,9 +903,9 @@ static void RemoveUnusedVerticesAtEnd()
 		LogPrintf("Removing %d unused vertices at end\n", NumVertices - new_count);
 
 		for (int i = new_count ; i < NumVertices ; i++)
-			delete Vertices[i];
+			delete gDocument.vertices[i];
 
-		Vertices.resize(new_count);
+		gDocument.vertices.resize(new_count);
 	}
 }
 
@@ -1402,7 +1402,7 @@ static void SaveVertices()
 
 	for (int i = 0 ; i < NumVertices ; i++)
 	{
-		const Vertex *vert = Vertices[i];
+		const Vertex *vert = gDocument.vertices[i];
 
 		raw_vertex_t raw;
 
@@ -1424,7 +1424,7 @@ static void SaveSectors()
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
-		const Sector *sec = Sectors[i];
+		const Sector *sec = gDocument.sectors[i];
 
 		raw_sector_t raw;
 
@@ -1453,7 +1453,7 @@ static void SaveThings()
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
-		const Thing *th = Things[i];
+		const Thing *th = gDocument.things[i];
 
 		raw_thing_t raw;
 
@@ -1480,7 +1480,7 @@ static void SaveThings_Hexen()
 
 	for (int i = 0 ; i < NumThings ; i++)
 	{
-		const Thing *th = Things[i];
+		const Thing *th = gDocument.things[i];
 
 		raw_hexen_thing_t raw;
 
@@ -1516,7 +1516,7 @@ static void SaveSideDefs()
 
 	for (int i = 0 ; i < NumSideDefs ; i++)
 	{
-		const SideDef *side = SideDefs[i];
+		const SideDef *side = gDocument.sidedefs[i];
 
 		raw_sidedef_t raw;
 
@@ -1544,7 +1544,7 @@ static void SaveLineDefs()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *ld = LineDefs[i];
+		const LineDef *ld = gDocument.linedefs[i];
 
 		raw_linedef_t raw;
 
@@ -1574,7 +1574,7 @@ static void SaveLineDefs_Hexen()
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *ld = LineDefs[i];
+		const LineDef *ld = gDocument.linedefs[i];
 
 		raw_hexen_linedef_t raw;
 

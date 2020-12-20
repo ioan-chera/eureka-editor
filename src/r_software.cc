@@ -257,8 +257,8 @@ public:
 
 			if (A_other >= 0)
 			{
-				int ax = static_cast<int>(Vertices[A_other]->x());
-				int ay = static_cast<int>(Vertices[A_other]->y());
+				int ax = static_cast<int>(gDocument.vertices[A_other]->x());
+				int ay = static_cast<int>(gDocument.vertices[A_other]->y());
 
 				int bx1 = static_cast<int>(B->ld->Start()->x());
 				int by1 = static_cast<int>(B->ld->Start()->y());
@@ -277,8 +277,8 @@ public:
 		else if (A->th >= 0 && B->th >= 0)
 		{
 			// prevent two things at same location from flickering
-			const Thing *const TA = Things[A->th];
-			const Thing *const TB = Things[B->th];
+			const Thing *const TA = gDocument.things[A->th];
+			const Thing *const TB = gDocument.things[B->th];
 
 			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
@@ -369,7 +369,7 @@ public:
 
 		SideDef *back_sd = (side == Side::left) ? ld->Right() : ld->Left();
 		if (back_sd)
-			back = Sectors[back_sd->sector];
+			back = gDocument.sectors[back_sd->sector];
 
 		// support for BOOM's 242 "transfer heights" line type
 		Sector temp_front;
@@ -378,7 +378,7 @@ public:
 		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
-			const Sector *dummy = Sectors[exfloor->heightsec];
+			const Sector *dummy = gDocument.sectors[exfloor->heightsec];
 			front = Boom242Sector(front, &temp_front, dummy);
 		}
 
@@ -387,7 +387,7 @@ public:
 			exfloor = Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const Sector *dummy = Sectors[exfloor->heightsec];
+				const Sector *dummy = gDocument.sectors[exfloor->heightsec];
 				back = Boom242Sector(back, &temp_back, dummy);
 			}
 		}
@@ -488,7 +488,7 @@ public:
 			return;
 
 		front = sec;
-		back  = Sectors[back_sd->sector];
+		back  = gDocument.sectors[back_sd->sector];
 
 		int c_h = MIN(front->ceilh,  back->ceilh);
 		int f_h = MAX(front->floorh, back->floorh);
@@ -705,7 +705,7 @@ public:
 
 	void AddLine(int ld_index)
 	{
-		LineDef *ld = LineDefs[ld_index];
+		LineDef *ld = gDocument.linedefs[ld_index];
 
 		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
 			return;
@@ -858,7 +858,7 @@ public:
 
 	void AddThing(int th_index)
 	{
-		Thing *th = Things[th_index];
+		Thing *th = gDocument.things[th_index];
 
 		const thingtype_t &info = M_GetThingType(th->type);
 
@@ -913,8 +913,8 @@ public:
 			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(thsec);
 			if (is_sector(exfloor->heightsec))
 			{
-				const Sector *real  = Sectors[thsec];
-				const Sector *dummy = Sectors[exfloor->heightsec];
+				const Sector *real  = gDocument.sectors[thsec];
+				const Sector *dummy = gDocument.sectors[exfloor->heightsec];
 
 				if (dummy->floorh > real->floorh &&
 					r_view.z > dummy->floorh &&
@@ -930,12 +930,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
-			h2 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - th->h());
+			h2 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - th->h());
 			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
-			h1 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->floorh : 0) + th->h());
+			h1 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + th->h());
 			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
@@ -1134,7 +1134,7 @@ public:
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-		const Sector *S = Sectors[sec_index];
+		const Sector *S = gDocument.sectors[sec_index];
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
@@ -1271,7 +1271,7 @@ public:
 				float dy = static_cast<float>(edit.drag_cur_y - edit.drag_start_y);
 				float dz = static_cast<float>(edit.drag_cur_z - edit.drag_start_z);
 
-				const Thing *T = Things[dw->th];
+				const Thing *T = gDocument.things[dw->th];
 
 				float x = static_cast<float>(T->x() + dx - r_view.x);
 				float y = static_cast<float>(T->y() + dy - r_view.y);
@@ -1296,12 +1296,12 @@ public:
 
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
-					h2 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->ceilh : 192) - T->h());
+					h2 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - T->h());
 					h1 = static_cast<int>(h2 - sprite->height() * scale);
 				}
 				else
 				{
-					h1 = static_cast<int>((is_sector(thsec) ? Sectors[thsec]->floorh : 0) + T->h());
+					h1 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + T->h());
 					h2 = static_cast<int>(h1 + sprite->height() * scale);
 				}
 
@@ -1654,7 +1654,7 @@ public:
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
 		int thsec = r_view.thing_sectors[dw->th];
-		int light = is_sector(thsec) ? Sectors[thsec]->light : 255;
+		int light = is_sector(thsec) ? gDocument.sectors[thsec]->light : 255;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* fill pixels */
