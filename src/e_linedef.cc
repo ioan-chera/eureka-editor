@@ -1324,15 +1324,15 @@ static int PickLineDefToExtend(selection_c& list, bool moving_start)
 }
 
 
-static void LD_SetLength(int ld, int new_len, int angle)
+static void LD_SetLength(int ld, int new_len, double angle)
 {
 	// the 'new_len' parameter can be negative, which means move
 	// the start vertex instead of the end vertex.
 
 	const LineDef *L = LineDefs[ld];
 
-	double dx = abs(new_len) * cos(angle * M_PI / 32768.0);
-	double dy = abs(new_len) * sin(angle * M_PI / 32768.0);
+	double dx = abs(new_len) * cos(angle);
+	double dy = abs(new_len) * sin(angle);
 
 	int idx = I_ROUND(dx);
 	int idy = I_ROUND(dy);
@@ -1371,14 +1371,13 @@ void LineDefs_SetLength(int new_len)
 		return;
 
 	// remember angles
-	std::vector<int> angles(NumLineDefs);
+	std::vector<double> angles(NumLineDefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = LineDefs[n];
 
-		angles[n] = ComputeAngle(static_cast<int>(L->End()->x() - L->Start()->x()),
-			static_cast<int>(L->End()->y() - L->Start()->y()));
+		angles[n] = atan2(L->End()->y() - L->Start()->y(), L->End()->x() - L->Start()->x());
 	}
 
 	BA_Begin();
