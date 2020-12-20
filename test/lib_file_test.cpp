@@ -130,3 +130,17 @@ TEST(LibFile, GetBaseName)
     ASSERT_EQ(GetBaseName("fil"), "fil");
 	ASSERT_EQ(GetBaseName(""), "");
 }
+
+TEST(LibFile, FilenameIsBare)
+{
+	ASSERT_TRUE(FilenameIsBare(""));
+	ASSERT_TRUE(FilenameIsBare("Doom"));
+	ASSERT_TRUE(FilenameIsBare("DOOM"));
+	ASSERT_TRUE(FilenameIsBare("doom"));
+	ASSERT_FALSE(FilenameIsBare("/doom"));
+	ASSERT_FALSE(FilenameIsBare(":doom"));
+	ASSERT_FALSE(FilenameIsBare("/doom.wad"));
+	ASSERT_FALSE(FilenameIsBare("doom.wad"));
+	ASSERT_FALSE(FilenameIsBare("C:\\doom"));
+	ASSERT_FALSE(FilenameIsBare("\\doom"));
+}
