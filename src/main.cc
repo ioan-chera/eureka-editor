@@ -146,7 +146,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	va_list arg_ptr;
 
 	va_start(arg_ptr, fmt);
-	SString buffer = StringVPrintf(fmt, arg_ptr);
+	SString buffer = SString::vprintf(fmt, arg_ptr);
 	va_end(arg_ptr);
 
 	// re-entered here? ouch!

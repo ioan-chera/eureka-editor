@@ -164,7 +164,7 @@ void Lump_c::Printf(EUR_FORMAT_STRING(const char *msg), ...)
 	va_list args;
 
 	va_start(args, msg);
-	SString buffer = StringVPrintf(msg, args);
+	SString buffer = SString::vprintf(msg, args);
 	va_end(args);
 
 	Write(buffer.c_str(), (int)buffer.length());

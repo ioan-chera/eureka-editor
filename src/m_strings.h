@@ -36,7 +36,6 @@ void y_strlowr (char *str);
 
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
-SString StringVPrintf(const char *str, va_list ap);
 void StringCopy(char *buffer, size_t size, const SString &source);
 
 //
@@ -64,6 +63,7 @@ public:
 	}
 
 	static SString printf(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(1, 2);
+	static SString vprintf(const char *format, va_list ap);
 
 	bool empty() const
 	{

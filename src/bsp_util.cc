@@ -47,7 +47,7 @@ void Failure(const char *fmt, ...)
 
 
 	va_start(args, fmt);
-	SString message = StringVPrintf(fmt, args);
+	SString message = SString::vprintf(fmt, args);
 	va_end(args);
 
 	if (cur_info->warnings)
@@ -66,7 +66,7 @@ void Warning(const char *fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	SString message = StringVPrintf(fmt, args);
+	SString message = SString::vprintf(fmt, args);
 	va_end(args);
 
 	if (cur_info->warnings)
