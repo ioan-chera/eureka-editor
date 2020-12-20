@@ -72,6 +72,8 @@ bool HasExtension(const SString &filename)
 	{
 		if (filename[A] == '.')
 		{
+			if(foundPotentialExtension)	// this would be the next pass
+				return true;
 			foundPotentialExtension = true;
 			continue;
 		}
