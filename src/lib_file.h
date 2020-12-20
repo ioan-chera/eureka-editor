@@ -47,7 +47,6 @@ SString GetAbsolutePath(const SString &path);
 // file utilities
 bool FileExists(const SString &filename);
 bool FileCopy(const SString &src_name, const SString &dest_name);
-bool FileRename(const SString &old_name, const SString &new_name);
 bool FileDelete(const SString &filename);
 bool FileChangeDir(const SString &dir_name);
 bool FileMakeDir(const SString &dir_name);

@@ -371,18 +371,6 @@ bool FileCopy(const SString &src_name, const SString &dest_name)
 }
 
 
-bool FileRename(const SString &old_name, const SString &new_name)
-{
-#ifdef WIN32
-	return (::MoveFile(old_name.c_str(), new_name.c_str()) != 0);
-
-#else // UNIX or MACOSX
-
-	return (rename(old_name.c_str(), new_name.c_str()) == 0);
-#endif
-}
-
-
 bool FileDelete(const SString &filename)
 {
 #ifdef WIN32
