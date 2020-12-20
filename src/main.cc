@@ -202,17 +202,19 @@ static void CreateHomeDirs()
 {
 	SYS_ASSERT(!home_dir.empty());
 
-	static char dir_name[FL_PATH_MAX];
+	char dir_name[FL_PATH_MAX];
 
 #ifdef __APPLE__
    // IOANCH 20130825: modified to use name-independent calls
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(osx_LibDir, NULL));
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::library, nullptr).c_str());
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(osx_LibAppSupportDir, NULL));
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
+														 nullptr).c_str());
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(osx_LibCacheDir, NULL));
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::libraryCache,
+														 nullptr).c_str());
 	FileMakeDir(dir_name);
 #endif
 
@@ -269,15 +271,15 @@ static void Determine_HomeDir(const char *argv0)
 		}
 
 #elif defined(__APPLE__)
-	char * path = StringNew(FL_PATH_MAX + 4);
+	char path[FL_PATH_MAX + 4];
 
-   fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibAppSupportDir, "eureka-editor"));
+   fl_filename_expand(path, OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
+													"eureka-editor").c_str());
    home_dir = path;
 
-   fl_filename_expand(path, OSX_UserDomainDirectory(osx_LibCacheDir, "eureka-editor"));
+   fl_filename_expand(path, OSX_UserDomainDirectory(macOSDirType::libraryCache,
+													"eureka-editor").c_str());
    cache_dir = path;
-
-	free(path);
 
 #else  // UNIX
 	char * path = StringNew(FL_PATH_MAX + 4);
