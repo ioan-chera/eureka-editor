@@ -147,7 +147,7 @@ SString ReplaceExtension(const SString &filename, const SString &ext)
 	return result;
 }
 
-size_t FindBaseName(const SString &filename)
+static size_t FindBaseName(const SString &filename)
 {
 	// Find the base name of the file (i.e. without any path).
 	// The result always points within the given string.
@@ -173,14 +173,7 @@ SString GetBaseName(const SString &path)
 	// The result always points within the given string.
 	//
 	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
-#ifdef WIN32
-	size_t s = path.find_last_of("/\\");
-#else
-	size_t s = path.rfind('/');
-#endif
-	if(s != std::string::npos)
-		return path.substr(s + 1);
-	return path;
+	return path.substr(FindBaseName(path));
 }
 
 bool FilenameIsBare(const SString &filename)

@@ -38,7 +38,6 @@ class SString;
 bool HasExtension(const SString &filename);
 bool MatchExtension(const SString &filename, const SString &ext);
 SString ReplaceExtension(const SString &filename, const SString &ext);
-size_t FindBaseName(const SString &filename);
 SString GetBaseName(const SString &path);
 bool FilenameIsBare(const SString &filename);
 SString FilenameReposition(const SString &filename, const SString &othername);

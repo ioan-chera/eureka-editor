@@ -121,11 +121,12 @@ TEST(LibFile, FilenameGetPath)
 #endif
 }
 
-TEST(LibFile, FindBaseName)
+TEST(LibFile, GetBaseName)
 {
-    ASSERT_EQ(FindBaseName("path/to///file"), 10);
-    ASSERT_EQ(FindBaseName("path/to/file"), 8);
-    ASSERT_EQ(FindBaseName("/file"), 1);
-    ASSERT_EQ(FindBaseName("//file"), 2);
-    ASSERT_EQ(FindBaseName("file"), 0);
+	ASSERT_EQ(GetBaseName("path/to///fileA.wad"), "fileA.wad");
+    ASSERT_EQ(GetBaseName("path/to/fileB"), "fileB");
+    ASSERT_EQ(GetBaseName("/fileC.txt"), "fileC.txt");
+    ASSERT_EQ(GetBaseName("//file"), "file");
+    ASSERT_EQ(GetBaseName("fil"), "fil");
+	ASSERT_EQ(GetBaseName(""), "");
 }
