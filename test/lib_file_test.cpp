@@ -43,6 +43,7 @@ TEST(LibFile, HasExtension)
 	ASSERT_TRUE(HasExtension("man.wad/doom..wad"));
 	ASSERT_FALSE(HasExtension(".okay"));
 	ASSERT_FALSE(HasExtension("man/.okay"));
+	ASSERT_TRUE(HasExtension("man/..okay"));
 	ASSERT_FALSE(HasExtension("man/.okay."));
 	ASSERT_TRUE(HasExtension("man/.okay.wad"));
 	ASSERT_FALSE(HasExtension("/."));
@@ -71,6 +72,42 @@ TEST(LibFile, MatchExtension)
 	ASSERT_TRUE(MatchExtension("..", nullptr));
 	ASSERT_FALSE(MatchExtension("..", "."));
 	ASSERT_TRUE(MatchExtension("", nullptr));
+}
+
+TEST(LibFile, ReplaceExtension)
+{
+	ASSERT_EQ(ReplaceExtension("man/doc.", "wad"), "man/doc..wad");
+	ASSERT_EQ(ReplaceExtension("man/doc.", "WAD"), "man/doc..WAD");
+	ASSERT_EQ(ReplaceExtension("man/doc.", ""), "man/doc.");
+	ASSERT_EQ(ReplaceExtension("man/doc.", nullptr), "man/doc.");
+	ASSERT_EQ(ReplaceExtension("man/.doc", ""), "man/.doc");
+	ASSERT_EQ(ReplaceExtension("man/.doc", nullptr), "man/.doc");
+	ASSERT_EQ(ReplaceExtension("man/.doc", "wad"), "man/.doc.wad");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom", "waD"), "man.wad/doom.waD");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom.wad", ".txt"), "man.wad/doom.txt");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom.wad", ""), "man.wad/doom");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom.wad", nullptr), "man.wad/doom");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom..wad", nullptr), "man.wad/doom.");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom..wad", ""), "man.wad/doom.");
+	ASSERT_EQ(ReplaceExtension("man.wad/doom..wad", "txt"), "man.wad/doom..txt");
+	ASSERT_EQ(ReplaceExtension(".okay", "txt"), ".okay.txt");
+	ASSERT_EQ(ReplaceExtension(".okay", ""), ".okay");
+	ASSERT_EQ(ReplaceExtension(".okay", nullptr), ".okay");
+	ASSERT_EQ(ReplaceExtension("/.", nullptr), "/.");
+	ASSERT_EQ(ReplaceExtension("/.", "txt"), "/..txt");
+	ASSERT_EQ(ReplaceExtension(".", "txt"), "..txt");
+	ASSERT_EQ(ReplaceExtension("", "txt"), ".txt");
+	ASSERT_EQ(ReplaceExtension(".", ""), ".");
+	ASSERT_EQ(ReplaceExtension(".", nullptr), ".");
+	ASSERT_EQ(ReplaceExtension("..", ""), "..");
+	ASSERT_EQ(ReplaceExtension("..", nullptr), "..");
+	ASSERT_EQ(ReplaceExtension("..", "txt"), "...txt");
+	ASSERT_EQ(ReplaceExtension("..txt", "wad"), "..wad");
+	ASSERT_EQ(ReplaceExtension("..txt", ""), ".");
+	ASSERT_EQ(ReplaceExtension("..txt", nullptr), ".");
+	ASSERT_EQ(ReplaceExtension("", ""), "");
+	ASSERT_EQ(ReplaceExtension("", nullptr), "");
+	ASSERT_EQ(ReplaceExtension("", "wad"), ".wad");
 }
 
 TEST(LibFile, FilenameGetPath)

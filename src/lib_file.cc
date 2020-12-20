@@ -113,6 +113,8 @@ bool MatchExtension(const SString &filename, const SString &ext)
 	if(!HasExtension(filename))	// don't acknowledge extension if set
 		return false;
 
+	if(ext[0] == '.')
+		return filename.noCaseEndsWith(ext);
 	return filename.noCaseEndsWith("." + ext);
 }
 
@@ -126,36 +128,23 @@ bool MatchExtension(const SString &filename, const SString &ext)
 //
 SString ReplaceExtension(const SString &filename, const SString &ext)
 {
-	SYS_ASSERT(filename[0] != 0);
-
-	size_t total_len = filename.length() + (ext.good() ? ext.length() : 0);
-
-	SString buffer;
-	buffer.reserve(total_len + 10);
-	buffer = filename;
-
-	size_t dot_pos;
-#ifdef WIN32
-	dot_pos = buffer.find_last_of("./\\:");
-#else
-	dot_pos = buffer.find_last_of("./");
-#endif
-
-	if(dot_pos != SString::npos && buffer[(int)dot_pos] != '.')
-		dot_pos = SString::npos;
-	if (ext.empty())
-	{
-		if(dot_pos != SString::npos)
-			buffer.erase(dot_pos, std::string::npos);
-		return buffer;
-	}
-
-	if (dot_pos != SString::npos && dot_pos != buffer.length() - 1)
-		buffer.erase(dot_pos + 1, SString::npos);
+	SString actualExt;
+	if(ext.good() && ext[0] == '.')
+		actualExt = ext;
 	else
-		buffer += '.';
-	buffer += ext;
-	return buffer;
+		actualExt = "." + ext;
+	if(!HasExtension(filename))
+	{
+		if(ext.good())
+			return filename + actualExt;
+		return filename;
+	}
+	size_t dotPos = filename.rfind('.');
+	SString result = filename;
+	result.erase(dotPos, SString::npos);
+	if(ext.good())
+		result += actualExt;
+	return result;
 }
 
 size_t FindBaseName(const SString &filename)

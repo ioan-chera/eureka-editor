@@ -1091,10 +1091,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	static char filename[FL_PATH_MAX];
-
-	snprintf(filename, sizeof(filename), "%s/backups/%s", cache_dir.c_str(), fl_filename_name(wad->PathName().c_str()));
-
+	SString filename = cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
 	SString dir_name = ReplaceExtension(filename, NULL);
 
 	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
