@@ -45,7 +45,7 @@ public:
 	double scale_x, scale_y;
 	double skew_x, skew_y;
 
-	int rotate;  // 16 bits (65536 = 360 degrees)
+	double rotate;	// radians
 
 public:
 	void Clear();

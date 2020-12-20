@@ -1339,8 +1339,8 @@ void transform_t::Apply(double *x, double *y) const
 
 	if (rotate)
 	{
-		double s = sin(rotate * M_PI / 32768.0);
-		double c = cos(rotate * M_PI / 32768.0);
+		double s = sin(rotate);
+		double c = cos(rotate);
 
 		double x1 = x0;
 		double y1 = y0;
@@ -1724,7 +1724,7 @@ static void DoScaleTwoThings(selection_c *list, transform_t& param)
 		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
 		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
 
-		float rot1 = static_cast<float>(param.rotate / 8192.0);
+		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
 		int ang_diff = static_cast<int>(I_ROUND(rot1) * 45.0);
 
@@ -1926,7 +1926,7 @@ void RotateObjects3(double deg, double pos_x, double pos_y)
 
 	param.Clear();
 
-	param.rotate = I_ROUND(deg * 65536.0 / 360.0);
+	param.rotate = deg * M_PI / 180.0;
 
 	DetermineOrigin(param, pos_x, pos_y);
 

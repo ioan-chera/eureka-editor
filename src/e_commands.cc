@@ -882,10 +882,9 @@ void Transform_Update()
 
 	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
 	{
-		int angle1 = (int)ComputeAngle(static_cast<int>(dx1), static_cast<int>(dy1));
-		int angle0 = (int)ComputeAngle(static_cast<int>(dx0), static_cast<int>(dy0));
+		double angle[2] = { atan2(dy1, dx1), atan2(dy0, dx0) };
 
-		edit.trans_param.rotate = angle1 - angle0;
+		edit.trans_param.rotate = angle[1] - angle[0];
 
 //		fprintf(stderr, "angle diff : %1.2f\n", edit.trans_rotate * 360.0 / 65536.0);
 	}
