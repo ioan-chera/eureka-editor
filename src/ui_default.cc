@@ -202,7 +202,7 @@ void UI_DefaultProps::SetThing(int number)
 {
 	default_thing = number;
 
-	thing->value(Int_TmpStr(default_thing));
+	thing->value(SString(default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -373,7 +373,7 @@ void UI_DefaultProps::LoadValues()
 	SetIntVal( ceil_h, default_ceil_h);
 	SetIntVal(  light, default_light_level);
 
-	thing->value(Int_TmpStr(default_thing));
+	thing->value(SString(default_thing).c_str());
 
 	UpdateThingDesc();
 }

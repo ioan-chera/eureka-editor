@@ -215,8 +215,8 @@ void UI_VertexBox::UpdateField()
 	if (is_vertex(obj))
 	{
 		// @@ FIXME show decimals in UDMF
-		pos_x->value(Int_TmpStr(static_cast<int>(Vertices[obj]->x())));
-		pos_y->value(Int_TmpStr(static_cast<int>(Vertices[obj]->y())));
+		pos_x->value(SString(static_cast<int>(Vertices[obj]->x())).c_str());
+		pos_y->value(SString(static_cast<int>(Vertices[obj]->y())).c_str());
 	}
 	else
 	{

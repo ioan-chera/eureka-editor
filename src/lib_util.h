@@ -51,10 +51,6 @@ double AlongDist(double x, double y, /* coord to test */
 // round a positive value up to the nearest power of two
 int RoundPOW2(int x);
 
-
-const char * Int_TmpStr(int value);
-
-
 /*
  *  dectoi
  *  If <c> is a decimal digit ("[0-9]"), return its value.

@@ -1453,7 +1453,7 @@ void UI_Preferences::LoadValues()
 	edit_def_mode->value(CLAMP(0, config::default_edit_mode, 3));
 	edit_lineinfo->value(CLAMP(0, config::highlight_line_info, 5));
 
-	edit_sectorsize->value(Int_TmpStr(config::new_sector_size));
+	edit_sectorsize->value(SString(config::new_sector_size).c_str());
 	edit_samemode->value(config::same_mode_clears_selection ? 1 : 0);
 	edit_add_del->value(config::sidedef_add_del_buttons ? 1 : 0);
 	edit_full_1S->value(config::show_full_one_sided ? 1 : 0);

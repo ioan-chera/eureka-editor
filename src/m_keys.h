@@ -178,9 +178,9 @@ bool ExecuteCommand(const editor_command_t *cmd,
 					const SString &param1 = "", const SString &param2 = "",
                     const SString &param3 = "", const SString &param4 = "");
 
-bool ExecuteCommand(const char *name,
-					const char *param1 = "", const char *param2 = "",
-                    const char *param3 = "", const char *param4 = "");
+bool ExecuteCommand(const SString &name,
+					const SString &param1 = "", const SString &param2 = "",
+                    const SString &param3 = "", const SString &param4 = "");
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 

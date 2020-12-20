@@ -680,7 +680,7 @@ void UI_ThingBox::AdjustExtraFloor(int dir)
 	int new_fl = (old_fl + dir) & 15;
 
 	if (new_fl)
-		exfloor->value(Int_TmpStr(new_fl));
+		exfloor->value(SString(new_fl).c_str());
 	else
 		exfloor->value("");
 
@@ -724,7 +724,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 		o_friend->value((options & MTF_Friend) ? 1 : 0);
 
 		if (options & MTF_EXFLOOR_MASK)
-			exfloor->value(Int_TmpStr((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT));
+			exfloor->value(SString((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
 		else
 			exfloor->value("");
 	}
@@ -815,9 +815,9 @@ void UI_ThingBox::UpdateField(int field)
 			const Thing *T = Things[obj];
 
 			// @@ FIXME show decimals in UDMF
-			pos_x->value(Int_TmpStr(static_cast<int>(T->x())));
-			pos_y->value(Int_TmpStr(static_cast<int>(T->y())));
-			pos_z->value(Int_TmpStr(static_cast<int>(T->h())));
+			pos_x->value(SString(static_cast<int>(T->x())).c_str());
+			pos_y->value(SString(static_cast<int>(T->y())).c_str());
+			pos_z->value(SString(static_cast<int>(T->h())).c_str());
 		}
 		else
 		{
@@ -830,7 +830,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
 		if (is_thing(obj))
-			angle->value(Int_TmpStr(Things[obj]->angle));
+			angle->value(SString(Things[obj]->angle).c_str());
 		else
 			angle->value("");
 	}
@@ -839,7 +839,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (field < 0 || field == Thing::F_TID)
 	{
 		if (is_thing(obj))
-			tid->value(Int_TmpStr(Things[obj]->tid));
+			tid->value(SString(Things[obj]->tid).c_str());
 		else
 			tid->value("");
 	}
@@ -850,7 +850,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const thingtype_t &info = M_GetThingType(Things[obj]->type);
 			desc->value(info.desc.c_str());
-			type->value(Int_TmpStr(Things[obj]->type));
+			type->value(SString(Things[obj]->type).c_str());
 			sprite->GetSprite(Things[obj]->type, FL_DARK2);
 		}
 		else
@@ -878,7 +878,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const linetype_t &info = M_GetLineType(Things[obj]->special);
 			spec_desc->value(info.desc.c_str());
-			spec_type->value(Int_TmpStr(Things[obj]->special));
+			spec_type->value(SString(Things[obj]->special).c_str());
 		}
 		else
 		{
@@ -910,7 +910,7 @@ void UI_ThingBox::UpdateField(int field)
 
 				if (T->special)
 				{
-					args[a]->value(Int_TmpStr(arg_val));
+					args[a]->value(SString(arg_val).c_str());
 
 					if (!spec.args[a].empty())
 						args[a]->copy_tooltip(spec.args[a].c_str());
@@ -921,7 +921,7 @@ void UI_ThingBox::UpdateField(int field)
 				{
 					// spawn arguments
 					if (arg_val || !info.args[a].empty())
-						args[a]->value(Int_TmpStr(arg_val));
+						args[a]->value(SString(arg_val).c_str());
 
 					if (!info.args[a].empty())
 						args[a]->copy_tooltip(info.args[a].c_str());

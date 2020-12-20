@@ -62,6 +62,10 @@ public:
 	{
 	}
 
+	explicit SString(int number) : data(std::to_string(number))
+	{
+	}
+
 	static SString printf(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(1, 2);
 	static SString vprintf(const char *format, va_list ap);
 
