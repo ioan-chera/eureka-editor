@@ -19,6 +19,36 @@
 #include "m_strings.h"
 #include "gtest/gtest.h"
 
+TEST(MStrings, YStricmp)
+{
+	ASSERT_EQ(y_stricmp("Jackson", "jackson"), 0);
+	ASSERT_NE(y_stricmp("Jackson", "Jacksonville"), 0);
+	ASSERT_EQ(y_strnicmp("jackson", "JACKSONVILLE", 7), 0);
+
+	ASSERT_LT(y_stricmp("jackson", "Michael"), 0);
+	ASSERT_LT(y_stricmp("Jackson", "michael"), 0);
+	ASSERT_GT(y_stricmp("mackson", "Jichael"), 0);
+	ASSERT_GT(y_stricmp("Mackson", "jichael"), 0);
+
+	ASSERT_EQ(y_stricmp("", ""), 0);
+}
+
+TEST(MStrings, YStrUprLowr)
+{
+	char name[] = "Jackson";
+	y_strupr(name);
+	ASSERT_STREQ(name, "JACKSON");
+	char name2[] = "Michael";
+	y_strlowr(name2);
+	ASSERT_STREQ(name2, "michael");
+
+	char empty[] = "";
+	y_strupr(empty);
+	ASSERT_STREQ(empty, "");
+	y_strlowr(empty);
+	ASSERT_STREQ(empty, "");
+}
+
 TEST(SString, Test)
 {
     SString nullString(nullptr);
