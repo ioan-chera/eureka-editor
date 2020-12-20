@@ -75,7 +75,7 @@ unsigned int TimeGetMillies()
   do                  \
   {                 \
     if (sizeof (type) != size)            \
-      FatalError("sizeof " #type " is %d (should be " #size ")\n",  \
+      ThrowException("sizeof " #type " is %d (should be " #size ")\n",  \
   (int) sizeof (type));           \
   }                 \
   while (0)

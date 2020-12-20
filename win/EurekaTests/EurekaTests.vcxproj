@@ -30,9 +30,11 @@
     <ClCompile Include="..\..\modules\googletest\googletest\src\gtest_main.cc" />
     <ClCompile Include="..\..\src\Errors.cpp" />
     <ClCompile Include="..\..\src\lib_file.cc" />
+    <ClCompile Include="..\..\src\lib_util.cc" />
     <ClCompile Include="..\..\src\m_bitvec.cc" />
     <ClCompile Include="..\..\src\m_strings.cc" />
     <ClCompile Include="..\..\test\lib_file_test.cpp" />
+    <ClCompile Include="..\..\test\lib_util_test.cpp" />
     <ClCompile Include="..\..\test\m_bitvec_test.cpp" />
     <ClCompile Include="..\..\test\SStringTest.cpp" />
     <ClCompile Include="..\..\test\StringTableTest.cpp" />
