@@ -58,9 +58,6 @@ SString GetExecutablePath(const char *argv0);
 
 //------------------------------------------------------------------------
 
-// directory functions
-bool PathIsDirectory(const char *path);
-
 enum scan_flags_e
 {
 	SCAN_F_IsDir    = (1 << 0),

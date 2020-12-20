@@ -442,34 +442,6 @@ bool FileLoad(const SString &filename, std::vector<u8_t> &data)
 	return true;
 }
 
-//
-// Note: returns false when the path doesn't exist.
-//
-bool PathIsDirectory(const char *path)
-{
-#ifdef WIN32
-	char old_dir[MAX_PATH+1];
-
-	if (GetCurrentDirectory(MAX_PATH, (LPSTR)old_dir) == FALSE)
-		return false;
-
-	bool result = SetCurrentDirectory(path);
-
-	SetCurrentDirectory(old_dir);
-
-	return result;
-
-#else // UNIX or MACOSX
-
-	struct stat finfo;
-
-	if (stat(path, &finfo) != 0)
-		return false;
-
-	return (S_ISDIR(finfo.st_mode)) ? true : false;
-#endif
-}
-
 //------------------------------------------------------------------------
 
 //
@@ -477,32 +449,29 @@ bool PathIsDirectory(const char *path)
 //
 int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func)
 {
-	SYS_ASSERT(path.good());
+	SString actualPath = path;
+	if(actualPath.empty())
+		actualPath = ".";
 	int count = 0;
 
 #ifdef WIN32
 
-	// this is a bit clunky.  We set the current directory to the
-	// target and use FindFirstFile with "*.*" as the pattern.
-	// Afterwards we restore the current directory.
-
-	char old_dir[MAX_PATH+1];
-
-	if (GetCurrentDirectory(MAX_PATH, (LPSTR)old_dir) == FALSE)
-		return SCAN_ERROR;
-
-	if (SetCurrentDirectory(path.c_str()) == FALSE)
+	DWORD attributes = GetFileAttributesA(path.c_str());
+	if(attributes == INVALID_FILE_ATTRIBUTES)
 		return SCAN_ERR_NoExist;
+	if(!(attributes & FILE_ATTRIBUTE_DIRECTORY))
+		return SCAN_ERR_NotDir;
+	SString pattern;
+	if(actualPath.back() == '/' || actualPath.back() == DIR_SEP_CH)
+		pattern = actualPath + "*";
+	else
+		pattern = actualPath + DIR_SEP_STR "*";
 
 	WIN32_FIND_DATA fdata;
 
-	HANDLE handle = FindFirstFile("*.*", &fdata);
+	HANDLE handle = FindFirstFile(pattern.c_str(), &fdata);
 	if (handle == INVALID_HANDLE_VALUE)
-	{
-		SetCurrentDirectory(old_dir);
-
 		return 0;  //??? (GetLastError() == ERROR_FILE_NOT_FOUND) ? 0 : SCAN_ERROR;
-	}
 
 	do
 	{
@@ -536,8 +505,6 @@ int ScanDirectory(const SString &path, const std::function<void(const SString &,
 	while (FindNextFile(handle, &fdata) != FALSE);
 
 	FindClose(handle);
-
-	SetCurrentDirectory(old_dir);
 
 
 #else // ---- UNIX ------------------------------------------------

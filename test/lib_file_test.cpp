@@ -294,3 +294,75 @@ TEST_F(LibFileTempDir, FileLoad)
 	// Mustn't read inexistent files
 	ASSERT_FALSE(FileLoad(getChildPath("file2"), result));
 }
+
+TEST_F(LibFileTempDir, ScanDirectory)
+{
+	// 1. Add a file, a "hidden" file, a folder and a "hidden" folder
+	SString path = getChildPath("file");
+	std::ofstream os(path.get());
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os << "hello";
+	os.close();
+
+	SString filePath = path;
+	
+	path = getChildPath(".file");
+	os.open(path.c_str());
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os << "shadow";
+	os.close();
+
+	path = getChildPath("dir");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	path = getChildPath(".dir");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+
+	SString dotDirPath = path;
+
+	// Also nest another file, to check it doesn't get listed
+	path = getChildPath("dir/file2");
+	os.open(path.c_str());
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os << "shadow2";
+	os.close();
+
+	int result = ScanDirectory(mTempDir, [](const SString &name, int flags)
+		{
+			if(name == "file")
+				ASSERT_EQ(flags, 0);
+			else if(name == ".file")
+				ASSERT_TRUE(flags & SCAN_F_Hidden);
+			else if(name == "dir")
+				ASSERT_TRUE(flags & SCAN_F_IsDir);
+			else if(name == ".dir")
+				ASSERT_EQ(flags & (SCAN_F_IsDir | SCAN_F_Hidden), SCAN_F_IsDir | SCAN_F_Hidden);
+			else
+				ASSERT_FALSE(true);	// error if getting here
+		});
+	ASSERT_EQ(result, 4);	// scan no more
+
+	// Now also try on some non-folder files
+	result = ScanDirectory(filePath, [](const SString &name, int flags)
+		{
+			ASSERT_FALSE(true);	// should not get here
+		});
+	ASSERT_EQ(result, SCAN_ERR_NotDir);
+
+	result = ScanDirectory(getChildPath("illegal"), [](const SString &name, int flags)
+		{
+			ASSERT_FALSE(true);	// should not get here
+		});
+	ASSERT_EQ(result, SCAN_ERR_NoExist);
+
+	// Also scan an empty dir
+	result = ScanDirectory(dotDirPath, [](const SString &name, int flags)
+		{
+			ASSERT_FALSE(true);	// should not get here
+		});
+	ASSERT_EQ(result, 0);
+}
