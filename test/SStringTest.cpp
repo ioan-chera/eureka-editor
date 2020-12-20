@@ -39,7 +39,7 @@ TEST(MStringsDeath, StringNew)
 	ASSERT_DEATH(Fatal([]{ StringNew(-1); }), "Assertion");
 }
 
-TEST(MString, StringDup)
+TEST(MStrings, StringDup)
 {
 	const char original[] = "Michael";
 	char *copy = StringDup(original);
@@ -70,7 +70,16 @@ TEST(MStrings, YStrUprLowr)
 	ASSERT_STREQ(empty, "");
 }
 
-TEST(SString, Test)
+TEST(MStrings, StringCopy)
+{
+	char buff[5];
+	StringCopy(buff, 5, "Michael");
+	ASSERT_STREQ(buff, "Mich");
+	StringCopy(buff, 5, "ABC");
+	ASSERT_STREQ(buff, "ABC");
+}
+
+TEST(SString, Construct)
 {
     SString nullString(nullptr);
     ASSERT_EQ(nullString, "");
@@ -104,9 +113,17 @@ TEST(SString, FindSpace)
     ASSERT_EQ(SString("Michae\n \tJackson").findSpace(), 6);
     ASSERT_EQ(SString("Micha\t \nJackson").findSpace(), 5);
     ASSERT_EQ(SString("Mich\r \tJackson").findSpace(), 4);
-    ASSERT_EQ(SString("MichJackson").findSpace(), std::string::npos);
-    ASSERT_EQ(SString("").findSpace(), std::string::npos);
+    ASSERT_EQ(SString("MichJackson").findSpace(), SString::npos);
+    ASSERT_EQ(SString().findSpace(), SString::npos);
     ASSERT_EQ(SString("\t").findSpace(), 0);
+}
+
+TEST(SString, FindDigit)
+{
+	ASSERT_EQ(SString("MAP01").findDigit(), 3);
+	ASSERT_EQ(SString("MAPXY").findDigit(), SString::npos);
+	ASSERT_EQ(SString("MAPF23").findDigit(), 4);
+	ASSERT_EQ(SString().findDigit(), SString::npos);
 }
 
 TEST(SString, TrimLeadingSpaces)
@@ -246,4 +263,32 @@ TEST(SString, AsCase)
 	ASSERT_EQ(SString("jackson").asTitle(), "Jackson");
 	ASSERT_EQ(SString("Jackson").asUpper(), "JACKSON");
 	ASSERT_EQ(SString("Jackson").asLower(), "jackson");
+}
+
+TEST(SString, GlobalOperatorPlus)
+{
+	ASSERT_EQ("Michael" + SString(" Jackson"), "Michael Jackson");
+	ASSERT_EQ(nullptr + SString(" Jackson"), " Jackson");
+}
+
+TEST(SString, GlobalOperatorStream)
+{
+	std::stringstream ss;
+	ss << SString("Michael") << ' ' << SString("Jackson");
+	ASSERT_EQ(ss.str(), "Michael Jackson");
+}
+
+TEST(SString, ToNumberOverloads)
+{
+	ASSERT_EQ(atoi(SString("42")), 42);
+	ASSERT_FLOAT_EQ(atof(SString("42.24")), 42.24f);
+	ASSERT_EQ(strtol(SString("42"), nullptr, 0), 42);
+	ASSERT_EQ(strtol(SString("042"), nullptr, 0), 042);
+	ASSERT_EQ(strtol(SString("0x42"), nullptr, 0), 0x42);
+	ASSERT_EQ(strtol(SString("042"), nullptr, 16), 0x42);
+	ASSERT_EQ(strtol(SString("042"), nullptr, 10), 42);
+	char *endptr = nullptr;
+	SString fourtytwo = "42a";
+	ASSERT_EQ(strtol(fourtytwo, &endptr, 0), 42);
+	ASSERT_EQ(endptr, fourtytwo.c_str() + 2);
 }
