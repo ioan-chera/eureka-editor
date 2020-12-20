@@ -53,7 +53,7 @@ bool FileMakeDir(const SString &dir_name);
 
 bool FileLoad(const SString &filename, std::vector<uint8_t> &data);
 
-// miscellanous
+// miscellaneous
 SString GetExecutablePath(const char *argv0);
 
 //------------------------------------------------------------------------
