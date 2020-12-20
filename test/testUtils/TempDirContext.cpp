@@ -19,7 +19,8 @@
 #include "TempDirContext.hpp"
 
 #ifdef _WIN32
-#error TODO Windows
+#include <Windows.h>
+#include <rpc.h>
 #else
 #include <unistd.h>
 #endif
@@ -30,7 +31,21 @@
 void TempDirContext::SetUp()
 {
 #ifdef _WIN32
-#error TODO Windows
+	char tempPath[MAX_PATH] = {};
+	DWORD result = GetTempPathA(sizeof(tempPath), tempPath);
+	
+	ASSERT_GT(result, 0u);
+	ASSERT_EQ(result, strlen(tempPath));
+
+	UUID uuid = {};
+	RPC_STATUS status = UuidCreate(&uuid);
+	ASSERT_EQ(status, RPC_S_OK);
+
+	ASSERT_NE(uuid.Data1, 0);
+
+	mTempDir = SString::printf("%sEurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", tempPath, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
+
+	ASSERT_TRUE(CreateDirectoryA(mTempDir.c_str(), nullptr));
 #else
 	char pattern[] = "/tmp/tempdirXXXXXX";
 	char *result = mkdtemp(pattern);
@@ -40,18 +55,33 @@ void TempDirContext::SetUp()
 #endif
 }
 
+//
+// Portable way to delete file or folder. Under Windows it seems that remove can't delete folders.
+//
+static bool deleteFileOrFolder(const char *path)
+{
+#ifdef _WIN32
+	DWORD attributes = GetFileAttributesA(path);
+	EXPECT_NE(attributes, INVALID_FILE_ATTRIBUTES);
+	if(attributes != INVALID_FILE_ATTRIBUTES && attributes & FILE_ATTRIBUTE_DIRECTORY)
+		return RemoveDirectoryA(path) != FALSE;
+	return remove(path) == 0;
+#else
+	return remove(path) == 0;
+#endif
+}
+
 void TempDirContext::TearDown()
 {
 	if(mTempDir.good())
 	{
 		while(!mDeleteList.empty())
 		{
-			int result = remove(mDeleteList.top().c_str());
-			ASSERT_EQ(result, 0);
+			// Don't assert fatally, so we get the change to delete what we can.
+			EXPECT_TRUE(deleteFileOrFolder(mDeleteList.top().c_str()));
 			mDeleteList.pop();
 		}
-		int result = remove(mTempDir.c_str());
-		ASSERT_EQ(result, 0);
+		ASSERT_TRUE(deleteFileOrFolder(mTempDir.c_str()));
 	}
 }
 
