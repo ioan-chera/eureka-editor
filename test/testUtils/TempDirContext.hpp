@@ -22,7 +22,7 @@
 #include "m_strings.h"
 #include "gtest/gtest.h"
 
-#include <vector>
+#include <stack>
 
 class TempDirContext : public ::testing::Test
 {
@@ -32,7 +32,7 @@ protected:
 	SString getChildPath(const char *path);
 
 	SString mTempDir;
-	std::vector<SString> mDeleteList;
+	std::stack<SString> mDeleteList;
 };
 
 #endif /* TempDirContext_hpp */

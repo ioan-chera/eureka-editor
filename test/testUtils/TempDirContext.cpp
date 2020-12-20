@@ -44,10 +44,11 @@ void TempDirContext::TearDown()
 {
 	if(mTempDir.good())
 	{
-		for(const SString &path : mDeleteList)
+		while(!mDeleteList.empty())
 		{
-			int result = remove(path.c_str());
+			int result = remove(mDeleteList.top().c_str());
 			ASSERT_EQ(result, 0);
+			mDeleteList.pop();
 		}
 		int result = remove(mTempDir.c_str());
 		ASSERT_EQ(result, 0);

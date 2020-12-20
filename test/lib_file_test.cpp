@@ -174,12 +174,12 @@ TEST_F(LibFileTempDir, FileExists)
 	std::ofstream os(path.get());
 	ASSERT_TRUE(os.is_open());
 	os.close();
-	mDeleteList.push_back(path);
+	mDeleteList.push(path);
 	ASSERT_TRUE(FileExists(path));
 
 	int result = remove(path.c_str());
 	ASSERT_EQ(result, 0);
-	mDeleteList.clear();
+	mDeleteList.pop();
 
 	// Deleted, now must be back to false
 	ASSERT_FALSE(FileExists(path));
@@ -191,14 +191,14 @@ TEST_F(LibFileTempDir, FileCopy)
 
 	std::ofstream os(path.get());
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push_back(path);
+	mDeleteList.push(path);
 	os << "HelloWorld!";
 	os.close();
 
 	SString path2 = getChildPath("file2");
 	bool result = FileCopy(path, path2);
 	ASSERT_TRUE(result);
-	mDeleteList.push_back(path2);
+	mDeleteList.push(path2);
 
 	std::ifstream is(path2.get());
 	ASSERT_TRUE(is.is_open());
@@ -245,11 +245,51 @@ TEST_F(LibFileTempDir, FileDelete)
 
 	std::ofstream os(path.get());
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push_back(path);
+	mDeleteList.push(path);
 	os << "Hello";
 	os.close();
 
 	ASSERT_TRUE(FileDelete(path));
-	mDeleteList.clear();
+	mDeleteList.pop();
+
+}
+
+// NOTE: FileChangeDir modifies the process state
+
+TEST_F(LibFileTempDir, FileMakeDir)
+{
+	SString path = getChildPath("dir");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	// Disallow overwriting
+	ASSERT_FALSE(FileMakeDir(path));
+	// Disallow inexistent intermediary paths
+	ASSERT_FALSE(FileMakeDir(getChildPath("dir2/dir3")));
 	
+}
+
+TEST_F(LibFileTempDir, FileLoad)
+{
+	// Must test a sufficiently large file
+	std::vector<char> randomData;
+	randomData.reserve(40000);
+	for(int i = 0; i < 40000; ++i)
+		randomData.push_back(static_cast<char>(rand() & 0xff));
+
+	SString path = getChildPath("file");
+	std::ofstream os(path.get(), std::ios::binary);
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os.write(randomData.data(), randomData.size());
+	os.close();
+
+	std::vector<uint8_t> result;
+	ASSERT_TRUE(FileLoad(path, result));
+	ASSERT_EQ(result.size(), 40000);
+	ASSERT_EQ(memcmp(result.data(), randomData.data(), result.size()), 0);
+
+	// Mustn't read dirs
+	ASSERT_FALSE(FileLoad(mTempDir, result));
+	// Mustn't read inexistent files
+	ASSERT_FALSE(FileLoad(getChildPath("file2"), result));
 }
