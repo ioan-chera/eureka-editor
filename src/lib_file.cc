@@ -108,20 +108,10 @@ bool MatchExtension(const SString &filename, const SString &ext)
 {
 	if (ext.empty())
 		return ! HasExtension(filename);
+	if(!HasExtension(filename))	// don't acknowledge extension if set
+		return false;
 
-	int A = (int)filename.length() - 1;
-	int B = (int)ext.length() - 1;
-
-	for (; B >= 0 ; B--, A--)
-	{
-		if (A < 0)
-			return false;
-
-		if (toupper(filename[A]) != toupper(ext[B]))
-			return false;
-	}
-
-	return (A >= 1) && (filename[A] == '.');
+	return filename.noCaseEndsWith("." + ext);
 }
 
 

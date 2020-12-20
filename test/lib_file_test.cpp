@@ -51,6 +51,28 @@ TEST(LibFile, HasExtension)
 	ASSERT_FALSE(HasExtension(""));
 }
 
+TEST(LibFile, MatchExtension)
+{
+	ASSERT_TRUE(MatchExtension("man/doc.", nullptr));
+	ASSERT_TRUE(MatchExtension("man/doc.", ""));
+	ASSERT_FALSE(MatchExtension("man/.doc.", "doc"));
+	ASSERT_TRUE(MatchExtension("man/doc. ", " "));
+	ASSERT_TRUE(MatchExtension("man.wad/doom", nullptr));
+	ASSERT_FALSE(MatchExtension("man.wad/doom", "doom"));
+	ASSERT_TRUE(MatchExtension("man.wad/doom.wad", ".WAD"));
+	ASSERT_TRUE(MatchExtension("man.wad/doom..wad", ".WAD"));
+	ASSERT_TRUE(MatchExtension(".okay", ""));
+	ASSERT_FALSE(MatchExtension(".okay", "okay"));
+	ASSERT_TRUE(MatchExtension("man/.okay", ""));
+	ASSERT_FALSE(MatchExtension("man/.okay", "okay"));
+	ASSERT_TRUE(MatchExtension("man/.okay.WAD", "wad"));
+	ASSERT_TRUE(MatchExtension("/.", nullptr));
+	ASSERT_TRUE(MatchExtension(".", nullptr));
+	ASSERT_TRUE(MatchExtension("..", nullptr));
+	ASSERT_FALSE(MatchExtension("..", "."));
+	ASSERT_TRUE(MatchExtension("", nullptr));
+}
+
 TEST(LibFile, FilenameGetPath)
 {
     ASSERT_EQ(FilenameGetPath("path/to/file"), "path/to");
