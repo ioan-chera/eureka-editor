@@ -38,42 +38,6 @@ enum class ObjType
 	sectors
 };
 
-inline static ObjType ObjTypeFromInt(int raw)
-{
-	switch(raw)
-	{
-	default:
-	case 0:
-		return ObjType::things;
-	case 1:
-		return ObjType::linedefs;
-	case 2:
-		return ObjType::sidedefs;
-	case 3:
-		return ObjType::vertices;
-	case 4:
-		return ObjType::sectors;
-	}
-}
-
-inline static int IntFromObjType(ObjType type)
-{
-	switch(type)
-	{
-	default:
-	case ObjType::things:
-		return 0;
-	case ObjType::linedefs:
-		return 1;
-	case ObjType::sidedefs:
-		return 2;
-	case ObjType::vertices:
-		return 3;
-	case ObjType::sectors:
-		return 4;
-	}
-}
-
 // special object number for "NONE"
 #define NIL_OBJ		-1
 

@@ -443,5 +443,8 @@
     <ClInclude Include="..\..\src\Errors.hpp">
       <Filter>Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\objid.h">
+      <Filter>Code</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

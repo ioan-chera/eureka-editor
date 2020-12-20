@@ -682,7 +682,7 @@ class edit_op_c
 public:
 	EditOp action = EditOp::none;
 
-	byte objtype = 0;
+	ObjType objtype = ObjType::things;
 	byte field = 0;
 	byte _pad = 0;
 
@@ -697,16 +697,16 @@ public:
 		switch (action)
 		{
 			case EditOp::change:
-				RawChange(ObjTypeFromInt(objtype), objnum, (int)field, &value);
+				RawChange(objtype, objnum, (int)field, &value);
 				return;
 
 			case EditOp::del:
-				ptr = RawDelete(ObjTypeFromInt(objtype), objnum);
+				ptr = RawDelete(objtype, objnum);
 				action = EditOp::insert;  // reverse the operation
 				return;
 
 			case EditOp::insert:
-				RawInsert(ObjTypeFromInt(objtype), objnum, ptr);
+				RawInsert(objtype, objnum, ptr);
 				ptr = NULL;
 				action = EditOp::del;  // reverse the operation
 				return;
@@ -722,7 +722,7 @@ public:
 		if (action == EditOp::insert)
 		{
 			SYS_ASSERT(ptr);
-			DeleteFinally(ObjTypeFromInt(objtype), ptr);
+			DeleteFinally(objtype, ptr);
 		}
 		else if (action == EditOp::del)
 		{
@@ -924,7 +924,7 @@ int BA_New(ObjType type)
 	edit_op_c op;
 
 	op.action  = EditOp::insert;
-	op.objtype = IntFromObjType(type);
+	op.objtype = type;
 
 	switch (type)
 	{
@@ -972,7 +972,7 @@ void BA_Delete(ObjType type, int objnum)
 	edit_op_c op;
 
 	op.action  = EditOp::del;
-	op.objtype = IntFromObjType(type);
+	op.objtype = type;
 	op.objnum  = objnum;
 
 	// this must happen _before_ doing the deletion (otherwise
@@ -1029,7 +1029,7 @@ bool BA_Change(ObjType type, int objnum, byte field, int value)
 	edit_op_c op;
 
 	op.action  = EditOp::change;
-	op.objtype = IntFromObjType(type);
+	op.objtype = type;
 	op.field   = field;
 	op.objnum  = objnum;
 	op.value   = value;
