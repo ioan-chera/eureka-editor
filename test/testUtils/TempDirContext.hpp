@@ -22,13 +22,17 @@
 #include "m_strings.h"
 #include "gtest/gtest.h"
 
+#include <vector>
+
 class TempDirContext : public ::testing::Test
 {
 protected:
 	void SetUp() override;
-	virtual ~TempDirContext();
+	void TearDown() override;
+	SString getChildPath(const char *path);
 
 	SString mTempDir;
+	std::vector<SString> mDeleteList;
 };
 
 #endif /* TempDirContext_hpp */

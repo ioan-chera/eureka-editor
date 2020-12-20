@@ -36,13 +36,32 @@ void TempDirContext::SetUp()
 	char *result = mkdtemp(pattern);
 	ASSERT_NE(result, nullptr);
 	mTempDir = result;
+	ASSERT_TRUE(mTempDir.good());
 #endif
 }
 
-TempDirContext::~TempDirContext()
+void TempDirContext::TearDown()
 {
 	if(mTempDir.good())
-		remove(mTempDir.c_str());
+	{
+		for(const SString &path : mDeleteList)
+		{
+			int result = remove(path.c_str());
+			ASSERT_EQ(result, 0);
+		}
+		int result = remove(mTempDir.c_str());
+		ASSERT_EQ(result, 0);
+	}
+}
+
+//
+// Gets a child path
+//
+SString TempDirContext::getChildPath(const char *path)
+{
+	EXPECT_TRUE(path);
+	EXPECT_TRUE(*path);
+	return mTempDir + "/" + path;
 }
 
 TEST_F(TempDirContext, Test)
