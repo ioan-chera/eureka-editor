@@ -416,7 +416,7 @@ static int * RawDeleteThing(int objnum)
 {
 	SYS_ASSERT(0 <= objnum && objnum < NumThings);
 
-	int * result = (int*) Things[objnum];
+	int * result = reinterpret_cast<int*>(Things[objnum]);
 
 	for (int n = objnum ; n < NumThings-1 ; n++)
 		Things[n] = Things[n + 1];
@@ -684,7 +684,6 @@ public:
 
 	ObjType objtype = ObjType::things;
 	byte field = 0;
-	byte _pad = 0;
 
 	int objnum = 0;
 
