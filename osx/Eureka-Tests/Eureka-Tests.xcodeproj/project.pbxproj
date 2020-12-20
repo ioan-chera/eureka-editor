@@ -25,6 +25,8 @@
 		4FBC5CBB258E8396005480CA /* m_bitvec_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CBA258E8396005480CA /* m_bitvec_test.cpp */; };
 		4FBC5CBF258E83F6005480CA /* m_bitvec.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CBE258E83F5005480CA /* m_bitvec.cc */; };
 		4FBC5CC6258F580F005480CA /* FatalHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CC4258F580F005480CA /* FatalHandler.cpp */; };
+		4FBC5CCA258F96AC005480CA /* TempDirContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CC8258F96AC005480CA /* TempDirContext.cpp */; };
+		4FBC5CCE258F9B1A005480CA /* libfltk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FBC5CCD258F9B1A005480CA /* libfltk.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -65,6 +67,9 @@
 		4FBC5CBE258E83F5005480CA /* m_bitvec.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_bitvec.cc; path = ../../src/m_bitvec.cc; sourceTree = "<group>"; };
 		4FBC5CC4258F580F005480CA /* FatalHandler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FatalHandler.cpp; path = ../../test/testUtils/FatalHandler.cpp; sourceTree = "<group>"; };
 		4FBC5CC5258F580F005480CA /* FatalHandler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FatalHandler.hpp; path = ../../test/testUtils/FatalHandler.hpp; sourceTree = "<group>"; };
+		4FBC5CC8258F96AC005480CA /* TempDirContext.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TempDirContext.cpp; path = ../../test/testUtils/TempDirContext.cpp; sourceTree = "<group>"; };
+		4FBC5CC9258F96AC005480CA /* TempDirContext.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TempDirContext.hpp; path = ../../test/testUtils/TempDirContext.hpp; sourceTree = "<group>"; };
+		4FBC5CCD258F9B1A005480CA /* libfltk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfltk.a; path = "../fltk-1.3.5/lib/libfltk.a"; sourceTree = "<group>"; };
 		4FCB3A45253B55870038EFEB /* Eureka-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Eureka-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -73,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FBC5CCE258F9B1A005480CA /* libfltk.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,13 +134,24 @@
 			children = (
 				4FBC5CC4258F580F005480CA /* FatalHandler.cpp */,
 				4FBC5CC5258F580F005480CA /* FatalHandler.hpp */,
+				4FBC5CC8258F96AC005480CA /* TempDirContext.cpp */,
+				4FBC5CC9258F96AC005480CA /* TempDirContext.hpp */,
 			);
 			name = testUtils;
+			sourceTree = "<group>";
+		};
+		4FBC5CCC258F9B11005480CA /* FLTK */ = {
+			isa = PBXGroup;
+			children = (
+				4FBC5CCD258F9B1A005480CA /* libfltk.a */,
+			);
+			name = FLTK;
 			sourceTree = "<group>";
 		};
 		4FCB3A3C253B55870038EFEB = {
 			isa = PBXGroup;
 			children = (
+				4FBC5CCC258F9B11005480CA /* FLTK */,
 				4FBC5CC3258F57DF005480CA /* testUtils */,
 				4FBC5CA8258E8300005480CA /* Eureka */,
 				4FBC5BCC258D3648005480CA /* tests */,
@@ -217,6 +234,7 @@
 				4FBC5CC6258F580F005480CA /* FatalHandler.cpp in Sources */,
 				4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */,
 				4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */,
+				4FBC5CCA258F96AC005480CA /* TempDirContext.cpp in Sources */,
 				4FBC5CAD258E831A005480CA /* StringTableTest.cpp in Sources */,
 				4FBC5BC0258D3622005480CA /* gtest_main.cc in Sources */,
 				4FBC5BC3258D3622005480CA /* gtest-filepath.cc in Sources */,
@@ -287,6 +305,7 @@
 					../../modules/googletest/googletest,
 					..,
 				);
+				LIBRARY_SEARCH_PATHS = ..;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -343,6 +362,7 @@
 					../../modules/googletest/googletest,
 					..,
 				);
+				LIBRARY_SEARCH_PATHS = ..;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

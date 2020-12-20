@@ -18,21 +18,17 @@
 
 #include "lib_file.h"
 #include "m_strings.h"
+#include "testUtils/TempDirContext.hpp"
 #include "gtest/gtest.h"
+#include "FL/filename.H"
 
 void DebugPrintf(const char *str, ...)
 {
 }
 
-const char *fl_filename_name(const char * filename)
+class LibFileTempDir : public TempDirContext
 {
-    return nullptr;
-}
-
-int fl_filename_absolute(char *to, int tolen, const char *from)
-{
-    return 0;
-}
+};
 
 TEST(LibFile, HasExtension)
 {
@@ -159,4 +155,13 @@ TEST(LibFile, FilenameReposition)
 	ASSERT_EQ(FilenameReposition(nullptr, nullptr), "");
 	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "lamb"), "doom.wad");
 	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "/abc/def/lamb"), "/abc/def/doom.wad");
+}
+
+TEST_F(LibFileTempDir, GetAbsolutePath)
+{
+	char path[FL_PATH_MAX];
+	int result = fl_filename_absolute(path, sizeof(path), mTempDir.c_str());
+	ASSERT_NE(result, 0);
+	SString stringResult = GetAbsolutePath(mTempDir);
+	ASSERT_STREQ(stringResult.c_str(), path);
 }
