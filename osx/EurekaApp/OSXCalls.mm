@@ -30,6 +30,7 @@
 
 #ifdef __APPLE__
 
+#include "m_strings.h"
 #import "Foundation/Foundation.h"
 #include "OSXCalls.h"
 
@@ -39,20 +40,20 @@
 //
 // Returns the directory where to save configs
 //
-const char *OSX_UserDomainDirectory(osx_dirtype dirtype, const char *subdir)
+SString OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
 {
    NSSearchPathDirectory spd;
    switch (dirtype)
    {
-      case osx_LibDir:
+	   case macOSDirType::library:
          spd = NSLibraryDirectory;
          break;
          
-      case osx_LibAppSupportDir:
+	   case macOSDirType::libraryAppSupport:
          spd = NSApplicationSupportDirectory;
          break;
          
-      case osx_LibCacheDir:
+	   case macOSDirType::libraryCache:
          spd = NSCachesDirectory;
          break;
    }

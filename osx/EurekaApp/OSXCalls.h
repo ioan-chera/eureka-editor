@@ -33,25 +33,17 @@
 #ifndef __Eureka_Doom_Editor__OSXCalls__
 #define __Eureka_Doom_Editor__OSXCalls__
 
-//#ifdef __cplusplus__
-//extern "C"
-//{
-//#endif
+class SString;
 
-   // Currently used paths
-   enum
-   {
-      osx_LibDir,
-      osx_LibAppSupportDir,
-      osx_LibCacheDir,
-   };
-   typedef unsigned osx_dirtype;
+// Currently used paths
+enum class macOSDirType
+{
+	library,
+	libraryAppSupport,
+	libraryCache
+};
    
-   const char *OSX_UserDomainDirectory(osx_dirtype dirtype, const char *subdir);
-
-//#ifdef __cplusplus__
-//}
-//#endif
+SString OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir);
 
 #endif /* defined(__Eureka_Doom_Editor__OSXCalls__) */
 
