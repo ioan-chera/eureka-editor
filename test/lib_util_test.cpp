@@ -25,8 +25,3 @@ TEST(LibUtil, CheckTypeSizes)
 }
 
 // Don't test time. It wastes time.
-
-TEST(LibUtil, ComputeAngle)
-{
-	//ASSERT_LE(fabs())
-}

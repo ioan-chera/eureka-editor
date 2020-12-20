@@ -107,17 +107,6 @@ void CheckTypeSizes()
 	assert_size(raw_vertex_t,   4);
 }
 
-
-//
-// translate (dx, dy) into an integer angle value (0-65535)
-//
-unsigned int ComputeAngle(int dx, int dy)
-{
-	return (unsigned int) (atan2 ((double) dy, (double) dx) * 10430.37835 + 0.5);
-}
-
-
-
 //
 // compute the distance from (0, 0) to (dx, dy)
 //
