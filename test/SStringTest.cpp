@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "m_strings.h"
+#include "testUtils/FatalHandler.hpp"
 #include "gtest/gtest.h"
 
 TEST(MStrings, YStricmp)
@@ -31,6 +32,11 @@ TEST(MStrings, YStricmp)
 	ASSERT_GT(y_stricmp("Mackson", "jichael"), 0);
 
 	ASSERT_EQ(y_stricmp("", ""), 0);
+}
+
+TEST(MStringsDeath, StringNew)
+{
+	ASSERT_DEATH(Fatal([]{ StringNew(-1); }), "Assertion");
 }
 
 TEST(MStrings, YStrUprLowr)

@@ -99,6 +99,7 @@ void y_strlowr(char *str)
 char *StringNew(int length)
 {
 	// length does not include the trailing NUL.
+	SYS_ASSERT(length >= 0);
 
 	char *s = (char *) calloc(length + 1, 1);
 
