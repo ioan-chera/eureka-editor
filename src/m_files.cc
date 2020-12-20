@@ -1053,13 +1053,9 @@ static void backup_scan_file(const SString &name, int flags, void *priv_dat)
 }
 
 
-static const char *Backup_Name(const SString &dir_name, int slot)
+inline static const char *Backup_Name(const SString &dir_name, int slot)
 {
-	static char filename[FL_PATH_MAX];
-
-	snprintf(filename, sizeof(filename), "%s/%d.wad", dir_name.c_str(), slot);
-
-	return filename;
+	return SString::printf("%s/%d.wad", dir_name.c_str(), slot);
 }
 
 
