@@ -24,6 +24,7 @@
 		4FBC5CB8258E833E005480CA /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CB3258E833E005480CA /* Errors.cpp */; };
 		4FBC5CBB258E8396005480CA /* m_bitvec_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CBA258E8396005480CA /* m_bitvec_test.cpp */; };
 		4FBC5CBF258E83F6005480CA /* m_bitvec.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CBE258E83F5005480CA /* m_bitvec.cc */; };
+		4FBC5CC6258F580F005480CA /* FatalHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5CC4258F580F005480CA /* FatalHandler.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -62,6 +63,8 @@
 		4FBC5CBA258E8396005480CA /* m_bitvec_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = m_bitvec_test.cpp; path = ../../test/m_bitvec_test.cpp; sourceTree = "<group>"; };
 		4FBC5CBD258E83F5005480CA /* m_bitvec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = m_bitvec.h; path = ../../src/m_bitvec.h; sourceTree = "<group>"; };
 		4FBC5CBE258E83F5005480CA /* m_bitvec.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = m_bitvec.cc; path = ../../src/m_bitvec.cc; sourceTree = "<group>"; };
+		4FBC5CC4258F580F005480CA /* FatalHandler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FatalHandler.cpp; path = ../../test/testUtils/FatalHandler.cpp; sourceTree = "<group>"; };
+		4FBC5CC5258F580F005480CA /* FatalHandler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = FatalHandler.hpp; path = ../../test/testUtils/FatalHandler.hpp; sourceTree = "<group>"; };
 		4FCB3A45253B55870038EFEB /* Eureka-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Eureka-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -120,9 +123,19 @@
 			name = Eureka;
 			sourceTree = "<group>";
 		};
+		4FBC5CC3258F57DF005480CA /* testUtils */ = {
+			isa = PBXGroup;
+			children = (
+				4FBC5CC4258F580F005480CA /* FatalHandler.cpp */,
+				4FBC5CC5258F580F005480CA /* FatalHandler.hpp */,
+			);
+			name = testUtils;
+			sourceTree = "<group>";
+		};
 		4FCB3A3C253B55870038EFEB = {
 			isa = PBXGroup;
 			children = (
+				4FBC5CC3258F57DF005480CA /* testUtils */,
 				4FBC5CA8258E8300005480CA /* Eureka */,
 				4FBC5BCC258D3648005480CA /* tests */,
 				4FBC5BB5258D3600005480CA /* google-test */,
@@ -201,6 +214,7 @@
 				4FBC5CAC258E831A005480CA /* lib_file_test.cpp in Sources */,
 				4FBC5CB8258E833E005480CA /* Errors.cpp in Sources */,
 				4FBC5CBF258E83F6005480CA /* m_bitvec.cc in Sources */,
+				4FBC5CC6258F580F005480CA /* FatalHandler.cpp in Sources */,
 				4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */,
 				4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */,
 				4FBC5CAD258E831A005480CA /* StringTableTest.cpp in Sources */,
