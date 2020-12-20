@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\test\m_bitvec_test.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\m_bitvec.cc">
+      <Filter>Eureka</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\modules\googletest\googletest\src\gtest-internal-inl.h">
