@@ -113,7 +113,7 @@ char *StringNew(int length)
 char *StringDup(const char *orig, int limit)
 {
 	if (! orig)
-		return NULL;
+		return nullptr;
 
 	if (limit < 0)
 	{

@@ -39,6 +39,21 @@ TEST(MStringsDeath, StringNew)
 	ASSERT_DEATH(Fatal([]{ StringNew(-1); }), "Assertion");
 }
 
+TEST(MString, StringDup)
+{
+	const char original[] = "Michael";
+	char *copy = StringDup(original);
+	ASSERT_STREQ(copy, original);
+	ASSERT_NE(copy, original);
+	free(copy);
+	copy = StringDup(original, 4);
+	ASSERT_STREQ(copy, "Mich");
+	free(copy);
+	copy = StringDup(original, 0);
+	ASSERT_STREQ(copy, "");
+	free(copy);
+}
+
 TEST(MStrings, YStrUprLowr)
 {
 	char name[] = "Jackson";
