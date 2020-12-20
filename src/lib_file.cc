@@ -236,7 +236,7 @@ static void FilenameStripBase(SString &path)
 		if(colonpos != SString::npos && colonpos > seppos)
 		{
 			if(colonpos < path.size() - 1)
-				path.erase(colonpos + 1);
+				path.erase(colonpos + 1, SString::npos);
 			return;
 		}
 		if(seppos == 0)
@@ -244,7 +244,7 @@ static void FilenameStripBase(SString &path)
 			path = "\\";
 			return;
 		}
-		path.erase(seppos);
+		path.erase(seppos, SString::npos);
 		return;
 	}
 	path = ".";

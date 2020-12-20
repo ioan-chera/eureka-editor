@@ -1053,7 +1053,7 @@ static void backup_scan_file(const SString &name, int flags, void *priv_dat)
 }
 
 
-inline static const char *Backup_Name(const SString &dir_name, int slot)
+inline static SString Backup_Name(const SString &dir_name, int slot)
 {
 	return SString::printf("%s/%d.wad", dir_name.c_str(), slot);
 }
@@ -1121,16 +1121,16 @@ void M_BackupWad(Wad_file *wad)
 
 	// actually back-up the file
 
-	const char * dest_name = Backup_Name(dir_name, b_high + 1);
+	SString dest_name = Backup_Name(dir_name, b_high + 1);
 
-	if (! wad->Backup(dest_name))
+	if (! wad->Backup(dest_name.c_str()))
 	{
 		// Hmmm, show a dialog ??
 		LogPrintf("WARNING: backup failed (cannot copy file)\n");
 		return;
 	}
 
-	LogPrintf("Backed up wad to: %s\n", dest_name);
+	LogPrintf("Backed up wad to: %s\n", dest_name.c_str());
 }
 
 //--- editor settings ---

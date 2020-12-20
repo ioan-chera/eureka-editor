@@ -295,7 +295,7 @@ TEST(SString, GlobalOperatorStream)
 TEST(SString, ToNumberOverloads)
 {
 	ASSERT_EQ(atoi(SString("42")), 42);
-	ASSERT_FLOAT_EQ(atof(SString("42.24")), 42.24f);
+	ASSERT_DOUBLE_EQ(atof(SString("42.24")), 42.24);
 	ASSERT_EQ(strtol(SString("42"), nullptr, 0), 42);
 	ASSERT_EQ(strtol(SString("042"), nullptr, 0), 042);
 	ASSERT_EQ(strtol(SString("0x42"), nullptr, 0), 0x42);
