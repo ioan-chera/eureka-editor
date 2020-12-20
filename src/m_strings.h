@@ -90,6 +90,8 @@ public:
 		return !y_strnicmp(data.c_str() + pos, c ? c : "", c ? strlen(c) : 0);
 	}
 
+	bool noCaseEndsWith(const SString &text) const;
+
 	size_t findNoCase(const char *c) const
 	{
 		SString upperme = asUpper();

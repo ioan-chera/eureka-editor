@@ -193,6 +193,14 @@ TEST(SString, NoCaseCheck)
 	ASSERT_TRUE(SString("MICHAEL JACKSON").noCaseStartsWith("mich"));
 	ASSERT_FALSE(SString("MICHAEL JACKSON").noCaseStartsWith("Jack"));
 
+	ASSERT_TRUE(SString("JACKSON").noCaseEndsWith("Son"));
+	ASSERT_FALSE(SString("JACKSON").noCaseEndsWith("MJackson"));
+	ASSERT_TRUE(SString("JACKSON").noCaseEndsWith("Jackson"));
+	ASSERT_TRUE(SString("JACKSON").noCaseEndsWith(""));
+	ASSERT_TRUE(SString("JACKSON").noCaseEndsWith(nullptr));
+	ASSERT_TRUE(SString().noCaseEndsWith(nullptr));
+	ASSERT_FALSE(SString().noCaseEndsWith("a"));
+
 	ASSERT_EQ(SString("Michael Jackson").findNoCase("jack"), 8);
 	ASSERT_EQ(SString("Michael Jackson").findNoCase("ACK"), 9);
 	ASSERT_EQ(SString("Michael Jackson").findNoCase("Jax"), std::string::npos);

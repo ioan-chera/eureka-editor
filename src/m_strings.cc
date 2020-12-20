@@ -211,6 +211,19 @@ SString SString::vprintf(const char *format, va_list ap)
 }
 
 //
+// Checks if a string ends with, no-case
+//
+bool SString::noCaseEndsWith(const SString &text) const
+{
+	if(text.empty())
+		return true;
+	size_t textLength = text.length();
+	if(length() < textLength)
+		return false;
+	return !y_stricmp(c_str() + length() - textLength, text.c_str());
+}
+
+//
 // Constructs a string from a raw buffer with limited length
 // Unlike std::string, this one trims the string at any potential NUL
 //
