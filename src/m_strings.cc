@@ -132,24 +132,6 @@ char *StringDup(const char *orig, int limit)
 	return s;
 }
 
-
-SString StringUpper(const SString &name)
-{
-	SString copy(name);
-	for(char &c : copy)
-		c = toupper(c);
-	return copy;
-}
-
-
-SString StringLower(const SString &name)
-{
-	SString copy(name);
-	for(char &c : copy)
-		c = tolower(c);
-	return copy;
-}
-
 //
 // Non-leaking version
 //
@@ -301,6 +283,39 @@ void SString::trimTrailingSet(const char *set)
 {
 	while(good() && strchr(set, data.back()))
 		data.pop_back();
+}
+
+//
+// As title
+//
+SString SString::asTitle() const
+{
+	SString result(*this);
+	if(result.good())
+		result[0] = toupper(result[0]);
+	return result;
+}
+
+//
+// Lower case
+//
+SString SString::asLower() const
+{
+	SString result(*this);
+	for(char &c : result)
+		c = tolower(c);
+	return result;
+}
+
+//
+// Upper case
+//
+SString SString::asUpper() const
+{
+	SString result(*this);
+	for(char &c : result)
+		c = toupper(c);
+	return result;
 }
 
 //

@@ -913,7 +913,7 @@ void UDMF_SwitchEngine()
 		return;
 
 	// convert to lowercase
-	SString namespace_l = StringLower(Udmf_namespace);
+	SString namespace_l = Udmf_namespace.asLower();
 
 	// already set?
 	if (Port_name.noCaseEqual(namespace_l))

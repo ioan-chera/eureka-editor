@@ -176,7 +176,7 @@ SString UI_ChooseMap::Run()
 	if (action == ACT_CANCEL)
 		return "";
 
-	return StringUpper(map_name->value());
+	return SString(map_name->value()).asUpper();
 }
 
 
@@ -352,7 +352,7 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 
 	if (using_wad)
 	{
-		*map_v = StringUpper(map_name->value());
+		*map_v = SString(map_name->value()).asUpper();
 
 		if (using_wad == loaded_wad)
 		{

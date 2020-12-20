@@ -865,7 +865,7 @@ static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 		if (nargs < 1)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
-		loadingGame.baseGame = StringLower(argv[1]);
+		loadingGame.baseGame = SString(argv[1]).asLower();
 	}
 }
 
@@ -887,7 +887,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-			loading_Port->AddSupportedGame(StringLower(*argv));
+			loading_Port->AddSupportedGame(SString(*argv).asLower());
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{

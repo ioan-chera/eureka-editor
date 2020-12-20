@@ -990,7 +990,7 @@ void LoadLevel(Wad_file *wad, const SString &level)
 		}
 	}
 
-	Level_name = StringUpper(level);
+	Level_name = level.asUpper();
 
 	Status_Set("Loaded %s", Level_name.c_str());
 
@@ -1613,7 +1613,7 @@ static void EmptyLump(const char *name)
 static void SaveLevel(const SString &level)
 {
 	// set global level name now (for debugging code)
-	Level_name = StringUpper(level);
+	Level_name = level.asUpper();
 
 	edit_wad->BeginWrite();
 
@@ -1996,7 +1996,7 @@ void CMD_RenameMap()
 		edit_wad->EndWrite();
 	}
 
-	Level_name = StringUpper(new_name);
+	Level_name = new_name.asUpper();
 
 	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
 

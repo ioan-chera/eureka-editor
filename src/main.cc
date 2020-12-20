@@ -382,7 +382,7 @@ static bool DetermineIWAD()
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		Iwad_name = StringLower(Iwad_name.c_str());
+		Iwad_name = Iwad_name.asLower();
 
 		if (! M_CanLoadDefinitions("games", Iwad_name))
 			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
@@ -480,7 +480,7 @@ static SString DetermineLevel()
 	if (!Level_name.empty())
 	{
 		if (! isdigit(Level_name[0]))
-			return StringUpper(Level_name);
+			return Level_name.asUpper();
 
 		level_number = atoi(Level_name);
 	}

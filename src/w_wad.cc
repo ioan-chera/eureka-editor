@@ -74,7 +74,7 @@ Lump_c::Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len) :
 	parent(_par), l_start(_start), l_length(_len)
 {
 	// ensure lump name is uppercase
-	name = StringUpper(_nam);
+	name = _nam.asUpper();
 }
 
 
@@ -106,7 +106,7 @@ void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
 
 void Lump_c::Rename(const char *new_name)
 {
-	name = StringUpper(new_name);
+	name = SString(new_name).asUpper();
 }
 
 

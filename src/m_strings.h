@@ -36,8 +36,6 @@ void y_strlowr (char *str);
 
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
-SString StringUpper(const SString &name);
-SString StringLower(const SString &name);
 SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 SString StringVPrintf(const char *str, va_list ap);
 void StringCopy(char *buffer, size_t size, const SString &source);
@@ -93,8 +91,8 @@ public:
 
 	size_t findNoCase(const char *c) const
 	{
-		SString upperme = StringUpper(*this);
-		SString upperthem = StringUpper(c);
+		SString upperme = asUpper();
+		SString upperthem = SString(c).asUpper();
 		return upperme.find(upperthem);
 	}
 
@@ -339,13 +337,9 @@ public:
 	//
 	// Capitalizes first letter
 	//
-	SString asTitle() const
-	{
-		SString result(*this);
-		if(result.good())
-			result[0] = toupper(result[0]);
-		return result;
-	}
+	SString asTitle() const;
+	SString asLower() const;
+	SString asUpper() const;
 
 	size_t findSpace() const;
 	size_t findDigit() const;

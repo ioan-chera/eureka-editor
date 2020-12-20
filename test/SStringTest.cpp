@@ -240,3 +240,10 @@ TEST(SString, CutWithSpace)
 	ASSERT_EQ(name, "Michael");
 	ASSERT_EQ(surname, "Jackson");
 }
+
+TEST(SString, AsCase)
+{
+	ASSERT_EQ(SString("jackson").asTitle(), "Jackson");
+	ASSERT_EQ(SString("Jackson").asUpper(), "JACKSON");
+	ASSERT_EQ(SString("Jackson").asLower(), "jackson");
+}

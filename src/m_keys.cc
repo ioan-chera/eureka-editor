@@ -949,7 +949,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const SString & func
 	if (cmd->req_context != KCTX_NONE &&
 	    bind.context != cmd->req_context)
 	{
-		SString mode = StringUpper(M_KeyContextString(cmd->req_context));
+		SString mode = SString(M_KeyContextString(cmd->req_context)).asUpper();
 
 		snprintf(error_msg, sizeof(error_msg), "%s can only be used in %s mode",
 				 tokens[0].c_str(), mode.c_str());
