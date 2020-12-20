@@ -32,7 +32,7 @@ void TempDirContext::SetUp()
 #ifdef _WIN32
 #error TODO Windows
 #else
-	char pattern[] = "tempdirXXXXXX";
+	char pattern[] = "/tmp/tempdirXXXXXX";
 	char *result = mkdtemp(pattern);
 	ASSERT_NE(result, nullptr);
 	mTempDir = result;
