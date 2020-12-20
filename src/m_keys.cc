@@ -284,18 +284,18 @@ static SString BareKeyName(keycode_t key)
 	if(key < 127 && key > 32 && isprint(key) && key != '"')
 		return SString(static_cast<char>(key));
 	if(FL_F < key && key <= FL_F_Last)
-		return StringPrintf("F%d", key - FL_F);
+		return SString::printf("F%d", key - FL_F);
 	if(is_mouse_button(key))
-		return StringPrintf("MOUSE%d", key - FL_Button);
+		return SString::printf("MOUSE%d", key - FL_Button);
 	// find key in mapping table
 	for(int k = 0; s_key_map[k].name; k++)
 		if(key == s_key_map[k].key)
 			return s_key_map[k].name;
 	if(FL_KP + 33 <= key && key <= FL_KP_Last)
-		return StringPrintf("KP_%c", (char)(key & 127));
+		return SString::printf("KP_%c", (char)(key & 127));
 
 	// fallback : hex code
-	return StringPrintf("0x%04x", key);
+	return SString::printf("0x%04x", key);
 }
 
 
@@ -858,7 +858,7 @@ SString M_StringForFunc(int index)
 			buffer.push_back(':');
 
 		buffer.push_back(' ');
-		buffer += StringPrintf("%.30s", param.c_str());
+		buffer += SString::printf("%.30s", param.c_str());
 	}
 
 	return buffer;

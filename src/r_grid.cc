@@ -724,7 +724,7 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 
 void Grid_WriteUser(std::ostream &os)
 {
-	os << "map_pos " << StringPrintf("%1.0f %1.0f %1.6f", grid.orig_x, grid.orig_y, grid.Scale) << 
+	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.orig_x, grid.orig_y, grid.Scale) <<
 		'\n';
 	os << "grid " << (grid.shown ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
 		grid.step << '\n';

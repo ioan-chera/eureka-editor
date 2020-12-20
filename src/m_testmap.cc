@@ -247,7 +247,7 @@ static SString CalcWarpString()
 	if(Level_name.length() >= 4 && Level_name.noCaseStartsWith("MAP") && isdigit(Level_name[3]))
 	{
 		long number = strtol(Level_name.c_str() + 3, nullptr, 10);
-		return StringPrintf("-warp %ld", number);
+		return SString::printf("-warp %ld", number);
 	}
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
@@ -255,7 +255,7 @@ static SString CalcWarpString()
 	if(Level_name.length() >= 4 && !isdigit(Level_name[0]) && isdigit(Level_name[1]) &&
 	   !isdigit(Level_name[2]) && isdigit(Level_name[3]))
 	{
-		return StringPrintf("-warp %c %s", Level_name[1], Level_name.c_str() + 3);
+		return SString::printf("-warp %c %s", Level_name[1], Level_name.c_str() + 3);
 	}
 
 	// map name is non-standard, find the first digit group and hope
@@ -387,9 +387,9 @@ void CMD_TestMap()
 
 	// build the command string
 
-	SString cmd_buffer = StringPrintf("%s %s %s",
-									  CalcEXEName(info).c_str(), GrabWadNames(info).c_str(), 
-									  CalcWarpString().c_str());
+	SString cmd_buffer = SString::printf("%s %s %s",
+										 CalcEXEName(info).c_str(), GrabWadNames(info).c_str(),
+										 CalcWarpString().c_str());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer.c_str());

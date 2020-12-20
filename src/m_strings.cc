@@ -135,39 +135,6 @@ char *StringDup(const char *orig, int limit)
 //
 // Non-leaking version
 //
-SString StringPrintf(EUR_FORMAT_STRING(const char *str), ...)
-{
-	// Algorithm: keep doubling the allocated buffer size
-	// until the output fits. Based on code by Darren Salt.
-
-	char *buf = NULL;
-	int buf_size = 128;
-
-	for (;;)
-	{
-		va_list args;
-		int out_len;
-
-		buf_size *= 2;
-
-		buf = (char*)realloc(buf, buf_size);
-		if (!buf)
-			ThrowException("Out of memory (formatting string)\n");
-
-		va_start(args, str);
-		out_len = vsnprintf(buf, buf_size, str, args);
-		va_end(args);
-
-		// old versions of vsnprintf() simply return -1 when
-		// the output doesn't fit.
-		if (out_len < 0 || out_len >= buf_size)
-			continue;
-
-		SString result(buf);
-		free(buf);
-		return result;
-	}
-}
 SString StringVPrintf(const char *str, va_list ap)
 {
 	// Algorithm: keep doubling the allocated buffer size
@@ -209,6 +176,43 @@ void StringCopy(char *buffer, size_t size, const SString &source)
 		return;	// trivial
 	strncpy(buffer, source.c_str(), size);
 	buffer[size - 1] = 0;
+}
+
+//
+// Make a SString from printf format
+//
+SString SString::printf(EUR_FORMAT_STRING(const char *format), ...)
+{
+	// Algorithm: keep doubling the allocated buffer size
+	// until the output fits. Based on code by Darren Salt.
+
+	char *buf = NULL;
+	int buf_size = 128;
+
+	for (;;)
+	{
+		va_list args;
+		int out_len;
+
+		buf_size *= 2;
+
+		buf = (char*)realloc(buf, buf_size);
+		if (!buf)
+			ThrowException("Out of memory (formatting string)\n");
+
+		va_start(args, format);
+		out_len = vsnprintf(buf, buf_size, format, args);
+		va_end(args);
+
+		// old versions of vsnprintf() simply return -1 when
+		// the output doesn't fit.
+		if (out_len < 0 || out_len >= buf_size)
+			continue;
+
+		SString result(buf);
+		free(buf);
+		return result;
+	}
 }
 
 //

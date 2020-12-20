@@ -1891,7 +1891,7 @@ static u32_t CalcGLChecksum(void)
 
 inline static SString CalcOptionsString()
 {
-	return StringPrintf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
+	return SString::printf("--cost %d%s", cur_info->factor, cur_info->fast ? " --fast" : "");
 }
 
 
@@ -2233,7 +2233,7 @@ Lump_c * CreateGLMarker()
 
 	if (lev_current_name.length() <= 5)
 	{
-		name_buf = StringPrintf("GL_%s", lev_current_name.c_str());
+		name_buf = "GL_" + lev_current_name;
 	}
 	else
 	{

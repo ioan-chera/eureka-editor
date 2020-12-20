@@ -1155,7 +1155,7 @@ int Recently_used::find(const SString &name)
 
 int Recently_used::find_number(int val)
 {
-	return find(StringPrintf("%d", val));
+	return find(SString::printf("%d", val));
 }
 
 
@@ -1188,7 +1188,7 @@ void Recently_used::insert(const SString &name)
 
 void Recently_used::insert_number(int val)
 {
-	insert(StringPrintf("%d", val));
+	insert(SString::printf("%d", val));
 }
 
 

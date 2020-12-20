@@ -729,8 +729,8 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 	{
 		SString short_name = fl_filename_name(Pwad_list[k].c_str());
 
-		short_name = StringPrintf("%s%s%d:  %s", (k < 9) ? "  " : "",
-									(k < 9) ? "&" : "", 1+k, short_name.c_str());
+		short_name = SString::printf("%s%s%d:  %s", (k < 9) ? "  " : "",
+									 (k < 9) ? "&" : "", 1+k, short_name.c_str());
 
 		Menu_AddItem(pos, short_name.c_str(),
 					 FCAL file_do_load_given,

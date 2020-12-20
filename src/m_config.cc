@@ -1204,7 +1204,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				{
 					if (! ignore)
 					{
-						*static_cast<SString *>(o->data_ptr) = StringPrintf("%s%s", argv[0], argv[1]);
+						*static_cast<SString *>(o->data_ptr) = SString(argv[0]) + argv[1];
 					}
 
 					argv++;
@@ -1357,7 +1357,7 @@ int M_WriteConfigFile()
 				break;
 
 			case OPT_COLOR:
-				os << StringPrintf("%06x", *((rgb_color_t *)o->data_ptr) >> 8);
+				os << SString::printf("%06x", *((rgb_color_t *)o->data_ptr) >> 8);
 				break;
 
 			case OPT_STRING_LIST:
@@ -1478,7 +1478,7 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions
 
 static SString PersistFilename(const crc32_c& crc)
 {
-	return StringPrintf("%s/cache/%08X%08X.dat", cache_dir.c_str(), crc.extra, crc.raw);
+	return SString::printf("%s/cache/%08X%08X.dat", cache_dir.c_str(), crc.extra, crc.raw);
 }
 
 

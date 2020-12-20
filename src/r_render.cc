@@ -1576,8 +1576,8 @@ bool Render3D_ParseUser(const std::vector<SString> &tokens)
 
 void Render3D_WriteUser(std::ostream &os)
 {
-	os << "camera " << StringPrintf("%1.2f %1.2f %1.2f %1.2f", r_view.x, r_view.y, r_view.z,
-									r_view.angle) << '\n';
+	os << "camera " << SString::printf("%1.2f %1.2f %1.2f %1.2f", r_view.x, r_view.y, r_view.z,
+									   r_view.angle) << '\n';
 	os << "r_modes " << (r_view.texturing ? 1 : 0) << ' ' << (r_view.sprites ? 1 : 0) << ' ' <<
 		(r_view.lighting ? 1 : 0) << '\n';
 	os << "r_gravity " << (r_view.gravity ? 1 : 0) << '\n';

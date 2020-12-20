@@ -581,7 +581,7 @@ int ScanDirectory(const SString &path, const std::function<void(const SString &,
 				strcmp(fdata->d_name, "..") == 0)
 			continue;
 
-		SString full_name = StringPrintf("%s/%s", path.c_str(), fdata->d_name);
+		SString full_name = path + "/" + fdata->d_name;
 
 		struct stat finfo;
 

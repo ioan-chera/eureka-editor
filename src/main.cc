@@ -327,9 +327,9 @@ static void Determine_InstallPath(const char *argv0)
 
 	for (int i = 0 ; prefixes[i] ; i++)
 	{
-		install_dir = StringPrintf("%s/share/eureka", prefixes[i]);
+		install_dir = SString(prefixes[i]) + "/share/eureka";
 
-		SString filename = StringPrintf("%s/games/doom2.ugh", install_dir.c_str());
+		SString filename = install_dir + "/games/doom2.ugh";
 
 		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
 		DebugPrintf("   looking for file: %s\n", filename.c_str());

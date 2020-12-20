@@ -1113,7 +1113,7 @@ void UI_FindAndReplace::InsertName(Fl_Input *inp, char append, const SString &na
 
 void UI_FindAndReplace::InsertNumber(Fl_Input *inp, char append, int number)
 {
-	InsertName(inp, append, StringPrintf("%d", number));
+	InsertName(inp, append, SString::printf("%d", number));
 }
 
 
