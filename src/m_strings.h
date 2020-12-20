@@ -342,6 +342,8 @@ public:
 	SString asLower() const;
 	SString asUpper() const;
 
+	SString getTidy(const char *badChars = nullptr) const;
+
 	size_t findSpace() const;
 	size_t findDigit() const;
 
@@ -389,8 +391,6 @@ inline static long strtol(const SString &string, char **endptr, int radix)
 {
 	return strtol(string.c_str(), endptr, radix);
 }
-
-SString StringTidy(const SString &str, const SString &bad_chars = "");
 
 //
 // String storage table

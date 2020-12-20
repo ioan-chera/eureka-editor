@@ -1252,7 +1252,7 @@ void Recently_used::WriteUser(std::ostream &os, char letter)
 {
 	for (int i = 0 ; i < size ; i++)
 	{
-		os << "recent_used " << letter << " \"" << StringTidy(name_set[i]) << "\"\n";
+		os << "recent_used " << letter << " \"" << name_set[i].getTidy() << "\"\n";
 	}
 }
 

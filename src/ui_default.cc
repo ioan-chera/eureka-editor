@@ -580,9 +580,9 @@ void Props_WriteUser(std::ostream &os)
 	os << "default light_level " << default_light_level << '\n';
 	os << "default thing " << default_thing << '\n';
 	
-	os << "default mid_tex \"" << StringTidy(default_wall_tex, "\"") << "\"\n";
-	os << "default floor_tex \"" << StringTidy(default_floor_tex, "\"") << "\"\n";
-	os << "default ceil_tex \"" << StringTidy(default_ceil_tex, "\"") << "\"\n";
+	os << "default mid_tex \"" << default_wall_tex.getTidy("\"") << "\"\n";
+	os << "default floor_tex \"" << default_floor_tex.getTidy("\"") << "\"\n";
+	os << "default ceil_tex \"" << default_ceil_tex.getTidy("\"") << "\"\n";
 }
 
 

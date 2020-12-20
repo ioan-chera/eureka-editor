@@ -265,6 +265,12 @@ TEST(SString, AsCase)
 	ASSERT_EQ(SString("Jackson").asLower(), "jackson");
 }
 
+TEST(SString, GetTidy)
+{
+	ASSERT_EQ(SString("\x02\x01\x02TEXT \"Gorilla\"\n\t\x19").getTidy(), "TEXT \"Gorilla\"");
+	ASSERT_EQ(SString("\x02\x01\x02TEXT \"Gorilla\"\n\t\x19").getTidy("\"a"), "TEXT Gorill");
+}
+
 TEST(SString, GlobalOperatorPlus)
 {
 	ASSERT_EQ("Michael" + SString(" Jackson"), "Michael Jackson");

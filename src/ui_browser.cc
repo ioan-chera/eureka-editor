@@ -1842,7 +1842,7 @@ void UI_Browser_Box::WriteUser(std::ostream &os)
 		os << "browser " << kind << " cat " << cat << '\n';
 	if(alpha)
 		os << "browser " << kind << " sort " << static_cast<int>(1 - alpha->value()) << '\n';
-	os << "browser " << kind << " search \"" << StringTidy(search->value(), "\"") << "\"\n";
+	os << "browser " << kind << " search \"" << SString(search->value()).getTidy("\"") << "\"\n";
 	if(pics)
 		os << "browser " << kind << " pics " << static_cast<int>(pics->value()) << '\n';
 	if(do_flats)

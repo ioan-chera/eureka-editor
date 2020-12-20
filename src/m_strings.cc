@@ -318,6 +318,21 @@ SString SString::asUpper() const
 }
 
 //
+// Get the version with just the printable characters and without the included bad characters.
+//
+SString SString::getTidy(const char *badChars) const
+{
+	SString buf;
+	buf.reserve(length() + 2);
+
+	for(const char &c : *this)
+		if(isprint(c) && (!badChars || !strchr(badChars, c)))
+			buf.push_back(c);
+
+	return buf;
+}
+
+//
 // Finds the first space
 //
 size_t SString::findSpace() const
@@ -338,18 +353,6 @@ size_t SString::findDigit() const
 			return i;
 	}
 	return std::string::npos;
-}
-
-SString StringTidy(const SString &str, const SString &bad_chars)
-{
-	SString buf;
-	buf.reserve(str.length() + 2);
-
-	for(const char &c : str)
-		if(isprint(c) && bad_chars.find(c) == std::string::npos)
-			buf.push_back(c);
-
-	return buf;
 }
 
 //
