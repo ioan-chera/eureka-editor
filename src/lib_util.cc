@@ -107,14 +107,6 @@ void CheckTypeSizes()
 	assert_size(raw_vertex_t,   4);
 }
 
-//
-// compute the distance from (0, 0) to (dx, dy)
-//
-unsigned int ComputeDist(int dx, int dy)
-{
-	return (unsigned int) (hypot ((double) dx, (double) dy) + 0.5);
-}
-
 
 double PerpDist(double x, double y,
                 double x1, double y1, double x2, double y2)

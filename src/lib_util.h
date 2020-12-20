@@ -42,8 +42,6 @@ void CheckTypeSizes();
 void TimeDelay(unsigned int millies);
 unsigned int TimeGetMillies();
 
-unsigned int ComputeDist  (int, int);
-
 double PerpDist(double x, double y,  /* coord to test */
                 double x1, double y1, double x2, double y2 /* line */);
 
