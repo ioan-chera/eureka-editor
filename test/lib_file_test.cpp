@@ -237,3 +237,19 @@ TEST_F(LibFileTempDir, FileCopy)
 	ASSERT_EQ(str, "SecondSight");
 	is2.close();
 }
+
+TEST_F(LibFileTempDir, FileDelete)
+{
+	SString path = getChildPath("file");
+	ASSERT_FALSE(FileDelete(path));	// can't delete what is not there
+
+	std::ofstream os(path.get());
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push_back(path);
+	os << "Hello";
+	os.close();
+
+	ASSERT_TRUE(FileDelete(path));
+	mDeleteList.clear();
+	
+}
