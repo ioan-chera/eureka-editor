@@ -63,18 +63,37 @@ bool HasExtension(const SString &filename)
 	if (A > 0 && filename[A] == '.')
 		return false;
 
+	if(filename == ".")	// must also cover this special case
+		return false;
+
+	bool foundPotentialExtension = false;
+
 	for (; A >= 0 ; A--)
 	{
 		if (filename[A] == '.')
-			return true;
+		{
+			foundPotentialExtension = true;
+			continue;
+		}
 
 		if (filename[A] == '/')
+		{
+			if(foundPotentialExtension)	// immediately before point
+				return false;
 			break;
+		}
 
 #ifdef WIN32
 		if (filename[A] == '\\' || filename[A] == ':')
+		{
+			if(foundPotentialExtension)
+				return false;
 			break;
+		}
 #endif
+		// Neither dot, / or \ (Windows)
+		if(foundPotentialExtension)
+			return true;
 	}
 
 	return false;

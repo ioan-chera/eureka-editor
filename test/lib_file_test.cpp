@@ -34,6 +34,23 @@ int fl_filename_absolute(char *to, int tolen, const char *from)
     return 0;
 }
 
+TEST(LibFile, HasExtension)
+{
+	ASSERT_FALSE(HasExtension("man/doc."));
+	ASSERT_TRUE(HasExtension("man/doom.wad"));
+	ASSERT_FALSE(HasExtension("man.wad/doom"));
+	ASSERT_TRUE(HasExtension("man.wad/doom.wad"));
+	ASSERT_TRUE(HasExtension("man.wad/doom..wad"));
+	ASSERT_FALSE(HasExtension(".okay"));
+	ASSERT_FALSE(HasExtension("man/.okay"));
+	ASSERT_FALSE(HasExtension("man/.okay."));
+	ASSERT_TRUE(HasExtension("man/.okay.wad"));
+	ASSERT_FALSE(HasExtension("/."));
+	ASSERT_FALSE(HasExtension("."));
+	ASSERT_FALSE(HasExtension(".."));
+	ASSERT_FALSE(HasExtension(""));
+}
+
 TEST(LibFile, FilenameGetPath)
 {
     ASSERT_EQ(FilenameGetPath("path/to/file"), "path/to");
