@@ -158,12 +158,13 @@ TEST(LibFile, FilenameReposition)
 	ASSERT_EQ(FilenameReposition("/manipulate/doom.wad", "/abc/def/lamb"), "/abc/def/doom.wad");
 }
 
-TEST_F(LibFileTempDir, GetAbsolutePath)
+TEST(LibFile, GetAbsolutePath)
 {
 	char path[FL_PATH_MAX];
-	int result = fl_filename_absolute(path, sizeof(path), mTempDir.c_str());
-	ASSERT_NE(result, 0);
-	SString stringResult = GetAbsolutePath(mTempDir);
+	int result = fl_filename_absolute(path, sizeof(path), "Hello");
+	ASSERT_NE(result, 0);	// absolute path stays absolute
+
+	SString stringResult = GetAbsolutePath("Hello");
 	ASSERT_STREQ(stringResult.c_str(), path);
 }
 
