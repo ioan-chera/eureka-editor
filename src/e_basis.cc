@@ -738,11 +738,19 @@ private:
 	SString message = "[something]";
 
 public:
+	undo_group_c() = default;
 	~undo_group_c()
 	{
 		for(auto it = ops.rbegin(); it != ops.rend(); ++it)
 			it->Destroy();
 	}
+
+	// Ensure we only use move semantics
+	undo_group_c(const undo_group_c &other) = delete;
+	undo_group_c &operator = (const undo_group_c &other) = delete;
+
+	undo_group_c(undo_group_c &&other) = default;
+	undo_group_c &operator = (undo_group_c &&other) = default;
 
 	bool Empty() const
 	{
