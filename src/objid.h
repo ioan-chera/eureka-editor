@@ -29,7 +29,7 @@
 
 
 // main kinds of objects
-enum class ObjType
+enum class ObjType : byte
 {
 	things,
 	linedefs,

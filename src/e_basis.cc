@@ -663,7 +663,7 @@ static void RawChange(ObjType objtype, int objnum, int field, int *value)
 //  BASIS API IMPLEMENTATION
 //------------------------------------------------------------------------
 
-enum class EditOp
+enum class EditOp : byte
 {
 	none,
 	change,
