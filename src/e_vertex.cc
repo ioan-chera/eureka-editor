@@ -837,7 +837,7 @@ void CMD_SEC_Disconnect(void)
 
 		Vertex *newbie = gDocument.vertices[new_v];
 
-		newbie->RawCopy(gDocument.vertices[*it]);
+		*newbie = *gDocument.vertices[*it];
 	}
 
 	// update linedefs, creating new ones where necessary

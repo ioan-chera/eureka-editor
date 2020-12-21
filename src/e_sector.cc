@@ -1223,7 +1223,7 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 		if (model < 0)
 			gDocument.sectors[new_sec]->SetDefaults();
 		else
-			gDocument.sectors[new_sec]->RawCopy(gDocument.sectors[model]);
+			*gDocument.sectors[new_sec] = *gDocument.sectors[model];
 	}
 
 	selection_c   flip(ObjType::linedefs);

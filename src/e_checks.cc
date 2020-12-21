@@ -337,7 +337,7 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 
 		const Vertex *N = gDocument.vertices[n];
 
-		if (! N->Matches(V))
+		if (*N != *V)
 			continue;
 
 		// Ok, found it, so update linedefs
@@ -980,7 +980,7 @@ static int Copy_SideDef(int num)
 {
 	int sd = gDocument.basis.addNew(ObjType::sidedefs);
 
-	gDocument.sidedefs[sd]->RawCopy(gDocument.sidedefs[num]);
+	*gDocument.sidedefs[sd] = *gDocument.sidedefs[num];
 
 	return sd;
 }

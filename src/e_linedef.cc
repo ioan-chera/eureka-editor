@@ -933,7 +933,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	LineDef * L2 = gDocument.linedefs[new_l];
 
 	// it is OK to directly set fields of newly created objects
-	L2->RawCopy(L);
+	*L2 = *L;
 
 	L2->start = new_v;
 	L2->end   = L->end;
@@ -950,7 +950,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	if (L->Right())
 	{
 		L2->right = gDocument.basis.addNew(ObjType::sidedefs);
-		L2->Right()->RawCopy(L->Right());
+		*L2->Right() = *L->Right();
 
 		if (! config::leave_offsets_alone)
 			L2->Right()->x_offset += new_length;
@@ -959,7 +959,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	if (L->Left())
 	{
 		L2->left = gDocument.basis.addNew(ObjType::sidedefs);
-		L2->Left()->RawCopy(L->Left());
+		*L2->Left() = *L->Left();
 
 		if (! config::leave_offsets_alone)
 		{

@@ -421,7 +421,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		vert_map[*it] = (int)clip_board->verts.size();
 
 		Vertex * SD = new Vertex;
-		SD->RawCopy(gDocument.vertices[*it]);
+		*SD = *gDocument.vertices[*it];
 		clip_board->verts.push_back(SD);
 	}
 
@@ -432,7 +432,7 @@ static void CopyGroupOfObjects(selection_c *list)
 			sector_map[*it] = (int)clip_board->sectors.size();
 
 			Sector * S = new Sector;
-			S->RawCopy(gDocument.sectors[*it]);
+			*S = *gDocument.sectors[*it];
 			clip_board->sectors.push_back(S);
 		}
 	}
@@ -442,7 +442,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		side_map[*it] = (int)clip_board->sides.size();
 
 		SideDef * SD = new SideDef;
-		SD->RawCopy(gDocument.sidedefs[*it]);
+		*SD = *gDocument.sidedefs[*it];
 		clip_board->sides.push_back(SD);
 
 		// adjust sector references, if needed
@@ -456,7 +456,7 @@ static void CopyGroupOfObjects(selection_c *list)
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
 		LineDef * L = new LineDef;
-		L->RawCopy(gDocument.linedefs[*it]);
+		*L = *gDocument.linedefs[*it];
 		clip_board->lines.push_back(L);
 
 		// adjust vertex references
@@ -490,7 +490,7 @@ static void CopyGroupOfObjects(selection_c *list)
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
 			Thing * T = new Thing;
-			T->RawCopy(gDocument.things[*it]);
+			*T = *gDocument.things[*it];
 			clip_board->things.push_back(T);
 		}
 	}
@@ -517,7 +517,7 @@ static bool Clipboard_DoCopy()
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
-				T->RawCopy(gDocument.things[*it]);
+				*T = *gDocument.things[*it];
 				clip_board->things.push_back(T);
 			}
 			break;
@@ -526,7 +526,7 @@ static bool Clipboard_DoCopy()
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
-				V->RawCopy(gDocument.vertices[*it]);
+				*V = *gDocument.vertices[*it];
 				clip_board->verts.push_back(V);
 			}
 			break;
@@ -575,7 +575,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 		vert_map[i] = new_v;
 
-		V->RawCopy(clip_board->verts[i]);
+		*V = *clip_board->verts[i];
 
 		V->SetRawX(V->x() + pos_x - cx);
 		V->SetRawY(V->y() + pos_y - cy);
@@ -588,7 +588,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 		sector_map[i] = new_s;
 
-		S->RawCopy(clip_board->sectors[i]);
+		*S = *clip_board->sectors[i];
 	}
 
 	for (i = 0 ; i < clip_board->sides.size() ; i++)
@@ -605,7 +605,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 		side_map[i] = new_sd;
 
-		SD->RawCopy(clip_board->sides[i]);
+		*SD = *clip_board->sides[i];
 
 		if (SD->sector < 0)
 		{
@@ -620,7 +620,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 		int new_l = gDocument.basis.addNew(ObjType::linedefs);
 		LineDef * L = gDocument.linedefs[new_l];
 
-		L->RawCopy(clip_board->lines[i]);
+		*L = *clip_board->lines[i];
 
 		// adjust vertex references
 		SYS_ASSERT(vert_map.find(L->start) != vert_map.end());
@@ -658,7 +658,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 		int new_t = gDocument.basis.addNew(ObjType::things);
 		Thing * T = gDocument.things[new_t];
 
-		T->RawCopy(clip_board->things[i]);
+		*T = *clip_board->things[i];
 
 		T->SetRawX(T->x() + pos_x - cx);
 		T->SetRawY(T->y() + pos_y - cy);
@@ -766,7 +766,7 @@ static bool Clipboard_DoPaste()
 				int new_t = gDocument.basis.addNew(ObjType::things);
 				Thing * T = gDocument.things[new_t];
 
-				T->RawCopy(clip_board->things[i]);
+				*T = *clip_board->things[i];
 
 				T->SetRawX(T->x() + pos_x - cx);
 				T->SetRawY(T->y() + pos_y - cy);
@@ -786,7 +786,7 @@ static bool Clipboard_DoPaste()
 				int new_v = gDocument.basis.addNew(ObjType::vertices);
 				Vertex * V = gDocument.vertices[new_v];
 
-				V->RawCopy(clip_board->verts[i]);
+				*V = *clip_board->verts[i];
 
 				V->SetRawX(V->x() + pos_x - cx);
 				V->SetRawY(V->y() + pos_y - cy);

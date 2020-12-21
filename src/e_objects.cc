@@ -82,7 +82,7 @@ static void CreateSquare(int model)
 	int new_sec = gDocument.basis.addNew(ObjType::sectors);
 
 	if (model >= 0)
-		gDocument.sectors[new_sec]->RawCopy(gDocument.sectors[model]);
+		*gDocument.sectors[new_sec] = *gDocument.sectors[model];
 	else
 		gDocument.sectors[new_sec]->SetDefaults();
 
@@ -135,8 +135,8 @@ static void Insert_Thing()
 	int new_t = gDocument.basis.addNew(ObjType::things);
 	Thing *T = gDocument.things[new_t];
 
-	if (model >= 0)
-		T->RawCopy(gDocument.things[model]);
+	if(model >= 0)
+		*T = *gDocument.things[model];
 	else
 	{
 		T->type = default_thing;
@@ -175,7 +175,7 @@ static int Sector_New(int model = -1, int model2 = -1, int model3 = -1)
 	if (model < 0)
 		gDocument.sectors[new_sec]->SetDefaults();
 	else
-		gDocument.sectors[new_sec]->RawCopy(gDocument.sectors[model]);
+		*gDocument.sectors[new_sec] = *gDocument.sectors[model];
 
 	return new_sec;
 }
@@ -448,8 +448,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		if (new_vert >= 0)
 		{
 			// just ignore when highlight is same as drawing-start
-			if (old_vert >= 0 &&
-				gDocument.vertices[old_vert]->Matches(gDocument.vertices[new_vert]))
+			if (old_vert >= 0 && *gDocument.vertices[old_vert] == *gDocument.vertices[new_vert])
 			{
 				edit.Selected->set(old_vert);
 				return;

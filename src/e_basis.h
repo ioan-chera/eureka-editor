@@ -42,9 +42,7 @@ class crc32_c;
 // design decision aiming to simplify the logic and code for undo
 // and redo.
 //
-// Strings are represented as offsets into a string table, where
-// fetching the actual (read-only) string is fast, but adding new
-// strings is slow (with the current code).
+// Strings are represented as offsets into a string table.
 //
 // These structures are always ensured to have valid fields, e.g.
 // the LineDef vertex numbers are OK, the SideDef sector number is
@@ -95,30 +93,25 @@ inline static Side operator * (Side side1, Side side2)
 class Thing
 {
 public:
-	fixcoord_t raw_x;
-	fixcoord_t raw_y;
+	fixcoord_t raw_x = 0;
+	fixcoord_t raw_y = 0;
 
-	int angle;
-	int type;
-	int options;
+	int angle = 0;
+	int type = 0;
+	int options = 0;
 
 	// Hexen stuff
-	fixcoord_t raw_h;
+	fixcoord_t raw_h = 0;
 
-	int tid;
-	int special;
-	int arg1, arg2, arg3, arg4, arg5;
+	int tid = 0;
+	int special = 0;
+	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
 
 	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
 	       F_H, F_TID, F_SPECIAL,
 		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Thing() : raw_x(0), raw_y(0), angle(0), type(0), options(0),
-			  raw_h(0), tid(0), special(0),
-			  arg1(0), arg2(0), arg3(0), arg4(0), arg5(0)
-	{ }
-
 	inline double x() const
 	{
 		return FROM_COORD(raw_x);
@@ -143,25 +136,6 @@ public:
 		SetRawY(y);
 	}
 
-	void RawCopy(const Thing *other)
-	{
-		raw_x = other->raw_x;
-		raw_y = other->raw_y;
-		raw_h = other->raw_h;
-
-		angle = other->angle;
-		type = other->type;
-		options = other->options;
-		tid = other->tid;
-		special = other->special;
-
-		arg1 = other->arg1;
-		arg2 = other->arg2;
-		arg3 = other->arg3;
-		arg4 = other->arg4;
-		arg5 = other->arg5;
-	}
-
 	int Arg(int which /* 1..5 */) const
 	{
 		if (which == 1) return arg1;
@@ -178,15 +152,12 @@ public:
 class Vertex
 {
 public:
-	fixcoord_t raw_x;
-	fixcoord_t raw_y;
+	fixcoord_t raw_x = 0;
+	fixcoord_t raw_y = 0;
 
 	enum { F_X, F_Y };
 
 public:
-	Vertex() : raw_x(0), raw_y(0)
-	{ }
-
 	inline double x() const
 	{
 		return FROM_COORD(raw_x);
@@ -206,20 +177,18 @@ public:
 		SetRawY(y);
 	}
 
-	void RawCopy(const Vertex *other)
-	{
-		raw_x = other->raw_x;
-		raw_y = other->raw_y;
-	}
-
 	bool Matches(fixcoord_t ox, fixcoord_t oy) const
 	{
 		return (raw_x == ox) && (raw_y == oy);
 	}
 
-	bool Matches(const Vertex *other) const
+	bool operator == (const Vertex &other) const
 	{
-		return (raw_x == other->raw_x) && (raw_y == other->raw_y);
+		return raw_x == other.raw_x && raw_y == other.raw_y;
+	}
+	bool operator != (const Vertex &other) const
+	{
+		return raw_x != other.raw_x || raw_y != other.raw_y;
 	}
 };
 
@@ -227,32 +196,17 @@ public:
 class Sector
 {
 public:
-	int floorh;
-	int ceilh;
-	int floor_tex;
-	int ceil_tex;
-	int light;
-	int type;
-	int tag;
+	int floorh = 0;
+	int ceilh = 0;
+	int floor_tex = 0;
+	int ceil_tex = 0;
+	int light = 0;
+	int type = 0;
+	int tag = 0;
 
 	enum { F_FLOORH, F_CEILH, F_FLOOR_TEX, F_CEIL_TEX, F_LIGHT, F_TYPE, F_TAG };
 
 public:
-	Sector() : floorh(0), ceilh(0), floor_tex(0), ceil_tex(0),
-			   light(0), type(0), tag(0)
-	{ }
-
-	void RawCopy(const Sector *other)
-	{
-		floorh = other->floorh;
-		ceilh  = other->ceilh;
-		floor_tex = other->floor_tex;
-		ceil_tex  = other->ceil_tex;
-		light  = other->light;
-		type   = other->type;
-		tag    = other->tag;
-	}
-
 	SString FloorTex() const;
 	SString CeilTex() const;
 
@@ -268,29 +222,16 @@ public:
 class SideDef
 {
 public:
-	int x_offset;
-	int y_offset;
-	int upper_tex;
-	int mid_tex;
-	int lower_tex;
-	int sector;
+	int x_offset = 0;
+	int y_offset = 0;
+	int upper_tex = 0;
+	int mid_tex = 0;
+	int lower_tex = 0;
+	int sector = 0;
 
 	enum { F_X_OFFSET, F_Y_OFFSET, F_UPPER_TEX, F_MID_TEX, F_LOWER_TEX, F_SECTOR };
 
 public:
-	SideDef() : x_offset(0), y_offset(0), upper_tex(0), mid_tex(0),
-				lower_tex(0), sector(0)
-	{ }
-
-	void RawCopy(const SideDef *other)
-	{
-		x_offset  = other->x_offset;
-		y_offset  = other->y_offset;
-		upper_tex = other->upper_tex;
-		mid_tex   = other->mid_tex;
-		lower_tex = other->lower_tex;
-		sector    = other->sector;
-	}
 
 	SString UpperTex() const;
 	SString MidTex()   const;
@@ -306,47 +247,26 @@ public:
 class LineDef
 {
 public:
-	int start;
-	int end;
-	int right;
-	int left;
+	int start = 0;
+	int end = 0;
+	int right = -1;
+	int left = -1;
 
-	int flags;
-	int type;
-	int tag;
+	int flags = 0;
+	int type = 0;
+	int tag = 0;
 
 	// Hexen stuff  [NOTE: tag is 'arg1']
-	int arg2;
-	int arg3;
-	int arg4;
-	int arg5;
+	int arg2 = 0;
+	int arg3 = 0;
+	int arg4 = 0;
+	int arg5 = 0;
 
 	enum { F_START, F_END, F_RIGHT, F_LEFT,
 	       F_FLAGS, F_TYPE, F_TAG,
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	LineDef() : start(0), end(0), right(-1), left(-1),
-				flags(0), type(0), tag(0),
-				arg2(0), arg3(0), arg4(0), arg5(0)
-	{ }
-
-	void RawCopy(const LineDef *other)
-	{
-		start = other->start;
-		end   = other->end;
-		right = other->right;
-		left  = other->left;
-		flags = other->flags;
-
-		type  = other->type;
-		tag   = other->tag;   // arg1
-		arg2  = other->arg2;
-		arg3  = other->arg3;
-		arg4  = other->arg4;
-		arg5  = other->arg5;
-	}
-
 	Vertex *Start() const;
 	Vertex *End()   const;
 
