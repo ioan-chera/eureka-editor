@@ -345,36 +345,7 @@ class DocumentModule
 public:
 	DocumentModule(Document &doc);
 
-	std::vector<Thing *> &things;
-	std::vector<Vertex *> &vertices;
-	std::vector<Sector *> &sectors;
-	std::vector<SideDef *> &sidedefs;
-	std::vector<LineDef *> &linedefs;
-
-	std::vector<byte> &headerData;
-	std::vector<byte> &behaviorData;
-	std::vector<byte> &scriptsData;
-
-	int numThings() const
-	{
-		return static_cast<int>(things.size());
-	}
-	int numVertices() const
-	{
-		return static_cast<int>(vertices.size());
-	}
-	int numSectors() const
-	{
-		return static_cast<int>(sectors.size());
-	}
-	int numSidedefs() const
-	{
-		return static_cast<int>(sidedefs.size());
-	}
-	int numLinedefs() const
-	{
-		return static_cast<int>(linedefs.size());
-	}
+	Document &doc;
 };
 
 //
@@ -443,18 +414,18 @@ private:
 		void rawChange(Basis &basis);
 
 		void *rawDelete(Basis &basis) const;
-		Thing *rawDeleteThing(DocumentModule &module) const;
-		Vertex *rawDeleteVertex(DocumentModule &module) const;
-		Sector *rawDeleteSector(DocumentModule &module) const;
-		SideDef *rawDeleteSidedef(DocumentModule &module) const;
-		LineDef *rawDeleteLinedef(DocumentModule &module) const;
+		Thing *rawDeleteThing(Document &doc) const;
+		Vertex *rawDeleteVertex(Document &doc) const;
+		Sector *rawDeleteSector(Document &doc) const;
+		SideDef *rawDeleteSidedef(Document &doc) const;
+		LineDef *rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis) const;
-		void rawInsertThing(DocumentModule &module) const;
-		void rawInsertVertex(DocumentModule &module) const;
-		void rawInsertSector(DocumentModule &module) const;
-		void rawInsertSidedef(DocumentModule &module) const;
-		void rawInsertLinedef(DocumentModule &module) const;
+		void rawInsertThing(Document &doc) const;
+		void rawInsertVertex(Document &doc) const;
+		void rawInsertSector(Document &doc) const;
+		void rawInsertSidedef(Document &doc) const;
+		void rawInsertLinedef(Document &doc) const;
 
 		void deleteFinally();
 	};

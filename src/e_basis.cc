@@ -60,7 +60,7 @@ StringTable basis_strtab;
 //
 // Document module common instantiator
 //
-DocumentModule::DocumentModule(Document &doc) : things(doc.things), vertices(doc.vertices), sectors(doc.sectors), sidedefs(doc.sidedefs), linedefs(doc.linedefs), headerData(doc.headerData), behaviorData(doc.behaviorData), scriptsData(doc.scriptsData)
+DocumentModule::DocumentModule(Document &doc) : doc(doc)
 {
 }
 
@@ -360,27 +360,27 @@ int Basis::addNew(ObjType type)
 	switch(type)
 	{
 	case ObjType::things:
-		op.objnum = numThings();
+		op.objnum = doc.numThings();
 		op.thing = new Thing;
 		break;
 
 	case ObjType::vertices:
-		op.objnum = numVertices();
+		op.objnum = doc.numVertices();
 		op.vertex = new Vertex;
 		break;
 
 	case ObjType::sidedefs:
-		op.objnum = numSidedefs();
+		op.objnum = doc.numSidedefs();
 		op.sidedef = new SideDef;
 		break;
 
 	case ObjType::linedefs:
-		op.objnum = numLinedefs();
+		op.objnum = doc.numLinedefs();
 		op.linedef = new LineDef;
 		break;
 
 	case ObjType::sectors:
-		op.objnum = numSectors();
+		op.objnum = doc.numSectors();
 		op.sector = new Sector;
 		break;
 
@@ -413,9 +413,9 @@ void Basis::del(ObjType type, int objnum)
 	if(type == ObjType::sidedefs)
 	{
 		// unbind sidedef from any linedefs using it
-		for(int n = numLinedefs() - 1; n >= 0; n--)
+		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = linedefs[n];
+			LineDef *L = doc.linedefs[n];
 
 			if(L->right == objnum)
 				changeLinedef(n, LineDef::F_RIGHT, -1);
@@ -427,9 +427,9 @@ void Basis::del(ObjType type, int objnum)
 	else if(type == ObjType::vertices)
 	{
 		// delete any linedefs bound to this vertex
-		for(int n = numLinedefs() - 1; n >= 0; n--)
+		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = linedefs[n];
+			LineDef *L = doc.linedefs[n];
 
 			if(L->start == objnum || L->end == objnum)
 				del(ObjType::linedefs, n);
@@ -438,8 +438,8 @@ void Basis::del(ObjType type, int objnum)
 	else if(type == ObjType::sectors)
 	{
 		// delete the sidedefs bound to this sector
-		for(int n = numSidedefs() - 1; n >= 0; n--)
-			if(sidedefs[n]->sector == objnum)
+		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
+			if(doc.sidedefs[n]->sector == objnum)
 				del(ObjType::sidedefs, n);
 	}
 
@@ -476,7 +476,7 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 //
 bool Basis::changeThing(int thing, byte field, int value)
 {
-	SYS_ASSERT(thing >= 0 && thing < numThings());
+	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
 	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	if(field == Thing::F_TYPE)
@@ -490,7 +490,7 @@ bool Basis::changeThing(int thing, byte field, int value)
 //
 bool Basis::changeVertex(int vert, byte field, int value)
 {
-	SYS_ASSERT(vert >= 0 && vert < numVertices());
+	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
 	SYS_ASSERT(field <= Vertex::F_Y);
 
 	return change(ObjType::vertices, vert, field, value);
@@ -501,7 +501,7 @@ bool Basis::changeVertex(int vert, byte field, int value)
 //
 bool Basis::changeSector(int sec, byte field, int value)
 {
-	SYS_ASSERT(sec >= 0 && sec < numSectors());
+	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
 	SYS_ASSERT(field <= Sector::F_TAG);
 
 	if(field == Sector::F_FLOOR_TEX ||
@@ -518,7 +518,7 @@ bool Basis::changeSector(int sec, byte field, int value)
 //
 bool Basis::changeSidedef(int side, byte field, int value)
 {
-	SYS_ASSERT(side >= 0 && side < numSidedefs());
+	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
 	SYS_ASSERT(field <= SideDef::F_SECTOR);
 
 	if(field == SideDef::F_LOWER_TEX ||
@@ -536,7 +536,7 @@ bool Basis::changeSidedef(int side, byte field, int value)
 //
 bool Basis::changeLinedef(int line, byte field, int value)
 {
-	SYS_ASSERT(line >= 0 && line < numLinedefs());
+	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
 	SYS_ASSERT(field <= LineDef::F_ARG5);
 
 	return change(ObjType::linedefs, line, field, value);
@@ -597,26 +597,26 @@ void Basis::clearAll()
 {
 	int i;
 
-	for(i = 0; i < numThings(); i++)
-		delete things[i];
-	for(i = 0; i < numVertices(); i++)
-		delete vertices[i];
-	for(i = 0; i < numSectors(); i++)
-		delete sectors[i];
-	for(i = 0; i < numSidedefs(); i++)
-		delete sidedefs[i];
-	for(i = 0; i < numLinedefs(); i++)
-		delete linedefs[i];
+	for(Thing *thing : doc.things)
+		delete thing;
+	for(Vertex *vertex : doc.vertices)
+		delete vertex;
+	for(Sector *sector : doc.sectors)
+		delete sector;
+	for(SideDef *sidedef : doc.sidedefs)
+		delete sidedef;
+	for(LineDef *linedef : doc.linedefs)
+		delete linedef;
 
-	things.clear();
-	vertices.clear();
-	sectors.clear();
-	sidedefs.clear();
-	linedefs.clear();
+	doc.things.clear();
+	doc.vertices.clear();
+	doc.sectors.clear();
+	doc.sidedefs.clear();
+	doc.linedefs.clear();
 
-	headerData.clear();
-	behaviorData.clear();
-	scriptsData.clear();
+	doc.headerData.clear();
+	doc.behaviorData.clear();
+	doc.scriptsData.clear();
 
 	mUndoHistory.clear();
 	mRedoFuture.clear();
@@ -680,24 +680,24 @@ void Basis::EditOperation::rawChange(Basis &basis)
 	switch(objtype)
 	{
 	case ObjType::things:
-		SYS_ASSERT(0 <= objnum && objnum < basis.numThings());
-		pos = reinterpret_cast<int *>(basis.things[objnum]);
+		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
+		pos = reinterpret_cast<int *>(basis.doc.things[objnum]);
 		break;
 	case ObjType::vertices:
-		SYS_ASSERT(0 <= objnum && objnum < basis.numVertices());
-		pos = reinterpret_cast<int *>(basis.vertices[objnum]);
+		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
+		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum]);
 		break;
 	case ObjType::sectors:
-		SYS_ASSERT(0 <= objnum && objnum < basis.numSectors());
-		pos = reinterpret_cast<int *>(basis.sectors[objnum]);
+		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
+		pos = reinterpret_cast<int *>(basis.doc.sectors[objnum]);
 		break;
 	case ObjType::sidedefs:
-		SYS_ASSERT(0 <= objnum && objnum < basis.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.sidedefs[objnum]);
+		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
+		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum]);
 		break;
 	case ObjType::linedefs:
-		SYS_ASSERT(0 <= objnum && objnum < basis.numLinedefs());
-		pos = reinterpret_cast<int *>(basis.linedefs[objnum]);
+		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
+		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum]);
 		break;
 	default:
 		BugError("Basis::EditOperation::rawChange: bad objtype %d\n", objtype);
@@ -732,19 +732,19 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 	switch(objtype)
 	{
 	case ObjType::things:
-		return rawDeleteThing(basis);
+		return rawDeleteThing(basis.doc);
 
 	case ObjType::vertices:
-		return rawDeleteVertex(basis);
+		return rawDeleteVertex(basis.doc);
 
 	case ObjType::sectors:
-		return rawDeleteSector(basis);
+		return rawDeleteSector(basis.doc);
 
 	case ObjType::sidedefs:
-		return rawDeleteSidedef(basis);
+		return rawDeleteSidedef(basis.doc);
 
 	case ObjType::linedefs:
-		return rawDeleteLinedef(basis);
+		return rawDeleteLinedef(basis.doc);
 
 	default:
 		BugError("Basis::EditOperation::rawDelete: bad objtype %d\n", objtype);
@@ -755,12 +755,12 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 //
 // Thing deletion
 //
-Thing *Basis::EditOperation::rawDeleteThing(DocumentModule &module) const
+Thing *Basis::EditOperation::rawDeleteThing(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum < module.numThings());
+	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
 
-	Thing *result = module.things[objnum];
-	module.things.erase(module.things.begin() + objnum);
+	Thing *result = doc.things[objnum];
+	doc.things.erase(doc.things.begin() + objnum);
 
 	return result;
 }
@@ -768,20 +768,20 @@ Thing *Basis::EditOperation::rawDeleteThing(DocumentModule &module) const
 //
 // Vertex deletion (and update linedef refs)
 //
-Vertex *Basis::EditOperation::rawDeleteVertex(DocumentModule &module) const
+Vertex *Basis::EditOperation::rawDeleteVertex(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum < module.numVertices());
+	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
-	Vertex *result = module.vertices[objnum];
-	module.vertices.erase(module.vertices.begin() + objnum);
+	Vertex *result = doc.vertices[objnum];
+	doc.vertices.erase(doc.vertices.begin() + objnum);
 
 	// fix the linedef references
 
-	if(objnum < module.numVertices())
+	if(objnum < doc.numVertices())
 	{
-		for(int n = module.numLinedefs() - 1; n >= 0; n--)
+		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = module.linedefs[n];
+			LineDef *L = doc.linedefs[n];
 
 			if(L->start > objnum)
 				L->start--;
@@ -797,20 +797,20 @@ Vertex *Basis::EditOperation::rawDeleteVertex(DocumentModule &module) const
 //
 // Raw delete sector (and update sidedef refs)
 //
-Sector *Basis::EditOperation::rawDeleteSector(DocumentModule &module) const
+Sector *Basis::EditOperation::rawDeleteSector(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum < module.numSectors());
+	SYS_ASSERT(0 <= objnum && objnum < doc.numSectors());
 
-	Sector *result = module.sectors[objnum];
-	module.sectors.erase(module.sectors.begin() + objnum);
+	Sector *result = doc.sectors[objnum];
+	doc.sectors.erase(doc.sectors.begin() + objnum);
 
 	// fix sidedef references
 
-	if(objnum < module.numSectors())
+	if(objnum < doc.numSectors())
 	{
-		for(int n = module.numSidedefs() - 1; n >= 0; n--)
+		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = module.sidedefs[n];
+			SideDef *S = doc.sidedefs[n];
 
 			if(S->sector > objnum)
 				S->sector--;
@@ -823,20 +823,20 @@ Sector *Basis::EditOperation::rawDeleteSector(DocumentModule &module) const
 //
 // Delete sidedef (and update linedef references)
 //
-SideDef *Basis::EditOperation::rawDeleteSidedef(DocumentModule &module) const
+SideDef *Basis::EditOperation::rawDeleteSidedef(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum < module.numSidedefs());
+	SYS_ASSERT(0 <= objnum && objnum < doc.numSidedefs());
 
-	SideDef *result = module.sidedefs[objnum];
-	module.sidedefs.erase(module.sidedefs.begin() + objnum);
+	SideDef *result = doc.sidedefs[objnum];
+	doc.sidedefs.erase(doc.sidedefs.begin() + objnum);
 
 	// fix the linedefs references
 
-	if(objnum < module.numSidedefs())
+	if(objnum < doc.numSidedefs())
 	{
-		for(int n = module.numLinedefs() - 1; n >= 0; n--)
+		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = module.linedefs[n];
+			LineDef *L = doc.linedefs[n];
 
 			if(L->right > objnum)
 				L->right--;
@@ -852,12 +852,12 @@ SideDef *Basis::EditOperation::rawDeleteSidedef(DocumentModule &module) const
 //
 // Raw delete linedef
 //
-LineDef *Basis::EditOperation::rawDeleteLinedef(DocumentModule &module) const
+LineDef *Basis::EditOperation::rawDeleteLinedef(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum < module.numLinedefs());
+	SYS_ASSERT(0 <= objnum && objnum < doc.numLinedefs());
 
-	LineDef *result = module.linedefs[objnum];
-	module.linedefs.erase(module.linedefs.begin() + objnum);
+	LineDef *result = doc.linedefs[objnum];
+	doc.linedefs.erase(doc.linedefs.begin() + objnum);
 
 	return result;
 }
@@ -879,23 +879,23 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 	switch(objtype)
 	{
 	case ObjType::things:
-		rawInsertThing(basis);
+		rawInsertThing(basis.doc);
 		break;
 
 	case ObjType::vertices:
-		rawInsertVertex(basis);
+		rawInsertVertex(basis.doc);
 		break;
 
 	case ObjType::sidedefs:
-		rawInsertSidedef(basis);
+		rawInsertSidedef(basis.doc);
 		break;
 
 	case ObjType::sectors:
-		rawInsertSector(basis);
+		rawInsertSector(basis.doc);
 		break;
 
 	case ObjType::linedefs:
-		rawInsertLinedef(basis);
+		rawInsertLinedef(basis.doc);
 		break;
 
 	default:
@@ -906,27 +906,27 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 //
 // Thing insertion
 //
-void Basis::EditOperation::rawInsertThing(DocumentModule &module) const
+void Basis::EditOperation::rawInsertThing(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum <= module.numThings());
-	module.things.insert(module.things.begin() + objnum, thing);
+	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
+	doc.things.insert(doc.things.begin() + objnum, thing);
 }
 
 //
 // Vertex insertion
 //
-void Basis::EditOperation::rawInsertVertex(DocumentModule &module) const
+void Basis::EditOperation::rawInsertVertex(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum <= module.numVertices());
-	module.vertices.insert(module.vertices.begin() + objnum, vertex);
+	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
+	doc.vertices.insert(doc.vertices.begin() + objnum, vertex);
 
 	// fix references in linedefs
 
-	if(objnum + 1 < module.numVertices())
+	if(objnum + 1 < doc.numVertices())
 	{
-		for(int n = module.numLinedefs() - 1; n >= 0; n--)
+		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = module.linedefs[n];
+			LineDef *L = doc.linedefs[n];
 
 			if(L->start >= objnum)
 				L->start++;
@@ -940,18 +940,18 @@ void Basis::EditOperation::rawInsertVertex(DocumentModule &module) const
 //
 // Sector insertion
 //
-void Basis::EditOperation::rawInsertSector(DocumentModule &module) const
+void Basis::EditOperation::rawInsertSector(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum <= module.numSectors());
-	module.sectors.insert(module.sectors.begin() + objnum, sector);
+	SYS_ASSERT(0 <= objnum && objnum <= doc.numSectors());
+	doc.sectors.insert(doc.sectors.begin() + objnum, sector);
 
 	// fix all sidedef references
 
-	if(objnum + 1 < module.numSectors())
+	if(objnum + 1 < doc.numSectors())
 	{
-		for(int n = module.numSidedefs() - 1; n >= 0; n--)
+		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = module.sidedefs[n];
+			SideDef *S = doc.sidedefs[n];
 
 			if(S->sector >= objnum)
 				S->sector++;
@@ -962,18 +962,18 @@ void Basis::EditOperation::rawInsertSector(DocumentModule &module) const
 //
 // Sidedef insertion
 //
-void Basis::EditOperation::rawInsertSidedef(DocumentModule &module) const
+void Basis::EditOperation::rawInsertSidedef(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum <= module.numSidedefs());
-	module.sidedefs.insert(module.sidedefs.begin() + objnum, sidedef);
+	SYS_ASSERT(0 <= objnum && objnum <= doc.numSidedefs());
+	doc.sidedefs.insert(doc.sidedefs.begin() + objnum, sidedef);
 
 	// fix the linedefs references
 
-	if(objnum + 1 < module.numSidedefs())
+	if(objnum + 1 < doc.numSidedefs())
 	{
-		for(int n = module.numLinedefs() - 1; n >= 0; n--)
+		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = module.linedefs[n];
+			LineDef *L = doc.linedefs[n];
 
 			if(L->right >= objnum)
 				L->right++;
@@ -987,10 +987,10 @@ void Basis::EditOperation::rawInsertSidedef(DocumentModule &module) const
 //
 // Linedef insertion
 //
-void Basis::EditOperation::rawInsertLinedef(DocumentModule &module) const
+void Basis::EditOperation::rawInsertLinedef(Document &doc) const
 {
-	SYS_ASSERT(0 <= objnum && objnum <= module.numLinedefs());
-	module.linedefs.insert(module.linedefs.begin() + objnum, linedef);
+	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
+	doc.linedefs.insert(doc.linedefs.begin() + objnum, linedef);
 }
 
 //
