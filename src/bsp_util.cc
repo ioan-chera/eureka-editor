@@ -236,8 +236,8 @@ static void MarkPolyobjSector(int sector)
 	{
 		LineDef *L = gDocument.linedefs[i];
 
-		if ((L->right >= 0 && L->Right()->sector == sector) ||
-			(L->left  >= 0 && L->Left()->sector  == sector))
+		if ((L->right >= 0 && L->Right(gDocument)->sector == sector) ||
+			(L->left  >= 0 && L->Left(gDocument)->sector  == sector))
 		{
 			L->flags |= MLF_IS_PRECIOUS;
 		}
@@ -272,18 +272,18 @@ static void MarkPolyobjPoint(double x, double y)
 		const LineDef *L = gDocument.linedefs[i];
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
-					(int) L->Start()->x(), (int) L->Start()->y(),
-					(int) L->End()->x(),   (int) L->End()->y()))
+					(int) L->Start(gDocument)->x(), (int) L->Start(gDocument)->y(),
+					(int) L->End(gDocument)->x(),   (int) L->End(gDocument)->y()))
 		{
 #     if DEBUG_POLYOBJ
 			DebugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
 			if (L->left >= 0)
-				MarkPolyobjSector(L->Left()->sector);
+				MarkPolyobjSector(L->Left(gDocument)->sector);
 
 			if (L->right >= 0)
-				MarkPolyobjSector(L->Right()->sector);
+				MarkPolyobjSector(L->Right(gDocument)->sector);
 
 			inside_count++;
 		}
@@ -304,10 +304,10 @@ static void MarkPolyobjPoint(double x, double y)
 
 		double x_cut;
 
-		x1 = L->Start()->x();
-		y1 = L->Start()->y();
-		x2 = L->End()->x();
-		y2 = L->End()->y();
+		x1 = L->Start(gDocument)->x();
+		y1 = L->Start(gDocument)->y();
+		x2 = L->End(gDocument)->x();
+		y2 = L->End(gDocument)->y();
 
 		/* check vertical range */
 		if (fabs(y2 - y1) < EPSILON)
@@ -336,8 +336,8 @@ static void MarkPolyobjPoint(double x, double y)
 
 	const LineDef *best_ld = gDocument.linedefs[best_match];
 
-	y1 = best_ld->Start()->y();
-	y2 = best_ld->End()->y();
+	y1 = best_ld->Start(gDocument)->y();
+	y2 = best_ld->End(gDocument)->y();
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
@@ -356,9 +356,9 @@ static void MarkPolyobjPoint(double x, double y)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = (best_ld->right >= 0) ? best_ld->Right()->sector : -1;
+		sector = (best_ld->right >= 0) ? best_ld->Right(gDocument)->sector : -1;
 	else
-		sector = (best_ld->left >= 0) ? best_ld->Left()->sector : -1;
+		sector = (best_ld->left >= 0) ? best_ld->Left(gDocument)->sector : -1;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -511,9 +511,9 @@ static inline int LineVertexLowest(const LineDef *L)
 	// returns the "lowest" vertex (normally the left-most, but if the
 	// line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
-	return ( L->Start()->raw_x <  L->End()->raw_x ||
-			(L->Start()->raw_x == L->End()->raw_x &&
-			 L->Start()->raw_y <  L->End()->raw_y)) ? 0 : 1;
+	return ( L->Start(gDocument)->raw_x <  L->End(gDocument)->raw_x ||
+			(L->Start(gDocument)->raw_x == L->End(gDocument)->raw_x &&
+			 L->Start(gDocument)->raw_y <  L->End(gDocument)->raw_y)) ? 0 : 1;
 }
 
 static int LineStartCompare(const void *p1, const void *p2)
@@ -528,8 +528,8 @@ static int LineStartCompare(const void *p1, const void *p2)
 	const LineDef *B = gDocument.linedefs[line2];
 
 	// determine left-most vertex of each line
-	const Vertex *C = LineVertexLowest(A) ? A->End() : A->Start();
-	const Vertex *D = LineVertexLowest(B) ? B->End() : B->Start();
+	const Vertex *C = LineVertexLowest(A) ? A->End(gDocument) : A->Start(gDocument);
+	const Vertex *D = LineVertexLowest(B) ? B->End(gDocument) : B->Start(gDocument);
 
 	if (C->raw_x != D->raw_x)
 		return C->raw_x - D->raw_x;
@@ -549,8 +549,8 @@ static int LineEndCompare(const void *p1, const void *p2)
 	const LineDef *B = gDocument.linedefs[line2];
 
 	// determine right-most vertex of each line
-	const Vertex * C = LineVertexLowest(A) ? A->Start() : A->End();
-	const Vertex * D = LineVertexLowest(B) ? B->Start() : B->End();
+	const Vertex * C = LineVertexLowest(A) ? A->Start(gDocument) : A->End(gDocument);
+	const Vertex * D = LineVertexLowest(B) ? B->Start(gDocument) : B->End(gDocument);
 
 	if (C->raw_x != D->raw_x)
 		return C->raw_x - D->raw_x;
@@ -659,16 +659,16 @@ void CalculateWallTips()
 	{
 		const LineDef *L = gDocument.linedefs[i];
 
-		if ((L->flags & MLF_IS_OVERLAP) || L->IsZeroLength())
+		if ((L->flags & MLF_IS_OVERLAP) || L->IsZeroLength(gDocument))
 			continue;
 
-		double x1 = L->Start()->x();
-		double y1 = L->Start()->y();
-		double x2 = L->End()->x();
-		double y2 = L->End()->y();
+		double x1 = L->Start(gDocument)->x();
+		double y1 = L->Start(gDocument)->y();
+		double x2 = L->End(gDocument)->x();
+		double y2 = L->End(gDocument)->y();
 
-		bool left  = (L->left  >= 0) && is_sector(L->Left()->sector);
-		bool right = (L->right >= 0) && is_sector(L->Right()->sector);
+		bool left  = (L->left  >= 0) && is_sector(L->Left(gDocument)->sector);
+		bool right = (L->right >= 0) && is_sector(L->Right(gDocument)->sector);
 
 		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);
 		VertexAddWallTip(lev_vertices[L->end],   x1-x2, y1-y2, right, left);

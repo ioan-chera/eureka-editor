@@ -402,10 +402,10 @@ static void AdjustOfs_UpdateBBox(int ld_num)
 {
 	const LineDef *L = gDocument.linedefs[ld_num];
 
-	float lx1 = static_cast<float>(L->Start()->x());
-	float ly1 = static_cast<float>(L->Start()->y());
-	float lx2 = static_cast<float>(L->End()->x());
-	float ly2 = static_cast<float>(L->End()->y());
+	float lx1 = static_cast<float>(L->Start(gDocument)->x());
+	float ly1 = static_cast<float>(L->Start(gDocument)->y());
+	float lx2 = static_cast<float>(L->End(gDocument)->x());
+	float ly2 = static_cast<float>(L->End(gDocument)->y());
 
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
@@ -1306,32 +1306,32 @@ static int LD_GrabTex(const LineDef *L, int part)
 		return BA_InternaliseString(default_wall_tex);
 
 	if (L->OneSided())
-		return L->Right()->mid_tex;
+		return L->Right(gDocument)->mid_tex;
 
-	if (part & PART_RT_LOWER) return L->Right()->lower_tex;
-	if (part & PART_RT_UPPER) return L->Right()->upper_tex;
+	if (part & PART_RT_LOWER) return L->Right(gDocument)->lower_tex;
+	if (part & PART_RT_UPPER) return L->Right(gDocument)->upper_tex;
 
-	if (part & PART_LF_LOWER) return L->Left()->lower_tex;
-	if (part & PART_LF_UPPER) return L->Left()->upper_tex;
+	if (part & PART_LF_LOWER) return L->Left(gDocument)->lower_tex;
+	if (part & PART_LF_UPPER) return L->Left(gDocument)->upper_tex;
 
-	if (part & PART_RT_RAIL)  return L->Right()->mid_tex;
-	if (part & PART_LF_RAIL)  return L->Left() ->mid_tex;
+	if (part & PART_RT_RAIL)  return L->Right(gDocument)->mid_tex;
+	if (part & PART_LF_RAIL)  return L->Left(gDocument) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (L->Left()->SecRef()->floorh > L->Right()->SecRef()->floorh)
-		return L->Right()->lower_tex;
+	if (L->Left(gDocument)->SecRef(gDocument)->floorh > L->Right(gDocument)->SecRef(gDocument)->floorh)
+		return L->Right(gDocument)->lower_tex;
 
-	if (L->Left()->SecRef()->ceilh < L->Right()->SecRef()->ceilh)
-		return L->Right()->upper_tex;
+	if (L->Left(gDocument)->SecRef(gDocument)->ceilh < L->Right(gDocument)->SecRef(gDocument)->ceilh)
+		return L->Right(gDocument)->upper_tex;
 
-	if (L->Left()->SecRef()->floorh < L->Right()->SecRef()->floorh)
-		return L->Left()->lower_tex;
+	if (L->Left(gDocument)->SecRef(gDocument)->floorh < L->Right(gDocument)->SecRef(gDocument)->floorh)
+		return L->Left(gDocument)->lower_tex;
 
-	if (L->Left()->SecRef()->ceilh > L->Right()->SecRef()->ceilh)
-		return L->Left()->upper_tex;
+	if (L->Left(gDocument)->SecRef(gDocument)->ceilh > L->Right(gDocument)->SecRef(gDocument)->ceilh)
+		return L->Left(gDocument)->upper_tex;
 
 	// emergency fallback
-	return L->Right()->lower_tex;
+	return L->Right(gDocument)->lower_tex;
 }
 
 

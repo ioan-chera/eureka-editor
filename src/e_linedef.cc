@@ -71,13 +71,13 @@ bool LineDefWouldOverlap(int v1, double x2, double y2)
 		LineDef *L = gDocument.linedefs[n];
 
 		// zero-length lines should not exist, but don't get stroppy if they do
-		if (L->IsZeroLength())
+		if (L->IsZeroLength(gDocument))
 			continue;
 
-		double lx1 = L->Start()->x();
-		double ly1 = L->Start()->y();
-		double lx2 = L->End()->x();
-		double ly2 = L->End()->y();
+		double lx1 = L->Start(gDocument)->x();
+		double ly1 = L->Start(gDocument)->y();
+		double lx2 = L->End(gDocument)->x();
+		double ly2 = L->End(gDocument)->y();
 
 		double a, b;
 
@@ -90,7 +90,7 @@ bool LineDefWouldOverlap(int v1, double x2, double y2)
 		a = AlongDist(x1, y1, lx1, ly1, lx2, ly2);
 		b = AlongDist(x2, y2, lx1, ly1, lx2, ly2);
 
-		double len = L->CalcLength();
+		double len = L->CalcLength(gDocument);
 
 		if (a > b)
 			std::swap(a, b);
@@ -155,8 +155,8 @@ static bool PartIsVisible(const Objid& obj, char part)
 	if (! L->TwoSided())
 		return (part == 'l');
 
-	const Sector *front = L->Right()->SecRef();
-	const Sector *back  = L->Left ()->SecRef();
+	const Sector *front = L->Right(gDocument)->SecRef(gDocument);
+	const Sector *back  = L->Left (gDocument)->SecRef(gDocument);
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -195,8 +195,8 @@ static void PartCalcExtent(const Objid& obj, char part, int *z1, int *z2)
 	{
 		if (SD)
 		{
-			*z1 = SD->SecRef()->floorh;
-			*z2 = SD->SecRef()->ceilh;
+			*z1 = SD->SecRef(gDocument)->floorh;
+			*z2 = SD->SecRef(gDocument)->ceilh;
 		}
 		else
 		{
@@ -216,8 +216,8 @@ static void PartCalcExtent(const Objid& obj, char part, int *z1, int *z2)
 			part = 'l';
 	}
 
-	const Sector *front = L->Right()->SecRef();
-	const Sector *back  = L->Left ()->SecRef();
+	const Sector *front = L->Right(gDocument)->SecRef(gDocument);
+	const Sector *back  = L->Left (gDocument)->SecRef(gDocument);
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -378,7 +378,7 @@ static void DetermineAdjoiner(Objid& result,
 		if (N == L)
 			continue;
 
-		if (N->IsZeroLength())
+		if (N->IsZeroLength(gDocument))
 			continue;
 
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))
@@ -418,7 +418,7 @@ static int CalcReferenceH(const Objid& obj)
 		if (! SD)
 			return 256;
 
-		const Sector *front = SD->SecRef();
+		const Sector *front = SD->SecRef(gDocument);
 
 		if (L->flags & MLF_LowerUnpegged)
 			return front->floorh + W_GetTextureHeight(SD->MidTex());
@@ -427,8 +427,8 @@ static int CalcReferenceH(const Objid& obj)
 	}
 
 
-	const Sector *front = L->Right()->SecRef();
-	const Sector *back  = L->Left ()->SecRef();
+	const Sector *front = L->Right(gDocument)->SecRef(gDocument);
+	const Sector *back  = L->Left (gDocument)->SecRef(gDocument);
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -469,14 +469,14 @@ static void DoAlignX(const Objid& cur,
 
 	if (on_left)
 	{
-		new_offset += I_ROUND(adj_L->CalcLength());
+		new_offset += I_ROUND(adj_L->CalcLength(gDocument));
 
 		if (new_offset > 0)
 			new_offset &= 1023;
 	}
 	else
 	{
-		new_offset -= I_ROUND(cur_L->CalcLength());
+		new_offset -= I_ROUND(cur_L->CalcLength(gDocument));
 
 		if (new_offset < 0)
 			new_offset = - (-new_offset & 1023);
@@ -564,7 +564,7 @@ static void DoClearOfs(const Objid& cur, int align_flags)
 		// when the /right flag is used, make the texture end at the right side
 		// (whereas zero makes it begin at the left side)
 		if (align_flags & LINALIGN_Right)
-			gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(LD_ptr(cur)->CalcLength()));
+			gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(LD_ptr(cur)->CalcLength(gDocument)));
 		else
 			gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0);
 	}
@@ -942,28 +942,28 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	gDocument.basis.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
-	int orig_length = I_ROUND(L->CalcLength());
-	int new_length  = I_ROUND(hypot(L->Start()->x() - V->x(), L->Start()->y() - V->y()));
+	int orig_length = I_ROUND(L->CalcLength(gDocument));
+	int new_length  = I_ROUND(hypot(L->Start(gDocument)->x() - V->x(), L->Start(gDocument)->y() - V->y()));
 
 	// update sidedefs
 
-	if (L->Right())
+	if (L->Right(gDocument))
 	{
 		L2->right = gDocument.basis.addNew(ObjType::sidedefs);
-		*L2->Right() = *L->Right();
+		*L2->Right(gDocument) = *L->Right(gDocument);
 
 		if (! config::leave_offsets_alone)
-			L2->Right()->x_offset += new_length;
+			L2->Right(gDocument)->x_offset += new_length;
 	}
 
-	if (L->Left())
+	if (L->Left(gDocument))
 	{
 		L2->left = gDocument.basis.addNew(ObjType::sidedefs);
-		*L2->Left() = *L->Left();
+		*L2->Left(gDocument) = *L->Left(gDocument);
 
 		if (! config::leave_offsets_alone)
 		{
-			int new_x_ofs = L->Left()->x_offset + orig_length - new_length;
+			int new_x_ofs = L->Left(gDocument)->x_offset + orig_length - new_length;
 
 			gDocument.basis.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
 		}
@@ -978,12 +978,12 @@ static bool DoSplitLineDef(int ld)
 	LineDef * L = gDocument.linedefs[ld];
 
 	// prevent creating tiny lines (especially zero-length)
-	if (abs(L->Start()->x() - L->End()->x()) < 4 &&
-	    abs(L->Start()->y() - L->End()->y()) < 4)
+	if (abs(L->Start(gDocument)->x() - L->End(gDocument)->x()) < 4 &&
+	    abs(L->Start(gDocument)->y() - L->End(gDocument)->y()) < 4)
 		return false;
 
-	double new_x = (L->Start()->x() + L->End()->x()) / 2;
-	double new_y = (L->Start()->y() + L->End()->y()) / 2;
+	double new_x = (L->Start(gDocument)->x() + L->End(gDocument)->x()) / 2;
+	double new_y = (L->Start(gDocument)->y() + L->End(gDocument)->y()) / 2;
 
 	int new_v = gDocument.basis.addNew(ObjType::vertices);
 
@@ -1095,11 +1095,11 @@ void LD_MergedSecondSideDef(int ld)
 	int  left_tex = 0;
 	int right_tex = 0;
 
-	if (! is_null_tex(L->Left()->MidTex()))
-		left_tex = L->Left()->mid_tex;
+	if (! is_null_tex(L->Left(gDocument)->MidTex()))
+		left_tex = L->Left(gDocument)->mid_tex;
 
-	if (! is_null_tex(L->Right()->MidTex()))
-		right_tex = L->Right()->mid_tex;
+	if (! is_null_tex(L->Right(gDocument)->MidTex()))
+		right_tex = L->Right(gDocument)->mid_tex;
 
 	if (! left_tex)  left_tex = right_tex;
 	if (! right_tex) right_tex = left_tex;
@@ -1252,10 +1252,10 @@ void MoveCoordOntoLineDef(int ld, double *x, double *y)
 {
 	const LineDef *L = gDocument.linedefs[ld];
 
-	double x1 = L->Start()->x();
-	double y1 = L->Start()->y();
-	double x2 = L->End()->x();
-	double y2 = L->End()->y();
+	double x1 = L->Start(gDocument)->x();
+	double y1 = L->Start(gDocument)->y();
+	double x2 = L->End(gDocument)->x();
+	double y2 = L->End(gDocument)->y();
 
 	double dx = x2 - x1;
 	double dy = y2 - y1;
@@ -1348,13 +1348,13 @@ static void LD_SetLength(int ld, int new_len, double angle)
 
 	if (new_len < 0)
 	{
-		gDocument.basis.changeVertex(L->start, Vertex::F_X, L->End()->raw_x - INT_TO_COORD(idx));
-		gDocument.basis.changeVertex(L->start, Vertex::F_Y, L->End()->raw_y - INT_TO_COORD(idy));
+		gDocument.basis.changeVertex(L->start, Vertex::F_X, L->End(gDocument)->raw_x - INT_TO_COORD(idx));
+		gDocument.basis.changeVertex(L->start, Vertex::F_Y, L->End(gDocument)->raw_y - INT_TO_COORD(idy));
 	}
 	else
 	{
-		gDocument.basis.changeVertex(L->end, Vertex::F_X, L->Start()->raw_x + INT_TO_COORD(idx));
-		gDocument.basis.changeVertex(L->end, Vertex::F_Y, L->Start()->raw_y + INT_TO_COORD(idy));
+		gDocument.basis.changeVertex(L->end, Vertex::F_X, L->Start(gDocument)->raw_x + INT_TO_COORD(idx));
+		gDocument.basis.changeVertex(L->end, Vertex::F_Y, L->Start(gDocument)->raw_y + INT_TO_COORD(idy));
 	}
 }
 
@@ -1377,7 +1377,7 @@ void LineDefs_SetLength(int new_len)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
-		angles[n] = atan2(L->End()->y() - L->Start()->y(), L->End()->x() - L->Start()->x());
+		angles[n] = atan2(L->End(gDocument)->y() - L->Start(gDocument)->y(), L->End(gDocument)->x() - L->Start(gDocument)->x());
 	}
 
 	gDocument.basis.begin();
@@ -1400,14 +1400,14 @@ void LD_FixForLostSide(int ld)
 {
 	LineDef * L = gDocument.linedefs[ld];
 
-	SYS_ASSERT(L->Right());
+	SYS_ASSERT(L->Right(gDocument));
 
 	int tex;
 
-	if (! is_null_tex(L->Right()->LowerTex()))
-		tex = L->Right()->lower_tex;
-	else if (! is_null_tex(L->Right()->UpperTex()))
-		tex = L->Right()->upper_tex;
+	if (! is_null_tex(L->Right(gDocument)->LowerTex()))
+		tex = L->Right(gDocument)->lower_tex;
+	else if (! is_null_tex(L->Right(gDocument)->UpperTex()))
+		tex = L->Right(gDocument)->upper_tex;
 	else
 		tex = BA_InternaliseString(default_wall_tex);
 

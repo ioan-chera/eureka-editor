@@ -56,44 +56,44 @@ static bool MatchingTextures(int index1, int index2)
 	LineDef *L2 = gDocument.linedefs[index2];
 
 	// lines with no sidedefs only match each other
-	if (! L1->Right() || ! L2->Right())
-		return L1->Right() == L2->Right();
+	if (! L1->Right(gDocument) || ! L2->Right(gDocument))
+		return L1->Right(gDocument) == L2->Right(gDocument);
 
 	// determine texture to match from first line
 	int texture = 0;
 
 	if (! L1->TwoSided())
 	{
-		texture = L1->Right()->mid_tex;
+		texture = L1->Right(gDocument)->mid_tex;
 	}
 	else
 	{
-		int f_diff = L1->Left()->SecRef()->floorh - L1->Right()->SecRef()->floorh;
-		int c_diff = L1->Left()->SecRef()->ceilh  - L1->Right()->SecRef()->ceilh;
+		int f_diff = L1->Left(gDocument)->SecRef(gDocument)->floorh - L1->Right(gDocument)->SecRef(gDocument)->floorh;
+		int c_diff = L1->Left(gDocument)->SecRef(gDocument)->ceilh  - L1->Right(gDocument)->SecRef(gDocument)->ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
-			texture = (c_diff > 0) ? L1->Left()->upper_tex : L1->Right()->upper_tex;
+			texture = (c_diff > 0) ? L1->Left(gDocument)->upper_tex : L1->Right(gDocument)->upper_tex;
 		else
-			texture = (f_diff < 0) ? L1->Left()->lower_tex : L1->Right()->lower_tex;
+			texture = (f_diff < 0) ? L1->Left(gDocument)->lower_tex : L1->Right(gDocument)->lower_tex;
 	}
 
 	// match texture with other line
 
 	if (! L2->TwoSided())
 	{
-		return (L2->Right()->mid_tex == texture);
+		return (L2->Right(gDocument)->mid_tex == texture);
 	}
 	else
 	{
-		int f_diff = L2->Left()->SecRef()->floorh - L2->Right()->SecRef()->floorh;
-		int c_diff = L2->Left()->SecRef()->ceilh  - L2->Right()->SecRef()->ceilh;
+		int f_diff = L2->Left(gDocument)->SecRef(gDocument)->floorh - L2->Right(gDocument)->SecRef(gDocument)->floorh;
+		int c_diff = L2->Left(gDocument)->SecRef(gDocument)->ceilh  - L2->Right(gDocument)->SecRef(gDocument)->ceilh;
 
 		if (c_diff != 0)
-			if (texture == ((c_diff > 0) ? L2->Left()->upper_tex : L2->Right()->upper_tex))
+			if (texture == ((c_diff > 0) ? L2->Left(gDocument)->upper_tex : L2->Right(gDocument)->upper_tex))
 				return true;
 
 		if (f_diff != 0)
-			if (texture == ((f_diff < 0) ? L2->Left()->lower_tex : L2->Right()->lower_tex))
+			if (texture == ((f_diff < 0) ? L2->Left(gDocument)->lower_tex : L2->Right(gDocument)->lower_tex))
 				return true;
 
 		return false;
@@ -251,8 +251,8 @@ static bool GrowContiguousSectors(selection_c &seen)
 		if (! L->TwoSided())
 			continue;
 
-		int sec1 = L->Right()->sector;
-		int sec2 = L-> Left()->sector;
+		int sec1 = L->Right(gDocument)->sector;
+		int sec2 = L-> Left(gDocument)->sector;
 
 		if (sec1 == sec2)
 			continue;
@@ -509,13 +509,13 @@ void CMD_PruneUnused(void)
 		if (L->left >= 0)
 		{
 			used_sides.set(L->left);
-			used_secs.set(L->Left()->sector);
+			used_secs.set(L->Left(gDocument)->sector);
 		}
 
 		if (L->right >= 0)
 		{
 			used_sides.set(L->right);
-			used_secs.set(L->Right()->sector);
+			used_secs.set(L->Right(gDocument)->sector);
 		}
 	}
 
@@ -575,8 +575,8 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 			if (! L->TwoSided())
 				continue;
 
-			int sec1 = L->WhatSector(Side::right);
-			int sec2 = L->WhatSector(Side::left);
+			int sec1 = L->WhatSector(Side::right, gDocument);
+			int sec2 = L->WhatSector(Side::left, gDocument);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);

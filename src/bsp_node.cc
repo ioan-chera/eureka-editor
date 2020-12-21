@@ -809,7 +809,7 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? gDocument.linedefs[seg->linedef]->IsSelfRef() : false;
+	bool self_ref = (seg->linedef >= 0) ? gDocument.linedefs[seg->linedef]->IsSelfRef(gDocument) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1155,17 +1155,17 @@ void node_t::SetPartition(const seg_t *part)
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = part_L->Start()->x();
-		y  = part_L->Start()->y();
-		dx = part_L->End()->x() - x;
-		dy = part_L->End()->y() - y;
+		x  = part_L->Start(gDocument)->x();
+		y  = part_L->Start(gDocument)->y();
+		dx = part_L->End(gDocument)->x() - x;
+		dy = part_L->End(gDocument)->y() - y;
 	}
 	else  /* left side */
 	{
-		x  = part_L->End()->x();
-		y  = part_L->End()->y();
-		dx = part_L->Start()->x() - x;
-		dy = part_L->Start()->y() - y;
+		x  = part_L->End(gDocument)->x();
+		y  = part_L->End(gDocument)->y();
+		dx = part_L->Start(gDocument)->x() - x;
+		dy = part_L->Start(gDocument)->y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
@@ -1365,7 +1365,7 @@ seg_t *CreateSegs()
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (line->IsZeroLength())
+		if (line->IsZeroLength(gDocument))
 			continue;
 
 		// ignore overlapping lines
@@ -1373,7 +1373,7 @@ seg_t *CreateSegs()
 			continue;
 
 		// check for extremely long lines
-		if (line->CalcLength() >= 30000)
+		if (line->CalcLength(gDocument) >= 30000)
 			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
@@ -1523,7 +1523,7 @@ void subsec_t::ClockwiseOrder()
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (gDocument.linedefs[array[i]->linedef]->IsSelfRef())
+		else if (gDocument.linedefs[array[i]->linedef]->IsSelfRef(gDocument))
 			cur_score = 2;
 
 		if (cur_score > best_score)

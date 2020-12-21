@@ -268,11 +268,11 @@ static void LineDefsBetweenSectors(selection_c *list, int sec1, int sec2)
 	{
 		const LineDef * L = gDocument.linedefs[i];
 
-		if (! (L->Left() && L->Right()))
+		if (! (L->Left(gDocument) && L->Right(gDocument)))
 			continue;
 
-		if ((L->Left()->sector == sec1 && L->Right()->sector == sec2) ||
-		    (L->Left()->sector == sec2 && L->Right()->sector == sec1))
+		if ((L->Left(gDocument)->sector == sec1 && L->Right(gDocument)->sector == sec2) ||
+		    (L->Left(gDocument)->sector == sec2 && L->Right(gDocument)->sector == sec1))
 		{
 			list->set(i);
 		}
@@ -450,7 +450,7 @@ double lineloop_c::TotalLength() const
 	{
 		const LineDef *L = gDocument.linedefs[lines[k]];
 
-		result += L->CalcLength();
+		result += L->CalcLength(gDocument);
 	}
 
 	return result;
@@ -463,11 +463,11 @@ bool lineloop_c::SameSector(int *sec_num) const
 
 	SYS_ASSERT(lines.size() > 0);
 
-	int sec = gDocument.linedefs[lines[0]]->WhatSector(sides[0]);
+	int sec = gDocument.linedefs[lines[0]]->WhatSector(sides[0], gDocument);
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		if (sec != gDocument.linedefs[lines[k]]->WhatSector(sides[k]))
+		if (sec != gDocument.linedefs[lines[k]]->WhatSector(sides[k], gDocument))
 			return false;
 	}
 
@@ -503,12 +503,12 @@ int lineloop_c::NeighboringSector() const
 		const LineDef *L = gDocument.linedefs[lines[i]];
 
 		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
-		int sec = gDocument.linedefs[lines[i]]->WhatSector(- sides[i]);
+		int sec = gDocument.linedefs[lines[i]]->WhatSector(- sides[i], gDocument);
 
 		if (sec < 0)
 			continue;
 
-		double len = L->CalcLength();
+		double len = L->CalcLength(gDocument);
 
 		if (len > best_len)
 		{
@@ -545,7 +545,7 @@ int lineloop_c::IslandSector() const
 		if (get_just_line(opp_ld))
 			continue;
 
-		return gDocument.linedefs[opp_ld]->WhatSector(opp_side);
+		return gDocument.linedefs[opp_ld]->WhatSector(opp_side, gDocument);
 	}
 
 	return -1;
@@ -559,7 +559,7 @@ int lineloop_c::DetermineSector() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k]);
+		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k], gDocument);
 
 		if (sec >= 0)
 			return sec;
@@ -580,11 +580,11 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 	{
 		const LineDef *L = gDocument.linedefs[lines[i]];
 
-		*x1 = MIN(*x1, MIN(L->Start()->x(), L->End()->x()));
-		*y1 = MIN(*y1, MIN(L->Start()->y(), L->End()->y()));
+		*x1 = MIN(*x1, MIN(L->Start(gDocument)->x(), L->End(gDocument)->x()));
+		*y1 = MIN(*y1, MIN(L->Start(gDocument)->y(), L->End(gDocument)->y()));
 
-		*x2 = MAX(*x2, MAX(L->Start()->x(), L->End()->x()));
-		*y2 = MAX(*y2, MAX(L->Start()->y(), L->End()->y()));
+		*x2 = MAX(*x2, MAX(L->Start(gDocument)->x(), L->End(gDocument)->x()));
+		*y2 = MAX(*y2, MAX(L->Start(gDocument)->y(), L->End(gDocument)->y()));
 	}
 }
 
@@ -595,7 +595,7 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k]);
+		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k], gDocument);
 
 		if (sec >= 0)
 			list->set(sec);
@@ -673,7 +673,7 @@ bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare)
 			if (! N->TouchesVertex(cur_vert))
 				continue;
 
-			if (ignore_bare && !N->Left() && !N->Right())
+			if (ignore_bare && !N->Left(gDocument) && !N->Right(gDocument))
 				continue;
 
 			int other_vert;
@@ -775,10 +775,10 @@ bool lineloop_c::LookForIsland()
 	{
 		const LineDef * L = gDocument.linedefs[ld];
 
-		double x1 = L->Start()->x();
-		double y1 = L->Start()->y();
-		double x2 = L->End()->x();
-		double y2 = L->End()->y();
+		double x1 = L->Start(gDocument)->x();
+		double y1 = L->Start(gDocument)->y();
+		double x2 = L->End(gDocument)->x();
+		double y2 = L->End(gDocument)->y();
 
 		if (MAX(x1, x2) < bbox_x1 || MIN(x1, x2) > bbox_x2 ||
 		    MAX(y1, y2) < bbox_y1 || MIN(y1, y2) > bbox_y2)
@@ -881,8 +881,8 @@ void lineloop_c::Dump() const
 		DebugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
 					lines[i],
-					L->Start()->x(), L->Start()->y(),
-					L->End  ()->x(), L->End  ()->y());
+					L->Start(gDocument)->x(), L->Start(gDocument)->y(),
+					L->End  (gDocument)->x(), L->End  (gDocument)->y());
 	}
 }
 
@@ -1240,10 +1240,10 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
-		if (L->WhatSector(Side::left ) >= 0)
-			unused.clear(L->WhatSector(Side::left ));
-		if (L->WhatSector(Side::right) >= 0)
-			unused.clear(L->WhatSector(Side::right));
+		if (L->WhatSector(Side::left, gDocument) >= 0)
+			unused.clear(L->WhatSector(Side::left, gDocument));
+		if (L->WhatSector(Side::right, gDocument) >= 0)
+			unused.clear(L->WhatSector(Side::right, gDocument));
 	}
 
 	DeleteObjects(&unused);

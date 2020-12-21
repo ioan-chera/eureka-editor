@@ -33,7 +33,7 @@
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
 class crc32_c;
-
+struct Document;
 
 //
 // DESIGN NOTES
@@ -237,7 +237,7 @@ public:
 	SString MidTex()   const;
 	SString LowerTex() const;
 
-	Sector *SecRef() const;
+	Sector *SecRef(const Document &doc) const;
 
 	// use new_tex when >= 0, otherwise use default_wall_tex
 	void SetDefaults(bool two_sided, int new_tex = -1);
@@ -267,24 +267,24 @@ public:
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Vertex *Start() const;
-	Vertex *End()   const;
+	Vertex *Start(const Document &doc) const;
+	Vertex *End(const Document &doc)   const;
 
 	// remember: these two can return NULL!
-	SideDef *Right() const;
-	SideDef *Left()  const;
+	SideDef *Right(const Document &doc) const;
+	SideDef *Left(const Document &doc)  const;
 
 	bool TouchesVertex(int v_num) const
 	{
 		return (start == v_num) || (end == v_num);
 	}
 
-	bool TouchesCoord(fixcoord_t tx, fixcoord_t ty) const
+	bool TouchesCoord(fixcoord_t tx, fixcoord_t ty, const Document &doc) const
 	{
-		return Start()->Matches(tx, ty) || End()->Matches(tx, ty);
+		return Start(doc)->Matches(tx, ty) || End(doc)->Matches(tx, ty);
 	}
 
-	bool TouchesSector(int sec_num) const;
+	bool TouchesSector(int sec_num, const Document &doc) const;
 
 	bool NoSided() const
 	{
@@ -302,26 +302,26 @@ public:
 	}
 
 	// side is either SIDE_LEFT or SIDE_RIGHT
-	int WhatSector(Side side) const;
+	int WhatSector(Side side, const Document &doc) const;
 	int WhatSideDef(Side side) const;
 
-	double CalcLength() const;
+	double CalcLength(const Document &doc) const;
 
-	bool IsZeroLength() const
+	bool IsZeroLength(const Document &doc) const
 	{
-		return (Start()->raw_x == End()->raw_x) && (Start()->raw_y == End()->raw_y);
+		return (Start(doc)->raw_x == End(doc)->raw_x) && (Start(doc)->raw_y == End(doc)->raw_y);
 	}
 
-	bool IsSelfRef() const;
+	bool IsSelfRef(const Document &doc) const;
 
-	bool IsHorizontal() const
+	bool IsHorizontal(const Document &doc) const
 	{
-		return (Start()->raw_y == End()->raw_y);
+		return (Start(doc)->raw_y == End(doc)->raw_y);
 	}
 
-	bool IsVertical() const
+	bool IsVertical(const Document &doc) const
 	{
-		return (Start()->raw_x == End()->raw_x);
+		return (Start(doc)->raw_x == End(doc)->raw_x);
 	}
 
 	int Arg(int which /* 1..5 */) const
@@ -339,7 +339,6 @@ public:
 //
 // This is an interface with direct references to Document's components, for less clutter
 //
-struct Document;
 class DocumentModule
 {
 public:

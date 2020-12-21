@@ -366,7 +366,7 @@ void UI_Canvas::DrawEverything()
 		if (edit.mode == ObjType::linedefs && !edit.show_object_numbers)
 		{
 			const LineDef *L = gDocument.linedefs[edit.highlight.num];
-			DrawLineInfo(L->Start()->x(), L->Start()->y(), L->End()->x(), L->End()->y(), false);
+			DrawLineInfo(L->Start(gDocument)->x(), L->Start(gDocument)->y(), L->End(gDocument)->x(), L->End(gDocument)->y(), false);
 		}
 
 		RenderThickness(1);
@@ -690,15 +690,15 @@ void UI_Canvas::DrawLinedefs()
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
-		double x1 = L->Start()->x();
-		double y1 = L->Start()->y();
-		double x2 = L->End  ()->x();
-		double y2 = L->End  ()->y();
+		double x1 = L->Start(gDocument)->x();
+		double y1 = L->Start(gDocument)->y();
+		double x2 = L->End  (gDocument)->x();
+		double y2 = L->End  (gDocument)->y();
 
 		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 			continue;
 
-		bool one_sided = (! L->Left());
+		bool one_sided = (! L->Left(gDocument));
 
 		Fl_Color col = LIGHTGREY;
 
@@ -736,7 +736,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (edit.error_mode)
 					col = LIGHTGREY;
-				else if (! L->Right()) // no first sidedef?
+				else if (! L->Right(gDocument)) // no first sidedef?
 					col = RED;
 				else if (L->type != 0)
 				{
@@ -845,10 +845,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
-			double x1 = gDocument.linedefs[n]->Start()->x();
-			double y1 = gDocument.linedefs[n]->Start()->y();
-			double x2 = gDocument.linedefs[n]->End  ()->x();
-			double y2 = gDocument.linedefs[n]->End  ()->y();
+			double x1 = gDocument.linedefs[n]->Start(gDocument)->x();
+			double y1 = gDocument.linedefs[n]->Start(gDocument)->y();
+			double x2 = gDocument.linedefs[n]->End  (gDocument)->x();
+			double y2 = gDocument.linedefs[n]->End  (gDocument)->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				continue;
@@ -1344,10 +1344,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::linedefs:
 		{
-			double x1 = dx + gDocument.linedefs[objnum]->Start()->x();
-			double y1 = dy + gDocument.linedefs[objnum]->Start()->y();
-			double x2 = dx + gDocument.linedefs[objnum]->End  ()->x();
-			double y2 = dy + gDocument.linedefs[objnum]->End  ()->y();
+			double x1 = dx + gDocument.linedefs[objnum]->Start(gDocument)->x();
+			double y1 = dy + gDocument.linedefs[objnum]->Start(gDocument)->y();
+			double x2 = dx + gDocument.linedefs[objnum]->End  (gDocument)->x();
+			double y2 = dy + gDocument.linedefs[objnum]->End  (gDocument)->y();
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				break;
@@ -1388,7 +1388,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			{
 				const LineDef *L = gDocument.linedefs[n];
 
-				if (! L->TouchesSector(objnum))
+				if (! L->TouchesSector(objnum, gDocument))
 					continue;
 
 				bool reverse = false;
@@ -1396,8 +1396,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 				// skip lines if both sides are in the selection
 				if (skip_lines && L->TwoSided())
 				{
-					int sec1 = L->Right()->sector;
-					int sec2 = L->Left ()->sector;
+					int sec1 = L->Right(gDocument)->sector;
+					int sec2 = L->Left (gDocument)->sector;
 
 					if ((sec1 == objnum || edit.Selected->get(sec1)) &&
 					    (sec2 == objnum || edit.Selected->get(sec2)))
@@ -1407,10 +1407,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 						reverse = true;
 				}
 
-				double x1 = dx + L->Start()->x();
-				double y1 = dy + L->Start()->y();
-				double x2 = dx + L->End  ()->x();
-				double y2 = dy + L->End  ()->y();
+				double x1 = dx + L->Start(gDocument)->x();
+				double y1 = dy + L->Start(gDocument)->y();
+				double x2 = dx + L->End  (gDocument)->x();
+				double y2 = dy + L->End  (gDocument)->y();
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1483,10 +1483,10 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::linedefs:
 		{
-			double x1 = gDocument.linedefs[objnum]->Start()->x();
-			double y1 = gDocument.linedefs[objnum]->Start()->y();
-			double x2 = gDocument.linedefs[objnum]->End  ()->x();
-			double y2 = gDocument.linedefs[objnum]->End  ()->y();
+			double x1 = gDocument.linedefs[objnum]->Start(gDocument)->x();
+			double y1 = gDocument.linedefs[objnum]->Start(gDocument)->y();
+			double x2 = gDocument.linedefs[objnum]->End  (gDocument)->x();
+			double y2 = gDocument.linedefs[objnum]->End  (gDocument)->y();
 
 			edit.trans_param.Apply(&x1, &y1);
 			edit.trans_param.Apply(&x2, &y2);
@@ -1502,13 +1502,13 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 		{
 			for (int n = 0 ; n < NumLineDefs ; n++)
 			{
-				if (!gDocument.linedefs[n]->TouchesSector(objnum))
+				if (!gDocument.linedefs[n]->TouchesSector(objnum, gDocument))
 					continue;
 
-				double x1 = gDocument.linedefs[n]->Start()->x();
-				double y1 = gDocument.linedefs[n]->Start()->y();
-				double x2 = gDocument.linedefs[n]->End  ()->x();
-				double y2 = gDocument.linedefs[n]->End  ()->y();
+				double x1 = gDocument.linedefs[n]->Start(gDocument)->x();
+				double y1 = gDocument.linedefs[n]->Start(gDocument)->y();
+				double x2 = gDocument.linedefs[n]->End  (gDocument)->x();
+				double y2 = gDocument.linedefs[n]->End  (gDocument)->y();
 
 				edit.trans_param.Apply(&x1, &y1);
 				edit.trans_param.Apply(&x2, &y2);
@@ -1557,10 +1557,10 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
-		double x1 = dx + L->Start()->x();
-		double y1 = dy + L->Start()->y();
-		double x2 = dx + L->End  ()->x();
-		double y2 = dy + L->End  ()->y();
+		double x1 = dx + L->Start(gDocument)->x();
+		double y1 = dy + L->Start(gDocument)->y();
+		double x2 = dx + L->End  (gDocument)->x();
+		double y2 = dy + L->End  (gDocument)->y();
 
 		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 			continue;
@@ -1571,8 +1571,8 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 		int sec1 = -1;
 		int sec2 = -1;
 
-		if (L->right >= 0) sec1 = L->Right()->sector;
-		if (L->left  >= 0) sec2 = L->Left() ->sector;
+		if (L->right >= 0) sec1 = L->Right(gDocument)->sector;
+		if (L->left  >= 0) sec2 = L->Left(gDocument) ->sector;
 
 		bool touches1 = (sec1 >= 0) && list->get(sec1);
 		bool touches2 = (sec2 >= 0) && list->get(sec2);

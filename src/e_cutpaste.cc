@@ -630,26 +630,26 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->Right())
+		if (L->Right(gDocument))
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
 		}
 
-		if (L->Left())
+		if (L->Left(gDocument))
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
 		}
 
 		// flip linedef if necessary
-		if (L->Left() && ! L->Right())
+		if (L->Left(gDocument) && ! L->Right(gDocument))
 		{
 			FlipLineDef(new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(L->Right()->MidTex()))
+		if (L->OneSided() && is_null_tex(L->Right(gDocument)->MidTex()))
 			LD_FixForLostSide(new_l);
 	}
 
@@ -930,8 +930,8 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 
 		const LineDef *L = gDocument.linedefs[n];
 
-		if (L->Right()) result->clear(L->right);
-		if (L->Left())  result->clear(L->left);
+		if (L->Right(gDocument)) result->clear(L->right);
+		if (L->Left(gDocument))  result->clear(L->left);
 	}
 
 	for (int i = 0 ; i < NumSideDefs ; i++)
@@ -956,8 +956,8 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 		//    -1 : no side
 		//     0 : deleted side
 		//    +1 : kept side
-		int right_m = (L->right < 0) ? -1 : sectors->get(L->Right()->sector) ? 0 : 1;
-		int  left_m = (L->left  < 0) ? -1 : sectors->get(L->Left() ->sector) ? 0 : 1;
+		int right_m = (L->right < 0) ? -1 : sectors->get(L->Right(gDocument)->sector) ? 0 : 1;
+		int  left_m = (L->left  < 0) ? -1 : sectors->get(L->Left(gDocument) ->sector) ? 0 : 1;
 
 		if (MAX(right_m, left_m) == 0)
 		{
@@ -984,10 +984,10 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 		{
 			del_lines.set(n);
 
-			if (linedef->WhatSector(Side::left ) >= 0)
-				result->set(linedef->WhatSector(Side::left ));
-			if (linedef->WhatSector(Side::right) >= 0)
-				result->set(linedef->WhatSector(Side::right));
+			if (linedef->WhatSector(Side::left, gDocument) >= 0)
+				result->set(linedef->WhatSector(Side::left, gDocument));
+			if (linedef->WhatSector(Side::right, gDocument) >= 0)
+				result->set(linedef->WhatSector(Side::right, gDocument));
 		}
 	}
 
@@ -1003,7 +1003,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 		for (Side what_side : kSides)
 		{
-			int sec_num = linedef->WhatSector(what_side);
+			int sec_num = linedef->WhatSector(what_side, gDocument);
 
 			if (sec_num < 0)
 				continue;
@@ -1025,7 +1025,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 			const LineDef *oppositeLinedef = gDocument.linedefs[opp_ld];
 
-			if (oppositeLinedef->WhatSector(opp_side) == sec_num)
+			if (oppositeLinedef->WhatSector(opp_side, gDocument) == sec_num)
 				result->clear(sec_num);
 		}
 	}
@@ -1041,8 +1041,8 @@ static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 		// the logic is ugly here mainly to handle flipping (in particular,
 		// not to flip the line when _both_ sides are unlinked).
 
-		bool do_right = L->Right() ? sectors->get(L->Right()->sector) : false;
-		bool do_left  = L->Left()  ? sectors->get(L->Left() ->sector) : false;
+		bool do_right = L->Right(gDocument) ? sectors->get(L->Right(gDocument)->sector) : false;
+		bool do_left  = L->Left(gDocument)  ? sectors->get(L->Left(gDocument) ->sector) : false;
 
 		// line shouldn't be in list unless it touches the sector
 		SYS_ASSERT(do_right || do_left);
@@ -1096,7 +1096,7 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	LineDef *L2 = gDocument.linedefs[ld2];
 
 	// we merge L2 into L1, unless L1 is significantly shorter
-	if (L1->CalcLength() < L2->CalcLength() * 0.7)
+	if (L1->CalcLength(gDocument) < L2->CalcLength(gDocument) * 0.7)
 	{
 		std::swap(ld1, ld2);
 		std::swap(L1,  L2);

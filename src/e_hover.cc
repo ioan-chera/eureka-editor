@@ -41,10 +41,10 @@ extern int vertex_radius(double scale);
 
 double ApproxDistToLineDef(const LineDef * L, double x, double y)
 {
-	double x1 = L->Start()->x();
-	double y1 = L->Start()->y();
-	double x2 = L->End()->x();
-	double y2 = L->End()->y();
+	double x1 = L->Start(gDocument)->x();
+	double y1 = L->Start(gDocument)->y();
+	double x2 = L->End(gDocument)->x();
+	double y2 = L->End(gDocument)->y();
 
 	double dx = x2 - x1;
 	double dy = y2 - y1;
@@ -101,8 +101,8 @@ int ClosestLine_CastingHoriz(double x, double y, Side *side)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double ly1 = gDocument.linedefs[n]->Start()->y();
-		double ly2 = gDocument.linedefs[n]->End()->y();
+		double ly1 = gDocument.linedefs[n]->Start(gDocument)->y();
+		double ly2 = gDocument.linedefs[n]->End(gDocument)->y();
 
 		// ignore purely horizontal lines
 		if (ly1 == ly2)
@@ -112,8 +112,8 @@ int ClosestLine_CastingHoriz(double x, double y, Side *side)
 		if (MIN(ly1, ly2) >= y || MAX(ly1, ly2) <= y)
 			continue;
 
-		double lx1 = gDocument.linedefs[n]->Start()->x();
-		double lx2 = gDocument.linedefs[n]->End()->x();
+		double lx1 = gDocument.linedefs[n]->Start(gDocument)->x();
+		double lx2 = gDocument.linedefs[n]->End(gDocument)->x();
 
 		double dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (ly2 - ly1);
 
@@ -149,8 +149,8 @@ int ClosestLine_CastingVert(double x, double y, Side *side)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double lx1 = gDocument.linedefs[n]->Start()->x();
-		double lx2 = gDocument.linedefs[n]->End()->x();
+		double lx1 = gDocument.linedefs[n]->Start(gDocument)->x();
+		double lx2 = gDocument.linedefs[n]->End(gDocument)->x();
 
 		// ignore purely vertical lines
 		if (lx1 == lx2)
@@ -160,8 +160,8 @@ int ClosestLine_CastingVert(double x, double y, Side *side)
 		if (MIN(lx1, lx2) >= x || MAX(lx1, lx2) <= x)
 			continue;
 
-		double ly1 = gDocument.linedefs[n]->Start()->y();
-		double ly2 = gDocument.linedefs[n]->End()->y();
+		double ly1 = gDocument.linedefs[n]->Start(gDocument)->y();
+		double ly2 = gDocument.linedefs[n]->End(gDocument)->y();
 
 		double dist = ly1 - y + (ly2 - ly1) * (x - lx1) / (lx2 - lx1);
 
@@ -198,15 +198,15 @@ int ClosestLine_CastAtAngle(double x, double y, float radians)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
-		double a = PerpDist(L->Start()->x(), L->Start()->y(),  x, y, x2, y2);
-		double b = PerpDist(L->  End()->x(), L->  End()->y(),  x, y, x2, y2);
+		double a = PerpDist(L->Start(gDocument)->x(), L->Start(gDocument)->y(),  x, y, x2, y2);
+		double b = PerpDist(L->  End(gDocument)->x(), L->  End(gDocument)->y(),  x, y, x2, y2);
 
 		// completely on one side of the vector?
 		if (a > 0 && b > 0) continue;
 		if (a < 0 && b < 0) continue;
 
-		double c = AlongDist(L->Start()->x(), L->Start()->y(),  x, y, x2, y2);
-		double d = AlongDist(L->  End()->x(), L->  End()->y(),  x, y, x2, y2);
+		double c = AlongDist(L->Start(gDocument)->x(), L->Start(gDocument)->y(),  x, y, x2, y2);
+		double d = AlongDist(L->  End(gDocument)->x(), L->  End(gDocument)->y(),  x, y, x2, y2);
 
 		double dist;
 
@@ -247,10 +247,10 @@ bool PointOutsideOfMap(double x, double y)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double lx1 = gDocument.linedefs[n]->Start()->x();
-		double ly1 = gDocument.linedefs[n]->Start()->y();
-		double lx2 = gDocument.linedefs[n]->End()->x();
-		double ly2 = gDocument.linedefs[n]->End()->y();
+		double lx1 = gDocument.linedefs[n]->Start(gDocument)->x();
+		double ly1 = gDocument.linedefs[n]->Start(gDocument)->y();
+		double lx2 = gDocument.linedefs[n]->End(gDocument)->x();
+		double ly2 = gDocument.linedefs[n]->End(gDocument)->y();
 
 		// does the linedef cross the horizontal ray?
 		if (MIN(ly1, ly2) < y2 && MAX(ly1, ly2) > y2)
@@ -309,13 +309,13 @@ public:
 
 		const LineDef * L = gDocument.linedefs[ld];
 
-		dx = L->End()->x() - L->Start()->x();
-		dy = L->End()->y() - L->Start()->y();
+		dx = L->End(gDocument)->x() - L->Start(gDocument)->x();
+		dy = L->End(gDocument)->y() - L->Start(gDocument)->y();
 
 		cast_horizontal = fabs(dy) >= fabs(dx);
 
-		x = L->Start()->x() + dx * 0.5;
-		y = L->Start()->y() + dy * 0.5;
+		x = L->Start(gDocument)->x() + dx * 0.5;
+		y = L->Start(gDocument)->y() + dy * 0.5;
 
 		if (cast_horizontal && fabs(dy) > 0)
 		{
@@ -339,10 +339,10 @@ public:
 		if (ld == n)  // ignore input line
 			return;
 
-		double nx1 = gDocument.linedefs[n]->Start()->x();
-		double ny1 = gDocument.linedefs[n]->Start()->y();
-		double nx2 = gDocument.linedefs[n]->End()->x();
-		double ny2 = gDocument.linedefs[n]->End()->y();
+		double nx1 = gDocument.linedefs[n]->Start(gDocument)->x();
+		double ny1 = gDocument.linedefs[n]->Start(gDocument)->y();
+		double nx2 = gDocument.linedefs[n]->End(gDocument)->x();
+		double ny2 = gDocument.linedefs[n]->End(gDocument)->y();
 
 		if (cast_horizontal)
 		{
@@ -468,11 +468,11 @@ public:
 		const LineDef *L = gDocument.linedefs[ld];
 
 		// can ignore purely vertical lines
-		if (L->IsVertical())
+		if (L->IsVertical(gDocument))
 			return;
 
-		double x1 = MIN(L->Start()->x(), L->End()->x());
-		double x2 = MAX(L->Start()->x(), L->End()->x());
+		double x1 = MIN(L->Start(gDocument)->x(), L->End(gDocument)->x());
+		double x2 = MAX(L->Start(gDocument)->x(), L->End(gDocument)->x());
 
 		AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
 	}
@@ -503,11 +503,11 @@ public:
 		const LineDef *L = gDocument.linedefs[ld];
 
 		// can ignore purely horizonal lines
-		if (L->IsHorizontal())
+		if (L->IsHorizontal(gDocument))
 			return;
 
-		double y1 = MIN(L->Start()->y(), L->End()->y());
-		double y2 = MAX(L->Start()->y(), L->End()->y());
+		double y1 = MIN(L->Start(gDocument)->y(), L->End(gDocument)->y());
+		double y2 = MAX(L->Start(gDocument)->y(), L->End(gDocument)->y());
 
 		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
 	}
@@ -618,7 +618,7 @@ int OppositeSector(int ld, Side ld_side)
 	if (opp < 0)
 		return -1;
 
-	return gDocument.linedefs[opp]->WhatSector(opp_side);
+	return gDocument.linedefs[opp]->WhatSector(opp_side, gDocument);
 }
 
 
@@ -684,10 +684,10 @@ static Objid NearestLineDef(double x, double y)
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		double x1 = gDocument.linedefs[n]->Start()->x();
-		double y1 = gDocument.linedefs[n]->Start()->y();
-		double x2 = gDocument.linedefs[n]->End()->x();
-		double y2 = gDocument.linedefs[n]->End()->y();
+		double x1 = gDocument.linedefs[n]->Start(gDocument)->x();
+		double y1 = gDocument.linedefs[n]->Start(gDocument)->y();
+		double x2 = gDocument.linedefs[n]->End(gDocument)->x();
+		double y2 = gDocument.linedefs[n]->End(gDocument)->y();
 
 		// Skip all lines of which all points are more than <mapslack>
 		// units away from (x,y).  In a typical level, this test will
@@ -744,10 +744,10 @@ static Objid NearestSplitLine(double x, double y, int ignore_vert)
 		if (L->start == ignore_vert || L->end == ignore_vert)
 			continue;
 
-		double x1 = L->Start()->x();
-		double y1 = L->Start()->y();
-		double x2 = L->End()->x();
-		double y2 = L->End()->y();
+		double x1 = L->Start(gDocument)->x();
+		double y1 = L->Start(gDocument)->y();
+		double x2 = L->End(gDocument)->x();
+		double y2 = L->End(gDocument)->y();
 
 		if (MAX(x1,x2) < lx || MIN(x1,x2) > hx ||
 		    MAX(y1,y2) < ly || MIN(y1,y2) > hy)
@@ -986,10 +986,10 @@ void FindSplitLine(Objid& out, double& out_x, double& out_y,
 
 	const LineDef * L = gDocument.linedefs[out.num];
 
-	double x1 = L->Start()->x();
-	double y1 = L->Start()->y();
-	double x2 = L->End()->x();
-	double y2 = L->End()->y();
+	double x1 = L->Start(gDocument)->x();
+	double y1 = L->Start(gDocument)->y();
+	double x2 = L->End(gDocument)->x();
+	double y2 = L->End(gDocument)->y();
 
 	double len = hypot(x2 - x1, y2 - y1);
 
@@ -1040,7 +1040,7 @@ void FindSplitLine(Objid& out, double& out_x, double& out_y,
 		out_y = grid.ForceSnapY(ptr_y);
 
 		// snapped onto an end point?
-		if (L->TouchesCoord(TO_COORD(out_x), TO_COORD(out_y)))
+		if (L->TouchesCoord(TO_COORD(out_x), TO_COORD(out_y), gDocument))
 		{
 			out.clear();
 			return;
@@ -1196,10 +1196,10 @@ static void FindCrossingLines(crossing_state_c& cross,
 	{
 		const LineDef * L = gDocument.linedefs[ld];
 
-		double lx1 = L->Start()->x();
-		double ly1 = L->Start()->y();
-		double lx2 = L->End()->x();
-		double ly2 = L->End()->y();
+		double lx1 = L->Start(gDocument)->x();
+		double ly1 = L->Start(gDocument)->y();
+		double lx2 = L->End(gDocument)->x();
+		double ly2 = L->End(gDocument)->y();
 
 		// bbox test -- eliminate most lines from consideration
 		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
@@ -1208,7 +1208,7 @@ static void FindCrossingLines(crossing_state_c& cross,
 			continue;
 		}
 
-		if (L->IsZeroLength())
+		if (L->IsZeroLength(gDocument))
 			continue;
 
 		if (cross.HasLine(ld))

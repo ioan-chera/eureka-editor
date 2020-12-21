@@ -105,8 +105,8 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	int new_mid_tex = (ld1_onesided) ? L1->Right()->mid_tex :
-					  (ld2_onesided) ? L2->Right()->mid_tex : 0;
+	int new_mid_tex = (ld1_onesided) ? L1->Right(gDocument)->mid_tex :
+					  (ld2_onesided) ? L2->Right(gDocument)->mid_tex : 0;
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
@@ -115,8 +115,8 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 		FlipLineDef(ld1);
 	}
 
-	bool same_left  = (L2->WhatSector(Side::left)  == L1->WhatSector(Side::left));
-	bool same_right = (L2->WhatSector(Side::right) == L1->WhatSector(Side::right));
+	bool same_left  = (L2->WhatSector(Side::left, gDocument)  == L1->WhatSector(Side::left, gDocument));
+	bool same_right = (L2->WhatSector(Side::right, gDocument) == L1->WhatSector(Side::right, gDocument));
 
 	if (same_left && same_right)
 	{
@@ -145,7 +145,7 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 
 
 	// fix orientation of remaining linedef if needed
-	if (L2->Left() && ! L2->Right())
+	if (L2->Left(gDocument) && ! L2->Right(gDocument))
 	{
 		FlipLineDef(ld2);
 	}
@@ -418,8 +418,8 @@ static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *
 {
 	const Vertex * V = gDocument.vertices[v_num];
 
-	double dx = L->End()->x() - L->Start()->x();
-	double dy = L->End()->y() - L->Start()->y();
+	double dx = L->End(gDocument)->x() - L->Start(gDocument)->x();
+	double dy = L->End(gDocument)->y() - L->Start(gDocument)->y();
 
 	if (L->end == v_num)
 	{
@@ -633,8 +633,8 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 		const LineDef * L = gDocument.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
-		bool right_in = L->Right() && edit.Selected->get(L->Right()->sector);
+		bool  left_in = L->Left(gDocument)  && edit.Selected->get(L->Left(gDocument)->sector);
+		bool right_in = L->Right(gDocument) && edit.Selected->get(L->Right(gDocument)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -642,7 +642,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 		bool innie = false;
 		bool outie = false;
 
-		if (L->Right())
+		if (L->Right(gDocument))
 		{
 			if (right_in)
 				innie = true;
@@ -650,7 +650,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 				outie = true;
 		}
 
-		if (L->Left())
+		if (L->Left(gDocument))
 		{
 			if (left_in)
 				innie = true;
@@ -848,8 +848,8 @@ void CMD_SEC_Disconnect(void)
 		const LineDef * L = gDocument.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left()  && edit.Selected->get(L->Left()->sector);
-		bool right_in = L->Right() && edit.Selected->get(L->Right()->sector);
+		bool  left_in = L->Left(gDocument)  && edit.Selected->get(L->Left(gDocument)->sector);
+		bool right_in = L->Right(gDocument) && edit.Selected->get(L->Right(gDocument)->sector);
 
 		if (! (left_in || right_in))
 			continue;

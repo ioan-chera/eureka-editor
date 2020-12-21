@@ -260,10 +260,10 @@ public:
 				int ax = static_cast<int>(gDocument.vertices[A_other]->x());
 				int ay = static_cast<int>(gDocument.vertices[A_other]->y());
 
-				int bx1 = static_cast<int>(B->ld->Start()->x());
-				int by1 = static_cast<int>(B->ld->Start()->y());
-				int bx2 = static_cast<int>(B->ld->End()->x());
-				int by2 = static_cast<int>(B->ld->End()->y());
+				int bx1 = static_cast<int>(B->ld->Start(gDocument)->x());
+				int by1 = static_cast<int>(B->ld->Start(gDocument)->y());
+				int bx2 = static_cast<int>(B->ld->End(gDocument)->x());
+				int by2 = static_cast<int>(B->ld->End(gDocument)->y());
 
 				int cx = (int)r_view.x;  // camera
 				int cy = (int)r_view.y;
@@ -367,7 +367,7 @@ public:
 		Sector *front = sec;
 		Sector *back  = NULL;
 
-		SideDef *back_sd = (side == Side::left) ? ld->Right() : ld->Left();
+		SideDef *back_sd = (side == Side::left) ? ld->Right(gDocument) : ld->Left(gDocument);
 		if (back_sd)
 			back = gDocument.sectors[back_sd->sector];
 
@@ -710,13 +710,13 @@ public:
 		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
 			return;
 
-		if (! ld->Right())
+		if (! ld->Right(gDocument))
 			return;
 
-		float x1 = static_cast<float>(ld->Start()->x() - r_view.x);
-		float y1 = static_cast<float>(ld->Start()->y() - r_view.y);
-		float x2 = static_cast<float>(ld->End()->x() - r_view.x);
-		float y2 = static_cast<float>(ld->End()->y() - r_view.y);
+		float x1 = static_cast<float>(ld->Start(gDocument)->x() - r_view.x);
+		float y1 = static_cast<float>(ld->Start(gDocument)->y() - r_view.y);
+		float x2 = static_cast<float>(ld->End(gDocument)->x() - r_view.x);
+		float y2 = static_cast<float>(ld->End(gDocument)->y() - r_view.y);
 
 		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
 		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
@@ -740,7 +740,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == Side::left) ? ld->Left() : ld->Right();
+		SideDef *sd = (side == Side::left) ? ld->Left(gDocument) : ld->Right(gDocument);
 
 		if (! sd)
 			return;
@@ -827,16 +827,16 @@ public:
 		dw->ld_index = ld_index;
 
 		dw->sd = sd;
-		dw->sec = sd->SecRef();
+		dw->sec = sd->SecRef(gDocument);
 		dw->side = side;
 		dw->thingFlags = 0;
 
 		dw->wall_light = dw->sec->light;
 
 		// add "fake constrast" for axis-aligned walls
-		if (ld->IsVertical())
+		if (ld->IsVertical(gDocument))
 			dw->wall_light += 16;
-		else if (ld->IsHorizontal())
+		else if (ld->IsHorizontal(gDocument))
 			dw->wall_light -= 16;
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
@@ -1025,8 +1025,8 @@ public:
 
 		if (dw->ld->TwoSided())
 		{
-			const Sector *front = dw->ld->Right()->SecRef();
-			const Sector *back  = dw->ld-> Left()->SecRef();
+			const Sector *front = dw->ld->Right(gDocument)->SecRef(gDocument);
+			const Sector *back  = dw->ld-> Left(gDocument)->SecRef(gDocument);
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
@@ -1049,8 +1049,8 @@ public:
 			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
 				return;
 
-			z1 = dw->sd->SecRef()->floorh;
-			z2 = dw->sd->SecRef()->ceilh;
+			z1 = dw->sd->SecRef(gDocument)->floorh;
+			z2 = dw->sd->SecRef(gDocument)->ceilh;
 		}
 
 		int x1 = dw->sx1;
@@ -1178,7 +1178,7 @@ public:
 
 			if (sec_index >= 0)
 			{
-				if (! dw->ld->TouchesSector(sec_index))
+				if (! dw->ld->TouchesSector(sec_index, gDocument))
 					continue;
 
 				// Note: hl_color already set by caller
@@ -1196,8 +1196,8 @@ public:
 
 			for (int what_side = 0 ; what_side < 2 ; what_side++)
 			{
-				const SideDef *sd_front = dw->ld->Right();
-				const SideDef *sd_back  = dw->ld->Left();
+				const SideDef *sd_front = dw->ld->Right(gDocument);
+				const SideDef *sd_back  = dw->ld->Left(gDocument);
 
 				if (sd_front && sd_back && sd_front == sd_back)
 					break;
@@ -1397,7 +1397,7 @@ public:
 			if (! dw)
 				continue;
 
-			int one_sided = dw->ld && ! dw->ld->Left();
+			int one_sided = dw->ld && ! dw->ld->Left(gDocument);
 			int vis_count = dw->sx2 - dw->sx1 + 1;
 
 			for (int x = dw->sx1 ; x <= dw->sx2 ; x++)

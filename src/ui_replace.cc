@@ -1479,7 +1479,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SideDef *SD = (pass == 0) ? L->Right() : L->Left();
+		const SideDef *SD = (pass == 0) ? L->Right(gDocument) : L->Left(gDocument);
 
 		if (! SD)
 			continue;
@@ -1707,7 +1707,7 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 	{
 		int sd_num = (pass == 0) ? L->right : L->left;
 
-		const SideDef *SD = (pass == 0) ? L->Right() : L->Left();
+		const SideDef *SD = (pass == 0) ? L->Right(gDocument) : L->Left(gDocument);
 
 		if (! SD)
 			continue;

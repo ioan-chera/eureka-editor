@@ -693,10 +693,10 @@ void CMD_Insert()
 //
 bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 {
-	double lx0 = gDocument.linedefs[ld]->Start()->x();
-	double ly0 = gDocument.linedefs[ld]->Start()->y();
-	double lx1 = gDocument.linedefs[ld]->End()->x();
-	double ly1 = gDocument.linedefs[ld]->End()->y();
+	double lx0 = gDocument.linedefs[ld]->Start(gDocument)->x();
+	double ly0 = gDocument.linedefs[ld]->Start(gDocument)->y();
+	double lx1 = gDocument.linedefs[ld]->End(gDocument)->x();
+	double ly1 = gDocument.linedefs[ld]->End(gDocument)->y();
 
 	double i;
 
@@ -925,7 +925,7 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
 
 	// handle textures
-	if (do_tex && L1->Right() && L2->Right())
+	if (do_tex && L1->Right(gDocument) && L2->Right(gDocument))
 	{
 		/* There are four cases, depending on number of sides:
 		 *
@@ -939,11 +939,11 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 		 * (d) double --> double : copy each side, but possibly flip the
 		 *                         second linedef based on floor or ceil diff.
 		 */
-		if (! L1->Left())
+		if (! L1->Left(gDocument))
 		{
-			int tex = L1->Right()->mid_tex;
+			int tex = L1->Right(gDocument)->mid_tex;
 
-			if (! L2->Left())
+			if (! L2->Left(gDocument))
 			{
 				gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
@@ -960,17 +960,17 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 				flags |= MLF_UpperUnpegged;
 			}
 		}
-		else if (! L2->Left())
+		else if (! L2->Left(gDocument))
 		{
 			/* pick which texture to copy */
 
-			const Sector *front = L1->Right()->SecRef();
-			const Sector *back  = L1-> Left()->SecRef();
+			const Sector *front = L1->Right(gDocument)->SecRef(gDocument);
+			const Sector *back  = L1-> Left(gDocument)->SecRef(gDocument);
 
-			int f_l = L1->Right()->lower_tex;
-			int f_u = L1->Right()->upper_tex;
-			int b_l = L1-> Left()->lower_tex;
-			int b_u = L1-> Left()->upper_tex;
+			int f_l = L1->Right(gDocument)->lower_tex;
+			int f_u = L1->Right(gDocument)->upper_tex;
+			int b_l = L1-> Left(gDocument)->lower_tex;
+			int b_u = L1-> Left(gDocument)->upper_tex;
 
 			// ignore missing textures
 			if (is_null_tex(BA_GetString(f_l))) f_l = 0;
@@ -997,13 +997,13 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 		}
 		else
 		{
-			const SideDef *RS = L1->Right();
-			const SideDef *LS = L1->Left();
+			const SideDef *RS = L1->Right(gDocument);
+			const SideDef *LS = L1->Left(gDocument);
 
-			const Sector *F1 = L1->Right()->SecRef();
-			const Sector *B1 = L1-> Left()->SecRef();
-			const Sector *F2 = L2->Right()->SecRef();
-			const Sector *B2 = L2-> Left()->SecRef();
+			const Sector *F1 = L1->Right(gDocument)->SecRef(gDocument);
+			const Sector *B1 = L1-> Left(gDocument)->SecRef(gDocument);
+			const Sector *F2 = L2->Right(gDocument)->SecRef(gDocument);
+			const Sector *B2 = L2-> Left(gDocument)->SecRef(gDocument);
 
 			// logic to determine which sides we copy
 
@@ -1179,7 +1179,7 @@ static void Drag_CountOnGrid_Worker(ObjType obj_type, int objnum, int *count, in
 			{
 				LineDef *L = gDocument.linedefs[n];
 
-				if (! L->TouchesSector(objnum))
+				if (! L->TouchesSector(objnum, gDocument))
 					continue;
 
 				Drag_CountOnGrid_Worker(ObjType::linedefs, n, count, total);
@@ -1243,7 +1243,7 @@ static void Drag_UpdateCurrentDist(ObjType obj_type, int objnum, double *x, doub
 			{
 				LineDef *L = gDocument.linedefs[n];
 
-				if (! L->TouchesSector(objnum))
+				if (! L->TouchesSector(objnum, gDocument))
 					continue;
 
 				Drag_UpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,
@@ -2095,17 +2095,17 @@ static void Quantize_Vertices(selection_c *list)
 			continue;
 
 		// IDEA: make this a method of LineDef
-		double x1 = L->Start()->x();
-		double y1 = L->Start()->y();
-		double x2 = L->End()->x();
-		double y2 = L->End()->y();
+		double x1 = L->Start(gDocument)->x();
+		double y1 = L->Start(gDocument)->y();
+		double x2 = L->End(gDocument)->x();
+		double y2 = L->End(gDocument)->y();
 
-		if (L->IsHorizontal())
+		if (L->IsHorizontal(gDocument))
 		{
 			vert_modes[L->start] |= V_HORIZ;
 			vert_modes[L->end]   |= V_HORIZ;
 		}
-		else if (L->IsVertical())
+		else if (L->IsVertical(gDocument))
 		{
 			vert_modes[L->start] |= V_VERT;
 			vert_modes[L->end]   |= V_VERT;

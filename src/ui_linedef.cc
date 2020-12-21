@@ -305,14 +305,14 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 			return;
 		}
 
-		if (L->Right())
+		if (L->Right(gDocument))
 		{
 			if (parts & PART_RT_LOWER) gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 			if (parts & PART_RT_UPPER) gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 			if (parts & PART_RT_RAIL)  gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
-		if (L->Left())
+		if (L->Left(gDocument))
 		{
 			if (parts & PART_LF_LOWER) gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 			if (parts & PART_LF_UPPER) gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
@@ -329,8 +329,8 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 
 		// convenience: set lower unpeg on first change
 		if (! (L->flags & MLF_LowerUnpegged)  &&
-		    is_null_tex(L->Right()->MidTex()) &&
-		    is_null_tex(L-> Left()->MidTex()) )
+		    is_null_tex(L->Right(gDocument)->MidTex()) &&
+		    is_null_tex(L-> Left(gDocument)->MidTex()) )
 		{
 			gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
@@ -359,7 +359,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	if (e_state & FL_BUTTON3)
 	{
 		// back ceiling is higher?
-		if (L->Left()->SecRef()->ceilh > L->Right()->SecRef()->ceilh)
+		if (L->Left(gDocument)->SecRef(gDocument)->ceilh > L->Right(gDocument)->SecRef(gDocument)->ceilh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -371,7 +371,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	else
 	{
 		// back floor is lower?
-		if (L->Left()->SecRef()->floorh < L->Right()->SecRef()->floorh)
+		if (L->Left(gDocument)->SecRef(gDocument)->floorh < L->Right(gDocument)->SecRef(gDocument)->floorh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -845,7 +845,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(gDocument.linedefs[n]->CalcLength());
+	float len_f = static_cast<float>(gDocument.linedefs[n]->CalcLength(gDocument));
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);
@@ -964,8 +964,8 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 	if (L->left < 0 || L->right < 0)
 		return SOLID_MID;
 
-	Sector *right = L->Right()->SecRef();
-	Sector * left = L->Left ()->SecRef();
+	Sector *right = L->Right(gDocument)->SecRef(gDocument);
+	Sector * left = L->Left (gDocument)->SecRef(gDocument);
 
 	if (side == Side::left)
 		std::swap(left, right);

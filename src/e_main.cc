@@ -688,8 +688,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 		{
 			const LineDef *L = gDocument.linedefs[l];
 
-			if ( (L->Right() && src->get(L->Right()->sector)) ||
-				 (L->Left()  && src->get(L->Left()->sector)) )
+			if ( (L->Right(gDocument) && src->get(L->Right(gDocument)->sector)) ||
+				 (L->Left(gDocument)  && src->get(L->Left(gDocument)->sector)) )
 			{
 				dest->set(l);
 			}
@@ -704,8 +704,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 		{
 			const LineDef *L = gDocument.linedefs[l];
 
-			if ( (L->Right() && src->get(L->Right()->sector)) ||
-				 (L->Left()  && src->get(L->Left()->sector)) )
+			if ( (L->Right(gDocument) && src->get(L->Right(gDocument)->sector)) ||
+				 (L->Left(gDocument)  && src->get(L->Left(gDocument)->sector)) )
 			{
 				dest->set(L->start);
 				dest->set(L->end);
@@ -721,8 +721,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 		{
 			const LineDef *L = gDocument.linedefs[*it];
 
-			if (L->Right()) dest->set(L->right);
-			if (L->Left())  dest->set(L->left);
+			if (L->Right(gDocument)) dest->set(L->right);
+			if (L->Left(gDocument))  dest->set(L->left);
 		}
 		return;
 	}
@@ -784,8 +784,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 	{
 		const LineDef *L = gDocument.linedefs[l];
 
-		if (L->Right()) dest->set(L->Right()->sector);
-		if (L->Left())  dest->set(L->Left()->sector);
+		if (L->Right(gDocument)) dest->set(L->Right(gDocument)->sector);
+		if (L->Left(gDocument))  dest->set(L->Left(gDocument)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
@@ -805,8 +805,8 @@ void ConvertSelection(selection_c * src, selection_c * dest)
 				continue;
 		}
 
-		if (L->Right()) dest->clear(L->Right()->sector);
-		if (L->Left())  dest->clear(L->Left()->sector);
+		if (L->Right(gDocument)) dest->clear(L->Right(gDocument)->sector);
+		if (L->Left(gDocument))  dest->clear(L->Left(gDocument)->sector);
 	}
 }
 
@@ -902,10 +902,10 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 				const LineDef *L = gDocument.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
-				    y1 <= L->Start()->y() && L->Start()->y() <= y2 &&
-				    x1 <= L->End()->x()   && L->End()->x() <= x2 &&
-				    y1 <= L->End()->y()   && L->End()->y() <= y2)
+				if (x1 <= L->Start(gDocument)->x() && L->Start(gDocument)->x() <= x2 &&
+				    y1 <= L->Start(gDocument)->y() && L->Start(gDocument)->y() <= y2 &&
+				    x1 <= L->End(gDocument)->x()   && L->End(gDocument)->x() <= x2 &&
+				    y1 <= L->End(gDocument)->y()   && L->End(gDocument)->y() <= y2)
 				{
 					list->toggle(n);
 				}
@@ -922,13 +922,13 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 				const LineDef *L = gDocument.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
-				int s1 = L->Right() ? L->Right()->sector : -1;
-				int s2 = L->Left( ) ? L->Left() ->sector : -1;
+				int s1 = L->Right(gDocument) ? L->Right(gDocument)->sector : -1;
+				int s2 = L->Left(gDocument) ? L->Left(gDocument) ->sector : -1;
 
-				if (x1 <= L->Start()->x() && L->Start()->x() <= x2 &&
-				    y1 <= L->Start()->y() && L->Start()->y() <= y2 &&
-				    x1 <= L->End()->x()   && L->End()->x() <= x2 &&
-				    y1 <= L->End()->y()   && L->End()->y() <= y2)
+				if (x1 <= L->Start(gDocument)->x() && L->Start(gDocument)->x() <= x2 &&
+				    y1 <= L->Start(gDocument)->y() && L->Start(gDocument)->y() <= y2 &&
+				    x1 <= L->End(gDocument)->x()   && L->End(gDocument)->x() <= x2 &&
+				    y1 <= L->End(gDocument)->y()   && L->End(gDocument)->y() <= y2)
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);

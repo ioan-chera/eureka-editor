@@ -239,7 +239,7 @@ void Vertex_FindDanglers(selection_c& sel)
 
 		// dangling vertices are fine for lines setting inside a sector
 		// (i.e. with same sector on both sides)
-		if (L->TwoSided() && (L->WhatSector(Side::left) == L->WhatSector(Side::right)))
+		if (L->TwoSided() && (L->WhatSector(Side::left, gDocument) == L->WhatSector(Side::right, gDocument)))
 		{
 			line_counts[v1] = line_counts[v2] = 2;
 			continue;
@@ -584,21 +584,21 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 		{
 			const LineDef *L = gDocument.linedefs[i];
 
-			if (! L->TouchesSector(s))
+			if (! L->TouchesSector(s, gDocument))
 				continue;
 
 			// ignore lines with same sector on both sides
 			if (L->left >= 0 && L->right >= 0 &&
-			    L->Left()->sector == L->Right()->sector)
+			    L->Left(gDocument)->sector == L->Right(gDocument)->sector)
 				continue;
 
-			if (L->right >= 0 && L->Right()->sector == s)
+			if (L->right >= 0 && L->Right(gDocument)->sector == s)
 			{
 				ends[L->start] |= 1;
 				ends[L->end]   |= 2;
 			}
 
-			if (L->left >= 0 && L->Left()->sector == s)
+			if (L->left >= 0 && L->Left(gDocument)->sector == s)
 			{
 				ends[L->start] |= 2;
 				ends[L->end]   |= 1;
@@ -671,9 +671,9 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 		{
 			int s = OppositeSector(n, Side::right);
 
-			if (s < 0 || L->Right()->sector != s)
+			if (s < 0 || L->Right(gDocument)->sector != s)
 			{
-				 secs.set(L->Right()->sector);
+				 secs.set(L->Right(gDocument)->sector);
 				lines.set(n);
 			}
 		}
@@ -682,9 +682,9 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 		{
 			int s = OppositeSector(n, Side::left);
 
-			if (s < 0 || L->Left()->sector != s)
+			if (s < 0 || L->Left(gDocument)->sector != s)
 			{
-				 secs.set(L->Left()->sector);
+				 secs.set(L->Left(gDocument)->sector);
 				lines.set(n);
 			}
 		}
@@ -825,10 +825,10 @@ void Sectors_FindUnused(selection_c& sel)
 		const LineDef *L = gDocument.linedefs[i];
 
 		if (L->left >= 0)
-			sel.set(L->Left()->sector);
+			sel.set(L->Left(gDocument)->sector);
 
 		if (L->right >= 0)
-			sel.set(L->Right()->sector);
+			sel.set(L->Right(gDocument)->sector);
 	}
 
 	sel.frob_range(0, NumSectors - 1, BitOp::toggle);
@@ -1734,8 +1734,8 @@ static inline bool LD_is_blocking(const LineDef *L)
 	if (L->right < 0 || L->left < 0)
 		return true;
 
-	const Sector *S1 = L->Right()->SecRef();
-	const Sector *S2 = L-> Left()->SecRef();
+	const Sector *S1 = L->Right(gDocument)->SecRef(gDocument);
+	const Sector *S2 = L-> Left(gDocument)->SecRef(gDocument);
 
 	int f_max = MAX(S1->floorh, S2->floorh);
 	int c_min = MIN(S1-> ceilh, S2-> ceilh);
@@ -2034,7 +2034,7 @@ void LineDefs_FindZeroLen(selection_c& lines)
 	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
-		if (gDocument.linedefs[n]->IsZeroLength())
+		if (gDocument.linedefs[n]->IsZeroLength(gDocument))
 			lines.set(n);
 }
 
@@ -2045,7 +2045,7 @@ void LineDefs_RemoveZeroLen()
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
-		if (gDocument.linedefs[n]->IsZeroLength())
+		if (gDocument.linedefs[n]->IsZeroLength(gDocument))
 			lines.set(n);
 	}
 
@@ -2356,15 +2356,15 @@ static int linedef_pos_cmp(int A, int B)
 	const LineDef *AL = gDocument.linedefs[A];
 	const LineDef *BL = gDocument.linedefs[B];
 
-	int A_x1 = static_cast<int>(AL->Start()->x());
-	int A_y1 = static_cast<int>(AL->Start()->y());
-	int A_x2 = static_cast<int>(AL->End()->x());
-	int A_y2 = static_cast<int>(AL->End()->y());
+	int A_x1 = static_cast<int>(AL->Start(gDocument)->x());
+	int A_y1 = static_cast<int>(AL->Start(gDocument)->y());
+	int A_x2 = static_cast<int>(AL->End(gDocument)->x());
+	int A_y2 = static_cast<int>(AL->End(gDocument)->y());
 
-	int B_x1 = static_cast<int>(BL->Start()->x());
-	int B_y1 = static_cast<int>(BL->Start()->y());
-	int B_x2 = static_cast<int>(BL->End()->x());
-	int B_y2 = static_cast<int>(BL->End()->y());
+	int B_x1 = static_cast<int>(BL->Start(gDocument)->x());
+	int B_y1 = static_cast<int>(BL->Start(gDocument)->y());
+	int B_x2 = static_cast<int>(BL->End(gDocument)->x());
+	int B_y2 = static_cast<int>(BL->End(gDocument)->y());
 
 	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
 	{
@@ -2407,8 +2407,8 @@ struct linedef_minx_CMP_pred
 		const LineDef *AL = gDocument.linedefs[A];
 		const LineDef *BL = gDocument.linedefs[B];
 
-		fixcoord_t A_x = MIN(AL->Start()->raw_x, AL->End()->raw_x);
-		fixcoord_t B_x = MIN(BL->Start()->raw_x, BL->End()->raw_x);
+		fixcoord_t A_x = MIN(AL->Start(gDocument)->raw_x, AL->End(gDocument)->raw_x);
+		fixcoord_t B_x = MIN(BL->Start(gDocument)->raw_x, BL->End(gDocument)->raw_x);
 
 		return A_x < B_x;
 	}
@@ -2441,7 +2441,7 @@ void LineDefs_FindOverlaps(selection_c& lines)
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (gDocument.linedefs[ld2]->IsZeroLength())
+		if (gDocument.linedefs[ld2]->IsZeroLength(gDocument))
 			continue;
 
 		// only the second (or third, etc) linedef is stored
@@ -2498,7 +2498,7 @@ static int CheckLinesCross(int A, int B)
 	const LineDef *BL = gDocument.linedefs[B];
 
 	// ignore zero-length lines
-	if (AL->IsZeroLength() || BL->IsZeroLength())
+	if (AL->IsZeroLength(gDocument) || BL->IsZeroLength(gDocument))
 		return 0;
 
 	// ignore directly overlapping here
@@ -2511,14 +2511,14 @@ static int CheckLinesCross(int A, int B)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (MIN(AL->Start()->raw_y, AL->End()->raw_y) >
-	    MAX(BL->Start()->raw_y, BL->End()->raw_y))
+	if (MIN(AL->Start(gDocument)->raw_y, AL->End(gDocument)->raw_y) >
+	    MAX(BL->Start(gDocument)->raw_y, BL->End(gDocument)->raw_y))
 	{
 		return 0;
 	}
 
-	if (MIN(BL->Start()->raw_y, BL->End()->raw_y) >
-	    MAX(AL->Start()->raw_y, AL->End()->raw_y))
+	if (MIN(BL->Start(gDocument)->raw_y, BL->End(gDocument)->raw_y) >
+	    MAX(AL->Start(gDocument)->raw_y, AL->End(gDocument)->raw_y))
 	{
 		return 0;
 	}
@@ -2526,15 +2526,15 @@ static int CheckLinesCross(int A, int B)
 
 	// precise (but slower) intersection test
 
-	double ax1 = AL->Start()->x();
-	double ay1 = AL->Start()->y();
-	double ax2 = AL->End()->x();
-	double ay2 = AL->End()->y();
+	double ax1 = AL->Start(gDocument)->x();
+	double ay1 = AL->Start(gDocument)->y();
+	double ax2 = AL->End(gDocument)->x();
+	double ay2 = AL->End(gDocument)->y();
 
-	double bx1 = BL->Start()->x();
-	double by1 = BL->Start()->y();
-	double bx2 = BL->End()->x();
-	double by2 = BL->End()->y();
+	double bx1 = BL->Start(gDocument)->x();
+	double by1 = BL->Start(gDocument)->y();
+	double bx2 = BL->End(gDocument)->x();
+	double by2 = BL->End(gDocument)->y();
 
 	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
 	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
@@ -2570,7 +2570,7 @@ static int CheckLinesCross(int A, int B)
 		(e_side == 0 && f_side == 0))
 	{
 		// choose longest line as the measuring stick
-		if (AL->CalcLength() < BL->CalcLength())
+		if (AL->CalcLength(gDocument) < BL->CalcLength(gDocument))
 		{
 			std::swap(ax1, bx1);  std::swap(ax2, bx2);
 			std::swap(ay1, by1);  std::swap(ay2, by2);
@@ -2629,7 +2629,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 		const LineDef *L1 = gDocument.linedefs[n2];
 
-		fixcoord_t max_x = MAX(L1->Start()->raw_x, L1->End()->raw_x);
+		fixcoord_t max_x = MAX(L1->Start(gDocument)->raw_x, L1->End(gDocument)->raw_x);
 
 		for (int k = n + 1 ; k < NumLineDefs ; k++)
 		{
@@ -2637,7 +2637,7 @@ void LineDefs_FindCrossings(selection_c& lines)
 
 			const LineDef *L2 = gDocument.linedefs[k2];
 
-			fixcoord_t min_x = MIN(L2->Start()->raw_x, L2->End()->raw_x);
+			fixcoord_t min_x = MIN(L2->Start(gDocument)->raw_x, L2->End(gDocument)->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)
@@ -3444,28 +3444,28 @@ void Textures_FindMissing(selection_c& lines)
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right()->MidTex()))
+			if (is_null_tex(L->Right(gDocument)->MidTex()))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right()->SecRef();
-			const Sector *back  = L->Left() ->SecRef();
+			const Sector *front = L->Right(gDocument)->SecRef(gDocument);
+			const Sector *back  = L->Left(gDocument) ->SecRef(gDocument);
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right()->LowerTex()))
+			if (front->floorh < back->floorh && is_null_tex(L->Right(gDocument)->LowerTex()))
 				lines.set(n);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left()->LowerTex()))
+			if (back->floorh < front->floorh && is_null_tex(L->Left(gDocument)->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right()->UpperTex()))
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right(gDocument)->UpperTex()))
 				lines.set(n);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left()->UpperTex()))
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left(gDocument)->UpperTex()))
 				lines.set(n);
 		}
 	}
@@ -3499,28 +3499,28 @@ void Textures_FixMissing()
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right()->MidTex()))
+			if (is_null_tex(L->Right(gDocument)->MidTex()))
 				gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right()->SecRef();
-			const Sector *back  = L->Left() ->SecRef();
+			const Sector *front = L->Right(gDocument)->SecRef(gDocument);
+			const Sector *back  = L->Left(gDocument) ->SecRef(gDocument);
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right()->LowerTex()))
+			if (front->floorh < back->floorh && is_null_tex(L->Right(gDocument)->LowerTex()))
 				gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left()->LowerTex()))
+			if (back->floorh < front->floorh && is_null_tex(L->Left(gDocument)->LowerTex()))
 				gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right()->UpperTex()))
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right(gDocument)->UpperTex()))
 				gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left()->UpperTex()))
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left(gDocument)->UpperTex()))
 				gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -3575,16 +3575,16 @@ void Textures_FindTransparent(selection_c& lines,
 
 		if (L->OneSided())
 		{
-			if (check_transparent(L->Right()->MidTex(), names))
+			if (check_transparent(L->Right(gDocument)->MidTex(), names))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
 			// note : plain OR operator here to check all parts (do NOT want short-circuit)
-			if (check_transparent(L->Right()->LowerTex(), names) |
-				check_transparent(L->Right()->UpperTex(), names) |
-				check_transparent(L-> Left()->LowerTex(), names) |
-				check_transparent(L-> Left()->UpperTex(), names))
+			if (check_transparent(L->Right(gDocument)->LowerTex(), names) |
+				check_transparent(L->Right(gDocument)->UpperTex(), names) |
+				check_transparent(L-> Left(gDocument)->LowerTex(), names) |
+				check_transparent(L-> Left(gDocument)->UpperTex(), names))
 			{
 				lines.set(n);
 			}
@@ -3637,21 +3637,21 @@ void Textures_FixTransparent()
 
 		if (L->OneSided())
 		{
-			if (is_transparent(L->Right()->MidTex()))
+			if (is_transparent(L->Right(gDocument)->MidTex()))
 				gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			if (is_transparent(L->Left()->LowerTex()))
+			if (is_transparent(L->Left(gDocument)->LowerTex()))
 				gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Left()->UpperTex()))
+			if (is_transparent(L->Left(gDocument)->UpperTex()))
 				gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
-			if (is_transparent(L->Right()->LowerTex()))
+			if (is_transparent(L->Right(gDocument)->LowerTex()))
 				gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Right()->UpperTex()))
+			if (is_transparent(L->Right(gDocument)->UpperTex()))
 				gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -3710,8 +3710,8 @@ void Textures_FindMedusa(selection_c& lines,
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(L->Right()->MidTex(), names) |  /* plain OR */
-			check_medusa(L-> Left()->MidTex(), names))
+		if (check_medusa(L->Right(gDocument)->MidTex(), names) |  /* plain OR */
+			check_medusa(L-> Left(gDocument)->MidTex(), names))
 		{
 			lines.set(n);
 		}
@@ -3748,12 +3748,12 @@ void Textures_RemoveMedusa()
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(L->Right()->MidTex(), names))
+		if (check_medusa(L->Right(gDocument)->MidTex(), names))
 		{
 			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
-		if (check_medusa(L-> Left()->MidTex(), names))
+		if (check_medusa(L-> Left(gDocument)->MidTex(), names))
 		{
 			gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
@@ -3798,7 +3798,7 @@ void Textures_FindUnknownTex(selection_c& lines,
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
-			const SideDef *SD = side ? L->Left() : L->Right();
+			const SideDef *SD = side ? L->Left(gDocument) : L->Right(gDocument);
 
 			if (! SD)
 				continue;
@@ -3988,9 +3988,9 @@ void Textures_FindDupSwitches(selection_c& lines)
 		// switch textures only work on the front side
 		// (no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right()->LowerTex());
-		bool upper = is_switch_tex(L->Right()->UpperTex());
-		bool mid   = is_switch_tex(L->Right()->MidTex());
+		bool lower = is_switch_tex(L->Right(gDocument)->LowerTex());
+		bool upper = is_switch_tex(L->Right(gDocument)->UpperTex());
+		bool mid   = is_switch_tex(L->Right(gDocument)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -4049,9 +4049,9 @@ void Textures_FixDupSwitches()
 		// switch textures only work on the front side
 		// (hence no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right()->LowerTex());
-		bool upper = is_switch_tex(L->Right()->UpperTex());
-		bool mid   = is_switch_tex(L->Right()->MidTex());
+		bool lower = is_switch_tex(L->Right(gDocument)->LowerTex());
+		bool upper = is_switch_tex(L->Right(gDocument)->UpperTex());
+		bool mid   = is_switch_tex(L->Right(gDocument)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -4066,8 +4066,8 @@ void Textures_FixDupSwitches()
 			continue;
 		}
 
-		const Sector *front = L->Right()->SecRef();
-		const Sector *back  = L->Left() ->SecRef();
+		const Sector *front = L->Right(gDocument)->SecRef(gDocument);
+		const Sector *back  = L->Left(gDocument) ->SecRef(gDocument);
 
 		bool lower_vis = (front->floorh < back->floorh);
 		bool upper_vis = (front->ceilh > back->ceilh);

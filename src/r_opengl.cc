@@ -769,9 +769,9 @@ public:
 			int light = front->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical())
+			if (ld->IsVertical(gDocument))
 				light += 16;
-			else if (ld->IsHorizontal())
+			else if (ld->IsHorizontal(gDocument))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
@@ -849,12 +849,12 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
-			int light = sd->SecRef()->light;
+			int light = sd->SecRef(gDocument)->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical())
+			if (ld->IsVertical(gDocument))
 				light += 16;
-			else if (ld->IsHorizontal())
+			else if (ld->IsHorizontal(gDocument))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
@@ -874,13 +874,13 @@ public:
 		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
 			return;
 
-		if (! ld->Right())
+		if (! ld->Right(gDocument))
 			return;
 
-		float x1 = static_cast<float>(ld->Start()->x() - r_view.x);
-		float y1 = static_cast<float>(ld->Start()->y() - r_view.y);
-		float x2 = static_cast<float>(ld->End()->x() - r_view.x);
-		float y2 = static_cast<float>(ld->End()->y() - r_view.y);
+		float x1 = static_cast<float>(ld->Start(gDocument)->x() - r_view.x);
+		float y1 = static_cast<float>(ld->Start(gDocument)->y() - r_view.y);
+		float x2 = static_cast<float>(ld->End(gDocument)->x() - r_view.x);
+		float y2 = static_cast<float>(ld->End(gDocument)->y() - r_view.y);
 
 		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
 		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
@@ -908,7 +908,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == Side::left) ? ld->Left() : ld->Right();
+		const SideDef *sd = (side == Side::left) ? ld->Left(gDocument) : ld->Right(gDocument);
 
 		if (! sd)
 			return;
@@ -967,26 +967,26 @@ public:
 			return;
 
 		bool self_ref = false;
-		if (ld->Left() && ld->Right() && ld->Left()->sector == ld->Right()->sector)
+		if (ld->Left(gDocument) && ld->Right(gDocument) && ld->Left(gDocument)->sector == ld->Right(gDocument)->sector)
 			self_ref = true;
 
 		// mark sectors to be drawn
 		// [ this method means we don't need to check visibility of sectors ]
 		if (! self_ref)
 		{
-			if (ld->Left() && is_sector(ld->Left()->sector))
-				seen_sectors.set(ld->Left()->sector);
+			if (ld->Left(gDocument) && is_sector(ld->Left(gDocument)->sector))
+				seen_sectors.set(ld->Left(gDocument)->sector);
 
-			if (ld->Right() && is_sector(ld->Right()->sector))
-				seen_sectors.set(ld->Right()->sector);
+			if (ld->Right(gDocument) && is_sector(ld->Right(gDocument)->sector))
+				seen_sectors.set(ld->Right(gDocument)->sector);
 		}
 
 		/* actually draw it... */
 
-		x1 = static_cast<float>(ld->Start()->x());
-		y1 = static_cast<float>(ld->Start()->y());
-		x2 = static_cast<float>(ld->End()->x());
-		y2 = static_cast<float>(ld->End()->y());
+		x1 = static_cast<float>(ld->Start(gDocument)->x());
+		y1 = static_cast<float>(ld->Start(gDocument)->y());
+		x2 = static_cast<float>(ld->End(gDocument)->x());
+		y2 = static_cast<float>(ld->End(gDocument)->y());
 
 		if (side == Side::left)
 		{
@@ -996,7 +996,7 @@ public:
 
 		float ld_len = hypotf(x2 - x1, y2 - y1);
 
-		const Sector *front = sd ? sd->SecRef() : NULL;
+		const Sector *front = sd ? sd->SecRef(gDocument) : NULL;
 
 		bool sky_front = is_sky(front->CeilTex());
 		bool sky_upper = false;
@@ -1010,8 +1010,8 @@ public:
 		}
 		else
 		{
-			const SideDef *sd_back = (side == Side::left) ? ld->Right() : ld->Left();
-			const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
+			const SideDef *sd_back = (side == Side::left) ? ld->Right(gDocument) : ld->Left(gDocument);
+			const Sector *back  = sd_back ? sd_back->SecRef(gDocument) : NULL;
 
 			sky_upper = sky_front && is_sky(back->CeilTex());
 
@@ -1329,24 +1329,24 @@ public:
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
-		const SideDef *sd = (side == Side::left) ? L->Left() : L->Right();
+		const SideDef *sd = (side == Side::left) ? L->Left(gDocument) : L->Right(gDocument);
 		if (sd == NULL)
 			return;
 
-		float x1 = static_cast<float>(L->Start()->x());
-		float y1 = static_cast<float>(L->Start()->y());
-		float x2 = static_cast<float>(L->End()->x());
-		float y2 = static_cast<float>(L->End()->y());
+		float x1 = static_cast<float>(L->Start(gDocument)->x());
+		float y1 = static_cast<float>(L->Start(gDocument)->y());
+		float x2 = static_cast<float>(L->End(gDocument)->x());
+		float y2 = static_cast<float>(L->End(gDocument)->y());
 
 		// check that this side is facing the camera
 		Side cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
 		if (cam_side != side)
 			return;
 
-		const SideDef *sd_back = (side == Side::left) ? L->Right() : L->Left();
+		const SideDef *sd_back = (side == Side::left) ? L->Right(gDocument) : L->Left(gDocument);
 
-		const Sector *front = sd->SecRef();
-		const Sector *back  = sd_back ? sd_back->SecRef() : NULL;
+		const Sector *front = sd->SecRef(gDocument);
+		const Sector *back  = sd_back ? sd_back->SecRef(gDocument) : NULL;
 
 		float z1, z2;
 
@@ -1418,12 +1418,12 @@ public:
 		{
 			const LineDef *L = gDocument.linedefs[n];
 
-			if (L->TouchesSector(sec_index))
+			if (L->TouchesSector(sec_index, gDocument))
 			{
-				float x1 = static_cast<float>(L->Start()->x());
-				float y1 = static_cast<float>(L->Start()->y());
-				float x2 = static_cast<float>(L->End()->x());
-				float y2 = static_cast<float>(L->End()->y());
+				float x1 = static_cast<float>(L->Start(gDocument)->x());
+				float y1 = static_cast<float>(L->Start(gDocument)->y());
+				float x2 = static_cast<float>(L->End(gDocument)->x());
+				float y2 = static_cast<float>(L->End(gDocument)->y());
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);

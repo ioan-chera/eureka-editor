@@ -162,53 +162,53 @@ void SideDef::SetDefaults(bool two_sided, int new_tex)
 }
 
 
-Sector * SideDef::SecRef() const
+Sector * SideDef::SecRef(const Document &doc) const
 {
-	return gDocument.sectors[sector];
+	return doc.sectors[sector];
 }
 
-Vertex * LineDef::Start() const
+Vertex * LineDef::Start(const Document &doc) const
 {
-	return gDocument.vertices[start];
+	return doc.vertices[start];
 }
 
-Vertex * LineDef::End() const
+Vertex * LineDef::End(const Document &doc) const
 {
-	return gDocument.vertices[end];
+	return doc.vertices[end];
 }
 
-SideDef * LineDef::Right() const
+SideDef * LineDef::Right(const Document &doc) const
 {
-	return (right >= 0) ? gDocument.sidedefs[right] : nullptr;
+	return (right >= 0) ? doc.sidedefs[right] : nullptr;
 }
 
-SideDef * LineDef::Left() const
+SideDef * LineDef::Left(const Document &doc) const
 {
-	return (left >= 0) ? gDocument.sidedefs[left] : nullptr;
+	return (left >= 0) ? doc.sidedefs[left] : nullptr;
 }
 
 
-bool LineDef::TouchesSector(int sec_num) const
+bool LineDef::TouchesSector(int sec_num, const Document &doc) const
 {
-	if (right >= 0 && gDocument.sidedefs[right]->sector == sec_num)
+	if (right >= 0 && doc.sidedefs[right]->sector == sec_num)
 		return true;
 
-	if (left >= 0 && gDocument.sidedefs[left]->sector == sec_num)
+	if (left >= 0 && doc.sidedefs[left]->sector == sec_num)
 		return true;
 
 	return false;
 }
 
 
-int LineDef::WhatSector(Side side) const
+int LineDef::WhatSector(Side side, const Document &doc) const
 {
 	switch (side)
 	{
 		case Side::left:
-			return Left() ? Left()->sector : -1;
+			return Left(doc) ? Left(doc)->sector : -1;
 
 		case Side::right:
-			return Right() ? Right()->sector : -1;
+			return Right(doc) ? Right(doc)->sector : -1;
 
 		default:
 			BugError("bad side : %d\n", side);
@@ -232,16 +232,16 @@ int LineDef::WhatSideDef(Side side) const
 	}
 }
 
-bool LineDef::IsSelfRef() const
+bool LineDef::IsSelfRef(const Document &doc) const
 {
 	return (left >= 0) && (right >= 0) &&
-		gDocument.sidedefs[left]->sector == gDocument.sidedefs[right]->sector;
+		doc.sidedefs[left]->sector == doc.sidedefs[right]->sector;
 }
 
-double LineDef::CalcLength() const
+double LineDef::CalcLength(const Document &doc) const
 {
-	double dx = Start()->x() - End()->x();
-	double dy = Start()->y() - End()->y();
+	double dx = Start(doc)->x() - End(doc)->x();
+	double dy = Start(doc)->y() - End(doc)->y();
 
 	return hypot(dx, dy);
 }
@@ -595,8 +595,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	int i;
-
 	for(Thing *thing : doc.things)
 		delete thing;
 	for(Vertex *vertex : doc.vertices)
@@ -1124,7 +1122,7 @@ static void ChecksumSector(crc32_c &crc, const Sector *sector)
 	crc += sector->CeilTex();
 }
 
-static void ChecksumSideDef(crc32_c &crc, const SideDef *S)
+static void ChecksumSideDef(crc32_c &crc, const SideDef *S, const Document &doc)
 {
 	crc += S->x_offset;
 	crc += S->y_offset;
@@ -1133,23 +1131,23 @@ static void ChecksumSideDef(crc32_c &crc, const SideDef *S)
 	crc += S->MidTex();
 	crc += S->UpperTex();
 
-	ChecksumSector(crc, S->SecRef());
+	ChecksumSector(crc, S->SecRef(doc));
 }
 
-static void ChecksumLineDef(crc32_c &crc, const LineDef *L)
+static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 {
 	crc += L->flags;
 	crc += L->type;
 	crc += L->tag;
 
-	ChecksumVertex(crc, L->Start());
-	ChecksumVertex(crc, L->End());
+	ChecksumVertex(crc, L->Start(doc));
+	ChecksumVertex(crc, L->End(doc));
 
-	if(L->Right())
-		ChecksumSideDef(crc, L->Right());
+	if(L->Right(doc))
+		ChecksumSideDef(crc, L->Right(doc), doc);
 
-	if(L->Left())
-		ChecksumSideDef(crc, L->Left());
+	if(L->Left(doc))
+		ChecksumSideDef(crc, L->Left(doc), doc);
 }
 
 //
@@ -1190,7 +1188,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 		ChecksumThing(crc, things[i]);
 
 	for(i = 0; i < numLinedefs(); i++)
-		ChecksumLineDef(crc, linedefs[i]);
+		ChecksumLineDef(crc, linedefs[i], *this);
 }
 
 //--- editor settings ---

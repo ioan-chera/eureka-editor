@@ -257,8 +257,8 @@ public:
 
 				info.AddLine(n);
 
-				info.AddVertex(L->Start());
-				info.AddVertex(L->End());
+				info.AddVertex(L->Start(gDocument));
+				info.AddVertex(L->End(gDocument));
 			}
 		}
 
@@ -289,7 +289,7 @@ public:
 		if (L->tag <= 0 || L->right < 0)
 			return;
 
-		int dummy_sec = L->Right()->sector;
+		int dummy_sec = L->Right(gDocument)->sector;
 
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
@@ -512,18 +512,18 @@ public:
 
 	void PlaneAlignPart(const LineDef *L, Side side, int plane)
 	{
-		int sec_num = L->WhatSector(side);
-		const Sector *front = gDocument.sectors[L->WhatSector(side)];
-		const Sector *back  = gDocument.sectors[L->WhatSector(-side)];
+		int sec_num = L->WhatSector(side, gDocument);
+		const Sector *front = gDocument.sectors[L->WhatSector(side, gDocument)];
+		const Sector *back  = gDocument.sectors[L->WhatSector(-side, gDocument)];
 
 		// find a vertex belonging to sector and is far from the line
 		const Vertex *v = NULL;
 		double best_dist = 0.1;
 
-		double lx1 = L->Start()->x();
-		double ly1 = L->Start()->y();
-		double lx2 = L->End()->x();
-		double ly2 = L->End()->y();
+		double lx1 = L->Start(gDocument)->x();
+		double ly1 = L->Start(gDocument)->y();
+		double lx2 = L->End(gDocument)->x();
+		double ly2 = L->End(gDocument)->y();
 
 		if (side == Side::left)
 		{
@@ -534,11 +534,11 @@ public:
 		for (int n = 0 ; n < NumLineDefs ; n++)
 		{
 			const LineDef *L2 = gDocument.linedefs[n];
-			if (L2->TouchesSector(sec_num))
+			if (L2->TouchesSector(sec_num, gDocument))
 			{
 				for (int pass = 0 ; pass < 2 ; pass++)
 				{
-					const Vertex *v2 = pass ? L2->End() : L2->Start();
+					const Vertex *v2 = pass ? L2->End(gDocument) : L2->Start(gDocument);
 					double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
 
 					if (dist > best_dist)
@@ -577,33 +577,33 @@ public:
 	{
 		for (int n = 0 ; n < NumSectors ; n++)
 		{
-			if (f1_tag > 0 && gDocument.sectors[n]->tag == f1_tag && L->Right())
+			if (f1_tag > 0 && gDocument.sectors[n]->tag == f1_tag && L->Right(gDocument))
 			{
-				infos[L->Right()->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+				infos[L->Right(gDocument)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 				f1_tag = 0;
 			}
-			if (c1_tag > 0 && gDocument.sectors[n]->tag == c1_tag && L->Right())
+			if (c1_tag > 0 && gDocument.sectors[n]->tag == c1_tag && L->Right(gDocument))
 			{
-				infos[L->Right()->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+				infos[L->Right(gDocument)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 				c1_tag = 0;
 			}
 
-			if (f2_tag > 0 && gDocument.sectors[n]->tag == f2_tag && L->Left())
+			if (f2_tag > 0 && gDocument.sectors[n]->tag == f2_tag && L->Left(gDocument))
 			{
-				infos[L->Left()->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+				infos[L->Left(gDocument)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 				f2_tag = 0;
 			}
-			if (c2_tag > 0 && gDocument.sectors[n]->tag == c2_tag && L->Left())
+			if (c2_tag > 0 && gDocument.sectors[n]->tag == c2_tag && L->Left(gDocument))
 			{
-				infos[L->Left()->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+				infos[L->Left(gDocument)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 				c2_tag = 0;
 			}
 		}
 
 		if (L->left >= 0 && L->right >= 0)
 		{
-			int front_sec = L->Right()->sector;
-			int  back_sec = L->Left()->sector;
+			int front_sec = L->Right(gDocument)->sector;
+			int  back_sec = L->Left(gDocument)->sector;
 
 			switch (share & 3)
 			{
@@ -754,19 +754,19 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
-		if (! L->TouchesSector(num))
+		if (! L->TouchesSector(num, gDocument))
 			continue;
 
 		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(Side::left) == L->WhatSector(Side::right))
+		if (L->WhatSector(Side::left, gDocument) == L->WhatSector(Side::right, gDocument))
 			continue;
 
 		sector_edge_t edge;
 
-		edge.x1 = static_cast<int>(L->Start()->x());
-		edge.y1 = static_cast<int>(L->Start()->y());
-		edge.x2 = static_cast<int>(L->End()->x());
-		edge.y2 = static_cast<int>(L->End()->y());
+		edge.x1 = static_cast<int>(L->Start(gDocument)->x());
+		edge.y1 = static_cast<int>(L->Start(gDocument)->y());
+		edge.x2 = static_cast<int>(L->End(gDocument)->x());
+		edge.y2 = static_cast<int>(L->End(gDocument)->y());
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)
@@ -784,7 +784,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		}
 
 		// compute side
-		bool is_right = (L->WhatSector(Side::right) == num);
+		bool is_right = (L->WhatSector(Side::right, gDocument) == num);
 
 		if (edge.flipped)
 			is_right = !is_right;
