@@ -728,14 +728,16 @@ public:
 
 #define MAX_UNDO_MESSAGE  200
 
+#define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
+
 class undo_group_c
 {
 private:
 	std::vector<edit_op_c> ops;
 
-	int dir = +1;
+	int dir = 0;	// dir must be +1 or -1 if active
 
-	SString message = "[something]";
+	SString message = DEFAULT_UNDO_GROUP_MESSAGE;
 
 public:
 	undo_group_c() = default;
@@ -749,8 +751,38 @@ public:
 	undo_group_c(const undo_group_c &other) = delete;
 	undo_group_c &operator = (const undo_group_c &other) = delete;
 
-	undo_group_c(undo_group_c &&other) = default;
-	undo_group_c &operator = (undo_group_c &&other) = default;
+	undo_group_c(undo_group_c &&other) noexcept
+	{
+		*this = std::move(other);
+	}
+	undo_group_c &operator = (undo_group_c &&other) noexcept
+	{
+		ops = std::move(other.ops);
+		dir = other.dir;
+		message = std::move(other.message);
+
+		other.Reset();	// ensure the other goes into the default state
+		return *this;
+	}
+
+	//
+	// When it's "deleted".
+	//
+	void Reset()
+	{
+		ops.clear();
+		dir = 0;
+		message = DEFAULT_UNDO_GROUP_MESSAGE;
+	}
+
+	bool IsActive() const
+	{
+		return !!dir;
+	}
+	void Activate()
+	{
+		dir = +1;
+	}
 
 	bool Empty() const
 	{
@@ -795,42 +827,33 @@ public:
 	}
 };
 
+// TODO: move these to Document
+// TODO: remove pointer usage, prefer move semantics
+static undo_group_c cur_group;
 
-static undo_group_c *cur_group;
-
-static std::list<undo_group_c *> undo_history;
-static std::list<undo_group_c *> redo_future;
+static std::list<undo_group_c> undo_history;
+static std::list<undo_group_c> redo_future;
 
 
-static void ClearUndoHistory()
+inline static void ClearUndoHistory()
 {
-	std::list<undo_group_c *>::iterator LI;
-
-	for (LI = undo_history.begin(); LI != undo_history.end(); LI++)
-		delete *LI;
-
 	undo_history.clear();
 }
 
-static void ClearRedoFuture()
+inline static void ClearRedoFuture()
 {
-	std::list<undo_group_c *>::iterator LI;
-
-	for (LI = redo_future.begin(); LI != redo_future.end(); LI++)
-		delete *LI;
-
 	redo_future.clear();
 }
 
 
 void BA_Begin()
 {
-	if (cur_group)
+	if (cur_group.IsActive())
 		BugError("BA_Begin called twice without BA_End\n");
 
 	ClearRedoFuture();
 
-	cur_group = new undo_group_c();
+	cur_group.Activate();
 
 	DoClearChangeStatus();
 }
@@ -838,20 +861,18 @@ void BA_Begin()
 
 void BA_End()
 {
-	if (! cur_group)
+	if (! cur_group.IsActive())
 		BugError("BA_End called without a previous BA_Begin\n");
 
-	cur_group->End();
+	cur_group.End();
 
-	if (cur_group->Empty())
-		delete cur_group;
+	if(cur_group.Empty())
+		cur_group.Reset();
 	else
 	{
-		undo_history.push_front(cur_group);
-		Status_Set("%s", cur_group->GetMsg().c_str());
+		undo_history.push_front(std::move(cur_group));
+		Status_Set("%s", cur_group.GetMsg().c_str());
 	}
-
-	cur_group = NULL;
 
 	DoProcessChangeStatus();
 }
@@ -859,18 +880,17 @@ void BA_End()
 
 void BA_Abort(bool keep_changes)
 {
-	if (! cur_group)
+	if (! cur_group.IsActive())
 		BugError("BA_Abort called without a previous BA_Begin\n");
 
-	cur_group->End();
+	cur_group.End();
 
-	if (! keep_changes && ! cur_group->Empty())
+	if (! keep_changes && ! cur_group.Empty())
 	{
-		cur_group->ReApply();
+		cur_group.ReApply();
 	}
 
-	delete cur_group;
-	cur_group = NULL;
+	cur_group.Reset();
 
 	did_make_changes  = false;
 
@@ -881,7 +901,7 @@ void BA_Abort(bool keep_changes)
 void BA_Message(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	SYS_ASSERT(msg);
-	SYS_ASSERT(cur_group);
+	SYS_ASSERT(cur_group.IsActive());
 
 	va_list arg_ptr;
 
@@ -893,7 +913,7 @@ void BA_Message(EUR_FORMAT_STRING(const char *msg), ...)
 
 	buffer[MAX_UNDO_MESSAGE-1] = 0;
 
-	cur_group->SetMsg(buffer);
+	cur_group.SetMsg(buffer);
 }
 
 
@@ -919,7 +939,7 @@ void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix)
 
 int BA_New(ObjType type)
 {
-	SYS_ASSERT(cur_group);
+	SYS_ASSERT(cur_group.IsActive());
 
 	edit_op_c op;
 
@@ -957,9 +977,9 @@ int BA_New(ObjType type)
 			BugError("BA_New: unknown type\n");
 	}
 
-	SYS_ASSERT(cur_group);
+	SYS_ASSERT(cur_group.IsActive());
 
-	cur_group->Add_Apply(op);
+	cur_group.Add_Apply(op);
 
 	return op.objnum;
 }
@@ -967,7 +987,7 @@ int BA_New(ObjType type)
 
 void BA_Delete(ObjType type, int objnum)
 {
-	SYS_ASSERT(cur_group);
+	SYS_ASSERT(cur_group.IsActive());
 
 	edit_op_c op;
 
@@ -1016,9 +1036,9 @@ void BA_Delete(ObjType type, int objnum)
 		}
 	}
 
-	SYS_ASSERT(cur_group);
+	SYS_ASSERT(cur_group.IsActive());
 
-	cur_group->Add_Apply(op);
+	cur_group.Add_Apply(op);
 }
 
 
@@ -1034,9 +1054,9 @@ bool BA_Change(ObjType type, int objnum, byte field, int value)
 	op.objnum  = objnum;
 	op.value   = value;
 
-	SYS_ASSERT(cur_group);
+	SYS_ASSERT(cur_group.IsActive());
 
-	cur_group->Add_Apply(op);
+	cur_group.Add_Apply(op);
 	return true;
 }
 
@@ -1048,14 +1068,14 @@ bool BA_Undo()
 
 	DoClearChangeStatus();
 
-	undo_group_c * grp = undo_history.front();
+	undo_group_c grp = std::move(undo_history.front());
 	undo_history.pop_front();
 
-	Status_Set("UNDO: %s", grp->GetMsg().c_str());
+	Status_Set("UNDO: %s", grp.GetMsg().c_str());
 
-	grp->ReApply();
+	grp.ReApply();
 
-	redo_future.push_front(grp);
+	redo_future.push_front(std::move(grp));
 
 	DoProcessChangeStatus();
 	return true;
@@ -1068,14 +1088,14 @@ bool BA_Redo()
 
 	DoClearChangeStatus();
 
-	undo_group_c * grp = redo_future.front();
+	undo_group_c grp = std::move(redo_future.front());
 	redo_future.pop_front();
 
-	Status_Set("Redo: %s", grp->GetMsg().c_str());
+	Status_Set("Redo: %s", grp.GetMsg().c_str());
 
-	grp->ReApply();
+	grp.ReApply();
 
-	undo_history.push_front(grp);
+	undo_history.push_front(std::move(grp));
 
 	DoProcessChangeStatus();
 	return true;
