@@ -505,7 +505,15 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		int *ptr = nullptr;
+		union
+		{
+			int *ptr = nullptr;
+			Thing *thing;
+			Vertex *vertex;
+			Sector *sector;
+			SideDef *sidedef;
+			LineDef *linedef;
+		};
 		int value = 0;
 
 		void apply(Basis &basis);
@@ -514,12 +522,12 @@ private:
 	private:
 		void rawChange(Basis &basis);
 
-		int *rawDelete(Basis &basis) const;
-		int *rawDeleteThing(DocumentModule &module) const;
-		int *rawDeleteVertex(DocumentModule &module) const;
-		int *rawDeleteSector(DocumentModule &module) const;
-		int *rawDeleteSidedef(DocumentModule &module) const;
-		int *rawDeleteLinedef(DocumentModule &module) const;
+		void *rawDelete(Basis &basis) const;
+		Thing *rawDeleteThing(DocumentModule &module) const;
+		Vertex *rawDeleteVertex(DocumentModule &module) const;
+		Sector *rawDeleteSector(DocumentModule &module) const;
+		SideDef *rawDeleteSidedef(DocumentModule &module) const;
+		LineDef *rawDeleteLinedef(DocumentModule &module) const;
 
 		void rawInsert(Basis &basis) const;
 		void rawInsertThing(DocumentModule &module) const;

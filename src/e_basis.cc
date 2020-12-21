@@ -361,27 +361,27 @@ int Basis::addNew(ObjType type)
 	{
 	case ObjType::things:
 		op.objnum = numThings();
-		op.ptr = reinterpret_cast<int *>(new Thing);
+		op.thing = new Thing;
 		break;
 
 	case ObjType::vertices:
 		op.objnum = numVertices();
-		op.ptr = reinterpret_cast<int *>(new Vertex);
+		op.vertex = new Vertex;
 		break;
 
 	case ObjType::sidedefs:
 		op.objnum = numSidedefs();
-		op.ptr = reinterpret_cast<int *>(new SideDef);
+		op.sidedef = new SideDef;
 		break;
 
 	case ObjType::linedefs:
 		op.objnum = numLinedefs();
-		op.ptr = reinterpret_cast<int *>(new LineDef);
+		op.linedef = new LineDef;
 		break;
 
 	case ObjType::sectors:
 		op.objnum = numSectors();
-		op.ptr = reinterpret_cast<int *>(new Sector);
+		op.sector = new Sector;
 		break;
 
 	default:
@@ -639,7 +639,7 @@ void Basis::EditOperation::apply(Basis &basis)
 		rawChange(basis);
 		return;
 	case EditType::del:
-		ptr = rawDelete(basis);
+		ptr = static_cast<int *>(rawDelete(basis));
 		action = EditType::insert;	// reverse the operation
 		return;
 	case EditType::insert:
@@ -718,7 +718,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 //
 // Deletion operation
 //
-int *Basis::EditOperation::rawDelete(Basis &basis) const
+void *Basis::EditOperation::rawDelete(Basis &basis) const
 {
 	basis.mDidMakeChanges = true;
 
@@ -755,11 +755,11 @@ int *Basis::EditOperation::rawDelete(Basis &basis) const
 //
 // Thing deletion
 //
-int *Basis::EditOperation::rawDeleteThing(DocumentModule &module) const
+Thing *Basis::EditOperation::rawDeleteThing(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < module.numThings());
 
-	int *result = reinterpret_cast<int *>(module.things[objnum]);
+	Thing *result = module.things[objnum];
 	module.things.erase(module.things.begin() + objnum);
 
 	return result;
@@ -768,11 +768,11 @@ int *Basis::EditOperation::rawDeleteThing(DocumentModule &module) const
 //
 // Vertex deletion (and update linedef refs)
 //
-int *Basis::EditOperation::rawDeleteVertex(DocumentModule &module) const
+Vertex *Basis::EditOperation::rawDeleteVertex(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < module.numVertices());
 
-	int *result = reinterpret_cast<int *>(module.vertices[objnum]);
+	Vertex *result = module.vertices[objnum];
 	module.vertices.erase(module.vertices.begin() + objnum);
 
 	// fix the linedef references
@@ -797,11 +797,11 @@ int *Basis::EditOperation::rawDeleteVertex(DocumentModule &module) const
 //
 // Raw delete sector (and update sidedef refs)
 //
-int *Basis::EditOperation::rawDeleteSector(DocumentModule &module) const
+Sector *Basis::EditOperation::rawDeleteSector(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < module.numSectors());
 
-	int *result = reinterpret_cast<int *>(module.sectors[objnum]);
+	Sector *result = module.sectors[objnum];
 	module.sectors.erase(module.sectors.begin() + objnum);
 
 	// fix sidedef references
@@ -823,11 +823,11 @@ int *Basis::EditOperation::rawDeleteSector(DocumentModule &module) const
 //
 // Delete sidedef (and update linedef references)
 //
-int *Basis::EditOperation::rawDeleteSidedef(DocumentModule &module) const
+SideDef *Basis::EditOperation::rawDeleteSidedef(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < module.numSidedefs());
 
-	int *result = reinterpret_cast<int *>(module.sidedefs[objnum]);
+	SideDef *result = module.sidedefs[objnum];
 	module.sidedefs.erase(module.sidedefs.begin() + objnum);
 
 	// fix the linedefs references
@@ -852,11 +852,11 @@ int *Basis::EditOperation::rawDeleteSidedef(DocumentModule &module) const
 //
 // Raw delete linedef
 //
-int *Basis::EditOperation::rawDeleteLinedef(DocumentModule &module) const
+LineDef *Basis::EditOperation::rawDeleteLinedef(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < module.numLinedefs());
 
-	int *result = reinterpret_cast<int *>(module.linedefs[objnum]);
+	LineDef *result = module.linedefs[objnum];
 	module.linedefs.erase(module.linedefs.begin() + objnum);
 
 	return result;
@@ -909,7 +909,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 void Basis::EditOperation::rawInsertThing(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= module.numThings());
-	module.things.insert(module.things.begin() + objnum, reinterpret_cast<Thing *>(ptr));
+	module.things.insert(module.things.begin() + objnum, thing);
 }
 
 //
@@ -918,7 +918,7 @@ void Basis::EditOperation::rawInsertThing(DocumentModule &module) const
 void Basis::EditOperation::rawInsertVertex(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= module.numVertices());
-	module.vertices.insert(module.vertices.begin() + objnum, reinterpret_cast<Vertex *>(ptr));
+	module.vertices.insert(module.vertices.begin() + objnum, vertex);
 
 	// fix references in linedefs
 
@@ -943,7 +943,7 @@ void Basis::EditOperation::rawInsertVertex(DocumentModule &module) const
 void Basis::EditOperation::rawInsertSector(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= module.numSectors());
-	module.sectors.insert(module.sectors.begin() + objnum, reinterpret_cast<Sector *>(ptr));
+	module.sectors.insert(module.sectors.begin() + objnum, sector);
 
 	// fix all sidedef references
 
@@ -965,7 +965,7 @@ void Basis::EditOperation::rawInsertSector(DocumentModule &module) const
 void Basis::EditOperation::rawInsertSidedef(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= module.numSidedefs());
-	module.sidedefs.insert(module.sidedefs.begin() + objnum, reinterpret_cast<SideDef *>(ptr));
+	module.sidedefs.insert(module.sidedefs.begin() + objnum, sidedef);
 
 	// fix the linedefs references
 
@@ -990,7 +990,7 @@ void Basis::EditOperation::rawInsertSidedef(DocumentModule &module) const
 void Basis::EditOperation::rawInsertLinedef(DocumentModule &module) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= module.numLinedefs());
-	module.linedefs.insert(module.linedefs.begin() + objnum, reinterpret_cast<LineDef *>(ptr));
+	module.linedefs.insert(module.linedefs.begin() + objnum, linedef);
 }
 
 //
@@ -1000,11 +1000,11 @@ void Basis::EditOperation::deleteFinally()
 {
 	switch(objtype)
 	{
-	case ObjType::things:   delete reinterpret_cast<Thing *>(ptr); break;
-	case ObjType::vertices: delete reinterpret_cast<Vertex *>(ptr); break;
-	case ObjType::sectors:  delete reinterpret_cast<Sector *>(ptr); break;
-	case ObjType::sidedefs: delete reinterpret_cast<SideDef *>(ptr); break;
-	case ObjType::linedefs: delete reinterpret_cast<LineDef *>(ptr); break;
+	case ObjType::things:   delete thing; break;
+	case ObjType::vertices: delete vertex; break;
+	case ObjType::sectors:  delete sector; break;
+	case ObjType::sidedefs: delete sidedef; break;
+	case ObjType::linedefs: delete linedef; break;
 
 	default:
 		BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
