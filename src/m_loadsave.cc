@@ -90,7 +90,7 @@ static void ReplaceEditWad(Wad_file *new_wad)
 
 static void FreshLevel()
 {
-	BA_ClearAll();
+	gDocument.basis.clearAll();
 
 	Sector *sec = new Sector;
 	gDocument.sectors.push_back(sec);
@@ -618,12 +618,12 @@ static void LoadHeader()
 	if (length == 0)
 		return;
 
-	HeaderData.resize(length);
+	gDocument.headerData.resize(length);
 
 	if (! lump->Seek())
 		FatalError("Error seeking to header lump!\n");
 
-	if (! lump->Read(& HeaderData[0], length))
+	if (! lump->Read(&gDocument.headerData[0], length))
 		FatalError("Error reading header lump.\n");
 }
 
@@ -637,12 +637,12 @@ static void LoadBehavior()
 
 	int length = lump->Length();
 
-	BehaviorData.resize(length);
+	gDocument.behaviorData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(& BehaviorData[0], length))
+	if (! lump->Read(&gDocument.behaviorData[0], length))
 		FatalError("Error reading BEHAVIOR.\n");
 }
 
@@ -656,12 +656,12 @@ static void LoadScripts()
 
 	int length = lump->Length();
 
-	ScriptsData.resize(length);
+	gDocument.scriptsData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(& ScriptsData[0], length))
+	if (! lump->Read(&gDocument.scriptsData[0], length))
 		FatalError("Error reading SCRIPTS.\n");
 }
 
@@ -982,7 +982,7 @@ void LoadLevel(Wad_file *wad, const SString &level)
 		// load the user state associated with this map
 		crc32_c adler_crc;
 
-		BA_LevelChecksum(adler_crc);
+		gDocument.getLevelChecksum(adler_crc);
 
 		if (! M_LoadUserState())
 		{
@@ -1005,7 +1005,7 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 
 	Level_format = load_wad->LevelFormat(loading_level);
 
-	BA_ClearAll();
+	gDocument.basis.clearAll();
 
 	bad_linedef_count = 0;
 	bad_sector_refs   = 0;
@@ -1352,13 +1352,13 @@ static int saving_level;
 
 static void SaveHeader(const SString &level)
 {
-	int size = (int)HeaderData.size();
+	int size = (int)gDocument.headerData.size();
 
 	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
 
 	if (size > 0)
 	{
-		lump->Write(& HeaderData[0], size);
+		lump->Write(&gDocument.headerData[0], size);
 	}
 
 	lump->Finish();
@@ -1367,13 +1367,13 @@ static void SaveHeader(const SString &level)
 
 static void SaveBehavior()
 {
-	int size = (int)BehaviorData.size();
+	int size = (int)gDocument.behaviorData.size();
 
 	Lump_c *lump = edit_wad->AddLump("BEHAVIOR", size);
 
 	if (size > 0)
 	{
-		lump->Write(& BehaviorData[0], size);
+		lump->Write(&gDocument.behaviorData[0], size);
 	}
 
 	lump->Finish();
@@ -1382,13 +1382,13 @@ static void SaveBehavior()
 
 static void SaveScripts()
 {
-	int size = (int)ScriptsData.size();
+	int size = (int)gDocument.scriptsData.size();
 
 	if (size > 0)
 	{
 		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
 
-		lump->Write(& ScriptsData[0], size);
+		lump->Write(&gDocument.scriptsData[0], size);
 		lump->Finish();
 	}
 }

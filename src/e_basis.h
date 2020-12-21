@@ -27,6 +27,11 @@
 #ifndef __EUREKA_E_BASIS_H__
 #define __EUREKA_E_BASIS_H__
 
+#include "m_strings.h"
+#include <list>
+
+#define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
+
 class crc32_c;
 
 
@@ -412,23 +417,266 @@ public:
 };
 
 //
-// The document associated with a file. All stuff will go here
+// This is an interface with direct references to Document's components, for less clutter
 //
-class Document
+struct Document;
+class DocumentModule
 {
 public:
+	DocumentModule(Document &doc);
+
+	std::vector<Thing *> &things;
+	std::vector<Vertex *> &vertices;
+	std::vector<Sector *> &sectors;
+	std::vector<SideDef *> &sidedefs;
+	std::vector<LineDef *> &linedefs;
+
+	std::vector<byte> &headerData;
+	std::vector<byte> &behaviorData;
+	std::vector<byte> &scriptsData;
+
+	int numThings() const
+	{
+		return static_cast<int>(things.size());
+	}
+	int numVertices() const
+	{
+		return static_cast<int>(vertices.size());
+	}
+	int numSectors() const
+	{
+		return static_cast<int>(sectors.size());
+	}
+	int numSidedefs() const
+	{
+		return static_cast<int>(sidedefs.size());
+	}
+	int numLinedefs() const
+	{
+		return static_cast<int>(linedefs.size());
+	}
+};
+
+//
+// Editor command manager, handles undo/redo
+//
+class Basis : public DocumentModule
+{
+public:
+	Basis(Document &doc) : DocumentModule(doc)
+	{
+	}
+
+	void begin();
+	void end();
+	void abort(bool keepChanges);
+	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
+	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
+	int addNew(ObjType type);
+	void del(ObjType type, int objnum);
+	bool change(ObjType type, int objnum, byte field, int value);
+	bool changeThing(int thing, byte field, int value);
+	bool changeVertex(int vert, byte field, int value);
+	bool changeSector(int sec, byte field, int value);
+	bool changeSidedef(int side, byte field, int value);
+	bool changeLinedef(int line, byte field, int value);
+	bool undo();
+	bool redo();
+	void clearAll();
+
+private:
+	//
+	// Edit change
+	//
+	enum class EditType : byte
+	{
+		none,	// initial state (invalid)
+		change,
+		insert,
+		del
+	};
+
+	//
+	// Edit operation
+	//
+	struct EditOperation
+	{
+		EditType action = EditType::none;
+		ObjType objtype = ObjType::things;
+		byte field = 0;
+		int objnum = 0;
+		int *ptr = nullptr;
+		int value = 0;
+
+		void apply(Basis &basis);
+		void destroy();
+
+	private:
+		void rawChange(Basis &basis);
+
+		int *rawDelete(Basis &basis) const;
+		int *rawDeleteThing(DocumentModule &module) const;
+		int *rawDeleteVertex(DocumentModule &module) const;
+		int *rawDeleteSector(DocumentModule &module) const;
+		int *rawDeleteSidedef(DocumentModule &module) const;
+		int *rawDeleteLinedef(DocumentModule &module) const;
+
+		void rawInsert(Basis &basis) const;
+		void rawInsertThing(DocumentModule &module) const;
+		void rawInsertVertex(DocumentModule &module) const;
+		void rawInsertSector(DocumentModule &module) const;
+		void rawInsertSidedef(DocumentModule &module) const;
+		void rawInsertLinedef(DocumentModule &module) const;
+
+		void deleteFinally();
+	};
+	friend struct EditOperation;
+
+	//
+	// Undo operation group
+	//
+	class UndoGroup
+	{
+	public:
+		UndoGroup() = default;
+		~UndoGroup()
+		{
+			for(auto it = mOps.rbegin(); it != mOps.rend(); ++it)
+				it->destroy();
+		}
+		
+		// Ensure we only use move semantics
+		UndoGroup(const UndoGroup &other) = delete;
+		UndoGroup &operator = (const UndoGroup &other) = delete;
+
+		//
+		// Move constructor takes same semantics as operator
+		//
+		UndoGroup(UndoGroup &&other) noexcept
+		{
+			*this = std::move(other);
+		}
+		UndoGroup &operator = (UndoGroup &&other) noexcept;
+
+		void reset();
+		
+		//
+		// Mark if active and ready to use
+		//
+		bool isActive() const
+		{
+			return !!mDir;
+		}
+
+		//
+		// Start it
+		//
+		void activate()
+		{
+			mDir = +1;
+		}
+
+		//
+		// Whether it's empty of data
+		//
+		bool isEmpty() const
+		{
+			return mOps.empty();
+		}
+
+		void addApply(const EditOperation &op, Basis &basis);
+
+		//
+		// End current action
+		//
+		void end()
+		{
+			mDir = -1;
+		}
+
+		void reapply(Basis &basis);
+
+		//
+		// Get the message
+		//
+		const SString &getMessage() const
+		{
+			return mMessage;
+		}
+
+		//
+		// Put the message 
+		//
+		void setMessage(const SString &message)
+		{
+			mMessage = message;
+		}
+
+	private:
+		std::vector<EditOperation> mOps;
+		SString mMessage = DEFAULT_UNDO_GROUP_MESSAGE;
+		int mDir = 0;	// dir must be +1 or -1 if active
+	};
+
+	void doClearChangeStatus();
+	void doProcessChangeStatus() const;
+
+	UndoGroup mCurrentGroup;
+	// FIXME: use a better data type here
+	std::list<UndoGroup> mUndoHistory;
+	std::list<UndoGroup> mRedoFuture;
+
+	bool mDidMakeChanges = false;
+};
+
+//
+// The document associated with a file. All stuff will go here
+//
+struct Document
+{
 	std::vector<Thing *> things;
 	std::vector<Vertex *> vertices;
 	std::vector<Sector *> sectors;
 	std::vector<SideDef *> sidedefs;
 	std::vector<LineDef *> linedefs;
+
+	std::vector<byte> headerData;
+	std::vector<byte> behaviorData;
+	std::vector<byte> scriptsData;
+
+	Basis basis;
+
+	Document() : basis(*this)
+	{
+	}
+
+	// FIXME: right now these are copied over to DocumentModule
+	int numThings() const
+	{
+		return static_cast<int>(things.size());
+	}
+	int numVertices() const
+	{
+		return static_cast<int>(vertices.size());
+	}
+	int numSectors() const
+	{
+		return static_cast<int>(sectors.size());
+	}
+	int numSidedefs() const
+	{
+		return static_cast<int>(sidedefs.size());
+	}
+	int numLinedefs() const
+	{
+		return static_cast<int>(linedefs.size());
+	}
+	int numObjects(ObjType type) const;
+
+	void getLevelChecksum(crc32_c &crc) const;
 };
 
 extern Document gDocument;
-
-extern std::vector<byte>  HeaderData;
-extern std::vector<byte>  BehaviorData;
-extern std::vector<byte>  ScriptsData;
 
 
 #define NumThings     ((int)gDocument.things.size())
@@ -436,8 +684,6 @@ extern std::vector<byte>  ScriptsData;
 #define NumSectors    ((int)gDocument.sectors.size())
 #define NumSideDefs   ((int)gDocument.sidedefs.size())
 #define NumLineDefs   ((int)gDocument.linedefs.size())
-
-int NumObjects(ObjType type);
 
 #define is_thing(n)    ((n) >= 0 && (n) < NumThings  )
 #define is_vertex(n)   ((n) >= 0 && (n) < NumVertices)
@@ -450,48 +696,6 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 
 /* BASIS API */
 
-// begin a group of operations that will become a single undo/redo
-// step.  Any stored _redo_ steps will be forgotten.  The BA_New,
-// BA_Delete, BA_Change and BA_Message functions must only be called
-// between BA_Begin() and BA_End() pairs.
-void BA_Begin();
-
-// finish a group of operations.
-void BA_End();
-
-// abort the group of operations -- the undo/redo history is not
-// modified and any changes since BA_Begin() are undone except
-// when 'keep_changes' is true.
-void BA_Abort(bool keep_changes = false);
-
-// assign a message to the current operation.
-// this can be called multiple times.
-void BA_Message(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
-
-void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix = "");
-
-// create a new object, returning its objnum.  It is safe to
-// directly set the new object's fields after calling BA_New().
-int BA_New(ObjType type);
-
-// deletes the given object, and in certain cases other types of
-// objects bound to it (e.g. deleting a vertex will cause all
-// bound linedefs to also be deleted).
-void BA_Delete(ObjType type, int objnum);
-
-// change a field of an existing object.  If the value was the
-// same as before, nothing happens and false is returned.
-// Otherwise returns true.
-bool BA_Change(ObjType type, int objnum, byte field, int value);
-
-// attempt to undo the last normal or redo operation.  Returns
-// false if the undo history is empty.
-bool BA_Undo();
-
-// attempt to re-do the last undo operation.  Returns false if
-// there is no stored redo steps.
-bool BA_Redo();
-
 // add this string to the basis string table (if it doesn't
 // already exist) and return its integer offset.
 int BA_InternaliseString(const SString &str);
@@ -499,23 +703,6 @@ int BA_InternaliseShortStr(const char *str, int max_len);
 
 // get the string from the basis string table.
 SString BA_GetString(int offset);
-
-// clear everything (before loading a new level).
-void BA_ClearAll();
-
-// compute a checksum for the current level
-void BA_LevelChecksum(crc32_c& crc);
-
-
-/* HELPERS */
-
-bool BA_ChangeTH(int thing, byte field, int value);
-bool BA_ChangeVT(int vert,  byte field, int value);
-bool BA_ChangeSEC(int sec,  byte field, int value);
-bool BA_ChangeSD(int side,  byte field, int value);
-bool BA_ChangeLD(int line,  byte field, int value);
-bool BA_ChangeRAD(int rad,  byte field, int value);
-
 
 #endif  /* __EUREKA_E_BASIS_H__ */
 

@@ -46,11 +46,6 @@
 
 Document gDocument;	// currently a singleton.
 
-std::vector<byte>  HeaderData;
-std::vector<byte>  BehaviorData;
-std::vector<byte>  ScriptsData;
-
-
 int default_floor_h		=   0;
 int default_ceil_h		= 128;
 int default_light_level	= 176;
@@ -60,31 +55,14 @@ SString default_wall_tex	= "GRAY1";
 SString default_floor_tex	= "FLAT1";
 SString default_ceil_tex	= "FLAT1";
 
-
-static bool did_make_changes;
-
-
 StringTable basis_strtab;
 
-int NumObjects(ObjType type)
+//
+// Document module common instantiator
+//
+DocumentModule::DocumentModule(Document &doc) : things(doc.things), vertices(doc.vertices), sectors(doc.sectors), sidedefs(doc.sidedefs), linedefs(doc.linedefs), headerData(doc.headerData), behaviorData(doc.behaviorData), scriptsData(doc.scriptsData)
 {
-	switch (type)
-	{
-	case ObjType::things:
-		return NumThings;
-	case ObjType::linedefs:
-		return NumLineDefs;
-	case ObjType::sidedefs:
-		return NumSideDefs;
-	case ObjType::vertices:
-		return NumVertices;
-	case ObjType::sectors:
-		return NumSectors;
-	default:
-		return 0;
-	}
 }
-
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -101,34 +79,6 @@ const char *NameForObjectType(ObjType type, bool plural)
 		return "XXX"; /* NOT REACHED */
 	}
 }
-
-
-static void DoClearChangeStatus()
-{
-	did_make_changes = false;
-
-	Clipboard_NotifyBegin();
-	Selection_NotifyBegin();
-	 MapStuff_NotifyBegin();
-	 Render3D_NotifyBegin();
-	ObjectBox_NotifyBegin();
-}
-
-static void DoProcessChangeStatus()
-{
-	if (did_make_changes)
-	{
-		MadeChanges = 1;
-		RedrawMap();
-	}
-
-	Clipboard_NotifyEnd();
-	Selection_NotifyEnd();
-	 MapStuff_NotifyEnd();
-	 Render3D_NotifyEnd();
-	ObjectBox_NotifyEnd();
-}
-
 
 int BA_InternaliseString(const SString &str)
 {
@@ -282,13 +232,11 @@ int LineDef::WhatSideDef(Side side) const
 	}
 }
 
-
 bool LineDef::IsSelfRef() const
 {
 	return (left >= 0) && (right >= 0) &&
 		gDocument.sidedefs[left]->sector == gDocument.sidedefs[right]->sector;
 }
-
 
 double LineDef::CalcLength() const
 {
@@ -301,201 +249,544 @@ double LineDef::CalcLength() const
 
 //------------------------------------------------------------------------
 
+//------------------------------------------------------------------------
+//  BASIS API IMPLEMENTATION
+//------------------------------------------------------------------------
 
-static void RawInsertThing(int objnum, int *ptr)
+//
+// Begin a group of operations that will become a single undo/redo
+// step.  Any stored _redo_ steps will be forgotten.  The BA_New,
+// BA_Delete, BA_Change and BA_Message functions must only be called
+// between BA_Begin() and BA_End() pairs.
+//
+void Basis::begin()
 {
-	SYS_ASSERT(0 <= objnum && objnum <= NumThings);
-
-	gDocument.things.push_back(NULL);
-
-	for (int n = NumThings-1 ; n > objnum ; n--)
-		gDocument.things[n] = gDocument.things[n - 1];
-
-	gDocument.things[objnum] = reinterpret_cast<Thing*>(ptr);
+	if(mCurrentGroup.isActive())
+		BugError("Basis::begin called twice without Basis::end\n");
+	mRedoFuture.clear();
+	mCurrentGroup.activate();
+	doClearChangeStatus();
 }
 
-static void RawInsertLineDef(int objnum, int *ptr)
+//
+// finish a group of operations.
+//
+void Basis::end()
 {
-	SYS_ASSERT(0 <= objnum && objnum <= NumLineDefs);
+	if(!mCurrentGroup.isActive())
+		BugError("Basis::end called without a previous Basis::begin\n");
+	mCurrentGroup.end();
 
-	gDocument.linedefs.push_back(NULL);
-
-	for (int n = NumLineDefs-1 ; n > objnum ; n--)
-		gDocument.linedefs[n] = gDocument.linedefs[n - 1];
-
-	gDocument.linedefs[objnum] = reinterpret_cast<LineDef*>(ptr);
-}
-
-static void RawInsertVertex(int objnum, int *ptr)
-{
-	SYS_ASSERT(0 <= objnum && objnum <= NumVertices);
-
-	gDocument.vertices.push_back(NULL);
-
-	for (int n = NumVertices-1 ; n > objnum ; n--)
-		gDocument.vertices[n] = gDocument.vertices[n - 1];
-
-	gDocument.vertices[objnum] = reinterpret_cast<Vertex*>(ptr);
-
-	// fix references in linedefs
-
-	if (objnum+1 < NumVertices)
+	if(mCurrentGroup.isEmpty())
+		mCurrentGroup.reset();
+	else
 	{
-		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
-		{
-			LineDef *L = gDocument.linedefs[n];
+		mUndoHistory.push_front(std::move(mCurrentGroup));
+		Status_Set("%s", mCurrentGroup.getMessage().c_str());
+	}
+	doProcessChangeStatus();
+}
 
-			if (L->start >= objnum)
-				L->start++;
+//
+// abort the group of operations -- the undo/redo history is not
+// modified and any changes since BA_Begin() are undone except
+// when 'keep_changes' is true.
+//
+void Basis::abort(bool keepChanges)
+{
+	if(!mCurrentGroup.isActive())
+		BugError("Basis::abort called without a previous Basis::begin\n");
 
-			if (L->end >= objnum)
-				L->end++;
-		}
+	mCurrentGroup.end();
+
+	if(!keepChanges && !mCurrentGroup.isEmpty())
+		mCurrentGroup.reapply(*this);
+
+	mCurrentGroup.reset();
+	mDidMakeChanges = false;
+	doProcessChangeStatus();
+}
+
+//
+// assign a message to the current operation.
+// this can be called multiple times.
+//
+void Basis::setMessage(EUR_FORMAT_STRING(const char *format), ...)
+{
+	SYS_ASSERT(format);
+	SYS_ASSERT(mCurrentGroup.isActive());
+
+	va_list arg_ptr;
+	va_start(arg_ptr, format);
+	mCurrentGroup.setMessage(SString::vprintf(format, arg_ptr));
+	va_end(arg_ptr);
+}
+
+//
+// Set a message for the selection
+//
+void Basis::setMessageForSelection(const char *verb, const selection_c &list, const char *suffix)
+{
+	// utility for creating messages like "moved 3 things"
+
+	int total = list.count_obj();
+
+	if(total < 1)  // oops
+		return;
+
+	if(total == 1)
+	{
+		setMessage("%s %s #%d%s", verb, NameForObjectType(list.what_type()), list.find_first(), suffix);
+	}
+	else
+	{
+		setMessage("%s %d %s%s", verb, total, NameForObjectType(list.what_type(), true /* plural */), suffix);
 	}
 }
 
-static void RawInsertSideDef(int objnum, int *ptr)
+//
+// create a new object, returning its objnum.  It is safe to
+// directly set the new object's fields after calling BA_New(). 
+//
+int Basis::addNew(ObjType type)
 {
-	SYS_ASSERT(0 <= objnum && objnum <= NumSideDefs);
+	SYS_ASSERT(mCurrentGroup.isActive());
 
-	gDocument.sidedefs.push_back(NULL);
+	EditOperation op;
 
-	for (int n = NumSideDefs-1 ; n > objnum ; n--)
-		gDocument.sidedefs[n] = gDocument.sidedefs[n - 1];
+	op.action = EditType::insert;
+	op.objtype = type;
 
-	gDocument.sidedefs[objnum] = reinterpret_cast<SideDef*>(ptr);
-
-	// fix the linedefs references
-
-	if (objnum+1 < NumSideDefs)
+	switch(type)
 	{
-		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
+	case ObjType::things:
+		op.objnum = numThings();
+		op.ptr = reinterpret_cast<int *>(new Thing);
+		break;
+
+	case ObjType::vertices:
+		op.objnum = numVertices();
+		op.ptr = reinterpret_cast<int *>(new Vertex);
+		break;
+
+	case ObjType::sidedefs:
+		op.objnum = numSidedefs();
+		op.ptr = reinterpret_cast<int *>(new SideDef);
+		break;
+
+	case ObjType::linedefs:
+		op.objnum = numLinedefs();
+		op.ptr = reinterpret_cast<int *>(new LineDef);
+		break;
+
+	case ObjType::sectors:
+		op.objnum = numSectors();
+		op.ptr = reinterpret_cast<int *>(new Sector);
+		break;
+
+	default:
+		BugError("Basis::addNew: unknown type\n");
+	}
+
+	mCurrentGroup.addApply(op, *this);
+
+	return op.objnum;
+}
+
+//
+// deletes the given object, and in certain cases other types of
+// objects bound to it (e.g. deleting a vertex will cause all
+// bound linedefs to also be deleted).
+//
+void Basis::del(ObjType type, int objnum)
+{
+	SYS_ASSERT(mCurrentGroup.isActive());
+
+	EditOperation op;
+
+	op.action = EditType::del;
+	op.objtype = type;
+	op.objnum = objnum;
+
+	// this must happen _before_ doing the deletion (otherwise
+	// when we undo, the insertion will mess up the references).
+	if(type == ObjType::sidedefs)
+	{
+		// unbind sidedef from any linedefs using it
+		for(int n = numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = gDocument.linedefs[n];
+			LineDef *L = linedefs[n];
 
-			if (L->right >= objnum)
-				L->right++;
+			if(L->right == objnum)
+				changeLinedef(n, LineDef::F_RIGHT, -1);
 
-			if (L->left >= objnum)
-				L->left++;
+			if(L->left == objnum)
+				changeLinedef(n, LineDef::F_LEFT, -1);
 		}
+	}
+	else if(type == ObjType::vertices)
+	{
+		// delete any linedefs bound to this vertex
+		for(int n = numLinedefs() - 1; n >= 0; n--)
+		{
+			LineDef *L = linedefs[n];
+
+			if(L->start == objnum || L->end == objnum)
+				del(ObjType::linedefs, n);
+		}
+	}
+	else if(type == ObjType::sectors)
+	{
+		// delete the sidedefs bound to this sector
+		for(int n = numSidedefs() - 1; n >= 0; n--)
+			if(sidedefs[n]->sector == objnum)
+				del(ObjType::sidedefs, n);
+	}
+
+	SYS_ASSERT(mCurrentGroup.isActive());
+
+	mCurrentGroup.addApply(op, *this);
+}
+
+//
+// change a field of an existing object.  If the value was the
+// same as before, nothing happens and false is returned.
+// Otherwise returns true.
+//
+bool Basis::change(ObjType type, int objnum, byte field, int value)
+{
+	// TODO: optimise, check whether value actually changes
+
+	EditOperation op;
+
+	op.action = EditType::change;
+	op.objtype = type;
+	op.field = field;
+	op.objnum = objnum;
+	op.value = value;
+
+	SYS_ASSERT(mCurrentGroup.isActive());
+
+	mCurrentGroup.addApply(op, *this);
+	return true;
+}
+
+//
+// Change thing
+//
+bool Basis::changeThing(int thing, byte field, int value)
+{
+	SYS_ASSERT(thing >= 0 && thing < numThings());
+	SYS_ASSERT(field <= Thing::F_ARG5);
+
+	if(field == Thing::F_TYPE)
+		recent_things.insert_number(value);
+
+	return change(ObjType::things, thing, field, value);
+}
+
+//
+// Change vertex
+//
+bool Basis::changeVertex(int vert, byte field, int value)
+{
+	SYS_ASSERT(vert >= 0 && vert < numVertices());
+	SYS_ASSERT(field <= Vertex::F_Y);
+
+	return change(ObjType::vertices, vert, field, value);
+}
+
+//
+// Change sector
+//
+bool Basis::changeSector(int sec, byte field, int value)
+{
+	SYS_ASSERT(sec >= 0 && sec < numSectors());
+	SYS_ASSERT(field <= Sector::F_TAG);
+
+	if(field == Sector::F_FLOOR_TEX ||
+		field == Sector::F_CEIL_TEX)
+	{
+		recent_flats.insert(BA_GetString(value));
+	}
+
+	return change(ObjType::sectors, sec, field, value);
+}
+
+//
+// Change sidedef
+//
+bool Basis::changeSidedef(int side, byte field, int value)
+{
+	SYS_ASSERT(side >= 0 && side < numSidedefs());
+	SYS_ASSERT(field <= SideDef::F_SECTOR);
+
+	if(field == SideDef::F_LOWER_TEX ||
+		field == SideDef::F_UPPER_TEX ||
+		field == SideDef::F_MID_TEX)
+	{
+		recent_textures.insert(BA_GetString(value));
+	}
+
+	return change(ObjType::sidedefs, side, field, value);
+}
+
+//
+// Change linedef
+//
+bool Basis::changeLinedef(int line, byte field, int value)
+{
+	SYS_ASSERT(line >= 0 && line < numLinedefs());
+	SYS_ASSERT(field <= LineDef::F_ARG5);
+
+	return change(ObjType::linedefs, line, field, value);
+}
+
+//
+// attempt to undo the last normal or redo operation.  Returns
+// false if the undo history is empty.
+//
+bool Basis::undo()
+{
+	if(mUndoHistory.empty())
+		return false;
+
+	doClearChangeStatus();
+
+	UndoGroup grp = std::move(mUndoHistory.front());
+	mUndoHistory.pop_front();
+
+	Status_Set("UNDO: %s", grp.getMessage().c_str());
+
+	grp.reapply(*this);
+
+	mRedoFuture.push_front(std::move(grp));
+
+	doProcessChangeStatus();
+	return true;
+}
+
+//
+// attempt to re-do the last undo operation.  Returns false if
+// there is no stored redo steps.
+//
+bool Basis::redo()
+{
+	if(mRedoFuture.empty())
+		return false;
+
+	doClearChangeStatus();
+
+	UndoGroup grp = std::move(mRedoFuture.front());
+	mRedoFuture.pop_front();
+
+	Status_Set("Redo: %s", grp.getMessage().c_str());
+
+	grp.reapply(*this);
+
+	mUndoHistory.push_front(std::move(grp));
+
+	doProcessChangeStatus();
+	return true;
+}
+
+//
+// clear everything (before loading a new level).
+//
+void Basis::clearAll()
+{
+	int i;
+
+	for(i = 0; i < numThings(); i++)
+		delete things[i];
+	for(i = 0; i < numVertices(); i++)
+		delete vertices[i];
+	for(i = 0; i < numSectors(); i++)
+		delete sectors[i];
+	for(i = 0; i < numSidedefs(); i++)
+		delete sidedefs[i];
+	for(i = 0; i < numLinedefs(); i++)
+		delete linedefs[i];
+
+	things.clear();
+	vertices.clear();
+	sectors.clear();
+	sidedefs.clear();
+	linedefs.clear();
+
+	headerData.clear();
+	behaviorData.clear();
+	scriptsData.clear();
+
+	mUndoHistory.clear();
+	mRedoFuture.clear();
+
+	// Note: we don't clear the string table, since there can be
+	//       string references in the clipboard.
+
+	// TODO: other modules
+	Clipboard_ClearLocals();
+}
+
+//
+// Execute the operation
+//
+void Basis::EditOperation::apply(Basis &basis)
+{
+	switch(action)
+	{
+	case EditType::change:
+		rawChange(basis);
+		return;
+	case EditType::del:
+		ptr = rawDelete(basis);
+		action = EditType::insert;	// reverse the operation
+		return;
+	case EditType::insert:
+		rawInsert(basis);
+		ptr = nullptr;
+		action = EditType::del;	// reverse the operation
+		return;
+	default:
+		BugError("Basis::EditOperation::apply\n");
 	}
 }
 
-static void RawInsertSector(int objnum, int *ptr)
+//
+// Destroy an edit operation
+//
+void Basis::EditOperation::destroy()
 {
-	SYS_ASSERT(0 <= objnum && objnum <= NumSectors);
-
-	gDocument.sectors.push_back(NULL);
-
-	for (int n = NumSectors-1 ; n > objnum ; n--)
-		gDocument.sectors[n] = gDocument.sectors[n - 1];
-
-	gDocument.sectors[objnum] = reinterpret_cast<Sector*>(ptr);
-
-	// fix all sidedef references
-
-	if (objnum+1 < NumSectors)
+	switch(action)
 	{
-		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
-		{
-			SideDef *S = gDocument.sidedefs[n];
-
-			if (S->sector >= objnum)
-				S->sector++;
-		}
+	case EditType::insert:
+		SYS_ASSERT(ptr);
+		deleteFinally();
+		break;
+	case EditType::del:
+		SYS_ASSERT(!ptr);
+		break;
+	default:
+		break;
 	}
 }
 
-static int * RawDeleteThing(int objnum)
+//
+// Execute the raw change
+//
+void Basis::EditOperation::rawChange(Basis &basis)
 {
-	SYS_ASSERT(0 <= objnum && objnum < NumThings);
+	int *pos = nullptr;
+	switch(objtype)
+	{
+	case ObjType::things:
+		SYS_ASSERT(0 <= objnum && objnum < basis.numThings());
+		pos = reinterpret_cast<int *>(basis.things[objnum]);
+		break;
+	case ObjType::vertices:
+		SYS_ASSERT(0 <= objnum && objnum < basis.numVertices());
+		pos = reinterpret_cast<int *>(basis.vertices[objnum]);
+		break;
+	case ObjType::sectors:
+		SYS_ASSERT(0 <= objnum && objnum < basis.numSectors());
+		pos = reinterpret_cast<int *>(basis.sectors[objnum]);
+		break;
+	case ObjType::sidedefs:
+		SYS_ASSERT(0 <= objnum && objnum < basis.numSidedefs());
+		pos = reinterpret_cast<int *>(basis.sidedefs[objnum]);
+		break;
+	case ObjType::linedefs:
+		SYS_ASSERT(0 <= objnum && objnum < basis.numLinedefs());
+		pos = reinterpret_cast<int *>(basis.linedefs[objnum]);
+		break;
+	default:
+		BugError("Basis::EditOperation::rawChange: bad objtype %d\n", objtype);
+		return; /* NOT REACHED */
+	}
+	// TODO: CHANGE THIS TO A SAFER WAY!
+	std::swap(pos[field], value);
+	basis.mDidMakeChanges = true;
 
-	int * result = reinterpret_cast<int*>(gDocument.things[objnum]);
+	// TODO: their modules
+	Clipboard_NotifyChange(objtype, objnum, field);
+	Selection_NotifyChange(objtype, objnum, field);
+	MapStuff_NotifyChange(objtype, objnum, field);
+	Render3D_NotifyChange(objtype, objnum, field);
+	ObjectBox_NotifyChange(objtype, objnum, field);
+}
 
-	for (int n = objnum ; n < NumThings-1 ; n++)
-		gDocument.things[n] = gDocument.things[n + 1];
+//
+// Deletion operation
+//
+int *Basis::EditOperation::rawDelete(Basis &basis) const
+{
+	basis.mDidMakeChanges = true;
 
-	gDocument.things.pop_back();
+	// TODO: their own modules
+	Clipboard_NotifyDelete(objtype, objnum);
+	Selection_NotifyDelete(objtype, objnum);
+	MapStuff_NotifyDelete(objtype, objnum);
+	Render3D_NotifyDelete(objtype, objnum);
+	ObjectBox_NotifyDelete(objtype, objnum);
+
+	switch(objtype)
+	{
+	case ObjType::things:
+		return rawDeleteThing(basis);
+
+	case ObjType::vertices:
+		return rawDeleteVertex(basis);
+
+	case ObjType::sectors:
+		return rawDeleteSector(basis);
+
+	case ObjType::sidedefs:
+		return rawDeleteSidedef(basis);
+
+	case ObjType::linedefs:
+		return rawDeleteLinedef(basis);
+
+	default:
+		BugError("Basis::EditOperation::rawDelete: bad objtype %d\n", objtype);
+		return NULL; /* NOT REACHED */
+	}
+}
+
+//
+// Thing deletion
+//
+int *Basis::EditOperation::rawDeleteThing(DocumentModule &module) const
+{
+	SYS_ASSERT(0 <= objnum && objnum < module.numThings());
+
+	int *result = reinterpret_cast<int *>(module.things[objnum]);
+	module.things.erase(module.things.begin() + objnum);
 
 	return result;
 }
 
-static void RawInsert(ObjType objtype, int objnum, int *ptr)
+//
+// Vertex deletion (and update linedef refs)
+//
+int *Basis::EditOperation::rawDeleteVertex(DocumentModule &module) const
 {
-	did_make_changes = true;
+	SYS_ASSERT(0 <= objnum && objnum < module.numVertices());
 
-	Clipboard_NotifyInsert(objtype, objnum);
-	Selection_NotifyInsert(objtype, objnum);
-	 MapStuff_NotifyInsert(objtype, objnum);
-	 Render3D_NotifyInsert(objtype, objnum);
-	ObjectBox_NotifyInsert(objtype, objnum);
-
-	switch (objtype)
-	{
-		case ObjType::things:
-			RawInsertThing(objnum, ptr);
-			break;
-
-		case ObjType::vertices:
-			RawInsertVertex(objnum, ptr);
-			break;
-
-		case ObjType::sidedefs:
-			RawInsertSideDef(objnum, ptr);
-			break;
-
-		case ObjType::sectors:
-			RawInsertSector(objnum, ptr);
-			break;
-
-		case ObjType::linedefs:
-			RawInsertLineDef(objnum, ptr);
-			break;
-
-		default:
-			BugError("RawInsert: bad objtype %d\n", (int)objtype);
-	}
-}
-
-
-static int * RawDeleteLineDef(int objnum)
-{
-	SYS_ASSERT(0 <= objnum && objnum < NumLineDefs);
-
-	int * result = reinterpret_cast<int*>(gDocument.linedefs[objnum]);
-
-	for (int n = objnum ; n < NumLineDefs-1 ; n++)
-		gDocument.linedefs[n] = gDocument.linedefs[n + 1];
-
-	gDocument.linedefs.pop_back();
-
-	return result;
-}
-
-static int * RawDeleteVertex(int objnum)
-{
-	SYS_ASSERT(0 <= objnum && objnum < NumVertices);
-
-	int * result = reinterpret_cast<int*>(gDocument.vertices[objnum]);
-
-	for (int n = objnum ; n < NumVertices-1 ; n++)
-		gDocument.vertices[n] = gDocument.vertices[n + 1];
-
-	gDocument.vertices.pop_back();
+	int *result = reinterpret_cast<int *>(module.vertices[objnum]);
+	module.vertices.erase(module.vertices.begin() + objnum);
 
 	// fix the linedef references
 
-	if (objnum < NumVertices)
+	if(objnum < module.numVertices())
 	{
-		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
+		for(int n = module.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = gDocument.linedefs[n];
+			LineDef *L = module.linedefs[n];
 
-			if (L->start > objnum)
+			if(L->start > objnum)
 				L->start--;
 
-			if (L->end > objnum)
+			if(L->end > objnum)
 				L->end--;
 		}
 	}
@@ -503,56 +794,25 @@ static int * RawDeleteVertex(int objnum)
 	return result;
 }
 
-static int * RawDeleteSideDef(int objnum)
+//
+// Raw delete sector (and update sidedef refs)
+//
+int *Basis::EditOperation::rawDeleteSector(DocumentModule &module) const
 {
-	SYS_ASSERT(0 <= objnum && objnum < NumSideDefs);
+	SYS_ASSERT(0 <= objnum && objnum < module.numSectors());
 
-	int * result = reinterpret_cast<int*>(gDocument.sidedefs[objnum]);
-
-	for (int n = objnum ; n < NumSideDefs-1 ; n++)
-		gDocument.sidedefs[n] = gDocument.sidedefs[n + 1];
-
-	gDocument.sidedefs.pop_back();
-
-	// fix the linedefs references
-
-	if (objnum < NumSideDefs)
-	{
-		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
-		{
-			LineDef *L = gDocument.linedefs[n];
-
-			if (L->right > objnum)
-				L->right--;
-
-			if (L->left > objnum)
-				L->left--;
-		}
-	}
-
-	return result;
-}
-
-static int * RawDeleteSector(int objnum)
-{
-	SYS_ASSERT(0 <= objnum && objnum < NumSectors);
-
-	int * result = reinterpret_cast<int*>(gDocument.sectors[objnum]);
-
-	for (int n = objnum ; n < NumSectors-1 ; n++)
-		gDocument.sectors[n] = gDocument.sectors[n + 1];
-
-	gDocument.sectors.pop_back();
+	int *result = reinterpret_cast<int *>(module.sectors[objnum]);
+	module.sectors.erase(module.sectors.begin() + objnum);
 
 	// fix sidedef references
 
-	if (objnum < NumSectors)
+	if(objnum < module.numSectors())
 	{
-		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
+		for(int n = module.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = gDocument.sidedefs[n];
+			SideDef *S = module.sidedefs[n];
 
-			if (S->sector > objnum)
+			if(S->sector > objnum)
 				S->sector--;
 		}
 	}
@@ -560,644 +820,284 @@ static int * RawDeleteSector(int objnum)
 	return result;
 }
 
-static int * RawDelete(ObjType objtype, int objnum)
+//
+// Delete sidedef (and update linedef references)
+//
+int *Basis::EditOperation::rawDeleteSidedef(DocumentModule &module) const
 {
-	did_make_changes = true;
+	SYS_ASSERT(0 <= objnum && objnum < module.numSidedefs());
 
-	Clipboard_NotifyDelete(objtype, objnum);
-	Selection_NotifyDelete(objtype, objnum);
-	 MapStuff_NotifyDelete(objtype, objnum);
-	 Render3D_NotifyDelete(objtype, objnum);
-	ObjectBox_NotifyDelete(objtype, objnum);
+	int *result = reinterpret_cast<int *>(module.sidedefs[objnum]);
+	module.sidedefs.erase(module.sidedefs.begin() + objnum);
 
-	switch (objtype)
+	// fix the linedefs references
+
+	if(objnum < module.numSidedefs())
 	{
-		case ObjType::things:
-			return RawDeleteThing(objnum);
-
-		case ObjType::vertices:
-			return RawDeleteVertex(objnum);
-
-		case ObjType::sectors:
-			return RawDeleteSector(objnum);
-
-		case ObjType::sidedefs:
-			return RawDeleteSideDef(objnum);
-
-		case ObjType::linedefs:
-			return RawDeleteLineDef(objnum);
-
-		default:
-			BugError("RawDelete: bad objtype %d\n", (int)objtype);
-			return NULL; /* NOT REACHED */
-	}
-}
-
-
-static void DeleteFinally(ObjType objtype, int *ptr)
-{
-// fprintf(stderr, "DeleteFinally: %p\n", ptr);
-	switch (objtype)
-	{
-		case ObjType::things:   delete reinterpret_cast<Thing   *>(ptr); break;
-		case ObjType::vertices: delete reinterpret_cast<Vertex  *>(ptr); break;
-		case ObjType::sectors:  delete reinterpret_cast<Sector  *>(ptr); break;
-		case ObjType::sidedefs: delete reinterpret_cast<SideDef *>(ptr); break;
-		case ObjType::linedefs: delete reinterpret_cast<LineDef *>(ptr); break;
-
-		default:
-			BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
-	}
-}
-
-
-static void RawChange(ObjType objtype, int objnum, int field, int *value)
-{
-	int * pos = NULL;
-
-	switch (objtype)
-	{
-		case ObjType::things:
-			SYS_ASSERT(0 <= objnum && objnum < NumThings);
-			pos = reinterpret_cast<int*>(gDocument.things[objnum]);
-			break;
-
-		case ObjType::vertices:
-			SYS_ASSERT(0 <= objnum && objnum < NumVertices);
-			pos = reinterpret_cast<int*>(gDocument.vertices[objnum]);
-			break;
-
-		case ObjType::sectors:
-			SYS_ASSERT(0 <= objnum && objnum < NumSectors);
-			pos = reinterpret_cast<int*>(gDocument.sectors[objnum]);
-			break;
-
-		case ObjType::sidedefs:
-			SYS_ASSERT(0 <= objnum && objnum < NumSideDefs);
-			pos = reinterpret_cast<int*>(gDocument.sidedefs[objnum]);
-			break;
-
-		case ObjType::linedefs:
-			SYS_ASSERT(0 <= objnum && objnum < NumLineDefs);
-			pos = reinterpret_cast<int*>(gDocument.linedefs[objnum]);
-			break;
-
-		default:
-			BugError("RawGetBase: bad objtype %d\n", (int)objtype);
-			return; /* NOT REACHED */
-	}
-
-	std::swap(pos[field], *value);
-
-	did_make_changes = true;
-
-	Clipboard_NotifyChange(objtype, objnum, field);
-	Selection_NotifyChange(objtype, objnum, field);
-	 MapStuff_NotifyChange(objtype, objnum, field);
-	 Render3D_NotifyChange(objtype, objnum, field);
-	ObjectBox_NotifyChange(objtype, objnum, field);
-}
-
-
-//------------------------------------------------------------------------
-//  BASIS API IMPLEMENTATION
-//------------------------------------------------------------------------
-
-enum class EditOp : byte
-{
-	none,
-	change,
-	insert,
-	del
-};
-
-
-class edit_op_c
-{
-public:
-	EditOp action = EditOp::none;
-
-	ObjType objtype = ObjType::things;
-	byte field = 0;
-
-	int objnum = 0;
-
-	int *ptr = nullptr;
-	int value = 0;
-
-public:
-	void Apply()
-	{
-		switch (action)
+		for(int n = module.numLinedefs() - 1; n >= 0; n--)
 		{
-			case EditOp::change:
-				RawChange(objtype, objnum, (int)field, &value);
-				return;
+			LineDef *L = module.linedefs[n];
 
-			case EditOp::del:
-				ptr = RawDelete(objtype, objnum);
-				action = EditOp::insert;  // reverse the operation
-				return;
+			if(L->right > objnum)
+				L->right--;
 
-			case EditOp::insert:
-				RawInsert(objtype, objnum, ptr);
-				ptr = NULL;
-				action = EditOp::del;  // reverse the operation
-				return;
-
-			default:
-				BugError("edit_op_c::Apply\n");
+			if(L->left > objnum)
+				L->left--;
 		}
 	}
 
-	void Destroy()
+	return result;
+}
+
+//
+// Raw delete linedef
+//
+int *Basis::EditOperation::rawDeleteLinedef(DocumentModule &module) const
+{
+	SYS_ASSERT(0 <= objnum && objnum < module.numLinedefs());
+
+	int *result = reinterpret_cast<int *>(module.linedefs[objnum]);
+	module.linedefs.erase(module.linedefs.begin() + objnum);
+
+	return result;
+}
+
+//
+// Insert operation
+//
+void Basis::EditOperation::rawInsert(Basis &basis) const
+{
+	basis.mDidMakeChanges = true;
+
+	// TODO: their module
+	Clipboard_NotifyInsert(objtype, objnum);
+	Selection_NotifyInsert(objtype, objnum);
+	MapStuff_NotifyInsert(objtype, objnum);
+	Render3D_NotifyInsert(objtype, objnum);
+	ObjectBox_NotifyInsert(objtype, objnum);
+
+	switch(objtype)
 	{
-// fprintf(stderr, "edit_op_c::Destroy %p action = '%c'\n", this, (action == 0) ? ' ' : action);
-		if (action == EditOp::insert)
+	case ObjType::things:
+		rawInsertThing(basis);
+		break;
+
+	case ObjType::vertices:
+		rawInsertVertex(basis);
+		break;
+
+	case ObjType::sidedefs:
+		rawInsertSidedef(basis);
+		break;
+
+	case ObjType::sectors:
+		rawInsertSector(basis);
+		break;
+
+	case ObjType::linedefs:
+		rawInsertLinedef(basis);
+		break;
+
+	default:
+		BugError("Basis::EditOperation::rawInsert: bad objtype %d\n", objtype);
+	}
+}
+
+//
+// Thing insertion
+//
+void Basis::EditOperation::rawInsertThing(DocumentModule &module) const
+{
+	SYS_ASSERT(0 <= objnum && objnum <= module.numThings());
+	module.things.insert(module.things.begin() + objnum, reinterpret_cast<Thing *>(ptr));
+}
+
+//
+// Vertex insertion
+//
+void Basis::EditOperation::rawInsertVertex(DocumentModule &module) const
+{
+	SYS_ASSERT(0 <= objnum && objnum <= module.numVertices());
+	module.vertices.insert(module.vertices.begin() + objnum, reinterpret_cast<Vertex *>(ptr));
+
+	// fix references in linedefs
+
+	if(objnum + 1 < module.numVertices())
+	{
+		for(int n = module.numLinedefs() - 1; n >= 0; n--)
 		{
-			SYS_ASSERT(ptr);
-			DeleteFinally(objtype, ptr);
-		}
-		else if (action == EditOp::del)
-		{
-			SYS_ASSERT(! ptr);
-		}
-	}
-};
+			LineDef *L = module.linedefs[n];
 
+			if(L->start >= objnum)
+				L->start++;
 
-#define MAX_UNDO_MESSAGE  200
-
-#define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
-
-class undo_group_c
-{
-private:
-	std::vector<edit_op_c> ops;
-
-	int dir = 0;	// dir must be +1 or -1 if active
-
-	SString message = DEFAULT_UNDO_GROUP_MESSAGE;
-
-public:
-	undo_group_c() = default;
-	~undo_group_c()
-	{
-		for(auto it = ops.rbegin(); it != ops.rend(); ++it)
-			it->Destroy();
-	}
-
-	// Ensure we only use move semantics
-	undo_group_c(const undo_group_c &other) = delete;
-	undo_group_c &operator = (const undo_group_c &other) = delete;
-
-	undo_group_c(undo_group_c &&other) noexcept
-	{
-		*this = std::move(other);
-	}
-	undo_group_c &operator = (undo_group_c &&other) noexcept
-	{
-		ops = std::move(other.ops);
-		dir = other.dir;
-		message = std::move(other.message);
-
-		other.Reset();	// ensure the other goes into the default state
-		return *this;
-	}
-
-	//
-	// When it's "deleted".
-	//
-	void Reset()
-	{
-		ops.clear();
-		dir = 0;
-		message = DEFAULT_UNDO_GROUP_MESSAGE;
-	}
-
-	bool IsActive() const
-	{
-		return !!dir;
-	}
-	void Activate()
-	{
-		dir = +1;
-	}
-
-	bool Empty() const
-	{
-		return ops.empty();
-	}
-
-	void Add_Apply(const edit_op_c& op)
-	{
-		ops.push_back(op);
-
-		ops.back().Apply();
-	}
-
-	void End()
-	{
-		dir = -1;
-	}
-
-	void ReApply()
-	{
-		int total = (int)ops.size();
-
-		if (dir > 0)
-			for (auto it = ops.begin(); it != ops.end(); ++it)
-				it->Apply();
-		else
-			for (auto it = ops.rbegin(); it != ops.rend(); ++it)
-				it->Apply();
-
-		// reverse the order for next time
-		dir = -dir;
-	}
-
-	void SetMsg(const char *buf)
-	{
-		message = buf;
-	}
-
-	const SString &GetMsg() const
-	{
-		return message;
-	}
-};
-
-// TODO: move these to Document
-static undo_group_c cur_group;
-
-static std::list<undo_group_c> undo_history;
-static std::list<undo_group_c> redo_future;
-
-
-inline static void ClearUndoHistory()
-{
-	undo_history.clear();
-}
-
-inline static void ClearRedoFuture()
-{
-	redo_future.clear();
-}
-
-
-void BA_Begin()
-{
-	if (cur_group.IsActive())
-		BugError("BA_Begin called twice without BA_End\n");
-
-	ClearRedoFuture();
-
-	cur_group.Activate();
-
-	DoClearChangeStatus();
-}
-
-
-void BA_End()
-{
-	if (! cur_group.IsActive())
-		BugError("BA_End called without a previous BA_Begin\n");
-
-	cur_group.End();
-
-	if(cur_group.Empty())
-		cur_group.Reset();
-	else
-	{
-		undo_history.push_front(std::move(cur_group));
-		Status_Set("%s", cur_group.GetMsg().c_str());
-	}
-
-	DoProcessChangeStatus();
-}
-
-
-void BA_Abort(bool keep_changes)
-{
-	if (! cur_group.IsActive())
-		BugError("BA_Abort called without a previous BA_Begin\n");
-
-	cur_group.End();
-
-	if (! keep_changes && ! cur_group.Empty())
-	{
-		cur_group.ReApply();
-	}
-
-	cur_group.Reset();
-
-	did_make_changes  = false;
-
-	DoProcessChangeStatus();
-}
-
-
-void BA_Message(EUR_FORMAT_STRING(const char *msg), ...)
-{
-	SYS_ASSERT(msg);
-	SYS_ASSERT(cur_group.IsActive());
-
-	va_list arg_ptr;
-
-	char buffer[MAX_UNDO_MESSAGE];
-
-	va_start(arg_ptr, msg);
-	vsnprintf(buffer, MAX_UNDO_MESSAGE, msg, arg_ptr);
-	va_end(arg_ptr);
-
-	buffer[MAX_UNDO_MESSAGE-1] = 0;
-
-	cur_group.SetMsg(buffer);
-}
-
-
-void BA_MessageForSel(const char *verb, selection_c *list, const char *suffix)
-{
-	// utility for creating messages like "moved 3 things"
-
-	int total = list->count_obj();
-
-	if (total < 1)  // oops
-		return;
-
-	if (total == 1)
-	{
-		BA_Message("%s %s #%d%s", verb, NameForObjectType(list->what_type()), list->find_first(), suffix);
-	}
-	else
-	{
-		BA_Message("%s %d %s%s", verb, total, NameForObjectType(list->what_type(), true /* plural */), suffix);
-	}
-}
-
-
-int BA_New(ObjType type)
-{
-	SYS_ASSERT(cur_group.IsActive());
-
-	edit_op_c op;
-
-	op.action  = EditOp::insert;
-	op.objtype = type;
-
-	switch (type)
-	{
-		case ObjType::things:
-			op.objnum = NumThings;
-			op.ptr = reinterpret_cast<int*>(new Thing);
-			break;
-
-		case ObjType::vertices:
-			op.objnum = NumVertices;
-			op.ptr = reinterpret_cast<int *>(new Vertex);
-			break;
-
-		case ObjType::sidedefs:
-			op.objnum = NumSideDefs;
-			op.ptr = reinterpret_cast<int *>(new SideDef);
-			break;
-
-		case ObjType::linedefs:
-			op.objnum = NumLineDefs;
-			op.ptr = reinterpret_cast<int *>(new LineDef);
-			break;
-
-		case ObjType::sectors:
-			op.objnum = NumSectors;
-			op.ptr = reinterpret_cast<int *>(new Sector);
-			break;
-
-		default:
-			BugError("BA_New: unknown type\n");
-	}
-
-	cur_group.Add_Apply(op);
-
-	return op.objnum;
-}
-
-
-void BA_Delete(ObjType type, int objnum)
-{
-	SYS_ASSERT(cur_group.IsActive());
-
-	edit_op_c op;
-
-	op.action  = EditOp::del;
-	op.objtype = type;
-	op.objnum  = objnum;
-
-	// this must happen _before_ doing the deletion (otherwise
-	// when we undo, the insertion will mess up the references).
-	if (type == ObjType::sidedefs)
-	{
-		// unbind sidedef from any linedefs using it
-		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
-		{
-			LineDef *L = gDocument.linedefs[n];
-
-			if (L->right == objnum)
-				BA_ChangeLD(n, LineDef::F_RIGHT, -1);
-
-			if (L->left == objnum)
-				BA_ChangeLD(n, LineDef::F_LEFT, -1);
+			if(L->end >= objnum)
+				L->end++;
 		}
 	}
-	else if (type == ObjType::vertices)
-	{
-		// delete any linedefs bound to this vertex
-		for (int n = NumLineDefs-1 ; n >= 0 ; n--)
-		{
-			LineDef *L = gDocument.linedefs[n];
+}
 
-			if (L->start == objnum || L->end == objnum)
-			{
-				BA_Delete(ObjType::linedefs, n);
-			}
+//
+// Sector insertion
+//
+void Basis::EditOperation::rawInsertSector(DocumentModule &module) const
+{
+	SYS_ASSERT(0 <= objnum && objnum <= module.numSectors());
+	module.sectors.insert(module.sectors.begin() + objnum, reinterpret_cast<Sector *>(ptr));
+
+	// fix all sidedef references
+
+	if(objnum + 1 < module.numSectors())
+	{
+		for(int n = module.numSidedefs() - 1; n >= 0; n--)
+		{
+			SideDef *S = module.sidedefs[n];
+
+			if(S->sector >= objnum)
+				S->sector++;
 		}
 	}
-	else if (type == ObjType::sectors)
+}
+
+//
+// Sidedef insertion
+//
+void Basis::EditOperation::rawInsertSidedef(DocumentModule &module) const
+{
+	SYS_ASSERT(0 <= objnum && objnum <= module.numSidedefs());
+	module.sidedefs.insert(module.sidedefs.begin() + objnum, reinterpret_cast<SideDef *>(ptr));
+
+	// fix the linedefs references
+
+	if(objnum + 1 < module.numSidedefs())
 	{
-		// delete the sidedefs bound to this sector
-		for (int n = NumSideDefs-1 ; n >= 0 ; n--)
+		for(int n = module.numLinedefs() - 1; n >= 0; n--)
 		{
-			if (gDocument.sidedefs[n]->sector == objnum)
-			{
-				BA_Delete(ObjType::sidedefs, n);
-			}
+			LineDef *L = module.linedefs[n];
+
+			if(L->right >= objnum)
+				L->right++;
+
+			if(L->left >= objnum)
+				L->left++;
 		}
 	}
-
-	SYS_ASSERT(cur_group.IsActive());
-
-	cur_group.Add_Apply(op);
 }
 
-
-bool BA_Change(ObjType type, int objnum, byte field, int value)
+//
+// Linedef insertion
+//
+void Basis::EditOperation::rawInsertLinedef(DocumentModule &module) const
 {
-	// TODO: optimise, check whether value actually changes
-
-	edit_op_c op;
-
-	op.action  = EditOp::change;
-	op.objtype = type;
-	op.field   = field;
-	op.objnum  = objnum;
-	op.value   = value;
-
-	SYS_ASSERT(cur_group.IsActive());
-
-	cur_group.Add_Apply(op);
-	return true;
+	SYS_ASSERT(0 <= objnum && objnum <= module.numLinedefs());
+	module.linedefs.insert(module.linedefs.begin() + objnum, reinterpret_cast<LineDef *>(ptr));
 }
 
-
-bool BA_Undo()
+//
+// Action to do on destruction of insert operation
+//
+void Basis::EditOperation::deleteFinally()
 {
-	if (undo_history.empty())
-		return false;
-
-	DoClearChangeStatus();
-
-	undo_group_c grp = std::move(undo_history.front());
-	undo_history.pop_front();
-
-	Status_Set("UNDO: %s", grp.GetMsg().c_str());
-
-	grp.ReApply();
-
-	redo_future.push_front(std::move(grp));
-
-	DoProcessChangeStatus();
-	return true;
-}
-
-bool BA_Redo()
-{
-	if (redo_future.empty())
-		return false;
-
-	DoClearChangeStatus();
-
-	undo_group_c grp = std::move(redo_future.front());
-	redo_future.pop_front();
-
-	Status_Set("Redo: %s", grp.GetMsg().c_str());
-
-	grp.ReApply();
-
-	undo_history.push_front(std::move(grp));
-
-	DoProcessChangeStatus();
-	return true;
-}
-
-
-void BA_ClearAll()
-{
-	int i;
-
-	for (i = 0 ; i < NumThings   ; i++) 
-		delete gDocument.things[i];
-	for (i = 0 ; i < NumVertices ; i++) 
-		delete gDocument.vertices[i];
-	for (i = 0 ; i < NumSectors  ; i++) 
-		delete gDocument.sectors[i];
-	for (i = 0 ; i < NumSideDefs ; i++) 
-		delete gDocument.sidedefs[i];
-	for (i = 0 ; i < NumLineDefs ; i++) 
-		delete gDocument.linedefs[i];
-
-	gDocument.things.clear();
-	gDocument.vertices.clear();
-	gDocument.sectors.clear();
-	gDocument.sidedefs.clear();
-	gDocument.linedefs.clear();
-
-	HeaderData.clear();
-	BehaviorData.clear();
-	ScriptsData.clear();
-
-	ClearUndoHistory();
-	ClearRedoFuture();
-
-	// Note: we don't clear the string table, since there can be
-	//       string references in the clipboard.
-
-	Clipboard_ClearLocals();
-}
-
-
-/* HELPERS */
-
-bool BA_ChangeTH(int thing, byte field, int value)
-{
-	SYS_ASSERT(is_thing(thing));
-	SYS_ASSERT(field <= Thing::F_ARG5);
-
-	if (field == Thing::F_TYPE)
-		recent_things.insert_number(value);
-
-	return BA_Change(ObjType::things, thing, field, value);
-}
-
-bool BA_ChangeVT(int vert, byte field, int value)
-{
-	SYS_ASSERT(is_vertex(vert));
-	SYS_ASSERT(field <= Vertex::F_Y);
-
-	return BA_Change(ObjType::vertices, vert, field, value);
-}
-
-bool BA_ChangeSEC(int sec, byte field, int value)
-{
-	SYS_ASSERT(is_sector(sec));
-	SYS_ASSERT(field <= Sector::F_TAG);
-
-	if (field == Sector::F_FLOOR_TEX ||
-		field == Sector::F_CEIL_TEX)
+	switch(objtype)
 	{
-		recent_flats.insert(BA_GetString(value));
+	case ObjType::things:   delete reinterpret_cast<Thing *>(ptr); break;
+	case ObjType::vertices: delete reinterpret_cast<Vertex *>(ptr); break;
+	case ObjType::sectors:  delete reinterpret_cast<Sector *>(ptr); break;
+	case ObjType::sidedefs: delete reinterpret_cast<SideDef *>(ptr); break;
+	case ObjType::linedefs: delete reinterpret_cast<LineDef *>(ptr); break;
+
+	default:
+		BugError("DeleteFinally: bad objtype %d\n", (int)objtype);
+	}
+}
+
+//
+// Move operator
+//
+Basis::UndoGroup &Basis::UndoGroup::operator = (UndoGroup &&other) noexcept
+{
+	mOps = std::move(other.mOps);
+	mDir = other.mDir;
+	mMessage = std::move(other.mMessage);
+
+	other.reset();	// ensure the other goes into the default state
+	return *this;
+}
+
+//
+// Reset to initial, inactive state
+//
+void Basis::UndoGroup::reset()
+{
+	mOps.clear();
+	mDir = 0;
+	mMessage = DEFAULT_UNDO_GROUP_MESSAGE;
+}
+
+//
+// Add and apply
+//
+void Basis::UndoGroup::addApply(const EditOperation &op, Basis &basis)
+{
+	mOps.push_back(op);
+	mOps.back().apply(basis);
+}
+
+//
+// Reapply
+//
+void Basis::UndoGroup::reapply(Basis &basis)
+{
+	if(mDir > 0)
+		for(auto it = mOps.begin(); it != mOps.end(); ++it)
+			it->apply(basis);
+	else if(mDir < 0)
+		for(auto it = mOps.rbegin(); it != mOps.rend(); ++it)
+			it->apply(basis);
+
+	// reverse the order for next time
+	mDir = -mDir;
+}
+
+//
+// Clear change status
+//
+void Basis::doClearChangeStatus()
+{
+	mDidMakeChanges = false;
+
+	// TODO: these shall go to other modules
+	Clipboard_NotifyBegin();
+	Selection_NotifyBegin();
+	MapStuff_NotifyBegin();
+	Render3D_NotifyBegin();
+	ObjectBox_NotifyBegin();
+}
+
+//
+// If we made changes, notify the others
+//
+void Basis::doProcessChangeStatus() const
+{
+	if(mDidMakeChanges)
+	{
+		// TODO: the other modules
+		MadeChanges = 1;
+		RedrawMap();
 	}
 
-	return BA_Change(ObjType::sectors, sec, field, value);
+	Clipboard_NotifyEnd();
+	Selection_NotifyEnd();
+	MapStuff_NotifyEnd();
+	Render3D_NotifyEnd();
+	ObjectBox_NotifyEnd();
 }
-
-bool BA_ChangeSD(int side, byte field, int value)
-{
-	SYS_ASSERT(is_sidedef(side));
-	SYS_ASSERT(field <= SideDef::F_SECTOR);
-
-	if (field == SideDef::F_LOWER_TEX ||
-		field == SideDef::F_UPPER_TEX ||
-		field == SideDef::F_MID_TEX)
-	{
-		recent_textures.insert(BA_GetString(value));
-	}
-
-	return BA_Change(ObjType::sidedefs, side, field, value);
-}
-
-bool BA_ChangeLD(int line, byte field, int value)
-{
-	SYS_ASSERT(is_linedef(line));
-	SYS_ASSERT(field <= LineDef::F_ARG5);
-
-	return BA_Change(ObjType::linedefs, line, field, value);
-}
-
 
 //------------------------------------------------------------------------
 //   CHECKSUM LOGIC
 //------------------------------------------------------------------------
 
-static void ChecksumThing(crc32_c& crc, const Thing * T)
+static void ChecksumThing(crc32_c &crc, const Thing *T)
 {
 	crc += T->raw_x;
 	crc += T->raw_y;
@@ -1206,13 +1106,13 @@ static void ChecksumThing(crc32_c& crc, const Thing * T)
 	crc += T->options;
 }
 
-static void ChecksumVertex(crc32_c& crc, const Vertex * V)
+static void ChecksumVertex(crc32_c &crc, const Vertex *V)
 {
 	crc += V->raw_x;
 	crc += V->raw_y;
 }
 
-static void ChecksumSector(crc32_c& crc, const Sector * sector)
+static void ChecksumSector(crc32_c &crc, const Sector *sector)
 {
 	crc += sector->floorh;
 	crc += sector->ceilh;
@@ -1224,7 +1124,7 @@ static void ChecksumSector(crc32_c& crc, const Sector * sector)
 	crc += sector->CeilTex();
 }
 
-static void ChecksumSideDef(crc32_c& crc, const SideDef * S)
+static void ChecksumSideDef(crc32_c &crc, const SideDef *S)
 {
 	crc += S->x_offset;
 	crc += S->y_offset;
@@ -1236,7 +1136,7 @@ static void ChecksumSideDef(crc32_c& crc, const SideDef * S)
 	ChecksumSector(crc, S->SecRef());
 }
 
-static void ChecksumLineDef(crc32_c& crc, const LineDef * L)
+static void ChecksumLineDef(crc32_c &crc, const LineDef *L)
 {
 	crc += L->flags;
 	crc += L->type;
@@ -1245,15 +1145,39 @@ static void ChecksumLineDef(crc32_c& crc, const LineDef * L)
 	ChecksumVertex(crc, L->Start());
 	ChecksumVertex(crc, L->End());
 
-	if (L->Right())
+	if(L->Right())
 		ChecksumSideDef(crc, L->Right());
 
-	if (L->Left())
+	if(L->Left())
 		ChecksumSideDef(crc, L->Left());
 }
 
+//
+// Get number of objects based on enum
+//
+int Document::numObjects(ObjType type) const
+{
+	switch(type)
+	{
+	case ObjType::things:
+		return numThings();
+	case ObjType::linedefs:
+		return numLinedefs();
+	case ObjType::sidedefs:
+		return numSidedefs();
+	case ObjType::vertices:
+		return numVertices();
+	case ObjType::sectors:
+		return numSectors();
+	default:
+		return 0;
+	}
+}
 
-void BA_LevelChecksum(crc32_c& crc)
+//
+// compute a checksum for the current level
+//
+void Document::getLevelChecksum(crc32_c &crc) const
 {
 	// the following method conveniently skips any unused vertices,
 	// sidedefs and sectors.  It also adds each sector umpteen times
@@ -1262,13 +1186,12 @@ void BA_LevelChecksum(crc32_c& crc)
 
 	int i;
 
-	for (i = 0 ; i < NumThings ; i++)
-		ChecksumThing(crc, gDocument.things[i]);
+	for(i = 0; i < numThings(); i++)
+		ChecksumThing(crc, things[i]);
 
-	for (i = 0 ; i < NumLineDefs ; i++)
-		ChecksumLineDef(crc, gDocument.linedefs[i]);
+	for(i = 0; i < numLinedefs(); i++)
+		ChecksumLineDef(crc, linedefs[i]);
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

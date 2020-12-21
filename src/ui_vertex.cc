@@ -117,15 +117,15 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_Message("edited X of"/*, edit.Selected*/);
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("edited X of"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
+			gDocument.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -137,15 +137,15 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_Message("edited Y of"/*, edit.Selected*/);
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("edited Y of"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
+			gDocument.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -176,18 +176,18 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		fixcoord_t fdx = MakeValidCoord(dx * step);
 		fixcoord_t fdy = MakeValidCoord(dy * step);
 
-		BA_Begin();
-		BA_Message("adjusted"/*, edit.Selected*/);
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("adjusted"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			const Vertex *V = gDocument.vertices[*it];
 
-			BA_ChangeVT(*it, Vertex::F_X, V->raw_x + fdx);
-			BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + fdy);
+			gDocument.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
+			gDocument.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 

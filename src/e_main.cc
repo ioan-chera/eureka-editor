@@ -1077,7 +1077,7 @@ void Selection_Toggle(Objid& obj)
 
 void Selection_Validate()
 {
-	int num_obj = NumObjects(edit.mode);
+	int num_obj = gDocument.numObjects(edit.mode);
 
 	if (edit.Selected->max_obj() >= num_obj)
 	{

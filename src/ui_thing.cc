@@ -362,15 +362,15 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited type of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited type of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			BA_ChangeTH(*it, Thing::F_TYPE, new_type);
+			gDocument.basis.changeThing(*it, Thing::F_TYPE, new_type);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -406,15 +406,15 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited special of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited special of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			BA_ChangeTH(*it, Thing::F_SPECIAL, new_type);
+			gDocument.basis.changeThing(*it, Thing::F_SPECIAL, new_type);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -495,15 +495,15 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited angle of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited angle of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeTH(*it, Thing::F_ANGLE, new_ang);
+			gDocument.basis.changeThing(*it, Thing::F_ANGLE, new_ang);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -517,15 +517,15 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited TID of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited TID of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeTH(*it, Thing::F_TID, new_tid);
+			gDocument.basis.changeThing(*it, Thing::F_TID, new_tid);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -538,13 +538,13 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited X of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited X of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
-			BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
+			gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -556,13 +556,13 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited Y of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited Y of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
-			BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
+			gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -574,13 +574,13 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited Z of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited Z of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
-			BA_ChangeTH(*it, Thing::F_H, INT_TO_COORD(new_h));
+			gDocument.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -596,8 +596,8 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited flags of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited flags of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -605,10 +605,10 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			BA_ChangeTH(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
+			gDocument.basis.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -658,15 +658,15 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited args of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited args of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeTH(*it, Thing::F_ARG1 + arg_idx, new_value);
+			gDocument.basis.changeThing(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 

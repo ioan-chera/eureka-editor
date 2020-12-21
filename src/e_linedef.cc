@@ -486,7 +486,7 @@ static void DoAlignX(const Objid& cur,
 
 	int sd = cur_L->WhatSideDef(where);
 
-	BA_ChangeSD(sd, SideDef::F_X_OFFSET, new_offset);
+	gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_offset);
 }
 
 
@@ -541,11 +541,11 @@ static void DoAlignY(const Objid& cur,
 
 	int sd = L->WhatSideDef(where);
 
-	BA_ChangeSD(sd, SideDef::F_Y_OFFSET, new_offset);
+	gDocument.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, new_offset);
 
 	if (new_flags != L->flags)
 	{
-		BA_ChangeLD(cur.num, LineDef::F_FLAGS, new_flags);
+		gDocument.basis.changeLinedef(cur.num, LineDef::F_FLAGS, new_flags);
 	}
 }
 
@@ -564,13 +564,13 @@ static void DoClearOfs(const Objid& cur, int align_flags)
 		// when the /right flag is used, make the texture end at the right side
 		// (whereas zero makes it begin at the left side)
 		if (align_flags & LINALIGN_Right)
-			BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(LD_ptr(cur)->CalcLength()));
+			gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(LD_ptr(cur)->CalcLength()));
 		else
-			BA_ChangeSD(sd, SideDef::F_X_OFFSET, 0);
+			gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0);
 	}
 
 	if (align_flags & LINALIGN_Y)
-		BA_ChangeSD(sd, SideDef::F_Y_OFFSET, 0);
+		gDocument.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, 0);
 }
 
 
@@ -801,16 +801,16 @@ void CMD_LIN_Align()
 		return;
 	}
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	Line_AlignGroup(group, align_flags);
 
 	if (do_clear)
-		BA_Message("cleared offsets");
+		gDocument.basis.setMessage("cleared offsets");
 	else
-		BA_Message("aligned offsets");
+		gDocument.basis.setMessage("aligned offsets");
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -824,8 +824,8 @@ static void FlipLine_verts(int ld)
 	int old_start = gDocument.linedefs[ld]->start;
 	int old_end   = gDocument.linedefs[ld]->end;
 
-	BA_ChangeLD(ld, LineDef::F_START, old_end);
-	BA_ChangeLD(ld, LineDef::F_END, old_start);
+	gDocument.basis.changeLinedef(ld, LineDef::F_START, old_end);
+	gDocument.basis.changeLinedef(ld, LineDef::F_END, old_start);
 }
 
 
@@ -834,8 +834,8 @@ static void FlipLine_sides(int ld)
 	int old_right = gDocument.linedefs[ld]->right;
 	int old_left  = gDocument.linedefs[ld]->left;
 
-	BA_ChangeLD(ld, LineDef::F_RIGHT, old_left);
-	BA_ChangeLD(ld, LineDef::F_LEFT, old_right);
+	gDocument.basis.changeLinedef(ld, LineDef::F_RIGHT, old_left);
+	gDocument.basis.changeLinedef(ld, LineDef::F_LEFT, old_right);
 }
 
 
@@ -880,8 +880,8 @@ void CMD_LIN_Flip()
 
 	bool force_it = Exec_HasFlag("/force");
 
-	BA_Begin();
-	BA_MessageForSel("flipped", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("flipped", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -891,7 +891,7 @@ void CMD_LIN_Flip()
 			FlipLineDef_safe(*it);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -907,15 +907,15 @@ void CMD_LIN_SwapSides()
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("swapped sides on", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("swapped sides on", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		FlipLine_sides(*it);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -928,7 +928,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	Vertex  * V = gDocument.vertices[new_v];
 
 	// create new linedef
-	int new_l = BA_New(ObjType::linedefs);
+	int new_l = gDocument.basis.addNew(ObjType::linedefs);
 
 	LineDef * L2 = gDocument.linedefs[new_l];
 
@@ -939,7 +939,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 	L2->end   = L->end;
 
 	// update vertex on original line
-	BA_ChangeLD(ld, LineDef::F_END, new_v);
+	gDocument.basis.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
 	int orig_length = I_ROUND(L->CalcLength());
@@ -949,7 +949,7 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	if (L->Right())
 	{
-		L2->right = BA_New(ObjType::sidedefs);
+		L2->right = gDocument.basis.addNew(ObjType::sidedefs);
 		L2->Right()->RawCopy(L->Right());
 
 		if (! config::leave_offsets_alone)
@@ -958,14 +958,14 @@ int SplitLineDefAtVertex(int ld, int new_v)
 
 	if (L->Left())
 	{
-		L2->left = BA_New(ObjType::sidedefs);
+		L2->left = gDocument.basis.addNew(ObjType::sidedefs);
 		L2->Left()->RawCopy(L->Left());
 
 		if (! config::leave_offsets_alone)
 		{
 			int new_x_ofs = L->Left()->x_offset + orig_length - new_length;
 
-			BA_ChangeSD(L->left, SideDef::F_X_OFFSET, new_x_ofs);
+			gDocument.basis.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
 		}
 	}
 
@@ -985,7 +985,7 @@ static bool DoSplitLineDef(int ld)
 	double new_x = (L->Start()->x() + L->End()->x()) / 2;
 	double new_y = (L->Start()->y() + L->End()->y()) / 2;
 
-	int new_v = BA_New(ObjType::vertices);
+	int new_v = gDocument.basis.addNew(ObjType::vertices);
 
 	Vertex * V = gDocument.vertices[new_v];
 
@@ -1012,7 +1012,7 @@ void CMD_LIN_SplitHalf(void)
 	int new_first = NumLineDefs;
 	int new_count = 0;
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -1020,8 +1020,8 @@ void CMD_LIN_SplitHalf(void)
 			new_count++;
 	}
 
-	BA_Message("halved %d lines", new_count);
-	BA_End();
+	gDocument.basis.setMessage("halved %d lines", new_count);
+	gDocument.basis.end();
 
 	// Hmmmmm -- should abort early if some lines are too short??
 	if (new_count < edit.Selected->count_obj())
@@ -1048,7 +1048,7 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
 
-	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+	gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
@@ -1060,10 +1060,10 @@ void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
 		SD->lower_tex = other->mid_tex;
 		SD->upper_tex = other->mid_tex;
 
-		BA_ChangeSD(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
-		BA_ChangeSD(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
+		gDocument.basis.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
+		gDocument.basis.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
 
-		BA_ChangeSD(other_sd, SideDef::F_MID_TEX, null_tex);
+		gDocument.basis.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
 	}
 	else
 	{
@@ -1086,7 +1086,7 @@ void LD_MergedSecondSideDef(int ld)
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
 
-	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+	gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
@@ -1111,14 +1111,14 @@ void LD_MergedSecondSideDef(int ld)
 		right_tex = left_tex;
 	}
 
-	BA_ChangeSD(L->left,  SideDef::F_MID_TEX, null_tex);
-	BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+	gDocument.basis.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex);
+	gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 
-	BA_ChangeSD(L->left,  SideDef::F_LOWER_TEX, left_tex);
-	BA_ChangeSD(L->left,  SideDef::F_UPPER_TEX, left_tex);
+	gDocument.basis.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex);
+	gDocument.basis.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex);
 
-	BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, right_tex);
-	BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, right_tex);
+	gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex);
+	gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex);
 }
 
 
@@ -1130,9 +1130,9 @@ void LD_RemoveSideDef(int ld, Side ld_side)
 	int other_sd = (ld_side == Side::right) ? L->left : L->right;
 
 	if (ld_side == Side::right)
-		BA_ChangeLD(ld, LineDef::F_RIGHT, -1);
+		gDocument.basis.changeLinedef(ld, LineDef::F_RIGHT, -1);
 	else
-		BA_ChangeLD(ld, LineDef::F_LEFT, -1);
+		gDocument.basis.changeLinedef(ld, LineDef::F_LEFT, -1);
 
 	if (other_sd < 0)
 		return;
@@ -1149,7 +1149,7 @@ void LD_RemoveSideDef(int ld, Side ld_side)
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	BA_ChangeLD(ld, LineDef::F_FLAGS, new_flags);
+	gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// FIXME: if sidedef is shared, either don't modify it _OR_ duplicate it
 
@@ -1172,7 +1172,7 @@ void LD_RemoveSideDef(int ld, Side ld_side)
 			new_tex = SD->upper_tex;
 	}
 
-	BA_ChangeSD(other_sd, SideDef::F_MID_TEX, new_tex);
+	gDocument.basis.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex);
 }
 
 
@@ -1206,12 +1206,12 @@ void CMD_LIN_MergeTwo(void)
 	Selection_Clear(true);
 
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	// ld2 steals the sidedef from ld1
 
-	BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
-	BA_ChangeLD(ld1, LineDef::F_RIGHT, -1);
+	gDocument.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+	gDocument.basis.changeLinedef(ld1, LineDef::F_RIGHT, -1);
 
 	LD_MergedSecondSideDef(ld2);
 
@@ -1225,14 +1225,14 @@ void CMD_LIN_MergeTwo(void)
 		const LineDef * L = gDocument.linedefs[n];
 
 		if (L->start == L1->start)
-			BA_ChangeLD(n, LineDef::F_START, L2->end);
+			gDocument.basis.changeLinedef(n, LineDef::F_START, L2->end);
 		else if (L->start == L1->end)
-			BA_ChangeLD(n, LineDef::F_START, L2->start);
+			gDocument.basis.changeLinedef(n, LineDef::F_START, L2->start);
 
 		if (L->end == L1->start)
-			BA_ChangeLD(n, LineDef::F_END, L2->end);
+			gDocument.basis.changeLinedef(n, LineDef::F_END, L2->end);
 		else if (L->end == L1->end)
-			BA_ChangeLD(n, LineDef::F_END, L2->start);
+			gDocument.basis.changeLinedef(n, LineDef::F_END, L2->start);
 	}
 
 	// delete ld1 and any unused vertices
@@ -1243,8 +1243,8 @@ void CMD_LIN_MergeTwo(void)
 
 	DeleteObjects_WithUnused(&del_line);
 
-	BA_Message("merged two linedefs");
-	BA_End();
+	gDocument.basis.setMessage("merged two linedefs");
+	gDocument.basis.end();
 }
 
 
@@ -1348,13 +1348,13 @@ static void LD_SetLength(int ld, int new_len, double angle)
 
 	if (new_len < 0)
 	{
-		BA_ChangeVT(L->start, Vertex::F_X, L->End()->raw_x - INT_TO_COORD(idx));
-		BA_ChangeVT(L->start, Vertex::F_Y, L->End()->raw_y - INT_TO_COORD(idy));
+		gDocument.basis.changeVertex(L->start, Vertex::F_X, L->End()->raw_x - INT_TO_COORD(idx));
+		gDocument.basis.changeVertex(L->start, Vertex::F_Y, L->End()->raw_y - INT_TO_COORD(idy));
 	}
 	else
 	{
-		BA_ChangeVT(L->end, Vertex::F_X, L->Start()->raw_x + INT_TO_COORD(idx));
-		BA_ChangeVT(L->end, Vertex::F_Y, L->Start()->raw_y + INT_TO_COORD(idy));
+		gDocument.basis.changeVertex(L->end, Vertex::F_X, L->Start()->raw_x + INT_TO_COORD(idx));
+		gDocument.basis.changeVertex(L->end, Vertex::F_Y, L->Start()->raw_y + INT_TO_COORD(idy));
 	}
 }
 
@@ -1380,8 +1380,8 @@ void LineDefs_SetLength(int new_len)
 		angles[n] = atan2(L->End()->y() - L->Start()->y(), L->End()->x() - L->Start()->x());
 	}
 
-	BA_Begin();
-	BA_MessageForSel("set length of", &list);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("set length of", list);
 
 	while (! list.empty())
 	{
@@ -1392,7 +1392,7 @@ void LineDefs_SetLength(int new_len)
 		LD_SetLength(ld, new_len, angles[ld]);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1411,7 +1411,7 @@ void LD_FixForLostSide(int ld)
 	else
 		tex = BA_InternaliseString(default_wall_tex);
 
-	BA_ChangeSD(L->right, SideDef::F_MID_TEX, tex);
+	gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
 }
 
 

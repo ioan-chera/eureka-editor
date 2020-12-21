@@ -105,26 +105,26 @@ public:
 		if (s > 0)
 		{
 			const char *name = (s == 1) ? "sector" : "sectors";
-			BA_Message("pasted %zu %s", s, name);
+			gDocument.basis.setMessage("pasted %zu %s", s, name);
 		}
 		else if (l > 0)
 		{
 			const char *name = (l == 1) ? "linedef" : "linedefs";
-			BA_Message("pasted %zu %s", l, name);
+			gDocument.basis.setMessage("pasted %zu %s", l, name);
 		}
 		else if (t > 0)
 		{
 			const char *name = (t == 1) ? "thing" : "things";
-			BA_Message("pasted %zu %s", t, name);
+			gDocument.basis.setMessage("pasted %zu %s", t, name);
 		}
 		else if (v > 0)
 		{
 			const char *name = (v == 1) ? "vertex" : "vertices";
-			BA_Message("pasted %zu %s", v, name);
+			gDocument.basis.setMessage("pasted %zu %s", v, name);
 		}
 		else
 		{
-			BA_Message("pasted something");
+			gDocument.basis.setMessage("pasted something");
 		}
 	}
 
@@ -570,7 +570,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
-		int new_v = BA_New(ObjType::vertices);
+		int new_v = gDocument.basis.addNew(ObjType::vertices);
 		Vertex * V = gDocument.vertices[new_v];
 
 		vert_map[i] = new_v;
@@ -583,7 +583,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
-		int new_s = BA_New(ObjType::sectors);
+		int new_s = gDocument.basis.addNew(ObjType::sectors);
 		Sector * S = gDocument.sectors[new_s];
 
 		sector_map[i] = new_s;
@@ -600,7 +600,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 			continue;
 		}
 
-		int new_sd = BA_New(ObjType::sidedefs);
+		int new_sd = gDocument.basis.addNew(ObjType::sidedefs);
 		SideDef * SD = gDocument.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
@@ -617,7 +617,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
-		int new_l = BA_New(ObjType::linedefs);
+		int new_l = gDocument.basis.addNew(ObjType::linedefs);
 		LineDef * L = gDocument.linedefs[new_l];
 
 		L->RawCopy(clip_board->lines[i]);
@@ -655,7 +655,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
-		int new_t = BA_New(ObjType::things);
+		int new_t = gDocument.basis.addNew(ObjType::things);
 		Thing * T = gDocument.things[new_t];
 
 		T->RawCopy(clip_board->things[i]);
@@ -749,7 +749,7 @@ static bool Clipboard_DoPaste()
 	pos_x = grid.SnapX(pos_x);
 	pos_y = grid.SnapY(pos_y);
 
-	BA_Begin();
+	gDocument.basis.begin();
 	clip_board->Paste_BA_Message();
 
 	clip_doing_paste = true;
@@ -763,7 +763,7 @@ static bool Clipboard_DoPaste()
 
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
-				int new_t = BA_New(ObjType::things);
+				int new_t = gDocument.basis.addNew(ObjType::things);
 				Thing * T = gDocument.things[new_t];
 
 				T->RawCopy(clip_board->things[i]);
@@ -783,7 +783,7 @@ static bool Clipboard_DoPaste()
 
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
-				int new_v = BA_New(ObjType::vertices);
+				int new_v = gDocument.basis.addNew(ObjType::vertices);
 				Vertex * V = gDocument.vertices[new_v];
 
 				V->RawCopy(clip_board->verts[i]);
@@ -807,7 +807,7 @@ static bool Clipboard_DoPaste()
 
 	clip_doing_paste = false;
 
-	BA_End();
+	gDocument.basis.end();
 
 	edit.error_mode = false;
 
@@ -1119,22 +1119,22 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	UnusedSideDefs(&line_sel, NULL /* sec_sel */, &side_sel);
 
 
-	BA_Begin();
-	BA_Message("deleted vertex #%d\n", v_num);
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
-		BA_ChangeLD(ld1, LineDef::F_START, v2);
+		gDocument.basis.changeLinedef(ld1, LineDef::F_START, v2);
 	else
-		BA_ChangeLD(ld1, LineDef::F_END, v2);
+		gDocument.basis.changeLinedef(ld1, LineDef::F_END, v2);
 
 	// NOT-DO: update X offsets on existing linedef
 
-	BA_Delete(ObjType::linedefs, ld2);
-	BA_Delete(ObjType::vertices, v_num);
+	gDocument.basis.del(ObjType::linedefs, ld2);
+	gDocument.basis.del(ObjType::vertices, v_num);
 
 	DeleteObjects(&side_sel);
 
-	BA_End();
+	gDocument.basis.end();
 
 	return true;
 }
@@ -1264,12 +1264,12 @@ void CMD_Delete()
 		// delete vertex normally
 	}
 
-	BA_Begin();
-	BA_MessageForSel("deleted", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("deleted", *edit.Selected);
 
 	DeleteObjects_WithUnused(edit.Selected, keep, false /* keep_verts */, keep);
 
-	BA_End();
+	gDocument.basis.end();
 
 success:
 	Editor_ClearAction();

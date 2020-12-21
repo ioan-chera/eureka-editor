@@ -1156,7 +1156,7 @@ void crossing_state_c::SplitAllLines()
 	{
 		if (points[i].ld >= 0)
 		{
-			points[i].vert = BA_New(ObjType::vertices);
+			points[i].vert = gDocument.basis.addNew(ObjType::vertices);
 
 			Vertex *V = gDocument.vertices[points[i].vert];
 

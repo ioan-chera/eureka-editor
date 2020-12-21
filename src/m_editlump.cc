@@ -444,12 +444,12 @@ void CMD_EditLump()
 	// if lump exists, load the contents
 	if (lump_name == EDLUMP_HEADER)
 	{
-		editor->LoadMemory(HeaderData);
+		editor->LoadMemory(gDocument.headerData);
 		editor->SetTitle(Level_name);
 	}
 	else if (lump_name == EDLUMP_SCRIPTS)
 	{
-		editor->LoadMemory(ScriptsData);
+		editor->LoadMemory(gDocument.scriptsData);
 		editor->SetTitle("SCRIPTS");
 	}
 	else
@@ -475,12 +475,12 @@ void CMD_EditLump()
 
 		if (lump_name == EDLUMP_HEADER)
 		{
-			editor->SaveMemory(HeaderData);
+			editor->SaveMemory(gDocument.headerData);
 			MadeChanges = 1;
 		}
 		else if (lump_name == EDLUMP_SCRIPTS)
 		{
-			editor->SaveMemory(ScriptsData);
+			editor->SaveMemory(gDocument.scriptsData);
 			MadeChanges = 1;
 		}
 		else
@@ -548,7 +548,7 @@ void CMD_AddBehaviorLump()
 		return;
 	}
 
-	BehaviorData = std::move(data);
+	gDocument.behaviorData = std::move(data);
 
 	MadeChanges = 1;
 }

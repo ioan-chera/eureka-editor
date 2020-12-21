@@ -566,7 +566,7 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 
 	case TRANS_K_Rotate:
 	case TRANS_K_RotScale:
-		rot_degrees = edit.trans_param.rotate * (180 / M_PI);
+		rot_degrees = static_cast<int>(round(edit.trans_param.rotate * (180 / M_PI)));
 		IB_Number(cx, cy, "rotate by", rot_degrees, 3);
 		break;
 

@@ -347,10 +347,10 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 			LineDef *L = gDocument.linedefs[ld];
 
 			if (L->start == idx)
-				BA_ChangeLD(ld, LineDef::F_START, n);
+				gDocument.basis.changeLinedef(ld, LineDef::F_START, n);
 
 			if (L->end == idx)
-				BA_ChangeLD(ld, LineDef::F_END, n);
+				gDocument.basis.changeLinedef(ld, LineDef::F_END, n);
 		}
 
 		return;
@@ -366,8 +366,8 @@ void Vertex_MergeOverlaps()
 	selection_c verts;
 	Vertex_FindOverlaps(verts);
 
-	BA_Begin();
-	BA_Message("merged overlapping vertices");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("merged overlapping vertices");
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -377,7 +377,7 @@ void Vertex_MergeOverlaps()
 	// nothing should reference these vertices now
 	DeleteObjects(&verts);
 
-	BA_End();
+	gDocument.basis.end();
 
 	RedrawMap();
 }
@@ -417,12 +417,12 @@ void Vertex_RemoveUnused()
 
 	Vertex_FindUnused(sel);
 
-	BA_Begin();
-	BA_Message("removed unused vertices");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed unused vertices");
 
 	DeleteObjects(&sel);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -803,13 +803,13 @@ void Sectors_ClearUnknown()
 
 	Sectors_FindUnknown(sel, types);
 
-	BA_Begin();
-	BA_Message("cleared unknown sector types");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("cleared unknown sector types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		BA_ChangeSEC(*it, Sector::F_TYPE, 0);
+		gDocument.basis.changeSector(*it, Sector::F_TYPE, 0);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -841,12 +841,12 @@ void Sectors_RemoveUnused()
 
 	Sectors_FindUnused(sel);
 
-	BA_Begin();
-	BA_Message("removed unused sectors");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed unused sectors");
 
 	DeleteObjects(&sel);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -871,18 +871,18 @@ void Sectors_FixBadCeil()
 
 	Sectors_FindBadCeil(sel);
 
-	BA_Begin();
-	BA_Message("fixed bad sector heights");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed bad sector heights");
 
 	for (int i = 0 ; i < NumSectors ; i++)
 	{
 		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
 		{
-			BA_ChangeSEC(i, Sector::F_CEILH, gDocument.sectors[i]->floorh);
+			gDocument.basis.changeSector(i, Sector::F_CEILH, gDocument.sectors[i]->floorh);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -922,12 +922,12 @@ void SideDefs_RemoveUnused()
 
 	SideDefs_FindUnused(sel);
 
-	BA_Begin();
-	BA_Message("removed unused sidedefs");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed unused sidedefs");
 
 	DeleteObjects(&sel);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -978,7 +978,7 @@ void SideDefs_ShowPacked()
 
 static int Copy_SideDef(int num)
 {
-	int sd = BA_New(ObjType::sidedefs);
+	int sd = gDocument.basis.addNew(ObjType::sidedefs);
 
 	gDocument.sidedefs[sd]->RawCopy(gDocument.sidedefs[num]);
 
@@ -1010,7 +1010,7 @@ void SideDefs_Unpack(bool is_after_load)
 	}
 
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	for (int sd = 0 ; sd < NumSideDefs ; sd++)
 	{
@@ -1034,28 +1034,28 @@ void SideDefs_Unpack(bool is_after_load)
 		// handle it when first linedef uses sidedef on both sides
 		if (gDocument.linedefs[first]->left == gDocument.linedefs[first]->right)
 		{
-			BA_ChangeLD(first, LineDef::F_LEFT, Copy_SideDef(sd));
+			gDocument.basis.changeLinedef(first, LineDef::F_LEFT, Copy_SideDef(sd));
 		}
 
 		// duplicate any remaining references
 		for (int ld = first + 1 ; ld < NumLineDefs ; ld++)
 		{
 			if (gDocument.linedefs[ld]->left == sd)
-				BA_ChangeLD(ld, LineDef::F_LEFT, Copy_SideDef(sd));
+				gDocument.basis.changeLinedef(ld, LineDef::F_LEFT, Copy_SideDef(sd));
 
 			if (gDocument.linedefs[ld]->right == sd)
-				BA_ChangeLD(ld, LineDef::F_RIGHT, Copy_SideDef(sd));
+				gDocument.basis.changeLinedef(ld, LineDef::F_RIGHT, Copy_SideDef(sd));
 		}
 	}
 
 	if (is_after_load)
 	{
-		BA_Abort(true /* keep changes */);
+		gDocument.basis.abort(true /* keep changes */);
 	}
 	else
 	{
-		BA_Message("unpacked all sidedefs");
-		BA_End();
+		gDocument.basis.setMessage("unpacked all sidedefs");
+		gDocument.basis.end();
 	}
 
 	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), NumSideDefs);
@@ -1371,12 +1371,12 @@ void Things_RemoveUnknown()
 
 	Things_FindUnknown(sel, types);
 
-	BA_Begin();
-	BA_Message("removed unknown things");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed unknown things");
 
 	DeleteObjects(&sel);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1467,12 +1467,12 @@ void Things_RemoveInVoid()
 
 	Things_FindInVoid(sel);
 
-	BA_Begin();
-	BA_Message("removed things in the void");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed things in the void");
 
 	DeleteObjects(&sel);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1556,8 +1556,8 @@ void Things_ShowDuds()
 
 void Things_FixDuds()
 {
-	BA_Begin();
-	BA_Message("fixed unspawnable things");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed unspawnable things");
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
@@ -1603,11 +1603,11 @@ void Things_FixDuds()
 
 		if (new_options != T->options)
 		{
-			BA_ChangeTH(n, Thing::F_OPTIONS, new_options);
+			gDocument.basis.changeThing(n, Thing::F_OPTIONS, new_options);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2049,8 +2049,8 @@ void LineDefs_RemoveZeroLen()
 			lines.set(n);
 	}
 
-	BA_Begin();
-	BA_Message("removed zero-len linedefs");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed zero-len linedefs");
 
 	// NOTE: the vertex overlapping test handles cases where the
 	//       vertices of other lines joining a zero-length one
@@ -2058,7 +2058,7 @@ void LineDefs_RemoveZeroLen()
 
 	DeleteObjects_WithUnused(&lines);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2138,8 +2138,8 @@ void LineDefs_ShowManualDoors()
 
 void LineDefs_FixManualDoors()
 {
-	BA_Begin();
-	BA_Message("fixed manual doors");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed manual doors");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2153,11 +2153,11 @@ void LineDefs_FixManualDoors()
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
-			BA_ChangeLD(n, LineDef::F_TYPE, 0);
+			gDocument.basis.changeLinedef(n, LineDef::F_TYPE, 0);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2188,8 +2188,8 @@ void LineDefs_ShowLackImpass()
 
 void LineDefs_FixLackImpass()
 {
-	BA_Begin();
-	BA_Message("fixed impassible flags");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed impassible flags");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -2199,11 +2199,11 @@ void LineDefs_FixLackImpass()
 		{
 			int new_flags = L->flags | MLF_Blocking;
 
-			BA_ChangeLD(n, LineDef::F_FLAGS, new_flags);
+			gDocument.basis.changeLinedef(n, LineDef::F_FLAGS, new_flags);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2237,21 +2237,21 @@ void LineDefs_ShowBad2SFlag()
 
 void LineDefs_FixBad2SFlag()
 {
-	BA_Begin();
-	BA_Message("fixed two-sided flags");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed two-sided flags");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
-			BA_ChangeLD(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
+			gDocument.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
 
 		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
-			BA_ChangeLD(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
+			gDocument.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2338,13 +2338,13 @@ void LineDefs_ClearUnknown()
 
 	LineDefs_FindUnknown(sel, types);
 
-	BA_Begin();
-	BA_Message("cleared unknown line types");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		BA_ChangeLD(*it, LineDef::F_TYPE, 0);
+		gDocument.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2470,13 +2470,13 @@ void LineDefs_RemoveOverlaps()
 
 	UnusedVertices(&lines, &unused_verts);
 
-	BA_Begin();
-	BA_Message("removed overlapping lines");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("removed overlapping lines");
 
 	DeleteObjects(&lines);
 	DeleteObjects(&unused_verts);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2983,18 +2983,18 @@ void Tags_ApplyNewValue(int new_tag)
 {
 	// uses the current selection (caller must set it up)
 
-	BA_Begin();
-	BA_MessageForSel("new tag for", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("new tag for", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 	{
 		if (edit.mode == ObjType::linedefs)
-			BA_ChangeLD(*it, LineDef::F_TAG, new_tag);
+			gDocument.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
 		else if (edit.mode == ObjType::sectors)
-			BA_ChangeSEC(*it, Sector::F_TAG, new_tag);
+			gDocument.basis.changeSector(*it, Sector::F_TAG, new_tag);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -3487,8 +3487,8 @@ void Textures_FixMissing()
 {
 	int new_wall = BA_InternaliseString(default_wall_tex);
 
-	BA_Begin();
-	BA_Message("fixed missing textures");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed missing textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3500,7 +3500,7 @@ void Textures_FixMissing()
 		if (L->OneSided())
 		{
 			if (is_null_tex(L->Right()->MidTex()))
-				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
@@ -3508,24 +3508,24 @@ void Textures_FixMissing()
 			const Sector *back  = L->Left() ->SecRef();
 
 			if (front->floorh < back->floorh && is_null_tex(L->Right()->LowerTex()))
-				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (back->floorh < front->floorh && is_null_tex(L->Left()->LowerTex()))
-				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right()->UpperTex()))
-				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
 			if (back->ceilh > front->ceilh && is_null_tex(L->Left()->UpperTex()))
-				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -3625,8 +3625,8 @@ void Textures_FixTransparent()
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	BA_Begin();
-	BA_Message("fixed transparent textures");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed transparent textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3638,25 +3638,25 @@ void Textures_FixTransparent()
 		if (L->OneSided())
 		{
 			if (is_transparent(L->Right()->MidTex()))
-				BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
 			if (is_transparent(L->Left()->LowerTex()))
-				BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(L->Left()->UpperTex()))
-				BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
 			if (is_transparent(L->Right()->LowerTex()))
-				BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(L->Right()->UpperTex()))
-				BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+				gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -3738,8 +3738,8 @@ void Textures_RemoveMedusa()
 
 	std::map<SString, int> names;
 
-	BA_Begin();
-	BA_Message("fixed medusa textures");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed medusa textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3750,16 +3750,16 @@ void Textures_RemoveMedusa()
 
 		if (check_medusa(L->Right()->MidTex(), names))
 		{
-			BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
 		if (check_medusa(L-> Left()->MidTex(), names))
 		{
-			BA_ChangeSD(L->left, SideDef::F_MID_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -3903,8 +3903,8 @@ void Textures_FixUnknownTex()
 
 	int null_tex = BA_InternaliseString("-");
 
-	BA_Begin();
-	BA_Message("fixed unknown textures");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed unknown textures");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -3922,17 +3922,17 @@ void Textures_FixUnknownTex()
 			const SideDef *SD = gDocument.sidedefs[sd_num];
 
 			if (! W_TextureIsKnown(SD->LowerTex()))
-				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_wall);
+				gDocument.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
 			if (! W_TextureIsKnown(SD->UpperTex()))
-				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_wall);
+				gDocument.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
 			if (! W_TextureIsKnown(SD->MidTex()))
-				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
+				gDocument.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -3941,21 +3941,21 @@ void Textures_FixUnknownFlat()
 	int new_floor = BA_InternaliseString(default_floor_tex);
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
-	BA_Begin();
-	BA_Message("fixed unknown flats");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed unknown flats");
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
 		const Sector *S = gDocument.sectors[s];
 
 		if (! W_FlatIsKnown(S->FloorTex()))
-			BA_ChangeSEC(s, Sector::F_FLOOR_TEX, new_floor);
+			gDocument.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
 		if (! W_FlatIsKnown(S->CeilTex()))
-			BA_ChangeSEC(s, Sector::F_CEIL_TEX, new_ceil);
+			gDocument.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -4032,8 +4032,8 @@ void Textures_FixDupSwitches()
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	BA_Begin();
-	BA_Message("fixed non-animating switches");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("fixed non-animating switches");
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -4061,8 +4061,8 @@ void Textures_FixDupSwitches()
 		if (L->OneSided())
 		{
 			// we don't care if "mid" is not a switch
-			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, null_tex);
-			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			continue;
 		}
 
@@ -4074,34 +4074,34 @@ void Textures_FixDupSwitches()
 
 		if (count >= 2 && upper && !upper_vis)
 		{
-			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			upper = false;
 			count--;
 		}
 
 		if (count >= 2 && lower && !lower_vis)
 		{
-			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
 			lower = false;
 			count--;
 		}
 
 		if (count >= 2 && mid)
 		{
-			BA_ChangeSD(L->right, SideDef::F_MID_TEX, null_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 			mid = false;
 			count--;
 		}
 
 		if (count >= 2)
 		{
-			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_wall);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 			upper = false;
 			count--;
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 

@@ -425,7 +425,7 @@ void GoToObject(const Objid& objid)
 
 void CMD_JumpToObject(void)
 {
-	int total = NumObjects(edit.mode);
+	int total = gDocument.numObjects(edit.mode);
 
 	if (total <= 0)
 	{
@@ -459,7 +459,7 @@ void CMD_NextObject()
 
 	int num = edit.Selected->find_first();
 
-	if (num >= NumObjects(edit.mode))
+	if (num >= gDocument.numObjects(edit.mode))
 	{
 		Beep("Next: no more objects");
 		return;
@@ -533,14 +533,14 @@ void CMD_PruneUnused(void)
 		return;
 	}
 
-	BA_Begin();
-	BA_Message("pruned %d objects", num_secs + num_sides + num_verts);
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
 	DeleteObjects(&used_sides);
 	DeleteObjects(&used_secs);
 	DeleteObjects(&used_verts);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 

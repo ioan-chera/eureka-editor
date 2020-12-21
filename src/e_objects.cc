@@ -73,15 +73,13 @@ void DeleteObjects(selection_c *list)
 	std::sort(objnums.begin(), objnums.end());
 
 	for (int i = (int)objnums.size()-1 ; i >= 0 ; i--)
-	{
-		BA_Delete(list->what_type(), objnums[i]);
-	}
+		gDocument.basis.del(list->what_type(), objnums[i]);
 }
 
 
 static void CreateSquare(int model)
 {
-	int new_sec = BA_New(ObjType::sectors);
+	int new_sec = gDocument.basis.addNew(ObjType::sectors);
 
 	if (model >= 0)
 		gDocument.sectors[new_sec]->RawCopy(gDocument.sectors[model]);
@@ -96,18 +94,18 @@ static void CreateSquare(int model)
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		int new_v = BA_New(ObjType::vertices);
+		int new_v = gDocument.basis.addNew(ObjType::vertices);
 		Vertex *V = gDocument.vertices[new_v];
 
 		V->SetRawX((i >= 2) ? x2 : x1);
 		V->SetRawY((i==1 || i==2) ? y2 : y1);
 
-		int new_sd = BA_New(ObjType::sidedefs);
+		int new_sd = gDocument.basis.addNew(ObjType::sidedefs);
 
 		gDocument.sidedefs[new_sd]->SetDefaults(false);
 		gDocument.sidedefs[new_sd]->sector = new_sec;
 
-		int new_ld = BA_New(ObjType::linedefs);
+		int new_ld = gDocument.basis.addNew(ObjType::linedefs);
 
 		LineDef * L = gDocument.linedefs[new_ld];
 
@@ -132,9 +130,9 @@ static void Insert_Thing()
 		model = edit.Selected->find_first();
 
 
-	BA_Begin();
+	gDocument.basis.begin();
 
-	int new_t = BA_New(ObjType::things);
+	int new_t = gDocument.basis.addNew(ObjType::things);
 	Thing *T = gDocument.things[new_t];
 
 	if (model >= 0)
@@ -156,8 +154,8 @@ static void Insert_Thing()
 
 	recent_things.insert_number(T->type);
 
-	BA_Message("added thing #%d", new_t);
-	BA_End();
+	gDocument.basis.setMessage("added thing #%d", new_t);
+	gDocument.basis.end();
 
 
 	// select it
@@ -169,7 +167,7 @@ static void Insert_Thing()
 
 static int Sector_New(int model = -1, int model2 = -1, int model3 = -1)
 {
-	int new_sec = BA_New(ObjType::sectors);
+	int new_sec = gDocument.basis.addNew(ObjType::sectors);
 
 	if (model < 0) model = model2;
 	if (model < 0) model = model3;
@@ -336,7 +334,7 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	if (LineDefAlreadyExists(v1, v2))
 		return;
 
-	int new_ld = BA_New(ObjType::linedefs);
+	int new_ld = gDocument.basis.addNew(ObjType::linedefs);
 
 	LineDef * L = gDocument.linedefs[new_ld];
 
@@ -500,12 +498,12 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	}
 
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 
 	if (new_vert < 0)
 	{
-		new_vert = BA_New(ObjType::vertices);
+		new_vert = gDocument.basis.addNew(ObjType::vertices);
 
 		Vertex *V = gDocument.vertices[new_vert];
 
@@ -518,11 +516,11 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		if (split_ld >= 0)
 		{
 			SplitLineDefAtVertex(split_ld, new_vert);
-			BA_Message("split linedef #%d", split_ld);
+			gDocument.basis.setMessage("split linedef #%d", split_ld);
 		}
 		else
 		{
-			BA_Message("added vertex #%d", new_vert);
+			gDocument.basis.setMessage("added vertex #%d", new_vert);
 		}
 	}
 
@@ -549,14 +547,14 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		// this can make new sectors too
 		Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
 
-		BA_Message("added linedef");
+		gDocument.basis.setMessage("added linedef");
 
 		edit.draw_from = Objid(ObjType::vertices, new_vert);
 		edit.Selected->set(new_vert);
 	}
 
 
-	BA_End();
+	gDocument.basis.end();
 
 
 begin_drawing:
@@ -610,8 +608,8 @@ static void Insert_Sector()
 	// if outside of the map, create a square
 	if (PointOutsideOfMap(edit.map_x, edit.map_y))
 	{
-		BA_Begin();
-		BA_Message("added sector (outside map)");
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("added sector (outside map)");
 
 		int model = -1;
 		if (sel_count > 0)
@@ -619,7 +617,7 @@ static void Insert_Sector()
 
 		CreateSquare(model);
 
-		BA_End();
+		gDocument.basis.end();
 		return;
 	}
 
@@ -637,12 +635,12 @@ static void Insert_Sector()
 		model = -1;  // look for a neighbor to copy
 
 
-	BA_Begin();
-	BA_Message("added new sector");
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("added new sector");
 
 	bool ok = AssignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
 
-	BA_End();
+	gDocument.basis.end();
 
 	// select the new sector
 	if (ok)
@@ -754,9 +752,9 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			{
 				const Thing * T = gDocument.things[*it];
 
-				BA_ChangeTH(*it, Thing::F_X, T->raw_x + fdx);
-				BA_ChangeTH(*it, Thing::F_Y, T->raw_y + fdy);
-				BA_ChangeTH(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
+				gDocument.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
+				gDocument.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
+				gDocument.basis.changeThing(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
 			}
 			break;
 
@@ -765,8 +763,8 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			{
 				const Vertex * V = gDocument.vertices[*it];
 
-				BA_ChangeVT(*it, Vertex::F_X, V->raw_x + fdx);
-				BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + fdy);
+				gDocument.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
+				gDocument.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 			}
 			break;
 
@@ -776,8 +774,8 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			{
 				const Sector * S = gDocument.sectors[*it];
 
-				BA_ChangeSEC(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
-				BA_ChangeSEC(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
+				gDocument.basis.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
+				gDocument.basis.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -802,8 +800,8 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 	if (list->empty())
 		return;
 
-	BA_Begin();
-	BA_MessageForSel("moved", list);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("moved", *list);
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -818,7 +816,7 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 
 	DoMoveObjects(list, delta_x, delta_y, delta_z);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -835,14 +833,14 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 
 	/* move a single vertex */
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	int did_split_line = -1;
 
 	// handle a single vertex merging onto an existing one
 	if (edit.highlight.valid())
 	{
-		BA_Message("merge vertex #%d", obj.num);
+		gDocument.basis.setMessage("merge vertex #%d", obj.num);
 
 		SYS_ASSERT(obj.num != edit.highlight.num);
 
@@ -853,7 +851,7 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 
 		Vertex_MergeList(&verts);
 
-		BA_End();
+		gDocument.basis.end();
 		return;
 	}
 
@@ -874,11 +872,11 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 	DoMoveObjects(&list, delta_x, delta_y, delta_z);
 
 	if (did_split_line >= 0)
-		BA_Message("split linedef #%d", did_split_line);
+		gDocument.basis.setMessage("split linedef #%d", did_split_line);
 	else
-		BA_MessageForSel("moved", &list);
+		gDocument.basis.setMessageForSelection("moved", list);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -886,18 +884,18 @@ static void TransferThingProperties(int src_thing, int dest_thing)
 {
 	const Thing * T = gDocument.things[src_thing];
 
-	BA_ChangeTH(dest_thing, Thing::F_TYPE,    T->type);
-	BA_ChangeTH(dest_thing, Thing::F_OPTIONS, T->options);
+	gDocument.basis.changeThing(dest_thing, Thing::F_TYPE,    T->type);
+	gDocument.basis.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
 //	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
-	BA_ChangeTH(dest_thing, Thing::F_TID,     T->tid);
-	BA_ChangeTH(dest_thing, Thing::F_SPECIAL, T->special);
+	gDocument.basis.changeThing(dest_thing, Thing::F_TID,     T->tid);
+	gDocument.basis.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
 
-	BA_ChangeTH(dest_thing, Thing::F_ARG1, T->arg1);
-	BA_ChangeTH(dest_thing, Thing::F_ARG2, T->arg2);
-	BA_ChangeTH(dest_thing, Thing::F_ARG3, T->arg3);
-	BA_ChangeTH(dest_thing, Thing::F_ARG4, T->arg4);
-	BA_ChangeTH(dest_thing, Thing::F_ARG5, T->arg5);
+	gDocument.basis.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
+	gDocument.basis.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
+	gDocument.basis.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
+	gDocument.basis.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
+	gDocument.basis.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
 }
 
 
@@ -905,14 +903,14 @@ static void TransferSectorProperties(int src_sec, int dest_sec)
 {
 	const Sector * sector = gDocument.sectors[src_sec];
 
-	BA_ChangeSEC(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	BA_ChangeSEC(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
-	BA_ChangeSEC(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	BA_ChangeSEC(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
+	gDocument.basis.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
+	gDocument.basis.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
+	gDocument.basis.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
+	gDocument.basis.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
 
-	BA_ChangeSEC(dest_sec, Sector::F_LIGHT,  sector->light);
-	BA_ChangeSEC(dest_sec, Sector::F_TYPE,   sector->type);
-	BA_ChangeSEC(dest_sec, Sector::F_TAG,    sector->tag);
+	gDocument.basis.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
+	gDocument.basis.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
+	gDocument.basis.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
 }
 
 
@@ -948,15 +946,15 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 
 			if (! L2->Left())
 			{
-				BA_ChangeSD(L2->right, SideDef::F_MID_TEX, tex);
+				gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 			else
 			{
-				BA_ChangeSD(L2->right, SideDef::F_LOWER_TEX, tex);
-				BA_ChangeSD(L2->right, SideDef::F_UPPER_TEX, tex);
+				gDocument.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
+				gDocument.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
 
-				BA_ChangeSD(L2->left,  SideDef::F_LOWER_TEX, tex);
-				BA_ChangeSD(L2->left,  SideDef::F_UPPER_TEX, tex);
+				gDocument.basis.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
+				gDocument.basis.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
@@ -995,7 +993,7 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 
 			if (tex > 0)
 			{
-				BA_ChangeSD(L2->right, SideDef::F_MID_TEX, tex);
+				gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 		}
 		else
@@ -1034,25 +1032,25 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			BA_ChangeSD(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
-			BA_ChangeSD(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
-			BA_ChangeSD(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+			gDocument.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
+			gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
+			gDocument.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
 
-			BA_ChangeSD(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
-			BA_ChangeSD(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
-			BA_ChangeSD(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
+			gDocument.basis.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
+			gDocument.basis.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
+			gDocument.basis.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
 		}
 	}
 
-	BA_ChangeLD(dest_line, LineDef::F_FLAGS, flags);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
 
-	BA_ChangeLD(dest_line, LineDef::F_TYPE, L1->type);
-	BA_ChangeLD(dest_line, LineDef::F_TAG,  L1->tag);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
 
-	BA_ChangeLD(dest_line, LineDef::F_ARG2, L1->arg2);
-	BA_ChangeLD(dest_line, LineDef::F_ARG3, L1->arg3);
-	BA_ChangeLD(dest_line, LineDef::F_ARG4, L1->arg4);
-	BA_ChangeLD(dest_line, LineDef::F_ARG5, L1->arg5);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
+	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
 }
 
 
@@ -1092,8 +1090,8 @@ void CMD_CopyProperties()
 		if (source == target)
 			return;
 
-		BA_Begin();
-		BA_Message("copied properties");
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("copied properties");
 
 		switch (edit.mode)
 		{
@@ -1112,7 +1110,7 @@ void CMD_CopyProperties()
 			default: break;
 		}
 
-		BA_End();
+		gDocument.basis.end();
 
 	}
 	else  /* reverse mode, HILITE --> SEL */
@@ -1125,8 +1123,8 @@ void CMD_CopyProperties()
 
 		int source = edit.highlight.num;
 
-		BA_Begin();
-		BA_Message("copied properties");
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("copied properties");
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -1151,7 +1149,7 @@ void CMD_CopyProperties()
 			}
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -1502,19 +1500,19 @@ static void DoMirrorThings(selection_c *list, bool is_vert, double mid_x, double
 
 		if (is_vert)
 		{
-			BA_ChangeTH(*it, Thing::F_Y, 2*fix_my - T->raw_y);
+			gDocument.basis.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
 
 			if (T->angle != 0)
-				BA_ChangeTH(*it, Thing::F_ANGLE, 360 - T->angle);
+				gDocument.basis.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			BA_ChangeTH(*it, Thing::F_X, 2*fix_mx - T->raw_x);
+			gDocument.basis.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
 
 			if (T->angle > 180)
-				BA_ChangeTH(*it, Thing::F_ANGLE, 540 - T->angle);
+				gDocument.basis.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
 			else
-				BA_ChangeTH(*it, Thing::F_ANGLE, 180 - T->angle);
+				gDocument.basis.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
 		}
 	}
 }
@@ -1533,9 +1531,9 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 		const Vertex * V = gDocument.vertices[*it];
 
 		if (is_vert)
-			BA_ChangeVT(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
+			gDocument.basis.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
 		else
-			BA_ChangeVT(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
+			gDocument.basis.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1549,8 +1547,8 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 		int start = L->start;
 		int end   = L->end;
 
-		BA_ChangeLD(*it, LineDef::F_START, end);
-		BA_ChangeLD(*it, LineDef::F_END, start);
+		gDocument.basis.changeLinedef(*it, LineDef::F_START, end);
+		gDocument.basis.changeLinedef(*it, LineDef::F_END, start);
 	}
 }
 
@@ -1595,12 +1593,12 @@ void CMD_Mirror()
 	double mid_x, mid_y;
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	BA_Begin();
-	BA_MessageForSel("mirrored", edit.Selected, is_vert ? " vertically" : " horizontally");
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
 	DoMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1622,17 +1620,17 @@ static void DoRotate90Things(selection_c *list, bool anti_clockwise,
 
 		if (anti_clockwise)
 		{
-			BA_ChangeTH(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			BA_ChangeTH(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			gDocument.basis.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
+			gDocument.basis.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
-			BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
+			gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			BA_ChangeTH(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			BA_ChangeTH(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			gDocument.basis.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
+			gDocument.basis.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
-			BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
+			gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
 	}
 }
@@ -1658,8 +1656,8 @@ void CMD_Rotate90()
 	double mid_x, mid_y;
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	BA_Begin();
-	BA_MessageForSel("rotated", edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
 	if (edit.mode == ObjType::things)
 	{
@@ -1692,18 +1690,18 @@ void CMD_Rotate90()
 
 			if (anti_clockwise)
 			{
-				BA_ChangeVT(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-				BA_ChangeVT(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+				gDocument.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+				gDocument.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
 			}
 			else
 			{
-				BA_ChangeVT(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-				BA_ChangeVT(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+				gDocument.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+				gDocument.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
 			}
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1721,8 +1719,8 @@ static void DoScaleTwoThings(selection_c *list, transform_t& param)
 
 		param.Apply(&new_x, &new_y);
 
-		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
-		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
+		gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
+		gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1730,7 +1728,7 @@ static void DoScaleTwoThings(selection_c *list, transform_t& param)
 
 		if (ang_diff)
 		{
-			BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
+			gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
 		}
 	}
 }
@@ -1750,8 +1748,8 @@ static void DoScaleTwoVertices(selection_c *list, transform_t& param)
 
 		param.Apply(&new_x, &new_y);
 
-		BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
-		BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
+		gDocument.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
+		gDocument.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 	}
 }
 
@@ -1785,8 +1783,8 @@ void TransformObjects(transform_t& param)
 
 	SYS_ASSERT(edit.Selected->notempty());
 
-	BA_Begin();
-	BA_MessageForSel("scaled", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("scaled", *edit.Selected);
 
 	if (param.scale_x < 0)
 	{
@@ -1802,7 +1800,7 @@ void TransformObjects(transform_t& param)
 
 	DoScaleTwoStuff(edit.Selected, param);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1848,12 +1846,12 @@ void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y)
 
 	DetermineOrigin(param, pos_x, pos_y);
 
-	BA_Begin();
-	BA_MessageForSel("scaled", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("scaled", *edit.Selected);
 	{
 		DoScaleTwoStuff(edit.Selected, param);
 	}
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1891,8 +1889,8 @@ static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
 
-		BA_ChangeSEC(*it, Sector::F_FLOORH, new_f);
-		BA_ChangeSEC(*it, Sector::F_CEILH,  new_c);
+		gDocument.basis.changeSector(*it, Sector::F_FLOORH, new_f);
+		gDocument.basis.changeSector(*it, Sector::F_CEILH,  new_c);
 	}
 }
 
@@ -1910,13 +1908,13 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 
 	DetermineOrigin(param, pos_x, pos_y);
 
-	BA_Begin();
-	BA_MessageForSel("scaled", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("scaled", *edit.Selected);
 	{
 		DoScaleTwoStuff(edit.Selected, param);
 		DoScaleSectorHeights(edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1930,12 +1928,12 @@ void RotateObjects3(double deg, double pos_x, double pos_y)
 
 	DetermineOrigin(param, pos_x, pos_y);
 
-	BA_Begin();
-	BA_MessageForSel("rotated", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("rotated", *edit.Selected);
 	{
 		DoScaleTwoStuff(edit.Selected, param);
 	}
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -2010,12 +2008,12 @@ static void DoEnlargeOrShrink(bool do_shrink)
 		param.mid_y = ly + (hy - ly) / 2;
 	}
 
-	BA_Begin();
-	BA_MessageForSel(do_shrink ? "shrunk" : "enlarged", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *edit.Selected);
 
 	DoScaleTwoStuff(edit.Selected, param);
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -2056,8 +2054,8 @@ static void Quantize_Things(selection_c *list)
 
 			if (! SpotInUse(ObjType::things, new_x, new_y))
 			{
-				BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(new_x));
-				BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(new_y));
+				gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
+				gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2160,8 +2158,8 @@ static void Quantize_Vertices(selection_c *list)
 
 			if (! SpotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				BA_ChangeVT(*it, Vertex::F_X, MakeValidCoord(new_x));
-				BA_ChangeVT(*it, Vertex::F_Y, MakeValidCoord(new_y));
+				gDocument.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
+				gDocument.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2191,8 +2189,8 @@ void CMD_Quantize()
 		Selection_Add(edit.highlight);
 	}
 
-	BA_Begin();
-	BA_MessageForSel("quantized", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("quantized", *edit.Selected);
 
 	switch (edit.mode)
 	{
@@ -2217,7 +2215,7 @@ void CMD_Quantize()
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	edit.error_mode = true;
 }

@@ -353,7 +353,7 @@ public:
 		{
 			if (fields[i].field == field)
 			{
-				BA_Change(type, fields[i].obj, (byte)field, fields[i].value + delta);
+				gDocument.basis.change(type, fields[i].obj, (byte)field, fields[i].value + delta);
 			}
 		}
 	}
@@ -537,13 +537,13 @@ static void AdjustOfs_Finish()
 
 	if (dx || dy)
 	{
-		BA_Begin();
-		BA_Message("adjusted offsets");
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("adjusted offsets");
 
 		edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
 		edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
 
-		BA_End();
+		gDocument.basis.end();
 	}
 
 	delete edit.adjust_bucket;
@@ -826,12 +826,12 @@ void Render3D_DragSectors()
 	if (dz == 0)
 		return;
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	if (dz > 0)
-		BA_Message("raised sectors");
+		gDocument.basis.setMessage("raised sectors");
 	else
-		BA_Message("lowered sectors");
+		gDocument.basis.setMessage("lowered sectors");
 
 	if (edit.dragged.valid())
 	{
@@ -850,7 +850,7 @@ void Render3D_DragSectors()
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1160,15 +1160,15 @@ static void StoreSelectedThing(int new_type)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("pasted type of", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("pasted type of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		BA_ChangeTH(*it, Thing::F_TYPE, new_type);
+		gDocument.basis.changeThing(*it, Thing::F_TYPE, new_type);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1242,21 +1242,21 @@ static void StoreSelectedFlat(int new_tex)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("pasted flat to", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("pasted flat to", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
+			gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			BA_ChangeSEC(*it, Sector::F_CEIL_TEX, new_tex);
+			gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1277,21 +1277,21 @@ static void StoreDefaultedFlats()
 	int floor_tex = BA_InternaliseString(default_floor_tex);
 	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
-	BA_Begin();
-	BA_MessageForSel("defaulted flat in", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, floor_tex);
+			gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			BA_ChangeSEC(*it, Sector::F_CEIL_TEX, ceil_tex);
+			gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1388,8 +1388,8 @@ static void StoreSelectedTexture(int new_tex)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("pasted tex to", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("pasted tex to", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -1401,32 +1401,32 @@ static void StoreSelectedTexture(int new_tex)
 
 		if (L->OneSided())
 		{
-			BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 			continue;
 		}
 
 		/* right side */
 		if (parts == 1 || (parts & PART_RT_LOWER))
-			BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_RT_UPPER))
-			BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 		if (parts & PART_RT_RAIL)
-			BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 
 		/* left side */
 		if (parts == 1 || (parts & PART_LF_LOWER))
-			BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_LF_UPPER))
-			BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
 
 		if (parts & PART_LF_RAIL)
-			BA_ChangeSD(L->left, SideDef::F_MID_TEX, new_tex);
+			gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

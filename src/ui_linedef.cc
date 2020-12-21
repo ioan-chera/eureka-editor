@@ -246,15 +246,15 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited type of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited type of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			BA_ChangeLD(*it, LineDef::F_TYPE, new_type);
+			gDocument.basis.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 
 	// update description
@@ -299,24 +299,24 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	{
 		if (L->OneSided())
 		{
-			if (parts & PART_RT_LOWER) BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (parts & PART_RT_UPPER) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_LOWER) gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_UPPER) gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
 		}
 
 		if (L->Right())
 		{
-			if (parts & PART_RT_LOWER) BA_ChangeSD(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_RT_UPPER) BA_ChangeSD(L->right, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_RT_RAIL)  BA_ChangeSD(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_LOWER) gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_RT_UPPER) gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_RAIL)  gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
 		if (L->Left())
 		{
-			if (parts & PART_LF_LOWER) BA_ChangeSD(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_LF_UPPER) BA_ChangeSD(L->left, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_LF_RAIL)  BA_ChangeSD(L->left, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_LF_LOWER) gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_LF_UPPER) gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_LF_RAIL)  gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
 	}
@@ -332,11 +332,11 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		    is_null_tex(L->Right()->MidTex()) &&
 		    is_null_tex(L-> Left()->MidTex()) )
 		{
-			BA_ChangeLD(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
+			gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
 
-		BA_ChangeSD(L->left,  SideDef::F_MID_TEX, new_tex);
-		BA_ChangeSD(L->right, SideDef::F_MID_TEX, new_tex);
+		gDocument.basis.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex);
+		gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
@@ -348,7 +348,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		if (sd < 0)
 			return;
 
-		BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+		gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
@@ -365,7 +365,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		BA_ChangeSD(sd1, SideDef::F_UPPER_TEX, new_tex);
+		gDocument.basis.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 	}
 	// modify a lower texture
 	else
@@ -386,9 +386,9 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		// impossible to set them to different textures).
 
 		if (S->lower_tex == S->upper_tex)
-			BA_ChangeSD(sd1, SideDef::F_UPPER_TEX, new_tex);
+			gDocument.basis.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 
-		BA_ChangeSD(sd1, SideDef::F_LOWER_TEX, new_tex);
+		gDocument.basis.changeSidedef(sd1, SideDef::F_LOWER_TEX, new_tex);
 	}
 }
 
@@ -404,8 +404,8 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited texture on", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited texture on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -419,7 +419,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 			SetTexOnLine(*it, new_tex, e_state, p2);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 
 	UpdateField();
@@ -488,8 +488,8 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 	if (edit.Selected->empty())
 		return;
 
-	BA_Begin();
-	BA_Message("pasted %s", BA_GetString(new_tex).c_str());
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -506,23 +506,23 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 			if (L->TwoSided())
 			{
 				if (parts2 & PART_RT_LOWER)
-					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 
 				if (parts2 & PART_RT_UPPER)
-					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 
 				if (parts2 & PART_RT_RAIL)
-					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 			}
 			else  // one-sided line
 			{
 				if (parts2 & PART_RT_LOWER)
-					BA_ChangeSD(sd, SideDef::F_MID_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 			}
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	UpdateField();
 	UpdateSides();
@@ -608,8 +608,8 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited flags of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited flags of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -617,10 +617,10 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			BA_ChangeLD(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+			gDocument.basis.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -638,15 +638,15 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited args of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited args of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeLD(*it, LineDef::F_TAG + arg_idx, new_value);
+			gDocument.basis.changeLinedef(*it, LineDef::F_TAG + arg_idx, new_value);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 

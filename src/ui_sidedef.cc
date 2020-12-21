@@ -197,8 +197,8 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited texture on", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited texture on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -215,20 +215,20 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 				if (lower)
 				{
-					BA_ChangeSD(sd, SideDef::F_LOWER_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 				}
 				else if (upper)
 				{
-					BA_ChangeSD(sd, SideDef::F_UPPER_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 				}
 				else if (rail)
 				{
-					BA_ChangeSD(sd, SideDef::F_MID_TEX,   new_tex);
+					gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex);
 				}
 			}
 		}
 
-		BA_End();
+		gDocument.basis.end();
 
 		box->UpdateField();
 	}
@@ -273,12 +273,12 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 	int field = box->is_front ? LineDef::F_RIGHT : LineDef::F_LEFT;
 
-	BA_Begin();
+	gDocument.basis.begin();
 
 	// make sure we have a fallback sector to use
 	if (NumSectors == 0)
 	{
-		int new_sec = BA_New(ObjType::sectors);
+		int new_sec = gDocument.basis.addNew(ObjType::sectors);
 
 		gDocument.sectors[new_sec]->SetDefaults();
 	}
@@ -301,19 +301,19 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			new_sec = NumSectors - 1;
 
 		// create the new sidedef
-		sd = BA_New(ObjType::sidedefs);
+		sd = gDocument.basis.addNew(ObjType::sidedefs);
 
 		gDocument.sidedefs[sd]->SetDefaults(other >= 0);
 		gDocument.sidedefs[sd]->sector = new_sec;
 
-		BA_ChangeLD(*it, field, sd);
+		gDocument.basis.changeLinedef(*it, field, sd);
 
 		if (other >= 0)
 			LD_AddSecondSideDef(*it, sd, other);
 	}
 
-	BA_MessageForSel("added sidedef to", edit.Selected);
-	BA_End();
+	gDocument.basis.setMessageForSelection("added sidedef to", *edit.Selected);
+	gDocument.basis.end();
 
 	main_win->line_box->UpdateField();
 	main_win->line_box->UpdateSides();
@@ -331,7 +331,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		return;
 
 	// iterate over selected linedefs
-	BA_Begin();
+	gDocument.basis.begin();
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -347,8 +347,8 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		LD_RemoveSideDef(*it, box->is_front ? Side::right : Side::left);
 	}
 
-	BA_MessageForSel("deleted sidedef from", edit.Selected);
-	BA_End();
+	gDocument.basis.setMessageForSelection("deleted sidedef from", *edit.Selected);
+	gDocument.basis.end();
 
 	main_win->line_box->UpdateField();
 	main_win->line_box->UpdateSides();
@@ -365,12 +365,12 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
+		gDocument.basis.begin();
 
 		if (w == box->x_ofs)
-			BA_MessageForSel("edited X offset on", edit.Selected);
+			gDocument.basis.setMessageForSelection("edited X offset on", *edit.Selected);
 		else
-			BA_MessageForSel("edited Y offset on", edit.Selected);
+			gDocument.basis.setMessageForSelection("edited Y offset on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -381,13 +381,13 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 			if (is_sidedef(sd))
 			{
 				if (w == box->x_ofs)
-					BA_ChangeSD(sd, SideDef::F_X_OFFSET, new_x_ofs);
+					gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_x_ofs);
 				else
-					BA_ChangeSD(sd, SideDef::F_Y_OFFSET, new_y_ofs);
+					gDocument.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, new_y_ofs);
 			}
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -403,8 +403,8 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited sector-ref on", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited sector-ref on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -413,10 +413,10 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 			int sd = box->is_front ? L->right : L->left;
 
 			if (is_sidedef(sd))
-				BA_ChangeSD(sd, SideDef::F_SECTOR, new_sec);
+				gDocument.basis.changeSidedef(sd, SideDef::F_SECTOR, new_sec);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 

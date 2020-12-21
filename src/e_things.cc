@@ -63,17 +63,17 @@ void CMD_TH_SpinThings(void)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("spun", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("spun", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Thing *T = gDocument.things[*it];
 
-		BA_ChangeTH(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+		gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	main_win->thing_box->UpdateField(Thing::F_ANGLE);
 
@@ -135,8 +135,8 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 
 	const Thing *T = gDocument.things[th];
 
-	BA_ChangeTH(th, Thing::F_X, T->raw_x + fdx);
-	BA_ChangeTH(th, Thing::F_Y, T->raw_y + fdy);
+	gDocument.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
+	gDocument.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);
 }
 
 
@@ -154,8 +154,8 @@ void CMD_TH_Disconnect(void)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("disconnected", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	while (! edit.Selected->empty())
 	{
@@ -181,7 +181,7 @@ void CMD_TH_Disconnect(void)
 		}
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -204,16 +204,16 @@ void CMD_TH_Merge(void)
 	double mid_x, mid_y;
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	BA_Begin();
-	BA_MessageForSel("merged", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		BA_ChangeTH(*it, Thing::F_X, MakeValidCoord(mid_x));
-		BA_ChangeTH(*it, Thing::F_Y, MakeValidCoord(mid_y));
+		gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(mid_x));
+		gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(mid_y));
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 

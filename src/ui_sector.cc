@@ -257,22 +257,22 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
+		gDocument.basis.begin();
 
 		if (w == box->floor_h)
-			BA_MessageForSel("edited floor of", edit.Selected);
+			gDocument.basis.setMessageForSelection("edited floor of", *edit.Selected);
 		else
-			BA_MessageForSel("edited ceiling of", edit.Selected);
+			gDocument.basis.setMessageForSelection("edited ceiling of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
 			if (w == box->floor_h)
-				BA_ChangeSEC(*it, Sector::F_FLOORH, f_h);
+				gDocument.basis.changeSector(*it, Sector::F_FLOORH, f_h);
 			else
-				BA_ChangeSEC(*it, Sector::F_CEILH, c_h);
+				gDocument.basis.changeSector(*it, Sector::F_CEILH, c_h);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 
 		box-> floor_h->value(SString(f_h).c_str());
 		box->  ceil_h->value(SString(c_h).c_str());
@@ -297,8 +297,8 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited headroom of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited headroom of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
@@ -306,10 +306,10 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 			new_h = CLAMP(-32767, new_h, 32767);
 
-			BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
+			gDocument.basis.changeSector(*it, Sector::F_CEILH, new_h);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 
 		box->UpdateField();
 	}
@@ -366,8 +366,8 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited texture on", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited texture on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -376,13 +376,13 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 				parts = filter_parts;
 
 			if (parts & filter_parts & PART_FLOOR)
-				BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, tex_num);
+				gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, tex_num);
 
 			if (parts & filter_parts & parts & PART_CEIL)
-				BA_ChangeSEC(*it, Sector::F_CEIL_TEX, tex_num);
+				gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, tex_num);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 
 	UpdateField();
@@ -489,17 +489,17 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited type of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited type of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			int old_type = gDocument.sectors[*it]->type;
 
-			BA_ChangeSEC(*it, Sector::F_TYPE, (old_type & ~mask) | value);
+			gDocument.basis.changeSector(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 
 	// update the description
@@ -564,15 +564,15 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("edited light of", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("edited light of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
+			gDocument.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 	}
 }
 
@@ -836,16 +836,16 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 	if (edit.Selected->empty())
 		return;
 
-	BA_Begin();
-	BA_Message("pasted %s", BA_GetString(new_tex).c_str());
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_tex);
-		if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_tex);
+		if (parts & PART_FLOOR) gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+		if (parts & PART_CEIL)  gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX,  new_tex);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	UpdateField();
 }
@@ -858,16 +858,16 @@ void UI_SectorBox::CB_Cut(int parts)
 
 	if (! edit.Selected->empty())
 	{
-		BA_Begin();
-		BA_MessageForSel("cut texture on", edit.Selected);
+		gDocument.basis.begin();
+		gDocument.basis.setMessageForSelection("cut texture on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			if (parts & PART_FLOOR) BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, new_floor);
-			if (parts & PART_CEIL)  BA_ChangeSEC(*it, Sector::F_CEIL_TEX,  new_ceil);
+			if (parts & PART_FLOOR) gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_floor);
+			if (parts & PART_CEIL)  gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil);
 		}
 
-		BA_End();
+		gDocument.basis.end();
 
 		UpdateField();
 	}

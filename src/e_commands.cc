@@ -111,7 +111,7 @@ void CMD_SelectAll()
 {
 	Editor_ClearErrorMode();
 
-	int total = NumObjects(edit.mode);
+	int total = gDocument.numObjects(edit.mode);
 
 	Selection_Push();
 
@@ -143,7 +143,7 @@ void CMD_InvertSelection()
 	// do not clear selection when in error mode
 	edit.error_mode = false;
 
-	int total = NumObjects(edit.mode);
+	int total = gDocument.numObjects(edit.mode);
 
 	if (edit.Selected->what_type() != edit.mode)
 	{
@@ -169,7 +169,7 @@ void CMD_Quit()
 
 void CMD_Undo()
 {
-	if (! BA_Undo())
+	if (! gDocument.basis.undo())
 	{
 		Beep("No operation to undo");
 		return;
@@ -182,7 +182,7 @@ void CMD_Undo()
 
 void CMD_Redo()
 {
-	if (! BA_Redo())
+	if (! gDocument.basis.redo())
 	{
 		Beep("No operation to redo");
 		return;
@@ -789,10 +789,10 @@ void CMD_ACT_Click()
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 
-		BA_Begin();
-		BA_Message("split linedef #%d", split_ld);
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("split linedef #%d", split_ld);
 
-		int new_vert = BA_New(ObjType::vertices);
+		int new_vert = gDocument.basis.addNew(ObjType::vertices);
 
 		Vertex *V = gDocument.vertices[new_vert];
 
@@ -800,7 +800,7 @@ void CMD_ACT_Click()
 
 		SplitLineDefAtVertex(split_ld, new_vert);
 
-		BA_End();
+		gDocument.basis.end();
 
 		if (want_select)
 			edit.Selected->set(new_vert);

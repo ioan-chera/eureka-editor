@@ -1489,7 +1489,7 @@ bool M_LoadUserState()
 {
 	crc32_c crc;
 
-	BA_LevelChecksum(crc);
+	gDocument.getLevelChecksum(crc);
 
 	SString filename = PersistFilename(crc);
 
@@ -1543,7 +1543,7 @@ bool M_SaveUserState()
 {
 	crc32_c crc;
 
-	BA_LevelChecksum(crc);
+	gDocument.getLevelChecksum(crc);
 
 	SString filename = PersistFilename(crc);
 

@@ -1232,7 +1232,7 @@ bool UI_FindAndReplace::FindNext()
 
 
 	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
-	int total    = NumObjects(cur_obj.type);
+	int total    = gDocument.numObjects(cur_obj.type);
 
 	for (int idx = start_at ; idx < total ; idx++)
 	{
@@ -1294,12 +1294,12 @@ void UI_FindAndReplace::DoReplace()
 
 	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-	BA_Begin();
-	BA_Message("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
 	ApplyReplace(cur_obj.num, replace_tex_id);
 
-	BA_End();
+	gDocument.basis.end();
 
 	// move onto next object
 	FindNext();
@@ -1388,7 +1388,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	{
 		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-		BA_Begin();
+		gDocument.basis.begin();
 	}
 
 	// we select objects even in REPLACE mode
@@ -1400,7 +1400,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	// this clears the selection
 	edit.Selected->change_type(edit.mode);
 
-	int total = NumObjects(cur_obj.type);
+	int total = gDocument.numObjects(cur_obj.type);
 	int count = 0;
 
 	for (int idx = 0 ; idx < total ; idx++)
@@ -1426,8 +1426,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		BA_MessageForSel("replacement in", edit.Selected);
-		BA_End();
+		gDocument.basis.setMessageForSelection("replacement in", *edit.Selected);
+		gDocument.basis.end();
 	}
 
 	if (count > 0)
@@ -1693,7 +1693,7 @@ void UI_FindAndReplace::Replace_Thing(int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	BA_ChangeTH(idx, Thing::F_TYPE, new_type);
+	gDocument.basis.changeThing(idx, Thing::F_TYPE, new_type);
 }
 
 
@@ -1720,22 +1720,22 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))
-					BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
+					gDocument.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex.good() && Pattern_Match(L_tex, pattern))
-				BA_ChangeSD(sd_num, SideDef::F_LOWER_TEX, new_tex);
+				gDocument.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex.good() && Pattern_Match(U_tex, pattern))
-				BA_ChangeSD(sd_num, SideDef::F_UPPER_TEX, new_tex);
+				gDocument.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
-				BA_ChangeSD(sd_num, SideDef::F_MID_TEX, new_tex);
+				gDocument.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 	}
 }
 
@@ -1748,14 +1748,14 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(sector->FloorTex(), pattern))
-			BA_ChangeSEC(idx, Sector::F_FLOOR_TEX, new_tex);
+			gDocument.basis.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
 
 	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
 								|| ( is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
-			BA_ChangeSEC(idx, Sector::F_CEIL_TEX, new_tex);
+			gDocument.basis.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
 
@@ -1763,7 +1763,7 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	BA_ChangeLD(idx, LineDef::F_TYPE, new_type);
+	gDocument.basis.changeLinedef(idx, LineDef::F_TYPE, new_type);
 }
 
 
@@ -1775,7 +1775,7 @@ void UI_FindAndReplace::Replace_SectorType(int idx)
 	int old_type = gDocument.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());
 
-	BA_ChangeSEC(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
+	gDocument.basis.changeSector(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
 }
 
 //--- editor settings ---

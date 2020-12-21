@@ -130,11 +130,11 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 
 	if (same_left)
 	{
-		BA_ChangeLD(ld2, LineDef::F_LEFT, L1->right);
+		gDocument.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
 	}
 	else if (same_right)
 	{
-		BA_ChangeLD(ld2, LineDef::F_RIGHT, L1->left);
+		gDocument.basis.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
 	}
 	else
 	{
@@ -152,7 +152,7 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 
 	if (L2->OneSided() && new_mid_tex > 0)
 	{
-		BA_ChangeSD(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+		gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
 	// fix flags of remaining linedef
@@ -169,7 +169,7 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 		new_flags |=  MLF_Blocking;
 	}
 
-	BA_ChangeLD(ld2, LineDef::F_FLAGS, new_flags);
+	gDocument.basis.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
 }
 
 
@@ -231,10 +231,10 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
-			BA_ChangeLD(n, LineDef::F_START, v2);
+			gDocument.basis.changeLinedef(n, LineDef::F_START, v2);
 
 		if (L->end == v1)
-			BA_ChangeLD(n, LineDef::F_END, v2);
+			gDocument.basis.changeLinedef(n, LineDef::F_END, v2);
 
 		if (L->start == v2 && L->end == v2)
 			del_lines.set(n);
@@ -298,12 +298,12 @@ void CMD_VT_Merge()
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("merged", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
 
 	Vertex_MergeList(edit.Selected);
 
-	BA_End();
+	gDocument.basis.end();
 
 	Selection_Clear(true /* no_save */);
 }
@@ -354,8 +354,8 @@ bool Vertex_TryFixDangler(int v_num)
 		fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
 #endif
 
-		BA_Begin();
-		BA_Message("merged dangling vertex #%d\n", v_num);
+		gDocument.basis.begin();
+		gDocument.basis.setMessage("merged dangling vertex #%d\n", v_num);
 
 		selection_c list(ObjType::vertices);
 
@@ -364,7 +364,7 @@ bool Vertex_TryFixDangler(int v_num)
 
 		Vertex_MergeList(&list);
 
-		BA_End();
+		gDocument.basis.end();
 
 		edit.Selected->set(v_other);
 
@@ -402,12 +402,12 @@ bool Vertex_TryFixDangler(int v_num)
 	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_obj.num, v_num);
 #endif
 
-	BA_Begin();
-	BA_Message("split linedef #%d\n", line_obj.num);
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("split linedef #%d\n", line_obj.num);
 
 	SplitLineDefAtVertex(line_obj.num, v_num);
 
-	BA_End();
+	gDocument.basis.end();
 
 	// no vertices were added or removed, hence can continue Insert_Vertex
 	return false;
@@ -470,19 +470,19 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 			// need a new one.
 			if (which != num_lines-1)
 			{
-				int new_v = BA_New(ObjType::vertices);
+				int new_v = gDocument.basis.addNew(ObjType::vertices);
 
 				gDocument.vertices[new_v]->SetRawXY(new_x, new_y);
 
 				if (L->start == v_num)
-					BA_ChangeLD(n, LineDef::F_START, new_v);
+					gDocument.basis.changeLinedef(n, LineDef::F_START, new_v);
 				else
-					BA_ChangeLD(n, LineDef::F_END, new_v);
+					gDocument.basis.changeLinedef(n, LineDef::F_END, new_v);
 			}
 			else
 			{
-				BA_ChangeVT(v_num, Vertex::F_X, MakeValidCoord(new_x));
-				BA_ChangeVT(v_num, Vertex::F_Y, MakeValidCoord(new_y));
+				gDocument.basis.changeVertex(v_num, Vertex::F_X, MakeValidCoord(new_x));
+				gDocument.basis.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -506,8 +506,8 @@ void CMD_VT_Disconnect(void)
 
 	bool seen_one = false;
 
-	BA_Begin();
-	BA_MessageForSel("disconnected", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -527,7 +527,7 @@ void CMD_VT_Disconnect(void)
 	if (! seen_one)
 		Beep("Nothing was disconnected");
 
-	BA_End();
+	gDocument.basis.end();
 
 	Selection_Clear(true);
 }
@@ -564,7 +564,7 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 	double new_x, new_y;
 	CalcDisconnectCoord(gDocument.linedefs[ld], v_num, &new_x, &new_y);
 
-	int new_v = BA_New(ObjType::vertices);
+	int new_v = gDocument.basis.addNew(ObjType::vertices);
 
 	gDocument.vertices[new_v]->SetRawXY(new_x, new_y);
 
@@ -574,10 +574,10 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 		LineDef *L2 = gDocument.linedefs[*it];
 
 		if (L2->start == v_num)
-			BA_ChangeLD(*it, LineDef::F_START, new_v);
+			gDocument.basis.changeLinedef(*it, LineDef::F_START, new_v);
 
 		if (L2->end == v_num)
-			BA_ChangeLD(*it, LineDef::F_END, new_v);
+			gDocument.basis.changeLinedef(*it, LineDef::F_END, new_v);
 	}
 
 	*seen_one = true;
@@ -602,8 +602,8 @@ void CMD_LIN_Disconnect(void)
 
 	bool seen_one = false;
 
-	BA_Begin();
-	BA_MessageForSel("disconnected", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -611,7 +611,7 @@ void CMD_LIN_Disconnect(void)
 		DoDisconnectLineDef(*it, 1, &seen_one);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (! seen_one)
 		Beep("Nothing was disconnected");
@@ -683,7 +683,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 {
 	const LineDef * L1 = gDocument.linedefs[ld_num];
 
-	int new_ld = BA_New(ObjType::linedefs);
+	int new_ld = gDocument.basis.addNew(ObjType::linedefs);
 	int lost_sd;
 
 	LineDef * L2 = gDocument.linedefs[new_ld];
@@ -707,7 +707,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 		FlipLineDef(ld_num);
 	}
 
-	BA_ChangeLD(ld_num, LineDef::F_LEFT, -1);
+	gDocument.basis.changeLinedef(ld_num, LineDef::F_LEFT, -1);
 
 
 	// determine new flags
@@ -717,7 +717,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	BA_ChangeLD(ld_num, LineDef::F_FLAGS, new_flags);
+	gDocument.basis.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
 
 	L2->flags = L1->flags;
 
@@ -733,7 +733,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	BA_ChangeSD(L1->right, SideDef::F_MID_TEX, tex);
+	gDocument.basis.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
 
 
 	// now fix the second line's textures
@@ -745,7 +745,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	BA_ChangeSD(lost_sd, SideDef::F_MID_TEX, tex);
+	gDocument.basis.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
 }
 
 
@@ -819,8 +819,8 @@ void CMD_SEC_Disconnect(void)
 	DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
-	BA_Begin();
-	BA_MessageForSel("disconnected", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
 
@@ -831,7 +831,7 @@ void CMD_SEC_Disconnect(void)
 
 	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 	{
-		int new_v = BA_New(ObjType::vertices);
+		int new_v = gDocument.basis.addNew(ObjType::vertices);
 
 		mapping[*it] = new_v;
 
@@ -866,10 +866,10 @@ void CMD_SEC_Disconnect(void)
 		else
 		{
 			if (start2 >= 0)
-				BA_ChangeLD(n, LineDef::F_START, start2);
+				gDocument.basis.changeLinedef(n, LineDef::F_START, start2);
 
 			if (end2 >= 0)
-				BA_ChangeLD(n, LineDef::F_END, end2);
+				gDocument.basis.changeLinedef(n, LineDef::F_END, end2);
 		}
 	}
 
@@ -885,11 +885,11 @@ void CMD_SEC_Disconnect(void)
 	{
 		const Vertex * V = gDocument.vertices[*it];
 
-		BA_ChangeVT(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-		BA_ChangeVT(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
+		gDocument.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+		gDocument.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1076,8 +1076,8 @@ void CMD_VT_ShapeLine(void)
 	}
 
 
-	BA_Begin();
-	BA_Message("shaped %d vertices", (int)along_list.size());
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
@@ -1093,11 +1093,11 @@ void CMD_VT_ShapeLine(void)
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		BA_ChangeVT(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
-		BA_ChangeVT(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
+		gDocument.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
+		gDocument.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 
@@ -1163,8 +1163,8 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			BA_ChangeVT(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
-			BA_ChangeVT(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
+			gDocument.basis.changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
+			gDocument.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
 		}
 		else
 		{
@@ -1338,13 +1338,13 @@ void CMD_VT_ShapeArc(void)
 
 	// actually move stuff now
 
-	BA_Begin();
-	BA_Message("shaped %d vertices", (int)along_list.size());
+	gDocument.basis.begin();
+	gDocument.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
 	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 
-	BA_End();
+	gDocument.basis.end();
 }
 
 

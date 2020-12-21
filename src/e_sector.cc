@@ -76,10 +76,10 @@ void SEC_SafeRaiseLower(int sec, int parts, int dz)
 	}
 
 	if (parts & PART_FLOOR)
-		BA_ChangeSEC(sec, Sector::F_FLOORH, f);
+		gDocument.basis.changeSector(sec, Sector::F_FLOORH, f);
 
 	if (parts & PART_CEIL)
-		BA_ChangeSEC(sec, Sector::F_CEILH, c);
+		gDocument.basis.changeSector(sec, Sector::F_CEILH, c);
 }
 
 
@@ -100,8 +100,8 @@ void CMD_SEC_Floor(void)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel(diff < 0 ? "lowered floor of" : "raised floor of", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -109,10 +109,10 @@ void CMD_SEC_Floor(void)
 
 		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
-		BA_ChangeSEC(*it, Sector::F_FLOORH, new_h);
+		gDocument.basis.changeSector(*it, Sector::F_FLOORH, new_h);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
@@ -138,8 +138,8 @@ void CMD_SEC_Ceil(void)
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel(diff < 0 ? "lowered ceil of" : "raised ceil of", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -147,10 +147,10 @@ void CMD_SEC_Ceil(void)
 
 		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
-		BA_ChangeSEC(*it, Sector::F_CEILH, new_h);
+		gDocument.basis.changeSector(*it, Sector::F_CEILH, new_h);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_CEILH);
 
@@ -187,8 +187,8 @@ void SectorsAdjustLight(int delta)
 	if (edit.Selected->empty())
 		return;
 
-	BA_Begin();
-	BA_MessageForSel(delta < 0 ? "darkened" : "brightened", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -196,10 +196,10 @@ void SectorsAdjustLight(int delta)
 
 		int new_lt = light_add_delta(S->light, delta);
 
-		BA_ChangeSEC(*it, Sector::F_LIGHT, new_lt);
+		gDocument.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_LIGHT);
 }
@@ -238,8 +238,8 @@ void CMD_SEC_SwapFlats()
 		return;
 	}
 
-	BA_Begin();
-	BA_MessageForSel("swapped flats in", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("swapped flats in", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -248,11 +248,11 @@ void CMD_SEC_SwapFlats()
 		int floor_tex = S->floor_tex;
 		int  ceil_tex = S->ceil_tex;
 
-		BA_ChangeSEC(*it, Sector::F_FLOOR_TEX, ceil_tex);
-		BA_ChangeSEC(*it, Sector::F_CEIL_TEX, floor_tex);
+		gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
+		gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
 	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
@@ -288,7 +288,7 @@ static void ReplaceSectorRefs(int old_sec, int new_sec)
 
 		if (sd->sector == old_sec)
 		{
-			BA_ChangeSD(i, SideDef::F_SECTOR, new_sec);
+			gDocument.basis.changeSidedef(i, SideDef::F_SECTOR, new_sec);
 		}
 	}
 }
@@ -324,22 +324,22 @@ void CMD_SEC_Merge(void)
 	selection_c common_lines(ObjType::linedefs);
 	selection_c unused_secs (ObjType::sectors);
 
-	BA_Begin();
-	BA_MessageForSel("merged", edit.Selected);
+	gDocument.basis.begin();
+	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
 
 	// keep the properties of the first selected sector
 	if (new_sec != first)
 	{
 		const Sector *ref = gDocument.sectors[first];
 
-		BA_ChangeSEC(new_sec, Sector::F_FLOORH,    ref->floorh);
-		BA_ChangeSEC(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-		BA_ChangeSEC(new_sec, Sector::F_CEILH,     ref->ceilh);
-		BA_ChangeSEC(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+		gDocument.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
+		gDocument.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+		gDocument.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
+		gDocument.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
 
-		BA_ChangeSEC(new_sec, Sector::F_LIGHT, ref->light);
-		BA_ChangeSEC(new_sec, Sector::F_TYPE,  ref->type);
-		BA_ChangeSEC(new_sec, Sector::F_TAG,   ref->tag);
+		gDocument.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
+		gDocument.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
+		gDocument.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
@@ -363,7 +363,7 @@ void CMD_SEC_Merge(void)
 		DeleteObjects_WithUnused(&common_lines);
 	}
 
-	BA_End();
+	gDocument.basis.end();
 
 	// re-select the final sector
 	Selection_Clear(true /* no_save */);
@@ -1053,7 +1053,7 @@ static void DoAssignSector(int ld, Side side, int new_sec,
 
 	if (sd_num >= 0)
 	{
-		BA_ChangeSD(sd_num, SideDef::F_SECTOR, new_sec);
+		gDocument.basis.changeSidedef(sd_num, SideDef::F_SECTOR, new_sec);
 		return;
 	}
 
@@ -1071,7 +1071,7 @@ static void DoAssignSector(int ld, Side side, int new_sec,
 	SYS_ASSERT(new_upper >= 0);
 
 	// create new sidedef
-	int new_sd = BA_New(ObjType::sidedefs);
+	int new_sd = gDocument.basis.addNew(ObjType::sidedefs);
 
 	SideDef * SD = gDocument.sidedefs[new_sd];
 
@@ -1093,9 +1093,9 @@ static void DoAssignSector(int ld, Side side, int new_sec,
 	SD->sector = new_sec;
 
 	if (side == Side::right)
-		BA_ChangeLD(ld, LineDef::F_RIGHT, new_sd);
+		gDocument.basis.changeLinedef(ld, LineDef::F_RIGHT, new_sd);
 	else
-		BA_ChangeLD(ld, LineDef::F_LEFT, new_sd);
+		gDocument.basis.changeLinedef(ld, LineDef::F_LEFT, new_sd);
 
 	// if we're adding a second side to the linedef, clear out some
 	// of the properties that aren't needed anymore: middle texture,
@@ -1215,7 +1215,7 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 
 	if (new_sec < 0)
 	{
-		new_sec = BA_New(ObjType::sectors);
+		new_sec = gDocument.basis.addNew(ObjType::sectors);
 
 		if (model < 0)
 			model = loop.NeighboringSector();
