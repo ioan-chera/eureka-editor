@@ -740,10 +740,8 @@ private:
 public:
 	~undo_group_c()
 	{
-		for (int i = (int)ops.size() - 1 ; i >= 0 ; i--)
-		{
-			ops[i].Destroy();
-		}
+		for(auto it = ops.rbegin(); it != ops.rend(); ++it)
+			it->Destroy();
 	}
 
 	bool Empty() const
@@ -751,7 +749,7 @@ public:
 		return ops.empty();
 	}
 
-	void Add_Apply(edit_op_c& op)
+	void Add_Apply(const edit_op_c& op)
 	{
 		ops.push_back(op);
 
@@ -768,11 +766,11 @@ public:
 		int total = (int)ops.size();
 
 		if (dir > 0)
-			for (int i = 0; i < total; i++)
-				ops[i].Apply();
+			for (auto it = ops.begin(); it != ops.end(); ++it)
+				it->Apply();
 		else
-			for (int i = total-1; i >= 0; i--)
-				ops[i].Apply();
+			for (auto it = ops.rbegin(); it != ops.rend(); ++it)
+				it->Apply();
 
 		// reverse the order for next time
 		dir = -dir;
