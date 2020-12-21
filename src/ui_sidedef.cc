@@ -45,8 +45,8 @@ bool config::sidedef_add_del_buttons = false;
 // Constructor
 //
 UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
-    Fl_Group(X, Y, W, H),
-    obj(SETOBJ_NO_LINE), is_front(_side == 0),
+	Fl_Group(X, Y, W, H),
+	obj(SETOBJ_NO_LINE), is_front(_side == 0),
 	on_2S_line(false)
 {
 	box(FL_FLAT_BOX); // FL_UP_BOX
@@ -98,7 +98,7 @@ UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
 
 	int LX = X+16;
 	int UX = X+W-64-16;
-	    MX = MX-32;
+		MX = MX-32;
 
 	if (config::swap_sidedefs)
 	{
