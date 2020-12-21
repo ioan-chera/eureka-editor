@@ -828,7 +828,6 @@ public:
 };
 
 // TODO: move these to Document
-// TODO: remove pointer usage, prefer move semantics
 static undo_group_c cur_group;
 
 static std::list<undo_group_c> undo_history;
@@ -950,34 +949,32 @@ int BA_New(ObjType type)
 	{
 		case ObjType::things:
 			op.objnum = NumThings;
-			op.ptr = (int*) new Thing;
+			op.ptr = reinterpret_cast<int*>(new Thing);
 			break;
 
 		case ObjType::vertices:
 			op.objnum = NumVertices;
-			op.ptr = (int*) new Vertex;
+			op.ptr = reinterpret_cast<int *>(new Vertex);
 			break;
 
 		case ObjType::sidedefs:
 			op.objnum = NumSideDefs;
-			op.ptr = (int*) new SideDef;
+			op.ptr = reinterpret_cast<int *>(new SideDef);
 			break;
 
 		case ObjType::linedefs:
 			op.objnum = NumLineDefs;
-			op.ptr = (int*) new LineDef;
+			op.ptr = reinterpret_cast<int *>(new LineDef);
 			break;
 
 		case ObjType::sectors:
 			op.objnum = NumSectors;
-			op.ptr = (int*) new Sector;
+			op.ptr = reinterpret_cast<int *>(new Sector);
 			break;
 
 		default:
 			BugError("BA_New: unknown type\n");
 	}
-
-	SYS_ASSERT(cur_group.IsActive());
 
 	cur_group.Add_Apply(op);
 
