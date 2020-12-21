@@ -71,6 +71,7 @@ OBJS = \
 	$(OBJ_DIR)/e_sector.o  \
 	$(OBJ_DIR)/e_things.o  \
 	$(OBJ_DIR)/e_vertex.o  \
+	$(OBJ_DIR)/Errors.o    \
 	$(OBJ_DIR)/im_color.o  \
 	$(OBJ_DIR)/im_img.o   \
 	$(OBJ_DIR)/lib_adler.o  \
