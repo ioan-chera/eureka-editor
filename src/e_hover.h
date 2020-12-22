@@ -27,10 +27,21 @@
 #ifndef __EUREKA_X_HOVER_H__
 #define __EUREKA_X_HOVER_H__
 
+#include "DocumentModule.h"
 
 class Objid;
 class bitvec_c;
 
+//
+// The hover thing
+//
+class Hover : public DocumentModule
+{
+public:
+	Hover(Document &doc) : DocumentModule(doc)
+	{
+	}
+};
 
 void GetNearObject(Objid &o, ObjType objtype, double x, double y);
 

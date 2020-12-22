@@ -59,6 +59,7 @@ DUMMY=$(OBJ_DIR)/zzdummy
 #----- Object files ----------------------------------------------
 
 OBJS = \
+	$(OBJ_DIR)/Document.o \
 	$(OBJ_DIR)/e_basis.o   \
 	$(OBJ_DIR)/e_checks.o   \
 	$(OBJ_DIR)/e_commands.o  \

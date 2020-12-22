@@ -27,12 +27,15 @@
 #ifndef __EUREKA_E_BASIS_H__
 #define __EUREKA_E_BASIS_H__
 
+#include "DocumentModule.h"
 #include "m_strings.h"
-#include <list>
+#include "objid.h"
+#include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
 class crc32_c;
+class selection_c;
 struct Document;
 
 //
@@ -337,17 +340,6 @@ public:
 };
 
 //
-// This is an interface with direct references to Document's components, for less clutter
-//
-class DocumentModule
-{
-public:
-	DocumentModule(Document &doc);
-
-	Document &doc;
-};
-
-//
 // Editor command manager, handles undo/redo
 //
 class Basis : public DocumentModule
@@ -527,70 +519,7 @@ private:
 	bool mDidMakeChanges = false;
 };
 
-//
-// The document associated with a file. All stuff will go here
-//
-struct Document
-{
-	std::vector<Thing *> things;
-	std::vector<Vertex *> vertices;
-	std::vector<Sector *> sectors;
-	std::vector<SideDef *> sidedefs;
-	std::vector<LineDef *> linedefs;
-
-	std::vector<byte> headerData;
-	std::vector<byte> behaviorData;
-	std::vector<byte> scriptsData;
-
-	Basis basis;
-
-	Document() : basis(*this)
-	{
-	}
-
-	// FIXME: right now these are copied over to DocumentModule
-	int numThings() const
-	{
-		return static_cast<int>(things.size());
-	}
-	int numVertices() const
-	{
-		return static_cast<int>(vertices.size());
-	}
-	int numSectors() const
-	{
-		return static_cast<int>(sectors.size());
-	}
-	int numSidedefs() const
-	{
-		return static_cast<int>(sidedefs.size());
-	}
-	int numLinedefs() const
-	{
-		return static_cast<int>(linedefs.size());
-	}
-	int numObjects(ObjType type) const;
-
-	void getLevelChecksum(crc32_c &crc) const;
-};
-
-extern Document gDocument;
-
-
-#define NumThings     ((int)gDocument.things.size())
-#define NumVertices   ((int)gDocument.vertices.size())
-#define NumSectors    ((int)gDocument.sectors.size())
-#define NumSideDefs   ((int)gDocument.sidedefs.size())
-#define NumLineDefs   ((int)gDocument.linedefs.size())
-
-#define is_thing(n)    ((n) >= 0 && (n) < NumThings  )
-#define is_vertex(n)   ((n) >= 0 && (n) < NumVertices)
-#define is_sector(n)   ((n) >= 0 && (n) < NumSectors )
-#define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
-#define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
-
 const char *NameForObjectType(ObjType type, bool plural = false);
-
 
 /* BASIS API */
 

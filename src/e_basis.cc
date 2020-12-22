@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.hpp"
+#include "Document.h"
 #include "main.h"
 
 #include <algorithm>
@@ -44,8 +45,6 @@
 #include "e_objects.h"
 #include "r_render.h"
 
-Document gDocument;	// currently a singleton.
-
 int default_floor_h		=   0;
 int default_ceil_h		= 128;
 int default_light_level	= 176;
@@ -56,13 +55,6 @@ SString default_floor_tex	= "FLAT1";
 SString default_ceil_tex	= "FLAT1";
 
 StringTable basis_strtab;
-
-//
-// Document module common instantiator
-//
-DocumentModule::DocumentModule(Document &doc) : doc(doc)
-{
-}
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -1083,106 +1075,6 @@ void Basis::doProcessChangeStatus() const
 	MapStuff_NotifyEnd();
 	Render3D_NotifyEnd();
 	ObjectBox_NotifyEnd();
-}
-
-//------------------------------------------------------------------------
-//   CHECKSUM LOGIC
-//------------------------------------------------------------------------
-
-static void ChecksumThing(crc32_c &crc, const Thing *T)
-{
-	crc += T->raw_x;
-	crc += T->raw_y;
-	crc += T->angle;
-	crc += T->type;
-	crc += T->options;
-}
-
-static void ChecksumVertex(crc32_c &crc, const Vertex *V)
-{
-	crc += V->raw_x;
-	crc += V->raw_y;
-}
-
-static void ChecksumSector(crc32_c &crc, const Sector *sector)
-{
-	crc += sector->floorh;
-	crc += sector->ceilh;
-	crc += sector->light;
-	crc += sector->type;
-	crc += sector->tag;
-
-	crc += sector->FloorTex();
-	crc += sector->CeilTex();
-}
-
-static void ChecksumSideDef(crc32_c &crc, const SideDef *S, const Document &doc)
-{
-	crc += S->x_offset;
-	crc += S->y_offset;
-
-	crc += S->LowerTex();
-	crc += S->MidTex();
-	crc += S->UpperTex();
-
-	ChecksumSector(crc, S->SecRef(doc));
-}
-
-static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
-{
-	crc += L->flags;
-	crc += L->type;
-	crc += L->tag;
-
-	ChecksumVertex(crc, L->Start(doc));
-	ChecksumVertex(crc, L->End(doc));
-
-	if(L->Right(doc))
-		ChecksumSideDef(crc, L->Right(doc), doc);
-
-	if(L->Left(doc))
-		ChecksumSideDef(crc, L->Left(doc), doc);
-}
-
-//
-// Get number of objects based on enum
-//
-int Document::numObjects(ObjType type) const
-{
-	switch(type)
-	{
-	case ObjType::things:
-		return numThings();
-	case ObjType::linedefs:
-		return numLinedefs();
-	case ObjType::sidedefs:
-		return numSidedefs();
-	case ObjType::vertices:
-		return numVertices();
-	case ObjType::sectors:
-		return numSectors();
-	default:
-		return 0;
-	}
-}
-
-//
-// compute a checksum for the current level
-//
-void Document::getLevelChecksum(crc32_c &crc) const
-{
-	// the following method conveniently skips any unused vertices,
-	// sidedefs and sectors.  It also adds each sector umpteen times
-	// (for each line in the sector), but that should not affect the
-	// validity of the final checksum.
-
-	int i;
-
-	for(i = 0; i < numThings(); i++)
-		ChecksumThing(crc, things[i]);
-
-	for(i = 0; i < numLinedefs(); i++)
-		ChecksumLineDef(crc, linedefs[i], *this);
 }
 
 //--- editor settings ---

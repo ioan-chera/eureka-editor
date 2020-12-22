@@ -27,6 +27,7 @@
 #ifndef __EUREKA_OBJ_ID_H__
 #define __EUREKA_OBJ_ID_H__
 
+#include "sys_type.h"
 
 // main kinds of objects
 enum class ObjType : byte

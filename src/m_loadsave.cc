@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.hpp"
+#include "Document.h"
 #include "main.h"
 
 #include "lib_adler.h"

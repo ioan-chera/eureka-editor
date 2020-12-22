@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.hpp"
+#include "Document.h"
 #include "main.h"
 
 #include <map>

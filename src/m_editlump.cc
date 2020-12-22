@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.hpp"
+#include "Document.h"
 #include "main.h"
 #include "m_editlump.h"
 #include "w_wad.h"
