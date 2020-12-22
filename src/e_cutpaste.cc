@@ -98,7 +98,7 @@ public:
 		return (int)num;
 	}
 
-	void Paste_BA_Message() const
+	void Paste_BA_Message(Document &doc) const
 	{
 		size_t t = things.size();
 		size_t v = verts.size();
@@ -108,26 +108,26 @@ public:
 		if (s > 0)
 		{
 			const char *name = NameForObjectType(ObjType::sectors, s != 1);
-			gDocument.basis.setMessage("pasted %zu %s", s, name);
+			doc.basis.setMessage("pasted %zu %s", s, name);
 		}
 		else if (l > 0)
 		{
 			const char *name = NameForObjectType(ObjType::linedefs, l != 1);
-			gDocument.basis.setMessage("pasted %zu %s", l, name);
+			doc.basis.setMessage("pasted %zu %s", l, name);
 		}
 		else if (t > 0)
 		{
 			const char *name = NameForObjectType(ObjType::things, t != 1);
-			gDocument.basis.setMessage("pasted %zu %s", t, name);
+			doc.basis.setMessage("pasted %zu %s", t, name);
 		}
 		else if (v > 0)
 		{
 			const char *name = NameForObjectType(ObjType::vertices, v != 1);
-			gDocument.basis.setMessage("pasted %zu %s", v, name);
+			doc.basis.setMessage("pasted %zu %s", v, name);
 		}
 		else
 		{
-			gDocument.basis.setMessage("pasted something");
+			doc.basis.setMessage("pasted something");
 		}
 	}
 
@@ -731,7 +731,7 @@ static bool Clipboard_DoPaste()
 	pos_y = grid.SnapY(pos_y);
 
 	gDocument.basis.begin();
-	clip_board->Paste_BA_Message();
+	clip_board->Paste_BA_Message(gDocument);
 
 	clip_doing_paste = true;
 
