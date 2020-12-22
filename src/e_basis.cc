@@ -698,7 +698,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum]);
 		break;
 	default:
-		BugError("Basis::EditOperation::rawChange: bad objtype %d\n", objtype);
+		BugError("Basis::EditOperation::rawChange: bad objtype %hhu\n", objtype);
 		return; /* NOT REACHED */
 	}
 	// TODO: CHANGE THIS TO A SAFER WAY!
@@ -745,7 +745,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 		return rawDeleteLinedef(basis.doc);
 
 	default:
-		BugError("Basis::EditOperation::rawDelete: bad objtype %d\n", objtype);
+		BugError("Basis::EditOperation::rawDelete: bad objtype %hhu\n", objtype);
 		return NULL; /* NOT REACHED */
 	}
 }
@@ -897,7 +897,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 		break;
 
 	default:
-		BugError("Basis::EditOperation::rawInsert: bad objtype %d\n", objtype);
+		BugError("Basis::EditOperation::rawInsert: bad objtype %hhu\n", objtype);
 	}
 }
 
