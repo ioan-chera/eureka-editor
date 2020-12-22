@@ -45,7 +45,7 @@ void CMD_ApplyTag();
 //------------------------------------------------------------------------
 
 // the CHECK_xxx functions return the following values:
-typedef enum
+enum check_result_e
 {
 	CKR_OK = 0,            // no issues at all
 	CKR_MinorProblem,      // only minor issues
@@ -53,7 +53,7 @@ typedef enum
 	CKR_Highlight,         // need to highlight stuff (skip further checks)
 	CKR_TookAction         // [internal use : user took some action]
 
-} check_result_e;
+};
 
 
 class UI_Check_base : public UI_Escapable_Window
