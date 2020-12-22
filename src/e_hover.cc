@@ -641,16 +641,9 @@ Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, dou
 struct thing_comparer_t
 {
 public:
-	double distance;
-	bool   inside;
-	int    radius;
-
-	thing_comparer_t()
-	{
-		distance = 9e9;
-		radius   = (1 << 30);
-		inside   = false;
-	}
+	double distance = 9e9;
+	bool   inside = false;
+	int    radius = 1 << 30;
 
 	bool operator<= (const thing_comparer_t& other) const
 	{
@@ -845,15 +838,16 @@ static Objid NearestThing(double x, double y)
 
 	for (int n = 0 ; n < NumThings ; n++)
 	{
-		double tx = gDocument.things[n]->x();
-		double ty = gDocument.things[n]->y();
+		const Thing *thing = gDocument.things[n];
+		double tx = thing->x();
+		double ty = thing->y();
 
 		// filter out things that are outside the search bbox.
 		// this search box is enlarged by MAX_RADIUS.
 		if (tx < lx || tx > hx || ty < ly || ty > hy)
 			continue;
 
-		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+		const thingtype_t &info = M_GetThingType(thing->type);
 
 		// more accurate bbox test using the real radius
 		double r = info.radius + mapslack;

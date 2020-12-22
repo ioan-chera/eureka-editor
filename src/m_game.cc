@@ -1357,9 +1357,7 @@ const linetype_t & M_GetLineType(int type)
 
 const thingtype_t & M_GetThingType(int type)
 {
-	std::map<int, thingtype_t>::iterator TI;
-
-	TI = thing_types.find(type);
+	auto TI = thing_types.find(type);
 
 	if (TI != thing_types.end())
 		return TI->second;
