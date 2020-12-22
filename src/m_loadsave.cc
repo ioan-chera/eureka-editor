@@ -495,8 +495,8 @@ static void LoadSectors()
 		UpperCaseShortStr(raw.floor_tex, 8);
 		UpperCaseShortStr(raw. ceil_tex, 8);
 
-		sec->floor_tex = BA_InternaliseShortStr(raw.floor_tex, 8);
-		sec->ceil_tex  = BA_InternaliseShortStr(raw.ceil_tex,  8);
+		sec->floor_tex = BA_InternaliseString(SString(raw.floor_tex, 8));
+		sec->ceil_tex  = BA_InternaliseString(SString(raw.ceil_tex,  8));
 
 		sec->light = LE_U16(raw.light);
 		sec->type  = LE_U16(raw.type);
@@ -770,9 +770,9 @@ static void LoadSideDefs()
 		UpperCaseShortStr(raw.lower_tex, 8);
 		UpperCaseShortStr(raw.  mid_tex, 8);
 
-		sd->upper_tex = BA_InternaliseShortStr(raw.upper_tex, 8);
-		sd->lower_tex = BA_InternaliseShortStr(raw.lower_tex, 8);
-		sd->  mid_tex = BA_InternaliseShortStr(raw.  mid_tex, 8);
+		sd->upper_tex = BA_InternaliseString(SString(raw.upper_tex, 8));
+		sd->lower_tex = BA_InternaliseString(SString(raw.lower_tex, 8));
+		sd->  mid_tex = BA_InternaliseString(SString(raw.  mid_tex, 8));
 
 		sd->sector = LE_U16(raw.sector);
 

@@ -597,7 +597,6 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 // add this string to the basis string table (if it doesn't
 // already exist) and return its integer offset.
 int BA_InternaliseString(const SString &str);
-int BA_InternaliseShortStr(const char *str, int max_len);
 
 // get the string from the basis string table.
 SString BA_GetString(int offset);

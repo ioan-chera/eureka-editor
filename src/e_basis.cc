@@ -85,15 +85,6 @@ int BA_InternaliseString(const SString &str)
 	return basis_strtab.add(str);
 }
 
-int BA_InternaliseShortStr(const char *str, int max_len)
-{
-	SString goodie(str, max_len);
-
-	int result = BA_InternaliseString(goodie);
-
-	return result;
-}
-
 SString BA_GetString(int offset)
 {
 	return basis_strtab.get(offset);
