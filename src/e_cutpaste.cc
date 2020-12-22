@@ -79,13 +79,16 @@ public:
 
 	~clipboard_data_c()
 	{
-		unsigned int i;
-
-		for (i = 0 ; i < things.size()   ; i++) delete things[i];
-		for (i = 0 ; i < verts.size()    ; i++) delete verts[i];
-		for (i = 0 ; i < sectors.size()  ; i++) delete sectors[i];
-		for (i = 0 ; i < sides.size()    ; i++) delete sides[i];
-		for (i = 0 ; i < lines.size()    ; i++) delete lines[i];
+		for(Thing *thing : things)
+			delete thing;
+		for(Vertex *vertex : verts)
+			delete vertex;
+		for(Sector *sector : sectors)
+			delete sector;
+		for(SideDef *sidedef : sides)
+			delete sidedef;
+		for(LineDef *linedef : lines)
+			delete linedef;
 	}
 
 	int TotalSize() const
@@ -179,9 +182,9 @@ public:
 		if (! uses_real_sectors)
 			return false;
 
-		for (unsigned int i = 0 ; i < sides.size() ; i++)
+		for (const SideDef *side : sides)
 		{
-			if (s1 <= sides[i]->sector && sides[i]->sector <= s2)
+			if (s1 <= side->sector && side->sector <= s2)
 				return true;
 		}
 
@@ -193,10 +196,10 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (unsigned int i = 0 ; i < sides.size() ; i++)
+		for (SideDef *side : sides)
 		{
-			if (sides[i]->sector >= snum)
-				sides[i]->sector++;
+			if (side->sector >= snum)
+				side->sector++;
 		}
 	}
 
@@ -205,12 +208,12 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (unsigned int i = 0 ; i < sides.size() ; i++)
+		for (SideDef *side : sides)
 		{
-			if (sides[i]->sector == snum)
-				sides[i]->sector = INVALID_SECTOR;
-			else if (sides[i]->sector > snum)
-				sides[i]->sector--;
+			if (side->sector == snum)
+				side->sector = INVALID_SECTOR;
+			else if (side->sector > snum)
+				side->sector--;
 		}
 	}
 
@@ -219,10 +222,10 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (unsigned int i = 0 ; i < sides.size() ; i++)
+		for (SideDef *side : sides)
 		{
-			if (sides[i]->sector >= 0)
-				sides[i]->sector = INVALID_SECTOR;
+			if (side->sector >= 0)
+				side->sector = INVALID_SECTOR;
 		}
 	}
 };
