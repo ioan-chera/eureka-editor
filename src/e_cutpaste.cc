@@ -131,47 +131,25 @@ public:
 		}
 	}
 
-	void CentreOfThings(double *cx, double *cy)
+	template<typename T>
+	void CentreOfPointObjects(const std::vector<T *> &list, double *cx, double *cy) const
 	{
 		*cx = *cy = 0;
 
-		if (things.empty())
+		if (list.empty())
 			return;
 
 		double sum_x = 0;
 		double sum_y = 0;
 
-		for (unsigned int i = 0 ; i < things.size() ; i++)
+		for (const T *object : list)
 		{
-			sum_x += things[i]->x();
-			sum_y += things[i]->y();
+			sum_x += object->x();
+			sum_y += object->y();
 		}
 
-		sum_x /= (double)things.size();
-		sum_y /= (double)things.size();
-
-		*cx = sum_x;
-		*cy = sum_y;
-	}
-
-	void CentreOfVertices(double *cx, double *cy)
-	{
-		*cx = *cy = 0;
-
-		if (verts.empty())
-			return;
-
-		double sum_x = 0;
-		double sum_y = 0;
-
-		for (unsigned int i = 0 ; i < verts.size() ; i++)
-		{
-			sum_x += verts[i]->x();
-			sum_y += verts[i]->y();
-		}
-
-		sum_x /= (double)verts.size();
-		sum_y /= (double)verts.size();
+		sum_x /= (double)list.size();
+		sum_y /= (double)list.size();
 
 		*cx = sum_x;
 		*cy = sum_y;
@@ -562,7 +540,7 @@ static bool Clipboard_DoCopy()
 static void PasteGroupOfObjects(double pos_x, double pos_y)
 {
 	double cx, cy;
-	clip_board->CentreOfVertices(&cx, &cy);
+	clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
 
 	// these hold the mapping from clipboard index --> real index
 	std::map<int, int> vert_map;
@@ -762,7 +740,7 @@ static bool Clipboard_DoPaste()
 		case ObjType::things:
 		{
 			double cx, cy;
-			clip_board->CentreOfThings(&cx, &cy);
+			clip_board->CentreOfPointObjects(clip_board->things, &cx, &cy);
 
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
@@ -782,7 +760,7 @@ static bool Clipboard_DoPaste()
 		case ObjType::vertices:
 		{
 			double cx, cy;
-			clip_board->CentreOfVertices(&cx, &cy);
+			clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
 
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
