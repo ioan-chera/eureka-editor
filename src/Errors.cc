@@ -16,7 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.hpp"
+#include "Errors.h"
 
 #include <stdarg.h>
 #include <stdio.h>

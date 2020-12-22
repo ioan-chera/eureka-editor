@@ -24,7 +24,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.hpp"
+#include "Errors.h"
 #include "main.h"
 
 #include <time.h>

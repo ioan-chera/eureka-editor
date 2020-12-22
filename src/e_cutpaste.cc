@@ -30,7 +30,7 @@
 #include "e_main.h"
 #include "e_sector.h"
 #include "e_vertex.h"
-#include "Errors.hpp"
+#include "Errors.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "r_grid.h"

@@ -18,7 +18,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.hpp"
+#include "Errors.h"
 #include "m_strings.h"
 #include "sys_debug.h"
 #include <stdio.h>
