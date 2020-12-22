@@ -107,22 +107,22 @@ public:
 
 		if (s > 0)
 		{
-			const char *name = (s == 1) ? "sector" : "sectors";
+			const char *name = NameForObjectType(ObjType::sectors, s != 1);
 			gDocument.basis.setMessage("pasted %zu %s", s, name);
 		}
 		else if (l > 0)
 		{
-			const char *name = (l == 1) ? "linedef" : "linedefs";
+			const char *name = NameForObjectType(ObjType::linedefs, l != 1);
 			gDocument.basis.setMessage("pasted %zu %s", l, name);
 		}
 		else if (t > 0)
 		{
-			const char *name = (t == 1) ? "thing" : "things";
+			const char *name = NameForObjectType(ObjType::things, t != 1);
 			gDocument.basis.setMessage("pasted %zu %s", t, name);
 		}
 		else if (v > 0)
 		{
-			const char *name = (v == 1) ? "vertex" : "vertices";
+			const char *name = NameForObjectType(ObjType::vertices, v != 1);
 			gDocument.basis.setMessage("pasted %zu %s", v, name);
 		}
 		else
