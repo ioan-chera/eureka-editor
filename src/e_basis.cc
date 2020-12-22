@@ -263,7 +263,8 @@ void Basis::begin()
 {
 	if(mCurrentGroup.isActive())
 		BugError("Basis::begin called twice without Basis::end\n");
-	mRedoFuture.clear();
+	while(!mRedoFuture.empty())
+		mRedoFuture.pop();
 	mCurrentGroup.activate();
 	doClearChangeStatus();
 }
@@ -281,7 +282,7 @@ void Basis::end()
 		mCurrentGroup.reset();
 	else
 	{
-		mUndoHistory.push_front(std::move(mCurrentGroup));
+		mUndoHistory.push(std::move(mCurrentGroup));
 		Status_Set("%s", mCurrentGroup.getMessage().c_str());
 	}
 	doProcessChangeStatus();
@@ -553,14 +554,14 @@ bool Basis::undo()
 
 	doClearChangeStatus();
 
-	UndoGroup grp = std::move(mUndoHistory.front());
-	mUndoHistory.pop_front();
+	UndoGroup grp = std::move(mUndoHistory.top());
+	mUndoHistory.pop();
 
 	Status_Set("UNDO: %s", grp.getMessage().c_str());
 
 	grp.reapply(*this);
 
-	mRedoFuture.push_front(std::move(grp));
+	mRedoFuture.push(std::move(grp));
 
 	doProcessChangeStatus();
 	return true;
@@ -577,14 +578,14 @@ bool Basis::redo()
 
 	doClearChangeStatus();
 
-	UndoGroup grp = std::move(mRedoFuture.front());
-	mRedoFuture.pop_front();
+	UndoGroup grp = std::move(mRedoFuture.top());
+	mRedoFuture.pop();
 
 	Status_Set("Redo: %s", grp.getMessage().c_str());
 
 	grp.reapply(*this);
 
-	mUndoHistory.push_front(std::move(grp));
+	mUndoHistory.push(std::move(grp));
 
 	doProcessChangeStatus();
 	return true;
@@ -616,8 +617,10 @@ void Basis::clearAll()
 	doc.behaviorData.clear();
 	doc.scriptsData.clear();
 
-	mUndoHistory.clear();
-	mRedoFuture.clear();
+	while(!mUndoHistory.empty())
+		mUndoHistory.pop();
+	while(!mRedoFuture.empty())
+		mRedoFuture.pop();
 
 	// Note: we don't clear the string table, since there can be
 	//       string references in the clipboard.

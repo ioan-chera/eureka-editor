@@ -521,8 +521,8 @@ private:
 
 	UndoGroup mCurrentGroup;
 	// FIXME: use a better data type here
-	std::list<UndoGroup> mUndoHistory;
-	std::list<UndoGroup> mRedoFuture;
+	std::stack<UndoGroup> mUndoHistory;
+	std::stack<UndoGroup> mRedoFuture;
 
 	bool mDidMakeChanges = false;
 };
