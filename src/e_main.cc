@@ -656,7 +656,7 @@ void DumpSelection(selection_c * list)
 }
 
 
-void ConvertSelection(selection_c * src, selection_c * dest)
+void ConvertSelection(const selection_c * src, selection_c * dest)
 {
 	if (src->what_type() == dest->what_type())
 	{

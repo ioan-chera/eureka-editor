@@ -216,7 +216,7 @@ void Selection_NotifyEnd();
 
 void DumpSelection (selection_c * list);
 
-void ConvertSelection(selection_c * src, selection_c * dest);
+void ConvertSelection(const selection_c * src, selection_c * dest);
 
 int Selection_FirstLine(selection_c *list);
 
