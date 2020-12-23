@@ -52,6 +52,7 @@ public:
 	Objid findSplitLineForDangler(int v_num) const;
 
 	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
+	int getOppositeSector(int ld, Side ld_side) const;
 
 private:
 	Objid getNearestThing(double x, double y) const;
@@ -66,8 +67,6 @@ private:
 	fastopp_node_c *m_fastopp_X_tree = nullptr;
 	fastopp_node_c *m_fastopp_Y_tree = nullptr;
 };
-
-int OppositeSector(int ld, Side ld_side);
 
 void FastOpposite_Begin();
 void FastOpposite_Finish();

@@ -296,7 +296,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			continue;
 
 		// determine what sector to use
-		int new_sec = OppositeSector(*it, box->is_front ? Side::right : Side::left);
+		int new_sec = gDocument.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left);
 
 		if (new_sec < 0)
 			new_sec = NumSectors - 1;

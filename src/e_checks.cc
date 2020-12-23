@@ -670,7 +670,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 
 		if (L->right >= 0)
 		{
-			int s = OppositeSector(n, Side::right);
+			int s = gDocument.hover.getOppositeSector(n, Side::right);
 
 			if (s < 0 || L->Right(gDocument)->sector != s)
 			{
@@ -681,7 +681,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 
 		if (L->left >= 0)
 		{
-			int s = OppositeSector(n, Side::left);
+			int s = gDocument.hover.getOppositeSector(n, Side::left);
 
 			if (s < 0 || L->Left(gDocument)->sector != s)
 			{

@@ -418,21 +418,6 @@ void FastOpposite_Finish()
 	delete fastopp_Y_tree;  fastopp_Y_tree = NULL;
 }
 
-
-int OppositeSector(int ld, Side ld_side)
-{
-	Side opp_side;
-
-	int opp = gDocument.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
-
-	// can see the void?
-	if (opp < 0)
-		return -1;
-
-	return gDocument.linedefs[opp]->WhatSector(opp_side, gDocument);
-}
-
-
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
 Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2)
 {
@@ -803,6 +788,22 @@ int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bit
 	}
 
 	return test.best_match;
+}
+
+//
+// Get oppossite sector
+//
+int Hover::getOppositeSector(int ld, Side ld_side) const
+{
+	Side opp_side;
+
+	int opp = getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
+
+	// can see the void?
+	if(opp < 0)
+		return -1;
+
+	return doc.linedefs[opp]->WhatSector(opp_side, doc);
 }
 
 //
