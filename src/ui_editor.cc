@@ -688,17 +688,6 @@ void UI_TextEditor::ExportToFile()
 
 	LogPrintf("Writing text to file: %s\n", filename);
 
-#ifdef WIN32
-	// in Windows, if the text contains unicode (UTF-8) then we
-	// need to prefix the output file with a BOM (byte order mark).
-	if (ContainsUnicode())
-	{
-		fputc(0xEF, fp);
-		fputc(0xBB, fp);
-		fputc(0xBF, fp);
-	}
-#endif
-
 	int len = tbuf->length();
 
 	for (int p = 0 ; p < len ; p++)
