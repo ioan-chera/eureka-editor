@@ -138,38 +138,45 @@ bool PointOutsideOfMap(double x, double y)
 
 struct opp_test_state_t
 {
-	int ld;
-	Side ld_side;   // a SIDE_XXX value
+	int ld = 0;
+	Side ld_side = Side::right;   // a SIDE_XXX value
 
-	Side * result_side;
+	Side * result_side = nullptr;
 
-	double dx, dy;
+	double dx = 0, dy = 0;
 
 	// origin of casting line
-	double x, y;
+	double x = 0, y = 0;
 
 	// casting line is horizontal?
-	bool cast_horizontal;
+	bool cast_horizontal = false;
 
-	int    best_match;
-	double best_dist;
+	int    best_match = 0;
+	double best_dist = 0;
+
+	const Document &doc;
 
 public:
+	explicit opp_test_state_t(const Document &doc) : doc(doc)
+	{
+	}
+
 	void ComputeCastOrigin()
 	{
+		SYS_ASSERT(ld >= 0 && ld < doc.numLinedefs());
 		// choose a coordinate on the source line near the middle, but make
 		// sure the casting line is not integral (i.e. lies between two lines
 		// on the unit grid) so that we never directly hit a vertex.
 
-		const LineDef * L = gDocument.linedefs[ld];
+		const LineDef * L = doc.linedefs[ld];
 
-		dx = L->End(gDocument)->x() - L->Start(gDocument)->x();
-		dy = L->End(gDocument)->y() - L->Start(gDocument)->y();
+		dx = L->End(doc)->x() - L->Start(doc)->x();
+		dy = L->End(doc)->y() - L->Start(doc)->y();
 
 		cast_horizontal = fabs(dy) >= fabs(dx);
 
-		x = L->Start(gDocument)->x() + dx * 0.5;
-		y = L->Start(gDocument)->y() + dy * 0.5;
+		x = L->Start(doc)->x() + dx * 0.5;
+		y = L->Start(doc)->y() + dy * 0.5;
 
 		if (cast_horizontal && fabs(dy) > 0)
 		{
@@ -193,10 +200,10 @@ public:
 		if (ld == n)  // ignore input line
 			return;
 
-		double nx1 = gDocument.linedefs[n]->Start(gDocument)->x();
-		double ny1 = gDocument.linedefs[n]->Start(gDocument)->y();
-		double nx2 = gDocument.linedefs[n]->End(gDocument)->x();
-		double ny2 = gDocument.linedefs[n]->End(gDocument)->y();
+		double nx1 = doc.linedefs[n]->Start(doc)->x();
+		double ny1 = doc.linedefs[n]->Start(doc)->y();
+		double nx2 = doc.linedefs[n]->End(doc)->x();
+		double ny2 = doc.linedefs[n]->End(doc)->y();
 
 		if (cast_horizontal)
 		{
@@ -758,7 +765,7 @@ int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bit
 	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
 	// result_side uses the same values (never 0).
 
-	opp_test_state_t  test;
+	opp_test_state_t  test(doc);
 
 	test.ld = ld;
 	test.ld_side = ld_side;
