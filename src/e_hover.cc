@@ -659,59 +659,6 @@ public:
 	}
 };
 
-
-//
-// determine which linedef is under the pointer
-//
-static Objid NearestLineDef(double x, double y)
-{
-	// slack in map units
-	double mapslack = 2.5 + 16.0f / grid.Scale;
-
-	double lx = x - mapslack;
-	double ly = y - mapslack;
-	double hx = x + mapslack;
-	double hy = y + mapslack;
-
-	int    best = -1;
-	double best_dist = 9e9;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		double x1 = gDocument.linedefs[n]->Start(gDocument)->x();
-		double y1 = gDocument.linedefs[n]->Start(gDocument)->y();
-		double x2 = gDocument.linedefs[n]->End(gDocument)->x();
-		double y2 = gDocument.linedefs[n]->End(gDocument)->y();
-
-		// Skip all lines of which all points are more than <mapslack>
-		// units away from (x,y).  In a typical level, this test will
-		// filter out all the linedefs but a handful.
-		if (MAX(x1,x2) < lx || MIN(x1,x2) > hx ||
-		    MAX(y1,y2) < ly || MIN(y1,y2) > hy)
-			continue;
-
-		double dist = ApproxDistToLineDef(gDocument.linedefs[n], x, y);
-
-		if (dist > mapslack)
-			continue;
-
-		// use "<=" because if there are overlapping linedefs, we want
-		// to return the highest-numbered one.
-		if (dist <= best_dist)
-		{
-			best = n;
-			best_dist = dist;
-		}
-	}
-
-	if (best >= 0)
-		return Objid(ObjType::linedefs, best);
-
-	// none found
-	return Objid();
-}
-
-
 //
 // determine which linedef would be split if a new vertex were
 // added at the given coordinates.
@@ -834,7 +781,7 @@ Objid Hover::getNearbyObject(ObjType type, double x, double y) const
 		return getNearestVertex(x, y);
 
 	case ObjType::linedefs:
-		return NearestLineDef(x, y);
+		return getNearestLinedef(x, y);
 
 	case ObjType::sectors:
 		return NearestSector(x, y);
@@ -948,6 +895,57 @@ Objid Hover::getNearestVertex(double x, double y) const
 
 	if(best >= 0)
 		return Objid(ObjType::vertices, best);
+
+	// none found
+	return Objid();
+}
+
+//
+// determine which linedef is under the pointer
+//
+Objid Hover::getNearestLinedef(double x, double y) const
+{
+	// slack in map units
+	double mapslack = 2.5 + 16.0f / grid.Scale;
+
+	double lx = x - mapslack;
+	double ly = y - mapslack;
+	double hx = x + mapslack;
+	double hy = y + mapslack;
+
+	int    best = -1;
+	double best_dist = 9e9;
+
+	for(int n = 0; n < doc.numLinedefs(); n++)
+	{
+		double x1 = doc.linedefs[n]->Start(doc)->x();
+		double y1 = doc.linedefs[n]->Start(doc)->y();
+		double x2 = doc.linedefs[n]->End(doc)->x();
+		double y2 = doc.linedefs[n]->End(doc)->y();
+
+		// Skip all lines of which all points are more than <mapslack>
+		// units away from (x,y).  In a typical level, this test will
+		// filter out all the linedefs but a handful.
+		if(MAX(x1, x2) < lx || MIN(x1, x2) > hx ||
+			MAX(y1, y2) < ly || MIN(y1, y2) > hy)
+			continue;
+
+		double dist = ApproxDistToLineDef(doc.linedefs[n], x, y);
+
+		if(dist > mapslack)
+			continue;
+
+		// use "<=" because if there are overlapping linedefs, we want
+		// to return the highest-numbered one.
+		if(dist <= best_dist)
+		{
+			best = n;
+			best_dist = dist;
+		}
+	}
+
+	if(best >= 0)
+		return Objid(ObjType::linedefs, best);
 
 	// none found
 	return Objid();
