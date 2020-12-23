@@ -49,14 +49,14 @@ private:
 	Objid getNearestVertex(double x, double y) const;
 	Objid getNearestLinedef(double x, double y) const;
 	Objid getNearestSector(double x, double y) const;
+
+	double getApproximateDistanceToLinedef(const LineDef &line, double x, double y) const;
 };
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,
 				   double ptr_x, double ptr_y, int ignore_vert = -1);
 
 void FindSplitLineForDangler(Objid& out, int v_num);
-
-double ApproxDistToLineDef(const LineDef * L, double x, double y);
 
 int ClosestLine_CastingHoriz(double x, double y, Side *side);
 int ClosestLine_CastingVert (double x, double y, Side *side);

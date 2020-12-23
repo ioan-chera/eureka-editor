@@ -886,7 +886,7 @@ Objid Hover::getNearestLinedef(double x, double y) const
 			MAX(y1, y2) < ly || MIN(y1, y2) > hy)
 			continue;
 
-		double dist = ApproxDistToLineDef(doc.linedefs[n], x, y);
+		double dist = getApproximateDistanceToLinedef(*doc.linedefs[n], x, y);
 
 		if(dist > mapslack)
 			continue;
@@ -929,8 +929,8 @@ Objid Hover::getNearestSector(double x, double y) const
 		/* nothing needed */
 	}
 	else if(line1 < 0 ||
-		ApproxDistToLineDef(doc.linedefs[line2], x, y) <
-		ApproxDistToLineDef(doc.linedefs[line1], x, y))
+		getApproximateDistanceToLinedef(*doc.linedefs[line2], x, y) <
+		getApproximateDistanceToLinedef(*doc.linedefs[line1], x, y))
 	{
 		line1 = line2;
 		side1 = side2;
@@ -948,6 +948,59 @@ Objid Hover::getNearestSector(double x, double y) const
 
 	// none found
 	return Objid();
+}
+
+//
+// Gets an approximate distance from a point to a linedef
+//
+double Hover::getApproximateDistanceToLinedef(const LineDef &line, double x, double y) const
+{
+	double x1 = line.Start(doc)->x();
+	double y1 = line.Start(doc)->y();
+	double x2 = line.End(doc)->x();
+	double y2 = line.End(doc)->y();
+
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+
+	if(fabs(dx) > fabs(dy))
+	{
+		// The linedef is rather horizontal
+
+		// case 1: x is to the left of the linedef
+		//         hence return distance to the left-most vertex
+		if(x < (dx > 0 ? x1 : x2))
+			return hypot(x - (dx > 0 ? x1 : x2),
+				y - (dx > 0 ? y1 : y2));
+
+		// case 2: x is to the right of the linedef
+		//         hence return distance to the right-most vertex
+		if(x > (dx > 0 ? x2 : x1))
+			return hypot(x - (dx > 0 ? x2 : x1),
+				y - (dx > 0 ? y2 : y1));
+
+		// case 3: x is in-between (and not equal to) both vertices
+		//         hence use slope formula to get intersection point
+		double y3 = y1 + (x - x1) * dy / dx;
+
+		return fabs(y3 - y);
+	}
+	else
+	{
+		// The linedef is rather vertical
+
+		if(y < (dy > 0 ? y1 : y2))
+			return hypot(x - (dy > 0 ? x1 : x2),
+				y - (dy > 0 ? y1 : y2));
+
+		if(y > (dy > 0 ? y2 : y1))
+			return hypot(x - (dy > 0 ? x2 : x1),
+				y - (dy > 0 ? y2 : y1));
+
+		double x3 = x1 + (y - y1) * dx / dy;
+
+		return fabs(x3 - x);
+	}
 }
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,
