@@ -50,6 +50,8 @@ public:
 	Objid findSplitLine(double &out_x, double &out_y, double ptr_x, double ptr_y, int ignore_vert) const;
 	Objid findSplitLineForDangler(int v_num) const;
 
+	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
+
 private:
 	Objid getNearestThing(double x, double y) const;
 	Objid getNearestVertex(double x, double y) const;
@@ -61,7 +63,6 @@ private:
 	Objid getNearestSplitLine(double x, double y, int ignore_vert) const;
 };
 
-int OppositeLineDef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines = NULL);
 int OppositeSector(int ld, Side ld_side);
 
 void FastOpposite_Begin();

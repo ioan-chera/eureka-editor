@@ -1000,7 +1000,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 			// know that this sector should be kept.
 
 			Side opp_side;
-			int opp_ld = OppositeLineDef(n, what_side, &opp_side, &del_lines);
+			int opp_ld = gDocument.hover.getOppositeLinedef(n, what_side, &opp_side, &del_lines);
 
 			if (opp_ld < 0)
 				continue;

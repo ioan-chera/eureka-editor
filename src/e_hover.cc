@@ -414,59 +414,11 @@ void FastOpposite_Finish()
 }
 
 
-int OppositeLineDef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines)
-{
-	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
-	// result_side uses the same values (never 0).
-
-	opp_test_state_t  test;
-
-	test.ld = ld;
-	test.ld_side = ld_side;
-	test.result_side = result_side;
-
-	// this sets dx and dy
-	test.ComputeCastOrigin();
-
-	if (test.dx == 0 && test.dy == 0)
-		return -1;
-
-	test.best_match = -1;
-	test.best_dist  = 9e9;
-
-	if (fastopp_X_tree)
-	{
-		// fast way : use the binary tree
-
-		SYS_ASSERT(ignore_lines == NULL);
-
-		if (test.cast_horizontal)
-			fastopp_Y_tree->Process(test, test.y);
-		else
-			fastopp_X_tree->Process(test, test.x);
-	}
-	else
-	{
-		// normal way : test all linedefs
-
-		for (int n = 0 ; n < NumLineDefs ; n++)
-		{
-			if (ignore_lines && ignore_lines->get(n))
-				continue;
-
-			test.ProcessLine(n);
-		}
-	}
-
-	return test.best_match;
-}
-
-
 int OppositeSector(int ld, Side ld_side)
 {
 	Side opp_side;
 
-	int opp = OppositeLineDef(ld, ld_side, &opp_side);
+	int opp = gDocument.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
 
 	// can see the void?
 	if (opp < 0)
@@ -796,6 +748,56 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 Objid Hover::findSplitLineForDangler(int v_num) const
 {
 	return getNearestSplitLine(doc.vertices[v_num]->x(), doc.vertices[v_num]->y(), v_num);
+}
+
+//
+// Get the opposite linedef
+//
+int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const
+{
+	// ld_side is either SIDE_LEFT or SIDE_RIGHT.
+	// result_side uses the same values (never 0).
+
+	opp_test_state_t  test;
+
+	test.ld = ld;
+	test.ld_side = ld_side;
+	test.result_side = result_side;
+
+	// this sets dx and dy
+	test.ComputeCastOrigin();
+
+	if(test.dx == 0 && test.dy == 0)
+		return -1;
+
+	test.best_match = -1;
+	test.best_dist = 9e9;
+
+	if(fastopp_X_tree)
+	{
+		// fast way : use the binary tree
+
+		SYS_ASSERT(ignore_lines == NULL);
+
+		if(test.cast_horizontal)
+			fastopp_Y_tree->Process(test, test.y);
+		else
+			fastopp_X_tree->Process(test, test.x);
+	}
+	else
+	{
+		// normal way : test all linedefs
+
+		for(int n = 0; n < NumLineDefs; n++)
+		{
+			if(ignore_lines && ignore_lines->get(n))
+				continue;
+
+			test.ProcessLine(n);
+		}
+	}
+
+	return test.best_match;
 }
 
 //
