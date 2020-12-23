@@ -839,6 +839,14 @@ static void FlipLine_sides(int ld)
 	gDocument.basis.changeLinedef(ld, LineDef::F_LEFT, old_right);
 }
 
+//
+// Flip linedef
+//
+void LinedefModule::flipLinedef(int ld) const
+{
+	FlipLine_verts(ld);
+	FlipLine_sides(ld);
+}
 
 void FlipLineDef(int ld)
 {
@@ -862,7 +870,7 @@ void FlipLineDefGroup(selection_c *flip)
 {
 	for (sel_iter_c it(flip) ; !it.done() ; it.next())
 	{
-		FlipLineDef(*it);
+		gDocument.linemod.flipLinedef(*it);
 	}
 }
 
@@ -887,7 +895,7 @@ void CMD_LIN_Flip()
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		if (force_it)
-			FlipLineDef(*it);
+			gDocument.linemod.flipLinedef(*it);
 		else
 			FlipLineDef_safe(*it);
 	}

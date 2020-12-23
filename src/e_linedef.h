@@ -35,9 +35,10 @@ public:
 	LinedefModule(Document &doc) : DocumentModule(doc)
 	{
 	}
+
+	void flipLinedef(int ld) const;
 };
 
-void FlipLineDef(int ld);
 void FlipLineDefGroup(selection_c *flip);
 
 

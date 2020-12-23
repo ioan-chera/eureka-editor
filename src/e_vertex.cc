@@ -113,7 +113,7 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 	// endpoint) but going the opposite direction.
 	if ((L2->end == v) == (L1->end == v))
 	{
-		FlipLineDef(ld1);
+		gDocument.linemod.flipLinedef(ld1);
 	}
 
 	bool same_left  = (L2->WhatSector(Side::left, gDocument)  == L1->WhatSector(Side::left, gDocument));
@@ -148,7 +148,7 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 	// fix orientation of remaining linedef if needed
 	if (L2->Left(gDocument) && ! L2->Right(gDocument))
 	{
-		FlipLineDef(ld2);
+		gDocument.linemod.flipLinedef(ld2);
 	}
 
 	if (L2->OneSided() && new_mid_tex > 0)
@@ -704,7 +704,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 
 		lost_sd = L1->right;
 
-		FlipLineDef(ld_num);
+		gDocument.linemod.flipLinedef(ld_num);
 	}
 
 	gDocument.basis.changeLinedef(ld_num, LineDef::F_LEFT, -1);

@@ -627,7 +627,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 		// flip linedef if necessary
 		if (L->Left(gDocument) && ! L->Right(gDocument))
 		{
-			FlipLineDef(new_l);
+			gDocument.linemod.flipLinedef(new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
@@ -1037,7 +1037,7 @@ static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 		else if (do_right)
 		{
 			LD_RemoveSideDef(*it, Side::right);
-			FlipLineDef(*it);
+			gDocument.linemod.flipLinedef(*it);
 		}
 		else // do_left
 		{
