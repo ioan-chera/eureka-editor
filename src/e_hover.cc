@@ -752,6 +752,95 @@ int Hover::getClosestLine_CastingVert(double x, double y, Side *side) const
 }
 
 //
+// Finds a split line
+//
+Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double ptr_y, int ignore_vert) const
+{
+	out_x = out_y = 0;
+
+	Objid out = NearestSplitLine(ptr_x, ptr_y, ignore_vert);
+
+	if(!out.valid())
+		return Objid();
+
+	const LineDef *L = doc.linedefs[out.num];
+
+	double x1 = L->Start(doc)->x();
+	double y1 = L->Start(doc)->y();
+	double x2 = L->End(doc)->x();
+	double y2 = L->End(doc)->y();
+
+	double len = hypot(x2 - x1, y2 - y1);
+
+	if(grid.ratio > 0 && edit.action == ACT_DRAW_LINE)
+	{
+		const Vertex *V = doc.vertices[edit.draw_from.num];
+
+		// convert ratio into a vector, use it to intersect the linedef
+		double px1 = V->x();
+		double py1 = V->y();
+
+		double px2 = ptr_x;
+		double py2 = ptr_y;
+
+		grid.RatioSnapXY(px2, py2, px1, py1);
+
+		if(fabs(px1 - px2) < 0.1 && fabs(py1 - py2) < 0.1)
+			return Objid();
+
+		// compute intersection point
+		double c = PerpDist(x1, y1, px1, py1, px2, py2);
+		double d = PerpDist(x2, y2, px1, py1, px2, py2);
+
+		int c_side = (c < -0.02) ? -1 : (c > 0.02) ? +1 : 0;
+		int d_side = (d < -0.02) ? -1 : (d > 0.02) ? +1 : 0;
+
+		if(c_side * d_side >= 0)
+			return Objid();
+
+		c = c / (c - d);
+
+		out_x = x1 + c * (x2 - x1);
+		out_y = y1 + c * (y2 - y1);
+	}
+	else if(grid.snap)
+	{
+		// don't highlight the line if the new vertex would snap onto
+		// the same coordinate as the start or end of the linedef.
+		// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
+
+		out_x = grid.ForceSnapX(ptr_x);
+		out_y = grid.ForceSnapY(ptr_y);
+
+		// snapped onto an end point?
+		if(L->TouchesCoord(TO_COORD(out_x), TO_COORD(out_y), doc))
+			return Objid();
+
+		// require snap coordinate be not TOO FAR from the line
+		double perp = PerpDist(out_x, out_y, x1, y1, x2, y2);
+
+		if(fabs(perp) > len * 0.2)
+			return Objid();
+	}
+	else
+	{
+		// in FREE mode, ensure split point is directly on the linedef
+		out_x = ptr_x;
+		out_y = ptr_y;
+
+		MoveCoordOntoLineDef(out.num, &out_x, &out_y);
+	}
+
+	// always ensure result is along the linedef (not off the ends)
+	double along = AlongDist(out_x, out_y, x1, y1, x2, y2);
+
+	if(along < 0.05 || along > len - 0.05)
+		return Objid();
+	
+	return out;
+}
+
+//
 // determine which thing is under the mouse pointer
 //
 Objid Hover::getNearestThing(double x, double y) const
@@ -1005,107 +1094,6 @@ double Hover::getApproximateDistanceToLinedef(const LineDef &line, double x, dou
 		return fabs(x3 - x);
 	}
 }
-
-void FindSplitLine(Objid& out, double& out_x, double& out_y,
-				   double ptr_x, double ptr_y, int ignore_vert)
-{
-	out_x = out_y = 0;
-
-	out = NearestSplitLine(ptr_x, ptr_y, ignore_vert);
-
-	if (! out.valid())
-		return;
-
-	const LineDef * L = gDocument.linedefs[out.num];
-
-	double x1 = L->Start(gDocument)->x();
-	double y1 = L->Start(gDocument)->y();
-	double x2 = L->End(gDocument)->x();
-	double y2 = L->End(gDocument)->y();
-
-	double len = hypot(x2 - x1, y2 - y1);
-
-	if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE)
-	{
-		Vertex *V = gDocument.vertices[edit.draw_from.num];
-
-		// convert ratio into a vector, use it to intersect the linedef
-		double px1 = V->x();
-		double py1 = V->y();
-
-		double px2 = ptr_x;
-		double py2 = ptr_y;
-
-		grid.RatioSnapXY(px2, py2, px1, py1);
-
-		if (fabs(px1 - px2) < 0.1 && fabs(py1 - py2) < 0.1)
-		{
-			out.clear();
-			return;
-		}
-
-		// compute intersection point
-		double c = PerpDist(x1, y1,  px1, py1, px2, py2);
-		double d = PerpDist(x2, y2,  px1, py1, px2, py2);
-
-		int c_side = (c < -0.02) ? -1 : (c > 0.02) ? +1 : 0;
-		int d_side = (d < -0.02) ? -1 : (d > 0.02) ? +1 : 0;
-
-		if (c_side * d_side >= 0)
-		{
-			out.clear();
-			return;
-		}
-
-		c = c / (c - d);
-
-		out_x = x1 + c * (x2 - x1);
-		out_y = y1 + c * (y2 - y1);
-	}
-	else if (grid.snap)
-	{
-		// don't highlight the line if the new vertex would snap onto
-		// the same coordinate as the start or end of the linedef.
-		// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
-
-		out_x = grid.ForceSnapX(ptr_x);
-		out_y = grid.ForceSnapY(ptr_y);
-
-		// snapped onto an end point?
-		if (L->TouchesCoord(TO_COORD(out_x), TO_COORD(out_y), gDocument))
-		{
-			out.clear();
-			return;
-		}
-
-		// require snap coordinate be not TOO FAR from the line
-		double perp = PerpDist(out_x, out_y, x1, y1, x2, y2);
-
-		if (fabs(perp) > len * 0.2)
-		{
-			out.clear();
-			return;
-		}
-	}
-	else
-	{
-		// in FREE mode, ensure split point is directly on the linedef
-		out_x = ptr_x;
-		out_y = ptr_y;
-
-		MoveCoordOntoLineDef(out.num, &out_x, &out_y);
-	}
-
-	// always ensure result is along the linedef (not off the ends)
-	double along = AlongDist(out_x, out_y, x1, y1, x2, y2);
-
-	if (along < 0.05 || along > len - 0.05)
-	{
-		out.clear();
-		return;
-	}
-}
-
 
 void FindSplitLineForDangler(Objid& out, int v_num)
 {

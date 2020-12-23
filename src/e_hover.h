@@ -47,6 +47,8 @@ public:
 	int getClosestLine_CastingHoriz(double x, double y, Side *side) const;
 	int getClosestLine_CastingVert(double x, double y, Side *side) const;
 
+	Objid findSplitLine(double &out_x, double &out_y, double ptr_x, double ptr_y, int ignore_vert) const;
+
 private:
 	Objid getNearestThing(double x, double y) const;
 	Objid getNearestVertex(double x, double y) const;
@@ -55,9 +57,6 @@ private:
 
 	double getApproximateDistanceToLinedef(const LineDef &line, double x, double y) const;
 };
-
-void FindSplitLine(Objid& out, double& out_x, double& out_y,
-				   double ptr_x, double ptr_y, int ignore_vert = -1);
 
 void FindSplitLineForDangler(Objid& out, int v_num);
 

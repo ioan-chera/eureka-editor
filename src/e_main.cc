@@ -250,7 +250,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 		edit.pointer_in_window &&
 	    edit.highlight.is_nil())
 	{
-		FindSplitLine(edit.split_line, edit.split_x, edit.split_y,
+		edit.split_line = gDocument.hover.findSplitLine(edit.split_x, edit.split_y,
 					  map_x, map_y, edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
