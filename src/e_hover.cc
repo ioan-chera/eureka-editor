@@ -270,19 +270,17 @@ public:
 	int lo, hi;   // coordinate range
 	int mid;
 
-	fastopp_node_c * lo_child;
-	fastopp_node_c * hi_child;
+	fastopp_node_c * lo_child = nullptr;
+	fastopp_node_c * hi_child = nullptr;
 
 	std::vector<int> lines;
 
-public:
-	fastopp_node_c(int _low, int _high) :
-		lo(_low), hi(_high),
-		lo_child(NULL), hi_child(NULL),
-		lines()
-	{
-		mid = (lo + hi) / 2;
+	const Document &doc;
 
+public:
+	fastopp_node_c(int _low, int _high, const Document &doc) :
+		lo(_low), hi(_high), mid((_low + _high) / 2), doc(doc)
+	{
 		Subdivide();
 	}
 
@@ -298,8 +296,8 @@ private:
 		if (hi - lo <= FASTOPP_DIST)
 			return;
 
-		lo_child = new fastopp_node_c(lo, mid);
-		hi_child = new fastopp_node_c(mid, hi);
+		lo_child = new fastopp_node_c(lo, mid, doc);
+		hi_child = new fastopp_node_c(mid, hi, doc);
 	}
 
 public:
@@ -326,14 +324,14 @@ public:
 
 	void AddLine_X(int ld)
 	{
-		const LineDef *L = gDocument.linedefs[ld];
+		const LineDef *L = doc.linedefs[ld];
 
 		// can ignore purely vertical lines
-		if (L->IsVertical(gDocument))
+		if (L->IsVertical(doc))
 			return;
 
-		double x1 = MIN(L->Start(gDocument)->x(), L->End(gDocument)->x());
-		double x2 = MAX(L->Start(gDocument)->x(), L->End(gDocument)->x());
+		double x1 = MIN(L->Start(doc)->x(), L->End(doc)->x());
+		double x2 = MAX(L->Start(doc)->x(), L->End(doc)->x());
 
 		AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
 	}
@@ -361,14 +359,14 @@ public:
 
 	void AddLine_Y(int ld)
 	{
-		const LineDef *L = gDocument.linedefs[ld];
+		const LineDef *L = doc.linedefs[ld];
 
 		// can ignore purely horizonal lines
-		if (L->IsHorizontal(gDocument))
+		if (L->IsHorizontal(doc))
 			return;
 
-		double y1 = MIN(L->Start(gDocument)->y(), L->End(gDocument)->y());
-		double y2 = MAX(L->Start(gDocument)->y(), L->End(gDocument)->y());
+		double y1 = MIN(L->Start(doc)->y(), L->End(doc)->y());
+		double y2 = MAX(L->Start(doc)->y(), L->End(doc)->y());
 
 		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
 	}
@@ -403,8 +401,8 @@ void FastOpposite_Begin()
 {
 	CalculateLevelBounds();
 
-	fastopp_X_tree = new fastopp_node_c(static_cast<int>(Map_bound_x1 - 8), static_cast<int>(Map_bound_x2 + 8));
-	fastopp_Y_tree = new fastopp_node_c(static_cast<int>(Map_bound_y1 - 8), static_cast<int>(Map_bound_y2 + 8));
+	fastopp_X_tree = new fastopp_node_c(static_cast<int>(Map_bound_x1 - 8), static_cast<int>(Map_bound_x2 + 8), gDocument);
+	fastopp_Y_tree = new fastopp_node_c(static_cast<int>(Map_bound_y1 - 8), static_cast<int>(Map_bound_y2 + 8), gDocument);
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
