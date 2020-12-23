@@ -243,7 +243,10 @@
     <ClCompile Include="..\..\src\bsp_util.cc">
       <Filter>Code\BSP_</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Errors.cpp">
+    <ClCompile Include="..\..\src\Document.cc">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Errors.cc">
       <Filter>Code</Filter>
     </ClCompile>
   </ItemGroup>
@@ -440,10 +443,19 @@
     <ClInclude Include="..\..\src\bsp.h">
       <Filter>Code\BSP_</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Errors.hpp">
+    <ClInclude Include="..\..\src\objid.h">
       <Filter>Code</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\objid.h">
+    <ClInclude Include="..\..\src\Document.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\DocumentModule.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Errors.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\PrintfMacros.h">
       <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>

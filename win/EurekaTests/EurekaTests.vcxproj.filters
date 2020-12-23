@@ -63,9 +63,6 @@
     <ClCompile Include="..\..\src\m_strings.cc">
       <Filter>Eureka</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Errors.cpp">
-      <Filter>Eureka</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\testUtils\FatalHandler.cpp">
       <Filter>testUtils</Filter>
     </ClCompile>
@@ -83,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="..\..\test\lib_util_test.cpp">
       <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Errors.cc">
+      <Filter>Eureka</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

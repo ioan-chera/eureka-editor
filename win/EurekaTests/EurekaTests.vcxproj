@@ -28,7 +28,7 @@
     <ClCompile Include="..\..\modules\googletest\googletest\src\gtest-typed-test.cc" />
     <ClCompile Include="..\..\modules\googletest\googletest\src\gtest.cc" />
     <ClCompile Include="..\..\modules\googletest\googletest\src\gtest_main.cc" />
-    <ClCompile Include="..\..\src\Errors.cpp" />
+    <ClCompile Include="..\..\src\Errors.cc" />
     <ClCompile Include="..\..\src\lib_file.cc" />
     <ClCompile Include="..\..\src\lib_util.cc" />
     <ClCompile Include="..\..\src\m_bitvec.cc" />

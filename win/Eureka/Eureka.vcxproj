@@ -162,7 +162,8 @@
     <ClCompile Include="..\..\src\bsp_level.cc" />
     <ClCompile Include="..\..\src\bsp_node.cc" />
     <ClCompile Include="..\..\src\bsp_util.cc" />
-    <ClCompile Include="..\..\src\Errors.cpp" />
+    <ClCompile Include="..\..\src\Document.cc" />
+    <ClCompile Include="..\..\src\Errors.cc" />
     <ClCompile Include="..\..\src\e_basis.cc" />
     <ClCompile Include="..\..\src\e_checks.cc" />
     <ClCompile Include="..\..\src\e_commands.cc" />
@@ -230,7 +231,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\bsp.h" />
-    <ClInclude Include="..\..\src\Errors.hpp" />
+    <ClInclude Include="..\..\src\Document.h" />
+    <ClInclude Include="..\..\src\DocumentModule.h" />
+    <ClInclude Include="..\..\src\Errors.h" />
     <ClInclude Include="..\..\src\e_basis.h" />
     <ClInclude Include="..\..\src\e_checks.h" />
     <ClInclude Include="..\..\src\e_cutpaste.h" />
@@ -262,6 +265,7 @@
     <ClInclude Include="..\..\src\m_strings.h" />
     <ClInclude Include="..\..\src\m_udmf.h" />
     <ClInclude Include="..\..\src\objid.h" />
+    <ClInclude Include="..\..\src\PrintfMacros.h" />
     <ClInclude Include="..\..\src\r_grid.h" />
     <ClInclude Include="..\..\src\r_render.h" />
     <ClInclude Include="..\..\src\r_subdiv.h" />
