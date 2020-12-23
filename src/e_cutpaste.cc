@@ -1089,7 +1089,7 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	int v2 = (L2->start == v_num) ? L2->end : L2->start;
 
 	// ensure we don't create two directly overlapping linedefs
-	if (LineDefAlreadyExists(v1, v2))
+	if (gDocument.linemod.linedefAlreadyExists(v1, v2))
 		return false;
 
 	// see what sidedefs would become unused

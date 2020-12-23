@@ -325,7 +325,7 @@ bool Vertex_TryFixDangler(int v_num)
 		double dy = gDocument.vertices[v_num]->y() - gDocument.vertices[i]->y();
 
 		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
-			! LineDefAlreadyExists(v_num, v_other))
+			! gDocument.linemod.linedefAlreadyExists(v_num, v_other))
 		{
 			v_other = i;
 			break;

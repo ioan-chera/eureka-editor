@@ -42,6 +42,8 @@ public:
 	void flipLinedefGroup(const selection_c *flip) const;
 
 	void setLinedefsLength(int new_len) const;
+
+	bool linedefAlreadyExists(int v1, int v2) const;
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
@@ -51,7 +53,6 @@ private:
 	void linedefSetLength(int ld, int new_len, double angle) const;
 };
 
-bool LineDefAlreadyExists(int v1, int v2);
 bool LineDefWouldOverlap(int v1, double x2, double y2);
 
 int SplitLineDefAtVertex(int ld, int v_idx);

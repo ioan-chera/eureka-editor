@@ -332,7 +332,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 {
-	if (LineDefAlreadyExists(v1, v2))
+	if (gDocument.linemod.linedefAlreadyExists(v1, v2))
 		return;
 
 	int new_ld = gDocument.basis.addNew(ObjType::linedefs);
@@ -476,7 +476,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			}
 
 			// handle case where a line already exists between the two vertices
-			if (LineDefAlreadyExists(old_vert, new_vert))
+			if (gDocument.linemod.linedefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
 				edit.draw_from = Objid(ObjType::vertices, new_vert);

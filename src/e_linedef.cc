@@ -42,21 +42,6 @@
 // config items
 bool config::leave_offsets_alone = true;
 
-
-bool LineDefAlreadyExists(int v1, int v2)
-{
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = gDocument.linedefs[n];
-
-		if (L->start == v1 && L->end == v2) return true;
-		if (L->start == v2 && L->end == v1) return true;
-	}
-
-	return false;
-}
-
-
 //
 // return true if adding a line between v1 and v2 would overlap an
 // existing line.  By "overlap" I mean parallel and sitting on top
@@ -896,6 +881,22 @@ void LinedefModule::setLinedefsLength(int new_len) const
 	}
 
 	doc.basis.end();
+}
+
+//
+// If linedef already exists
+//
+bool LinedefModule::linedefAlreadyExists(int v1, int v2) const
+{
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
+	{
+		const LineDef *L = doc.linedefs[n];
+
+		if (L->start == v1 && L->end == v2) return true;
+		if (L->start == v2 && L->end == v1) return true;
+	}
+
+	return false;
 }
 
 //
