@@ -798,7 +798,7 @@ void CMD_ACT_Click()
 
 		V->SetRawXY(edit.split_x, edit.split_y);
 
-		SplitLineDefAtVertex(split_ld, new_vert);
+		gDocument.linemod.splitLinedefAtVertex(split_ld, new_vert);
 
 		gDocument.basis.end();
 

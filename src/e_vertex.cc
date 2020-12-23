@@ -405,7 +405,7 @@ bool Vertex_TryFixDangler(int v_num)
 	gDocument.basis.begin();
 	gDocument.basis.setMessage("split linedef #%d\n", line_obj.num);
 
-	SplitLineDefAtVertex(line_obj.num, v_num);
+	gDocument.linemod.splitLinedefAtVertex(line_obj.num, v_num);
 
 	gDocument.basis.end();
 

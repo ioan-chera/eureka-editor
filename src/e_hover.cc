@@ -1259,7 +1259,7 @@ void crossing_state_c::SplitAllLines()
 
 			V->SetRawXY(points[i].x, points[i].y);
 
-			SplitLineDefAtVertex(points[i].ld, points[i].vert);
+			doc.linemod.splitLinedefAtVertex(points[i].ld, points[i].vert);
 		}
 	}
 }

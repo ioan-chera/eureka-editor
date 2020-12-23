@@ -44,6 +44,8 @@ public:
 	void setLinedefsLength(int new_len) const;
 
 	bool linedefAlreadyExists(int v1, int v2) const;
+
+	int splitLinedefAtVertex(int ld, int v_idx) const;
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
@@ -52,10 +54,6 @@ private:
 	bool linedefStartWillBeMoved(int ld, selection_c &list) const;
 	void linedefSetLength(int ld, int new_len, double angle) const;
 };
-
-bool LineDefWouldOverlap(int v1, double x2, double y2);
-
-int SplitLineDefAtVertex(int ld, int v_idx);
 
 void MoveCoordOntoLineDef(int ld, double *x, double *y);
 

@@ -42,55 +42,6 @@
 // config items
 bool config::leave_offsets_alone = true;
 
-//
-// return true if adding a line between v1 and v2 would overlap an
-// existing line.  By "overlap" I mean parallel and sitting on top
-// (this does NOT test for lines crossing each other).
-//
-bool LineDefWouldOverlap(int v1, double x2, double y2)
-{
-	double x1 = gDocument.vertices[v1]->x();
-	double y1 = gDocument.vertices[v1]->y();
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = gDocument.linedefs[n];
-
-		// zero-length lines should not exist, but don't get stroppy if they do
-		if (L->IsZeroLength(gDocument))
-			continue;
-
-		double lx1 = L->Start(gDocument)->x();
-		double ly1 = L->Start(gDocument)->y();
-		double lx2 = L->End(gDocument)->x();
-		double ly2 = L->End(gDocument)->y();
-
-		double a, b;
-
-		a = PerpDist(x1, y1, lx1, ly1, lx2, ly2);
-		b = PerpDist(x2, y2, lx1, ly1, lx2, ly2);
-
-		if (fabs(a) >= 2.0 || fabs(b) >= 2.0)
-			continue;
-
-		a = AlongDist(x1, y1, lx1, ly1, lx2, ly2);
-		b = AlongDist(x2, y2, lx1, ly1, lx2, ly2);
-
-		double len = L->CalcLength(gDocument);
-
-		if (a > b)
-			std::swap(a, b);
-
-		if (b < 0.5 || a > len - 0.5)
-			continue;
-
-		return true;
-	}
-
-	return false;
-}
-
-
 //------------------------------------------------------------------------
 
 static inline const LineDef * LD_ptr(const Objid& obj)
@@ -900,6 +851,59 @@ bool LinedefModule::linedefAlreadyExists(int v1, int v2) const
 }
 
 //
+// Split linedef at vertex
+//
+int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
+{
+	LineDef * L = doc.linedefs[ld];
+	Vertex  * V = doc.vertices[new_v];
+
+	// create new linedef
+	int new_l = doc.basis.addNew(ObjType::linedefs);
+
+	LineDef * L2 = doc.linedefs[new_l];
+
+	// it is OK to directly set fields of newly created objects
+	*L2 = *L;
+
+	L2->start = new_v;
+	L2->end   = L->end;
+
+	// update vertex on original line
+	doc.basis.changeLinedef(ld, LineDef::F_END, new_v);
+
+	// compute lengths (to update sidedef X offsets)
+	int orig_length = I_ROUND(L->CalcLength(doc));
+	int new_length  = I_ROUND(hypot(L->Start(doc)->x() - V->x(), L->Start(doc)->y() - V->y()));
+
+	// update sidedefs
+
+	if (L->Right(doc))
+	{
+		L2->right = doc.basis.addNew(ObjType::sidedefs);
+		*L2->Right(doc) = *L->Right(doc);
+
+		if (! config::leave_offsets_alone)
+			L2->Right(doc)->x_offset += new_length;
+	}
+
+	if (L->Left(doc))
+	{
+		L2->left = doc.basis.addNew(ObjType::sidedefs);
+		*L2->Left(doc) = *L->Left(doc);
+
+		if (! config::leave_offsets_alone)
+		{
+			int new_x_ofs = L->Left(doc)->x_offset + orig_length - new_length;
+
+			doc.basis.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
+		}
+	}
+
+	return new_l;
+}
+
+//
 // Flip vertices of linedef
 //
 void LinedefModule::flipLine_verts(int ld) const
@@ -1090,58 +1094,6 @@ void CMD_LIN_SwapSides()
 		Selection_Clear(true /* nosave */);
 }
 
-
-int SplitLineDefAtVertex(int ld, int new_v)
-{
-	LineDef * L = gDocument.linedefs[ld];
-	Vertex  * V = gDocument.vertices[new_v];
-
-	// create new linedef
-	int new_l = gDocument.basis.addNew(ObjType::linedefs);
-
-	LineDef * L2 = gDocument.linedefs[new_l];
-
-	// it is OK to directly set fields of newly created objects
-	*L2 = *L;
-
-	L2->start = new_v;
-	L2->end   = L->end;
-
-	// update vertex on original line
-	gDocument.basis.changeLinedef(ld, LineDef::F_END, new_v);
-
-	// compute lengths (to update sidedef X offsets)
-	int orig_length = I_ROUND(L->CalcLength(gDocument));
-	int new_length  = I_ROUND(hypot(L->Start(gDocument)->x() - V->x(), L->Start(gDocument)->y() - V->y()));
-
-	// update sidedefs
-
-	if (L->Right(gDocument))
-	{
-		L2->right = gDocument.basis.addNew(ObjType::sidedefs);
-		*L2->Right(gDocument) = *L->Right(gDocument);
-
-		if (! config::leave_offsets_alone)
-			L2->Right(gDocument)->x_offset += new_length;
-	}
-
-	if (L->Left(gDocument))
-	{
-		L2->left = gDocument.basis.addNew(ObjType::sidedefs);
-		*L2->Left(gDocument) = *L->Left(gDocument);
-
-		if (! config::leave_offsets_alone)
-		{
-			int new_x_ofs = L->Left(gDocument)->x_offset + orig_length - new_length;
-
-			gDocument.basis.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
-		}
-	}
-
-	return new_l;
-}
-
-
 static bool DoSplitLineDef(int ld)
 {
 	LineDef * L = gDocument.linedefs[ld];
@@ -1160,7 +1112,7 @@ static bool DoSplitLineDef(int ld)
 
 	V->SetRawXY(new_x, new_y);
 
-	SplitLineDefAtVertex(ld, new_v);
+	gDocument.linemod.splitLinedefAtVertex(ld, new_v);
 
 	return true;
 }

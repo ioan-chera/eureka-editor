@@ -515,7 +515,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		// splitting an existing line?
 		if (split_ld >= 0)
 		{
-			SplitLineDefAtVertex(split_ld, new_vert);
+			gDocument.linemod.splitLinedefAtVertex(split_ld, new_vert);
 			gDocument.basis.setMessage("split linedef #%d", split_ld);
 		}
 		else
@@ -860,7 +860,7 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 	{
 		did_split_line = edit.split_line.num;
 
-		SplitLineDefAtVertex(edit.split_line.num, obj.num);
+		gDocument.linemod.splitLinedefAtVertex(edit.split_line.num, obj.num);
 
 		// now move the vertex!
 	}
