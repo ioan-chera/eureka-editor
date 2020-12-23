@@ -758,7 +758,7 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 {
 	out_x = out_y = 0;
 
-	Objid out = NearestSplitLine(ptr_x, ptr_y, ignore_vert);
+	Objid out = getNearestSplitLine(ptr_x, ptr_y, ignore_vert);
 
 	if(!out.valid())
 		return Objid();
@@ -1093,6 +1093,68 @@ double Hover::getApproximateDistanceToLinedef(const LineDef &line, double x, dou
 
 		return fabs(x3 - x);
 	}
+}
+
+//
+// determine which linedef would be split if a new vertex were
+// added at the given coordinates.
+//
+Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
+{
+	// slack in map units
+	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
+
+	double lx = x - mapslack;
+	double ly = y - mapslack;
+	double hx = x + mapslack;
+	double hy = y + mapslack;
+
+	int    best = -1;
+	double best_dist = 9e9;
+
+	double too_small = (Level_format == MAPF_UDMF) ? 0.2 : 4.0;
+
+	for(int n = 0; n < doc.numLinedefs(); n++)
+	{
+		const LineDef *L = doc.linedefs[n];
+
+		if(L->start == ignore_vert || L->end == ignore_vert)
+			continue;
+
+		double x1 = L->Start(doc)->x();
+		double y1 = L->Start(doc)->y();
+		double x2 = L->End(doc)->x();
+		double y2 = L->End(doc)->y();
+
+		if(MAX(x1, x2) < lx || MIN(x1, x2) > hx ||
+			MAX(y1, y2) < ly || MIN(y1, y2) > hy)
+			continue;
+
+		// skip linedef if given point matches a vertex
+		if(x == x1 && y == y1) continue;
+		if(x == x2 && y == y2) continue;
+
+		// skip linedef if too small to split
+		if(fabs(x2 - x1) < too_small && fabs(y2 - y1) < too_small)
+			continue;
+
+		double dist = getApproximateDistanceToLinedef(*L, x, y);
+
+		if(dist > mapslack)
+			continue;
+
+		if(dist <= best_dist)
+		{
+			best = n;
+			best_dist = dist;
+		}
+	}
+
+	if(best >= 0)
+		return Objid(ObjType::linedefs, best);
+
+	// none found
+	return Objid();
 }
 
 void FindSplitLineForDangler(Objid& out, int v_num)

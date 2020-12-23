@@ -56,6 +56,8 @@ private:
 	Objid getNearestSector(double x, double y) const;
 
 	double getApproximateDistanceToLinedef(const LineDef &line, double x, double y) const;
+
+	Objid getNearestSplitLine(double x, double y, int ignore_vert) const;
 };
 
 void FindSplitLineForDangler(Objid& out, int v_num);
