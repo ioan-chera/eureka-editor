@@ -904,6 +904,33 @@ int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
 }
 
 //
+// Move coordinate into linedef
+//
+void LinedefModule::moveCoordOntoLinedef(int ld, double *x, double *y) const
+{
+	const LineDef *L = doc.linedefs[ld];
+
+	double x1 = L->Start(doc)->x();
+	double y1 = L->Start(doc)->y();
+	double x2 = L->End(doc)->x();
+	double y2 = L->End(doc)->y();
+
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+
+	double len_squared = dx*dx + dy*dy;
+
+	SYS_ASSERT(len_squared > 0);
+
+	// compute along distance
+	double along = (*x - x1) * dx + (*y - y1) * dy;
+
+	// result = start + along * line unit vector
+	*x = x1 + along * dx / len_squared;
+	*y = y1 + along * dy / len_squared;
+}
+
+//
 // Flip vertices of linedef
 //
 void LinedefModule::flipLine_verts(int ld) const
@@ -1366,31 +1393,6 @@ void CMD_LIN_MergeTwo(void)
 
 	gDocument.basis.setMessage("merged two linedefs");
 	gDocument.basis.end();
-}
-
-
-void MoveCoordOntoLineDef(int ld, double *x, double *y)
-{
-	const LineDef *L = gDocument.linedefs[ld];
-
-	double x1 = L->Start(gDocument)->x();
-	double y1 = L->Start(gDocument)->y();
-	double x2 = L->End(gDocument)->x();
-	double y2 = L->End(gDocument)->y();
-
-	double dx = x2 - x1;
-	double dy = y2 - y1;
-
-	double len_squared = dx*dx + dy*dy;
-
-	SYS_ASSERT(len_squared > 0);
-
-	// compute along distance
-	double along = (*x - x1) * dx + (*y - y1) * dy;
-
-	// result = start + along * line unit vector
-	*x = x1 + along * dx / len_squared;
-	*y = y1 + along * dy / len_squared;
 }
 
 void LD_FixForLostSide(int ld)

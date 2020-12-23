@@ -540,7 +540,7 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 		out_x = ptr_x;
 		out_y = ptr_y;
 
-		MoveCoordOntoLineDef(out.num, &out_x, &out_y);
+		doc.linemod.moveCoordOntoLinedef(out.num, &out_x, &out_y);
 	}
 
 	// always ensure result is along the linedef (not off the ends)
