@@ -1925,7 +1925,7 @@ void UI_Canvas::DrawCurrentLine()
 	DrawLineInfo(V->x(), V->y(), new_x, new_y, grid.ratio > 0);
 
 	// draw all the crossing points
-	crossing_state_c cross;
+	crossing_state_c cross(gDocument);
 
 	gDocument.hover.findCrossingPoints(cross,
 					   V->x(), V->y(), edit.draw_from.num,

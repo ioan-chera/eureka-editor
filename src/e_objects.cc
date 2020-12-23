@@ -366,7 +366,7 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 
 ///  fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 
-	crossing_state_c cross;
+	crossing_state_c cross(gDocument);
 
 	gDocument.hover.findCrossingPoints(cross,
 		gDocument.vertices[v1]->x(), gDocument.vertices[v1]->y(), v1,

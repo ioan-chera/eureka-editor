@@ -97,12 +97,15 @@ public:
 	std::vector< cross_point_t > points;
 
 	// the start/end coordinates of the whole tested line
-	double start_x, start_y;
-	double   end_x,   end_y;
+	double start_x = 0, start_y = 0;
+	double   end_x = 0,   end_y = 0;
+
+	const Document &doc;
 
 public:
-	 crossing_state_c();
-	~crossing_state_c();
+	explicit crossing_state_c(const Document &doc) : doc(doc)
+	{
+	}
 
 	void clear();
 

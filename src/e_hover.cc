@@ -1230,15 +1230,6 @@ Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 
 //------------------------------------------------------------------------
 
-
-crossing_state_c::crossing_state_c() : points()
-{ }
-
-
-crossing_state_c::~crossing_state_c()
-{ }
-
-
 void crossing_state_c::clear()
 {
 	points.clear();
