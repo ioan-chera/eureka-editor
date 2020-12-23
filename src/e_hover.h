@@ -43,6 +43,9 @@ public:
 	}
 
 	Objid getNearbyObject(ObjType type, double x, double y) const;
+
+private:
+	Objid getNearestThing(double x, double y) const;
 };
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,

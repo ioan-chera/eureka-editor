@@ -818,65 +818,6 @@ static Objid NearestSector(double x, double y)
 	return Objid();
 }
 
-
-//
-// determine which thing is under the mouse pointer
-//
-static Objid NearestThing(double x, double y)
-{
-	double mapslack = 1 + 16.0f / grid.Scale;
-
-	double max_radius = MAX_RADIUS + ceil(mapslack);
-
-	double lx = x - max_radius;
-	double ly = y - max_radius;
-	double hx = x + max_radius;
-	double hy = y + max_radius;
-
-	int best = -1;
-	thing_comparer_t best_comp;
-
-	for (int n = 0 ; n < NumThings ; n++)
-	{
-		const Thing *thing = gDocument.things[n];
-		double tx = thing->x();
-		double ty = thing->y();
-
-		// filter out things that are outside the search bbox.
-		// this search box is enlarged by MAX_RADIUS.
-		if (tx < lx || tx > hx || ty < ly || ty > hy)
-			continue;
-
-		const thingtype_t &info = M_GetThingType(thing->type);
-
-		// more accurate bbox test using the real radius
-		double r = info.radius + mapslack;
-
-		if (x < tx - r - mapslack || x > tx + r + mapslack ||
-			y < ty - r - mapslack || y > ty + r + mapslack)
-			continue;
-
-		thing_comparer_t th_comp;
-
-		th_comp.distance = hypot(x - tx, y - ty);
-		th_comp.radius   = (int)r;
-		th_comp.inside   = (x > tx - r && x < tx + r && y > ty - r && y < ty + r);
-
-		if (best < 0 || th_comp <= best_comp)
-		{
-			best = n;
-			best_comp = th_comp;
-		}
-	}
-
-	if (best >= 0)
-		return Objid(ObjType::things, best);
-
-	// none found
-	return Objid();
-}
-
-
 //
 // determine which vertex is under the pointer
 //
@@ -938,7 +879,7 @@ Objid Hover::getNearbyObject(ObjType type, double x, double y) const
 	switch(type)
 	{
 	case ObjType::things:
-		return NearestThing(x, y);
+		return getNearestThing(x, y);
 
 	case ObjType::vertices:
 		return NearestVertex(x, y);
@@ -956,42 +897,60 @@ Objid Hover::getNearbyObject(ObjType type, double x, double y) const
 }
 
 //
-//  sets 'o' to which object is under the pointer at the given
-//  coordinates.  when several objects are close, the smallest
-//  is chosen.
+// determine which thing is under the mouse pointer
 //
-void GetNearObject(Objid& o, ObjType objtype, double x, double y)
+Objid Hover::getNearestThing(double x, double y) const
 {
-	switch (objtype)
+	double mapslack = 1 + 16.0f / grid.Scale;
+
+	double max_radius = MAX_RADIUS + ceil(mapslack);
+
+	double lx = x - max_radius;
+	double ly = y - max_radius;
+	double hx = x + max_radius;
+	double hy = y + max_radius;
+
+	int best = -1;
+	thing_comparer_t best_comp;
+
+	for(int n = 0; n < doc.numThings(); n++)
 	{
-		case ObjType::things:
-		{
-			o = NearestThing(x, y);
-			break;
-		}
+		const Thing *thing = doc.things[n];
+		double tx = thing->x();
+		double ty = thing->y();
 
-		case ObjType::vertices:
-		{
-			o = NearestVertex(x, y);
-			break;
-		}
+		// filter out things that are outside the search bbox.
+		// this search box is enlarged by MAX_RADIUS.
+		if(tx < lx || tx > hx || ty < ly || ty > hy)
+			continue;
 
-		case ObjType::linedefs:
-		{
-			o = NearestLineDef(x, y);
-			break;
-		}
+		const thingtype_t &info = M_GetThingType(thing->type);
 
-		case ObjType::sectors:
-		{
-			o = NearestSector(x, y);
-			break;
-		}
+		// more accurate bbox test using the real radius
+		double r = info.radius + mapslack;
 
-		default:
-			BugError("GetNearObject: bad objtype %d\n", (int) objtype);
-			break; /* NOT REACHED */
+		if(x < tx - r - mapslack || x > tx + r + mapslack ||
+			y < ty - r - mapslack || y > ty + r + mapslack)
+			continue;
+
+		thing_comparer_t th_comp;
+
+		th_comp.distance = hypot(x - tx, y - ty);
+		th_comp.radius = (int)r;
+		th_comp.inside = (x > tx - r && x < tx + r && y > ty - r && y < ty + r);
+
+		if(best < 0 || th_comp <= best_comp)
+		{
+			best = n;
+			best_comp = th_comp;
+		}
 	}
+
+	if(best >= 0)
+		return Objid(ObjType::things, best);
+
+	// none found
+	return Objid();
 }
 
 
