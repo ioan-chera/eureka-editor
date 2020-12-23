@@ -61,8 +61,6 @@ private:
 	Objid getNearestSplitLine(double x, double y, int ignore_vert) const;
 };
 
-int ClosestLine_CastAtAngle (double x, double y, float radians);
-
 int OppositeLineDef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines = NULL);
 int OppositeSector(int ld, Side ld_side);
 

@@ -90,56 +90,6 @@ double ApproxDistToLineDef(const LineDef * L, double x, double y)
 	}
 }
 
-int ClosestLine_CastAtAngle(double x, double y, float radians)
-{
-	int    best_match = -1;
-	double best_dist  = 9e9;
-
-	double x2 = x + 256 * cos(radians);
-	double y2 = y + 256 * sin(radians);
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		const LineDef *L = gDocument.linedefs[n];
-
-		double a = PerpDist(L->Start(gDocument)->x(), L->Start(gDocument)->y(),  x, y, x2, y2);
-		double b = PerpDist(L->  End(gDocument)->x(), L->  End(gDocument)->y(),  x, y, x2, y2);
-
-		// completely on one side of the vector?
-		if (a > 0 && b > 0) continue;
-		if (a < 0 && b < 0) continue;
-
-		double c = AlongDist(L->Start(gDocument)->x(), L->Start(gDocument)->y(),  x, y, x2, y2);
-		double d = AlongDist(L->  End(gDocument)->x(), L->  End(gDocument)->y(),  x, y, x2, y2);
-
-		double dist;
-
-		if (fabs(a) < 1 && fabs(b) < 1)
-			dist = MIN(c, d);
-		else if (fabs(a) < 1)
-			dist = c;
-		else if (fabs(b) < 1)
-			dist = d;
-		else
-		{
-			double factor = a / (a - b);
-			dist = c * (1 - factor) + d * factor;
-		}
-
-		// behind or touching the vector?
-		if (dist < 1) continue;
-
-		if (dist < best_dist)
-		{
-			best_match = n;
-			best_dist  = dist;
-		}
-	}
-
-	return best_match;
-}
-
-
 bool PointOutsideOfMap(double x, double y)
 {
 	// this keeps track of directions tested
