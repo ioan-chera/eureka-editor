@@ -691,7 +691,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 		}
 	}
 
-	FastOpposite_Finish();
+	gDocument.hover.fastOpposite_finish();
 }
 
 

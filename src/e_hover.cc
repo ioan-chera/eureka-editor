@@ -392,17 +392,6 @@ public:
 	}
 };
 
-
-static fastopp_node_c * fastopp_X_tree;
-static fastopp_node_c * fastopp_Y_tree;
-
-
-void FastOpposite_Finish()
-{
-	delete fastopp_X_tree;  fastopp_X_tree = NULL;
-	delete fastopp_Y_tree;  fastopp_Y_tree = NULL;
-}
-
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
 Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2)
 {
@@ -808,6 +797,18 @@ void Hover::fastOpposite_begin()
 		m_fastopp_X_tree->AddLine_X(n);
 		m_fastopp_Y_tree->AddLine_Y(n);
 	}
+}
+
+//
+// End fast-opposite mode
+//
+void Hover::fastOpposite_finish()
+{
+	SYS_ASSERT(m_fastopp_X_tree || m_fastopp_Y_tree);
+	delete m_fastopp_X_tree;
+	m_fastopp_X_tree = nullptr;
+	delete m_fastopp_Y_tree;
+	m_fastopp_Y_tree = nullptr;
 }
 
 //
