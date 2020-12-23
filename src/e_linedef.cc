@@ -844,8 +844,20 @@ static void FlipLine_sides(int ld)
 //
 void LinedefModule::flipLinedef(int ld) const
 {
-	FlipLine_verts(ld);
+	flipLine_verts(ld);
 	FlipLine_sides(ld);
+}
+
+//
+// Flip vertices of linedef
+//
+void LinedefModule::flipLine_verts(int ld) const
+{
+	int old_start = doc.linedefs[ld]->start;
+	int old_end   = doc.linedefs[ld]->end;
+
+	doc.basis.changeLinedef(ld, LineDef::F_START, old_end);
+	doc.basis.changeLinedef(ld, LineDef::F_END, old_start);
 }
 
 void FlipLineDef(int ld)
