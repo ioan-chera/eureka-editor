@@ -90,55 +90,6 @@ double ApproxDistToLineDef(const LineDef * L, double x, double y)
 	}
 }
 
-
-int ClosestLine_CastingHoriz(double x, double y, Side *side)
-{
-	int    best_match = -1;
-	double best_dist  = 9e9;
-
-	// most lines have integral X coords, so offset slightly to
-	// avoid hitting vertices.
-	y += 0.04;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		double ly1 = gDocument.linedefs[n]->Start(gDocument)->y();
-		double ly2 = gDocument.linedefs[n]->End(gDocument)->y();
-
-		// ignore purely horizontal lines
-		if (ly1 == ly2)
-			continue;
-
-		// does the linedef cross the horizontal ray?
-		if (MIN(ly1, ly2) >= y || MAX(ly1, ly2) <= y)
-			continue;
-
-		double lx1 = gDocument.linedefs[n]->Start(gDocument)->x();
-		double lx2 = gDocument.linedefs[n]->End(gDocument)->x();
-
-		double dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (ly2 - ly1);
-
-		if (fabs(dist) < best_dist)
-		{
-			best_match = n;
-			best_dist  = fabs(dist);
-
-			if (side)
-			{
-				if (best_dist < 0.01)
-					*side = Side::neither;  // on the line
-				else if ( (ly1 > ly2) == (dist > 0))
-					*side = Side::right;  // right side
-				else
-					*side = Side::left; // left side
-			}
-		}
-	}
-
-	return best_match;
-}
-
-
 int ClosestLine_CastingVert(double x, double y, Side *side)
 {
 	int    best_match = -1;
@@ -749,6 +700,56 @@ Objid Hover::getNearbyObject(ObjType type, double x, double y) const
 }
 
 //
+// Get the closest line, by casting horizontally
+//
+int Hover::getClosestLine_CastingHoriz(double x, double y, Side *side) const
+{
+	int    best_match = -1;
+	double best_dist = 9e9;
+
+	// most lines have integral X coords, so offset slightly to
+	// avoid hitting vertices.
+	y += 0.04;
+
+	for(int n = 0; n < doc.numLinedefs(); n++)
+	{
+		double ly1 = doc.linedefs[n]->Start(doc)->y();
+		double ly2 = doc.linedefs[n]->End(doc)->y();
+
+		// ignore purely horizontal lines
+		if(ly1 == ly2)
+			continue;
+
+		// does the linedef cross the horizontal ray?
+		if(MIN(ly1, ly2) >= y || MAX(ly1, ly2) <= y)
+			continue;
+
+		double lx1 = doc.linedefs[n]->Start(doc)->x();
+		double lx2 = doc.linedefs[n]->End(doc)->x();
+
+		double dist = lx1 - x + (lx2 - lx1) * (y - ly1) / (ly2 - ly1);
+
+		if(fabs(dist) < best_dist)
+		{
+			best_match = n;
+			best_dist = fabs(dist);
+
+			if(side)
+			{
+				if(best_dist < 0.01)
+					*side = Side::neither;  // on the line
+				else if((ly1 > ly2) == (dist > 0))
+					*side = Side::right;  // right side
+				else
+					*side = Side::left; // left side
+			}
+		}
+	}
+
+	return best_match;
+}
+
+//
 // determine which thing is under the mouse pointer
 //
 Objid Hover::getNearestThing(double x, double y) const
@@ -921,7 +922,7 @@ Objid Hover::getNearestSector(double x, double y) const
 
 	Side side1, side2;
 
-	int line1 = ClosestLine_CastingHoriz(x, y, &side1);
+	int line1 = getClosestLine_CastingHoriz(x, y, &side1);
 	int line2 = ClosestLine_CastingVert(x, y, &side2);
 
 	if(line2 < 0)

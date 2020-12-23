@@ -1134,7 +1134,7 @@ static bool GetLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 	int ld;
 	Side side;
 
-	ld = ClosestLine_CastingHoriz(map_x, map_y, &side);
+	ld = gDocument.hover.getClosestLine_CastingHoriz(map_x, map_y, &side);
 
 	DebugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, side);
 
