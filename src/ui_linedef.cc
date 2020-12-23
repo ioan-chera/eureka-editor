@@ -661,7 +661,7 @@ void UI_LineBox::length_callback(Fl_Widget *w, void *data)
 	// negative values are allowed, it moves the start vertex
 	new_len = CLAMP(-32768, new_len, 32768);
 
-	LineDefs_SetLength(new_len);
+	gDocument.linemod.setLinedefsLength(new_len);
 }
 
 

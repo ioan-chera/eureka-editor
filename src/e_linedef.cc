@@ -859,6 +859,48 @@ void LinedefModule::flipLinedefGroup(const selection_c *flip) const
 	}
 }
 
+static int PickLineDefToExtend(selection_c& list, bool moving_start);
+static void LD_SetLength(int ld, int new_len, double angle);
+
+//
+// Set linedef length
+//
+void LinedefModule::setLinedefsLength(int new_len) const
+{
+	// this works on the current selection (caller must set it up)
+
+	// use a copy of the selection
+	selection_c list(ObjType::linedefs);
+	ConvertSelection(edit.Selected, &list);
+
+	if (list.empty())
+		return;
+
+	// remember angles
+	std::vector<double> angles(doc.numLinedefs());
+
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
+	{
+		const LineDef *L = doc.linedefs[n];
+
+		angles[n] = atan2(L->End(doc)->y() - L->Start(doc)->y(), L->End(doc)->x() - L->Start(doc)->x());
+	}
+
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("set length of", list);
+
+	while (! list.empty())
+	{
+		int ld = PickLineDefToExtend(list, new_len < 0 /* moving_start */);
+
+		list.clear(ld);
+
+		LD_SetLength(ld, new_len, angles[ld]);
+	}
+
+	doc.basis.end();
+}
+
 //
 // Flip vertices of linedef
 //
@@ -1392,44 +1434,6 @@ static void LD_SetLength(int ld, int new_len, double angle)
 		gDocument.basis.changeVertex(L->end, Vertex::F_Y, L->Start(gDocument)->raw_y + INT_TO_COORD(idy));
 	}
 }
-
-
-void LineDefs_SetLength(int new_len)
-{
-	// this works on the current selection (caller must set it up)
-
-	// use a copy of the selection
-	selection_c list(ObjType::linedefs);
-	ConvertSelection(edit.Selected, &list);
-
-	if (list.empty())
-		return;
-
-	// remember angles
-	std::vector<double> angles(NumLineDefs);
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		const LineDef *L = gDocument.linedefs[n];
-
-		angles[n] = atan2(L->End(gDocument)->y() - L->Start(gDocument)->y(), L->End(gDocument)->x() - L->Start(gDocument)->x());
-	}
-
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("set length of", list);
-
-	while (! list.empty())
-	{
-		int ld = PickLineDefToExtend(list, new_len < 0 /* moving_start */);
-
-		list.clear(ld);
-
-		LD_SetLength(ld, new_len, angles[ld]);
-	}
-
-	gDocument.basis.end();
-}
-
 
 void LD_FixForLostSide(int ld)
 {

@@ -38,12 +38,11 @@ public:
 
 	void flipLinedef(int ld) const;
 	void flipLinedefGroup(const selection_c *flip) const;
+	void setLinedefsLength(int new_len) const;
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
 };
-
-void LineDefs_SetLength(int new_len);
 
 bool LineDefAlreadyExists(int v1, int v2);
 bool LineDefWouldOverlap(int v1, double x2, double y2);
