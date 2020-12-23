@@ -995,7 +995,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 
 	LineFile file(filename);
 	if (! file)
-		ThrowException("Cannot open %s: %s\n", filename.c_str(), strerror(errno));
+		ThrowException("Cannot open %s: %s\n", filename.c_str(), GetErrorMessage(errno).c_str());
 
 	while (file.readLine(pst->readstring))
 	{

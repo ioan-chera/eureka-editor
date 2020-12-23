@@ -228,7 +228,7 @@ retry:
 		}
 
 		int what = errno;
-		LogPrintf("Open failed: %s\n", strerror(what));
+		LogPrintf("Open failed: %s\n", GetErrorMessage(what).c_str());
 		return NULL;
 	}
 

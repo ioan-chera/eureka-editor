@@ -51,6 +51,8 @@ double AlongDist(double x, double y, /* coord to test */
 // round a positive value up to the nearest power of two
 int RoundPOW2(int x);
 
+SString GetErrorMessage(int errorNumber);
+
 /*
  *  y_isident - return true iff <c> is one of a-z, A-Z, 0-9 or "_".
  *

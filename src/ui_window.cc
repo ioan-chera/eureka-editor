@@ -797,7 +797,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 
 	if (! fp)
 	{
-		filename = strerror(errno);
+		filename = GetErrorMessage(errno);
 
 		DLG_Notify("Unable to save the log file:\n\n%s", filename.c_str());
 		return;

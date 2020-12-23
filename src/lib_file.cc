@@ -533,7 +533,7 @@ int ScanDirectory(const SString &path, const std::function<void(const SString &,
 
 		if (stat(full_name.c_str(), &finfo) != 0)
 		{
-			DebugPrintf(".... stat failed: %s\n", strerror(errno));
+			DebugPrintf(".... stat failed: %s\n", GetErrorMessage(errno).c_str());
 			continue;
 		}
 

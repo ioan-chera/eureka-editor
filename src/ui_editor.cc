@@ -631,7 +631,7 @@ void UI_TextEditor::InsertFile()
 
 	if (!file)
 	{
-		line = strerror(errno);
+		line = GetErrorMessage(errno);
 		DLG_Notify("Unable to open text file:\n\n%s", line.c_str());
 		return;
 	}
@@ -675,8 +675,6 @@ void UI_TextEditor::ExportToFile()
 			break;
 	}
 
-	static char msgbuf[FL_PATH_MAX];
-
 	const char *filename = chooser.filename();
 
 	// open file in binary mode (we handle CR/LF ourselves)
@@ -684,8 +682,7 @@ void UI_TextEditor::ExportToFile()
 
 	if (fp == NULL)
 	{
-		snprintf(msgbuf, sizeof(msgbuf), "%s", strerror(errno));
-		DLG_Notify("Unable to create output file:\n\n%s", msgbuf);
+		DLG_Notify("Unable to create output file:\n\n%s", GetErrorMessage(errno).c_str());
 		return;
 	}
 
@@ -722,8 +719,7 @@ void UI_TextEditor::ExportToFile()
 
 		if (fputc(ch, fp) == EOF)
 		{
-			snprintf(msgbuf, sizeof(msgbuf), "%s", strerror(errno));
-			DLG_Notify("A write error occurred:\n\n%s", msgbuf);
+			DLG_Notify("A write error occurred:\n\n%s", GetErrorMessage(errno).c_str());
 
 			fclose(fp);
 			return;

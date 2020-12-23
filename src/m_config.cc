@@ -1034,7 +1034,7 @@ int M_ParseConfigFile()
 
 	if (!is.is_open())
 	{
-		LogPrintf("--> %s\n", strerror(errno));
+		LogPrintf("--> %s\n", GetErrorMessage(errno).c_str());
 		return -1;
 	}
 
@@ -1052,7 +1052,7 @@ int M_ParseDefaultConfigFile()
 
 	if (!is.is_open())
 	{
-		LogPrintf("--> %s\n", strerror(errno));
+		LogPrintf("--> %s\n", GetErrorMessage(errno).c_str());
 		return -1;
 	}
 
@@ -1324,7 +1324,7 @@ int M_WriteConfigFile()
 
 	if (! os.is_open())
 	{
-		LogPrintf("--> %s\n", strerror(errno));
+		LogPrintf("--> %s\n", GetErrorMessage(errno).c_str());
 		return -1;
 	}
 	os << "# Eureka configuration (local)\n";
@@ -1554,7 +1554,7 @@ bool M_SaveUserState()
 
 	if (! os.is_open())
 	{
-		LogPrintf("--> FAILED! (%s)\n", strerror(errno));
+		LogPrintf("--> FAILED! (%s)\n", GetErrorMessage(errno).c_str());
 		return false;
 	}
 

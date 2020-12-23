@@ -151,6 +151,23 @@ int RoundPOW2(int x)
 	return x + 1;
 }
 
+//
+// Thread-safe way to get error message, instead of strerror
+//
+SString GetErrorMessage(int errorNumber)
+{
+#ifdef _WIN32
+	char message[256];
+	errno_t result = strerror_s(message, errorNumber);
+	if(result)
+		return "(FAILED GETTING ERROR MESSAGE)";
+	return message;
+#else
+	// TODO: use the threadsafe method
+	return strerror(errorNumber);
+#endif
+}
+
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
