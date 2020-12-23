@@ -48,6 +48,7 @@ private:
 	Objid getNearestThing(double x, double y) const;
 	Objid getNearestVertex(double x, double y) const;
 	Objid getNearestLinedef(double x, double y) const;
+	Objid getNearestSector(double x, double y) const;
 };
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,

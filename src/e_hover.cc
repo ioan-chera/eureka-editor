@@ -721,50 +721,6 @@ static Objid NearestSplitLine(double x, double y, int ignore_vert)
 	return Objid();
 }
 
-
-//
-//  determine which sector is under the pointer
-//
-static Objid NearestSector(double x, double y)
-{
-	/* hack, hack...  I look for the first LineDef crossing
-	   an horizontal half-line drawn from the cursor */
-
-	// -AJA- updated this to look in four directions (N/S/E/W) and
-	//       grab the closest linedef.  Now it is possible to access
-	//       self-referencing lines, even purely horizontal ones.
-
-	Side side1, side2;
-
-	int line1 = ClosestLine_CastingHoriz(x, y, &side1);
-  	int line2 = ClosestLine_CastingVert (x, y, &side2);
-
-	if (line2 < 0)
-	{
-		/* nothing needed */
-	}
-	else if (line1 < 0 ||
-	         ApproxDistToLineDef(gDocument.linedefs[line2], x, y) <
-	         ApproxDistToLineDef(gDocument.linedefs[line1], x, y))
-	{
-		line1 = line2;
-		side1 = side2;
-	}
-
-	// grab the sector reference from the appropriate side
-	// (Note that side1 = +1 for right, -1 for left, 0 for "on").
-	if (line1 >= 0)
-	{
-		int sd_num = (side1 == Side::left) ? gDocument.linedefs[line1]->left : gDocument.linedefs[line1]->right;
-
-		if (sd_num >= 0)
-			return Objid(ObjType::sectors, gDocument.sidedefs[sd_num]->sector);
-	}
-
-	// none found
-	return Objid();
-}
-
 //
 //  Returns the object which is under the pointer at the given
 //  coordinates.  When several objects are close, the smallest
@@ -784,7 +740,7 @@ Objid Hover::getNearbyObject(ObjType type, double x, double y) const
 		return getNearestLinedef(x, y);
 
 	case ObjType::sectors:
-		return NearestSector(x, y);
+		return getNearestSector(x, y);
 
 	default:
 		BugError("Hover::getNearbyObject: bad objtype %d\n", (int)type);
@@ -946,6 +902,49 @@ Objid Hover::getNearestLinedef(double x, double y) const
 
 	if(best >= 0)
 		return Objid(ObjType::linedefs, best);
+
+	// none found
+	return Objid();
+}
+
+//
+//  determine which sector is under the pointer
+//
+Objid Hover::getNearestSector(double x, double y) const
+{
+	/* hack, hack...  I look for the first LineDef crossing
+	   an horizontal half-line drawn from the cursor */
+
+	   // -AJA- updated this to look in four directions (N/S/E/W) and
+	   //       grab the closest linedef.  Now it is possible to access
+	   //       self-referencing lines, even purely horizontal ones.
+
+	Side side1, side2;
+
+	int line1 = ClosestLine_CastingHoriz(x, y, &side1);
+	int line2 = ClosestLine_CastingVert(x, y, &side2);
+
+	if(line2 < 0)
+	{
+		/* nothing needed */
+	}
+	else if(line1 < 0 ||
+		ApproxDistToLineDef(doc.linedefs[line2], x, y) <
+		ApproxDistToLineDef(doc.linedefs[line1], x, y))
+	{
+		line1 = line2;
+		side1 = side2;
+	}
+
+	// grab the sector reference from the appropriate side
+	// (Note that side1 = +1 for right, -1 for left, 0 for "on").
+	if(line1 >= 0)
+	{
+		int sd_num = (side1 == Side::left) ? doc.linedefs[line1]->left : doc.linedefs[line1]->right;
+
+		if(sd_num >= 0)
+			return Objid(ObjType::sectors, doc.sidedefs[sd_num]->sector);
+	}
 
 	// none found
 	return Objid();
