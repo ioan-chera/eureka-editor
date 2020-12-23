@@ -29,6 +29,8 @@
 
 #include "DocumentModule.h"
 
+class selection_c;
+
 class LinedefModule : public DocumentModule
 {
 public:
@@ -38,10 +40,15 @@ public:
 
 	void flipLinedef(int ld) const;
 	void flipLinedefGroup(const selection_c *flip) const;
+
 	void setLinedefsLength(int new_len) const;
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
+	int pickLinedefToExtend(selection_c& list, bool moving_start) const;
+	bool linedefEndWillBeMoved(int ld, selection_c &list) const;
+	bool linedefStartWillBeMoved(int ld, selection_c &list) const;
+	void linedefSetLength(int ld, int new_len, double angle) const;
 };
 
 bool LineDefAlreadyExists(int v1, int v2);

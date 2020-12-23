@@ -859,9 +859,6 @@ void LinedefModule::flipLinedefGroup(const selection_c *flip) const
 	}
 }
 
-static int PickLineDefToExtend(selection_c& list, bool moving_start);
-static void LD_SetLength(int ld, int new_len, double angle);
-
 //
 // Set linedef length
 //
@@ -891,11 +888,11 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 	while (! list.empty())
 	{
-		int ld = PickLineDefToExtend(list, new_len < 0 /* moving_start */);
+		int ld = pickLinedefToExtend(list, new_len < 0 /* moving_start */);
 
 		list.clear(ld);
 
-		LD_SetLength(ld, new_len, angles[ld]);
+		linedefSetLength(ld, new_len, angles[ld]);
 	}
 
 	doc.basis.end();
@@ -923,7 +920,101 @@ void LinedefModule::flipLine_sides(int ld) const
 
 	doc.basis.changeLinedef(ld, LineDef::F_RIGHT, old_left);
 	doc.basis.changeLinedef(ld, LineDef::F_LEFT, old_right);
+}
 
+//
+// Pick linedef to extend
+//
+int LinedefModule::pickLinedefToExtend(selection_c &list, bool moving_start) const
+{
+	// We want a line whose new length is not going to be wrecked
+	// by a change to a later linedef.  However we must handle loops!
+
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
+	{
+		if (moving_start)
+		{
+			if (! linedefEndWillBeMoved(*it, list))
+				return *it;
+		}
+		else
+		{
+			if (! linedefStartWillBeMoved(*it, list))
+				return *it;
+		}
+	}
+
+	return list.find_first();
+
+}
+
+//
+// Linedef end will be moved
+//
+bool LinedefModule::linedefEndWillBeMoved(int ld, selection_c &list) const
+{
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
+	{
+		const LineDef *L = doc.linedefs[*it];
+
+		if (*it != ld && L->start == doc.linedefs[ld]->end)
+			return true;
+	}
+
+	return false;
+}
+
+//
+// Linedef start will be moved
+//
+bool LinedefModule::linedefStartWillBeMoved(int ld, selection_c &list) const
+{
+	for (sel_iter_c it(list) ; !it.done() ; it.next())
+	{
+		const LineDef *L = doc.linedefs[*it];
+
+		if (*it != ld && L->end == doc.linedefs[ld]->start)
+			return true;
+	}
+
+	return false;
+}
+
+//
+// Set linedef length
+//
+void LinedefModule::linedefSetLength(int ld, int new_len, double angle) const
+{
+	// the 'new_len' parameter can be negative, which means move
+	// the start vertex instead of the end vertex.
+
+	const LineDef *L = doc.linedefs[ld];
+
+	double dx = abs(new_len) * cos(angle);
+	double dy = abs(new_len) * sin(angle);
+
+	int idx = I_ROUND(dx);
+	int idy = I_ROUND(dy);
+
+	if (idx == 0 && idy == 0)
+	{
+		if (dx < 0) idx = (int)floor(dx); else idx = (int)ceil(dx);
+		if (dy < 0) idy = (int)floor(dy); else idy = (int)ceil(dy);
+	}
+
+	if (idx == 0 && idy == 0)
+		idx = 1;
+
+	if (new_len < 0)
+	{
+		doc.basis.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - INT_TO_COORD(idx));
+		doc.basis.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - INT_TO_COORD(idy));
+	}
+	else
+	{
+		doc.basis.changeVertex(L->end, Vertex::F_X, L->Start(doc)->raw_x + INT_TO_COORD(idx));
+		doc.basis.changeVertex(L->end, Vertex::F_Y, L->Start(doc)->raw_y + INT_TO_COORD(idy));
+	}
 }
 
 void FlipLineDef(int ld)
@@ -1347,92 +1438,6 @@ void MoveCoordOntoLineDef(int ld, double *x, double *y)
 	// result = start + along * line unit vector
 	*x = x1 + along * dx / len_squared;
 	*y = y1 + along * dy / len_squared;
-}
-
-
-static bool LD_StartWillBeMoved(int ld, selection_c& list)
-{
-	for (sel_iter_c it(list) ; !it.done() ; it.next())
-	{
-		const LineDef *L = gDocument.linedefs[*it];
-
-		if (*it != ld && L->end == gDocument.linedefs[ld]->start)
-			return true;
-	}
-
-	return false;
-}
-
-
-static bool LD_EndWillBeMoved(int ld, selection_c& list)
-{
-	for (sel_iter_c it(list) ; !it.done() ; it.next())
-	{
-		const LineDef *L = gDocument.linedefs[*it];
-
-		if (*it != ld && L->start == gDocument.linedefs[ld]->end)
-			return true;
-	}
-
-	return false;
-}
-
-
-static int PickLineDefToExtend(selection_c& list, bool moving_start)
-{
-	// We want a line whose new length is not going to be wrecked
-	// by a change to a later linedef.  However we must handle loops!
-
-	for (sel_iter_c it(list) ; !it.done() ; it.next())
-	{
-		if (moving_start)
-		{
-			if (! LD_EndWillBeMoved(*it, list))
-				return *it;
-		}
-		else
-		{
-			if (! LD_StartWillBeMoved(*it, list))
-				return *it;
-		}
-	}
-
-	return list.find_first();
-}
-
-
-static void LD_SetLength(int ld, int new_len, double angle)
-{
-	// the 'new_len' parameter can be negative, which means move
-	// the start vertex instead of the end vertex.
-
-	const LineDef *L = gDocument.linedefs[ld];
-
-	double dx = abs(new_len) * cos(angle);
-	double dy = abs(new_len) * sin(angle);
-
-	int idx = I_ROUND(dx);
-	int idy = I_ROUND(dy);
-
-	if (idx == 0 && idy == 0)
-	{
-		if (dx < 0) idx = (int)floor(dx); else idx = (int)ceil(dx);
-		if (dy < 0) idy = (int)floor(dy); else idy = (int)ceil(dy);
-	}
-
-	if (idx == 0 && idy == 0)
-		idx = 1;
-
-	if (new_len < 0)
-	{
-		gDocument.basis.changeVertex(L->start, Vertex::F_X, L->End(gDocument)->raw_x - INT_TO_COORD(idx));
-		gDocument.basis.changeVertex(L->start, Vertex::F_Y, L->End(gDocument)->raw_y - INT_TO_COORD(idy));
-	}
-	else
-	{
-		gDocument.basis.changeVertex(L->end, Vertex::F_X, L->Start(gDocument)->raw_x + INT_TO_COORD(idx));
-		gDocument.basis.changeVertex(L->end, Vertex::F_Y, L->Start(gDocument)->raw_y + INT_TO_COORD(idy));
-	}
 }
 
 void LD_FixForLostSide(int ld)
