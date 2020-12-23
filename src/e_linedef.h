@@ -39,6 +39,7 @@ public:
 	void flipLinedef(int ld) const;
 private:
 	void flipLine_verts(int ld) const;
+	void flipLine_sides(int ld) const;
 };
 
 void FlipLineDefGroup(selection_c *flip);
