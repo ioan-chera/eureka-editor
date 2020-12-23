@@ -371,7 +371,7 @@ public:
 		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
 	}
 
-	void Process(opp_test_state_t& test, double coord)
+	void Process(opp_test_state_t& test, double coord) const
 	{
 		for (unsigned int k = 0 ; k < lines.size() ; k++)
 			test.ProcessLine(lines[k]);
@@ -778,16 +778,16 @@ int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bit
 	test.best_match = -1;
 	test.best_dist = 9e9;
 
-	if(fastopp_X_tree)
+	if(m_fastopp_X_tree)
 	{
 		// fast way : use the binary tree
 
 		SYS_ASSERT(ignore_lines == NULL);
 
 		if(test.cast_horizontal)
-			fastopp_Y_tree->Process(test, test.y);
+			m_fastopp_Y_tree->Process(test, test.y);
 		else
-			fastopp_X_tree->Process(test, test.x);
+			m_fastopp_X_tree->Process(test, test.x);
 	}
 	else
 	{
