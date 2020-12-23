@@ -1242,8 +1242,8 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.x    = gDocument.vertices[v]->x();
-	pt.y    = gDocument.vertices[v]->y();
+	pt.x    = doc.vertices[v]->x();
+	pt.y    = doc.vertices[v]->y();
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1294,9 +1294,9 @@ void crossing_state_c::SplitAllLines()
 	{
 		if (points[i].ld >= 0)
 		{
-			points[i].vert = gDocument.basis.addNew(ObjType::vertices);
+			points[i].vert = doc.basis.addNew(ObjType::vertices);
 
-			Vertex *V = gDocument.vertices[points[i].vert];
+			Vertex *V = doc.vertices[points[i].vert];
 
 			V->SetRawXY(points[i].x, points[i].y);
 

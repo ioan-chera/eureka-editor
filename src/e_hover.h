@@ -100,10 +100,10 @@ public:
 	double start_x = 0, start_y = 0;
 	double   end_x = 0,   end_y = 0;
 
-	const Document &doc;
+	Document &doc;
 
 public:
-	explicit crossing_state_c(const Document &doc) : doc(doc)
+	explicit crossing_state_c(Document &doc) : doc(doc)
 	{
 	}
 
