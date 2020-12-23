@@ -39,57 +39,6 @@
 
 extern int vertex_radius(double scale);
 
-
-double ApproxDistToLineDef(const LineDef * L, double x, double y)
-{
-	double x1 = L->Start(gDocument)->x();
-	double y1 = L->Start(gDocument)->y();
-	double x2 = L->End(gDocument)->x();
-	double y2 = L->End(gDocument)->y();
-
-	double dx = x2 - x1;
-	double dy = y2 - y1;
-
-	if (fabs(dx) > fabs(dy))
-	{
-		// The linedef is rather horizontal
-
-		// case 1: x is to the left of the linedef
-		//         hence return distance to the left-most vertex
-		if (x < (dx > 0 ? x1 : x2))
-			return hypot(x - (dx > 0 ? x1 : x2),
-						 y - (dx > 0 ? y1 : y2));
-
-		// case 2: x is to the right of the linedef
-		//         hence return distance to the right-most vertex
-		if (x > (dx > 0 ? x2 : x1))
-			return hypot(x - (dx > 0 ? x2 : x1),
-						 y - (dx > 0 ? y2 : y1));
-
-		// case 3: x is in-between (and not equal to) both vertices
-		//         hence use slope formula to get intersection point
-		double y3 = y1 + (x - x1) * dy / dx;
-
-		return fabs(y3 - y);
-	}
-	else
-	{
-		// The linedef is rather vertical
-
-		if (y < (dy > 0 ? y1 : y2))
-			return hypot(x - (dy > 0 ? x1 : x2),
-						 y - (dy > 0 ? y1 : y2));
-
-		if (y > (dy > 0 ? y2 : y1))
-			return hypot(x - (dy > 0 ? x2 : x1),
-						 y - (dy > 0 ? y2 : y1));
-
-		double x3 = x1 + (y - y1) * dx / dy;
-
-		return fabs(x3 - x);
-	}
-}
-
 //------------------------------------------------------------------------
 
 #define FASTOPP_DIST  320
@@ -386,68 +335,6 @@ public:
 		return (distance <= other.distance);
 	}
 };
-
-//
-// determine which linedef would be split if a new vertex were
-// added at the given coordinates.
-//
-static Objid NearestSplitLine(double x, double y, int ignore_vert)
-{
-	// slack in map units
-	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
-
-	double lx = x - mapslack;
-	double ly = y - mapslack;
-	double hx = x + mapslack;
-	double hy = y + mapslack;
-
-	int    best = -1;
-	double best_dist = 9e9;
-
-	double too_small = (Level_format == MAPF_UDMF) ? 0.2 : 4.0;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		LineDef *L = gDocument.linedefs[n];
-
-		if (L->start == ignore_vert || L->end == ignore_vert)
-			continue;
-
-		double x1 = L->Start(gDocument)->x();
-		double y1 = L->Start(gDocument)->y();
-		double x2 = L->End(gDocument)->x();
-		double y2 = L->End(gDocument)->y();
-
-		if (MAX(x1,x2) < lx || MIN(x1,x2) > hx ||
-		    MAX(y1,y2) < ly || MIN(y1,y2) > hy)
-			continue;
-
-		// skip linedef if given point matches a vertex
-		if (x == x1 && y == y1) continue;
-		if (x == x2 && y == y2) continue;
-
-		// skip linedef if too small to split
-		if (fabs(x2 - x1) < too_small && fabs(y2 - y1) < too_small)
-			continue;
-
-		double dist = ApproxDistToLineDef(L, x, y);
-
-		if (dist > mapslack)
-			continue;
-
-		if (dist <= best_dist)
-		{
-			best = n;
-			best_dist = dist;
-		}
-	}
-
-	if (best >= 0)
-		return Objid(ObjType::linedefs, best);
-
-	// none found
-	return Objid();
-}
 
 //
 //  Returns the object which is under the pointer at the given
@@ -816,10 +703,6 @@ bool Hover::isPointOutsideOfMap(double x, double y) const
 #define CROSSING_EPSILON  0.2
 #define    ALONG_EPSILON  0.1
 
-static void FindCrossingLines(crossing_state_c &cross,
-	double x1, double y1, int possible_v1,
-	double x2, double y2, int possible_v2);
-
 //
 // Find crossing points
 //
@@ -898,7 +781,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		double next_y2 = cross.points[k].y;
 		double next_v = cross.points[k].vert;
 
-		FindCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
+		findCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
 			next_x2, next_y2, static_cast<int>(next_v));
 
 		cur_x1 = next_x2;
@@ -906,7 +789,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		cur_v = static_cast<int>(next_v);
 	}
 
-	FindCrossingLines(cross, cur_x1, cur_y1, cur_v, x2, y2, possible_v2);
+	findCrossingLines(cross, cur_x1, cur_y1, cur_v, x2, y2, possible_v2);
 
 	cross.Sort();
 }
@@ -1228,6 +1111,82 @@ Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 	return Objid();
 }
 
+//
+// Find crossing lines
+//
+void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const
+{
+	// this could happen when two vertices are overlapping
+	if (fabs(x1 - x2) < ALONG_EPSILON && fabs(y1 - y2) < ALONG_EPSILON)
+		return;
+
+	// distances along WHOLE original line for this segment
+	double along1 = AlongDist(x1, y1,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
+	double along2 = AlongDist(x2, y2,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
+
+	// bounding box of segment
+	double bbox_x1 = MIN(x1, x2) - 0.25;
+	double bbox_y1 = MIN(y1, y2) - 0.25;
+
+	double bbox_x2 = MAX(x1, x2) + 0.25;
+	double bbox_y2 = MAX(y1, y2) + 0.25;
+
+
+	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
+	{
+		const LineDef * L = doc.linedefs[ld];
+
+		double lx1 = L->Start(doc)->x();
+		double ly1 = L->Start(doc)->y();
+		double lx2 = L->End(doc)->x();
+		double ly2 = L->End(doc)->y();
+
+		// bbox test -- eliminate most lines from consideration
+		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
+			MAX(ly1,ly2) < bbox_y1 || MIN(ly1,ly2) > bbox_y2)
+		{
+			continue;
+		}
+
+		if (L->IsZeroLength(doc))
+			continue;
+
+		if (cross.HasLine(ld))
+			continue;
+
+		// skip linedef if an end-point is one of the vertices already
+		// in the crossing state (including the very start or very end).
+		if (cross.HasVertex(L->start) || cross.HasVertex(L->end))
+			continue;
+
+		// only need to handle cases where this linedef distinctly crosses
+		// the new line (i.e. start and end are clearly on opposite sides).
+
+		double a = PerpDist(lx1,ly1, x1,y1, x2,y2);
+		double b = PerpDist(lx2,ly2, x1,y1, x2,y2);
+
+		if (! ((a < -CROSSING_EPSILON && b >  CROSSING_EPSILON) ||
+			   (a >  CROSSING_EPSILON && b < -CROSSING_EPSILON)))
+		{
+			continue;
+		}
+
+		// compute intersection point
+		double l_along = a / (a - b);
+
+		double new_x = lx1 + l_along * (lx2 - lx1);
+		double new_y = ly1 + l_along * (ly2 - ly1);
+
+		double along = AlongDist(new_x, new_y,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
+
+		// ensure new vertex lies within this segment (and not too close to ends)
+		if (along > along1 + ALONG_EPSILON && along < along2 - ALONG_EPSILON)
+		{
+			cross.add_line(ld, new_x, new_y, along);
+		}
+	}
+}
+
 //------------------------------------------------------------------------
 
 void crossing_state_c::clear()
@@ -1304,83 +1263,6 @@ void crossing_state_c::SplitAllLines()
 		}
 	}
 }
-
-
-static void FindCrossingLines(crossing_state_c& cross,
-						double x1, double y1, int possible_v1,
-						double x2, double y2, int possible_v2)
-{
-	// this could happen when two vertices are overlapping
-	if (fabs(x1 - x2) < ALONG_EPSILON && fabs(y1 - y2) < ALONG_EPSILON)
-		return;
-
-	// distances along WHOLE original line for this segment
-	double along1 = AlongDist(x1, y1,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
-	double along2 = AlongDist(x2, y2,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
-
-	// bounding box of segment
-	double bbox_x1 = MIN(x1, x2) - 0.25;
-	double bbox_y1 = MIN(y1, y2) - 0.25;
-
-	double bbox_x2 = MAX(x1, x2) + 0.25;
-	double bbox_y2 = MAX(y1, y2) + 0.25;
-
-
-	for (int ld = 0 ; ld < NumLineDefs ; ld++)
-	{
-		const LineDef * L = gDocument.linedefs[ld];
-
-		double lx1 = L->Start(gDocument)->x();
-		double ly1 = L->Start(gDocument)->y();
-		double lx2 = L->End(gDocument)->x();
-		double ly2 = L->End(gDocument)->y();
-
-		// bbox test -- eliminate most lines from consideration
-		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
-		    MAX(ly1,ly2) < bbox_y1 || MIN(ly1,ly2) > bbox_y2)
-		{
-			continue;
-		}
-
-		if (L->IsZeroLength(gDocument))
-			continue;
-
-		if (cross.HasLine(ld))
-			continue;
-
-		// skip linedef if an end-point is one of the vertices already
-		// in the crossing state (including the very start or very end).
-		if (cross.HasVertex(L->start) || cross.HasVertex(L->end))
-			continue;
-
-		// only need to handle cases where this linedef distinctly crosses
-		// the new line (i.e. start and end are clearly on opposite sides).
-
-		double a = PerpDist(lx1,ly1, x1,y1, x2,y2);
-		double b = PerpDist(lx2,ly2, x1,y1, x2,y2);
-
-		if (! ((a < -CROSSING_EPSILON && b >  CROSSING_EPSILON) ||
-			   (a >  CROSSING_EPSILON && b < -CROSSING_EPSILON)))
-		{
-			continue;
-		}
-
-		// compute intersection point
-		double l_along = a / (a - b);
-
-		double new_x = lx1 + l_along * (lx2 - lx1);
-		double new_y = ly1 + l_along * (ly2 - ly1);
-
-		double along = AlongDist(new_x, new_y,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
-
-		// ensure new vertex lies within this segment (and not too close to ends)
-		if (along > along1 + ALONG_EPSILON && along < along2 - ALONG_EPSILON)
-		{
-			cross.add_line(ld, new_x, new_y, along);
-		}
-	}
-}
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
