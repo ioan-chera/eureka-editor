@@ -48,6 +48,7 @@ public:
 	int getClosestLine_CastingVert(double x, double y, Side *side) const;
 
 	Objid findSplitLine(double &out_x, double &out_y, double ptr_x, double ptr_y, int ignore_vert) const;
+	Objid findSplitLineForDangler(int v_num) const;
 
 private:
 	Objid getNearestThing(double x, double y) const;
@@ -59,8 +60,6 @@ private:
 
 	Objid getNearestSplitLine(double x, double y, int ignore_vert) const;
 };
-
-void FindSplitLineForDangler(Objid& out, int v_num);
 
 int ClosestLine_CastAtAngle (double x, double y, float radians);
 

@@ -841,6 +841,14 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 }
 
 //
+// Find a split line for a dangling vertex
+//
+Objid Hover::findSplitLineForDangler(int v_num) const
+{
+	return getNearestSplitLine(doc.vertices[v_num]->x(), doc.vertices[v_num]->y(), v_num);
+}
+
+//
 // determine which thing is under the mouse pointer
 //
 Objid Hover::getNearestThing(double x, double y) const
@@ -1156,12 +1164,6 @@ Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 	// none found
 	return Objid();
 }
-
-void FindSplitLineForDangler(Objid& out, int v_num)
-{
-	out = NearestSplitLine(gDocument.vertices[v_num]->x(), gDocument.vertices[v_num]->y(), v_num);
-}
-
 
 //------------------------------------------------------------------------
 

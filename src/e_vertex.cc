@@ -393,8 +393,7 @@ bool Vertex_TryFixDangler(int v_num)
 
 	// see if vertex is sitting on a line
 
-	Objid line_obj;
-	FindSplitLineForDangler(line_obj, v_num);
+	Objid line_obj = gDocument.hover.findSplitLineForDangler(v_num);
 
 	if (! line_obj.valid())
 		return false;
