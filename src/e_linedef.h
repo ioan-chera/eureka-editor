@@ -50,51 +50,67 @@ public:
 	void moveCoordOntoLinedef(int ld, double *x, double *y) const;
 
 	void addSecondSidedef(int ld, int new_sd, int other_sd) const;
+	void removeSidedef(int ld, Side ld_side) const;
+	void fixForLostSide(int ld) const;
+
+	double angleBetweenLines(int A, int B, int C) const;
+
+	/* commands */
+	static void commandAlign();
+	static void commandFlip();
+	static void commandMergeTwo();
+	static void commandSplitHalf();
+	static void commandSwapSides();
+
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
+	void flipLinedef_safe(int ld) const;
 	int pickLinedefToExtend(selection_c& list, bool moving_start) const;
 	bool linedefEndWillBeMoved(int ld, selection_c &list) const;
 	bool linedefStartWillBeMoved(int ld, selection_c &list) const;
 	void linedefSetLength(int ld, int new_len, double angle) const;
+
+	bool alignOffsets(const Objid& obj, int align_flags) const;
+	void alignGroup(const std::vector<Objid> & group, int align_flags) const;
+	void doClearOfs(const Objid& cur, int align_flags) const;
+	void doAlignX(const Objid &cur, const Objid &adj, int align_flags) const;
+	void doAlignY(const Objid& cur, const Objid& adj, int align_flags) const;
+
+	inline const LineDef *pointer(const Objid &obj) const;
+	inline const SideDef *sidedefPointer(const Objid &obj) const;
+	void determineAdjoiner(Objid& result,
+						   const Objid& cur, int align_flags) const;
+	int scoreAdjoiner(const Objid &adj, const Objid &cur, int align_flags) const;
+	int scoreTextureMatch(const Objid &adj, const Objid &cur) const;
+	void partCalcExtent(const Objid &obj, char part, int *z1, int *z2) const;
+	bool partIsVisible(const Objid& obj, char part) const;
+
+	int calcReferenceH(const Objid& obj) const;
+
+	bool alignCheckAdjacent(const std::vector<Objid> & group,
+							int j, int k, bool do_right) const;
+	int alignPickNextSurface(const std::vector<Objid> & group,
+							  const std::vector<byte>& seen, bool do_right) const;
+
+	bool doSplitLineDef(int ld) const;
+
+	void mergedSecondSidedef(int ld) const;
 };
-
-void LD_RemoveSideDef(int ld, Side ld_side);
-void LD_FixForLostSide(int ld);
-
-double LD_AngleBetweenLines(int A, int B, int C);
-
-bool LD_GetTwoNeighbors(int new_ld, int v1, int v2,
-						int *ld1, int *side1,
-						int *ld2, int *side2);
 
 SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);
 
 bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
 					const Sector *front, const Sector *back);
 
-typedef enum
+enum linedef_align_flag_e
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset
 	LINALIGN_Y		= (1 << 1),		// align the Y offset
 	LINALIGN_Clear	= (1 << 2),		// clear the offset(s), instead of aligning
 	LINALIGN_Unpeg	= (1 << 3),		// change the unpegging flags
 	LINALIGN_Right	= (1 << 4)		// align with sidedef on RIGHT of this one [ otherwise do LEFT ]
-}
-linedef_align_flag_e;
-
-bool Line_AlignOffsets(const Objid& obj, int align_flags);
-
-void Line_AlignGroup(std::vector<Objid> & group, int align_flags);
-
-
-/* commands */
-
-void CMD_LIN_Flip();
-void CMD_LIN_SwapSides();
-void CMD_LIN_Align();
-void CMD_LIN_MergeTwo();
-void CMD_LIN_SplitHalf();
+};
 
 #endif  /* __EUREKA_E_LINEDEF_H__ */
 

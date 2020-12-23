@@ -2090,7 +2090,7 @@ static editor_command_t  render_commands[] =
 	// backwards compatibility.
 	// [ we cannot remap this in FindEditorCommand, it fails the context check ]
 	{	"3D_Align", NULL,
-		&CMD_LIN_Align,
+		&LinedefModule::commandAlign,
 		/* flags */ "/x /y /right /clear"
 	},
 

@@ -345,7 +345,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 
 		// NOTE WELL: the actual sidedef is not deleted (it might be shared)
 
-		LD_RemoveSideDef(*it, box->is_front ? Side::right : Side::left);
+		gDocument.linemod.removeSidedef(*it, box->is_front ? Side::right : Side::left);
 	}
 
 	gDocument.basis.setMessageForSelection("deleted sidedef from", *edit.Selected);

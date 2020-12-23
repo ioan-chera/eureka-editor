@@ -696,7 +696,7 @@ bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare)
 			if (n == ld)
 				angle = 361.0;
 			else
-				angle = LD_AngleBetweenLines(prev_vert, cur_vert, other_vert);
+				angle = gDocument.linemod.angleBetweenLines(prev_vert, cur_vert, other_vert);
 
 			if (next_line < 0 || angle < best_angle)
 			{

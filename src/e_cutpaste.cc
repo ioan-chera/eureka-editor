@@ -632,7 +632,7 @@ static void PasteGroupOfObjects(double pos_x, double pos_y)
 
 		// if the linedef lost a side, fix texturing
 		if (L->OneSided() && is_null_tex(L->Right(gDocument)->MidTex()))
-			LD_FixForLostSide(new_l);
+			gDocument.linemod.fixForLostSide(new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
@@ -1031,17 +1031,17 @@ static void FixupLineDefs(selection_c *lines, selection_c *sectors)
 
 		if (do_right && do_left)
 		{
-			LD_RemoveSideDef(*it, Side::right);
-			LD_RemoveSideDef(*it, Side::left);
+			gDocument.linemod.removeSidedef(*it, Side::right);
+			gDocument.linemod.removeSidedef(*it, Side::left);
 		}
 		else if (do_right)
 		{
-			LD_RemoveSideDef(*it, Side::right);
+			gDocument.linemod.removeSidedef(*it, Side::right);
 			gDocument.linemod.flipLinedef(*it);
 		}
 		else // do_left
 		{
-			LD_RemoveSideDef(*it, Side::left);
+			gDocument.linemod.removeSidedef(*it, Side::left);
 		}
 	}
 }

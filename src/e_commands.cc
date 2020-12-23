@@ -1058,7 +1058,7 @@ void CMD_Merge()
 			break;
 
 		case ObjType::linedefs:
-			CMD_LIN_MergeTwo();
+			LinedefModule::commandMergeTwo();
 			break;
 
 		case ObjType::sectors:
@@ -1764,21 +1764,21 @@ static editor_command_t  command_table[] =
 	/* ------ LineDef mode ------ */
 
 	{	"LIN_Align", NULL,
-		&CMD_LIN_Align,
+		&LinedefModule::commandAlign,
 		/* flags */ "/x /y /right /clear"
 	},
 
 	{	"LIN_Flip", NULL,
-		&CMD_LIN_Flip,
+		&LinedefModule::commandFlip,
 		/* flags */ "/force"
 	},
 
 	{	"LIN_SwapSides", NULL,
-		&CMD_LIN_SwapSides
+		&LinedefModule::commandSwapSides
 	},
 
 	{	"LIN_SplitHalf", NULL,
-		&CMD_LIN_SplitHalf
+		&LinedefModule::commandSplitHalf
 	},
 
 	{	"LIN_SelectPath", NULL,
