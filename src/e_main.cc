@@ -278,7 +278,7 @@ void UpdateHighlight()
 	if (edit.pointer_in_window &&
 	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		GetNearObject(edit.highlight, edit.mode, edit.map_x, edit.map_y);
+		edit.highlight = gDocument.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
@@ -671,8 +671,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 		{
 			const Thing *T = gDocument.things[t];
 
-			Objid obj;
-			GetNearObject(obj, ObjType::sectors, T->x(), T->y());
+			Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{

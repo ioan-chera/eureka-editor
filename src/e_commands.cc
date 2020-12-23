@@ -591,8 +591,7 @@ static void DoBeginDrag()
 			{
 				const Thing *T = gDocument.things[edit.drag_thing_num];
 
-				Objid sec;
-				GetNearObject(sec, ObjType::sectors, T->x(), T->y());
+				Objid sec = gDocument.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 				if (sec.valid())
 					edit.drag_thing_floorh = static_cast<float>(gDocument.sectors[sec.num]->floorh);
@@ -719,7 +718,7 @@ static void ACT_Click_release(void)
 		if (edit.render3d)
 			near_obj = edit.highlight;
 		else
-			GetNearObject(near_obj, edit.mode, edit.map_x, edit.map_y);
+			near_obj = gDocument.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 		if (near_obj.num == click_obj.num)
 			Selection_Toggle(click_obj);
@@ -814,7 +813,7 @@ void CMD_ACT_Click()
 	}
 
 	// find the object under the pointer.
-	GetNearObject(edit.clicked, edit.mode, edit.map_x, edit.map_y);
+	edit.clicked = gDocument.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box
 	if (edit.click_check_select && edit.clicked.is_nil())

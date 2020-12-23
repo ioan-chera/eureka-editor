@@ -628,8 +628,7 @@ public:
 			return;
 
 		// find sector containing the thing
-		Objid o;
-		GetNearObject(o, ObjType::sectors, T->x(), T->y());
+		Objid o = gDocument.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 		if (!o.valid())
 			return;
@@ -654,8 +653,7 @@ public:
 		double ty = T->y();
 
 		// find sector containing the thing
-		Objid o;
-		GetNearObject(o, ObjType::sectors, tx, ty);
+		Objid o = gDocument.hover.getNearbyObject(ObjType::sectors, tx, ty);
 
 		if (!o.valid())
 			return;

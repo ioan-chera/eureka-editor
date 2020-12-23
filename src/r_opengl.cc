@@ -1595,8 +1595,7 @@ public:
 
 	void MarkCameraSector()
 	{
-		Objid obj;
-		GetNearObject(obj, ObjType::sectors, r_view.x, r_view.y);
+		Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, r_view.x, r_view.y);
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);

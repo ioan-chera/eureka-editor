@@ -928,6 +928,32 @@ static Objid NearestVertex(double x, double y)
 	return Objid();
 }
 
+//
+//  Returns the object which is under the pointer at the given
+//  coordinates.  When several objects are close, the smallest
+//  is chosen.
+//
+Objid Hover::getNearbyObject(ObjType type, double x, double y) const
+{
+	switch(type)
+	{
+	case ObjType::things:
+		return NearestThing(x, y);
+
+	case ObjType::vertices:
+		return NearestVertex(x, y);
+
+	case ObjType::linedefs:
+		return NearestLineDef(x, y);
+
+	case ObjType::sectors:
+		return NearestSector(x, y);
+
+	default:
+		BugError("Hover::getNearbyObject: bad objtype %d\n", (int)type);
+		return Objid(); /* NOT REACHED */
+	}
+}
 
 //
 //  sets 'o' to which object is under the pointer at the given

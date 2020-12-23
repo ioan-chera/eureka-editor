@@ -1418,9 +1418,7 @@ void Things_FindInVoid(selection_c& list)
 		double x = gDocument.things[n]->x();
 		double y = gDocument.things[n]->y();
 
-		Objid obj;
-
-		GetNearObject(obj, ObjType::sectors, x, y);
+		Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, x, y);
 
 		if (! obj.is_nil())
 			continue;
@@ -1439,7 +1437,7 @@ void Things_FindInVoid(selection_c& list)
 			double x2 = x + ((corner & 1) ? -4 : +4);
 			double y2 = y + ((corner & 2) ? -4 : +4);
 
-			GetNearObject(obj, ObjType::sectors, x2, y2);
+			obj = gDocument.hover.getNearbyObject(ObjType::sectors, x2, y2);
 
 			if (obj.is_nil())
 				out_count++;

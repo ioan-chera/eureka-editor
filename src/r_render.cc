@@ -129,9 +129,7 @@ void Render_View_t::FindGroundZ()
 		double test_x = x + dx * 8;
 		double test_y = y + dy * 8;
 
-		Objid o;
-
-		GetNearObject(o, ObjType::sectors, test_x, test_y);
+		Objid o = gDocument.hover.getNearbyObject(ObjType::sectors, test_x, test_y);
 
 		if (o.num >= 0)
 		{
@@ -238,8 +236,7 @@ namespace thing_sec_cache
 
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
-			Objid obj;
-			GetNearObject(obj, ObjType::sectors, gDocument.things[i]->x(), gDocument.things[i]->y());
+			Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, gDocument.things[i]->x(), gDocument.things[i]->y());
 
 			r_view.thing_sectors[i] = obj.num;
 		}
@@ -940,11 +937,9 @@ static void DragThings_Update()
 	new_y = static_cast<float>(new_y + dy * fwd_vy / fwd_len);
 
 	// handle a change in floor height
-	Objid old_sec;
-	GetNearObject(old_sec, ObjType::sectors, old_x, old_y);
+	Objid old_sec = gDocument.hover.getNearbyObject(ObjType::sectors, old_x, old_y);
 
-	Objid new_sec;
-	GetNearObject(new_sec, ObjType::sectors, new_x, new_y);
+	Objid new_sec = gDocument.hover.getNearbyObject(ObjType::sectors, new_x, new_y);
 
 	if (old_sec.valid() && new_sec.valid())
 	{
