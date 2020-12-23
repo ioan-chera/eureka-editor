@@ -53,6 +53,7 @@ public:
 
 	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
 	int getOppositeSector(int ld, Side ld_side) const;
+	void fastOpposite_begin();
 
 private:
 	Objid getNearestThing(double x, double y) const;
@@ -68,7 +69,6 @@ private:
 	fastopp_node_c *m_fastopp_Y_tree = nullptr;
 };
 
-void FastOpposite_Begin();
 void FastOpposite_Finish();
 
 bool PointOutsideOfMap(double x, double y);

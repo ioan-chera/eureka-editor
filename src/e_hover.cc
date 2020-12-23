@@ -397,21 +397,6 @@ static fastopp_node_c * fastopp_X_tree;
 static fastopp_node_c * fastopp_Y_tree;
 
 
-void FastOpposite_Begin()
-{
-	CalculateLevelBounds();
-
-	fastopp_X_tree = new fastopp_node_c(static_cast<int>(Map_bound_x1 - 8), static_cast<int>(Map_bound_x2 + 8), gDocument);
-	fastopp_Y_tree = new fastopp_node_c(static_cast<int>(Map_bound_y1 - 8), static_cast<int>(Map_bound_y2 + 8), gDocument);
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		fastopp_X_tree->AddLine_X(n);
-		fastopp_Y_tree->AddLine_Y(n);
-	}
-}
-
-
 void FastOpposite_Finish()
 {
 	delete fastopp_X_tree;  fastopp_X_tree = NULL;
@@ -804,6 +789,25 @@ int Hover::getOppositeSector(int ld, Side ld_side) const
 		return -1;
 
 	return doc.linedefs[opp]->WhatSector(opp_side, doc);
+}
+
+//
+// Begin fast-opposite mode
+//
+void Hover::fastOpposite_begin()
+{
+	SYS_ASSERT(!m_fastopp_X_tree && !m_fastopp_Y_tree);
+
+	CalculateLevelBounds();
+
+	m_fastopp_X_tree = new fastopp_node_c(static_cast<int>(Map_bound_x1 - 8), static_cast<int>(Map_bound_x2 + 8), doc);
+	m_fastopp_Y_tree = new fastopp_node_c(static_cast<int>(Map_bound_y1 - 8), static_cast<int>(Map_bound_y2 + 8), doc);
+
+	for(int n = 0; n < doc.numLinedefs(); n++)
+	{
+		m_fastopp_X_tree->AddLine_X(n);
+		m_fastopp_Y_tree->AddLine_Y(n);
+	}
 }
 
 //

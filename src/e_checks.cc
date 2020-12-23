@@ -662,7 +662,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 	if (NumLineDefs == 0 || NumSectors == 0)
 		return;
 
-	FastOpposite_Begin();
+	gDocument.hover.fastOpposite_begin();
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
