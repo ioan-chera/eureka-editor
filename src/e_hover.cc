@@ -813,6 +813,104 @@ bool Hover::isPointOutsideOfMap(double x, double y) const
 	return true;
 }
 
+#define CROSSING_EPSILON  0.2
+#define    ALONG_EPSILON  0.1
+
+static void FindCrossingLines(crossing_state_c &cross,
+	double x1, double y1, int possible_v1,
+	double x2, double y2, int possible_v2);
+
+//
+// Find crossing points
+//
+void Hover::findCrossingPoints(crossing_state_c &cross,
+	double x1, double y1, int possible_v1,
+	double x2, double y2, int possible_v2) const
+{
+	cross.clear();
+
+	cross.start_x = x1;
+	cross.start_y = y1;
+	cross.end_x = x2;
+	cross.end_y = y2;
+
+
+	// when zooming out, make it easier to hit a vertex
+	double close_dist = 4 * sqrt(1.0 / grid.Scale);
+
+	close_dist = CLAMP(1.0, close_dist, 12.0);
+
+
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+
+	double length = hypot(dx, dy);
+
+	// same coords?  (sanity check)
+	if(length < 0.01)
+		return;
+
+
+	/* must do all vertices FIRST */
+
+	for(int v = 0; v < doc.numVertices(); v++)
+	{
+		if(v == possible_v1 || v == possible_v2)
+			continue;
+
+		const Vertex *VC = doc.vertices[v];
+
+		// ignore vertices at same coordinates as v1 or v2
+		if(VC->Matches(TO_COORD(x1), TO_COORD(y1)) ||
+			VC->Matches(TO_COORD(x2), TO_COORD(y2)))
+			continue;
+
+		// is this vertex sitting on the line?
+		double perp = PerpDist(VC->x(), VC->y(), x1, y1, x2, y2);
+
+		if(fabs(perp) > close_dist)
+			continue;
+
+		double along = AlongDist(VC->x(), VC->y(), x1, y1, x2, y2);
+
+		if(along > ALONG_EPSILON && along < length - ALONG_EPSILON)
+		{
+			cross.add_vert(v, along);
+		}
+	}
+
+	cross.Sort();
+
+
+	/* process each pair of adjacent vertices to find split lines */
+
+	double cur_x1 = x1;
+	double cur_y1 = y1;
+	int    cur_v = possible_v1;
+
+	// grab number of points now, since we will adding split points
+	// (at the end) and we only want vertices here.
+	size_t num_verts = cross.points.size();
+
+	for(size_t k = 0; k < num_verts; k++)
+	{
+		double next_x2 = cross.points[k].x;
+		double next_y2 = cross.points[k].y;
+		double next_v = cross.points[k].vert;
+
+		FindCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
+			next_x2, next_y2, static_cast<int>(next_v));
+
+		cur_x1 = next_x2;
+		cur_y1 = next_y2;
+		cur_v = static_cast<int>(next_v);
+	}
+
+	FindCrossingLines(cross, cur_x1, cur_y1, cur_v, x2, y2, possible_v2);
+
+	cross.Sort();
+}
+
 //
 // determine which thing is under the mouse pointer
 //
@@ -1217,10 +1315,6 @@ void crossing_state_c::SplitAllLines()
 }
 
 
-#define CROSSING_EPSILON  0.2
-#define    ALONG_EPSILON  0.1
-
-
 static void FindCrossingLines(crossing_state_c& cross,
 						double x1, double y1, int possible_v1,
 						double x2, double y2, int possible_v2)
@@ -1296,94 +1390,6 @@ static void FindCrossingLines(crossing_state_c& cross,
 	}
 }
 
-
-void FindCrossingPoints(crossing_state_c& cross,
-						double x1, double y1, int possible_v1,
-						double x2, double y2, int possible_v2)
-{
-	cross.clear();
-
-	cross.start_x = x1;
-	cross.start_y = y1;
-	cross.  end_x = x2;
-	cross.  end_y = y2;
-
-
-	// when zooming out, make it easier to hit a vertex
-	double close_dist = 4 * sqrt(1.0 / grid.Scale);
-
-	close_dist = CLAMP(1.0, close_dist, 12.0);
-
-
-	double dx = x2 - x1;
-	double dy = y2 - y1;
-
-	double length = hypot(dx, dy);
-
-	// same coords?  (sanity check)
-	if (length < 0.01)
-		return;
-
-
-	/* must do all vertices FIRST */
-
-	for (int v = 0 ; v < NumVertices ; v++)
-	{
-		if (v == possible_v1 || v == possible_v2)
-			continue;
-
-		const Vertex * VC = gDocument.vertices[v];
-
-		// ignore vertices at same coordinates as v1 or v2
-		if (VC->Matches(TO_COORD(x1), TO_COORD(y1)) ||
-			VC->Matches(TO_COORD(x2), TO_COORD(y2)))
-			continue;
-
-		// is this vertex sitting on the line?
-		double perp = PerpDist(VC->x(), VC->y(), x1,y1, x2,y2);
-
-		if (fabs(perp) > close_dist)
-			continue;
-
-		double along = AlongDist(VC->x(), VC->y(), x1,y1, x2,y2);
-
-		if (along > ALONG_EPSILON && along < length - ALONG_EPSILON)
-		{
-			cross.add_vert(v, along);
-		}
-	}
-
-	cross.Sort();
-
-
-	/* process each pair of adjacent vertices to find split lines */
-
-	double cur_x1 = x1;
-	double cur_y1 = y1;
-	int    cur_v  = possible_v1;
-
-	// grab number of points now, since we will adding split points
-	// (at the end) and we only want vertices here.
-	size_t num_verts = cross.points.size();
-
-	for (size_t k = 0 ; k < num_verts ; k++)
-	{
-		double next_x2 = cross.points[k].x;
-		double next_y2 = cross.points[k].y;
-		double next_v  = cross.points[k].vert;
-
-		FindCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
-						  next_x2, next_y2, static_cast<int>(next_v));
-
-		cur_x1 = next_x2;
-		cur_y1 = next_y2;
-		cur_v  = static_cast<int>(next_v);
-	}
-
-	FindCrossingLines(cross, cur_x1, cur_y1, cur_v, x2, y2, possible_v2);
-
-	cross.Sort();
-}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

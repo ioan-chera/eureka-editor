@@ -30,6 +30,7 @@
 #include "DocumentModule.h"
 
 class bitvec_c;
+class crossing_state_c;
 class fastopp_node_c;
 class Objid;
 
@@ -58,6 +59,10 @@ public:
 
 	bool isPointOutsideOfMap(double x, double y) const;
 
+	void findCrossingPoints(crossing_state_c &cross,
+		double x1, double y1, int possible_v1,
+		double x2, double y2, int possible_v2) const;
+
 private:
 	Objid getNearestThing(double x, double y) const;
 	Objid getNearestVertex(double x, double y) const;
@@ -76,15 +81,14 @@ private:
 Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2);
 
 
-typedef struct
+struct cross_point_t
 {
 	int vert;	// >= 0 when we hit a vertex
 	int ld;     // >= 0 when we hit a linedef instead
 
 	double x, y;	// coordinate of line split point
 	double dist;
-}
-cross_point_t;
+};
 
 
 class crossing_state_c
@@ -121,10 +125,6 @@ private:
 		}
 	};
 };
-
-void FindCrossingPoints(crossing_state_c& cross,
-						double x1, double y1, int possible_v1,
-						double x2, double y2, int possible_v2);
 
 #endif  /* __EUREKA_X_HOVER_H__ */
 

@@ -368,7 +368,7 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 
 	crossing_state_c cross;
 
-	FindCrossingPoints(cross,
+	gDocument.hover.findCrossingPoints(cross,
 		gDocument.vertices[v1]->x(), gDocument.vertices[v1]->y(), v1,
 		gDocument.vertices[v2]->x(), gDocument.vertices[v2]->y(), v2);
 
