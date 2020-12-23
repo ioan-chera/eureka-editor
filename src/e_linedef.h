@@ -27,6 +27,16 @@
 #ifndef __EUREKA_E_LINEDEF_H__
 #define __EUREKA_E_LINEDEF_H__
 
+#include "DocumentModule.h"
+
+class LinedefModule : public DocumentModule
+{
+public:
+	LinedefModule(Document &doc) : DocumentModule(doc)
+	{
+	}
+};
+
 void FlipLineDef(int ld);
 void FlipLineDefGroup(selection_c *flip);
 
