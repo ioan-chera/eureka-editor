@@ -310,7 +310,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		gDocument.basis.changeLinedef(*it, field, sd);
 
 		if (other >= 0)
-			LD_AddSecondSideDef(*it, sd, other);
+			gDocument.linemod.addSecondSidedef(*it, sd, other);
 	}
 
 	gDocument.basis.setMessageForSelection("added sidedef to", *edit.Selected);

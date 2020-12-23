@@ -46,6 +46,10 @@ public:
 	bool linedefAlreadyExists(int v1, int v2) const;
 
 	int splitLinedefAtVertex(int ld, int v_idx) const;
+
+	void moveCoordOntoLinedef(int ld, double *x, double *y) const;
+
+	void addSecondSidedef(int ld, int new_sd, int other_sd) const;
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
@@ -55,9 +59,6 @@ private:
 	void linedefSetLength(int ld, int new_len, double angle) const;
 };
 
-void MoveCoordOntoLineDef(int ld, double *x, double *y);
-
-void LD_AddSecondSideDef(int ld, int new_sd, int other_sd);
 void LD_RemoveSideDef(int ld, Side ld_side);
 void LD_FixForLostSide(int ld);
 

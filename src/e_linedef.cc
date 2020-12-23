@@ -931,6 +931,43 @@ void LinedefModule::moveCoordOntoLinedef(int ld, double *x, double *y) const
 }
 
 //
+// Add second sidedef
+//
+void LinedefModule::addSecondSidedef(int ld, int new_sd, int other_sd) const
+{
+	const LineDef * L  = doc.linedefs[ld];
+	SideDef * SD = doc.sidedefs[new_sd];
+
+	int new_flags = L->flags;
+
+	new_flags |=  MLF_TwoSided;
+	new_flags &= ~MLF_Blocking;
+
+	doc.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+
+	// TODO: make this a global pseudo-constant
+	int null_tex = BA_InternaliseString("-");
+
+	const SideDef *other = doc.sidedefs[other_sd];
+
+	if (! is_null_tex(other->MidTex()))
+	{
+		SD->lower_tex = other->mid_tex;
+		SD->upper_tex = other->mid_tex;
+
+		doc.basis.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
+		doc.basis.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
+
+		doc.basis.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
+	}
+	else
+	{
+		SD->lower_tex = other->lower_tex;
+		SD->upper_tex = other->upper_tex;
+	}
+}
+
+//
 // Flip vertices of linedef
 //
 void LinedefModule::flipLine_verts(int ld) const
@@ -1182,41 +1219,6 @@ void CMD_LIN_SplitHalf(void)
 	else if (new_count > 0)
 	{
 		edit.Selected->frob_range(new_first, new_first + new_count - 1, BitOp::add);
-	}
-}
-
-
-void LD_AddSecondSideDef(int ld, int new_sd, int other_sd)
-{
-	LineDef * L  = gDocument.linedefs[ld];
-	SideDef * SD = gDocument.sidedefs[new_sd];
-
-	int new_flags = L->flags;
-
-	new_flags |=  MLF_TwoSided;
-	new_flags &= ~MLF_Blocking;
-
-	gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
-
-	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
-
-	const SideDef *other = gDocument.sidedefs[other_sd];
-
-	if (! is_null_tex(other->MidTex()))
-	{
-		SD->lower_tex = other->mid_tex;
-		SD->upper_tex = other->mid_tex;
-
-		gDocument.basis.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
-		gDocument.basis.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
-
-		gDocument.basis.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
-	}
-	else
-	{
-		SD->lower_tex = other->lower_tex;
-		SD->upper_tex = other->upper_tex;
 	}
 }
 

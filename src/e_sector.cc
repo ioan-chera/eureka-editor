@@ -1103,7 +1103,7 @@ static void DoAssignSector(int ld, Side side, int new_sec,
 	// two-sided flag, and impassible flag.
 
 	if (other_sd >= 0)
-		LD_AddSecondSideDef(ld, new_sd, other_sd);
+		gDocument.linemod.addSecondSidedef(ld, new_sd, other_sd);
 }
 
 
