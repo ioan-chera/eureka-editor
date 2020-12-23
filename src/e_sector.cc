@@ -1234,7 +1234,7 @@ bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 
 	loop.AssignSector(new_sec, &flip);
 
-	FlipLineDefGroup(&flip);
+	gDocument.linemod.flipLinedefGroup(&flip);
 
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < NumLineDefs ; n++)

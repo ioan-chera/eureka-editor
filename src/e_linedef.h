@@ -37,13 +37,11 @@ public:
 	}
 
 	void flipLinedef(int ld) const;
+	void flipLinedefGroup(const selection_c *flip) const;
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;
 };
-
-void FlipLineDefGroup(selection_c *flip);
-
 
 void LineDefs_SetLength(int new_len);
 

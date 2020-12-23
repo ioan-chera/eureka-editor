@@ -353,7 +353,7 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 
 		CheckClosedLoop(new_ld, v1, v2, &flip);
 
-		FlipLineDefGroup(&flip);
+		gDocument.linemod.flipLinedefGroup(&flip);
 	}
 }
 

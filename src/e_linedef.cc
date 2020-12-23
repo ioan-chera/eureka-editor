@@ -849,6 +849,17 @@ void LinedefModule::flipLinedef(int ld) const
 }
 
 //
+// Flip linedef group
+//
+void LinedefModule::flipLinedefGroup(const selection_c *flip) const
+{
+	for (sel_iter_c it(flip) ; !it.done() ; it.next())
+	{
+		flipLinedef(*it);
+	}
+}
+
+//
 // Flip vertices of linedef
 //
 void LinedefModule::flipLine_verts(int ld) const
@@ -889,16 +900,6 @@ void FlipLineDef_safe(int ld)
 	if (!gDocument.linedefs[ld]->OneSided())
 		FlipLine_sides(ld);
 }
-
-
-void FlipLineDefGroup(selection_c *flip)
-{
-	for (sel_iter_c it(flip) ; !it.done() ; it.next())
-	{
-		gDocument.linemod.flipLinedef(*it);
-	}
-}
-
 
 //
 // flip the orientation of some LineDefs
