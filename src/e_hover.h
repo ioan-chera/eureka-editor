@@ -56,6 +56,8 @@ public:
 	void fastOpposite_begin();
 	void fastOpposite_finish();
 
+	bool isPointOutsideOfMap(double x, double y) const;
+
 private:
 	Objid getNearestThing(double x, double y) const;
 	Objid getNearestVertex(double x, double y) const;
@@ -69,8 +71,6 @@ private:
 	fastopp_node_c *m_fastopp_X_tree = nullptr;
 	fastopp_node_c *m_fastopp_Y_tree = nullptr;
 };
-
-bool PointOutsideOfMap(double x, double y);
 
 // result: -1 for back, +1 for front, 0 for _exactly_on_ the line
 Side PointOnLineSide(double x, double y, double lx1, double ly1, double lx2, double ly2);

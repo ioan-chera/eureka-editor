@@ -90,47 +90,6 @@ double ApproxDistToLineDef(const LineDef * L, double x, double y)
 	}
 }
 
-bool PointOutsideOfMap(double x, double y)
-{
-	// this keeps track of directions tested
-	int dirs = 0;
-
-	// most end-points will be integral, so look in-between
-	double x2 = x + 0.04;
-	double y2 = y + 0.04;
-
-	for (int n = 0 ; n < NumLineDefs ; n++)
-	{
-		double lx1 = gDocument.linedefs[n]->Start(gDocument)->x();
-		double ly1 = gDocument.linedefs[n]->Start(gDocument)->y();
-		double lx2 = gDocument.linedefs[n]->End(gDocument)->x();
-		double ly2 = gDocument.linedefs[n]->End(gDocument)->y();
-
-		// does the linedef cross the horizontal ray?
-		if (MIN(ly1, ly2) < y2 && MAX(ly1, ly2) > y2)
-		{
-			double dist = lx1 - x + (lx2 - lx1) * (y2 - ly1) / (ly2 - ly1);
-
-			dirs |= (dist < 0) ? 1 : 2;
-
-			if (dirs == 15) return false;
-		}
-
-		// does the linedef cross the vertical ray?
-		if (MIN(lx1, lx2) < x2 && MAX(lx1, lx2) > x2)
-		{
-			double dist = ly1 - y + (ly2 - ly1) * (x2 - lx1) / (lx2 - lx1);
-
-			dirs |= (dist < 0) ? 4 : 8;
-
-			if (dirs == 15) return false;
-		}
-	}
-
-	return true;
-}
-
-
 //------------------------------------------------------------------------
 
 #define FASTOPP_DIST  320
@@ -809,6 +768,49 @@ void Hover::fastOpposite_finish()
 	m_fastopp_X_tree = nullptr;
 	delete m_fastopp_Y_tree;
 	m_fastopp_Y_tree = nullptr;
+}
+
+//
+// whether point is outside of map
+//
+bool Hover::isPointOutsideOfMap(double x, double y) const
+{
+	// this keeps track of directions tested
+	int dirs = 0;
+
+	// most end-points will be integral, so look in-between
+	double x2 = x + 0.04;
+	double y2 = y + 0.04;
+
+	for(int n = 0; n < doc.numLinedefs(); n++)
+	{
+		double lx1 = doc.linedefs[n]->Start(doc)->x();
+		double ly1 = doc.linedefs[n]->Start(doc)->y();
+		double lx2 = doc.linedefs[n]->End(doc)->x();
+		double ly2 = doc.linedefs[n]->End(doc)->y();
+
+		// does the linedef cross the horizontal ray?
+		if(MIN(ly1, ly2) < y2 && MAX(ly1, ly2) > y2)
+		{
+			double dist = lx1 - x + (lx2 - lx1) * (y2 - ly1) / (ly2 - ly1);
+
+			dirs |= (dist < 0) ? 1 : 2;
+
+			if(dirs == 15) return false;
+		}
+
+		// does the linedef cross the vertical ray?
+		if(MIN(lx1, lx2) < x2 && MAX(lx1, lx2) > x2)
+		{
+			double dist = ly1 - y + (ly2 - ly1) * (x2 - lx1) / (lx2 - lx1);
+
+			dirs |= (dist < 0) ? 4 : 8;
+
+			if(dirs == 15) return false;
+		}
+	}
+
+	return true;
 }
 
 //

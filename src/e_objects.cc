@@ -606,7 +606,7 @@ static void Insert_Sector()
 	}
 
 	// if outside of the map, create a square
-	if (PointOutsideOfMap(edit.map_x, edit.map_y))
+	if (gDocument.hover.isPointOutsideOfMap(edit.map_x, edit.map_y))
 	{
 		gDocument.basis.begin();
 		gDocument.basis.setMessage("added sector (outside map)");
