@@ -819,57 +819,6 @@ static Objid NearestSector(double x, double y)
 }
 
 //
-// determine which vertex is under the pointer
-//
-static Objid NearestVertex(double x, double y)
-{
-	const int screen_pix = vertex_radius(grid.Scale);
-
-	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
-
-	// workaround for overly zealous highlighting when zoomed in far
-	if (grid.Scale >= 15.0) mapslack *= 0.7;
-	if (grid.Scale >= 31.0) mapslack *= 0.5;
-
-	double lx = x - mapslack - 0.5;
-	double ly = y - mapslack - 0.5;
-	double hx = x + mapslack + 0.5;
-	double hy = y + mapslack + 0.5;
-
-	int    best = -1;
-	double best_dist = 9e9;
-
-	for (int n = 0 ; n < NumVertices ; n++)
-	{
-		double vx = gDocument.vertices[n]->x();
-		double vy = gDocument.vertices[n]->y();
-
-		// filter out vertices that are outside the search bbox
-		if (vx < lx || vx > hx || vy < ly || vy > hy)
-			continue;
-
-		double dist = hypot(x - vx, y - vy);
-
-		if (dist > mapslack)
-			continue;
-
-		// use "<=" because if there are superimposed vertices, we want
-		// to return the highest-numbered one.
-		if (dist <= best_dist)
-		{
-			best = n;
-			best_dist = dist;
-		}
-	}
-
-	if (best >= 0)
-		return Objid(ObjType::vertices, best);
-
-	// none found
-	return Objid();
-}
-
-//
 //  Returns the object which is under the pointer at the given
 //  coordinates.  When several objects are close, the smallest
 //  is chosen.
@@ -882,7 +831,7 @@ Objid Hover::getNearbyObject(ObjType type, double x, double y) const
 		return getNearestThing(x, y);
 
 	case ObjType::vertices:
-		return NearestVertex(x, y);
+		return getNearestVertex(x, y);
 
 	case ObjType::linedefs:
 		return NearestLineDef(x, y);
@@ -953,6 +902,56 @@ Objid Hover::getNearestThing(double x, double y) const
 	return Objid();
 }
 
+//
+// determine which vertex is under the pointer
+//
+Objid Hover::getNearestVertex(double x, double y) const
+{
+	const int screen_pix = vertex_radius(grid.Scale);
+
+	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
+
+	// workaround for overly zealous highlighting when zoomed in far
+	if(grid.Scale >= 15.0) mapslack *= 0.7;
+	if(grid.Scale >= 31.0) mapslack *= 0.5;
+
+	double lx = x - mapslack - 0.5;
+	double ly = y - mapslack - 0.5;
+	double hx = x + mapslack + 0.5;
+	double hy = y + mapslack + 0.5;
+
+	int    best = -1;
+	double best_dist = 9e9;
+
+	for(int n = 0; n < doc.numVertices(); n++)
+	{
+		double vx = doc.vertices[n]->x();
+		double vy = doc.vertices[n]->y();
+
+		// filter out vertices that are outside the search bbox
+		if(vx < lx || vx > hx || vy < ly || vy > hy)
+			continue;
+
+		double dist = hypot(x - vx, y - vy);
+
+		if(dist > mapslack)
+			continue;
+
+		// use "<=" because if there are superimposed vertices, we want
+		// to return the highest-numbered one.
+		if(dist <= best_dist)
+		{
+			best = n;
+			best_dist = dist;
+		}
+	}
+
+	if(best >= 0)
+		return Objid(ObjType::vertices, best);
+
+	// none found
+	return Objid();
+}
 
 void FindSplitLine(Objid& out, double& out_x, double& out_y,
 				   double ptr_x, double ptr_y, int ignore_vert)
