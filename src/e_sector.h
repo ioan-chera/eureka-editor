@@ -27,6 +27,8 @@
 #ifndef __EUREKA_E_SECTOR_H__
 #define __EUREKA_E_SECTOR_H__
 
+#include "DocumentModule.h"
+
 class lineloop_c
 {
 public:
@@ -110,25 +112,44 @@ private:
 	void CalcBounds(double *x1, double *y1, double *x2, double *y2) const;
 };
 
+//
+// Sector module
+//
+class SectorModule : public DocumentModule
+{
+public:
+	SectorModule(Document &doc) : DocumentModule(doc)
+	{
+	}
 
-bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false);
+	bool traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false) const;
+	bool assignSectorToSpace(double map_x, double map_y, int new_sec = -1, int model = -1) const;
+	void sectorsAdjustLight(int delta) const;
+	void safeRaiseLower(int sec, int parts, int dz) const;
 
-bool AssignSectorToSpace(double map_x, double map_y, int new_sec = -1, int model = -1);
+	/* commands */
 
-void SectorsAdjustLight(int delta);
+	static void commandFloor();
+	static void commandCeiling();
+	static void commandLight();
+	static void commandMerge();
+	static void commandSwapFlats();
 
-void SEC_SafeRaiseLower(int sec, int parts, int dz);
+private:
+	friend class lineloop_c;
 
+	void linedefsBetweenSectors(selection_c *list, int sec1, int sec2) const;
+	void replaceSectorRefs(int old_sec, int new_sec) const;
+	inline bool willBeTwoSided(int ld, Side side) const;
+	void determineNewTextures(lineloop_c& loop,
+									 std::vector<int>& lower_texs,
+							  std::vector<int>& upper_texs) const;
+	void doAssignSector(int ld, Side side, int new_sec,
+							   int new_lower, int new_upper,
+						selection_c *flip) const;
+	bool getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const;
+};
 
-/* commands */
-
-void CMD_SEC_Floor(void);
-void CMD_SEC_Ceil(void);
-
-void CMD_SEC_Light(void);
-
-void CMD_SEC_Merge(void);
-void CMD_SEC_SwapFlats(void);
 
 #endif  /* __EUREKA_E_SECTOR_H__ */
 

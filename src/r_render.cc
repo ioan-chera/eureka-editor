@@ -835,7 +835,7 @@ void Render3D_DragSectors()
 	{
 		int parts = edit.dragged.parts;
 
-		SEC_SafeRaiseLower(edit.dragged.num, parts, dz);
+		gDocument.secmod.safeRaiseLower(edit.dragged.num, parts, dz);
 	}
 	else
 	{
@@ -844,7 +844,7 @@ void Render3D_DragSectors()
 			int parts = edit.Selected->get_ext(*it);
 			parts &= ~1;
 
-			SEC_SafeRaiseLower(*it, parts, dz);
+			gDocument.secmod.safeRaiseLower(*it, parts, dz);
 		}
 	}
 

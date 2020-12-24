@@ -22,6 +22,7 @@
 #include "e_basis.h"
 #include "e_hover.h"
 #include "e_linedef.h"
+#include "e_sector.h"
 #include "e_vertex.h"
 
 //
@@ -43,8 +44,9 @@ struct Document
 	Hover hover;
 	LinedefModule linemod;
 	VertexModule vertmod;
+	SectorModule secmod;
 
-	Document() : basis(*this), hover(*this), linemod(*this), vertmod(*this)
+	Document() : basis(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this)
 	{
 	}
 

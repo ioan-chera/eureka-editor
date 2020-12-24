@@ -201,8 +201,8 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 	// trace the loops on either side of the new line
 
-	 left.ok = TraceLineLoop(new_ld, Side::left,   left.loop);
-	right.ok = TraceLineLoop(new_ld, Side::right, right.loop);
+	 left.ok = gDocument.secmod.traceLineLoop(new_ld, Side::left,   left.loop);
+	right.ok = gDocument.secmod.traceLineLoop(new_ld, Side::right, right.loop);
 
 #ifdef DEBUG_LOOP
 	fprintf(stderr, "CLOSED LOOP : left_ok:%d right_ok:%d\n",
@@ -638,7 +638,7 @@ static void Insert_Sector()
 	gDocument.basis.begin();
 	gDocument.basis.setMessage("added new sector");
 
-	bool ok = AssignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
+	bool ok = gDocument.secmod.assignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
 
 	gDocument.basis.end();
 

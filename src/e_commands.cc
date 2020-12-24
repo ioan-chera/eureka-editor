@@ -1062,7 +1062,7 @@ void CMD_Merge()
 			break;
 
 		case ObjType::sectors:
-			CMD_SEC_Merge();
+			SectorModule::commandMerge();
 			break;
 
 		case ObjType::things:
@@ -1790,15 +1790,15 @@ static editor_command_t  command_table[] =
 	/* ------ Sector mode ------ */
 
 	{	"SEC_Floor", NULL,
-		&CMD_SEC_Floor
+		&SectorModule::commandFloor
 	},
 
 	{	"SEC_Ceil", NULL,
-		&CMD_SEC_Ceil
+		&SectorModule::commandCeiling
 	},
 
 	{	"SEC_Light", NULL,
-		&CMD_SEC_Light
+		&SectorModule::commandLight
 	},
 
 	{	"SEC_SelectGroup", NULL,
@@ -1807,7 +1807,7 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"SEC_SwapFlats", NULL,
-		&CMD_SEC_SwapFlats
+		&SectorModule::commandSwapFlats
 	},
 
 
