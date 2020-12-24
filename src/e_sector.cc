@@ -378,20 +378,6 @@ void CMD_SEC_Merge(void)
 
 // #define DEBUG_LINELOOP  1
 
-
-lineloop_c::lineloop_c() :
-	lines(), sides(),
-	faces_outward(false),
-	islands()
-{ }
-
-
-lineloop_c::~lineloop_c()
-{
-	clear();
-}
-
-
 void lineloop_c::clear()
 {
 	lines.clear();
@@ -449,9 +435,9 @@ double lineloop_c::TotalLength() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		const LineDef *L = gDocument.linedefs[lines[k]];
+		const LineDef *L = doc.linedefs[lines[k]];
 
-		result += L->CalcLength(gDocument);
+		result += L->CalcLength(doc);
 	}
 
 	return result;
@@ -464,11 +450,11 @@ bool lineloop_c::SameSector(int *sec_num) const
 
 	SYS_ASSERT(lines.size() > 0);
 
-	int sec = gDocument.linedefs[lines[0]]->WhatSector(sides[0], gDocument);
+	int sec = doc.linedefs[lines[0]]->WhatSector(sides[0], doc);
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		if (sec != gDocument.linedefs[lines[k]]->WhatSector(sides[k], gDocument))
+		if (sec != doc.linedefs[lines[k]]->WhatSector(sides[k], doc))
 			return false;
 	}
 
@@ -501,15 +487,15 @@ int lineloop_c::NeighboringSector() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const LineDef *L = gDocument.linedefs[lines[i]];
+		const LineDef *L = doc.linedefs[lines[i]];
 
 		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
-		int sec = gDocument.linedefs[lines[i]]->WhatSector(- sides[i], gDocument);
+		int sec = doc.linedefs[lines[i]]->WhatSector(- sides[i], doc);
 
 		if (sec < 0)
 			continue;
 
-		double len = L->CalcLength(gDocument);
+		double len = L->CalcLength(doc);
 
 		if (len > best_len)
 		{
@@ -534,7 +520,7 @@ int lineloop_c::IslandSector() const
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		Side opp_side;
-		int opp_ld = gDocument.hover.getOppositeLinedef(lines[i], sides[i], &opp_side, nullptr);
+		int opp_ld = doc.hover.getOppositeLinedef(lines[i], sides[i], &opp_side, nullptr);
 
 		// can see "the void" ?
 		// this means the geometry around here is broken, but for
@@ -546,7 +532,7 @@ int lineloop_c::IslandSector() const
 		if (get_just_line(opp_ld))
 			continue;
 
-		return gDocument.linedefs[opp_ld]->WhatSector(opp_side, gDocument);
+		return doc.linedefs[opp_ld]->WhatSector(opp_side, doc);
 	}
 
 	return -1;
@@ -560,7 +546,7 @@ int lineloop_c::DetermineSector() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k], gDocument);
+		int sec = doc.linedefs[lines[k]]->WhatSector(sides[k], doc);
 
 		if (sec >= 0)
 			return sec;
@@ -579,13 +565,13 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const LineDef *L = gDocument.linedefs[lines[i]];
+		const LineDef *L = doc.linedefs[lines[i]];
 
-		*x1 = MIN(*x1, MIN(L->Start(gDocument)->x(), L->End(gDocument)->x()));
-		*y1 = MIN(*y1, MIN(L->Start(gDocument)->y(), L->End(gDocument)->y()));
+		*x1 = MIN(*x1, MIN(L->Start(doc)->x(), L->End(doc)->x()));
+		*y1 = MIN(*y1, MIN(L->Start(doc)->y(), L->End(doc)->y()));
 
-		*x2 = MAX(*x2, MAX(L->Start(gDocument)->x(), L->End(gDocument)->x()));
-		*y2 = MAX(*y2, MAX(L->Start(gDocument)->y(), L->End(gDocument)->y()));
+		*x2 = MAX(*x2, MAX(L->Start(doc)->x(), L->End(doc)->x()));
+		*y2 = MAX(*y2, MAX(L->Start(doc)->y(), L->End(doc)->y()));
 	}
 }
 
@@ -596,7 +582,7 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = gDocument.linedefs[lines[k]]->WhatSector(sides[k], gDocument);
+		int sec = doc.linedefs[lines[k]]->WhatSector(sides[k], doc);
 
 		if (sec >= 0)
 			list->set(sec);
@@ -772,14 +758,14 @@ bool lineloop_c::LookForIsland()
 
 	int count = 0;
 
-	for (int ld = 0 ; ld < NumLineDefs ; ld++)
+	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
-		const LineDef * L = gDocument.linedefs[ld];
+		const LineDef * L = doc.linedefs[ld];
 
-		double x1 = L->Start(gDocument)->x();
-		double y1 = L->Start(gDocument)->y();
-		double x2 = L->End(gDocument)->x();
-		double y2 = L->End(gDocument)->y();
+		double x1 = L->Start(doc)->x();
+		double y1 = L->Start(doc)->y();
+		double x2 = L->End(doc)->x();
+		double y2 = L->End(doc)->y();
 
 		if (MAX(x1, x2) < bbox_x1 || MIN(x1, x2) > bbox_x2 ||
 		    MAX(y1, y2) < bbox_y1 || MIN(y1, y2) > bbox_y2)
@@ -792,7 +778,7 @@ bool lineloop_c::LookForIsland()
 			Side ld_side = where ? Side::right : Side::left;
 
 			Side opp_side;
-			int opp = gDocument.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
+			int opp = doc.hover.getOppositeLinedef(ld, ld_side, &opp_side, nullptr);
 
 			if (opp < 0)
 				continue;
@@ -809,12 +795,12 @@ DebugPrintf("Found line:%d side:%d <--> opp:%d opp_side:%d  us:%d them:%d\n",
 ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 #endif
 
-			lineloop_c *island = new lineloop_c;
+			lineloop_c *island = new lineloop_c(doc);
 
 			// treat isolated linedefs like islands
 			if (! ld_in_path &&
-				gDocument.vertmod.howManyLinedefs(gDocument.linedefs[ld]->start) == 1 &&
-				gDocument.vertmod.howManyLinedefs(gDocument.linedefs[ld]->end)   == 1)
+				doc.vertmod.howManyLinedefs(doc.linedefs[ld]->start) == 1 &&
+				doc.vertmod.howManyLinedefs(doc.linedefs[ld]->end)   == 1)
 			{
 				island->push_back(ld, Side::right);
 				island->push_back(ld, Side::left);
@@ -877,13 +863,13 @@ void lineloop_c::Dump() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const LineDef *L = gDocument.linedefs[lines[i]];
+		const LineDef *L = doc.linedefs[lines[i]];
 
 		DebugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
 					lines[i],
-					L->Start(gDocument)->x(), L->Start(gDocument)->y(),
-					L->End  (gDocument)->x(), L->End  (gDocument)->y());
+					L->Start(doc)->x(), L->Start(doc)->y(),
+					L->End  (doc)->x(), L->End  (doc)->y());
 	}
 }
 
@@ -1204,7 +1190,7 @@ static bool GetLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 //
 bool AssignSectorToSpace(double map_x, double map_y, int new_sec, int model)
 {
-	lineloop_c loop;
+	lineloop_c loop(gDocument);
 
 	if (! GetLoopForSpace(map_x, map_y, loop))
 	{

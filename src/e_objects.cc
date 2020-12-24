@@ -188,7 +188,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 	struct check_closed_data_t
 	{
-		lineloop_c loop;
+		lineloop_c loop = lineloop_c(gDocument);
 
 		bool ok;
 

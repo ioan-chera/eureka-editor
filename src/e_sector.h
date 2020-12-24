@@ -43,16 +43,23 @@ public:
 
 	//  true if the lines face outward (average angle > 180 degrees)
 	// false if the lines face  inward (average angle < 180 degrees)
-	bool faces_outward;
+	bool faces_outward = false;
 
 	// Islands are outward facing line-loops which lie inside this one
 	// (which must be inward facing).  This list is only created by
 	// calling FindIslands() method, which can be very expensive.
 	std::vector< lineloop_c * > islands;
 
+	const Document &doc;
 public:
-	 lineloop_c();
-	~lineloop_c();
+	lineloop_c(const Document &doc) : doc(doc)
+	{
+	}
+
+	~lineloop_c()
+	{
+		clear();
+	}
 
 	void clear();
 
