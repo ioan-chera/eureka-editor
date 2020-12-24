@@ -136,20 +136,26 @@ typedef int map_format_bitset_t;
  *  Interfile global variables
  */
 
-extern bool want_quit;
-extern bool app_has_focus;
-extern bool in_fatal_error;
+namespace global
+{
+	extern bool want_quit;
+	extern bool app_has_focus;
+	extern bool in_fatal_error;
 
-extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
-extern SString home_dir;     // home dir (e.g. $HOME/.eureka)
-extern SString cache_dir;    // for caches and backups, can be same as home_dir
+	extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
+	extern SString home_dir;      // home dir (e.g. $HOME/.eureka)
+	extern SString cache_dir;    // for caches and backups, can be same as home_dir
+}
 
-extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
-extern SString Port_name;   // Name of source port "vanilla", "boom", ...
-extern SString Level_name;  // Name of map lump we are editing
+namespace instance
+{
+	extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
+	extern SString Port_name;   // Name of source port "vanilla", "boom", ...
+	extern SString Level_name;  // Name of map lump we are editing
 
-extern MapFormat Level_format;   // format of current map
-extern SString  Udmf_namespace; // for UDMF, the current namespace
+	extern MapFormat Level_format;   // format of current map
+	extern SString  Udmf_namespace; // for UDMF, the current namespace
+}
 
 extern SString config_file; // Name of the configuration file, or NULL
 extern SString log_file;    // Name of log file, or NULL
@@ -157,7 +163,10 @@ extern SString log_file;    // Name of log file, or NULL
 extern SString Iwad_name;   // Filename of the iwad
 extern SString Pwad_name;   // Filename of current wad, or NULL
 
-extern std::vector<SString> Pwad_list;
+namespace global
+{
+	extern std::vector<SString> Pwad_list;
+}
 extern std::vector<SString> Resource_list;
 
 

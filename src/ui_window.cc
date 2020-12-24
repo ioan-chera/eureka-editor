@@ -525,7 +525,7 @@ void UI_MainWindow::UpdateGameInfo()
 
 int UI_MainWindow::handle(int event)
 {
-	if (in_fatal_error)
+	if (global::in_fatal_error)
 		return 0;
 
 	return Fl_Double_Window::handle(event);
@@ -533,7 +533,7 @@ int UI_MainWindow::handle(int event)
 
 void UI_MainWindow::draw()
 {
-	if (in_fatal_error)
+	if (global::in_fatal_error)
 		return;
 
 	return Fl_Double_Window::draw();

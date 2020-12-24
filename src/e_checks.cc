@@ -1519,7 +1519,7 @@ void Things_FindDuds(selection_c& list)
 		int modes   = 1;
 		int classes = 1;
 
-		if (Level_format != MapFormat::doom)
+		if (instance::Level_format != MapFormat::doom)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
@@ -1528,7 +1528,7 @@ void Things_FindDuds(selection_c& list)
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (Level_format != MapFormat::doom)
+		if (instance::Level_format != MapFormat::doom)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 		}
@@ -1577,7 +1577,7 @@ void Things_FixDuds()
 		if (skills == 0)
 			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
 
-		if (Level_format != MapFormat::doom)
+		if (instance::Level_format != MapFormat::doom)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 
@@ -1592,7 +1592,7 @@ void Things_FixDuds()
 				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (Level_format != MapFormat::doom)
+		if (instance::Level_format != MapFormat::doom)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 
@@ -1689,7 +1689,7 @@ static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
 	int opt1 = T1->options;
 	int opt2 = T2->options;
 
-	if (Level_format != MapFormat::doom)
+	if (instance::Level_format != MapFormat::doom)
 	{
 		if (info1->group == 'p') opt1 |= 0x7E7;
 		if (info2->group == 'p') opt2 |= 0x7E7;
@@ -3188,7 +3188,7 @@ static bool SEC_check_beast_mark(int tag)
 	if (tag == 667)
 	{
 		// tag #667 can only be used on MAP07
-		return Level_name.noCaseEqual("MAP07");
+		return instance::Level_name.noCaseEqual("MAP07");
 	}
 
 	if (tag == 666)
@@ -3196,16 +3196,16 @@ static bool SEC_check_beast_mark(int tag)
 		// for Heretic, the map must be an end-of-episode map: ExM8
 		if (Features.tag_666 == 2)
 		{
-			if (Level_name.length() != 4)
+			if (instance::Level_name.length() != 4)
 				return false;
 
-			return (Level_name[3] == '8');
+			return (instance::Level_name[3] == '8');
 		}
 
 		// for Doom, either need a particular map, or the presence
 		// of a KEEN thing.
-		if (Level_name.noCaseEqual("E1M8") || Level_name.noCaseEqual("E4M6") || 
-			Level_name.noCaseEqual("E4M8") || Level_name.noCaseEqual("MAP07"))
+		if (instance::Level_name.noCaseEqual("E1M8") || instance::Level_name.noCaseEqual("E4M6") ||
+			instance::Level_name.noCaseEqual("E4M8") || instance::Level_name.noCaseEqual("MAP07"))
 		{
 			return true;
 		}

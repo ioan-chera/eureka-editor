@@ -110,7 +110,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Home directory",
 		"<dir>",
-		&home_dir
+		&global::home_dir
 	},
 
 	{	"install",
@@ -119,7 +119,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Installation directory",
 		"<dir>",
-		&install_dir
+		&global::install_dir
 	},
 
 	{	"log",
@@ -186,7 +186,7 @@ static const opt_desc_t options[] =
 		"",
 		"Wad file(s) to edit",
 		"<file>...",
-		&Pwad_list
+		&global::Pwad_list
 	},
 
 	{	"merge",
@@ -213,7 +213,7 @@ static const opt_desc_t options[] =
 		"",
 		"Port (engine) name",
 		"<name>",
-		&Port_name
+		&instance::Port_name
 	},
 
 	{	"warp",
@@ -222,7 +222,7 @@ static const opt_desc_t options[] =
 		"w<",
 		"Select level to edit",
 		"<map>",
-		&Level_name
+		&instance::Level_name
 	},
 
 	{	"udmftest",
@@ -1009,9 +1009,9 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 
 inline static SString default_config_file()
 {
-	SYS_ASSERT(!home_dir.empty());
+	SYS_ASSERT(!global::home_dir.empty());
 
-	return home_dir + "/config.cfg";
+	return global::home_dir + "/config.cfg";
 }
 
 
@@ -1043,7 +1043,7 @@ int M_ParseConfigFile()
 
 int M_ParseDefaultConfigFile()
 {
-	SString filename = install_dir + "/defaults.cfg";
+	SString filename = global::install_dir + "/defaults.cfg";
 
 	std::ifstream is(filename.get());
 
@@ -1076,7 +1076,7 @@ void M_ParseEnvironmentVars()
 
 void M_AddPwadName(const char *filename)
 {
-	Pwad_list.push_back(filename);
+	global::Pwad_list.push_back(filename);
 }
 
 
@@ -1478,7 +1478,7 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions
 
 static SString PersistFilename(const crc32_c& crc)
 {
-	return SString::printf("%s/cache/%08X%08X.dat", cache_dir.c_str(), crc.extra, crc.raw);
+	return SString::printf("%s/cache/%08X%08X.dat", global::cache_dir.c_str(), crc.extra, crc.raw);
 }
 
 

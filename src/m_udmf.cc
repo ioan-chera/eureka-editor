@@ -345,7 +345,7 @@ static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		Udmf_namespace = value.DecodeString();
+		instance::Udmf_namespace = value.DecodeString();
 	}
 	else if (name.Match("ee_compat"))
 	{
@@ -711,7 +711,7 @@ static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
 
 static void UDMF_WriteInfo(Lump_c *lump)
 {
-	lump->Printf("namespace = \"%s\";\n\n", Udmf_namespace.c_str());
+	lump->Printf("namespace = \"%s\";\n\n", instance::Udmf_namespace.c_str());
 }
 
 static void UDMF_WriteThings(Lump_c *lump)
@@ -910,14 +910,14 @@ void UDMF_SaveLevel()
 
 void UDMF_SwitchEngine()
 {
-	if (Udmf_namespace.empty())
+	if (instance::Udmf_namespace.empty())
 		return;
 
 	// convert to lowercase
-	SString namespace_l = Udmf_namespace.asLower();
+	SString namespace_l = instance::Udmf_namespace.asLower();
 
 	// already set?
-	if (Port_name.noCaseEqual(namespace_l))
+	if (instance::Port_name.noCaseEqual(namespace_l))
 	{
 		return;
 	}

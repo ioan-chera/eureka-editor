@@ -99,7 +99,7 @@ void M_WriteKnownIWADs(FILE *fp)
 
 void M_ValidateGivenFiles()
 {
-	for (const SString &pwad : Pwad_list)
+	for (const SString &pwad : global::Pwad_list)
 	{
 		if (! Wad_file::Validate(pwad))
 			ThrowException("Given pwad does not exist or is invalid: %s\n",
@@ -110,8 +110,8 @@ void M_ValidateGivenFiles()
 
 int M_FindGivenFile(const char *filename)
 {
-	for (int i = 0 ; i < (int)Pwad_list.size() ; i++)
-		if (Pwad_list[i] == filename)
+	for (int i = 0 ; i < (int)global::Pwad_list.size() ; i++)
+		if (global::Pwad_list[i] == filename)
 			return i;
 
 	return -1;  // Not Found
@@ -438,7 +438,7 @@ static void ParseMiscConfig(std::istream &is)
 
 void M_LoadRecent()
 {
-	SString filename = home_dir + "/misc.cfg";
+	SString filename = global::home_dir + "/misc.cfg";
 
 	std::ifstream is(filename.get());
 	if(!is.is_open())
@@ -459,7 +459,7 @@ void M_LoadRecent()
 
 void M_SaveRecent()
 {
-	SString filename = home_dir + "/misc.cfg";
+	SString filename = global::home_dir + "/misc.cfg";
 
 	FILE *fp = fopen(filename.c_str(), "w");
 
@@ -553,9 +553,9 @@ bool M_TryOpenMostRecent()
 	/* -- OK -- */
 
 	if (wad->LevelFind(map_name) >= 0)
-		Level_name = map_name;
+		instance::Level_name = map_name;
 	else
-		Level_name.clear();
+		instance::Level_name.clear();
 
 	Pwad_name = filename;
 
@@ -652,7 +652,7 @@ static SString SearchForIWAD(const SString &game)
 
 	// 1. look in ~/.eureka/iwads first
 
-	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", home_dir.c_str());
+	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", global::home_dir.c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
 	SString path = SearchDirForIWAD(dir_name, game);
@@ -755,7 +755,7 @@ SString M_PickDefaultIWAD()
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
 
-	if (!Level_name.empty() && toupper(Level_name[0]) == 'E')
+	if (!instance::Level_name.empty() && toupper(instance::Level_name[0]) == 'E')
 	{
 		default_game = "doom";
 	}
@@ -966,8 +966,8 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	if (!new_port.empty())
 	{
-		if (! (keep_cmd_line_args && !Port_name.empty()))
-			Port_name = new_port;
+		if (! (keep_cmd_line_args && !instance::Port_name.empty()))
+			instance::Port_name = new_port;
 	}
 
 	if (! keep_cmd_line_args)
@@ -996,11 +996,11 @@ void M_WriteEurekaLump(Wad_file *wad)
 
 	lump->Printf("# Eureka project info\n");
 
-	if (!Game_name.empty())
-		lump->Printf("game %s\n", Game_name.c_str());
+	if (!instance::Game_name.empty())
+		lump->Printf("game %s\n", instance::Game_name.c_str());
 
-	if (!Port_name.empty())
-		lump->Printf("port %s\n", Port_name.c_str());
+	if (!instance::Port_name.empty())
+		lump->Printf("port %s\n", instance::Port_name.c_str());
 
 	for (const SString &resource : Resource_list)
 	{
@@ -1087,7 +1087,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	SString filename = cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
+	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
 	SString dir_name = ReplaceExtension(filename, NULL);
 
 	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());

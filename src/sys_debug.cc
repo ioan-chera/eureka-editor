@@ -100,7 +100,7 @@ void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 		fflush(log_fp);
 	}
 
-	if (log_window_open && !in_fatal_error)
+	if (log_window_open && !global::in_fatal_error)
 		LogViewer_AddLine(buffer);
 	else
 		kept_messages.push_back(buffer);

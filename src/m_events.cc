@@ -437,7 +437,7 @@ extern void Transform_Update();
 
 static void EV_EnterWindow()
 {
-	if (!app_has_focus)
+	if (!global::app_has_focus)
 	{
 		edit.pointer_in_window = false;
 		return;
@@ -731,7 +731,7 @@ int EV_RawButton(int event)
 
 int EV_RawMouse(int event)
 {
-	if (!app_has_focus)
+	if (!global::app_has_focus)
 		return 1;
 
 	int mod = Fl::event_state() & MOD_ALL_MASK;
@@ -902,17 +902,15 @@ static bool M_ParseOperationFile()
 {
 	// open the file and build all the menus it contains.
 
-	static char filename[FL_PATH_MAX];
-
 	// look in user's $HOME directory first
-	snprintf(filename, sizeof(filename), "%s/operations.cfg", home_dir.c_str());
+	SString filename = global::home_dir + "/operations.cfg";
 
 	LineFile file(filename);
 
 	// otherwise load it from the installation directory
 	if (! file)
 	{
-		snprintf(filename, sizeof(filename), "%s/operations.cfg", install_dir.c_str());
+		filename = global::install_dir + "/operations.cfg";
 
 		file.open(filename);
 	}

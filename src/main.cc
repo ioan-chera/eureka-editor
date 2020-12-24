@@ -64,30 +64,30 @@
 //  global variables
 //
 
-bool want_quit = false;
-bool app_has_focus = false;
-bool in_fatal_error = false;
+bool global::want_quit = false;
+bool global::app_has_focus = false;
+bool global::in_fatal_error = false;
 
 SString config_file;
 SString log_file;
 
-SString install_dir;
-SString home_dir;
-SString cache_dir;
+SString global::install_dir;
+SString global::home_dir;
+SString global::cache_dir;
 
 
 SString Iwad_name;
 SString Pwad_name;
 
-std::vector<SString> Pwad_list;
+std::vector<SString> global::Pwad_list;
 std::vector<SString> Resource_list;
 
-SString Game_name;
-SString Port_name;
-SString Level_name;
+SString instance::Game_name;
+SString instance::Port_name;
+SString instance::Level_name;
 
-MapFormat Level_format;
-SString  Udmf_namespace;
+MapFormat instance::Level_format;
+SString  instance::Udmf_namespace;
 
 
 //
@@ -150,7 +150,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	va_end(arg_ptr);
 
 	// re-entered here? ouch!
-	if (in_fatal_error)
+	if (global::in_fatal_error)
 	{
 		fprintf(stderr, "\nERROR LOOP DETECTED!\n");
 		fflush(stderr);
@@ -160,7 +160,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	}
 
 	// minimise chance of a infinite loop of errors
-	in_fatal_error = true;
+	global::in_fatal_error = true;
 
 	if (init_progress == ProgressStatus::nothing || Quiet || !log_file.empty())
 	{
@@ -190,7 +190,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 #endif
 
 	init_progress = ProgressStatus::nothing;
-	app_has_focus = false;
+	global::app_has_focus = false;
 
 	MasterDir_CloseAll();
 	LogClose();
@@ -200,7 +200,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 
 static void CreateHomeDirs()
 {
-	SYS_ASSERT(!home_dir.empty());
+	SYS_ASSERT(!global::home_dir.empty());
 
 	char dir_name[FL_PATH_MAX];
 
@@ -219,8 +219,8 @@ static void CreateHomeDirs()
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(home_dir);
-	FileMakeDir(cache_dir);
+	FileMakeDir(global::home_dir);
+	FileMakeDir(global::cache_dir);
 
 	static const char *const subdirs[] =
 	{
@@ -235,7 +235,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? cache_dir.c_str() : home_dir.c_str(), subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.c_str() : global::home_dir.c_str(), subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -246,7 +246,7 @@ static void CreateHomeDirs()
 static void Determine_HomeDir(const char *argv0)
 {
 	// already set by cmd-line option?
-	if (home_dir.empty())
+	if (global::home_dir.empty())
 	{
 #if defined(WIN32)
 	// get the %APPDATA% location
@@ -255,18 +255,18 @@ static void Determine_HomeDir(const char *argv0)
 		wchar_t *wpath = nullptr;
 		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &wpath)))
 		{
-			home_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			global::home_dir = WideToUTF8(wpath) + "\\EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 		else
 		{
-			SYS_ASSERT(install_dir.good());
-			home_dir = install_dir + "\\app_data";
+			SYS_ASSERT(global::install_dir.good());
+			global::home_dir = global::install_dir + "\\app_data";
 		}
 		wpath = nullptr;
 		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wpath)))
 		{
-			cache_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			global::cache_dir = WideToUTF8(wpath) + "\\EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 
@@ -291,30 +291,30 @@ static void Determine_HomeDir(const char *argv0)
 #endif
 	}
 
-	if (home_dir.empty())
-		FatalError("Unable to find home directory!\n");
+	if (global::home_dir.empty())
+		ThrowException("Unable to find home directory!\n");
 
-	if (cache_dir.empty())
-		cache_dir = home_dir;
+	if (global::cache_dir.empty())
+		global::cache_dir = global::home_dir;
 
-	LogPrintf("Home  dir: %s\n", home_dir.c_str());
-	LogPrintf("Cache dir: %s\n", cache_dir.c_str());
+	LogPrintf("Home  dir: %s\n", global::home_dir.c_str());
+	LogPrintf("Cache dir: %s\n", global::cache_dir.c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();
 
 	// determine log filename
-	log_file = home_dir + "/logs.txt";
+	log_file = global::home_dir + "/logs.txt";
 }
 
 
 static void Determine_InstallPath(const char *argv0)
 {
 	// already set by cmd-line option?
-	if (install_dir.empty())
+	if (global::install_dir.empty())
 	{
 #ifdef WIN32
-	install_dir = GetExecutablePath(argv0);
+		global::install_dir = GetExecutablePath(argv0);
 
 #else
 	static const char *prefixes[] =
@@ -327,11 +327,11 @@ static void Determine_InstallPath(const char *argv0)
 
 	for (int i = 0 ; prefixes[i] ; i++)
 	{
-		install_dir = SString(prefixes[i]) + "/share/eureka";
+		global::install_dir = SString(prefixes[i]) + "/share/eureka";
 
-		SString filename = install_dir + "/games/doom2.ugh";
+		SString filename = global::install_dir + "/games/doom2.ugh";
 
-		DebugPrintf("Trying install path: %s\n", install_dir.c_str());
+		DebugPrintf("Trying install path: %s\n", global::install_dir.c_str());
 		DebugPrintf("   looking for file: %s\n", filename.c_str());
 
 		bool exists = FileExists(filename);
@@ -339,22 +339,22 @@ static void Determine_InstallPath(const char *argv0)
 		if (exists)
 			break;
 
-		install_dir.clear();
+		global::install_dir.clear();
 	}
 #endif
 	}
 
 	// fallback : look in current directory
-	if (install_dir.empty())
+	if (global::install_dir.empty())
 	{
 		if (FileExists("./games/doom2.ugh"))
-			install_dir = ".";
+			global::install_dir = ".";
 	}
 
-	if (install_dir.empty())
+	if (global::install_dir.empty())
 		ThrowException("Unable to find install directory!\n");
 
-	LogPrintf("Install dir: %s\n", install_dir.c_str());
+	LogPrintf("Install dir: %s\n", global::install_dir.c_str());
 }
 
 
@@ -424,7 +424,7 @@ static bool DetermineIWAD()
 		}
 	}
 
-	Game_name = GameNameFromIWAD(Iwad_name);
+	instance::Game_name = GameNameFromIWAD(Iwad_name);
 
 	return true;
 }
@@ -434,15 +434,15 @@ static void DeterminePort()
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
-	if (!Port_name.empty())
+	if (!instance::Port_name.empty())
 	{
-		if (! M_CanLoadDefinitions("ports", Port_name))
-			FatalError("Unknown port '%s' (no definition file)\n", Port_name.c_str());
+		if (! M_CanLoadDefinitions("ports", instance::Port_name))
+			FatalError("Unknown port '%s' (no definition file)\n", instance::Port_name.c_str());
 
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(Game_name);
+	SString base_game = M_GetBaseGame(instance::Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -459,11 +459,11 @@ static void DeterminePort()
 	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
-				  config::default_port.c_str(), Game_name.c_str());
+				  config::default_port.c_str(), instance::Game_name.c_str());
 		config::default_port = "vanilla";
 	}
 
-	Port_name = config::default_port;
+	instance::Port_name = config::default_port;
 }
 
 
@@ -477,12 +477,12 @@ static SString DetermineLevel()
 
 	int level_number = 0;
 
-	if (!Level_name.empty())
+	if (!instance::Level_name.empty())
 	{
-		if (! isdigit(Level_name[0]))
-			return Level_name.asUpper();
+		if (! isdigit(instance::Level_name[0]))
+			return instance::Level_name.asUpper();
 
-		level_number = atoi(Level_name);
+		level_number = atoi(instance::Level_name);
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -658,7 +658,7 @@ static void Main_OpenWindow()
 #ifndef NO_OPENGL
 		main_win->canvas->show();  // needed for OpenGL
 #endif
-		app_has_focus = true;
+		global::app_has_focus = true;
 	}
 
 	// kill the stupid bright background of the "plastic" scheme
@@ -696,7 +696,7 @@ static void Main_OpenWindow()
 
 void Main_Quit()
 {
-	want_quit = true;
+	global::want_quit = true;
 }
 
 
@@ -755,7 +755,7 @@ void Main_Loop()
 
 			Fl::wait(0);
 
-			if (want_quit)
+			if (global::want_quit)
 				break;
 		}
 		else
@@ -763,12 +763,12 @@ void Main_Loop()
 			Fl::wait(0.2);
 		}
 
-		if (want_quit)
+		if (global::want_quit)
 		{
 			if (Main_ConfirmQuit("quit"))
 				break;
 
-			want_quit = false;
+			global::want_quit = false;
 		}
 
 		// TODO: handle these in a better way
@@ -817,12 +817,12 @@ static void Main_LoadIWAD()
 
 static void ReadGameInfo()
 {
-	Game_name = GameNameFromIWAD(Iwad_name);
+	instance::Game_name = GameNameFromIWAD(Iwad_name);
 
-	LogPrintf("Game name: '%s'\n", Game_name.c_str());
+	LogPrintf("Game name: '%s'\n", instance::Game_name.c_str());
 	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
 
-	M_LoadDefinitions("games", Game_name);
+	M_LoadDefinitions("games", instance::Game_name);
 }
 
 
@@ -832,15 +832,15 @@ static void ReadPortInfo()
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(!Port_name.empty());
+	SYS_ASSERT(!instance::Port_name.empty());
 
-	SString base_game = M_GetBaseGame(Game_name);
+	SString base_game = M_GetBaseGame(instance::Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(base_game, Port_name))
+	if (! M_CheckPortSupportsGame(base_game, instance::Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-				  Port_name.c_str(), Game_name.c_str());
+			instance::Port_name.c_str(), instance::Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -849,17 +849,17 @@ static void ReadPortInfo()
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-							  Port_name.c_str(), Game_name.c_str());
+			instance::Port_name.c_str(), instance::Game_name.c_str());
 
 		if (res == 0)
 		{
-			Port_name = "vanilla";
+			instance::Port_name = "vanilla";
 		}
 	}
 
-	LogPrintf("Port name: '%s'\n", Port_name.c_str());
+	LogPrintf("Port name: '%s'\n", instance::Port_name.c_str());
 
-	M_LoadDefinitions("ports", Port_name);
+	M_LoadDefinitions("ports", instance::Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (Features.strife_flags)
@@ -1074,13 +1074,13 @@ int main(int argc, char *argv[])
 		// open a specified PWAD now
 		// [ the map is loaded later.... ]
 
-		if (!Pwad_list.empty())
+		if (!global::Pwad_list.empty())
 		{
 			// this fatal errors on any missing file
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			Pwad_name = Pwad_list[0];
+			Pwad_name = global::Pwad_list[0];
 
 			edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
 			if (! edit_wad)
@@ -1091,7 +1091,7 @@ int main(int argc, char *argv[])
 			MasterDir_Add(edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!Iwad_name.empty() || !Level_name.empty()))
+		else if (config::auto_load_recent && ! (!Iwad_name.empty() || !instance::Level_name.empty()))
 		{
 			if (M_TryOpenMostRecent())
 			{
@@ -1129,11 +1129,11 @@ int main(int argc, char *argv[])
 
 
 		// load the initial level
-		Level_name = DetermineLevel();
+		instance::Level_name = DetermineLevel();
 
-		LogPrintf("Loading initial map : %s\n", Level_name.c_str());
+		LogPrintf("Loading initial map : %s\n", instance::Level_name.c_str());
 
-		LoadLevel(edit_wad ? edit_wad : game_wad, Level_name);
+		LoadLevel(edit_wad ? edit_wad : game_wad, instance::Level_name);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
@@ -1148,7 +1148,7 @@ int main(int argc, char *argv[])
 		LogPrintf("Quit\n");
 
 		init_progress = ProgressStatus::nothing;
-		app_has_focus = false;
+		global::app_has_focus = false;
 
 		MasterDir_CloseAll();
 		LogClose();

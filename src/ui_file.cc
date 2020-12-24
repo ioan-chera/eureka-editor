@@ -832,7 +832,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString prev_game = game;
 
 	if (prev_game.empty())
-		prev_game = Game_name;
+		prev_game = instance::Game_name;
 	if (prev_game.empty())
 		prev_game = "doom2";
 
@@ -869,7 +869,7 @@ void UI_ProjectSetup::PopulatePort()
 		prev_port = port_choice->mvalue()->text;
 
 	if (prev_port.empty())
-		prev_port = Port_name;
+		prev_port = instance::Port_name;
 	if (!prev_port.empty())
 		prev_port = "vanilla";
 
@@ -887,8 +887,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (game_choice->mvalue())
 		base_game = M_GetBaseGame(game_choice->mvalue()->text);
-	else if (!Game_name.empty())
-		base_game = M_GetBaseGame(Game_name);
+	else if (!instance::Game_name.empty())
+		base_game = M_GetBaseGame(instance::Game_name);
 
 	if (base_game.empty())
 		base_game = "doom2";
@@ -913,7 +913,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	MapFormat prev_fmt = map_format;
 
 	if (prev_fmt == MapFormat::invalid)
-		prev_fmt = Level_format;
+		prev_fmt = instance::Level_format;
 
 
 	format_choice->clear();

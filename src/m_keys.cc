@@ -627,18 +627,18 @@ void M_LoadBindings()
 {
 	all_bindings.clear();
 
-	LoadBindingsFromPath(install_dir.c_str(), true /* required */);
+	LoadBindingsFromPath(global::install_dir.c_str(), true /* required */);
 
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(home_dir.c_str(), false);
+	LoadBindingsFromPath(global::home_dir.c_str(), false);
 }
 
 
 void M_SaveBindings()
 {
-	SString filename = home_dir + "/bindings.cfg";
+	SString filename = global::home_dir + "/bindings.cfg";
 
 	std::ofstream os(filename.get(), std::ios::trunc);
 	if (! os.is_open())

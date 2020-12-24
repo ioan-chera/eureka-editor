@@ -138,7 +138,7 @@ void M_PrepareConfigVariables()
 {
 	parse_vars.clear();
 
-	switch (Level_format)
+	switch (instance::Level_format)
 	{
 		case MapFormat::doom:
 			parse_vars["$MAP_FORMAT"] = "DOOM";
@@ -156,25 +156,25 @@ void M_PrepareConfigVariables()
 			break;
 	}
 
-	if (! Udmf_namespace.empty())
+	if (!instance::Udmf_namespace.empty())
 	{
-		parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
+		parse_vars["$UDMF_NAMESPACE"] = instance::Udmf_namespace;
 	}
 
-	if (!Game_name.empty())
+	if (!instance::Game_name.empty())
 	{
-		parse_vars["$GAME_NAME"] = Game_name;
+		parse_vars["$GAME_NAME"] = instance::Game_name;
 
-		if (M_CanLoadDefinitions("games", Game_name))
+		if (M_CanLoadDefinitions("games", instance::Game_name))
 		{
-			SString base_game = M_GetBaseGame(Game_name);
+			SString base_game = M_GetBaseGame(instance::Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
-	if (!Port_name.empty())
+	if (!instance::Port_name.empty())
 	{
-		parse_vars["$PORT_NAME"] = Port_name;
+		parse_vars["$PORT_NAME"] = instance::Port_name;
 	}
 }
 
@@ -368,7 +368,7 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 	SYS_ASSERT(folder.good() && name.good());
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SString &base_dir = (pass == 0) ? home_dir : install_dir;
+		const SString &base_dir = (pass == 0) ? global::home_dir : global::install_dir;
 
 		if (base_dir.empty())
 			continue;
@@ -1181,9 +1181,9 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 			return;
 		temp_list.push_back(ReplaceExtension(name, NULL));
 	};
-	path = install_dir + "/" + folder;
+	path = global::install_dir + "/" + folder;
 	ScanDirectory(path, scanner_add_file);
-	path = home_dir + "/" + folder;
+	path = global::home_dir + "/" + folder;
 	ScanDirectory(path, scanner_add_file);
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)

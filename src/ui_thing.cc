@@ -424,7 +424,7 @@ void UI_ThingBox::dynspec_callback(Fl_Widget *w, void *data)
 {
 	UI_ThingBox *box = (UI_ThingBox *)data;
 
-	if (box->obj < 0 || Level_format == MapFormat::doom)
+	if (box->obj < 0 || instance::Level_format == MapFormat::doom)
 		return;
 
 	int value = atoi(box->spec_type->value());
@@ -481,7 +481,7 @@ void UI_ThingBox::BrowsedItem(char kind, int number, const char *name, int e_sta
 	{
 		SetThingType(number);
 	}
-	else if (kind == 'L' && Level_format != MapFormat::doom)
+	else if (kind == 'L' && instance::Level_format != MapFormat::doom)
 	{
 		SetSpecialType(number);
 	}
@@ -699,7 +699,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 
 	o_ambush->value((options & MTF_Ambush) ? 1 : 0);
 
-	if (Level_format != MapFormat::doom)
+	if (instance::Level_format != MapFormat::doom)
 	{
 		o_sp  ->value((options & MTF_Hexen_SP)   ? 1 : 0);
 		o_coop->value((options & MTF_Hexen_COOP) ? 1 : 0);
@@ -720,7 +720,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 		o_vanilla_dm->value((options & MTF_Not_SP) ? 1 : 0);
 	}
 
-	if (Level_format == MapFormat::doom)
+	if (instance::Level_format == MapFormat::doom)
 	{
 		o_friend->value((options & MTF_Friend) ? 1 : 0);
 
@@ -762,7 +762,7 @@ int UI_ThingBox::CalcOptions() const
 		if (o_ambush->value()) options |= MTF_Ambush;
 	}
 
-	if (Level_format != MapFormat::doom)
+	if (instance::Level_format != MapFormat::doom)
 	{
 		if (o_sp  ->value()) options |= MTF_Hexen_SP;
 		if (o_coop->value()) options |= MTF_Hexen_COOP;
@@ -785,7 +785,7 @@ int UI_ThingBox::CalcOptions() const
 		if (o_vanilla_dm->value()) options |= MTF_Not_SP;
 	}
 
-	if (Level_format == MapFormat::doom)
+	if (instance::Level_format == MapFormat::doom)
 	{
 		if (Features.friend_flag && o_friend->value())
 			options |= MTF_Friend;
@@ -870,7 +870,7 @@ void UI_ThingBox::UpdateField(int field)
 			OptionsFromInt(0);
 	}
 
-	if (Level_format == MapFormat::doom)
+	if (instance::Level_format == MapFormat::doom)
 		return;
 
 	if (field < 0 || field == Thing::F_SPECIAL)
@@ -943,7 +943,7 @@ void UI_ThingBox::UpdateTotal()
 
 void UI_ThingBox::UpdateGameInfo()
 {
-	if (Features.coop_dm_flags || Level_format != MapFormat::doom)
+	if (Features.coop_dm_flags || instance::Level_format != MapFormat::doom)
 	{
 		o_sp  ->show();
 		o_coop->show();
@@ -994,7 +994,7 @@ void UI_ThingBox::UpdateGameInfo()
 
 	thing_opt_CB_data_c *ocb;
 
-	if (Level_format != MapFormat::doom)
+	if (instance::Level_format != MapFormat::doom)
 	{
 		pos_z->show();
 
