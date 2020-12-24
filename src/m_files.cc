@@ -559,7 +559,7 @@ bool M_TryOpenMostRecent()
 
 	Pwad_name = filename;
 
-	edit_wad = wad;
+	instance::edit_wad = wad;
 
 	return true;
 }
@@ -759,14 +759,14 @@ SString M_PickDefaultIWAD()
 	{
 		default_game = "doom";
 	}
-	else if (edit_wad)
+	else if (instance::edit_wad)
 	{
-		int idx = edit_wad->LevelFindFirst();
+		int idx = instance::edit_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = edit_wad->LevelHeader(idx);
-			const SString &name = edit_wad->GetLump(idx)->Name();
+			idx = instance::edit_wad->LevelHeader(idx);
+			const SString &name = instance::edit_wad->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";

@@ -1798,7 +1798,7 @@ void SaveXGL3Format(node_t *root_node)
 
 void LoadLevel()
 {
-	Lump_c *LEV = edit_wad->GetLump(lev_current_start);
+	Lump_c *LEV = instance::edit_wad->GetLump(lev_current_start);
 
 	lev_current_name = LEV->Name();
 	lev_overflows = 0;
@@ -1905,7 +1905,7 @@ void UpdateGLMarker(Lump_c *marker)
 	// [ otherwise we write data into the wrong part of the file ]
 	u32_t crc = CalcGLChecksum();
 
-	edit_wad->RecreateLump(marker, max_size);
+	instance::edit_wad->RecreateLump(marker, max_size);
 
 	// when original name is long, need to specify it here
 	if (lev_current_name.length() > 5)
@@ -1930,22 +1930,22 @@ void UpdateGLMarker(Lump_c *marker)
 
 static void AddMissingLump(const char *name, const char *after)
 {
-	if (edit_wad->LevelLookupLump(lev_current_idx, name) >= 0)
+	if (instance::edit_wad->LevelLookupLump(lev_current_idx, name) >= 0)
 		return;
 
-	int exist = edit_wad->LevelLookupLump(lev_current_idx, after);
+	int exist = instance::edit_wad->LevelLookupLump(lev_current_idx, after);
 
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
 		Warning("Missing %s lump -- level structure is broken\n", after);
 
-		exist = edit_wad->LevelLastLump(lev_current_idx);
+		exist = instance::edit_wad->LevelLastLump(lev_current_idx);
 	}
 
-	edit_wad->InsertPoint(exist + 1);
+	instance::edit_wad->InsertPoint(exist + 1);
 
-	edit_wad->AddLump(name)->Finish();
+	instance::edit_wad->AddLump(name)->Finish();
 }
 
 
@@ -1953,10 +1953,10 @@ build_result_e SaveLevel(node_t *root_node)
 {
 	// Note: root_node may be NULL
 
-	edit_wad->BeginWrite();
+	instance::edit_wad->BeginWrite();
 
 	// remove any existing GL-Nodes
-	edit_wad->RemoveGLNodes(lev_current_idx);
+	instance::edit_wad->RemoveGLNodes(lev_current_idx);
 
 	// ensure all necessary level lumps are present
 	AddMissingLump("SEGS",     "VERTEXES");
@@ -2042,7 +2042,7 @@ build_result_e SaveLevel(node_t *root_node)
 		UpdateGLMarker(gl_marker);
 	}
 
-	edit_wad->EndWrite();
+	instance::edit_wad->EndWrite();
 
 	if (lev_overflows > 0)
 	{
@@ -2058,10 +2058,10 @@ build_result_e SaveLevel(node_t *root_node)
 
 build_result_e SaveUDMF(node_t *root_node)
 {
-	edit_wad->BeginWrite();
+	instance::edit_wad->BeginWrite();
 
 	// remove any existing ZNODES lump
-	edit_wad->RemoveZNodes(lev_current_idx);
+	instance::edit_wad->RemoveZNodes(lev_current_idx);
 
 	if (num_real_lines >= 0)
 	{
@@ -2070,7 +2070,7 @@ build_result_e SaveUDMF(node_t *root_node)
 		SaveXGL3Format(root_node);
 	}
 
-	edit_wad->EndWrite();
+	instance::edit_wad->EndWrite();
 
 	if (lev_overflows > 0)
 	{
@@ -2192,12 +2192,12 @@ void ZLibFinishLump(void)
 
 Lump_c * FindLevelLump(const char *name)
 {
-	int idx = edit_wad->LevelLookupLump(lev_current_idx, name);
+	int idx = instance::edit_wad->LevelLookupLump(lev_current_idx, name);
 
 	if (idx < 0)
 		return NULL;
 
-	return edit_wad->GetLump(idx);
+	return instance::edit_wad->GetLump(idx);
 }
 
 
@@ -2208,20 +2208,20 @@ Lump_c * CreateLevelLump(const char *name, int max_size)
 
 	if (lump)
 	{
-		edit_wad->RecreateLump(lump, max_size);
+		instance::edit_wad->RecreateLump(lump, max_size);
 	}
 	else
 	{
-		int last_idx = edit_wad->LevelLastLump(lev_current_idx);
+		int last_idx = instance::edit_wad->LevelLastLump(lev_current_idx);
 
 		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
 		// after the last known lump of the level.
 		if (instance::Level_format != MapFormat::udmf)
 			last_idx++;
 
-		edit_wad->InsertPoint(last_idx);
+		instance::edit_wad->InsertPoint(last_idx);
 
-		lump = edit_wad->AddLump(name, max_size);
+		lump = instance::edit_wad->AddLump(name, max_size);
 	}
 
 	return lump;
@@ -2242,11 +2242,11 @@ Lump_c * CreateGLMarker()
 		name_buf = "GL_LEVEL";
 	}
 
-	int last_idx = edit_wad->LevelLastLump(lev_current_idx);
+	int last_idx = instance::edit_wad->LevelLastLump(lev_current_idx);
 
-	edit_wad->InsertPoint(last_idx + 1);
+	instance::edit_wad->InsertPoint(last_idx + 1);
 
-	Lump_c *marker = edit_wad->AddLump(name_buf);
+	Lump_c *marker = instance::edit_wad->AddLump(name_buf);
 
 	marker->Finish();
 
@@ -2273,7 +2273,7 @@ build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 		return BUILD_Cancelled;
 
 	lev_current_idx   = lev_idx;
-	lev_current_start = edit_wad->LevelHeader(lev_idx);
+	lev_current_start = instance::edit_wad->LevelHeader(lev_idx);
 
 	LoadLevel();
 

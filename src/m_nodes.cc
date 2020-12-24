@@ -334,7 +334,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
-	int num_levels = edit_wad->LevelCount();
+	int num_levels = instance::edit_wad->LevelCount();
 	SYS_ASSERT(num_levels > 0);
 
 	GB_PrintMsg("\n");
@@ -347,7 +347,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(edit_wad, n);
+		LoadLevelNum(instance::edit_wad, n);
 
 		ret = AJBSP_BuildLevel(info, n);
 
@@ -418,13 +418,13 @@ void BuildNodesAfterSave(int lev_idx)
 
 void CMD_BuildAllNodes()
 {
-	if (! edit_wad)
+	if (!instance::edit_wad)
 	{
 		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
+	if (instance::edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot build nodes on a read-only file.");
 		return;
@@ -452,7 +452,7 @@ void CMD_BuildAllNodes()
 
 
 	// this probably cannot happen, but check anyway
-	if (edit_wad->LevelCount() == 0)
+	if (instance::edit_wad->LevelCount() == 0)
 	{
 		DLG_Notify("Cannot build nodes: no levels found!");
 		return;
@@ -510,7 +510,7 @@ void CMD_BuildAllNodes()
 
 
 	// reload the previous level
-	LoadLevel(edit_wad, CurLevel);
+	LoadLevel(instance::edit_wad, CurLevel);
 }
 
 

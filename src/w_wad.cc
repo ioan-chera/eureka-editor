@@ -34,8 +34,8 @@
 #include "w_wad.h"
 
 
-Wad_file * game_wad;
-Wad_file * edit_wad;
+Wad_file * instance::game_wad;
+Wad_file * instance::edit_wad;
 
 std::vector<Wad_file *> master_dir;
 

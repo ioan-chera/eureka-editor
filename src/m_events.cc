@@ -980,7 +980,7 @@ void M_LoadOperationMenus()
 	if (! M_ParseOperationFile())
 	{
 		no_operation_cfg = true;
-		DLG_Notify("Installation problem: cannot find \"operaitons.cfg\" file!");
+		DLG_Notify("Installation problem: cannot find \"operations.cfg\" file!");
 	}
 }
 

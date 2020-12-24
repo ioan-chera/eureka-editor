@@ -487,7 +487,7 @@ static SString DetermineLevel()
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? edit_wad : game_wad;
+		Wad_file *wad = (pass == 0) ? instance::edit_wad : instance::game_wad;
 
 		if (! wad)
 			continue;
@@ -792,12 +792,12 @@ static void LoadResourceFile(const char *filename)
 	}
 
 	if (! Wad_file::Validate(filename))
-		FatalError("Resource does not exist: %s\n", filename);
+		ThrowException("Resource does not exist: %s\n", filename);
 
 	Wad_file *wad = Wad_file::Open(filename, WadOpenMode_read);
 
 	if (! wad)
-		FatalError("Cannot load resource: %s\n", filename);
+		ThrowException("Cannot load resource: %s\n", filename);
 
 	MasterDir_Add(wad);
 }
@@ -807,11 +807,11 @@ static void Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	game_wad = Wad_file::Open(instance::Iwad_name, WadOpenMode_read);
-	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", instance::Iwad_name.c_str());
+	instance::game_wad = Wad_file::Open(instance::Iwad_name, WadOpenMode_read);
+	if (!instance::game_wad)
+		ThrowException("Failed to open game IWAD: %s\n", instance::Iwad_name.c_str());
 
-	MasterDir_Add(game_wad);
+	MasterDir_Add(instance::game_wad);
 }
 
 
@@ -890,8 +890,8 @@ void Main_LoadResources()
 	ReadPortInfo();
 
 	// reset the master directory
-	if (edit_wad)
-		MasterDir_Remove(edit_wad);
+	if (instance::edit_wad)
+		MasterDir_Remove(instance::edit_wad);
 
 	MasterDir_CloseAll();
 
@@ -903,8 +903,8 @@ void Main_LoadResources()
 		LoadResourceFile(resource.c_str());
 	}
 
-	if (edit_wad)
-		MasterDir_Add(edit_wad);
+	if (instance::edit_wad)
+		MasterDir_Add(instance::edit_wad);
 
 	// finally, load textures and stuff...
 	W_LoadPalette();
@@ -1082,20 +1082,20 @@ int main(int argc, char *argv[])
 
 			Pwad_name = global::Pwad_list[0];
 
-			edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
-			if (! edit_wad)
+			instance::edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
+			if (!instance::edit_wad)
 				ThrowException("Cannot load pwad: %s\n", Pwad_name.c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			MasterDir_Add(edit_wad);
+			MasterDir_Add(instance::edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!instance::Iwad_name.empty() || !instance::Level_name.empty()))
 		{
 			if (M_TryOpenMostRecent())
 			{
-				MasterDir_Add(edit_wad);
+				MasterDir_Add(instance::edit_wad);
 			}
 		}
 
@@ -1107,9 +1107,9 @@ int main(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (edit_wad)
+		if (instance::edit_wad)
 		{
-			if (! M_ParseEurekaLump(edit_wad, true /* keep_cmd_line_args */))
+			if (! M_ParseEurekaLump(instance::edit_wad, true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				RemoveEditWad();
@@ -1133,7 +1133,7 @@ int main(int argc, char *argv[])
 
 		LogPrintf("Loading initial map : %s\n", instance::Level_name.c_str());
 
-		LoadLevel(edit_wad ? edit_wad : game_wad, instance::Level_name);
+		LoadLevel(instance::edit_wad ? instance::edit_wad : instance::game_wad, instance::Level_name);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

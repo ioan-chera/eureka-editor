@@ -304,12 +304,12 @@ static SString GrabWadNames(const port_path_info_t *info)
 	}
 
 	// always specify the iwad
-	AppendWadName(wad_names, game_wad->PathName(), "-iwad");
+	AppendWadName(wad_names, instance::game_wad->PathName(), "-iwad");
 
 	// add any resource wads
 	for (const Wad_file *wad : master_dir)
 	{
-		if (wad == game_wad || wad == edit_wad)
+		if (wad == instance::game_wad || wad == instance::edit_wad)
 			continue;
 
 		AppendWadName(wad_names, wad->PathName(),
@@ -322,8 +322,8 @@ static SString GrabWadNames(const port_path_info_t *info)
 	}
 
 	// the current PWAD, if exists, must be last
-	if (edit_wad)
-		AppendWadName(wad_names, edit_wad->PathName(), !has_file ? "-file" : NULL);
+	if (instance::edit_wad)
+		AppendWadName(wad_names, instance::edit_wad->PathName(), !has_file ? "-file" : NULL);
 
 	return wad_names;
 }
