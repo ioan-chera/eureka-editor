@@ -196,7 +196,7 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 	Level_format = dialog->map_format;
 	Udmf_namespace = dialog->name_space;
 
-	SYS_ASSERT(Level_format != MAPF_INVALID);
+	SYS_ASSERT(Level_format != MapFormat::invalid);
 
 	Resource_list.clear();
 
@@ -1014,13 +1014,13 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 
 	LoadHeader();
 
-	if (Level_format == MAPF_UDMF)
+	if (Level_format == MapFormat::udmf)
 	{
 		UDMF_LoadLevel();
 	}
 	else
 	{
-		if (Level_format == MAPF_Hexen)
+		if (Level_format == MapFormat::hexen)
 			LoadThings_Hexen();
 		else
 			LoadThings();
@@ -1029,7 +1029,7 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 		LoadSectors();
 		LoadSideDefs();
 
-		if (Level_format == MAPF_Hexen)
+		if (Level_format == MapFormat::hexen)
 		{
 			LoadLineDefs_Hexen();
 
@@ -1633,14 +1633,14 @@ static void SaveLevel(const SString &level)
 
 	SaveHeader(level);
 
-	if (Level_format == MAPF_UDMF)
+	if (Level_format == MapFormat::udmf)
 	{
 		UDMF_SaveLevel();
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
-		if (Level_format == MAPF_Hexen)
+		if (Level_format == MapFormat::hexen)
 		{
 			SaveThings_Hexen();
 			SaveLineDefs_Hexen();
@@ -1663,7 +1663,7 @@ static void SaveLevel(const SString &level)
 		EmptyLump("REJECT");
 		EmptyLump("BLOCKMAP");
 
-		if (Level_format == MAPF_Hexen)
+		if (Level_format == MapFormat::hexen)
 		{
 			SaveBehavior();
 			SaveScripts();

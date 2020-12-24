@@ -584,7 +584,7 @@ static void DoBeginDrag()
 		{
 			edit.drag_thing_num = edit.clicked.num;
 			edit.drag_thing_floorh = static_cast<float>(edit.drag_start_z);
-			edit.drag_thing_up_down = (Level_format != MAPF_Doom && !grid.snap);
+			edit.drag_thing_up_down = (Level_format != MapFormat::doom && !grid.snap);
 
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
@@ -1202,7 +1202,7 @@ void CMD_MoveObjects_Dialog()
 
 	bool want_dz = (edit.mode == ObjType::sectors);
 	// can move things vertically in Hexen/UDMF formats
-	if (edit.mode == ObjType::things && Level_format != MAPF_Doom)
+	if (edit.mode == ObjType::things && Level_format != MapFormat::doom)
 		want_dz = true;
 
 	UI_MoveDialog * dialog = new UI_MoveDialog(want_dz);

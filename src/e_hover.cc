@@ -1066,7 +1066,7 @@ Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 	int    best = -1;
 	double best_dist = 9e9;
 
-	double too_small = (Level_format == MAPF_UDMF) ? 0.2 : 4.0;
+	double too_small = (Level_format == MapFormat::udmf) ? 0.2 : 4.0;
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{

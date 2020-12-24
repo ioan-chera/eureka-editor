@@ -119,14 +119,12 @@
 
 typedef std::vector< const char * > string_list_t;
 
-
-enum map_format_e
+enum class MapFormat
 {
-	MAPF_INVALID = 0,
-
-	MAPF_Doom,
-	MAPF_Hexen,
-	MAPF_UDMF
+	invalid,
+	doom,
+	hexen,
+	udmf
 };
 
 
@@ -150,7 +148,7 @@ extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
 extern SString Port_name;   // Name of source port "vanilla", "boom", ...
 extern SString Level_name;  // Name of map lump we are editing
 
-extern map_format_e Level_format;   // format of current map
+extern MapFormat Level_format;   // format of current map
 extern SString  Udmf_namespace; // for UDMF, the current namespace
 
 extern SString config_file; // Name of the configuration file, or NULL

@@ -234,7 +234,7 @@ public:
 	// returns a lump index, -1 if not found
 	int LevelLookupLump(int lev_num, const char *name);
 
-	map_format_e LevelFormat(int lev_num);
+	MapFormat LevelFormat(int lev_num);
 
 	void  SortLevels();
 

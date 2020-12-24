@@ -676,7 +676,7 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	map_format(MAPF_INVALID), name_space()
+	map_format(MapFormat::invalid), name_space()
 {
 	callback(close_callback, this);
 
@@ -910,9 +910,9 @@ void UI_ProjectSetup::PopulatePort()
 
 void UI_ProjectSetup::PopulateMapFormat()
 {
-	map_format_e prev_fmt = map_format;
+	MapFormat prev_fmt = map_format;
 
-	if (prev_fmt == MAPF_INVALID)
+	if (prev_fmt == MapFormat::invalid)
 		prev_fmt = Level_format;
 
 
@@ -921,7 +921,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	// if no game, format doesn't matter
 	if (game.empty())
 	{
-		map_format = MAPF_Doom;
+		map_format = MapFormat::doom;
 		name_space = "";
 		return;
 	}
@@ -946,24 +946,24 @@ void UI_ProjectSetup::PopulateMapFormat()
 	int menu_value = 0;
 	int entry_id = 0;
 
-	if (usable_formats & (1 << MAPF_Doom))
+	if (usable_formats & (1 << static_cast<int>(MapFormat::doom)))
 	{
 		format_choice->add("Doom Format");
 		entry_id++;
 	}
 
-	if (usable_formats & (1 << MAPF_Hexen))
+	if (usable_formats & (1 << static_cast<int>(MapFormat::hexen)))
 	{
-		if (prev_fmt == MAPF_Hexen)
+		if (prev_fmt == MapFormat::hexen)
 			menu_value = entry_id;
 
 		format_choice->add("Hexen Format");
 		entry_id++;
 	}
 
-	if (udmf_testing && (usable_formats & (1 << MAPF_UDMF)))
+	if (udmf_testing && (usable_formats & (1 << static_cast<int>(MapFormat::udmf))))
 	{
-		if (prev_fmt == MAPF_UDMF)
+		if (prev_fmt == MapFormat::udmf)
 			menu_value = entry_id;
 
 		format_choice->add("UDMF");
@@ -985,7 +985,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 
 	// don't leave namespace as "" when chosen format is UDMF.
 	// [ this is to handle broken config files somewhat sanely ]
-	if (name_space.empty() && map_format == MAPF_UDMF)
+	if (name_space.empty() && map_format == MapFormat::udmf)
 		name_space = "Hexen";
 }
 
@@ -1117,11 +1117,11 @@ void UI_ProjectSetup::format_callback(Fl_Choice *w, void *data)
 	const char * fmt_str = w->mvalue()->text;
 
 	if (strstr(fmt_str, "UDMF"))
-		that->map_format = MAPF_UDMF;
+		that->map_format = MapFormat::udmf;
 	else if (strstr(fmt_str, "Hexen"))
-		that->map_format = MAPF_Hexen;
+		that->map_format = MapFormat::hexen;
 	else
-		that->map_format = MAPF_Doom;
+		that->map_format = MapFormat::doom;
 
 	that->PopulateNamespaces();
 }

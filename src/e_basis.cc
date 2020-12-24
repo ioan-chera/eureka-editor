@@ -85,7 +85,7 @@ SString BA_GetString(int offset)
 
 fixcoord_t MakeValidCoord(double x)
 {
-	if (Level_format == MAPF_UDMF)
+	if (Level_format == MapFormat::udmf)
 		return TO_COORD(x);
 
 	// in standard format, coordinates must be integral

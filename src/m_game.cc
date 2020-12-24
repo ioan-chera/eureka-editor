@@ -140,15 +140,15 @@ void M_PrepareConfigVariables()
 
 	switch (Level_format)
 	{
-		case MAPF_Doom:
+		case MapFormat::doom:
 			parse_vars["$MAP_FORMAT"] = "DOOM";
 			break;
 
-		case MAPF_Hexen:
+		case MapFormat::hexen:
 			parse_vars["$MAP_FORMAT"] = "HEXEN";
 			break;
 
-		case MAPF_UDMF:
+		case MapFormat::udmf:
 			parse_vars["$MAP_FORMAT"] = "UDMF";
 			break;
 
@@ -246,13 +246,13 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 	for ( ; argc > 0 ; argv++, argc--)
 	{
 		if (y_stricmp(argv[0], "DOOM") == 0)
-			result |= (1 << MAPF_Doom);
+			result |= (1 << static_cast<int>(MapFormat::doom));
 
 		else if (y_stricmp(argv[0], "HEXEN") == 0)
-			result |= (1 << MAPF_Hexen);
+			result |= (1 << static_cast<int>(MapFormat::hexen));
 
 		else if (y_stricmp(argv[0], "UDMF") == 0)
-			result |= (1 << MAPF_UDMF);
+			result |= (1 << static_cast<int>(MapFormat::udmf));
 
 		else
 			ThrowException("Unknown map format '%s' in definition file.\n", argv[0]);
@@ -1227,9 +1227,9 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 
 	// a bit hacky, maybe should do it a better way...
 	if (strcmp(game, "hexen") == 0)
-		return (1 << MAPF_Hexen);
+		return (1 << static_cast<int>(MapFormat::hexen));
 
-	return (1 << MAPF_Doom);
+	return (1 << static_cast<int>(MapFormat::doom));
 }
 
 

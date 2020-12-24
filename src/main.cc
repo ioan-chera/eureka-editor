@@ -86,7 +86,7 @@ SString Game_name;
 SString Port_name;
 SString Level_name;
 
-map_format_e Level_format;
+MapFormat Level_format;
 SString  Udmf_namespace;
 
 

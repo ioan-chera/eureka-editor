@@ -488,22 +488,22 @@ int Wad_file::LevelHeader(int lev_num)
 }
 
 
-map_format_e Wad_file::LevelFormat(int lev_num)
+MapFormat Wad_file::LevelFormat(int lev_num)
 {
 	int start = LevelHeader(lev_num);
 
 	if (directory[start+1].lump->name.noCaseEqual("TEXTMAP"))
-		return MAPF_UDMF;
+		return MapFormat::udmf;
 
 	if (start + LL_BEHAVIOR < NumLumps())
 	{
 		const SString &name = GetLump(start + LL_BEHAVIOR)->Name();
 
 		if (name.noCaseEqual("BEHAVIOR"))
-			return MAPF_Hexen;
+			return MapFormat::hexen;
 	}
 
-	return MAPF_Doom;
+	return MapFormat::doom;
 }
 
 

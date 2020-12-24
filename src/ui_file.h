@@ -192,7 +192,7 @@ public:
 	SString game;
 	SString port;
 
-	map_format_e map_format;
+	MapFormat map_format;
 	SString  name_space;
 
 	SString res[RES_NUM];
