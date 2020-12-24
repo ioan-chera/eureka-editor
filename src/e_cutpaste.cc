@@ -819,7 +819,7 @@ void CMD_CopyAndPaste()
 
 void CMD_Clipboard_Cut()
 {
-	if (main_win->ClipboardOp(EditCommand::cut))
+	if (instance::main_win->ClipboardOp(EditCommand::cut))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -840,7 +840,7 @@ void CMD_Clipboard_Cut()
 
 void CMD_Clipboard_Copy()
 {
-	if (main_win->ClipboardOp(EditCommand::copy))
+	if (instance::main_win->ClipboardOp(EditCommand::copy))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -859,7 +859,7 @@ void CMD_Clipboard_Copy()
 
 void CMD_Clipboard_Paste()
 {
-	if (main_win->ClipboardOp(EditCommand::paste))
+	if (instance::main_win->ClipboardOp(EditCommand::paste))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -1218,7 +1218,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 
 void CMD_Delete()
 {
-	if (main_win->ClipboardOp(EditCommand::del))
+	if (instance::main_win->ClipboardOp(EditCommand::del))
 		return;
 
 	SelectHighlight unselect = SelectionOrHighlight();

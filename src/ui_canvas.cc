@@ -171,7 +171,7 @@ void UI_Canvas::draw()
 
 	// Note: this crud is a workaround for retina displays on MacOS
 	Fl::use_high_res_GL(true);
-	int pix = I_ROUND(main_win->canvas->pixels_per_unit());
+	int pix = I_ROUND(instance::main_win->canvas->pixels_per_unit());
 	Fl::use_high_res_GL(false);
 
 	glLoadIdentity();

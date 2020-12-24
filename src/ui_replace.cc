@@ -428,7 +428,7 @@ UI_FindAndReplace::~UI_FindAndReplace()
 
 void UI_FindAndReplace::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->HideSpecialPanel();
+	instance::main_win->HideSpecialPanel();
 }
 
 
@@ -1167,7 +1167,7 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 
 		if (box->find_pic->Selected())
 		{
-			main_win->BrowserMode(box->GetKind());
+			instance::main_win->BrowserMode(box->GetKind());
 
 			Fl::focus(box->find_match);
 			box->find_match->redraw();
@@ -1181,7 +1181,7 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 
 		if (box->rep_pic->Selected())
 		{
-			main_win->BrowserMode(box->GetKind());
+			instance::main_win->BrowserMode(box->GetKind());
 
 			Fl::focus(box->rep_value);
 			box->rep_value->redraw();

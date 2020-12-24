@@ -76,7 +76,7 @@ void CMD_TH_SpinThings(void)
 
 	gDocument.basis.end();
 
-	main_win->thing_box->UpdateField(Thing::F_ANGLE);
+	instance::main_win->thing_box->UpdateField(Thing::F_ANGLE);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

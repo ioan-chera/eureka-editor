@@ -642,9 +642,9 @@ static void Main_SetupFLTK()
 //
 static void Main_OpenWindow()
 {
-	main_win = new UI_MainWindow();
+	instance::main_win = new UI_MainWindow();
 
-	main_win->label("Eureka v" EUREKA_VERSION);
+	instance::main_win->label("Eureka v" EUREKA_VERSION);
 
 	// show window (pass some dummy arguments)
 	{
@@ -654,9 +654,9 @@ static void Main_OpenWindow()
 		argv[0] = StringDup("Eureka.exe");
 		argv[1] = NULL;
 
-		main_win->show(argc, argv);
+		instance::main_win->show(argc, argv);
 #ifndef NO_OPENGL
-		main_win->canvas->show();  // needed for OpenGL
+		instance::main_win->canvas->show();  // needed for OpenGL
 #endif
 		global::app_has_focus = true;
 	}
@@ -667,7 +667,7 @@ static void Main_OpenWindow()
 		delete Fl::scheme_bg_;
 		Fl::scheme_bg_ = NULL;
 
-		main_win->image(NULL);
+		instance::main_win->image(NULL);
 	}
 
 	Fl::check();
@@ -675,7 +675,7 @@ static void Main_OpenWindow()
 	InitAboutDialog();
 
 	if (config::begin_maximized)
-		main_win->Maximize();
+		instance::main_win->Maximize();
 
 	log_viewer = new UI_LogViewer();
 
@@ -683,12 +683,12 @@ static void Main_OpenWindow()
 
 	Fl::add_handler(Main_key_handler);
 
-	main_win->BrowserMode(0);
-	main_win->NewEditMode(edit.mode);
+	instance::main_win->BrowserMode(0);
+	instance::main_win->NewEditMode(edit.mode);
 
 	// allow processing keyboard events, even before the mouse
 	// pointer has entered our window.
-	Fl::focus(main_win->canvas);
+	Fl::focus(instance::main_win->canvas);
 
 	Fl::check();
 }
@@ -772,9 +772,9 @@ void Main_Loop()
 		}
 
 		// TODO: handle these in a better way
-		main_win->UpdateTitle(MadeChanges ? '*' : 0);
+		instance::main_win->UpdateTitle(MadeChanges ? '*' : 0);
 
-		main_win->scroll->UpdateBounds();
+		instance::main_win->scroll->UpdateBounds();
 
 		if (edit.Selected->empty())
 			edit.error_mode = false;
@@ -920,15 +920,15 @@ void Main_LoadResources()
 	// reset sector info (for slopes and 3D floors)
 	Subdiv_InvalidateAll();
 
-	if (main_win)
+	if (instance::main_win)
 	{
 		// kill all loaded OpenGL images
-		if (main_win->canvas)
-			main_win->canvas->DeleteContext();
+		if (instance::main_win->canvas)
+			instance::main_win->canvas->DeleteContext();
 
-		main_win->UpdateGameInfo();
+		instance::main_win->UpdateGameInfo();
 
-		main_win->browser->Populate();
+		instance::main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
 		Props_LoadValues();

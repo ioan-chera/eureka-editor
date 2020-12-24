@@ -1573,7 +1573,7 @@ void UI_Preferences::SaveValues()
 		Fl::background2(255, 255, 255);
 		Fl::foreground(0, 0, 0);
 
-		main_win->redraw();
+		instance::main_win->redraw();
 	}
 	else if (config::gui_color_set == 2)
 	{
@@ -1584,7 +1584,7 @@ void UI_Preferences::SaveValues()
 		Fl::foreground (RGB_RED(config::gui_custom_fg), RGB_GREEN(config::gui_custom_fg),
 						RGB_BLUE(config::gui_custom_fg));
 
-		main_win->redraw();
+		instance::main_win->redraw();
 	}
 
 	/* General Tab */
@@ -1616,7 +1616,7 @@ void UI_Preferences::SaveValues()
 		config::browser_small_tex = new_small_tex;
 		config::browser_combine_tex = new_combo;
 
-		main_win->browser->Populate();
+		instance::main_win->browser->Populate();
 	}
 
 	// decode the user ratio
@@ -1628,7 +1628,7 @@ void UI_Preferences::SaveValues()
 	if (config::grid_ratio_low > config::grid_ratio_high)
 		std::swap(config::grid_ratio_low, config::grid_ratio_high);
 
-	main_win->info_bar->UpdateRatio();
+	instance::main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 

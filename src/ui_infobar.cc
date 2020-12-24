@@ -267,7 +267,7 @@ void UI_InfoBar::ratio_callback(Fl_Widget *w, void *data)
 	Fl_Menu_Button *ratio_lock = (Fl_Menu_Button *)w;
 
 	grid.ratio = ratio_lock->value();
-	main_win->info_bar->UpdateRatio();
+	instance::main_win->info_bar->UpdateRatio();
 }
 
 
@@ -293,7 +293,7 @@ void UI_InfoBar::SetMouse(double mx, double my)
 {
 	// TODO this method should go away
 
-	main_win->status_bar->redraw();
+	instance::main_win->status_bar->redraw();
 }
 
 
@@ -542,7 +542,7 @@ void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 	}
 	else
 	{
-		main_win->canvas->DragDelta(&dx, &dy);
+		instance::main_win->canvas->DragDelta(&dx, &dy);
 	}
 
 	IB_Coord(cx, cy, "dragging delta x", static_cast<float>(dx));
@@ -721,7 +721,7 @@ void UI_StatusBar::SetStatus(const char *str)
 
 void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...)
 {
-	if (! main_win)
+	if (!instance::main_win)
 		return;
 
 	va_list arg_ptr;
@@ -734,16 +734,16 @@ void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	main_win->status_bar->SetStatus(buffer);
+	instance::main_win->status_bar->SetStatus(buffer);
 }
 
 
 void Status_Clear()
 {
-	if (! main_win)
+	if (!instance::main_win)
 		return;
 
-	main_win->status_bar->SetStatus("");
+	instance::main_win->status_bar->SetStatus("");
 }
 
 //--- editor settings ---

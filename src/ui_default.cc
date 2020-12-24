@@ -177,7 +177,7 @@ UI_DefaultProps::~UI_DefaultProps()
 
 void UI_DefaultProps::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->HideSpecialPanel();
+	instance::main_win->HideSpecialPanel();
 }
 
 
@@ -227,7 +227,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			main_win->BrowserMode('T');
+			instance::main_win->BrowserMode('T');
 
 		return;
 	}
@@ -253,7 +253,7 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			main_win->BrowserMode('F');
+			instance::main_win->BrowserMode('F');
 
 		return;
 	}
@@ -334,7 +334,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 	if (w == box->th_sprite)
 	{
-		main_win->BrowserMode('O');
+		instance::main_win->BrowserMode('O');
 		return;
 	}
 
@@ -586,8 +586,8 @@ void Props_WriteUser(std::ostream &os)
 
 void Props_LoadValues()
 {
-	if (main_win)
-		main_win->props_box->LoadValues();
+	if (instance::main_win)
+		instance::main_win->props_box->LoadValues();
 }
 
 

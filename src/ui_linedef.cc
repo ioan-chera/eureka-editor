@@ -285,7 +285,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 		box->desc->value(info.desc.c_str());
 	}
 
-	main_win->browser->UpdateGenType(new_type);
+	instance::main_win->browser->UpdateGenType(new_type);
 }
 
 
@@ -671,13 +671,13 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		main_win->BrowserMode('L');
+		instance::main_win->BrowserMode('L');
 		return;
 	}
 
 	if (w == box->gen)
 	{
-		main_win->BrowserMode('G');
+		instance::main_win->BrowserMode('G');
 		return;
 	}
 }
@@ -795,7 +795,7 @@ void UI_LineBox::UpdateField(int field)
 				desc->value(info.desc.c_str());
 			}
 
-			main_win->browser->UpdateGenType(type_num);
+			instance::main_win->browser->UpdateGenType(type_num);
 		}
 		else
 		{
@@ -803,7 +803,7 @@ void UI_LineBox::UpdateField(int field)
 			desc->value("");
 			choose->label("Choose");
 
-			main_win->browser->UpdateGenType(0);
+			instance::main_win->browser->UpdateGenType(0);
 		}
 	}
 

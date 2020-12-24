@@ -39,7 +39,7 @@
 #define WINDOW_MIN_W  928
 #define WINDOW_MIN_H  640
 
-UI_MainWindow *main_win;
+UI_MainWindow *instance::main_win;
 
 
 //

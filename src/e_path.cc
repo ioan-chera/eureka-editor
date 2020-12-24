@@ -377,7 +377,7 @@ void GoToSelection()
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
-		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = instance::main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
 
 		if (eval <= 0)
 			break;
@@ -391,7 +391,7 @@ void GoToSelection()
 		if (grid.Scale >= 1.0)
 			break;
 
-		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = instance::main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
 
 		if (eval >= 0)
 			break;

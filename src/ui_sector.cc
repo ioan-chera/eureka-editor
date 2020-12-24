@@ -342,7 +342,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			main_win->BrowserMode('F');
+			instance::main_win->BrowserMode('F');
 		return;
 	}
 
@@ -619,7 +619,7 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		main_win->BrowserMode('S');
+		instance::main_win->BrowserMode('S');
 		return;
 	}
 

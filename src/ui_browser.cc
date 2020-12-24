@@ -202,7 +202,7 @@ void Browser_Item::texture_callback(Fl_Widget *w, void *data)
 	const char *tex_name = (const char *)data;
 	SYS_ASSERT(tex_name);
 
-	main_win->BrowsedItem('T', 0, tex_name, Fl::event_state());
+	instance::main_win->BrowsedItem('T', 0, tex_name, Fl::event_state());
 }
 
 
@@ -211,7 +211,7 @@ void Browser_Item::flat_callback(Fl_Widget *w, void *data)
 	const char *flat_name = (const char *)data;
 	SYS_ASSERT(flat_name);
 
-	main_win->BrowsedItem('F', 0, flat_name, Fl::event_state());
+	instance::main_win->BrowsedItem('F', 0, flat_name, Fl::event_state());
 }
 
 
@@ -219,7 +219,7 @@ void Browser_Item::thing_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->BrowsedItem('O', item->number, "", Fl::event_state());
+	instance::main_win->BrowsedItem('O', item->number, "", Fl::event_state());
 }
 
 
@@ -227,7 +227,7 @@ void Browser_Item::line_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->BrowsedItem('L', item->number, "", Fl::event_state());
+	instance::main_win->BrowsedItem('L', item->number, "", Fl::event_state());
 }
 
 
@@ -235,7 +235,7 @@ void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	main_win->BrowsedItem('S', item->number, "", Fl::event_state());
+	instance::main_win->BrowsedItem('S', item->number, "", Fl::event_state());
 }
 
 
@@ -409,7 +409,7 @@ void UI_Browser_Box::search_callback(Fl_Widget *w, void *data)
 
 void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->BrowserMode(0);
+	instance::main_win->BrowserMode(0);
 }
 
 
@@ -1492,7 +1492,7 @@ void UI_Generalized_Box::UpdateGenType(int line_type)
 
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	main_win->BrowserMode(0);
+	instance::main_win->BrowserMode(0);
 }
 
 void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
@@ -1525,7 +1525,7 @@ void UI_Generalized_Box::edit_callback(Fl_Widget *w, void *data)
 	{
 		int line_type = box->ComputeType();
 
-		main_win->BrowsedItem('L', line_type, "", 0);
+		instance::main_win->BrowsedItem('L', line_type, "", 0);
 	}
 	box->in_update = false;
 }
@@ -1627,7 +1627,7 @@ void UI_Browser::SetActive(int new_active)
 	}
 
 	if (new_active == ACTIVE_GENERALIZED)
-		main_win->tile->MinimiseRight();
+		instance::main_win->tile->MinimiseRight();
 }
 
 
@@ -1757,7 +1757,7 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	// show browser if hidden [ and then force the RECENT category ]
 	if (! visible())
 	{
-		main_win->BrowserMode('/');
+		instance::main_win->BrowserMode('/');
 
 		force_recent = true;
 	}
@@ -1857,7 +1857,7 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "open_browser" && tokens.size() >= 2)
 	{
-		main_win->BrowserMode(tokens[1][0]);
+		instance::main_win->BrowserMode(tokens[1][0]);
 		return true;
 	}
 
@@ -1885,12 +1885,12 @@ void UI_Browser::WriteUser(std::ostream &os)
 
 bool Browser_ParseUser(const std::vector<SString> &tokens)
 {
-	if (main_win)
+	if (instance::main_win)
 	{
-		if (main_win->tile->ParseUser(tokens))
+		if (instance::main_win->tile->ParseUser(tokens))
 			return true;
 
-		if (main_win->browser->ParseUser(tokens))
+		if (instance::main_win->browser->ParseUser(tokens))
 			return true;
 	}
 
@@ -1899,10 +1899,10 @@ bool Browser_ParseUser(const std::vector<SString> &tokens)
 
 void Browser_WriteUser(std::ostream &os)
 {
-	if (main_win)
+	if (instance::main_win)
 	{
-		main_win->tile->WriteUser(os);
-		main_win->browser->WriteUser(os);
+		instance::main_win->tile->WriteUser(os);
+		instance::main_win->browser->WriteUser(os);
 	}
 }
 

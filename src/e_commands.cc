@@ -177,7 +177,7 @@ void CMD_Undo()
 	}
 
 	RedrawMap();
-	main_win->UpdatePanelObj();
+	instance::main_win->UpdatePanelObj();
 }
 
 
@@ -190,7 +190,7 @@ void CMD_Redo()
 	}
 
 	RedrawMap();
-	main_win->UpdatePanelObj();
+	instance::main_win->UpdatePanelObj();
 }
 
 
@@ -201,8 +201,8 @@ static void SetGamma(int new_val)
 	W_UpdateGamma();
 
 	// for OpenGL, need to reload all images
-	if (main_win && main_win->canvas)
-		main_win->canvas->DeleteContext();
+	if (instance::main_win && instance::main_win->canvas)
+		instance::main_win->canvas->DeleteContext();
 
 	Status_Set("gamma level %d", config::usegamma);
 
@@ -240,10 +240,10 @@ void CMD_SetVar()
 		Editor_ClearAction();
 
 		int want_vis   = bool_val ? 1 : 0;
-		int is_visible = main_win->browser->visible() ? 1 : 0;
+		int is_visible = instance::main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
-			main_win->BrowserMode('/');
+			instance::main_win->BrowserMode('/');
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -270,7 +270,7 @@ void CMD_SetVar()
 	else if (var_name.noCaseEqual("ratio"))
 	{
 		grid.ratio = CLAMP(0, int_val, 7);
-		main_win->info_bar->UpdateRatio();
+		instance::main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
@@ -312,11 +312,11 @@ void CMD_ToggleVar()
 	{
 		Editor_ClearAction();
 
-		main_win->BrowserMode('/');
+		instance::main_win->BrowserMode('/');
 	}
 	else if (var_name.noCaseEqual("recent"))
 	{
-		main_win->browser->ToggleRecent();
+		instance::main_win->browser->ToggleRecent();
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -347,7 +347,7 @@ void CMD_ToggleVar()
 		else
 			grid.ratio++;
 
-		main_win->info_bar->UpdateRatio();
+		instance::main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
@@ -383,20 +383,20 @@ void CMD_BrowserMode()
 	}
 
 	// if that browser is already open, close it now
-	if (main_win->browser->visible() &&
-		main_win->browser->GetMode() == mode &&
+	if (instance::main_win->browser->visible() &&
+		instance::main_win->browser->GetMode() == mode &&
 		! Exec_HasFlag("/force") &&
 		! Exec_HasFlag("/recent"))
 	{
-		main_win->BrowserMode(0);
+		instance::main_win->BrowserMode(0);
 		return;
 	}
 
-	main_win->BrowserMode(mode);
+	instance::main_win->BrowserMode(mode);
 
 	if (Exec_HasFlag("/recent"))
 	{
-		main_win->browser->ToggleRecent(true /* force */);
+		instance::main_win->browser->ToggleRecent(true /* force */);
 	}
 }
 
@@ -413,7 +413,7 @@ void CMD_Scroll()
 		return;
 	}
 
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
 
 	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
 	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
@@ -436,7 +436,7 @@ void CMD_NAV_Scroll_Left()
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
 	edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Left_release);
@@ -457,7 +457,7 @@ void CMD_NAV_Scroll_Right()
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
 	edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Right_release);
@@ -478,7 +478,7 @@ void CMD_NAV_Scroll_Up()
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
 	edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Up_release);
@@ -499,7 +499,7 @@ void CMD_NAV_Scroll_Down()
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
 	edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(EXEC_CurKey, &NAV_Scroll_Down_release);
@@ -620,7 +620,7 @@ static void DoBeginDrag()
 
 	Editor_SetAction(ACT_DRAG);
 
-	main_win->canvas->redraw();
+	instance::main_win->canvas->redraw();
 }
 
 
@@ -635,7 +635,7 @@ static void ACT_SelectBox_release(void)
 
 	// a mere click and release will unselect everything
 	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-	if (! main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	if (!instance::main_win->canvas->SelboxGet(x1, y1, x2, y2))
 	{
 		ExecuteCommand("UnselectAll");
 		return;
@@ -666,7 +666,7 @@ static void ACT_Drag_release(void)
 
 	// note: DragDelta needs edit.dragged
 	double dx, dy;
-	main_win->canvas->DragDelta(&dx, &dy);
+	instance::main_win->canvas->DragDelta(&dx, &dy);
 
 	Objid dragged(edit.dragged);
 	edit.dragged.clear();
@@ -924,7 +924,7 @@ void Transform_Update()
 			break;
 	}
 
-	main_win->canvas->redraw();
+	instance::main_win->canvas->redraw();
 }
 
 
@@ -1041,7 +1041,7 @@ void CMD_WHEEL_Scroll()
 	float delta_x = static_cast<float>(wheel_dx);
 	float delta_y = static_cast<float>(0 - wheel_dy);
 
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
 
 	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
@@ -1305,7 +1305,7 @@ void CMD_GRID_Zoom()
 
 void CMD_BR_CycleCategory()
 {
-	if (! main_win->browser->visible())
+	if (!instance::main_win->browser->visible())
 	{
 		Beep("Browser not open");
 		return;
@@ -1313,25 +1313,25 @@ void CMD_BR_CycleCategory()
 
 	int dir = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
 
-	main_win->browser->CycleCategory(dir);
+	instance::main_win->browser->CycleCategory(dir);
 }
 
 
 void CMD_BR_ClearSearch()
 {
-	if (! main_win->browser->visible())
+	if (!instance::main_win->browser->visible())
 	{
 		Beep("Browser not open");
 		return;
 	}
 
-	main_win->browser->ClearSearchBox();
+	instance::main_win->browser->ClearSearchBox();
 }
 
 
 void CMD_BR_Scroll()
 {
-	if (! main_win->browser->visible())
+	if (!instance::main_win->browser->visible())
 	{
 		Beep("Browser not open");
 		return;
@@ -1345,25 +1345,25 @@ void CMD_BR_Scroll()
 
 	int delta = atoi(EXEC_Param[0]);
 
-	main_win->browser->Scroll(delta);
+	instance::main_win->browser->Scroll(delta);
 }
 
 
 void CMD_DefaultProps()
 {
-	main_win->ShowDefaultProps();
+	instance::main_win->ShowDefaultProps();
 }
 
 
 void CMD_FindDialog()
 {
-	main_win->ShowFindAndReplace();
+	instance::main_win->ShowFindAndReplace();
 }
 
 
 void CMD_FindNext()
 {
-	main_win->find_box->FindNext();
+	instance::main_win->find_box->FindNext();
 }
 
 

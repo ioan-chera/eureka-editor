@@ -153,9 +153,10 @@ private:
 	static void quit_callback(Fl_Widget *w, void *data);
 };
 
-
-extern UI_MainWindow * main_win;
-
+namespace instance
+{
+	extern UI_MainWindow *main_win;
+}
 
 //------------------------------------------------------------------------
 

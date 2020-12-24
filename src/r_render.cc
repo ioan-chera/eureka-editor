@@ -632,8 +632,8 @@ void Render3D_Draw(int ox, int oy, int ow, int oh)
 
 bool Render3D_Query(Objid& hl, int sx, int sy)
 {
-	int ow = main_win->canvas->w();
-	int oh = main_win->canvas->h();
+	int ow = instance::main_win->canvas->w();
+	int oh = instance::main_win->canvas->h();
 
 #ifdef NO_OPENGL
 	// in OpenGL mode, UI_Canvas is a window and that means the
@@ -724,22 +724,22 @@ void Render3D_Enable(bool _enable)
 	edit.dragged.clear();
 
 	// give keyboard focus to the appropriate large widget
-	Fl::focus(main_win->canvas);
+	Fl::focus(instance::main_win->canvas);
 
-	main_win->scroll->UpdateRenderMode();
-	main_win->info_bar->UpdateSecRend();
+	instance::main_win->scroll->UpdateRenderMode();
+	instance::main_win->info_bar->UpdateSecRend();
 
 	if (edit.render3d)
 	{
-		main_win->info_bar->SetMouse(r_view.x, r_view.y);
+		instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 
 		// TODO: ideally query this, like code in PointerPos
 		r_view.mouse_x = r_view.mouse_y = -1;
 	}
 	else
 	{
-		main_win->canvas->PointerPos();
-		main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+		instance::main_win->canvas->PointerPos();
+		instance::main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 	}
 
 	RedrawMap();
@@ -795,14 +795,14 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 		r_view.gravity = false;
 	}
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 
 
 static void DragSectors_Update()
 {
-	float ow = static_cast<float>(main_win->canvas->w());
+	float ow = static_cast<float>(instance::main_win->canvas->w());
 	float x_slope = 100.0f / config::render_pixel_aspect;
 
 	float factor = static_cast<float>(CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
@@ -854,7 +854,7 @@ void Render3D_DragSectors()
 
 static void DragThings_Update()
 {
-	float ow = static_cast<float>(main_win->canvas->w());
+	float ow = static_cast<float>(instance::main_win->canvas->w());
 //	float oh = main_win->canvas->h();
 
 	float x_slope = 100.0f / config::render_pixel_aspect;
@@ -1022,8 +1022,8 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		if (edit.mode == ObjType::things)
 			DragThings_Update();
 
-		main_win->canvas->redraw();
-		main_win->status_bar->redraw();
+		instance::main_win->canvas->redraw();
+		instance::main_win->status_bar->redraw();
 		return;
 	}
 
@@ -1048,10 +1048,10 @@ void Render3D_UpdateHighlight()
 			edit.highlight = current_hl;
 	}
 
-	main_win->canvas->UpdateHighlight();
-	main_win->canvas->redraw();
+	instance::main_win->canvas->UpdateHighlight();
+	instance::main_win->canvas->redraw();
 
-	main_win->status_bar->redraw();
+	instance::main_win->status_bar->redraw();
 }
 
 
@@ -1102,7 +1102,7 @@ void Render3D_Navigate()
 		r_view.SetAngle(static_cast<float>(r_view.angle + dang));
 	}
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 
@@ -1592,7 +1592,7 @@ void R3D_Forward()
 	r_view.x += r_view.Cos * dist;
 	r_view.y += r_view.Sin * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 
@@ -1603,7 +1603,7 @@ void R3D_Backward()
 	r_view.x -= r_view.Cos * dist;
 	r_view.y -= r_view.Sin * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 
@@ -1614,7 +1614,7 @@ void R3D_Left()
 	r_view.x -= r_view.Sin * dist;
 	r_view.y += r_view.Cos * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 
@@ -1625,7 +1625,7 @@ void R3D_Right()
 	r_view.x += r_view.Sin * dist;
 	r_view.y -= r_view.Cos * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 
@@ -1991,7 +1991,7 @@ void R3D_WHEEL_Move()
 	r_view.x += speed * (r_view.Cos * dy + r_view.Sin * dx);
 	r_view.y += speed * (r_view.Sin * dy - r_view.Cos * dx);
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap();
 }
 

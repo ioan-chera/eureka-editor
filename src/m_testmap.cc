@@ -396,7 +396,7 @@ void CMD_TestMap()
 
 	Status_Set("TESTING MAP");
 
-	main_win->redraw();
+	instance::main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 
@@ -419,7 +419,7 @@ void CMD_TestMap()
 		FileChangeDir(old_dir);
 	}
 
-	main_win->redraw();
+	instance::main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 }

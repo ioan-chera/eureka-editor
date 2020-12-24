@@ -318,7 +318,7 @@ int UI_Pic::handle(int event)
 	switch (event)
 	{
 		case FL_ENTER:
-			main_win->SetCursor(FL_CURSOR_HAND);
+			instance::main_win->SetCursor(FL_CURSOR_HAND);
 			highlighted = true;
 			redraw();
 			return 1;
@@ -326,7 +326,7 @@ int UI_Pic::handle(int event)
 		case FL_LEAVE:
 			if (highlighted)
 			{
-				main_win->SetCursor(FL_CURSOR_DEFAULT);
+				instance::main_win->SetCursor(FL_CURSOR_DEFAULT);
 				highlighted = false;
 				redraw();
 			}

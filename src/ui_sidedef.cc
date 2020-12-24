@@ -171,7 +171,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			main_win->BrowserMode('T');
+			instance::main_win->BrowserMode('T');
 		return;
 	}
 
@@ -316,8 +316,8 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	gDocument.basis.setMessageForSelection("added sidedef to", *edit.Selected);
 	gDocument.basis.end();
 
-	main_win->line_box->UpdateField();
-	main_win->line_box->UpdateSides();
+	instance::main_win->line_box->UpdateField();
+	instance::main_win->line_box->UpdateSides();
 }
 
 
@@ -351,8 +351,8 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 	gDocument.basis.setMessageForSelection("deleted sidedef from", *edit.Selected);
 	gDocument.basis.end();
 
-	main_win->line_box->UpdateField();
-	main_win->line_box->UpdateSides();
+	instance::main_win->line_box->UpdateField();
+	instance::main_win->line_box->UpdateSides();
 }
 
 

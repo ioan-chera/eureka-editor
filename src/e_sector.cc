@@ -115,7 +115,7 @@ void SectorModule::commandFloor()
 
 	gDocument.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_FLOORH);
+	instance::main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -153,7 +153,7 @@ void SectorModule::commandCeiling()
 
 	gDocument.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_CEILH);
+	instance::main_win->sec_box->UpdateField(Sector::F_CEILH);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -202,7 +202,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 	doc.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_LIGHT);
+	instance::main_win->sec_box->UpdateField(Sector::F_LIGHT);
 }
 
 
@@ -255,8 +255,8 @@ void SectorModule::commandSwapFlats()
 
 	gDocument.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
-	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
+	instance::main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
+	instance::main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

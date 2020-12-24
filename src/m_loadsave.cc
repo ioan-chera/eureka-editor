@@ -971,14 +971,14 @@ void LoadLevel(Wad_file *wad, const SString &level)
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 
-	main_win->UpdateTotals();
-	main_win->UpdateGameInfo();
-	main_win->InvalidatePanelObj();
-	main_win->redraw();
+	instance::main_win->UpdateTotals();
+	instance::main_win->UpdateGameInfo();
+	instance::main_win->InvalidatePanelObj();
+	instance::main_win->redraw();
 
-	if (main_win)
+	if (instance::main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		instance::main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -1691,9 +1691,9 @@ static void SaveLevel(const SString &level)
 
 	Status_Set("Saved %s", instance::Level_name.c_str());
 
-	if (main_win)
+	if (instance::main_win)
 	{
-		main_win->SetTitle(edit_wad->PathName(), instance::Level_name, false);
+		instance::main_win->SetTitle(edit_wad->PathName(), instance::Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1999,7 +1999,7 @@ void CMD_RenameMap()
 
 	instance::Level_name = new_name.asUpper();
 
-	main_win->SetTitle(edit_wad->PathName(), instance::Level_name, false);
+	instance::main_win->SetTitle(edit_wad->PathName(), instance::Level_name, false);
 
 	Status_Set("Renamed to %s", instance::Level_name.c_str());
 }

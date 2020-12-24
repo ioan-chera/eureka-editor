@@ -58,7 +58,7 @@ void Editor_ClearAction()
 			return;
 
 		case ACT_ADJUST_OFS:
-			main_win->SetCursor(FL_CURSOR_DEFAULT);
+			instance::main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
 
 		default:
@@ -85,7 +85,7 @@ void Editor_SetAction(editor_action_e  new_action)
 			mouse_last_x = Fl::event_x();
 			mouse_last_y = Fl::event_y();
 
-			main_win->SetCursor(FL_CURSOR_HAND);
+			instance::main_win->SetCursor(FL_CURSOR_HAND);
 			break;
 
 		default:
@@ -112,7 +112,7 @@ void Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 	if (mode < 0)
 	{
 		edit.is_panning = true;
-		main_win->SetCursor(FL_CURSOR_HAND);
+		instance::main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
 
@@ -120,7 +120,7 @@ void Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 	if (mode > 0)
 	{
 		edit.is_panning = false;
-		main_win->SetCursor(FL_CURSOR_DEFAULT);
+		instance::main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
 
@@ -445,10 +445,10 @@ static void EV_EnterWindow()
 
 	edit.pointer_in_window = true;
 
-	main_win->canvas->PointerPos(true /* in_event */);
+	instance::main_win->canvas->PointerPos(true /* in_event */);
 
 	// restore keyboard focus to the canvas
-	Fl_Widget * foc = main_win->canvas;
+	Fl_Widget * foc = instance::main_win->canvas;
 
 	if (Fl::focus() != foc)
 		foc->take_focus();
@@ -498,7 +498,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	// unless the mouse is in the 2D/3D view (or began a drag there).
 	edit.pointer_in_window = true;
 
-	main_win->canvas->PointerPos(true /* in_event */);
+	instance::main_win->canvas->PointerPos(true /* in_event */);
 
 //  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
 
@@ -508,7 +508,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+	instance::main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 
 	if (edit.action == ACT_TRANSFORM)
 	{
@@ -528,7 +528,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		edit.selbox_x2 = edit.map_x;
 		edit.selbox_y2 = edit.map_y;
 
-		main_win->canvas->redraw();
+		instance::main_win->canvas->redraw();
 		return;
 	}
 
@@ -545,7 +545,7 @@ void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		if (edit.mode == ObjType::vertices && edit.dragged.valid())
 			UpdateHighlight();
 
-		main_win->canvas->redraw();
+		instance::main_win->canvas->redraw();
 		return;
 	}
 
@@ -657,7 +657,7 @@ int EV_RawKey(int event)
 
 	// keyboard propagation logic
 
-	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+	if (instance::main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
 	if (edit.render3d && ExecuteKey(key, KCTX_Render))
@@ -691,7 +691,7 @@ int EV_RawWheel(int event)
 	ClearStickyMod();
 
 	// ensure we zoom from correct place
-	main_win->canvas->PointerPos(true /* in_event */);
+	instance::main_win->canvas->PointerPos(true /* in_event */);
 
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
@@ -709,7 +709,7 @@ int EV_RawButton(int event)
 {
 	ClearStickyMod();
 
-	main_win->canvas->PointerPos(true /* in_event */);
+	instance::main_win->canvas->PointerPos(true /* in_event */);
 
 	// Hack Alert : this is required to support pressing two buttons at the
 	// same time.  Without this, FLTK does not send us the second button
@@ -717,7 +717,7 @@ int EV_RawButton(int event)
 	// widget becomes NULL.
 
 	if (Fl::event_buttons() != 0)
-		Fl::pushed(main_win->canvas);
+		Fl::pushed(instance::main_win->canvas);
 
 
 	int button = Fl::event_button();
@@ -892,7 +892,7 @@ static void M_AddOperationMenu(SString context, Fl_Menu_Button *menu)
 
 	op_all_menus[context] = menu;
 
-	main_win->add(menu);
+	instance::main_win->add(menu);
 }
 
 
