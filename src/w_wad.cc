@@ -37,7 +37,7 @@
 Wad_file * instance::game_wad;
 Wad_file * instance::edit_wad;
 
-std::vector<Wad_file *> master_dir;
+std::vector<Wad_file *> instance::master_dir;
 
 // UDMF support is unfinished and hence disabled by default.
 bool global::udmf_testing = false;
@@ -1273,9 +1273,9 @@ bool Wad_file::Backup(const char *new_filename)
 
 Lump_c * W_FindGlobalLump(const SString &name)
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)instance::master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace_Global);
+		Lump_c *L = instance::master_dir[i]->FindLumpInNamespace(name, WadNamespace_Global);
 		if (L)
 			return L;
 	}
@@ -1286,9 +1286,9 @@ Lump_c * W_FindGlobalLump(const SString &name)
 
 Lump_c * W_FindSpriteLump(const SString &name)
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)instance::master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace_Sprites);
+		Lump_c *L = instance::master_dir[i]->FindLumpInNamespace(name, WadNamespace_Sprites);
 		if (L)
 			return L;
 	}
@@ -1331,7 +1331,7 @@ void MasterDir_Add(Wad_file *wad)
 {
 	DebugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
-	master_dir.push_back(wad);
+	instance::master_dir.push_back(wad);
 }
 
 
@@ -1341,19 +1341,19 @@ void MasterDir_Remove(Wad_file *wad)
 
 	std::vector<Wad_file *>::iterator ENDP;
 
-	ENDP = std::remove(master_dir.begin(), master_dir.end(), wad);
+	ENDP = std::remove(instance::master_dir.begin(), instance::master_dir.end(), wad);
 
-	master_dir.erase(ENDP, master_dir.end());
+	instance::master_dir.erase(ENDP, instance::master_dir.end());
 }
 
 
 void MasterDir_CloseAll()
 {
-	while (master_dir.size() > 0)
+	while (instance::master_dir.size() > 0)
 	{
-		Wad_file *wad = master_dir.back();
+		Wad_file *wad = instance::master_dir.back();
 
-		master_dir.pop_back();
+		instance::master_dir.pop_back();
 
 		delete wad;
 	}
@@ -1379,9 +1379,9 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 bool MasterDir_HaveFilename(const SString &chk_path)
 {
-	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
+	for (unsigned int k = 0 ; k < instance::master_dir.size() ; k++)
 	{
-		const SString &wad_path = master_dir[k]->PathName();
+		const SString &wad_path = instance::master_dir[k]->PathName();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

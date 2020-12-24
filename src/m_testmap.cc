@@ -307,7 +307,7 @@ static SString GrabWadNames(const port_path_info_t *info)
 	AppendWadName(wad_names, instance::game_wad->PathName(), "-iwad");
 
 	// add any resource wads
-	for (const Wad_file *wad : master_dir)
+	for (const Wad_file *wad : instance::master_dir)
 	{
 		if (wad == instance::game_wad || wad == instance::edit_wad)
 			continue;

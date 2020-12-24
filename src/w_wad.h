@@ -365,9 +365,9 @@ namespace instance
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	extern Wad_file *edit_wad;
-}
 
-extern std::vector<Wad_file *> master_dir;
+	extern std::vector<Wad_file *> master_dir;
+}
 
 
 // find a lump in any loaded wad (later ones tried first),

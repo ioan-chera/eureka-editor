@@ -411,7 +411,7 @@ void UI_OpenMap::Populate()
 	else if (look_where->value() >= LOOK_Resource)
 	{
 		int first = 1;
-		int last  = (int)master_dir.size() - 1;
+		int last  = (int)instance::master_dir.size() - 1;
 
 		if (instance::edit_wad)
 			last--;
@@ -422,9 +422,9 @@ void UI_OpenMap::Populate()
 
 		for (int r = last ; r >= first ; r--)
 		{
-			if (master_dir[r]->LevelCount() >= 0)
+			if (instance::master_dir[r]->LevelCount() >= 0)
 			{
-				using_wad = master_dir[r];
+				using_wad = instance::master_dir[r];
 				PopulateButtons();
 				break;
 			}
