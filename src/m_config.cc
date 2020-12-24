@@ -128,7 +128,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Log messages to specified file",
 		"<file>",
-		&log_file
+		&global::log_file
 	},
 
 	{	"config",
@@ -137,7 +137,7 @@ static const opt_desc_t options[] =
 		"1<",
 		"Config file to load / save",
 		"<file>",
-		&config_file
+		&global::config_file
 	},
 
 	{	"help",
@@ -204,7 +204,7 @@ static const opt_desc_t options[] =
 		"",
 		"The name of the IWAD (game data)",
 		"<file>",
-		&Iwad_name
+		&instance::Iwad_name
 	},
 
 	{	"port",
@@ -1022,14 +1022,14 @@ inline static SString default_config_file()
 //
 int M_ParseConfigFile()
 {
-	if (config_file.empty())
+	if (global::config_file.empty())
 	{
-		config_file = default_config_file();
+		global::config_file = default_config_file();
 	}
 
-	std::ifstream is(config_file.get());
+	std::ifstream is(global::config_file.get());
 
-	LogPrintf("Reading config file: %s\n", config_file.c_str());
+	LogPrintf("Reading config file: %s\n", global::config_file.c_str());
 
 	if (!is.is_open())
 	{
@@ -1037,7 +1037,7 @@ int M_ParseConfigFile()
 		return -1;
 	}
 
-	return parse_a_config_file(is, config_file);
+	return parse_a_config_file(is, global::config_file);
 }
 
 
@@ -1315,11 +1315,11 @@ void M_PrintCommandLineOptions(FILE *fp)
 
 int M_WriteConfigFile()
 {
-	SYS_ASSERT(!config_file.empty());
+	SYS_ASSERT(!global::config_file.empty());
 
-	LogPrintf("Writing config file: %s\n", config_file.c_str());
+	LogPrintf("Writing config file: %s\n", global::config_file.c_str());
 
-	std::ofstream os(config_file.get(), std::ios::trunc);
+	std::ofstream os(global::config_file.get(), std::ios::trunc);
 
 	if (! os.is_open())
 	{

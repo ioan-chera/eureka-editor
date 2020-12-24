@@ -190,8 +190,8 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 
 	SYS_ASSERT(!instance::Game_name.empty());
 
-	Iwad_name = M_QueryKnownIWAD(instance::Game_name);
-	SYS_ASSERT(!Iwad_name.empty());
+	instance::Iwad_name = M_QueryKnownIWAD(instance::Game_name);
+	SYS_ASSERT(!instance::Iwad_name.empty());
 
 	instance::Level_format = dialog->map_format;
 	instance::Udmf_namespace = dialog->name_space;
@@ -331,8 +331,8 @@ bool MissingIWAD_Dialog()
 		instance::Game_name = dialog->game;
 		SYS_ASSERT(!instance::Game_name.empty());
 
-		Iwad_name = M_QueryKnownIWAD(instance::Game_name);
-		SYS_ASSERT(!Iwad_name.empty());
+		instance::Iwad_name = M_QueryKnownIWAD(instance::Game_name);
+		SYS_ASSERT(!instance::Iwad_name.empty());
 	}
 
 	delete dialog;

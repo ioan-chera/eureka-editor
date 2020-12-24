@@ -68,15 +68,15 @@ bool global::want_quit = false;
 bool global::app_has_focus = false;
 bool global::in_fatal_error = false;
 
-SString config_file;
-SString log_file;
+SString global::config_file;
+SString global::log_file;
 
 SString global::install_dir;
 SString global::home_dir;
 SString global::cache_dir;
 
 
-SString Iwad_name;
+SString instance::Iwad_name;
 SString Pwad_name;
 
 std::vector<SString> global::Pwad_list;
@@ -162,7 +162,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	// minimise chance of a infinite loop of errors
 	global::in_fatal_error = true;
 
-	if (init_progress == ProgressStatus::nothing || Quiet || !log_file.empty())
+	if (init_progress == ProgressStatus::nothing || Quiet || !global::log_file.empty())
 	{
 		fprintf(stderr, "\nFATAL ERROR: %s", buffer.c_str());
 	}
@@ -304,7 +304,7 @@ static void Determine_HomeDir(const char *argv0)
 	CreateHomeDirs();
 
 	// determine log filename
-	log_file = global::home_dir + "/logs.txt";
+	global::log_file = global::home_dir + "/logs.txt";
 }
 
 
@@ -377,45 +377,45 @@ static bool DetermineIWAD()
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (!Iwad_name.empty() && FilenameIsBare(Iwad_name))
+	if (!instance::Iwad_name.empty() && FilenameIsBare(instance::Iwad_name))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		Iwad_name = Iwad_name.asLower();
+		instance::Iwad_name = instance::Iwad_name.asLower();
 
-		if (! M_CanLoadDefinitions("games", Iwad_name))
-			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
+		if (! M_CanLoadDefinitions("games", instance::Iwad_name))
+			ThrowException("Unknown game '%s' (no definition file)\n", instance::Iwad_name.c_str());
 
-		SString path = M_QueryKnownIWAD(Iwad_name);
+		SString path = M_QueryKnownIWAD(instance::Iwad_name);
 
 		if (path.empty())
-			FatalError("Cannot find IWAD for game '%s'\n", Iwad_name.c_str());
+			ThrowException("Cannot find IWAD for game '%s'\n", instance::Iwad_name.c_str());
 
-		Iwad_name = path;
+		instance::Iwad_name = path;
 	}
-	else if (!Iwad_name.empty())
+	else if (!instance::Iwad_name.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(Iwad_name))
-			Iwad_name = ReplaceExtension(Iwad_name, "wad");
+		if (! HasExtension(instance::Iwad_name))
+			instance::Iwad_name = ReplaceExtension(instance::Iwad_name, "wad");
 
-		if (! Wad_file::Validate(Iwad_name))
-			FatalError("IWAD does not exist or is invalid: %s\n", Iwad_name.c_str());
+		if (! Wad_file::Validate(instance::Iwad_name))
+			FatalError("IWAD does not exist or is invalid: %s\n", instance::Iwad_name.c_str());
 
-		SString game = GameNameFromIWAD(Iwad_name);
+		SString game = GameNameFromIWAD(instance::Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", game))
-			FatalError("Unknown game '%s' (no definition file)\n", Iwad_name.c_str());
+			FatalError("Unknown game '%s' (no definition file)\n", instance::Iwad_name.c_str());
 
-		M_AddKnownIWAD(Iwad_name);
+		M_AddKnownIWAD(instance::Iwad_name);
 		M_SaveRecent();
 	}
 	else
 	{
-		Iwad_name = M_PickDefaultIWAD();
+		instance::Iwad_name = M_PickDefaultIWAD();
 
-		if (Iwad_name.empty())
+		if (instance::Iwad_name.empty())
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
@@ -424,7 +424,7 @@ static bool DetermineIWAD()
 		}
 	}
 
-	instance::Game_name = GameNameFromIWAD(Iwad_name);
+	instance::Game_name = GameNameFromIWAD(instance::Iwad_name);
 
 	return true;
 }
@@ -807,9 +807,9 @@ static void Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	game_wad = Wad_file::Open(Iwad_name, WadOpenMode_read);
+	game_wad = Wad_file::Open(instance::Iwad_name, WadOpenMode_read);
 	if (! game_wad)
-		FatalError("Failed to open game IWAD: %s\n", Iwad_name.c_str());
+		FatalError("Failed to open game IWAD: %s\n", instance::Iwad_name.c_str());
 
 	MasterDir_Add(game_wad);
 }
@@ -817,10 +817,10 @@ static void Main_LoadIWAD()
 
 static void ReadGameInfo()
 {
-	instance::Game_name = GameNameFromIWAD(Iwad_name);
+	instance::Game_name = GameNameFromIWAD(instance::Iwad_name);
 
 	LogPrintf("Game name: '%s'\n", instance::Game_name.c_str());
-	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
+	LogPrintf("IWAD file: '%s'\n", instance::Iwad_name.c_str());
 
 	M_LoadDefinitions("games", instance::Game_name);
 }
@@ -1039,7 +1039,7 @@ int main(int argc, char *argv[])
 		Determine_InstallPath(argv[0]);
 		Determine_HomeDir(argv[0]);
 
-		LogOpenFile(log_file.c_str());
+		LogOpenFile(global::log_file.c_str());
 
 
 		// load all the config settings
@@ -1091,7 +1091,7 @@ int main(int argc, char *argv[])
 			MasterDir_Add(edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!Iwad_name.empty() || !instance::Level_name.empty()))
+		else if (config::auto_load_recent && ! (!instance::Iwad_name.empty() || !instance::Level_name.empty()))
 		{
 			if (M_TryOpenMostRecent())
 			{

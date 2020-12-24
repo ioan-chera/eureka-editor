@@ -157,10 +157,16 @@ namespace instance
 	extern SString  Udmf_namespace; // for UDMF, the current namespace
 }
 
-extern SString config_file; // Name of the configuration file, or NULL
-extern SString log_file;    // Name of log file, or NULL
+namespace global
+{
+	extern SString config_file; // Name of the configuration file, or NULL
+	extern SString log_file;    // Name of log file, or NULL
+}
 
-extern SString Iwad_name;   // Filename of the iwad
+namespace instance
+{
+	extern SString Iwad_name;   // Filename of the iwad
+}
 extern SString Pwad_name;   // Filename of current wad, or NULL
 
 namespace global
