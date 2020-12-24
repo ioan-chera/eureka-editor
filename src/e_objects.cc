@@ -346,8 +346,8 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	if (no_fill)
 		return;
 
-	if (Vertex_HowManyLineDefs(v1) >= 2 &&
-		Vertex_HowManyLineDefs(v2) >= 2)
+	if (gDocument.vertmod.howManyLinedefs(v1) >= 2 &&
+		gDocument.vertmod.howManyLinedefs(v2) >= 2)
 	{
 		selection_c flip(ObjType::linedefs);
 
@@ -440,7 +440,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
-			new_vert = Vertex_FindExact(TO_COORD(new_x), TO_COORD(new_y));
+			new_vert = gDocument.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -458,7 +458,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			// a plain INSERT will attempt to fix a dangling vertex
 			if (edit.action == ACT_NOTHING)
 			{
-				if (Vertex_TryFixDangler(new_vert))
+				if (gDocument.vertmod.tryFixDangler(new_vert))
 				{
 					// a vertex was deleted, selection/highlight is now invalid
 					return;
@@ -534,7 +534,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	else
 	{
 		// closing a loop?
-		if (!force_continue && Vertex_HowManyLineDefs(new_vert) > 0)
+		if (!force_continue && gDocument.vertmod.howManyLinedefs(new_vert) > 0)
 		{
 			closed_a_loop = true;
 		}
@@ -849,7 +849,7 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 		verts.set(edit.highlight.num);	// keep the highlight
 		verts.set(obj.num);
 
-		Vertex_MergeList(&verts);
+		gDocument.vertmod.mergeList(&verts);
 
 		gDocument.basis.end();
 		return;

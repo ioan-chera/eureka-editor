@@ -613,7 +613,7 @@ static void DoBeginDrag()
 
 		// find opposite end-point when dragging a single vertex
 		if (edit.dragged.valid())
-			edit.drag_other_vert = Vertex_FindDragOther(edit.dragged.num);
+			edit.drag_other_vert = gDocument.vertmod.findDragOther(edit.dragged.num);
 	}
 
 	edit.clicked.clear();
@@ -1054,7 +1054,7 @@ void CMD_Merge()
 	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			CMD_VT_Merge();
+			VertexModule::commandMerge();
 			break;
 
 		case ObjType::linedefs:
@@ -1081,15 +1081,15 @@ void CMD_Disconnect()
 	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			CMD_VT_Disconnect();
+			VertexModule::commandDisconnect();
 			break;
 
 		case ObjType::linedefs:
-			CMD_LIN_Disconnect();
+			VertexModule::commandLineDisconnect();
 			break;
 
 		case ObjType::sectors:
-			CMD_SEC_Disconnect();
+			VertexModule::commandSectorDisconnect();
 			break;
 
 		case ObjType::things:
@@ -1821,11 +1821,11 @@ static editor_command_t  command_table[] =
 	/* ------ Vertex mode ------ */
 
 	{	"VT_ShapeLine", NULL,
-		&CMD_VT_ShapeLine
+		&VertexModule::commandShapeLine
 	},
 
 	{	"VT_ShapeArc", NULL,
-		&CMD_VT_ShapeArc
+		&VertexModule::commandShapeArc
 	},
 
 

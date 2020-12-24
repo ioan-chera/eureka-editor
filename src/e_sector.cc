@@ -645,8 +645,8 @@ bool TraceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare)
 #endif
 
 	// check for an isolated line
-	if (Vertex_HowManyLineDefs( cur_vert) == 1 &&
-		Vertex_HowManyLineDefs(prev_vert) == 1)
+	if (gDocument.vertmod.howManyLinedefs( cur_vert) == 1 &&
+		gDocument.vertmod.howManyLinedefs(prev_vert) == 1)
 		return false;
 
 	// compute the average angle over all the lines
@@ -813,8 +813,8 @@ ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 
 			// treat isolated linedefs like islands
 			if (! ld_in_path &&
-				Vertex_HowManyLineDefs(gDocument.linedefs[ld]->start) == 1 &&
-				Vertex_HowManyLineDefs(gDocument.linedefs[ld]->end)   == 1)
+				gDocument.vertmod.howManyLinedefs(gDocument.linedefs[ld]->start) == 1 &&
+				gDocument.vertmod.howManyLinedefs(gDocument.linedefs[ld]->end)   == 1)
 			{
 				island->push_back(ld, Side::right);
 				island->push_back(ld, Side::left);

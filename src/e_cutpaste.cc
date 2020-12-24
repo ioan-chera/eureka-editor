@@ -1237,7 +1237,7 @@ void CMD_Delete()
 		int v_num = edit.Selected->find_first();
 		SYS_ASSERT(v_num >= 0);
 
-		if (Vertex_HowManyLineDefs(v_num) == 2)
+		if (gDocument.vertmod.howManyLinedefs(v_num) == 2)
 		{
 			if (DeleteVertex_MergeLineDefs(v_num))
 				goto success;

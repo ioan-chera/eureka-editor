@@ -22,6 +22,7 @@
 #include "e_basis.h"
 #include "e_hover.h"
 #include "e_linedef.h"
+#include "e_vertex.h"
 
 //
 // The document associated with a file. All stuff will go here
@@ -41,8 +42,9 @@ struct Document
 	Basis basis;
 	Hover hover;
 	LinedefModule linemod;
+	VertexModule vertmod;
 
-	Document() : basis(*this), hover(*this), linemod(*this)
+	Document() : basis(*this), hover(*this), linemod(*this), vertmod(*this)
 	{
 	}
 

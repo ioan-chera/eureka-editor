@@ -27,24 +27,47 @@
 #ifndef __EUREKA_E_VERTEX_H__
 #define __EUREKA_E_VERTEX_H__
 
-int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy);
-int Vertex_FindDragOther(int v_num);
-int Vertex_HowManyLineDefs(int v_num);
+#include "DocumentModule.h"
 
-void Vertex_MergeList(selection_c *list);
-bool Vertex_TryFixDangler(int v_num);
+struct vert_along_t;
 
-/* commands */
+class VertexModule : public DocumentModule
+{
+public:
+	VertexModule(Document &doc) : DocumentModule(doc)
+	{
+	}
 
-void CMD_VT_Merge(void);
+	int findExact(fixcoord_t fx, fixcoord_t fy) const;
+	int findDragOther(int v_num) const;
+	int howManyLinedefs(int v_num) const;
+	void mergeList(selection_c *list) const;
+	bool tryFixDangler(int v_num) const;
 
-void CMD_VT_Disconnect(void);
+	/* commands */
 
-void CMD_LIN_Disconnect(void);
-void CMD_SEC_Disconnect(void);
+	static void commandMerge();
+	static void commandDisconnect();
+	static void commandLineDisconnect();
+	static void commandSectorDisconnect();
+	static void commandShapeLine();
+	static void commandShapeArc();
 
-void CMD_VT_ShapeLine(void);
-void CMD_VT_ShapeArc (void);
+private:
+	void mergeSandwichLines(int ld1, int ld2, int v, selection_c &del_lines) const;
+	void doMergeVertex(int v1, int v2, selection_c &del_lines) const;
+	void calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const;
+	void doDisconnectVertex(int v_num, int num_lines) const;
+	void doDisconnectLinedef(int ld, int which_vert, bool *seen_one) const;
+	void verticesOfDetachableSectors(selection_c &verts) const;
+	void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side) const;
+	void DETSEC_CalcMoveVector(selection_c *detach_verts, double *dx, double *dy) const;
+	double evaluateCircle(double mid_x, double mid_y, double r,
+		std::vector< vert_along_t > &along_list,
+		unsigned int start_idx, double arc_rad,
+		double ang_offset /* radians */,
+		bool move_vertices = false) const;
+};
 
 #endif  /* __EUREKA_E_VERTEX_H__ */
 

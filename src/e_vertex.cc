@@ -43,11 +43,11 @@
 #include <algorithm>
 
 
-int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
+int VertexModule::findExact(fixcoord_t fx, fixcoord_t fy) const
 {
-	for (int i = 0 ; i < NumVertices ; i++)
+	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
-		if (gDocument.vertices[i]->Matches(fx, fy))
+		if (doc.vertices[i]->Matches(fx, fy))
 			return i;
 	}
 
@@ -55,16 +55,16 @@ int Vertex_FindExact(fixcoord_t fx, fixcoord_t fy)
 }
 
 
-int Vertex_FindDragOther(int v_num)
+int VertexModule::findDragOther(int v_num) const
 {
 	// we always return the START of a linedef if possible, but
 	// if that doesn't occur then return the END of a linedef.
 
 	int fallback = -1;
 
-	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (int i = 0 ; i < doc.numLinedefs() ; i++)
 	{
-		const LineDef *L = gDocument.linedefs[i];
+		const LineDef *L = doc.linedefs[i];
 
 		if (L->end == v_num)
 			return L->start;
@@ -77,13 +77,13 @@ int Vertex_FindDragOther(int v_num)
 }
 
 
-int Vertex_HowManyLineDefs(int v_num)
+int VertexModule::howManyLinedefs(int v_num) const
 {
 	int count = 0;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		LineDef *L = gDocument.linedefs[n];
+		LineDef *L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 			count++;
@@ -98,26 +98,26 @@ int Vertex_HowManyLineDefs(int v_num)
 // vertex 'v' is the shared vertex (the "hinge").
 // to prevent an overlap, we merge ld1 into ld2.
 //
-static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
+void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines) const
 {
-	LineDef *L1 = gDocument.linedefs[ld1];
-	LineDef *L2 = gDocument.linedefs[ld2];
+	LineDef *L1 = doc.linedefs[ld1];
+	LineDef *L2 = doc.linedefs[ld2];
 
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	int new_mid_tex = (ld1_onesided) ? L1->Right(gDocument)->mid_tex :
-					  (ld2_onesided) ? L2->Right(gDocument)->mid_tex : 0;
+	int new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
+					  (ld2_onesided) ? L2->Right(doc)->mid_tex : 0;
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
 	if ((L2->end == v) == (L1->end == v))
 	{
-		gDocument.linemod.flipLinedef(ld1);
+		doc.linemod.flipLinedef(ld1);
 	}
 
-	bool same_left  = (L2->WhatSector(Side::left, gDocument)  == L1->WhatSector(Side::left, gDocument));
-	bool same_right = (L2->WhatSector(Side::right, gDocument) == L1->WhatSector(Side::right, gDocument));
+	bool same_left  = (L2->WhatSector(Side::left, doc)  == L1->WhatSector(Side::left, doc));
+	bool same_right = (L2->WhatSector(Side::right, doc) == L1->WhatSector(Side::right, doc));
 
 	if (same_left && same_right)
 	{
@@ -131,11 +131,11 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 
 	if (same_left)
 	{
-		gDocument.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+		doc.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
 	}
 	else if (same_right)
 	{
-		gDocument.basis.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
+		doc.basis.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
 	}
 	else
 	{
@@ -146,14 +146,14 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 
 
 	// fix orientation of remaining linedef if needed
-	if (L2->Left(gDocument) && ! L2->Right(gDocument))
+	if (L2->Left(doc) && ! L2->Right(doc))
 	{
-		gDocument.linemod.flipLinedef(ld2);
+		doc.linemod.flipLinedef(ld2);
 	}
 
 	if (L2->OneSided() && new_mid_tex > 0)
 	{
-		gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+		doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
 	// fix flags of remaining linedef
@@ -170,14 +170,14 @@ static void MergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines)
 		new_flags |=  MLF_Blocking;
 	}
 
-	gDocument.basis.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
+	doc.basis.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
 }
 
 
 //
 // merge v1 into v2
 //
-static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
+void VertexModule::doMergeVertex(int v1, int v2, selection_c& del_lines) const
 {
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
@@ -185,9 +185,9 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 	// check if two linedefs would overlap after the merge
 	// [ but ignore lines already marked for deletion ]
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (! L->TouchesVertex(v1))
 			continue;
@@ -199,12 +199,12 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 
 		int found = -1;
 
-		for (int k = 0 ; k < NumLineDefs ; k++)
+		for (int k = 0 ; k < doc.numLinedefs(); k++)
 		{
 			if (k == n)
 				continue;
 
-			const LineDef *K = gDocument.linedefs[k];
+			const LineDef *K = doc.linedefs[k];
 
 			if ((K->start == v3 && K->end == v2) ||
 				(K->start == v2 && K->end == v3))
@@ -216,7 +216,7 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 
 		if (found >= 0 && ! del_lines.get(found))
 		{
-			MergeSandwichLines(n, found, v3, del_lines);
+			mergeSandwichLines(n, found, v3, del_lines);
 			break;
 		}
 	}
@@ -224,18 +224,18 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 	// update all linedefs which use V1 to use V2 instead, and
 	// delete any line that exists between the two vertices.
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		// change *ALL* references, this is critical
 		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
-			gDocument.basis.changeLinedef(n, LineDef::F_START, v2);
+			doc.basis.changeLinedef(n, LineDef::F_START, v2);
 
 		if (L->end == v1)
-			gDocument.basis.changeLinedef(n, LineDef::F_END, v2);
+			doc.basis.changeLinedef(n, LineDef::F_END, v2);
 
 		if (L->start == v2 && L->end == v2)
 			del_lines.set(n);
@@ -247,7 +247,7 @@ static void DoMergeVertex(int v1, int v2, selection_c& del_lines)
 // the first vertex is kept, all the other vertices are deleted
 // (after fixing the attached linedefs).
 //
-void Vertex_MergeList(selection_c *verts)
+void VertexModule::mergeList(selection_c *verts) const
 {
 	if (verts->count_obj() < 2)
 		return;
@@ -271,7 +271,7 @@ void Vertex_MergeList(selection_c *verts)
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		DoMergeVertex(*it, v, del_lines);
+		doMergeVertex(*it, v, del_lines);
 	}
 
 	// all these vertices will be unused now, hence this call
@@ -286,7 +286,7 @@ void Vertex_MergeList(selection_c *verts)
 }
 
 
-void CMD_VT_Merge()
+void VertexModule::commandMerge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -302,7 +302,7 @@ void CMD_VT_Merge()
 	gDocument.basis.begin();
 	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
 
-	Vertex_MergeList(edit.Selected);
+	gDocument.vertmod.mergeList(edit.Selected);
 
 	gDocument.basis.end();
 
@@ -310,22 +310,22 @@ void CMD_VT_Merge()
 }
 
 
-bool Vertex_TryFixDangler(int v_num)
+bool VertexModule::tryFixDangler(int v_num) const
 {
 	// see if this vertex is sitting on another one (or very close to it)
 	int v_other  = -1;
 	int max_dist = 2;
 
-	for (int i = 0 ; i < NumVertices ; i++)
+	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
 		if (i == v_num)
 			continue;
 
-		double dx = gDocument.vertices[v_num]->x() - gDocument.vertices[i]->x();
-		double dy = gDocument.vertices[v_num]->y() - gDocument.vertices[i]->y();
+		double dx = doc.vertices[v_num]->x() - doc.vertices[i]->x();
+		double dy = doc.vertices[v_num]->y() - doc.vertices[i]->y();
 
 		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
-			! gDocument.linemod.linedefAlreadyExists(v_num, v_other))
+			!doc.linemod.linedefAlreadyExists(v_num, v_other))
 		{
 			v_other = i;
 			break;
@@ -334,9 +334,9 @@ bool Vertex_TryFixDangler(int v_num)
 
 
 	// check for a dangling vertex
-	if (Vertex_HowManyLineDefs(v_num) != 1)
+	if (howManyLinedefs(v_num) != 1)
 	{
-		if (v_other >= 0 && Vertex_HowManyLineDefs(v_other) == 1)
+		if (v_other >= 0 && howManyLinedefs(v_other) == 1)
 			std::swap(v_num, v_other);
 		else
 			return false;
@@ -355,17 +355,17 @@ bool Vertex_TryFixDangler(int v_num)
 		fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
 #endif
 
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("merged dangling vertex #%d\n", v_num);
+		doc.basis.begin();
+		doc.basis.setMessage("merged dangling vertex #%d\n", v_num);
 
 		selection_c list(ObjType::vertices);
 
 		list.set(v_other);	// first one is the one kept
 		list.set(v_num);
 
-		Vertex_MergeList(&list);
+		mergeList(&list);
 
-		gDocument.basis.end();
+		doc.basis.end();
 
 		edit.Selected->set(v_other);
 
@@ -393,7 +393,7 @@ bool Vertex_TryFixDangler(int v_num)
 
 	// see if vertex is sitting on a line
 
-	Objid line_obj = gDocument.hover.findSplitLineForDangler(v_num);
+	Objid line_obj = doc.hover.findSplitLineForDangler(v_num);
 
 	if (! line_obj.valid())
 		return false;
@@ -402,24 +402,24 @@ bool Vertex_TryFixDangler(int v_num)
 	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_obj.num, v_num);
 #endif
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("split linedef #%d\n", line_obj.num);
+	doc.basis.begin();
+	doc.basis.setMessage("split linedef #%d\n", line_obj.num);
 
-	gDocument.linemod.splitLinedefAtVertex(line_obj.num, v_num);
+	doc.linemod.splitLinedefAtVertex(line_obj.num, v_num);
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	// no vertices were added or removed, hence can continue Insert_Vertex
 	return false;
 }
 
 
-static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y)
+void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const
 {
-	const Vertex * V = gDocument.vertices[v_num];
+	const Vertex * V = doc.vertices[v_num];
 
-	double dx = L->End(gDocument)->x() - L->Start(gDocument)->x();
-	double dy = L->End(gDocument)->y() - L->Start(gDocument)->y();
+	double dx = L->End(doc)->x() - L->Start(doc)->x();
+	double dy = L->End(doc)->y() - L->Start(doc)->y();
 
 	if (L->end == v_num)
 	{
@@ -453,36 +453,36 @@ static void CalcDisconnectCoord(const LineDef *L, int v_num, double *x, double *
 }
 
 
-static void DoDisconnectVertex(int v_num, int num_lines)
+void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 {
 	int which = 0;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		LineDef *L = gDocument.linedefs[n];
+		LineDef *L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
 			double new_x, new_y;
-			CalcDisconnectCoord(L, v_num, &new_x, &new_y);
+			calcDisconnectCoord(L, v_num, &new_x, &new_y);
 
 			// the _LAST_ linedef keeps the current vertex, the rest
 			// need a new one.
 			if (which != num_lines-1)
 			{
-				int new_v = gDocument.basis.addNew(ObjType::vertices);
+				int new_v = doc.basis.addNew(ObjType::vertices);
 
-				gDocument.vertices[new_v]->SetRawXY(new_x, new_y);
+				doc.vertices[new_v]->SetRawXY(new_x, new_y);
 
 				if (L->start == v_num)
-					gDocument.basis.changeLinedef(n, LineDef::F_START, new_v);
+					doc.basis.changeLinedef(n, LineDef::F_START, new_v);
 				else
-					gDocument.basis.changeLinedef(n, LineDef::F_END, new_v);
+					doc.basis.changeLinedef(n, LineDef::F_END, new_v);
 			}
 			else
 			{
-				gDocument.basis.changeVertex(v_num, Vertex::F_X, MakeValidCoord(new_x));
-				gDocument.basis.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(new_y));
+				doc.basis.changeVertex(v_num, Vertex::F_X, MakeValidCoord(new_x));
+				doc.basis.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -491,7 +491,7 @@ static void DoDisconnectVertex(int v_num, int num_lines)
 }
 
 
-void CMD_VT_Disconnect(void)
+void VertexModule::commandDisconnect()
 {
 	if (edit.Selected->empty())
 	{
@@ -514,12 +514,12 @@ void CMD_VT_Disconnect(void)
 		int v_num = *it;
 
 		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = Vertex_HowManyLineDefs(*it);
+		int num_lines = gDocument.vertmod.howManyLinedefs(*it);
 
 		if (num_lines < 2)
 			continue;
 
-		DoDisconnectVertex(v_num, num_lines);
+		gDocument.vertmod.doDisconnectVertex(v_num, num_lines);
 
 		seen_one = true;
 	}
@@ -533,9 +533,9 @@ void CMD_VT_Disconnect(void)
 }
 
 
-static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
+void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) const
 {
-	LineDef *L = gDocument.linedefs[ld];
+	const LineDef *L = doc.linedefs[ld];
 
 	int v_num = which_vert ? L->end : L->start;
 
@@ -544,12 +544,12 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 
 	bool touches_non_sel = false;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
 		if (edit.Selected->get(n))
 			continue;
 
-		LineDef *N = gDocument.linedefs[n];
+		LineDef *N = doc.linedefs[n];
 
 		if (N->start == v_num || N->end == v_num)
 		{
@@ -562,29 +562,29 @@ static void DoDisconnectLineDef(int ld, int which_vert, bool *seen_one)
 		return;
 
 	double new_x, new_y;
-	CalcDisconnectCoord(gDocument.linedefs[ld], v_num, &new_x, &new_y);
+	calcDisconnectCoord(doc.linedefs[ld], v_num, &new_x, &new_y);
 
-	int new_v = gDocument.basis.addNew(ObjType::vertices);
+	int new_v = doc.basis.addNew(ObjType::vertices);
 
-	gDocument.vertices[new_v]->SetRawXY(new_x, new_y);
+	doc.vertices[new_v]->SetRawXY(new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		LineDef *L2 = gDocument.linedefs[*it];
+		LineDef *L2 = doc.linedefs[*it];
 
 		if (L2->start == v_num)
-			gDocument.basis.changeLinedef(*it, LineDef::F_START, new_v);
+			doc.basis.changeLinedef(*it, LineDef::F_START, new_v);
 
 		if (L2->end == v_num)
-			gDocument.basis.changeLinedef(*it, LineDef::F_END, new_v);
+			doc.basis.changeLinedef(*it, LineDef::F_END, new_v);
 	}
 
 	*seen_one = true;
 }
 
 
-void CMD_LIN_Disconnect(void)
+void VertexModule::commandLineDisconnect()
 {
 	// Note: the logic here is significantly different than the logic
 	//       in VT_Disconnect, since we want to keep linedefs in the
@@ -607,8 +607,8 @@ void CMD_LIN_Disconnect(void)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		DoDisconnectLineDef(*it, 0, &seen_one);
-		DoDisconnectLineDef(*it, 1, &seen_one);
+		gDocument.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
+		gDocument.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
 	}
 
 	gDocument.basis.end();
@@ -621,20 +621,20 @@ void CMD_LIN_Disconnect(void)
 }
 
 
-static void VerticesOfDetachableSectors(selection_c &verts)
+void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 {
-	SYS_ASSERT(NumVertices > 0);
+	SYS_ASSERT(doc.numVertices() > 0);
 
-	bitvec_c  in_verts(NumVertices);
-	bitvec_c out_verts(NumVertices);
+	bitvec_c  in_verts(doc.numVertices());
+	bitvec_c out_verts(doc.numVertices());
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef * L = gDocument.linedefs[n];
+		const LineDef * L = doc.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(gDocument)  && edit.Selected->get(L->Left(gDocument)->sector);
-		bool right_in = L->Right(gDocument) && edit.Selected->get(L->Right(gDocument)->sector);
+		bool  left_in = L->Left(doc)  && edit.Selected->get(L->Left(doc)->sector);
+		bool right_in = L->Right(doc) && edit.Selected->get(L->Right(doc)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -642,7 +642,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 		bool innie = false;
 		bool outie = false;
 
-		if (L->Right(gDocument))
+		if (L->Right(doc))
 		{
 			if (right_in)
 				innie = true;
@@ -650,7 +650,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 				outie = true;
 		}
 
-		if (L->Left(gDocument))
+		if (L->Left(doc))
 		{
 			if (left_in)
 				innie = true;
@@ -671,7 +671,7 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 		}
 	}
 
-	for (int k = 0 ; k < NumVertices ; k++)
+	for (int k = 0 ; k < doc.numVertices() ; k++)
 	{
 		if (in_verts.get(k) && out_verts.get(k))
 			verts.set(k);
@@ -679,14 +679,14 @@ static void VerticesOfDetachableSectors(selection_c &verts)
 }
 
 
-static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
+void VertexModule::DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side) const
 {
-	const LineDef * L1 = gDocument.linedefs[ld_num];
+	const LineDef * L1 = doc.linedefs[ld_num];
 
-	int new_ld = gDocument.basis.addNew(ObjType::linedefs);
+	int new_ld = doc.basis.addNew(ObjType::linedefs);
 	int lost_sd;
 
-	LineDef * L2 = gDocument.linedefs[new_ld];
+	LineDef * L2 = doc.linedefs[new_ld];
 
 	if (in_side == Side::left)
 	{
@@ -704,10 +704,10 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 
 		lost_sd = L1->right;
 
-		gDocument.linemod.flipLinedef(ld_num);
+		doc.linemod.flipLinedef(ld_num);
 	}
 
-	gDocument.basis.changeLinedef(ld_num, LineDef::F_LEFT, -1);
+	doc.basis.changeLinedef(ld_num, LineDef::F_LEFT, -1);
 
 
 	// determine new flags
@@ -717,7 +717,7 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	gDocument.basis.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
+	doc.basis.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
 
 	L2->flags = L1->flags;
 
@@ -726,30 +726,30 @@ static void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side)
 
 	int tex = BA_InternaliseString(default_wall_tex);
 
-	const SideDef * SD = gDocument.sidedefs[L1->right];
+	const SideDef * SD = doc.sidedefs[L1->right];
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	gDocument.basis.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
+	doc.basis.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
 
 
 	// now fix the second line's textures
 
-	SD = gDocument.sidedefs[lost_sd];
+	SD = doc.sidedefs[lost_sd];
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	gDocument.basis.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
+	doc.basis.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
 }
 
 
-static void DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx, double * dy)
+void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx, double * dy) const
 {
 	double det_mid_x, sec_mid_x;
 	double det_mid_y, sec_mid_y;
@@ -784,7 +784,7 @@ static void DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx, doubl
 }
 
 
-void CMD_SEC_Disconnect(void)
+void VertexModule::commandSectorDisconnect(void)
 {
 	if (NumVertices == 0)
 	{
@@ -803,7 +803,7 @@ void CMD_SEC_Disconnect(void)
 
 	// collect all vertices which need to be detached
 	selection_c detach_verts(ObjType::vertices);
-	VerticesOfDetachableSectors(detach_verts);
+	gDocument.vertmod.verticesOfDetachableSectors(detach_verts);
 
 	if (detach_verts.empty())
 	{
@@ -816,7 +816,7 @@ void CMD_SEC_Disconnect(void)
 
 	// determine vector to move the detach coords
 	double move_dx, move_dy;
-	DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
+	gDocument.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
 	gDocument.basis.begin();
@@ -861,7 +861,7 @@ void CMD_SEC_Disconnect(void)
 
 		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
-			DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
+			gDocument.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
 		}
 		else
 		{
@@ -948,7 +948,7 @@ public:
 };
 
 
-void CMD_VT_ShapeLine(void)
+void VertexModule::commandShapeLine()
 {
 	if (edit.Selected->count_obj() < 3)
 	{
@@ -1138,11 +1138,11 @@ static double BiggestGapAngle(std::vector< vert_along_t > &along_list,
 }
 
 
-static double EvaluateCircle(double mid_x, double mid_y, double r,
-							 std::vector< vert_along_t > &along_list,
-							 unsigned int start_idx, double arc_rad,
-							 double ang_offset /* radians */,
-							 bool move_vertices = false)
+double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
+	std::vector< vert_along_t > &along_list,
+	unsigned int start_idx, double arc_rad,
+	double ang_offset /* radians */,
+	bool move_vertices) const
 {
 	double cost = 0;
 
@@ -1152,7 +1152,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 	{
 		unsigned int k = (start_idx + i) % along_list.size();
 
-		const Vertex *V = gDocument.vertices[along_list[k].vert_num];
+		const Vertex *V = doc.vertices[along_list[k].vert_num];
 
 		double frac = i / (double)(along_list.size() - (partial_circle ? 1 : 0));
 
@@ -1163,8 +1163,8 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			gDocument.basis.changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
-			gDocument.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
+			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
+			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
 		}
 		else
 		{
@@ -1179,7 +1179,7 @@ static double EvaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-void CMD_VT_ShapeArc(void)
+void VertexModule::commandShapeArc()
 {
 	if (EXEC_Param[0].empty())
 	{
@@ -1324,7 +1324,7 @@ void CMD_VT_ShapeArc(void)
 		{
 			double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
-			double cost = EvaluateCircle(mid_x, mid_y, r, along_list,
+			double cost = gDocument.vertmod.evaluateCircle(mid_x, mid_y, r, along_list,
 										 start_idx, arc_rad, ang_offset, false);
 
 			if (cost < best_cost)
@@ -1341,7 +1341,7 @@ void CMD_VT_ShapeArc(void)
 	gDocument.basis.begin();
 	gDocument.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
-	EvaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
+	gDocument.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 
 	gDocument.basis.end();
