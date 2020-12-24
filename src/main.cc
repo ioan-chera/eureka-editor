@@ -112,12 +112,12 @@ rgb_color_t config::gui_custom_fg = RGB_MAKE(0, 0, 0);
 //    1 = read early options, set up logging
 //    2 = parsed all options, inited FLTK
 //    3 = opened the main window
-enum ProgressStatus
+enum class ProgressStatus
 {
-	ProgressStatus_nothing,
-	ProgressStatus_early,
-	ProgressStatus_loaded,
-	ProgressStatus_window
+	nothing,
+	early,
+	loaded,
+	window
 };
 static ProgressStatus init_progress;
 
@@ -162,23 +162,23 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	// minimise chance of a infinite loop of errors
 	in_fatal_error = true;
 
-	if (init_progress == ProgressStatus_nothing || Quiet || !log_file.empty())
+	if (init_progress == ProgressStatus::nothing || Quiet || !log_file.empty())
 	{
 		fprintf(stderr, "\nFATAL ERROR: %s", buffer.c_str());
 	}
 
-	if (init_progress >= ProgressStatus_early)
+	if (init_progress >= ProgressStatus::early)
 	{
 		LogPrintf("\nFATAL ERROR: %s", buffer.c_str());
 	}
 
-	if (init_progress >= ProgressStatus_loaded)
+	if (init_progress >= ProgressStatus::loaded)
 	{
 		RemoveSingleNewlines(buffer);
 
 		DLG_ShowError("%s", buffer.c_str());
 
-		init_progress = ProgressStatus_early;
+		init_progress = ProgressStatus::early;
 	}
 #ifdef WIN32
 	else
@@ -189,7 +189,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	}
 #endif
 
-	init_progress = ProgressStatus_nothing;
+	init_progress = ProgressStatus::nothing;
 	app_has_focus = false;
 
 	MasterDir_CloseAll();
@@ -352,7 +352,7 @@ static void Determine_InstallPath(const char *argv0)
 	}
 
 	if (install_dir.empty())
-		FatalError("Unable to find install directory!\n");
+		ThrowException("Unable to find install directory!\n");
 
 	LogPrintf("Install dir: %s\n", install_dir.c_str());
 }
@@ -1005,7 +1005,7 @@ int main(int argc, char *argv[])
 {
 	try
 	{
-		init_progress = ProgressStatus_nothing;
+		init_progress = ProgressStatus::nothing;
 
 
 		// a quick pass through the command line arguments
@@ -1023,7 +1023,7 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 
-		init_progress = ProgressStatus_early;
+		init_progress = ProgressStatus::early;
 
 
 		LogPrintf("\n");
@@ -1056,7 +1056,7 @@ int main(int argc, char *argv[])
 
 		Main_SetupFLTK();
 
-		init_progress = ProgressStatus_loaded;
+		init_progress = ProgressStatus::loaded;
 
 
 		M_LoadRecent();
@@ -1066,7 +1066,7 @@ int main(int argc, char *argv[])
 
 		Main_OpenWindow();
 
-		init_progress = ProgressStatus_window;
+		init_progress = ProgressStatus::window;
 
 		M_LoadOperationMenus();
 
@@ -1084,7 +1084,7 @@ int main(int argc, char *argv[])
 
 			edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
 			if (! edit_wad)
-				FatalError("Cannot load pwad: %s\n", Pwad_name.c_str());
+				ThrowException("Cannot load pwad: %s\n", Pwad_name.c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
@@ -1147,7 +1147,7 @@ int main(int argc, char *argv[])
 
 		LogPrintf("Quit\n");
 
-		init_progress = ProgressStatus_nothing;
+		init_progress = ProgressStatus::nothing;
 		app_has_focus = false;
 
 		MasterDir_CloseAll();

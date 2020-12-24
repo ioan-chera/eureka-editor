@@ -77,7 +77,7 @@ typedef enum
 opt_type_t;
 
 
-typedef struct
+struct opt_desc_t
 {
 	const char *long_name;  // Command line arg. or keyword
 	const char *short_name; // Abbreviated command line argument
@@ -95,8 +95,7 @@ typedef struct
 	const char *arg_desc;  // Description of the argument (NULL --> none or default)
 
 	void *data_ptr;   // Pointer to the data
-}
-opt_desc_t;
+};
 
 
 static const opt_desc_t options[] =
@@ -1114,7 +1113,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		{
 			if (o->opt_type == OPT_END)
 			{
-				FatalError("unknown option: '%s'\n", argv[0]);
+				ThrowException("unknown option: '%s'\n", argv[0]);
 				/* NOT REACHED */
 			}
 
@@ -1160,7 +1159,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 			case OPT_INTEGER:
 				if (argc < 2)
 				{
-					FatalError("missing argument after '%s'\n", argv[0]);
+					ThrowException("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 
@@ -1176,7 +1175,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 			case OPT_COLOR:
 				if (argc < 2)
 				{
-					FatalError("missing argument after '%s'\n", argv[0]);
+					ThrowException("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 
@@ -1192,7 +1191,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 			case OPT_STRING:
 				if (argc < 2)
 				{
-					FatalError("missing argument after '%s'\n", argv[0]);
+					ThrowException("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 				argv++;
@@ -1218,7 +1217,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 			case OPT_STRING_LIST:
 				if (argc < 2)
 				{
-					FatalError("missing argument after '%s'\n", argv[0]);
+					ThrowException("missing argument after '%s'\n", argv[0]);
 					/* NOT REACHED */
 				}
 				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
