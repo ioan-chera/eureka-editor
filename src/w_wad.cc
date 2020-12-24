@@ -40,7 +40,7 @@ Wad_file * edit_wad;
 std::vector<Wad_file *> master_dir;
 
 // UDMF support is unfinished and hence disabled by default.
-bool udmf_testing = false;
+bool global::udmf_testing = false;
 
 
 #define MAX_LUMPS_IN_A_LEVEL	21
@@ -610,7 +610,7 @@ void Wad_file::DetectLevels()
 		int part_count = 0;
 
 		// check for UDMF levels
-		if (udmf_testing && directory[k+1].lump->name.noCaseEqual("TEXTMAP"))
+		if (global::udmf_testing && directory[k+1].lump->name.noCaseEqual("TEXTMAP"))
 		{
 			levels.push_back(k);
 			DebugPrintf("Detected level : %s (UDMF)\n", directory[k].lump->name.c_str());

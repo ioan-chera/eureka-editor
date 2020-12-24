@@ -386,9 +386,10 @@ void MasterDir_Remove(Wad_file *wad);
 bool MasterDir_HaveFilename(const SString &chk_path);
 void MasterDir_CloseAll();
 
-
-extern bool udmf_testing;
-
+namespace global
+{
+	extern bool udmf_testing;
+}
 
 #endif  /* __EUREKA_W_WAD_H__ */
 

@@ -24,8 +24,8 @@
 #include <stdio.h>
 #include <vector>
 
-bool Quiet = false;
-bool Debugging = false;
+bool global::Quiet = false;
+bool global::Debugging = false;
 
 
 static FILE * log_fp;
@@ -105,7 +105,7 @@ void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 	else
 		kept_messages.push_back(buffer);
 
-	if (! Quiet)
+	if (! global::Quiet)
 	{
 		fputs(buffer, stdout);
 		fflush(stdout);
@@ -115,7 +115,7 @@ void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 
 void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 {
-	if (Debugging && log_fp)
+	if (global::Debugging && log_fp)
 	{
 		static char buffer[MSG_BUF_LEN];
 
@@ -141,7 +141,7 @@ void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 			fprintf(log_fp, "# %s\n", pos);
 			fflush(log_fp);
 
-			if (! Quiet)
+			if (! global::Quiet)
 			{
 				fprintf(stderr, "# %s\n", pos);
 			}

@@ -80,7 +80,7 @@ SString instance::Iwad_name;
 SString Pwad_name;
 
 std::vector<SString> global::Pwad_list;
-std::vector<SString> Resource_list;
+std::vector<SString> instance::Resource_list;
 
 SString instance::Game_name;
 SString instance::Port_name;
@@ -121,8 +121,8 @@ enum class ProgressStatus
 };
 static ProgressStatus init_progress;
 
-int show_help     = 0;
-int show_version  = 0;
+int global::show_help     = 0;
+int global::show_version  = 0;
 
 
 static void RemoveSingleNewlines(SString &buffer)
@@ -162,7 +162,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	// minimise chance of a infinite loop of errors
 	global::in_fatal_error = true;
 
-	if (init_progress == ProgressStatus::nothing || Quiet || !global::log_file.empty())
+	if (init_progress == ProgressStatus::nothing || global::Quiet || !global::log_file.empty())
 	{
 		fprintf(stderr, "\nFATAL ERROR: %s", buffer.c_str());
 	}
@@ -898,7 +898,7 @@ void Main_LoadResources()
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (const SString &resource : Resource_list)
+	for (const SString &resource : instance::Resource_list)
 	{
 		LoadResourceFile(resource.c_str());
 	}
@@ -1012,12 +1012,12 @@ int main(int argc, char *argv[])
 		// to handle special options, like --help, --install, --config
 		M_ParseCommandLine(argc - 1, argv + 1, 1);
 
-		if (show_help)
+		if (global::show_help)
 		{
 			ShowHelp();
 			return 0;
 		}
-		else if (show_version)
+		else if (global::show_version)
 		{
 			ShowVersion();
 			return 0;

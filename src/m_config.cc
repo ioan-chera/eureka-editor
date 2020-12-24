@@ -146,7 +146,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Show usage summary",
 		NULL,
-		&show_help
+		&global::show_help
 	},
 
 	{	"version",
@@ -155,7 +155,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Show the version",
 		NULL,
-		&show_version
+		&global::show_version
 	},
 
 	{	"debug",
@@ -164,7 +164,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Enable debugging messages",
 		NULL,
-		&Debugging
+		&global::Debugging
 	},
 
 	{	"quiet",
@@ -173,7 +173,7 @@ static const opt_desc_t options[] =
 		"1",
 		"Quiet mode (no messages on stdout)",
 		NULL,
-		&Quiet
+		&global::Quiet
 	},
 
 	//
@@ -195,7 +195,7 @@ static const opt_desc_t options[] =
 		"",
 		"Resource file(s) to load",
 		"<file>...",
-		&Resource_list
+		&instance::Resource_list
 	},
 
 	{	"iwad",
@@ -231,7 +231,7 @@ static const opt_desc_t options[] =
 		"H",
 		"Enable the unfinished UDMF support",
 		NULL,
-		&udmf_testing
+		&global::udmf_testing
 	},
 
 	/* ------------ Preferences ------------ */

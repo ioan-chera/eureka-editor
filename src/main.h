@@ -173,7 +173,10 @@ namespace global
 {
 	extern std::vector<SString> Pwad_list;
 }
-extern std::vector<SString> Resource_list;
+namespace instance
+{
+	extern std::vector<SString> Resource_list;
+}
 
 
 extern int	default_floor_h;
@@ -185,10 +188,11 @@ extern SString default_wall_tex;
 extern SString default_floor_tex;
 extern SString default_ceil_tex;
 
-
-extern int   show_help;		// Print usage message and exit.
-extern int   show_version;	// Print version info and exit.
-
+namespace global
+{
+	extern int   show_help;		// Print usage message and exit.
+	extern int   show_version;	// Print version info and exit.
+}
 
 extern int MadeChanges;
 

@@ -815,7 +815,7 @@ SString M_PickDefaultIWAD()
 static void M_AddResource_Unique(const SString & filename)
 {
 	// check if base filename (without path) already exists
-	for (const SString &resource : Resource_list)
+	for (const SString &resource : instance::Resource_list)
 	{
 		const char *A = fl_filename_name(filename.c_str());
 		const char *B = fl_filename_name(resource.c_str());
@@ -824,7 +824,7 @@ static void M_AddResource_Unique(const SString & filename)
 			return;		// found it
 	}
 
-	Resource_list.push_back(filename);
+	instance::Resource_list.push_back(filename);
 }
 
 
@@ -971,7 +971,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 	}
 
 	if (! keep_cmd_line_args)
-		Resource_list.clear();
+		instance::Resource_list.clear();
 
 	for (const SString &resource : new_resources)
 	{
@@ -1002,7 +1002,7 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (!instance::Port_name.empty())
 		lump->Printf("port %s\n", instance::Port_name.c_str());
 
-	for (const SString &resource : Resource_list)
+	for (const SString &resource : instance::Resource_list)
 	{
 		SString absolute_name = GetAbsolutePath(resource);
 

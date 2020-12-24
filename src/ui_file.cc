@@ -961,7 +961,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 		entry_id++;
 	}
 
-	if (udmf_testing && (usable_formats & (1 << static_cast<int>(MapFormat::udmf))))
+	if (global::udmf_testing && (usable_formats & (1 << static_cast<int>(MapFormat::udmf))))
 	{
 		if (prev_fmt == MapFormat::udmf)
 			menu_value = entry_id;
@@ -1050,9 +1050,9 @@ void UI_ProjectSetup::PopulateResources()
 		if (! res_name[r])
 			continue;
 
-		if (r < (int)Resource_list.size())
+		if (r < (int)instance::Resource_list.size())
 		{
-			res[r] = Resource_list[r];
+			res[r] = instance::Resource_list[r];
 
 			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}
