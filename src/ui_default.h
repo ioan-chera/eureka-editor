@@ -23,6 +23,9 @@
 
 #include "e_cutpaste.h"
 
+class Fl_Int_Input;
+class Fl_Output;
+
 class UI_DefaultProps : public Fl_Group
 {
 private:

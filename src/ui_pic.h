@@ -21,6 +21,7 @@
 #ifndef __EUREKA_UI_PIC_H__
 #define __EUREKA_UI_PIC_H__
 
+#include "FL/Fl_Input.H"
 
 class Img_c;
 

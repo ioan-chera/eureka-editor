@@ -21,6 +21,9 @@
 #ifndef __EUREKA_UI_EDITOR_H__
 #define __EUREKA_UI_EDITOR_H__
 
+#include "FL/Fl_Double_Window.H"
+
+class Fl_Text_Buffer;
 class Wad_file;
 class UI_TedStatusBar;
 class UI_TedWrapper;

@@ -23,6 +23,8 @@
 
 #include "e_cutpaste.h"
 
+class Fl_Choice;
+class Fl_Output;
 class number_group_c;
 class UI_TripleCheckButton;
 

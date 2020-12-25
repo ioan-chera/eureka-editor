@@ -49,6 +49,7 @@
 #define MIN_BROWSER_W	250
 
 
+class Fl_Multi_Browser;
 class Wad_file;
 
 

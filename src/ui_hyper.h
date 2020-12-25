@@ -22,6 +22,8 @@
 #ifndef __EUREKA_UI_HYPER_H__
 #define __EUREKA_UI_HYPER_H__
 
+#include "FL/Fl_Button.H"
+
 class UI_HyperLink : public Fl_Button
 {
 private:

@@ -21,6 +21,7 @@
 #ifndef __EUREKA_UI_TILE_H__
 #define __EUREKA_UI_TILE_H__
 
+#include "FL/Fl_Tile.H"
 
 class UI_Tile : public Fl_Tile
 {

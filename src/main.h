@@ -40,17 +40,7 @@
  */
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-  #ifndef WIN32
-  #define WIN32
-  #endif
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
+#include "WindowsInclude.h"
 #endif
 
 #include "PrintfMacros.h"

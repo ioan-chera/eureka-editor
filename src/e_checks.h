@@ -27,7 +27,19 @@
 #ifndef __EUREKA_E_CHECKS_H__
 #define __EUREKA_E_CHECKS_H__
 
+#include "DocumentModule.h"
 #include "ui_window.h"
+
+//
+// The map checking module
+//
+class ChecksModule : public DocumentModule
+{
+public:
+	ChecksModule(Document &doc) : DocumentModule(doc)
+	{
+	}
+};
 
 
 void SideDefs_Unpack(bool is_after_load = false);

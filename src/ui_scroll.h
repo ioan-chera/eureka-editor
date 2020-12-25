@@ -24,6 +24,7 @@
 
 #define SBAR_W  16
 
+class Fl_Scrollbar;
 
 class UI_Scroll : public Fl_Group
 {

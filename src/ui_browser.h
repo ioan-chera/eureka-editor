@@ -26,6 +26,8 @@
 
 
 class Browser_Button;
+class Fl_Check_Button;
+class Fl_Choice;
 
 
 class Browser_Item : public Fl_Group

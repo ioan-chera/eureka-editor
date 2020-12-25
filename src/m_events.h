@@ -27,6 +27,7 @@
 #ifndef __EUREKA_M_EVENTS_H__
 #define __EUREKA_M_EVENTS_H__
 
+#include "m_keys.h"
 
 typedef enum
 {

@@ -29,7 +29,7 @@
 #include "m_select.h"
 #include "e_objects.h"
 #include "r_grid.h"
-
+#include "sys_macro.h"
 
 class Img_c;
 

@@ -458,5 +458,8 @@
     <ClInclude Include="..\..\src\PrintfMacros.h">
       <Filter>Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\WindowsInclude.h">
+      <Filter>Code</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

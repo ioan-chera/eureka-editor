@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_INFOBAR_H__
 #define __EUREKA_UI_INFOBAR_H__
 
+class Fl_Menu_Button;
+class Fl_Toggle_Button;
 
 class UI_InfoBar : public Fl_Group
 {
