@@ -652,10 +652,10 @@ void UI_Canvas::DrawVertices()
 
 	RenderColor(FL_GREEN);
 
-	for (int n = 0 ; n < NumVertices ; n++)
+	for (const Vertex *vertex : gDocument.vertices)
 	{
-		double x = gDocument.vertices[n]->x();
-		double y = gDocument.vertices[n]->y();
+		double x = vertex->x();
+		double y = vertex->y();
 
 		if (Vis(x, y, r))
 		{
@@ -665,7 +665,7 @@ void UI_Canvas::DrawVertices()
 
 	if (edit.show_object_numbers)
 	{
-		for (int n = 0 ; n < NumVertices ; n++)
+		for (int n = 0 ; n < gDocument.numVertices(); n++)
 		{
 			double x = gDocument.vertices[n]->x();
 			double y = gDocument.vertices[n]->y();

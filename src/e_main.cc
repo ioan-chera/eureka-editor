@@ -77,7 +77,7 @@ int  config::thing_render_default = 1;
 //
 static void zoom_fit()
 {
-	if (NumVertices == 0)
+	if (gDocument.numVertices() == 0)
 		return;
 
 	double xzoom = 1;
@@ -394,7 +394,7 @@ void Editor_ChangeMode(char mode_char)
 
 void UpdateLevelBounds(int start_vert)
 {
-	for (int i = start_vert ; i < NumVertices ; i++)
+	for(int i = start_vert; i < gDocument.numVertices(); i++)
 	{
 		const Vertex * V = gDocument.vertices[i];
 
@@ -408,7 +408,7 @@ void UpdateLevelBounds(int start_vert)
 
 void CalculateLevelBounds()
 {
-	if (NumVertices == 0)
+	if (gDocument.numVertices() == 0)
 	{
 		Map_bound_x1 = Map_bound_x2 = 0;
 		Map_bound_y1 = Map_bound_y2 = 0;
@@ -882,7 +882,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 			break;
 
 		case ObjType::vertices:
-			for (int n = 0 ; n < NumVertices ; n++)
+			for (int n = 0 ; n < gDocument.numVertices(); n++)
 			{
 				const Vertex *V = gDocument.vertices[n];
 

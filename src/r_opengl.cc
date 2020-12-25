@@ -872,7 +872,7 @@ public:
 	{
 		const LineDef *ld = gDocument.linedefs[ld_index];
 
-		if (! is_vertex(ld->start) || ! is_vertex(ld->end))
+		if (! gDocument.isVertex(ld->start) || !gDocument.isVertex(ld->end))
 			return;
 
 		if (! ld->Right(gDocument))

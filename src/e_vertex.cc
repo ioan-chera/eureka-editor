@@ -786,7 +786,7 @@ void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx
 
 void VertexModule::commandSectorDisconnect(void)
 {
-	if (NumVertices == 0)
+	if (gDocument.numVertices() == 0)
 	{
 		Beep("No sectors to disconnect");
 		return;
@@ -824,9 +824,9 @@ void VertexModule::commandSectorDisconnect(void)
 
 	// create new vertices, and a mapping from old --> new
 
-	int * mapping = new int[NumVertices];
+	int * mapping = new int[gDocument.numVertices()];
 
-	for (n = 0 ; n < NumVertices ; n++)
+	for (n = 0 ; n < gDocument.numVertices(); n++)
 		mapping[n] = -1;
 
 	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())

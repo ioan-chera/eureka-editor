@@ -213,7 +213,7 @@ void UI_VertexBox::SetObj(int _index, int _count)
 
 void UI_VertexBox::UpdateField()
 {
-	if (is_vertex(obj))
+	if (gDocument.isVertex(obj))
 	{
 		// @@ FIXME show decimals in UDMF
 		pos_x->value(SString(static_cast<int>(gDocument.vertices[obj]->x())).c_str());
@@ -229,7 +229,7 @@ void UI_VertexBox::UpdateField()
 
 void UI_VertexBox::UpdateTotal()
 {
-	which->SetTotal(NumVertices);
+	which->SetTotal(gDocument.numVertices());
 }
 
 

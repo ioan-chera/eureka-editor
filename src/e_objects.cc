@@ -1948,8 +1948,8 @@ static bool SpotInUse(ObjType obj_type, int x, int y)
 			return false;
 
 		case ObjType::vertices:
-			for (int n = 0 ; n < NumVertices ; n++)
-				if (I_ROUND(gDocument.vertices[n]->x()) == x && I_ROUND(gDocument.vertices[n]->y()) == y)
+			for (const Vertex *vertex : gDocument.vertices)
+				if (I_ROUND(vertex->x()) == x && I_ROUND(vertex->y()) == y)
 					return true;
 			return false;
 
@@ -2085,7 +2085,7 @@ static void Quantize_Vertices(selection_c *list)
 		V_DIAG_SE = (1 << 3)
 	};
 
-	byte * vert_modes = new byte[NumVertices];
+	byte * vert_modes = new byte[gDocument.numVertices()];
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{

@@ -425,7 +425,7 @@ static void UDMF_ParseVertexField(Vertex *V, Udmf_Token& field, Udmf_Token& valu
 		V->raw_y = value.DecodeCoord();
 	else
 	{
-		DebugPrintf("vertex #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+		DebugPrintf("vertex #%d: unknown field '%s'\n", gDocument.numVertices()-1, field.c_str());
 	}
 }
 
@@ -487,7 +487,7 @@ static void UDMF_ParseLinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& v
 
 	else
 	{
-		DebugPrintf("linedef #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+		DebugPrintf("linedef #%d: unknown field '%s'\n", gDocument.numVertices() -1, field.c_str());
 	}
 }
 
@@ -511,7 +511,7 @@ static void UDMF_ParseSidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& v
 		SD->y_offset = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sidedef #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+		DebugPrintf("sidedef #%d: unknown field '%s'\n", gDocument.numVertices() -1, field.c_str());
 	}
 }
 
@@ -533,7 +533,7 @@ static void UDMF_ParseSectorField(Sector *S, Udmf_Token& field, Udmf_Token& valu
 		S->tag = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sector #%d: unknown field '%s'\n", NumVertices-1, field.c_str());
+		DebugPrintf("sector #%d: unknown field '%s'\n", gDocument.numVertices() -1, field.c_str());
 	}
 }
 
@@ -760,7 +760,7 @@ static void UDMF_WriteThings(Lump_c *lump)
 
 static void UDMF_WriteVertices(Lump_c *lump)
 {
-	for (int i = 0 ; i < NumVertices ; i++)
+	for (int i = 0 ; i < gDocument.numVertices(); i++)
 	{
 		lump->Printf("vertex // %d\n", i);
 		lump->Printf("{\n");

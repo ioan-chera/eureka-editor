@@ -474,7 +474,7 @@ static int VertexCompare(const void *p1, const void *p2)
 
 void DetectOverlappingVertices(void)
 {
-	SYS_ASSERT(num_vertices == NumVertices);
+	SYS_ASSERT(num_vertices == gDocument.numVertices());
 
 	u16_t *array = new u16_t[num_vertices];
 

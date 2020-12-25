@@ -575,7 +575,7 @@ void ValidateSidedefRefs(LineDef * ld, int num)
 
 void ValidateVertexRefs(LineDef *ld, int num)
 {
-	if (ld->start >= NumVertices || ld->end >= NumVertices ||
+	if (ld->start >= gDocument.numVertices() || ld->end >= gDocument.numVertices() ||
 	    ld->start == ld->end)
 	{
 		LogPrintf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
@@ -584,11 +584,11 @@ void ValidateVertexRefs(LineDef *ld, int num)
 		bad_linedef_count++;
 
 		// ensure we have a valid vertex
-		if (NumVertices < 2)
+		if (gDocument.numVertices() < 2)
 			CreateFallbackVertices();
 
 		ld->start = 0;
-		ld->end   = NumVertices - 1;
+		ld->end   = gDocument.numVertices() - 1;
 	}
 }
 
@@ -881,10 +881,10 @@ static void LoadLineDefs_Hexen()
 
 static void RemoveUnusedVerticesAtEnd()
 {
-	if (NumVertices == 0)
+	if (gDocument.numVertices() == 0)
 		return;
 
-	bitvec_c used_verts(NumVertices);
+	bitvec_c used_verts(gDocument.numVertices());
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
 	{
@@ -892,18 +892,18 @@ static void RemoveUnusedVerticesAtEnd()
 		used_verts.set(gDocument.linedefs[i]->end);
 	}
 
-	int new_count = NumVertices;
+	int new_count = gDocument.numVertices();
 
 	while (new_count > 2 && !used_verts.get(new_count-1))
 		new_count--;
 
 	// we directly modify the vertex array here (which is not
 	// normally kosher, but level loading is a special case).
-	if (new_count < NumVertices)
+	if (new_count < gDocument.numVertices())
 	{
-		LogPrintf("Removing %d unused vertices at end\n", NumVertices - new_count);
+		LogPrintf("Removing %d unused vertices at end\n", gDocument.numVertices() - new_count);
 
-		for (int i = new_count ; i < NumVertices ; i++)
+		for (int i = new_count ; i < gDocument.numVertices(); i++)
 			delete gDocument.vertices[i];
 
 		gDocument.vertices.resize(new_count);
@@ -1397,14 +1397,12 @@ static void SaveScripts()
 
 static void SaveVertices()
 {
-	int size = NumVertices * (int)sizeof(raw_vertex_t);
+	int size = gDocument.numVertices() * (int)sizeof(raw_vertex_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("VERTEXES", size);
 
-	for (int i = 0 ; i < NumVertices ; i++)
+	for (const Vertex *vert : gDocument.vertices)
 	{
-		const Vertex *vert = gDocument.vertices[i];
-
 		raw_vertex_t raw;
 
 		raw.x = LE_S16(COORD_TO_INT(vert->raw_x));

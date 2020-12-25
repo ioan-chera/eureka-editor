@@ -224,12 +224,12 @@ void Vertex_FindDanglers(selection_c& sel)
 {
 	sel.change_type(ObjType::vertices);
 
-	if (NumVertices == 0 || NumLineDefs == 0)
+	if (gDocument.numVertices() == 0 || NumLineDefs == 0)
 		return;
 
-	byte * line_counts = new byte[NumVertices];
+	byte * line_counts = new byte[gDocument.numVertices()];
 
-	memset(line_counts, 0, NumVertices);
+	memset(line_counts, 0, gDocument.numVertices());
 
 	for (int n = 0 ; n < NumLineDefs ; n++)
 	{
@@ -250,7 +250,7 @@ void Vertex_FindDanglers(selection_c& sel)
 		if (line_counts[v2] < 2) line_counts[v2] += 1;
 	}
 
-	for (int k = 0 ; k < NumVertices ; k++)
+	for (int k = 0 ; k < gDocument.numVertices(); k++)
 	{
 		if (line_counts[k] == 1)
 			sel.set(k);
@@ -290,15 +290,15 @@ void Vertex_FindOverlaps(selection_c& sel)
 
 	sel.change_type(ObjType::vertices);
 
-	if (NumVertices < 2)
+	if (gDocument.numVertices() < 2)
 		return;
 
 	// sort the vertices into order of the 'X' value.
 	// hence any overlapping vertices will be near each other.
 
-	std::vector<int> sorted_list(NumVertices, 0);
+	std::vector<int> sorted_list(gDocument.numVertices(), 0);
 
-	for (int i = 0 ; i < NumVertices ; i++)
+	for (int i = 0 ; i < gDocument.numVertices(); i++)
 		sorted_list[i] = i;
 
 	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
@@ -306,9 +306,9 @@ void Vertex_FindOverlaps(selection_c& sel)
 #define VERT_K  gDocument.vertices[sorted_list[k]]
 #define VERT_N  gDocument.vertices[sorted_list[n]]
 
-	for (int k = 0 ; k < NumVertices ; k++)
+	for (int k = 0 ; k < gDocument.numVertices(); k++)
 	{
-		for (int n = k + 1 ; n < NumVertices && VERT_N->raw_x == VERT_K->raw_x ; n++)
+		for (int n = k + 1 ; n < gDocument.numVertices() && VERT_N->raw_x == VERT_K->raw_x ; n++)
 		{
 			if (VERT_N->raw_y == VERT_K->raw_y)
 			{
@@ -327,7 +327,7 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 	const Vertex *V = gDocument.vertices[idx];
 
 	// find the base vertex (the one V is sitting on)
-	for (int n = 0 ; n < NumVertices ; n++)
+	for (int n = 0 ; n < gDocument.numVertices(); n++)
 	{
 		if (n == idx)
 			continue;
@@ -399,7 +399,7 @@ void Vertex_FindUnused(selection_c& sel)
 {
 	sel.change_type(ObjType::vertices);
 
-	if (NumVertices == 0)
+	if (gDocument.numVertices() == 0)
 		return;
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
@@ -408,7 +408,7 @@ void Vertex_FindUnused(selection_c& sel)
 		sel.set(gDocument.linedefs[i]->end);
 	}
 
-	sel.frob_range(0, NumVertices - 1, BitOp::toggle);
+	sel.frob_range(0, gDocument.numVertices() - 1, BitOp::toggle);
 }
 
 
@@ -567,16 +567,16 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 	 secs.change_type(ObjType::sectors);
 	verts.change_type(ObjType::vertices);
 
-	if (NumVertices == 0 || NumSectors == 0)
+	if (gDocument.numVertices() == 0 || NumSectors == 0)
 		return;
 
-	byte *ends = new byte[NumVertices];
+	byte *ends = new byte[gDocument.numVertices()];
 	int v;
 
 	for (int s = 0 ; s < NumSectors ; s++)
 	{
 		// clear the "ends" array
-		for (v = 0 ; v < NumVertices ; v++)
+		for (v = 0 ; v < gDocument.numVertices(); v++)
 			ends[v] = 0;
 
 		// for each sidedef bound to the Sector, store a "1" in the "ends"
@@ -608,7 +608,7 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 
 		// every entry in the "ends" array should be 0 or 3
 
-		for (v = 0 ; v < NumVertices ; v++)
+		for (v = 0 ; v < gDocument.numVertices(); v++)
 		{
 			if (ends[v] == 1 || ends[v] == 2)
 			{

@@ -683,7 +683,7 @@ static void ReselectGroup()
 	if (clip_board->mode == ObjType::vertices)
 	{
 		int count = (int)clip_board->verts.size();
-		new_sel.frob_range(NumVertices - count, NumVertices-1, BitOp::add);
+		new_sel.frob_range(gDocument.numVertices() - count, gDocument.numVertices() -1, BitOp::add);
 	}
 	else if (clip_board->mode == ObjType::linedefs)
 	{
