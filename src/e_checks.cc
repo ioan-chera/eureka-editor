@@ -49,11 +49,6 @@
 
 #define CAMERA_PEST  32000
 
-
-static char check_message[MSG_BUF_LEN];
-static char check_buffer [MSG_BUF_LEN];
-
-
 //------------------------------------------------------------------------
 
 class UI_Check_base : public UI_Escapable_Window
@@ -80,7 +75,7 @@ public:
 
 	void AddGap(int H);
 
-	void AddLine(const char *msg, int severity = 0, int W = -1,
+	void AddLine(const SString &msg, int severity = 0, int W = -1,
 		const char *button1 = NULL, Fl_Callback *cb1 = NULL,
 		const char *button2 = NULL, Fl_Callback *cb2 = NULL,
 		const char *button3 = NULL, Fl_Callback *cb3 = NULL);
@@ -170,7 +165,7 @@ void UI_Check_base::AddGap(int H)
 
 
 void UI_Check_base::AddLine(
-		const char *msg, int severity, int W,
+		const SString &msg, int severity, int W,
 		 const char *button1, Fl_Callback *cb1,
 		 const char *button2, Fl_Callback *cb2,
 		 const char *button3, Fl_Callback *cb3)
@@ -182,7 +177,7 @@ void UI_Check_base::AddLine(
 
 	Fl_Box *box = new Fl_Box(FL_NO_BOX, cx, cy, W, 25, NULL);
 	box->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
-	box->copy_label(msg);
+	box->copy_label(msg.c_str());
 
 	if (severity == 2)
 	{
@@ -533,6 +528,8 @@ CheckResult ChecksModule::checkVertices(int min_severity) const
 
 	selection_c  sel;
 
+	SString check_message;
+
 	for (;;)
 	{
 		Vertex_FindOverlaps(sel, doc);
@@ -541,9 +538,9 @@ CheckResult ChecksModule::checkVertices(int min_severity) const
 			dialog->AddLine("No overlapping vertices");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d overlapping vertices", sel.count_obj());
+			check_message = SString::printf("%d overlapping vertices", sel.count_obj());
 
-			dialog->AddLine(check_message, 2, 210,
+			dialog->AddLine(check_message.c_str(), 2, 210,
 			                "Show",  &UI_Check_Vertices::action_highlight,
 			                "Merge", &UI_Check_Vertices::action_merge);
 		}
@@ -555,7 +552,7 @@ CheckResult ChecksModule::checkVertices(int min_severity) const
 			dialog->AddLine("No dangling vertices");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d dangling vertices", sel.count_obj());
+			check_message = SString::printf("%d dangling vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 210,
 			                "Show",  &UI_Check_Vertices::action_show_danglers);
@@ -568,7 +565,7 @@ CheckResult ChecksModule::checkVertices(int min_severity) const
 			dialog->AddLine("No unused vertices");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unused vertices", sel.count_obj());
+			check_message = SString::printf("%d unused vertices", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 210,
 			                "Show",   &UI_Check_Vertices::action_show_unused,
@@ -1215,6 +1212,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 	selection_c  sel, other;
 
 	std::map<int, int> types;
+	SString check_message;
 
 	for (;;)
 	{
@@ -1224,7 +1222,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 			dialog->AddLine("No unclosed sectors");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unclosed sectors", sel.count_obj());
+			check_message = SString::printf("%d unclosed sectors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_unclosed,
@@ -1238,7 +1236,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 			dialog->AddLine("No mismatched sectors");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d mismatched sectors", sel.count_obj());
+			check_message = SString::printf("%d mismatched sectors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show",  &UI_Check_Sectors::action_show_mismatch,
@@ -1252,7 +1250,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 			dialog->AddLine("No sectors with ceil < floor");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d sectors with ceil < floor", sel.count_obj());
+			check_message = SString::printf("%d sectors with ceil < floor", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show", &UI_Check_Sectors::action_show_ceil,
@@ -1268,7 +1266,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 			dialog->AddLine("No unknown sector types");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unknown sector types", (int)types.size());
+			check_message = SString::printf("%d unknown sector types", (int)types.size());
 
 			dialog->AddLine(check_message, 2, 220,
 			                "Show",   &UI_Check_Sectors::action_show_unknown,
@@ -1285,7 +1283,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 		{
 			int approx_num = sel.count_obj();
 
-			snprintf(check_message, sizeof(check_message), "%d shared sidedefs", approx_num);
+			check_message = SString::printf("%d shared sidedefs", approx_num);
 
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",   &UI_Check_Sectors::action_show_packed,
@@ -1299,7 +1297,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 			dialog->AddLine("No unused sectors");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unused sectors", sel.count_obj());
+			check_message = SString::printf("%d unused sectors", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 170,
 			                "Remove", &UI_Check_Sectors::action_remove);
@@ -1312,7 +1310,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 			dialog->AddLine("No unused sidedefs");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unused sidedefs", sel.count_obj());
+			check_message = SString::printf("%d unused sidedefs", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 170,
 			                "Remove", &UI_Check_Sectors::action_remove_sidedefs);
@@ -1932,6 +1930,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 	selection_c  sel;
 
 	std::map<int, int> types;
+	SString check_message;
 
 	for (;;)
 	{
@@ -1941,7 +1940,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 			dialog->AddLine("No unknown thing types");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unknown things", (int)types.size());
+			check_message = SString::printf("%d unknown things", (int)types.size());
 
 			dialog->AddLine(check_message, 2, 200,
 			                "Show",   &UI_Check_Things::action_show_unknown,
@@ -1956,7 +1955,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 			dialog->AddLine("No stuck actors");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d stuck actors", sel.count_obj());
+			check_message = SString::printf("%d stuck actors", sel.count_obj());
 
 			dialog->AddLine(check_message, 2, 200,
 			                "Show",  &UI_Check_Things::action_show_stuck);
@@ -1969,7 +1968,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 			dialog->AddLine("No things in the void");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d things in the void", sel.count_obj());
+			check_message = SString::printf("%d things in the void", sel.count_obj());
 
 			dialog->AddLine(check_message, 1, 200,
 			                "Show",   &UI_Check_Things::action_show_void,
@@ -1983,7 +1982,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 			dialog->AddLine("No unspawnable things -- skill flags are OK");
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "%d unspawnable things", sel.count_obj());
+			check_message = SString::printf("%d unspawnable things", sel.count_obj());
 			dialog->AddLine(check_message, 1, 200,
 			                "Show", &UI_Check_Things::action_show_duds,
 			                "Fix",  &UI_Check_Things::action_fix_duds);
@@ -2020,19 +2019,19 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		}
 		else if (dm_num < Misc_info.min_dm_starts)
 		{
-			snprintf(check_message, sizeof(check_message), "Found %d deathmatch starts -- need at least %d", dm_num,
+			check_message = SString::printf("Found %d deathmatch starts -- need at least %d", dm_num,
 			        Misc_info.min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
 		else if (dm_num > Misc_info.max_dm_starts)
 		{
-			snprintf(check_message, sizeof(check_message), "Found %d deathmatch starts -- maximum is %d", dm_num,
+			check_message = SString::printf("Found %d deathmatch starts -- maximum is %d", dm_num,
 			        Misc_info.max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
 		{
-			snprintf(check_message, sizeof(check_message), "Found %d deathmatch starts -- OK", dm_num);
+			check_message = SString::printf("Found %d deathmatch starts -- OK", dm_num);
 			dialog->AddLine(check_message);
 		}
 
@@ -2839,6 +2838,8 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 
 	std::map<int, int> types;
 
+	SString check_buffer;
+
 	for (;;)
 	{
 		LineDefs_FindZeroLen(sel, doc);
@@ -2847,7 +2848,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No zero-length linedefs");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d zero-length linedefs", sel.count_obj());
+			check_buffer = SString::printf("%d zero-length linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Show",   &UI_Check_LineDefs::action_show_zero,
@@ -2861,7 +2862,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No overlapping linedefs");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d overlapping linedefs", sel.count_obj());
+			check_buffer = SString::printf("%d overlapping linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Show",   &UI_Check_LineDefs::action_show_overlap,
@@ -2875,7 +2876,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No criss-crossing linedefs");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d criss-crossing linedefs", sel.count_obj());
+			check_buffer = SString::printf("%d criss-crossing linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 220,
 			                "Show", &UI_Check_LineDefs::action_show_crossing);
@@ -2890,7 +2891,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No unknown line types");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d unknown line types", (int)types.size());
+			check_buffer = SString::printf("%d unknown line types", (int)types.size());
 
 			dialog->AddLine(check_buffer, 1, 210,
 			                "Show",   &UI_Check_LineDefs::action_show_unknown,
@@ -2905,7 +2906,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No linedefs without a right side");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d linedefs without right side", sel.count_obj());
+			check_buffer = SString::printf("%d linedefs without right side", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_mis_right);
@@ -2918,7 +2919,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No manual doors on 1S linedefs");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d manual doors on 1S linedefs", sel.count_obj());
+			check_buffer = SString::printf("%d manual doors on 1S linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 300,
 			                "Show", &UI_Check_LineDefs::action_show_manual_doors,
@@ -2932,7 +2933,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No non-blocking one-sided linedefs");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d non-blocking one-sided linedefs", sel.count_obj());
+			check_buffer = SString::printf("%d non-blocking one-sided linedefs", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_lack_impass,
@@ -2946,7 +2947,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 			dialog->AddLine("No linedefs with wrong 2S flag");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d linedefs with wrong 2S flag", sel.count_obj());
+			check_buffer = SString::printf("%d linedefs with wrong 2S flag", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 300,
 			                "Show", &UI_Check_LineDefs::action_show_bad_2s_flag,
@@ -3353,6 +3354,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0, doc);
 
 	selection_c  sel;
+	SString check_buffer;
 
 	for (;;)
 	{
@@ -3362,7 +3364,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 			dialog->AddLine("No linedefs missing a needed tag");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d linedefs missing a needed tag", sel.count_obj());
+			check_buffer = SString::printf("%d linedefs missing a needed tag", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 320,
 			                "Show", &UI_Check_Tags::action_show_missing_tag);
@@ -3375,7 +3377,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 			dialog->AddLine("No tagged linedefs w/o a matching sector");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d tagged linedefs w/o a matching sector", sel.count_obj());
+			check_buffer = SString::printf("%d tagged linedefs w/o a matching sector", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 2, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_line);
@@ -3388,7 +3390,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 			dialog->AddLine("No tagged sectors w/o a matching linedef");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d tagged sectors w/o a matching linedef", sel.count_obj());
+			check_buffer = SString::printf("%d tagged sectors w/o a matching linedef", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_unmatch_sec);
@@ -3401,7 +3403,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d sectors have an invalid 666/667 tag", sel.count_obj());
+			check_buffer = SString::printf("%d sectors have an invalid 666/667 tag", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 350,
 			                "Show", &UI_Check_Tags::action_show_beast_marks);
@@ -3418,7 +3420,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 			dialog->AddLine("No tags are in use");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "Lowest tag: %d   Highest tag: %d", min_tag, max_tag);
+			check_buffer = SString::printf("Lowest tag: %d   Highest tag: %d", min_tag, max_tag);
 			dialog->AddLine(check_buffer);
 		}
 
@@ -4277,6 +4279,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 	selection_c  sel;
 
 	std::map<SString, int> names;
+	SString check_buffer;
 
 	for (;;)
 	{
@@ -4286,7 +4289,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 			dialog->AddLine("No unknown textures");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d unknown textures", (int)names.size());
+			check_buffer = SString::printf("%d unknown textures", (int)names.size());
 
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_tex,
@@ -4301,7 +4304,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 			dialog->AddLine("No unknown flats");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d unknown flats", (int)names.size());
+			check_buffer = SString::printf("%d unknown flats", (int)names.size());
 
 			dialog->AddLine(check_buffer, 2, 200,
 			                "Show", &UI_Check_Textures::action_show_unk_flat,
@@ -4318,7 +4321,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 				dialog->AddLine("No textures causing Medusa Effect");
 			else
 			{
-				snprintf(check_buffer, sizeof(check_buffer), "%d Medusa textures", (int)names.size());
+				check_buffer = SString::printf("%d Medusa textures", (int)names.size());
 
 				dialog->AddLine(check_buffer, 2, 200,
 								"Show", &UI_Check_Textures::action_show_medusa,
@@ -4336,7 +4339,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 			dialog->AddLine("No missing textures on walls");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d missing textures on walls", sel.count_obj());
+			check_buffer = SString::printf("%d missing textures on walls", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_missing,
@@ -4350,7 +4353,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 			dialog->AddLine("No transparent textures on solids");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d transparent textures on solids", sel.count_obj());
+			check_buffer = SString::printf("%d transparent textures on solids", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_transparent,
@@ -4365,7 +4368,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 			dialog->AddLine("No non-animating switch textures");
 		else
 		{
-			snprintf(check_buffer, sizeof(check_buffer), "%d non-animating switch textures", sel.count_obj());
+			check_buffer = SString::printf("%d non-animating switch textures", sel.count_obj());
 
 			dialog->AddLine(check_buffer, 1, 275,
 			                "Show", &UI_Check_Textures::action_show_dup_switch,
