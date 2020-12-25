@@ -594,7 +594,7 @@ void UI_LineBox::tag_callback(Fl_Widget *w, void *data)
 	int new_tag = atoi(box->tag->value());
 
 	if (! edit.Selected->empty())
-		Tags_ApplyNewValue(new_tag);
+		gDocument.checks.tagsApplyNewValue(new_tag);
 }
 
 

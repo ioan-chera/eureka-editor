@@ -30,6 +30,16 @@
 #include "DocumentModule.h"
 #include "ui_window.h"
 
+// the CHECK_xxx functions return the following values:
+enum class CheckResult
+{
+	ok,				// no issues at all
+	minorProblem,	// only minor issues
+	majorProblem,	// some major problems
+	highlight,		// need to highlight stuff (skip further checks)
+	tookAction		// [internal use : user took some action]
+};
+
 //
 // The map checking module
 //
@@ -39,73 +49,26 @@ public:
 	ChecksModule(Document &doc) : DocumentModule(doc)
 	{
 	}
-};
 
+	void sidedefsUnpack(bool is_after_load) const;
+	void tagsApplyNewValue(int new_tag) const;
+	void tagsUsedRange(int *min_tag, int *max_tag) const;
 
-void SideDefs_Unpack(bool is_after_load = false);
-void SideDefs_NormalizeMiddles();
-
-void Tags_ApplyNewValue(int new_tag);
-void Tags_UsedRange(int *min_tag, int *max_tag);
-
-
-void CMD_MapCheck();
-
-void CMD_ApplyTag();
-
-
-//------------------------------------------------------------------------
-
-// the CHECK_xxx functions return the following values:
-enum check_result_e
-{
-	CKR_OK = 0,            // no issues at all
-	CKR_MinorProblem,      // only minor issues
-	CKR_MajorProblem,      // some major problems
-	CKR_Highlight,         // need to highlight stuff (skip further checks)
-	CKR_TookAction         // [internal use : user took some action]
-
-};
-
-
-class UI_Check_base : public UI_Escapable_Window
-{
-protected:
-	bool want_close;
-
-	check_result_e  user_action;
-
-	Fl_Group * line_group;
-
-	int cy;
-	int worst_severity;
+	static void commandMapCheck();
+	static void commandApplyTag();
 
 private:
-	static void close_callback(Fl_Widget *, void *);
+	void checkAll(bool majorStuff) const;
 
-public:
-	UI_Check_base(int W, int H, bool all_mode, const char *L,
-	              const char *header_txt);
-	virtual ~UI_Check_base();
+	CheckResult checkVertices(int minSeverity) const;
+	CheckResult checkSectors(int minSeverity) const;
+	CheckResult checkThings(int minSeverity) const;
+	CheckResult checkLinedefs(int minSeverity) const;
+	CheckResult checkTags(int minSeverity) const;
+	CheckResult checkTextures(int minSeverity) const;
 
-	void Reset();
-
-	void AddGap(int H);
-
-	void AddLine(const char *msg, int severity = 0, int W = -1,
-	             const char *button1 = NULL, Fl_Callback *cb1 = NULL,
-	             const char *button2 = NULL, Fl_Callback *cb2 = NULL,
-	             const char *button3 = NULL, Fl_Callback *cb3 = NULL);
-
-	check_result_e  Run();
-
-	int WorstSeverity() const { return worst_severity; }
+	int copySidedef(int num) const;
 };
-
-
-check_result_e CHECK_LineDefs(int min_severity = 0);
-check_result_e CHECK_Textures(int min_severity = 0);
-check_result_e CHECK_Tags    (int min_severity = 0);
 
 #endif  /* __EUREKA_E_CHECKS_H__ */
 

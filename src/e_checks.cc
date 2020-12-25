@@ -55,6 +55,43 @@ static char check_buffer [MSG_BUF_LEN];
 
 
 //------------------------------------------------------------------------
+
+class UI_Check_base : public UI_Escapable_Window
+{
+protected:
+	bool want_close;
+
+	CheckResult  user_action;
+
+	Fl_Group *line_group;
+
+	int cy;
+	int worst_severity;
+
+private:
+	static void close_callback(Fl_Widget *, void *);
+
+public:
+	UI_Check_base(int W, int H, bool all_mode, const char *L,
+		const char *header_txt);
+	virtual ~UI_Check_base();
+
+	void Reset();
+
+	void AddGap(int H);
+
+	void AddLine(const char *msg, int severity = 0, int W = -1,
+		const char *button1 = NULL, Fl_Callback *cb1 = NULL,
+		const char *button2 = NULL, Fl_Callback *cb2 = NULL,
+		const char *button3 = NULL, Fl_Callback *cb3 = NULL);
+
+	CheckResult  Run();
+
+	int WorstSeverity() const { return worst_severity; }
+};
+
+
+//------------------------------------------------------------------------
 //  BASE CLASS
 //------------------------------------------------------------------------
 
@@ -69,7 +106,7 @@ void UI_Check_base::close_callback(Fl_Widget *w, void *data)
 UI_Check_base::UI_Check_base(int W, int H, bool all_mode,
                              const char *L, const char *header_txt) :
 	UI_Escapable_Window(W, H, L),
-	want_close(false), user_action(CKR_OK),
+	want_close(false), user_action(CheckResult::ok),
 	worst_severity(0)
 {
 	cy = 10;
@@ -116,7 +153,7 @@ UI_Check_base::~UI_Check_base()
 void UI_Check_base::Reset()
 {
 	want_close = false;
-	user_action = CKR_OK;
+	user_action = CheckResult::ok;
 
 	cy = 45;
 
@@ -197,48 +234,48 @@ void UI_Check_base::AddLine(
 }
 
 
-check_result_e UI_Check_base::Run()
+CheckResult UI_Check_base::Run()
 {
 	set_modal();
 
 	show();
 
-	while (! (want_close || user_action != CKR_OK))
+	while (! (want_close || user_action != CheckResult::ok))
 		Fl::wait(0.2);
 
-	if (user_action != CKR_OK)
+	if (user_action != CheckResult::ok)
 		return user_action;
 
 	switch (worst_severity)
 	{
-		case 0:  return CKR_OK;
-		case 1:  return CKR_MinorProblem;
-		default: return CKR_MajorProblem;
+		case 0:  return CheckResult::ok;
+		case 1:  return CheckResult::minorProblem;
+		default: return CheckResult::majorProblem;
 	}
 }
 
 
 //------------------------------------------------------------------------
 
-void Vertex_FindDanglers(selection_c& sel)
+static void Vertex_FindDanglers(selection_c& sel, const Document &doc)
 {
 	sel.change_type(ObjType::vertices);
 
-	if (gDocument.numVertices() == 0 || gDocument.numLinedefs() == 0)
+	if (doc.numVertices() == 0 || doc.numLinedefs() == 0)
 		return;
 
-	byte * line_counts = new byte[gDocument.numVertices()];
+	byte * line_counts = new byte[doc.numVertices()];
 
-	memset(line_counts, 0, gDocument.numVertices());
+	memset(line_counts, 0, doc.numVertices());
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		int v1 = L->start;
 		int v2 = L->end;
 
 		// dangling vertices are fine for lines setting inside a sector
 		// (i.e. with same sector on both sides)
-		if (L->TwoSided() && (L->WhatSector(Side::left, gDocument) == L->WhatSector(Side::right, gDocument)))
+		if (L->TwoSided() && (L->WhatSector(Side::left, doc) == L->WhatSector(Side::right, doc)))
 		{
 			line_counts[v1] = line_counts[v2] = 2;
 			continue;
@@ -248,7 +285,7 @@ void Vertex_FindDanglers(selection_c& sel)
 		if (line_counts[v2] < 2) line_counts[v2] += 1;
 	}
 
-	for (int k = 0 ; k < gDocument.numVertices(); k++)
+	for (int k = 0 ; k < doc.numVertices(); k++)
 	{
 		if (line_counts[k] == 1)
 			sel.set(k);
@@ -258,12 +295,12 @@ void Vertex_FindDanglers(selection_c& sel)
 }
 
 
-void Vertex_ShowDanglers()
+static void Vertex_ShowDanglers(const Document &doc)
 {
 	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
-	Vertex_FindDanglers(*edit.Selected);
+	Vertex_FindDanglers(*edit.Selected, doc);
 
 	GoToErrors();
 }
@@ -271,42 +308,47 @@ void Vertex_ShowDanglers()
 
 struct vertex_X_CMP_pred
 {
+	const Document &doc;
+	explicit vertex_X_CMP_pred(const Document &doc) : doc(doc)
+	{
+	}
+
 	inline bool operator() (int A, int B) const
 	{
-		const Vertex *V1 = gDocument.vertices[A];
-		const Vertex *V2 = gDocument.vertices[B];
+		const Vertex *V1 = doc.vertices[A];
+		const Vertex *V2 = doc.vertices[B];
 
 		return V1->raw_x < V2->raw_x;
 	}
 };
 
 
-void Vertex_FindOverlaps(selection_c& sel)
+void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 {
 	// NOTE: when two or more vertices share the same coordinates,
 	//       only the second and subsequent ones are stored in 'sel'.
 
 	sel.change_type(ObjType::vertices);
 
-	if (gDocument.numVertices() < 2)
+	if (doc.numVertices() < 2)
 		return;
 
 	// sort the vertices into order of the 'X' value.
 	// hence any overlapping vertices will be near each other.
 
-	std::vector<int> sorted_list(gDocument.numVertices(), 0);
+	std::vector<int> sorted_list(doc.numVertices(), 0);
 
-	for (int i = 0 ; i < gDocument.numVertices(); i++)
+	for (int i = 0 ; i < doc.numVertices(); i++)
 		sorted_list[i] = i;
 
-	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred());
+	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred(doc));
 
-#define VERT_K  gDocument.vertices[sorted_list[k]]
-#define VERT_N  gDocument.vertices[sorted_list[n]]
+#define VERT_K  doc.vertices[sorted_list[k]]
+#define VERT_N  doc.vertices[sorted_list[n]]
 
-	for (int k = 0 ; k < gDocument.numVertices(); k++)
+	for (int k = 0 ; k < doc.numVertices(); k++)
 	{
-		for (int n = k + 1 ; n < gDocument.numVertices() && VERT_N->raw_x == VERT_K->raw_x ; n++)
+		for (int n = k + 1 ; n < doc.numVertices() && VERT_N->raw_x == VERT_K->raw_x ; n++)
 		{
 			if (VERT_N->raw_y == VERT_K->raw_y)
 			{
@@ -320,12 +362,12 @@ void Vertex_FindOverlaps(selection_c& sel)
 }
 
 
-static void Vertex_MergeOne(int idx, selection_c& merge_verts)
+static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
 {
-	const Vertex *V = gDocument.vertices[idx];
+	const Vertex *V = doc.vertices[idx];
 
 	// find the base vertex (the one V is sitting on)
-	for (int n = 0 ; n < gDocument.numVertices(); n++)
+	for (int n = 0 ; n < doc.numVertices(); n++)
 	{
 		if (n == idx)
 			continue;
@@ -334,22 +376,22 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 		if (merge_verts.get(n))
 			continue;
 
-		const Vertex *N = gDocument.vertices[n];
+		const Vertex *N = doc.vertices[n];
 
 		if (*N != *V)
 			continue;
 
 		// Ok, found it, so update linedefs
 
-		for (int ld = 0 ; ld < gDocument.numLinedefs(); ld++)
+		for (int ld = 0 ; ld < doc.numLinedefs(); ld++)
 		{
-			LineDef *L = gDocument.linedefs[ld];
+			LineDef *L = doc.linedefs[ld];
 
 			if (L->start == idx)
-				gDocument.basis.changeLinedef(ld, LineDef::F_START, n);
+				doc.basis.changeLinedef(ld, LineDef::F_START, n);
 
 			if (L->end == idx)
-				gDocument.basis.changeLinedef(ld, LineDef::F_END, n);
+				doc.basis.changeLinedef(ld, LineDef::F_END, n);
 		}
 
 		return;
@@ -360,77 +402,77 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts)
 }
 
 
-void Vertex_MergeOverlaps()
+static void Vertex_MergeOverlaps(Document &doc)
 {
 	selection_c verts;
-	Vertex_FindOverlaps(verts);
+	Vertex_FindOverlaps(verts, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("merged overlapping vertices");
+	doc.basis.begin();
+	doc.basis.setMessage("merged overlapping vertices");
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		Vertex_MergeOne(*it, verts);
+		Vertex_MergeOne(*it, verts, doc);
 	}
 
 	// nothing should reference these vertices now
 	DeleteObjects(&verts);
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	RedrawMap();
 }
 
 
-void Vertex_ShowOverlaps()
+static void Vertex_ShowOverlaps(const Document &doc)
 {
 	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
-	Vertex_FindOverlaps(*edit.Selected);
+	Vertex_FindOverlaps(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Vertex_FindUnused(selection_c& sel)
+static void Vertex_FindUnused(selection_c& sel, const Document &doc)
 {
 	sel.change_type(ObjType::vertices);
 
-	if (gDocument.numVertices() == 0)
+	if (doc.numVertices() == 0)
 		return;
 
-	for (const LineDef *linedef : gDocument.linedefs)
+	for (const LineDef *linedef : doc.linedefs)
 	{
 		sel.set(linedef->start);
 		sel.set(linedef->end);
 	}
 
-	sel.frob_range(0, gDocument.numVertices() - 1, BitOp::toggle);
+	sel.frob_range(0, doc.numVertices() - 1, BitOp::toggle);
 }
 
 
-void Vertex_RemoveUnused()
+static void Vertex_RemoveUnused(Document &doc)
 {
 	selection_c sel;
 
-	Vertex_FindUnused(sel);
+	Vertex_FindUnused(sel, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed unused vertices");
+	doc.basis.begin();
+	doc.basis.setMessage("removed unused vertices");
 
 	DeleteObjects(&sel);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Vertex_ShowUnused()
+static void Vertex_ShowUnused(const Document &doc)
 {
 	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
-	Vertex_FindUnused(*edit.Selected);
+	Vertex_FindUnused(*edit.Selected, doc);
 
 	GoToErrors();
 }
@@ -441,59 +483,59 @@ void Vertex_ShowUnused()
 class UI_Check_Vertices : public UI_Check_base
 {
 public:
-	UI_Check_Vertices(bool all_mode) :
+	UI_Check_Vertices(bool all_mode, Document &doc) :
 		UI_Check_base(520, 224, all_mode, "Check : Vertices",
-				      "Vertex test results")
+				      "Vertex test results"), doc(doc)
 	{ }
 
-public:
 	static void action_merge(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_MergeOverlaps();
-		dialog->user_action = CKR_TookAction;
+		Vertex_MergeOverlaps(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_highlight(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowOverlaps();
-		dialog->user_action = CKR_Highlight;
+		Vertex_ShowOverlaps(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_unused(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowUnused();
-		dialog->user_action = CKR_Highlight;
+		Vertex_ShowUnused(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_RemoveUnused();
-		dialog->user_action = CKR_TookAction;
+		Vertex_RemoveUnused(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_danglers(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowDanglers();
-		dialog->user_action = CKR_Highlight;
+		Vertex_ShowDanglers(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
-
+private:
+	Document &doc;
 };
 
 
-check_result_e CHECK_Vertices(int min_severity = 0)
+CheckResult ChecksModule::checkVertices(int min_severity) const
 {
-	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0);
+	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0, doc);
 
 	selection_c  sel;
 
 	for (;;)
 	{
-		Vertex_FindOverlaps(sel);
+		Vertex_FindOverlaps(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No overlapping vertices");
@@ -507,7 +549,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 		}
 
 
-		Vertex_FindDanglers(sel);
+		Vertex_FindDanglers(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No dangling vertices");
@@ -520,7 +562,7 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 		}
 
 
-		Vertex_FindUnused(sel);
+		Vertex_FindUnused(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unused vertices");
@@ -539,12 +581,12 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 		{
 			delete dialog;
 
-			return CKR_OK;
+			return CheckResult::ok;
 		}
 
-		check_result_e result = dialog->Run();
+		CheckResult result = dialog->Run();
 
-		if (result == CKR_TookAction)
+		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
 			dialog->Reset();
@@ -560,42 +602,42 @@ check_result_e CHECK_Vertices(int min_severity = 0)
 
 //------------------------------------------------------------------------
 
-void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
+static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Document &doc)
 {
 	 secs.change_type(ObjType::sectors);
 	verts.change_type(ObjType::vertices);
 
-	if (gDocument.numVertices() == 0 || gDocument.numSectors() == 0)
+	if (doc.numVertices() == 0 || doc.numSectors() == 0)
 		return;
 
-	byte *ends = new byte[gDocument.numVertices()];
+	byte *ends = new byte[doc.numVertices()];
 	int v;
 
-	for (int s = 0 ; s < gDocument.numSectors(); s++)
+	for (int s = 0 ; s < doc.numSectors(); s++)
 	{
 		// clear the "ends" array
-		for (v = 0 ; v < gDocument.numVertices(); v++)
+		for (v = 0 ; v < doc.numVertices(); v++)
 			ends[v] = 0;
 
 		// for each sidedef bound to the Sector, store a "1" in the "ends"
 		// array for its starting vertex, and a "2" for its ending vertex.
-		for (const LineDef *L : gDocument.linedefs)
+		for (const LineDef *L : doc.linedefs)
 		{
-			if (! L->TouchesSector(s, gDocument))
+			if (! L->TouchesSector(s, doc))
 				continue;
 
 			// ignore lines with same sector on both sides
 			if (L->left >= 0 && L->right >= 0 &&
-			    L->Left(gDocument)->sector == L->Right(gDocument)->sector)
+			    L->Left(doc)->sector == L->Right(doc)->sector)
 				continue;
 
-			if (L->right >= 0 && L->Right(gDocument)->sector == s)
+			if (L->right >= 0 && L->Right(doc)->sector == s)
 			{
 				ends[L->start] |= 1;
 				ends[L->end]   |= 2;
 			}
 
-			if (L->left >= 0 && L->Left(gDocument)->sector == s)
+			if (L->left >= 0 && L->Left(doc)->sector == s)
 			{
 				ends[L->start] |= 2;
 				ends[L->end]   |= 1;
@@ -604,7 +646,7 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 
 		// every entry in the "ends" array should be 0 or 3
 
-		for (v = 0 ; v < gDocument.numVertices(); v++)
+		for (v = 0 ; v < doc.numVertices(); v++)
 		{
 			if (ends[v] == 1 || ends[v] == 2)
 			{
@@ -618,7 +660,7 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 }
 
 
-static void Sectors_ShowUnclosed(ObjType what)
+static void Sectors_ShowUnclosed(ObjType what, const Document &doc)
 {
 	if (edit.mode != what)
 		Editor_ChangeMode((what == ObjType::sectors) ? 's' : 'v');
@@ -626,15 +668,15 @@ static void Sectors_ShowUnclosed(ObjType what)
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindUnclosed(*edit.Selected, other);
+		Sectors_FindUnclosed(*edit.Selected, other, doc);
 	else
-		Sectors_FindUnclosed(other, *edit.Selected);
+		Sectors_FindUnclosed(other, *edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
+static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Document &doc)
 {
 	//
 	// Note from RQ:
@@ -655,43 +697,43 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 	 secs.change_type(ObjType::sectors);
 	lines.change_type(ObjType::linedefs);
 
-	if (gDocument.numLinedefs() == 0 || gDocument.numSectors() == 0)
+	if (doc.numLinedefs() == 0 || doc.numSectors() == 0)
 		return;
 
-	gDocument.hover.fastOpposite_begin();
+	doc.hover.fastOpposite_begin();
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->right >= 0)
 		{
-			int s = gDocument.hover.getOppositeSector(n, Side::right);
+			int s = doc.hover.getOppositeSector(n, Side::right);
 
-			if (s < 0 || L->Right(gDocument)->sector != s)
+			if (s < 0 || L->Right(doc)->sector != s)
 			{
-				 secs.set(L->Right(gDocument)->sector);
+				 secs.set(L->Right(doc)->sector);
 				lines.set(n);
 			}
 		}
 
 		if (L->left >= 0)
 		{
-			int s = gDocument.hover.getOppositeSector(n, Side::left);
+			int s = doc.hover.getOppositeSector(n, Side::left);
 
-			if (s < 0 || L->Left(gDocument)->sector != s)
+			if (s < 0 || L->Left(doc)->sector != s)
 			{
-				 secs.set(L->Left(gDocument)->sector);
+				 secs.set(L->Left(doc)->sector);
 				lines.set(n);
 			}
 		}
 	}
 
-	gDocument.hover.fastOpposite_finish();
+	doc.hover.fastOpposite_finish();
 }
 
 
-static void Sectors_ShowMismatches(ObjType what)
+static void Sectors_ShowMismatches(ObjType what, Document &doc)
 {
 	if (edit.mode != what)
 		Editor_ChangeMode((what == ObjType::sectors) ? 's' : 'l');
@@ -699,9 +741,9 @@ static void Sectors_ShowMismatches(ObjType what)
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindMismatches(*edit.Selected, other);
+		Sectors_FindMismatches(*edit.Selected, other, doc);
 	else
-		Sectors_FindMismatches(other, *edit.Selected);
+		Sectors_FindMismatches(other, *edit.Selected, doc);
 
 	GoToErrors();
 }
@@ -718,7 +760,7 @@ static void bump_unknown_type(std::map<int, int>& t_map, int type)
 }
 
 
-static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
+static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, const Document &doc)
 {
 	types.clear();
 
@@ -726,9 +768,9 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	int max_type = (Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
 
-	for (int n = 0 ; n < gDocument.numSectors(); n++)
+	for (int n = 0 ; n < doc.numSectors(); n++)
 	{
-		int type_num = gDocument.sectors[n]->type;
+		int type_num = doc.sectors[n]->type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -758,27 +800,27 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 }
 
 
-static void Sectors_ShowUnknown()
+static void Sectors_ShowUnknown(const Document &doc)
 {
 	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	std::map<int, int> types;
 
-	Sectors_FindUnknown(*edit.Selected, types);
+	Sectors_FindUnknown(*edit.Selected, types, doc);
 
 	GoToErrors();
 }
 
 
-void Sectors_LogUnknown()
+static void Sectors_LogUnknown(const Document &doc)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 	std::map<int, int>::iterator IT;
 
-	Sectors_FindUnknown(sel, types);
+	Sectors_FindUnknown(sel, types, doc);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown Sector Types:\n");
@@ -793,147 +835,147 @@ void Sectors_LogUnknown()
 }
 
 
-void Sectors_ClearUnknown()
+static void Sectors_ClearUnknown(Document &doc)
 {
 	selection_c sel;
 	std::map<int, int> types;
 
-	Sectors_FindUnknown(sel, types);
+	Sectors_FindUnknown(sel, types, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("cleared unknown sector types");
+	doc.basis.begin();
+	doc.basis.setMessage("cleared unknown sector types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		gDocument.basis.changeSector(*it, Sector::F_TYPE, 0);
+		doc.basis.changeSector(*it, Sector::F_TYPE, 0);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Sectors_FindUnused(selection_c& sel)
+void Sectors_FindUnused(selection_c& sel, const Document &doc)
 {
 	sel.change_type(ObjType::sectors);
 
-	if (gDocument.numSectors() == 0)
+	if (doc.numSectors() == 0)
 		return;
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		if (L->left >= 0)
-			sel.set(L->Left(gDocument)->sector);
+			sel.set(L->Left(doc)->sector);
 
 		if (L->right >= 0)
-			sel.set(L->Right(gDocument)->sector);
+			sel.set(L->Right(doc)->sector);
 	}
 
-	sel.frob_range(0, gDocument.numSectors() - 1, BitOp::toggle);
+	sel.frob_range(0, doc.numSectors() - 1, BitOp::toggle);
 }
 
 
-void Sectors_RemoveUnused()
+static void Sectors_RemoveUnused(Document &doc)
 {
 	selection_c sel;
 
-	Sectors_FindUnused(sel);
+	Sectors_FindUnused(sel, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed unused sectors");
+	doc.basis.begin();
+	doc.basis.setMessage("removed unused sectors");
 
 	DeleteObjects(&sel);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Sectors_FindBadCeil(selection_c& sel)
+static void Sectors_FindBadCeil(selection_c& sel, const Document &doc)
 {
 	sel.change_type(ObjType::sectors);
 
-	if (gDocument.numSectors() == 0)
+	if (doc.numSectors() == 0)
 		return;
 
-	for (int i = 0 ; i < gDocument.numSectors(); i++)
+	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
-		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
+		if (doc.sectors[i]->ceilh < doc.sectors[i]->floorh)
 			sel.set(i);
 	}
 }
 
 
-void Sectors_FixBadCeil()
+static void Sectors_FixBadCeil(Document &doc)
 {
 	selection_c sel;
 
-	Sectors_FindBadCeil(sel);
+	Sectors_FindBadCeil(sel, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed bad sector heights");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed bad sector heights");
 
-	for (int i = 0 ; i < gDocument.numSectors(); i++)
+	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
-		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
+		if (doc.sectors[i]->ceilh < doc.sectors[i]->floorh)
 		{
-			gDocument.basis.changeSector(i, Sector::F_CEILH, gDocument.sectors[i]->floorh);
+			doc.basis.changeSector(i, Sector::F_CEILH, doc.sectors[i]->floorh);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Sectors_ShowBadCeil()
+static void Sectors_ShowBadCeil(const Document &doc)
 {
 	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
-	Sectors_FindBadCeil(*edit.Selected);
+	Sectors_FindBadCeil(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void SideDefs_FindUnused(selection_c& sel)
+static void SideDefs_FindUnused(selection_c& sel, const Document &doc)
 {
 	sel.change_type(ObjType::sidedefs);
 
-	if (gDocument.numSidedefs() == 0)
+	if (doc.numSidedefs() == 0)
 		return;
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		if (L->left  >= 0) sel.set(L->left);
 		if (L->right >= 0) sel.set(L->right);
 	}
 
-	sel.frob_range(0, gDocument.numSidedefs() - 1, BitOp::toggle);
+	sel.frob_range(0, doc.numSidedefs() - 1, BitOp::toggle);
 }
 
 
-void SideDefs_RemoveUnused()
+static void SideDefs_RemoveUnused(Document &doc)
 {
 	selection_c sel;
 
-	SideDefs_FindUnused(sel);
+	SideDefs_FindUnused(sel, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed unused sidedefs");
+	doc.basis.begin();
+	doc.basis.setMessage("removed unused sidedefs");
 
 	DeleteObjects(&sel);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
+static void SideDefs_FindPacking(selection_c& sides, selection_c& lines, const Document &doc)
 {
 	sides.change_type(ObjType::sidedefs);
 	lines.change_type(ObjType::linedefs);
 
-	for (int i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (int i = 0 ; i < doc.numLinedefs(); i++)
 	for (int k = 0 ; k < i ; k++)
 	{
-		const LineDef * A = gDocument.linedefs[i];
-		const LineDef * B = gDocument.linedefs[k];
+		const LineDef * A = doc.linedefs[i];
+		const LineDef * B = doc.linedefs[k];
 
 		bool AA = (A->left  >= 0 && A->left == A->right);
 
@@ -956,24 +998,24 @@ void SideDefs_FindPacking(selection_c& sides, selection_c& lines)
 }
 
 
-void SideDefs_ShowPacked()
+static void SideDefs_ShowPacked(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	selection_c sides;
 
-	SideDefs_FindPacking(sides, *edit.Selected);
+	SideDefs_FindPacking(sides, *edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-static int Copy_SideDef(int num)
+int ChecksModule::copySidedef(int num) const
 {
-	int sd = gDocument.basis.addNew(ObjType::sidedefs);
+	int sd = doc.basis.addNew(ObjType::sidedefs);
 
-	*gDocument.sidedefs[sd] = *gDocument.sidedefs[num];
+	*doc.sidedefs[sd] = *doc.sidedefs[num];
 
 	return sd;
 }
@@ -986,12 +1028,12 @@ static const char *const unpack_confirm_message =
 	"Unpack the sidedefs now?";
 
 
-void SideDefs_Unpack(bool is_after_load)
+void ChecksModule::sidedefsUnpack(bool is_after_load) const
 {
 	selection_c sides;
 	selection_c lines;
 
-	SideDefs_FindPacking(sides, lines);
+	SideDefs_FindPacking(sides, lines, doc);
 
 	if (sides.empty())
 		return;
@@ -1003,9 +1045,9 @@ void SideDefs_Unpack(bool is_after_load)
 	}
 
 
-	gDocument.basis.begin();
+	doc.basis.begin();
 
-	for (int sd = 0 ; sd < gDocument.numSidedefs(); sd++)
+	for (int sd = 0 ; sd < doc.numSidedefs(); sd++)
 	{
 		if (! sides.get(sd))
 			continue;
@@ -1013,45 +1055,45 @@ void SideDefs_Unpack(bool is_after_load)
 		// find the first linedef which uses this sidedef
 		int first;
 
-		for (first = 0 ; first < gDocument.numLinedefs(); first++)
+		for (first = 0 ; first < doc.numLinedefs(); first++)
 		{
-			const LineDef *F = gDocument.linedefs[first];
+			const LineDef *F = doc.linedefs[first];
 
 			if (F->left == sd || F->right == sd)
 				break;
 		}
 
-		if (first >= gDocument.numLinedefs())
+		if (first >= doc.numLinedefs())
 			continue;
 
 		// handle it when first linedef uses sidedef on both sides
-		if (gDocument.linedefs[first]->left == gDocument.linedefs[first]->right)
+		if (doc.linedefs[first]->left == doc.linedefs[first]->right)
 		{
-			gDocument.basis.changeLinedef(first, LineDef::F_LEFT, Copy_SideDef(sd));
+			doc.basis.changeLinedef(first, LineDef::F_LEFT, copySidedef(sd));
 		}
 
 		// duplicate any remaining references
-		for (int ld = first + 1 ; ld < gDocument.numLinedefs(); ld++)
+		for (int ld = first + 1 ; ld < doc.numLinedefs(); ld++)
 		{
-			if (gDocument.linedefs[ld]->left == sd)
-				gDocument.basis.changeLinedef(ld, LineDef::F_LEFT, Copy_SideDef(sd));
+			if (doc.linedefs[ld]->left == sd)
+				doc.basis.changeLinedef(ld, LineDef::F_LEFT, copySidedef(sd));
 
-			if (gDocument.linedefs[ld]->right == sd)
-				gDocument.basis.changeLinedef(ld, LineDef::F_RIGHT, Copy_SideDef(sd));
+			if (doc.linedefs[ld]->right == sd)
+				doc.basis.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(sd));
 		}
 	}
 
 	if (is_after_load)
 	{
-		gDocument.basis.abort(true /* keep changes */);
+		doc.basis.abort(true /* keep changes */);
 	}
 	else
 	{
-		gDocument.basis.setMessage("unpacked all sidedefs");
-		gDocument.basis.end();
+		doc.basis.setMessage("unpacked all sidedefs");
+		doc.basis.end();
 	}
 
-	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), gDocument.numSidedefs());
+	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), doc.numSidedefs());
 }
 
 
@@ -1060,113 +1102,115 @@ void SideDefs_Unpack(bool is_after_load)
 class UI_Check_Sectors : public UI_Check_base
 {
 public:
-	UI_Check_Sectors(bool all_mode) :
+	UI_Check_Sectors(bool all_mode, Document &doc) :
 		UI_Check_base(530, 346, all_mode, "Check : Sectors",
-				      "Sector test results")
+				      "Sector test results"), doc(doc)
 	{ }
 
-public:
 	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_RemoveUnused();
-		dialog->user_action = CKR_TookAction;
+		Sectors_RemoveUnused(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_remove_sidedefs(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		SideDefs_RemoveUnused();
-		dialog->user_action = CKR_TookAction;
+		SideDefs_RemoveUnused(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_fix_ceil(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_FixBadCeil();
-		dialog->user_action = CKR_TookAction;
+		Sectors_FixBadCeil(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_ceil(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowBadCeil();
-		dialog->user_action = CKR_Highlight;
+		Sectors_ShowBadCeil(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_unpack(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		SideDefs_Unpack();
-		dialog->user_action = CKR_Highlight;
+		dialog->doc.checks.sidedefsUnpack(false);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_packed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		SideDefs_ShowPacked();
-		dialog->user_action = CKR_Highlight;
+		SideDefs_ShowPacked(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_show_unclosed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnclosed(ObjType::sectors);
-		dialog->user_action = CKR_Highlight;
+		Sectors_ShowUnclosed(ObjType::sectors, dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_un_verts(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnclosed(ObjType::vertices);
-		dialog->user_action = CKR_Highlight;
+		Sectors_ShowUnclosed(ObjType::vertices, dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_show_mismatch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowMismatches(ObjType::sectors);
-		dialog->user_action = CKR_Highlight;
+		Sectors_ShowMismatches(ObjType::sectors, dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_mis_lines(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowMismatches(ObjType::linedefs);
-		dialog->user_action = CKR_Highlight;
+		Sectors_ShowMismatches(ObjType::linedefs, dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnknown();
-		dialog->user_action = CKR_Highlight;
+		Sectors_ShowUnknown(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_LogUnknown();
-		dialog->user_action = CKR_Highlight;
+		Sectors_LogUnknown(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_clear_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ClearUnknown();
-		dialog->user_action = CKR_TookAction;
+		Sectors_ClearUnknown(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
+
+private:
+	Document &doc;
 };
 
 
-check_result_e CHECK_Sectors(int min_severity = 0)
+CheckResult ChecksModule::checkSectors(int min_severity) const
 {
-	UI_Check_Sectors *dialog = new UI_Check_Sectors(min_severity > 0);
+	UI_Check_Sectors *dialog = new UI_Check_Sectors(min_severity > 0, doc);
 
 	selection_c  sel, other;
 
@@ -1174,7 +1218,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 
 	for (;;)
 	{
-		Sectors_FindUnclosed(sel, other);
+		Sectors_FindUnclosed(sel, other, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unclosed sectors");
@@ -1188,7 +1232,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		}
 
 
-		Sectors_FindMismatches(sel, other);
+		Sectors_FindMismatches(sel, other, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No mismatched sectors");
@@ -1202,7 +1246,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		}
 
 
-		Sectors_FindBadCeil(sel);
+		Sectors_FindBadCeil(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No sectors with ceil < floor");
@@ -1218,7 +1262,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		dialog->AddGap(10);
 
 
-		Sectors_FindUnknown(sel, types);
+		Sectors_FindUnknown(sel, types, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown sector types");
@@ -1233,7 +1277,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		}
 
 
-		SideDefs_FindPacking(sel, other);
+		SideDefs_FindPacking(sel, other, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No shared sidedefs");
@@ -1249,7 +1293,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		}
 
 
-		Sectors_FindUnused(sel);
+		Sectors_FindUnused(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unused sectors");
@@ -1262,7 +1306,7 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		}
 
 
-		SideDefs_FindUnused(sel);
+		SideDefs_FindUnused(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unused sidedefs");
@@ -1280,12 +1324,12 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 		{
 			delete dialog;
 
-			return CKR_OK;
+			return CheckResult::ok;
 		}
 
-		check_result_e result = dialog->Run();
+		CheckResult result = dialog->Run();
 
-		if (result == CKR_TookAction)
+		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
 			dialog->Reset();
@@ -1301,19 +1345,19 @@ check_result_e CHECK_Sectors(int min_severity = 0)
 
 //------------------------------------------------------------------------
 
-void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
+void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Document &doc)
 {
 	types.clear();
 
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < gDocument.numThings() ; n++)
+	for (int n = 0 ; n < doc.numThings() ; n++)
 	{
-		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+		const thingtype_t &info = M_GetThingType(doc.things[n]->type);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
-			bump_unknown_type(types, gDocument.things[n]->type);
+			bump_unknown_type(types, doc.things[n]->type);
 
 			list.set(n);
 		}
@@ -1321,27 +1365,27 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 }
 
 
-void Things_ShowUnknown()
+static void Things_ShowUnknown(const Document &doc)
 {
 	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
 	std::map<int, int> types;
 
-	Things_FindUnknown(*edit.Selected, types);
+	Things_FindUnknown(*edit.Selected, types, doc);
 
 	GoToErrors();
 }
 
 
-void Things_LogUnknown()
+static void Things_LogUnknown(const Document &doc)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 	std::map<int, int>::iterator IT;
 
-	Things_FindUnknown(sel, types);
+	Things_FindUnknown(sel, types, doc);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown Things:\n");
@@ -1356,31 +1400,31 @@ void Things_LogUnknown()
 }
 
 
-void Things_RemoveUnknown()
+const void Things_RemoveUnknown(Document &doc)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 
-	Things_FindUnknown(sel, types);
+	Things_FindUnknown(sel, types, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed unknown things");
+	doc.basis.begin();
+	doc.basis.setMessage("removed unknown things");
 
 	DeleteObjects(&sel);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
 // this returns a bitmask : bits 0..3 for players 1..4
-int Things_FindStarts(int *dm_num)
+static int Things_FindStarts(int *dm_num, const Document &doc)
 {
 	*dm_num = 0;
 
 	int mask = 0;
 
-	for(const Thing *T : gDocument.things)
+	for(const Thing *T : doc.things)
 	{
 		// ideally, these type numbers would not be hard-coded....
 
@@ -1399,22 +1443,22 @@ int Things_FindStarts(int *dm_num)
 }
 
 
-void Things_FindInVoid(selection_c& list)
+static void Things_FindInVoid(selection_c& list, const Document &doc)
 {
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < gDocument.numThings() ; n++)
+	for (int n = 0 ; n < doc.numThings() ; n++)
 	{
-		double x = gDocument.things[n]->x();
-		double y = gDocument.things[n]->y();
+		double x = doc.things[n]->x();
+		double y = doc.things[n]->y();
 
-		Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, x, y);
+		Objid obj = doc.hover.getNearbyObject(ObjType::sectors, x, y);
 
 		if (! obj.is_nil())
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+		const thingtype_t &info = M_GetThingType(doc.things[n]->type);
 
 		if (info.flags & THINGDEF_VOID)
 			continue;
@@ -1427,7 +1471,7 @@ void Things_FindInVoid(selection_c& list)
 			double x2 = x + ((corner & 1) ? -4 : +4);
 			double y2 = y + ((corner & 2) ? -4 : +4);
 
-			obj = gDocument.hover.getNearbyObject(ObjType::sectors, x2, y2);
+			obj = doc.hover.getNearbyObject(ObjType::sectors, x2, y2);
 
 			if (obj.is_nil())
 				out_count++;
@@ -1439,29 +1483,29 @@ void Things_FindInVoid(selection_c& list)
 }
 
 
-void Things_ShowInVoid()
+static void Things_ShowInVoid(const Document &doc)
 {
 	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
-	Things_FindInVoid(*edit.Selected);
+	Things_FindInVoid(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Things_RemoveInVoid()
+static void Things_RemoveInVoid(Document &doc)
 {
 	selection_c sel;
 
-	Things_FindInVoid(sel);
+	Things_FindInVoid(sel, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed things in the void");
+	doc.basis.begin();
+	doc.basis.setMessage("removed things in the void");
 
 	DeleteObjects(&sel);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -1494,13 +1538,13 @@ static bool TH_always_spawned(int type)
 }
 
 
-void Things_FindDuds(selection_c& list)
+static void Things_FindDuds(selection_c& list, const Document &doc)
 {
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < gDocument.numThings() ; n++)
+	for (int n = 0 ; n < doc.numThings() ; n++)
 	{
-		const Thing *T = gDocument.things[n];
+		const Thing *T = doc.things[n];
 
 		if (T->type == CAMERA_PEST)
 			continue;
@@ -1532,25 +1576,25 @@ void Things_FindDuds(selection_c& list)
 }
 
 
-void Things_ShowDuds()
+static void Things_ShowDuds(const Document &doc)
 {
 	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
-	Things_FindDuds(*edit.Selected);
+	Things_FindDuds(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Things_FixDuds()
+const void Things_FixDuds(Document &doc)
 {
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed unspawnable things");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed unspawnable things");
 
-	for (int n = 0 ; n < gDocument.numThings() ; n++)
+	for (int n = 0 ; n < doc.numThings() ; n++)
 	{
-		const Thing *T = gDocument.things[n];
+		const Thing *T = doc.things[n];
 
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
@@ -1592,22 +1636,22 @@ void Things_FixDuds()
 
 		if (new_options != T->options)
 		{
-			gDocument.basis.changeThing(n, Thing::F_OPTIONS, new_options);
+			doc.basis.changeThing(n, Thing::F_OPTIONS, new_options);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
 //------------------------------------------------------------------------
 
 static void CollectBlockingThings(std::vector<int>& list,
-                                  std::vector<int>& sizes)
+                                  std::vector<int>& sizes, const Document &doc)
 {
-	for (int n = 0 ; n < gDocument.numThings() ; n++)
+	for (int n = 0 ; n < doc.numThings() ; n++)
 	{
-		const Thing *T = gDocument.things[n];
+		const Thing *T = doc.things[n];
 
 		const thingtype_t &info = M_GetThingType(T->type);
 
@@ -1712,7 +1756,7 @@ static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
 }
 
 
-static inline bool LD_is_blocking(const LineDef *L)
+static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
 {
 #define MONSTER_HEIGHT  36
 
@@ -1723,8 +1767,8 @@ static inline bool LD_is_blocking(const LineDef *L)
 	if (L->right < 0 || L->left < 0)
 		return true;
 
-	const Sector *S1 = L->Right(gDocument)->SecRef(gDocument);
-	const Sector *S2 = L-> Left(gDocument)->SecRef(gDocument);
+	const Sector *S1 = L->Right(doc)->SecRef(doc);
+	const Sector *S2 = L-> Left(doc)->SecRef(doc);
 
 	int f_max = MAX(S1->floorh, S2->floorh);
 	int c_min = MIN(S1-> ceilh, S2-> ceilh);
@@ -1733,7 +1777,7 @@ static inline bool LD_is_blocking(const LineDef *L)
 }
 
 
-static bool ThingStuckInWall(const Thing *T, int r, char group)
+static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &doc)
 {
 	// only check players and monsters
 	if (! (group == 'p' || group == 'm'))
@@ -1751,11 +1795,11 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 	double x2 = T->x() + r;
 	double y2 = T->y() + r;
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
-		if (! LD_is_blocking(L))
+		if (! LD_is_blocking(L, doc))
 			continue;
 
 		if (LineTouchesBox(n, x1, y1, x2, y2))
@@ -1766,27 +1810,27 @@ static bool ThingStuckInWall(const Thing *T, int r, char group)
 }
 
 
-void Things_FindStuckies(selection_c& list)
+static void Things_FindStuckies(selection_c& list, const Document &doc)
 {
 	list.change_type(ObjType::things);
 
 	std::vector<int> blockers;
 	std::vector<int> sizes;
 
-	CollectBlockingThings(blockers, sizes);
+	CollectBlockingThings(blockers, sizes, doc);
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const Thing *T = gDocument.things[blockers[n]];
+		const Thing *T = doc.things[blockers[n]];
 
 		const thingtype_t &info = M_GetThingType(T->type);
 
-		if (ThingStuckInWall(T, info.radius, info.group))
+		if (ThingStuckInWall(T, info.radius, info.group, doc))
 			list.set(blockers[n]);
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const Thing *T2 = gDocument.things[blockers[n2]];
+			const Thing *T2 = doc.things[blockers[n2]];
 
 			const thingtype_t &info2 = M_GetThingType(T2->type);
 
@@ -1797,12 +1841,12 @@ void Things_FindStuckies(selection_c& list)
 }
 
 
-void Things_ShowStuckies()
+static void Things_ShowStuckies(const Document &doc)
 {
 	if (edit.mode != ObjType::things)
 		Editor_ChangeMode('t');
 
-	Things_FindStuckies(*edit.Selected);
+	Things_FindStuckies(*edit.Selected, doc);
 
 	GoToErrors();
 }
@@ -1813,75 +1857,77 @@ void Things_ShowStuckies()
 class UI_Check_Things : public UI_Check_base
 {
 public:
-	UI_Check_Things(bool all_mode) :
+	UI_Check_Things(bool all_mode, Document &doc) :
 		UI_Check_base(520, 316, all_mode, "Check : Things",
-				      "Thing test results")
+				      "Thing test results"), doc(doc)
 	{ }
 
 public:
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowUnknown();
-		dialog->user_action = CKR_Highlight;
+		Things_ShowUnknown(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_LogUnknown();
-		dialog->user_action = CKR_Highlight;
+		Things_LogUnknown(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_RemoveUnknown();
-		dialog->user_action = CKR_TookAction;
+		Things_RemoveUnknown(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowInVoid();
-		dialog->user_action = CKR_Highlight;
+		Things_ShowInVoid(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_RemoveInVoid();
-		dialog->user_action = CKR_TookAction;
+		Things_RemoveInVoid(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_stuck(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowStuckies();
-		dialog->user_action = CKR_Highlight;
+		Things_ShowStuckies(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_show_duds(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowDuds();
-		dialog->user_action = CKR_Highlight;
+		Things_ShowDuds(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_duds(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_FixDuds();
-		dialog->user_action = CKR_TookAction;
+		Things_FixDuds(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
+private:
+	Document &doc;
 };
 
 
-check_result_e CHECK_Things(int min_severity = 0)
+CheckResult ChecksModule::checkThings(int min_severity) const
 {
-	UI_Check_Things *dialog = new UI_Check_Things(min_severity > 0);
+	UI_Check_Things *dialog = new UI_Check_Things(min_severity > 0, doc);
 
 	selection_c  sel;
 
@@ -1889,7 +1935,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 	for (;;)
 	{
-		Things_FindUnknown(sel, types);
+		Things_FindUnknown(sel, types, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown thing types");
@@ -1904,7 +1950,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		}
 
 
-		Things_FindStuckies(sel);
+		Things_FindStuckies(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No stuck actors");
@@ -1917,7 +1963,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		}
 
 
-		Things_FindInVoid(sel);
+		Things_FindInVoid(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No things in the void");
@@ -1931,7 +1977,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 		}
 
 
-		Things_FindDuds(sel);
+		Things_FindDuds(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unspawnable things -- skill flags are OK");
@@ -1949,7 +1995,7 @@ check_result_e CHECK_Things(int min_severity = 0)
 
 		int dm_num, mask;
 
-		mask = Things_FindStarts(&dm_num);
+		mask = Things_FindStarts(&dm_num, doc);
 
 		if (Features.no_need_players)
 			dialog->AddLine("Player starts not needed, no check done");
@@ -1996,12 +2042,12 @@ check_result_e CHECK_Things(int min_severity = 0)
 		{
 			delete dialog;
 
-			return CKR_OK;
+			return CheckResult::ok;
 		}
 
-		check_result_e result = dialog->Run();
+		CheckResult result = dialog->Run();
 
-		if (result == CKR_TookAction)
+		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
 			dialog->Reset();
@@ -2018,28 +2064,28 @@ check_result_e CHECK_Things(int min_severity = 0)
 //------------------------------------------------------------------------
 
 
-void LineDefs_FindZeroLen(selection_c& lines)
+static void LineDefs_FindZeroLen(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
-		if (gDocument.linedefs[n]->IsZeroLength(gDocument))
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
+		if (doc.linedefs[n]->IsZeroLength(doc))
 			lines.set(n);
 }
 
 
-void LineDefs_RemoveZeroLen()
+static void LineDefs_RemoveZeroLen(Document &doc)
 {
 	selection_c lines(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		if (gDocument.linedefs[n]->IsZeroLength(gDocument))
+		if (doc.linedefs[n]->IsZeroLength(doc))
 			lines.set(n);
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed zero-len linedefs");
+	doc.basis.begin();
+	doc.basis.setMessage("removed zero-len linedefs");
 
 	// NOTE: the vertex overlapping test handles cases where the
 	//       vertices of other lines joining a zero-length one
@@ -2047,18 +2093,18 @@ void LineDefs_RemoveZeroLen()
 
 	DeleteObjects_WithUnused(&lines);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void LineDefs_ShowZeroLen()
+static void LineDefs_ShowZeroLen(const Document &doc)
 {
 	if (edit.mode != ObjType::vertices)
 		Editor_ChangeMode('v');
 
 	selection_c sel;
 
-	LineDefs_FindZeroLen(sel);
+	LineDefs_FindZeroLen(sel, doc);
 
 	ConvertSelection(&sel, edit.Selected);
 
@@ -2066,36 +2112,36 @@ void LineDefs_ShowZeroLen()
 }
 
 
-void LineDefs_FindMissingRight(selection_c& lines)
+static void LineDefs_FindMissingRight(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
-		if (gDocument.linedefs[n]->right < 0)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
+		if (doc.linedefs[n]->right < 0)
 			lines.set(n);
 }
 
 
-void LineDefs_ShowMissingRight()
+static void LineDefs_ShowMissingRight(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	LineDefs_FindMissingRight(*edit.Selected);
+	LineDefs_FindMissingRight(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void LineDefs_FindManualDoors(selection_c& lines)
+static void LineDefs_FindManualDoors(selection_c& lines, const Document &doc)
 {
 	// find D1/DR manual doors on one-sided linedefs
 
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -2114,25 +2160,25 @@ void LineDefs_FindManualDoors(selection_c& lines)
 }
 
 
-void LineDefs_ShowManualDoors()
+static void LineDefs_ShowManualDoors(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	LineDefs_FindManualDoors(*edit.Selected);
+	LineDefs_FindManualDoors(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void LineDefs_FixManualDoors()
+static void LineDefs_FixManualDoors(Document &doc)
 {
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed manual doors");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed manual doors");
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->type <= 0 || L->left >= 0)
 			continue;
@@ -2142,21 +2188,21 @@ void LineDefs_FixManualDoors()
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
-			gDocument.basis.changeLinedef(n, LineDef::F_TYPE, 0);
+			doc.basis.changeLinedef(n, LineDef::F_TYPE, 0);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void LineDefs_FindLackImpass(selection_c& lines)
+static void LineDefs_FindLackImpass(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 			lines.set(n);
@@ -2164,45 +2210,45 @@ void LineDefs_FindLackImpass(selection_c& lines)
 }
 
 
-void LineDefs_ShowLackImpass()
+static void LineDefs_ShowLackImpass(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	LineDefs_FindLackImpass(*edit.Selected);
+	LineDefs_FindLackImpass(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void LineDefs_FixLackImpass()
+static void LineDefs_FixLackImpass(Document &doc)
 {
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed impassible flags");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed impassible flags");
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 		{
 			int new_flags = L->flags | MLF_Blocking;
 
-			gDocument.basis.changeLinedef(n, LineDef::F_FLAGS, new_flags);
+			doc.basis.changeLinedef(n, LineDef::F_FLAGS, new_flags);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void LineDefs_FindBad2SFlag(selection_c& lines)
+static void LineDefs_FindBad2SFlag(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			lines.set(n);
@@ -2213,34 +2259,34 @@ void LineDefs_FindBad2SFlag(selection_c& lines)
 }
 
 
-void LineDefs_ShowBad2SFlag()
+static void LineDefs_ShowBad2SFlag(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	LineDefs_FindBad2SFlag(*edit.Selected);
+	LineDefs_FindBad2SFlag(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void LineDefs_FixBad2SFlag()
+static void LineDefs_FixBad2SFlag(Document &doc)
 {
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed two-sided flags");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed two-sided flags");
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
-			gDocument.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
+			doc.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
 
 		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
-			gDocument.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
+			doc.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -2255,15 +2301,15 @@ static void bung_unknown_type(std::map<int, int>& t_map, int type)
 }
 
 
-void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
+static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, const Document &doc)
 {
 	types.clear();
 
 	list.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		int type_num = gDocument.linedefs[n]->type;
+		int type_num = doc.linedefs[n]->type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -2285,27 +2331,27 @@ void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types)
 }
 
 
-void LineDefs_ShowUnknown()
+static void LineDefs_ShowUnknown(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<int, int> types;
 
-	LineDefs_FindUnknown(*edit.Selected, types);
+	LineDefs_FindUnknown(*edit.Selected, types, doc);
 
 	GoToErrors();
 }
 
 
-void LineDefs_LogUnknown()
+static void LineDefs_LogUnknown(const Document &doc)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 	std::map<int, int>::iterator IT;
 
-	LineDefs_FindUnknown(sel, types);
+	LineDefs_FindUnknown(sel, types, doc);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown Line Types:\n");
@@ -2320,40 +2366,40 @@ void LineDefs_LogUnknown()
 }
 
 
-void LineDefs_ClearUnknown()
+static void LineDefs_ClearUnknown(Document &doc)
 {
 	selection_c sel;
 	std::map<int, int> types;
 
-	LineDefs_FindUnknown(sel, types);
+	LineDefs_FindUnknown(sel, types, doc);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("cleared unknown line types");
+	doc.basis.begin();
+	doc.basis.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		gDocument.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
+		doc.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
 //------------------------------------------------------------------------
 
 
-static int linedef_pos_cmp(int A, int B)
+static int linedef_pos_cmp(int A, int B, const Document &doc)
 {
-	const LineDef *AL = gDocument.linedefs[A];
-	const LineDef *BL = gDocument.linedefs[B];
+	const LineDef *AL = doc.linedefs[A];
+	const LineDef *BL = doc.linedefs[B];
 
-	int A_x1 = static_cast<int>(AL->Start(gDocument)->x());
-	int A_y1 = static_cast<int>(AL->Start(gDocument)->y());
-	int A_x2 = static_cast<int>(AL->End(gDocument)->x());
-	int A_y2 = static_cast<int>(AL->End(gDocument)->y());
+	int A_x1 = static_cast<int>(AL->Start(doc)->x());
+	int A_y1 = static_cast<int>(AL->Start(doc)->y());
+	int A_x2 = static_cast<int>(AL->End(doc)->x());
+	int A_y2 = static_cast<int>(AL->End(doc)->y());
 
-	int B_x1 = static_cast<int>(BL->Start(gDocument)->x());
-	int B_y1 = static_cast<int>(BL->Start(gDocument)->y());
-	int B_x2 = static_cast<int>(BL->End(gDocument)->x());
-	int B_y2 = static_cast<int>(BL->End(gDocument)->y());
+	int B_x1 = static_cast<int>(BL->Start(doc)->x());
+	int B_y1 = static_cast<int>(BL->Start(doc)->y());
+	int B_x2 = static_cast<int>(BL->End(doc)->x());
+	int B_y2 = static_cast<int>(BL->End(doc)->y());
 
 	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
 	{
@@ -2382,94 +2428,98 @@ static int linedef_pos_cmp(int A, int B)
 
 struct linedef_pos_CMP_pred
 {
+	const Document &doc;
+
 	inline bool operator() (int A, int B) const
 	{
-		return linedef_pos_cmp(A, B) < 0;
+		return linedef_pos_cmp(A, B, doc) < 0;
 	}
 };
 
 
 struct linedef_minx_CMP_pred
 {
+	const Document &doc;
+
 	inline bool operator() (int A, int B) const
 	{
-		const LineDef *AL = gDocument.linedefs[A];
-		const LineDef *BL = gDocument.linedefs[B];
+		const LineDef *AL = doc.linedefs[A];
+		const LineDef *BL = doc.linedefs[B];
 
-		fixcoord_t A_x = MIN(AL->Start(gDocument)->raw_x, AL->End(gDocument)->raw_x);
-		fixcoord_t B_x = MIN(BL->Start(gDocument)->raw_x, BL->End(gDocument)->raw_x);
+		fixcoord_t A_x = MIN(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
+		fixcoord_t B_x = MIN(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
 
 		return A_x < B_x;
 	}
 };
 
 
-void LineDefs_FindOverlaps(selection_c& lines)
+static void LineDefs_FindOverlaps(selection_c& lines, const Document &doc)
 {
 	// we only find directly overlapping linedefs here
 
 	lines.change_type(ObjType::linedefs);
 
-	if (gDocument.numLinedefs() < 2)
+	if (doc.numLinedefs() < 2)
 		return;
 
 	int n;
 
 	// sort linedefs by their position.  overlapping lines will end up
 	// adjacent to each other after the sort.
-	std::vector<int> sorted_list(gDocument.numLinedefs(), 0);
+	std::vector<int> sorted_list(doc.numLinedefs(), 0);
 
-	for (n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (n = 0 ; n < doc.numLinedefs(); n++)
 		sorted_list[n] = n;
 
-	std::sort(sorted_list.begin(), sorted_list.end(), linedef_pos_CMP_pred());
+	std::sort(sorted_list.begin(), sorted_list.end(), linedef_pos_CMP_pred{ doc });
 
-	for (n = 0 ; n < gDocument.numLinedefs() - 1 ; n++)
+	for (n = 0 ; n < doc.numLinedefs() - 1 ; n++)
 	{
 		int ld1 = sorted_list[n];
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (gDocument.linedefs[ld2]->IsZeroLength(gDocument))
+		if (doc.linedefs[ld2]->IsZeroLength(doc))
 			continue;
 
 		// only the second (or third, etc) linedef is stored
-		if (linedef_pos_cmp(ld1, ld2) == 0)
+		if (linedef_pos_cmp(ld1, ld2, doc) == 0)
 			lines.set(ld2);
 	}
 }
 
 
-void LineDefs_ShowOverlaps()
+static void LineDefs_ShowOverlaps(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	LineDefs_FindOverlaps(*edit.Selected);
+	LineDefs_FindOverlaps(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void LineDefs_RemoveOverlaps()
+static void LineDefs_RemoveOverlaps(Document &doc)
 {
 	selection_c lines, unused_verts;
 
-	LineDefs_FindOverlaps(lines);
+	LineDefs_FindOverlaps(lines, doc);
 
 	UnusedVertices(&lines, &unused_verts);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("removed overlapping lines");
+	doc.basis.begin();
+	doc.basis.setMessage("removed overlapping lines");
 
 	DeleteObjects(&lines);
 	DeleteObjects(&unused_verts);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-static int CheckLinesCross(int A, int B)
+static int CheckLinesCross(int A, int B, const Document &doc)
 {
 	// return values:
 	//    0 : the lines do not cross
@@ -2483,15 +2533,15 @@ static int CheckLinesCross(int A, int B)
 
 	SYS_ASSERT(A != B);
 
-	const LineDef *AL = gDocument.linedefs[A];
-	const LineDef *BL = gDocument.linedefs[B];
+	const LineDef *AL = doc.linedefs[A];
+	const LineDef *BL = doc.linedefs[B];
 
 	// ignore zero-length lines
-	if (AL->IsZeroLength(gDocument) || BL->IsZeroLength(gDocument))
+	if (AL->IsZeroLength(doc) || BL->IsZeroLength(doc))
 		return 0;
 
 	// ignore directly overlapping here
-	if (linedef_pos_cmp(A, B) == 0)
+	if (linedef_pos_cmp(A, B, doc) == 0)
 		return 0;
 
 
@@ -2500,14 +2550,14 @@ static int CheckLinesCross(int A, int B)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (MIN(AL->Start(gDocument)->raw_y, AL->End(gDocument)->raw_y) >
-	    MAX(BL->Start(gDocument)->raw_y, BL->End(gDocument)->raw_y))
+	if (MIN(AL->Start(doc)->raw_y, AL->End(doc)->raw_y) >
+	    MAX(BL->Start(doc)->raw_y, BL->End(doc)->raw_y))
 	{
 		return 0;
 	}
 
-	if (MIN(BL->Start(gDocument)->raw_y, BL->End(gDocument)->raw_y) >
-	    MAX(AL->Start(gDocument)->raw_y, AL->End(gDocument)->raw_y))
+	if (MIN(BL->Start(doc)->raw_y, BL->End(doc)->raw_y) >
+	    MAX(AL->Start(doc)->raw_y, AL->End(doc)->raw_y))
 	{
 		return 0;
 	}
@@ -2515,15 +2565,15 @@ static int CheckLinesCross(int A, int B)
 
 	// precise (but slower) intersection test
 
-	double ax1 = AL->Start(gDocument)->x();
-	double ay1 = AL->Start(gDocument)->y();
-	double ax2 = AL->End(gDocument)->x();
-	double ay2 = AL->End(gDocument)->y();
+	double ax1 = AL->Start(doc)->x();
+	double ay1 = AL->Start(doc)->y();
+	double ax2 = AL->End(doc)->x();
+	double ay2 = AL->End(doc)->y();
 
-	double bx1 = BL->Start(gDocument)->x();
-	double by1 = BL->Start(gDocument)->y();
-	double bx2 = BL->End(gDocument)->x();
-	double by2 = BL->End(gDocument)->y();
+	double bx1 = BL->Start(doc)->x();
+	double by1 = BL->Start(doc)->y();
+	double bx2 = BL->End(doc)->x();
+	double by2 = BL->End(doc)->y();
 
 	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
 	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
@@ -2559,7 +2609,7 @@ static int CheckLinesCross(int A, int B)
 		(e_side == 0 && f_side == 0))
 	{
 		// choose longest line as the measuring stick
-		if (AL->CalcLength(gDocument) < BL->CalcLength(gDocument))
+		if (AL->CalcLength(doc) < BL->CalcLength(doc))
 		{
 			std::swap(ax1, bx1);  std::swap(ax2, bx2);
 			std::swap(ay1, by1);  std::swap(ay2, by2);
@@ -2594,45 +2644,45 @@ static int CheckLinesCross(int A, int B)
 }
 
 
-void LineDefs_FindCrossings(selection_c& lines)
+static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	if (gDocument.numLinedefs() < 2)
+	if (doc.numLinedefs() < 2)
 		return;
 
 	int n;
 
 	// sort linedefs by their position.  linedefs which cross will be
 	// near each other in this list.
-	std::vector<int> sorted_list(gDocument.numLinedefs(), 0);
+	std::vector<int> sorted_list(doc.numLinedefs(), 0);
 
-	for (n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (n = 0 ; n < doc.numLinedefs(); n++)
 		sorted_list[n] = n;
 
-	std::sort(sorted_list.begin(), sorted_list.end(), linedef_minx_CMP_pred());
+	std::sort(sorted_list.begin(), sorted_list.end(), linedef_minx_CMP_pred{ doc });
 
-	for (n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (n = 0 ; n < doc.numLinedefs(); n++)
 	{
 		int n2 = sorted_list[n];
 
-		const LineDef *L1 = gDocument.linedefs[n2];
+		const LineDef *L1 = doc.linedefs[n2];
 
-		fixcoord_t max_x = MAX(L1->Start(gDocument)->raw_x, L1->End(gDocument)->raw_x);
+		fixcoord_t max_x = MAX(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
 
-		for (int k = n + 1 ; k < gDocument.numLinedefs(); k++)
+		for (int k = n + 1 ; k < doc.numLinedefs(); k++)
 		{
 			int k2 = sorted_list[k];
 
-			const LineDef *L2 = gDocument.linedefs[k2];
+			const LineDef *L2 = doc.linedefs[k2];
 
-			fixcoord_t min_x = MIN(L2->Start(gDocument)->raw_x, L2->End(gDocument)->raw_x);
+			fixcoord_t min_x = MIN(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)
 				break;
 
-			int res = CheckLinesCross(n2, k2);
+			int res = CheckLinesCross(n2, k2, doc);
 
 			if (res)
 			{
@@ -2644,12 +2694,12 @@ void LineDefs_FindCrossings(selection_c& lines)
 }
 
 
-void LineDefs_ShowCrossings()
+static void LineDefs_ShowCrossings(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	LineDefs_FindCrossings(*edit.Selected);
+	LineDefs_FindCrossings(*edit.Selected, doc);
 
 	GoToErrors();
 }
@@ -2660,127 +2710,130 @@ void LineDefs_ShowCrossings()
 class UI_Check_LineDefs : public UI_Check_base
 {
 public:
-	UI_Check_LineDefs(bool all_mode) :
+	UI_Check_LineDefs(bool all_mode, Document &doc) :
 		UI_Check_base(530, 370, all_mode, "Check : LineDefs",
-		              "LineDef test results")
+		              "LineDef test results"), doc(doc)
 	{ }
 
 public:
 	static void action_show_zero(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowZeroLen();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowZeroLen(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_zero(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_RemoveZeroLen();
-		dialog->user_action = CKR_TookAction;
+		LineDefs_RemoveZeroLen(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_mis_right(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowMissingRight();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowMissingRight(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_show_manual_doors(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowManualDoors();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowManualDoors(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_manual_doors(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixManualDoors();
-		dialog->user_action = CKR_TookAction;
+		LineDefs_FixManualDoors(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_lack_impass(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowLackImpass();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowLackImpass(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_lack_impass(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixLackImpass();
-		dialog->user_action = CKR_TookAction;
+		LineDefs_FixLackImpass(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_bad_2s_flag(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowBad2SFlag();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowBad2SFlag(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_bad_2s_flag(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixBad2SFlag();
-		dialog->user_action = CKR_TookAction;
+		LineDefs_FixBad2SFlag(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowUnknown();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowUnknown(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_LogUnknown();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_LogUnknown(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_clear_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ClearUnknown();
-		dialog->user_action = CKR_TookAction;
+		LineDefs_ClearUnknown(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_remove_overlap(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_RemoveOverlaps();
-		dialog->user_action = CKR_TookAction;
+		LineDefs_RemoveOverlaps(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_overlap(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowOverlaps();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowOverlaps(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_crossing(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowCrossings();
-		dialog->user_action = CKR_Highlight;
+		LineDefs_ShowCrossings(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
+
+private:
+	Document &doc;
 };
 
 
-check_result_e CHECK_LineDefs(int min_severity)
+CheckResult ChecksModule::checkLinedefs(int min_severity) const
 {
-	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(min_severity > 0);
+	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(min_severity > 0, doc);
 
 	selection_c  sel, other;
 
@@ -2788,7 +2841,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 
 	for (;;)
 	{
-		LineDefs_FindZeroLen(sel);
+		LineDefs_FindZeroLen(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No zero-length linedefs");
@@ -2802,7 +2855,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 
-		LineDefs_FindOverlaps(sel);
+		LineDefs_FindOverlaps(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No overlapping linedefs");
@@ -2816,7 +2869,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 
-		LineDefs_FindCrossings(sel);
+		LineDefs_FindCrossings(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No criss-crossing linedefs");
@@ -2831,7 +2884,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		dialog->AddGap(10);
 
 
-		LineDefs_FindUnknown(sel, types);
+		LineDefs_FindUnknown(sel, types, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown line types");
@@ -2846,7 +2899,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 
-		LineDefs_FindMissingRight(sel);
+		LineDefs_FindMissingRight(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No linedefs without a right side");
@@ -2859,7 +2912,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 
-		LineDefs_FindManualDoors(sel);
+		LineDefs_FindManualDoors(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No manual doors on 1S linedefs");
@@ -2873,7 +2926,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 
-		LineDefs_FindLackImpass(sel);
+		LineDefs_FindLackImpass(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No non-blocking one-sided linedefs");
@@ -2887,7 +2940,7 @@ check_result_e CHECK_LineDefs(int min_severity)
 		}
 
 
-		LineDefs_FindBad2SFlag(sel);
+		LineDefs_FindBad2SFlag(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No linedefs with wrong 2S flag");
@@ -2906,12 +2959,12 @@ check_result_e CHECK_LineDefs(int min_severity)
 		{
 			delete dialog;
 
-			return CKR_OK;
+			return CheckResult::ok;
 		}
 
-		check_result_e result = dialog->Run();
+		CheckResult result = dialog->Run();
 
-		if (result == CKR_TookAction)
+		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
 			dialog->Reset();
@@ -2927,16 +2980,16 @@ check_result_e CHECK_LineDefs(int min_severity)
 
 //------------------------------------------------------------------------
 
-void Tags_UsedRange(int *min_tag, int *max_tag)
+void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 {
 	int i;
 
 	*min_tag = +999999;
 	*max_tag = -999999;
 
-	for (i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		int tag = gDocument.linedefs[i]->tag;
+		int tag = doc.linedefs[i]->tag;
 
 		if (tag > 0)
 		{
@@ -2945,9 +2998,9 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 		}
 	}
 
-	for (i = 0 ; i < gDocument.numSectors() ; i++)
+	for (i = 0 ; i < doc.numSectors() ; i++)
 	{
-		int tag = gDocument.sectors[i]->tag;
+		int tag = doc.sectors[i]->tag;
 
 		// ignore special tags
 		if (Features.tag_666 && (tag == 666 || tag == 667))
@@ -2968,26 +3021,26 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 }
 
 
-void Tags_ApplyNewValue(int new_tag)
+void ChecksModule::tagsApplyNewValue(int new_tag) const
 {
 	// uses the current selection (caller must set it up)
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("new tag for", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("new tag for", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 	{
 		if (edit.mode == ObjType::linedefs)
-			gDocument.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
+			doc.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
 		else if (edit.mode == ObjType::sectors)
-			gDocument.basis.changeSector(*it, Sector::F_TAG, new_tag);
+			doc.basis.changeSector(*it, Sector::F_TAG, new_tag);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void CMD_ApplyTag()
+void ChecksModule::commandApplyTag()
 {
 	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
 	{
@@ -3022,7 +3075,7 @@ void CMD_ApplyTag()
 
 	int min_tag, max_tag;
 
-	Tags_UsedRange(&min_tag, &max_tag);
+	gDocument.checks.tagsUsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + (do_last ? 0 : 1);
 	if (new_tag <= 0)
@@ -3035,7 +3088,7 @@ void CMD_ApplyTag()
 	}
 	else
 	{
-		Tags_ApplyNewValue(new_tag);
+		gDocument.checks.tagsApplyNewValue(new_tag);
 	}
 
 	if (unselect == SelectHighlight::unselect)
@@ -3043,9 +3096,9 @@ void CMD_ApplyTag()
 }
 
 
-static bool LD_tag_exists(int tag)
+static bool LD_tag_exists(int tag, const Document &doc)
 {
-	for (const LineDef *linedef : gDocument.linedefs)
+	for (const LineDef *linedef : doc.linedefs)
 		if (linedef->tag == tag)
 			return true;
 
@@ -3053,9 +3106,9 @@ static bool LD_tag_exists(int tag)
 }
 
 
-static bool SEC_tag_exists(int tag)
+static bool SEC_tag_exists(int tag, const Document &doc)
 {
-	for (const Sector *sector : gDocument.sectors)
+	for (const Sector *sector : doc.sectors)
 		if (sector->tag == tag)
 			return true;
 
@@ -3063,13 +3116,13 @@ static bool SEC_tag_exists(int tag)
 }
 
 
-void Tags_FindUnmatchedSectors(selection_c& secs)
+void Tags_FindUnmatchedSectors(selection_c& secs, const Document &doc)
 {
 	secs.change_type(ObjType::sectors);
 
-	for (int s = 0 ; s < gDocument.numSectors(); s++)
+	for (int s = 0 ; s < doc.numSectors(); s++)
 	{
-		int tag = gDocument.sectors[s]->tag;
+		int tag = doc.sectors[s]->tag;
 
 		if (tag <= 0)
 			continue;
@@ -3079,19 +3132,19 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 		if (Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
-		if (! LD_tag_exists(tag))
+		if (! LD_tag_exists(tag, doc))
 			secs.set(s);
 	}
 }
 
 
-void Tags_FindUnmatchedLineDefs(selection_c& lines)
+static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->tag <= 0)
 			continue;
@@ -3101,41 +3154,41 @@ void Tags_FindUnmatchedLineDefs(selection_c& lines)
 		if (L->type <= 0)
 			continue;
 
-		if (! SEC_tag_exists(L->tag))
+		if (! SEC_tag_exists(L->tag, doc))
 			lines.set(n);
 	}
 }
 
 
-void Tags_ShowUnmatchedSectors()
+static void Tags_ShowUnmatchedSectors(const Document &doc)
 {
 	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
-	Tags_FindUnmatchedSectors(*edit.Selected);
+	Tags_FindUnmatchedSectors(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Tags_ShowUnmatchedLineDefs()
+static void Tags_ShowUnmatchedLineDefs(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	Tags_FindUnmatchedLineDefs(*edit.Selected);
+	Tags_FindUnmatchedLineDefs(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Tags_FindMissingTags(selection_c& lines)
+static void Tags_FindMissingTags(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -3159,18 +3212,18 @@ void Tags_FindMissingTags(selection_c& lines)
 }
 
 
-void Tags_ShowMissingTags()
+static void Tags_ShowMissingTags(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	Tags_FindMissingTags(*edit.Selected);
+	Tags_FindMissingTags(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-static bool SEC_check_beast_mark(int tag)
+static bool SEC_check_beast_mark(int tag, const Document &doc)
 {
 	if (! Features.tag_666)
 		return true;
@@ -3200,7 +3253,7 @@ static bool SEC_check_beast_mark(int tag)
 			return true;
 		}
 
-		for (const Thing *thing : gDocument.things)
+		for (const Thing *thing : doc.things)
 		{
 			const thingtype_t &info = M_GetThingType(thing->type);
 
@@ -3215,26 +3268,26 @@ static bool SEC_check_beast_mark(int tag)
 }
 
 
-void Tags_FindBeastMarks(selection_c& secs)
+static void Tags_FindBeastMarks(selection_c& secs, const Document &doc)
 {
 	secs.change_type(ObjType::sectors);
 
-	for (int s = 0 ; s < gDocument.numSectors(); s++)
+	for (int s = 0 ; s < doc.numSectors(); s++)
 	{
-		int tag = gDocument.sectors[s]->tag;
+		int tag = doc.sectors[s]->tag;
 
-		if (! SEC_check_beast_mark(tag))
+		if (! SEC_check_beast_mark(tag, doc))
 			secs.set(s);
 	}
 }
 
 
-void Tags_ShowBeastMarks()
+static void Tags_ShowBeastMarks(const Document &doc)
 {
 	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
-	Tags_FindBeastMarks(*edit.Selected);
+	Tags_FindBeastMarks(*edit.Selected, doc);
 
 	GoToErrors();
 }
@@ -3247,19 +3300,17 @@ class UI_Check_Tags : public UI_Check_base
 public:
 	int fresh_tag;
 
-public:
-	UI_Check_Tags(bool all_mode) :
+	UI_Check_Tags(bool all_mode, const Document &doc) :
 		UI_Check_base(520, 326, all_mode, "Check : Tags", "Tag test results"),
-		fresh_tag(0)
+		fresh_tag(0), doc(doc)
 	{ }
 
-public:
 	static void action_fresh_tag(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
 
 		// fresh_tag is set externally
-		Tags_ApplyNewValue(dialog->fresh_tag);
+		dialog->doc.checks.tagsApplyNewValue(dialog->fresh_tag);
 
 		dialog->want_close = true;
 	}
@@ -3267,42 +3318,45 @@ public:
 	static void action_show_unmatch_sec(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowUnmatchedSectors();
-		dialog->user_action = CKR_Highlight;
+		Tags_ShowUnmatchedSectors(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_unmatch_line(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowUnmatchedLineDefs();
-		dialog->user_action = CKR_Highlight;
+		Tags_ShowUnmatchedLineDefs(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_missing_tag(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowMissingTags();
-		dialog->user_action = CKR_Highlight;
+		Tags_ShowMissingTags(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_beast_marks(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowBeastMarks();
-		dialog->user_action = CKR_Highlight;
+		Tags_ShowBeastMarks(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
+
+private:
+	const Document &doc;
 };
 
 
-check_result_e CHECK_Tags(int min_severity)
+CheckResult ChecksModule::checkTags(int min_severity) const
 {
-	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0);
+	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0, doc);
 
 	selection_c  sel;
 
 	for (;;)
 	{
-		Tags_FindMissingTags(sel);
+		Tags_FindMissingTags(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No linedefs missing a needed tag");
@@ -3315,7 +3369,7 @@ check_result_e CHECK_Tags(int min_severity)
 		}
 
 
-		Tags_FindUnmatchedLineDefs(sel);
+		Tags_FindUnmatchedLineDefs(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No tagged linedefs w/o a matching sector");
@@ -3328,7 +3382,7 @@ check_result_e CHECK_Tags(int min_severity)
 		}
 
 
-		Tags_FindUnmatchedSectors(sel);
+		Tags_FindUnmatchedSectors(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No tagged sectors w/o a matching linedef");
@@ -3341,7 +3395,7 @@ check_result_e CHECK_Tags(int min_severity)
 		}
 
 
-		Tags_FindBeastMarks(sel);
+		Tags_FindBeastMarks(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");
@@ -3358,7 +3412,7 @@ check_result_e CHECK_Tags(int min_severity)
 
 		int min_tag, max_tag;
 
-		Tags_UsedRange(&min_tag, &max_tag);
+		tagsUsedRange(&min_tag, &max_tag);
 
 		if (max_tag <= 0)
 			dialog->AddLine("No tags are in use");
@@ -3386,12 +3440,12 @@ check_result_e CHECK_Tags(int min_severity)
 		{
 			delete dialog;
 
-			return CKR_OK;
+			return CheckResult::ok;
 		}
 
-		check_result_e result = dialog->Run();
+		CheckResult result = dialog->Run();
 
-		if (result == CKR_TookAction)
+		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
 			dialog->Reset();
@@ -3420,99 +3474,99 @@ static void bump_unknown_name(std::map<SString, int>& list,
 }
 
 
-void Textures_FindMissing(selection_c& lines)
+void Textures_FindMissing(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right(gDocument)->MidTex()))
+			if (is_null_tex(L->Right(doc)->MidTex()))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(gDocument)->SecRef(gDocument);
-			const Sector *back  = L->Left(gDocument) ->SecRef(gDocument);
+			const Sector *front = L->Right(doc)->SecRef(doc);
+			const Sector *back  = L->Left(doc) ->SecRef(doc);
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(gDocument)->LowerTex()))
+			if (front->floorh < back->floorh && is_null_tex(L->Right(doc)->LowerTex()))
 				lines.set(n);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(gDocument)->LowerTex()))
+			if (back->floorh < front->floorh && is_null_tex(L->Left(doc)->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(gDocument)->UpperTex()))
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right(doc)->UpperTex()))
 				lines.set(n);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(gDocument)->UpperTex()))
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left(doc)->UpperTex()))
 				lines.set(n);
 		}
 	}
 }
 
 
-void Textures_ShowMissing()
+static void Textures_ShowMissing(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	Textures_FindMissing(*edit.Selected);
+	Textures_FindMissing(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Textures_FixMissing()
+static void Textures_FixMissing(Document &doc)
 {
 	int new_wall = BA_InternaliseString(default_wall_tex);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed missing textures");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed missing textures");
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right(gDocument)->MidTex()))
-				gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+			if (is_null_tex(L->Right(doc)->MidTex()))
+				doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(gDocument)->SecRef(gDocument);
-			const Sector *back  = L->Left(gDocument) ->SecRef(gDocument);
+			const Sector *front = L->Right(doc)->SecRef(doc);
+			const Sector *back  = L->Left(doc) ->SecRef(doc);
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(gDocument)->LowerTex()))
-				gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+			if (front->floorh < back->floorh && is_null_tex(L->Right(doc)->LowerTex()))
+				doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(gDocument)->LowerTex()))
-				gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+			if (back->floorh < front->floorh && is_null_tex(L->Left(doc)->LowerTex()))
+				doc.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(gDocument)->UpperTex()))
-				gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right(doc)->UpperTex()))
+				doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(gDocument)->UpperTex()))
-				gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left(doc)->UpperTex()))
+				doc.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -3546,32 +3600,32 @@ static int check_transparent(const SString &tex,
 }
 
 
-void Textures_FindTransparent(selection_c& lines,
-                              std::map<SString, int>& names)
+static void Textures_FindTransparent(selection_c& lines,
+                              std::map<SString, int>& names, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (check_transparent(L->Right(gDocument)->MidTex(), names))
+			if (check_transparent(L->Right(doc)->MidTex(), names))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
 			// note : plain OR operator here to check all parts (do NOT want short-circuit)
-			if (check_transparent(L->Right(gDocument)->LowerTex(), names) |
-				check_transparent(L->Right(gDocument)->UpperTex(), names) |
-				check_transparent(L-> Left(gDocument)->LowerTex(), names) |
-				check_transparent(L-> Left(gDocument)->UpperTex(), names))
+			if (check_transparent(L->Right(doc)->LowerTex(), names) |
+				check_transparent(L->Right(doc)->UpperTex(), names) |
+				check_transparent(L-> Left(doc)->LowerTex(), names) |
+				check_transparent(L-> Left(doc)->UpperTex(), names))
 			{
 				lines.set(n);
 			}
@@ -3580,20 +3634,20 @@ void Textures_FindTransparent(selection_c& lines,
 }
 
 
-void Textures_ShowTransparent()
+static void Textures_ShowTransparent(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<SString, int> names;
 
-	Textures_FindTransparent(*edit.Selected, names);
+	Textures_FindTransparent(*edit.Selected, names, doc);
 
 	GoToErrors();
 }
 
 
-void Textures_FixTransparent()
+static void Textures_FixTransparent(Document &doc)
 {
 	SString new_tex = default_wall_tex;
 
@@ -3612,47 +3666,47 @@ void Textures_FixTransparent()
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed transparent textures");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed transparent textures");
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_transparent(L->Right(gDocument)->MidTex()))
-				gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+			if (is_transparent(L->Right(doc)->MidTex()))
+				doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			if (is_transparent(L->Left(gDocument)->LowerTex()))
-				gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+			if (is_transparent(L->Left(doc)->LowerTex()))
+				doc.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Left(gDocument)->UpperTex()))
-				gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+			if (is_transparent(L->Left(doc)->UpperTex()))
+				doc.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
-			if (is_transparent(L->Right(gDocument)->LowerTex()))
-				gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+			if (is_transparent(L->Right(doc)->LowerTex()))
+				doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Right(gDocument)->UpperTex()))
-				gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			if (is_transparent(L->Right(doc)->UpperTex()))
+				doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Textures_LogTransparent()
+static void Textures_LogTransparent(const Document &doc)
 {
 	selection_c sel;
 
 	std::map<SString, int> names;
 	std::map<SString, int>::iterator IT;
 
-	Textures_FindTransparent(sel, names);
+	Textures_FindTransparent(sel, names, doc);
 
 	LogPrintf("\n");
 	LogPrintf("Transparent textures on solid walls:\n");
@@ -3681,22 +3735,22 @@ static int check_medusa(const SString &tex,
 }
 
 
-void Textures_FindMedusa(selection_c& lines,
-                         std::map<SString, int>& names)
+static void Textures_FindMedusa(selection_c& lines,
+                         std::map<SString, int>& names, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(L->Right(gDocument)->MidTex(), names) |  /* plain OR */
-			check_medusa(L-> Left(gDocument)->MidTex(), names))
+		if (check_medusa(L->Right(doc)->MidTex(), names) |  /* plain OR */
+			check_medusa(L-> Left(doc)->MidTex(), names))
 		{
 			lines.set(n);
 		}
@@ -3704,56 +3758,56 @@ void Textures_FindMedusa(selection_c& lines,
 }
 
 
-void Textures_ShowMedusa()
+static void Textures_ShowMedusa(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<SString, int> names;
 
-	Textures_FindMedusa(*edit.Selected, names);
+	Textures_FindMedusa(*edit.Selected, names, doc);
 
 	GoToErrors();
 }
 
 
-void Textures_RemoveMedusa()
+static void Textures_RemoveMedusa(Document &doc)
 {
 	int null_tex = BA_InternaliseString("-");
 
 	std::map<SString, int> names;
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed medusa textures");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed medusa textures");
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(L->Right(gDocument)->MidTex(), names))
+		if (check_medusa(L->Right(doc)->MidTex(), names))
 		{
-			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
-		if (check_medusa(L-> Left(gDocument)->MidTex(), names))
+		if (check_medusa(L-> Left(doc)->MidTex(), names))
 		{
-			gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
+			doc.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Textures_LogMedusa()
+static void Textures_LogMedusa(const Document &doc)
 {
 	selection_c sel;
 
 	std::map<SString, int> names;
 	std::map<SString, int>::iterator IT;
 
-	Textures_FindMedusa(sel, names);
+	Textures_FindMedusa(sel, names, doc);
 
 	LogPrintf("\n");
 	LogPrintf("Medusa effect textures:\n");
@@ -3768,20 +3822,20 @@ void Textures_LogMedusa()
 }
 
 
-void Textures_FindUnknownTex(selection_c& lines,
-                             std::map<SString, int>& names)
+static void Textures_FindUnknownTex(selection_c& lines,
+                             std::map<SString, int>& names, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
-			const SideDef *SD = side ? L->Left(gDocument) : L->Right(gDocument);
+			const SideDef *SD = side ? L->Left(doc) : L->Right(doc);
 
 			if (! SD)
 				continue;
@@ -3803,16 +3857,16 @@ void Textures_FindUnknownTex(selection_c& lines,
 }
 
 
-void Textures_FindUnknownFlat(selection_c& secs,
-                              std::map<SString, int>& names)
+static void Textures_FindUnknownFlat(selection_c& secs,
+                              std::map<SString, int>& names, const Document &doc)
 {
 	secs.change_type(ObjType::sectors);
 
 	names.clear();
 
-	for (int s = 0 ; s < gDocument.numSectors(); s++)
+	for (int s = 0 ; s < doc.numSectors(); s++)
 	{
-		const Sector *S = gDocument.sectors[s];
+		const Sector *S = doc.sectors[s];
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
@@ -3829,33 +3883,33 @@ void Textures_FindUnknownFlat(selection_c& secs,
 }
 
 
-void Textures_ShowUnknownTex()
+static void Textures_ShowUnknownTex(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownTex(*edit.Selected, names);
+	Textures_FindUnknownTex(*edit.Selected, names, doc);
 
 	GoToErrors();
 }
 
 
-void Textures_ShowUnknownFlat()
+static void Textures_ShowUnknownFlat(const Document &doc)
 {
 	if (edit.mode != ObjType::sectors)
 		Editor_ChangeMode('s');
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownFlat(*edit.Selected, names);
+	Textures_FindUnknownFlat(*edit.Selected, names, doc);
 
 	GoToErrors();
 }
 
 
-void Textures_LogUnknown(bool do_flat)
+static void Textures_LogUnknown(bool do_flat, const Document &doc)
 {
 	selection_c sel;
 
@@ -3863,9 +3917,9 @@ void Textures_LogUnknown(bool do_flat)
 	std::map<SString, int>::iterator IT;
 
 	if (do_flat)
-		Textures_FindUnknownFlat(sel, names);
+		Textures_FindUnknownFlat(sel, names, doc);
 	else
-		Textures_FindUnknownTex(sel, names);
+		Textures_FindUnknownTex(sel, names, doc);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown %s:\n", do_flat ? "Flats" : "Textures");
@@ -3880,16 +3934,16 @@ void Textures_LogUnknown(bool do_flat)
 }
 
 
-void Textures_FixUnknownTex()
+static void Textures_FixUnknownTex(Document &doc)
 {
 	int new_wall = BA_InternaliseString(default_wall_tex);
 
 	int null_tex = BA_InternaliseString("-");
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed unknown textures");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed unknown textures");
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		bool two_sided = L->TwoSided();
 
@@ -3900,43 +3954,43 @@ void Textures_FixUnknownTex()
 			if (sd_num < 0)
 				continue;
 
-			const SideDef *SD = gDocument.sidedefs[sd_num];
+			const SideDef *SD = doc.sidedefs[sd_num];
 
 			if (! W_TextureIsKnown(SD->LowerTex()))
-				gDocument.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
+				doc.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
 			if (! W_TextureIsKnown(SD->UpperTex()))
-				gDocument.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
+				doc.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
 			if (! W_TextureIsKnown(SD->MidTex()))
-				gDocument.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
+				doc.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void Textures_FixUnknownFlat()
+static void Textures_FixUnknownFlat(Document &doc)
 {
 	int new_floor = BA_InternaliseString(default_floor_tex);
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed unknown flats");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed unknown flats");
 
-	for (int s = 0 ; s < gDocument.numSectors(); s++)
+	for (int s = 0 ; s < doc.numSectors(); s++)
 	{
-		const Sector *S = gDocument.sectors[s];
+		const Sector *S = doc.sectors[s];
 
 		if (! W_FlatIsKnown(S->FloorTex()))
-			gDocument.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
+			doc.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
 		if (! W_FlatIsKnown(S->CeilTex()))
-			gDocument.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
+			doc.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -3951,13 +4005,13 @@ static bool is_switch_tex(const SString &tex)
 }
 
 
-void Textures_FindDupSwitches(selection_c& lines)
+static void Textures_FindDupSwitches(selection_c& lines, const Document &doc)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		// only check lines with a special
 		if (! L->type)
@@ -3969,9 +4023,9 @@ void Textures_FindDupSwitches(selection_c& lines)
 		// switch textures only work on the front side
 		// (no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right(gDocument)->LowerTex());
-		bool upper = is_switch_tex(L->Right(gDocument)->UpperTex());
-		bool mid   = is_switch_tex(L->Right(gDocument)->MidTex());
+		bool lower = is_switch_tex(L->Right(doc)->LowerTex());
+		bool upper = is_switch_tex(L->Right(doc)->UpperTex());
+		bool mid   = is_switch_tex(L->Right(doc)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -3981,18 +4035,18 @@ void Textures_FindDupSwitches(selection_c& lines)
 }
 
 
-void Textures_ShowDupSwitches()
+static void Textures_ShowDupSwitches(const Document &doc)
 {
 	if (edit.mode != ObjType::linedefs)
 		Editor_ChangeMode('l');
 
-	Textures_FindDupSwitches(*edit.Selected);
+	Textures_FindDupSwitches(*edit.Selected, doc);
 
 	GoToErrors();
 }
 
 
-void Textures_FixDupSwitches()
+static void Textures_FixDupSwitches(Document &doc)
 {
 	int null_tex = BA_InternaliseString("-");
 
@@ -4013,10 +4067,10 @@ void Textures_FixDupSwitches()
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("fixed non-animating switches");
+	doc.basis.begin();
+	doc.basis.setMessage("fixed non-animating switches");
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		// only check lines with a special
 		if (! L->type)
@@ -4028,9 +4082,9 @@ void Textures_FixDupSwitches()
 		// switch textures only work on the front side
 		// (hence no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right(gDocument)->LowerTex());
-		bool upper = is_switch_tex(L->Right(gDocument)->UpperTex());
-		bool mid   = is_switch_tex(L->Right(gDocument)->MidTex());
+		bool lower = is_switch_tex(L->Right(doc)->LowerTex());
+		bool upper = is_switch_tex(L->Right(doc)->UpperTex());
+		bool mid   = is_switch_tex(L->Right(doc)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -4040,47 +4094,47 @@ void Textures_FixDupSwitches()
 		if (L->OneSided())
 		{
 			// we don't care if "mid" is not a switch
-			gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
-			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			continue;
 		}
 
-		const Sector *front = L->Right(gDocument)->SecRef(gDocument);
-		const Sector *back  = L->Left(gDocument) ->SecRef(gDocument);
+		const Sector *front = L->Right(doc)->SecRef(doc);
+		const Sector *back  = L->Left(doc) ->SecRef(doc);
 
 		bool lower_vis = (front->floorh < back->floorh);
 		bool upper_vis = (front->ceilh > back->ceilh);
 
 		if (count >= 2 && upper && !upper_vis)
 		{
-			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			upper = false;
 			count--;
 		}
 
 		if (count >= 2 && lower && !lower_vis)
 		{
-			gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
 			lower = false;
 			count--;
 		}
 
 		if (count >= 2 && mid)
 		{
-			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 			mid = false;
 			count--;
 		}
 
 		if (count >= 2)
 		{
-			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 			upper = false;
 			count--;
 		}
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -4089,134 +4143,136 @@ void Textures_FixDupSwitches()
 class UI_Check_Textures : public UI_Check_base
 {
 public:
-	UI_Check_Textures(bool all_mode) :
+	UI_Check_Textures(bool all_mode, Document &doc) :
 		UI_Check_base(580, 286, all_mode, "Check : Textures",
-		              "Texture test results")
+		              "Texture test results"), doc(doc)
 	{ }
 
-public:
 	static void action_show_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowUnknownTex();
-		dialog->user_action = CKR_Highlight;
+		Textures_ShowUnknownTex(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogUnknown(false);
-		dialog->user_action = CKR_Highlight;
+		Textures_LogUnknown(false, dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixUnknownTex();
-		dialog->user_action = CKR_TookAction;
+		Textures_FixUnknownTex(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowUnknownFlat();
-		dialog->user_action = CKR_Highlight;
+		Textures_ShowUnknownFlat(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogUnknown(true);
-		dialog->user_action = CKR_Highlight;
+		Textures_LogUnknown(true, dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixUnknownFlat();
-		dialog->user_action = CKR_TookAction;
+		Textures_FixUnknownFlat(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_missing(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowMissing();
-		dialog->user_action = CKR_Highlight;
+		Textures_ShowMissing(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_missing(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixMissing();
-		dialog->user_action = CKR_TookAction;
+		Textures_FixMissing(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowTransparent();
-		dialog->user_action = CKR_Highlight;
+		Textures_ShowTransparent(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixTransparent();
-		dialog->user_action = CKR_TookAction;
+		Textures_FixTransparent(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_log_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogTransparent();
-		dialog->user_action = CKR_Highlight;
+		Textures_LogTransparent(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 
 	static void action_show_dup_switch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowDupSwitches();
-		dialog->user_action = CKR_Highlight;
+		Textures_ShowDupSwitches(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_dup_switch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixDupSwitches();
-		dialog->user_action = CKR_TookAction;
+		Textures_FixDupSwitches(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 
 	static void action_show_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowMedusa();
-		dialog->user_action = CKR_Highlight;
+		Textures_ShowMedusa(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_RemoveMedusa();
-		dialog->user_action = CKR_TookAction;
+		Textures_RemoveMedusa(dialog->doc);
+		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_log_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogMedusa();
-		dialog->user_action = CKR_Highlight;
+		Textures_LogMedusa(dialog->doc);
+		dialog->user_action = CheckResult::highlight;
 	}
+
+private:
+	Document &doc;
 };
 
 
-check_result_e CHECK_Textures(int min_severity)
+CheckResult ChecksModule::checkTextures(int min_severity) const
 {
-	UI_Check_Textures *dialog = new UI_Check_Textures(min_severity > 0);
+	UI_Check_Textures *dialog = new UI_Check_Textures(min_severity > 0, doc);
 
 	selection_c  sel;
 
@@ -4224,7 +4280,7 @@ check_result_e CHECK_Textures(int min_severity)
 
 	for (;;)
 	{
-		Textures_FindUnknownTex(sel, names);
+		Textures_FindUnknownTex(sel, names, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown textures");
@@ -4239,7 +4295,7 @@ check_result_e CHECK_Textures(int min_severity)
 		}
 
 
-		Textures_FindUnknownFlat(sel, names);
+		Textures_FindUnknownFlat(sel, names, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown flats");
@@ -4256,7 +4312,7 @@ check_result_e CHECK_Textures(int min_severity)
 
 		if (! Features.medusa_fixed)
 		{
-			Textures_FindMedusa(sel, names);
+			Textures_FindMedusa(sel, names, doc);
 
 			if (sel.empty())
 				dialog->AddLine("No textures causing Medusa Effect");
@@ -4274,7 +4330,7 @@ check_result_e CHECK_Textures(int min_severity)
 		dialog->AddGap(10);
 
 
-		Textures_FindMissing(sel);
+		Textures_FindMissing(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No missing textures on walls");
@@ -4288,7 +4344,7 @@ check_result_e CHECK_Textures(int min_severity)
 		}
 
 
-		Textures_FindTransparent(sel, names);
+		Textures_FindTransparent(sel, names, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No transparent textures on solids");
@@ -4303,7 +4359,7 @@ check_result_e CHECK_Textures(int min_severity)
 		}
 
 
-		Textures_FindDupSwitches(sel);
+		Textures_FindDupSwitches(sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No non-animating switch textures");
@@ -4321,12 +4377,12 @@ check_result_e CHECK_Textures(int min_severity)
 		{
 			delete dialog;
 
-			return CKR_OK;
+			return CheckResult::ok;
 		}
 
-		check_result_e result = dialog->Run();
+		CheckResult result = dialog->Run();
 
-		if (result == CKR_TookAction)
+		if (result == CheckResult::tookAction)
 		{
 			// repeat the tests
 			dialog->Reset();
@@ -4343,38 +4399,38 @@ check_result_e CHECK_Textures(int min_severity)
 //------------------------------------------------------------------------
 
 
-void CHECK_All(bool major_stuff)
+void ChecksModule::checkAll(bool major_stuff) const
 {
 	bool no_worries = true;
 
 	int min_severity = major_stuff ? 2 : 1;
 
-	check_result_e result;
+	CheckResult result;
 
 
-	result = CHECK_Vertices(min_severity);
-	if (result == CKR_Highlight) return;
-	if (result != CKR_OK) no_worries = false;
+	result = checkVertices(min_severity);
+	if (result == CheckResult::highlight) return;
+	if (result != CheckResult::ok) no_worries = false;
 
-	result = CHECK_Sectors(min_severity);
-	if (result == CKR_Highlight) return;
-	if (result != CKR_OK) no_worries = false;
+	result = checkSectors(min_severity);
+	if (result == CheckResult::highlight) return;
+	if (result != CheckResult::ok) no_worries = false;
 
-	result = CHECK_LineDefs(min_severity);
-	if (result == CKR_Highlight) return;
-	if (result != CKR_OK) no_worries = false;
+	result = checkLinedefs(min_severity);
+	if (result == CheckResult::highlight) return;
+	if (result != CheckResult::ok) no_worries = false;
 
-	result = CHECK_Things(min_severity);
-	if (result == CKR_Highlight) return;
-	if (result != CKR_OK) no_worries = false;
+	result = checkThings(min_severity);
+	if (result == CheckResult::highlight) return;
+	if (result != CheckResult::ok) no_worries = false;
 
-	result = CHECK_Textures(min_severity);
-	if (result == CKR_Highlight) return;
-	if (result != CKR_OK) no_worries = false;
+	result = checkTextures(min_severity);
+	if (result == CheckResult::highlight) return;
+	if (result != CheckResult::ok) no_worries = false;
 
-	result = CHECK_Tags(min_severity);
-	if (result == CKR_Highlight) return;
-	if (result != CKR_OK) no_worries = false;
+	result = checkTags(min_severity);
+	if (result == CheckResult::highlight) return;
+	if (result != CheckResult::ok) no_worries = false;
 
 
 	if (no_worries)
@@ -4385,7 +4441,7 @@ void CHECK_All(bool major_stuff)
 }
 
 
-void CMD_MapCheck()
+void ChecksModule::commandMapCheck()
 {
 	SString what = EXEC_Param[0];
 
@@ -4396,46 +4452,46 @@ void CMD_MapCheck()
 	}
 	else if (what.noCaseEqual("all"))
 	{
-		CHECK_All(false);
+		gDocument.checks.checkAll(false);
 	}
 	else if (what.noCaseEqual("major"))
 	{
-		CHECK_All(true);
+		gDocument.checks.checkAll(true);
 	}
 	else if (what.noCaseEqual("vertices"))
 	{
-		CHECK_Vertices();
+		gDocument.checks.checkVertices(0);
 	}
 	else if (what.noCaseEqual("sectors"))
 	{
-		CHECK_Sectors();
+		gDocument.checks.checkSectors(0);
 	}
 	else if (what.noCaseEqual("linedefs"))
 	{
-		CHECK_LineDefs();
+		gDocument.checks.checkLinedefs(0);
 	}
 	else if (what.noCaseEqual("things"))
 	{
-		CHECK_Things();
+		gDocument.checks.checkThings(0);
 	}
 	else if (what.noCaseEqual("current"))  // current editing mode
 	{
 		switch (edit.mode)
 		{
 			case ObjType::vertices:
-				CHECK_Vertices();
+				gDocument.checks.checkVertices(0);
 				break;
 
 			case ObjType::sectors:
-				CHECK_Sectors();
+				gDocument.checks.checkSectors(0);
 				break;
 
 			case ObjType::linedefs:
-				CHECK_LineDefs();
+				gDocument.checks.checkLinedefs(0);
 				break;
 
 			case ObjType::things:
-				CHECK_Things();
+				gDocument.checks.checkThings(0);
 				break;
 
 			default:
@@ -4445,11 +4501,11 @@ void CMD_MapCheck()
 	}
 	else if (what.noCaseEqual("textures"))
 	{
-		CHECK_Textures();
+		gDocument.checks.checkTextures(0);
 	}
 	else if (what.noCaseEqual("tags"))
 	{
-		CHECK_Tags();
+		gDocument.checks.checkTags(0);
 	}
 	else
 	{
@@ -4458,11 +4514,11 @@ void CMD_MapCheck()
 }
 
 
-void Debug_CheckUnusedStuff()
+void Debug_CheckUnusedStuff(Document &doc)
 {
 	selection_c sel;
 
-	Sectors_FindUnused(sel);
+	Sectors_FindUnused(sel, doc);
 
 	int num = sel.count_obj();
 
@@ -4471,11 +4527,11 @@ void Debug_CheckUnusedStuff()
 		fl_beep();
 		DLG_Notify("Operation left %d sectors unused.", num);
 
-		Sectors_RemoveUnused();
+		Sectors_RemoveUnused(doc);
 		return;
 	}
 
-	SideDefs_FindUnused(sel);
+	SideDefs_FindUnused(sel, doc);
 
 	num = sel.count_obj();
 
@@ -4484,7 +4540,7 @@ void Debug_CheckUnusedStuff()
 		fl_beep();
 		DLG_Notify("Operation left %d sidedefs unused.", num);
 
-		SideDefs_RemoveUnused();
+		SideDefs_RemoveUnused(doc);
 		return;
 	}
 }

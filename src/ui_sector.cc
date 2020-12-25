@@ -587,14 +587,14 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 	new_tag = CLAMP(-32767, new_tag, 32767);
 
 	if (! edit.Selected->empty())
-		Tags_ApplyNewValue(new_tag);
+		gDocument.checks.tagsApplyNewValue(new_tag);
 }
 
 
 void UI_SectorBox::FreshTag()
 {
 	int min_tag, max_tag;
-	Tags_UsedRange(&min_tag, &max_tag);
+	gDocument.checks.tagsUsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + 1;
 
@@ -609,7 +609,7 @@ void UI_SectorBox::FreshTag()
 	}
 
 	if (! edit.Selected->empty())
-		Tags_ApplyNewValue(new_tag);
+		gDocument.checks.tagsApplyNewValue(new_tag);
 }
 
 

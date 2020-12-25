@@ -1051,7 +1051,7 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 	// However they just get in the way for editing, so remove them.
 	RemoveUnusedVerticesAtEnd();
 
-	SideDefs_Unpack(true);
+	gDocument.checks.sidedefsUnpack(true);
 
 	CalculateLevelBounds();
 	Subdiv_InvalidateAll();

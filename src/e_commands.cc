@@ -1434,7 +1434,7 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"MapCheck", "Misc",
-		&CMD_MapCheck,
+		&ChecksModule::commandMapCheck,
 		/* flags */ NULL,
 		/* keywords */ "all major vertices sectors linedefs things textures tags current"
 	},
@@ -1740,7 +1740,7 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"ApplyTag",	"General",
-		&CMD_ApplyTag,
+		&ChecksModule::commandApplyTag,
 		/* flags */ NULL,
 		/* keywords */ "fresh last"
 	},
