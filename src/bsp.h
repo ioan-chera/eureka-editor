@@ -82,7 +82,7 @@ enum build_result_e
 };
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Document &doc);
 
 
 //======================================================================
@@ -150,27 +150,11 @@ void Adler32_Finish(u32_t *crc);
 // BLOCKMAP : Generate the blockmap
 //------------------------------------------------------------------------
 
-// compute blockmap origin & size (the block_x/y/w/h variables)
-// based on the set of loaded linedefs.
-//
-void InitBlockmap();
-
-// build the blockmap and write the data into the BLOCKMAP lump
-void PutBlockmap();
-
 // utility routines...
 void GetBlockmapBounds(int *x, int *y, int *w, int *h);
 
 int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax,
     int x1, int y1, int x2, int y2);
-
-
-//------------------------------------------------------------------------
-// REJECT : Generate the reject table
-//------------------------------------------------------------------------
-
-// build the reject table and write it into the REJECT lump
-void PutReject();
 
 
 //------------------------------------------------------------------------

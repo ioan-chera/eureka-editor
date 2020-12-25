@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Document.h"
 #include "Errors.h"
 #include "main.h"
 #include "m_config.h"
@@ -349,7 +350,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 		// load level
 		LoadLevelNum(instance::edit_wad, n);
 
-		ret = AJBSP_BuildLevel(info, n);
+		ret = AJBSP_BuildLevel(info, n, gDocument);
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -405,7 +406,7 @@ void BuildNodesAfterSave(int lev_idx)
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx);
+	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, gDocument);
 
 	// TODO : maybe print # of serious/minor warnings
 

@@ -181,14 +181,14 @@ static void BlockAdd(int blk_num, int line_index)
 }
 
 
-static void BlockAddLine(int line_index)
+static void BlockAddLine(int line_index, const Document &doc)
 {
-	const LineDef *L = gDocument.linedefs[line_index];
+	const LineDef *L = doc.linedefs[line_index];
 
-	int x1 = (int) L->Start(gDocument)->x();
-	int y1 = (int) L->Start(gDocument)->y();
-	int x2 = (int) L->End(gDocument)->x();
-	int y2 = (int) L->End(gDocument)->y();
+	int x1 = (int) L->Start(doc)->x();
+	int y1 = (int) L->Start(doc)->y();
+	int x2 = (int) L->End(doc)->x();
+	int y2 = (int) L->End(doc)->y();
 
 	int bx1 = (MIN(x1,x2) - block_x) / 128;
 	int by1 = (MIN(y1,y2) - block_y) / 128;
@@ -253,17 +253,17 @@ static void BlockAddLine(int line_index)
 }
 
 
-static void CreateBlockmap()
+static void CreateBlockmap(const Document &doc)
 {
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
 		// ignore zero-length lines
-		if (gDocument.linedefs[i]->IsZeroLength(gDocument))
+		if (doc.linedefs[i]->IsZeroLength(doc))
 			continue;
 
-		BlockAddLine(i);
+		BlockAddLine(i, doc);
 	}
 }
 
@@ -491,7 +491,7 @@ static void FreeBlockmap(void)
 }
 
 
-static void FindBlockmapLimits(bbox_t *bbox)
+static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 {
 	int mid_x = 0;
 	int mid_y = 0;
@@ -501,14 +501,14 @@ static void FindBlockmapLimits(bbox_t *bbox)
 
 	for (int i=0 ; i < NumLineDefs ; i++)
 	{
-		const LineDef *L = gDocument.linedefs[i];
+		const LineDef *L = doc.linedefs[i];
 
-		if (! L->IsZeroLength(gDocument))
+		if (! L->IsZeroLength(doc))
 		{
-			double x1 = L->Start(gDocument)->x();
-			double y1 = L->Start(gDocument)->y();
-			double x2 = L->End(gDocument)->x();
-			double y2 = L->End(gDocument)->y();
+			double x1 = L->Start(doc)->x();
+			double y1 = L->Start(doc)->y();
+			double x2 = L->End(doc)->x();
+			double y2 = L->End(doc)->y();
 
 			int lx = (int)floor(MIN(x1, x2));
 			int ly = (int)floor(MIN(y1, y2));
@@ -537,13 +537,16 @@ static void FindBlockmapLimits(bbox_t *bbox)
 # endif
 }
 
-
-void InitBlockmap()
+//
+// compute blockmap origin & size (the block_x/y/w/h variables)
+// based on the set of loaded linedefs.
+//
+static void InitBlockmap(const Document &doc)
 {
 	bbox_t map_bbox;
 
 	// find limits of linedefs, and store as map limits
-	FindBlockmapLimits(&map_bbox);
+	FindBlockmapLimits(&map_bbox, doc);
 
 	PrintDetail("Map goes from (%d,%d) to (%d,%d)\n",
 			map_bbox.minx, map_bbox.miny, map_bbox.maxx, map_bbox.maxy);
@@ -557,8 +560,10 @@ void InitBlockmap()
 	block_count = block_w * block_h;
 }
 
-
-void PutBlockmap()
+//
+// build the blockmap and write the data into the BLOCKMAP lump
+//
+static void PutBlockmap(const Document &doc)
 {
 	if (! cur_info->do_blockmap || NumLineDefs == 0)
 	{
@@ -572,7 +577,7 @@ void PutBlockmap()
 	// initial phase: create internal blockmap containing the index of
 	// all lines in each block.
 
-	CreateBlockmap();
+	CreateBlockmap(doc);
 
 	// -AJA- second phase: compress the blockmap.  We do this by sorting
 	//       the blocks, which is a typical way to detect duplicates in
@@ -645,17 +650,15 @@ static void Reject_Free()
 // Now we scan the linedef list.  For each two-sectored line,
 // merge the two sector groups into one.  That's it!
 //
-static void Reject_GroupSectors()
+static void Reject_GroupSectors(const Document &doc)
 {
-	for (int i=0 ; i < NumLineDefs ; i++)
+	for(const LineDef *L : doc.linedefs)
 	{
-		const LineDef *L = gDocument.linedefs[i];
-
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		int sec1 = L->Right(gDocument)->sector;
-		int sec2 = L->Left(gDocument) ->sector;
+		int sec1 = L->Right(doc)->sector;
+		int sec2 = L->Left(doc) ->sector;
 
 		if (sec1 < 0 || sec2 < 0 || sec1 == sec2)
 			continue;
@@ -738,11 +741,13 @@ static void Reject_WriteLump()
 
 
 //
+// build the reject table and write it into the REJECT lump
+//
 // For now we only do very basic reject processing, limited to
 // determining all isolated groups of sectors (islands that are
 // surrounded by void space).
 //
-void PutReject()
+static void PutReject(const Document &doc)
 {
 	if (! cur_info->do_reject || NumSectors == 0)
 	{
@@ -752,7 +757,7 @@ void PutReject()
 	}
 
 	Reject_Init();
-	Reject_GroupSectors();
+	Reject_GroupSectors(doc);
 	Reject_ProcessSectors();
 
 # if DEBUG_REJECT
@@ -881,14 +886,14 @@ void FreeWallTips()
 
 /* ----- reading routines ------------------------------ */
 
-static void GetVertices(void)
+static void GetVertices(const Document &doc)
 {
-	for (int i = 0 ; i < NumVertices ; i++)
+	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
 		vertex_t *vert = NewVertex();
 
-		vert->x = gDocument.vertices[i]->x();
-		vert->y = gDocument.vertices[i]->y();
+		vert->x = doc.vertices[i]->x();
+		vert->y = doc.vertices[i]->y();
 
 		vert->index = i;
 	}
@@ -911,12 +916,12 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 #endif
 
 
-static inline int VanillaSegDist(const seg_t *seg)
+static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
-	const LineDef *L = gDocument.linedefs[seg->linedef];
+	const LineDef *L = doc.linedefs[seg->linedef];
 
-	double lx = seg->side ? L->End(gDocument)->x() : L->Start(gDocument)->x();
-	double ly = seg->side ? L->End(gDocument)->y() : L->Start(gDocument)->y();
+	double lx = seg->side ? L->End(doc)->x() : L->Start(doc)->x();
+	double ly = seg->side ? L->End(doc)->y() : L->Start(doc)->y();
 
 	// use the "true" starting coord (as stored in the wad)
 	double sx = I_ROUND(seg->start->x);
@@ -1059,7 +1064,7 @@ static inline u32_t VertexIndex_XNOD(const vertex_t *v)
 }
 
 
-void PutSegs(void)
+static void PutSegs(const Document &doc)
 {
 	int i, count;
 
@@ -1079,7 +1084,7 @@ void PutSegs(void)
 		raw.angle   = LE_U16(VanillaSegAngle(seg));
 		raw.linedef = LE_U16(seg->linedef);
 		raw.flip    = LE_U16(seg->side);
-		raw.dist    = LE_U16(VanillaSegDist(seg));
+		raw.dist    = LE_U16(VanillaSegDist(seg, doc));
 
 		lump->Write(&raw, sizeof(raw));
 
@@ -1796,7 +1801,7 @@ void SaveXGL3Format(node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-static void LoadLevel()
+static void LoadLevel(const Document &doc)
 {
 	Lump_c *LEV = instance::edit_wad->GetLump(lev_current_start);
 
@@ -1808,12 +1813,10 @@ static void LoadLevel()
 	num_new_vert = 0;
 	num_real_lines = 0;
 
-	GetVertices();
+	GetVertices(doc);
 
-	for (int ld = 0 ; ld < NumLineDefs ; ld++)
+	for(LineDef *L : doc.linedefs)
 	{
-		LineDef *L = gDocument.linedefs[ld];
-
 		if (L->right >= 0 || L->left >= 0)
 			num_real_lines++;
 
@@ -1949,7 +1952,7 @@ static void AddMissingLump(const char *name, const char *after)
 }
 
 
-build_result_e SaveLevel(node_t *root_node)
+static build_result_e SaveLevel(node_t *root_node, const Document &doc)
 {
 	// Note: root_node may be NULL
 
@@ -2027,13 +2030,13 @@ build_result_e SaveLevel(node_t *root_node)
 
 		PutVertices("VERTEXES", false);
 
-		PutSegs();
+		PutSegs(doc);
 		PutSubsecs("SSECTORS", false);
 		PutNodes("NODES", false, root_node);
 	}
 
-	PutBlockmap();
-	PutReject();
+	PutBlockmap(doc);
+	PutReject(doc);
 
 	// keyword support (v5.0 of the specs).
 	// must be done *after* doing normal nodes (for proper checksum).
@@ -2261,7 +2264,7 @@ Lump_c * CreateGLMarker()
 nodebuildinfo_t * cur_info = NULL;
 
 
-build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
+static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Document &doc)
 {
 	cur_info = info;
 
@@ -2275,9 +2278,9 @@ build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 	lev_current_idx   = lev_idx;
 	lev_current_start = instance::edit_wad->LevelHeader(lev_idx);
 
-	LoadLevel();
+	LoadLevel(doc);
 
-	InitBlockmap();
+	InitBlockmap(doc);
 
 
 	build_result_e ret = BUILD_OK;
@@ -2308,7 +2311,7 @@ build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 		if (instance::Level_format == MapFormat::udmf)
 			ret = SaveUDMF(root_node);
 		else
-			ret = SaveLevel(root_node);
+			ret = SaveLevel(root_node, doc);
 	}
 	else
 	{
@@ -2319,8 +2322,8 @@ build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 	FreeQuickAllocCuts();
 
 	// clear some fake line flags
-	for (int i = 0 ; i < NumLineDefs ; i++)
-		gDocument.linedefs[i]->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
+	for(LineDef *linedef : doc.linedefs)
+		linedef->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
 }
@@ -2328,9 +2331,9 @@ build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx)
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Document &doc)
 {
-	return ajbsp::BuildLevel(info, lev_idx);
+	return ajbsp::BuildLevel(info, lev_idx, doc);
 }
 
 //--- editor settings ---
