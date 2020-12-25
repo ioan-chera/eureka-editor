@@ -79,15 +79,15 @@ void RotateObjects3(double deg, double pos_x, double pos_y);
 
 /* commands */
 
-void CMD_Insert();
+void CMD_Insert(Document &doc);
 
-void CMD_CopyProperties();
+void CMD_CopyProperties(Document &doc);
 
-void CMD_Mirror  ();
-void CMD_Rotate90();
-void CMD_Enlarge ();
-void CMD_Shrink  ();
-void CMD_Quantize();
+void CMD_Mirror  (Document &doc);
+void CMD_Rotate90(Document &doc);
+void CMD_Enlarge (Document &doc);
+void CMD_Shrink  (Document &doc);
+void CMD_Quantize(Document &doc);
 
 
 #endif  /* __EUREKA_OBJECTS_H__ */

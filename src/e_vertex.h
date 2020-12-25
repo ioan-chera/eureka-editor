@@ -50,8 +50,8 @@ public:
 	static void commandDisconnect();
 	static void commandLineDisconnect();
 	static void commandSectorDisconnect();
-	static void commandShapeLine();
-	static void commandShapeArc();
+	static void commandShapeLine(Document &doc);
+	static void commandShapeArc(Document &doc);
 
 private:
 	void mergeSandwichLines(int ld1, int ld2, int v, selection_c &del_lines) const;

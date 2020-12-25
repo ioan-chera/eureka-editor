@@ -176,7 +176,7 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 //
 // select/unselect all linedefs in a non-forked path.
 //
-void CMD_LIN_SelectPath(void)
+void CMD_LIN_SelectPath(Document &doc)
 {
 	// determine starting linedef
 	if (edit.highlight.is_nil())
@@ -194,7 +194,7 @@ void CMD_LIN_SelectPath(void)
 
 	int start_L = edit.highlight.num;
 
-	if ((match & SLP_OneSided) && !gDocument.linedefs[start_L]->OneSided())
+	if ((match & SLP_OneSided) && !doc.linedefs[start_L]->OneSided())
 		return;
 
 	bool unset_them = false;
@@ -206,8 +206,8 @@ void CMD_LIN_SelectPath(void)
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(start_L, gDocument.linedefs[start_L]->start, seen, match);
-	SelectLinesInHalfPath(start_L, gDocument.linedefs[start_L]->end,   seen, match);
+	SelectLinesInHalfPath(start_L, doc.linedefs[start_L]->start, seen, match);
+	SelectLinesInHalfPath(start_L, doc.linedefs[start_L]->end,   seen, match);
 
 	Editor_ClearErrorMode();
 
@@ -316,7 +316,7 @@ static bool GrowContiguousSectors(selection_c &seen)
 //
 // select/unselect a contiguous group of sectors.
 //
-void CMD_SEC_SelectGroup(void)
+void CMD_SEC_SelectGroup(Document &doc)
 {
 	// determine starting sector
 	if (edit.highlight.is_nil())
@@ -422,9 +422,9 @@ void GoToObject(const Objid& objid)
 }
 
 
-void CMD_JumpToObject(void)
+void CMD_JumpToObject(Document &doc)
 {
-	int total = gDocument.numObjects(edit.mode);
+	int total = doc.numObjects(edit.mode);
 
 	if (total <= 0)
 	{
@@ -492,13 +492,13 @@ void CMD_PrevObject()
 }
 
 
-void CMD_PruneUnused(void)
+void CMD_PruneUnused(Document &doc)
 {
 	selection_c used_secs (ObjType::sectors);
 	selection_c used_sides(ObjType::sidedefs);
 	selection_c used_verts(ObjType::vertices);
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		used_verts.set(L->start);
 		used_verts.set(L->end);
@@ -506,19 +506,19 @@ void CMD_PruneUnused(void)
 		if (L->left >= 0)
 		{
 			used_sides.set(L->left);
-			used_secs.set(L->Left(gDocument)->sector);
+			used_secs.set(L->Left(doc)->sector);
 		}
 
 		if (L->right >= 0)
 		{
 			used_sides.set(L->right);
-			used_secs.set(L->Right(gDocument)->sector);
+			used_secs.set(L->Right(doc)->sector);
 		}
 	}
 
-	used_secs .frob_range(0, gDocument.numSectors() -1, BitOp::toggle);
-	used_sides.frob_range(0, gDocument.numSidedefs() -1, BitOp::toggle);
-	used_verts.frob_range(0, gDocument.numVertices()-1, BitOp::toggle);
+	used_secs .frob_range(0, doc.numSectors() -1, BitOp::toggle);
+	used_sides.frob_range(0, doc.numSidedefs() -1, BitOp::toggle);
+	used_verts.frob_range(0, doc.numVertices()-1, BitOp::toggle);
 
 	int num_secs  = used_secs .count_obj();
 	int num_sides = used_sides.count_obj();
@@ -530,14 +530,14 @@ void CMD_PruneUnused(void)
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
+	doc.basis.begin();
+	doc.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
 	DeleteObjects(&used_sides);
 	DeleteObjects(&used_secs);
 	DeleteObjects(&used_verts);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 

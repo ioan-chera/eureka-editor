@@ -687,7 +687,7 @@ static void Reject_DebugGroups()
 {
 	// Note: this routine is destructive to the group numbers
 
-	for (int i=0 ; i < gDocument.numSectors(); i++)
+	for (int i=0 ; i < doc.numSectors(); i++)
 	{
 		int group = rej_sector_groups[i];
 		int count = 0;
@@ -695,7 +695,7 @@ static void Reject_DebugGroups()
 		if (group < 0)
 			continue;
 
-		for (int k = i ; k < gDocument.numSectors() ; k++)
+		for (int k = i ; k < doc.numSectors() ; k++)
 		{
 			if (rej_sector_groups[k] == group)
 			{
@@ -908,7 +908,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 	if (num == 0xFFFF)
 		return NULL;
 
-	if ((int)num >= gDocument.numSidedefs() && (s16_t)(num) < 0)
+	if ((int)num >= doc.numSidedefs() && (s16_t)(num) < 0)
 		return NULL;
 
 	return SideDefs[num];

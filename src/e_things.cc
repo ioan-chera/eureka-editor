@@ -50,7 +50,7 @@ int calc_new_angle(int angle, int diff)
 //
 // spin_thing - change the angle of things
 //
-void CMD_TH_SpinThings(void)
+void CMD_TH_SpinThings(Document &doc)
 {
 	int degrees = atoi(EXEC_Param[0]);
 
@@ -64,17 +64,17 @@ void CMD_TH_SpinThings(void)
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("spun", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("spun", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Thing *T = gDocument.things[*it];
+		const Thing *T = doc.things[*it];
 
-		gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+		doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	instance::main_win->thing_box->UpdateField(Thing::F_ANGLE);
 

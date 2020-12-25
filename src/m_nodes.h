@@ -23,7 +23,7 @@
 
 void BuildNodesAfterSave(int lev_idx);
 
-void CMD_BuildAllNodes();
+void CMD_BuildAllNodes(Document &doc);
 
 #endif  /* __EUREKA_E_NODES_H__ */
 

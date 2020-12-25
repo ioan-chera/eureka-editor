@@ -21,8 +21,8 @@
 #ifndef __EUREKA_M_EDITLUMP_H__
 #define __EUREKA_M_EDITLUMP_H__
 
-void CMD_EditLump();
-void CMD_AddBehaviorLump();
+void CMD_EditLump(Document &doc);
+void CMD_AddBehaviorLump(Document &doc);
 
 #endif  /* __EUREKA_M_EDITLUMP_H__ */
 

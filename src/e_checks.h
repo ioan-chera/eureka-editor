@@ -54,8 +54,8 @@ public:
 	void tagsApplyNewValue(int new_tag) const;
 	void tagsUsedRange(int *min_tag, int *max_tag) const;
 
-	static void commandMapCheck();
-	static void commandApplyTag();
+	static void commandMapCheck(Document &doc);
+	static void commandApplyTag(Document &doc);
 
 private:
 	void checkAll(bool majorStuff) const;

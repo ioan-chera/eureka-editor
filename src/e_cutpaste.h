@@ -49,12 +49,12 @@ void DeleteObjects_WithUnused(selection_c *list,
 			bool keep_verts  = false,
 			bool keep_lines  = false);
 
-void CMD_Delete();
-void CMD_CopyAndPaste();
+void CMD_Delete(Document &doc);
+void CMD_CopyAndPaste(Document &doc);
 
-void CMD_Clipboard_Cut();
-void CMD_Clipboard_Copy();
-void CMD_Clipboard_Paste();
+void CMD_Clipboard_Cut(Document &doc);
+void CMD_Clipboard_Copy(Document &doc);
+void CMD_Clipboard_Paste(Document &doc);
 
 
 //----------------------------------------------------------------------

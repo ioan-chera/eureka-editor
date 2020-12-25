@@ -671,7 +671,7 @@ void LinedefModule::alignGroup(const std::vector<Objid> & group, int align_flags
 	}
 }
 
-void LinedefModule::commandAlign()
+void LinedefModule::commandAlign(Document &doc)
 {
 	// parse the flags
 	bool do_X = Exec_HasFlag("/x");
@@ -713,7 +713,7 @@ void LinedefModule::commandAlign()
 		int parts = edit.Selected->get_ext(*it);
 		parts &= ~1;
 
-		const LineDef *L = gDocument.linedefs[*it];
+		const LineDef *L = doc.linedefs[*it];
 
 		// safety check
 		if (L->left  < 0) parts &= ~PART_LF_ALL;
@@ -746,8 +746,8 @@ void LinedefModule::commandAlign()
 			// decide whether to use upper or lower
 			// WISH : this could be smarter....
 
-			bool lower_vis = gDocument.linemod.partIsVisible(obj, 'l');
-			bool upper_vis = gDocument.linemod.partIsVisible(obj, 'u');
+			bool lower_vis = doc.linemod.partIsVisible(obj, 'l');
+			bool upper_vis = doc.linemod.partIsVisible(obj, 'u');
 
 			if (! (lower_vis || upper_vis))
 				continue;
@@ -768,16 +768,16 @@ void LinedefModule::commandAlign()
 		return;
 	}
 
-	gDocument.basis.begin();
+	doc.basis.begin();
 
-	gDocument.linemod.alignGroup(group, align_flags);
+	doc.linemod.alignGroup(group, align_flags);
 
 	if (do_clear)
-		gDocument.basis.setMessage("cleared offsets");
+		doc.basis.setMessage("cleared offsets");
 	else
-		gDocument.basis.setMessage("aligned offsets");
+		doc.basis.setMessage("aligned offsets");
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -843,7 +843,7 @@ void LinedefModule::flipLinedefGroup(const selection_c *flip) const
 //
 // flip the orientation of some LineDefs
 //
-void LinedefModule::commandFlip()
+void LinedefModule::commandFlip(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -854,24 +854,24 @@ void LinedefModule::commandFlip()
 
 	bool force_it = Exec_HasFlag("/force");
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("flipped", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("flipped", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		if (force_it)
-			gDocument.linemod.flipLinedef(*it);
+			doc.linemod.flipLinedef(*it);
 		else
-			gDocument.linemod.flipLinedef_safe(*it);
+			doc.linemod.flipLinedef_safe(*it);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
-void LinedefModule::commandSwapSides()
+void LinedefModule::commandSwapSides(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -880,15 +880,15 @@ void LinedefModule::commandSwapSides()
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("swapped sides on", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("swapped sides on", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		gDocument.linemod.flipLine_sides(*it);
+		doc.linemod.flipLine_sides(*it);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -973,7 +973,7 @@ bool LinedefModule::doSplitLineDef(int ld) const
 //
 // split one or more LineDefs in two, adding new Vertices in the middle
 //
-void LinedefModule::commandSplitHalf()
+void LinedefModule::commandSplitHalf(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -982,19 +982,19 @@ void LinedefModule::commandSplitHalf()
 		return;
 	}
 
-	int new_first = gDocument.numLinedefs();
+	int new_first = doc.numLinedefs();
 	int new_count = 0;
 
-	gDocument.basis.begin();
+	doc.basis.begin();
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		if (gDocument.linemod.doSplitLineDef(*it))
+		if (doc.linemod.doSplitLineDef(*it))
 			new_count++;
 	}
 
-	gDocument.basis.setMessage("halved %d lines", new_count);
-	gDocument.basis.end();
+	doc.basis.setMessage("halved %d lines", new_count);
+	doc.basis.end();
 
 	// Hmmmmm -- should abort early if some lines are too short??
 	if (new_count < edit.Selected->count_obj())

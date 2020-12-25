@@ -21,7 +21,7 @@
 #ifndef __EUREKA_UI_PREFS_H__
 #define __EUREKA_UI_PREFS_H__
 
-void CMD_Preferences();
+void CMD_Preferences(Document &doc);
 
 #endif  /* __EUREKA_UI_PREFS_H__ */
 

@@ -84,7 +84,7 @@ void SectorModule::safeRaiseLower(int sec, int parts, int dz) const
 }
 
 
-void SectorModule::commandFloor()
+void SectorModule::commandFloor(Document &doc)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -101,19 +101,19 @@ void SectorModule::commandFloor()
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = gDocument.sectors[*it];
+		const Sector *S = doc.sectors[*it];
 
 		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
-		gDocument.basis.changeSector(*it, Sector::F_FLOORH, new_h);
+		doc.basis.changeSector(*it, Sector::F_FLOORH, new_h);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	instance::main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
@@ -122,7 +122,7 @@ void SectorModule::commandFloor()
 }
 
 
-void SectorModule::commandCeiling()
+void SectorModule::commandCeiling(Document &doc)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -139,19 +139,19 @@ void SectorModule::commandCeiling()
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = gDocument.sectors[*it];
+		const Sector *S = doc.sectors[*it];
 
 		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
-		gDocument.basis.changeSector(*it, Sector::F_CEILH, new_h);
+		doc.basis.changeSector(*it, Sector::F_CEILH, new_h);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	instance::main_win->sec_box->UpdateField(Sector::F_CEILH);
 
@@ -206,7 +206,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 }
 
 
-void SectorModule::commandLight()
+void SectorModule::commandLight(Document &doc)
 {
 	int diff = atoi(EXEC_Param[0]);
 
@@ -223,14 +223,14 @@ void SectorModule::commandLight()
 		return;
 	}
 
-	gDocument.secmod.sectorsAdjustLight(diff);
+	doc.secmod.sectorsAdjustLight(diff);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
 
-void SectorModule::commandSwapFlats()
+void SectorModule::commandSwapFlats(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -239,21 +239,21 @@ void SectorModule::commandSwapFlats()
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("swapped flats in", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("swapped flats in", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = gDocument.sectors[*it];
+		const Sector *S = doc.sectors[*it];
 
 		int floor_tex = S->floor_tex;
 		int  ceil_tex = S->ceil_tex;
 
-		gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
-		gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
+		doc.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
+		doc.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	instance::main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
 	instance::main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);

@@ -985,7 +985,7 @@ void M_LoadOperationMenus()
 }
 
 
-void CMD_OperationMenu()
+void CMD_OperationMenu(Document &doc)
 {
 	if (no_operation_cfg)
 		return;

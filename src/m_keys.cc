@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Document.h"
 #include "Errors.h"
 #include "main.h"
 #include "m_config.h"
@@ -1100,7 +1101,7 @@ extern void Debug_CheckUnusedStuff(Document &doc);
 
 static void DoExecuteCommand(const editor_command_t *cmd)
 {
-	(* cmd->func)();
+	(* cmd->func)(gDocument);
 
 //	Debug_CheckUnusedStuff();
 }

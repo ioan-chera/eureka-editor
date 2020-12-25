@@ -948,7 +948,7 @@ public:
 };
 
 
-void VertexModule::commandShapeLine()
+void VertexModule::commandShapeLine(Document &doc)
 {
 	if (edit.Selected->count_obj() < 3)
 	{
@@ -985,7 +985,7 @@ void VertexModule::commandShapeLine()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = gDocument.vertices[*it];
+		const Vertex *V = doc.vertices[*it];
 
 		double weight = WeightForVertex(V, x1,y1, x2,y2, width,height, -1);
 
@@ -1041,7 +1041,7 @@ void VertexModule::commandShapeLine()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = gDocument.vertices[*it];
+		const Vertex *V = doc.vertices[*it];
 
 		vert_along_t ALONG(*it, AlongDist(V->x(), V->y(), ax,ay, bx,by));
 
@@ -1052,8 +1052,8 @@ void VertexModule::commandShapeLine()
 
 
 	// compute proper positions for start and end of the line
-	const Vertex *V1 = gDocument.vertices[along_list.front().vert_num];
-	const Vertex *V2 = gDocument.vertices[along_list. back().vert_num];
+	const Vertex *V1 = doc.vertices[along_list.front().vert_num];
+	const Vertex *V2 = doc.vertices[along_list. back().vert_num];
 
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
@@ -1076,8 +1076,8 @@ void VertexModule::commandShapeLine()
 	}
 
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("shaped %d vertices", (int)along_list.size());
+	doc.basis.begin();
+	doc.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
@@ -1093,11 +1093,11 @@ void VertexModule::commandShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		gDocument.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
-		gDocument.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
+		doc.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
+		doc.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -1179,7 +1179,7 @@ double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-void VertexModule::commandShapeArc()
+void VertexModule::commandShapeArc(Document &doc)
 {
 	if (EXEC_Param[0].empty())
 	{
@@ -1234,7 +1234,7 @@ void VertexModule::commandShapeArc()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = gDocument.vertices[*it];
+		const Vertex *V = doc.vertices[*it];
 
 		double dx = V->x() - mid_x;
 		double dy = V->y() - mid_y;
@@ -1276,8 +1276,8 @@ void VertexModule::commandShapeArc()
 	else
 		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
-	const Vertex * start_V = gDocument.vertices[along_list[start_idx].vert_num];
-	const Vertex * end_V   = gDocument.vertices[along_list[  end_idx].vert_num];
+	const Vertex * start_V = doc.vertices[along_list[start_idx].vert_num];
+	const Vertex * end_V   = doc.vertices[along_list[  end_idx].vert_num];
 
 	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 
@@ -1324,7 +1324,7 @@ void VertexModule::commandShapeArc()
 		{
 			double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
-			double cost = gDocument.vertmod.evaluateCircle(mid_x, mid_y, r, along_list,
+			double cost = doc.vertmod.evaluateCircle(mid_x, mid_y, r, along_list,
 										 start_idx, arc_rad, ang_offset, false);
 
 			if (cost < best_cost)
@@ -1338,13 +1338,13 @@ void VertexModule::commandShapeArc()
 
 	// actually move stuff now
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("shaped %d vertices", (int)along_list.size());
+	doc.basis.begin();
+	doc.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
-	gDocument.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
+	doc.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 

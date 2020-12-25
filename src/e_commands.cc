@@ -54,13 +54,13 @@
 int config::minimum_drag_pixels = 5;
 
 
-void CMD_Nothing()
+void CMD_Nothing(Document &doc)
 {
 	/* hey jude, don't make it bad */
 }
 
 
-void CMD_MetaKey()
+void CMD_MetaKey(Document &doc)
 {
 	if (edit.sticky_mod)
 	{
@@ -74,7 +74,7 @@ void CMD_MetaKey()
 }
 
 
-void CMD_EditMode()
+void CMD_EditMode(Document &doc)
 {
 	char mode = tolower(EXEC_Param[0][0]);
 
@@ -88,7 +88,7 @@ void CMD_EditMode()
 }
 
 
-void CMD_Select()
+static void CMD_Select(Document &doc)
 {
 	if (edit.render3d)
 		return;
@@ -108,11 +108,11 @@ void CMD_Select()
 }
 
 
-void CMD_SelectAll()
+static void CMD_SelectAll(Document &doc)
 {
 	Editor_ClearErrorMode();
 
-	int total = gDocument.numObjects(edit.mode);
+	int total = doc.numObjects(edit.mode);
 
 	Selection_Push();
 
@@ -123,7 +123,7 @@ void CMD_SelectAll()
 }
 
 
-void CMD_UnselectAll()
+static void CMD_UnselectAll(Document &doc)
 {
 	Editor_ClearErrorMode();
 
@@ -139,12 +139,12 @@ void CMD_UnselectAll()
 }
 
 
-void CMD_InvertSelection()
+static void CMD_InvertSelection(Document &doc)
 {
 	// do not clear selection when in error mode
 	edit.error_mode = false;
 
-	int total = gDocument.numObjects(edit.mode);
+	int total = doc.numObjects(edit.mode);
 
 	if (edit.Selected->what_type() != edit.mode)
 	{
@@ -162,15 +162,15 @@ void CMD_InvertSelection()
 }
 
 
-void CMD_Quit()
+static void CMD_Quit(Document &doc)
 {
 	Main_Quit();
 }
 
 
-void CMD_Undo()
+static void CMD_Undo(Document &doc)
 {
-	if (! gDocument.basis.undo())
+	if (! doc.basis.undo())
 	{
 		Beep("No operation to undo");
 		return;
@@ -181,7 +181,7 @@ void CMD_Undo()
 }
 
 
-void CMD_Redo()
+static void CMD_Redo(Document &doc)
 {
 	if (! gDocument.basis.redo())
 	{
@@ -210,7 +210,7 @@ static void SetGamma(int new_val)
 }
 
 
-void CMD_SetVar()
+void CMD_SetVar(Document &doc)
 {
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
@@ -294,7 +294,7 @@ void CMD_SetVar()
 }
 
 
-void CMD_ToggleVar()
+void CMD_ToggleVar(Document &doc)
 {
 	SString var_name = EXEC_Param[0];
 
@@ -365,7 +365,7 @@ void CMD_ToggleVar()
 }
 
 
-void CMD_BrowserMode()
+static void CMD_BrowserMode(Document &doc)
 {
 	if (EXEC_Param[0].empty())
 	{
@@ -401,7 +401,7 @@ void CMD_BrowserMode()
 }
 
 
-void CMD_Scroll()
+void CMD_Scroll(Document &doc)
 {
 	// these are percentages
 	float delta_x = static_cast<float>(atof(EXEC_Param[0]));
@@ -427,7 +427,7 @@ static void NAV_Scroll_Left_release(void)
 	edit.nav_left = 0;
 }
 
-void CMD_NAV_Scroll_Left()
+void CMD_NAV_Scroll_Left(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -448,7 +448,7 @@ static void NAV_Scroll_Right_release(void)
 	edit.nav_right = 0;
 }
 
-void CMD_NAV_Scroll_Right()
+void CMD_NAV_Scroll_Right(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -469,7 +469,7 @@ static void NAV_Scroll_Up_release(void)
 	edit.nav_up = 0;
 }
 
-void CMD_NAV_Scroll_Up()
+void CMD_NAV_Scroll_Up(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -490,7 +490,7 @@ static void NAV_Scroll_Down_release(void)
 	edit.nav_down = 0;
 }
 
-void CMD_NAV_Scroll_Down()
+static void CMD_NAV_Scroll_Down(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -511,7 +511,7 @@ static void NAV_MouseScroll_release(void)
 	Editor_ScrollMap(+1);
 }
 
-void CMD_NAV_MouseScroll()
+static void CMD_NAV_MouseScroll(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -730,7 +730,7 @@ static void ACT_Click_release(void)
 	RedrawMap();
 }
 
-void CMD_ACT_Click()
+static void CMD_ACT_Click(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -759,7 +759,7 @@ void CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const Thing *T = gDocument.things[edit.highlight.num];
+			const Thing *T = doc.things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
 		}
 		else
@@ -785,22 +785,22 @@ void CMD_ACT_Click()
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const LineDef *L = gDocument.linedefs[split_ld];
+		const LineDef *L = doc.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("split linedef #%d", split_ld);
+		doc.basis.begin();
+		doc.basis.setMessage("split linedef #%d", split_ld);
 
-		int new_vert = gDocument.basis.addNew(ObjType::vertices);
+		int new_vert = doc.basis.addNew(ObjType::vertices);
 
-		Vertex *V = gDocument.vertices[new_vert];
+		Vertex *V = doc.vertices[new_vert];
 
 		V->SetRawXY(edit.split_x, edit.split_y);
 
-		gDocument.linemod.splitLinedefAtVertex(split_ld, new_vert);
+		doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
 
-		gDocument.basis.end();
+		doc.basis.end();
 
 		if (want_select)
 			edit.Selected->set(new_vert);
@@ -813,7 +813,7 @@ void CMD_ACT_Click()
 	}
 
 	// find the object under the pointer.
-	edit.clicked = gDocument.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+	edit.clicked = doc.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box
 	if (edit.click_check_select && edit.clicked.is_nil())
@@ -829,7 +829,7 @@ void CMD_ACT_Click()
 }
 
 
-void CMD_ACT_SelectBox()
+void CMD_ACT_SelectBox(Document &doc)
 {
 	if (edit.render3d)
 		return;
@@ -847,7 +847,7 @@ void CMD_ACT_SelectBox()
 }
 
 
-void CMD_ACT_Drag()
+static void CMD_ACT_Drag(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -944,7 +944,7 @@ static void ACT_Transform_release(void)
 	RedrawMap();
 }
 
-void CMD_ACT_Transform()
+static void CMD_ACT_Transform(Document &doc)
 {
 	if (edit.render3d)
 		return;
@@ -1024,7 +1024,7 @@ void CMD_ACT_Transform()
 }
 
 
-void CMD_WHEEL_Scroll()
+void CMD_WHEEL_Scroll(Document &doc)
 {
 	float speed = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1049,7 +1049,7 @@ void CMD_WHEEL_Scroll()
 }
 
 
-void CMD_Merge()
+static void CMD_Merge(Document &doc)
 {
 	switch (edit.mode)
 	{
@@ -1076,7 +1076,7 @@ void CMD_Merge()
 }
 
 
-void CMD_Disconnect()
+static void CMD_Disconnect(Document &doc)
 {
 	switch (edit.mode)
 	{
@@ -1103,7 +1103,7 @@ void CMD_Disconnect()
 }
 
 
-void CMD_Zoom()
+static void CMD_Zoom(Document &doc)
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -1126,7 +1126,7 @@ void CMD_Zoom()
 }
 
 
-void CMD_ZoomWholeMap()
+static void CMD_ZoomWholeMap(Document &doc)
 {
 	if (edit.render3d)
 		Render3D_Enable(false);
@@ -1135,7 +1135,7 @@ void CMD_ZoomWholeMap()
 }
 
 
-void CMD_ZoomSelection()
+static void CMD_ZoomSelection(Document &doc)
 {
 	if (edit.Selected->empty())
 	{
@@ -1147,7 +1147,7 @@ void CMD_ZoomSelection()
 }
 
 
-void CMD_GoToCamera()
+static void CMD_GoToCamera(Document &doc)
 {
 	if (edit.render3d)
 		Render3D_Enable(false);
@@ -1161,7 +1161,7 @@ void CMD_GoToCamera()
 }
 
 
-void CMD_PlaceCamera()
+static void CMD_PlaceCamera(Document &doc)
 {
 	if (edit.render3d)
 	{
@@ -1191,7 +1191,7 @@ void CMD_PlaceCamera()
 }
 
 
-void CMD_MoveObjects_Dialog()
+static void CMD_MoveObjects_Dialog(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1216,7 +1216,7 @@ void CMD_MoveObjects_Dialog()
 }
 
 
-void CMD_ScaleObjects_Dialog()
+static void CMD_ScaleObjects_Dialog(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1236,7 +1236,7 @@ void CMD_ScaleObjects_Dialog()
 }
 
 
-void CMD_RotateObjects_Dialog()
+static void CMD_RotateObjects_Dialog(Document &doc)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1256,7 +1256,7 @@ void CMD_RotateObjects_Dialog()
 }
 
 
-void CMD_GRID_Bump()
+void CMD_GRID_Bump(Document &doc)
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -1266,7 +1266,7 @@ void CMD_GRID_Bump()
 }
 
 
-void CMD_GRID_Set()
+void CMD_GRID_Set(Document &doc)
 {
 	int step = atoi(EXEC_Param[0]);
 
@@ -1280,7 +1280,7 @@ void CMD_GRID_Set()
 }
 
 
-void CMD_GRID_Zoom()
+void CMD_GRID_Zoom(Document &doc)
 {
 	// target scale is positive for NN:1 and negative for 1:NN
 
@@ -1303,7 +1303,7 @@ void CMD_GRID_Zoom()
 }
 
 
-void CMD_BR_CycleCategory()
+static void CMD_BR_CycleCategory(Document &doc)
 {
 	if (!instance::main_win->browser->visible())
 	{
@@ -1317,7 +1317,7 @@ void CMD_BR_CycleCategory()
 }
 
 
-void CMD_BR_ClearSearch()
+static void CMD_BR_ClearSearch(Document &doc)
 {
 	if (!instance::main_win->browser->visible())
 	{
@@ -1329,7 +1329,7 @@ void CMD_BR_ClearSearch()
 }
 
 
-void CMD_BR_Scroll()
+static void CMD_BR_Scroll(Document &doc)
 {
 	if (!instance::main_win->browser->visible())
 	{
@@ -1349,38 +1349,38 @@ void CMD_BR_Scroll()
 }
 
 
-void CMD_DefaultProps()
+static void CMD_DefaultProps(Document &doc)
 {
 	instance::main_win->ShowDefaultProps();
 }
 
 
-void CMD_FindDialog()
+static void CMD_FindDialog(Document &doc)
 {
 	instance::main_win->ShowFindAndReplace();
 }
 
 
-void CMD_FindNext()
+static void CMD_FindNext(Document &doc)
 {
 	instance::main_win->find_box->FindNext();
 }
 
 
-void CMD_RecalcSectors()
+static void CMD_RecalcSectors(Document &doc)
 {
 	Subdiv_InvalidateAll();
 	RedrawMap();
 }
 
 
-void CMD_LogViewer()
+static void CMD_LogViewer(Document &doc)
 {
 	LogViewer_Open();
 }
 
 
-void CMD_OnlineDocs()
+static void CMD_OnlineDocs(Document &doc)
 {
 	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
 	if (rv == 1)
@@ -1390,7 +1390,7 @@ void CMD_OnlineDocs()
 }
 
 
-void CMD_AboutDialog()
+static void CMD_AboutDialog(Document &doc)
 {
 	DLG_AboutText();
 }

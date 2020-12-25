@@ -214,7 +214,7 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 }
 
 
-void CMD_ManageProject()
+void CMD_ManageProject(Document &doc)
 {
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, false /* is_startup */);
 
@@ -229,7 +229,7 @@ void CMD_ManageProject()
 }
 
 
-void CMD_NewProject()
+void CMD_NewProject(Document &doc)
 {
 	if (! Main_ConfirmQuit("create a new project"))
 		return;
@@ -341,7 +341,7 @@ bool MissingIWAD_Dialog()
 }
 
 
-void CMD_FreshMap()
+void CMD_FreshMap(Document &doc)
 {
 	if (!instance::edit_wad)
 	{
@@ -1143,7 +1143,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 }
 
 
-void CMD_OpenMap()
+void CMD_OpenMap(Document &doc)
 {
 	if (! Main_ConfirmQuit("open another map"))
 		return;
@@ -1216,7 +1216,7 @@ void CMD_OpenMap()
 }
 
 
-void CMD_GivenFile()
+void CMD_GivenFile(Document &doc)
 {
 	SString mode = EXEC_Param[0];
 
@@ -1262,7 +1262,7 @@ void CMD_GivenFile()
 }
 
 
-void CMD_FlipMap()
+void CMD_FlipMap(Document &doc)
 {
 	SString mode = EXEC_Param[0];
 
@@ -1858,13 +1858,13 @@ bool M_ExportMap()
 }
 
 
-void CMD_SaveMap()
+void CMD_SaveMap(Document &doc)
 {
 	M_SaveMap();
 }
 
 
-void CMD_ExportMap()
+void CMD_ExportMap(Document &doc)
 {
 	M_ExportMap();
 }
@@ -1874,7 +1874,7 @@ void CMD_ExportMap()
 //  COPY, RENAME and DELETE MAP
 //------------------------------------------------------------------------
 
-void CMD_CopyMap()
+void CMD_CopyMap(Document &doc)
 {
 	if (!instance::edit_wad)
 	{
@@ -1919,7 +1919,7 @@ void CMD_CopyMap()
 }
 
 
-void CMD_RenameMap()
+void CMD_RenameMap(Document &doc)
 {
 	if (!instance::edit_wad)
 	{
@@ -1991,7 +1991,7 @@ void CMD_RenameMap()
 }
 
 
-void CMD_DeleteMap()
+void CMD_DeleteMap(Document &doc)
 {
 	if (!instance::edit_wad)
 	{

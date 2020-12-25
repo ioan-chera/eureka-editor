@@ -329,7 +329,7 @@ static SString GrabWadNames(const port_path_info_t *info)
 }
 
 
-void CMD_TestMap()
+void CMD_TestMap(Document &doc)
 {
 	if (MadeChanges)
 	{

@@ -1086,7 +1086,7 @@ void Selection_Validate()
 }
 
 
-void CMD_LastSelection()
+void CMD_LastSelection(Document &doc)
 {
 	if (! last_Sel)
 	{

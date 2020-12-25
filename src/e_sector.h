@@ -129,11 +129,11 @@ public:
 
 	/* commands */
 
-	static void commandFloor();
-	static void commandCeiling();
-	static void commandLight();
+	static void commandFloor(Document &doc);
+	static void commandCeiling(Document &doc);
+	static void commandLight(Document &doc);
 	static void commandMerge();
-	static void commandSwapFlats();
+	static void commandSwapFlats(Document &doc);
 
 private:
 	friend class lineloop_c;

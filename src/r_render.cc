@@ -1585,7 +1585,7 @@ void Render3D_WriteUser(std::ostream &os)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
-void R3D_Forward()
+static void R3D_Forward(Document &doc)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1596,7 +1596,7 @@ void R3D_Forward()
 	RedrawMap();
 }
 
-void R3D_Backward()
+static void R3D_Backward(Document &doc)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1607,7 +1607,7 @@ void R3D_Backward()
 	RedrawMap();
 }
 
-void R3D_Left()
+static void R3D_Left(Document &doc)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1618,7 +1618,7 @@ void R3D_Left()
 	RedrawMap();
 }
 
-void R3D_Right()
+static void R3D_Right(Document &doc)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1629,7 +1629,7 @@ void R3D_Right()
 	RedrawMap();
 }
 
-void R3D_Up()
+static void R3D_Up(Document &doc)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
@@ -1646,7 +1646,7 @@ void R3D_Up()
 	RedrawMap();
 }
 
-void R3D_Down()
+static void R3D_Down(Document &doc)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
@@ -1664,7 +1664,7 @@ void R3D_Down()
 }
 
 
-void R3D_Turn()
+static void R3D_Turn(Document &doc)
 {
 	float angle = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1677,7 +1677,7 @@ void R3D_Turn()
 }
 
 
-void R3D_DropToFloor()
+static void R3D_DropToFloor(Document &doc)
 {
 	r_view.FindGroundZ();
 
@@ -1690,7 +1690,7 @@ static void R3D_NAV_Forward_release()
 	edit.nav_fwd = 0;
 }
 
-void R3D_NAV_Forward()
+static void R3D_NAV_Forward(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1709,7 +1709,7 @@ static void R3D_NAV_Back_release(void)
 	edit.nav_back = 0;
 }
 
-void R3D_NAV_Back()
+static void R3D_NAV_Back(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1728,7 +1728,7 @@ static void R3D_NAV_Right_release(void)
 	edit.nav_right = 0;
 }
 
-void R3D_NAV_Right()
+static void R3D_NAV_Right(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1747,7 +1747,7 @@ static void R3D_NAV_Left_release(void)
 	edit.nav_left = 0;
 }
 
-void R3D_NAV_Left()
+static void R3D_NAV_Left(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1766,7 +1766,7 @@ static void R3D_NAV_Up_release(void)
 	edit.nav_up = 0;
 }
 
-void R3D_NAV_Up()
+static void R3D_NAV_Up(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1793,7 +1793,7 @@ static void R3D_NAV_Down_release(void)
 	edit.nav_down = 0;
 }
 
-void R3D_NAV_Down()
+static void R3D_NAV_Down(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1820,7 +1820,7 @@ static void R3D_NAV_TurnLeft_release(void)
 	edit.nav_turn_L = 0;
 }
 
-void R3D_NAV_TurnLeft()
+static void R3D_NAV_TurnLeft(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1842,7 +1842,7 @@ static void R3D_NAV_TurnRight_release(void)
 	edit.nav_turn_R = 0;
 }
 
-void R3D_NAV_TurnRight()
+static void R3D_NAV_TurnRight(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1868,7 +1868,7 @@ static void ACT_AdjustOfs_release(void)
 	AdjustOfs_Finish();
 }
 
-void R3D_ACT_AdjustOfs()
+static void R3D_ACT_AdjustOfs(Document &doc)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1886,7 +1886,7 @@ void R3D_ACT_AdjustOfs()
 }
 
 
-void R3D_Set()
+static void R3D_Set(Document &doc)
 {
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
@@ -1933,7 +1933,7 @@ void R3D_Set()
 }
 
 
-void R3D_Toggle()
+static void R3D_Toggle(Document &doc)
 {
 	SString var_name = EXEC_Param[0];
 
@@ -1969,7 +1969,7 @@ void R3D_Toggle()
 }
 
 
-void R3D_WHEEL_Move()
+static void R3D_WHEEL_Move(Document &doc)
 {
 	float dx = static_cast<float>(Fl::event_dx());
 	float dy = static_cast<float>(Fl::event_dy());
@@ -1997,9 +1997,6 @@ void R3D_WHEEL_Move()
 
 
 //------------------------------------------------------------------------
-
-extern void CMD_ACT_Click();
-
 
 static editor_command_t  render_commands[] =
 {

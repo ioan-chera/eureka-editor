@@ -3041,7 +3041,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag) const
 }
 
 
-void ChecksModule::commandApplyTag()
+void ChecksModule::commandApplyTag(Document &doc)
 {
 	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
 	{
@@ -3076,7 +3076,7 @@ void ChecksModule::commandApplyTag()
 
 	int min_tag, max_tag;
 
-	gDocument.checks.tagsUsedRange(&min_tag, &max_tag);
+	doc.checks.tagsUsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + (do_last ? 0 : 1);
 	if (new_tag <= 0)
@@ -3089,7 +3089,7 @@ void ChecksModule::commandApplyTag()
 	}
 	else
 	{
-		gDocument.checks.tagsApplyNewValue(new_tag);
+		doc.checks.tagsApplyNewValue(new_tag);
 	}
 
 	if (unselect == SelectHighlight::unselect)
@@ -4444,7 +4444,7 @@ void ChecksModule::checkAll(bool major_stuff) const
 }
 
 
-void ChecksModule::commandMapCheck()
+void ChecksModule::commandMapCheck(Document &doc)
 {
 	SString what = EXEC_Param[0];
 
@@ -4455,46 +4455,46 @@ void ChecksModule::commandMapCheck()
 	}
 	else if (what.noCaseEqual("all"))
 	{
-		gDocument.checks.checkAll(false);
+		doc.checks.checkAll(false);
 	}
 	else if (what.noCaseEqual("major"))
 	{
-		gDocument.checks.checkAll(true);
+		doc.checks.checkAll(true);
 	}
 	else if (what.noCaseEqual("vertices"))
 	{
-		gDocument.checks.checkVertices(0);
+		doc.checks.checkVertices(0);
 	}
 	else if (what.noCaseEqual("sectors"))
 	{
-		gDocument.checks.checkSectors(0);
+		doc.checks.checkSectors(0);
 	}
 	else if (what.noCaseEqual("linedefs"))
 	{
-		gDocument.checks.checkLinedefs(0);
+		doc.checks.checkLinedefs(0);
 	}
 	else if (what.noCaseEqual("things"))
 	{
-		gDocument.checks.checkThings(0);
+		doc.checks.checkThings(0);
 	}
 	else if (what.noCaseEqual("current"))  // current editing mode
 	{
 		switch (edit.mode)
 		{
 			case ObjType::vertices:
-				gDocument.checks.checkVertices(0);
+				doc.checks.checkVertices(0);
 				break;
 
 			case ObjType::sectors:
-				gDocument.checks.checkSectors(0);
+				doc.checks.checkSectors(0);
 				break;
 
 			case ObjType::linedefs:
-				gDocument.checks.checkLinedefs(0);
+				doc.checks.checkLinedefs(0);
 				break;
 
 			case ObjType::things:
-				gDocument.checks.checkThings(0);
+				doc.checks.checkThings(0);
 				break;
 
 			default:
@@ -4504,11 +4504,11 @@ void ChecksModule::commandMapCheck()
 	}
 	else if (what.noCaseEqual("textures"))
 	{
-		gDocument.checks.checkTextures(0);
+		doc.checks.checkTextures(0);
 	}
 	else if (what.noCaseEqual("tags"))
 	{
-		gDocument.checks.checkTags(0);
+		doc.checks.checkTags(0);
 	}
 	else
 	{
