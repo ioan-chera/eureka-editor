@@ -40,59 +40,33 @@ void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 //
 #define DEFAULT_FACTOR  11
 
-class nodebuildinfo_t
+struct nodebuildinfo_t
 {
-public:
-	int factor;
+	int factor = DEFAULT_FACTOR;
 
-	bool gl_nodes;
+	bool gl_nodes = true;
 
 	// when these two are false, they create an empty lump
-	bool do_blockmap;
-	bool do_reject;
+	bool do_blockmap = true;
+	bool do_reject = true;
 
-	bool fast;
-	bool warnings;
+	bool fast = false;
+	bool warnings = false;
 
-	bool force_v5;
-	bool force_xnod;
-	bool force_compress;
+	bool force_v5 = false;
+	bool force_xnod = false;
+	bool force_compress = false;
 
 	// the GUI can set this to tell the node builder to stop
-	bool cancelled;
+	bool cancelled = false;
 
 	// from here on, various bits of internal state
-	int total_failed_maps;
-	int total_warnings;
-
-public:
-	nodebuildinfo_t() :
-		factor(DEFAULT_FACTOR),
-
-		gl_nodes(true),
-
-		do_blockmap(true),
-		do_reject  (true),
-
-		fast(false),
-		warnings(false),
-
-		force_v5(false),
-		force_xnod(false),
-		force_compress(false),
-
-		cancelled(false),
-
-		total_failed_maps(0),
-		total_warnings(0)
-	{ }
-
-	~nodebuildinfo_t()
-	{ }
+	int total_failed_maps = 0;
+	int total_warnings = 0;
 };
 
 
-typedef enum
+enum build_result_e
 {
 	// everything went peachy keen
 	BUILD_OK = 0,
@@ -105,8 +79,7 @@ typedef enum
 
 	// when saving the map, one or more lumps overflowed
 	BUILD_LumpOverflow
-}
-build_result_e;
+};
 
 
 build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx);
@@ -150,7 +123,6 @@ void PrintDetail(const char *fmt, ...);
 
 void Failure(const char *fmt, ...);
 void Warning(const char *fmt, ...);
-void MinorIssue(const char *fmt, ...);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
@@ -205,17 +177,17 @@ void PutReject();
 // LEVEL : Level structures & read/write functions.
 //------------------------------------------------------------------------
 
-struct node_s;
+struct node_t;
 
 class quadtree_c;
 
 
 // a wall-tip is where a wall meets a vertex
-typedef struct walltip_s
+struct walltip_t
 {
 	// link in list.  List is kept in ANTI-clockwise order.
-	struct walltip_s *next;
-	struct walltip_s *prev;
+	walltip_t *next;
+	walltip_t *prev;
 
 	// angle that line makes at vertex (degrees).
 	angle_g angle;
@@ -225,11 +197,10 @@ typedef struct walltip_s
 	// right is the side of decreasing angles.
 	bool open_left;
 	bool open_right;
-}
-walltip_t;
+};
 
 
-typedef struct vertex_s
+struct vertex_t
 {
 	// coordinates
 	double x, y;
@@ -244,12 +215,11 @@ typedef struct vertex_s
 	// usually NULL, unless this vertex occupies the same location as a
 	// previous vertex.  when there are multiple vertices at one spot,
 	// the second and third (etc) all refer to the first.
-	struct vertex_s *overlap;
+	struct vertex_t *overlap;
 
 	// list of wall-tips
 	walltip_t *tip_set;
-}
-vertex_t;
+};
 
 
 inline bool coalesce_sec(Sector *sec)
@@ -258,10 +228,10 @@ inline bool coalesce_sec(Sector *sec)
 }
 
 
-typedef struct seg_s
+struct seg_t
 {
 	// link for list
-	struct seg_s *next;
+	struct seg_t *next;
 
 	vertex_t *start;   // from this vertex...
 	vertex_t *end;     // ... to this vertex
@@ -275,7 +245,7 @@ typedef struct seg_s
 	// seg on other side, or NULL if one-sided.  This relationship is
 	// always one-to-one -- if one of the segs is split, the partner seg
 	// must also be split.
-	struct seg_s *partner;
+	struct seg_t *partner;
 
 	// seg index.  Only valid once the seg has been added to a
 	// subsector.  A negative value means it is invalid -- there
@@ -328,8 +298,7 @@ public:
 	{
 		return (x * pdy - y * pdx + p_perp) / p_length;
 	}
-}
-seg_t;
+};
 
 
 // a seg with this index is removed by SortSegs().
@@ -337,7 +306,7 @@ seg_t;
 #define SEG_IS_GARBAGE  (1 << 29)
 
 
-typedef struct subsec_s
+struct subsec_t
 {
 	// list of segs
 	seg_t *seg_list;
@@ -363,31 +332,28 @@ public:
 
 	void SanityCheckClosed();
 	void SanityCheckHasRealSeg();
-}
-subsec_t;
+};
 
 
-typedef struct bbox_s
+struct bbox_t
 {
 	int minx, miny;
 	int maxx, maxy;
-}
-bbox_t;
+};
 
 
-typedef struct child_s
+struct child_t
 {
 	// child node or subsector (one must be NULL)
-	struct node_s *node;
+	node_t *node;
 	subsec_t *subsec;
 
 	// child bounding box
 	bbox_t bounds;
-}
-child_t;
+};
 
 
-typedef struct node_s
+struct node_t
 {
 	// these coordinates are high precision to support UDMF.
 	// in non-UDMF maps, they will actually be integral since a
@@ -406,8 +372,7 @@ typedef struct node_s
 
 public:
 	void SetPartition(const seg_t *part);
-}
-node_t;
+};
 
 
 class quadtree_c
@@ -555,12 +520,12 @@ inline void ListAddSeg(seg_t **list_ptr, seg_t *seg)
 // an "intersection" remembers the vertex that touches a BSP divider
 // line (especially a new vertex that is created at a seg split).
 
-typedef struct intersection_s
+struct intersection_t
 {
 	// link in list.  The intersection list is kept sorted by
 	// along_dist, in ascending order.
-	struct intersection_s *next;
-	struct intersection_s *prev;
+	intersection_t *next;
+	intersection_t *prev;
 
 	// vertex in question
 	vertex_t *vertex;
@@ -578,8 +543,7 @@ typedef struct intersection_s
 	// true if OPEN and false if CLOSED.
 	bool open_before;
 	bool open_after;
-}
-intersection_t;
+};
 
 
 /* -------- functions ---------------------------- */

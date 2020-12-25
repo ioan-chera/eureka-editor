@@ -1796,7 +1796,7 @@ void SaveXGL3Format(node_t *root_node)
 
 /* ----- whole-level routines --------------------------- */
 
-void LoadLevel()
+static void LoadLevel()
 {
 	Lump_c *LEV = instance::edit_wad->GetLump(lev_current_start);
 
