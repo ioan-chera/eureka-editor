@@ -409,8 +409,10 @@ void DetectPolyobjSectors(void)
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
 	bool hexen_style = true;
 
-	for(const Thing *T : gDocument.things)
+	for (i = 0 ; i < gDocument.numThings() ; i++)
 	{
+		const Thing *T = gDocument.things[i];
+
 		if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
 		{
 			// -JL- A ZDoom style polyobj thing found
@@ -424,8 +426,10 @@ void DetectPolyobjSectors(void)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for(const Thing *T : gDocument.things)
+	for (i = 0 ; i < gDocument.numThings(); i++)
 	{
+		const Thing *T = gDocument.things[i];
+
 		double x = T->x();
 		double y = T->y();
 

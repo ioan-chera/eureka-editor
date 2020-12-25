@@ -2945,9 +2945,9 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 		}
 	}
 
-	for (const Sector *sector : gDocument.sectors)
+	for (i = 0 ; i < gDocument.numSectors() ; i++)
 	{
-		int tag = sector->tag;
+		int tag = gDocument.sectors[i]->tag;
 
 		// ignore special tags
 		if (Features.tag_666 && (tag == 666 || tag == 667))
