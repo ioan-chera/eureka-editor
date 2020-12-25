@@ -277,7 +277,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	gDocument.basis.begin();
 
 	// make sure we have a fallback sector to use
-	if (NumSectors == 0)
+	if (gDocument.numSectors() == 0)
 	{
 		int new_sec = gDocument.basis.addNew(ObjType::sectors);
 
@@ -299,7 +299,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		int new_sec = gDocument.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left);
 
 		if (new_sec < 0)
-			new_sec = NumSectors - 1;
+			new_sec = gDocument.numSectors() - 1;
 
 		// create the new sidedef
 		sd = gDocument.basis.addNew(ObjType::sidedefs);
@@ -399,7 +399,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 	int new_sec = atoi(box->sec->value());
 
-	new_sec = CLAMP(0, new_sec, NumSectors-1);
+	new_sec = CLAMP(0, new_sec, gDocument.numSectors() -1);
 
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())

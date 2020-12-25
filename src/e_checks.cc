@@ -567,13 +567,13 @@ void Sectors_FindUnclosed(selection_c& secs, selection_c& verts)
 	 secs.change_type(ObjType::sectors);
 	verts.change_type(ObjType::vertices);
 
-	if (gDocument.numVertices() == 0 || NumSectors == 0)
+	if (gDocument.numVertices() == 0 || gDocument.numSectors() == 0)
 		return;
 
 	byte *ends = new byte[gDocument.numVertices()];
 	int v;
 
-	for (int s = 0 ; s < NumSectors ; s++)
+	for (int s = 0 ; s < gDocument.numSectors(); s++)
 	{
 		// clear the "ends" array
 		for (v = 0 ; v < gDocument.numVertices(); v++)
@@ -659,7 +659,7 @@ void Sectors_FindMismatches(selection_c& secs, selection_c& lines)
 	 secs.change_type(ObjType::sectors);
 	lines.change_type(ObjType::linedefs);
 
-	if (NumLineDefs == 0 || NumSectors == 0)
+	if (NumLineDefs == 0 || gDocument.numSectors() == 0)
 		return;
 
 	gDocument.hover.fastOpposite_begin();
@@ -730,7 +730,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	int max_type = (Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
 
-	for (int n = 0 ; n < NumSectors ; n++)
+	for (int n = 0 ; n < gDocument.numSectors(); n++)
 	{
 		int type_num = gDocument.sectors[n]->type;
 
@@ -818,7 +818,7 @@ void Sectors_FindUnused(selection_c& sel)
 {
 	sel.change_type(ObjType::sectors);
 
-	if (NumSectors == 0)
+	if (gDocument.numSectors() == 0)
 		return;
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
@@ -832,7 +832,7 @@ void Sectors_FindUnused(selection_c& sel)
 			sel.set(L->Right(gDocument)->sector);
 	}
 
-	sel.frob_range(0, NumSectors - 1, BitOp::toggle);
+	sel.frob_range(0, gDocument.numSectors() - 1, BitOp::toggle);
 }
 
 
@@ -855,10 +855,10 @@ void Sectors_FindBadCeil(selection_c& sel)
 {
 	sel.change_type(ObjType::sectors);
 
-	if (NumSectors == 0)
+	if (gDocument.numSectors() == 0)
 		return;
 
-	for (int i = 0 ; i < NumSectors ; i++)
+	for (int i = 0 ; i < gDocument.numSectors(); i++)
 	{
 		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
 			sel.set(i);
@@ -875,7 +875,7 @@ void Sectors_FixBadCeil()
 	gDocument.basis.begin();
 	gDocument.basis.setMessage("fixed bad sector heights");
 
-	for (int i = 0 ; i < NumSectors ; i++)
+	for (int i = 0 ; i < gDocument.numSectors(); i++)
 	{
 		if (gDocument.sectors[i]->ceilh < gDocument.sectors[i]->floorh)
 		{
@@ -2953,9 +2953,9 @@ void Tags_UsedRange(int *min_tag, int *max_tag)
 		}
 	}
 
-	for (i = 0 ; i < NumSectors ; i++)
+	for (const Sector *sector : gDocument.sectors)
 	{
-		int tag = gDocument.sectors[i]->tag;
+		int tag = sector->tag;
 
 		// ignore special tags
 		if (Features.tag_666 && (tag == 666 || tag == 667))
@@ -3063,8 +3063,8 @@ static bool LD_tag_exists(int tag)
 
 static bool SEC_tag_exists(int tag)
 {
-	for (int s = 0 ; s < NumSectors ; s++)
-		if (gDocument.sectors[s]->tag == tag)
+	for (const Sector *sector : gDocument.sectors)
+		if (sector->tag == tag)
 			return true;
 
 	return false;
@@ -3075,7 +3075,7 @@ void Tags_FindUnmatchedSectors(selection_c& secs)
 {
 	secs.change_type(ObjType::sectors);
 
-	for (int s = 0 ; s < NumSectors ; s++)
+	for (int s = 0 ; s < gDocument.numSectors(); s++)
 	{
 		int tag = gDocument.sectors[s]->tag;
 
@@ -3227,7 +3227,7 @@ void Tags_FindBeastMarks(selection_c& secs)
 {
 	secs.change_type(ObjType::sectors);
 
-	for (int s = 0 ; s < NumSectors ; s++)
+	for (int s = 0 ; s < gDocument.numSectors(); s++)
 	{
 		int tag = gDocument.sectors[s]->tag;
 
@@ -3824,7 +3824,7 @@ void Textures_FindUnknownFlat(selection_c& secs,
 
 	names.clear();
 
-	for (int s = 0 ; s < NumSectors ; s++)
+	for (int s = 0 ; s < gDocument.numSectors(); s++)
 	{
 		const Sector *S = gDocument.sectors[s];
 
@@ -3941,7 +3941,7 @@ void Textures_FixUnknownFlat()
 	gDocument.basis.begin();
 	gDocument.basis.setMessage("fixed unknown flats");
 
-	for (int s = 0 ; s < NumSectors ; s++)
+	for (int s = 0 ; s < gDocument.numSectors(); s++)
 	{
 		const Sector *S = gDocument.sectors[s];
 

@@ -940,7 +940,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 				}
 			}
 
-			for (int i = 0 ; i < NumSectors ; i++)
+			for (int i = 0 ; i < gDocument.numSectors(); i++)
 				if (in_sectors.get(i) && ! out_sectors.get(i))
 					list->toggle(i);
 

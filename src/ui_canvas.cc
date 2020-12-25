@@ -391,7 +391,7 @@ void UI_Canvas::DrawMap()
 
 	if (edit.sector_render_mode && ! edit.error_mode)
 	{
-		for (int n = 0 ; n < NumSectors ; n++)
+		for (int n = 0 ; n < gDocument.numSectors(); n++)
 			RenderSector(n);
 	}
 
@@ -1535,7 +1535,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 	// handle tagged linedefs : show matching sector(s)
 	if (objtype == ObjType::linedefs && gDocument.linedefs[objnum]->tag > 0)
 	{
-		for (int m = 0 ; m < NumSectors ; m++)
+		for (int m = 0 ; m < gDocument.numSectors(); m++)
 			if (gDocument.sectors[m]->tag == gDocument.linedefs[objnum]->tag)
 				DrawHighlight(ObjType::sectors, m);
 	}

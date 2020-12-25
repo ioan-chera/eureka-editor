@@ -261,13 +261,13 @@ void Clipboard_NotifyInsert(ObjType type, int objnum)
 		return;
 
 	// paste operations should only insert new sectors at the end
-	if (objnum < NumSectors)
+	if (objnum < gDocument.numSectors())
 	{
 		SYS_ASSERT(! clip_doing_paste);
 	}
 
 #if 0  // OLD WAY
-	if (clip_board->HasSectorRefs(objnum, NumSectors-1))
+	if (clip_board->HasSectorRefs(objnum, gDocument.numSectors() -1))
 	{
 		Clipboard_Clear();
 	}
@@ -699,7 +699,7 @@ static void ReselectGroup()
 		SYS_ASSERT(clip_board->mode == ObjType::sectors);
 
 		int count = (int)clip_board->sectors.size();
-		new_sel.frob_range(NumSectors - count, NumSectors-1, BitOp::add);
+		new_sel.frob_range(gDocument.numSectors() - count, gDocument.numSectors() -1, BitOp::add);
 	}
 
 	Selection_Clear();

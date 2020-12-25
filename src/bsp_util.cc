@@ -226,7 +226,7 @@ static void MarkPolyobjSector(int sector)
 {
 	int i;
 
-	if (! is_sector(sector))
+	if (! gDocument.isSector(sector))
 		return;
 
 # if DEBUG_POLYOBJ
@@ -664,8 +664,8 @@ void CalculateWallTips()
 		double x2 = L->End(gDocument)->x();
 		double y2 = L->End(gDocument)->y();
 
-		bool left  = (L->left  >= 0) && is_sector(L->Left(gDocument)->sector);
-		bool right = (L->right >= 0) && is_sector(L->Right(gDocument)->sector);
+		bool left  = (L->left  >= 0) && gDocument.isSector(L->Left(gDocument)->sector);
+		bool right = (L->right >= 0) && gDocument.isSector(L->Right(gDocument)->sector);
 
 		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);
 		VertexAddWallTip(lev_vertices[L->end],   x1-x2, y1-y2, right, left);

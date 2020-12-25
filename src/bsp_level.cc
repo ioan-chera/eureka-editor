@@ -687,7 +687,7 @@ static void Reject_DebugGroups()
 {
 	// Note: this routine is destructive to the group numbers
 
-	for (int i=0 ; i < NumSectors ; i++)
+	for (int i=0 ; i < gDocument.numSectors(); i++)
 	{
 		int group = rej_sector_groups[i];
 		int count = 0;
@@ -695,7 +695,7 @@ static void Reject_DebugGroups()
 		if (group < 0)
 			continue;
 
-		for (int k = i ; k < NumSectors ; k++)
+		for (int k = i ; k < gDocument.numSectors() ; k++)
 		{
 			if (rej_sector_groups[k] == group)
 			{

@@ -863,7 +863,7 @@ static void UDMF_WriteSideDefs(Lump_c *lump)
 
 static void UDMF_WriteSectors(Lump_c *lump)
 {
-	for (int i = 0 ; i < NumSectors ; i++)
+	for (int i = 0 ; i < gDocument.numSectors(); i++)
 	{
 		lump->Printf("sector // %d\n", i);
 		lump->Printf("{\n");

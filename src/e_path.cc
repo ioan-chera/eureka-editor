@@ -520,7 +520,7 @@ void CMD_PruneUnused(void)
 		}
 	}
 
-	used_secs .frob_range(0, NumSectors -1, BitOp::toggle);
+	used_secs .frob_range(0, gDocument.numSectors() -1, BitOp::toggle);
 	used_sides.frob_range(0, NumSideDefs-1, BitOp::toggle);
 	used_verts.frob_range(0, gDocument.numVertices()-1, BitOp::toggle);
 
@@ -560,7 +560,7 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 {
 	bool changes;
 
-	for (int k = 0 ; k < NumSectors ; k++)
+	for (int k = 0 ; k < gDocument.numSectors(); k++)
 		vec[k] = 0;
 
 	vec[sound_start_sec] = 2;
@@ -613,7 +613,7 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 
 static void CalcFinalPropagation()
 {
-	for (int s = 0 ; s < NumSectors ; s++)
+	for (int s = 0 ; s < gDocument.numSectors(); s++)
 	{
 		int t1 = sound_temp1_vec[s];
 		int t2 = sound_temp2_vec[s];
@@ -641,11 +641,11 @@ static void CalcFinalPropagation()
 
 const byte * SoundPropagation(int start_sec)
 {
-	if ((int)sound_prop_vec.size() != NumSectors)
+	if ((int)sound_prop_vec.size() != gDocument.numSectors())
 	{
-		sound_prop_vec .resize(NumSectors);
-		sound_temp1_vec.resize(NumSectors);
-		sound_temp2_vec.resize(NumSectors);
+		sound_prop_vec .resize(gDocument.numSectors());
+		sound_temp1_vec.resize(gDocument.numSectors());
+		sound_temp2_vec.resize(gDocument.numSectors());
 
 		sound_propagation_invalid = true;
 	}

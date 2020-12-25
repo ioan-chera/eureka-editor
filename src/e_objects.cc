@@ -403,7 +403,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	double new_x = grid.SnapX(edit.map_x);
 	double new_y = grid.SnapY(edit.map_y);
 
-	int orig_num_sectors = NumSectors;
+	int orig_num_sectors = gDocument.numSectors();
 
 
 	// are we drawing a line?
@@ -581,12 +581,12 @@ begin_drawing:
 
 	// select vertices of a newly created sector?
 	if (select_verts_of_new_sectors && closed_a_loop &&
-		NumSectors > orig_num_sectors)
+		gDocument.numSectors() > orig_num_sectors)
 	{
 		selection_c sel(ObjType::sectors);
 
 		// more than one sector may have been created, pick the last
-		sel.set(NumSectors - 1);
+		sel.set(gDocument.numSectors() - 1);
 
 		edit.Selected->change_type(edit.mode);
 		ConvertSelection(&sel, edit.Selected);
@@ -646,7 +646,7 @@ static void Insert_Sector()
 	if (ok)
 	{
 		Selection_Clear();
-		edit.Selected->set(NumSectors - 1);
+		edit.Selected->set(gDocument.numSectors() - 1);
 	}
 
 	RedrawMap();

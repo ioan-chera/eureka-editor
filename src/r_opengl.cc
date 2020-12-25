@@ -96,7 +96,7 @@ public:
 	bitvec_c seen_sectors;
 
 public:
-	RendInfo3D() : seen_sectors(NumSectors + 1)
+	RendInfo3D() : seen_sectors(gDocument.numSectors() + 1)
 	{ }
 
 	~RendInfo3D()
@@ -975,10 +975,10 @@ public:
 		// [ this method means we don't need to check visibility of sectors ]
 		if (! self_ref)
 		{
-			if (ld->Left(gDocument) && is_sector(ld->Left(gDocument)->sector))
+			if (ld->Left(gDocument) && gDocument.isSector(ld->Left(gDocument)->sector))
 				seen_sectors.set(ld->Left(gDocument)->sector);
 
-			if (ld->Right(gDocument) && is_sector(ld->Right(gDocument)->sector))
+			if (ld->Right(gDocument) && gDocument.isSector(ld->Right(gDocument)->sector))
 				seen_sectors.set(ld->Right(gDocument)->sector);
 		}
 
@@ -1275,12 +1275,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1307,7 +1307,7 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
-			int light = is_sector(sec_num) ? gDocument.sectors[sec_num]->light : 255;
+			int light = gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->light : 255;
 
 			L = DoomLightToFloat(light, ty /* dist */);
 		}
@@ -1478,12 +1478,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((is_sector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1611,7 +1611,7 @@ public:
 
 		glDisable(GL_ALPHA_TEST);
 
-		for (int s=0 ; s < NumSectors ; s++)
+		for (int s=0 ; s < gDocument.numSectors(); s++)
 			if (seen_sectors.get(s))
 				DrawSector(s);
 

@@ -101,11 +101,9 @@ struct Document
 extern Document gDocument;
 
 
-#define NumSectors    ((int)gDocument.sectors.size())
 #define NumSideDefs   ((int)gDocument.sidedefs.size())
 #define NumLineDefs   ((int)gDocument.linedefs.size())
 
-#define is_sector(n)   ((n) >= 0 && (n) < NumSectors )
 #define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
 #define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
 

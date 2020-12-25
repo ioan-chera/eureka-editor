@@ -909,10 +909,10 @@ public:
 		int thsec = r_view.thing_sectors[th_index];
 
 		// check if thing is hidden by BOOM deep water
-		if (is_sector(thsec))
+		if (gDocument.isSector(thsec))
 		{
 			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(thsec);
-			if (is_sector(exfloor->heightsec))
+			if (gDocument.isSector(exfloor->heightsec))
 			{
 				const Sector *real  = gDocument.sectors[thsec];
 				const Sector *dummy = gDocument.sectors[exfloor->heightsec];
@@ -931,12 +931,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
-			h2 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - th->h());
+			h2 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - th->h());
 			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
-			h1 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + th->h());
+			h1 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + th->h());
 			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
@@ -1297,12 +1297,12 @@ public:
 
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
-					h2 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - T->h());
+					h2 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - T->h());
 					h1 = static_cast<int>(h2 - sprite->height() * scale);
 				}
 				else
 				{
-					h1 = static_cast<int>((is_sector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + T->h());
+					h1 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + T->h());
 					h2 = static_cast<int>(h1 + sprite->height() * scale);
 				}
 
@@ -1655,7 +1655,7 @@ public:
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
 		int thsec = r_view.thing_sectors[dw->th];
-		int light = is_sector(thsec) ? gDocument.sectors[thsec]->light : 255;
+		int light = gDocument.isSector(thsec) ? gDocument.sectors[thsec]->light : 255;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* fill pixels */

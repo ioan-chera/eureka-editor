@@ -215,9 +215,9 @@ public:
 public:
 	void Update()
 	{
-		if (total != NumSectors)
+		if (total != gDocument.numSectors())
 		{
-			total = NumSectors;
+			total = gDocument.numSectors();
 
 			infos.resize((size_t) total);
 
@@ -292,7 +292,7 @@ public:
 
 		int dummy_sec = L->Right(gDocument)->sector;
 
-		for (int n = 0 ; n < NumSectors ; n++)
+		for (int n = 0 ; n < gDocument.numSectors(); n++)
 		{
 			if (gDocument.sectors[n]->tag == L->tag)
 				infos[n].floors.heightsec = dummy_sec;
@@ -372,7 +372,7 @@ public:
 		EF.flags = flags;
 
 		// find all matching sectors
-		for (int n = 0 ; n < NumSectors ; n++)
+		for (int n = 0 ; n < gDocument.numSectors(); n++)
 		{
 			if (gDocument.sectors[n]->tag == sec_tag)
 				infos[n].floors.floors.push_back(EF);
@@ -576,7 +576,7 @@ public:
 
 	void PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share)
 	{
-		for (int n = 0 ; n < NumSectors ; n++)
+		for (int n = 0 ; n < gDocument.numSectors(); n++)
 		{
 			if (f1_tag > 0 && gDocument.sectors[n]->tag == f1_tag && L->Right(gDocument))
 			{
@@ -633,7 +633,7 @@ public:
 		if (!o.valid())
 			return;
 
-		for (int n = 0 ; n < NumSectors ; n++)
+		for (int n = 0 ; n < gDocument.numSectors(); n++)
 		{
 			if (gDocument.sectors[n]->tag == T->arg1)
 			{

@@ -705,7 +705,7 @@ void UI_SectorBox::UpdateField(int field)
 {
 	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
 	{
-		if (is_sector(obj))
+		if (gDocument.isSector(obj))
 		{
 			floor_h->value(SString(gDocument.sectors[obj]->floorh).c_str());
 			ceil_h->value(SString(gDocument.sectors[obj]->ceilh).c_str());
@@ -721,7 +721,7 @@ void UI_SectorBox::UpdateField(int field)
 
 	if (field < 0 || field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
 	{
-		if (is_sector(obj))
+		if (gDocument.isSector(obj))
 		{
 			f_tex->value(gDocument.sectors[obj]->FloorTex().c_str());
 			c_tex->value(gDocument.sectors[obj]->CeilTex().c_str());
@@ -752,7 +752,7 @@ void UI_SectorBox::UpdateField(int field)
 		bm_friction->value(0);
 		bm_wind->value(0);
 
-		if (is_sector(obj))
+		if (gDocument.isSector(obj))
 		{
 			int value = gDocument.sectors[obj]->type;
 			int mask  = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
@@ -784,7 +784,7 @@ void UI_SectorBox::UpdateField(int field)
 
 	if (field < 0 || field == Sector::F_LIGHT || field == Sector::F_TAG)
 	{
-		if (is_sector(obj))
+		if (gDocument.isSector(obj))
 		{
 			light->value(SString(gDocument.sectors[obj]->light).c_str());
 			tag->value(SString(gDocument.sectors[obj]->tag).c_str());
@@ -957,7 +957,7 @@ void UI_SectorBox::UnselectPics()
 // FIXME: make a method of Sector class
 void UI_SectorBox::UpdateTotal()
 {
-	which->SetTotal(NumSectors);
+	which->SetTotal(gDocument.numSectors());
 }
 
 

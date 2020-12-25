@@ -522,7 +522,7 @@ static void CreateFallbackSector()
 static void CreateFallbackSideDef()
 {
 	// we need a valid sector too!
-	if (NumSectors == 0)
+	if (gDocument.numSectors() == 0)
 		CreateFallbackSector();
 
 	LogPrintf("Creating a fallback sidedef.\n");
@@ -594,7 +594,7 @@ void ValidateVertexRefs(LineDef *ld, int num)
 
 void ValidateSectorRef(SideDef *sd, int num)
 {
-	if (sd->sector >= NumSectors)
+	if (sd->sector >= gDocument.numSectors())
 	{
 		LogPrintf("WARNING: sidedef #%d has invalid sector (%d)\n",
 		          num, sd->sector);
@@ -602,7 +602,7 @@ void ValidateSectorRef(SideDef *sd, int num)
 		bad_sector_refs++;
 
 		// ensure we have a valid sector
-		if (NumSectors == 0)
+		if (gDocument.numSectors() == 0)
 			CreateFallbackSector();
 
 		sd->sector = 0;
@@ -1417,14 +1417,12 @@ static void SaveVertices()
 
 static void SaveSectors()
 {
-	int size = NumSectors * (int)sizeof(raw_sector_t);
+	int size = gDocument.numSectors() * (int)sizeof(raw_sector_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("SECTORS", size);
 
-	for (int i = 0 ; i < NumSectors ; i++)
+	for (const Sector *sec : gDocument.sectors)
 	{
-		const Sector *sec = gDocument.sectors[i];
-
 		raw_sector_t raw;
 
 		raw.floorh = LE_S16(sec->floorh);
