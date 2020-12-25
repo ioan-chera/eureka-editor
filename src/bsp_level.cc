@@ -257,7 +257,7 @@ static void CreateBlockmap(const Document &doc)
 {
 	block_lines = (u16_t **) UtilCalloc(block_count * sizeof(u16_t *));
 
-	for (int i=0 ; i < NumLineDefs ; i++)
+	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
 		// ignore zero-length lines
 		if (doc.linedefs[i]->IsZeroLength(doc))
@@ -499,7 +499,7 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 	bbox->minx = bbox->miny = SHRT_MAX;
 	bbox->maxx = bbox->maxy = SHRT_MIN;
 
-	for (int i=0 ; i < NumLineDefs ; i++)
+	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
 		const LineDef *L = doc.linedefs[i];
 
@@ -526,10 +526,10 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 		}
 	}
 
-	if (NumLineDefs > 0)
+	if (doc.numLinedefs() > 0)
 	{
-		block_mid_x = (mid_x / NumLineDefs) * 16;
-		block_mid_y = (mid_y / NumLineDefs) * 16;
+		block_mid_x = (mid_x / doc.numLinedefs()) * 16;
+		block_mid_y = (mid_y / doc.numLinedefs()) * 16;
 	}
 
 # if DEBUG_BLOCKMAP
@@ -565,7 +565,7 @@ static void InitBlockmap(const Document &doc)
 //
 static void PutBlockmap(const Document &doc)
 {
-	if (! cur_info->do_blockmap || NumLineDefs == 0)
+	if (! cur_info->do_blockmap || doc.numLinedefs() == 0)
 	{
 		// just create an empty blockmap lump
 		CreateLevelLump("BLOCKMAP")->Finish();
@@ -620,16 +620,16 @@ static std::vector<int> rej_sector_groups;
 //
 // Allocate the matrix, init sectors into individual groups.
 //
-static void Reject_Init()
+static void Reject_Init(const Document &doc)
 {
-	rej_total_size = (NumSectors * NumSectors + 7) / 8;
+	rej_total_size = (doc.numSectors() * doc.numSectors() + 7) / 8;
 
 	rej_matrix = new u8_t[rej_total_size];
 	memset(rej_matrix, 0, rej_total_size);
 
-	rej_sector_groups.resize(NumSectors);
+	rej_sector_groups.resize(doc.numSectors());
 
-	for (int i=0 ; i < NumSectors ; i++)
+	for (int i=0 ; i < doc.numSectors() ; i++)
 	{
 		rej_sector_groups[i] = i;
 	}
@@ -675,7 +675,7 @@ static void Reject_GroupSectors(const Document &doc)
 			std::swap(group1, group2);
 
 		// merge the groups
-		for (int s = 0 ; s < NumSectors ; s++)
+		for (int s = 0 ; s < doc.numSectors() ; s++)
 			if (rej_sector_groups[s] == group2)
 				rej_sector_groups[s] =  group1;
 	}
@@ -710,17 +710,17 @@ static void Reject_DebugGroups()
 #endif
 
 
-static void Reject_ProcessSectors()
+static void Reject_ProcessSectors(const Document &doc)
 {
-	for (int view=0 ; view < NumSectors ; view++)
+	for (int view=0 ; view < doc.numSectors() ; view++)
 	{
 		for (int target=0 ; target < view ; target++)
 		{
 			if (rej_sector_groups[view] == rej_sector_groups[target])
 				continue;
 
-			int p1 = view * NumSectors + target;
-			int p2 = target * NumSectors + view;
+			int p1 = view * doc.numSectors() + target;
+			int p2 = target * doc.numSectors() + view;
 
 			// must do both directions at same time
 			rej_matrix[p1 >> 3] |= (1 << (p1 & 7));
@@ -749,16 +749,16 @@ static void Reject_WriteLump()
 //
 static void PutReject(const Document &doc)
 {
-	if (! cur_info->do_reject || NumSectors == 0)
+	if (! cur_info->do_reject || doc.numSectors() == 0)
 	{
 		// just create an empty reject lump
 		CreateLevelLump("REJECT")->Finish();
 		return;
 	}
 
-	Reject_Init();
+	Reject_Init(doc);
 	Reject_GroupSectors(doc);
-	Reject_ProcessSectors();
+	Reject_ProcessSectors(doc);
 
 # if DEBUG_REJECT
 	Reject_DebugGroups();
@@ -1404,21 +1404,21 @@ void PutNodes(const char *name, int do_v5, node_t *root)
 }
 
 
-void CheckLimits(bool& force_v5, bool& force_xnod)
+static void CheckLimits(bool& force_v5, bool& force_xnod, const Document &doc)
 {
-	if (NumSectors > 65534)
+	if (doc.numSectors() > 65534)
 	{
 		Failure("Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
-	if (NumSideDefs > 65534)
+	if (doc.numSidedefs() > 65534)
 	{
 		Failure("Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
-	if (NumLineDefs > 65534)
+	if (doc.numLinedefs() > 65534)
 	{
 		Failure("Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
@@ -1828,7 +1828,7 @@ static void LoadLevel(const Document &doc)
 	}
 
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
-			NumVertices, NumSectors, NumSideDefs, NumLineDefs, NumThings);
+			doc.numVertices(), doc.numSectors(), doc.numSidedefs(), doc.numLinedefs(), doc.numThings());
 
 	DetectOverlappingVertices();
 	DetectOverlappingLines();
@@ -1974,7 +1974,7 @@ static build_result_e SaveLevel(node_t *root_node, const Document &doc)
 
 	// check for overflows...
 	// this sets the force_xxx vars if certain limits are breached
-	CheckLimits(force_v5, force_xnod);
+	CheckLimits(force_v5, force_xnod, doc);
 
 
 	/* --- GL Nodes --- */
