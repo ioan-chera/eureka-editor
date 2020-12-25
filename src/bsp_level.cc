@@ -2288,10 +2288,10 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Docum
 	if (num_real_lines > 0)
 	{
 		// create initial segs
-		seg_t *list = CreateSegs();
+		seg_t *list = CreateSegs(doc);
 
 		// recursively create nodes
-		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0);
+		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0, doc);
 	}
 
 	if (ret == BUILD_OK)
@@ -2306,7 +2306,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Docum
 					ComputeBspHeight(root_node->l.node));
 		}
 
-		ClockwiseBspTree();
+		ClockwiseBspTree(doc);
 
 		if (instance::Level_format == MapFormat::udmf)
 			ret = SaveUDMF(root_node);

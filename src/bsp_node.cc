@@ -343,7 +343,7 @@ static void AddIntersection(intersection_t ** cut_list,
 // Returns true if a "bad seg" was found early.
 //
 static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
-		int best_cost, eval_info_t *info)
+		int best_cost, eval_info_t *info, const Document &doc)
 {
 	double qnty;
 	double a, b, fa, fb;
@@ -423,7 +423,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 		if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
 		{
-			if (check->linedef >= 0 && (gDocument.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
+			if (check->linedef >= 0 && (doc.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
 				info->cost += 40 * factor * PRECIOUS_MULTIPLY;
 		}
 
@@ -491,7 +491,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		// are exhausted.  This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
-		if (check->linedef >= 0 && (gDocument.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
+		if (check->linedef >= 0 && (doc.linedefs[check->linedef]->flags & MLF_IS_PRECIOUS))
 			info->cost += 100 * factor * PRECIOUS_MULTIPLY;
 		else
 			info->cost += 100 * factor;
@@ -517,7 +517,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 	{
 		if (tree->subs[c] && !tree->subs[c]->Empty())
 		{
-			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info))
+			if (EvalPartitionWorker(tree->subs[c], part, best_cost, info, doc))
 				return true;
 		}
 	}
@@ -534,7 +534,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 // Returns the computed cost, or a negative value if the seg should be
 // skipped altogether.
 //
-static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost)
+static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Document &doc)
 {
 	eval_info_t info;
 
@@ -549,7 +549,7 @@ static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost)
 	info.mini_left  = 0;
 	info.mini_right = 0;
 
-	if (EvalPartitionWorker(tree, part, best_cost, &info))
+	if (EvalPartitionWorker(tree, part, best_cost, &info, doc))
 		return -1;
 
 	/* make sure there is at least one real seg on each side */
@@ -647,7 +647,7 @@ static void EvaluateFastWorker(quadtree_c *tree,
 }
 
 
-static seg_t *FindFastSeg(quadtree_c *tree)
+static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
 {
 	seg_t *best_H = NULL;
 	seg_t *best_V = NULL;
@@ -661,10 +661,10 @@ static seg_t *FindFastSeg(quadtree_c *tree)
 	int V_cost = -1;
 
 	if (best_H)
-		H_cost = EvalPartition(tree, best_H, 99999999);
+		H_cost = EvalPartition(tree, best_H, 99999999, doc);
 
 	if (best_V)
-		V_cost = EvalPartition(tree, best_V, 99999999);
+		V_cost = EvalPartition(tree, best_V, 99999999, doc);
 
 # if DEBUG_PICKNODE
 	DebugPrintf("FindFastSeg: best_H=%p (cost %d) | best_V=%p (cost %d)\n",
@@ -683,7 +683,7 @@ static seg_t *FindFastSeg(quadtree_c *tree)
 
 /* returns false if cancelled */
 static bool PickNodeWorker(quadtree_c *part_list,
-		quadtree_c *tree, seg_t ** best, int *best_cost)
+		quadtree_c *tree, seg_t ** best, int *best_cost, const Document &doc)
 {
 	// try each partition
 	for (seg_t *part=part_list->list ; part ; part = part->next)
@@ -701,7 +701,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 		if (part->linedef < 0)
 			continue;
 
-		int cost = EvalPartition(tree, part, *best_cost);
+		int cost = EvalPartition(tree, part, *best_cost, doc);
 
 		/* seg unsuitable or too costly ? */
 		if (cost < 0 || cost >= *best_cost)
@@ -720,7 +720,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 	{
 		if (part_list->subs[c] && !part_list->subs[c]->Empty())
 		{
-			PickNodeWorker(part_list->subs[c], tree, best, best_cost);
+			PickNodeWorker(part_list->subs[c], tree, best, best_cost, doc);
 		}
 	}
 
@@ -731,7 +731,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-seg_t *PickNode(quadtree_c *tree, int depth)
+static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 {
 	seg_t *best=NULL;
 
@@ -751,7 +751,7 @@ seg_t *PickNode(quadtree_c *tree, int depth)
 		DebugPrintf("PickNode: Looking for Fast node...\n");
 #   endif
 
-		best = FindFastSeg(tree);
+		best = FindFastSeg(tree, doc);
 
 		if (best)
 		{
@@ -764,7 +764,7 @@ seg_t *PickNode(quadtree_c *tree, int depth)
 		}
 	}
 
-	if (! PickNodeWorker(tree, tree, &best, &best_cost))
+	if (! PickNodeWorker(tree, tree, &best, &best_cost, doc))
 	{
 		/* hack here : BuildNodes will detect the cancellation */
 		return NULL;
@@ -798,9 +798,9 @@ seg_t *PickNode(quadtree_c *tree, int depth)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-void DivideOneSeg(seg_t *seg, seg_t *part,
+static void DivideOneSeg(seg_t *seg, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
-		intersection_t ** cut_list)
+		intersection_t ** cut_list, const Document &doc)
 {
 	seg_t *new_seg;
 
@@ -810,7 +810,7 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? gDocument.linedefs[seg->linedef]->IsSelfRef(gDocument) : false;
+	bool self_ref = (seg->linedef >= 0) ? doc.linedefs[seg->linedef]->IsSelfRef(doc) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -884,7 +884,7 @@ void DivideOneSeg(seg_t *seg, seg_t *part,
 
 static void SeparateSegs(quadtree_c *tree, seg_t *part,
 		seg_t **left_list, seg_t **right_list,
-		intersection_t ** cut_list)
+		intersection_t ** cut_list, const Document &doc)
 {
 	while (tree->list != NULL)
 	{
@@ -893,14 +893,14 @@ static void SeparateSegs(quadtree_c *tree, seg_t *part,
 
 		seg->quad = NULL;
 
-		DivideOneSeg(seg, part, left_list, right_list, cut_list);
+		DivideOneSeg(seg, part, left_list, right_list, cut_list, doc);
 	}
 
 	// recursively handle sub-blocks
 	if (tree->subs[0])
 	{
-		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list);
-		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list);
+		SeparateSegs(tree->subs[0], part, left_list, right_list, cut_list, doc);
+		SeparateSegs(tree->subs[1], part, left_list, right_list, cut_list, doc);
 	}
 
 	// this quadtree_c is empty now
@@ -1148,25 +1148,25 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 #endif
 
 
-void node_t::SetPartition(const seg_t *part)
+void node_t::SetPartition(const seg_t *part, const Document &doc)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const LineDef *part_L = gDocument.linedefs[part->linedef];
+	const LineDef *part_L = doc.linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = part_L->Start(gDocument)->x();
-		y  = part_L->Start(gDocument)->y();
-		dx = part_L->End(gDocument)->x() - x;
-		dy = part_L->End(gDocument)->y() - y;
+		x  = part_L->Start(doc)->x();
+		y  = part_L->Start(doc)->y();
+		dx = part_L->End(doc)->x() - x;
+		dy = part_L->End(doc)->y() - y;
 	}
 	else  /* left side */
 	{
-		x  = part_L->End(gDocument)->x();
-		y  = part_L->End(gDocument)->y();
-		dx = part_L->Start(gDocument)->x() - x;
-		dy = part_L->Start(gDocument)->y() - y;
+		x  = part_L->End(doc)->x();
+		y  = part_L->End(doc)->y();
+		dx = part_L->Start(doc)->x() - x;
+		dy = part_L->Start(doc)->y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
@@ -1317,14 +1317,14 @@ void quadtree_c::ConvertToList(seg_t **_list)
 
 
 static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
-		int sidedef, int what_side /* 0 or 1 */)
+		int sidedef, int what_side /* 0 or 1 */, const Document &doc)
 {
 	SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = gDocument.sidedefs[sidedef];
+		sd = doc.sidedefs[sidedef];
 
 	// check for bad sidedef
-	if (sd && !is_sector(sd->sector))
+	if (sd && !doc.isSector(sd->sector))
 	{
 		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
@@ -1354,19 +1354,19 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 // Initially create all segs, one for each linedef.
 // Must be called *after* InitBlockmap().
 //
-seg_t *CreateSegs()
+seg_t *CreateSegs(const Document &doc)
 {
 	seg_t *list = NULL;
 
-	for (int i=0 ; i < NumLineDefs ; i++)
+	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const LineDef *line = gDocument.linedefs[i];
+		const LineDef *line = doc.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (line->IsZeroLength(gDocument))
+		if (line->IsZeroLength(doc))
 			continue;
 
 		// ignore overlapping lines
@@ -1374,12 +1374,12 @@ seg_t *CreateSegs()
 			continue;
 
 		// check for extremely long lines
-		if (line->CalcLength(gDocument) >= 30000)
+		if (line->CalcLength(doc) >= 30000)
 			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0);
+			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0, doc);
 
 			ListAddSeg(&list, right);
 		}
@@ -1390,7 +1390,7 @@ seg_t *CreateSegs()
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1);
+			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1, doc);
 
 			ListAddSeg(&list, left);
 
@@ -1449,7 +1449,7 @@ void subsec_t::DetermineMiddle()
 }
 
 
-void subsec_t::ClockwiseOrder()
+void subsec_t::ClockwiseOrder(const Document &doc)
 {
 	seg_t *seg;
 
@@ -1524,7 +1524,7 @@ void subsec_t::ClockwiseOrder()
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (gDocument.linedefs[array[i]->linedef]->IsSelfRef(gDocument))
+		else if (doc.linedefs[array[i]->linedef]->IsSelfRef(doc))
 			cur_score = 2;
 
 		if (cur_score > best_score)
@@ -1686,7 +1686,7 @@ static void DebugShowSegs(seg_t *list)
 
 
 build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-						  node_t ** N, subsec_t ** S, int depth)
+						  node_t ** N, subsec_t ** S, int depth, const Document &doc)
 {
 	*N = NULL;
 	*S = NULL;
@@ -1706,7 +1706,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 
 	/* pick partition line  None indicates convexicity */
-	seg_t *part = PickNode(tree, depth);
+	seg_t *part = PickNode(tree, depth, doc);
 
 	if (part == NULL)
 	{
@@ -1737,7 +1737,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	seg_t *rights = NULL;
 	intersection_t *cut_list = NULL;
 
-	SeparateSegs(tree, part, &lefts, &rights, &cut_list);
+	SeparateSegs(tree, part, &lefts, &rights, &cut_list, doc);
 
 	delete tree;
 	tree = NULL;
@@ -1751,14 +1751,14 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 
-	node->SetPartition(part);
+	node->SetPartition(part, doc);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: Going LEFT\n");
 # endif
 
 	build_result_e ret;
-	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1);
+	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1, doc);
 
 	if (ret != BUILD_OK)
 		return ret;
@@ -1767,7 +1767,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	DebugPrintf("Build: Going RIGHT\n");
 # endif
 
-	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1);
+	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1, doc);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: DONE\n");
@@ -1777,7 +1777,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 }
 
 
-void ClockwiseBspTree()
+void ClockwiseBspTree(const Document &doc)
 {
 	current_seg_index = 0;
 
@@ -1785,7 +1785,7 @@ void ClockwiseBspTree()
 	{
 		subsec_t *sub = lev_subsecs[i];
 
-		sub->ClockwiseOrder();
+		sub->ClockwiseOrder(doc);
 		sub->RenumberSegs();
 
 		// do some sanity checks

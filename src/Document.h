@@ -50,7 +50,9 @@ struct Document
 	{
 	}
 
-	// FIXME: right now these are copied over to DocumentModule
+	//
+	// Count map objects
+	//
 	int numThings() const
 	{
 		return static_cast<int>(things.size());
@@ -71,8 +73,28 @@ struct Document
 	{
 		return static_cast<int>(linedefs.size());
 	}
-	int numObjects(ObjType type) const;
+	bool isThing(int n) const
+	{
+		return n >= 0 && n < numThings();
+	}
+	bool isVertex(int n) const
+	{
+		return n >= 0 && n < numVertices();
+	}
+	bool isSector(int n) const
+	{
+		return n >= 0 && n < numSectors();
+	}
+	bool isSidedef(int n) const
+	{
+		return n >= 0 && n < numSidedefs();
+	}
+	bool isLinedef(int n) const
+	{
+		return n >= 0 && n < numLinedefs();
+	}
 
+	int numObjects(ObjType type) const;
 	void getLevelChecksum(crc32_c &crc) const;
 };
 

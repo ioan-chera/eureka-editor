@@ -308,7 +308,7 @@ struct subsec_t
 
 public:
 	void DetermineMiddle();
-	void ClockwiseOrder();
+	void ClockwiseOrder(const Document &doc);
 	void RenumberSegs();
 
 	void RoundOff();
@@ -355,7 +355,7 @@ struct node_t
 	int index;
 
 public:
-	void SetPartition(const seg_t *part);
+	void SetPartition(const seg_t *part, const Document &doc);
 };
 
 
@@ -581,7 +581,7 @@ void FreeQuickAllocCuts(void);
 // scan all the linedef of the level and convert each sidedef into a
 // seg (or seg pair).  Returns the list of segs.
 //
-seg_t *CreateSegs(void);
+seg_t *CreateSegs(const Document &doc);
 
 quadtree_c *TreeFromSegList(seg_t *list);
 
@@ -593,7 +593,7 @@ quadtree_c *TreeFromSegList(seg_t *list);
 // returns BUILD_OK, or BUILD_Cancelled if user stopped it.
 //
 build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-    node_t ** N, subsec_t ** S, int depth);
+    node_t ** N, subsec_t ** S, int depth, const Document &doc);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(node_t *node);
@@ -605,7 +605,7 @@ int ComputeBspHeight(node_t *node);
 //   a partner will insert another seg into that partner's list, usually
 //   in the wrong place order-wise. ]
 //
-void ClockwiseBspTree();
+void ClockwiseBspTree(const Document &doc);
 
 // traverse the BSP tree and do whatever is necessary to convert the
 // node information from GL standard to normal standard (for example,
