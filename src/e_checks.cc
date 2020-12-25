@@ -1315,7 +1315,7 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types)
 
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (int n = 0 ; n < gDocument.numThings() ; n++)
 	{
 		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
 
@@ -1388,10 +1388,8 @@ int Things_FindStarts(int *dm_num)
 
 	int mask = 0;
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for(const Thing *T : gDocument.things)
 	{
-		const Thing * T = gDocument.things[n];
-
 		// ideally, these type numbers would not be hard-coded....
 
 		switch (T->type)
@@ -1413,7 +1411,7 @@ void Things_FindInVoid(selection_c& list)
 {
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (int n = 0 ; n < gDocument.numThings() ; n++)
 	{
 		double x = gDocument.things[n]->x();
 		double y = gDocument.things[n]->y();
@@ -1508,7 +1506,7 @@ void Things_FindDuds(selection_c& list)
 {
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (int n = 0 ; n < gDocument.numThings() ; n++)
 	{
 		const Thing *T = gDocument.things[n];
 
@@ -1558,7 +1556,7 @@ void Things_FixDuds()
 	gDocument.basis.begin();
 	gDocument.basis.setMessage("fixed unspawnable things");
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (int n = 0 ; n < gDocument.numThings() ; n++)
 	{
 		const Thing *T = gDocument.things[n];
 
@@ -1615,7 +1613,7 @@ void Things_FixDuds()
 static void CollectBlockingThings(std::vector<int>& list,
                                   std::vector<int>& sizes)
 {
-	for (int n = 0 ; n < NumThings ; n++)
+	for (int n = 0 ; n < gDocument.numThings() ; n++)
 	{
 		const Thing *T = gDocument.things[n];
 
@@ -3210,9 +3208,9 @@ static bool SEC_check_beast_mark(int tag)
 			return true;
 		}
 
-		for (int n = 0 ; n < NumThings ; n++)
+		for (const Thing *thing : gDocument.things)
 		{
-			const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+			const thingtype_t &info = M_GetThingType(thing->type);
 
 			if (info.desc.noCaseEqual("Commander Keen"))
 				return true;

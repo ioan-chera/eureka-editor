@@ -1618,7 +1618,7 @@ public:
 		glEnable(GL_ALPHA_TEST);
 
 		if (r_view.sprites)
-			for (int t=0 ; t < NumThings ; t++)
+			for (int t=0 ; t < gDocument.numThings() ; t++)
 				DrawThing(t);
 	}
 

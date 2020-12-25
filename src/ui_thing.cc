@@ -674,7 +674,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 void UI_ThingBox::AdjustExtraFloor(int dir)
 {
-	if (! is_thing(obj))
+	if (!gDocument.isThing(obj))
 		return;
 
 	int old_fl = atoi(exfloor->value());
@@ -811,7 +811,7 @@ void UI_ThingBox::UpdateField(int field)
 		field == Thing::F_Y ||
 		field == Thing::F_H)
 	{
-		if (is_thing(obj))
+		if (gDocument.isThing(obj))
 		{
 			const Thing *T = gDocument.things[obj];
 
@@ -830,7 +830,7 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
-		if (is_thing(obj))
+		if (gDocument.isThing(obj))
 			angle->value(SString(gDocument.things[obj]->angle).c_str());
 		else
 			angle->value("");
@@ -839,7 +839,7 @@ void UI_ThingBox::UpdateField(int field)
 	// IOANCH 9/2015
 	if (field < 0 || field == Thing::F_TID)
 	{
-		if (is_thing(obj))
+		if (gDocument.isThing(obj))
 			tid->value(SString(gDocument.things[obj]->tid).c_str());
 		else
 			tid->value("");
@@ -847,7 +847,7 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_TYPE)
 	{
-		if (is_thing(obj))
+		if (gDocument.isThing(obj))
 		{
 			const thingtype_t &info = M_GetThingType(gDocument.things[obj]->type);
 			desc->value(info.desc.c_str());
@@ -864,7 +864,7 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_OPTIONS)
 	{
-		if (is_thing(obj))
+		if (gDocument.isThing(obj))
 			OptionsFromInt(gDocument.things[obj]->options);
 		else
 			OptionsFromInt(0);
@@ -875,7 +875,7 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_SPECIAL)
 	{
-		if (is_thing(obj) && gDocument.things[obj]->special)
+		if (gDocument.isThing(obj) && gDocument.things[obj]->special)
 		{
 			const linetype_t &info = M_GetLineType(gDocument.things[obj]->special);
 			spec_desc->value(info.desc.c_str());
@@ -897,7 +897,7 @@ void UI_ThingBox::UpdateField(int field)
 			args[a]->textcolor(FL_BLACK);
 		}
 
-		if (is_thing(obj))
+		if (gDocument.isThing(obj))
 		{
 			const Thing *T = gDocument.things[obj];
 
@@ -937,7 +937,7 @@ void UI_ThingBox::UpdateField(int field)
 
 void UI_ThingBox::UpdateTotal()
 {
-	which->SetTotal(NumThings);
+	which->SetTotal(gDocument.numThings());
 }
 
 

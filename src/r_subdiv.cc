@@ -263,13 +263,13 @@ public:
 			}
 		}
 
-		for (int n = 0 ; n < NumThings ; n++)
+		for (const Thing *thing : gDocument.things)
 		{
-			CheckSlopeThing(gDocument.things[n]);
+			CheckSlopeThing(thing);
 		}
-		for (int n = 0 ; n < NumThings ; n++)
+		for (const Thing *thing : gDocument.things)
 		{
-			CheckSlopeCopyThing(gDocument.things[n]);
+			CheckSlopeCopyThing(thing);
 		}
 
 		for (int n = 0 ; n < NumLineDefs ; n++)

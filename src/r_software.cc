@@ -2010,7 +2010,7 @@ public:
 			AddLine(i);
 
 		if (r_view.sprites)
-			for (int k=0 ; k < NumThings ; k++)
+			for (int k=0 ; k < gDocument.numThings() ; k++)
 				AddThing(k);
 
 		ClipSolids();

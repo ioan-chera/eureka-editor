@@ -667,7 +667,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::things)
 	{
-		for (int t = 0 ; t < NumThings ; t++)
+		for (int t = 0 ; t < gDocument.numThings() ; t++)
 		{
 			const Thing *T = gDocument.things[t];
 
@@ -867,7 +867,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 	switch (objtype)
 	{
 		case ObjType::things:
-			for (int n = 0 ; n < NumThings ; n++)
+			for (int n = 0 ; n < gDocument.numThings() ; n++)
 			{
 				const Thing *T = gDocument.things[n];
 

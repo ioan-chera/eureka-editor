@@ -101,13 +101,11 @@ struct Document
 extern Document gDocument;
 
 
-#define NumThings     ((int)gDocument.things.size())
 #define NumVertices   ((int)gDocument.vertices.size())
 #define NumSectors    ((int)gDocument.sectors.size())
 #define NumSideDefs   ((int)gDocument.sidedefs.size())
 #define NumLineDefs   ((int)gDocument.linedefs.size())
 
-#define is_thing(n)    ((n) >= 0 && (n) < NumThings  )
 #define is_vertex(n)   ((n) >= 0 && (n) < NumVertices)
 #define is_sector(n)   ((n) >= 0 && (n) < NumSectors )
 #define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)

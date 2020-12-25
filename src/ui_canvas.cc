@@ -896,15 +896,15 @@ void UI_Canvas::DrawThings()
 	else if (edit.error_mode)
 		RenderColor(LIGHTGREY);
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (const Thing *thing : gDocument.things)
 	{
-		double x = gDocument.things[n]->x();
-		double y = gDocument.things[n]->y();
+		double x = thing->x();
+		double y = thing->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+		const thingtype_t &info = M_GetThingType(thing->type);
 
 		if (edit.mode == ObjType::things && !edit.error_mode)
 		{
@@ -914,13 +914,13 @@ void UI_Canvas::DrawThings()
 
 		int r = info.radius;
 
-		DrawThing(x, y, r, gDocument.things[n]->angle, false);
+		DrawThing(x, y, r, thing->angle, false);
 	}
 
 	// draw the thing numbers
 	if (edit.mode == ObjType::things && edit.show_object_numbers)
 	{
-		for (int n = 0 ; n < NumThings ; n++)
+		for (int n = 0 ; n < gDocument.numThings(); n++)
 		{
 			double x = gDocument.things[n]->x();
 			double y = gDocument.things[n]->y();
@@ -947,15 +947,15 @@ void UI_Canvas::DrawThingBodies()
 	if (edit.error_mode)
 		return;
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (const Thing *thing : gDocument.things)
 	{
-		double x = gDocument.things[n]->x();
-		double y = gDocument.things[n]->y();
+		double x = thing->x();
+		double y = thing->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+		const thingtype_t &info = M_GetThingType(thing->type);
 
 		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
@@ -981,18 +981,18 @@ void UI_Canvas::DrawThingSprites()
 	glAlphaFunc(GL_GREATER, 0.5);
 #endif
 
-	for (int n = 0 ; n < NumThings ; n++)
+	for (const Thing *thing : gDocument.things)
 	{
-		double x = gDocument.things[n]->x();
-		double y = gDocument.things[n]->y();
+		double x = thing->x();
+		double y = thing->y();
 
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(gDocument.things[n]->type);
+		const thingtype_t &info = M_GetThingType(thing->type);
 		float scale = info.scale;
 
-		Img_c *sprite = W_GetSprite(gDocument.things[n]->type);
+		Img_c *sprite = W_GetSprite(thing->type);
 
 		if (! sprite)
 		{

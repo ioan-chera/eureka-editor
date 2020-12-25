@@ -78,7 +78,7 @@ namespace thing_sec_cache
 	void InvalidateAll()
 	{
 		invalid_low  = 0;
-		invalid_high = NumThings - 1;
+		invalid_high = gDocument.numThings() - 1;
 	}
 
 	void Update();
@@ -208,7 +208,7 @@ static Thing *FindPlayer(int typenum)
 {
 	// need to search backwards (to handle Voodoo dolls properly)
 
-	for (int i = NumThings-1 ; i >= 0 ; i--)
+	for ( int i = gDocument.numThings()-1 ; i >= 0 ; i--)
 		if (gDocument.things[i]->type == typenum)
 			return gDocument.things[i];
 
@@ -224,9 +224,9 @@ namespace thing_sec_cache
 	{
 		// guarantee that thing_sectors has the correct size.
 		// [ prevent a potential crash ]
-		if (NumThings != (int)r_view.thing_sectors.size())
+		if (gDocument.numThings() != (int)r_view.thing_sectors.size())
 		{
-			r_view.thing_sectors.resize(NumThings);
+			r_view.thing_sectors.resize(gDocument.numThings());
 			thing_sec_cache::InvalidateAll();
 		}
 

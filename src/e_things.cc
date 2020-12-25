@@ -116,7 +116,7 @@ static void CollectOverlapGroup(selection_c& list)
 
 	list.set(first);
 
-	for (int k = 0 ; k < NumThings ; k++)
+	for (int k = 0 ; k < gDocument.numThings() ; k++)
 		if (k != first && ThingsAtSameLoc(k, first))
 			list.set(k);
 }

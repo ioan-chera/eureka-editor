@@ -413,7 +413,7 @@ static void UDMF_ParseThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 
 	else
 	{
-		DebugPrintf("thing #%d: unknown field '%s'\n", NumThings-1, field.c_str());
+		DebugPrintf("thing #%d: unknown field '%s'\n", gDocument.numThings()-1, field.c_str());
 	}
 }
 
@@ -716,7 +716,7 @@ static void UDMF_WriteInfo(Lump_c *lump)
 
 static void UDMF_WriteThings(Lump_c *lump)
 {
-	for (int i = 0 ; i < NumThings ; i++)
+	for (int i = 0 ; i < gDocument.numThings() ; i++)
 	{
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");

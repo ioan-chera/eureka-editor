@@ -1942,8 +1942,8 @@ static bool SpotInUse(ObjType obj_type, int x, int y)
 	switch (obj_type)
 	{
 		case ObjType::things:
-			for (int n = 0 ; n < NumThings ; n++)
-				if (I_ROUND(gDocument.things[n]->x()) == x && I_ROUND(gDocument.things[n]->y()) == y)
+			for (const Thing *thing : gDocument.things)
+				if (I_ROUND(thing->x()) == x && I_ROUND(thing->y()) == y)
 					return true;
 			return false;
 

@@ -1448,14 +1448,12 @@ static void SaveSectors()
 
 static void SaveThings()
 {
-	int size = NumThings * (int)sizeof(raw_thing_t);
+	int size = gDocument.numThings() * (int)sizeof(raw_thing_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("THINGS", size);
 
-	for (int i = 0 ; i < NumThings ; i++)
+	for (const Thing *th : gDocument.things)
 	{
-		const Thing *th = gDocument.things[i];
-
 		raw_thing_t raw;
 
 		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
@@ -1475,14 +1473,12 @@ static void SaveThings()
 // IOANCH 9/2015
 static void SaveThings_Hexen()
 {
-	int size = NumThings * (int)sizeof(raw_hexen_thing_t);
+	int size = gDocument.numThings() * (int)sizeof(raw_hexen_thing_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("THINGS", size);
 
-	for (int i = 0 ; i < NumThings ; i++)
+	for (const Thing *th : gDocument.things)
 	{
-		const Thing *th = gDocument.things[i];
-
 		raw_hexen_thing_t raw;
 
 		raw.tid = LE_S16(th->tid);

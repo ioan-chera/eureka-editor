@@ -662,7 +662,7 @@ static void ReselectGroup()
 
 			Selection_Clear();
 
-			edit.Selected->frob_range(NumThings - count, NumThings-1, BitOp::add);
+			edit.Selected->frob_range(gDocument.numThings() - count, gDocument.numThings()-1, BitOp::add);
 		}
 		return;
 	}
