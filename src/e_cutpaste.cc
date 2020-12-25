@@ -916,7 +916,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 		if (L->Left(gDocument))  result->clear(L->left);
 	}
 
-	for (int i = 0 ; i < NumSideDefs ; i++)
+	for (int i = 0 ; i < gDocument.numSidedefs(); i++)
 	{
 		const SideDef *SD = gDocument.sidedefs[i];
 

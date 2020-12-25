@@ -902,7 +902,7 @@ void SideDefs_FindUnused(selection_c& sel)
 {
 	sel.change_type(ObjType::sidedefs);
 
-	if (NumSideDefs == 0)
+	if (gDocument.numSidedefs() == 0)
 		return;
 
 	for (int i = 0 ; i < NumLineDefs ; i++)
@@ -913,7 +913,7 @@ void SideDefs_FindUnused(selection_c& sel)
 		if (L->right >= 0) sel.set(L->right);
 	}
 
-	sel.frob_range(0, NumSideDefs - 1, BitOp::toggle);
+	sel.frob_range(0, gDocument.numSidedefs() - 1, BitOp::toggle);
 }
 
 
@@ -1013,7 +1013,7 @@ void SideDefs_Unpack(bool is_after_load)
 
 	gDocument.basis.begin();
 
-	for (int sd = 0 ; sd < NumSideDefs ; sd++)
+	for (int sd = 0 ; sd < gDocument.numSidedefs(); sd++)
 	{
 		if (! sides.get(sd))
 			continue;
@@ -1059,7 +1059,7 @@ void SideDefs_Unpack(bool is_after_load)
 		gDocument.basis.end();
 	}
 
-	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), NumSideDefs);
+	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), gDocument.numSidedefs());
 }
 
 

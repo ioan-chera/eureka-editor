@@ -521,7 +521,7 @@ void CMD_PruneUnused(void)
 	}
 
 	used_secs .frob_range(0, gDocument.numSectors() -1, BitOp::toggle);
-	used_sides.frob_range(0, NumSideDefs-1, BitOp::toggle);
+	used_sides.frob_range(0, gDocument.numSidedefs() -1, BitOp::toggle);
 	used_verts.frob_range(0, gDocument.numVertices()-1, BitOp::toggle);
 
 	int num_secs  = used_secs .count_obj();

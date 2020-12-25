@@ -729,7 +729,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::sidedefs)
 	{
-		for (int n = 0 ; n < NumSideDefs ; n++)
+		for (int n = 0 ; n < gDocument.numSidedefs(); n++)
 		{
 			const SideDef * SD = gDocument.sidedefs[n];
 

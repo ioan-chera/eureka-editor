@@ -207,7 +207,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 			int sd = box->is_front ? L->right : L->left;
 
-			if (is_sidedef(sd))
+			if (gDocument.isSidedef(sd))
 			{
 				bool lower = (w == box->l_tex || w == box->l_pic);
 				bool upper = (w == box->u_tex || w == box->u_pic);
@@ -292,7 +292,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		int other = box->is_front ? L->left : L->right;
 
 		// skip lines which already have this sidedef
-		if (is_sidedef(sd))
+		if (gDocument.isSidedef(sd))
 			continue;
 
 		// determine what sector to use
@@ -379,7 +379,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 
 			int sd = box->is_front ? L->right : L->left;
 
-			if (is_sidedef(sd))
+			if (gDocument.isSidedef(sd))
 			{
 				if (w == box->x_ofs)
 					gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_x_ofs);
@@ -413,7 +413,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 			int sd = box->is_front ? L->right : L->left;
 
-			if (is_sidedef(sd))
+			if (gDocument.isSidedef(sd))
 				gDocument.basis.changeSidedef(sd, SideDef::F_SECTOR, new_sec);
 		}
 
@@ -452,7 +452,7 @@ void UI_SideBox::SetObj(int index, int solid_mask, bool two_sided)
 
 void UI_SideBox::UpdateField()
 {
-	if (is_sidedef(obj))
+	if (gDocument.isSidedef(obj))
 	{
 		const SideDef *sd = gDocument.sidedefs[obj];
 
@@ -509,7 +509,7 @@ void UI_SideBox::UpdateField()
 
 void UI_SideBox::UpdateLabel()
 {
-	if (! is_sidedef(obj))
+	if (!gDocument.isSidedef(obj))
 	{
 		label(is_front ? "   No Front Sidedef" : "   No Back Sidedef");
 		return;
@@ -531,7 +531,7 @@ void UI_SideBox::UpdateAddDel()
 		add_button->hide();
 		del_button->hide();
 	}
-	else if (! is_sidedef(obj))
+	else if (!gDocument.isSidedef(obj))
 	{
 		add_button->show();
 		del_button->hide();

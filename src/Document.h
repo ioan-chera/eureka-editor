@@ -101,10 +101,8 @@ struct Document
 extern Document gDocument;
 
 
-#define NumSideDefs   ((int)gDocument.sidedefs.size())
 #define NumLineDefs   ((int)gDocument.linedefs.size())
 
-#define is_sidedef(n)  ((n) >= 0 && (n) < NumSideDefs)
 #define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
 
 #endif /* Document_hpp */

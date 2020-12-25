@@ -908,7 +908,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 	if (num == 0xFFFF)
 		return NULL;
 
-	if ((int)num >= NumSideDefs && (s16_t)(num) < 0)
+	if ((int)num >= gDocument.numSidedefs() && (s16_t)(num) < 0)
 		return NULL;
 
 	return SideDefs[num];

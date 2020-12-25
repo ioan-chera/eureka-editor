@@ -637,7 +637,7 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 
 static void ValidateLevel_UDMF()
 {
-	for (int n = 0 ; n < NumSideDefs ; n++)
+	for (int n = 0 ; n < gDocument.numSidedefs() ; n++)
 	{
 		ValidateSectorRef(gDocument.sidedefs[n], n);
 	}
@@ -834,7 +834,7 @@ static void UDMF_WriteLineDefs(Lump_c *lump)
 
 static void UDMF_WriteSideDefs(Lump_c *lump)
 {
-	for (int i = 0 ; i < NumSideDefs ; i++)
+	for (int i = 0 ; i < gDocument.numSidedefs(); i++)
 	{
 		lump->Printf("sidedef // %d\n", i);
 		lump->Printf("{\n");

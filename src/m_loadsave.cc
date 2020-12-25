@@ -554,7 +554,7 @@ static void CreateFallbackVertices()
 
 void ValidateSidedefRefs(LineDef * ld, int num)
 {
-	if (ld->right >= NumSideDefs || ld->left >= NumSideDefs)
+	if (ld->right >= gDocument.numSidedefs() || ld->left >= gDocument.numSidedefs())
 	{
 		LogPrintf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
 				  num, ld->right, ld->left);
@@ -562,13 +562,13 @@ void ValidateSidedefRefs(LineDef * ld, int num)
 		bad_sidedef_refs++;
 
 		// ensure we have a usable sidedef
-		if (NumSideDefs == 0)
+		if (gDocument.numSidedefs() == 0)
 			CreateFallbackSideDef();
 
-		if (ld->right >= NumSideDefs)
+		if (ld->right >= gDocument.numSidedefs())
 			ld->right = 0;
 
-		if (ld->left >= NumSideDefs)
+		if (ld->left >= gDocument.numSidedefs())
 			ld->left = 0;
 	}
 }
@@ -1503,14 +1503,12 @@ static void SaveThings_Hexen()
 
 static void SaveSideDefs()
 {
-	int size = NumSideDefs * (int)sizeof(raw_sidedef_t);
+	int size = gDocument.numSidedefs() * (int)sizeof(raw_sidedef_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("SIDEDEFS", size);
 
-	for (int i = 0 ; i < NumSideDefs ; i++)
+	for (const SideDef *side : gDocument.sidedefs)
 	{
-		const SideDef *side = gDocument.sidedefs[i];
-
 		raw_sidedef_t raw;
 
 		raw.x_offset = LE_S16(side->x_offset);
