@@ -692,7 +692,7 @@ static void ReselectGroup()
 		// the sectors (non-pasted lines refer to them too).
 
 		int count = (int)clip_board->lines.size();
-		new_sel.frob_range(NumLineDefs - count, NumLineDefs-1, BitOp::add);
+		new_sel.frob_range(gDocument.numLinedefs() - count, gDocument.numLinedefs() -1, BitOp::add);
 	}
 	else
 	{
@@ -884,7 +884,7 @@ void UnusedVertices(selection_c *lines, selection_c *result)
 
 	ConvertSelection(lines, result);
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		// we are interested in the lines we are NOT deleting
 		if (lines->get(n))
@@ -904,7 +904,7 @@ void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result)
 
 	ConvertSelection(lines, result);
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		// we are interested in the lines we are NOT deleting
 		if (lines->get(n))
@@ -930,7 +930,7 @@ void UnusedLineDefs(selection_c *sectors, selection_c *result)
 {
 	SYS_ASSERT(sectors->what_type() == ObjType::sectors);
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
@@ -956,9 +956,9 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 
 	// collect all the sectors that touch a linedef being removed.
 
-	bitvec_c del_lines(NumLineDefs);
+	bitvec_c del_lines(gDocument.numLinedefs());
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		const LineDef *linedef = gDocument.linedefs[n];
 
@@ -976,7 +976,7 @@ void DuddedSectors(const selection_c &verts, const selection_c &lines, selection
 	// visit all linedefs NOT being removed, and see if the sector(s)
 	// on it will actually be OK after the delete.
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		const LineDef *linedef = gDocument.linedefs[n];
 
@@ -1056,7 +1056,7 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	int ld1 = -1;
 	int ld2 = -1;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
@@ -1151,7 +1151,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 
 	if (list->what_type() == ObjType::vertices)
 	{
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 		{
 			const LineDef *L = gDocument.linedefs[n];
 

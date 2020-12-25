@@ -378,7 +378,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 	// find the line joined to this vertex
 	int joined_ld = -1;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		if (LineDefs[n]->TouchesVertex(v_num))
 		{
@@ -843,7 +843,7 @@ void VertexModule::commandSectorDisconnect(void)
 	// update linedefs, creating new ones where necessary
 	// (go backwards so we don't visit newly created lines)
 
-	for (n = NumLineDefs-1 ; n >= 0 ; n--)
+	for (n = gDocument.numLinedefs() -1 ; n >= 0 ; n--)
 	{
 		const LineDef * L = gDocument.linedefs[n];
 

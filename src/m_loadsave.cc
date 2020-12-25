@@ -886,10 +886,10 @@ static void RemoveUnusedVerticesAtEnd()
 
 	bitvec_c used_verts(gDocument.numVertices());
 
-	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (const LineDef *linedef : gDocument.linedefs)
 	{
-		used_verts.set(gDocument.linedefs[i]->start);
-		used_verts.set(gDocument.linedefs[i]->end);
+		used_verts.set(linedef->start);
+		used_verts.set(linedef->end);
 	}
 
 	int new_count = gDocument.numVertices();
@@ -1529,14 +1529,12 @@ static void SaveSideDefs()
 
 static void SaveLineDefs()
 {
-	int size = NumLineDefs * (int)sizeof(raw_linedef_t);
+	int size = gDocument.numLinedefs() * (int)sizeof(raw_linedef_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("LINEDEFS", size);
 
-	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (const LineDef *ld : gDocument.linedefs)
 	{
-		const LineDef *ld = gDocument.linedefs[i];
-
 		raw_linedef_t raw;
 
 		raw.start = LE_U16(ld->start);
@@ -1559,14 +1557,12 @@ static void SaveLineDefs()
 // IOANCH 9/2015
 static void SaveLineDefs_Hexen()
 {
-	int size = NumLineDefs * (int)sizeof(raw_hexen_linedef_t);
+	int size = gDocument.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("LINEDEFS", size);
 
-	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (const LineDef *ld : gDocument.linedefs)
 	{
-		const LineDef *ld = gDocument.linedefs[i];
-
 		raw_hexen_linedef_t raw;
 
 		raw.start = LE_U16(ld->start);

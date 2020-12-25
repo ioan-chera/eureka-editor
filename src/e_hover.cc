@@ -598,7 +598,7 @@ int Hover::getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bit
 	{
 		// normal way : test all linedefs
 
-		for(int n = 0; n < NumLineDefs; n++)
+		for(int n = 0; n < gDocument.numLinedefs(); n++)
 		{
 			if(ignore_lines && ignore_lines->get(n))
 				continue;

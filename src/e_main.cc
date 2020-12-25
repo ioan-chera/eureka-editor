@@ -684,7 +684,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::linedefs)
 	{
-		for (int l = 0 ; l < NumLineDefs ; l++)
+		for (int l = 0 ; l < gDocument.numLinedefs(); l++)
 		{
 			const LineDef *L = gDocument.linedefs[l];
 
@@ -700,10 +700,8 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::vertices)
 	{
-		for (int l = 0 ; l < NumLineDefs ; l++)
+		for (const LineDef *L : gDocument.linedefs)
 		{
-			const LineDef *L = gDocument.linedefs[l];
-
 			if ( (L->Right(gDocument) && src->get(L->Right(gDocument)->sector)) ||
 				 (L->Left(gDocument)  && src->get(L->Left(gDocument)->sector)) )
 			{
@@ -756,7 +754,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 	if (src->what_type() == ObjType::vertices && dest->what_type() == ObjType::linedefs)
 	{
 		// select all linedefs that have both ends selected
-		for (int l = 0 ; l < NumLineDefs ; l++)
+		for (int l = 0 ; l < gDocument.numLinedefs(); l++)
 		{
 			const LineDef *L = gDocument.linedefs[l];
 
@@ -780,7 +778,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 	// step 1: select all sectors (except empty ones)
 	int l;
 
-	for (l = 0 ; l < NumLineDefs ; l++)
+	for (l = 0 ; l < gDocument.numLinedefs() ; l++)
 	{
 		const LineDef *L = gDocument.linedefs[l];
 
@@ -790,7 +788,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	// step 2: unselect any sectors if a component is not selected
 
-	for (l = 0 ; l < NumLineDefs ; l++)
+	for (l = 0 ; l < gDocument.numLinedefs(); l++)
 	{
 		const LineDef *L = gDocument.linedefs[l];
 
@@ -897,7 +895,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 			break;
 
 		case ObjType::linedefs:
-			for (int n = 0 ; n < NumLineDefs ; n++)
+			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 			{
 				const LineDef *L = gDocument.linedefs[n];
 
@@ -917,7 +915,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 			selection_c  in_sectors(ObjType::sectors);
 			selection_c out_sectors(ObjType::sectors);
 
-			for (int n = 0 ; n < NumLineDefs ; n++)
+			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 			{
 				const LineDef *L = gDocument.linedefs[n];
 

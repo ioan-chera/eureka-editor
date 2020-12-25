@@ -982,7 +982,7 @@ void LinedefModule::commandSplitHalf()
 		return;
 	}
 
-	int new_first = NumLineDefs;
+	int new_first = gDocument.numLinedefs();
 	int new_count = 0;
 
 	gDocument.basis.begin();
@@ -1193,7 +1193,7 @@ void LinedefModule::commandMergeTwo()
 
 	// fix existing lines connected to ld1 : reconnect to ld2
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		if (n == ld1 || n == ld2)
 			continue;

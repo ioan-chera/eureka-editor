@@ -687,7 +687,7 @@ void UI_Canvas::DrawVertices()
 //
 void UI_Canvas::DrawLinedefs()
 {
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		const LineDef *L = gDocument.linedefs[n];
 
@@ -725,7 +725,7 @@ void UI_Canvas::DrawLinedefs()
 					line_kind = 'k';
 
 				// show info of last four added lines
-				if (n != edit.split_line.num && n >= (NumLineDefs - 4) &&
+				if (n != edit.split_line.num && n >= (gDocument.numLinedefs() - 4) &&
 					!edit.show_object_numbers)
 				{
 					DrawLineInfo(x1, y1, x2, y2, false);
@@ -844,7 +844,7 @@ void UI_Canvas::DrawLinedefs()
 	// draw the linedef numbers
 	if (edit.mode == ObjType::linedefs && edit.show_object_numbers)
 	{
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 		{
 			double x1 = gDocument.linedefs[n]->Start(gDocument)->x();
 			double y1 = gDocument.linedefs[n]->Start(gDocument)->y();
@@ -1385,10 +1385,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::sectors:
 		{
-			for (int n = 0 ; n < NumLineDefs ; n++)
+			for (const LineDef *L : gDocument.linedefs)
 			{
-				const LineDef *L = gDocument.linedefs[n];
-
 				if (! L->TouchesSector(objnum, gDocument))
 					continue;
 
@@ -1501,15 +1499,15 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::sectors:
 		{
-			for (int n = 0 ; n < NumLineDefs ; n++)
+			for (const LineDef *linedef : gDocument.linedefs)
 			{
-				if (!gDocument.linedefs[n]->TouchesSector(objnum, gDocument))
+				if (!linedef->TouchesSector(objnum, gDocument))
 					continue;
 
-				double x1 = gDocument.linedefs[n]->Start(gDocument)->x();
-				double y1 = gDocument.linedefs[n]->Start(gDocument)->y();
-				double x2 = gDocument.linedefs[n]->End  (gDocument)->x();
-				double y2 = gDocument.linedefs[n]->End  (gDocument)->y();
+				double x1 = linedef->Start(gDocument)->x();
+				double y1 = linedef->Start(gDocument)->y();
+				double x2 = linedef->End  (gDocument)->x();
+				double y2 = linedef->End  (gDocument)->y();
 
 				edit.trans_param.Apply(&x1, &y1);
 				edit.trans_param.Apply(&x2, &y2);
@@ -1543,7 +1541,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 	// handle tagged sectors : show matching line(s)
 	if (objtype == ObjType::sectors && gDocument.sectors[objnum]->tag > 0)
 	{
-		for (int m = 0 ; m < NumLineDefs ; m++)
+		for (int m = 0 ; m < gDocument.numLinedefs(); m++)
 			if (gDocument.linedefs[m]->tag == gDocument.sectors[objnum]->tag)
 				DrawHighlight(ObjType::linedefs, m);
 	}
@@ -1554,10 +1552,8 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 {
 	// color and line thickness have been set by caller
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (const LineDef *L : gDocument.linedefs)
 	{
-		const LineDef *L = gDocument.linedefs[n];
-
 		double x1 = dx + L->Start(gDocument)->x();
 		double y1 = dy + L->Start(gDocument)->y();
 		double x2 = dx + L->End  (gDocument)->x();

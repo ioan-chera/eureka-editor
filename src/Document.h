@@ -100,9 +100,4 @@ struct Document
 
 extern Document gDocument;
 
-
-#define NumLineDefs   ((int)gDocument.linedefs.size())
-
-#define is_linedef(n)  ((n) >= 0 && (n) < NumLineDefs)
-
 #endif /* Document_hpp */

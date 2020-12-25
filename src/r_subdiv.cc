@@ -238,7 +238,7 @@ public:
 			infos[sec].floors.c_plane.Init(static_cast<float>(S->ceilh));
 		}
 
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 		{
 			const LineDef *L = gDocument.linedefs[n];
 
@@ -272,9 +272,9 @@ public:
 			CheckSlopeCopyThing(thing);
 		}
 
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (const LineDef *linedef : gDocument.linedefs)
 		{
-			CheckPlaneCopy(gDocument.linedefs[n]);
+			CheckPlaneCopy(linedef);
 		}
 	}
 
@@ -532,9 +532,8 @@ public:
 			std::swap(ly1, ly2);
 		}
 
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (const LineDef *L2 : gDocument.linedefs)
 		{
-			const LineDef *L2 = gDocument.linedefs[n];
 			if (L2->TouchesSector(sec_num, gDocument))
 			{
 				for (int pass = 0 ; pass < 2 ; pass++)

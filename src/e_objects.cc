@@ -1176,7 +1176,7 @@ static void Drag_CountOnGrid_Worker(ObjType obj_type, int objnum, int *count, in
 			break;
 
 		case ObjType::sectors:
-			for (int n = 0 ; n < NumLineDefs ; n++)
+			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 			{
 				LineDef *L = gDocument.linedefs[n];
 
@@ -1240,7 +1240,7 @@ static void Drag_UpdateCurrentDist(ObjType obj_type, int objnum, double *x, doub
 			// (some vertices can be processed two or more times, that
 			// won't matter though).
 
-			for (int n = 0 ; n < NumLineDefs ; n++)
+			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 			{
 				LineDef *L = gDocument.linedefs[n];
 
@@ -2087,10 +2087,8 @@ static void Quantize_Vertices(selection_c *list)
 
 	byte * vert_modes = new byte[gDocument.numVertices()];
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (const LineDef *L : gDocument.linedefs)
 	{
-		const LineDef *L = gDocument.linedefs[n];
-
 		// require both vertices of the linedef to be in the selection
 		if (! (list->get(L->start) && list->get(L->end)))
 			continue;

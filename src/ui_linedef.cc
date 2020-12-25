@@ -709,7 +709,7 @@ void UI_LineBox::UpdateField(int field)
 {
 	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
 	{
-		if (is_linedef(obj))
+		if (gDocument.isLinedef(obj))
 			CalcLength();
 		else
 			length->value("");
@@ -724,7 +724,7 @@ void UI_LineBox::UpdateField(int field)
 			args[a]->textcolor(FL_BLACK);
 		}
 
-		if (is_linedef(obj))
+		if (gDocument.isLinedef(obj))
 		{
 			const LineDef *L = gDocument.linedefs[obj];
 
@@ -758,7 +758,7 @@ void UI_LineBox::UpdateField(int field)
 
 	if (field < 0 || field == LineDef::F_RIGHT || field == LineDef::F_LEFT)
 	{
-		if (is_linedef(obj))
+		if (gDocument.isLinedef(obj))
 		{
 			const LineDef *L = gDocument.linedefs[obj];
 
@@ -777,7 +777,7 @@ void UI_LineBox::UpdateField(int field)
 
 	if (field < 0 || field == LineDef::F_TYPE)
 	{
-		if (is_linedef(obj))
+		if (gDocument.isLinedef(obj))
 		{
 			int type_num = gDocument.linedefs[obj]->type;
 
@@ -809,7 +809,7 @@ void UI_LineBox::UpdateField(int field)
 
 	if (field < 0 || field == LineDef::F_FLAGS)
 	{
-		if (is_linedef(obj))
+		if (gDocument.isLinedef(obj))
 		{
 			actkind->activate();
 
@@ -951,7 +951,7 @@ int UI_LineBox::CalcFlags() const
 
 void UI_LineBox::UpdateTotal()
 {
-	which->SetTotal(NumLineDefs);
+	which->SetTotal(gDocument.numLinedefs());
 }
 
 

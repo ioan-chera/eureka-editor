@@ -642,7 +642,7 @@ static void ValidateLevel_UDMF()
 		ValidateSectorRef(gDocument.sidedefs[n], n);
 	}
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		LineDef *L = gDocument.linedefs[n];
 
@@ -776,7 +776,7 @@ static void UDMF_WriteVertices(Lump_c *lump)
 
 static void UDMF_WriteLineDefs(Lump_c *lump)
 {
-	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (int i = 0 ; i < gDocument.numLinedefs(); i++)
 	{
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");

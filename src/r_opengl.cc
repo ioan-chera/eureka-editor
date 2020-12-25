@@ -1415,10 +1415,8 @@ public:
 				return;
 		}
 
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (const LineDef *L : gDocument.linedefs)
 		{
-			const LineDef *L = gDocument.linedefs[n];
-
 			if (L->TouchesSector(sec_index, gDocument))
 			{
 				float x1 = static_cast<float>(L->Start(gDocument)->x());
@@ -1606,7 +1604,7 @@ public:
 		// always draw the sector the camera is in
 		MarkCameraSector();
 
-		for (int i=0 ; i < NumLineDefs ; i++)
+		for (int i=0 ; i < gDocument.numLinedefs(); i++)
 			DrawLine(i);
 
 		glDisable(GL_ALPHA_TEST);

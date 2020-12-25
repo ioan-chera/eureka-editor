@@ -108,7 +108,7 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 	*L_other = -1;
 	*V_other = -1;
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
 	{
 		if (n == L)
 			continue;
@@ -245,10 +245,8 @@ static bool GrowContiguousSectors(selection_c &seen)
 	bool do_tag     = Exec_HasFlag("/tag");
 	bool do_special = Exec_HasFlag("/special");
 
-	for (int n = 0 ; n < NumLineDefs ; n++)
+	for (const LineDef *L : gDocument.linedefs)
 	{
-		LineDef *L = gDocument.linedefs[n];
-
 		if (! L->TwoSided())
 			continue;
 
@@ -500,10 +498,8 @@ void CMD_PruneUnused(void)
 	selection_c used_sides(ObjType::sidedefs);
 	selection_c used_verts(ObjType::vertices);
 
-	for (int i = 0 ; i < NumLineDefs ; i++)
+	for (const LineDef *L : gDocument.linedefs)
 	{
-		const LineDef * L = gDocument.linedefs[i];
-
 		used_verts.set(L->start);
 		used_verts.set(L->end);
 
@@ -569,10 +565,8 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 	{
 		changes = false;
 
-		for (int n = 0 ; n < NumLineDefs ; n++)
+		for (const LineDef *L : gDocument.linedefs)
 		{
-			const LineDef *L = gDocument.linedefs[n];
-
 			if (! L->TwoSided())
 				continue;
 

@@ -233,7 +233,7 @@ static void MarkPolyobjSector(int sector)
 	DebugPrintf("  Marking SECTOR %d\n", sector);
 # endif
 
-	for (i = 0 ; i < NumLineDefs ; i++)
+	for (i = 0 ; i < gDocument.numLinedefs(); i++)
 	{
 		LineDef *L = gDocument.linedefs[i];
 
@@ -268,7 +268,7 @@ static void MarkPolyobjPoint(double x, double y)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0 ; i < NumLineDefs ; i++)
+	for (i = 0 ; i < gDocument.numLinedefs(); i++)
 	{
 		const LineDef *L = gDocument.linedefs[i];
 
@@ -299,7 +299,7 @@ static void MarkPolyobjPoint(double x, double y)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0 ; i < NumLineDefs ; i++)
+	for (i = 0 ; i < gDocument.numLinedefs(); i++)
 	{
 		LineDef *L = gDocument.linedefs[i];
 
@@ -392,7 +392,7 @@ void DetectPolyobjSectors(void)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0 ; i < NumLineDefs ; i++)
+	for (i = 0 ; i < gDocument.numLinedefs(); i++)
 	{
 		const LineDef *L = gDocument.linedefs[i];
 
@@ -400,7 +400,7 @@ void DetectPolyobjSectors(void)
 			break;
 	}
 
-	if (i == NumLineDefs)
+	if (i == gDocument.numLinedefs())
 	{
 		// -JL- No polyobjs in this level
 		return;
@@ -564,20 +564,20 @@ void DetectOverlappingLines(void)
 	//   Note: does not detect partially overlapping lines.
 
 	int i;
-	int *array = (int *)UtilCalloc(NumLineDefs * sizeof(int));
+	int *array = (int *)UtilCalloc(gDocument.numLinedefs() * sizeof(int));
 	int count = 0;
 
 	// sort array of indices
-	for (i=0 ; i < NumLineDefs ; i++)
+	for (i=0 ; i < gDocument.numLinedefs(); i++)
 		array[i] = i;
 
-	qsort(array, NumLineDefs, sizeof(int), LineStartCompare);
+	qsort(array, gDocument.numLinedefs(), sizeof(int), LineStartCompare);
 
-	for (i=0 ; i < NumLineDefs - 1 ; i++)
+	for (i=0 ; i < gDocument.numLinedefs() - 1 ; i++)
 	{
 		int j;
 
-		for (j = i+1 ; j < NumLineDefs ; j++)
+		for (j = i+1 ; j < gDocument.numLinedefs(); j++)
 		{
 			if (LineStartCompare(array + i, array + j) != 0)
 				break;
@@ -652,7 +652,7 @@ void CalculateWallTips()
 {
 	int i;
 
-	for (i=0 ; i < NumLineDefs ; i++)
+	for (i=0 ; i < gDocument.numLinedefs(); i++)
 	{
 		const LineDef *L = gDocument.linedefs[i];
 

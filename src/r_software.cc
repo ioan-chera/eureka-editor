@@ -2006,7 +2006,7 @@ public:
 
 		InitDepthBuf(r_view.screen_w);
 
-		for (int i=0 ; i < NumLineDefs ; i++)
+		for (int i=0 ; i < gDocument.numLinedefs(); i++)
 			AddLine(i);
 
 		if (r_view.sprites)
