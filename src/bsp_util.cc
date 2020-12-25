@@ -222,30 +222,30 @@ void Adler32_Finish(u32_t *crc)
 
 /* ----- polyobj handling ----------------------------- */
 
-static void MarkPolyobjSector(int sector)
+static void MarkPolyobjSector(int sector, const Document &doc)
 {
 	int i;
 
-	if (! gDocument.isSector(sector))
+	if (! doc.isSector(sector))
 		return;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Marking SECTOR %d\n", sector);
 # endif
 
-	for (i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		LineDef *L = gDocument.linedefs[i];
+		LineDef *L = doc.linedefs[i];
 
-		if ((L->right >= 0 && L->Right(gDocument)->sector == sector) ||
-			(L->left  >= 0 && L->Left(gDocument)->sector  == sector))
+		if ((L->right >= 0 && L->Right(doc)->sector == sector) ||
+			(L->left  >= 0 && L->Left(doc)->sector  == sector))
 		{
 			L->flags |= MLF_IS_PRECIOUS;
 		}
 	}
 }
 
-static void MarkPolyobjPoint(double x, double y)
+static void MarkPolyobjPoint(double x, double y, const Document &doc)
 {
 	int i;
 	int inside_count = 0;
@@ -268,23 +268,23 @@ static void MarkPolyobjPoint(double x, double y)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const LineDef *L = gDocument.linedefs[i];
+		const LineDef *L = doc.linedefs[i];
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
-					(int) L->Start(gDocument)->x(), (int) L->Start(gDocument)->y(),
-					(int) L->End(gDocument)->x(),   (int) L->End(gDocument)->y()))
+					(int) L->Start(doc)->x(), (int) L->Start(doc)->y(),
+					(int) L->End(doc)->x(),   (int) L->End(doc)->y()))
 		{
 #     if DEBUG_POLYOBJ
 			DebugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
 			if (L->left >= 0)
-				MarkPolyobjSector(L->Left(gDocument)->sector);
+				MarkPolyobjSector(L->Left(doc)->sector, doc);
 
 			if (L->right >= 0)
-				MarkPolyobjSector(L->Right(gDocument)->sector);
+				MarkPolyobjSector(L->Right(doc)->sector, doc);
 
 			inside_count++;
 		}
@@ -299,16 +299,16 @@ static void MarkPolyobjPoint(double x, double y)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		LineDef *L = gDocument.linedefs[i];
+		const LineDef *L = doc.linedefs[i];
 
 		double x_cut;
 
-		x1 = L->Start(gDocument)->x();
-		y1 = L->Start(gDocument)->y();
-		x2 = L->End(gDocument)->x();
-		y2 = L->End(gDocument)->y();
+		x1 = L->Start(doc)->x();
+		y1 = L->Start(doc)->y();
+		x2 = L->End(doc)->x();
+		y2 = L->End(doc)->y();
 
 		/* check vertical range */
 		if (fabs(y2 - y1) < EPSILON)
@@ -335,10 +335,10 @@ static void MarkPolyobjPoint(double x, double y)
 		return;
 	}
 
-	const LineDef *best_ld = gDocument.linedefs[best_match];
+	const LineDef *best_ld = doc.linedefs[best_match];
 
-	y1 = best_ld->Start(gDocument)->y();
-	y2 = best_ld->End(gDocument)->y();
+	y1 = best_ld->Start(doc)->y();
+	y2 = best_ld->End(doc)->y();
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
@@ -357,9 +357,9 @@ static void MarkPolyobjPoint(double x, double y)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = (best_ld->right >= 0) ? best_ld->Right(gDocument)->sector : -1;
+		sector = (best_ld->right >= 0) ? best_ld->Right(doc)->sector : -1;
 	else
-		sector = (best_ld->left >= 0) ? best_ld->Left(gDocument)->sector : -1;
+		sector = (best_ld->left >= 0) ? best_ld->Left(doc)->sector : -1;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -371,14 +371,14 @@ static void MarkPolyobjPoint(double x, double y)
 		return;
 	}
 
-	MarkPolyobjSector(sector);
+	MarkPolyobjSector(sector, doc);
 }
 
 
 //
 // Based on code courtesy of Janis Legzdinsh.
 //
-void DetectPolyobjSectors(void)
+void DetectPolyobjSectors(const Document &doc)
 {
 	int i;
 
@@ -392,15 +392,15 @@ void DetectPolyobjSectors(void)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		const LineDef *L = gDocument.linedefs[i];
+		const LineDef *L = doc.linedefs[i];
 
 		if (L->type == HEXTYPE_POLY_START || L->type == HEXTYPE_POLY_EXPLICIT)
 			break;
 	}
 
-	if (i == gDocument.numLinedefs())
+	if (i == doc.numLinedefs())
 	{
 		// -JL- No polyobjs in this level
 		return;
@@ -409,9 +409,9 @@ void DetectPolyobjSectors(void)
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
 	bool hexen_style = true;
 
-	for (i = 0 ; i < gDocument.numThings() ; i++)
+	for (i = 0 ; i < doc.numThings() ; i++)
 	{
-		const Thing *T = gDocument.things[i];
+		const Thing *T = doc.things[i];
 
 		if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
 		{
@@ -426,9 +426,9 @@ void DetectPolyobjSectors(void)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for (i = 0 ; i < gDocument.numThings(); i++)
+	for (i = 0 ; i < doc.numThings(); i++)
 	{
-		const Thing *T = gDocument.things[i];
+		const Thing *T = doc.things[i];
 
 		double x = T->x();
 		double y = T->y();
@@ -451,14 +451,14 @@ void DetectPolyobjSectors(void)
 		DebugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #   endif
 
-		MarkPolyobjPoint(x, y);
+		MarkPolyobjPoint(x, y, doc);
 	}
 }
 
 
 /* ----- analysis routines ----------------------------- */
 
-static int VertexCompare(const void *p1, const void *p2)
+static int VertexCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int vert1 = static_cast<const u16_t *>(p1)[0];
 	int vert2 = static_cast<const u16_t *>(p2)[0];
@@ -466,8 +466,8 @@ static int VertexCompare(const void *p1, const void *p2)
 	if (vert1 == vert2)
 		return 0;
 
-	const Vertex *A = gDocument.vertices[vert1];
-	const Vertex *B = gDocument.vertices[vert2];
+	const Vertex *A = doc.vertices[vert1];
+	const Vertex *B = doc.vertices[vert2];
 
 	if (A->raw_x != B->raw_x)
 		return A->raw_x - B->raw_x;
@@ -476,9 +476,9 @@ static int VertexCompare(const void *p1, const void *p2)
 }
 
 
-void DetectOverlappingVertices(void)
+void DetectOverlappingVertices(const Document &doc)
 {
-	SYS_ASSERT(num_vertices == gDocument.numVertices());
+	SYS_ASSERT(num_vertices == doc.numVertices());
 
 	u16_t *array = new u16_t[num_vertices];
 
@@ -487,12 +487,15 @@ void DetectOverlappingVertices(void)
 	for (i=0 ; i < num_vertices ; i++)
 		array[i] = i;
 
-	qsort(array, num_vertices, sizeof(u16_t), VertexCompare);
+	std::sort(array, array + num_vertices, [&doc](u16_t left, u16_t right)
+		{
+			return VertexCompare(doc, &left, &right) < 0;
+		});
 
 	// now mark them off
 	for (i=0 ; i < num_vertices - 1 ; i++)
 	{
-		if (VertexCompare(array + i, array + i + 1) == 0)
+		if (VertexCompare(doc, array + i, array + i + 1) == 0)
 		{
 			// found an overlap!
 
@@ -507,17 +510,17 @@ void DetectOverlappingVertices(void)
 }
 
 
-static inline int LineVertexLowest(const LineDef *L)
+static inline int LineVertexLowest(const Document &doc, const LineDef *L)
 {
 	// returns the "lowest" vertex (normally the left-most, but if the
 	// line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
-	return ( L->Start(gDocument)->raw_x <  L->End(gDocument)->raw_x ||
-			(L->Start(gDocument)->raw_x == L->End(gDocument)->raw_x &&
-			 L->Start(gDocument)->raw_y <  L->End(gDocument)->raw_y)) ? 0 : 1;
+	return ( L->Start(doc)->raw_x <  L->End(doc)->raw_x ||
+			(L->Start(doc)->raw_x == L->End(doc)->raw_x &&
+			 L->Start(doc)->raw_y <  L->End(doc)->raw_y)) ? 0 : 1;
 }
 
-static int LineStartCompare(const void *p1, const void *p2)
+static int LineStartCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
@@ -525,12 +528,12 @@ static int LineStartCompare(const void *p1, const void *p2)
 	if (line1 == line2)
 		return 0;
 
-	const LineDef *A = gDocument.linedefs[line1];
-	const LineDef *B = gDocument.linedefs[line2];
+	const LineDef *A = doc.linedefs[line1];
+	const LineDef *B = doc.linedefs[line2];
 
 	// determine left-most vertex of each line
-	const Vertex *C = LineVertexLowest(A) ? A->End(gDocument) : A->Start(gDocument);
-	const Vertex *D = LineVertexLowest(B) ? B->End(gDocument) : B->Start(gDocument);
+	const Vertex *C = LineVertexLowest(doc, A) ? A->End(doc) : A->Start(doc);
+	const Vertex *D = LineVertexLowest(doc, B) ? B->End(doc) : B->Start(doc);
 
 	if (C->raw_x != D->raw_x)
 		return C->raw_x - D->raw_x;
@@ -538,7 +541,7 @@ static int LineStartCompare(const void *p1, const void *p2)
 	return C->raw_y - D->raw_y;
 }
 
-static int LineEndCompare(const void *p1, const void *p2)
+static int LineEndCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
@@ -546,12 +549,12 @@ static int LineEndCompare(const void *p1, const void *p2)
 	if (line1 == line2)
 		return 0;
 
-	const LineDef *A = gDocument.linedefs[line1];
-	const LineDef *B = gDocument.linedefs[line2];
+	const LineDef *A = doc.linedefs[line1];
+	const LineDef *B = doc.linedefs[line2];
 
 	// determine right-most vertex of each line
-	const Vertex * C = LineVertexLowest(A) ? A->Start(gDocument) : A->End(gDocument);
-	const Vertex * D = LineVertexLowest(B) ? B->Start(gDocument) : B->End(gDocument);
+	const Vertex * C = LineVertexLowest(doc, A) ? A->Start(doc) : A->End(doc);
+	const Vertex * D = LineVertexLowest(doc, B) ? B->Start(doc) : B->End(doc);
 
 	if (C->raw_x != D->raw_x)
 		return C->raw_x - D->raw_x;
@@ -560,7 +563,7 @@ static int LineEndCompare(const void *p1, const void *p2)
 }
 
 
-void DetectOverlappingLines(void)
+void DetectOverlappingLines(const Document &doc)
 {
 	// Algorithm:
 	//   Sort all lines by left-most vertex.
@@ -568,29 +571,32 @@ void DetectOverlappingLines(void)
 	//   Note: does not detect partially overlapping lines.
 
 	int i;
-	int *array = (int *)UtilCalloc(gDocument.numLinedefs() * sizeof(int));
+	int *array = (int *)UtilCalloc(doc.numLinedefs() * sizeof(int));
 	int count = 0;
 
 	// sort array of indices
-	for (i=0 ; i < gDocument.numLinedefs(); i++)
+	for (i=0 ; i < doc.numLinedefs(); i++)
 		array[i] = i;
 
-	qsort(array, gDocument.numLinedefs(), sizeof(int), LineStartCompare);
+	std::sort(array, array + doc.numLinedefs(), [&doc](int left, int right)
+		{
+			return LineStartCompare(doc, &left, &right) < 0;
+		});
 
-	for (i=0 ; i < gDocument.numLinedefs() - 1 ; i++)
+	for (i=0 ; i < doc.numLinedefs() - 1 ; i++)
 	{
 		int j;
 
-		for (j = i+1 ; j < gDocument.numLinedefs(); j++)
+		for (j = i+1 ; j < doc.numLinedefs(); j++)
 		{
-			if (LineStartCompare(array + i, array + j) != 0)
+			if (LineStartCompare(doc, array + i, array + j) != 0)
 				break;
 
-			if (LineEndCompare(array + i, array + j) == 0)
+			if (LineEndCompare(doc, array + i, array + j) == 0)
 			{
 				// found an overlap !
 
-				LineDef *L = gDocument.linedefs[array[j]];
+				LineDef *L = doc.linedefs[array[j]];
 				L->flags |= MLF_IS_OVERLAP;
 				count++;
 			}
@@ -652,24 +658,24 @@ static void VertexAddWallTip(vertex_t *vert, double dx, double dy,
 }
 
 
-void CalculateWallTips()
+void CalculateWallTips(const Document &doc)
 {
 	int i;
 
-	for (i=0 ; i < gDocument.numLinedefs(); i++)
+	for (i=0 ; i < doc.numLinedefs(); i++)
 	{
-		const LineDef *L = gDocument.linedefs[i];
+		const LineDef *L = doc.linedefs[i];
 
-		if ((L->flags & MLF_IS_OVERLAP) || L->IsZeroLength(gDocument))
+		if ((L->flags & MLF_IS_OVERLAP) || L->IsZeroLength(doc))
 			continue;
 
-		double x1 = L->Start(gDocument)->x();
-		double y1 = L->Start(gDocument)->y();
-		double x2 = L->End(gDocument)->x();
-		double y2 = L->End(gDocument)->y();
+		double x1 = L->Start(doc)->x();
+		double y1 = L->Start(doc)->y();
+		double x2 = L->End(doc)->x();
+		double y2 = L->End(doc)->y();
 
-		bool left  = (L->left  >= 0) && gDocument.isSector(L->Left(gDocument)->sector);
-		bool right = (L->right >= 0) && gDocument.isSector(L->Right(gDocument)->sector);
+		bool left  = (L->left  >= 0) && doc.isSector(L->Left(doc)->sector);
+		bool right = (L->right >= 0) && doc.isSector(L->Right(doc)->sector);
 
 		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);
 		VertexAddWallTip(lev_vertices[L->end],   x1-x2, y1-y2, right, left);
@@ -692,7 +698,7 @@ void CalculateWallTips()
 }
 
 
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
+vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc)
 {
 	vertex_t *vert = NewVertex();
 
@@ -704,14 +710,14 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y)
 	num_new_vert++;
 
 	// compute wall-tip info
-	if (seg->linedef < 0 || gDocument.linedefs[seg->linedef]->TwoSided())
+	if (seg->linedef < 0 || doc.linedefs[seg->linedef]->TwoSided())
 	{
 		VertexAddWallTip(vert, -seg->pdx, -seg->pdy, true, true);
 		VertexAddWallTip(vert,  seg->pdx,  seg->pdy, true, true);
 	}
 	else
 	{
-		const LineDef *L = gDocument.linedefs[seg->linedef];
+		const LineDef *L = doc.linedefs[seg->linedef];
 
 		bool front_open = ((seg->side ? L->left : L->right) >= 0);
 

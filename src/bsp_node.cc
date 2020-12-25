@@ -168,7 +168,7 @@ void seg_t::Recompute()
 //       segs (except the one we are currently splitting) must exist
 //       on a singly-linked list somewhere.
 //
-static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
+static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
 {
 	seg_t *new_seg;
 	vertex_t *new_vert;
@@ -181,7 +181,7 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y)
 		DebugPrintf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 # endif
 
-	new_vert = NewVertexFromSplitSeg(old_seg, x, y);
+	new_vert = NewVertexFromSplitSeg(old_seg, x, y, doc);
 	new_seg  = NewSeg();
 
 	// copy seg info
@@ -865,7 +865,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 
 	ComputeIntersection(seg, part, a, b, &x, &y);
 
-	new_seg = SplitSeg(seg, x, y);
+	new_seg = SplitSeg(seg, x, y, doc);
 
 	AddIntersection(cut_list, seg->end, part, self_ref);
 

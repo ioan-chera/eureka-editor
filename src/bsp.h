@@ -460,17 +460,17 @@ void ZLibFinishLump(void);
 
 
 // detection routines
-void DetectOverlappingVertices(void);
-void DetectOverlappingLines(void);
-void DetectPolyobjSectors(void);
+void DetectOverlappingVertices(const Document &doc);
+void DetectOverlappingLines(const Document &doc);
+void DetectPolyobjSectors(const Document &doc);
 
 // computes the wall tips for all of the vertices
-void CalculateWallTips();
+void CalculateWallTips(const Document &doc);
 
 // return a new vertex (with correct wall-tip info) for the split that
 // happens along the given seg at the given location.
 //
-vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y);
+vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &doc);
 
 // return a new end vertex to compensate for a seg that would end up
 // being zero-length (after integer rounding).  Doesn't compute the

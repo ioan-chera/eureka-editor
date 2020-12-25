@@ -1830,15 +1830,15 @@ static void LoadLevel(const Document &doc)
 	PrintDetail("Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
 			doc.numVertices(), doc.numSectors(), doc.numSidedefs(), doc.numLinedefs(), doc.numThings());
 
-	DetectOverlappingVertices();
-	DetectOverlappingLines();
+	DetectOverlappingVertices(doc);
+	DetectOverlappingLines(doc);
 
-	CalculateWallTips();
+	CalculateWallTips(doc);
 
 	if (instance::Level_format != MapFormat::doom)
 	{
 		// -JL- Find sectors containing polyobjs
-		DetectPolyobjSectors();
+		DetectPolyobjSectors(doc);
 	}
 }
 
