@@ -74,7 +74,7 @@ private:
 	int cur_font;  // 14 or 19
 
 public:
-	UI_Canvas(int X, int Y, int W, int H, const char *label = NULL);
+	UI_Canvas(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_Canvas();
 
 public:
@@ -211,6 +211,8 @@ private:
 		dest[2] = cur_col.b;
 	}
 #endif
+
+	Instance &mInstance;
 };
 
 

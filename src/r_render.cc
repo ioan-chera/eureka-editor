@@ -611,7 +611,7 @@ void AdjustOfs_RenderPost()
 
 static Thing *player;
 
-extern void CheckBeginDrag();
+extern void CheckBeginDrag(Instance &inst);
 
 
 void Render3D_Draw(int ox, int oy, int ow, int oh)
@@ -981,7 +981,7 @@ void Render3D_DragThings()
 }
 
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy)
 {
 	edit.pointer_in_window = true;
 
@@ -1002,7 +1002,7 @@ void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_CLICK)
 	{
-		CheckBeginDrag();
+		CheckBeginDrag(inst);
 	}
 	else if (edit.action == ACT_DRAG)
 	{

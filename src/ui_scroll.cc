@@ -293,11 +293,11 @@ void UI_Scroll::Line_size(int pixels)
 
 #define INFO_BAR_H	30
 
-UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
+UI_CanvasScroll::UI_CanvasScroll(Instance &inst, int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H),
 	enable_bars(true),
 	bound_x1(0), bound_x2(100),
-	bound_y1(0), bound_y2(100)
+	bound_y1(0), bound_y2(100), mInstance(inst)
 {
 	for (int i = 0 ; i < 4 ; i++)
 		last_bounds[i] = 12345678;
@@ -324,7 +324,7 @@ UI_CanvasScroll::UI_CanvasScroll(int X, int Y, int W, int H) :
 	horiz->callback(bar_callback, this);
 
 
-	canvas = new UI_Canvas(X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
+	canvas = new UI_Canvas(mInstance, X + SBAR_W, Y, W - SBAR_W, H - SBAR_W);
 
 	resizable(canvas);
 

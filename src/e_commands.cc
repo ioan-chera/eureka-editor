@@ -520,10 +520,10 @@ static void CMD_NAV_MouseScroll(Instance &inst)
 }
 
 
-static void DoBeginDrag();
+static void DoBeginDrag(Instance &inst);
 
 
-void CheckBeginDrag()
+void CheckBeginDrag(Instance &inst)
 {
 	if (! edit.clicked.valid())
 		return;
@@ -549,10 +549,10 @@ void CheckBeginDrag()
 	else
 		edit.dragged.clear();
 
-	DoBeginDrag();
+	DoBeginDrag(gInstance);
 }
 
-static void DoBeginDrag()
+static void DoBeginDrag(Instance &inst)
 {
 	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
 	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
@@ -579,12 +579,12 @@ static void DoBeginDrag()
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const Thing *T = gDocument.things[edit.drag_thing_num];
+				const Thing *T = inst.level.things[edit.drag_thing_num];
 
-				Objid sec = gDocument.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+				Objid sec = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 				if (sec.valid())
-					edit.drag_thing_floorh = static_cast<float>(gDocument.sectors[sec.num]->floorh);
+					edit.drag_thing_floorh = static_cast<float>(inst.level.sectors[sec.num]->floorh);
 			}
 		}
 	}
@@ -854,7 +854,7 @@ static void CMD_ACT_Drag(Instance &inst)
 	// we only drag the selection, never a single object
 	edit.dragged.clear();
 
-	DoBeginDrag();
+	DoBeginDrag(inst);
 }
 
 

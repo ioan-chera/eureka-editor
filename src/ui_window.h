@@ -89,7 +89,7 @@ private:
 	int last_x, last_y, last_w, last_h;
 
 public:
-	UI_MainWindow();
+	explicit UI_MainWindow(Instance &inst);
 	virtual ~UI_MainWindow();
 
 	// FLTK methods
@@ -152,6 +152,8 @@ public:
 
 private:
 	static void quit_callback(Fl_Widget *w, void *data);
+
+	Instance &mInstance;
 };
 
 namespace instance

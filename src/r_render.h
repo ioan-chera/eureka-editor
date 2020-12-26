@@ -98,7 +98,7 @@ void Render3D_Draw(int ox, int oy, int ow, int oh);
 // [ see the struct definition for more details... ]
 bool Render3D_Query(Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
-void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_ScrollMap(int dx = 0, int dy = 0, keycode_t mod = 0);
 void Render3D_Navigate();
 

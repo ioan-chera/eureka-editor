@@ -109,7 +109,7 @@ private:
 	int last_bounds[4];
 
 public:
-	UI_CanvasScroll(int X, int Y, int W, int H);
+	UI_CanvasScroll(Instance &inst, int X, int Y, int W, int H);
 
 	virtual ~UI_CanvasScroll();
 
@@ -130,6 +130,8 @@ private:
 	void Scroll_Y();
 
 	static void bar_callback(Fl_Widget *, void *);
+
+	Instance &mInstance;
 };
 
 

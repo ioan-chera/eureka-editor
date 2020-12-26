@@ -431,7 +431,7 @@ int wheel_dy;
 
 static bool in_operation_menu;
 
-extern void CheckBeginDrag();
+extern void CheckBeginDrag(Instance &inst);
 extern void Transform_Update();
 
 
@@ -492,7 +492,7 @@ void EV_EscapeKey()
 }
 
 
-static void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy)
 {
 	// this is probably redundant, as we generally shouldn't get here
 	// unless the mouse is in the 2D/3D view (or began a drag there).
@@ -552,7 +552,7 @@ static void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	// begin dragging?
 	if (edit.action == ACT_CLICK)
 	{
-		CheckBeginDrag();
+		CheckBeginDrag(inst);
 	}
 
 	// in general, just update the highlight, split-line (etc)
@@ -729,7 +729,7 @@ int EV_RawButton(int event)
 }
 
 
-static int EV_RawMouse(int event)
+static int EV_RawMouse(Instance &inst, int event)
 {
 	if (!global::app_has_focus)
 		return 1;
@@ -741,11 +741,11 @@ static int EV_RawMouse(int event)
 
 	if (edit.render3d)
 	{
-		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		Render3D_MouseMotion(inst, Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 	else
 	{
-		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		EV_MouseMotion(inst, Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 
 	mouse_last_x = Fl::event_x();
@@ -755,7 +755,7 @@ static int EV_RawMouse(int event)
 }
 
 
-int EV_HandleEvent(int event)
+int EV_HandleEvent(Instance &inst, int event)
 {
 	//// fprintf(stderr, "HANDLE EVENT %d\n", event);
 
@@ -786,7 +786,7 @@ int EV_HandleEvent(int event)
 
 		case FL_DRAG:
 		case FL_MOVE:
-			return EV_RawMouse(event);
+			return EV_RawMouse(inst, event);
 
 		default:
 			// pass on everything else

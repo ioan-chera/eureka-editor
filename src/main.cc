@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 
 #include <time.h>
@@ -642,7 +643,7 @@ static void Main_SetupFLTK()
 //
 static void Main_OpenWindow()
 {
-	instance::main_win = new UI_MainWindow();
+	instance::main_win = new UI_MainWindow(gInstance);
 
 	instance::main_win->label("Eureka v" EUREKA_VERSION);
 

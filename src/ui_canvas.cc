@@ -80,7 +80,7 @@ int config::highlight_line_info = (int)LINFO_Length;
 int vertex_radius(double scale);
 
 
-UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
+UI_Canvas::UI_Canvas(Instance &inst, int X, int Y, int W, int H, const char *label) :
 #ifdef NO_OPENGL
 	Fl_Widget(X, Y, W, H, label),
 #else
@@ -90,7 +90,8 @@ UI_Canvas::UI_Canvas(int X, int Y, int W, int H, const char *label) :
 	last_splitter(-1),
 	last_split_x(), last_split_y(),
 	snap_x(-1), snap_y(-1),
-	seen_sectors()
+	seen_sectors(),
+	mInstance(inst)
 {
 #ifdef NO_OPENGL
 	rgb_buf = NULL;
@@ -196,7 +197,7 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
-	if (EV_HandleEvent(event))
+	if (EV_HandleEvent(mInstance, event))
 		return 1;
 
 	return Fl_Widget::handle(event);

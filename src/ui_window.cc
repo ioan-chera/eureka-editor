@@ -45,10 +45,10 @@ UI_MainWindow *instance::main_win;
 //
 // MainWin Constructor
 //
-UI_MainWindow::UI_MainWindow() :
+UI_MainWindow::UI_MainWindow(Instance &inst) :
 	Fl_Double_Window(WINDOW_MIN_W, WINDOW_MIN_H, EUREKA_TITLE),
 	cursor_shape(FL_CURSOR_DEFAULT),
-	last_x(0), last_y(0), last_w(0), last_h(0)
+	last_x(0), last_y(0), last_w(0), last_h(0), mInstance(inst)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
@@ -85,7 +85,7 @@ UI_MainWindow::UI_MainWindow() :
 	int cw = w() - panel_W - browser_W;
 	int ch = ey - cy;
 
-	scroll = new UI_CanvasScroll(0, cy, cw, ch);
+	scroll = new UI_CanvasScroll(mInstance, 0, cy, cw, ch);
 
 	// UI_CanvasScroll creates these, we mirror them for easier access
 	canvas = scroll->canvas;
