@@ -1950,14 +1950,12 @@ public:
 
 			// render, front to back
 
-			DrawWall::vec_t::iterator S, E, P;
+			int activeSize = (int)active.size();
+			int position;
 
-			S = active.begin();
-			E = active.end();
-
-			for (P=S ; P != E ; P++)
+			for (position = 0; position < activeSize; ++position)
 			{
-				DrawWall *dw = (*P);
+				DrawWall *dw = active[position];
 
 				// for things, just remember the open space
 				{
@@ -1980,12 +1978,12 @@ public:
 			// now render things, back to front
 			// (mid-masked textures are done here too)
 
-			if (P == E)
-				P--;
+			if (position == activeSize)
+				position--;
 
-			for ( ; P != (S-1) ; P--)
+			for ( ; position >= 0; --position)
 			{
-				DrawWall *dw = (*P);
+				DrawWall *dw = active[position];
 
 				if (dw->th >= 0)
 					RenderSprite(dw, x);
