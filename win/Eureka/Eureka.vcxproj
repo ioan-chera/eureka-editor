@@ -298,6 +298,7 @@
     <ClInclude Include="..\..\src\ui_vertex.h" />
     <ClInclude Include="..\..\src\ui_window.h" />
     <ClInclude Include="..\..\src\WindowsInclude.h" />
+    <ClInclude Include="..\..\src\WindowsSanitization.h" />
     <ClInclude Include="..\..\src\w_loadpic.h" />
     <ClInclude Include="..\..\src\w_rawdef.h" />
     <ClInclude Include="..\..\src\w_texture.h" />

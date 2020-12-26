@@ -467,5 +467,8 @@
     <ClInclude Include="..\..\src\Instance.h">
       <Filter>Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\WindowsSanitization.h">
+      <Filter>Code</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

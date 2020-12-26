@@ -68,6 +68,8 @@
 #include <FL/filename.H>
 #include <FL/x.H>
 
+#include "WindowsSanitization.h"
+
 #endif /* __EUREKA_HDR_FLTK__ */
 
 //--- editor settings ---
