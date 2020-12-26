@@ -549,7 +549,7 @@ void CheckBeginDrag(Instance &inst)
 	else
 		edit.dragged.clear();
 
-	DoBeginDrag(gInstance);
+	DoBeginDrag(inst);
 }
 
 static void DoBeginDrag(Instance &inst)
