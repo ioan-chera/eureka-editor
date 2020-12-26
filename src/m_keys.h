@@ -22,6 +22,7 @@
 #define __EUREKA_M_KEYS_H__
 
 #include "m_strings.h"
+#include "objid.h"
 
 struct Instance;
 
@@ -30,29 +31,26 @@ struct Instance;
  *   - spacebar is ' ' (ASCII code 32)
  *   - letter keys are lowercase
  *   - all other keys use the FLTK code (e.g. FL_Enter, FL_Up, etc)
- *   - control keys (like CTRL-A) use MOD_COMMAND flag (never '\001')
+ *   - control keys (like CTRL-A) use EMOD_COMMAND flag (never '\001')
  *
  * Modifier (MOD_XXXX value) is or-ed with the bare key.
- *   - uppercase letters are the lowercase letter + MOD_SHIFT
+ *   - uppercase letters are the lowercase letter + EMOD_SHIFT
  *   - can extract bare key with FL_KEY_MASK
- *   - can extract modifier with MOD_ALL_MASK
+ *   - can extract modifier with EMOD_ALL_MASK
  *   - only a single modifier can be present:
- *       MOD_COMMAND > MOD_META > MOD_ALT > MOD_SHIFT
+ *       EMOD_COMMAND > EMOD_META > EMOD_ALT > EMOD_SHIFT
  *   - using my own names since "FL_CONTROL" is fucking confusing
  */
 typedef unsigned int keycode_t;
 
-#define MOD_none     0
+#define EMOD_none     0
 
-#undef  MOD_ALT    // these clash with Windows defines
-#undef  MOD_SHIFT  //
+#define EMOD_COMMAND  FL_COMMAND
+#define EMOD_META     FL_CONTROL
+#define EMOD_ALT      FL_ALT
+#define EMOD_SHIFT    FL_SHIFT
 
-#define MOD_COMMAND  FL_COMMAND
-#define MOD_META     FL_CONTROL
-#define MOD_ALT      FL_ALT
-#define MOD_SHIFT    FL_SHIFT
-
-#define MOD_ALL_MASK  (MOD_COMMAND | MOD_META | MOD_ALT | MOD_SHIFT)
+#define EMOD_ALL_MASK  (EMOD_COMMAND | EMOD_META | EMOD_ALT | EMOD_SHIFT)
 
 
 // made-up values to represent the mouse wheel

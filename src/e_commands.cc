@@ -60,7 +60,7 @@ static void CMD_MetaKey(Instance &inst)
 
 	Status_Set("META...");
 
-	edit.sticky_mod = MOD_META;
+	edit.sticky_mod = EMOD_META;
 }
 
 
@@ -1020,11 +1020,11 @@ static void CMD_WHEEL_Scroll(Instance &inst)
 
 	if (Exec_HasFlag("/LAX"))
 	{
-		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+		keycode_t mod = Fl::event_state() & EMOD_ALL_MASK;
 
-		if (mod & MOD_SHIFT)
+		if (mod & EMOD_SHIFT)
 			speed /= 3.0;
-		else if (mod & MOD_COMMAND)
+		else if (mod & EMOD_COMMAND)
 			speed *= 3.0;
 	}
 

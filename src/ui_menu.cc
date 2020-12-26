@@ -604,9 +604,9 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 		// convert to a Eureka key code
 		keycode_t key = shortcut & FL_KEY_MASK;
 
-			 if (shortcut & FL_COMMAND) key |= MOD_COMMAND;
-		else if (shortcut & FL_META)    key |= MOD_META;
-		else if (shortcut & FL_ALT)     key |= MOD_ALT;
+			 if (shortcut & FL_COMMAND) key |= EMOD_COMMAND;
+		else if (shortcut & FL_META)    key |= EMOD_META;
+		else if (shortcut & FL_ALT)     key |= EMOD_ALT;
 
 		if (M_IsKeyBound(key, KCTX_General))
 			items[i].shortcut_ = 0;

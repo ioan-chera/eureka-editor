@@ -163,13 +163,13 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 	if (w == box->move_up)    dy = +1;
 	if (w == box->move_down)  dy = -1;
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = Fl::event_state() & EMOD_ALL_MASK;
 
 	int step = vertex_bump_medium;
 
-	if (mod & MOD_SHIFT)
+	if (mod & EMOD_SHIFT)
 		step = vertex_bump_small;
-	else if (mod & MOD_COMMAND)
+	else if (mod & EMOD_COMMAND)
 		step = vertex_bump_large;
 
 	if (! edit.Selected->empty())

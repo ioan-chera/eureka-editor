@@ -174,8 +174,8 @@ static void Navigate2D()
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
-	if (mod & MOD_SHIFT)   mod_factor = 0.5;
-	if (mod & MOD_COMMAND) mod_factor = 2.0;
+	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
+	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
 	if (edit.nav_left || edit.nav_right ||
 		edit.nav_up   || edit.nav_down)
@@ -248,7 +248,7 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 
 	edit.nav_lax = Exec_HasFlag("/LAX");
 	if (edit.nav_lax)
-		lax_mod = MOD_SHIFT | MOD_COMMAND;
+		lax_mod = EMOD_SHIFT | EMOD_COMMAND;
 
 	edit.is_navigating = true;
 
@@ -296,7 +296,7 @@ bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
 	keycode_t lax_mod = 0;
 
 	if (Exec_HasFlag("/LAX"))
-		lax_mod = MOD_SHIFT | MOD_COMMAND;
+		lax_mod = EMOD_SHIFT | EMOD_COMMAND;
 
 	nav_active_key_t& N = cur_action_key;
 
@@ -321,7 +321,7 @@ bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
 static inline bool CheckKeyPressed(nav_active_key_t& N)
 {
 #if 0  // IGNORE MODIFIER CHANGES
-	keycode_t mod  = N.key & MOD_ALL_MASK;
+	keycode_t mod  = N.key & EMOD_ALL_MASK;
 
 	// grab current modifiers, but simplify to a single one
 	keycode_t cur_mod = M_TranslateKey(0, Fl::event_state());
@@ -605,7 +605,7 @@ keycode_t M_ReadLaxModifiers()
 	// pressed or released.
 
 #if defined(WIN32) || defined(__APPLE__)
-	return Fl::event_state() & (MOD_COMMAND | MOD_SHIFT);
+	return Fl::event_state() & (EMOD_COMMAND | EMOD_SHIFT);
 
 #else /* Linux and X-Windows */
 
@@ -618,10 +618,10 @@ keycode_t M_ReadLaxModifiers()
 	keycode_t result = 0;
 
 	if (Fl::event_key(FL_Shift_L) || Fl::event_key(FL_Shift_R))
-		result |= MOD_SHIFT;
+		result |= EMOD_SHIFT;
 
 	if (Fl::event_key(FL_Control_L) || Fl::event_key(FL_Control_R))
-		result |= MOD_COMMAND;
+		result |= EMOD_COMMAND;
 
 	return result;
 #endif
@@ -734,7 +734,7 @@ static int EV_RawMouse(Instance &inst, int event)
 	if (!global::app_has_focus)
 		return 1;
 
-	int mod = Fl::event_state() & MOD_ALL_MASK;
+	int mod = Fl::event_state() & EMOD_ALL_MASK;
 
 	int dx = Fl::event_x() - mouse_last_x;
 	int dy = Fl::event_y() - mouse_last_y;

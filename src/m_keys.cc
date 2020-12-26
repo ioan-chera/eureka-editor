@@ -218,33 +218,33 @@ keycode_t M_ParseKeyString(const SString &mstr)
 {
 	int key = 0;
 
-	// for MOD_COMMAND, accept both CMD and CTRL prefixes
+	// for EMOD_COMMAND, accept both CMD and CTRL prefixes
 
 	SString str = mstr;
 
 	if (str.noCaseStartsWith("CMD-"))
 	{
-		key |= MOD_COMMAND;
+		key |= EMOD_COMMAND;
 		str.erase(0, 4);
 	}
 	else if (str.noCaseStartsWith("CTRL-"))
 	{
-		key |= MOD_COMMAND;
+		key |= EMOD_COMMAND;
 		str.erase(0, 5);
 	}
 	else if (str.noCaseStartsWith("META-"))
 	{
-		key |= MOD_META;
+		key |= EMOD_META;
 		str.erase(0, 5);
 	}
 	else if (str.noCaseStartsWith("ALT-"))
 	{
-		key |= MOD_ALT;
+		key |= EMOD_ALT;
 		str.erase(0, 4);
 	}
 	else if (str.noCaseStartsWith("SHIFT-"))
 	{
-		key |= MOD_SHIFT;
+		key |= EMOD_SHIFT;
 		str.erase(0, 6);
 	}
 	else if (str.noCaseStartsWith("LAX-"))
@@ -253,9 +253,9 @@ keycode_t M_ParseKeyString(const SString &mstr)
 		str.erase(0, 4);
 	}
 
-	// convert uppercase letter --> lowercase + MOD_SHIFT
+	// convert uppercase letter --> lowercase + EMOD_SHIFT
 	if (str.length() == 1 && str[0] >= 'A' && str[0] <= 'Z')
-		return MOD_SHIFT | (unsigned char) tolower(str[0]);
+		return EMOD_SHIFT | (unsigned char) tolower(str[0]);
 
 	if (str.length() == 1 && str[0] > 32 && str[0] < 127 && isprint(str[0]))
 		return key | (unsigned char) str[0];
@@ -303,13 +303,13 @@ static SString BareKeyName(keycode_t key)
 static const char *ModName_Dash(keycode_t mod)
 {
 #ifdef __APPLE__
-	if (mod & MOD_COMMAND) return "CMD-";
+	if (mod & EMOD_COMMAND) return "CMD-";
 #else
-	if (mod & MOD_COMMAND) return "CTRL-";
+	if (mod & EMOD_COMMAND) return "CTRL-";
 #endif
-	if (mod & MOD_META)    return "META-";
-	if (mod & MOD_ALT)     return "ALT-";
-	if (mod & MOD_SHIFT)   return "SHIFT-";
+	if (mod & EMOD_META)    return "META-";
+	if (mod & EMOD_ALT)     return "ALT-";
+	if (mod & EMOD_SHIFT)   return "SHIFT-";
 
 	if (mod & MOD_LAX_SHIFTCTRL) return "LAX-";
 
@@ -320,13 +320,13 @@ static const char *ModName_Dash(keycode_t mod)
 static const char *ModName_Space(keycode_t mod)
 {
 #ifdef __APPLE__
-	if (mod & MOD_COMMAND) return "CMD ";
+	if (mod & EMOD_COMMAND) return "CMD ";
 #else
-	if (mod & MOD_COMMAND) return "CTRL ";
+	if (mod & EMOD_COMMAND) return "CTRL ";
 #endif
-	if (mod & MOD_META)    return "META ";
-	if (mod & MOD_ALT)     return "ALT ";
-	if (mod & MOD_SHIFT)   return "SHIFT ";
+	if (mod & EMOD_META)    return "META ";
+	if (mod & EMOD_ALT)     return "ALT ";
+	if (mod & EMOD_SHIFT)   return "SHIFT ";
 
 	if (mod & MOD_LAX_SHIFTCTRL) return "LAX ";
 
@@ -339,7 +339,7 @@ const char * M_KeyToString(keycode_t key)
 	static char buffer[200];
 
 	// convert SHIFT + letter --> uppercase letter
-	if ((key & MOD_ALL_MASK) == MOD_SHIFT &&
+	if ((key & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(key & FL_KEY_MASK)  <  127 &&
 		isalpha(key & FL_KEY_MASK))
 	{
@@ -356,8 +356,8 @@ const char * M_KeyToString(keycode_t key)
 
 int M_KeyCmp(keycode_t A, keycode_t B)
 {
-	keycode_t A_mod = A & MOD_ALL_MASK;
-	keycode_t B_mod = B & MOD_ALL_MASK;
+	keycode_t A_mod = A & EMOD_ALL_MASK;
+	keycode_t B_mod = B & EMOD_ALL_MASK;
 
 	A &= FL_KEY_MASK;
 	B &= FL_KEY_MASK;
@@ -881,7 +881,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 
 	// display SHIFT + letter as an uppercase letter
 	keycode_t tempk = bind.key;
-	if ((tempk & MOD_ALL_MASK) == MOD_SHIFT &&
+	if ((tempk & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(tempk & FL_KEY_MASK)  <  127 &&
 		isalpha(tempk & FL_KEY_MASK))
 	{
@@ -1042,10 +1042,10 @@ keycode_t M_TranslateKey(int key, int state)
 
 	// modifier logic -- only allow a single one
 
-	     if (state & MOD_COMMAND) key |= MOD_COMMAND;
-	else if (state & MOD_META)    key |= MOD_META;
-	else if (state & MOD_ALT)     key |= MOD_ALT;
-	else if (state & MOD_SHIFT)   key |= MOD_SHIFT;
+	     if (state & EMOD_COMMAND) key |= EMOD_COMMAND;
+	else if (state & EMOD_META)    key |= EMOD_META;
+	else if (state & EMOD_ALT)     key |= EMOD_ALT;
+	else if (state & EMOD_SHIFT)   key |= EMOD_SHIFT;
 
 	return key;
 }
@@ -1055,9 +1055,9 @@ int M_KeyToShortcut(keycode_t key)
 {
 	int shortcut = key & FL_KEY_MASK;
 
-	     if (key & MOD_COMMAND) shortcut |= MOD_COMMAND;
-	else if (key & MOD_ALT)     shortcut |= MOD_ALT;
-	else if (key & MOD_SHIFT)   shortcut |= MOD_SHIFT;
+	     if (key & EMOD_COMMAND) shortcut |= EMOD_COMMAND;
+	else if (key & EMOD_ALT)     shortcut |= EMOD_ALT;
+	else if (key & EMOD_SHIFT)   shortcut |= EMOD_SHIFT;
 
 	return shortcut;
 }
@@ -1129,8 +1129,8 @@ static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
 
 		if (is_lax)
 		{
-			key1 &= ~ (MOD_SHIFT | MOD_COMMAND | MOD_LAX_SHIFTCTRL);
-			key2 &= ~ (MOD_SHIFT | MOD_COMMAND | MOD_LAX_SHIFTCTRL);
+			key1 &= ~ (EMOD_SHIFT | EMOD_COMMAND | MOD_LAX_SHIFTCTRL);
+			key2 &= ~ (EMOD_SHIFT | EMOD_COMMAND | MOD_LAX_SHIFTCTRL);
 		}
 
 		if (key1 != key2)

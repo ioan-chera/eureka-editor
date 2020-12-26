@@ -570,7 +570,7 @@ static void AdjustOfs_Delta(int dx, int dy)
 
 	keycode_t mod = edit.adjust_lax ? M_ReadLaxModifiers() : 0;
 
-	float factor = (mod & MOD_SHIFT) ? 0.5f : 2.0f;
+	float factor = (mod & EMOD_SHIFT) ? 0.5f : 2.0f;
 
 	if (!config::render_high_detail)
 		factor = factor * 0.5f;
@@ -761,11 +761,11 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 			dx = 0;
 	}
 
-	bool is_strafe = (mod & MOD_ALT) ? true : false;
+	bool is_strafe = (mod & EMOD_ALT) ? true : false;
 
 	float mod_factor = 1.0;
-	if (mod & MOD_SHIFT)   mod_factor = 0.4f;
-	if (mod & MOD_COMMAND) mod_factor = 2.5f;
+	if (mod & EMOD_SHIFT)   mod_factor = 0.4f;
+	if (mod & EMOD_COMMAND) mod_factor = 2.5f;
 
 	float speed = edit.panning_speed * mod_factor;
 
@@ -1067,8 +1067,8 @@ void Render3D_Navigate()
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
-	if (mod & MOD_SHIFT)   mod_factor = 0.5;
-	if (mod & MOD_COMMAND) mod_factor = 2.0;
+	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
+	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
 	if (edit.nav_fwd || edit.nav_back || edit.nav_right || edit.nav_left)
 	{
@@ -1980,11 +1980,11 @@ static void R3D_WHEEL_Move(Instance &inst)
 
 	if (Exec_HasFlag("/LAX"))
 	{
-		keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+		keycode_t mod = Fl::event_state() & EMOD_ALL_MASK;
 
-		if (mod == MOD_SHIFT)
+		if (mod == EMOD_SHIFT)
 			speed /= 4.0;
-		else if (mod == MOD_COMMAND)
+		else if (mod == EMOD_COMMAND)
 			speed *= 4.0;
 	}
 

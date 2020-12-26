@@ -629,13 +629,13 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	keycode_t mod = Fl::event_state() & MOD_ALL_MASK;
+	keycode_t mod = Fl::event_state() & EMOD_ALL_MASK;
 
 	int lt_step = config::light_bump_medium;
 
-	if (mod & MOD_SHIFT)
+	if (mod & EMOD_SHIFT)
 		lt_step = config::light_bump_small;
-	else if (mod & MOD_COMMAND)
+	else if (mod & EMOD_COMMAND)
 		lt_step = config::light_bump_large;
 
 	if (w == box->lt_up)
@@ -651,9 +651,9 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	int mv_step = config::floor_bump_medium;
 
-	if (mod & MOD_SHIFT)
+	if (mod & EMOD_SHIFT)
 		mv_step = config::floor_bump_small;
-	else if (mod & MOD_COMMAND)
+	else if (mod & EMOD_COMMAND)
 		mv_step = config::floor_bump_large;
 
 	if (w == box->ce_up)
