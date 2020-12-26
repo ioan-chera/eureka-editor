@@ -373,9 +373,10 @@ public:
 	}
 };
 
-
-static RecentFiles_c  recent_files;
-
+namespace global
+{
+	static RecentFiles_c  recent_files;
+}
 
 //
 // Parse miscellaneous config
@@ -409,7 +410,7 @@ static void ParseMiscConfig(std::istream &is)
 		if(line == "recent")
 		{
 			if(Wad_file::Validate(path))
-				recent_files.insert(path, map);
+				global::recent_files.insert(path, map);
 			else
 				LogPrintf("  no longer exists: %s\n", path.c_str());
 		}
@@ -449,7 +450,7 @@ void M_LoadRecent()
 
 	LogPrintf("Reading recent list from: %s\n", filename.c_str());
 
-	recent_files.clear();
+	global::recent_files.clear();
 	 known_iwads.clear();
 	  port_paths.clear();
 
@@ -473,7 +474,7 @@ void M_SaveRecent()
 
 	fprintf(fp, "# Eureka miscellaneous stuff\n");
 
-	recent_files.WriteFile(fp);
+	global::recent_files.WriteFile(fp);
 
 	M_WriteKnownIWADs(fp);
 
@@ -486,17 +487,17 @@ void M_SaveRecent()
 
 int M_RecentCount()
 {
-	return recent_files.getSize();
+	return global::recent_files.getSize();
 }
 
 SString M_RecentShortName(int index)
 {
-	return recent_files.Format(index);
+	return global::recent_files.Format(index);
 }
 
 void * M_RecentData(int index)
 {
-	return recent_files.getData(index);
+	return global::recent_files.getData(index);
 }
 
 
@@ -514,7 +515,7 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 {
 	const SString &absolute_name = GetAbsolutePath(filename);
 
-	recent_files.insert(absolute_name, map_name);
+	global::recent_files.insert(absolute_name, map_name);
 
 	M_SaveRecent();  // why wait?
 }
@@ -522,13 +523,13 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 
 bool M_TryOpenMostRecent()
 {
-	if (recent_files.getSize() == 0)
+	if (global::recent_files.getSize() == 0)
 		return false;
 
 	SString filename;
 	SString map_name;
 
-	recent_files.Lookup(0, &filename, &map_name);
+	global::recent_files.Lookup(0, &filename, &map_name);
 
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
