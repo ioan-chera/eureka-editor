@@ -75,6 +75,7 @@ OBJS = \
 	$(OBJ_DIR)/Errors.o    \
 	$(OBJ_DIR)/im_color.o  \
 	$(OBJ_DIR)/im_img.o   \
+	$(OBJ_DIR)/Instance.o \
 	$(OBJ_DIR)/lib_adler.o  \
 	$(OBJ_DIR)/lib_file.o  \
 	$(OBJ_DIR)/lib_tga.o   \
