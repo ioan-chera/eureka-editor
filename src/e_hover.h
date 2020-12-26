@@ -32,7 +32,9 @@
 class bitvec_c;
 class crossing_state_c;
 class fastopp_node_c;
+class LineDef;
 class Objid;
+enum class Side;
 
 //
 // The hover module

@@ -27,6 +27,7 @@
 #ifndef __EUREKA_OBJECTS_H__
 #define __EUREKA_OBJECTS_H__
 
+class selection_c;
 
 void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z = 0);
 void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z = 0);

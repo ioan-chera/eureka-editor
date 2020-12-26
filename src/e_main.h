@@ -30,10 +30,11 @@
 #include <string>
 
 #include "m_events.h"
+#include "e_objects.h"
 #include "e_things.h"
 
 class SaveBucket_c;
-
+class selection_c;
 
 typedef enum
 {

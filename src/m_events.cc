@@ -24,15 +24,14 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
-#include "main.h"
-
 #include "m_events.h"
-#include "m_config.h"
+
 #include "e_main.h"
 #include "e_hover.h"
+#include "Errors.h"
+#include "m_config.h"
+#include "main.h"
 #include "r_render.h"
-
 #include "ui_window.h"
 #include "ui_misc.h"
 

@@ -27,6 +27,7 @@
 #ifndef __EUREKA_IM_COLOR_H__
 #define __EUREKA_IM_COLOR_H__
 
+#include "sys_macro.h"
 
 typedef u32_t rgb_color_t;
 
