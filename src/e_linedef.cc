@@ -1152,7 +1152,7 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 }
 
 
-void LinedefModule::commandMergeTwo()
+void LinedefModule::commandMergeTwo(Instance &inst)
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -1170,8 +1170,8 @@ void LinedefModule::commandMergeTwo()
 	int ld2 = edit.Selected->find_first();
 	int ld1 = edit.Selected->find_second();
 
-	const LineDef * L1 = gDocument.linedefs[ld1];
-	const LineDef * L2 = gDocument.linedefs[ld2];
+	const LineDef * L1 = inst.level.linedefs[ld1];
+	const LineDef * L2 = inst.level.linedefs[ld2];
 
 	if (! (L1->OneSided() && L2->OneSided()))
 	{
@@ -1182,33 +1182,33 @@ void LinedefModule::commandMergeTwo()
 	Selection_Clear(true);
 
 
-	gDocument.basis.begin();
+	inst.level.basis.begin();
 
 	// ld2 steals the sidedef from ld1
 
-	gDocument.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
-	gDocument.basis.changeLinedef(ld1, LineDef::F_RIGHT, -1);
+	inst.level.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+	inst.level.basis.changeLinedef(ld1, LineDef::F_RIGHT, -1);
 
-	gDocument.linemod.mergedSecondSidedef(ld2);
+	inst.level.linemod.mergedSecondSidedef(ld2);
 
 	// fix existing lines connected to ld1 : reconnect to ld2
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
 		if (n == ld1 || n == ld2)
 			continue;
 
-		const LineDef * L = gDocument.linedefs[n];
+		const LineDef * L = inst.level.linedefs[n];
 
 		if (L->start == L1->start)
-			gDocument.basis.changeLinedef(n, LineDef::F_START, L2->end);
+			inst.level.basis.changeLinedef(n, LineDef::F_START, L2->end);
 		else if (L->start == L1->end)
-			gDocument.basis.changeLinedef(n, LineDef::F_START, L2->start);
+			inst.level.basis.changeLinedef(n, LineDef::F_START, L2->start);
 
 		if (L->end == L1->start)
-			gDocument.basis.changeLinedef(n, LineDef::F_END, L2->end);
+			inst.level.basis.changeLinedef(n, LineDef::F_END, L2->end);
 		else if (L->end == L1->end)
-			gDocument.basis.changeLinedef(n, LineDef::F_END, L2->start);
+			inst.level.basis.changeLinedef(n, LineDef::F_END, L2->start);
 	}
 
 	// delete ld1 and any unused vertices
@@ -1219,8 +1219,8 @@ void LinedefModule::commandMergeTwo()
 
 	DeleteObjects_WithUnused(&del_line);
 
-	gDocument.basis.setMessage("merged two linedefs");
-	gDocument.basis.end();
+	inst.level.basis.setMessage("merged two linedefs");
+	inst.level.basis.end();
 }
 
 //

@@ -603,7 +603,7 @@ static void DoBeginDrag(Instance &inst)
 
 		// find opposite end-point when dragging a single vertex
 		if (edit.dragged.valid())
-			edit.drag_other_vert = gDocument.vertmod.findDragOther(edit.dragged.num);
+			edit.drag_other_vert = inst.level.vertmod.findDragOther(edit.dragged.num);
 	}
 
 	edit.clicked.clear();
@@ -1048,7 +1048,7 @@ static void CMD_Merge(Instance &inst)
 			break;
 
 		case ObjType::linedefs:
-			LinedefModule::commandMergeTwo();
+			LinedefModule::commandMergeTwo(inst);
 			break;
 
 		case ObjType::sectors:

@@ -58,7 +58,7 @@ public:
 	/* commands */
 	static void commandAlign(Instance &inst);
 	static void commandFlip(Instance &inst);
-	static void commandMergeTwo();
+	static void commandMergeTwo(Instance &inst);
 	static void commandSplitHalf(Instance &inst);
 	static void commandSwapSides(Instance &inst);
 
