@@ -54,7 +54,7 @@ public:
 };
 
 
-typedef enum
+enum transform_keyword_e
 {
 	TRANS_K_Scale = 0,		// scale and keep aspect
 	TRANS_K_Stretch,		// scale X and Y independently
@@ -62,7 +62,7 @@ typedef enum
 	TRANS_K_RotScale,		// rotate and scale at same time
 	TRANS_K_Skew			// skew (shear) along an axis
 
-} transform_keyword_e;
+};
 
 
 void Objs_CalcMiddle(selection_c * list, double *x, double *y);
