@@ -18,8 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 #include "m_editlump.h"
 #include "w_wad.h"
@@ -377,7 +377,7 @@ SString UI_ChooseTextLump::Run()
 
 //------------------------------------------------------------------------
 
-void CMD_EditLump(Document &doc)
+void CMD_EditLump(Instance &inst)
 {
 	SString lump_name = EXEC_Param[0];
 
@@ -445,12 +445,12 @@ void CMD_EditLump(Document &doc)
 	// if lump exists, load the contents
 	if (lump_name == EDLUMP_HEADER)
 	{
-		editor->LoadMemory(doc.headerData);
+		editor->LoadMemory(inst.level.headerData);
 		editor->SetTitle(instance::Level_name);
 	}
 	else if (lump_name == EDLUMP_SCRIPTS)
 	{
-		editor->LoadMemory(doc.scriptsData);
+		editor->LoadMemory(inst.level.scriptsData);
 		editor->SetTitle("SCRIPTS");
 	}
 	else
@@ -476,12 +476,12 @@ void CMD_EditLump(Document &doc)
 
 		if (lump_name == EDLUMP_HEADER)
 		{
-			editor->SaveMemory(doc.headerData);
+			editor->SaveMemory(inst.level.headerData);
 			MadeChanges = 1;
 		}
 		else if (lump_name == EDLUMP_SCRIPTS)
 		{
-			editor->SaveMemory(doc.scriptsData);
+			editor->SaveMemory(inst.level.scriptsData);
 			MadeChanges = 1;
 		}
 		else
@@ -496,7 +496,7 @@ void CMD_EditLump(Document &doc)
 
 //------------------------------------------------------------------------
 
-void CMD_AddBehaviorLump(Document &doc)
+void CMD_AddBehaviorLump(Instance &inst)
 {
 	if (instance::Level_format != MapFormat::hexen)
 	{
@@ -549,7 +549,7 @@ void CMD_AddBehaviorLump(Document &doc)
 		return;
 	}
 
-	doc.behaviorData = std::move(data);
+	inst.level.behaviorData = std::move(data);
 
 	MadeChanges = 1;
 }

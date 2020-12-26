@@ -48,23 +48,23 @@ bool M_ExportMap();
 
 /* commands */
 
-void CMD_NewProject(Document &doc);
-void CMD_ManageProject(Document &doc);
+void CMD_NewProject(Instance &inst);
+void CMD_ManageProject(Instance &inst);
 
-void CMD_OpenMap(Document &doc);
-void CMD_GivenFile(Document &doc);
-void CMD_FlipMap(Document &doc);
+void CMD_OpenMap(Instance &inst);
+void CMD_GivenFile(Instance &inst);
+void CMD_FlipMap(Instance &inst);
 
-void CMD_SaveMap(Document &doc);
-void CMD_ExportMap(Document &doc);
+void CMD_SaveMap(Instance &inst);
+void CMD_ExportMap(Instance &inst);
 
-void CMD_FreshMap(Document &doc);
-void CMD_CopyMap(Document &doc);
-void CMD_RenameMap(Document &doc);
-void CMD_DeleteMap(Document &doc);
+void CMD_FreshMap(Instance &inst);
+void CMD_CopyMap(Instance &inst);
+void CMD_RenameMap(Instance &inst);
+void CMD_DeleteMap(Instance &inst);
 
 // this one in m_testmap.cc
-void CMD_TestMap(Document &doc);
+void CMD_TestMap(Instance &inst);
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 

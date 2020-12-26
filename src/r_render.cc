@@ -1585,7 +1585,7 @@ void Render3D_WriteUser(std::ostream &os)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
-static void R3D_Forward(Document &doc)
+static void R3D_Forward(Instance &inst)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1596,7 +1596,7 @@ static void R3D_Forward(Document &doc)
 	RedrawMap();
 }
 
-static void R3D_Backward(Document &doc)
+static void R3D_Backward(Instance &inst)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1607,7 +1607,7 @@ static void R3D_Backward(Document &doc)
 	RedrawMap();
 }
 
-static void R3D_Left(Document &doc)
+static void R3D_Left(Instance &inst)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1618,7 +1618,7 @@ static void R3D_Left(Document &doc)
 	RedrawMap();
 }
 
-static void R3D_Right(Document &doc)
+static void R3D_Right(Instance &inst)
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1629,7 +1629,7 @@ static void R3D_Right(Document &doc)
 	RedrawMap();
 }
 
-static void R3D_Up(Document &doc)
+static void R3D_Up(Instance &inst)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
@@ -1646,7 +1646,7 @@ static void R3D_Up(Document &doc)
 	RedrawMap();
 }
 
-static void R3D_Down(Document &doc)
+static void R3D_Down(Instance &inst)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
@@ -1664,7 +1664,7 @@ static void R3D_Down(Document &doc)
 }
 
 
-static void R3D_Turn(Document &doc)
+static void R3D_Turn(Instance &inst)
 {
 	float angle = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1677,7 +1677,7 @@ static void R3D_Turn(Document &doc)
 }
 
 
-static void R3D_DropToFloor(Document &doc)
+static void R3D_DropToFloor(Instance &inst)
 {
 	r_view.FindGroundZ();
 
@@ -1690,7 +1690,7 @@ static void R3D_NAV_Forward_release()
 	edit.nav_fwd = 0;
 }
 
-static void R3D_NAV_Forward(Document &doc)
+static void R3D_NAV_Forward(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1709,7 +1709,7 @@ static void R3D_NAV_Back_release(void)
 	edit.nav_back = 0;
 }
 
-static void R3D_NAV_Back(Document &doc)
+static void R3D_NAV_Back(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1728,7 +1728,7 @@ static void R3D_NAV_Right_release(void)
 	edit.nav_right = 0;
 }
 
-static void R3D_NAV_Right(Document &doc)
+static void R3D_NAV_Right(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1747,7 +1747,7 @@ static void R3D_NAV_Left_release(void)
 	edit.nav_left = 0;
 }
 
-static void R3D_NAV_Left(Document &doc)
+static void R3D_NAV_Left(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1766,7 +1766,7 @@ static void R3D_NAV_Up_release(void)
 	edit.nav_up = 0;
 }
 
-static void R3D_NAV_Up(Document &doc)
+static void R3D_NAV_Up(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1793,7 +1793,7 @@ static void R3D_NAV_Down_release(void)
 	edit.nav_down = 0;
 }
 
-static void R3D_NAV_Down(Document &doc)
+static void R3D_NAV_Down(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1820,7 +1820,7 @@ static void R3D_NAV_TurnLeft_release(void)
 	edit.nav_turn_L = 0;
 }
 
-static void R3D_NAV_TurnLeft(Document &doc)
+static void R3D_NAV_TurnLeft(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1842,7 +1842,7 @@ static void R3D_NAV_TurnRight_release(void)
 	edit.nav_turn_R = 0;
 }
 
-static void R3D_NAV_TurnRight(Document &doc)
+static void R3D_NAV_TurnRight(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1868,7 +1868,7 @@ static void ACT_AdjustOfs_release(void)
 	AdjustOfs_Finish();
 }
 
-static void R3D_ACT_AdjustOfs(Document &doc)
+static void R3D_ACT_AdjustOfs(Instance &inst)
 {
 	if (! EXEC_CurKey)
 		return;
@@ -1886,7 +1886,7 @@ static void R3D_ACT_AdjustOfs(Document &doc)
 }
 
 
-static void R3D_Set(Document &doc)
+static void R3D_Set(Instance &inst)
 {
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
@@ -1933,7 +1933,7 @@ static void R3D_Set(Document &doc)
 }
 
 
-static void R3D_Toggle(Document &doc)
+static void R3D_Toggle(Instance &inst)
 {
 	SString var_name = EXEC_Param[0];
 
@@ -1969,7 +1969,7 @@ static void R3D_Toggle(Document &doc)
 }
 
 
-static void R3D_WHEEL_Move(Document &doc)
+static void R3D_WHEEL_Move(Instance &inst)
 {
 	float dx = static_cast<float>(Fl::event_dx());
 	float dy = static_cast<float>(Fl::event_dy());

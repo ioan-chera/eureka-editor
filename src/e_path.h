@@ -48,15 +48,15 @@ const byte * SoundPropagation(int start_sec);
 
 /* commands */
 
-void CMD_LIN_SelectPath(Document &doc);
+void CMD_LIN_SelectPath(Instance &inst);
 
-void CMD_SEC_SelectGroup(Document &doc);
+void CMD_SEC_SelectGroup(Instance &inst);
 
-void CMD_JumpToObject(Document &doc);
+void CMD_JumpToObject(Instance &inst);
 void CMD_NextObject();
 void CMD_PrevObject();
 
-void CMD_PruneUnused(Document &doc);
+void CMD_PruneUnused(Instance &inst);
 
 
 #endif  /* __EUREKA_E_PATH_H__ */

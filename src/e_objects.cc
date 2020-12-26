@@ -653,7 +653,7 @@ static void Insert_Sector()
 }
 
 
-void CMD_Insert(Document &doc)
+void CMD_Insert(Instance &inst)
 {
 	bool force_cont;
 	bool no_fill;
@@ -1054,7 +1054,7 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 }
 
 
-void CMD_CopyProperties(Document &doc)
+void CMD_CopyProperties(Instance &inst)
 {
 	if (edit.highlight.is_nil())
 	{
@@ -1090,8 +1090,8 @@ void CMD_CopyProperties(Document &doc)
 		if (source == target)
 			return;
 
-		doc.basis.begin();
-		doc.basis.setMessage("copied properties");
+		inst.level.basis.begin();
+		inst.level.basis.setMessage("copied properties");
 
 		switch (edit.mode)
 		{
@@ -1110,7 +1110,7 @@ void CMD_CopyProperties(Document &doc)
 			default: break;
 		}
 
-		doc.basis.end();
+		inst.level.basis.end();
 
 	}
 	else  /* reverse mode, HILITE --> SEL */
@@ -1123,8 +1123,8 @@ void CMD_CopyProperties(Document &doc)
 
 		int source = edit.highlight.num;
 
-		doc.basis.begin();
-		doc.basis.setMessage("copied properties");
+		inst.level.basis.begin();
+		inst.level.basis.setMessage("copied properties");
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -1149,7 +1149,7 @@ void CMD_CopyProperties(Document &doc)
 			}
 		}
 
-		doc.basis.end();
+		inst.level.basis.end();
 	}
 }
 
@@ -1576,7 +1576,7 @@ static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double 
 }
 
 
-void CMD_Mirror(Document &doc)
+void CMD_Mirror(Instance &inst)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1593,12 +1593,12 @@ void CMD_Mirror(Document &doc)
 	double mid_x, mid_y;
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
 	DoMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
-	doc.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1636,7 +1636,7 @@ static void DoRotate90Things(selection_c *list, bool anti_clockwise,
 }
 
 
-void CMD_Rotate90(Document &doc)
+void CMD_Rotate90(Instance &inst)
 {
 	if (EXEC_Param[0].empty())
 	{
@@ -1656,8 +1656,8 @@ void CMD_Rotate90(Document &doc)
 	double mid_x, mid_y;
 	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
 	if (edit.mode == ObjType::things)
 	{
@@ -1683,25 +1683,25 @@ void CMD_Rotate90(Document &doc)
 
 		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
-			const Vertex * V = doc.vertices[*it];
+			const Vertex * V = inst.level.vertices[*it];
 
 			fixcoord_t old_x = V->raw_x;
 			fixcoord_t old_y = V->raw_y;
 
 			if (anti_clockwise)
 			{
-				doc.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-				doc.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+				inst.level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+				inst.level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
 			}
 			else
 			{
-				doc.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-				doc.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+				inst.level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+				inst.level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
 			}
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -2020,12 +2020,12 @@ static void DoEnlargeOrShrink(bool do_shrink)
 }
 
 
-void CMD_Enlarge(Document &doc)
+void CMD_Enlarge(Instance &inst)
 {
 	DoEnlargeOrShrink(false /* do_shrink */);
 }
 
-void CMD_Shrink(Document &doc)
+void CMD_Shrink(Instance &inst)
 {
 	DoEnlargeOrShrink(true /* do_shrink */);
 }
@@ -2174,7 +2174,7 @@ static void Quantize_Vertices(selection_c *list)
 }
 
 
-void CMD_Quantize(Document &doc)
+void CMD_Quantize(Instance &inst)
 {
 	if (edit.Selected->empty())
 	{
@@ -2187,8 +2187,8 @@ void CMD_Quantize(Document &doc)
 		Selection_Add(edit.highlight);
 	}
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection("quantized", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("quantized", *edit.Selected);
 
 	switch (edit.mode)
 	{
@@ -2213,7 +2213,7 @@ void CMD_Quantize(Document &doc)
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 
 	edit.error_mode = true;
 }

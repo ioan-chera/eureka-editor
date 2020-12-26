@@ -57,7 +57,7 @@ int calc_new_angle(int angle, int diff);
 
 /* commands */
 
-void CMD_TH_SpinThings(Document &doc);
+void CMD_TH_SpinThings(Instance &inst);
 void CMD_TH_Disconnect(void);
 void CMD_TH_Merge(void);
 

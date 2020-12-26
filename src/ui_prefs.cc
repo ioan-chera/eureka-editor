@@ -1781,7 +1781,7 @@ int UI_Preferences::handle(int event)
 //------------------------------------------------------------------------
 
 
-void CMD_Preferences(Document &doc)
+void CMD_Preferences(Instance &inst)
 {
 	UI_Preferences * dialog = new UI_Preferences();
 

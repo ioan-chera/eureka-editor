@@ -56,11 +56,11 @@ public:
 	double angleBetweenLines(int A, int B, int C) const;
 
 	/* commands */
-	static void commandAlign(Document &doc);
-	static void commandFlip(Document &doc);
+	static void commandAlign(Instance &inst);
+	static void commandFlip(Instance &inst);
 	static void commandMergeTwo();
-	static void commandSplitHalf(Document &doc);
-	static void commandSwapSides(Document &doc);
+	static void commandSplitHalf(Instance &inst);
+	static void commandSwapSides(Instance &inst);
 
 private:
 	void flipLine_verts(int ld) const;

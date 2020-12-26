@@ -23,6 +23,8 @@
 
 #include "m_strings.h"
 
+struct Instance;
+
 /* Key value:
  *   - can be a printable ASCII character, e.g. 'a', '2', ';'
  *   - spacebar is ' ' (ASCII code 32)
@@ -129,7 +131,7 @@ void M_RemoveBinding(keycode_t key, key_context_e context);
 
 /* --- command execution stuff --- */
 
-typedef void (* command_func_t)(Document &doc);
+typedef void (* command_func_t)(Instance &instance);
 
 struct editor_command_t
 {

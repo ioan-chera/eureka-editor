@@ -245,7 +245,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 
 /* commands */
 
-void CMD_LastSelection(Document &doc);
+void CMD_LastSelection(Instance &inst);
 
 
 //----------------------------------------------------------------------

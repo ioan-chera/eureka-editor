@@ -802,7 +802,7 @@ static bool Clipboard_DoPaste()
 
 //------------------------------------------------------------------------
 
-void CMD_CopyAndPaste(Document &doc)
+void CMD_CopyAndPaste(Instance &inst)
 {
 	if (edit.Selected->empty() && edit.highlight.is_nil())
 	{
@@ -817,7 +817,7 @@ void CMD_CopyAndPaste(Document &doc)
 }
 
 
-void CMD_Clipboard_Cut(Document &doc)
+void CMD_Clipboard_Cut(Instance &inst)
 {
 	if (instance::main_win->ClipboardOp(EditCommand::cut))
 		return;
@@ -838,7 +838,7 @@ void CMD_Clipboard_Cut(Document &doc)
 }
 
 
-void CMD_Clipboard_Copy(Document &doc)
+void CMD_Clipboard_Copy(Instance &inst)
 {
 	if (instance::main_win->ClipboardOp(EditCommand::copy))
 		return;
@@ -857,7 +857,7 @@ void CMD_Clipboard_Copy(Document &doc)
 }
 
 
-void CMD_Clipboard_Paste(Document &doc)
+void CMD_Clipboard_Paste(Instance &inst)
 {
 	if (instance::main_win->ClipboardOp(EditCommand::paste))
 		return;
@@ -1216,7 +1216,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 }
 
 
-void CMD_Delete(Document &doc)
+void CMD_Delete(Instance &inst)
 {
 	if (instance::main_win->ClipboardOp(EditCommand::del))
 		return;
@@ -1237,7 +1237,7 @@ void CMD_Delete(Document &doc)
 		int v_num = edit.Selected->find_first();
 		SYS_ASSERT(v_num >= 0);
 
-		if (doc.vertmod.howManyLinedefs(v_num) == 2)
+		if (inst.level.vertmod.howManyLinedefs(v_num) == 2)
 		{
 			if (DeleteVertex_MergeLineDefs(v_num))
 				goto success;
@@ -1246,12 +1246,12 @@ void CMD_Delete(Document &doc)
 		// delete vertex normally
 	}
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection("deleted", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("deleted", *edit.Selected);
 
 	DeleteObjects_WithUnused(edit.Selected, keep, false /* keep_verts */, keep);
 
-	doc.basis.end();
+	inst.level.basis.end();
 
 success:
 	Editor_ClearAction();

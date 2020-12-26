@@ -417,7 +417,7 @@ void BuildNodesAfterSave(int lev_idx)
 }
 
 
-void CMD_BuildAllNodes(Document &doc)
+void CMD_BuildAllNodes(Instance &inst)
 {
 	if (!instance::edit_wad)
 	{

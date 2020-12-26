@@ -21,6 +21,8 @@
 #ifndef __EUREKA_E_CUTPASTE_H__
 #define __EUREKA_E_CUTPASTE_H__
 
+struct Instance;
+
 //
 // Edit menu command
 //
@@ -49,12 +51,12 @@ void DeleteObjects_WithUnused(selection_c *list,
 			bool keep_verts  = false,
 			bool keep_lines  = false);
 
-void CMD_Delete(Document &doc);
-void CMD_CopyAndPaste(Document &doc);
+void CMD_Delete(Instance &inst);
+void CMD_CopyAndPaste(Instance &inst);
 
-void CMD_Clipboard_Cut(Document &doc);
-void CMD_Clipboard_Copy(Document &doc);
-void CMD_Clipboard_Paste(Document &doc);
+void CMD_Clipboard_Cut(Instance &inst);
+void CMD_Clipboard_Copy(Instance &inst);
+void CMD_Clipboard_Paste(Instance &inst);
 
 
 //----------------------------------------------------------------------

@@ -24,8 +24,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 
 #include <algorithm>
@@ -3041,7 +3041,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag) const
 }
 
 
-void ChecksModule::commandApplyTag(Document &doc)
+void ChecksModule::commandApplyTag(Instance &inst)
 {
 	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
 	{
@@ -3076,7 +3076,7 @@ void ChecksModule::commandApplyTag(Document &doc)
 
 	int min_tag, max_tag;
 
-	doc.checks.tagsUsedRange(&min_tag, &max_tag);
+	inst.level.checks.tagsUsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + (do_last ? 0 : 1);
 	if (new_tag <= 0)
@@ -3089,7 +3089,7 @@ void ChecksModule::commandApplyTag(Document &doc)
 	}
 	else
 	{
-		doc.checks.tagsApplyNewValue(new_tag);
+		inst.level.checks.tagsApplyNewValue(new_tag);
 	}
 
 	if (unselect == SelectHighlight::unselect)
@@ -4444,7 +4444,7 @@ void ChecksModule::checkAll(bool major_stuff) const
 }
 
 
-void ChecksModule::commandMapCheck(Document &doc)
+void ChecksModule::commandMapCheck(Instance &inst)
 {
 	SString what = EXEC_Param[0];
 
@@ -4455,46 +4455,46 @@ void ChecksModule::commandMapCheck(Document &doc)
 	}
 	else if (what.noCaseEqual("all"))
 	{
-		doc.checks.checkAll(false);
+		inst.level.checks.checkAll(false);
 	}
 	else if (what.noCaseEqual("major"))
 	{
-		doc.checks.checkAll(true);
+		inst.level.checks.checkAll(true);
 	}
 	else if (what.noCaseEqual("vertices"))
 	{
-		doc.checks.checkVertices(0);
+		inst.level.checks.checkVertices(0);
 	}
 	else if (what.noCaseEqual("sectors"))
 	{
-		doc.checks.checkSectors(0);
+		inst.level.checks.checkSectors(0);
 	}
 	else if (what.noCaseEqual("linedefs"))
 	{
-		doc.checks.checkLinedefs(0);
+		inst.level.checks.checkLinedefs(0);
 	}
 	else if (what.noCaseEqual("things"))
 	{
-		doc.checks.checkThings(0);
+		inst.level.checks.checkThings(0);
 	}
 	else if (what.noCaseEqual("current"))  // current editing mode
 	{
 		switch (edit.mode)
 		{
 			case ObjType::vertices:
-				doc.checks.checkVertices(0);
+				inst.level.checks.checkVertices(0);
 				break;
 
 			case ObjType::sectors:
-				doc.checks.checkSectors(0);
+				inst.level.checks.checkSectors(0);
 				break;
 
 			case ObjType::linedefs:
-				doc.checks.checkLinedefs(0);
+				inst.level.checks.checkLinedefs(0);
 				break;
 
 			case ObjType::things:
-				doc.checks.checkThings(0);
+				inst.level.checks.checkThings(0);
 				break;
 
 			default:
@@ -4504,11 +4504,11 @@ void ChecksModule::commandMapCheck(Document &doc)
 	}
 	else if (what.noCaseEqual("textures"))
 	{
-		doc.checks.checkTextures(0);
+		inst.level.checks.checkTextures(0);
 	}
 	else if (what.noCaseEqual("tags"))
 	{
-		doc.checks.checkTags(0);
+		inst.level.checks.checkTags(0);
 	}
 	else
 	{
