@@ -31,26 +31,6 @@
 
 class selection_c;
 
-//
-// e_objects module
-//
-class ObjectsModule : public DocumentModule
-{
-public:
-	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
-	{
-	}
-	void move(selection_c *list, double delta_x, double delta_y, double delta_z) const;
-};
-
-void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z = 0);
-
-void DeleteObjects(selection_c * list);
-
-bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1);
-
-void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y);
-
 
 struct transform_t
 {
@@ -67,6 +47,74 @@ public:
 	void Apply(double *x, double *y) const;
 };
 
+//
+// e_objects module
+//
+class ObjectsModule : public DocumentModule
+{
+public:
+	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
+	{
+	}
+	void move(selection_c *list, double delta_x, double delta_y, double delta_z) const;
+	void singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const;
+	void del(selection_c *list) const;
+	bool lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const;
+	void getDragFocus(double *x, double *y, double ptr_x, double ptr_y) const;
+	void calcMiddle(selection_c *list, double *x, double *y) const;
+	void calcBBox(selection_c *list, double *x1, double *y1, double *x2, double *y2) const;
+	void transform(transform_t &param) const;
+	void scale3(double scale_x, double scale_y, double pos_x, double pos_y) const;
+	void scale4(double scale_x, double scale_y, double scale_z,
+		double pos_x, double pos_y, double pos_z) const;
+	void rotate3(double deg, double pos_x, double pos_y) const;
+
+	/* commands */
+
+	static void commandInsert(Instance &inst);
+	static void commandCopyProperties(Instance &inst);
+	static void commandMirror(Instance &inst);
+	static void commandRotate90(Instance &inst);
+	static void commandEnlarge(Instance &inst);
+	static void commandShrink(Instance &inst);
+	static void commandQuantize(Instance &inst);
+
+private:
+	void insertSector() const;
+	void createSquare(int model) const;
+	void insertThing() const;
+	void insertVertex(bool force_continue, bool no_fill) const;
+	void insertLinedefAutosplit(int v1, int v2, bool no_fill) const;
+	void insertLinedef(int v1, int v2, bool no_fill) const;
+	bool checkClosedLoop(int new_ld, int v1, int v2, selection_c *flip) const;
+	int sectorNew(int model, int model2, int model3) const;
+	void doMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z) const;
+	void transferThingProperties(int src_thing, int dest_thing) const;
+	void transferSectorProperties(int src_sec, int dest_sec) const;
+	void transferLinedefProperties(int src_line, int dest_line, bool do_tex) const;
+	void dragCountOnGrid(int *count, int *total) const;
+	void dragCountOnGridWorker(ObjType obj_type, int objnum, int *count, int *total) const;
+	void dragUpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,
+		double *best_dist, double ptr_x, double ptr_y,
+		bool only_grid) const;
+	void doMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
+	void doRotate90Things(selection_c *list, bool anti_clockwise,
+		double mid_x, double mid_y) const;
+	void doEnlargeOrShrink(bool do_shrink) const;
+	void doScaleTwoThings(selection_c *list, transform_t &param) const;
+	void doScaleTwoStuff(selection_c *list, transform_t &param) const;
+	void doScaleTwoVertices(selection_c *list, transform_t &param) const;
+	void determineOrigin(transform_t &param, double pos_x, double pos_y) const;
+	void doScaleSectorHeights(selection_c *list, double scale_z, int pos_z) const;
+	void quantizeThings(selection_c *list) const;
+	void quantizeVertices(selection_c *list) const;
+	bool spotInUse(ObjType obj_type, int x, int y) const;
+};
+
+
+
 
 enum transform_keyword_e
 {
@@ -75,34 +123,7 @@ enum transform_keyword_e
 	TRANS_K_Rotate,			// rotate
 	TRANS_K_RotScale,		// rotate and scale at same time
 	TRANS_K_Skew			// skew (shear) along an axis
-
 };
-
-
-void Objs_CalcMiddle(selection_c * list, double *x, double *y);
-void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, double *y2);
-
-void TransformObjects(transform_t& param);
-
-void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y);
-void ScaleObjects4(double scale_x, double scale_y, double scale_z,
-                   double pos_x, double pos_y, double pos_z);
-
-void RotateObjects3(double deg, double pos_x, double pos_y);
-
-
-/* commands */
-
-void CMD_Insert(Instance &inst);
-
-void CMD_CopyProperties(Instance &inst);
-
-void CMD_Mirror  (Instance &inst);
-void CMD_Rotate90(Instance &inst);
-void CMD_Enlarge (Instance &inst);
-void CMD_Shrink  (Instance &inst);
-void CMD_Quantize(Instance &inst);
-
 
 #endif  /* __EUREKA_OBJECTS_H__ */
 

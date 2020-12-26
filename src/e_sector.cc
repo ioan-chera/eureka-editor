@@ -357,7 +357,7 @@ void SectorModule::commandMerge()
 		unused_secs.set(old_sec);
 	}
 
-	DeleteObjects(&unused_secs);
+	gDocument.objects.del(&unused_secs);
 
 	if (! keep_common_lines)
 	{
@@ -1233,7 +1233,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 			unused.clear(L->WhatSector(Side::right, doc));
 	}
 
-	DeleteObjects(&unused);
+	doc.objects.del(&unused);
 
 	return true;
 }

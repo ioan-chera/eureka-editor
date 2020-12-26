@@ -56,7 +56,7 @@ bool select_verts_of_new_sectors = true;
 //  this is very raw, e.g. it does not check for stuff that will
 //  remain unused afterwards.
 //
-void DeleteObjects(selection_c *list)
+void ObjectsModule::del(selection_c *list) const
 {
 	// we need to process the object numbers from highest to lowest,
 	// because each deletion invalidates all higher-numbered refs
@@ -74,18 +74,18 @@ void DeleteObjects(selection_c *list)
 	std::sort(objnums.begin(), objnums.end());
 
 	for (int i = (int)objnums.size()-1 ; i >= 0 ; i--)
-		gDocument.basis.del(list->what_type(), objnums[i]);
+		doc.basis.del(list->what_type(), objnums[i]);
 }
 
 
-static void CreateSquare(int model)
+void ObjectsModule::createSquare(int model) const
 {
-	int new_sec = gDocument.basis.addNew(ObjType::sectors);
+	int new_sec = doc.basis.addNew(ObjType::sectors);
 
 	if (model >= 0)
-		*gDocument.sectors[new_sec] = *gDocument.sectors[model];
+		*doc.sectors[new_sec] = *doc.sectors[model];
 	else
-		gDocument.sectors[new_sec]->SetDefaults();
+		doc.sectors[new_sec]->SetDefaults();
 
 	double x1 = grid.QuantSnapX(edit.map_x, false);
 	double y1 = grid.QuantSnapX(edit.map_y, false);
@@ -95,20 +95,20 @@ static void CreateSquare(int model)
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		int new_v = gDocument.basis.addNew(ObjType::vertices);
-		Vertex *V = gDocument.vertices[new_v];
+		int new_v = doc.basis.addNew(ObjType::vertices);
+		Vertex *V = doc.vertices[new_v];
 
 		V->SetRawX((i >= 2) ? x2 : x1);
 		V->SetRawY((i==1 || i==2) ? y2 : y1);
 
-		int new_sd = gDocument.basis.addNew(ObjType::sidedefs);
+		int new_sd = doc.basis.addNew(ObjType::sidedefs);
 
-		gDocument.sidedefs[new_sd]->SetDefaults(false);
-		gDocument.sidedefs[new_sd]->sector = new_sec;
+		doc.sidedefs[new_sd]->SetDefaults(false);
+		doc.sidedefs[new_sd]->sector = new_sec;
 
-		int new_ld = gDocument.basis.addNew(ObjType::linedefs);
+		int new_ld = doc.basis.addNew(ObjType::linedefs);
 
-		LineDef * L = gDocument.linedefs[new_ld];
+		LineDef * L = doc.linedefs[new_ld];
 
 		L->start = new_v;
 		L->end   = (i == 3) ? (new_v - 3) : new_v + 1;
@@ -123,7 +123,7 @@ static void CreateSquare(int model)
 }
 
 
-static void Insert_Thing()
+void ObjectsModule::insertThing() const
 {
 	int model = -1;
 
@@ -131,13 +131,13 @@ static void Insert_Thing()
 		model = edit.Selected->find_first();
 
 
-	gDocument.basis.begin();
+	doc.basis.begin();
 
-	int new_t = gDocument.basis.addNew(ObjType::things);
-	Thing *T = gDocument.things[new_t];
+	int new_t = doc.basis.addNew(ObjType::things);
+	Thing *T = doc.things[new_t];
 
 	if(model >= 0)
-		*T = *gDocument.things[model];
+		*T = *doc.things[model];
 	else
 	{
 		T->type = default_thing;
@@ -155,8 +155,8 @@ static void Insert_Thing()
 
 	recent_things.insert_number(T->type);
 
-	gDocument.basis.setMessage("added thing #%d", new_t);
-	gDocument.basis.end();
+	doc.basis.setMessage("added thing #%d", new_t);
+	doc.basis.end();
 
 
 	// select it
@@ -166,29 +166,29 @@ static void Insert_Thing()
 }
 
 
-static int Sector_New(int model = -1, int model2 = -1, int model3 = -1)
+int ObjectsModule::sectorNew(int model, int model2, int model3) const
 {
-	int new_sec = gDocument.basis.addNew(ObjType::sectors);
+	int new_sec = doc.basis.addNew(ObjType::sectors);
 
 	if (model < 0) model = model2;
 	if (model < 0) model = model3;
 
 	if (model < 0)
-		gDocument.sectors[new_sec]->SetDefaults();
+		doc.sectors[new_sec]->SetDefaults();
 	else
-		*gDocument.sectors[new_sec] = *gDocument.sectors[model];
+		*doc.sectors[new_sec] = *doc.sectors[model];
 
 	return new_sec;
 }
 
 
-static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
+bool ObjectsModule::checkClosedLoop(int new_ld, int v1, int v2, selection_c *flip) const
 {
 	// returns true if we assigned a sector (so drawing should stop)
 
 	struct check_closed_data_t
 	{
-		lineloop_c loop = lineloop_c(gDocument);
+		lineloop_c loop;
 
 		bool ok;
 
@@ -197,12 +197,12 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 		double length;
 
-	} left, right;
+	} left{ lineloop_c(doc) }, right{ lineloop_c(doc) };
 
 	// trace the loops on either side of the new line
 
-	 left.ok = gDocument.secmod.traceLineLoop(new_ld, Side::left,   left.loop);
-	right.ok = gDocument.secmod.traceLineLoop(new_ld, Side::right, right.loop);
+	 left.ok = doc.secmod.traceLineLoop(new_ld, Side::left,   left.loop);
+	right.ok = doc.secmod.traceLineLoop(new_ld, Side::right, right.loop);
 
 #ifdef DEBUG_LOOP
 	fprintf(stderr, "CLOSED LOOP : left_ok:%d right_ok:%d\n",
@@ -280,7 +280,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 		lineloop_c& innie = left.loop.faces_outward ? right.loop : left.loop;
 
 		// TODO : REVIEW NeighboringSector(), it's a bit random what we get
-		int new_sec = Sector_New(innie.NeighboringSector());
+		int new_sec = sectorNew(innie.NeighboringSector(), -1, -1);
 
 		innie.AssignSector(new_sec, flip);
 		return true;
@@ -309,7 +309,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 
 	if (left.length < right.length)
 	{
-		int new_sec = Sector_New(left.sec, right.sec, left.loop.NeighboringSector());
+		int new_sec = sectorNew(left.sec, right.sec, left.loop.NeighboringSector());
 
 		if (right.sec >= 0)
 			right.loop.AssignSector(right.sec, flip);
@@ -318,7 +318,7 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 	}
 	else
 	{
-		int new_sec = Sector_New(right.sec, left.sec, right.loop.NeighboringSector());
+		int new_sec = sectorNew(right.sec, left.sec, right.loop.NeighboringSector());
 
 		right.loop.AssignSector(new_sec, flip);
 
@@ -330,14 +330,14 @@ static bool CheckClosedLoop(int new_ld, int v1, int v2, selection_c *flip)
 }
 
 
-static void Insert_LineDef(int v1, int v2, bool no_fill = false)
+void ObjectsModule::insertLinedef(int v1, int v2, bool no_fill) const
 {
-	if (gDocument.linemod.linedefAlreadyExists(v1, v2))
+	if (doc.linemod.linedefAlreadyExists(v1, v2))
 		return;
 
-	int new_ld = gDocument.basis.addNew(ObjType::linedefs);
+	int new_ld = doc.basis.addNew(ObjType::linedefs);
 
-	LineDef * L = gDocument.linedefs[new_ld];
+	LineDef * L = doc.linedefs[new_ld];
 
 	L->start = v1;
 	L->end   = v2;
@@ -346,19 +346,19 @@ static void Insert_LineDef(int v1, int v2, bool no_fill = false)
 	if (no_fill)
 		return;
 
-	if (gDocument.vertmod.howManyLinedefs(v1) >= 2 &&
-		gDocument.vertmod.howManyLinedefs(v2) >= 2)
+	if (doc.vertmod.howManyLinedefs(v1) >= 2 &&
+		doc.vertmod.howManyLinedefs(v2) >= 2)
 	{
 		selection_c flip(ObjType::linedefs);
 
-		CheckClosedLoop(new_ld, v1, v2, &flip);
+		checkClosedLoop(new_ld, v1, v2, &flip);
 
-		gDocument.linemod.flipLinedefGroup(&flip);
+		doc.linemod.flipLinedefGroup(&flip);
 	}
 }
 
 
-static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
+void ObjectsModule::insertLinedefAutosplit(int v1, int v2, bool no_fill) const
 {
 	// Find a linedef which this new line would cross, and if it exists
 	// add a vertex there and create TWO lines.  Also handle a vertex
@@ -366,11 +366,11 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 
 ///  fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 
-	crossing_state_c cross(gDocument);
+	crossing_state_c cross(doc);
 
-	gDocument.hover.findCrossingPoints(cross,
-		gDocument.vertices[v1]->x(), gDocument.vertices[v1]->y(), v1,
-		gDocument.vertices[v2]->x(), gDocument.vertices[v2]->y(), v2);
+	doc.hover.findCrossingPoints(cross,
+		doc.vertices[v1]->x(), doc.vertices[v1]->y(), v1,
+		doc.vertices[v2]->x(), doc.vertices[v2]->y(), v2);
 
 	cross.SplitAllLines();
 
@@ -383,16 +383,16 @@ static void Insert_LineDef_autosplit(int v1, int v2, bool no_fill = false)
 		SYS_ASSERT(next_v != v1);
 		SYS_ASSERT(next_v != v2);
 
-		Insert_LineDef(cur_v, next_v, no_fill);
+		insertLinedef(cur_v, next_v, no_fill);
 
 		cur_v = next_v;
 	}
 
-	Insert_LineDef(cur_v, v2, no_fill);
+	insertLinedef(cur_v, v2, no_fill);
 }
 
 
-static void Insert_Vertex(bool force_continue, bool no_fill)
+void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 {
 	bool closed_a_loop = false;
 
@@ -403,7 +403,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	double new_x = grid.SnapX(edit.map_x);
 	double new_y = grid.SnapY(edit.map_y);
 
-	int orig_num_sectors = gDocument.numSectors();
+	int orig_num_sectors = doc.numSectors();
 
 
 	// are we drawing a line?
@@ -425,7 +425,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
-			gDocument.linedefs[split_ld]->TouchesVertex(old_vert))
+			doc.linedefs[split_ld]->TouchesVertex(old_vert))
 		{
 			old_vert = -1;
 		}
@@ -440,7 +440,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
-			new_vert = gDocument.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
+			new_vert = doc.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -449,7 +449,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		if (new_vert >= 0)
 		{
 			// just ignore when highlight is same as drawing-start
-			if (old_vert >= 0 && *gDocument.vertices[old_vert] == *gDocument.vertices[new_vert])
+			if (old_vert >= 0 && *doc.vertices[old_vert] == *doc.vertices[new_vert])
 			{
 				edit.Selected->set(old_vert);
 				return;
@@ -458,7 +458,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			// a plain INSERT will attempt to fix a dangling vertex
 			if (edit.action == ACT_NOTHING)
 			{
-				if (gDocument.vertmod.tryFixDangler(new_vert))
+				if (doc.vertmod.tryFixDangler(new_vert))
 				{
 					// a vertex was deleted, selection/highlight is now invalid
 					return;
@@ -476,7 +476,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 			}
 
 			// handle case where a line already exists between the two vertices
-			if (gDocument.linemod.linedefAlreadyExists(old_vert, new_vert))
+			if (doc.linemod.linedefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
 				edit.draw_from = Objid(ObjType::vertices, new_vert);
@@ -491,21 +491,21 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 
 	// would we create a new vertex on top of an existing one?
 	if (new_vert < 0 && old_vert >= 0 &&
-		gDocument.vertices[old_vert]->Matches(MakeValidCoord(new_x), MakeValidCoord(new_y)))
+		doc.vertices[old_vert]->Matches(MakeValidCoord(new_x), MakeValidCoord(new_y)))
 	{
 		edit.Selected->set(old_vert);
 		return;
 	}
 
 
-	gDocument.basis.begin();
+	doc.basis.begin();
 
 
 	if (new_vert < 0)
 	{
-		new_vert = gDocument.basis.addNew(ObjType::vertices);
+		new_vert = doc.basis.addNew(ObjType::vertices);
 
-		Vertex *V = gDocument.vertices[new_vert];
+		Vertex *V = doc.vertices[new_vert];
 
 		V->SetRawXY(new_x, new_y);
 
@@ -515,12 +515,12 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		// splitting an existing line?
 		if (split_ld >= 0)
 		{
-			gDocument.linemod.splitLinedefAtVertex(split_ld, new_vert);
-			gDocument.basis.setMessage("split linedef #%d", split_ld);
+			doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
+			doc.basis.setMessage("split linedef #%d", split_ld);
 		}
 		else
 		{
-			gDocument.basis.setMessage("added vertex #%d", new_vert);
+			doc.basis.setMessage("added vertex #%d", new_vert);
 		}
 	}
 
@@ -534,7 +534,7 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 	else
 	{
 		// closing a loop?
-		if (!force_continue && gDocument.vertmod.howManyLinedefs(new_vert) > 0)
+		if (!force_continue && doc.vertmod.howManyLinedefs(new_vert) > 0)
 		{
 			closed_a_loop = true;
 		}
@@ -545,16 +545,16 @@ static void Insert_Vertex(bool force_continue, bool no_fill)
 		SYS_ASSERT(old_vert != new_vert);
 
 		// this can make new sectors too
-		Insert_LineDef_autosplit(old_vert, new_vert, no_fill);
+		insertLinedefAutosplit(old_vert, new_vert, no_fill);
 
-		gDocument.basis.setMessage("added linedef");
+		doc.basis.setMessage("added linedef");
 
 		edit.draw_from = Objid(ObjType::vertices, new_vert);
 		edit.Selected->set(new_vert);
 	}
 
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 
 begin_drawing:
@@ -567,8 +567,8 @@ begin_drawing:
 		edit.draw_from = Objid(ObjType::vertices, old_vert);
 		edit.Selected->set(old_vert);
 
-		edit.draw_to_x = gDocument.vertices[old_vert]->x();
-		edit.draw_to_y = gDocument.vertices[old_vert]->y();
+		edit.draw_to_x = doc.vertices[old_vert]->x();
+		edit.draw_to_y = doc.vertices[old_vert]->y();
 
 		Editor_SetAction(ACT_DRAW_LINE);
 	}
@@ -581,12 +581,12 @@ begin_drawing:
 
 	// select vertices of a newly created sector?
 	if (select_verts_of_new_sectors && closed_a_loop &&
-		gDocument.numSectors() > orig_num_sectors)
+		doc.numSectors() > orig_num_sectors)
 	{
 		selection_c sel(ObjType::sectors);
 
 		// more than one sector may have been created, pick the last
-		sel.set(gDocument.numSectors() - 1);
+		sel.set(doc.numSectors() - 1);
 
 		edit.Selected->change_type(edit.mode);
 		ConvertSelection(&sel, edit.Selected);
@@ -596,7 +596,7 @@ begin_drawing:
 }
 
 
-static void Insert_Sector()
+void ObjectsModule::insertSector() const
 {
 	int sel_count = edit.Selected->count_obj();
 	if (sel_count > 1)
@@ -606,18 +606,18 @@ static void Insert_Sector()
 	}
 
 	// if outside of the map, create a square
-	if (gDocument.hover.isPointOutsideOfMap(edit.map_x, edit.map_y))
+	if (doc.hover.isPointOutsideOfMap(edit.map_x, edit.map_y))
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("added sector (outside map)");
+		doc.basis.begin();
+		doc.basis.setMessage("added sector (outside map)");
 
 		int model = -1;
 		if (sel_count > 0)
 			model = edit.Selected->find_first();
 
-		CreateSquare(model);
+		createSquare(model);
 
-		gDocument.basis.end();
+		doc.basis.end();
 		return;
 	}
 
@@ -635,25 +635,25 @@ static void Insert_Sector()
 		model = -1;  // look for a neighbor to copy
 
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("added new sector");
+	doc.basis.begin();
+	doc.basis.setMessage("added new sector");
 
-	bool ok = gDocument.secmod.assignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
+	bool ok = doc.secmod.assignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	// select the new sector
 	if (ok)
 	{
 		Selection_Clear();
-		edit.Selected->set(gDocument.numSectors() - 1);
+		edit.Selected->set(doc.numSectors() - 1);
 	}
 
 	RedrawMap();
 }
 
 
-void CMD_Insert(Instance &inst)
+void ObjectsModule::commandInsert(Instance &inst)
 {
 	bool force_cont;
 	bool no_fill;
@@ -667,17 +667,17 @@ void CMD_Insert(Instance &inst)
 	switch (edit.mode)
 	{
 		case ObjType::things:
-			Insert_Thing();
+			inst.level.objects.insertThing();
 			break;
 
 		case ObjType::vertices:
 			force_cont = Exec_HasFlag("/continue");
 			no_fill    = Exec_HasFlag("/nofill");
-			Insert_Vertex(force_cont, no_fill);
+			inst.level.objects.insertVertex(force_cont, no_fill);
 			break;
 
 		case ObjType::sectors:
-			Insert_Sector();
+			inst.level.objects.insertSector();
 			break;
 
 		default:
@@ -692,12 +692,12 @@ void CMD_Insert(Instance &inst)
 //
 // check if any part of a LineDef is inside the given box
 //
-bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
+bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
-	double lx0 = gDocument.linedefs[ld]->Start(gDocument)->x();
-	double ly0 = gDocument.linedefs[ld]->Start(gDocument)->y();
-	double lx1 = gDocument.linedefs[ld]->End(gDocument)->x();
-	double ly1 = gDocument.linedefs[ld]->End(gDocument)->y();
+	double lx0 = doc.linedefs[ld]->Start(doc)->x();
+	double ly0 = doc.linedefs[ld]->Start(doc)->y();
+	double lx1 = doc.linedefs[ld]->End(doc)->x();
+	double ly1 = doc.linedefs[ld]->End(doc)->y();
 
 	double i;
 
@@ -739,7 +739,7 @@ bool LineTouchesBox(int ld, double x0, double y0, double x1, double y1)
 }
 
 
-static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
+void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z) const
 {
 	fixcoord_t fdx = MakeValidCoord(delta_x);
 	fixcoord_t fdy = MakeValidCoord(delta_y);
@@ -750,21 +750,21 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 		case ObjType::things:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing * T = gDocument.things[*it];
+				const Thing * T = doc.things[*it];
 
-				gDocument.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				gDocument.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				gDocument.basis.changeThing(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
+				doc.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
+				doc.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
+				doc.basis.changeThing(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
 			}
 			break;
 
 		case ObjType::vertices:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex * V = gDocument.vertices[*it];
+				const Vertex * V = doc.vertices[*it];
 
-				gDocument.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-				gDocument.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+				doc.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
+				doc.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 			}
 			break;
 
@@ -772,10 +772,10 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Sector * S = gDocument.sectors[*it];
+				const Sector * S = doc.sectors[*it];
 
-				gDocument.basis.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
-				gDocument.basis.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
+				doc.basis.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
+				doc.basis.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -785,7 +785,7 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 				selection_c verts(ObjType::vertices);
 				ConvertSelection(list, &verts);
 
-				DoMoveObjects(&verts, delta_x, delta_y, delta_z);
+				doMoveObjects(&verts, delta_x, delta_y, delta_z);
 			}
 			break;
 
@@ -811,36 +811,36 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 		selection_c thing_sel(ObjType::things);
 		ConvertSelection(list, &thing_sel);
 
-		DoMoveObjects(&thing_sel, delta_x, delta_y, 0);
+		doMoveObjects(&thing_sel, delta_x, delta_y, 0);
 	}
 
-	DoMoveObjects(list, delta_x, delta_y, delta_z);
+	doMoveObjects(list, delta_x, delta_y, delta_z);
 
 	doc.basis.end();
 }
 
 
-void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z)
+void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
 {
 	if (edit.mode != ObjType::vertices)
 	{
 		selection_c list(edit.mode);
 		list.set(obj.num);
 
-		gDocument.objects.move(&list, delta_x, delta_y, delta_z);
+		doc.objects.move(&list, delta_x, delta_y, delta_z);
 		return;
 	}
 
 	/* move a single vertex */
 
-	gDocument.basis.begin();
+	doc.basis.begin();
 
 	int did_split_line = -1;
 
 	// handle a single vertex merging onto an existing one
 	if (edit.highlight.valid())
 	{
-		gDocument.basis.setMessage("merge vertex #%d", obj.num);
+		doc.basis.setMessage("merge vertex #%d", obj.num);
 
 		SYS_ASSERT(obj.num != edit.highlight.num);
 
@@ -849,9 +849,9 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 		verts.set(edit.highlight.num);	// keep the highlight
 		verts.set(obj.num);
 
-		gDocument.vertmod.mergeList(&verts);
+		doc.vertmod.mergeList(&verts);
 
-		gDocument.basis.end();
+		doc.basis.end();
 		return;
 	}
 
@@ -860,7 +860,7 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 	{
 		did_split_line = edit.split_line.num;
 
-		gDocument.linemod.splitLinedefAtVertex(edit.split_line.num, obj.num);
+		doc.linemod.splitLinedefAtVertex(edit.split_line.num, obj.num);
 
 		// now move the vertex!
 	}
@@ -869,64 +869,64 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 
 	list.set(obj.num);
 
-	DoMoveObjects(&list, delta_x, delta_y, delta_z);
+	doMoveObjects(&list, delta_x, delta_y, delta_z);
 
 	if (did_split_line >= 0)
-		gDocument.basis.setMessage("split linedef #%d", did_split_line);
+		doc.basis.setMessage("split linedef #%d", did_split_line);
 	else
-		gDocument.basis.setMessageForSelection("moved", list);
+		doc.basis.setMessageForSelection("moved", list);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-static void TransferThingProperties(int src_thing, int dest_thing)
+void ObjectsModule::transferThingProperties(int src_thing, int dest_thing) const
 {
-	const Thing * T = gDocument.things[src_thing];
+	const Thing * T = doc.things[src_thing];
 
-	gDocument.basis.changeThing(dest_thing, Thing::F_TYPE,    T->type);
-	gDocument.basis.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
+	doc.basis.changeThing(dest_thing, Thing::F_TYPE,    T->type);
+	doc.basis.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
 //	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
-	gDocument.basis.changeThing(dest_thing, Thing::F_TID,     T->tid);
-	gDocument.basis.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
+	doc.basis.changeThing(dest_thing, Thing::F_TID,     T->tid);
+	doc.basis.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
 
-	gDocument.basis.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
-	gDocument.basis.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
-	gDocument.basis.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
-	gDocument.basis.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
-	gDocument.basis.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
+	doc.basis.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
+	doc.basis.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
+	doc.basis.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
+	doc.basis.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
+	doc.basis.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
 }
 
 
-static void TransferSectorProperties(int src_sec, int dest_sec)
+void ObjectsModule::transferSectorProperties(int src_sec, int dest_sec) const
 {
-	const Sector * sector = gDocument.sectors[src_sec];
+	const Sector * sector = doc.sectors[src_sec];
 
-	gDocument.basis.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	gDocument.basis.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
-	gDocument.basis.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	gDocument.basis.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
+	doc.basis.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
+	doc.basis.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
+	doc.basis.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
+	doc.basis.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
 
-	gDocument.basis.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
-	gDocument.basis.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
-	gDocument.basis.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
+	doc.basis.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
+	doc.basis.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
+	doc.basis.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
 }
 
 
 #define LINEDEF_FLAG_KEEP  (MLF_Blocking + MLF_TwoSided)
 
-static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
+void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool do_tex) const
 {
-	const LineDef * L1 = gDocument.linedefs[src_line];
-	const LineDef * L2 = gDocument.linedefs[dest_line];
+	const LineDef * L1 = doc.linedefs[src_line];
+	const LineDef * L2 = doc.linedefs[dest_line];
 
 	// don't transfer certain flags
-	int flags = gDocument.linedefs[dest_line]->flags;
+	int flags = doc.linedefs[dest_line]->flags;
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
 
 	// handle textures
-	if (do_tex && L1->Right(gDocument) && L2->Right(gDocument))
+	if (do_tex && L1->Right(doc) && L2->Right(doc))
 	{
 		/* There are four cases, depending on number of sides:
 		 *
@@ -940,38 +940,38 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 		 * (d) double --> double : copy each side, but possibly flip the
 		 *                         second linedef based on floor or ceil diff.
 		 */
-		if (! L1->Left(gDocument))
+		if (! L1->Left(doc))
 		{
-			int tex = L1->Right(gDocument)->mid_tex;
+			int tex = L1->Right(doc)->mid_tex;
 
-			if (! L2->Left(gDocument))
+			if (! L2->Left(doc))
 			{
-				gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 			else
 			{
-				gDocument.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
-				gDocument.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
+				doc.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
+				doc.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
 
-				gDocument.basis.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
-				gDocument.basis.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
+				doc.basis.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
+				doc.basis.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
 				flags |= MLF_UpperUnpegged;
 			}
 		}
-		else if (! L2->Left(gDocument))
+		else if (! L2->Left(doc))
 		{
 			/* pick which texture to copy */
 
-			const Sector *front = L1->Right(gDocument)->SecRef(gDocument);
-			const Sector *back  = L1-> Left(gDocument)->SecRef(gDocument);
+			const Sector *front = L1->Right(doc)->SecRef(doc);
+			const Sector *back  = L1-> Left(doc)->SecRef(doc);
 
-			int f_l = L1->Right(gDocument)->lower_tex;
-			int f_u = L1->Right(gDocument)->upper_tex;
-			int b_l = L1-> Left(gDocument)->lower_tex;
-			int b_u = L1-> Left(gDocument)->upper_tex;
+			int f_l = L1->Right(doc)->lower_tex;
+			int f_u = L1->Right(doc)->upper_tex;
+			int b_l = L1-> Left(doc)->lower_tex;
+			int b_u = L1-> Left(doc)->upper_tex;
 
 			// ignore missing textures
 			if (is_null_tex(BA_GetString(f_l))) f_l = 0;
@@ -993,18 +993,18 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 
 			if (tex > 0)
 			{
-				gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 		}
 		else
 		{
-			const SideDef *RS = L1->Right(gDocument);
-			const SideDef *LS = L1->Left(gDocument);
+			const SideDef *RS = L1->Right(doc);
+			const SideDef *LS = L1->Left(doc);
 
-			const Sector *F1 = L1->Right(gDocument)->SecRef(gDocument);
-			const Sector *B1 = L1-> Left(gDocument)->SecRef(gDocument);
-			const Sector *F2 = L2->Right(gDocument)->SecRef(gDocument);
-			const Sector *B2 = L2-> Left(gDocument)->SecRef(gDocument);
+			const Sector *F1 = L1->Right(doc)->SecRef(doc);
+			const Sector *B1 = L1-> Left(doc)->SecRef(doc);
+			const Sector *F2 = L2->Right(doc)->SecRef(doc);
+			const Sector *B2 = L2-> Left(doc)->SecRef(doc);
 
 			// logic to determine which sides we copy
 
@@ -1032,29 +1032,29 @@ static void TransferLinedefProperties(int src_line, int dest_line, bool do_tex)
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			gDocument.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
-			gDocument.basis.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
-			gDocument.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+			doc.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
+			doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
+			doc.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
 
-			gDocument.basis.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
-			gDocument.basis.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
-			gDocument.basis.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
+			doc.basis.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
+			doc.basis.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
+			doc.basis.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
 		}
 	}
 
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
+	doc.basis.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
 
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
+	doc.basis.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
+	doc.basis.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
 
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
-	gDocument.basis.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
+	doc.basis.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
+	doc.basis.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
+	doc.basis.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
+	doc.basis.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
 }
 
 
-void CMD_CopyProperties(Instance &inst)
+void ObjectsModule::commandCopyProperties(Instance &inst)
 {
 	if (edit.highlight.is_nil())
 	{
@@ -1096,15 +1096,15 @@ void CMD_CopyProperties(Instance &inst)
 		switch (edit.mode)
 		{
 			case ObjType::sectors:
-				TransferSectorProperties(source, target);
+				inst.level.objects.transferSectorProperties(source, target);
 				break;
 
 			case ObjType::things:
-				TransferThingProperties(source, target);
+				inst.level.objects.transferThingProperties(source, target);
 				break;
 
 			case ObjType::linedefs:
-				TransferLinedefProperties(source, target, true /* do_tex */);
+				inst.level.objects.transferLinedefProperties(source, target, true /* do_tex */);
 				break;
 
 			default: break;
@@ -1134,15 +1134,15 @@ void CMD_CopyProperties(Instance &inst)
 			switch (edit.mode)
 			{
 				case ObjType::sectors:
-					TransferSectorProperties(source, *it);
+					inst.level.objects.transferSectorProperties(source, *it);
 					break;
 
 				case ObjType::things:
-					TransferThingProperties(source, *it);
+					inst.level.objects.transferThingProperties(source, *it);
 					break;
 
 				case ObjType::linedefs:
-					TransferLinedefProperties(source, *it, true /* do_tex */);
+					inst.level.objects.transferLinedefProperties(source, *it, true /* do_tex */);
 					break;
 
 				default: break;
@@ -1154,36 +1154,36 @@ void CMD_CopyProperties(Instance &inst)
 }
 
 
-static void Drag_CountOnGrid_Worker(ObjType obj_type, int objnum, int *count, int *total)
+void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *count, int *total) const
 {
 	switch (obj_type)
 	{
 		case ObjType::things:
 			*total += 1;
-			if (grid.OnGrid(gDocument.things[objnum]->x(), gDocument.things[objnum]->y()))
+			if (grid.OnGrid(doc.things[objnum]->x(), doc.things[objnum]->y()))
 				*count += 1;
 			break;
 
 		case ObjType::vertices:
 			*total += 1;
-			if (grid.OnGrid(gDocument.vertices[objnum]->x(), gDocument.vertices[objnum]->y()))
+			if (grid.OnGrid(doc.vertices[objnum]->x(), doc.vertices[objnum]->y()))
 				*count += 1;
 			break;
 
 		case ObjType::linedefs:
-			Drag_CountOnGrid_Worker(ObjType::vertices, gDocument.linedefs[objnum]->start, count, total);
-			Drag_CountOnGrid_Worker(ObjType::vertices, gDocument.linedefs[objnum]->end,   count, total);
+			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum]->start, count, total);
+			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum]->end,   count, total);
 			break;
 
 		case ObjType::sectors:
-			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				LineDef *L = gDocument.linedefs[n];
+				LineDef *L = doc.linedefs[n];
 
-				if (! L->TouchesSector(objnum, gDocument))
+				if (! L->TouchesSector(objnum, doc))
 					continue;
 
-				Drag_CountOnGrid_Worker(ObjType::linedefs, n, count, total);
+				dragCountOnGridWorker(ObjType::linedefs, n, count, total);
 			}
 			break;
 
@@ -1193,44 +1193,44 @@ static void Drag_CountOnGrid_Worker(ObjType obj_type, int objnum, int *count, in
 }
 
 
-static void Drag_CountOnGrid(int *count, int *total)
+void ObjectsModule::dragCountOnGrid(int *count, int *total) const
 {
 	// Note: the results are approximate, vertices can be counted two
 	//       or more times.
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		Drag_CountOnGrid_Worker(edit.mode, *it, count, total);
+		dragCountOnGridWorker(edit.mode, *it, count, total);
 	}
 }
 
 
-static void Drag_UpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,
+void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,
 								   double *best_dist, double ptr_x, double ptr_y,
-								   bool only_grid)
+								   bool only_grid) const
 {
 	double x2, y2;
 
 	switch (obj_type)
 	{
 		case ObjType::things:
-			x2 = gDocument.things[objnum]->x();
-			y2 = gDocument.things[objnum]->y();
+			x2 = doc.things[objnum]->x();
+			y2 = doc.things[objnum]->y();
 			break;
 
 		case ObjType::vertices:
-			x2 = gDocument.vertices[objnum]->x();
-			y2 = gDocument.vertices[objnum]->y();
+			x2 = doc.vertices[objnum]->x();
+			y2 = doc.vertices[objnum]->y();
 			break;
 
 		case ObjType::linedefs:
 			{
-				LineDef *L = gDocument.linedefs[objnum];
+				LineDef *L = doc.linedefs[objnum];
 
-				Drag_UpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
+				dragUpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
 
-				Drag_UpdateCurrentDist(ObjType::vertices, L->end,   x, y, best_dist,
+				dragUpdateCurrentDist(ObjType::vertices, L->end,   x, y, best_dist,
 				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
@@ -1240,14 +1240,14 @@ static void Drag_UpdateCurrentDist(ObjType obj_type, int objnum, double *x, doub
 			// (some vertices can be processed two or more times, that
 			// won't matter though).
 
-			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				LineDef *L = gDocument.linedefs[n];
+				LineDef *L = doc.linedefs[n];
 
-				if (! L->TouchesSector(objnum, gDocument))
+				if (! L->TouchesSector(objnum, doc))
 					continue;
 
-				Drag_UpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,
+				dragUpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,
 				                       ptr_x, ptr_y, only_grid);
 			}
 			return;
@@ -1278,7 +1278,7 @@ static void Drag_UpdateCurrentDist(ObjType obj_type, int objnum, double *x, doub
 // allows a mostly-grid-snapped set of objects to stay snapped
 // to the grid.
 //
-void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y)
+void ObjectsModule::getDragFocus(double *x, double *y, double ptr_x, double ptr_y) const
 {
 	*x = 0;
 	*y = 0;
@@ -1293,7 +1293,7 @@ void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y)
 
 	if (grid.snap)
 	{
-		Drag_CountOnGrid(&count, &total);
+		dragCountOnGrid(&count, &total);
 
 		if (total > 0 && count > total / 2)
 			only_grid = true;
@@ -1305,14 +1305,14 @@ void GetDragFocus(double *x, double *y, double ptr_x, double ptr_y)
 
 	if (edit.dragged.valid())  // a single object
 	{
-		Drag_UpdateCurrentDist(edit.mode, edit.dragged.num, x, y, &best_dist,
+		dragUpdateCurrentDist(edit.mode, edit.dragged.num, x, y, &best_dist,
 							   ptr_x, ptr_y, only_grid);
 		return;
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		Drag_UpdateCurrentDist(edit.mode, *it, x, y, &best_dist,
+		dragUpdateCurrentDist(edit.mode, *it, x, y, &best_dist,
 							   ptr_x, ptr_y, only_grid);
 	}
 }
@@ -1368,7 +1368,7 @@ void transform_t::Apply(double *x, double *y) const
 // often give a different result than using the middle of the bounding
 // box.
 //
-void Objs_CalcMiddle(selection_c * list, double *x, double *y)
+void ObjectsModule::calcMiddle(selection_c * list, double *x, double *y) const
 {
 	*x = *y = 0;
 
@@ -1386,8 +1386,8 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
-				sum_x += gDocument.things[*it]->x();
-				sum_y += gDocument.things[*it]->y();
+				sum_x += doc.things[*it]->x();
+				sum_y += doc.things[*it]->y();
 			}
 			break;
 		}
@@ -1396,8 +1396,8 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
-				sum_x += gDocument.vertices[*it]->x();
-				sum_y += gDocument.vertices[*it]->y();
+				sum_x += doc.vertices[*it]->x();
+				sum_y += doc.vertices[*it]->y();
 			}
 			break;
 		}
@@ -1408,7 +1408,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(list, &verts);
 
-			Objs_CalcMiddle(&verts, x, y);
+			calcMiddle(&verts, x, y);
 			return;
 		}
 	}
@@ -1424,7 +1424,7 @@ void Objs_CalcMiddle(selection_c * list, double *x, double *y)
 // returns a bounding box that completely includes a list of objects.
 // when the list is empty, bottom-left coordinate is arbitrary.
 //
-void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, double *y2)
+void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double *x2, double *y2) const
 {
 	if (list->empty())
 	{
@@ -1442,7 +1442,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing *T = gDocument.things[*it];
+				const Thing *T = doc.things[*it];
 				double Tx = T->x();
 				double Ty = T->y();
 
@@ -1461,7 +1461,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex *V = gDocument.vertices[*it];
+				const Vertex *V = doc.vertices[*it];
 				double Vx = V->x();
 				double Vy = V->y();
 
@@ -1479,7 +1479,7 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(list, &verts);
 
-			Objs_CalcBBox(&verts, x1, y1, x2, y2);
+			calcBBox(&verts, x1, y1, x2, y2);
 			return;
 		}
 	}
@@ -1489,36 +1489,36 @@ void Objs_CalcBBox(selection_c * list, double *x1, double *y1, double *x2, doubl
 }
 
 
-static void DoMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y)
+void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = gDocument.things[*it];
+		const Thing * T = doc.things[*it];
 
 		if (is_vert)
 		{
-			gDocument.basis.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
+			doc.basis.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
 
 			if (T->angle != 0)
-				gDocument.basis.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
+				doc.basis.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			gDocument.basis.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
+			doc.basis.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
 
 			if (T->angle > 180)
-				gDocument.basis.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
+				doc.basis.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
 			else
-				gDocument.basis.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
+				doc.basis.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
 		}
 	}
 }
 
 
-static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y)
+void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
@@ -1528,12 +1528,12 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = gDocument.vertices[*it];
+		const Vertex * V = doc.vertices[*it];
 
 		if (is_vert)
-			gDocument.basis.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
+			doc.basis.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
 		else
-			gDocument.basis.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
+			doc.basis.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1542,22 +1542,22 @@ static void DoMirrorVertices(selection_c *list, bool is_vert, double mid_x, doub
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		LineDef * L = gDocument.linedefs[*it];
+		LineDef * L = doc.linedefs[*it];
 
 		int start = L->start;
 		int end   = L->end;
 
-		gDocument.basis.changeLinedef(*it, LineDef::F_START, end);
-		gDocument.basis.changeLinedef(*it, LineDef::F_END, start);
+		doc.basis.changeLinedef(*it, LineDef::F_START, end);
+		doc.basis.changeLinedef(*it, LineDef::F_END, start);
 	}
 }
 
 
-static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y)
+void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
 	if (edit.mode == ObjType::things)
 	{
-		DoMirrorThings(list, is_vert, mid_x, mid_y);
+		doMirrorThings(list, is_vert, mid_x, mid_y);
 		return;
 	}
 
@@ -1569,14 +1569,14 @@ static void DoMirrorStuff(selection_c *list, bool is_vert, double mid_x, double 
 		selection_c things(ObjType::things);
 		ConvertSelection(list, &things);
 
-		DoMirrorThings(&things, is_vert, mid_x, mid_y);
+		doMirrorThings(&things, is_vert, mid_x, mid_y);
 	}
 
-	DoMirrorVertices(list, is_vert, mid_x, mid_y);
+	doMirrorVertices(list, is_vert, mid_x, mid_y);
 }
 
 
-void CMD_Mirror(Instance &inst)
+void ObjectsModule::commandMirror(Instance &inst)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1591,12 +1591,12 @@ void CMD_Mirror(Instance &inst)
 		is_vert = true;
 
 	double mid_x, mid_y;
-	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
-	DoMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
+	inst.level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
 	inst.level.basis.end();
 
@@ -1605,38 +1605,38 @@ void CMD_Mirror(Instance &inst)
 }
 
 
-static void DoRotate90Things(selection_c *list, bool anti_clockwise,
-							 double mid_x, double mid_y)
+void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
+							 double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = MakeValidCoord(mid_x);
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = gDocument.things[*it];
+		const Thing * T = doc.things[*it];
 
 		fixcoord_t old_x = T->raw_x;
 		fixcoord_t old_y = T->raw_y;
 
 		if (anti_clockwise)
 		{
-			gDocument.basis.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			gDocument.basis.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			doc.basis.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
+			doc.basis.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
-			gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
+			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			gDocument.basis.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			gDocument.basis.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			doc.basis.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
+			doc.basis.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
-			gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
+			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
 	}
 }
 
 
-void CMD_Rotate90(Instance &inst)
+void ObjectsModule::commandRotate90(Instance &inst)
 {
 	if (EXEC_Param[0].empty())
 	{
@@ -1654,14 +1654,14 @@ void CMD_Rotate90(Instance &inst)
 	}
 
 	double mid_x, mid_y;
-	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
 	if (edit.mode == ObjType::things)
 	{
-		DoRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
+		inst.level.objects.doRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
 	}
 	else
 	{
@@ -1671,7 +1671,7 @@ void CMD_Rotate90(Instance &inst)
 			selection_c things(ObjType::things);
 			ConvertSelection(edit.Selected, &things);
 
-			DoRotate90Things(&things, anti_clockwise, mid_x, mid_y);
+			inst.level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 		}
 
 		// everything else just rotates the vertices
@@ -1708,19 +1708,19 @@ void CMD_Rotate90(Instance &inst)
 }
 
 
-static void DoScaleTwoThings(selection_c *list, transform_t& param)
+void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) const
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = gDocument.things[*it];
+		const Thing * T = doc.things[*it];
 
 		double new_x = T->x();
 		double new_y = T->y();
 
 		param.Apply(&new_x, &new_y);
 
-		gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
-		gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
+		doc.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
+		doc.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1728,37 +1728,37 @@ static void DoScaleTwoThings(selection_c *list, transform_t& param)
 
 		if (ang_diff)
 		{
-			gDocument.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
+			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
 		}
 	}
 }
 
 
-static void DoScaleTwoVertices(selection_c *list, transform_t& param)
+void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) const 
 {
 	selection_c verts(ObjType::vertices);
 	ConvertSelection(list, &verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = gDocument.vertices[*it];
+		const Vertex * V = doc.vertices[*it];
 
 		double new_x = V->x();
 		double new_y = V->y();
 
 		param.Apply(&new_x, &new_y);
 
-		gDocument.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
-		gDocument.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
+		doc.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
+		doc.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 	}
 }
 
 
-static void DoScaleTwoStuff(selection_c *list, transform_t& param)
+void ObjectsModule::doScaleTwoStuff(selection_c *list, transform_t& param) const
 {
 	if (edit.mode == ObjType::things)
 	{
-		DoScaleTwoThings(list, param);
+		doScaleTwoThings(list, param);
 		return;
 	}
 
@@ -1770,51 +1770,51 @@ static void DoScaleTwoStuff(selection_c *list, transform_t& param)
 		selection_c things(ObjType::things);
 		ConvertSelection(list, &things);
 
-		DoScaleTwoThings(&things, param);
+		doScaleTwoThings(&things, param);
 	}
 
-	DoScaleTwoVertices(list, param);
+	doScaleTwoVertices(list, param);
 }
 
 
-void TransformObjects(transform_t& param)
+void ObjectsModule::transform(transform_t& param) const
 {
 	// this is called by the MOUSE2 dynamic scaling code
 
 	SYS_ASSERT(edit.Selected->notempty());
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("scaled", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("scaled", *edit.Selected);
 
 	if (param.scale_x < 0)
 	{
 		param.scale_x = -param.scale_x;
-		DoMirrorStuff(edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
 	}
 
 	if (param.scale_y < 0)
 	{
 		param.scale_y = -param.scale_y;
-		DoMirrorStuff(edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
 	}
 
-	DoScaleTwoStuff(edit.Selected, param);
+	doScaleTwoStuff(edit.Selected, param);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-static void DetermineOrigin(transform_t& param, double pos_x, double pos_y)
+void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos_y) const 
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
-		Objs_CalcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
+		doc.objects.calcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
 		return;
 	}
 
 	double lx, ly, hx, hy;
 
-	Objs_CalcBBox(edit.Selected, &lx, &ly, &hx, &hy);
+	doc.objects.calcBBox(edit.Selected, &lx, &ly, &hx, &hy);
 
 	if (pos_x < 0)
 		param.mid_x = lx;
@@ -1832,7 +1832,7 @@ static void DetermineOrigin(transform_t& param, double pos_x, double pos_y)
 }
 
 
-void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y)
+void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double pos_y) const
 {
 	SYS_ASSERT(scale_x > 0);
 	SYS_ASSERT(scale_y > 0);
@@ -1844,18 +1844,18 @@ void ScaleObjects3(double scale_x, double scale_y, double pos_x, double pos_y)
 	param.scale_x = scale_x;
 	param.scale_y = scale_y;
 
-	DetermineOrigin(param, pos_x, pos_y);
+	determineOrigin(param, pos_x, pos_y);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("scaled", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("scaled", *edit.Selected);
 	{
-		DoScaleTwoStuff(edit.Selected, param);
+		doScaleTwoStuff(edit.Selected, param);
 	}
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
+void ObjectsModule::doScaleSectorHeights(selection_c *list, double scale_z, int pos_z) const
 {
 	SYS_ASSERT(! list->empty());
 
@@ -1865,7 +1865,7 @@ static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Sector * S = gDocument.sectors[*it];
+		const Sector * S = doc.sectors[*it];
 
 		lz = MIN(lz, S->floorh);
 		hz = MAX(hz, S->ceilh);
@@ -1884,18 +1884,18 @@ static void DoScaleSectorHeights(selection_c *list, double scale_z, int pos_z)
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Sector * S = gDocument.sectors[*it];
+		const Sector * S = doc.sectors[*it];
 
 		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
 
-		gDocument.basis.changeSector(*it, Sector::F_FLOORH, new_f);
-		gDocument.basis.changeSector(*it, Sector::F_CEILH,  new_c);
+		doc.basis.changeSector(*it, Sector::F_FLOORH, new_f);
+		doc.basis.changeSector(*it, Sector::F_CEILH,  new_c);
 	}
 }
 
-void ScaleObjects4(double scale_x, double scale_y, double scale_z,
-                   double pos_x, double pos_y, double pos_z)
+void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
+                   double pos_x, double pos_y, double pos_z) const
 {
 	SYS_ASSERT(edit.mode == ObjType::sectors);
 
@@ -1906,19 +1906,19 @@ void ScaleObjects4(double scale_x, double scale_y, double scale_z,
 	param.scale_x = scale_x;
 	param.scale_y = scale_y;
 
-	DetermineOrigin(param, pos_x, pos_y);
+	determineOrigin(param, pos_x, pos_y);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("scaled", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("scaled", *edit.Selected);
 	{
-		DoScaleTwoStuff(edit.Selected, param);
-		DoScaleSectorHeights(edit.Selected, scale_z, static_cast<int>(pos_z));
+		doScaleTwoStuff(edit.Selected, param);
+		doScaleSectorHeights(edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-void RotateObjects3(double deg, double pos_x, double pos_y)
+void ObjectsModule::rotate3(double deg, double pos_x, double pos_y) const
 {
 	transform_t param;
 
@@ -1926,29 +1926,29 @@ void RotateObjects3(double deg, double pos_x, double pos_y)
 
 	param.rotate = deg * M_PI / 180.0;
 
-	DetermineOrigin(param, pos_x, pos_y);
+	determineOrigin(param, pos_x, pos_y);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("rotated", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("rotated", *edit.Selected);
 	{
-		DoScaleTwoStuff(edit.Selected, param);
+		doScaleTwoStuff(edit.Selected, param);
 	}
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
-static bool SpotInUse(ObjType obj_type, int x, int y)
+bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 {
 	switch (obj_type)
 	{
 		case ObjType::things:
-			for (const Thing *thing : gDocument.things)
+			for (const Thing *thing : doc.things)
 				if (I_ROUND(thing->x()) == x && I_ROUND(thing->y()) == y)
 					return true;
 			return false;
 
 		case ObjType::vertices:
-			for (const Vertex *vertex : gDocument.vertices)
+			for (const Vertex *vertex : doc.vertices)
 				if (I_ROUND(vertex->x()) == x && I_ROUND(vertex->y()) == y)
 					return true;
 			return false;
@@ -1960,7 +1960,7 @@ static bool SpotInUse(ObjType obj_type, int x, int y)
 }
 
 
-static void DoEnlargeOrShrink(bool do_shrink)
+void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 {
 	// setup transform parameters...
 	float mul = 2.0;
@@ -1997,41 +1997,41 @@ static void DoEnlargeOrShrink(bool do_shrink)
 	// TODO: CONFIG ITEM (or FLAG)
 	if ((true))
 	{
-		Objs_CalcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
+		calcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
 	}
 	else
 	{
 		double lx, ly, hx, hy;
-		Objs_CalcBBox(edit.Selected, &lx, &ly, &hx, &hy);
+		calcBBox(edit.Selected, &lx, &ly, &hx, &hy);
 
 		param.mid_x = lx + (hx - lx) / 2;
 		param.mid_y = ly + (hy - ly) / 2;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *edit.Selected);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *edit.Selected);
 
-	DoScaleTwoStuff(edit.Selected, param);
+	doScaleTwoStuff(edit.Selected, param);
 
-	gDocument.basis.end();
+	doc.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
 }
 
 
-void CMD_Enlarge(Instance &inst)
+void ObjectsModule::commandEnlarge(Instance &inst)
 {
-	DoEnlargeOrShrink(false /* do_shrink */);
+	inst.level.objects.doEnlargeOrShrink(false /* do_shrink */);
 }
 
-void CMD_Shrink(Instance &inst)
+void ObjectsModule::commandShrink(Instance &inst)
 {
-	DoEnlargeOrShrink(true /* do_shrink */);
+	inst.level.objects.doEnlargeOrShrink(true /* do_shrink */);
 }
 
 
-static void Quantize_Things(selection_c *list)
+void ObjectsModule::quantizeThings(selection_c *list) const
 {
 	// remember the things which we moved
 	// (since we cannot modify the selection while we iterate over it)
@@ -2039,7 +2039,7 @@ static void Quantize_Things(selection_c *list)
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = gDocument.things[*it];
+		const Thing * T = doc.things[*it];
 
 		if (grid.OnGrid(T->x(), T->y()))
 		{
@@ -2052,10 +2052,10 @@ static void Quantize_Things(selection_c *list)
 			int new_x = grid.QuantSnapX(T->x(), pass & 1);
 			int new_y = grid.QuantSnapY(T->y(), pass & 2);
 
-			if (! SpotInUse(ObjType::things, new_x, new_y))
+			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
-				gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
+				doc.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
+				doc.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2070,7 +2070,7 @@ static void Quantize_Things(selection_c *list)
 }
 
 
-static void Quantize_Vertices(selection_c *list)
+void ObjectsModule::quantizeVertices(selection_c *list) const
 {
 	// first : do an analysis pass, remember vertices that are part
 	// of a horizontal or vertical line (and both in the selection)
@@ -2085,26 +2085,26 @@ static void Quantize_Vertices(selection_c *list)
 		V_DIAG_SE = (1 << 3)
 	};
 
-	byte * vert_modes = new byte[gDocument.numVertices()];
+	byte * vert_modes = new byte[doc.numVertices()];
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : doc.linedefs)
 	{
 		// require both vertices of the linedef to be in the selection
 		if (! (list->get(L->start) && list->get(L->end)))
 			continue;
 
 		// IDEA: make this a method of LineDef
-		double x1 = L->Start(gDocument)->x();
-		double y1 = L->Start(gDocument)->y();
-		double x2 = L->End(gDocument)->x();
-		double y2 = L->End(gDocument)->y();
+		double x1 = L->Start(doc)->x();
+		double y1 = L->Start(doc)->y();
+		double x2 = L->End(doc)->x();
+		double y2 = L->End(doc)->y();
 
-		if (L->IsHorizontal(gDocument))
+		if (L->IsHorizontal(doc))
 		{
 			vert_modes[L->start] |= V_HORIZ;
 			vert_modes[L->end]   |= V_HORIZ;
 		}
-		else if (L->IsVertical(gDocument))
+		else if (L->IsVertical(doc))
 		{
 			vert_modes[L->start] |= V_VERT;
 			vert_modes[L->end]   |= V_VERT;
@@ -2127,7 +2127,7 @@ static void Quantize_Vertices(selection_c *list)
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Vertex * V = gDocument.vertices[*it];
+		const Vertex * V = doc.vertices[*it];
 
 		if (grid.OnGrid(V->x(), V->y()))
 		{
@@ -2154,10 +2154,10 @@ static void Quantize_Vertices(selection_c *list)
 
 			// TODO: keep diagonal lines diagonal...
 
-			if (! SpotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
+			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				gDocument.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
-				gDocument.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
+				doc.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
+				doc.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2174,7 +2174,7 @@ static void Quantize_Vertices(selection_c *list)
 }
 
 
-void CMD_Quantize(Instance &inst)
+void ObjectsModule::commandQuantize(Instance &inst)
 {
 	if (edit.Selected->empty())
 	{
@@ -2193,11 +2193,11 @@ void CMD_Quantize(Instance &inst)
 	switch (edit.mode)
 	{
 		case ObjType::things:
-			Quantize_Things(edit.Selected);
+			inst.level.objects.quantizeThings(edit.Selected);
 			break;
 
 		case ObjType::vertices:
-			Quantize_Vertices(edit.Selected);
+			inst.level.objects.quantizeVertices(edit.Selected);
 			break;
 
 		// everything else merely quantizes vertices
@@ -2206,7 +2206,7 @@ void CMD_Quantize(Instance &inst)
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(edit.Selected, &verts);
 
-			Quantize_Vertices(&verts);
+			inst.level.objects.quantizeVertices(&verts);
 
 			Selection_Clear();
 			break;

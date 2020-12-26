@@ -365,7 +365,7 @@ void GoToSelection()
 		Render3D_Enable(false);
 
 	double x1, y1, x2, y2;
-	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	gDocument.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double mid_x = (x1 + x2) / 2;
 	double mid_y = (y1 + y2) / 2;
@@ -533,9 +533,9 @@ void CMD_PruneUnused(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
-	DeleteObjects(&used_sides);
-	DeleteObjects(&used_secs);
-	DeleteObjects(&used_verts);
+	inst.level.objects.del(&used_sides);
+	inst.level.objects.del(&used_secs);
+	inst.level.objects.del(&used_verts);
 
 	inst.level.basis.end();
 }

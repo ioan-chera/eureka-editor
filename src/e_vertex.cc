@@ -276,7 +276,7 @@ void VertexModule::mergeList(selection_c *verts) const
 
 	// all these vertices will be unused now, hence this call
 	// shouldn't kill any other objects.
-	DeleteObjects(verts);
+	doc.objects.del(verts);
 
 	// we NEED to keep unused vertices here, otherwise we can merge
 	// all vertices of an isolated sector and end up with NOTHING!
@@ -754,8 +754,8 @@ void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx
 	double det_mid_x, sec_mid_x;
 	double det_mid_y, sec_mid_y;
 
-	Objs_CalcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
-	Objs_CalcMiddle(edit.Selected, &sec_mid_x, &sec_mid_y);
+	doc.objects.calcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
+	doc.objects.calcMiddle(edit.Selected, &sec_mid_x, &sec_mid_y);
 
 	*dx = sec_mid_x - det_mid_x;
 	*dy = sec_mid_y - det_mid_y;
@@ -959,7 +959,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 	// determine orientation and position of the line
 
 	double x1, y1, x2, y2;
-	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	inst.level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;
@@ -1207,7 +1207,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	// determine middle point for circle
 	double x1, y1, x2, y2;
-	Objs_CalcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	inst.level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;

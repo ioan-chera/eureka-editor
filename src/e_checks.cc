@@ -411,7 +411,7 @@ static void Vertex_MergeOverlaps(Document &doc)
 	}
 
 	// nothing should reference these vertices now
-	DeleteObjects(&verts);
+	doc.objects.del(&verts);
 
 	doc.basis.end();
 
@@ -456,7 +456,7 @@ static void Vertex_RemoveUnused(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unused vertices");
 
-	DeleteObjects(&sel);
+	doc.objects.del(&sel);
 
 	doc.basis.end();
 }
@@ -878,7 +878,7 @@ static void Sectors_RemoveUnused(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unused sectors");
 
-	DeleteObjects(&sel);
+	doc.objects.del(&sel);
 
 	doc.basis.end();
 }
@@ -957,7 +957,7 @@ static void SideDefs_RemoveUnused(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unused sidedefs");
 
-	DeleteObjects(&sel);
+	doc.objects.del(&sel);
 
 	doc.basis.end();
 }
@@ -1409,7 +1409,7 @@ const void Things_RemoveUnknown(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unknown things");
 
-	DeleteObjects(&sel);
+	doc.objects.del(&sel);
 
 	doc.basis.end();
 }
@@ -1501,7 +1501,7 @@ static void Things_RemoveInVoid(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed things in the void");
 
-	DeleteObjects(&sel);
+	doc.objects.del(&sel);
 
 	doc.basis.end();
 }
@@ -1800,7 +1800,7 @@ static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &
 		if (! LD_is_blocking(L, doc))
 			continue;
 
-		if (LineTouchesBox(n, x1, y1, x2, y2))
+		if (doc.objects.lineTouchesBox(n, x1, y1, x2, y2))
 			return true;
 	}
 
@@ -2511,8 +2511,8 @@ static void LineDefs_RemoveOverlaps(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed overlapping lines");
 
-	DeleteObjects(&lines);
-	DeleteObjects(&unused_verts);
+	doc.objects.del(&lines);
+	doc.objects.del(&unused_verts);
 
 	doc.basis.end();
 }

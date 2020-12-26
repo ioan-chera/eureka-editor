@@ -173,7 +173,7 @@ void CMD_TH_Disconnect(void)
 			continue;
 
 		double mid_x, mid_y;
-		Objs_CalcMiddle(&overlaps, &mid_x, &mid_y);
+		gDocument.objects.calcMiddle(&overlaps, &mid_x, &mid_y);
 
 		int n = 0;
 		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
@@ -203,7 +203,7 @@ void CMD_TH_Merge(void)
 	}
 
 	double mid_x, mid_y;
-	Objs_CalcMiddle(edit.Selected, &mid_x, &mid_y);
+	gDocument.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
 	gDocument.basis.begin();
 	gDocument.basis.setMessageForSelection("merged", *edit.Selected);

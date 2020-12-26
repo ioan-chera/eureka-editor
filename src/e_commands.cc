@@ -563,7 +563,7 @@ static void DoBeginDrag(Instance &inst)
 	edit.drag_other_vert = -1;
 
 	// the focus is only used when grid snapping is on
-	GetDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
+	inst.level.objects.getDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
 
 	if (edit.render3d)
 	{
@@ -667,7 +667,7 @@ static void ACT_Drag_release(Instance &inst)
 	if (! edit.render3d && (dx || dy))
 	{
 		if (dragged.valid())
-			DragSingleObject(dragged, dx, dy);
+			inst.level.objects.singleDrag(dragged, dx, dy, 0);
 		else
 			inst.level.objects.move(edit.Selected, dx, dy, 0);
 	}
@@ -927,7 +927,7 @@ static void ACT_Transform_release(Instance &inst)
 	if (edit.trans_lines)
 		edit.trans_lines->clear_all();
 
-	TransformObjects(edit.trans_param);
+	inst.level.objects.transform(edit.trans_param);
 
 	Editor_ClearAction();
 
@@ -988,7 +988,7 @@ static void CMD_ACT_Transform(Instance &inst)
 
 
 	double middle_x, middle_y;
-	Objs_CalcMiddle(edit.Selected, &middle_x, &middle_y);
+	inst.level.objects.calcMiddle(edit.Selected, &middle_x, &middle_y);
 
 	edit.trans_mode = mode;
 	edit.trans_start_x = edit.map_x;
@@ -1543,7 +1543,7 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"Insert",	"Edit",
-		&CMD_Insert,
+		&ObjectsModule::commandInsert,
 		/* flags */ "/continue /nofill"
 	},
 
@@ -1589,7 +1589,7 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"CopyProperties",   "Edit",
-		&CMD_CopyProperties,
+		&ObjectsModule::commandCopyProperties,
 		/* flags */ "/reverse"
 	},
 
@@ -1706,27 +1706,27 @@ static editor_command_t  command_table[] =
 	},
 
 	{	"Mirror",	"General",
-		&CMD_Mirror,
+		&ObjectsModule::commandMirror,
 		/* flags */ NULL,
 		/* keywords */ "horiz vert"
 	},
 
 	{	"Rotate90",	"General",
-		&CMD_Rotate90,
+		&ObjectsModule::commandRotate90,
 		/* flags */ NULL,
 		/* keywords */ "cw acw"
 	},
 
 	{	"Enlarge",	"General",
-		&CMD_Enlarge
+		&ObjectsModule::commandEnlarge
 	},
 
 	{	"Shrink",	"General",
-		&CMD_Shrink
+		&ObjectsModule::commandShrink
 	},
 
 	{	"Quantize",	"General",
-		&CMD_Quantize
+		&ObjectsModule::commandQuantize
 	},
 
 	{	"ApplyTag",	"General",

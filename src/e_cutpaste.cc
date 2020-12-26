@@ -1114,7 +1114,7 @@ static bool DeleteVertex_MergeLineDefs(int v_num)
 	gDocument.basis.del(ObjType::linedefs, ld2);
 	gDocument.basis.del(ObjType::vertices, v_num);
 
-	DeleteObjects(&side_sel);
+	gDocument.objects.del(&side_sel);
 
 	gDocument.basis.end();
 
@@ -1145,7 +1145,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 			break;
 
 		default: /* OBJ_THINGS or OBJ_SIDEDEFS */
-			DeleteObjects(list);
+			gDocument.objects.del(list);
 			return;
 	}
 
@@ -1192,7 +1192,7 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 		selection_c thing_sel(ObjType::things);
 
 		ConvertSelection(&sec_sel, &thing_sel);
-		DeleteObjects(&thing_sel);
+		gDocument.objects.del(&thing_sel);
 	}
 
 	// perform linedef fixups here (when sectors get removed)
@@ -1209,10 +1209,10 @@ void DeleteObjects_WithUnused(selection_c *list, bool keep_things,
 	}
 
 	// actually delete stuff, in the correct order
-	DeleteObjects(&line_sel);
-	DeleteObjects(&side_sel);
-	DeleteObjects(&vert_sel);
-	DeleteObjects( &sec_sel);
+	gDocument.objects.del(&line_sel);
+	gDocument.objects.del(&side_sel);
+	gDocument.objects.del(&vert_sel);
+	gDocument.objects.del( &sec_sel);
 }
 
 
