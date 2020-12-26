@@ -274,11 +274,11 @@ public:
 #define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
 
-UI_FindAndReplace::UI_FindAndReplace(int X, int Y, int W, int H) :
+UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H) :
 	Fl_Group(X, Y, W, H, NULL),
 	cur_obj(),
 	find_numbers(new number_group_c),
-	 tag_numbers(new number_group_c)
+	 tag_numbers(new number_group_c), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -1208,7 +1208,7 @@ bool UI_FindAndReplace::FindNext()
 
 	if (cur_obj.type != edit.mode)
 	{
-		Editor_ChangeMode_Raw(cur_obj.type);
+		Editor_ChangeMode_Raw(inst, cur_obj.type);
 	}
 
 
@@ -1229,7 +1229,7 @@ bool UI_FindAndReplace::FindNext()
 		}
 	}
 
-	Selection_Clear();
+	Selection_Clear(inst);
 
 
 	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
@@ -1253,7 +1253,7 @@ bool UI_FindAndReplace::FindNext()
 				rep_value->do_callback();
 			}
 
-			GoToObject(cur_obj);
+			GoToObject(inst, cur_obj);
 
 			Status_Set("found #%d", idx);
 			return true;
@@ -1381,7 +1381,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	ComputeFlagMask();
 
 	if (cur_obj.type != edit.mode)
-		Editor_ChangeMode_Raw(cur_obj.type);
+		Editor_ChangeMode_Raw(inst, cur_obj.type);
 
 	int replace_tex_id = 0;
 
@@ -1433,7 +1433,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (count > 0)
 	{
-		GoToSelection();
+		GoToSelection(inst);
 		edit.error_mode = true;
 	}
 
@@ -1443,7 +1443,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 		rep_value->do_callback();
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 

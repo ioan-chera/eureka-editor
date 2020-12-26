@@ -764,7 +764,7 @@ void LinedefModule::commandAlign(Instance &inst)
 	{
 		Beep("no visible surfaces");
 		if (unselect == SelectHighlight::unselect)
-			Selection_Clear(true /* nosave */);
+			Selection_Clear(inst, true /* nosave */);
 		return;
 	}
 
@@ -780,7 +780,7 @@ void LinedefModule::commandAlign(Instance &inst)
 	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 //------------------------------------------------------------------------
@@ -868,7 +868,7 @@ void LinedefModule::commandFlip(Instance &inst)
 	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 void LinedefModule::commandSwapSides(Instance &inst)
@@ -891,7 +891,7 @@ void LinedefModule::commandSwapSides(Instance &inst)
 	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 //
@@ -1002,7 +1002,7 @@ void LinedefModule::commandSplitHalf(Instance &inst)
 
 	if (unselect == SelectHighlight::unselect)
 	{
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 	}
 	else if (new_count > 0)
 	{
@@ -1179,7 +1179,7 @@ void LinedefModule::commandMergeTwo(Instance &inst)
 		return;
 	}
 
-	Selection_Clear(true);
+	Selection_Clear(inst, true);
 
 
 	inst.level.basis.begin();

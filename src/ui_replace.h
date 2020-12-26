@@ -100,7 +100,7 @@ private:
 	Fl_Check_Button *o_two_sided;
 
 public:
-	UI_FindAndReplace(int X, int Y, int W, int H);
+	UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H);
 	virtual ~UI_FindAndReplace();
 
 	void Open();
@@ -185,6 +185,8 @@ private:
 
 	static void filter_toggle_callback(Fl_Widget *w, void *data);
 	static void     tag_input_callback(Fl_Widget *w, void *data);
+
+	Instance &inst;
 };
 
 

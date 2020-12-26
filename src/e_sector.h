@@ -132,7 +132,7 @@ public:
 	static void commandFloor(Instance &inst);
 	static void commandCeiling(Instance &inst);
 	static void commandLight(Instance &inst);
-	static void commandMerge();
+	static void commandMerge(Instance &inst);
 	static void commandSwapFlats(Instance &inst);
 
 private:

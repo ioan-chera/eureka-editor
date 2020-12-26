@@ -27,6 +27,8 @@
 #include "e_sector.h"
 #include "e_vertex.h"
 
+struct Instance;
+
 //
 // The document associated with a file. All stuff will go here
 //
@@ -50,7 +52,7 @@ struct Document
 	SectorModule secmod;
 	ObjectsModule objects;
 
-	Document() : basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this)
+	explicit Document(Instance &inst) : basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this), inst(inst)
 	{
 	}
 
@@ -100,6 +102,10 @@ struct Document
 
 	int numObjects(ObjType type) const;
 	void getLevelChecksum(crc32_c &crc) const;
+
+private:
+	friend class DocumentModule;
+	Instance &inst;	// make this private because we don't want to access it from Document
 };
 
 #endif /* Document_hpp */

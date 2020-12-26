@@ -550,7 +550,7 @@ static void AdjustOfs_Finish()
 	Editor_ClearAction();
 }
 
-static void AdjustOfs_Delta(int dx, int dy)
+static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 {
 	if (! edit.adjust_bucket)
 		return;
@@ -581,7 +581,7 @@ static void AdjustOfs_Delta(int dx, int dy)
 	edit.adjust_dx -= dx * factor * dx_factor;
 	edit.adjust_dy -= dy * factor * dy_factor;
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -713,7 +713,7 @@ void Render3D_Setup()
 }
 
 
-void Render3D_Enable(bool _enable)
+void Render3D_Enable(Instance &inst, bool _enable)
 {
 	Editor_ClearAction();
 
@@ -742,11 +742,11 @@ void Render3D_Enable(bool _enable)
 		instance::main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
-void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
+void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 {
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
@@ -796,7 +796,7 @@ void Render3D_ScrollMap(int dx, int dy, keycode_t mod)
 	}
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -955,7 +955,7 @@ static void DragThings_Update()
 	edit.drag_cur_y = edit.drag_start_y + new_y - old_y;
 }
 
-void Render3D_DragThings()
+void Render3D_DragThings(Instance &inst)
 {
 	double dx = edit.drag_cur_x - edit.drag_start_x;
 	double dy = edit.drag_cur_y - edit.drag_start_y;
@@ -970,14 +970,14 @@ void Render3D_DragThings()
 		selection_c sel(ObjType::things);
 		sel.set(edit.dragged.num);
 
-		gDocument.objects.move(&sel, dx, dy, dz);
+		inst.level.objects.move(&sel, dx, dy, dz);
 	}
 	else
 	{
-		gDocument.objects.move(edit.Selected, dx, dy, dz);
+		inst.level.objects.move(edit.Selected, dx, dy, dz);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -991,12 +991,12 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 
 	if (edit.is_panning)
 	{
-		Editor_ScrollMap(0, dx, dy, mod);
+		Editor_ScrollMap(inst, 0, dx, dy, mod);
 		return;
 	}
 	else if (edit.action == ACT_ADJUST_OFS)
 	{
-		AdjustOfs_Delta(dx, dy);
+		AdjustOfs_Delta(inst, dx, dy);
 		return;
 	}
 
@@ -1027,7 +1027,7 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 		return;
 	}
 
-	UpdateHighlight();
+	UpdateHighlight(inst);
 }
 
 
@@ -1055,7 +1055,7 @@ void Render3D_UpdateHighlight()
 }
 
 
-void Render3D_Navigate()
+void Render3D_Navigate(Instance &inst)
 {
 	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
@@ -1103,7 +1103,7 @@ void Render3D_Navigate()
 	}
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1144,7 +1144,7 @@ static int GrabSelectedThing()
 }
 
 
-static void StoreSelectedThing(int new_type)
+static void StoreSelectedThing(Instance &inst, int new_type)
 {
 	// this code is similar to code in UI_Thing::type_callback(),
 	// but here we must handle a highlighted object.
@@ -1156,18 +1156,18 @@ static void StoreSelectedThing(int new_type)
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("pasted type of", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("pasted type of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		gDocument.basis.changeThing(*it, Thing::F_TYPE, new_type);
+		inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 
 	Status_Set("pasted type %d", new_type);
 }
@@ -1229,7 +1229,7 @@ static int GrabSelectedFlat()
 }
 
 
-static void StoreSelectedFlat(int new_tex)
+static void StoreSelectedFlat(Instance &inst, int new_tex)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1238,30 +1238,30 @@ static void StoreSelectedFlat(int new_tex)
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("pasted flat to", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("pasted flat to", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+			inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
+			inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 
 	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
-static void StoreDefaultedFlats()
+static void StoreDefaultedFlats(Instance &inst)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1273,24 +1273,24 @@ static void StoreDefaultedFlats()
 	int floor_tex = BA_InternaliseString(default_floor_tex);
 	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			gDocument.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
+			inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			gDocument.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
+			inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 
 	Status_Set("defaulted flats");
 }
@@ -1375,7 +1375,7 @@ static int GrabSelectedTexture()
 }
 
 
-static void StoreSelectedTexture(int new_tex)
+static void StoreSelectedTexture(Instance &inst, int new_tex)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1384,12 +1384,12 @@ static void StoreSelectedTexture(int new_tex)
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("pasted tex to", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("pasted tex to", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = gDocument.linedefs[*it];
+		const LineDef *L = inst.level.linedefs[*it];
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (L->NoSided())
@@ -1397,35 +1397,35 @@ static void StoreSelectedTexture(int new_tex)
 
 		if (L->OneSided())
 		{
-			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 			continue;
 		}
 
 		/* right side */
 		if (parts == 1 || (parts & PART_RT_LOWER))
-			gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_RT_UPPER))
-			gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 		if (parts & PART_RT_RAIL)
-			gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 
 		/* left side */
 		if (parts == 1 || (parts & PART_LF_LOWER))
-			gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_LF_UPPER))
-			gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
 
 		if (parts & PART_LF_RAIL)
-			gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
+			inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 
 	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
@@ -1461,20 +1461,20 @@ void Render3D_CB_Copy()
 }
 
 
-void Render3D_CB_Paste()
+void Render3D_CB_Paste(Instance &inst)
 {
 	switch (edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(Texboard_GetThing());
+		StoreSelectedThing(inst, Texboard_GetThing());
 		break;
 
 	case ObjType::sectors:
-		StoreSelectedFlat(Texboard_GetFlatNum());
+		StoreSelectedFlat(inst, Texboard_GetFlatNum());
 		break;
 
 	case ObjType::linedefs:
-		StoreSelectedTexture(Texboard_GetTexNum());
+		StoreSelectedTexture(inst, Texboard_GetTexNum());
 		break;
 
 	default:
@@ -1483,22 +1483,22 @@ void Render3D_CB_Paste()
 }
 
 
-void Render3D_CB_Cut()
+void Render3D_CB_Cut(Instance &inst)
 {
 	// this is repurposed to set the default texture/thing
 
 	switch (edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(default_thing);
+		StoreSelectedThing(inst, default_thing);
 		break;
 
 	case ObjType::sectors:
-		StoreDefaultedFlats();
+		StoreDefaultedFlats(inst);
 		break;
 
 	case ObjType::linedefs:
-			StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
+			StoreSelectedTexture(inst, BA_InternaliseString(default_wall_tex));
 		break;
 
 	default:
@@ -1593,7 +1593,7 @@ static void R3D_Forward(Instance &inst)
 	r_view.y += r_view.Sin * dist;
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void R3D_Backward(Instance &inst)
@@ -1604,7 +1604,7 @@ static void R3D_Backward(Instance &inst)
 	r_view.y -= r_view.Sin * dist;
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void R3D_Left(Instance &inst)
@@ -1615,7 +1615,7 @@ static void R3D_Left(Instance &inst)
 	r_view.y += r_view.Cos * dist;
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void R3D_Right(Instance &inst)
@@ -1626,7 +1626,7 @@ static void R3D_Right(Instance &inst)
 	r_view.y -= r_view.Cos * dist;
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void R3D_Up(Instance &inst)
@@ -1643,7 +1643,7 @@ static void R3D_Up(Instance &inst)
 
 	r_view.z += dist;
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void R3D_Down(Instance &inst)
@@ -1660,7 +1660,7 @@ static void R3D_Down(Instance &inst)
 
 	r_view.z -= dist;
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1673,7 +1673,7 @@ static void R3D_Turn(Instance &inst)
 
 	r_view.SetAngle(static_cast<float>(r_view.angle + angle));
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1681,7 +1681,7 @@ static void R3D_DropToFloor(Instance &inst)
 {
 	r_view.FindGroundZ();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1929,7 +1929,7 @@ static void R3D_Set(Instance &inst)
 		return;
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1965,7 +1965,7 @@ static void R3D_Toggle(Instance &inst)
 		return;
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1992,7 +1992,7 @@ static void R3D_WHEEL_Move(Instance &inst)
 	r_view.y += speed * (r_view.Sin * dy - r_view.Cos * dx);
 
 	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 

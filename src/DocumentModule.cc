@@ -16,22 +16,9 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef INSTANCE_H_
-#define INSTANCE_H_
-
+#include "DocumentModule.h"
 #include "Document.h"
 
-//
-// An instance with a document, holding all other associated data, such as the window reference, the
-// wad list.
-//
-struct Instance
+DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 {
-	Document level{*this};	// level data proper
-};
-
-extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
-// temporary reference to instance's unique level (until we remove its usage)
-static Document &gDocument = gInstance.level;
-
-#endif
+}

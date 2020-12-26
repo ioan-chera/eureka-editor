@@ -46,10 +46,10 @@ public:
 
 	/* commands */
 
-	static void commandMerge();
-	static void commandDisconnect();
-	static void commandLineDisconnect();
-	static void commandSectorDisconnect();
+	static void commandMerge(Instance &inst);
+	static void commandDisconnect(Instance &inst);
+	static void commandLineDisconnect(Instance &inst);
+	static void commandSectorDisconnect(Instance &inst);
 	static void commandShapeLine(Instance &inst);
 	static void commandShapeArc(Instance &inst);
 

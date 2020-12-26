@@ -286,7 +286,7 @@ void VertexModule::mergeList(selection_c *verts) const
 }
 
 
-void VertexModule::commandMerge()
+void VertexModule::commandMerge(Instance &inst)
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -299,14 +299,14 @@ void VertexModule::commandMerge()
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("merged", *edit.Selected);
 
-	gDocument.vertmod.mergeList(edit.Selected);
+	inst.level.vertmod.mergeList(edit.Selected);
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
-	Selection_Clear(true /* no_save */);
+	Selection_Clear(inst, true /* no_save */);
 }
 
 
@@ -345,7 +345,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 	if (v_other >= 0)
 	{
-		Selection_Clear(true /* no_save */);
+		Selection_Clear(inst, true /* no_save */);
 
 		// delete highest numbered one  [ so the other index remains valid ]
 		if (v_num < v_other)
@@ -491,7 +491,7 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 }
 
 
-void VertexModule::commandDisconnect()
+void VertexModule::commandDisconnect(Instance &inst)
 {
 	if (edit.Selected->empty())
 	{
@@ -506,20 +506,20 @@ void VertexModule::commandDisconnect()
 
 	bool seen_one = false;
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		int v_num = *it;
 
 		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = gDocument.vertmod.howManyLinedefs(*it);
+		int num_lines = inst.level.vertmod.howManyLinedefs(*it);
 
 		if (num_lines < 2)
 			continue;
 
-		gDocument.vertmod.doDisconnectVertex(v_num, num_lines);
+		inst.level.vertmod.doDisconnectVertex(v_num, num_lines);
 
 		seen_one = true;
 	}
@@ -527,9 +527,9 @@ void VertexModule::commandDisconnect()
 	if (! seen_one)
 		Beep("Nothing was disconnected");
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
-	Selection_Clear(true);
+	Selection_Clear(inst, true);
 }
 
 
@@ -584,7 +584,7 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 }
 
 
-void VertexModule::commandLineDisconnect()
+void VertexModule::commandLineDisconnect(Instance &inst)
 {
 	// Note: the logic here is significantly different than the logic
 	//       in VT_Disconnect, since we want to keep linedefs in the
@@ -602,22 +602,22 @@ void VertexModule::commandLineDisconnect()
 
 	bool seen_one = false;
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		gDocument.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
-		gDocument.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
+		inst.level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
+		inst.level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	if (! seen_one)
 		Beep("Nothing was disconnected");
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* no save */);
+		Selection_Clear(inst, true /* no save */);
 }
 
 
@@ -784,9 +784,9 @@ void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx
 }
 
 
-void VertexModule::commandSectorDisconnect(void)
+void VertexModule::commandSectorDisconnect(Instance &inst)
 {
-	if (gDocument.numVertices() == 0)
+	if (inst.level.numVertices() == 0)
 	{
 		Beep("No sectors to disconnect");
 		return;
@@ -803,53 +803,53 @@ void VertexModule::commandSectorDisconnect(void)
 
 	// collect all vertices which need to be detached
 	selection_c detach_verts(ObjType::vertices);
-	gDocument.vertmod.verticesOfDetachableSectors(detach_verts);
+	inst.level.vertmod.verticesOfDetachableSectors(detach_verts);
 
 	if (detach_verts.empty())
 	{
 		Beep("Already disconnected");
 		if (unselect == SelectHighlight::unselect)
-			Selection_Clear(true /* nosave */);
+			Selection_Clear(inst, true /* nosave */);
 		return;
 	}
 
 
 	// determine vector to move the detach coords
 	double move_dx, move_dy;
-	gDocument.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
+	inst.level.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
 
-	int * mapping = new int[gDocument.numVertices()];
+	int * mapping = new int[inst.level.numVertices()];
 
-	for (n = 0 ; n < gDocument.numVertices(); n++)
+	for (n = 0 ; n < inst.level.numVertices(); n++)
 		mapping[n] = -1;
 
 	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 	{
-		int new_v = gDocument.basis.addNew(ObjType::vertices);
+		int new_v = inst.level.basis.addNew(ObjType::vertices);
 
 		mapping[*it] = new_v;
 
-		Vertex *newbie = gDocument.vertices[new_v];
+		Vertex *newbie = inst.level.vertices[new_v];
 
-		*newbie = *gDocument.vertices[*it];
+		*newbie = *inst.level.vertices[*it];
 	}
 
 	// update linedefs, creating new ones where necessary
 	// (go backwards so we don't visit newly created lines)
 
-	for (n = gDocument.numLinedefs() -1 ; n >= 0 ; n--)
+	for (n = inst.level.numLinedefs() -1 ; n >= 0 ; n--)
 	{
-		const LineDef * L = gDocument.linedefs[n];
+		const LineDef * L = inst.level.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(gDocument)  && edit.Selected->get(L->Left(gDocument)->sector);
-		bool right_in = L->Right(gDocument) && edit.Selected->get(L->Right(gDocument)->sector);
+		bool  left_in = L->Left(inst.level)  && edit.Selected->get(L->Left(inst.level)->sector);
+		bool right_in = L->Right(inst.level) && edit.Selected->get(L->Right(inst.level)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -861,15 +861,15 @@ void VertexModule::commandSectorDisconnect(void)
 
 		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
-			gDocument.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
+			inst.level.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
 		}
 		else
 		{
 			if (start2 >= 0)
-				gDocument.basis.changeLinedef(n, LineDef::F_START, start2);
+				inst.level.basis.changeLinedef(n, LineDef::F_START, start2);
 
 			if (end2 >= 0)
-				gDocument.basis.changeLinedef(n, LineDef::F_END, end2);
+				inst.level.basis.changeLinedef(n, LineDef::F_END, end2);
 		}
 	}
 
@@ -883,16 +883,16 @@ void VertexModule::commandSectorDisconnect(void)
 
 	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = gDocument.vertices[*it];
+		const Vertex * V = inst.level.vertices[*it];
 
-		gDocument.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-		gDocument.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
+		inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+		inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 

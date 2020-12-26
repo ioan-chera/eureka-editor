@@ -961,7 +961,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 	int lev_num = wad->LevelFind(level);
 
 	if (lev_num < 0)
-		FatalError("No such map: %s\n", level.c_str());
+		ThrowException("No such map: %s\n", level.c_str());
 
 	LoadLevelNum(wad, lev_num);
 
@@ -986,7 +986,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 
 		gDocument.getLevelChecksum(adler_crc);
 
-		if (! M_LoadUserState())
+		if (! M_LoadUserState(inst))
 		{
 			M_DefaultUserState(inst);
 		}
@@ -996,7 +996,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 
 	Status_Set("Loaded %s", instance::Level_name.c_str());
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 

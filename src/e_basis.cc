@@ -1067,7 +1067,7 @@ void Basis::doProcessChangeStatus() const
 	{
 		// TODO: the other modules
 		MadeChanges = 1;
-		RedrawMap();
+		RedrawMap(inst);
 	}
 
 	Clipboard_NotifyEnd();

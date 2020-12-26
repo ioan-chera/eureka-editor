@@ -209,17 +209,17 @@ void CMD_LIN_SelectPath(Instance &inst)
 	SelectLinesInHalfPath(start_L, inst.level.linedefs[start_L]->start, seen, match);
 	SelectLinesInHalfPath(start_L, inst.level.linedefs[start_L]->end,   seen, match);
 
-	Editor_ClearErrorMode();
+	Editor_ClearErrorMode(inst);
 
 	if (fresh_sel)
-		Selection_Clear();
+		Selection_Clear(inst);
 
 	if (unset_them)
 		edit.Selected->unmerge(seen);
 	else
 		edit.Selected->merge(seen);
 
-	 RedrawMap();
+	 RedrawMap(inst);
 }
 
 
@@ -342,27 +342,27 @@ void CMD_SEC_SelectGroup(Instance &inst)
 	{ }
 
 
-	Editor_ClearErrorMode();
+	Editor_ClearErrorMode(inst);
 
 	if (fresh_sel)
-		Selection_Clear();
+		Selection_Clear(inst);
 
 	if (unset_them)
 		edit.Selected->unmerge(seen);
 	else
 		edit.Selected->merge(seen);
 
-	 RedrawMap();
+	 RedrawMap(inst);
 }
 
 
 //------------------------------------------------------------------------
 
 
-void GoToSelection()
+void GoToSelection(Instance &inst)
 {
 	if (edit.render3d)
-		Render3D_Enable(false);
+		Render3D_Enable(inst, false);
 
 	double x1, y1, x2, y2;
 	gDocument.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
@@ -397,28 +397,28 @@ void GoToSelection()
 		grid.AdjustScale(+1);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
-void GoToErrors()
+void GoToErrors(Instance &inst)
 {
 	edit.error_mode = true;
 
-	GoToSelection();
+	GoToSelection(inst);
 }
 
 
 //
 // centre the map around the object and zoom in if necessary
 //
-void GoToObject(const Objid& objid)
+void GoToObject(Instance &inst, const Objid& objid)
 {
-	Selection_Clear();
+	Selection_Clear(inst);
 
 	edit.Selected->set(objid.num);
 
-	GoToSelection();
+	GoToSelection(inst);
 }
 
 
@@ -444,51 +444,7 @@ void CMD_JumpToObject(Instance &inst)
 	// this is guaranteed by the dialog
 	SYS_ASSERT(num < total);
 
-	GoToObject(Objid(edit.mode, num));
-}
-
-
-void CMD_NextObject()
-{
-	if (edit.Selected->count_obj() != 1)
-	{
-		Beep("Next: need a single object");
-		return;
-	}
-
-	int num = edit.Selected->find_first();
-
-	if (num >= gDocument.numObjects(edit.mode))
-	{
-		Beep("Next: no more objects");
-		return;
-	}
-
-	num += 1;
-
-	GoToObject(Objid(edit.mode, num));
-}
-
-
-void CMD_PrevObject()
-{
-	if (edit.Selected->count_obj() != 1)
-	{
-		Beep("Prev: need a single object");
-		return;
-	}
-
-	int num = edit.Selected->find_first();
-
-	if (num <= 0)
-	{
-		Beep("Prev: no more objects");
-		return;
-	}
-
-	num -= 1;
-
-	GoToObject(Objid(edit.mode, num));
+	GoToObject(inst, Objid(edit.mode, num));
 }
 
 

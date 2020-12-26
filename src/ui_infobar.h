@@ -27,7 +27,7 @@ class Fl_Toggle_Button;
 class UI_InfoBar : public Fl_Group
 {
 public:
-	UI_InfoBar(int X, int Y, int W, int H, const char *label = NULL);
+	UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_InfoBar();
 
 private:
@@ -73,6 +73,8 @@ private:
 	static void grid_callback(Fl_Widget *, void *);
 	static void snap_callback(Fl_Widget *, void *);
 	static void ratio_callback(Fl_Widget *, void *);
+
+	Instance &inst;
 };
 
 

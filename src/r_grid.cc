@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 
@@ -33,8 +34,8 @@
 #include "m_config.h"
 #include "ui_window.h"
 
-
-Grid_State_c  grid;
+// TODO: make this PART of instance
+Grid_State_c  grid(gInstance);
 
 // config items
 int  config::grid_default_size = 64;
@@ -49,11 +50,11 @@ int  config::grid_ratio_high = 3;  // custom ratio (high must be >= low)
 int  config::grid_ratio_low  = 1;  // (low must be > 0)
 
 
-Grid_State_c::Grid_State_c() :
+Grid_State_c::Grid_State_c(Instance &inst) :
 	step(64 /* dummy */), snap(true),
 	ratio(0), shown(true),
 	orig_x(0.0), orig_y(0.0),
-	Scale(1.0)
+	Scale(1.0), inst(inst)
 { }
 
 Grid_State_c::~Grid_State_c()
@@ -108,7 +109,7 @@ void Grid_State_c::MoveTo(double x, double y)
 		instance::main_win->scroll->AdjustPos();
 		instance::main_win->canvas->PointerPos();
 
-		RedrawMap();
+		RedrawMap(inst);
 	}
 }
 
@@ -415,7 +416,7 @@ void Grid_State_c::RefocusZoom(double map_x, double map_y, float before_Scale)
 	if (instance::main_win)
 	{
 		instance::main_win->canvas->PointerPos();
-		RedrawMap();
+		RedrawMap(inst);
 	}
 }
 
@@ -459,7 +460,7 @@ void Grid_State_c::RawSetScale(int i)
 	instance::main_win->canvas->PointerPos();
 	instance::main_win->info_bar->SetScale(Scale);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -486,7 +487,7 @@ void Grid_State_c::RawSetStep(int i)
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -501,7 +502,7 @@ void Grid_State_c::ForceStep(int new_step)
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -524,7 +525,7 @@ void Grid_State_c::StepFromScale()
 
 	step = grid_values[result];
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -614,14 +615,14 @@ void Grid_State_c::RawSetShown(bool new_value)
 	if (! shown)
 	{
 		instance::main_win->info_bar->SetGrid(-1);
-		RedrawMap();
+		RedrawMap(inst);
 		return;
 	}
 
 	// update the info-bar
 	instance::main_win->info_bar->SetGrid(step);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -652,7 +653,7 @@ void Grid_State_c::SetSnap(bool enable)
 	if (instance::main_win)
 		instance::main_win->info_bar->UpdateSnap();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 void Grid_State_c::ToggleSnap()
@@ -677,7 +678,7 @@ void Grid_State_c::NearestScale(double want_scale)
 }
 
 
-bool Grid_ParseUser(const std::vector<SString> &tokens)
+bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "map_pos" && tokens.size() >= 4)
 	{
@@ -690,7 +691,7 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 
 		grid.NearestScale(new_scale);
 
-		RedrawMap();
+		RedrawMap(inst);
 		return true;
 	}
 
@@ -704,7 +705,7 @@ bool Grid_ParseUser(const std::vector<SString> &tokens)
 
 		grid.RawSetShown(t_shown);
 
-		RedrawMap();
+		RedrawMap(inst);
 
 		return true;
 	}

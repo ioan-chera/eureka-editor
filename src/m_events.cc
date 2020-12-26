@@ -105,7 +105,7 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 
 
 // this is only used for mouse scrolling
-void Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
+void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
 {
 	// started?
 	if (mode < 0)
@@ -131,7 +131,7 @@ void Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 
 	if (edit.render3d)
 	{
-		Render3D_ScrollMap(dx, dy, mod);
+		Render3D_ScrollMap(inst, dx, dy, mod);
 	}
 	else
 	{
@@ -161,7 +161,7 @@ void Editor_ClearNav()
 }
 
 
-static void Navigate2D()
+static void Navigate2D(Instance &inst)
 {
 	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
@@ -188,7 +188,7 @@ static void Navigate2D()
 		grid.Scroll(delta_x, delta_y);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -228,12 +228,12 @@ void Nav_Clear()
 }
 
 
-void Nav_Navigate()
+void Nav_Navigate(Instance &inst)
 {
 	if (edit.render3d)
-		Render3D_Navigate();
+		Render3D_Navigate(inst);
 	else
-		Navigate2D();
+		Navigate2D(inst);
 }
 
 
@@ -434,7 +434,7 @@ extern void CheckBeginDrag(Instance &inst);
 extern void Transform_Update();
 
 
-static void EV_EnterWindow()
+static void EV_EnterWindow(Instance &inst)
 {
 	if (!global::app_has_focus)
 	{
@@ -452,11 +452,11 @@ static void EV_EnterWindow()
 	if (Fl::focus() != foc)
 		foc->take_focus();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
-static void EV_LeaveWindow()
+static void EV_LeaveWindow(Instance &inst)
 {
 	// ignore FL_LEAVE event when doing a popup operation menu,
 	// otherwise we lose the highlight and kill drawing mode.
@@ -470,11 +470,11 @@ static void EV_LeaveWindow()
 		Editor_ClearAction();
 
 	// this will update (disable) any current highlight
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
-void EV_EscapeKey()
+void EV_EscapeKey(Instance &inst)
 {
 	Nav_Clear();
 	ClearStickyMod();
@@ -486,8 +486,8 @@ void EV_EscapeKey()
 	edit.split_line.clear();
 	edit.draw_from.clear();
 
-	UpdateHighlight();
-	RedrawMap();
+	UpdateHighlight(inst);
+	RedrawMap(inst);
 }
 
 
@@ -503,7 +503,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 
 	if (edit.is_panning)
 	{
-		Editor_ScrollMap(0, dx, dy, mod);
+		Editor_ScrollMap(inst, 0, dx, dy, mod);
 		return;
 	}
 
@@ -518,7 +518,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	if (edit.action == ACT_DRAW_LINE)
 	{
 		// this calls UpdateHighlight() which updates edit.draw_to_x/y
-		RedrawMap();
+		RedrawMap(inst);
 		return;
 	}
 
@@ -542,7 +542,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta
 		if (edit.mode == ObjType::vertices && edit.dragged.valid())
-			UpdateHighlight();
+			UpdateHighlight(inst);
 
 		instance::main_win->canvas->redraw();
 		return;
@@ -555,7 +555,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	}
 
 	// in general, just update the highlight, split-line (etc)
-	UpdateHighlight();
+	UpdateHighlight(inst);
 }
 
 
@@ -764,11 +764,11 @@ int EV_HandleEvent(Instance &inst, int event)
 			return 1;
 
 		case FL_ENTER:
-			EV_EnterWindow();
+			EV_EnterWindow(inst);
 			return 1;
 
 		case FL_LEAVE:
-			EV_LeaveWindow();
+			EV_LeaveWindow(inst);
 			return 1;
 
 		case FL_KEYDOWN:

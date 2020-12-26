@@ -118,7 +118,7 @@ void SectorModule::commandFloor(Instance &inst)
 	instance::main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -156,7 +156,7 @@ void SectorModule::commandCeiling(Instance &inst)
 	instance::main_win->sec_box->UpdateField(Sector::F_CEILH);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -226,7 +226,7 @@ void SectorModule::commandLight(Instance &inst)
 	inst.level.secmod.sectorsAdjustLight(diff);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -259,7 +259,7 @@ void SectorModule::commandSwapFlats(Instance &inst)
 	instance::main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -295,7 +295,7 @@ void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
 }
 
 
-void SectorModule::commandMerge()
+void SectorModule::commandMerge(Instance &inst)
 {
 	// need a selection
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
@@ -325,22 +325,22 @@ void SectorModule::commandMerge()
 	selection_c common_lines(ObjType::linedefs);
 	selection_c unused_secs (ObjType::sectors);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("merged", *edit.Selected);
 
 	// keep the properties of the first selected sector
 	if (new_sec != first)
 	{
-		const Sector *ref = gDocument.sectors[first];
+		const Sector *ref = inst.level.sectors[first];
 
-		gDocument.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-		gDocument.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-		gDocument.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-		gDocument.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+		inst.level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
+		inst.level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+		inst.level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
+		inst.level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
 
-		gDocument.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
-		gDocument.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
-		gDocument.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+		inst.level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
+		inst.level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
+		inst.level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
@@ -350,24 +350,24 @@ void SectorModule::commandMerge()
 		if (old_sec == new_sec)
 			continue;
 
-		gDocument.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
+		inst.level.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
 
-		gDocument.secmod.replaceSectorRefs(old_sec, new_sec);
+		inst.level.secmod.replaceSectorRefs(old_sec, new_sec);
 
 		unused_secs.set(old_sec);
 	}
 
-	gDocument.objects.del(&unused_secs);
+	inst.level.objects.del(&unused_secs);
 
 	if (! keep_common_lines)
 	{
-		DeleteObjects_WithUnused(gDocument, &common_lines, false, false, false);
+		DeleteObjects_WithUnused(inst.level, &common_lines, false, false, false);
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	// re-select the final sector
-	Selection_Clear(true /* no_save */);
+	Selection_Clear(inst, true /* no_save */);
 
 	edit.Selected->set(new_sec);
 }

@@ -117,7 +117,7 @@ void ObjectsModule::createSquare(int model) const
 	}
 
 	// select it
-	Selection_Clear();
+	Selection_Clear(inst);
 
 	edit.Selected->set(new_sec);
 }
@@ -160,7 +160,7 @@ void ObjectsModule::insertThing() const
 
 
 	// select it
-	Selection_Clear();
+	Selection_Clear(inst);
 
 	edit.Selected->set(new_t);
 }
@@ -562,7 +562,7 @@ begin_drawing:
 	if (edit.action == ACT_NOTHING && !closed_a_loop &&
 		old_vert >= 0 && new_vert < 0)
 	{
-		Selection_Clear();
+		Selection_Clear(inst);
 
 		edit.draw_from = Objid(ObjType::vertices, old_vert);
 		edit.Selected->set(old_vert);
@@ -592,7 +592,7 @@ begin_drawing:
 		ConvertSelection(&sel, edit.Selected);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -645,11 +645,11 @@ void ObjectsModule::insertSector() const
 	// select the new sector
 	if (ok)
 	{
-		Selection_Clear();
+		Selection_Clear(inst);
 		edit.Selected->set(doc.numSectors() - 1);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -685,7 +685,7 @@ void ObjectsModule::commandInsert(Instance &inst)
 			break;
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1601,7 +1601,7 @@ void ObjectsModule::commandMirror(Instance &inst)
 	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -1704,7 +1704,7 @@ void ObjectsModule::commandRotate90(Instance &inst)
 	inst.level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -2016,7 +2016,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	doc.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -2208,7 +2208,7 @@ void ObjectsModule::commandQuantize(Instance &inst)
 
 			inst.level.objects.quantizeVertices(&verts);
 
-			Selection_Clear();
+			Selection_Clear(inst);
 			break;
 		}
 	}

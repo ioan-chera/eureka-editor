@@ -530,7 +530,8 @@ int Main_key_handler(int event)
 
 	if (Fl::event_key() == FL_Escape)
 	{
-		EV_EscapeKey();
+		// TODO: use the currently active instance instead
+		EV_EscapeKey(gInstance);
 		return 1;
 	}
 
@@ -746,13 +747,15 @@ SString Main_FileOpFolder()
 
 void Main_Loop()
 {
-	RedrawMap();
+	// TODO: must think this through
+	RedrawMap(gInstance);
 
 	for (;;)
 	{
+		// TODO: determine the active instance
 		if (edit.is_navigating)
 		{
-			Nav_Navigate();
+			Nav_Navigate(gInstance);
 
 			Fl::wait(0);
 

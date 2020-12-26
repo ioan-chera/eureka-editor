@@ -49,12 +49,12 @@ void Editor_SetAction(editor_action_e new_action);
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 void Editor_UpdateFromScroll();
-void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
+void Editor_ScrollMap(Instance &inst, int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
 
 /* raw input handling */
 
 int EV_HandleEvent(Instance &inst, int event);
-void EV_EscapeKey();
+void EV_EscapeKey(Instance &inst);
 
 void ClearStickyMod();
 
@@ -69,7 +69,7 @@ extern int wheel_dy;
 typedef void (* nav_release_func_t)(Instance &inst);
 
 void Nav_Clear();
-void Nav_Navigate();
+void Nav_Navigate(Instance &inst);
 bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func);
 bool Nav_ActionKey(Instance &inst, keycode_t key, nav_release_func_t func);
 

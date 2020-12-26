@@ -74,7 +74,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	}
 
 
-	info_bar = new UI_InfoBar(0, ey - 31, w(), 31);
+	info_bar = new UI_InfoBar(mInstance, 0, ey - 31, w(), 31);
 	add(info_bar);
 
 	ey = ey - info_bar->h();
@@ -121,7 +121,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	props_box->hide();
 	add(props_box);
 
-	find_box = new UI_FindAndReplace(w() - panel_W, BY, panel_W, BH);
+	find_box = new UI_FindAndReplace(inst, w() - panel_W, BY, panel_W, BH);
 	find_box->hide();
 	add(find_box);
 }

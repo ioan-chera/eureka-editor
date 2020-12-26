@@ -479,7 +479,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 }
 
 
-static bool Clipboard_DoCopy(const Instance &inst)
+static bool Clipboard_DoCopy(Instance &inst)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -530,7 +530,7 @@ static bool Clipboard_DoCopy(const Instance &inst)
 		Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 
 	return result;
 }
@@ -660,7 +660,7 @@ static void ReselectGroup(Instance &inst)
 		{
 			int count = (int)clip_board->things.size();
 
-			Selection_Clear();
+			Selection_Clear(inst);
 
 			edit.Selected->frob_range(inst.level.numThings() - count, inst.level.numThings()-1, BitOp::add);
 		}
@@ -702,7 +702,7 @@ static void ReselectGroup(Instance &inst)
 		new_sel.frob_range(inst.level.numSectors() - count, inst.level.numSectors() -1, BitOp::add);
 	}
 
-	Selection_Clear();
+	Selection_Clear(inst);
 
 	ConvertSelection(&new_sel, edit.Selected);
 }
@@ -824,7 +824,7 @@ void CMD_Clipboard_Cut(Instance &inst)
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Cut();
+		Render3D_CB_Cut(inst);
 		return;
 	}
 
@@ -864,7 +864,7 @@ void CMD_Clipboard_Paste(Instance &inst)
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Paste();
+		Render3D_CB_Paste(inst);
 		return;
 	}
 
@@ -1257,12 +1257,12 @@ success:
 	Editor_ClearAction();
 
 	// always clear the selection (deleting objects invalidates it)
-	Selection_Clear();
+	Selection_Clear(inst);
 
 	edit.highlight.clear();
 	edit.split_line.clear();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 

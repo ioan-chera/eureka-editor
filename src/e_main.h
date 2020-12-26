@@ -173,16 +173,16 @@ extern Editor_State_t  edit;
 
 void Editor_Init();
 void Editor_DefaultState();
-bool Editor_ParseUser(const std::vector<SString> &tokens);
+bool Editor_ParseUser(Instance &inst, const std::vector<SString> &tokens);
 void Editor_WriteUser(std::ostream &os);
 
-void Editor_ClearErrorMode();
-void Editor_ChangeMode(char mode);
-void Editor_ChangeMode_Raw(ObjType new_mode);
+void Editor_ClearErrorMode(Instance &inst);
+void Editor_ChangeMode(Instance &inst, char mode);
+void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode);
 
-void UpdateHighlight();
+void UpdateHighlight(Instance &inst);
 
-void RedrawMap();
+void RedrawMap(Instance &inst);
 void ZoomWholeMap(Instance &inst);
 
 
@@ -225,7 +225,7 @@ void Selection_Add(Objid& obj);
 void Selection_Remove(Objid& obj);
 void Selection_Toggle(Objid& obj);
 
-void Selection_Clear(bool no_save = false);
+void Selection_Clear(Instance &inst, bool no_save = false);
 void Selection_Push();
 void Selection_InvalidateLast();
 

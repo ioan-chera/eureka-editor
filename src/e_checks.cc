@@ -290,14 +290,14 @@ static void Vertex_FindDanglers(selection_c& sel, const Document &doc)
 }
 
 
-static void Vertex_ShowDanglers(const Document &doc)
+static void Vertex_ShowDanglers(Instance &inst)
 {
 	if (edit.mode != ObjType::vertices)
-		Editor_ChangeMode('v');
+		Editor_ChangeMode(inst, 'v');
 
-	Vertex_FindDanglers(*edit.Selected, doc);
+	Vertex_FindDanglers(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -397,36 +397,36 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
 }
 
 
-static void Vertex_MergeOverlaps(Document &doc)
+static void Vertex_MergeOverlaps(Instance &inst)
 {
 	selection_c verts;
-	Vertex_FindOverlaps(verts, doc);
+	Vertex_FindOverlaps(verts, inst.level);
 
-	doc.basis.begin();
-	doc.basis.setMessage("merged overlapping vertices");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("merged overlapping vertices");
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		Vertex_MergeOne(*it, verts, doc);
+		Vertex_MergeOne(*it, verts, inst.level);
 	}
 
 	// nothing should reference these vertices now
-	doc.objects.del(&verts);
+	inst.level.objects.del(&verts);
 
-	doc.basis.end();
+	inst.level.basis.end();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
-static void Vertex_ShowOverlaps(const Document &doc)
+static void Vertex_ShowOverlaps(Instance &inst)
 {
 	if (edit.mode != ObjType::vertices)
-		Editor_ChangeMode('v');
+		Editor_ChangeMode(inst, 'v');
 
-	Vertex_FindOverlaps(*edit.Selected, doc);
+	Vertex_FindOverlaps(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -462,14 +462,14 @@ static void Vertex_RemoveUnused(Document &doc)
 }
 
 
-static void Vertex_ShowUnused(const Document &doc)
+static void Vertex_ShowUnused(Instance &inst)
 {
 	if (edit.mode != ObjType::vertices)
-		Editor_ChangeMode('v');
+		Editor_ChangeMode(inst, 'v');
 
-	Vertex_FindUnused(*edit.Selected, doc);
+	Vertex_FindUnused(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -478,53 +478,53 @@ static void Vertex_ShowUnused(const Document &doc)
 class UI_Check_Vertices : public UI_Check_base
 {
 public:
-	UI_Check_Vertices(bool all_mode, Document &doc) :
+	UI_Check_Vertices(bool all_mode, Instance &inst) :
 		UI_Check_base(520, 224, all_mode, "Check : Vertices",
-				      "Vertex test results"), doc(doc)
+				      "Vertex test results"), inst(inst)
 	{ }
 
 	static void action_merge(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_MergeOverlaps(dialog->doc);
+		Vertex_MergeOverlaps(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_highlight(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowOverlaps(dialog->doc);
+		Vertex_ShowOverlaps(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_unused(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowUnused(dialog->doc);
+		Vertex_ShowUnused(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_RemoveUnused(dialog->doc);
+		Vertex_RemoveUnused(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_danglers(Fl_Widget *w, void *data)
 	{
 		UI_Check_Vertices *dialog = (UI_Check_Vertices *)data;
-		Vertex_ShowDanglers(dialog->doc);
+		Vertex_ShowDanglers(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 private:
-	Document &doc;
+	Instance &inst;
 };
 
 
 CheckResult ChecksModule::checkVertices(int min_severity) const
 {
-	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0, doc);
+	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0, inst);
 
 	selection_c  sel;
 
@@ -657,19 +657,19 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 }
 
 
-static void Sectors_ShowUnclosed(ObjType what, const Document &doc)
+static void Sectors_ShowUnclosed(ObjType what, Instance &inst)
 {
 	if (edit.mode != what)
-		Editor_ChangeMode((what == ObjType::sectors) ? 's' : 'v');
+		Editor_ChangeMode(inst, (what == ObjType::sectors) ? 's' : 'v');
 
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindUnclosed(*edit.Selected, other, doc);
+		Sectors_FindUnclosed(*edit.Selected, other, inst.level);
 	else
-		Sectors_FindUnclosed(other, *edit.Selected, doc);
+		Sectors_FindUnclosed(other, *edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -730,19 +730,19 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 }
 
 
-static void Sectors_ShowMismatches(ObjType what, Document &doc)
+static void Sectors_ShowMismatches(ObjType what, Instance &inst)
 {
 	if (edit.mode != what)
-		Editor_ChangeMode((what == ObjType::sectors) ? 's' : 'l');
+		Editor_ChangeMode(inst, (what == ObjType::sectors) ? 's' : 'l');
 
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindMismatches(*edit.Selected, other, doc);
+		Sectors_FindMismatches(*edit.Selected, other, inst.level);
 	else
-		Sectors_FindMismatches(other, *edit.Selected, doc);
+		Sectors_FindMismatches(other, *edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -797,16 +797,16 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 }
 
 
-static void Sectors_ShowUnknown(const Document &doc)
+static void Sectors_ShowUnknown(Instance &inst)
 {
 	if (edit.mode != ObjType::sectors)
-		Editor_ChangeMode('s');
+		Editor_ChangeMode(inst, 's');
 
 	std::map<int, int> types;
 
-	Sectors_FindUnknown(*edit.Selected, types, doc);
+	Sectors_FindUnknown(*edit.Selected, types, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -920,14 +920,14 @@ static void Sectors_FixBadCeil(Document &doc)
 }
 
 
-static void Sectors_ShowBadCeil(const Document &doc)
+static void Sectors_ShowBadCeil(Instance &inst)
 {
 	if (edit.mode != ObjType::sectors)
-		Editor_ChangeMode('s');
+		Editor_ChangeMode(inst, 's');
 
-	Sectors_FindBadCeil(*edit.Selected, doc);
+	Sectors_FindBadCeil(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -995,16 +995,16 @@ static void SideDefs_FindPacking(selection_c& sides, selection_c& lines, const D
 }
 
 
-static void SideDefs_ShowPacked(const Document &doc)
+static void SideDefs_ShowPacked(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
 	selection_c sides;
 
-	SideDefs_FindPacking(sides, *edit.Selected, doc);
+	SideDefs_FindPacking(sides, *edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -1099,22 +1099,22 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 class UI_Check_Sectors : public UI_Check_base
 {
 public:
-	UI_Check_Sectors(bool all_mode, Document &doc) :
+	UI_Check_Sectors(bool all_mode, Instance &inst) :
 		UI_Check_base(530, 346, all_mode, "Check : Sectors",
-				      "Sector test results"), doc(doc)
+				      "Sector test results"), inst(inst)
 	{ }
 
 	static void action_remove(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_RemoveUnused(dialog->doc);
+		Sectors_RemoveUnused(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_remove_sidedefs(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		SideDefs_RemoveUnused(dialog->doc);
+		SideDefs_RemoveUnused(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -1122,14 +1122,14 @@ public:
 	static void action_fix_ceil(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_FixBadCeil(dialog->doc);
+		Sectors_FixBadCeil(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_ceil(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowBadCeil(dialog->doc);
+		Sectors_ShowBadCeil(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -1137,14 +1137,14 @@ public:
 	static void action_unpack(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		dialog->doc.checks.sidedefsUnpack(false);
+		dialog->inst.level.checks.sidedefsUnpack(false);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_packed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		SideDefs_ShowPacked(dialog->doc);
+		SideDefs_ShowPacked(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -1152,14 +1152,14 @@ public:
 	static void action_show_unclosed(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnclosed(ObjType::sectors, dialog->doc);
+		Sectors_ShowUnclosed(ObjType::sectors, dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_un_verts(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnclosed(ObjType::vertices, dialog->doc);
+		Sectors_ShowUnclosed(ObjType::vertices, dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -1167,14 +1167,14 @@ public:
 	static void action_show_mismatch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowMismatches(ObjType::sectors, dialog->doc);
+		Sectors_ShowMismatches(ObjType::sectors, dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_mis_lines(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowMismatches(ObjType::linedefs, dialog->doc);
+		Sectors_ShowMismatches(ObjType::linedefs, dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -1182,32 +1182,32 @@ public:
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ShowUnknown(dialog->doc);
+		Sectors_ShowUnknown(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_LogUnknown(dialog->doc);
+		Sectors_LogUnknown(dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_clear_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ClearUnknown(dialog->doc);
+		Sectors_ClearUnknown(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 private:
-	Document &doc;
+	Instance &inst;
 };
 
 
 CheckResult ChecksModule::checkSectors(int min_severity) const
 {
-	UI_Check_Sectors *dialog = new UI_Check_Sectors(min_severity > 0, doc);
+	UI_Check_Sectors *dialog = new UI_Check_Sectors(min_severity > 0, inst);
 
 	selection_c  sel, other;
 
@@ -1363,16 +1363,16 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Docu
 }
 
 
-static void Things_ShowUnknown(const Document &doc)
+static void Things_ShowUnknown(Instance &inst)
 {
 	if (edit.mode != ObjType::things)
-		Editor_ChangeMode('t');
+		Editor_ChangeMode(inst, 't');
 
 	std::map<int, int> types;
 
-	Things_FindUnknown(*edit.Selected, types, doc);
+	Things_FindUnknown(*edit.Selected, types, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -1481,14 +1481,14 @@ static void Things_FindInVoid(selection_c& list, const Document &doc)
 }
 
 
-static void Things_ShowInVoid(const Document &doc)
+static void Things_ShowInVoid(Instance &inst)
 {
 	if (edit.mode != ObjType::things)
-		Editor_ChangeMode('t');
+		Editor_ChangeMode(inst, 't');
 
-	Things_FindInVoid(*edit.Selected, doc);
+	Things_FindInVoid(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -1574,14 +1574,14 @@ static void Things_FindDuds(selection_c& list, const Document &doc)
 }
 
 
-static void Things_ShowDuds(const Document &doc)
+static void Things_ShowDuds(Instance &inst)
 {
 	if (edit.mode != ObjType::things)
-		Editor_ChangeMode('t');
+		Editor_ChangeMode(inst, 't');
 
-	Things_FindDuds(*edit.Selected, doc);
+	Things_FindDuds(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -1839,14 +1839,14 @@ static void Things_FindStuckies(selection_c& list, const Document &doc)
 }
 
 
-static void Things_ShowStuckies(const Document &doc)
+static void Things_ShowStuckies(Instance &inst)
 {
 	if (edit.mode != ObjType::things)
-		Editor_ChangeMode('t');
+		Editor_ChangeMode(inst, 't');
 
-	Things_FindStuckies(*edit.Selected, doc);
+	Things_FindStuckies(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -1855,30 +1855,30 @@ static void Things_ShowStuckies(const Document &doc)
 class UI_Check_Things : public UI_Check_base
 {
 public:
-	UI_Check_Things(bool all_mode, Document &doc) :
+	UI_Check_Things(bool all_mode, Instance &inst) :
 		UI_Check_base(520, 316, all_mode, "Check : Things",
-				      "Thing test results"), doc(doc)
+				      "Thing test results"), inst(inst)
 	{ }
 
 public:
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowUnknown(dialog->doc);
+		Things_ShowUnknown(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_LogUnknown(dialog->doc);
+		Things_LogUnknown(dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_RemoveUnknown(dialog->doc);
+		Things_RemoveUnknown(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -1886,21 +1886,21 @@ public:
 	static void action_show_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowInVoid(dialog->doc);
+		Things_ShowInVoid(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_RemoveInVoid(dialog->doc);
+		Things_RemoveInVoid(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_stuck(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowStuckies(dialog->doc);
+		Things_ShowStuckies(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -1908,24 +1908,24 @@ public:
 	static void action_show_duds(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_ShowDuds(dialog->doc);
+		Things_ShowDuds(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_duds(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_FixDuds(dialog->doc);
+		Things_FixDuds(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 private:
-	Document &doc;
+	Instance &inst;
 };
 
 
 CheckResult ChecksModule::checkThings(int min_severity) const
 {
-	UI_Check_Things *dialog = new UI_Check_Things(min_severity > 0, doc);
+	UI_Check_Things *dialog = new UI_Check_Things(min_severity > 0, inst);
 
 	selection_c  sel;
 
@@ -2096,18 +2096,18 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 }
 
 
-static void LineDefs_ShowZeroLen(const Document &doc)
+static void LineDefs_ShowZeroLen(Instance &inst)
 {
 	if (edit.mode != ObjType::vertices)
-		Editor_ChangeMode('v');
+		Editor_ChangeMode(inst, 'v');
 
 	selection_c sel;
 
-	LineDefs_FindZeroLen(sel, doc);
+	LineDefs_FindZeroLen(sel, inst.level);
 
 	ConvertSelection(&sel, edit.Selected);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2121,14 +2121,14 @@ static void LineDefs_FindMissingRight(selection_c& lines, const Document &doc)
 }
 
 
-static void LineDefs_ShowMissingRight(const Document &doc)
+static void LineDefs_ShowMissingRight(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindMissingRight(*edit.Selected, doc);
+	LineDefs_FindMissingRight(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2159,14 +2159,14 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Document &doc)
 }
 
 
-static void LineDefs_ShowManualDoors(const Document &doc)
+static void LineDefs_ShowManualDoors(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindManualDoors(*edit.Selected, doc);
+	LineDefs_FindManualDoors(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2209,14 +2209,14 @@ static void LineDefs_FindLackImpass(selection_c& lines, const Document &doc)
 }
 
 
-static void LineDefs_ShowLackImpass(const Document &doc)
+static void LineDefs_ShowLackImpass(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindLackImpass(*edit.Selected, doc);
+	LineDefs_FindLackImpass(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2258,14 +2258,14 @@ static void LineDefs_FindBad2SFlag(selection_c& lines, const Document &doc)
 }
 
 
-static void LineDefs_ShowBad2SFlag(const Document &doc)
+static void LineDefs_ShowBad2SFlag(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindBad2SFlag(*edit.Selected, doc);
+	LineDefs_FindBad2SFlag(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2330,16 +2330,16 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 }
 
 
-static void LineDefs_ShowUnknown(const Document &doc)
+static void LineDefs_ShowUnknown(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
 	std::map<int, int> types;
 
-	LineDefs_FindUnknown(*edit.Selected, types, doc);
+	LineDefs_FindUnknown(*edit.Selected, types, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2489,14 +2489,14 @@ static void LineDefs_FindOverlaps(selection_c& lines, const Document &doc)
 }
 
 
-static void LineDefs_ShowOverlaps(const Document &doc)
+static void LineDefs_ShowOverlaps(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindOverlaps(*edit.Selected, doc);
+	LineDefs_FindOverlaps(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2693,14 +2693,14 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 }
 
 
-static void LineDefs_ShowCrossings(const Document &doc)
+static void LineDefs_ShowCrossings(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindCrossings(*edit.Selected, doc);
+	LineDefs_FindCrossings(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -2709,30 +2709,30 @@ static void LineDefs_ShowCrossings(const Document &doc)
 class UI_Check_LineDefs : public UI_Check_base
 {
 public:
-	UI_Check_LineDefs(bool all_mode, Document &doc) :
+	UI_Check_LineDefs(bool all_mode, Instance &inst) :
 		UI_Check_base(530, 370, all_mode, "Check : LineDefs",
-		              "LineDef test results"), doc(doc)
+		              "LineDef test results"), inst(inst)
 	{ }
 
 public:
 	static void action_show_zero(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowZeroLen(dialog->doc);
+		LineDefs_ShowZeroLen(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_zero(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_RemoveZeroLen(dialog->doc);
+		LineDefs_RemoveZeroLen(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_mis_right(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowMissingRight(dialog->doc);
+		LineDefs_ShowMissingRight(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -2740,14 +2740,14 @@ public:
 	static void action_show_manual_doors(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowManualDoors(dialog->doc);
+		LineDefs_ShowManualDoors(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_manual_doors(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixManualDoors(dialog->doc);
+		LineDefs_FixManualDoors(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -2755,14 +2755,14 @@ public:
 	static void action_show_lack_impass(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowLackImpass(dialog->doc);
+		LineDefs_ShowLackImpass(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_lack_impass(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixLackImpass(dialog->doc);
+		LineDefs_FixLackImpass(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -2770,14 +2770,14 @@ public:
 	static void action_show_bad_2s_flag(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowBad2SFlag(dialog->doc);
+		LineDefs_ShowBad2SFlag(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_bad_2s_flag(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixBad2SFlag(dialog->doc);
+		LineDefs_FixBad2SFlag(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -2785,21 +2785,21 @@ public:
 	static void action_show_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowUnknown(dialog->doc);
+		LineDefs_ShowUnknown(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_LogUnknown(dialog->doc);
+		LineDefs_LogUnknown(dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_clear_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ClearUnknown(dialog->doc);
+		LineDefs_ClearUnknown(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -2807,32 +2807,32 @@ public:
 	static void action_remove_overlap(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_RemoveOverlaps(dialog->doc);
+		LineDefs_RemoveOverlaps(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_show_overlap(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowOverlaps(dialog->doc);
+		LineDefs_ShowOverlaps(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_crossing(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ShowCrossings(dialog->doc);
+		LineDefs_ShowCrossings(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 private:
-	Document &doc;
+	Instance &inst;
 };
 
 
 CheckResult ChecksModule::checkLinedefs(int min_severity) const
 {
-	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(min_severity > 0, doc);
+	UI_Check_LineDefs *dialog = new UI_Check_LineDefs(min_severity > 0, inst);
 
 	selection_c  sel, other;
 
@@ -3093,7 +3093,7 @@ void ChecksModule::commandApplyTag(Instance &inst)
 	}
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -3161,25 +3161,25 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 }
 
 
-static void Tags_ShowUnmatchedSectors(const Document &doc)
+static void Tags_ShowUnmatchedSectors(Instance &inst)
 {
 	if (edit.mode != ObjType::sectors)
-		Editor_ChangeMode('s');
+		Editor_ChangeMode(inst, 's');
 
-	Tags_FindUnmatchedSectors(*edit.Selected, doc);
+	Tags_FindUnmatchedSectors(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
-static void Tags_ShowUnmatchedLineDefs(const Document &doc)
+static void Tags_ShowUnmatchedLineDefs(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	Tags_FindUnmatchedLineDefs(*edit.Selected, doc);
+	Tags_FindUnmatchedLineDefs(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -3213,14 +3213,14 @@ static void Tags_FindMissingTags(selection_c& lines, const Document &doc)
 }
 
 
-static void Tags_ShowMissingTags(const Document &doc)
+static void Tags_ShowMissingTags(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	Tags_FindMissingTags(*edit.Selected, doc);
+	Tags_FindMissingTags(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -3283,14 +3283,14 @@ static void Tags_FindBeastMarks(selection_c& secs, const Document &doc)
 }
 
 
-static void Tags_ShowBeastMarks(const Document &doc)
+static void Tags_ShowBeastMarks(Instance &inst)
 {
 	if (edit.mode != ObjType::sectors)
-		Editor_ChangeMode('s');
+		Editor_ChangeMode(inst, 's');
 
-	Tags_FindBeastMarks(*edit.Selected, doc);
+	Tags_FindBeastMarks(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -3301,9 +3301,9 @@ class UI_Check_Tags : public UI_Check_base
 public:
 	int fresh_tag;
 
-	UI_Check_Tags(bool all_mode, const Document &doc) :
+	UI_Check_Tags(bool all_mode, Instance &inst) :
 		UI_Check_base(520, 326, all_mode, "Check : Tags", "Tag test results"),
-		fresh_tag(0), doc(doc)
+		fresh_tag(0), inst(inst)
 	{ }
 
 	static void action_fresh_tag(Fl_Widget *w, void *data)
@@ -3311,7 +3311,7 @@ public:
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
 
 		// fresh_tag is set externally
-		dialog->doc.checks.tagsApplyNewValue(dialog->fresh_tag);
+		dialog->inst.level.checks.tagsApplyNewValue(dialog->fresh_tag);
 
 		dialog->want_close = true;
 	}
@@ -3319,39 +3319,39 @@ public:
 	static void action_show_unmatch_sec(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowUnmatchedSectors(dialog->doc);
+		Tags_ShowUnmatchedSectors(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_unmatch_line(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowUnmatchedLineDefs(dialog->doc);
+		Tags_ShowUnmatchedLineDefs(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_missing_tag(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowMissingTags(dialog->doc);
+		Tags_ShowMissingTags(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_show_beast_marks(Fl_Widget *w, void *data)
 	{
 		UI_Check_Tags *dialog = (UI_Check_Tags *)data;
-		Tags_ShowBeastMarks(dialog->doc);
+		Tags_ShowBeastMarks(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 private:
-	const Document &doc;
+	Instance &inst;
 };
 
 
 CheckResult ChecksModule::checkTags(int min_severity) const
 {
-	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0, doc);
+	UI_Check_Tags *dialog = new UI_Check_Tags(min_severity > 0, inst);
 
 	selection_c  sel;
 	SString check_buffer;
@@ -3517,14 +3517,14 @@ void Textures_FindMissing(selection_c& lines, const Document &doc)
 }
 
 
-static void Textures_ShowMissing(const Document &doc)
+static void Textures_ShowMissing(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	Textures_FindMissing(*edit.Selected, doc);
+	Textures_FindMissing(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -3636,16 +3636,16 @@ static void Textures_FindTransparent(selection_c& lines,
 }
 
 
-static void Textures_ShowTransparent(const Document &doc)
+static void Textures_ShowTransparent(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
 	std::map<SString, int> names;
 
-	Textures_FindTransparent(*edit.Selected, names, doc);
+	Textures_FindTransparent(*edit.Selected, names, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -3760,16 +3760,16 @@ static void Textures_FindMedusa(selection_c& lines,
 }
 
 
-static void Textures_ShowMedusa(const Document &doc)
+static void Textures_ShowMedusa(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
 	std::map<SString, int> names;
 
-	Textures_FindMedusa(*edit.Selected, names, doc);
+	Textures_FindMedusa(*edit.Selected, names, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -3885,29 +3885,29 @@ static void Textures_FindUnknownFlat(selection_c& secs,
 }
 
 
-static void Textures_ShowUnknownTex(const Document &doc)
+static void Textures_ShowUnknownTex(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownTex(*edit.Selected, names, doc);
+	Textures_FindUnknownTex(*edit.Selected, names, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
-static void Textures_ShowUnknownFlat(const Document &doc)
+static void Textures_ShowUnknownFlat(Instance &inst)
 {
 	if (edit.mode != ObjType::sectors)
-		Editor_ChangeMode('s');
+		Editor_ChangeMode(inst, 's');
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownFlat(*edit.Selected, names, doc);
+	Textures_FindUnknownFlat(*edit.Selected, names, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -4037,14 +4037,14 @@ static void Textures_FindDupSwitches(selection_c& lines, const Document &doc)
 }
 
 
-static void Textures_ShowDupSwitches(const Document &doc)
+static void Textures_ShowDupSwitches(Instance &inst)
 {
 	if (edit.mode != ObjType::linedefs)
-		Editor_ChangeMode('l');
+		Editor_ChangeMode(inst, 'l');
 
-	Textures_FindDupSwitches(*edit.Selected, doc);
+	Textures_FindDupSwitches(*edit.Selected, inst.level);
 
-	GoToErrors();
+	GoToErrors(inst);
 }
 
 
@@ -4145,29 +4145,29 @@ static void Textures_FixDupSwitches(Document &doc)
 class UI_Check_Textures : public UI_Check_base
 {
 public:
-	UI_Check_Textures(bool all_mode, Document &doc) :
+	UI_Check_Textures(bool all_mode, Instance &inst) :
 		UI_Check_base(580, 286, all_mode, "Check : Textures",
-		              "Texture test results"), doc(doc)
+		              "Texture test results"), inst(inst)
 	{ }
 
 	static void action_show_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowUnknownTex(dialog->doc);
+		Textures_ShowUnknownTex(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogUnknown(false, dialog->doc);
+		Textures_LogUnknown(false, dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixUnknownTex(dialog->doc);
+		Textures_FixUnknownTex(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4175,21 +4175,21 @@ public:
 	static void action_show_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowUnknownFlat(dialog->doc);
+		Textures_ShowUnknownFlat(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_log_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogUnknown(true, dialog->doc);
+		Textures_LogUnknown(true, dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixUnknownFlat(dialog->doc);
+		Textures_FixUnknownFlat(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4197,14 +4197,14 @@ public:
 	static void action_show_missing(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowMissing(dialog->doc);
+		Textures_ShowMissing(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_missing(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixMissing(dialog->doc);
+		Textures_FixMissing(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4212,21 +4212,21 @@ public:
 	static void action_show_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowTransparent(dialog->doc);
+		Textures_ShowTransparent(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixTransparent(dialog->doc);
+		Textures_FixTransparent(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_log_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogTransparent(dialog->doc);
+		Textures_LogTransparent(dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -4234,14 +4234,14 @@ public:
 	static void action_show_dup_switch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowDupSwitches(dialog->doc);
+		Textures_ShowDupSwitches(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_fix_dup_switch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixDupSwitches(dialog->doc);
+		Textures_FixDupSwitches(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4249,32 +4249,32 @@ public:
 	static void action_show_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_ShowMedusa(dialog->doc);
+		Textures_ShowMedusa(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_RemoveMedusa(dialog->doc);
+		Textures_RemoveMedusa(dialog->inst.level);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_log_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogMedusa(dialog->doc);
+		Textures_LogMedusa(dialog->inst.level);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 private:
-	Document &doc;
+	Instance &inst;
 };
 
 
 CheckResult ChecksModule::checkTextures(int min_severity) const
 {
-	UI_Check_Textures *dialog = new UI_Check_Textures(min_severity > 0, doc);
+	UI_Check_Textures *dialog = new UI_Check_Textures(min_severity > 0, inst);
 
 	selection_c  sel;
 

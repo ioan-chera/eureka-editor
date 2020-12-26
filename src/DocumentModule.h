@@ -20,6 +20,7 @@
 #define DocumentModule_h
 
 struct Document;
+struct Instance;
 
 //
 // This is an interface with direct references to Document's components, for less clutter
@@ -27,10 +28,9 @@ struct Document;
 class DocumentModule
 {
 public:
-	DocumentModule(Document &doc)  : doc(doc)
-	{
-	}
+	DocumentModule(Document &doc);
 
+	Instance &inst;
 	Document &doc;
 };
 

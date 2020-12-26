@@ -74,7 +74,7 @@ static void CMD_EditMode(Instance &inst)
 		return;
 	}
 
-	Editor_ChangeMode(mode);
+	Editor_ChangeMode(inst, mode);
 }
 
 
@@ -94,13 +94,13 @@ static void CMD_Select(Instance &inst)
 	}
 
 	Selection_Toggle(edit.highlight);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
 static void CMD_SelectAll(Instance &inst)
 {
-	Editor_ClearErrorMode();
+	Editor_ClearErrorMode(inst);
 
 	int total = inst.level.numObjects(edit.mode);
 
@@ -109,13 +109,13 @@ static void CMD_SelectAll(Instance &inst)
 	edit.Selected->change_type(edit.mode);
 	edit.Selected->frob_range(0, total-1, BitOp::add);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
 static void CMD_UnselectAll(Instance &inst)
 {
-	Editor_ClearErrorMode();
+	Editor_ClearErrorMode(inst);
 
 	if (edit.action == ACT_DRAW_LINE ||
 		edit.action == ACT_TRANSFORM)
@@ -123,9 +123,9 @@ static void CMD_UnselectAll(Instance &inst)
 		Editor_ClearAction();
 	}
 
-	Selection_Clear();
+	Selection_Clear(inst);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -148,7 +148,7 @@ static void CMD_InvertSelection(Instance &inst)
 
 	edit.Selected->frob_range(0, total-1, BitOp::toggle);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -166,7 +166,7 @@ static void CMD_Undo(Instance &inst)
 		return;
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 	instance::main_win->UpdatePanelObj();
 }
 
@@ -179,12 +179,12 @@ static void CMD_Redo(Instance &inst)
 		return;
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 	instance::main_win->UpdatePanelObj();
 }
 
 
-static void SetGamma(int new_val)
+static void SetGamma(Instance &inst, int new_val)
 {
 	config::usegamma = CLAMP(0, new_val, 4);
 
@@ -196,7 +196,7 @@ static void SetGamma(int new_val)
 
 	Status_Set("gamma level %d", config::usegamma);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -223,7 +223,7 @@ static void CMD_SetVar(Instance &inst)
 
 	if (var_name.noCaseEqual("3d"))
 	{
-		Render3D_Enable(bool_val);
+		Render3D_Enable(inst, bool_val);
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
@@ -246,22 +246,22 @@ static void CMD_SetVar(Instance &inst)
 	else if (var_name.noCaseEqual("sprites"))
 	{
 		edit.thing_render_mode = int_val;
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
 		edit.show_object_numbers = bool_val;
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("gamma"))
 	{
-		SetGamma(int_val);
+		SetGamma(inst, int_val);
 	}
 	else if (var_name.noCaseEqual("ratio"))
 	{
 		grid.ratio = CLAMP(0, int_val, 7);
 		instance::main_win->info_bar->UpdateRatio();
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
@@ -269,13 +269,13 @@ static void CMD_SetVar(Instance &inst)
 		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
 
 		if (edit.render3d)
-			Render3D_Enable(false);
+			Render3D_Enable(inst, false);
 
 		// need sectors mode for sound propagation display
 		if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
-			Editor_ChangeMode('s');
+			Editor_ChangeMode(inst, 's');
 
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else
 	{
@@ -296,7 +296,7 @@ static void CMD_ToggleVar(Instance &inst)
 
 	if (var_name.noCaseEqual("3d"))
 	{
-		Render3D_Enable(! edit.render3d);
+		Render3D_Enable(inst, ! edit.render3d);
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
@@ -319,16 +319,16 @@ static void CMD_ToggleVar(Instance &inst)
 	else if (var_name.noCaseEqual("sprites"))
 	{
 		edit.thing_render_mode = ! edit.thing_render_mode;
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
 		edit.show_object_numbers = ! edit.show_object_numbers;
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("gamma"))
 	{
-		SetGamma((config::usegamma >= 4) ? 0 : config::usegamma + 1);
+		SetGamma(inst, (config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (var_name.noCaseEqual("ratio"))
 	{
@@ -338,7 +338,7 @@ static void CMD_ToggleVar(Instance &inst)
 			grid.ratio++;
 
 		instance::main_win->info_bar->UpdateRatio();
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
@@ -346,7 +346,7 @@ static void CMD_ToggleVar(Instance &inst)
 			edit.sector_render_mode = SREND_Nothing;
 		else
 			edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)edit.sector_render_mode);
-		RedrawMap();
+		RedrawMap(inst);
 	}
 	else
 	{
@@ -498,7 +498,7 @@ static void CMD_NAV_Scroll_Down(Instance &inst)
 
 static void NAV_MouseScroll_release(Instance &inst)
 {
-	Editor_ScrollMap(+1);
+	Editor_ScrollMap(inst, +1);
 }
 
 static void CMD_NAV_MouseScroll(Instance &inst)
@@ -515,7 +515,7 @@ static void CMD_NAV_MouseScroll(Instance &inst)
 	if (Nav_SetKey(inst, EXEC_CurKey, &NAV_MouseScroll_release))
 	{
 		// begin
-		Editor_ScrollMap(-1);
+		Editor_ScrollMap(inst, -1);
 	}
 }
 
@@ -621,7 +621,7 @@ static void ACT_SelectBox_release(Instance &inst)
 		return;
 
 	Editor_ClearAction();
-	Editor_ClearErrorMode();
+	Editor_ClearErrorMode(inst);
 
 	// a mere click and release will unselect everything
 	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
@@ -632,7 +632,7 @@ static void ACT_SelectBox_release(Instance &inst)
 	}
 
 	SelectObjectsInBox(inst.level, edit.Selected, edit.mode, x1, y1, x2, y2);
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -648,7 +648,7 @@ static void ACT_Drag_release(Instance &inst)
 	if (edit.render3d)
 	{
 		if (edit.mode == ObjType::things)
-			Render3D_DragThings();
+			Render3D_DragThings(inst);
 
 		if (edit.mode == ObjType::sectors)
 			Render3D_DragSectors();
@@ -674,7 +674,7 @@ static void ACT_Drag_release(Instance &inst)
 
 	Editor_ClearAction();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -715,9 +715,9 @@ static void ACT_Click_release(Instance &inst)
 	}
 
 	Editor_ClearAction();
-	Editor_ClearErrorMode();
+	Editor_ClearErrorMode(inst);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void CMD_ACT_Click(Instance &inst)
@@ -798,7 +798,7 @@ static void CMD_ACT_Click(Instance &inst)
 		edit.clicked = Objid(ObjType::vertices, new_vert);
 		Editor_SetAction(ACT_CLICK);
 
-		RedrawMap();
+		RedrawMap(inst);
 		return;
 	}
 
@@ -931,7 +931,7 @@ static void ACT_Transform_release(Instance &inst)
 
 	Editor_ClearAction();
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 static void CMD_ACT_Transform(Instance &inst)
@@ -1044,7 +1044,7 @@ static void CMD_Merge(Instance &inst)
 	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			VertexModule::commandMerge();
+			VertexModule::commandMerge(inst);
 			break;
 
 		case ObjType::linedefs:
@@ -1052,7 +1052,7 @@ static void CMD_Merge(Instance &inst)
 			break;
 
 		case ObjType::sectors:
-			SectorModule::commandMerge();
+			SectorModule::commandMerge(inst);
 			break;
 
 		case ObjType::things:
@@ -1071,15 +1071,15 @@ static void CMD_Disconnect(Instance &inst)
 	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			VertexModule::commandDisconnect();
+			VertexModule::commandDisconnect(inst);
 			break;
 
 		case ObjType::linedefs:
-			VertexModule::commandLineDisconnect();
+			VertexModule::commandLineDisconnect(inst);
 			break;
 
 		case ObjType::sectors:
-			VertexModule::commandSectorDisconnect();
+			VertexModule::commandSectorDisconnect(inst);
 			break;
 
 		case ObjType::things:
@@ -1119,7 +1119,7 @@ static void CMD_Zoom(Instance &inst)
 static void CMD_ZoomWholeMap(Instance &inst)
 {
 	if (edit.render3d)
-		Render3D_Enable(false);
+		Render3D_Enable(inst, false);
 
 	ZoomWholeMap(inst);
 }
@@ -1133,21 +1133,21 @@ static void CMD_ZoomSelection(Instance &inst)
 		return;
 	}
 
-	GoToSelection();
+	GoToSelection(inst);
 }
 
 
 static void CMD_GoToCamera(Instance &inst)
 {
 	if (edit.render3d)
-		Render3D_Enable(false);
+		Render3D_Enable(inst, false);
 
 	double x, y; float angle;
 	Render3D_GetCameraPos(&x, &y, &angle);
 
 	grid.MoveTo(x, y);
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1174,10 +1174,10 @@ static void CMD_PlaceCamera(Instance &inst)
 
 	if (Exec_HasFlag("/open3d"))
 	{
-		Render3D_Enable(true);
+		Render3D_Enable(inst, true);
 	}
 
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 
@@ -1202,7 +1202,7 @@ static void CMD_MoveObjects_Dialog(Instance &inst)
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -1222,7 +1222,7 @@ static void CMD_ScaleObjects_Dialog(Instance &inst)
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -1242,7 +1242,7 @@ static void CMD_RotateObjects_Dialog(Instance &inst)
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(true /* nosave */);
+		Selection_Clear(inst, true /* nosave */);
 }
 
 
@@ -1360,7 +1360,7 @@ static void CMD_FindNext(Instance &inst)
 static void CMD_RecalcSectors(Instance &inst)
 {
 	Subdiv_InvalidateAll();
-	RedrawMap();
+	RedrawMap(inst);
 }
 
 

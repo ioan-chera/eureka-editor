@@ -57,8 +57,8 @@ const int UI_InfoBar::grid_amounts[12] =
 //
 // UI_InfoBar Constructor
 //
-UI_InfoBar::UI_InfoBar(int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label)
+UI_InfoBar::UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *label) :
+    Fl_Group(X, Y, W, H, label), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -181,8 +181,9 @@ void UI_InfoBar::mode_callback(Fl_Widget *w, void *data)
 	Fl_Menu_Button *mode = (Fl_Menu_Button *)w;
 
 	static const char *mode_keys = "tlsvr";
+	auto bar = static_cast<const UI_InfoBar *>(data);
 
-	Editor_ChangeMode(mode_keys[mode->value()]);
+	Editor_ChangeMode(bar->inst, mode_keys[mode->value()]);
 }
 
 
@@ -190,10 +191,12 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 {
 	Fl_Menu_Button *sec_rend = (Fl_Menu_Button *)w;
 
+	auto bar = static_cast<const UI_InfoBar *>(data);
+
 	// last option is 3D mode
 	if (sec_rend->value() > SREND_SoundProp)
 	{
-		Render3D_Enable(true);
+		Render3D_Enable(bar->inst, true);
 		return;
 	}
 
@@ -209,13 +212,13 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 	}
 
 	if (edit.render3d)
-		Render3D_Enable(false);
+		Render3D_Enable(bar->inst, false);
 
 	// need sectors mode for sound propagation display
 	if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
-		Editor_ChangeMode('s');
-
-	RedrawMap();
+		Editor_ChangeMode(bar->inst, 's');
+	
+	RedrawMap(bar->inst);
 }
 
 

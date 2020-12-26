@@ -88,7 +88,7 @@ extern Render_View_t r_view;
 void Render3D_Setup();
 void Render3D_RegisterCommands();
 
-void Render3D_Enable(bool _enable);
+void Render3D_Enable(Instance &inst, bool _enable);
 
 // this is basically the FLTK draw() method
 void Render3D_Draw(int ox, int oy, int ow, int oh);
@@ -99,17 +99,17 @@ void Render3D_Draw(int ox, int oy, int ow, int oh);
 bool Render3D_Query(Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy);
-void Render3D_ScrollMap(int dx = 0, int dy = 0, keycode_t mod = 0);
-void Render3D_Navigate();
+void Render3D_ScrollMap(Instance &inst, int dx = 0, int dy = 0, keycode_t mod = 0);
+void Render3D_Navigate(Instance &inst);
 
 void Render3D_UpdateHighlight();
 
-void Render3D_DragThings();
+void Render3D_DragThings(Instance &inst);
 void Render3D_DragSectors();
 
-void Render3D_CB_Cut();
+void Render3D_CB_Cut(Instance &inst);
 void Render3D_CB_Copy();
-void Render3D_CB_Paste();
+void Render3D_CB_Paste(Instance &inst);
 
 void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);

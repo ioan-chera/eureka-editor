@@ -185,7 +185,7 @@ enum class ParseOptions
 int M_ParseLine(const SString &line, std::vector<SString> &tokens, ParseOptions options);
 
 // user state persistence (stuff like camera pos, grid settings, ...)
-bool M_LoadUserState();
+bool M_LoadUserState(Instance &inst);
 bool M_SaveUserState();
 
 void M_DefaultUserState(Instance &inst);

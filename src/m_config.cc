@@ -1485,11 +1485,11 @@ static SString PersistFilename(const crc32_c& crc)
 #define MAX_TOKENS  10
 
 
-bool M_LoadUserState()
+bool M_LoadUserState(Instance &inst)
 {
 	crc32_c crc;
 
-	gDocument.getLevelChecksum(crc);
+	inst.level.getLevelChecksum(crc);
 
 	SString filename = PersistFilename(crc);
 
@@ -1516,8 +1516,8 @@ bool M_LoadUserState()
 			continue;
 		}
 
-		if (  Editor_ParseUser(tokens) ||
-		        Grid_ParseUser(tokens) ||
+		if (  Editor_ParseUser(inst, tokens) ||
+		        Grid_ParseUser(inst, tokens) ||
 		    Render3D_ParseUser(tokens) ||
 		     Browser_ParseUser(tokens) ||
 		       Props_ParseUser(tokens) ||

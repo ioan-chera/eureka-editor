@@ -163,6 +163,7 @@
     <ClCompile Include="..\..\src\bsp_node.cc" />
     <ClCompile Include="..\..\src\bsp_util.cc" />
     <ClCompile Include="..\..\src\Document.cc" />
+    <ClCompile Include="..\..\src\DocumentModule.cc" />
     <ClCompile Include="..\..\src\Errors.cc" />
     <ClCompile Include="..\..\src\e_basis.cc" />
     <ClCompile Include="..\..\src\e_checks.cc" />

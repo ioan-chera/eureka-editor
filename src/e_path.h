@@ -29,9 +29,9 @@
 
 /* find/next/prev stuff */
 
-void GoToObject(const Objid& objid);
-void GoToSelection();
-void GoToErrors();
+void GoToObject(Instance &inst, const Objid& objid);
+void GoToSelection(Instance &inst);
+void GoToErrors(Instance &inst);
 
 
 typedef enum
@@ -53,8 +53,6 @@ void CMD_LIN_SelectPath(Instance &inst);
 void CMD_SEC_SelectGroup(Instance &inst);
 
 void CMD_JumpToObject(Instance &inst);
-void CMD_NextObject();
-void CMD_PrevObject();
 
 void CMD_PruneUnused(Instance &inst);
 

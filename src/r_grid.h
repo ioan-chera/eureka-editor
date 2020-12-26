@@ -24,7 +24,7 @@
 
 class Grid_State_c
 {
-friend bool Grid_ParseUser(const std::vector<SString> &tokens);
+friend bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens);
 
 public:
 	// the actual grid step (64, 128, etc)
@@ -48,7 +48,7 @@ public:
 	double Scale;
 
 public:
-	Grid_State_c();
+	explicit Grid_State_c(Instance &inst);
 	virtual ~Grid_State_c();
 
 public:
@@ -126,12 +126,14 @@ private:
 	static const double scale_values[];
 	static const int digit_scales[];
 	static const int grid_values[];
+
+	Instance &inst;
 };
 
 extern Grid_State_c grid;
 
 
-bool Grid_ParseUser(const std::vector<SString> &tokens);
+bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens);
 void Grid_WriteUser(std::ostream &os);
 
 #endif  /* __EUREKA_R_GRID_H__ */
