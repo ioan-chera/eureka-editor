@@ -61,8 +61,10 @@ public:
 	Fl_Button *add_button;
 	Fl_Button *del_button;
 
+	Instance &inst;
+
 public:
-	UI_SideBox(int X, int Y, int W, int H, int _side);
+	UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side);
 	virtual ~UI_SideBox();
 
 public:

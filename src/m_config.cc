@@ -1539,11 +1539,11 @@ bool M_LoadUserState(Instance &inst)
 }
 
 
-bool M_SaveUserState()
+bool M_SaveUserState(const Instance &inst)
 {
 	crc32_c crc;
 
-	gDocument.getLevelChecksum(crc);
+	inst.level.getLevelChecksum(crc);
 
 	SString filename = PersistFilename(crc);
 
@@ -1574,7 +1574,7 @@ void M_DefaultUserState(Instance &inst)
 
 	ZoomWholeMap(inst);
 
-	Render3D_Setup();
+	Render3D_Setup(inst);
 
 	Editor_DefaultState();
 }

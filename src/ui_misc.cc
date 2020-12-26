@@ -26,9 +26,9 @@
 
 #include "main.h"
 
-UI_MoveDialog::UI_MoveDialog(bool want_dz) :
+UI_MoveDialog::UI_MoveDialog(Instance &inst, bool want_dz) :
 	UI_Escapable_Window(360, 205, "Move Objects"),
-	want_close(false)
+	want_close(false), inst(inst)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the offset to move objects:");
 	title->labelsize(16);
@@ -100,7 +100,7 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 	int delta_y = atoi(that->delta_y->value());
 	int delta_z = atoi(that->delta_z->value());
 
-	gDocument.objects.move(edit.Selected, delta_x, delta_y, delta_z);
+	that->inst.level.objects.move(edit.Selected, delta_x, delta_y, delta_z);
 
 	that->want_close = true;
 }
@@ -109,9 +109,9 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 //------------------------------------------------------------------------
 
 
-UI_ScaleDialog::UI_ScaleDialog() :
+UI_ScaleDialog::UI_ScaleDialog(Instance &inst) :
 	UI_Escapable_Window(360, 270, "Scale Objects"),
-	want_close(false)
+	want_close(false), inst(inst)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter the scale amount:");
 	title->labelsize(16);
@@ -251,9 +251,9 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_z = that->origin_z->value() - 1;
 
 	if (edit.mode == ObjType::sectors)
-		gDocument.objects.scale4(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
+		that->inst.level.objects.scale4(scale_x, scale_y, scale_z, pos_x, pos_y, pos_z);
 	else
-		gDocument.objects.scale3(scale_x, scale_y, pos_x, pos_y);
+		that->inst.level.objects.scale3(scale_x, scale_y, pos_x, pos_y);
 
 	that->want_close = true;
 }
@@ -262,9 +262,9 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 //------------------------------------------------------------------------
 
 
-UI_RotateDialog::UI_RotateDialog() :
+UI_RotateDialog::UI_RotateDialog(Instance &inst) :
 	UI_Escapable_Window(360, 200, "Rotate Objects"),
-	want_close(false)
+	want_close(false), inst(inst)
 {
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, "Enter # of degrees to rotate objects:");
 	title->labelsize(16);
@@ -343,7 +343,7 @@ void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
 	int pos_x = (that->origin->value() % 3) - 1;
 	int pos_y = (that->origin->value() / 3) - 1;
 
-	gDocument.objects.rotate3(angle, pos_x, pos_y);
+	that->inst.level.objects.rotate3(angle, pos_x, pos_y);
 
 	that->want_close = true;
 }

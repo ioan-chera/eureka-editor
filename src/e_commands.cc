@@ -651,7 +651,7 @@ static void ACT_Drag_release(Instance &inst)
 			Render3D_DragThings(inst);
 
 		if (edit.mode == ObjType::sectors)
-			Render3D_DragSectors();
+			Render3D_DragSectors(inst);
 	}
 
 	// note: DragDelta needs edit.dragged
@@ -1056,7 +1056,7 @@ static void CMD_Merge(Instance &inst)
 			break;
 
 		case ObjType::things:
-			CMD_TH_Merge();
+			CMD_TH_Merge(inst);
 			break;
 
 		default:
@@ -1083,7 +1083,7 @@ static void CMD_Disconnect(Instance &inst)
 			break;
 
 		case ObjType::things:
-			CMD_TH_Disconnect();
+			CMD_TH_Disconnect(inst);
 			break;
 
 		default:
@@ -1195,7 +1195,7 @@ static void CMD_MoveObjects_Dialog(Instance &inst)
 	if (edit.mode == ObjType::things && instance::Level_format != MapFormat::doom)
 		want_dz = true;
 
-	UI_MoveDialog * dialog = new UI_MoveDialog(want_dz);
+	UI_MoveDialog * dialog = new UI_MoveDialog(inst, want_dz);
 
 	dialog->Run();
 
@@ -1215,7 +1215,7 @@ static void CMD_ScaleObjects_Dialog(Instance &inst)
 		return;
 	}
 
-	UI_ScaleDialog * dialog = new UI_ScaleDialog();
+	UI_ScaleDialog * dialog = new UI_ScaleDialog(inst);
 
 	dialog->Run();
 
@@ -1235,7 +1235,7 @@ static void CMD_RotateObjects_Dialog(Instance &inst)
 		return;
 	}
 
-	UI_RotateDialog * dialog = new UI_RotateDialog();
+	UI_RotateDialog * dialog = new UI_RotateDialog(inst);
 
 	dialog->Run();
 

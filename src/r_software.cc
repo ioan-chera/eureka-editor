@@ -226,6 +226,11 @@ public:
 	DrawSurf floor;
 	DrawSurf rail;
 
+	Instance &inst;
+	explicit DrawWall(Instance &inst) : inst(inst)
+	{
+	}
+
 	// IsCloser tests if THIS wall (wall A) is closer to the camera
 	// than the given wall (wall B).
 	//
@@ -258,13 +263,13 @@ public:
 
 			if (A_other >= 0)
 			{
-				int ax = static_cast<int>(gDocument.vertices[A_other]->x());
-				int ay = static_cast<int>(gDocument.vertices[A_other]->y());
+				int ax = static_cast<int>(inst.level.vertices[A_other]->x());
+				int ay = static_cast<int>(inst.level.vertices[A_other]->y());
 
-				int bx1 = static_cast<int>(B->ld->Start(gDocument)->x());
-				int by1 = static_cast<int>(B->ld->Start(gDocument)->y());
-				int bx2 = static_cast<int>(B->ld->End(gDocument)->x());
-				int by2 = static_cast<int>(B->ld->End(gDocument)->y());
+				int bx1 = static_cast<int>(B->ld->Start(inst.level)->x());
+				int by1 = static_cast<int>(B->ld->Start(inst.level)->y());
+				int bx2 = static_cast<int>(B->ld->End(inst.level)->x());
+				int by2 = static_cast<int>(B->ld->End(inst.level)->y());
 
 				int cx = (int)r_view.x;  // camera
 				int cy = (int)r_view.y;
@@ -278,8 +283,8 @@ public:
 		else if (A->th >= 0 && B->th >= 0)
 		{
 			// prevent two things at same location from flickering
-			const Thing *const TA = gDocument.things[A->th];
-			const Thing *const TB = gDocument.things[B->th];
+			const Thing *const TA = inst.level.things[A->th];
+			const Thing *const TB = inst.level.things[B->th];
 
 			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
@@ -368,9 +373,9 @@ public:
 		Sector *front = sec;
 		Sector *back  = NULL;
 
-		SideDef *back_sd = (side == Side::left) ? ld->Right(gDocument) : ld->Left(gDocument);
+		SideDef *back_sd = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
 		if (back_sd)
-			back = gDocument.sectors[back_sd->sector];
+			back = inst.level.sectors[back_sd->sector];
 
 		// support for BOOM's 242 "transfer heights" line type
 		Sector temp_front;
@@ -379,7 +384,7 @@ public:
 		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
-			const Sector *dummy = gDocument.sectors[exfloor->heightsec];
+			const Sector *dummy = inst.level.sectors[exfloor->heightsec];
 			front = Boom242Sector(front, &temp_front, dummy);
 		}
 
@@ -388,7 +393,7 @@ public:
 			exfloor = Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const Sector *dummy = gDocument.sectors[exfloor->heightsec];
+				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
 				back = Boom242Sector(back, &temp_back, dummy);
 			}
 		}
@@ -489,7 +494,7 @@ public:
 			return;
 
 		front = sec;
-		back  = gDocument.sectors[back_sd->sector];
+		back  = inst.level.sectors[back_sd->sector];
 
 		int c_h = MIN(front->ceilh,  back->ceilh);
 		int f_h = MAX(front->floorh, back->floorh);
@@ -566,6 +571,8 @@ public:
 	int hl_thick;
 	Fl_Color hl_color;
 
+	Instance &inst;
+
 private:
 	static void DeleteWall(DrawWall *P)
 	{
@@ -573,10 +580,10 @@ private:
 	}
 
 public:
-	RendInfo() :
+	explicit RendInfo(Instance &inst) :
 		walls(), active(),
 		query_mode(0), query_sx(), query_sy(),
-		depth_x(), open_y1(), open_y2()
+		depth_x(), open_y1(), open_y2(), inst(inst)
 	{ }
 
 	~RendInfo()
@@ -706,18 +713,18 @@ public:
 
 	void AddLine(int ld_index)
 	{
-		LineDef *ld = gDocument.linedefs[ld_index];
+		LineDef *ld = inst.level.linedefs[ld_index];
 
-		if (!gDocument.isVertex(ld->start) || !gDocument.isVertex(ld->end))
+		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
 
-		if (! ld->Right(gDocument))
+		if (! ld->Right(inst.level))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(gDocument)->x() - r_view.x);
-		float y1 = static_cast<float>(ld->Start(gDocument)->y() - r_view.y);
-		float x2 = static_cast<float>(ld->End(gDocument)->x() - r_view.x);
-		float y2 = static_cast<float>(ld->End(gDocument)->y() - r_view.y);
+		float x1 = static_cast<float>(ld->Start(inst.level)->x() - r_view.x);
+		float y1 = static_cast<float>(ld->Start(inst.level)->y() - r_view.y);
+		float x2 = static_cast<float>(ld->End(inst.level)->x() - r_view.x);
+		float y2 = static_cast<float>(ld->End(inst.level)->y() - r_view.y);
 
 		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
 		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
@@ -741,7 +748,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == Side::left) ? ld->Left(gDocument) : ld->Right(gDocument);
+		SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : ld->Right(inst.level);
 
 		if (! sd)
 			return;
@@ -821,23 +828,23 @@ public:
 
 		// create drawwall structure
 
-		DrawWall *dw = new DrawWall;
+		DrawWall *dw = new DrawWall(inst);
 
 		dw->th = -1;
 		dw->ld = ld;
 		dw->ld_index = ld_index;
 
 		dw->sd = sd;
-		dw->sec = sd->SecRef(gDocument);
+		dw->sec = sd->SecRef(inst.level);
 		dw->side = side;
 		dw->thingFlags = 0;
 
 		dw->wall_light = dw->sec->light;
 
 		// add "fake constrast" for axis-aligned walls
-		if (ld->IsVertical(gDocument))
+		if (ld->IsVertical(inst.level))
 			dw->wall_light += 16;
-		else if (ld->IsHorizontal(gDocument))
+		else if (ld->IsHorizontal(inst.level))
 			dw->wall_light -= 16;
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;
@@ -859,7 +866,7 @@ public:
 
 	void AddThing(int th_index)
 	{
-		Thing *th = gDocument.things[th_index];
+		Thing *th = inst.level.things[th_index];
 
 		const thingtype_t &info = M_GetThingType(th->type);
 
@@ -909,13 +916,13 @@ public:
 		int thsec = r_view.thing_sectors[th_index];
 
 		// check if thing is hidden by BOOM deep water
-		if (gDocument.isSector(thsec))
+		if (inst.level.isSector(thsec))
 		{
 			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(thsec);
-			if (gDocument.isSector(exfloor->heightsec))
+			if (inst.level.isSector(exfloor->heightsec))
 			{
-				const Sector *real  = gDocument.sectors[thsec];
-				const Sector *dummy = gDocument.sectors[exfloor->heightsec];
+				const Sector *real  = inst.level.sectors[thsec];
+				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
 
 				if (dummy->floorh > real->floorh &&
 					r_view.z > dummy->floorh &&
@@ -931,18 +938,18 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
-			h2 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - th->h());
+			h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - th->h());
 			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
-			h1 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + th->h());
+			h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + th->h());
 			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
 		// create drawwall structure
 
-		DrawWall *dw = new DrawWall;
+		DrawWall *dw = new DrawWall(inst);
 
 		dw->th  = th_index;
 		dw->ld_index = -1;
@@ -1026,8 +1033,8 @@ public:
 
 		if (dw->ld->TwoSided())
 		{
-			const Sector *front = dw->ld->Right(gDocument)->SecRef(gDocument);
-			const Sector *back  = dw->ld-> Left(gDocument)->SecRef(gDocument);
+			const Sector *front = dw->ld->Right(inst.level)->SecRef(inst.level);
+			const Sector *back  = dw->ld-> Left(inst.level)->SecRef(inst.level);
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
@@ -1050,8 +1057,8 @@ public:
 			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
 				return;
 
-			z1 = dw->sd->SecRef(gDocument)->floorh;
-			z2 = dw->sd->SecRef(gDocument)->ceilh;
+			z1 = dw->sd->SecRef(inst.level)->floorh;
+			z2 = dw->sd->SecRef(inst.level)->ceilh;
 		}
 
 		int x1 = dw->sx1;
@@ -1135,7 +1142,7 @@ public:
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-		const Sector *S = gDocument.sectors[sec_index];
+		const Sector *S = inst.level.sectors[sec_index];
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
@@ -1179,7 +1186,7 @@ public:
 
 			if (sec_index >= 0)
 			{
-				if (! dw->ld->TouchesSector(sec_index, gDocument))
+				if (! dw->ld->TouchesSector(sec_index, inst.level))
 					continue;
 
 				// Note: hl_color already set by caller
@@ -1197,8 +1204,8 @@ public:
 
 			for (int what_side = 0 ; what_side < 2 ; what_side++)
 			{
-				const SideDef *sd_front = dw->ld->Right(gDocument);
-				const SideDef *sd_back  = dw->ld->Left(gDocument);
+				const SideDef *sd_front = dw->ld->Right(inst.level);
+				const SideDef *sd_back  = dw->ld->Left(inst.level);
 
 				if (sd_front && sd_back && sd_front == sd_back)
 					break;
@@ -1272,7 +1279,7 @@ public:
 				float dy = static_cast<float>(edit.drag_cur_y - edit.drag_start_y);
 				float dz = static_cast<float>(edit.drag_cur_z - edit.drag_start_z);
 
-				const Thing *T = gDocument.things[dw->th];
+				const Thing *T = inst.level.things[dw->th];
 
 				float x = static_cast<float>(T->x() + dx - r_view.x);
 				float y = static_cast<float>(T->y() + dy - r_view.y);
@@ -1297,12 +1304,12 @@ public:
 
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
-					h2 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->ceilh : 192) - T->h());
+					h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - T->h());
 					h1 = static_cast<int>(h2 - sprite->height() * scale);
 				}
 				else
 				{
-					h1 = static_cast<int>((gDocument.isSector(thsec) ? gDocument.sectors[thsec]->floorh : 0) + T->h());
+					h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + T->h());
 					h2 = static_cast<int>(h1 + sprite->height() * scale);
 				}
 
@@ -1398,7 +1405,7 @@ public:
 			if (! dw)
 				continue;
 
-			int one_sided = dw->ld && ! dw->ld->Left(gDocument);
+			int one_sided = dw->ld && ! dw->ld->Left(inst.level);
 			int vis_count = dw->sx2 - dw->sx1 + 1;
 
 			for (int x = dw->sx1 ; x <= dw->sx2 ; x++)
@@ -1655,7 +1662,7 @@ public:
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
 		int thsec = r_view.thing_sectors[dw->th];
-		int light = gDocument.isSector(thsec) ? gDocument.sectors[thsec]->light : 255;
+		int light = inst.level.isSector(thsec) ? inst.level.sectors[thsec]->light : 255;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* fill pixels */
@@ -2006,11 +2013,11 @@ public:
 
 		InitDepthBuf(r_view.screen_w);
 
-		for (int i=0 ; i < gDocument.numLinedefs(); i++)
+		for (int i=0 ; i < inst.level.numLinedefs(); i++)
 			AddLine(i);
 
 		if (r_view.sprites)
-			for (int k=0 ; k < gDocument.numThings() ; k++)
+			for (int k=0 ; k < inst.level.numThings() ; k++)
 				AddThing(k);
 
 		ClipSolids();
@@ -2088,9 +2095,9 @@ static void BlitLores(int ox, int oy, int ow, int oh)
 }
 
 
-void SW_RenderWorld(int ox, int oy, int ow, int oh)
+void SW_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh)
 {
-	RendInfo rend;
+	RendInfo rend(inst);
 
 	fl_push_clip(ox, oy, ow, oh);
 
@@ -2107,7 +2114,7 @@ void SW_RenderWorld(int ox, int oy, int ow, int oh)
 }
 
 
-bool SW_QueryPoint(Objid& hl, int qx, int qy)
+bool SW_QueryPoint(Instance &inst, Objid& hl, int qx, int qy)
 {
 	if (! config::render_high_detail)
 	{
@@ -2115,7 +2122,7 @@ bool SW_QueryPoint(Objid& hl, int qx, int qy)
 		qy = qy / 2;
 	}
 
-	RendInfo rend;
+	RendInfo rend(inst);
 
 	// this runs the renderer, but *no* drawing is done
 	rend.Query(qx, qy);

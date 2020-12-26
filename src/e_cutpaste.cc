@@ -845,7 +845,7 @@ void CMD_Clipboard_Copy(Instance &inst)
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Copy();
+		Render3D_CB_Copy(inst);
 		return;
 	}
 

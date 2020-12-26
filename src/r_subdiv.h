@@ -58,7 +58,7 @@ void Subdiv_InvalidateAll();
 
 bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy);
 
-sector_subdivision_c *Subdiv_PolygonsForSector(int num);
+sector_subdivision_c *Subdiv_PolygonsForSector(Instance &inst, int num);
 
 
 class extrafloor_c

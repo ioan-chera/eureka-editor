@@ -31,7 +31,5 @@ struct Instance
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
-// temporary reference to instance's unique level (until we remove its usage)
-static Document &gDocument = gInstance.level;
 
 #endif

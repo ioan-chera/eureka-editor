@@ -205,8 +205,10 @@ public:
 
 	std::vector<sector_extra_info_t> infos;
 
+	Instance &inst;
+
 public:
-	sector_info_cache_c() : total(-1), infos()
+	explicit sector_info_cache_c(Instance &inst) : total(-1), infos(), inst(inst)
 	{ }
 
 	~sector_info_cache_c()
@@ -215,9 +217,9 @@ public:
 public:
 	void Update()
 	{
-		if (total != gDocument.numSectors())
+		if (total != inst.level.numSectors())
 		{
-			total = gDocument.numSectors();
+			total = inst.level.numSectors();
 
 			infos.resize((size_t) total);
 
@@ -231,16 +233,16 @@ public:
 
 		for (sec = 0 ; sec < total ; sec++)
 		{
-			const Sector *S = gDocument.sectors[sec];
+			const Sector *S = inst.level.sectors[sec];
 
 			infos[sec].Clear();
 			infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
 			infos[sec].floors.c_plane.Init(static_cast<float>(S->ceilh));
 		}
 
-		for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 		{
-			const LineDef *L = gDocument.linedefs[n];
+			const LineDef *L = inst.level.linedefs[n];
 
 			CheckBoom242(L);
 			CheckExtraFloor(L, n);
@@ -252,27 +254,27 @@ public:
 				if (sd_num < 0)
 					continue;
 
-				sec = gDocument.sidedefs[sd_num]->sector;
+				sec = inst.level.sidedefs[sd_num]->sector;
 
 				sector_extra_info_t& info = infos[sec];
 
 				info.AddLine(n);
 
-				info.AddVertex(L->Start(gDocument));
-				info.AddVertex(L->End(gDocument));
+				info.AddVertex(L->Start(inst.level));
+				info.AddVertex(L->End(inst.level));
 			}
 		}
 
-		for (const Thing *thing : gDocument.things)
+		for (const Thing *thing : inst.level.things)
 		{
 			CheckSlopeThing(thing);
 		}
-		for (const Thing *thing : gDocument.things)
+		for (const Thing *thing : inst.level.things)
 		{
 			CheckSlopeCopyThing(thing);
 		}
 
-		for (const LineDef *linedef : gDocument.linedefs)
+		for (const LineDef *linedef : inst.level.linedefs)
 		{
 			CheckPlaneCopy(linedef);
 		}
@@ -290,11 +292,11 @@ public:
 		if (L->tag <= 0 || L->right < 0)
 			return;
 
-		int dummy_sec = L->Right(gDocument)->sector;
+		int dummy_sec = L->Right(inst.level)->sector;
 
-		for (int n = 0 ; n < gDocument.numSectors(); n++)
+		for (int n = 0 ; n < inst.level.numSectors(); n++)
 		{
-			if (gDocument.sectors[n]->tag == L->tag)
+			if (inst.level.sectors[n]->tag == L->tag)
 				infos[n].floors.heightsec = dummy_sec;
 		}
 	}
@@ -372,9 +374,9 @@ public:
 		EF.flags = flags;
 
 		// find all matching sectors
-		for (int n = 0 ; n < gDocument.numSectors(); n++)
+		for (int n = 0 ; n < inst.level.numSectors(); n++)
 		{
-			if (gDocument.sectors[n]->tag == sec_tag)
+			if (inst.level.sectors[n]->tag == sec_tag)
 				infos[n].floors.floors.push_back(EF);
 		}
 	}
@@ -513,18 +515,18 @@ public:
 
 	void PlaneAlignPart(const LineDef *L, Side side, int plane)
 	{
-		int sec_num = L->WhatSector(side, gDocument);
-		const Sector *front = gDocument.sectors[L->WhatSector(side, gDocument)];
-		const Sector *back  = gDocument.sectors[L->WhatSector(-side, gDocument)];
+		int sec_num = L->WhatSector(side, inst.level);
+		const Sector *front = inst.level.sectors[L->WhatSector(side, inst.level)];
+		const Sector *back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
 
 		// find a vertex belonging to sector and is far from the line
 		const Vertex *v = NULL;
 		double best_dist = 0.1;
 
-		double lx1 = L->Start(gDocument)->x();
-		double ly1 = L->Start(gDocument)->y();
-		double lx2 = L->End(gDocument)->x();
-		double ly2 = L->End(gDocument)->y();
+		double lx1 = L->Start(inst.level)->x();
+		double ly1 = L->Start(inst.level)->y();
+		double lx2 = L->End(inst.level)->x();
+		double ly2 = L->End(inst.level)->y();
 
 		if (side == Side::left)
 		{
@@ -532,13 +534,13 @@ public:
 			std::swap(ly1, ly2);
 		}
 
-		for (const LineDef *L2 : gDocument.linedefs)
+		for (const LineDef *L2 : inst.level.linedefs)
 		{
-			if (L2->TouchesSector(sec_num, gDocument))
+			if (L2->TouchesSector(sec_num, inst.level))
 			{
 				for (int pass = 0 ; pass < 2 ; pass++)
 				{
-					const Vertex *v2 = pass ? L2->End(gDocument) : L2->Start(gDocument);
+					const Vertex *v2 = pass ? L2->End(inst.level) : L2->Start(inst.level);
 					double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
 
 					if (dist > best_dist)
@@ -575,35 +577,35 @@ public:
 
 	void PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share)
 	{
-		for (int n = 0 ; n < gDocument.numSectors(); n++)
+		for (int n = 0 ; n < inst.level.numSectors(); n++)
 		{
-			if (f1_tag > 0 && gDocument.sectors[n]->tag == f1_tag && L->Right(gDocument))
+			if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && L->Right(inst.level))
 			{
-				infos[L->Right(gDocument)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+				infos[L->Right(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 				f1_tag = 0;
 			}
-			if (c1_tag > 0 && gDocument.sectors[n]->tag == c1_tag && L->Right(gDocument))
+			if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && L->Right(inst.level))
 			{
-				infos[L->Right(gDocument)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+				infos[L->Right(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 				c1_tag = 0;
 			}
 
-			if (f2_tag > 0 && gDocument.sectors[n]->tag == f2_tag && L->Left(gDocument))
+			if (f2_tag > 0 && inst.level.sectors[n]->tag == f2_tag && L->Left(inst.level))
 			{
-				infos[L->Left(gDocument)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+				infos[L->Left(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 				f2_tag = 0;
 			}
-			if (c2_tag > 0 && gDocument.sectors[n]->tag == c2_tag && L->Left(gDocument))
+			if (c2_tag > 0 && inst.level.sectors[n]->tag == c2_tag && L->Left(inst.level))
 			{
-				infos[L->Left(gDocument)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+				infos[L->Left(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 				c2_tag = 0;
 			}
 		}
 
 		if (L->left >= 0 && L->right >= 0)
 		{
-			int front_sec = L->Right(gDocument)->sector;
-			int  back_sec = L->Left(gDocument)->sector;
+			int front_sec = L->Right(inst.level)->sector;
+			int  back_sec = L->Left(inst.level)->sector;
 
 			switch (share & 3)
 			{
@@ -627,14 +629,14 @@ public:
 			return;
 
 		// find sector containing the thing
-		Objid o = gDocument.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 		if (!o.valid())
 			return;
 
-		for (int n = 0 ; n < gDocument.numSectors(); n++)
+		for (int n = 0 ; n < inst.level.numSectors(); n++)
 		{
-			if (gDocument.sectors[n]->tag == T->arg1)
+			if (inst.level.sectors[n]->tag == T->arg1)
 			{
 				if (plane > 0)
 					infos[o.num].floors.c_plane.Copy(infos[n].floors.c_plane);
@@ -652,7 +654,7 @@ public:
 		double ty = T->y();
 
 		// find sector containing the thing
-		Objid o = gDocument.hover.getNearbyObject(ObjType::sectors, tx, ty);
+		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, tx, ty);
 
 		if (!o.valid())
 			return;
@@ -732,10 +734,11 @@ public:
 	}
 };
 
-static sector_info_cache_c sector_info_cache;
+// TODO: make it per instance
+static sector_info_cache_c sector_info_cache(gInstance);
 
 
-static void R_SubdivideSector(int num, sector_extra_info_t& exinfo)
+static void R_SubdivideSector(Instance &inst, int num, sector_extra_info_t& exinfo)
 {
 	if (exinfo.first_line < 0)
 		return;
@@ -750,21 +753,21 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
-		const LineDef *L = gDocument.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
-		if (! L->TouchesSector(num, gDocument))
+		if (! L->TouchesSector(num, inst.level))
 			continue;
 
 		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(Side::left, gDocument) == L->WhatSector(Side::right, gDocument))
+		if (L->WhatSector(Side::left, inst.level) == L->WhatSector(Side::right, inst.level))
 			continue;
 
 		sector_edge_t edge;
 
-		edge.x1 = static_cast<int>(L->Start(gDocument)->x());
-		edge.y1 = static_cast<int>(L->Start(gDocument)->y());
-		edge.x2 = static_cast<int>(L->End(gDocument)->x());
-		edge.y2 = static_cast<int>(L->End(gDocument)->y());
+		edge.x1 = static_cast<int>(L->Start(inst.level)->x());
+		edge.y1 = static_cast<int>(L->Start(inst.level)->y());
+		edge.x2 = static_cast<int>(L->End(inst.level)->x());
+		edge.y2 = static_cast<int>(L->End(inst.level)->y());
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)
@@ -782,7 +785,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		}
 
 		// compute side
-		bool is_right = (L->WhatSector(Side::right, gDocument) == num);
+		bool is_right = (L->WhatSector(Side::right, inst.level) == num);
 
 		if (edge.flipped)
 			is_right = !is_right;
@@ -952,7 +955,7 @@ bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx,
 }
 
 
-sector_subdivision_c *Subdiv_PolygonsForSector(int num)
+sector_subdivision_c *Subdiv_PolygonsForSector(Instance &inst, int num)
 {
 	sector_info_cache.Update();
 
@@ -960,7 +963,7 @@ sector_subdivision_c *Subdiv_PolygonsForSector(int num)
 
 	if (! exinfo.built)
 	{
-		R_SubdivideSector(num, exinfo);
+		R_SubdivideSector(inst, num, exinfo);
 		exinfo.built = true;
 	}
 

@@ -340,7 +340,7 @@ void CMD_TestMap(Instance &inst)
 			return;
 		}
 
-		if (! M_SaveMap())
+		if (! M_SaveMap(inst))
 			return;
 	}
 

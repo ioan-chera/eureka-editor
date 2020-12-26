@@ -186,7 +186,7 @@ int M_ParseLine(const SString &line, std::vector<SString> &tokens, ParseOptions 
 
 // user state persistence (stuff like camera pos, grid settings, ...)
 bool M_LoadUserState(Instance &inst);
-bool M_SaveUserState();
+bool M_SaveUserState(const Instance &inst);
 
 void M_DefaultUserState(Instance &inst);
 

@@ -43,8 +43,7 @@ void OpenFileMap(const SString &filename, const SString &map_name = "");
 extern int last_given_file;
 
 // these return false if user cancelled
-bool M_SaveMap();
-bool M_ExportMap();
+bool M_SaveMap(Instance &inst);
 
 /* commands */
 

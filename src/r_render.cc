@@ -75,20 +75,21 @@ namespace thing_sec_cache
 		invalid_high = MAX(invalid_high, th);
 	}
 
-	void InvalidateAll()
+	void InvalidateAll(const Document &doc)
 	{
 		invalid_low  = 0;
-		invalid_high = gDocument.numThings() - 1;
+		invalid_high = doc.numThings() - 1;
 	}
 
-	void Update();
+	void Update(Instance &inst);
 };
 
 
-Render_View_t r_view;
+// TODO: make it per instance
+Render_View_t r_view(gInstance);
 
 
-Render_View_t::Render_View_t() :
+Render_View_t::Render_View_t(Instance &inst) :
 	p_type(0), px(), py(),
 	x(), y(), z(),
 	angle(), Sin(), Cos(),
@@ -96,7 +97,7 @@ Render_View_t::Render_View_t() :
 	texturing(false), sprites(false), lighting(false),
 	gravity(true),
 	thing_sectors(),
-	mouse_x(-1), mouse_y(-1)
+	mouse_x(-1), mouse_y(-1), inst(inst)
 { }
 
 Render_View_t::~Render_View_t()
@@ -129,11 +130,11 @@ void Render_View_t::FindGroundZ()
 		double test_x = x + dx * 8;
 		double test_y = y + dy * 8;
 
-		Objid o = gDocument.hover.getNearbyObject(ObjType::sectors, test_x, test_y);
+		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, test_x, test_y);
 
 		if (o.num >= 0)
 		{
-			double z = gDocument.sectors[o.num]->floorh;
+			double z = inst.level.sectors[o.num]->floorh;
 			{
 				sector_3dfloors_c *ex = Subdiv_3DFloorsForSector(o.num);
 				if (ex->f_plane.sloped)
@@ -195,7 +196,7 @@ void Render_View_t::UpdateScreen(int ow, int oh)
 
 void Render_View_t::PrepareToRender(int ow, int oh)
 {
-	thing_sec_cache::Update();
+	thing_sec_cache::Update(inst);
 
 	UpdateScreen(ow, oh);
 
@@ -204,13 +205,13 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 }
 
 
-static Thing *FindPlayer(int typenum)
+static Thing *FindPlayer(const Document &doc, int typenum)
 {
 	// need to search backwards (to handle Voodoo dolls properly)
 
-	for ( int i = gDocument.numThings()-1 ; i >= 0 ; i--)
-		if (gDocument.things[i]->type == typenum)
-			return gDocument.things[i];
+	for ( int i = doc.numThings()-1 ; i >= 0 ; i--)
+		if (doc.things[i]->type == typenum)
+			return doc.things[i];
 
 	return NULL;  // not found
 }
@@ -220,14 +221,14 @@ static Thing *FindPlayer(int typenum)
 
 namespace thing_sec_cache
 {
-	void Update()
+	void Update(Instance &inst)
 	{
 		// guarantee that thing_sectors has the correct size.
 		// [ prevent a potential crash ]
-		if (gDocument.numThings() != (int)r_view.thing_sectors.size())
+		if (inst.level.numThings() != (int)r_view.thing_sectors.size())
 		{
-			r_view.thing_sectors.resize(gDocument.numThings());
-			thing_sec_cache::InvalidateAll();
+			r_view.thing_sectors.resize(inst.level.numThings());
+			thing_sec_cache::InvalidateAll(inst.level);
 		}
 
 		// nothing changed?
@@ -236,7 +237,7 @@ namespace thing_sec_cache
 
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
-			Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, gDocument.things[i]->x(), gDocument.things[i]->y());
+			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.level.things[i]->x(), inst.level.things[i]->y());
 
 			r_view.thing_sectors[i] = obj.num;
 		}
@@ -256,10 +257,10 @@ void Render3D_NotifyInsert(ObjType type, int objnum)
 		thing_sec_cache::InvalidateThing(objnum);
 }
 
-void Render3D_NotifyDelete(ObjType type, int objnum)
+void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 {
 	if (type == ObjType::things || type == ObjType::sectors)
-		thing_sec_cache::InvalidateAll();
+		thing_sec_cache::InvalidateAll(doc);
 }
 
 void Render3D_NotifyChange(ObjType type, int objnum, int field)
@@ -271,9 +272,9 @@ void Render3D_NotifyChange(ObjType type, int objnum, int field)
 	}
 }
 
-void Render3D_NotifyEnd()
+void Render3D_NotifyEnd(Instance &inst)
 {
-	thing_sec_cache::Update();
+	thing_sec_cache::Update(inst);
 }
 
 
@@ -302,9 +303,10 @@ private:
 	ObjType type;
 
 	std::vector< save_obj_field_c > fields;
+	Instance &inst;
 
 public:
-	SaveBucket_c(ObjType type) : type(type)
+	SaveBucket_c(ObjType type, Instance &inst) : type(type), inst(inst)
 	{
 	}
 
@@ -351,7 +353,7 @@ public:
 		{
 			if (fields[i].field == field)
 			{
-				gDocument.basis.change(type, fields[i].obj, (byte)field, fields[i].value + delta);
+				inst.level.basis.change(type, fields[i].obj, (byte)field, fields[i].value + delta);
 			}
 		}
 	}
@@ -362,19 +364,19 @@ private:
 		switch (type)
 		{
 			case ObjType::things:
-				return reinterpret_cast<int*>(gDocument.things[objnum]);
+				return reinterpret_cast<int*>(inst.level.things[objnum]);
 
 			case ObjType::vertices:
-				return reinterpret_cast<int *>(gDocument.vertices[objnum]);
+				return reinterpret_cast<int *>(inst.level.vertices[objnum]);
 
 			case ObjType::sectors:
-				return reinterpret_cast<int *>(gDocument.sectors[objnum]);
+				return reinterpret_cast<int *>(inst.level.sectors[objnum]);
 
 			case ObjType::sidedefs:
-				return reinterpret_cast<int *>(gDocument.sidedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.sidedefs[objnum]);
 
 			case ObjType::linedefs:
-				return reinterpret_cast<int *>(gDocument.linedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.linedefs[objnum]);
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -396,14 +398,14 @@ private:
 };
 
 
-static void AdjustOfs_UpdateBBox(int ld_num)
+static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
-	const LineDef *L = gDocument.linedefs[ld_num];
+	const LineDef *L = inst.level.linedefs[ld_num];
 
-	float lx1 = static_cast<float>(L->Start(gDocument)->x());
-	float ly1 = static_cast<float>(L->Start(gDocument)->y());
-	float lx2 = static_cast<float>(L->End(gDocument)->x());
-	float ly2 = static_cast<float>(L->End(gDocument)->y());
+	float lx1 = static_cast<float>(L->Start(inst.level)->x());
+	float ly1 = static_cast<float>(L->Start(inst.level)->y());
+	float lx2 = static_cast<float>(L->End(inst.level)->x());
+	float ly2 = static_cast<float>(L->End(inst.level)->y());
 
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
@@ -436,12 +438,12 @@ void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 	dy_factor = dist / r_view.aspect_sh;
 }
 
-static void AdjustOfs_Add(int ld_num, int part)
+static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 {
 	if (! edit.adjust_bucket)
 		return;
 
-	const LineDef *L = gDocument.linedefs[ld_num];
+	const LineDef *L = inst.level.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
 	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
@@ -454,12 +456,12 @@ static void AdjustOfs_Add(int ld_num, int part)
 	edit.adjust_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
 }
 
-static void AdjustOfs_Begin()
+static void AdjustOfs_Begin(Instance &inst)
 {
 	if (edit.adjust_bucket)
 		delete edit.adjust_bucket;
 
-	edit.adjust_bucket = new SaveBucket_c(ObjType::sidedefs);
+	edit.adjust_bucket = new SaveBucket_c(ObjType::sidedefs, inst);
 	edit.adjust_lax = Exec_HasFlag("/LAX");
 
 	int total_lines = 0;
@@ -484,15 +486,15 @@ static void AdjustOfs_Begin()
 			}
 
 			total_lines++;
-			AdjustOfs_UpdateBBox(ld_num);
+			AdjustOfs_UpdateBBox(inst, ld_num);
 
-			if (parts & PART_RT_LOWER) AdjustOfs_Add(ld_num, PART_RT_LOWER);
-			if (parts & PART_RT_UPPER) AdjustOfs_Add(ld_num, PART_RT_UPPER);
-			if (parts & PART_RT_RAIL)  AdjustOfs_Add(ld_num, PART_RT_RAIL);
+			if (parts & PART_RT_LOWER) AdjustOfs_Add(inst, ld_num, PART_RT_LOWER);
+			if (parts & PART_RT_UPPER) AdjustOfs_Add(inst, ld_num, PART_RT_UPPER);
+			if (parts & PART_RT_RAIL)  AdjustOfs_Add(inst, ld_num, PART_RT_RAIL);
 
-			if (parts & PART_LF_LOWER) AdjustOfs_Add(ld_num, PART_LF_LOWER);
-			if (parts & PART_LF_UPPER) AdjustOfs_Add(ld_num, PART_LF_UPPER);
-			if (parts & PART_LF_RAIL)  AdjustOfs_Add(ld_num, PART_LF_RAIL);
+			if (parts & PART_LF_LOWER) AdjustOfs_Add(inst, ld_num, PART_LF_LOWER);
+			if (parts & PART_LF_UPPER) AdjustOfs_Add(inst, ld_num, PART_LF_UPPER);
+			if (parts & PART_LF_RAIL)  AdjustOfs_Add(inst, ld_num, PART_LF_RAIL);
 		}
 	}
 	else if (edit.highlight.valid())
@@ -502,8 +504,8 @@ static void AdjustOfs_Begin()
 
 		if (parts >= 2)
 		{
-			AdjustOfs_Add(ld_num, parts);
-			AdjustOfs_UpdateBBox(ld_num);
+			AdjustOfs_Add(inst, ld_num, parts);
+			AdjustOfs_UpdateBBox(inst, ld_num);
 			total_lines++;
 		}
 	}
@@ -522,7 +524,7 @@ static void AdjustOfs_Begin()
 	Editor_SetAction(ACT_ADJUST_OFS);
 }
 
-static void AdjustOfs_Finish()
+static void AdjustOfs_Finish(Instance &inst)
 {
 	if (! edit.adjust_bucket)
 	{
@@ -535,13 +537,13 @@ static void AdjustOfs_Finish()
 
 	if (dx || dy)
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("adjusted offsets");
+		inst.level.basis.begin();
+		inst.level.basis.setMessage("adjusted offsets");
 
 		edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
 		edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
 
-		gDocument.basis.end();
+		inst.level.basis.end();
 	}
 
 	delete edit.adjust_bucket;
@@ -614,23 +616,23 @@ static Thing *player;
 extern void CheckBeginDrag(Instance &inst);
 
 
-void Render3D_Draw(int ox, int oy, int ow, int oh)
+void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 {
 	r_view.PrepareToRender(ow, oh);
 
 	AdjustOfs_RenderAnte();
 
 #ifdef NO_OPENGL
-	SW_RenderWorld(ox, oy, ow, oh);
+	SW_RenderWorld(inst, ox, oy, ow, oh);
 #else
-	RGL_RenderWorld(ox, oy, ow, oh);
+	RGL_RenderWorld(inst, ox, oy, ow, oh);
 #endif
 
 	AdjustOfs_RenderPost();
 }
 
 
-bool Render3D_Query(Objid& hl, int sx, int sy)
+bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 {
 	int ow = instance::main_win->canvas->w();
 	int oh = instance::main_win->canvas->h();
@@ -659,13 +661,13 @@ bool Render3D_Query(Objid& hl, int sx, int sy)
 
 	r_view.PrepareToRender(ow, oh);
 
-	return SW_QueryPoint(hl, sx, sy);
+	return SW_QueryPoint(inst, hl, sx, sy);
 }
 
 
-void Render3D_Setup()
+void Render3D_Setup(Instance &inst)
 {
-	thing_sec_cache::InvalidateAll();
+	thing_sec_cache::InvalidateAll(inst.level);
 	r_view.thing_sectors.resize(0);
 
 	if (! r_view.p_type)
@@ -674,14 +676,14 @@ void Render3D_Setup()
 		r_view.px = 99999;
 	}
 
-	player = FindPlayer(r_view.p_type);
+	player = FindPlayer(inst.level, r_view.p_type);
 
 	if (! player)
 	{
 		if (r_view.p_type != THING_DEATHMATCH)
 			r_view.p_type = THING_DEATHMATCH;
 
-		player = FindPlayer(r_view.p_type);
+		player = FindPlayer(inst.level, r_view.p_type);
 	}
 
 	if (player && !(r_view.px == player->x() && r_view.py == player->y()))
@@ -818,24 +820,24 @@ static void DragSectors_Update()
 		edit.drag_sector_dz = 0;
 }
 
-void Render3D_DragSectors()
+void Render3D_DragSectors(Instance &inst)
 {
 	int dz = I_ROUND(edit.drag_sector_dz);
 	if (dz == 0)
 		return;
 
-	gDocument.basis.begin();
+	inst.level.basis.begin();
 
 	if (dz > 0)
-		gDocument.basis.setMessage("raised sectors");
+		inst.level.basis.setMessage("raised sectors");
 	else
-		gDocument.basis.setMessage("lowered sectors");
+		inst.level.basis.setMessage("lowered sectors");
 
 	if (edit.dragged.valid())
 	{
 		int parts = edit.dragged.parts;
 
-		gDocument.secmod.safeRaiseLower(edit.dragged.num, parts, dz);
+		inst.level.secmod.safeRaiseLower(edit.dragged.num, parts, dz);
 	}
 	else
 	{
@@ -844,15 +846,15 @@ void Render3D_DragSectors()
 			int parts = edit.Selected->get_ext(*it);
 			parts &= ~1;
 
-			gDocument.secmod.safeRaiseLower(*it, parts, dz);
+			inst.level.secmod.safeRaiseLower(*it, parts, dz);
 		}
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 }
 
 
-static void DragThings_Update()
+static void DragThings_Update(Instance &inst)
 {
 	float ow = static_cast<float>(instance::main_win->canvas->w());
 //	float oh = main_win->canvas->h();
@@ -917,7 +919,7 @@ static void DragThings_Update()
 	}
 #endif
 
-	const Thing *T = gDocument.things[edit.drag_thing_num];
+	const Thing *T = inst.level.things[edit.drag_thing_num];
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -937,14 +939,14 @@ static void DragThings_Update()
 	new_y = static_cast<float>(new_y + dy * fwd_vy / fwd_len);
 
 	// handle a change in floor height
-	Objid old_sec = gDocument.hover.getNearbyObject(ObjType::sectors, old_x, old_y);
+	Objid old_sec = inst.level.hover.getNearbyObject(ObjType::sectors, old_x, old_y);
 
-	Objid new_sec = gDocument.hover.getNearbyObject(ObjType::sectors, new_x, new_y);
+	Objid new_sec = inst.level.hover.getNearbyObject(ObjType::sectors, new_x, new_y);
 
 	if (old_sec.valid() && new_sec.valid())
 	{
-		float old_z = static_cast<float>(gDocument.sectors[old_sec.num]->floorh);
-		float new_z = static_cast<float>(gDocument.sectors[new_sec.num]->floorh);
+		float old_z = static_cast<float>(inst.level.sectors[old_sec.num]->floorh);
+		float new_z = static_cast<float>(inst.level.sectors[new_sec.num]->floorh);
 
 		// intent here is to show proper position, NOT raise/lower things.
 		// [ perhaps add a new variable? ]
@@ -1008,7 +1010,7 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 	{
 		// get the latest map_x/y/z coordinates
 		Objid unused_hl;
-		Render3D_Query(unused_hl, x, y);
+		Render3D_Query(inst, unused_hl, x, y);
 
 		edit.drag_screen_dx = x - edit.click_screen_x;
 		edit.drag_screen_dy = y - edit.click_screen_y;
@@ -1020,7 +1022,7 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 			DragSectors_Update();
 
 		if (edit.mode == ObjType::things)
-			DragThings_Update();
+			DragThings_Update(inst);
 
 		instance::main_win->canvas->redraw();
 		instance::main_win->status_bar->redraw();
@@ -1031,7 +1033,7 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 }
 
 
-void Render3D_UpdateHighlight()
+void Render3D_UpdateHighlight(Instance &inst)
 {
 	edit.highlight.clear();
 	edit.split_line.clear();
@@ -1042,7 +1044,7 @@ void Render3D_UpdateHighlight()
 		Objid current_hl;
 
 		// this also updates edit.map_x/y/z
-		Render3D_Query(current_hl, r_view.mouse_x, r_view.mouse_y);
+		Render3D_Query(inst, current_hl, r_view.mouse_x, r_view.mouse_y);
 
 		if (current_hl.type == edit.mode)
 			edit.highlight = current_hl;
@@ -1109,7 +1111,7 @@ void Render3D_Navigate(Instance &inst)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // things are selected and they have different types.
-static int GrabSelectedThing()
+static int GrabSelectedThing(Instance &inst)
 {
 	int result = -1;
 
@@ -1121,13 +1123,13 @@ static int GrabSelectedThing()
 			return -1;
 		}
 
-		result = gDocument.things[edit.highlight.num]->type;
+		result = inst.level.things[edit.highlight.num]->type;
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = gDocument.things[*it];
+			const Thing *T = inst.level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
 				Beep("multiple thing types");
@@ -1187,7 +1189,7 @@ static int SEC_GrabFlat(const Sector *S, int part)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // sectors are selected and they have different flats.
-static int GrabSelectedFlat()
+static int GrabSelectedFlat(Instance &inst)
 {
 	int result = -1;
 
@@ -1199,7 +1201,7 @@ static int GrabSelectedFlat()
 			return -1;
 		}
 
-		const Sector *S = gDocument.sectors[edit.highlight.num];
+		const Sector *S = inst.level.sectors[edit.highlight.num];
 
 		result = SEC_GrabFlat(S, edit.highlight.parts);
 	}
@@ -1207,7 +1209,7 @@ static int GrabSelectedFlat()
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = gDocument.sectors[*it];
+			const Sector *S = inst.level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			int tex = SEC_GrabFlat(S, parts & ~1);
@@ -1296,44 +1298,44 @@ static void StoreDefaultedFlats(Instance &inst)
 }
 
 
-static int LD_GrabTex(const LineDef *L, int part)
+static int LD_GrabTex(const Instance &inst, const LineDef *L, int part)
 {
 	if (L->NoSided())
 		return BA_InternaliseString(default_wall_tex);
 
 	if (L->OneSided())
-		return L->Right(gDocument)->mid_tex;
+		return L->Right(inst.level)->mid_tex;
 
-	if (part & PART_RT_LOWER) return L->Right(gDocument)->lower_tex;
-	if (part & PART_RT_UPPER) return L->Right(gDocument)->upper_tex;
+	if (part & PART_RT_LOWER) return L->Right(inst.level)->lower_tex;
+	if (part & PART_RT_UPPER) return L->Right(inst.level)->upper_tex;
 
-	if (part & PART_LF_LOWER) return L->Left(gDocument)->lower_tex;
-	if (part & PART_LF_UPPER) return L->Left(gDocument)->upper_tex;
+	if (part & PART_LF_LOWER) return L->Left(inst.level)->lower_tex;
+	if (part & PART_LF_UPPER) return L->Left(inst.level)->upper_tex;
 
-	if (part & PART_RT_RAIL)  return L->Right(gDocument)->mid_tex;
-	if (part & PART_LF_RAIL)  return L->Left(gDocument) ->mid_tex;
+	if (part & PART_RT_RAIL)  return L->Right(inst.level)->mid_tex;
+	if (part & PART_LF_RAIL)  return L->Left(inst.level) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (L->Left(gDocument)->SecRef(gDocument)->floorh > L->Right(gDocument)->SecRef(gDocument)->floorh)
-		return L->Right(gDocument)->lower_tex;
+	if (L->Left(inst.level)->SecRef(inst.level)->floorh > L->Right(inst.level)->SecRef(inst.level)->floorh)
+		return L->Right(inst.level)->lower_tex;
 
-	if (L->Left(gDocument)->SecRef(gDocument)->ceilh < L->Right(gDocument)->SecRef(gDocument)->ceilh)
-		return L->Right(gDocument)->upper_tex;
+	if (L->Left(inst.level)->SecRef(inst.level)->ceilh < L->Right(inst.level)->SecRef(inst.level)->ceilh)
+		return L->Right(inst.level)->upper_tex;
 
-	if (L->Left(gDocument)->SecRef(gDocument)->floorh < L->Right(gDocument)->SecRef(gDocument)->floorh)
-		return L->Left(gDocument)->lower_tex;
+	if (L->Left(inst.level)->SecRef(inst.level)->floorh < L->Right(inst.level)->SecRef(inst.level)->floorh)
+		return L->Left(inst.level)->lower_tex;
 
-	if (L->Left(gDocument)->SecRef(gDocument)->ceilh > L->Right(gDocument)->SecRef(gDocument)->ceilh)
-		return L->Left(gDocument)->upper_tex;
+	if (L->Left(inst.level)->SecRef(inst.level)->ceilh > L->Right(inst.level)->SecRef(inst.level)->ceilh)
+		return L->Left(inst.level)->upper_tex;
 
 	// emergency fallback
-	return L->Right(gDocument)->lower_tex;
+	return L->Right(inst.level)->lower_tex;
 }
 
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // linedefs are selected and they have different textures.
-static int GrabSelectedTexture()
+static int GrabSelectedTexture(Instance &inst)
 {
 	int result = -1;
 
@@ -1345,18 +1347,18 @@ static int GrabSelectedTexture()
 			return -1;
 		}
 
-		const LineDef *L = gDocument.linedefs[edit.highlight.num];
+		const LineDef *L = inst.level.linedefs[edit.highlight.num];
 
-		result = LD_GrabTex(L, edit.highlight.parts);
+		result = LD_GrabTex(inst, L, edit.highlight.parts);
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = inst.level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			int tex = LD_GrabTex(L, parts & ~1);
+			int tex = LD_GrabTex(inst, L, parts & ~1);
 
 			if (result >= 0 && tex != result)
 			{
@@ -1431,26 +1433,26 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 }
 
 
-void Render3D_CB_Copy()
+void Render3D_CB_Copy(Instance &inst)
 {
 	int num;
 
 	switch (edit.mode)
 	{
 	case ObjType::things:
-		num = GrabSelectedThing();
+		num = GrabSelectedThing(inst);
 		if (num >= 0)
 			Texboard_SetThing(num);
 		break;
 
 	case ObjType::sectors:
-		num = GrabSelectedFlat();
+		num = GrabSelectedFlat(inst);
 		if (num >= 0)
 			Texboard_SetFlat(BA_GetString(num));
 		break;
 
 	case ObjType::linedefs:
-		num = GrabSelectedTexture();
+		num = GrabSelectedTexture(inst);
 		if (num >= 0)
 			Texboard_SetTex(BA_GetString(num));
 		break;
@@ -1865,7 +1867,7 @@ static void ACT_AdjustOfs_release(Instance &inst)
 	if (edit.action != ACT_ADJUST_OFS)
 		return;
 
-	AdjustOfs_Finish();
+	AdjustOfs_Finish(inst);
 }
 
 static void R3D_ACT_AdjustOfs(Instance &inst)
@@ -1882,7 +1884,7 @@ static void R3D_ACT_AdjustOfs(Instance &inst)
 		return;
 	}
 
-	AdjustOfs_Begin();
+	AdjustOfs_Begin(inst);
 }
 
 

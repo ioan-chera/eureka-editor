@@ -55,7 +55,7 @@ int last_given_file;
 bool inhibit_node_build;
 
 
-static void SaveLevel(const SString &level);
+static void SaveLevel(Instance &inst, const SString &level);
 
 static const char * overwrite_message =
 	"The %s PWAD already contains this map.  "
@@ -91,28 +91,28 @@ static void ReplaceEditWad(Wad_file *new_wad)
 
 static void FreshLevel(Instance &inst)
 {
-	gDocument.basis.clearAll();
+	inst.level.basis.clearAll();
 
 	Sector *sec = new Sector;
-	gDocument.sectors.push_back(sec);
+	inst.level.sectors.push_back(sec);
 
 	sec->SetDefaults();
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		Vertex *v = new Vertex;
-		gDocument.vertices.push_back(v);
+		inst.level.vertices.push_back(v);
 
 		v->SetRawX((i >= 2) ? 256 : -256);
 		v->SetRawY((i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
-		gDocument.sidedefs.push_back(sd);
+		inst.level.sidedefs.push_back(sd);
 
 		sd->SetDefaults(false);
 
 		LineDef *ld = new LineDef;
-		gDocument.linedefs.push_back(ld);
+		inst.level.linedefs.push_back(ld);
 
 		ld->start = i;
 		ld->end   = (i+1) % 4;
@@ -123,7 +123,7 @@ static void FreshLevel(Instance &inst)
 	for (int pl = 1 ; pl <= 4 ; pl++)
 	{
 		Thing *th = new Thing;
-		gDocument.things.push_back(th);
+		inst.level.things.push_back(th);
 
 		th->type  = pl;
 		th->angle = 90;
@@ -316,7 +316,7 @@ void CMD_NewProject(Instance &inst)
 	FreshLevel(gInstance);
 
 	// save it now : sets Level_name and window title
-	SaveLevel(map_name);
+	SaveLevel(gInstance, map_name);
 }
 
 
@@ -390,7 +390,7 @@ void CMD_FreshMap(Instance &inst)
 	FreshLevel(inst);
 
 	// save it now : sets Level_name and window title
-	SaveLevel(map_name);
+	SaveLevel(inst, map_name);
 }
 
 
@@ -437,11 +437,11 @@ Lump_c * Load_LookupAndSeek(const char *name)
 }
 
 
-static void LoadVertices()
+static void LoadVertices(Document &doc)
 {
 	Lump_c *lump = Load_LookupAndSeek("VERTEXES");
 	if (! lump)
-		FatalError("No vertex lump!\n");
+		ThrowException("No vertex lump!\n");
 
 	int count = lump->Length() / sizeof(raw_vertex_t);
 
@@ -449,26 +449,26 @@ static void LoadVertices()
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
-	gDocument.vertices.reserve(count);
+	doc.vertices.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_vertex_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading vertices.\n");
+			ThrowException("Error reading vertices.\n");
 
 		Vertex *vert = new Vertex;
 
 		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
 		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
-		gDocument.vertices.push_back(vert);
+		doc.vertices.push_back(vert);
 	}
 }
 
 
-static void LoadSectors()
+static void LoadSectors(Document &doc)
 {
 	Lump_c *lump = Load_LookupAndSeek("SECTORS");
 	if (! lump)
@@ -480,7 +480,7 @@ static void LoadSectors()
 	PrintDebug("GetSectors: num = %d\n", count);
 # endif
 
-	gDocument.sectors.reserve(count);
+	doc.sectors.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -504,12 +504,12 @@ static void LoadSectors()
 		sec->type  = LE_U16(raw.type);
 		sec->tag   = LE_S16(raw.tag);
 
-		gDocument.sectors.push_back(sec);
+		doc.sectors.push_back(sec);
 	}
 }
 
 
-static void CreateFallbackSector()
+static void CreateFallbackSector(Document &doc)
 {
 	LogPrintf("Creating a fallback sector.\n");
 
@@ -517,14 +517,14 @@ static void CreateFallbackSector()
 
 	sec->SetDefaults();
 
-	gDocument.sectors.push_back(sec);
+	doc.sectors.push_back(sec);
 }
 
-static void CreateFallbackSideDef()
+static void CreateFallbackSideDef(Document &doc)
 {
 	// we need a valid sector too!
-	if (gDocument.numSectors() == 0)
-		CreateFallbackSector();
+	if (doc.numSectors() == 0)
+		CreateFallbackSector(doc);
 
 	LogPrintf("Creating a fallback sidedef.\n");
 
@@ -532,10 +532,10 @@ static void CreateFallbackSideDef()
 
 	sd->SetDefaults(false);
 
-	gDocument.sidedefs.push_back(sd);
+	doc.sidedefs.push_back(sd);
 }
 
-static void CreateFallbackVertices()
+static void CreateFallbackVertices(Document &doc)
 {
 	LogPrintf("Creating two fallback vertices.\n");
 
@@ -548,14 +548,14 @@ static void CreateFallbackVertices()
 	v2->raw_x = INT_TO_COORD(555);
 	v2->raw_y = INT_TO_COORD(555);
 
-	gDocument.vertices.push_back(v1);
-	gDocument.vertices.push_back(v2);
+	doc.vertices.push_back(v1);
+	doc.vertices.push_back(v2);
 }
 
 
-void ValidateSidedefRefs(LineDef * ld, int num)
+void ValidateSidedefRefs(Instance &inst, LineDef * ld, int num)
 {
-	if (ld->right >= gDocument.numSidedefs() || ld->left >= gDocument.numSidedefs())
+	if (ld->right >= inst.level.numSidedefs() || ld->left >= inst.level.numSidedefs())
 	{
 		LogPrintf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
 				  num, ld->right, ld->left);
@@ -563,20 +563,20 @@ void ValidateSidedefRefs(LineDef * ld, int num)
 		bad_sidedef_refs++;
 
 		// ensure we have a usable sidedef
-		if (gDocument.numSidedefs() == 0)
-			CreateFallbackSideDef();
+		if (inst.level.numSidedefs() == 0)
+			CreateFallbackSideDef(inst.level);
 
-		if (ld->right >= gDocument.numSidedefs())
+		if (ld->right >= inst.level.numSidedefs())
 			ld->right = 0;
 
-		if (ld->left >= gDocument.numSidedefs())
+		if (ld->left >= inst.level.numSidedefs())
 			ld->left = 0;
 	}
 }
 
-void ValidateVertexRefs(LineDef *ld, int num)
+void ValidateVertexRefs(Instance &inst, LineDef *ld, int num)
 {
-	if (ld->start >= gDocument.numVertices() || ld->end >= gDocument.numVertices() ||
+	if (ld->start >= inst.level.numVertices() || ld->end >= inst.level.numVertices() ||
 	    ld->start == ld->end)
 	{
 		LogPrintf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
@@ -585,17 +585,17 @@ void ValidateVertexRefs(LineDef *ld, int num)
 		bad_linedef_count++;
 
 		// ensure we have a valid vertex
-		if (gDocument.numVertices() < 2)
-			CreateFallbackVertices();
+		if (inst.level.numVertices() < 2)
+			CreateFallbackVertices(inst.level);
 
 		ld->start = 0;
-		ld->end   = gDocument.numVertices() - 1;
+		ld->end   = inst.level.numVertices() - 1;
 	}
 }
 
-void ValidateSectorRef(SideDef *sd, int num)
+void ValidateSectorRef(Instance &inst, SideDef *sd, int num)
 {
-	if (sd->sector >= gDocument.numSectors())
+	if (sd->sector >= inst.level.numSectors())
 	{
 		LogPrintf("WARNING: sidedef #%d has invalid sector (%d)\n",
 		          num, sd->sector);
@@ -603,15 +603,15 @@ void ValidateSectorRef(SideDef *sd, int num)
 		bad_sector_refs++;
 
 		// ensure we have a valid sector
-		if (gDocument.numSectors() == 0)
-			CreateFallbackSector();
+		if (inst.level.numSectors() == 0)
+			CreateFallbackSector(inst.level);
 
 		sd->sector = 0;
 	}
 }
 
 
-static void LoadHeader()
+static void LoadHeader(Instance &inst)
 {
 	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
 
@@ -620,36 +620,36 @@ static void LoadHeader()
 	if (length == 0)
 		return;
 
-	gDocument.headerData.resize(length);
+	inst.level.headerData.resize(length);
 
 	if (! lump->Seek())
-		FatalError("Error seeking to header lump!\n");
+		ThrowException("Error seeking to header lump!\n");
 
-	if (! lump->Read(&gDocument.headerData[0], length))
-		FatalError("Error reading header lump.\n");
+	if (! lump->Read(&inst.level.headerData[0], length))
+		ThrowException("Error reading header lump.\n");
 }
 
 
-static void LoadBehavior()
+static void LoadBehavior(Document &doc)
 {
 	// IOANCH 9/2015: support Hexen maps
 	Lump_c *lump = Load_LookupAndSeek("BEHAVIOR");
 	if (! lump)
-		FatalError("No BEHAVIOR lump!\n");
+		ThrowException("No BEHAVIOR lump!\n");
 
 	int length = lump->Length();
 
-	gDocument.behaviorData.resize(length);
+	doc.behaviorData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(&gDocument.behaviorData[0], length))
-		FatalError("Error reading BEHAVIOR.\n");
+	if (! lump->Read(&doc.behaviorData[0], length))
+		ThrowException("Error reading BEHAVIOR.\n");
 }
 
 
-static void LoadScripts()
+static void LoadScripts(Document &doc)
 {
 	// the SCRIPTS lump is usually absent
 	Lump_c *lump = Load_LookupAndSeek("SCRIPTS");
@@ -658,21 +658,21 @@ static void LoadScripts()
 
 	int length = lump->Length();
 
-	gDocument.scriptsData.resize(length);
+	doc.scriptsData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(&gDocument.scriptsData[0], length))
-		FatalError("Error reading SCRIPTS.\n");
+	if (! lump->Read(&doc.scriptsData[0], length))
+		ThrowException("Error reading SCRIPTS.\n");
 }
 
 
-static void LoadThings()
+static void LoadThings(Document &doc)
 {
 	Lump_c *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
-		FatalError("No things lump!\n");
+		ThrowException("No things lump!\n");
 
 	int count = lump->Length() / sizeof(raw_thing_t);
 
@@ -685,7 +685,7 @@ static void LoadThings()
 		raw_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading things.\n");
+			ThrowException("Error reading things.\n");
 
 		Thing *th = new Thing;
 
@@ -696,17 +696,17 @@ static void LoadThings()
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
 
-		gDocument.things.push_back(th);
+		doc.things.push_back(th);
 	}
 }
 
 
 // IOANCH 9/2015
-static void LoadThings_Hexen()
+static void LoadThings_Hexen(Document &doc)
 {
 	Lump_c *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
-		FatalError("No things lump!\n");
+		ThrowException("No things lump!\n");
 
 	int count = lump->Length() / sizeof(raw_hexen_thing_t);
 
@@ -719,7 +719,7 @@ static void LoadThings_Hexen()
 		raw_hexen_thing_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading things.\n");
+			ThrowException("Error reading things.\n");
 
 		Thing *th = new Thing;
 
@@ -739,12 +739,12 @@ static void LoadThings_Hexen()
 		th->arg4 = raw.args[3];
 		th->arg5 = raw.args[4];
 
-		gDocument.things.push_back(th);
+		doc.things.push_back(th);
 	}
 }
 
 
-static void LoadSideDefs()
+static void LoadSideDefs(Instance &inst)
 {
 	Lump_c *lump = Load_LookupAndSeek("SIDEDEFS");
 	if(!lump)
@@ -778,18 +778,18 @@ static void LoadSideDefs()
 
 		sd->sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(sd, i);
+		ValidateSectorRef(inst, sd, i);
 
-		gDocument.sidedefs.push_back(sd);
+		inst.level.sidedefs.push_back(sd);
 	}
 }
 
 
-static void LoadLineDefs()
+static void LoadLineDefs(Instance &inst)
 {
 	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
-		FatalError("No linedefs lump!\n");
+		ThrowException("No linedefs lump!\n");
 
 	int count = lump->Length() / sizeof(raw_linedef_t);
 
@@ -805,7 +805,7 @@ static void LoadLineDefs()
 		raw_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading linedefs.\n");
+			ThrowException("Error reading linedefs.\n");
 
 		LineDef *ld = new LineDef;
 
@@ -822,20 +822,20 @@ static void LoadLineDefs()
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i);
-		ValidateSidedefRefs(ld, i);
+		ValidateVertexRefs(inst, ld, i);
+		ValidateSidedefRefs(inst, ld, i);
 
-		gDocument.linedefs.push_back(ld);
+		inst.level.linedefs.push_back(ld);
 	}
 }
 
 
 // IOANCH 9/2015
-static void LoadLineDefs_Hexen()
+static void LoadLineDefs_Hexen(Instance &inst)
 {
 	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
-		FatalError("No linedefs lump!\n");
+		ThrowException("No linedefs lump!\n");
 
 	int count = lump->Length() / sizeof(raw_hexen_linedef_t);
 
@@ -851,7 +851,7 @@ static void LoadLineDefs_Hexen()
 		raw_hexen_linedef_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading linedefs.\n");
+			ThrowException("Error reading linedefs.\n");
 
 		LineDef *ld = new LineDef;
 
@@ -872,42 +872,42 @@ static void LoadLineDefs_Hexen()
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i);
-		ValidateSidedefRefs(ld, i);
+		ValidateVertexRefs(inst, ld, i);
+		ValidateSidedefRefs(inst, ld, i);
 
-		gDocument.linedefs.push_back(ld);
+		inst.level.linedefs.push_back(ld);
 	}
 }
 
 
-static void RemoveUnusedVerticesAtEnd()
+static void RemoveUnusedVerticesAtEnd(Document &doc)
 {
-	if (gDocument.numVertices() == 0)
+	if (doc.numVertices() == 0)
 		return;
 
-	bitvec_c used_verts(gDocument.numVertices());
+	bitvec_c used_verts(doc.numVertices());
 
-	for (const LineDef *linedef : gDocument.linedefs)
+	for (const LineDef *linedef : doc.linedefs)
 	{
 		used_verts.set(linedef->start);
 		used_verts.set(linedef->end);
 	}
 
-	int new_count = gDocument.numVertices();
+	int new_count = doc.numVertices();
 
 	while (new_count > 2 && !used_verts.get(new_count-1))
 		new_count--;
 
 	// we directly modify the vertex array here (which is not
 	// normally kosher, but level loading is a special case).
-	if (new_count < gDocument.numVertices())
+	if (new_count < doc.numVertices())
 	{
-		LogPrintf("Removing %d unused vertices at end\n", gDocument.numVertices() - new_count);
+		LogPrintf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
 
-		for (int i = new_count ; i < gDocument.numVertices(); i++)
-			delete gDocument.vertices[i];
+		for (int i = new_count ; i < doc.numVertices(); i++)
+			delete doc.vertices[i];
 
-		gDocument.vertices.resize(new_count);
+		doc.vertices.resize(new_count);
 	}
 }
 
@@ -984,7 +984,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 		// load the user state associated with this map
 		crc32_c adler_crc;
 
-		gDocument.getLevelChecksum(adler_crc);
+		inst.level.getLevelChecksum(adler_crc);
 
 		if (! M_LoadUserState(inst))
 		{
@@ -1007,39 +1007,39 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 
 	instance::Level_format = load_wad->LevelFormat(loading_level);
 
-	gDocument.basis.clearAll();
+	inst.level.basis.clearAll();
 
 	bad_linedef_count = 0;
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader();
+	LoadHeader(inst);
 
 	if (instance::Level_format == MapFormat::udmf)
 	{
-		UDMF_LoadLevel();
+		UDMF_LoadLevel(inst);
 	}
 	else
 	{
 		if (instance::Level_format == MapFormat::hexen)
-			LoadThings_Hexen();
+			LoadThings_Hexen(inst.level);
 		else
-			LoadThings();
+			LoadThings(inst.level);
 
-		LoadVertices();
-		LoadSectors();
-		LoadSideDefs();
+		LoadVertices(inst.level);
+		LoadSectors(inst.level);
+		LoadSideDefs(inst);
 
 		if (instance::Level_format == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen();
+			LoadLineDefs_Hexen(inst);
 
-			LoadBehavior();
-			LoadScripts();
+			LoadBehavior(inst.level);
+			LoadScripts(inst.level);
 		}
 		else
 		{
-			LoadLineDefs();
+			LoadLineDefs(inst);
 		}
 	}
 
@@ -1050,9 +1050,9 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 
 	// Node builders create a lot of new vertices for segs.
 	// However they just get in the way for editing, so remove them.
-	RemoveUnusedVerticesAtEnd();
+	RemoveUnusedVerticesAtEnd(inst.level);
 
-	gDocument.checks.sidedefsUnpack(true);
+	inst.level.checks.sidedefsUnpack(true);
 
 	CalculateLevelBounds(inst);
 	Subdiv_InvalidateAll();
@@ -1355,57 +1355,57 @@ void CMD_FlipMap(Instance &inst)
 static int saving_level;
 
 
-static void SaveHeader(const SString &level)
+static void SaveHeader(Instance &inst, const SString &level)
 {
-	int size = (int)gDocument.headerData.size();
+	int size = (int)inst.level.headerData.size();
 
 	Lump_c *lump = instance::edit_wad->AddLevel(level, size, &saving_level);
 
 	if (size > 0)
 	{
-		lump->Write(&gDocument.headerData[0], size);
+		lump->Write(&inst.level.headerData[0], size);
 	}
 
 	lump->Finish();
 }
 
 
-static void SaveBehavior()
+static void SaveBehavior(Instance &inst)
 {
-	int size = (int)gDocument.behaviorData.size();
+	int size = (int)inst.level.behaviorData.size();
 
 	Lump_c *lump = instance::edit_wad->AddLump("BEHAVIOR", size);
 
 	if (size > 0)
 	{
-		lump->Write(&gDocument.behaviorData[0], size);
+		lump->Write(&inst.level.behaviorData[0], size);
 	}
 
 	lump->Finish();
 }
 
 
-static void SaveScripts()
+static void SaveScripts(Instance &inst)
 {
-	int size = (int)gDocument.scriptsData.size();
+	int size = (int)inst.level.scriptsData.size();
 
 	if (size > 0)
 	{
 		Lump_c *lump = instance::edit_wad->AddLump("SCRIPTS", size);
 
-		lump->Write(&gDocument.scriptsData[0], size);
+		lump->Write(&inst.level.scriptsData[0], size);
 		lump->Finish();
 	}
 }
 
 
-static void SaveVertices()
+static void SaveVertices(Instance &inst)
 {
-	int size = gDocument.numVertices() * (int)sizeof(raw_vertex_t);
+	int size = inst.level.numVertices() * (int)sizeof(raw_vertex_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("VERTEXES", size);
 
-	for (const Vertex *vert : gDocument.vertices)
+	for (const Vertex *vert : inst.level.vertices)
 	{
 		raw_vertex_t raw;
 
@@ -1419,13 +1419,13 @@ static void SaveVertices()
 }
 
 
-static void SaveSectors()
+static void SaveSectors(Instance &inst)
 {
-	int size = gDocument.numSectors() * (int)sizeof(raw_sector_t);
+	int size = inst.level.numSectors() * (int)sizeof(raw_sector_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("SECTORS", size);
 
-	for (const Sector *sec : gDocument.sectors)
+	for (const Sector *sec : inst.level.sectors)
 	{
 		raw_sector_t raw;
 
@@ -1446,13 +1446,13 @@ static void SaveSectors()
 }
 
 
-static void SaveThings()
+static void SaveThings(Instance &inst)
 {
-	int size = gDocument.numThings() * (int)sizeof(raw_thing_t);
+	int size = inst.level.numThings() * (int)sizeof(raw_thing_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("THINGS", size);
 
-	for (const Thing *th : gDocument.things)
+	for (const Thing *th : inst.level.things)
 	{
 		raw_thing_t raw;
 
@@ -1471,13 +1471,13 @@ static void SaveThings()
 
 
 // IOANCH 9/2015
-static void SaveThings_Hexen()
+static void SaveThings_Hexen(Instance &inst)
 {
-	int size = gDocument.numThings() * (int)sizeof(raw_hexen_thing_t);
+	int size = inst.level.numThings() * (int)sizeof(raw_hexen_thing_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("THINGS", size);
 
-	for (const Thing *th : gDocument.things)
+	for (const Thing *th : inst.level.things)
 	{
 		raw_hexen_thing_t raw;
 
@@ -1505,13 +1505,13 @@ static void SaveThings_Hexen()
 }
 
 
-static void SaveSideDefs()
+static void SaveSideDefs(Instance &inst)
 {
-	int size = gDocument.numSidedefs() * (int)sizeof(raw_sidedef_t);
+	int size = inst.level.numSidedefs() * (int)sizeof(raw_sidedef_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("SIDEDEFS", size);
 
-	for (const SideDef *side : gDocument.sidedefs)
+	for (const SideDef *side : inst.level.sidedefs)
 	{
 		raw_sidedef_t raw;
 
@@ -1531,13 +1531,13 @@ static void SaveSideDefs()
 }
 
 
-static void SaveLineDefs()
+static void SaveLineDefs(Instance &inst)
 {
-	int size = gDocument.numLinedefs() * (int)sizeof(raw_linedef_t);
+	int size = inst.level.numLinedefs() * (int)sizeof(raw_linedef_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("LINEDEFS", size);
 
-	for (const LineDef *ld : gDocument.linedefs)
+	for (const LineDef *ld : inst.level.linedefs)
 	{
 		raw_linedef_t raw;
 
@@ -1559,13 +1559,13 @@ static void SaveLineDefs()
 
 
 // IOANCH 9/2015
-static void SaveLineDefs_Hexen()
+static void SaveLineDefs_Hexen(Instance &inst)
 {
-	int size = gDocument.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
+	int size = inst.level.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
 
 	Lump_c *lump = instance::edit_wad->AddLump("LINEDEFS", size);
 
-	for (const LineDef *ld : gDocument.linedefs)
+	for (const LineDef *ld : inst.level.linedefs)
 	{
 		raw_hexen_linedef_t raw;
 
@@ -1601,7 +1601,7 @@ static void EmptyLump(const char *name)
 // Write out the level data
 //
 
-static void SaveLevel(const SString &level)
+static void SaveLevel(Instance &inst, const SString &level)
 {
 	// set global level name now (for debugging code)
 	instance::Level_name = level.asUpper();
@@ -1621,42 +1621,42 @@ static void SaveLevel(const SString &level)
 
 	instance::edit_wad->InsertPoint(level_lump);
 
-	SaveHeader(level);
+	SaveHeader(inst, level);
 
 	if (instance::Level_format == MapFormat::udmf)
 	{
-		UDMF_SaveLevel();
+		UDMF_SaveLevel(inst);
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
 		if (instance::Level_format == MapFormat::hexen)
 		{
-			SaveThings_Hexen();
-			SaveLineDefs_Hexen();
+			SaveThings_Hexen(inst);
+			SaveLineDefs_Hexen(inst);
 		}
 		else
 		{
-			SaveThings();
-			SaveLineDefs();
+			SaveThings(inst);
+			SaveLineDefs(inst);
 		}
 
-		SaveSideDefs();
-		SaveVertices();
+		SaveSideDefs(inst);
+		SaveVertices(inst);
 
 		EmptyLump("SEGS");
 		EmptyLump("SSECTORS");
 		EmptyLump("NODES");
 
-		SaveSectors();
+		SaveSectors(inst);
 
 		EmptyLump("REJECT");
 		EmptyLump("BLOCKMAP");
 
 		if (instance::Level_format == MapFormat::hexen)
 		{
-			SaveBehavior();
-			SaveScripts();
+			SaveBehavior(inst);
+			SaveScripts(inst);
 		}
 	}
 
@@ -1667,7 +1667,7 @@ static void SaveLevel(const SString &level)
 	// build the nodes
 	if (config::bsp_on_save && ! inhibit_node_build)
 	{
-		BuildNodesAfterSave(saving_level);
+		BuildNodesAfterSave(inst, saving_level);
 	}
 
 
@@ -1686,21 +1686,22 @@ static void SaveLevel(const SString &level)
 		instance::main_win->SetTitle(instance::edit_wad->PathName(), instance::Level_name, false);
 
 		// save the user state associated with this map
-		M_SaveUserState();
+		M_SaveUserState(inst);
 	}
 
 	MadeChanges = 0;
 }
 
+static bool M_ExportMap(Instance &inst);
 
-bool M_SaveMap()
+bool M_SaveMap(Instance &inst)
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
 	if (!instance::edit_wad)
 	{
-		return M_ExportMap();
+		return M_ExportMap(inst);
 	}
 
 	if (instance::edit_wad->IsReadOnly())
@@ -1712,7 +1713,7 @@ bool M_SaveMap()
 			return false;
 		}
 
-		return M_ExportMap();
+		return M_ExportMap(inst);
 	}
 
 
@@ -1720,13 +1721,13 @@ bool M_SaveMap()
 
 	LogPrintf("Saving Map : %s in %s\n", instance::Level_name.c_str(), instance::edit_wad->PathName().c_str());
 
-	SaveLevel(instance::Level_name);
+	SaveLevel(inst, instance::Level_name);
 
 	return true;
 }
 
 
-bool M_ExportMap()
+static bool M_ExportMap(Instance &inst)
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -1853,7 +1854,7 @@ bool M_ExportMap()
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
 
-	SaveLevel(map_name);
+	SaveLevel(inst, map_name);
 
 	// do this after the save (in case it fatal errors)
 	Main_LoadResources();
@@ -1864,13 +1865,13 @@ bool M_ExportMap()
 
 void CMD_SaveMap(Instance &inst)
 {
-	M_SaveMap();
+	M_SaveMap(inst);
 }
 
 
 void CMD_ExportMap(Instance &inst)
 {
-	M_ExportMap();
+	M_ExportMap(inst);
 }
 
 
@@ -1917,7 +1918,7 @@ void CMD_CopyMap(Instance &inst)
 	// perform the copy (just a save)
 	LogPrintf("Copying Map : %s --> %s\n", instance::Level_name.c_str(), new_name.c_str());
 
-	SaveLevel(new_name);
+	SaveLevel(inst, new_name);
 
 	Status_Set("Copied to %s", instance::Level_name.c_str());
 }

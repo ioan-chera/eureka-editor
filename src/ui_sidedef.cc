@@ -45,10 +45,10 @@ bool config::sidedef_add_del_buttons = false;
 //
 // Constructor
 //
-UI_SideBox::UI_SideBox(int X, int Y, int W, int H, int _side) :
+UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	Fl_Group(X, Y, W, H),
 	obj(SETOBJ_NO_LINE), is_front(_side == 0),
-	on_2S_line(false)
+	on_2S_line(false), inst(inst)
 {
 	box(FL_FLAT_BOX); // FL_UP_BOX
 
@@ -198,16 +198,16 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited texture on", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited texture on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
-			if (gDocument.isSidedef(sd))
+			if (box->inst.level.isSidedef(sd))
 			{
 				bool lower = (w == box->l_tex || w == box->l_pic);
 				bool upper = (w == box->u_tex || w == box->u_pic);
@@ -216,20 +216,20 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 				if (lower)
 				{
-					gDocument.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+					box->inst.level.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 				}
 				else if (upper)
 				{
-					gDocument.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+					box->inst.level.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 				}
 				else if (rail)
 				{
-					gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex);
+					box->inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex);
 				}
 			}
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 
 		box->UpdateField();
 	}
@@ -274,47 +274,47 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 	int field = box->is_front ? LineDef::F_RIGHT : LineDef::F_LEFT;
 
-	gDocument.basis.begin();
+	box->inst.level.basis.begin();
 
 	// make sure we have a fallback sector to use
-	if (gDocument.numSectors() == 0)
+	if (box->inst.level.numSectors() == 0)
 	{
-		int new_sec = gDocument.basis.addNew(ObjType::sectors);
+		int new_sec = box->inst.level.basis.addNew(ObjType::sectors);
 
-		gDocument.sectors[new_sec]->SetDefaults();
+		box->inst.level.sectors[new_sec]->SetDefaults();
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = gDocument.linedefs[*it];
+		const LineDef *L = box->inst.level.linedefs[*it];
 
 		int sd    = box->is_front ? L->right : L->left;
 		int other = box->is_front ? L->left : L->right;
 
 		// skip lines which already have this sidedef
-		if (gDocument.isSidedef(sd))
+		if (box->inst.level.isSidedef(sd))
 			continue;
 
 		// determine what sector to use
-		int new_sec = gDocument.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left);
+		int new_sec = box->inst.level.hover.getOppositeSector(*it, box->is_front ? Side::right : Side::left);
 
 		if (new_sec < 0)
-			new_sec = gDocument.numSectors() - 1;
+			new_sec = box->inst.level.numSectors() - 1;
 
 		// create the new sidedef
-		sd = gDocument.basis.addNew(ObjType::sidedefs);
+		sd = box->inst.level.basis.addNew(ObjType::sidedefs);
 
-		gDocument.sidedefs[sd]->SetDefaults(other >= 0);
-		gDocument.sidedefs[sd]->sector = new_sec;
+		box->inst.level.sidedefs[sd]->SetDefaults(other >= 0);
+		box->inst.level.sidedefs[sd]->sector = new_sec;
 
-		gDocument.basis.changeLinedef(*it, field, sd);
+		box->inst.level.basis.changeLinedef(*it, field, sd);
 
 		if (other >= 0)
-			gDocument.linemod.addSecondSidedef(*it, sd, other);
+			box->inst.level.linemod.addSecondSidedef(*it, sd, other);
 	}
 
-	gDocument.basis.setMessageForSelection("added sidedef to", *edit.Selected);
-	gDocument.basis.end();
+	box->inst.level.basis.setMessageForSelection("added sidedef to", *edit.Selected);
+	box->inst.level.basis.end();
 
 	instance::main_win->line_box->UpdateField();
 	instance::main_win->line_box->UpdateSides();
@@ -332,11 +332,11 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 		return;
 
 	// iterate over selected linedefs
-	gDocument.basis.begin();
+	box->inst.level.basis.begin();
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = gDocument.linedefs[*it];
+		const LineDef *L = box->inst.level.linedefs[*it];
 
 		int sd = box->is_front ? L->right : L->left;
 
@@ -345,11 +345,11 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 
 		// NOTE WELL: the actual sidedef is not deleted (it might be shared)
 
-		gDocument.linemod.removeSidedef(*it, box->is_front ? Side::right : Side::left);
+		box->inst.level.linemod.removeSidedef(*it, box->is_front ? Side::right : Side::left);
 	}
 
-	gDocument.basis.setMessageForSelection("deleted sidedef from", *edit.Selected);
-	gDocument.basis.end();
+	box->inst.level.basis.setMessageForSelection("deleted sidedef from", *edit.Selected);
+	box->inst.level.basis.end();
 
 	instance::main_win->line_box->UpdateField();
 	instance::main_win->line_box->UpdateSides();
@@ -366,29 +366,29 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
+		box->inst.level.basis.begin();
 
 		if (w == box->x_ofs)
-			gDocument.basis.setMessageForSelection("edited X offset on", *edit.Selected);
+			box->inst.level.basis.setMessageForSelection("edited X offset on", *edit.Selected);
 		else
-			gDocument.basis.setMessageForSelection("edited Y offset on", *edit.Selected);
+			box->inst.level.basis.setMessageForSelection("edited Y offset on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
-			if (gDocument.isSidedef(sd))
+			if (box->inst.level.isSidedef(sd))
 			{
 				if (w == box->x_ofs)
-					gDocument.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_x_ofs);
+					box->inst.level.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_x_ofs);
 				else
-					gDocument.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, new_y_ofs);
+					box->inst.level.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, new_y_ofs);
 			}
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -399,25 +399,25 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 	int new_sec = atoi(box->sec->value());
 
-	new_sec = CLAMP(0, new_sec, gDocument.numSectors() -1);
+	new_sec = CLAMP(0, new_sec, box->inst.level.numSectors() -1);
 
 	// iterate over selected linedefs
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited sector-ref on", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited sector-ref on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
-			if (gDocument.isSidedef(sd))
-				gDocument.basis.changeSidedef(sd, SideDef::F_SECTOR, new_sec);
+			if (box->inst.level.isSidedef(sd))
+				box->inst.level.basis.changeSidedef(sd, SideDef::F_SECTOR, new_sec);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -452,9 +452,9 @@ void UI_SideBox::SetObj(int index, int solid_mask, bool two_sided)
 
 void UI_SideBox::UpdateField()
 {
-	if (gDocument.isSidedef(obj))
+	if (inst.level.isSidedef(obj))
 	{
-		const SideDef *sd = gDocument.sidedefs[obj];
+		const SideDef *sd = inst.level.sidedefs[obj];
 
 		x_ofs->value(SString(sd->x_offset).c_str());
 		y_ofs->value(SString(sd->y_offset).c_str());
@@ -509,7 +509,7 @@ void UI_SideBox::UpdateField()
 
 void UI_SideBox::UpdateLabel()
 {
-	if (!gDocument.isSidedef(obj))
+	if (!inst.level.isSidedef(obj))
 	{
 		label(is_front ? "   No Front Sidedef" : "   No Back Sidedef");
 		return;
@@ -531,7 +531,7 @@ void UI_SideBox::UpdateAddDel()
 		add_button->hide();
 		del_button->hide();
 	}
-	else if (!gDocument.isSidedef(obj))
+	else if (!inst.level.isSidedef(obj))
 	{
 		add_button->show();
 		del_button->hide();

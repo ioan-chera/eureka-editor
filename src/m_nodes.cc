@@ -350,7 +350,7 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 		// load level
 		LoadLevelNum(inst, instance::edit_wad, n);
 
-		ret = AJBSP_BuildLevel(info, n, gDocument);
+		ret = AJBSP_BuildLevel(info, n, inst.level);
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -398,7 +398,7 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 }
 
 
-void BuildNodesAfterSave(int lev_idx)
+void BuildNodesAfterSave(Instance &inst, int lev_idx)
 {
 	dialog = NULL;
 
@@ -406,7 +406,7 @@ void BuildNodesAfterSave(int lev_idx)
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, gDocument);
+	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, inst.level);
 
 	// TODO : maybe print # of serious/minor warnings
 
@@ -442,7 +442,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 		inhibit_node_build = true;
 
-		bool save_result = M_SaveMap();
+		bool save_result = M_SaveMap(inst);
 
 		inhibit_node_build = false;
 

@@ -58,8 +58,8 @@ int calc_new_angle(int angle, int diff);
 /* commands */
 
 void CMD_TH_SpinThings(Instance &inst);
-void CMD_TH_Disconnect(void);
-void CMD_TH_Merge(void);
+void CMD_TH_Disconnect(Instance &inst);
+void CMD_TH_Merge(Instance &inst);
 
 
 #endif  /* __EUREKA_E_THINGS_H__ */

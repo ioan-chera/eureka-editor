@@ -72,8 +72,11 @@ public:
 	Fl_Check_Button * bm_friction;
 	Fl_Check_Button * bm_wind;
 
+private:
+	Instance &inst;
+
 public:
-	UI_SectorBox(int X, int Y, int W, int H, const char *label = NULL);
+	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_SectorBox();
 
 public:

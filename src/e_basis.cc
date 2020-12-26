@@ -710,7 +710,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 	Clipboard_NotifyDelete(objtype, objnum);
 	Selection_NotifyDelete(objtype, objnum);
 	MapStuff_NotifyDelete(objtype, objnum);
-	Render3D_NotifyDelete(objtype, objnum);
+	Render3D_NotifyDelete(basis.doc, objtype, objnum);
 	ObjectBox_NotifyDelete(objtype, objnum);
 
 	switch(objtype)
@@ -1073,7 +1073,7 @@ void Basis::doProcessChangeStatus() const
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();
 	MapStuff_NotifyEnd(inst);
-	Render3D_NotifyEnd();
+	Render3D_NotifyEnd(inst);
 	ObjectBox_NotifyEnd();
 }
 

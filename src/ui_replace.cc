@@ -1233,7 +1233,7 @@ bool UI_FindAndReplace::FindNext()
 
 
 	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
-	int total    = gDocument.numObjects(cur_obj.type);
+	int total    = inst.level.numObjects(cur_obj.type);
 
 	for (int idx = start_at ; idx < total ; idx++)
 	{
@@ -1295,12 +1295,12 @@ void UI_FindAndReplace::DoReplace()
 
 	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
 	ApplyReplace(cur_obj.num, replace_tex_id);
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	// move onto next object
 	FindNext();
@@ -1389,7 +1389,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	{
 		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-		gDocument.basis.begin();
+		inst.level.basis.begin();
 	}
 
 	// we select objects even in REPLACE mode
@@ -1401,7 +1401,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	// this clears the selection
 	edit.Selected->change_type(edit.mode);
 
-	int total = gDocument.numObjects(cur_obj.type);
+	int total = inst.level.numObjects(cur_obj.type);
 	int count = 0;
 
 	for (int idx = 0 ; idx < total ; idx++)
@@ -1427,8 +1427,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		gDocument.basis.setMessageForSelection("replacement in", *edit.Selected);
-		gDocument.basis.end();
+		inst.level.basis.setMessageForSelection("replacement in", *edit.Selected);
+		inst.level.basis.end();
 	}
 
 	if (count > 0)
@@ -1453,7 +1453,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 bool UI_FindAndReplace::Match_Thing(int idx)
 {
-	const Thing *T = gDocument.things[idx];
+	const Thing *T = inst.level.things[idx];
 
 	if (! find_numbers->get(T->type))
 		return false;
@@ -1471,7 +1471,7 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
-	const LineDef *L = gDocument.linedefs[idx];
+	const LineDef *L = inst.level.linedefs[idx];
 
 	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
 		return false;
@@ -1480,7 +1480,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SideDef *SD = (pass == 0) ? L->Right(gDocument) : L->Left(gDocument);
+		const SideDef *SD = (pass == 0) ? L->Right(inst.level) : L->Left(inst.level);
 
 		if (! SD)
 			continue;
@@ -1514,7 +1514,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
-	const Sector *sector = gDocument.sectors[idx];
+	const Sector *sector = inst.level.sectors[idx];
 
 	if (! Filter_Tag(sector->tag))
 		return false;
@@ -1538,7 +1538,7 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 bool UI_FindAndReplace::Match_LineType(int idx)
 {
-	const LineDef *L = gDocument.linedefs[idx];
+	const LineDef *L = inst.level.linedefs[idx];
 
 	if (! find_numbers->get(L->type))
 		return false;
@@ -1552,7 +1552,7 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 
 bool UI_FindAndReplace::Match_SectorType(int idx)
 {
-	const Sector *sector = gDocument.sectors[idx];
+	const Sector *sector = inst.level.sectors[idx];
 
 	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
@@ -1694,13 +1694,13 @@ void UI_FindAndReplace::Replace_Thing(int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	gDocument.basis.changeThing(idx, Thing::F_TYPE, new_type);
+	inst.level.basis.changeThing(idx, Thing::F_TYPE, new_type);
 }
 
 
 void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 {
-	const LineDef *L = gDocument.linedefs[idx];
+	const LineDef *L = inst.level.linedefs[idx];
 
 	const char *pattern = find_match->value();
 
@@ -1708,7 +1708,7 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 	{
 		int sd_num = (pass == 0) ? L->right : L->left;
 
-		const SideDef *SD = (pass == 0) ? L->Right(gDocument) : L->Left(gDocument);
+		const SideDef *SD = (pass == 0) ? L->Right(inst.level) : L->Left(inst.level);
 
 		if (! SD)
 			continue;
@@ -1721,42 +1721,42 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))
-					gDocument.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
+					inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex.good() && Pattern_Match(L_tex, pattern))
-				gDocument.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
+				inst.level.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex.good() && Pattern_Match(U_tex, pattern))
-				gDocument.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
+				inst.level.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
-				gDocument.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
+				inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 	}
 }
 
 
 void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 {
-	const Sector *sector = gDocument.sectors[idx];
+	const Sector *sector = inst.level.sectors[idx];
 
 	const char *pattern = find_match->value();
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(sector->FloorTex(), pattern))
-			gDocument.basis.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
+			inst.level.basis.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
 
 	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
 								|| ( is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
-			gDocument.basis.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
+			inst.level.basis.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
 
@@ -1764,7 +1764,7 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	gDocument.basis.changeLinedef(idx, LineDef::F_TYPE, new_type);
+	inst.level.basis.changeLinedef(idx, LineDef::F_TYPE, new_type);
 }
 
 
@@ -1773,10 +1773,10 @@ void UI_FindAndReplace::Replace_SectorType(int idx)
 	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
-	int old_type = gDocument.sectors[idx]->type;
+	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());
 
-	gDocument.basis.changeSector(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
+	inst.level.basis.changeSector(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
 }
 
 //--- editor settings ---

@@ -68,9 +68,9 @@ const char ** arrow_pixmaps[8] =
 //
 // UI_ThingBox Constructor
 //
-UI_ThingBox::UI_ThingBox(int X, int Y, int W, int H, const char *label) :
+UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0)
+    obj(-1), count(0), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -363,15 +363,15 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited type of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited type of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			gDocument.basis.changeThing(*it, Thing::F_TYPE, new_type);
+			box->inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -407,15 +407,15 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited special of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited special of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			gDocument.basis.changeThing(*it, Thing::F_SPECIAL, new_type);
+			box->inst.level.basis.changeThing(*it, Thing::F_SPECIAL, new_type);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -496,15 +496,15 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited angle of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited angle of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			gDocument.basis.changeThing(*it, Thing::F_ANGLE, new_ang);
+			box->inst.level.basis.changeThing(*it, Thing::F_ANGLE, new_ang);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -518,15 +518,15 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited TID of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited TID of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			gDocument.basis.changeThing(*it, Thing::F_TID, new_tid);
+			box->inst.level.basis.changeThing(*it, Thing::F_TID, new_tid);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -539,13 +539,13 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited X of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited X of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
-			gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
+			box->inst.level.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -557,13 +557,13 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited Y of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited Y of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
-			gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
+			box->inst.level.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -575,13 +575,13 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited Z of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited Z of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
-			gDocument.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
+			box->inst.level.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -597,19 +597,19 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited flags of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited flags of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const Thing *T = gDocument.things[*it];
+			const Thing *T = box->inst.level.things[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			gDocument.basis.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
+			box->inst.level.basis.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -659,22 +659,22 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited args of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited args of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			gDocument.basis.changeThing(*it, Thing::F_ARG1 + arg_idx, new_value);
+			box->inst.level.basis.changeThing(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
 
 void UI_ThingBox::AdjustExtraFloor(int dir)
 {
-	if (!gDocument.isThing(obj))
+	if (!inst.level.isThing(obj))
 		return;
 
 	int old_fl = atoi(exfloor->value());
@@ -811,9 +811,9 @@ void UI_ThingBox::UpdateField(int field)
 		field == Thing::F_Y ||
 		field == Thing::F_H)
 	{
-		if (gDocument.isThing(obj))
+		if (inst.level.isThing(obj))
 		{
-			const Thing *T = gDocument.things[obj];
+			const Thing *T = inst.level.things[obj];
 
 			// @@ FIXME show decimals in UDMF
 			pos_x->value(SString(static_cast<int>(T->x())).c_str());
@@ -830,8 +830,8 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
-		if (gDocument.isThing(obj))
-			angle->value(SString(gDocument.things[obj]->angle).c_str());
+		if (inst.level.isThing(obj))
+			angle->value(SString(inst.level.things[obj]->angle).c_str());
 		else
 			angle->value("");
 	}
@@ -839,20 +839,20 @@ void UI_ThingBox::UpdateField(int field)
 	// IOANCH 9/2015
 	if (field < 0 || field == Thing::F_TID)
 	{
-		if (gDocument.isThing(obj))
-			tid->value(SString(gDocument.things[obj]->tid).c_str());
+		if (inst.level.isThing(obj))
+			tid->value(SString(inst.level.things[obj]->tid).c_str());
 		else
 			tid->value("");
 	}
 
 	if (field < 0 || field == Thing::F_TYPE)
 	{
-		if (gDocument.isThing(obj))
+		if (inst.level.isThing(obj))
 		{
-			const thingtype_t &info = M_GetThingType(gDocument.things[obj]->type);
+			const thingtype_t &info = M_GetThingType(inst.level.things[obj]->type);
 			desc->value(info.desc.c_str());
-			type->value(SString(gDocument.things[obj]->type).c_str());
-			sprite->GetSprite(gDocument.things[obj]->type, FL_DARK2);
+			type->value(SString(inst.level.things[obj]->type).c_str());
+			sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
 		}
 		else
 		{
@@ -864,8 +864,8 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_OPTIONS)
 	{
-		if (gDocument.isThing(obj))
-			OptionsFromInt(gDocument.things[obj]->options);
+		if (inst.level.isThing(obj))
+			OptionsFromInt(inst.level.things[obj]->options);
 		else
 			OptionsFromInt(0);
 	}
@@ -875,11 +875,11 @@ void UI_ThingBox::UpdateField(int field)
 
 	if (field < 0 || field == Thing::F_SPECIAL)
 	{
-		if (gDocument.isThing(obj) && gDocument.things[obj]->special)
+		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
 		{
-			const linetype_t &info = M_GetLineType(gDocument.things[obj]->special);
+			const linetype_t &info = M_GetLineType(inst.level.things[obj]->special);
 			spec_desc->value(info.desc.c_str());
-			spec_type->value(SString(gDocument.things[obj]->special).c_str());
+			spec_type->value(SString(inst.level.things[obj]->special).c_str());
 		}
 		else
 		{
@@ -897,9 +897,9 @@ void UI_ThingBox::UpdateField(int field)
 			args[a]->textcolor(FL_BLACK);
 		}
 
-		if (gDocument.isThing(obj))
+		if (inst.level.isThing(obj))
 		{
-			const Thing *T = gDocument.things[obj];
+			const Thing *T = inst.level.things[obj];
 
 			const thingtype_t &info = M_GetThingType(T->type);
 			const linetype_t  &spec = M_GetLineType (T->special);
@@ -937,7 +937,7 @@ void UI_ThingBox::UpdateField(int field)
 
 void UI_ThingBox::UpdateTotal()
 {
-	which->SetTotal(gDocument.numThings());
+	which->SetTotal(inst.level.numThings());
 }
 
 

@@ -95,8 +95,11 @@ public:
 	// sector is on-screen.
 	bitvec_c seen_sectors;
 
+private:
+	Instance &inst;
+
 public:
-	RendInfo3D() : seen_sectors(gDocument.numSectors() + 1)
+	explicit RendInfo3D(Instance &inst) : seen_sectors(inst.level.numSectors() + 1), inst(inst)
 	{ }
 
 	~RendInfo3D()
@@ -770,9 +773,9 @@ public:
 			int light = front->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical(gDocument))
+			if (ld->IsVertical(inst.level))
 				light += 16;
-			else if (ld->IsHorizontal(gDocument))
+			else if (ld->IsHorizontal(inst.level))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
@@ -850,12 +853,12 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
-			int light = sd->SecRef(gDocument)->light;
+			int light = sd->SecRef(inst.level)->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical(gDocument))
+			if (ld->IsVertical(inst.level))
 				light += 16;
-			else if (ld->IsHorizontal(gDocument))
+			else if (ld->IsHorizontal(inst.level))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
@@ -870,18 +873,18 @@ public:
 
 	void DrawLine(int ld_index)
 	{
-		const LineDef *ld = gDocument.linedefs[ld_index];
+		const LineDef *ld = inst.level.linedefs[ld_index];
 
-		if (! gDocument.isVertex(ld->start) || !gDocument.isVertex(ld->end))
+		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
 
-		if (! ld->Right(gDocument))
+		if (! ld->Right(inst.level))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(gDocument)->x() - r_view.x);
-		float y1 = static_cast<float>(ld->Start(gDocument)->y() - r_view.y);
-		float x2 = static_cast<float>(ld->End(gDocument)->x() - r_view.x);
-		float y2 = static_cast<float>(ld->End(gDocument)->y() - r_view.y);
+		float x1 = static_cast<float>(ld->Start(inst.level)->x() - r_view.x);
+		float y1 = static_cast<float>(ld->Start(inst.level)->y() - r_view.y);
+		float x2 = static_cast<float>(ld->End(inst.level)->x() - r_view.x);
+		float y2 = static_cast<float>(ld->End(inst.level)->y() - r_view.y);
 
 		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
 		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
@@ -909,7 +912,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == Side::left) ? ld->Left(gDocument) : ld->Right(gDocument);
+		const SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : ld->Right(inst.level);
 
 		if (! sd)
 			return;
@@ -968,26 +971,26 @@ public:
 			return;
 
 		bool self_ref = false;
-		if (ld->Left(gDocument) && ld->Right(gDocument) && ld->Left(gDocument)->sector == ld->Right(gDocument)->sector)
+		if (ld->Left(inst.level) && ld->Right(inst.level) && ld->Left(inst.level)->sector == ld->Right(inst.level)->sector)
 			self_ref = true;
 
 		// mark sectors to be drawn
 		// [ this method means we don't need to check visibility of sectors ]
 		if (! self_ref)
 		{
-			if (ld->Left(gDocument) && gDocument.isSector(ld->Left(gDocument)->sector))
-				seen_sectors.set(ld->Left(gDocument)->sector);
+			if (ld->Left(inst.level) && inst.level.isSector(ld->Left(inst.level)->sector))
+				seen_sectors.set(ld->Left(inst.level)->sector);
 
-			if (ld->Right(gDocument) && gDocument.isSector(ld->Right(gDocument)->sector))
-				seen_sectors.set(ld->Right(gDocument)->sector);
+			if (ld->Right(inst.level) && inst.level.isSector(ld->Right(inst.level)->sector))
+				seen_sectors.set(ld->Right(inst.level)->sector);
 		}
 
 		/* actually draw it... */
 
-		x1 = static_cast<float>(ld->Start(gDocument)->x());
-		y1 = static_cast<float>(ld->Start(gDocument)->y());
-		x2 = static_cast<float>(ld->End(gDocument)->x());
-		y2 = static_cast<float>(ld->End(gDocument)->y());
+		x1 = static_cast<float>(ld->Start(inst.level)->x());
+		y1 = static_cast<float>(ld->Start(inst.level)->y());
+		x2 = static_cast<float>(ld->End(inst.level)->x());
+		y2 = static_cast<float>(ld->End(inst.level)->y());
 
 		if (side == Side::left)
 		{
@@ -997,7 +1000,7 @@ public:
 
 		float ld_len = hypotf(x2 - x1, y2 - y1);
 
-		const Sector *front = sd ? sd->SecRef(gDocument) : NULL;
+		const Sector *front = sd ? sd->SecRef(inst.level) : NULL;
 
 		bool sky_front = is_sky(front->CeilTex());
 		bool sky_upper = false;
@@ -1011,8 +1014,8 @@ public:
 		}
 		else
 		{
-			const SideDef *sd_back = (side == Side::left) ? ld->Right(gDocument) : ld->Left(gDocument);
-			const Sector *back  = sd_back ? sd_back->SecRef(gDocument) : NULL;
+			const SideDef *sd_back = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
+			const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
 
 			sky_upper = sky_front && is_sky(back->CeilTex());
 
@@ -1022,7 +1025,7 @@ public:
 			sector_3dfloors_c *b_ex = Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
-				dummy = gDocument.sectors[b_ex->heightsec];
+				dummy = inst.level.sectors[b_ex->heightsec];
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
@@ -1032,7 +1035,7 @@ public:
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
-				dummy = gDocument.sectors[f_ex->heightsec];
+				dummy = inst.level.sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 				{
 					dummy_fp.Init(static_cast<float>(dummy->floorh));
@@ -1065,8 +1068,8 @@ public:
 				for (size_t k = 0 ; k < b_ex->floors.size() ; k++)
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
-					const SideDef *ef_sd = gDocument.sidedefs[EF.sd];
-					const Sector *dummy = gDocument.sectors[ef_sd->sector];
+					const SideDef *ef_sd = inst.level.sidedefs[EF.sd];
+					const Sector *dummy = inst.level.sectors[ef_sd->sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1116,12 +1119,12 @@ public:
 
 	void DrawSector(int sec_index)
 	{
-		sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(sec_index);
+		sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(inst, sec_index);
 
 		if (! subdiv)
 			return;
 
-		const Sector *sec = gDocument.sectors[sec_index];
+		const Sector *sec = inst.level.sectors[sec_index];
 		const Sector *dummy = NULL;
 
 		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sec_index);
@@ -1131,7 +1134,7 @@ public:
 		// support for BOOM's 242 "transfer heights" line type
 		if (exfloor->heightsec >= 0)
 		{
-			dummy = gDocument.sectors[exfloor->heightsec];
+			dummy = inst.level.sectors[exfloor->heightsec];
 
 			if (dummy->floorh > sec->floorh && r_view.z < dummy->floorh)
 			{
@@ -1181,7 +1184,7 @@ public:
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const Sector *dummy = gDocument.sectors[gDocument.sidedefs[EF.sd]->sector];
+			const Sector *dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.
@@ -1211,7 +1214,7 @@ public:
 
 	void DrawThing(int th_index)
 	{
-		Thing *th = gDocument.things[th_index];
+		Thing *th = inst.level.things[th_index];
 
 		const thingtype_t &info = M_GetThingType(th->type);
 
@@ -1275,12 +1278,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1307,7 +1310,7 @@ public:
 
 		if (r_view.lighting && !fullbright)
 		{
-			int light = gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->light : 255;
+			int light = inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->light : 255;
 
 			L = DoomLightToFloat(light, ty /* dist */);
 		}
@@ -1326,28 +1329,28 @@ public:
 
 	void HighlightLine(int ld_index, int part)
 	{
-		const LineDef *L = gDocument.linedefs[ld_index];
+		const LineDef *L = inst.level.linedefs[ld_index];
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
-		const SideDef *sd = (side == Side::left) ? L->Left(gDocument) : L->Right(gDocument);
+		const SideDef *sd = (side == Side::left) ? L->Left(inst.level) : L->Right(inst.level);
 		if (sd == NULL)
 			return;
 
-		float x1 = static_cast<float>(L->Start(gDocument)->x());
-		float y1 = static_cast<float>(L->Start(gDocument)->y());
-		float x2 = static_cast<float>(L->End(gDocument)->x());
-		float y2 = static_cast<float>(L->End(gDocument)->y());
+		float x1 = static_cast<float>(L->Start(inst.level)->x());
+		float y1 = static_cast<float>(L->Start(inst.level)->y());
+		float x2 = static_cast<float>(L->End(inst.level)->x());
+		float y2 = static_cast<float>(L->End(inst.level)->y());
 
 		// check that this side is facing the camera
 		Side cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
 		if (cam_side != side)
 			return;
 
-		const SideDef *sd_back = (side == Side::left) ? L->Right(gDocument) : L->Left(gDocument);
+		const SideDef *sd_back = (side == Side::left) ? L->Right(inst.level) : L->Left(inst.level);
 
-		const Sector *front = sd->SecRef(gDocument);
-		const Sector *back  = sd_back ? sd_back->SecRef(gDocument) : NULL;
+		const Sector *front = sd->SecRef(inst.level);
+		const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
 
 		float z1, z2;
 
@@ -1394,7 +1397,7 @@ public:
 
 	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = gDocument.sectors[sec_index];
+		const Sector *sec = inst.level.sectors[sec_index];
 
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
@@ -1415,14 +1418,14 @@ public:
 				return;
 		}
 
-		for (const LineDef *L : gDocument.linedefs)
+		for (const LineDef *L : inst.level.linedefs)
 		{
-			if (L->TouchesSector(sec_index, gDocument))
+			if (L->TouchesSector(sec_index, inst.level))
 			{
-				float x1 = static_cast<float>(L->Start(gDocument)->x());
-				float y1 = static_cast<float>(L->Start(gDocument)->y());
-				float x2 = static_cast<float>(L->End(gDocument)->x());
-				float y2 = static_cast<float>(L->End(gDocument)->y());
+				float x1 = static_cast<float>(L->Start(inst.level)->x());
+				float y1 = static_cast<float>(L->Start(inst.level)->y());
+				float x2 = static_cast<float>(L->End(inst.level)->x());
+				float y2 = static_cast<float>(L->End(inst.level)->y());
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);
@@ -1434,7 +1437,7 @@ public:
 
 	void HighlightThing(int th_index)
 	{
-		Thing *th = gDocument.things[th_index];
+		Thing *th = inst.level.things[th_index];
 		float tx = static_cast<float>(th->x());
 		float ty = static_cast<float>(th->y());
 
@@ -1476,12 +1479,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->ceilh : 192) - th->h());
+			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th->h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((gDocument.isSector(sec_num) ? gDocument.sectors[sec_num]->floorh : 0) + th->h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th->h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1593,7 +1596,7 @@ public:
 
 	void MarkCameraSector()
 	{
-		Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, r_view.x, r_view.y);
+		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, r_view.x, r_view.y);
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);
@@ -1604,19 +1607,19 @@ public:
 		// always draw the sector the camera is in
 		MarkCameraSector();
 
-		for (int i=0 ; i < gDocument.numLinedefs(); i++)
+		for (int i=0 ; i < inst.level.numLinedefs(); i++)
 			DrawLine(i);
 
 		glDisable(GL_ALPHA_TEST);
 
-		for (int s=0 ; s < gDocument.numSectors(); s++)
+		for (int s=0 ; s < inst.level.numSectors(); s++)
 			if (seen_sectors.get(s))
 				DrawSector(s);
 
 		glEnable(GL_ALPHA_TEST);
 
 		if (r_view.sprites)
-			for (int t=0 ; t < gDocument.numThings() ; t++)
+			for (int t=0 ; t < inst.level.numThings() ; t++)
 				DrawThing(t);
 	}
 
@@ -1690,9 +1693,9 @@ public:
 };
 
 
-void RGL_RenderWorld(int ox, int oy, int ow, int oh)
+void RGL_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh)
 {
-	RendInfo3D rend;
+	RendInfo3D rend(inst);
 
 	rend.Begin(ow, oh);
 	rend.Render();

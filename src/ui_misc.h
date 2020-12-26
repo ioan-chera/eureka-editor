@@ -37,8 +37,10 @@ private:
 
 	bool want_close;
 
+	Instance &inst;
+
 public:
-	UI_MoveDialog(bool want_dz);
+	UI_MoveDialog(Instance &inst, bool want_dz);
 	virtual ~UI_MoveDialog();
 
 	void Run();
@@ -67,8 +69,10 @@ private:
 
 	bool want_close;
 
+	Instance &inst;
+
 public:
-	UI_ScaleDialog();
+	explicit UI_ScaleDialog(Instance &inst);
 	virtual ~UI_ScaleDialog();
 
 	void Run();
@@ -94,8 +98,10 @@ private:
 
 	bool want_close;
 
+	Instance &inst;
+
 public:
-	UI_RotateDialog();
+	explicit UI_RotateDialog(Instance &inst);
 	virtual ~UI_RotateDialog();
 
 	void Run();

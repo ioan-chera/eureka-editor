@@ -84,8 +84,10 @@ private:
 	Fl_Output    *spec_desc;
 	Fl_Int_Input *args[5];
 
+	Instance &inst;
+
 public:
-	UI_ThingBox(int X, int Y, int W, int H, const char *label = NULL);
+	UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_ThingBox();
 
 public:

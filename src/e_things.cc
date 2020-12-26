@@ -83,25 +83,10 @@ void CMD_TH_SpinThings(Instance &inst)
 }
 
 
-bool ThingsOverlap(int th1, int th2)
+static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 {
-	const Thing *T1 = gDocument.things[th1];
-	const Thing *T2 = gDocument.things[th2];
-
-	int r1 = M_GetThingType(T1->type).radius;
-	int r2 = M_GetThingType(T2->type).radius;
-
-	double dx = abs(T1->x() - T2->x());
-	double dy = abs(T1->y() - T2->y());
-
-	return (MAX(dx, dy) < r1 + r2);
-}
-
-
-bool ThingsAtSameLoc(int th1, int th2)
-{
-	const Thing *T1 = gDocument.things[th1];
-	const Thing *T2 = gDocument.things[th2];
+	const Thing *T1 = doc.things[th1];
+	const Thing *T2 = doc.things[th2];
 
 	double dx = abs(T1->x() - T2->x());
 	double dy = abs(T1->y() - T2->y());
@@ -110,19 +95,19 @@ bool ThingsAtSameLoc(int th1, int th2)
 }
 
 
-static void CollectOverlapGroup(selection_c& list)
+static void CollectOverlapGroup(const Instance &inst, selection_c& list)
 {
 	int first = edit.Selected->find_first();
 
 	list.set(first);
 
-	for (int k = 0 ; k < gDocument.numThings() ; k++)
-		if (k != first && ThingsAtSameLoc(k, first))
+	for (int k = 0 ; k < inst.level.numThings() ; k++)
+		if (k != first && ThingsAtSameLoc(inst.level, k, first))
 			list.set(k);
 }
 
 
-static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
+static void MoveOverlapThing(Document &doc, int th, int mid_x, int mid_y, int n, int total)
 {
 	float angle = static_cast<float>(n * 360 / total);
 
@@ -134,10 +119,10 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 	fixcoord_t fdx = MakeValidCoord(vec_x * dist);
 	fixcoord_t fdy = MakeValidCoord(vec_y * dist);
 
-	const Thing *T = gDocument.things[th];
+	const Thing *T = doc.things[th];
 
-	gDocument.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
-	gDocument.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);
+	doc.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
+	doc.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);
 }
 
 
@@ -146,7 +131,7 @@ static void MoveOverlapThing(int th, int mid_x, int mid_y, int n, int total)
 //  things are moved so they are more distinct -- about 8 units away
 //  from that location.
 //
-void CMD_TH_Disconnect(void)
+void CMD_TH_Disconnect(Instance &inst)
 {
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -155,14 +140,14 @@ void CMD_TH_Disconnect(void)
 		return;
 	}
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	while (! edit.Selected->empty())
 	{
 		selection_c overlaps(ObjType::things);
 
-		CollectOverlapGroup(overlaps);
+		CollectOverlapGroup(inst, overlaps);
 
 		// remove these from the selection
 		edit.Selected->unmerge(overlaps);
@@ -173,23 +158,23 @@ void CMD_TH_Disconnect(void)
 			continue;
 
 		double mid_x, mid_y;
-		gDocument.objects.calcMiddle(&overlaps, &mid_x, &mid_y);
+		inst.level.objects.calcMiddle(&overlaps, &mid_x, &mid_y);
 
 		int n = 0;
 		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
 		{
-			MoveOverlapThing(*it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
+			MoveOverlapThing(inst.level, *it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
 		}
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 }
 
 
 //
 // place all selected things at same location
 //
-void CMD_TH_Merge(void)
+void CMD_TH_Merge(Instance &inst)
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
@@ -203,18 +188,18 @@ void CMD_TH_Merge(void)
 	}
 
 	double mid_x, mid_y;
-	gDocument.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("merged", *edit.Selected);
+	inst.level.basis.begin();
+	inst.level.basis.setMessageForSelection("merged", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		gDocument.basis.changeThing(*it, Thing::F_X, MakeValidCoord(mid_x));
-		gDocument.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(mid_y));
+		inst.level.basis.changeThing(*it, Thing::F_X, MakeValidCoord(mid_x));
+		inst.level.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(mid_y));
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 }
 
 

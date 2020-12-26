@@ -33,9 +33,9 @@
 extern int loading_level;
 extern Lump_c * Load_LookupAndSeek(const char *name);
 
-extern void ValidateSidedefRefs(LineDef * ld, int num);
-extern void ValidateVertexRefs(LineDef *ld, int num);
-extern void ValidateSectorRef(SideDef *sd, int num);
+extern void ValidateSidedefRefs(Instance &inst, LineDef * ld, int num);
+extern void ValidateVertexRefs(Instance &inst, LineDef *ld, int num);
+extern void ValidateSectorRef(Instance &inst, SideDef *sd, int num);
 
 
 class Udmf_Token
@@ -358,7 +358,7 @@ static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 }
 
 
-static void UDMF_ParseThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& field, Udmf_Token& value)
 {
 	// just ignore any setting with the "false" keyword
 	if (value.Match("false"))
@@ -413,11 +413,11 @@ static void UDMF_ParseThingField(Thing *T, Udmf_Token& field, Udmf_Token& value)
 
 	else
 	{
-		DebugPrintf("thing #%d: unknown field '%s'\n", gDocument.numThings()-1, field.c_str());
+		DebugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
 	}
 }
 
-static void UDMF_ParseVertexField(Vertex *V, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& field, Udmf_Token& value)
 {
 	if (field.Match("x"))
 		V->raw_x = value.DecodeCoord();
@@ -425,11 +425,11 @@ static void UDMF_ParseVertexField(Vertex *V, Udmf_Token& field, Udmf_Token& valu
 		V->raw_y = value.DecodeCoord();
 	else
 	{
-		DebugPrintf("vertex #%d: unknown field '%s'\n", gDocument.numVertices()-1, field.c_str());
+		DebugPrintf("vertex #%d: unknown field '%s'\n", doc.numVertices()-1, field.c_str());
 	}
 }
 
-static void UDMF_ParseLinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, Udmf_Token& field, Udmf_Token& value)
 {
 	// Note: vertex and sidedef numbers are validated later on
 
@@ -487,11 +487,11 @@ static void UDMF_ParseLinedefField(LineDef *LD, Udmf_Token& field, Udmf_Token& v
 
 	else
 	{
-		DebugPrintf("linedef #%d: unknown field '%s'\n", gDocument.numVertices() -1, field.c_str());
+		DebugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
 
-static void UDMF_ParseSidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, Udmf_Token& field, Udmf_Token& value)
 {
 	// Note: sector numbers are validated later on
 
@@ -511,11 +511,11 @@ static void UDMF_ParseSidedefField(SideDef *SD, Udmf_Token& field, Udmf_Token& v
 		SD->y_offset = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sidedef #%d: unknown field '%s'\n", gDocument.numVertices() -1, field.c_str());
+		DebugPrintf("sidedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
 
-static void UDMF_ParseSectorField(Sector *S, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseSectorField(const Document &doc, Sector *S, Udmf_Token& field, Udmf_Token& value)
 {
 	if (field.Match("heightfloor"))
 		S->floorh = value.DecodeInt();
@@ -533,11 +533,11 @@ static void UDMF_ParseSectorField(Sector *S, Udmf_Token& field, Udmf_Token& valu
 		S->tag = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sector #%d: unknown field '%s'\n", gDocument.numVertices() -1, field.c_str());
+		DebugPrintf("sector #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
 
-static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& name)
 {
 	// create a new object of the specified type
 	Objid kind;
@@ -553,19 +553,19 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		kind = Objid(ObjType::things, 1);
 		new_T = new Thing;
 		new_T->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
-		gDocument.things.push_back(new_T);
+		doc.things.push_back(new_T);
 	}
 	else if (name.Match("vertex"))
 	{
 		kind = Objid(ObjType::vertices, 1);
 		new_V = new Vertex;
-		gDocument.vertices.push_back(new_V);
+		doc.vertices.push_back(new_V);
 	}
 	else if (name.Match("linedef"))
 	{
 		kind = Objid(ObjType::linedefs, 1);
 		new_LD = new LineDef;
-		gDocument.linedefs.push_back(new_LD);
+		doc.linedefs.push_back(new_LD);
 	}
 	else if (name.Match("sidedef"))
 	{
@@ -574,14 +574,14 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		new_SD->mid_tex = BA_InternaliseString("-");
 		new_SD->lower_tex = new_SD->mid_tex;
 		new_SD->upper_tex = new_SD->mid_tex;
-		gDocument.sidedefs.push_back(new_SD);
+		doc.sidedefs.push_back(new_SD);
 	}
 	else if (name.Match("sector"))
 	{
 		kind = Objid(ObjType::sectors, 1);
 		new_S = new Sector;
 		new_S->light = 160;
-		gDocument.sectors.push_back(new_S);
+		doc.sectors.push_back(new_S);
 	}
 
 	if (!kind.valid())
@@ -618,47 +618,48 @@ static void UDMF_ParseObject(Udmf_Parser& parser, Udmf_Token& name)
 		}
 
 		if (new_T)
-			UDMF_ParseThingField(new_T, tok, value);
+			UDMF_ParseThingField(doc, new_T, tok, value);
 
 		if (new_V)
-			UDMF_ParseVertexField(new_V, tok, value);
+			UDMF_ParseVertexField(doc, new_V, tok, value);
 
 		if (new_LD)
-			UDMF_ParseLinedefField(new_LD, tok, value);
+			UDMF_ParseLinedefField(doc, new_LD, tok, value);
 
 		if (new_SD)
-			UDMF_ParseSidedefField(new_SD, tok, value);
+			UDMF_ParseSidedefField(doc, new_SD, tok, value);
 
 		if (new_S)
-			UDMF_ParseSectorField(new_S, tok, value);
+			UDMF_ParseSectorField(doc, new_S, tok, value);
 	}
 }
 
 
-static void ValidateLevel_UDMF()
+static void ValidateLevel_UDMF(Instance &inst)
 {
-	for (int n = 0 ; n < gDocument.numSidedefs() ; n++)
+	for (int n = 0 ; n < inst.level.numSidedefs() ; n++)
 	{
-		ValidateSectorRef(gDocument.sidedefs[n], n);
+		ValidateSectorRef(inst, inst.level.sidedefs[n], n);
 	}
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		LineDef *L = gDocument.linedefs[n];
+		LineDef *L = inst.level.linedefs[n];
 
-		ValidateVertexRefs(L, n);
-		ValidateSidedefRefs(L, n);
+		ValidateVertexRefs(inst, L, n);
+		ValidateSidedefRefs(inst, L, n);
 	}
 }
 
 
-void UDMF_LoadLevel()
+void UDMF_LoadLevel(Instance &inst)
 {
 	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
 	// we assume this cannot happen
 	if (! lump)
 		return;
 
+	// TODO: reduce stack!!
 	Udmf_Parser parser(lump);
 
 	for (;;)
@@ -686,7 +687,7 @@ void UDMF_LoadLevel()
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(parser, tok);
+			UDMF_ParseObject(inst.level, parser, tok);
 			continue;
 		}
 
@@ -695,7 +696,7 @@ void UDMF_LoadLevel()
 		parser.SkipToEOLN();
 	}
 
-	ValidateLevel_UDMF();
+	ValidateLevel_UDMF(inst);
 }
 
 
@@ -714,14 +715,14 @@ static void UDMF_WriteInfo(Lump_c *lump)
 	lump->Printf("namespace = \"%s\";\n\n", instance::Udmf_namespace.c_str());
 }
 
-static void UDMF_WriteThings(Lump_c *lump)
+static void UDMF_WriteThings(const Document &doc, Lump_c *lump)
 {
-	for (int i = 0 ; i < gDocument.numThings() ; i++)
+	for (int i = 0 ; i < doc.numThings() ; i++)
 	{
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");
 
-		const Thing *th = gDocument.things[i];
+		const Thing *th = doc.things[i];
 
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
@@ -758,14 +759,14 @@ static void UDMF_WriteThings(Lump_c *lump)
 	}
 }
 
-static void UDMF_WriteVertices(Lump_c *lump)
+static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 {
-	for (int i = 0 ; i < gDocument.numVertices(); i++)
+	for (int i = 0 ; i < doc.numVertices(); i++)
 	{
 		lump->Printf("vertex // %d\n", i);
 		lump->Printf("{\n");
 
-		const Vertex *vert = gDocument.vertices[i];
+		const Vertex *vert = doc.vertices[i];
 
 		lump->Printf("x = %1.3f;\n", vert->x());
 		lump->Printf("y = %1.3f;\n", vert->y());
@@ -774,14 +775,14 @@ static void UDMF_WriteVertices(Lump_c *lump)
 	}
 }
 
-static void UDMF_WriteLineDefs(Lump_c *lump)
+static void UDMF_WriteLineDefs(const Document &doc, Lump_c *lump)
 {
-	for (int i = 0 ; i < gDocument.numLinedefs(); i++)
+	for (int i = 0 ; i < doc.numLinedefs(); i++)
 	{
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const LineDef *ld = gDocument.linedefs[i];
+		const LineDef *ld = doc.linedefs[i];
 
 		lump->Printf("v1 = %d;\n", ld->start);
 		lump->Printf("v2 = %d;\n", ld->end);
@@ -832,14 +833,14 @@ static void UDMF_WriteLineDefs(Lump_c *lump)
 	}
 }
 
-static void UDMF_WriteSideDefs(Lump_c *lump)
+static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 {
-	for (int i = 0 ; i < gDocument.numSidedefs(); i++)
+	for (int i = 0 ; i < doc.numSidedefs(); i++)
 	{
 		lump->Printf("sidedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const SideDef *side = gDocument.sidedefs[i];
+		const SideDef *side = doc.sidedefs[i];
 
 		lump->Printf("sector = %d;\n", side->sector);
 
@@ -861,14 +862,14 @@ static void UDMF_WriteSideDefs(Lump_c *lump)
 	}
 }
 
-static void UDMF_WriteSectors(Lump_c *lump)
+static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 {
-	for (int i = 0 ; i < gDocument.numSectors(); i++)
+	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
 		lump->Printf("sector // %d\n", i);
 		lump->Printf("{\n");
 
-		const Sector *sec = gDocument.sectors[i];
+		const Sector *sec = doc.sectors[i];
 
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);
@@ -888,16 +889,16 @@ static void UDMF_WriteSectors(Lump_c *lump)
 	}
 }
 
-void UDMF_SaveLevel()
+void UDMF_SaveLevel(const Instance &inst)
 {
 	Lump_c *lump = instance::edit_wad->AddLump("TEXTMAP");
 
 	UDMF_WriteInfo(lump);
-	UDMF_WriteThings(lump);
-	UDMF_WriteVertices(lump);
-	UDMF_WriteLineDefs(lump);
-	UDMF_WriteSideDefs(lump);
-	UDMF_WriteSectors(lump);
+	UDMF_WriteThings(inst.level, lump);
+	UDMF_WriteVertices(inst.level, lump);
+	UDMF_WriteLineDefs(inst.level, lump);
+	UDMF_WriteSideDefs(inst.level, lump);
+	UDMF_WriteSectors(inst.level, lump);
 
 	lump->Finish();
 

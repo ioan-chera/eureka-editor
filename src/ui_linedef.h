@@ -63,8 +63,10 @@ public:
 	Fl_Check_Button *f_sound;
 	Fl_Check_Button *f_flyers;    // Strife
 
+	Instance &inst;
+
 public:
-	UI_LineBox(int X, int Y, int W, int H, const char *label = NULL);
+	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_LineBox();
 
 public:

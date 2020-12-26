@@ -58,9 +58,9 @@ public:
 //
 // UI_LineBox Constructor
 //
-UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
+UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0)
+    obj(-1), count(0), inst(inst)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
@@ -215,12 +215,12 @@ UI_LineBox::UI_LineBox(int X, int Y, int W, int H, const char *label) :
 	Y += 29;
 
 
-	front = new UI_SideBox(x(), Y, w(), 140, 0);
+	front = new UI_SideBox(inst, x(), Y, w(), 140, 0);
 
 	Y += front->h() + 14;
 
 
-	back = new UI_SideBox(x(), Y, w(), 140, 1);
+	back = new UI_SideBox(inst, x(), Y, w(), 140, 1);
 
 	Y += back->h();
 
@@ -247,15 +247,15 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited type of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited type of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			gDocument.basis.changeLinedef(*it, LineDef::F_TYPE, new_type);
+			box->inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 
 	// update description
@@ -293,31 +293,31 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 {
 	bool opposite = (e_state & FL_SHIFT);
 
-	LineDef *L = gDocument.linedefs[ld];
+	LineDef *L = inst.level.linedefs[ld];
 
 	// handle the selected texture boxes
 	if (parts != 0)
 	{
 		if (L->OneSided())
 		{
-			if (parts & PART_RT_LOWER) gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (parts & PART_RT_UPPER) gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_LOWER) inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_UPPER) inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
 		}
 
-		if (L->Right(gDocument))
+		if (L->Right(inst.level))
 		{
-			if (parts & PART_RT_LOWER) gDocument.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_RT_UPPER) gDocument.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_RT_RAIL)  gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_LOWER) inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_RT_UPPER) inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_RAIL)  inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
-		if (L->Left(gDocument))
+		if (L->Left(inst.level))
 		{
-			if (parts & PART_LF_LOWER) gDocument.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_LF_UPPER) gDocument.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_LF_RAIL)  gDocument.basis.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_LF_LOWER) inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_LF_UPPER) inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_LF_RAIL)  inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
 	}
@@ -330,14 +330,14 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 
 		// convenience: set lower unpeg on first change
 		if (! (L->flags & MLF_LowerUnpegged)  &&
-		    is_null_tex(L->Right(gDocument)->MidTex()) &&
-		    is_null_tex(L-> Left(gDocument)->MidTex()) )
+		    is_null_tex(L->Right(inst.level)->MidTex()) &&
+		    is_null_tex(L-> Left(inst.level)->MidTex()) )
 		{
-			gDocument.basis.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
+			inst.level.basis.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
 
-		gDocument.basis.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex);
-		gDocument.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+		inst.level.basis.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex);
+		inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
@@ -349,7 +349,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		if (sd < 0)
 			return;
 
-		gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
+		inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
@@ -360,25 +360,25 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	if (e_state & FL_BUTTON3)
 	{
 		// back ceiling is higher?
-		if (L->Left(gDocument)->SecRef(gDocument)->ceilh > L->Right(gDocument)->SecRef(gDocument)->ceilh)
+		if (L->Left(inst.level)->SecRef(inst.level)->ceilh > L->Right(inst.level)->SecRef(inst.level)->ceilh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		gDocument.basis.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
+		inst.level.basis.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 	}
 	// modify a lower texture
 	else
 	{
 		// back floor is lower?
-		if (L->Left(gDocument)->SecRef(gDocument)->floorh < L->Right(gDocument)->SecRef(gDocument)->floorh)
+		if (L->Left(inst.level)->SecRef(inst.level)->floorh < L->Right(inst.level)->SecRef(inst.level)->floorh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		SideDef *S = gDocument.sidedefs[sd1];
+		SideDef *S = inst.level.sidedefs[sd1];
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).
@@ -387,9 +387,9 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		// impossible to set them to different textures).
 
 		if (S->lower_tex == S->upper_tex)
-			gDocument.basis.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
+			inst.level.basis.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 
-		gDocument.basis.changeSidedef(sd1, SideDef::F_LOWER_TEX, new_tex);
+		inst.level.basis.changeSidedef(sd1, SideDef::F_LOWER_TEX, new_tex);
 	}
 }
 
@@ -405,8 +405,8 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited texture on", *edit.Selected);
+		inst.level.basis.begin();
+		inst.level.basis.setMessageForSelection("edited texture on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -420,7 +420,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 			SetTexOnLine(*it, new_tex, e_state, p2);
 		}
 
-		gDocument.basis.end();
+		inst.level.basis.end();
 	}
 
 	UpdateField();
@@ -489,12 +489,12 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 	if (edit.Selected->empty())
 		return;
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = gDocument.linedefs[*it];
+		const LineDef *L = inst.level.linedefs[*it];
 
 		for (int pass = 0 ; pass < 2 ; pass++)
 		{
@@ -507,23 +507,23 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 			if (L->TwoSided())
 			{
 				if (parts2 & PART_RT_LOWER)
-					gDocument.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+					inst.level.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 
 				if (parts2 & PART_RT_UPPER)
-					gDocument.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+					inst.level.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 
 				if (parts2 & PART_RT_RAIL)
-					gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
+					inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 			}
 			else  // one-sided line
 			{
 				if (parts2 & PART_RT_LOWER)
-					gDocument.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
+					inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 			}
 		}
 	}
 
-	gDocument.basis.end();
+	inst.level.basis.end();
 
 	UpdateField();
 	UpdateSides();
@@ -594,7 +594,7 @@ void UI_LineBox::tag_callback(Fl_Widget *w, void *data)
 	int new_tag = atoi(box->tag->value());
 
 	if (! edit.Selected->empty())
-		gDocument.checks.tagsApplyNewValue(new_tag);
+		box->inst.level.checks.tagsApplyNewValue(new_tag);
 }
 
 
@@ -609,19 +609,19 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited flags of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited flags of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = box->inst.level.linedefs[*it];
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
-			gDocument.basis.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
+			box->inst.level.basis.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -639,15 +639,15 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessageForSelection("edited args of", *edit.Selected);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessageForSelection("edited args of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			gDocument.basis.changeLinedef(*it, LineDef::F_TAG + arg_idx, new_value);
+			box->inst.level.basis.changeLinedef(*it, LineDef::F_TAG + arg_idx, new_value);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -661,7 +661,7 @@ void UI_LineBox::length_callback(Fl_Widget *w, void *data)
 	// negative values are allowed, it moves the start vertex
 	new_len = CLAMP(-32768, new_len, 32768);
 
-	gDocument.linemod.setLinedefsLength(new_len);
+	box->inst.level.linemod.setLinedefsLength(new_len);
 }
 
 
@@ -709,7 +709,7 @@ void UI_LineBox::UpdateField(int field)
 {
 	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
 	{
-		if (gDocument.isLinedef(obj))
+		if (inst.level.isLinedef(obj))
 			CalcLength();
 		else
 			length->value("");
@@ -724,11 +724,11 @@ void UI_LineBox::UpdateField(int field)
 			args[a]->textcolor(FL_BLACK);
 		}
 
-		if (gDocument.isLinedef(obj))
+		if (inst.level.isLinedef(obj))
 		{
-			const LineDef *L = gDocument.linedefs[obj];
+			const LineDef *L = inst.level.linedefs[obj];
 
-			tag->value(SString(gDocument.linedefs[obj]->tag).c_str());
+			tag->value(SString(inst.level.linedefs[obj]->tag).c_str());
 
 			const linetype_t &info = M_GetLineType(L->type);
 
@@ -758,9 +758,9 @@ void UI_LineBox::UpdateField(int field)
 
 	if (field < 0 || field == LineDef::F_RIGHT || field == LineDef::F_LEFT)
 	{
-		if (gDocument.isLinedef(obj))
+		if (inst.level.isLinedef(obj))
 		{
-			const LineDef *L = gDocument.linedefs[obj];
+			const LineDef *L = inst.level.linedefs[obj];
 
 			int right_mask = SolidMask(L, Side::right);
 			int  left_mask = SolidMask(L, Side::left);
@@ -777,9 +777,9 @@ void UI_LineBox::UpdateField(int field)
 
 	if (field < 0 || field == LineDef::F_TYPE)
 	{
-		if (gDocument.isLinedef(obj))
+		if (inst.level.isLinedef(obj))
 		{
-			int type_num = gDocument.linedefs[obj]->type;
+			int type_num = inst.level.linedefs[obj]->type;
 
 			type->value(SString(type_num).c_str());
 
@@ -809,11 +809,11 @@ void UI_LineBox::UpdateField(int field)
 
 	if (field < 0 || field == LineDef::F_FLAGS)
 	{
-		if (gDocument.isLinedef(obj))
+		if (inst.level.isLinedef(obj))
 		{
 			actkind->activate();
 
-			FlagsFromInt(gDocument.linedefs[obj]->flags);
+			FlagsFromInt(inst.level.linedefs[obj]->flags);
 		}
 		else
 		{
@@ -846,7 +846,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(gDocument.linedefs[n]->CalcLength(gDocument));
+	float len_f = static_cast<float>(inst.level.linedefs[n]->CalcLength(inst.level));
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);
@@ -951,7 +951,7 @@ int UI_LineBox::CalcFlags() const
 
 void UI_LineBox::UpdateTotal()
 {
-	which->SetTotal(gDocument.numLinedefs());
+	which->SetTotal(inst.level.numLinedefs());
 }
 
 
@@ -965,8 +965,8 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 	if (L->left < 0 || L->right < 0)
 		return SOLID_MID;
 
-	Sector *right = L->Right(gDocument)->SecRef(gDocument);
-	Sector * left = L->Left (gDocument)->SecRef(gDocument);
+	Sector *right = L->Right(inst.level)->SecRef(inst.level);
+	Sector * left = L->Left (inst.level)->SecRef(inst.level);
 
 	if (side == Side::left)
 		std::swap(left, right);

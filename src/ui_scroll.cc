@@ -329,7 +329,7 @@ UI_CanvasScroll::UI_CanvasScroll(Instance &inst, int X, int Y, int W, int H) :
 	resizable(canvas);
 
 
-	status = new UI_StatusBar(X, Y, W, INFO_BAR_H);
+	status = new UI_StatusBar(inst, X, Y, W, INFO_BAR_H);
 
 	end();
 }

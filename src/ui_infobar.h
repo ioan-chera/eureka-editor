@@ -85,8 +85,10 @@ class UI_StatusBar : public Fl_Widget
 private:
 	SString status;
 
+	Instance &inst;
+
 public:
-	UI_StatusBar(int X, int Y, int W, int H, const char *label = NULL);
+	UI_StatusBar(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_StatusBar();
 
 public:

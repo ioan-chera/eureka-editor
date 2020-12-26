@@ -267,7 +267,7 @@ void UpdateHighlight(Instance &inst)
 {
 	if (edit.render3d)
 	{
-		Render3D_UpdateHighlight();
+		Render3D_UpdateHighlight(inst);
 		UpdatePanel(inst);
 		return;
 	}

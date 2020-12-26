@@ -417,9 +417,9 @@ void UI_InfoBar::UpdateSnapText()
 #define INFO_DIM_COL	fl_rgb_color(128, 128, 128)
 
 
-UI_StatusBar::UI_StatusBar(int X, int Y, int W, int H, const char *label) :
+UI_StatusBar::UI_StatusBar(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Widget(X, Y, W, H, label),
-	status()
+	status(), inst(inst)
 {
 	box(FL_NO_BOX);
 }
@@ -609,7 +609,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const LineDef *L = gDocument.linedefs[edit.highlight.num];
+		const LineDef *L = inst.level.linedefs[edit.highlight.num];
 
 		int x_offset = 0;
 		int y_offset = 0;
@@ -617,9 +617,9 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 		const SideDef *SD = NULL;
 
 		if (hl.parts & PART_LF_ALL)
-			SD = L->Left(gDocument);
+			SD = L->Left(inst.level);
 		else
-			SD = L->Right(gDocument);
+			SD = L->Right(inst.level);
 
 		if (SD != NULL)
 		{
@@ -641,7 +641,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! edit.draw_from.valid())
 		return;
 
-	const Vertex *V = gDocument.vertices[edit.draw_from.num];
+	const Vertex *V = inst.level.vertices[edit.draw_from.num];
 
 	double dx = edit.draw_to_x - V->x();
 	double dy = edit.draw_to_y - V->y();
