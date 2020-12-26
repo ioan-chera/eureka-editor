@@ -29,7 +29,7 @@
 
 #include "w_wad.h"
 
-void LoadLevel(Wad_file *wad, const SString &level);
+void LoadLevel(Instance &inst, Wad_file *wad, const SString &level);
 void LoadLevelNum(Wad_file *wad, int lev_num);
 
 void GetLevelFormat(Wad_file *wad, const char *level);

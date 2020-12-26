@@ -641,9 +641,9 @@ static void Main_SetupFLTK()
 //
 // Creates the main window
 //
-static void Main_OpenWindow()
+static void Main_OpenWindow(Instance &inst)
 {
-	instance::main_win = new UI_MainWindow(gInstance);
+	instance::main_win = new UI_MainWindow(inst);
 
 	instance::main_win->label("Eureka v" EUREKA_VERSION);
 
@@ -1065,7 +1065,7 @@ int main(int argc, char *argv[])
 
 		M_LookForIWADs();
 
-		Main_OpenWindow();
+		Main_OpenWindow(gInstance);
 
 		init_progress = ProgressStatus::window;
 
@@ -1134,7 +1134,8 @@ int main(int argc, char *argv[])
 
 		LogPrintf("Loading initial map : %s\n", instance::Level_name.c_str());
 
-		LoadLevel(instance::edit_wad ? instance::edit_wad : instance::game_wad, instance::Level_name);
+		// TODO: the first instance
+		LoadLevel(gInstance, instance::edit_wad ? instance::edit_wad : instance::game_wad, instance::Level_name);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

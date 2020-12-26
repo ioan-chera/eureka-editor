@@ -75,9 +75,9 @@ int  config::thing_render_default = 1;
 //
 // adjust zoom factor to make whole map fit in window
 //
-static void zoom_fit()
+static void zoom_fit(Instance &inst)
 {
-	if (gDocument.numVertices() == 0)
+	if (inst.level.numVertices() == 0)
 		return;
 
 	double xzoom = 1;
@@ -98,12 +98,12 @@ static void zoom_fit()
 }
 
 
-void ZoomWholeMap()
+void ZoomWholeMap(Instance &inst)
 {
 	if (MadeChanges)
 		CalculateLevelBounds();
 
-	zoom_fit();
+	zoom_fit(inst);
 
 	RedrawMap();
 }

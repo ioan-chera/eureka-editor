@@ -183,7 +183,7 @@ void Editor_ChangeMode_Raw(ObjType new_mode);
 void UpdateHighlight();
 
 void RedrawMap();
-void ZoomWholeMap();
+void ZoomWholeMap(Instance &inst);
 
 
 extern double Map_bound_x1;   /* minimum X value of map */

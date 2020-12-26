@@ -511,7 +511,8 @@ void CMD_BuildAllNodes(Instance &inst)
 
 
 	// reload the previous level
-	LoadLevel(instance::edit_wad, CurLevel);
+	// TODO: improve this to NOT mean reloading the level
+	LoadLevel(inst, instance::edit_wad, CurLevel);
 }
 
 

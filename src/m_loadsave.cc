@@ -89,7 +89,7 @@ static void ReplaceEditWad(Wad_file *new_wad)
 }
 
 
-static void FreshLevel()
+static void FreshLevel(Instance &inst)
 {
 	gDocument.basis.clearAll();
 
@@ -134,7 +134,7 @@ static void FreshLevel()
 
 	CalculateLevelBounds();
 
-	ZoomWholeMap();
+	ZoomWholeMap(inst);
 
 	Editor_DefaultState();
 }
@@ -312,8 +312,8 @@ void CMD_NewProject(Instance &inst)
 
 	MasterDir_Add(instance::edit_wad);
 
-
-	FreshLevel();
+	// TODO: new instance
+	FreshLevel(gInstance);
 
 	// save it now : sets Level_name and window title
 	SaveLevel(map_name);
@@ -386,7 +386,8 @@ void CMD_FreshMap(Instance &inst)
 
 	LogPrintf("Created NEW map : %s\n", map_name.c_str());
 
-	FreshLevel();
+	// TODO: make this allow running another level
+	FreshLevel(inst);
 
 	// save it now : sets Level_name and window title
 	SaveLevel(map_name);
@@ -955,7 +956,7 @@ void GetLevelFormat(Wad_file *wad, const char *level)
 // Read in the level data
 //
 
-void LoadLevel(Wad_file *wad, const SString &level)
+void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 {
 	int lev_num = wad->LevelFind(level);
 
@@ -987,7 +988,7 @@ void LoadLevel(Wad_file *wad, const SString &level)
 
 		if (! M_LoadUserState())
 		{
-			M_DefaultUserState();
+			M_DefaultUserState(inst);
 		}
 	}
 
@@ -1066,6 +1067,7 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 //
 void OpenFileMap(const SString &filename, const SString &map_namem)
 {
+	// TODO: change this to start a new instance
 	SString map_name = map_namem;
 	if (! Main_ConfirmQuit("open another map"))
 		return;
@@ -1136,7 +1138,8 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), instance::edit_wad->PathName().c_str());
 
-	LoadLevel(instance::edit_wad, map_name);
+	// TODO: new instance
+	LoadLevel(gInstance, instance::edit_wad, map_name);
 
 	// must be after LoadLevel as we need the Level_format
 	Main_LoadResources();
@@ -1204,7 +1207,8 @@ void CMD_OpenMap(Instance &inst)
 
 	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
 
-	LoadLevel(wad, map_name);
+	// TODO: overhaul the interface to select map from the same wad
+	LoadLevel(inst, wad, map_name);
 
 	if (new_resources)
 	{
@@ -1340,7 +1344,7 @@ void CMD_FlipMap(Instance &inst)
 
 	LogPrintf("Flipping Map to : %s\n", map_name.c_str());
 
-	LoadLevel(wad, map_name);
+	LoadLevel(inst, wad, map_name);
 }
 
 
@@ -2048,7 +2052,8 @@ void CMD_DeleteMap(Instance &inst)
 
 		LogPrintf("OK.  Loading : %s....\n", map_name.c_str());
 
-		LoadLevel(instance::edit_wad, map_name);
+		// TODO: overhaul the interface to NOT go back to the IWAD
+		LoadLevel(inst, instance::edit_wad, map_name);
 	}
 }
 

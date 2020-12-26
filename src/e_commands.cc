@@ -1121,7 +1121,7 @@ static void CMD_ZoomWholeMap(Instance &inst)
 	if (edit.render3d)
 		Render3D_Enable(false);
 
-	ZoomWholeMap();
+	ZoomWholeMap(inst);
 }
 
 

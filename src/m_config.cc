@@ -1568,11 +1568,11 @@ bool M_SaveUserState()
 }
 
 
-void M_DefaultUserState()
+void M_DefaultUserState(Instance &inst)
 {
 	grid.Init();
 
-	ZoomWholeMap();
+	ZoomWholeMap(inst);
 
 	Render3D_Setup();
 

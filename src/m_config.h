@@ -188,7 +188,7 @@ int M_ParseLine(const SString &line, std::vector<SString> &tokens, ParseOptions 
 bool M_LoadUserState();
 bool M_SaveUserState();
 
-void M_DefaultUserState();
+void M_DefaultUserState(Instance &inst);
 
 #endif  /* __EUREKA_M_CONFIG_H__ */
 
