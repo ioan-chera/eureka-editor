@@ -631,7 +631,7 @@ static void ACT_SelectBox_release(Instance &inst)
 		return;
 	}
 
-	SelectObjectsInBox(edit.Selected, edit.mode, x1, y1, x2, y2);
+	SelectObjectsInBox(inst.level, edit.Selected, edit.mode, x1, y1, x2, y2);
 	RedrawMap();
 }
 

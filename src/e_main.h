@@ -241,7 +241,7 @@ enum class SelectHighlight
 
 SelectHighlight SelectionOrHighlight();
 
-void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
+void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
 
 
 /* commands */

@@ -854,7 +854,7 @@ SelectHighlight SelectionOrHighlight()
 //
 // select all objects inside a given box
 //
-void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2)
+void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2)
 {
 	if (x2 < x1)
 		std::swap(x1, x2);
@@ -865,9 +865,9 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 	switch (objtype)
 	{
 		case ObjType::things:
-			for (int n = 0 ; n < gDocument.numThings() ; n++)
+			for (int n = 0 ; n < doc.numThings() ; n++)
 			{
-				const Thing *T = gDocument.things[n];
+				const Thing *T = doc.things[n];
 
 				double tx = T->x();
 				double ty = T->y();
@@ -880,9 +880,9 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 			break;
 
 		case ObjType::vertices:
-			for (int n = 0 ; n < gDocument.numVertices(); n++)
+			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const Vertex *V = gDocument.vertices[n];
+				const Vertex *V = doc.vertices[n];
 
 				double vx = V->x();
 				double vy = V->y();
@@ -895,15 +895,15 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 			break;
 
 		case ObjType::linedefs:
-			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = gDocument.linedefs[n];
+				const LineDef *L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if (x1 <= L->Start(gDocument)->x() && L->Start(gDocument)->x() <= x2 &&
-				    y1 <= L->Start(gDocument)->y() && L->Start(gDocument)->y() <= y2 &&
-				    x1 <= L->End(gDocument)->x()   && L->End(gDocument)->x() <= x2 &&
-				    y1 <= L->End(gDocument)->y()   && L->End(gDocument)->y() <= y2)
+				if (x1 <= L->Start(doc)->x() && L->Start(doc)->x() <= x2 &&
+				    y1 <= L->Start(doc)->y() && L->Start(doc)->y() <= y2 &&
+				    x1 <= L->End(doc)->x()   && L->End(doc)->x() <= x2 &&
+				    y1 <= L->End(doc)->y()   && L->End(doc)->y() <= y2)
 				{
 					list->toggle(n);
 				}
@@ -915,18 +915,18 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 			selection_c  in_sectors(ObjType::sectors);
 			selection_c out_sectors(ObjType::sectors);
 
-			for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = gDocument.linedefs[n];
+				const LineDef *L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
-				int s1 = L->Right(gDocument) ? L->Right(gDocument)->sector : -1;
-				int s2 = L->Left(gDocument) ? L->Left(gDocument) ->sector : -1;
+				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
+				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
 
-				if (x1 <= L->Start(gDocument)->x() && L->Start(gDocument)->x() <= x2 &&
-				    y1 <= L->Start(gDocument)->y() && L->Start(gDocument)->y() <= y2 &&
-				    x1 <= L->End(gDocument)->x()   && L->End(gDocument)->x() <= x2 &&
-				    y1 <= L->End(gDocument)->y()   && L->End(gDocument)->y() <= y2)
+				if (x1 <= L->Start(doc)->x() && L->Start(doc)->x() <= x2 &&
+				    y1 <= L->Start(doc)->y() && L->Start(doc)->y() <= y2 &&
+				    x1 <= L->End(doc)->x()   && L->End(doc)->x() <= x2 &&
+				    y1 <= L->End(doc)->y()   && L->End(doc)->y() <= y2)
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);
@@ -938,7 +938,7 @@ void SelectObjectsInBox(selection_c *list, ObjType objtype, double x1, double y1
 				}
 			}
 
-			for (int i = 0 ; i < gDocument.numSectors(); i++)
+			for (int i = 0 ; i < doc.numSectors(); i++)
 				if (in_sectors.get(i) && ! out_sectors.get(i))
 					list->toggle(i);
 
