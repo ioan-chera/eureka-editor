@@ -327,7 +327,7 @@ static void PrepareInfo(nodebuildinfo_t *info)
 }
 
 
-static build_result_e BuildAllNodes(nodebuildinfo_t *info)
+static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 {
 	LogPrintf("\n");
 
@@ -348,7 +348,7 @@ static build_result_e BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(instance::edit_wad, n);
+		LoadLevelNum(inst, instance::edit_wad, n);
 
 		ret = AJBSP_BuildLevel(info, n, gDocument);
 
@@ -483,7 +483,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = BuildAllNodes(nb_info);
+	build_result_e ret = BuildAllNodes(inst, nb_info);
 
 	if (ret == BUILD_OK)
 	{

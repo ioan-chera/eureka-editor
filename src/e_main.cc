@@ -101,7 +101,7 @@ static void zoom_fit(Instance &inst)
 void ZoomWholeMap(Instance &inst)
 {
 	if (MadeChanges)
-		CalculateLevelBounds();
+		CalculateLevelBounds(inst);
 
 	zoom_fit(inst);
 
@@ -235,7 +235,7 @@ void UpdateDrawLine(Instance &inst)
 }
 
 
-static void UpdateSplitLine(double map_x, double map_y)
+static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 {
 	edit.split_line.clear();
 
@@ -250,7 +250,7 @@ static void UpdateSplitLine(double map_x, double map_y)
 		edit.pointer_in_window &&
 	    edit.highlight.is_nil())
 	{
-		edit.split_line = gDocument.hover.findSplitLine(edit.split_x, edit.split_y,
+		edit.split_line = inst.level.hover.findSplitLine(edit.split_x, edit.split_y,
 					  map_x, map_y, edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
@@ -278,7 +278,7 @@ void UpdateHighlight(Instance &inst)
 	if (edit.pointer_in_window &&
 	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		edit.highlight = gDocument.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+		edit.highlight = inst.level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
@@ -292,8 +292,8 @@ void UpdateHighlight(Instance &inst)
 		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = gDocument.vertices[edit.highlight.num];
-			const Vertex *S = gDocument.vertices[edit.draw_from.num];
+			const Vertex *V = inst.level.vertices[edit.highlight.num];
+			const Vertex *S = inst.level.vertices[edit.draw_from.num];
 
 			double vx = V->x();
 			double vy = V->y();
@@ -308,7 +308,7 @@ void UpdateHighlight(Instance &inst)
 		}
 	}
 
-	UpdateSplitLine(edit.map_x, edit.map_y);
+	UpdateSplitLine(inst, edit.map_x, edit.map_y);
 	UpdateDrawLine(inst);
 
 	instance::main_win->canvas->UpdateHighlight();
@@ -392,11 +392,11 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 //------------------------------------------------------------------------
 
 
-void UpdateLevelBounds(int start_vert)
+static void UpdateLevelBounds(Instance &inst, int start_vert)
 {
-	for(int i = start_vert; i < gDocument.numVertices(); i++)
+	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
-		const Vertex * V = gDocument.vertices[i];
+		const Vertex * V = inst.level.vertices[i];
 
 		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
 		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
@@ -406,9 +406,9 @@ void UpdateLevelBounds(int start_vert)
 	}
 }
 
-void CalculateLevelBounds()
+void CalculateLevelBounds(Instance &inst)
 {
-	if (gDocument.numVertices() == 0)
+	if (inst.level.numVertices() == 0)
 	{
 		Map_bound_x1 = Map_bound_x2 = 0;
 		Map_bound_y1 = Map_bound_y2 = 0;
@@ -418,7 +418,7 @@ void CalculateLevelBounds()
 	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
 	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
 
-	UpdateLevelBounds(0);
+	UpdateLevelBounds(inst, 0);
 }
 
 
@@ -484,15 +484,15 @@ void MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		Subdiv_InvalidateAll();
 }
 
-void MapStuff_NotifyEnd()
+void MapStuff_NotifyEnd(Instance &inst)
 {
 	if (recalc_map_bounds || moved_vertex_count > 10)  // TODO: CONFIG
 	{
-		CalculateLevelBounds();
+		CalculateLevelBounds(inst);
 	}
 	else if (new_vertex_minimum >= 0)
 	{
-		UpdateLevelBounds(new_vertex_minimum);
+		UpdateLevelBounds(inst, new_vertex_minimum);
 	}
 }
 

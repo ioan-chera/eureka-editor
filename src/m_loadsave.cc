@@ -132,7 +132,7 @@ static void FreshLevel(Instance &inst)
 		th->SetRawY((pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
-	CalculateLevelBounds();
+	CalculateLevelBounds(inst);
 
 	ZoomWholeMap(inst);
 
@@ -963,7 +963,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 	if (lev_num < 0)
 		ThrowException("No such map: %s\n", level.c_str());
 
-	LoadLevelNum(wad, lev_num);
+	LoadLevelNum(inst, wad, lev_num);
 
 	// reset various editor state
 	Editor_ClearAction();
@@ -1000,7 +1000,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 }
 
 
-void LoadLevelNum(Wad_file *wad, int lev_num)
+void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 {
 	load_wad = wad;
 	loading_level = lev_num;
@@ -1054,7 +1054,7 @@ void LoadLevelNum(Wad_file *wad, int lev_num)
 
 	gDocument.checks.sidedefsUnpack(true);
 
-	CalculateLevelBounds();
+	CalculateLevelBounds(inst);
 	Subdiv_InvalidateAll();
 
 	MadeChanges = 0;

@@ -191,14 +191,14 @@ extern double Map_bound_y1;   /* minimum Y value of map */
 extern double Map_bound_x2;   /* maximum X value of map */
 extern double Map_bound_y2;   /* maximum Y value of map */
 
-void CalculateLevelBounds();
+void CalculateLevelBounds(Instance &inst);
 
 
 void MapStuff_NotifyBegin();
 void MapStuff_NotifyInsert(ObjType type, int objnum);
 void MapStuff_NotifyDelete(ObjType type, int objnum);
 void MapStuff_NotifyChange(ObjType type, int objnum, int field);
-void MapStuff_NotifyEnd();
+void MapStuff_NotifyEnd(Instance &inst);
 
 
 void ObjectBox_NotifyBegin();

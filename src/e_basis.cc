@@ -1072,7 +1072,7 @@ void Basis::doProcessChangeStatus() const
 
 	Clipboard_NotifyEnd();
 	Selection_NotifyEnd();
-	MapStuff_NotifyEnd();
+	MapStuff_NotifyEnd(inst);
 	Render3D_NotifyEnd();
 	ObjectBox_NotifyEnd();
 }
