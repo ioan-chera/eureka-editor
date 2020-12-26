@@ -970,11 +970,11 @@ void Render3D_DragThings()
 		selection_c sel(ObjType::things);
 		sel.set(edit.dragged.num);
 
-		MoveObjects(&sel, dx, dy, dz);
+		gDocument.objects.move(&sel, dx, dy, dz);
 	}
 	else
 	{
-		MoveObjects(edit.Selected, dx, dy, dz);
+		gDocument.objects.move(edit.Selected, dx, dy, dz);
 	}
 
 	RedrawMap();

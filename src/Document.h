@@ -23,6 +23,7 @@
 #include "e_checks.h"
 #include "e_hover.h"
 #include "e_linedef.h"
+#include "e_objects.h"
 #include "e_sector.h"
 #include "e_vertex.h"
 
@@ -47,8 +48,9 @@ struct Document
 	LinedefModule linemod;
 	VertexModule vertmod;
 	SectorModule secmod;
+	ObjectsModule objects;
 
-	Document() : basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this)
+	Document() : basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
 	}
 

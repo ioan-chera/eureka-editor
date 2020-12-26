@@ -27,9 +27,22 @@
 #ifndef __EUREKA_OBJECTS_H__
 #define __EUREKA_OBJECTS_H__
 
+#include "DocumentModule.h"
+
 class selection_c;
 
-void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z = 0);
+//
+// e_objects module
+//
+class ObjectsModule : public DocumentModule
+{
+public:
+	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
+	{
+	}
+	void move(selection_c *list, double delta_x, double delta_y, double delta_z) const;
+};
+
 void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z = 0);
 
 void DeleteObjects(selection_c * list);

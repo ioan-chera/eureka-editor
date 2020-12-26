@@ -795,13 +795,13 @@ static void DoMoveObjects(selection_c *list, double delta_x, double delta_y, dou
 }
 
 
-void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z)
+void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, double delta_z) const
 {
 	if (list->empty())
 		return;
 
-	gDocument.basis.begin();
-	gDocument.basis.setMessageForSelection("moved", *list);
+	doc.basis.begin();
+	doc.basis.setMessageForSelection("moved", *list);
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -816,7 +816,7 @@ void MoveObjects(selection_c *list, double delta_x, double delta_y, double delta
 
 	DoMoveObjects(list, delta_x, delta_y, delta_z);
 
-	gDocument.basis.end();
+	doc.basis.end();
 }
 
 
@@ -827,7 +827,7 @@ void DragSingleObject(Objid& obj, double delta_x, double delta_y, double delta_z
 		selection_c list(edit.mode);
 		list.set(obj.num);
 
-		MoveObjects(&list, delta_x, delta_y, delta_z);
+		gDocument.objects.move(&list, delta_x, delta_y, delta_z);
 		return;
 	}
 

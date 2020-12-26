@@ -669,7 +669,7 @@ static void ACT_Drag_release(Instance &inst)
 		if (dragged.valid())
 			DragSingleObject(dragged, dx, dy);
 		else
-			MoveObjects(edit.Selected, dx, dy);
+			inst.level.objects.move(edit.Selected, dx, dy, 0);
 	}
 
 	Editor_ClearAction();
