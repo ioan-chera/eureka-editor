@@ -100,6 +100,4 @@ struct Document
 	void getLevelChecksum(crc32_c &crc) const;
 };
 
-extern Document gDocument;
-
 #endif /* Document_hpp */

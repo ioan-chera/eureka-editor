@@ -18,7 +18,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
+#include "Instance.h"
 #include "main.h"
 #include "ui_window.h"
 

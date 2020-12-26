@@ -19,8 +19,6 @@
 #include "Document.h"
 #include "lib_adler.h"
 
-Document gDocument;	// currently a singleton.
-
 //
 // Get number of objects based on enum
 //

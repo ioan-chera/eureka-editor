@@ -21,7 +21,7 @@
 
 #ifndef NO_OPENGL
 
-#include "Document.h"
+#include "Instance.h"
 #include "main.h"
 
 #include <map>

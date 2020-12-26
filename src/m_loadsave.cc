@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 
 #include "lib_adler.h"

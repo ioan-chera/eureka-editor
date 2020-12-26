@@ -178,6 +178,7 @@
     <ClCompile Include="..\..\src\e_vertex.cc" />
     <ClCompile Include="..\..\src\im_color.cc" />
     <ClCompile Include="..\..\src\im_img.cc" />
+    <ClCompile Include="..\..\src\Instance.cc" />
     <ClCompile Include="..\..\src\lib_adler.cc" />
     <ClCompile Include="..\..\src\lib_file.cc" />
     <ClCompile Include="..\..\src\lib_tga.cc" />
@@ -247,6 +248,7 @@
     <ClInclude Include="..\..\src\e_vertex.h" />
     <ClInclude Include="..\..\src\im_color.h" />
     <ClInclude Include="..\..\src\im_img.h" />
+    <ClInclude Include="..\..\src\Instance.h" />
     <ClInclude Include="..\..\src\lib_adler.h" />
     <ClInclude Include="..\..\src\lib_file.h" />
     <ClInclude Include="..\..\src\lib_tga.h" />

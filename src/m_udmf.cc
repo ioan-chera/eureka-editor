@@ -18,7 +18,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
+#include "Instance.h"
 #include "main.h"
 
 #include "m_udmf.h"

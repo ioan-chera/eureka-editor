@@ -249,6 +249,9 @@
     <ClCompile Include="..\..\src\Errors.cc">
       <Filter>Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Instance.cc">
+      <Filter>Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\e_basis.h">
@@ -459,6 +462,9 @@
       <Filter>Code</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\WindowsInclude.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Instance.h">
       <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>
