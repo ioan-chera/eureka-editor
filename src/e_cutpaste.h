@@ -21,6 +21,10 @@
 #ifndef __EUREKA_E_CUTPASTE_H__
 #define __EUREKA_E_CUTPASTE_H__
 
+#include "objid.h"
+
+class selection_c;
+class SString;
 struct Instance;
 
 //

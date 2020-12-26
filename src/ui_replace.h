@@ -25,6 +25,7 @@
 
 class Fl_Choice;
 class Fl_Output;
+class LineDef;
 class number_group_c;
 class UI_TripleCheckButton;
 

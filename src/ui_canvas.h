@@ -32,7 +32,7 @@
 #include "sys_macro.h"
 
 class Img_c;
-
+enum class Side;
 
 #ifdef NO_OPENGL
 class UI_Canvas : public Fl_Widget

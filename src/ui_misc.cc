@@ -18,16 +18,13 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
-#include "Instance.h"
-
-#include "main.h"
-
-#include "e_main.h"
-#include "e_objects.h"
-#include "ui_window.h"
 #include "ui_misc.h"
 
+#include "Errors.h"
+#include "Instance.h"
+#include "e_main.h"
+
+#include "main.h"
 
 UI_MoveDialog::UI_MoveDialog(bool want_dz) :
 	UI_Escapable_Window(360, 205, "Move Objects"),

@@ -21,6 +21,10 @@
 #ifndef __EUREKA_UI_MISC_H__
 #define __EUREKA_UI_MISC_H__
 
+#include "ui_window.h"
+
+class Fl_Float_Input;
+
 class UI_MoveDialog : public UI_Escapable_Window
 {
 private:
