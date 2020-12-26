@@ -43,7 +43,7 @@ typedef enum
 
 } propagate_level_e;
 
-const byte * SoundPropagation(int start_sec);
+const byte * SoundPropagation(const Instance &inst, int start_sec);
 
 
 /* commands */

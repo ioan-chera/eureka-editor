@@ -91,7 +91,7 @@ UI_Canvas::UI_Canvas(Instance &inst, int X, int Y, int W, int H, const char *lab
 	last_split_x(), last_split_y(),
 	snap_x(-1), snap_y(-1),
 	seen_sectors(),
-	mInstance(inst)
+	inst(inst)
 {
 #ifdef NO_OPENGL
 	rgb_buf = NULL;
@@ -197,7 +197,7 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
-	if (EV_HandleEvent(mInstance, event))
+	if (EV_HandleEvent(inst, event))
 		return 1;
 
 	return Fl_Widget::handle(event);
@@ -2067,7 +2067,7 @@ void UI_Canvas::RenderSector(int num)
 		if (edit.mode != ObjType::sectors || !edit.highlight.valid())
 			return;
 
-		const byte * prop = SoundPropagation(edit.highlight.num);
+		const byte * prop = SoundPropagation(inst, edit.highlight.num);
 
 		switch ((propagate_level_e) prop[num])
 		{

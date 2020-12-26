@@ -212,7 +212,7 @@ private:
 	}
 #endif
 
-	Instance &mInstance;
+	Instance &inst;
 };
 
 

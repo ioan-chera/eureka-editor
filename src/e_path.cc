@@ -51,50 +51,50 @@ typedef enum
 select_lines_in_path_flag_e;
 
 
-static bool MatchingTextures(int index1, int index2)
+static bool MatchingTextures(const Document &doc, int index1, int index2)
 {
-	LineDef *L1 = gDocument.linedefs[index1];
-	LineDef *L2 = gDocument.linedefs[index2];
+	LineDef *L1 = doc.linedefs[index1];
+	LineDef *L2 = doc.linedefs[index2];
 
 	// lines with no sidedefs only match each other
-	if (! L1->Right(gDocument) || ! L2->Right(gDocument))
-		return L1->Right(gDocument) == L2->Right(gDocument);
+	if (! L1->Right(doc) || ! L2->Right(doc))
+		return L1->Right(doc) == L2->Right(doc);
 
 	// determine texture to match from first line
 	int texture = 0;
 
 	if (! L1->TwoSided())
 	{
-		texture = L1->Right(gDocument)->mid_tex;
+		texture = L1->Right(doc)->mid_tex;
 	}
 	else
 	{
-		int f_diff = L1->Left(gDocument)->SecRef(gDocument)->floorh - L1->Right(gDocument)->SecRef(gDocument)->floorh;
-		int c_diff = L1->Left(gDocument)->SecRef(gDocument)->ceilh  - L1->Right(gDocument)->SecRef(gDocument)->ceilh;
+		int f_diff = L1->Left(doc)->SecRef(doc)->floorh - L1->Right(doc)->SecRef(doc)->floorh;
+		int c_diff = L1->Left(doc)->SecRef(doc)->ceilh  - L1->Right(doc)->SecRef(doc)->ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
-			texture = (c_diff > 0) ? L1->Left(gDocument)->upper_tex : L1->Right(gDocument)->upper_tex;
+			texture = (c_diff > 0) ? L1->Left(doc)->upper_tex : L1->Right(doc)->upper_tex;
 		else
-			texture = (f_diff < 0) ? L1->Left(gDocument)->lower_tex : L1->Right(gDocument)->lower_tex;
+			texture = (f_diff < 0) ? L1->Left(doc)->lower_tex : L1->Right(doc)->lower_tex;
 	}
 
 	// match texture with other line
 
 	if (! L2->TwoSided())
 	{
-		return (L2->Right(gDocument)->mid_tex == texture);
+		return (L2->Right(doc)->mid_tex == texture);
 	}
 	else
 	{
-		int f_diff = L2->Left(gDocument)->SecRef(gDocument)->floorh - L2->Right(gDocument)->SecRef(gDocument)->floorh;
-		int c_diff = L2->Left(gDocument)->SecRef(gDocument)->ceilh  - L2->Right(gDocument)->SecRef(gDocument)->ceilh;
+		int f_diff = L2->Left(doc)->SecRef(doc)->floorh - L2->Right(doc)->SecRef(doc)->floorh;
+		int c_diff = L2->Left(doc)->SecRef(doc)->ceilh  - L2->Right(doc)->SecRef(doc)->ceilh;
 
 		if (c_diff != 0)
-			if (texture == ((c_diff > 0) ? L2->Left(gDocument)->upper_tex : L2->Right(gDocument)->upper_tex))
+			if (texture == ((c_diff > 0) ? L2->Left(doc)->upper_tex : L2->Right(doc)->upper_tex))
 				return true;
 
 		if (f_diff != 0)
-			if (texture == ((f_diff < 0) ? L2->Left(gDocument)->lower_tex : L2->Right(gDocument)->lower_tex))
+			if (texture == ((f_diff < 0) ? L2->Left(doc)->lower_tex : L2->Right(doc)->lower_tex))
 				return true;
 
 		return false;
@@ -102,24 +102,24 @@ static bool MatchingTextures(int index1, int index2)
 }
 
 
-bool OtherLineDef(int L, int V, int *L_other, int *V_other,
+static bool OtherLineDef(const Document &doc, int L, int V, int *L_other, int *V_other,
                   int match, int start_L)
 {
 	*L_other = -1;
 	*V_other = -1;
 
-	for (int n = 0 ; n < gDocument.numLinedefs(); n++)
+	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
 		if (n == L)
 			continue;
 
-		if ((match & SLP_OneSided) && !gDocument.linedefs[n]->OneSided())
+		if ((match & SLP_OneSided) && !doc.linedefs[n]->OneSided())
 			continue;
 
 		for (int k = 0 ; k < 2 ; k++)
 		{
-			int v1 = gDocument.linedefs[n]->start;
-			int v2 = gDocument.linedefs[n]->end;
+			int v1 = doc.linedefs[n]->start;
+			int v2 = doc.linedefs[n]->end;
 
 			if (k == 1)
 				std::swap(v1, v2);
@@ -127,7 +127,7 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 			if (v1 != V)
 				continue;
 
-			if ((match & SLP_SameTex) && ! MatchingTextures(start_L, n))
+			if ((match & SLP_SameTex) && ! MatchingTextures(doc, start_L, n))
 				continue;
 
 			if (*L_other >= 0)  // There is a fork in the path. Stop here.
@@ -149,7 +149,7 @@ bool OtherLineDef(int L, int V, int *L_other, int *V_other,
 // then it is added to the selection and we continue from the new
 // linedef and vertex.
 //
-static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
+static void SelectLinesInHalfPath(const Document &doc, int L, int V, selection_c& seen, int match)
 {
 	int start_L = L;
 
@@ -158,7 +158,7 @@ static void SelectLinesInHalfPath(int L, int V, selection_c& seen, int match)
 		int L_other, V_other;
 
 		// does not exist or is forky
-		if (! OtherLineDef(L, V, &L_other, &V_other, match, start_L))
+		if (! OtherLineDef(doc, L, V, &L_other, &V_other, match, start_L))
 			break;
 
 		// already seen?
@@ -206,8 +206,8 @@ void CMD_LIN_SelectPath(Instance &inst)
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(start_L, inst.level.linedefs[start_L]->start, seen, match);
-	SelectLinesInHalfPath(start_L, inst.level.linedefs[start_L]->end,   seen, match);
+	SelectLinesInHalfPath(inst.level, start_L, inst.level.linedefs[start_L]->start, seen, match);
+	SelectLinesInHalfPath(inst.level, start_L, inst.level.linedefs[start_L]->end,   seen, match);
 
 	Editor_ClearErrorMode(inst);
 
@@ -227,7 +227,7 @@ void CMD_LIN_SelectPath(Instance &inst)
 
 #define PLAYER_STEP_H	24
 
-static bool GrowContiguousSectors(selection_c &seen)
+static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 {
 	// returns TRUE when some new sectors got added
 
@@ -245,19 +245,19 @@ static bool GrowContiguousSectors(selection_c &seen)
 	bool do_tag     = Exec_HasFlag("/tag");
 	bool do_special = Exec_HasFlag("/special");
 
-	for (const LineDef *L : gDocument.linedefs)
+	for (const LineDef *L : inst.level.linedefs)
 	{
 		if (! L->TwoSided())
 			continue;
 
-		int sec1 = L->Right(gDocument)->sector;
-		int sec2 = L-> Left(gDocument)->sector;
+		int sec1 = L->Right(inst.level)->sector;
+		int sec2 = L-> Left(inst.level)->sector;
 
 		if (sec1 == sec2)
 			continue;
 
-		Sector *S1 = gDocument.sectors[sec1];
-		Sector *S2 = gDocument.sectors[sec2];
+		Sector *S1 = inst.level.sectors[sec1];
+		Sector *S2 = inst.level.sectors[sec2];
 
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
@@ -338,7 +338,7 @@ void CMD_SEC_SelectGroup(Instance &inst)
 
 	seen.set(start_sec);
 
-	while (GrowContiguousSectors(seen))
+	while (GrowContiguousSectors(inst, seen))
 	{ }
 
 
@@ -365,7 +365,7 @@ void GoToSelection(Instance &inst)
 		Render3D_Enable(inst, false);
 
 	double x1, y1, x2, y2;
-	gDocument.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	inst.level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double mid_x = (x1 + x2) / 2;
 	double mid_y = (y1 + y2) / 2;
@@ -508,11 +508,11 @@ static std::vector<byte> sound_temp2_vec;
 static int sound_start_sec;
 
 
-static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
+static void CalcPropagation(const Document &doc, std::vector<byte>& vec, bool ignore_doors)
 {
 	bool changes;
 
-	for (int k = 0 ; k < gDocument.numSectors(); k++)
+	for (int k = 0 ; k < doc.numSectors(); k++)
 		vec[k] = 0;
 
 	vec[sound_start_sec] = 2;
@@ -521,21 +521,21 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 	{
 		changes = false;
 
-		for (const LineDef *L : gDocument.linedefs)
+		for (const LineDef *L : doc.linedefs)
 		{
 			if (! L->TwoSided())
 				continue;
 
-			int sec1 = L->WhatSector(Side::right, gDocument);
-			int sec2 = L->WhatSector(Side::left, gDocument);
+			int sec1 = L->WhatSector(Side::right, doc);
+			int sec2 = L->WhatSector(Side::left, doc);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);
 
 			// check for doors
 			if (!ignore_doors &&
-				(MIN(gDocument.sectors[sec1]->ceilh, gDocument.sectors[sec2]->ceilh) <=
-				 MAX(gDocument.sectors[sec1]->floorh, gDocument.sectors[sec2]->floorh)))
+				(MIN(doc.sectors[sec1]->ceilh, doc.sectors[sec2]->ceilh) <=
+				 MAX(doc.sectors[sec1]->floorh, doc.sectors[sec2]->floorh)))
 			{
 				continue;
 			}
@@ -561,9 +561,9 @@ static void CalcPropagation(std::vector<byte>& vec, bool ignore_doors)
 }
 
 
-static void CalcFinalPropagation()
+static void CalcFinalPropagation(const Instance &inst)
 {
-	for (int s = 0 ; s < gDocument.numSectors(); s++)
+	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
 		int t1 = sound_temp1_vec[s];
 		int t2 = sound_temp2_vec[s];
@@ -589,13 +589,13 @@ static void CalcFinalPropagation()
 }
 
 
-const byte * SoundPropagation(int start_sec)
+const byte * SoundPropagation(const Instance &inst, int start_sec)
 {
-	if ((int)sound_prop_vec.size() != gDocument.numSectors())
+	if ((int)sound_prop_vec.size() != inst.level.numSectors())
 	{
-		sound_prop_vec .resize(gDocument.numSectors());
-		sound_temp1_vec.resize(gDocument.numSectors());
-		sound_temp2_vec.resize(gDocument.numSectors());
+		sound_prop_vec .resize(inst.level.numSectors());
+		sound_temp1_vec.resize(inst.level.numSectors());
+		sound_temp2_vec.resize(inst.level.numSectors());
 
 		sound_propagation_invalid = true;
 	}
@@ -608,10 +608,10 @@ const byte * SoundPropagation(int start_sec)
 		sound_start_sec = start_sec;
 		sound_propagation_invalid = false;
 
-		CalcPropagation(sound_temp1_vec, false);
-		CalcPropagation(sound_temp2_vec, true);
+		CalcPropagation(inst.level, sound_temp1_vec, false);
+		CalcPropagation(inst.level, sound_temp2_vec, true);
 
-		CalcFinalPropagation();
+		CalcFinalPropagation(inst);
 	}
 
 	return &sound_prop_vec[0];
