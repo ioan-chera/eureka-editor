@@ -39,9 +39,9 @@ extern const char ** arrow_pixmaps[8];
 //
 // UI_VertexBox Constructor
 //
-UI_VertexBox::UI_VertexBox(int X, int Y, int W, int H, const char *label) :
+UI_VertexBox::UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0)
+    obj(-1), count(0), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -118,15 +118,15 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("edited X of"/*, edit.Selected*/);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessage("edited X of"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			gDocument.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
+			box->inst.level.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -138,15 +138,15 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 	if (! edit.Selected->empty())
 	{
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("edited Y of"/*, edit.Selected*/);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessage("edited Y of"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			gDocument.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
+			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -177,18 +177,18 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		fixcoord_t fdx = MakeValidCoord(dx * step);
 		fixcoord_t fdy = MakeValidCoord(dy * step);
 
-		gDocument.basis.begin();
-		gDocument.basis.setMessage("adjusted"/*, edit.Selected*/);
+		box->inst.level.basis.begin();
+		box->inst.level.basis.setMessage("adjusted"/*, edit.Selected*/);
 
 		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
 		{
-			const Vertex *V = gDocument.vertices[*it];
+			const Vertex *V = box->inst.level.vertices[*it];
 
-			gDocument.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-			gDocument.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+			box->inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
+			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 		}
 
-		gDocument.basis.end();
+		box->inst.level.basis.end();
 	}
 }
 
@@ -213,11 +213,11 @@ void UI_VertexBox::SetObj(int _index, int _count)
 
 void UI_VertexBox::UpdateField()
 {
-	if (gDocument.isVertex(obj))
+	if (inst.level.isVertex(obj))
 	{
 		// @@ FIXME show decimals in UDMF
-		pos_x->value(SString(static_cast<int>(gDocument.vertices[obj]->x())).c_str());
-		pos_y->value(SString(static_cast<int>(gDocument.vertices[obj]->y())).c_str());
+		pos_x->value(SString(static_cast<int>(inst.level.vertices[obj]->x())).c_str());
+		pos_y->value(SString(static_cast<int>(inst.level.vertices[obj]->y())).c_str());
 	}
 	else
 	{
@@ -229,7 +229,7 @@ void UI_VertexBox::UpdateField()
 
 void UI_VertexBox::UpdateTotal()
 {
-	which->SetTotal(gDocument.numVertices());
+	which->SetTotal(inst.level.numVertices());
 }
 
 

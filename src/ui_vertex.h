@@ -39,8 +39,10 @@ public:
 	Fl_Button *move_up;
 	Fl_Button *move_down;
 
+	Instance &inst;
+
 public:
-	UI_VertexBox(int X, int Y, int W, int H, const char *label = NULL);
+	UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_VertexBox();
 
 public:

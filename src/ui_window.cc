@@ -102,19 +102,19 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	int BY = 0;     // cy+2
 	int BH = ey-4;  // ey-BY-2
 
-	thing_box = new UI_ThingBox(w() - panel_W, BY, panel_W, BH);
+	thing_box = new UI_ThingBox(inst, w() - panel_W, BY, panel_W, BH);
 	thing_box->hide();
 	add(thing_box);
 
-	line_box = new UI_LineBox(w() - panel_W, BY, panel_W, BH);
+	line_box = new UI_LineBox(inst, w() - panel_W, BY, panel_W, BH);
 	line_box->hide();
 	add(line_box);
 
-	sec_box = new UI_SectorBox(w() - panel_W, BY, panel_W, BH);
+	sec_box = new UI_SectorBox(inst, w() - panel_W, BY, panel_W, BH);
 	sec_box->hide();
 	add(sec_box);
 
-	vert_box = new UI_VertexBox(w() - panel_W, BY, panel_W, BH);
+	vert_box = new UI_VertexBox(inst, w() - panel_W, BY, panel_W, BH);
 	add(vert_box);
 
 	props_box = new UI_DefaultProps(w() - panel_W, BY, panel_W, BH);
