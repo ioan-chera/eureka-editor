@@ -237,7 +237,7 @@ void Nav_Navigate()
 }
 
 
-bool Nav_SetKey(keycode_t key, nav_release_func_t func)
+bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func)
 {
 	// when starting a navigation, grab the current time
 	if (! edit.is_navigating)
@@ -272,7 +272,7 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 		// if it's the same physical key, release the previous action
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
-			(N.release)();
+			(N.release)(inst);
 			 N.key = 0;
 		}
 	}
@@ -290,7 +290,7 @@ bool Nav_SetKey(keycode_t key, nav_release_func_t func)
 }
 
 
-bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
+bool Nav_ActionKey(Instance &inst, keycode_t key, nav_release_func_t func)
 {
 	keycode_t lax_mod = 0;
 
@@ -306,7 +306,7 @@ bool Nav_ActionKey(keycode_t key, nav_release_func_t func)
 			return false;
 
 		// release the existing action
-		(N.release)();
+		(N.release)(inst);
 	}
 
 	N.key     = key;
@@ -350,7 +350,7 @@ static inline bool CheckKeyPressed(nav_active_key_t& N)
 }
 
 
-void Nav_UpdateActionKey()
+static void Nav_UpdateActionKey(Instance &inst)
 {
 	nav_active_key_t& N = cur_action_key;
 
@@ -359,18 +359,18 @@ void Nav_UpdateActionKey()
 
 	if (! CheckKeyPressed(N))
 	{
-		(N.release)();
+		(N.release)(inst);
 		 N.key = 0;
 	}
 }
 
 
-void Nav_UpdateKeys()
+static void Nav_UpdateKeys(Instance &inst)
 {
 	// ensure the currently active keys are still pressed
 	// [ call this after getting each keyboard event from FLTK ]
 
-	Nav_UpdateActionKey();
+	Nav_UpdateActionKey(inst);
 
 	if (! edit.is_navigating)
 		return;
@@ -388,7 +388,7 @@ void Nav_UpdateKeys()
 		if (! CheckKeyPressed(N))
 		{
 			// call release function, clear the slot
-			(N.release)();
+			(N.release)(inst);
 			 N.key = 0;
 			continue;
 		}
@@ -627,9 +627,9 @@ keycode_t M_ReadLaxModifiers()
 }
 
 
-int EV_RawKey(int event)
+static int EV_RawKey(Instance &inst, int event)
 {
-	Nav_UpdateKeys();
+	Nav_UpdateKeys(inst);
 
 	if (event == FL_KEYUP || event == FL_RELEASE)
 		return 0;
@@ -685,7 +685,7 @@ int EV_RawKey(int event)
 }
 
 
-int EV_RawWheel(int event)
+static int EV_RawWheel(Instance &inst, int event)
 {
 	ClearStickyMod();
 
@@ -698,13 +698,13 @@ int EV_RawWheel(int event)
 	if (wheel_dx == 0 && wheel_dy == 0)
 		return 1;
 
-	EV_RawKey(FL_MOUSEWHEEL);
+	EV_RawKey(inst, FL_MOUSEWHEEL);
 
 	return 1;
 }
 
 
-int EV_RawButton(int event)
+static int EV_RawButton(Instance &inst, int event)
 {
 	ClearStickyMod();
 
@@ -724,7 +724,7 @@ int EV_RawButton(int event)
 	if (button < 1 || button > 8)
 		return 0;
 
-	return EV_RawKey(event);
+	return EV_RawKey(inst, event);
 }
 
 
@@ -774,14 +774,14 @@ int EV_HandleEvent(Instance &inst, int event)
 		case FL_KEYDOWN:
 		case FL_KEYUP:
 		case FL_SHORTCUT:
-			return EV_RawKey(event);
+			return EV_RawKey(inst, event);
 
 		case FL_PUSH:
 		case FL_RELEASE:
-			return EV_RawButton(event);
+			return EV_RawButton(inst, event);
 
 		case FL_MOUSEWHEEL:
-			return EV_RawWheel(event);
+			return EV_RawWheel(inst, event);
 
 		case FL_DRAG:
 		case FL_MOVE:

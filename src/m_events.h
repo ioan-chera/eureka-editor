@@ -66,13 +66,12 @@ keycode_t M_ReadLaxModifiers();
 extern int wheel_dx;
 extern int wheel_dy;
 
-typedef void (* nav_release_func_t)(void);
+typedef void (* nav_release_func_t)(Instance &inst);
 
 void Nav_Clear();
 void Nav_Navigate();
-bool Nav_SetKey(keycode_t key, nav_release_func_t func);
-bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
-void Nav_UpdateKeys();
+bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func);
+bool Nav_ActionKey(Instance &inst, keycode_t key, nav_release_func_t func);
 
 unsigned int Nav_TimeDiff(); /* milliseconds */
 
