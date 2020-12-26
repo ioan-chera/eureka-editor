@@ -2090,7 +2090,7 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 	//       vertices of other lines joining a zero-length one
 	//       need to be merged.
 
-	DeleteObjects_WithUnused(&lines);
+	DeleteObjects_WithUnused(doc, &lines, false, false, false);
 
 	doc.basis.end();
 }
@@ -2506,7 +2506,7 @@ static void LineDefs_RemoveOverlaps(Document &doc)
 
 	LineDefs_FindOverlaps(lines, doc);
 
-	UnusedVertices(&lines, &unused_verts);
+	UnusedVertices(doc, &lines, &unused_verts);
 
 	doc.basis.begin();
 	doc.basis.setMessage("removed overlapping lines");

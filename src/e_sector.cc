@@ -361,7 +361,7 @@ void SectorModule::commandMerge()
 
 	if (! keep_common_lines)
 	{
-		DeleteObjects_WithUnused(&common_lines);
+		DeleteObjects_WithUnused(gDocument, &common_lines, false, false, false);
 	}
 
 	gDocument.basis.end();

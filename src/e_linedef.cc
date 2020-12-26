@@ -1217,7 +1217,7 @@ void LinedefModule::commandMergeTwo(Instance &inst)
 
 	del_line.set(ld1);
 
-	DeleteObjects_WithUnused(&del_line);
+	DeleteObjects_WithUnused(inst.level, &del_line, false, false, false);
 
 	inst.level.basis.setMessage("merged two linedefs");
 	inst.level.basis.end();

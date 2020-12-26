@@ -854,7 +854,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 	basis.mDidMakeChanges = true;
 
 	// TODO: their module
-	Clipboard_NotifyInsert(objtype, objnum);
+	Clipboard_NotifyInsert(basis.doc, objtype, objnum);
 	Selection_NotifyInsert(objtype, objnum);
 	MapStuff_NotifyInsert(objtype, objnum);
 	Render3D_NotifyInsert(objtype, objnum);

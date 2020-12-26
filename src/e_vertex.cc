@@ -280,7 +280,7 @@ void VertexModule::mergeList(selection_c *verts) const
 
 	// we NEED to keep unused vertices here, otherwise we can merge
 	// all vertices of an isolated sector and end up with NOTHING!
-	DeleteObjects_WithUnused(&del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
+	DeleteObjects_WithUnused(doc, &del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
 
 	verts->clear_all();
 }

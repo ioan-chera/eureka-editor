@@ -25,6 +25,7 @@
 
 class selection_c;
 class SString;
+struct Document;
 struct Instance;
 
 //
@@ -42,18 +43,18 @@ void Clipboard_Clear();
 void Clipboard_ClearLocals();
 
 void Clipboard_NotifyBegin();
-void Clipboard_NotifyInsert(ObjType type, int objnum);
+void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum);
 void Clipboard_NotifyDelete(ObjType type, int objnum);
 void Clipboard_NotifyChange(ObjType type, int objnum, int field);
 void Clipboard_NotifyEnd();
 
-void UnusedVertices(selection_c *lines, selection_c *result);
-void UnusedSideDefs(selection_c *lines, selection_c *secs, selection_c *result);
+void UnusedVertices(const Document &doc, selection_c *lines, selection_c *result);
+void UnusedSideDefs(const Document &doc, selection_c *lines, selection_c *secs, selection_c *result);
 
-void DeleteObjects_WithUnused(selection_c *list,
-			bool keep_things = false,
-			bool keep_verts  = false,
-			bool keep_lines  = false);
+void DeleteObjects_WithUnused(const Document &doc, selection_c *list,
+			bool keep_things,
+			bool keep_verts ,
+			bool keep_lines );
 
 void CMD_Delete(Instance &inst);
 void CMD_CopyAndPaste(Instance &inst);
