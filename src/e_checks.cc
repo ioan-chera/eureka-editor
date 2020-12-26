@@ -2105,7 +2105,7 @@ static void LineDefs_ShowZeroLen(Instance &inst)
 
 	LineDefs_FindZeroLen(sel, inst.level);
 
-	ConvertSelection(&sel, edit.Selected);
+	ConvertSelection(inst.level, &sel, edit.Selected);
 
 	GoToErrors(inst);
 }

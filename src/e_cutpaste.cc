@@ -379,8 +379,8 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 	selection_c side_sel(ObjType::sidedefs);
 	selection_c line_sel(ObjType::linedefs);
 
-	ConvertSelection(list, &line_sel);
-	ConvertSelection(&line_sel, &vert_sel);
+	ConvertSelection(doc, list, &line_sel);
+	ConvertSelection(doc, &line_sel, &vert_sel);
 
 	// determine needed sidedefs
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
@@ -467,7 +467,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 	{
 		selection_c thing_sel(ObjType::things);
 
-		ConvertSelection(list, &thing_sel);
+		ConvertSelection(doc, list, &thing_sel);
 
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
@@ -704,7 +704,7 @@ static void ReselectGroup(Instance &inst)
 
 	Selection_Clear(inst);
 
-	ConvertSelection(&new_sel, edit.Selected);
+	ConvertSelection(inst.level, &new_sel, edit.Selected);
 }
 
 
@@ -882,7 +882,7 @@ void UnusedVertices(const Document &doc, selection_c *lines, selection_c *result
 {
 	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
 
-	ConvertSelection(lines, result);
+	ConvertSelection(doc, lines, result);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
@@ -902,7 +902,7 @@ void UnusedSideDefs(const Document &doc, selection_c *lines, selection_c *secs, 
 {
 	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
 
-	ConvertSelection(lines, result);
+	ConvertSelection(doc, lines, result);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
@@ -1191,7 +1191,7 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 	{
 		selection_c thing_sel(ObjType::things);
 
-		ConvertSelection(&sec_sel, &thing_sel);
+		ConvertSelection(doc, &sec_sel, &thing_sel);
 		doc.objects.del(&thing_sel);
 	}
 
@@ -1200,7 +1200,7 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 	{
 		selection_c fixups(ObjType::linedefs);
 
-		ConvertSelection(&sec_sel, &fixups);
+		ConvertSelection(doc, &sec_sel, &fixups);
 
 		// skip lines which will get deleted
 		fixups.unmerge(line_sel);

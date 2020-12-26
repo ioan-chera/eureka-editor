@@ -197,7 +197,7 @@ void CalculateLevelBounds(Instance &inst);
 void MapStuff_NotifyBegin();
 void MapStuff_NotifyInsert(ObjType type, int objnum);
 void MapStuff_NotifyDelete(ObjType type, int objnum);
-void MapStuff_NotifyChange(ObjType type, int objnum, int field);
+void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field);
 void MapStuff_NotifyEnd(Instance &inst);
 
 
@@ -217,9 +217,7 @@ void Selection_NotifyEnd();
 
 void DumpSelection (selection_c * list);
 
-void ConvertSelection(const selection_c * src, selection_c * dest);
-
-int Selection_FirstLine(selection_c *list);
+void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest);
 
 void Selection_Add(Objid& obj);
 void Selection_Remove(Objid& obj);

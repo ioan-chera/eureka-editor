@@ -122,8 +122,9 @@ void RedrawMap(Instance &inst)
 	instance::main_win->canvas->redraw();
 }
 
+static int Selection_FirstLine(const Document &doc, selection_c *list);
 
-static void UpdatePanel()
+static void UpdatePanel(const Instance &inst)
 {
 	// -AJA- I think the highlighted object is always the same type as
 	//       the current editing mode.  But do this check for safety.
@@ -155,7 +156,7 @@ static void UpdatePanel()
 	{
 		// in linedef mode, we prefer showing a two-sided linedef
 		if (edit.mode == ObjType::linedefs && obj_count > 1)
-			obj_idx = Selection_FirstLine(edit.Selected);
+			obj_idx = Selection_FirstLine(inst.level, edit.Selected);
 		else
 			obj_idx = edit.Selected->find_first();
 	}
@@ -267,7 +268,7 @@ void UpdateHighlight(Instance &inst)
 	if (edit.render3d)
 	{
 		Render3D_UpdateHighlight();
-		UpdatePanel();
+		UpdatePanel(inst);
 		return;
 	}
 
@@ -314,7 +315,7 @@ void UpdateHighlight(Instance &inst)
 	instance::main_win->canvas->UpdateHighlight();
 	instance::main_win->canvas->CheckGridSnap();
 
-	UpdatePanel();
+	UpdatePanel(inst);
 }
 
 
@@ -370,7 +371,7 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 		selection_c *prev_sel = edit.Selected;
 		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
-		ConvertSelection(prev_sel, edit.Selected);
+		ConvertSelection(inst.level, prev_sel, edit.Selected);
 		delete prev_sel;
 	}
 	else if (instance::main_win->isSpecialPanelShown())
@@ -454,7 +455,7 @@ void MapStuff_NotifyDelete(ObjType type, int objnum)
 	}
 }
 
-void MapStuff_NotifyChange(ObjType type, int objnum, int field)
+void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
 {
 	if (type == ObjType::vertices)
 	{
@@ -462,7 +463,7 @@ void MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = gDocument.vertices[objnum];
+		const Vertex * V = inst.level.vertices[objnum];
 
 		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
 		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
@@ -656,7 +657,7 @@ void DumpSelection(selection_c * list)
 }
 
 
-void ConvertSelection(const selection_c * src, selection_c * dest)
+void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest)
 {
 	if (src->what_type() == dest->what_type())
 	{
@@ -667,11 +668,11 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::things)
 	{
-		for (int t = 0 ; t < gDocument.numThings() ; t++)
+		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
-			const Thing *T = gDocument.things[t];
+			const Thing *T = doc.things[t];
 
-			Objid obj = gDocument.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 			if (! obj.is_nil() && src->get(obj.num))
 			{
@@ -684,12 +685,12 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::linedefs)
 	{
-		for (int l = 0 ; l < gDocument.numLinedefs(); l++)
+		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = gDocument.linedefs[l];
+			const LineDef *L = doc.linedefs[l];
 
-			if ( (L->Right(gDocument) && src->get(L->Right(gDocument)->sector)) ||
-				 (L->Left(gDocument)  && src->get(L->Left(gDocument)->sector)) )
+			if ( (L->Right(doc) && src->get(L->Right(doc)->sector)) ||
+				 (L->Left(doc)  && src->get(L->Left(doc)->sector)) )
 			{
 				dest->set(l);
 			}
@@ -700,10 +701,10 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::vertices)
 	{
-		for (const LineDef *L : gDocument.linedefs)
+		for (const LineDef *L : doc.linedefs)
 		{
-			if ( (L->Right(gDocument) && src->get(L->Right(gDocument)->sector)) ||
-				 (L->Left(gDocument)  && src->get(L->Left(gDocument)->sector)) )
+			if ( (L->Right(doc) && src->get(L->Right(doc)->sector)) ||
+				 (L->Left(doc)  && src->get(L->Left(doc)->sector)) )
 			{
 				dest->set(L->start);
 				dest->set(L->end);
@@ -717,19 +718,19 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = doc.linedefs[*it];
 
-			if (L->Right(gDocument)) dest->set(L->right);
-			if (L->Left(gDocument))  dest->set(L->left);
+			if (L->Right(doc)) dest->set(L->right);
+			if (L->Left(doc))  dest->set(L->left);
 		}
 		return;
 	}
 
 	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::sidedefs)
 	{
-		for (int n = 0 ; n < gDocument.numSidedefs(); n++)
+		for (int n = 0 ; n < doc.numSidedefs(); n++)
 		{
-			const SideDef * SD = gDocument.sidedefs[n];
+			const SideDef * SD = doc.sidedefs[n];
 
 			if (src->get(SD->sector))
 				dest->set(n);
@@ -742,7 +743,7 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = gDocument.linedefs[*it];
+			const LineDef *L = doc.linedefs[*it];
 
 			dest->set(L->start);
 			dest->set(L->end);
@@ -754,9 +755,9 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 	if (src->what_type() == ObjType::vertices && dest->what_type() == ObjType::linedefs)
 	{
 		// select all linedefs that have both ends selected
-		for (int l = 0 ; l < gDocument.numLinedefs(); l++)
+		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = gDocument.linedefs[l];
+			const LineDef *L = doc.linedefs[l];
 
 			if (src->get(L->start) && src->get(L->end))
 			{
@@ -778,19 +779,19 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 	// step 1: select all sectors (except empty ones)
 	int l;
 
-	for (l = 0 ; l < gDocument.numLinedefs() ; l++)
+	for (l = 0 ; l < doc.numLinedefs() ; l++)
 	{
-		const LineDef *L = gDocument.linedefs[l];
+		const LineDef *L = doc.linedefs[l];
 
-		if (L->Right(gDocument)) dest->set(L->Right(gDocument)->sector);
-		if (L->Left(gDocument))  dest->set(L->Left(gDocument)->sector);
+		if (L->Right(doc)) dest->set(L->Right(doc)->sector);
+		if (L->Left(doc))  dest->set(L->Left(doc)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
 
-	for (l = 0 ; l < gDocument.numLinedefs(); l++)
+	for (l = 0 ; l < doc.numLinedefs(); l++)
 	{
-		const LineDef *L = gDocument.linedefs[l];
+		const LineDef *L = doc.linedefs[l];
 
 		if (src->what_type() == ObjType::vertices)
 		{
@@ -803,8 +804,8 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 				continue;
 		}
 
-		if (L->Right(gDocument)) dest->clear(L->Right(gDocument)->sector);
-		if (L->Left(gDocument))  dest->clear(L->Left(gDocument)->sector);
+		if (L->Right(doc)) dest->clear(L->Right(doc)->sector);
+		if (L->Left(doc))  dest->clear(L->Left(doc)->sector);
 	}
 }
 
@@ -816,11 +817,11 @@ void ConvertSelection(const selection_c * src, selection_c * dest)
 //
 // NOTE: this is slow, as it may need to search the whole list.
 //
-int Selection_FirstLine(selection_c *list)
+static int Selection_FirstLine(const Document &doc, selection_c *list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const LineDef *L = gDocument.linedefs[*it];
+		const LineDef *L = doc.linedefs[*it];
 
 		if (L->TwoSided())
 			return *it;
@@ -1073,9 +1074,9 @@ void Selection_Toggle(Objid& obj)
 }
 
 
-void Selection_Validate()
+static void Selection_Validate(const Instance &inst)
 {
-	int num_obj = gDocument.numObjects(edit.mode);
+	int num_obj = inst.level.numObjects(edit.mode);
 
 	if (edit.Selected->max_obj() >= num_obj)
 	{
@@ -1106,7 +1107,7 @@ void CMD_LastSelection(Instance &inst)
 	std::swap(last_Sel, edit.Selected);
 
 	// ensure everything is kosher
-	Selection_Validate();
+	Selection_Validate(inst);
 
 	if (changed_mode)
 		GoToSelection(inst);

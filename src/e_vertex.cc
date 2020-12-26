@@ -267,7 +267,7 @@ void VertexModule::mergeList(selection_c *verts) const
 	selection_c del_lines(ObjType::linedefs);
 
 	// this prevents unnecessary sandwich mergers
-	ConvertSelection(verts, &del_lines);
+	ConvertSelection(doc, verts, &del_lines);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -879,7 +879,7 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 	selection_c all_verts(ObjType::vertices);
 
-	ConvertSelection(edit.Selected, &all_verts);
+	ConvertSelection(inst.level, edit.Selected, &all_verts);
 
 	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 	{

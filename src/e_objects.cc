@@ -589,7 +589,7 @@ begin_drawing:
 		sel.set(doc.numSectors() - 1);
 
 		edit.Selected->change_type(edit.mode);
-		ConvertSelection(&sel, edit.Selected);
+		ConvertSelection(doc, &sel, edit.Selected);
 	}
 
 	RedrawMap(inst);
@@ -783,7 +783,7 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 		case ObjType::linedefs:
 			{
 				selection_c verts(ObjType::vertices);
-				ConvertSelection(list, &verts);
+				ConvertSelection(doc, list, &verts);
 
 				doMoveObjects(&verts, delta_x, delta_y, delta_z);
 			}
@@ -809,7 +809,7 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 	if (edit.mode == ObjType::sectors)
 	{
 		selection_c thing_sel(ObjType::things);
-		ConvertSelection(list, &thing_sel);
+		ConvertSelection(doc, list, &thing_sel);
 
 		doMoveObjects(&thing_sel, delta_x, delta_y, 0);
 	}
@@ -1406,7 +1406,7 @@ void ObjectsModule::calcMiddle(selection_c * list, double *x, double *y) const
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(list, &verts);
+			ConvertSelection(doc, list, &verts);
 
 			calcMiddle(&verts, x, y);
 			return;
@@ -1477,7 +1477,7 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(list, &verts);
+			ConvertSelection(doc, list, &verts);
 
 			calcBBox(&verts, x1, y1, x2, y2);
 			return;
@@ -1524,7 +1524,7 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 	fixcoord_t fix_my = MakeValidCoord(mid_y);
 
 	selection_c verts(ObjType::vertices);
-	ConvertSelection(list, &verts);
+	ConvertSelection(doc, list, &verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -1538,7 +1538,7 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 
 	// flip linedefs too !!
 	selection_c lines(ObjType::linedefs);
-	ConvertSelection(&verts, &lines);
+	ConvertSelection(doc, &verts, &lines);
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
@@ -1567,7 +1567,7 @@ void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x,
 	{
 		// handle things in Sectors mode too
 		selection_c things(ObjType::things);
-		ConvertSelection(list, &things);
+		ConvertSelection(doc, list, &things);
 
 		doMirrorThings(&things, is_vert, mid_x, mid_y);
 	}
@@ -1669,14 +1669,14 @@ void ObjectsModule::commandRotate90(Instance &inst)
 		if (edit.mode == ObjType::sectors)
 		{
 			selection_c things(ObjType::things);
-			ConvertSelection(edit.Selected, &things);
+			ConvertSelection(inst.level, edit.Selected, &things);
 
 			inst.level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 		}
 
 		// everything else just rotates the vertices
 		selection_c verts(ObjType::vertices);
-		ConvertSelection(edit.Selected, &verts);
+		ConvertSelection(inst.level, edit.Selected, &verts);
 
 		fixcoord_t fix_mx = MakeValidCoord(mid_x);
 		fixcoord_t fix_my = MakeValidCoord(mid_y);
@@ -1737,7 +1737,7 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) const 
 {
 	selection_c verts(ObjType::vertices);
-	ConvertSelection(list, &verts);
+	ConvertSelection(doc, list, &verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -1768,7 +1768,7 @@ void ObjectsModule::doScaleTwoStuff(selection_c *list, transform_t& param) const
 	{
 		// handle things in Sectors mode too
 		selection_c things(ObjType::things);
-		ConvertSelection(list, &things);
+		ConvertSelection(doc, list, &things);
 
 		doScaleTwoThings(&things, param);
 	}
@@ -2204,7 +2204,7 @@ void ObjectsModule::commandQuantize(Instance &inst)
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(edit.Selected, &verts);
+			ConvertSelection(inst.level, edit.Selected, &verts);
 
 			inst.level.objects.quantizeVertices(&verts);
 

@@ -694,7 +694,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 	// TODO: their modules
 	Clipboard_NotifyChange(objtype, objnum, field);
 	Selection_NotifyChange(objtype, objnum, field);
-	MapStuff_NotifyChange(objtype, objnum, field);
+	MapStuff_NotifyChange(basis.inst, objtype, objnum, field);
 	Render3D_NotifyChange(objtype, objnum, field);
 	ObjectBox_NotifyChange(objtype, objnum, field);
 }

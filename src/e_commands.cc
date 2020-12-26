@@ -142,7 +142,7 @@ static void CMD_InvertSelection(Instance &inst)
 		selection_c *prev_sel = edit.Selected;
 		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
-		ConvertSelection(prev_sel, edit.Selected);
+		ConvertSelection(inst.level, prev_sel, edit.Selected);
 		delete prev_sel;
 	}
 
@@ -599,7 +599,7 @@ static void DoBeginDrag(Instance &inst)
 	if (edit.mode == ObjType::vertices)
 	{
 		edit.drag_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(edit.Selected, edit.drag_lines);
+		ConvertSelection(inst.level, edit.Selected, edit.drag_lines);
 
 		// find opposite end-point when dragging a single vertex
 		if (edit.dragged.valid())
@@ -1007,7 +1007,7 @@ static void CMD_ACT_Transform(Instance &inst)
 	if (edit.mode == ObjType::vertices)
 	{
 		edit.trans_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(edit.Selected, edit.trans_lines);
+		ConvertSelection(inst.level, edit.Selected, edit.trans_lines);
 	}
 
 	Editor_SetAction(ACT_TRANSFORM);

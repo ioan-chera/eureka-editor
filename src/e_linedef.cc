@@ -1355,7 +1355,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 	// use a copy of the selection
 	selection_c list(ObjType::linedefs);
-	ConvertSelection(edit.Selected, &list);
+	ConvertSelection(doc, edit.Selected, &list);
 
 	if (list.empty())
 		return;
