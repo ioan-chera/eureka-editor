@@ -492,7 +492,7 @@ void EV_EscapeKey()
 }
 
 
-void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+static void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	// this is probably redundant, as we generally shouldn't get here
 	// unless the mouse is in the 2D/3D view (or began a drag there).
@@ -729,7 +729,7 @@ int EV_RawButton(int event)
 }
 
 
-int EV_RawMouse(int event)
+static int EV_RawMouse(int event)
 {
 	if (!global::app_has_focus)
 		return 1;
