@@ -24,25 +24,13 @@
 //
 //------------------------------------------------------------------------
 
+#include "e_basis.h"
+
 #include "Errors.h"
 #include "Instance.h"
 #include "main.h"
 
-#include <algorithm>
-#include <list>
-#include <string>
-
-#include "lib_adler.h"
-
-#include "e_basis.h"
-#include "e_main.h"
-#include "m_strings.h"
-
-#include "m_game.h"  // g_default_xxx
-
 // need these for the XXX_Notify() prototypes
-#include "e_cutpaste.h"
-#include "e_objects.h"
 #include "r_render.h"
 
 int default_floor_h		=   0;
