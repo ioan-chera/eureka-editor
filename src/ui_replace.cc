@@ -996,7 +996,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
 	int tex_num = (what->value() == 1) ?
-		Texboard_GetTexNum(inst) : Texboard_GetFlatNum();
+		Texboard_GetTexNum(inst) : Texboard_GetFlatNum(inst);
 
 	SString tex_name = BA_GetString(tex_num);
 

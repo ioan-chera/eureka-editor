@@ -1208,7 +1208,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 			model = loop.NeighboringSector();
 
 		if (model < 0)
-			doc.sectors[new_sec]->SetDefaults();
+			doc.sectors[new_sec]->SetDefaults(inst);
 		else
 			*doc.sectors[new_sec] = *doc.sectors[model];
 	}

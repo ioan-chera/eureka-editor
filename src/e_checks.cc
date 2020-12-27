@@ -3973,26 +3973,26 @@ static void Textures_FixUnknownTex(Instance &inst)
 }
 
 
-static void Textures_FixUnknownFlat(Document &doc)
+static void Textures_FixUnknownFlat(Instance &inst)
 {
-	int new_floor = BA_InternaliseString(default_floor_tex);
+	int new_floor = BA_InternaliseString(inst.default_floor_tex);
 	int new_ceil  = BA_InternaliseString(default_ceil_tex);
 
-	doc.basis.begin();
-	doc.basis.setMessage("fixed unknown flats");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed unknown flats");
 
-	for (int s = 0 ; s < doc.numSectors(); s++)
+	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		const Sector *S = doc.sectors[s];
+		const Sector *S = inst.level.sectors[s];
 
 		if (! W_FlatIsKnown(S->FloorTex()))
-			doc.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
+			inst.level.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
 		if (! W_FlatIsKnown(S->CeilTex()))
-			doc.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
+			inst.level.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -4189,7 +4189,7 @@ public:
 	static void action_fix_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixUnknownFlat(dialog->inst.level);
+		Textures_FixUnknownFlat(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 

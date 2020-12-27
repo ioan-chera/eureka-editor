@@ -1272,7 +1272,7 @@ static void StoreDefaultedFlats(Instance &inst)
 		return;
 	}
 
-	int floor_tex = BA_InternaliseString(default_floor_tex);
+	int floor_tex = BA_InternaliseString(inst.default_floor_tex);
 	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
 	inst.level.basis.begin();
@@ -1472,7 +1472,7 @@ void Render3D_CB_Paste(Instance &inst)
 		break;
 
 	case ObjType::sectors:
-		StoreSelectedFlat(inst, Texboard_GetFlatNum());
+		StoreSelectedFlat(inst, Texboard_GetFlatNum(inst));
 		break;
 
 	case ObjType::linedefs:

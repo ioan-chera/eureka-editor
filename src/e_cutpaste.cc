@@ -328,10 +328,10 @@ int Texboard_GetTexNum(const Instance &inst)
 	return BA_InternaliseString(tex_clipboard::tex);
 }
 
-int Texboard_GetFlatNum()
+int Texboard_GetFlatNum(const Instance &inst)
 {
 	if (tex_clipboard::flat.empty())
-		tex_clipboard::flat = default_floor_tex;
+		tex_clipboard::flat = inst.default_floor_tex;
 
 	return BA_InternaliseString(tex_clipboard::flat);
 }

@@ -218,7 +218,7 @@ public:
 		return ceilh - floorh;
 	}
 
-	void SetDefaults();
+	void SetDefaults(const Instance &inst);
 };
 
 

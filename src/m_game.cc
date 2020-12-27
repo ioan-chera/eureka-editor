@@ -609,7 +609,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 3);
 
 		inst.default_wall_tex	= argv[1];
-		default_floor_tex	= argv[2];
+		inst.default_floor_tex	= argv[2];
 		default_ceil_tex	= argv[3];
 	}
 	else if (y_stricmp(argv[0], "default_thing") == 0)

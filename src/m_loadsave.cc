@@ -96,7 +96,7 @@ static void FreshLevel(Instance &inst)
 	Sector *sec = new Sector;
 	inst.level.sectors.push_back(sec);
 
-	sec->SetDefaults();
+	sec->SetDefaults(inst);
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
@@ -509,22 +509,22 @@ static void LoadSectors(Document &doc)
 }
 
 
-static void CreateFallbackSector(Document &doc)
+static void CreateFallbackSector(Instance &inst)
 {
 	LogPrintf("Creating a fallback sector.\n");
 
 	Sector *sec = new Sector;
 
-	sec->SetDefaults();
+	sec->SetDefaults(inst);
 
-	doc.sectors.push_back(sec);
+	inst.level.sectors.push_back(sec);
 }
 
 static void CreateFallbackSideDef(Instance &inst)
 {
 	// we need a valid sector too!
 	if (inst.level.numSectors() == 0)
-		CreateFallbackSector(inst.level);
+		CreateFallbackSector(inst);
 
 	LogPrintf("Creating a fallback sidedef.\n");
 
@@ -604,7 +604,7 @@ void ValidateSectorRef(Instance &inst, SideDef *sd, int num)
 
 		// ensure we have a valid sector
 		if (inst.level.numSectors() == 0)
-			CreateFallbackSector(inst.level);
+			CreateFallbackSector(inst);
 
 		sd->sector = 0;
 	}

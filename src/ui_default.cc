@@ -261,7 +261,7 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 	}
 
 	if (w == box->f_tex)
-		default_floor_tex = Normalize_and_Dup(box->f_tex);
+		box->inst.default_floor_tex = Normalize_and_Dup(box->f_tex);
 
 	if (w == box->c_tex)
 		default_ceil_tex = Normalize_and_Dup(box->c_tex);
@@ -362,7 +362,7 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 void UI_DefaultProps::LoadValues()
 {
 	w_tex->value(inst.default_wall_tex.c_str());
-	f_tex->value(default_floor_tex.c_str());
+	f_tex->value(inst.default_floor_tex.c_str());
 	c_tex->value(default_ceil_tex.c_str());
 
 	w_pic->GetTex (w_tex->value());
@@ -405,13 +405,13 @@ void UI_DefaultProps::CB_Paste(int sel_pics)
 {
 	if (sel_pics & 1)
 	{
-		f_tex->value(BA_GetString(Texboard_GetFlatNum()).c_str());
+		f_tex->value(BA_GetString(Texboard_GetFlatNum(inst)).c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(BA_GetString(Texboard_GetFlatNum()).c_str());
+		c_tex->value(BA_GetString(Texboard_GetFlatNum(inst)).c_str());
 		c_tex->do_callback();
 	}
 
@@ -560,7 +560,7 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 		inst.default_thing = atoi(tokens[2]);
 
 	if (tokens[1] == "floor_tex")
-		default_floor_tex = tokens[2];
+		inst.default_floor_tex = tokens[2];
 
 	if (tokens[1] == "ceil_tex")
 		default_ceil_tex = tokens[2];
@@ -581,7 +581,7 @@ void Props_WriteUser(const Instance &inst, std::ostream &os)
 	os << "default thing " << inst.default_thing << '\n';
 	
 	os << "default mid_tex \"" << inst.default_wall_tex.getTidy("\"") << "\"\n";
-	os << "default floor_tex \"" << default_floor_tex.getTidy("\"") << "\"\n";
+	os << "default floor_tex \"" << inst.default_floor_tex.getTidy("\"") << "\"\n";
 	os << "default ceil_tex \"" << default_ceil_tex.getTidy("\"") << "\"\n";
 }
 

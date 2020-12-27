@@ -37,7 +37,6 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-SString default_floor_tex	= "FLAT1";
 SString default_ceil_tex	= "FLAT1";
 
 StringTable basis_strtab;
@@ -89,12 +88,12 @@ SString Sector::CeilTex() const
 	return basis_strtab.get(ceil_tex);
 }
 
-void Sector::SetDefaults()
+void Sector::SetDefaults(const Instance &inst)
 {
 	floorh = global::default_floor_h;
 	 ceilh = global::default_ceil_h;
 
-	floor_tex = BA_InternaliseString(default_floor_tex);
+	floor_tex = BA_InternaliseString(inst.default_floor_tex);
 	 ceil_tex = BA_InternaliseString(default_ceil_tex);
 
 	light = global::default_light_level;
