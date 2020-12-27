@@ -58,7 +58,7 @@ static void CMD_MetaKey(Instance &inst)
 		return;
 	}
 
-	Status_Set(inst, "META...");
+	inst.Status_Set("META...");
 
 	edit.sticky_mod = EMOD_META;
 }
@@ -194,7 +194,7 @@ static void SetGamma(Instance &inst, int new_val)
 	if (inst.main_win && inst.main_win->canvas)
 		inst.main_win->canvas->DeleteContext();
 
-	Status_Set(inst, "gamma level %d", config::usegamma);
+	inst.Status_Set("gamma level %d", config::usegamma);
 
 	RedrawMap(inst);
 }
@@ -1374,7 +1374,7 @@ static void CMD_OnlineDocs(Instance &inst)
 {
 	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
 	if (rv == 1)
-		Status_Set(inst, "Opened web browser");
+		inst.Status_Set("Opened web browser");
 	else
 		Beep(inst, "Failed to open web browser");
 }

@@ -723,22 +723,18 @@ void UI_StatusBar::SetStatus(const char *str)
 }
 
 
-void Status_Set(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
+void Instance::Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const
 {
-	if (!inst.main_win)
+	if (!main_win)
 		return;
 
 	va_list arg_ptr;
 
-	static char buffer[MSG_BUF_LEN];
-
 	va_start(arg_ptr, fmt);
-	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+	SString text = SString::vprintf(fmt, arg_ptr);;
 	va_end(arg_ptr);
 
-	buffer[MSG_BUF_LEN-1] = 0;
-
-	inst.main_win->status_bar->SetStatus(buffer);
+	main_win->status_bar->SetStatus(text.c_str());
 }
 
 

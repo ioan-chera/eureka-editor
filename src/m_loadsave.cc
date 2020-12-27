@@ -994,7 +994,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 
 	instance::Level_name = level.asUpper();
 
-	Status_Set(inst, "Loaded %s", instance::Level_name.c_str());
+	inst.Status_Set("Loaded %s", instance::Level_name.c_str());
 
 	RedrawMap(inst);
 }
@@ -1680,7 +1680,7 @@ static void SaveLevel(Instance &inst, const SString &level)
 
 	M_AddRecent(instance::edit_wad->PathName(), instance::Level_name);
 
-	Status_Set(inst, "Saved %s", instance::Level_name.c_str());
+	inst.Status_Set("Saved %s", instance::Level_name.c_str());
 
 	if (inst.main_win)
 	{
@@ -1921,7 +1921,7 @@ void CMD_CopyMap(Instance &inst)
 
 	SaveLevel(inst, new_name);
 
-	Status_Set(inst, "Copied to %s", instance::Level_name.c_str());
+	inst.Status_Set("Copied to %s", instance::Level_name.c_str());
 }
 
 
@@ -1993,7 +1993,7 @@ void CMD_RenameMap(Instance &inst)
 
 	inst.main_win->SetTitle(instance::edit_wad->PathName(), instance::Level_name, false);
 
-	Status_Set(inst, "Renamed to %s", instance::Level_name.c_str());
+	inst.Status_Set("Renamed to %s", instance::Level_name.c_str());
 }
 
 

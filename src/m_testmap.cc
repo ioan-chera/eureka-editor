@@ -395,7 +395,7 @@ void CMD_TestMap(Instance &inst)
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer.c_str());
 
-	Status_Set(inst, "TESTING MAP");
+	inst.Status_Set("TESTING MAP");
 
 	inst.main_win->redraw();
 	Fl::wait(0.1);
@@ -407,9 +407,9 @@ void CMD_TestMap(Instance &inst)
 	int status = system(cmd_buffer.c_str());
 
 	if (status == 0)
-		Status_Set(inst, "Result: OK");
+		inst.Status_Set("Result: OK");
 	else
-		Status_Set(inst, "Result code: %d\n", status);
+		inst.Status_Set("Result code: %d\n", status);
 
 	LogPrintf("--> result code: %d\n", status);
 

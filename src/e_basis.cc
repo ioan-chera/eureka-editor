@@ -24,8 +24,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 
 #include <algorithm>
@@ -266,7 +266,7 @@ void Basis::end()
 	else
 	{
 		mUndoHistory.push(std::move(mCurrentGroup));
-		Status_Set(inst, "%s", mCurrentGroup.getMessage().c_str());
+		inst.Status_Set("%s", mCurrentGroup.getMessage().c_str());
 	}
 	doProcessChangeStatus();
 }
@@ -540,7 +540,7 @@ bool Basis::undo()
 	UndoGroup grp = std::move(mUndoHistory.top());
 	mUndoHistory.pop();
 
-	Status_Set(inst, "UNDO: %s", grp.getMessage().c_str());
+	inst.Status_Set("UNDO: %s", grp.getMessage().c_str());
 
 	grp.reapply(*this);
 
@@ -564,7 +564,7 @@ bool Basis::redo()
 	UndoGroup grp = std::move(mRedoFuture.top());
 	mRedoFuture.pop();
 
-	Status_Set(inst, "Redo: %s", grp.getMessage().c_str());
+	inst.Status_Set("Redo: %s", grp.getMessage().c_str());
 
 	grp.reapply(*this);
 

@@ -828,7 +828,7 @@ void UI_SectorBox::CB_Copy(int parts)
 
 	Texboard_SetFlat(name);
 
-	Status_Set(inst, "copied %s", name);
+	inst.Status_Set("copied %s", name);
 }
 
 

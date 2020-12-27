@@ -488,17 +488,17 @@ void CMD_BuildAllNodes(Instance &inst)
 	if (ret == BUILD_OK)
 	{
 		dialog->Finish_OK();
-		Status_Set(inst, "Built nodes OK");
+		inst.Status_Set("Built nodes OK");
 	}
 	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
-		Status_Set(inst, "Cancelled building nodes");
+		inst.Status_Set("Cancelled building nodes");
 	}
 	else
 	{
 		dialog->Finish_Error();
-		Status_Set(inst, "Error building nodes");
+		inst.Status_Set("Error building nodes");
 	}
 
 	while (! dialog->WantClose())

@@ -479,7 +479,7 @@ void UI_LineBox::CB_Copy(int parts)
 
 	Texboard_SetTex(name);
 
-	Status_Set(inst, "copied %s", name);
+	inst.Status_Set("copied %s", name);
 }
 
 

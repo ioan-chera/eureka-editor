@@ -525,9 +525,9 @@ static bool Clipboard_DoCopy(Instance &inst)
 
 	int total = edit.Selected->count_obj();
 	if (total == 1)
-		Status_Set(inst, "copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
+		inst.Status_Set("copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
 	else
-		Status_Set(inst, "copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
+		inst.Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);

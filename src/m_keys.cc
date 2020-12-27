@@ -1261,7 +1261,7 @@ void Beep(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	Status_Set(inst, "%s", buffer);
+	inst.Status_Set("%s", buffer);
 	LogPrintf("BEEP: %s\n", buffer);
 
 	fl_beep();

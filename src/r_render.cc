@@ -1140,7 +1140,7 @@ static int GrabSelectedThing(Instance &inst)
 		}
 	}
 
-	Status_Set(inst, "copied type %d", result);
+	inst.Status_Set("copied type %d", result);
 
 	return result;
 }
@@ -1171,7 +1171,7 @@ static void StoreSelectedThing(Instance &inst, int new_type)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set(inst, "pasted type %d", new_type);
+	inst.Status_Set("pasted type %d", new_type);
 }
 
 
@@ -1225,7 +1225,7 @@ static int GrabSelectedFlat(Instance &inst)
 	}
 
 	if (result >= 0)
-		Status_Set(inst, "copied %s", BA_GetString(result).c_str());
+		inst.Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1259,7 +1259,7 @@ static void StoreSelectedFlat(Instance &inst, int new_tex)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set(inst, "pasted %s", BA_GetString(new_tex).c_str());
+	inst.Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
@@ -1294,7 +1294,7 @@ static void StoreDefaultedFlats(Instance &inst)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set(inst, "defaulted flats");
+	inst.Status_Set("defaulted flats");
 }
 
 
@@ -1371,7 +1371,7 @@ static int GrabSelectedTexture(Instance &inst)
 	}
 
 	if (result >= 0)
-		Status_Set(inst, "copied %s", BA_GetString(result).c_str());
+		inst.Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1429,7 +1429,7 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set(inst, "pasted %s", BA_GetString(new_tex).c_str());
+	inst.Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
