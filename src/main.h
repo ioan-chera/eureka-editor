@@ -176,8 +176,6 @@ namespace global
 	extern int	default_light_level;
 }
 
-extern SString default_ceil_tex;
-
 namespace global
 {
 	extern int   show_help;		// Print usage message and exit.

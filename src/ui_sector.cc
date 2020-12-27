@@ -351,7 +351,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	// right click sets to default value
 	// [ Note the 'is_pic' check prevents a bug when using RMB in browser ]
 	if (is_pic && Fl::event_button() == 3)
-		new_flat = is_floor ? box->inst.default_floor_tex : default_ceil_tex;
+		new_flat = is_floor ? box->inst.default_floor_tex : box->inst.default_ceil_tex;
 	else if (is_floor)
 		new_flat = NormalizeTex(box->f_tex->value());
 	else
@@ -855,7 +855,7 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 void UI_SectorBox::CB_Cut(int parts)
 {
 	int new_floor = BA_InternaliseString(inst.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+	int new_ceil  = BA_InternaliseString(inst.default_ceil_tex);
 
 	if (! inst.edit.Selected->empty())
 	{

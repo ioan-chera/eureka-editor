@@ -1273,7 +1273,7 @@ static void StoreDefaultedFlats(Instance &inst)
 	}
 
 	int floor_tex = BA_InternaliseString(inst.default_floor_tex);
-	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
+	int ceil_tex  = BA_InternaliseString(inst.default_ceil_tex);
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessageForSelection("defaulted flat in", *inst.edit.Selected);

@@ -264,7 +264,7 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		box->inst.default_floor_tex = Normalize_and_Dup(box->f_tex);
 
 	if (w == box->c_tex)
-		default_ceil_tex = Normalize_and_Dup(box->c_tex);
+		box->inst.default_ceil_tex = Normalize_and_Dup(box->c_tex);
 
 	box->f_pic->GetFlat(box->f_tex->value());
 	box->c_pic->GetFlat(box->c_tex->value());
@@ -363,7 +363,7 @@ void UI_DefaultProps::LoadValues()
 {
 	w_tex->value(inst.default_wall_tex.c_str());
 	f_tex->value(inst.default_floor_tex.c_str());
-	c_tex->value(default_ceil_tex.c_str());
+	c_tex->value(inst.default_ceil_tex.c_str());
 
 	w_pic->GetTex (w_tex->value());
 	f_pic->GetFlat(f_tex->value());
@@ -563,7 +563,7 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 		inst.default_floor_tex = tokens[2];
 
 	if (tokens[1] == "ceil_tex")
-		default_ceil_tex = tokens[2];
+		inst.default_ceil_tex = tokens[2];
 
 	if (tokens[1] == "mid_tex")
 		inst.default_wall_tex = tokens[2];
@@ -582,7 +582,7 @@ void Props_WriteUser(const Instance &inst, std::ostream &os)
 	
 	os << "default mid_tex \"" << inst.default_wall_tex.getTidy("\"") << "\"\n";
 	os << "default floor_tex \"" << inst.default_floor_tex.getTidy("\"") << "\"\n";
-	os << "default ceil_tex \"" << default_ceil_tex.getTidy("\"") << "\"\n";
+	os << "default ceil_tex \"" << inst.default_ceil_tex.getTidy("\"") << "\"\n";
 }
 
 

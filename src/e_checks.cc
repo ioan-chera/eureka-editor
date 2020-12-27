@@ -3976,7 +3976,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 static void Textures_FixUnknownFlat(Instance &inst)
 {
 	int new_floor = BA_InternaliseString(inst.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(default_ceil_tex);
+	int new_ceil  = BA_InternaliseString(inst.default_ceil_tex);
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed unknown flats");

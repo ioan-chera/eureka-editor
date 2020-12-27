@@ -59,6 +59,7 @@ public:	// will be private when we encapsulate everything
 	int default_thing = 2001;
 	SString default_wall_tex = "GRAY1";
 	SString default_floor_tex = "FLAT1";
+	SString default_ceil_tex = "FLAT1";
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
