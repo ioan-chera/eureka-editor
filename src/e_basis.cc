@@ -37,7 +37,10 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-StringTable basis_strtab;
+namespace global
+{
+	static StringTable basis_strtab;
+}
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -57,12 +60,12 @@ const char *NameForObjectType(ObjType type, bool plural)
 
 int BA_InternaliseString(const SString &str)
 {
-	return basis_strtab.add(str);
+	return global::basis_strtab.add(str);
 }
 
 SString BA_GetString(int offset)
 {
-	return basis_strtab.get(offset);
+	return global::basis_strtab.get(offset);
 }
 
 
@@ -78,12 +81,12 @@ fixcoord_t MakeValidCoord(double x)
 
 SString Sector::FloorTex() const
 {
-	return basis_strtab.get(floor_tex);
+	return global::basis_strtab.get(floor_tex);
 }
 
 SString Sector::CeilTex() const
 {
-	return basis_strtab.get(ceil_tex);
+	return global::basis_strtab.get(ceil_tex);
 }
 
 void Sector::SetDefaults(const Instance &inst)
@@ -100,17 +103,17 @@ void Sector::SetDefaults(const Instance &inst)
 
 SString SideDef::UpperTex() const
 {
-	return basis_strtab.get(upper_tex);
+	return global::basis_strtab.get(upper_tex);
 }
 
 SString SideDef::MidTex() const
 {
-	return basis_strtab.get(mid_tex);
+	return global::basis_strtab.get(mid_tex);
 }
 
 SString SideDef::LowerTex() const
 {
-	return basis_strtab.get(lower_tex);
+	return global::basis_strtab.get(lower_tex);
 }
 
 void SideDef::SetDefaults(const Instance &inst, bool two_sided, int new_tex)
