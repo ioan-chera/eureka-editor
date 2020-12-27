@@ -109,7 +109,7 @@ static void FreshLevel(Instance &inst)
 		SideDef *sd = new SideDef;
 		inst.level.sidedefs.push_back(sd);
 
-		sd->SetDefaults(false);
+		sd->SetDefaults(inst, false);
 
 		LineDef *ld = new LineDef;
 		inst.level.linedefs.push_back(ld);
@@ -520,19 +520,19 @@ static void CreateFallbackSector(Document &doc)
 	doc.sectors.push_back(sec);
 }
 
-static void CreateFallbackSideDef(Document &doc)
+static void CreateFallbackSideDef(Instance &inst)
 {
 	// we need a valid sector too!
-	if (doc.numSectors() == 0)
-		CreateFallbackSector(doc);
+	if (inst.level.numSectors() == 0)
+		CreateFallbackSector(inst.level);
 
 	LogPrintf("Creating a fallback sidedef.\n");
 
 	SideDef *sd = new SideDef;
 
-	sd->SetDefaults(false);
+	sd->SetDefaults(inst, false);
 
-	doc.sidedefs.push_back(sd);
+	inst.level.sidedefs.push_back(sd);
 }
 
 static void CreateFallbackVertices(Document &doc)
@@ -564,7 +564,7 @@ void ValidateSidedefRefs(Instance &inst, LineDef * ld, int num)
 
 		// ensure we have a usable sidedef
 		if (inst.level.numSidedefs() == 0)
-			CreateFallbackSideDef(inst.level);
+			CreateFallbackSideDef(inst);
 
 		if (ld->right >= inst.level.numSidedefs())
 			ld->right = 0;

@@ -183,7 +183,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		if (w == box->r_pic)
 			new_tex = BA_InternaliseString("-");
 		else
-			new_tex = BA_InternaliseString(default_wall_tex);
+			new_tex = BA_InternaliseString(box->inst.default_wall_tex);
 	}
 	else
 	{
@@ -304,7 +304,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		// create the new sidedef
 		sd = box->inst.level.basis.addNew(ObjType::sidedefs);
 
-		box->inst.level.sidedefs[sd]->SetDefaults(other >= 0);
+		box->inst.level.sidedefs[sd]->SetDefaults(box->inst, other >= 0);
 		box->inst.level.sidedefs[sd]->sector = new_sec;
 
 		box->inst.level.basis.changeLinedef(*it, field, sd);

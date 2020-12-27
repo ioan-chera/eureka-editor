@@ -3528,47 +3528,47 @@ static void Textures_ShowMissing(Instance &inst)
 }
 
 
-static void Textures_FixMissing(Document &doc)
+static void Textures_FixMissing(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(default_wall_tex);
+	int new_wall = BA_InternaliseString(inst.default_wall_tex);
 
-	doc.basis.begin();
-	doc.basis.setMessage("fixed missing textures");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed missing textures");
 
-	for (const LineDef *L : doc.linedefs)
+	for (const LineDef *L : inst.level.linedefs)
 	{
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right(doc)->MidTex()))
-				doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+			if (is_null_tex(L->Right(inst.level)->MidTex()))
+				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(doc)->SecRef(doc);
-			const Sector *back  = L->Left(doc) ->SecRef(doc);
+			const Sector *front = L->Right(inst.level)->SecRef(inst.level);
+			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(doc)->LowerTex()))
-				doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
+				inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(doc)->LowerTex()))
-				doc.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(doc)->UpperTex()))
-				doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
+				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(doc)->UpperTex()))
-				doc.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -3649,9 +3649,9 @@ static void Textures_ShowTransparent(Instance &inst)
 }
 
 
-static void Textures_FixTransparent(Document &doc)
+static void Textures_FixTransparent(Instance &inst)
 {
-	SString new_tex = default_wall_tex;
+	SString new_tex = inst.default_wall_tex;
 
 	// do something reasonable if default wall is transparent
 	if (is_transparent(new_tex))
@@ -3668,36 +3668,36 @@ static void Textures_FixTransparent(Document &doc)
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	doc.basis.begin();
-	doc.basis.setMessage("fixed transparent textures");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed transparent textures");
 
-	for (const LineDef *L : doc.linedefs)
+	for (const LineDef *L : inst.level.linedefs)
 	{
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_transparent(L->Right(doc)->MidTex()))
-				doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+			if (is_transparent(L->Right(inst.level)->MidTex()))
+				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			if (is_transparent(L->Left(doc)->LowerTex()))
-				doc.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+			if (is_transparent(L->Left(inst.level)->LowerTex()))
+				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Left(doc)->UpperTex()))
-				doc.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+			if (is_transparent(L->Left(inst.level)->UpperTex()))
+				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
-			if (is_transparent(L->Right(doc)->LowerTex()))
-				doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+			if (is_transparent(L->Right(inst.level)->LowerTex()))
+				inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Right(doc)->UpperTex()))
-				doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			if (is_transparent(L->Right(inst.level)->UpperTex()))
+				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -3936,16 +3936,16 @@ static void Textures_LogUnknown(bool do_flat, const Document &doc)
 }
 
 
-static void Textures_FixUnknownTex(Document &doc)
+static void Textures_FixUnknownTex(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(default_wall_tex);
+	int new_wall = BA_InternaliseString(inst.default_wall_tex);
 
 	int null_tex = BA_InternaliseString("-");
 
-	doc.basis.begin();
-	doc.basis.setMessage("fixed unknown textures");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed unknown textures");
 
-	for (const LineDef *L : doc.linedefs)
+	for (const LineDef *L : inst.level.linedefs)
 	{
 		bool two_sided = L->TwoSided();
 
@@ -3956,20 +3956,20 @@ static void Textures_FixUnknownTex(Document &doc)
 			if (sd_num < 0)
 				continue;
 
-			const SideDef *SD = doc.sidedefs[sd_num];
+			const SideDef *SD = inst.level.sidedefs[sd_num];
 
 			if (! W_TextureIsKnown(SD->LowerTex()))
-				doc.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
+				inst.level.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
 			if (! W_TextureIsKnown(SD->UpperTex()))
-				doc.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
+				inst.level.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
 			if (! W_TextureIsKnown(SD->MidTex()))
-				doc.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
+				inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -4048,11 +4048,11 @@ static void Textures_ShowDupSwitches(Instance &inst)
 }
 
 
-static void Textures_FixDupSwitches(Document &doc)
+static void Textures_FixDupSwitches(Instance &inst)
 {
 	int null_tex = BA_InternaliseString("-");
 
-	SString new_tex = default_wall_tex;
+	SString new_tex = inst.default_wall_tex;
 
 	// do something reasonable if default wall is a switch
 	if (is_switch_tex(new_tex))
@@ -4069,10 +4069,10 @@ static void Textures_FixDupSwitches(Document &doc)
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	doc.basis.begin();
-	doc.basis.setMessage("fixed non-animating switches");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed non-animating switches");
 
-	for (const LineDef *L : doc.linedefs)
+	for (const LineDef *L : inst.level.linedefs)
 	{
 		// only check lines with a special
 		if (! L->type)
@@ -4084,9 +4084,9 @@ static void Textures_FixDupSwitches(Document &doc)
 		// switch textures only work on the front side
 		// (hence no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right(doc)->LowerTex());
-		bool upper = is_switch_tex(L->Right(doc)->UpperTex());
-		bool mid   = is_switch_tex(L->Right(doc)->MidTex());
+		bool lower = is_switch_tex(L->Right(inst.level)->LowerTex());
+		bool upper = is_switch_tex(L->Right(inst.level)->UpperTex());
+		bool mid   = is_switch_tex(L->Right(inst.level)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -4096,47 +4096,47 @@ static void Textures_FixDupSwitches(Document &doc)
 		if (L->OneSided())
 		{
 			// we don't care if "mid" is not a switch
-			doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
-			doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			continue;
 		}
 
-		const Sector *front = L->Right(doc)->SecRef(doc);
-		const Sector *back  = L->Left(doc) ->SecRef(doc);
+		const Sector *front = L->Right(inst.level)->SecRef(inst.level);
+		const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
 
 		bool lower_vis = (front->floorh < back->floorh);
 		bool upper_vis = (front->ceilh > back->ceilh);
 
 		if (count >= 2 && upper && !upper_vis)
 		{
-			doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			upper = false;
 			count--;
 		}
 
 		if (count >= 2 && lower && !lower_vis)
 		{
-			doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
 			lower = false;
 			count--;
 		}
 
 		if (count >= 2 && mid)
 		{
-			doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 			mid = false;
 			count--;
 		}
 
 		if (count >= 2)
 		{
-			doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 			upper = false;
 			count--;
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -4167,7 +4167,7 @@ public:
 	static void action_fix_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixUnknownTex(dialog->inst.level);
+		Textures_FixUnknownTex(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4204,7 +4204,7 @@ public:
 	static void action_fix_missing(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixMissing(dialog->inst.level);
+		Textures_FixMissing(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4219,7 +4219,7 @@ public:
 	static void action_fix_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixTransparent(dialog->inst.level);
+		Textures_FixTransparent(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -4241,7 +4241,7 @@ public:
 	static void action_fix_dup_switch(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_FixDupSwitches(dialog->inst.level);
+		Textures_FixDupSwitches(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 

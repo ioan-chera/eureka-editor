@@ -1301,7 +1301,7 @@ static void StoreDefaultedFlats(Instance &inst)
 static int LD_GrabTex(const Instance &inst, const LineDef *L, int part)
 {
 	if (L->NoSided())
-		return BA_InternaliseString(default_wall_tex);
+		return BA_InternaliseString(inst.default_wall_tex);
 
 	if (L->OneSided())
 		return L->Right(inst.level)->mid_tex;
@@ -1476,7 +1476,7 @@ void Render3D_CB_Paste(Instance &inst)
 		break;
 
 	case ObjType::linedefs:
-		StoreSelectedTexture(inst, Texboard_GetTexNum());
+		StoreSelectedTexture(inst, Texboard_GetTexNum(inst));
 		break;
 
 	default:
@@ -1500,7 +1500,7 @@ void Render3D_CB_Cut(Instance &inst)
 		break;
 
 	case ObjType::linedefs:
-			StoreSelectedTexture(inst, BA_InternaliseString(default_wall_tex));
+			StoreSelectedTexture(inst, BA_InternaliseString(inst.default_wall_tex));
 		break;
 
 	default:

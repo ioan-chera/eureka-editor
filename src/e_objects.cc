@@ -103,7 +103,7 @@ void ObjectsModule::createSquare(int model) const
 
 		int new_sd = doc.basis.addNew(ObjType::sidedefs);
 
-		doc.sidedefs[new_sd]->SetDefaults(false);
+		doc.sidedefs[new_sd]->SetDefaults(inst, false);
 		doc.sidedefs[new_sd]->sector = new_sec;
 
 		int new_ld = doc.basis.addNew(ObjType::linedefs);

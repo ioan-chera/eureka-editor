@@ -1081,7 +1081,7 @@ void LinedefModule::mergedSecondSidedef(int ld) const
 	// use default texture if both sides are empty
 	if (! left_tex)
 	{
-		left_tex = BA_InternaliseString(default_wall_tex);
+		left_tex = BA_InternaliseString(inst.default_wall_tex);
 		right_tex = left_tex;
 	}
 
@@ -1131,7 +1131,7 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 
 	const SideDef *SD = doc.sidedefs[other_sd];
 
-	int new_tex = BA_InternaliseString(default_wall_tex);
+	int new_tex = BA_InternaliseString(inst.default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -1401,7 +1401,7 @@ void LinedefModule::fixForLostSide(int ld) const
 	else if (! is_null_tex(L->Right(doc)->UpperTex()))
 		tex = L->Right(doc)->upper_tex;
 	else
-		tex = BA_InternaliseString(default_wall_tex);
+		tex = BA_InternaliseString(inst.default_wall_tex);
 
 	doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
 }

@@ -70,7 +70,7 @@ void CMD_Clipboard_Paste(Instance &inst);
 
 void Texboard_Clear();
 
-int Texboard_GetTexNum();
+int Texboard_GetTexNum(const Instance &inst);
 int Texboard_GetFlatNum();
 int Texboard_GetThing(const Instance &inst);
 

@@ -37,7 +37,6 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-SString default_wall_tex	= "GRAY1";
 SString default_floor_tex	= "FLAT1";
 SString default_ceil_tex	= "FLAT1";
 
@@ -117,10 +116,10 @@ SString SideDef::LowerTex() const
 	return basis_strtab.get(lower_tex);
 }
 
-void SideDef::SetDefaults(bool two_sided, int new_tex)
+void SideDef::SetDefaults(const Instance &inst, bool two_sided, int new_tex)
 {
 	if (new_tex < 0)
-		new_tex = BA_InternaliseString(default_wall_tex);
+		new_tex = BA_InternaliseString(inst.default_wall_tex);
 
 	lower_tex = new_tex;
 	upper_tex = new_tex;

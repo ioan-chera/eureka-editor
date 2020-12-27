@@ -243,7 +243,7 @@ public:
 	Sector *SecRef(const Document &doc) const;
 
 	// use new_tex when >= 0, otherwise use default_wall_tex
-	void SetDefaults(bool two_sided, int new_tex = -1);
+	void SetDefaults(const Instance &inst, bool two_sided, int new_tex = -1);
 };
 
 

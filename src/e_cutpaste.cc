@@ -320,10 +320,10 @@ void Texboard_Clear()
 	tex_clipboard::thing = 0;
 }
 
-int Texboard_GetTexNum()
+int Texboard_GetTexNum(const Instance &inst)
 {
 	if (tex_clipboard::tex.empty())
-		tex_clipboard::tex = default_wall_tex;
+		tex_clipboard::tex = inst.default_wall_tex;
 
 	return BA_InternaliseString(tex_clipboard::tex);
 }
