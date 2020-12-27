@@ -21,7 +21,7 @@
 #ifndef __EUREKA_E_NODES_H__
 #define __EUREKA_E_NODES_H__
 
-struct Instance;
+class Instance;
 
 void BuildNodesAfterSave(Instance &inst, int lev_idx);
 

@@ -27,7 +27,7 @@
 #include "e_sector.h"
 #include "e_vertex.h"
 
-struct Instance;
+class Instance;
 
 //
 // The document associated with a file. All stuff will go here

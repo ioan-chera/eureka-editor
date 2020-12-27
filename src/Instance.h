@@ -25,8 +25,11 @@
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-struct Instance
+class Instance
 {
+public:
+
+public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
 
 	UI_MainWindow *main_win = nullptr;

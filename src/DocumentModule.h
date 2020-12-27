@@ -20,7 +20,7 @@
 #define DocumentModule_h
 
 struct Document;
-struct Instance;
+class Instance;
 
 //
 // This is an interface with direct references to Document's components, for less clutter

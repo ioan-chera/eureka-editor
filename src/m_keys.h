@@ -24,7 +24,7 @@
 #include "m_strings.h"
 #include "objid.h"
 
-struct Instance;
+class Instance;
 
 /* Key value:
  *   - can be a printable ASCII character, e.g. 'a', '2', ';'
