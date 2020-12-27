@@ -1402,12 +1402,12 @@ public:
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
 		// are we dragging this surface?
-		if (edit.action == ACT_DRAG &&
-			(!edit.dragged.valid() ||
-			 (edit.dragged.num == sec_index &&
-			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
+		if (inst.edit.action == ACT_DRAG &&
+			(!inst.edit.dragged.valid() ||
+			 (inst.edit.dragged.num == sec_index &&
+			  (inst.edit.dragged.parts == 0 || (inst.edit.dragged.parts & part)) )))
 		{
-			z = z + edit.drag_sector_dz;
+			z = z + inst.edit.drag_sector_dz;
 		}
 		else
 		{
@@ -1443,13 +1443,13 @@ public:
 
 		float drag_dz = 0;
 
-		if (edit.action == ACT_DRAG &&
-			(!edit.dragged.valid() || edit.dragged.num == th_index))
+		if (inst.edit.action == ACT_DRAG &&
+			(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 		{
-			tx += static_cast<float>(edit.drag_cur_x - edit.drag_start_x);
-			ty += static_cast<float>(edit.drag_cur_y - edit.drag_start_y);
+			tx += static_cast<float>(inst.edit.drag_cur_x - inst.edit.drag_start_x);
+			ty += static_cast<float>(inst.edit.drag_cur_y - inst.edit.drag_start_y);
 
-			drag_dz = static_cast<float>(edit.drag_cur_z - edit.drag_start_z);
+			drag_dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
 		}
 
 		const thingtype_t &info = M_GetThingType(th->type);
@@ -1554,18 +1554,18 @@ public:
 
 		bool saw_hl = false;
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			if (edit.highlight.valid() && *it == edit.highlight.num)
+			if (inst.edit.highlight.valid() && *it == inst.edit.highlight.num)
 			{
 				saw_hl = true;
 
 				// can skip drawing twice for things, but not other stuff
-				if (edit.mode == ObjType::things)
+				if (inst.edit.mode == ObjType::things)
 					continue;
 			}
 
-			byte parts = edit.Selected->get_ext(*it);
+			byte parts = inst.edit.Selected->get_ext(*it);
 
 			if (parts > 1)
 			{
@@ -1577,7 +1577,7 @@ public:
 				parts = 0;
 			}
 
-			Objid obj(edit.mode, *it, parts & ~1);
+			Objid obj(inst.edit.mode, *it, parts & ~1);
 
 			HighlightObject(obj);
 		}
@@ -1586,10 +1586,10 @@ public:
 
 		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-		if (edit.action == ACT_DRAG && edit.dragged.valid())
-			HighlightObject(edit.dragged);
+		if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+			HighlightObject(inst.edit.dragged);
 		else
-			HighlightObject(edit.highlight);
+			HighlightObject(inst.edit.highlight);
 
 		glLineWidth(1);
 	}

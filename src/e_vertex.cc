@@ -288,21 +288,21 @@ void VertexModule::mergeList(selection_c *verts) const
 
 void VertexModule::commandMerge(Instance &inst)
 {
-	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
+	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		inst.Selection_Add(inst.edit.highlight);
 	}
 
-	if (edit.Selected->count_obj() < 2)
+	if (inst.edit.Selected->count_obj() < 2)
 	{
 		inst.Beep("Need 2 or more vertices to merge");
 		return;
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("merged", *edit.Selected);
+	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
 
-	inst.level.vertmod.mergeList(edit.Selected);
+	inst.level.vertmod.mergeList(inst.edit.Selected);
 
 	inst.level.basis.end();
 
@@ -367,7 +367,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 		doc.basis.end();
 
-		edit.Selected->set(v_other);
+		inst.edit.Selected->set(v_other);
 
 		inst.Beep("Merged a dangling vertex");
 		return true;
@@ -493,23 +493,23 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 
 void VertexModule::commandDisconnect(Instance &inst)
 {
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
-		if (edit.highlight.is_nil())
+		if (inst.edit.highlight.is_nil())
 		{
 			inst.Beep("Nothing to disconnect");
 			return;
 		}
 
-		Selection_Add(edit.highlight);
+		inst.Selection_Add(inst.edit.highlight);
 	}
 
 	bool seen_one = false;
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		int v_num = *it;
 
@@ -546,7 +546,7 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		if (edit.Selected->get(n))
+		if (inst.edit.Selected->get(n))
 			continue;
 
 		LineDef *N = doc.linedefs[n];
@@ -569,7 +569,7 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 	doc.vertices[new_v]->SetRawXY(new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		LineDef *L2 = doc.linedefs[*it];
 
@@ -593,7 +593,7 @@ void VertexModule::commandLineDisconnect(Instance &inst)
 	//
 	// Hence need separate code for this.
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("Nothing to disconnect");
@@ -603,9 +603,9 @@ void VertexModule::commandLineDisconnect(Instance &inst)
 	bool seen_one = false;
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		inst.level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
 		inst.level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
@@ -633,8 +633,8 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 		const LineDef * L = doc.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(doc)  && edit.Selected->get(L->Left(doc)->sector);
-		bool right_in = L->Right(doc) && edit.Selected->get(L->Right(doc)->sector);
+		bool  left_in = L->Left(doc)  && inst.edit.Selected->get(L->Left(doc)->sector);
+		bool right_in = L->Right(doc) && inst.edit.Selected->get(L->Right(doc)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -755,7 +755,7 @@ void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx
 	double det_mid_y, sec_mid_y;
 
 	doc.objects.calcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
-	doc.objects.calcMiddle(edit.Selected, &sec_mid_x, &sec_mid_y);
+	doc.objects.calcMiddle(inst.edit.Selected, &sec_mid_x, &sec_mid_y);
 
 	*dx = sec_mid_x - det_mid_x;
 	*dy = sec_mid_y - det_mid_y;
@@ -792,7 +792,7 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No sectors to disconnect");
@@ -820,7 +820,7 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
 
@@ -848,8 +848,8 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 		const LineDef * L = inst.level.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(inst.level)  && edit.Selected->get(L->Left(inst.level)->sector);
-		bool right_in = L->Right(inst.level) && edit.Selected->get(L->Right(inst.level)->sector);
+		bool  left_in = L->Left(inst.level)  && inst.edit.Selected->get(L->Left(inst.level)->sector);
+		bool right_in = L->Right(inst.level) && inst.edit.Selected->get(L->Right(inst.level)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -879,7 +879,7 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 	selection_c all_verts(ObjType::vertices);
 
-	ConvertSelection(inst.level, edit.Selected, &all_verts);
+	ConvertSelection(inst.level, inst.edit.Selected, &all_verts);
 
 	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 	{
@@ -950,7 +950,7 @@ public:
 
 void VertexModule::commandShapeLine(Instance &inst)
 {
-	if (edit.Selected->count_obj() < 3)
+	if (inst.edit.Selected->count_obj() < 3)
 	{
 		inst.Beep("Need 3 or more vertices to shape");
 		return;
@@ -959,7 +959,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 	// determine orientation and position of the line
 
 	double x1, y1, x2, y2;
-	inst.level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	inst.level.objects.calcBBox(inst.edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;
@@ -983,7 +983,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 	double by = 0;
 	double b_total = 0;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Vertex *V = inst.level.vertices[*it];
 
@@ -1039,7 +1039,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Vertex *V = inst.level.vertices[*it];
 
@@ -1198,7 +1198,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 	double arc_rad = arc_deg * M_PI / 180.0;
 
 
-	if (edit.Selected->count_obj() < 3)
+	if (inst.edit.Selected->count_obj() < 3)
 	{
 		inst.Beep("Need 3 or more vertices to shape");
 		return;
@@ -1207,7 +1207,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	// determine middle point for circle
 	double x1, y1, x2, y2;
-	inst.level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	inst.level.objects.calcBBox(inst.edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;
@@ -1232,7 +1232,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Vertex *V = inst.level.vertices[*it];
 

@@ -210,7 +210,7 @@ void UI_MainWindow::HideSpecialPanel()
 	props_box->hide();
 	 find_box->hide();
 
-	switch (edit.mode)
+	switch (mInstance.edit.mode)
 	{
 		case ObjType::things:   thing_box->show(); break;
 		case ObjType::linedefs:  line_box->show(); break;
@@ -277,8 +277,8 @@ void UI_MainWindow::UpdateTotals()
 
 int UI_MainWindow::GetPanelObjNum() const
 {
-	// FIXME: using 'edit' here feels like a hack or mis-design
-	switch (edit.mode)
+	// FIXME: using 'inst.edit' here feels like a hack or mis-design
+	switch (mInstance.edit.mode)
 	{
 		case ObjType::things:   return thing_box->GetObj();
 		case ObjType::vertices: return  vert_box->GetObj();

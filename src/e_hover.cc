@@ -484,9 +484,9 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 
 	double len = hypot(x2 - x1, y2 - y1);
 
-	if(grid.ratio > 0 && edit.action == ACT_DRAW_LINE)
+	if(grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE)
 	{
-		const Vertex *V = doc.vertices[edit.draw_from.num];
+		const Vertex *V = doc.vertices[inst.edit.draw_from.num];
 
 		// convert ratio into a vector, use it to intersect the linedef
 		double px1 = V->x();

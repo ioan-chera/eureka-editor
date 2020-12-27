@@ -642,7 +642,7 @@ void UI_FindAndReplace::ResetFilters()
 
 bool UI_FindAndReplace::WhatFromEditMode()
 {
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::things:   what->value(0); return true;
 		case ObjType::linedefs: what->value(1); return true;
@@ -1207,7 +1207,7 @@ bool UI_FindAndReplace::FindNext()
 
 	ComputeFlagMask();
 
-	if (cur_obj.type != edit.mode)
+	if (cur_obj.type != inst.edit.mode)
 	{
 		Editor_ChangeMode_Raw(inst, cur_obj.type);
 	}
@@ -1218,12 +1218,12 @@ bool UI_FindAndReplace::FindNext()
 	// grab the selection *once*, on the first find
 	if (is_first)
 	{
-		previous_sel->change_type(edit.mode);
-		previous_sel->merge(*edit.Selected);
+		previous_sel->change_type(inst.edit.mode);
+		previous_sel->merge(*inst.edit.Selected);
 
 		// catch a common user mistake
 		if (filter_toggle->value() && restrict_to_sel->value() &&
-			edit.Selected->empty())
+			inst.edit.Selected->empty())
 		{
 			inst.Beep("EMPTY SELECTION!");
 			return false;
@@ -1373,7 +1373,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	// catch a common user mistake
 	if (filter_toggle->value() && restrict_to_sel->value() &&
-		edit.Selected->empty())
+		inst.edit.Selected->empty())
 	{
 		inst.Beep("EMPTY SELECTION!");
 		return;
@@ -1381,7 +1381,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	ComputeFlagMask();
 
-	if (cur_obj.type != edit.mode)
+	if (cur_obj.type != inst.edit.mode)
 		Editor_ChangeMode_Raw(inst, cur_obj.type);
 
 	int replace_tex_id = 0;
@@ -1396,11 +1396,11 @@ void UI_FindAndReplace::DoAll(bool replace)
 	// we select objects even in REPLACE mode
 	// (gives the user a visual indication that stuff was done)
 
-	previous_sel->change_type(edit.mode);
-	previous_sel->merge(*edit.Selected);
+	previous_sel->change_type(inst.edit.mode);
+	previous_sel->merge(*inst.edit.Selected);
 
 	// this clears the selection
-	edit.Selected->change_type(edit.mode);
+	inst.edit.Selected->change_type(inst.edit.mode);
 
 	int total = inst.level.numObjects(cur_obj.type);
 	int count = 0;
@@ -1418,7 +1418,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 		if (replace)
 			ApplyReplace(idx, replace_tex_id);
 
-		edit.Selected->set(idx);
+		inst.edit.Selected->set(idx);
 	}
 
 	if (count == 0)
@@ -1428,14 +1428,14 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		inst.level.basis.setMessageForSelection("replacement in", *edit.Selected);
+		inst.level.basis.setMessageForSelection("replacement in", *inst.edit.Selected);
 		inst.level.basis.end();
 	}
 
 	if (count > 0)
 	{
 		GoToSelection(inst);
-		edit.error_mode = true;
+		inst.edit.error_mode = true;
 	}
 
 	if (replace)

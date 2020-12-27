@@ -68,15 +68,11 @@ extern int wheel_dy;
 
 typedef void (* nav_release_func_t)(Instance &inst);
 
-void Nav_Clear();
 void Nav_Navigate(Instance &inst);
 bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func);
 bool Nav_ActionKey(Instance &inst, keycode_t key, nav_release_func_t func);
 
 unsigned int Nav_TimeDiff(); /* milliseconds */
-
-void Editor_ClearNav();
-
 
 void M_LoadOperationMenus(Instance &inst);
 

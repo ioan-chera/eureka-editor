@@ -1557,7 +1557,7 @@ bool M_SaveUserState(const Instance &inst)
 		return false;
 	}
 
-	  Editor_WriteUser(os);
+	inst.Editor_WriteUser(os);
 	    Grid_WriteUser(os);
 	Render3D_WriteUser(os);
 	 Browser_WriteUser(inst, os);
@@ -1576,7 +1576,7 @@ void M_DefaultUserState(Instance &inst)
 
 	Render3D_Setup(inst);
 
-	Editor_DefaultState();
+	inst.Editor_DefaultState();
 }
 
 

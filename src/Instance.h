@@ -20,6 +20,7 @@
 #define INSTANCE_H_
 
 #include "Document.h"
+#include "e_main.h"
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
@@ -28,6 +29,19 @@
 class Instance
 {
 public:
+	// E_MAIN
+	void Editor_DefaultState();
+	void Editor_Init();
+	void Editor_WriteUser(std::ostream &os) const;
+	void Selection_Add(Objid &obj) const;
+	void Selection_Push() const;
+	void Selection_Toggle(Objid &obj) const;
+	SelectHighlight SelectionOrHighlight();
+
+	// M_EVENTS
+	void Editor_ClearNav();
+	void Nav_Clear();
+
 	// M_KEYS
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 
@@ -39,6 +53,7 @@ public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
 
 	UI_MainWindow *main_win = nullptr;
+	Editor_State_t edit = {};
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

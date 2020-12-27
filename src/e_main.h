@@ -167,14 +167,7 @@ struct Editor_State_t
 	struct { float x1, y1, x2, y2; } adjust_bbox;
 };
 
-
-extern Editor_State_t  edit;
-
-
-void Editor_Init();
-void Editor_DefaultState();
 bool Editor_ParseUser(Instance &inst, const std::vector<SString> &tokens);
-void Editor_WriteUser(std::ostream &os);
 
 void Editor_ClearErrorMode(Instance &inst);
 void Editor_ChangeMode(Instance &inst, char mode);
@@ -209,22 +202,17 @@ void ObjectBox_NotifyEnd(Instance &inst);
 
 
 void Selection_NotifyBegin();
-void Selection_NotifyInsert(ObjType type, int objnum);
-void Selection_NotifyDelete(ObjType type, int objnum);
+void Selection_NotifyInsert(const Instance &inst, ObjType type, int objnum);
+void Selection_NotifyDelete(const Instance &inst, ObjType type, int objnum);
 void Selection_NotifyChange(ObjType type, int objnum, int field);
-void Selection_NotifyEnd();
+void Selection_NotifyEnd(const Instance &inst);
 
 
 void DumpSelection (selection_c * list);
 
 void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest);
 
-void Selection_Add(Objid& obj);
-void Selection_Remove(Objid& obj);
-void Selection_Toggle(Objid& obj);
-
 void Selection_Clear(Instance &inst, bool no_save = false);
-void Selection_Push();
 void Selection_InvalidateLast();
 
 //
@@ -236,8 +224,6 @@ enum class SelectHighlight
 	unselect,	// using highlight, must unselect at end
 	empty		// both selection or highlight are empty
 };
-
-SelectHighlight SelectionOrHighlight();
 
 void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
 

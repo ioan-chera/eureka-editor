@@ -1102,7 +1102,7 @@ public:
 			else
 			{
 				line2  = dw->ld_index;
-				parts2 = edit.Selected->get_ext(line2);
+				parts2 = inst.edit.Selected->get_ext(line2);
 
 				if (parts2 == 0)
 					continue;
@@ -1147,12 +1147,12 @@ public:
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
 		// are we dragging this surface?
-		if (edit.action == ACT_DRAG &&
-			(!edit.dragged.valid() ||
-			 (edit.dragged.num == sec_index &&
-			  (edit.dragged.parts == 0 || (edit.dragged.parts & part)) )))
+		if (inst.edit.action == ACT_DRAG &&
+			(!inst.edit.dragged.valid() ||
+			 (inst.edit.dragged.num == sec_index &&
+			  (inst.edit.dragged.parts == 0 || (inst.edit.dragged.parts & part)) )))
 		{
-			z = z + (int)edit.drag_sector_dz;
+			z = z + (int)inst.edit.drag_sector_dz;
 		}
 		else
 		{
@@ -1218,7 +1218,7 @@ public:
 
 				int sec2 = sd_front->sector;
 
-				parts = edit.Selected->get_ext(sec2);
+				parts = inst.edit.Selected->get_ext(sec2);
 				if (parts == 0)
 					continue;
 
@@ -1258,7 +1258,7 @@ public:
 			}
 			else
 			{
-				if (! edit.Selected->get(dw->th))
+				if (! inst.edit.Selected->get(dw->th))
 					continue;
 			}
 
@@ -1271,13 +1271,13 @@ public:
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			if (edit.action == ACT_DRAG &&
-				(!edit.dragged.valid() || edit.dragged.num == th_index))
+			if (inst.edit.action == ACT_DRAG &&
+				(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 			{
 				// re-project thing onto the viewplane
-				float dx = static_cast<float>(edit.drag_cur_x - edit.drag_start_x);
-				float dy = static_cast<float>(edit.drag_cur_y - edit.drag_start_y);
-				float dz = static_cast<float>(edit.drag_cur_z - edit.drag_start_z);
+				float dx = static_cast<float>(inst.edit.drag_cur_x - inst.edit.drag_start_x);
+				float dy = static_cast<float>(inst.edit.drag_cur_y - inst.edit.drag_start_y);
+				float dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
 
 				const Thing *T = inst.level.things[dw->th];
 
@@ -1334,23 +1334,23 @@ public:
 
 		hl_thick = 2;
 
-		switch (edit.mode)
+		switch (inst.edit.mode)
 		{
 		case ObjType::things:
 			hl_color = SEL_COL;
 			HighlightThings(-1);
 
 			hl_color = HI_COL;
-			if (edit.action == ACT_DRAG && edit.dragged.valid())
+			if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
 			{
-				HighlightThings(edit.dragged.num);
+				HighlightThings(inst.edit.dragged.num);
 			}
-			else if (edit.highlight.valid())
+			else if (inst.edit.highlight.valid())
 			{
-				if (edit.Selected->get(edit.highlight.num))
+				if (inst.edit.Selected->get(inst.edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;
 
-				HighlightThings(edit.highlight.num);
+				HighlightThings(inst.edit.highlight.num);
 			}
 			break;
 
@@ -1358,16 +1358,16 @@ public:
 			HighlightSectors(-1, -1);
 
 			hl_color = HI_COL;
-			if (edit.action == ACT_DRAG && edit.dragged.valid())
+			if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
 			{
-				HighlightSectors(edit.dragged.num, edit.dragged.parts);
+				HighlightSectors(inst.edit.dragged.num, inst.edit.dragged.parts);
 			}
-			else if (edit.highlight.valid())
+			else if (inst.edit.highlight.valid())
 			{
-				if (edit.Selected->get(edit.highlight.num))
+				if (inst.edit.Selected->get(inst.edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;
 
-				HighlightSectors(edit.highlight.num, edit.highlight.parts);
+				HighlightSectors(inst.edit.highlight.num, inst.edit.highlight.parts);
 			}
 			break;
 
@@ -1375,12 +1375,12 @@ public:
 			HighlightLines(-1, -1);
 
 			hl_color = HI_COL;
-			if (edit.action == ACT_DRAG && edit.dragged.valid())
+			if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
 			{
-				if (edit.Selected->get(edit.highlight.num))
+				if (inst.edit.Selected->get(inst.edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;
 
-				HighlightLines(edit.highlight.num, edit.highlight.parts);
+				HighlightLines(inst.edit.highlight.num, inst.edit.highlight.parts);
 			}
 			break;
 
@@ -1639,7 +1639,7 @@ public:
 
 		if (query_mode)
 		{
-			if (y1 <= query_sy && query_sy <= y2 && edit.mode == ObjType::things)
+			if (y1 <= query_sy && query_sy <= y2 && inst.edit.mode == ObjType::things)
 			{
 				query_result = Objid(ObjType::things, dw->th);
 			}
@@ -1723,7 +1723,7 @@ public:
 
 		if (query_mode)
 		{
-			if (y1 <= query_sy && query_sy <= y2 && edit.mode == ObjType::linedefs)
+			if (y1 <= query_sy && query_sy <= y2 && inst.edit.mode == ObjType::linedefs)
 			{
 				int part = (dw->side == Side::left) ? PART_LF_RAIL : PART_RT_RAIL;
 				query_result = Objid(ObjType::linedefs, dw->ld_index, part);
@@ -2127,9 +2127,9 @@ bool SW_QueryPoint(Instance &inst, Objid& hl, int qx, int qy)
 
 	if (rend.query_map_x != 0)
 	{
-		edit.map_x = rend.query_map_x;
-		edit.map_y = rend.query_map_y;
-		edit.map_z = rend.query_map_z;
+		inst.edit.map_x = rend.query_map_x;
+		inst.edit.map_y = rend.query_map_y;
+		inst.edit.map_z = rend.query_map_z;
 	}
 
 	if (! rend.query_result.valid())

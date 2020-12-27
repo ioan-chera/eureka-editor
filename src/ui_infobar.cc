@@ -202,20 +202,20 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 
 	switch (sec_rend->value())
 	{
-	case 1: edit.sector_render_mode = SREND_Floor; break;
-	case 2: edit.sector_render_mode = SREND_Ceiling; break;
-	case 3: edit.sector_render_mode = SREND_Lighting; break;
-	case 4: edit.sector_render_mode = SREND_FloorBright; break;
-	case 5: edit.sector_render_mode = SREND_CeilBright; break;
-	case 6: edit.sector_render_mode = SREND_SoundProp; break;
-	default: edit.sector_render_mode = SREND_Nothing; break;
+	case 1: bar->inst.edit.sector_render_mode = SREND_Floor; break;
+	case 2: bar->inst.edit.sector_render_mode = SREND_Ceiling; break;
+	case 3: bar->inst.edit.sector_render_mode = SREND_Lighting; break;
+	case 4: bar->inst.edit.sector_render_mode = SREND_FloorBright; break;
+	case 5: bar->inst.edit.sector_render_mode = SREND_CeilBright; break;
+	case 6: bar->inst.edit.sector_render_mode = SREND_SoundProp; break;
+	default: bar->inst.edit.sector_render_mode = SREND_Nothing; break;
 	}
 
-	if (edit.render3d)
+	if (bar->inst.edit.render3d)
 		Render3D_Enable(bar->inst, false);
 
 	// need sectors mode for sound propagation display
-	if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
+	if (bar->inst.edit.sector_render_mode == SREND_SoundProp && bar->inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(bar->inst, 's');
 	
 	RedrawMap(bar->inst);
@@ -340,13 +340,13 @@ void UI_InfoBar::UpdateSnap()
 
 void UI_InfoBar::UpdateSecRend()
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		sec_rend->label("3D VIEW");
 		return;
 	}
 
-	switch (edit.sector_render_mode)
+	switch (inst.edit.sector_render_mode)
 	{
 	case SREND_Floor:       sec_rend->label("Floor");   break;
 	case SREND_Ceiling:     sec_rend->label("Ceiling"); break;
@@ -450,14 +450,14 @@ void UI_StatusBar::draw()
 	int cx = x() + 10;
 	int cy = y() + 20;
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		IB_Number(cx, cy, "x", I_ROUND(r_view.x), 5);
 		IB_Number(cx, cy, "y", I_ROUND(r_view.y), 5);
 		IB_Number(cx, cy, "z", I_ROUND(r_view.z) - Misc_info.view_height, 4);
 
 		// use less space when an action is occurring
-		if (edit.action == ACT_NOTHING)
+		if (inst.edit.action == ACT_NOTHING)
 		{
 			int ang = I_ROUND(r_view.angle * 180 / M_PI);
 			if (ang < 0) ang += 360;
@@ -475,8 +475,8 @@ void UI_StatusBar::draw()
 	}
 	else  // 2D view
 	{
-		float mx = static_cast<float>(grid.SnapX(edit.map_x));
-		float my = static_cast<float>(grid.SnapX(edit.map_y));
+		float mx = static_cast<float>(grid.SnapX(inst.edit.map_x));
+		float my = static_cast<float>(grid.SnapX(inst.edit.map_y));
 
 		mx = CLAMP(-32767, mx, 32767);
 		my = CLAMP(-32767, my, 32767);
@@ -496,7 +496,7 @@ void UI_StatusBar::draw()
 
 	fl_color(INFO_TEXT_COL);
 
-	switch (edit.action)
+	switch (inst.edit.action)
 	{
 	case ACT_DRAG:
 		IB_ShowDrag(cx, cy);
@@ -525,24 +525,24 @@ void UI_StatusBar::draw()
 
 void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 {
-	if (edit.render3d && edit.mode == ObjType::sectors)
+	if (inst.edit.render3d && inst.edit.mode == ObjType::sectors)
 	{
-		IB_Number(cx, cy, "raise delta", I_ROUND(edit.drag_sector_dz), 4);
+		IB_Number(cx, cy, "raise delta", I_ROUND(inst.edit.drag_sector_dz), 4);
 		return;
 	}
-	if (edit.render3d && edit.mode == ObjType::things && edit.drag_thing_up_down)
+	if (inst.edit.render3d && inst.edit.mode == ObjType::things && inst.edit.drag_thing_up_down)
 	{
-		double dz = edit.drag_cur_z - edit.drag_start_z;
+		double dz = inst.edit.drag_cur_z - inst.edit.drag_start_z;
 		IB_Number(cx, cy, "raise delta", I_ROUND(dz), 4);
 		return;
 	}
 
 	double dx, dy;
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
-		dx = edit.drag_cur_x - edit.drag_start_x;
-		dy = edit.drag_cur_y - edit.drag_start_y;
+		dx = inst.edit.drag_cur_x - inst.edit.drag_start_x;
+		dy = inst.edit.drag_cur_y - inst.edit.drag_start_y;
 	}
 	else
 	{
@@ -558,49 +558,49 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 {
 	int rot_degrees;
 
-	switch (edit.trans_mode)
+	switch (inst.edit.trans_mode)
 	{
 	case TRANS_K_Scale:
-		IB_Coord(cx, cy, "scale by", static_cast<float>(edit.trans_param.scale_x));
+		IB_Coord(cx, cy, "scale by", static_cast<float>(inst.edit.trans_param.scale_x));
 		break;
 
 	case TRANS_K_Stretch:
-		IB_Coord(cx, cy, "stretch x", static_cast<float>(edit.trans_param.scale_x));
-		IB_Coord(cx, cy,         "y", static_cast<float>(edit.trans_param.scale_y));
+		IB_Coord(cx, cy, "stretch x", static_cast<float>(inst.edit.trans_param.scale_x));
+		IB_Coord(cx, cy,         "y", static_cast<float>(inst.edit.trans_param.scale_y));
 		break;
 
 	case TRANS_K_Rotate:
 	case TRANS_K_RotScale:
-		rot_degrees = static_cast<int>(round(edit.trans_param.rotate * (180 / M_PI)));
+		rot_degrees = static_cast<int>(round(inst.edit.trans_param.rotate * (180 / M_PI)));
 		IB_Number(cx, cy, "rotate by", rot_degrees, 3);
 		break;
 
 	case TRANS_K_Skew:
-		IB_Coord(cx, cy, "skew x", static_cast<float>(edit.trans_param.skew_x));
-		IB_Coord(cx, cy,      "y", static_cast<float>(edit.trans_param.skew_y));
+		IB_Coord(cx, cy, "skew x", static_cast<float>(inst.edit.trans_param.skew_x));
+		IB_Coord(cx, cy,      "y", static_cast<float>(inst.edit.trans_param.skew_y));
 		break;
 	}
 
-	if (edit.trans_mode == TRANS_K_RotScale)
-		IB_Coord(cx, cy, "scale", static_cast<float>(edit.trans_param.scale_x));
+	if (inst.edit.trans_mode == TRANS_K_RotScale)
+		IB_Coord(cx, cy, "scale", static_cast<float>(inst.edit.trans_param.scale_x));
 }
 
 
 void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 {
-	int dx = I_ROUND(edit.adjust_dx);
-	int dy = I_ROUND(edit.adjust_dy);
+	int dx = I_ROUND(inst.edit.adjust_dx);
+	int dy = I_ROUND(inst.edit.adjust_dy);
 
-	Objid hl = edit.highlight;
+	Objid hl = inst.edit.highlight;
 
-	if (! edit.Selected->empty())
+	if (! inst.edit.Selected->empty())
 	{
-		if (edit.Selected->count_obj() == 1)
+		if (inst.edit.Selected->count_obj() == 1)
 		{
-			int first = edit.Selected->find_first();
-			int parts = edit.Selected->get_ext(first);
+			int first = inst.edit.Selected->find_first();
+			int parts = inst.edit.Selected->get_ext(first);
 
-			hl = Objid(edit.mode, first, parts);
+			hl = Objid(inst.edit.mode, first, parts);
 		}
 		else
 		{
@@ -610,7 +610,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const LineDef *L = inst.level.linedefs[edit.highlight.num];
+		const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
 
 		int x_offset = 0;
 		int y_offset = 0;
@@ -639,13 +639,13 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 {
-	if (! edit.draw_from.valid())
+	if (! inst.edit.draw_from.valid())
 		return;
 
-	const Vertex *V = inst.level.vertices[edit.draw_from.num];
+	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num];
 
-	double dx = edit.draw_to_x - V->x();
-	double dy = edit.draw_to_y - V->y();
+	double dx = inst.edit.draw_to_x - V->x();
+	double dy = inst.edit.draw_to_y - V->y();
 
 	// show a ratio value
 	fixcoord_t fdx = TO_COORD(dx);

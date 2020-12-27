@@ -410,13 +410,13 @@ static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
 
-	edit.adjust_bbox.x1 = MIN(edit.adjust_bbox.x1, lx1);
-	edit.adjust_bbox.y1 = MIN(edit.adjust_bbox.y1, ly1);
-	edit.adjust_bbox.x2 = MAX(edit.adjust_bbox.x2, lx2);
-	edit.adjust_bbox.y2 = MAX(edit.adjust_bbox.y2, ly2);
+	inst.edit.adjust_bbox.x1 = MIN(inst.edit.adjust_bbox.x1, lx1);
+	inst.edit.adjust_bbox.y1 = MIN(inst.edit.adjust_bbox.y1, ly1);
+	inst.edit.adjust_bbox.x2 = MAX(inst.edit.adjust_bbox.x2, lx2);
+	inst.edit.adjust_bbox.y2 = MAX(inst.edit.adjust_bbox.y2, ly2);
 }
 
-void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
+static void AdjustOfs_CalcDistFactor(const Instance &inst, float& dx_factor, float& dy_factor)
 {
 	// this computes how far to move the offsets for each screen pixel
 	// the mouse moves.  we want it to appear as though each texture
@@ -424,11 +424,11 @@ void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 	// of a switch, that switch follows the mouse pointer around.
 	// such an effect can only be approximate though.
 
-	float dx = static_cast<float>((r_view.x < edit.adjust_bbox.x1) ? (edit.adjust_bbox.x1 - r_view.x) :
-			   (r_view.x > edit.adjust_bbox.x2) ? (r_view.x - edit.adjust_bbox.x2) : 0);
+	float dx = static_cast<float>((r_view.x < inst.edit.adjust_bbox.x1) ? (inst.edit.adjust_bbox.x1 - r_view.x) :
+			   (r_view.x > inst.edit.adjust_bbox.x2) ? (r_view.x - inst.edit.adjust_bbox.x2) : 0);
 
-	float dy = static_cast<float>((r_view.y < edit.adjust_bbox.y1) ? (edit.adjust_bbox.y1 - r_view.y) :
-			   (r_view.y > edit.adjust_bbox.y2) ? (r_view.y - edit.adjust_bbox.y2) : 0);
+	float dy = static_cast<float>((r_view.y < inst.edit.adjust_bbox.y1) ? (inst.edit.adjust_bbox.y1 - r_view.y) :
+			   (r_view.y > inst.edit.adjust_bbox.y2) ? (r_view.y - inst.edit.adjust_bbox.y2) : 0);
 
 	float dist = hypot(dx, dy);
 
@@ -440,7 +440,7 @@ void AdjustOfs_CalcDistFactor(float& dx_factor, float& dy_factor)
 
 static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 {
-	if (! edit.adjust_bucket)
+	if (! inst.edit.adjust_bucket)
 		return;
 
 	const LineDef *L = inst.level.linedefs[ld_num];
@@ -452,31 +452,31 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 
 	// TODO : UDMF ports can allow full control over each part
 
-	edit.adjust_bucket->Save(sd_num, SideDef::F_X_OFFSET);
-	edit.adjust_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
+	inst.edit.adjust_bucket->Save(sd_num, SideDef::F_X_OFFSET);
+	inst.edit.adjust_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
 }
 
 static void AdjustOfs_Begin(Instance &inst)
 {
-	if (edit.adjust_bucket)
-		delete edit.adjust_bucket;
+	if (inst.edit.adjust_bucket)
+		delete inst.edit.adjust_bucket;
 
-	edit.adjust_bucket = new SaveBucket_c(ObjType::sidedefs, inst);
-	edit.adjust_lax = Exec_HasFlag("/LAX");
+	inst.edit.adjust_bucket = new SaveBucket_c(ObjType::sidedefs, inst);
+	inst.edit.adjust_lax = Exec_HasFlag("/LAX");
 
 	int total_lines = 0;
 
 	// we will compute the bbox of selected lines
-	edit.adjust_bbox.x1 = edit.adjust_bbox.y1 = static_cast<float>(+9e9);
-	edit.adjust_bbox.x2 = edit.adjust_bbox.y2 = static_cast<float>(-9e9);
+	inst.edit.adjust_bbox.x1 = inst.edit.adjust_bbox.y1 = static_cast<float>(+9e9);
+	inst.edit.adjust_bbox.x2 = inst.edit.adjust_bbox.y2 = static_cast<float>(-9e9);
 
 	// find the sidedefs to adjust
-	if (! edit.Selected->empty())
+	if (! inst.edit.Selected->empty())
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int ld_num = *it;
-			byte parts = edit.Selected->get_ext(ld_num);
+			byte parts = inst.edit.Selected->get_ext(ld_num);
 
 			// handle "simply selected" linedefs
 			if (parts <= 1)
@@ -497,10 +497,10 @@ static void AdjustOfs_Begin(Instance &inst)
 			if (parts & PART_LF_RAIL)  AdjustOfs_Add(inst, ld_num, PART_LF_RAIL);
 		}
 	}
-	else if (edit.highlight.valid())
+	else if (inst.edit.highlight.valid())
 	{
-		int  ld_num = edit.highlight.num;
-		byte parts  = edit.highlight.parts;
+		int  ld_num = inst.edit.highlight.num;
+		byte parts  = inst.edit.highlight.parts;
 
 		if (parts >= 2)
 		{
@@ -516,45 +516,45 @@ static void AdjustOfs_Begin(Instance &inst)
 		return;
 	}
 
-	edit.adjust_dx = 0;
-	edit.adjust_dy = 0;
+	inst.edit.adjust_dx = 0;
+	inst.edit.adjust_dy = 0;
 
-	edit.adjust_lax = Exec_HasFlag("/LAX");
+	inst.edit.adjust_lax = Exec_HasFlag("/LAX");
 
 	Editor_SetAction(inst, ACT_ADJUST_OFS);
 }
 
 static void AdjustOfs_Finish(Instance &inst)
 {
-	if (! edit.adjust_bucket)
+	if (! inst.edit.adjust_bucket)
 	{
 		Editor_ClearAction(inst);
 		return;
 	}
 
-	int dx = I_ROUND(edit.adjust_dx);
-	int dy = I_ROUND(edit.adjust_dy);
+	int dx = I_ROUND(inst.edit.adjust_dx);
+	int dy = I_ROUND(inst.edit.adjust_dy);
 
 	if (dx || dy)
 	{
 		inst.level.basis.begin();
 		inst.level.basis.setMessage("adjusted offsets");
 
-		edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
-		edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
+		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
+		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
 
 		inst.level.basis.end();
 	}
 
-	delete edit.adjust_bucket;
-	edit.adjust_bucket = NULL;
+	delete inst.edit.adjust_bucket;
+	inst.edit.adjust_bucket = NULL;
 
 	Editor_ClearAction(inst);
 }
 
 static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 {
-	if (! edit.adjust_bucket)
+	if (! inst.edit.adjust_bucket)
 		return;
 
 	if (dx == 0 && dy == 0)
@@ -570,7 +570,7 @@ static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 			dx = 0;
 	}
 
-	keycode_t mod = edit.adjust_lax ? M_ReadLaxModifiers() : 0;
+	keycode_t mod = inst.edit.adjust_lax ? M_ReadLaxModifiers() : 0;
 
 	float factor = (mod & EMOD_SHIFT) ? 0.5f : 2.0f;
 
@@ -578,33 +578,33 @@ static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 		factor = factor * 0.5f;
 
 	float dx_factor, dy_factor;
-	AdjustOfs_CalcDistFactor(dx_factor, dy_factor);
+	AdjustOfs_CalcDistFactor(inst, dx_factor, dy_factor);
 
-	edit.adjust_dx -= dx * factor * dx_factor;
-	edit.adjust_dy -= dy * factor * dy_factor;
+	inst.edit.adjust_dx -= dx * factor * dx_factor;
+	inst.edit.adjust_dy -= dy * factor * dy_factor;
 
 	RedrawMap(inst);
 }
 
 
-void AdjustOfs_RenderAnte()
+static void AdjustOfs_RenderAnte(const Instance &inst)
 {
-	if (edit.action == ACT_ADJUST_OFS && edit.adjust_bucket)
+	if (inst.edit.action == ACT_ADJUST_OFS && inst.edit.adjust_bucket)
 	{
-		int dx = I_ROUND(edit.adjust_dx);
-		int dy = I_ROUND(edit.adjust_dy);
+		int dx = I_ROUND(inst.edit.adjust_dx);
+		int dy = I_ROUND(inst.edit.adjust_dy);
 
 		// change it temporarily (just for the render)
-		edit.adjust_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
-		edit.adjust_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
+		inst.edit.adjust_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
+		inst.edit.adjust_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
 	}
 }
 
-void AdjustOfs_RenderPost()
+static void AdjustOfs_RenderPost(const Instance &inst)
 {
-	if (edit.action == ACT_ADJUST_OFS && edit.adjust_bucket)
+	if (inst.edit.action == ACT_ADJUST_OFS && inst.edit.adjust_bucket)
 	{
-		edit.adjust_bucket->RestoreAll();
+		inst.edit.adjust_bucket->RestoreAll();
 	}
 }
 
@@ -620,7 +620,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 {
 	r_view.PrepareToRender(ow, oh);
 
-	AdjustOfs_RenderAnte();
+	AdjustOfs_RenderAnte(inst);
 
 #ifdef NO_OPENGL
 	SW_RenderWorld(inst, ox, oy, ow, oh);
@@ -628,7 +628,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 	RGL_RenderWorld(inst, ox, oy, ow, oh);
 #endif
 
-	AdjustOfs_RenderPost();
+	AdjustOfs_RenderPost(inst);
 }
 
 
@@ -656,7 +656,7 @@ bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 
 	hl.clear();
 
-	if (! edit.pointer_in_window)
+	if (! inst.edit.pointer_in_window)
 		return false;
 
 	r_view.PrepareToRender(ow, oh);
@@ -719,11 +719,11 @@ void Render3D_Enable(Instance &inst, bool _enable)
 {
 	Editor_ClearAction(inst);
 
-	edit.render3d = _enable;
+	inst.edit.render3d = _enable;
 
-	edit.highlight.clear();
-	edit.clicked.clear();
-	edit.dragged.clear();
+	inst.edit.highlight.clear();
+	inst.edit.clicked.clear();
+	inst.edit.dragged.clear();
 
 	// give keyboard focus to the appropriate large widget
 	Fl::focus(inst.main_win->canvas);
@@ -731,7 +731,7 @@ void Render3D_Enable(Instance &inst, bool _enable)
 	inst.main_win->scroll->UpdateRenderMode();
 	inst.main_win->info_bar->UpdateSecRend();
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 
@@ -741,7 +741,7 @@ void Render3D_Enable(Instance &inst, bool _enable)
 	else
 	{
 		inst.main_win->canvas->PointerPos();
-		inst.main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+		inst.main_win->info_bar->SetMouse(inst.edit.map_x, inst.edit.map_y);
 	}
 
 	RedrawMap(inst);
@@ -769,7 +769,7 @@ void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 	if (mod & EMOD_SHIFT)   mod_factor = 0.4f;
 	if (mod & EMOD_COMMAND) mod_factor = 2.5f;
 
-	float speed = edit.panning_speed * mod_factor;
+	float speed = inst.edit.panning_speed * mod_factor;
 
 	if (is_strafe)
 	{
@@ -807,22 +807,22 @@ static void DragSectors_Update(Instance &inst)
 	float ow = static_cast<float>(inst.main_win->canvas->w());
 	float x_slope = 100.0f / config::render_pixel_aspect;
 
-	float factor = static_cast<float>(CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
-	float map_dz = -edit.drag_screen_dy * factor;
+	float factor = static_cast<float>(CLAMP(20, inst.edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
+	float map_dz = -inst.edit.drag_screen_dy * factor;
 
 	float step = 8.0;  // TODO config item
 
 	if (map_dz > step*0.25)
-		edit.drag_sector_dz = step * (int)ceil(map_dz / step);
+		inst.edit.drag_sector_dz = step * (int)ceil(map_dz / step);
 	else if (map_dz < step*-0.25)
-		edit.drag_sector_dz = step * (int)floor(map_dz / step);
+		inst.edit.drag_sector_dz = step * (int)floor(map_dz / step);
 	else
-		edit.drag_sector_dz = 0;
+		inst.edit.drag_sector_dz = 0;
 }
 
 void Render3D_DragSectors(Instance &inst)
 {
-	int dz = I_ROUND(edit.drag_sector_dz);
+	int dz = I_ROUND(inst.edit.drag_sector_dz);
 	if (dz == 0)
 		return;
 
@@ -833,17 +833,17 @@ void Render3D_DragSectors(Instance &inst)
 	else
 		inst.level.basis.setMessage("lowered sectors");
 
-	if (edit.dragged.valid())
+	if (inst.edit.dragged.valid())
 	{
-		int parts = edit.dragged.parts;
+		int parts = inst.edit.dragged.parts;
 
-		inst.level.secmod.safeRaiseLower(edit.dragged.num, parts, dz);
+		inst.level.secmod.safeRaiseLower(inst.edit.dragged.num, parts, dz);
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			int parts = edit.Selected->get_ext(*it);
+			int parts = inst.edit.Selected->get_ext(*it);
 			parts &= ~1;
 
 			inst.level.secmod.safeRaiseLower(*it, parts, dz);
@@ -862,26 +862,26 @@ static void DragThings_Update(Instance &inst)
 	float x_slope = 100.0f / config::render_pixel_aspect;
 //	float y_slope = (float)oh / (float)ow;
 
-	float dist = CLAMP(20, edit.drag_point_dist, 1000);
+	float dist = CLAMP(20, inst.edit.drag_point_dist, 1000);
 
 	float x_factor = dist / (ow * 0.5f);
 	float y_factor = dist / (ow * x_slope * 0.5f);
 
-	if (edit.drag_thing_up_down)
+	if (inst.edit.drag_thing_up_down)
 	{
 		// vertical positioning in Hexen and UDMF formats
-		float map_dz = -edit.drag_screen_dy * y_factor;
+		float map_dz = -inst.edit.drag_screen_dy * y_factor;
 
 		// final result is in drag_cur_x/y/z
-		edit.drag_cur_x = edit.drag_start_x;
-		edit.drag_cur_y = edit.drag_start_y;
-		edit.drag_cur_z = edit.drag_start_z + map_dz;
+		inst.edit.drag_cur_x = inst.edit.drag_start_x;
+		inst.edit.drag_cur_y = inst.edit.drag_start_y;
+		inst.edit.drag_cur_z = inst.edit.drag_start_z + map_dz;
 		return;
 	}
 
 	/* move thing around XY plane */
 
-	edit.drag_cur_z = edit.drag_start_z;
+	inst.edit.drag_cur_z = inst.edit.drag_start_z;
 
 	// vectors for view camera
 	double fwd_vx = r_view.Cos;
@@ -890,27 +890,27 @@ static void DragThings_Update(Instance &inst)
 	double side_vx =  fwd_vy;
 	double side_vy = -fwd_vx;
 
-	double dx =  edit.drag_screen_dx * x_factor;
-	double dy = -edit.drag_screen_dy * y_factor * 2.0;
+	double dx =  inst.edit.drag_screen_dx * x_factor;
+	double dy = -inst.edit.drag_screen_dy * y_factor * 2.0;
 
 	// this usually won't happen, but is a reasonable fallback...
-	if (edit.drag_thing_num < 0)
+	if (inst.edit.drag_thing_num < 0)
 	{
-		edit.drag_cur_x = edit.drag_start_x + dx * side_vx + dy * fwd_vx;
-		edit.drag_cur_y = edit.drag_start_y + dx * side_vy + dy * fwd_vy;
+		inst.edit.drag_cur_x = inst.edit.drag_start_x + dx * side_vx + dy * fwd_vx;
+		inst.edit.drag_cur_y = inst.edit.drag_start_y + dx * side_vy + dy * fwd_vy;
 		return;
 	}
 
 	// old code for depth calculation, works well in certain cases
 	// but very poorly in other cases.
 #if 0
-	int sy1 = edit.click_screen_y;
-	int sy2 = sy1 + edit.drag_screen_dy;
+	int sy1 = inst.edit.click_screen_y;
+	int sy2 = sy1 + inst.edit.drag_screen_dy;
 
 	if (sy1 >= oh/2 && sy2 >= oh/2)
 	{
-		double d1 = (edit.drag_thing_floorh - r_view.z) / (oh - sy1*2.0);
-		double d2 = (edit.drag_thing_floorh - r_view.z) / (oh - sy2*2.0);
+		double d1 = (inst.edit.drag_thing_floorh - r_view.z) / (oh - sy1*2.0);
+		double d2 = (inst.edit.drag_thing_floorh - r_view.z) / (oh - sy2*2.0);
 
 		d1 = d1 * ow;
 		d2 = d2 * ow;
@@ -919,7 +919,7 @@ static void DragThings_Update(Instance &inst)
 	}
 #endif
 
-	const Thing *T = inst.level.things[edit.drag_thing_num];
+	const Thing *T = inst.level.things[inst.edit.drag_thing_num];
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -950,33 +950,33 @@ static void DragThings_Update(Instance &inst)
 
 		// intent here is to show proper position, NOT raise/lower things.
 		// [ perhaps add a new variable? ]
-		edit.drag_cur_z += (new_z - old_z);
+		inst.edit.drag_cur_z += (new_z - old_z);
 	}
 
-	edit.drag_cur_x = edit.drag_start_x + new_x - old_x;
-	edit.drag_cur_y = edit.drag_start_y + new_y - old_y;
+	inst.edit.drag_cur_x = inst.edit.drag_start_x + new_x - old_x;
+	inst.edit.drag_cur_y = inst.edit.drag_start_y + new_y - old_y;
 }
 
 void Render3D_DragThings(Instance &inst)
 {
-	double dx = edit.drag_cur_x - edit.drag_start_x;
-	double dy = edit.drag_cur_y - edit.drag_start_y;
-	double dz = edit.drag_cur_z - edit.drag_start_z;
+	double dx = inst.edit.drag_cur_x - inst.edit.drag_start_x;
+	double dy = inst.edit.drag_cur_y - inst.edit.drag_start_y;
+	double dz = inst.edit.drag_cur_z - inst.edit.drag_start_z;
 
 	// for movement in XY plane, ensure we don't raise/lower things
-	if (! edit.drag_thing_up_down)
+	if (! inst.edit.drag_thing_up_down)
 		dz = 0.0;
 
-	if (edit.dragged.valid())
+	if (inst.edit.dragged.valid())
 	{
 		selection_c sel(ObjType::things);
-		sel.set(edit.dragged.num);
+		sel.set(inst.edit.dragged.num);
 
 		inst.level.objects.move(&sel, dx, dy, dz);
 	}
 	else
 	{
-		inst.level.objects.move(edit.Selected, dx, dy, dz);
+		inst.level.objects.move(inst.edit.Selected, dx, dy, dz);
 	}
 
 	RedrawMap(inst);
@@ -985,43 +985,43 @@ void Render3D_DragThings(Instance &inst)
 
 void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy)
 {
-	edit.pointer_in_window = true;
+	inst.edit.pointer_in_window = true;
 
 	// save position for Render3D_UpdateHighlight
 	r_view.mouse_x = x;
 	r_view.mouse_y = y;
 
-	if (edit.is_panning)
+	if (inst.edit.is_panning)
 	{
 		Editor_ScrollMap(inst, 0, dx, dy, mod);
 		return;
 	}
-	else if (edit.action == ACT_ADJUST_OFS)
+	else if (inst.edit.action == ACT_ADJUST_OFS)
 	{
 		AdjustOfs_Delta(inst, dx, dy);
 		return;
 	}
 
-	if (edit.action == ACT_CLICK)
+	if (inst.edit.action == ACT_CLICK)
 	{
 		CheckBeginDrag(inst);
 	}
-	else if (edit.action == ACT_DRAG)
+	else if (inst.edit.action == ACT_DRAG)
 	{
 		// get the latest map_x/y/z coordinates
 		Objid unused_hl;
 		Render3D_Query(inst, unused_hl, x, y);
 
-		edit.drag_screen_dx = x - edit.click_screen_x;
-		edit.drag_screen_dy = y - edit.click_screen_y;
+		inst.edit.drag_screen_dx = x - inst.edit.click_screen_x;
+		inst.edit.drag_screen_dy = y - inst.edit.click_screen_y;
 
-		edit.drag_cur_x = edit.map_x;
-		edit.drag_cur_y = edit.map_y;
+		inst.edit.drag_cur_x = inst.edit.map_x;
+		inst.edit.drag_cur_y = inst.edit.map_y;
 
-		if (edit.mode == ObjType::sectors)
+		if (inst.edit.mode == ObjType::sectors)
 			DragSectors_Update(inst);
 
-		if (edit.mode == ObjType::things)
+		if (inst.edit.mode == ObjType::things)
 			DragThings_Update(inst);
 
 		inst.main_win->canvas->redraw();
@@ -1035,19 +1035,19 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 
 void Render3D_UpdateHighlight(Instance &inst)
 {
-	edit.highlight.clear();
-	edit.split_line.clear();
+	inst.edit.highlight.clear();
+	inst.edit.split_line.clear();
 
-	if (edit.pointer_in_window && r_view.mouse_x >= 0 &&
-		edit.action != ACT_DRAG)
+	if (inst.edit.pointer_in_window && r_view.mouse_x >= 0 &&
+		inst.edit.action != ACT_DRAG)
 	{
 		Objid current_hl;
 
-		// this also updates edit.map_x/y/z
+		// this also updates inst.edit.map_x/y/z
 		Render3D_Query(inst, current_hl, r_view.mouse_x, r_view.mouse_y);
 
-		if (current_hl.type == edit.mode)
-			edit.highlight = current_hl;
+		if (current_hl.type == inst.edit.mode)
+			inst.edit.highlight = current_hl;
 	}
 
 	inst.main_win->canvas->UpdateHighlight();
@@ -1065,17 +1065,17 @@ void Render3D_Navigate(Instance &inst)
 
 	keycode_t mod = 0;
 
-	if (edit.nav_lax)
+	if (inst.edit.nav_lax)
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
 	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
-	if (edit.nav_fwd || edit.nav_back || edit.nav_right || edit.nav_left)
+	if (inst.edit.nav_fwd || inst.edit.nav_back || inst.edit.nav_right || inst.edit.nav_left)
 	{
-		float fwd   = edit.nav_fwd   - edit.nav_back;
-		float right = edit.nav_right - edit.nav_left;
+		float fwd   = inst.edit.nav_fwd   - inst.edit.nav_back;
+		float right = inst.edit.nav_right - inst.edit.nav_left;
 
 		float dx = static_cast<float>(r_view.Cos * fwd + r_view.Sin * right);
 		float dy = static_cast<float>(r_view.Sin * fwd - r_view.Cos * right);
@@ -1087,16 +1087,16 @@ void Render3D_Navigate(Instance &inst)
 		r_view.y += dy * delay_ms;
 	}
 
-	if (edit.nav_up || edit.nav_down)
+	if (inst.edit.nav_up || inst.edit.nav_down)
 	{
-		float dz = (edit.nav_up - edit.nav_down);
+		float dz = (inst.edit.nav_up - inst.edit.nav_down);
 
 		r_view.z += dz * mod_factor * delay_ms;
 	}
 
-	if (edit.nav_turn_L || edit.nav_turn_R)
+	if (inst.edit.nav_turn_L || inst.edit.nav_turn_R)
 	{
-		float dang = (edit.nav_turn_L - edit.nav_turn_R);
+		float dang = (inst.edit.nav_turn_L - inst.edit.nav_turn_R);
 
 		dang = dang * mod_factor * delay_ms;
 		dang = CLAMP(-90, dang, 90);
@@ -1115,19 +1115,19 @@ static int GrabSelectedThing(Instance &inst)
 {
 	int result = -1;
 
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
-		if (edit.highlight.is_nil())
+		if (inst.edit.highlight.is_nil())
 		{
 			inst.Beep("no things for copy/cut type");
 			return -1;
 		}
 
-		result = inst.level.things[edit.highlight.num]->type;
+		result = inst.level.things[inst.edit.highlight.num]->type;
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const Thing *T = inst.level.things[*it];
 			if (result >= 0 && T->type != result)
@@ -1151,7 +1151,7 @@ static void StoreSelectedThing(Instance &inst, int new_type)
 	// this code is similar to code in UI_Thing::type_callback(),
 	// but here we must handle a highlighted object.
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("no things for paste type");
@@ -1159,9 +1159,9 @@ static void StoreSelectedThing(Instance &inst, int new_type)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("pasted type of", *edit.Selected);
+	inst.level.basis.setMessageForSelection("pasted type of", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
 	}
@@ -1193,24 +1193,24 @@ static int GrabSelectedFlat(Instance &inst)
 {
 	int result = -1;
 
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
-		if (edit.highlight.is_nil())
+		if (inst.edit.highlight.is_nil())
 		{
 			inst.Beep("no sectors for copy/cut flat");
 			return -1;
 		}
 
-		const Sector *S = inst.level.sectors[edit.highlight.num];
+		const Sector *S = inst.level.sectors[inst.edit.highlight.num];
 
-		result = SEC_GrabFlat(S, edit.highlight.parts);
+		result = SEC_GrabFlat(S, inst.edit.highlight.parts);
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const Sector *S = inst.level.sectors[*it];
-			byte parts = edit.Selected->get_ext(*it);
+			byte parts = inst.edit.Selected->get_ext(*it);
 
 			int tex = SEC_GrabFlat(S, parts & ~1);
 
@@ -1233,7 +1233,7 @@ static int GrabSelectedFlat(Instance &inst)
 
 static void StoreSelectedFlat(Instance &inst, int new_tex)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("no sectors for paste flat");
@@ -1241,11 +1241,11 @@ static void StoreSelectedFlat(Instance &inst, int new_tex)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("pasted flat to", *edit.Selected);
+	inst.level.basis.setMessageForSelection("pasted flat to", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		byte parts = edit.Selected->get_ext(*it);
+		byte parts = inst.edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
 			inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
@@ -1265,7 +1265,7 @@ static void StoreSelectedFlat(Instance &inst, int new_tex)
 
 static void StoreDefaultedFlats(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("no sectors for default");
@@ -1276,11 +1276,11 @@ static void StoreDefaultedFlats(Instance &inst)
 	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
+	inst.level.basis.setMessageForSelection("defaulted flat in", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		byte parts = edit.Selected->get_ext(*it);
+		byte parts = inst.edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
 			inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
@@ -1339,24 +1339,24 @@ static int GrabSelectedTexture(Instance &inst)
 {
 	int result = -1;
 
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
-		if (edit.highlight.is_nil())
+		if (inst.edit.highlight.is_nil())
 		{
 			inst.Beep("no linedefs for copy/cut tex");
 			return -1;
 		}
 
-		const LineDef *L = inst.level.linedefs[edit.highlight.num];
+		const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
 
-		result = LD_GrabTex(inst, L, edit.highlight.parts);
+		result = LD_GrabTex(inst, L, inst.edit.highlight.parts);
 	}
 	else
 	{
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			const LineDef *L = inst.level.linedefs[*it];
-			byte parts = edit.Selected->get_ext(*it);
+			byte parts = inst.edit.Selected->get_ext(*it);
 
 			int tex = LD_GrabTex(inst, L, parts & ~1);
 
@@ -1379,7 +1379,7 @@ static int GrabSelectedTexture(Instance &inst)
 
 static void StoreSelectedTexture(Instance &inst, int new_tex)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("no linedefs for paste tex");
@@ -1387,12 +1387,12 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("pasted tex to", *edit.Selected);
+	inst.level.basis.setMessageForSelection("pasted tex to", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const LineDef *L = inst.level.linedefs[*it];
-		byte parts = edit.Selected->get_ext(*it);
+		byte parts = inst.edit.Selected->get_ext(*it);
 
 		if (L->NoSided())
 			continue;
@@ -1437,7 +1437,7 @@ void Render3D_CB_Copy(Instance &inst)
 {
 	int num;
 
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 	case ObjType::things:
 		num = GrabSelectedThing(inst);
@@ -1465,7 +1465,7 @@ void Render3D_CB_Copy(Instance &inst)
 
 void Render3D_CB_Paste(Instance &inst)
 {
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 	case ObjType::things:
 		StoreSelectedThing(inst, Texboard_GetThing());
@@ -1489,7 +1489,7 @@ void Render3D_CB_Cut(Instance &inst)
 {
 	// this is repurposed to set the default texture/thing
 
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 	case ObjType::things:
 		StoreSelectedThing(inst, default_thing);
@@ -1689,7 +1689,7 @@ static void R3D_DropToFloor(Instance &inst)
 
 static void R3D_NAV_Forward_release(Instance &inst)
 {
-	edit.nav_fwd = 0;
+	inst.edit.nav_fwd = 0;
 }
 
 static void R3D_NAV_Forward(Instance &inst)
@@ -1697,10 +1697,10 @@ static void R3D_NAV_Forward(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
-	edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Forward_release);
 }
@@ -1708,7 +1708,7 @@ static void R3D_NAV_Forward(Instance &inst)
 
 static void R3D_NAV_Back_release(Instance &inst)
 {
-	edit.nav_back = 0;
+	inst.edit.nav_back = 0;
 }
 
 static void R3D_NAV_Back(Instance &inst)
@@ -1716,10 +1716,10 @@ static void R3D_NAV_Back(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
-	edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Back_release);
 }
@@ -1727,7 +1727,7 @@ static void R3D_NAV_Back(Instance &inst)
 
 static void R3D_NAV_Right_release(Instance &inst)
 {
-	edit.nav_right = 0;
+	inst.edit.nav_right = 0;
 }
 
 static void R3D_NAV_Right(Instance &inst)
@@ -1735,10 +1735,10 @@ static void R3D_NAV_Right(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
-	edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Right_release);
 }
@@ -1746,7 +1746,7 @@ static void R3D_NAV_Right(Instance &inst)
 
 static void R3D_NAV_Left_release(Instance &inst)
 {
-	edit.nav_left = 0;
+	inst.edit.nav_left = 0;
 }
 
 static void R3D_NAV_Left(Instance &inst)
@@ -1754,10 +1754,10 @@ static void R3D_NAV_Left(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
-	edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Left_release);
 }
@@ -1765,7 +1765,7 @@ static void R3D_NAV_Left(Instance &inst)
 
 static void R3D_NAV_Up_release(Instance &inst)
 {
-	edit.nav_up = 0;
+	inst.edit.nav_up = 0;
 }
 
 static void R3D_NAV_Up(Instance &inst)
@@ -1781,10 +1781,10 @@ static void R3D_NAV_Up(Instance &inst)
 
 	r_view.gravity = false;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
-	edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Up_release);
 }
@@ -1792,7 +1792,7 @@ static void R3D_NAV_Up(Instance &inst)
 
 static void R3D_NAV_Down_release(Instance &inst)
 {
-	edit.nav_down = 0;
+	inst.edit.nav_down = 0;
 }
 
 static void R3D_NAV_Down(Instance &inst)
@@ -1808,10 +1808,10 @@ static void R3D_NAV_Down(Instance &inst)
 
 	r_view.gravity = false;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
-	edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Down_release);
 }
@@ -1819,7 +1819,7 @@ static void R3D_NAV_Down(Instance &inst)
 
 static void R3D_NAV_TurnLeft_release(Instance &inst)
 {
-	edit.nav_turn_L = 0;
+	inst.edit.nav_turn_L = 0;
 }
 
 static void R3D_NAV_TurnLeft(Instance &inst)
@@ -1827,13 +1827,13 @@ static void R3D_NAV_TurnLeft(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
+	inst.edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_TurnLeft_release);
 }
@@ -1841,7 +1841,7 @@ static void R3D_NAV_TurnLeft(Instance &inst)
 
 static void R3D_NAV_TurnRight_release(Instance &inst)
 {
-	edit.nav_turn_R = 0;
+	inst.edit.nav_turn_R = 0;
 }
 
 static void R3D_NAV_TurnRight(Instance &inst)
@@ -1849,13 +1849,13 @@ static void R3D_NAV_TurnRight(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
+	inst.edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
 
 	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_TurnRight_release);
 }
@@ -1864,7 +1864,7 @@ static void R3D_NAV_TurnRight(Instance &inst)
 static void ACT_AdjustOfs_release(Instance &inst)
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_ADJUST_OFS)
+	if (inst.edit.action != ACT_ADJUST_OFS)
 		return;
 
 	AdjustOfs_Finish(inst);
@@ -1878,7 +1878,7 @@ static void R3D_ACT_AdjustOfs(Instance &inst)
 	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_AdjustOfs_release))
 		return;
 
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 	{
 		inst.Beep("not in linedef mode");
 		return;

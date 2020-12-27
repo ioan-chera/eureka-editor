@@ -481,7 +481,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 
 static bool Clipboard_DoCopy(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 		return false;
 
@@ -491,12 +491,12 @@ static bool Clipboard_DoCopy(Instance &inst)
 
 	bool result = true;
 
-	clip_board = new clipboard_data_c(edit.mode);
+	clip_board = new clipboard_data_c(inst.edit.mode);
 
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::things:
-			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
 				*T = *inst.level.things[*it];
@@ -505,7 +505,7 @@ static bool Clipboard_DoCopy(Instance &inst)
 			break;
 
 		case ObjType::vertices:
-			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
 				*V = *inst.level.vertices[*it];
@@ -515,7 +515,7 @@ static bool Clipboard_DoCopy(Instance &inst)
 
 		case ObjType::linedefs:
 		case ObjType::sectors:
-			CopyGroupOfObjects(inst.level, edit.Selected);
+			CopyGroupOfObjects(inst.level, inst.edit.Selected);
 			break;
 
 		default:
@@ -523,11 +523,11 @@ static bool Clipboard_DoCopy(Instance &inst)
 			break;
 	}
 
-	int total = edit.Selected->count_obj();
+	int total = inst.edit.Selected->count_obj();
 	if (total == 1)
-		inst.Status_Set("copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
+		inst.Status_Set("copied %s #%d", NameForObjectType(inst.edit.Selected->what_type()), inst.edit.Selected->find_first());
 	else
-		inst.Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
+		inst.Status_Set("copied %d %s", total, NameForObjectType(inst.edit.Selected->what_type(), true /* plural */));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
@@ -653,7 +653,7 @@ static void ReselectGroup(Instance &inst)
 	// this assumes all the new objects are at the end of their
 	// array (currently true, but not a guarantee of BA_New).
 
-	if (edit.mode == ObjType::things)
+	if (inst.edit.mode == ObjType::things)
 	{
 		if (clip_board->mode == ObjType::things ||
 		    clip_board->mode == ObjType::sectors)
@@ -662,7 +662,7 @@ static void ReselectGroup(Instance &inst)
 
 			Selection_Clear(inst);
 
-			edit.Selected->frob_range(inst.level.numThings() - count, inst.level.numThings()-1, BitOp::add);
+			inst.edit.Selected->frob_range(inst.level.numThings() - count, inst.level.numThings()-1, BitOp::add);
 		}
 		return;
 	}
@@ -671,9 +671,9 @@ static void ReselectGroup(Instance &inst)
 			    	  clip_board->mode == ObjType::linedefs ||
 					  clip_board->mode == ObjType::sectors);
 
-	bool is_mappy =  (edit.mode == ObjType::vertices ||
-			    	  edit.mode == ObjType::linedefs ||
-					  edit.mode == ObjType::sectors);
+	bool is_mappy =  (inst.edit.mode == ObjType::vertices ||
+			    	  inst.edit.mode == ObjType::linedefs ||
+					  inst.edit.mode == ObjType::sectors);
 
 	if (! (was_mappy && is_mappy))
 		return;
@@ -704,7 +704,7 @@ static void ReselectGroup(Instance &inst)
 
 	Selection_Clear(inst);
 
-	ConvertSelection(inst.level, &new_sel, edit.Selected);
+	ConvertSelection(inst.level, &new_sel, inst.edit.Selected);
 }
 
 
@@ -718,10 +718,10 @@ static bool Clipboard_DoPaste(Instance &inst)
 		return false;
 
 	// figure out where to put stuff
-	double pos_x = edit.map_x;
-	double pos_y = edit.map_y;
+	double pos_x = inst.edit.map_x;
+	double pos_y = inst.edit.map_y;
 
-	if (! edit.pointer_in_window)
+	if (! inst.edit.pointer_in_window)
 	{
 		pos_x = grid.orig_x;
 		pos_y = grid.orig_y;
@@ -791,7 +791,7 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 	inst.level.basis.end();
 
-	edit.error_mode = false;
+	inst.edit.error_mode = false;
 
 	if (reselect)
 		ReselectGroup(inst);
@@ -804,7 +804,7 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 void CMD_CopyAndPaste(Instance &inst)
 {
-	if (edit.Selected->empty() && edit.highlight.is_nil())
+	if (inst.edit.Selected->empty() && inst.edit.highlight.is_nil())
 	{
 		inst.Beep("Nothing to copy and paste");
 		return;
@@ -822,7 +822,7 @@ void CMD_Clipboard_Cut(Instance &inst)
 	if (inst.main_win->ClipboardOp(EditCommand::cut))
 		return;
 
-	if (edit.render3d && edit.mode != ObjType::things)
+	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
 	{
 		Render3D_CB_Cut(inst);
 		return;
@@ -843,7 +843,7 @@ void CMD_Clipboard_Copy(Instance &inst)
 	if (inst.main_win->ClipboardOp(EditCommand::copy))
 		return;
 
-	if (edit.render3d && edit.mode != ObjType::things)
+	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
 	{
 		Render3D_CB_Copy(inst);
 		return;
@@ -862,7 +862,7 @@ void CMD_Clipboard_Paste(Instance &inst)
 	if (inst.main_win->ClipboardOp(EditCommand::paste))
 		return;
 
-	if (edit.render3d && edit.mode != ObjType::things)
+	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
 	{
 		Render3D_CB_Paste(inst);
 		return;
@@ -1221,7 +1221,7 @@ void CMD_Delete(Instance &inst)
 	if (inst.main_win->ClipboardOp(EditCommand::del))
 		return;
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("Nothing to delete");
@@ -1232,9 +1232,9 @@ void CMD_Delete(Instance &inst)
 
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
-	if (edit.mode == ObjType::vertices && edit.Selected->count_obj() == 1)
+	if (inst.edit.mode == ObjType::vertices && inst.edit.Selected->count_obj() == 1)
 	{
-		int v_num = edit.Selected->find_first();
+		int v_num = inst.edit.Selected->find_first();
 		SYS_ASSERT(v_num >= 0);
 
 		if (inst.level.vertmod.howManyLinedefs(v_num) == 2)
@@ -1247,9 +1247,9 @@ void CMD_Delete(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("deleted", *edit.Selected);
+	inst.level.basis.setMessageForSelection("deleted", *inst.edit.Selected);
 
-	DeleteObjects_WithUnused(inst.level, edit.Selected, keep, false /* keep_verts */, keep);
+	DeleteObjects_WithUnused(inst.level, inst.edit.Selected, keep, false /* keep_verts */, keep);
 
 	inst.level.basis.end();
 
@@ -1259,8 +1259,8 @@ success:
 	// always clear the selection (deleting objects invalidates it)
 	Selection_Clear(inst);
 
-	edit.highlight.clear();
-	edit.split_line.clear();
+	inst.edit.highlight.clear();
+	inst.edit.split_line.clear();
 
 	RedrawMap(inst);
 }

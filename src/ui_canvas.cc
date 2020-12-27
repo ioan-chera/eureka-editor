@@ -143,7 +143,7 @@ void UI_Canvas::draw()
 #endif
 #endif
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		Render3D_Draw(inst, x(), y(), w(), h());
 		return;
@@ -237,7 +237,7 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 
 void UI_Canvas::PointerPos(bool in_event)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		return;
 
 	// we read current position outside of FLTK's event propagation.
@@ -248,21 +248,21 @@ void UI_Canvas::PointerPos(bool in_event)
 	raw_x -= main_win->x_root();
 	raw_y -= main_win->y_root();
 
-	edit.map_x = MAPX(raw_x);
-	edit.map_y = MAPY(raw_y);
+	inst.edit.map_x = MAPX(raw_x);
+	inst.edit.map_y = MAPY(raw_y);
 
 #else // OpenGL
 	raw_x -= x_root();
 	raw_y -= y_root();
 
-	edit.map_x = MAPX(raw_x);
-	edit.map_y = MAPY(h() - 1 - raw_y);
+	inst.edit.map_x = MAPX(raw_x);
+	inst.edit.map_y = MAPY(h() - 1 - raw_y);
 #endif
 
-	grid.NaturalSnapXY(edit.map_x, edit.map_y);
+	grid.NaturalSnapXY(inst.edit.map_x, inst.edit.map_y);
 
 	// no Z coord with the 2D map view
-	edit.map_z = -1;
+	inst.edit.map_z = -1;
 }
 
 
@@ -297,49 +297,49 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 void UI_Canvas::DrawEverything()
 {
 	// setup for drawing sector numbers
-	if (edit.show_object_numbers && edit.mode == ObjType::sectors)
+	if (inst.edit.show_object_numbers && inst.edit.mode == ObjType::sectors)
 	{
 		seen_sectors.clear_all();
 	}
 
 	DrawMap();
 
-	DrawSelection(edit.Selected);
+	DrawSelection(inst.edit.Selected);
 
-	if (edit.action == ACT_DRAG && !edit.dragged.valid() && edit.drag_lines != NULL)
-		DrawSelection(edit.drag_lines);
-	else if (edit.action == ACT_TRANSFORM && edit.trans_lines != NULL)
-		DrawSelection(edit.trans_lines);
+	if (inst.edit.action == ACT_DRAG && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
+		DrawSelection(inst.edit.drag_lines);
+	else if (inst.edit.action == ACT_TRANSFORM && inst.edit.trans_lines != NULL)
+		DrawSelection(inst.edit.trans_lines);
 
-	if (edit.action == ACT_DRAG && edit.dragged.valid())
+	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
 	{
 		double dx = 0;
 		double dy = 0;
 		DragDelta(&dx, &dy);
 
-		if (edit.mode == ObjType::vertices)
+		if (inst.edit.mode == ObjType::vertices)
 			RenderColor(HI_AND_SEL_COL);
 		else
 			RenderColor(HI_COL);
 
-		if (edit.mode == ObjType::linedefs || edit.mode == ObjType::sectors)
+		if (inst.edit.mode == ObjType::linedefs || inst.edit.mode == ObjType::sectors)
 			RenderThickness(2);
 
-		DrawHighlight(edit.mode, edit.dragged.num, false /* skip_lines */, dx, dy);
+		DrawHighlight(inst.edit.mode, inst.edit.dragged.num, false /* skip_lines */, dx, dy);
 
-		if (edit.mode == ObjType::vertices && edit.highlight.valid())
+		if (inst.edit.mode == ObjType::vertices && inst.edit.highlight.valid())
 		{
 			RenderColor(HI_COL);
-			DrawHighlight(edit.highlight.type, edit.highlight.num);
+			DrawHighlight(inst.edit.highlight.type, inst.edit.highlight.num);
 		}
 
 		RenderThickness(1);
 
 		// when ratio lock is on, want to see the new line
-		if (edit.mode == ObjType::vertices && grid.ratio > 0 && edit.drag_other_vert >= 0)
+		if (inst.edit.mode == ObjType::vertices && grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
 		{
-			const Vertex *v0 = inst.level.vertices[edit.drag_other_vert];
-			const Vertex *v1 = inst.level.vertices[edit.dragged.num];
+			const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
+			const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy);
@@ -347,37 +347,37 @@ void UI_Canvas::DrawEverything()
 			DrawLineInfo(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy, true);
 		}
 	}
-	else if (edit.highlight.valid())
+	else if (inst.edit.highlight.valid())
 	{
-		if (edit.action != ACT_DRAW_LINE && edit.Selected->get(edit.highlight.num))
+		if (inst.edit.action != ACT_DRAW_LINE && inst.edit.Selected->get(inst.edit.highlight.num))
 			RenderColor(HI_AND_SEL_COL);
 		else
 			RenderColor(HI_COL);
 
-		if (edit.highlight.type == ObjType::linedefs || edit.highlight.type == ObjType::sectors)
+		if (inst.edit.highlight.type == ObjType::linedefs || inst.edit.highlight.type == ObjType::sectors)
 			RenderThickness(2);
 
-		DrawHighlight(edit.highlight.type, edit.highlight.num);
+		DrawHighlight(inst.edit.highlight.type, inst.edit.highlight.num);
 
-		if (! edit.error_mode)
+		if (! inst.edit.error_mode)
 		{
 			RenderColor(LIGHTRED);
-			DrawTagged(edit.highlight.type, edit.highlight.num);
+			DrawTagged(inst.edit.highlight.type, inst.edit.highlight.num);
 		}
 
-		if (edit.mode == ObjType::linedefs && !edit.show_object_numbers)
+		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
-			const LineDef *L = inst.level.linedefs[edit.highlight.num];
+			const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
 			DrawLineInfo(L->Start(inst.level)->x(), L->Start(inst.level)->y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
 		}
 
 		RenderThickness(1);
 	}
 
-	if (edit.action == ACT_SELBOX)
+	if (inst.edit.action == ACT_SELBOX)
 		SelboxDraw();
 
-	if (edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == ACT_DRAW_LINE)
 		DrawCurrentLine();
 }
 
@@ -390,7 +390,7 @@ void UI_Canvas::DrawMap()
 	RenderColor(FL_BLACK);
 	RenderRect(xx, yy, w(), h());
 
-	if (edit.sector_render_mode && ! edit.error_mode)
+	if (inst.edit.sector_render_mode && ! inst.edit.error_mode)
 	{
 		for (int n = 0 ; n < inst.level.numSectors(); n++)
 			RenderSector(n);
@@ -410,7 +410,7 @@ void UI_Canvas::DrawMap()
 
 	DrawCamera();
 
-	if (edit.mode != ObjType::things)
+	if (inst.edit.mode != ObjType::things)
 		DrawThings();
 
 	if (grid.snap && config::grid_snap_indicator)
@@ -418,12 +418,12 @@ void UI_Canvas::DrawMap()
 
 	DrawLinedefs();
 
-	if (edit.mode == ObjType::vertices)
+	if (inst.edit.mode == ObjType::vertices)
 		DrawVertices();
 
-	if (edit.mode == ObjType::things)
+	if (inst.edit.mode == ObjType::things)
 	{
-		if (edit.thing_render_mode > 0)
+		if (inst.edit.thing_render_mode > 0)
 		{
 			DrawThings();
 			DrawThingSprites();
@@ -438,7 +438,7 @@ void UI_Canvas::DrawMap()
 
 
 //
-//  draw the grid in the background of the edit window
+//  draw the grid in the background of the inst.edit window
 //
 void UI_Canvas::DrawGrid_Normal()
 {
@@ -664,7 +664,7 @@ void UI_Canvas::DrawVertices()
 		}
 	}
 
-	if (edit.show_object_numbers)
+	if (inst.edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < inst.level.numVertices(); n++)
 		{
@@ -707,27 +707,27 @@ void UI_Canvas::DrawLinedefs()
 		// 'p' for plain, 'k' for knobbly, 's' for split
 		char line_kind = 'p';
 
-		switch (edit.mode)
+		switch (inst.edit.mode)
 		{
 			case ObjType::vertices:
 			{
-				if (n == edit.split_line.num)
+				if (n == inst.edit.split_line.num)
 					col = HI_AND_SEL_COL;
-				else if (edit.error_mode)
+				else if (inst.edit.error_mode)
 					col = LIGHTGREY;
 				else if (L->right < 0)
 					col = RED;
 				else if (one_sided)
 					col = WHITE;
 
-				if (n == edit.split_line.num)
+				if (n == inst.edit.split_line.num)
 					line_kind = 's';
 				else
 					line_kind = 'k';
 
 				// show info of last four added lines
-				if (n != edit.split_line.num && n >= (inst.level.numLinedefs() - 4) &&
-					!edit.show_object_numbers)
+				if (n != inst.edit.split_line.num && n >= (inst.level.numLinedefs() - 4) &&
+					!inst.edit.show_object_numbers)
 				{
 					DrawLineInfo(x1, y1, x2, y2, false);
 				}
@@ -736,7 +736,7 @@ void UI_Canvas::DrawLinedefs()
 
 			case ObjType::linedefs:
 			{
-				if (edit.error_mode)
+				if (inst.edit.error_mode)
 					col = LIGHTGREY;
 				else if (! L->Right(inst.level)) // no first sidedef?
 					col = RED;
@@ -764,11 +764,11 @@ void UI_Canvas::DrawLinedefs()
 				int s1  = (sd1 < 0) ? NIL_OBJ : inst.level.sidedefs[sd1]->sector;
 				int s2  = (sd2 < 0) ? NIL_OBJ : inst.level.sidedefs[sd2]->sector;
 
-				if (edit.error_mode)
+				if (inst.edit.error_mode)
 					col = LIGHTGREY;
 				else if (sd1 < 0)
 					col = RED;
-				else if (edit.sector_render_mode == SREND_SoundProp)
+				else if (inst.edit.sector_render_mode == SREND_SoundProp)
 				{
 					if (L->flags & MLF_SoundBlock)
 						col = FL_MAGENTA;
@@ -804,7 +804,7 @@ void UI_Canvas::DrawLinedefs()
 						col = WHITE;
 				}
 
-				if (edit.show_object_numbers)
+				if (inst.edit.show_object_numbers)
 				{
 					if (s1 != NIL_OBJ)
 						DrawSectorNum(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), Side::right, s1);
@@ -818,7 +818,7 @@ void UI_Canvas::DrawLinedefs()
 			// OBJ_THINGS
 			default:
 			{
-				if (one_sided && ! edit.error_mode)
+				if (one_sided && ! inst.edit.error_mode)
 					col = WHITE;
 			}
 			break;
@@ -843,7 +843,7 @@ void UI_Canvas::DrawLinedefs()
 	}
 
 	// draw the linedef numbers
-	if (edit.mode == ObjType::linedefs && edit.show_object_numbers)
+	if (inst.edit.mode == ObjType::linedefs && inst.edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 		{
@@ -892,9 +892,9 @@ void UI_Canvas::DrawThing(double x, double y, int r, int angle, bool big_arrow)
 //
 void UI_Canvas::DrawThings()
 {
-	if (edit.mode != ObjType::things)
+	if (inst.edit.mode != ObjType::things)
 		RenderColor(DARKGREY);
-	else if (edit.error_mode)
+	else if (inst.edit.error_mode)
 		RenderColor(LIGHTGREY);
 
 	for (const Thing *thing : inst.level.things)
@@ -907,7 +907,7 @@ void UI_Canvas::DrawThings()
 
 		const thingtype_t &info = M_GetThingType(thing->type);
 
-		if (edit.mode == ObjType::things && !edit.error_mode)
+		if (inst.edit.mode == ObjType::things && !inst.edit.error_mode)
 		{
 			Fl_Color col = (Fl_Color)info.color;
 			RenderColor(col);
@@ -919,7 +919,7 @@ void UI_Canvas::DrawThings()
 	}
 
 	// draw the thing numbers
-	if (edit.mode == ObjType::things && edit.show_object_numbers)
+	if (inst.edit.mode == ObjType::things && inst.edit.show_object_numbers)
 	{
 		for (int n = 0 ; n < inst.level.numThings(); n++)
 		{
@@ -945,7 +945,7 @@ void UI_Canvas::DrawThings()
 //
 void UI_Canvas::DrawThingBodies()
 {
-	if (edit.error_mode)
+	if (inst.edit.error_mode)
 		return;
 
 	for (const Thing *thing : inst.level.things)
@@ -1273,8 +1273,8 @@ void UI_Canvas::CheckGridSnap()
 	if (!grid.snap || !config::grid_snap_indicator)
 		return;
 
-	double new_snap_x = grid.SnapX(edit.map_x);
-	double new_snap_y = grid.SnapY(edit.map_y);
+	double new_snap_x = grid.SnapX(inst.edit.map_x);
+	double new_snap_y = grid.SnapY(inst.edit.map_y);
 
 	if (snap_x == new_snap_x && snap_y == new_snap_y)
 		return;
@@ -1290,19 +1290,19 @@ void UI_Canvas::UpdateHighlight()
 {
 	bool changes = false;
 
-	if (! (last_highlight == edit.highlight))
+	if (! (last_highlight == inst.edit.highlight))
 	{
-		last_highlight = edit.highlight;
+		last_highlight = inst.edit.highlight;
 		changes = true;
 	}
 
-	int new_ld = edit.split_line.valid() ? edit.split_line.num : -1;
+	int new_ld = inst.edit.split_line.valid() ? inst.edit.split_line.num : -1;
 
-	if (! (last_splitter == new_ld && last_split_x == edit.split_x && last_split_y == edit.split_y))
+	if (! (last_splitter == new_ld && last_split_x == inst.edit.split_x && last_split_y == inst.edit.split_y))
 	{
 		last_splitter = new_ld;
-		last_split_x  = edit.split_x;
-		last_split_y  = edit.split_y;
+		last_split_x  = inst.edit.split_x;
+		last_split_y  = inst.edit.split_y;
 		changes = true;
 	}
 
@@ -1335,7 +1335,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 			int r = info.radius;
 
-			if (edit.error_mode)
+			if (inst.edit.error_mode)
 				DrawThing(x, y, r, inst.level.things[objnum]->angle, false /* big_arrow */);
 
 			r += r / 10 + 4;
@@ -1399,8 +1399,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 					int sec1 = L->Right(inst.level)->sector;
 					int sec2 = L->Left (inst.level)->sector;
 
-					if ((sec1 == objnum || edit.Selected->get(sec1)) &&
-					    (sec2 == objnum || edit.Selected->get(sec2)))
+					if ((sec1 == objnum || inst.edit.Selected->get(sec1)) &&
+					    (sec2 == objnum || inst.edit.Selected->get(sec2)))
 						continue;
 
 					if (sec1 != objnum)
@@ -1440,7 +1440,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			double x = inst.level.things[objnum]->x();
 			double y = inst.level.things[objnum]->y();
 
-			edit.trans_param.Apply(&x, &y);
+			inst.edit.trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
@@ -1460,7 +1460,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 			int vert_r = vertex_radius(grid.Scale);
 
-			edit.trans_param.Apply(&x, &y);
+			inst.edit.trans_param.Apply(&x, &y);
 
 			if (! Vis(x, y, vert_r))
 				break;
@@ -1488,8 +1488,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			double x2 = inst.level.linedefs[objnum]->End  (inst.level)->x();
 			double y2 = inst.level.linedefs[objnum]->End  (inst.level)->y();
 
-			edit.trans_param.Apply(&x1, &y1);
-			edit.trans_param.Apply(&x2, &y2);
+			inst.edit.trans_param.Apply(&x1, &y1);
+			inst.edit.trans_param.Apply(&x2, &y2);
 
 			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 				break;
@@ -1510,8 +1510,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 				double x2 = linedef->End  (inst.level)->x();
 				double y2 = linedef->End  (inst.level)->y();
 
-				edit.trans_param.Apply(&x1, &y1);
-				edit.trans_param.Apply(&x2, &y2);
+				inst.edit.trans_param.Apply(&x1, &y1);
+				inst.edit.trans_param.Apply(&x2, &y2);
 
 				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
 					continue;
@@ -1596,7 +1596,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	if (! list || list->empty())
 		return;
 
-	if (edit.action == ACT_TRANSFORM)
+	if (inst.edit.action == ACT_TRANSFORM)
 	{
 		RenderColor(SEL_COL);
 
@@ -1615,12 +1615,12 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	double dx = 0;
 	double dy = 0;
 
-	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
+	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
 	{
 		DragDelta(&dx, &dy);
 	}
 
-	RenderColor(edit.error_mode ? FL_RED : SEL_COL);
+	RenderColor(inst.edit.error_mode ? FL_RED : SEL_COL);
 
 	if (list->what_type() == ObjType::linedefs || list->what_type() == ObjType::sectors)
 		RenderThickness(2);
@@ -1638,7 +1638,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		}
 	}
 
-	if (! edit.error_mode && dx == 0 && dy == 0)
+	if (! inst.edit.error_mode && dx == 0 && dy == 0)
 	{
 		RenderColor(LIGHTRED);
 
@@ -1734,24 +1734,24 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 	int scr_x2 = SCREENX(map_x2);
 	int scr_y2 = SCREENY(map_y2);
 
-	int scr_mx = SCREENX(edit.split_x);
-	int scr_my = SCREENY(edit.split_y);
+	int scr_mx = SCREENX(inst.edit.split_x);
+	int scr_my = SCREENY(inst.edit.split_y);
 
 	RenderLine(scr_x1, scr_y1, scr_mx, scr_my);
 	RenderLine(scr_x2, scr_y2, scr_mx, scr_my);
 
-	if (! edit.show_object_numbers)
+	if (! inst.edit.show_object_numbers)
 	{
-		double len1 = hypot(map_x1 - edit.split_x, map_y1 - edit.split_y);
-		double len2 = hypot(map_x2 - edit.split_x, map_y2 - edit.split_y);
+		double len1 = hypot(map_x1 - inst.edit.split_x, map_y1 - inst.edit.split_y);
+		double len2 = hypot(map_x2 - inst.edit.split_x, map_y2 - inst.edit.split_y);
 
-		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), Side::neither, I_ROUND(len1));
-		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(edit.split_x), static_cast<int>(edit.split_y), Side::neither, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split_x), static_cast<int>(inst.edit.split_y), Side::neither, I_ROUND(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split_x), static_cast<int>(inst.edit.split_y), Side::neither, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);
 
-	DrawSplitPoint(edit.split_x, edit.split_y);
+	DrawSplitPoint(inst.edit.split_x, inst.edit.split_y);
 }
 
 
@@ -1880,10 +1880,10 @@ void UI_Canvas::DrawCamera()
 void UI_Canvas::DrawSnapPoint()
 {
 	// don't draw if an action is occurring
-	if (edit.action != ACT_NOTHING)
+	if (inst.edit.action != ACT_NOTHING)
 		return;
 
-	if (edit.split_line.valid())
+	if (inst.edit.split_line.valid())
 		return;
 
 	if (! Vis(snap_x, snap_y, 10))
@@ -1901,16 +1901,16 @@ void UI_Canvas::DrawSnapPoint()
 
 void UI_Canvas::DrawCurrentLine()
 {
-	if (edit.draw_from.is_nil())
+	if (inst.edit.draw_from.is_nil())
 		return;
 
-	const Vertex * V = inst.level.vertices[edit.draw_from.num];
+	const Vertex * V = inst.level.vertices[inst.edit.draw_from.num];
 
-	double new_x = edit.draw_to_x;
-	double new_y = edit.draw_to_y;
+	double new_x = inst.edit.draw_to_x;
+	double new_y = inst.edit.draw_to_y;
 
 	// should draw a vertex?
-	if (! (edit.highlight.valid() || edit.split_line.valid()))
+	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
 	{
 		RenderColor(FL_GREEN);
 		DrawVertex(new_x, new_y, vertex_radius(grid.Scale));
@@ -1925,15 +1925,15 @@ void UI_Canvas::DrawCurrentLine()
 	crossing_state_c cross(inst.level);
 
 	inst.level.hover.findCrossingPoints(cross,
-					   V->x(), V->y(), edit.draw_from.num,
-					   new_x, new_y, edit.highlight.valid() ? edit.highlight.num : -1);
+					   V->x(), V->y(), inst.edit.draw_from.num,
+					   new_x, new_y, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{
 		cross_point_t& point = cross.points[k];
 
 		// ignore current split line (what new vertex is sitting on)
-		if (point.ld >= 0 && point.ld == edit.split_line.num)
+		if (point.ld >= 0 && point.ld == inst.edit.split_line.num)
 			continue;
 
 		if (point.vert >= 0)
@@ -1948,10 +1948,10 @@ void UI_Canvas::DrawCurrentLine()
 
 bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 {
-	x1 = MIN(edit.selbox_x1, edit.selbox_x2);
-	y1 = MIN(edit.selbox_y1, edit.selbox_y2);
-	x2 = MAX(edit.selbox_x1, edit.selbox_x2);
-	y2 = MAX(edit.selbox_y1, edit.selbox_y2);
+	x1 = MIN(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	y1 = MIN(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	x2 = MAX(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	y2 = MAX(inst.edit.selbox_y1, inst.edit.selbox_y2);
 
 	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
 	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
@@ -1966,10 +1966,10 @@ bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 
 void UI_Canvas::SelboxDraw()
 {
-	double x1 = MIN(edit.selbox_x1, edit.selbox_x2);
-	double x2 = MAX(edit.selbox_x1, edit.selbox_x2);
-	double y1 = MIN(edit.selbox_y1, edit.selbox_y2);
-	double y2 = MAX(edit.selbox_y1, edit.selbox_y2);
+	double x1 = MIN(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	double x2 = MAX(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	double y1 = MIN(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	double y2 = MAX(inst.edit.selbox_y1, inst.edit.selbox_y2);
 
 	RenderColor(FL_CYAN);
 
@@ -1982,8 +1982,8 @@ void UI_Canvas::SelboxDraw()
 
 void UI_Canvas::DragDelta(double *dx, double *dy)
 {
-	*dx = edit.drag_cur_x - edit.drag_start_x;
-	*dy = edit.drag_cur_y - edit.drag_start_y;
+	*dx = inst.edit.drag_cur_x - inst.edit.drag_start_x;
+	*dy = inst.edit.drag_cur_y - inst.edit.drag_start_y;
 
 	float pixel_dx = static_cast<float>(*dx * grid.Scale);
 	float pixel_dy = static_cast<float>(*dy * grid.Scale);
@@ -1997,14 +1997,14 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 	}
 
 	// handle ratio-lock of a single dragged vertex
-	if (edit.mode == ObjType::vertices && grid.ratio > 0 &&
-		edit.dragged.num >= 0 && edit.drag_other_vert >= 0)
+	if (inst.edit.mode == ObjType::vertices && grid.ratio > 0 &&
+		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
-		const Vertex *v0 = inst.level.vertices[edit.drag_other_vert];
-		const Vertex *v1 = inst.level.vertices[edit.dragged.num];
+		const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
+		const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
 
-		double new_x = edit.drag_cur_x;
-		double new_y = edit.drag_cur_y;
+		double new_x = inst.edit.drag_cur_x;
+		double new_y = inst.edit.drag_cur_y;
 
 		grid.RatioSnapXY(new_x, new_y, v0->x(), v0->y());
 
@@ -2015,23 +2015,23 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 
 	if (grid.ratio > 0)
 	{
-		double new_x = edit.drag_cur_x;
-		double new_y = edit.drag_cur_y;
+		double new_x = inst.edit.drag_cur_x;
+		double new_y = inst.edit.drag_cur_y;
 
-		grid.RatioSnapXY(new_x, new_y, edit.drag_start_x, edit.drag_start_y);
+		grid.RatioSnapXY(new_x, new_y, inst.edit.drag_start_x, inst.edit.drag_start_y);
 
-		*dx = new_x - edit.drag_start_x;
-		*dy = new_y - edit.drag_start_y;
+		*dx = new_x - inst.edit.drag_start_x;
+		*dy = new_y - inst.edit.drag_start_y;
 		return;
 	}
 
 	if (grid.snap)
 	{
-		double focus_x = edit.drag_focus_x + *dx;
-		double focus_y = edit.drag_focus_y + *dy;
+		double focus_x = inst.edit.drag_focus_x + *dx;
+		double focus_y = inst.edit.drag_focus_y + *dy;
 
-		*dx = grid.SnapX(focus_x) - edit.drag_focus_x;
-		*dy = grid.SnapY(focus_y) - edit.drag_focus_y;
+		*dx = grid.SnapX(focus_x) - inst.edit.drag_focus_x;
+		*dy = grid.SnapY(focus_y) - inst.edit.drag_focus_y;
 	}
 }
 
@@ -2058,16 +2058,16 @@ void UI_Canvas::RenderSector(int num)
 
 	Img_c * img = NULL;
 
-	if (edit.sector_render_mode == SREND_Lighting)
+	if (inst.edit.sector_render_mode == SREND_Lighting)
 	{
 		RenderColor(light_col);
 	}
-	else if (edit.sector_render_mode == SREND_SoundProp)
+	else if (inst.edit.sector_render_mode == SREND_SoundProp)
 	{
-		if (edit.mode != ObjType::sectors || !edit.highlight.valid())
+		if (inst.edit.mode != ObjType::sectors || !inst.edit.highlight.valid())
 			return;
 
-		const byte * prop = SoundPropagation(inst, edit.highlight.num);
+		const byte * prop = SoundPropagation(inst, inst.edit.highlight.num);
 
 		switch ((propagate_level_e) prop[num])
 		{
@@ -2079,11 +2079,11 @@ void UI_Canvas::RenderSector(int num)
 	}
 	else
 	{
-		if (edit.sector_render_mode <= SREND_Ceiling)
+		if (inst.edit.sector_render_mode <= SREND_Ceiling)
 			light_and_tex = true;
 
-		if (edit.sector_render_mode == SREND_Ceiling ||
-			edit.sector_render_mode == SREND_CeilBright)
+		if (inst.edit.sector_render_mode == SREND_Ceiling ||
+			inst.edit.sector_render_mode == SREND_CeilBright)
 			tex_name = inst.level.sectors[num]->CeilTex();
 		else
 			tex_name = inst.level.sectors[num]->FloorTex();

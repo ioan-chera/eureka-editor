@@ -179,7 +179,7 @@ static void SelectLinesInHalfPath(const Document &doc, int L, int V, selection_c
 void CMD_LIN_SelectPath(Instance &inst)
 {
 	// determine starting linedef
-	if (edit.highlight.is_nil())
+	if (inst.edit.highlight.is_nil())
 	{
 		inst.Beep("No highlighted line");
 		return;
@@ -192,14 +192,14 @@ void CMD_LIN_SelectPath(Instance &inst)
 	if (Exec_HasFlag("/onesided")) match |= SLP_OneSided;
 	if (Exec_HasFlag("/sametex"))  match |= SLP_SameTex;
 
-	int start_L = edit.highlight.num;
+	int start_L = inst.edit.highlight.num;
 
 	if ((match & SLP_OneSided) && !inst.level.linedefs[start_L]->OneSided())
 		return;
 
 	bool unset_them = false;
 
-	if (!fresh_sel && edit.Selected->get(start_L))
+	if (!fresh_sel && inst.edit.Selected->get(start_L))
 		unset_them = true;
 
 	selection_c seen(ObjType::linedefs);
@@ -215,9 +215,9 @@ void CMD_LIN_SelectPath(Instance &inst)
 		Selection_Clear(inst);
 
 	if (unset_them)
-		edit.Selected->unmerge(seen);
+		inst.edit.Selected->unmerge(seen);
 	else
-		edit.Selected->merge(seen);
+		inst.edit.Selected->merge(seen);
 
 	 RedrawMap(inst);
 }
@@ -319,7 +319,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 void CMD_SEC_SelectGroup(Instance &inst)
 {
 	// determine starting sector
-	if (edit.highlight.is_nil())
+	if (inst.edit.highlight.is_nil())
 	{
 		inst.Beep("No highlighted sector");
 		return;
@@ -327,11 +327,11 @@ void CMD_SEC_SelectGroup(Instance &inst)
 
 	bool fresh_sel = Exec_HasFlag("/fresh");
 
-	int start_sec = edit.highlight.num;
+	int start_sec = inst.edit.highlight.num;
 
 	bool unset_them = false;
 
-	if (!fresh_sel && edit.Selected->get(start_sec))
+	if (!fresh_sel && inst.edit.Selected->get(start_sec))
 		unset_them = true;
 
 	selection_c seen(ObjType::sectors);
@@ -348,9 +348,9 @@ void CMD_SEC_SelectGroup(Instance &inst)
 		Selection_Clear(inst);
 
 	if (unset_them)
-		edit.Selected->unmerge(seen);
+		inst.edit.Selected->unmerge(seen);
 	else
-		edit.Selected->merge(seen);
+		inst.edit.Selected->merge(seen);
 
 	 RedrawMap(inst);
 }
@@ -361,11 +361,11 @@ void CMD_SEC_SelectGroup(Instance &inst)
 
 void GoToSelection(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		Render3D_Enable(inst, false);
 
 	double x1, y1, x2, y2;
-	inst.level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	inst.level.objects.calcBBox(inst.edit.Selected, &x1, &y1, &x2, &y2);
 
 	double mid_x = (x1 + x2) / 2;
 	double mid_y = (y1 + y2) / 2;
@@ -403,7 +403,7 @@ void GoToSelection(Instance &inst)
 
 void GoToErrors(Instance &inst)
 {
-	edit.error_mode = true;
+	inst.edit.error_mode = true;
 
 	GoToSelection(inst);
 }
@@ -416,7 +416,7 @@ void GoToObject(Instance &inst, const Objid& objid)
 {
 	Selection_Clear(inst);
 
-	edit.Selected->set(objid.num);
+	inst.edit.Selected->set(objid.num);
 
 	GoToSelection(inst);
 }
@@ -424,7 +424,7 @@ void GoToObject(Instance &inst, const Objid& objid)
 
 void CMD_JumpToObject(Instance &inst)
 {
-	int total = inst.level.numObjects(edit.mode);
+	int total = inst.level.numObjects(inst.edit.mode);
 
 	if (total <= 0)
 	{
@@ -432,7 +432,7 @@ void CMD_JumpToObject(Instance &inst)
 		return;
 	}
 
-	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(edit.mode), total - 1);
+	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(inst.edit.mode), total - 1);
 
 	int num = dialog->Run();
 
@@ -444,7 +444,7 @@ void CMD_JumpToObject(Instance &inst)
 	// this is guaranteed by the dialog
 	SYS_ASSERT(num < total);
 
-	GoToObject(inst, Objid(edit.mode, num));
+	GoToObject(inst, Objid(inst.edit.mode, num));
 }
 
 

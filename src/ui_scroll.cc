@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 #include "m_config.h"
@@ -342,10 +343,10 @@ UI_CanvasScroll::~UI_CanvasScroll()
 void UI_CanvasScroll::UpdateRenderMode()
 {
 	int old_bars = enable_bars ? 1 : 0;
-	int new_bars = config::map_scroll_bars && !edit.render3d ? 1 : 0;
+	int new_bars = config::map_scroll_bars && !mInstance.edit.render3d ? 1 : 0;
 
 	int old_rend = status->visible() ? 1 : 0;
-	int new_rend = edit.render3d ? 1 : 0;
+	int new_rend = mInstance.edit.render3d ? 1 : 0;
 
 	// nothing changed?
 	if (old_bars == new_bars && old_rend == new_rend)

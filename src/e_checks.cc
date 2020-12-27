@@ -292,10 +292,10 @@ static void Vertex_FindDanglers(selection_c& sel, const Document &doc)
 
 static void Vertex_ShowDanglers(Instance &inst)
 {
-	if (edit.mode != ObjType::vertices)
+	if (inst.edit.mode != ObjType::vertices)
 		Editor_ChangeMode(inst, 'v');
 
-	Vertex_FindDanglers(*edit.Selected, inst.level);
+	Vertex_FindDanglers(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -421,10 +421,10 @@ static void Vertex_MergeOverlaps(Instance &inst)
 
 static void Vertex_ShowOverlaps(Instance &inst)
 {
-	if (edit.mode != ObjType::vertices)
+	if (inst.edit.mode != ObjType::vertices)
 		Editor_ChangeMode(inst, 'v');
 
-	Vertex_FindOverlaps(*edit.Selected, inst.level);
+	Vertex_FindOverlaps(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -464,10 +464,10 @@ static void Vertex_RemoveUnused(Document &doc)
 
 static void Vertex_ShowUnused(Instance &inst)
 {
-	if (edit.mode != ObjType::vertices)
+	if (inst.edit.mode != ObjType::vertices)
 		Editor_ChangeMode(inst, 'v');
 
-	Vertex_FindUnused(*edit.Selected, inst.level);
+	Vertex_FindUnused(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -659,15 +659,15 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 
 static void Sectors_ShowUnclosed(ObjType what, Instance &inst)
 {
-	if (edit.mode != what)
+	if (inst.edit.mode != what)
 		Editor_ChangeMode(inst, (what == ObjType::sectors) ? 's' : 'v');
 
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindUnclosed(*edit.Selected, other, inst.level);
+		Sectors_FindUnclosed(*inst.edit.Selected, other, inst.level);
 	else
-		Sectors_FindUnclosed(other, *edit.Selected, inst.level);
+		Sectors_FindUnclosed(other, *inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -732,15 +732,15 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 
 static void Sectors_ShowMismatches(ObjType what, Instance &inst)
 {
-	if (edit.mode != what)
+	if (inst.edit.mode != what)
 		Editor_ChangeMode(inst, (what == ObjType::sectors) ? 's' : 'l');
 
 	selection_c other;
 
 	if (what == ObjType::sectors)
-		Sectors_FindMismatches(*edit.Selected, other, inst.level);
+		Sectors_FindMismatches(*inst.edit.Selected, other, inst.level);
 	else
-		Sectors_FindMismatches(other, *edit.Selected, inst.level);
+		Sectors_FindMismatches(other, *inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -799,12 +799,12 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 
 static void Sectors_ShowUnknown(Instance &inst)
 {
-	if (edit.mode != ObjType::sectors)
+	if (inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(inst, 's');
 
 	std::map<int, int> types;
 
-	Sectors_FindUnknown(*edit.Selected, types, inst.level);
+	Sectors_FindUnknown(*inst.edit.Selected, types, inst.level);
 
 	GoToErrors(inst);
 }
@@ -922,10 +922,10 @@ static void Sectors_FixBadCeil(Document &doc)
 
 static void Sectors_ShowBadCeil(Instance &inst)
 {
-	if (edit.mode != ObjType::sectors)
+	if (inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(inst, 's');
 
-	Sectors_FindBadCeil(*edit.Selected, inst.level);
+	Sectors_FindBadCeil(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -997,12 +997,12 @@ static void SideDefs_FindPacking(selection_c& sides, selection_c& lines, const D
 
 static void SideDefs_ShowPacked(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
 	selection_c sides;
 
-	SideDefs_FindPacking(sides, *edit.Selected, inst.level);
+	SideDefs_FindPacking(sides, *inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -1365,12 +1365,12 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Docu
 
 static void Things_ShowUnknown(Instance &inst)
 {
-	if (edit.mode != ObjType::things)
+	if (inst.edit.mode != ObjType::things)
 		Editor_ChangeMode(inst, 't');
 
 	std::map<int, int> types;
 
-	Things_FindUnknown(*edit.Selected, types, inst.level);
+	Things_FindUnknown(*inst.edit.Selected, types, inst.level);
 
 	GoToErrors(inst);
 }
@@ -1483,10 +1483,10 @@ static void Things_FindInVoid(selection_c& list, const Document &doc)
 
 static void Things_ShowInVoid(Instance &inst)
 {
-	if (edit.mode != ObjType::things)
+	if (inst.edit.mode != ObjType::things)
 		Editor_ChangeMode(inst, 't');
 
-	Things_FindInVoid(*edit.Selected, inst.level);
+	Things_FindInVoid(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -1576,10 +1576,10 @@ static void Things_FindDuds(selection_c& list, const Document &doc)
 
 static void Things_ShowDuds(Instance &inst)
 {
-	if (edit.mode != ObjType::things)
+	if (inst.edit.mode != ObjType::things)
 		Editor_ChangeMode(inst, 't');
 
-	Things_FindDuds(*edit.Selected, inst.level);
+	Things_FindDuds(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -1841,10 +1841,10 @@ static void Things_FindStuckies(selection_c& list, const Document &doc)
 
 static void Things_ShowStuckies(Instance &inst)
 {
-	if (edit.mode != ObjType::things)
+	if (inst.edit.mode != ObjType::things)
 		Editor_ChangeMode(inst, 't');
 
-	Things_FindStuckies(*edit.Selected, inst.level);
+	Things_FindStuckies(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2098,14 +2098,14 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 
 static void LineDefs_ShowZeroLen(Instance &inst)
 {
-	if (edit.mode != ObjType::vertices)
+	if (inst.edit.mode != ObjType::vertices)
 		Editor_ChangeMode(inst, 'v');
 
 	selection_c sel;
 
 	LineDefs_FindZeroLen(sel, inst.level);
 
-	ConvertSelection(inst.level, &sel, edit.Selected);
+	ConvertSelection(inst.level, &sel, inst.edit.Selected);
 
 	GoToErrors(inst);
 }
@@ -2123,10 +2123,10 @@ static void LineDefs_FindMissingRight(selection_c& lines, const Document &doc)
 
 static void LineDefs_ShowMissingRight(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindMissingRight(*edit.Selected, inst.level);
+	LineDefs_FindMissingRight(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2161,10 +2161,10 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Document &doc)
 
 static void LineDefs_ShowManualDoors(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindManualDoors(*edit.Selected, inst.level);
+	LineDefs_FindManualDoors(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2211,10 +2211,10 @@ static void LineDefs_FindLackImpass(selection_c& lines, const Document &doc)
 
 static void LineDefs_ShowLackImpass(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindLackImpass(*edit.Selected, inst.level);
+	LineDefs_FindLackImpass(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2260,10 +2260,10 @@ static void LineDefs_FindBad2SFlag(selection_c& lines, const Document &doc)
 
 static void LineDefs_ShowBad2SFlag(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindBad2SFlag(*edit.Selected, inst.level);
+	LineDefs_FindBad2SFlag(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2332,12 +2332,12 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 
 static void LineDefs_ShowUnknown(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
 	std::map<int, int> types;
 
-	LineDefs_FindUnknown(*edit.Selected, types, inst.level);
+	LineDefs_FindUnknown(*inst.edit.Selected, types, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2491,10 +2491,10 @@ static void LineDefs_FindOverlaps(selection_c& lines, const Document &doc)
 
 static void LineDefs_ShowOverlaps(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindOverlaps(*edit.Selected, inst.level);
+	LineDefs_FindOverlaps(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -2695,10 +2695,10 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 static void LineDefs_ShowCrossings(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	LineDefs_FindCrossings(*edit.Selected, inst.level);
+	LineDefs_FindCrossings(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3027,13 +3027,13 @@ void ChecksModule::tagsApplyNewValue(int new_tag) const
 	// uses the current selection (caller must set it up)
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection("new tag for", *edit.Selected);
+	doc.basis.setMessageForSelection("new tag for", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+	for (sel_iter_c it(inst.edit.Selected); !it.done(); it.next())
 	{
-		if (edit.mode == ObjType::linedefs)
+		if (inst.edit.mode == ObjType::linedefs)
 			doc.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
-		else if (edit.mode == ObjType::sectors)
+		else if (inst.edit.mode == ObjType::sectors)
 			doc.basis.changeSector(*it, Sector::F_TAG, new_tag);
 	}
 
@@ -3043,7 +3043,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag) const
 
 void ChecksModule::commandApplyTag(Instance &inst)
 {
-	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
+	if (! (inst.edit.mode == ObjType::sectors || inst.edit.mode == ObjType::linedefs))
 	{
 		inst.Beep("ApplyTag: wrong mode");
 		return;
@@ -3067,7 +3067,7 @@ void ChecksModule::commandApplyTag(Instance &inst)
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("ApplyTag: nothing selected");
@@ -3163,10 +3163,10 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 
 static void Tags_ShowUnmatchedSectors(Instance &inst)
 {
-	if (edit.mode != ObjType::sectors)
+	if (inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(inst, 's');
 
-	Tags_FindUnmatchedSectors(*edit.Selected, inst.level);
+	Tags_FindUnmatchedSectors(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3174,10 +3174,10 @@ static void Tags_ShowUnmatchedSectors(Instance &inst)
 
 static void Tags_ShowUnmatchedLineDefs(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	Tags_FindUnmatchedLineDefs(*edit.Selected, inst.level);
+	Tags_FindUnmatchedLineDefs(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3215,10 +3215,10 @@ static void Tags_FindMissingTags(selection_c& lines, const Document &doc)
 
 static void Tags_ShowMissingTags(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	Tags_FindMissingTags(*edit.Selected, inst.level);
+	Tags_FindMissingTags(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3285,10 +3285,10 @@ static void Tags_FindBeastMarks(selection_c& secs, const Document &doc)
 
 static void Tags_ShowBeastMarks(Instance &inst)
 {
-	if (edit.mode != ObjType::sectors)
+	if (inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(inst, 's');
 
-	Tags_FindBeastMarks(*edit.Selected, inst.level);
+	Tags_FindBeastMarks(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3424,8 +3424,8 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 			dialog->AddLine(check_buffer);
 		}
 
-		if ((edit.mode == ObjType::linedefs || edit.mode == ObjType::sectors) &&
-		    edit.Selected->notempty())
+		if ((inst.edit.mode == ObjType::linedefs || inst.edit.mode == ObjType::sectors) &&
+		    inst.edit.Selected->notempty())
 		{
 			dialog->fresh_tag = max_tag + 1;
 
@@ -3519,10 +3519,10 @@ void Textures_FindMissing(selection_c& lines, const Document &doc)
 
 static void Textures_ShowMissing(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	Textures_FindMissing(*edit.Selected, inst.level);
+	Textures_FindMissing(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3638,12 +3638,12 @@ static void Textures_FindTransparent(selection_c& lines,
 
 static void Textures_ShowTransparent(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
 	std::map<SString, int> names;
 
-	Textures_FindTransparent(*edit.Selected, names, inst.level);
+	Textures_FindTransparent(*inst.edit.Selected, names, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3762,12 +3762,12 @@ static void Textures_FindMedusa(selection_c& lines,
 
 static void Textures_ShowMedusa(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
 	std::map<SString, int> names;
 
-	Textures_FindMedusa(*edit.Selected, names, inst.level);
+	Textures_FindMedusa(*inst.edit.Selected, names, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3887,12 +3887,12 @@ static void Textures_FindUnknownFlat(selection_c& secs,
 
 static void Textures_ShowUnknownTex(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownTex(*edit.Selected, names, inst.level);
+	Textures_FindUnknownTex(*inst.edit.Selected, names, inst.level);
 
 	GoToErrors(inst);
 }
@@ -3900,12 +3900,12 @@ static void Textures_ShowUnknownTex(Instance &inst)
 
 static void Textures_ShowUnknownFlat(Instance &inst)
 {
-	if (edit.mode != ObjType::sectors)
+	if (inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(inst, 's');
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownFlat(*edit.Selected, names, inst.level);
+	Textures_FindUnknownFlat(*inst.edit.Selected, names, inst.level);
 
 	GoToErrors(inst);
 }
@@ -4039,10 +4039,10 @@ static void Textures_FindDupSwitches(selection_c& lines, const Document &doc)
 
 static void Textures_ShowDupSwitches(Instance &inst)
 {
-	if (edit.mode != ObjType::linedefs)
+	if (inst.edit.mode != ObjType::linedefs)
 		Editor_ChangeMode(inst, 'l');
 
-	Textures_FindDupSwitches(*edit.Selected, inst.level);
+	Textures_FindDupSwitches(*inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
@@ -4479,7 +4479,7 @@ void ChecksModule::commandMapCheck(Instance &inst)
 	}
 	else if (what.noCaseEqual("current"))  // current editing mode
 	{
-		switch (edit.mode)
+		switch (inst.edit.mode)
 		{
 			case ObjType::vertices:
 				inst.level.checks.checkVertices(0);

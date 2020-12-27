@@ -52,7 +52,7 @@ static void CMD_Nothing(Instance &inst)
 
 static void CMD_MetaKey(Instance &inst)
 {
-	if (edit.sticky_mod)
+	if (inst.edit.sticky_mod)
 	{
 		ClearStickyMod(inst);
 		return;
@@ -60,7 +60,7 @@ static void CMD_MetaKey(Instance &inst)
 
 	inst.Status_Set("META...");
 
-	edit.sticky_mod = EMOD_META;
+	inst.edit.sticky_mod = EMOD_META;
 }
 
 
@@ -80,20 +80,20 @@ static void CMD_EditMode(Instance &inst)
 
 static void CMD_Select(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		return;
 
 	// FIXME : action in effect?
 
 	// FIXME : split_line in effect?
 
-	if (edit.highlight.is_nil())
+	if (inst.edit.highlight.is_nil())
 	{
 		inst.Beep("Nothing under cursor");
 		return;
 	}
 
-	Selection_Toggle(edit.highlight);
+	inst.Selection_Toggle(inst.edit.highlight);
 	RedrawMap(inst);
 }
 
@@ -102,12 +102,12 @@ static void CMD_SelectAll(Instance &inst)
 {
 	Editor_ClearErrorMode(inst);
 
-	int total = inst.level.numObjects(edit.mode);
+	int total = inst.level.numObjects(inst.edit.mode);
 
-	Selection_Push();
+	inst.Selection_Push();
 
-	edit.Selected->change_type(edit.mode);
-	edit.Selected->frob_range(0, total-1, BitOp::add);
+	inst.edit.Selected->change_type(inst.edit.mode);
+	inst.edit.Selected->frob_range(0, total-1, BitOp::add);
 
 	RedrawMap(inst);
 }
@@ -117,8 +117,8 @@ static void CMD_UnselectAll(Instance &inst)
 {
 	Editor_ClearErrorMode(inst);
 
-	if (edit.action == ACT_DRAW_LINE ||
-		edit.action == ACT_TRANSFORM)
+	if (inst.edit.action == ACT_DRAW_LINE ||
+		inst.edit.action == ACT_TRANSFORM)
 	{
 		Editor_ClearAction(inst);
 	}
@@ -132,21 +132,21 @@ static void CMD_UnselectAll(Instance &inst)
 static void CMD_InvertSelection(Instance &inst)
 {
 	// do not clear selection when in error mode
-	edit.error_mode = false;
+	inst.edit.error_mode = false;
 
-	int total = inst.level.numObjects(edit.mode);
+	int total = inst.level.numObjects(inst.edit.mode);
 
-	if (edit.Selected->what_type() != edit.mode)
+	if (inst.edit.Selected->what_type() != inst.edit.mode)
 	{
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c *prev_sel = inst.edit.Selected;
+		inst.edit.Selected = new selection_c(inst.edit.mode, true /* extended */);
 
-		ConvertSelection(inst.level, prev_sel, edit.Selected);
+		ConvertSelection(inst.level, prev_sel, inst.edit.Selected);
 		delete prev_sel;
 	}
 
-	edit.Selected->frob_range(0, total-1, BitOp::toggle);
+	inst.edit.Selected->frob_range(0, total-1, BitOp::toggle);
 
 	RedrawMap(inst);
 }
@@ -245,12 +245,12 @@ static void CMD_SetVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("sprites"))
 	{
-		edit.thing_render_mode = int_val;
+		inst.edit.thing_render_mode = int_val;
 		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
-		edit.show_object_numbers = bool_val;
+		inst.edit.show_object_numbers = bool_val;
 		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("gamma"))
@@ -266,13 +266,13 @@ static void CMD_SetVar(Instance &inst)
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
-		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
+		inst.edit.sector_render_mode = (sector_rendering_mode_e) int_val;
 
-		if (edit.render3d)
+		if (inst.edit.render3d)
 			Render3D_Enable(inst, false);
 
 		// need sectors mode for sound propagation display
-		if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
+		if (inst.edit.sector_render_mode == SREND_SoundProp && inst.edit.mode != ObjType::sectors)
 			Editor_ChangeMode(inst, 's');
 
 		RedrawMap(inst);
@@ -296,7 +296,7 @@ static void CMD_ToggleVar(Instance &inst)
 
 	if (var_name.noCaseEqual("3d"))
 	{
-		Render3D_Enable(inst, ! edit.render3d);
+		Render3D_Enable(inst, ! inst.edit.render3d);
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
@@ -318,12 +318,12 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("sprites"))
 	{
-		edit.thing_render_mode = ! edit.thing_render_mode;
+		inst.edit.thing_render_mode = ! inst.edit.thing_render_mode;
 		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
-		edit.show_object_numbers = ! edit.show_object_numbers;
+		inst.edit.show_object_numbers = ! inst.edit.show_object_numbers;
 		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("gamma"))
@@ -342,10 +342,10 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
-		if (edit.sector_render_mode >= SREND_SoundProp)
-			edit.sector_render_mode = SREND_Nothing;
+		if (inst.edit.sector_render_mode >= SREND_SoundProp)
+			inst.edit.sector_render_mode = SREND_Nothing;
 		else
-			edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)edit.sector_render_mode);
+			inst.edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)inst.edit.sector_render_mode);
 		RedrawMap(inst);
 	}
 	else
@@ -414,7 +414,7 @@ static void CMD_Scroll(Instance &inst)
 
 static void NAV_Scroll_Left_release(Instance &inst)
 {
-	edit.nav_left = 0;
+	inst.edit.nav_left = 0;
 }
 
 static void CMD_NAV_Scroll_Left(Instance &inst)
@@ -422,12 +422,12 @@ static void CMD_NAV_Scroll_Left(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	inst.edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Left_release);
 }
@@ -435,7 +435,7 @@ static void CMD_NAV_Scroll_Left(Instance &inst)
 
 static void NAV_Scroll_Right_release(Instance &inst)
 {
-	edit.nav_right = 0;
+	inst.edit.nav_right = 0;
 }
 
 static void CMD_NAV_Scroll_Right(Instance &inst)
@@ -443,12 +443,12 @@ static void CMD_NAV_Scroll_Right(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	inst.edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Right_release);
 }
@@ -456,7 +456,7 @@ static void CMD_NAV_Scroll_Right(Instance &inst)
 
 static void NAV_Scroll_Up_release(Instance &inst)
 {
-	edit.nav_up = 0;
+	inst.edit.nav_up = 0;
 }
 
 static void CMD_NAV_Scroll_Up(Instance &inst)
@@ -464,12 +464,12 @@ static void CMD_NAV_Scroll_Up(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	inst.edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Up_release);
 }
@@ -477,7 +477,7 @@ static void CMD_NAV_Scroll_Up(Instance &inst)
 
 static void NAV_Scroll_Down_release(Instance &inst)
 {
-	edit.nav_down = 0;
+	inst.edit.nav_down = 0;
 }
 
 static void CMD_NAV_Scroll_Down(Instance &inst)
@@ -485,12 +485,12 @@ static void CMD_NAV_Scroll_Down(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	inst.edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Down_release);
 }
@@ -506,11 +506,11 @@ static void CMD_NAV_MouseScroll(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	edit.panning_speed = static_cast<float>(atof(EXEC_Param[0]));
-	edit.panning_lax = Exec_HasFlag("/LAX");
+	inst.edit.panning_speed = static_cast<float>(atof(EXEC_Param[0]));
+	inst.edit.panning_lax = Exec_HasFlag("/LAX");
 
-	if (! edit.is_navigating)
-		Editor_ClearNav();
+	if (! inst.edit.is_navigating)
+		inst.Editor_ClearNav();
 
 	if (Nav_SetKey(inst, EXEC_CurKey, &NAV_MouseScroll_release))
 	{
@@ -525,18 +525,18 @@ static void DoBeginDrag(Instance &inst);
 
 void CheckBeginDrag(Instance &inst)
 {
-	if (! edit.clicked.valid())
+	if (! inst.edit.clicked.valid())
 		return;
 
-	if (! edit.click_check_drag)
+	if (! inst.edit.click_check_drag)
 		return;
 
 	// can drag things and sector planes in 3D mode
-	if (edit.render3d && !(edit.mode == ObjType::things || edit.mode == ObjType::sectors))
+	if (inst.edit.render3d && !(inst.edit.mode == ObjType::things || inst.edit.mode == ObjType::sectors))
 		return;
 
-	int pixel_dx = Fl::event_x() - edit.click_screen_x;
-	int pixel_dy = Fl::event_y() - edit.click_screen_y;
+	int pixel_dx = Fl::event_x() - inst.edit.click_screen_x;
+	int pixel_dy = Fl::event_y() - inst.edit.click_screen_y;
 
 	if (MAX(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
 		return;
@@ -544,69 +544,69 @@ void CheckBeginDrag(Instance &inst)
 	// if highlighted object is in selection, we drag the selection,
 	// otherwise we drag just this one object.
 
-	if (edit.click_force_single || !edit.Selected->get(edit.clicked.num))
-		edit.dragged = edit.clicked;
+	if (inst.edit.click_force_single || !inst.edit.Selected->get(inst.edit.clicked.num))
+		inst.edit.dragged = inst.edit.clicked;
 	else
-		edit.dragged.clear();
+		inst.edit.dragged.clear();
 
 	DoBeginDrag(inst);
 }
 
 static void DoBeginDrag(Instance &inst)
 {
-	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
-	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
-	edit.drag_start_z = edit.drag_cur_z = edit.click_map_z;
+	inst.edit.drag_start_x = inst.edit.drag_cur_x = inst.edit.click_map_x;
+	inst.edit.drag_start_y = inst.edit.drag_cur_y = inst.edit.click_map_y;
+	inst.edit.drag_start_z = inst.edit.drag_cur_z = inst.edit.click_map_z;
 
-	edit.drag_screen_dx  = edit.drag_screen_dy = 0;
-	edit.drag_thing_num  = -1;
-	edit.drag_other_vert = -1;
+	inst.edit.drag_screen_dx  = inst.edit.drag_screen_dy = 0;
+	inst.edit.drag_thing_num  = -1;
+	inst.edit.drag_other_vert = -1;
 
 	// the focus is only used when grid snapping is on
-	inst.level.objects.getDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
+	inst.level.objects.getDragFocus(&inst.edit.drag_focus_x, &inst.edit.drag_focus_y, inst.edit.click_map_x, inst.edit.click_map_y);
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
-		if (edit.mode == ObjType::sectors)
-			edit.drag_sector_dz = 0;
+		if (inst.edit.mode == ObjType::sectors)
+			inst.edit.drag_sector_dz = 0;
 
-		if (edit.mode == ObjType::things)
+		if (inst.edit.mode == ObjType::things)
 		{
-			edit.drag_thing_num = edit.clicked.num;
-			edit.drag_thing_floorh = static_cast<float>(edit.drag_start_z);
-			edit.drag_thing_up_down = (instance::Level_format != MapFormat::doom && !grid.snap);
+			inst.edit.drag_thing_num = inst.edit.clicked.num;
+			inst.edit.drag_thing_floorh = static_cast<float>(inst.edit.drag_start_z);
+			inst.edit.drag_thing_up_down = (instance::Level_format != MapFormat::doom && !grid.snap);
 
 			// get thing's floor
-			if (edit.drag_thing_num >= 0)
+			if (inst.edit.drag_thing_num >= 0)
 			{
-				const Thing *T = inst.level.things[edit.drag_thing_num];
+				const Thing *T = inst.level.things[inst.edit.drag_thing_num];
 
 				Objid sec = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 				if (sec.valid())
-					edit.drag_thing_floorh = static_cast<float>(inst.level.sectors[sec.num]->floorh);
+					inst.edit.drag_thing_floorh = static_cast<float>(inst.level.sectors[sec.num]->floorh);
 			}
 		}
 	}
 
 	// in vertex mode, show all the connected lines too
-	if (edit.drag_lines)
+	if (inst.edit.drag_lines)
 	{
-		delete edit.drag_lines;
-		edit.drag_lines = NULL;
+		delete inst.edit.drag_lines;
+		inst.edit.drag_lines = NULL;
 	}
 
-	if (edit.mode == ObjType::vertices)
+	if (inst.edit.mode == ObjType::vertices)
 	{
-		edit.drag_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(inst.level, edit.Selected, edit.drag_lines);
+		inst.edit.drag_lines = new selection_c(ObjType::linedefs);
+		ConvertSelection(inst.level, inst.edit.Selected, inst.edit.drag_lines);
 
 		// find opposite end-point when dragging a single vertex
-		if (edit.dragged.valid())
-			edit.drag_other_vert = inst.level.vertmod.findDragOther(edit.dragged.num);
+		if (inst.edit.dragged.valid())
+			inst.edit.drag_other_vert = inst.level.vertmod.findDragOther(inst.edit.dragged.num);
 	}
 
-	edit.clicked.clear();
+	inst.edit.clicked.clear();
 
 	Editor_SetAction(inst, ACT_DRAG);
 
@@ -617,7 +617,7 @@ static void DoBeginDrag(Instance &inst)
 static void ACT_SelectBox_release(Instance &inst)
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_SELBOX)
+	if (inst.edit.action != ACT_SELBOX)
 		return;
 
 	Editor_ClearAction(inst);
@@ -631,7 +631,7 @@ static void ACT_SelectBox_release(Instance &inst)
 		return;
 	}
 
-	SelectObjectsInBox(inst.level, edit.Selected, edit.mode, x1, y1, x2, y2);
+	SelectObjectsInBox(inst.level, inst.edit.Selected, inst.edit.mode, x1, y1, x2, y2);
 	RedrawMap(inst);
 }
 
@@ -639,37 +639,37 @@ static void ACT_SelectBox_release(Instance &inst)
 static void ACT_Drag_release(Instance &inst)
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_DRAG)
+	if (inst.edit.action != ACT_DRAG)
 	{
-		edit.dragged.clear();
+		inst.edit.dragged.clear();
 		return;
 	}
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
-		if (edit.mode == ObjType::things)
+		if (inst.edit.mode == ObjType::things)
 			Render3D_DragThings(inst);
 
-		if (edit.mode == ObjType::sectors)
+		if (inst.edit.mode == ObjType::sectors)
 			Render3D_DragSectors(inst);
 	}
 
-	// note: DragDelta needs edit.dragged
+	// note: DragDelta needs inst.edit.dragged
 	double dx, dy;
 	inst.main_win->canvas->DragDelta(&dx, &dy);
 
-	Objid dragged(edit.dragged);
-	edit.dragged.clear();
+	Objid dragged(inst.edit.dragged);
+	inst.edit.dragged.clear();
 
-	if (edit.drag_lines)
-		edit.drag_lines->clear_all();
+	if (inst.edit.drag_lines)
+		inst.edit.drag_lines->clear_all();
 
-	if (! edit.render3d && (dx || dy))
+	if (! inst.edit.render3d && (dx || dy))
 	{
 		if (dragged.valid())
 			inst.level.objects.singleDrag(dragged, dx, dy, 0);
 		else
-			inst.level.objects.move(edit.Selected, dx, dy, 0);
+			inst.level.objects.move(inst.edit.Selected, dx, dy, 0);
 	}
 
 	Editor_ClearAction(inst);
@@ -680,38 +680,38 @@ static void ACT_Drag_release(Instance &inst)
 
 static void ACT_Click_release(Instance &inst)
 {
-	Objid click_obj(edit.clicked);
-	edit.clicked.clear();
+	Objid click_obj(inst.edit.clicked);
+	inst.edit.clicked.clear();
 
-	edit.click_check_drag = false;
+	inst.edit.click_check_drag = false;
 
 
-	if (edit.action == ACT_SELBOX)
+	if (inst.edit.action == ACT_SELBOX)
 	{
 		ACT_SelectBox_release(inst);
 		return;
 	}
-	else if (edit.action == ACT_DRAG)
+	else if (inst.edit.action == ACT_DRAG)
 	{
 		ACT_Drag_release(inst);
 		return;
 	}
 
 	// check if cancelled or overridden
-	if (edit.action != ACT_CLICK)
+	if (inst.edit.action != ACT_CLICK)
 		return;
 
-	if (edit.click_check_select && click_obj.valid())
+	if (inst.edit.click_check_select && click_obj.valid())
 	{
 		// only toggle selection if it's the same object as before
 		Objid near_obj;
-		if (edit.render3d)
-			near_obj = edit.highlight;
+		if (inst.edit.render3d)
+			near_obj = inst.edit.highlight;
 		else
-			near_obj = inst.level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+			near_obj = inst.level.hover.getNearbyObject(inst.edit.mode, inst.edit.map_x, inst.edit.map_y);
 
 		if (near_obj.num == click_obj.num)
-			Selection_Toggle(click_obj);
+			inst.Selection_Toggle(click_obj);
 	}
 
 	Editor_ClearAction(inst);
@@ -726,58 +726,58 @@ static void CMD_ACT_Click(Instance &inst)
 		return;
 
 	// require a highlighted object in 3D mode
-	if (edit.render3d && edit.highlight.is_nil())
+	if (inst.edit.render3d && inst.edit.highlight.is_nil())
 		return;
 
 	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_Click_release))
 		return;
 
-	edit.click_check_select = ! Exec_HasFlag("/noselect");
-	edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
-	edit.click_force_single = false;
+	inst.edit.click_check_select = ! Exec_HasFlag("/noselect");
+	inst.edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
+	inst.edit.click_force_single = false;
 
 	// remember some state (for drag detection)
-	edit.click_screen_x = Fl::event_x();
-	edit.click_screen_y = Fl::event_y();
+	inst.edit.click_screen_x = Fl::event_x();
+	inst.edit.click_screen_y = Fl::event_y();
 
-	edit.click_map_x = edit.map_x;
-	edit.click_map_y = edit.map_y;
-	edit.click_map_z = edit.map_z;
+	inst.edit.click_map_x = inst.edit.map_x;
+	inst.edit.click_map_y = inst.edit.map_y;
+	inst.edit.click_map_z = inst.edit.map_z;
 
 	// handle 3D mode, skip stuff below which only makes sense in 2D
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
-		if (edit.highlight.type == ObjType::things)
+		if (inst.edit.highlight.type == ObjType::things)
 		{
-			const Thing *T = inst.level.things[edit.highlight.num];
-			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
+			const Thing *T = inst.level.things[inst.edit.highlight.num];
+			inst.edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
 		}
 		else
 		{
-			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(edit.map_x, edit.map_y));
+			inst.edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(inst.edit.map_x, inst.edit.map_y));
 		}
 
-		edit.clicked = edit.highlight;
+		inst.edit.clicked = inst.edit.highlight;
 		Editor_SetAction(inst, ACT_CLICK);
 		return;
 	}
 
 	// check for splitting a line, and ensure we can drag the vertex
 	if (! Exec_HasFlag("/nosplit") &&
-		edit.mode == ObjType::vertices &&
-		edit.split_line.valid() &&
-		edit.action != ACT_DRAW_LINE)
+		inst.edit.mode == ObjType::vertices &&
+		inst.edit.split_line.valid() &&
+		inst.edit.action != ACT_DRAW_LINE)
 	{
-		int split_ld = edit.split_line.num;
+		int split_ld = inst.edit.split_line.num;
 
-		edit.click_force_single = true;   // if drag vertex, force single-obj mode
-		edit.click_check_select = false;  // do NOT select the new vertex
+		inst.edit.click_force_single = true;   // if drag vertex, force single-obj mode
+		inst.edit.click_check_select = false;  // do NOT select the new vertex
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
 		const LineDef *L = inst.level.linedefs[split_ld];
 
-		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
+		bool want_select = inst.edit.Selected->get(L->start) && inst.edit.Selected->get(L->end);
 
 		inst.level.basis.begin();
 		inst.level.basis.setMessage("split linedef #%d", split_ld);
@@ -786,16 +786,16 @@ static void CMD_ACT_Click(Instance &inst)
 
 		Vertex *V = inst.level.vertices[new_vert];
 
-		V->SetRawXY(edit.split_x, edit.split_y);
+		V->SetRawXY(inst.edit.split_x, inst.edit.split_y);
 
 		inst.level.linemod.splitLinedefAtVertex(split_ld, new_vert);
 
 		inst.level.basis.end();
 
 		if (want_select)
-			edit.Selected->set(new_vert);
+			inst.edit.Selected->set(new_vert);
 
-		edit.clicked = Objid(ObjType::vertices, new_vert);
+		inst.edit.clicked = Objid(ObjType::vertices, new_vert);
 		Editor_SetAction(inst, ACT_CLICK);
 
 		RedrawMap(inst);
@@ -803,13 +803,13 @@ static void CMD_ACT_Click(Instance &inst)
 	}
 
 	// find the object under the pointer.
-	edit.clicked = inst.level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+	inst.edit.clicked = inst.level.hover.getNearbyObject(inst.edit.mode, inst.edit.map_x, inst.edit.map_y);
 
 	// clicking on an empty space starts a new selection box
-	if (edit.click_check_select && edit.clicked.is_nil())
+	if (inst.edit.click_check_select && inst.edit.clicked.is_nil())
 	{
-		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
-		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
+		inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
+		inst.edit.selbox_y1 = inst.edit.selbox_y2 = inst.edit.map_y;
 
 		Editor_SetAction(inst, ACT_SELBOX);
 		return;
@@ -821,7 +821,7 @@ static void CMD_ACT_Click(Instance &inst)
 
 static void CMD_ACT_SelectBox(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		return;
 
 	if (! EXEC_CurKey)
@@ -830,8 +830,8 @@ static void CMD_ACT_SelectBox(Instance &inst)
 	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_SelectBox_release))
 		return;
 
-	edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
-	edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
+	inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
+	inst.edit.selbox_y1 = inst.edit.selbox_y2 = inst.edit.map_y;
 
 	Editor_SetAction(inst, ACT_SELBOX);
 }
@@ -842,7 +842,7 @@ static void CMD_ACT_Drag(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
 		inst.Beep("Nothing to drag");
 		return;
@@ -852,7 +852,7 @@ static void CMD_ACT_Drag(Instance &inst)
 		return;
 
 	// we only drag the selection, never a single object
-	edit.dragged.clear();
+	inst.edit.dragged.clear();
 
 	DoBeginDrag(inst);
 }
@@ -860,26 +860,26 @@ static void CMD_ACT_Drag(Instance &inst)
 
 void Transform_Update(Instance &inst)
 {
-	double dx1 = edit.map_x - edit.trans_param.mid_x;
-	double dy1 = edit.map_y - edit.trans_param.mid_y;
+	double dx1 = inst.edit.map_x - inst.edit.trans_param.mid_x;
+	double dy1 = inst.edit.map_y - inst.edit.trans_param.mid_y;
 
-	double dx0 = edit.trans_start_x - edit.trans_param.mid_x;
-	double dy0 = edit.trans_start_y - edit.trans_param.mid_y;
+	double dx0 = inst.edit.trans_start_x - inst.edit.trans_param.mid_x;
+	double dy0 = inst.edit.trans_start_y - inst.edit.trans_param.mid_y;
 
-	edit.trans_param.scale_x = edit.trans_param.scale_y = 1;
-	edit.trans_param.skew_x  = edit.trans_param.skew_y  = 0;
-	edit.trans_param.rotate  = 0;
+	inst.edit.trans_param.scale_x = inst.edit.trans_param.scale_y = 1;
+	inst.edit.trans_param.skew_x  = inst.edit.trans_param.skew_y  = 0;
+	inst.edit.trans_param.rotate  = 0;
 
-	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
+	if (inst.edit.trans_mode == TRANS_K_Rotate || inst.edit.trans_mode == TRANS_K_RotScale)
 	{
 		double angle[2] = { atan2(dy1, dx1), atan2(dy0, dx0) };
 
-		edit.trans_param.rotate = angle[1] - angle[0];
+		inst.edit.trans_param.rotate = angle[1] - angle[0];
 
-//		fprintf(stderr, "angle diff : %1.2f\n", edit.trans_rotate * 360.0 / 65536.0);
+//		fprintf(stderr, "angle diff : %1.2f\n", inst.edit.trans_rotate * 360.0 / 65536.0);
 	}
 
-	switch (edit.trans_mode)
+	switch (inst.edit.trans_mode)
 	{
 		case TRANS_K_Scale:
 		case TRANS_K_RotScale:
@@ -888,14 +888,14 @@ void Transform_Update(Instance &inst)
 
 			if (dx0)
 			{
-				edit.trans_param.scale_x = dx1 / (float)dx0;
-				edit.trans_param.scale_y = edit.trans_param.scale_x;
+				inst.edit.trans_param.scale_x = dx1 / (float)dx0;
+				inst.edit.trans_param.scale_y = inst.edit.trans_param.scale_x;
 			}
 			break;
 
 		case TRANS_K_Stretch:
-			if (dx0) edit.trans_param.scale_x = dx1 / (float)dx0;
-			if (dy0) edit.trans_param.scale_y = dy1 / (float)dy0;
+			if (dx0) inst.edit.trans_param.scale_x = dx1 / (float)dx0;
+			if (dy0) inst.edit.trans_param.scale_y = dy1 / (float)dy0;
 			break;
 
 		case TRANS_K_Rotate:
@@ -905,11 +905,11 @@ void Transform_Update(Instance &inst)
 		case TRANS_K_Skew:
 			if (abs(dx0) >= abs(dy0))
 			{
-				if (dx0) edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+				if (dx0) inst.edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
 			}
 			else
 			{
-				if (dy0) edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+				if (dy0) inst.edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
 			}
 			break;
 	}
@@ -921,13 +921,13 @@ void Transform_Update(Instance &inst)
 static void ACT_Transform_release(Instance &inst)
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_TRANSFORM)
+	if (inst.edit.action != ACT_TRANSFORM)
 		return;
 
-	if (edit.trans_lines)
-		edit.trans_lines->clear_all();
+	if (inst.edit.trans_lines)
+		inst.edit.trans_lines->clear_all();
 
-	inst.level.objects.transform(edit.trans_param);
+	inst.level.objects.transform(inst.edit.trans_param);
 
 	Editor_ClearAction(inst);
 
@@ -936,13 +936,13 @@ static void ACT_Transform_release(Instance &inst)
 
 static void CMD_ACT_Transform(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		return;
 
 	if (! EXEC_CurKey)
 		return;
 
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
 		inst.Beep("Nothing to scale");
 		return;
@@ -988,26 +988,26 @@ static void CMD_ACT_Transform(Instance &inst)
 
 
 	double middle_x, middle_y;
-	inst.level.objects.calcMiddle(edit.Selected, &middle_x, &middle_y);
+	inst.level.objects.calcMiddle(inst.edit.Selected, &middle_x, &middle_y);
 
-	edit.trans_mode = mode;
-	edit.trans_start_x = edit.map_x;
-	edit.trans_start_y = edit.map_y;
+	inst.edit.trans_mode = mode;
+	inst.edit.trans_start_x = inst.edit.map_x;
+	inst.edit.trans_start_y = inst.edit.map_y;
 
-	edit.trans_param.Clear();
-	edit.trans_param.mid_x = middle_x;
-	edit.trans_param.mid_y = middle_y;
+	inst.edit.trans_param.Clear();
+	inst.edit.trans_param.mid_x = middle_x;
+	inst.edit.trans_param.mid_y = middle_y;
 
-	if (edit.trans_lines)
+	if (inst.edit.trans_lines)
 	{
-		delete edit.trans_lines;
-		edit.trans_lines = NULL;
+		delete inst.edit.trans_lines;
+		inst.edit.trans_lines = NULL;
 	}
 
-	if (edit.mode == ObjType::vertices)
+	if (inst.edit.mode == ObjType::vertices)
 	{
-		edit.trans_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(inst.level, edit.Selected, edit.trans_lines);
+		inst.edit.trans_lines = new selection_c(ObjType::linedefs);
+		ConvertSelection(inst.level, inst.edit.Selected, inst.edit.trans_lines);
 	}
 
 	Editor_SetAction(inst, ACT_TRANSFORM);
@@ -1041,7 +1041,7 @@ static void CMD_WHEEL_Scroll(Instance &inst)
 
 static void CMD_Merge(Instance &inst)
 {
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::vertices:
 			VertexModule::commandMerge(inst);
@@ -1068,7 +1068,7 @@ static void CMD_Merge(Instance &inst)
 
 static void CMD_Disconnect(Instance &inst)
 {
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::vertices:
 			VertexModule::commandDisconnect(inst);
@@ -1103,8 +1103,8 @@ static void CMD_Zoom(Instance &inst)
 		return;
 	}
 
-	int mid_x = static_cast<int>(edit.map_x);
-	int mid_y = static_cast<int>(edit.map_y);
+	int mid_x = static_cast<int>(inst.edit.map_x);
+	int mid_y = static_cast<int>(inst.edit.map_y);
 
 	if (Exec_HasFlag("/center"))
 	{
@@ -1118,7 +1118,7 @@ static void CMD_Zoom(Instance &inst)
 
 static void CMD_ZoomWholeMap(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		Render3D_Enable(inst, false);
 
 	ZoomWholeMap(inst);
@@ -1127,7 +1127,7 @@ static void CMD_ZoomWholeMap(Instance &inst)
 
 static void CMD_ZoomSelection(Instance &inst)
 {
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
 		inst.Beep("No selection to zoom");
 		return;
@@ -1139,7 +1139,7 @@ static void CMD_ZoomSelection(Instance &inst)
 
 static void CMD_GoToCamera(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		Render3D_Enable(inst, false);
 
 	double x, y; float angle;
@@ -1153,13 +1153,13 @@ static void CMD_GoToCamera(Instance &inst)
 
 static void CMD_PlaceCamera(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		inst.Beep("Not supported in 3D view");
 		return;
 	}
 
-	if (! edit.pointer_in_window)
+	if (! inst.edit.pointer_in_window)
 	{
 		// IDEA: turn cursor into cross, wait for click in map window
 
@@ -1167,8 +1167,8 @@ static void CMD_PlaceCamera(Instance &inst)
 		return;
 	}
 
-	double x = edit.map_x;
-	double y = edit.map_y;
+	double x = inst.edit.map_x;
+	double y = inst.edit.map_y;
 
 	Render3D_SetCameraPos(x, y);
 
@@ -1183,16 +1183,16 @@ static void CMD_PlaceCamera(Instance &inst)
 
 static void CMD_MoveObjects_Dialog(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("Nothing to move");
 		return;
 	}
 
-	bool want_dz = (edit.mode == ObjType::sectors);
+	bool want_dz = (inst.edit.mode == ObjType::sectors);
 	// can move things vertically in Hexen/UDMF formats
-	if (edit.mode == ObjType::things && instance::Level_format != MapFormat::doom)
+	if (inst.edit.mode == ObjType::things && instance::Level_format != MapFormat::doom)
 		want_dz = true;
 
 	UI_MoveDialog * dialog = new UI_MoveDialog(inst, want_dz);
@@ -1208,7 +1208,7 @@ static void CMD_MoveObjects_Dialog(Instance &inst)
 
 static void CMD_ScaleObjects_Dialog(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("Nothing to scale");
@@ -1228,7 +1228,7 @@ static void CMD_ScaleObjects_Dialog(Instance &inst)
 
 static void CMD_RotateObjects_Dialog(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("Nothing to rotate");
@@ -1289,7 +1289,7 @@ static void CMD_GRID_Zoom(Instance &inst)
 
 	grid.NearestScale(scale);
 
-	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+	grid.RefocusZoom(inst.edit.map_x, inst.edit.map_y, S1);
 }
 
 

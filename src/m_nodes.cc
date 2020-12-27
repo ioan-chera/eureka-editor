@@ -467,8 +467,8 @@ void CMD_BuildAllNodes(Instance &inst)
 	Editor_ClearAction(inst);
 	Selection_InvalidateLast();
 
-	edit.Selected->clear_all();
-	edit.highlight.clear();
+	inst.edit.Selected->clear_all();
+	inst.edit.highlight.clear();
 
 
 	dialog = new UI_NodeDialog();

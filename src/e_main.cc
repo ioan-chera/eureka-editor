@@ -43,10 +43,6 @@
 
 #include "ui_window.h"
 
-
-Editor_State_t  edit;
-
-
 double Map_bound_x1 =  32767;   /* minimum X value of map */
 double Map_bound_y1 =  32767;   /* minimum Y value of map */
 double Map_bound_x2 = -32767;   /* maximum X value of map */
@@ -128,8 +124,8 @@ static void UpdatePanel(const Instance &inst)
 {
 	// -AJA- I think the highlighted object is always the same type as
 	//       the current editing mode.  But do this check for safety.
-	if (edit.highlight.valid() &&
-		edit.highlight.type != edit.mode)
+	if (inst.edit.highlight.valid() &&
+		inst.edit.highlight.type != inst.edit.mode)
 		return;
 
 
@@ -140,28 +136,28 @@ static void UpdatePanel(const Instance &inst)
 	// It's a little more complicated since highlight may or may not
 	// be part of the selection.
 
-	int obj_idx   = edit.highlight.num;
-	int obj_count = edit.Selected->count_obj();
+	int obj_idx   = inst.edit.highlight.num;
+	int obj_count = inst.edit.Selected->count_obj();
 
 	// the highlight is usually turned off when dragging, so compensate
-	if (obj_idx < 0 && edit.action == ACT_DRAG)
-		obj_idx = edit.dragged.num;
+	if (obj_idx < 0 && inst.edit.action == ACT_DRAG)
+		obj_idx = inst.edit.dragged.num;
 
 	if (obj_idx >= 0)
 	{
-		if (! edit.Selected->get(obj_idx))
+		if (! inst.edit.Selected->get(obj_idx))
 			obj_count = 0;
 	}
 	else if (obj_count > 0)
 	{
 		// in linedef mode, we prefer showing a two-sided linedef
-		if (edit.mode == ObjType::linedefs && obj_count > 1)
-			obj_idx = Selection_FirstLine(inst.level, edit.Selected);
+		if (inst.edit.mode == ObjType::linedefs && obj_count > 1)
+			obj_idx = Selection_FirstLine(inst.level, inst.edit.Selected);
 		else
-			obj_idx = edit.Selected->find_first();
+			obj_idx = inst.edit.Selected->find_first();
 	}
 
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::things:
 			inst.main_win->thing_box->SetObj(obj_idx, obj_count);
@@ -186,27 +182,27 @@ static void UpdatePanel(const Instance &inst)
 
 void UpdateDrawLine(Instance &inst)
 {
-	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
+	if (inst.edit.action != ACT_DRAW_LINE || inst.edit.draw_from.is_nil())
 		return;
 
-	const Vertex *V = inst.level.vertices[edit.draw_from.num];
+	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num];
 
-	double new_x = edit.map_x;
-	double new_y = edit.map_y;
+	double new_x = inst.edit.map_x;
+	double new_y = inst.edit.map_y;
 
 	if (grid.ratio > 0)
 	{
 		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
 	}
-	else if (edit.highlight.valid())
+	else if (inst.edit.highlight.valid())
 	{
-		new_x = inst.level.vertices[edit.highlight.num]->x();
-		new_y = inst.level.vertices[edit.highlight.num]->y();
+		new_x = inst.level.vertices[inst.edit.highlight.num]->x();
+		new_y = inst.level.vertices[inst.edit.highlight.num]->y();
 	}
-	else if (edit.split_line.valid())
+	else if (inst.edit.split_line.valid())
 	{
-		new_x = edit.split_x;
-		new_y = edit.split_y;
+		new_x = inst.edit.split_x;
+		new_y = inst.edit.split_y;
 	}
 	else
 	{
@@ -214,45 +210,45 @@ void UpdateDrawLine(Instance &inst)
 		new_y = grid.SnapY(new_y);
 	}
 
-	edit.draw_to_x = new_x;
-	edit.draw_to_y = new_y;
+	inst.edit.draw_to_x = new_x;
+	inst.edit.draw_to_y = new_y;
 
 	// when drawing mode, highlight a vertex at the snap position
-	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
+	if (grid.snap && inst.edit.highlight.is_nil() && inst.edit.split_line.is_nil())
 	{
 		int near_vert = inst.level.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 		if (near_vert >= 0)
 		{
-			edit.highlight = Objid(ObjType::vertices, near_vert);
+			inst.edit.highlight = Objid(ObjType::vertices, near_vert);
 		}
 	}
 
 	// never highlight the vertex we are drawing from
-	if (edit.draw_from.valid() &&
-		edit.draw_from == edit.highlight)
+	if (inst.edit.draw_from.valid() &&
+		inst.edit.draw_from == inst.edit.highlight)
 	{
-		edit.highlight.clear();
+		inst.edit.highlight.clear();
 	}
 }
 
 
 static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 {
-	edit.split_line.clear();
+	inst.edit.split_line.clear();
 
 	// splitting usually disabled while dragging stuff, EXCEPT a single vertex
-	if (edit.action == ACT_DRAG && edit.dragged.is_nil())
+	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
 		goto done;
 
 	// in vertex mode, see if there is a linedef which would be split by
 	// adding a new vertex.
 
-	if (edit.mode == ObjType::vertices &&
-		edit.pointer_in_window &&
-	    edit.highlight.is_nil())
+	if (inst.edit.mode == ObjType::vertices &&
+		inst.edit.pointer_in_window &&
+	    inst.edit.highlight.is_nil())
 	{
-		edit.split_line = inst.level.hover.findSplitLine(edit.split_x, edit.split_y,
-					  map_x, map_y, edit.dragged.num);
+		inst.edit.split_line = inst.level.hover.findSplitLine(inst.edit.split_x, inst.edit.split_y,
+					  map_x, map_y, inst.edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -265,7 +261,7 @@ done:
 
 void UpdateHighlight(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		Render3D_UpdateHighlight(inst);
 		UpdatePanel(inst);
@@ -273,28 +269,28 @@ void UpdateHighlight(Instance &inst)
 	}
 
 	// find the object to highlight
-	edit.highlight.clear();
+	inst.edit.highlight.clear();
 
 	// don't highlight when dragging, EXCEPT when dragging a single vertex
-	if (edit.pointer_in_window &&
-	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
+	if (inst.edit.pointer_in_window &&
+	    (inst.edit.action != ACT_DRAG || (inst.edit.mode == ObjType::vertices && inst.edit.dragged.valid()) ))
 	{
-		edit.highlight = inst.level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+		inst.edit.highlight = inst.level.hover.getNearbyObject(inst.edit.mode, inst.edit.map_x, inst.edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
-			edit.highlight.valid() && edit.dragged.num == edit.highlight.num)
+		if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid() &&
+			inst.edit.highlight.valid() && inst.edit.dragged.num == inst.edit.highlight.num)
 		{
-			edit.highlight.clear();
+			inst.edit.highlight.clear();
 		}
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
-			edit.mode == ObjType::vertices && edit.highlight.valid())
+		if (grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE &&
+			inst.edit.mode == ObjType::vertices && inst.edit.highlight.valid())
 		{
-			const Vertex *V = inst.level.vertices[edit.highlight.num];
-			const Vertex *S = inst.level.vertices[edit.draw_from.num];
+			const Vertex *V = inst.level.vertices[inst.edit.highlight.num];
+			const Vertex *S = inst.level.vertices[inst.edit.draw_from.num];
 
 			double vx = V->x();
 			double vy = V->y();
@@ -304,12 +300,12 @@ void UpdateHighlight(Instance &inst)
 			if (MakeValidCoord(vx) != V->raw_x ||
 				MakeValidCoord(vy) != V->raw_y)
 			{
-				edit.highlight.clear();
+				inst.edit.highlight.clear();
 			}
 		}
 	}
 
-	UpdateSplitLine(inst, edit.map_x, edit.map_y);
+	UpdateSplitLine(inst, inst.edit.map_x, inst.edit.map_y);
 	UpdateDrawLine(inst);
 
 	inst.main_win->canvas->UpdateHighlight();
@@ -321,7 +317,7 @@ void UpdateHighlight(Instance &inst)
 
 void Editor_ClearErrorMode(Instance &inst)
 {
-	if (edit.error_mode)
+	if (inst.edit.error_mode)
 	{
 		Selection_Clear(inst);
 	}
@@ -331,22 +327,22 @@ void Editor_ClearErrorMode(Instance &inst)
 void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode)
 {
 	// keep selection after a "Find All" and user dismisses panel
-	if (new_mode == edit.mode && inst.main_win->isSpecialPanelShown())
-		edit.error_mode = false;
+	if (new_mode == inst.edit.mode && inst.main_win->isSpecialPanelShown())
+		inst.edit.error_mode = false;
 
-	edit.mode = new_mode;
+	inst.edit.mode = new_mode;
 
 	Editor_ClearAction(inst);
 	Editor_ClearErrorMode(inst);
 
-	edit.highlight.clear();
-	edit.split_line.clear();
+	inst.edit.highlight.clear();
+	inst.edit.split_line.clear();
 }
 
 
 void Editor_ChangeMode(Instance &inst, char mode_char)
 {
-	ObjType  prev_type = edit.mode;
+	ObjType  prev_type = inst.edit.mode;
 
 	// Set the object type according to the new mode.
 	switch (mode_char)
@@ -361,23 +357,23 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 			return;
 	}
 
-	if (prev_type != edit.mode)
+	if (prev_type != inst.edit.mode)
 	{
-		Selection_Push();
+		inst.Selection_Push();
 
-		inst.main_win->NewEditMode(edit.mode);
+		inst.main_win->NewEditMode(inst.edit.mode);
 
 		// convert the selection
-		selection_c *prev_sel = edit.Selected;
-		edit.Selected = new selection_c(edit.mode, true /* extended */);
+		selection_c *prev_sel = inst.edit.Selected;
+		inst.edit.Selected = new selection_c(inst.edit.mode, true /* extended */);
 
-		ConvertSelection(inst.level, prev_sel, edit.Selected);
+		ConvertSelection(inst.level, prev_sel, inst.edit.Selected);
 		delete prev_sel;
 	}
 	else if (inst.main_win->isSpecialPanelShown())
 	{
 		// same mode, but this removes the special panel
-		inst.main_win->NewEditMode(edit.mode);
+		inst.main_win->NewEditMode(inst.edit.mode);
 	}
 	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
 	//       change.  We optionally emulate that behavior here.
@@ -447,8 +443,8 @@ void MapStuff_NotifyDelete(Instance &inst, ObjType type, int objnum)
 	{
 		recalc_map_bounds = true;
 
-		if (edit.action == ACT_DRAW_LINE &&
-			edit.draw_from.num == objnum)
+		if (inst.edit.action == ACT_DRAW_LINE &&
+			inst.edit.draw_from.num == objnum)
 		{
 			Editor_ClearAction(inst);
 		}
@@ -521,7 +517,7 @@ void ObjectBox_NotifyInsert(Instance &inst, ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
-	if (type != edit.mode)
+	if (type != inst.edit.mode)
 		return;
 
 	if (objnum > inst.main_win->GetPanelObjNum())
@@ -535,7 +531,7 @@ void ObjectBox_NotifyDelete(Instance &inst, ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
-	if (type != edit.mode)
+	if (type != inst.edit.mode)
 		return;
 
 	if (objnum > inst.main_win->GetPanelObjNum())
@@ -547,7 +543,7 @@ void ObjectBox_NotifyDelete(Instance &inst, ObjType type, int objnum)
 
 void ObjectBox_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
 {
-	if (type != edit.mode)
+	if (type != inst.edit.mode)
 		return;
 
 	if (objnum != inst.main_win->GetPanelObjNum())
@@ -590,10 +586,10 @@ void Selection_NotifyBegin()
 	invalidated_last_sel  = false;
 }
 
-void Selection_NotifyInsert(ObjType type, int objnum)
+void Selection_NotifyInsert(const Instance &inst, ObjType type, int objnum)
 {
-	if (type == edit.Selected->what_type() &&
-		objnum <= edit.Selected->max_obj())
+	if (type == inst.edit.Selected->what_type() &&
+		objnum <= inst.edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
@@ -606,9 +602,9 @@ void Selection_NotifyInsert(ObjType type, int objnum)
 	}
 }
 
-void Selection_NotifyDelete(ObjType type, int objnum)
+void Selection_NotifyDelete(const Instance &inst, ObjType type, int objnum)
 {
-	if (objnum <= edit.Selected->max_obj())
+	if (objnum <= inst.edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
@@ -628,12 +624,12 @@ void Selection_NotifyChange(ObjType type, int objnum, int field)
 }
 
 
-void Selection_NotifyEnd()
+void Selection_NotifyEnd(const Instance &inst)
 {
 	if (invalidated_selection)
 	{
 		// this clears AND RESIZES the selection_c object
-		edit.Selected->change_type(edit.mode);
+		inst.edit.Selected->change_type(inst.edit.mode);
 	}
 
 	if (invalidated_last_sel)
@@ -837,7 +833,7 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 // selection if it is non-empty, otherwise the highlight.
 // Returns false if both selection and highlight are empty.
 //
-SelectHighlight SelectionOrHighlight()
+SelectHighlight Instance::SelectionOrHighlight()
 {
 	if(!edit.Selected->empty())
 		return SelectHighlight::ok;
@@ -959,7 +955,7 @@ void Selection_InvalidateLast()
 }
 
 
-void Selection_Push()
+void Instance::Selection_Push() const
 {
 	if (edit.Selected->empty())
 		return;
@@ -981,12 +977,12 @@ void Selection_Push()
 void Selection_Clear(Instance &inst, bool no_save)
 {
 	if (! no_save)
-		Selection_Push();
+		inst.Selection_Push();
 
 	// this always clears it
-	edit.Selected->change_type(edit.mode);
+	inst.edit.Selected->change_type(inst.edit.mode);
 
-	edit.error_mode = false;
+	inst.edit.error_mode = false;
 
 	if (inst.main_win)
 		inst.main_win->UnselectPics();
@@ -995,7 +991,7 @@ void Selection_Clear(Instance &inst, bool no_save)
 }
 
 
-void Selection_Add(Objid& obj)
+void Instance::Selection_Add(Objid& obj) const
 {
 	// validate the mode is correct
 	if (obj.type != edit.mode)
@@ -1018,33 +1014,7 @@ void Selection_Add(Objid& obj)
 	edit.Selected->set_ext(obj.num, cur);
 }
 
-
-void Selection_Remove(Objid& obj)
-{
-	if (obj.type != edit.mode)
-		return;
-
-	if (obj.parts == 0)
-	{
-		edit.Selected->clear(obj.num);
-		return;
-	}
-
-	byte cur = edit.Selected->get_ext(obj.num);
-	if (cur == 0)
-		return;
-
-	cur = 1 | (cur & ~obj.parts);
-
-	// if we unset all the parts, then unset the object itself
-	if (cur == 1)
-		cur = 0;
-
-	edit.Selected->set_ext(obj.num, cur);
-}
-
-
-void Selection_Toggle(Objid& obj)
+void Instance::Selection_Toggle(Objid& obj) const
 {
 	if (obj.type != edit.mode)
 		return;
@@ -1076,11 +1046,11 @@ void Selection_Toggle(Objid& obj)
 
 static void Selection_Validate(const Instance &inst)
 {
-	int num_obj = inst.level.numObjects(edit.mode);
+	int num_obj = inst.level.numObjects(inst.edit.mode);
 
-	if (edit.Selected->max_obj() >= num_obj)
+	if (inst.edit.Selected->max_obj() >= num_obj)
 	{
-		edit.Selected->frob_range(num_obj, edit.Selected->max_obj(), BitOp::remove);
+		inst.edit.Selected->frob_range(num_obj, inst.edit.Selected->max_obj(), BitOp::remove);
 
 		inst.Beep("BUG: invalid selection");
 	}
@@ -1097,14 +1067,14 @@ void CMD_LastSelection(Instance &inst)
 
 	bool changed_mode = false;
 
-	if (last_Sel->what_type() != edit.mode)
+	if (last_Sel->what_type() != inst.edit.mode)
 	{
 		changed_mode = true;
 		Editor_ChangeMode_Raw(inst, last_Sel->what_type());
-		inst.main_win->NewEditMode(edit.mode);
+		inst.main_win->NewEditMode(inst.edit.mode);
 	}
 
-	std::swap(last_Sel, edit.Selected);
+	std::swap(last_Sel, inst.edit.Selected);
 
 	// ensure everything is kosher
 	Selection_Validate(inst);
@@ -1314,7 +1284,7 @@ bool RecUsed_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 void Editor_RegisterCommands();
 
 
-void Editor_Init()
+void Instance::Editor_Init()
 {
 	switch (config::default_edit_mode)
 	{
@@ -1350,7 +1320,7 @@ void Editor_Init()
 }
 
 
-void Editor_DefaultState()
+void Instance::Editor_DefaultState()
 {
 	edit.action = ACT_NOTHING;
 	edit.sticky_mod = 0;
@@ -1377,28 +1347,28 @@ bool Editor_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 
 	if (tokens[0] == "render_mode" && tokens.size() >= 2)
 	{
-		edit.render3d = atoi(tokens[1]);
+		inst.edit.render3d = atoi(tokens[1]);
 		RedrawMap(inst);
 		return true;
 	}
 
 	if (tokens[0] == "sector_render_mode" && tokens.size() >= 2)
 	{
-		edit.sector_render_mode = atoi(tokens[1]);
+		inst.edit.sector_render_mode = atoi(tokens[1]);
 		RedrawMap(inst);
 		return true;
 	}
 
 	if (tokens[0] == "thing_render_mode" && tokens.size() >= 2)
 	{
-		edit.thing_render_mode = atoi(tokens[1]);
+		inst.edit.thing_render_mode = atoi(tokens[1]);
 		RedrawMap(inst);
 		return true;
 	}
 
 	if (tokens[0] == "show_object_numbers" && tokens.size() >= 2)
 	{
-		edit.show_object_numbers = atoi(tokens[1]);
+		inst.edit.show_object_numbers = atoi(tokens[1]);
 		RedrawMap(inst);
 		return true;
 	}
@@ -1409,7 +1379,7 @@ bool Editor_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 //
 // Write editor state
 //
-void Editor_WriteUser(std::ostream &os)
+void Instance::Editor_WriteUser(std::ostream &os) const
 {
 	switch (edit.mode)
 	{

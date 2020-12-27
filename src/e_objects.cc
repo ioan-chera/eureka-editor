@@ -87,8 +87,8 @@ void ObjectsModule::createSquare(int model) const
 	else
 		doc.sectors[new_sec]->SetDefaults();
 
-	double x1 = grid.QuantSnapX(edit.map_x, false);
-	double y1 = grid.QuantSnapX(edit.map_y, false);
+	double x1 = grid.QuantSnapX(inst.edit.map_x, false);
+	double y1 = grid.QuantSnapX(inst.edit.map_y, false);
 
 	double x2 = x1 + config::new_sector_size;
 	double y2 = y1 + config::new_sector_size;
@@ -119,7 +119,7 @@ void ObjectsModule::createSquare(int model) const
 	// select it
 	Selection_Clear(inst);
 
-	edit.Selected->set(new_sec);
+	inst.edit.Selected->set(new_sec);
 }
 
 
@@ -127,8 +127,8 @@ void ObjectsModule::insertThing() const
 {
 	int model = -1;
 
-	if (edit.Selected->notempty())
-		model = edit.Selected->find_first();
+	if (inst.edit.Selected->notempty())
+		model = inst.edit.Selected->find_first();
 
 
 	doc.basis.begin();
@@ -150,8 +150,8 @@ void ObjectsModule::insertThing() const
 		}
 	}
 
-	T->SetRawX(grid.SnapX(edit.map_x));
-	T->SetRawY(grid.SnapY(edit.map_y));
+	T->SetRawX(grid.SnapX(inst.edit.map_x));
+	T->SetRawY(grid.SnapY(inst.edit.map_y));
 
 	recent_things.insert_number(T->type);
 
@@ -162,7 +162,7 @@ void ObjectsModule::insertThing() const
 	// select it
 	Selection_Clear(inst);
 
-	edit.Selected->set(new_t);
+	inst.edit.Selected->set(new_t);
 }
 
 
@@ -400,28 +400,28 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	int old_vert = -1;
 	int new_vert = -1;
 
-	double new_x = grid.SnapX(edit.map_x);
-	double new_y = grid.SnapY(edit.map_y);
+	double new_x = grid.SnapX(inst.edit.map_x);
+	double new_y = grid.SnapY(inst.edit.map_y);
 
 	int orig_num_sectors = doc.numSectors();
 
 
 	// are we drawing a line?
-	if (edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == ACT_DRAW_LINE)
 	{
-		old_vert = edit.draw_from.num;
+		old_vert = inst.edit.draw_from.num;
 
-		new_x = edit.draw_to_x;
-		new_y = edit.draw_to_y;
+		new_x = inst.edit.draw_to_x;
+		new_y = inst.edit.draw_to_y;
 	}
 
 	// a linedef which we are splitting (usually none)
-	int split_ld = edit.split_line.valid() ? edit.split_line.num : -1;
+	int split_ld = inst.edit.split_line.valid() ? inst.edit.split_line.num : -1;
 
 	if (split_ld >= 0)
 	{
-		new_x = edit.split_x;
-		new_y = edit.split_y;
+		new_x = inst.edit.split_x;
+		new_y = inst.edit.split_y;
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
@@ -435,11 +435,11 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		// not splitting a line.
 		// check if there is a "nearby" vertex (e.g. the highlighted one)
 
-		if (edit.highlight.valid())
-			new_vert = edit.highlight.num;
+		if (inst.edit.highlight.valid())
+			new_vert = inst.edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (new_vert < 0 && grid.snap && ! (edit.action == ACT_DRAW_LINE))
+		if (new_vert < 0 && grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
 			new_vert = doc.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		//
@@ -451,12 +451,12 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			// just ignore when highlight is same as drawing-start
 			if (old_vert >= 0 && *doc.vertices[old_vert] == *doc.vertices[new_vert])
 			{
-				edit.Selected->set(old_vert);
+				inst.edit.Selected->set(old_vert);
 				return;
 			}
 
 			// a plain INSERT will attempt to fix a dangling vertex
-			if (edit.action == ACT_NOTHING)
+			if (inst.edit.action == ACT_NOTHING)
 			{
 				if (doc.vertmod.tryFixDangler(new_vert))
 				{
@@ -466,7 +466,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			}
 
 			// our insertion point is an existing vertex, and we are not
-			// in drawing mode, so there is no edit operation to perform.
+			// in drawing mode, so there is no inst.edit operation to perform.
 			if (old_vert < 0)
 			{
 				old_vert = new_vert;
@@ -479,8 +479,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			if (doc.linemod.linedefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				edit.draw_from = Objid(ObjType::vertices, new_vert);
-				edit.Selected->set(new_vert);
+				inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+				inst.edit.Selected->set(new_vert);
 				return;
 			}
 		}
@@ -493,7 +493,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	if (new_vert < 0 && old_vert >= 0 &&
 		doc.vertices[old_vert]->Matches(MakeValidCoord(new_x), MakeValidCoord(new_y)))
 	{
-		edit.Selected->set(old_vert);
+		inst.edit.Selected->set(old_vert);
 		return;
 	}
 
@@ -509,8 +509,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		V->SetRawXY(new_x, new_y);
 
-		edit.draw_from = Objid(ObjType::vertices, new_vert);
-		edit.Selected->set(new_vert);
+		inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+		inst.edit.Selected->set(new_vert);
 
 		// splitting an existing line?
 		if (split_ld >= 0)
@@ -549,8 +549,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		doc.basis.setMessage("added linedef");
 
-		edit.draw_from = Objid(ObjType::vertices, new_vert);
-		edit.Selected->set(new_vert);
+		inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+		inst.edit.Selected->set(new_vert);
 	}
 
 
@@ -559,16 +559,16 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 begin_drawing:
 	// begin drawing mode?
-	if (edit.action == ACT_NOTHING && !closed_a_loop &&
+	if (inst.edit.action == ACT_NOTHING && !closed_a_loop &&
 		old_vert >= 0 && new_vert < 0)
 	{
 		Selection_Clear(inst);
 
-		edit.draw_from = Objid(ObjType::vertices, old_vert);
-		edit.Selected->set(old_vert);
+		inst.edit.draw_from = Objid(ObjType::vertices, old_vert);
+		inst.edit.Selected->set(old_vert);
 
-		edit.draw_to_x = doc.vertices[old_vert]->x();
-		edit.draw_to_y = doc.vertices[old_vert]->y();
+		inst.edit.draw_to_x = doc.vertices[old_vert]->x();
+		inst.edit.draw_to_y = doc.vertices[old_vert]->y();
 
 		Editor_SetAction(inst, ACT_DRAW_LINE);
 	}
@@ -588,8 +588,8 @@ begin_drawing:
 		// more than one sector may have been created, pick the last
 		sel.set(doc.numSectors() - 1);
 
-		edit.Selected->change_type(edit.mode);
-		ConvertSelection(doc, &sel, edit.Selected);
+		inst.edit.Selected->change_type(inst.edit.mode);
+		ConvertSelection(doc, &sel, inst.edit.Selected);
 	}
 
 	RedrawMap(inst);
@@ -598,7 +598,7 @@ begin_drawing:
 
 void ObjectsModule::insertSector() const
 {
-	int sel_count = edit.Selected->count_obj();
+	int sel_count = inst.edit.Selected->count_obj();
 	if (sel_count > 1)
 	{
 		inst.Beep("Too many sectors to copy from");
@@ -606,14 +606,14 @@ void ObjectsModule::insertSector() const
 	}
 
 	// if outside of the map, create a square
-	if (doc.hover.isPointOutsideOfMap(edit.map_x, edit.map_y))
+	if (doc.hover.isPointOutsideOfMap(inst.edit.map_x, inst.edit.map_y))
 	{
 		doc.basis.begin();
 		doc.basis.setMessage("added sector (outside map)");
 
 		int model = -1;
 		if (sel_count > 0)
-			model = edit.Selected->find_first();
+			model = inst.edit.Selected->find_first();
 
 		createSquare(model);
 
@@ -628,9 +628,9 @@ void ObjectsModule::insertSector() const
 	int model;
 
 	if (sel_count > 0)
-		model = edit.Selected->find_first();
-	else if (edit.highlight.valid())
-		model = edit.highlight.num;
+		model = inst.edit.Selected->find_first();
+	else if (inst.edit.highlight.valid())
+		model = inst.edit.highlight.num;
 	else
 		model = -1;  // look for a neighbor to copy
 
@@ -638,7 +638,7 @@ void ObjectsModule::insertSector() const
 	doc.basis.begin();
 	doc.basis.setMessage("added new sector");
 
-	bool ok = doc.secmod.assignSectorToSpace(edit.map_x, edit.map_y, -1 /* create */, model);
+	bool ok = doc.secmod.assignSectorToSpace(inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
 
 	doc.basis.end();
 
@@ -646,7 +646,7 @@ void ObjectsModule::insertSector() const
 	if (ok)
 	{
 		Selection_Clear(inst);
-		edit.Selected->set(doc.numSectors() - 1);
+		inst.edit.Selected->set(doc.numSectors() - 1);
 	}
 
 	RedrawMap(inst);
@@ -658,13 +658,13 @@ void ObjectsModule::commandInsert(Instance &inst)
 	bool force_cont;
 	bool no_fill;
 
-	if (edit.render3d && edit.mode != ObjType::things)
+	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
 	{
 		inst.Beep("Cannot insert in this mode");
 		return;
 	}
 
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::things:
 			inst.level.objects.insertThing();
@@ -806,7 +806,7 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
 	// each thing is in).
-	if (edit.mode == ObjType::sectors)
+	if (inst.edit.mode == ObjType::sectors)
 	{
 		selection_c thing_sel(ObjType::things);
 		ConvertSelection(doc, list, &thing_sel);
@@ -822,9 +822,9 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 
 void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
 {
-	if (edit.mode != ObjType::vertices)
+	if (inst.edit.mode != ObjType::vertices)
 	{
-		selection_c list(edit.mode);
+		selection_c list(inst.edit.mode);
 		list.set(obj.num);
 
 		doc.objects.move(&list, delta_x, delta_y, delta_z);
@@ -838,15 +838,15 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 	int did_split_line = -1;
 
 	// handle a single vertex merging onto an existing one
-	if (edit.highlight.valid())
+	if (inst.edit.highlight.valid())
 	{
 		doc.basis.setMessage("merge vertex #%d", obj.num);
 
-		SYS_ASSERT(obj.num != edit.highlight.num);
+		SYS_ASSERT(obj.num != inst.edit.highlight.num);
 
 		selection_c verts(ObjType::vertices);
 
-		verts.set(edit.highlight.num);	// keep the highlight
+		verts.set(inst.edit.highlight.num);	// keep the highlight
 		verts.set(obj.num);
 
 		doc.vertmod.mergeList(&verts);
@@ -856,16 +856,16 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 	}
 
 	// handle a single vertex splitting a linedef
-	if (edit.split_line.valid())
+	if (inst.edit.split_line.valid())
 	{
-		did_split_line = edit.split_line.num;
+		did_split_line = inst.edit.split_line.num;
 
-		doc.linemod.splitLinedefAtVertex(edit.split_line.num, obj.num);
+		doc.linemod.splitLinedefAtVertex(inst.edit.split_line.num, obj.num);
 
 		// now move the vertex!
 	}
 
-	selection_c list(edit.mode);
+	selection_c list(inst.edit.mode);
 
 	list.set(obj.num);
 
@@ -1056,17 +1056,17 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 void ObjectsModule::commandCopyProperties(Instance &inst)
 {
-	if (edit.highlight.is_nil())
+	if (inst.edit.highlight.is_nil())
 	{
 		inst.Beep("No target for CopyProperties");
 		return;
 	}
-	else if (edit.Selected->empty())
+	else if (inst.edit.Selected->empty())
 	{
 		inst.Beep("No source for CopyProperties");
 		return;
 	}
-	else if (edit.mode == ObjType::vertices)
+	else if (inst.edit.mode == ObjType::vertices)
 	{
 		inst.Beep("No properties to copy");
 		return;
@@ -1077,14 +1077,14 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 
 	if (! Exec_HasFlag("/reverse"))
 	{
-		if (edit.Selected->count_obj() != 1)
+		if (inst.edit.Selected->count_obj() != 1)
 		{
 			inst.Beep("Too many sources for CopyProperties");
 			return;
 		}
 
-		int source = edit.Selected->find_first();
-		int target = edit.highlight.num;
+		int source = inst.edit.Selected->find_first();
+		int target = inst.edit.highlight.num;
 
 		// silently allow copying onto self
 		if (source == target)
@@ -1093,7 +1093,7 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 		inst.level.basis.begin();
 		inst.level.basis.setMessage("copied properties");
 
-		switch (edit.mode)
+		switch (inst.edit.mode)
 		{
 			case ObjType::sectors:
 				inst.level.objects.transferSectorProperties(source, target);
@@ -1115,23 +1115,23 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 	}
 	else  /* reverse mode, HILITE --> SEL */
 	{
-		if (edit.Selected->count_obj() == 1 && edit.Selected->find_first() == edit.highlight.num)
+		if (inst.edit.Selected->count_obj() == 1 && inst.edit.Selected->find_first() == inst.edit.highlight.num)
 		{
 			inst.Beep("No selection for CopyProperties");
 			return;
 		}
 
-		int source = edit.highlight.num;
+		int source = inst.edit.highlight.num;
 
 		inst.level.basis.begin();
 		inst.level.basis.setMessage("copied properties");
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			if (*it == source)
 				continue;
 
-			switch (edit.mode)
+			switch (inst.edit.mode)
 			{
 				case ObjType::sectors:
 					inst.level.objects.transferSectorProperties(source, *it);
@@ -1198,9 +1198,9 @@ void ObjectsModule::dragCountOnGrid(int *count, int *total) const
 	// Note: the results are approximate, vertices can be counted two
 	//       or more times.
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		dragCountOnGridWorker(edit.mode, *it, count, total);
+		dragCountOnGridWorker(inst.edit.mode, *it, count, total);
 	}
 }
 
@@ -1303,16 +1303,16 @@ void ObjectsModule::getDragFocus(double *x, double *y, double ptr_x, double ptr_
 	// honors the 'only_grid' property (when set).
 	double best_dist = 9e9;
 
-	if (edit.dragged.valid())  // a single object
+	if (inst.edit.dragged.valid())  // a single object
 	{
-		dragUpdateCurrentDist(edit.mode, edit.dragged.num, x, y, &best_dist,
+		dragUpdateCurrentDist(inst.edit.mode, inst.edit.dragged.num, x, y, &best_dist,
 							   ptr_x, ptr_y, only_grid);
 		return;
 	}
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		dragUpdateCurrentDist(edit.mode, *it, x, y, &best_dist,
+		dragUpdateCurrentDist(inst.edit.mode, *it, x, y, &best_dist,
 							   ptr_x, ptr_y, only_grid);
 	}
 }
@@ -1555,7 +1555,7 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 
 void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
-	if (edit.mode == ObjType::things)
+	if (inst.edit.mode == ObjType::things)
 	{
 		doMirrorThings(list, is_vert, mid_x, mid_y);
 		return;
@@ -1563,7 +1563,7 @@ void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x,
 
 	// everything else just modifies the vertices
 
-	if (edit.mode == ObjType::sectors)
+	if (inst.edit.mode == ObjType::sectors)
 	{
 		// handle things in Sectors mode too
 		selection_c things(ObjType::things);
@@ -1578,7 +1578,7 @@ void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x,
 
 void ObjectsModule::commandMirror(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No objects to mirror");
@@ -1591,12 +1591,12 @@ void ObjectsModule::commandMirror(Instance &inst)
 		is_vert = true;
 
 	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
+	inst.level.basis.setMessageForSelection("mirrored", *inst.edit.Selected, is_vert ? " vertically" : " horizontally");
 
-	inst.level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
+	inst.level.objects.doMirrorStuff(inst.edit.Selected, is_vert, mid_x, mid_y);
 
 	inst.level.basis.end();
 
@@ -1646,7 +1646,7 @@ void ObjectsModule::commandRotate90(Instance &inst)
 
 	bool anti_clockwise = (tolower(EXEC_Param[0][0]) == 'a');
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No objects to rotate");
@@ -1654,29 +1654,29 @@ void ObjectsModule::commandRotate90(Instance &inst)
 	}
 
 	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
+	inst.level.basis.setMessageForSelection("rotated", *inst.edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
-	if (edit.mode == ObjType::things)
+	if (inst.edit.mode == ObjType::things)
 	{
-		inst.level.objects.doRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
+		inst.level.objects.doRotate90Things(inst.edit.Selected, anti_clockwise, mid_x, mid_y);
 	}
 	else
 	{
 		// handle things inside sectors
-		if (edit.mode == ObjType::sectors)
+		if (inst.edit.mode == ObjType::sectors)
 		{
 			selection_c things(ObjType::things);
-			ConvertSelection(inst.level, edit.Selected, &things);
+			ConvertSelection(inst.level, inst.edit.Selected, &things);
 
 			inst.level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 		}
 
 		// everything else just rotates the vertices
 		selection_c verts(ObjType::vertices);
-		ConvertSelection(inst.level, edit.Selected, &verts);
+		ConvertSelection(inst.level, inst.edit.Selected, &verts);
 
 		fixcoord_t fix_mx = MakeValidCoord(mid_x);
 		fixcoord_t fix_my = MakeValidCoord(mid_y);
@@ -1756,7 +1756,7 @@ void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) co
 
 void ObjectsModule::doScaleTwoStuff(selection_c *list, transform_t& param) const
 {
-	if (edit.mode == ObjType::things)
+	if (inst.edit.mode == ObjType::things)
 	{
 		doScaleTwoThings(list, param);
 		return;
@@ -1764,7 +1764,7 @@ void ObjectsModule::doScaleTwoStuff(selection_c *list, transform_t& param) const
 
 	// everything else just modifies the vertices
 
-	if (edit.mode == ObjType::sectors)
+	if (inst.edit.mode == ObjType::sectors)
 	{
 		// handle things in Sectors mode too
 		selection_c things(ObjType::things);
@@ -1781,24 +1781,24 @@ void ObjectsModule::transform(transform_t& param) const
 {
 	// this is called by the MOUSE2 dynamic scaling code
 
-	SYS_ASSERT(edit.Selected->notempty());
+	SYS_ASSERT(inst.edit.Selected->notempty());
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection("scaled", *edit.Selected);
+	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
 
 	if (param.scale_x < 0)
 	{
 		param.scale_x = -param.scale_x;
-		doMirrorStuff(edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(inst.edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
 	}
 
 	if (param.scale_y < 0)
 	{
 		param.scale_y = -param.scale_y;
-		doMirrorStuff(edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(inst.edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
 	}
 
-	doScaleTwoStuff(edit.Selected, param);
+	doScaleTwoStuff(inst.edit.Selected, param);
 
 	doc.basis.end();
 }
@@ -1808,13 +1808,13 @@ void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
-		doc.objects.calcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
+		doc.objects.calcMiddle(inst.edit.Selected, &param.mid_x, &param.mid_y);
 		return;
 	}
 
 	double lx, ly, hx, hy;
 
-	doc.objects.calcBBox(edit.Selected, &lx, &ly, &hx, &hy);
+	doc.objects.calcBBox(inst.edit.Selected, &lx, &ly, &hx, &hy);
 
 	if (pos_x < 0)
 		param.mid_x = lx;
@@ -1847,9 +1847,9 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 	determineOrigin(param, pos_x, pos_y);
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection("scaled", *edit.Selected);
+	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(edit.Selected, param);
+		doScaleTwoStuff(inst.edit.Selected, param);
 	}
 	doc.basis.end();
 }
@@ -1897,7 +1897,7 @@ void ObjectsModule::doScaleSectorHeights(selection_c *list, double scale_z, int 
 void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
                    double pos_x, double pos_y, double pos_z) const
 {
-	SYS_ASSERT(edit.mode == ObjType::sectors);
+	SYS_ASSERT(inst.edit.mode == ObjType::sectors);
 
 	transform_t param;
 
@@ -1909,10 +1909,10 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 	determineOrigin(param, pos_x, pos_y);
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection("scaled", *edit.Selected);
+	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(edit.Selected, param);
-		doScaleSectorHeights(edit.Selected, scale_z, static_cast<int>(pos_z));
+		doScaleTwoStuff(inst.edit.Selected, param);
+		doScaleSectorHeights(inst.edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
 	doc.basis.end();
 }
@@ -1929,9 +1929,9 @@ void ObjectsModule::rotate3(double deg, double pos_x, double pos_y) const
 	determineOrigin(param, pos_x, pos_y);
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection("rotated", *edit.Selected);
+	doc.basis.setMessageForSelection("rotated", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(edit.Selected, param);
+		doScaleTwoStuff(inst.edit.Selected, param);
 	}
 	doc.basis.end();
 }
@@ -1987,7 +1987,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	param.scale_y = mul;
 
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");
@@ -1997,21 +1997,21 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	// TODO: CONFIG ITEM (or FLAG)
 	if ((true))
 	{
-		calcMiddle(edit.Selected, &param.mid_x, &param.mid_y);
+		calcMiddle(inst.edit.Selected, &param.mid_x, &param.mid_y);
 	}
 	else
 	{
 		double lx, ly, hx, hy;
-		calcBBox(edit.Selected, &lx, &ly, &hx, &hy);
+		calcBBox(inst.edit.Selected, &lx, &ly, &hx, &hy);
 
 		param.mid_x = lx + (hx - lx) / 2;
 		param.mid_y = ly + (hy - ly) / 2;
 	}
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *edit.Selected);
+	doc.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
 
-	doScaleTwoStuff(edit.Selected, param);
+	doScaleTwoStuff(inst.edit.Selected, param);
 
 	doc.basis.end();
 
@@ -2176,35 +2176,35 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 
 void ObjectsModule::commandQuantize(Instance &inst)
 {
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 	{
-		if (edit.highlight.is_nil())
+		if (inst.edit.highlight.is_nil())
 		{
 			inst.Beep("Nothing to quantize");
 			return;
 		}
 
-		Selection_Add(edit.highlight);
+		inst.Selection_Add(inst.edit.highlight);
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("quantized", *edit.Selected);
+	inst.level.basis.setMessageForSelection("quantized", *inst.edit.Selected);
 
-	switch (edit.mode)
+	switch (inst.edit.mode)
 	{
 		case ObjType::things:
-			inst.level.objects.quantizeThings(edit.Selected);
+			inst.level.objects.quantizeThings(inst.edit.Selected);
 			break;
 
 		case ObjType::vertices:
-			inst.level.objects.quantizeVertices(edit.Selected);
+			inst.level.objects.quantizeVertices(inst.edit.Selected);
 			break;
 
 		// everything else merely quantizes vertices
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(inst.level, edit.Selected, &verts);
+			ConvertSelection(inst.level, inst.edit.Selected, &verts);
 
 			inst.level.objects.quantizeVertices(&verts);
 
@@ -2215,7 +2215,7 @@ void ObjectsModule::commandQuantize(Instance &inst)
 
 	inst.level.basis.end();
 
-	edit.error_mode = true;
+	inst.edit.error_mode = true;
 }
 
 //--- editor settings ---

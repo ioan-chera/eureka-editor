@@ -116,12 +116,12 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 	int new_x = atoi(box->pos_x->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessage("edited X of"/*, edit.Selected*/);
+		box->inst.level.basis.setMessage("edited X of"/*, inst.edit.Selected*/);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
 		}
@@ -136,12 +136,12 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 	int new_y = atoi(box->pos_y->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessage("edited Y of"/*, edit.Selected*/);
+		box->inst.level.basis.setMessage("edited Y of"/*, inst.edit.Selected*/);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
 		}
@@ -172,15 +172,15 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 	else if (mod & EMOD_COMMAND)
 		step = vertex_bump_large;
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		fixcoord_t fdx = MakeValidCoord(dx * step);
 		fixcoord_t fdy = MakeValidCoord(dy * step);
 
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessage("adjusted"/*, edit.Selected*/);
+		box->inst.level.basis.setMessage("adjusted"/*, inst.edit.Selected*/);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const Vertex *V = box->inst.level.vertices[*it];
 

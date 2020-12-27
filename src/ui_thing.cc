@@ -361,12 +361,12 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(new_type, FL_DARK2);
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited type of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			box->inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
 		}
@@ -405,12 +405,12 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 	else
 		box->spec_desc->value(info.desc.c_str());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited special of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited special of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			box->inst.level.basis.changeThing(*it, Thing::F_SPECIAL, new_type);
 		}
@@ -494,12 +494,12 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 	int new_ang = atoi(box->angle->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited angle of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited angle of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeThing(*it, Thing::F_ANGLE, new_ang);
 		}
@@ -516,12 +516,12 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 	int new_tid = atoi(box->tid->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited TID of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited TID of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeThing(*it, Thing::F_TID, new_tid);
 		}
@@ -537,12 +537,12 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 
 	int new_x = atoi(box->pos_x->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited X of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			box->inst.level.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
 
 		box->inst.level.basis.end();
@@ -555,12 +555,12 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 
 	int new_y = atoi(box->pos_y->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited Y of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			box->inst.level.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
 
 		box->inst.level.basis.end();
@@ -573,12 +573,12 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 
 	int new_h = atoi(box->pos_z->value());
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited Z of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			box->inst.level.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
 
 		box->inst.level.basis.end();
@@ -595,12 +595,12 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	int mask = ocb->mask;
 	int new_opts = box->CalcOptions();
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited flags of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const Thing *T = box->inst.level.things[*it];
 
@@ -657,12 +657,12 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 	new_value = CLAMP(0, new_value, 255);
 
-	if (! edit.Selected->empty())
+	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited args of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeThing(*it, Thing::F_ARG1 + arg_idx, new_value);
 		}

@@ -686,7 +686,7 @@ static void Main_OpenWindow(Instance &inst)
 	Fl::add_handler(Main_key_handler);
 
 	inst.main_win->BrowserMode(0);
-	inst.main_win->NewEditMode(edit.mode);
+	inst.main_win->NewEditMode(inst.edit.mode);
 
 	// allow processing keyboard events, even before the mouse
 	// pointer has entered our window.
@@ -753,7 +753,7 @@ void Main_Loop()
 	for (;;)
 	{
 		// TODO: determine the active instance
-		if (edit.is_navigating)
+		if (gInstance.edit.is_navigating)
 		{
 			Nav_Navigate(gInstance);
 
@@ -782,8 +782,8 @@ void Main_Loop()
 
 		gInstance.main_win->scroll->UpdateBounds();
 
-		if (edit.Selected->empty())
-			edit.error_mode = false;
+		if (gInstance.edit.Selected->empty())
+			gInstance.edit.error_mode = false;
 	}
 }
 
@@ -1057,8 +1057,8 @@ int main(int argc, char *argv[])
 		// and command line arguments will override both
 		M_ParseCommandLine(argc - 1, argv + 1, 2);
 
-
-		Editor_Init();
+		// TODO: create a new instance
+		gInstance.Editor_Init();
 
 		Main_SetupFLTK();
 

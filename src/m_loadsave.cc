@@ -136,7 +136,7 @@ static void FreshLevel(Instance &inst)
 
 	ZoomWholeMap(inst);
 
-	Editor_DefaultState();
+	inst.Editor_DefaultState();
 }
 
 
@@ -969,8 +969,8 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 	Editor_ClearAction(inst);
 	Selection_InvalidateLast();
 
-	edit.Selected->clear_all();
-	edit.highlight.clear();
+	inst.edit.Selected->clear_all();
+	inst.edit.highlight.clear();
 
 	inst.main_win->UpdateTotals();
 	inst.main_win->UpdateGameInfo();

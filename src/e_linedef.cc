@@ -697,8 +697,8 @@ void LinedefModule::commandAlign(Instance &inst)
 	if (do_clear) align_flags |= LINALIGN_Clear;
 
 
-	SelectHighlight unselect = SelectionOrHighlight();
-	if (edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
+	SelectHighlight unselect = inst.SelectionOrHighlight();
+	if (inst.edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
 	{
 		inst.Beep("no lines to align");
 		return;
@@ -708,9 +708,9 @@ void LinedefModule::commandAlign(Instance &inst)
 
 	std::vector< Objid > group;
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		int parts = edit.Selected->get_ext(*it);
+		int parts = inst.edit.Selected->get_ext(*it);
 		parts &= ~1;
 
 		const LineDef *L = inst.level.linedefs[*it];
@@ -845,7 +845,7 @@ void LinedefModule::flipLinedefGroup(const selection_c *flip) const
 //
 void LinedefModule::commandFlip(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No lines to flip");
@@ -855,9 +855,9 @@ void LinedefModule::commandFlip(Instance &inst)
 	bool force_it = Exec_HasFlag("/force");
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("flipped", *edit.Selected);
+	inst.level.basis.setMessageForSelection("flipped", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		if (force_it)
 			inst.level.linemod.flipLinedef(*it);
@@ -873,7 +873,7 @@ void LinedefModule::commandFlip(Instance &inst)
 
 void LinedefModule::commandSwapSides(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No lines to swap sides");
@@ -881,9 +881,9 @@ void LinedefModule::commandSwapSides(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("swapped sides on", *edit.Selected);
+	inst.level.basis.setMessageForSelection("swapped sides on", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		inst.level.linemod.flipLine_sides(*it);
 	}
@@ -975,7 +975,7 @@ bool LinedefModule::doSplitLineDef(int ld) const
 //
 void LinedefModule::commandSplitHalf(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No lines to split");
@@ -987,7 +987,7 @@ void LinedefModule::commandSplitHalf(Instance &inst)
 
 	inst.level.basis.begin();
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		if (inst.level.linemod.doSplitLineDef(*it))
 			new_count++;
@@ -997,7 +997,7 @@ void LinedefModule::commandSplitHalf(Instance &inst)
 	inst.level.basis.end();
 
 	// Hmmmmm -- should abort early if some lines are too short??
-	if (new_count < edit.Selected->count_obj())
+	if (new_count < inst.edit.Selected->count_obj())
 		inst.Beep("Some lines were too short!");
 
 	if (unselect == SelectHighlight::unselect)
@@ -1006,7 +1006,7 @@ void LinedefModule::commandSplitHalf(Instance &inst)
 	}
 	else if (new_count > 0)
 	{
-		edit.Selected->frob_range(new_first, new_first + new_count - 1, BitOp::add);
+		inst.edit.Selected->frob_range(new_first, new_first + new_count - 1, BitOp::add);
 	}
 }
 
@@ -1154,21 +1154,21 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 
 void LinedefModule::commandMergeTwo(Instance &inst)
 {
-	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
+	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		inst.Selection_Add(inst.edit.highlight);
 	}
 
-	if (edit.Selected->count_obj() != 2)
+	if (inst.edit.Selected->count_obj() != 2)
 	{
-		inst.Beep("Need 2 linedefs to merge (got %d)", edit.Selected->count_obj());
+		inst.Beep("Need 2 linedefs to merge (got %d)", inst.edit.Selected->count_obj());
 		return;
 	}
 
 	// we will merge the second into the first
 
-	int ld2 = edit.Selected->find_first();
-	int ld1 = edit.Selected->find_second();
+	int ld2 = inst.edit.Selected->find_first();
+	int ld1 = inst.edit.Selected->find_second();
 
 	const LineDef * L1 = inst.level.linedefs[ld1];
 	const LineDef * L2 = inst.level.linedefs[ld2];
@@ -1355,7 +1355,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 	// use a copy of the selection
 	selection_c list(ObjType::linedefs);
-	ConvertSelection(doc, edit.Selected, &list);
+	ConvertSelection(doc, inst.edit.Selected, &list);
 
 	if (list.empty())
 		return;

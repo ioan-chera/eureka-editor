@@ -637,7 +637,7 @@ void Basis::EditOperation::apply(Basis &basis)
 }
 
 //
-// Destroy an edit operation
+// Destroy an inst.inst.edit operation
 //
 void Basis::EditOperation::destroy()
 {
@@ -708,7 +708,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 
 	// TODO: their own modules
 	Clipboard_NotifyDelete(objtype, objnum);
-	Selection_NotifyDelete(objtype, objnum);
+	Selection_NotifyDelete(basis.inst, objtype, objnum);
 	MapStuff_NotifyDelete(basis.inst, objtype, objnum);
 	Render3D_NotifyDelete(basis.doc, objtype, objnum);
 	ObjectBox_NotifyDelete(basis.inst, objtype, objnum);
@@ -855,7 +855,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 
 	// TODO: their module
 	Clipboard_NotifyInsert(basis.doc, objtype, objnum);
-	Selection_NotifyInsert(objtype, objnum);
+	Selection_NotifyInsert(basis.inst, objtype, objnum);
 	MapStuff_NotifyInsert(objtype, objnum);
 	Render3D_NotifyInsert(objtype, objnum);
 	ObjectBox_NotifyInsert(basis.inst, objtype, objnum);
@@ -1071,7 +1071,7 @@ void Basis::doProcessChangeStatus() const
 	}
 
 	Clipboard_NotifyEnd();
-	Selection_NotifyEnd();
+	Selection_NotifyEnd(inst);
 	MapStuff_NotifyEnd(inst);
 	Render3D_NotifyEnd(inst);
 	ObjectBox_NotifyEnd(inst);

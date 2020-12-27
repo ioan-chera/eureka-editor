@@ -245,12 +245,12 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 	// support hexadecimal
 	int new_type = (int)strtol(box->type->value(), NULL, 0);
 
-	if (! edit.Selected->empty())
+	if (! box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited type of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			box->inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
@@ -403,14 +403,14 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 	// let the widget(s) get updated.  That's because we do different
 	// things depending on whether the line is one-sided or two-sided.
 
-	if (! edit.Selected->empty())
+	if (! inst.edit.Selected->empty())
 	{
 		inst.level.basis.begin();
-		inst.level.basis.setMessageForSelection("edited texture on", *edit.Selected);
+		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			int p2 = edit.Selected->get_ext(*it);
+			int p2 = inst.edit.Selected->get_ext(*it);
 
 			// only use parts explicitly selected in 3D view when no
 			// parts in the linedef panel are selected.
@@ -486,13 +486,13 @@ void UI_LineBox::CB_Copy(int parts)
 void UI_LineBox::CB_Paste(int parts, int new_tex)
 {
 	// iterate over selected linedefs
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 		return;
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const LineDef *L = inst.level.linedefs[*it];
 
@@ -593,7 +593,7 @@ void UI_LineBox::tag_callback(Fl_Widget *w, void *data)
 
 	int new_tag = atoi(box->tag->value());
 
-	if (! edit.Selected->empty())
+	if (! box->inst.edit.Selected->empty())
 		box->inst.level.checks.tagsApplyNewValue(new_tag);
 }
 
@@ -607,12 +607,12 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 	int mask = l_f_c->mask;
 	int new_flags = box->CalcFlags();
 
-	if (! edit.Selected->empty())
+	if (! box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited flags of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const LineDef *L = box->inst.level.linedefs[*it];
 
@@ -637,12 +637,12 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 	new_value = CLAMP(0, new_value, 255);
 
-	if (! edit.Selected->empty())
+	if (! box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited args of", *edit.Selected);
+		box->inst.level.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
-		for (sel_iter_c it(edit.Selected); !it.done(); it.next())
+		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeLinedef(*it, LineDef::F_TAG + arg_idx, new_value);
 		}

@@ -39,10 +39,10 @@
 
 void ClearStickyMod(Instance &inst)
 {
-	if (edit.sticky_mod)
+	if (inst.edit.sticky_mod)
 		inst.Status_Clear();
 
-	edit.sticky_mod = 0;
+	inst.edit.sticky_mod = 0;
 }
 
 
@@ -52,7 +52,7 @@ static int mouse_last_y;
 
 void Editor_ClearAction(Instance &inst)
 {
-	switch (edit.action)
+	switch (inst.edit.action)
 	{
 		case ACT_NOTHING:
 			return;
@@ -66,7 +66,7 @@ void Editor_ClearAction(Instance &inst)
 			break;
 	}
 
-	edit.action = ACT_NOTHING;
+	inst.edit.action = ACT_NOTHING;
 }
 
 
@@ -74,9 +74,9 @@ void Editor_SetAction(Instance &inst, editor_action_e  new_action)
 {
 	Editor_ClearAction(inst);
 
-	edit.action = new_action;
+	inst.edit.action = new_action;
 
-	switch (edit.action)
+	switch (inst.edit.action)
 	{
 		case ACT_NOTHING:
 			return;
@@ -111,7 +111,7 @@ void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
 	// started?
 	if (mode < 0)
 	{
-		edit.is_panning = true;
+		inst.edit.is_panning = true;
 		inst.main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
@@ -119,24 +119,24 @@ void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
 	// finished?
 	if (mode > 0)
 	{
-		edit.is_panning = false;
+		inst.edit.is_panning = false;
 		inst.main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
 
-	if (! edit.panning_lax)
+	if (! inst.edit.panning_lax)
 		mod = 0;
 
 	if (dx == 0 && dy == 0)
 		return;
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		Render3D_ScrollMap(inst, dx, dy, mod);
 	}
 	else
 	{
-		float speed = static_cast<float>(edit.panning_speed / grid.Scale);
+		float speed = static_cast<float>(inst.edit.panning_speed / grid.Scale);
 
 		double delta_x = ((double) -dx * speed);
 		double delta_y = ((double)  dy * speed);
@@ -146,7 +146,7 @@ void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
 }
 
 
-void Editor_ClearNav()
+void Instance::Editor_ClearNav() 
 {
 	edit.nav_left  = 0;
 	edit.nav_right = 0;
@@ -170,18 +170,18 @@ static void Navigate2D(Instance &inst)
 
 	keycode_t mod = 0;
 
-	if (edit.nav_lax)
+	if (inst.edit.nav_lax)
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
 	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
-	if (edit.nav_left || edit.nav_right ||
-		edit.nav_up   || edit.nav_down)
+	if (inst.edit.nav_left || inst.edit.nav_right ||
+		inst.edit.nav_up   || inst.edit.nav_down)
 	{
-		float delta_x = (edit.nav_right - edit.nav_left);
-		float delta_y = (edit.nav_up    - edit.nav_down);
+		float delta_x = (inst.edit.nav_right - inst.edit.nav_left);
+		float delta_y = (inst.edit.nav_up    - inst.edit.nav_down);
 
 		delta_x = delta_x * mod_factor * delay_ms;
 		delta_y = delta_y * mod_factor * delay_ms;
@@ -219,7 +219,7 @@ static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
 static unsigned int nav_time;
 
 
-void Nav_Clear()
+void Instance::Nav_Clear()
 {
 	Editor_ClearNav();
 
@@ -231,7 +231,7 @@ void Nav_Clear()
 
 void Nav_Navigate(Instance &inst)
 {
-	if (edit.render3d)
+	if (inst.edit.render3d)
 		Render3D_Navigate(inst);
 	else
 		Navigate2D(inst);
@@ -241,16 +241,16 @@ void Nav_Navigate(Instance &inst)
 bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func)
 {
 	// when starting a navigation, grab the current time
-	if (! edit.is_navigating)
+	if (! inst.edit.is_navigating)
 		Nav_TimeDiff();
 
 	keycode_t lax_mod = 0;
 
-	edit.nav_lax = Exec_HasFlag("/LAX");
-	if (edit.nav_lax)
+	inst.edit.nav_lax = Exec_HasFlag("/LAX");
+	if (inst.edit.nav_lax)
 		lax_mod = EMOD_SHIFT | EMOD_COMMAND;
 
-	edit.is_navigating = true;
+	inst.edit.is_navigating = true;
 
 	int free_slot = -1;
 
@@ -373,11 +373,11 @@ static void Nav_UpdateKeys(Instance &inst)
 
 	Nav_UpdateActionKey(inst);
 
-	if (! edit.is_navigating)
+	if (! inst.edit.is_navigating)
 		return;
 
 	// we rebuilt this value
-	edit.is_navigating = false;
+	inst.edit.is_navigating = false;
 
 	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
 	{
@@ -395,7 +395,7 @@ static void Nav_UpdateKeys(Instance &inst)
 		}
 
 		// at least one navigation key is still active
-		edit.is_navigating = true;
+		inst.edit.is_navigating = true;
 	}
 }
 
@@ -439,11 +439,11 @@ static void EV_EnterWindow(Instance &inst)
 {
 	if (!global::app_has_focus)
 	{
-		edit.pointer_in_window = false;
+		inst.edit.pointer_in_window = false;
 		return;
 	}
 
-	edit.pointer_in_window = true;
+	inst.edit.pointer_in_window = true;
 
 	inst.main_win->canvas->PointerPos(true /* in_event */);
 
@@ -464,10 +464,10 @@ static void EV_LeaveWindow(Instance &inst)
 	if (in_operation_menu)
 		return;
 
-	edit.pointer_in_window = false;
+	inst.edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
-	if (edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == ACT_DRAW_LINE)
 		Editor_ClearAction(inst);
 
 	// this will update (disable) any current highlight
@@ -477,15 +477,15 @@ static void EV_LeaveWindow(Instance &inst)
 
 void EV_EscapeKey(Instance &inst)
 {
-	Nav_Clear();
+	inst.Nav_Clear();
 	ClearStickyMod(inst);
 	Editor_ClearAction(inst);
 	inst.Status_Clear();
 
-	edit.clicked.clear();
-	edit.dragged.clear();
-	edit.split_line.clear();
-	edit.draw_from.clear();
+	inst.edit.clicked.clear();
+	inst.edit.dragged.clear();
+	inst.edit.split_line.clear();
+	inst.edit.draw_from.clear();
 
 	UpdateHighlight(inst);
 	RedrawMap(inst);
@@ -496,53 +496,53 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 {
 	// this is probably redundant, as we generally shouldn't get here
 	// unless the mouse is in the 2D/3D view (or began a drag there).
-	edit.pointer_in_window = true;
+	inst.edit.pointer_in_window = true;
 
 	inst.main_win->canvas->PointerPos(true /* in_event */);
 
-//  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
+//  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, inst.edit.map_x, inst.edit.map_y);
 
-	if (edit.is_panning)
+	if (inst.edit.is_panning)
 	{
 		Editor_ScrollMap(inst, 0, dx, dy, mod);
 		return;
 	}
 
-	inst.main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+	inst.main_win->info_bar->SetMouse(inst.edit.map_x, inst.edit.map_y);
 
-	if (edit.action == ACT_TRANSFORM)
+	if (inst.edit.action == ACT_TRANSFORM)
 	{
 		Transform_Update(inst);
 		return;
 	}
 
-	if (edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == ACT_DRAW_LINE)
 	{
-		// this calls UpdateHighlight() which updates edit.draw_to_x/y
+		// this calls UpdateHighlight() which updates inst.edit.draw_to_x/y
 		RedrawMap(inst);
 		return;
 	}
 
-	if (edit.action == ACT_SELBOX)
+	if (inst.edit.action == ACT_SELBOX)
 	{
-		edit.selbox_x2 = edit.map_x;
-		edit.selbox_y2 = edit.map_y;
+		inst.edit.selbox_x2 = inst.edit.map_x;
+		inst.edit.selbox_y2 = inst.edit.map_y;
 
 		inst.main_win->canvas->redraw();
 		return;
 	}
 
-	if (edit.action == ACT_DRAG)
+	if (inst.edit.action == ACT_DRAG)
 	{
-		edit.drag_screen_dx = x - edit.click_screen_x;
-		edit.drag_screen_dy = y - edit.click_screen_y;
+		inst.edit.drag_screen_dx = x - inst.edit.click_screen_x;
+		inst.edit.drag_screen_dy = y - inst.edit.click_screen_y;
 
-		edit.drag_cur_x = edit.map_x;
-		edit.drag_cur_y = edit.map_y;
+		inst.edit.drag_cur_x = inst.edit.map_x;
+		inst.edit.drag_cur_y = inst.edit.map_y;
 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta
-		if (edit.mode == ObjType::vertices && edit.dragged.valid())
+		if (inst.edit.mode == ObjType::vertices && inst.edit.dragged.valid())
 			UpdateHighlight(inst);
 
 		inst.main_win->canvas->redraw();
@@ -550,7 +550,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	}
 
 	// begin dragging?
-	if (edit.action == ACT_CLICK)
+	if (inst.edit.action == ACT_CLICK)
 	{
 		CheckBeginDrag(inst);
 	}
@@ -638,11 +638,11 @@ static int EV_RawKey(Instance &inst, int event)
 	int raw_key   = M_RawKeyForEvent(event);
 	int raw_state = Fl::event_state();
 
-	int old_sticky_mod = edit.sticky_mod;
+	int old_sticky_mod = inst.edit.sticky_mod;
 
-	if (edit.sticky_mod)
+	if (inst.edit.sticky_mod)
 	{
-		raw_state = edit.sticky_mod;
+		raw_state = inst.edit.sticky_mod;
 		ClearStickyMod(inst);
 	}
 
@@ -660,10 +660,10 @@ static int EV_RawKey(Instance &inst, int event)
 	if (inst.main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
-	if (edit.render3d && ExecuteKey(key, KCTX_Render))
+	if (inst.edit.render3d && ExecuteKey(key, KCTX_Render))
 		return 1;
 
-	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
+	if (ExecuteKey(key, M_ModeToKeyContext(inst.edit.mode)))
 		return 1;
 
 	if (ExecuteKey(key, KCTX_General))
@@ -739,7 +739,7 @@ static int EV_RawMouse(Instance &inst, int event)
 	int dx = Fl::event_x() - mouse_last_x;
 	int dy = Fl::event_y() - mouse_last_y;
 
-	if (edit.render3d)
+	if (inst.edit.render3d)
 	{
 		Render3D_MouseMotion(inst, Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
@@ -995,13 +995,13 @@ void CMD_OperationMenu(Instance &inst)
 	// if no context given, pick one based on editing mode
 	if (context.empty())
 	{
-		if (edit.render3d)
+		if (inst.edit.render3d)
 		{
 			context = "render";
 		}
 		else
 		{
-			switch (edit.mode)
+			switch (inst.edit.mode)
 			{
 			case ObjType::linedefs:	context = "line";   break;
 			case ObjType::sectors:	context = "sector"; break;

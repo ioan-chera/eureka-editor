@@ -57,7 +57,7 @@ void CMD_TH_SpinThings(Instance &inst)
 	if (! degrees)
 		degrees = +45;
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No things to spin");
@@ -65,9 +65,9 @@ void CMD_TH_SpinThings(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("spun", *edit.Selected);
+	inst.level.basis.setMessageForSelection("spun", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Thing *T = inst.level.things[*it];
 
@@ -97,7 +97,7 @@ static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 
 static void CollectOverlapGroup(const Instance &inst, selection_c& list)
 {
-	int first = edit.Selected->find_first();
+	int first = inst.edit.Selected->find_first();
 
 	list.set(first);
 
@@ -133,7 +133,7 @@ static void MoveOverlapThing(Document &doc, int th, int mid_x, int mid_y, int n,
 //
 void CMD_TH_Disconnect(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No vertices to disconnect");
@@ -141,16 +141,16 @@ void CMD_TH_Disconnect(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *edit.Selected);
+	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
 
-	while (! edit.Selected->empty())
+	while (!inst.edit.Selected->empty())
 	{
 		selection_c overlaps(ObjType::things);
 
 		CollectOverlapGroup(inst, overlaps);
 
 		// remove these from the selection
-		edit.Selected->unmerge(overlaps);
+		inst.edit.Selected->unmerge(overlaps);
 
 
 		int total = overlaps.count_obj();
@@ -176,24 +176,24 @@ void CMD_TH_Disconnect(Instance &inst)
 //
 void CMD_TH_Merge(Instance &inst)
 {
-	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
+	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		inst.Selection_Add(inst.edit.highlight);
 	}
 
-	if (edit.Selected->count_obj() < 2)
+	if (inst.edit.Selected->count_obj() < 2)
 	{
 		inst.Beep("Need 2 or more things to merge");
 		return;
 	}
 
 	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("merged", *edit.Selected);
+	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		inst.level.basis.changeThing(*it, Thing::F_X, MakeValidCoord(mid_x));
 		inst.level.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(mid_y));

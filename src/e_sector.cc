@@ -94,7 +94,7 @@ void SectorModule::commandFloor(Instance &inst)
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No sectors to move");
@@ -102,9 +102,9 @@ void SectorModule::commandFloor(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
+	inst.level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = inst.level.sectors[*it];
 
@@ -132,7 +132,7 @@ void SectorModule::commandCeiling(Instance &inst)
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No sectors to move");
@@ -140,9 +140,9 @@ void SectorModule::commandCeiling(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
+	inst.level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = inst.level.sectors[*it];
 
@@ -185,13 +185,13 @@ void SectorModule::sectorsAdjustLight(int delta) const
 {
 	// this uses the current selection (caller must set it up)
 
-	if (edit.Selected->empty())
+	if (inst.edit.Selected->empty())
 		return;
 
 	doc.basis.begin();
-	doc.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *edit.Selected);
+	doc.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = doc.sectors[*it];
 
@@ -216,7 +216,7 @@ void SectorModule::commandLight(Instance &inst)
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No sectors to adjust light");
@@ -232,7 +232,7 @@ void SectorModule::commandLight(Instance &inst)
 
 void SectorModule::commandSwapFlats(Instance &inst)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = inst.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No sectors to swap");
@@ -240,9 +240,9 @@ void SectorModule::commandSwapFlats(Instance &inst)
 	}
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("swapped flats in", *edit.Selected);
+	inst.level.basis.setMessageForSelection("swapped flats in", *inst.edit.Selected);
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		const Sector *S = inst.level.sectors[*it];
 
@@ -298,26 +298,26 @@ void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
 void SectorModule::commandMerge(Instance &inst)
 {
 	// need a selection
-	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
+	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		inst.Selection_Add(inst.edit.highlight);
 	}
 
-	if (edit.Selected->count_obj() < 2)
+	if (inst.edit.Selected->count_obj() < 2)
 	{
 		inst.Beep("Need 2 or more sectors to merge");
 		return;
 	}
 
-	int first = edit.Selected->find_first();
+	int first = inst.edit.Selected->find_first();
 
 	bool keep_common_lines = Exec_HasFlag("/keep");
 
 	// we require the *lowest* numbered sector, otherwise we can
 	// select the wrong sector afterwards (due to renumbering).
-	int new_sec = edit.Selected->max_obj();
+	int new_sec = inst.edit.Selected->max_obj();
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		new_sec = MIN(new_sec, *it);
 	}
@@ -326,7 +326,7 @@ void SectorModule::commandMerge(Instance &inst)
 	selection_c unused_secs (ObjType::sectors);
 
 	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("merged", *edit.Selected);
+	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
 
 	// keep the properties of the first selected sector
 	if (new_sec != first)
@@ -343,7 +343,7 @@ void SectorModule::commandMerge(Instance &inst)
 		inst.level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 	}
 
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
 		int old_sec = *it;
 
@@ -369,7 +369,7 @@ void SectorModule::commandMerge(Instance &inst)
 	// re-select the final sector
 	Selection_Clear(inst, true /* no_save */);
 
-	edit.Selected->set(new_sec);
+	inst.edit.Selected->set(new_sec);
 }
 
 

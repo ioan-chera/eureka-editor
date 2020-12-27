@@ -41,11 +41,11 @@ class UI_Canvas : public Fl_Gl_Window
 #endif
 {
 private:
-	// this is used to detect changes in edit.highlight
+	// this is used to detect changes in inst.edit.highlight
 	// [ to prevent unnecessary redraws ]
 	Objid last_highlight;
 
-	// this is used to detect changes in edit.split_line (etc)
+	// this is used to detect changes in inst.edit.split_line (etc)
 	// [ to prevent unnecessary redraws ]
 	int last_splitter;
 	double last_split_x;
