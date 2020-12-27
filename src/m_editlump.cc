@@ -430,7 +430,7 @@ void CMD_EditLump(Instance &inst)
 
 	if (!special && ! ValidLumpToEdit(lump_name))
 	{
-		Beep("Invalid lump: '%s'", lump_name.c_str());
+		Beep(inst, "Invalid lump: '%s'", lump_name.c_str());
 		return;
 	}
 

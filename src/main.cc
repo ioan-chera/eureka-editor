@@ -644,9 +644,9 @@ static void Main_SetupFLTK()
 //
 static void Main_OpenWindow(Instance &inst)
 {
-	instance::main_win = new UI_MainWindow(inst);
+	inst.main_win = new UI_MainWindow(inst);
 
-	instance::main_win->label("Eureka v" EUREKA_VERSION);
+	inst.main_win->label("Eureka v" EUREKA_VERSION);
 
 	// show window (pass some dummy arguments)
 	{
@@ -656,9 +656,9 @@ static void Main_OpenWindow(Instance &inst)
 		argv[0] = StringDup("Eureka.exe");
 		argv[1] = NULL;
 
-		instance::main_win->show(argc, argv);
+		inst.main_win->show(argc, argv);
 #ifndef NO_OPENGL
-		instance::main_win->canvas->show();  // needed for OpenGL
+		inst.main_win->canvas->show();  // needed for OpenGL
 #endif
 		global::app_has_focus = true;
 	}
@@ -669,7 +669,7 @@ static void Main_OpenWindow(Instance &inst)
 		delete Fl::scheme_bg_;
 		Fl::scheme_bg_ = NULL;
 
-		instance::main_win->image(NULL);
+		inst.main_win->image(NULL);
 	}
 
 	Fl::check();
@@ -677,7 +677,7 @@ static void Main_OpenWindow(Instance &inst)
 	InitAboutDialog();
 
 	if (config::begin_maximized)
-		instance::main_win->Maximize();
+		inst.main_win->Maximize();
 
 	log_viewer = new UI_LogViewer();
 
@@ -685,12 +685,12 @@ static void Main_OpenWindow(Instance &inst)
 
 	Fl::add_handler(Main_key_handler);
 
-	instance::main_win->BrowserMode(0);
-	instance::main_win->NewEditMode(edit.mode);
+	inst.main_win->BrowserMode(0);
+	inst.main_win->NewEditMode(edit.mode);
 
 	// allow processing keyboard events, even before the mouse
 	// pointer has entered our window.
-	Fl::focus(instance::main_win->canvas);
+	Fl::focus(inst.main_win->canvas);
 
 	Fl::check();
 }
@@ -776,9 +776,11 @@ void Main_Loop()
 		}
 
 		// TODO: handle these in a better way
-		instance::main_win->UpdateTitle(MadeChanges ? '*' : 0);
 
-		instance::main_win->scroll->UpdateBounds();
+		// TODO: HANDLE ALL INSTANCES
+		gInstance.main_win->UpdateTitle(MadeChanges ? '*' : 0);
+
+		gInstance.main_win->scroll->UpdateBounds();
 
 		if (edit.Selected->empty())
 			edit.error_mode = false;
@@ -880,7 +882,7 @@ static void ReadPortInfo()
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Main_LoadResources()
+void Main_LoadResources(Instance &inst)
 {
 	LogPrintf("\n");
 	LogPrintf("----- Loading Resources -----\n");
@@ -924,18 +926,18 @@ void Main_LoadResources()
 	// reset sector info (for slopes and 3D floors)
 	Subdiv_InvalidateAll();
 
-	if (instance::main_win)
+	if (inst.main_win)
 	{
 		// kill all loaded OpenGL images
-		if (instance::main_win->canvas)
-			instance::main_win->canvas->DeleteContext();
+		if (inst.main_win->canvas)
+			inst.main_win->canvas->DeleteContext();
 
-		instance::main_win->UpdateGameInfo();
+		inst.main_win->UpdateGameInfo();
 
-		instance::main_win->browser->Populate();
+		inst.main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
-		Props_LoadValues();
+		Props_LoadValues(inst);
 	}
 }
 
@@ -1072,7 +1074,7 @@ int main(int argc, char *argv[])
 
 		init_progress = ProgressStatus::window;
 
-		M_LoadOperationMenus();
+		M_LoadOperationMenus(gInstance);
 
 
 		// open a specified PWAD now
@@ -1142,7 +1144,7 @@ int main(int argc, char *argv[])
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
-		Main_LoadResources();
+		Main_LoadResources(gInstance);	// TODO: instance management
 
 
 		Main_Loop();

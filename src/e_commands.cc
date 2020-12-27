@@ -54,11 +54,11 @@ static void CMD_MetaKey(Instance &inst)
 {
 	if (edit.sticky_mod)
 	{
-		ClearStickyMod();
+		ClearStickyMod(inst);
 		return;
 	}
 
-	Status_Set("META...");
+	Status_Set(inst, "META...");
 
 	edit.sticky_mod = EMOD_META;
 }
@@ -70,7 +70,7 @@ static void CMD_EditMode(Instance &inst)
 
 	if (! mode || ! strchr("lstvr", mode))
 	{
-		Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
+		Beep(inst, "Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -89,7 +89,7 @@ static void CMD_Select(Instance &inst)
 
 	if (edit.highlight.is_nil())
 	{
-		Beep("Nothing under cursor");
+		Beep(inst, "Nothing under cursor");
 		return;
 	}
 
@@ -120,7 +120,7 @@ static void CMD_UnselectAll(Instance &inst)
 	if (edit.action == ACT_DRAW_LINE ||
 		edit.action == ACT_TRANSFORM)
 	{
-		Editor_ClearAction();
+		Editor_ClearAction(inst);
 	}
 
 	Selection_Clear(inst);
@@ -162,12 +162,12 @@ static void CMD_Undo(Instance &inst)
 {
 	if (! inst.level.basis.undo())
 	{
-		Beep("No operation to undo");
+		Beep(inst, "No operation to undo");
 		return;
 	}
 
 	RedrawMap(inst);
-	instance::main_win->UpdatePanelObj();
+	inst.main_win->UpdatePanelObj();
 }
 
 
@@ -175,12 +175,12 @@ static void CMD_Redo(Instance &inst)
 {
 	if (! inst.level.basis.redo())
 	{
-		Beep("No operation to redo");
+		Beep(inst, "No operation to redo");
 		return;
 	}
 
 	RedrawMap(inst);
-	instance::main_win->UpdatePanelObj();
+	inst.main_win->UpdatePanelObj();
 }
 
 
@@ -191,10 +191,10 @@ static void SetGamma(Instance &inst, int new_val)
 	W_UpdateGamma();
 
 	// for OpenGL, need to reload all images
-	if (instance::main_win && instance::main_win->canvas)
-		instance::main_win->canvas->DeleteContext();
+	if (inst.main_win && inst.main_win->canvas)
+		inst.main_win->canvas->DeleteContext();
 
-	Status_Set("gamma level %d", config::usegamma);
+	Status_Set(inst, "gamma level %d", config::usegamma);
 
 	RedrawMap(inst);
 }
@@ -207,13 +207,13 @@ static void CMD_SetVar(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep("Set: missing var name");
+		Beep(inst, "Set: missing var name");
 		return;
 	}
 
 	if (value.empty())
 	{
-		Beep("Set: missing value");
+		Beep(inst, "Set: missing value");
 		return;
 	}
 
@@ -227,13 +227,13 @@ static void CMD_SetVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
-		Editor_ClearAction();
+		Editor_ClearAction(inst);
 
 		int want_vis   = bool_val ? 1 : 0;
-		int is_visible = instance::main_win->browser->visible() ? 1 : 0;
+		int is_visible = inst.main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
-			instance::main_win->BrowserMode('/');
+			inst.main_win->BrowserMode('/');
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -260,7 +260,7 @@ static void CMD_SetVar(Instance &inst)
 	else if (var_name.noCaseEqual("ratio"))
 	{
 		grid.ratio = CLAMP(0, int_val, 7);
-		instance::main_win->info_bar->UpdateRatio();
+		inst.main_win->info_bar->UpdateRatio();
 		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("sec_render"))
@@ -279,7 +279,7 @@ static void CMD_SetVar(Instance &inst)
 	}
 	else
 	{
-		Beep("Set: unknown var: %s", var_name.c_str());
+		Beep(inst, "Set: unknown var: %s", var_name.c_str());
 	}
 }
 
@@ -290,7 +290,7 @@ static void CMD_ToggleVar(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep("Toggle: missing var name");
+		Beep(inst, "Toggle: missing var name");
 		return;
 	}
 
@@ -300,13 +300,13 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
-		Editor_ClearAction();
+		Editor_ClearAction(inst);
 
-		instance::main_win->BrowserMode('/');
+		inst.main_win->BrowserMode('/');
 	}
 	else if (var_name.noCaseEqual("recent"))
 	{
-		instance::main_win->browser->ToggleRecent();
+		inst.main_win->browser->ToggleRecent();
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -337,7 +337,7 @@ static void CMD_ToggleVar(Instance &inst)
 		else
 			grid.ratio++;
 
-		instance::main_win->info_bar->UpdateRatio();
+		inst.main_win->info_bar->UpdateRatio();
 		RedrawMap(inst);
 	}
 	else if (var_name.noCaseEqual("sec_render"))
@@ -350,7 +350,7 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else
 	{
-		Beep("Toggle: unknown var: %s", var_name.c_str());
+		Beep(inst, "Toggle: unknown var: %s", var_name.c_str());
 	}
 }
 
@@ -359,7 +359,7 @@ static void CMD_BrowserMode(Instance &inst)
 {
 	if (EXEC_Param[0].empty())
 	{
-		Beep("BrowserMode: missing mode");
+		Beep(inst, "BrowserMode: missing mode");
 		return;
 	}
 
@@ -368,25 +368,25 @@ static void CMD_BrowserMode(Instance &inst)
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
 	       mode == 'T' || mode == 'F' || mode == 'G'))
 	{
-		Beep("Unknown browser mode: %s", EXEC_Param[0].c_str());
+		Beep(inst, "Unknown browser mode: %s", EXEC_Param[0].c_str());
 		return;
 	}
 
 	// if that browser is already open, close it now
-	if (instance::main_win->browser->visible() &&
-		instance::main_win->browser->GetMode() == mode &&
+	if (inst.main_win->browser->visible() &&
+		inst.main_win->browser->GetMode() == mode &&
 		! Exec_HasFlag("/force") &&
 		! Exec_HasFlag("/recent"))
 	{
-		instance::main_win->BrowserMode(0);
+		inst.main_win->BrowserMode(0);
 		return;
 	}
 
-	instance::main_win->BrowserMode(mode);
+	inst.main_win->BrowserMode(mode);
 
 	if (Exec_HasFlag("/recent"))
 	{
-		instance::main_win->browser->ToggleRecent(true /* force */);
+		inst.main_win->browser->ToggleRecent(true /* force */);
 	}
 }
 
@@ -399,11 +399,11 @@ static void CMD_Scroll(Instance &inst)
 
 	if (delta_x == 0 && delta_y == 0)
 	{
-		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
+		Beep(inst, "Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
 		return;
 	}
 
-	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
+	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 
 	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
 	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
@@ -426,7 +426,7 @@ static void CMD_NAV_Scroll_Left(Instance &inst)
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
+	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Left_release);
@@ -447,7 +447,7 @@ static void CMD_NAV_Scroll_Right(Instance &inst)
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
+	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Right_release);
@@ -468,7 +468,7 @@ static void CMD_NAV_Scroll_Up(Instance &inst)
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
+	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Up_release);
@@ -489,7 +489,7 @@ static void CMD_NAV_Scroll_Down(Instance &inst)
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
+	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
 	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Down_release);
@@ -608,9 +608,9 @@ static void DoBeginDrag(Instance &inst)
 
 	edit.clicked.clear();
 
-	Editor_SetAction(ACT_DRAG);
+	Editor_SetAction(inst, ACT_DRAG);
 
-	instance::main_win->canvas->redraw();
+	inst.main_win->canvas->redraw();
 }
 
 
@@ -620,12 +620,12 @@ static void ACT_SelectBox_release(Instance &inst)
 	if (edit.action != ACT_SELBOX)
 		return;
 
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 	Editor_ClearErrorMode(inst);
 
 	// a mere click and release will unselect everything
 	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-	if (!instance::main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	if (!inst.main_win->canvas->SelboxGet(x1, y1, x2, y2))
 	{
 		ExecuteCommand("UnselectAll");
 		return;
@@ -656,7 +656,7 @@ static void ACT_Drag_release(Instance &inst)
 
 	// note: DragDelta needs edit.dragged
 	double dx, dy;
-	instance::main_win->canvas->DragDelta(&dx, &dy);
+	inst.main_win->canvas->DragDelta(&dx, &dy);
 
 	Objid dragged(edit.dragged);
 	edit.dragged.clear();
@@ -672,7 +672,7 @@ static void ACT_Drag_release(Instance &inst)
 			inst.level.objects.move(edit.Selected, dx, dy, 0);
 	}
 
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 
 	RedrawMap(inst);
 }
@@ -714,7 +714,7 @@ static void ACT_Click_release(Instance &inst)
 			Selection_Toggle(click_obj);
 	}
 
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 	Editor_ClearErrorMode(inst);
 
 	RedrawMap(inst);
@@ -758,7 +758,7 @@ static void CMD_ACT_Click(Instance &inst)
 		}
 
 		edit.clicked = edit.highlight;
-		Editor_SetAction(ACT_CLICK);
+		Editor_SetAction(inst, ACT_CLICK);
 		return;
 	}
 
@@ -796,7 +796,7 @@ static void CMD_ACT_Click(Instance &inst)
 			edit.Selected->set(new_vert);
 
 		edit.clicked = Objid(ObjType::vertices, new_vert);
-		Editor_SetAction(ACT_CLICK);
+		Editor_SetAction(inst, ACT_CLICK);
 
 		RedrawMap(inst);
 		return;
@@ -811,11 +811,11 @@ static void CMD_ACT_Click(Instance &inst)
 		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
 		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-		Editor_SetAction(ACT_SELBOX);
+		Editor_SetAction(inst, ACT_SELBOX);
 		return;
 	}
 
-	Editor_SetAction(ACT_CLICK);
+	Editor_SetAction(inst, ACT_CLICK);
 }
 
 
@@ -833,7 +833,7 @@ static void CMD_ACT_SelectBox(Instance &inst)
 	edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
 	edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-	Editor_SetAction(ACT_SELBOX);
+	Editor_SetAction(inst, ACT_SELBOX);
 }
 
 
@@ -844,7 +844,7 @@ static void CMD_ACT_Drag(Instance &inst)
 
 	if (edit.Selected->empty())
 	{
-		Beep("Nothing to drag");
+		Beep(inst, "Nothing to drag");
 		return;
 	}
 
@@ -858,7 +858,7 @@ static void CMD_ACT_Drag(Instance &inst)
 }
 
 
-void Transform_Update()
+void Transform_Update(Instance &inst)
 {
 	double dx1 = edit.map_x - edit.trans_param.mid_x;
 	double dy1 = edit.map_y - edit.trans_param.mid_y;
@@ -914,7 +914,7 @@ void Transform_Update()
 			break;
 	}
 
-	instance::main_win->canvas->redraw();
+	inst.main_win->canvas->redraw();
 }
 
 
@@ -929,7 +929,7 @@ static void ACT_Transform_release(Instance &inst)
 
 	inst.level.objects.transform(edit.trans_param);
 
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 
 	RedrawMap(inst);
 }
@@ -944,7 +944,7 @@ static void CMD_ACT_Transform(Instance &inst)
 
 	if (edit.Selected->empty())
 	{
-		Beep("Nothing to scale");
+		Beep(inst, "Nothing to scale");
 		return;
 	}
 
@@ -953,7 +953,7 @@ static void CMD_ACT_Transform(Instance &inst)
 
 	if (keyword.empty())
 	{
-		Beep("ACT_Transform: missing keyword");
+		Beep(inst, "ACT_Transform: missing keyword");
 		return;
 	}
 	else if (keyword.noCaseEqual("scale"))
@@ -978,7 +978,7 @@ static void CMD_ACT_Transform(Instance &inst)
 	}
 	else
 	{
-		Beep("ACT_Transform: unknown keyword: %s", keyword.c_str());
+		Beep(inst, "ACT_Transform: unknown keyword: %s", keyword.c_str());
 		return;
 	}
 
@@ -1010,7 +1010,7 @@ static void CMD_ACT_Transform(Instance &inst)
 		ConvertSelection(inst.level, edit.Selected, edit.trans_lines);
 	}
 
-	Editor_SetAction(ACT_TRANSFORM);
+	Editor_SetAction(inst, ACT_TRANSFORM);
 }
 
 
@@ -1031,7 +1031,7 @@ static void CMD_WHEEL_Scroll(Instance &inst)
 	float delta_x = static_cast<float>(wheel_dx);
 	float delta_y = static_cast<float>(0 - wheel_dy);
 
-	int base_size = (instance::main_win->canvas->w() + instance::main_win->canvas->h()) / 2;
+	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 
 	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
@@ -1060,7 +1060,7 @@ static void CMD_Merge(Instance &inst)
 			break;
 
 		default:
-			Beep("Cannot merge that");
+			Beep(inst, "Cannot merge that");
 			break;
 	}
 }
@@ -1087,7 +1087,7 @@ static void CMD_Disconnect(Instance &inst)
 			break;
 
 		default:
-			Beep("Cannot disconnect that");
+			Beep(inst, "Cannot disconnect that");
 			break;
 	}
 }
@@ -1099,7 +1099,7 @@ static void CMD_Zoom(Instance &inst)
 
 	if (delta == 0)
 	{
-		Beep("Zoom: bad or missing value");
+		Beep(inst, "Zoom: bad or missing value");
 		return;
 	}
 
@@ -1129,7 +1129,7 @@ static void CMD_ZoomSelection(Instance &inst)
 {
 	if (edit.Selected->empty())
 	{
-		Beep("No selection to zoom");
+		Beep(inst, "No selection to zoom");
 		return;
 	}
 
@@ -1155,7 +1155,7 @@ static void CMD_PlaceCamera(Instance &inst)
 {
 	if (edit.render3d)
 	{
-		Beep("Not supported in 3D view");
+		Beep(inst, "Not supported in 3D view");
 		return;
 	}
 
@@ -1163,7 +1163,7 @@ static void CMD_PlaceCamera(Instance &inst)
 	{
 		// IDEA: turn cursor into cross, wait for click in map window
 
-		Beep("Mouse is not over map");
+		Beep(inst, "Mouse is not over map");
 		return;
 	}
 
@@ -1186,7 +1186,7 @@ static void CMD_MoveObjects_Dialog(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("Nothing to move");
+		Beep(inst, "Nothing to move");
 		return;
 	}
 
@@ -1211,7 +1211,7 @@ static void CMD_ScaleObjects_Dialog(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("Nothing to scale");
+		Beep(inst, "Nothing to scale");
 		return;
 	}
 
@@ -1231,7 +1231,7 @@ static void CMD_RotateObjects_Dialog(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("Nothing to rotate");
+		Beep(inst, "Nothing to rotate");
 		return;
 	}
 
@@ -1262,7 +1262,7 @@ static void CMD_GRID_Set(Instance &inst)
 
 	if (step < 2 || step > 4096)
 	{
-		Beep("Bad grid step");
+		Beep(inst, "Bad grid step");
 		return;
 	}
 
@@ -1278,7 +1278,7 @@ static void CMD_GRID_Zoom(Instance &inst)
 
 	if (scale == 0)
 	{
-		Beep("Bad scale");
+		Beep(inst, "Bad scale");
 		return;
 	}
 
@@ -1295,65 +1295,65 @@ static void CMD_GRID_Zoom(Instance &inst)
 
 static void CMD_BR_CycleCategory(Instance &inst)
 {
-	if (!instance::main_win->browser->visible())
+	if (!inst.main_win->browser->visible())
 	{
-		Beep("Browser not open");
+		Beep(inst, "Browser not open");
 		return;
 	}
 
 	int dir = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
 
-	instance::main_win->browser->CycleCategory(dir);
+	inst.main_win->browser->CycleCategory(dir);
 }
 
 
 static void CMD_BR_ClearSearch(Instance &inst)
 {
-	if (!instance::main_win->browser->visible())
+	if (!inst.main_win->browser->visible())
 	{
-		Beep("Browser not open");
+		Beep(inst, "Browser not open");
 		return;
 	}
 
-	instance::main_win->browser->ClearSearchBox();
+	inst.main_win->browser->ClearSearchBox();
 }
 
 
 static void CMD_BR_Scroll(Instance &inst)
 {
-	if (!instance::main_win->browser->visible())
+	if (!inst.main_win->browser->visible())
 	{
-		Beep("Browser not open");
+		Beep(inst, "Browser not open");
 		return;
 	}
 
 	if (EXEC_Param[0].empty())
 	{
-		Beep("BR_Scroll: missing value");
+		Beep(inst, "BR_Scroll: missing value");
 		return;
 	}
 
 	int delta = atoi(EXEC_Param[0]);
 
-	instance::main_win->browser->Scroll(delta);
+	inst.main_win->browser->Scroll(delta);
 }
 
 
 static void CMD_DefaultProps(Instance &inst)
 {
-	instance::main_win->ShowDefaultProps();
+	inst.main_win->ShowDefaultProps();
 }
 
 
 static void CMD_FindDialog(Instance &inst)
 {
-	instance::main_win->ShowFindAndReplace();
+	inst.main_win->ShowFindAndReplace();
 }
 
 
 static void CMD_FindNext(Instance &inst)
 {
-	instance::main_win->find_box->FindNext();
+	inst.main_win->find_box->FindNext();
 }
 
 
@@ -1374,9 +1374,9 @@ static void CMD_OnlineDocs(Instance &inst)
 {
 	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
 	if (rv == 1)
-		Status_Set("Opened web browser");
+		Status_Set(inst, "Opened web browser");
 	else
-		Beep("Failed to open web browser");
+		Beep(inst, "Failed to open web browser");
 }
 
 

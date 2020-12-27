@@ -285,7 +285,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 		box->desc->value(info.desc.c_str());
 	}
 
-	instance::main_win->browser->UpdateGenType(new_type);
+	box->inst.main_win->browser->UpdateGenType(new_type);
 }
 
 
@@ -469,7 +469,7 @@ void UI_LineBox::CB_Copy(int parts)
 
 			if (name && y_stricmp(name, b_name) != 0)
 			{
-				Beep("multiple textures");
+				Beep(inst, "multiple textures");
 				return;
 			}
 
@@ -479,7 +479,7 @@ void UI_LineBox::CB_Copy(int parts)
 
 	Texboard_SetTex(name);
 
-	Status_Set("copied %s", name);
+	Status_Set(inst, "copied %s", name);
 }
 
 
@@ -671,13 +671,13 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		instance::main_win->BrowserMode('L');
+		box->inst.main_win->BrowserMode('L');
 		return;
 	}
 
 	if (w == box->gen)
 	{
-		instance::main_win->BrowserMode('G');
+		box->inst.main_win->BrowserMode('G');
 		return;
 	}
 }
@@ -795,7 +795,7 @@ void UI_LineBox::UpdateField(int field)
 				desc->value(info.desc.c_str());
 			}
 
-			instance::main_win->browser->UpdateGenType(type_num);
+			inst.main_win->browser->UpdateGenType(type_num);
 		}
 		else
 		{
@@ -803,7 +803,7 @@ void UI_LineBox::UpdateField(int field)
 			desc->value("");
 			choose->label("Choose");
 
-			instance::main_win->browser->UpdateGenType(0);
+			inst.main_win->browser->UpdateGenType(0);
 		}
 	}
 

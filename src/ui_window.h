@@ -156,11 +156,6 @@ private:
 	Instance &mInstance;
 };
 
-namespace instance
-{
-	extern UI_MainWindow *main_win;
-}
-
 //------------------------------------------------------------------------
 
 class UI_Escapable_Window : public Fl_Double_Window

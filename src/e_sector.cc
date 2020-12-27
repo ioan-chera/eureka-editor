@@ -90,14 +90,14 @@ void SectorModule::commandFloor(Instance &inst)
 
 	if (diff == 0)
 	{
-		Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
+		Beep(inst, "SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No sectors to move");
+		Beep(inst, "No sectors to move");
 		return;
 	}
 
@@ -115,7 +115,7 @@ void SectorModule::commandFloor(Instance &inst)
 
 	inst.level.basis.end();
 
-	instance::main_win->sec_box->UpdateField(Sector::F_FLOORH);
+	inst.main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
@@ -128,14 +128,14 @@ void SectorModule::commandCeiling(Instance &inst)
 
 	if (diff == 0)
 	{
-		Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
+		Beep(inst, "SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No sectors to move");
+		Beep(inst, "No sectors to move");
 		return;
 	}
 
@@ -153,7 +153,7 @@ void SectorModule::commandCeiling(Instance &inst)
 
 	inst.level.basis.end();
 
-	instance::main_win->sec_box->UpdateField(Sector::F_CEILH);
+	inst.main_win->sec_box->UpdateField(Sector::F_CEILH);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
@@ -202,7 +202,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 	doc.basis.end();
 
-	instance::main_win->sec_box->UpdateField(Sector::F_LIGHT);
+	inst.main_win->sec_box->UpdateField(Sector::F_LIGHT);
 }
 
 
@@ -212,14 +212,14 @@ void SectorModule::commandLight(Instance &inst)
 
 	if (diff == 0)
 	{
-		Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
+		Beep(inst, "SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No sectors to adjust light");
+		Beep(inst, "No sectors to adjust light");
 		return;
 	}
 
@@ -235,7 +235,7 @@ void SectorModule::commandSwapFlats(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No sectors to swap");
+		Beep(inst, "No sectors to swap");
 		return;
 	}
 
@@ -255,8 +255,8 @@ void SectorModule::commandSwapFlats(Instance &inst)
 
 	inst.level.basis.end();
 
-	instance::main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
-	instance::main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
+	inst.main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
+	inst.main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
@@ -305,7 +305,7 @@ void SectorModule::commandMerge(Instance &inst)
 
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep("Need 2 or more sectors to merge");
+		Beep(inst, "Need 2 or more sectors to merge");
 		return;
 	}
 
@@ -1194,7 +1194,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 
 	if (! getLoopForSpace(map_x, map_y, loop))
 	{
-		Beep("Area is not closed");
+		Beep(inst, "Area is not closed");
 		return false;
 	}
 

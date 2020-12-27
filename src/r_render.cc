@@ -512,7 +512,7 @@ static void AdjustOfs_Begin(Instance &inst)
 
 	if (total_lines == 0)
 	{
-		Beep("nothing to adjust");
+		Beep(inst, "nothing to adjust");
 		return;
 	}
 
@@ -521,14 +521,14 @@ static void AdjustOfs_Begin(Instance &inst)
 
 	edit.adjust_lax = Exec_HasFlag("/LAX");
 
-	Editor_SetAction(ACT_ADJUST_OFS);
+	Editor_SetAction(inst, ACT_ADJUST_OFS);
 }
 
 static void AdjustOfs_Finish(Instance &inst)
 {
 	if (! edit.adjust_bucket)
 	{
-		Editor_ClearAction();
+		Editor_ClearAction(inst);
 		return;
 	}
 
@@ -549,7 +549,7 @@ static void AdjustOfs_Finish(Instance &inst)
 	delete edit.adjust_bucket;
 	edit.adjust_bucket = NULL;
 
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 }
 
 static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
@@ -634,8 +634,8 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 
 bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 {
-	int ow = instance::main_win->canvas->w();
-	int oh = instance::main_win->canvas->h();
+	int ow = inst.main_win->canvas->w();
+	int oh = inst.main_win->canvas->h();
 
 #ifdef NO_OPENGL
 	// in OpenGL mode, UI_Canvas is a window and that means the
@@ -717,7 +717,7 @@ void Render3D_Setup(Instance &inst)
 
 void Render3D_Enable(Instance &inst, bool _enable)
 {
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 
 	edit.render3d = _enable;
 
@@ -726,22 +726,22 @@ void Render3D_Enable(Instance &inst, bool _enable)
 	edit.dragged.clear();
 
 	// give keyboard focus to the appropriate large widget
-	Fl::focus(instance::main_win->canvas);
+	Fl::focus(inst.main_win->canvas);
 
-	instance::main_win->scroll->UpdateRenderMode();
-	instance::main_win->info_bar->UpdateSecRend();
+	inst.main_win->scroll->UpdateRenderMode();
+	inst.main_win->info_bar->UpdateSecRend();
 
 	if (edit.render3d)
 	{
-		instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+		inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 
 		// TODO: ideally query this, like code in PointerPos
 		r_view.mouse_x = r_view.mouse_y = -1;
 	}
 	else
 	{
-		instance::main_win->canvas->PointerPos();
-		instance::main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+		inst.main_win->canvas->PointerPos();
+		inst.main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 	}
 
 	RedrawMap(inst);
@@ -797,14 +797,14 @@ void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 		r_view.gravity = false;
 	}
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 
 
-static void DragSectors_Update()
+static void DragSectors_Update(Instance &inst)
 {
-	float ow = static_cast<float>(instance::main_win->canvas->w());
+	float ow = static_cast<float>(inst.main_win->canvas->w());
 	float x_slope = 100.0f / config::render_pixel_aspect;
 
 	float factor = static_cast<float>(CLAMP(20, edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
@@ -856,7 +856,7 @@ void Render3D_DragSectors(Instance &inst)
 
 static void DragThings_Update(Instance &inst)
 {
-	float ow = static_cast<float>(instance::main_win->canvas->w());
+	float ow = static_cast<float>(inst.main_win->canvas->w());
 //	float oh = main_win->canvas->h();
 
 	float x_slope = 100.0f / config::render_pixel_aspect;
@@ -1019,13 +1019,13 @@ void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, i
 		edit.drag_cur_y = edit.map_y;
 
 		if (edit.mode == ObjType::sectors)
-			DragSectors_Update();
+			DragSectors_Update(inst);
 
 		if (edit.mode == ObjType::things)
 			DragThings_Update(inst);
 
-		instance::main_win->canvas->redraw();
-		instance::main_win->status_bar->redraw();
+		inst.main_win->canvas->redraw();
+		inst.main_win->status_bar->redraw();
 		return;
 	}
 
@@ -1050,10 +1050,10 @@ void Render3D_UpdateHighlight(Instance &inst)
 			edit.highlight = current_hl;
 	}
 
-	instance::main_win->canvas->UpdateHighlight();
-	instance::main_win->canvas->redraw();
+	inst.main_win->canvas->UpdateHighlight();
+	inst.main_win->canvas->redraw();
 
-	instance::main_win->status_bar->redraw();
+	inst.main_win->status_bar->redraw();
 }
 
 
@@ -1104,7 +1104,7 @@ void Render3D_Navigate(Instance &inst)
 		r_view.SetAngle(static_cast<float>(r_view.angle + dang));
 	}
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 
@@ -1119,7 +1119,7 @@ static int GrabSelectedThing(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep("no things for copy/cut type");
+			Beep(inst, "no things for copy/cut type");
 			return -1;
 		}
 
@@ -1132,7 +1132,7 @@ static int GrabSelectedThing(Instance &inst)
 			const Thing *T = inst.level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
-				Beep("multiple thing types");
+				Beep(inst, "multiple thing types");
 				return -2;
 			}
 
@@ -1140,7 +1140,7 @@ static int GrabSelectedThing(Instance &inst)
 		}
 	}
 
-	Status_Set("copied type %d", result);
+	Status_Set(inst, "copied type %d", result);
 
 	return result;
 }
@@ -1154,7 +1154,7 @@ static void StoreSelectedThing(Instance &inst, int new_type)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("no things for paste type");
+		Beep(inst, "no things for paste type");
 		return;
 	}
 
@@ -1171,7 +1171,7 @@ static void StoreSelectedThing(Instance &inst, int new_type)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set("pasted type %d", new_type);
+	Status_Set(inst, "pasted type %d", new_type);
 }
 
 
@@ -1197,7 +1197,7 @@ static int GrabSelectedFlat(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep("no sectors for copy/cut flat");
+			Beep(inst, "no sectors for copy/cut flat");
 			return -1;
 		}
 
@@ -1216,7 +1216,7 @@ static int GrabSelectedFlat(Instance &inst)
 
 			if (result >= 0 && tex != result)
 			{
-				Beep("multiple flats present");
+				Beep(inst, "multiple flats present");
 				return -2;
 			}
 
@@ -1225,7 +1225,7 @@ static int GrabSelectedFlat(Instance &inst)
 	}
 
 	if (result >= 0)
-		Status_Set("copied %s", BA_GetString(result).c_str());
+		Status_Set(inst, "copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1236,7 +1236,7 @@ static void StoreSelectedFlat(Instance &inst, int new_tex)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("no sectors for paste flat");
+		Beep(inst, "no sectors for paste flat");
 		return;
 	}
 
@@ -1259,7 +1259,7 @@ static void StoreSelectedFlat(Instance &inst, int new_tex)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
+	Status_Set(inst, "pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
@@ -1268,7 +1268,7 @@ static void StoreDefaultedFlats(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("no sectors for default");
+		Beep(inst, "no sectors for default");
 		return;
 	}
 
@@ -1294,7 +1294,7 @@ static void StoreDefaultedFlats(Instance &inst)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set("defaulted flats");
+	Status_Set(inst, "defaulted flats");
 }
 
 
@@ -1343,7 +1343,7 @@ static int GrabSelectedTexture(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep("no linedefs for copy/cut tex");
+			Beep(inst, "no linedefs for copy/cut tex");
 			return -1;
 		}
 
@@ -1362,7 +1362,7 @@ static int GrabSelectedTexture(Instance &inst)
 
 			if (result >= 0 && tex != result)
 			{
-				Beep("multiple textures present");
+				Beep(inst, "multiple textures present");
 				return -2;
 			}
 
@@ -1371,7 +1371,7 @@ static int GrabSelectedTexture(Instance &inst)
 	}
 
 	if (result >= 0)
-		Status_Set("copied %s", BA_GetString(result).c_str());
+		Status_Set(inst, "copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1382,7 +1382,7 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("no linedefs for paste tex");
+		Beep(inst, "no linedefs for paste tex");
 		return;
 	}
 
@@ -1429,7 +1429,7 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
 
-	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
+	Status_Set(inst, "pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
@@ -1594,7 +1594,7 @@ static void R3D_Forward(Instance &inst)
 	r_view.x += r_view.Cos * dist;
 	r_view.y += r_view.Sin * dist;
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 
@@ -1605,7 +1605,7 @@ static void R3D_Backward(Instance &inst)
 	r_view.x -= r_view.Cos * dist;
 	r_view.y -= r_view.Sin * dist;
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 
@@ -1616,7 +1616,7 @@ static void R3D_Left(Instance &inst)
 	r_view.x -= r_view.Sin * dist;
 	r_view.y += r_view.Cos * dist;
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 
@@ -1627,7 +1627,7 @@ static void R3D_Right(Instance &inst)
 	r_view.x += r_view.Sin * dist;
 	r_view.y -= r_view.Cos * dist;
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 
@@ -1635,7 +1635,7 @@ static void R3D_Up(Instance &inst)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep("Gravity is on");
+		Beep(inst, "Gravity is on");
 		return;
 	}
 
@@ -1652,7 +1652,7 @@ static void R3D_Down(Instance &inst)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep("Gravity is on");
+		Beep(inst, "Gravity is on");
 		return;
 	}
 
@@ -1775,7 +1775,7 @@ static void R3D_NAV_Up(Instance &inst)
 
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep("Gravity is on");
+		Beep(inst, "Gravity is on");
 		return;
 	}
 
@@ -1802,7 +1802,7 @@ static void R3D_NAV_Down(Instance &inst)
 
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep("Gravity is on");
+		Beep(inst, "Gravity is on");
 		return;
 	}
 
@@ -1880,7 +1880,7 @@ static void R3D_ACT_AdjustOfs(Instance &inst)
 
 	if (edit.mode != ObjType::linedefs)
 	{
-		Beep("not in linedef mode");
+		Beep(inst, "not in linedef mode");
 		return;
 	}
 
@@ -1895,13 +1895,13 @@ static void R3D_Set(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep("3D_Set: missing var name");
+		Beep(inst, "3D_Set: missing var name");
 		return;
 	}
 
 	if (value.empty())
 	{
-		Beep("3D_Set: missing value");
+		Beep(inst, "3D_Set: missing value");
 		return;
 	}
 
@@ -1927,7 +1927,7 @@ static void R3D_Set(Instance &inst)
 	}
 	else
 	{
-		Beep("3D_Set: unknown var: %s", var_name.c_str());
+		Beep(inst, "3D_Set: unknown var: %s", var_name.c_str());
 		return;
 	}
 
@@ -1941,7 +1941,7 @@ static void R3D_Toggle(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep("3D_Toggle: missing var name");
+		Beep(inst, "3D_Toggle: missing var name");
 		return;
 	}
 
@@ -1963,7 +1963,7 @@ static void R3D_Toggle(Instance &inst)
 	}
 	else
 	{
-		Beep("3D_Toggle: unknown var: %s", var_name.c_str());
+		Beep(inst, "3D_Toggle: unknown var: %s", var_name.c_str());
 		return;
 	}
 
@@ -1993,7 +1993,7 @@ static void R3D_WHEEL_Move(Instance &inst)
 	r_view.x += speed * (r_view.Cos * dy + r_view.Sin * dx);
 	r_view.y += speed * (r_view.Sin * dy - r_view.Cos * dx);
 
-	instance::main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
 	RedrawMap(inst);
 }
 

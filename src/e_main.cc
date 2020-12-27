@@ -83,8 +83,8 @@ static void zoom_fit(Instance &inst)
 	double xzoom = 1;
 	double yzoom = 1;
 
-	int ScrMaxX = instance::main_win->canvas->w();
-	int ScrMaxY = instance::main_win->canvas->h();
+	int ScrMaxX = inst.main_win->canvas->w();
+	int ScrMaxY = inst.main_win->canvas->h();
 
 	if (Map_bound_x1 < Map_bound_x2)
 		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
@@ -111,15 +111,15 @@ void ZoomWholeMap(Instance &inst)
 
 void RedrawMap(Instance &inst)
 {
-	if (!instance::main_win)
+	if (!inst.main_win)
 		return;
 
 	UpdateHighlight(inst);
 
-	instance::main_win->scroll->UpdateRenderMode();
-	instance::main_win->info_bar->UpdateSecRend();
-	instance::main_win->status_bar->redraw();
-	instance::main_win->canvas->redraw();
+	inst.main_win->scroll->UpdateRenderMode();
+	inst.main_win->info_bar->UpdateSecRend();
+	inst.main_win->status_bar->redraw();
+	inst.main_win->canvas->redraw();
 }
 
 static int Selection_FirstLine(const Document &doc, selection_c *list);
@@ -164,19 +164,19 @@ static void UpdatePanel(const Instance &inst)
 	switch (edit.mode)
 	{
 		case ObjType::things:
-			instance::main_win->thing_box->SetObj(obj_idx, obj_count);
+			inst.main_win->thing_box->SetObj(obj_idx, obj_count);
 			break;
 
 		case ObjType::linedefs:
-			instance::main_win->line_box->SetObj(obj_idx, obj_count);
+			inst.main_win->line_box->SetObj(obj_idx, obj_count);
 			break;
 
 		case ObjType::sectors:
-			instance::main_win->sec_box->SetObj(obj_idx, obj_count);
+			inst.main_win->sec_box->SetObj(obj_idx, obj_count);
 			break;
 
 		case ObjType::vertices:
-			instance::main_win->vert_box->SetObj(obj_idx, obj_count);
+			inst.main_win->vert_box->SetObj(obj_idx, obj_count);
 			break;
 
 		default: break;
@@ -259,7 +259,7 @@ static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 	}
 
 done:
-	instance::main_win->canvas->UpdateHighlight();
+	inst.main_win->canvas->UpdateHighlight();
 }
 
 
@@ -312,8 +312,8 @@ void UpdateHighlight(Instance &inst)
 	UpdateSplitLine(inst, edit.map_x, edit.map_y);
 	UpdateDrawLine(inst);
 
-	instance::main_win->canvas->UpdateHighlight();
-	instance::main_win->canvas->CheckGridSnap();
+	inst.main_win->canvas->UpdateHighlight();
+	inst.main_win->canvas->CheckGridSnap();
 
 	UpdatePanel(inst);
 }
@@ -331,12 +331,12 @@ void Editor_ClearErrorMode(Instance &inst)
 void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode)
 {
 	// keep selection after a "Find All" and user dismisses panel
-	if (new_mode == edit.mode && instance::main_win->isSpecialPanelShown())
+	if (new_mode == edit.mode && inst.main_win->isSpecialPanelShown())
 		edit.error_mode = false;
 
 	edit.mode = new_mode;
 
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 	Editor_ClearErrorMode(inst);
 
 	edit.highlight.clear();
@@ -357,7 +357,7 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 		case 'v': Editor_ChangeMode_Raw(inst, ObjType::vertices); break;
 
 		default:
-			Beep("Unknown mode: %c\n", mode_char);
+			Beep(inst, "Unknown mode: %c\n", mode_char);
 			return;
 	}
 
@@ -365,7 +365,7 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 	{
 		Selection_Push();
 
-		instance::main_win->NewEditMode(edit.mode);
+		inst.main_win->NewEditMode(edit.mode);
 
 		// convert the selection
 		selection_c *prev_sel = edit.Selected;
@@ -374,10 +374,10 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 		ConvertSelection(inst.level, prev_sel, edit.Selected);
 		delete prev_sel;
 	}
-	else if (instance::main_win->isSpecialPanelShown())
+	else if (inst.main_win->isSpecialPanelShown())
 	{
 		// same mode, but this removes the special panel
-		instance::main_win->NewEditMode(edit.mode);
+		inst.main_win->NewEditMode(edit.mode);
 	}
 	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
 	//       change.  We optionally emulate that behavior here.
@@ -441,7 +441,7 @@ void MapStuff_NotifyInsert(ObjType type, int objnum)
 	}
 }
 
-void MapStuff_NotifyDelete(ObjType type, int objnum)
+void MapStuff_NotifyDelete(Instance &inst, ObjType type, int objnum)
 {
 	if (type == ObjType::vertices)
 	{
@@ -450,7 +450,7 @@ void MapStuff_NotifyDelete(ObjType type, int objnum)
 		if (edit.action == ACT_DRAW_LINE &&
 			edit.draw_from.num == objnum)
 		{
-			Editor_ClearAction();
+			Editor_ClearAction(inst);
 		}
 	}
 }
@@ -517,62 +517,62 @@ void ObjectBox_NotifyBegin()
 }
 
 
-void ObjectBox_NotifyInsert(ObjType type, int objnum)
+void ObjectBox_NotifyInsert(Instance &inst, ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
 	if (type != edit.mode)
 		return;
 
-	if (objnum > instance::main_win->GetPanelObjNum())
+	if (objnum > inst.main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;
 }
 
 
-void ObjectBox_NotifyDelete(ObjType type, int objnum)
+void ObjectBox_NotifyDelete(Instance &inst, ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
 	if (type != edit.mode)
 		return;
 
-	if (objnum > instance::main_win->GetPanelObjNum())
+	if (objnum > inst.main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;
 }
 
 
-void ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+void ObjectBox_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
 {
 	if (type != edit.mode)
 		return;
 
-	if (objnum != instance::main_win->GetPanelObjNum())
+	if (objnum != inst.main_win->GetPanelObjNum())
 		return;
 
 	changed_panel_obj = true;
 }
 
 
-void ObjectBox_NotifyEnd()
+void ObjectBox_NotifyEnd(Instance &inst)
 {
 	if (invalidated_totals)
-		instance::main_win->UpdateTotals();
+		inst.main_win->UpdateTotals();
 
 	if (invalidated_panel_obj)
 	{
-		instance::main_win->InvalidatePanelObj();
+		inst.main_win->InvalidatePanelObj();
 	}
 	else if (changed_panel_obj)
 	{
-		instance::main_win->UpdatePanelObj();
+		inst.main_win->UpdatePanelObj();
 	}
 
 	if (changed_recent_list)
-		instance::main_win->browser->RecentUpdate();
+		inst.main_win->browser->RecentUpdate();
 }
 
 
@@ -988,8 +988,8 @@ void Selection_Clear(Instance &inst, bool no_save)
 
 	edit.error_mode = false;
 
-	if (instance::main_win)
-		instance::main_win->UnselectPics();
+	if (inst.main_win)
+		inst.main_win->UnselectPics();
 
 	RedrawMap(inst);
 }
@@ -1082,7 +1082,7 @@ static void Selection_Validate(const Instance &inst)
 	{
 		edit.Selected->frob_range(num_obj, edit.Selected->max_obj(), BitOp::remove);
 
-		Beep("BUG: invalid selection");
+		Beep(inst, "BUG: invalid selection");
 	}
 }
 
@@ -1091,7 +1091,7 @@ void CMD_LastSelection(Instance &inst)
 {
 	if (! last_Sel)
 	{
-		Beep("No last selection (or was invalidated)");
+		Beep(inst, "No last selection (or was invalidated)");
 		return;
 	}
 
@@ -1101,7 +1101,7 @@ void CMD_LastSelection(Instance &inst)
 	{
 		changed_mode = true;
 		Editor_ChangeMode_Raw(inst, last_Sel->what_type());
-		instance::main_win->NewEditMode(edit.mode);
+		inst.main_win->NewEditMode(edit.mode);
 	}
 
 	std::swap(last_Sel, edit.Selected);
@@ -1234,14 +1234,14 @@ void Recently_used::clear()
 }
 
 
-void RecUsed_ClearAll()
+void RecUsed_ClearAll(Instance &inst)
 {
 	recent_textures.clear();
 	recent_flats   .clear();
 	recent_things  .clear();
 
-	if (instance::main_win)
-		instance::main_win->browser->RecentUpdate();
+	if (inst.main_win)
+		inst.main_win->browser->RecentUpdate();
 }
 
 
@@ -1266,14 +1266,14 @@ void RecUsed_WriteUser(std::ostream &os)
 }
 
 
-bool RecUsed_ParseUser(const std::vector<SString> &tokens)
+bool RecUsed_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 {
 	if (tokens[0] != "recent_used" || tokens.size() < 2)
 		return false;
 
 	if (tokens[1] == "clear")
 	{
-		RecUsed_ClearAll();
+		RecUsed_ClearAll(inst);
 		return true;
 	}
 
@@ -1300,8 +1300,8 @@ bool RecUsed_ParseUser(const std::vector<SString> &tokens)
 			break;
 	}
 
-	if (instance::main_win)
-		instance::main_win->browser->RecentUpdate();
+	if (inst.main_win)
+		inst.main_win->browser->RecentUpdate();
 
 	return true;
 }

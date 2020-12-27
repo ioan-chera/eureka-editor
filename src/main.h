@@ -192,7 +192,7 @@ extern int MadeChanges;
  */
 
 bool Main_ConfirmQuit(const char *action);
-void Main_LoadResources();
+void Main_LoadResources(Instance &inst);
 void Main_Quit();
 
 [[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
@@ -209,10 +209,10 @@ SString GameNameFromIWAD(const SString &iwad_name);
 SString Main_FileOpFolder();
 
 
-void Beep(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
+void Beep(const Instance &inst, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 
-void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
-void Status_Clear();
+void Status_Set(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
+void Status_Clear(const Instance &inst);
 
 
 #endif  /* __EUREKA_MAIN_H__ */

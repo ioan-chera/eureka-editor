@@ -525,9 +525,9 @@ static bool Clipboard_DoCopy(Instance &inst)
 
 	int total = edit.Selected->count_obj();
 	if (total == 1)
-		Status_Set("copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
+		Status_Set(inst, "copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
 	else
-		Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
+		Status_Set(inst, "copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
@@ -806,7 +806,7 @@ void CMD_CopyAndPaste(Instance &inst)
 {
 	if (edit.Selected->empty() && edit.highlight.is_nil())
 	{
-		Beep("Nothing to copy and paste");
+		Beep(inst, "Nothing to copy and paste");
 		return;
 	}
 
@@ -819,7 +819,7 @@ void CMD_CopyAndPaste(Instance &inst)
 
 void CMD_Clipboard_Cut(Instance &inst)
 {
-	if (instance::main_win->ClipboardOp(EditCommand::cut))
+	if (inst.main_win->ClipboardOp(EditCommand::cut))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -830,7 +830,7 @@ void CMD_Clipboard_Cut(Instance &inst)
 
 	if (! Clipboard_DoCopy(inst))
 	{
-		Beep("Nothing to cut");
+		Beep(inst, "Nothing to cut");
 		return;
 	}
 
@@ -840,7 +840,7 @@ void CMD_Clipboard_Cut(Instance &inst)
 
 void CMD_Clipboard_Copy(Instance &inst)
 {
-	if (instance::main_win->ClipboardOp(EditCommand::copy))
+	if (inst.main_win->ClipboardOp(EditCommand::copy))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -851,7 +851,7 @@ void CMD_Clipboard_Copy(Instance &inst)
 
 	if (! Clipboard_DoCopy(inst))
 	{
-		Beep("Nothing to copy");
+		Beep(inst, "Nothing to copy");
 		return;
 	}
 }
@@ -859,7 +859,7 @@ void CMD_Clipboard_Copy(Instance &inst)
 
 void CMD_Clipboard_Paste(Instance &inst)
 {
-	if (instance::main_win->ClipboardOp(EditCommand::paste))
+	if (inst.main_win->ClipboardOp(EditCommand::paste))
 		return;
 
 	if (edit.render3d && edit.mode != ObjType::things)
@@ -870,7 +870,7 @@ void CMD_Clipboard_Paste(Instance &inst)
 
 	if (! Clipboard_DoPaste(inst))
 	{
-		Beep("Clipboard is empty");
+		Beep(inst, "Clipboard is empty");
 		return;
 	}
 }
@@ -1218,13 +1218,13 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 
 void CMD_Delete(Instance &inst)
 {
-	if (instance::main_win->ClipboardOp(EditCommand::del))
+	if (inst.main_win->ClipboardOp(EditCommand::del))
 		return;
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("Nothing to delete");
+		Beep(inst, "Nothing to delete");
 		return;
 	}
 
@@ -1254,7 +1254,7 @@ void CMD_Delete(Instance &inst)
 	inst.level.basis.end();
 
 success:
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 
 	// always clear the selection (deleting objects invalidates it)
 	Selection_Clear(inst);

@@ -48,15 +48,18 @@ public:
 	Browser_Button * button;
 
 	UI_Pic *pic;
+	SString mPicCallbackString;	// optional, storage for callback data string
+
+	Instance &inst;
 
 public:
 	// this constructor makes a simple text button
-	Browser_Item(int X, int Y, int W, int H,
+	Browser_Item(Instance &inst, int X, int Y, int W, int H,
 	             const SString &_desc, const SString &_realname,
 				 int _num, char _kind, char _category);
 
 	// this constructor makes a picture with a text label below it
-	Browser_Item(int X, int Y, int W, int H,
+	Browser_Item(Instance &inst, int X, int Y, int W, int H,
 				 const SString &_desc, const SString &_realname,
 				 int _num, char _kind, char _category,
 	             int pic_w, int pic_h, UI_Pic *_pic);
@@ -64,6 +67,14 @@ public:
 	virtual ~Browser_Item();
 
 	bool MatchName(const char *name) const;
+
+	//
+	// Assigns the given string and returns the pointer to it (can't be const due to void*)
+	//
+	void setPicCallbackString(const SString &text)
+	{
+		mPicCallbackString = text;
+	}
 
 public:
 	static void texture_callback(Fl_Widget *w, void *data);
@@ -96,8 +107,10 @@ private:
 
 	SString cat_letters;
 
+	Instance &inst;
+
 public:
-	UI_Browser_Box(int X, int Y, int W, int H, const char *label, char _kind);
+	UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const char *label, char _kind);
 	virtual ~UI_Browser_Box();
 
 	/* FLTK method */
@@ -176,8 +189,10 @@ private:
 
 	int in_update;
 
+	Instance &inst;
+
 public:
-	UI_Generalized_Box(int X, int Y, int W, int H, const char *label);
+	UI_Generalized_Box(Instance &inst, int X, int Y, int W, int H, const char *label);
 	virtual ~UI_Generalized_Box();
 
 	void Populate();
@@ -214,8 +229,10 @@ private:
  	// currently active browser box (may be hidden though)
 	int active;
 
+	Instance &inst;
+
 public:
-	UI_Browser(int X, int Y, int W, int H, const char *label = NULL);
+	UI_Browser(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
 	virtual ~UI_Browser();
 
 public:
@@ -253,8 +270,8 @@ private:
 };
 
 
-bool Browser_ParseUser(const std::vector<SString> &tokens);
-void Browser_WriteUser(std::ostream &os);
+bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens);
+void Browser_WriteUser(const Instance &inst, std::ostream &os);
 
 #endif  /* __EUREKA_UI_BROWSER_H__ */
 

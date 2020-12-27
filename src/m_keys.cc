@@ -1249,7 +1249,7 @@ bool ExecuteCommand(const SString &name,
 //
 //  play a fascinating tune
 //
-void Beep(EUR_FORMAT_STRING(const char *fmt), ...)
+void Beep(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list arg_ptr;
 
@@ -1261,7 +1261,7 @@ void Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	buffer[MSG_BUF_LEN-1] = 0;
 
-	Status_Set("%s", buffer);
+	Status_Set(inst, "%s", buffer);
 	LogPrintf("BEEP: %s\n", buffer);
 
 	fl_beep();

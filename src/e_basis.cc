@@ -266,7 +266,7 @@ void Basis::end()
 	else
 	{
 		mUndoHistory.push(std::move(mCurrentGroup));
-		Status_Set("%s", mCurrentGroup.getMessage().c_str());
+		Status_Set(inst, "%s", mCurrentGroup.getMessage().c_str());
 	}
 	doProcessChangeStatus();
 }
@@ -540,7 +540,7 @@ bool Basis::undo()
 	UndoGroup grp = std::move(mUndoHistory.top());
 	mUndoHistory.pop();
 
-	Status_Set("UNDO: %s", grp.getMessage().c_str());
+	Status_Set(inst, "UNDO: %s", grp.getMessage().c_str());
 
 	grp.reapply(*this);
 
@@ -564,7 +564,7 @@ bool Basis::redo()
 	UndoGroup grp = std::move(mRedoFuture.top());
 	mRedoFuture.pop();
 
-	Status_Set("Redo: %s", grp.getMessage().c_str());
+	Status_Set(inst, "Redo: %s", grp.getMessage().c_str());
 
 	grp.reapply(*this);
 
@@ -696,7 +696,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 	Selection_NotifyChange(objtype, objnum, field);
 	MapStuff_NotifyChange(basis.inst, objtype, objnum, field);
 	Render3D_NotifyChange(objtype, objnum, field);
-	ObjectBox_NotifyChange(objtype, objnum, field);
+	ObjectBox_NotifyChange(basis.inst, objtype, objnum, field);
 }
 
 //
@@ -709,9 +709,9 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 	// TODO: their own modules
 	Clipboard_NotifyDelete(objtype, objnum);
 	Selection_NotifyDelete(objtype, objnum);
-	MapStuff_NotifyDelete(objtype, objnum);
+	MapStuff_NotifyDelete(basis.inst, objtype, objnum);
 	Render3D_NotifyDelete(basis.doc, objtype, objnum);
-	ObjectBox_NotifyDelete(objtype, objnum);
+	ObjectBox_NotifyDelete(basis.inst, objtype, objnum);
 
 	switch(objtype)
 	{
@@ -858,7 +858,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 	Selection_NotifyInsert(objtype, objnum);
 	MapStuff_NotifyInsert(objtype, objnum);
 	Render3D_NotifyInsert(objtype, objnum);
-	ObjectBox_NotifyInsert(objtype, objnum);
+	ObjectBox_NotifyInsert(basis.inst, objtype, objnum);
 
 	switch(objtype)
 	{
@@ -1074,7 +1074,7 @@ void Basis::doProcessChangeStatus() const
 	Selection_NotifyEnd();
 	MapStuff_NotifyEnd(inst);
 	Render3D_NotifyEnd(inst);
-	ObjectBox_NotifyEnd();
+	ObjectBox_NotifyEnd(inst);
 }
 
 //--- editor settings ---

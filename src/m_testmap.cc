@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 
@@ -359,7 +360,7 @@ void CMD_TestMap(Instance &inst)
 	// this generally can't happen, but we check anyway...
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		Beep("invalid path to executable");
+		Beep(inst, "invalid path to executable");
 		return;
 	}
 
@@ -380,7 +381,7 @@ void CMD_TestMap(Instance &inst)
 	if (! FileChangeDir(folder))
 	{
 		// FIXME : a notify dialog
-		Beep("chdir failed!");
+		Beep(inst, "chdir failed!");
 		return;
 	}
 
@@ -394,9 +395,9 @@ void CMD_TestMap(Instance &inst)
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer.c_str());
 
-	Status_Set("TESTING MAP");
+	Status_Set(inst, "TESTING MAP");
 
-	instance::main_win->redraw();
+	inst.main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 
@@ -406,9 +407,9 @@ void CMD_TestMap(Instance &inst)
 	int status = system(cmd_buffer.c_str());
 
 	if (status == 0)
-		Status_Set("Result: OK");
+		Status_Set(inst, "Result: OK");
 	else
-		Status_Set("Result code: %d\n", status);
+		Status_Set(inst, "Result code: %d\n", status);
 
 	LogPrintf("--> result code: %d\n", status);
 
@@ -419,7 +420,7 @@ void CMD_TestMap(Instance &inst)
 		FileChangeDir(old_dir);
 	}
 
-	instance::main_win->redraw();
+	inst.main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 }

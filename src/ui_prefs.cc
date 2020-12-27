@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 #include "m_config.h"
@@ -1573,7 +1574,8 @@ void UI_Preferences::SaveValues()
 		Fl::background2(255, 255, 255);
 		Fl::foreground(0, 0, 0);
 
-		instance::main_win->redraw();
+		// TODO: update for ALL windows
+		gInstance.main_win->redraw();
 	}
 	else if (config::gui_color_set == 2)
 	{
@@ -1584,7 +1586,8 @@ void UI_Preferences::SaveValues()
 		Fl::foreground (RGB_RED(config::gui_custom_fg), RGB_GREEN(config::gui_custom_fg),
 						RGB_BLUE(config::gui_custom_fg));
 
-		instance::main_win->redraw();
+		// TODO: update for ALL windows
+		gInstance.main_win->redraw();
 	}
 
 	/* General Tab */
@@ -1616,7 +1619,8 @@ void UI_Preferences::SaveValues()
 		config::browser_small_tex = new_small_tex;
 		config::browser_combine_tex = new_combo;
 
-		instance::main_win->browser->Populate();
+		// TODO: update for ALL windows
+		gInstance.main_win->browser->Populate();
 	}
 
 	// decode the user ratio
@@ -1628,7 +1632,8 @@ void UI_Preferences::SaveValues()
 	if (config::grid_ratio_low > config::grid_ratio_high)
 		std::swap(config::grid_ratio_low, config::grid_ratio_high);
 
-	instance::main_win->info_bar->UpdateRatio();
+	// TODO: update for ALL windows
+	gInstance.main_win->info_bar->UpdateRatio();
 
 	/* Grid Tab */
 

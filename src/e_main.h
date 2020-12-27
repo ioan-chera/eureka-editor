@@ -196,16 +196,16 @@ void CalculateLevelBounds(Instance &inst);
 
 void MapStuff_NotifyBegin();
 void MapStuff_NotifyInsert(ObjType type, int objnum);
-void MapStuff_NotifyDelete(ObjType type, int objnum);
+void MapStuff_NotifyDelete(Instance &inst, ObjType type, int objnum);
 void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field);
 void MapStuff_NotifyEnd(Instance &inst);
 
 
 void ObjectBox_NotifyBegin();
-void ObjectBox_NotifyInsert(ObjType type, int objnum);
-void ObjectBox_NotifyDelete(ObjType type, int objnum);
-void ObjectBox_NotifyChange(ObjType type, int objnum, int field);
-void ObjectBox_NotifyEnd();
+void ObjectBox_NotifyInsert(Instance &inst, ObjType type, int objnum);
+void ObjectBox_NotifyDelete(Instance &inst, ObjType type, int objnum);
+void ObjectBox_NotifyChange(Instance &inst, ObjType type, int objnum, int field);
+void ObjectBox_NotifyEnd(Instance &inst);
 
 
 void Selection_NotifyBegin();
@@ -290,9 +290,9 @@ extern Recently_used  recent_textures;
 extern Recently_used  recent_flats;
 extern Recently_used  recent_things;
 
-void RecUsed_ClearAll();
+void RecUsed_ClearAll(Instance &inst);
 void RecUsed_WriteUser(std::ostream &os);
-bool RecUsed_ParseUser(const std::vector<SString> &tokens);
+bool RecUsed_ParseUser(Instance &inst, const std::vector<SString> &tokens);
 
 
 #endif  /* __EUREKA_LEVELS_H__ */

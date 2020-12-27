@@ -181,7 +181,7 @@ static bool Project_AskFile(SString &filename)
 }
 
 
-void Project_ApplyChanges(UI_ProjectSetup *dialog)
+static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 {
 	// grab the new information
 
@@ -208,7 +208,7 @@ void Project_ApplyChanges(UI_ProjectSetup *dialog)
 
 	Fl::wait(0.1);
 
-	Main_LoadResources();
+	Main_LoadResources(inst);
 
 	Fl::wait(0.1);
 }
@@ -222,7 +222,7 @@ void CMD_ManageProject(Instance &inst)
 
 	if (ok)
 	{
-		Project_ApplyChanges(dialog);
+		Project_ApplyChanges(inst, dialog);
 	}
 
 	delete dialog;
@@ -280,7 +280,7 @@ void CMD_NewProject(Instance &inst)
 	RemoveEditWad();
 
 	// this calls Main_LoadResources which resets the master directory
-	Project_ApplyChanges(dialog);
+	Project_ApplyChanges(inst, dialog);
 
 	delete dialog;
 
@@ -966,20 +966,20 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 	LoadLevelNum(inst, wad, lev_num);
 
 	// reset various editor state
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 	Selection_InvalidateLast();
 
 	edit.Selected->clear_all();
 	edit.highlight.clear();
 
-	instance::main_win->UpdateTotals();
-	instance::main_win->UpdateGameInfo();
-	instance::main_win->InvalidatePanelObj();
-	instance::main_win->redraw();
+	inst.main_win->UpdateTotals();
+	inst.main_win->UpdateGameInfo();
+	inst.main_win->InvalidatePanelObj();
+	inst.main_win->redraw();
 
-	if (instance::main_win)
+	if (inst.main_win)
 	{
-		instance::main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		inst.main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -994,7 +994,7 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 
 	instance::Level_name = level.asUpper();
 
-	Status_Set("Loaded %s", instance::Level_name.c_str());
+	Status_Set(inst, "Loaded %s", instance::Level_name.c_str());
 
 	RedrawMap(inst);
 }
@@ -1142,7 +1142,8 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	LoadLevel(gInstance, instance::edit_wad, map_name);
 
 	// must be after LoadLevel as we need the Level_format
-	Main_LoadResources();
+	// TODO: same here
+	Main_LoadResources(gInstance);
 }
 
 
@@ -1215,7 +1216,7 @@ void CMD_OpenMap(Instance &inst)
 		// this can invalidate the 'wad' var (since it closes/reopens
 		// all wads in the master_dir), so it MUST be after LoadLevel.
 		// less importantly, we need to know the Level_format.
-		Main_LoadResources();
+		Main_LoadResources(inst);
 	}
 }
 
@@ -1248,13 +1249,13 @@ void CMD_GivenFile(Instance &inst)
 	}
 	else
 	{
-		Beep("GivenFile: unknown keyword: %s", mode.c_str());
+		Beep(inst, "GivenFile: unknown keyword: %s", mode.c_str());
 		return;
 	}
 
 	if (index < 0 || index >= (int)global::Pwad_list.size())
 	{
-		Beep("No more files");
+		Beep(inst, "No more files");
 		return;
 	}
 
@@ -1272,7 +1273,7 @@ void CMD_FlipMap(Instance &inst)
 
 	if (mode.empty())
 	{
-		Beep("FlipMap: missing keyword");
+		Beep(inst, "FlipMap: missing keyword");
 		return;
 	}
 
@@ -1289,7 +1290,7 @@ void CMD_FlipMap(Instance &inst)
 
 	if (max_idx < 0)
 	{
-		Beep("No maps ?!?");
+		Beep(inst, "No maps ?!?");
 		return;
 	}
 
@@ -1304,7 +1305,7 @@ void CMD_FlipMap(Instance &inst)
 			lev_idx++;
 		else
 		{
-			Beep("No more maps");
+			Beep(inst, "No more maps");
 			return;
 		}
 	}
@@ -1316,7 +1317,7 @@ void CMD_FlipMap(Instance &inst)
 			lev_idx--;
 		else
 		{
-			Beep("No more maps");
+			Beep(inst, "No more maps");
 			return;
 		}
 	}
@@ -1330,7 +1331,7 @@ void CMD_FlipMap(Instance &inst)
 	}
 	else
 	{
-		Beep("FlipMap: unknown keyword: %s", mode.c_str());
+		Beep(inst, "FlipMap: unknown keyword: %s", mode.c_str());
 		return;
 	}
 
@@ -1679,11 +1680,11 @@ static void SaveLevel(Instance &inst, const SString &level)
 
 	M_AddRecent(instance::edit_wad->PathName(), instance::Level_name);
 
-	Status_Set("Saved %s", instance::Level_name.c_str());
+	Status_Set(inst, "Saved %s", instance::Level_name.c_str());
 
-	if (instance::main_win)
+	if (inst.main_win)
 	{
-		instance::main_win->SetTitle(instance::edit_wad->PathName(), instance::Level_name, false);
+		inst.main_win->SetTitle(instance::edit_wad->PathName(), instance::Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState(inst);
@@ -1857,7 +1858,7 @@ static bool M_ExportMap(Instance &inst)
 	SaveLevel(inst, map_name);
 
 	// do this after the save (in case it fatal errors)
-	Main_LoadResources();
+	Main_LoadResources(inst);
 
 	return true;
 }
@@ -1911,7 +1912,7 @@ void CMD_CopyMap(Instance &inst)
 	// (should be prevented by the choose-map dialog)
 	if (y_stricmp(new_name.c_str(), instance::Level_name.c_str()) == 0)
 	{
-		Beep("Name is same!?!");
+		Beep(inst, "Name is same!?!");
 		return;
 	}
 
@@ -1920,7 +1921,7 @@ void CMD_CopyMap(Instance &inst)
 
 	SaveLevel(inst, new_name);
 
-	Status_Set("Copied to %s", instance::Level_name.c_str());
+	Status_Set(inst, "Copied to %s", instance::Level_name.c_str());
 }
 
 
@@ -1971,7 +1972,7 @@ void CMD_RenameMap(Instance &inst)
 	// (should be prevented by the choose-map dialog)
 	if (y_stricmp(new_name.c_str(), instance::Level_name.c_str()) == 0)
 	{
-		Beep("Name is same!?!");
+		Beep(inst, "Name is same!?!");
 		return;
 	}
 
@@ -1990,9 +1991,9 @@ void CMD_RenameMap(Instance &inst)
 
 	instance::Level_name = new_name.asUpper();
 
-	instance::main_win->SetTitle(instance::edit_wad->PathName(), instance::Level_name, false);
+	inst.main_win->SetTitle(instance::edit_wad->PathName(), instance::Level_name, false);
 
-	Status_Set("Renamed to %s", instance::Level_name.c_str());
+	Status_Set(inst, "Renamed to %s", instance::Level_name.c_str());
 }
 
 
@@ -2031,7 +2032,7 @@ void CMD_DeleteMap(Instance &inst)
 
 	if (lev_num < 0)
 	{
-		Beep("No such map ?!?");
+		Beep(inst, "No such map ?!?");
 		return;
 	}
 

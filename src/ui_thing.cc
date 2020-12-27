@@ -104,7 +104,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	Y = Y + desc->h() + 4;
 
 
-	sprite = new UI_Pic(X + W - 120, Y + 10, 100,100, "Sprite");
+	sprite = new UI_Pic(inst, X + W - 120, Y + 10, 100,100, "Sprite");
 	sprite->callback(button_callback, this);
 
 
@@ -625,10 +625,10 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 		box->AdjustExtraFloor(+1);
 
 	if (w == box->choose || w == box->sprite)
-		instance::main_win->BrowserMode('O');
+		box->inst.main_win->BrowserMode('O');
 
 	if (w == box->spec_choose)
-		instance::main_win->BrowserMode('L');
+		box->inst.main_win->BrowserMode('L');
 
 	// check for the angle buttons
 	for (int i = 0 ; i < 8 ; i++)

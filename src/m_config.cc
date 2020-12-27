@@ -1519,9 +1519,9 @@ bool M_LoadUserState(Instance &inst)
 		if (  Editor_ParseUser(inst, tokens) ||
 		        Grid_ParseUser(inst, tokens) ||
 		    Render3D_ParseUser(tokens) ||
-		     Browser_ParseUser(tokens) ||
+		     Browser_ParseUser(inst, tokens) ||
 		       Props_ParseUser(tokens) ||
-		     RecUsed_ParseUser(tokens))
+		     RecUsed_ParseUser(inst, tokens))
 		{
 			// Ok
 		}
@@ -1533,7 +1533,7 @@ bool M_LoadUserState(Instance &inst)
 
 	file.close();
 
-	Props_LoadValues();
+	Props_LoadValues(inst);
 
 	return true;
 }
@@ -1560,7 +1560,7 @@ bool M_SaveUserState(const Instance &inst)
 	  Editor_WriteUser(os);
 	    Grid_WriteUser(os);
 	Render3D_WriteUser(os);
-	 Browser_WriteUser(os);
+	 Browser_WriteUser(inst, os);
 	   Props_WriteUser(os);
 	 RecUsed_WriteUser(os);
 

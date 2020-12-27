@@ -122,8 +122,8 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	Y += light->h() + 20;
 
 
-	c_pic = new UI_Pic(X+W-82, Y-2,  64, 64, "Ceil");
-	f_pic = new UI_Pic(X+W-82, Y+74, 64, 64, "Floor");
+	c_pic = new UI_Pic(inst, X+W-82, Y-2,  64, 64, "Ceil");
+	f_pic = new UI_Pic(inst, X+W-82, Y+74, 64, 64, "Floor");
 
 	c_pic->callback(tex_callback, this);
 	f_pic->callback(tex_callback, this);
@@ -342,7 +342,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			instance::main_win->BrowserMode('F');
+			box->inst.main_win->BrowserMode('F');
 		return;
 	}
 
@@ -604,7 +604,7 @@ void UI_SectorBox::FreshTag()
 
 	if (new_tag > 32767)
 	{
-		Beep("Out of tag numbers");
+		Beep(inst, "Out of tag numbers");
 		return;
 	}
 
@@ -619,7 +619,7 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		instance::main_win->BrowserMode('S');
+		box->inst.main_win->BrowserMode('S');
 		return;
 	}
 
@@ -815,7 +815,7 @@ void UI_SectorBox::CB_Copy(int parts)
 {
 	if (parts == (PART_FLOOR | PART_CEIL))
 	{
-		Beep("multiple textures");
+		Beep(inst, "multiple textures");
 		return;
 	}
 
@@ -828,7 +828,7 @@ void UI_SectorBox::CB_Copy(int parts)
 
 	Texboard_SetFlat(name);
 
-	Status_Set("copied %s", name);
+	Status_Set(inst, "copied %s", name);
 }
 
 

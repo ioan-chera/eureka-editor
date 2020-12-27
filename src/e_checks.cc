@@ -3045,7 +3045,7 @@ void ChecksModule::commandApplyTag(Instance &inst)
 {
 	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
 	{
-		Beep("ApplyTag: wrong mode");
+		Beep(inst, "ApplyTag: wrong mode");
 		return;
 	}
 
@@ -3063,14 +3063,14 @@ void ChecksModule::commandApplyTag(Instance &inst)
 	}
 	else
 	{
-		Beep("ApplyTag: unknown keyword: %s\n", mode.c_str());
+		Beep(inst, "ApplyTag: unknown keyword: %s\n", mode.c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("ApplyTag: nothing selected");
+		Beep(inst, "ApplyTag: nothing selected");
 		return;
 	}
 
@@ -3081,11 +3081,11 @@ void ChecksModule::commandApplyTag(Instance &inst)
 	int new_tag = max_tag + (do_last ? 0 : 1);
 	if (new_tag <= 0)
 	{
-		Beep("No last tag");
+		Beep(inst, "No last tag");
 	}
 	else if (new_tag > 32767)
 	{
-		Beep("Out of tag numbers");
+		Beep(inst, "Out of tag numbers");
 	}
 	else
 	{
@@ -4450,7 +4450,7 @@ void ChecksModule::commandMapCheck(Instance &inst)
 
 	if (what.empty())
 	{
-		Beep("MapCheck: missing keyword");
+		Beep(inst, "MapCheck: missing keyword");
 		return;
 	}
 	else if (what.noCaseEqual("all"))
@@ -4498,7 +4498,7 @@ void ChecksModule::commandMapCheck(Instance &inst)
 				break;
 
 			default:
-				Beep("Nothing to check");
+				Beep(inst, "Nothing to check");
 				break;
 		}
 	}
@@ -4512,7 +4512,7 @@ void ChecksModule::commandMapCheck(Instance &inst)
 	}
 	else
 	{
-		Beep("MapCheck: unknown keyword: %s\n", what.c_str());
+		Beep(inst, "MapCheck: unknown keyword: %s\n", what.c_str());
 	}
 }
 

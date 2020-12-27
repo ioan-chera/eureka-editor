@@ -49,8 +49,10 @@ private:
 	SString what_text;
 	Fl_Color    what_color;
 
+	Instance &inst;
+
 public:
-	UI_Pic(int X, int Y, int W, int H, const char *L = "");
+	UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L = "");
 
 	// FLTK method for event handling
 	int handle(int event);

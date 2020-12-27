@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Instance.h"
 #include "main.h"
 #include "ui_window.h"
 
@@ -33,8 +34,8 @@
 #define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
 
-UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
-	Fl_Group(X, Y, W, H, NULL)
+UI_DefaultProps::UI_DefaultProps(Instance &inst, int X, int Y, int W, int H) :
+	Fl_Group(X, Y, W, H, NULL), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -57,7 +58,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	Y += 32;
 
-	w_pic = new UI_Pic(X+W-76,   Y, 64, 64);
+	w_pic = new UI_Pic(inst, X+W-76,   Y, 64, 64);
 	w_pic->callback(tex_callback, this);
 	w_pic->AllowHighlight(true);
 
@@ -73,8 +74,8 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	// ---- SECTOR PROPS --------------
 
-	c_pic = new UI_Pic(X+W-76, Y+2,  64, 64);
-	f_pic = new UI_Pic(X+W-76, Y+78, 64, 64);
+	c_pic = new UI_Pic(inst, X+W-76, Y+2,  64, 64);
+	f_pic = new UI_Pic(inst, X+W-76, Y+78, 64, 64);
 
 	c_pic->callback(flat_callback, this);
 	f_pic->callback(flat_callback, this);
@@ -161,7 +162,7 @@ UI_DefaultProps::UI_DefaultProps(int X, int Y, int W, int H) :
 
 	th_desc = new Fl_Output(X+60, Y+80-26, 122, 24);
 
-	th_sprite = new UI_Pic(X+W-90, Y, 80,80, "Sprite");
+	th_sprite = new UI_Pic(inst, X+W-90, Y, 80,80, "Sprite");
 	th_sprite->callback(thing_callback, this);
 
 
@@ -177,7 +178,8 @@ UI_DefaultProps::~UI_DefaultProps()
 
 void UI_DefaultProps::hide_callback(Fl_Widget *w, void *data)
 {
-	instance::main_win->HideSpecialPanel();
+	auto props = static_cast<UI_DefaultProps *>(data);
+	props->inst.main_win->HideSpecialPanel();
 }
 
 
@@ -227,7 +229,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			instance::main_win->BrowserMode('T');
+			box->inst.main_win->BrowserMode('T');
 
 		return;
 	}
@@ -253,7 +255,7 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			instance::main_win->BrowserMode('F');
+			box->inst.main_win->BrowserMode('F');
 
 		return;
 	}
@@ -334,7 +336,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 	if (w == box->th_sprite)
 	{
-		instance::main_win->BrowserMode('O');
+		box->inst.main_win->BrowserMode('O');
 		return;
 	}
 
@@ -388,7 +390,7 @@ void UI_DefaultProps::CB_Copy(int sel_pics)
 		case 4: name = w_tex->value(); break;
 
 		default:
-			Beep("multiple textures");
+			Beep(inst, "multiple textures");
 			return;
 	}
 
@@ -468,7 +470,7 @@ bool UI_DefaultProps::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::cut:
-			Beep("cannot cut that");
+			Beep(inst, "cannot cut that");
 			break;
 
 		case EditCommand::del:
@@ -584,10 +586,10 @@ void Props_WriteUser(std::ostream &os)
 }
 
 
-void Props_LoadValues()
+void Props_LoadValues(const Instance &inst)
 {
-	if (instance::main_win)
-		instance::main_win->props_box->LoadValues();
+	if (inst.main_win)
+		inst.main_win->props_box->LoadValues();
 }
 
 

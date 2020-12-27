@@ -18,6 +18,8 @@
 //
 //------------------------------------------------------------------------
 
+#include "Instance.h"
+
 #include "main.h"
 #include "ui_pic.h"
 #include "ui_window.h"
@@ -34,12 +36,12 @@
 //
 // UI_Pic Constructor
 //
-UI_Pic::UI_Pic(int X, int Y, int W, int H, const char *L) :
+UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 	Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
 	rgb(NULL), special(SP_None),
 	allow_hl(false),
 	highlighted(false),
-	selected(false)
+	selected(false), inst(inst)
 {
 	color(FL_DARK2);
 
@@ -318,7 +320,7 @@ int UI_Pic::handle(int event)
 	switch (event)
 	{
 		case FL_ENTER:
-			instance::main_win->SetCursor(FL_CURSOR_HAND);
+			inst.main_win->SetCursor(FL_CURSOR_HAND);
 			highlighted = true;
 			redraw();
 			return 1;
@@ -326,7 +328,7 @@ int UI_Pic::handle(int event)
 		case FL_LEAVE:
 			if (highlighted)
 			{
-				instance::main_win->SetCursor(FL_CURSOR_DEFAULT);
+				inst.main_win->SetCursor(FL_CURSOR_DEFAULT);
 				highlighted = false;
 				redraw();
 			}
@@ -397,7 +399,6 @@ void UI_Pic::Unhighlight()
 {
 	handle(FL_LEAVE);
 }
-
 
 //------------------------------------------------------------------------
 

@@ -28,6 +28,8 @@
 struct Instance
 {
 	Document level{*this};	// level data proper
+
+	UI_MainWindow *main_win = nullptr;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

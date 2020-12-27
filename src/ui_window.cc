@@ -39,9 +39,6 @@
 #define WINDOW_MIN_W  928
 #define WINDOW_MIN_H  640
 
-UI_MainWindow *instance::main_win;
-
-
 //
 // MainWin Constructor
 //
@@ -91,7 +88,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	canvas = scroll->canvas;
 	status_bar = scroll->status;
 
-	browser = new UI_Browser(w() - panel_W - browser_W, cy, browser_W, ey - cy);
+	browser = new UI_Browser(inst, w() - panel_W - browser_W, cy, browser_W, ey - cy);
 
 	tile = new UI_Tile(0, cy, w() - panel_W, ey - cy, NULL, scroll, browser);
 	add(tile);
@@ -117,7 +114,7 @@ UI_MainWindow::UI_MainWindow(Instance &inst) :
 	vert_box = new UI_VertexBox(inst, w() - panel_W, BY, panel_W, BH);
 	add(vert_box);
 
-	props_box = new UI_DefaultProps(w() - panel_W, BY, panel_W, BH);
+	props_box = new UI_DefaultProps(inst, w() - panel_W, BY, panel_W, BH);
 	props_box->hide();
 	add(props_box);
 
@@ -452,7 +449,7 @@ void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_s
 	}
 	else
 	{
-		Beep("no target for browsed item");
+		Beep(mInstance, "no target for browsed item");
 	}
 }
 

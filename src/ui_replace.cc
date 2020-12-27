@@ -316,7 +316,7 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 		find_desc = new Fl_Output(X+75, Y+125, 135, 25, "Desc: ");
 
-		find_pic = new UI_Pic(X+225, Y+95, 64, 64, "Choose");
+		find_pic = new UI_Pic(inst, X+225, Y+95, 64, 64, "Choose");
 		find_pic->callback((Fl_Callback *)choose_callback, this);
 		// NOTE: no point allowing highlight when copy'n'paste don't work
 		// find_pic->AllowHighlight(true);
@@ -342,7 +342,7 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 		rep_desc = new Fl_Output(X+75, Y+260, 135, 25, "Desc: ");
 
-		rep_pic = new UI_Pic(X+225, Y+230, 64, 64, "Choose");
+		rep_pic = new UI_Pic(inst, X+225, Y+230, 64, 64, "Choose");
 		rep_pic->callback((Fl_Callback *)choose_callback, this);
 		// rep_pic->AllowHighlight(true);
 
@@ -428,7 +428,8 @@ UI_FindAndReplace::~UI_FindAndReplace()
 
 void UI_FindAndReplace::hide_callback(Fl_Widget *w, void *data)
 {
-	instance::main_win->HideSpecialPanel();
+	auto box = static_cast<const UI_FindAndReplace *>(data);
+	box->inst.main_win->HideSpecialPanel();
 }
 
 
@@ -979,7 +980,7 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 
 	if (tex_name[0] == 0)
 	{
-		Beep("invalid texture name");
+		Beep(inst, "invalid texture name");
 		return;
 	}
 
@@ -1167,7 +1168,7 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 
 		if (box->find_pic->Selected())
 		{
-			instance::main_win->BrowserMode(box->GetKind());
+			box->inst.main_win->BrowserMode(box->GetKind());
 
 			Fl::focus(box->find_match);
 			box->find_match->redraw();
@@ -1181,7 +1182,7 @@ void UI_FindAndReplace::choose_callback(UI_Pic *w, void *data)
 
 		if (box->rep_pic->Selected())
 		{
-			instance::main_win->BrowserMode(box->GetKind());
+			box->inst.main_win->BrowserMode(box->GetKind());
 
 			Fl::focus(box->rep_value);
 			box->rep_value->redraw();
@@ -1200,7 +1201,7 @@ bool UI_FindAndReplace::FindNext()
 	// this can happen via CTRL-G shortcut (View / Go to next)
 	if (strlen(find_match->value()) == 0)
 	{
-		Beep("No find active!");
+		Beep(inst, "No find active!");
 		return false;
 	}
 
@@ -1224,7 +1225,7 @@ bool UI_FindAndReplace::FindNext()
 		if (filter_toggle->value() && restrict_to_sel->value() &&
 			edit.Selected->empty())
 		{
-			Beep("EMPTY SELECTION!");
+			Beep(inst, "EMPTY SELECTION!");
 			return false;
 		}
 	}
@@ -1255,7 +1256,7 @@ bool UI_FindAndReplace::FindNext()
 
 			GoToObject(inst, cur_obj);
 
-			Status_Set("found #%d", idx);
+			Status_Set(inst, "found #%d", idx);
 			return true;
 		}
 	}
@@ -1268,9 +1269,9 @@ bool UI_FindAndReplace::FindNext()
 	rep_value->do_callback();
 
 	if (is_first)
-		Beep("Nothing found");
+		Beep(inst, "Nothing found");
 	else
-		Beep("No more found");
+		Beep(inst, "No more found");
 
 	return false;
 }
@@ -1282,14 +1283,14 @@ void UI_FindAndReplace::DoReplace()
 	if (strlen(find_match->value()) == 0 ||
 		strlen( rep_value->value()) == 0)
 	{
-		Beep("Bad replace");
+		Beep(inst, "Bad replace");
 		return;
 	}
 
 	// this generally can't happen either
 	if (cur_obj.is_nil())
 	{
-		Beep("No object to replace!");
+		Beep(inst, "No object to replace!");
 		return;
 	}
 
@@ -1366,7 +1367,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 {
 	if (strlen(find_match->value()) == 0)
 	{
-		Beep("No find active!");
+		Beep(inst, "No find active!");
 		return;
 	}
 
@@ -1374,7 +1375,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (filter_toggle->value() && restrict_to_sel->value() &&
 		edit.Selected->empty())
 	{
-		Beep("EMPTY SELECTION!");
+		Beep(inst, "EMPTY SELECTION!");
 		return;
 	}
 
@@ -1421,9 +1422,9 @@ void UI_FindAndReplace::DoAll(bool replace)
 	}
 
 	if (count == 0)
-		Beep("Nothing found");
+		Beep(inst, "Nothing found");
 	else
-		Status_Set("found %d objects", count);
+		Status_Set(inst, "found %d objects", count);
 
 	if (replace)
 	{

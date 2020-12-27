@@ -29,6 +29,7 @@
 #include "e_main.h"
 #include "e_hover.h"
 #include "Errors.h"
+#include "Instance.h"
 #include "m_config.h"
 #include "main.h"
 #include "r_render.h"
@@ -36,10 +37,10 @@
 #include "ui_misc.h"
 
 
-void ClearStickyMod()
+void ClearStickyMod(Instance &inst)
 {
 	if (edit.sticky_mod)
-		Status_Clear();
+		Status_Clear(inst);
 
 	edit.sticky_mod = 0;
 }
@@ -49,7 +50,7 @@ static int mouse_last_x;
 static int mouse_last_y;
 
 
-void Editor_ClearAction()
+void Editor_ClearAction(Instance &inst)
 {
 	switch (edit.action)
 	{
@@ -57,7 +58,7 @@ void Editor_ClearAction()
 			return;
 
 		case ACT_ADJUST_OFS:
-			instance::main_win->SetCursor(FL_CURSOR_DEFAULT);
+			inst.main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
 
 		default:
@@ -69,9 +70,9 @@ void Editor_ClearAction()
 }
 
 
-void Editor_SetAction(editor_action_e  new_action)
+void Editor_SetAction(Instance &inst, editor_action_e  new_action)
 {
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 
 	edit.action = new_action;
 
@@ -84,7 +85,7 @@ void Editor_SetAction(editor_action_e  new_action)
 			mouse_last_x = Fl::event_x();
 			mouse_last_y = Fl::event_y();
 
-			instance::main_win->SetCursor(FL_CURSOR_HAND);
+			inst.main_win->SetCursor(FL_CURSOR_HAND);
 			break;
 
 		default:
@@ -111,7 +112,7 @@ void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
 	if (mode < 0)
 	{
 		edit.is_panning = true;
-		instance::main_win->SetCursor(FL_CURSOR_HAND);
+		inst.main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
 
@@ -119,7 +120,7 @@ void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
 	if (mode > 0)
 	{
 		edit.is_panning = false;
-		instance::main_win->SetCursor(FL_CURSOR_DEFAULT);
+		inst.main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
 
@@ -431,7 +432,7 @@ int wheel_dy;
 static bool in_operation_menu;
 
 extern void CheckBeginDrag(Instance &inst);
-extern void Transform_Update();
+extern void Transform_Update(Instance &inst);
 
 
 static void EV_EnterWindow(Instance &inst)
@@ -444,10 +445,10 @@ static void EV_EnterWindow(Instance &inst)
 
 	edit.pointer_in_window = true;
 
-	instance::main_win->canvas->PointerPos(true /* in_event */);
+	inst.main_win->canvas->PointerPos(true /* in_event */);
 
 	// restore keyboard focus to the canvas
-	Fl_Widget * foc = instance::main_win->canvas;
+	Fl_Widget * foc = inst.main_win->canvas;
 
 	if (Fl::focus() != foc)
 		foc->take_focus();
@@ -467,7 +468,7 @@ static void EV_LeaveWindow(Instance &inst)
 
 	// this offers a handy way to get out of drawing mode
 	if (edit.action == ACT_DRAW_LINE)
-		Editor_ClearAction();
+		Editor_ClearAction(inst);
 
 	// this will update (disable) any current highlight
 	RedrawMap(inst);
@@ -477,9 +478,9 @@ static void EV_LeaveWindow(Instance &inst)
 void EV_EscapeKey(Instance &inst)
 {
 	Nav_Clear();
-	ClearStickyMod();
-	Editor_ClearAction();
-	Status_Clear();
+	ClearStickyMod(inst);
+	Editor_ClearAction(inst);
+	Status_Clear(inst);
 
 	edit.clicked.clear();
 	edit.dragged.clear();
@@ -497,7 +498,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	// unless the mouse is in the 2D/3D view (or began a drag there).
 	edit.pointer_in_window = true;
 
-	instance::main_win->canvas->PointerPos(true /* in_event */);
+	inst.main_win->canvas->PointerPos(true /* in_event */);
 
 //  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, edit.map_x, edit.map_y);
 
@@ -507,11 +508,11 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 		return;
 	}
 
-	instance::main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+	inst.main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 
 	if (edit.action == ACT_TRANSFORM)
 	{
-		Transform_Update();
+		Transform_Update(inst);
 		return;
 	}
 
@@ -527,7 +528,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 		edit.selbox_x2 = edit.map_x;
 		edit.selbox_y2 = edit.map_y;
 
-		instance::main_win->canvas->redraw();
+		inst.main_win->canvas->redraw();
 		return;
 	}
 
@@ -544,7 +545,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 		if (edit.mode == ObjType::vertices && edit.dragged.valid())
 			UpdateHighlight(inst);
 
-		instance::main_win->canvas->redraw();
+		inst.main_win->canvas->redraw();
 		return;
 	}
 
@@ -642,7 +643,7 @@ static int EV_RawKey(Instance &inst, int event)
 	if (edit.sticky_mod)
 	{
 		raw_state = edit.sticky_mod;
-		ClearStickyMod();
+		ClearStickyMod(inst);
 	}
 
 	keycode_t key = M_TranslateKey(raw_key, raw_state);
@@ -656,7 +657,7 @@ static int EV_RawKey(Instance &inst, int event)
 
 	// keyboard propagation logic
 
-	if (instance::main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+	if (inst.main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
 	if (edit.render3d && ExecuteKey(key, KCTX_Render))
@@ -687,10 +688,10 @@ static int EV_RawKey(Instance &inst, int event)
 
 static int EV_RawWheel(Instance &inst, int event)
 {
-	ClearStickyMod();
+	ClearStickyMod(inst);
 
 	// ensure we zoom from correct place
-	instance::main_win->canvas->PointerPos(true /* in_event */);
+	inst.main_win->canvas->PointerPos(true /* in_event */);
 
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
@@ -706,9 +707,9 @@ static int EV_RawWheel(Instance &inst, int event)
 
 static int EV_RawButton(Instance &inst, int event)
 {
-	ClearStickyMod();
+	ClearStickyMod(inst);
 
-	instance::main_win->canvas->PointerPos(true /* in_event */);
+	inst.main_win->canvas->PointerPos(true /* in_event */);
 
 	// Hack Alert : this is required to support pressing two buttons at the
 	// same time.  Without this, FLTK does not send us the second button
@@ -716,7 +717,7 @@ static int EV_RawButton(Instance &inst, int event)
 	// widget becomes NULL.
 
 	if (Fl::event_buttons() != 0)
-		Fl::pushed(instance::main_win->canvas);
+		Fl::pushed(inst.main_win->canvas);
 
 
 	int button = Fl::event_button();
@@ -863,11 +864,11 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 }
 
 
-static void M_AddOperationMenu(SString context, Fl_Menu_Button *menu)
+static void M_AddOperationMenu(Instance &inst, SString context, Fl_Menu_Button *menu)
 {
 	if (menu->size() < 2)
 	{
-		FatalError("operations.cfg: no %s items.\n", context.c_str());
+		ThrowException("operations.cfg: no %s items.\n", context.c_str());
 		return;
 	}
 
@@ -891,13 +892,13 @@ static void M_AddOperationMenu(SString context, Fl_Menu_Button *menu)
 
 	op_all_menus[context] = menu;
 
-	instance::main_win->add(menu);
+	inst.main_win->add(menu);
 }
 
 
 #define MAX_TOKENS  30
 
-static bool M_ParseOperationFile()
+static bool M_ParseOperationFile(Instance &inst)
 {
 	// open the file and build all the menus it contains.
 
@@ -948,7 +949,7 @@ static bool M_ParseOperationFile()
 			}
 
 			if (menu != NULL)
-				M_AddOperationMenu(context, menu);
+				M_AddOperationMenu(inst, context, menu);
 
 			// create new menu
 			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
@@ -966,17 +967,17 @@ static bool M_ParseOperationFile()
 	file.close();
 
 	if (menu != NULL)
-		M_AddOperationMenu(context, menu);
+		M_AddOperationMenu(inst, context, menu);
 
 	return true;
 }
 
 
-void M_LoadOperationMenus()
+void M_LoadOperationMenus(Instance &inst)
 {
 	LogPrintf("Loading Operation menus...\n");
 
-	if (! M_ParseOperationFile())
+	if (! M_ParseOperationFile(inst))
 	{
 		no_operation_cfg = true;
 		DLG_Notify("Installation problem: cannot find \"operations.cfg\" file!");
@@ -1014,7 +1015,7 @@ void CMD_OperationMenu(Instance &inst)
 
 	if (menu == NULL)
 	{
-		Beep("no such menu: %s", context.c_str());
+		Beep(inst, "no such menu: %s", context.c_str());
 		return;
 	}
 

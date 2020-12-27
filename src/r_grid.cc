@@ -79,8 +79,8 @@ void Grid_State_c::Init()
 	{
 		shown = false;
 
-		if (instance::main_win)
-			instance::main_win->info_bar->SetGrid(-1);
+		if (inst.main_win)
+			inst.main_win->info_bar->SetGrid(-1);
 	}
 	else
 	{
@@ -89,8 +89,8 @@ void Grid_State_c::Init()
 
 	snap = config::grid_default_snap;
 
-	if (instance::main_win)
-		instance::main_win->info_bar->UpdateSnap();
+	if (inst.main_win)
+		inst.main_win->info_bar->UpdateSnap();
 }
 
 
@@ -104,10 +104,10 @@ void Grid_State_c::MoveTo(double x, double y)
 	orig_x = x;
 	orig_y = y;
 
-	if (instance::main_win)
+	if (inst.main_win)
 	{
-		instance::main_win->scroll->AdjustPos();
-		instance::main_win->canvas->PointerPos();
+		inst.main_win->scroll->AdjustPos();
+		inst.main_win->canvas->PointerPos();
 
 		RedrawMap(inst);
 	}
@@ -413,9 +413,9 @@ void Grid_State_c::RefocusZoom(double map_x, double map_y, float before_Scale)
 	orig_x += (map_x - orig_x) * dist_factor;
 	orig_y += (map_y - orig_y) * dist_factor;
 
-	if (instance::main_win)
+	if (inst.main_win)
 	{
-		instance::main_win->canvas->PointerPos();
+		inst.main_win->canvas->PointerPos();
 		RedrawMap(inst);
 	}
 }
@@ -453,12 +453,12 @@ void Grid_State_c::RawSetScale(int i)
 
 	Scale = scale_values[i];
 
-	if (!instance::main_win)
+	if (!inst.main_win)
 		return;
 
-	instance::main_win->scroll->AdjustPos();
-	instance::main_win->canvas->PointerPos();
-	instance::main_win->info_bar->SetScale(Scale);
+	inst.main_win->scroll->AdjustPos();
+	inst.main_win->canvas->PointerPos();
+	inst.main_win->info_bar->SetScale(Scale);
 
 	RedrawMap(inst);
 }
@@ -472,16 +472,16 @@ void Grid_State_c::RawSetStep(int i)
 	{
 		shown = false;
 
-		if (instance::main_win)
-			instance::main_win->info_bar->SetGrid(-1);
+		if (inst.main_win)
+			inst.main_win->info_bar->SetGrid(-1);
 	}
 	else
 	{
 		shown = true;
 		step  = grid_values[i];
 
-		if (instance::main_win)
-			instance::main_win->info_bar->SetGrid(step);
+		if (inst.main_win)
+			inst.main_win->info_bar->SetGrid(step);
 	}
 
 	if (config::grid_hide_in_free_mode)
@@ -496,8 +496,8 @@ void Grid_State_c::ForceStep(int new_step)
 	step  = new_step;
 	shown = true;
 
-	if (instance::main_win)
-		instance::main_win->info_bar->SetGrid(step);
+	if (inst.main_win)
+		inst.main_win->info_bar->SetGrid(step);
 
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
@@ -533,7 +533,7 @@ void Grid_State_c::AdjustStep(int delta)
 {
 	if (! shown)
 	{
-		Beep("Grid is off (cannot change step)");
+		Beep(inst, "Grid is off (cannot change step)");
 		return;
 	}
 
@@ -609,18 +609,18 @@ void Grid_State_c::RawSetShown(bool new_value)
 {
 	shown = new_value;
 
-	if (!instance::main_win)
+	if (!inst.main_win)
 		return;
 
 	if (! shown)
 	{
-		instance::main_win->info_bar->SetGrid(-1);
+		inst.main_win->info_bar->SetGrid(-1);
 		RedrawMap(inst);
 		return;
 	}
 
 	// update the info-bar
-	instance::main_win->info_bar->SetGrid(step);
+	inst.main_win->info_bar->SetGrid(step);
 
 	RedrawMap(inst);
 }
@@ -650,8 +650,8 @@ void Grid_State_c::SetSnap(bool enable)
 	if (config::grid_hide_in_free_mode && snap != shown)
 		SetShown(snap);
 
-	if (instance::main_win)
-		instance::main_win->info_bar->UpdateSnap();
+	if (inst.main_win)
+		inst.main_win->info_bar->UpdateSnap();
 
 	RedrawMap(inst);
 }
@@ -714,8 +714,8 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	{
 		grid.snap = atoi(tokens[1]) ? true : false;
 
-		if (instance::main_win)
-			instance::main_win->info_bar->UpdateSnap();
+		if (inst.main_win)
+			inst.main_win->info_bar->UpdateSnap();
 
 		return true;
 	}

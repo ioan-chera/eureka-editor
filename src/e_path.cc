@@ -181,7 +181,7 @@ void CMD_LIN_SelectPath(Instance &inst)
 	// determine starting linedef
 	if (edit.highlight.is_nil())
 	{
-		Beep("No highlighted line");
+		Beep(inst, "No highlighted line");
 		return;
 	}
 
@@ -321,7 +321,7 @@ void CMD_SEC_SelectGroup(Instance &inst)
 	// determine starting sector
 	if (edit.highlight.is_nil())
 	{
-		Beep("No highlighted sector");
+		Beep(inst, "No highlighted sector");
 		return;
 	}
 
@@ -375,7 +375,7 @@ void GoToSelection(Instance &inst)
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
-		int eval = instance::main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = inst.main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
 
 		if (eval <= 0)
 			break;
@@ -389,7 +389,7 @@ void GoToSelection(Instance &inst)
 		if (grid.Scale >= 1.0)
 			break;
 
-		int eval = instance::main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = inst.main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
 
 		if (eval >= 0)
 			break;
@@ -428,7 +428,7 @@ void CMD_JumpToObject(Instance &inst)
 
 	if (total <= 0)
 	{
-		Beep("No objects!");
+		Beep(inst, "No objects!");
 		return;
 	}
 
@@ -482,7 +482,7 @@ void CMD_PruneUnused(Instance &inst)
 
 	if (num_verts == 0 && num_sides == 0 && num_secs == 0)
 	{
-		Beep("Nothing to prune");
+		Beep(inst, "Nothing to prune");
 		return;
 	}
 

@@ -109,9 +109,9 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	m_x_tile_positions[0] = std::min(LX, UX);
 	m_x_tile_positions[1] = MX;
 
-	l_pic = new UI_Pic(LX, Y, 64, 64, "Lower");
-	u_pic = new UI_Pic(UX, Y, 64, 64, "Upper");
-	r_pic = new UI_Pic(MX, Y, 64, 64, "Rail");
+	l_pic = new UI_Pic(inst, LX, Y, 64, 64, "Lower");
+	u_pic = new UI_Pic(inst, UX, Y, 64, 64, "Upper");
+	r_pic = new UI_Pic(inst, MX, Y, 64, 64, "Rail");
 
 	l_pic->callback(tex_callback, this);
 	u_pic->callback(tex_callback, this);
@@ -171,7 +171,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			instance::main_win->BrowserMode('T');
+			box->inst.main_win->BrowserMode('T');
 		return;
 	}
 
@@ -316,8 +316,8 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	box->inst.level.basis.setMessageForSelection("added sidedef to", *edit.Selected);
 	box->inst.level.basis.end();
 
-	instance::main_win->line_box->UpdateField();
-	instance::main_win->line_box->UpdateSides();
+	box->inst.main_win->line_box->UpdateField();
+	box->inst.main_win->line_box->UpdateSides();
 }
 
 
@@ -351,8 +351,8 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 	box->inst.level.basis.setMessageForSelection("deleted sidedef from", *edit.Selected);
 	box->inst.level.basis.end();
 
-	instance::main_win->line_box->UpdateField();
-	instance::main_win->line_box->UpdateSides();
+	box->inst.main_win->line_box->UpdateField();
+	box->inst.main_win->line_box->UpdateSides();
 }
 
 

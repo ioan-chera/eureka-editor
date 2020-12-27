@@ -464,7 +464,7 @@ void CMD_BuildAllNodes(Instance &inst)
 	SString CurLevel(instance::Level_name);
 
 	// reset various editor state
-	Editor_ClearAction();
+	Editor_ClearAction(inst);
 	Selection_InvalidateLast();
 
 	edit.Selected->clear_all();
@@ -488,17 +488,17 @@ void CMD_BuildAllNodes(Instance &inst)
 	if (ret == BUILD_OK)
 	{
 		dialog->Finish_OK();
-		Status_Set("Built nodes OK");
+		Status_Set(inst, "Built nodes OK");
 	}
 	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
-		Status_Set("Cancelled building nodes");
+		Status_Set(inst, "Cancelled building nodes");
 	}
 	else
 	{
 		dialog->Finish_Error();
-		Status_Set("Error building nodes");
+		Status_Set(inst, "Error building nodes");
 	}
 
 	while (! dialog->WantClose())

@@ -241,7 +241,7 @@ void UI_ScaleDialog::ok_callback(Fl_Widget *w, void *data)
 	if (scale_x <= 0 || scale_y <= 0 || scale_z <= 0)
 	{
 		// WISH: deactivate OK button instead (don't get here)
-		Beep("bad scaling value");
+		Beep(that->inst, "bad scaling value");
 		that->want_close = true;
 		return;
 	}

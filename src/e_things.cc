@@ -60,7 +60,7 @@ void CMD_TH_SpinThings(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No things to spin");
+		Beep(inst, "No things to spin");
 		return;
 	}
 
@@ -76,7 +76,7 @@ void CMD_TH_SpinThings(Instance &inst)
 
 	inst.level.basis.end();
 
-	instance::main_win->thing_box->UpdateField(Thing::F_ANGLE);
+	inst.main_win->thing_box->UpdateField(Thing::F_ANGLE);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* nosave */);
@@ -136,7 +136,7 @@ void CMD_TH_Disconnect(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No vertices to disconnect");
+		Beep(inst, "No vertices to disconnect");
 		return;
 	}
 
@@ -183,7 +183,7 @@ void CMD_TH_Merge(Instance &inst)
 
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep("Need 2 or more things to merge");
+		Beep(inst, "Need 2 or more things to merge");
 		return;
 	}
 

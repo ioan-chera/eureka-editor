@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 
@@ -136,14 +137,14 @@ public:
 
 /* text item */
 
-Browser_Item::Browser_Item(int X, int Y, int W, int H,
+Browser_Item::Browser_Item(Instance &inst, int X, int Y, int W, int H,
 						   const SString &_desc, const SString &_realname,
 						   int _num, char _kind, char _category) :
 	Fl_Group(X, Y, W, H, ""),
 	desc(_desc), real_name(_realname),
 	number(_num), kind(_kind), category(_category),
 	recent_idx(-2),
-	button(NULL), pic(NULL)
+	button(NULL), pic(NULL), inst(inst)
 {
 	end();
 
@@ -160,7 +161,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 
 /* image item */
 
-Browser_Item::Browser_Item(int X, int Y, int W, int H,
+Browser_Item::Browser_Item(Instance &inst, int X, int Y, int W, int H,
 						   const SString &_desc, const SString &_realname,
 						   int _num, char _kind, char _category,
 						   int pic_w, int pic_h, UI_Pic *_pic) :
@@ -168,7 +169,7 @@ Browser_Item::Browser_Item(int X, int Y, int W, int H,
 	desc(_desc), real_name(_realname),
 	number(_num), kind(_kind), category(_category),
 	recent_idx(-2),
-	button(NULL), pic(_pic)
+	button(NULL), pic(_pic), inst(inst)
 {
 	end();
 
@@ -199,19 +200,15 @@ bool Browser_Item::MatchName(const char *name) const
 
 void Browser_Item::texture_callback(Fl_Widget *w, void *data)
 {
-	const char *tex_name = (const char *)data;
-	SYS_ASSERT(tex_name);
-
-	instance::main_win->BrowsedItem('T', 0, tex_name, Fl::event_state());
+	auto item = static_cast<const Browser_Item *>(data);
+	item->inst.main_win->BrowsedItem('T', 0, item->mPicCallbackString.c_str(), Fl::event_state());
 }
 
 
 void Browser_Item::flat_callback(Fl_Widget *w, void *data)
 {
-	const char *flat_name = (const char *)data;
-	SYS_ASSERT(flat_name);
-
-	instance::main_win->BrowsedItem('F', 0, flat_name, Fl::event_state());
+	auto item = static_cast<const Browser_Item *>(data);
+	item->inst.main_win->BrowsedItem('F', 0, item->mPicCallbackString.c_str(), Fl::event_state());
 }
 
 
@@ -219,7 +216,7 @@ void Browser_Item::thing_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	instance::main_win->BrowsedItem('O', item->number, "", Fl::event_state());
+	item->inst.main_win->BrowsedItem('O', item->number, "", Fl::event_state());
 }
 
 
@@ -227,7 +224,7 @@ void Browser_Item::line_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	instance::main_win->BrowsedItem('L', item->number, "", Fl::event_state());
+	item->inst.main_win->BrowsedItem('L', item->number, "", Fl::event_state());
 }
 
 
@@ -235,16 +232,16 @@ void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	instance::main_win->BrowsedItem('S', item->number, "", Fl::event_state());
+	item->inst.main_win->BrowsedItem('S', item->number, "", Fl::event_state());
 }
 
 
 //------------------------------------------------------------------------
 
 
-UI_Browser_Box::UI_Browser_Box(int X, int Y, int W, int H, const char *label, char _kind) :
+UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const char *label, char _kind) :
     Fl_Group(X, Y, W, H, NULL),
-	kind(_kind), pic_mode(false)
+	kind(_kind), pic_mode(false), inst(inst)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
@@ -409,7 +406,8 @@ void UI_Browser_Box::search_callback(Fl_Widget *w, void *data)
 
 void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	instance::main_win->BrowserMode(0);
+	auto box = static_cast<const UI_Browser_Box *>(data);
+	box->inst.main_win->BrowserMode(0);
 }
 
 
@@ -736,29 +734,29 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 
 		char item_cat = 0;
 
-		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
+		UI_Pic *pic = new UI_Pic(inst, cx + 8, cy + 4, pic_w, pic_h);
 
 		if (imkind == 'F')
-		{
-			pic->GetFlat(name);
-			// FIXME: #57 possible dangling pointer!
-			pic->callback(Browser_Item::flat_callback, (void *)name.c_str());
-
 			item_cat = M_GetFlatType(name);
-		}
 		else if (imkind == 'T')
-		{
-			pic->GetTex(name);
-			// FIXME: #57 possible dangling pointer!
-			pic->callback(Browser_Item::texture_callback, (void *)name.c_str());
-
 			item_cat = M_GetTextureType(name);
-		}
 
-		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
+		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
 		                                      full_desc, name, 0 /* num */,
 											  imkind, item_cat,
 		                                      pic_w, pic_h, pic);
+
+		if(imkind == 'F')
+		{
+			item->setPicCallbackString(name);
+			pic->callback(Browser_Item::flat_callback, item);
+		}
+		else if(imkind == 'T')
+		{
+			item->setPicCallbackString(name);
+			pic->callback(Browser_Item::texture_callback, item);
+		}
+
 		scroll->Add(item);
 	}
 }
@@ -800,11 +798,11 @@ void UI_Browser_Box::Populate_Sprites()
 		int item_w = 8 + MAX(pic_w, 64) + 2;
 		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
 
-		UI_Pic *pic = new UI_Pic(cx + 8, cy + 4, pic_w, pic_h);
+		UI_Pic *pic = new UI_Pic(inst, cx + 8, cy + 4, pic_w, pic_h);
 
 		pic->GetSprite(TI->first, FL_BLACK);
 
-		Browser_Item *item = new Browser_Item(cx, cy, item_w, item_h,
+		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
 		                                      full_desc, "", TI->first,
 											  kind, info.group,
 		                                      pic_w, pic_h, pic);
@@ -833,7 +831,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info.desc.c_str());
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
+		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
 											  TI->first, kind, info.group);
 
 		item->button->callback(Browser_Item::thing_callback, item);
@@ -861,7 +859,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
 				 TidyLineDesc(info.desc.c_str()));
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
+		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
 											  TI->first, kind, info.group);
 
 		item->button->callback(Browser_Item::line_callback, item);
@@ -888,7 +886,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info.desc.c_str());
 
-		Browser_Item *item = new Browser_Item(mx, y, mw, 24, full_desc, "",
+		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
 											  TI->first, kind, 0 /* cat */);
 
 		item->button->callback(Browser_Item::sector_callback, item);
@@ -1308,10 +1306,10 @@ public:
 };
 
 
-UI_Generalized_Box::UI_Generalized_Box(int X, int Y, int W, int H, const char *label) :
+UI_Generalized_Box::UI_Generalized_Box(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, NULL),
 	num_pages(0),
-	in_update(false)
+	in_update(false), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -1492,7 +1490,8 @@ void UI_Generalized_Box::UpdateGenType(int line_type)
 
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
-	instance::main_win->BrowserMode(0);
+	auto box = static_cast<UI_Generalized_Box *>(data);
+	box->inst.main_win->BrowserMode(0);
 }
 
 void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
@@ -1525,7 +1524,7 @@ void UI_Generalized_Box::edit_callback(Fl_Widget *w, void *data)
 	{
 		int line_type = box->ComputeType();
 
-		instance::main_win->BrowsedItem('L', line_type, "", 0);
+		box->inst.main_win->BrowsedItem('L', line_type, "", 0);
 	}
 	box->in_update = false;
 }
@@ -1534,9 +1533,9 @@ void UI_Generalized_Box::edit_callback(Fl_Widget *w, void *data)
 //------------------------------------------------------------------------
 
 
-UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
+UI_Browser::UI_Browser(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
-	active(2)
+	active(2), inst(inst)
 {
 	// create each browser box
 
@@ -1553,13 +1552,13 @@ UI_Browser::UI_Browser(int X, int Y, int W, int H, const char *label) :
 
 	for (int i = 0 ; i < 5 ; i++)
 	{
-		browsers[i] = new UI_Browser_Box(X, Y, W, H, mode_titles[i], mode_letters[i]);
+		browsers[i] = new UI_Browser_Box(inst, X, Y, W, H, mode_titles[i], mode_letters[i]);
 
 		if (i != active)
 			browsers[i]->hide();
 	}
 
-	gen_box = new UI_Generalized_Box(X, Y, W, H, "Generalized");
+	gen_box = new UI_Generalized_Box(inst, X, Y, W, H, "Generalized");
 	gen_box->hide();
 
 
@@ -1627,7 +1626,7 @@ void UI_Browser::SetActive(int new_active)
 	}
 
 	if (new_active == ACTIVE_GENERALIZED)
-		instance::main_win->tile->MinimiseRight();
+		inst.main_win->tile->MinimiseRight();
 }
 
 
@@ -1757,7 +1756,7 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	// show browser if hidden [ and then force the RECENT category ]
 	if (! visible())
 	{
-		instance::main_win->BrowserMode('/');
+		inst.main_win->BrowserMode('/');
 
 		force_recent = true;
 	}
@@ -1857,7 +1856,7 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "open_browser" && tokens.size() >= 2)
 	{
-		instance::main_win->BrowserMode(tokens[1][0]);
+		inst.main_win->BrowserMode(tokens[1][0]);
 		return true;
 	}
 
@@ -1883,26 +1882,26 @@ void UI_Browser::WriteUser(std::ostream &os)
 }
 
 
-bool Browser_ParseUser(const std::vector<SString> &tokens)
+bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 {
-	if (instance::main_win)
+	if (inst.main_win)
 	{
-		if (instance::main_win->tile->ParseUser(tokens))
+		if (inst.main_win->tile->ParseUser(tokens))
 			return true;
 
-		if (instance::main_win->browser->ParseUser(tokens))
+		if (inst.main_win->browser->ParseUser(tokens))
 			return true;
 	}
 
 	return false;
 }
 
-void Browser_WriteUser(std::ostream &os)
+void Browser_WriteUser(const Instance &inst, std::ostream &os)
 {
-	if (instance::main_win)
+	if (inst.main_win)
 	{
-		instance::main_win->tile->WriteUser(os);
-		instance::main_win->browser->WriteUser(os);
+		inst.main_win->tile->WriteUser(os);
+		inst.main_win->browser->WriteUser(os);
 	}
 }
 

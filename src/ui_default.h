@@ -49,8 +49,10 @@ private:
 	Fl_Output    *th_desc;
 	UI_Pic		 *th_sprite;
 
+	Instance &inst;
+
 public:
-	UI_DefaultProps(int X, int Y, int W, int H);
+	UI_DefaultProps(Instance &inst, int X, int Y, int W, int H);
 	virtual ~UI_DefaultProps();
 
 	// see ui_window.h for description of these two methods
@@ -87,7 +89,7 @@ private:
 
 bool Props_ParseUser(const std::vector<SString> &tokens);
 void Props_WriteUser(std::ostream &os);
-void Props_LoadValues();
+void Props_LoadValues(const Instance &inst);
 
 #endif  /* __EUREKA_UI_DEFAULT_H__ */
 

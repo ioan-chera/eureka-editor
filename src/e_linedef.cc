@@ -679,7 +679,7 @@ void LinedefModule::commandAlign(Instance &inst)
 
 	if (! (do_X || do_Y))
 	{
-		Beep("LIN_Align: need x or y flag");
+		Beep(inst, "LIN_Align: need x or y flag");
 		return;
 	}
 
@@ -700,7 +700,7 @@ void LinedefModule::commandAlign(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
 	{
-		Beep("no lines to align");
+		Beep(inst, "no lines to align");
 		return;
 	}
 
@@ -762,7 +762,7 @@ void LinedefModule::commandAlign(Instance &inst)
 
 	if (group.empty())
 	{
-		Beep("no visible surfaces");
+		Beep(inst, "no visible surfaces");
 		if (unselect == SelectHighlight::unselect)
 			Selection_Clear(inst, true /* nosave */);
 		return;
@@ -848,7 +848,7 @@ void LinedefModule::commandFlip(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No lines to flip");
+		Beep(inst, "No lines to flip");
 		return;
 	}
 
@@ -876,7 +876,7 @@ void LinedefModule::commandSwapSides(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No lines to swap sides");
+		Beep(inst, "No lines to swap sides");
 		return;
 	}
 
@@ -978,7 +978,7 @@ void LinedefModule::commandSplitHalf(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep("No lines to split");
+		Beep(inst, "No lines to split");
 		return;
 	}
 
@@ -998,7 +998,7 @@ void LinedefModule::commandSplitHalf(Instance &inst)
 
 	// Hmmmmm -- should abort early if some lines are too short??
 	if (new_count < edit.Selected->count_obj())
-		Beep("Some lines were too short!");
+		Beep(inst, "Some lines were too short!");
 
 	if (unselect == SelectHighlight::unselect)
 	{
@@ -1161,7 +1161,7 @@ void LinedefModule::commandMergeTwo(Instance &inst)
 
 	if (edit.Selected->count_obj() != 2)
 	{
-		Beep("Need 2 linedefs to merge (got %d)", edit.Selected->count_obj());
+		Beep(inst, "Need 2 linedefs to merge (got %d)", edit.Selected->count_obj());
 		return;
 	}
 
@@ -1175,7 +1175,7 @@ void LinedefModule::commandMergeTwo(Instance &inst)
 
 	if (! (L1->OneSided() && L2->OneSided()))
 	{
-		Beep("Linedefs to merge must be single sided.");
+		Beep(inst, "Linedefs to merge must be single sided.");
 		return;
 	}
 

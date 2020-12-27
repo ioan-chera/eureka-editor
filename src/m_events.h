@@ -43,8 +43,8 @@ typedef enum
 } editor_action_e;
 
 
-void Editor_ClearAction();
-void Editor_SetAction(editor_action_e new_action);
+void Editor_ClearAction(Instance &inst);
+void Editor_SetAction(Instance &inst, editor_action_e new_action);
 
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
@@ -56,7 +56,7 @@ void Editor_ScrollMap(Instance &inst, int mode, int dx = 0, int dy = 0, keycode_
 int EV_HandleEvent(Instance &inst, int event);
 void EV_EscapeKey(Instance &inst);
 
-void ClearStickyMod();
+void ClearStickyMod(Instance &inst);
 
 keycode_t M_RawKeyForEvent(int event);
 keycode_t M_CookedKeyForEvent(int event);
@@ -78,7 +78,7 @@ unsigned int Nav_TimeDiff(); /* milliseconds */
 void Editor_ClearNav();
 
 
-void M_LoadOperationMenus();
+void M_LoadOperationMenus(Instance &inst);
 
 void CMD_OperationMenu(Instance &inst);
 
