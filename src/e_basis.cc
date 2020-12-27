@@ -33,9 +33,10 @@
 // need these for the XXX_Notify() prototypes
 #include "r_render.h"
 
-int default_floor_h		=   0;
-int default_ceil_h		= 128;
-int default_light_level	= 176;
+int global::default_floor_h		=   0;
+int global::default_ceil_h		= 128;
+int global::default_light_level	= 176;
+
 int default_thing		= 2001;
 
 SString default_wall_tex	= "GRAY1";
@@ -93,13 +94,13 @@ SString Sector::CeilTex() const
 
 void Sector::SetDefaults()
 {
-	floorh = default_floor_h;
-	 ceilh = default_ceil_h;
+	floorh = global::default_floor_h;
+	 ceilh = global::default_ceil_h;
 
 	floor_tex = BA_InternaliseString(default_floor_tex);
 	 ceil_tex = BA_InternaliseString(default_ceil_tex);
 
-	light = default_light_level;
+	light = global::default_light_level;
 }
 
 

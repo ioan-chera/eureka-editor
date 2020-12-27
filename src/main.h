@@ -169,9 +169,12 @@ namespace instance
 }
 
 
-extern int	default_floor_h;
-extern int	default_ceil_h;
-extern int	default_light_level;
+namespace global
+{
+	extern int	default_floor_h;
+	extern int	default_ceil_h;
+	extern int	default_light_level;
+}
 extern int	default_thing;
 
 extern SString default_wall_tex;

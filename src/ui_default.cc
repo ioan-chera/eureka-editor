@@ -304,19 +304,19 @@ void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 		diff = 64;
 
 	if (w == box->fl_up)
-		default_floor_h += diff;
+		global::default_floor_h += diff;
 
 	if (w == box->fl_down)
-		default_floor_h -= diff;
+		global::default_floor_h -= diff;
 
 	if (w == box->ce_up)
-		default_ceil_h += diff;
+		global::default_ceil_h += diff;
 
 	if (w == box->ce_down)
-		default_ceil_h -= diff;
+		global::default_ceil_h -= diff;
 
-	box->SetIntVal(box->floor_h, default_floor_h);
-	box->SetIntVal(box-> ceil_h, default_ceil_h);
+	box->SetIntVal(box->floor_h, global::default_floor_h);
+	box->SetIntVal(box-> ceil_h, global::default_ceil_h);
 }
 
 
@@ -324,9 +324,9 @@ void UI_DefaultProps::height_callback(Fl_Widget *w, void *data)
 {
 	UI_DefaultProps *box = (UI_DefaultProps *)data;
 
-	default_floor_h = atoi(box->floor_h->value());
-	default_ceil_h  = atoi(box-> ceil_h->value());
-	default_light_level = atoi(box->light->value());
+	global::default_floor_h = atoi(box->floor_h->value());
+	global::default_ceil_h  = atoi(box-> ceil_h->value());
+	global::default_light_level = atoi(box->light->value());
 }
 
 
@@ -369,9 +369,9 @@ void UI_DefaultProps::LoadValues()
 	f_pic->GetFlat(f_tex->value());
 	c_pic->GetFlat(c_tex->value());
 
-	SetIntVal(floor_h, default_floor_h);
-	SetIntVal( ceil_h, default_ceil_h);
-	SetIntVal(  light, default_light_level);
+	SetIntVal(floor_h, global::default_floor_h);
+	SetIntVal( ceil_h, global::default_ceil_h);
+	SetIntVal(  light, global::default_light_level);
 
 	thing->value(SString(default_thing).c_str());
 
@@ -548,13 +548,13 @@ bool Props_ParseUser(const std::vector<SString> &tokens)
 		return false;
 
 	if (tokens[1] == "floor_h")
-		default_floor_h = atoi(tokens[2]);
+		global::default_floor_h = atoi(tokens[2]);
 
 	if (tokens[1] == "ceil_h")
-		default_ceil_h = atoi(tokens[2]);
+		global::default_ceil_h = atoi(tokens[2]);
 
 	if (tokens[1] == "light_level")
-		default_light_level = atoi(tokens[2]);
+		global::default_light_level = atoi(tokens[2]);
 
 	if (tokens[1] == "thing")
 		default_thing = atoi(tokens[2]);
@@ -575,9 +575,9 @@ void Props_WriteUser(std::ostream &os)
 {
 	os << '\n';
 
-	os << "default floor_h " << default_floor_h << '\n';
-	os << "default ceil_h " << default_ceil_h << '\n';
-	os << "default light_level " << default_light_level << '\n';
+	os << "default floor_h " << global::default_floor_h << '\n';
+	os << "default ceil_h " << global::default_ceil_h << '\n';
+	os << "default light_level " << global::default_light_level << '\n';
 	os << "default thing " << default_thing << '\n';
 	
 	os << "default mid_tex \"" << default_wall_tex.getTidy("\"") << "\"\n";
