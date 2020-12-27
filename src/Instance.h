@@ -54,6 +54,9 @@ public:	// will be private when we encapsulate everything
 
 	UI_MainWindow *main_win = nullptr;
 	Editor_State_t edit = {};
+
+	// Game-dependent (thus instance dependent) defaults
+	int default_thing = 2001;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

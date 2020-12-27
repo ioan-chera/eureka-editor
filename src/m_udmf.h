@@ -26,8 +26,6 @@ class Instance;
 void UDMF_LoadLevel(Instance &inst);
 void UDMF_SaveLevel(const Instance &inst);
 
-void UDMF_SwitchEngine();
-
 #endif  /* __EUREKA_M_UDMF_H__ */
 
 //--- editor settings ---

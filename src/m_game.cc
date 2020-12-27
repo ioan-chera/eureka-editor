@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 
 #include <map>
@@ -134,7 +135,7 @@ void M_ClearAllDefinitions()
 }
 
 
-void M_PrepareConfigVariables()
+void M_PrepareConfigVariables(Instance &inst)
 {
 	parse_vars.clear();
 
@@ -167,7 +168,7 @@ void M_PrepareConfigVariables()
 
 		if (M_CanLoadDefinitions("games", instance::Game_name))
 		{
-			SString base_game = M_GetBaseGame(instance::Game_name);
+			SString base_game = M_GetBaseGame(inst, instance::Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
@@ -400,7 +401,7 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 // Examples: "games" + "doom2"
 //           "ports" + "edge"
 //
-void M_LoadDefinitions(const SString &folder, const SString &name)
+void M_LoadDefinitions(Instance &inst, const SString &folder, const SString &name)
 {
 	// this is for error messages & debugging
 	char prettyname[256];
@@ -415,7 +416,7 @@ void M_LoadDefinitions(const SString &folder, const SString &name)
 
 	DebugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(PURPOSE_Normal, nullptr, filename, folder, prettyname);
+	M_ParseDefinitionFile(inst, PURPOSE_Normal, nullptr, filename, folder, prettyname);
 }
 
 
@@ -549,7 +550,7 @@ static void M_TokenizeLine(parser_state_c *pst)
 }
 
 
-static void M_ParseNormalLine(parser_state_c *pst)
+static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -616,7 +617,7 @@ static void M_ParseNormalLine(parser_state_c *pst)
 		if (nargs != 1)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
-		default_thing = atoi(argv[1]);
+		inst.default_thing = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "linegroup") == 0 ||
 			 y_stricmp(argv[0], "spec_group") == 0)
@@ -967,7 +968,8 @@ static void M_ParseSetVar(parser_state_c *pst)
 //  only minimal parsing occurs, in particular the "include", "set"
 //  and "if".."endif" directives are NOT handled.
 //
-void M_ParseDefinitionFile(const parse_purpose_e purpose,
+void M_ParseDefinitionFile(Instance &inst,
+						   const parse_purpose_e purpose,
 						   void *target,
 						   const SString &filename,
 						   const SString &cfolder,
@@ -1078,7 +1080,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 				ThrowException("%s(%d): Cannot find include file: %s.ugh\n",
 							   pst->fname.c_str(), pst->lineno, pst->argv[1]);
 
-			M_ParseDefinitionFile(purpose, target, new_name, new_folder,
+			M_ParseDefinitionFile(inst, purpose, target, new_name, new_folder,
 								  NULL /* prettyname */,
 								  include_level + 1);
 			continue;
@@ -1098,7 +1100,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 
 
 		// handle everything else
-		M_ParseNormalLine(pst);
+		M_ParseNormalLine(inst, pst);
 	}
 
 	// check for an unterminated conditional
@@ -1112,7 +1114,7 @@ void M_ParseDefinitionFile(const parse_purpose_e purpose,
 //
 // Load game info
 //
-static GameInfo M_LoadGameInfo(const SString &game)
+static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 {
 	// already loaded?
 	auto it = sLoadedGameDefs.find(game);
@@ -1123,7 +1125,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(PURPOSE_GameInfo, &loadingGame, filename, "games", nullptr);
+	M_ParseDefinitionFile(inst, PURPOSE_GameInfo, &loadingGame, filename, "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		ThrowException("Game definition for '%s' does not set base_game\n", game.c_str());
 
@@ -1132,7 +1134,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 }
 
 
-PortInfo_c * M_LoadPortInfo(const SString &port)
+PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 {
 	std::map<SString, PortInfo_c *>::iterator IT;
 	IT = loaded_port_defs.find(port);
@@ -1146,7 +1148,7 @@ PortInfo_c * M_LoadPortInfo(const SString &port)
 
 	loading_Port = new PortInfo_c(port);
 
-	M_ParseDefinitionFile(PURPOSE_PortInfo, nullptr, filename, "ports", NULL);
+	M_ParseDefinitionFile(inst, PURPOSE_PortInfo, nullptr, filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2
 	if (loading_Port->supported_games.empty())
@@ -1210,18 +1212,18 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 
 }
 
-SString M_GetBaseGame(const SString &game)
+SString M_GetBaseGame(Instance &inst, const SString &game)
 {
-	GameInfo ginfo = M_LoadGameInfo(game);
+	GameInfo ginfo = M_LoadGameInfo(inst, game);
 	SYS_ASSERT(ginfo);
 
 	return ginfo.baseGame;
 }
 
 
-map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
+map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game, const char *port)
 {
-	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
 	if (pinfo && pinfo->formats != 0)
 		return pinfo->formats;
 
@@ -1233,7 +1235,7 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
+bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game, const SString &port)
 {
 	if (port == "vanilla")
 	{
@@ -1242,7 +1244,7 @@ bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
 		return true;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
 	if (! pinfo)
 		return false;
 
@@ -1259,7 +1261,7 @@ bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name)
+SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name)
 {
 	std::vector<SString> list = M_CollectKnownDefs("ports");
 
@@ -1280,7 +1282,7 @@ SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char 
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(base_game, list[i]))
+		if (! M_CheckPortSupportsGame(inst, base_game, list[i]))
 			continue;
 
 		if (result[0])

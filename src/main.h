@@ -175,7 +175,6 @@ namespace global
 	extern int	default_ceil_h;
 	extern int	default_light_level;
 }
-extern int	default_thing;
 
 extern SString default_wall_tex;
 extern SString default_floor_tex;

@@ -191,18 +191,18 @@ void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 
 void UI_DefaultProps::UpdateThingDesc()
 {
-	const thingtype_t &info = M_GetThingType(default_thing);
+	const thingtype_t &info = M_GetThingType(inst.default_thing);
 
 	th_desc->value(info.desc.c_str());
-	th_sprite->GetSprite(default_thing, FL_DARK2);
+	th_sprite->GetSprite(inst.default_thing, FL_DARK2);
 }
 
 
 void UI_DefaultProps::SetThing(int number)
 {
-	default_thing = number;
+	inst.default_thing = number;
 
-	thing->value(SString(default_thing).c_str());
+	thing->value(SString(inst.default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -340,7 +340,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	default_thing = atoi(box->thing->value());
+	box->inst.default_thing = atoi(box->thing->value());
 
 	box->UpdateThingDesc();
 }
@@ -373,7 +373,7 @@ void UI_DefaultProps::LoadValues()
 	SetIntVal( ceil_h, global::default_ceil_h);
 	SetIntVal(  light, global::default_light_level);
 
-	thing->value(SString(default_thing).c_str());
+	thing->value(SString(inst.default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -538,7 +538,7 @@ void UI_DefaultProps::UnselectPics()
 //------------------------------------------------------------------------
 
 
-bool Props_ParseUser(const std::vector<SString> &tokens)
+bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 {
 	// syntax is:  default  <prop>  <value>
 	if (tokens.size() < 3)
@@ -557,7 +557,7 @@ bool Props_ParseUser(const std::vector<SString> &tokens)
 		global::default_light_level = atoi(tokens[2]);
 
 	if (tokens[1] == "thing")
-		default_thing = atoi(tokens[2]);
+		inst.default_thing = atoi(tokens[2]);
 
 	if (tokens[1] == "floor_tex")
 		default_floor_tex = tokens[2];
@@ -571,14 +571,14 @@ bool Props_ParseUser(const std::vector<SString> &tokens)
 	return true;
 }
 
-void Props_WriteUser(std::ostream &os)
+void Props_WriteUser(const Instance &inst, std::ostream &os)
 {
 	os << '\n';
 
 	os << "default floor_h " << global::default_floor_h << '\n';
 	os << "default ceil_h " << global::default_ceil_h << '\n';
 	os << "default light_level " << global::default_light_level << '\n';
-	os << "default thing " << default_thing << '\n';
+	os << "default thing " << inst.default_thing << '\n';
 	
 	os << "default mid_tex \"" << default_wall_tex.getTidy("\"") << "\"\n";
 	os << "default floor_tex \"" << default_floor_tex.getTidy("\"") << "\"\n";

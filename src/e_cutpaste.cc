@@ -336,10 +336,10 @@ int Texboard_GetFlatNum()
 	return BA_InternaliseString(tex_clipboard::flat);
 }
 
-int Texboard_GetThing()
+int Texboard_GetThing(const Instance &inst)
 {
 	if (tex_clipboard::thing == 0)
-		return default_thing;
+		return inst.default_thing;
 
 	return tex_clipboard::thing;
 }

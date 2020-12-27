@@ -72,7 +72,7 @@ void Texboard_Clear();
 
 int Texboard_GetTexNum();
 int Texboard_GetFlatNum();
-int Texboard_GetThing();
+int Texboard_GetThing(const Instance &inst);
 
 void Texboard_SetTex(const SString &new_tex);
 void Texboard_SetFlat(const SString &new_flat);

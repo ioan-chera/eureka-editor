@@ -909,29 +909,5 @@ void UDMF_SaveLevel(const Instance &inst)
 
 //----------------------------------------------------------------------
 
-void UDMF_SwitchEngine()
-{
-	if (instance::Udmf_namespace.empty())
-		return;
-
-	// convert to lowercase
-	SString namespace_l = instance::Udmf_namespace.asLower();
-
-	// already set?
-	if (instance::Port_name.noCaseEqual(namespace_l))
-	{
-		return;
-	}
-
-	PortInfo_c *pinfo = M_LoadPortInfo(namespace_l);
-
-	if (pinfo)
-	{
-		// TODO
-	}
-
-	// TODO
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

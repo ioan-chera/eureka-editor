@@ -216,7 +216,7 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 
 void CMD_ManageProject(Instance &inst)
 {
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, false /* is_startup */);
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(inst, false /* new_project */, false /* is_startup */);
 
 	bool ok = dialog->Run();
 
@@ -244,8 +244,8 @@ void CMD_NewProject(Instance &inst)
 
 
 	/* second, query what Game, Port and Resources to use */
-
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(true /* new_project */, false /* is_startup */);
+	// TODO: new instance
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(gInstance, true /* new_project */, false /* is_startup */);
 
 	bool ok = dialog->Run();
 
@@ -320,9 +320,9 @@ void CMD_NewProject(Instance &inst)
 }
 
 
-bool MissingIWAD_Dialog()
+bool MissingIWAD_Dialog(Instance &inst)
 {
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(false /* new_project */, true /* is_startup */);
+	UI_ProjectSetup * dialog = new UI_ProjectSetup(inst, false /* new_project */, true /* is_startup */);
 
 	bool ok = dialog->Run();
 

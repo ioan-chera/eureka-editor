@@ -1468,7 +1468,7 @@ void Render3D_CB_Paste(Instance &inst)
 	switch (inst.edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(inst, Texboard_GetThing());
+		StoreSelectedThing(inst, Texboard_GetThing(inst));
 		break;
 
 	case ObjType::sectors:
@@ -1492,7 +1492,7 @@ void Render3D_CB_Cut(Instance &inst)
 	switch (inst.edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(inst, default_thing);
+		StoreSelectedThing(inst, inst.default_thing);
 		break;
 
 	case ObjType::sectors:

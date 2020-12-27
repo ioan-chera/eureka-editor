@@ -1520,7 +1520,7 @@ bool M_LoadUserState(Instance &inst)
 		        Grid_ParseUser(inst, tokens) ||
 		    Render3D_ParseUser(tokens) ||
 		     Browser_ParseUser(inst, tokens) ||
-		       Props_ParseUser(tokens) ||
+		       Props_ParseUser(inst, tokens) ||
 		     RecUsed_ParseUser(inst, tokens))
 		{
 			// Ok
@@ -1561,7 +1561,7 @@ bool M_SaveUserState(const Instance &inst)
 	    Grid_WriteUser(os);
 	Render3D_WriteUser(os);
 	 Browser_WriteUser(inst, os);
-	   Props_WriteUser(os);
+	   Props_WriteUser(inst, os);
 	 RecUsed_WriteUser(os);
 
 	return true;

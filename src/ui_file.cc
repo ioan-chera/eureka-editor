@@ -673,10 +673,10 @@ UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
 #define STARTUP_MSG  "No IWADs could be found."
 
 
-UI_ProjectSetup::UI_ProjectSetup(bool new_project, bool is_startup) :
+UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
 	action(ACT_none),
-	map_format(MapFormat::invalid), name_space()
+	map_format(MapFormat::invalid), name_space(), inst(inst)
 {
 	callback(close_callback, this);
 
@@ -886,9 +886,9 @@ void UI_ProjectSetup::PopulatePort()
 	SString base_game;
 
 	if (game_choice->mvalue())
-		base_game = M_GetBaseGame(game_choice->mvalue()->text);
+		base_game = M_GetBaseGame(inst, game_choice->mvalue()->text);
 	else if (!instance::Game_name.empty())
-		base_game = M_GetBaseGame(instance::Game_name);
+		base_game = M_GetBaseGame(inst, instance::Game_name);
 
 	if (base_game.empty())
 		base_game = "doom2";
@@ -896,7 +896,7 @@ void UI_ProjectSetup::PopulatePort()
 
 	int menu_value = 0;
 
-	SString menu_string = M_CollectPortsForMenu(base_game.c_str(), &menu_value, prev_port.c_str());
+	SString menu_string = M_CollectPortsForMenu(inst, base_game.c_str(), &menu_value, prev_port.c_str());
 
 	if (!menu_string.empty())
 	{
@@ -937,7 +937,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	if (port_choice->mvalue())
 		c_port = port_choice->mvalue()->text;
 
-	usable_formats = M_DetermineMapFormats(c_game, c_port);
+	usable_formats = M_DetermineMapFormats(inst, c_game, c_port);
 
 	SYS_ASSERT(usable_formats != 0);
 
@@ -979,7 +979,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	// determine the UDMF namespace
 	name_space = "";
 
-	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
+	PortInfo_c *pinfo = M_LoadPortInfo(inst, port_choice->mvalue()->text);
 	if (pinfo)
 		name_space = pinfo->udmf_namespace;
 
@@ -1014,7 +1014,7 @@ void UI_ProjectSetup::PopulateNamespaces()
 	if (! port_choice->mvalue())
 		return;
 
-	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
+	PortInfo_c *pinfo = M_LoadPortInfo(inst, port_choice->mvalue()->text);
 	if (! pinfo)
 		return;
 

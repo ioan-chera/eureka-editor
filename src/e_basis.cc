@@ -37,8 +37,6 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-int default_thing		= 2001;
-
 SString default_wall_tex	= "GRAY1";
 SString default_floor_tex	= "FLAT1";
 SString default_ceil_tex	= "FLAT1";

@@ -197,8 +197,10 @@ public:
 
 	SString res[RES_NUM];
 
+	Instance &inst;
+
 public:
-	UI_ProjectSetup(bool new_project = false, bool is_startup = false);
+	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
 	virtual ~UI_ProjectSetup();
 
 	// returns true if something changed

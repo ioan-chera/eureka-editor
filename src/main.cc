@@ -372,7 +372,7 @@ SString GameNameFromIWAD(const SString &iwad_name)
 }
 
 
-static bool DetermineIWAD()
+static bool DetermineIWAD(Instance &inst)
 {
 	// this mainly handles a value specified on the command-line,
 	// since values in a EUREKA_LUMP are already vetted.  Hence
@@ -420,7 +420,7 @@ static bool DetermineIWAD()
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
-			if (! MissingIWAD_Dialog())
+			if (! MissingIWAD_Dialog(inst))
 				return false;
 		}
 	}
@@ -431,19 +431,19 @@ static bool DetermineIWAD()
 }
 
 
-static void DeterminePort()
+static void DeterminePort(Instance &inst)
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
 	if (!instance::Port_name.empty())
 	{
 		if (! M_CanLoadDefinitions("ports", instance::Port_name))
-			FatalError("Unknown port '%s' (no definition file)\n", instance::Port_name.c_str());
+			ThrowException("Unknown port '%s' (no definition file)\n", instance::Port_name.c_str());
 
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(instance::Game_name);
+	SString base_game = M_GetBaseGame(inst, instance::Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -457,7 +457,7 @@ static void DeterminePort()
 				  config::default_port.c_str());
 		config::default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
+	else if (! M_CheckPortSupportsGame(inst, base_game, config::default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
 				  config::default_port.c_str(), instance::Game_name.c_str());
@@ -788,12 +788,12 @@ void Main_Loop()
 }
 
 
-static void LoadResourceFile(const char *filename)
+static void LoadResourceFile(Instance &inst, const char *filename)
 {
 	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(PURPOSE_Resource, nullptr, filename);
+		M_ParseDefinitionFile(inst, PURPOSE_Resource, nullptr, filename);
 		return;
 	}
 
@@ -821,18 +821,18 @@ static void Main_LoadIWAD()
 }
 
 
-static void ReadGameInfo()
+static void ReadGameInfo(Instance &inst)
 {
 	instance::Game_name = GameNameFromIWAD(instance::Iwad_name);
 
 	LogPrintf("Game name: '%s'\n", instance::Game_name.c_str());
 	LogPrintf("IWAD file: '%s'\n", instance::Iwad_name.c_str());
 
-	M_LoadDefinitions("games", instance::Game_name);
+	M_LoadDefinitions(inst, "games", instance::Game_name);
 }
 
 
-static void ReadPortInfo()
+static void ReadPortInfo(Instance &inst)
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
@@ -840,10 +840,10 @@ static void ReadPortInfo()
 
 	SYS_ASSERT(!instance::Port_name.empty());
 
-	SString base_game = M_GetBaseGame(instance::Game_name);
+	SString base_game = M_GetBaseGame(inst, instance::Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(base_game, instance::Port_name))
+	if (! M_CheckPortSupportsGame(inst, base_game, instance::Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 			instance::Port_name.c_str(), instance::Game_name.c_str());
@@ -865,7 +865,7 @@ static void ReadPortInfo()
 
 	LogPrintf("Port name: '%s'\n", instance::Port_name.c_str());
 
-	M_LoadDefinitions("ports", instance::Port_name);
+	M_LoadDefinitions(inst, "ports", instance::Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (Features.strife_flags)
@@ -890,10 +890,10 @@ void Main_LoadResources(Instance &inst)
 	M_ClearAllDefinitions();
 
 	// clear the parse variables, pre-set a few vars
-	M_PrepareConfigVariables();
+	M_PrepareConfigVariables(inst);
 
-	ReadGameInfo();
-	ReadPortInfo();
+	ReadGameInfo(inst);
+	ReadPortInfo(inst);
 
 	// reset the master directory
 	if (instance::edit_wad)
@@ -906,7 +906,7 @@ void Main_LoadResources(Instance &inst)
 	// load all resource wads
 	for (const SString &resource : instance::Resource_list)
 	{
-		LoadResourceFile(resource.c_str());
+		LoadResourceFile(inst, resource.c_str());
 	}
 
 	if (instance::edit_wad)
@@ -1124,10 +1124,11 @@ int main(int argc, char *argv[])
 
 
 		// determine which IWAD to use
-		if (! DetermineIWAD())
+		// TODO: instance management
+		if (! DetermineIWAD(gInstance))
 			goto quit;
 
-		DeterminePort();
+		DeterminePort(gInstance);
 
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
