@@ -82,7 +82,7 @@ enum build_result_e
 };
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Document &doc);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
 
 
 //======================================================================
@@ -428,10 +428,6 @@ seg_t     *NewSeg();
 subsec_t  *NewSubsec();
 node_t    *NewNode();
 walltip_t *NewWallTip();
-
-Lump_c * CreateGLMarker();
-Lump_c * CreateLevelLump(const char *name, int max_size = -1);
-Lump_c * FindLevelLump(const char *name);
 
 // Zlib compression support
 void ZLibBeginLump(Lump_c *lump);

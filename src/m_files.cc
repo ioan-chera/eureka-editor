@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 #include "m_files.h"
 #include "m_config.h"
@@ -521,7 +522,7 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 }
 
 
-bool M_TryOpenMostRecent()
+bool Instance::M_TryOpenMostRecent()
 {
 	if (global::recent_files.getSize() == 0)
 		return false;
@@ -560,7 +561,7 @@ bool M_TryOpenMostRecent()
 
 	Pwad_name = filename;
 
-	instance::edit_wad = wad;
+	edit_wad = wad;
 
 	return true;
 }
@@ -751,7 +752,7 @@ void M_LookForIWADs()
 }
 
 
-SString M_PickDefaultIWAD()
+SString Instance::M_PickDefaultIWAD() const
 {
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
@@ -760,14 +761,14 @@ SString M_PickDefaultIWAD()
 	{
 		default_game = "doom";
 	}
-	else if (instance::edit_wad)
+	else if (edit_wad)
 	{
-		int idx = instance::edit_wad->LevelFindFirst();
+		int idx = edit_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = instance::edit_wad->LevelHeader(idx);
-			const SString &name = instance::edit_wad->GetLump(idx)->Name();
+			idx = edit_wad->LevelHeader(idx);
+			const SString &name = edit_wad->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";

@@ -335,7 +335,7 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
-	int num_levels = instance::edit_wad->LevelCount();
+	int num_levels = inst.edit_wad->LevelCount();
 	SYS_ASSERT(num_levels > 0);
 
 	GB_PrintMsg("\n");
@@ -348,9 +348,9 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(inst, instance::edit_wad, n);
+		LoadLevelNum(inst, inst.edit_wad, n);
 
-		ret = AJBSP_BuildLevel(info, n, inst.level);
+		ret = AJBSP_BuildLevel(info, n, inst);
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -406,7 +406,7 @@ void BuildNodesAfterSave(Instance &inst, int lev_idx)
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, inst.level);
+	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, inst);
 
 	// TODO : maybe print # of serious/minor warnings
 
@@ -419,13 +419,13 @@ void BuildNodesAfterSave(Instance &inst, int lev_idx)
 
 void CMD_BuildAllNodes(Instance &inst)
 {
-	if (!instance::edit_wad)
+	if (!inst.edit_wad)
 	{
 		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 		return;
 	}
 
-	if (instance::edit_wad->IsReadOnly())
+	if (inst.edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot build nodes on a read-only file.");
 		return;
@@ -453,7 +453,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 
 	// this probably cannot happen, but check anyway
-	if (instance::edit_wad->LevelCount() == 0)
+	if (inst.edit_wad->LevelCount() == 0)
 	{
 		DLG_Notify("Cannot build nodes: no levels found!");
 		return;
@@ -512,7 +512,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 	// reload the previous level
 	// TODO: improve this to NOT mean reloading the level
-	LoadLevel(inst, instance::edit_wad, CurLevel);
+	LoadLevel(inst, inst.edit_wad, CurLevel);
 }
 
 

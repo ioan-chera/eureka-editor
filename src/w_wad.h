@@ -361,12 +361,7 @@ namespace instance
 {
 	extern Wad_file *game_wad;
 
-
-	// the current PWAD, or NULL for none.
-	// when present it is also at master_dir.back()
-	extern Wad_file *edit_wad;
-
-	extern std::vector<Wad_file *> master_dir;
+extern std::vector<Wad_file *> master_dir;
 }
 
 

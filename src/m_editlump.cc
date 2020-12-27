@@ -434,12 +434,12 @@ void CMD_EditLump(Instance &inst)
 		return;
 	}
 
-	Wad_file *wad = instance::edit_wad ? instance::edit_wad : instance::game_wad;
+	Wad_file *wad = inst.edit_wad ? inst.edit_wad : instance::game_wad;
 
 	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor();
 
-	if (!instance::edit_wad || instance::edit_wad->IsReadOnly())
+	if (!inst.edit_wad || inst.edit_wad->IsReadOnly())
 		editor->SetReadOnly();
 
 	// if lump exists, load the contents
@@ -472,7 +472,7 @@ void CMD_EditLump(Instance &inst)
 		if (res != UI_TextEditor::RUN_Save)
 			break;
 
-		SYS_ASSERT(wad == instance::edit_wad);
+		SYS_ASSERT(wad == inst.edit_wad);
 
 		if (lump_name == EDLUMP_HEADER)
 		{

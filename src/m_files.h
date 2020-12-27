@@ -28,7 +28,6 @@ void M_SaveRecent();
 
 void M_AddRecent(const SString &filename, const SString &map_name);
 void M_OpenRecentFromMenu(void *priv_data);
-bool M_TryOpenMostRecent();
 
 // these three only for menu code
 int M_RecentCount();
@@ -40,7 +39,6 @@ void M_LookForIWADs();
 void M_AddKnownIWAD(const SString &path);
 SString M_QueryKnownIWAD(const SString &game);
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
-SString M_PickDefaultIWAD();
 
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const char *filename);

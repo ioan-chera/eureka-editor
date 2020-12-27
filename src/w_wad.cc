@@ -35,7 +35,6 @@
 
 
 Wad_file * instance::game_wad;
-Wad_file * instance::edit_wad;
 
 std::vector<Wad_file *> instance::master_dir;
 

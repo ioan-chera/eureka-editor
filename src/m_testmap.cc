@@ -288,7 +288,7 @@ static void AppendWadName(SString &str, const SString &name, const SString &parm
 }
 
 
-static SString GrabWadNames(const port_path_info_t *info)
+static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 {
 	SString wad_names;
 
@@ -310,7 +310,7 @@ static SString GrabWadNames(const port_path_info_t *info)
 	// add any resource wads
 	for (const Wad_file *wad : instance::master_dir)
 	{
-		if (wad == instance::game_wad || wad == instance::edit_wad)
+		if (wad == instance::game_wad || wad == inst.edit_wad)
 			continue;
 
 		AppendWadName(wad_names, wad->PathName(),
@@ -323,8 +323,8 @@ static SString GrabWadNames(const port_path_info_t *info)
 	}
 
 	// the current PWAD, if exists, must be last
-	if (instance::edit_wad)
-		AppendWadName(wad_names, instance::edit_wad->PathName(), !has_file ? "-file" : NULL);
+	if (inst.edit_wad)
+		AppendWadName(wad_names, inst.edit_wad->PathName(), !has_file ? "-file" : NULL);
 
 	return wad_names;
 }
@@ -389,7 +389,7 @@ void CMD_TestMap(Instance &inst)
 	// build the command string
 
 	SString cmd_buffer = SString::printf("%s %s %s",
-										 CalcEXEName(info).c_str(), GrabWadNames(info).c_str(),
+										 CalcEXEName(info).c_str(), GrabWadNames(inst, info).c_str(),
 										 CalcWarpString().c_str());
 
 	LogPrintf("Testing map using the following command:\n");

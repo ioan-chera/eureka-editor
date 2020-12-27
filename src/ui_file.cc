@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 #include "m_config.h"
@@ -249,11 +250,11 @@ void UI_ChooseMap::CheckMapName()
 //------------------------------------------------------------------------
 
 
-UI_OpenMap::UI_OpenMap() :
+UI_OpenMap::UI_OpenMap(Instance &inst) :
 	UI_Escapable_Window(420, 475, "Open Map"),
 	action(ACT_none),
 	loaded_wad(NULL),
-	 using_wad(NULL)
+	 using_wad(NULL), inst(inst)
 {
 	resizable(NULL);
 
@@ -265,7 +266,7 @@ UI_OpenMap::UI_OpenMap() :
 		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
 		look_where->callback(look_callback, this);
 
-		look_where->value(instance::edit_wad ? LOOK_PWad : LOOK_IWad);
+		look_where->value(inst.edit_wad ? LOOK_PWad : LOOK_IWad);
 	}
 
 	{
@@ -334,8 +335,8 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 	map_v->clear();
 	*did_load = false;
 
-	if (instance::edit_wad)
-		SetPWAD(instance::edit_wad->PathName());
+	if (inst.edit_wad)
+		SetPWAD(inst.edit_wad->PathName());
 
 	Populate();
 
@@ -413,7 +414,7 @@ void UI_OpenMap::Populate()
 		int first = 1;
 		int last  = (int)instance::master_dir.size() - 1;
 
-		if (instance::edit_wad)
+		if (inst.edit_wad)
 			last--;
 
 		// we simply use the last resource which contains levels
@@ -435,9 +436,9 @@ void UI_OpenMap::Populate()
 		using_wad = loaded_wad;
 		PopulateButtons();
 	}
-	else if (instance::edit_wad)
+	else if (inst.edit_wad)
 	{
-		using_wad = instance::edit_wad;
+		using_wad = inst.edit_wad;
 		PopulateButtons();
 	}
 

@@ -42,8 +42,15 @@ public:
 	void Editor_ClearNav();
 	void Nav_Clear();
 
+	// M_FILES
+	SString M_PickDefaultIWAD() const;
+	bool M_TryOpenMostRecent();
+
 	// M_KEYS
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
+
+	// M_LOADSAVE
+	void RemoveEditWad();
 
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
@@ -55,7 +62,17 @@ public:	// will be private when we encapsulate everything
 	UI_MainWindow *main_win = nullptr;
 	Editor_State_t edit = {};
 
+	//
+	// Wad settings
+	//
+
+	// the current PWAD, or NULL for none.
+	// when present it is also at master_dir.back()
+	Wad_file *edit_wad = nullptr;
+
+	//
 	// Game-dependent (thus instance dependent) defaults
+	//
 	int default_thing = 2001;
 	SString default_wall_tex = "GRAY1";
 	SString default_floor_tex = "FLAT1";

@@ -34,8 +34,6 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num);
 
 void GetLevelFormat(Wad_file *wad, const char *level);
 
-void RemoveEditWad();
-
 bool MissingIWAD_Dialog(Instance &inst);
 
 void OpenFileMap(const SString &filename, const SString &map_name = "");

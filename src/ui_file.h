@@ -100,8 +100,10 @@ private:
 	// field above, or NULL.
 	Wad_file * using_wad;
 
+	Instance &inst;
+
 public:
-	UI_OpenMap();
+	UI_OpenMap(Instance &inst);
 	virtual ~UI_OpenMap();
 
 	// Run the dialog and return an opened wad (from Wad_file::Open)

@@ -891,7 +891,7 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 
 void UDMF_SaveLevel(const Instance &inst)
 {
-	Lump_c *lump = instance::edit_wad->AddLump("TEXTMAP");
+	Lump_c *lump = inst.edit_wad->AddLump("TEXTMAP");
 
 	UDMF_WriteInfo(lump);
 	UDMF_WriteThings(inst.level, lump);
@@ -902,7 +902,7 @@ void UDMF_SaveLevel(const Instance &inst)
 
 	lump->Finish();
 
-	lump = instance::edit_wad->AddLump("ENDMAP");
+	lump = inst.edit_wad->AddLump("ENDMAP");
 	lump->Finish();
 }
 
