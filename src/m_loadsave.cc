@@ -1249,13 +1249,13 @@ void CMD_GivenFile(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "GivenFile: unknown keyword: %s", mode.c_str());
+		inst.Beep("GivenFile: unknown keyword: %s", mode.c_str());
 		return;
 	}
 
 	if (index < 0 || index >= (int)global::Pwad_list.size())
 	{
-		Beep(inst, "No more files");
+		inst.Beep("No more files");
 		return;
 	}
 
@@ -1273,7 +1273,7 @@ void CMD_FlipMap(Instance &inst)
 
 	if (mode.empty())
 	{
-		Beep(inst, "FlipMap: missing keyword");
+		inst.Beep("FlipMap: missing keyword");
 		return;
 	}
 
@@ -1290,7 +1290,7 @@ void CMD_FlipMap(Instance &inst)
 
 	if (max_idx < 0)
 	{
-		Beep(inst, "No maps ?!?");
+		inst.Beep("No maps ?!?");
 		return;
 	}
 
@@ -1305,7 +1305,7 @@ void CMD_FlipMap(Instance &inst)
 			lev_idx++;
 		else
 		{
-			Beep(inst, "No more maps");
+			inst.Beep("No more maps");
 			return;
 		}
 	}
@@ -1317,7 +1317,7 @@ void CMD_FlipMap(Instance &inst)
 			lev_idx--;
 		else
 		{
-			Beep(inst, "No more maps");
+			inst.Beep("No more maps");
 			return;
 		}
 	}
@@ -1331,7 +1331,7 @@ void CMD_FlipMap(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "FlipMap: unknown keyword: %s", mode.c_str());
+		inst.Beep("FlipMap: unknown keyword: %s", mode.c_str());
 		return;
 	}
 
@@ -1912,7 +1912,7 @@ void CMD_CopyMap(Instance &inst)
 	// (should be prevented by the choose-map dialog)
 	if (y_stricmp(new_name.c_str(), instance::Level_name.c_str()) == 0)
 	{
-		Beep(inst, "Name is same!?!");
+		inst.Beep("Name is same!?!");
 		return;
 	}
 
@@ -1972,7 +1972,7 @@ void CMD_RenameMap(Instance &inst)
 	// (should be prevented by the choose-map dialog)
 	if (y_stricmp(new_name.c_str(), instance::Level_name.c_str()) == 0)
 	{
-		Beep(inst, "Name is same!?!");
+		inst.Beep("Name is same!?!");
 		return;
 	}
 
@@ -2032,7 +2032,7 @@ void CMD_DeleteMap(Instance &inst)
 
 	if (lev_num < 0)
 	{
-		Beep(inst, "No such map ?!?");
+		inst.Beep("No such map ?!?");
 		return;
 	}
 

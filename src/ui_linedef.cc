@@ -469,7 +469,7 @@ void UI_LineBox::CB_Copy(int parts)
 
 			if (name && y_stricmp(name, b_name) != 0)
 			{
-				Beep(inst, "multiple textures");
+				inst.Beep("multiple textures");
 				return;
 			}
 

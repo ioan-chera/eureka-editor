@@ -28,8 +28,12 @@
 class Instance
 {
 public:
+	// M_KEYS
+	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
+
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
+	void Status_Clear() const;
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper

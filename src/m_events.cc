@@ -40,7 +40,7 @@
 void ClearStickyMod(Instance &inst)
 {
 	if (edit.sticky_mod)
-		Status_Clear(inst);
+		inst.Status_Clear();
 
 	edit.sticky_mod = 0;
 }
@@ -480,7 +480,7 @@ void EV_EscapeKey(Instance &inst)
 	Nav_Clear();
 	ClearStickyMod(inst);
 	Editor_ClearAction(inst);
-	Status_Clear(inst);
+	inst.Status_Clear();
 
 	edit.clicked.clear();
 	edit.dragged.clear();
@@ -1015,7 +1015,7 @@ void CMD_OperationMenu(Instance &inst)
 
 	if (menu == NULL)
 	{
-		Beep(inst, "no such menu: %s", context.c_str());
+		inst.Beep("no such menu: %s", context.c_str());
 		return;
 	}
 

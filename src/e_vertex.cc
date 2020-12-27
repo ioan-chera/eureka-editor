@@ -295,7 +295,7 @@ void VertexModule::commandMerge(Instance &inst)
 
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep(inst, "Need 2 or more vertices to merge");
+		inst.Beep("Need 2 or more vertices to merge");
 		return;
 	}
 
@@ -369,7 +369,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 		edit.Selected->set(v_other);
 
-		Beep(inst, "Merged a dangling vertex");
+		inst.Beep("Merged a dangling vertex");
 		return true;
 	}
 
@@ -497,7 +497,7 @@ void VertexModule::commandDisconnect(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep(inst, "Nothing to disconnect");
+			inst.Beep("Nothing to disconnect");
 			return;
 		}
 
@@ -525,7 +525,7 @@ void VertexModule::commandDisconnect(Instance &inst)
 	}
 
 	if (! seen_one)
-		Beep(inst, "Nothing was disconnected");
+		inst.Beep("Nothing was disconnected");
 
 	inst.level.basis.end();
 
@@ -596,7 +596,7 @@ void VertexModule::commandLineDisconnect(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "Nothing to disconnect");
+		inst.Beep("Nothing to disconnect");
 		return;
 	}
 
@@ -614,7 +614,7 @@ void VertexModule::commandLineDisconnect(Instance &inst)
 	inst.level.basis.end();
 
 	if (! seen_one)
-		Beep(inst, "Nothing was disconnected");
+		inst.Beep("Nothing was disconnected");
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(inst, true /* no save */);
@@ -788,14 +788,14 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 {
 	if (inst.level.numVertices() == 0)
 	{
-		Beep(inst, "No sectors to disconnect");
+		inst.Beep("No sectors to disconnect");
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No sectors to disconnect");
+		inst.Beep("No sectors to disconnect");
 		return;
 	}
 
@@ -807,7 +807,7 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 	if (detach_verts.empty())
 	{
-		Beep(inst, "Already disconnected");
+		inst.Beep("Already disconnected");
 		if (unselect == SelectHighlight::unselect)
 			Selection_Clear(inst, true /* nosave */);
 		return;
@@ -952,7 +952,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 {
 	if (edit.Selected->count_obj() < 3)
 	{
-		Beep(inst, "Need 3 or more vertices to shape");
+		inst.Beep("Need 3 or more vertices to shape");
 		return;
 	}
 
@@ -966,7 +966,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 
 	if (width < 4 && height < 4)
 	{
-		Beep(inst, "Too small");
+		inst.Beep("Too small");
 		return;
 	}
 
@@ -1026,7 +1026,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 
 	if (unit_len < 2)
 	{
-		Beep(inst, "Cannot determine line");
+		inst.Beep("Cannot determine line");
 		return;
 	}
 
@@ -1183,7 +1183,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 {
 	if (EXEC_Param[0].empty())
 	{
-		Beep(inst, "VT_ShapeArc: missing angle parameter");
+		inst.Beep("VT_ShapeArc: missing angle parameter");
 		return;
 	}
 
@@ -1191,7 +1191,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	if (arc_deg < 30 || arc_deg > 360)
 	{
-		Beep(inst, "VT_ShapeArc: bad angle: %s", EXEC_Param[0].c_str());
+		inst.Beep("VT_ShapeArc: bad angle: %s", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -1200,7 +1200,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	if (edit.Selected->count_obj() < 3)
 	{
-		Beep(inst, "Need 3 or more vertices to shape");
+		inst.Beep("Need 3 or more vertices to shape");
 		return;
 	}
 
@@ -1214,7 +1214,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	if (width < 4 && height < 4)
 	{
-		Beep(inst, "Too small");
+		inst.Beep("Too small");
 		return;
 	}
 
@@ -1243,7 +1243,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 		if (dist < 4)
 		{
-			Beep(inst, "Strange shape");
+			inst.Beep("Strange shape");
 			return;
 		}
 

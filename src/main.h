@@ -208,12 +208,6 @@ SString GameNameFromIWAD(const SString &iwad_name);
 
 SString Main_FileOpFolder();
 
-
-void Beep(const Instance &inst, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
-
-void Status_Clear(const Instance &inst);
-
-
 #endif  /* __EUREKA_MAIN_H__ */
 
 //--- editor settings ---

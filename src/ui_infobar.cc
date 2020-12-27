@@ -738,12 +738,12 @@ void Instance::Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const
 }
 
 
-void Status_Clear(const Instance &inst)
+void Instance::Status_Clear() const
 {
-	if (!inst.main_win)
+	if (!main_win)
 		return;
 
-	inst.main_win->status_bar->SetStatus("");
+	main_win->status_bar->SetStatus("");
 }
 
 //--- editor settings ---

@@ -90,14 +90,14 @@ void SectorModule::commandFloor(Instance &inst)
 
 	if (diff == 0)
 	{
-		Beep(inst, "SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
+		inst.Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No sectors to move");
+		inst.Beep("No sectors to move");
 		return;
 	}
 
@@ -128,14 +128,14 @@ void SectorModule::commandCeiling(Instance &inst)
 
 	if (diff == 0)
 	{
-		Beep(inst, "SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
+		inst.Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No sectors to move");
+		inst.Beep("No sectors to move");
 		return;
 	}
 
@@ -212,14 +212,14 @@ void SectorModule::commandLight(Instance &inst)
 
 	if (diff == 0)
 	{
-		Beep(inst, "SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
+		inst.Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No sectors to adjust light");
+		inst.Beep("No sectors to adjust light");
 		return;
 	}
 
@@ -235,7 +235,7 @@ void SectorModule::commandSwapFlats(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No sectors to swap");
+		inst.Beep("No sectors to swap");
 		return;
 	}
 
@@ -305,7 +305,7 @@ void SectorModule::commandMerge(Instance &inst)
 
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep(inst, "Need 2 or more sectors to merge");
+		inst.Beep("Need 2 or more sectors to merge");
 		return;
 	}
 
@@ -1194,7 +1194,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 
 	if (! getLoopForSpace(map_x, map_y, loop))
 	{
-		Beep(inst, "Area is not closed");
+		inst.Beep("Area is not closed");
 		return false;
 	}
 

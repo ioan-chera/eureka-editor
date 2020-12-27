@@ -512,7 +512,7 @@ static void AdjustOfs_Begin(Instance &inst)
 
 	if (total_lines == 0)
 	{
-		Beep(inst, "nothing to adjust");
+		inst.Beep("nothing to adjust");
 		return;
 	}
 
@@ -1119,7 +1119,7 @@ static int GrabSelectedThing(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep(inst, "no things for copy/cut type");
+			inst.Beep("no things for copy/cut type");
 			return -1;
 		}
 
@@ -1132,7 +1132,7 @@ static int GrabSelectedThing(Instance &inst)
 			const Thing *T = inst.level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
-				Beep(inst, "multiple thing types");
+				inst.Beep("multiple thing types");
 				return -2;
 			}
 
@@ -1154,7 +1154,7 @@ static void StoreSelectedThing(Instance &inst, int new_type)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "no things for paste type");
+		inst.Beep("no things for paste type");
 		return;
 	}
 
@@ -1197,7 +1197,7 @@ static int GrabSelectedFlat(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep(inst, "no sectors for copy/cut flat");
+			inst.Beep("no sectors for copy/cut flat");
 			return -1;
 		}
 
@@ -1216,7 +1216,7 @@ static int GrabSelectedFlat(Instance &inst)
 
 			if (result >= 0 && tex != result)
 			{
-				Beep(inst, "multiple flats present");
+				inst.Beep("multiple flats present");
 				return -2;
 			}
 
@@ -1236,7 +1236,7 @@ static void StoreSelectedFlat(Instance &inst, int new_tex)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "no sectors for paste flat");
+		inst.Beep("no sectors for paste flat");
 		return;
 	}
 
@@ -1268,7 +1268,7 @@ static void StoreDefaultedFlats(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "no sectors for default");
+		inst.Beep("no sectors for default");
 		return;
 	}
 
@@ -1343,7 +1343,7 @@ static int GrabSelectedTexture(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep(inst, "no linedefs for copy/cut tex");
+			inst.Beep("no linedefs for copy/cut tex");
 			return -1;
 		}
 
@@ -1362,7 +1362,7 @@ static int GrabSelectedTexture(Instance &inst)
 
 			if (result >= 0 && tex != result)
 			{
-				Beep(inst, "multiple textures present");
+				inst.Beep("multiple textures present");
 				return -2;
 			}
 
@@ -1382,7 +1382,7 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "no linedefs for paste tex");
+		inst.Beep("no linedefs for paste tex");
 		return;
 	}
 
@@ -1635,7 +1635,7 @@ static void R3D_Up(Instance &inst)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep(inst, "Gravity is on");
+		inst.Beep("Gravity is on");
 		return;
 	}
 
@@ -1652,7 +1652,7 @@ static void R3D_Down(Instance &inst)
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep(inst, "Gravity is on");
+		inst.Beep("Gravity is on");
 		return;
 	}
 
@@ -1775,7 +1775,7 @@ static void R3D_NAV_Up(Instance &inst)
 
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep(inst, "Gravity is on");
+		inst.Beep("Gravity is on");
 		return;
 	}
 
@@ -1802,7 +1802,7 @@ static void R3D_NAV_Down(Instance &inst)
 
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		Beep(inst, "Gravity is on");
+		inst.Beep("Gravity is on");
 		return;
 	}
 
@@ -1880,7 +1880,7 @@ static void R3D_ACT_AdjustOfs(Instance &inst)
 
 	if (edit.mode != ObjType::linedefs)
 	{
-		Beep(inst, "not in linedef mode");
+		inst.Beep("not in linedef mode");
 		return;
 	}
 
@@ -1895,13 +1895,13 @@ static void R3D_Set(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep(inst, "3D_Set: missing var name");
+		inst.Beep("3D_Set: missing var name");
 		return;
 	}
 
 	if (value.empty())
 	{
-		Beep(inst, "3D_Set: missing value");
+		inst.Beep("3D_Set: missing value");
 		return;
 	}
 
@@ -1927,7 +1927,7 @@ static void R3D_Set(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "3D_Set: unknown var: %s", var_name.c_str());
+		inst.Beep("3D_Set: unknown var: %s", var_name.c_str());
 		return;
 	}
 
@@ -1941,7 +1941,7 @@ static void R3D_Toggle(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep(inst, "3D_Toggle: missing var name");
+		inst.Beep("3D_Toggle: missing var name");
 		return;
 	}
 
@@ -1963,7 +1963,7 @@ static void R3D_Toggle(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "3D_Toggle: unknown var: %s", var_name.c_str());
+		inst.Beep("3D_Toggle: unknown var: %s", var_name.c_str());
 		return;
 	}
 

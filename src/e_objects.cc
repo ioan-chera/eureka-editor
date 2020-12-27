@@ -601,7 +601,7 @@ void ObjectsModule::insertSector() const
 	int sel_count = edit.Selected->count_obj();
 	if (sel_count > 1)
 	{
-		Beep(inst, "Too many sectors to copy from");
+		inst.Beep("Too many sectors to copy from");
 		return;
 	}
 
@@ -660,7 +660,7 @@ void ObjectsModule::commandInsert(Instance &inst)
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Beep(inst, "Cannot insert in this mode");
+		inst.Beep("Cannot insert in this mode");
 		return;
 	}
 
@@ -681,7 +681,7 @@ void ObjectsModule::commandInsert(Instance &inst)
 			break;
 
 		default:
-			Beep(inst, "Cannot insert in this mode");
+			inst.Beep("Cannot insert in this mode");
 			break;
 	}
 
@@ -1058,17 +1058,17 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 {
 	if (edit.highlight.is_nil())
 	{
-		Beep(inst, "No target for CopyProperties");
+		inst.Beep("No target for CopyProperties");
 		return;
 	}
 	else if (edit.Selected->empty())
 	{
-		Beep(inst, "No source for CopyProperties");
+		inst.Beep("No source for CopyProperties");
 		return;
 	}
 	else if (edit.mode == ObjType::vertices)
 	{
-		Beep(inst, "No properties to copy");
+		inst.Beep("No properties to copy");
 		return;
 	}
 
@@ -1079,7 +1079,7 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 	{
 		if (edit.Selected->count_obj() != 1)
 		{
-			Beep(inst, "Too many sources for CopyProperties");
+			inst.Beep("Too many sources for CopyProperties");
 			return;
 		}
 
@@ -1117,7 +1117,7 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 	{
 		if (edit.Selected->count_obj() == 1 && edit.Selected->find_first() == edit.highlight.num)
 		{
-			Beep(inst, "No selection for CopyProperties");
+			inst.Beep("No selection for CopyProperties");
 			return;
 		}
 
@@ -1581,7 +1581,7 @@ void ObjectsModule::commandMirror(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No objects to mirror");
+		inst.Beep("No objects to mirror");
 		return;
 	}
 
@@ -1640,7 +1640,7 @@ void ObjectsModule::commandRotate90(Instance &inst)
 {
 	if (EXEC_Param[0].empty())
 	{
-		Beep(inst, "Rotate90: missing keyword");
+		inst.Beep("Rotate90: missing keyword");
 		return;
 	}
 
@@ -1649,7 +1649,7 @@ void ObjectsModule::commandRotate90(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No objects to rotate");
+		inst.Beep("No objects to rotate");
 		return;
 	}
 
@@ -1971,7 +1971,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 
 		if (mul < 0.02 || mul > 50)
 		{
-			Beep(inst, "bad factor: %s", EXEC_Param[0].c_str());
+			inst.Beep("bad factor: %s", EXEC_Param[0].c_str());
 			return;
 		}
 	}
@@ -1990,7 +1990,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No objects to %s", do_shrink ? "shrink" : "enlarge");
+		inst.Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");
 		return;
 	}
 
@@ -2066,7 +2066,7 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 	list->unmerge(moved);
 
 	if (! list->empty())
-		Beep(inst, "Quantize: could not move %d things", list->count_obj());
+		inst.Beep("Quantize: could not move %d things", list->count_obj());
 }
 
 
@@ -2170,7 +2170,7 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 	list->unmerge(moved);
 
 	if (list->notempty())
-		Beep(inst, "Quantize: could not move %d vertices", list->count_obj());
+		inst.Beep("Quantize: could not move %d vertices", list->count_obj());
 }
 
 
@@ -2180,7 +2180,7 @@ void ObjectsModule::commandQuantize(Instance &inst)
 	{
 		if (edit.highlight.is_nil())
 		{
-			Beep(inst, "Nothing to quantize");
+			inst.Beep("Nothing to quantize");
 			return;
 		}
 

@@ -357,7 +357,7 @@ void Editor_ChangeMode(Instance &inst, char mode_char)
 		case 'v': Editor_ChangeMode_Raw(inst, ObjType::vertices); break;
 
 		default:
-			Beep(inst, "Unknown mode: %c\n", mode_char);
+			inst.Beep("Unknown mode: %c\n", mode_char);
 			return;
 	}
 
@@ -1082,7 +1082,7 @@ static void Selection_Validate(const Instance &inst)
 	{
 		edit.Selected->frob_range(num_obj, edit.Selected->max_obj(), BitOp::remove);
 
-		Beep(inst, "BUG: invalid selection");
+		inst.Beep("BUG: invalid selection");
 	}
 }
 
@@ -1091,7 +1091,7 @@ void CMD_LastSelection(Instance &inst)
 {
 	if (! last_Sel)
 	{
-		Beep(inst, "No last selection (or was invalidated)");
+		inst.Beep("No last selection (or was invalidated)");
 		return;
 	}
 

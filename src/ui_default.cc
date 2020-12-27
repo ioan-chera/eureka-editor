@@ -390,7 +390,7 @@ void UI_DefaultProps::CB_Copy(int sel_pics)
 		case 4: name = w_tex->value(); break;
 
 		default:
-			Beep(inst, "multiple textures");
+			inst.Beep("multiple textures");
 			return;
 	}
 
@@ -470,7 +470,7 @@ bool UI_DefaultProps::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::cut:
-			Beep(inst, "cannot cut that");
+			inst.Beep("cannot cut that");
 			break;
 
 		case EditCommand::del:

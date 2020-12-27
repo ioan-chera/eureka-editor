@@ -1249,20 +1249,16 @@ bool ExecuteCommand(const SString &name,
 //
 //  play a fascinating tune
 //
-void Beep(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
+void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...) const
 {
 	va_list arg_ptr;
 
-	static char buffer[MSG_BUF_LEN];
-
 	va_start(arg_ptr, fmt);
-	vsnprintf(buffer, MSG_BUF_LEN-1, fmt, arg_ptr);
+	SString text = SString::vprintf(fmt, arg_ptr);
 	va_end(arg_ptr);
 
-	buffer[MSG_BUF_LEN-1] = 0;
-
-	inst.Status_Set("%s", buffer);
-	LogPrintf("BEEP: %s\n", buffer);
+	Status_Set("%s", text.c_str());
+	LogPrintf("BEEP: %s\n", text.c_str());
 
 	fl_beep();
 

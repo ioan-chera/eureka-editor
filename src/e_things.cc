@@ -60,7 +60,7 @@ void CMD_TH_SpinThings(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No things to spin");
+		inst.Beep("No things to spin");
 		return;
 	}
 
@@ -136,7 +136,7 @@ void CMD_TH_Disconnect(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "No vertices to disconnect");
+		inst.Beep("No vertices to disconnect");
 		return;
 	}
 
@@ -183,7 +183,7 @@ void CMD_TH_Merge(Instance &inst)
 
 	if (edit.Selected->count_obj() < 2)
 	{
-		Beep(inst, "Need 2 or more things to merge");
+		inst.Beep("Need 2 or more things to merge");
 		return;
 	}
 

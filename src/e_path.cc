@@ -181,7 +181,7 @@ void CMD_LIN_SelectPath(Instance &inst)
 	// determine starting linedef
 	if (edit.highlight.is_nil())
 	{
-		Beep(inst, "No highlighted line");
+		inst.Beep("No highlighted line");
 		return;
 	}
 
@@ -321,7 +321,7 @@ void CMD_SEC_SelectGroup(Instance &inst)
 	// determine starting sector
 	if (edit.highlight.is_nil())
 	{
-		Beep(inst, "No highlighted sector");
+		inst.Beep("No highlighted sector");
 		return;
 	}
 
@@ -428,7 +428,7 @@ void CMD_JumpToObject(Instance &inst)
 
 	if (total <= 0)
 	{
-		Beep(inst, "No objects!");
+		inst.Beep("No objects!");
 		return;
 	}
 
@@ -482,7 +482,7 @@ void CMD_PruneUnused(Instance &inst)
 
 	if (num_verts == 0 && num_sides == 0 && num_secs == 0)
 	{
-		Beep(inst, "Nothing to prune");
+		inst.Beep("Nothing to prune");
 		return;
 	}
 

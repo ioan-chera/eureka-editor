@@ -533,7 +533,7 @@ void Grid_State_c::AdjustStep(int delta)
 {
 	if (! shown)
 	{
-		Beep(inst, "Grid is off (cannot change step)");
+		inst.Beep("Grid is off (cannot change step)");
 		return;
 	}
 

@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Instance.h"
 #include "main.h"
 
 #include "e_main.h"
@@ -449,7 +450,7 @@ void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_s
 	}
 	else
 	{
-		Beep(mInstance, "no target for browsed item");
+		mInstance.Beep("no target for browsed item");
 	}
 }
 

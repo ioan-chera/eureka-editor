@@ -806,7 +806,7 @@ void CMD_CopyAndPaste(Instance &inst)
 {
 	if (edit.Selected->empty() && edit.highlight.is_nil())
 	{
-		Beep(inst, "Nothing to copy and paste");
+		inst.Beep("Nothing to copy and paste");
 		return;
 	}
 
@@ -830,7 +830,7 @@ void CMD_Clipboard_Cut(Instance &inst)
 
 	if (! Clipboard_DoCopy(inst))
 	{
-		Beep(inst, "Nothing to cut");
+		inst.Beep("Nothing to cut");
 		return;
 	}
 
@@ -851,7 +851,7 @@ void CMD_Clipboard_Copy(Instance &inst)
 
 	if (! Clipboard_DoCopy(inst))
 	{
-		Beep(inst, "Nothing to copy");
+		inst.Beep("Nothing to copy");
 		return;
 	}
 }
@@ -870,7 +870,7 @@ void CMD_Clipboard_Paste(Instance &inst)
 
 	if (! Clipboard_DoPaste(inst))
 	{
-		Beep(inst, "Clipboard is empty");
+		inst.Beep("Clipboard is empty");
 		return;
 	}
 }
@@ -1224,7 +1224,7 @@ void CMD_Delete(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "Nothing to delete");
+		inst.Beep("Nothing to delete");
 		return;
 	}
 

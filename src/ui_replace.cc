@@ -980,7 +980,7 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 
 	if (tex_name[0] == 0)
 	{
-		Beep(inst, "invalid texture name");
+		inst.Beep("invalid texture name");
 		return;
 	}
 
@@ -1201,7 +1201,7 @@ bool UI_FindAndReplace::FindNext()
 	// this can happen via CTRL-G shortcut (View / Go to next)
 	if (strlen(find_match->value()) == 0)
 	{
-		Beep(inst, "No find active!");
+		inst.Beep("No find active!");
 		return false;
 	}
 
@@ -1225,7 +1225,7 @@ bool UI_FindAndReplace::FindNext()
 		if (filter_toggle->value() && restrict_to_sel->value() &&
 			edit.Selected->empty())
 		{
-			Beep(inst, "EMPTY SELECTION!");
+			inst.Beep("EMPTY SELECTION!");
 			return false;
 		}
 	}
@@ -1269,9 +1269,9 @@ bool UI_FindAndReplace::FindNext()
 	rep_value->do_callback();
 
 	if (is_first)
-		Beep(inst, "Nothing found");
+		inst.Beep("Nothing found");
 	else
-		Beep(inst, "No more found");
+		inst.Beep("No more found");
 
 	return false;
 }
@@ -1283,14 +1283,14 @@ void UI_FindAndReplace::DoReplace()
 	if (strlen(find_match->value()) == 0 ||
 		strlen( rep_value->value()) == 0)
 	{
-		Beep(inst, "Bad replace");
+		inst.Beep("Bad replace");
 		return;
 	}
 
 	// this generally can't happen either
 	if (cur_obj.is_nil())
 	{
-		Beep(inst, "No object to replace!");
+		inst.Beep("No object to replace!");
 		return;
 	}
 
@@ -1367,7 +1367,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 {
 	if (strlen(find_match->value()) == 0)
 	{
-		Beep(inst, "No find active!");
+		inst.Beep("No find active!");
 		return;
 	}
 
@@ -1375,7 +1375,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (filter_toggle->value() && restrict_to_sel->value() &&
 		edit.Selected->empty())
 	{
-		Beep(inst, "EMPTY SELECTION!");
+		inst.Beep("EMPTY SELECTION!");
 		return;
 	}
 
@@ -1422,7 +1422,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	}
 
 	if (count == 0)
-		Beep(inst, "Nothing found");
+		inst.Beep("Nothing found");
 	else
 		inst.Status_Set("found %d objects", count);
 

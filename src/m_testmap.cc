@@ -360,7 +360,7 @@ void CMD_TestMap(Instance &inst)
 	// this generally can't happen, but we check anyway...
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		Beep(inst, "invalid path to executable");
+		inst.Beep("invalid path to executable");
 		return;
 	}
 
@@ -381,7 +381,7 @@ void CMD_TestMap(Instance &inst)
 	if (! FileChangeDir(folder))
 	{
 		// FIXME : a notify dialog
-		Beep(inst, "chdir failed!");
+		inst.Beep("chdir failed!");
 		return;
 	}
 

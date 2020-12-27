@@ -604,7 +604,7 @@ void UI_SectorBox::FreshTag()
 
 	if (new_tag > 32767)
 	{
-		Beep(inst, "Out of tag numbers");
+		inst.Beep("Out of tag numbers");
 		return;
 	}
 
@@ -815,7 +815,7 @@ void UI_SectorBox::CB_Copy(int parts)
 {
 	if (parts == (PART_FLOOR | PART_CEIL))
 	{
-		Beep(inst, "multiple textures");
+		inst.Beep("multiple textures");
 		return;
 	}
 

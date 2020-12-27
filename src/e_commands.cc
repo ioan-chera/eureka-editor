@@ -70,7 +70,7 @@ static void CMD_EditMode(Instance &inst)
 
 	if (! mode || ! strchr("lstvr", mode))
 	{
-		Beep(inst, "Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
+		inst.Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -89,7 +89,7 @@ static void CMD_Select(Instance &inst)
 
 	if (edit.highlight.is_nil())
 	{
-		Beep(inst, "Nothing under cursor");
+		inst.Beep("Nothing under cursor");
 		return;
 	}
 
@@ -162,7 +162,7 @@ static void CMD_Undo(Instance &inst)
 {
 	if (! inst.level.basis.undo())
 	{
-		Beep(inst, "No operation to undo");
+		inst.Beep("No operation to undo");
 		return;
 	}
 
@@ -175,7 +175,7 @@ static void CMD_Redo(Instance &inst)
 {
 	if (! inst.level.basis.redo())
 	{
-		Beep(inst, "No operation to redo");
+		inst.Beep("No operation to redo");
 		return;
 	}
 
@@ -207,13 +207,13 @@ static void CMD_SetVar(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep(inst, "Set: missing var name");
+		inst.Beep("Set: missing var name");
 		return;
 	}
 
 	if (value.empty())
 	{
-		Beep(inst, "Set: missing value");
+		inst.Beep("Set: missing value");
 		return;
 	}
 
@@ -279,7 +279,7 @@ static void CMD_SetVar(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "Set: unknown var: %s", var_name.c_str());
+		inst.Beep("Set: unknown var: %s", var_name.c_str());
 	}
 }
 
@@ -290,7 +290,7 @@ static void CMD_ToggleVar(Instance &inst)
 
 	if (var_name.empty())
 	{
-		Beep(inst, "Toggle: missing var name");
+		inst.Beep("Toggle: missing var name");
 		return;
 	}
 
@@ -350,7 +350,7 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "Toggle: unknown var: %s", var_name.c_str());
+		inst.Beep("Toggle: unknown var: %s", var_name.c_str());
 	}
 }
 
@@ -359,7 +359,7 @@ static void CMD_BrowserMode(Instance &inst)
 {
 	if (EXEC_Param[0].empty())
 	{
-		Beep(inst, "BrowserMode: missing mode");
+		inst.Beep("BrowserMode: missing mode");
 		return;
 	}
 
@@ -368,7 +368,7 @@ static void CMD_BrowserMode(Instance &inst)
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
 	       mode == 'T' || mode == 'F' || mode == 'G'))
 	{
-		Beep(inst, "Unknown browser mode: %s", EXEC_Param[0].c_str());
+		inst.Beep("Unknown browser mode: %s", EXEC_Param[0].c_str());
 		return;
 	}
 
@@ -399,7 +399,7 @@ static void CMD_Scroll(Instance &inst)
 
 	if (delta_x == 0 && delta_y == 0)
 	{
-		Beep(inst, "Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
+		inst.Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
 		return;
 	}
 
@@ -844,7 +844,7 @@ static void CMD_ACT_Drag(Instance &inst)
 
 	if (edit.Selected->empty())
 	{
-		Beep(inst, "Nothing to drag");
+		inst.Beep("Nothing to drag");
 		return;
 	}
 
@@ -944,7 +944,7 @@ static void CMD_ACT_Transform(Instance &inst)
 
 	if (edit.Selected->empty())
 	{
-		Beep(inst, "Nothing to scale");
+		inst.Beep("Nothing to scale");
 		return;
 	}
 
@@ -953,7 +953,7 @@ static void CMD_ACT_Transform(Instance &inst)
 
 	if (keyword.empty())
 	{
-		Beep(inst, "ACT_Transform: missing keyword");
+		inst.Beep("ACT_Transform: missing keyword");
 		return;
 	}
 	else if (keyword.noCaseEqual("scale"))
@@ -978,7 +978,7 @@ static void CMD_ACT_Transform(Instance &inst)
 	}
 	else
 	{
-		Beep(inst, "ACT_Transform: unknown keyword: %s", keyword.c_str());
+		inst.Beep("ACT_Transform: unknown keyword: %s", keyword.c_str());
 		return;
 	}
 
@@ -1060,7 +1060,7 @@ static void CMD_Merge(Instance &inst)
 			break;
 
 		default:
-			Beep(inst, "Cannot merge that");
+			inst.Beep("Cannot merge that");
 			break;
 	}
 }
@@ -1087,7 +1087,7 @@ static void CMD_Disconnect(Instance &inst)
 			break;
 
 		default:
-			Beep(inst, "Cannot disconnect that");
+			inst.Beep("Cannot disconnect that");
 			break;
 	}
 }
@@ -1099,7 +1099,7 @@ static void CMD_Zoom(Instance &inst)
 
 	if (delta == 0)
 	{
-		Beep(inst, "Zoom: bad or missing value");
+		inst.Beep("Zoom: bad or missing value");
 		return;
 	}
 
@@ -1129,7 +1129,7 @@ static void CMD_ZoomSelection(Instance &inst)
 {
 	if (edit.Selected->empty())
 	{
-		Beep(inst, "No selection to zoom");
+		inst.Beep("No selection to zoom");
 		return;
 	}
 
@@ -1155,7 +1155,7 @@ static void CMD_PlaceCamera(Instance &inst)
 {
 	if (edit.render3d)
 	{
-		Beep(inst, "Not supported in 3D view");
+		inst.Beep("Not supported in 3D view");
 		return;
 	}
 
@@ -1163,7 +1163,7 @@ static void CMD_PlaceCamera(Instance &inst)
 	{
 		// IDEA: turn cursor into cross, wait for click in map window
 
-		Beep(inst, "Mouse is not over map");
+		inst.Beep("Mouse is not over map");
 		return;
 	}
 
@@ -1186,7 +1186,7 @@ static void CMD_MoveObjects_Dialog(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "Nothing to move");
+		inst.Beep("Nothing to move");
 		return;
 	}
 
@@ -1211,7 +1211,7 @@ static void CMD_ScaleObjects_Dialog(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "Nothing to scale");
+		inst.Beep("Nothing to scale");
 		return;
 	}
 
@@ -1231,7 +1231,7 @@ static void CMD_RotateObjects_Dialog(Instance &inst)
 	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		Beep(inst, "Nothing to rotate");
+		inst.Beep("Nothing to rotate");
 		return;
 	}
 
@@ -1262,7 +1262,7 @@ static void CMD_GRID_Set(Instance &inst)
 
 	if (step < 2 || step > 4096)
 	{
-		Beep(inst, "Bad grid step");
+		inst.Beep("Bad grid step");
 		return;
 	}
 
@@ -1278,7 +1278,7 @@ static void CMD_GRID_Zoom(Instance &inst)
 
 	if (scale == 0)
 	{
-		Beep(inst, "Bad scale");
+		inst.Beep("Bad scale");
 		return;
 	}
 
@@ -1297,7 +1297,7 @@ static void CMD_BR_CycleCategory(Instance &inst)
 {
 	if (!inst.main_win->browser->visible())
 	{
-		Beep(inst, "Browser not open");
+		inst.Beep("Browser not open");
 		return;
 	}
 
@@ -1311,7 +1311,7 @@ static void CMD_BR_ClearSearch(Instance &inst)
 {
 	if (!inst.main_win->browser->visible())
 	{
-		Beep(inst, "Browser not open");
+		inst.Beep("Browser not open");
 		return;
 	}
 
@@ -1323,13 +1323,13 @@ static void CMD_BR_Scroll(Instance &inst)
 {
 	if (!inst.main_win->browser->visible())
 	{
-		Beep(inst, "Browser not open");
+		inst.Beep("Browser not open");
 		return;
 	}
 
 	if (EXEC_Param[0].empty())
 	{
-		Beep(inst, "BR_Scroll: missing value");
+		inst.Beep("BR_Scroll: missing value");
 		return;
 	}
 
@@ -1376,7 +1376,7 @@ static void CMD_OnlineDocs(Instance &inst)
 	if (rv == 1)
 		inst.Status_Set("Opened web browser");
 	else
-		Beep(inst, "Failed to open web browser");
+		inst.Beep("Failed to open web browser");
 }
 
 
