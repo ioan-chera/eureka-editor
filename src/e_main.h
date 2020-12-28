@@ -231,21 +231,12 @@ public:
 
 	void clear();
 
-	void WriteUser(std::ostream &os, char letter);
+	void WriteUser(std::ostream &os, char letter) const;
 
 private:
 	void erase(int index);
 	void push_front(const SString &name);
 };
-
-extern Recently_used  recent_textures;
-extern Recently_used  recent_flats;
-extern Recently_used  recent_things;
-
-void RecUsed_ClearAll(Instance &inst);
-void RecUsed_WriteUser(std::ostream &os);
-bool RecUsed_ParseUser(Instance &inst, const std::vector<SString> &tokens);
-
 
 #endif  /* __EUREKA_LEVELS_H__ */
 

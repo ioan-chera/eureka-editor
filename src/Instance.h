@@ -53,6 +53,8 @@ public:
 	void ObjectBox_NotifyDelete(ObjType type, int objnum);
 	void ObjectBox_NotifyEnd() const;
 	void ObjectBox_NotifyInsert(ObjType type, int objnum);
+	bool RecUsed_ParseUser(const std::vector<SString> &tokens);
+	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
 	void Selection_Add(Objid &obj) const;
 	void Selection_InvalidateLast();
@@ -75,6 +77,7 @@ public:
 	// M_CONFIG
 	void M_DefaultUserState();
 	bool M_LoadUserState();
+	bool M_SaveUserState() const;
 
 	// M_EVENTS
 	void Editor_ClearNav();
@@ -110,6 +113,12 @@ public:
 
 	// R_SOFTWARE
 	bool SW_QueryPoint(Objid &hl, int qx, int qy);
+
+	// UI_BROWSER
+	void Browser_WriteUser(std::ostream &os) const;
+
+	// UI_DEFAULT
+	void Props_WriteUser(std::ostream &os) const;
 
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
@@ -185,6 +194,10 @@ public:	// will be private when we encapsulate everything
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;
+	// the containers for the textures (etc)
+	Recently_used recent_flats{ *this };
+	Recently_used recent_textures{ *this };
+	Recently_used recent_things{ *this };
 
 	//
 	// Path stuff

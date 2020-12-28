@@ -153,7 +153,7 @@ void ObjectsModule::insertThing() const
 	T->SetRawX(inst, grid.SnapX(inst.edit.map_x));
 	T->SetRawY(inst, grid.SnapY(inst.edit.map_y));
 
-	recent_things.insert_number(T->type);
+	inst.recent_things.insert_number(T->type);
 
 	doc.basis.setMessage("added thing #%d", new_t);
 	doc.basis.end();

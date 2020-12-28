@@ -571,18 +571,18 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return true;
 }
 
-void Props_WriteUser(const Instance &inst, std::ostream &os)
+void Instance::Props_WriteUser(std::ostream &os) const
 {
 	os << '\n';
 
 	os << "default floor_h " << global::default_floor_h << '\n';
 	os << "default ceil_h " << global::default_ceil_h << '\n';
 	os << "default light_level " << global::default_light_level << '\n';
-	os << "default thing " << inst.default_thing << '\n';
+	os << "default thing " << default_thing << '\n';
 	
-	os << "default mid_tex \"" << inst.default_wall_tex.getTidy("\"") << "\"\n";
-	os << "default floor_tex \"" << inst.default_floor_tex.getTidy("\"") << "\"\n";
-	os << "default ceil_tex \"" << inst.default_ceil_tex.getTidy("\"") << "\"\n";
+	os << "default mid_tex \"" << default_wall_tex.getTidy("\"") << "\"\n";
+	os << "default floor_tex \"" << default_floor_tex.getTidy("\"") << "\"\n";
+	os << "default ceil_tex \"" << default_ceil_tex.getTidy("\"") << "\"\n";
 }
 
 

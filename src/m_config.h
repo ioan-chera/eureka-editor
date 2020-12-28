@@ -184,9 +184,6 @@ enum class ParseOptions
 // returns number of tokens, zero for comment, negative on error
 int M_ParseLine(const SString &line, std::vector<SString> &tokens, ParseOptions options);
 
-// user state persistence (stuff like camera pos, grid settings, ...)
-bool M_SaveUserState(const Instance &inst);
-
 #endif  /* __EUREKA_M_CONFIG_H__ */
 
 //--- editor settings ---

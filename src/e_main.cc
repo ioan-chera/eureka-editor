@@ -1067,12 +1067,6 @@ void CMD_LastSelection(Instance &inst)
 //------------------------------------------------------------------------
 
 
-// the containers for the textures (etc)
-Recently_used  recent_textures(gInstance);
-Recently_used  recent_flats(gInstance);
-Recently_used  recent_things(gInstance);
-
-
 Recently_used::Recently_used(Instance &inst) :
 	size(0),
 	keep_num(RECENTLY_USED_MAX - 2), inst(inst)
@@ -1180,11 +1174,11 @@ void Recently_used::clear()
 }
 
 
-void RecUsed_ClearAll(Instance &inst)
+static void RecUsed_ClearAll(Instance &inst)
 {
-	recent_textures.clear();
-	recent_flats   .clear();
-	recent_things  .clear();
+	inst.recent_textures.clear();
+	inst.recent_flats   .clear();
+	inst.recent_things  .clear();
 
 	if (inst.main_win)
 		inst.main_win->browser->RecentUpdate();
@@ -1193,7 +1187,7 @@ void RecUsed_ClearAll(Instance &inst)
 
 /* --- Save and Restore --- */
 
-void Recently_used::WriteUser(std::ostream &os, char letter)
+void Recently_used::WriteUser(std::ostream &os, char letter) const
 {
 	for (int i = 0 ; i < size ; i++)
 	{
@@ -1202,7 +1196,7 @@ void Recently_used::WriteUser(std::ostream &os, char letter)
 }
 
 
-void RecUsed_WriteUser(std::ostream &os)
+void Instance::RecUsed_WriteUser(std::ostream &os) const
 {
 	os << "\nrecent_used clear\n";
 	
@@ -1212,14 +1206,14 @@ void RecUsed_WriteUser(std::ostream &os)
 }
 
 
-bool RecUsed_ParseUser(Instance &inst, const std::vector<SString> &tokens)
+bool Instance::RecUsed_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] != "recent_used" || tokens.size() < 2)
 		return false;
 
 	if (tokens[1] == "clear")
 	{
-		RecUsed_ClearAll(inst);
+		RecUsed_ClearAll(*this);
 		return true;
 	}
 
@@ -1246,8 +1240,8 @@ bool RecUsed_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 			break;
 	}
 
-	if (inst.main_win)
-		inst.main_win->browser->RecentUpdate();
+	if (main_win)
+		main_win->browser->RecentUpdate();
 
 	return true;
 }

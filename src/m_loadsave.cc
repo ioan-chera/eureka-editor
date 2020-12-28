@@ -1674,7 +1674,7 @@ static void SaveLevel(Instance &inst, const SString &level)
 		inst.main_win->SetTitle(inst.edit_wad->PathName(), inst.Level_name, false);
 
 		// save the user state associated with this map
-		M_SaveUserState(inst);
+		inst.M_SaveUserState();
 	}
 
 	inst.MadeChanges = false;

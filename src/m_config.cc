@@ -1521,7 +1521,7 @@ bool Instance::M_LoadUserState()
 		    Render3D_ParseUser(tokens) ||
 		     Browser_ParseUser(*this, tokens) ||
 		       Props_ParseUser(*this, tokens) ||
-		     RecUsed_ParseUser(*this, tokens))
+		     RecUsed_ParseUser(tokens))
 		{
 			// Ok
 		}
@@ -1538,12 +1538,14 @@ bool Instance::M_LoadUserState()
 	return true;
 }
 
-
-bool M_SaveUserState(const Instance &inst)
+//
+// user state persistence (stuff like camera pos, grid settings, ...)
+//
+bool Instance::M_SaveUserState() const
 {
 	crc32_c crc;
 
-	inst.level.getLevelChecksum(crc);
+	level.getLevelChecksum(crc);
 
 	SString filename = PersistFilename(crc);
 
@@ -1557,12 +1559,12 @@ bool M_SaveUserState(const Instance &inst)
 		return false;
 	}
 
-	inst.Editor_WriteUser(os);
-	    Grid_WriteUser(os);
+	Editor_WriteUser(os);
+	Grid_WriteUser(os);
 	Render3D_WriteUser(os);
-	 Browser_WriteUser(inst, os);
-	   Props_WriteUser(inst, os);
-	 RecUsed_WriteUser(os);
+	Browser_WriteUser(os);
+	Props_WriteUser(os);
+	RecUsed_WriteUser(os);
 
 	return true;
 }

@@ -542,19 +542,19 @@ bool UI_Browser_Box::Recent_UpdateItem(Browser_Item *item)
 	switch (item->kind)
 	{
 		case 'T':
-			new_idx = recent_textures.find(item->real_name);
+			new_idx = inst.recent_textures.find(item->real_name);
 			if (new_idx < 0)
-				new_idx = recent_flats.find(item->real_name);
+				new_idx = inst.recent_flats.find(item->real_name);
 			break;
 
 		case 'F':
-			new_idx = recent_flats.find(item->real_name);
+			new_idx = inst.recent_flats.find(item->real_name);
 			if (new_idx < 0)
-				new_idx = recent_textures.find(item->real_name);
+				new_idx = inst.recent_textures.find(item->real_name);
 			break;
 
 		case 'O':
-			new_idx = recent_things.find_number(item->number);
+			new_idx = inst.recent_things.find_number(item->number);
 			break;
 
 		default:
@@ -1896,12 +1896,12 @@ bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return false;
 }
 
-void Browser_WriteUser(const Instance &inst, std::ostream &os)
+void Instance::Browser_WriteUser(std::ostream &os) const
 {
-	if (inst.main_win)
+	if (main_win)
 	{
-		inst.main_win->tile->WriteUser(os);
-		inst.main_win->browser->WriteUser(os);
+		main_win->tile->WriteUser(os);
+		main_win->browser->WriteUser(os);
 	}
 }
 

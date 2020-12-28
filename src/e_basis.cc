@@ -473,7 +473,7 @@ bool Basis::changeThing(int thing, byte field, int value)
 	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	if(field == Thing::F_TYPE)
-		recent_things.insert_number(value);
+		inst.recent_things.insert_number(value);
 
 	return change(ObjType::things, thing, field, value);
 }
@@ -500,7 +500,7 @@ bool Basis::changeSector(int sec, byte field, int value)
 	if(field == Sector::F_FLOOR_TEX ||
 		field == Sector::F_CEIL_TEX)
 	{
-		recent_flats.insert(BA_GetString(value));
+		inst.recent_flats.insert(BA_GetString(value));
 	}
 
 	return change(ObjType::sectors, sec, field, value);
@@ -518,7 +518,7 @@ bool Basis::changeSidedef(int side, byte field, int value)
 		field == SideDef::F_UPPER_TEX ||
 		field == SideDef::F_MID_TEX)
 	{
-		recent_textures.insert(BA_GetString(value));
+		inst.recent_textures.insert(BA_GetString(value));
 	}
 
 	return change(ObjType::sidedefs, side, field, value);

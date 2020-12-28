@@ -753,7 +753,7 @@ static bool Clipboard_DoPaste(Instance &inst)
 				T->SetRawX(inst, T->x() + pos_x - cx);
 				T->SetRawY(inst, T->y() + pos_y - cy);
 
-				recent_things.insert_number(T->type);
+				inst.recent_things.insert_number(T->type);
 			}
 			break;
 		}

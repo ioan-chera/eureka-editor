@@ -271,7 +271,6 @@ private:
 
 
 bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens);
-void Browser_WriteUser(const Instance &inst, std::ostream &os);
 
 #endif  /* __EUREKA_UI_BROWSER_H__ */
 
