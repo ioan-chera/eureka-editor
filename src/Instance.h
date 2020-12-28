@@ -23,6 +23,8 @@
 #include "e_main.h"
 #include "main.h"
 
+class Lump_c;
+
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
@@ -41,6 +43,10 @@ public:
 	void Selection_Push() const;
 	void Selection_Toggle(Objid &obj) const;
 	SelectHighlight SelectionOrHighlight();
+
+	// IM_COLOR
+	void W_LoadColormap() const;
+	void W_LoadPalette() const;
 
 	// M_EVENTS
 	void Editor_ClearNav();
@@ -70,6 +76,19 @@ public:
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
 
+	// W_TEXTURE
+	Img_c *W_GetSprite(int type) const;
+	void W_LoadFlats() const;
+	void W_LoadTextures() const;
+
+	// W_WAD
+	void MasterDir_Add(Wad_file *wad);
+	void MasterDir_CloseAll();
+	bool MasterDir_HaveFilename(const SString &chk_path) const;
+	void MasterDir_Remove(Wad_file *wad);
+	Lump_c *W_FindGlobalLump(const SString &name) const;
+	Lump_c *W_FindSpriteLump(const SString &name) const;
+
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
 
@@ -84,6 +103,7 @@ public:	// will be private when we encapsulate everything
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
 	Wad_file *game_wad = nullptr;
+	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
 	SString Port_name;	// Name of source port "vanilla", "boom", ...

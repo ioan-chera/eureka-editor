@@ -182,7 +182,8 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	init_progress = ProgressStatus::nothing;
 	global::app_has_focus = false;
 
-	MasterDir_CloseAll();
+	// TODO: ALL instances. This is death.
+	gInstance.MasterDir_CloseAll();
 	LogClose();
 
 	exit(2);
@@ -794,7 +795,7 @@ static void LoadResourceFile(Instance &inst, const char *filename)
 	if (! wad)
 		ThrowException("Cannot load resource: %s\n", filename);
 
-	MasterDir_Add(wad);
+	inst.MasterDir_Add(wad);
 }
 
 
@@ -806,7 +807,7 @@ static void Main_LoadIWAD(Instance &inst)
 	if (!inst.game_wad)
 		ThrowException("Failed to open game IWAD: %s\n", inst.Iwad_name.c_str());
 
-	MasterDir_Add(inst.game_wad);
+	inst.MasterDir_Add(inst.game_wad);
 }
 
 
@@ -1084,14 +1085,14 @@ int main(int argc, char *argv[])
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			MasterDir_Add(gInstance.edit_wad);
+			gInstance.MasterDir_Add(gInstance.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.Iwad_name.empty() || !gInstance.Level_name.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
-				MasterDir_Add(gInstance.edit_wad);
+				gInstance.MasterDir_Add(gInstance.edit_wad);
 			}
 		}
 
@@ -1149,7 +1150,8 @@ int main(int argc, char *argv[])
 		init_progress = ProgressStatus::nothing;
 		global::app_has_focus = false;
 
-		MasterDir_CloseAll();
+		// TODO: all instances
+		gInstance.MasterDir_CloseAll();
 		LogClose();
 
 		return 0;

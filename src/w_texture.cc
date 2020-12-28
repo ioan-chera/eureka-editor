@@ -24,6 +24,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Instance.h"
 #include "main.h"
 
 #include <map>
@@ -116,7 +117,7 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 }
 
 
-static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
+static void LoadTextureEntry_Strife(const Instance &inst, byte *tex_data, int tex_length, int offset,
 									byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
@@ -163,7 +164,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = W_FindGlobalLump(picname);
+		Lump_c *lump = inst.W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -181,7 +182,7 @@ static void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
 }
 
 
-static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
+static void LoadTextureEntry_DOOM(const Instance &inst, byte *tex_data, int tex_length, int offset,
 								  byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
@@ -230,7 +231,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		picname[8] = 0;
 
 //DebugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = W_FindGlobalLump(picname);
+		Lump_c *lump = inst.W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -248,7 +249,7 @@ static void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 }
 
 
-static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
+static void LoadTexturesLump(const Instance &inst, Lump_c *lump, byte *pnames, int pname_size,
                              bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
@@ -291,9 +292,9 @@ static void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
-			LoadTextureEntry_Strife(tex_data, tex_length, offset, pnames, pname_size, skip_first);
+			LoadTextureEntry_Strife(inst, tex_data, tex_length, offset, pnames, pname_size, skip_first);
 		else
-			LoadTextureEntry_DOOM(tex_data, tex_length, offset, pnames, pname_size, skip_first);
+			LoadTextureEntry_DOOM(inst,tex_data, tex_length, offset, pnames, pname_size, skip_first);
 	}
 
 	W_FreeLumpData(&tex_data);
@@ -353,17 +354,17 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 }
 
 
-void W_LoadTextures()
+void Instance::W_LoadTextures() const
 {
 	W_ClearTextures();
 
-	for (int i = 0 ; i < (int)instance::master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
 		LogPrintf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = instance::master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace_Global);
-		Lump_c *texture1 = instance::master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace_Global);
-		Lump_c *texture2 = instance::master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace_Global);
+		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace_Global);
+		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace_Global);
+		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace_Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -378,17 +379,17 @@ void W_LoadTextures()
 			int pname_size = W_LoadLumpData(pnames, &pname_data);
 
 			if (texture1)
-				LoadTexturesLump(texture1, pname_data, pname_size, true);
+				LoadTexturesLump(*this, texture1, pname_data, pname_size, true);
 
 			if (texture2)
-				LoadTexturesLump(texture2, pname_data, pname_size, false);
+				LoadTexturesLump(*this, texture2, pname_data, pname_size, false);
 
 			W_FreeLumpData(&pname_data);
 		}
 
 		if (Features.tx_start)
 		{
-			W_LoadTextures_TX_START(instance::master_dir[i]);
+			W_LoadTextures_TX_START(master_dir[i]);
 		}
 	}
 }
@@ -559,15 +560,15 @@ static Img_c * LoadFlatImage(const SString &name, Lump_c *lump)
 }
 
 
-void W_LoadFlats()
+void Instance::W_LoadFlats() const
 {
 	W_ClearFlats();
 
-	for (int i = 0 ; i < (int)instance::master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
 		LogPrintf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = instance::master_dir[i];
+		const Wad_file *wf = master_dir[i];
 
 		for(const LumpRef &lumpRef : wf->directory)
 		{
@@ -660,7 +661,7 @@ void W_ClearSprites()
 
 
 // find sprite by prefix
-Lump_c * Sprite_loc_by_root (const SString &name)
+static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 {
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
@@ -673,19 +674,19 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 	if(buffer.length() == 5)
 		buffer += '0';
 
-	Lump_c *lump = W_FindSpriteLump(buffer);
+	Lump_c *lump = inst.W_FindSpriteLump(buffer);
 
 	if (! lump)
 	{
 		if(buffer.length() >= 6)
 			buffer[5] = '1';
-		lump = W_FindSpriteLump(buffer);
+		lump = inst.W_FindSpriteLump(buffer);
 	}
 
 	if (! lump)
 	{
 		buffer += "D1";
-		lump = W_FindSpriteLump(buffer);
+		lump = inst.W_FindSpriteLump(buffer);
 	}
 
 	if (lump)
@@ -701,13 +702,13 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = W_FindGlobalLump(buffer);
+		lump = inst.W_FindGlobalLump(buffer);
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = W_FindGlobalLump(buffer);
+			lump = inst.W_FindGlobalLump(buffer);
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -721,14 +722,14 @@ Lump_c * Sprite_loc_by_root (const SString &name)
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = W_FindGlobalLump(name);
+		lump = inst.W_FindGlobalLump(name);
 	}
 
 	return lump;
 }
 
 
-Img_c * W_GetSprite(int type)
+Img_c *Instance::W_GetSprite(int type) const
 {
 	sprite_map_t::iterator P = sprites.find(type);
 
@@ -759,7 +760,7 @@ Img_c * W_GetSprite(int type)
 	}
 	else
 	{
-		Lump_c *lump = Sprite_loc_by_root(info.sprite);
+		Lump_c *lump = Sprite_loc_by_root(*this, info.sprite);
 		if (! lump)
 		{
 			// for the MBF dog, create our own sprite for it, since

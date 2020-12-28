@@ -69,9 +69,6 @@ extern int gammatable[5][256];
 
 void W_UpdateGamma();
 
-void W_LoadPalette();
-void W_LoadColormap();
-
 byte W_FindPaletteColor(int r, int g, int b);
 
 void W_CreateBrightMap();

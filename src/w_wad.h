@@ -134,8 +134,8 @@ struct LumpRef
 
 class Wad_file
 {
+friend class Instance;
 friend class Lump_c;
-friend void W_LoadFlats();
 friend void W_LoadTextures_TX_START(Wad_file *wf);
 
 private:
@@ -355,33 +355,11 @@ private:
 	};
 };
 
-
-// the IWAD, never NULL, always at master_dir.front()
-namespace instance
-{
-extern std::vector<Wad_file *> master_dir;
-}
-
-
-// find a lump in any loaded wad (later ones tried first),
-// returning NULL if not found.
-Lump_c * W_FindGlobalLump(const SString &name);
-
-// find a lump that only exists in a certain namespace (sprite,
-// or patch) of a loaded wad (later ones tried first).
-Lump_c * W_FindSpriteLump(const SString &name);
-
 // load the lump into memory, returning the size
 int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
 void W_FreeLumpData(byte ** buf_ptr);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
-
-void MasterDir_Add   (Wad_file *wad);
-void MasterDir_Remove(Wad_file *wad);
-
-bool MasterDir_HaveFilename(const SString &chk_path);
-void MasterDir_CloseAll();
 
 namespace global
 {

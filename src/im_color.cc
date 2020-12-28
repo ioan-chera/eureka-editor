@@ -24,6 +24,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Instance.h"
 #include "main.h"
 
 #include "im_color.h"
@@ -84,7 +85,7 @@ void W_UpdateGamma()
 }
 
 
-void W_LoadPalette()
+void Instance::W_LoadPalette() const
 {
 	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
 
@@ -116,7 +117,7 @@ void W_LoadPalette()
 }
 
 
-void W_LoadColormap()
+void Instance::W_LoadColormap() const
 {
 	Lump_c *lump = W_FindGlobalLump("COLORMAP");
 

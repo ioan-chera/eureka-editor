@@ -29,8 +29,6 @@
 
 #include "im_img.h"
 
-void W_LoadTextures();
-
 // accepts "-", "#xxxx" or an existing texture name
 bool W_TextureIsKnown(const SString &name);
 
@@ -46,8 +44,6 @@ SString NormalizeTex(const SString &name);
 
 /* ---- FLATS ---- */
 
-void W_LoadFlats();
-
 // checks if the flat exists
 bool W_FlatIsKnown(const SString &name);
 
@@ -57,8 +53,6 @@ Img_c * W_GetFlat(const SString &name, bool try_uppercase = false);
 /* ---- SPRITES ---- */
 
 void W_ClearSprites();
-
-Img_c * W_GetSprite(int type);
 
 
 /* ---- ALL ---- */

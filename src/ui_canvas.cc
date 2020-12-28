@@ -993,7 +993,7 @@ void UI_Canvas::DrawThingSprites()
 		const thingtype_t &info = M_GetThingType(thing->type);
 		float scale = info.scale;
 
-		Img_c *sprite = W_GetSprite(thing->type);
+		Img_c *sprite = inst.W_GetSprite(thing->type);
 
 		if (! sprite)
 		{
