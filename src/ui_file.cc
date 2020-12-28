@@ -833,7 +833,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString prev_game = game;
 
 	if (prev_game.empty())
-		prev_game = instance::Game_name;
+		prev_game = inst.Game_name;
 	if (prev_game.empty())
 		prev_game = "doom2";
 
@@ -888,8 +888,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (game_choice->mvalue())
 		base_game = inst.M_GetBaseGame(game_choice->mvalue()->text);
-	else if (!instance::Game_name.empty())
-		base_game = inst.M_GetBaseGame(instance::Game_name);
+	else if (!inst.Game_name.empty())
+		base_game = inst.M_GetBaseGame(inst.Game_name);
 
 	if (base_game.empty())
 		base_game = "doom2";

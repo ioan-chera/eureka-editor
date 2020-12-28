@@ -998,8 +998,8 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 
 	lump->Printf("# Eureka project info\n");
 
-	if (!instance::Game_name.empty())
-		lump->Printf("game %s\n", instance::Game_name.c_str());
+	if (!Game_name.empty())
+		lump->Printf("game %s\n", Game_name.c_str());
 
 	if (!Port_name.empty())
 		lump->Printf("port %s\n", Port_name.c_str());

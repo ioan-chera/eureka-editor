@@ -162,13 +162,13 @@ void Instance::M_PrepareConfigVariables()
 		parse_vars["$UDMF_NAMESPACE"] = instance::Udmf_namespace;
 	}
 
-	if (!instance::Game_name.empty())
+	if (!Game_name.empty())
 	{
-		parse_vars["$GAME_NAME"] = instance::Game_name;
+		parse_vars["$GAME_NAME"] = Game_name;
 
-		if (M_CanLoadDefinitions("games", instance::Game_name))
+		if (M_CanLoadDefinitions("games", Game_name))
 		{
-			SString base_game = M_GetBaseGame(instance::Game_name);
+			SString base_game = M_GetBaseGame(Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}

@@ -139,8 +139,6 @@ namespace global
 
 namespace instance
 {
-	extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
-
 	extern SString  Udmf_namespace; // for UDMF, the current namespace
 }
 

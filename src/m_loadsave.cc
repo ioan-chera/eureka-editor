@@ -185,12 +185,12 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 {
 	// grab the new information
 
-	instance::Game_name = dialog->game;
+	inst.Game_name = dialog->game;
 	inst.Port_name = dialog->port;
 
-	SYS_ASSERT(!instance::Game_name.empty());
+	SYS_ASSERT(!inst.Game_name.empty());
 
-	inst.Iwad_name = M_QueryKnownIWAD(instance::Game_name);
+	inst.Iwad_name = M_QueryKnownIWAD(inst.Game_name);
 	SYS_ASSERT(!inst.Iwad_name.empty());
 
 	inst.Level_format = dialog->map_format;
@@ -328,10 +328,10 @@ bool Instance::MissingIWAD_Dialog()
 
 	if (ok)
 	{
-		instance::Game_name = dialog->game;
-		SYS_ASSERT(!instance::Game_name.empty());
+		Game_name = dialog->game;
+		SYS_ASSERT(!Game_name.empty());
 
-		Iwad_name = M_QueryKnownIWAD(instance::Game_name);
+		Iwad_name = M_QueryKnownIWAD(Game_name);
 		SYS_ASSERT(!Iwad_name.empty());
 	}
 

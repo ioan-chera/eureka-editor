@@ -80,8 +80,6 @@ SString Pwad_name;
 
 std::vector<SString> global::Pwad_list;
 
-SString instance::Game_name;
-
 SString  instance::Udmf_namespace;
 
 
@@ -419,7 +417,7 @@ static bool DetermineIWAD(Instance &inst)
 		}
 	}
 
-	instance::Game_name = GameNameFromIWAD(inst.Iwad_name);
+	inst.Game_name = GameNameFromIWAD(inst.Iwad_name);
 
 	return true;
 }
@@ -437,7 +435,7 @@ static void DeterminePort(Instance &inst)
 		return;
 	}
 
-	SString base_game = inst.M_GetBaseGame(instance::Game_name);
+	SString base_game = inst.M_GetBaseGame(inst.Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -454,7 +452,7 @@ static void DeterminePort(Instance &inst)
 	else if (! M_CheckPortSupportsGame(inst, base_game, config::default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
-				  config::default_port.c_str(), instance::Game_name.c_str());
+				  config::default_port.c_str(), inst.Game_name.c_str());
 		config::default_port = "vanilla";
 	}
 
@@ -817,12 +815,12 @@ static void Main_LoadIWAD(Instance &inst)
 
 static void ReadGameInfo(Instance &inst)
 {
-	instance::Game_name = GameNameFromIWAD(inst.Iwad_name);
+	inst.Game_name = GameNameFromIWAD(inst.Iwad_name);
 
-	LogPrintf("Game name: '%s'\n", instance::Game_name.c_str());
+	LogPrintf("Game name: '%s'\n", inst.Game_name.c_str());
 	LogPrintf("IWAD file: '%s'\n", inst.Iwad_name.c_str());
 
-	M_LoadDefinitions(inst, "games", instance::Game_name);
+	M_LoadDefinitions(inst, "games", inst.Game_name);
 }
 
 
@@ -834,13 +832,13 @@ static void ReadPortInfo(Instance &inst)
 
 	SYS_ASSERT(!inst.Port_name.empty());
 
-	SString base_game = inst.M_GetBaseGame(instance::Game_name);
+	SString base_game = inst.M_GetBaseGame(inst.Game_name);
 
 	// warn user if this port is incompatible with the game
 	if (! M_CheckPortSupportsGame(inst, base_game, inst.Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-			inst.Port_name.c_str(), instance::Game_name.c_str());
+			inst.Port_name.c_str(), inst.Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -849,7 +847,7 @@ static void ReadPortInfo(Instance &inst)
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-			inst.Port_name.c_str(), instance::Game_name.c_str());
+			inst.Port_name.c_str(), inst.Game_name.c_str());
 
 		if (res == 0)
 		{

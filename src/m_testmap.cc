@@ -347,14 +347,14 @@ void CMD_TestMap(Instance &inst)
 
 
 	// check if we know the executable path, if not then ask
-	port_path_info_t *info = M_QueryPortPath(QueryName(inst.Port_name, instance::Game_name));
+	port_path_info_t *info = M_QueryPortPath(QueryName(inst.Port_name, inst.Game_name));
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(inst.Port_name, instance::Game_name))
+		if (! M_PortSetupDialog(inst.Port_name, inst.Game_name))
 			return;
 
-		info = M_QueryPortPath(QueryName(inst.Port_name, instance::Game_name));
+		info = M_QueryPortPath(QueryName(inst.Port_name, inst.Game_name));
 	}
 
 	// this generally can't happen, but we check anyway...
