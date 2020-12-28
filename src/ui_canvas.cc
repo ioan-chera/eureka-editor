@@ -997,7 +997,7 @@ void UI_Canvas::DrawThingSprites()
 
 		if (! sprite)
 		{
-			sprite = IM_UnknownSprite();
+			sprite = inst.IM_UnknownSprite();
 			scale = 0.66f;
 		}
 
@@ -1060,7 +1060,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 
 			if (pix != TRANS_PIXEL)
 			{
-				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+				inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 		}
 	}
@@ -2090,7 +2090,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (is_sky(tex_name))
 		{
-			RenderColor(palette[Misc_info.sky_color]);
+			RenderColor(inst.palette[Misc_info.sky_color]);
 		}
 		else
 		{
@@ -2098,7 +2098,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (! img)
 			{
-				img = IM_UnknownTex();
+				img = inst.IM_UnknownTex();
 			}
 		}
 	}
@@ -2198,7 +2198,7 @@ void UI_Canvas::RenderSector(int num)
 
 					img_pixel_t pix = src_pix[ty * tw + tx];
 
-					IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+					inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 
 					dest[0] = ((int)dest[0] * r) >> 16;
 					dest[1] = ((int)dest[1] * g) >> 16;
@@ -2213,7 +2213,7 @@ void UI_Canvas::RenderSector(int num)
 
 					img_pixel_t pix = src_pix[ty * tw + tx];
 
-					IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+					inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 				}
 			}
 		}
@@ -2593,14 +2593,14 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 
 	if (cur_font < 17)
 	{
-		font_img  = IM_DigitFont_11x14();
+		font_img  = inst.IM_DigitFont_11x14();
 		font_cw   = 11;
 		font_ch   = 14;
 		font_step = font_cw - 2;
 	}
 	else
 	{
-		font_img  = IM_DigitFont_14x19();
+		font_img  = inst.IM_DigitFont_14x19();
 		font_cw   = 14;
 		font_ch   = 19;
 		font_step = font_cw - 2;
@@ -2680,7 +2680,7 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 
 			if (pix != TRANS_PIXEL)
 			{
-				IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+				inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 		}
 	}

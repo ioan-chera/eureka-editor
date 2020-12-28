@@ -21,8 +21,10 @@
 
 #include "Document.h"
 #include "e_main.h"
+#include "im_img.h"
 #include "main.h"
 
+class Fl_RGB_Image;
 class Lump_c;
 
 //
@@ -71,8 +73,64 @@ public:
 	const byte *SoundPropagation(int start_sec);
 
 	// IM_COLOR
-	void W_LoadColormap() const;
-	void W_LoadPalette() const;
+	byte W_FindPaletteColor(int r, int g, int b) const;
+	void W_LoadColormap();
+	void W_LoadPalette();
+	void W_UpdateGamma();
+
+	// IM_IMG
+	Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src) const;
+	Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H) const;
+	Img_c *IM_CreateDogSprite() const;
+	Img_c *IM_CreateLightSprite() const;
+	Img_c *IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;
+	Img_c *IM_DigitFont_11x14() const;
+	Img_c *IM_DigitFont_14x19() const;
+	Img_c *IM_MissingTex() const;
+	Img_c *IM_SpecialTex() const;
+	Img_c *IM_UnknownFlat() const;
+	Img_c *IM_UnknownSprite() const;
+	Img_c *IM_UnknownTex() const;
+
+	// this one applies the current gamma.
+	// for rendering the 3D view or the 2D sectors and sprites.
+	inline void IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
+	{
+		if(p & IS_RGB_PIXEL)
+		{
+			r = rgb555_gamma[IMG_PIXEL_RED(p)];
+			g = rgb555_gamma[IMG_PIXEL_GREEN(p)];
+			b = rgb555_gamma[IMG_PIXEL_BLUE(p)];
+		}
+		else
+		{
+			const rgb_color_t col = palette[p];
+
+			r = RGB_RED(col);
+			g = RGB_GREEN(col);
+			b = RGB_BLUE(col);
+		}
+	}
+
+	// this applies a constant gamma.
+	// for textures/flats/things in the browser and panels.
+	inline void IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const
+	{
+		if(p & IS_RGB_PIXEL)
+		{
+			r = rgb555_medium[IMG_PIXEL_RED(p)];
+			g = rgb555_medium[IMG_PIXEL_GREEN(p)];
+			b = rgb555_medium[IMG_PIXEL_BLUE(p)];
+		}
+		else
+		{
+			const rgb_color_t col = palette_medium[p];
+
+			r = RGB_RED(col);
+			g = RGB_GREEN(col);
+			b = RGB_BLUE(col);
+		}
+	}
 
 	// M_CONFIG
 	void M_DefaultUserState();
@@ -108,11 +166,13 @@ public:
 
 	// R_RENDER
 	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	bool Render3D_ParseUser(const std::vector<SString> &tokens);
 	void Render3D_Setup();
 	void Render3D_UpdateHighlight();
 
 	// R_SOFTWARE
 	bool SW_QueryPoint(Objid &hl, int qx, int qy);
+	void SW_RenderWorld(int ox, int oy, int ow, int oh) const;
 
 	// UI_BROWSER
 	void Browser_WriteUser(std::ostream &os) const;
@@ -124,10 +184,17 @@ public:
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
 
+	// W_LOADPIC
+	Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name) const;
+	Img_c *LoadImage_PNG(Lump_c *lump, const SString &name) const;
+	Img_c *LoadImage_TGA(Lump_c *lump, const SString &name) const;
+	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
+
 	// W_TEXTURE
 	Img_c *W_GetSprite(int type) const;
 	void W_LoadFlats() const;
 	void W_LoadTextures() const;
+	void W_LoadTextures_TX_START(Wad_file *wf) const;
 
 	// W_WAD
 	void MasterDir_Add(Wad_file *wad);
@@ -207,6 +274,20 @@ public:	// will be private when we encapsulate everything
 	std::vector<byte> sound_temp1_vec;
 	std::vector<byte> sound_temp2_vec;
 	int sound_start_sec = 0;
+
+	//
+	// Color stuff
+	//
+	byte bright_map[256] = {};
+	// this palette has the gamma setting applied
+	rgb_color_t palette[256] = {};
+	rgb_color_t palette_medium[256] = {};
+	byte raw_colormap[32][256] = {};
+	byte raw_palette[256][3] = {};
+	byte rgb555_gamma[32];
+	byte rgb555_medium[32];
+	// the palette color closest to what TRANS_PIXEL really is
+	int trans_replace = 0;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

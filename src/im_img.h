@@ -54,6 +54,7 @@ const img_pixel_t IS_RGB_PIXEL = 0x8000;
 // the color number used to represent transparent pixels in an Img_c.
 const img_pixel_t TRANS_PIXEL = 255;
 
+class Instance;
 
 class Img_c
 {
@@ -66,9 +67,11 @@ private:
 	// texture identifier for OpenGL, 0 if not uploaded yet
 	GLuint gl_tex;
 
+	const Instance &inst;
+
 public:
-	 Img_c();
-	 Img_c(int width, int height, bool _dummy = false);
+	explicit Img_c(const Instance &inst);
+	 Img_c(const Instance &inst, int width, int height, bool _dummy = false);
 	~Img_c();
 
 	inline bool is_null() const
@@ -134,83 +137,6 @@ private:
 
 void IM_ResetDummyTextures();
 void IM_UnloadDummyTextures();
-
-Img_c * IM_MissingTex();
-Img_c * IM_UnknownTex();
-Img_c * IM_SpecialTex();
-Img_c * IM_UnknownFlat();
-Img_c * IM_UnknownSprite();
-
-Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size);
-Img_c * IM_CreateDogSprite();
-Img_c * IM_CreateLightSprite();
-Img_c * IM_CreateMapSpotSprite(int base_r, int base_g, int base_b);
-
-Img_c * IM_DigitFont_11x14();
-Img_c * IM_DigitFont_14x19();
-
-Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src);
-Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H);
-
-
-//------------------------------------------------------------------------
-
-
-inline void IM_DecodePixel_raw(img_pixel_t p, byte& r, byte& g, byte& b)
-{
-	if (p & IS_RGB_PIXEL)
-	{
-		r = IMG_PIXEL_RED(p)   << 3;
-		g = IMG_PIXEL_GREEN(p) << 3;
-		b = IMG_PIXEL_BLUE(p)  << 3;
-	}
-	else
-	{
-		r = raw_palette[p][0];
-		g = raw_palette[p][1];
-		b = raw_palette[p][2];
-	}
-}
-
-// this one applies the current gamma.
-// for rendering the 3D view or the 2D sectors and sprites.
-inline void IM_DecodePixel(img_pixel_t p, byte& r, byte& g, byte& b)
-{
-	if (p & IS_RGB_PIXEL)
-	{
-		r = rgb555_gamma[IMG_PIXEL_RED(p)];
-		g = rgb555_gamma[IMG_PIXEL_GREEN(p)];
-		b = rgb555_gamma[IMG_PIXEL_BLUE(p)];
-	}
-	else
-	{
-		const rgb_color_t col = palette[p];
-
-		r = RGB_RED(col);
-		g = RGB_GREEN(col);
-		b = RGB_BLUE(col);
-	}
-}
-
-// this applies a constant gamma.
-// for textures/flats/things in the browser and panels.
-inline void IM_DecodePixel_medium(img_pixel_t p, byte& r, byte& g, byte& b)
-{
-	if (p & IS_RGB_PIXEL)
-	{
-		r = rgb555_medium[IMG_PIXEL_RED(p)];
-		g = rgb555_medium[IMG_PIXEL_GREEN(p)];
-		b = rgb555_medium[IMG_PIXEL_BLUE(p)];
-	}
-	else
-	{
-		const rgb_color_t col = palette_medium[p];
-
-		r = RGB_RED(col);
-		g = RGB_GREEN(col);
-		b = RGB_BLUE(col);
-	}
-}
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 
 #include "main.h"
 
@@ -55,7 +56,7 @@ post_t;
 #define P_SENTINEL  0xFF
 
 
-static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
+static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, int x, int y)
 {
 	SYS_ASSERT(column);
 
@@ -96,7 +97,7 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 			byte pix = *src++;
 
 			if (pix == TRANS_PIXEL)
-				pix = trans_replace;
+				pix = inst.trans_replace;
 
 			dest[top * W] = pix;
 		}
@@ -106,7 +107,7 @@ static void DrawColumn(Img_c& img, const post_t *column, int x, int y)
 }
 
 
-Img_c * LoadImage_PNG(Lump_c *lump, const SString &name)
+Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 {
 	// load the raw data
 	byte *tex_data;
@@ -131,7 +132,7 @@ Img_c * LoadImage_PNG(Lump_c *lump, const SString &name)
 }
 
 
-Img_c * LoadImage_JPEG(Lump_c *lump, const SString &name)
+Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 {
 	// load the raw data
 	byte *tex_data;
@@ -158,7 +159,7 @@ Img_c * LoadImage_JPEG(Lump_c *lump, const SString &name)
 }
 
 
-Img_c * LoadImage_TGA(Lump_c *lump, const SString &name)
+Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
 {
 	// load the raw data
 	byte *tex_data;
@@ -228,13 +229,13 @@ static bool ComposePicture(Img_c& dest, Img_c *sub,
 //
 //  Return true on success, false on failure.
 //
-bool LoadPicture(Img_c& dest,      // image to load picture into
+bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	Lump_c *lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
-	int *pic_height)   // (can be NULL)
+	int *pic_height) const   // (can be NULL)
 {
 	char img_fmt = W_DetectImageFormat(lump);
 	Img_c *sub;
@@ -302,7 +303,7 @@ bool LoadPicture(Img_c& dest,      // image to load picture into
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
-		DrawColumn(dest, column, pic_x_offset + x, pic_y_offset);
+		DrawColumn(*this, dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
 	W_FreeLumpData(&raw_data);

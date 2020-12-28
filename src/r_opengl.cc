@@ -152,7 +152,7 @@ public:
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			IM_DecodePixel(Misc_info.sky_color, r, g, b);
+			inst.IM_DecodePixel(Misc_info.sky_color, r, g, b);
 			return NULL;
 		}
 
@@ -168,14 +168,14 @@ public:
 			else
 				col = HashedPalColor(fname, Misc_info.floor_colors);
 
-			IM_DecodePixel(col, r, g, b);
+			inst.IM_DecodePixel(col, r, g, b);
 			return NULL;
 		}
 
 		Img_c *img = W_GetFlat(fname);
 		if (! img)
 		{
-			img = IM_UnknownFlat();
+			img = inst.IM_UnknownFlat();
 			fullbright = config::render_unknown_bright;
 		}
 
@@ -201,7 +201,7 @@ public:
 			else
 				col = HashedPalColor(tname, Misc_info.wall_colors);
 
-			IM_DecodePixel(col, r, g, b);
+			inst.IM_DecodePixel(col, r, g, b);
 			return NULL;
 		}
 
@@ -209,12 +209,12 @@ public:
 
 		if (is_null_tex(tname))
 		{
-			img = IM_MissingTex();
+			img = inst.IM_MissingTex();
 			fullbright = config::render_missing_bright;
 		}
 		else if (is_special_tex(tname))
 		{
-			img = IM_SpecialTex();
+			img = inst.IM_SpecialTex();
 		}
 		else
 		{
@@ -222,7 +222,7 @@ public:
 
 			if (! img)
 			{
-				img = IM_UnknownTex();
+				img = inst.IM_UnknownTex();
 				fullbright = config::render_unknown_bright;
 			}
 		}
@@ -692,7 +692,7 @@ public:
 		if (sky_upper && where == 'U')
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			IM_DecodePixel(Misc_info.sky_color, r, g, b);
+			inst.IM_DecodePixel(Misc_info.sky_color, r, g, b);
 		}
 		else
 		{
@@ -1242,7 +1242,7 @@ public:
 		Img_c *img = inst.W_GetSprite(th->type);
 		if (! img)
 		{
-			img = IM_UnknownSprite();
+			img = inst.IM_UnknownSprite();
 			fullbright = true;
 			scale = 0.33f;
 		}
@@ -1459,7 +1459,7 @@ public:
 		Img_c *img = inst.W_GetSprite(th->type);
 		if (! img)
 		{
-			img = IM_UnknownSprite();
+			img = inst.IM_UnknownSprite();
 			scale = 0.33f;
 		}
 

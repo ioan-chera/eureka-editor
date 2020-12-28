@@ -31,20 +31,6 @@
 #include "w_wad.h"
 
 
-bool LoadPicture(Img_c& dest,
-	Lump_c *lump,           /* Lump containing picture */
-	const SString &pic_name,   /* Picture name, for messages */
-	int pic_x_offset,    /* Coordinates of top left corner of picture */
-	int pic_y_offset,    /* relative to top left corner of buffer. */
-	int *pic_width = NULL,    /* To return the size of the picture */
-	int *pic_height = NULL);  /* (can be NULL) */
-
-
-Img_c * LoadImage_PNG(Lump_c *lump, const SString &name);
-Img_c * LoadImage_JPEG(Lump_c *lump, const SString &name);
-Img_c * LoadImage_TGA(Lump_c *lump, const SString &name);
-
-
 // Determine the image format of the given wad lump.
 //
 // Return values are:

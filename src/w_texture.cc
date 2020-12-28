@@ -24,6 +24,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.h"
 #include "Instance.h"
 #include "main.h"
 
@@ -131,7 +132,7 @@ static void LoadTextureEntry_Strife(const Instance &inst, byte *tex_data, int te
 	if (width == 0 || height == 0)
 		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(width, height, false);
+	Img_c *img = new Img_c(inst, width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -167,7 +168,7 @@ static void LoadTextureEntry_Strife(const Instance &inst, byte *tex_data, int te
 		Lump_c *lump = inst.W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! inst.LoadPicture(*img, lump, picname, xofs, yofs))
 		{
 			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -194,16 +195,16 @@ static void LoadTextureEntry_DOOM(const Instance &inst, byte *tex_data, int tex_
 	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(width, height, false);
+	Img_c *img = new Img_c(inst, width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		FatalError("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+		ThrowException("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
 
 	const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
 
@@ -234,7 +235,7 @@ static void LoadTextureEntry_DOOM(const Instance &inst, byte *tex_data, int tex_
 		Lump_c *lump = inst.W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! inst.LoadPicture(*img, lump, picname, xofs, yofs))
 		{
 			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -301,7 +302,7 @@ static void LoadTexturesLump(const Instance &inst, Lump_c *lump, byte *pnames, i
 }
 
 
-void W_LoadTextures_TX_START(Wad_file *wf)
+void Instance::W_LoadTextures_TX_START(Wad_file *wf) const
 {
 	for(const LumpRef &lumpRef : wf->directory)
 	{
@@ -316,7 +317,7 @@ void W_LoadTextures_TX_START(Wad_file *wf)
 		switch (img_fmt)
 		{
 			case 'd': /* Doom patch */
-				img = new Img_c();
+				img = new Img_c(*this);
 				if (! LoadPicture(*img, lump, name, 0, 0))
 				{
 					delete img;
@@ -531,11 +532,11 @@ static void W_AddFlat(const SString &name, Img_c *img)
 }
 
 
-static Img_c * LoadFlatImage(const SString &name, Lump_c *lump)
+static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
-	Img_c *img = new Img_c(64, 64, false);
+	Img_c *img = new Img_c(inst, 64, 64, false);
 
 	int size = 64 * 64;
 
@@ -549,7 +550,7 @@ static Img_c * LoadFlatImage(const SString &name, Lump_c *lump)
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = trans_replace;
+			pix = inst.trans_replace;
 
 		img->wbuf() [i] = pix;
 	}
@@ -576,7 +577,7 @@ void Instance::W_LoadFlats() const
 				continue;
 			Lump_c *lump = lumpRef.lump;
 
-			Img_c * img = LoadFlatImage(lump->Name(), lump);
+			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
 
 			if (img)
 				W_AddFlat(lump->Name(), img);
@@ -774,7 +775,7 @@ Img_c *Instance::W_GetSprite(int type) const
 		}
 		else
 		{
-			result = new Img_c();
+			result = new Img_c(*this);
 
 			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
 			{

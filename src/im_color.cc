@@ -24,6 +24,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.h"
 #include "Instance.h"
 #include "main.h"
 
@@ -38,23 +39,7 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-
-rgb_color_t palette[256];
-rgb_color_t palette_medium[256];
-
-int trans_replace;
-
-byte raw_palette[256][3];
-byte raw_colormap[32][256];
-
-
-byte rgb555_gamma [32];
-byte rgb555_medium[32];
-
-byte bright_map[256];
-
-
-void W_UpdateGamma()
+void Instance::W_UpdateGamma()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
@@ -84,14 +69,15 @@ void W_UpdateGamma()
 	}
 }
 
+static void W_CreateBrightMap(Instance &inst);
 
-void Instance::W_LoadPalette() const
+void Instance::W_LoadPalette()
 {
 	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
 
 	if (! lump)
 	{
-		FatalError("PLAYPAL lump not found.\n");
+		ThrowException("PLAYPAL lump not found.\n");
 		return;
 	}
 
@@ -111,13 +97,13 @@ void Instance::W_LoadPalette() const
 
 	W_UpdateGamma();
 
-	W_CreateBrightMap();
+	W_CreateBrightMap(*this);
 
 	IM_ResetDummyTextures();
 }
 
 
-void Instance::W_LoadColormap() const
+void Instance::W_LoadColormap()
 {
 	Lump_c *lump = W_FindGlobalLump("COLORMAP");
 
@@ -177,7 +163,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 }
 
 
-byte W_FindPaletteColor(int r, int g, int b)
+byte Instance::W_FindPaletteColor(int r, int g, int b) const
 {
 	int best = 0;
 	int best_dist = (1 << 30);
@@ -204,13 +190,13 @@ byte W_FindPaletteColor(int r, int g, int b)
 }
 
 
-void W_CreateBrightMap()
+static void W_CreateBrightMap(Instance &inst)
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		byte r = raw_palette[c][0];
-		byte g = raw_palette[c][1];
-		byte b = raw_palette[c][2];
+		byte r = inst.raw_palette[c][0];
+		byte g = inst.raw_palette[c][1];
+		byte b = inst.raw_palette[c][2];
 
 		rgb_color_t col = LighterColor(fl_rgb_color(r, g, b));
 
@@ -218,7 +204,7 @@ void W_CreateBrightMap()
 		g = RGB_GREEN(col);
 		b = RGB_BLUE(col);
 
-		bright_map[c] = W_FindPaletteColor(r, g, b);
+		inst.bright_map[c] = inst.W_FindPaletteColor(r, g, b);
 	}
 }
 
@@ -304,7 +290,7 @@ int HashedPalColor(const SString &name, const int *cols)
 //------------------------------------------------------------------------
 
 
-int gammatable[5][256] =
+const int gammatable[5][256] =
 {
 	{
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,

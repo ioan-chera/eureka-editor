@@ -46,7 +46,7 @@
 
 extern rgb_color_t transparent_col;
 
-static img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
+static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, img_pixel_t pixel)
 {
 	int map = R_DoomLightingEquation(light, dist);
 
@@ -66,7 +66,7 @@ static img_pixel_t DoomLightRemap(int light, float dist, img_pixel_t pixel)
 	}
 	else
 	{
-		return raw_colormap[map][pixel];
+		return inst.raw_colormap[map][pixel];
 	}
 }
 
@@ -97,10 +97,12 @@ public:
 
 	bool fullbright;
 
+	const Instance &inst;
+
 public:
-	DrawSurf() : kind(K_INVIS), h1(), h2(), tex_h(),
+	explicit DrawSurf(const Instance &inst) : kind(K_INVIS), h1(), h2(), tex_h(),
 				 img(NULL), col(), y_clip(),
-				 fullbright(false)
+				 fullbright(false), inst(inst)
 	{ }
 
 	~DrawSurf()
@@ -123,7 +125,7 @@ public:
 
 			if (! img)
 			{
-				img = IM_UnknownFlat();
+				img = inst.IM_UnknownFlat();
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -145,13 +147,13 @@ public:
 		{
 			if (is_null_tex(tname))
 			{
-				img = IM_MissingTex();
+				img = inst.IM_MissingTex();
 				fullbright = config::render_missing_bright;
 				return;
 			}
 			else if (is_special_tex(tname))
 			{
-				img = IM_SpecialTex();
+				img = inst.IM_SpecialTex();
 				return;
 			}
 
@@ -159,7 +161,7 @@ public:
 
 			if (! img)
 			{
-				img = IM_UnknownTex();
+				img = inst.IM_UnknownTex();
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -226,8 +228,8 @@ public:
 	DrawSurf floor;
 	DrawSurf rail;
 
-	Instance &inst;
-	explicit DrawWall(Instance &inst) : inst(inst)
+	const Instance &inst;
+	explicit DrawWall(const Instance &inst) : ceil(inst), upper(inst), lower(inst), floor(inst), rail(inst), inst(inst)
 	{
 	}
 
@@ -571,7 +573,7 @@ public:
 	int hl_thick;
 	Fl_Color hl_color;
 
-	Instance &inst;
+	const Instance &inst;
 
 private:
 	static void DeleteWall(DrawWall *P)
@@ -580,7 +582,7 @@ private:
 	}
 
 public:
-	explicit RendInfo(Instance &inst) :
+	explicit RendInfo(const Instance &inst) :
 		walls(), active(),
 		query_mode(0), query_sx(), query_sy(),
 		depth_x(), open_y1(), open_y2(), inst(inst)
@@ -887,7 +889,7 @@ public:
 		Img_c *sprite = inst.W_GetSprite(th->type);
 		if (! sprite)
 		{
-			sprite = IM_UnknownSprite();
+			sprite = inst.IM_UnknownSprite();
 			is_unknown = true;
 			scale = 0.33f;
 		}
@@ -1462,7 +1464,7 @@ public:
 			*dest = src[ty * tw + tx];
 
 			if (r_view.lighting && ! surf.fullbright)
-				*dest = DoomLightRemap(light, dist, *dest);
+				*dest = DoomLightRemap(inst, light, dist, *dest);
 		}
 	}
 
@@ -1511,7 +1513,7 @@ public:
 				continue;
 
 			if (r_view.lighting && ! surf.fullbright)
-				*dest = DoomLightRemap(light, dist, pix);
+				*dest = DoomLightRemap(inst, light, dist, pix);
 			else
 				*dest = pix;
 		}
@@ -1530,7 +1532,7 @@ public:
 			float dist = YToDist(y1, surf.tex_h);
 
 			if (r_view.lighting && ! surf.fullbright)
-				*dest = DoomLightRemap(light, dist, surf.col);
+				*dest = DoomLightRemap(inst, light, dist, surf.col);
 			else
 				*dest = surf.col;
 		}
@@ -1548,7 +1550,7 @@ public:
 		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
 		{
 			if (r_view.lighting && ! surf.fullbright)
-				*dest = DoomLightRemap(light, dist, surf.col);
+				*dest = DoomLightRemap(inst, light, dist, surf.col);
 			else
 				*dest = surf.col;
 		}
@@ -1690,14 +1692,14 @@ public:
 				if (*dest & IS_RGB_PIXEL)
 					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
 				else
-					*dest = raw_colormap[14][*dest];
+					*dest = inst.raw_colormap[14][*dest];
 				continue;
 			}
 
 			*dest = pix;
 
 			if (r_view.lighting && ! (dw->thingFlags & THINGDEF_LIT))
-				*dest = DoomLightRemap(light, dist, *dest);
+				*dest = DoomLightRemap(inst, light, dist, *dest);
 		}
 	}
 
@@ -2042,7 +2044,7 @@ public:
 };
 
 
-static void BlitHires(int ox, int oy, int ow, int oh)
+static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 {
 	u8_t *line_rgb = new u8_t[r_view.screen_w * 3];
 
@@ -2055,7 +2057,7 @@ static void BlitHires(int ox, int oy, int ow, int oh)
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
-			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			inst.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy+ry, r_view.screen_w, 1);
@@ -2064,7 +2066,7 @@ static void BlitHires(int ox, int oy, int ow, int oh)
 }
 
 
-static void BlitLores(int ox, int oy, int ow, int oh)
+static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 {
 	// if destination width is odd, we store an extra pixel here
 	u8_t *line_rgb = new u8_t[(ow + 1) * 3];
@@ -2078,8 +2080,8 @@ static void BlitLores(int ox, int oy, int ow, int oh)
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
-			IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
-			IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
+			inst.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			inst.IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
@@ -2093,18 +2095,18 @@ static void BlitLores(int ox, int oy, int ow, int oh)
 }
 
 
-void SW_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh)
+void Instance::SW_RenderWorld(int ox, int oy, int ow, int oh) const
 {
-	RendInfo rend(inst);
+	RendInfo rend(*this);
 
 	fl_push_clip(ox, oy, ow, oh);
 
 	rend.Render();
 
 	if (config::render_high_detail)
-		BlitHires(ox, oy, ow, oh);
+		BlitHires(*this, ox, oy, ow, oh);
 	else
-		BlitLores(ox, oy, ow, oh);
+		BlitLores(*this, ox, oy, ow, oh);
 
 	rend.Highlight(ox, oy);
 

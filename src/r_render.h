@@ -113,7 +113,6 @@ void Render3D_CB_Paste(Instance &inst);
 void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);
 
-bool Render3D_ParseUser(const std::vector<SString> &tokens);
 void Render3D_WriteUser(std::ostream &os);
 
 void Render3D_NotifyBegin();
@@ -124,8 +123,6 @@ void Render3D_NotifyEnd(Instance &inst);
 
 
 /* API for rendering a scene (etc) */
-
-void SW_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh);
 
 void RGL_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh);
 

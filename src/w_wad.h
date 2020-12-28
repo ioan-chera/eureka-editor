@@ -136,7 +136,6 @@ class Wad_file
 {
 friend class Instance;
 friend class Lump_c;
-friend void W_LoadTextures_TX_START(Wad_file *wf);
 
 private:
 	SString filename;

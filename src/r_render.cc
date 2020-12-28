@@ -623,7 +623,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 	AdjustOfs_RenderAnte(inst);
 
 #ifdef NO_OPENGL
-	SW_RenderWorld(inst, ox, oy, ow, oh);
+	inst.SW_RenderWorld(ox, oy, ow, oh);
 #else
 	RGL_RenderWorld(inst, ox, oy, ow, oh);
 #endif
@@ -1528,7 +1528,7 @@ void Render3D_GetCameraPos(double *x, double *y, float *angle)
 }
 
 
-bool Render3D_ParseUser(const std::vector<SString> &tokens)
+bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "camera" && tokens.size() >= 5)
 	{

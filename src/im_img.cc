@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------
 
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 
 #include "im_img.h"
@@ -59,7 +60,7 @@ static Img_c * digit_font_14x19;
 #define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
 
-inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
+inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
 {
 	if (p & IS_RGB_PIXEL)
 	{
@@ -71,9 +72,9 @@ inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 	}
 	else
 	{
-		byte r = raw_palette[p][0];
-		byte g = raw_palette[p][1];
-		byte b = raw_palette[p][2];
+		byte r = inst.raw_palette[p][0];
+		byte g = inst.raw_palette[p][1];
+		byte b = inst.raw_palette[p][2];
 
 		return RGB_MAKE(r, g, b);
 	}
@@ -83,15 +84,15 @@ inline rgb_color_t IM_PixelToRGB(img_pixel_t p)
 //
 // default constructor, creating a null image
 //
-Img_c::Img_c() : pixels(NULL), w(0), h(0), gl_tex(0)
+Img_c::Img_c(const Instance &inst) : pixels(NULL), w(0), h(0), gl_tex(0), inst(inst)
 { }
 
 
 //
 // a constructor with dimensions
 //
-Img_c::Img_c(int width, int height, bool _dummy) :
-	pixels(NULL), w(0), h(0), gl_tex(0)
+Img_c::Img_c(const Instance &inst, int width, int height, bool _dummy) :
+	pixels(NULL), w(0), h(0), gl_tex(0), inst(inst)
 {
 	resize(width, height);
 }
@@ -210,7 +211,7 @@ void Img_c::compose(Img_c *other, int x, int y)
 //
 Img_c * Img_c::spectrify() const
 {
-	Img_c *omg = new Img_c(width(), height());
+	Img_c *omg = new Img_c(inst, width(), height());
 
 	int invis_start = Misc_info.invis_colors[0];
 	int invis_len   = Misc_info.invis_colors[1] - invis_start + 1;
@@ -253,7 +254,7 @@ Img_c * Img_c::scale_img(double scale) const
 	int owidth  = (int) (width()  * scale + 0.5);
 	int oheight = (int) (height() * scale + 0.5);
 
-	Img_c *omg = new Img_c(owidth, oheight);
+	Img_c *omg = new Img_c(inst, owidth, oheight);
 
 	const img_pixel_t *const ibuf = buf();
 	img_pixel_t       *const obuf = omg->wbuf();
@@ -290,7 +291,7 @@ Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img_c *omg = new Img_c(width(), height());
+	Img_c *omg = new Img_c(inst, width(), height());
 
 	int W = width();
 	int H = height();
@@ -350,7 +351,7 @@ void Img_c::test_make_RGB()
 
 		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
 		{
-			const rgb_color_t col = IM_PixelToRGB(pix);
+			const rgb_color_t col = IM_PixelToRGB(inst, pix);
 
 			byte r = RGB_RED(col)   >> 3;
 			byte g = RGB_GREEN(col) >> 3;
@@ -421,7 +422,7 @@ void Img_c::load_gl()
 			{
 				byte r, g, b;
 
-				IM_DecodePixel(pix, r, g, b);
+				inst.IM_DecodePixel(pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
@@ -552,9 +553,9 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
+static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg, int fg)
 {
-	Img_c *omg = new Img_c(64, 64, true);
+	Img_c *omg = new Img_c(inst, 64, 64, true);
 
 	img_pixel_t *obuf = omg->wbuf();
 
@@ -568,7 +569,7 @@ static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
 }
 
 
-Img_c * IM_MissingTex()
+Img_c *Instance::IM_MissingTex() const
 {
 	if (! missing_tex_image || missing_tex_color != Misc_info.missing_color)
 	{
@@ -577,14 +578,14 @@ Img_c * IM_MissingTex()
 		if (missing_tex_image)
 			delete missing_tex_image;
 
-		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
+		missing_tex_image = IM_CreateDummyTex(*this, missing_graphic, missing_tex_color, 0);
 	}
 
 	return missing_tex_image;
 }
 
 
-Img_c * IM_UnknownTex()
+Img_c *Instance::IM_UnknownTex() const
 {
 	if (! unknown_tex_image || unknown_tex_color != Misc_info.unknown_tex)
 	{
@@ -593,14 +594,14 @@ Img_c * IM_UnknownTex()
 		if (unknown_tex_image)
 			delete unknown_tex_image;
 
-		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
+		unknown_tex_image = IM_CreateDummyTex(*this, unknown_graphic, unknown_tex_color, 0);
 	}
 
 	return unknown_tex_image;
 }
 
 
-Img_c * IM_SpecialTex()
+Img_c *Instance::IM_SpecialTex() const
 {
 	if (special_tex_color < 0)
 	{
@@ -614,14 +615,14 @@ Img_c * IM_SpecialTex()
 	}
 
 	if (! special_tex_image)
-		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
+		special_tex_image = IM_CreateDummyTex(*this, unknown_graphic, special_tex_color,
 			W_FindPaletteColor(255, 255, 255));
 
 	return special_tex_image;
 }
 
 
-Img_c * IM_UnknownFlat()
+Img_c *Instance::IM_UnknownFlat() const
 {
 	if (! unknown_flat_image || unknown_flat_color != Misc_info.unknown_flat)
 	{
@@ -630,14 +631,14 @@ Img_c * IM_UnknownFlat()
 		if (unknown_flat_image)
 			delete unknown_flat_image;
 
-		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
+		unknown_flat_image = IM_CreateDummyTex(*this, unknown_graphic, unknown_flat_color, 0);
 	}
 
 	return unknown_flat_image;
 }
 
 
-Img_c * IM_UnknownSprite()
+Img_c *Instance::IM_UnknownSprite() const
 {
 	int unk_col = Misc_info.unknown_thing;
 	if (unk_col == 0)
@@ -650,7 +651,7 @@ Img_c * IM_UnknownSprite()
 		if (unknown_sprite_image)
 			delete unknown_sprite_image;
 
-		unknown_sprite_image = new Img_c(64, 64, true);
+		unknown_sprite_image = new Img_c(*this, 64, 64, true);
 
 		img_pixel_t *obuf = unknown_sprite_image->wbuf();
 
@@ -665,9 +666,9 @@ Img_c * IM_UnknownSprite()
 }
 
 
-Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *palette, int pal_size)
+static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char **text, const rgb_color_t *palette, int pal_size)
 {
-	Img_c *result = new Img_c(W, H);
+	Img_c *result = new Img_c(inst, W, H);
 
 	result->clear();
 
@@ -675,7 +676,7 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 	byte *conv_palette = new byte[pal_size];
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = inst.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -697,11 +698,11 @@ Img_c * IM_CreateFromText(int W, int H, const char **text, const rgb_color_t *pa
 }
 
 
-static Img_c * IM_CreateFont(int W, int H, const char **text,
+static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char **text,
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
-	Img_c *result = new Img_c(W, H);
+	Img_c *result = new Img_c(inst, W, H);
 
 	result->clear();
 
@@ -729,7 +730,7 @@ static Img_c * IM_CreateFont(int W, int H, const char **text,
 }
 
 
-Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src)
+Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 {
 	int W  = src->w();
 	int H  = src->h();
@@ -746,7 +747,7 @@ Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src)
 	if (! (D == 3 || D == 4))
 		return NULL;
 
-	Img_c *img = new Img_c(W, H);
+	Img_c *img = new Img_c(*this, W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -775,9 +776,9 @@ Img_c * IM_ConvertRGBImage(Fl_RGB_Image *src)
 }
 
 
-Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
+Img_c * Instance::IM_ConvertTGAImage(const rgba_color_t * data, int W, int H) const
 {
-	Img_c *img = new Img_c(W, H);
+	Img_c *img = new Img_c(*this, W, H);
 
 	img_pixel_t *dest = img->wbuf();
 
@@ -1019,20 +1020,20 @@ static const char *dog_image_text[] =
 };
 
 
-Img_c * IM_CreateDogSprite()
+Img_c *Instance::IM_CreateDogSprite() const
 {
-	return IM_CreateFromText(44, 26, dog_image_text, dog_palette, 7);
+	return IM_CreateFromText(*this, 44, 26, dog_image_text, dog_palette, 7);
 }
 
 
 //------------------------------------------------------------------------
 
-Img_c * IM_CreateLightSprite()
+Img_c *Instance::IM_CreateLightSprite() const
 {
 	int W = 11;
 	int H = 11;
 
-	Img_c *result = new Img_c(W, H);
+	Img_c *result = new Img_c(*this, W, H);
 
 	result->clear();
 
@@ -1069,12 +1070,12 @@ Img_c * IM_CreateLightSprite()
 }
 
 
-Img_c * IM_CreateMapSpotSprite(int base_r, int base_g, int base_b)
+Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const
 {
 	int W = 32;
 	int H = 32;
 
-	Img_c *result = new Img_c(W, H);
+	Img_c *result = new Img_c(*this, W, H);
 
 	result->clear();
 
@@ -1164,22 +1165,22 @@ static const char *digit_14x19_text[] =
 };
 
 
-Img_c * IM_DigitFont_11x14()
+Img_c *Instance::IM_DigitFont_11x14() const
 {
 	if (! digit_font_11x14)
 	{
-		digit_font_11x14 = IM_CreateFont(11*14, 14, digit_11x14_text,
+		digit_font_11x14 = IM_CreateFont(*this, 11*14, 14, digit_11x14_text,
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
 	return digit_font_11x14;
 }
 
-Img_c * IM_DigitFont_14x19()
+Img_c *Instance::IM_DigitFont_14x19() const
 {
 	if (! digit_font_14x19)
 	{
-		digit_font_14x19 = IM_CreateFont(14*14, 19, digit_14x19_text,
+		digit_font_14x19 = IM_CreateFont(*this, 14*14, 19, digit_14x19_text,
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
