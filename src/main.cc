@@ -76,8 +76,6 @@ SString global::install_dir;
 SString global::home_dir;
 SString global::cache_dir;
 
-
-SString instance::Iwad_name;
 SString Pwad_name;
 
 std::vector<SString> global::Pwad_list;
@@ -375,54 +373,54 @@ static bool DetermineIWAD(Instance &inst)
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (!instance::Iwad_name.empty() && FilenameIsBare(instance::Iwad_name))
+	if (!inst.Iwad_name.empty() && FilenameIsBare(inst.Iwad_name))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		instance::Iwad_name = instance::Iwad_name.asLower();
+		inst.Iwad_name = inst.Iwad_name.asLower();
 
-		if (! M_CanLoadDefinitions("games", instance::Iwad_name))
-			ThrowException("Unknown game '%s' (no definition file)\n", instance::Iwad_name.c_str());
+		if (! M_CanLoadDefinitions("games", inst.Iwad_name))
+			ThrowException("Unknown game '%s' (no definition file)\n", inst.Iwad_name.c_str());
 
-		SString path = M_QueryKnownIWAD(instance::Iwad_name);
+		SString path = M_QueryKnownIWAD(inst.Iwad_name);
 
 		if (path.empty())
-			ThrowException("Cannot find IWAD for game '%s'\n", instance::Iwad_name.c_str());
+			ThrowException("Cannot find IWAD for game '%s'\n", inst.Iwad_name.c_str());
 
-		instance::Iwad_name = path;
+		inst.Iwad_name = path;
 	}
-	else if (!instance::Iwad_name.empty())
+	else if (!inst.Iwad_name.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(instance::Iwad_name))
-			instance::Iwad_name = ReplaceExtension(instance::Iwad_name, "wad");
+		if (! HasExtension(inst.Iwad_name))
+			inst.Iwad_name = ReplaceExtension(inst.Iwad_name, "wad");
 
-		if (! Wad_file::Validate(instance::Iwad_name))
-			FatalError("IWAD does not exist or is invalid: %s\n", instance::Iwad_name.c_str());
+		if (! Wad_file::Validate(inst.Iwad_name))
+			FatalError("IWAD does not exist or is invalid: %s\n", inst.Iwad_name.c_str());
 
-		SString game = GameNameFromIWAD(instance::Iwad_name);
+		SString game = GameNameFromIWAD(inst.Iwad_name);
 
 		if (! M_CanLoadDefinitions("games", game))
-			FatalError("Unknown game '%s' (no definition file)\n", instance::Iwad_name.c_str());
+			ThrowException("Unknown game '%s' (no definition file)\n", inst.Iwad_name.c_str());
 
-		M_AddKnownIWAD(instance::Iwad_name);
+		M_AddKnownIWAD(inst.Iwad_name);
 		M_SaveRecent();
 	}
 	else
 	{
-		instance::Iwad_name = inst.M_PickDefaultIWAD();
+		inst.Iwad_name = inst.M_PickDefaultIWAD();
 
-		if (instance::Iwad_name.empty())
+		if (inst.Iwad_name.empty())
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
-			if (! MissingIWAD_Dialog(inst))
+			if (! inst.MissingIWAD_Dialog())
 				return false;
 		}
 	}
 
-	instance::Game_name = GameNameFromIWAD(instance::Iwad_name);
+	instance::Game_name = GameNameFromIWAD(inst.Iwad_name);
 
 	return true;
 }
@@ -810,9 +808,9 @@ static void Main_LoadIWAD(Instance &inst)
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	inst.game_wad = Wad_file::Open(instance::Iwad_name, WadOpenMode_read);
+	inst.game_wad = Wad_file::Open(inst.Iwad_name, WadOpenMode_read);
 	if (!inst.game_wad)
-		ThrowException("Failed to open game IWAD: %s\n", instance::Iwad_name.c_str());
+		ThrowException("Failed to open game IWAD: %s\n", inst.Iwad_name.c_str());
 
 	MasterDir_Add(inst.game_wad);
 }
@@ -820,10 +818,10 @@ static void Main_LoadIWAD(Instance &inst)
 
 static void ReadGameInfo(Instance &inst)
 {
-	instance::Game_name = GameNameFromIWAD(instance::Iwad_name);
+	instance::Game_name = GameNameFromIWAD(inst.Iwad_name);
 
 	LogPrintf("Game name: '%s'\n", instance::Game_name.c_str());
-	LogPrintf("IWAD file: '%s'\n", instance::Iwad_name.c_str());
+	LogPrintf("IWAD file: '%s'\n", inst.Iwad_name.c_str());
 
 	M_LoadDefinitions(inst, "games", instance::Game_name);
 }
@@ -1095,7 +1093,7 @@ int main(int argc, char *argv[])
 			MasterDir_Add(gInstance.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!instance::Iwad_name.empty() || !gInstance.Level_name.empty()))
+		else if (config::auto_load_recent && ! (!gInstance.Iwad_name.empty() || !gInstance.Level_name.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{

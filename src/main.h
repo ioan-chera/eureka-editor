@@ -150,10 +150,6 @@ namespace global
 	extern SString log_file;    // Name of log file, or NULL
 }
 
-namespace instance
-{
-	extern SString Iwad_name;   // Filename of the iwad
-}
 extern SString Pwad_name;   // Filename of current wad, or NULL
 
 namespace global

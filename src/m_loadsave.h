@@ -32,8 +32,6 @@
 void LoadLevel(Instance &inst, Wad_file *wad, const SString &level);
 void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num);
 
-bool MissingIWAD_Dialog(Instance &inst);
-
 void OpenFileMap(const SString &filename, const SString &map_name = "");
 
 extern int last_given_file;

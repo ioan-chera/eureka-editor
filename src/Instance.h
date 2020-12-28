@@ -60,6 +60,7 @@ public:
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 
 	// M_LOADSAVE
+	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
 
 	// MAIN
@@ -86,6 +87,7 @@ public:	// will be private when we encapsulate everything
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
 	SString Port_name;	// Name of source port "vanilla", "boom", ...
+	SString Iwad_name;	// Filename of the iwad
 
 	//
 	// Game-dependent (thus instance dependent) defaults

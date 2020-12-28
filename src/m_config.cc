@@ -204,7 +204,7 @@ static const opt_desc_t options[] =
 		"",
 		"The name of the IWAD (game data)",
 		"<file>",
-		&instance::Iwad_name
+		&gInstance.Iwad_name	// TODO: same deal
 	},
 
 	{	"port",
