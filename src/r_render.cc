@@ -613,9 +613,6 @@ static void AdjustOfs_RenderPost(const Instance &inst)
 
 static Thing *player;
 
-extern void CheckBeginDrag(Instance &inst);
-
-
 void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 {
 	r_view.PrepareToRender(ow, oh);
@@ -1004,7 +1001,7 @@ void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_CLICK)
 	{
-		CheckBeginDrag(*this);
+		CheckBeginDrag();
 	}
 	else if (edit.action == ACT_DRAG)
 	{
@@ -1587,55 +1584,55 @@ void Render3D_WriteUser(std::ostream &os)
 //  COMMAND FUNCTIONS
 //------------------------------------------------------------------------
 
-static void R3D_Forward(Instance &inst)
+void Instance::R3D_Forward()
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x += r_view.Cos * dist;
 	r_view.y += r_view.Sin * dist;
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	inst.RedrawMap();
+	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	RedrawMap();
 }
 
-static void R3D_Backward(Instance &inst)
+void Instance::R3D_Backward()
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x -= r_view.Cos * dist;
 	r_view.y -= r_view.Sin * dist;
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	inst.RedrawMap();
+	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	RedrawMap();
 }
 
-static void R3D_Left(Instance &inst)
+void Instance::R3D_Left()
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x -= r_view.Sin * dist;
 	r_view.y += r_view.Cos * dist;
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	inst.RedrawMap();
+	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	RedrawMap();
 }
 
-static void R3D_Right(Instance &inst)
+void Instance::R3D_Right()
 {
 	float dist = static_cast<float>(atof(EXEC_Param[0]));
 
 	r_view.x += r_view.Sin * dist;
 	r_view.y -= r_view.Cos * dist;
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	inst.RedrawMap();
+	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	RedrawMap();
 }
 
-static void R3D_Up(Instance &inst)
+void Instance::R3D_Up()
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		inst.Beep("Gravity is on");
+		Beep("Gravity is on");
 		return;
 	}
 
@@ -1645,14 +1642,14 @@ static void R3D_Up(Instance &inst)
 
 	r_view.z += dist;
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
-static void R3D_Down(Instance &inst)
+void Instance::R3D_Down()
 {
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		inst.Beep("Gravity is on");
+		Beep("Gravity is on");
 		return;
 	}
 
@@ -1662,11 +1659,11 @@ static void R3D_Down(Instance &inst)
 
 	r_view.z -= dist;
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void R3D_Turn(Instance &inst)
+void Instance::R3D_Turn()
 {
 	float angle = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1675,15 +1672,15 @@ static void R3D_Turn(Instance &inst)
 
 	r_view.SetAngle(static_cast<float>(r_view.angle + angle));
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void R3D_DropToFloor(Instance &inst)
+void Instance::R3D_DropToFloor()
 {
 	r_view.FindGroundZ();
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
@@ -1692,17 +1689,17 @@ void Instance::R3D_NAV_Forward_release()
 	edit.nav_fwd = 0;
 }
 
-static void R3D_NAV_Forward(Instance &inst)
+void Instance::R3D_NAV_Forward()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	inst.edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
+	edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Forward_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Forward_release);
 }
 
 
@@ -1711,17 +1708,17 @@ void Instance::R3D_NAV_Back_release()
 	edit.nav_back = 0;
 }
 
-static void R3D_NAV_Back(Instance &inst)
+void Instance::R3D_NAV_Back()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	inst.edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
+	edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Back_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Back_release);
 }
 
 
@@ -1730,17 +1727,17 @@ void Instance::R3D_NAV_Right_release()
 	edit.nav_right = 0;
 }
 
-static void R3D_NAV_Right(Instance &inst)
+void Instance::R3D_NAV_Right()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	inst.edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
+	edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Right_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Right_release);
 }
 
 
@@ -1749,17 +1746,17 @@ void Instance::R3D_NAV_Left_release()
 	edit.nav_left = 0;
 }
 
-static void R3D_NAV_Left(Instance &inst)
+void Instance::R3D_NAV_Left()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	inst.edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
+	edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Left_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Left_release);
 }
 
 
@@ -1768,25 +1765,25 @@ void Instance::R3D_NAV_Up_release()
 	edit.nav_up = 0;
 }
 
-static void R3D_NAV_Up(Instance &inst)
+void Instance::R3D_NAV_Up()
 {
 	if (! EXEC_CurKey)
 		return;
 
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		inst.Beep("Gravity is on");
+		Beep("Gravity is on");
 		return;
 	}
 
 	r_view.gravity = false;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	inst.edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
+	edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Up_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Up_release);
 }
 
 
@@ -1795,25 +1792,25 @@ void Instance::R3D_NAV_Down_release()
 	edit.nav_down = 0;
 }
 
-static void R3D_NAV_Down(Instance &inst)
+void Instance::R3D_NAV_Down()
 {
 	if (! EXEC_CurKey)
 		return;
 
 	if (r_view.gravity && config::render_lock_gravity)
 	{
-		inst.Beep("Gravity is on");
+		Beep("Gravity is on");
 		return;
 	}
 
 	r_view.gravity = false;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	inst.edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
+	edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Down_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Down_release);
 }
 
 
@@ -1822,20 +1819,20 @@ void Instance::R3D_NAV_TurnLeft_release()
 	edit.nav_turn_L = 0;
 }
 
-static void R3D_NAV_TurnLeft(Instance &inst)
+void Instance::R3D_NAV_TurnLeft()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
 	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	inst.edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
+	edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_TurnLeft_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_TurnLeft_release);
 }
 
 
@@ -1844,20 +1841,20 @@ void Instance::R3D_NAV_TurnRight_release()
 	edit.nav_turn_R = 0;
 }
 
-static void R3D_NAV_TurnRight(Instance &inst)
+void Instance::R3D_NAV_TurnRight()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
 	float turn = static_cast<float>(atof(EXEC_Param[0]));
 
 	// convert to radians
-	inst.edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
+	edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_TurnRight_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_TurnRight_release);
 }
 
 
@@ -1870,38 +1867,38 @@ void Instance::ACT_AdjustOfs_release()
 	AdjustOfs_Finish(*this);
 }
 
-static void R3D_ACT_AdjustOfs(Instance &inst)
+void Instance::R3D_ACT_AdjustOfs()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_AdjustOfs_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &Instance::ACT_AdjustOfs_release))
 		return;
 
-	if (inst.edit.mode != ObjType::linedefs)
+	if (edit.mode != ObjType::linedefs)
 	{
-		inst.Beep("not in linedef mode");
+		Beep("not in linedef mode");
 		return;
 	}
 
-	AdjustOfs_Begin(inst);
+	AdjustOfs_Begin(*this);
 }
 
 
-static void R3D_Set(Instance &inst)
+void Instance::R3D_Set()
 {
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
 
 	if (var_name.empty())
 	{
-		inst.Beep("3D_Set: missing var name");
+		Beep("3D_Set: missing var name");
 		return;
 	}
 
 	if (value.empty())
 	{
-		inst.Beep("3D_Set: missing value");
+		Beep("3D_Set: missing value");
 		return;
 	}
 
@@ -1927,21 +1924,21 @@ static void R3D_Set(Instance &inst)
 	}
 	else
 	{
-		inst.Beep("3D_Set: unknown var: %s", var_name.c_str());
+		Beep("3D_Set: unknown var: %s", var_name.c_str());
 		return;
 	}
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void R3D_Toggle(Instance &inst)
+void Instance::R3D_Toggle()
 {
 	SString var_name = EXEC_Param[0];
 
 	if (var_name.empty())
 	{
-		inst.Beep("3D_Toggle: missing var name");
+		Beep("3D_Toggle: missing var name");
 		return;
 	}
 
@@ -1963,15 +1960,15 @@ static void R3D_Toggle(Instance &inst)
 	}
 	else
 	{
-		inst.Beep("3D_Toggle: unknown var: %s", var_name.c_str());
+		Beep("3D_Toggle: unknown var: %s", var_name.c_str());
 		return;
 	}
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void R3D_WHEEL_Move(Instance &inst)
+void Instance::R3D_WHEEL_Move()
 {
 	float dx = static_cast<float>(Fl::event_dx());
 	float dy = static_cast<float>(Fl::event_dy());
@@ -1993,8 +1990,8 @@ static void R3D_WHEEL_Move(Instance &inst)
 	r_view.x += speed * (r_view.Cos * dy + r_view.Sin * dx);
 	r_view.y += speed * (r_view.Sin * dy - r_view.Cos * dx);
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	inst.RedrawMap();
+	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	RedrawMap();
 }
 
 
@@ -2003,93 +2000,93 @@ static void R3D_WHEEL_Move(Instance &inst)
 static editor_command_t  render_commands[] =
 {
 	{	"3D_Set", NULL,
-		&R3D_Set,
+		&Instance::R3D_Set,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
 	},
 
 	{	"3D_Toggle", NULL,
-		&R3D_Toggle,
+		&Instance::R3D_Toggle,
 		/* flags */ NULL,
 		/* keywords */ "tex obj light grav"
 	},
 
 	{	"3D_Forward", NULL,
-		&R3D_Forward
+		&Instance::R3D_Forward
 	},
 
 	{	"3D_Backward", NULL,
-		&R3D_Backward
+		&Instance::R3D_Backward
 	},
 
 	{	"3D_Left", NULL,
-		&R3D_Left
+		&Instance::R3D_Left
 	},
 
 	{	"3D_Right", NULL,
-		&R3D_Right
+		&Instance::R3D_Right
 	},
 
 	{	"3D_Up", NULL,
-		&R3D_Up
+		&Instance::R3D_Up
 	},
 
 	{	"3D_Down", NULL,
-		&R3D_Down
+		&Instance::R3D_Down
 	},
 
 	{	"3D_Turn", NULL,
-		&R3D_Turn
+		&Instance::R3D_Turn
 	},
 
 	{	"3D_DropToFloor", NULL,
-		&R3D_DropToFloor
+		&Instance::R3D_DropToFloor
 	},
 
 	{	"3D_ACT_AdjustOfs", NULL,
-		&R3D_ACT_AdjustOfs
+		&Instance::R3D_ACT_AdjustOfs
 	},
 
 	{	"3D_WHEEL_Move", NULL,
-		&R3D_WHEEL_Move
+		&Instance::R3D_WHEEL_Move
 	},
 
 	{	"3D_NAV_Forward", NULL,
-		&R3D_NAV_Forward
+		&Instance::R3D_NAV_Forward
 	},
 
 	{	"3D_NAV_Back", NULL,
-		&R3D_NAV_Back
+		&Instance::R3D_NAV_Back
 	},
 
 	{	"3D_NAV_Right", NULL,
-		&R3D_NAV_Right
+		&Instance::R3D_NAV_Right
 	},
 
 	{	"3D_NAV_Left", NULL,
-		&R3D_NAV_Left
+		&Instance::R3D_NAV_Left
 	},
 
 	{	"3D_NAV_Up", NULL,
-		&R3D_NAV_Up
+		&Instance::R3D_NAV_Up
 	},
 
 	{	"3D_NAV_Down", NULL,
-		&R3D_NAV_Down
+		&Instance::R3D_NAV_Down
 	},
 
 	{	"3D_NAV_TurnLeft", NULL,
-		&R3D_NAV_TurnLeft
+		&Instance::R3D_NAV_TurnLeft
 	},
 
 	{	"3D_NAV_TurnRight", NULL,
-		&R3D_NAV_TurnRight
+		&Instance::R3D_NAV_TurnRight
 	},
 
 	// backwards compatibility.
 	// [ we cannot remap this in FindEditorCommand, it fails the context check ]
 	{	"3D_Align", NULL,
-		&LinedefModule::commandAlign,
+		&Instance::CMD_LIN_Align,
 		/* flags */ "/x /y /right /clear"
 	},
 

@@ -330,9 +330,9 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 }
 
 
-void CMD_TestMap(Instance &inst)
+void Instance::CMD_TestMap()
 {
-	if (inst.MadeChanges)
+	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
@@ -341,26 +341,26 @@ void CMD_TestMap(Instance &inst)
 			return;
 		}
 
-		if (! M_SaveMap(inst))
+		if (! M_SaveMap(*this))
 			return;
 	}
 
 
 	// check if we know the executable path, if not then ask
-	port_path_info_t *info = M_QueryPortPath(QueryName(inst.Port_name, inst.Game_name));
+	port_path_info_t *info = M_QueryPortPath(QueryName(Port_name, Game_name));
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(inst.Port_name, inst.Game_name))
+		if (! M_PortSetupDialog(Port_name, Game_name))
 			return;
 
-		info = M_QueryPortPath(QueryName(inst.Port_name, inst.Game_name));
+		info = M_QueryPortPath(QueryName(Port_name, Game_name));
 	}
 
 	// this generally can't happen, but we check anyway...
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		inst.Beep("invalid path to executable");
+		Beep("invalid path to executable");
 		return;
 	}
 
@@ -381,7 +381,7 @@ void CMD_TestMap(Instance &inst)
 	if (! FileChangeDir(folder))
 	{
 		// FIXME : a notify dialog
-		inst.Beep("chdir failed!");
+		Beep("chdir failed!");
 		return;
 	}
 
@@ -389,15 +389,15 @@ void CMD_TestMap(Instance &inst)
 	// build the command string
 
 	SString cmd_buffer = SString::printf("%s %s %s",
-										 CalcEXEName(info).c_str(), GrabWadNames(inst, info).c_str(),
-										 CalcWarpString(inst).c_str());
+										 CalcEXEName(info).c_str(), GrabWadNames(*this, info).c_str(),
+										 CalcWarpString(*this).c_str());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer.c_str());
 
-	inst.Status_Set("TESTING MAP");
+	Status_Set("TESTING MAP");
 
-	inst.main_win->redraw();
+	main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 
@@ -407,9 +407,9 @@ void CMD_TestMap(Instance &inst)
 	int status = system(cmd_buffer.c_str());
 
 	if (status == 0)
-		inst.Status_Set("Result: OK");
+		Status_Set("Result: OK");
 	else
-		inst.Status_Set("Result code: %d\n", status);
+		Status_Set("Result code: %d\n", status);
 
 	LogPrintf("--> result code: %d\n", status);
 
@@ -420,7 +420,7 @@ void CMD_TestMap(Instance &inst)
 		FileChangeDir(old_dir);
 	}
 
-	inst.main_win->redraw();
+	main_win->redraw();
 	Fl::wait(0.1);
 	Fl::wait(0.1);
 }

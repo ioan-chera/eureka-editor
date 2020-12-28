@@ -56,14 +56,6 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list,
 			bool keep_verts ,
 			bool keep_lines );
 
-void CMD_Delete(Instance &inst);
-void CMD_CopyAndPaste(Instance &inst);
-
-void CMD_Clipboard_Cut(Instance &inst);
-void CMD_Clipboard_Copy(Instance &inst);
-void CMD_Clipboard_Paste(Instance &inst);
-
-
 //----------------------------------------------------------------------
 //  Texture Clipboard
 //----------------------------------------------------------------------

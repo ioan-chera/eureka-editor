@@ -948,25 +948,25 @@ public:
 };
 
 
-void VertexModule::commandShapeLine(Instance &inst)
+void Instance::CMD_VT_ShapeLine()
 {
-	if (inst.edit.Selected->count_obj() < 3)
+	if (edit.Selected->count_obj() < 3)
 	{
-		inst.Beep("Need 3 or more vertices to shape");
+		Beep("Need 3 or more vertices to shape");
 		return;
 	}
 
 	// determine orientation and position of the line
 
 	double x1, y1, x2, y2;
-	inst.level.objects.calcBBox(inst.edit.Selected, &x1, &y1, &x2, &y2);
+	level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;
 
 	if (width < 4 && height < 4)
 	{
-		inst.Beep("Too small");
+		Beep("Too small");
 		return;
 	}
 
@@ -983,9 +983,9 @@ void VertexModule::commandShapeLine(Instance &inst)
 	double by = 0;
 	double b_total = 0;
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = inst.level.vertices[*it];
+		const Vertex *V = level.vertices[*it];
 
 		double weight = WeightForVertex(V, x1,y1, x2,y2, width,height, -1);
 
@@ -1026,7 +1026,7 @@ void VertexModule::commandShapeLine(Instance &inst)
 
 	if (unit_len < 2)
 	{
-		inst.Beep("Cannot determine line");
+		Beep("Cannot determine line");
 		return;
 	}
 
@@ -1039,9 +1039,9 @@ void VertexModule::commandShapeLine(Instance &inst)
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = inst.level.vertices[*it];
+		const Vertex *V = level.vertices[*it];
 
 		vert_along_t ALONG(*it, AlongDist(V->x(), V->y(), ax,ay, bx,by));
 
@@ -1052,8 +1052,8 @@ void VertexModule::commandShapeLine(Instance &inst)
 
 
 	// compute proper positions for start and end of the line
-	const Vertex *V1 = inst.level.vertices[along_list.front().vert_num];
-	const Vertex *V2 = inst.level.vertices[along_list. back().vert_num];
+	const Vertex *V1 = level.vertices[along_list.front().vert_num];
+	const Vertex *V2 = level.vertices[along_list. back().vert_num];
 
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
@@ -1076,8 +1076,8 @@ void VertexModule::commandShapeLine(Instance &inst)
 	}
 
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("shaped %d vertices", (int)along_list.size());
+	level.basis.begin();
+	level.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
@@ -1093,11 +1093,11 @@ void VertexModule::commandShapeLine(Instance &inst)
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		inst.level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, inst.MakeValidCoord(nx));
-		inst.level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, inst.MakeValidCoord(ny));
+		level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
+		level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 }
 
 
@@ -1179,11 +1179,11 @@ double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
 }
 
 
-void VertexModule::commandShapeArc(Instance &inst)
+void Instance::CMD_VT_ShapeArc()
 {
 	if (EXEC_Param[0].empty())
 	{
-		inst.Beep("VT_ShapeArc: missing angle parameter");
+		Beep("VT_ShapeArc: missing angle parameter");
 		return;
 	}
 
@@ -1191,30 +1191,30 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	if (arc_deg < 30 || arc_deg > 360)
 	{
-		inst.Beep("VT_ShapeArc: bad angle: %s", EXEC_Param[0].c_str());
+		Beep("VT_ShapeArc: bad angle: %s", EXEC_Param[0].c_str());
 		return;
 	}
 
 	double arc_rad = arc_deg * M_PI / 180.0;
 
 
-	if (inst.edit.Selected->count_obj() < 3)
+	if (edit.Selected->count_obj() < 3)
 	{
-		inst.Beep("Need 3 or more vertices to shape");
+		Beep("Need 3 or more vertices to shape");
 		return;
 	}
 
 
 	// determine middle point for circle
 	double x1, y1, x2, y2;
-	inst.level.objects.calcBBox(inst.edit.Selected, &x1, &y1, &x2, &y2);
+	level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;
 
 	if (width < 4 && height < 4)
 	{
-		inst.Beep("Too small");
+		Beep("Too small");
 		return;
 	}
 
@@ -1232,9 +1232,9 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	std::vector< vert_along_t > along_list;
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = inst.level.vertices[*it];
+		const Vertex *V = level.vertices[*it];
 
 		double dx = V->x() - mid_x;
 		double dy = V->y() - mid_y;
@@ -1243,7 +1243,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 		if (dist < 4)
 		{
-			inst.Beep("Strange shape");
+			Beep("Strange shape");
 			return;
 		}
 
@@ -1276,8 +1276,8 @@ void VertexModule::commandShapeArc(Instance &inst)
 	else
 		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
-	const Vertex * start_V = inst.level.vertices[along_list[start_idx].vert_num];
-	const Vertex * end_V   = inst.level.vertices[along_list[  end_idx].vert_num];
+	const Vertex * start_V = level.vertices[along_list[start_idx].vert_num];
+	const Vertex * end_V   = level.vertices[along_list[  end_idx].vert_num];
 
 	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 
@@ -1324,7 +1324,7 @@ void VertexModule::commandShapeArc(Instance &inst)
 		{
 			double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
-			double cost = inst.level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list,
+			double cost = level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list,
 										 start_idx, arc_rad, ang_offset, false);
 
 			if (cost < best_cost)
@@ -1338,13 +1338,13 @@ void VertexModule::commandShapeArc(Instance &inst)
 
 	// actually move stuff now
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("shaped %d vertices", (int)along_list.size());
+	level.basis.begin();
+	level.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
-	inst.level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
+	level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 
-	inst.level.basis.end();
+	level.basis.end();
 }
 
 

@@ -1033,32 +1033,32 @@ static void Selection_Validate(const Instance &inst)
 }
 
 
-void CMD_LastSelection(Instance &inst)
+void Instance::CMD_LastSelection()
 {
-	if (! inst.last_Sel)
+	if (! last_Sel)
 	{
-		inst.Beep("No last selection (or was invalidated)");
+		Beep("No last selection (or was invalidated)");
 		return;
 	}
 
 	bool changed_mode = false;
 
-	if (inst.last_Sel->what_type() != inst.edit.mode)
+	if (last_Sel->what_type() != edit.mode)
 	{
 		changed_mode = true;
-		Editor_ChangeMode_Raw(inst, inst.last_Sel->what_type());
-		inst.main_win->NewEditMode(inst.edit.mode);
+		Editor_ChangeMode_Raw(*this, last_Sel->what_type());
+		main_win->NewEditMode(edit.mode);
 	}
 
-	std::swap(inst.last_Sel, inst.edit.Selected);
+	std::swap(last_Sel, edit.Selected);
 
 	// ensure everything is kosher
-	Selection_Validate(inst);
+	Selection_Validate(*this);
 
 	if (changed_mode)
-		GoToSelection(inst);
+		GoToSelection(*this);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 

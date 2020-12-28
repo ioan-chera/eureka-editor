@@ -84,79 +84,79 @@ void SectorModule::safeRaiseLower(int sec, int parts, int dz) const
 }
 
 
-void SectorModule::commandFloor(Instance &inst)
+void Instance::CMD_SEC_Floor()
 {
 	int diff = atoi(EXEC_Param[0]);
 
 	if (diff == 0)
 	{
-		inst.Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
+		Beep("SEC_Floor: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No sectors to move");
+		Beep("No sectors to move");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = inst.level.sectors[*it];
+		const Sector *S = level.sectors[*it];
 
 		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
-		inst.level.basis.changeSector(*it, Sector::F_FLOORH, new_h);
+		level.basis.changeSector(*it, Sector::F_FLOORH, new_h);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	inst.main_win->sec_box->UpdateField(Sector::F_FLOORH);
+	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
-void SectorModule::commandCeiling(Instance &inst)
+void Instance::CMD_SEC_Ceil()
 {
 	int diff = atoi(EXEC_Param[0]);
 
 	if (diff == 0)
 	{
-		inst.Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
+		Beep("SEC_Ceil: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No sectors to move");
+		Beep("No sectors to move");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = inst.level.sectors[*it];
+		const Sector *S = level.sectors[*it];
 
 		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
-		inst.level.basis.changeSector(*it, Sector::F_CEILH, new_h);
+		level.basis.changeSector(*it, Sector::F_CEILH, new_h);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	inst.main_win->sec_box->UpdateField(Sector::F_CEILH);
+	main_win->sec_box->UpdateField(Sector::F_CEILH);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
@@ -206,60 +206,60 @@ void SectorModule::sectorsAdjustLight(int delta) const
 }
 
 
-void SectorModule::commandLight(Instance &inst)
+void Instance::CMD_SEC_Light()
 {
 	int diff = atoi(EXEC_Param[0]);
 
 	if (diff == 0)
 	{
-		inst.Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
+		Beep("SEC_Light: bad parameter '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No sectors to adjust light");
+		Beep("No sectors to adjust light");
 		return;
 	}
 
-	inst.level.secmod.sectorsAdjustLight(diff);
+	level.secmod.sectorsAdjustLight(diff);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
-void SectorModule::commandSwapFlats(Instance &inst)
+void Instance::CMD_SEC_SwapFlats()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No sectors to swap");
+		Beep("No sectors to swap");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("swapped flats in", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("swapped flats in", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = inst.level.sectors[*it];
+		const Sector *S = level.sectors[*it];
 
 		int floor_tex = S->floor_tex;
 		int  ceil_tex = S->ceil_tex;
 
-		inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
-		inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
+		level.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
+		level.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	inst.main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
-	inst.main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
+	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
+	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 

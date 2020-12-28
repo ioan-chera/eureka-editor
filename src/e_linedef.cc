@@ -671,7 +671,7 @@ void LinedefModule::alignGroup(const std::vector<Objid> & group, int align_flags
 	}
 }
 
-void LinedefModule::commandAlign(Instance &inst)
+void Instance::CMD_LIN_Align()
 {
 	// parse the flags
 	bool do_X = Exec_HasFlag("/x");
@@ -679,7 +679,7 @@ void LinedefModule::commandAlign(Instance &inst)
 
 	if (! (do_X || do_Y))
 	{
-		inst.Beep("LIN_Align: need x or y flag");
+		Beep("LIN_Align: need x or y flag");
 		return;
 	}
 
@@ -697,10 +697,10 @@ void LinedefModule::commandAlign(Instance &inst)
 	if (do_clear) align_flags |= LINALIGN_Clear;
 
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
-	if (inst.edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
+	SelectHighlight unselect = SelectionOrHighlight();
+	if (edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
 	{
-		inst.Beep("no lines to align");
+		Beep("no lines to align");
 		return;
 	}
 
@@ -708,12 +708,12 @@ void LinedefModule::commandAlign(Instance &inst)
 
 	std::vector< Objid > group;
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		int parts = inst.edit.Selected->get_ext(*it);
+		int parts = edit.Selected->get_ext(*it);
 		parts &= ~1;
 
-		const LineDef *L = inst.level.linedefs[*it];
+		const LineDef *L = level.linedefs[*it];
 
 		// safety check
 		if (L->left  < 0) parts &= ~PART_LF_ALL;
@@ -746,8 +746,8 @@ void LinedefModule::commandAlign(Instance &inst)
 			// decide whether to use upper or lower
 			// WISH : this could be smarter....
 
-			bool lower_vis = inst.level.linemod.partIsVisible(obj, 'l');
-			bool upper_vis = inst.level.linemod.partIsVisible(obj, 'u');
+			bool lower_vis = level.linemod.partIsVisible(obj, 'l');
+			bool upper_vis = level.linemod.partIsVisible(obj, 'u');
 
 			if (! (lower_vis || upper_vis))
 				continue;
@@ -762,25 +762,25 @@ void LinedefModule::commandAlign(Instance &inst)
 
 	if (group.empty())
 	{
-		inst.Beep("no visible surfaces");
+		Beep("no visible surfaces");
 		if (unselect == SelectHighlight::unselect)
-			Selection_Clear(inst, true /* nosave */);
+			Selection_Clear(*this, true /* nosave */);
 		return;
 	}
 
-	inst.level.basis.begin();
+	level.basis.begin();
 
-	inst.level.linemod.alignGroup(group, align_flags);
+	level.linemod.alignGroup(group, align_flags);
 
 	if (do_clear)
-		inst.level.basis.setMessage("cleared offsets");
+		level.basis.setMessage("cleared offsets");
 	else
-		inst.level.basis.setMessage("aligned offsets");
+		level.basis.setMessage("aligned offsets");
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 //------------------------------------------------------------------------
@@ -843,55 +843,55 @@ void LinedefModule::flipLinedefGroup(const selection_c *flip) const
 //
 // flip the orientation of some LineDefs
 //
-void LinedefModule::commandFlip(Instance &inst)
+void Instance::CMD_LIN_Flip()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No lines to flip");
+		Beep("No lines to flip");
 		return;
 	}
 
 	bool force_it = Exec_HasFlag("/force");
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("flipped", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("flipped", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		if (force_it)
-			inst.level.linemod.flipLinedef(*it);
+			level.linemod.flipLinedef(*it);
 		else
-			inst.level.linemod.flipLinedef_safe(*it);
+			level.linemod.flipLinedef_safe(*it);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
-void LinedefModule::commandSwapSides(Instance &inst)
+void Instance::CMD_LIN_SwapSides()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No lines to swap sides");
+		Beep("No lines to swap sides");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("swapped sides on", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("swapped sides on", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		inst.level.linemod.flipLine_sides(*it);
+		level.linemod.flipLine_sides(*it);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 //
@@ -973,40 +973,40 @@ bool LinedefModule::doSplitLineDef(int ld) const
 //
 // split one or more LineDefs in two, adding new Vertices in the middle
 //
-void LinedefModule::commandSplitHalf(Instance &inst)
+void Instance::CMD_LIN_SplitHalf()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No lines to split");
+		Beep("No lines to split");
 		return;
 	}
 
-	int new_first = inst.level.numLinedefs();
+	int new_first = level.numLinedefs();
 	int new_count = 0;
 
-	inst.level.basis.begin();
+	level.basis.begin();
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		if (inst.level.linemod.doSplitLineDef(*it))
+		if (level.linemod.doSplitLineDef(*it))
 			new_count++;
 	}
 
-	inst.level.basis.setMessage("halved %d lines", new_count);
-	inst.level.basis.end();
+	level.basis.setMessage("halved %d lines", new_count);
+	level.basis.end();
 
 	// Hmmmmm -- should abort early if some lines are too short??
-	if (new_count < inst.edit.Selected->count_obj())
-		inst.Beep("Some lines were too short!");
+	if (new_count < edit.Selected->count_obj())
+		Beep("Some lines were too short!");
 
 	if (unselect == SelectHighlight::unselect)
 	{
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 	}
 	else if (new_count > 0)
 	{
-		inst.edit.Selected->frob_range(new_first, new_first + new_count - 1, BitOp::add);
+		edit.Selected->frob_range(new_first, new_first + new_count - 1, BitOp::add);
 	}
 }
 

@@ -129,7 +129,7 @@ void M_RemoveBinding(keycode_t key, key_context_e context);
 
 /* --- command execution stuff --- */
 
-typedef void (* command_func_t)(Instance &instance);
+typedef void (Instance::*command_func_t)();
 
 struct editor_command_t
 {

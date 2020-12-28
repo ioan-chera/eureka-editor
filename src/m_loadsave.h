@@ -38,26 +38,6 @@ extern int last_given_file;
 // these return false if user cancelled
 bool M_SaveMap(Instance &inst);
 
-/* commands */
-
-void CMD_NewProject(Instance &inst);
-void CMD_ManageProject(Instance &inst);
-
-void CMD_OpenMap(Instance &inst);
-void CMD_GivenFile(Instance &inst);
-void CMD_FlipMap(Instance &inst);
-
-void CMD_SaveMap(Instance &inst);
-void CMD_ExportMap(Instance &inst);
-
-void CMD_FreshMap(Instance &inst);
-void CMD_CopyMap(Instance &inst);
-void CMD_RenameMap(Instance &inst);
-void CMD_DeleteMap(Instance &inst);
-
-// this one in m_testmap.cc
-void CMD_TestMap(Instance &inst);
-
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 
 //--- editor settings ---

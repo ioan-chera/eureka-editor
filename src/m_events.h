@@ -73,8 +73,6 @@ unsigned int Nav_TimeDiff(); /* milliseconds */
 
 void M_LoadOperationMenus(Instance &inst);
 
-void CMD_OperationMenu(Instance &inst);
-
 struct nav_active_key_t
 {
 	// key or button code, including any modifier.

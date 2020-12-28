@@ -407,9 +407,6 @@ unsigned int Nav_TimeDiff()
 int wheel_dx;
 int wheel_dy;
 
-extern void CheckBeginDrag(Instance &inst);
-extern void Transform_Update(Instance &inst);
-
 
 static void EV_EnterWindow(Instance &inst)
 {
@@ -488,7 +485,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 
 	if (inst.edit.action == ACT_TRANSFORM)
 	{
-		Transform_Update(inst);
+		inst.Transform_Update();
 		return;
 	}
 
@@ -528,7 +525,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	// begin dragging?
 	if (inst.edit.action == ACT_CLICK)
 	{
-		CheckBeginDrag(inst);
+		inst.CheckBeginDrag();
 	}
 
 	// in general, just update the highlight, split-line (etc)
@@ -961,7 +958,7 @@ void M_LoadOperationMenus(Instance &inst)
 }
 
 
-void CMD_OperationMenu(Instance &inst)
+void Instance::CMD_OperationMenu()
 {
 	if (no_operation_cfg)
 		return;
@@ -971,13 +968,13 @@ void CMD_OperationMenu(Instance &inst)
 	// if no context given, pick one based on editing mode
 	if (context.empty())
 	{
-		if (inst.edit.render3d)
+		if (edit.render3d)
 		{
 			context = "render";
 		}
 		else
 		{
-			switch (inst.edit.mode)
+			switch (edit.mode)
 			{
 			case ObjType::linedefs:	context = "line";   break;
 			case ObjType::sectors:	context = "sector"; break;
@@ -991,7 +988,7 @@ void CMD_OperationMenu(Instance &inst)
 
 	if (menu == NULL)
 	{
-		inst.Beep("no such menu: %s", context.c_str());
+		Beep("no such menu: %s", context.c_str());
 		return;
 	}
 
@@ -1005,11 +1002,11 @@ void CMD_OperationMenu(Instance &inst)
 	// the pop-up menu will cause an FL_LEAVE event on the canvas,
 	// which we need to ignore to prevent forgetting the current
 	// highlight or killing line drawing mode.
-	inst.in_operation_menu = true;
+	in_operation_menu = true;
 
 	const Fl_Menu_Item *item = menu->popup();
 
-	inst.in_operation_menu = false;
+	in_operation_menu = false;
 
 	if (item)
 	{

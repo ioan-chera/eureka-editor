@@ -33,6 +33,7 @@ struct vert_along_t;
 
 class VertexModule : public DocumentModule
 {
+	friend class Instance;
 public:
 	VertexModule(Document &doc) : DocumentModule(doc)
 	{
@@ -50,8 +51,6 @@ public:
 	static void commandDisconnect(Instance &inst);
 	static void commandLineDisconnect(Instance &inst);
 	static void commandSectorDisconnect(Instance &inst);
-	static void commandShapeLine(Instance &inst);
-	static void commandShapeArc(Instance &inst);
 
 private:
 	void mergeSandwichLines(int ld1, int ld2, int v, selection_c &del_lines) const;

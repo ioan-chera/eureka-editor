@@ -21,8 +21,6 @@
 #ifndef __EUREKA_UI_PREFS_H__
 #define __EUREKA_UI_PREFS_H__
 
-void CMD_Preferences(Instance &inst);
-
 #endif  /* __EUREKA_UI_PREFS_H__ */
 
 //--- editor settings ---

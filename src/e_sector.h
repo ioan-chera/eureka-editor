@@ -117,6 +117,7 @@ private:
 //
 class SectorModule : public DocumentModule
 {
+	friend class Instance;
 public:
 	SectorModule(Document &doc) : DocumentModule(doc)
 	{
@@ -129,11 +130,7 @@ public:
 
 	/* commands */
 
-	static void commandFloor(Instance &inst);
-	static void commandCeiling(Instance &inst);
-	static void commandLight(Instance &inst);
 	static void commandMerge(Instance &inst);
-	static void commandSwapFlats(Instance &inst);
 
 private:
 	friend class lineloop_c;

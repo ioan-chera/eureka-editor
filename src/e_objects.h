@@ -52,6 +52,7 @@ public:
 //
 class ObjectsModule : public DocumentModule
 {
+	friend class Instance;
 public:
 	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
 	{
@@ -69,15 +70,6 @@ public:
 		double pos_x, double pos_y, double pos_z) const;
 	void rotate3(double deg, double pos_x, double pos_y) const;
 
-	/* commands */
-
-	static void commandInsert(Instance &inst);
-	static void commandCopyProperties(Instance &inst);
-	static void commandMirror(Instance &inst);
-	static void commandRotate90(Instance &inst);
-	static void commandEnlarge(Instance &inst);
-	static void commandShrink(Instance &inst);
-	static void commandQuantize(Instance &inst);
 
 private:
 	void insertSector() const;

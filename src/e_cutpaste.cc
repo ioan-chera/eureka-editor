@@ -802,35 +802,35 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 //------------------------------------------------------------------------
 
-void CMD_CopyAndPaste(Instance &inst)
+void Instance::CMD_CopyAndPaste()
 {
-	if (inst.edit.Selected->empty() && inst.edit.highlight.is_nil())
+	if (edit.Selected->empty() && edit.highlight.is_nil())
 	{
-		inst.Beep("Nothing to copy and paste");
+		Beep("Nothing to copy and paste");
 		return;
 	}
 
-	if (Clipboard_DoCopy(inst))
+	if (Clipboard_DoCopy(*this))
 	{
-		Clipboard_DoPaste(inst);
+		Clipboard_DoPaste(*this);
 	}
 }
 
 
-void CMD_Clipboard_Cut(Instance &inst)
+void Instance::CMD_Clipboard_Cut()
 {
-	if (inst.main_win->ClipboardOp(EditCommand::cut))
+	if (main_win->ClipboardOp(EditCommand::cut))
 		return;
 
-	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Cut(inst);
+		Render3D_CB_Cut(*this);
 		return;
 	}
 
-	if (! Clipboard_DoCopy(inst))
+	if (! Clipboard_DoCopy(*this))
 	{
-		inst.Beep("Nothing to cut");
+		Beep("Nothing to cut");
 		return;
 	}
 
@@ -838,39 +838,39 @@ void CMD_Clipboard_Cut(Instance &inst)
 }
 
 
-void CMD_Clipboard_Copy(Instance &inst)
+void Instance::CMD_Clipboard_Copy()
 {
-	if (inst.main_win->ClipboardOp(EditCommand::copy))
+	if (main_win->ClipboardOp(EditCommand::copy))
 		return;
 
-	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Copy(inst);
+		Render3D_CB_Copy(*this);
 		return;
 	}
 
-	if (! Clipboard_DoCopy(inst))
+	if (! Clipboard_DoCopy(*this))
 	{
-		inst.Beep("Nothing to copy");
+		Beep("Nothing to copy");
 		return;
 	}
 }
 
 
-void CMD_Clipboard_Paste(Instance &inst)
+void Instance::CMD_Clipboard_Paste()
 {
-	if (inst.main_win->ClipboardOp(EditCommand::paste))
+	if (main_win->ClipboardOp(EditCommand::paste))
 		return;
 
-	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Paste(inst);
+		Render3D_CB_Paste(*this);
 		return;
 	}
 
-	if (! Clipboard_DoPaste(inst))
+	if (! Clipboard_DoPaste(*this))
 	{
-		inst.Beep("Clipboard is empty");
+		Beep("Clipboard is empty");
 		return;
 	}
 }
@@ -1216,15 +1216,15 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 }
 
 
-void CMD_Delete(Instance &inst)
+void Instance::CMD_Delete()
 {
-	if (inst.main_win->ClipboardOp(EditCommand::del))
+	if (main_win->ClipboardOp(EditCommand::del))
 		return;
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("Nothing to delete");
+		Beep("Nothing to delete");
 		return;
 	}
 
@@ -1232,37 +1232,37 @@ void CMD_Delete(Instance &inst)
 
 	// special case for a single vertex connected to two linedefs,
 	// we delete the vertex but merge the two linedefs.
-	if (inst.edit.mode == ObjType::vertices && inst.edit.Selected->count_obj() == 1)
+	if (edit.mode == ObjType::vertices && edit.Selected->count_obj() == 1)
 	{
-		int v_num = inst.edit.Selected->find_first();
+		int v_num = edit.Selected->find_first();
 		SYS_ASSERT(v_num >= 0);
 
-		if (inst.level.vertmod.howManyLinedefs(v_num) == 2)
+		if (level.vertmod.howManyLinedefs(v_num) == 2)
 		{
-			if (DeleteVertex_MergeLineDefs(inst.level, v_num))
+			if (DeleteVertex_MergeLineDefs(level, v_num))
 				goto success;
 		}
 
 		// delete vertex normally
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("deleted", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("deleted", *edit.Selected);
 
-	DeleteObjects_WithUnused(inst.level, inst.edit.Selected, keep, false /* keep_verts */, keep);
+	DeleteObjects_WithUnused(level, edit.Selected, keep, false /* keep_verts */, keep);
 
-	inst.level.basis.end();
+	level.basis.end();
 
 success:
-	inst.Editor_ClearAction();
+	Editor_ClearAction();
 
 	// always clear the selection (deleting objects invalidates it)
-	Selection_Clear(inst);
+	Selection_Clear(*this);
 
-	inst.edit.highlight.clear();
-	inst.edit.split_line.clear();
+	edit.highlight.clear();
+	edit.split_line.clear();
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 

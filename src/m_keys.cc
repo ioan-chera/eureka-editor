@@ -1102,7 +1102,7 @@ extern void Debug_CheckUnusedStuff(Document &doc);
 
 static void DoExecuteCommand(const editor_command_t *cmd)
 {
-	(* cmd->func)(gInstance);
+	(gInstance.*cmd->func)();
 
 //	Debug_CheckUnusedStuff();
 }

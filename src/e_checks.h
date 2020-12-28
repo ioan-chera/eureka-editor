@@ -45,6 +45,7 @@ enum class CheckResult
 //
 class ChecksModule : public DocumentModule
 {
+	friend class Instance;
 public:
 	ChecksModule(Document &doc) : DocumentModule(doc)
 	{
@@ -53,9 +54,6 @@ public:
 	void sidedefsUnpack(bool is_after_load) const;
 	void tagsApplyNewValue(int new_tag) const;
 	void tagsUsedRange(int *min_tag, int *max_tag) const;
-
-	static void commandMapCheck(Instance &inst);
-	static void commandApplyTag(Instance &inst);
 
 private:
 	void checkAll(bool majorStuff) const;

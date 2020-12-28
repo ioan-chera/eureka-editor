@@ -44,143 +44,143 @@
 int config::minimum_drag_pixels = 5;
 
 
-static void CMD_Nothing(Instance &inst)
+void Instance::CMD_Nothing()
 {
 	/* hey jude, don't make it bad */
 }
 
 
-static void CMD_MetaKey(Instance &inst)
+void Instance::CMD_MetaKey()
 {
-	if (inst.edit.sticky_mod)
+	if (edit.sticky_mod)
 	{
-		ClearStickyMod(inst);
+		ClearStickyMod(*this);
 		return;
 	}
 
-	inst.Status_Set("META...");
+	Status_Set("META...");
 
-	inst.edit.sticky_mod = EMOD_META;
+	edit.sticky_mod = EMOD_META;
 }
 
 
-static void CMD_EditMode(Instance &inst)
+void Instance::CMD_EditMode()
 {
 	char mode = tolower(EXEC_Param[0][0]);
 
 	if (! mode || ! strchr("lstvr", mode))
 	{
-		inst.Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
+		Beep("Bad parameter for EditMode: '%s'", EXEC_Param[0].c_str());
 		return;
 	}
 
-	inst.Editor_ChangeMode(mode);
+	Editor_ChangeMode(mode);
 }
 
 
-static void CMD_Select(Instance &inst)
+void Instance::CMD_Select()
 {
-	if (inst.edit.render3d)
+	if (edit.render3d)
 		return;
 
 	// FIXME : action in effect?
 
 	// FIXME : split_line in effect?
 
-	if (inst.edit.highlight.is_nil())
+	if (edit.highlight.is_nil())
 	{
-		inst.Beep("Nothing under cursor");
+		Beep("Nothing under cursor");
 		return;
 	}
 
-	inst.Selection_Toggle(inst.edit.highlight);
-	inst.RedrawMap();
+	Selection_Toggle(edit.highlight);
+	RedrawMap();
 }
 
 
-static void CMD_SelectAll(Instance &inst)
+void Instance::CMD_SelectAll()
 {
-	Editor_ClearErrorMode(inst);
+	Editor_ClearErrorMode(*this);
 
-	int total = inst.level.numObjects(inst.edit.mode);
+	int total = level.numObjects(edit.mode);
 
-	inst.Selection_Push();
+	Selection_Push();
 
-	inst.edit.Selected->change_type(inst.edit.mode);
-	inst.edit.Selected->frob_range(0, total-1, BitOp::add);
+	edit.Selected->change_type(edit.mode);
+	edit.Selected->frob_range(0, total-1, BitOp::add);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void CMD_UnselectAll(Instance &inst)
+void Instance::CMD_UnselectAll()
 {
-	Editor_ClearErrorMode(inst);
+	Editor_ClearErrorMode(*this);
 
-	if (inst.edit.action == ACT_DRAW_LINE ||
-		inst.edit.action == ACT_TRANSFORM)
+	if (edit.action == ACT_DRAW_LINE ||
+		edit.action == ACT_TRANSFORM)
 	{
-		inst.Editor_ClearAction();
+		Editor_ClearAction();
 	}
 
-	Selection_Clear(inst);
+	Selection_Clear(*this);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void CMD_InvertSelection(Instance &inst)
+void Instance::CMD_InvertSelection()
 {
 	// do not clear selection when in error mode
-	inst.edit.error_mode = false;
+	edit.error_mode = false;
 
-	int total = inst.level.numObjects(inst.edit.mode);
+	int total = level.numObjects(edit.mode);
 
-	if (inst.edit.Selected->what_type() != inst.edit.mode)
+	if (edit.Selected->what_type() != edit.mode)
 	{
 		// convert the selection
-		selection_c *prev_sel = inst.edit.Selected;
-		inst.edit.Selected = new selection_c(inst.edit.mode, true /* extended */);
+		selection_c *prev_sel = edit.Selected;
+		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
-		ConvertSelection(inst.level, prev_sel, inst.edit.Selected);
+		ConvertSelection(level, prev_sel, edit.Selected);
 		delete prev_sel;
 	}
 
-	inst.edit.Selected->frob_range(0, total-1, BitOp::toggle);
+	edit.Selected->frob_range(0, total-1, BitOp::toggle);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void CMD_Quit(Instance &inst)
+void Instance::CMD_Quit()
 {
 	Main_Quit();
 }
 
 
-static void CMD_Undo(Instance &inst)
+void Instance::CMD_Undo()
 {
-	if (! inst.level.basis.undo())
+	if (! level.basis.undo())
 	{
-		inst.Beep("No operation to undo");
+		Beep("No operation to undo");
 		return;
 	}
 
-	inst.RedrawMap();
-	inst.main_win->UpdatePanelObj();
+	RedrawMap();
+	main_win->UpdatePanelObj();
 }
 
 
-static void CMD_Redo(Instance &inst)
+void Instance::CMD_Redo()
 {
-	if (! inst.level.basis.redo())
+	if (! level.basis.redo())
 	{
-		inst.Beep("No operation to redo");
+		Beep("No operation to redo");
 		return;
 	}
 
-	inst.RedrawMap();
-	inst.main_win->UpdatePanelObj();
+	RedrawMap();
+	main_win->UpdatePanelObj();
 }
 
 
@@ -200,20 +200,20 @@ static void SetGamma(Instance &inst, int new_val)
 }
 
 
-static void CMD_SetVar(Instance &inst)
+void Instance::CMD_SetVar()
 {
 	SString var_name = EXEC_Param[0];
 	SString value    = EXEC_Param[1];
 
 	if (var_name.empty())
 	{
-		inst.Beep("Set: missing var name");
+		Beep("Set: missing var name");
 		return;
 	}
 
 	if (value.empty())
 	{
-		inst.Beep("Set: missing value");
+		Beep("Set: missing value");
 		return;
 	}
 
@@ -223,17 +223,17 @@ static void CMD_SetVar(Instance &inst)
 
 	if (var_name.noCaseEqual("3d"))
 	{
-		Render3D_Enable(inst, bool_val);
+		Render3D_Enable(*this, bool_val);
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
-		inst.Editor_ClearAction();
+		Editor_ClearAction();
 
 		int want_vis   = bool_val ? 1 : 0;
-		int is_visible = inst.main_win->browser->visible() ? 1 : 0;
+		int is_visible = main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
-			inst.main_win->BrowserMode('/');
+			main_win->BrowserMode('/');
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -245,68 +245,68 @@ static void CMD_SetVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("sprites"))
 	{
-		inst.edit.thing_render_mode = int_val;
-		inst.RedrawMap();
+		edit.thing_render_mode = int_val;
+		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
-		inst.edit.show_object_numbers = bool_val;
-		inst.RedrawMap();
+		edit.show_object_numbers = bool_val;
+		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("gamma"))
 	{
-		SetGamma(inst, int_val);
+		SetGamma(*this, int_val);
 	}
 	else if (var_name.noCaseEqual("ratio"))
 	{
 		grid.ratio = CLAMP(0, int_val, 7);
-		inst.main_win->info_bar->UpdateRatio();
-		inst.RedrawMap();
+		main_win->info_bar->UpdateRatio();
+		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
 		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
-		inst.edit.sector_render_mode = (sector_rendering_mode_e) int_val;
+		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
 
-		if (inst.edit.render3d)
-			Render3D_Enable(inst, false);
+		if (edit.render3d)
+			Render3D_Enable(*this, false);
 
 		// need sectors mode for sound propagation display
-		if (inst.edit.sector_render_mode == SREND_SoundProp && inst.edit.mode != ObjType::sectors)
-			inst.Editor_ChangeMode('s');
+		if (edit.sector_render_mode == SREND_SoundProp && edit.mode != ObjType::sectors)
+			Editor_ChangeMode('s');
 
-		inst.RedrawMap();
+		RedrawMap();
 	}
 	else
 	{
-		inst.Beep("Set: unknown var: %s", var_name.c_str());
+		Beep("Set: unknown var: %s", var_name.c_str());
 	}
 }
 
 
-static void CMD_ToggleVar(Instance &inst)
+void Instance::CMD_ToggleVar()
 {
 	SString var_name = EXEC_Param[0];
 
 	if (var_name.empty())
 	{
-		inst.Beep("Toggle: missing var name");
+		Beep("Toggle: missing var name");
 		return;
 	}
 
 	if (var_name.noCaseEqual("3d"))
 	{
-		Render3D_Enable(inst, ! inst.edit.render3d);
+		Render3D_Enable(*this, ! edit.render3d);
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
-		inst.Editor_ClearAction();
+		Editor_ClearAction();
 
-		inst.main_win->BrowserMode('/');
+		main_win->BrowserMode('/');
 	}
 	else if (var_name.noCaseEqual("recent"))
 	{
-		inst.main_win->browser->ToggleRecent();
+		main_win->browser->ToggleRecent();
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -318,17 +318,17 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("sprites"))
 	{
-		inst.edit.thing_render_mode = ! inst.edit.thing_render_mode;
-		inst.RedrawMap();
+		edit.thing_render_mode = ! edit.thing_render_mode;
+		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
-		inst.edit.show_object_numbers = ! inst.edit.show_object_numbers;
-		inst.RedrawMap();
+		edit.show_object_numbers = ! edit.show_object_numbers;
+		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("gamma"))
 	{
-		SetGamma(inst, (config::usegamma >= 4) ? 0 : config::usegamma + 1);
+		SetGamma(*this, (config::usegamma >= 4) ? 0 : config::usegamma + 1);
 	}
 	else if (var_name.noCaseEqual("ratio"))
 	{
@@ -337,29 +337,29 @@ static void CMD_ToggleVar(Instance &inst)
 		else
 			grid.ratio++;
 
-		inst.main_win->info_bar->UpdateRatio();
-		inst.RedrawMap();
+		main_win->info_bar->UpdateRatio();
+		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
-		if (inst.edit.sector_render_mode >= SREND_SoundProp)
-			inst.edit.sector_render_mode = SREND_Nothing;
+		if (edit.sector_render_mode >= SREND_SoundProp)
+			edit.sector_render_mode = SREND_Nothing;
 		else
-			inst.edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)inst.edit.sector_render_mode);
-		inst.RedrawMap();
+			edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)edit.sector_render_mode);
+		RedrawMap();
 	}
 	else
 	{
-		inst.Beep("Toggle: unknown var: %s", var_name.c_str());
+		Beep("Toggle: unknown var: %s", var_name.c_str());
 	}
 }
 
 
-static void CMD_BrowserMode(Instance &inst)
+void Instance::CMD_BrowserMode()
 {
 	if (EXEC_Param[0].empty())
 	{
-		inst.Beep("BrowserMode: missing mode");
+		Beep("BrowserMode: missing mode");
 		return;
 	}
 
@@ -368,30 +368,30 @@ static void CMD_BrowserMode(Instance &inst)
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
 	       mode == 'T' || mode == 'F' || mode == 'G'))
 	{
-		inst.Beep("Unknown browser mode: %s", EXEC_Param[0].c_str());
+		Beep("Unknown browser mode: %s", EXEC_Param[0].c_str());
 		return;
 	}
 
 	// if that browser is already open, close it now
-	if (inst.main_win->browser->visible() &&
-		inst.main_win->browser->GetMode() == mode &&
+	if (main_win->browser->visible() &&
+		main_win->browser->GetMode() == mode &&
 		! Exec_HasFlag("/force") &&
 		! Exec_HasFlag("/recent"))
 	{
-		inst.main_win->BrowserMode(0);
+		main_win->BrowserMode(0);
 		return;
 	}
 
-	inst.main_win->BrowserMode(mode);
+	main_win->BrowserMode(mode);
 
 	if (Exec_HasFlag("/recent"))
 	{
-		inst.main_win->browser->ToggleRecent(true /* force */);
+		main_win->browser->ToggleRecent(true /* force */);
 	}
 }
 
 
-static void CMD_Scroll(Instance &inst)
+void Instance::CMD_Scroll()
 {
 	// these are percentages
 	float delta_x = static_cast<float>(atof(EXEC_Param[0]));
@@ -399,11 +399,11 @@ static void CMD_Scroll(Instance &inst)
 
 	if (delta_x == 0 && delta_y == 0)
 	{
-		inst.Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
+		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
 		return;
 	}
 
-	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
 	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
 	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
@@ -417,19 +417,19 @@ void Instance::NAV_Scroll_Left_release()
 	edit.nav_left = 0;
 }
 
-static void CMD_NAV_Scroll_Left(Instance &inst)
+void Instance::CMD_NAV_Scroll_Left()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	inst.edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Left_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Left_release);
 }
 
 
@@ -438,19 +438,19 @@ void Instance::NAV_Scroll_Right_release()
 	edit.nav_right = 0;
 }
 
-static void CMD_NAV_Scroll_Right(Instance &inst)
+void Instance::CMD_NAV_Scroll_Right()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	inst.edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Right_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Right_release);
 }
 
 
@@ -459,19 +459,19 @@ void Instance::NAV_Scroll_Up_release()
 	edit.nav_up = 0;
 }
 
-static void CMD_NAV_Scroll_Up(Instance &inst)
+void Instance::CMD_NAV_Scroll_Up()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	inst.edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Up_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Up_release);
 }
 
 
@@ -480,19 +480,19 @@ void Instance::NAV_Scroll_Down_release()
 	edit.nav_down = 0;
 }
 
-static void CMD_NAV_Scroll_Down(Instance &inst)
+void Instance::CMD_NAV_Scroll_Down()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
-	inst.edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
+	edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Down_release);
+	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Down_release);
 }
 
 
@@ -501,21 +501,21 @@ void Instance::NAV_MouseScroll_release()
 	Editor_ScrollMap(+1);
 }
 
-static void CMD_NAV_MouseScroll(Instance &inst)
+void Instance::CMD_NAV_MouseScroll()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	inst.edit.panning_speed = static_cast<float>(atof(EXEC_Param[0]));
-	inst.edit.panning_lax = Exec_HasFlag("/LAX");
+	edit.panning_speed = static_cast<float>(atof(EXEC_Param[0]));
+	edit.panning_lax = Exec_HasFlag("/LAX");
 
-	if (! inst.edit.is_navigating)
-		inst.Editor_ClearNav();
+	if (! edit.is_navigating)
+		Editor_ClearNav();
 
-	if (Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_MouseScroll_release))
+	if (Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_MouseScroll_release))
 	{
 		// begin
-		inst.Editor_ScrollMap(-1);
+		Editor_ScrollMap(-1);
 	}
 }
 
@@ -523,20 +523,20 @@ static void CMD_NAV_MouseScroll(Instance &inst)
 static void DoBeginDrag(Instance &inst);
 
 
-void CheckBeginDrag(Instance &inst)
+void Instance::CheckBeginDrag()
 {
-	if (! inst.edit.clicked.valid())
+	if (! edit.clicked.valid())
 		return;
 
-	if (! inst.edit.click_check_drag)
+	if (! edit.click_check_drag)
 		return;
 
 	// can drag things and sector planes in 3D mode
-	if (inst.edit.render3d && !(inst.edit.mode == ObjType::things || inst.edit.mode == ObjType::sectors))
+	if (edit.render3d && !(edit.mode == ObjType::things || edit.mode == ObjType::sectors))
 		return;
 
-	int pixel_dx = Fl::event_x() - inst.edit.click_screen_x;
-	int pixel_dy = Fl::event_y() - inst.edit.click_screen_y;
+	int pixel_dx = Fl::event_x() - edit.click_screen_x;
+	int pixel_dy = Fl::event_y() - edit.click_screen_y;
 
 	if (MAX(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
 		return;
@@ -544,12 +544,12 @@ void CheckBeginDrag(Instance &inst)
 	// if highlighted object is in selection, we drag the selection,
 	// otherwise we drag just this one object.
 
-	if (inst.edit.click_force_single || !inst.edit.Selected->get(inst.edit.clicked.num))
-		inst.edit.dragged = inst.edit.clicked;
+	if (edit.click_force_single || !edit.Selected->get(edit.clicked.num))
+		edit.dragged = edit.clicked;
 	else
-		inst.edit.dragged.clear();
+		edit.dragged.clear();
 
-	DoBeginDrag(inst);
+	DoBeginDrag(*this);
 }
 
 static void DoBeginDrag(Instance &inst)
@@ -720,166 +720,166 @@ void Instance::ACT_Click_release()
 	RedrawMap();
 }
 
-static void CMD_ACT_Click(Instance &inst)
+void Instance::CMD_ACT_Click()
 {
 	if (! EXEC_CurKey)
 		return;
 
 	// require a highlighted object in 3D mode
-	if (inst.edit.render3d && inst.edit.highlight.is_nil())
+	if (edit.render3d && edit.highlight.is_nil())
 		return;
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Click_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Click_release))
 		return;
 
-	inst.edit.click_check_select = ! Exec_HasFlag("/noselect");
-	inst.edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
-	inst.edit.click_force_single = false;
+	edit.click_check_select = ! Exec_HasFlag("/noselect");
+	edit.click_check_drag   = ! Exec_HasFlag("/nodrag");
+	edit.click_force_single = false;
 
 	// remember some state (for drag detection)
-	inst.edit.click_screen_x = Fl::event_x();
-	inst.edit.click_screen_y = Fl::event_y();
+	edit.click_screen_x = Fl::event_x();
+	edit.click_screen_y = Fl::event_y();
 
-	inst.edit.click_map_x = inst.edit.map_x;
-	inst.edit.click_map_y = inst.edit.map_y;
-	inst.edit.click_map_z = inst.edit.map_z;
+	edit.click_map_x = edit.map_x;
+	edit.click_map_y = edit.map_y;
+	edit.click_map_z = edit.map_z;
 
 	// handle 3D mode, skip stuff below which only makes sense in 2D
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		if (inst.edit.highlight.type == ObjType::things)
+		if (edit.highlight.type == ObjType::things)
 		{
-			const Thing *T = inst.level.things[inst.edit.highlight.num];
-			inst.edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
+			const Thing *T = level.things[edit.highlight.num];
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
 		}
 		else
 		{
-			inst.edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(inst.edit.map_x, inst.edit.map_y));
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(edit.map_x, edit.map_y));
 		}
 
-		inst.edit.clicked = inst.edit.highlight;
-		inst.Editor_SetAction(ACT_CLICK);
+		edit.clicked = edit.highlight;
+		Editor_SetAction(ACT_CLICK);
 		return;
 	}
 
 	// check for splitting a line, and ensure we can drag the vertex
 	if (! Exec_HasFlag("/nosplit") &&
-		inst.edit.mode == ObjType::vertices &&
-		inst.edit.split_line.valid() &&
-		inst.edit.action != ACT_DRAW_LINE)
+		edit.mode == ObjType::vertices &&
+		edit.split_line.valid() &&
+		edit.action != ACT_DRAW_LINE)
 	{
-		int split_ld = inst.edit.split_line.num;
+		int split_ld = edit.split_line.num;
 
-		inst.edit.click_force_single = true;   // if drag vertex, force single-obj mode
-		inst.edit.click_check_select = false;  // do NOT select the new vertex
+		edit.click_force_single = true;   // if drag vertex, force single-obj mode
+		edit.click_check_select = false;  // do NOT select the new vertex
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const LineDef *L = inst.level.linedefs[split_ld];
+		const LineDef *L = level.linedefs[split_ld];
 
-		bool want_select = inst.edit.Selected->get(L->start) && inst.edit.Selected->get(L->end);
+		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 
-		inst.level.basis.begin();
-		inst.level.basis.setMessage("split linedef #%d", split_ld);
+		level.basis.begin();
+		level.basis.setMessage("split linedef #%d", split_ld);
 
-		int new_vert = inst.level.basis.addNew(ObjType::vertices);
+		int new_vert = level.basis.addNew(ObjType::vertices);
 
-		Vertex *V = inst.level.vertices[new_vert];
+		Vertex *V = level.vertices[new_vert];
 
-		V->SetRawXY(inst, inst.edit.split_x, inst.edit.split_y);
+		V->SetRawXY(*this, edit.split_x, edit.split_y);
 
-		inst.level.linemod.splitLinedefAtVertex(split_ld, new_vert);
+		level.linemod.splitLinedefAtVertex(split_ld, new_vert);
 
-		inst.level.basis.end();
+		level.basis.end();
 
 		if (want_select)
-			inst.edit.Selected->set(new_vert);
+			edit.Selected->set(new_vert);
 
-		inst.edit.clicked = Objid(ObjType::vertices, new_vert);
-		inst.Editor_SetAction(ACT_CLICK);
+		edit.clicked = Objid(ObjType::vertices, new_vert);
+		Editor_SetAction(ACT_CLICK);
 
-		inst.RedrawMap();
+		RedrawMap();
 		return;
 	}
 
 	// find the object under the pointer.
-	inst.edit.clicked = inst.level.hover.getNearbyObject(inst.edit.mode, inst.edit.map_x, inst.edit.map_y);
+	edit.clicked = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 	// clicking on an empty space starts a new selection box
-	if (inst.edit.click_check_select && inst.edit.clicked.is_nil())
+	if (edit.click_check_select && edit.clicked.is_nil())
 	{
-		inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
-		inst.edit.selbox_y1 = inst.edit.selbox_y2 = inst.edit.map_y;
+		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
+		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-		inst.Editor_SetAction(ACT_SELBOX);
+		Editor_SetAction(ACT_SELBOX);
 		return;
 	}
 
-	inst.Editor_SetAction(ACT_CLICK);
+	Editor_SetAction(ACT_CLICK);
 }
 
 
-static void CMD_ACT_SelectBox(Instance &inst)
+void Instance::CMD_ACT_SelectBox()
 {
-	if (inst.edit.render3d)
+	if (edit.render3d)
 		return;
 
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_SelectBox_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &Instance::ACT_SelectBox_release))
 		return;
 
-	inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
-	inst.edit.selbox_y1 = inst.edit.selbox_y2 = inst.edit.map_y;
+	edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
+	edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
 
-	inst.Editor_SetAction(ACT_SELBOX);
+	Editor_SetAction(ACT_SELBOX);
 }
 
 
-static void CMD_ACT_Drag(Instance &inst)
+void Instance::CMD_ACT_Drag()
 {
 	if (! EXEC_CurKey)
 		return;
 
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		inst.Beep("Nothing to drag");
+		Beep("Nothing to drag");
 		return;
 	}
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Drag_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Drag_release))
 		return;
 
 	// we only drag the selection, never a single object
-	inst.edit.dragged.clear();
+	edit.dragged.clear();
 
-	DoBeginDrag(inst);
+	DoBeginDrag(*this);
 }
 
 
-void Transform_Update(Instance &inst)
+void Instance::Transform_Update()
 {
-	double dx1 = inst.edit.map_x - inst.edit.trans_param.mid_x;
-	double dy1 = inst.edit.map_y - inst.edit.trans_param.mid_y;
+	double dx1 = edit.map_x - edit.trans_param.mid_x;
+	double dy1 = edit.map_y - edit.trans_param.mid_y;
 
-	double dx0 = inst.edit.trans_start_x - inst.edit.trans_param.mid_x;
-	double dy0 = inst.edit.trans_start_y - inst.edit.trans_param.mid_y;
+	double dx0 = edit.trans_start_x - edit.trans_param.mid_x;
+	double dy0 = edit.trans_start_y - edit.trans_param.mid_y;
 
-	inst.edit.trans_param.scale_x = inst.edit.trans_param.scale_y = 1;
-	inst.edit.trans_param.skew_x  = inst.edit.trans_param.skew_y  = 0;
-	inst.edit.trans_param.rotate  = 0;
+	edit.trans_param.scale_x = edit.trans_param.scale_y = 1;
+	edit.trans_param.skew_x  = edit.trans_param.skew_y  = 0;
+	edit.trans_param.rotate  = 0;
 
-	if (inst.edit.trans_mode == TRANS_K_Rotate || inst.edit.trans_mode == TRANS_K_RotScale)
+	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
 	{
 		double angle[2] = { atan2(dy1, dx1), atan2(dy0, dx0) };
 
-		inst.edit.trans_param.rotate = angle[1] - angle[0];
+		edit.trans_param.rotate = angle[1] - angle[0];
 
 //		fprintf(stderr, "angle diff : %1.2f\n", inst.edit.trans_rotate * 360.0 / 65536.0);
 	}
 
-	switch (inst.edit.trans_mode)
+	switch (edit.trans_mode)
 	{
 		case TRANS_K_Scale:
 		case TRANS_K_RotScale:
@@ -888,14 +888,14 @@ void Transform_Update(Instance &inst)
 
 			if (dx0)
 			{
-				inst.edit.trans_param.scale_x = dx1 / (float)dx0;
-				inst.edit.trans_param.scale_y = inst.edit.trans_param.scale_x;
+				edit.trans_param.scale_x = dx1 / (float)dx0;
+				edit.trans_param.scale_y = edit.trans_param.scale_x;
 			}
 			break;
 
 		case TRANS_K_Stretch:
-			if (dx0) inst.edit.trans_param.scale_x = dx1 / (float)dx0;
-			if (dy0) inst.edit.trans_param.scale_y = dy1 / (float)dy0;
+			if (dx0) edit.trans_param.scale_x = dx1 / (float)dx0;
+			if (dy0) edit.trans_param.scale_y = dy1 / (float)dy0;
 			break;
 
 		case TRANS_K_Rotate:
@@ -905,16 +905,16 @@ void Transform_Update(Instance &inst)
 		case TRANS_K_Skew:
 			if (abs(dx0) >= abs(dy0))
 			{
-				if (dx0) inst.edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+				if (dx0) edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
 			}
 			else
 			{
-				if (dy0) inst.edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+				if (dy0) edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
 			}
 			break;
 	}
 
-	inst.main_win->canvas->redraw();
+	main_win->canvas->redraw();
 }
 
 
@@ -934,17 +934,17 @@ void Instance::ACT_Transform_release()
 	RedrawMap();
 }
 
-static void CMD_ACT_Transform(Instance &inst)
+void Instance::CMD_ACT_Transform()
 {
-	if (inst.edit.render3d)
+	if (edit.render3d)
 		return;
 
 	if (! EXEC_CurKey)
 		return;
 
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		inst.Beep("Nothing to scale");
+		Beep("Nothing to scale");
 		return;
 	}
 
@@ -953,7 +953,7 @@ static void CMD_ACT_Transform(Instance &inst)
 
 	if (keyword.empty())
 	{
-		inst.Beep("ACT_Transform: missing keyword");
+		Beep("ACT_Transform: missing keyword");
 		return;
 	}
 	else if (keyword.noCaseEqual("scale"))
@@ -978,43 +978,43 @@ static void CMD_ACT_Transform(Instance &inst)
 	}
 	else
 	{
-		inst.Beep("ACT_Transform: unknown keyword: %s", keyword.c_str());
+		Beep("ACT_Transform: unknown keyword: %s", keyword.c_str());
 		return;
 	}
 
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Transform_release))
+	if (! Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Transform_release))
 		return;
 
 
 	double middle_x, middle_y;
-	inst.level.objects.calcMiddle(inst.edit.Selected, &middle_x, &middle_y);
+	level.objects.calcMiddle(edit.Selected, &middle_x, &middle_y);
 
-	inst.edit.trans_mode = mode;
-	inst.edit.trans_start_x = inst.edit.map_x;
-	inst.edit.trans_start_y = inst.edit.map_y;
+	edit.trans_mode = mode;
+	edit.trans_start_x = edit.map_x;
+	edit.trans_start_y = edit.map_y;
 
-	inst.edit.trans_param.Clear();
-	inst.edit.trans_param.mid_x = middle_x;
-	inst.edit.trans_param.mid_y = middle_y;
+	edit.trans_param.Clear();
+	edit.trans_param.mid_x = middle_x;
+	edit.trans_param.mid_y = middle_y;
 
-	if (inst.edit.trans_lines)
+	if (edit.trans_lines)
 	{
-		delete inst.edit.trans_lines;
-		inst.edit.trans_lines = NULL;
+		delete edit.trans_lines;
+		edit.trans_lines = NULL;
 	}
 
-	if (inst.edit.mode == ObjType::vertices)
+	if (edit.mode == ObjType::vertices)
 	{
-		inst.edit.trans_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(inst.level, inst.edit.Selected, inst.edit.trans_lines);
+		edit.trans_lines = new selection_c(ObjType::linedefs);
+		ConvertSelection(level, edit.Selected, edit.trans_lines);
 	}
 
-	inst.Editor_SetAction(ACT_TRANSFORM);
+	Editor_SetAction(ACT_TRANSFORM);
 }
 
 
-static void CMD_WHEEL_Scroll(Instance &inst)
+void Instance::CMD_WHEEL_Scroll()
 {
 	float speed = static_cast<float>(atof(EXEC_Param[0]));
 
@@ -1031,7 +1031,7 @@ static void CMD_WHEEL_Scroll(Instance &inst)
 	float delta_x = static_cast<float>(wheel_dx);
 	float delta_y = static_cast<float>(0 - wheel_dy);
 
-	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
+	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
 	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
@@ -1039,72 +1039,72 @@ static void CMD_WHEEL_Scroll(Instance &inst)
 }
 
 
-static void CMD_Merge(Instance &inst)
+void Instance::CMD_Merge()
 {
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			VertexModule::commandMerge(inst);
+			VertexModule::commandMerge(*this);
 			break;
 
 		case ObjType::linedefs:
-			LinedefModule::commandMergeTwo(inst);
+			LinedefModule::commandMergeTwo(*this);
 			break;
 
 		case ObjType::sectors:
-			SectorModule::commandMerge(inst);
+			SectorModule::commandMerge(*this);
 			break;
 
 		case ObjType::things:
-			CMD_TH_Merge(inst);
+			CMD_TH_Merge(*this);
 			break;
 
 		default:
-			inst.Beep("Cannot merge that");
+			Beep("Cannot merge that");
 			break;
 	}
 }
 
 
-static void CMD_Disconnect(Instance &inst)
+void Instance::CMD_Disconnect()
 {
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			VertexModule::commandDisconnect(inst);
+			VertexModule::commandDisconnect(*this);
 			break;
 
 		case ObjType::linedefs:
-			VertexModule::commandLineDisconnect(inst);
+			VertexModule::commandLineDisconnect(*this);
 			break;
 
 		case ObjType::sectors:
-			VertexModule::commandSectorDisconnect(inst);
+			VertexModule::commandSectorDisconnect(*this);
 			break;
 
 		case ObjType::things:
-			CMD_TH_Disconnect(inst);
+			CMD_TH_Disconnect(*this);
 			break;
 
 		default:
-			inst.Beep("Cannot disconnect that");
+			Beep("Cannot disconnect that");
 			break;
 	}
 }
 
 
-static void CMD_Zoom(Instance &inst)
+void Instance::CMD_Zoom()
 {
 	int delta = atoi(EXEC_Param[0]);
 
 	if (delta == 0)
 	{
-		inst.Beep("Zoom: bad or missing value");
+		Beep("Zoom: bad or missing value");
 		return;
 	}
 
-	int mid_x = static_cast<int>(inst.edit.map_x);
-	int mid_y = static_cast<int>(inst.edit.map_y);
+	int mid_x = static_cast<int>(edit.map_x);
+	int mid_y = static_cast<int>(edit.map_y);
 
 	if (Exec_HasFlag("/center"))
 	{
@@ -1116,137 +1116,137 @@ static void CMD_Zoom(Instance &inst)
 }
 
 
-static void CMD_ZoomWholeMap(Instance &inst)
+void Instance::CMD_ZoomWholeMap()
 {
-	if (inst.edit.render3d)
-		Render3D_Enable(inst, false);
+	if (edit.render3d)
+		Render3D_Enable(*this, false);
 
-	inst.ZoomWholeMap();
+	ZoomWholeMap();
 }
 
 
-static void CMD_ZoomSelection(Instance &inst)
+void Instance::CMD_ZoomSelection()
 {
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		inst.Beep("No selection to zoom");
+		Beep("No selection to zoom");
 		return;
 	}
 
-	GoToSelection(inst);
+	GoToSelection(*this);
 }
 
 
-static void CMD_GoToCamera(Instance &inst)
+void Instance::CMD_GoToCamera()
 {
-	if (inst.edit.render3d)
-		Render3D_Enable(inst, false);
+	if (edit.render3d)
+		Render3D_Enable(*this, false);
 
 	double x, y; float angle;
 	Render3D_GetCameraPos(&x, &y, &angle);
 
 	grid.MoveTo(x, y);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void CMD_PlaceCamera(Instance &inst)
+void Instance::CMD_PlaceCamera()
 {
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		inst.Beep("Not supported in 3D view");
+		Beep("Not supported in 3D view");
 		return;
 	}
 
-	if (! inst.edit.pointer_in_window)
+	if (! edit.pointer_in_window)
 	{
 		// IDEA: turn cursor into cross, wait for click in map window
 
-		inst.Beep("Mouse is not over map");
+		Beep("Mouse is not over map");
 		return;
 	}
 
-	double x = inst.edit.map_x;
-	double y = inst.edit.map_y;
+	double x = edit.map_x;
+	double y = edit.map_y;
 
 	Render3D_SetCameraPos(x, y);
 
 	if (Exec_HasFlag("/open3d"))
 	{
-		Render3D_Enable(inst, true);
+		Render3D_Enable(*this, true);
 	}
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void CMD_MoveObjects_Dialog(Instance &inst)
+void Instance::CMD_MoveObjects_Dialog()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("Nothing to move");
+		Beep("Nothing to move");
 		return;
 	}
 
-	bool want_dz = (inst.edit.mode == ObjType::sectors);
+	bool want_dz = (edit.mode == ObjType::sectors);
 	// can move things vertically in Hexen/UDMF formats
-	if (inst.edit.mode == ObjType::things && inst.Level_format != MapFormat::doom)
+	if (edit.mode == ObjType::things && Level_format != MapFormat::doom)
 		want_dz = true;
 
-	UI_MoveDialog * dialog = new UI_MoveDialog(inst, want_dz);
+	UI_MoveDialog * dialog = new UI_MoveDialog(*this, want_dz);
 
 	dialog->Run();
 
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
-static void CMD_ScaleObjects_Dialog(Instance &inst)
+void Instance::CMD_ScaleObjects_Dialog()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("Nothing to scale");
+		Beep("Nothing to scale");
 		return;
 	}
 
-	UI_ScaleDialog * dialog = new UI_ScaleDialog(inst);
+	UI_ScaleDialog * dialog = new UI_ScaleDialog(*this);
 
 	dialog->Run();
 
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
-static void CMD_RotateObjects_Dialog(Instance &inst)
+void Instance::CMD_RotateObjects_Dialog()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("Nothing to rotate");
+		Beep("Nothing to rotate");
 		return;
 	}
 
-	UI_RotateDialog * dialog = new UI_RotateDialog(inst);
+	UI_RotateDialog * dialog = new UI_RotateDialog(*this);
 
 	dialog->Run();
 
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
-static void CMD_GRID_Bump(Instance &inst)
+void Instance::CMD_GRID_Bump()
 {
 	int delta = atoi(EXEC_Param[0]);
 
@@ -1256,13 +1256,13 @@ static void CMD_GRID_Bump(Instance &inst)
 }
 
 
-static void CMD_GRID_Set(Instance &inst)
+void Instance::CMD_GRID_Set()
 {
 	int step = atoi(EXEC_Param[0]);
 
 	if (step < 2 || step > 4096)
 	{
-		inst.Beep("Bad grid step");
+		Beep("Bad grid step");
 		return;
 	}
 
@@ -1270,7 +1270,7 @@ static void CMD_GRID_Set(Instance &inst)
 }
 
 
-static void CMD_GRID_Zoom(Instance &inst)
+void Instance::CMD_GRID_Zoom()
 {
 	// target scale is positive for NN:1 and negative for 1:NN
 
@@ -1278,7 +1278,7 @@ static void CMD_GRID_Zoom(Instance &inst)
 
 	if (scale == 0)
 	{
-		inst.Beep("Bad scale");
+		Beep("Bad scale");
 		return;
 	}
 
@@ -1289,98 +1289,98 @@ static void CMD_GRID_Zoom(Instance &inst)
 
 	grid.NearestScale(scale);
 
-	grid.RefocusZoom(inst.edit.map_x, inst.edit.map_y, S1);
+	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
 }
 
 
-static void CMD_BR_CycleCategory(Instance &inst)
+void Instance::CMD_BR_CycleCategory()
 {
-	if (!inst.main_win->browser->visible())
+	if (!main_win->browser->visible())
 	{
-		inst.Beep("Browser not open");
+		Beep("Browser not open");
 		return;
 	}
 
 	int dir = (atoi(EXEC_Param[0]) >= 0) ? +1 : -1;
 
-	inst.main_win->browser->CycleCategory(dir);
+	main_win->browser->CycleCategory(dir);
 }
 
 
-static void CMD_BR_ClearSearch(Instance &inst)
+void Instance::CMD_BR_ClearSearch()
 {
-	if (!inst.main_win->browser->visible())
+	if (!main_win->browser->visible())
 	{
-		inst.Beep("Browser not open");
+		Beep("Browser not open");
 		return;
 	}
 
-	inst.main_win->browser->ClearSearchBox();
+	main_win->browser->ClearSearchBox();
 }
 
 
-static void CMD_BR_Scroll(Instance &inst)
+void Instance::CMD_BR_Scroll()
 {
-	if (!inst.main_win->browser->visible())
+	if (!main_win->browser->visible())
 	{
-		inst.Beep("Browser not open");
+		Beep("Browser not open");
 		return;
 	}
 
 	if (EXEC_Param[0].empty())
 	{
-		inst.Beep("BR_Scroll: missing value");
+		Beep("BR_Scroll: missing value");
 		return;
 	}
 
 	int delta = atoi(EXEC_Param[0]);
 
-	inst.main_win->browser->Scroll(delta);
+	main_win->browser->Scroll(delta);
 }
 
 
-static void CMD_DefaultProps(Instance &inst)
+void Instance::CMD_DefaultProps()
 {
-	inst.main_win->ShowDefaultProps();
+	main_win->ShowDefaultProps();
 }
 
 
-static void CMD_FindDialog(Instance &inst)
+void Instance::CMD_FindDialog()
 {
-	inst.main_win->ShowFindAndReplace();
+	main_win->ShowFindAndReplace();
 }
 
 
-static void CMD_FindNext(Instance &inst)
+void Instance::CMD_FindNext()
 {
-	inst.main_win->find_box->FindNext();
+	main_win->find_box->FindNext();
 }
 
 
-static void CMD_RecalcSectors(Instance &inst)
+void Instance::CMD_RecalcSectors()
 {
 	Subdiv_InvalidateAll();
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void CMD_LogViewer(Instance &inst)
+void Instance::CMD_LogViewer()
 {
 	LogViewer_Open();
 }
 
 
-static void CMD_OnlineDocs(Instance &inst)
+void Instance::CMD_OnlineDocs()
 {
 	int rv = fl_open_uri("http://eureka-editor.sourceforge.net/?n=Docs.Index");
 	if (rv == 1)
-		inst.Status_Set("Opened web browser");
+		Status_Set("Opened web browser");
 	else
-		inst.Beep("Failed to open web browser");
+		Beep("Failed to open web browser");
 }
 
 
-static void CMD_AboutDialog(Instance &inst)
+void Instance::CMD_AboutDialog()
 {
 	DLG_AboutText();
 }
@@ -1395,37 +1395,37 @@ static editor_command_t  command_table[] =
 	/* ---- miscellaneous / UI stuff ---- */
 
 	{	"Nothing", "Misc",
-		&CMD_Nothing
+		&Instance::CMD_Nothing
 	},
 
 	{	"Set", "Misc",
-		&CMD_SetVar,
+		&Instance::CMD_SetVar,
 		/* flags */ NULL,
 		/* keywords */ "3d browser gamma grid obj_nums ratio sec_render snap sprites"
 	},
 
 	{	"Toggle", "Misc",
-		&CMD_ToggleVar,
+		&Instance::CMD_ToggleVar,
 		/* flags */ NULL,
 		/* keywords */ "3d browser gamma grid obj_nums ratio sec_render snap recent sprites"
 	},
 
 	{	"MetaKey", "Misc",
-		&CMD_MetaKey
+		&Instance::CMD_MetaKey
 	},
 
 	{	"EditMode", "Misc",
-		&CMD_EditMode,
+		&Instance::CMD_EditMode,
 		/* flags */ NULL,
 		/* keywords */ "thing line sector vertex"
 	},
 
 	{	"OpMenu",  "Misc",
-		&CMD_OperationMenu
+		&Instance::CMD_OperationMenu
 	},
 
 	{	"MapCheck", "Misc",
-		&ChecksModule::commandMapCheck,
+		&Instance::CMD_MapCheck,
 		/* flags */ NULL,
 		/* keywords */ "all major vertices sectors linedefs things textures tags current"
 	},
@@ -1434,319 +1434,319 @@ static editor_command_t  command_table[] =
 	/* ----- 2D canvas ----- */
 
 	{	"Scroll",  "2D View",
-		&CMD_Scroll
+		&Instance::CMD_Scroll
 	},
 
 	{	"GRID_Bump",  "2D View",
-		&CMD_GRID_Bump
+		&Instance::CMD_GRID_Bump
 	},
 
 	{	"GRID_Set",  "2D View",
-		&CMD_GRID_Set
+		&Instance::CMD_GRID_Set
 	},
 
 	{	"GRID_Zoom",  "2D View",
-		&CMD_GRID_Zoom
+		&Instance::CMD_GRID_Zoom
 	},
 
 	{	"ACT_SelectBox", "2D View",
-		&CMD_ACT_SelectBox
+		&Instance::CMD_ACT_SelectBox
 	},
 
 	{	"WHEEL_Scroll",  "2D View",
-		&CMD_WHEEL_Scroll
+		&Instance::CMD_WHEEL_Scroll
 	},
 
 	{	"NAV_Scroll_Left",  "2D View",
-		&CMD_NAV_Scroll_Left
+		&Instance::CMD_NAV_Scroll_Left
 	},
 
 	{	"NAV_Scroll_Right",  "2D View",
-		&CMD_NAV_Scroll_Right
+		&Instance::CMD_NAV_Scroll_Right
 	},
 
 	{	"NAV_Scroll_Up",  "2D View",
-		&CMD_NAV_Scroll_Up
+		&Instance::CMD_NAV_Scroll_Up
 	},
 
 	{	"NAV_Scroll_Down",  "2D View",
-		&CMD_NAV_Scroll_Down
+		&Instance::CMD_NAV_Scroll_Down
 	},
 
 	{	"NAV_MouseScroll", "2D View",
-		&CMD_NAV_MouseScroll
+		&Instance::CMD_NAV_MouseScroll
 	},
 
 
 	/* ----- FILE menu ----- */
 
 	{	"NewProject",  "File",
-		&CMD_NewProject
+		&Instance::CMD_NewProject
 	},
 
 	{	"ManageProject",  "File",
-		&CMD_ManageProject
+		&Instance::CMD_ManageProject
 	},
 
 	{	"OpenMap",  "File",
-		&CMD_OpenMap
+		&Instance::CMD_OpenMap
 	},
 
 	{	"GivenFile",  "File",
-		&CMD_GivenFile,
+		&Instance::CMD_GivenFile,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last current"
 	},
 
 	{	"FlipMap",  "File",
-		&CMD_FlipMap,
+		&Instance::CMD_FlipMap,
 		/* flags */ NULL,
 		/* keywords */ "next prev first last"
 	},
 
 	{	"SaveMap",  "File",
-		&CMD_SaveMap
+		&Instance::CMD_SaveMap
 	},
 
 	{	"ExportMap",  "File",
-		&CMD_ExportMap
+		&Instance::CMD_ExportMap
 	},
 
 	{	"FreshMap",  "File",
-		&CMD_FreshMap
+		&Instance::CMD_FreshMap
 	},
 
 	{	"CopyMap",  "File",
-		&CMD_CopyMap
+		&Instance::CMD_CopyMap
 	},
 
 	{	"RenameMap",  "File",
-		&CMD_RenameMap
+		&Instance::CMD_RenameMap
 	},
 
 	{	"DeleteMap",  "File",
-		&CMD_DeleteMap
+		&Instance::CMD_DeleteMap
 	},
 
 	{	"Quit",  "File",
-		&CMD_Quit
+		&Instance::CMD_Quit
 	},
 
 
 	/* ----- EDIT menu ----- */
 
 	{	"Undo",   "Edit",
-		&CMD_Undo
+		&Instance::CMD_Undo
 	},
 
 	{	"Redo",   "Edit",
-		&CMD_Redo
+		&Instance::CMD_Redo
 	},
 
 	{	"Insert",	"Edit",
-		&ObjectsModule::commandInsert,
+		&Instance::CMD_ObjectInsert,
 		/* flags */ "/continue /nofill"
 	},
 
 	{	"Delete",	"Edit",
-		&CMD_Delete,
+		&Instance::CMD_Delete,
 		/* flags */ "/keep"
 	},
 
 	{	"Clipboard_Cut",   "Edit",
-		&CMD_Clipboard_Cut
+		&Instance::CMD_Clipboard_Cut
 	},
 
 	{	"Clipboard_Copy",   "Edit",
-		&CMD_Clipboard_Copy
+		&Instance::CMD_Clipboard_Copy
 	},
 
 	{	"Clipboard_Paste",   "Edit",
-		&CMD_Clipboard_Paste
+		&Instance::CMD_Clipboard_Paste
 	},
 
 	{	"Select",	"Edit",
-		&CMD_Select
+		&Instance::CMD_Select
 	},
 
 	{	"SelectAll",	"Edit",
-		&CMD_SelectAll
+		&Instance::CMD_SelectAll
 	},
 
 	{	"UnselectAll",	"Edit",
-		&CMD_UnselectAll
+		&Instance::CMD_UnselectAll
 	},
 
 	{	"InvertSelection",	"Edit",
-		&CMD_InvertSelection
+		&Instance::CMD_InvertSelection
 	},
 
 	{	"LastSelection",	"Edit",
-		&CMD_LastSelection
+		&Instance::CMD_LastSelection
 	},
 
 	{	"CopyAndPaste",   "Edit",
-		&CMD_CopyAndPaste
+		&Instance::CMD_CopyAndPaste
 	},
 
 	{	"CopyProperties",   "Edit",
-		&ObjectsModule::commandCopyProperties,
+		&Instance::CMD_CopyProperties,
 		/* flags */ "/reverse"
 	},
 
 	{	"PruneUnused",   "Edit",
-		&CMD_PruneUnused
+		&Instance::CMD_PruneUnused
 	},
 
 	{	"MoveObjectsDialog",   "Edit",
-		&CMD_MoveObjects_Dialog
+		&Instance::CMD_MoveObjects_Dialog
 	},
 
 	{	"ScaleObjectsDialog",   "Edit",
-		&CMD_ScaleObjects_Dialog
+		&Instance::CMD_ScaleObjects_Dialog
 	},
 
 	{	"RotateObjectsDialog",   "Edit",
-		&CMD_RotateObjects_Dialog
+		&Instance::CMD_RotateObjects_Dialog
 	},
 
 
 	/* ----- VIEW menu ----- */
 
 	{	"Zoom",  "View",
-		&CMD_Zoom,
+		&Instance::CMD_Zoom,
 		/* flags */ "/center"
 	},
 
 	{	"ZoomWholeMap",  "View",
-		&CMD_ZoomWholeMap
+		&Instance::CMD_ZoomWholeMap
 	},
 
 	{	"ZoomSelection",  "View",
-		&CMD_ZoomSelection
+		&Instance::CMD_ZoomSelection
 	},
 
 	{	"DefaultProps",  "View",
-		&CMD_DefaultProps
+		&Instance::CMD_DefaultProps
 	},
 
 	{	"FindDialog",  "View",
-		&CMD_FindDialog
+		&Instance::CMD_FindDialog
 	},
 
 	{	"FindNext",  "View",
-		&CMD_FindNext
+		&Instance::CMD_FindNext
 	},
 
 	{	"GoToCamera",  "View",
-		&CMD_GoToCamera
+		&Instance::CMD_GoToCamera
 	},
 
 	{	"PlaceCamera",  "View",
-		&CMD_PlaceCamera,
+		&Instance::CMD_PlaceCamera,
 		/* flags */ "/open3d"
 	},
 
 	{	"JumpToObject",  "View",
-		&CMD_JumpToObject
+		&Instance::CMD_JumpToObject
 	},
 
 
 	/* ------ TOOLS menu ------ */
 
 	{	"PreferenceDialog",  "Tools",
-		&CMD_Preferences
+		&Instance::CMD_Preferences
 	},
 
 	{	"TestMap",  "Tools",
-		&CMD_TestMap
+		&Instance::CMD_TestMap
 	},
 
 	{	"RecalcSectors",  "Tools",
-		&CMD_RecalcSectors
+		&Instance::CMD_RecalcSectors
 	},
 
 	{	"BuildAllNodes",  "Tools",
-		&CMD_BuildAllNodes
+		&Instance::CMD_BuildAllNodes
 	},
 
 	{	"EditLump",  "Tools",
-		&CMD_EditLump,
+		&Instance::CMD_EditLump,
 		/* flags */ "/header /scripts"
 	},
 
 	{	"AddBehavior",  "Tools",
-		&CMD_AddBehaviorLump
+		&Instance::CMD_AddBehaviorLump
 	},
 
 	{	"LogViewer",  "Tools",
-		&CMD_LogViewer
+		&Instance::CMD_LogViewer
 	},
 
 
 	/* ------ HELP menu ------ */
 
 	{	"OnlineDocs",  "Help",
-		&CMD_OnlineDocs
+		&Instance::CMD_OnlineDocs
 	},
 
 	{	"AboutDialog",  "Help",
-		&CMD_AboutDialog
+		&Instance::CMD_AboutDialog
 	},
 
 
 	/* ----- general operations ----- */
 
 	{	"Merge",	"General",
-		&CMD_Merge,
+		&Instance::CMD_Merge,
 		/* flags */ "/keep"
 	},
 
 	{	"Disconnect",	"General",
-		&CMD_Disconnect
+		&Instance::CMD_Disconnect
 	},
 
 	{	"Mirror",	"General",
-		&ObjectsModule::commandMirror,
+		&Instance::CMD_Mirror,
 		/* flags */ NULL,
 		/* keywords */ "horiz vert"
 	},
 
 	{	"Rotate90",	"General",
-		&ObjectsModule::commandRotate90,
+		&Instance::CMD_Rotate90,
 		/* flags */ NULL,
 		/* keywords */ "cw acw"
 	},
 
 	{	"Enlarge",	"General",
-		&ObjectsModule::commandEnlarge
+		&Instance::CMD_Enlarge
 	},
 
 	{	"Shrink",	"General",
-		&ObjectsModule::commandShrink
+		&Instance::CMD_Shrink
 	},
 
 	{	"Quantize",	"General",
-		&ObjectsModule::commandQuantize
+		&Instance::CMD_Quantize
 	},
 
 	{	"ApplyTag",	"General",
-		&ChecksModule::commandApplyTag,
+		&Instance::CMD_ApplyTag,
 		/* flags */ NULL,
 		/* keywords */ "fresh last"
 	},
 
 	{	"ACT_Click", "General",
-		&CMD_ACT_Click,
+		&Instance::CMD_ACT_Click,
 		/* flags */ "/noselect /nodrag /nosplit"
 	},
 
 	{	"ACT_Drag", "General",
-		&CMD_ACT_Drag
+		&Instance::CMD_ACT_Drag
 	},
 
 	{	"ACT_Transform", "General",
-		&CMD_ACT_Transform,
+		&Instance::CMD_ACT_Transform,
 		/* flags */ NULL,
 		/* keywords */ "scale stretch rotate rotscale skew"
 	},
@@ -1755,25 +1755,25 @@ static editor_command_t  command_table[] =
 	/* ------ LineDef mode ------ */
 
 	{	"LIN_Align", NULL,
-		&LinedefModule::commandAlign,
+		&Instance::CMD_LIN_Align,
 		/* flags */ "/x /y /right /clear"
 	},
 
 	{	"LIN_Flip", NULL,
-		&LinedefModule::commandFlip,
+		&Instance::CMD_LIN_Flip,
 		/* flags */ "/force"
 	},
 
 	{	"LIN_SwapSides", NULL,
-		&LinedefModule::commandSwapSides
+		&Instance::CMD_LIN_SwapSides
 	},
 
 	{	"LIN_SplitHalf", NULL,
-		&LinedefModule::commandSplitHalf
+		&Instance::CMD_LIN_SplitHalf
 	},
 
 	{	"LIN_SelectPath", NULL,
-		&CMD_LIN_SelectPath,
+		&Instance::CMD_LIN_SelectPath,
 		/* flags */ "/fresh /onesided /sametex"
 	},
 
@@ -1781,63 +1781,63 @@ static editor_command_t  command_table[] =
 	/* ------ Sector mode ------ */
 
 	{	"SEC_Floor", NULL,
-		&SectorModule::commandFloor
+		&Instance::CMD_SEC_Floor
 	},
 
 	{	"SEC_Ceil", NULL,
-		&SectorModule::commandCeiling
+		&Instance::CMD_SEC_Ceil
 	},
 
 	{	"SEC_Light", NULL,
-		&SectorModule::commandLight
+		&Instance::CMD_SEC_Light
 	},
 
 	{	"SEC_SelectGroup", NULL,
-		&CMD_SEC_SelectGroup,
+		&Instance::CMD_SEC_SelectGroup,
 		/* flags */ "/fresh /can_walk /doors /floor_h /floor_tex /ceil_h /ceil_tex /light /tag /special"
 	},
 
 	{	"SEC_SwapFlats", NULL,
-		&SectorModule::commandSwapFlats
+		&Instance::CMD_SEC_SwapFlats
 	},
 
 
 	/* ------ Thing mode ------ */
 
 	{	"TH_Spin", NULL,
-		&CMD_TH_SpinThings
+		&Instance::CMD_TH_SpinThings
 	},
 
 
 	/* ------ Vertex mode ------ */
 
 	{	"VT_ShapeLine", NULL,
-		&VertexModule::commandShapeLine
+		&Instance::CMD_VT_ShapeLine
 	},
 
 	{	"VT_ShapeArc", NULL,
-		&VertexModule::commandShapeArc
+		&Instance::CMD_VT_ShapeArc
 	},
 
 
 	/* -------- Browser -------- */
 
 	{	"BrowserMode", "Browser",
-		&CMD_BrowserMode,
+		&Instance::CMD_BrowserMode,
 		/* flags */ "/recent",
 		/* keywords */ "obj tex flat line sec genline"
 	},
 
 	{	"BR_CycleCategory", "Browser",
-		&CMD_BR_CycleCategory
+		&Instance::CMD_BR_CycleCategory
 	},
 
 	{	"BR_ClearSearch", "Browser",
-		&CMD_BR_ClearSearch
+		&Instance::CMD_BR_ClearSearch
 	},
 
 	{	"BR_Scroll", "Browser",
-		&CMD_BR_Scroll
+		&Instance::CMD_BR_Scroll
 	},
 
 	// end of command list

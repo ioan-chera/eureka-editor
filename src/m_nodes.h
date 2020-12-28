@@ -25,8 +25,6 @@ class Instance;
 
 void BuildNodesAfterSave(Instance &inst, int lev_idx);
 
-void CMD_BuildAllNodes(Instance &inst);
-
 #endif  /* __EUREKA_E_NODES_H__ */
 
 //--- editor settings ---

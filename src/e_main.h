@@ -191,12 +191,6 @@ enum class SelectHighlight
 
 void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
 
-
-/* commands */
-
-void CMD_LastSelection(Instance &inst);
-
-
 //----------------------------------------------------------------------
 //  Helper for handling either the highlight or selection
 //----------------------------------------------------------------------

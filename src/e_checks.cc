@@ -3041,11 +3041,11 @@ void ChecksModule::tagsApplyNewValue(int new_tag) const
 }
 
 
-void ChecksModule::commandApplyTag(Instance &inst)
+void Instance::CMD_ApplyTag()
 {
-	if (! (inst.edit.mode == ObjType::sectors || inst.edit.mode == ObjType::linedefs))
+	if (! (edit.mode == ObjType::sectors || edit.mode == ObjType::linedefs))
 	{
-		inst.Beep("ApplyTag: wrong mode");
+		Beep("ApplyTag: wrong mode");
 		return;
 	}
 
@@ -3063,37 +3063,37 @@ void ChecksModule::commandApplyTag(Instance &inst)
 	}
 	else
 	{
-		inst.Beep("ApplyTag: unknown keyword: %s\n", mode.c_str());
+		Beep("ApplyTag: unknown keyword: %s\n", mode.c_str());
 		return;
 	}
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("ApplyTag: nothing selected");
+		Beep("ApplyTag: nothing selected");
 		return;
 	}
 
 	int min_tag, max_tag;
 
-	inst.level.checks.tagsUsedRange(&min_tag, &max_tag);
+	level.checks.tagsUsedRange(&min_tag, &max_tag);
 
 	int new_tag = max_tag + (do_last ? 0 : 1);
 	if (new_tag <= 0)
 	{
-		inst.Beep("No last tag");
+		Beep("No last tag");
 	}
 	else if (new_tag > 32767)
 	{
-		inst.Beep("Out of tag numbers");
+		Beep("Out of tag numbers");
 	}
 	else
 	{
-		inst.level.checks.tagsApplyNewValue(new_tag);
+		level.checks.tagsApplyNewValue(new_tag);
 	}
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
@@ -4444,75 +4444,75 @@ void ChecksModule::checkAll(bool major_stuff) const
 }
 
 
-void ChecksModule::commandMapCheck(Instance &inst)
+void Instance::CMD_MapCheck()
 {
 	SString what = EXEC_Param[0];
 
 	if (what.empty())
 	{
-		inst.Beep("MapCheck: missing keyword");
+		Beep("MapCheck: missing keyword");
 		return;
 	}
 	else if (what.noCaseEqual("all"))
 	{
-		inst.level.checks.checkAll(false);
+		level.checks.checkAll(false);
 	}
 	else if (what.noCaseEqual("major"))
 	{
-		inst.level.checks.checkAll(true);
+		level.checks.checkAll(true);
 	}
 	else if (what.noCaseEqual("vertices"))
 	{
-		inst.level.checks.checkVertices(0);
+		level.checks.checkVertices(0);
 	}
 	else if (what.noCaseEqual("sectors"))
 	{
-		inst.level.checks.checkSectors(0);
+		level.checks.checkSectors(0);
 	}
 	else if (what.noCaseEqual("linedefs"))
 	{
-		inst.level.checks.checkLinedefs(0);
+		level.checks.checkLinedefs(0);
 	}
 	else if (what.noCaseEqual("things"))
 	{
-		inst.level.checks.checkThings(0);
+		level.checks.checkThings(0);
 	}
 	else if (what.noCaseEqual("current"))  // current editing mode
 	{
-		switch (inst.edit.mode)
+		switch (edit.mode)
 		{
 			case ObjType::vertices:
-				inst.level.checks.checkVertices(0);
+				level.checks.checkVertices(0);
 				break;
 
 			case ObjType::sectors:
-				inst.level.checks.checkSectors(0);
+				level.checks.checkSectors(0);
 				break;
 
 			case ObjType::linedefs:
-				inst.level.checks.checkLinedefs(0);
+				level.checks.checkLinedefs(0);
 				break;
 
 			case ObjType::things:
-				inst.level.checks.checkThings(0);
+				level.checks.checkThings(0);
 				break;
 
 			default:
-				inst.Beep("Nothing to check");
+				Beep("Nothing to check");
 				break;
 		}
 	}
 	else if (what.noCaseEqual("textures"))
 	{
-		inst.level.checks.checkTextures(0);
+		level.checks.checkTextures(0);
 	}
 	else if (what.noCaseEqual("tags"))
 	{
-		inst.level.checks.checkTags(0);
+		level.checks.checkTags(0);
 	}
 	else
 	{
-		inst.Beep("MapCheck: unknown keyword: %s\n", what.c_str());
+		Beep("MapCheck: unknown keyword: %s\n", what.c_str());
 	}
 }
 

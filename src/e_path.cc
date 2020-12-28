@@ -176,12 +176,12 @@ static void SelectLinesInHalfPath(const Document &doc, int L, int V, selection_c
 //
 // select/unselect all linedefs in a non-forked path.
 //
-void CMD_LIN_SelectPath(Instance &inst)
+void Instance::CMD_LIN_SelectPath()
 {
 	// determine starting linedef
-	if (inst.edit.highlight.is_nil())
+	if (edit.highlight.is_nil())
 	{
-		inst.Beep("No highlighted line");
+		Beep("No highlighted line");
 		return;
 	}
 
@@ -192,34 +192,34 @@ void CMD_LIN_SelectPath(Instance &inst)
 	if (Exec_HasFlag("/onesided")) match |= SLP_OneSided;
 	if (Exec_HasFlag("/sametex"))  match |= SLP_SameTex;
 
-	int start_L = inst.edit.highlight.num;
+	int start_L = edit.highlight.num;
 
-	if ((match & SLP_OneSided) && !inst.level.linedefs[start_L]->OneSided())
+	if ((match & SLP_OneSided) && !level.linedefs[start_L]->OneSided())
 		return;
 
 	bool unset_them = false;
 
-	if (!fresh_sel && inst.edit.Selected->get(start_L))
+	if (!fresh_sel && edit.Selected->get(start_L))
 		unset_them = true;
 
 	selection_c seen(ObjType::linedefs);
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(inst.level, start_L, inst.level.linedefs[start_L]->start, seen, match);
-	SelectLinesInHalfPath(inst.level, start_L, inst.level.linedefs[start_L]->end,   seen, match);
+	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L]->start, seen, match);
+	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L]->end,   seen, match);
 
-	Editor_ClearErrorMode(inst);
+	Editor_ClearErrorMode(*this);
 
 	if (fresh_sel)
-		Selection_Clear(inst);
+		Selection_Clear(*this);
 
 	if (unset_them)
-		inst.edit.Selected->unmerge(seen);
+		edit.Selected->unmerge(seen);
 	else
-		inst.edit.Selected->merge(seen);
+		edit.Selected->merge(seen);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
@@ -316,43 +316,43 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 //
 // select/unselect a contiguous group of sectors.
 //
-void CMD_SEC_SelectGroup(Instance &inst)
+void Instance::CMD_SEC_SelectGroup()
 {
 	// determine starting sector
-	if (inst.edit.highlight.is_nil())
+	if (edit.highlight.is_nil())
 	{
-		inst.Beep("No highlighted sector");
+		Beep("No highlighted sector");
 		return;
 	}
 
 	bool fresh_sel = Exec_HasFlag("/fresh");
 
-	int start_sec = inst.edit.highlight.num;
+	int start_sec = edit.highlight.num;
 
 	bool unset_them = false;
 
-	if (!fresh_sel && inst.edit.Selected->get(start_sec))
+	if (!fresh_sel && edit.Selected->get(start_sec))
 		unset_them = true;
 
 	selection_c seen(ObjType::sectors);
 
 	seen.set(start_sec);
 
-	while (GrowContiguousSectors(inst, seen))
+	while (GrowContiguousSectors(*this, seen))
 	{ }
 
 
-	Editor_ClearErrorMode(inst);
+	Editor_ClearErrorMode(*this);
 
 	if (fresh_sel)
-		Selection_Clear(inst);
+		Selection_Clear(*this);
 
 	if (unset_them)
-		inst.edit.Selected->unmerge(seen);
+		edit.Selected->unmerge(seen);
 	else
-		inst.edit.Selected->merge(seen);
+		edit.Selected->merge(seen);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
@@ -422,17 +422,17 @@ void GoToObject(Instance &inst, const Objid& objid)
 }
 
 
-void CMD_JumpToObject(Instance &inst)
+void Instance::CMD_JumpToObject()
 {
-	int total = inst.level.numObjects(inst.edit.mode);
+	int total = level.numObjects(edit.mode);
 
 	if (total <= 0)
 	{
-		inst.Beep("No objects!");
+		Beep("No objects!");
 		return;
 	}
 
-	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(inst.edit.mode), total - 1);
+	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(edit.mode), total - 1);
 
 	int num = dialog->Run();
 
@@ -444,17 +444,17 @@ void CMD_JumpToObject(Instance &inst)
 	// this is guaranteed by the dialog
 	SYS_ASSERT(num < total);
 
-	GoToObject(inst, Objid(inst.edit.mode, num));
+	GoToObject(*this, Objid(edit.mode, num));
 }
 
 
-void CMD_PruneUnused(Instance &inst)
+void Instance::CMD_PruneUnused()
 {
 	selection_c used_secs (ObjType::sectors);
 	selection_c used_sides(ObjType::sidedefs);
 	selection_c used_verts(ObjType::vertices);
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const LineDef *L : level.linedefs)
 	{
 		used_verts.set(L->start);
 		used_verts.set(L->end);
@@ -462,19 +462,19 @@ void CMD_PruneUnused(Instance &inst)
 		if (L->left >= 0)
 		{
 			used_sides.set(L->left);
-			used_secs.set(L->Left(inst.level)->sector);
+			used_secs.set(L->Left(level)->sector);
 		}
 
 		if (L->right >= 0)
 		{
 			used_sides.set(L->right);
-			used_secs.set(L->Right(inst.level)->sector);
+			used_secs.set(L->Right(level)->sector);
 		}
 	}
 
-	used_secs .frob_range(0, inst.level.numSectors() -1, BitOp::toggle);
-	used_sides.frob_range(0, inst.level.numSidedefs() -1, BitOp::toggle);
-	used_verts.frob_range(0, inst.level.numVertices()-1, BitOp::toggle);
+	used_secs .frob_range(0, level.numSectors() -1, BitOp::toggle);
+	used_sides.frob_range(0, level.numSidedefs() -1, BitOp::toggle);
+	used_verts.frob_range(0, level.numVertices()-1, BitOp::toggle);
 
 	int num_secs  = used_secs .count_obj();
 	int num_sides = used_sides.count_obj();
@@ -482,18 +482,18 @@ void CMD_PruneUnused(Instance &inst)
 
 	if (num_verts == 0 && num_sides == 0 && num_secs == 0)
 	{
-		inst.Beep("Nothing to prune");
+		Beep("Nothing to prune");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
+	level.basis.begin();
+	level.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
-	inst.level.objects.del(&used_sides);
-	inst.level.objects.del(&used_secs);
-	inst.level.objects.del(&used_verts);
+	level.objects.del(&used_sides);
+	level.objects.del(&used_secs);
+	level.objects.del(&used_verts);
 
-	inst.level.basis.end();
+	level.basis.end();
 }
 
 

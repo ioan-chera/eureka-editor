@@ -43,17 +43,6 @@ enum propagate_level_e
 
 };
 
-/* commands */
-
-void CMD_LIN_SelectPath(Instance &inst);
-
-void CMD_SEC_SelectGroup(Instance &inst);
-
-void CMD_JumpToObject(Instance &inst);
-
-void CMD_PruneUnused(Instance &inst);
-
-
 #endif  /* __EUREKA_E_PATH_H__ */
 
 //--- editor settings ---

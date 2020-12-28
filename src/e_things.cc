@@ -50,36 +50,36 @@ int calc_new_angle(int angle, int diff)
 //
 // spin_thing - change the angle of things
 //
-void CMD_TH_SpinThings(Instance &inst)
+void Instance::CMD_TH_SpinThings()
 {
 	int degrees = atoi(EXEC_Param[0]);
 
 	if (! degrees)
 		degrees = +45;
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No things to spin");
+		Beep("No things to spin");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("spun", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("spun", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Thing *T = inst.level.things[*it];
+		const Thing *T = level.things[*it];
 
-		inst.level.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+		level.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	inst.main_win->thing_box->UpdateField(Thing::F_ANGLE);
+	main_win->thing_box->UpdateField(Thing::F_ANGLE);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 

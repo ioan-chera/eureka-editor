@@ -33,6 +33,7 @@ class selection_c;
 
 class LinedefModule : public DocumentModule
 {
+	friend class Instance;
 public:
 	LinedefModule(Document &doc) : DocumentModule(doc)
 	{
@@ -56,12 +57,8 @@ public:
 	double angleBetweenLines(int A, int B, int C) const;
 
 	/* commands */
-	static void commandAlign(Instance &inst);
-	static void commandFlip(Instance &inst);
 	static void commandMergeTwo(Instance &inst);
-	static void commandSplitHalf(Instance &inst);
-	static void commandSwapSides(Instance &inst);
-
+	
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;

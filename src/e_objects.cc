@@ -651,39 +651,39 @@ void ObjectsModule::insertSector() const
 }
 
 
-void ObjectsModule::commandInsert(Instance &inst)
+void Instance::CMD_ObjectInsert()
 {
 	bool force_cont;
 	bool no_fill;
 
-	if (inst.edit.render3d && inst.edit.mode != ObjType::things)
+	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		inst.Beep("Cannot insert in this mode");
+		Beep("Cannot insert in this mode");
 		return;
 	}
 
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 		case ObjType::things:
-			inst.level.objects.insertThing();
+			level.objects.insertThing();
 			break;
 
 		case ObjType::vertices:
 			force_cont = Exec_HasFlag("/continue");
 			no_fill    = Exec_HasFlag("/nofill");
-			inst.level.objects.insertVertex(force_cont, no_fill);
+			level.objects.insertVertex(force_cont, no_fill);
 			break;
 
 		case ObjType::sectors:
-			inst.level.objects.insertSector();
+			level.objects.insertSector();
 			break;
 
 		default:
-			inst.Beep("Cannot insert in this mode");
+			Beep("Cannot insert in this mode");
 			break;
 	}
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
@@ -1052,21 +1052,21 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 }
 
 
-void ObjectsModule::commandCopyProperties(Instance &inst)
+void Instance::CMD_CopyProperties()
 {
-	if (inst.edit.highlight.is_nil())
+	if (edit.highlight.is_nil())
 	{
-		inst.Beep("No target for CopyProperties");
+		Beep("No target for CopyProperties");
 		return;
 	}
-	else if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		inst.Beep("No source for CopyProperties");
+		Beep("No source for CopyProperties");
 		return;
 	}
-	else if (inst.edit.mode == ObjType::vertices)
+	if (edit.mode == ObjType::vertices)
 	{
-		inst.Beep("No properties to copy");
+		Beep("No properties to copy");
 		return;
 	}
 
@@ -1075,79 +1075,79 @@ void ObjectsModule::commandCopyProperties(Instance &inst)
 
 	if (! Exec_HasFlag("/reverse"))
 	{
-		if (inst.edit.Selected->count_obj() != 1)
+		if (edit.Selected->count_obj() != 1)
 		{
-			inst.Beep("Too many sources for CopyProperties");
+			Beep("Too many sources for CopyProperties");
 			return;
 		}
 
-		int source = inst.edit.Selected->find_first();
-		int target = inst.edit.highlight.num;
+		int source = edit.Selected->find_first();
+		int target = edit.highlight.num;
 
 		// silently allow copying onto self
 		if (source == target)
 			return;
 
-		inst.level.basis.begin();
-		inst.level.basis.setMessage("copied properties");
+		level.basis.begin();
+		level.basis.setMessage("copied properties");
 
-		switch (inst.edit.mode)
+		switch (edit.mode)
 		{
 			case ObjType::sectors:
-				inst.level.objects.transferSectorProperties(source, target);
+				level.objects.transferSectorProperties(source, target);
 				break;
 
 			case ObjType::things:
-				inst.level.objects.transferThingProperties(source, target);
+				level.objects.transferThingProperties(source, target);
 				break;
 
 			case ObjType::linedefs:
-				inst.level.objects.transferLinedefProperties(source, target, true /* do_tex */);
+				level.objects.transferLinedefProperties(source, target, true /* do_tex */);
 				break;
 
 			default: break;
 		}
 
-		inst.level.basis.end();
+		level.basis.end();
 
 	}
 	else  /* reverse mode, HILITE --> SEL */
 	{
-		if (inst.edit.Selected->count_obj() == 1 && inst.edit.Selected->find_first() == inst.edit.highlight.num)
+		if (edit.Selected->count_obj() == 1 && edit.Selected->find_first() == edit.highlight.num)
 		{
-			inst.Beep("No selection for CopyProperties");
+			Beep("No selection for CopyProperties");
 			return;
 		}
 
-		int source = inst.edit.highlight.num;
+		int source = edit.highlight.num;
 
-		inst.level.basis.begin();
-		inst.level.basis.setMessage("copied properties");
+		level.basis.begin();
+		level.basis.setMessage("copied properties");
 
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			if (*it == source)
 				continue;
 
-			switch (inst.edit.mode)
+			switch (edit.mode)
 			{
 				case ObjType::sectors:
-					inst.level.objects.transferSectorProperties(source, *it);
+					level.objects.transferSectorProperties(source, *it);
 					break;
 
 				case ObjType::things:
-					inst.level.objects.transferThingProperties(source, *it);
+					level.objects.transferThingProperties(source, *it);
 					break;
 
 				case ObjType::linedefs:
-					inst.level.objects.transferLinedefProperties(source, *it, true /* do_tex */);
+					level.objects.transferLinedefProperties(source, *it, true /* do_tex */);
 					break;
 
 				default: break;
 			}
 		}
 
-		inst.level.basis.end();
+		level.basis.end();
 	}
 }
 
@@ -1574,12 +1574,12 @@ void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x,
 }
 
 
-void ObjectsModule::commandMirror(Instance &inst)
+void Instance::CMD_Mirror()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No objects to mirror");
+		Beep("No objects to mirror");
 		return;
 	}
 
@@ -1589,17 +1589,17 @@ void ObjectsModule::commandMirror(Instance &inst)
 		is_vert = true;
 
 	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
+	level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("mirrored", *inst.edit.Selected, is_vert ? " vertically" : " horizontally");
+	level.basis.begin();
+	level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
-	inst.level.objects.doMirrorStuff(inst.edit.Selected, is_vert, mid_x, mid_y);
+	level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
@@ -1634,75 +1634,75 @@ void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
 }
 
 
-void ObjectsModule::commandRotate90(Instance &inst)
+void Instance::CMD_Rotate90()
 {
 	if (EXEC_Param[0].empty())
 	{
-		inst.Beep("Rotate90: missing keyword");
+		Beep("Rotate90: missing keyword");
 		return;
 	}
 
 	bool anti_clockwise = (tolower(EXEC_Param[0][0]) == 'a');
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No objects to rotate");
+		Beep("No objects to rotate");
 		return;
 	}
 
 	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
+	level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("rotated", *inst.edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
+	level.basis.begin();
+	level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
-	if (inst.edit.mode == ObjType::things)
+	if (edit.mode == ObjType::things)
 	{
-		inst.level.objects.doRotate90Things(inst.edit.Selected, anti_clockwise, mid_x, mid_y);
+		level.objects.doRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
 	}
 	else
 	{
 		// handle things inside sectors
-		if (inst.edit.mode == ObjType::sectors)
+		if (edit.mode == ObjType::sectors)
 		{
 			selection_c things(ObjType::things);
-			ConvertSelection(inst.level, inst.edit.Selected, &things);
+			ConvertSelection(level, edit.Selected, &things);
 
-			inst.level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
+			level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 		}
 
 		// everything else just rotates the vertices
 		selection_c verts(ObjType::vertices);
-		ConvertSelection(inst.level, inst.edit.Selected, &verts);
+		ConvertSelection(level, edit.Selected, &verts);
 
-		fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
-		fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
+		fixcoord_t fix_mx = MakeValidCoord(mid_x);
+		fixcoord_t fix_my = MakeValidCoord(mid_y);
 
 		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
-			const Vertex * V = inst.level.vertices[*it];
+			const Vertex * V = level.vertices[*it];
 
 			fixcoord_t old_x = V->raw_x;
 			fixcoord_t old_y = V->raw_y;
 
 			if (anti_clockwise)
 			{
-				inst.level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-				inst.level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+				level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+				level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
 			}
 			else
 			{
-				inst.level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-				inst.level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+				level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+				level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
 			}
 		}
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(*this, true /* nosave */);
 }
 
 
@@ -2018,14 +2018,14 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 }
 
 
-void ObjectsModule::commandEnlarge(Instance &inst)
+void Instance::CMD_Enlarge()
 {
-	inst.level.objects.doEnlargeOrShrink(false /* do_shrink */);
+	level.objects.doEnlargeOrShrink(false /* do_shrink */);
 }
 
-void ObjectsModule::commandShrink(Instance &inst)
+void Instance::CMD_Shrink()
 {
-	inst.level.objects.doEnlargeOrShrink(true /* do_shrink */);
+	level.objects.doEnlargeOrShrink(true /* do_shrink */);
 }
 
 
@@ -2172,48 +2172,48 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 }
 
 
-void ObjectsModule::commandQuantize(Instance &inst)
+void Instance::CMD_Quantize()
 {
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		if (inst.edit.highlight.is_nil())
+		if (edit.highlight.is_nil())
 		{
-			inst.Beep("Nothing to quantize");
+			Beep("Nothing to quantize");
 			return;
 		}
 
-		inst.Selection_Add(inst.edit.highlight);
+		Selection_Add(edit.highlight);
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("quantized", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("quantized", *edit.Selected);
 
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 		case ObjType::things:
-			inst.level.objects.quantizeThings(inst.edit.Selected);
+			level.objects.quantizeThings(edit.Selected);
 			break;
 
 		case ObjType::vertices:
-			inst.level.objects.quantizeVertices(inst.edit.Selected);
+			level.objects.quantizeVertices(edit.Selected);
 			break;
 
 		// everything else merely quantizes vertices
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(inst.level, inst.edit.Selected, &verts);
+			ConvertSelection(level, edit.Selected, &verts);
 
-			inst.level.objects.quantizeVertices(&verts);
+			level.objects.quantizeVertices(&verts);
 
-			Selection_Clear(inst);
+			Selection_Clear(*this);
 			break;
 		}
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	inst.edit.error_mode = true;
+	edit.error_mode = true;
 }
 
 //--- editor settings ---

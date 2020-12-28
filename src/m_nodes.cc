@@ -417,21 +417,21 @@ void BuildNodesAfterSave(Instance &inst, int lev_idx)
 }
 
 
-void CMD_BuildAllNodes(Instance &inst)
+void Instance::CMD_BuildAllNodes()
 {
-	if (!inst.edit_wad)
+	if (!edit_wad)
 	{
 		DLG_Notify("Cannot build nodes unless you are editing a PWAD.");
 		return;
 	}
 
-	if (inst.edit_wad->IsReadOnly())
+	if (edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot build nodes on a read-only file.");
 		return;
 	}
 
-	if (inst.MadeChanges)
+	if (MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
@@ -442,7 +442,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 		inhibit_node_build = true;
 
-		bool save_result = M_SaveMap(inst);
+		bool save_result = M_SaveMap(*this);
 
 		inhibit_node_build = false;
 
@@ -453,7 +453,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 
 	// this probably cannot happen, but check anyway
-	if (inst.edit_wad->LevelCount() == 0)
+	if (edit_wad->LevelCount() == 0)
 	{
 		DLG_Notify("Cannot build nodes: no levels found!");
 		return;
@@ -461,14 +461,14 @@ void CMD_BuildAllNodes(Instance &inst)
 
 
 	// remember current level
-	SString CurLevel(inst.Level_name);
+	SString CurLevel(Level_name);
 
 	// reset various editor state
-	inst.Editor_ClearAction();
-	inst.Selection_InvalidateLast();
+	Editor_ClearAction();
+	Selection_InvalidateLast();
 
-	inst.edit.Selected->clear_all();
-	inst.edit.highlight.clear();
+	edit.Selected->clear_all();
+	edit.highlight.clear();
 
 
 	dialog = new UI_NodeDialog();
@@ -483,22 +483,22 @@ void CMD_BuildAllNodes(Instance &inst)
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = BuildAllNodes(inst, nb_info);
+	build_result_e ret = BuildAllNodes(*this, nb_info);
 
 	if (ret == BUILD_OK)
 	{
 		dialog->Finish_OK();
-		inst.Status_Set("Built nodes OK");
+		Status_Set("Built nodes OK");
 	}
 	else if (nb_info->cancelled)
 	{
 		dialog->Finish_Cancel();
-		inst.Status_Set("Cancelled building nodes");
+		Status_Set("Cancelled building nodes");
 	}
 	else
 	{
 		dialog->Finish_Error();
-		inst.Status_Set("Error building nodes");
+		Status_Set("Error building nodes");
 	}
 
 	while (! dialog->WantClose())
@@ -512,7 +512,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 	// reload the previous level
 	// TODO: improve this to NOT mean reloading the level
-	inst.LoadLevel(inst.edit_wad, CurLevel);
+	LoadLevel(edit_wad, CurLevel);
 }
 
 

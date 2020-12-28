@@ -379,7 +379,7 @@ SString UI_ChooseTextLump::Run()
 
 //------------------------------------------------------------------------
 
-void CMD_EditLump(Instance &inst)
+void Instance::CMD_EditLump()
 {
 	SString lump_name = EXEC_Param[0];
 
@@ -395,7 +395,7 @@ void CMD_EditLump(Instance &inst)
 	if (lump_name[0] == 0 || lump_name[0] == '/')
 	{
 		// ask for the lump name
-		UI_ChooseTextLump *dialog = new UI_ChooseTextLump(inst);
+		UI_ChooseTextLump *dialog = new UI_ChooseTextLump(*this);
 
 		lump_name = dialog->Run();
 
@@ -405,7 +405,7 @@ void CMD_EditLump(Instance &inst)
 			return;
 
 		// check if user typed name of current level
-		if (lump_name.noCaseEqual(inst.Level_name))
+		if (lump_name.noCaseEqual(Level_name))
 			lump_name = EDLUMP_HEADER;
 	}
 
@@ -423,7 +423,7 @@ void CMD_EditLump(Instance &inst)
 	// only create a per-level SCRIPTS lump in a Hexen map
 	// [ the UI_ChooseTextLump already prevents this, but we need to
 	//   handle the /scripts option of the EditLump command ]
-	if (lump_name == EDLUMP_SCRIPTS && inst.Level_format != MapFormat::hexen)
+	if (lump_name == EDLUMP_SCRIPTS && Level_format != MapFormat::hexen)
 	{
 		DLG_Notify("A per-level SCRIPTS lump can only be created "
 					"on a Hexen format map.");
@@ -432,27 +432,27 @@ void CMD_EditLump(Instance &inst)
 
 	if (!special && ! ValidLumpToEdit(lump_name))
 	{
-		inst.Beep("Invalid lump: '%s'", lump_name.c_str());
+		Beep("Invalid lump: '%s'", lump_name.c_str());
 		return;
 	}
 
-	Wad_file *wad = inst.edit_wad ? inst.edit_wad : inst.game_wad;
+	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
 	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor();
 
-	if (!inst.edit_wad || inst.edit_wad->IsReadOnly())
+	if (!edit_wad || edit_wad->IsReadOnly())
 		editor->SetReadOnly();
 
 	// if lump exists, load the contents
 	if (lump_name == EDLUMP_HEADER)
 	{
-		editor->LoadMemory(inst.level.headerData);
-		editor->SetTitle(inst.Level_name);
+		editor->LoadMemory(level.headerData);
+		editor->SetTitle(Level_name);
 	}
 	else if (lump_name == EDLUMP_SCRIPTS)
 	{
-		editor->LoadMemory(inst.level.scriptsData);
+		editor->LoadMemory(level.scriptsData);
 		editor->SetTitle("SCRIPTS");
 	}
 	else
@@ -474,17 +474,17 @@ void CMD_EditLump(Instance &inst)
 		if (res != UI_TextEditor::RUN_Save)
 			break;
 
-		SYS_ASSERT(wad == inst.edit_wad);
+		SYS_ASSERT(wad == edit_wad);
 
 		if (lump_name == EDLUMP_HEADER)
 		{
-			editor->SaveMemory(inst.level.headerData);
-			inst.MadeChanges = true;
+			editor->SaveMemory(level.headerData);
+			MadeChanges = true;
 		}
 		else if (lump_name == EDLUMP_SCRIPTS)
 		{
-			editor->SaveMemory(inst.level.scriptsData);
-			inst.MadeChanges = true;
+			editor->SaveMemory(level.scriptsData);
+			MadeChanges = true;
 		}
 		else
 		{
@@ -498,9 +498,9 @@ void CMD_EditLump(Instance &inst)
 
 //------------------------------------------------------------------------
 
-void CMD_AddBehaviorLump(Instance &inst)
+void Instance::CMD_AddBehaviorLump()
 {
-	if (inst.Level_format != MapFormat::hexen)
+	if (Level_format != MapFormat::hexen)
 	{
 		DLG_Notify("A BEHAVIOR lump can only be added to a Hexen format map.");
 		return;
@@ -551,9 +551,9 @@ void CMD_AddBehaviorLump(Instance &inst)
 		return;
 	}
 
-	inst.level.behaviorData = std::move(data);
+	level.behaviorData = std::move(data);
 
-	inst.MadeChanges = true;
+	MadeChanges = true;
 }
 
 //--- editor settings ---
