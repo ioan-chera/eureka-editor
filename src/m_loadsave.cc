@@ -194,7 +194,7 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 	SYS_ASSERT(!inst.Iwad_name.empty());
 
 	inst.Level_format = dialog->map_format;
-	instance::Udmf_namespace = dialog->name_space;
+	inst.Udmf_namespace = dialog->name_space;
 
 	SYS_ASSERT(inst.Level_format != MapFormat::invalid);
 

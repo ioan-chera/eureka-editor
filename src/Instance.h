@@ -89,6 +89,7 @@ public:	// will be private when we encapsulate everything
 	SString Port_name;	// Name of source port "vanilla", "boom", ...
 	SString Iwad_name;	// Filename of the iwad
 	SString Game_name;	// Name of game "doom", "doom2", "heretic", ...
+	SString Udmf_namespace;	// for UDMF, the current namespace
 	std::vector<SString> Resource_list;
 
 	//

@@ -137,11 +137,6 @@ namespace global
 	extern SString cache_dir;    // for caches and backups, can be same as home_dir
 }
 
-namespace instance
-{
-	extern SString  Udmf_namespace; // for UDMF, the current namespace
-}
-
 namespace global
 {
 	extern SString config_file; // Name of the configuration file, or NULL

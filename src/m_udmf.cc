@@ -326,7 +326,7 @@ public:
 };
 
 
-static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
+static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token& name)
 {
 	Udmf_Token value = parser.Next();
 	if (value.IsEOF())
@@ -346,7 +346,7 @@ static void UDMF_ParseGlobalVar(Udmf_Parser& parser, Udmf_Token& name)
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		instance::Udmf_namespace = value.DecodeString();
+		inst.Udmf_namespace = value.DecodeString();
 	}
 	else if (name.Match("ee_compat"))
 	{
@@ -683,7 +683,7 @@ void UDMF_LoadLevel(Instance &inst)
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(parser, tok);
+			UDMF_ParseGlobalVar(inst, parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
@@ -711,9 +711,9 @@ static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
 	}
 }
 
-static void UDMF_WriteInfo(Lump_c *lump)
+static void UDMF_WriteInfo(const Instance &inst, Lump_c *lump)
 {
-	lump->Printf("namespace = \"%s\";\n\n", instance::Udmf_namespace.c_str());
+	lump->Printf("namespace = \"%s\";\n\n", inst.Udmf_namespace.c_str());
 }
 
 static void UDMF_WriteThings(const Document &doc, Lump_c *lump)
@@ -894,7 +894,7 @@ void UDMF_SaveLevel(const Instance &inst)
 {
 	Lump_c *lump = inst.edit_wad->AddLump("TEXTMAP");
 
-	UDMF_WriteInfo(lump);
+	UDMF_WriteInfo(inst, lump);
 	UDMF_WriteThings(inst.level, lump);
 	UDMF_WriteVertices(inst.level, lump);
 	UDMF_WriteLineDefs(inst.level, lump);

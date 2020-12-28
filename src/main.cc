@@ -80,9 +80,6 @@ SString Pwad_name;
 
 std::vector<SString> global::Pwad_list;
 
-SString  instance::Udmf_namespace;
-
-
 //
 // config items
 //

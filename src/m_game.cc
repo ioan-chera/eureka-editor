@@ -157,9 +157,9 @@ void Instance::M_PrepareConfigVariables()
 			break;
 	}
 
-	if (!instance::Udmf_namespace.empty())
+	if (!Udmf_namespace.empty())
 	{
-		parse_vars["$UDMF_NAMESPACE"] = instance::Udmf_namespace;
+		parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
 	}
 
 	if (!Game_name.empty())
