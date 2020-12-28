@@ -521,7 +521,7 @@ static void AdjustOfs_Begin(Instance &inst)
 
 	inst.edit.adjust_lax = Exec_HasFlag("/LAX");
 
-	Editor_SetAction(inst, ACT_ADJUST_OFS);
+	inst.Editor_SetAction(ACT_ADJUST_OFS);
 }
 
 static void AdjustOfs_Finish(Instance &inst)

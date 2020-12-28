@@ -568,7 +568,7 @@ begin_drawing:
 		inst.edit.draw_to_x = doc.vertices[old_vert]->x();
 		inst.edit.draw_to_y = doc.vertices[old_vert]->y();
 
-		Editor_SetAction(inst, ACT_DRAW_LINE);
+		inst.Editor_SetAction(ACT_DRAW_LINE);
 	}
 
 	// stop drawing mode?

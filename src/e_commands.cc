@@ -608,7 +608,7 @@ static void DoBeginDrag(Instance &inst)
 
 	inst.edit.clicked.clear();
 
-	Editor_SetAction(inst, ACT_DRAG);
+	inst.Editor_SetAction(ACT_DRAG);
 
 	inst.main_win->canvas->redraw();
 }
@@ -758,7 +758,7 @@ static void CMD_ACT_Click(Instance &inst)
 		}
 
 		inst.edit.clicked = inst.edit.highlight;
-		Editor_SetAction(inst, ACT_CLICK);
+		inst.Editor_SetAction(ACT_CLICK);
 		return;
 	}
 
@@ -796,7 +796,7 @@ static void CMD_ACT_Click(Instance &inst)
 			inst.edit.Selected->set(new_vert);
 
 		inst.edit.clicked = Objid(ObjType::vertices, new_vert);
-		Editor_SetAction(inst, ACT_CLICK);
+		inst.Editor_SetAction(ACT_CLICK);
 
 		inst.RedrawMap();
 		return;
@@ -811,11 +811,11 @@ static void CMD_ACT_Click(Instance &inst)
 		inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
 		inst.edit.selbox_y1 = inst.edit.selbox_y2 = inst.edit.map_y;
 
-		Editor_SetAction(inst, ACT_SELBOX);
+		inst.Editor_SetAction(ACT_SELBOX);
 		return;
 	}
 
-	Editor_SetAction(inst, ACT_CLICK);
+	inst.Editor_SetAction(ACT_CLICK);
 }
 
 
@@ -833,7 +833,7 @@ static void CMD_ACT_SelectBox(Instance &inst)
 	inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
 	inst.edit.selbox_y1 = inst.edit.selbox_y2 = inst.edit.map_y;
 
-	Editor_SetAction(inst, ACT_SELBOX);
+	inst.Editor_SetAction(ACT_SELBOX);
 }
 
 
@@ -1010,7 +1010,7 @@ static void CMD_ACT_Transform(Instance &inst)
 		ConvertSelection(inst.level, inst.edit.Selected, inst.edit.trans_lines);
 	}
 
-	Editor_SetAction(inst, ACT_TRANSFORM);
+	inst.Editor_SetAction(ACT_TRANSFORM);
 }
 
 

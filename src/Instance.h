@@ -163,6 +163,7 @@ public:
 	// M_EVENTS
 	void Editor_ClearNav();
 	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
+	void Editor_SetAction(editor_action_e new_action);
 	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
 
@@ -333,7 +334,10 @@ public:	// will be private when we encapsulate everything
 #endif
 
 	// IO stuff
-	nav_active_key_t cur_action_key;
+	nav_active_key_t cur_action_key = {};
+	bool in_operation_menu = false;
+	int mouse_last_x = 0;
+	int mouse_last_y = 0;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

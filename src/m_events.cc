@@ -45,11 +45,6 @@ void ClearStickyMod(Instance &inst)
 	inst.edit.sticky_mod = 0;
 }
 
-
-static int mouse_last_x;
-static int mouse_last_y;
-
-
 void Instance::Editor_ClearAction()
 {
 	switch (edit.action)
@@ -70,13 +65,13 @@ void Instance::Editor_ClearAction()
 }
 
 
-void Editor_SetAction(Instance &inst, editor_action_e  new_action)
+void Instance::Editor_SetAction(editor_action_e  new_action)
 {
-	inst.Editor_ClearAction();
+	Editor_ClearAction();
 
-	inst.edit.action = new_action;
+	edit.action = new_action;
 
-	switch (inst.edit.action)
+	switch (edit.action)
 	{
 		case ACT_NOTHING:
 			return;
@@ -85,7 +80,7 @@ void Editor_SetAction(Instance &inst, editor_action_e  new_action)
 			mouse_last_x = Fl::event_x();
 			mouse_last_y = Fl::event_y();
 
-			inst.main_win->SetCursor(FL_CURSOR_HAND);
+			main_win->SetCursor(FL_CURSOR_HAND);
 			break;
 
 		default:
@@ -412,8 +407,6 @@ unsigned int Nav_TimeDiff()
 int wheel_dx;
 int wheel_dy;
 
-static bool in_operation_menu;
-
 extern void CheckBeginDrag(Instance &inst);
 extern void Transform_Update(Instance &inst);
 
@@ -444,7 +437,7 @@ static void EV_LeaveWindow(Instance &inst)
 {
 	// ignore FL_LEAVE event when doing a popup operation menu,
 	// otherwise we lose the highlight and kill drawing mode.
-	if (in_operation_menu)
+	if (inst.in_operation_menu)
 		return;
 
 	inst.edit.pointer_in_window = false;
@@ -719,8 +712,8 @@ static int EV_RawMouse(Instance &inst, int event)
 
 	int mod = Fl::event_state() & EMOD_ALL_MASK;
 
-	int dx = Fl::event_x() - mouse_last_x;
-	int dy = Fl::event_y() - mouse_last_y;
+	int dx = Fl::event_x() - inst.mouse_last_x;
+	int dy = Fl::event_y() - inst.mouse_last_y;
 
 	if (inst.edit.render3d)
 	{
@@ -731,8 +724,8 @@ static int EV_RawMouse(Instance &inst, int event)
 		EV_MouseMotion(inst, Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 
-	mouse_last_x = Fl::event_x();
-	mouse_last_y = Fl::event_y();
+	inst.mouse_last_x = Fl::event_x();
+	inst.mouse_last_y = Fl::event_y();
 
 	return 1;
 }
@@ -1012,11 +1005,11 @@ void CMD_OperationMenu(Instance &inst)
 	// the pop-up menu will cause an FL_LEAVE event on the canvas,
 	// which we need to ignore to prevent forgetting the current
 	// highlight or killing line drawing mode.
-	in_operation_menu = true;
+	inst.in_operation_menu = true;
 
 	const Fl_Menu_Item *item = menu->popup();
 
-	in_operation_menu = false;
+	inst.in_operation_menu = false;
 
 	if (item)
 	{
