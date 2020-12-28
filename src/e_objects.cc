@@ -48,8 +48,6 @@
 // config items
 int  config::new_sector_size = 128;
 
-bool select_verts_of_new_sectors = true;
-
 
 //
 //  delete a group of objects.
@@ -580,7 +578,7 @@ begin_drawing:
 	}
 
 	// select vertices of a newly created sector?
-	if (select_verts_of_new_sectors && closed_a_loop &&
+	if (closed_a_loop &&
 		doc.numSectors() > orig_num_sectors)
 	{
 		selection_c sel(ObjType::sectors);
