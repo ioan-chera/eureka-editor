@@ -135,11 +135,11 @@ void M_ClearAllDefinitions()
 }
 
 
-void M_PrepareConfigVariables(Instance &inst)
+void Instance::M_PrepareConfigVariables()
 {
 	parse_vars.clear();
 
-	switch (inst.Level_format)
+	switch (Level_format)
 	{
 		case MapFormat::doom:
 			parse_vars["$MAP_FORMAT"] = "DOOM";
@@ -168,14 +168,14 @@ void M_PrepareConfigVariables(Instance &inst)
 
 		if (M_CanLoadDefinitions("games", instance::Game_name))
 		{
-			SString base_game = M_GetBaseGame(inst, instance::Game_name);
+			SString base_game = M_GetBaseGame(instance::Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
-	if (!instance::Port_name.empty())
+	if (!Port_name.empty())
 	{
-		parse_vars["$PORT_NAME"] = instance::Port_name;
+		parse_vars["$PORT_NAME"] = Port_name;
 	}
 }
 
@@ -1212,9 +1212,9 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 
 }
 
-SString M_GetBaseGame(Instance &inst, const SString &game)
+SString Instance::M_GetBaseGame(const SString &game)
 {
-	GameInfo ginfo = M_LoadGameInfo(inst, game);
+	GameInfo ginfo = M_LoadGameInfo(*this, game);
 	SYS_ASSERT(ginfo);
 
 	return ginfo.baseGame;

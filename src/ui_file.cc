@@ -870,7 +870,7 @@ void UI_ProjectSetup::PopulatePort()
 		prev_port = port_choice->mvalue()->text;
 
 	if (prev_port.empty())
-		prev_port = instance::Port_name;
+		prev_port = inst.Port_name;
 	if (!prev_port.empty())
 		prev_port = "vanilla";
 
@@ -887,9 +887,9 @@ void UI_ProjectSetup::PopulatePort()
 	SString base_game;
 
 	if (game_choice->mvalue())
-		base_game = M_GetBaseGame(inst, game_choice->mvalue()->text);
+		base_game = inst.M_GetBaseGame(game_choice->mvalue()->text);
 	else if (!instance::Game_name.empty())
-		base_game = M_GetBaseGame(inst, instance::Game_name);
+		base_game = inst.M_GetBaseGame(instance::Game_name);
 
 	if (base_game.empty())
 		base_game = "doom2";

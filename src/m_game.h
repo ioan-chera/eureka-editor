@@ -260,7 +260,6 @@ extern int num_gen_linetypes;
 //------------------------------------------------------------------------
 
 void M_ClearAllDefinitions();
-void M_PrepareConfigVariables(Instance &inst);
 
 void M_LoadDefinitions(Instance &inst, const SString &folder, const SString &name);
 
@@ -289,8 +288,6 @@ std::vector<SString> M_CollectKnownDefs(const char *folder);
 bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game, const SString &port);
 
 SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
-
-SString M_GetBaseGame(Instance &inst, const SString &game);
 
 map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game, const char *port);
 

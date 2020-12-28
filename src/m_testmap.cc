@@ -30,7 +30,7 @@
 #include "ui_window.h"
 
 
-static SString QueryName(const SString &port = instance::Port_name, const SString &cgame = instance::Game_name)
+static SString QueryName(const SString &port, const SString &cgame)
 {
 	SYS_ASSERT(port.good());
 
@@ -299,7 +299,7 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 	// see if we should use the "-merge" parameter, which is
 	// required for Chocolate-Doom and derivates like Crispy Doom.
 	// TODO : is there a better way to do this?
-	if (instance::Port_name.noCaseEqual("vanilla"))
+	if (inst.Port_name.noCaseEqual("vanilla"))
 	{
 		use_merge = 1;
 	}
@@ -347,14 +347,14 @@ void CMD_TestMap(Instance &inst)
 
 
 	// check if we know the executable path, if not then ask
-	port_path_info_t *info = M_QueryPortPath(QueryName());
+	port_path_info_t *info = M_QueryPortPath(QueryName(inst.Port_name, instance::Game_name));
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(instance::Port_name, instance::Game_name))
+		if (! M_PortSetupDialog(inst.Port_name, instance::Game_name))
 			return;
 
-		info = M_QueryPortPath(QueryName());
+		info = M_QueryPortPath(QueryName(inst.Port_name, instance::Game_name));
 	}
 
 	// this generally can't happen, but we check anyway...

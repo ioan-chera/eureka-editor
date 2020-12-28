@@ -47,14 +47,23 @@ public:
 	void Nav_Clear();
 
 	// M_FILES
+	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
+	void M_WriteEurekaLump(Wad_file *wad) const;
+
+	// M_GAME
+	SString M_GetBaseGame(const SString &game);
+	void M_PrepareConfigVariables();
 
 	// M_KEYS
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 
 	// M_LOADSAVE
 	void RemoveEditWad();
+
+	// MAIN
+	void Main_LoadResources();
 
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
@@ -76,6 +85,7 @@ public:	// will be private when we encapsulate everything
 	Wad_file *game_wad = nullptr;
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
+	SString Port_name;	// Name of source port "vanilla", "boom", ...
 
 	//
 	// Game-dependent (thus instance dependent) defaults

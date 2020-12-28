@@ -186,7 +186,7 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 	// grab the new information
 
 	instance::Game_name = dialog->game;
-	instance::Port_name = dialog->port;
+	inst.Port_name = dialog->port;
 
 	SYS_ASSERT(!instance::Game_name.empty());
 
@@ -208,7 +208,7 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 
 	Fl::wait(0.1);
 
-	Main_LoadResources(inst);
+	inst.Main_LoadResources();
 
 	Fl::wait(0.1);
 }
@@ -1100,7 +1100,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! M_ParseEurekaLump(wad))
+		if (! gInstance.M_ParseEurekaLump(wad))
 		{
 			delete wad;
 			return;
@@ -1130,7 +1130,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
-	Main_LoadResources(gInstance);
+	gInstance.Main_LoadResources();
 }
 
 
@@ -1165,7 +1165,7 @@ void CMD_OpenMap(Instance &inst)
 
 	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
-		if (! M_ParseEurekaLump(wad))
+		if (! inst.M_ParseEurekaLump(wad))
 		{
 			delete wad;
 			return;
@@ -1203,7 +1203,7 @@ void CMD_OpenMap(Instance &inst)
 		// this can invalidate the 'wad' var (since it closes/reopens
 		// all wads in the master_dir), so it MUST be after LoadLevel.
 		// less importantly, we need to know the Level_format.
-		Main_LoadResources(inst);
+		inst.Main_LoadResources();
 	}
 }
 
@@ -1663,7 +1663,7 @@ static void SaveLevel(Instance &inst, const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	inst.edit_wad->SortLevels();
 
-	M_WriteEurekaLump(inst.edit_wad);
+	inst.M_WriteEurekaLump(inst.edit_wad);
 
 	M_AddRecent(inst.edit_wad->PathName(), inst.Level_name);
 
@@ -1778,7 +1778,7 @@ static bool M_ExportMap(Instance &inst)
 		// adopt iwad/port/resources of the target wad
 		if (wad->FindLump(EUREKA_LUMP))
 		{
-			if (! M_ParseEurekaLump(wad))
+			if (! inst.M_ParseEurekaLump(wad))
 			{
 				delete wad;
 				return false;
@@ -1845,7 +1845,7 @@ static bool M_ExportMap(Instance &inst)
 	SaveLevel(inst, map_name);
 
 	// do this after the save (in case it fatal errors)
-	Main_LoadResources(inst);
+	inst.Main_LoadResources();
 
 	return true;
 }

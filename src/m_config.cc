@@ -213,7 +213,7 @@ static const opt_desc_t options[] =
 		"",
 		"Port (engine) name",
 		"<name>",
-		&instance::Port_name
+		&gInstance.Port_name	// TODO: same deal
 	},
 
 	{	"warp",

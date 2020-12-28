@@ -833,7 +833,7 @@ static void M_AddResource_Unique(const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
-bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
+bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -968,8 +968,8 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	if (!new_port.empty())
 	{
-		if (! (keep_cmd_line_args && !instance::Port_name.empty()))
-			instance::Port_name = new_port;
+		if (! (keep_cmd_line_args && !Port_name.empty()))
+			Port_name = new_port;
 	}
 
 	if (! keep_cmd_line_args)
@@ -984,7 +984,7 @@ bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 }
 
 
-void M_WriteEurekaLump(Wad_file *wad)
+void Instance::M_WriteEurekaLump(Wad_file *wad) const
 {
 	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
 
@@ -1001,8 +1001,8 @@ void M_WriteEurekaLump(Wad_file *wad)
 	if (!instance::Game_name.empty())
 		lump->Printf("game %s\n", instance::Game_name.c_str());
 
-	if (!instance::Port_name.empty())
-		lump->Printf("port %s\n", instance::Port_name.c_str());
+	if (!Port_name.empty())
+		lump->Printf("port %s\n", Port_name.c_str());
 
 	for (const SString &resource : instance::Resource_list)
 	{

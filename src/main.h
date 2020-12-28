@@ -140,7 +140,6 @@ namespace global
 namespace instance
 {
 	extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
-	extern SString Port_name;   // Name of source port "vanilla", "boom", ...
 
 	extern SString  Udmf_namespace; // for UDMF, the current namespace
 }
@@ -188,7 +187,6 @@ extern int MadeChanges;
  */
 
 bool Main_ConfirmQuit(const char *action);
-void Main_LoadResources(Instance &inst);
 void Main_Quit();
 
 [[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);

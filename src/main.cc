@@ -84,7 +84,6 @@ std::vector<SString> global::Pwad_list;
 std::vector<SString> instance::Resource_list;
 
 SString instance::Game_name;
-SString instance::Port_name;
 
 SString  instance::Udmf_namespace;
 
@@ -433,15 +432,15 @@ static void DeterminePort(Instance &inst)
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
-	if (!instance::Port_name.empty())
+	if (!inst.Port_name.empty())
 	{
-		if (! M_CanLoadDefinitions("ports", instance::Port_name))
-			ThrowException("Unknown port '%s' (no definition file)\n", instance::Port_name.c_str());
+		if (! M_CanLoadDefinitions("ports", inst.Port_name))
+			ThrowException("Unknown port '%s' (no definition file)\n", inst.Port_name.c_str());
 
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(inst, instance::Game_name);
+	SString base_game = inst.M_GetBaseGame(instance::Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -462,7 +461,7 @@ static void DeterminePort(Instance &inst)
 		config::default_port = "vanilla";
 	}
 
-	instance::Port_name = config::default_port;
+	inst.Port_name = config::default_port;
 }
 
 
@@ -836,15 +835,15 @@ static void ReadPortInfo(Instance &inst)
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(!instance::Port_name.empty());
+	SYS_ASSERT(!inst.Port_name.empty());
 
-	SString base_game = M_GetBaseGame(inst, instance::Game_name);
+	SString base_game = inst.M_GetBaseGame(instance::Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(inst, base_game, instance::Port_name))
+	if (! M_CheckPortSupportsGame(inst, base_game, inst.Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-			instance::Port_name.c_str(), instance::Game_name.c_str());
+			inst.Port_name.c_str(), instance::Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -853,17 +852,17 @@ static void ReadPortInfo(Instance &inst)
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-			instance::Port_name.c_str(), instance::Game_name.c_str());
+			inst.Port_name.c_str(), instance::Game_name.c_str());
 
 		if (res == 0)
 		{
-			instance::Port_name = "vanilla";
+			inst.Port_name = "vanilla";
 		}
 	}
 
-	LogPrintf("Port name: '%s'\n", instance::Port_name.c_str());
+	LogPrintf("Port name: '%s'\n", inst.Port_name.c_str());
 
-	M_LoadDefinitions(inst, "ports", instance::Port_name);
+	M_LoadDefinitions(inst, "ports", inst.Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (Features.strife_flags)
@@ -880,7 +879,7 @@ static void ReadPortInfo(Instance &inst)
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Main_LoadResources(Instance &inst)
+void Instance::Main_LoadResources()
 {
 	LogPrintf("\n");
 	LogPrintf("----- Loading Resources -----\n");
@@ -888,27 +887,27 @@ void Main_LoadResources(Instance &inst)
 	M_ClearAllDefinitions();
 
 	// clear the parse variables, pre-set a few vars
-	M_PrepareConfigVariables(inst);
+	M_PrepareConfigVariables();
 
-	ReadGameInfo(inst);
-	ReadPortInfo(inst);
+	ReadGameInfo(*this);
+	ReadPortInfo(*this);
 
 	// reset the master directory
-	if (inst.edit_wad)
-		MasterDir_Remove(inst.edit_wad);
+	if (edit_wad)
+		MasterDir_Remove(edit_wad);
 
 	MasterDir_CloseAll();
 
-	Main_LoadIWAD(inst);
+	Main_LoadIWAD(*this);
 
 	// load all resource wads
 	for (const SString &resource : instance::Resource_list)
 	{
-		LoadResourceFile(inst, resource.c_str());
+		LoadResourceFile(*this, resource.c_str());
 	}
 
-	if (inst.edit_wad)
-		MasterDir_Add(inst.edit_wad);
+	if (edit_wad)
+		MasterDir_Add(edit_wad);
 
 	// finally, load textures and stuff...
 	W_LoadPalette();
@@ -924,18 +923,18 @@ void Main_LoadResources(Instance &inst)
 	// reset sector info (for slopes and 3D floors)
 	Subdiv_InvalidateAll();
 
-	if (inst.main_win)
+	if (main_win)
 	{
 		// kill all loaded OpenGL images
-		if (inst.main_win->canvas)
-			inst.main_win->canvas->DeleteContext();
+		if (main_win->canvas)
+			main_win->canvas->DeleteContext();
 
-		inst.main_win->UpdateGameInfo();
+		main_win->UpdateGameInfo();
 
-		inst.main_win->browser->Populate();
+		main_win->browser->Populate();
 
 		// TODO: only call this when the IWAD has changed
-		Props_LoadValues(inst);
+		Props_LoadValues(*this);
 	}
 }
 
@@ -1114,7 +1113,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.edit_wad)
 		{
-			if (! M_ParseEurekaLump(gInstance.edit_wad, true /* keep_cmd_line_args */))
+			if (! gInstance.M_ParseEurekaLump(gInstance.edit_wad, true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.RemoveEditWad();
@@ -1145,7 +1144,7 @@ int main(int argc, char *argv[])
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
-		Main_LoadResources(gInstance);	// TODO: instance management
+		gInstance.Main_LoadResources();	// TODO: instance management
 
 
 		Main_Loop();
