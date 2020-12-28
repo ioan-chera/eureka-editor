@@ -29,7 +29,9 @@
 
 #include "m_keys.h"
 
-typedef enum
+#define MAX_NAV_ACTIVE_KEYS  20
+
+enum editor_action_e
 {
 	ACT_NOTHING = 0,
 
@@ -39,9 +41,24 @@ typedef enum
 	ACT_TRANSFORM,		// user is scaling/rotating some objects
 	ACT_ADJUST_OFS,		// user is adjusting the offsets on a sidedef
 	ACT_DRAW_LINE,		// user is drawing a new line
+};
 
-} editor_action_e;
+typedef void (Instance:: *nav_release_func_t)();
 
+struct nav_active_key_t
+{
+	// key or button code, including any modifier.
+	// zero when this slot is unused.
+	keycode_t  key;
+
+	// function to call when user releases the key or button.
+	nav_release_func_t  release;
+
+	// modifiers that can change state without a keypress
+	// being considered as a new command.
+	keycode_t  lax_mod;
+
+};
 
 void Editor_SetAction(Instance &inst, editor_action_e new_action);
 
@@ -64,29 +81,11 @@ keycode_t M_ReadLaxModifiers();
 extern int wheel_dx;
 extern int wheel_dy;
 
-typedef void (Instance::*nav_release_func_t)();
-
 void Nav_Navigate(Instance &inst);
-bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func);
 
 unsigned int Nav_TimeDiff(); /* milliseconds */
 
 void M_LoadOperationMenus(Instance &inst);
-
-struct nav_active_key_t
-{
-	// key or button code, including any modifier.
-	// zero when this slot is unused.
-	keycode_t  key;
-
-	// function to call when user releases the key or button.
-	nav_release_func_t  release;
-
-	// modifiers that can change state without a keypress
-	// being considered as a new command.
-	keycode_t  lax_mod;
-
-};
 
 #endif /* __EUREKA_M_EVENTS_H__ */
 

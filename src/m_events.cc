@@ -190,10 +190,6 @@ static void Navigate2D(Instance &inst)
 
 /* navigation system */
 
-#define MAX_NAV_ACTIVE_KEYS  20
-
-static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
-
 static unsigned int nav_time;
 
 
@@ -216,19 +212,19 @@ void Nav_Navigate(Instance &inst)
 }
 
 
-bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func)
+bool Instance::Nav_SetKey(keycode_t key, nav_release_func_t func)
 {
 	// when starting a navigation, grab the current time
-	if (! inst.edit.is_navigating)
+	if (! edit.is_navigating)
 		Nav_TimeDiff();
 
 	keycode_t lax_mod = 0;
 
-	inst.edit.nav_lax = Exec_HasFlag("/LAX");
-	if (inst.edit.nav_lax)
+	edit.nav_lax = Exec_HasFlag("/LAX");
+	if (edit.nav_lax)
 		lax_mod = EMOD_SHIFT | EMOD_COMMAND;
 
-	inst.edit.is_navigating = true;
+	edit.is_navigating = true;
 
 	int free_slot = -1;
 
@@ -251,7 +247,7 @@ bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func)
 		// if it's the same physical key, release the previous action
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
-			(inst.*N.release)();
+			(this->*N.release)();
 			N.key = 0;
 		}
 	}
@@ -359,7 +355,7 @@ static void Nav_UpdateKeys(Instance &inst)
 
 	for (int i = 0 ; i < MAX_NAV_ACTIVE_KEYS ; i++)
 	{
-		nav_active_key_t& N = nav_actives[i];
+		nav_active_key_t& N = inst.nav_actives[i];
 
 		if (! N.key)
 			continue;

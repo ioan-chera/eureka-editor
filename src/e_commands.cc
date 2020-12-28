@@ -417,21 +417,28 @@ void Instance::NAV_Scroll_Left_release()
 	edit.nav_left = 0;
 }
 
-void Instance::CMD_NAV_Scroll_Left()
+//
+// Scroll in any direction as dictated by CMD_Nav_Scroll_*
+//
+void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 {
-	if (! EXEC_CurKey)
+	if(!EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
+	if(!edit.is_navigating)
 		Editor_ClearNav();
 
 	float perc = static_cast<float>(atof(EXEC_Param[0]));
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
+	*editNav = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Left_release);
+	Nav_SetKey(EXEC_CurKey, func);
 }
 
+void Instance::CMD_NAV_Scroll_Left()
+{
+	navigationScroll(&edit.nav_left, &Instance::NAV_Scroll_Left_release);
+}
 
 void Instance::NAV_Scroll_Right_release()
 {
@@ -440,17 +447,7 @@ void Instance::NAV_Scroll_Right_release()
 
 void Instance::CMD_NAV_Scroll_Right()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Right_release);
+	navigationScroll(&edit.nav_right, &Instance::NAV_Scroll_Right_release);
 }
 
 
@@ -461,17 +458,7 @@ void Instance::NAV_Scroll_Up_release()
 
 void Instance::CMD_NAV_Scroll_Up()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Up_release);
+	navigationScroll(&edit.nav_up, &Instance::NAV_Scroll_Up_release);
 }
 
 
@@ -482,17 +469,7 @@ void Instance::NAV_Scroll_Down_release()
 
 void Instance::CMD_NAV_Scroll_Down()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	float perc = static_cast<float>(atof(EXEC_Param[0]));
-	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
-	edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_Scroll_Down_release);
+	navigationScroll(&edit.nav_down, &Instance::NAV_Scroll_Down_release);
 }
 
 
@@ -512,7 +489,7 @@ void Instance::CMD_NAV_MouseScroll()
 	if (! edit.is_navigating)
 		Editor_ClearNav();
 
-	if (Nav_SetKey(*this, EXEC_CurKey, &Instance::NAV_MouseScroll_release))
+	if (Nav_SetKey(EXEC_CurKey, &Instance::NAV_MouseScroll_release))
 	{
 		// begin
 		Editor_ScrollMap(-1);

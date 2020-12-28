@@ -1689,17 +1689,46 @@ void Instance::R3D_NAV_Forward_release()
 	edit.nav_fwd = 0;
 }
 
-void Instance::R3D_NAV_Forward()
+//
+// For 3D movement control
+//
+void Instance::navigation3DMove(float *editNav, nav_release_func_t func, bool fly)
 {
-	if (! EXEC_CurKey)
+	if(!EXEC_CurKey)
 		return;
 
-	if (! edit.is_navigating)
+	if(fly)
+	{
+		if(r_view.gravity && config::render_lock_gravity)
+		{
+			Beep("Gravity is on");
+			return;
+		}
+
+		r_view.gravity = false;
+	}
+
+	if(!edit.is_navigating)
 		Editor_ClearNav();
 
-	edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
+	*editNav = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Forward_release);
+	Nav_SetKey(EXEC_CurKey, func);
+}
+
+//
+// Applies turning adjustment
+//
+void Instance::navigation3DTurn(float *editNav, nav_release_func_t func)
+{
+	navigation3DMove(editNav, func, false);
+	*editNav = static_cast<float>(*editNav * M_PI / 180.0f);	// convert it to radians now
+}
+
+
+void Instance::R3D_NAV_Forward()
+{
+	navigation3DMove(&edit.nav_fwd, &Instance::R3D_NAV_Forward_release, false);
 }
 
 
@@ -1710,15 +1739,7 @@ void Instance::R3D_NAV_Back_release()
 
 void Instance::R3D_NAV_Back()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Back_release);
+	navigation3DMove(&edit.nav_back, &Instance::R3D_NAV_Back_release, false);
 }
 
 
@@ -1729,15 +1750,7 @@ void Instance::R3D_NAV_Right_release()
 
 void Instance::R3D_NAV_Right()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Right_release);
+	navigation3DMove(&edit.nav_right, &Instance::R3D_NAV_Right_release, false);
 }
 
 
@@ -1748,15 +1761,7 @@ void Instance::R3D_NAV_Left_release()
 
 void Instance::R3D_NAV_Left()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Left_release);
+	navigation3DMove(&edit.nav_left, &Instance::R3D_NAV_Left_release, false);
 }
 
 
@@ -1767,23 +1772,7 @@ void Instance::R3D_NAV_Up_release()
 
 void Instance::R3D_NAV_Up()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (r_view.gravity && config::render_lock_gravity)
-	{
-		Beep("Gravity is on");
-		return;
-	}
-
-	r_view.gravity = false;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Up_release);
+	navigation3DMove(&edit.nav_up, &Instance::R3D_NAV_Up_release, true);
 }
 
 
@@ -1794,25 +1783,8 @@ void Instance::R3D_NAV_Down_release()
 
 void Instance::R3D_NAV_Down()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (r_view.gravity && config::render_lock_gravity)
-	{
-		Beep("Gravity is on");
-		return;
-	}
-
-	r_view.gravity = false;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_Down_release);
+	navigation3DMove(&edit.nav_down, &Instance::R3D_NAV_Down_release, true);
 }
-
 
 void Instance::R3D_NAV_TurnLeft_release()
 {
@@ -1821,18 +1793,7 @@ void Instance::R3D_NAV_TurnLeft_release()
 
 void Instance::R3D_NAV_TurnLeft()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	float turn = static_cast<float>(atof(EXEC_Param[0]));
-
-	// convert to radians
-	edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_TurnLeft_release);
+	navigation3DTurn(&edit.nav_turn_L, &Instance::R3D_NAV_TurnLeft_release);
 }
 
 
@@ -1843,18 +1804,7 @@ void Instance::R3D_NAV_TurnRight_release()
 
 void Instance::R3D_NAV_TurnRight()
 {
-	if (! EXEC_CurKey)
-		return;
-
-	if (! edit.is_navigating)
-		Editor_ClearNav();
-
-	float turn = static_cast<float>(atof(EXEC_Param[0]));
-
-	// convert to radians
-	edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
-
-	Nav_SetKey(*this, EXEC_CurKey, &Instance::R3D_NAV_TurnRight_release);
+	navigation3DTurn(&edit.nav_turn_R, &Instance::R3D_NAV_TurnRight_release);
 }
 
 

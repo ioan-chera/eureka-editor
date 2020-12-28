@@ -282,6 +282,7 @@ public:
 	void Editor_SetAction(editor_action_e new_action);
 	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
+	bool Nav_SetKey(keycode_t key, nav_release_func_t func);
 
 	// M_FILES
 	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
@@ -344,6 +345,12 @@ public:
 	void MasterDir_Remove(Wad_file *wad);
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
+
+private:
+	// New private methods
+	void navigationScroll(float *editNav, nav_release_func_t func);
+	void navigation3DMove(float *editNav, nav_release_func_t func, bool fly);
+	void navigation3DTurn(float *editNav, nav_release_func_t func);
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
@@ -454,6 +461,7 @@ public:	// will be private when we encapsulate everything
 	bool in_operation_menu = false;
 	int mouse_last_x = 0;
 	int mouse_last_y = 0;
+	nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS] = {};
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
