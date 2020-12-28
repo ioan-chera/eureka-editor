@@ -37,6 +37,26 @@ public:
 	// E_BASIS
 	fixcoord_t MakeValidCoord(double x) const;
 
+	// E_COMMANDS
+	void ACT_Click_release();
+	void ACT_Drag_release();
+	void ACT_SelectBox_release();
+	void ACT_Transform_release();
+	void ACT_AdjustOfs_release();
+	void NAV_MouseScroll_release();
+	void NAV_Scroll_Left_release();
+	void NAV_Scroll_Right_release();
+	void NAV_Scroll_Up_release();
+	void NAV_Scroll_Down_release();
+	void R3D_NAV_Forward_release();
+	void R3D_NAV_Back_release();
+	void R3D_NAV_Right_release();
+	void R3D_NAV_Left_release();
+	void R3D_NAV_Up_release();
+	void R3D_NAV_Down_release();
+	void R3D_NAV_TurnLeft_release();
+	void R3D_NAV_TurnRight_release();
+
 	// E_MAIN
 	void CalculateLevelBounds();
 	void Editor_ChangeMode(char mode_char);

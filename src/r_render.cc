@@ -1687,9 +1687,9 @@ static void R3D_DropToFloor(Instance &inst)
 }
 
 
-static void R3D_NAV_Forward_release(Instance &inst)
+void Instance::R3D_NAV_Forward_release()
 {
-	inst.edit.nav_fwd = 0;
+	edit.nav_fwd = 0;
 }
 
 static void R3D_NAV_Forward(Instance &inst)
@@ -1702,13 +1702,13 @@ static void R3D_NAV_Forward(Instance &inst)
 
 	inst.edit.nav_fwd = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Forward_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Forward_release);
 }
 
 
-static void R3D_NAV_Back_release(Instance &inst)
+void Instance::R3D_NAV_Back_release()
 {
-	inst.edit.nav_back = 0;
+	edit.nav_back = 0;
 }
 
 static void R3D_NAV_Back(Instance &inst)
@@ -1721,13 +1721,13 @@ static void R3D_NAV_Back(Instance &inst)
 
 	inst.edit.nav_back = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Back_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Back_release);
 }
 
 
-static void R3D_NAV_Right_release(Instance &inst)
+void Instance::R3D_NAV_Right_release()
 {
-	inst.edit.nav_right = 0;
+	edit.nav_right = 0;
 }
 
 static void R3D_NAV_Right(Instance &inst)
@@ -1740,13 +1740,13 @@ static void R3D_NAV_Right(Instance &inst)
 
 	inst.edit.nav_right = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Right_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Right_release);
 }
 
 
-static void R3D_NAV_Left_release(Instance &inst)
+void Instance::R3D_NAV_Left_release()
 {
-	inst.edit.nav_left = 0;
+	edit.nav_left = 0;
 }
 
 static void R3D_NAV_Left(Instance &inst)
@@ -1759,13 +1759,13 @@ static void R3D_NAV_Left(Instance &inst)
 
 	inst.edit.nav_left = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Left_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Left_release);
 }
 
 
-static void R3D_NAV_Up_release(Instance &inst)
+void Instance::R3D_NAV_Up_release()
 {
-	inst.edit.nav_up = 0;
+	edit.nav_up = 0;
 }
 
 static void R3D_NAV_Up(Instance &inst)
@@ -1786,13 +1786,13 @@ static void R3D_NAV_Up(Instance &inst)
 
 	inst.edit.nav_up = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Up_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Up_release);
 }
 
 
-static void R3D_NAV_Down_release(Instance &inst)
+void Instance::R3D_NAV_Down_release()
 {
-	inst.edit.nav_down = 0;
+	edit.nav_down = 0;
 }
 
 static void R3D_NAV_Down(Instance &inst)
@@ -1813,13 +1813,13 @@ static void R3D_NAV_Down(Instance &inst)
 
 	inst.edit.nav_down = static_cast<float>(atof(EXEC_Param[0]));
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_Down_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_Down_release);
 }
 
 
-static void R3D_NAV_TurnLeft_release(Instance &inst)
+void Instance::R3D_NAV_TurnLeft_release()
 {
-	inst.edit.nav_turn_L = 0;
+	edit.nav_turn_L = 0;
 }
 
 static void R3D_NAV_TurnLeft(Instance &inst)
@@ -1835,13 +1835,13 @@ static void R3D_NAV_TurnLeft(Instance &inst)
 	// convert to radians
 	inst.edit.nav_turn_L = static_cast<float>(turn * M_PI / 180.0);
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_TurnLeft_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_TurnLeft_release);
 }
 
 
-static void R3D_NAV_TurnRight_release(Instance &inst)
+void Instance::R3D_NAV_TurnRight_release()
 {
-	inst.edit.nav_turn_R = 0;
+	edit.nav_turn_R = 0;
 }
 
 static void R3D_NAV_TurnRight(Instance &inst)
@@ -1857,17 +1857,17 @@ static void R3D_NAV_TurnRight(Instance &inst)
 	// convert to radians
 	inst.edit.nav_turn_R = static_cast<float>(turn * M_PI / 180.0);
 
-	Nav_SetKey(inst, EXEC_CurKey, &R3D_NAV_TurnRight_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::R3D_NAV_TurnRight_release);
 }
 
 
-static void ACT_AdjustOfs_release(Instance &inst)
+void Instance::ACT_AdjustOfs_release()
 {
 	// check if cancelled or overridden
-	if (inst.edit.action != ACT_ADJUST_OFS)
+	if (edit.action != ACT_ADJUST_OFS)
 		return;
 
-	AdjustOfs_Finish(inst);
+	AdjustOfs_Finish(*this);
 }
 
 static void R3D_ACT_AdjustOfs(Instance &inst)
@@ -1875,7 +1875,7 @@ static void R3D_ACT_AdjustOfs(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_AdjustOfs_release))
 		return;
 
 	if (inst.edit.mode != ObjType::linedefs)

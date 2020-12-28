@@ -256,8 +256,8 @@ bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func)
 		// if it's the same physical key, release the previous action
 		if ((N.key & FL_KEY_MASK) == (key & FL_KEY_MASK))
 		{
-			(N.release)(inst);
-			 N.key = 0;
+			(inst.*N.release)();
+			N.key = 0;
 		}
 	}
 
@@ -290,7 +290,7 @@ bool Instance::Nav_ActionKey(keycode_t key, nav_release_func_t func)
 			return false;
 
 		// release the existing action
-		(N.release)(*this);
+		(this->*N.release)();
 	}
 
 	N.key     = key;
@@ -343,7 +343,7 @@ static void Nav_UpdateActionKey(Instance &inst)
 
 	if (! CheckKeyPressed(N))
 	{
-		(N.release)(inst);
+		(inst.*N.release)();
 		 N.key = 0;
 	}
 }
@@ -372,8 +372,8 @@ static void Nav_UpdateKeys(Instance &inst)
 		if (! CheckKeyPressed(N))
 		{
 			// call release function, clear the slot
-			(N.release)(inst);
-			 N.key = 0;
+			(inst.*N.release)();
+			N.key = 0;
 			continue;
 		}
 

@@ -64,7 +64,7 @@ keycode_t M_ReadLaxModifiers();
 extern int wheel_dx;
 extern int wheel_dy;
 
-typedef void (* nav_release_func_t)(Instance &inst);
+typedef void (Instance::*nav_release_func_t)();
 
 void Nav_Navigate(Instance &inst);
 bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func);

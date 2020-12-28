@@ -412,9 +412,9 @@ static void CMD_Scroll(Instance &inst)
 }
 
 
-static void NAV_Scroll_Left_release(Instance &inst)
+void Instance::NAV_Scroll_Left_release()
 {
-	inst.edit.nav_left = 0;
+	edit.nav_left = 0;
 }
 
 static void CMD_NAV_Scroll_Left(Instance &inst)
@@ -429,13 +429,13 @@ static void CMD_NAV_Scroll_Left(Instance &inst)
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	inst.edit.nav_left = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Left_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Left_release);
 }
 
 
-static void NAV_Scroll_Right_release(Instance &inst)
+void Instance::NAV_Scroll_Right_release()
 {
-	inst.edit.nav_right = 0;
+	edit.nav_right = 0;
 }
 
 static void CMD_NAV_Scroll_Right(Instance &inst)
@@ -450,13 +450,13 @@ static void CMD_NAV_Scroll_Right(Instance &inst)
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	inst.edit.nav_right = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Right_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Right_release);
 }
 
 
-static void NAV_Scroll_Up_release(Instance &inst)
+void Instance::NAV_Scroll_Up_release()
 {
-	inst.edit.nav_up = 0;
+	edit.nav_up = 0;
 }
 
 static void CMD_NAV_Scroll_Up(Instance &inst)
@@ -471,13 +471,13 @@ static void CMD_NAV_Scroll_Up(Instance &inst)
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	inst.edit.nav_up = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Up_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Up_release);
 }
 
 
-static void NAV_Scroll_Down_release(Instance &inst)
+void Instance::NAV_Scroll_Down_release()
 {
-	inst.edit.nav_down = 0;
+	edit.nav_down = 0;
 }
 
 static void CMD_NAV_Scroll_Down(Instance &inst)
@@ -492,13 +492,13 @@ static void CMD_NAV_Scroll_Down(Instance &inst)
 	int base_size = (inst.main_win->canvas->w() + inst.main_win->canvas->h()) / 2;
 	inst.edit.nav_down = static_cast<float>(perc * base_size / 100.0 / grid.Scale);
 
-	Nav_SetKey(inst, EXEC_CurKey, &NAV_Scroll_Down_release);
+	Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_Scroll_Down_release);
 }
 
 
-static void NAV_MouseScroll_release(Instance &inst)
+void Instance::NAV_MouseScroll_release()
 {
-	inst.Editor_ScrollMap(+1);
+	Editor_ScrollMap(+1);
 }
 
 static void CMD_NAV_MouseScroll(Instance &inst)
@@ -512,7 +512,7 @@ static void CMD_NAV_MouseScroll(Instance &inst)
 	if (! inst.edit.is_navigating)
 		inst.Editor_ClearNav();
 
-	if (Nav_SetKey(inst, EXEC_CurKey, &NAV_MouseScroll_release))
+	if (Nav_SetKey(inst, EXEC_CurKey, &Instance::NAV_MouseScroll_release))
 	{
 		// begin
 		inst.Editor_ScrollMap(-1);
@@ -614,110 +614,110 @@ static void DoBeginDrag(Instance &inst)
 }
 
 
-static void ACT_SelectBox_release(Instance &inst)
+void Instance::ACT_SelectBox_release()
 {
 	// check if cancelled or overridden
-	if (inst.edit.action != ACT_SELBOX)
+	if (edit.action != ACT_SELBOX)
 		return;
 
-	inst.Editor_ClearAction();
-	Editor_ClearErrorMode(inst);
+	Editor_ClearAction();
+	Editor_ClearErrorMode(*this);
 
 	// a mere click and release will unselect everything
 	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-	if (!inst.main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	if (!main_win->canvas->SelboxGet(x1, y1, x2, y2))
 	{
 		ExecuteCommand("UnselectAll");
 		return;
 	}
 
-	SelectObjectsInBox(inst.level, inst.edit.Selected, inst.edit.mode, x1, y1, x2, y2);
-	inst.RedrawMap();
+	SelectObjectsInBox(level, edit.Selected, edit.mode, x1, y1, x2, y2);
+	RedrawMap();
 }
 
 
-static void ACT_Drag_release(Instance &inst)
+void Instance::ACT_Drag_release()
 {
 	// check if cancelled or overridden
-	if (inst.edit.action != ACT_DRAG)
+	if (edit.action != ACT_DRAG)
 	{
-		inst.edit.dragged.clear();
+		edit.dragged.clear();
 		return;
 	}
 
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		if (inst.edit.mode == ObjType::things)
-			Render3D_DragThings(inst);
+		if (edit.mode == ObjType::things)
+			Render3D_DragThings(*this);
 
-		if (inst.edit.mode == ObjType::sectors)
-			Render3D_DragSectors(inst);
+		if (edit.mode == ObjType::sectors)
+			Render3D_DragSectors(*this);
 	}
 
 	// note: DragDelta needs inst.edit.dragged
 	double dx, dy;
-	inst.main_win->canvas->DragDelta(&dx, &dy);
+	main_win->canvas->DragDelta(&dx, &dy);
 
-	Objid dragged(inst.edit.dragged);
-	inst.edit.dragged.clear();
+	Objid dragged(edit.dragged);
+	edit.dragged.clear();
 
-	if (inst.edit.drag_lines)
-		inst.edit.drag_lines->clear_all();
+	if (edit.drag_lines)
+		edit.drag_lines->clear_all();
 
-	if (! inst.edit.render3d && (dx || dy))
+	if (! edit.render3d && (dx || dy))
 	{
 		if (dragged.valid())
-			inst.level.objects.singleDrag(dragged, dx, dy, 0);
+			level.objects.singleDrag(dragged, dx, dy, 0);
 		else
-			inst.level.objects.move(inst.edit.Selected, dx, dy, 0);
+			level.objects.move(edit.Selected, dx, dy, 0);
 	}
 
-	inst.Editor_ClearAction();
+	Editor_ClearAction();
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void ACT_Click_release(Instance &inst)
+void Instance::ACT_Click_release()
 {
-	Objid click_obj(inst.edit.clicked);
-	inst.edit.clicked.clear();
+	Objid click_obj(edit.clicked);
+	edit.clicked.clear();
 
-	inst.edit.click_check_drag = false;
+	edit.click_check_drag = false;
 
 
-	if (inst.edit.action == ACT_SELBOX)
+	if (edit.action == ACT_SELBOX)
 	{
-		ACT_SelectBox_release(inst);
+		ACT_SelectBox_release();
 		return;
 	}
-	else if (inst.edit.action == ACT_DRAG)
+	else if (edit.action == ACT_DRAG)
 	{
-		ACT_Drag_release(inst);
+		ACT_Drag_release();
 		return;
 	}
 
 	// check if cancelled or overridden
-	if (inst.edit.action != ACT_CLICK)
+	if (edit.action != ACT_CLICK)
 		return;
 
-	if (inst.edit.click_check_select && click_obj.valid())
+	if (edit.click_check_select && click_obj.valid())
 	{
 		// only toggle selection if it's the same object as before
 		Objid near_obj;
-		if (inst.edit.render3d)
-			near_obj = inst.edit.highlight;
+		if (edit.render3d)
+			near_obj = edit.highlight;
 		else
-			near_obj = inst.level.hover.getNearbyObject(inst.edit.mode, inst.edit.map_x, inst.edit.map_y);
+			near_obj = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 		if (near_obj.num == click_obj.num)
-			inst.Selection_Toggle(click_obj);
+			Selection_Toggle(click_obj);
 	}
 
-	inst.Editor_ClearAction();
-	Editor_ClearErrorMode(inst);
+	Editor_ClearAction();
+	Editor_ClearErrorMode(*this);
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 static void CMD_ACT_Click(Instance &inst)
@@ -729,7 +729,7 @@ static void CMD_ACT_Click(Instance &inst)
 	if (inst.edit.render3d && inst.edit.highlight.is_nil())
 		return;
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Click_release))
 		return;
 
 	inst.edit.click_check_select = ! Exec_HasFlag("/noselect");
@@ -827,7 +827,7 @@ static void CMD_ACT_SelectBox(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_SelectBox_release))
 		return;
 
 	inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
@@ -848,7 +848,7 @@ static void CMD_ACT_Drag(Instance &inst)
 		return;
 	}
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Drag_release))
 		return;
 
 	// we only drag the selection, never a single object
@@ -918,20 +918,20 @@ void Transform_Update(Instance &inst)
 }
 
 
-static void ACT_Transform_release(Instance &inst)
+void Instance::ACT_Transform_release()
 {
 	// check if cancelled or overridden
-	if (inst.edit.action != ACT_TRANSFORM)
+	if (edit.action != ACT_TRANSFORM)
 		return;
 
-	if (inst.edit.trans_lines)
-		inst.edit.trans_lines->clear_all();
+	if (edit.trans_lines)
+		edit.trans_lines->clear_all();
 
-	inst.level.objects.transform(inst.edit.trans_param);
+	level.objects.transform(edit.trans_param);
 
-	inst.Editor_ClearAction();
+	Editor_ClearAction();
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 static void CMD_ACT_Transform(Instance &inst)
@@ -983,7 +983,7 @@ static void CMD_ACT_Transform(Instance &inst)
 	}
 
 
-	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_Transform_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &Instance::ACT_Transform_release))
 		return;
 
 
