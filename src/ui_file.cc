@@ -1051,9 +1051,9 @@ void UI_ProjectSetup::PopulateResources()
 		if (! res_name[r])
 			continue;
 
-		if (r < (int)instance::Resource_list.size())
+		if (r < (int)inst.Resource_list.size())
 		{
-			res[r] = instance::Resource_list[r];
+			res[r] = inst.Resource_list[r];
 
 			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}

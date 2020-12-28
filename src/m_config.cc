@@ -195,7 +195,7 @@ static const opt_desc_t options[] =
 		"",
 		"Resource file(s) to load",
 		"<file>...",
-		&instance::Resource_list
+		&gInstance.Resource_list
 	},
 
 	{	"iwad",

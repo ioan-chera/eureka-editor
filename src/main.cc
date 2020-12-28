@@ -79,7 +79,6 @@ SString global::cache_dir;
 SString Pwad_name;
 
 std::vector<SString> global::Pwad_list;
-std::vector<SString> instance::Resource_list;
 
 SString instance::Game_name;
 
@@ -899,7 +898,7 @@ void Instance::Main_LoadResources()
 	Main_LoadIWAD(*this);
 
 	// load all resource wads
-	for (const SString &resource : instance::Resource_list)
+	for (const SString &resource : Resource_list)
 	{
 		LoadResourceFile(*this, resource.c_str());
 	}

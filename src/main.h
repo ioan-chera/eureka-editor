@@ -156,10 +156,6 @@ namespace global
 {
 	extern std::vector<SString> Pwad_list;
 }
-namespace instance
-{
-	extern std::vector<SString> Resource_list;
-}
 
 
 namespace global

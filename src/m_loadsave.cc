@@ -198,12 +198,12 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 
 	SYS_ASSERT(inst.Level_format != MapFormat::invalid);
 
-	instance::Resource_list.clear();
+	inst.Resource_list.clear();
 
 	for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
 	{
 		if (!dialog->res[i].empty())
-			instance::Resource_list.push_back(dialog->res[i]);
+			inst.Resource_list.push_back(dialog->res[i]);
 	}
 
 	Fl::wait(0.1);
