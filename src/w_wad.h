@@ -359,8 +359,6 @@ private:
 // the IWAD, never NULL, always at master_dir.front()
 namespace instance
 {
-	extern Wad_file *game_wad;
-
 extern std::vector<Wad_file *> master_dir;
 }
 

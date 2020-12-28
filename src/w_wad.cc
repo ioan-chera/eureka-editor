@@ -33,9 +33,6 @@
 #include "w_rawdef.h"
 #include "w_wad.h"
 
-
-Wad_file * instance::game_wad;
-
 std::vector<Wad_file *> instance::master_dir;
 
 // UDMF support is unfinished and hence disabled by default.

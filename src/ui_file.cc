@@ -406,7 +406,7 @@ void UI_OpenMap::Populate()
 
 	if (look_where->value() == LOOK_IWad)
 	{
-		using_wad = instance::game_wad;
+		using_wad = inst.game_wad;
 		PopulateButtons();
 	}
 	else if (look_where->value() >= LOOK_Resource)

@@ -73,6 +73,7 @@ public:	// will be private when we encapsulate everything
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
+	Wad_file *game_wad = nullptr;
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
 

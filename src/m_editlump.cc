@@ -436,7 +436,7 @@ void CMD_EditLump(Instance &inst)
 		return;
 	}
 
-	Wad_file *wad = inst.edit_wad ? inst.edit_wad : instance::game_wad;
+	Wad_file *wad = inst.edit_wad ? inst.edit_wad : inst.game_wad;
 
 	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor();

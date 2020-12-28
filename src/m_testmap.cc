@@ -305,12 +305,12 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 	}
 
 	// always specify the iwad
-	AppendWadName(wad_names, instance::game_wad->PathName(), "-iwad");
+	AppendWadName(wad_names, inst.game_wad->PathName(), "-iwad");
 
 	// add any resource wads
 	for (const Wad_file *wad : instance::master_dir)
 	{
-		if (wad == instance::game_wad || wad == inst.edit_wad)
+		if (wad == inst.game_wad || wad == inst.edit_wad)
 			continue;
 
 		AppendWadName(wad_names, wad->PathName(),
