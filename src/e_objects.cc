@@ -576,7 +576,7 @@ begin_drawing:
 	// stop drawing mode?
 	if (closed_a_loop && !force_continue)
 	{
-		Editor_ClearAction(inst);
+		inst.Editor_ClearAction();
 	}
 
 	// select vertices of a newly created sector?
@@ -592,7 +592,7 @@ begin_drawing:
 		ConvertSelection(doc, &sel, inst.edit.Selected);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -649,7 +649,7 @@ void ObjectsModule::insertSector() const
 		inst.edit.Selected->set(doc.numSectors() - 1);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -685,7 +685,7 @@ void ObjectsModule::commandInsert(Instance &inst)
 			break;
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 

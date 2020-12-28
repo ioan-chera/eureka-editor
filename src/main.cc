@@ -693,7 +693,7 @@ void Main_Quit()
 
 
 // used for 'New Map' / 'Open Map' functions too
-bool Main_ConfirmQuit(const char *action)
+bool Instance::Main_ConfirmQuit(const char *action) const
 {
 	if (! MadeChanges)
 		return true;
@@ -738,7 +738,7 @@ SString Main_FileOpFolder()
 void Main_Loop()
 {
 	// TODO: must think this through
-	RedrawMap(gInstance);
+	gInstance.RedrawMap();
 
 	for (;;)
 	{
@@ -759,7 +759,7 @@ void Main_Loop()
 
 		if (global::want_quit)
 		{
-			if (Main_ConfirmQuit("quit"))
+			if (gInstance.Main_ConfirmQuit("quit"))
 				break;
 
 			global::want_quit = false;
@@ -768,7 +768,7 @@ void Main_Loop()
 		// TODO: handle these in a better way
 
 		// TODO: HANDLE ALL INSTANCES
-		gInstance.main_win->UpdateTitle(MadeChanges ? '*' : 0);
+		gInstance.main_win->UpdateTitle(gInstance.MadeChanges ? '*' : 0);
 
 		gInstance.main_win->scroll->UpdateBounds();
 
@@ -1133,7 +1133,7 @@ int main(int argc, char *argv[])
 		LogPrintf("Loading initial map : %s\n", gInstance.Level_name.c_str());
 
 		// TODO: the first instance
-		LoadLevel(gInstance, gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.Level_name);
+		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.Level_name);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

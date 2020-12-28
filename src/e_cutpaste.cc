@@ -1254,7 +1254,7 @@ void CMD_Delete(Instance &inst)
 	inst.level.basis.end();
 
 success:
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 
 	// always clear the selection (deleting objects invalidates it)
 	Selection_Clear(inst);
@@ -1262,7 +1262,7 @@ success:
 	inst.edit.highlight.clear();
 	inst.edit.split_line.clear();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 

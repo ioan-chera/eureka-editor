@@ -34,17 +34,14 @@ void GoToSelection(Instance &inst);
 void GoToErrors(Instance &inst);
 
 
-typedef enum
+enum propagate_level_e
 {
 	PGL_Never = 0,	// can never be heared
 	PGL_Maybe,		// a possibility of being heared
 	PGL_Level_1,	// reduced by a single level
 	PGL_Level_2		// no blocking at all
 
-} propagate_level_e;
-
-const byte * SoundPropagation(const Instance &inst, int start_sec);
-
+};
 
 /* commands */
 

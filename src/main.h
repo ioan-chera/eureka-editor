@@ -164,14 +164,10 @@ namespace global
 	extern int   show_version;	// Print version info and exit.
 }
 
-extern int MadeChanges;
-
 
 /*
  *  Various global functions
  */
-
-bool Main_ConfirmQuit(const char *action);
 void Main_Quit();
 
 [[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);

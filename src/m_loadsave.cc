@@ -132,9 +132,9 @@ static void FreshLevel(Instance &inst)
 		th->SetRawY(inst, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
-	CalculateLevelBounds(inst);
+	inst.CalculateLevelBounds();
 
-	ZoomWholeMap(inst);
+	inst.ZoomWholeMap();
 
 	inst.Editor_DefaultState();
 }
@@ -231,7 +231,7 @@ void CMD_ManageProject(Instance &inst)
 
 void CMD_NewProject(Instance &inst)
 {
-	if (! Main_ConfirmQuit("create a new project"))
+	if (! inst.Main_ConfirmQuit("create a new project"))
 		return;
 
 
@@ -355,7 +355,7 @@ void CMD_FreshMap(Instance &inst)
 		return;
 	}
 
-	if (! Main_ConfirmQuit("create a fresh map"))
+	if (! inst.Main_ConfirmQuit("create a fresh map"))
 		return;
 
 
@@ -943,47 +943,47 @@ static void ShowLoadProblem()
 // Read in the level data
 //
 
-void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
+void Instance::LoadLevel(Wad_file *wad, const SString &level)
 {
 	int lev_num = wad->LevelFind(level);
 
 	if (lev_num < 0)
 		ThrowException("No such map: %s\n", level.c_str());
 
-	LoadLevelNum(inst, wad, lev_num);
+	LoadLevelNum(*this, wad, lev_num);
 
 	// reset various editor state
-	Editor_ClearAction(inst);
+	Editor_ClearAction();
 	Selection_InvalidateLast();
 
-	inst.edit.Selected->clear_all();
-	inst.edit.highlight.clear();
+	edit.Selected->clear_all();
+	edit.highlight.clear();
 
-	inst.main_win->UpdateTotals();
-	inst.main_win->UpdateGameInfo();
-	inst.main_win->InvalidatePanelObj();
-	inst.main_win->redraw();
+	main_win->UpdateTotals();
+	main_win->UpdateGameInfo();
+	main_win->InvalidatePanelObj();
+	main_win->redraw();
 
-	if (inst.main_win)
+	if (main_win)
 	{
-		inst.main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
 
-		inst.level.getLevelChecksum(adler_crc);
+		this->level.getLevelChecksum(adler_crc);
 
-		if (! M_LoadUserState(inst))
+		if (! M_LoadUserState())
 		{
-			M_DefaultUserState(inst);
+			M_DefaultUserState();
 		}
 	}
 
-	inst.Level_name = level.asUpper();
+	Level_name = level.asUpper();
 
-	inst.Status_Set("Loaded %s", inst.Level_name.c_str());
+	Status_Set("Loaded %s", Level_name.c_str());
 
-	RedrawMap(inst);
+	RedrawMap();
 }
 
 
@@ -1041,10 +1041,10 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 
 	inst.level.checks.sidedefsUnpack(true);
 
-	CalculateLevelBounds(inst);
+	inst.CalculateLevelBounds();
 	Subdiv_InvalidateAll();
 
-	MadeChanges = 0;
+	inst.MadeChanges = false;
 }
 
 
@@ -1056,7 +1056,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
-	if (! Main_ConfirmQuit("open another map"))
+	if (! gInstance.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1126,7 +1126,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.edit_wad->PathName().c_str());
 
 	// TODO: new instance
-	LoadLevel(gInstance, gInstance.edit_wad, map_name);
+	gInstance.LoadLevel(gInstance.edit_wad, map_name);
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
@@ -1136,7 +1136,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 void CMD_OpenMap(Instance &inst)
 {
-	if (! Main_ConfirmQuit("open another map"))
+	if (! inst.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1196,7 +1196,7 @@ void CMD_OpenMap(Instance &inst)
 	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
-	LoadLevel(inst, wad, map_name);
+	inst.LoadLevel(wad, map_name);
 
 	if (new_resources)
 	{
@@ -1265,7 +1265,7 @@ void CMD_FlipMap(Instance &inst)
 	}
 
 
-	if (! Main_ConfirmQuit("open another map"))
+	if (! inst.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1332,7 +1332,7 @@ void CMD_FlipMap(Instance &inst)
 
 	LogPrintf("Flipping Map to : %s\n", map_name.c_str());
 
-	LoadLevel(inst, wad, map_name);
+	inst.LoadLevel(wad, map_name);
 }
 
 
@@ -1677,7 +1677,7 @@ static void SaveLevel(Instance &inst, const SString &level)
 		M_SaveUserState(inst);
 	}
 
-	MadeChanges = 0;
+	inst.MadeChanges = false;
 }
 
 static bool M_ExportMap(Instance &inst);
@@ -2042,7 +2042,7 @@ void CMD_DeleteMap(Instance &inst)
 		LogPrintf("OK.  Loading : %s....\n", map_name.c_str());
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
-		LoadLevel(inst, inst.edit_wad, map_name);
+		inst.LoadLevel(inst.edit_wad, map_name);
 	}
 }
 

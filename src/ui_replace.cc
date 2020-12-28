@@ -1444,7 +1444,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 		rep_value->do_callback();
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 

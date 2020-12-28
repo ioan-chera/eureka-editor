@@ -109,7 +109,7 @@ void Grid_State_c::MoveTo(double x, double y)
 		inst.main_win->scroll->AdjustPos();
 		inst.main_win->canvas->PointerPos();
 
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 }
 
@@ -416,7 +416,7 @@ void Grid_State_c::RefocusZoom(double map_x, double map_y, float before_Scale)
 	if (inst.main_win)
 	{
 		inst.main_win->canvas->PointerPos();
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 }
 
@@ -460,7 +460,7 @@ void Grid_State_c::RawSetScale(int i)
 	inst.main_win->canvas->PointerPos();
 	inst.main_win->info_bar->SetScale(Scale);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -487,7 +487,7 @@ void Grid_State_c::RawSetStep(int i)
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -502,7 +502,7 @@ void Grid_State_c::ForceStep(int new_step)
 	if (config::grid_hide_in_free_mode)
 		SetSnap(shown);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -525,7 +525,7 @@ void Grid_State_c::StepFromScale()
 
 	step = grid_values[result];
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -615,14 +615,14 @@ void Grid_State_c::RawSetShown(bool new_value)
 	if (! shown)
 	{
 		inst.main_win->info_bar->SetGrid(-1);
-		RedrawMap(inst);
+		inst.RedrawMap();
 		return;
 	}
 
 	// update the info-bar
 	inst.main_win->info_bar->SetGrid(step);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -653,7 +653,7 @@ void Grid_State_c::SetSnap(bool enable)
 	if (inst.main_win)
 		inst.main_win->info_bar->UpdateSnap();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 void Grid_State_c::ToggleSnap()
@@ -691,7 +691,7 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 
 		grid.NearestScale(new_scale);
 
-		RedrawMap(inst);
+		inst.RedrawMap();
 		return true;
 	}
 
@@ -705,7 +705,7 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 
 		grid.RawSetShown(t_shown);
 
-		RedrawMap(inst);
+		inst.RedrawMap();
 
 		return true;
 	}

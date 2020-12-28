@@ -219,7 +219,7 @@ void CMD_LIN_SelectPath(Instance &inst)
 	else
 		inst.edit.Selected->merge(seen);
 
-	 RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -352,7 +352,7 @@ void CMD_SEC_SelectGroup(Instance &inst)
 	else
 		inst.edit.Selected->merge(seen);
 
-	 RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -397,7 +397,7 @@ void GoToSelection(Instance &inst)
 		grid.AdjustScale(+1);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -499,8 +499,6 @@ void CMD_PruneUnused(Instance &inst)
 
 //------------------------------------------------------------------------
 
-bool sound_propagation_invalid;
-
 static std::vector<byte> sound_prop_vec;
 static std::vector<byte> sound_temp1_vec;
 static std::vector<byte> sound_temp2_vec;
@@ -589,13 +587,13 @@ static void CalcFinalPropagation(const Instance &inst)
 }
 
 
-const byte * SoundPropagation(const Instance &inst, int start_sec)
+const byte *Instance::SoundPropagation(int start_sec)
 {
-	if ((int)sound_prop_vec.size() != inst.level.numSectors())
+	if ((int)sound_prop_vec.size() != level.numSectors())
 	{
-		sound_prop_vec .resize(inst.level.numSectors());
-		sound_temp1_vec.resize(inst.level.numSectors());
-		sound_temp2_vec.resize(inst.level.numSectors());
+		sound_prop_vec .resize(level.numSectors());
+		sound_temp1_vec.resize(level.numSectors());
+		sound_temp2_vec.resize(level.numSectors());
 
 		sound_propagation_invalid = true;
 	}
@@ -608,10 +606,10 @@ const byte * SoundPropagation(const Instance &inst, int start_sec)
 		sound_start_sec = start_sec;
 		sound_propagation_invalid = false;
 
-		CalcPropagation(inst.level, sound_temp1_vec, false);
-		CalcPropagation(inst.level, sound_temp2_vec, true);
+		CalcPropagation(level, sound_temp1_vec, false);
+		CalcPropagation(level, sound_temp2_vec, true);
 
-		CalcFinalPropagation(inst);
+		CalcFinalPropagation(*this);
 	}
 
 	return &sound_prop_vec[0];

@@ -703,9 +703,9 @@ void Basis::EditOperation::rawChange(Basis &basis)
 	// TODO: their modules
 	Clipboard_NotifyChange(objtype, objnum, field);
 	Selection_NotifyChange(objtype, objnum, field);
-	MapStuff_NotifyChange(basis.inst, objtype, objnum, field);
+	basis.inst.MapStuff_NotifyChange(objtype, objnum, field);
 	Render3D_NotifyChange(objtype, objnum, field);
-	ObjectBox_NotifyChange(basis.inst, objtype, objnum, field);
+	basis.inst.ObjectBox_NotifyChange(objtype, objnum, field);
 }
 
 //
@@ -717,10 +717,10 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 
 	// TODO: their own modules
 	Clipboard_NotifyDelete(objtype, objnum);
-	Selection_NotifyDelete(basis.inst, objtype, objnum);
-	MapStuff_NotifyDelete(basis.inst, objtype, objnum);
+	basis.inst.Selection_NotifyDelete(objtype, objnum);
+	basis.inst.MapStuff_NotifyDelete(objtype, objnum);
 	Render3D_NotifyDelete(basis.doc, objtype, objnum);
-	ObjectBox_NotifyDelete(basis.inst, objtype, objnum);
+	basis.inst.ObjectBox_NotifyDelete(objtype, objnum);
 
 	switch(objtype)
 	{
@@ -864,10 +864,10 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 
 	// TODO: their module
 	Clipboard_NotifyInsert(basis.doc, objtype, objnum);
-	Selection_NotifyInsert(basis.inst, objtype, objnum);
-	MapStuff_NotifyInsert(objtype, objnum);
+	basis.inst.Selection_NotifyInsert(objtype, objnum);
+	basis.inst.MapStuff_NotifyInsert(objtype, objnum);
 	Render3D_NotifyInsert(objtype, objnum);
-	ObjectBox_NotifyInsert(basis.inst, objtype, objnum);
+	basis.inst.ObjectBox_NotifyInsert(objtype, objnum);
 
 	switch(objtype)
 	{
@@ -1061,10 +1061,10 @@ void Basis::doClearChangeStatus()
 
 	// TODO: these shall go to other modules
 	Clipboard_NotifyBegin();
-	Selection_NotifyBegin();
-	MapStuff_NotifyBegin();
+	inst.Selection_NotifyBegin();
+	inst.MapStuff_NotifyBegin();
 	Render3D_NotifyBegin();
-	ObjectBox_NotifyBegin();
+	inst.ObjectBox_NotifyBegin();
 }
 
 //
@@ -1075,15 +1075,15 @@ void Basis::doProcessChangeStatus() const
 	if(mDidMakeChanges)
 	{
 		// TODO: the other modules
-		MadeChanges = 1;
-		RedrawMap(inst);
+		inst.MadeChanges = true;
+		inst.RedrawMap();
 	}
 
 	Clipboard_NotifyEnd();
-	Selection_NotifyEnd(inst);
-	MapStuff_NotifyEnd(inst);
+	inst.Selection_NotifyEnd();
+	inst.MapStuff_NotifyEnd();
 	Render3D_NotifyEnd(inst);
-	ObjectBox_NotifyEnd(inst);
+	inst.ObjectBox_NotifyEnd();
 }
 
 //--- editor settings ---

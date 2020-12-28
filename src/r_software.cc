@@ -2112,7 +2112,7 @@ void SW_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh)
 }
 
 
-bool SW_QueryPoint(Instance &inst, Objid& hl, int qx, int qy)
+bool Instance::SW_QueryPoint(Objid& hl, int qx, int qy)
 {
 	if (! config::render_high_detail)
 	{
@@ -2120,16 +2120,16 @@ bool SW_QueryPoint(Instance &inst, Objid& hl, int qx, int qy)
 		qy = qy / 2;
 	}
 
-	RendInfo rend(inst);
+	RendInfo rend(*this);
 
 	// this runs the renderer, but *no* drawing is done
 	rend.Query(qx, qy);
 
 	if (rend.query_map_x != 0)
 	{
-		inst.edit.map_x = rend.query_map_x;
-		inst.edit.map_y = rend.query_map_y;
-		inst.edit.map_z = rend.query_map_z;
+		edit.map_x = rend.query_map_x;
+		edit.map_y = rend.query_map_y;
+		edit.map_z = rend.query_map_z;
 	}
 
 	if (! rend.query_result.valid())

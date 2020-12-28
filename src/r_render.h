@@ -88,7 +88,6 @@ public:
 extern Render_View_t r_view;
 
 
-void Render3D_Setup(Instance &inst);
 void Render3D_RegisterCommands();
 
 void Render3D_Enable(Instance &inst, bool _enable);
@@ -101,11 +100,8 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh);
 // [ see the struct definition for more details... ]
 bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
-void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy);
 void Render3D_ScrollMap(Instance &inst, int dx = 0, int dy = 0, keycode_t mod = 0);
 void Render3D_Navigate(Instance &inst);
-
-void Render3D_UpdateHighlight(Instance &inst);
 
 void Render3D_DragThings(Instance &inst);
 void Render3D_DragSectors(Instance &inst);
@@ -130,7 +126,6 @@ void Render3D_NotifyEnd(Instance &inst);
 /* API for rendering a scene (etc) */
 
 void SW_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh);
-bool SW_QueryPoint(Instance &inst, Objid& hl, int qx, int qy);
 
 void RGL_RenderWorld(Instance &inst, int ox, int oy, int ow, int oh);
 

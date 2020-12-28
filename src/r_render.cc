@@ -528,7 +528,7 @@ static void AdjustOfs_Finish(Instance &inst)
 {
 	if (! inst.edit.adjust_bucket)
 	{
-		Editor_ClearAction(inst);
+		inst.Editor_ClearAction();
 		return;
 	}
 
@@ -549,7 +549,7 @@ static void AdjustOfs_Finish(Instance &inst)
 	delete inst.edit.adjust_bucket;
 	inst.edit.adjust_bucket = NULL;
 
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 }
 
 static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
@@ -583,7 +583,7 @@ static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 	inst.edit.adjust_dx -= dx * factor * dx_factor;
 	inst.edit.adjust_dy -= dy * factor * dy_factor;
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -632,7 +632,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 }
 
 
-bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
+static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 {
 	int ow = inst.main_win->canvas->w();
 	int oh = inst.main_win->canvas->h();
@@ -661,13 +661,13 @@ bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 
 	r_view.PrepareToRender(ow, oh);
 
-	return SW_QueryPoint(inst, hl, sx, sy);
+	return inst.SW_QueryPoint(hl, sx, sy);
 }
 
 
-void Render3D_Setup(Instance &inst)
+void Instance::Render3D_Setup()
 {
-	thing_sec_cache::InvalidateAll(inst.level);
+	thing_sec_cache::InvalidateAll(level);
 	r_view.thing_sectors.resize(0);
 
 	if (! r_view.p_type)
@@ -676,14 +676,14 @@ void Render3D_Setup(Instance &inst)
 		r_view.px = 99999;
 	}
 
-	player = FindPlayer(inst.level, r_view.p_type);
+	player = FindPlayer(level, r_view.p_type);
 
 	if (! player)
 	{
 		if (r_view.p_type != THING_DEATHMATCH)
 			r_view.p_type = THING_DEATHMATCH;
 
-		player = FindPlayer(inst.level, r_view.p_type);
+		player = FindPlayer(level, r_view.p_type);
 	}
 
 	if (player && !(r_view.px == player->x() && r_view.py == player->y()))
@@ -717,7 +717,7 @@ void Render3D_Setup(Instance &inst)
 
 void Render3D_Enable(Instance &inst, bool _enable)
 {
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 
 	inst.edit.render3d = _enable;
 
@@ -744,7 +744,7 @@ void Render3D_Enable(Instance &inst, bool _enable)
 		inst.main_win->info_bar->SetMouse(inst.edit.map_x, inst.edit.map_y);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -798,7 +798,7 @@ void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 	}
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -979,81 +979,81 @@ void Render3D_DragThings(Instance &inst)
 		inst.level.objects.move(inst.edit.Selected, dx, dy, dz);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
-void Render3D_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy)
+void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
-	inst.edit.pointer_in_window = true;
+	edit.pointer_in_window = true;
 
 	// save position for Render3D_UpdateHighlight
 	r_view.mouse_x = x;
 	r_view.mouse_y = y;
 
-	if (inst.edit.is_panning)
+	if (edit.is_panning)
 	{
-		Editor_ScrollMap(inst, 0, dx, dy, mod);
+		Editor_ScrollMap(0, dx, dy, mod);
 		return;
 	}
-	else if (inst.edit.action == ACT_ADJUST_OFS)
+	else if (edit.action == ACT_ADJUST_OFS)
 	{
-		AdjustOfs_Delta(inst, dx, dy);
+		AdjustOfs_Delta(*this, dx, dy);
 		return;
 	}
 
-	if (inst.edit.action == ACT_CLICK)
+	if (edit.action == ACT_CLICK)
 	{
-		CheckBeginDrag(inst);
+		CheckBeginDrag(*this);
 	}
-	else if (inst.edit.action == ACT_DRAG)
+	else if (edit.action == ACT_DRAG)
 	{
 		// get the latest map_x/y/z coordinates
 		Objid unused_hl;
-		Render3D_Query(inst, unused_hl, x, y);
+		Render3D_Query(*this, unused_hl, x, y);
 
-		inst.edit.drag_screen_dx = x - inst.edit.click_screen_x;
-		inst.edit.drag_screen_dy = y - inst.edit.click_screen_y;
+		edit.drag_screen_dx = x - edit.click_screen_x;
+		edit.drag_screen_dy = y - edit.click_screen_y;
 
-		inst.edit.drag_cur_x = inst.edit.map_x;
-		inst.edit.drag_cur_y = inst.edit.map_y;
+		edit.drag_cur_x = edit.map_x;
+		edit.drag_cur_y = edit.map_y;
 
-		if (inst.edit.mode == ObjType::sectors)
-			DragSectors_Update(inst);
+		if (edit.mode == ObjType::sectors)
+			DragSectors_Update(*this);
 
-		if (inst.edit.mode == ObjType::things)
-			DragThings_Update(inst);
+		if (edit.mode == ObjType::things)
+			DragThings_Update(*this);
 
-		inst.main_win->canvas->redraw();
-		inst.main_win->status_bar->redraw();
+		main_win->canvas->redraw();
+		main_win->status_bar->redraw();
 		return;
 	}
 
-	UpdateHighlight(inst);
+	UpdateHighlight();
 }
 
 
-void Render3D_UpdateHighlight(Instance &inst)
+void Instance::Render3D_UpdateHighlight()
 {
-	inst.edit.highlight.clear();
-	inst.edit.split_line.clear();
+	edit.highlight.clear();
+	edit.split_line.clear();
 
-	if (inst.edit.pointer_in_window && r_view.mouse_x >= 0 &&
-		inst.edit.action != ACT_DRAG)
+	if (edit.pointer_in_window && r_view.mouse_x >= 0 &&
+		edit.action != ACT_DRAG)
 	{
 		Objid current_hl;
 
 		// this also updates inst.edit.map_x/y/z
-		Render3D_Query(inst, current_hl, r_view.mouse_x, r_view.mouse_y);
+		Render3D_Query(*this, current_hl, r_view.mouse_x, r_view.mouse_y);
 
-		if (current_hl.type == inst.edit.mode)
-			inst.edit.highlight = current_hl;
+		if (current_hl.type == edit.mode)
+			edit.highlight = current_hl;
 	}
 
-	inst.main_win->canvas->UpdateHighlight();
-	inst.main_win->canvas->redraw();
+	main_win->canvas->UpdateHighlight();
+	main_win->canvas->redraw();
 
-	inst.main_win->status_bar->redraw();
+	main_win->status_bar->redraw();
 }
 
 
@@ -1105,7 +1105,7 @@ void Render3D_Navigate(Instance &inst)
 	}
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1595,7 +1595,7 @@ static void R3D_Forward(Instance &inst)
 	r_view.y += r_view.Sin * dist;
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void R3D_Backward(Instance &inst)
@@ -1606,7 +1606,7 @@ static void R3D_Backward(Instance &inst)
 	r_view.y -= r_view.Sin * dist;
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void R3D_Left(Instance &inst)
@@ -1617,7 +1617,7 @@ static void R3D_Left(Instance &inst)
 	r_view.y += r_view.Cos * dist;
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void R3D_Right(Instance &inst)
@@ -1628,7 +1628,7 @@ static void R3D_Right(Instance &inst)
 	r_view.y -= r_view.Cos * dist;
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void R3D_Up(Instance &inst)
@@ -1645,7 +1645,7 @@ static void R3D_Up(Instance &inst)
 
 	r_view.z += dist;
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void R3D_Down(Instance &inst)
@@ -1662,7 +1662,7 @@ static void R3D_Down(Instance &inst)
 
 	r_view.z -= dist;
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1675,7 +1675,7 @@ static void R3D_Turn(Instance &inst)
 
 	r_view.SetAngle(static_cast<float>(r_view.angle + angle));
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1683,7 +1683,7 @@ static void R3D_DropToFloor(Instance &inst)
 {
 	r_view.FindGroundZ();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1931,7 +1931,7 @@ static void R3D_Set(Instance &inst)
 		return;
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1967,7 +1967,7 @@ static void R3D_Toggle(Instance &inst)
 		return;
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1994,7 +1994,7 @@ static void R3D_WHEEL_Move(Instance &inst)
 	r_view.y += speed * (r_view.Sin * dy - r_view.Cos * dx);
 
 	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 

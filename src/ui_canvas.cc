@@ -600,11 +600,11 @@ void UI_Canvas::DrawMapBounds()
 {
 	RenderColor(FL_RED);
 
-	DrawMapLine(Map_bound_x1, Map_bound_y1, Map_bound_x2, Map_bound_y1);
-	DrawMapLine(Map_bound_x1, Map_bound_y2, Map_bound_x2, Map_bound_y2);
+	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y1, inst.Map_bound_x2, inst.Map_bound_y1);
+	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y2, inst.Map_bound_x2, inst.Map_bound_y2);
 
-	DrawMapLine(Map_bound_x1, Map_bound_y1, Map_bound_x1, Map_bound_y2);
-	DrawMapLine(Map_bound_x2, Map_bound_y1, Map_bound_x2, Map_bound_y2);
+	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y1, inst.Map_bound_x1, inst.Map_bound_y2);
+	DrawMapLine(inst.Map_bound_x2, inst.Map_bound_y1, inst.Map_bound_x2, inst.Map_bound_y2);
 }
 
 
@@ -2067,7 +2067,7 @@ void UI_Canvas::RenderSector(int num)
 		if (inst.edit.mode != ObjType::sectors || !inst.edit.highlight.valid())
 			return;
 
-		const byte * prop = SoundPropagation(inst, inst.edit.highlight.num);
+		const byte * prop = inst.SoundPropagation(inst.edit.highlight.num);
 
 		switch ((propagate_level_e) prop[num])
 		{

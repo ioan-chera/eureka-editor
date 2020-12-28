@@ -74,7 +74,7 @@ static void CMD_EditMode(Instance &inst)
 		return;
 	}
 
-	Editor_ChangeMode(inst, mode);
+	inst.Editor_ChangeMode(mode);
 }
 
 
@@ -94,7 +94,7 @@ static void CMD_Select(Instance &inst)
 	}
 
 	inst.Selection_Toggle(inst.edit.highlight);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -109,7 +109,7 @@ static void CMD_SelectAll(Instance &inst)
 	inst.edit.Selected->change_type(inst.edit.mode);
 	inst.edit.Selected->frob_range(0, total-1, BitOp::add);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -120,12 +120,12 @@ static void CMD_UnselectAll(Instance &inst)
 	if (inst.edit.action == ACT_DRAW_LINE ||
 		inst.edit.action == ACT_TRANSFORM)
 	{
-		Editor_ClearAction(inst);
+		inst.Editor_ClearAction();
 	}
 
 	Selection_Clear(inst);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -148,7 +148,7 @@ static void CMD_InvertSelection(Instance &inst)
 
 	inst.edit.Selected->frob_range(0, total-1, BitOp::toggle);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -166,7 +166,7 @@ static void CMD_Undo(Instance &inst)
 		return;
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 	inst.main_win->UpdatePanelObj();
 }
 
@@ -179,7 +179,7 @@ static void CMD_Redo(Instance &inst)
 		return;
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 	inst.main_win->UpdatePanelObj();
 }
 
@@ -196,7 +196,7 @@ static void SetGamma(Instance &inst, int new_val)
 
 	inst.Status_Set("gamma level %d", config::usegamma);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -227,7 +227,7 @@ static void CMD_SetVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
-		Editor_ClearAction(inst);
+		inst.Editor_ClearAction();
 
 		int want_vis   = bool_val ? 1 : 0;
 		int is_visible = inst.main_win->browser->visible() ? 1 : 0;
@@ -246,12 +246,12 @@ static void CMD_SetVar(Instance &inst)
 	else if (var_name.noCaseEqual("sprites"))
 	{
 		inst.edit.thing_render_mode = int_val;
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
 		inst.edit.show_object_numbers = bool_val;
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else if (var_name.noCaseEqual("gamma"))
 	{
@@ -261,7 +261,7 @@ static void CMD_SetVar(Instance &inst)
 	{
 		grid.ratio = CLAMP(0, int_val, 7);
 		inst.main_win->info_bar->UpdateRatio();
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
@@ -273,9 +273,9 @@ static void CMD_SetVar(Instance &inst)
 
 		// need sectors mode for sound propagation display
 		if (inst.edit.sector_render_mode == SREND_SoundProp && inst.edit.mode != ObjType::sectors)
-			Editor_ChangeMode(inst, 's');
+			inst.Editor_ChangeMode('s');
 
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else
 	{
@@ -300,7 +300,7 @@ static void CMD_ToggleVar(Instance &inst)
 	}
 	else if (var_name.noCaseEqual("browser"))
 	{
-		Editor_ClearAction(inst);
+		inst.Editor_ClearAction();
 
 		inst.main_win->BrowserMode('/');
 	}
@@ -319,12 +319,12 @@ static void CMD_ToggleVar(Instance &inst)
 	else if (var_name.noCaseEqual("sprites"))
 	{
 		inst.edit.thing_render_mode = ! inst.edit.thing_render_mode;
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else if (var_name.noCaseEqual("obj_nums"))
 	{
 		inst.edit.show_object_numbers = ! inst.edit.show_object_numbers;
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else if (var_name.noCaseEqual("gamma"))
 	{
@@ -338,7 +338,7 @@ static void CMD_ToggleVar(Instance &inst)
 			grid.ratio++;
 
 		inst.main_win->info_bar->UpdateRatio();
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
@@ -346,7 +346,7 @@ static void CMD_ToggleVar(Instance &inst)
 			inst.edit.sector_render_mode = SREND_Nothing;
 		else
 			inst.edit.sector_render_mode = (sector_rendering_mode_e)(1 + (int)inst.edit.sector_render_mode);
-		RedrawMap(inst);
+		inst.RedrawMap();
 	}
 	else
 	{
@@ -498,7 +498,7 @@ static void CMD_NAV_Scroll_Down(Instance &inst)
 
 static void NAV_MouseScroll_release(Instance &inst)
 {
-	Editor_ScrollMap(inst, +1);
+	inst.Editor_ScrollMap(+1);
 }
 
 static void CMD_NAV_MouseScroll(Instance &inst)
@@ -515,7 +515,7 @@ static void CMD_NAV_MouseScroll(Instance &inst)
 	if (Nav_SetKey(inst, EXEC_CurKey, &NAV_MouseScroll_release))
 	{
 		// begin
-		Editor_ScrollMap(inst, -1);
+		inst.Editor_ScrollMap(-1);
 	}
 }
 
@@ -620,7 +620,7 @@ static void ACT_SelectBox_release(Instance &inst)
 	if (inst.edit.action != ACT_SELBOX)
 		return;
 
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 	Editor_ClearErrorMode(inst);
 
 	// a mere click and release will unselect everything
@@ -632,7 +632,7 @@ static void ACT_SelectBox_release(Instance &inst)
 	}
 
 	SelectObjectsInBox(inst.level, inst.edit.Selected, inst.edit.mode, x1, y1, x2, y2);
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -672,9 +672,9 @@ static void ACT_Drag_release(Instance &inst)
 			inst.level.objects.move(inst.edit.Selected, dx, dy, 0);
 	}
 
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -714,10 +714,10 @@ static void ACT_Click_release(Instance &inst)
 			inst.Selection_Toggle(click_obj);
 	}
 
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 	Editor_ClearErrorMode(inst);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void CMD_ACT_Click(Instance &inst)
@@ -798,7 +798,7 @@ static void CMD_ACT_Click(Instance &inst)
 		inst.edit.clicked = Objid(ObjType::vertices, new_vert);
 		Editor_SetAction(inst, ACT_CLICK);
 
-		RedrawMap(inst);
+		inst.RedrawMap();
 		return;
 	}
 
@@ -929,9 +929,9 @@ static void ACT_Transform_release(Instance &inst)
 
 	inst.level.objects.transform(inst.edit.trans_param);
 
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 static void CMD_ACT_Transform(Instance &inst)
@@ -1121,7 +1121,7 @@ static void CMD_ZoomWholeMap(Instance &inst)
 	if (inst.edit.render3d)
 		Render3D_Enable(inst, false);
 
-	ZoomWholeMap(inst);
+	inst.ZoomWholeMap();
 }
 
 
@@ -1147,7 +1147,7 @@ static void CMD_GoToCamera(Instance &inst)
 
 	grid.MoveTo(x, y);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1177,7 +1177,7 @@ static void CMD_PlaceCamera(Instance &inst)
 		Render3D_Enable(inst, true);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1360,7 +1360,7 @@ static void CMD_FindNext(Instance &inst)
 static void CMD_RecalcSectors(Instance &inst)
 {
 	Subdiv_InvalidateAll();
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1388,7 +1388,8 @@ static void CMD_AboutDialog(Instance &inst)
 
 //------------------------------------------------------------------------
 
-
+namespace global
+{
 static editor_command_t  command_table[] =
 {
 	/* ---- miscellaneous / UI stuff ---- */
@@ -1842,11 +1843,11 @@ static editor_command_t  command_table[] =
 	// end of command list
 	{	NULL, NULL, 0, NULL  }
 };
-
+}	// namespace global
 
 void Editor_RegisterCommands()
 {
-	M_RegisterCommandList(command_table);
+	M_RegisterCommandList(global::command_table);
 }
 
 

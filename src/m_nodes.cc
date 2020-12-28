@@ -431,7 +431,7 @@ void CMD_BuildAllNodes(Instance &inst)
 		return;
 	}
 
-	if (MadeChanges)
+	if (inst.MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "
@@ -464,8 +464,8 @@ void CMD_BuildAllNodes(Instance &inst)
 	SString CurLevel(inst.Level_name);
 
 	// reset various editor state
-	Editor_ClearAction(inst);
-	Selection_InvalidateLast();
+	inst.Editor_ClearAction();
+	inst.Selection_InvalidateLast();
 
 	inst.edit.Selected->clear_all();
 	inst.edit.highlight.clear();
@@ -512,7 +512,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 	// reload the previous level
 	// TODO: improve this to NOT mean reloading the level
-	LoadLevel(inst, inst.edit_wad, CurLevel);
+	inst.LoadLevel(inst.edit_wad, CurLevel);
 }
 
 

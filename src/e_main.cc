@@ -43,22 +43,6 @@
 
 #include "ui_window.h"
 
-double Map_bound_x1 =  32767;   /* minimum X value of map */
-double Map_bound_y1 =  32767;   /* minimum Y value of map */
-double Map_bound_x2 = -32767;   /* maximum X value of map */
-double Map_bound_y2 = -32767;   /* maximum Y value of map */
-
-int MadeChanges;
-
-static bool recalc_map_bounds;
-static int  new_vertex_minimum;
-static int  moved_vertex_count;
-
-static selection_c * last_Sel;
-
-extern bool sound_propagation_invalid;
-
-
 // config items
 int config::default_edit_mode = 3;  // Vertices
 
@@ -82,40 +66,40 @@ static void zoom_fit(Instance &inst)
 	int ScrMaxX = inst.main_win->canvas->w();
 	int ScrMaxY = inst.main_win->canvas->h();
 
-	if (Map_bound_x1 < Map_bound_x2)
-		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
+	if (inst.Map_bound_x1 < inst.Map_bound_x2)
+		xzoom = ScrMaxX / (inst.Map_bound_x2 - inst.Map_bound_x1);
 
-	if (Map_bound_y1 < Map_bound_y2)
-		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
+	if (inst.Map_bound_y1 < inst.Map_bound_y2)
+		yzoom = ScrMaxY / (inst.Map_bound_y2 - inst.Map_bound_y1);
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
-	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
+	grid.MoveTo((inst.Map_bound_x1 + inst.Map_bound_x2) / 2, (inst.Map_bound_y1 + inst.Map_bound_y2) / 2);
 }
 
 
-void ZoomWholeMap(Instance &inst)
+void Instance::ZoomWholeMap()
 {
 	if (MadeChanges)
-		CalculateLevelBounds(inst);
+		CalculateLevelBounds();
 
-	zoom_fit(inst);
+	zoom_fit(*this);
 
-	RedrawMap(inst);
+	RedrawMap();
 }
 
 
-void RedrawMap(Instance &inst)
+void Instance::RedrawMap()
 {
-	if (!inst.main_win)
+	if (!main_win)
 		return;
 
-	UpdateHighlight(inst);
+	UpdateHighlight();
 
-	inst.main_win->scroll->UpdateRenderMode();
-	inst.main_win->info_bar->UpdateSecRend();
-	inst.main_win->status_bar->redraw();
-	inst.main_win->canvas->redraw();
+	main_win->scroll->UpdateRenderMode();
+	main_win->info_bar->UpdateSecRend();
+	main_win->status_bar->redraw();
+	main_win->canvas->redraw();
 }
 
 static int Selection_FirstLine(const Document &doc, selection_c *list);
@@ -180,7 +164,7 @@ static void UpdatePanel(const Instance &inst)
 }
 
 
-void UpdateDrawLine(Instance &inst)
+static void UpdateDrawLine(Instance &inst)
 {
 	if (inst.edit.action != ACT_DRAW_LINE || inst.edit.draw_from.is_nil())
 		return;
@@ -259,59 +243,59 @@ done:
 }
 
 
-void UpdateHighlight(Instance &inst)
+void Instance::UpdateHighlight()
 {
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		Render3D_UpdateHighlight(inst);
-		UpdatePanel(inst);
+		Render3D_UpdateHighlight();
+		UpdatePanel(*this);
 		return;
 	}
 
 	// find the object to highlight
-	inst.edit.highlight.clear();
+	edit.highlight.clear();
 
 	// don't highlight when dragging, EXCEPT when dragging a single vertex
-	if (inst.edit.pointer_in_window &&
-	    (inst.edit.action != ACT_DRAG || (inst.edit.mode == ObjType::vertices && inst.edit.dragged.valid()) ))
+	if (edit.pointer_in_window &&
+	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		inst.edit.highlight = inst.level.hover.getNearbyObject(inst.edit.mode, inst.edit.map_x, inst.edit.map_y);
+		edit.highlight = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid() &&
-			inst.edit.highlight.valid() && inst.edit.dragged.num == inst.edit.highlight.num)
+		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
+			edit.highlight.valid() && edit.dragged.num == edit.highlight.num)
 		{
-			inst.edit.highlight.clear();
+			edit.highlight.clear();
 		}
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE &&
-			inst.edit.mode == ObjType::vertices && inst.edit.highlight.valid())
+		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
+			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = inst.level.vertices[inst.edit.highlight.num];
-			const Vertex *S = inst.level.vertices[inst.edit.draw_from.num];
+			const Vertex *V = level.vertices[edit.highlight.num];
+			const Vertex *S = level.vertices[edit.draw_from.num];
 
 			double vx = V->x();
 			double vy = V->y();
 
 			grid.RatioSnapXY(vx, vy, S->x(), S->y());
 
-			if (inst.MakeValidCoord(vx) != V->raw_x ||
-				inst.MakeValidCoord(vy) != V->raw_y)
+			if (MakeValidCoord(vx) != V->raw_x ||
+				MakeValidCoord(vy) != V->raw_y)
 			{
-				inst.edit.highlight.clear();
+				edit.highlight.clear();
 			}
 		}
 	}
 
-	UpdateSplitLine(inst, inst.edit.map_x, inst.edit.map_y);
-	UpdateDrawLine(inst);
+	UpdateSplitLine(*this, edit.map_x, edit.map_y);
+	UpdateDrawLine(*this);
 
-	inst.main_win->canvas->UpdateHighlight();
-	inst.main_win->canvas->CheckGridSnap();
+	main_win->canvas->UpdateHighlight();
+	main_win->canvas->CheckGridSnap();
 
-	UpdatePanel(inst);
+	UpdatePanel(*this);
 }
 
 
@@ -332,7 +316,7 @@ void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode)
 
 	inst.edit.mode = new_mode;
 
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 	Editor_ClearErrorMode(inst);
 
 	inst.edit.highlight.clear();
@@ -340,49 +324,49 @@ void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode)
 }
 
 
-void Editor_ChangeMode(Instance &inst, char mode_char)
+void Instance::Editor_ChangeMode(char mode_char)
 {
-	ObjType  prev_type = inst.edit.mode;
+	ObjType  prev_type = edit.mode;
 
 	// Set the object type according to the new mode.
 	switch (mode_char)
 	{
-		case 't': Editor_ChangeMode_Raw(inst, ObjType::things);   break;
-		case 'l': Editor_ChangeMode_Raw(inst, ObjType::linedefs); break;
-		case 's': Editor_ChangeMode_Raw(inst, ObjType::sectors);  break;
-		case 'v': Editor_ChangeMode_Raw(inst, ObjType::vertices); break;
+		case 't': Editor_ChangeMode_Raw(*this, ObjType::things);   break;
+		case 'l': Editor_ChangeMode_Raw(*this, ObjType::linedefs); break;
+		case 's': Editor_ChangeMode_Raw(*this, ObjType::sectors);  break;
+		case 'v': Editor_ChangeMode_Raw(*this, ObjType::vertices); break;
 
 		default:
-			inst.Beep("Unknown mode: %c\n", mode_char);
+			Beep("Unknown mode: %c\n", mode_char);
 			return;
 	}
 
-	if (prev_type != inst.edit.mode)
+	if (prev_type != edit.mode)
 	{
-		inst.Selection_Push();
+		Selection_Push();
 
-		inst.main_win->NewEditMode(inst.edit.mode);
+		main_win->NewEditMode(edit.mode);
 
 		// convert the selection
-		selection_c *prev_sel = inst.edit.Selected;
-		inst.edit.Selected = new selection_c(inst.edit.mode, true /* extended */);
+		selection_c *prev_sel = edit.Selected;
+		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
-		ConvertSelection(inst.level, prev_sel, inst.edit.Selected);
+		ConvertSelection(level, prev_sel, edit.Selected);
 		delete prev_sel;
 	}
-	else if (inst.main_win->isSpecialPanelShown())
+	else if (main_win->isSpecialPanelShown())
 	{
 		// same mode, but this removes the special panel
-		inst.main_win->NewEditMode(inst.edit.mode);
+		main_win->NewEditMode(edit.mode);
 	}
 	// -AJA- Yadex (DEU?) would clear the selection if the mode didn't
 	//       change.  We optionally emulate that behavior here.
 	else if (config::same_mode_clears_selection)
 	{
-		Selection_Clear(inst);
+		Selection_Clear(*this);
 	}
 
-	RedrawMap(inst);
+	RedrawMap();
 }
 
 
@@ -395,17 +379,17 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 	{
 		const Vertex * V = inst.level.vertices[i];
 
-		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
-		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
+		if (V->x() < inst.Map_bound_x1) inst.Map_bound_x1 = V->x();
+		if (V->y() < inst.Map_bound_y1) inst.Map_bound_y1 = V->y();
 
-		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
-		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
+		if (V->x() > inst.Map_bound_x2) inst.Map_bound_x2 = V->x();
+		if (V->y() > inst.Map_bound_y2) inst.Map_bound_y2 = V->y();
 	}
 }
 
-void CalculateLevelBounds(Instance &inst)
+void Instance::CalculateLevelBounds()
 {
-	if (inst.level.numVertices() == 0)
+	if (level.numVertices() == 0)
 	{
 		Map_bound_x1 = Map_bound_x2 = 0;
 		Map_bound_y1 = Map_bound_y2 = 0;
@@ -415,11 +399,11 @@ void CalculateLevelBounds(Instance &inst)
 	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
 	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
 
-	UpdateLevelBounds(inst, 0);
+	UpdateLevelBounds(*this, 0);
 }
 
 
-void MapStuff_NotifyBegin()
+void Instance::MapStuff_NotifyBegin()
 {
 	recalc_map_bounds  = false;
 	new_vertex_minimum = -1;
@@ -428,7 +412,7 @@ void MapStuff_NotifyBegin()
 	sound_propagation_invalid = true;
 }
 
-void MapStuff_NotifyInsert(ObjType type, int objnum)
+void Instance::MapStuff_NotifyInsert(ObjType type, int objnum)
 {
 	if (type == ObjType::vertices)
 	{
@@ -437,21 +421,21 @@ void MapStuff_NotifyInsert(ObjType type, int objnum)
 	}
 }
 
-void MapStuff_NotifyDelete(Instance &inst, ObjType type, int objnum)
+void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 {
 	if (type == ObjType::vertices)
 	{
 		recalc_map_bounds = true;
 
-		if (inst.edit.action == ACT_DRAW_LINE &&
-			inst.edit.draw_from.num == objnum)
+		if (edit.action == ACT_DRAW_LINE &&
+			edit.draw_from.num == objnum)
 		{
-			Editor_ClearAction(inst);
+			Editor_ClearAction();
 		}
 	}
 }
 
-void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 {
 	if (type == ObjType::vertices)
 	{
@@ -459,7 +443,7 @@ void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = inst.level.vertices[objnum];
+		const Vertex * V = level.vertices[objnum];
 
 		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
 		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
@@ -481,15 +465,15 @@ void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
 		Subdiv_InvalidateAll();
 }
 
-void MapStuff_NotifyEnd(Instance &inst)
+void Instance::MapStuff_NotifyEnd()
 {
 	if (recalc_map_bounds || moved_vertex_count > 10)  // TODO: CONFIG
 	{
-		CalculateLevelBounds(inst);
+		CalculateLevelBounds();
 	}
 	else if (new_vertex_minimum >= 0)
 	{
-		UpdateLevelBounds(inst, new_vertex_minimum);
+		UpdateLevelBounds(*this, new_vertex_minimum);
 	}
 }
 
@@ -498,13 +482,8 @@ void MapStuff_NotifyEnd(Instance &inst)
 //  ObjectBox Notification handling
 //------------------------------------------------------------------------
 
-static bool invalidated_totals;
-static bool invalidated_panel_obj;
-static bool changed_panel_obj;
-static bool changed_recent_list;
 
-
-void ObjectBox_NotifyBegin()
+void Instance::ObjectBox_NotifyBegin()
 {
 	invalidated_totals = false;
 	invalidated_panel_obj = false;
@@ -513,62 +492,62 @@ void ObjectBox_NotifyBegin()
 }
 
 
-void ObjectBox_NotifyInsert(Instance &inst, ObjType type, int objnum)
+void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
-	if (type != inst.edit.mode)
+	if (type != edit.mode)
 		return;
 
-	if (objnum > inst.main_win->GetPanelObjNum())
+	if (objnum > main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;
 }
 
 
-void ObjectBox_NotifyDelete(Instance &inst, ObjType type, int objnum)
+void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 {
 	invalidated_totals = true;
 
-	if (type != inst.edit.mode)
+	if (type != edit.mode)
 		return;
 
-	if (objnum > inst.main_win->GetPanelObjNum())
+	if (objnum > main_win->GetPanelObjNum())
 		return;
 
 	invalidated_panel_obj = true;
 }
 
 
-void ObjectBox_NotifyChange(Instance &inst, ObjType type, int objnum, int field)
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
 {
-	if (type != inst.edit.mode)
+	if (type != edit.mode)
 		return;
 
-	if (objnum != inst.main_win->GetPanelObjNum())
+	if (objnum != main_win->GetPanelObjNum())
 		return;
 
 	changed_panel_obj = true;
 }
 
 
-void ObjectBox_NotifyEnd(Instance &inst)
+void Instance::ObjectBox_NotifyEnd() const
 {
 	if (invalidated_totals)
-		inst.main_win->UpdateTotals();
+		main_win->UpdateTotals();
 
 	if (invalidated_panel_obj)
 	{
-		inst.main_win->InvalidatePanelObj();
+		main_win->InvalidatePanelObj();
 	}
 	else if (changed_panel_obj)
 	{
-		inst.main_win->UpdatePanelObj();
+		main_win->UpdatePanelObj();
 	}
 
 	if (changed_recent_list)
-		inst.main_win->browser->RecentUpdate();
+		main_win->browser->RecentUpdate();
 }
 
 
@@ -576,20 +555,17 @@ void ObjectBox_NotifyEnd(Instance &inst)
 //  Selection Notification, ETC
 //------------------------------------------------------------------------
 
-static bool invalidated_selection;
-static bool invalidated_last_sel;
 
-
-void Selection_NotifyBegin()
+void Instance::Selection_NotifyBegin()
 {
 	invalidated_selection = false;
 	invalidated_last_sel  = false;
 }
 
-void Selection_NotifyInsert(const Instance &inst, ObjType type, int objnum)
+void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 {
-	if (type == inst.edit.Selected->what_type() &&
-		objnum <= inst.edit.Selected->max_obj())
+	if (type == edit.Selected->what_type() &&
+		objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
@@ -602,9 +578,9 @@ void Selection_NotifyInsert(const Instance &inst, ObjType type, int objnum)
 	}
 }
 
-void Selection_NotifyDelete(const Instance &inst, ObjType type, int objnum)
+void Instance::Selection_NotifyDelete(ObjType type, int objnum)
 {
-	if (objnum <= inst.edit.Selected->max_obj())
+	if (objnum <= edit.Selected->max_obj())
 	{
 		invalidated_selection = true;
 	}
@@ -624,12 +600,12 @@ void Selection_NotifyChange(ObjType type, int objnum, int field)
 }
 
 
-void Selection_NotifyEnd(const Instance &inst)
+void Instance::Selection_NotifyEnd()
 {
 	if (invalidated_selection)
 	{
 		// this clears AND RESIZES the selection_c object
-		inst.edit.Selected->change_type(inst.edit.mode);
+		edit.Selected->change_type(edit.mode);
 	}
 
 	if (invalidated_last_sel)
@@ -948,14 +924,14 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 
 
-void Selection_InvalidateLast()
+void Instance::Selection_InvalidateLast()
 {
 	delete last_Sel;
 	last_Sel = NULL;
 }
 
 
-void Instance::Selection_Push() const
+void Instance::Selection_Push()
 {
 	if (edit.Selected->empty())
 		return;
@@ -987,7 +963,7 @@ void Selection_Clear(Instance &inst, bool no_save)
 	if (inst.main_win)
 		inst.main_win->UnselectPics();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1059,7 +1035,7 @@ static void Selection_Validate(const Instance &inst)
 
 void CMD_LastSelection(Instance &inst)
 {
-	if (! last_Sel)
+	if (! inst.last_Sel)
 	{
 		inst.Beep("No last selection (or was invalidated)");
 		return;
@@ -1067,14 +1043,14 @@ void CMD_LastSelection(Instance &inst)
 
 	bool changed_mode = false;
 
-	if (last_Sel->what_type() != inst.edit.mode)
+	if (inst.last_Sel->what_type() != inst.edit.mode)
 	{
 		changed_mode = true;
-		Editor_ChangeMode_Raw(inst, last_Sel->what_type());
+		Editor_ChangeMode_Raw(inst, inst.last_Sel->what_type());
 		inst.main_win->NewEditMode(inst.edit.mode);
 	}
 
-	std::swap(last_Sel, inst.edit.Selected);
+	std::swap(inst.last_Sel, inst.edit.Selected);
 
 	// ensure everything is kosher
 	Selection_Validate(inst);
@@ -1082,7 +1058,7 @@ void CMD_LastSelection(Instance &inst)
 	if (changed_mode)
 		GoToSelection(inst);
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -1092,14 +1068,14 @@ void CMD_LastSelection(Instance &inst)
 
 
 // the containers for the textures (etc)
-Recently_used  recent_textures;
-Recently_used  recent_flats;
-Recently_used  recent_things;
+Recently_used  recent_textures(gInstance);
+Recently_used  recent_flats(gInstance);
+Recently_used  recent_things(gInstance);
 
 
-Recently_used::Recently_used() :
+Recently_used::Recently_used(Instance &inst) :
 	size(0),
-	keep_num(RECENTLY_USED_MAX - 2)
+	keep_num(RECENTLY_USED_MAX - 2), inst(inst)
 {
 }
 
@@ -1152,7 +1128,7 @@ void Recently_used::insert(const SString &name)
 	// mark browser for later update
 	// [ this method may be called very often by basis, too expensive to
 	//   update the browser here ]
-	changed_recent_list = true;
+	inst.changed_recent_list = true;
 }
 
 void Recently_used::insert_number(int val)
@@ -1313,7 +1289,7 @@ void Instance::Editor_Init()
 
 	grid.Init();
 
-	MadeChanges = 0;
+	MadeChanges = false;
 
 	  Editor_RegisterCommands();
 	Render3D_RegisterCommands();
@@ -1337,39 +1313,39 @@ void Instance::Editor_DefaultState()
 }
 
 
-bool Editor_ParseUser(Instance &inst, const std::vector<SString> &tokens)
+bool Instance::Editor_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "edit_mode" && tokens.size() >= 2)
 	{
-		Editor_ChangeMode(inst, tokens[1][0]);
+		Editor_ChangeMode(tokens[1][0]);
 		return true;
 	}
 
 	if (tokens[0] == "render_mode" && tokens.size() >= 2)
 	{
-		inst.edit.render3d = atoi(tokens[1]);
-		RedrawMap(inst);
+		edit.render3d = atoi(tokens[1]);
+		RedrawMap();
 		return true;
 	}
 
 	if (tokens[0] == "sector_render_mode" && tokens.size() >= 2)
 	{
-		inst.edit.sector_render_mode = atoi(tokens[1]);
-		RedrawMap(inst);
+		edit.sector_render_mode = atoi(tokens[1]);
+		RedrawMap();
 		return true;
 	}
 
 	if (tokens[0] == "thing_render_mode" && tokens.size() >= 2)
 	{
-		inst.edit.thing_render_mode = atoi(tokens[1]);
-		RedrawMap(inst);
+		edit.thing_render_mode = atoi(tokens[1]);
+		RedrawMap();
 		return true;
 	}
 
 	if (tokens[0] == "show_object_numbers" && tokens.size() >= 2)
 	{
-		inst.edit.show_object_numbers = atoi(tokens[1]);
-		RedrawMap(inst);
+		edit.show_object_numbers = atoi(tokens[1]);
+		RedrawMap();
 		return true;
 	}
 

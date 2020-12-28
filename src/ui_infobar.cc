@@ -183,7 +183,7 @@ void UI_InfoBar::mode_callback(Fl_Widget *w, void *data)
 	static const char *mode_keys = "tlsvr";
 	auto bar = static_cast<const UI_InfoBar *>(data);
 
-	Editor_ChangeMode(bar->inst, mode_keys[mode->value()]);
+	bar->inst.Editor_ChangeMode(mode_keys[mode->value()]);
 }
 
 
@@ -216,9 +216,9 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 
 	// need sectors mode for sound propagation display
 	if (bar->inst.edit.sector_render_mode == SREND_SoundProp && bar->inst.edit.mode != ObjType::sectors)
-		Editor_ChangeMode(bar->inst, 's');
+		bar->inst.Editor_ChangeMode('s');
 	
-	RedrawMap(bar->inst);
+	bar->inst.RedrawMap(); 
 }
 
 

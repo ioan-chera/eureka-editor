@@ -43,13 +43,11 @@ typedef enum
 } editor_action_e;
 
 
-void Editor_ClearAction(Instance &inst);
 void Editor_SetAction(Instance &inst, editor_action_e new_action);
 
 void Editor_Zoom(int delta, int mid_x, int mid_y);
 
 void Editor_UpdateFromScroll();
-void Editor_ScrollMap(Instance &inst, int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
 
 /* raw input handling */
 

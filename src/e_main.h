@@ -167,45 +167,10 @@ struct Editor_State_t
 	struct { float x1, y1, x2, y2; } adjust_bbox;
 };
 
-bool Editor_ParseUser(Instance &inst, const std::vector<SString> &tokens);
-
 void Editor_ClearErrorMode(Instance &inst);
-void Editor_ChangeMode(Instance &inst, char mode);
 void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode);
 
-void UpdateHighlight(Instance &inst);
-
-void RedrawMap(Instance &inst);
-void ZoomWholeMap(Instance &inst);
-
-
-extern double Map_bound_x1;   /* minimum X value of map */
-extern double Map_bound_y1;   /* minimum Y value of map */
-extern double Map_bound_x2;   /* maximum X value of map */
-extern double Map_bound_y2;   /* maximum Y value of map */
-
-void CalculateLevelBounds(Instance &inst);
-
-
-void MapStuff_NotifyBegin();
-void MapStuff_NotifyInsert(ObjType type, int objnum);
-void MapStuff_NotifyDelete(Instance &inst, ObjType type, int objnum);
-void MapStuff_NotifyChange(Instance &inst, ObjType type, int objnum, int field);
-void MapStuff_NotifyEnd(Instance &inst);
-
-
-void ObjectBox_NotifyBegin();
-void ObjectBox_NotifyInsert(Instance &inst, ObjType type, int objnum);
-void ObjectBox_NotifyDelete(Instance &inst, ObjType type, int objnum);
-void ObjectBox_NotifyChange(Instance &inst, ObjType type, int objnum, int field);
-void ObjectBox_NotifyEnd(Instance &inst);
-
-
-void Selection_NotifyBegin();
-void Selection_NotifyInsert(const Instance &inst, ObjType type, int objnum);
-void Selection_NotifyDelete(const Instance &inst, ObjType type, int objnum);
 void Selection_NotifyChange(ObjType type, int objnum, int field);
-void Selection_NotifyEnd(const Instance &inst);
 
 
 void DumpSelection (selection_c * list);
@@ -213,7 +178,6 @@ void DumpSelection (selection_c * list);
 void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest);
 
 void Selection_Clear(Instance &inst, bool no_save = false);
-void Selection_InvalidateLast();
 
 //
 // When using editor
@@ -253,8 +217,10 @@ private:
 
 	SString name_set[RECENTLY_USED_MAX];
 
+	Instance &inst;
+
 public:
-	 Recently_used();
+	explicit Recently_used(Instance &inst);
 	~Recently_used();
 
 	int find(const SString &name);

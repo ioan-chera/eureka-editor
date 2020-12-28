@@ -332,7 +332,7 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 
 void CMD_TestMap(Instance &inst)
 {
-	if (MadeChanges)
+	if (inst.MadeChanges)
 	{
 		if (DLG_Confirm("Cancel|&Save",
 		                "You have unsaved changes, do you want to save them now "

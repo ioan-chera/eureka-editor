@@ -38,9 +38,10 @@ keycode_t EXEC_CurKey;
 // anywhere except in the key_binding_t structure.
 #define MOD_LAX_SHIFTCTRL	FL_SCROLL_LOCK
 
-
-static std::vector< editor_command_t * > all_commands;
-
+namespace global
+{
+	static std::vector< editor_command_t * > all_commands;
+}
 
 static key_context_e RequiredContextFromName(const char *name)
 {
@@ -86,7 +87,7 @@ void M_RegisterCommandList(editor_command_t * list)
 		list->req_context = RequiredContextFromName(list->name);
 		list->group_name  = CalcGroupName(list->group_name, list->req_context);
 
-		all_commands.push_back(list);
+		global::all_commands.push_back(list);
 	}
 }
 
@@ -106,9 +107,9 @@ const editor_command_t * FindEditorCommand(const SString &namem)
 	else if (name.noCaseEqual("OperationMenu"))
 		name = "OpMenu";
 
-	for (unsigned int i = 0 ; i < all_commands.size() ; i++)
-		if (name.noCaseEqual(all_commands[i]->name))
-			return all_commands[i];
+	for (unsigned int i = 0 ; i < global::all_commands.size() ; i++)
+		if (name.noCaseEqual(global::all_commands[i]->name))
+			return global::all_commands[i];
 
 	return NULL;
 }
@@ -116,10 +117,10 @@ const editor_command_t * FindEditorCommand(const SString &namem)
 
 const editor_command_t * LookupEditorCommand(int idx)
 {
-	if (idx >= (int)all_commands.size())
+	if (idx >= (int)global::all_commands.size())
 		return NULL;
 
-	return all_commands[idx];
+	return global::all_commands[idx];
 }
 
 

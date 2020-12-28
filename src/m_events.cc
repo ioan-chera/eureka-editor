@@ -50,15 +50,15 @@ static int mouse_last_x;
 static int mouse_last_y;
 
 
-void Editor_ClearAction(Instance &inst)
+void Instance::Editor_ClearAction()
 {
-	switch (inst.edit.action)
+	switch (edit.action)
 	{
 		case ACT_NOTHING:
 			return;
 
 		case ACT_ADJUST_OFS:
-			inst.main_win->SetCursor(FL_CURSOR_DEFAULT);
+			main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
 
 		default:
@@ -66,13 +66,13 @@ void Editor_ClearAction(Instance &inst)
 			break;
 	}
 
-	inst.edit.action = ACT_NOTHING;
+	edit.action = ACT_NOTHING;
 }
 
 
 void Editor_SetAction(Instance &inst, editor_action_e  new_action)
 {
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 
 	inst.edit.action = new_action;
 
@@ -106,37 +106,37 @@ void Editor_Zoom(int delta, int mid_x, int mid_y)
 
 
 // this is only used for mouse scrolling
-void Editor_ScrollMap(Instance &inst, int mode, int dx, int dy, keycode_t mod)
+void Instance::Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 {
 	// started?
 	if (mode < 0)
 	{
-		inst.edit.is_panning = true;
-		inst.main_win->SetCursor(FL_CURSOR_HAND);
+		edit.is_panning = true;
+		main_win->SetCursor(FL_CURSOR_HAND);
 		return;
 	}
 
 	// finished?
 	if (mode > 0)
 	{
-		inst.edit.is_panning = false;
-		inst.main_win->SetCursor(FL_CURSOR_DEFAULT);
+		edit.is_panning = false;
+		main_win->SetCursor(FL_CURSOR_DEFAULT);
 		return;
 	}
 
-	if (! inst.edit.panning_lax)
+	if (! edit.panning_lax)
 		mod = 0;
 
 	if (dx == 0 && dy == 0)
 		return;
 
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		Render3D_ScrollMap(inst, dx, dy, mod);
+		Render3D_ScrollMap(*this, dx, dy, mod);
 	}
 	else
 	{
-		float speed = static_cast<float>(inst.edit.panning_speed / grid.Scale);
+		float speed = static_cast<float>(edit.panning_speed / grid.Scale);
 
 		double delta_x = ((double) -dx * speed);
 		double delta_y = ((double)  dy * speed);
@@ -189,7 +189,7 @@ static void Navigate2D(Instance &inst)
 		grid.Scroll(delta_x, delta_y);
 	}
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -453,7 +453,7 @@ static void EV_EnterWindow(Instance &inst)
 	if (Fl::focus() != foc)
 		foc->take_focus();
 
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -468,10 +468,10 @@ static void EV_LeaveWindow(Instance &inst)
 
 	// this offers a handy way to get out of drawing mode
 	if (inst.edit.action == ACT_DRAW_LINE)
-		Editor_ClearAction(inst);
+		inst.Editor_ClearAction();
 
 	// this will update (disable) any current highlight
-	RedrawMap(inst);
+	inst.RedrawMap();
 }
 
 
@@ -479,7 +479,7 @@ void EV_EscapeKey(Instance &inst)
 {
 	inst.Nav_Clear();
 	ClearStickyMod(inst);
-	Editor_ClearAction(inst);
+	inst.Editor_ClearAction();
 	inst.Status_Clear();
 
 	inst.edit.clicked.clear();
@@ -487,8 +487,8 @@ void EV_EscapeKey(Instance &inst)
 	inst.edit.split_line.clear();
 	inst.edit.draw_from.clear();
 
-	UpdateHighlight(inst);
-	RedrawMap(inst);
+	inst.UpdateHighlight();
+	inst.RedrawMap();
 }
 
 
@@ -504,7 +504,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 
 	if (inst.edit.is_panning)
 	{
-		Editor_ScrollMap(inst, 0, dx, dy, mod);
+		inst.Editor_ScrollMap(0, dx, dy, mod);
 		return;
 	}
 
@@ -519,7 +519,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	if (inst.edit.action == ACT_DRAW_LINE)
 	{
 		// this calls UpdateHighlight() which updates inst.edit.draw_to_x/y
-		RedrawMap(inst);
+		inst.RedrawMap();
 		return;
 	}
 
@@ -543,7 +543,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta
 		if (inst.edit.mode == ObjType::vertices && inst.edit.dragged.valid())
-			UpdateHighlight(inst);
+			inst.UpdateHighlight();
 
 		inst.main_win->canvas->redraw();
 		return;
@@ -556,7 +556,7 @@ static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, 
 	}
 
 	// in general, just update the highlight, split-line (etc)
-	UpdateHighlight(inst);
+	inst.UpdateHighlight();
 }
 
 
@@ -741,7 +741,7 @@ static int EV_RawMouse(Instance &inst, int event)
 
 	if (inst.edit.render3d)
 	{
-		Render3D_MouseMotion(inst, Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		inst.Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 	else
 	{

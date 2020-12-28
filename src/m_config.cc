@@ -1485,11 +1485,11 @@ static SString PersistFilename(const crc32_c& crc)
 #define MAX_TOKENS  10
 
 
-bool M_LoadUserState(Instance &inst)
+bool Instance::M_LoadUserState()
 {
 	crc32_c crc;
 
-	inst.level.getLevelChecksum(crc);
+	level.getLevelChecksum(crc);
 
 	SString filename = PersistFilename(crc);
 
@@ -1516,12 +1516,12 @@ bool M_LoadUserState(Instance &inst)
 			continue;
 		}
 
-		if (  Editor_ParseUser(inst, tokens) ||
-		        Grid_ParseUser(inst, tokens) ||
+		if (  Editor_ParseUser(tokens) ||
+		        Grid_ParseUser(*this, tokens) ||
 		    Render3D_ParseUser(tokens) ||
-		     Browser_ParseUser(inst, tokens) ||
-		       Props_ParseUser(inst, tokens) ||
-		     RecUsed_ParseUser(inst, tokens))
+		     Browser_ParseUser(*this, tokens) ||
+		       Props_ParseUser(*this, tokens) ||
+		     RecUsed_ParseUser(*this, tokens))
 		{
 			// Ok
 		}
@@ -1533,7 +1533,7 @@ bool M_LoadUserState(Instance &inst)
 
 	file.close();
 
-	Props_LoadValues(inst);
+	Props_LoadValues(*this);
 
 	return true;
 }
@@ -1568,15 +1568,15 @@ bool M_SaveUserState(const Instance &inst)
 }
 
 
-void M_DefaultUserState(Instance &inst)
+void Instance::M_DefaultUserState()
 {
 	grid.Init();
 
-	ZoomWholeMap(inst);
+	ZoomWholeMap();
 
-	Render3D_Setup(inst);
+	Render3D_Setup();
 
-	inst.Editor_DefaultState();
+	Editor_DefaultState();
 }
 
 

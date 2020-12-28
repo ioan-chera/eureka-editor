@@ -36,20 +36,49 @@ public:
 	fixcoord_t MakeValidCoord(double x) const;
 
 	// E_MAIN
+	void CalculateLevelBounds();
+	void Editor_ChangeMode(char mode_char);
+	void Editor_ClearAction();
 	void Editor_DefaultState();
 	void Editor_Init();
+	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;
+	void MapStuff_NotifyBegin();
+	void MapStuff_NotifyChange(ObjType type, int objnum, int field);
+	void MapStuff_NotifyDelete(ObjType type, int objnum);
+	void MapStuff_NotifyEnd();
+	void MapStuff_NotifyInsert(ObjType type, int objnum);
+	void ObjectBox_NotifyBegin();
+	void ObjectBox_NotifyChange(ObjType type, int objnum, int field);
+	void ObjectBox_NotifyDelete(ObjType type, int objnum);
+	void ObjectBox_NotifyEnd() const;
+	void ObjectBox_NotifyInsert(ObjType type, int objnum);
+	void RedrawMap();
 	void Selection_Add(Objid &obj) const;
-	void Selection_Push() const;
+	void Selection_InvalidateLast();
+	void Selection_NotifyBegin();
+	void Selection_NotifyDelete(ObjType type, int objnum);
+	void Selection_NotifyEnd();
+	void Selection_NotifyInsert(ObjType type, int objnum);
+	void Selection_Push();
 	void Selection_Toggle(Objid &obj) const;
 	SelectHighlight SelectionOrHighlight();
+	void UpdateHighlight();
+	void ZoomWholeMap();
+
+	const byte *SoundPropagation(int start_sec);
 
 	// IM_COLOR
 	void W_LoadColormap() const;
 	void W_LoadPalette() const;
 
+	// M_CONFIG
+	void M_DefaultUserState();
+	bool M_LoadUserState();
+
 	// M_EVENTS
 	void Editor_ClearNav();
+	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
 	void Nav_Clear();
 
 	// M_FILES
@@ -66,11 +95,21 @@ public:
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 
 	// M_LOADSAVE
+	void LoadLevel(Wad_file *wad, const SString &level);
 	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
 
 	// MAIN
+	bool Main_ConfirmQuit(const char *action) const;
 	void Main_LoadResources();
+
+	// R_RENDER
+	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	void Render3D_Setup();
+	void Render3D_UpdateHighlight();
+
+	// R_SOFTWARE
+	bool SW_QueryPoint(Objid &hl, int qx, int qy);
 
 	// UI_INFOBAR
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
@@ -119,6 +158,38 @@ public:	// will be private when we encapsulate everything
 	SString default_wall_tex = "GRAY1";
 	SString default_floor_tex = "FLAT1";
 	SString default_ceil_tex = "FLAT1";
+
+	//
+	// Panel stuff
+	//
+	bool changed_panel_obj = false;
+	bool changed_recent_list = false;
+	bool invalidated_last_sel = false;
+	bool invalidated_panel_obj = false;
+	bool invalidated_selection = false;
+	bool invalidated_totals = false;
+
+	//
+	// Selection stuff
+	//
+	selection_c *last_Sel = nullptr;
+
+	//
+	// Document stuff
+	//
+	bool MadeChanges = false;
+	double Map_bound_x1 = 32767;   /* minimum X value of map */
+	double Map_bound_y1 = 32767;   /* minimum Y value of map */
+	double Map_bound_x2 = -32767;   /* maximum X value of map */
+	double Map_bound_y2 = -32767;   /* maximum Y value of map */
+	int moved_vertex_count = 0;
+	int new_vertex_minimum = 0;
+	bool recalc_map_bounds = false;
+
+	//
+	// Path stuff
+	//
+	bool sound_propagation_invalid = false;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
