@@ -74,6 +74,7 @@ public:	// will be private when we encapsulate everything
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
 	MapFormat Level_format = {};	// format of current map
+	SString Level_name;	// Name of map lump we are editing
 
 	//
 	// Game-dependent (thus instance dependent) defaults

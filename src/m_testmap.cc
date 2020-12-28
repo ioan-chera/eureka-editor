@@ -237,35 +237,35 @@ static SString CalcEXEName(const port_path_info_t *info)
 }
 
 
-static SString CalcWarpString()
+static SString CalcWarpString(const Instance &inst)
 {
-	SYS_ASSERT(!instance::Level_name.empty());
+	SYS_ASSERT(!inst.Level_name.empty());
 	// FIXME : EDGE allows a full name: -warp MAP03
 	//         Eternity too.
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if(instance::Level_name.length() >= 4 && instance::Level_name.noCaseStartsWith("MAP") && isdigit(instance::Level_name[3]))
+	if(inst.Level_name.length() >= 4 && inst.Level_name.noCaseStartsWith("MAP") && isdigit(inst.Level_name[3]))
 	{
-		long number = strtol(instance::Level_name.c_str() + 3, nullptr, 10);
+		long number = strtol(inst.Level_name.c_str() + 3, nullptr, 10);
 		return SString::printf("-warp %ld", number);
 	}
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if(instance::Level_name.length() >= 4 && !isdigit(instance::Level_name[0]) && isdigit(instance::Level_name[1]) &&
-	   !isdigit(instance::Level_name[2]) && isdigit(instance::Level_name[3]))
+	if(inst.Level_name.length() >= 4 && !isdigit(inst.Level_name[0]) && isdigit(inst.Level_name[1]) &&
+	   !isdigit(inst.Level_name[2]) && isdigit(inst.Level_name[3]))
 	{
-		return SString::printf("-warp %c %s", instance::Level_name[1], instance::Level_name.c_str() + 3);
+		return SString::printf("-warp %c %s", inst.Level_name[1], inst.Level_name.c_str() + 3);
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	size_t digitPos = instance::Level_name.findDigit();
+	size_t digitPos = inst.Level_name.findDigit();
 	if(digitPos != std::string::npos)
 	{
-		return SString("-warp ") + (instance::Level_name.c_str() + digitPos);
+		return SString("-warp ") + (inst.Level_name.c_str() + digitPos);
 	}
 
 	// no digits at all, oh shit!
@@ -390,7 +390,7 @@ void CMD_TestMap(Instance &inst)
 
 	SString cmd_buffer = SString::printf("%s %s %s",
 										 CalcEXEName(info).c_str(), GrabWadNames(inst, info).c_str(),
-										 CalcWarpString().c_str());
+										 CalcWarpString(inst).c_str());
 
 	LogPrintf("Testing map using the following command:\n");
 	LogPrintf("--> %s\n", cmd_buffer.c_str());

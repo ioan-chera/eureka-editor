@@ -222,7 +222,7 @@ static const opt_desc_t options[] =
 		"w<",
 		"Select level to edit",
 		"<map>",
-		&instance::Level_name
+		&gInstance.Level_name	// TODO: this will need to work only for first instance
 	},
 
 	{	"udmftest",

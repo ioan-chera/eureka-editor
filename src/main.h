@@ -141,7 +141,6 @@ namespace instance
 {
 	extern SString Game_name;   // Name of game "doom", "doom2", "heretic", ...
 	extern SString Port_name;   // Name of source port "vanilla", "boom", ...
-	extern SString Level_name;  // Name of map lump we are editing
 
 	extern SString  Udmf_namespace; // for UDMF, the current namespace
 }

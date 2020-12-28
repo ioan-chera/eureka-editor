@@ -555,9 +555,9 @@ bool Instance::M_TryOpenMostRecent()
 	/* -- OK -- */
 
 	if (wad->LevelFind(map_name) >= 0)
-		instance::Level_name = map_name;
+		Level_name = map_name;
 	else
-		instance::Level_name.clear();
+		Level_name.clear();
 
 	Pwad_name = filename;
 
@@ -757,7 +757,7 @@ SString Instance::M_PickDefaultIWAD() const
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
 
-	if (!instance::Level_name.empty() && toupper(instance::Level_name[0]) == 'E')
+	if (!Level_name.empty() && toupper(Level_name[0]) == 'E')
 	{
 		default_game = "doom";
 	}

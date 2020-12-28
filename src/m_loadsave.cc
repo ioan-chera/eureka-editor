@@ -359,9 +359,9 @@ void CMD_FreshMap(Instance &inst)
 		return;
 
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(instance::Level_name.c_str());
+	UI_ChooseMap * dialog = new UI_ChooseMap(inst.Level_name.c_str());
 
-	dialog->PopulateButtons(toupper(instance::Level_name[0]), inst.edit_wad);
+	dialog->PopulateButtons(toupper(inst.Level_name[0]), inst.edit_wad);
 
 	SString map_name = dialog->Run();
 
@@ -979,9 +979,9 @@ void LoadLevel(Instance &inst, Wad_file *wad, const SString &level)
 		}
 	}
 
-	instance::Level_name = level.asUpper();
+	inst.Level_name = level.asUpper();
 
-	inst.Status_Set("Loaded %s", instance::Level_name.c_str());
+	inst.Status_Set("Loaded %s", inst.Level_name.c_str());
 
 	RedrawMap(inst);
 }
@@ -1272,7 +1272,7 @@ void CMD_FlipMap(Instance &inst)
 	Wad_file *wad = inst.edit_wad ? inst.edit_wad : instance::game_wad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
-	int lev_idx = wad->LevelFind(instance::Level_name);
+	int lev_idx = wad->LevelFind(inst.Level_name);
 	int max_idx = wad->LevelCount() - 1;
 
 	if (max_idx < 0)
@@ -1592,7 +1592,7 @@ static void EmptyLump(const Instance &inst, const char *name)
 static void SaveLevel(Instance &inst, const SString &level)
 {
 	// set global level name now (for debugging code)
-	instance::Level_name = level.asUpper();
+	inst.Level_name = level.asUpper();
 
 	inst.edit_wad->BeginWrite();
 
@@ -1665,13 +1665,13 @@ static void SaveLevel(Instance &inst, const SString &level)
 
 	M_WriteEurekaLump(inst.edit_wad);
 
-	M_AddRecent(inst.edit_wad->PathName(), instance::Level_name);
+	M_AddRecent(inst.edit_wad->PathName(), inst.Level_name);
 
-	inst.Status_Set("Saved %s", instance::Level_name.c_str());
+	inst.Status_Set("Saved %s", inst.Level_name.c_str());
 
 	if (inst.main_win)
 	{
-		inst.main_win->SetTitle(inst.edit_wad->PathName(), instance::Level_name, false);
+		inst.main_win->SetTitle(inst.edit_wad->PathName(), inst.Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState(inst);
@@ -1707,9 +1707,9 @@ bool M_SaveMap(Instance &inst)
 
 	M_BackupWad(inst.edit_wad);
 
-	LogPrintf("Saving Map : %s in %s\n", instance::Level_name.c_str(), inst.edit_wad->PathName().c_str());
+	LogPrintf("Saving Map : %s in %s\n", inst.Level_name.c_str(), inst.edit_wad->PathName().c_str());
 
-	SaveLevel(inst, instance::Level_name);
+	SaveLevel(inst, inst.Level_name);
 
 	return true;
 }
@@ -1800,9 +1800,9 @@ static bool M_ExportMap(Instance &inst)
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(instance::Level_name.c_str());
+	UI_ChooseMap * dialog = new UI_ChooseMap(inst.Level_name.c_str());
 
-	dialog->PopulateButtons(toupper(instance::Level_name[0]), wad);
+	dialog->PopulateButtons(toupper(inst.Level_name[0]), wad);
 
 	SString map_name = dialog->Run();
 
@@ -1883,9 +1883,9 @@ void CMD_CopyMap(Instance &inst)
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(instance::Level_name.c_str(), inst.edit_wad);
+	UI_ChooseMap * dialog = new UI_ChooseMap(inst.Level_name.c_str(), inst.edit_wad);
 
-	dialog->PopulateButtons(toupper(instance::Level_name[0]), inst.edit_wad);
+	dialog->PopulateButtons(toupper(inst.Level_name[0]), inst.edit_wad);
 
 	SString new_name = dialog->Run();
 
@@ -1897,18 +1897,18 @@ void CMD_CopyMap(Instance &inst)
 
 	// sanity check that the name is different
 	// (should be prevented by the choose-map dialog)
-	if (y_stricmp(new_name.c_str(), instance::Level_name.c_str()) == 0)
+	if (y_stricmp(new_name.c_str(), inst.Level_name.c_str()) == 0)
 	{
 		inst.Beep("Name is same!?!");
 		return;
 	}
 
 	// perform the copy (just a save)
-	LogPrintf("Copying Map : %s --> %s\n", instance::Level_name.c_str(), new_name.c_str());
+	LogPrintf("Copying Map : %s --> %s\n", inst.Level_name.c_str(), new_name.c_str());
 
 	SaveLevel(inst, new_name);
 
-	inst.Status_Set("Copied to %s", instance::Level_name.c_str());
+	inst.Status_Set("Copied to %s", inst.Level_name.c_str());
 }
 
 
@@ -1929,7 +1929,7 @@ void CMD_RenameMap(Instance &inst)
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(instance::Level_name.c_str(), inst.edit_wad /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(inst.Level_name.c_str(), inst.edit_wad /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]
@@ -1957,7 +1957,7 @@ void CMD_RenameMap(Instance &inst)
 
 	// sanity check that the name is different
 	// (should be prevented by the choose-map dialog)
-	if (y_stricmp(new_name.c_str(), instance::Level_name.c_str()) == 0)
+	if (y_stricmp(new_name.c_str(), inst.Level_name.c_str()) == 0)
 	{
 		inst.Beep("Name is same!?!");
 		return;
@@ -1965,7 +1965,7 @@ void CMD_RenameMap(Instance &inst)
 
 
 	// perform the rename
-	int lev_num = inst.edit_wad->LevelFind(instance::Level_name);
+	int lev_num = inst.edit_wad->LevelFind(inst.Level_name);
 
 	if (lev_num >= 0)
 	{
@@ -1976,11 +1976,11 @@ void CMD_RenameMap(Instance &inst)
 		inst.edit_wad->EndWrite();
 	}
 
-	instance::Level_name = new_name.asUpper();
+	inst.Level_name = new_name.asUpper();
 
-	inst.main_win->SetTitle(inst.edit_wad->PathName(), instance::Level_name, false);
+	inst.main_win->SetTitle(inst.edit_wad->PathName(), inst.Level_name, false);
 
-	inst.Status_Set("Renamed to %s", instance::Level_name.c_str());
+	inst.Status_Set("Renamed to %s", inst.Level_name.c_str());
 }
 
 
@@ -2013,9 +2013,9 @@ void CMD_DeleteMap(Instance &inst)
 		return;
 	}
 
-	LogPrintf("Deleting Map : %s...\n", instance::Level_name.c_str());
+	LogPrintf("Deleting Map : %s...\n", inst.Level_name.c_str());
 
-	int lev_num = inst.edit_wad->LevelFind(instance::Level_name);
+	int lev_num = inst.edit_wad->LevelFind(inst.Level_name);
 
 	if (lev_num < 0)
 	{

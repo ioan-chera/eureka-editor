@@ -3224,7 +3224,7 @@ static void Tags_ShowMissingTags(Instance &inst)
 }
 
 
-static bool SEC_check_beast_mark(int tag, const Document &doc)
+static bool SEC_check_beast_mark(int tag, const Instance &inst)
 {
 	if (! Features.tag_666)
 		return true;
@@ -3232,7 +3232,7 @@ static bool SEC_check_beast_mark(int tag, const Document &doc)
 	if (tag == 667)
 	{
 		// tag #667 can only be used on MAP07
-		return instance::Level_name.noCaseEqual("MAP07");
+		return inst.Level_name.noCaseEqual("MAP07");
 	}
 
 	if (tag == 666)
@@ -3240,21 +3240,21 @@ static bool SEC_check_beast_mark(int tag, const Document &doc)
 		// for Heretic, the map must be an end-of-episode map: ExM8
 		if (Features.tag_666 == 2)
 		{
-			if (instance::Level_name.length() != 4)
+			if (inst.Level_name.length() != 4)
 				return false;
 
-			return (instance::Level_name[3] == '8');
+			return (inst.Level_name[3] == '8');
 		}
 
 		// for Doom, either need a particular map, or the presence
 		// of a KEEN thing.
-		if (instance::Level_name.noCaseEqual("E1M8") || instance::Level_name.noCaseEqual("E4M6") ||
-			instance::Level_name.noCaseEqual("E4M8") || instance::Level_name.noCaseEqual("MAP07"))
+		if (inst.Level_name.noCaseEqual("E1M8") || inst.Level_name.noCaseEqual("E4M6") ||
+			inst.Level_name.noCaseEqual("E4M8") || inst.Level_name.noCaseEqual("MAP07"))
 		{
 			return true;
 		}
 
-		for (const Thing *thing : doc.things)
+		for (const Thing *thing : inst.level.things)
 		{
 			const thingtype_t &info = M_GetThingType(thing->type);
 
@@ -3269,15 +3269,15 @@ static bool SEC_check_beast_mark(int tag, const Document &doc)
 }
 
 
-static void Tags_FindBeastMarks(selection_c& secs, const Document &doc)
+static void Tags_FindBeastMarks(selection_c& secs, const Instance &inst)
 {
 	secs.change_type(ObjType::sectors);
 
-	for (int s = 0 ; s < doc.numSectors(); s++)
+	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		int tag = doc.sectors[s]->tag;
+		int tag = inst.level.sectors[s]->tag;
 
-		if (! SEC_check_beast_mark(tag, doc))
+		if (! SEC_check_beast_mark(tag, inst))
 			secs.set(s);
 	}
 }
@@ -3288,7 +3288,7 @@ static void Tags_ShowBeastMarks(Instance &inst)
 	if (inst.edit.mode != ObjType::sectors)
 		Editor_ChangeMode(inst, 's');
 
-	Tags_FindBeastMarks(*inst.edit.Selected, inst.level);
+	Tags_FindBeastMarks(*inst.edit.Selected, inst);
 
 	GoToErrors(inst);
 }
@@ -3397,7 +3397,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		}
 
 
-		Tags_FindBeastMarks(sel, doc);
+		Tags_FindBeastMarks(sel, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No sectors with tag 666 or 667 used on the wrong map");

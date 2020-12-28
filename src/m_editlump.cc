@@ -405,7 +405,7 @@ void CMD_EditLump(Instance &inst)
 			return;
 
 		// check if user typed name of current level
-		if (lump_name.noCaseEqual(instance::Level_name))
+		if (lump_name.noCaseEqual(inst.Level_name))
 			lump_name = EDLUMP_HEADER;
 	}
 
@@ -448,7 +448,7 @@ void CMD_EditLump(Instance &inst)
 	if (lump_name == EDLUMP_HEADER)
 	{
 		editor->LoadMemory(inst.level.headerData);
-		editor->SetTitle(instance::Level_name);
+		editor->SetTitle(inst.Level_name);
 	}
 	else if (lump_name == EDLUMP_SCRIPTS)
 	{

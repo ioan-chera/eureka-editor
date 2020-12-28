@@ -85,7 +85,6 @@ std::vector<SString> instance::Resource_list;
 
 SString instance::Game_name;
 SString instance::Port_name;
-SString instance::Level_name;
 
 SString  instance::Udmf_namespace;
 
@@ -477,12 +476,12 @@ static SString DetermineLevel(const Instance &inst)
 
 	int level_number = 0;
 
-	if (!instance::Level_name.empty())
+	if (!inst.Level_name.empty())
 	{
-		if (! isdigit(instance::Level_name[0]))
-			return instance::Level_name.asUpper();
+		if (! isdigit(inst.Level_name[0]))
+			return inst.Level_name.asUpper();
 
-		level_number = atoi(instance::Level_name);
+		level_number = atoi(inst.Level_name);
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -1097,7 +1096,7 @@ int main(int argc, char *argv[])
 			MasterDir_Add(gInstance.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!instance::Iwad_name.empty() || !instance::Level_name.empty()))
+		else if (config::auto_load_recent && ! (!instance::Iwad_name.empty() || !gInstance.Level_name.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
@@ -1137,12 +1136,12 @@ int main(int argc, char *argv[])
 
 		// load the initial level
 		// TODO: first instance
-		instance::Level_name = DetermineLevel(gInstance);
+		gInstance.Level_name = DetermineLevel(gInstance);
 
-		LogPrintf("Loading initial map : %s\n", instance::Level_name.c_str());
+		LogPrintf("Loading initial map : %s\n", gInstance.Level_name.c_str());
 
 		// TODO: the first instance
-		LoadLevel(gInstance, gInstance.edit_wad ? gInstance.edit_wad : instance::game_wad, instance::Level_name);
+		LoadLevel(gInstance, gInstance.edit_wad ? gInstance.edit_wad : instance::game_wad, gInstance.Level_name);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

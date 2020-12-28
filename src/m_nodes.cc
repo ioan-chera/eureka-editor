@@ -461,7 +461,7 @@ void CMD_BuildAllNodes(Instance &inst)
 
 
 	// remember current level
-	SString CurLevel(instance::Level_name);
+	SString CurLevel(inst.Level_name);
 
 	// reset various editor state
 	Editor_ClearAction(inst);
