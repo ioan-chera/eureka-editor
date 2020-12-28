@@ -499,41 +499,34 @@ void CMD_PruneUnused(Instance &inst)
 
 //------------------------------------------------------------------------
 
-static std::vector<byte> sound_prop_vec;
-static std::vector<byte> sound_temp1_vec;
-static std::vector<byte> sound_temp2_vec;
-
-static int sound_start_sec;
-
-
-static void CalcPropagation(const Document &doc, std::vector<byte>& vec, bool ignore_doors)
+static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool ignore_doors)
 {
 	bool changes;
 
-	for (int k = 0 ; k < doc.numSectors(); k++)
+	for (int k = 0 ; k < inst.level.numSectors(); k++)
 		vec[k] = 0;
 
-	vec[sound_start_sec] = 2;
+	vec[inst.sound_start_sec] = 2;
 
 	do
 	{
 		changes = false;
 
-		for (const LineDef *L : doc.linedefs)
+		for (const LineDef *L : inst.level.linedefs)
 		{
 			if (! L->TwoSided())
 				continue;
 
-			int sec1 = L->WhatSector(Side::right, doc);
-			int sec2 = L->WhatSector(Side::left, doc);
+			int sec1 = L->WhatSector(Side::right, inst.level);
+			int sec2 = L->WhatSector(Side::left, inst.level);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);
 
 			// check for doors
 			if (!ignore_doors &&
-				(MIN(doc.sectors[sec1]->ceilh, doc.sectors[sec2]->ceilh) <=
-				 MAX(doc.sectors[sec1]->floorh, doc.sectors[sec2]->floorh)))
+				(MIN(inst.level.sectors[sec1]->ceilh, inst.level.sectors[sec2]->ceilh) <=
+				 MAX(inst.level.sectors[sec1]->floorh, inst.level.sectors[sec2]->floorh)))
 			{
 				continue;
 			}
@@ -559,18 +552,18 @@ static void CalcPropagation(const Document &doc, std::vector<byte>& vec, bool ig
 }
 
 
-static void CalcFinalPropagation(const Instance &inst)
+static void CalcFinalPropagation(Instance &inst)
 {
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		int t1 = sound_temp1_vec[s];
-		int t2 = sound_temp2_vec[s];
+		int t1 = inst.sound_temp1_vec[s];
+		int t2 = inst.sound_temp2_vec[s];
 
 		if (t1 != t2)
 		{
 			if (t1 == 0 || t2 == 0)
 			{
-				sound_prop_vec[s] = PGL_Maybe;
+				inst.sound_prop_vec[s] = PGL_Maybe;
 				continue;
 			}
 
@@ -579,9 +572,9 @@ static void CalcFinalPropagation(const Instance &inst)
 
 		switch (t1)
 		{
-			case 0: sound_prop_vec[s] = PGL_Never;   break;
-			case 1: sound_prop_vec[s] = PGL_Level_1; break;
-			case 2: sound_prop_vec[s] = PGL_Level_2; break;
+			case 0: inst.sound_prop_vec[s] = PGL_Never;   break;
+			case 1: inst.sound_prop_vec[s] = PGL_Level_1; break;
+			case 2: inst.sound_prop_vec[s] = PGL_Level_2; break;
 		}
 	}
 }
@@ -606,8 +599,8 @@ const byte *Instance::SoundPropagation(int start_sec)
 		sound_start_sec = start_sec;
 		sound_propagation_invalid = false;
 
-		CalcPropagation(level, sound_temp1_vec, false);
-		CalcPropagation(level, sound_temp2_vec, true);
+		CalcPropagation(*this, sound_temp1_vec, false);
+		CalcPropagation(*this, sound_temp2_vec, true);
 
 		CalcFinalPropagation(*this);
 	}

@@ -203,6 +203,10 @@ public:	// will be private when we encapsulate everything
 	// Path stuff
 	//
 	bool sound_propagation_invalid = false;
+	std::vector<byte> sound_prop_vec;
+	std::vector<byte> sound_temp1_vec;
+	std::vector<byte> sound_temp2_vec;
+	int sound_start_sec = 0;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
