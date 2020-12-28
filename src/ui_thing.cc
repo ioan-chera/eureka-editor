@@ -46,17 +46,17 @@ public:
 };
 
 
-extern const char * arrow_0_xpm[];
-extern const char * arrow_45_xpm[];
-extern const char * arrow_90_xpm[];
-extern const char * arrow_135_xpm[];
-extern const char * arrow_180_xpm[];
-extern const char * arrow_225_xpm[];
-extern const char * arrow_270_xpm[];
-extern const char * arrow_315_xpm[];
+extern const char *const arrow_0_xpm[];
+extern const char *const arrow_45_xpm[];
+extern const char *const arrow_90_xpm[];
+extern const char *const arrow_135_xpm[];
+extern const char *const arrow_180_xpm[];
+extern const char *const arrow_225_xpm[];
+extern const char *const arrow_270_xpm[];
+extern const char *const arrow_315_xpm[];
 
 
-const char ** arrow_pixmaps[8] =
+extern const char *const *arrow_pixmaps[8] =
 {
 	arrow_0_xpm,   arrow_45_xpm,
 	arrow_90_xpm,  arrow_135_xpm,

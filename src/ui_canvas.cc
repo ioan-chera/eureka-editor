@@ -132,7 +132,7 @@ void UI_Canvas::draw()
 		// reset the 'gl_tex' field of all loaded images, as the value
 		// belongs to a context which was (probably) just deleted and
 		// hence refer to textures which no longer exist.
-		W_UnloadAllTextures();
+		inst.W_UnloadAllTextures();
 	}
 
 #ifndef _WIN32	// TODO: #56: reenable this for Windows
@@ -1084,7 +1084,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	float ty1 = 0.0;
 	float tx2, ty2;
 
-	if (use_npot_textures)
+	if (inst.use_npot_textures)
 	{
 		tx2 = 1.0;
 		ty2 = 1.0;
@@ -2691,7 +2691,7 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 
 	int img_w, img_h;
 
-	if (use_npot_textures)
+	if (inst.use_npot_textures)
 	{
 		img_w = img->width();
 		img_h = img->height();

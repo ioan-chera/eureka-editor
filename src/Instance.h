@@ -84,13 +84,16 @@ public:
 	Img_c *IM_CreateDogSprite() const;
 	Img_c *IM_CreateLightSprite() const;
 	Img_c *IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;
-	Img_c *IM_DigitFont_11x14() const;
-	Img_c *IM_DigitFont_14x19() const;
-	Img_c *IM_MissingTex() const;
-	Img_c *IM_SpecialTex() const;
-	Img_c *IM_UnknownFlat() const;
-	Img_c *IM_UnknownSprite() const;
-	Img_c *IM_UnknownTex() const;
+	Img_c *IM_DigitFont_11x14();
+	Img_c *IM_DigitFont_14x19();
+	Img_c *IM_MissingTex();
+	void IM_ResetDummyTextures();
+	Img_c *IM_SpecialTex();
+	Img_c *IM_UnknownFlat();
+	Img_c *IM_UnknownSprite();
+	Img_c *IM_UnknownTex();
+	void W_UnloadAllTextures() const;
+	void IM_UnloadDummyTextures() const;
 
 	// this one applies the current gamma.
 	// for rendering the 3D view or the 2D sectors and sprites.
@@ -140,6 +143,7 @@ public:
 	// M_EVENTS
 	void Editor_ClearNav();
 	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
+	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
 
 	// M_FILES
@@ -172,7 +176,7 @@ public:
 
 	// R_SOFTWARE
 	bool SW_QueryPoint(Objid &hl, int qx, int qy);
-	void SW_RenderWorld(int ox, int oy, int ow, int oh) const;
+	void SW_RenderWorld(int ox, int oy, int ow, int oh);
 
 	// UI_BROWSER
 	void Browser_WriteUser(std::ostream &os) const;
@@ -288,6 +292,28 @@ public:	// will be private when we encapsulate everything
 	byte rgb555_medium[32];
 	// the palette color closest to what TRANS_PIXEL really is
 	int trans_replace = 0;
+	int missing_tex_color = 0;
+	int special_tex_color = 0;
+	int unknown_flat_color = 0;
+	int unknown_sprite_color = 0;
+	int unknown_tex_color = 0;
+
+	//
+	// Image stuff
+	//
+	Img_c *digit_font_11x14 = nullptr;
+	Img_c *digit_font_14x19 = nullptr;
+	Img_c *missing_tex_image = nullptr;
+	Img_c *special_tex_image = nullptr;
+	Img_c *unknown_flat_image = nullptr;
+	Img_c *unknown_sprite_image = nullptr;
+	Img_c *unknown_tex_image = nullptr;
+#ifndef NO_OPENGL
+	bool use_npot_textures = false;
+#endif
+
+	// IO stuff
+	nav_active_key_t cur_action_key;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

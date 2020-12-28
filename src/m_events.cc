@@ -197,23 +197,6 @@ static void Navigate2D(Instance &inst)
 
 #define MAX_NAV_ACTIVE_KEYS  20
 
-typedef struct
-{
-	// key or button code, including any modifier.
-	// zero when this slot is unused.
-	keycode_t  key;
-
-	// function to call when user releases the key or button.
-	nav_release_func_t  release;
-
-	// modifiers that can change state without a keypress
-	// being considered as a new command.
-	keycode_t  lax_mod;
-
-} nav_active_key_t;
-
-static nav_active_key_t cur_action_key;
-
 static nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS];
 
 static unsigned int nav_time;
@@ -291,7 +274,7 @@ bool Nav_SetKey(Instance &inst, keycode_t key, nav_release_func_t func)
 }
 
 
-bool Nav_ActionKey(Instance &inst, keycode_t key, nav_release_func_t func)
+bool Instance::Nav_ActionKey(keycode_t key, nav_release_func_t func)
 {
 	keycode_t lax_mod = 0;
 
@@ -307,7 +290,7 @@ bool Nav_ActionKey(Instance &inst, keycode_t key, nav_release_func_t func)
 			return false;
 
 		// release the existing action
-		(N.release)(inst);
+		(N.release)(*this);
 	}
 
 	N.key     = key;
@@ -353,7 +336,7 @@ static inline bool CheckKeyPressed(nav_active_key_t& N)
 
 static void Nav_UpdateActionKey(Instance &inst)
 {
-	nav_active_key_t& N = cur_action_key;
+	nav_active_key_t& N = inst.cur_action_key;
 
 	if (! N.key)
 		return;

@@ -54,12 +54,6 @@ Img_c * W_GetFlat(const SString &name, bool try_uppercase = false);
 
 void W_ClearSprites();
 
-
-/* ---- ALL ---- */
-
-void W_UnloadAllTextures();
-
-
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 
 //--- editor settings ---

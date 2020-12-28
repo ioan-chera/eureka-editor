@@ -729,7 +729,7 @@ static void CMD_ACT_Click(Instance &inst)
 	if (inst.edit.render3d && inst.edit.highlight.is_nil())
 		return;
 
-	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_Click_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_Click_release))
 		return;
 
 	inst.edit.click_check_select = ! Exec_HasFlag("/noselect");
@@ -827,7 +827,7 @@ static void CMD_ACT_SelectBox(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_SelectBox_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_SelectBox_release))
 		return;
 
 	inst.edit.selbox_x1 = inst.edit.selbox_x2 = inst.edit.map_x;
@@ -848,7 +848,7 @@ static void CMD_ACT_Drag(Instance &inst)
 		return;
 	}
 
-	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_Drag_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_Drag_release))
 		return;
 
 	// we only drag the selection, never a single object
@@ -983,7 +983,7 @@ static void CMD_ACT_Transform(Instance &inst)
 	}
 
 
-	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_Transform_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_Transform_release))
 		return;
 
 

@@ -38,24 +38,7 @@
 #else
 #include "GL/glext.h"
 #endif
-bool use_npot_textures = false;
 #endif
-
-
-static int missing_tex_color;
-static int unknown_tex_color;
-static int special_tex_color;
-static int unknown_flat_color;
-static int unknown_sprite_color;
-
-static Img_c * missing_tex_image;
-static Img_c * unknown_tex_image;
-static Img_c * special_tex_image;
-static Img_c * unknown_flat_image;
-static Img_c * unknown_sprite_image;
-
-static Img_c * digit_font_11x14;
-static Img_c * digit_font_14x19;
 
 #define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
@@ -380,7 +363,7 @@ void Img_c::load_gl()
 
 	// construct a power-of-two sized bottom-up RGBA image
 	int tw, th;
-	if (use_npot_textures)
+	if (inst.use_npot_textures)
 	{
 		tw = w;
 		th = h;
@@ -474,7 +457,7 @@ void Img_c::bind_gl()
 //------------------------------------------------------------------------
 
 
-void IM_ResetDummyTextures()
+void Instance::IM_ResetDummyTextures()
 {
 	missing_tex_color  = -1;
 	unknown_tex_color  = -1;
@@ -484,7 +467,7 @@ void IM_ResetDummyTextures()
 }
 
 
-void IM_UnloadDummyTextures()
+void Instance::IM_UnloadDummyTextures() const
 {
 	bool can_delete = false;
 
@@ -569,7 +552,7 @@ static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg,
 }
 
 
-Img_c *Instance::IM_MissingTex() const
+Img_c *Instance::IM_MissingTex()
 {
 	if (! missing_tex_image || missing_tex_color != Misc_info.missing_color)
 	{
@@ -585,7 +568,7 @@ Img_c *Instance::IM_MissingTex() const
 }
 
 
-Img_c *Instance::IM_UnknownTex() const
+Img_c *Instance::IM_UnknownTex()
 {
 	if (! unknown_tex_image || unknown_tex_color != Misc_info.unknown_tex)
 	{
@@ -601,7 +584,7 @@ Img_c *Instance::IM_UnknownTex() const
 }
 
 
-Img_c *Instance::IM_SpecialTex() const
+Img_c *Instance::IM_SpecialTex()
 {
 	if (special_tex_color < 0)
 	{
@@ -622,7 +605,7 @@ Img_c *Instance::IM_SpecialTex() const
 }
 
 
-Img_c *Instance::IM_UnknownFlat() const
+Img_c *Instance::IM_UnknownFlat()
 {
 	if (! unknown_flat_image || unknown_flat_color != Misc_info.unknown_flat)
 	{
@@ -638,7 +621,7 @@ Img_c *Instance::IM_UnknownFlat() const
 }
 
 
-Img_c *Instance::IM_UnknownSprite() const
+Img_c *Instance::IM_UnknownSprite()
 {
 	int unk_col = Misc_info.unknown_thing;
 	if (unk_col == 0)
@@ -666,7 +649,7 @@ Img_c *Instance::IM_UnknownSprite() const
 }
 
 
-static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char **text, const rgb_color_t *palette, int pal_size)
+static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
 	Img_c *result = new Img_c(inst, W, H);
 
@@ -698,7 +681,7 @@ static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char 
 }
 
 
-static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char **text,
+static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *const *text,
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
@@ -809,7 +792,7 @@ Img_c * Instance::IM_ConvertTGAImage(const rgba_color_t * data, int W, int H) co
 //
 
 /* XPM */
-const char * arrow_0_xpm[] =
+extern const char *const arrow_0_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -829,7 +812,7 @@ const char * arrow_0_xpm[] =
 };
 
 /* XPM */
-const char * arrow_45_xpm[] =
+extern const char *const arrow_45_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -849,7 +832,7 @@ const char * arrow_45_xpm[] =
 };
 
 /* XPM */
-const char * arrow_90_xpm[] =
+extern const char *const arrow_90_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -869,7 +852,7 @@ const char * arrow_90_xpm[] =
 };
 
 /* XPM */
-const char * arrow_135_xpm[] =
+extern const char *const arrow_135_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -889,7 +872,7 @@ const char * arrow_135_xpm[] =
 };
 
 /* XPM */
-const char * arrow_180_xpm[] =
+extern const char *const arrow_180_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -909,7 +892,7 @@ const char * arrow_180_xpm[] =
 };
 
 /* XPM */
-const char * arrow_225_xpm[] =
+extern const char *const arrow_225_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -929,7 +912,7 @@ const char * arrow_225_xpm[] =
 };
 
 /* XPM */
-const char * arrow_270_xpm[] =
+extern const char *const arrow_270_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -949,7 +932,7 @@ const char * arrow_270_xpm[] =
 };
 
 /* XPM */
-const char * arrow_315_xpm[] =
+extern const char *const arrow_315_xpm[] =
 {
 	"12 12 2 1",
 	" 	c None",
@@ -989,7 +972,7 @@ static const rgb_color_t dog_palette[] =
 };
 
 
-static const char *dog_image_text[] =
+static const char *const dog_image_text[] =
 {
 	"       aaaa                                 ",
 	"      abbbba                                ",
@@ -1122,7 +1105,7 @@ static const int digit_font_intensities[] =
 };
 
 
-static const char *digit_11x14_text[] =
+static const char *const digit_11x14_text[] =
 {
 	"                                                                                                                                                 aaaaaaa  ",
 	"  aaaaaaa    aaaaaa     aaaaaaaa    aaaaaaa     aaaaa    aaaaaaa     aaaaaa    aaaaaaaa   aaaaaaa    aaaaaaa                                     agqspda  ",
@@ -1141,7 +1124,7 @@ static const char *digit_11x14_text[] =
 };
 
 
-static const char *digit_14x19_text[] =
+static const char *const digit_14x19_text[] =
 {
 	"                                                                                                                                                                                          aaaaaa    ",
 	"    aaaaaa         aaaaa       aaaaaaa       aaaaaaa          aaaaa     aaaaaaaaa        aaaaaa     aaaaaaaaaa      aaaaaa        aaaaaa                                                 aadklgaa   ",
@@ -1165,7 +1148,7 @@ static const char *digit_14x19_text[] =
 };
 
 
-Img_c *Instance::IM_DigitFont_11x14() const
+Img_c *Instance::IM_DigitFont_11x14()
 {
 	if (! digit_font_11x14)
 	{
@@ -1176,7 +1159,7 @@ Img_c *Instance::IM_DigitFont_11x14() const
 	return digit_font_11x14;
 }
 
-Img_c *Instance::IM_DigitFont_14x19() const
+Img_c *Instance::IM_DigitFont_14x19()
 {
 	if (! digit_font_14x19)
 	{

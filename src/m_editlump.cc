@@ -36,7 +36,7 @@
 
 // Various lumps that definitely should not be edited as text.
 // Note: this list is not meant to be exhaustive.
-static const char * invalid_text_lumps[] =
+static const char *const invalid_text_lumps[] =
 {
 	// editor stuff
 	EUREKA_LUMP,
@@ -72,7 +72,7 @@ static const char * invalid_text_lumps[] =
 
 
 // TODO : ideally put these in an external file
-static const char * common_text_lumps[] =
+static const char *const common_text_lumps[] =
 {
 	// Hexen (plus source-port variants)
 	"MAPINFO", "ZMAPINFO", "EMAPINFO",

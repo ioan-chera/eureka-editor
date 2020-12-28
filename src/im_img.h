@@ -33,7 +33,6 @@
 typedef unsigned int GLuint;
 #else
 #include "FL/gl.h"
-extern bool use_npot_textures;
 #endif
 
 // this is a 16-bit value:
@@ -133,10 +132,6 @@ private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it
 };
-
-
-void IM_ResetDummyTextures();
-void IM_UnloadDummyTextures();
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

@@ -33,7 +33,7 @@ int vertex_bump_medium = 4;
 int vertex_bump_large  = 16;
 
 
-extern const char ** arrow_pixmaps[8];
+extern const char *const *arrow_pixmaps[8];
 
 
 //

@@ -97,10 +97,10 @@ public:
 
 	bool fullbright;
 
-	const Instance &inst;
+	Instance &inst;
 
 public:
-	explicit DrawSurf(const Instance &inst) : kind(K_INVIS), h1(), h2(), tex_h(),
+	explicit DrawSurf(Instance &inst) : kind(K_INVIS), h1(), h2(), tex_h(),
 				 img(NULL), col(), y_clip(),
 				 fullbright(false), inst(inst)
 	{ }
@@ -228,8 +228,8 @@ public:
 	DrawSurf floor;
 	DrawSurf rail;
 
-	const Instance &inst;
-	explicit DrawWall(const Instance &inst) : ceil(inst), upper(inst), lower(inst), floor(inst), rail(inst), inst(inst)
+	Instance &inst;
+	explicit DrawWall(Instance &inst) : ceil(inst), upper(inst), lower(inst), floor(inst), rail(inst), inst(inst)
 	{
 	}
 
@@ -573,7 +573,7 @@ public:
 	int hl_thick;
 	Fl_Color hl_color;
 
-	const Instance &inst;
+	Instance &inst;
 
 private:
 	static void DeleteWall(DrawWall *P)
@@ -582,7 +582,7 @@ private:
 	}
 
 public:
-	explicit RendInfo(const Instance &inst) :
+	explicit RendInfo(Instance &inst) :
 		walls(), active(),
 		query_mode(0), query_sx(), query_sy(),
 		depth_x(), open_y1(), open_y2(), inst(inst)
@@ -2095,7 +2095,7 @@ static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 }
 
 
-void Instance::SW_RenderWorld(int ox, int oy, int ow, int oh) const
+void Instance::SW_RenderWorld(int ox, int oy, int ow, int oh)
 {
 	RendInfo rend(*this);
 

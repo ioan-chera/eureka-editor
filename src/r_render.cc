@@ -1875,7 +1875,7 @@ static void R3D_ACT_AdjustOfs(Instance &inst)
 	if (! EXEC_CurKey)
 		return;
 
-	if (! Nav_ActionKey(inst, EXEC_CurKey, &ACT_AdjustOfs_release))
+	if (! inst.Nav_ActionKey(EXEC_CurKey, &ACT_AdjustOfs_release))
 		return;
 
 	if (inst.edit.mode != ObjType::linedefs)
