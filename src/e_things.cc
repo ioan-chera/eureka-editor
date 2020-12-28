@@ -107,7 +107,7 @@ static void CollectOverlapGroup(const Instance &inst, selection_c& list)
 }
 
 
-static void MoveOverlapThing(Document &doc, int th, int mid_x, int mid_y, int n, int total)
+static void MoveOverlapThing(Instance &inst, int th, int mid_x, int mid_y, int n, int total)
 {
 	float angle = static_cast<float>(n * 360 / total);
 
@@ -116,13 +116,13 @@ static void MoveOverlapThing(Document &doc, int th, int mid_x, int mid_y, int n,
 
 	float dist = static_cast<float>(8 + 6 * MIN(100, total));
 
-	fixcoord_t fdx = MakeValidCoord(vec_x * dist);
-	fixcoord_t fdy = MakeValidCoord(vec_y * dist);
+	fixcoord_t fdx = inst.MakeValidCoord(vec_x * dist);
+	fixcoord_t fdy = inst.MakeValidCoord(vec_y * dist);
 
-	const Thing *T = doc.things[th];
+	const Thing *T = inst.level.things[th];
 
-	doc.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
-	doc.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);
+	inst.level.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
+	inst.level.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);
 }
 
 
@@ -163,7 +163,7 @@ void CMD_TH_Disconnect(Instance &inst)
 		int n = 0;
 		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
 		{
-			MoveOverlapThing(inst.level, *it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
+			MoveOverlapThing(inst, *it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
 		}
 	}
 
@@ -195,8 +195,8 @@ void CMD_TH_Merge(Instance &inst)
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		inst.level.basis.changeThing(*it, Thing::F_X, MakeValidCoord(mid_x));
-		inst.level.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(mid_y));
+		inst.level.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid_x));
+		inst.level.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid_y));
 	}
 
 	inst.level.basis.end();

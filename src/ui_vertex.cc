@@ -123,7 +123,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
+			box->inst.level.basis.changeVertex(*it, Vertex::F_X, box->inst.MakeValidCoord(new_x));
 		}
 
 		box->inst.level.basis.end();
@@ -143,7 +143,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
+			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, box->inst.MakeValidCoord(new_y));
 		}
 
 		box->inst.level.basis.end();
@@ -174,8 +174,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		fixcoord_t fdx = MakeValidCoord(dx * step);
-		fixcoord_t fdy = MakeValidCoord(dy * step);
+		fixcoord_t fdx = box->inst.MakeValidCoord(dx * step);
+		fixcoord_t fdy = box->inst.MakeValidCoord(dy * step);
 
 		box->inst.level.basis.begin();
 		box->inst.level.basis.setMessage("adjusted"/*, inst.edit.Selected*/);

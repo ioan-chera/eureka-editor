@@ -297,8 +297,8 @@ void UpdateHighlight(Instance &inst)
 
 			grid.RatioSnapXY(vx, vy, S->x(), S->y());
 
-			if (MakeValidCoord(vx) != V->raw_x ||
-				MakeValidCoord(vy) != V->raw_y)
+			if (inst.MakeValidCoord(vx) != V->raw_x ||
+				inst.MakeValidCoord(vy) != V->raw_y)
 			{
 				inst.edit.highlight.clear();
 			}

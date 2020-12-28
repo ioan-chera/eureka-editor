@@ -914,7 +914,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	MapFormat prev_fmt = map_format;
 
 	if (prev_fmt == MapFormat::invalid)
-		prev_fmt = instance::Level_format;
+		prev_fmt = inst.Level_format;
 
 
 	format_choice->clear();

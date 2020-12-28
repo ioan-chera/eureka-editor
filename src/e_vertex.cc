@@ -472,7 +472,7 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 			{
 				int new_v = doc.basis.addNew(ObjType::vertices);
 
-				doc.vertices[new_v]->SetRawXY(new_x, new_y);
+				doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
 
 				if (L->start == v_num)
 					doc.basis.changeLinedef(n, LineDef::F_START, new_v);
@@ -481,8 +481,8 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 			}
 			else
 			{
-				doc.basis.changeVertex(v_num, Vertex::F_X, MakeValidCoord(new_x));
-				doc.basis.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(new_y));
+				doc.basis.changeVertex(v_num, Vertex::F_X, inst.MakeValidCoord(new_x));
+				doc.basis.changeVertex(v_num, Vertex::F_Y, inst.MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -566,7 +566,7 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 
 	int new_v = doc.basis.addNew(ObjType::vertices);
 
-	doc.vertices[new_v]->SetRawXY(new_x, new_y);
+	doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
@@ -885,8 +885,8 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 	{
 		const Vertex * V = inst.level.vertices[*it];
 
-		inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-		inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
+		inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + inst.MakeValidCoord(move_dx));
+		inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + inst.MakeValidCoord(move_dy));
 	}
 
 	inst.level.basis.end();
@@ -1093,8 +1093,8 @@ void VertexModule::commandShapeLine(Instance &inst)
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		inst.level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
-		inst.level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
+		inst.level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, inst.MakeValidCoord(nx));
+		inst.level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, inst.MakeValidCoord(ny));
 	}
 
 	inst.level.basis.end();
@@ -1163,8 +1163,8 @@ double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(new_x));
-			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(new_y));
+			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_X, inst.MakeValidCoord(new_x));
+			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, inst.MakeValidCoord(new_y));
 		}
 		else
 		{

@@ -98,8 +98,8 @@ void ObjectsModule::createSquare(int model) const
 		int new_v = doc.basis.addNew(ObjType::vertices);
 		Vertex *V = doc.vertices[new_v];
 
-		V->SetRawX((i >= 2) ? x2 : x1);
-		V->SetRawY((i==1 || i==2) ? y2 : y1);
+		V->SetRawX(inst, (i >= 2) ? x2 : x1);
+		V->SetRawY(inst, (i==1 || i==2) ? y2 : y1);
 
 		int new_sd = doc.basis.addNew(ObjType::sidedefs);
 
@@ -143,15 +143,15 @@ void ObjectsModule::insertThing() const
 		T->type = inst.default_thing;
 		T->options = MTF_Easy | MTF_Medium | MTF_Hard;
 
-		if (instance::Level_format != MapFormat::doom)
+		if (inst.Level_format != MapFormat::doom)
 		{
 			T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 			T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
 		}
 	}
 
-	T->SetRawX(grid.SnapX(inst.edit.map_x));
-	T->SetRawY(grid.SnapY(inst.edit.map_y));
+	T->SetRawX(inst, grid.SnapX(inst.edit.map_x));
+	T->SetRawY(inst, grid.SnapY(inst.edit.map_y));
 
 	recent_things.insert_number(T->type);
 
@@ -366,7 +366,7 @@ void ObjectsModule::insertLinedefAutosplit(int v1, int v2, bool no_fill) const
 
 ///  fprintf(stderr, "Insert_LineDef_autosplit %d..%d\n", v1, v2);
 
-	crossing_state_c cross(doc);
+	crossing_state_c cross(inst);
 
 	doc.hover.findCrossingPoints(cross,
 		doc.vertices[v1]->x(), doc.vertices[v1]->y(), v1,
@@ -491,7 +491,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	// would we create a new vertex on top of an existing one?
 	if (new_vert < 0 && old_vert >= 0 &&
-		doc.vertices[old_vert]->Matches(MakeValidCoord(new_x), MakeValidCoord(new_y)))
+		doc.vertices[old_vert]->Matches(inst.MakeValidCoord(new_x), inst.MakeValidCoord(new_y)))
 	{
 		inst.edit.Selected->set(old_vert);
 		return;
@@ -507,7 +507,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		Vertex *V = doc.vertices[new_vert];
 
-		V->SetRawXY(new_x, new_y);
+		V->SetRawXY(inst, new_x, new_y);
 
 		inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
 		inst.edit.Selected->set(new_vert);
@@ -741,9 +741,9 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 
 void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z) const
 {
-	fixcoord_t fdx = MakeValidCoord(delta_x);
-	fixcoord_t fdy = MakeValidCoord(delta_y);
-	fixcoord_t fdz = MakeValidCoord(delta_z);
+	fixcoord_t fdx = inst.MakeValidCoord(delta_x);
+	fixcoord_t fdy = inst.MakeValidCoord(delta_y);
+	fixcoord_t fdz = inst.MakeValidCoord(delta_z);
 
 	switch (list->what_type())
 	{
@@ -1491,8 +1491,8 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 
 void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = MakeValidCoord(mid_x);
-	fixcoord_t fix_my = MakeValidCoord(mid_y);
+	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
+	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1520,8 +1520,8 @@ void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x
 
 void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = MakeValidCoord(mid_x);
-	fixcoord_t fix_my = MakeValidCoord(mid_y);
+	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
+	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
 
 	selection_c verts(ObjType::vertices);
 	ConvertSelection(doc, list, &verts);
@@ -1608,8 +1608,8 @@ void ObjectsModule::commandMirror(Instance &inst)
 void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
 							 double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = MakeValidCoord(mid_x);
-	fixcoord_t fix_my = MakeValidCoord(mid_y);
+	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
+	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1678,8 +1678,8 @@ void ObjectsModule::commandRotate90(Instance &inst)
 		selection_c verts(ObjType::vertices);
 		ConvertSelection(inst.level, inst.edit.Selected, &verts);
 
-		fixcoord_t fix_mx = MakeValidCoord(mid_x);
-		fixcoord_t fix_my = MakeValidCoord(mid_y);
+		fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
+		fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
 
 		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
@@ -1719,8 +1719,8 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 
 		param.Apply(&new_x, &new_y);
 
-		doc.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
-		doc.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
+		doc.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
+		doc.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1748,8 +1748,8 @@ void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) co
 
 		param.Apply(&new_x, &new_y);
 
-		doc.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
-		doc.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
+		doc.basis.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
+		doc.basis.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
 	}
 }
 
@@ -2054,8 +2054,8 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				doc.basis.changeThing(*it, Thing::F_X, MakeValidCoord(new_x));
-				doc.basis.changeThing(*it, Thing::F_Y, MakeValidCoord(new_y));
+				doc.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
+				doc.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2156,8 +2156,8 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				doc.basis.changeVertex(*it, Vertex::F_X, MakeValidCoord(new_x));
-				doc.basis.changeVertex(*it, Vertex::F_Y, MakeValidCoord(new_y));
+				doc.basis.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
+				doc.basis.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;

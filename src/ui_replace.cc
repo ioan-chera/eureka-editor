@@ -455,7 +455,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	if (test) (w)->show(); else (w)->hide();
 
 	// common stuff
-	if (x == 0 && instance::Level_format == MapFormat::doom)
+	if (x == 0 && inst.Level_format == MapFormat::doom)
 	{
 		tag_input->deactivate();
 		tag_input->value("");
@@ -490,7 +490,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 #undef SHOW_WIDGET_IF
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == 0 && ! Features.coop_dm_flags && instance::Level_format == MapFormat::doom)
+	if (x == 0 && ! Features.coop_dm_flags && inst.Level_format == MapFormat::doom)
 	{
 		  o_sp->hide();
 		o_coop->hide();
@@ -1463,7 +1463,7 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 	if ((T->options & options_mask) != options_value)
 		return false;
 
-	if (instance::Level_format == MapFormat::hexen && ! Filter_Tag(T->tid))
+	if (inst.Level_format == MapFormat::hexen && ! Filter_Tag(T->tid))
 		return false;
 
 	return true;

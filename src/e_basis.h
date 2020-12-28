@@ -64,8 +64,6 @@ typedef int fixcoord_t;
 #define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
 #define COORD_TO_INT(i)  ((int) ((i) / 4096))
 
-fixcoord_t MakeValidCoord(double x);
-
 enum class Side
 {
 	right,
@@ -129,14 +127,14 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(double x) { raw_x = MakeValidCoord(x); }
-	void SetRawY(double y) { raw_y = MakeValidCoord(y); }
-	void SetRawH(double h) { raw_h = MakeValidCoord(h); }
+	void SetRawX(const Instance &inst, double x);
+	void SetRawY(const Instance &inst, double y);
+	void SetRawH(const Instance &inst, double h);
 
-	void SetRawXY(double x, double y)
+	void SetRawXY(const Instance &inst, double x, double y)
 	{
-		SetRawX(x);
-		SetRawY(y);
+		SetRawX(inst, x);
+		SetRawY(inst, y);
 	}
 
 	int Arg(int which /* 1..5 */) const
@@ -171,13 +169,13 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(double x) { raw_x = MakeValidCoord(x); }
-	void SetRawY(double y) { raw_y = MakeValidCoord(y); }
+	void SetRawX(const Instance &inst, double x);
+	void SetRawY(const Instance &inst, double y);
 
-	void SetRawXY(double x, double y)
+	void SetRawXY(const Instance &inst, double x, double y)
 	{
-		SetRawX(x);
-		SetRawY(y);
+		SetRawX(inst, x);
+		SetRawY(inst, y);
 	}
 
 	bool Matches(fixcoord_t ox, fixcoord_t oy) const

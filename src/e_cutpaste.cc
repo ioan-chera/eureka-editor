@@ -538,7 +538,7 @@ static bool Clipboard_DoCopy(Instance &inst)
 
 //------------------------------------------------------------------------
 
-static void PasteGroupOfObjects(Document &doc, double pos_x, double pos_y)
+static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 {
 	double cx, cy;
 	clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
@@ -552,21 +552,21 @@ static void PasteGroupOfObjects(Document &doc, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
-		int new_v = doc.basis.addNew(ObjType::vertices);
-		Vertex * V = doc.vertices[new_v];
+		int new_v = inst.level.basis.addNew(ObjType::vertices);
+		Vertex * V = inst.level.vertices[new_v];
 
 		vert_map[i] = new_v;
 
 		*V = *clip_board->verts[i];
 
-		V->SetRawX(V->x() + pos_x - cx);
-		V->SetRawY(V->y() + pos_y - cy);
+		V->SetRawX(inst, V->x() + pos_x - cx);
+		V->SetRawY(inst, V->y() + pos_y - cy);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
-		int new_s = doc.basis.addNew(ObjType::sectors);
-		Sector * S = doc.sectors[new_s];
+		int new_s = inst.level.basis.addNew(ObjType::sectors);
+		Sector * S = inst.level.sectors[new_s];
 
 		sector_map[i] = new_s;
 
@@ -582,8 +582,8 @@ static void PasteGroupOfObjects(Document &doc, double pos_x, double pos_y)
 			continue;
 		}
 
-		int new_sd = doc.basis.addNew(ObjType::sidedefs);
-		SideDef * SD = doc.sidedefs[new_sd];
+		int new_sd = inst.level.basis.addNew(ObjType::sidedefs);
+		SideDef * SD = inst.level.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
@@ -599,8 +599,8 @@ static void PasteGroupOfObjects(Document &doc, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
-		int new_l = doc.basis.addNew(ObjType::linedefs);
-		LineDef * L = doc.linedefs[new_l];
+		int new_l = inst.level.basis.addNew(ObjType::linedefs);
+		LineDef * L = inst.level.linedefs[new_l];
 
 		*L = *clip_board->lines[i];
 
@@ -612,38 +612,38 @@ static void PasteGroupOfObjects(Document &doc, double pos_x, double pos_y)
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->Right(doc))
+		if (L->Right(inst.level))
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
 		}
 
-		if (L->Left(doc))
+		if (L->Left(inst.level))
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
 		}
 
 		// flip linedef if necessary
-		if (L->Left(doc) && ! L->Right(doc))
+		if (L->Left(inst.level) && ! L->Right(inst.level))
 		{
-			doc.linemod.flipLinedef(new_l);
+			inst.level.linemod.flipLinedef(new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(L->Right(doc)->MidTex()))
-			doc.linemod.fixForLostSide(new_l);
+		if (L->OneSided() && is_null_tex(L->Right(inst.level)->MidTex()))
+			inst.level.linemod.fixForLostSide(new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
-		int new_t = doc.basis.addNew(ObjType::things);
-		Thing * T = doc.things[new_t];
+		int new_t = inst.level.basis.addNew(ObjType::things);
+		Thing * T = inst.level.things[new_t];
 
 		*T = *clip_board->things[i];
 
-		T->SetRawX(T->x() + pos_x - cx);
-		T->SetRawY(T->y() + pos_y - cy);
+		T->SetRawX(inst, T->x() + pos_x - cx);
+		T->SetRawY(inst, T->y() + pos_y - cy);
 	}
 }
 
@@ -750,8 +750,8 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 				*T = *clip_board->things[i];
 
-				T->SetRawX(T->x() + pos_x - cx);
-				T->SetRawY(T->y() + pos_y - cy);
+				T->SetRawX(inst, T->x() + pos_x - cx);
+				T->SetRawY(inst, T->y() + pos_y - cy);
 
 				recent_things.insert_number(T->type);
 			}
@@ -770,8 +770,8 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 				*V = *clip_board->verts[i];
 
-				V->SetRawX(V->x() + pos_x - cx);
-				V->SetRawY(V->y() + pos_y - cy);
+				V->SetRawX(inst, V->x() + pos_x - cx);
+				V->SetRawY(inst, V->y() + pos_y - cy);
 			}
 			break;
 		}
@@ -779,7 +779,7 @@ static bool Clipboard_DoPaste(Instance &inst)
 		case ObjType::linedefs:
 		case ObjType::sectors:
 		{
-			PasteGroupOfObjects(inst.level, pos_x, pos_y);
+			PasteGroupOfObjects(inst, pos_x, pos_y);
 			break;
 		}
 

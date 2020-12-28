@@ -37,9 +37,8 @@
 // Rewritten again by Andrew Apted (-AJA-), 1999-2000.
 //
 
-#include "Document.h"
 #include "Errors.h"
-#include "main.h"
+#include "Instance.h"
 #include "bsp.h"
 
 #include "w_rawdef.h"
@@ -1148,32 +1147,32 @@ void quadtree_c::VerifySide(seg_t *part, int side)
 #endif
 
 
-void node_t::SetPartition(const seg_t *part, const Document &doc)
+void node_t::SetPartition(const seg_t *part, const Instance &inst)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const LineDef *part_L = doc.linedefs[part->linedef];
+	const LineDef *part_L = inst.level.linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = part_L->Start(doc)->x();
-		y  = part_L->Start(doc)->y();
-		dx = part_L->End(doc)->x() - x;
-		dy = part_L->End(doc)->y() - y;
+		x  = part_L->Start(inst.level)->x();
+		y  = part_L->Start(inst.level)->y();
+		dx = part_L->End(inst.level)->x() - x;
+		dy = part_L->End(inst.level)->y() - y;
 	}
 	else  /* left side */
 	{
-		x  = part_L->End(doc)->x();
-		y  = part_L->End(doc)->y();
-		dx = part_L->Start(doc)->x() - x;
-		dy = part_L->Start(doc)->y() - y;
+		x  = part_L->End(inst.level)->x();
+		y  = part_L->End(inst.level)->y();
+		dx = part_L->Start(inst.level)->x() - x;
+		dy = part_L->Start(inst.level)->y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
 
 	if (fabs(dx) > 32000 || fabs(dy) > 32000)
 	{
-		if (instance::Level_format == MapFormat::udmf)
+		if (inst.Level_format == MapFormat::udmf)
 		{
 			// XGL3 nodes are 16.16 fixed point, hence we still need
 			// to reduce the delta.
@@ -1686,7 +1685,7 @@ static void DebugShowSegs(seg_t *list)
 
 
 build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-						  node_t ** N, subsec_t ** S, int depth, const Document &doc)
+						  node_t ** N, subsec_t ** S, int depth, const Instance &inst)
 {
 	*N = NULL;
 	*S = NULL;
@@ -1706,7 +1705,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 
 	/* pick partition line  None indicates convexicity */
-	seg_t *part = PickNode(tree, depth, doc);
+	seg_t *part = PickNode(tree, depth, inst.level);
 
 	if (part == NULL)
 	{
@@ -1737,7 +1736,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	seg_t *rights = NULL;
 	intersection_t *cut_list = NULL;
 
-	SeparateSegs(tree, part, &lefts, &rights, &cut_list, doc);
+	SeparateSegs(tree, part, &lefts, &rights, &cut_list, inst.level);
 
 	delete tree;
 	tree = NULL;
@@ -1751,14 +1750,14 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 
 	AddMinisegs(cut_list, part, &lefts, &rights);
 
-	node->SetPartition(part, doc);
+	node->SetPartition(part, inst);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: Going LEFT\n");
 # endif
 
 	build_result_e ret;
-	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1, doc);
+	ret = BuildNodes(lefts, &node->l.bounds, &node->l.node, &node->l.subsec, depth+1, inst);
 
 	if (ret != BUILD_OK)
 		return ret;
@@ -1767,7 +1766,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	DebugPrintf("Build: Going RIGHT\n");
 # endif
 
-	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1, doc);
+	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1, inst);
 
 # if DEBUG_BUILDER
 	DebugPrintf("Build: DONE\n");

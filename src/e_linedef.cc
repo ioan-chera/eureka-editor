@@ -963,7 +963,7 @@ bool LinedefModule::doSplitLineDef(int ld) const
 
 	Vertex * V = doc.vertices[new_v];
 
-	V->SetRawXY(new_x, new_y);
+	V->SetRawXY(inst, new_x, new_y);
 
 	splitLinedefAtVertex(ld, new_v);
 

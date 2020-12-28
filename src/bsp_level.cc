@@ -1836,7 +1836,7 @@ static void LoadLevel(const Instance &inst)
 
 	CalculateWallTips(inst.level);
 
-	if (instance::Level_format != MapFormat::doom)
+	if (inst.Level_format != MapFormat::doom)
 	{
 		// -JL- Find sectors containing polyobjs
 		DetectPolyobjSectors(inst.level);
@@ -2222,7 +2222,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name, int max_
 
 		// in UDMF maps, insert before the ENDMAP lump, otherwise insert
 		// after the last known lump of the level.
-		if (instance::Level_format != MapFormat::udmf)
+		if (inst.Level_format != MapFormat::udmf)
 			last_idx++;
 
 		inst.edit_wad->InsertPoint(last_idx);
@@ -2294,7 +2294,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 		seg_t *list = CreateSegs(inst.level);
 
 		// recursively create nodes
-		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0, inst.level);
+		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0, inst);
 	}
 
 	if (ret == BUILD_OK)
@@ -2311,7 +2311,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 
 		ClockwiseBspTree(inst.level);
 
-		if (instance::Level_format == MapFormat::udmf)
+		if (inst.Level_format == MapFormat::udmf)
 			ret = SaveUDMF(inst, root_node);
 		else
 			ret = SaveLevel(root_node, inst);

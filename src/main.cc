@@ -87,7 +87,6 @@ SString instance::Game_name;
 SString instance::Port_name;
 SString instance::Level_name;
 
-MapFormat instance::Level_format;
 SString  instance::Udmf_namespace;
 
 

@@ -1066,7 +1066,7 @@ Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 	int    best = -1;
 	double best_dist = 9e9;
 
-	double too_small = (instance::Level_format == MapFormat::udmf) ? 0.2 : 4.0;
+	double too_small = (inst.Level_format == MapFormat::udmf) ? 0.2 : 4.0;
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
@@ -1201,8 +1201,8 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.x    = doc.vertices[v]->x();
-	pt.y    = doc.vertices[v]->y();
+	pt.x    = inst.level.vertices[v]->x();
+	pt.y    = inst.level.vertices[v]->y();
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1253,13 +1253,13 @@ void crossing_state_c::SplitAllLines()
 	{
 		if (points[i].ld >= 0)
 		{
-			points[i].vert = doc.basis.addNew(ObjType::vertices);
+			points[i].vert = inst.level.basis.addNew(ObjType::vertices);
 
-			Vertex *V = doc.vertices[points[i].vert];
+			Vertex *V = inst.level.vertices[points[i].vert];
 
-			V->SetRawXY(points[i].x, points[i].y);
+			V->SetRawXY(inst, points[i].x, points[i].y);
 
-			doc.linemod.splitLinedefAtVertex(points[i].ld, points[i].vert);
+			inst.level.linemod.splitLinedefAtVertex(points[i].ld, points[i].vert);
 		}
 	}
 }

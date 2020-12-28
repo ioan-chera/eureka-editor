@@ -574,7 +574,7 @@ static void DoBeginDrag(Instance &inst)
 		{
 			inst.edit.drag_thing_num = inst.edit.clicked.num;
 			inst.edit.drag_thing_floorh = static_cast<float>(inst.edit.drag_start_z);
-			inst.edit.drag_thing_up_down = (instance::Level_format != MapFormat::doom && !grid.snap);
+			inst.edit.drag_thing_up_down = (inst.Level_format != MapFormat::doom && !grid.snap);
 
 			// get thing's floor
 			if (inst.edit.drag_thing_num >= 0)
@@ -786,7 +786,7 @@ static void CMD_ACT_Click(Instance &inst)
 
 		Vertex *V = inst.level.vertices[new_vert];
 
-		V->SetRawXY(inst.edit.split_x, inst.edit.split_y);
+		V->SetRawXY(inst, inst.edit.split_x, inst.edit.split_y);
 
 		inst.level.linemod.splitLinedefAtVertex(split_ld, new_vert);
 
@@ -1192,7 +1192,7 @@ static void CMD_MoveObjects_Dialog(Instance &inst)
 
 	bool want_dz = (inst.edit.mode == ObjType::sectors);
 	// can move things vertically in Hexen/UDMF formats
-	if (inst.edit.mode == ObjType::things && instance::Level_format != MapFormat::doom)
+	if (inst.edit.mode == ObjType::things && inst.Level_format != MapFormat::doom)
 		want_dz = true;
 
 	UI_MoveDialog * dialog = new UI_MoveDialog(inst, want_dz);

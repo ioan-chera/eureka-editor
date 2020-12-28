@@ -44,11 +44,13 @@ private:
 	// empty means EOF
 	SString text;
 
+	Instance &inst;
+
 public:
-	Udmf_Token(const char *str) : text(str)
+	Udmf_Token(Instance &inst, const char *str) : text(str), inst(inst)
 	{ }
 
-	Udmf_Token(const char *str, int len) : text(str, len)
+	Udmf_Token(Instance &inst, const char *str, int len) : text(str, len), inst(inst)
 	{ }
 
 	const char *c_str()
@@ -107,7 +109,7 @@ public:
 
 	fixcoord_t DecodeCoord() const
 	{
-		return MakeValidCoord(DecodeFloat());
+		return inst.MakeValidCoord(DecodeFloat());
 	}
 
 	int DecodeTexture() const
@@ -146,10 +148,10 @@ private:
 	Lump_c *lump;
 
 	// reached EOF or a file read error
-	bool done;
+	bool done = false;
 
 	// we have seen a "/*" but not the closing "*/"
-	bool in_comment;
+	bool in_comment = false;
 
 	// number of remaining bytes
 	int remaining;
@@ -158,14 +160,13 @@ private:
 	char buffer[U_BUF_SIZE];
 
 	// position in buffer and used size of buffer
-	int b_pos;
-	int b_size;
+	int b_pos = 0;
+	int b_size = 0;
+
+	Instance &inst;
 
 public:
-	Udmf_Parser(Lump_c *_lump) :
-		lump(_lump),
-		done(false), in_comment(false),
-		b_pos(0), b_size(0)
+	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), inst(inst)
 	{
 		remaining = lump->Length();
 	}
@@ -175,7 +176,7 @@ public:
 		for (;;)
 		{
 			if (done)
-				return Udmf_Token("");
+				return Udmf_Token(inst, "");
 
 			// when position reaches half-way point, shift buffer down
 			if (b_pos >= U_BUF_SIZE/2)
@@ -282,7 +283,7 @@ public:
 					b_pos++;
 				}
 
-				return Udmf_Token(buffer+start, b_pos - start);
+				return Udmf_Token(inst, buffer+start, b_pos - start);
 			}
 
 			// is it a identifier or number?
@@ -301,13 +302,13 @@ public:
 					break;
 				}
 
-				return Udmf_Token(buffer+start, b_pos - start);
+				return Udmf_Token(inst, buffer+start, b_pos - start);
 			}
 
 			// it must be a symbol, such as '{' or '}'
 			b_pos++;
 
-			return Udmf_Token(buffer+start, 1);
+			return Udmf_Token(inst, buffer+start, 1);
 		}
 	}
 
@@ -660,7 +661,7 @@ void UDMF_LoadLevel(Instance &inst)
 		return;
 
 	// TODO: reduce stack!!
-	Udmf_Parser parser(lump);
+	Udmf_Parser parser(inst, lump);
 
 	for (;;)
 	{

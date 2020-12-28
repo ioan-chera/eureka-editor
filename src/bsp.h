@@ -355,7 +355,7 @@ struct node_t
 	int index;
 
 public:
-	void SetPartition(const seg_t *part, const Document &doc);
+	void SetPartition(const seg_t *part, const Instance &inst);
 };
 
 
@@ -589,7 +589,7 @@ quadtree_c *TreeFromSegList(seg_t *list);
 // returns BUILD_OK, or BUILD_Cancelled if user stopped it.
 //
 build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
-    node_t ** N, subsec_t ** S, int depth, const Document &doc);
+    node_t ** N, subsec_t ** S, int depth, const Instance &inst);
 
 // compute the height of the bsp tree, starting at 'node'.
 int ComputeBspHeight(node_t *node);

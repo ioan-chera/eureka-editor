@@ -1201,8 +1201,8 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	/* length */
 
-	fixcoord_t idx = MakeValidCoord(map_x2) - MakeValidCoord(map_x1);
-	fixcoord_t idy = MakeValidCoord(map_y2) - MakeValidCoord(map_y1);
+	fixcoord_t idx = inst.MakeValidCoord(map_x2) - inst.MakeValidCoord(map_x1);
+	fixcoord_t idy = inst.MakeValidCoord(map_y2) - inst.MakeValidCoord(map_y1);
 
 	if (info == LINFO_Length || info >= LINFO_Length_Angle)
 	{
@@ -1922,7 +1922,7 @@ void UI_Canvas::DrawCurrentLine()
 	DrawLineInfo(V->x(), V->y(), new_x, new_y, grid.ratio > 0);
 
 	// draw all the crossing points
-	crossing_state_c cross(inst.level);
+	crossing_state_c cross(inst);
 
 	inst.level.hover.findCrossingPoints(cross,
 					   V->x(), V->y(), inst.edit.draw_from.num,

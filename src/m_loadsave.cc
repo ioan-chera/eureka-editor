@@ -103,8 +103,8 @@ static void FreshLevel(Instance &inst)
 		Vertex *v = new Vertex;
 		inst.level.vertices.push_back(v);
 
-		v->SetRawX((i >= 2) ? 256 : -256);
-		v->SetRawY((i==1 || i==2) ? 256 :-256);
+		v->SetRawX(inst, (i >= 2) ? 256 : -256);
+		v->SetRawY(inst, (i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
 		inst.level.sidedefs.push_back(sd);
@@ -128,8 +128,8 @@ static void FreshLevel(Instance &inst)
 		th->type  = pl;
 		th->angle = 90;
 
-		th->SetRawX((pl == 1) ? 0 : (pl - 3) * 48);
-		th->SetRawY((pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		th->SetRawX(inst, (pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY(inst, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
 	CalculateLevelBounds(inst);
@@ -193,10 +193,10 @@ static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
 	instance::Iwad_name = M_QueryKnownIWAD(instance::Game_name);
 	SYS_ASSERT(!instance::Iwad_name.empty());
 
-	instance::Level_format = dialog->map_format;
+	inst.Level_format = dialog->map_format;
 	instance::Udmf_namespace = dialog->name_space;
 
-	SYS_ASSERT(instance::Level_format != MapFormat::invalid);
+	SYS_ASSERT(inst.Level_format != MapFormat::invalid);
 
 	instance::Resource_list.clear();
 
@@ -939,19 +939,6 @@ static void ShowLoadProblem()
 	DLG_Notify("Map validation report:\n\n%s", message);
 }
 
-
-void GetLevelFormat(Wad_file *wad, const char *level)
-{
-	int lev_num = wad->LevelFind(level);
-
-	// ignore failure here, it will be caught later
-	if (lev_num >= 0)
-	{
-		instance::Level_format = wad->LevelFormat(lev_num);
-	}
-}
-
-
 //
 // Read in the level data
 //
@@ -1005,7 +992,7 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 	load_wad = wad;
 	loading_level = lev_num;
 
-	instance::Level_format = load_wad->LevelFormat(loading_level);
+	inst.Level_format = load_wad->LevelFormat(loading_level);
 
 	inst.level.basis.clearAll();
 
@@ -1015,13 +1002,13 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 
 	LoadHeader(inst);
 
-	if (instance::Level_format == MapFormat::udmf)
+	if (inst.Level_format == MapFormat::udmf)
 	{
 		UDMF_LoadLevel(inst);
 	}
 	else
 	{
-		if (instance::Level_format == MapFormat::hexen)
+		if (inst.Level_format == MapFormat::hexen)
 			LoadThings_Hexen(inst.level);
 		else
 			LoadThings(inst.level);
@@ -1030,7 +1017,7 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 		LoadSectors(inst.level);
 		LoadSideDefs(inst);
 
-		if (instance::Level_format == MapFormat::hexen)
+		if (inst.Level_format == MapFormat::hexen)
 		{
 			LoadLineDefs_Hexen(inst);
 
@@ -1624,14 +1611,14 @@ static void SaveLevel(Instance &inst, const SString &level)
 
 	SaveHeader(inst, level);
 
-	if (instance::Level_format == MapFormat::udmf)
+	if (inst.Level_format == MapFormat::udmf)
 	{
 		UDMF_SaveLevel(inst);
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
-		if (instance::Level_format == MapFormat::hexen)
+		if (inst.Level_format == MapFormat::hexen)
 		{
 			SaveThings_Hexen(inst);
 			SaveLineDefs_Hexen(inst);
@@ -1654,7 +1641,7 @@ static void SaveLevel(Instance &inst, const SString &level)
 		EmptyLump(inst, "REJECT");
 		EmptyLump(inst, "BLOCKMAP");
 
-		if (instance::Level_format == MapFormat::hexen)
+		if (inst.Level_format == MapFormat::hexen)
 		{
 			SaveBehavior(inst);
 			SaveScripts(inst);

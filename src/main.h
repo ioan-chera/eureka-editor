@@ -143,7 +143,6 @@ namespace instance
 	extern SString Port_name;   // Name of source port "vanilla", "boom", ...
 	extern SString Level_name;  // Name of map lump we are editing
 
-	extern MapFormat Level_format;   // format of current map
 	extern SString  Udmf_namespace; // for UDMF, the current namespace
 }
 

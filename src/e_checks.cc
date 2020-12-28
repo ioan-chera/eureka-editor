@@ -1536,7 +1536,7 @@ static bool TH_always_spawned(int type)
 }
 
 
-static void Things_FindDuds(selection_c& list, const Document &doc)
+static void Things_FindDuds(const Instance &inst, selection_c& list, const Document &doc)
 {
 	list.change_type(ObjType::things);
 
@@ -1551,7 +1551,7 @@ static void Things_FindDuds(selection_c& list, const Document &doc)
 		int modes   = 1;
 		int classes = 1;
 
-		if (instance::Level_format != MapFormat::doom)
+		if (inst.Level_format != MapFormat::doom)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
@@ -1560,7 +1560,7 @@ static void Things_FindDuds(selection_c& list, const Document &doc)
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (instance::Level_format != MapFormat::doom)
+		if (inst.Level_format != MapFormat::doom)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 		}
@@ -1579,20 +1579,20 @@ static void Things_ShowDuds(Instance &inst)
 	if (inst.edit.mode != ObjType::things)
 		Editor_ChangeMode(inst, 't');
 
-	Things_FindDuds(*inst.edit.Selected, inst.level);
+	Things_FindDuds(inst, *inst.edit.Selected, inst.level);
 
 	GoToErrors(inst);
 }
 
 
-const void Things_FixDuds(Document &doc)
+const void Things_FixDuds(Instance &inst)
 {
-	doc.basis.begin();
-	doc.basis.setMessage("fixed unspawnable things");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed unspawnable things");
 
-	for (int n = 0 ; n < doc.numThings() ; n++)
+	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = doc.things[n];
+		const Thing *T = inst.level.things[n];
 
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
@@ -1609,7 +1609,7 @@ const void Things_FixDuds(Document &doc)
 		if (skills == 0)
 			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
 
-		if (instance::Level_format != MapFormat::doom)
+		if (inst.Level_format != MapFormat::doom)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 
@@ -1624,7 +1624,7 @@ const void Things_FixDuds(Document &doc)
 				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (instance::Level_format != MapFormat::doom)
+		if (inst.Level_format != MapFormat::doom)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 
@@ -1634,11 +1634,11 @@ const void Things_FixDuds(Document &doc)
 
 		if (new_options != T->options)
 		{
-			doc.basis.changeThing(n, Thing::F_OPTIONS, new_options);
+			inst.level.basis.changeThing(n, Thing::F_OPTIONS, new_options);
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -1685,7 +1685,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 #define MONSTER_STEP_DIST  8
 
 
-static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
+static bool ThingStuckInThing(const Instance &inst, const Thing *T1, const thingtype_t *info1,
 							  const Thing *T2, const thingtype_t *info2)
 {
 	SYS_ASSERT(T1 != T2);
@@ -1721,7 +1721,7 @@ static bool ThingStuckInThing(const Thing *T1, const thingtype_t *info1,
 	int opt1 = T1->options;
 	int opt2 = T2->options;
 
-	if (instance::Level_format != MapFormat::doom)
+	if (inst.Level_format != MapFormat::doom)
 	{
 		if (info1->group == 'p') opt1 |= 0x7E7;
 		if (info2->group == 'p') opt2 |= 0x7E7;
@@ -1808,31 +1808,31 @@ static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &
 }
 
 
-static void Things_FindStuckies(selection_c& list, const Document &doc)
+static void Things_FindStuckies(selection_c& list, const Instance &inst)
 {
 	list.change_type(ObjType::things);
 
 	std::vector<int> blockers;
 	std::vector<int> sizes;
 
-	CollectBlockingThings(blockers, sizes, doc);
+	CollectBlockingThings(blockers, sizes, inst.level);
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const Thing *T = doc.things[blockers[n]];
+		const Thing *T = inst.level.things[blockers[n]];
 
 		const thingtype_t &info = M_GetThingType(T->type);
 
-		if (ThingStuckInWall(T, info.radius, info.group, doc))
+		if (ThingStuckInWall(T, info.radius, info.group, inst.level))
 			list.set(blockers[n]);
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const Thing *T2 = doc.things[blockers[n2]];
+			const Thing *T2 = inst.level.things[blockers[n2]];
 
 			const thingtype_t &info2 = M_GetThingType(T2->type);
 
-			if (ThingStuckInThing(T, &info, T2, &info2))
+			if (ThingStuckInThing(inst, T, &info, T2, &info2))
 				list.set(blockers[n]);
 		}
 	}
@@ -1844,7 +1844,7 @@ static void Things_ShowStuckies(Instance &inst)
 	if (inst.edit.mode != ObjType::things)
 		Editor_ChangeMode(inst, 't');
 
-	Things_FindStuckies(*inst.edit.Selected, inst.level);
+	Things_FindStuckies(*inst.edit.Selected, inst);
 
 	GoToErrors(inst);
 }
@@ -1915,7 +1915,7 @@ public:
 	static void action_fix_duds(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_FixDuds(dialog->inst.level);
+		Things_FixDuds(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 private:
@@ -1949,7 +1949,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		}
 
 
-		Things_FindStuckies(sel, doc);
+		Things_FindStuckies(sel, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No stuck actors");
@@ -1976,7 +1976,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		}
 
 
-		Things_FindDuds(sel, doc);
+		Things_FindDuds(inst, sel, doc);
 
 		if (sel.empty())
 			dialog->AddLine("No unspawnable things -- skill flags are OK");

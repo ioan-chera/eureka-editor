@@ -21,6 +21,7 @@
 
 #include "Document.h"
 #include "e_main.h"
+#include "main.h"
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
@@ -29,6 +30,9 @@
 class Instance
 {
 public:
+	// E_BASIS
+	fixcoord_t MakeValidCoord(double x) const;
+
 	// E_MAIN
 	void Editor_DefaultState();
 	void Editor_Init();
@@ -69,6 +73,7 @@ public:	// will be private when we encapsulate everything
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
+	MapFormat Level_format = {};	// format of current map
 
 	//
 	// Game-dependent (thus instance dependent) defaults

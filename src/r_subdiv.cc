@@ -284,7 +284,7 @@ public:
 	{
 		if (Features.gen_types && (L->type == 242 || L->type == 280))
 		{ /* ok */ }
-		else if (instance::Level_format != MapFormat::doom && L->type == 209)
+		else if (inst.Level_format != MapFormat::doom && L->type == 209)
 		{ /* ok */ }
 		else
 			return;
@@ -310,7 +310,7 @@ public:
 		int sec_tag = L->tag;
 
 		// EDGE style
-		if (instance::Level_format == MapFormat::doom && (Features.extra_floors & 1))
+		if (inst.Level_format == MapFormat::doom && (Features.extra_floors & 1))
 		{
 			switch (L->type)
 			{
@@ -330,7 +330,7 @@ public:
 		}
 
 		// Legacy style
-		if (instance::Level_format == MapFormat::doom && (Features.extra_floors & 2))
+		if (inst.Level_format == MapFormat::doom && (Features.extra_floors & 2))
 		{
 			switch (L->type)
 			{
@@ -346,7 +346,7 @@ public:
 		}
 
 		// ZDoom style
-		if (instance::Level_format != MapFormat::doom && (Features.extra_floors & 4))
+		if (inst.Level_format != MapFormat::doom && (Features.extra_floors & 4))
 		{
 			if (L->type != 160)
 				return;
@@ -384,7 +384,7 @@ public:
 	void CheckLineSlope(const LineDef *L)
 	{
 		// EDGE style
-		if (instance::Level_format == MapFormat::doom && (Features.slopes & 1))
+		if (inst.Level_format == MapFormat::doom && (Features.slopes & 1))
 		{
 			switch (L->type)
 			{
@@ -396,7 +396,7 @@ public:
 		}
 
 		// Eternity style
-		if (instance::Level_format == MapFormat::doom && (Features.slopes & 2))
+		if (inst.Level_format == MapFormat::doom && (Features.slopes & 2))
 		{
 			switch (L->type)
 			{
@@ -413,7 +413,7 @@ public:
 		}
 
 		// Odamex and ZDoom style
-		if (instance::Level_format == MapFormat::doom && (Features.slopes & 4))
+		if (inst.Level_format == MapFormat::doom && (Features.slopes & 4))
 		{
 			switch (L->type)
 			{
@@ -430,7 +430,7 @@ public:
 		}
 
 		// ZDoom (in hexen format)
-		if (instance::Level_format != MapFormat::doom && (Features.slopes & 8))
+		if (inst.Level_format != MapFormat::doom && (Features.slopes & 8))
 		{
 			if (L->type == 181)
 				PlaneAlign(L, L->tag, L->arg2);
@@ -440,7 +440,7 @@ public:
 	void CheckPlaneCopy(const LineDef *L)
 	{
 		// Eternity style
-		if (instance::Level_format == MapFormat::doom && (Features.slopes & 2))
+		if (inst.Level_format == MapFormat::doom && (Features.slopes & 2))
 		{
 			switch (L->type)
 			{
@@ -452,7 +452,7 @@ public:
 		}
 
 		// ZDoom (in hexen format)
-		if (instance::Level_format != MapFormat::doom && (Features.slopes & 8))
+		if (inst.Level_format != MapFormat::doom && (Features.slopes & 8))
 		{
 			if (L->type == 118)
 				PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
@@ -461,7 +461,7 @@ public:
 
 	void CheckSlopeThing(const Thing *T)
 	{
-		if (instance::Level_format != MapFormat::doom && (Features.slopes & 16))
+		if (inst.Level_format != MapFormat::doom && (Features.slopes & 16))
 		{
 			switch (T->type)
 			{
@@ -478,7 +478,7 @@ public:
 
 	void CheckSlopeCopyThing(const Thing *T)
 	{
-		if (instance::Level_format != MapFormat::doom && (Features.slopes & 16))
+		if (inst.Level_format != MapFormat::doom && (Features.slopes & 16))
 		{
 			switch (T->type)
 			{

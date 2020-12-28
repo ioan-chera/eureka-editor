@@ -104,10 +104,10 @@ public:
 	double start_x = 0, start_y = 0;
 	double   end_x = 0,   end_y = 0;
 
-	Document &doc;
+	Instance &inst;
 
 public:
-	explicit crossing_state_c(Document &doc) : doc(doc)
+	explicit crossing_state_c(Instance &inst) : inst(inst)
 	{
 	}
 

@@ -139,7 +139,7 @@ void M_PrepareConfigVariables(Instance &inst)
 {
 	parse_vars.clear();
 
-	switch (instance::Level_format)
+	switch (inst.Level_format)
 	{
 		case MapFormat::doom:
 			parse_vars["$MAP_FORMAT"] = "DOOM";
