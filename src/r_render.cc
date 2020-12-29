@@ -1108,28 +1108,28 @@ void Render3D_Navigate(Instance &inst)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // things are selected and they have different types.
-static int GrabSelectedThing(Instance &inst)
+int Instance::GrabSelectedThing() const
 {
 	int result = -1;
 
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		if (inst.edit.highlight.is_nil())
+		if (edit.highlight.is_nil())
 		{
-			inst.Beep("no things for copy/cut type");
+			Beep("no things for copy/cut type");
 			return -1;
 		}
 
-		result = inst.level.things[inst.edit.highlight.num]->type;
+		result = level.things[edit.highlight.num]->type;
 	}
 	else
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = inst.level.things[*it];
+			const Thing *T = level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
-				inst.Beep("multiple thing types");
+				Beep("multiple thing types");
 				return -2;
 			}
 
@@ -1137,7 +1137,7 @@ static int GrabSelectedThing(Instance &inst)
 		}
 	}
 
-	inst.Status_Set("copied type %d", result);
+	Status_Set("copied type %d", result);
 
 	return result;
 }
@@ -1186,34 +1186,34 @@ static int SEC_GrabFlat(const Sector *S, int part)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // sectors are selected and they have different flats.
-static int GrabSelectedFlat(Instance &inst)
+int Instance::GrabSelectedFlat() const
 {
 	int result = -1;
 
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		if (inst.edit.highlight.is_nil())
+		if (edit.highlight.is_nil())
 		{
-			inst.Beep("no sectors for copy/cut flat");
+			Beep("no sectors for copy/cut flat");
 			return -1;
 		}
 
-		const Sector *S = inst.level.sectors[inst.edit.highlight.num];
+		const Sector *S = level.sectors[edit.highlight.num];
 
-		result = SEC_GrabFlat(S, inst.edit.highlight.parts);
+		result = SEC_GrabFlat(S, edit.highlight.parts);
 	}
 	else
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = inst.level.sectors[*it];
-			byte parts = inst.edit.Selected->get_ext(*it);
+			const Sector *S = level.sectors[*it];
+			byte parts = edit.Selected->get_ext(*it);
 
 			int tex = SEC_GrabFlat(S, parts & ~1);
 
 			if (result >= 0 && tex != result)
 			{
-				inst.Beep("multiple flats present");
+				Beep("multiple flats present");
 				return -2;
 			}
 
@@ -1222,7 +1222,7 @@ static int GrabSelectedFlat(Instance &inst)
 	}
 
 	if (result >= 0)
-		inst.Status_Set("copied %s", BA_GetString(result).c_str());
+		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1295,71 +1295,71 @@ static void StoreDefaultedFlats(Instance &inst)
 }
 
 
-static int LD_GrabTex(const Instance &inst, const LineDef *L, int part)
+int Instance::LD_GrabTex(const LineDef *L, int part) const
 {
 	if (L->NoSided())
-		return BA_InternaliseString(inst.default_wall_tex);
+		return BA_InternaliseString(default_wall_tex);
 
 	if (L->OneSided())
-		return L->Right(inst.level)->mid_tex;
+		return L->Right(level)->mid_tex;
 
-	if (part & PART_RT_LOWER) return L->Right(inst.level)->lower_tex;
-	if (part & PART_RT_UPPER) return L->Right(inst.level)->upper_tex;
+	if (part & PART_RT_LOWER) return L->Right(level)->lower_tex;
+	if (part & PART_RT_UPPER) return L->Right(level)->upper_tex;
 
-	if (part & PART_LF_LOWER) return L->Left(inst.level)->lower_tex;
-	if (part & PART_LF_UPPER) return L->Left(inst.level)->upper_tex;
+	if (part & PART_LF_LOWER) return L->Left(level)->lower_tex;
+	if (part & PART_LF_UPPER) return L->Left(level)->upper_tex;
 
-	if (part & PART_RT_RAIL)  return L->Right(inst.level)->mid_tex;
-	if (part & PART_LF_RAIL)  return L->Left(inst.level) ->mid_tex;
+	if (part & PART_RT_RAIL)  return L->Right(level)->mid_tex;
+	if (part & PART_LF_RAIL)  return L->Left(level) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (L->Left(inst.level)->SecRef(inst.level)->floorh > L->Right(inst.level)->SecRef(inst.level)->floorh)
-		return L->Right(inst.level)->lower_tex;
+	if (L->Left(level)->SecRef(level)->floorh > L->Right(level)->SecRef(level)->floorh)
+		return L->Right(level)->lower_tex;
 
-	if (L->Left(inst.level)->SecRef(inst.level)->ceilh < L->Right(inst.level)->SecRef(inst.level)->ceilh)
-		return L->Right(inst.level)->upper_tex;
+	if (L->Left(level)->SecRef(level)->ceilh < L->Right(level)->SecRef(level)->ceilh)
+		return L->Right(level)->upper_tex;
 
-	if (L->Left(inst.level)->SecRef(inst.level)->floorh < L->Right(inst.level)->SecRef(inst.level)->floorh)
-		return L->Left(inst.level)->lower_tex;
+	if (L->Left(level)->SecRef(level)->floorh < L->Right(level)->SecRef(level)->floorh)
+		return L->Left(level)->lower_tex;
 
-	if (L->Left(inst.level)->SecRef(inst.level)->ceilh > L->Right(inst.level)->SecRef(inst.level)->ceilh)
-		return L->Left(inst.level)->upper_tex;
+	if (L->Left(level)->SecRef(level)->ceilh > L->Right(level)->SecRef(level)->ceilh)
+		return L->Left(level)->upper_tex;
 
 	// emergency fallback
-	return L->Right(inst.level)->lower_tex;
+	return L->Right(level)->lower_tex;
 }
 
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // linedefs are selected and they have different textures.
-static int GrabSelectedTexture(Instance &inst)
+int Instance::GrabSelectedTexture() const
 {
 	int result = -1;
 
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		if (inst.edit.highlight.is_nil())
+		if (edit.highlight.is_nil())
 		{
-			inst.Beep("no linedefs for copy/cut tex");
+			Beep("no linedefs for copy/cut tex");
 			return -1;
 		}
 
-		const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
+		const LineDef *L = level.linedefs[edit.highlight.num];
 
-		result = LD_GrabTex(inst, L, inst.edit.highlight.parts);
+		result = LD_GrabTex(L, edit.highlight.parts);
 	}
 	else
 	{
-		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = inst.level.linedefs[*it];
-			byte parts = inst.edit.Selected->get_ext(*it);
+			const LineDef *L = level.linedefs[*it];
+			byte parts = edit.Selected->get_ext(*it);
 
-			int tex = LD_GrabTex(inst, L, parts & ~1);
+			int tex = LD_GrabTex(L, parts & ~1);
 
 			if (result >= 0 && tex != result)
 			{
-				inst.Beep("multiple textures present");
+				Beep("multiple textures present");
 				return -2;
 			}
 
@@ -1368,7 +1368,7 @@ static int GrabSelectedTexture(Instance &inst)
 	}
 
 	if (result >= 0)
-		inst.Status_Set("copied %s", BA_GetString(result).c_str());
+		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
@@ -1430,26 +1430,26 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 }
 
 
-void Render3D_CB_Copy(Instance &inst)
+void Instance::Render3D_CB_Copy() const
 {
 	int num;
 
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 	case ObjType::things:
-		num = GrabSelectedThing(inst);
+		num = GrabSelectedThing();
 		if (num >= 0)
 			Texboard_SetThing(num);
 		break;
 
 	case ObjType::sectors:
-		num = GrabSelectedFlat(inst);
+		num = GrabSelectedFlat();
 		if (num >= 0)
 			Texboard_SetFlat(BA_GetString(num));
 		break;
 
 	case ObjType::linedefs:
-		num = GrabSelectedTexture(inst);
+		num = GrabSelectedTexture();
 		if (num >= 0)
 			Texboard_SetTex(BA_GetString(num));
 		break;

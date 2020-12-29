@@ -396,7 +396,7 @@ void Instance::W_LoadTextures() const
 }
 
 
-Img_c * W_GetTexture(const SString &name, bool try_uppercase)
+Img_c * Instance::W_GetTexture(const SString &name, bool try_uppercase) const
 {
 	if (is_null_tex(name))
 		return NULL;
@@ -427,7 +427,7 @@ Img_c * W_GetTexture(const SString &name, bool try_uppercase)
 }
 
 
-int W_GetTextureHeight(const SString &name)
+int Instance::W_GetTextureHeight(const SString &name) const
 {
 	Img_c *img = W_GetTexture(name);
 
@@ -437,8 +437,8 @@ int W_GetTextureHeight(const SString &name)
 	return img->height();
 }
 
-
-bool W_TextureIsKnown(const SString &name)
+// accepts "-", "#xxxx" or an existing texture name
+bool Instance::W_TextureIsKnown(const SString &name) const
 {
 	if (is_null_tex(name) || is_special_tex(name))
 		return true;
@@ -586,7 +586,7 @@ void Instance::W_LoadFlats() const
 }
 
 
-Img_c * W_GetFlat(const SString &name, bool try_uppercase)
+Img_c * Instance::W_GetFlat(const SString &name, bool try_uppercase) const
 {
 	std::map<SString, Img_c *>::iterator P = flats.find(name);
 
@@ -610,7 +610,7 @@ Img_c * W_GetFlat(const SString &name, bool try_uppercase)
 }
 
 
-bool W_FlatIsKnown(const SString &name)
+bool Instance::W_FlatIsKnown(const SString &name) const
 {
 	// sectors do not support "-" (but our code can make it)
 	if (is_null_tex(name))
@@ -695,7 +695,7 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 
 	// check outside of the sprite namespace...
 
-	if (Features.lax_sprites)
+	if (inst.Features.lax_sprites)
 	{
 		buffer = name;
 		if(buffer.length() == 4)

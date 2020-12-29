@@ -887,9 +887,9 @@ void UI_ProjectSetup::PopulatePort()
 	SString base_game;
 
 	if (game_choice->mvalue())
-		base_game = inst.M_GetBaseGame(game_choice->mvalue()->text);
+		base_game = M_GetBaseGame(game_choice->mvalue()->text);
 	else if (!inst.Game_name.empty())
-		base_game = inst.M_GetBaseGame(inst.Game_name);
+		base_game = M_GetBaseGame(inst.Game_name);
 
 	if (base_game.empty())
 		base_game = "doom2";
@@ -938,7 +938,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	if (port_choice->mvalue())
 		c_port = port_choice->mvalue()->text;
 
-	usable_formats = M_DetermineMapFormats(inst, c_game, c_port);
+	usable_formats = M_DetermineMapFormats(c_game, c_port);
 
 	SYS_ASSERT(usable_formats != 0);
 
@@ -980,7 +980,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	// determine the UDMF namespace
 	name_space = "";
 
-	PortInfo_c *pinfo = M_LoadPortInfo(inst, port_choice->mvalue()->text);
+	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
 	if (pinfo)
 		name_space = pinfo->udmf_namespace;
 

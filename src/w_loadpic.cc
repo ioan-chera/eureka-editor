@@ -80,7 +80,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 		{
 			// The original DOOM did not honor negative y-offsets for
 			// patches but some ports like ZDoom do.
-			if (Features.neg_patch_offsets)
+			if (inst.Features.neg_patch_offsets)
 				src -= top;
 			else
 				count += top;

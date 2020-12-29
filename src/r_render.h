@@ -107,7 +107,6 @@ void Render3D_DragThings(Instance &inst);
 void Render3D_DragSectors(Instance &inst);
 
 void Render3D_CB_Cut(Instance &inst);
-void Render3D_CB_Copy(Instance &inst);
 void Render3D_CB_Paste(Instance &inst);
 
 void Render3D_SetCameraPos(double new_x, double new_y);

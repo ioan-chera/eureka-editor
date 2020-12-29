@@ -395,9 +395,9 @@ void UI_DefaultProps::CB_Copy(int sel_pics)
 	}
 
 	if (sel_pics & 4)
-		Texboard_SetTex(name);
+		inst.Texboard_SetTex(name);
 	else
-		Texboard_SetFlat(name);
+		inst.Texboard_SetFlat(name);
 }
 
 

@@ -490,7 +490,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 #undef SHOW_WIDGET_IF
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == 0 && ! Features.coop_dm_flags && inst.Level_format == MapFormat::doom)
+	if (x == 0 && ! inst.Features.coop_dm_flags && inst.Level_format == MapFormat::doom)
 	{
 		  o_sp->hide();
 		o_coop->hide();
@@ -837,8 +837,8 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 		case 4: // Sectors by Type
 		{
-			int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-						(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+			int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+						(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 			const sectortype_t & info = M_GetSectorType(type_num & mask);
 			desc->value(info.desc.c_str());
@@ -972,7 +972,7 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 	if (tex_name[0])
 	{
 		bool is_known = (what->value() == 1) ?
-			W_TextureIsKnown(tex_name) : W_FlatIsKnown(tex_name);
+			inst.W_TextureIsKnown(tex_name) : inst.W_FlatIsKnown(tex_name);
 
 		if (!is_known)
 			tex_name = "";
@@ -985,9 +985,9 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 	}
 
 	if (what->value() == 1)
-		Texboard_SetTex(tex_name);
+		inst.Texboard_SetTex(tex_name);
 	else
-		Texboard_SetFlat(tex_name);
+		inst.Texboard_SetFlat(tex_name);
 }
 
 
@@ -1555,8 +1555,8 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 {
 	const Sector *sector = inst.level.sectors[idx];
 
-	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+				(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 	if (! find_numbers->get(sector->type & mask))
 		return false;
@@ -1631,7 +1631,7 @@ void UI_FindAndReplace::ComputeFlagMask()
 	FLAG_FROM_WIDGET(o_medium, 1, MTF_Medium);
 	FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard);
 
-	if (Features.coop_dm_flags)
+	if (inst.Features.coop_dm_flags)
 	{
 		FLAG_FROM_WIDGET(  o_sp, -1, MTF_Not_SP);
 		FLAG_FROM_WIDGET(o_coop, -1, MTF_Not_COOP);
@@ -1771,8 +1771,8 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 
 void UI_FindAndReplace::Replace_SectorType(int idx)
 {
-	int mask = (Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+				(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());

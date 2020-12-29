@@ -97,9 +97,6 @@ private:
 
 SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);
 
-bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
-					const Sector *front, const Sector *back);
-
 enum linedef_align_flag_e
 {
 	LINALIGN_X		= (1 << 0),		// align the X offset

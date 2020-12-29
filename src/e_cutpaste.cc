@@ -344,7 +344,7 @@ int Texboard_GetThing(const Instance &inst)
 	return tex_clipboard::thing;
 }
 
-void Texboard_SetTex(const SString &new_tex)
+void Instance::Texboard_SetTex(const SString &new_tex) const
 {
 	tex_clipboard::tex = new_tex;
 
@@ -352,7 +352,7 @@ void Texboard_SetTex(const SString &new_tex)
 		tex_clipboard::flat = new_tex;
 }
 
-void Texboard_SetFlat(const SString &new_flat)
+void Instance::Texboard_SetFlat(const SString &new_flat) const
 {
 	tex_clipboard::flat = new_flat;
 
@@ -845,7 +845,7 @@ void Instance::CMD_Clipboard_Copy()
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Copy(*this);
+		Render3D_CB_Copy();
 		return;
 	}
 

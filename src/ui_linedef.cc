@@ -477,7 +477,7 @@ void UI_LineBox::CB_Copy(int parts)
 		}
 	}
 
-	Texboard_SetTex(name);
+	inst.Texboard_SetTex(name);
 
 	inst.Status_Set("copied %s", name);
 }
@@ -923,13 +923,13 @@ int UI_LineBox::CalcFlags() const
 	}
 	else
 	{
-		if (Features.pass_through && f_passthru->value())
+		if (inst.Features.pass_through && f_passthru->value())
 			lineflags |= MLF_Boom_PassThru;
 
-		if (Features.midtex_3d && f_3dmidtex->value())
+		if (inst.Features.midtex_3d && f_3dmidtex->value())
 			lineflags |= MLF_Eternity_3DMidTex;
 
-		if (Features.strife_flags)
+		if (inst.Features.strife_flags)
 		{
 			if (f_jumpover->value())
 				lineflags |= MLF_Strife_JumpOver;
@@ -1010,17 +1010,17 @@ void UI_LineBox::UpdateGameInfo()
 		actkind->hide();
 		desc->resize(type->x(), desc->y(), w()-78, desc->h());
 
-		if (Features.pass_through)
+		if (inst.Features.pass_through)
 			f_passthru->show();
 		else
 			f_passthru->hide();
 
-		if (Features.midtex_3d)
+		if (inst.Features.midtex_3d)
 			f_3dmidtex->show();
 		else
 			f_3dmidtex->hide();
 
-		if (Features.strife_flags)
+		if (inst.Features.strife_flags)
 		{
 			f_jumpover->show();
 			f_flyers->show();
@@ -1035,7 +1035,7 @@ void UI_LineBox::UpdateGameInfo()
 			f_trans2->hide();
 		}
 
-		if (Features.gen_types)
+		if (inst.Features.gen_types)
 			gen->show();
 		else
 			gen->hide();
@@ -1055,7 +1055,7 @@ void UI_LineBox::UpdateGameInfo()
 
 const char * UI_LineBox::GeneralizedDesc(int type_num)
 {
-	if (! Features.gen_types)
+	if (! inst.Features.gen_types)
 		return NULL;
 
 	static char desc_buffer[256];

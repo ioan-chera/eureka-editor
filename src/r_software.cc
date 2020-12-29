@@ -121,7 +121,7 @@ public:
 
 		if (r_view.texturing)
 		{
-			img = W_GetFlat(fname);
+			img = inst.W_GetFlat(fname);
 
 			if (! img)
 			{
@@ -157,7 +157,7 @@ public:
 				return;
 			}
 
-			img = W_GetTexture(tname);
+			img = inst.W_GetTexture(tname);
 
 			if (! img)
 			{
@@ -1050,7 +1050,7 @@ public:
 			}
 			else
 			{
-				if (! LD_RailHeights(z1, z2, dw->ld, dw->sd, front, back))
+				if (! inst.LD_RailHeights(z1, z2, dw->ld, dw->sd, front, back))
 					return;
 			}
 		}

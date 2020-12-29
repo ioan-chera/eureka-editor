@@ -388,7 +388,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 		const Sector *front = SD->SecRef(doc);
 
 		if (L->flags & MLF_LowerUnpegged)
-			return front->floorh + W_GetTextureHeight(SD->MidTex());
+			return front->floorh + inst.W_GetTextureHeight(SD->MidTex());
 
 		return front->ceilh;
 	}
@@ -406,7 +406,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 	if (obj.parts & (PART_RT_UPPER | PART_LF_UPPER))
 	{
 		if (! (L->flags & MLF_UpperUnpegged))
-			return back->ceilh + W_GetTextureHeight(SD->UpperTex());
+			return back->ceilh + inst.W_GetTextureHeight(SD->UpperTex());
 
 		return front->ceilh;
 	}
@@ -1503,8 +1503,8 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 }
 
 
-bool LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
-					const Sector *front, const Sector *back)
+bool Instance::LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef *sd,
+					const Sector *front, const Sector *back) const
 {
 	SString rail_tex = sd->MidTex();
 	if (is_null_tex(rail_tex))

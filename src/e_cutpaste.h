@@ -66,8 +66,6 @@ int Texboard_GetTexNum(const Instance &inst);
 int Texboard_GetFlatNum(const Instance &inst);
 int Texboard_GetThing(const Instance &inst);
 
-void Texboard_SetTex(const SString &new_tex);
-void Texboard_SetFlat(const SString &new_flat);
 void Texboard_SetThing(int new_id);
 
 

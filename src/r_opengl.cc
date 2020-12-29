@@ -172,7 +172,7 @@ public:
 			return NULL;
 		}
 
-		Img_c *img = W_GetFlat(fname);
+		Img_c *img = inst.W_GetFlat(fname);
 		if (! img)
 		{
 			img = inst.IM_UnknownFlat();
@@ -218,7 +218,7 @@ public:
 		}
 		else
 		{
-			img = W_GetTexture(tname);
+			img = inst.W_GetTexture(tname);
 
 			if (! img)
 			{
@@ -1370,7 +1370,7 @@ public:
 			{
 				int zi1, zi2;
 
-				if (! LD_RailHeights(zi1, zi2, L, sd, front, back))
+				if (! inst.LD_RailHeights(zi1, zi2, L, sd, front, back))
 					return;
 
 				z1 = static_cast<float>(zi1); z2 = static_cast<float>(zi2);

@@ -730,7 +730,7 @@ void UI_ThingBox::OptionsFromInt(int options)
 			exfloor->value("");
 	}
 
-	if (Features.strife_flags)
+	if (inst.Features.strife_flags)
 	{
 		o_sf_ambush->value((options & MTF_Strife_Ambush) ? 1 : 0);
 		o_sf_friend->value((options & MTF_Strife_Friend) ? 1 : 0);
@@ -749,7 +749,7 @@ int UI_ThingBox::CalcOptions() const
 	if (o_medium->value()) options |= MTF_Medium;
 	if (o_hard  ->value()) options |= MTF_Hard;
 
-	if (Features.strife_flags)
+	if (inst.Features.strife_flags)
 	{
 		if (o_sf_ambush->value()) options |= MTF_Strife_Ambush;
 		if (o_sf_friend->value()) options |= MTF_Strife_Friend;
@@ -774,7 +774,7 @@ int UI_ThingBox::CalcOptions() const
 
 		if (o_dormant->value()) options |= MTF_Hexen_Dormant;
 	}
-	else if (Features.coop_dm_flags)
+	else if (inst.Features.coop_dm_flags)
 	{
 		if (0 == o_sp  ->value()) options |= MTF_Not_SP;
 		if (0 == o_coop->value()) options |= MTF_Not_COOP;
@@ -787,7 +787,7 @@ int UI_ThingBox::CalcOptions() const
 
 	if (inst.Level_format == MapFormat::doom)
 	{
-		if (Features.friend_flag && o_friend->value())
+		if (inst.Features.friend_flag && o_friend->value())
 			options |= MTF_Friend;
 
 #if 0
@@ -943,7 +943,7 @@ void UI_ThingBox::UpdateTotal()
 
 void UI_ThingBox::UpdateGameInfo()
 {
-	if (Features.coop_dm_flags || inst.Level_format != MapFormat::doom)
+	if (inst.Features.coop_dm_flags || inst.Level_format != MapFormat::doom)
 	{
 		o_sp  ->show();
 		o_coop->show();
@@ -962,13 +962,13 @@ void UI_ThingBox::UpdateGameInfo()
 		o_dm  ->hide();
 	}
 
-	if (Features.friend_flag && !Features.strife_flags)
+	if (inst.Features.friend_flag && !inst.Features.strife_flags)
 		o_friend->show();
 	else
 		o_friend->hide();
 
 
-	if (Features.strife_flags)
+	if (inst.Features.strife_flags)
 	{
 		o_ambush->hide();
 

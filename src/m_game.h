@@ -31,6 +31,9 @@
 
 #include <map>
 
+// for this, set/clear/test bits using (1 << MAPF_xxx)
+typedef int map_format_bitset_t;
+
 
 /*
  *  Data structures for game definition data
@@ -140,7 +143,7 @@ enum class GenSectorFamily : int
 	zdoom	// ZDoom shifted Boom generalized sectors
 };
 
-typedef struct
+struct port_features_t
 {
 	// NOTE: values here are generally 0 or 1, but some can be higher
 
@@ -167,11 +170,10 @@ typedef struct
 	int extra_floors;		// bitmask: +1 EDGE, +2 Legacy, +4 for ZDoom in Hexen format
 	int slopes;				// bitmask: +1 EDGE, +2 Eternity, +4 Odamex,
 							//          +8 for ZDoom in Hexen format, +16 ZDoom things
-} port_features_t;
+};
 
 
 extern misc_info_t      Misc_info;
-extern port_features_t  Features;
 
 //
 // Game info
@@ -259,10 +261,6 @@ extern int num_gen_linetypes;
 
 //------------------------------------------------------------------------
 
-void M_ClearAllDefinitions();
-
-void M_LoadDefinitions(Instance &inst, const SString &folder, const SString &name);
-
 bool M_CanLoadDefinitions(const SString &folder, const SString &name);
 
 enum parse_purpose_e
@@ -273,7 +271,7 @@ enum parse_purpose_e
 	PURPOSE_PortInfo,		// load a PortInfo_c
 };
 
-void M_ParseDefinitionFile(Instance &inst,
+void M_ParseDefinitionFile(Instance *inst,
 						   parse_purpose_e purpose,
 						   void *purposeTarget,
 						   const SString &filename,
@@ -281,15 +279,17 @@ void M_ParseDefinitionFile(Instance &inst,
 						   const SString &prettyname = NULL,
                            int include_level = 0);
 
-PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port);
+PortInfo_c * M_LoadPortInfo(const SString &port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
-bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game, const SString &port);
+bool M_CheckPortSupportsGame(const SString &base_game, const SString &port);
 
 SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
 
-map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game, const char *port);
+SString M_GetBaseGame(const SString &game);
+
+map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
 
 // is this flat a sky?

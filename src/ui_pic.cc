@@ -123,7 +123,7 @@ void UI_Pic::MarkSpecial()
 
 void UI_Pic::GetFlat(const SString & fname)
 {
-	Img_c *img = W_GetFlat(fname, true /* try_uppercase */);
+	Img_c *img = inst.W_GetFlat(fname, true /* try_uppercase */);
 
 	TiledImg(img);
 }
@@ -142,7 +142,7 @@ void UI_Pic::GetTex(const SString & tname)
 		return;
 	}
 
-	Img_c *img = W_GetTexture(tname, true /* try_uppercase */);
+	Img_c *img = inst.W_GetTexture(tname, true /* try_uppercase */);
 
 	TiledImg(img);
 }

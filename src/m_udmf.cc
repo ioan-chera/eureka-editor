@@ -716,14 +716,14 @@ static void UDMF_WriteInfo(const Instance &inst, Lump_c *lump)
 	lump->Printf("namespace = \"%s\";\n\n", inst.Udmf_namespace.c_str());
 }
 
-static void UDMF_WriteThings(const Document &doc, Lump_c *lump)
+static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 {
-	for (int i = 0 ; i < doc.numThings() ; i++)
+	for (int i = 0 ; i < inst.level.numThings() ; i++)
 	{
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");
 
-		const Thing *th = doc.things[i];
+		const Thing *th = inst.level.things[i];
 
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
@@ -747,7 +747,7 @@ static void UDMF_WriteThings(const Document &doc, Lump_c *lump)
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 
-		if (Features.friend_flag)
+		if (inst.Features.friend_flag)
 			WrFlag(lump, th->options, "friend", MTF_Friend);
 
 		// TODO Hexen flags
@@ -776,14 +776,14 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 	}
 }
 
-static void UDMF_WriteLineDefs(const Document &doc, Lump_c *lump)
+static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 {
-	for (int i = 0 ; i < doc.numLinedefs(); i++)
+	for (int i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const LineDef *ld = doc.linedefs[i];
+		const LineDef *ld = inst.level.linedefs[i];
 
 		lump->Printf("v1 = %d;\n", ld->start);
 		lump->Printf("v2 = %d;\n", ld->end);
@@ -818,10 +818,10 @@ static void UDMF_WriteLineDefs(const Document &doc, Lump_c *lump)
 		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
 		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
 
-		if (Features.pass_through)
+		if (inst.Features.pass_through)
 			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
 
-		if (Features.midtex_3d)
+		if (inst.Features.midtex_3d)
 			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
 
 		// TODO : hexen stuff (SPAC flags, etc)
@@ -895,9 +895,9 @@ void UDMF_SaveLevel(const Instance &inst)
 	Lump_c *lump = inst.edit_wad->AddLump("TEXTMAP");
 
 	UDMF_WriteInfo(inst, lump);
-	UDMF_WriteThings(inst.level, lump);
+	UDMF_WriteThings(inst, lump);
 	UDMF_WriteVertices(inst.level, lump);
-	UDMF_WriteLineDefs(inst.level, lump);
+	UDMF_WriteLineDefs(inst, lump);
 	UDMF_WriteSideDefs(inst.level, lump);
 	UDMF_WriteSectors(inst.level, lump);
 

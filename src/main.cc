@@ -433,7 +433,7 @@ static void DeterminePort(Instance &inst)
 		return;
 	}
 
-	SString base_game = inst.M_GetBaseGame(inst.Game_name);
+	SString base_game = M_GetBaseGame(inst.Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -447,7 +447,7 @@ static void DeterminePort(Instance &inst)
 				  config::default_port.c_str());
 		config::default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(inst, base_game, config::default_port))
+	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
 	{
 		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
 				  config::default_port.c_str(), inst.Game_name.c_str());
@@ -783,7 +783,7 @@ static void LoadResourceFile(Instance &inst, const char *filename)
 	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(inst, PURPOSE_Resource, nullptr, filename);
+		M_ParseDefinitionFile(&inst, PURPOSE_Resource, nullptr, filename);
 		return;
 	}
 
@@ -811,32 +811,32 @@ static void Main_LoadIWAD(Instance &inst)
 }
 
 
-static void ReadGameInfo(Instance &inst)
+void Instance::ReadGameInfo()
 {
-	inst.Game_name = GameNameFromIWAD(inst.Iwad_name);
+	Game_name = GameNameFromIWAD(Iwad_name);
 
-	LogPrintf("Game name: '%s'\n", inst.Game_name.c_str());
-	LogPrintf("IWAD file: '%s'\n", inst.Iwad_name.c_str());
+	LogPrintf("Game name: '%s'\n", Game_name.c_str());
+	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
 
-	M_LoadDefinitions(inst, "games", inst.Game_name);
+	M_LoadDefinitions("games", Game_name);
 }
 
 
-static void ReadPortInfo(Instance &inst)
+void Instance::ReadPortInfo()
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(!inst.Port_name.empty());
+	SYS_ASSERT(!Port_name.empty());
 
-	SString base_game = inst.M_GetBaseGame(inst.Game_name);
+	SString base_game = M_GetBaseGame(Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(inst, base_game, inst.Port_name))
+	if (! M_CheckPortSupportsGame(base_game, Port_name))
 	{
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-			inst.Port_name.c_str(), inst.Game_name.c_str());
+			Port_name.c_str(), Game_name.c_str());
 
 		int res = DLG_Confirm("&vanilla|No Change",
 						"Warning: the given port '%s' is not compatible with "
@@ -845,17 +845,17 @@ static void ReadPortInfo(Instance &inst)
 						"To prevent seeing invalid line and sector types, "
 						"it is recommended to reset the port to something valid.\n"
 						"Select a new port now?",
-			inst.Port_name.c_str(), inst.Game_name.c_str());
+			Port_name.c_str(), Game_name.c_str());
 
 		if (res == 0)
 		{
-			inst.Port_name = "vanilla";
+			Port_name = "vanilla";
 		}
 	}
 
-	LogPrintf("Port name: '%s'\n", inst.Port_name.c_str());
+	LogPrintf("Port name: '%s'\n", Port_name.c_str());
 
-	M_LoadDefinitions(inst, "ports", inst.Port_name);
+	M_LoadDefinitions("ports", Port_name);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (Features.strife_flags)
@@ -882,8 +882,8 @@ void Instance::Main_LoadResources()
 	// clear the parse variables, pre-set a few vars
 	M_PrepareConfigVariables();
 
-	ReadGameInfo(*this);
-	ReadPortInfo(*this);
+	ReadGameInfo();
+	ReadPortInfo();
 
 	// reset the master directory
 	if (edit_wad)

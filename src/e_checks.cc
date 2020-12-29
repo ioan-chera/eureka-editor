@@ -757,17 +757,17 @@ static void bump_unknown_type(std::map<int, int>& t_map, int type)
 }
 
 
-static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, const Document &doc)
+static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, const Instance &inst)
 {
 	types.clear();
 
 	list.change_type(ObjType::sectors);
 
-	int max_type = (Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
+	int max_type = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
 
-	for (int n = 0 ; n < doc.numSectors(); n++)
+	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		int type_num = doc.sectors[n]->type;
+		int type_num = inst.level.sectors[n]->type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -781,9 +781,9 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 		}
 
 		// Boom and ZDoom generalized sectors
-		if (Features.gen_sectors == GenSectorFamily::zdoom)
+		if (inst.Features.gen_sectors == GenSectorFamily::zdoom)
 			type_num &= 255;
-		else if (Features.gen_sectors != GenSectorFamily::none)
+		else if (inst.Features.gen_sectors != GenSectorFamily::none)
 			type_num &= 31;
 
 		const sectortype_t &info = M_GetSectorType(type_num);
@@ -804,20 +804,20 @@ static void Sectors_ShowUnknown(Instance &inst)
 
 	std::map<int, int> types;
 
-	Sectors_FindUnknown(*inst.edit.Selected, types, inst.level);
+	Sectors_FindUnknown(*inst.edit.Selected, types, inst);
 
 	GoToErrors(inst);
 }
 
 
-static void Sectors_LogUnknown(const Document &doc)
+static void Sectors_LogUnknown(const Instance &inst)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 	std::map<int, int>::iterator IT;
 
-	Sectors_FindUnknown(sel, types, doc);
+	Sectors_FindUnknown(sel, types, inst);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown Sector Types:\n");
@@ -832,20 +832,20 @@ static void Sectors_LogUnknown(const Document &doc)
 }
 
 
-static void Sectors_ClearUnknown(Document &doc)
+static void Sectors_ClearUnknown(Instance &inst)
 {
 	selection_c sel;
 	std::map<int, int> types;
 
-	Sectors_FindUnknown(sel, types, doc);
+	Sectors_FindUnknown(sel, types, inst);
 
-	doc.basis.begin();
-	doc.basis.setMessage("cleared unknown sector types");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("cleared unknown sector types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		doc.basis.changeSector(*it, Sector::F_TYPE, 0);
+		inst.level.basis.changeSector(*it, Sector::F_TYPE, 0);
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -1189,14 +1189,14 @@ public:
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_LogUnknown(dialog->inst.level);
+		Sectors_LogUnknown(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_clear_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Sectors *dialog = (UI_Check_Sectors *)data;
-		Sectors_ClearUnknown(dialog->inst.level);
+		Sectors_ClearUnknown(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -1260,7 +1260,7 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 		dialog->AddGap(10);
 
 
-		Sectors_FindUnknown(sel, types, doc);
+		Sectors_FindUnknown(sel, types, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown sector types");
@@ -1536,13 +1536,13 @@ static bool TH_always_spawned(int type)
 }
 
 
-static void Things_FindDuds(const Instance &inst, selection_c& list, const Document &doc)
+static void Things_FindDuds(const Instance &inst, selection_c& list)
 {
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < doc.numThings() ; n++)
+	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = doc.things[n];
+		const Thing *T = inst.level.things[n];
 
 		if (T->type == CAMERA_PEST)
 			continue;
@@ -1555,7 +1555,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list, const Docum
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
-		else if (Features.coop_dm_flags)
+		else if (inst.Features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
@@ -1579,7 +1579,7 @@ static void Things_ShowDuds(Instance &inst)
 	if (inst.edit.mode != ObjType::things)
 		inst.Editor_ChangeMode('t');
 
-	Things_FindDuds(inst, *inst.edit.Selected, inst.level);
+	Things_FindDuds(inst, *inst.edit.Selected);
 
 	GoToErrors(inst);
 }
@@ -1616,7 +1616,7 @@ const void Things_FixDuds(Instance &inst)
 			if (modes == 0)
 				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 		}
-		else if (Features.coop_dm_flags)
+		else if (inst.Features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 
@@ -1976,7 +1976,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		}
 
 
-		Things_FindDuds(inst, sel, doc);
+		Things_FindDuds(inst, sel);
 
 		if (sel.empty())
 			dialog->AddLine("No unspawnable things -- skill flags are OK");
@@ -1996,7 +1996,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 
 		mask = Things_FindStarts(&dm_num, doc);
 
-		if (Features.no_need_players)
+		if (inst.Features.no_need_players)
 			dialog->AddLine("Player starts not needed, no check done");
 		else if (! (mask & 1))
 			dialog->AddLine("Player 1 start is missing!", 2);
@@ -2009,7 +2009,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		else
 			dialog->AddLine("Found all 4 player starts");
 
-		if (Features.no_need_players)
+		if (inst.Features.no_need_players)
 		{
 			// leave a blank space
 		}
@@ -2300,15 +2300,15 @@ static void bung_unknown_type(std::map<int, int>& t_map, int type)
 }
 
 
-static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, const Document &doc)
+static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, const Instance &inst)
 {
 	types.clear();
 
 	list.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		int type_num = doc.linedefs[n]->type;
+		int type_num = inst.level.linedefs[n]->type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -2317,7 +2317,7 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 		const linetype_t &info = M_GetLineType(type_num);
 
 		// Boom generalized line type?
-		if (Features.gen_types && is_genline(type_num))
+		if (inst.Features.gen_types && is_genline(type_num))
 			continue;
 
 		if (info.desc.startsWith("UNKNOWN"))
@@ -2337,20 +2337,20 @@ static void LineDefs_ShowUnknown(Instance &inst)
 
 	std::map<int, int> types;
 
-	LineDefs_FindUnknown(*inst.edit.Selected, types, inst.level);
+	LineDefs_FindUnknown(*inst.edit.Selected, types, inst);
 
 	GoToErrors(inst);
 }
 
 
-static void LineDefs_LogUnknown(const Document &doc)
+static void LineDefs_LogUnknown(const Instance &inst)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 	std::map<int, int>::iterator IT;
 
-	LineDefs_FindUnknown(sel, types, doc);
+	LineDefs_FindUnknown(sel, types, inst);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown Line Types:\n");
@@ -2365,20 +2365,20 @@ static void LineDefs_LogUnknown(const Document &doc)
 }
 
 
-static void LineDefs_ClearUnknown(Document &doc)
+static void LineDefs_ClearUnknown(Instance &inst)
 {
 	selection_c sel;
 	std::map<int, int> types;
 
-	LineDefs_FindUnknown(sel, types, doc);
+	LineDefs_FindUnknown(sel, types, inst);
 
-	doc.basis.begin();
-	doc.basis.setMessage("cleared unknown line types");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		doc.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
+		inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -2792,14 +2792,14 @@ public:
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_LogUnknown(dialog->inst.level);
+		LineDefs_LogUnknown(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_clear_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_ClearUnknown(dialog->inst.level);
+		LineDefs_ClearUnknown(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -2885,7 +2885,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 		dialog->AddGap(10);
 
 
-		LineDefs_FindUnknown(sel, types, doc);
+		LineDefs_FindUnknown(sel, types, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown line types");
@@ -3004,7 +3004,7 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 		int tag = doc.sectors[i]->tag;
 
 		// ignore special tags
-		if (Features.tag_666 && (tag == 666 || tag == 667))
+		if (inst.Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
 		if (tag > 0)
@@ -3117,23 +3117,23 @@ static bool SEC_tag_exists(int tag, const Document &doc)
 }
 
 
-void Tags_FindUnmatchedSectors(selection_c& secs, const Document &doc)
+static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 {
 	secs.change_type(ObjType::sectors);
 
-	for (int s = 0 ; s < doc.numSectors(); s++)
+	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		int tag = doc.sectors[s]->tag;
+		int tag = inst.level.sectors[s]->tag;
 
 		if (tag <= 0)
 			continue;
 
 		// DOOM and Heretic use tag #666 to open doors (etc) on the
 		// death of boss monsters.
-		if (Features.tag_666 && (tag == 666 || tag == 667))
+		if (inst.Features.tag_666 && (tag == 666 || tag == 667))
 			continue;
 
-		if (! LD_tag_exists(tag, doc))
+		if (! LD_tag_exists(tag, inst.level))
 			secs.set(s);
 	}
 }
@@ -3166,7 +3166,7 @@ static void Tags_ShowUnmatchedSectors(Instance &inst)
 	if (inst.edit.mode != ObjType::sectors)
 		inst.Editor_ChangeMode('s');
 
-	Tags_FindUnmatchedSectors(*inst.edit.Selected, inst.level);
+	Tags_FindUnmatchedSectors(*inst.edit.Selected, inst);
 
 	GoToErrors(inst);
 }
@@ -3226,7 +3226,7 @@ static void Tags_ShowMissingTags(Instance &inst)
 
 static bool SEC_check_beast_mark(int tag, const Instance &inst)
 {
-	if (! Features.tag_666)
+	if (! inst.Features.tag_666)
 		return true;
 
 	if (tag == 667)
@@ -3238,7 +3238,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 	if (tag == 666)
 	{
 		// for Heretic, the map must be an end-of-episode map: ExM8
-		if (Features.tag_666 == 2)
+		if (inst.Features.tag_666 == 2)
 		{
 			if (inst.Level_name.length() != 4)
 				return false;
@@ -3384,7 +3384,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		}
 
 
-		Tags_FindUnmatchedSectors(sel, doc);
+		Tags_FindUnmatchedSectors(sel, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No tagged sectors w/o a matching linedef");
@@ -3572,7 +3572,7 @@ static void Textures_FixMissing(Instance &inst)
 }
 
 
-static bool is_transparent(const SString &tex)
+static bool is_transparent(const Instance &inst, const SString &tex)
 {
 	// ignore lack of texture here
 	// [ technically "-" is the poster-child of transparency,
@@ -3580,7 +3580,7 @@ static bool is_transparent(const SString &tex)
 	if (is_null_tex(tex))
 		return false;
 
-	Img_c *img = W_GetTexture(tex);
+	Img_c *img = inst.W_GetTexture(tex);
 	if (! img)
 		return false;
 
@@ -3589,10 +3589,10 @@ static bool is_transparent(const SString &tex)
 }
 
 
-static int check_transparent(const SString &tex,
+static int check_transparent(const Instance &inst, const SString &tex,
                              std::map<SString, int>& names)
 {
-	if (is_transparent(tex))
+	if (is_transparent(inst, tex))
 	{
 		bump_unknown_name(names, tex);
 		return 1;
@@ -3602,32 +3602,32 @@ static int check_transparent(const SString &tex,
 }
 
 
-static void Textures_FindTransparent(selection_c& lines,
-                              std::map<SString, int>& names, const Document &doc)
+static void Textures_FindTransparent(const Instance &inst, selection_c& lines,
+                              std::map<SString, int>& names)
 {
 	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (check_transparent(L->Right(doc)->MidTex(), names))
+			if (check_transparent(inst, L->Right(inst.level)->MidTex(), names))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
 			// note : plain OR operator here to check all parts (do NOT want short-circuit)
-			if (check_transparent(L->Right(doc)->LowerTex(), names) |
-				check_transparent(L->Right(doc)->UpperTex(), names) |
-				check_transparent(L-> Left(doc)->LowerTex(), names) |
-				check_transparent(L-> Left(doc)->UpperTex(), names))
+			if (check_transparent(inst, L->Right(inst.level)->LowerTex(), names) |
+				check_transparent(inst, L->Right(inst.level)->UpperTex(), names) |
+				check_transparent(inst, L-> Left(inst.level)->LowerTex(), names) |
+				check_transparent(inst, L-> Left(inst.level)->UpperTex(), names))
 			{
 				lines.set(n);
 			}
@@ -3643,7 +3643,7 @@ static void Textures_ShowTransparent(Instance &inst)
 
 	std::map<SString, int> names;
 
-	Textures_FindTransparent(*inst.edit.Selected, names, inst.level);
+	Textures_FindTransparent(inst, *inst.edit.Selected, names);
 
 	GoToErrors(inst);
 }
@@ -3654,13 +3654,13 @@ static void Textures_FixTransparent(Instance &inst)
 	SString new_tex = inst.default_wall_tex;
 
 	// do something reasonable if default wall is transparent
-	if (is_transparent(new_tex))
+	if (is_transparent(inst, new_tex))
 	{
-		if (W_TextureIsKnown("SANDSQ2"))
+		if (inst.W_TextureIsKnown("SANDSQ2"))
 			new_tex = "SANDSQ2";	// Heretic
-		else if (W_TextureIsKnown("CASTLE07"))
+		else if (inst.W_TextureIsKnown("CASTLE07"))
 			new_tex = "CASTLE07";	// Hexen
-		else if (W_TextureIsKnown("BRKBRN02"))
+		else if (inst.W_TextureIsKnown("BRKBRN02"))
 			new_tex = "BRKBRN02";	// Strife
 		else
 			new_tex = "GRAY1";		// Doom
@@ -3678,21 +3678,21 @@ static void Textures_FixTransparent(Instance &inst)
 
 		if (L->OneSided())
 		{
-			if (is_transparent(L->Right(inst.level)->MidTex()))
+			if (is_transparent(inst, L->Right(inst.level)->MidTex()))
 				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			if (is_transparent(L->Left(inst.level)->LowerTex()))
+			if (is_transparent(inst, L->Left(inst.level)->LowerTex()))
 				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Left(inst.level)->UpperTex()))
+			if (is_transparent(inst, L->Left(inst.level)->UpperTex()))
 				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
-			if (is_transparent(L->Right(inst.level)->LowerTex()))
+			if (is_transparent(inst, L->Right(inst.level)->LowerTex()))
 				inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(L->Right(inst.level)->UpperTex()))
+			if (is_transparent(inst, L->Right(inst.level)->UpperTex()))
 				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -3701,14 +3701,14 @@ static void Textures_FixTransparent(Instance &inst)
 }
 
 
-static void Textures_LogTransparent(const Document &doc)
+static void Textures_LogTransparent(const Instance &inst)
 {
 	selection_c sel;
 
 	std::map<SString, int> names;
 	std::map<SString, int>::iterator IT;
 
-	Textures_FindTransparent(sel, names, doc);
+	Textures_FindTransparent(inst, sel, names);
 
 	LogPrintf("\n");
 	LogPrintf("Transparent textures on solid walls:\n");
@@ -3825,19 +3825,19 @@ static void Textures_LogMedusa(const Document &doc)
 
 
 static void Textures_FindUnknownTex(selection_c& lines,
-                             std::map<SString, int>& names, const Document &doc)
+                             std::map<SString, int>& names, const Instance &inst)
 {
 	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
-			const SideDef *SD = side ? L->Left(doc) : L->Right(doc);
+			const SideDef *SD = side ? L->Left(inst.level) : L->Right(inst.level);
 
 			if (! SD)
 				continue;
@@ -3847,7 +3847,7 @@ static void Textures_FindUnknownTex(selection_c& lines,
 				SString tex = (part == 0) ? SD->LowerTex() :
 							  (part == 1) ? SD->UpperTex() : SD->MidTex();
 
-				if (! W_TextureIsKnown(tex))
+				if (! inst.W_TextureIsKnown(tex))
 				{
 					bump_unknown_name(names, tex);
 
@@ -3860,21 +3860,21 @@ static void Textures_FindUnknownTex(selection_c& lines,
 
 
 static void Textures_FindUnknownFlat(selection_c& secs,
-                              std::map<SString, int>& names, const Document &doc)
+                              std::map<SString, int>& names, const Instance &inst)
 {
 	secs.change_type(ObjType::sectors);
 
 	names.clear();
 
-	for (int s = 0 ; s < doc.numSectors(); s++)
+	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		const Sector *S = doc.sectors[s];
+		const Sector *S = inst.level.sectors[s];
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
 			SString flat = part ? S->CeilTex() : S->FloorTex();
 
-			if (! W_FlatIsKnown(flat))
+			if (! inst.W_FlatIsKnown(flat))
 			{
 				bump_unknown_name(names, flat);
 
@@ -3892,7 +3892,7 @@ static void Textures_ShowUnknownTex(Instance &inst)
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownTex(*inst.edit.Selected, names, inst.level);
+	Textures_FindUnknownTex(*inst.edit.Selected, names, inst);
 
 	GoToErrors(inst);
 }
@@ -3905,13 +3905,13 @@ static void Textures_ShowUnknownFlat(Instance &inst)
 
 	std::map<SString, int> names;
 
-	Textures_FindUnknownFlat(*inst.edit.Selected, names, inst.level);
+	Textures_FindUnknownFlat(*inst.edit.Selected, names, inst);
 
 	GoToErrors(inst);
 }
 
 
-static void Textures_LogUnknown(bool do_flat, const Document &doc)
+static void Textures_LogUnknown(bool do_flat, const Instance &inst)
 {
 	selection_c sel;
 
@@ -3919,9 +3919,9 @@ static void Textures_LogUnknown(bool do_flat, const Document &doc)
 	std::map<SString, int>::iterator IT;
 
 	if (do_flat)
-		Textures_FindUnknownFlat(sel, names, doc);
+		Textures_FindUnknownFlat(sel, names, inst);
 	else
-		Textures_FindUnknownTex(sel, names, doc);
+		Textures_FindUnknownTex(sel, names, inst);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown %s:\n", do_flat ? "Flats" : "Textures");
@@ -3958,13 +3958,13 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 			const SideDef *SD = inst.level.sidedefs[sd_num];
 
-			if (! W_TextureIsKnown(SD->LowerTex()))
+			if (! inst.W_TextureIsKnown(SD->LowerTex()))
 				inst.level.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
-			if (! W_TextureIsKnown(SD->UpperTex()))
+			if (!inst.W_TextureIsKnown(SD->UpperTex()))
 				inst.level.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
-			if (! W_TextureIsKnown(SD->MidTex()))
+			if (!inst.W_TextureIsKnown(SD->MidTex()))
 				inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
@@ -3985,10 +3985,10 @@ static void Textures_FixUnknownFlat(Instance &inst)
 	{
 		const Sector *S = inst.level.sectors[s];
 
-		if (! W_FlatIsKnown(S->FloorTex()))
+		if (! inst.W_FlatIsKnown(S->FloorTex()))
 			inst.level.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
-		if (! W_FlatIsKnown(S->CeilTex()))
+		if (!inst.W_FlatIsKnown(S->CeilTex()))
 			inst.level.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 
@@ -4057,11 +4057,11 @@ static void Textures_FixDupSwitches(Instance &inst)
 	// do something reasonable if default wall is a switch
 	if (is_switch_tex(new_tex))
 	{
-		if (W_TextureIsKnown("SANDSQ2"))
+		if (inst.W_TextureIsKnown("SANDSQ2"))
 			new_tex = "SANDSQ2";	// Heretic
-		else if (W_TextureIsKnown("CASTLE07"))
+		else if (inst.W_TextureIsKnown("CASTLE07"))
 			new_tex = "CASTLE07";	// Hexen
-		else if (W_TextureIsKnown("BRKBRN02"))
+		else if (inst.W_TextureIsKnown("BRKBRN02"))
 			new_tex = "BRKBRN02";	// Strife
 		else
 			new_tex = "GRAY1";		// Doom
@@ -4160,7 +4160,7 @@ public:
 	static void action_log_unk_tex(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogUnknown(false, dialog->inst.level);
+		Textures_LogUnknown(false, dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -4182,7 +4182,7 @@ public:
 	static void action_log_unk_flat(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogUnknown(true, dialog->inst.level);
+		Textures_LogUnknown(true, dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -4226,7 +4226,7 @@ public:
 	static void action_log_transparent(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogTransparent(dialog->inst.level);
+		Textures_LogTransparent(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -4283,7 +4283,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 
 	for (;;)
 	{
-		Textures_FindUnknownTex(sel, names, doc);
+		Textures_FindUnknownTex(sel, names, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown textures");
@@ -4298,7 +4298,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 		}
 
 
-		Textures_FindUnknownFlat(sel, names, doc);
+		Textures_FindUnknownFlat(sel, names, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown flats");
@@ -4313,7 +4313,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 		}
 
 
-		if (! Features.medusa_fixed)
+		if (! inst.Features.medusa_fixed)
 		{
 			Textures_FindMedusa(sel, names, doc);
 
@@ -4347,7 +4347,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 		}
 
 
-		Textures_FindTransparent(sel, names, doc);
+		Textures_FindTransparent(inst, sel, names);
 
 		if (sel.empty())
 			dialog->AddLine("No transparent textures on solids");

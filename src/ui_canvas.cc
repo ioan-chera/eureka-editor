@@ -2094,7 +2094,7 @@ void UI_Canvas::RenderSector(int num)
 		}
 		else
 		{
-			img = W_GetFlat(tex_name);
+			img = inst.W_GetFlat(tex_name);
 
 			if (! img)
 			{

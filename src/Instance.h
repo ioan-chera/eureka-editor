@@ -22,6 +22,7 @@
 #include "Document.h"
 #include "e_main.h"
 #include "im_img.h"
+#include "m_game.h"
 #include "main.h"
 
 #include <unordered_map>
@@ -175,6 +176,14 @@ public:
 	void R3D_WHEEL_Move();
 	void Transform_Update();
 
+	// E_CUTPASTE
+	void Texboard_SetFlat(const SString &new_flat) const;
+	void Texboard_SetTex(const SString &new_tex) const;
+
+	// E_LINEDEF
+	bool LD_RailHeights(int &z1, int &z2, const LineDef *L, const SideDef *sd,
+		const Sector *front, const Sector *back) const;
+
 	// E_MAIN
 	void CalculateLevelBounds();
 	void Editor_ChangeMode(char mode_char);
@@ -299,7 +308,7 @@ public:
 	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
-	SString M_GetBaseGame(const SString &game);
+	void M_ClearAllDefinitions();
 	void M_PrepareConfigVariables();
 
 	// M_KEYS
@@ -315,6 +324,7 @@ public:
 	void Main_LoadResources();
 
 	// R_RENDER
+	void Render3D_CB_Copy() const;
 	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 	bool Render3D_ParseUser(const std::vector<SString> &tokens);
 	void Render3D_Setup();
@@ -341,10 +351,15 @@ public:
 	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
 	// W_TEXTURE
+	bool W_FlatIsKnown(const SString &name) const;
+	Img_c *W_GetFlat(const SString &name, bool try_uppercase = false) const;
 	Img_c *W_GetSprite(int type) const;
+	Img_c *W_GetTexture(const SString &name, bool try_uppercase = false) const;
+	int W_GetTextureHeight(const SString &name) const;
 	void W_LoadFlats() const;
 	void W_LoadTextures() const;
 	void W_LoadTextures_TX_START(Wad_file *wf) const;
+	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
 	void MasterDir_Add(Wad_file *wad);
@@ -370,6 +385,17 @@ private:
 	int EV_RawWheel(int event);
 	void M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
 	bool M_ParseOperationFile();
+
+	// MAIN
+	void M_LoadDefinitions(const SString &folder, const SString &name);
+	void ReadGameInfo();
+	void ReadPortInfo();
+
+	// R_RENDER
+	int GrabSelectedFlat() const;
+	int GrabSelectedTexture() const;
+	int GrabSelectedThing() const;
+	int LD_GrabTex(const LineDef *L, int part) const;
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
@@ -401,6 +427,7 @@ public:	// will be private when we encapsulate everything
 	SString default_wall_tex = "GRAY1";
 	SString default_floor_tex = "FLAT1";
 	SString default_ceil_tex = "FLAT1";
+	port_features_t Features = {};
 
 	//
 	// Panel stuff
@@ -475,7 +502,9 @@ public:	// will be private when we encapsulate everything
 	bool use_npot_textures = false;
 #endif
 
+	//
 	// IO stuff
+	//
 	nav_active_key_t cur_action_key = {};
 	bool in_operation_menu = false;
 	int mouse_last_x = 0;
