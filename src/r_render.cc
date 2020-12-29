@@ -1056,7 +1056,7 @@ void Instance::Render3D_UpdateHighlight()
 
 void Render3D_Navigate(Instance &inst)
 {
-	float delay_ms = static_cast<float>(Nav_TimeDiff());
+	float delay_ms = static_cast<float>(inst.Nav_TimeDiff());
 
 	delay_ms = delay_ms / 1000.0f;
 

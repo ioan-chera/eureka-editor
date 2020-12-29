@@ -159,7 +159,7 @@ void Instance::Editor_ClearNav()
 
 static void Navigate2D(Instance &inst)
 {
-	float delay_ms = static_cast<float>(Nav_TimeDiff());
+	float delay_ms = static_cast<float>(inst.Nav_TimeDiff());
 
 	delay_ms = delay_ms / 1000.0f;
 
@@ -186,12 +186,6 @@ static void Navigate2D(Instance &inst)
 
 	inst.RedrawMap();
 }
-
-
-/* navigation system */
-
-static unsigned int nav_time;
-
 
 void Instance::Nav_Clear()
 {
@@ -375,7 +369,7 @@ static void Nav_UpdateKeys(Instance &inst)
 
 
 // returns number of milliseconds since the previous call
-unsigned int Nav_TimeDiff()
+unsigned int Instance::Nav_TimeDiff()
 {
 	unsigned int old_time = nav_time;
 

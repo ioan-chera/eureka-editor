@@ -283,6 +283,7 @@ public:
 	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
 	bool Nav_SetKey(keycode_t key, nav_release_func_t func);
+	unsigned Nav_TimeDiff();
 
 	// M_FILES
 	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
@@ -462,6 +463,7 @@ public:	// will be private when we encapsulate everything
 	int mouse_last_x = 0;
 	int mouse_last_y = 0;
 	nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS] = {};
+	unsigned nav_time = 0;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

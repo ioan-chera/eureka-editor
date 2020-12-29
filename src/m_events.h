@@ -83,8 +83,6 @@ extern int wheel_dy;
 
 void Nav_Navigate(Instance &inst);
 
-unsigned int Nav_TimeDiff(); /* milliseconds */
-
 void M_LoadOperationMenus(Instance &inst);
 
 #endif /* __EUREKA_M_EVENTS_H__ */
