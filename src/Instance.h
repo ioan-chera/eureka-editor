@@ -24,6 +24,8 @@
 #include "im_img.h"
 #include "main.h"
 
+#include <unordered_map>
+
 class Fl_RGB_Image;
 class Lump_c;
 
@@ -277,11 +279,16 @@ public:
 	bool M_SaveUserState() const;
 
 	// M_EVENTS
+	void ClearStickyMod();
 	void Editor_ClearNav();
 	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
 	void Editor_SetAction(editor_action_e new_action);
+	void EV_EscapeKey();
+	int EV_HandleEvent(int event);
+	void M_LoadOperationMenus();
 	bool Nav_ActionKey(keycode_t key, nav_release_func_t func);
 	void Nav_Clear();
+	void Nav_Navigate();
 	bool Nav_SetKey(keycode_t key, nav_release_func_t func);
 	unsigned Nav_TimeDiff();
 
@@ -352,6 +359,17 @@ private:
 	void navigationScroll(float *editNav, nav_release_func_t func);
 	void navigation3DMove(float *editNav, nav_release_func_t func, bool fly);
 	void navigation3DTurn(float *editNav, nav_release_func_t func);
+
+	// M_EVENTS
+	void EV_EnterWindow();
+	void EV_LeaveWindow();
+	void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	int EV_RawButton(int event);
+	int EV_RawKey(int event);
+	int EV_RawMouse(int event);
+	int EV_RawWheel(int event);
+	void M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
+	bool M_ParseOperationFile();
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
@@ -464,6 +482,11 @@ public:	// will be private when we encapsulate everything
 	int mouse_last_y = 0;
 	nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS] = {};
 	unsigned nav_time = 0;
+	bool no_operation_cfg = false;
+	std::unordered_map<SString, Fl_Menu_Button *> op_all_menus;
+	// these are grabbed from FL_MOUSEWHEEL events
+	int wheel_dx = 0;
+	int wheel_dy = 0;
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

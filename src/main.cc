@@ -521,7 +521,7 @@ int Main_key_handler(int event)
 	if (Fl::event_key() == FL_Escape)
 	{
 		// TODO: use the currently active instance instead
-		EV_EscapeKey(gInstance);
+		gInstance.EV_EscapeKey();
 		return 1;
 	}
 
@@ -745,7 +745,7 @@ void Main_Loop()
 		// TODO: determine the active instance
 		if (gInstance.edit.is_navigating)
 		{
-			Nav_Navigate(gInstance);
+			gInstance.Nav_Navigate();
 
 			Fl::wait(0);
 
@@ -1064,7 +1064,7 @@ int main(int argc, char *argv[])
 
 		init_progress = ProgressStatus::window;
 
-		M_LoadOperationMenus(gInstance);
+		gInstance.M_LoadOperationMenus();
 
 
 		// open a specified PWAD now

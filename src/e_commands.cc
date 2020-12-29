@@ -54,7 +54,7 @@ void Instance::CMD_MetaKey()
 {
 	if (edit.sticky_mod)
 	{
-		ClearStickyMod(*this);
+		ClearStickyMod();
 		return;
 	}
 

@@ -68,22 +68,10 @@ void Editor_UpdateFromScroll();
 
 /* raw input handling */
 
-int EV_HandleEvent(Instance &inst, int event);
-void EV_EscapeKey(Instance &inst);
-
-void ClearStickyMod(Instance &inst);
-
 keycode_t M_RawKeyForEvent(int event);
 keycode_t M_CookedKeyForEvent(int event);
 
 keycode_t M_ReadLaxModifiers();
-
-extern int wheel_dx;
-extern int wheel_dy;
-
-void Nav_Navigate(Instance &inst);
-
-void M_LoadOperationMenus(Instance &inst);
 
 #endif /* __EUREKA_M_EVENTS_H__ */
 

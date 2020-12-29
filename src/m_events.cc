@@ -37,12 +37,12 @@
 #include "ui_misc.h"
 
 
-void ClearStickyMod(Instance &inst)
+void Instance::ClearStickyMod()
 {
-	if (inst.edit.sticky_mod)
-		inst.Status_Clear();
+	if (edit.sticky_mod)
+		Status_Clear();
 
-	inst.edit.sticky_mod = 0;
+	edit.sticky_mod = 0;
 }
 
 void Instance::Editor_ClearAction()
@@ -197,12 +197,12 @@ void Instance::Nav_Clear()
 }
 
 
-void Nav_Navigate(Instance &inst)
+void Instance::Nav_Navigate()
 {
-	if (inst.edit.render3d)
-		Render3D_Navigate(inst);
+	if (edit.render3d)
+		Render3D_Navigate(*this);
 	else
-		Navigate2D(inst);
+		Navigate2D(*this);
 }
 
 
@@ -393,133 +393,128 @@ unsigned int Instance::Nav_TimeDiff()
 //   EVENT HANDLING
 //------------------------------------------------------------------------
 
-// these are grabbed from FL_MOUSEWHEEL events
-int wheel_dx;
-int wheel_dy;
-
-
-static void EV_EnterWindow(Instance &inst)
+void Instance::EV_EnterWindow()
 {
 	if (!global::app_has_focus)
 	{
-		inst.edit.pointer_in_window = false;
+		edit.pointer_in_window = false;
 		return;
 	}
 
-	inst.edit.pointer_in_window = true;
+	edit.pointer_in_window = true;
 
-	inst.main_win->canvas->PointerPos(true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 	// restore keyboard focus to the canvas
-	Fl_Widget * foc = inst.main_win->canvas;
+	Fl_Widget * foc = main_win->canvas;
 
 	if (Fl::focus() != foc)
 		foc->take_focus();
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-static void EV_LeaveWindow(Instance &inst)
+void Instance::EV_LeaveWindow()
 {
 	// ignore FL_LEAVE event when doing a popup operation menu,
 	// otherwise we lose the highlight and kill drawing mode.
-	if (inst.in_operation_menu)
+	if (in_operation_menu)
 		return;
 
-	inst.edit.pointer_in_window = false;
+	edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
-	if (inst.edit.action == ACT_DRAW_LINE)
-		inst.Editor_ClearAction();
+	if (edit.action == ACT_DRAW_LINE)
+		Editor_ClearAction();
 
 	// this will update (disable) any current highlight
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-void EV_EscapeKey(Instance &inst)
+void Instance::EV_EscapeKey()
 {
-	inst.Nav_Clear();
-	ClearStickyMod(inst);
-	inst.Editor_ClearAction();
-	inst.Status_Clear();
+	Nav_Clear();
+	ClearStickyMod();
+	Editor_ClearAction();
+	Status_Clear();
 
-	inst.edit.clicked.clear();
-	inst.edit.dragged.clear();
-	inst.edit.split_line.clear();
-	inst.edit.draw_from.clear();
+	edit.clicked.clear();
+	edit.dragged.clear();
+	edit.split_line.clear();
+	edit.draw_from.clear();
 
-	inst.UpdateHighlight();
-	inst.RedrawMap();
+	UpdateHighlight();
+	RedrawMap();
 }
 
 
-static void EV_MouseMotion(Instance &inst, int x, int y, keycode_t mod, int dx, int dy)
+void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 {
 	// this is probably redundant, as we generally shouldn't get here
 	// unless the mouse is in the 2D/3D view (or began a drag there).
-	inst.edit.pointer_in_window = true;
+	edit.pointer_in_window = true;
 
-	inst.main_win->canvas->PointerPos(true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 //  fprintf(stderr, "MOUSE MOTION: (%d %d)  map: (%1.2f %1.2f)\n", x, y, inst.edit.map_x, inst.edit.map_y);
 
-	if (inst.edit.is_panning)
+	if (edit.is_panning)
 	{
-		inst.Editor_ScrollMap(0, dx, dy, mod);
+		Editor_ScrollMap(0, dx, dy, mod);
 		return;
 	}
 
-	inst.main_win->info_bar->SetMouse(inst.edit.map_x, inst.edit.map_y);
+	main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
 
-	if (inst.edit.action == ACT_TRANSFORM)
+	if (edit.action == ACT_TRANSFORM)
 	{
-		inst.Transform_Update();
+		Transform_Update();
 		return;
 	}
 
-	if (inst.edit.action == ACT_DRAW_LINE)
+	if (edit.action == ACT_DRAW_LINE)
 	{
 		// this calls UpdateHighlight() which updates inst.edit.draw_to_x/y
-		inst.RedrawMap();
+		RedrawMap();
 		return;
 	}
 
-	if (inst.edit.action == ACT_SELBOX)
+	if (edit.action == ACT_SELBOX)
 	{
-		inst.edit.selbox_x2 = inst.edit.map_x;
-		inst.edit.selbox_y2 = inst.edit.map_y;
+		edit.selbox_x2 = edit.map_x;
+		edit.selbox_y2 = edit.map_y;
 
-		inst.main_win->canvas->redraw();
+		main_win->canvas->redraw();
 		return;
 	}
 
-	if (inst.edit.action == ACT_DRAG)
+	if (edit.action == ACT_DRAG)
 	{
-		inst.edit.drag_screen_dx = x - inst.edit.click_screen_x;
-		inst.edit.drag_screen_dy = y - inst.edit.click_screen_y;
+		edit.drag_screen_dx = x - edit.click_screen_x;
+		edit.drag_screen_dy = y - edit.click_screen_y;
 
-		inst.edit.drag_cur_x = inst.edit.map_x;
-		inst.edit.drag_cur_y = inst.edit.map_y;
+		edit.drag_cur_x = edit.map_x;
+		edit.drag_cur_y = edit.map_y;
 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta
-		if (inst.edit.mode == ObjType::vertices && inst.edit.dragged.valid())
-			inst.UpdateHighlight();
+		if (edit.mode == ObjType::vertices && edit.dragged.valid())
+			UpdateHighlight();
 
-		inst.main_win->canvas->redraw();
+		main_win->canvas->redraw();
 		return;
 	}
 
 	// begin dragging?
-	if (inst.edit.action == ACT_CLICK)
+	if (edit.action == ACT_CLICK)
 	{
-		inst.CheckBeginDrag();
+		CheckBeginDrag();
 	}
 
 	// in general, just update the highlight, split-line (etc)
-	inst.UpdateHighlight();
+	UpdateHighlight();
 }
 
 
@@ -591,9 +586,9 @@ keycode_t M_ReadLaxModifiers()
 }
 
 
-static int EV_RawKey(Instance &inst, int event)
+int Instance::EV_RawKey(int event)
 {
-	Nav_UpdateKeys(inst);
+	Nav_UpdateKeys(*this);
 
 	if (event == FL_KEYUP || event == FL_RELEASE)
 		return 0;
@@ -601,12 +596,12 @@ static int EV_RawKey(Instance &inst, int event)
 	int raw_key   = M_RawKeyForEvent(event);
 	int raw_state = Fl::event_state();
 
-	int old_sticky_mod = inst.edit.sticky_mod;
+	int old_sticky_mod = edit.sticky_mod;
 
-	if (inst.edit.sticky_mod)
+	if (edit.sticky_mod)
 	{
-		raw_state = inst.edit.sticky_mod;
-		ClearStickyMod(inst);
+		raw_state = edit.sticky_mod;
+		ClearStickyMod();
 	}
 
 	keycode_t key = M_TranslateKey(raw_key, raw_state);
@@ -620,13 +615,13 @@ static int EV_RawKey(Instance &inst, int event)
 
 	// keyboard propagation logic
 
-	if (inst.main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
 		return 1;
 
-	if (inst.edit.render3d && ExecuteKey(key, KCTX_Render))
+	if (edit.render3d && ExecuteKey(key, KCTX_Render))
 		return 1;
 
-	if (ExecuteKey(key, M_ModeToKeyContext(inst.edit.mode)))
+	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
 		return 1;
 
 	if (ExecuteKey(key, KCTX_General))
@@ -649,12 +644,12 @@ static int EV_RawKey(Instance &inst, int event)
 }
 
 
-static int EV_RawWheel(Instance &inst, int event)
+int Instance::EV_RawWheel(int event)
 {
-	ClearStickyMod(inst);
+	ClearStickyMod();
 
 	// ensure we zoom from correct place
-	inst.main_win->canvas->PointerPos(true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 	wheel_dx = Fl::event_dx();
 	wheel_dy = Fl::event_dy();
@@ -662,17 +657,17 @@ static int EV_RawWheel(Instance &inst, int event)
 	if (wheel_dx == 0 && wheel_dy == 0)
 		return 1;
 
-	EV_RawKey(inst, FL_MOUSEWHEEL);
+	EV_RawKey(FL_MOUSEWHEEL);
 
 	return 1;
 }
 
 
-static int EV_RawButton(Instance &inst, int event)
+int Instance::EV_RawButton(int event)
 {
-	ClearStickyMod(inst);
+	ClearStickyMod();
 
-	inst.main_win->canvas->PointerPos(true /* in_event */);
+	main_win->canvas->PointerPos(true /* in_event */);
 
 	// Hack Alert : this is required to support pressing two buttons at the
 	// same time.  Without this, FLTK does not send us the second button
@@ -680,7 +675,7 @@ static int EV_RawButton(Instance &inst, int event)
 	// widget becomes NULL.
 
 	if (Fl::event_buttons() != 0)
-		Fl::pushed(inst.main_win->canvas);
+		Fl::pushed(main_win->canvas);
 
 
 	int button = Fl::event_button();
@@ -688,37 +683,37 @@ static int EV_RawButton(Instance &inst, int event)
 	if (button < 1 || button > 8)
 		return 0;
 
-	return EV_RawKey(inst, event);
+	return EV_RawKey(event);
 }
 
 
-static int EV_RawMouse(Instance &inst, int event)
+int Instance::EV_RawMouse(int event)
 {
 	if (!global::app_has_focus)
 		return 1;
 
 	int mod = Fl::event_state() & EMOD_ALL_MASK;
 
-	int dx = Fl::event_x() - inst.mouse_last_x;
-	int dy = Fl::event_y() - inst.mouse_last_y;
+	int dx = Fl::event_x() - mouse_last_x;
+	int dy = Fl::event_y() - mouse_last_y;
 
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		inst.Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 	else
 	{
-		EV_MouseMotion(inst, Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
 	}
 
-	inst.mouse_last_x = Fl::event_x();
-	inst.mouse_last_y = Fl::event_y();
+	mouse_last_x = Fl::event_x();
+	mouse_last_y = Fl::event_y();
 
 	return 1;
 }
 
 
-int EV_HandleEvent(Instance &inst, int event)
+int Instance::EV_HandleEvent(int event)
 {
 	//// fprintf(stderr, "HANDLE EVENT %d\n", event);
 
@@ -728,28 +723,28 @@ int EV_HandleEvent(Instance &inst, int event)
 			return 1;
 
 		case FL_ENTER:
-			EV_EnterWindow(inst);
+			EV_EnterWindow();
 			return 1;
 
 		case FL_LEAVE:
-			EV_LeaveWindow(inst);
+			EV_LeaveWindow();
 			return 1;
 
 		case FL_KEYDOWN:
 		case FL_KEYUP:
 		case FL_SHORTCUT:
-			return EV_RawKey(inst, event);
+			return EV_RawKey(event);
 
 		case FL_PUSH:
 		case FL_RELEASE:
-			return EV_RawButton(inst, event);
+			return EV_RawButton(event);
 
 		case FL_MOUSEWHEEL:
-			return EV_RawWheel(inst, event);
+			return EV_RawWheel(event);
 
 		case FL_DRAG:
 		case FL_MOVE:
-			return EV_RawMouse(inst, event);
+			return EV_RawMouse(event);
 
 		default:
 			// pass on everything else
@@ -764,18 +759,12 @@ int EV_HandleEvent(Instance &inst, int event)
 //   OPERATION MENU(S)
 //------------------------------------------------------------------------
 
-static bool no_operation_cfg;
-
-static std::map< SString, Fl_Menu_Button* > op_all_menus;
-
-
-typedef struct
+struct operation_command_t
 {
 	const editor_command_t *cmd;
 
 	SString param[MAX_EXEC_PARAM];
-
-} operation_command_t;
+};
 
 
 static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Button *menu)
@@ -799,10 +788,10 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 
 	// parse the command and its parameters...
 	if (tokens.size() < 2)
-		FatalError("operations.cfg: entry missing description.\n");
+		ThrowException("operations.cfg: entry missing description.\n");
 
 	if (tokens.size() < 3)
-		FatalError("operations.cfg: entry missing command name.\n");
+		ThrowException("operations.cfg: entry missing command name.\n");
 
 	const editor_command_t *cmd = FindEditorCommand(tokens[2]);
 
@@ -827,7 +816,7 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 }
 
 
-static void M_AddOperationMenu(Instance &inst, SString context, Fl_Menu_Button *menu)
+void Instance::M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu)
 {
 	if (menu->size() < 2)
 	{
@@ -855,13 +844,13 @@ static void M_AddOperationMenu(Instance &inst, SString context, Fl_Menu_Button *
 
 	op_all_menus[context] = menu;
 
-	inst.main_win->add(menu);
+	main_win->add(menu);
 }
 
 
 #define MAX_TOKENS  30
 
-static bool M_ParseOperationFile(Instance &inst)
+bool Instance::M_ParseOperationFile()
 {
 	// open the file and build all the menus it contains.
 
@@ -912,7 +901,7 @@ static bool M_ParseOperationFile(Instance &inst)
 			}
 
 			if (menu != NULL)
-				M_AddOperationMenu(inst, context, menu);
+				M_AddOperationMenu(context, menu);
 
 			// create new menu
 			menu = new Fl_Menu_Button(0, 0, 99, 99, "");
@@ -930,17 +919,17 @@ static bool M_ParseOperationFile(Instance &inst)
 	file.close();
 
 	if (menu != NULL)
-		M_AddOperationMenu(inst, context, menu);
+		M_AddOperationMenu(context, menu);
 
 	return true;
 }
 
 
-void M_LoadOperationMenus(Instance &inst)
+void Instance::M_LoadOperationMenus()
 {
 	LogPrintf("Loading Operation menus...\n");
 
-	if (! M_ParseOperationFile(inst))
+	if (! M_ParseOperationFile())
 	{
 		no_operation_cfg = true;
 		DLG_Notify("Installation problem: cannot find \"operations.cfg\" file!");

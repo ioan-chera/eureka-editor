@@ -197,7 +197,7 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
-	if (EV_HandleEvent(inst, event))
+	if (inst.EV_HandleEvent(event))
 		return 1;
 
 	return Fl_Widget::handle(event);
