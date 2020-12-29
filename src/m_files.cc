@@ -32,7 +32,10 @@
 
 // list of known iwads (mapping GAME name --> PATH)
 
-static std::map<SString, SString> known_iwads;
+namespace global
+{
+	static std::map<SString, SString> known_iwads;
+}
 
 
 void M_AddKnownIWAD(const SString &path)
@@ -41,7 +44,7 @@ void M_AddKnownIWAD(const SString &path)
 
 	const SString &game = GameNameFromIWAD(path);
 
-	known_iwads[game] = absolute_name;
+	global::known_iwads[game] = absolute_name;
 }
 
 
@@ -49,9 +52,9 @@ SString M_QueryKnownIWAD(const SString &game)
 {
 	std::map<SString, SString>::iterator KI;
 
-	KI = known_iwads.find(game);
+	KI = global::known_iwads.find(game);
 
-	if (KI != known_iwads.end())
+	if (KI != global::known_iwads.end())
 		return KI->second;
 	else
 		return "";
@@ -70,7 +73,7 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 
 	int index = 0;
 
-	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
+	for (KI = global::known_iwads.begin() ; KI != global::known_iwads.end() ; KI++, index++)
 	{
 		const SString &name = KI->first;
 
@@ -87,11 +90,11 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 }
 
 
-void M_WriteKnownIWADs(FILE *fp)
+static void M_WriteKnownIWADs(FILE *fp)
 {
 	std::map<SString, SString>::iterator KI;
 
-	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
+	for (KI = global::known_iwads.begin() ; KI != global::known_iwads.end() ; KI++)
 	{
 		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
 	}
@@ -125,22 +128,25 @@ int M_FindGivenFile(const char *filename)
 
 // the set of all known source port paths
 
-static std::map<SString, port_path_info_t> port_paths;
+namespace global
+{
+	static std::map<SString, port_path_info_t> port_paths;
+}
 
 
 port_path_info_t * M_QueryPortPath(const SString &name, bool create_it)
 {
 	std::map<SString, port_path_info_t>::iterator IT;
 
-	IT = port_paths.find(name);
+	IT = global::port_paths.find(name);
 
-	if (IT != port_paths.end())
+	if (IT != global::port_paths.end())
 		return &IT->second;
 
 	if (create_it)
 	{
 		port_path_info_t info;
-		port_paths[name] = info;
+		global::port_paths[name] = info;
 
 		return M_QueryPortPath(name);
 	}
@@ -193,7 +199,7 @@ void M_WritePortPaths(FILE *fp)
 {
 	std::map<SString, port_path_info_t>::iterator IT;
 
-	for (IT = port_paths.begin() ; IT != port_paths.end() ; IT++)
+	for (IT = global::port_paths.begin() ; IT != global::port_paths.end() ; IT++)
 	{
 		port_path_info_t& info = IT->second;
 
@@ -421,7 +427,7 @@ static void ParseMiscConfig(std::istream &is)
 			if(map.noCaseEqual("freedoom"))
 				LogPrintf("  ignoring for compatibility: %s\n", path.c_str());
 			else if(Wad_file::Validate(path))
-				known_iwads[map] = path;
+				global::known_iwads[map] = path;
 			else
 				LogPrintf("  no longer exists: %s\n", path.c_str());
 		}
@@ -452,8 +458,8 @@ void M_LoadRecent()
 	LogPrintf("Reading recent list from: %s\n", filename.c_str());
 
 	global::recent_files.clear();
-	 known_iwads.clear();
-	  port_paths.clear();
+	global::known_iwads.clear();
+	global::port_paths.clear();
 
 	ParseMiscConfig(is);
 }
@@ -802,9 +808,9 @@ SString Instance::M_PickDefaultIWAD() const
 
 	std::map<SString, SString>::iterator KI;
 
-	KI = known_iwads.begin();
+	KI = global::known_iwads.begin();
 
-	if (KI != known_iwads.end())
+	if (KI != global::known_iwads.end())
 		return KI->second;
 
 	// nothing left to try
