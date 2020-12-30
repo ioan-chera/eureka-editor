@@ -2132,15 +2132,15 @@ static void LineDefs_ShowMissingRight(Instance &inst)
 }
 
 
-static void LineDefs_FindManualDoors(selection_c& lines, const Document &doc)
+static void LineDefs_FindManualDoors(selection_c& lines, const Instance &inst)
 {
 	// find D1/DR manual doors on one-sided linedefs
 
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -2148,7 +2148,7 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Document &doc)
 		if (L->left >= 0)
 			continue;
 
-		const linetype_t &info = M_GetLineType(L->type);
+		const linetype_t &info = inst.M_GetLineType(L->type);
 
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
@@ -2164,34 +2164,34 @@ static void LineDefs_ShowManualDoors(Instance &inst)
 	if (inst.edit.mode != ObjType::linedefs)
 		inst.Editor_ChangeMode('l');
 
-	LineDefs_FindManualDoors(*inst.edit.Selected, inst.level);
+	LineDefs_FindManualDoors(*inst.edit.Selected, inst);
 
 	GoToErrors(inst);
 }
 
 
-static void LineDefs_FixManualDoors(Document &doc)
+static void LineDefs_FixManualDoors(Instance &inst)
 {
-	doc.basis.begin();
-	doc.basis.setMessage("fixed manual doors");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed manual doors");
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		if (L->type <= 0 || L->left >= 0)
 			continue;
 
-		const linetype_t &info = M_GetLineType(L->type);
+		const linetype_t &info = inst.M_GetLineType(L->type);
 
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
-			doc.basis.changeLinedef(n, LineDef::F_TYPE, 0);
+			inst.level.basis.changeLinedef(n, LineDef::F_TYPE, 0);
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -2314,7 +2314,7 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 		if (type_num == 0)
 			continue;
 
-		const linetype_t &info = M_GetLineType(type_num);
+		const linetype_t &info = inst.M_GetLineType(type_num);
 
 		// Boom generalized line type?
 		if (inst.Features.gen_types && is_genline(type_num))
@@ -2747,7 +2747,7 @@ public:
 	static void action_fix_manual_doors(Fl_Widget *w, void *data)
 	{
 		UI_Check_LineDefs *dialog = (UI_Check_LineDefs *)data;
-		LineDefs_FixManualDoors(dialog->inst.level);
+		LineDefs_FixManualDoors(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -2913,7 +2913,7 @@ CheckResult ChecksModule::checkLinedefs(int min_severity) const
 		}
 
 
-		LineDefs_FindManualDoors(sel, doc);
+		LineDefs_FindManualDoors(sel, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No manual doors on 1S linedefs");
@@ -3183,13 +3183,13 @@ static void Tags_ShowUnmatchedLineDefs(Instance &inst)
 }
 
 
-static void Tags_FindMissingTags(selection_c& lines, const Document &doc)
+static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -3201,7 +3201,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Document &doc)
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 
 		// TODO: boom generalized manual doors (etc??)
-		const linetype_t &info = M_GetLineType(L->type);
+		const linetype_t &info = inst.M_GetLineType(L->type);
 
 		char first = info.desc[0];
 
@@ -3218,7 +3218,7 @@ static void Tags_ShowMissingTags(Instance &inst)
 	if (inst.edit.mode != ObjType::linedefs)
 		inst.Editor_ChangeMode('l');
 
-	Tags_FindMissingTags(*inst.edit.Selected, inst.level);
+	Tags_FindMissingTags(*inst.edit.Selected, inst);
 
 	GoToErrors(inst);
 }
@@ -3358,7 +3358,7 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 
 	for (;;)
 	{
-		Tags_FindMissingTags(sel, doc);
+		Tags_FindMissingTags(sel, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No linedefs missing a needed tag");

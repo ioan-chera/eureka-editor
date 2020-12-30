@@ -255,7 +255,6 @@ struct generalized_linetype_t
 };
 
 
-extern generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
 extern int num_gen_linetypes;
 
 
@@ -300,15 +299,11 @@ bool is_special_tex(const SString &tex);	// begins with "#"
 
 
 const sectortype_t & M_GetSectorType(int type);
-const linetype_t   & M_GetLineType(int type);
 const thingtype_t  & M_GetThingType(int type);
 
 char M_GetTextureType(const SString &name);
-char M_GetFlatType(const SString &name);
 
-SString M_LineCategoryString(SString &letters);
 SString M_ThingCategoryString(SString &letters);
-SString M_TextureCategoryString(SString &letters, bool do_flats);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

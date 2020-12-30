@@ -42,10 +42,8 @@
 extern std::map<SString, Img_c *> flats;
 extern std::map<SString, Img_c *> textures;
 
-extern std::map<char, linegroup_t>  line_groups;
 extern std::map<char, thinggroup_t> thing_groups;
 
-extern std::map<int, linetype_t>   line_types;
 extern std::map<int, sectortype_t> sector_types;
 extern std::map<int, thingtype_t>  thing_types;
 
@@ -737,7 +735,7 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 		UI_Pic *pic = new UI_Pic(inst, cx + 8, cy + 4, pic_w, pic_h);
 
 		if (imkind == 'F')
-			item_cat = M_GetFlatType(name);
+			item_cat = inst.M_GetFlatType(name);
 		else if (imkind == 'T')
 			item_cat = M_GetTextureType(name);
 
@@ -852,7 +850,7 @@ void UI_Browser_Box::Populate_LineTypes()
 
 	char full_desc[256];
 
-	for (TI = line_types.begin() ; TI != line_types.end() ; TI++)
+	for (TI = inst.line_types.begin() ; TI != inst.line_types.end() ; TI++)
 	{
 		const linetype_t &info = TI->second;
 
@@ -1418,7 +1416,7 @@ void UI_Generalized_Box::CreatePages()
 
 	for (int i = 0 ; i < num_gen_linetypes ; i++)
 	{
-		const generalized_linetype_t *info = &gen_linetypes[i];
+		const generalized_linetype_t *info = &inst.gen_linetypes[i];
 
 		category->add(info->name.c_str());
 
@@ -1585,16 +1583,16 @@ void UI_Browser::Populate()
 
 	SString letters;
 
-	SString tex_cats = M_TextureCategoryString(letters, false);
+	SString tex_cats = inst.M_TextureCategoryString(letters, false);
 	browsers[0]->SetCategories(tex_cats, letters);
 
-	SString flat_cats = M_TextureCategoryString(letters, true);
+	SString flat_cats = inst.M_TextureCategoryString(letters, true);
 	browsers[1]->SetCategories(flat_cats, letters);
 
 	SString thing_cats = M_ThingCategoryString(letters);
 	browsers[2]->SetCategories(thing_cats, letters);
 
-	SString line_cats = M_LineCategoryString(letters);
+	SString line_cats = inst.M_LineCategoryString(letters);
 	browsers[3]->SetCategories(line_cats, letters);
 
 	// TODO: sector_cats

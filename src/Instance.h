@@ -309,7 +309,11 @@ public:
 
 	// M_GAME
 	void M_ClearAllDefinitions();
+	char M_GetFlatType(const SString &name) const;
+	const linetype_t &M_GetLineType(int type) const;
+	SString M_LineCategoryString(SString &letters) const;
 	void M_PrepareConfigVariables();
+	SString M_TextureCategoryString(SString &letters, bool do_flats) const;
 
 	// M_KEYS
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
@@ -428,6 +432,10 @@ public:	// will be private when we encapsulate everything
 	SString default_floor_tex = "FLAT1";
 	SString default_ceil_tex = "FLAT1";
 	port_features_t Features = {};
+	std::map<SString, char> flat_categories;
+	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
+	std::map<char, linegroup_t> line_groups;
+	std::map<int, linetype_t> line_types;
 
 	//
 	// Panel stuff

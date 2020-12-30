@@ -281,7 +281,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	}
 	else
 	{
-		const linetype_t &info = M_GetLineType(new_type);
+		const linetype_t &info = box->inst.M_GetLineType(new_type);
 		box->desc->value(info.desc.c_str());
 	}
 
@@ -730,7 +730,7 @@ void UI_LineBox::UpdateField(int field)
 
 			tag->value(SString(inst.level.linedefs[obj]->tag).c_str());
 
-			const linetype_t &info = M_GetLineType(L->type);
+			const linetype_t &info = inst.M_GetLineType(L->type);
 
 			if (inst.Level_format != MapFormat::doom)
 			{
@@ -791,7 +791,7 @@ void UI_LineBox::UpdateField(int field)
 			}
 			else
 			{
-				const linetype_t &info = M_GetLineType(type_num);
+				const linetype_t &info = inst.M_GetLineType(type_num);
 				desc->value(info.desc.c_str());
 			}
 
@@ -1062,7 +1062,7 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 
 	for (int i = 0 ; i < num_gen_linetypes ; i++)
 	{
-		const generalized_linetype_t *info = &gen_linetypes[i];
+		const generalized_linetype_t *info = &inst.gen_linetypes[i];
 
 		if (type_num >= info->base && type_num < (info->base + info->length))
 		{

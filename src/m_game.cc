@@ -53,23 +53,13 @@ static std::map<SString, PortInfo_c *> loaded_port_defs;
 // TODO : move into parser_state_c
 static PortInfo_c *loading_Port;
 
-
-std::map<char, linegroup_t>    line_groups;
 std::map<char, thinggroup_t>   thing_groups;
 std::map<char, texturegroup_t> texture_groups;
 
-std::map<int, linetype_t>   line_types;
 std::map<int, sectortype_t> sector_types;
 std::map<int, thingtype_t>  thing_types;
 
 std::map<SString, char> texture_categories;
-std::map<SString, char> flat_categories;
-
-
-//
-// BOOM Generalized Lines
-//
-generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES];
 
 int num_gen_linetypes;
 
@@ -92,12 +82,12 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 }
 
 
-static void M_FreeAllDefinitions()
+static void M_FreeAllDefinitions(Instance &inst)
 {
 	// TODO: prevent memory leak, delete contents of these maps
 
-    line_groups.clear();
-    line_types.clear();
+    inst.line_groups.clear();
+    inst.line_types.clear();
     sector_types.clear();
 
     thing_groups.clear();
@@ -105,7 +95,7 @@ static void M_FreeAllDefinitions()
 
 	texture_groups.clear();
 	texture_categories.clear();
-	flat_categories.clear();
+	inst.flat_categories.clear();
 }
 
 
@@ -115,7 +105,7 @@ static void M_FreeAllDefinitions()
 //
 void Instance::M_ClearAllDefinitions()
 {
-	M_FreeAllDefinitions();
+	M_FreeAllDefinitions(*this);
 
 	Misc_info = misc_info_t();
 	// TODO: #58
@@ -262,14 +252,14 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 }
 
 
-static void ParseClearKeywords(char ** argv, int argc)
+static void ParseClearKeywords(Instance &inst, char ** argv, int argc)
 {
 	for ( ; argc > 0 ; argv++, argc--)
 	{
 		if (y_stricmp(argv[0], "lines") == 0)
 		{
-			line_groups.clear();
-			line_types.clear();
+			inst.line_groups.clear();
+			inst.line_types.clear();
 		}
 		else if (y_stricmp(argv[0], "sectors") == 0)
 		{
@@ -285,7 +275,7 @@ static void ParseClearKeywords(char ** argv, int argc)
 			texture_groups.clear();
 			texture_categories.clear();
 
-			flat_categories.clear();
+			inst.flat_categories.clear();
 		}
 		else
 			ThrowException("Unknown clear keyword '%s' in definition file.\n", argv[0]);
@@ -629,7 +619,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		lg.group = argv[1][0];
 		lg.desc  = argv[2];
 
-		line_groups[lg.group] = lg;
+		inst.line_groups[lg.group] = lg;
 	}
 
 	else if (y_stricmp(argv[0], "line") == 0 ||
@@ -652,13 +642,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 				info.args[i] = argv[4 + i];
 		}
 
-		if (line_groups.find( info.group) == line_groups.end())
+		if (inst.line_groups.find( info.group) == inst.line_groups.end())
 		{
 			LogPrintf("%s(%d): unknown line group '%c'\n",
 					  pst->fname.c_str(), pst->lineno,  info.group);
 		}
 		else
-			line_types[number] = info;
+			inst.line_types[number] = info;
 	}
 
 	else if (y_stricmp(argv[0], "sector") == 0)
@@ -769,7 +759,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 					  pst->fname.c_str(), pst->lineno, group);
 		}
 		else
-			flat_categories[name] = group;
+			inst.flat_categories[name] = group;
 	}
 
 	else if (y_stricmp(argv[0], "gen_line") == 0)
@@ -783,7 +773,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
 			ThrowException("%s(%d): too many gen_line definitions\n", pst->fname.c_str(), pst->lineno);
 
-		generalized_linetype_t *def = &gen_linetypes[pst->current_gen_line];
+		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
 
 		def->key = argv[1][0];
 
@@ -803,7 +793,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		if (pst->current_gen_line < 0)
 			ThrowException("%s(%d): gen_field used outside of a gen_line definition\n", pst->fname.c_str(), pst->lineno);
 
-		generalized_linetype_t *def = &gen_linetypes[pst->current_gen_line];
+		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
 
 		generalized_field_t *field = &def->fields[def->num_fields];
 
@@ -833,7 +823,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		if (nargs < 1)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 2);
 
-		ParseClearKeywords(pst->argv + 1, nargs);
+		ParseClearKeywords(inst, pst->argv + 1, nargs);
 	}
 
 /*  FIXME
@@ -1338,9 +1328,9 @@ const sectortype_t & M_GetSectorType(int type)
 }
 
 
-const linetype_t & M_GetLineType(int type)
+const linetype_t &Instance::M_GetLineType(int type) const
 {
-	std::map<int, linetype_t>::iterator LI;
+	std::map<int, linetype_t>::const_iterator LI;
 
 	LI = line_types.find(type);
 
@@ -1387,9 +1377,9 @@ char M_GetTextureType(const SString &name)
 }
 
 
-char M_GetFlatType(const SString &name)
+char Instance::M_GetFlatType(const SString &name) const
 {
-	std::map<SString, char>::iterator TI;
+	std::map<SString, char>::const_iterator TI;
 
 	TI = flat_categories.find(name);
 
@@ -1464,7 +1454,7 @@ static SString M_CategoryString(SString &letters, bool recent, const std::map<ch
 	return buffer;
 }
 
-SString M_LineCategoryString(SString &letters)
+SString Instance::M_LineCategoryString(SString &letters) const
 {
 	return M_CategoryString(letters, false, line_groups, line_types);
 }
@@ -1476,7 +1466,7 @@ SString M_ThingCategoryString(SString &letters)
 }
 
 
-SString M_TextureCategoryString(SString &letters, bool do_flats)
+SString Instance::M_TextureCategoryString(SString &letters, bool do_flats) const
 {
 	return M_CategoryString(letters, true, texture_groups, do_flats ? flat_categories : texture_categories);
 }

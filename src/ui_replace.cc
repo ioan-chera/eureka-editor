@@ -830,7 +830,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 		case 3: // Lines by Type
 		{
-			const linetype_t &info = M_GetLineType(type_num);
+			const linetype_t &info = inst.M_GetLineType(type_num);
 			desc->value(info.desc.c_str());
 			break;
 		}
