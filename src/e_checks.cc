@@ -786,7 +786,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 		else if (inst.Features.gen_sectors != GenSectorFamily::none)
 			type_num &= 31;
 
-		const sectortype_t &info = M_GetSectorType(type_num);
+		const sectortype_t &info = inst.M_GetSectorType(type_num);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
@@ -1343,19 +1343,19 @@ CheckResult ChecksModule::checkSectors(int min_severity) const
 
 //------------------------------------------------------------------------
 
-void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Document &doc)
+void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Instance &inst)
 {
 	types.clear();
 
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < doc.numThings() ; n++)
+	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const thingtype_t &info = M_GetThingType(doc.things[n]->type);
+		const thingtype_t &info = inst.M_GetThingType(inst.level.things[n]->type);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
-			bump_unknown_type(types, doc.things[n]->type);
+			bump_unknown_type(types, inst.level.things[n]->type);
 
 			list.set(n);
 		}
@@ -1370,20 +1370,20 @@ static void Things_ShowUnknown(Instance &inst)
 
 	std::map<int, int> types;
 
-	Things_FindUnknown(*inst.edit.Selected, types, inst.level);
+	Things_FindUnknown(*inst.edit.Selected, types, inst);
 
 	GoToErrors(inst);
 }
 
 
-static void Things_LogUnknown(const Document &doc)
+static void Things_LogUnknown(const Instance &inst)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 	std::map<int, int>::iterator IT;
 
-	Things_FindUnknown(sel, types, doc);
+	Things_FindUnknown(sel, types, inst);
 
 	LogPrintf("\n");
 	LogPrintf("Unknown Things:\n");
@@ -1398,20 +1398,20 @@ static void Things_LogUnknown(const Document &doc)
 }
 
 
-const void Things_RemoveUnknown(Document &doc)
+const void Things_RemoveUnknown(Instance &inst)
 {
 	selection_c sel;
 
 	std::map<int, int> types;
 
-	Things_FindUnknown(sel, types, doc);
+	Things_FindUnknown(sel, types, inst);
 
-	doc.basis.begin();
-	doc.basis.setMessage("removed unknown things");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("removed unknown things");
 
-	doc.objects.del(&sel);
+	inst.level.objects.del(&sel);
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
@@ -1441,22 +1441,22 @@ static int Things_FindStarts(int *dm_num, const Document &doc)
 }
 
 
-static void Things_FindInVoid(selection_c& list, const Document &doc)
+static void Things_FindInVoid(selection_c& list, const Instance &inst)
 {
 	list.change_type(ObjType::things);
 
-	for (int n = 0 ; n < doc.numThings() ; n++)
+	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		double x = doc.things[n]->x();
-		double y = doc.things[n]->y();
+		double x = inst.level.things[n]->x();
+		double y = inst.level.things[n]->y();
 
-		Objid obj = doc.hover.getNearbyObject(ObjType::sectors, x, y);
+		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, x, y);
 
 		if (! obj.is_nil())
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t &info = M_GetThingType(doc.things[n]->type);
+		const thingtype_t &info = inst.M_GetThingType(inst.level.things[n]->type);
 
 		if (info.flags & THINGDEF_VOID)
 			continue;
@@ -1469,7 +1469,7 @@ static void Things_FindInVoid(selection_c& list, const Document &doc)
 			double x2 = x + ((corner & 1) ? -4 : +4);
 			double y2 = y + ((corner & 2) ? -4 : +4);
 
-			obj = doc.hover.getNearbyObject(ObjType::sectors, x2, y2);
+			obj = inst.level.hover.getNearbyObject(ObjType::sectors, x2, y2);
 
 			if (obj.is_nil())
 				out_count++;
@@ -1486,32 +1486,32 @@ static void Things_ShowInVoid(Instance &inst)
 	if (inst.edit.mode != ObjType::things)
 		inst.Editor_ChangeMode('t');
 
-	Things_FindInVoid(*inst.edit.Selected, inst.level);
+	Things_FindInVoid(*inst.edit.Selected, inst);
 
 	GoToErrors(inst);
 }
 
 
-static void Things_RemoveInVoid(Document &doc)
+static void Things_RemoveInVoid(Instance &inst)
 {
 	selection_c sel;
 
-	Things_FindInVoid(sel, doc);
+	Things_FindInVoid(sel, inst);
 
-	doc.basis.begin();
-	doc.basis.setMessage("removed things in the void");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("removed things in the void");
 
-	doc.objects.del(&sel);
+	inst.level.objects.del(&sel);
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
 // returns true if the game engine ALWAYS spawns this thing
 // (i.e. the skill-flags and mode-flags are ignored).
-static bool TH_always_spawned(int type)
+static bool TH_always_spawned(const Instance &inst, int type)
 {
-	const thingtype_t &info = M_GetThingType(type);
+	const thingtype_t &info = inst.M_GetThingType(type);
 
 	// a player?
 	if (1 <= type && type <= 4)
@@ -1567,7 +1567,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 
 		if (skills == 0 || modes == 0 || classes == 0)
 		{
-			if (! TH_always_spawned(T->type))
+			if (! TH_always_spawned(inst, T->type))
 				list.set(n);
 		}
 	}
@@ -1645,13 +1645,13 @@ const void Things_FixDuds(Instance &inst)
 //------------------------------------------------------------------------
 
 static void CollectBlockingThings(std::vector<int>& list,
-                                  std::vector<int>& sizes, const Document &doc)
+                                  std::vector<int>& sizes, const Instance &inst)
 {
-	for (int n = 0 ; n < doc.numThings() ; n++)
+	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = doc.things[n];
+		const Thing *T = inst.level.things[n];
 
-		const thingtype_t &info = M_GetThingType(T->type);
+		const thingtype_t &info = inst.M_GetThingType(T->type);
 
 		if (info.flags & THINGDEF_PASS)
 			continue;
@@ -1815,13 +1815,13 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 	std::vector<int> blockers;
 	std::vector<int> sizes;
 
-	CollectBlockingThings(blockers, sizes, inst.level);
+	CollectBlockingThings(blockers, sizes, inst);
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
 		const Thing *T = inst.level.things[blockers[n]];
 
-		const thingtype_t &info = M_GetThingType(T->type);
+		const thingtype_t &info = inst.M_GetThingType(T->type);
 
 		if (ThingStuckInWall(T, info.radius, info.group, inst.level))
 			list.set(blockers[n]);
@@ -1830,7 +1830,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 		{
 			const Thing *T2 = inst.level.things[blockers[n2]];
 
-			const thingtype_t &info2 = M_GetThingType(T2->type);
+			const thingtype_t &info2 = inst.M_GetThingType(T2->type);
 
 			if (ThingStuckInThing(inst, T, &info, T2, &info2))
 				list.set(blockers[n]);
@@ -1871,14 +1871,14 @@ public:
 	static void action_log_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_LogUnknown(dialog->inst.level);
+		Things_LogUnknown(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
 	static void action_remove_unknown(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_RemoveUnknown(dialog->inst.level);
+		Things_RemoveUnknown(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -1893,7 +1893,7 @@ public:
 	static void action_remove_void(Fl_Widget *w, void *data)
 	{
 		UI_Check_Things *dialog = (UI_Check_Things *)data;
-		Things_RemoveInVoid(dialog->inst.level);
+		Things_RemoveInVoid(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
@@ -1934,7 +1934,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 
 	for (;;)
 	{
-		Things_FindUnknown(sel, types, doc);
+		Things_FindUnknown(sel, types, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No unknown thing types");
@@ -1962,7 +1962,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		}
 
 
-		Things_FindInVoid(sel, doc);
+		Things_FindInVoid(sel, inst);
 
 		if (sel.empty())
 			dialog->AddLine("No things in the void");
@@ -2017,16 +2017,16 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		{
 			dialog->AddLine("Map is missing deathmatch starts", 1);
 		}
-		else if (dm_num < Misc_info.min_dm_starts)
+		else if (dm_num < inst.Misc_info.min_dm_starts)
 		{
 			check_message = SString::printf("Found %d deathmatch starts -- need at least %d", dm_num,
-			        Misc_info.min_dm_starts);
+				inst.Misc_info.min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
-		else if (dm_num > Misc_info.max_dm_starts)
+		else if (dm_num > inst.Misc_info.max_dm_starts)
 		{
 			check_message = SString::printf("Found %d deathmatch starts -- maximum is %d", dm_num,
-			        Misc_info.max_dm_starts);
+				inst.Misc_info.max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
@@ -3256,7 +3256,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 
 		for (const Thing *thing : inst.level.things)
 		{
-			const thingtype_t &info = M_GetThingType(thing->type);
+			const thingtype_t &info = inst.M_GetThingType(thing->type);
 
 			if (info.desc.noCaseEqual("Commander Keen"))
 				return true;
@@ -3476,41 +3476,41 @@ static void bump_unknown_name(std::map<SString, int>& list,
 }
 
 
-void Textures_FindMissing(selection_c& lines, const Document &doc)
+static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 {
 	lines.change_type(ObjType::linedefs);
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right(doc)->MidTex()))
+			if (is_null_tex(L->Right(inst.level)->MidTex()))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(doc)->SecRef(doc);
-			const Sector *back  = L->Left(doc) ->SecRef(doc);
+			const Sector *front = L->Right(inst.level)->SecRef(inst.level);
+			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(doc)->LowerTex()))
+			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
 				lines.set(n);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(doc)->LowerTex()))
+			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
-			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
+			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(doc)->UpperTex()))
+			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
 				lines.set(n);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(doc)->UpperTex()))
+			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
 				lines.set(n);
 		}
 	}
@@ -3522,7 +3522,7 @@ static void Textures_ShowMissing(Instance &inst)
 	if (inst.edit.mode != ObjType::linedefs)
 		inst.Editor_ChangeMode('l');
 
-	Textures_FindMissing(*inst.edit.Selected, inst.level);
+	Textures_FindMissing(inst, *inst.edit.Selected);
 
 	GoToErrors(inst);
 }
@@ -3557,7 +3557,7 @@ static void Textures_FixMissing(Instance &inst)
 				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
-			if (is_sky(front->CeilTex()) && is_sky(back->CeilTex()))
+			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
@@ -4333,7 +4333,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 		dialog->AddGap(10);
 
 
-		Textures_FindMissing(sel, doc);
+		Textures_FindMissing(inst, sel);
 
 		if (sel.empty())
 			dialog->AddLine("No missing textures on walls");

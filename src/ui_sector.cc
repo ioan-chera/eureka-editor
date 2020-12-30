@@ -330,7 +330,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == 2)
 	{
-		box->SetFlat(Misc_info.sky_flat, PART_CEIL);
+		box->SetFlat(box->inst.Misc_info.sky_flat, PART_CEIL);
 		return;
 	}
 
@@ -527,7 +527,7 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 		value &= gen_mask;
 	}
 
-	const sectortype_t &info = M_GetSectorType(value);
+	const sectortype_t &info = box->inst.M_GetSectorType(value);
 
 	box->desc->value(info.desc.c_str());
 }
@@ -760,7 +760,7 @@ void UI_SectorBox::UpdateField(int field)
 
 			type->value(SString(value & mask).c_str());
 
-			const sectortype_t &info = M_GetSectorType(value & mask);
+			const sectortype_t &info = inst.M_GetSectorType(value & mask);
 			desc->value(info.desc.c_str());
 
 			if (inst.Features.gen_sectors != GenSectorFamily::none)
@@ -906,7 +906,7 @@ bool UI_SectorBox::ClipboardOp(EditCommand op)
 
 		case EditCommand::del:
 			// abuse the delete function to turn sector ceilings into sky
-			CB_Paste(parts, BA_InternaliseString(Misc_info.sky_flat));
+			CB_Paste(parts, BA_InternaliseString(inst.Misc_info.sky_flat));
 			break;
 	}
 

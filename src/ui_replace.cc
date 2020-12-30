@@ -822,7 +822,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 	{
 		case 0: // Things
 		{
-			const thingtype_t &info = M_GetThingType(type_num);
+			const thingtype_t &info = inst.M_GetThingType(type_num);
 			desc->value(info.desc.c_str());
 			 pic->GetSprite(type_num, FL_DARK2);
 			break;
@@ -840,7 +840,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 			int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 						(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
-			const sectortype_t & info = M_GetSectorType(type_num & mask);
+			const sectortype_t & info = inst.M_GetSectorType(type_num & mask);
 			desc->value(info.desc.c_str());
 			break;
 		}
@@ -1528,8 +1528,8 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 	SString ceil_tex = sector->CeilTex();
 
-	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
-								|| ( is_sky(ceil_tex) && o_skies->value()) )
+	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
+								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
 			return true;
 
@@ -1754,8 +1754,8 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 
 	SString ceil_tex = sector->CeilTex();
 
-	if (!filter_toggle->value() || (!is_sky(ceil_tex) && o_ceilings->value())
-								|| ( is_sky(ceil_tex) && o_skies->value()) )
+	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
+								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
 			inst.level.basis.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
 }

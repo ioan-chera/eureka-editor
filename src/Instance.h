@@ -308,12 +308,17 @@ public:
 	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
+	bool is_sky(const SString &flat) const;
 	void M_ClearAllDefinitions();
 	char M_GetFlatType(const SString &name) const;
 	const linetype_t &M_GetLineType(int type) const;
+	const sectortype_t &M_GetSectorType(int type) const;
+	char M_GetTextureType(const SString &name) const;
+	const thingtype_t &M_GetThingType(int type) const;
 	SString M_LineCategoryString(SString &letters) const;
 	void M_PrepareConfigVariables();
 	SString M_TextureCategoryString(SString &letters, bool do_flats) const;
+	SString M_ThingCategoryString(SString &letters) const;
 
 	// M_KEYS
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
@@ -428,14 +433,21 @@ public:	// will be private when we encapsulate everything
 	// Game-dependent (thus instance dependent) defaults
 	//
 	int default_thing = 2001;
-	SString default_wall_tex = "GRAY1";
-	SString default_floor_tex = "FLAT1";
 	SString default_ceil_tex = "FLAT1";
+	SString default_floor_tex = "FLAT1";
+	SString default_wall_tex = "GRAY1";
 	port_features_t Features = {};
 	std::map<SString, char> flat_categories;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
 	std::map<char, linegroup_t> line_groups;
 	std::map<int, linetype_t> line_types;
+	misc_info_t Misc_info = {};
+	int num_gen_linetypes = 0;
+	std::map<int, sectortype_t> sector_types;
+	std::map<SString, char> texture_categories;
+	std::map<char, texturegroup_t> texture_groups;
+	std::map<char, thinggroup_t> thing_groups;
+	std::map<int, thingtype_t> thing_types;
 
 	//
 	// Panel stuff

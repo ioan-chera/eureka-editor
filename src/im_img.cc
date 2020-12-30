@@ -196,8 +196,8 @@ Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(inst, width(), height());
 
-	int invis_start = Misc_info.invis_colors[0];
-	int invis_len   = Misc_info.invis_colors[1] - invis_start + 1;
+	int invis_start = inst.Misc_info.invis_colors[0];
+	int invis_len   = inst.Misc_info.invis_colors[1] - invis_start + 1;
 
 	if (invis_len < 1)
 		invis_len = 1;

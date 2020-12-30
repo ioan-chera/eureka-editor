@@ -41,30 +41,22 @@
 #define UNKNOWN_THING_RADIUS  16
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
+namespace global
+{
+	// all the game and port definitions and previously loaded
+	static std::unordered_map<SString, GameInfo> sLoadedGameDefs;
+	static std::map<SString, PortInfo_c *> loaded_port_defs;
 
-misc_info_t      Misc_info;
-
-
-// all the game and port definitions and previously loaded
-static std::unordered_map<SString, GameInfo> sLoadedGameDefs;
-static std::map<SString, PortInfo_c *> loaded_port_defs;
-
-// the information being loaded for PURPOSE_GameInfo / PortInfo
-// TODO : move into parser_state_c
-static PortInfo_c *loading_Port;
-
-std::map<char, thinggroup_t>   thing_groups;
-std::map<char, texturegroup_t> texture_groups;
-
-std::map<int, sectortype_t> sector_types;
-std::map<int, thingtype_t>  thing_types;
-
-std::map<SString, char> texture_categories;
-
-int num_gen_linetypes;
+	// the information being loaded for PURPOSE_GameInfo / PortInfo
+	// TODO : move into parser_state_c
+	static PortInfo_c *loading_Port;
+}
 
 // variables which are "set" in def files
-static std::map< SString, SString > parse_vars;
+namespace global
+{
+	static std::map< SString, SString > parse_vars;
+}
 
 void PortInfo_c::AddSupportedGame(const SString &game)
 {
@@ -88,13 +80,13 @@ static void M_FreeAllDefinitions(Instance &inst)
 
     inst.line_groups.clear();
     inst.line_types.clear();
-    sector_types.clear();
+    inst.sector_types.clear();
 
-    thing_groups.clear();
-    thing_types.clear();
+    inst.thing_groups.clear();
+    inst.thing_types.clear();
 
-	texture_groups.clear();
-	texture_categories.clear();
+	inst.texture_groups.clear();
+	inst.texture_categories.clear();
 	inst.flat_categories.clear();
 }
 
@@ -126,20 +118,20 @@ void Instance::M_ClearAllDefinitions()
 
 void Instance::M_PrepareConfigVariables()
 {
-	parse_vars.clear();
+	global::parse_vars.clear();
 
 	switch (Level_format)
 	{
 		case MapFormat::doom:
-			parse_vars["$MAP_FORMAT"] = "DOOM";
+			global::parse_vars["$MAP_FORMAT"] = "DOOM";
 			break;
 
 		case MapFormat::hexen:
-			parse_vars["$MAP_FORMAT"] = "HEXEN";
+			global::parse_vars["$MAP_FORMAT"] = "HEXEN";
 			break;
 
 		case MapFormat::udmf:
-			parse_vars["$MAP_FORMAT"] = "UDMF";
+			global::parse_vars["$MAP_FORMAT"] = "UDMF";
 			break;
 
 		default:
@@ -148,23 +140,23 @@ void Instance::M_PrepareConfigVariables()
 
 	if (!Udmf_namespace.empty())
 	{
-		parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
+		global::parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
 	}
 
 	if (!Game_name.empty())
 	{
-		parse_vars["$GAME_NAME"] = Game_name;
+		global::parse_vars["$GAME_NAME"] = Game_name;
 
 		if (M_CanLoadDefinitions("games", Game_name))
 		{
 			SString base_game = M_GetBaseGame(Game_name);
-			parse_vars["$BASE_GAME"] = base_game;
+			global::parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
 	if (!Port_name.empty())
 	{
-		parse_vars["$PORT_NAME"] = Port_name;
+		global::parse_vars["$PORT_NAME"] = Port_name;
 	}
 }
 
@@ -185,42 +177,42 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
-static void ParseColorDef(char ** argv, int argc)
+static void ParseColorDef(Instance &inst, char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
-		Misc_info.sky_color = atoi(argv[1]);
+		inst.Misc_info.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "wall") == 0)
 	{
-		Misc_info.wall_colors[0] = atoi(argv[1]);
-		Misc_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		inst.Misc_info.wall_colors[0] = atoi(argv[1]);
+		inst.Misc_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "floor") == 0)
 	{
-		Misc_info.floor_colors[0] = atoi(argv[1]);
-		Misc_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		inst.Misc_info.floor_colors[0] = atoi(argv[1]);
+		inst.Misc_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "invis") == 0)
 	{
-		Misc_info.invis_colors[0] = atoi(argv[1]);
-		Misc_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		inst.Misc_info.invis_colors[0] = atoi(argv[1]);
+		inst.Misc_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{
-		Misc_info.missing_color = atoi(argv[1]);
+		inst.Misc_info.missing_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_tex") == 0)
 	{
-		Misc_info.unknown_tex = atoi(argv[1]);
+		inst.Misc_info.unknown_tex = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_flat") == 0)
 	{
-		Misc_info.unknown_flat = atoi(argv[1]);
+		inst.Misc_info.unknown_flat = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_thing") == 0)
 	{
-		Misc_info.unknown_thing = atoi(argv[1]);
+		inst.Misc_info.unknown_thing = atoi(argv[1]);
 	}
 	else
 	{
@@ -263,17 +255,17 @@ static void ParseClearKeywords(Instance &inst, char ** argv, int argc)
 		}
 		else if (y_stricmp(argv[0], "sectors") == 0)
 		{
-			sector_types.clear();
+			inst.sector_types.clear();
 		}
 		else if (y_stricmp(argv[0], "things") == 0)
 		{
-			thing_groups.clear();
-			thing_types.clear();
+			inst.thing_groups.clear();
+			inst.thing_types.clear();
 		}
 		else if (y_stricmp(argv[0], "textures") == 0)
 		{
-			texture_groups.clear();
-			texture_categories.clear();
+			inst.texture_groups.clear();
+			inst.texture_categories.clear();
 
 			inst.flat_categories.clear();
 		}
@@ -560,30 +552,30 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		if (nargs != 3)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
-		Misc_info.player_r    = atoi(argv[1]);
-		Misc_info.player_h    = atoi(argv[2]);
-		Misc_info.view_height = atoi(argv[3]);
+		inst.Misc_info.player_r    = atoi(argv[1]);
+		inst.Misc_info.player_h    = atoi(argv[2]);
+		inst.Misc_info.view_height = atoi(argv[3]);
 	}
 	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
 	{
 		if (nargs != 1)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
-		Misc_info.sky_color = atoi(argv[1]);
+		inst.Misc_info.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "sky_flat") == 0)
 	{
 		if (nargs != 1)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
-		Misc_info.sky_flat = argv[1];
+		inst.Misc_info.sky_flat = argv[1];
 	}
 	else if (y_stricmp(argv[0], "color") == 0)
 	{
 		if (nargs < 2)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 2);
 
-		ParseColorDef(pst->argv + 1, nargs);
+		ParseColorDef(inst, pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "feature") == 0)
 	{
@@ -662,7 +654,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		info.desc = argv[2];
 
-		sector_types[number] = info;
+		inst.sector_types[number] = info;
 	}
 
 	else if (y_stricmp(argv[0], "thinggroup") == 0)
@@ -676,7 +668,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		tg.color = ParseColor(argv[2]);
 		tg.desc  = argv[3];
 
-		thing_groups[tg.group] = tg;
+		inst.thing_groups[tg.group] = tg;
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)
@@ -702,16 +694,16 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 				info.args[i] = argv[8 + i];
 		}
 
-		if (thing_groups.find(info.group) == thing_groups.end())
+		if (inst.thing_groups.find(info.group) == inst.thing_groups.end())
 		{
 			LogPrintf("%s(%d): unknown thing group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, info.group);
 		}
 		else
 		{
-			info.color = thing_groups[info.group].color;
+			info.color = inst.thing_groups[info.group].color;
 
-			thing_types[number] = info;
+			inst.thing_types[number] = info;
 		}
 	}
 
@@ -725,7 +717,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		tg.group = argv[1][0];
 		tg.desc  = argv[2];
 
-		texture_groups[tg.group] = tg;
+		inst.texture_groups[tg.group] = tg;
 	}
 
 	else if (y_stricmp(argv[0], "texture") == 0)
@@ -736,13 +728,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
 
-		if (texture_groups.find(tolower(group)) == texture_groups.end())
+		if (inst.texture_groups.find(tolower(group)) == inst.texture_groups.end())
 		{
 			LogPrintf("%s(%d): unknown texture group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, group);
 		}
 		else
-			texture_categories[name] = group;
+			inst.texture_categories[name] = group;
 	}
 
 	else if (y_stricmp(argv[0], "flat") == 0)
@@ -753,7 +745,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
 
-		if (texture_groups.find(tolower(group)) == texture_groups.end())
+		if (inst.texture_groups.find(tolower(group)) == inst.texture_groups.end())
 		{
 			LogPrintf("%s(%d): unknown texture group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, group);
@@ -767,10 +759,10 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		if (nargs != 4)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 4);
 
-		pst->current_gen_line = num_gen_linetypes;
-		num_gen_linetypes++;
+		pst->current_gen_line = inst.num_gen_linetypes;
+		inst.num_gen_linetypes++;
 
-		if (num_gen_linetypes > MAX_GEN_NUM_TYPES)
+		if (inst.num_gen_linetypes > MAX_GEN_NUM_TYPES)
 			ThrowException("%s(%d): too many gen_line definitions\n", pst->fname.c_str(), pst->lineno);
 
 		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
@@ -877,14 +869,14 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-			loading_Port->AddSupportedGame(SString(*argv).asLower());
+			global::loading_Port->AddSupportedGame(SString(*argv).asLower());
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
-		loading_Port->formats = ParseMapFormats(argv + 1, nargs);
+		global::loading_Port->formats = ParseMapFormats(argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
@@ -892,7 +884,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, argv[0], 1);
 
 		// want to preserve the case here
-		loading_Port->udmf_namespace = argv[1];
+		global::loading_Port->udmf_namespace = argv[1];
 	}
 }
 
@@ -916,7 +908,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 		// tokens are stored in pst->tokenbuf, so this is OK
 		y_strupr(argv[0]);
 
-		SString var_value = parse_vars[argv[0]];
+		SString var_value = global::parse_vars[argv[0]];
 
 		// test multiple values, only need one to succeed
 		for (int i = 2 ; i < nargs ; i++)
@@ -946,7 +938,7 @@ static void M_ParseSetVar(parser_state_c *pst)
 	// tokens are stored in pst->tokenbuf, so this is OK
 	y_strupr(argv[0]);
 
-	parse_vars[argv[0]] = argv[1];
+	global::parse_vars[argv[0]] = argv[1];
 }
 
 
@@ -1106,8 +1098,8 @@ void M_ParseDefinitionFile(Instance *inst,
 static GameInfo M_LoadGameInfo(const SString &game)
 {
 	// already loaded?
-	auto it = sLoadedGameDefs.find(game);
-	if(it != sLoadedGameDefs.end())
+	auto it = global::sLoadedGameDefs.find(game);
+	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
 	SString filename = FindDefinitionFile("games", game);
@@ -1118,7 +1110,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(loadingGame.baseGame.empty())
 		ThrowException("Game definition for '%s' does not set base_game\n", game.c_str());
 
-	sLoadedGameDefs[game] = loadingGame;
+	global::sLoadedGameDefs[game] = loadingGame;
 	return loadingGame;
 }
 
@@ -1126,28 +1118,28 @@ static GameInfo M_LoadGameInfo(const SString &game)
 PortInfo_c * M_LoadPortInfo(const SString &port)
 {
 	std::map<SString, PortInfo_c *>::iterator IT;
-	IT = loaded_port_defs.find(port);
+	IT = global::loaded_port_defs.find(port);
 
-	if (IT != loaded_port_defs.end())
+	if (IT != global::loaded_port_defs.end())
 		return IT->second;
 
 	SString filename = FindDefinitionFile("ports", port);
 	if (filename.empty())
 		return NULL;
 
-	loading_Port = new PortInfo_c(port);
+	global::loading_Port = new PortInfo_c(port);
 
 	M_ParseDefinitionFile(nullptr, PURPOSE_PortInfo, nullptr, filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2
-	if (loading_Port->supported_games.empty())
+	if (global::loading_Port->supported_games.empty())
 	{
-		loading_Port->supported_games.push_back("doom");
-		loading_Port->supported_games.push_back("doom2");
+		global::loading_Port->supported_games.push_back("doom");
+		global::loading_Port->supported_games.push_back("doom2");
 	}
 
-	loaded_port_defs[port] = loading_Port;
-	return loading_Port;
+	global::loaded_port_defs[port] = global::loading_Port;
+	return global::loading_Port;
 }
 
 
@@ -1293,8 +1285,8 @@ SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_
 
 //------------------------------------------------------------------------
 
-
-bool is_sky(const SString &flat)
+// is this flat a sky?
+bool Instance::is_sky(const SString &flat) const
 {
 	return flat.noCaseEqual(Misc_info.sky_flat);
 }
@@ -1310,9 +1302,9 @@ bool is_special_tex(const SString &tex)
 }
 
 
-const sectortype_t & M_GetSectorType(int type)
+const sectortype_t &Instance::M_GetSectorType(int type) const
 {
-	std::map<int, sectortype_t>::iterator SI;
+	std::map<int, sectortype_t>::const_iterator SI;
 
 	SI = sector_types.find(type);
 
@@ -1346,7 +1338,7 @@ const linetype_t &Instance::M_GetLineType(int type) const
 }
 
 
-const thingtype_t & M_GetThingType(int type)
+const thingtype_t &Instance::M_GetThingType(int type) const
 {
 	auto TI = thing_types.find(type);
 
@@ -1364,9 +1356,9 @@ const thingtype_t & M_GetThingType(int type)
 }
 
 
-char M_GetTextureType(const SString &name)
+char Instance::M_GetTextureType(const SString &name) const
 {
-	std::map<SString, char>::iterator TI;
+	std::map<SString, char>::const_iterator TI;
 
 	TI = texture_categories.find(name);
 
@@ -1460,7 +1452,7 @@ SString Instance::M_LineCategoryString(SString &letters) const
 }
 
 
-SString M_ThingCategoryString(SString &letters)
+SString Instance::M_ThingCategoryString(SString &letters) const
 {
 	return M_CategoryString(letters, true, thing_groups, thing_types);
 }

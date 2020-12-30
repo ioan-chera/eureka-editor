@@ -191,7 +191,7 @@ void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 
 void UI_DefaultProps::UpdateThingDesc()
 {
-	const thingtype_t &info = M_GetThingType(inst.default_thing);
+	const thingtype_t &info = inst.M_GetThingType(inst.default_thing);
 
 	th_desc->value(info.desc.c_str());
 	th_sprite->GetSprite(inst.default_thing, FL_DARK2);
@@ -352,7 +352,7 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->thing->value());
 
-	const thingtype_t &info = M_GetThingType(value);
+	const thingtype_t &info = box->inst.M_GetThingType(value);
 
 	box->th_desc->value(info.desc.c_str());
 	box->th_sprite->GetSprite(value, FL_DARK2);
@@ -429,13 +429,13 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 
 	if (sel_pics & 1)
 	{
-		f_tex->value(Misc_info.sky_flat.c_str());
+		f_tex->value(inst.Misc_info.sky_flat.c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(Misc_info.sky_flat.c_str());
+		c_tex->value(inst.Misc_info.sky_flat.c_str());
 		c_tex->do_callback();
 	}
 }

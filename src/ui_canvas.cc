@@ -905,7 +905,7 @@ void UI_Canvas::DrawThings()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(thing->type);
+		const thingtype_t &info = inst.M_GetThingType(thing->type);
 
 		if (inst.edit.mode == ObjType::things && !inst.edit.error_mode)
 		{
@@ -929,7 +929,7 @@ void UI_Canvas::DrawThings()
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
 
-			const thingtype_t &info = M_GetThingType(inst.level.things[n]->type);
+			const thingtype_t &info = inst.M_GetThingType(inst.level.things[n]->type);
 
 			x += info.radius + 8;
 			y += info.radius + 8;
@@ -956,7 +956,7 @@ void UI_Canvas::DrawThingBodies()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(thing->type);
+		const thingtype_t &info = inst.M_GetThingType(thing->type);
 
 		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
@@ -990,7 +990,7 @@ void UI_Canvas::DrawThingSprites()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(thing->type);
+		const thingtype_t &info = inst.M_GetThingType(thing->type);
 		float scale = info.scale;
 
 		Img_c *sprite = inst.W_GetSprite(thing->type);
@@ -1331,7 +1331,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.M_GetThingType(inst.level.things[objnum]->type);
 
 			int r = info.radius;
 
@@ -1445,7 +1445,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.M_GetThingType(inst.level.things[objnum]->type);
 
 			int r = info.radius;
 
@@ -2088,9 +2088,9 @@ void UI_Canvas::RenderSector(int num)
 		else
 			tex_name = inst.level.sectors[num]->FloorTex();
 
-		if (is_sky(tex_name))
+		if (inst.is_sky(tex_name))
 		{
-			RenderColor(inst.palette[Misc_info.sky_color]);
+			RenderColor(inst.palette[inst.Misc_info.sky_color]);
 		}
 		else
 		{

@@ -112,9 +112,9 @@ public:
 	{
 		fullbright = false;
 
-		if (is_sky(fname))
+		if (inst.is_sky(fname))
 		{
-			col = Misc_info.sky_color;
+			col = inst.Misc_info.sky_color;
 			fullbright = true;
 			return;
 		}
@@ -134,9 +134,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (r_view.lighting)
-			col = Misc_info.floor_colors[1];
+			col = inst.Misc_info.floor_colors[1];
 		else
-			col = HashedPalColor(fname, Misc_info.floor_colors);
+			col = HashedPalColor(fname, inst.Misc_info.floor_colors);
 	}
 
 	void FindTex(const SString & tname, LineDef *ld)
@@ -170,9 +170,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (r_view.lighting)
-			col = Misc_info.wall_colors[1];
+			col = inst.Misc_info.wall_colors[1];
 		else
-			col = HashedPalColor(tname, Misc_info.wall_colors);
+			col = HashedPalColor(tname, inst.Misc_info.wall_colors);
 	}
 };
 
@@ -400,10 +400,10 @@ public:
 			}
 		}
 
-		bool sky_upper = back && is_sky(front->CeilTex()) && is_sky(back->CeilTex());
+		bool sky_upper = back && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex());
 		bool self_ref  = (front == back) ? true : false;
 
-		if ((front->ceilh > r_view.z || is_sky(front->CeilTex()))
+		if ((front->ceilh > r_view.z || inst.is_sky(front->CeilTex()))
 		    && ! sky_upper && ! self_ref)
 		{
 			ceil.kind = DrawSurf::K_FLAT;
@@ -870,7 +870,7 @@ public:
 	{
 		Thing *th = inst.level.things[th_index];
 
-		const thingtype_t &info = M_GetThingType(th->type);
+		const thingtype_t &info = inst.M_GetThingType(th->type);
 
 		float x = static_cast<float>(th->x() - r_view.x);
 		float y = static_cast<float>(th->y() - r_view.y);

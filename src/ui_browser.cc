@@ -42,12 +42,6 @@
 extern std::map<SString, Img_c *> flats;
 extern std::map<SString, Img_c *> textures;
 
-extern std::map<char, thinggroup_t> thing_groups;
-
-extern std::map<int, sectortype_t> sector_types;
-extern std::map<int, thingtype_t>  thing_types;
-
-
 #define  BROWBACK_COL  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 
 
@@ -737,7 +731,7 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 		if (imkind == 'F')
 			item_cat = inst.M_GetFlatType(name);
 		else if (imkind == 'T')
-			item_cat = M_GetTextureType(name);
+			item_cat = inst.M_GetTextureType(name);
 
 		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
 		                                      full_desc, name, 0 /* num */,
@@ -777,7 +771,7 @@ void UI_Browser_Box::Populate_Sprites()
 
 	char full_desc[256];
 
-	for (TI = thing_types.begin() ; TI != thing_types.end() ; TI++)
+	for (TI = inst.thing_types.begin() ; TI != inst.thing_types.end() ; TI++)
 	{
 		const thingtype_t &info = TI->second;
 
@@ -823,7 +817,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 	char full_desc[256];
 
-	for (TI = thing_types.begin() ; TI != thing_types.end() ; TI++)
+	for (TI = inst.thing_types.begin() ; TI != inst.thing_types.end() ; TI++)
 	{
 		const thingtype_t &info = TI->second;
 
@@ -878,7 +872,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 	char full_desc[256];
 
-	for (TI = sector_types.begin() ; TI != sector_types.end() ; TI++)
+	for (TI = inst.sector_types.begin() ; TI != inst.sector_types.end() ; TI++)
 	{
 		const sectortype_t &info = TI->second;
 
@@ -1414,7 +1408,7 @@ void UI_Generalized_Box::CreatePages()
 
 	int X = x();  /// + (w() - MIN_BROWSER_W);
 
-	for (int i = 0 ; i < num_gen_linetypes ; i++)
+	for (int i = 0 ; i < inst.num_gen_linetypes ; i++)
 	{
 		const generalized_linetype_t *info = &inst.gen_linetypes[i];
 
@@ -1589,7 +1583,7 @@ void UI_Browser::Populate()
 	SString flat_cats = inst.M_TextureCategoryString(letters, true);
 	browsers[1]->SetCategories(flat_cats, letters);
 
-	SString thing_cats = M_ThingCategoryString(letters);
+	SString thing_cats = inst.M_ThingCategoryString(letters);
 	browsers[2]->SetCategories(thing_cats, letters);
 
 	SString line_cats = inst.M_LineCategoryString(letters);

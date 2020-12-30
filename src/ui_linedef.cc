@@ -977,7 +977,7 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 		mask |= SOLID_LOWER;
 
 	// upper texture of "-" is OK between two skies
-	bool two_skies = is_sky(right->CeilTex()) && is_sky(left->CeilTex());
+	bool two_skies = inst.is_sky(right->CeilTex()) && inst.is_sky(left->CeilTex());
 
 	if (right-> ceilh > left-> ceilh && !two_skies)
 		mask |= SOLID_UPPER;
@@ -1060,7 +1060,7 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 
 	static char desc_buffer[256];
 
-	for (int i = 0 ; i < num_gen_linetypes ; i++)
+	for (int i = 0 ; i < inst.num_gen_linetypes ; i++)
 	{
 		const generalized_linetype_t *info = &inst.gen_linetypes[i];
 

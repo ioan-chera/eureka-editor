@@ -172,9 +172,6 @@ struct port_features_t
 							//          +8 for ZDoom in Hexen format, +16 ZDoom things
 };
 
-
-extern misc_info_t      Misc_info;
-
 //
 // Game info
 //
@@ -254,10 +251,6 @@ struct generalized_linetype_t
 	int num_fields;
 };
 
-
-extern int num_gen_linetypes;
-
-
 //------------------------------------------------------------------------
 
 bool M_CanLoadDefinitions(const SString &folder, const SString &name);
@@ -290,20 +283,8 @@ SString M_GetBaseGame(const SString &game);
 
 map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
 
-
-// is this flat a sky?
-bool is_sky(const SString &flat);
-
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"
-
-
-const sectortype_t & M_GetSectorType(int type);
-const thingtype_t  & M_GetThingType(int type);
-
-char M_GetTextureType(const SString &name);
-
-SString M_ThingCategoryString(SString &letters);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

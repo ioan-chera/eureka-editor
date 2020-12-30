@@ -147,12 +147,12 @@ public:
 	{
 		fullbright = false;
 
-		if (is_sky(fname))
+		if (inst.is_sky(fname))
 		{
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			inst.IM_DecodePixel(Misc_info.sky_color, r, g, b);
+			inst.IM_DecodePixel(inst.Misc_info.sky_color, r, g, b);
 			return NULL;
 		}
 
@@ -164,9 +164,9 @@ public:
 
 			// when lighting and no texturing, use a single color
 			if (r_view.lighting)
-				col = Misc_info.floor_colors[1];
+				col = inst.Misc_info.floor_colors[1];
 			else
-				col = HashedPalColor(fname, Misc_info.floor_colors);
+				col = HashedPalColor(fname, inst.Misc_info.floor_colors);
 
 			inst.IM_DecodePixel(col, r, g, b);
 			return NULL;
@@ -197,9 +197,9 @@ public:
 
 			// when lighting and no texturing, use a single color
 			if (r_view.lighting)
-				col = Misc_info.wall_colors[1];
+				col = inst.Misc_info.wall_colors[1];
 			else
-				col = HashedPalColor(tname, Misc_info.wall_colors);
+				col = HashedPalColor(tname, inst.Misc_info.wall_colors);
 
 			inst.IM_DecodePixel(col, r, g, b);
 			return NULL;
@@ -692,7 +692,7 @@ public:
 		if (sky_upper && where == 'U')
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			inst.IM_DecodePixel(Misc_info.sky_color, r, g, b);
+			inst.IM_DecodePixel(inst.Misc_info.sky_color, r, g, b);
 		}
 		else
 		{
@@ -1002,7 +1002,7 @@ public:
 
 		const Sector *front = sd ? sd->SecRef(inst.level) : NULL;
 
-		bool sky_front = is_sky(front->CeilTex());
+		bool sky_front = inst.is_sky(front->CeilTex());
 		bool sky_upper = false;
 
 		if (ld->OneSided())
@@ -1017,7 +1017,7 @@ public:
 			const SideDef *sd_back = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
 			const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
 
-			sky_upper = sky_front && is_sky(back->CeilTex());
+			sky_upper = sky_front && inst.is_sky(back->CeilTex());
 
 			// check for BOOM 242 invisible platforms
 			bool invis_back = false;
@@ -1160,7 +1160,7 @@ public:
 				// invisible platform
 				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
-				if (!is_sky(sec->CeilTex()))
+				if (!inst.is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else
@@ -1168,7 +1168,7 @@ public:
 				// space B : normal
 				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
-				if (!is_sky(sec->CeilTex()))
+				if (!inst.is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 		} else {
@@ -1176,7 +1176,7 @@ public:
 			// normal sector
 			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
 
-			if (!is_sky(sec->CeilTex()))
+			if (!inst.is_sky(sec->CeilTex()))
 				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
 		}
 
@@ -1216,7 +1216,7 @@ public:
 	{
 		Thing *th = inst.level.things[th_index];
 
-		const thingtype_t &info = M_GetThingType(th->type);
+		const thingtype_t &info = inst.M_GetThingType(th->type);
 
 		// project sprite to check if it is off-screen
 
@@ -1452,7 +1452,7 @@ public:
 			drag_dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
 		}
 
-		const thingtype_t &info = M_GetThingType(th->type);
+		const thingtype_t &info = inst.M_GetThingType(th->type);
 
 		float scale = info.scale;
 
