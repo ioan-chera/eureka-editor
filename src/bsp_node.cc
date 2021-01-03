@@ -1183,7 +1183,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 		{
 			if (((int)dx | (int)dy) & 1)
 			{
-				Warning("Loss of accuracy on VERY long node: "
+				Warning(inst, "Loss of accuracy on VERY long node: "
 						"(%d,%d) -> (%d,%d)\n", x, y, x + dx, y+ dy);
 			}
 
@@ -1316,16 +1316,16 @@ void quadtree_c::ConvertToList(seg_t **_list)
 
 
 static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
-		int sidedef, int what_side /* 0 or 1 */, const Document &doc)
+		int sidedef, int what_side /* 0 or 1 */, const Instance &inst)
 {
 	SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = doc.sidedefs[sidedef];
+		sd = inst.level.sidedefs[sidedef];
 
 	// check for bad sidedef
-	if (sd && !doc.isSector(sd->sector))
+	if (sd && !inst.level.isSector(sd->sector))
 	{
-		Warning("Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
+		Warning(inst, "Bad sidedef on linedef #%d (Z_CheckHeap error)\n", line);
 	}
 
 	// handle overlapping vertices, pick a nominal one
@@ -1353,19 +1353,19 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 // Initially create all segs, one for each linedef.
 // Must be called *after* InitBlockmap().
 //
-seg_t *CreateSegs(const Document &doc)
+seg_t *CreateSegs(const Instance &inst)
 {
 	seg_t *list = NULL;
 
-	for (int i=0 ; i < doc.numLinedefs() ; i++)
+	for (int i=0 ; i < inst.level.numLinedefs() ; i++)
 	{
-		const LineDef *line = doc.linedefs[i];
+		const LineDef *line = inst.level.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (line->IsZeroLength(doc))
+		if (line->IsZeroLength(inst.level))
 			continue;
 
 		// ignore overlapping lines
@@ -1373,23 +1373,23 @@ seg_t *CreateSegs(const Document &doc)
 			continue;
 
 		// check for extremely long lines
-		if (line->CalcLength(doc) >= 30000)
-			Warning("Linedef #%d is VERY long, it may cause problems\n", i);
+		if (line->CalcLength(inst.level) >= 30000)
+			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
 		{
-			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0, doc);
+			right = CreateOneSeg(i, lev_vertices[line->start], lev_vertices[line->end], line->right, 0, inst);
 
 			ListAddSeg(&list, right);
 		}
 		else
 		{
-			Warning("Linedef #%d has no right sidedef!\n", i);
+			Warning(inst, "Linedef #%d has no right sidedef!\n", i);
 		}
 
 		if (line->left >= 0)
 		{
-			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1, doc);
+			left = CreateOneSeg(i, lev_vertices[line->end], lev_vertices[line->start], line->left, 1, inst);
 
 			ListAddSeg(&list, left);
 
@@ -1406,7 +1406,7 @@ seg_t *CreateSegs(const Document &doc)
 		else
 		{
 			if (line->flags & MLF_TwoSided)
-				Warning("Linedef #%d is 2s but has no left sidedef\n", i);
+				Warning(inst, "Linedef #%d is 2s but has no left sidedef\n", i);
 		}
 	}
 

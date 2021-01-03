@@ -18,8 +18,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Document.h"
 #include "Errors.h"
+#include "Instance.h"
 #include "main.h"
 #include "bsp.h"
 
@@ -42,7 +42,7 @@ void PrintDetail(const char *fmt, ...)
 }
 
 
-void Failure(const char *fmt, ...)
+void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list args;
 
@@ -52,7 +52,7 @@ void Failure(const char *fmt, ...)
 	va_end(args);
 
 	if (cur_info->warnings)
-		GB_PrintMsg("Failure: %s", message.c_str());
+		inst.GB_PrintMsg("Failure: %s", message.c_str());
 
 	cur_info->total_warnings++;
 
@@ -62,7 +62,7 @@ void Failure(const char *fmt, ...)
 }
 
 
-void Warning(const char *fmt, ...)
+void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list args;
 
@@ -71,7 +71,7 @@ void Warning(const char *fmt, ...)
 	va_end(args);
 
 	if (cur_info->warnings)
-		GB_PrintMsg("Warning: %s", message.c_str());
+		inst.GB_PrintMsg("Warning: %s", message.c_str());
 
 	cur_info->total_warnings++;
 
@@ -245,7 +245,7 @@ static void MarkPolyobjSector(int sector, const Document &doc)
 	}
 }
 
-static void MarkPolyobjPoint(double x, double y, const Document &doc)
+static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 {
 	int i;
 	int inside_count = 0;
@@ -268,23 +268,23 @@ static void MarkPolyobjPoint(double x, double y, const Document &doc)
 	int bmaxx = (int) (x + POLY_BOX_SZ);
 	int bmaxy = (int) (y + POLY_BOX_SZ);
 
-	for (i = 0 ; i < doc.numLinedefs(); i++)
+	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		const LineDef *L = doc.linedefs[i];
+		const LineDef *L = inst.level.linedefs[i];
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
-					(int) L->Start(doc)->x(), (int) L->Start(doc)->y(),
-					(int) L->End(doc)->x(),   (int) L->End(doc)->y()))
+					(int) L->Start(inst.level)->x(), (int) L->Start(inst.level)->y(),
+					(int) L->End(inst.level)->x(),   (int) L->End(inst.level)->y()))
 		{
 #     if DEBUG_POLYOBJ
 			DebugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
 			if (L->left >= 0)
-				MarkPolyobjSector(L->Left(doc)->sector, doc);
+				MarkPolyobjSector(L->Left(inst.level)->sector, inst.level);
 
 			if (L->right >= 0)
-				MarkPolyobjSector(L->Right(doc)->sector, doc);
+				MarkPolyobjSector(L->Right(inst.level)->sector, inst.level);
 
 			inside_count++;
 		}
@@ -299,16 +299,16 @@ static void MarkPolyobjPoint(double x, double y, const Document &doc)
 	//       If the point is sitting directly on a (two-sided) line,
 	//       then we mark the sectors on both sides.
 
-	for (i = 0 ; i < doc.numLinedefs(); i++)
+	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		const LineDef *L = doc.linedefs[i];
+		const LineDef *L = inst.level.linedefs[i];
 
 		double x_cut;
 
-		x1 = L->Start(doc)->x();
-		y1 = L->Start(doc)->y();
-		x2 = L->End(doc)->x();
-		y2 = L->End(doc)->y();
+		x1 = L->Start(inst.level)->x();
+		y1 = L->Start(inst.level)->y();
+		x2 = L->End(inst.level)->x();
+		y2 = L->End(inst.level)->y();
 
 		/* check vertical range */
 		if (fabs(y2 - y1) < EPSILON)
@@ -331,14 +331,14 @@ static void MarkPolyobjPoint(double x, double y, const Document &doc)
 
 	if (best_match < 0)
 	{
-		Warning("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning(inst, "Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 
-	const LineDef *best_ld = doc.linedefs[best_match];
+	const LineDef *best_ld = inst.level.linedefs[best_match];
 
-	y1 = best_ld->Start(doc)->y();
-	y2 = best_ld->End(doc)->y();
+	y1 = best_ld->Start(inst.level)->y();
+	y2 = best_ld->End(inst.level)->y();
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
@@ -357,9 +357,9 @@ static void MarkPolyobjPoint(double x, double y, const Document &doc)
 	 * actually on.
 	 */
 	if ((y1 > y2) == (best_dist > 0))
-		sector = (best_ld->right >= 0) ? best_ld->Right(doc)->sector : -1;
+		sector = (best_ld->right >= 0) ? best_ld->Right(inst.level)->sector : -1;
 	else
-		sector = (best_ld->left >= 0) ? best_ld->Left(doc)->sector : -1;
+		sector = (best_ld->left >= 0) ? best_ld->Left(inst.level)->sector : -1;
 
 # if DEBUG_POLYOBJ
 	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -367,18 +367,18 @@ static void MarkPolyobjPoint(double x, double y, const Document &doc)
 
 	if (sector < 0)
 	{
-		Warning("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+		Warning(inst, "Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
 		return;
 	}
 
-	MarkPolyobjSector(sector, doc);
+	MarkPolyobjSector(sector, inst.level);
 }
 
 
 //
 // Based on code courtesy of Janis Legzdinsh.
 //
-void DetectPolyobjSectors(const Document &doc)
+void DetectPolyobjSectors(const Instance &inst)
 {
 	int i;
 
@@ -392,15 +392,15 @@ void DetectPolyobjSectors(const Document &doc)
 	//      used, otherwise Hexen polyobj thing types are used.
 
 	// -JL- First go through all lines to see if level contains any polyobjs
-	for (i = 0 ; i < doc.numLinedefs(); i++)
+	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		const LineDef *L = doc.linedefs[i];
+		const LineDef *L = inst.level.linedefs[i];
 
 		if (L->type == HEXTYPE_POLY_START || L->type == HEXTYPE_POLY_EXPLICIT)
 			break;
 	}
 
-	if (i == doc.numLinedefs())
+	if (i == inst.level.numLinedefs())
 	{
 		// -JL- No polyobjs in this level
 		return;
@@ -409,9 +409,9 @@ void DetectPolyobjSectors(const Document &doc)
 	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
 	bool hexen_style = true;
 
-	for (i = 0 ; i < doc.numThings() ; i++)
+	for (i = 0 ; i < inst.level.numThings() ; i++)
 	{
-		const Thing *T = doc.things[i];
+		const Thing *T = inst.level.things[i];
 
 		if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
 		{
@@ -426,9 +426,9 @@ void DetectPolyobjSectors(const Document &doc)
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
-	for (i = 0 ; i < doc.numThings(); i++)
+	for (i = 0 ; i < inst.level.numThings(); i++)
 	{
-		const Thing *T = doc.things[i];
+		const Thing *T = inst.level.things[i];
 
 		double x = T->x();
 		double y = T->y();
@@ -451,7 +451,7 @@ void DetectPolyobjSectors(const Document &doc)
 		DebugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #   endif
 
-		MarkPolyobjPoint(x, y, doc);
+		MarkPolyobjPoint(x, y, inst);
 	}
 }
 

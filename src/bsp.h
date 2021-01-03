@@ -22,14 +22,15 @@
 #define __EUREKA_BSP_H__
 
 #include "lib_util.h"
+#include "sys_type.h"
 
+#include <vector>
+
+class Instance;
 class Lump_c;
-
-
-/* external funcs */
-
-void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
-
+class Sector;
+enum class Side;
+struct Document;
 
 // Node Build Information Structure
 //
@@ -121,8 +122,8 @@ typedef double angle_g;  // degrees, 0 is E, 90 is N
 
 void PrintDetail(const char *fmt, ...);
 
-void Failure(const char *fmt, ...);
-void Warning(const char *fmt, ...);
+void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
+void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
 
 // allocate and clear some memory.  guaranteed not to fail.
 void *UtilCalloc(int size);
@@ -204,13 +205,6 @@ struct vertex_t
 	// list of wall-tips
 	walltip_t *tip_set;
 };
-
-
-inline bool coalesce_sec(Sector *sec)
-{
-	return (sec->tag >= 900 && sec->tag < 1000);
-}
-
 
 struct seg_t
 {
@@ -458,7 +452,7 @@ void ZLibFinishLump(void);
 // detection routines
 void DetectOverlappingVertices(const Document &doc);
 void DetectOverlappingLines(const Document &doc);
-void DetectPolyobjSectors(const Document &doc);
+void DetectPolyobjSectors(const Instance &inst);
 
 // computes the wall tips for all of the vertices
 void CalculateWallTips(const Document &doc);
@@ -577,7 +571,7 @@ void FreeQuickAllocCuts(void);
 // scan all the linedef of the level and convert each sidedef into a
 // seg (or seg pair).  Returns the list of segs.
 //
-seg_t *CreateSegs(const Document &doc);
+seg_t *CreateSegs(const Instance &inst);
 
 quadtree_c *TreeFromSegList(seg_t *list);
 

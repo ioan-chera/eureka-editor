@@ -262,14 +262,6 @@ void UI_NodeDialog::Finish_Error()
 
 //------------------------------------------------------------------------
 
-
-static nodebuildinfo_t * nb_info;
-
-static char message_buf[MSG_BUF_LEN];
-
-static UI_NodeDialog * dialog;
-
-
 static const char *build_ErrorString(build_result_e ret)
 {
 	switch (ret)
@@ -287,18 +279,16 @@ static const char *build_ErrorString(build_result_e ret)
 }
 
 
-void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...)
+void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const
 {
 	va_list args;
 
 	va_start(args, str);
-	vsnprintf(message_buf, MSG_BUF_LEN, str, args);
+	SString message_buf = SString::vprintf(str, args);
 	va_end(args);
 
-	message_buf[MSG_BUF_LEN-1] = 0;
-
-	if (dialog)
-		dialog->Print(message_buf);
+	if (nodeialog)
+		nodeialog->Print(message_buf.c_str());
 
 	LogPrintf("BSP: %s", message_buf);
 }
@@ -324,7 +314,7 @@ static void PrepareInfo(nodebuildinfo_t *info)
 }
 
 
-static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
+build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 {
 	LogPrintf("\n");
 
@@ -332,12 +322,12 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 
 	SYS_ASSERT(1 <= info->factor && info->factor <= 32);
 
-	int num_levels = inst.edit_wad->LevelCount();
+	int num_levels = edit_wad->LevelCount();
 	SYS_ASSERT(num_levels > 0);
 
 	GB_PrintMsg("\n");
 
-	dialog->SetProg(0);
+	nodeialog->SetProg(0);
 
 	build_result_e ret;
 
@@ -345,9 +335,9 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		inst.LoadLevelNum(inst.edit_wad, n);
+		LoadLevelNum(edit_wad, n);
 
-		ret = AJBSP_BuildLevel(info, n, inst);
+		ret = AJBSP_BuildLevel(info, n, *this);
 
 		// don't fail on maps with overflows
 		// [ Note that 'total_failed_maps' keeps a tally of these ]
@@ -357,11 +347,11 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 		if (ret != BUILD_OK)
 			break;
 
-		dialog->SetProg(100 * (n + 1) / num_levels);
+		nodeialog->SetProg(100 * (n + 1) / num_levels);
 
 		Fl::check();
 
-		if (dialog->WantCancel())
+		if (nodeialog->WantCancel())
 		{
 			nb_info->cancelled = true;
 		}
@@ -397,7 +387,7 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 
 void Instance::BuildNodesAfterSave(int lev_idx)
 {
-	dialog = NULL;
+	nodeialog = NULL;
 
 	nb_info = new nodebuildinfo_t;
 
@@ -468,10 +458,10 @@ void Instance::CMD_BuildAllNodes()
 	edit.highlight.clear();
 
 
-	dialog = new UI_NodeDialog();
+	nodeialog = new UI_NodeDialog();
 
-	dialog->set_modal();
-	dialog->show();
+	nodeialog->set_modal();
+	nodeialog->show();
 
 	Fl::check();
 
@@ -480,31 +470,31 @@ void Instance::CMD_BuildAllNodes()
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = BuildAllNodes(*this, nb_info);
+	build_result_e ret = BuildAllNodes(nb_info);
 
 	if (ret == BUILD_OK)
 	{
-		dialog->Finish_OK();
+		nodeialog->Finish_OK();
 		Status_Set("Built nodes OK");
 	}
 	else if (nb_info->cancelled)
 	{
-		dialog->Finish_Cancel();
+		nodeialog->Finish_Cancel();
 		Status_Set("Cancelled building nodes");
 	}
 	else
 	{
-		dialog->Finish_Error();
+		nodeialog->Finish_Error();
 		Status_Set("Error building nodes");
 	}
 
-	while (! dialog->WantClose())
+	while (!nodeialog->WantClose())
 	{
 		Fl::wait(0.2);
 	}
 
 	delete nb_info; nb_info = NULL;
-	delete dialog;  dialog = NULL;
+	delete nodeialog;  nodeialog = NULL;
 
 
 	// reload the previous level

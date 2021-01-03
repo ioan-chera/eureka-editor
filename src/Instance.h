@@ -19,6 +19,7 @@
 #ifndef INSTANCE_H_
 #define INSTANCE_H_
 
+#include "bsp.h"
 #include "Document.h"
 #include "e_main.h"
 #include "im_img.h"
@@ -29,6 +30,7 @@
 
 class Fl_RGB_Image;
 class Lump_c;
+class UI_NodeDialog;
 class UI_ProjectSetup;
 
 //
@@ -341,6 +343,7 @@ public:
 	
 	// M_NODES
 	void BuildNodesAfterSave(int lev_idx);
+	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
 
 	// M_UDMF
 	void UDMF_LoadLevel();
@@ -449,6 +452,9 @@ private:
 	void SaveVertices();
 	void ShowLoadProblem() const;
 
+	// M_NODES
+	build_result_e BuildAllNodes(nodebuildinfo_t *info);
+
 	// M_UDMF
 	void ValidateLevel_UDMF();
 
@@ -546,6 +552,8 @@ public:	// will be private when we encapsulate everything
 	Wad_file *load_wad = nullptr;
 	int loading_level = 0;
 	int saving_level = 0;
+	UI_NodeDialog *nodeialog = nullptr;
+	nodebuildinfo_t *nb_info = nullptr;
 
 	//
 	// Path stuff

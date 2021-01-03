@@ -593,7 +593,7 @@ static void PutBlockmap(const Instance &inst)
 		// leave an empty blockmap lump
 		CreateLevelLump(inst, "BLOCKMAP")->Finish();
 
-		Warning("Blockmap overflowed (lump will be empty)\n");
+		Warning(inst, "Blockmap overflowed (lump will be empty)\n");
 	}
 	else
 	{
@@ -996,7 +996,7 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 
 	if (! do_gl && count > 65534)
 	{
-		Failure("Number of vertices has overflowed.\n");
+		Failure(inst, "Number of vertices has overflowed.\n");
 		MarkOverflow(LIMIT_VERTEXES);
 	}
 }
@@ -1105,7 +1105,7 @@ static void PutSegs(const Instance &inst)
 
 	if (count > 65534)
 	{
-		Failure("Number of segs has overflowed.\n");
+		Failure(inst, "Number of segs has overflowed.\n");
 		MarkOverflow(LIMIT_SEGS);
 	}
 }
@@ -1234,7 +1234,7 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 
 	if (num_subsecs > 32767)
 	{
-		Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+		Failure(inst, "Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
 		MarkOverflow(do_gl ? LIMIT_GL_SSECT : LIMIT_SSECTORS);
 	}
 }
@@ -1399,29 +1399,29 @@ void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root)
 
 	if (!do_v5 && node_cur_index > 32767)
 	{
-		Failure("Number of nodes has overflowed.\n");
+		Failure(inst, "Number of nodes has overflowed.\n");
 		MarkOverflow(LIMIT_NODES);
 	}
 }
 
 
-static void CheckLimits(bool& force_v5, bool& force_xnod, const Document &doc)
+static void CheckLimits(bool& force_v5, bool& force_xnod, const Instance &inst)
 {
-	if (doc.numSectors() > 65534)
+	if (inst.level.numSectors() > 65534)
 	{
-		Failure("Map has too many sectors.\n");
+		Failure(inst, "Map has too many sectors.\n");
 		MarkOverflow(LIMIT_SECTORS);
 	}
 
-	if (doc.numSidedefs() > 65534)
+	if (inst.level.numSidedefs() > 65534)
 	{
-		Failure("Map has too many sidedefs.\n");
+		Failure(inst, "Map has too many sidedefs.\n");
 		MarkOverflow(LIMIT_SIDEDEFS);
 	}
 
-	if (doc.numLinedefs() > 65534)
+	if (inst.level.numLinedefs() > 65534)
 	{
-		Failure("Map has too many linedefs.\n");
+		Failure(inst, "Map has too many linedefs.\n");
 		MarkOverflow(LIMIT_LINEDEFS);
 	}
 
@@ -1432,7 +1432,7 @@ static void CheckLimits(bool& force_v5, bool& force_xnod, const Document &doc)
 			num_segs > 65534 ||
 			num_nodes > 32767)
 		{
-			Warning("Forcing V5 of GL-Nodes due to overflows.\n");
+			Warning(inst, "Forcing V5 of GL-Nodes due to overflows.\n");
 			force_v5 = true;
 		}
 	}
@@ -1444,7 +1444,7 @@ static void CheckLimits(bool& force_v5, bool& force_xnod, const Document &doc)
 			num_segs > 32767 ||
 			num_nodes > 32767)
 		{
-			Warning("Forcing XNOD format nodes due to overflows.\n");
+			Warning(inst, "Forcing XNOD format nodes due to overflows.\n");
 			force_xnod = true;
 		}
 	}
@@ -1809,7 +1809,7 @@ static void LoadLevel(const Instance &inst)
 	lev_current_name = LEV->Name();
 	lev_overflows = 0;
 
-	GB_PrintMsg("Building nodes on %s\n", lev_current_name.c_str());
+	inst.GB_PrintMsg("Building nodes on %s\n", lev_current_name.c_str());
 
 	num_new_vert = 0;
 	num_real_lines = 0;
@@ -1839,7 +1839,7 @@ static void LoadLevel(const Instance &inst)
 	if (inst.Level_format != MapFormat::doom)
 	{
 		// -JL- Find sectors containing polyobjs
-		DetectPolyobjSectors(inst.level);
+		DetectPolyobjSectors(inst);
 	}
 }
 
@@ -1943,7 +1943,7 @@ static void AddMissingLump(const Instance &inst, const char *name, const char *a
 	// if this happens, the level structure is very broken
 	if (exist < 0)
 	{
-		Warning("Missing %s lump -- level structure is broken\n", after);
+		Warning(inst, "Missing %s lump -- level structure is broken\n", after);
 
 		exist = inst.edit_wad->LevelLastLump(lev_current_idx);
 	}
@@ -1977,7 +1977,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 
 	// check for overflows...
 	// this sets the force_xxx vars if certain limits are breached
-	CheckLimits(force_v5, force_xnod, inst.level);
+	CheckLimits(force_v5, force_xnod, inst);
 
 
 	/* --- GL Nodes --- */
@@ -2053,7 +2053,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 	if (lev_overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
 
 		return BUILD_LumpOverflow;
 	}
@@ -2081,7 +2081,7 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 	if (lev_overflows > 0)
 	{
 		cur_info->total_failed_maps++;
-		GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
+		inst.GB_PrintMsg("FAILED with %d overflowed lumps\n", lev_overflows);
 
 		return BUILD_LumpOverflow;
 	}
@@ -2291,7 +2291,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	if (num_real_lines > 0)
 	{
 		// create initial segs
-		seg_t *list = CreateSegs(inst.level);
+		seg_t *list = CreateSegs(inst);
 
 		// recursively create nodes
 		ret = BuildNodes(list, &root_bbox, &root_node, &root_sub, 0, inst);
