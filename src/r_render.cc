@@ -606,8 +606,6 @@ static void AdjustOfs_RenderPost(const Instance &inst)
 
 //------------------------------------------------------------------------
 
-static Thing *player;
-
 void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 {
 	inst.r_view.PrepareToRender(ow, oh);
@@ -668,7 +666,7 @@ void Instance::Render3D_Setup()
 		r_view.px = 99999;
 	}
 
-	player = FindPlayer(level, r_view.p_type);
+	Thing *player = FindPlayer(level, r_view.p_type);
 
 	if (! player)
 	{
