@@ -43,6 +43,7 @@
 #include "ui_linedef.h"
 #include "ui_vertex.h"
 
+#include "FL/Fl_Sys_Menu_Bar.H"
 
 #define WINDOW_BG  FL_DARK3
 

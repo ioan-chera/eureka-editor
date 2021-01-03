@@ -18,6 +18,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.h"
 #include "Instance.h"
 #include "main.h"
 #include "ui_window.h"
@@ -35,47 +36,47 @@
 
 static void file_do_new_project(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("NewProject");
+	static_cast<Instance *>(data)->ExecuteCommand("NewProject");
 }
 
 static void file_do_manage_project(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("ManageProject");
+	static_cast<Instance *>(data)->ExecuteCommand("ManageProject");
 }
 
 static void file_do_open(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("OpenMap");
+	static_cast<Instance *>(data)->ExecuteCommand("OpenMap");
 }
 
 static void file_do_save(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("SaveMap");
+	static_cast<Instance *>(data)->ExecuteCommand("SaveMap");
 }
 
 static void file_do_export(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("ExportMap");
+	static_cast<Instance *>(data)->ExecuteCommand("ExportMap");
 }
 
 static void file_do_fresh_map(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("FreshMap");
+	static_cast<Instance *>(data)->ExecuteCommand("FreshMap");
 }
 
 static void file_do_copy_map(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("CopyMap");
+	static_cast<Instance *>(data)->ExecuteCommand("CopyMap");
 }
 
 static void file_do_rename(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("RenameMap");
+	static_cast<Instance *>(data)->ExecuteCommand("RenameMap");
 }
 
 static void file_do_delete(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("DeleteMap");
+	static_cast<Instance *>(data)->ExecuteCommand("DeleteMap");
 }
 
 static void file_do_load_given(Fl_Widget *w, void *data)
@@ -97,7 +98,7 @@ static void file_do_load_recent(Fl_Widget *w, void *data)
 
 static void file_do_quit(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Quit");
+	static_cast<Instance *>(data)->ExecuteCommand("Quit");
 }
 
 
@@ -107,82 +108,82 @@ static void file_do_quit(Fl_Widget *w, void * data)
 
 static void edit_do_undo(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Undo");
+	static_cast<Instance *>(data)->ExecuteCommand("Undo");
 }
 
 static void edit_do_redo(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Redo");
+	static_cast<Instance *>(data)->ExecuteCommand("Redo");
 }
 
 static void edit_do_cut(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Clipboard_Cut");
+	static_cast<Instance *>(data)->ExecuteCommand("Clipboard_Cut");
 }
 
 static void edit_do_copy(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Clipboard_Copy");
+	static_cast<Instance *>(data)->ExecuteCommand("Clipboard_Copy");
 }
 
 static void edit_do_paste(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Clipboard_Paste");
+	static_cast<Instance *>(data)->ExecuteCommand("Clipboard_Paste");
 }
 
 static void edit_do_delete(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Delete");
+	static_cast<Instance *>(data)->ExecuteCommand("Delete");
 }
 
 static void edit_do_select_all(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("SelectAll");
+	static_cast<Instance *>(data)->ExecuteCommand("SelectAll");
 }
 
 static void edit_do_unselect_all(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("UnselectAll");
+	static_cast<Instance *>(data)->ExecuteCommand("UnselectAll");
 }
 
 static void edit_do_invert_sel(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("InvertSelection");
+	static_cast<Instance *>(data)->ExecuteCommand("InvertSelection");
 }
 
 static void edit_do_last_sel(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("LastSelection");
+	static_cast<Instance *>(data)->ExecuteCommand("LastSelection");
 }
 
 static void edit_do_op_menu(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("OpMenu");
+	static_cast<Instance *>(data)->ExecuteCommand("OpMenu");
 }
 
 static void edit_do_move(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MoveObjectsDialog");
+	static_cast<Instance *>(data)->ExecuteCommand("MoveObjectsDialog");
 }
 
 static void edit_do_scale(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("ScaleObjectsDialog");
+	static_cast<Instance *>(data)->ExecuteCommand("ScaleObjectsDialog");
 }
 
 static void edit_do_rotate(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("RotateObjectsDialog");
+	static_cast<Instance *>(data)->ExecuteCommand("RotateObjectsDialog");
 }
 
 static void edit_do_mirror_horiz(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Mirror", "horiz");
+	static_cast<Instance *>(data)->ExecuteCommand("Mirror", "horiz");
 }
 
 static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Mirror", "vert");
+	static_cast<Instance *>(data)->ExecuteCommand("Mirror", "vert");
 }
 
 
@@ -192,67 +193,67 @@ static void edit_do_mirror_vert(Fl_Widget *w, void * data)
 
 static void view_do_zoom_in(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Zoom", "+1", "/center");
+	static_cast<Instance *>(data)->ExecuteCommand("Zoom", "+1", "/center");
 }
 
 static void view_do_zoom_out(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Zoom", "-1", "/center");
+	static_cast<Instance *>(data)->ExecuteCommand("Zoom", "-1", "/center");
 }
 
 static void view_do_whole_map(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("ZoomWholeMap");
+	static_cast<Instance *>(data)->ExecuteCommand("ZoomWholeMap");
 }
 
 static void view_do_whole_selection(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("ZoomSelection");
+	static_cast<Instance *>(data)->ExecuteCommand("ZoomSelection");
 }
 
 static void view_do_camera_pos(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("GoToCamera");
+	static_cast<Instance *>(data)->ExecuteCommand("GoToCamera");
 }
 
 static void view_do_toggle_3d(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Toggle", "3d");
+	static_cast<Instance *>(data)->ExecuteCommand("Toggle", "3d");
 }
 
 static void view_do_object_nums(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Toggle", "obj_nums");
+	static_cast<Instance *>(data)->ExecuteCommand("Toggle", "obj_nums");
 }
 
 static void view_do_sprites(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Toggle", "sprites");
+	static_cast<Instance *>(data)->ExecuteCommand("Toggle", "sprites");
 }
 
 static void view_do_gamma(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Toggle", "gamma");
+	static_cast<Instance *>(data)->ExecuteCommand("Toggle", "gamma");
 }
 
 static void view_do_default_props(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("DefaultProps");
+	static_cast<Instance *>(data)->ExecuteCommand("DefaultProps");
 }
 
 static void view_do_find(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("FindDialog");
+	static_cast<Instance *>(data)->ExecuteCommand("FindDialog");
 }
 
 static void view_do_next(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("FindNext");
+	static_cast<Instance *>(data)->ExecuteCommand("FindNext");
 }
 
 static void view_do_jump(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("JumpToObject");
+	static_cast<Instance *>(data)->ExecuteCommand("JumpToObject");
 }
 
 
@@ -262,52 +263,52 @@ static void view_do_jump(Fl_Widget *w, void * data)
 
 static void browser_do_textures(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "T");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "T");
 }
 
 static void browser_do_flats(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "F");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "F");
 }
 
 static void browser_do_things(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "O");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "O");
 }
 
 static void browser_do_lines(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "L");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "L");
 }
 
 static void browser_do_sectors(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "S");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "S");
 }
 
 static void browser_do_gen_types(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "G");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "G");
 }
 
 static void browser_do_recent_tex(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "T", "/recent");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "T", "/recent");
 }
 
 static void browser_do_recent_flats(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "F", "/recent");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "F", "/recent");
 }
 
 static void browser_do_recent_things(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BrowserMode", "O", "/recent");
+	static_cast<Instance *>(data)->ExecuteCommand("BrowserMode", "O", "/recent");
 }
 
 static void browser_hide(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("Set", "browser", "0");
+	static_cast<Instance *>(data)->ExecuteCommand("Set", "browser", "0");
 }
 
 
@@ -317,42 +318,42 @@ static void browser_hide(Fl_Widget *w, void * data)
 
 static void checks_do_all(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "all");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "all");
 }
 
 static void checks_do_major(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "major");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "major");
 }
 
 static void checks_do_vertices(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "vertices");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "vertices");
 }
 
 static void checks_do_sectors(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "sectors");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "sectors");
 }
 
 static void checks_do_linedefs(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "linedefs");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "linedefs");
 }
 
 static void checks_do_things(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "things");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "things");
 }
 
 static void checks_do_textures(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "textures");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "textures");
 }
 
 static void checks_do_tags(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("MapCheck", "tags");
+	static_cast<Instance *>(data)->ExecuteCommand("MapCheck", "tags");
 }
 
 
@@ -362,37 +363,37 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 
 static void tools_do_preferences(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("PreferenceDialog");
+	static_cast<Instance *>(data)->ExecuteCommand("PreferenceDialog");
 }
 
 static void tools_do_build_nodes(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("BuildAllNodes");
+	static_cast<Instance *>(data)->ExecuteCommand("BuildAllNodes");
 }
 
 static void tools_do_test_map(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("TestMap");
+	static_cast<Instance *>(data)->ExecuteCommand("TestMap");
 }
 
 static void tools_do_lump_editor(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("EditLump");
+	static_cast<Instance *>(data)->ExecuteCommand("EditLump");
 }
 
 static void tools_do_add_behavior(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("AddBehavior");
+	static_cast<Instance *>(data)->ExecuteCommand("AddBehavior");
 }
 
 static void tools_do_view_logs(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("LogViewer");
+	static_cast<Instance *>(data)->ExecuteCommand("LogViewer");
 }
 
 static void tools_do_recalc_sectors(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("RecalcSectors");
+	static_cast<Instance *>(data)->ExecuteCommand("RecalcSectors");
 }
 
 
@@ -402,12 +403,12 @@ static void tools_do_recalc_sectors(Fl_Widget *w, void * data)
 
 static void help_do_online_docs(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("OnlineDocs");
+	static_cast<Instance *>(data)->ExecuteCommand("OnlineDocs");
 }
 
 static void help_do_about(Fl_Widget *w, void * data)
 {
-	gInstance.ExecuteCommand("AboutDialog");
+	static_cast<Instance *>(data)->ExecuteCommand("AboutDialog");
 }
 
 
@@ -789,7 +790,7 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 }
 
 
-Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
+Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
@@ -805,6 +806,12 @@ Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h)
 
 	items = Menu_PopulateGivenFiles(items);
 	items = Menu_PopulateRecentFiles(items, FCAL file_do_load_recent);
+
+	SYS_ASSERT(items != menu_items);	// by now we know we made one for ourselves
+	int total = items[0].size();
+	for(int i = 0; i < total; ++i)
+		if(items[i].text && items[i].callback_)
+			items[i].user_data_ = this;
 
 	bar->menu(items);
 

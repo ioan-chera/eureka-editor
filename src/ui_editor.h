@@ -23,6 +23,7 @@
 
 #include "FL/Fl_Double_Window.H"
 
+class Fl_Menu_Bar;
 class Fl_Text_Buffer;
 class Wad_file;
 class UI_TedStatusBar;

@@ -357,6 +357,9 @@ public:
 	void Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
 	void Status_Clear() const;
 
+	// UI_MENU
+	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
+
 	// W_LOADPIC
 	Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name) const;
 	Img_c *LoadImage_PNG(Lump_c *lump, const SString &name) const;
@@ -398,6 +401,9 @@ private:
 	int EV_RawWheel(int event);
 	void M_AddOperationMenu(const SString &context, Fl_Menu_Button *menu);
 	bool M_ParseOperationFile();
+
+	// M_KEYS
+	void DoExecuteCommand(const editor_command_t *cmd);
 
 	// MAIN
 	void M_LoadDefinitions(const SString &folder, const SString &name);

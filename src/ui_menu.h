@@ -21,10 +21,6 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
-#include "FL/Fl_Sys_Menu_Bar.H"
-
-Fl_Sys_Menu_Bar * Menu_Create(int x, int y, int w, int h);
-
 #endif  /* __EUREKA_UI_MENU_H__ */
 
 //--- editor settings ---

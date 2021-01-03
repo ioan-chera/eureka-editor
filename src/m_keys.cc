@@ -1095,9 +1095,9 @@ bool Instance::Exec_HasFlag(const char *flag) const
 extern void Debug_CheckUnusedStuff(Document &doc);
 
 
-static void DoExecuteCommand(const editor_command_t *cmd)
+void Instance::DoExecuteCommand(const editor_command_t *cmd)
 {
-	(gInstance.*cmd->func)();
+	(this->*cmd->func)();
 
 //	Debug_CheckUnusedStuff();
 }
