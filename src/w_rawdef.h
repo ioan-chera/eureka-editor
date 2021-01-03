@@ -52,7 +52,7 @@ typedef struct raw_wad_entry_s
 
 // Lump order in a map WAD: each map needs a couple of lumps
 // to provide a complete scene geometry description.
-typedef enum
+enum lump_order_e
 {
 	LL_LABEL=0,   // A separator name, ExMx or MAPxx
 	LL_THINGS,    // Monsters, items..
@@ -66,8 +66,7 @@ typedef enum
 	LL_REJECT,    // LUT, sector-sector visibility
 	LL_BLOCKMAP,  // LUT, motion clipping, walls/grid element
 	LL_BEHAVIOR   // Hexen scripting stuff
-}
-lump_order_e;
+};
 
 
 /* ----- The level structures ---------------------- */
@@ -362,7 +361,7 @@ typedef struct patch_s
 // LineDef attributes.
 //
 
-typedef enum
+enum lineflag_e
 {
 	// solid, is an obstacle
 	MLF_Blocking = 0x0001,
@@ -404,55 +403,49 @@ typedef enum
 	// -AJA- this one is from Boom. Allows multiple lines to
 	//       be pushed simultaneously.
 	MLF_Boom_PassThru = 0x0200,
-}
-lineflag_e;
+};
 
 
-typedef enum
+enum eternity_lineflag_e
 {
 	MLF_Eternity_3DMidTex = 0x0400,
-}
-eternity_lineflag_e;
+};
 
 
-typedef enum
+enum xdoom_lineflag_e
 {
 	// -AJA- these three are from XDoom
 	MLF_XDoom_Translucent = 0x0400,
 	MLF_XDoom_ShootBlock  = 0x0800,
 	MLF_XDoom_SightBlock  = 0x1000,
-}
-xdoom_lineflag_e;
+};
 
 
-typedef enum
+enum hexen_lineflag_e
 {
 	// flags 0x001 .. 0x200 are same as DOOM above
 
 	MLF_Repeatable = 0x0200,
 	MLF_Activation = 0x1c00,
-}
-hexen_lineflag_e;
+};
 
 
-typedef enum
+enum strife_lineflag_e
 {
 	MLF_Strife_JumpOver      = 0x0200,
 	MLF_Strife_BlockFloaters = 0x0400,
 	MLF_Strife_Translucent1  = 0x0800,
 	MLF_Strife_Translucent2  = 0x1000,
-}
-strife_lineflag_e;
+};
 
 
-typedef enum
+enum zdoom_lineflag_e
 {
 	// these are supported by ZDoom (and derived ports)
 	MLF_ZDoom_MonCanActivate  = 0x2000,
 	MLF_ZDoom_BlockPlayers    = 0x4000,
 	MLF_ZDoom_BlockEverything = 0x8000,
-}
-zdoom_lineflag_e;
+};
 
 
 #define BOOM_GENLINE_FIRST	0x2f80
@@ -461,7 +454,7 @@ zdoom_lineflag_e;
 #define is_genline(tp)  ((tp) >= BOOM_GENLINE_FIRST && (tp) <= BOOM_GENLINE_LAST)
 
 
-typedef enum
+enum hexen_activation_e
 {
 	SPAC_Cross   = 0,	// when line is crossed (W1 / WR)
 	SPAC_Use     = 1,	// when line is used    (S1 / SR)
@@ -469,15 +462,14 @@ typedef enum
 	SPAC_Impact  = 3,	// when bullet/projectile hits line (G1 / GR)
 	SPAC_Push    = 4,	// when line is bumped (player is stopped)
 	SPAC_PCross  = 5,	// when projectile crosses the line
-}
-hexen_activation_e;
+};
 
 
 //
 // Sector attributes.
 //
 
-typedef enum
+enum boom_sectorflag_e
 {
 	BoomSF_TypeMask   = 0x001F,
 	BoomSF_DamageMask = 0x0060,
@@ -487,8 +479,7 @@ typedef enum
 	BoomSF_Wind       = 0x0200,
 	BoomSF_NoSounds   = 0x0400,
 	BoomSF_QuietPlane = 0x0800
-}
-boom_sectorflag_e;
+};
 
 #define MSF_BoomFlags  0x0FE0
 
@@ -497,7 +488,7 @@ boom_sectorflag_e;
 // Thing attributes.
 //
 
-typedef enum
+enum thing_option_e
 {
 	// these four used in Hexen too
 	MTF_Easy      = 1,
@@ -511,13 +502,12 @@ typedef enum
 
 	MTF_Friend    = 128,
 	MTF_Reserved  = 256,
-}
-thing_option_e;
+};
 
 #define MTF_EXFLOOR_MASK    0x3C00
 #define MTF_EXFLOOR_SHIFT   10
 
-typedef enum
+enum hexen_option_e
 {
 	MTF_Hexen_Dormant	= 16,
 
@@ -528,11 +518,10 @@ typedef enum
 	MTF_Hexen_SP		= 256,
 	MTF_Hexen_COOP		= 512,
 	MTF_Hexen_DM		= 1024,
-}
-hexen_option_e;
+};
 
 
-typedef enum
+enum strife_option_e
 {
 	MTF_Strife_Stand	= 8,
 	MTF_Strife_Ambush	= 32,
@@ -540,8 +529,7 @@ typedef enum
 
 	MTF_Strife_Shadow	= 256,
 	MTF_Strife_AltVis	= 512,
-}
-strife_option_e;
+};
 
 
 //

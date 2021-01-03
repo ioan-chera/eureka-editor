@@ -37,8 +37,6 @@
 #include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"
-#include "m_nodes.h"
-#include "m_udmf.h"
 #include "r_subdiv.h"
 #include "w_rawdef.h"
 #include "w_wad.h"

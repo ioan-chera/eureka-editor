@@ -21,7 +21,6 @@
 #include "Instance.h"
 #include "main.h"
 
-#include "m_udmf.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

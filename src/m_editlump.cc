@@ -21,7 +21,6 @@
 #include "Errors.h"
 #include "Instance.h"
 #include "main.h"
-#include "m_editlump.h"
 #include "w_wad.h"
 
 #include "ui_window.h"

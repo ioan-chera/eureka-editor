@@ -1033,12 +1033,11 @@ int config::backup_max_files = 30;
 int config::backup_max_space = 60;  // MB
 
 
-typedef struct
+struct backup_scan_data_t
 {
 	int low;
 	int high;
-
-} backup_scan_data_t;
+};
 
 
 static void backup_scan_file(const SString &name, int flags, void *priv_dat)

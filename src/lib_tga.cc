@@ -29,7 +29,7 @@
 #include "lib_tga.h"
 
 
-typedef struct
+struct targa_header_t
 {
 	u8_t	id_length;
 	u8_t	colormap_type;
@@ -43,11 +43,10 @@ typedef struct
 	u16_t	height;
 	u8_t	pixel_bits;
 	u8_t	attributes;
+};
 
-} targa_header_t;
 
-
-typedef enum
+enum tga_type_e
 {
 	TGA_INDEXED = 1,
 	TGA_INDEXED_RLE = 9,
@@ -57,8 +56,7 @@ typedef enum
 
 	TGA_BW = 3,
 	TGA_BW_RLE = 11
-}
-tga_type_e;
+};
 
 
 rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,

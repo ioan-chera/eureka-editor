@@ -49,7 +49,7 @@
 //
 //  Structures for command line arguments and config settings
 //
-typedef enum
+enum opt_type_t
 {
 	// End of the options description
 	OPT_END = 0,
@@ -73,8 +73,7 @@ typedef enum
 	// List of strings (not leaking)
 	// Receptacle is of type: std::vector<SString>
 	OPT_STRING_LIST,
-}
-opt_type_t;
+};
 
 
 struct opt_desc_t

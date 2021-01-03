@@ -87,7 +87,7 @@ struct thingtype_t
 };
 
 
-typedef enum
+enum thingdef_flags_e
 {
 	THINGDEF_INVIS   = (1 << 0),  // partially invisible
 	THINGDEF_CEIL    = (1 << 1),  // hangs from ceiling
@@ -95,8 +95,7 @@ typedef enum
 	THINGDEF_PASS    = (1 << 3),  // non-blocking
 	THINGDEF_VOID    = (1 << 4),  // can exist in the void
 	THINGDEF_TELEPT  = (1 << 5),  // teleport dest, can overlap certain things
-}
-thingdef_flags_e;
+};
 
 
 // texturegroup <letter> <description>

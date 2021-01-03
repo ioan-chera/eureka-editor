@@ -41,7 +41,7 @@
 
 
 // posts are runs of non masked source pixels
-typedef struct
+struct post_t
 {
 	// offset down from top.  P_SENTINEL terminates the list.
 	byte topdelta;
@@ -50,8 +50,7 @@ typedef struct
 	byte length;
 
 	/* byte pixels[length+2] */
-}
-post_t;
+};
 
 #define P_SENTINEL  0xFF
 
