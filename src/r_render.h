@@ -101,13 +101,9 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh);
 bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
 void Render3D_ScrollMap(Instance &inst, int dx = 0, int dy = 0, keycode_t mod = 0);
-void Render3D_Navigate(Instance &inst);
 
 void Render3D_DragThings(Instance &inst);
 void Render3D_DragSectors(Instance &inst);
-
-void Render3D_CB_Cut(Instance &inst);
-void Render3D_CB_Paste(Instance &inst);
 
 void Render3D_SetCameraPos(double new_x, double new_y);
 void Render3D_GetCameraPos(double *x, double *y, float *angle);

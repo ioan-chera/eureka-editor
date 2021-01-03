@@ -320,26 +320,26 @@ void Texboard_Clear()
 	tex_clipboard::thing = 0;
 }
 
-int Texboard_GetTexNum(const Instance &inst)
+int Instance::Texboard_GetTexNum() const
 {
 	if (tex_clipboard::tex.empty())
-		tex_clipboard::tex = inst.default_wall_tex;
+		tex_clipboard::tex = default_wall_tex;
 
 	return BA_InternaliseString(tex_clipboard::tex);
 }
 
-int Texboard_GetFlatNum(const Instance &inst)
+int Instance::Texboard_GetFlatNum() const
 {
 	if (tex_clipboard::flat.empty())
-		tex_clipboard::flat = inst.default_floor_tex;
+		tex_clipboard::flat = default_floor_tex;
 
 	return BA_InternaliseString(tex_clipboard::flat);
 }
 
-int Texboard_GetThing(const Instance &inst)
+int Instance::Texboard_GetThing() const
 {
 	if (tex_clipboard::thing == 0)
-		return inst.default_thing;
+		return default_thing;
 
 	return tex_clipboard::thing;
 }
@@ -479,9 +479,9 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 }
 
 
-static bool Clipboard_DoCopy(Instance &inst)
+bool Instance::Clipboard_DoCopy()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 		return false;
 
@@ -491,31 +491,31 @@ static bool Clipboard_DoCopy(Instance &inst)
 
 	bool result = true;
 
-	clip_board = new clipboard_data_c(inst.edit.mode);
+	clip_board = new clipboard_data_c(edit.mode);
 
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 		case ObjType::things:
-			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
-				*T = *inst.level.things[*it];
+				*T = *level.things[*it];
 				clip_board->things.push_back(T);
 			}
 			break;
 
 		case ObjType::vertices:
-			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
-				*V = *inst.level.vertices[*it];
+				*V = *level.vertices[*it];
 				clip_board->verts.push_back(V);
 			}
 			break;
 
 		case ObjType::linedefs:
 		case ObjType::sectors:
-			CopyGroupOfObjects(inst.level, inst.edit.Selected);
+			CopyGroupOfObjects(level, edit.Selected);
 			break;
 
 		default:
@@ -523,14 +523,14 @@ static bool Clipboard_DoCopy(Instance &inst)
 			break;
 	}
 
-	int total = inst.edit.Selected->count_obj();
+	int total = edit.Selected->count_obj();
 	if (total == 1)
-		inst.Status_Set("copied %s #%d", NameForObjectType(inst.edit.Selected->what_type()), inst.edit.Selected->find_first());
+		Status_Set("copied %s #%d", NameForObjectType(edit.Selected->what_type()), edit.Selected->find_first());
 	else
-		inst.Status_Set("copied %d %s", total, NameForObjectType(inst.edit.Selected->what_type(), true /* plural */));
+		Status_Set("copied %d %s", total, NameForObjectType(edit.Selected->what_type(), true /* plural */));
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 
 	return result;
 }
@@ -648,21 +648,21 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 }
 
 
-static void ReselectGroup(Instance &inst)
+void Instance::ReselectGroup()
 {
 	// this assumes all the new objects are at the end of their
 	// array (currently true, but not a guarantee of BA_New).
 
-	if (inst.edit.mode == ObjType::things)
+	if (edit.mode == ObjType::things)
 	{
 		if (clip_board->mode == ObjType::things ||
 		    clip_board->mode == ObjType::sectors)
 		{
 			int count = (int)clip_board->things.size();
 
-			Selection_Clear(inst);
+			Selection_Clear();
 
-			inst.edit.Selected->frob_range(inst.level.numThings() - count, inst.level.numThings()-1, BitOp::add);
+			edit.Selected->frob_range(level.numThings() - count, level.numThings()-1, BitOp::add);
 		}
 		return;
 	}
@@ -671,9 +671,9 @@ static void ReselectGroup(Instance &inst)
 			    	  clip_board->mode == ObjType::linedefs ||
 					  clip_board->mode == ObjType::sectors);
 
-	bool is_mappy =  (inst.edit.mode == ObjType::vertices ||
-			    	  inst.edit.mode == ObjType::linedefs ||
-					  inst.edit.mode == ObjType::sectors);
+	bool is_mappy =  (edit.mode == ObjType::vertices ||
+			    	  edit.mode == ObjType::linedefs ||
+					  edit.mode == ObjType::sectors);
 
 	if (! (was_mappy && is_mappy))
 		return;
@@ -683,7 +683,7 @@ static void ReselectGroup(Instance &inst)
 	if (clip_board->mode == ObjType::vertices)
 	{
 		int count = (int)clip_board->verts.size();
-		new_sel.frob_range(inst.level.numVertices() - count, inst.level.numVertices() -1, BitOp::add);
+		new_sel.frob_range(level.numVertices() - count, level.numVertices() -1, BitOp::add);
 	}
 	else if (clip_board->mode == ObjType::linedefs)
 	{
@@ -692,23 +692,23 @@ static void ReselectGroup(Instance &inst)
 		// the sectors (non-pasted lines refer to them too).
 
 		int count = (int)clip_board->lines.size();
-		new_sel.frob_range(inst.level.numLinedefs() - count, inst.level.numLinedefs() -1, BitOp::add);
+		new_sel.frob_range(level.numLinedefs() - count, level.numLinedefs() -1, BitOp::add);
 	}
 	else
 	{
 		SYS_ASSERT(clip_board->mode == ObjType::sectors);
 
 		int count = (int)clip_board->sectors.size();
-		new_sel.frob_range(inst.level.numSectors() - count, inst.level.numSectors() -1, BitOp::add);
+		new_sel.frob_range(level.numSectors() - count, level.numSectors() -1, BitOp::add);
 	}
 
-	Selection_Clear(inst);
+	Selection_Clear();
 
-	ConvertSelection(inst.level, &new_sel, inst.edit.Selected);
+	ConvertSelection(level, &new_sel, edit.Selected);
 }
 
 
-static bool Clipboard_DoPaste(Instance &inst)
+bool Instance::Clipboard_DoPaste()
 {
 	bool reselect = true;  // CONFIG TODO
 
@@ -718,10 +718,10 @@ static bool Clipboard_DoPaste(Instance &inst)
 		return false;
 
 	// figure out where to put stuff
-	double pos_x = inst.edit.map_x;
-	double pos_y = inst.edit.map_y;
+	double pos_x = edit.map_x;
+	double pos_y = edit.map_y;
 
-	if (! inst.edit.pointer_in_window)
+	if (! edit.pointer_in_window)
 	{
 		pos_x = grid.orig_x;
 		pos_y = grid.orig_y;
@@ -731,8 +731,8 @@ static bool Clipboard_DoPaste(Instance &inst)
 	pos_x = grid.SnapX(pos_x);
 	pos_y = grid.SnapY(pos_y);
 
-	inst.level.basis.begin();
-	clip_board->Paste_BA_Message(inst.level);
+	level.basis.begin();
+	clip_board->Paste_BA_Message(level);
 
 	clip_doing_paste = true;
 
@@ -745,15 +745,15 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
-				int new_t = inst.level.basis.addNew(ObjType::things);
-				Thing * T = inst.level.things[new_t];
+				int new_t = level.basis.addNew(ObjType::things);
+				Thing * T = level.things[new_t];
 
 				*T = *clip_board->things[i];
 
-				T->SetRawX(inst, T->x() + pos_x - cx);
-				T->SetRawY(inst, T->y() + pos_y - cy);
+				T->SetRawX(*this, T->x() + pos_x - cx);
+				T->SetRawY(*this, T->y() + pos_y - cy);
 
-				inst.recent_things.insert_number(T->type);
+				recent_things.insert_number(T->type);
 			}
 			break;
 		}
@@ -765,13 +765,13 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
-				int new_v = inst.level.basis.addNew(ObjType::vertices);
-				Vertex * V = inst.level.vertices[new_v];
+				int new_v = level.basis.addNew(ObjType::vertices);
+				Vertex * V = level.vertices[new_v];
 
 				*V = *clip_board->verts[i];
 
-				V->SetRawX(inst, V->x() + pos_x - cx);
-				V->SetRawY(inst, V->y() + pos_y - cy);
+				V->SetRawX(*this, V->x() + pos_x - cx);
+				V->SetRawY(*this, V->y() + pos_y - cy);
 			}
 			break;
 		}
@@ -779,7 +779,7 @@ static bool Clipboard_DoPaste(Instance &inst)
 		case ObjType::linedefs:
 		case ObjType::sectors:
 		{
-			PasteGroupOfObjects(inst, pos_x, pos_y);
+			PasteGroupOfObjects(*this, pos_x, pos_y);
 			break;
 		}
 
@@ -789,12 +789,12 @@ static bool Clipboard_DoPaste(Instance &inst)
 
 	clip_doing_paste = false;
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	inst.edit.error_mode = false;
+	edit.error_mode = false;
 
 	if (reselect)
-		ReselectGroup(inst);
+		ReselectGroup();
 
 	return true;
 }
@@ -810,9 +810,9 @@ void Instance::CMD_CopyAndPaste()
 		return;
 	}
 
-	if (Clipboard_DoCopy(*this))
+	if (Clipboard_DoCopy())
 	{
-		Clipboard_DoPaste(*this);
+		Clipboard_DoPaste();
 	}
 }
 
@@ -824,11 +824,11 @@ void Instance::CMD_Clipboard_Cut()
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Cut(*this);
+		Render3D_CB_Cut();
 		return;
 	}
 
-	if (! Clipboard_DoCopy(*this))
+	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to cut");
 		return;
@@ -849,7 +849,7 @@ void Instance::CMD_Clipboard_Copy()
 		return;
 	}
 
-	if (! Clipboard_DoCopy(*this))
+	if (! Clipboard_DoCopy())
 	{
 		Beep("Nothing to copy");
 		return;
@@ -864,11 +864,11 @@ void Instance::CMD_Clipboard_Paste()
 
 	if (edit.render3d && edit.mode != ObjType::things)
 	{
-		Render3D_CB_Paste(*this);
+		Render3D_CB_Paste();
 		return;
 	}
 
-	if (! Clipboard_DoPaste(*this))
+	if (! Clipboard_DoPaste())
 	{
 		Beep("Clipboard is empty");
 		return;
@@ -1257,7 +1257,7 @@ success:
 	Editor_ClearAction();
 
 	// always clear the selection (deleting objects invalidates it)
-	Selection_Clear(*this);
+	Selection_Clear();
 
 	edit.highlight.clear();
 	edit.split_line.clear();

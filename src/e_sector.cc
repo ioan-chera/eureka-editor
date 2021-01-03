@@ -118,7 +118,7 @@ void Instance::CMD_SEC_Floor()
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -156,7 +156,7 @@ void Instance::CMD_SEC_Ceil()
 	main_win->sec_box->UpdateField(Sector::F_CEILH);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -226,7 +226,7 @@ void Instance::CMD_SEC_Light()
 	level.secmod.sectorsAdjustLight(diff);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -259,7 +259,7 @@ void Instance::CMD_SEC_SwapFlats()
 	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -295,29 +295,29 @@ void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
 }
 
 
-void SectorModule::commandMerge(Instance &inst)
+void Instance::commandSectorMerge()
 {
 	// need a selection
-	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		inst.Selection_Add(inst.edit.highlight);
+		Selection_Add(edit.highlight);
 	}
 
-	if (inst.edit.Selected->count_obj() < 2)
+	if (edit.Selected->count_obj() < 2)
 	{
-		inst.Beep("Need 2 or more sectors to merge");
+		Beep("Need 2 or more sectors to merge");
 		return;
 	}
 
-	int first = inst.edit.Selected->find_first();
+	int first = edit.Selected->find_first();
 
-	bool keep_common_lines = inst.Exec_HasFlag("/keep");
+	bool keep_common_lines = Exec_HasFlag("/keep");
 
 	// we require the *lowest* numbered sector, otherwise we can
 	// select the wrong sector afterwards (due to renumbering).
-	int new_sec = inst.edit.Selected->max_obj();
+	int new_sec = edit.Selected->max_obj();
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		new_sec = MIN(new_sec, *it);
 	}
@@ -325,51 +325,51 @@ void SectorModule::commandMerge(Instance &inst)
 	selection_c common_lines(ObjType::linedefs);
 	selection_c unused_secs (ObjType::sectors);
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("merged", *edit.Selected);
 
 	// keep the properties of the first selected sector
 	if (new_sec != first)
 	{
-		const Sector *ref = inst.level.sectors[first];
+		const Sector *ref = level.sectors[first];
 
-		inst.level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-		inst.level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-		inst.level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-		inst.level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+		level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
+		level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+		level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
+		level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
 
-		inst.level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
-		inst.level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
-		inst.level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+		level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
+		level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
+		level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 	}
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		int old_sec = *it;
 
 		if (old_sec == new_sec)
 			continue;
 
-		inst.level.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
+		level.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
 
-		inst.level.secmod.replaceSectorRefs(old_sec, new_sec);
+		level.secmod.replaceSectorRefs(old_sec, new_sec);
 
 		unused_secs.set(old_sec);
 	}
 
-	inst.level.objects.del(&unused_secs);
+	level.objects.del(&unused_secs);
 
 	if (! keep_common_lines)
 	{
-		DeleteObjects_WithUnused(inst.level, &common_lines, false, false, false);
+		DeleteObjects_WithUnused(level, &common_lines, false, false, false);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	// re-select the final sector
-	Selection_Clear(inst, true /* no_save */);
+	Selection_Clear(true /* no_save */);
 
-	inst.edit.Selected->set(new_sec);
+	edit.Selected->set(new_sec);
 }
 
 

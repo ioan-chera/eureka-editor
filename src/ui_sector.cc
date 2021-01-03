@@ -897,7 +897,7 @@ bool UI_SectorBox::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::paste:
-			CB_Paste(parts, Texboard_GetFlatNum(inst));
+			CB_Paste(parts, inst.Texboard_GetFlatNum());
 			break;
 
 		case EditCommand::cut:

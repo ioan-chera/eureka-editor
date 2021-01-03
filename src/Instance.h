@@ -25,6 +25,7 @@
 #include "im_img.h"
 #include "m_game.h"
 #include "main.h"
+#include "r_grid.h"
 
 #include <unordered_map>
 
@@ -32,6 +33,7 @@ class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
+class Wad_file;
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
@@ -180,6 +182,8 @@ public:
 	void Transform_Update();
 
 	// E_CUTPASTE
+	int Texboard_GetFlatNum() const;
+	int Texboard_GetTexNum() const;
 	void Texboard_SetFlat(const SString &new_flat) const;
 	void Texboard_SetTex(const SString &new_tex) const;
 
@@ -190,6 +194,7 @@ public:
 	// E_MAIN
 	void CalculateLevelBounds();
 	void Editor_ChangeMode(char mode_char);
+	void Editor_ChangeMode_Raw(ObjType new_mode);
 	void Editor_ClearAction();
 	void Editor_DefaultState();
 	void Editor_Init();
@@ -209,6 +214,7 @@ public:
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
 	void Selection_Add(Objid &obj) const;
+	void Selection_Clear(bool no_save = false);
 	void Selection_InvalidateLast();
 	void Selection_NotifyBegin();
 	void Selection_NotifyDelete(ObjType type, int objnum);
@@ -220,6 +226,10 @@ public:
 	void UpdateHighlight();
 	void ZoomWholeMap();
 
+	// E_PATH
+	void GoToErrors();
+	void GoToObject(const Objid &objid);
+	void GoToSelection();
 	const byte *SoundPropagation(int start_sec);
 
 	// IM_COLOR
@@ -408,7 +418,34 @@ private:
 	void navigation3DMove(float *editNav, nav_release_func_t func, bool fly);
 	void navigation3DTurn(float *editNav, nav_release_func_t func);
 
+	// E_COMMANDS
+	void DoBeginDrag();
+
+	// E_CUTPASTE
+	bool Clipboard_DoCopy();
+	bool Clipboard_DoPaste();
+	void ReselectGroup();
+	int Texboard_GetThing() const;
+
+	// E_LINEDEF
+	void commandLinedefMergeTwo();
+
+	// E_MAIN
+	void Editor_ClearErrorMode();
+	void UpdateDrawLine();
+	void zoom_fit();
+
+	// E_SECTOR
+	void commandSectorMerge();
+
+	// E_VERTEX
+	void commandLineDisconnect();
+	void commandSectorDisconnect();
+	void commandVertexDisconnect();
+	void commandVertexMerge();
+
 	// M_EVENTS
+	void Editor_Zoom(int delta, int mid_x, int mid_y);
 	void EV_EnterWindow();
 	void EV_LeaveWindow();
 	void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
@@ -438,6 +475,7 @@ private:
 	void LoadThings_Hexen();
 	void LoadVertices();
 	bool M_ExportMap();
+	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
@@ -463,11 +501,22 @@ private:
 	void ReadGameInfo();
 	void ReadPortInfo();
 
+	// R_GRID
+	bool Grid_ParseUser(const std::vector<SString> &tokens);
+	void Grid_WriteUser(std::ostream &os) const;
+
 	// R_RENDER
 	int GrabSelectedFlat();
 	int GrabSelectedTexture();
 	int GrabSelectedThing();
 	int LD_GrabTex(const LineDef *L, int part) const;
+	void Render3D_CB_Cut();
+	void Render3D_CB_Paste();
+	void Render3D_Navigate();
+	void StoreDefaultedFlats();
+	void StoreSelectedFlat(int new_tex);
+	void StoreSelectedTexture(int new_tex);
+	void StoreSelectedThing(int new_type);
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
@@ -618,6 +667,11 @@ public:	// will be private when we encapsulate everything
 	int EXEC_Errno = 0;
 	SString EXEC_Flags[MAX_EXEC_PARAM] = {};
 	SString EXEC_Param[MAX_EXEC_PARAM] = {};
+
+	//
+	// Grid
+	//
+	Grid_State_c grid{ *this };
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

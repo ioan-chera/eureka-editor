@@ -56,9 +56,6 @@ public:
 
 	double angleBetweenLines(int A, int B, int C) const;
 
-	/* commands */
-	static void commandMergeTwo(Instance &inst);
-	
 private:
 	void flipLine_verts(int ld) const;
 	void flipLine_sides(int ld) const;

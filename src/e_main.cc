@@ -55,26 +55,26 @@ int  config::thing_render_default = 1;
 //
 // adjust zoom factor to make whole map fit in window
 //
-static void zoom_fit(Instance &inst)
+void Instance::zoom_fit()
 {
-	if (inst.level.numVertices() == 0)
+	if (level.numVertices() == 0)
 		return;
 
 	double xzoom = 1;
 	double yzoom = 1;
 
-	int ScrMaxX = inst.main_win->canvas->w();
-	int ScrMaxY = inst.main_win->canvas->h();
+	int ScrMaxX = main_win->canvas->w();
+	int ScrMaxY = main_win->canvas->h();
 
-	if (inst.Map_bound_x1 < inst.Map_bound_x2)
-		xzoom = ScrMaxX / (inst.Map_bound_x2 - inst.Map_bound_x1);
+	if (Map_bound_x1 < Map_bound_x2)
+		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
 
-	if (inst.Map_bound_y1 < inst.Map_bound_y2)
-		yzoom = ScrMaxY / (inst.Map_bound_y2 - inst.Map_bound_y1);
+	if (Map_bound_y1 < Map_bound_y2)
+		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
 
 	grid.NearestScale(MIN(xzoom, yzoom));
 
-	grid.MoveTo((inst.Map_bound_x1 + inst.Map_bound_x2) / 2, (inst.Map_bound_y1 + inst.Map_bound_y2) / 2);
+	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
 }
 
 
@@ -83,7 +83,7 @@ void Instance::ZoomWholeMap()
 	if (MadeChanges)
 		CalculateLevelBounds();
 
-	zoom_fit(*this);
+	zoom_fit();
 
 	RedrawMap();
 }
@@ -164,29 +164,29 @@ static void UpdatePanel(const Instance &inst)
 }
 
 
-static void UpdateDrawLine(Instance &inst)
+void Instance::UpdateDrawLine()
 {
-	if (inst.edit.action != ACT_DRAW_LINE || inst.edit.draw_from.is_nil())
+	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
 		return;
 
-	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num];
+	const Vertex *V = level.vertices[edit.draw_from.num];
 
-	double new_x = inst.edit.map_x;
-	double new_y = inst.edit.map_y;
+	double new_x = edit.map_x;
+	double new_y = edit.map_y;
 
 	if (grid.ratio > 0)
 	{
 		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
 	}
-	else if (inst.edit.highlight.valid())
+	else if (edit.highlight.valid())
 	{
-		new_x = inst.level.vertices[inst.edit.highlight.num]->x();
-		new_y = inst.level.vertices[inst.edit.highlight.num]->y();
+		new_x = level.vertices[edit.highlight.num]->x();
+		new_y = level.vertices[edit.highlight.num]->y();
 	}
-	else if (inst.edit.split_line.valid())
+	else if (edit.split_line.valid())
 	{
-		new_x = inst.edit.split_x;
-		new_y = inst.edit.split_y;
+		new_x = edit.split_x;
+		new_y = edit.split_y;
 	}
 	else
 	{
@@ -194,24 +194,24 @@ static void UpdateDrawLine(Instance &inst)
 		new_y = grid.SnapY(new_y);
 	}
 
-	inst.edit.draw_to_x = new_x;
-	inst.edit.draw_to_y = new_y;
+	edit.draw_to_x = new_x;
+	edit.draw_to_y = new_y;
 
 	// when drawing mode, highlight a vertex at the snap position
-	if (grid.snap && inst.edit.highlight.is_nil() && inst.edit.split_line.is_nil())
+	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int near_vert = inst.level.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
+		int near_vert = level.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 		if (near_vert >= 0)
 		{
-			inst.edit.highlight = Objid(ObjType::vertices, near_vert);
+			edit.highlight = Objid(ObjType::vertices, near_vert);
 		}
 	}
 
 	// never highlight the vertex we are drawing from
-	if (inst.edit.draw_from.valid() &&
-		inst.edit.draw_from == inst.edit.highlight)
+	if (edit.draw_from.valid() &&
+		edit.draw_from == edit.highlight)
 	{
-		inst.edit.highlight.clear();
+		edit.highlight.clear();
 	}
 }
 
@@ -290,7 +290,7 @@ void Instance::UpdateHighlight()
 	}
 
 	UpdateSplitLine(*this, edit.map_x, edit.map_y);
-	UpdateDrawLine(*this);
+	UpdateDrawLine();
 
 	main_win->canvas->UpdateHighlight();
 	main_win->canvas->CheckGridSnap();
@@ -299,28 +299,28 @@ void Instance::UpdateHighlight()
 }
 
 
-void Editor_ClearErrorMode(Instance &inst)
+void Instance::Editor_ClearErrorMode()
 {
-	if (inst.edit.error_mode)
+	if (edit.error_mode)
 	{
-		Selection_Clear(inst);
+		Selection_Clear();
 	}
 }
 
 
-void Editor_ChangeMode_Raw(Instance &inst, ObjType new_mode)
+void Instance::Editor_ChangeMode_Raw(ObjType new_mode)
 {
 	// keep selection after a "Find All" and user dismisses panel
-	if (new_mode == inst.edit.mode && inst.main_win->isSpecialPanelShown())
-		inst.edit.error_mode = false;
+	if (new_mode == edit.mode && main_win->isSpecialPanelShown())
+		edit.error_mode = false;
 
-	inst.edit.mode = new_mode;
+	edit.mode = new_mode;
 
-	inst.Editor_ClearAction();
-	Editor_ClearErrorMode(inst);
+	Editor_ClearAction();
+	Editor_ClearErrorMode();
 
-	inst.edit.highlight.clear();
-	inst.edit.split_line.clear();
+	edit.highlight.clear();
+	edit.split_line.clear();
 }
 
 
@@ -331,10 +331,10 @@ void Instance::Editor_ChangeMode(char mode_char)
 	// Set the object type according to the new mode.
 	switch (mode_char)
 	{
-		case 't': Editor_ChangeMode_Raw(*this, ObjType::things);   break;
-		case 'l': Editor_ChangeMode_Raw(*this, ObjType::linedefs); break;
-		case 's': Editor_ChangeMode_Raw(*this, ObjType::sectors);  break;
-		case 'v': Editor_ChangeMode_Raw(*this, ObjType::vertices); break;
+		case 't': Editor_ChangeMode_Raw(ObjType::things);   break;
+		case 'l': Editor_ChangeMode_Raw(ObjType::linedefs); break;
+		case 's': Editor_ChangeMode_Raw(ObjType::sectors);  break;
+		case 'v': Editor_ChangeMode_Raw(ObjType::vertices); break;
 
 		default:
 			Beep("Unknown mode: %c\n", mode_char);
@@ -363,7 +363,7 @@ void Instance::Editor_ChangeMode(char mode_char)
 	//       change.  We optionally emulate that behavior here.
 	else if (config::same_mode_clears_selection)
 	{
-		Selection_Clear(*this);
+		Selection_Clear();
 	}
 
 	RedrawMap();
@@ -950,20 +950,20 @@ void Instance::Selection_Push()
 }
 
 
-void Selection_Clear(Instance &inst, bool no_save)
+void Instance::Selection_Clear(bool no_save)
 {
 	if (! no_save)
-		inst.Selection_Push();
+		Selection_Push();
 
 	// this always clears it
-	inst.edit.Selected->change_type(inst.edit.mode);
+	edit.Selected->change_type(edit.mode);
 
-	inst.edit.error_mode = false;
+	edit.error_mode = false;
 
-	if (inst.main_win)
-		inst.main_win->UnselectPics();
+	if (main_win)
+		main_win->UnselectPics();
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
@@ -1046,7 +1046,7 @@ void Instance::CMD_LastSelection()
 	if (last_Sel->what_type() != edit.mode)
 	{
 		changed_mode = true;
-		Editor_ChangeMode_Raw(*this, last_Sel->what_type());
+		Editor_ChangeMode_Raw(last_Sel->what_type());
 		main_win->NewEditMode(edit.mode);
 	}
 
@@ -1056,7 +1056,7 @@ void Instance::CMD_LastSelection()
 	Selection_Validate(*this);
 
 	if (changed_mode)
-		GoToSelection(*this);
+		GoToSelection();
 
 	RedrawMap();
 }

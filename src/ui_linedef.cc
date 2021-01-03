@@ -552,7 +552,7 @@ bool UI_LineBox::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::paste:
-			CB_Paste(parts, Texboard_GetTexNum(inst));
+			CB_Paste(parts, inst.Texboard_GetTexNum());
 			break;
 
 		case EditCommand::cut:	// Cut

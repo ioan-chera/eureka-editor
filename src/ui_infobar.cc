@@ -121,7 +121,7 @@ UI_InfoBar::UI_InfoBar(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	grid_snap = new Fl_Toggle_Button(X+4, Y, 72, H);
-	grid_snap->value(grid.snap ? 1 : 0);
+	grid_snap->value(inst.grid.snap ? 1 : 0);
 	grid_snap->color(FREE_COLOR);
 	grid_snap->selection_color(SNAP_COLOR);
 	grid_snap->callback(snap_callback, this);
@@ -224,11 +224,12 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 
 void UI_InfoBar::scale_callback(Fl_Widget *w, void *data)
 {
+	auto bar = static_cast<UI_InfoBar *>(data);
 	Fl_Menu_Button *scale = (Fl_Menu_Button *)w;
 
 	double new_scale = scale_amounts[scale->value()];
 
-	grid.NearestScale(new_scale);
+	bar->inst.grid.NearestScale(new_scale);
 }
 
 
@@ -247,23 +248,25 @@ void UI_InfoBar::sc_plus_callback(Fl_Widget *w, void *data)
 
 void UI_InfoBar::grid_callback(Fl_Widget *w, void *data)
 {
+	auto bar = static_cast<UI_InfoBar *>(data);
 	Fl_Menu_Button *gsize = (Fl_Menu_Button *)w;
 
 	int new_step = grid_amounts[gsize->value()];
 
 	if (new_step < 0)
-		grid.SetShown(false);
+		bar->inst.grid.SetShown(false);
 	else
-		grid.ForceStep(new_step);
+		bar->inst.grid.ForceStep(new_step);
 }
 
 
 void UI_InfoBar::snap_callback(Fl_Widget *w, void *data)
 {
+	auto bar = static_cast<UI_InfoBar *>(data);
 	Fl_Toggle_Button *grid_snap = (Fl_Toggle_Button *)w;
 
 	// update editor state
-	grid.SetSnap(grid_snap->value() ? true : false);
+	bar->inst.grid.SetSnap(grid_snap->value() ? true : false);
 }
 
 
@@ -272,7 +275,7 @@ void UI_InfoBar::ratio_callback(Fl_Widget *w, void *data)
 	Fl_Menu_Button *ratio_lock = (Fl_Menu_Button *)w;
 	auto bar = static_cast<const UI_InfoBar *>(data);
 
-	grid.ratio = ratio_lock->value();
+	bar->inst.grid.ratio = ratio_lock->value();
 	bar->inst.main_win->info_bar->UpdateRatio();
 }
 
@@ -334,7 +337,7 @@ void UI_InfoBar::SetGrid(int new_step)
 
 void UI_InfoBar::UpdateSnap()
 {
-   grid_snap->value(grid.snap ? 1 : 0);
+   grid_snap->value(inst.grid.snap ? 1 : 0);
 
    UpdateSnapText();
 }
@@ -363,12 +366,12 @@ void UI_InfoBar::UpdateSecRend()
 
 void UI_InfoBar::UpdateRatio()
 {
-	if (grid.ratio == 0)
+	if (inst.grid.ratio == 0)
 		ratio_lock->color(FL_BACKGROUND_COLOR);
 	else
 		ratio_lock->color(RATIO_COLOR);
 
-	if (grid.ratio == 7)
+	if (inst.grid.ratio == 7)
 	{
 		char buffer[256];
 		snprintf(buffer, sizeof(buffer), "Usr %d:%d", config::grid_ratio_high, config::grid_ratio_low);
@@ -381,7 +384,7 @@ void UI_InfoBar::UpdateRatio()
 	}
 	else
 	{
-		ratio_lock->copy_label(ratio_lock->text(grid.ratio));
+		ratio_lock->copy_label(ratio_lock->text(inst.grid.ratio));
 	}
 }
 
@@ -477,8 +480,8 @@ void UI_StatusBar::draw()
 	}
 	else  // 2D view
 	{
-		float mx = static_cast<float>(grid.SnapX(inst.edit.map_x));
-		float my = static_cast<float>(grid.SnapX(inst.edit.map_y));
+		float mx = static_cast<float>(inst.grid.SnapX(inst.edit.map_x));
+		float my = static_cast<float>(inst.grid.SnapY(inst.edit.map_y));
 
 		mx = CLAMP(-32767, mx, 32767);
 		my = CLAMP(-32767, my, 32767);

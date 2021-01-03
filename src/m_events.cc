@@ -90,7 +90,7 @@ void Instance::Editor_SetAction(editor_action_e  new_action)
 }
 
 
-void Editor_Zoom(int delta, int mid_x, int mid_y)
+void Instance::Editor_Zoom(int delta, int mid_x, int mid_y)
 {
     float S1 = static_cast<float>(grid.Scale);
 
@@ -157,26 +157,26 @@ void Instance::Editor_ClearNav()
 }
 
 
-static void Navigate2D(Instance &inst)
+void Instance::Navigate2D()
 {
-	float delay_ms = static_cast<float>(inst.Nav_TimeDiff());
+	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
 	delay_ms = delay_ms / 1000.0f;
 
 	keycode_t mod = 0;
 
-	if (inst.edit.nav_lax)
+	if (edit.nav_lax)
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
 	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
-	if (inst.edit.nav_left || inst.edit.nav_right ||
-		inst.edit.nav_up   || inst.edit.nav_down)
+	if (edit.nav_left || edit.nav_right ||
+		edit.nav_up   || edit.nav_down)
 	{
-		float delta_x = (inst.edit.nav_right - inst.edit.nav_left);
-		float delta_y = (inst.edit.nav_up    - inst.edit.nav_down);
+		float delta_x = (edit.nav_right - edit.nav_left);
+		float delta_y = (edit.nav_up    - edit.nav_down);
 
 		delta_x = delta_x * mod_factor * delay_ms;
 		delta_y = delta_y * mod_factor * delay_ms;
@@ -184,7 +184,7 @@ static void Navigate2D(Instance &inst)
 		grid.Scroll(delta_x, delta_y);
 	}
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 void Instance::Nav_Clear()
@@ -200,9 +200,9 @@ void Instance::Nav_Clear()
 void Instance::Nav_Navigate()
 {
 	if (edit.render3d)
-		Render3D_Navigate(*this);
+		Render3D_Navigate();
 	else
-		Navigate2D(*this);
+		Navigate2D();
 }
 
 

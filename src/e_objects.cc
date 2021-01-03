@@ -85,8 +85,8 @@ void ObjectsModule::createSquare(int model) const
 	else
 		doc.sectors[new_sec]->SetDefaults(inst);
 
-	double x1 = grid.QuantSnapX(inst.edit.map_x, false);
-	double y1 = grid.QuantSnapX(inst.edit.map_y, false);
+	double x1 = inst.grid.QuantSnapX(inst.edit.map_x, false);
+	double y1 = inst.grid.QuantSnapX(inst.edit.map_y, false);
 
 	double x2 = x1 + config::new_sector_size;
 	double y2 = y1 + config::new_sector_size;
@@ -115,7 +115,7 @@ void ObjectsModule::createSquare(int model) const
 	}
 
 	// select it
-	Selection_Clear(inst);
+	inst.Selection_Clear();
 
 	inst.edit.Selected->set(new_sec);
 }
@@ -148,8 +148,8 @@ void ObjectsModule::insertThing() const
 		}
 	}
 
-	T->SetRawX(inst, grid.SnapX(inst.edit.map_x));
-	T->SetRawY(inst, grid.SnapY(inst.edit.map_y));
+	T->SetRawX(inst, inst.grid.SnapX(inst.edit.map_x));
+	T->SetRawY(inst, inst.grid.SnapY(inst.edit.map_y));
 
 	inst.recent_things.insert_number(T->type);
 
@@ -158,7 +158,7 @@ void ObjectsModule::insertThing() const
 
 
 	// select it
-	Selection_Clear(inst);
+	inst.Selection_Clear();
 
 	inst.edit.Selected->set(new_t);
 }
@@ -398,8 +398,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	int old_vert = -1;
 	int new_vert = -1;
 
-	double new_x = grid.SnapX(inst.edit.map_x);
-	double new_y = grid.SnapY(inst.edit.map_y);
+	double new_x = inst.grid.SnapX(inst.edit.map_x);
+	double new_y = inst.grid.SnapY(inst.edit.map_y);
 
 	int orig_num_sectors = doc.numSectors();
 
@@ -437,7 +437,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			new_vert = inst.edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (new_vert < 0 && grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
+		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
 			new_vert = doc.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 
 		//
@@ -560,7 +560,7 @@ begin_drawing:
 	if (inst.edit.action == ACT_NOTHING && !closed_a_loop &&
 		old_vert >= 0 && new_vert < 0)
 	{
-		Selection_Clear(inst);
+		inst.Selection_Clear();
 
 		inst.edit.draw_from = Objid(ObjType::vertices, old_vert);
 		inst.edit.Selected->set(old_vert);
@@ -643,7 +643,7 @@ void ObjectsModule::insertSector() const
 	// select the new sector
 	if (ok)
 	{
-		Selection_Clear(inst);
+		inst.Selection_Clear();
 		inst.edit.Selected->set(doc.numSectors() - 1);
 	}
 
@@ -1158,13 +1158,13 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 	{
 		case ObjType::things:
 			*total += 1;
-			if (grid.OnGrid(doc.things[objnum]->x(), doc.things[objnum]->y()))
+			if (inst.grid.OnGrid(doc.things[objnum]->x(), doc.things[objnum]->y()))
 				*count += 1;
 			break;
 
 		case ObjType::vertices:
 			*total += 1;
-			if (grid.OnGrid(doc.vertices[objnum]->x(), doc.vertices[objnum]->y()))
+			if (inst.grid.OnGrid(doc.vertices[objnum]->x(), doc.vertices[objnum]->y()))
 				*count += 1;
 			break;
 
@@ -1256,7 +1256,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 	// handle OBJ_THINGS and OBJ_VERTICES
 
-	if (only_grid && !grid.OnGrid(x2, y2))
+	if (only_grid && !inst.grid.OnGrid(x2, y2))
 		return;
 
 	double dist = hypot(x2 - ptr_x, y2 - ptr_y);
@@ -1289,7 +1289,7 @@ void ObjectsModule::getDragFocus(double *x, double *y, double ptr_x, double ptr_
 	int count = 0;
 	int total = 0;
 
-	if (grid.snap)
+	if (inst.grid.snap)
 	{
 		dragCountOnGrid(&count, &total);
 
@@ -1599,7 +1599,7 @@ void Instance::CMD_Mirror()
 	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -1702,7 +1702,7 @@ void Instance::CMD_Rotate90()
 	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -2014,7 +2014,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	doc.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		inst.Selection_Clear(true /* nosave */);
 }
 
 
@@ -2039,7 +2039,7 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 	{
 		const Thing * T = doc.things[*it];
 
-		if (grid.OnGrid(T->x(), T->y()))
+		if (inst.grid.OnGrid(T->x(), T->y()))
 		{
 			moved.set(*it);
 			continue;
@@ -2047,8 +2047,8 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 
 		for (int pass = 0 ; pass < 4 ; pass++)
 		{
-			int new_x = grid.QuantSnapX(T->x(), pass & 1);
-			int new_y = grid.QuantSnapY(T->y(), pass & 2);
+			int new_x = inst.grid.QuantSnapX(T->x(), pass & 1);
+			int new_y = inst.grid.QuantSnapY(T->y(), pass & 2);
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
@@ -2127,7 +2127,7 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 	{
 		const Vertex * V = doc.vertices[*it];
 
-		if (grid.OnGrid(V->x(), V->y()))
+		if (inst.grid.OnGrid(V->x(), V->y()))
 		{
 			moved.set(*it);
 			continue;
@@ -2139,8 +2139,8 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 		{
 			int x_dir, y_dir;
 
-			double new_x = grid.QuantSnapX(V->x(), pass & 1, &x_dir);
-			double new_y = grid.QuantSnapY(V->y(), pass & 2, &y_dir);
+			double new_x = inst.grid.QuantSnapX(V->x(), pass & 1, &x_dir);
+			double new_y = inst.grid.QuantSnapY(V->y(), pass & 2, &y_dir);
 
 			// keep horizontal lines horizontal
 			if ((mode & V_HORIZ) && (pass & 2))
@@ -2206,7 +2206,7 @@ void Instance::CMD_Quantize()
 
 			level.objects.quantizeVertices(&verts);
 
-			Selection_Clear(*this);
+			Selection_Clear();
 			break;
 		}
 	}

@@ -27,13 +27,6 @@
 #ifndef __EUREKA_E_PATH_H__
 #define __EUREKA_E_PATH_H__
 
-/* find/next/prev stuff */
-
-void GoToObject(Instance &inst, const Objid& objid);
-void GoToSelection(Instance &inst);
-void GoToErrors(Instance &inst);
-
-
 enum propagate_level_e
 {
 	PGL_Never = 0,	// can never be heared

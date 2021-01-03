@@ -209,10 +209,10 @@ void Instance::CMD_LIN_SelectPath()
 	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L]->start, seen, match);
 	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L]->end,   seen, match);
 
-	Editor_ClearErrorMode(*this);
+	Editor_ClearErrorMode();
 
 	if (fresh_sel)
-		Selection_Clear(*this);
+		Selection_Clear();
 
 	if (unset_them)
 		edit.Selected->unmerge(seen);
@@ -342,10 +342,10 @@ void Instance::CMD_SEC_SelectGroup()
 	{ }
 
 
-	Editor_ClearErrorMode(*this);
+	Editor_ClearErrorMode();
 
 	if (fresh_sel)
-		Selection_Clear(*this);
+		Selection_Clear();
 
 	if (unset_them)
 		edit.Selected->unmerge(seen);
@@ -359,13 +359,13 @@ void Instance::CMD_SEC_SelectGroup()
 //------------------------------------------------------------------------
 
 
-void GoToSelection(Instance &inst)
+void Instance::GoToSelection()
 {
-	if (inst.edit.render3d)
-		Render3D_Enable(inst, false);
+	if (edit.render3d)
+		Render3D_Enable(*this, false);
 
 	double x1, y1, x2, y2;
-	inst.level.objects.calcBBox(inst.edit.Selected, &x1, &y1, &x2, &y2);
+	level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
 
 	double mid_x = (x1 + x2) / 2;
 	double mid_y = (y1 + y2) / 2;
@@ -375,7 +375,7 @@ void GoToSelection(Instance &inst)
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
-		int eval = inst.main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
 
 		if (eval <= 0)
 			break;
@@ -389,7 +389,7 @@ void GoToSelection(Instance &inst)
 		if (grid.Scale >= 1.0)
 			break;
 
-		int eval = inst.main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
 
 		if (eval >= 0)
 			break;
@@ -397,28 +397,28 @@ void GoToSelection(Instance &inst)
 		grid.AdjustScale(+1);
 	}
 
-	inst.RedrawMap();
+	RedrawMap();
 }
 
 
-void GoToErrors(Instance &inst)
+void Instance::GoToErrors()
 {
-	inst.edit.error_mode = true;
+	edit.error_mode = true;
 
-	GoToSelection(inst);
+	GoToSelection();
 }
 
 
 //
 // centre the map around the object and zoom in if necessary
 //
-void GoToObject(Instance &inst, const Objid& objid)
+void Instance::GoToObject(const Objid& objid)
 {
-	Selection_Clear(inst);
+	Selection_Clear();
 
-	inst.edit.Selected->set(objid.num);
+	edit.Selected->set(objid.num);
 
-	GoToSelection(inst);
+	GoToSelection();
 }
 
 
@@ -444,7 +444,7 @@ void Instance::CMD_JumpToObject()
 	// this is guaranteed by the dialog
 	SYS_ASSERT(num < total);
 
-	GoToObject(*this, Objid(edit.mode, num));
+	GoToObject(Objid(edit.mode, num));
 }
 
 

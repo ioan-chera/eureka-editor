@@ -128,10 +128,6 @@ public:
 	void sectorsAdjustLight(int delta) const;
 	void safeRaiseLower(int sec, int parts, int dz) const;
 
-	/* commands */
-
-	static void commandMerge(Instance &inst);
-
 private:
 	friend class lineloop_c;
 

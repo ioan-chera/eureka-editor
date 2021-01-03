@@ -62,8 +62,6 @@ struct nav_active_key_t
 
 void Editor_SetAction(Instance &inst, editor_action_e new_action);
 
-void Editor_Zoom(int delta, int mid_x, int mid_y);
-
 void Editor_UpdateFromScroll();
 
 /* raw input handling */

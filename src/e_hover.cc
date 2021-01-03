@@ -484,7 +484,7 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 
 	double len = hypot(x2 - x1, y2 - y1);
 
-	if(grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE)
+	if(inst.grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE)
 	{
 		const Vertex *V = doc.vertices[inst.edit.draw_from.num];
 
@@ -495,7 +495,7 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 		double px2 = ptr_x;
 		double py2 = ptr_y;
 
-		grid.RatioSnapXY(px2, py2, px1, py1);
+		inst.grid.RatioSnapXY(px2, py2, px1, py1);
 
 		if(fabs(px1 - px2) < 0.1 && fabs(py1 - py2) < 0.1)
 			return Objid();
@@ -515,14 +515,14 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 		out_x = x1 + c * (x2 - x1);
 		out_y = y1 + c * (y2 - y1);
 	}
-	else if(grid.snap)
+	else if(inst.grid.snap)
 	{
 		// don't highlight the line if the new vertex would snap onto
 		// the same coordinate as the start or end of the linedef.
 		// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
 
-		out_x = grid.ForceSnapX(ptr_x);
-		out_y = grid.ForceSnapY(ptr_y);
+		out_x = inst.grid.ForceSnapX(ptr_x);
+		out_y = inst.grid.ForceSnapY(ptr_y);
 
 		// snapped onto an end point?
 		if(L->TouchesCoord(TO_COORD(out_x), TO_COORD(out_y), doc))
@@ -719,7 +719,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 
 
 	// when zooming out, make it easier to hit a vertex
-	double close_dist = 4 * sqrt(1.0 / grid.Scale);
+	double close_dist = 4 * sqrt(1.0 / inst.grid.Scale);
 
 	close_dist = CLAMP(1.0, close_dist, 12.0);
 
@@ -799,7 +799,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 //
 Objid Hover::getNearestThing(double x, double y) const
 {
-	double mapslack = 1 + 16.0f / grid.Scale;
+	double mapslack = 1 + 16.0f / inst.grid.Scale;
 
 	double max_radius = MAX_RADIUS + ceil(mapslack);
 
@@ -856,13 +856,13 @@ Objid Hover::getNearestThing(double x, double y) const
 //
 Objid Hover::getNearestVertex(double x, double y) const
 {
-	const int screen_pix = vertex_radius(grid.Scale);
+	const int screen_pix = vertex_radius(inst.grid.Scale);
 
-	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
+	double mapslack = 1 + (4 + screen_pix) / inst.grid.Scale;
 
 	// workaround for overly zealous highlighting when zoomed in far
-	if(grid.Scale >= 15.0) mapslack *= 0.7;
-	if(grid.Scale >= 31.0) mapslack *= 0.5;
+	if(inst.grid.Scale >= 15.0) mapslack *= 0.7;
+	if(inst.grid.Scale >= 31.0) mapslack *= 0.5;
 
 	double lx = x - mapslack - 0.5;
 	double ly = y - mapslack - 0.5;
@@ -908,7 +908,7 @@ Objid Hover::getNearestVertex(double x, double y) const
 Objid Hover::getNearestLinedef(double x, double y) const
 {
 	// slack in map units
-	double mapslack = 2.5 + 16.0f / grid.Scale;
+	double mapslack = 2.5 + 16.0f / inst.grid.Scale;
 
 	double lx = x - mapslack;
 	double ly = y - mapslack;
@@ -1056,7 +1056,7 @@ double Hover::getApproximateDistanceToLinedef(const LineDef &line, double x, dou
 Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 {
 	// slack in map units
-	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
+	double mapslack = 1.5 + ceil(8.0f / inst.grid.Scale);
 
 	double lx = x - mapslack;
 	double ly = y - mapslack;

@@ -764,7 +764,7 @@ void Instance::CMD_LIN_Align()
 	{
 		Beep("no visible surfaces");
 		if (unselect == SelectHighlight::unselect)
-			Selection_Clear(*this, true /* nosave */);
+			Selection_Clear(true /* nosave */);
 		return;
 	}
 
@@ -780,7 +780,7 @@ void Instance::CMD_LIN_Align()
 	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 //------------------------------------------------------------------------
@@ -868,7 +868,7 @@ void Instance::CMD_LIN_Flip()
 	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 void Instance::CMD_LIN_SwapSides()
@@ -891,7 +891,7 @@ void Instance::CMD_LIN_SwapSides()
 	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 //
@@ -1002,7 +1002,7 @@ void Instance::CMD_LIN_SplitHalf()
 
 	if (unselect == SelectHighlight::unselect)
 	{
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 	}
 	else if (new_count > 0)
 	{
@@ -1152,63 +1152,63 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 }
 
 
-void LinedefModule::commandMergeTwo(Instance &inst)
+void Instance::commandLinedefMergeTwo()
 {
-	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		inst.Selection_Add(inst.edit.highlight);
+		Selection_Add(edit.highlight);
 	}
 
-	if (inst.edit.Selected->count_obj() != 2)
+	if (edit.Selected->count_obj() != 2)
 	{
-		inst.Beep("Need 2 linedefs to merge (got %d)", inst.edit.Selected->count_obj());
+		Beep("Need 2 linedefs to merge (got %d)", edit.Selected->count_obj());
 		return;
 	}
 
 	// we will merge the second into the first
 
-	int ld2 = inst.edit.Selected->find_first();
-	int ld1 = inst.edit.Selected->find_second();
+	int ld2 = edit.Selected->find_first();
+	int ld1 = edit.Selected->find_second();
 
-	const LineDef * L1 = inst.level.linedefs[ld1];
-	const LineDef * L2 = inst.level.linedefs[ld2];
+	const LineDef * L1 = level.linedefs[ld1];
+	const LineDef * L2 = level.linedefs[ld2];
 
 	if (! (L1->OneSided() && L2->OneSided()))
 	{
-		inst.Beep("Linedefs to merge must be single sided.");
+		Beep("Linedefs to merge must be single sided.");
 		return;
 	}
 
-	Selection_Clear(inst, true);
+	Selection_Clear(true);
 
 
-	inst.level.basis.begin();
+	level.basis.begin();
 
 	// ld2 steals the sidedef from ld1
 
-	inst.level.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
-	inst.level.basis.changeLinedef(ld1, LineDef::F_RIGHT, -1);
+	level.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+	level.basis.changeLinedef(ld1, LineDef::F_RIGHT, -1);
 
-	inst.level.linemod.mergedSecondSidedef(ld2);
+	level.linemod.mergedSecondSidedef(ld2);
 
 	// fix existing lines connected to ld1 : reconnect to ld2
 
-	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
+	for (int n = 0 ; n < level.numLinedefs(); n++)
 	{
 		if (n == ld1 || n == ld2)
 			continue;
 
-		const LineDef * L = inst.level.linedefs[n];
+		const LineDef * L = level.linedefs[n];
 
 		if (L->start == L1->start)
-			inst.level.basis.changeLinedef(n, LineDef::F_START, L2->end);
+			level.basis.changeLinedef(n, LineDef::F_START, L2->end);
 		else if (L->start == L1->end)
-			inst.level.basis.changeLinedef(n, LineDef::F_START, L2->start);
+			level.basis.changeLinedef(n, LineDef::F_START, L2->start);
 
 		if (L->end == L1->start)
-			inst.level.basis.changeLinedef(n, LineDef::F_END, L2->end);
+			level.basis.changeLinedef(n, LineDef::F_END, L2->end);
 		else if (L->end == L1->end)
-			inst.level.basis.changeLinedef(n, LineDef::F_END, L2->start);
+			level.basis.changeLinedef(n, LineDef::F_END, L2->start);
 	}
 
 	// delete ld1 and any unused vertices
@@ -1217,10 +1217,10 @@ void LinedefModule::commandMergeTwo(Instance &inst)
 
 	del_line.set(ld1);
 
-	DeleteObjects_WithUnused(inst.level, &del_line, false, false, false);
+	DeleteObjects_WithUnused(level, &del_line, false, false, false);
 
-	inst.level.basis.setMessage("merged two linedefs");
-	inst.level.basis.end();
+	level.basis.setMessage("merged two linedefs");
+	level.basis.end();
 }
 
 //

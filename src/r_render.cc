@@ -1054,25 +1054,25 @@ void Instance::Render3D_UpdateHighlight()
 }
 
 
-void Render3D_Navigate(Instance &inst)
+void Instance::Render3D_Navigate()
 {
-	float delay_ms = static_cast<float>(inst.Nav_TimeDiff());
+	float delay_ms = static_cast<float>(Nav_TimeDiff());
 
 	delay_ms = delay_ms / 1000.0f;
 
 	keycode_t mod = 0;
 
-	if (inst.edit.nav_lax)
+	if (edit.nav_lax)
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
 	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
-	if (inst.edit.nav_fwd || inst.edit.nav_back || inst.edit.nav_right || inst.edit.nav_left)
+	if (edit.nav_fwd || edit.nav_back || edit.nav_right || edit.nav_left)
 	{
-		float fwd   = inst.edit.nav_fwd   - inst.edit.nav_back;
-		float right = inst.edit.nav_right - inst.edit.nav_left;
+		float fwd   = edit.nav_fwd   - edit.nav_back;
+		float right = edit.nav_right - edit.nav_left;
 
 		float dx = static_cast<float>(r_view.Cos * fwd + r_view.Sin * right);
 		float dy = static_cast<float>(r_view.Sin * fwd - r_view.Cos * right);
@@ -1084,16 +1084,16 @@ void Render3D_Navigate(Instance &inst)
 		r_view.y += dy * delay_ms;
 	}
 
-	if (inst.edit.nav_up || inst.edit.nav_down)
+	if (edit.nav_up || edit.nav_down)
 	{
-		float dz = (inst.edit.nav_up - inst.edit.nav_down);
+		float dz = (edit.nav_up - edit.nav_down);
 
 		r_view.z += dz * mod_factor * delay_ms;
 	}
 
-	if (inst.edit.nav_turn_L || inst.edit.nav_turn_R)
+	if (edit.nav_turn_L || edit.nav_turn_R)
 	{
-		float dang = (inst.edit.nav_turn_L - inst.edit.nav_turn_R);
+		float dang = (edit.nav_turn_L - edit.nav_turn_R);
 
 		dang = dang * mod_factor * delay_ms;
 		dang = CLAMP(-90, dang, 90);
@@ -1101,8 +1101,8 @@ void Render3D_Navigate(Instance &inst)
 		r_view.SetAngle(static_cast<float>(r_view.angle + dang));
 	}
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
-	inst.RedrawMap();
+	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	RedrawMap();
 }
 
 
@@ -1143,32 +1143,32 @@ int Instance::GrabSelectedThing()
 }
 
 
-static void StoreSelectedThing(Instance &inst, int new_type)
+void Instance::StoreSelectedThing(int new_type)
 {
 	// this code is similar to code in UI_Thing::type_callback(),
 	// but here we must handle a highlighted object.
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("no things for paste type");
+		Beep("no things for paste type");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("pasted type of", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("pasted type of", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
+		level.basis.changeThing(*it, Thing::F_TYPE, new_type);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 
-	inst.Status_Set("pasted type %d", new_type);
+	Status_Set("pasted type %d", new_type);
 }
 
 
@@ -1228,70 +1228,70 @@ int Instance::GrabSelectedFlat()
 }
 
 
-static void StoreSelectedFlat(Instance &inst, int new_tex)
+void Instance::StoreSelectedFlat(int new_tex)
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("no sectors for paste flat");
+		Beep("no sectors for paste flat");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("pasted flat to", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("pasted flat to", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		byte parts = inst.edit.Selected->get_ext(*it);
+		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
+			level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 
-	inst.Status_Set("pasted %s", BA_GetString(new_tex).c_str());
+	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
-static void StoreDefaultedFlats(Instance &inst)
+void Instance::StoreDefaultedFlats()
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("no sectors for default");
+		Beep("no sectors for default");
 		return;
 	}
 
-	int floor_tex = BA_InternaliseString(inst.default_floor_tex);
-	int ceil_tex  = BA_InternaliseString(inst.default_ceil_tex);
+	int floor_tex = BA_InternaliseString(default_floor_tex);
+	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("defaulted flat in", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		byte parts = inst.edit.Selected->get_ext(*it);
+		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
+			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
+			level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 
-	inst.Status_Set("defaulted flats");
+	Status_Set("defaulted flats");
 }
 
 
@@ -1374,59 +1374,59 @@ int Instance::GrabSelectedTexture()
 }
 
 
-static void StoreSelectedTexture(Instance &inst, int new_tex)
+void Instance::StoreSelectedTexture(int new_tex)
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("no linedefs for paste tex");
+		Beep("no linedefs for paste tex");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("pasted tex to", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("pasted tex to", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = inst.level.linedefs[*it];
-		byte parts = inst.edit.Selected->get_ext(*it);
+		const LineDef *L = level.linedefs[*it];
+		byte parts = edit.Selected->get_ext(*it);
 
 		if (L->NoSided())
 			continue;
 
 		if (L->OneSided())
 		{
-			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+			level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 			continue;
 		}
 
 		/* right side */
 		if (parts == 1 || (parts & PART_RT_LOWER))
-			inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+			level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_RT_UPPER))
-			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 		if (parts & PART_RT_RAIL)
-			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+			level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 
 		/* left side */
 		if (parts == 1 || (parts & PART_LF_LOWER))
-			inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+			level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 
 		if (parts == 1 || (parts & PART_LF_UPPER))
-			inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+			level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
 
 		if (parts & PART_LF_RAIL)
-			inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
+			level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 
-	inst.Status_Set("pasted %s", BA_GetString(new_tex).c_str());
+	Status_Set("pasted %s", BA_GetString(new_tex).c_str());
 }
 
 
@@ -1460,20 +1460,20 @@ void Instance::Render3D_CB_Copy()
 }
 
 
-void Render3D_CB_Paste(Instance &inst)
+void Instance::Render3D_CB_Paste()
 {
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(inst, Texboard_GetThing(inst));
+		StoreSelectedThing(Texboard_GetThing());
 		break;
 
 	case ObjType::sectors:
-		StoreSelectedFlat(inst, Texboard_GetFlatNum(inst));
+		StoreSelectedFlat(Texboard_GetFlatNum());
 		break;
 
 	case ObjType::linedefs:
-		StoreSelectedTexture(inst, Texboard_GetTexNum(inst));
+		StoreSelectedTexture(Texboard_GetTexNum());
 		break;
 
 	default:
@@ -1482,22 +1482,22 @@ void Render3D_CB_Paste(Instance &inst)
 }
 
 
-void Render3D_CB_Cut(Instance &inst)
+void Instance::Render3D_CB_Cut()
 {
 	// this is repurposed to set the default texture/thing
 
-	switch (inst.edit.mode)
+	switch (edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(inst, inst.default_thing);
+		StoreSelectedThing(default_thing);
 		break;
 
 	case ObjType::sectors:
-		StoreDefaultedFlats(inst);
+		StoreDefaultedFlats();
 		break;
 
 	case ObjType::linedefs:
-			StoreSelectedTexture(inst, BA_InternaliseString(inst.default_wall_tex));
+		StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
 		break;
 
 	default:

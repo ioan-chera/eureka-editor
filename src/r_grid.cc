@@ -34,9 +34,6 @@
 #include "m_config.h"
 #include "ui_window.h"
 
-// TODO: make this PART of instance
-Grid_State_c  grid(gInstance);
-
 // config items
 int  config::grid_default_size = 64;
 bool config::grid_default_snap = false;
@@ -122,18 +119,18 @@ void Grid_State_c::Scroll(double delta_x, double delta_y)
 
 int Grid_State_c::ForceSnapX(double map_x) const
 {
-	return static_cast<int>(grid.step * round(map_x / (double)grid.step));
+	return static_cast<int>(step * round(map_x / (double)step));
 }
 
 int Grid_State_c::ForceSnapY(double map_y) const
 {
-	return static_cast<int>(grid.step * round(map_y / (double)grid.step));
+	return static_cast<int>(step * round(map_y / (double)step));
 }
 
 
 double Grid_State_c::SnapX(double map_x) const
 {
-	if (! snap || grid.step == 0)
+	if (! snap || step == 0)
 		return map_x;
 
 	return ForceSnapX(map_x);
@@ -141,7 +138,7 @@ double Grid_State_c::SnapX(double map_x) const
 
 double Grid_State_c::SnapY(double map_y) const
 {
-	if (! snap || grid.step == 0)
+	if (! snap || step == 0)
 		return map_y;
 
 	return ForceSnapY(map_y);
@@ -152,8 +149,8 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 							   double start_x, double start_y) const
 {
 	// snap first, otherwise we lose the ratio
-	var_x = grid.SnapX(var_x);
-	var_y = grid.SnapY(var_y);
+	var_x = SnapX(var_x);
+	var_y = SnapY(var_y);
 
 	double dx = var_x - start_x;
 	double dy = var_y - start_y;
@@ -678,7 +675,7 @@ void Grid_State_c::NearestScale(double want_scale)
 }
 
 
-bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
+bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "map_pos" && tokens.size() >= 4)
 	{
@@ -691,7 +688,7 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 
 		grid.NearestScale(new_scale);
 
-		inst.RedrawMap();
+		RedrawMap();
 		return true;
 	}
 
@@ -705,7 +702,7 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 
 		grid.RawSetShown(t_shown);
 
-		inst.RedrawMap();
+		RedrawMap();
 
 		return true;
 	}
@@ -714,8 +711,8 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	{
 		grid.snap = atoi(tokens[1]) ? true : false;
 
-		if (inst.main_win)
-			inst.main_win->info_bar->UpdateSnap();
+		if (main_win)
+			main_win->info_bar->UpdateSnap();
 
 		return true;
 	}
@@ -723,7 +720,7 @@ bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 	return false;
 }
 
-void Grid_WriteUser(std::ostream &os)
+void Instance::Grid_WriteUser(std::ostream &os) const
 {
 	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.orig_x, grid.orig_y, grid.Scale) <<
 		'\n';

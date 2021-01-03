@@ -996,7 +996,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
 	int tex_num = (what->value() == 1) ?
-		Texboard_GetTexNum(inst) : Texboard_GetFlatNum(inst);
+		inst.Texboard_GetTexNum() : inst.Texboard_GetFlatNum();
 
 	SString tex_name = BA_GetString(tex_num);
 
@@ -1209,7 +1209,7 @@ bool UI_FindAndReplace::FindNext()
 
 	if (cur_obj.type != inst.edit.mode)
 	{
-		Editor_ChangeMode_Raw(inst, cur_obj.type);
+		inst.Editor_ChangeMode_Raw(cur_obj.type);
 	}
 
 
@@ -1230,7 +1230,7 @@ bool UI_FindAndReplace::FindNext()
 		}
 	}
 
-	Selection_Clear(inst);
+	inst.Selection_Clear();
 
 
 	int start_at = cur_obj.is_nil() ? 0 : (cur_obj.num + 1);
@@ -1254,7 +1254,7 @@ bool UI_FindAndReplace::FindNext()
 				rep_value->do_callback();
 			}
 
-			GoToObject(inst, cur_obj);
+			inst.GoToObject(cur_obj);
 
 			inst.Status_Set("found #%d", idx);
 			return true;
@@ -1382,7 +1382,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	ComputeFlagMask();
 
 	if (cur_obj.type != inst.edit.mode)
-		Editor_ChangeMode_Raw(inst, cur_obj.type);
+		inst.Editor_ChangeMode_Raw(cur_obj.type);
 
 	int replace_tex_id = 0;
 
@@ -1434,7 +1434,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (count > 0)
 	{
-		GoToSelection(inst);
+		inst.GoToSelection();
 		inst.edit.error_mode = true;
 	}
 

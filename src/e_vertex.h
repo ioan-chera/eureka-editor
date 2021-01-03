@@ -45,13 +45,6 @@ public:
 	void mergeList(selection_c *list) const;
 	bool tryFixDangler(int v_num) const;
 
-	/* commands */
-
-	static void commandMerge(Instance &inst);
-	static void commandDisconnect(Instance &inst);
-	static void commandLineDisconnect(Instance &inst);
-	static void commandSectorDisconnect(Instance &inst);
-
 private:
 	void mergeSandwichLines(int ld1, int ld2, int v, selection_c &del_lines) const;
 	void doMergeVertex(int v1, int v2, selection_c &del_lines) const;

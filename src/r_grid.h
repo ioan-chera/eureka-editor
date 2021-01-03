@@ -21,10 +21,11 @@
 #ifndef __EUREKA_R_GRID_H__
 #define __EUREKA_R_GRID_H__
 
+class Instance;
 
 class Grid_State_c
 {
-friend bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens);
+friend class Instance;
 
 public:
 	// the actual grid step (64, 128, etc)
@@ -129,12 +130,6 @@ private:
 
 	Instance &inst;
 };
-
-extern Grid_State_c grid;
-
-
-bool Grid_ParseUser(Instance &inst, const std::vector<SString> &tokens);
-void Grid_WriteUser(std::ostream &os);
 
 #endif  /* __EUREKA_R_GRID_H__ */
 

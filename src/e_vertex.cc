@@ -286,27 +286,27 @@ void VertexModule::mergeList(selection_c *verts) const
 }
 
 
-void VertexModule::commandMerge(Instance &inst)
+void Instance::commandVertexMerge()
 {
-	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
+	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		inst.Selection_Add(inst.edit.highlight);
+		Selection_Add(edit.highlight);
 	}
 
-	if (inst.edit.Selected->count_obj() < 2)
+	if (edit.Selected->count_obj() < 2)
 	{
-		inst.Beep("Need 2 or more vertices to merge");
+		Beep("Need 2 or more vertices to merge");
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("merged", *edit.Selected);
 
-	inst.level.vertmod.mergeList(inst.edit.Selected);
+	level.vertmod.mergeList(edit.Selected);
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	Selection_Clear(inst, true /* no_save */);
+	Selection_Clear(true /* no_save */);
 }
 
 
@@ -345,7 +345,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 	if (v_other >= 0)
 	{
-		Selection_Clear(inst, true /* no_save */);
+		inst.Selection_Clear(true /* no_save */);
 
 		// delete highest numbered one  [ so the other index remains valid ]
 		if (v_num < v_other)
@@ -491,45 +491,45 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 }
 
 
-void VertexModule::commandDisconnect(Instance &inst)
+void Instance::commandVertexDisconnect()
 {
-	if (inst.edit.Selected->empty())
+	if (edit.Selected->empty())
 	{
-		if (inst.edit.highlight.is_nil())
+		if (edit.highlight.is_nil())
 		{
-			inst.Beep("Nothing to disconnect");
+			Beep("Nothing to disconnect");
 			return;
 		}
 
-		inst.Selection_Add(inst.edit.highlight);
+		Selection_Add(edit.highlight);
 	}
 
 	bool seen_one = false;
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		int v_num = *it;
 
 		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = inst.level.vertmod.howManyLinedefs(*it);
+		int num_lines = level.vertmod.howManyLinedefs(*it);
 
 		if (num_lines < 2)
 			continue;
 
-		inst.level.vertmod.doDisconnectVertex(v_num, num_lines);
+		level.vertmod.doDisconnectVertex(v_num, num_lines);
 
 		seen_one = true;
 	}
 
 	if (! seen_one)
-		inst.Beep("Nothing was disconnected");
+		Beep("Nothing was disconnected");
 
-	inst.level.basis.end();
+	level.basis.end();
 
-	Selection_Clear(inst, true);
+	Selection_Clear(true);
 }
 
 
@@ -584,7 +584,7 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 }
 
 
-void VertexModule::commandLineDisconnect(Instance &inst)
+void Instance::commandLineDisconnect()
 {
 	// Note: the logic here is significantly different than the logic
 	//       in VT_Disconnect, since we want to keep linedefs in the
@@ -593,31 +593,31 @@ void VertexModule::commandLineDisconnect(Instance &inst)
 	//
 	// Hence need separate code for this.
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("Nothing to disconnect");
+		Beep("Nothing to disconnect");
 		return;
 	}
 
 	bool seen_one = false;
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		inst.level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
-		inst.level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
+		level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
+		level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (! seen_one)
-		inst.Beep("Nothing was disconnected");
+		Beep("Nothing was disconnected");
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* no save */);
+		Selection_Clear(true /* no save */);
 }
 
 
@@ -777,25 +777,25 @@ void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx
 	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
 	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	double mul = 1.0 / CLAMP(0.25, grid.Scale, 1.0);
+	double mul = 1.0 / CLAMP(0.25, inst.grid.Scale, 1.0);
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;
 }
 
 
-void VertexModule::commandSectorDisconnect(Instance &inst)
+void Instance::commandSectorDisconnect()
 {
-	if (inst.level.numVertices() == 0)
+	if (level.numVertices() == 0)
 	{
-		inst.Beep("No sectors to disconnect");
+		Beep("No sectors to disconnect");
 		return;
 	}
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
-		inst.Beep("No sectors to disconnect");
+		Beep("No sectors to disconnect");
 		return;
 	}
 
@@ -803,53 +803,53 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 	// collect all vertices which need to be detached
 	selection_c detach_verts(ObjType::vertices);
-	inst.level.vertmod.verticesOfDetachableSectors(detach_verts);
+	level.vertmod.verticesOfDetachableSectors(detach_verts);
 
 	if (detach_verts.empty())
 	{
-		inst.Beep("Already disconnected");
+		Beep("Already disconnected");
 		if (unselect == SelectHighlight::unselect)
-			Selection_Clear(inst, true /* nosave */);
+			Selection_Clear(true /* nosave */);
 		return;
 	}
 
 
 	// determine vector to move the detach coords
 	double move_dx, move_dy;
-	inst.level.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
+	level.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
+	level.basis.begin();
+	level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
 	// create new vertices, and a mapping from old --> new
 
-	int * mapping = new int[inst.level.numVertices()];
+	int * mapping = new int[level.numVertices()];
 
-	for (n = 0 ; n < inst.level.numVertices(); n++)
+	for (n = 0 ; n < level.numVertices(); n++)
 		mapping[n] = -1;
 
 	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 	{
-		int new_v = inst.level.basis.addNew(ObjType::vertices);
+		int new_v = level.basis.addNew(ObjType::vertices);
 
 		mapping[*it] = new_v;
 
-		Vertex *newbie = inst.level.vertices[new_v];
+		Vertex *newbie = level.vertices[new_v];
 
-		*newbie = *inst.level.vertices[*it];
+		*newbie = *level.vertices[*it];
 	}
 
 	// update linedefs, creating new ones where necessary
 	// (go backwards so we don't visit newly created lines)
 
-	for (n = inst.level.numLinedefs() -1 ; n >= 0 ; n--)
+	for (n = level.numLinedefs() -1 ; n >= 0 ; n--)
 	{
-		const LineDef * L = inst.level.linedefs[n];
+		const LineDef * L = level.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(inst.level)  && inst.edit.Selected->get(L->Left(inst.level)->sector);
-		bool right_in = L->Right(inst.level) && inst.edit.Selected->get(L->Right(inst.level)->sector);
+		bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
+		bool right_in = L->Right(level) && edit.Selected->get(L->Right(level)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -861,15 +861,15 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 		{
-			inst.level.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
+			level.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
 		}
 		else
 		{
 			if (start2 >= 0)
-				inst.level.basis.changeLinedef(n, LineDef::F_START, start2);
+				level.basis.changeLinedef(n, LineDef::F_START, start2);
 
 			if (end2 >= 0)
-				inst.level.basis.changeLinedef(n, LineDef::F_END, end2);
+				level.basis.changeLinedef(n, LineDef::F_END, end2);
 		}
 	}
 
@@ -879,20 +879,20 @@ void VertexModule::commandSectorDisconnect(Instance &inst)
 
 	selection_c all_verts(ObjType::vertices);
 
-	ConvertSelection(inst.level, inst.edit.Selected, &all_verts);
+	ConvertSelection(level, edit.Selected, &all_verts);
 
 	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = inst.level.vertices[*it];
+		const Vertex * V = level.vertices[*it];
 
-		inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + inst.MakeValidCoord(move_dx));
-		inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + inst.MakeValidCoord(move_dy));
+		level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+		level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 	}
 
-	inst.level.basis.end();
+	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(inst, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 

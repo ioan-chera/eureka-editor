@@ -297,7 +297,7 @@ static void Vertex_ShowDanglers(Instance &inst)
 
 	Vertex_FindDanglers(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -426,7 +426,7 @@ static void Vertex_ShowOverlaps(Instance &inst)
 
 	Vertex_FindOverlaps(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -469,7 +469,7 @@ static void Vertex_ShowUnused(Instance &inst)
 
 	Vertex_FindUnused(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -669,7 +669,7 @@ static void Sectors_ShowUnclosed(ObjType what, Instance &inst)
 	else
 		Sectors_FindUnclosed(other, *inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -742,7 +742,7 @@ static void Sectors_ShowMismatches(ObjType what, Instance &inst)
 	else
 		Sectors_FindMismatches(other, *inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -806,7 +806,7 @@ static void Sectors_ShowUnknown(Instance &inst)
 
 	Sectors_FindUnknown(*inst.edit.Selected, types, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -927,7 +927,7 @@ static void Sectors_ShowBadCeil(Instance &inst)
 
 	Sectors_FindBadCeil(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -1004,7 +1004,7 @@ static void SideDefs_ShowPacked(Instance &inst)
 
 	SideDefs_FindPacking(sides, *inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -1372,7 +1372,7 @@ static void Things_ShowUnknown(Instance &inst)
 
 	Things_FindUnknown(*inst.edit.Selected, types, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -1488,7 +1488,7 @@ static void Things_ShowInVoid(Instance &inst)
 
 	Things_FindInVoid(*inst.edit.Selected, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -1581,7 +1581,7 @@ static void Things_ShowDuds(Instance &inst)
 
 	Things_FindDuds(inst, *inst.edit.Selected);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -1846,7 +1846,7 @@ static void Things_ShowStuckies(Instance &inst)
 
 	Things_FindStuckies(*inst.edit.Selected, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2107,7 +2107,7 @@ static void LineDefs_ShowZeroLen(Instance &inst)
 
 	ConvertSelection(inst.level, &sel, inst.edit.Selected);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2128,7 +2128,7 @@ static void LineDefs_ShowMissingRight(Instance &inst)
 
 	LineDefs_FindMissingRight(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2166,7 +2166,7 @@ static void LineDefs_ShowManualDoors(Instance &inst)
 
 	LineDefs_FindManualDoors(*inst.edit.Selected, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2216,7 +2216,7 @@ static void LineDefs_ShowLackImpass(Instance &inst)
 
 	LineDefs_FindLackImpass(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2265,7 +2265,7 @@ static void LineDefs_ShowBad2SFlag(Instance &inst)
 
 	LineDefs_FindBad2SFlag(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2339,7 +2339,7 @@ static void LineDefs_ShowUnknown(Instance &inst)
 
 	LineDefs_FindUnknown(*inst.edit.Selected, types, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2496,7 +2496,7 @@ static void LineDefs_ShowOverlaps(Instance &inst)
 
 	LineDefs_FindOverlaps(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -2700,7 +2700,7 @@ static void LineDefs_ShowCrossings(Instance &inst)
 
 	LineDefs_FindCrossings(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3093,7 +3093,7 @@ void Instance::CMD_ApplyTag()
 	}
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -3168,7 +3168,7 @@ static void Tags_ShowUnmatchedSectors(Instance &inst)
 
 	Tags_FindUnmatchedSectors(*inst.edit.Selected, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3179,7 +3179,7 @@ static void Tags_ShowUnmatchedLineDefs(Instance &inst)
 
 	Tags_FindUnmatchedLineDefs(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3220,7 +3220,7 @@ static void Tags_ShowMissingTags(Instance &inst)
 
 	Tags_FindMissingTags(*inst.edit.Selected, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3290,7 +3290,7 @@ static void Tags_ShowBeastMarks(Instance &inst)
 
 	Tags_FindBeastMarks(*inst.edit.Selected, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3524,7 +3524,7 @@ static void Textures_ShowMissing(Instance &inst)
 
 	Textures_FindMissing(inst, *inst.edit.Selected);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3645,7 +3645,7 @@ static void Textures_ShowTransparent(Instance &inst)
 
 	Textures_FindTransparent(inst, *inst.edit.Selected, names);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3769,7 +3769,7 @@ static void Textures_ShowMedusa(Instance &inst)
 
 	Textures_FindMedusa(*inst.edit.Selected, names, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3894,7 +3894,7 @@ static void Textures_ShowUnknownTex(Instance &inst)
 
 	Textures_FindUnknownTex(*inst.edit.Selected, names, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -3907,7 +3907,7 @@ static void Textures_ShowUnknownFlat(Instance &inst)
 
 	Textures_FindUnknownFlat(*inst.edit.Selected, names, inst);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 
@@ -4044,7 +4044,7 @@ static void Textures_ShowDupSwitches(Instance &inst)
 
 	Textures_FindDupSwitches(*inst.edit.Selected, inst.level);
 
-	GoToErrors(inst);
+	inst.GoToErrors();
 }
 
 

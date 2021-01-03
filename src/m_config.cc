@@ -1517,7 +1517,7 @@ bool Instance::M_LoadUserState()
 		}
 
 		if (  Editor_ParseUser(tokens) ||
-		        Grid_ParseUser(*this, tokens) ||
+		        Grid_ParseUser(tokens) ||
 		    Render3D_ParseUser(tokens) ||
 		     Browser_ParseUser(*this, tokens) ||
 		       Props_ParseUser(*this, tokens) ||

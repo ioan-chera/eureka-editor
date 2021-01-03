@@ -100,7 +100,7 @@ void Instance::CMD_Select()
 
 void Instance::CMD_SelectAll()
 {
-	Editor_ClearErrorMode(*this);
+	Editor_ClearErrorMode();
 
 	int total = level.numObjects(edit.mode);
 
@@ -115,7 +115,7 @@ void Instance::CMD_SelectAll()
 
 void Instance::CMD_UnselectAll()
 {
-	Editor_ClearErrorMode(*this);
+	Editor_ClearErrorMode();
 
 	if (edit.action == ACT_DRAW_LINE ||
 		edit.action == ACT_TRANSFORM)
@@ -123,7 +123,7 @@ void Instance::CMD_UnselectAll()
 		Editor_ClearAction();
 	}
 
-	Selection_Clear(*this);
+	Selection_Clear();
 
 	RedrawMap();
 }
@@ -496,10 +496,6 @@ void Instance::CMD_NAV_MouseScroll()
 	}
 }
 
-
-static void DoBeginDrag(Instance &inst);
-
-
 void Instance::CheckBeginDrag()
 {
 	if (! edit.clicked.valid())
@@ -526,68 +522,68 @@ void Instance::CheckBeginDrag()
 	else
 		edit.dragged.clear();
 
-	DoBeginDrag(*this);
+	DoBeginDrag();
 }
 
-static void DoBeginDrag(Instance &inst)
+void Instance::DoBeginDrag()
 {
-	inst.edit.drag_start_x = inst.edit.drag_cur_x = inst.edit.click_map_x;
-	inst.edit.drag_start_y = inst.edit.drag_cur_y = inst.edit.click_map_y;
-	inst.edit.drag_start_z = inst.edit.drag_cur_z = inst.edit.click_map_z;
+	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
+	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
+	edit.drag_start_z = edit.drag_cur_z = edit.click_map_z;
 
-	inst.edit.drag_screen_dx  = inst.edit.drag_screen_dy = 0;
-	inst.edit.drag_thing_num  = -1;
-	inst.edit.drag_other_vert = -1;
+	edit.drag_screen_dx  = edit.drag_screen_dy = 0;
+	edit.drag_thing_num  = -1;
+	edit.drag_other_vert = -1;
 
 	// the focus is only used when grid snapping is on
-	inst.level.objects.getDragFocus(&inst.edit.drag_focus_x, &inst.edit.drag_focus_y, inst.edit.click_map_x, inst.edit.click_map_y);
+	level.objects.getDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
 
-	if (inst.edit.render3d)
+	if (edit.render3d)
 	{
-		if (inst.edit.mode == ObjType::sectors)
-			inst.edit.drag_sector_dz = 0;
+		if (edit.mode == ObjType::sectors)
+			edit.drag_sector_dz = 0;
 
-		if (inst.edit.mode == ObjType::things)
+		if (edit.mode == ObjType::things)
 		{
-			inst.edit.drag_thing_num = inst.edit.clicked.num;
-			inst.edit.drag_thing_floorh = static_cast<float>(inst.edit.drag_start_z);
-			inst.edit.drag_thing_up_down = (inst.Level_format != MapFormat::doom && !grid.snap);
+			edit.drag_thing_num = edit.clicked.num;
+			edit.drag_thing_floorh = static_cast<float>(edit.drag_start_z);
+			edit.drag_thing_up_down = (Level_format != MapFormat::doom && !grid.snap);
 
 			// get thing's floor
-			if (inst.edit.drag_thing_num >= 0)
+			if (edit.drag_thing_num >= 0)
 			{
-				const Thing *T = inst.level.things[inst.edit.drag_thing_num];
+				const Thing *T = level.things[edit.drag_thing_num];
 
-				Objid sec = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+				Objid sec = level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
 				if (sec.valid())
-					inst.edit.drag_thing_floorh = static_cast<float>(inst.level.sectors[sec.num]->floorh);
+					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num]->floorh);
 			}
 		}
 	}
 
 	// in vertex mode, show all the connected lines too
-	if (inst.edit.drag_lines)
+	if (edit.drag_lines)
 	{
-		delete inst.edit.drag_lines;
-		inst.edit.drag_lines = NULL;
+		delete edit.drag_lines;
+		edit.drag_lines = NULL;
 	}
 
-	if (inst.edit.mode == ObjType::vertices)
+	if (edit.mode == ObjType::vertices)
 	{
-		inst.edit.drag_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(inst.level, inst.edit.Selected, inst.edit.drag_lines);
+		edit.drag_lines = new selection_c(ObjType::linedefs);
+		ConvertSelection(level, edit.Selected, edit.drag_lines);
 
 		// find opposite end-point when dragging a single vertex
-		if (inst.edit.dragged.valid())
-			inst.edit.drag_other_vert = inst.level.vertmod.findDragOther(inst.edit.dragged.num);
+		if (edit.dragged.valid())
+			edit.drag_other_vert = level.vertmod.findDragOther(edit.dragged.num);
 	}
 
-	inst.edit.clicked.clear();
+	edit.clicked.clear();
 
-	inst.Editor_SetAction(ACT_DRAG);
+	Editor_SetAction(ACT_DRAG);
 
-	inst.main_win->canvas->redraw();
+	main_win->canvas->redraw();
 }
 
 
@@ -598,7 +594,7 @@ void Instance::ACT_SelectBox_release()
 		return;
 
 	Editor_ClearAction();
-	Editor_ClearErrorMode(*this);
+	Editor_ClearErrorMode();
 
 	// a mere click and release will unselect everything
 	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
@@ -692,7 +688,7 @@ void Instance::ACT_Click_release()
 	}
 
 	Editor_ClearAction();
-	Editor_ClearErrorMode(*this);
+	Editor_ClearErrorMode();
 
 	RedrawMap();
 }
@@ -831,7 +827,7 @@ void Instance::CMD_ACT_Drag()
 	// we only drag the selection, never a single object
 	edit.dragged.clear();
 
-	DoBeginDrag(*this);
+	DoBeginDrag();
 }
 
 
@@ -1021,15 +1017,15 @@ void Instance::CMD_Merge()
 	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			VertexModule::commandMerge(*this);
+			commandVertexMerge();
 			break;
 
 		case ObjType::linedefs:
-			LinedefModule::commandMergeTwo(*this);
+			commandLinedefMergeTwo();
 			break;
 
 		case ObjType::sectors:
-			SectorModule::commandMerge(*this);
+			commandSectorMerge();
 			break;
 
 		case ObjType::things:
@@ -1048,15 +1044,15 @@ void Instance::CMD_Disconnect()
 	switch (edit.mode)
 	{
 		case ObjType::vertices:
-			VertexModule::commandDisconnect(*this);
+			commandVertexDisconnect();
 			break;
 
 		case ObjType::linedefs:
-			VertexModule::commandLineDisconnect(*this);
+			commandLineDisconnect();
 			break;
 
 		case ObjType::sectors:
-			VertexModule::commandSectorDisconnect(*this);
+			commandSectorDisconnect();
 			break;
 
 		case ObjType::things:
@@ -1110,7 +1106,7 @@ void Instance::CMD_ZoomSelection()
 		return;
 	}
 
-	GoToSelection(*this);
+	GoToSelection();
 }
 
 
@@ -1179,7 +1175,7 @@ void Instance::CMD_MoveObjects_Dialog()
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -1199,7 +1195,7 @@ void Instance::CMD_ScaleObjects_Dialog()
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 
@@ -1219,7 +1215,7 @@ void Instance::CMD_RotateObjects_Dialog()
 	delete dialog;
 
 	if (unselect == SelectHighlight::unselect)
-		Selection_Clear(*this, true /* nosave */);
+		Selection_Clear(true /* nosave */);
 }
 
 

@@ -154,20 +154,20 @@ private:
 
 #ifdef NO_OPENGL
 	// convert screen coordinates to map coordinates
-	inline double MAPX(int sx) const { return grid.orig_x + (sx - w()/2 - x()) / grid.Scale; }
-	inline double MAPY(int sy) const { return grid.orig_y + (h()/2 - sy + y()) / grid.Scale; }
+	inline double MAPX(int sx) const;
+	inline double MAPY(int sy) const;
 
 	// convert map coordinates to screen coordinates
-	inline int SCREENX(double mx) const { return (x() + w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-	inline int SCREENY(double my) const { return (y() + h()/2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+	inline int SCREENX(double mx) const;
+	inline int SCREENY(double my) const;
 #else
 	// convert GL coordinates to map coordinates
-	inline double MAPX(int sx) const { return grid.orig_x + (sx - w()/2) / grid.Scale; }
-	inline double MAPY(int sy) const { return grid.orig_y + (sy - h()/2) / grid.Scale; }
+	inline double MAPX(int sx) const;
+	inline double MAPY(int sy) const;
 
 	// convert map coordinates to GL coordinates
-	inline int SCREENX(double mx) const { return (w()/2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-	inline int SCREENY(double my) const { return (h()/2 + I_ROUND((my - grid.orig_y) * grid.Scale)); }
+	inline int SCREENX(double mx) const;
+	inline int SCREENY(double my) const;
 #endif
 
 	inline bool Vis(double x, double y, int r) const

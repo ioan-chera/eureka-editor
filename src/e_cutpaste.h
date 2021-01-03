@@ -62,10 +62,6 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list,
 
 void Texboard_Clear();
 
-int Texboard_GetTexNum(const Instance &inst);
-int Texboard_GetFlatNum(const Instance &inst);
-int Texboard_GetThing(const Instance &inst);
-
 void Texboard_SetThing(int new_id);
 
 
