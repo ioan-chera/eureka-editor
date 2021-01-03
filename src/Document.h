@@ -34,6 +34,10 @@ class Instance;
 //
 struct Document
 {
+private:
+	Instance &inst;	// make this private because we don't want to access it from Document
+public:
+
 	std::vector<Thing *> things;
 	std::vector<Vertex *> vertices;
 	std::vector<Sector *> sectors;
@@ -52,7 +56,8 @@ struct Document
 	SectorModule secmod;
 	ObjectsModule objects;
 
-	explicit Document(Instance &inst) : basis(*this), checks(*this), hover(*this), linemod(*this), vertmod(*this), secmod(*this), objects(*this), inst(inst)
+	explicit Document(Instance &inst) : inst(inst), basis(*this), checks(*this), hover(*this),
+	linemod(*this), vertmod(*this), secmod(*this), objects(*this)
 	{
 	}
 
@@ -105,7 +110,6 @@ struct Document
 
 private:
 	friend class DocumentModule;
-	Instance &inst;	// make this private because we don't want to access it from Document
 };
 
 #endif /* Document_hpp */
