@@ -161,27 +161,6 @@ const editor_command_t * LookupEditorCommand(int index);
 #define MAX_EXEC_PARAM   16
 #define MAX_BIND_LENGTH  64
 
-extern SString EXEC_Param[MAX_EXEC_PARAM];
-extern SString EXEC_Flags[MAX_EXEC_PARAM];
-
-// result from command function, 0 is OK
-extern int EXEC_Errno;
-
-// key or mouse button pressed for command, 0 when none
-extern keycode_t EXEC_CurKey;
-
-bool Exec_HasFlag(const char *flag);
-
-bool ExecuteKey(keycode_t key, key_context_e context);
-
-bool ExecuteCommand(const editor_command_t *cmd,
-					const SString &param1 = "", const SString &param2 = "",
-                    const SString &param3 = "", const SString &param4 = "");
-
-bool ExecuteCommand(const SString &name,
-					const SString &param1 = "", const SString &param2 = "",
-                    const SString &param3 = "", const SString &param4 = "");
-
 #endif  /* __EUREKA_M_KEYS_H__ */
 
 //--- editor settings ---

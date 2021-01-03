@@ -658,23 +658,23 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->ce_up)
 	{
-		ExecuteCommand("SEC_Ceil", SString(+mv_step));
+		box->inst.ExecuteCommand("SEC_Ceil", SString(+mv_step));
 		return;
 	}
 	else if (w == box->ce_down)
 	{
-		ExecuteCommand("SEC_Ceil", SString(-mv_step));
+		box->inst.ExecuteCommand("SEC_Ceil", SString(-mv_step));
 		return;
 	}
 
 	if (w == box->fl_up)
 	{
-		ExecuteCommand("SEC_Floor", SString(+mv_step));
+		box->inst.ExecuteCommand("SEC_Floor", SString(+mv_step));
 		return;
 	}
 	else if (w == box->fl_down)
 	{
-		ExecuteCommand("SEC_Floor", SString(-mv_step));
+		box->inst.ExecuteCommand("SEC_Floor", SString(-mv_step));
 		return;
 	}
 }

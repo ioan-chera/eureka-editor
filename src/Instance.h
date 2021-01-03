@@ -321,7 +321,11 @@ public:
 	SString M_ThingCategoryString(SString &letters) const;
 
 	// M_KEYS
-	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) const EUR_PRINTF(2, 3);
+	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
+	bool Exec_HasFlag(const char *flag) const;
+	bool ExecuteCommand(const editor_command_t *cmd, const SString &param1 = "", const SString &param2 = "", const SString &param3 = "", const SString &param4 = "");
+	bool ExecuteCommand(const SString &name, const SString &param1 = "", const SString &param2 = "", const SString &param3 = "", const SString &param4 = "");
+	bool ExecuteKey(keycode_t key, key_context_e context);
 
 	// M_LOADSAVE
 	void LoadLevel(Wad_file *wad, const SString &level);
@@ -333,7 +337,7 @@ public:
 	void Main_LoadResources();
 
 	// R_RENDER
-	void Render3D_CB_Copy() const;
+	void Render3D_CB_Copy() ;
 	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 	bool Render3D_ParseUser(const std::vector<SString> &tokens);
 	void Render3D_Setup();
@@ -401,9 +405,9 @@ private:
 	void ReadPortInfo();
 
 	// R_RENDER
-	int GrabSelectedFlat() const;
-	int GrabSelectedTexture() const;
-	int GrabSelectedThing() const;
+	int GrabSelectedFlat();
+	int GrabSelectedTexture();
+	int GrabSelectedThing();
 	int LD_GrabTex(const LineDef *L, int part) const;
 
 public:	// will be private when we encapsulate everything
@@ -536,6 +540,13 @@ public:	// will be private when we encapsulate everything
 	// these are grabbed from FL_MOUSEWHEEL events
 	int wheel_dx = 0;
 	int wheel_dy = 0;
+
+	// key or mouse button pressed for command, 0 when none
+	keycode_t EXEC_CurKey = {};
+	// result from command function, 0 is OK
+	int EXEC_Errno = 0;
+	SString EXEC_Flags[MAX_EXEC_PARAM] = {};
+	SString EXEC_Param[MAX_EXEC_PARAM] = {};
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

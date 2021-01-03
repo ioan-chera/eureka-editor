@@ -234,12 +234,14 @@ void UI_InfoBar::scale_callback(Fl_Widget *w, void *data)
 
 void UI_InfoBar::sc_minus_callback(Fl_Widget *w, void *data)
 {
-	ExecuteCommand("Zoom", "-1", "/center");
+	auto bar = static_cast<UI_InfoBar *>(data);
+	bar->inst.ExecuteCommand("Zoom", "-1", "/center");
 }
 
 void UI_InfoBar::sc_plus_callback(Fl_Widget *w, void *data)
 {
-	ExecuteCommand("Zoom", "+1", "/center");
+	auto bar = static_cast<UI_InfoBar *>(data);
+	bar->inst.ExecuteCommand("Zoom", "+1", "/center");
 }
 
 

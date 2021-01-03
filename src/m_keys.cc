@@ -25,15 +25,6 @@
 
 #include <algorithm>
 
-
-SString EXEC_Param[MAX_EXEC_PARAM];
-SString EXEC_Flags[MAX_EXEC_PARAM];
-
-int EXEC_Errno;
-
-keycode_t EXEC_CurKey;
-
-
 // this fake mod represents the "LAX-" prefix and is NOT used
 // anywhere except in the key_binding_t structure.
 #define MOD_LAX_SHIFTCTRL	FL_SCROLL_LOCK
@@ -435,16 +426,18 @@ struct key_binding_t
 	bool is_duplicate;
 };
 
-
-static std::vector<key_binding_t> all_bindings;
-static std::vector<key_binding_t> install_binds;
+namespace global
+{
+	static std::vector<key_binding_t> all_bindings;
+	static std::vector<key_binding_t> install_binds;
+}
 
 
 bool M_IsKeyBound(keycode_t key, key_context_e context)
 {
-	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
 	{
-		const key_binding_t& bind = all_bindings[i];
+		const key_binding_t& bind = global::all_bindings[i];
 
 		if (bind.key == key && bind.context == context)
 			return true;
@@ -458,12 +451,12 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
 {
 	std::vector<key_binding_t>::iterator IT;
 
-	for (IT = all_bindings.begin() ; IT != all_bindings.end() ; IT++)
+	for (IT = global::all_bindings.begin() ; IT != global::all_bindings.end() ; IT++)
 	{
 		if (IT->key == key && IT->context == context)
 		{
 			// found it
-			all_bindings.erase(IT);
+			global::all_bindings.erase(IT);
 
 			// there should never be more than one
 			// (besides, our iterator is now invalid)
@@ -531,7 +524,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 	M_RemoveBinding(temp.key, temp.context);
 
-	all_bindings.push_back(temp);
+	global::all_bindings.push_back(temp);
 }
 
 
@@ -578,11 +571,11 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 static void CopyInstallBindings()
 {
-	install_binds.clear();
+	global::install_binds.clear();
 
-	for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+	for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
 	{
-		install_binds.push_back(all_bindings[i]);
+		global::install_binds.push_back(global::all_bindings[i]);
 	}
 }
 
@@ -627,7 +620,7 @@ static bool BindingExists(std::vector<key_binding_t>& list, const key_binding_t&
 
 void M_LoadBindings()
 {
-	all_bindings.clear();
+	global::all_bindings.clear();
 
 	LoadBindingsFromPath(global::install_dir.c_str(), true /* required */);
 
@@ -661,15 +654,15 @@ void M_SaveBindings()
 	{
 		int count = 0;
 
-		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
+		for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
 		{
-			const key_binding_t& bind = all_bindings[i];
+			const key_binding_t& bind = global::all_bindings[i];
 
 			if (bind.context != (key_context_e)ctx)
 				continue;
 
 			// no need to write it if unchanged from install_dir
-			if (BindingExists(install_binds, bind, true /* full match */))
+			if (BindingExists(global::install_binds, bind, true /* full match */))
 				continue;
 
 			os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
@@ -687,14 +680,14 @@ void M_SaveBindings()
 
 		// find un-bound keys (relative to installation)
 
-		for (unsigned int i = 0 ; i < install_binds.size() ; i++)
+		for (unsigned int i = 0 ; i < global::install_binds.size() ; i++)
 		{
-			const key_binding_t& bind = install_binds[i];
+			const key_binding_t& bind = global::install_binds[i];
 
 			if (bind.context != ctx)
 				continue;
 
-			if (! BindingExists(all_bindings, bind, false /* full match */))
+			if (! BindingExists(global::all_bindings, bind, false /* full match */))
 			{
 				os << M_KeyContextString(bind.context) << '\t' << M_KeyToString(bind.key) << '\t' <<
 					"UNBOUND" << '\n';
@@ -712,42 +705,44 @@ void M_SaveBindings()
 //  PREFERENCE DIALOG STUFF
 //------------------------------------------------------------------------
 
-// local copy of the bindings
-// these only become live after M_ApplyBindings()
-static std::vector<key_binding_t> pref_binds;
-
+namespace global
+{
+	// local copy of the bindings
+	// these only become live after M_ApplyBindings()
+	static std::vector<key_binding_t> pref_binds;
+}
 
 void M_CopyBindings(bool from_defaults)
 {
 	// returns # of bindings
 
-	pref_binds.clear();
+	global::pref_binds.clear();
 
 	if (from_defaults)
 	{
-		for (unsigned int i = 0 ; i < install_binds.size() ; i++)
-			pref_binds.push_back(install_binds[i]);
+		for (unsigned int i = 0 ; i < global::install_binds.size() ; i++)
+			global::pref_binds.push_back(global::install_binds[i]);
 	}
 	else
 	{
-		for (unsigned int i = 0 ; i < all_bindings.size() ; i++)
-			pref_binds.push_back(all_bindings[i]);
+		for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
+			global::pref_binds.push_back(global::all_bindings[i]);
 	}
 }
 
 
 void M_ApplyBindings()
 {
-	all_bindings.clear();
+	global::all_bindings.clear();
 
-	for (unsigned int i = 0 ; i < pref_binds.size() ; i++)
-		all_bindings.push_back(pref_binds[i]);
+	for (unsigned int i = 0 ; i < global::pref_binds.size() ; i++)
+		global::all_bindings.push_back(global::pref_binds[i]);
 }
 
 
 int M_NumBindings()
 {
-	return (int)pref_binds.size();
+	return (int)global::pref_binds.size();
 }
 
 
@@ -792,11 +787,11 @@ public:
 
 void M_SortBindings(char column, bool reverse)
 {
-	std::sort(pref_binds.begin(), pref_binds.end(),
+	std::sort(global::pref_binds.begin(), global::pref_binds.end(),
 	          KeyBind_CMP_pred(column));
 
 	if (reverse)
-		std::reverse(pref_binds.begin(), pref_binds.end());
+		std::reverse(global::pref_binds.begin(), global::pref_binds.end());
 }
 
 
@@ -807,11 +802,11 @@ void M_DetectConflictingBinds()
 
 	std::vector<key_binding_t> list;
 
-	for (unsigned int i = 0 ; i < pref_binds.size() ; i++)
+	for (unsigned int i = 0 ; i < global::pref_binds.size() ; i++)
 	{
-		pref_binds[i].is_duplicate = false;
+		global::pref_binds[i].is_duplicate = false;
 
-		list.push_back(pref_binds[i]);
+		list.push_back(global::pref_binds[i]);
 	}
 
 	std::sort(list.begin(), list.end(), KeyBind_CMP_pred('c'));
@@ -824,12 +819,12 @@ void M_DetectConflictingBinds()
 
 		// mark these in the local bindings
 
-		for (unsigned int n = 0 ; n < pref_binds.size() ; n++)
+		for (unsigned int n = 0 ; n < global::pref_binds.size() ; n++)
 		{
-			if (pref_binds[n].key     == list[k].key &&
-			    pref_binds[n].context == list[k].context)
+			if (global::pref_binds[n].key     == list[k].key &&
+				global::pref_binds[n].context == list[k].context)
 			{
-				pref_binds[n].is_duplicate = true;
+				global::pref_binds[n].is_duplicate = true;
 			}
 		}
 	}
@@ -841,8 +836,8 @@ SString M_StringForFunc(int index)
 	SString buffer;
 	buffer.reserve(2048);
 
-	SYS_ASSERT(index >= 0 && index < static_cast<int>(pref_binds.size()));
-	const key_binding_t& bind = pref_binds[index];
+	SYS_ASSERT(index >= 0 && index < static_cast<int>(global::pref_binds.size()));
+	const key_binding_t& bind = global::pref_binds[index];
 
 	SYS_ASSERT(!!bind.cmd);
 	buffer = bind.cmd->name;
@@ -869,9 +864,9 @@ SString M_StringForFunc(int index)
 
 const char * M_StringForBinding(int index, bool changing_key)
 {
-	SYS_ASSERT(index < (int)pref_binds.size());
+	SYS_ASSERT(index < (int)global::pref_binds.size());
 
-	const key_binding_t& bind = pref_binds[index];
+	const key_binding_t& bind = global::pref_binds[index];
 
 	static char buffer[600];
 
@@ -904,17 +899,17 @@ void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context)
 {
 	// hmmm... exposing key_binding_t may have been easier...
 
-	*key     = pref_binds[index].key;
-	*context = pref_binds[index].context;
+	*key     = global::pref_binds[index].key;
+	*context = global::pref_binds[index].context;
 }
 
 
 void M_ChangeBindingKey(int index, keycode_t key)
 {
-	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
+	SYS_ASSERT(0 <= index && index < (int)global::pref_binds.size());
 	SYS_ASSERT(key != 0);
 
-	pref_binds[index].key = key;
+	global::pref_binds[index].key = key;
 }
 
 
@@ -977,12 +972,12 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const SString & func
 const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
 							   const SString &func_str)
 {
-	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
+	SYS_ASSERT(0 <= index && index < (int)global::pref_binds.size());
 
-	pref_binds[index].key = key;
-	pref_binds[index].context = context;
+	global::pref_binds[index].key = key;
+	global::pref_binds[index].context = context;
 
-	const char *err_msg = DoParseBindingFunc(pref_binds[index], func_str);
+	const char *err_msg = DoParseBindingFunc(global::pref_binds[index], func_str);
 
 	return err_msg;
 }
@@ -1002,9 +997,9 @@ const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
 		return err_msg;
 
 	if (after < 0)
-		pref_binds.push_back(temp);
+		global::pref_binds.push_back(temp);
 	else
-		pref_binds.insert(pref_binds.begin() + (1 + after), temp);
+		global::pref_binds.insert(global::pref_binds.begin() + (1 + after), temp);
 
 	return NULL;  // OK
 }
@@ -1012,9 +1007,9 @@ const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
 
 void M_DeleteLocalBinding(int index)
 {
-	SYS_ASSERT(0 <= index && index < (int)pref_binds.size());
+	SYS_ASSERT(0 <= index && index < (int)global::pref_binds.size());
 
-	pref_binds.erase(pref_binds.begin() + index);
+	global::pref_binds.erase(global::pref_binds.begin() + index);
 }
 
 
@@ -1080,7 +1075,7 @@ key_context_e M_ModeToKeyContext(ObjType mode)
 }
 
 
-bool Exec_HasFlag(const char *flag)
+bool Instance::Exec_HasFlag(const char *flag) const
 {
 	// the parameter should include a leading '/'
 
@@ -1110,9 +1105,9 @@ static void DoExecuteCommand(const editor_command_t *cmd)
 
 static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
 {
-	for (int i = 0 ; i < (int)all_bindings.size() ; i++)
+	for (int i = 0 ; i < (int)global::all_bindings.size() ; i++)
 	{
-		const key_binding_t& bind = all_bindings[i];
+		const key_binding_t& bind = global::all_bindings[i];
 
 		SYS_ASSERT(bind.cmd);
 
@@ -1146,7 +1141,7 @@ static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
 }
 
 
-bool ExecuteKey(keycode_t key, key_context_e context)
+bool Instance::ExecuteKey(keycode_t key, key_context_e context)
 {
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{
@@ -1166,7 +1161,7 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 	if (idx < 0)
 		return false;
 
-	key_binding_t& bind = all_bindings[idx];
+	key_binding_t& bind = global::all_bindings[idx];
 
 	int p_idx = 0;
 	int f_idx = 0;
@@ -1199,7 +1194,7 @@ bool ExecuteKey(keycode_t key, key_context_e context)
 }
 
 
-bool ExecuteCommand(const editor_command_t *cmd,
+bool Instance::ExecuteCommand(const editor_command_t *cmd,
 					const SString &param1, const SString &param2,
                     const SString &param3, const SString &param4)
 {
@@ -1234,7 +1229,7 @@ bool ExecuteCommand(const editor_command_t *cmd,
 }
 
 
-bool ExecuteCommand(const SString &name,
+bool Instance::ExecuteCommand(const SString &name,
 					const SString &param1, const SString &param2,
 					const SString &param3, const SString &param4)
 {
@@ -1250,7 +1245,7 @@ bool ExecuteCommand(const SString &name,
 //
 //  play a fascinating tune
 //
-void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...) const
+void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 {
 	va_list arg_ptr;
 

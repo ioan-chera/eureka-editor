@@ -1020,7 +1020,7 @@ void Instance::Selection_Toggle(Objid& obj) const
 }
 
 
-static void Selection_Validate(const Instance &inst)
+static void Selection_Validate(Instance &inst)
 {
 	int num_obj = inst.level.numObjects(inst.edit.mode);
 

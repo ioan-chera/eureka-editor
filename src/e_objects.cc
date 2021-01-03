@@ -1963,13 +1963,13 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	// setup transform parameters...
 	float mul = 2.0;
 
-	if (EXEC_Param[0].good())
+	if (inst.EXEC_Param[0].good())
 	{
-		mul = static_cast<float>(atof(EXEC_Param[0]));
+		mul = static_cast<float>(atof(inst.EXEC_Param[0]));
 
 		if (mul < 0.02 || mul > 50)
 		{
-			inst.Beep("bad factor: %s", EXEC_Param[0].c_str());
+			inst.Beep("bad factor: %s", inst.EXEC_Param[0].c_str());
 			return;
 		}
 	}

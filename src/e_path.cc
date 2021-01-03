@@ -233,17 +233,17 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 
 	bool changed = false;
 
-	bool can_walk    = Exec_HasFlag("/can_walk");
-	bool allow_doors = Exec_HasFlag("/doors");
+	bool can_walk    = inst.Exec_HasFlag("/can_walk");
+	bool allow_doors = inst.Exec_HasFlag("/doors");
 
-	bool do_floor_h   = Exec_HasFlag("/floor_h");
-	bool do_floor_tex = Exec_HasFlag("/floor_tex");
-	bool do_ceil_h    = Exec_HasFlag("/ceil_h");
-	bool do_ceil_tex  = Exec_HasFlag("/ceil_tex");
+	bool do_floor_h   = inst.Exec_HasFlag("/floor_h");
+	bool do_floor_tex = inst.Exec_HasFlag("/floor_tex");
+	bool do_ceil_h    = inst.Exec_HasFlag("/ceil_h");
+	bool do_ceil_tex  = inst.Exec_HasFlag("/ceil_tex");
 
-	bool do_light   = Exec_HasFlag("/light");
-	bool do_tag     = Exec_HasFlag("/tag");
-	bool do_special = Exec_HasFlag("/special");
+	bool do_light   = inst.Exec_HasFlag("/light");
+	bool do_tag     = inst.Exec_HasFlag("/tag");
+	bool do_special = inst.Exec_HasFlag("/special");
 
 	for (const LineDef *L : inst.level.linedefs)
 	{

@@ -462,7 +462,7 @@ static void AdjustOfs_Begin(Instance &inst)
 		delete inst.edit.adjust_bucket;
 
 	inst.edit.adjust_bucket = new SaveBucket_c(ObjType::sidedefs, inst);
-	inst.edit.adjust_lax = Exec_HasFlag("/LAX");
+	inst.edit.adjust_lax = inst.Exec_HasFlag("/LAX");
 
 	int total_lines = 0;
 
@@ -519,7 +519,7 @@ static void AdjustOfs_Begin(Instance &inst)
 	inst.edit.adjust_dx = 0;
 	inst.edit.adjust_dy = 0;
 
-	inst.edit.adjust_lax = Exec_HasFlag("/LAX");
+	inst.edit.adjust_lax = inst.Exec_HasFlag("/LAX");
 
 	inst.Editor_SetAction(ACT_ADJUST_OFS);
 }
@@ -1108,7 +1108,7 @@ void Render3D_Navigate(Instance &inst)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // things are selected and they have different types.
-int Instance::GrabSelectedThing() const
+int Instance::GrabSelectedThing() 
 {
 	int result = -1;
 
@@ -1186,7 +1186,7 @@ static int SEC_GrabFlat(const Sector *S, int part)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // sectors are selected and they have different flats.
-int Instance::GrabSelectedFlat() const
+int Instance::GrabSelectedFlat()
 {
 	int result = -1;
 
@@ -1332,7 +1332,7 @@ int Instance::LD_GrabTex(const LineDef *L, int part) const
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // linedefs are selected and they have different textures.
-int Instance::GrabSelectedTexture() const
+int Instance::GrabSelectedTexture()
 {
 	int result = -1;
 
@@ -1430,7 +1430,7 @@ static void StoreSelectedTexture(Instance &inst, int new_tex)
 }
 
 
-void Instance::Render3D_CB_Copy() const
+void Instance::Render3D_CB_Copy()
 {
 	int num;
 

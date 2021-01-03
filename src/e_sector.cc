@@ -311,7 +311,7 @@ void SectorModule::commandMerge(Instance &inst)
 
 	int first = inst.edit.Selected->find_first();
 
-	bool keep_common_lines = Exec_HasFlag("/keep");
+	bool keep_common_lines = inst.Exec_HasFlag("/keep");
 
 	// we require the *lowest* numbered sector, otherwise we can
 	// select the wrong sector afterwards (due to renumbering).
