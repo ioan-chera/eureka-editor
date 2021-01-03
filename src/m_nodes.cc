@@ -44,9 +44,6 @@ bool config::bsp_force_zdoom	= false;
 bool config::bsp_compressed		= false;
 
 
-extern bool inhibit_node_build;
-
-
 #define NODE_PROGRESS_COLOR  fl_color_cube(2,6,2)
 
 
@@ -348,7 +345,7 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(inst, inst.edit_wad, n);
+		inst.LoadLevelNum(inst.edit_wad, n);
 
 		ret = AJBSP_BuildLevel(info, n, inst);
 
@@ -398,7 +395,7 @@ static build_result_e BuildAllNodes(Instance &inst, nodebuildinfo_t *info)
 }
 
 
-void BuildNodesAfterSave(Instance &inst, int lev_idx)
+void Instance::BuildNodesAfterSave(int lev_idx)
 {
 	dialog = NULL;
 
@@ -406,7 +403,7 @@ void BuildNodesAfterSave(Instance &inst, int lev_idx)
 
 	PrepareInfo(nb_info);
 
-	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, inst);
+	build_result_e ret = AJBSP_BuildLevel(nb_info, lev_idx, *this);
 
 	// TODO : maybe print # of serious/minor warnings
 
@@ -442,7 +439,7 @@ void Instance::CMD_BuildAllNodes()
 
 		inhibit_node_build = true;
 
-		bool save_result = M_SaveMap(*this);
+		bool save_result = M_SaveMap();
 
 		inhibit_node_build = false;
 

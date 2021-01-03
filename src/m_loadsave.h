@@ -29,14 +29,7 @@
 
 #include "w_wad.h"
 
-void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num);
-
 void OpenFileMap(const SString &filename, const SString &map_name = "");
-
-extern int last_given_file;
-
-// these return false if user cancelled
-bool M_SaveMap(Instance &inst);
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 

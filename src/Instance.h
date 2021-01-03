@@ -29,6 +29,7 @@
 
 class Fl_RGB_Image;
 class Lump_c;
+class UI_ProjectSetup;
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
@@ -328,9 +329,22 @@ public:
 	bool ExecuteKey(keycode_t key, key_context_e context);
 
 	// M_LOADSAVE
+	Lump_c *Load_LookupAndSeek(const char *name) const;
 	void LoadLevel(Wad_file *wad, const SString &level);
+	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
+	bool M_SaveMap();
+	void ValidateVertexRefs(LineDef *ld, int num);
+	void ValidateSectorRef(SideDef *sd, int num);
+	void ValidateSidedefRefs(LineDef *ld, int num);
+	
+	// M_NODES
+	void BuildNodesAfterSave(int lev_idx);
+
+	// M_UDMF
+	void UDMF_LoadLevel();
+	void UDMF_SaveLevel() const;
 
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
@@ -404,6 +418,39 @@ private:
 
 	// M_KEYS
 	void DoExecuteCommand(const editor_command_t *cmd);
+
+	// M_LOADSAVE
+	void CreateFallbackSector();
+	void CreateFallbackSideDef();
+	void EmptyLump(const char *name) const;
+	void FreshLevel();
+	void LoadBehavior();
+	void LoadHeader();
+	void LoadLineDefs();
+	void LoadLineDefs_Hexen();
+	void LoadScripts();
+	void LoadSectors();
+	void LoadSideDefs();
+	void LoadThings();
+	void LoadThings_Hexen();
+	void LoadVertices();
+	bool M_ExportMap();
+	void Project_ApplyChanges(UI_ProjectSetup *dialog);
+	void SaveBehavior();
+	void SaveHeader(const SString &level);
+	void SaveLevel(const SString &level);
+	void SaveLineDefs();
+	void SaveLineDefs_Hexen();
+	void SaveThings();
+	void SaveThings_Hexen();
+	void SaveScripts();
+	void SaveSectors();
+	void SaveSideDefs();
+	void SaveVertices();
+	void ShowLoadProblem() const;
+
+	// M_UDMF
+	void ValidateLevel_UDMF();
 
 	// MAIN
 	void M_LoadDefinitions(const SString &folder, const SString &name);
@@ -489,6 +536,16 @@ public:	// will be private when we encapsulate everything
 	Recently_used recent_flats{ *this };
 	Recently_used recent_textures{ *this };
 	Recently_used recent_things{ *this };
+	int bad_linedef_count = 0;
+	int bad_sector_refs = 0;
+	int bad_sidedef_refs = 0;
+	// this is only used to prevent a M_SaveMap which happens inside
+	// CMD_BuildAllNodes from building that saved level twice.
+	bool inhibit_node_build = false;
+	int last_given_file = 0;
+	Wad_file *load_wad = nullptr;
+	int loading_level = 0;
+	int saving_level = 0;
 
 	//
 	// Path stuff

@@ -29,15 +29,6 @@
 
 #include "ui_window.h"
 
-
-extern int loading_level;
-extern Lump_c * Load_LookupAndSeek(const char *name);
-
-extern void ValidateSidedefRefs(Instance &inst, LineDef * ld, int num);
-extern void ValidateVertexRefs(Instance &inst, LineDef *ld, int num);
-extern void ValidateSectorRef(Instance &inst, SideDef *sd, int num);
-
-
 class Udmf_Token
 {
 private:
@@ -636,24 +627,24 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 }
 
 
-static void ValidateLevel_UDMF(Instance &inst)
+void Instance::ValidateLevel_UDMF()
 {
-	for (int n = 0 ; n < inst.level.numSidedefs() ; n++)
+	for (int n = 0 ; n < level.numSidedefs() ; n++)
 	{
-		ValidateSectorRef(inst, inst.level.sidedefs[n], n);
+		ValidateSectorRef(level.sidedefs[n], n);
 	}
 
-	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
+	for (int n = 0 ; n < level.numLinedefs(); n++)
 	{
-		LineDef *L = inst.level.linedefs[n];
+		LineDef *L = level.linedefs[n];
 
-		ValidateVertexRefs(inst, L, n);
-		ValidateSidedefRefs(inst, L, n);
+		ValidateVertexRefs(L, n);
+		ValidateSidedefRefs(L, n);
 	}
 }
 
 
-void UDMF_LoadLevel(Instance &inst)
+void Instance::UDMF_LoadLevel()
 {
 	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
 	// we assume this cannot happen
@@ -661,7 +652,7 @@ void UDMF_LoadLevel(Instance &inst)
 		return;
 
 	// TODO: reduce stack!!
-	Udmf_Parser parser(inst, lump);
+	Udmf_Parser parser(*this, lump);
 
 	for (;;)
 	{
@@ -683,12 +674,12 @@ void UDMF_LoadLevel(Instance &inst)
 
 		if (tok2.Match("="))
 		{
-			UDMF_ParseGlobalVar(inst, parser, tok);
+			UDMF_ParseGlobalVar(*this, parser, tok);
 			continue;
 		}
 		if (tok2.Match("{"))
 		{
-			UDMF_ParseObject(inst.level, parser, tok);
+			UDMF_ParseObject(level, parser, tok);
 			continue;
 		}
 
@@ -697,7 +688,7 @@ void UDMF_LoadLevel(Instance &inst)
 		parser.SkipToEOLN();
 	}
 
-	ValidateLevel_UDMF(inst);
+	ValidateLevel_UDMF();
 }
 
 
@@ -890,20 +881,20 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 	}
 }
 
-void UDMF_SaveLevel(const Instance &inst)
+void Instance::UDMF_SaveLevel() const
 {
-	Lump_c *lump = inst.edit_wad->AddLump("TEXTMAP");
+	Lump_c *lump = edit_wad->AddLump("TEXTMAP");
 
-	UDMF_WriteInfo(inst, lump);
-	UDMF_WriteThings(inst, lump);
-	UDMF_WriteVertices(inst.level, lump);
-	UDMF_WriteLineDefs(inst, lump);
-	UDMF_WriteSideDefs(inst.level, lump);
-	UDMF_WriteSectors(inst.level, lump);
+	UDMF_WriteInfo(*this, lump);
+	UDMF_WriteThings(*this, lump);
+	UDMF_WriteVertices(level, lump);
+	UDMF_WriteLineDefs(*this, lump);
+	UDMF_WriteSideDefs(level, lump);
+	UDMF_WriteSectors(level, lump);
 
 	lump->Finish();
 
-	lump = inst.edit_wad->AddLump("ENDMAP");
+	lump = edit_wad->AddLump("ENDMAP");
 	lump->Finish();
 }
 

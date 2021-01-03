@@ -85,8 +85,9 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 
 	int given_idx = M_FindGivenFile(filename);
 
+	// TODO: think up the right instance to get this
 	if (given_idx >= 0)
-		last_given_file = given_idx;
+		gInstance.last_given_file = given_idx;
 
 	OpenFileMap(filename);
 }
@@ -810,7 +811,7 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 	SYS_ASSERT(items != menu_items);	// by now we know we made one for ourselves
 	int total = items[0].size();
 	for(int i = 0; i < total; ++i)
-		if(items[i].text && items[i].callback_)
+		if(items[i].text && items[i].callback_ && !items[i].user_data_)
 			items[i].user_data_ = this;
 
 	bar->menu(items);

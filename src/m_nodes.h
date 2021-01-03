@@ -21,10 +21,6 @@
 #ifndef __EUREKA_E_NODES_H__
 #define __EUREKA_E_NODES_H__
 
-class Instance;
-
-void BuildNodesAfterSave(Instance &inst, int lev_idx);
-
 #endif  /* __EUREKA_E_NODES_H__ */
 
 //--- editor settings ---

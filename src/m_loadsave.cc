@@ -46,18 +46,7 @@
 #include "ui_window.h"
 #include "ui_file.h"
 
-
-int last_given_file;
-
-
-// this is only used to prevent a M_SaveMap which happens inside
-// CMD_BuildAllNodes from building that saved level twice.
-bool inhibit_node_build;
-
-
-static void SaveLevel(Instance &inst, const SString &level);
-
-static const char * overwrite_message =
+static const char overwrite_message[] =
 	"The %s PWAD already contains this map.  "
 	"This operation will destroy that map (overwrite it)."
 	"\n\n"
@@ -89,30 +78,30 @@ static void ReplaceEditWad(Instance &inst, Wad_file *new_wad)
 }
 
 
-static void FreshLevel(Instance &inst)
+void Instance::FreshLevel()
 {
-	inst.level.basis.clearAll();
+	level.basis.clearAll();
 
 	Sector *sec = new Sector;
-	inst.level.sectors.push_back(sec);
+	level.sectors.push_back(sec);
 
-	sec->SetDefaults(inst);
+	sec->SetDefaults(*this);
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		Vertex *v = new Vertex;
-		inst.level.vertices.push_back(v);
+		level.vertices.push_back(v);
 
-		v->SetRawX(inst, (i >= 2) ? 256 : -256);
-		v->SetRawY(inst, (i==1 || i==2) ? 256 :-256);
+		v->SetRawX(*this, (i >= 2) ? 256 : -256);
+		v->SetRawY(*this, (i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
-		inst.level.sidedefs.push_back(sd);
+		level.sidedefs.push_back(sd);
 
-		sd->SetDefaults(inst, false);
+		sd->SetDefaults(*this, false);
 
 		LineDef *ld = new LineDef;
-		inst.level.linedefs.push_back(ld);
+		level.linedefs.push_back(ld);
 
 		ld->start = i;
 		ld->end   = (i+1) % 4;
@@ -123,20 +112,20 @@ static void FreshLevel(Instance &inst)
 	for (int pl = 1 ; pl <= 4 ; pl++)
 	{
 		Thing *th = new Thing;
-		inst.level.things.push_back(th);
+		level.things.push_back(th);
 
 		th->type  = pl;
 		th->angle = 90;
 
-		th->SetRawX(inst, (pl == 1) ? 0 : (pl - 3) * 48);
-		th->SetRawY(inst, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		th->SetRawX(*this, (pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY(*this, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
-	inst.CalculateLevelBounds();
+	CalculateLevelBounds();
 
-	inst.ZoomWholeMap();
+	ZoomWholeMap();
 
-	inst.Editor_DefaultState();
+	Editor_DefaultState();
 }
 
 
@@ -181,34 +170,34 @@ static bool Project_AskFile(SString &filename)
 }
 
 
-static void Project_ApplyChanges(Instance &inst, UI_ProjectSetup *dialog)
+void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
 	// grab the new information
 
-	inst.Game_name = dialog->game;
-	inst.Port_name = dialog->port;
+	Game_name = dialog->game;
+	Port_name = dialog->port;
 
-	SYS_ASSERT(!inst.Game_name.empty());
+	SYS_ASSERT(!Game_name.empty());
 
-	inst.Iwad_name = M_QueryKnownIWAD(inst.Game_name);
-	SYS_ASSERT(!inst.Iwad_name.empty());
+	Iwad_name = M_QueryKnownIWAD(Game_name);
+	SYS_ASSERT(!Iwad_name.empty());
 
-	inst.Level_format = dialog->map_format;
-	inst.Udmf_namespace = dialog->name_space;
+	Level_format = dialog->map_format;
+	Udmf_namespace = dialog->name_space;
 
-	SYS_ASSERT(inst.Level_format != MapFormat::invalid);
+	SYS_ASSERT(Level_format != MapFormat::invalid);
 
-	inst.Resource_list.clear();
+	Resource_list.clear();
 
 	for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
 	{
 		if (!dialog->res[i].empty())
-			inst.Resource_list.push_back(dialog->res[i]);
+			Resource_list.push_back(dialog->res[i]);
 	}
 
 	Fl::wait(0.1);
 
-	inst.Main_LoadResources();
+	Main_LoadResources();
 
 	Fl::wait(0.1);
 }
@@ -222,7 +211,7 @@ void Instance::CMD_ManageProject()
 
 	if (ok)
 	{
-		Project_ApplyChanges(*this, dialog);
+		Project_ApplyChanges(dialog);
 	}
 
 	delete dialog;
@@ -280,7 +269,7 @@ void Instance::CMD_NewProject()
 	RemoveEditWad();
 
 	// this calls Main_LoadResources which resets the master directory
-	Project_ApplyChanges(*this, dialog);
+	Project_ApplyChanges(dialog);
 
 	delete dialog;
 
@@ -313,10 +302,10 @@ void Instance::CMD_NewProject()
 	MasterDir_Add(edit_wad);
 
 	// TODO: new instance
-	FreshLevel(*this);
+	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(*this, map_name);
+	SaveLevel(map_name);
 }
 
 
@@ -387,28 +376,16 @@ void Instance::CMD_FreshMap()
 	LogPrintf("Created NEW map : %s\n", map_name.c_str());
 
 	// TODO: make this allow running another level
-	FreshLevel(*this);
+	FreshLevel();
 
 	// save it now : sets Level_name and window title
-	SaveLevel(*this, map_name);
+	SaveLevel(map_name);
 }
 
 
 //------------------------------------------------------------------------
 //  LOADING CODE
 //------------------------------------------------------------------------
-
-static Wad_file * load_wad;
-
-// TODO ideally static, but needed by m_udmf.cc too
-int loading_level;
-
-static int bad_linedef_count;
-
-static int bad_sector_refs;
-static int bad_sidedef_refs;
-
-
 
 static void UpperCaseShortStr(char *buf, int max_len)
 {
@@ -419,7 +396,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-Lump_c * Load_LookupAndSeek(const char *name)
+Lump_c *Instance::Load_LookupAndSeek(const char *name) const
 {
 	int idx = load_wad->LevelLookupLump(loading_level, name);
 
@@ -437,7 +414,7 @@ Lump_c * Load_LookupAndSeek(const char *name)
 }
 
 
-static void LoadVertices(Document &doc)
+void Instance::LoadVertices()
 {
 	Lump_c *lump = Load_LookupAndSeek("VERTEXES");
 	if (! lump)
@@ -449,7 +426,7 @@ static void LoadVertices(Document &doc)
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
-	doc.vertices.reserve(count);
+	level.vertices.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -463,16 +440,16 @@ static void LoadVertices(Document &doc)
 		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
 		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
-		doc.vertices.push_back(vert);
+		level.vertices.push_back(vert);
 	}
 }
 
 
-static void LoadSectors(Document &doc)
+void Instance::LoadSectors()
 {
 	Lump_c *lump = Load_LookupAndSeek("SECTORS");
 	if (! lump)
-		FatalError("No sector lump!\n");
+		ThrowException("No sector lump!\n");
 
 	int count = lump->Length() / sizeof(raw_sector_t);
 
@@ -480,14 +457,14 @@ static void LoadSectors(Document &doc)
 	PrintDebug("GetSectors: num = %d\n", count);
 # endif
 
-	doc.sectors.reserve(count);
+	level.sectors.reserve(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
 		raw_sector_t raw;
 
 		if (! lump->Read(&raw, sizeof(raw)))
-			FatalError("Error reading sectors.\n");
+			ThrowException("Error reading sectors.\n");
 
 		Sector *sec = new Sector;
 
@@ -504,35 +481,35 @@ static void LoadSectors(Document &doc)
 		sec->type  = LE_U16(raw.type);
 		sec->tag   = LE_S16(raw.tag);
 
-		doc.sectors.push_back(sec);
+		level.sectors.push_back(sec);
 	}
 }
 
 
-static void CreateFallbackSector(Instance &inst)
+void Instance::CreateFallbackSector()
 {
 	LogPrintf("Creating a fallback sector.\n");
 
 	Sector *sec = new Sector;
 
-	sec->SetDefaults(inst);
+	sec->SetDefaults(*this);
 
-	inst.level.sectors.push_back(sec);
+	level.sectors.push_back(sec);
 }
 
-static void CreateFallbackSideDef(Instance &inst)
+void Instance::CreateFallbackSideDef()
 {
 	// we need a valid sector too!
-	if (inst.level.numSectors() == 0)
-		CreateFallbackSector(inst);
+	if (level.numSectors() == 0)
+		CreateFallbackSector();
 
 	LogPrintf("Creating a fallback sidedef.\n");
 
 	SideDef *sd = new SideDef;
 
-	sd->SetDefaults(inst, false);
+	sd->SetDefaults(*this, false);
 
-	inst.level.sidedefs.push_back(sd);
+	level.sidedefs.push_back(sd);
 }
 
 static void CreateFallbackVertices(Document &doc)
@@ -553,9 +530,9 @@ static void CreateFallbackVertices(Document &doc)
 }
 
 
-void ValidateSidedefRefs(Instance &inst, LineDef * ld, int num)
+void Instance::ValidateSidedefRefs(LineDef * ld, int num)
 {
-	if (ld->right >= inst.level.numSidedefs() || ld->left >= inst.level.numSidedefs())
+	if (ld->right >= level.numSidedefs() || ld->left >= level.numSidedefs())
 	{
 		LogPrintf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
 				  num, ld->right, ld->left);
@@ -563,20 +540,20 @@ void ValidateSidedefRefs(Instance &inst, LineDef * ld, int num)
 		bad_sidedef_refs++;
 
 		// ensure we have a usable sidedef
-		if (inst.level.numSidedefs() == 0)
-			CreateFallbackSideDef(inst);
+		if (level.numSidedefs() == 0)
+			CreateFallbackSideDef();
 
-		if (ld->right >= inst.level.numSidedefs())
+		if (ld->right >= level.numSidedefs())
 			ld->right = 0;
 
-		if (ld->left >= inst.level.numSidedefs())
+		if (ld->left >= level.numSidedefs())
 			ld->left = 0;
 	}
 }
 
-void ValidateVertexRefs(Instance &inst, LineDef *ld, int num)
+void Instance::ValidateVertexRefs(LineDef *ld, int num)
 {
-	if (ld->start >= inst.level.numVertices() || ld->end >= inst.level.numVertices() ||
+	if (ld->start >= level.numVertices() || ld->end >= level.numVertices() ||
 	    ld->start == ld->end)
 	{
 		LogPrintf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
@@ -585,17 +562,17 @@ void ValidateVertexRefs(Instance &inst, LineDef *ld, int num)
 		bad_linedef_count++;
 
 		// ensure we have a valid vertex
-		if (inst.level.numVertices() < 2)
-			CreateFallbackVertices(inst.level);
+		if (level.numVertices() < 2)
+			CreateFallbackVertices(level);
 
 		ld->start = 0;
-		ld->end   = inst.level.numVertices() - 1;
+		ld->end   = level.numVertices() - 1;
 	}
 }
 
-void ValidateSectorRef(Instance &inst, SideDef *sd, int num)
+void Instance::ValidateSectorRef(SideDef *sd, int num)
 {
-	if (sd->sector >= inst.level.numSectors())
+	if (sd->sector >= level.numSectors())
 	{
 		LogPrintf("WARNING: sidedef #%d has invalid sector (%d)\n",
 		          num, sd->sector);
@@ -603,15 +580,15 @@ void ValidateSectorRef(Instance &inst, SideDef *sd, int num)
 		bad_sector_refs++;
 
 		// ensure we have a valid sector
-		if (inst.level.numSectors() == 0)
-			CreateFallbackSector(inst);
+		if (level.numSectors() == 0)
+			CreateFallbackSector();
 
 		sd->sector = 0;
 	}
 }
 
 
-static void LoadHeader(Instance &inst)
+void Instance::LoadHeader()
 {
 	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
 
@@ -620,17 +597,17 @@ static void LoadHeader(Instance &inst)
 	if (length == 0)
 		return;
 
-	inst.level.headerData.resize(length);
+	level.headerData.resize(length);
 
 	if (! lump->Seek())
 		ThrowException("Error seeking to header lump!\n");
 
-	if (! lump->Read(&inst.level.headerData[0], length))
+	if (! lump->Read(&level.headerData[0], length))
 		ThrowException("Error reading header lump.\n");
 }
 
 
-static void LoadBehavior(Document &doc)
+void Instance::LoadBehavior()
 {
 	// IOANCH 9/2015: support Hexen maps
 	Lump_c *lump = Load_LookupAndSeek("BEHAVIOR");
@@ -639,17 +616,17 @@ static void LoadBehavior(Document &doc)
 
 	int length = lump->Length();
 
-	doc.behaviorData.resize(length);
+	level.behaviorData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(&doc.behaviorData[0], length))
+	if (! lump->Read(&level.behaviorData[0], length))
 		ThrowException("Error reading BEHAVIOR.\n");
 }
 
 
-static void LoadScripts(Document &doc)
+void Instance::LoadScripts()
 {
 	// the SCRIPTS lump is usually absent
 	Lump_c *lump = Load_LookupAndSeek("SCRIPTS");
@@ -658,17 +635,17 @@ static void LoadScripts(Document &doc)
 
 	int length = lump->Length();
 
-	doc.scriptsData.resize(length);
+	level.scriptsData.resize(length);
 
 	if (length == 0)
 		return;
 
-	if (! lump->Read(&doc.scriptsData[0], length))
+	if (! lump->Read(&level.scriptsData[0], length))
 		ThrowException("Error reading SCRIPTS.\n");
 }
 
 
-static void LoadThings(Document &doc)
+void Instance::LoadThings()
 {
 	Lump_c *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
@@ -696,13 +673,13 @@ static void LoadThings(Document &doc)
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
 
-		doc.things.push_back(th);
+		level.things.push_back(th);
 	}
 }
 
 
 // IOANCH 9/2015
-static void LoadThings_Hexen(Document &doc)
+void Instance::LoadThings_Hexen()
 {
 	Lump_c *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
@@ -739,12 +716,12 @@ static void LoadThings_Hexen(Document &doc)
 		th->arg4 = raw.args[3];
 		th->arg5 = raw.args[4];
 
-		doc.things.push_back(th);
+		level.things.push_back(th);
 	}
 }
 
 
-static void LoadSideDefs(Instance &inst)
+void Instance::LoadSideDefs()
 {
 	Lump_c *lump = Load_LookupAndSeek("SIDEDEFS");
 	if(!lump)
@@ -778,14 +755,14 @@ static void LoadSideDefs(Instance &inst)
 
 		sd->sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(inst, sd, i);
+		ValidateSectorRef(sd, i);
 
-		inst.level.sidedefs.push_back(sd);
+		level.sidedefs.push_back(sd);
 	}
 }
 
 
-static void LoadLineDefs(Instance &inst)
+void Instance::LoadLineDefs()
 {
 	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
@@ -822,16 +799,16 @@ static void LoadLineDefs(Instance &inst)
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(inst, ld, i);
-		ValidateSidedefRefs(inst, ld, i);
+		ValidateVertexRefs(ld, i);
+		ValidateSidedefRefs(ld, i);
 
-		inst.level.linedefs.push_back(ld);
+		level.linedefs.push_back(ld);
 	}
 }
 
 
 // IOANCH 9/2015
-static void LoadLineDefs_Hexen(Instance &inst)
+void Instance::LoadLineDefs_Hexen()
 {
 	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
@@ -872,10 +849,10 @@ static void LoadLineDefs_Hexen(Instance &inst)
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(inst, ld, i);
-		ValidateSidedefRefs(inst, ld, i);
+		ValidateVertexRefs(ld, i);
+		ValidateSidedefRefs(ld, i);
 
-		inst.level.linedefs.push_back(ld);
+		level.linedefs.push_back(ld);
 	}
 }
 
@@ -912,31 +889,29 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 }
 
 
-static void ShowLoadProblem()
+void Instance::ShowLoadProblem() const
 {
 	LogPrintf("Map load problems:\n");
 	LogPrintf("   %d linedefs with bad vertex refs\n", bad_linedef_count);
 	LogPrintf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
 	LogPrintf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
 
-	static char message[MSG_BUF_LEN];
+	SString message;
 
 	if (bad_linedef_count > 0)
 	{
-		snprintf(message, sizeof(message),
-			"Found %d linedefs with bad vertex references.\n"
+		message = SString::printf("Found %d linedefs with bad vertex references.\n"
 			"These references have been replaced.",
 			bad_linedef_count);
 	}
 	else
 	{
-		snprintf(message, sizeof(message),
-			"Found %d bad sector refs, %d bad sidedef refs.\n"
+		message = SString::printf("Found %d bad sector refs, %d bad sidedef refs.\n"
 			"These references have been replaced.",
 			bad_sector_refs, bad_sidedef_refs);
 	}
 
-	DLG_Notify("Map validation report:\n\n%s", message);
+	DLG_Notify("Map validation report:\n\n%s", message.c_str());
 }
 
 //
@@ -950,7 +925,7 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 	if (lev_num < 0)
 		ThrowException("No such map: %s\n", level.c_str());
 
-	LoadLevelNum(*this, wad, lev_num);
+	LoadLevelNum(wad, lev_num);
 
 	// reset various editor state
 	Editor_ClearAction();
@@ -987,46 +962,46 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 }
 
 
-void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
+void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 {
 	load_wad = wad;
 	loading_level = lev_num;
 
-	inst.Level_format = load_wad->LevelFormat(loading_level);
+	Level_format = load_wad->LevelFormat(loading_level);
 
-	inst.level.basis.clearAll();
+	level.basis.clearAll();
 
 	bad_linedef_count = 0;
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader(inst);
+	LoadHeader();
 
-	if (inst.Level_format == MapFormat::udmf)
+	if (Level_format == MapFormat::udmf)
 	{
-		UDMF_LoadLevel(inst);
+		UDMF_LoadLevel();
 	}
 	else
 	{
-		if (inst.Level_format == MapFormat::hexen)
-			LoadThings_Hexen(inst.level);
+		if (Level_format == MapFormat::hexen)
+			LoadThings_Hexen();
 		else
-			LoadThings(inst.level);
+			LoadThings();
 
-		LoadVertices(inst.level);
-		LoadSectors(inst.level);
-		LoadSideDefs(inst);
+		LoadVertices();
+		LoadSectors();
+		LoadSideDefs();
 
-		if (inst.Level_format == MapFormat::hexen)
+		if (Level_format == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen(inst);
+			LoadLineDefs_Hexen();
 
-			LoadBehavior(inst.level);
-			LoadScripts(inst.level);
+			LoadBehavior();
+			LoadScripts();
 		}
 		else
 		{
-			LoadLineDefs(inst);
+			LoadLineDefs();
 		}
 	}
 
@@ -1037,14 +1012,14 @@ void LoadLevelNum(Instance &inst, Wad_file *wad, int lev_num)
 
 	// Node builders create a lot of new vertices for segs.
 	// However they just get in the way for editing, so remove them.
-	RemoveUnusedVerticesAtEnd(inst.level);
+	RemoveUnusedVerticesAtEnd(level);
 
-	inst.level.checks.sidedefsUnpack(true);
+	level.checks.sidedefsUnpack(true);
 
-	inst.CalculateLevelBounds();
+	CalculateLevelBounds();
 	Subdiv_InvalidateAll();
 
-	inst.MadeChanges = false;
+	MadeChanges = false;
 }
 
 
@@ -1340,60 +1315,57 @@ void Instance::CMD_FlipMap()
 //  SAVING CODE
 //------------------------------------------------------------------------
 
-static int saving_level;
-
-
-static void SaveHeader(Instance &inst, const SString &level)
+void Instance::SaveHeader(const SString &level)
 {
-	int size = (int)inst.level.headerData.size();
+	int size = (int)this->level.headerData.size();
 
-	Lump_c *lump = inst.edit_wad->AddLevel(level, size, &saving_level);
+	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
 
 	if (size > 0)
 	{
-		lump->Write(&inst.level.headerData[0], size);
+		lump->Write(&this->level.headerData[0], size);
 	}
 
 	lump->Finish();
 }
 
 
-static void SaveBehavior(Instance &inst)
+void Instance::SaveBehavior()
 {
-	int size = (int)inst.level.behaviorData.size();
+	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = inst.edit_wad->AddLump("BEHAVIOR", size);
+	Lump_c *lump = edit_wad->AddLump("BEHAVIOR", size);
 
 	if (size > 0)
 	{
-		lump->Write(&inst.level.behaviorData[0], size);
+		lump->Write(&level.behaviorData[0], size);
 	}
 
 	lump->Finish();
 }
 
 
-static void SaveScripts(Instance &inst)
+void Instance::SaveScripts()
 {
-	int size = (int)inst.level.scriptsData.size();
+	int size = (int)level.scriptsData.size();
 
 	if (size > 0)
 	{
-		Lump_c *lump = inst.edit_wad->AddLump("SCRIPTS", size);
+		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
 
-		lump->Write(&inst.level.scriptsData[0], size);
+		lump->Write(&level.scriptsData[0], size);
 		lump->Finish();
 	}
 }
 
 
-static void SaveVertices(Instance &inst)
+void Instance::SaveVertices()
 {
-	int size = inst.level.numVertices() * (int)sizeof(raw_vertex_t);
+	int size = level.numVertices() * (int)sizeof(raw_vertex_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("VERTEXES", size);
+	Lump_c *lump = edit_wad->AddLump("VERTEXES", size);
 
-	for (const Vertex *vert : inst.level.vertices)
+	for (const Vertex *vert : level.vertices)
 	{
 		raw_vertex_t raw;
 
@@ -1407,13 +1379,13 @@ static void SaveVertices(Instance &inst)
 }
 
 
-static void SaveSectors(Instance &inst)
+void Instance::SaveSectors()
 {
-	int size = inst.level.numSectors() * (int)sizeof(raw_sector_t);
+	int size = level.numSectors() * (int)sizeof(raw_sector_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("SECTORS", size);
+	Lump_c *lump = edit_wad->AddLump("SECTORS", size);
 
-	for (const Sector *sec : inst.level.sectors)
+	for (const Sector *sec : level.sectors)
 	{
 		raw_sector_t raw;
 
@@ -1434,13 +1406,13 @@ static void SaveSectors(Instance &inst)
 }
 
 
-static void SaveThings(Instance &inst)
+void Instance::SaveThings()
 {
-	int size = inst.level.numThings() * (int)sizeof(raw_thing_t);
+	int size = level.numThings() * (int)sizeof(raw_thing_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("THINGS", size);
+	Lump_c *lump = edit_wad->AddLump("THINGS", size);
 
-	for (const Thing *th : inst.level.things)
+	for (const Thing *th : level.things)
 	{
 		raw_thing_t raw;
 
@@ -1459,13 +1431,13 @@ static void SaveThings(Instance &inst)
 
 
 // IOANCH 9/2015
-static void SaveThings_Hexen(Instance &inst)
+void Instance::SaveThings_Hexen()
 {
-	int size = inst.level.numThings() * (int)sizeof(raw_hexen_thing_t);
+	int size = level.numThings() * (int)sizeof(raw_hexen_thing_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("THINGS", size);
+	Lump_c *lump = edit_wad->AddLump("THINGS", size);
 
-	for (const Thing *th : inst.level.things)
+	for (const Thing *th : level.things)
 	{
 		raw_hexen_thing_t raw;
 
@@ -1493,13 +1465,13 @@ static void SaveThings_Hexen(Instance &inst)
 }
 
 
-static void SaveSideDefs(Instance &inst)
+void Instance::SaveSideDefs()
 {
-	int size = inst.level.numSidedefs() * (int)sizeof(raw_sidedef_t);
+	int size = level.numSidedefs() * (int)sizeof(raw_sidedef_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("SIDEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("SIDEDEFS", size);
 
-	for (const SideDef *side : inst.level.sidedefs)
+	for (const SideDef *side : level.sidedefs)
 	{
 		raw_sidedef_t raw;
 
@@ -1519,13 +1491,13 @@ static void SaveSideDefs(Instance &inst)
 }
 
 
-static void SaveLineDefs(Instance &inst)
+void Instance::SaveLineDefs()
 {
-	int size = inst.level.numLinedefs() * (int)sizeof(raw_linedef_t);
+	int size = level.numLinedefs() * (int)sizeof(raw_linedef_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
 
-	for (const LineDef *ld : inst.level.linedefs)
+	for (const LineDef *ld : level.linedefs)
 	{
 		raw_linedef_t raw;
 
@@ -1547,13 +1519,13 @@ static void SaveLineDefs(Instance &inst)
 
 
 // IOANCH 9/2015
-static void SaveLineDefs_Hexen(Instance &inst)
+void Instance::SaveLineDefs_Hexen()
 {
-	int size = inst.level.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
+	int size = level.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
 
-	Lump_c *lump = inst.edit_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
 
-	for (const LineDef *ld : inst.level.linedefs)
+	for (const LineDef *ld : level.linedefs)
 	{
 		raw_hexen_linedef_t raw;
 
@@ -1579,9 +1551,9 @@ static void SaveLineDefs_Hexen(Instance &inst)
 }
 
 
-static void EmptyLump(const Instance &inst, const char *name)
+void Instance::EmptyLump(const char *name) const
 {
-	inst.edit_wad->AddLump(name)->Finish();
+	edit_wad->AddLump(name)->Finish();
 }
 
 
@@ -1589,110 +1561,109 @@ static void EmptyLump(const Instance &inst, const char *name)
 // Write out the level data
 //
 
-static void SaveLevel(Instance &inst, const SString &level)
+void Instance::SaveLevel(const SString &level)
 {
 	// set global level name now (for debugging code)
-	inst.Level_name = level.asUpper();
+	Level_name = level.asUpper();
 
-	inst.edit_wad->BeginWrite();
+	edit_wad->BeginWrite();
 
 	// remove previous version of level (if it exists)
-	int lev_num = inst.edit_wad->LevelFind(level);
+	int lev_num = edit_wad->LevelFind(level);
 	int level_lump = -1;
 
 	if (lev_num >= 0)
 	{
-		level_lump = inst.edit_wad->LevelHeader(lev_num);
+		level_lump = edit_wad->LevelHeader(lev_num);
 
-		inst.edit_wad->RemoveLevel(lev_num);
+		edit_wad->RemoveLevel(lev_num);
 	}
 
-	inst.edit_wad->InsertPoint(level_lump);
+	edit_wad->InsertPoint(level_lump);
 
-	SaveHeader(inst, level);
+	SaveHeader(level);
 
-	if (inst.Level_format == MapFormat::udmf)
+	if (Level_format == MapFormat::udmf)
 	{
-		UDMF_SaveLevel(inst);
+		UDMF_SaveLevel();
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
-		if (inst.Level_format == MapFormat::hexen)
+		if (Level_format == MapFormat::hexen)
 		{
-			SaveThings_Hexen(inst);
-			SaveLineDefs_Hexen(inst);
+			SaveThings_Hexen();
+			SaveLineDefs_Hexen();
 		}
 		else
 		{
-			SaveThings(inst);
-			SaveLineDefs(inst);
+			SaveThings();
+			SaveLineDefs();
 		}
 
-		SaveSideDefs(inst);
-		SaveVertices(inst);
+		SaveSideDefs();
+		SaveVertices();
 
-		EmptyLump(inst, "SEGS");
-		EmptyLump(inst, "SSECTORS");
-		EmptyLump(inst, "NODES");
+		EmptyLump("SEGS");
+		EmptyLump("SSECTORS");
+		EmptyLump("NODES");
 
-		SaveSectors(inst);
+		SaveSectors();
 
-		EmptyLump(inst, "REJECT");
-		EmptyLump(inst, "BLOCKMAP");
+		EmptyLump("REJECT");
+		EmptyLump("BLOCKMAP");
 
-		if (inst.Level_format == MapFormat::hexen)
+		if (Level_format == MapFormat::hexen)
 		{
-			SaveBehavior(inst);
-			SaveScripts(inst);
+			SaveBehavior();
+			SaveScripts();
 		}
 	}
 
 	// write out the new directory
-	inst.edit_wad->EndWrite();
+	edit_wad->EndWrite();
 
 
 	// build the nodes
 	if (config::bsp_on_save && ! inhibit_node_build)
 	{
-		BuildNodesAfterSave(inst, saving_level);
+		BuildNodesAfterSave(saving_level);
 	}
 
 
 	// this is mainly for Next/Prev-map commands
 	// [ it doesn't change the on-disk wad file at all ]
-	inst.edit_wad->SortLevels();
+	edit_wad->SortLevels();
 
-	inst.M_WriteEurekaLump(inst.edit_wad);
+	M_WriteEurekaLump(edit_wad);
 
-	M_AddRecent(inst.edit_wad->PathName(), inst.Level_name);
+	M_AddRecent(edit_wad->PathName(), Level_name);
 
-	inst.Status_Set("Saved %s", inst.Level_name.c_str());
+	Status_Set("Saved %s", Level_name.c_str());
 
-	if (inst.main_win)
+	if (main_win)
 	{
-		inst.main_win->SetTitle(inst.edit_wad->PathName(), inst.Level_name, false);
+		main_win->SetTitle(edit_wad->PathName(), Level_name, false);
 
 		// save the user state associated with this map
-		inst.M_SaveUserState();
+		M_SaveUserState();
 	}
 
-	inst.MadeChanges = false;
+	MadeChanges = false;
 }
 
-static bool M_ExportMap(Instance &inst);
-
-bool M_SaveMap(Instance &inst)
+// these return false if user cancelled
+bool Instance::M_SaveMap() 
 {
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
-	if (!inst.edit_wad)
+	if (!edit_wad)
 	{
-		return M_ExportMap(inst);
+		return M_ExportMap();
 	}
 
-	if (inst.edit_wad->IsReadOnly())
+	if (edit_wad->IsReadOnly())
 	{
 		if (DLG_Confirm("Cancel|&Export",
 		                "The current pwad is a READ-ONLY file. "
@@ -1701,21 +1672,21 @@ bool M_SaveMap(Instance &inst)
 			return false;
 		}
 
-		return M_ExportMap(inst);
+		return M_ExportMap();
 	}
 
 
-	M_BackupWad(inst.edit_wad);
+	M_BackupWad(edit_wad);
 
-	LogPrintf("Saving Map : %s in %s\n", inst.Level_name.c_str(), inst.edit_wad->PathName().c_str());
+	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName().c_str());
 
-	SaveLevel(inst, inst.Level_name);
+	SaveLevel(Level_name);
 
 	return true;
 }
 
 
-static bool M_ExportMap(Instance &inst)
+bool Instance::M_ExportMap()
 {
 	Fl_Native_File_Chooser chooser;
 
@@ -1751,7 +1722,7 @@ static bool M_ExportMap(Instance &inst)
 
 
 	// don't export into a file we currently have open
-	if (inst.MasterDir_HaveFilename(filename))
+	if (MasterDir_HaveFilename(filename))
 	{
 		DLG_Notify("Unable to export the map:\n\nFile already in use");
 		return false;
@@ -1778,7 +1749,7 @@ static bool M_ExportMap(Instance &inst)
 		// adopt iwad/port/resources of the target wad
 		if (wad->FindLump(EUREKA_LUMP))
 		{
-			if (! inst.M_ParseEurekaLump(wad))
+			if (! M_ParseEurekaLump(wad))
 			{
 				delete wad;
 				return false;
@@ -1800,9 +1771,9 @@ static bool M_ExportMap(Instance &inst)
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(inst.Level_name.c_str());
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
 
-	dialog->PopulateButtons(toupper(inst.Level_name[0]), wad);
+	dialog->PopulateButtons(toupper(Level_name[0]), wad);
 
 	SString map_name = dialog->Run();
 
@@ -1840,12 +1811,12 @@ static bool M_ExportMap(Instance &inst)
 	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// the new wad replaces the current PWAD
-	ReplaceEditWad(inst, wad);
+	ReplaceEditWad(*this, wad);
 
-	SaveLevel(inst, map_name);
+	SaveLevel(map_name);
 
 	// do this after the save (in case it fatal errors)
-	inst.Main_LoadResources();
+	Main_LoadResources();
 
 	return true;
 }
@@ -1853,13 +1824,13 @@ static bool M_ExportMap(Instance &inst)
 
 void Instance::CMD_SaveMap()
 {
-	M_SaveMap(*this);
+	M_SaveMap();
 }
 
 
 void Instance::CMD_ExportMap()
 {
-	M_ExportMap(*this);
+	M_ExportMap();
 }
 
 
@@ -1906,7 +1877,7 @@ void Instance::CMD_CopyMap()
 	// perform the copy (just a save)
 	LogPrintf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name.c_str());
 
-	SaveLevel(*this, new_name);
+	SaveLevel(new_name);
 
 	Status_Set("Copied to %s", Level_name.c_str());
 }

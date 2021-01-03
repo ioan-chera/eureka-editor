@@ -21,11 +21,6 @@
 #ifndef __EUREKA_M_UDMF_H__
 #define __EUREKA_M_UDMF_H__
 
-class Instance;
-
-void UDMF_LoadLevel(Instance &inst);
-void UDMF_SaveLevel(const Instance &inst);
-
 #endif  /* __EUREKA_M_UDMF_H__ */
 
 //--- editor settings ---

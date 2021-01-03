@@ -341,7 +341,7 @@ void Instance::CMD_TestMap()
 			return;
 		}
 
-		if (! M_SaveMap(*this))
+		if (! M_SaveMap())
 			return;
 	}
 
