@@ -84,11 +84,6 @@ namespace thing_sec_cache
 	void Update(Instance &inst);
 };
 
-
-// TODO: make it per instance
-Render_View_t r_view(gInstance);
-
-
 Render_View_t::Render_View_t(Instance &inst) :
 	p_type(0), px(), py(),
 	x(), y(), z(),
@@ -159,10 +154,10 @@ void Render_View_t::CalcAspect()
 
 double Render_View_t::DistToViewPlane(double map_x, double map_y)
 {
-	map_x -= r_view.x;
-	map_y -= r_view.y;
+	map_x -= x;
+	map_y -= y;
 
-	return map_x * r_view.Cos + map_y * r_view.Sin;
+	return map_x * Cos + map_y * Sin;
 }
 
 void Render_View_t::UpdateScreen(int ow, int oh)
@@ -225,9 +220,9 @@ namespace thing_sec_cache
 	{
 		// guarantee that thing_sectors has the correct size.
 		// [ prevent a potential crash ]
-		if (inst.level.numThings() != (int)r_view.thing_sectors.size())
+		if (inst.level.numThings() != (int)inst.r_view.thing_sectors.size())
 		{
-			r_view.thing_sectors.resize(inst.level.numThings());
+			inst.r_view.thing_sectors.resize(inst.level.numThings());
 			thing_sec_cache::InvalidateAll(inst.level);
 		}
 
@@ -239,7 +234,7 @@ namespace thing_sec_cache
 		{
 			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.level.things[i]->x(), inst.level.things[i]->y());
 
-			r_view.thing_sectors[i] = obj.num;
+			inst.r_view.thing_sectors[i] = obj.num;
 		}
 
 		thing_sec_cache::ResetRange();
@@ -424,18 +419,18 @@ static void AdjustOfs_CalcDistFactor(const Instance &inst, float& dx_factor, flo
 	// of a switch, that switch follows the mouse pointer around.
 	// such an effect can only be approximate though.
 
-	float dx = static_cast<float>((r_view.x < inst.edit.adjust_bbox.x1) ? (inst.edit.adjust_bbox.x1 - r_view.x) :
-			   (r_view.x > inst.edit.adjust_bbox.x2) ? (r_view.x - inst.edit.adjust_bbox.x2) : 0);
+	float dx = static_cast<float>((inst.r_view.x < inst.edit.adjust_bbox.x1) ? (inst.edit.adjust_bbox.x1 - inst.r_view.x) :
+			   (inst.r_view.x > inst.edit.adjust_bbox.x2) ? (inst.r_view.x - inst.edit.adjust_bbox.x2) : 0);
 
-	float dy = static_cast<float>((r_view.y < inst.edit.adjust_bbox.y1) ? (inst.edit.adjust_bbox.y1 - r_view.y) :
-			   (r_view.y > inst.edit.adjust_bbox.y2) ? (r_view.y - inst.edit.adjust_bbox.y2) : 0);
+	float dy = static_cast<float>((inst.r_view.y < inst.edit.adjust_bbox.y1) ? (inst.edit.adjust_bbox.y1 - inst.r_view.y) :
+			   (inst.r_view.y > inst.edit.adjust_bbox.y2) ? (inst.r_view.y - inst.edit.adjust_bbox.y2) : 0);
 
 	float dist = hypot(dx, dy);
 
 	dist = CLAMP(20, dist, 1000);
 
-	dx_factor = dist / r_view.aspect_sw;
-	dy_factor = dist / r_view.aspect_sh;
+	dx_factor = dist / inst.r_view.aspect_sw;
+	dy_factor = dist / inst.r_view.aspect_sh;
 }
 
 static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
@@ -615,7 +610,7 @@ static Thing *player;
 
 void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh)
 {
-	r_view.PrepareToRender(ow, oh);
+	inst.r_view.PrepareToRender(ow, oh);
 
 	AdjustOfs_RenderAnte(inst);
 
@@ -656,7 +651,7 @@ static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 	if (! inst.edit.pointer_in_window)
 		return false;
 
-	r_view.PrepareToRender(ow, oh);
+	inst.r_view.PrepareToRender(ow, oh);
 
 	return inst.SW_QueryPoint(hl, sx, sy);
 }
@@ -730,10 +725,10 @@ void Render3D_Enable(Instance &inst, bool _enable)
 
 	if (inst.edit.render3d)
 	{
-		inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
+		inst.main_win->info_bar->SetMouse(inst.r_view.x, inst.r_view.y);
 
 		// TODO: ideally query this, like code in PointerPos
-		r_view.mouse_x = r_view.mouse_y = -1;
+		inst.r_view.mouse_x = inst.r_view.mouse_y = -1;
 	}
 	else
 	{
@@ -770,31 +765,31 @@ void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 
 	if (is_strafe)
 	{
-		r_view.x += r_view.Sin * dx * mod_factor;
-		r_view.y -= r_view.Cos * dx * mod_factor;
+		inst.r_view.x += inst.r_view.Sin * dx * mod_factor;
+		inst.r_view.y -= inst.r_view.Cos * dx * mod_factor;
 	}
 	else  // turn camera
 	{
 		double d_ang = dx * speed * M_PI / 480.0;
 
-		r_view.SetAngle(static_cast<float>(r_view.angle - d_ang));
+		inst.r_view.SetAngle(static_cast<float>(inst.r_view.angle - d_ang));
 	}
 
 	dy = -dy;  //TODO CONFIG ITEM
 
 	if (is_strafe)
 	{
-		r_view.x += r_view.Cos * dy * mod_factor;
-		r_view.y += r_view.Sin * dy * mod_factor;
+		inst.r_view.x += inst.r_view.Cos * dy * mod_factor;
+		inst.r_view.y += inst.r_view.Sin * dy * mod_factor;
 	}
-	else if (! (config::render_lock_gravity && r_view.gravity))
+	else if (! (config::render_lock_gravity && inst.r_view.gravity))
 	{
-		r_view.z += dy * speed * 0.75;
+		inst.r_view.z += dy * speed * 0.75;
 
-		r_view.gravity = false;
+		inst.r_view.gravity = false;
 	}
 
-	inst.main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	inst.main_win->info_bar->SetMouse(inst.r_view.x, inst.r_view.y);
 	inst.RedrawMap();
 }
 
@@ -881,8 +876,8 @@ static void DragThings_Update(Instance &inst)
 	inst.edit.drag_cur_z = inst.edit.drag_start_z;
 
 	// vectors for view camera
-	double fwd_vx = r_view.Cos;
-	double fwd_vy = r_view.Sin;
+	double fwd_vx = inst.r_view.Cos;
+	double fwd_vy = inst.r_view.Sin;
 
 	double side_vx =  fwd_vy;
 	double side_vy = -fwd_vx;
@@ -925,8 +920,8 @@ static void DragThings_Update(Instance &inst)
 	float new_y = static_cast<float>(old_y + dx * side_vy);
 
 	// recompute forward/back vector
-	fwd_vx = new_x - r_view.x;
-	fwd_vy = new_y - r_view.y;
+	fwd_vx = new_x - inst.r_view.x;
+	fwd_vy = new_y - inst.r_view.y;
 
 	double fwd_len = hypot(fwd_vx, fwd_vy);
 	if (fwd_len < 1)
@@ -1506,7 +1501,7 @@ void Instance::Render3D_CB_Cut()
 }
 
 
-void Render3D_SetCameraPos(double new_x, double new_y)
+void Instance::Render3D_SetCameraPos(double new_x, double new_y)
 {
 	r_view.x = new_x;
 	r_view.y = new_y;
@@ -1515,7 +1510,7 @@ void Render3D_SetCameraPos(double new_x, double new_y)
 }
 
 
-void Render3D_GetCameraPos(double *x, double *y, float *angle)
+void Instance::Render3D_GetCameraPos(double *x, double *y, float *angle) const
 {
 	*x = r_view.x;
 	*y = r_view.y;
@@ -1569,7 +1564,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 	return false;
 }
 
-void Render3D_WriteUser(std::ostream &os)
+void Instance::Render3D_WriteUser(std::ostream &os) const
 {
 	os << "camera " << SString::printf("%1.2f %1.2f %1.2f %1.2f", r_view.x, r_view.y, r_view.z,
 									   r_view.angle) << '\n';

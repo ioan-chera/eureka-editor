@@ -42,12 +42,9 @@
 
 #include "ui_window.h"
 
-
-extern rgb_color_t transparent_col;
-
 // convert from our coordinate system (looking along +X)
 // to OpenGL's coordinate system (looking down -Z).
-static GLdouble flip_matrix[16] =
+static const GLdouble flip_matrix[16] =
 {
 	 0,  0, -1,  0,
 	-1,  0,  0,  0,
@@ -105,7 +102,7 @@ public:
 	~RendInfo3D()
 	{ }
 
-	static inline float PointToAngle(float x, float y)
+	inline float PointToAngle(float x, float y)
 	{
 		if (-0.01 < x && x < 0.01)
 			return static_cast<float>((y > 0) ? M_PI/2 : (3 * M_PI/2));
@@ -118,27 +115,27 @@ public:
 		return angle;
 	}
 
-	static inline int AngleToX(float ang)
+	inline int AngleToX(float ang)
 	{
 		float t = static_cast<float>(tan(M_PI/2 - ang));
 
-		int x = int(r_view.aspect_sw * t);
+		int x = int(inst.r_view.aspect_sw * t);
 
-		x = (r_view.screen_w + x) / 2;
+		x = (inst.r_view.screen_w + x) / 2;
 
 		if (x < 0)
 			x = 0;
-		else if (x > r_view.screen_w)
-			x = r_view.screen_w;
+		else if (x > inst.r_view.screen_w)
+			x = inst.r_view.screen_w;
 
 		return x;
 	}
 
-	static inline int DeltaToX(double iz, float tx)
+	inline int DeltaToX(double iz, float tx)
 	{
-		int x = int(r_view.aspect_sw * tx * iz);
+		int x = int(inst.r_view.aspect_sw * tx * iz);
 
-		x = (x + r_view.screen_w) / 2;
+		x = (x + inst.r_view.screen_w) / 2;
 
 		return x;
 	}
@@ -156,14 +153,14 @@ public:
 			return NULL;
 		}
 
-		if (! r_view.texturing)
+		if (! inst.r_view.texturing)
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			int col;
 
 			// when lighting and no texturing, use a single color
-			if (r_view.lighting)
+			if (inst.r_view.lighting)
 				col = inst.Misc_info.floor_colors[1];
 			else
 				col = HashedPalColor(fname, inst.Misc_info.floor_colors);
@@ -189,14 +186,14 @@ public:
 	{
 		fullbright = false;
 
-		if (! r_view.texturing)
+		if (! inst.r_view.texturing)
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			int col;
 
 			// when lighting and no texturing, use a single color
-			if (r_view.lighting)
+			if (inst.r_view.lighting)
 				col = inst.Misc_info.wall_colors[1];
 			else
 				col = HashedPalColor(tname, inst.Misc_info.wall_colors);
@@ -263,12 +260,12 @@ public:
 			level = DoomLightToFloat(light, cdist + 2.0f);
 
 			// coordinates of an infinite clipping line
-			float c_x = static_cast<float>(r_view.x + r_view.Cos * cdist);
-			float c_y = static_cast<float>(r_view.y + r_view.Sin * cdist);
+			float c_x = static_cast<float>(inst.r_view.x + inst.r_view.Cos * cdist);
+			float c_y = static_cast<float>(inst.r_view.y + inst.r_view.Sin * cdist);
 
 			// vector of clipping line (if camera is north, this is east)
-			float c_dx = static_cast<float>(r_view.Sin);
-			float c_dy = static_cast<float>(- r_view.Cos);
+			float c_dx = static_cast<float>(inst.r_view.Sin);
+			float c_dy = static_cast<float>(- inst.r_view.Cos);
 
 			// check which side the triangle points are on
 			double p1 = (ay - c_y) * c_dx - (ax - c_x) * c_dy;
@@ -506,12 +503,12 @@ public:
 			level = DoomLightToFloat(light, cdist + 2.0f);
 
 			// coordinates of an infinite clipping line
-			float c_x = static_cast<float>(r_view.x + r_view.Cos * cdist);
-			float c_y = static_cast<float>(r_view.y + r_view.Sin * cdist);
+			float c_x = static_cast<float>(inst.r_view.x + inst.r_view.Cos * cdist);
+			float c_y = static_cast<float>(inst.r_view.y + inst.r_view.Sin * cdist);
 
 			// vector of clipping line (if camera is north, this is east)
-			float c_dx = static_cast<float>(r_view.Sin);
-			float c_dy = static_cast<float>(- r_view.Cos);
+			float c_dx = static_cast<float>(inst.r_view.Sin);
+			float c_dy = static_cast<float>(- inst.r_view.Cos);
 
 			// check which side the start/end point is on
 			double n1 = (y1 - c_y) * c_dx - (x1 - c_x) * c_dy;
@@ -566,7 +563,7 @@ public:
 			float px = poly->mx[p];
 			float py = poly->my[p];
 
-			double dist = (py - r_view.y) * r_view.Sin + (px - r_view.x) * r_view.Cos;
+			double dist = (py - inst.r_view.y) * inst.r_view.Sin + (px - inst.r_view.x) * inst.r_view.Cos;
 
 			if (dist < config::render_far_clip + 1)
 				break;
@@ -587,8 +584,8 @@ public:
 		// check if camera is behind plane
 		if (! is_slope)
 		{
-			if (znormal > 0 && r_view.z < z) return;
-			if (znormal < 0 && r_view.z > z) return;
+			if (znormal > 0 && inst.r_view.z < z) return;
+			if (znormal < 0 && inst.r_view.z > z) return;
 		}
 
 		byte r0, g0, b0;
@@ -608,7 +605,7 @@ public:
 			if (IsPolygonClipped(poly))
 				continue;
 #endif
-			if (r_view.lighting && !fullbright)
+			if (inst.r_view.lighting && !fullbright)
 			{
 				float ax = poly->mx[0];
 				float ay = poly->my[0];
@@ -768,7 +765,7 @@ public:
 		double g0 = (double)g / 255.0;
 		double b0 = (double)b / 255.0;
 
-		if (r_view.lighting && !fullbright)
+		if (inst.r_view.lighting && !fullbright)
 		{
 			int light = front->light;
 
@@ -851,7 +848,7 @@ public:
 
 		float tex_scale = 1.0f / img_th;
 
-		if (r_view.lighting && !fullbright)
+		if (inst.r_view.lighting && !fullbright)
 		{
 			int light = sd->SecRef(inst.level)->light;
 
@@ -881,15 +878,15 @@ public:
 		if (! ld->Right(inst.level))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(inst.level)->x() - r_view.x);
-		float y1 = static_cast<float>(ld->Start(inst.level)->y() - r_view.y);
-		float x2 = static_cast<float>(ld->End(inst.level)->x() - r_view.x);
-		float y2 = static_cast<float>(ld->End(inst.level)->y() - r_view.y);
+		float x1 = static_cast<float>(ld->Start(inst.level)->x() - inst.r_view.x);
+		float y1 = static_cast<float>(ld->Start(inst.level)->y() - inst.r_view.y);
+		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
+		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
 
-		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
-		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
-		float tx2 = static_cast<float>(x2 * r_view.Sin - y2 * r_view.Cos);
-		float ty2 = static_cast<float>(x2 * r_view.Cos + y2 * r_view.Sin);
+		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
+		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
+		float tx2 = static_cast<float>(x2 * inst.r_view.Sin - y2 * inst.r_view.Cos);
+		float ty2 = static_cast<float>(x2 * inst.r_view.Cos + y2 * inst.r_view.Sin);
 
 		// reject line if complete behind viewplane
 		if (ty1 <= 0 && ty2 <= 0)
@@ -1058,7 +1055,7 @@ public:
 					ld_len, x1, y1, &b_ex->c_plane, x2, y2, &f_ex->c_plane);
 
 			// railing tex
-			if (!is_null_tex(sd->MidTex()) && r_view.texturing)
+			if (!is_null_tex(sd->MidTex()) && inst.r_view.texturing)
 				DrawMidMasker(ld, sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
 
@@ -1136,7 +1133,7 @@ public:
 		{
 			dummy = inst.level.sectors[exfloor->heightsec];
 
-			if (dummy->floorh > sec->floorh && r_view.z < dummy->floorh)
+			if (dummy->floorh > sec->floorh && inst.r_view.z < dummy->floorh)
 			{
 				// space C : underwater
 				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
@@ -1146,7 +1143,7 @@ public:
 				if (dummy->ceilh > sec->floorh)
 					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
-			else if (dummy->ceilh < sec->ceilh && r_view.z > dummy->ceilh)
+			else if (dummy->ceilh < sec->ceilh && inst.r_view.z > dummy->ceilh)
 			{
 				// space A : head over ceiling
 				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
@@ -1220,11 +1217,11 @@ public:
 
 		// project sprite to check if it is off-screen
 
-		float x = static_cast<float>(th->x() - r_view.x);
-		float y = static_cast<float>(th->y() - r_view.y);
+		float x = static_cast<float>(th->x() - inst.r_view.x);
+		float y = static_cast<float>(th->y() - inst.r_view.y);
 
-		float tx = static_cast<float>(x * r_view.Sin - y * r_view.Cos);
-		float ty = static_cast<float>(x * r_view.Cos + y * r_view.Sin);
+		float tx = static_cast<float>(x * inst.r_view.Sin - y * inst.r_view.Cos);
+		float ty = static_cast<float>(x * inst.r_view.Cos + y * inst.r_view.Sin);
 
 		// sprite is complete behind viewplane?
 		if (ty < 4)
@@ -1259,19 +1256,19 @@ public:
 		int sx1 = DeltaToX(iz, tx1);
 		int sx2 = DeltaToX(iz, tx2);
 
-		if (sx2 < 0 || sx1 > r_view.screen_w)
+		if (sx2 < 0 || sx1 > inst.r_view.screen_w)
 			return;
 
 		// sprite is potentially visible, so draw it
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = static_cast<float>(th->x() - r_view.Sin * scale_w * 0.5);
-		float y1 = static_cast<float>(th->y() + r_view.Cos * scale_w * 0.5);
+		float x1 = static_cast<float>(th->x() - inst.r_view.Sin * scale_w * 0.5);
+		float y1 = static_cast<float>(th->y() + inst.r_view.Cos * scale_w * 0.5);
 
-		float x2 = static_cast<float>(th->x() + r_view.Sin * scale_w * 0.5);
-		float y2 = static_cast<float>(th->y() - r_view.Cos * scale_w * 0.5);
+		float x2 = static_cast<float>(th->x() + inst.r_view.Sin * scale_w * 0.5);
+		float y2 = static_cast<float>(th->y() - inst.r_view.Cos * scale_w * 0.5);
 
-		int sec_num = r_view.thing_sectors[th_index];
+		int sec_num = inst.r_view.thing_sectors[th_index];
 
 		float z1, z2;
 
@@ -1308,7 +1305,7 @@ public:
 		// lighting
 		float L = 1.0;
 
-		if (r_view.lighting && !fullbright)
+		if (inst.r_view.lighting && !fullbright)
 		{
 			int light = inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->light : 255;
 
@@ -1343,7 +1340,7 @@ public:
 		float y2 = static_cast<float>(L->End(inst.level)->y());
 
 		// check that this side is facing the camera
-		Side cam_side = PointOnLineSide(r_view.x, r_view.y, x1,y1,x2,y2);
+		Side cam_side = PointOnLineSide(inst.r_view.x, inst.r_view.y, x1,y1,x2,y2);
 		if (cam_side != side)
 			return;
 
@@ -1412,9 +1409,9 @@ public:
 		else
 		{
 			// check that plane faces the camera
-			if (part == PART_FLOOR && (r_view.z < z + 0.2))
+			if (part == PART_FLOOR && (inst.r_view.z < z + 0.2))
 				return;
-			if (part == PART_CEIL && (r_view.z > z - 0.2))
+			if (part == PART_CEIL && (inst.r_view.z > z - 0.2))
 				return;
 		}
 
@@ -1467,12 +1464,12 @@ public:
 		float scale_h = img->height() * scale;
 
 		// choose X/Y coordinates so quad faces the camera
-		float x1 = static_cast<float>(tx - r_view.Sin * scale_w * 0.5);
-		float y1 = static_cast<float>(ty + r_view.Cos * scale_w * 0.5);
-		float x2 = static_cast<float>(tx + r_view.Sin * scale_w * 0.5);
-		float y2 = static_cast<float>(ty - r_view.Cos * scale_w * 0.5);
+		float x1 = static_cast<float>(tx - inst.r_view.Sin * scale_w * 0.5);
+		float y1 = static_cast<float>(ty + inst.r_view.Cos * scale_w * 0.5);
+		float x2 = static_cast<float>(tx + inst.r_view.Sin * scale_w * 0.5);
+		float y2 = static_cast<float>(ty - inst.r_view.Cos * scale_w * 0.5);
 
-		int sec_num = r_view.thing_sectors[th_index];
+		int sec_num = inst.r_view.thing_sectors[th_index];
 
 		float z1, z2;
 
@@ -1596,7 +1593,7 @@ public:
 
 	void MarkCameraSector()
 	{
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, r_view.x, r_view.y);
+		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.r_view.x, inst.r_view.y);
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);
@@ -1618,7 +1615,7 @@ public:
 
 		glEnable(GL_ALPHA_TEST);
 
-		if (r_view.sprites)
+		if (inst.r_view.sprites)
 			for (int t=0 ; t < inst.level.numThings() ; t++)
 				DrawThing(t);
 	}
@@ -1645,7 +1642,7 @@ public:
 
 		glViewport(0, 0, ow * pix, oh * pix);
 
-		GLdouble angle = r_view.angle * 180.0 / M_PI;
+		GLdouble angle = inst.r_view.angle * 180.0 / M_PI;
 
 		// the model-view matrix does three things:
 		//   1. translates X/Y/Z by view position
@@ -1658,7 +1655,7 @@ public:
 
 		glLoadMatrixd(flip_matrix);
 		glRotated(-angle, 0, 0, +1);
-		glTranslated(-r_view.x, -r_view.y, -r_view.z);
+		glTranslated(-inst.r_view.x, -inst.r_view.y, -inst.r_view.z);
 
 		// the projection matrix creates the 3D perspective
 		glMatrixMode(GL_PROJECTION);

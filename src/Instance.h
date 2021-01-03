@@ -26,6 +26,7 @@
 #include "m_game.h"
 #include "main.h"
 #include "r_grid.h"
+#include "r_render.h"
 
 #include <unordered_map>
 
@@ -365,10 +366,13 @@ public:
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
+	void Render3D_GetCameraPos(double *x, double *y, float *angle) const;
 	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 	bool Render3D_ParseUser(const std::vector<SString> &tokens);
+	void Render3D_SetCameraPos(double new_x, double new_y);
 	void Render3D_Setup();
 	void Render3D_UpdateHighlight();
+	void Render3D_WriteUser(std::ostream &os) const;
 
 	// R_SOFTWARE
 	bool SW_QueryPoint(Objid &hl, int qx, int qy);
@@ -669,9 +673,10 @@ public:	// will be private when we encapsulate everything
 	SString EXEC_Param[MAX_EXEC_PARAM] = {};
 
 	//
-	// Grid
+	// Rendering
 	//
 	Grid_State_c grid{ *this };
+	Render_View_t r_view{ *this };
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

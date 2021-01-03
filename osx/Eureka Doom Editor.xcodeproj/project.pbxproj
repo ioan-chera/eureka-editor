@@ -204,6 +204,7 @@
 		4FC7E67B259292EA005EFDA1 /* DocumentModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DocumentModule.h; path = ../../src/DocumentModule.h; sourceTree = "<group>"; };
 		4FC7E69425A218B6005EFDA1 /* DocumentModule.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DocumentModule.cc; path = ../../src/DocumentModule.cc; sourceTree = "<group>"; };
 		4FC7E69625A218B7005EFDA1 /* Instance.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Instance.cc; path = ../../src/Instance.cc; sourceTree = "<group>"; };
+		4FC7E69D25A21A7A005EFDA1 /* Instance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Instance.h; path = ../../src/Instance.h; sourceTree = "<group>"; };
 		4FCB3A4F253B559A0038EFEB /* Eureka-Tests.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Eureka-Tests.xcodeproj"; path = "Eureka-Tests/Eureka-Tests.xcodeproj"; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; usesTabs = 1; };
 		FA1E04ED16689A2900ED41DC /* ui_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_misc.h; path = ../../src/ui_misc.h; sourceTree = "<group>"; usesTabs = 1; };
@@ -467,6 +468,7 @@
 				4FBC5BE3258D4268005480CA /* Errors.h */,
 				FABBC096165B90280080245F /* hdr_fltk.h */,
 				4FC7E69625A218B7005EFDA1 /* Instance.cc */,
+				4FC7E69D25A21A7A005EFDA1 /* Instance.h */,
 				FABBC0B3165B90280080245F /* objid.h */,
 				4FBC5BD7258D3A42005480CA /* PrintfMacros.h */,
 				4FC7E6762592924E005EFDA1 /* Document.cc */,

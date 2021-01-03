@@ -84,10 +84,6 @@ public:
 	float AdjustDistFactor(float view_x, float view_y);
 };
 
-
-extern Render_View_t r_view;
-
-
 void Render3D_RegisterCommands();
 
 void Render3D_Enable(Instance &inst, bool _enable);
@@ -104,11 +100,6 @@ void Render3D_ScrollMap(Instance &inst, int dx = 0, int dy = 0, keycode_t mod = 
 
 void Render3D_DragThings(Instance &inst);
 void Render3D_DragSectors(Instance &inst);
-
-void Render3D_SetCameraPos(double new_x, double new_y);
-void Render3D_GetCameraPos(double *x, double *y, float *angle);
-
-void Render3D_WriteUser(std::ostream &os);
 
 void Render3D_NotifyBegin();
 void Render3D_NotifyInsert(ObjType type, int objnum);

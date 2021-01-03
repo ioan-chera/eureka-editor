@@ -43,9 +43,6 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 
-
-extern rgb_color_t transparent_col;
-
 static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, img_pixel_t pixel)
 {
 	int map = R_DoomLightingEquation(light, dist);
@@ -119,7 +116,7 @@ public:
 			return;
 		}
 
-		if (r_view.texturing)
+		if (inst.r_view.texturing)
 		{
 			img = inst.W_GetFlat(fname);
 
@@ -133,7 +130,7 @@ public:
 		}
 
 		// when lighting and no texturing, use a single color
-		if (r_view.lighting)
+		if (inst.r_view.lighting)
 			col = inst.Misc_info.floor_colors[1];
 		else
 			col = HashedPalColor(fname, inst.Misc_info.floor_colors);
@@ -143,7 +140,7 @@ public:
 	{
 		fullbright = false;
 
-		if (r_view.texturing)
+		if (inst.r_view.texturing)
 		{
 			if (is_null_tex(tname))
 			{
@@ -169,7 +166,7 @@ public:
 		}
 
 		// when lighting and no texturing, use a single color
-		if (r_view.lighting)
+		if (inst.r_view.lighting)
 			col = inst.Misc_info.wall_colors[1];
 		else
 			col = HashedPalColor(tname, inst.Misc_info.wall_colors);
@@ -273,8 +270,8 @@ public:
 				int bx2 = static_cast<int>(B->ld->End(inst.level)->x());
 				int by2 = static_cast<int>(B->ld->End(inst.level)->y());
 
-				int cx = (int)r_view.x;  // camera
-				int cy = (int)r_view.y;
+				int cx = (int)inst.r_view.x;  // camera
+				int cy = (int)inst.r_view.y;
 
 				Side A_side = PointOnLineSide(ax, ay, bx1, by1, bx2, by2);
 				Side C_side = PointOnLineSide(cx, cy, bx1, by1, bx2, by2);
@@ -344,7 +341,7 @@ public:
 		temp->floorh = dummy->floorh;
 		temp->ceilh  = dummy->ceilh;
 
-		if (dummy->floorh > real->floorh && r_view.z < dummy->floorh)
+		if (dummy->floorh > real->floorh && inst.r_view.z < dummy->floorh)
 		{
 			// space C : underwater
 			temp->floorh    =  real->floorh;
@@ -353,7 +350,7 @@ public:
 			temp->floor_tex = dummy->floor_tex;
 			temp->ceil_tex  = dummy->ceil_tex;
 		}
-		else if (dummy->ceilh < real->ceilh && r_view.z > dummy->ceilh)
+		else if (dummy->ceilh < real->ceilh && inst.r_view.z > dummy->ceilh)
 		{
 			// space A : head above ceiling
 			temp->floorh    = dummy->ceilh;
@@ -403,7 +400,7 @@ public:
 		bool sky_upper = back && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex());
 		bool self_ref  = (front == back) ? true : false;
 
-		if ((front->ceilh > r_view.z || inst.is_sky(front->CeilTex()))
+		if ((front->ceilh > inst.r_view.z || inst.is_sky(front->CeilTex()))
 		    && ! sky_upper && ! self_ref)
 		{
 			ceil.kind = DrawSurf::K_FLAT;
@@ -415,7 +412,7 @@ public:
 			ceil.FindFlat(front->CeilTex(), front);
 		}
 
-		if (front->floorh < r_view.z && ! self_ref)
+		if (front->floorh < inst.r_view.z && ! self_ref)
 		{
 			floor.kind = DrawSurf::K_FLAT;
 			floor.h1 = -99999;
@@ -485,7 +482,7 @@ public:
 
 		/* Mid-Masked texture */
 
-		if (! r_view.texturing)
+		if (! inst.r_view.texturing)
 			return;
 
 		if (is_null_tex(sd->MidTex()))
@@ -635,27 +632,27 @@ public:
 		return angle;
 	}
 
-	static inline int AngleToX(float ang)
+	inline int AngleToX(float ang)
 	{
 		float t = static_cast<float>(tan(M_PI/2 - ang));
 
-		int x = int(r_view.aspect_sw * t);
+		int x = int(inst.r_view.aspect_sw * t);
 
-		x = (r_view.screen_w + x) / 2;
+		x = (inst.r_view.screen_w + x) / 2;
 
 		if (x < 0)
 			x = 0;
-		else if (x > r_view.screen_w)
-			x = r_view.screen_w;
+		else if (x > inst.r_view.screen_w)
+			x = inst.r_view.screen_w;
 
 		return x;
 	}
 
-	static inline float XToAngle(int x)
+	inline float XToAngle(int x)
 	{
-		x = x * 2 - r_view.screen_w;
+		x = x * 2 - inst.r_view.screen_w;
 
-		float ang = static_cast<float>(M_PI/2 + atan(x / r_view.aspect_sw));
+		float ang = static_cast<float>(M_PI/2 + atan(x / inst.r_view.aspect_sw));
 
 		if (ang < 0)
 			ang = 0;
@@ -665,25 +662,25 @@ public:
 		return ang;
 	}
 
-	static inline int DeltaToX(double iz, float tx)
+	inline int DeltaToX(double iz, float tx)
 	{
-		int x = int(r_view.aspect_sw * tx * iz);
+		int x = int(inst.r_view.aspect_sw * tx * iz);
 
-		x = (x + r_view.screen_w) / 2;
+		x = (x + inst.r_view.screen_w) / 2;
 
 		return x;
 	}
 
-	static inline float XToDelta(int x, double iz)
+	inline float XToDelta(int x, double iz)
 	{
-		x = x * 2 - r_view.screen_w;
+		x = x * 2 - inst.r_view.screen_w;
 
-		float tx = static_cast<float>(x / iz / r_view.aspect_sw);
+		float tx = static_cast<float>(x / iz / inst.r_view.aspect_sw);
 
 		return tx;
 	}
 
-	static inline int DistToY(double iz, int sec_h)
+	inline int DistToY(double iz, int sec_h)
 	{
 		if (sec_h > 32770)
 			return -9999;
@@ -691,26 +688,26 @@ public:
 		if (sec_h < -32770)
 			return +9999;
 
-		int y = int(r_view.aspect_sh * (sec_h - r_view.z) * iz);
+		int y = int(inst.r_view.aspect_sh * (sec_h - inst.r_view.z) * iz);
 
-		return (r_view.screen_h - y) / 2;
+		return (inst.r_view.screen_h - y) / 2;
 	}
 
-	static inline float YToDist(int y, int sec_h)
+	inline float YToDist(int y, int sec_h)
 	{
-		y = r_view.screen_h - y * 2;
+		y = inst.r_view.screen_h - y * 2;
 
 		if (y == 0)
 			return 999999;
 
-		return static_cast<float>(r_view.aspect_sh * (sec_h - r_view.z) / y);
+		return static_cast<float>(inst.r_view.aspect_sh * (sec_h - inst.r_view.z) / y);
 	}
 
-	static inline float YToSecH(int y, double iz)
+	inline float YToSecH(int y, double iz)
 	{
-		y = y * 2 - r_view.screen_h;
+		y = y * 2 - inst.r_view.screen_h;
 
-		return static_cast<float>(r_view.z - (float(y) / r_view.aspect_sh / iz));
+		return static_cast<float>(inst.r_view.z - (float(y) / inst.r_view.aspect_sh / iz));
 	}
 
 	void AddLine(int ld_index)
@@ -723,15 +720,15 @@ public:
 		if (! ld->Right(inst.level))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(inst.level)->x() - r_view.x);
-		float y1 = static_cast<float>(ld->Start(inst.level)->y() - r_view.y);
-		float x2 = static_cast<float>(ld->End(inst.level)->x() - r_view.x);
-		float y2 = static_cast<float>(ld->End(inst.level)->y() - r_view.y);
+		float x1 = static_cast<float>(ld->Start(inst.level)->x() - inst.r_view.x);
+		float y1 = static_cast<float>(ld->Start(inst.level)->y() - inst.r_view.y);
+		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
+		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
 
-		float tx1 = static_cast<float>(x1 * r_view.Sin - y1 * r_view.Cos);
-		float ty1 = static_cast<float>(x1 * r_view.Cos + y1 * r_view.Sin);
-		float tx2 = static_cast<float>(x2 * r_view.Sin - y2 * r_view.Cos);
-		float ty2 = static_cast<float>(x2 * r_view.Cos + y2 * r_view.Sin);
+		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
+		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
+		float tx2 = static_cast<float>(x2 * inst.r_view.Sin - y2 * inst.r_view.Cos);
+		float ty2 = static_cast<float>(x2 * inst.r_view.Cos + y2 * inst.r_view.Sin);
 
 		// reject line if complete behind viewplane
 		if (ty1 <= 0 && ty2 <= 0)
@@ -872,11 +869,11 @@ public:
 
 		const thingtype_t &info = inst.M_GetThingType(th->type);
 
-		float x = static_cast<float>(th->x() - r_view.x);
-		float y = static_cast<float>(th->y() - r_view.y);
+		float x = static_cast<float>(th->x() - inst.r_view.x);
+		float y = static_cast<float>(th->y() - inst.r_view.y);
 
-		float tx = static_cast<float>(x * r_view.Sin - y * r_view.Cos);
-		float ty = static_cast<float>(x * r_view.Cos + y * r_view.Sin);
+		float tx = static_cast<float>(x * inst.r_view.Sin - y * inst.r_view.Cos);
+		float ty = static_cast<float>(x * inst.r_view.Cos + y * inst.r_view.Sin);
 
 		// reject sprite if complete behind viewplane
 		if (ty < 4)
@@ -905,8 +902,8 @@ public:
 		if (sx1 < 0)
 			sx1 = 0;
 
-		if (sx2 >= r_view.screen_w)
-			sx2 = r_view.screen_w - 1;
+		if (sx2 >= inst.r_view.screen_w)
+			sx2 = inst.r_view.screen_w - 1;
 
 		if (sx1 > sx2)
 			return;
@@ -915,7 +912,7 @@ public:
 		if (query_mode && (sx2 < query_sx || sx1 > query_sx))
 			return;
 
-		int thsec = r_view.thing_sectors[th_index];
+		int thsec = inst.r_view.thing_sectors[th_index];
 
 		// check if thing is hidden by BOOM deep water
 		if (inst.level.isSector(thsec))
@@ -927,7 +924,7 @@ public:
 				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
 
 				if (dummy->floorh > real->floorh &&
-					r_view.z > dummy->floorh &&
+					inst.r_view.z > dummy->floorh &&
 					!(info.flags & THINGDEF_CEIL))
 				{
 					return;
@@ -1000,9 +997,9 @@ public:
 		if (what == ObjType::sectors)
 		{
 			// sky surfaces require a check on Z height
-			if (part == PART_CEIL && dw->sec->ceilh > r_view.z + 1)
+			if (part == PART_CEIL && dw->sec->ceilh > inst.r_view.z + 1)
 				dist = YToDist(query_sy, dw->sec->ceilh);
-			else if (part == PART_FLOOR && dw->sec->floorh < r_view.z - 1)
+			else if (part == PART_FLOOR && dw->sec->floorh < inst.r_view.z - 1)
 				dist = YToDist(query_sy, dw->sec->floorh);
 		}
 
@@ -1012,11 +1009,11 @@ public:
 		float ang = XToAngle(query_sx);
 		float modv = static_cast<float>(cos(ang - M_PI/2));
 
-		float t_cos = static_cast<float>(cos(M_PI + -r_view.angle + ang) / modv);
-		float t_sin = static_cast<float>(sin(M_PI + -r_view.angle + ang) / modv);
+		float t_cos = static_cast<float>(cos(M_PI + -inst.r_view.angle + ang) / modv);
+		float t_sin = static_cast<float>(sin(M_PI + -inst.r_view.angle + ang) / modv);
 
-		query_map_x = static_cast<float>(r_view.x - t_sin * dist);
-		query_map_y = static_cast<float>(r_view.y - t_cos * dist);
+		query_map_x = static_cast<float>(inst.r_view.x - t_sin * dist);
+		query_map_y = static_cast<float>(inst.r_view.y - t_cos * dist);
 		query_map_z = YToSecH(query_sy, 1.0 / dist);
 
 		// ensure we never produce X == 0
@@ -1159,9 +1156,9 @@ public:
 		else
 		{
 			// check that plane faces the camera
-			if (part == PART_FLOOR && (r_view.z < z + 0.2))
+			if (part == PART_FLOOR && (inst.r_view.z < z + 0.2))
 				return;
-			if (part == PART_CEIL && (r_view.z > z - 0.2))
+			if (part == PART_CEIL && (inst.r_view.z > z - 0.2))
 				return;
 		}
 
@@ -1283,11 +1280,11 @@ public:
 
 				const Thing *T = inst.level.things[dw->th];
 
-				float x = static_cast<float>(T->x() + dx - r_view.x);
-				float y = static_cast<float>(T->y() + dy - r_view.y);
+				float x = static_cast<float>(T->x() + dx - inst.r_view.x);
+				float y = static_cast<float>(T->y() + dy - inst.r_view.y);
 
-				float tx = static_cast<float>(x * r_view.Sin - y * r_view.Cos);
-				float ty = static_cast<float>(x * r_view.Cos + y * r_view.Sin);
+				float tx = static_cast<float>(x * inst.r_view.Sin - y * inst.r_view.Cos);
+				float ty = static_cast<float>(x * inst.r_view.Cos + y * inst.r_view.Sin);
 
 				if (ty < 1) ty = 1;
 
@@ -1302,7 +1299,7 @@ public:
 				x1 = DeltaToX(iz, tx1) - 1;
 				x2 = DeltaToX(iz, tx2) + 1;
 
-				int thsec = r_view.thing_sectors[th_index];
+				int thsec = inst.r_view.thing_sectors[th_index];
 
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
@@ -1437,7 +1434,7 @@ public:
 	void RenderFlatColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *dest = r_view.screen;
+		img_pixel_t *dest = inst.r_view.screen;
 
 		const img_pixel_t *src = surf.img->buf();
 
@@ -1447,23 +1444,23 @@ public:
 		float ang = XToAngle(x);
 		float modv = static_cast<float>(cos(ang - M_PI/2));
 
-		float t_cos = static_cast<float>(cos(M_PI + -r_view.angle + ang) / modv);
-		float t_sin = static_cast<float>(sin(M_PI + -r_view.angle + ang) / modv);
+		float t_cos = static_cast<float>(cos(M_PI + -inst.r_view.angle + ang) / modv);
+		float t_sin = static_cast<float>(sin(M_PI + -inst.r_view.angle + ang) / modv);
 
-		dest += x + y1 * r_view.screen_w;
+		dest += x + y1 * inst.r_view.screen_w;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
+		for ( ; y1 <= y2 ; y1++, dest += inst.r_view.screen_w)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
-			int tx = int( r_view.x - t_sin * dist) & (tw - 1);
-			int ty = int(-r_view.y + t_cos * dist) & (th - 1);
+			int tx = int( inst.r_view.x - t_sin * dist) & (tw - 1);
+			int ty = int(-inst.r_view.y + t_cos * dist) & (th - 1);
 
 			*dest = src[ty * tw + tx];
 
-			if (r_view.lighting && ! surf.fullbright)
+			if (inst.r_view.lighting && ! surf.fullbright)
 				*dest = DoomLightRemap(inst, light, dist, *dest);
 		}
 	}
@@ -1471,7 +1468,7 @@ public:
 	void RenderTexColumn(DrawWall *dw, DrawSurf& surf,
 			int x, int y1, int y2)
 	{
-		img_pixel_t *dest = r_view.screen;
+		img_pixel_t *dest = inst.r_view.screen;
 
 		const img_pixel_t *src = surf.img->buf();
 
@@ -1498,9 +1495,9 @@ public:
 		hh += 0.2f;
 
 		src  += tx;
-		dest += x + y1 * r_view.screen_w;
+		dest += x + y1 * inst.r_view.screen_w;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, dest += r_view.screen_w)
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += inst.r_view.screen_w)
 		{
 			int ty = int(floor(hh)) % th;
 
@@ -1512,7 +1509,7 @@ public:
 			if (pix == TRANS_PIXEL)
 				continue;
 
-			if (r_view.lighting && ! surf.fullbright)
+			if (inst.r_view.lighting && ! surf.fullbright)
 				*dest = DoomLightRemap(inst, light, dist, pix);
 			else
 				*dest = pix;
@@ -1521,17 +1518,17 @@ public:
 
 	void SolidFlatColumn(DrawWall *dw, DrawSurf& surf, int x, int y1, int y2)
 	{
-		img_pixel_t *dest = r_view.screen;
+		img_pixel_t *dest = inst.r_view.screen;
 
-		dest += x + y1 * r_view.screen_w;
+		dest += x + y1 * inst.r_view.screen_w;
 
 		int light = dw->sec->light;
 
-		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
+		for ( ; y1 <= y2 ; y1++, dest += inst.r_view.screen_w)
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
-			if (r_view.lighting && ! surf.fullbright)
+			if (inst.r_view.lighting && ! surf.fullbright)
 				*dest = DoomLightRemap(inst, light, dist, surf.col);
 			else
 				*dest = surf.col;
@@ -1543,13 +1540,13 @@ public:
 		int  light = dw->wall_light;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
-		img_pixel_t *dest = r_view.screen;
+		img_pixel_t *dest = inst.r_view.screen;
 
-		dest += x + y1 * r_view.screen_w;
+		dest += x + y1 * inst.r_view.screen_w;
 
-		for ( ; y1 <= y2 ; y1++, dest += r_view.screen_w)
+		for ( ; y1 <= y2 ; y1++, dest += inst.r_view.screen_w)
 		{
-			if (r_view.lighting && ! surf.fullbright)
+			if (inst.r_view.lighting && ! surf.fullbright)
 				*dest = DoomLightRemap(inst, light, dist, surf.col);
 			else
 				*dest = surf.col;
@@ -1663,19 +1660,19 @@ public:
 
 		dh = (dh - hh) / MAX(1, y2 - y1);
 
-		int thsec = r_view.thing_sectors[dw->th];
+		int thsec = inst.r_view.thing_sectors[dw->th];
 		int light = inst.level.isSector(thsec) ? inst.level.sectors[thsec]->light : 255;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* fill pixels */
 
-		img_pixel_t *dest = r_view.screen;
-		dest += x + y1 * r_view.screen_w;
+		img_pixel_t *dest = inst.r_view.screen;
+		dest += x + y1 * inst.r_view.screen_w;
 
 		const img_pixel_t *src = dw->ceil.img->buf();
 		src += tx;
 
-		for ( ; y1 <= y2 ; y1++, hh += dh, dest += r_view.screen_w)
+		for ( ; y1 <= y2 ; y1++, hh += dh, dest += inst.r_view.screen_w)
 		{
 			int ty = int(hh / scale);
 
@@ -1698,7 +1695,7 @@ public:
 
 			*dest = pix;
 
-			if (r_view.lighting && ! (dw->thingFlags & THINGDEF_LIT))
+			if (inst.r_view.lighting && ! (dw->thingFlags & THINGDEF_LIT))
 				*dest = DoomLightRemap(inst, light, dist, *dest);
 		}
 	}
@@ -1937,12 +1934,12 @@ public:
 
 		active.clear();
 
-		for (int x=0 ; x < r_view.screen_w ; x++)
+		for (int x=0 ; x < inst.r_view.screen_w ; x++)
 		{
 			// clear vertical depth buffer
 
 			open_y1 = 0;
-			open_y2 = r_view.screen_h - 1;
+			open_y2 = inst.r_view.screen_h - 1;
 
 			UpdateActiveList(x);
 
@@ -2001,9 +1998,9 @@ public:
 		// [ other colors won't work here, since img_pixel_t is 16 bits ]
 		byte COLOR = 0;
 
-		size_t total = r_view.screen_w * r_view.screen_h;
+		size_t total = inst.r_view.screen_w * inst.r_view.screen_h;
 
-		memset(r_view.screen, COLOR, total * sizeof(r_view.screen[0]));
+		memset(inst.r_view.screen, COLOR, total * sizeof(inst.r_view.screen[0]));
 	}
 
 	void Render()
@@ -2011,12 +2008,12 @@ public:
 		if (! query_mode)
 			ClearScreen();
 
-		InitDepthBuf(r_view.screen_w);
+		InitDepthBuf(inst.r_view.screen_w);
 
 		for (int i=0 ; i < inst.level.numLinedefs(); i++)
 			AddLine(i);
 
-		if (r_view.sprites)
+		if (inst.r_view.sprites)
 			for (int k=0 ; k < inst.level.numThings() ; k++)
 				AddThing(k);
 
@@ -2046,21 +2043,21 @@ public:
 
 static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 {
-	u8_t *line_rgb = new u8_t[r_view.screen_w * 3];
+	u8_t *line_rgb = new u8_t[inst.r_view.screen_w * 3];
 
-	for (int ry = 0 ; ry < r_view.screen_h ; ry++)
+	for (int ry = 0 ; ry < inst.r_view.screen_h ; ry++)
 	{
 		u8_t *dest = line_rgb;
-		u8_t *dest_end = line_rgb + r_view.screen_w * 3;
+		u8_t *dest_end = line_rgb + inst.r_view.screen_w * 3;
 
-		const img_pixel_t *src = r_view.screen + ry * r_view.screen_w;
+		const img_pixel_t *src = inst.r_view.screen + ry * inst.r_view.screen_w;
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
 			inst.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
-		fl_draw_image(line_rgb, ox, oy+ry, r_view.screen_w, 1);
+		fl_draw_image(line_rgb, ox, oy+ry, inst.r_view.screen_w, 1);
 	}
 	delete[] line_rgb;
 }
@@ -2071,9 +2068,9 @@ static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 	// if destination width is odd, we store an extra pixel here
 	u8_t *line_rgb = new u8_t[(ow + 1) * 3];
 
-	for (int ry = 0 ; ry < r_view.screen_h ; ry++)
+	for (int ry = 0 ; ry < inst.r_view.screen_h ; ry++)
 	{
-		const img_pixel_t *src = r_view.screen + ry * r_view.screen_w;
+		const img_pixel_t *src = inst.r_view.screen + ry * inst.r_view.screen_w;
 
 		u8_t *dest = line_rgb;
 		u8_t *dest_end = line_rgb + ow * 3;

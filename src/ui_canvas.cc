@@ -1847,7 +1847,7 @@ void UI_Canvas::DrawCamera()
 	double map_x, map_y;
 	float angle;
 
-	Render3D_GetCameraPos(&map_x, &map_y, &angle);
+	inst.Render3D_GetCameraPos(&map_x, &map_y, &angle);
 
 	float mx = static_cast<float>(map_x);
 	float my = static_cast<float>(map_y);
