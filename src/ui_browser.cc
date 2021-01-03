@@ -38,10 +38,6 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
-
-extern std::map<SString, Img_c *> flats;
-extern std::map<SString, Img_c *> textures;
-
 #define  BROWBACK_COL  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK2)
 
 
@@ -919,15 +915,15 @@ void UI_Browser_Box::Populate()
 	{
 		case 'T':
 			if (config::browser_combine_tex)
-				Populate_Images('F', flats);
+				Populate_Images('F', inst.flats);
 
-			Populate_Images('T', textures);
+			Populate_Images('T', inst.textures);
 			break;
 
 		case 'F':
 			// the flat browser is never used when combine-tex is enabled
 			if (! config::browser_combine_tex)
-				Populate_Images('F', flats);
+				Populate_Images('F', inst.flats);
 			break;
 
 		case 'O':

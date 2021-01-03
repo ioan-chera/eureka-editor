@@ -3723,13 +3723,13 @@ static void Textures_LogTransparent(const Instance &inst)
 }
 
 
-static int check_medusa(const SString &tex,
+static int check_medusa(const Instance &inst, const SString &tex,
                         std::map<SString, int>& names)
 {
 	if (is_null_tex(tex) || is_special_tex(tex))
 		return 0;
 
-	if (! W_TextureCausesMedusa(tex))
+	if (! inst.W_TextureCausesMedusa(tex))
 		return 0;
 
 	bump_unknown_name(names, tex);
@@ -3738,21 +3738,21 @@ static int check_medusa(const SString &tex,
 
 
 static void Textures_FindMedusa(selection_c& lines,
-                         std::map<SString, int>& names, const Document &doc)
+                         std::map<SString, int>& names, const Instance &inst)
 {
 	lines.change_type(ObjType::linedefs);
 
 	names.clear();
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const LineDef *L = inst.level.linedefs[n];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(L->Right(doc)->MidTex(), names) |  /* plain OR */
-			check_medusa(L-> Left(doc)->MidTex(), names))
+		if (check_medusa(inst, L->Right(inst.level)->MidTex(), names) |  /* plain OR */
+			check_medusa(inst, L-> Left(inst.level)->MidTex(), names))
 		{
 			lines.set(n);
 		}
@@ -3767,49 +3767,49 @@ static void Textures_ShowMedusa(Instance &inst)
 
 	std::map<SString, int> names;
 
-	Textures_FindMedusa(*inst.edit.Selected, names, inst.level);
+	Textures_FindMedusa(*inst.edit.Selected, names, inst);
 
 	inst.GoToErrors();
 }
 
 
-static void Textures_RemoveMedusa(Document &doc)
+static void Textures_RemoveMedusa(Instance &inst)
 {
 	int null_tex = BA_InternaliseString("-");
 
 	std::map<SString, int> names;
 
-	doc.basis.begin();
-	doc.basis.setMessage("fixed medusa textures");
+	inst.level.basis.begin();
+	inst.level.basis.setMessage("fixed medusa textures");
 
-	for (const LineDef *L : doc.linedefs)
+	for (const LineDef *L : inst.level.linedefs)
 	{
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(L->Right(doc)->MidTex(), names))
+		if (check_medusa(inst, L->Right(inst.level)->MidTex(), names))
 		{
-			doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
-		if (check_medusa(L-> Left(doc)->MidTex(), names))
+		if (check_medusa(inst, L-> Left(inst.level)->MidTex(), names))
 		{
-			doc.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
+			inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
 	}
 
-	doc.basis.end();
+	inst.level.basis.end();
 }
 
 
-static void Textures_LogMedusa(const Document &doc)
+static void Textures_LogMedusa(const Instance &inst)
 {
 	selection_c sel;
 
 	std::map<SString, int> names;
 	std::map<SString, int>::iterator IT;
 
-	Textures_FindMedusa(sel, names, doc);
+	Textures_FindMedusa(sel, names, inst);
 
 	LogPrintf("\n");
 	LogPrintf("Medusa effect textures:\n");
@@ -4256,14 +4256,14 @@ public:
 	static void action_remove_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_RemoveMedusa(dialog->inst.level);
+		Textures_RemoveMedusa(dialog->inst);
 		dialog->user_action = CheckResult::tookAction;
 	}
 
 	static void action_log_medusa(Fl_Widget *w, void *data)
 	{
 		UI_Check_Textures *dialog = (UI_Check_Textures *)data;
-		Textures_LogMedusa(dialog->inst.level);
+		Textures_LogMedusa(dialog->inst);
 		dialog->user_action = CheckResult::highlight;
 	}
 
@@ -4315,7 +4315,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 
 		if (! inst.Features.medusa_fixed)
 		{
-			Textures_FindMedusa(sel, names, doc);
+			Textures_FindMedusa(sel, names, inst);
 
 			if (sel.empty())
 				dialog->AddLine("No textures causing Medusa Effect");

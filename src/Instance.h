@@ -28,6 +28,7 @@
 #include "r_grid.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "w_texture.h"
 
 #include <unordered_map>
 
@@ -405,14 +406,16 @@ public:
 	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
 	// W_TEXTURE
+	void W_AddFlat(const SString &name, Img_c *img);
 	bool W_FlatIsKnown(const SString &name) const;
 	Img_c *W_GetFlat(const SString &name, bool try_uppercase = false) const;
-	Img_c *W_GetSprite(int type) const;
+	Img_c *W_GetSprite(int type);
 	Img_c *W_GetTexture(const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const SString &name) const;
-	void W_LoadFlats() const;
-	void W_LoadTextures() const;
-	void W_LoadTextures_TX_START(Wad_file *wf) const;
+	void W_LoadFlats();
+	void W_LoadTextures();
+	void W_LoadTextures_TX_START(Wad_file *wf);
+	bool W_TextureCausesMedusa(const SString &name) const;
 	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
@@ -529,6 +532,15 @@ private:
 	void StoreSelectedTexture(int new_tex);
 	void StoreSelectedThing(int new_type);
 
+	// W_TEXTURE
+	void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
+	void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
+	void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size, bool skip_first);
+	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
+	void W_ClearFlats();
+	void W_ClearSprites();
+	void W_ClearTextures();
+
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
 
@@ -614,6 +626,11 @@ public:	// will be private when we encapsulate everything
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
+	std::map<SString, Img_c *> textures;
+	std::map<SString, Img_c *> flats;
+	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
+	std::map<SString, int> medusa_textures;
+	sprite_map_t sprites;
 
 	//
 	// Path stuff

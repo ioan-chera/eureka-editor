@@ -29,17 +29,14 @@
 
 #include "im_img.h"
 
-
-
-bool W_TextureCausesMedusa(const SString &name);
-
 // this truncates the name to 8 chars, and makes it uppercase.
 // [ result is a static buffer, copy if necessary! ]
 SString NormalizeTex(const SString &name);
 
 /* ---- SPRITES ---- */
 
-void W_ClearSprites();
+// maps type number to an image
+typedef std::map<int, Img_c *> sprite_map_t;
 
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 
