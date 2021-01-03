@@ -47,14 +47,13 @@ bool config::browser_combine_tex = false;
 
 
 // sort methods
-typedef enum
+enum sort_method_e
 {
 	SOM_Numeric = 0,
 	SOM_Alpha,
 	SOM_AlphaSkip,  // skip the S1, WR (etc) of linedef descriptions
 	SOM_Recent
-
-} sort_method_e;
+};
 
 
 bool Texture_MatchPattern(const char *tex, const char *pattern)
