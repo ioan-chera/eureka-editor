@@ -139,7 +139,7 @@ void UI_Canvas::draw()
 	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
 
 	if (strExt)
-		use_npot_textures = gluCheckExtension((const GLubyte*) "GL_ARB_texture_non_power_of_two", strExt) == GLU_TRUE;
+		inst.use_npot_textures = gluCheckExtension((const GLubyte*) "GL_ARB_texture_non_power_of_two", strExt) == GLU_TRUE;
 #endif
 #endif
 

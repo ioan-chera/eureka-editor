@@ -290,7 +290,7 @@ void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const
 	if (nodeialog)
 		nodeialog->Print(message_buf.c_str());
 
-	LogPrintf("BSP: %s", message_buf);
+	LogPrintf("BSP: %s", message_buf.c_str());
 }
 
 

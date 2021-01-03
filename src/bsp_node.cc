@@ -1184,7 +1184,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 			if (((int)dx | (int)dy) & 1)
 			{
 				Warning(inst, "Loss of accuracy on VERY long node: "
-						"(%d,%d) -> (%d,%d)\n", x, y, x + dx, y+ dy);
+						"(%f,%f) -> (%f,%f)\n", x, y, x + dx, y+ dy);
 			}
 
 			dx = round(dx * 0.5);

@@ -266,11 +266,11 @@ static void Determine_HomeDir(const char *argv0)
 
    fl_filename_expand(path, OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
 													"eureka-editor").c_str());
-   home_dir = path;
+   global::home_dir = path;
 
    fl_filename_expand(path, OSX_UserDomainDirectory(macOSDirType::libraryCache,
 													"eureka-editor").c_str());
-   cache_dir = path;
+		global::cache_dir = path;
 
 #else  // UNIX
 	char * path = StringNew(FL_PATH_MAX + 4);

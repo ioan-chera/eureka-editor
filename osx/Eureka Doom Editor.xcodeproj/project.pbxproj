@@ -41,6 +41,8 @@
 		4FBC5BE6258D44EB005480CA /* Errors.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BE2258D4268005480CA /* Errors.cc */; };
 		4FBD7302179FC5ED00937B50 /* about_logo.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4FBD7301179FC5ED00937B50 /* about_logo.png */; };
 		4FC7E6782592924E005EFDA1 /* Document.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FC7E6762592924E005EFDA1 /* Document.cc */; };
+		4FC7E69825A218E9005EFDA1 /* Instance.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FC7E69625A218B7005EFDA1 /* Instance.cc */; };
+		4FC7E69B25A218EC005EFDA1 /* DocumentModule.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FC7E69425A218B6005EFDA1 /* DocumentModule.cc */; };
 		FA1E04EE16689A2900ED41DC /* ui_misc.cc in Sources */ = {isa = PBXBuildFile; fileRef = FA1E04EC16689A2900ED41DC /* ui_misc.cc */; };
 		FA244640166CAA6100C68ED8 /* common in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463A166CAA6100C68ED8 /* common */; };
 		FA244642166CAA6100C68ED8 /* games in CopyFiles */ = {isa = PBXBuildFile; fileRef = FA24463C166CAA6100C68ED8 /* games */; };
@@ -200,6 +202,8 @@
 		4FC7E6762592924E005EFDA1 /* Document.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Document.cc; path = ../../src/Document.cc; sourceTree = "<group>"; };
 		4FC7E6772592924E005EFDA1 /* Document.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Document.h; path = ../../src/Document.h; sourceTree = "<group>"; };
 		4FC7E67B259292EA005EFDA1 /* DocumentModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DocumentModule.h; path = ../../src/DocumentModule.h; sourceTree = "<group>"; };
+		4FC7E69425A218B6005EFDA1 /* DocumentModule.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DocumentModule.cc; path = ../../src/DocumentModule.cc; sourceTree = "<group>"; };
+		4FC7E69625A218B7005EFDA1 /* Instance.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Instance.cc; path = ../../src/Instance.cc; sourceTree = "<group>"; };
 		4FCB3A4F253B559A0038EFEB /* Eureka-Tests.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Eureka-Tests.xcodeproj"; path = "Eureka-Tests/Eureka-Tests.xcodeproj"; sourceTree = "<group>"; };
 		FA1E04EC16689A2900ED41DC /* ui_misc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_misc.cc; path = ../../src/ui_misc.cc; sourceTree = "<group>"; usesTabs = 1; };
 		FA1E04ED16689A2900ED41DC /* ui_misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_misc.h; path = ../../src/ui_misc.h; sourceTree = "<group>"; usesTabs = 1; };
@@ -458,9 +462,11 @@
 				FABBC137165B905E0080245F /* lib_ */,
 				FABBC136165B90500080245F /* im_ */,
 				FABBC134165B90350080245F /* e_ */,
+				4FC7E69425A218B6005EFDA1 /* DocumentModule.cc */,
 				4FBC5BE2258D4268005480CA /* Errors.cc */,
 				4FBC5BE3258D4268005480CA /* Errors.h */,
 				FABBC096165B90280080245F /* hdr_fltk.h */,
+				4FC7E69625A218B7005EFDA1 /* Instance.cc */,
 				FABBC0B3165B90280080245F /* objid.h */,
 				4FBC5BD7258D3A42005480CA /* PrintfMacros.h */,
 				4FC7E6762592924E005EFDA1 /* Document.cc */,
@@ -827,6 +833,8 @@
 				4F48AAE320E800C800AD935F /* ui_editor.cc in Sources */,
 				FABBC100165B90280080245F /* e_path.cc in Sources */,
 				FABBC101165B90280080245F /* e_sector.cc in Sources */,
+				4FC7E69825A218E9005EFDA1 /* Instance.cc in Sources */,
+				4FC7E69B25A218EC005EFDA1 /* DocumentModule.cc in Sources */,
 				4FC7E6782592924E005EFDA1 /* Document.cc in Sources */,
 				FABBC102165B90280080245F /* e_things.cc in Sources */,
 				4FB8211F23F4924A0044B1C3 /* r_opengl.cc in Sources */,

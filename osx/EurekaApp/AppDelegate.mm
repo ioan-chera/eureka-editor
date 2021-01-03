@@ -57,7 +57,7 @@ int main_ORIGINAL(int argc, char *argv[]);
 {
 	// Set install_dir from here (it's dependent on project build settings)
     // Current value (might change): .app package root directory
-	install_dir = [[[NSBundle mainBundle] resourcePath]
+	global::install_dir = [[[NSBundle mainBundle] resourcePath]
 				   cStringUsingEncoding:NSUTF8StringEncoding];
 
     // home_dir is set inside the main program and doesn't depend on build
