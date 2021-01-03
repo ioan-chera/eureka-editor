@@ -21,7 +21,6 @@
 #ifndef __EUREKA_R_SUBDIV_H__
 #define __EUREKA_R_SUBDIV_H__
 
-
 struct sector_polygon_t
 {
 	// number of sides, either 3 or 4
@@ -51,12 +50,6 @@ public:
 	void AddPolygon(float lx1, float lx2, float low_y,
 					float hx1, float hx2, float high_y);
 };
-
-
-void Subdiv_InvalidateAll();
-
-
-bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy);
 
 sector_subdivision_c *Subdiv_PolygonsForSector(Instance &inst, int num);
 
@@ -147,8 +140,89 @@ public:
 	}
 };
 
-sector_3dfloors_c *Subdiv_3DFloorsForSector(int num);
 
+struct sector_extra_info_t
+{
+	// these are < 0 when the sector has no lines
+	int first_line;
+	int last_line;
+
+	// these are random junk when sector has no lines
+	double bound_x1, bound_x2;
+	double bound_y1, bound_y2;
+
+	sector_subdivision_c sub;
+
+	sector_3dfloors_c floors;
+
+	// true when polygons have been built for this sector.
+	bool built;
+
+	void Clear()
+	{
+		first_line = last_line = -1;
+
+		bound_x1 = 32767;
+		bound_y1 = 32767;
+		bound_x2 = -32767;
+		bound_y2 = -32767;
+
+		sub.Clear();
+		floors.Clear();
+
+		built = false;
+	}
+
+	void AddLine(int n)
+	{
+		if (first_line < 0 || first_line > n)
+			first_line = n;
+
+		if (last_line < n)
+			last_line = n;
+	}
+
+	void AddVertex(const Vertex *V)
+	{
+		bound_x1 = MIN(bound_x1, V->x());
+		bound_y1 = MIN(bound_y1, V->y());
+
+		bound_x2 = MAX(bound_x2, V->x());
+		bound_y2 = MAX(bound_y2, V->y());
+	}
+};
+
+//
+// Sector info cache
+//
+class sector_info_cache_c
+{
+public:
+	int total = -1;
+	std::vector<sector_extra_info_t> infos;
+	Instance &inst;
+public:
+	explicit sector_info_cache_c(Instance &inst) : inst(inst)
+	{ }
+
+
+public:
+	void Update();
+	void Rebuild();
+	void CheckBoom242(const LineDef *L);
+	void CheckExtraFloor(const LineDef *L, int ld_num);
+	void CheckLineSlope(const LineDef *L);
+	void CheckPlaneCopy(const LineDef *L);
+	void CheckSlopeThing(const Thing *T);
+	void CheckSlopeCopyThing(const Thing *T);
+	void PlaneAlign(const LineDef *L, int floor_mode, int ceil_mode);
+	void PlaneAlignPart(const LineDef *L, Side side, int plane);
+	void PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share);
+	void PlaneCopyFromThing(const Thing *T, int plane);
+	void PlaneTiltByThing(const Thing *T, int plane);
+	void SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,
+					   double x2, double y2, double z2);
+};
 
 #endif  /* __EUREKA_R_SUBDIV_H__ */
 

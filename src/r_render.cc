@@ -131,7 +131,7 @@ void Render_View_t::FindGroundZ()
 		{
 			double z = inst.level.sectors[o.num]->floorh;
 			{
-				sector_3dfloors_c *ex = Subdiv_3DFloorsForSector(o.num);
+				sector_3dfloors_c *ex = inst.Subdiv_3DFloorsForSector(o.num);
 				if (ex->f_plane.sloped)
 					z = ex->f_plane.SlopeZ(test_x, test_y);
 			}

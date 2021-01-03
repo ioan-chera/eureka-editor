@@ -2057,10 +2057,10 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 
 void UI_Canvas::RenderSector(int num)
 {
-	if (! Subdiv_SectorOnScreen(num, map_lx, map_ly, map_hx, map_hy))
+	if (! inst.Subdiv_SectorOnScreen(num, map_lx, map_ly, map_hx, map_hy))
 		return;
 
-	sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(inst, num);
+	sector_subdivision_c *subdiv = inst.Subdiv_PolygonsForSector(num);
 
 	if (! subdiv)
 		return;

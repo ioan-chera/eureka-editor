@@ -27,6 +27,7 @@
 #include "main.h"
 #include "r_grid.h"
 #include "r_render.h"
+#include "r_subdiv.h"
 
 #include <unordered_map>
 
@@ -378,6 +379,12 @@ public:
 	bool SW_QueryPoint(Objid &hl, int qx, int qy);
 	void SW_RenderWorld(int ox, int oy, int ow, int oh);
 
+	// R_SUBDIV
+	sector_3dfloors_c *Subdiv_3DFloorsForSector(int num);
+	void Subdiv_InvalidateAll();
+	bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy);
+	sector_subdivision_c *Subdiv_PolygonsForSector(int num);
+
 	// UI_BROWSER
 	void Browser_WriteUser(std::ostream &os) const;
 
@@ -677,6 +684,7 @@ public:	// will be private when we encapsulate everything
 	//
 	Grid_State_c grid{ *this };
 	Render_View_t r_view{ *this };
+	sector_info_cache_c sector_info_cache{ *this };
 };
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.

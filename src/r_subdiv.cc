@@ -145,597 +145,526 @@ struct sector_edge_t
 	};
 };
 
-
-struct sector_extra_info_t
+//
+// Update
+//
+void sector_info_cache_c::Update()
 {
-	// these are < 0 when the sector has no lines
-	int first_line;
-	int last_line;
+   if (total != inst.level.numSectors())
+   {
+	   total = inst.level.numSectors();
 
-	// these are random junk when sector has no lines
-	double bound_x1, bound_x2;
-	double bound_y1, bound_y2;
+	   infos.resize((size_t) total);
 
-	sector_subdivision_c sub;
+	   Rebuild();
+   }
+}
 
-	sector_3dfloors_c floors;
-
-	// true when polygons have been built for this sector.
-	bool built;
-
-	void Clear()
-	{
-		first_line = last_line = -1;
-
-		bound_x1 = 32767;
-		bound_y1 = 32767;
-		bound_x2 = -32767;
-		bound_y2 = -32767;
-
-		sub.Clear();
-		floors.Clear();
-
-		built = false;
-	}
-
-	void AddLine(int n)
-	{
-		if (first_line < 0 || first_line > n)
-			first_line = n;
-
-		if (last_line < n)
-			last_line = n;
-	}
-
-	void AddVertex(const Vertex *V)
-	{
-		bound_x1 = MIN(bound_x1, V->x());
-		bound_y1 = MIN(bound_y1, V->y());
-
-		bound_x2 = MAX(bound_x2, V->x());
-		bound_y2 = MAX(bound_y2, V->y());
-	}
-};
-
-
-class sector_info_cache_c
+void sector_info_cache_c::Rebuild()
 {
-public:
-	int total;
+	int sec;
 
-	std::vector<sector_extra_info_t> infos;
-
-	Instance &inst;
-
-public:
-	explicit sector_info_cache_c(Instance &inst) : total(-1), infos(), inst(inst)
-	{ }
-
-	~sector_info_cache_c()
-	{ }
-
-public:
-	void Update()
+	for (sec = 0 ; sec < total ; sec++)
 	{
-		if (total != inst.level.numSectors())
+		const Sector *S = inst.level.sectors[sec];
+
+		infos[sec].Clear();
+		infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
+		infos[sec].floors.c_plane.Init(static_cast<float>(S->ceilh));
+	}
+
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
+	{
+		const LineDef *L = inst.level.linedefs[n];
+
+		CheckBoom242(L);
+		CheckExtraFloor(L, n);
+		CheckLineSlope(L);
+
+		for (int side = 0 ; side < 2 ; side++)
 		{
-			total = inst.level.numSectors();
+			int sd_num = side ? L->left : L->right;
+			if (sd_num < 0)
+				continue;
 
-			infos.resize((size_t) total);
+			sec = inst.level.sidedefs[sd_num]->sector;
 
-			Rebuild();
+			sector_extra_info_t& info = infos[sec];
+
+			info.AddLine(n);
+
+			info.AddVertex(L->Start(inst.level));
+			info.AddVertex(L->End(inst.level));
 		}
 	}
 
-	void Rebuild()
+	for (const Thing *thing : inst.level.things)
 	{
-		int sec;
-
-		for (sec = 0 ; sec < total ; sec++)
-		{
-			const Sector *S = inst.level.sectors[sec];
-
-			infos[sec].Clear();
-			infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
-			infos[sec].floors.c_plane.Init(static_cast<float>(S->ceilh));
-		}
-
-		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
-		{
-			const LineDef *L = inst.level.linedefs[n];
-
-			CheckBoom242(L);
-			CheckExtraFloor(L, n);
-			CheckLineSlope(L);
-
-			for (int side = 0 ; side < 2 ; side++)
-			{
-				int sd_num = side ? L->left : L->right;
-				if (sd_num < 0)
-					continue;
-
-				sec = inst.level.sidedefs[sd_num]->sector;
-
-				sector_extra_info_t& info = infos[sec];
-
-				info.AddLine(n);
-
-				info.AddVertex(L->Start(inst.level));
-				info.AddVertex(L->End(inst.level));
-			}
-		}
-
-		for (const Thing *thing : inst.level.things)
-		{
-			CheckSlopeThing(thing);
-		}
-		for (const Thing *thing : inst.level.things)
-		{
-			CheckSlopeCopyThing(thing);
-		}
-
-		for (const LineDef *linedef : inst.level.linedefs)
-		{
-			CheckPlaneCopy(linedef);
-		}
+		CheckSlopeThing(thing);
+	}
+	for (const Thing *thing : inst.level.things)
+	{
+		CheckSlopeCopyThing(thing);
 	}
 
-	void CheckBoom242(const LineDef *L)
+	for (const LineDef *linedef : inst.level.linedefs)
 	{
-		if (inst.Features.gen_types && (L->type == 242 || L->type == 280))
-		{ /* ok */ }
-		else if (inst.Level_format != MapFormat::doom && L->type == 209)
-		{ /* ok */ }
-		else
-			return;
-
-		if (L->tag <= 0 || L->right < 0)
-			return;
-
-		int dummy_sec = L->Right(inst.level)->sector;
-
-		for (int n = 0 ; n < inst.level.numSectors(); n++)
-		{
-			if (inst.level.sectors[n]->tag == L->tag)
-				infos[n].floors.heightsec = dummy_sec;
-		}
+		CheckPlaneCopy(linedef);
 	}
+}
 
-	void CheckExtraFloor(const LineDef *L, int ld_num)
+void sector_info_cache_c::CheckBoom242(const LineDef *L)
+{
+	if (inst.Features.gen_types && (L->type == 242 || L->type == 280))
+	{ /* ok */ }
+	else if (inst.Level_format != MapFormat::doom && L->type == 209)
+	{ /* ok */ }
+	else
+		return;
+
+	if (L->tag <= 0 || L->right < 0)
+		return;
+
+	int dummy_sec = L->Right(inst.level)->sector;
+
+	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (L->tag <= 0 || L->right < 0)
-			return;
-
-		int flags = -1;
-		int sec_tag = L->tag;
-
-		// EDGE style
-		if (inst.Level_format == MapFormat::doom && (inst.Features.extra_floors & 1))
-		{
-			switch (L->type)
-			{
-			case 400: flags = 0; break;
-			case 401: flags = EXFL_UPPER; break;
-			case 402: flags = EXFL_LOWER; break;
-			case 403: flags = EXFL_BOTTOM; break; // liquid
-			case 413: flags = EXFL_BOTTOM; break; // thin and solid
-
-			case 404: case 405: case 406: case 407: case 408:  // liquid
-			case 414: case 415: case 416: case 417:  // thin and solid
-				flags = EXFL_BOTTOM | EXFL_TRANSLUC;
-				break;
-
-			default: break;
-			}
-		}
-
-		// Legacy style
-		if (inst.Level_format == MapFormat::doom && (inst.Features.extra_floors & 2))
-		{
-			switch (L->type)
-			{
-			case 281: flags = 0; break;
-			case 289: flags = 0; break;
-			case 300: flags = EXFL_TRANSLUC; break;
-			case 301: flags = EXFL_TOP | EXFL_TRANSLUC; break;
-			case 304: flags = EXFL_TOP; break;
-			case 306: flags = EXFL_TOP | EXFL_TRANSLUC; break; // invisible floor
-
-			default: break;
-			}
-		}
-
-		// ZDoom style
-		if (inst.Level_format != MapFormat::doom && (inst.Features.extra_floors & 4))
-		{
-			if (L->type != 160)
-				return;
-
-			flags = 0;
-
-			if ((L->arg2 & 3) == 0)
-				flags |= EXFL_VAVOOM;
-
-			if (L->arg3 & 8)  flags |= EXFL_TOP;
-			if (L->arg3 & 16) flags |= EXFL_UPPER;
-			if (L->arg3 & 32) flags |= EXFL_LOWER;
-
-			if ((L->arg2 & 8) == 0)
-				sec_tag |= (L->arg5 << 8);
-		}
-
-		if (flags < 0)
-			return;
-
-		extrafloor_c EF;
-
-		EF.ld = ld_num;
-		EF.sd = L->right;
-		EF.flags = flags;
-
-		// find all matching sectors
-		for (int n = 0 ; n < inst.level.numSectors(); n++)
-		{
-			if (inst.level.sectors[n]->tag == sec_tag)
-				infos[n].floors.floors.push_back(EF);
-		}
+		if (inst.level.sectors[n]->tag == L->tag)
+			infos[n].floors.heightsec = dummy_sec;
 	}
+}
 
-	void CheckLineSlope(const LineDef *L)
+void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
+{
+	if (L->tag <= 0 || L->right < 0)
+		return;
+
+	int flags = -1;
+	int sec_tag = L->tag;
+
+	// EDGE style
+	if (inst.Level_format == MapFormat::doom && (inst.Features.extra_floors & 1))
 	{
-		// EDGE style
-		if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 1))
+		switch (L->type)
 		{
-			switch (L->type)
-			{
-			case 567: PlaneAlign(L, 2, 0); break;
-			case 568: PlaneAlign(L, 0, 2); break;
-			case 569: PlaneAlign(L, 2, 2); break;
-			default: break;
-			}
-		}
+		case 400: flags = 0; break;
+		case 401: flags = EXFL_UPPER; break;
+		case 402: flags = EXFL_LOWER; break;
+		case 403: flags = EXFL_BOTTOM; break; // liquid
+		case 413: flags = EXFL_BOTTOM; break; // thin and solid
 
-		// Eternity style
-		if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 2))
-		{
-			switch (L->type)
-			{
-			case 386: PlaneAlign(L, 1, 0); break;
-			case 387: PlaneAlign(L, 0, 1); break;
-			case 388: PlaneAlign(L, 1, 1); break;
-			case 389: PlaneAlign(L, 2, 0); break;
-			case 390: PlaneAlign(L, 0, 2); break;
-			case 391: PlaneAlign(L, 2, 2); break;
-			case 392: PlaneAlign(L, 2, 1); break;
-			case 393: PlaneAlign(L, 1, 2); break;
-			default: break;
-			}
-		}
+		case 404: case 405: case 406: case 407: case 408:  // liquid
+		case 414: case 415: case 416: case 417:  // thin and solid
+			flags = EXFL_BOTTOM | EXFL_TRANSLUC;
+			break;
 
-		// Odamex and ZDoom style
-		if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 4))
-		{
-			switch (L->type)
-			{
-			case 340: PlaneAlign(L, 1, 0); break;
-			case 341: PlaneAlign(L, 0, 1); break;
-			case 342: PlaneAlign(L, 1, 1); break;
-			case 343: PlaneAlign(L, 2, 0); break;
-			case 344: PlaneAlign(L, 0, 2); break;
-			case 345: PlaneAlign(L, 2, 2); break;
-			case 346: PlaneAlign(L, 2, 1); break;
-			case 347: PlaneAlign(L, 1, 2); break;
-			default: break;
-			}
-		}
-
-		// ZDoom (in hexen format)
-		if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 8))
-		{
-			if (L->type == 181)
-				PlaneAlign(L, L->tag, L->arg2);
-		}
-	}
-
-	void CheckPlaneCopy(const LineDef *L)
-	{
-		// Eternity style
-		if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 2))
-		{
-			switch (L->type)
-			{
-			case 394: PlaneCopy(L, L->tag, 0, 0, 0, 0); break;
-			case 395: PlaneCopy(L, 0, L->tag, 0, 0, 0); break;
-			case 396: PlaneCopy(L, L->tag, L->tag, 0, 0, 0); break;
-			default: break;
-			}
-		}
-
-		// ZDoom (in hexen format)
-		if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 8))
-		{
-			if (L->type == 118)
-				PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
-		}
-	}
-
-	void CheckSlopeThing(const Thing *T)
-	{
-		if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 16))
-		{
-			switch (T->type)
-			{
-			// TODO 1500, 1501 Vavoom style
-			// TODO 1504, 1505 Vertex height (triangle sectors)
-			// TODO 9500, 9501 Line slope things
-
-			case 9502: PlaneTiltByThing(T, 0); break;
-			case 9503: PlaneTiltByThing(T, 1); break;
-			default: break;
-			}
-		}
-	}
-
-	void CheckSlopeCopyThing(const Thing *T)
-	{
-		if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 16))
-		{
-			switch (T->type)
-			{
-			case 9510: PlaneCopyFromThing(T, 0); break;
-			case 9511: PlaneCopyFromThing(T, 1); break;
-			default: break;
-			}
-		}
-	}
-
-	void PlaneAlign(const LineDef *L, int floor_mode, int ceil_mode)
-	{
-		if (L->left < 0 || L->right < 0)
-			return;
-
-		// support undocumented special case from ZDoom
-		if (ceil_mode == 0 && (floor_mode & 0x0C) != 0)
-			ceil_mode = (floor_mode >> 2);
-
-		switch (floor_mode & 3)
-		{
-		case 1: PlaneAlignPart(L, Side::right, 0 /* floor */); break;
-		case 2: PlaneAlignPart(L, Side::left,  0); break;
-		default: break;
-		}
-
-		switch (ceil_mode & 3)
-		{
-		case 1: PlaneAlignPart(L, Side::right, 1 /* ceil */); break;
-		case 2: PlaneAlignPart(L, Side::left,  1); break;
 		default: break;
 		}
 	}
 
-	void PlaneAlignPart(const LineDef *L, Side side, int plane)
+	// Legacy style
+	if (inst.Level_format == MapFormat::doom && (inst.Features.extra_floors & 2))
 	{
-		int sec_num = L->WhatSector(side, inst.level);
-		const Sector *front = inst.level.sectors[L->WhatSector(side, inst.level)];
-		const Sector *back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
-
-		// find a vertex belonging to sector and is far from the line
-		const Vertex *v = NULL;
-		double best_dist = 0.1;
-
-		double lx1 = L->Start(inst.level)->x();
-		double ly1 = L->Start(inst.level)->y();
-		double lx2 = L->End(inst.level)->x();
-		double ly2 = L->End(inst.level)->y();
-
-		if (side == Side::left)
+		switch (L->type)
 		{
-			std::swap(lx1, lx2);
-			std::swap(ly1, ly2);
+		case 281: flags = 0; break;
+		case 289: flags = 0; break;
+		case 300: flags = EXFL_TRANSLUC; break;
+		case 301: flags = EXFL_TOP | EXFL_TRANSLUC; break;
+		case 304: flags = EXFL_TOP; break;
+		case 306: flags = EXFL_TOP | EXFL_TRANSLUC; break; // invisible floor
+
+		default: break;
 		}
+	}
 
-		for (const LineDef *L2 : inst.level.linedefs)
+	// ZDoom style
+	if (inst.Level_format != MapFormat::doom && (inst.Features.extra_floors & 4))
+	{
+		if (L->type != 160)
+			return;
+
+		flags = 0;
+
+		if ((L->arg2 & 3) == 0)
+			flags |= EXFL_VAVOOM;
+
+		if (L->arg3 & 8)  flags |= EXFL_TOP;
+		if (L->arg3 & 16) flags |= EXFL_UPPER;
+		if (L->arg3 & 32) flags |= EXFL_LOWER;
+
+		if ((L->arg2 & 8) == 0)
+			sec_tag |= (L->arg5 << 8);
+	}
+
+	if (flags < 0)
+		return;
+
+	extrafloor_c EF;
+
+	EF.ld = ld_num;
+	EF.sd = L->right;
+	EF.flags = flags;
+
+	// find all matching sectors
+	for (int n = 0 ; n < inst.level.numSectors(); n++)
+	{
+		if (inst.level.sectors[n]->tag == sec_tag)
+			infos[n].floors.floors.push_back(EF);
+	}
+}
+
+void sector_info_cache_c::CheckLineSlope(const LineDef *L)
+{
+	// EDGE style
+	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 1))
+	{
+		switch (L->type)
 		{
-			if (L2->TouchesSector(sec_num, inst.level))
+		case 567: PlaneAlign(L, 2, 0); break;
+		case 568: PlaneAlign(L, 0, 2); break;
+		case 569: PlaneAlign(L, 2, 2); break;
+		default: break;
+		}
+	}
+
+	// Eternity style
+	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 2))
+	{
+		switch (L->type)
+		{
+		case 386: PlaneAlign(L, 1, 0); break;
+		case 387: PlaneAlign(L, 0, 1); break;
+		case 388: PlaneAlign(L, 1, 1); break;
+		case 389: PlaneAlign(L, 2, 0); break;
+		case 390: PlaneAlign(L, 0, 2); break;
+		case 391: PlaneAlign(L, 2, 2); break;
+		case 392: PlaneAlign(L, 2, 1); break;
+		case 393: PlaneAlign(L, 1, 2); break;
+		default: break;
+		}
+	}
+
+	// Odamex and ZDoom style
+	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 4))
+	{
+		switch (L->type)
+		{
+		case 340: PlaneAlign(L, 1, 0); break;
+		case 341: PlaneAlign(L, 0, 1); break;
+		case 342: PlaneAlign(L, 1, 1); break;
+		case 343: PlaneAlign(L, 2, 0); break;
+		case 344: PlaneAlign(L, 0, 2); break;
+		case 345: PlaneAlign(L, 2, 2); break;
+		case 346: PlaneAlign(L, 2, 1); break;
+		case 347: PlaneAlign(L, 1, 2); break;
+		default: break;
+		}
+	}
+
+	// ZDoom (in hexen format)
+	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 8))
+	{
+		if (L->type == 181)
+			PlaneAlign(L, L->tag, L->arg2);
+	}
+}
+
+void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
+{
+	// Eternity style
+	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 2))
+	{
+		switch (L->type)
+		{
+		case 394: PlaneCopy(L, L->tag, 0, 0, 0, 0); break;
+		case 395: PlaneCopy(L, 0, L->tag, 0, 0, 0); break;
+		case 396: PlaneCopy(L, L->tag, L->tag, 0, 0, 0); break;
+		default: break;
+		}
+	}
+
+	// ZDoom (in hexen format)
+	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 8))
+	{
+		if (L->type == 118)
+			PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
+	}
+}
+
+void sector_info_cache_c::CheckSlopeThing(const Thing *T)
+{
+	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 16))
+	{
+		switch (T->type)
+		{
+		// TODO 1500, 1501 Vavoom style
+		// TODO 1504, 1505 Vertex height (triangle sectors)
+		// TODO 9500, 9501 Line slope things
+
+		case 9502: PlaneTiltByThing(T, 0); break;
+		case 9503: PlaneTiltByThing(T, 1); break;
+		default: break;
+		}
+	}
+}
+
+void sector_info_cache_c::CheckSlopeCopyThing(const Thing *T)
+{
+	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 16))
+	{
+		switch (T->type)
+		{
+		case 9510: PlaneCopyFromThing(T, 0); break;
+		case 9511: PlaneCopyFromThing(T, 1); break;
+		default: break;
+		}
+	}
+}
+
+void sector_info_cache_c::PlaneAlign(const LineDef *L, int floor_mode, int ceil_mode)
+{
+	if (L->left < 0 || L->right < 0)
+		return;
+
+	// support undocumented special case from ZDoom
+	if (ceil_mode == 0 && (floor_mode & 0x0C) != 0)
+		ceil_mode = (floor_mode >> 2);
+
+	switch (floor_mode & 3)
+	{
+	case 1: PlaneAlignPart(L, Side::right, 0 /* floor */); break;
+	case 2: PlaneAlignPart(L, Side::left,  0); break;
+	default: break;
+	}
+
+	switch (ceil_mode & 3)
+	{
+	case 1: PlaneAlignPart(L, Side::right, 1 /* ceil */); break;
+	case 2: PlaneAlignPart(L, Side::left,  1); break;
+	default: break;
+	}
+}
+
+void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
+{
+	int sec_num = L->WhatSector(side, inst.level);
+	const Sector *front = inst.level.sectors[L->WhatSector(side, inst.level)];
+	const Sector *back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
+
+	// find a vertex belonging to sector and is far from the line
+	const Vertex *v = NULL;
+	double best_dist = 0.1;
+
+	double lx1 = L->Start(inst.level)->x();
+	double ly1 = L->Start(inst.level)->y();
+	double lx2 = L->End(inst.level)->x();
+	double ly2 = L->End(inst.level)->y();
+
+	if (side == Side::left)
+	{
+		std::swap(lx1, lx2);
+		std::swap(ly1, ly2);
+	}
+
+	for (const LineDef *L2 : inst.level.linedefs)
+	{
+		if (L2->TouchesSector(sec_num, inst.level))
+		{
+			for (int pass = 0 ; pass < 2 ; pass++)
 			{
-				for (int pass = 0 ; pass < 2 ; pass++)
+				const Vertex *v2 = pass ? L2->End(inst.level) : L2->Start(inst.level);
+				double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
+
+				if (dist > best_dist)
 				{
-					const Vertex *v2 = pass ? L2->End(inst.level) : L2->Start(inst.level);
-					double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
-
-					if (dist > best_dist)
-					{
-						v = v2;
-						best_dist = dist;
-					}
+					v = v2;
+					best_dist = dist;
 				}
 			}
 		}
+	}
 
-		if (v == NULL)
-			return;
+	if (v == NULL)
+		return;
 
-		// compute point at 90 degrees to the linedef
-		double ldx = (ly2 - ly1);
-		double ldy = (lx1 - lx2);
-		double ldh = hypot(ldx, ldy);
+	// compute point at 90 degrees to the linedef
+	double ldx = (ly2 - ly1);
+	double ldy = (lx1 - lx2);
+	double ldh = hypot(ldx, ldy);
 
-		double vx = lx1 + ldx * best_dist / ldh;
-		double vy = ly1 + ldy * best_dist / ldh;
+	double vx = lx1 + ldx * best_dist / ldh;
+	double vy = ly1 + ldy * best_dist / ldh;
 
-		if (plane > 0)
-		{   // ceiling
-			SlopeFromLine(infos[sec_num].floors.c_plane,
-				lx1, ly1, back->ceilh, vx, vy, front->ceilh);
+	if (plane > 0)
+	{   // ceiling
+		SlopeFromLine(infos[sec_num].floors.c_plane,
+			lx1, ly1, back->ceilh, vx, vy, front->ceilh);
+	}
+	else
+	{   // floor
+		SlopeFromLine(infos[sec_num].floors.f_plane,
+			lx1, ly1, back->floorh, vx, vy, front->floorh);
+	}
+}
+
+void sector_info_cache_c::PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share)
+{
+	for (int n = 0 ; n < inst.level.numSectors(); n++)
+	{
+		if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && L->Right(inst.level))
+		{
+			infos[L->Right(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+			f1_tag = 0;
 		}
-		else
-		{   // floor
-			SlopeFromLine(infos[sec_num].floors.f_plane,
-				lx1, ly1, back->floorh, vx, vy, front->floorh);
+		if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && L->Right(inst.level))
+		{
+			infos[L->Right(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+			c1_tag = 0;
+		}
+
+		if (f2_tag > 0 && inst.level.sectors[n]->tag == f2_tag && L->Left(inst.level))
+		{
+			infos[L->Left(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+			f2_tag = 0;
+		}
+		if (c2_tag > 0 && inst.level.sectors[n]->tag == c2_tag && L->Left(inst.level))
+		{
+			infos[L->Left(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+			c2_tag = 0;
 		}
 	}
 
-	void PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, int f2_tag, int c2_tag, int share)
+	if (L->left >= 0 && L->right >= 0)
 	{
-		for (int n = 0 ; n < inst.level.numSectors(); n++)
-		{
-			if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && L->Right(inst.level))
-			{
-				infos[L->Right(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
-				f1_tag = 0;
-			}
-			if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && L->Right(inst.level))
-			{
-				infos[L->Right(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
-				c1_tag = 0;
-			}
+		int front_sec = L->Right(inst.level)->sector;
+		int  back_sec = L->Left(inst.level)->sector;
 
-			if (f2_tag > 0 && inst.level.sectors[n]->tag == f2_tag && L->Left(inst.level))
-			{
-				infos[L->Left(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
-				f2_tag = 0;
-			}
-			if (c2_tag > 0 && inst.level.sectors[n]->tag == c2_tag && L->Left(inst.level))
-			{
-				infos[L->Left(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
-				c2_tag = 0;
-			}
+		switch (share & 3)
+		{
+		case 1: infos[ back_sec].floors.f_plane.Copy(infos[front_sec].floors.f_plane); break;
+		case 2: infos[front_sec].floors.f_plane.Copy(infos[ back_sec].floors.f_plane); break;
+		default: break;
 		}
 
-		if (L->left >= 0 && L->right >= 0)
+		switch (share & 12)
 		{
-			int front_sec = L->Right(inst.level)->sector;
-			int  back_sec = L->Left(inst.level)->sector;
-
-			switch (share & 3)
-			{
-			case 1: infos[ back_sec].floors.f_plane.Copy(infos[front_sec].floors.f_plane); break;
-			case 2: infos[front_sec].floors.f_plane.Copy(infos[ back_sec].floors.f_plane); break;
-			default: break;
-			}
-
-			switch (share & 12)
-			{
-			case 4: infos[ back_sec].floors.c_plane.Copy(infos[front_sec].floors.c_plane); break;
-			case 8: infos[front_sec].floors.c_plane.Copy(infos[ back_sec].floors.c_plane); break;
-			default: break;
-			}
+		case 4: infos[ back_sec].floors.c_plane.Copy(infos[front_sec].floors.c_plane); break;
+		case 8: infos[front_sec].floors.c_plane.Copy(infos[ back_sec].floors.c_plane); break;
+		default: break;
 		}
 	}
+}
 
-	void PlaneCopyFromThing(const Thing *T, int plane)
+void sector_info_cache_c::PlaneCopyFromThing(const Thing *T, int plane)
+{
+	if (T->arg1 == 0)
+		return;
+
+	// find sector containing the thing
+	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+
+	if (!o.valid())
+		return;
+
+	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (T->arg1 == 0)
-			return;
-
-		// find sector containing the thing
-		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
-
-		if (!o.valid())
-			return;
-
-		for (int n = 0 ; n < inst.level.numSectors(); n++)
+		if (inst.level.sectors[n]->tag == T->arg1)
 		{
-			if (inst.level.sectors[n]->tag == T->arg1)
-			{
-				if (plane > 0)
-					infos[o.num].floors.c_plane.Copy(infos[n].floors.c_plane);
-				else
-					infos[o.num].floors.f_plane.Copy(infos[n].floors.f_plane);
+			if (plane > 0)
+				infos[o.num].floors.c_plane.Copy(infos[n].floors.c_plane);
+			else
+				infos[o.num].floors.f_plane.Copy(infos[n].floors.f_plane);
 
-				return;
-			}
+			return;
 		}
 	}
+}
 
-	void PlaneTiltByThing(const Thing *T, int plane)
-	{
-		double tx = T->x();
-		double ty = T->y();
+void sector_info_cache_c::PlaneTiltByThing(const Thing *T, int plane)
+{
+	double tx = T->x();
+	double ty = T->y();
 
-		// find sector containing the thing
-		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, tx, ty);
+	// find sector containing the thing
+	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, tx, ty);
 
-		if (!o.valid())
-			return;
+	if (!o.valid())
+		return;
 
-		sector_3dfloors_c *ex = &infos[o.num].floors;
+	sector_3dfloors_c *ex = &infos[o.num].floors;
 
-		double tz = ex->PlaneZ(plane ? -1 : +1, tx, ty) + T->h();
+	double tz = ex->PlaneZ(plane ? -1 : +1, tx, ty) + T->h();
 
-		// vector for direction of thing
-		double tdx = cos(T->angle * M_PI / 180.0);
-		double tdy = sin(T->angle * M_PI / 180.0);
+	// vector for direction of thing
+	double tdx = cos(T->angle * M_PI / 180.0);
+	double tdy = sin(T->angle * M_PI / 180.0);
 
-		// get slope angle.
-		// when arg1 < 90, a point on plane in front of thing has lower Z.
-		int slope_ang = T->arg1 - 90;
-		slope_ang = CLAMP(-89, slope_ang, 89);
+	// get slope angle.
+	// when arg1 < 90, a point on plane in front of thing has lower Z.
+	int slope_ang = T->arg1 - 90;
+	slope_ang = CLAMP(-89, slope_ang, 89);
 
-		double az = sin(slope_ang * M_PI / 180.0);
+	double az = sin(slope_ang * M_PI / 180.0);
 
-		// FIXME support tilting an existing slope
+	// FIXME support tilting an existing slope
 #if 1
-		tdx *= 128.0;
-		tdy *= 128.0;
-		az  *= 128.0;
+	tdx *= 128.0;
+	tdy *= 128.0;
+	az  *= 128.0;
 
-		if (plane > 0)
-			SlopeFromLine(ex->c_plane, tx,ty,tz, tx+tdx, ty+tdy, tz+az);
-		else
-			SlopeFromLine(ex->f_plane, tx,ty,tz, tx+tdx, ty+tdy, tz+az);
+	if (plane > 0)
+		SlopeFromLine(ex->c_plane, tx,ty,tz, tx+tdx, ty+tdy, tz+az);
+	else
+		SlopeFromLine(ex->f_plane, tx,ty,tz, tx+tdx, ty+tdy, tz+az);
 #else
-		// get normal of existing plane
-		double nx, ny, nz;
-		if (plane == 0)
-		{
-			ex->f_plane.GetNormal(nx, ny, nz);
-		}
-		else
-		{
-			ex->c_plane.GetNormal(nx, ny, nz);
-			nx = -nx; ny = -ny; nz = -nz;
-		}
-#endif
-	}
-
-	void SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,
-			double x2, double y2, double z2)
+	// get normal of existing plane
+	double nx, ny, nz;
+	if (plane == 0)
 	{
-		double dx = x2 - x1;
-		double dy = y2 - y1;
-		double dz = z2 - z1;
-
-		if (fabs(dz) < 0.5)
-			return;
-
-		// make (dx dy) be a unit vector
-		double dlen = hypot(dx, dy);
-		dx /= dlen;
-		dy /= dlen;
-
-		// we want SlopeZ() to compute z1 at (x1 y1) and z2 at (x2 y2).
-		// assume xm = (dx * A) and ym = (dy * A) and zadd = B
-		// that leads to two simultaneous equations:
-		//    x1 * dx * A + y1 * dy * A + B = z1
-		//    x2 * dx * A + y2 * dy * A + B = z2
-		// which we need to solve for A and B....
-
-		double E = (x1 * dx + y1 * dy);
-		double F = (x2 * dx + y2 * dy);
-
-		double A = (z2 -z1) / (F - E);
-		double B = z1 - A * E;
-
-		pl.xm = static_cast<float>(dx * A);
-		pl.ym = static_cast<float>(dy * A);
-		pl.zadd = static_cast<float>(B);
-		pl.sloped = true;
+		ex->f_plane.GetNormal(nx, ny, nz);
 	}
-};
+	else
+	{
+		ex->c_plane.GetNormal(nx, ny, nz);
+		nx = -nx; ny = -ny; nz = -nz;
+	}
+#endif
+}
 
-// TODO: make it per instance
-static sector_info_cache_c sector_info_cache(gInstance);
+void sector_info_cache_c::SlopeFromLine(slope_plane_c& pl, double x1, double y1, double z1,
+		double x2, double y2, double z2)
+{
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+	double dz = z2 - z1;
+
+	if (fabs(dz) < 0.5)
+		return;
+
+	// make (dx dy) be a unit vector
+	double dlen = hypot(dx, dy);
+	dx /= dlen;
+	dy /= dlen;
+
+	// we want SlopeZ() to compute z1 at (x1 y1) and z2 at (x2 y2).
+	// assume xm = (dx * A) and ym = (dy * A) and zadd = B
+	// that leads to two simultaneous equations:
+	//    x1 * dx * A + y1 * dy * A + B = z1
+	//    x2 * dx * A + y2 * dy * A + B = z2
+	// which we need to solve for A and B....
+
+	double E = (x1 * dx + y1 * dy);
+	double F = (x2 * dx + y2 * dy);
+
+	double A = (z2 -z1) / (F - E);
+	double B = z1 - A * E;
+
+	pl.xm = static_cast<float>(dx * A);
+	pl.ym = static_cast<float>(dy * A);
+	pl.zadd = static_cast<float>(B);
+	pl.sloped = true;
+}
 
 
 static void R_SubdivideSector(Instance &inst, int num, sector_extra_info_t& exinfo)
@@ -931,14 +860,14 @@ fprintf(stderr, "E1 @ x=%1.2f side=%d  |  E2 @ x=%1.2f side=%d\n",
 }
 
 
-void Subdiv_InvalidateAll()
+void Instance::Subdiv_InvalidateAll()
 {
 	// invalidate everything
 	sector_info_cache.total = -1;
 }
 
 
-bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy)
+bool Instance::Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx, double map_hy)
 {
 	sector_info_cache.Update();
 
@@ -955,7 +884,7 @@ bool Subdiv_SectorOnScreen(int num, double map_lx, double map_ly, double map_hx,
 }
 
 
-sector_subdivision_c *Subdiv_PolygonsForSector(Instance &inst, int num)
+sector_subdivision_c *Instance::Subdiv_PolygonsForSector(int num)
 {
 	sector_info_cache.Update();
 
@@ -963,7 +892,7 @@ sector_subdivision_c *Subdiv_PolygonsForSector(Instance &inst, int num)
 
 	if (! exinfo.built)
 	{
-		R_SubdivideSector(inst, num, exinfo);
+		R_SubdivideSector(*this, num, exinfo);
 		exinfo.built = true;
 	}
 
@@ -1021,7 +950,7 @@ void slope_plane_c::Copy(const slope_plane_c& other)
 }
 
 
-sector_3dfloors_c *Subdiv_3DFloorsForSector(int num)
+sector_3dfloors_c *Instance::Subdiv_3DFloorsForSector(int num)
 {
 	sector_info_cache.Update();
 

@@ -1004,7 +1004,7 @@ public:
 
 		if (ld->OneSided())
 		{
-			sector_3dfloors_c *ex = Subdiv_3DFloorsForSector(sd->sector);
+			sector_3dfloors_c *ex = inst.Subdiv_3DFloorsForSector(sd->sector);
 
 			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
 				ld_len, x1, y1, &ex->f_plane, x2, y2, &ex->c_plane);
@@ -1019,7 +1019,7 @@ public:
 			// check for BOOM 242 invisible platforms
 			bool invis_back = false;
 			const Sector *dummy = NULL;
-			sector_3dfloors_c *b_ex = Subdiv_3DFloorsForSector(sd_back->sector);
+			sector_3dfloors_c *b_ex = inst.Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
 				dummy = inst.level.sectors[b_ex->heightsec];
@@ -1027,7 +1027,7 @@ public:
 					invis_back = true;
 			}
 
-			sector_3dfloors_c *f_ex = Subdiv_3DFloorsForSector(sd->sector);
+			sector_3dfloors_c *f_ex = inst.Subdiv_3DFloorsForSector(sd->sector);
 			slope_plane_c *f_floorp = &f_ex->f_plane;
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
@@ -1116,7 +1116,7 @@ public:
 
 	void DrawSector(int sec_index)
 	{
-		sector_subdivision_c *subdiv = Subdiv_PolygonsForSector(inst, sec_index);
+		sector_subdivision_c *subdiv = inst.Subdiv_PolygonsForSector(sec_index);
 
 		if (! subdiv)
 			return;
@@ -1124,7 +1124,7 @@ public:
 		const Sector *sec = inst.level.sectors[sec_index];
 		const Sector *dummy = NULL;
 
-		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sec_index);
+		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sec_index);
 
 		glColor3f(1, 1, 1);
 

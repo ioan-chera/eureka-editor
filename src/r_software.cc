@@ -380,7 +380,7 @@ public:
 		Sector temp_front;
 		Sector temp_back;
 
-		sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(sd->sector);
+		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
 			const Sector *dummy = inst.level.sectors[exfloor->heightsec];
@@ -389,7 +389,7 @@ public:
 
 		if (back != NULL)
 		{
-			exfloor = Subdiv_3DFloorsForSector(back_sd->sector);
+			exfloor = inst.Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
 				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
@@ -917,7 +917,7 @@ public:
 		// check if thing is hidden by BOOM deep water
 		if (inst.level.isSector(thsec))
 		{
-			sector_3dfloors_c *exfloor = Subdiv_3DFloorsForSector(thsec);
+			sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(thsec);
 			if (inst.level.isSector(exfloor->heightsec))
 			{
 				const Sector *real  = inst.level.sectors[thsec];
