@@ -795,7 +795,10 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 {
 	Fl_Sys_Menu_Bar *bar = new Fl_Sys_Menu_Bar(x, y, w, h);
 
-	Fl_Menu_Item *items = menu_items;
+	Fl_Menu_Item* items;
+	// TODO: make this an instance vector
+	items = new Fl_Menu_Item[sizeof(menu_items) / sizeof(menu_items[0])];
+	memcpy(items, menu_items, sizeof(menu_items));
 
 #ifdef __APPLE__
 	Menu_PackForMac(items);
