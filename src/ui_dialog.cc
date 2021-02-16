@@ -32,17 +32,27 @@
 
 #define FONT_SIZE  16
 
-
-static int dialog_result;
+//
+// Dialog box callback context
+//
+struct DialogContext
+{
+	int result;
+	std::vector<Fl_Widget *> buttons;
+};
 
 static void dialog_close_callback(Fl_Widget *w, void *data)
 {
-	dialog_result = 0;
+	auto context = static_cast<DialogContext *>(data);
+	context->result = 0;
 }
 
 static void dialog_button_callback(Fl_Widget *w, void *data)
 {
-	dialog_result = (int)(long)data;
+	auto context = static_cast<DialogContext *>(data);
+	auto it = std::find(context->buttons.begin(), context->buttons.end(), w);
+	SYS_ASSERT(it != context->buttons.end());
+	context->result = it - context->buttons.begin();
 }
 
 
@@ -50,7 +60,8 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 		const char *link_title = NULL, const char *link_url = NULL,
 		std::vector<SString> *labels = NULL)
 {
-	dialog_result = -1;
+	DialogContext context = {};
+	context.result = -1;
 
 	// determine required size
 	int mesg_W = 480;  // NOTE: fl_measure will wrap to this!
@@ -72,7 +83,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	int total_W = 10 + ICON_W + 10 + mesg_W + 10;
 	int total_H = 10 + mesg_H + 10;
 
-	if (link_title)
+	if (link_title && *link_title)
 		total_H += FONT_SIZE + 8;
 
 	total_H += 12 + BUT_H + 12;
@@ -82,8 +93,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	UI_Escapable_Window *dialog = new UI_Escapable_Window(total_W, total_H, title);
 
 	dialog->size_range(total_W, total_H, total_W, total_H);
-	dialog->callback((Fl_Callback *) dialog_close_callback);
-
+	dialog->callback((Fl_Callback *) dialog_close_callback, &context);
 
 	// create the error icon...
 	Fl_Box *icon = new Fl_Box(10, 10 + (10 + mesg_H - ICON_H) / 2, ICON_W, ICON_H, "");
@@ -122,7 +132,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 
 	// create the hyperlink...
-	if (link_title)
+	if (link_title && *link_title)
 	{
 		SYS_ASSERT(link_url);
 
@@ -144,6 +154,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	b_group->end();
 
 	int but_count = labels ? (int)labels->size() : 1;
+	context.buttons.reserve(but_count);
 
 	int but_x = total_W - 40;
 	int but_y = b_group->y() + 12;
@@ -157,8 +168,10 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 		Fl_Button *button = new Fl_Button(but_x - b_width, but_y, b_width, BUT_H, text);
 
+		context.buttons.push_back(button);
+
 		button->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
-		button->callback((Fl_Callback *) dialog_button_callback, (void *)(long)b);
+		button->callback((Fl_Callback *) dialog_button_callback, &context);
 
 		b_group->insert(*button, 0);
 
@@ -186,7 +199,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 
 	// run the GUI and let user make their choice
-	while (dialog_result < 0)
+	while (context.result < 0)
 	{
 		Fl::wait();
 	}
@@ -194,47 +207,42 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	// delete window (automatically deletes child widgets)
 	delete dialog;
 
-	return dialog_result;
+	return context.result;
 }
 
-
-static void ParseHyperLink(char *buffer, unsigned int buf_len,
-		const char ** link_title, const char ** link_url)
+static void ParseHyperLink(SString &message, SString &url, SString &linkTitle)
 {
 	// the syntax for a hyperlink is similar to HTML :-
 	//    <a http://blah.blah.org/foobie.html>Title</a>
 
-	char *pos = strstr(buffer, "<a ");
+	SString text = message;
 
-	if (! pos)
+	size_t pos = text.find("< a");
+	if(pos == SString::npos)
 		return;
 
 	// terminate the rest of the message here
-	pos[0] = '\n';
-	pos[1] = 0;
+	message = text;
+	message.erase(pos, SString::npos);
+	message.push_back('\n');
 
-	pos += 3;
+	url = text;
+	url.erase(0, pos + 3);
 
-	*link_url = pos;
-
-	pos = strstr(pos, ">");
-
-	if (! pos)  // malformed : oh well
+	pos = url.find('>');
+	if(pos == SString::npos)	// malformed : oh well
 		return;
 
+	linkTitle = url;
+	linkTitle.erase(0, pos + 1);
+
 	// terminate the URL here
-	pos[0] = 0;
-
-	pos++;
-
-	*link_title = pos;
-
-	pos = strstr(pos, "<");
-
-	if (pos)
-		pos[0] = 0;
+	url.erase(pos, SString::npos);
+	
+	pos = linkTitle.find('<');
+	if(pos != SString::npos)
+		linkTitle.erase(pos, SString::npos);
 }
-
 
 static void ParseButtons(const char *buttons,
                          std::vector<SString>& labels)
@@ -261,26 +269,20 @@ static void ParseButtons(const char *buttons,
 
 //------------------------------------------------------------------------
 
-static char dialog_buffer[MSG_BUF_LEN];
-
-
 void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
-	vsnprintf (dialog_buffer, MSG_BUF_LEN, msg, arg_pt);
+	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	dialog_buffer[MSG_BUF_LEN-1] = 0;
-
-	const char *link_title = NULL;
-	const char *link_url   = NULL;
-
 	// handle error messages with a hyperlink at the end
-	ParseHyperLink(dialog_buffer, sizeof(dialog_buffer), &link_title, &link_url);
+	SString linkTitle;
+	SString linkURL;
+	ParseHyperLink(dialog_buffer, linkTitle, linkURL);
 
-	DialogShowAndRun('!', dialog_buffer, "Eureka - Fatal Error", link_title, link_url);
+	DialogShowAndRun('!', dialog_buffer.c_str(), "Eureka - Fatal Error", linkTitle.c_str(), linkURL.c_str());
 }
 
 
@@ -289,12 +291,10 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
-	vsnprintf (dialog_buffer, MSG_BUF_LEN, msg, arg_pt);
+	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	dialog_buffer[MSG_BUF_LEN-1] = 0;
-
-	DialogShowAndRun('i', dialog_buffer, "Eureka - Notification");
+	DialogShowAndRun('i', dialog_buffer.c_str(), "Eureka - Notification");
 }
 
 
@@ -303,16 +303,14 @@ int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
-	vsnprintf (dialog_buffer, MSG_BUF_LEN, msg, arg_pt);
+	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
-
-	dialog_buffer[MSG_BUF_LEN-1] = 0;
 
 	std::vector<SString> labels;
 
 	ParseButtons(buttons, labels);
 
-	return DialogShowAndRun('?', dialog_buffer, "Eureka - Confirmation",
+	return DialogShowAndRun('?', dialog_buffer.c_str(), "Eureka - Confirmation",
 							NULL, NULL, &labels);
 }
 

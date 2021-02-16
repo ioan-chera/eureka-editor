@@ -296,7 +296,7 @@ void UI_TextEditor::menu_do_goto_bottom(Fl_Widget *w, void *data)
 #undef FCAL
 #define FCAL  (Fl_Callback *)
 
-static Fl_Menu_Item ted_menu_items[] =
+static const Fl_Menu_Item ted_menu_items[] =
 {
 	{ "&File", 0, 0, 0, FL_SUBMENU },
 		{ "&Insert File...",      FL_COMMAND + 'i', FCAL UI_TextEditor::menu_do_insert },
