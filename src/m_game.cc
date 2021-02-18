@@ -74,20 +74,20 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 }
 
 
-static void M_FreeAllDefinitions(Instance &inst)
+void Instance::M_FreeAllDefinitions()
 {
 	// TODO: prevent memory leak, delete contents of these maps
 
-    inst.line_groups.clear();
-    inst.line_types.clear();
-    inst.sector_types.clear();
+    line_groups.clear();
+    line_types.clear();
+    sector_types.clear();
 
-    inst.thing_groups.clear();
-    inst.thing_types.clear();
+    thing_groups.clear();
+    thing_types.clear();
 
-	inst.texture_groups.clear();
-	inst.texture_categories.clear();
-	inst.flat_categories.clear();
+	texture_groups.clear();
+	texture_categories.clear();
+	flat_categories.clear();
 }
 
 
@@ -97,7 +97,7 @@ static void M_FreeAllDefinitions(Instance &inst)
 //
 void Instance::M_ClearAllDefinitions()
 {
-	M_FreeAllDefinitions(*this);
+	M_FreeAllDefinitions();
 
 	Misc_info = misc_info_t();
 	// TODO: #58
