@@ -222,7 +222,7 @@ public:
 	{
 		return (int)levels.size();
 	}
-	int LevelHeader(int lev_num);
+	int LevelHeader(int lev_num) const;
 	int LevelLastLump(int lev_num);
 
 	// these return a level number (0 .. count-1)

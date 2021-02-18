@@ -475,7 +475,7 @@ int Wad_file::LevelFindFirst()
 }
 
 
-int Wad_file::LevelHeader(int lev_num)
+int Wad_file::LevelHeader(int lev_num) const
 {
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 

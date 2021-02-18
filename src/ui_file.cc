@@ -30,6 +30,7 @@
 #include "ui_window.h"
 #include "ui_file.h"
 
+#include <set>
 
 #define FREE_COL  fl_rgb_color(0x33, 0xFF, 0xAA)
 #define USED_COL  (config::gui_scheme == 2 ? fl_rgb_color(0xFF, 0x11, 0x11) : fl_rgb_color(0xFF, 0x88, 0x88))
@@ -468,7 +469,7 @@ static bool DifferentEpisode(const char *A, const char *B)
 
 void UI_OpenMap::PopulateButtons()
 {
-	Wad_file *wad = using_wad;
+	const Wad_file *wad = using_wad;
 	SYS_ASSERT(wad);
 
 	int num_levels = wad->LevelCount();
@@ -478,14 +479,13 @@ void UI_OpenMap::PopulateButtons()
 
 	button_grp->label("");
 
-	std::map<SString, int> level_names;
-	std::map<SString, int>::iterator IT;
+	std::set<SString> level_names;
 
 	for (int lev = 0 ; lev < num_levels ; lev++)
 	{
 		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
 
-		level_names[lump->Name()] = 1;
+		level_names.insert(lump->Name());
 	}
 
 	int cx_base = button_grp->x() + 25;
@@ -497,13 +497,11 @@ void UI_OpenMap::PopulateButtons()
 	int row = 0;
 	int col = 0;
 
-	const char *last_name = NULL;
+	SString last_name;
 
-	for (IT = level_names.begin() ; IT != level_names.end() ; IT++)
+	for (const SString &name : level_names)
 	{
-		const char *name = IT->first.c_str();
-
-		if (col > 0 && last_name && DifferentEpisode(last_name, name))
+		if (col > 0 && !last_name.empty() && DifferentEpisode(last_name.c_str(), name.c_str()))
 		{
 			col = 0;
 			row++;
@@ -513,7 +511,7 @@ void UI_OpenMap::PopulateButtons()
 		int cy = cy_base + row * 24 + (row / 2) * 8;
 
 		Fl_Button * but = new Fl_Button(cx, cy, but_W, 20);
-		but->copy_label(name);
+		but->copy_label(name.c_str());
 		but->color(FREE_COL);
 		but->callback(button_callback, this);
 
@@ -561,7 +559,7 @@ void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
 
 void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 {
-	UI_OpenMap * that = (UI_OpenMap *)data;
+	auto that = (UI_OpenMap *)data;
 
 	// sanity check
 	if (! that->using_wad)
