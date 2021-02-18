@@ -83,14 +83,14 @@ private:
 
 	Fl_Return_Button *ok_but;
 
-	enum
+	enum class Action
 	{
-		ACT_none = 0,
-		ACT_CANCEL,
-		ACT_ACCEPT
+		none,
+		cancel,
+		accept
 	};
 
-	int action;
+	Action action;
 
 	// the WAD file opened by the "Load" button (initially NULL)
 	Wad_file * loaded_wad;

@@ -253,7 +253,7 @@ void UI_ChooseMap::CheckMapName()
 
 UI_OpenMap::UI_OpenMap(Instance &inst) :
 	UI_Escapable_Window(420, 475, "Open Map"),
-	action(ACT_none),
+	action(Action::none),
 	loaded_wad(NULL),
 	 using_wad(NULL), inst(inst)
 {
@@ -344,12 +344,12 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 	set_modal();
 	show();
 
-	while (action == ACT_none)
+	while (action == Action::none)
 	{
 		Fl::wait(0.2);
 	}
 
-	if (action != ACT_ACCEPT)
+	if (action != Action::accept)
 		using_wad = NULL;
 
 	if (using_wad)
@@ -541,7 +541,7 @@ void UI_OpenMap::close_callback(Fl_Widget *w, void *data)
 {
 	UI_OpenMap * that = (UI_OpenMap *)data;
 
-	that->action = ACT_CANCEL;
+	that->action = Action::cancel;
 }
 
 
@@ -551,7 +551,7 @@ void UI_OpenMap::ok_callback(Fl_Widget *w, void *data)
 
 	// sanity check
 	if (that->using_wad && ValidateMapName(that->map_name->value()))
-		that->action = ACT_ACCEPT;
+		that->action = Action::accept;
 	else
 		fl_beep();
 }
@@ -566,7 +566,7 @@ void UI_OpenMap::button_callback(Fl_Widget *w, void *data)
 		return;
 
 	that->map_name->value(w->label());
-	that->action = ACT_ACCEPT;
+	that->action = Action::accept;
 }
 
 
