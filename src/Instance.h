@@ -511,6 +511,7 @@ private:
 	void ValidateLevel_UDMF();
 
 	// MAIN
+	void LoadResourceFile(const SString& filename);
 	void M_FreeAllDefinitions();
 	void M_LoadDefinitions(const SString &folder, const SString &name);
 	void ReadGameInfo();

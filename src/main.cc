@@ -778,24 +778,24 @@ void Main_Loop()
 }
 
 
-static void LoadResourceFile(Instance &inst, const char *filename)
+void Instance::LoadResourceFile(const SString &filename)
 {
 	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(&inst, PURPOSE_Resource, nullptr, filename);
+		M_ParseDefinitionFile(this, PURPOSE_Resource, nullptr, filename);
 		return;
 	}
 
 	if (! Wad_file::Validate(filename))
-		ThrowException("Resource does not exist: %s\n", filename);
+		ThrowException("Resource does not exist: %s\n", filename.c_str());
 
 	Wad_file *wad = Wad_file::Open(filename, WadOpenMode_read);
 
 	if (! wad)
-		ThrowException("Cannot load resource: %s\n", filename);
+		ThrowException("Cannot load resource: %s\n", filename.c_str());
 
-	inst.MasterDir_Add(wad);
+	MasterDir_Add(wad);
 }
 
 
@@ -896,7 +896,7 @@ void Instance::Main_LoadResources()
 	// load all resource wads
 	for (const SString &resource : Resource_list)
 	{
-		LoadResourceFile(*this, resource.c_str());
+		LoadResourceFile(resource);
 	}
 
 	if (edit_wad)
