@@ -130,6 +130,11 @@ bool Lump_c::GetLine(SString &string)
 	if(curPos < 0)
 		return false;	// EOF
 
+	curPos -= l_start;
+
+	if (curPos >= l_length)
+		return false;	// EOF
+
 	string.clear();
 	for(; curPos < l_length; ++curPos)
 	{
