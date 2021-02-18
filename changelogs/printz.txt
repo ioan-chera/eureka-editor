@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+18.02.2021
+* Do not throw a fatal error when loading invalid project resource files (other than broken UGH files).
+
+----------
 26.10.2020
 * Fixed a fatal error happening when deleting the last vertex.
 * Fixed an illegal operation being run when rendering 3D mode.

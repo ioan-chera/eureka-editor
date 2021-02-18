@@ -787,13 +787,13 @@ void Instance::LoadResourceFile(const SString &filename)
 		return;
 	}
 
-	if (! Wad_file::Validate(filename))
-		ThrowException("Resource does not exist: %s\n", filename.c_str());
+	if (!Wad_file::Validate(filename))
+		throw WadReadException("Invalid WAD file: " + filename);
 
 	Wad_file *wad = Wad_file::Open(filename, WadOpenMode_read);
 
-	if (! wad)
-		ThrowException("Cannot load resource: %s\n", filename.c_str());
+	if (!wad)
+		throw WadReadException("Cannot load resource: " + filename);
 
 	MasterDir_Add(wad);
 }
@@ -896,7 +896,14 @@ void Instance::Main_LoadResources()
 	// load all resource wads
 	for (const SString &resource : Resource_list)
 	{
-		LoadResourceFile(resource);
+		try
+		{
+			LoadResourceFile(resource);
+		}
+		catch (const WadReadException& e)
+		{
+			LogPrintf("%s\n", e.what());
+		}
 	}
 
 	if (edit_wad)
