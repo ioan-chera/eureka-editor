@@ -21,8 +21,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <stdexcept>
-
 //
 // Throw an exception using format
 //

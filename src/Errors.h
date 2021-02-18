@@ -20,6 +20,21 @@
 #define Errors_hpp
 
 #include "PrintfMacros.h"
+#include "m_strings.h"
+
+#include <stdexcept>
+
+//
+// Wad read exception
+//
+class WadReadException : public std::runtime_error
+{
+public:
+	WadReadException(const SString& msg) : std::runtime_error(msg.c_str())
+	{
+	}
+};
+
 [[noreturn]] void ThrowException(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 
 #endif /* Errors_hpp */
