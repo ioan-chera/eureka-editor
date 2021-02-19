@@ -570,8 +570,8 @@ int UI_Escapable_Window::handle(int event)
 UI_LogViewer * log_viewer;
 
 
-UI_LogViewer::UI_LogViewer() :
-	UI_Escapable_Window(580, 400, "Eureka Log Viewer")
+UI_LogViewer::UI_LogViewer(Instance &inst) :
+	UI_Escapable_Window(580, 400, "Eureka Log Viewer"), inst(inst)
 {
 	box(FL_NO_BOX);
 
@@ -762,11 +762,12 @@ void UI_LogViewer::copy_callback(Fl_Widget *w, void *data)
 void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 {
 	Fl_Native_File_Chooser chooser;
+	auto viewer = static_cast<UI_LogViewer*>(data);
 
 	chooser.title("Pick file to save to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Text files\t*.txt");
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(viewer->inst.Main_FileOpFolder().c_str());
 
 	switch (chooser.show())
 	{

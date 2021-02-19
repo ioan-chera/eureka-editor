@@ -166,8 +166,6 @@ private:
 
 	int action;
 
-	static UI_ProjectSetup * _instance;  // meh!
-
 	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
 	static void format_callback(Fl_Choice*, void*);
@@ -198,6 +196,9 @@ public:
 	SString  name_space;
 
 	SString res[RES_NUM];
+
+	Fl_Button* mResourceButtons[RES_NUM] = {};
+	Fl_Button* mClearButtons[RES_NUM] = {};
 
 	Instance &inst;
 

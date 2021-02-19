@@ -665,10 +665,6 @@ void UI_OpenMap::LoadFile()
 
 //------------------------------------------------------------------------
 
-
-UI_ProjectSetup * UI_ProjectSetup::_instance = NULL;
-
-
 #define STARTUP_MSG  "No IWADs could be found."
 
 
@@ -680,9 +676,6 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 	callback(close_callback, this);
 
 	resizable(NULL);
-
-	_instance = this;  // meh, hacky
-
 	int by = 0;
 
 	if (is_startup)
@@ -763,11 +756,13 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 		res_name[r]->copy_label(res_label);
 
 		Fl_Button *kill = new Fl_Button(270, cy, 30, 25, "x");
+		mClearButtons[r] = kill;
 		kill->labelsize(20);
-		kill->callback((Fl_Callback*)kill_callback, (void *)(long)r);
+		kill->callback((Fl_Callback*)kill_callback, this);
 
 		Fl_Button *load = new Fl_Button(315, cy, 75, 25, "Load");
-		load->callback((Fl_Callback*)load_callback, (void *)(long)r);
+		mResourceButtons[r] = load;
+		load->callback((Fl_Callback*)load_callback, this);
 	}
 
 	// bottom buttons
@@ -798,7 +793,6 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 
 UI_ProjectSetup::~UI_ProjectSetup()
 {
-	_instance = NULL;
 }
 
 
@@ -1143,7 +1137,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(that->inst.Main_FileOpFolder().c_str());
 
 	switch (chooser.show())
 	{
@@ -1180,11 +1174,6 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	that->PopulateMapFormat();
 }
 
-
-// m_testmap.cc
-extern bool M_PortSetupDialog(const SString &port, const SString &game);
-
-
 void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
@@ -1196,16 +1185,19 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	M_PortSetupDialog(that->port, that->game);
+	that->inst.M_PortSetupDialog(that->port, that->game);
 }
 
 
 void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 {
-	int r = (int)(long)data;
+	auto that = static_cast<UI_ProjectSetup*>(data);
+	int r;
+	for (r = 0; r < RES_NUM; ++r)
+		if (w == that->mResourceButtons[r])
+			break;
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
-	UI_ProjectSetup * that = _instance;
 	SYS_ASSERT(that);
 
 	Fl_Native_File_Chooser chooser;
@@ -1213,7 +1205,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh");
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(that->inst.Main_FileOpFolder().c_str());
 
 	switch (chooser.show())
 	{
@@ -1236,10 +1228,13 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 
 void UI_ProjectSetup::kill_callback(Fl_Button *w, void *data)
 {
-	int r = (int)(long)data;
+	auto that = static_cast<UI_ProjectSetup*>(data);
+	int r;
+	for (r = 0; r < RES_NUM; ++r)
+		if (w == that->mClearButtons[r])
+			break;
 	SYS_ASSERT(0 <= r && r < RES_NUM);
 
-	UI_ProjectSetup * that = _instance;
 	SYS_ASSERT(that);
 
 	if (!that->res[r].empty())

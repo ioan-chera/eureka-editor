@@ -20,6 +20,7 @@
 
 #include "Errors.h"
 
+#include "Instance.h"
 #include "main.h"
 #include "m_config.h"
 #include "w_wad.h"
@@ -344,10 +345,10 @@ static const Fl_Menu_Item ted_menu_items[] =
 
 //------------------------------------------------------------------------
 
-UI_TextEditor::UI_TextEditor() :
+UI_TextEditor::UI_TextEditor(Instance &inst) :
 	Fl_Double_Window(600, 400, ""),
 	want_close(false), want_save(false),
-	is_new(true), read_only(false), has_changes(false)
+	is_new(true), read_only(false), has_changes(false), inst(inst)
 {
 	size_range(520, 200);
 

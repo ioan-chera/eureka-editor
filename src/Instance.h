@@ -359,6 +359,9 @@ public:
 	void BuildNodesAfterSave(int lev_idx);
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
 
+	// M_TESTMAP
+	bool M_PortSetupDialog(const SString& port, const SString& game);
+
 	// M_UDMF
 	void UDMF_LoadLevel();
 	void UDMF_SaveLevel() const;
@@ -493,6 +496,7 @@ private:
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
+	bool Project_AskFile(SString& filename) const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
 	void SaveLevel(const SString &level);

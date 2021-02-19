@@ -127,7 +127,7 @@ void Instance::FreshLevel()
 }
 
 
-static bool Project_AskFile(SString &filename)
+bool Instance::Project_AskFile(SString &filename) const
 {
 	// this returns false if user cancelled
 

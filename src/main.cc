@@ -667,7 +667,7 @@ static void Main_OpenWindow(Instance &inst)
 	if (config::begin_maximized)
 		inst.main_win->Maximize();
 
-	log_viewer = new UI_LogViewer();
+	log_viewer = new UI_LogViewer(gInstance);
 
 	LogOpenWindow();
 
@@ -1084,7 +1084,7 @@ int main(int argc, char *argv[])
 			gInstance.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
-			gInstance.edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
+			gInstance.edit_wad = Wad_file::Open(gInstance.Pwad_name, WadOpenMode_append);
 			if (!gInstance.edit_wad)
 				ThrowException("Cannot load pwad: %s\n", gInstance.Pwad_name.c_str());
 

@@ -50,8 +50,10 @@ private:
 	// use SetFindString() to set this
 	SString find_string;
 
+	Instance& inst;
+
 public:
-	UI_TextEditor();
+	UI_TextEditor(Instance &inst);
 	virtual ~UI_TextEditor();
 
 	void SetReadOnly()

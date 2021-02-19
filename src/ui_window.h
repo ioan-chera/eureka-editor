@@ -179,9 +179,10 @@ private:
 	Fl_Multi_Browser * browser;
 
 	Fl_Button * copy_but;
+	Instance& inst;
 
 public:
-	UI_LogViewer();
+	UI_LogViewer(Instance &inst);
 	virtual ~UI_LogViewer();
 
 	void Add(const char *line);
