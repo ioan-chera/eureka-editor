@@ -55,6 +55,7 @@ port_path_info_t * M_QueryPortPath(const SString &name, bool create_it = false);
 
 bool M_IsPortPathValid(const port_path_info_t *info);
 
+bool readBuffer(FILE* f, size_t size, std::vector<byte>& target);
 
 #endif  /* __EUREKA_M_FILES_H__ */
 

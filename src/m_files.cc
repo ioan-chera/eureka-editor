@@ -166,6 +166,23 @@ bool M_IsPortPathValid(const port_path_info_t *info)
 	return true;
 }
 
+//
+// Reads an entire buffer from file
+//
+bool readBuffer(FILE* f, size_t size, std::vector<byte>& target)
+{
+	target.resize(size);
+	size_t toRead = size;
+	while (toRead > 0)
+	{
+		size_t r = fread(target.data() + size - toRead, 1, toRead, f);
+		if (!r)
+			return false;
+		toRead -= r;
+	}
+	return true;
+}
+
 
 //
 // Parse port path
