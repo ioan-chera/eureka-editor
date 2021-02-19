@@ -365,6 +365,7 @@ public:
 
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
+	SString Main_FileOpFolder() const;
 	void Main_LoadResources();
 
 	// R_RENDER
@@ -562,6 +563,7 @@ public:	// will be private when we encapsulate everything
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
 	SString Port_name;	// Name of source port "vanilla", "boom", ...
+	SString Pwad_name;	// Filename of current wad
 	SString Iwad_name;	// Filename of the iwad
 	SString Game_name;	// Name of game "doom", "doom2", "heretic", ...
 	SString Udmf_namespace;	// for UDMF, the current namespace

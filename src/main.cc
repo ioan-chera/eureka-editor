@@ -76,8 +76,6 @@ SString global::install_dir;
 SString global::home_dir;
 SString global::cache_dir;
 
-SString Pwad_name;
-
 std::vector<SString> global::Pwad_list;
 
 //
@@ -726,7 +724,7 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 // the directory we should use for a file open/save operation.
 // returns NULL when not sure.
 //
-SString Main_FileOpFolder()
+SString Instance::Main_FileOpFolder() const
 {
 	if (Pwad_name.good())
 		return FilenameGetPath(Pwad_name);
@@ -1083,12 +1081,12 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			Pwad_name = global::Pwad_list[0];
+			gInstance.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
 			gInstance.edit_wad = Wad_file::Open(Pwad_name, WadOpenMode_append);
 			if (!gInstance.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", Pwad_name.c_str());
+				ThrowException("Cannot load pwad: %s\n", gInstance.Pwad_name.c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)

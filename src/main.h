@@ -138,8 +138,6 @@ namespace global
 	extern SString log_file;    // Name of log file, or NULL
 }
 
-extern SString Pwad_name;   // Filename of current wad, or NULL
-
 namespace global
 {
 	extern std::vector<SString> Pwad_list;
@@ -175,8 +173,6 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 int  DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 
 SString GameNameFromIWAD(const SString &iwad_name);
-
-SString Main_FileOpFolder();
 
 #endif  /* __EUREKA_MAIN_H__ */
 
