@@ -532,7 +532,7 @@ bool Wad_file::ReadDirectory()
 		return false;
 	}
 
-	kind = header.ident[0] == 'I' ? WadKind_IWAD : WadKind_PWAD;
+	kind = header.ident[0] == 'I' ? WadKind::IWAD : WadKind::PWAD;
 
 	dir_start = LE_S32(header.dir_start);
 	dir_count = LE_S32(header.num_entries);
@@ -1246,7 +1246,7 @@ void Wad_file::WriteDirectory()
 
 	raw_wad_header_t header;
 
-	memcpy(header.ident, (kind == WadKind_IWAD) ? "IWAD" : "PWAD", 4);
+	memcpy(header.ident, (kind == WadKind::IWAD) ? "IWAD" : "PWAD", 4);
 
 	header.dir_start   = LE_U32(dir_start);
 	header.num_entries = LE_U32(dir_count);

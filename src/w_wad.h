@@ -47,10 +47,10 @@ enum class WadOpenMode
 	append
 };
 
-enum WadKind
+enum class WadKind
 {
-	WadKind_PWAD,
-	WadKind_IWAD
+	PWAD,
+	IWAD
 };
 
 const char *WadNamespaceString(WadNamespace ns);
@@ -144,7 +144,7 @@ private:
 
 	FILE * fp;
 
-	WadKind kind = WadKind_PWAD;  // 'P' for PWAD, 'I' for IWAD
+	WadKind kind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
 
 	// zero means "currently unknown", which only occurs after a
 	// call to BeginWrite() and before any call to AddLump() or
@@ -200,7 +200,7 @@ public:
 	}
 	bool IsIWAD() const
 	{
-		return kind == WadKind_IWAD;
+		return kind == WadKind::IWAD;
 	}
 
 	int TotalSize() const
