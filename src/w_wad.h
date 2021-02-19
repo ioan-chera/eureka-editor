@@ -32,12 +32,12 @@ class Wad_file;
 //
 // Wad namespace
 //
-enum WadNamespace
+enum class WadNamespace
 {
-	WadNamespace_Global,
-	WadNamespace_Flats,
-	WadNamespace_Sprites,
-	WadNamespace_TextureLumps
+	Global,
+	Flats,
+	Sprites,
+	TextureLumps
 };
 
 enum class WadOpenMode

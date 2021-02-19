@@ -299,7 +299,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 {
 	for(const LumpRef &lumpRef : wf->directory)
 	{
-		if(lumpRef.ns != WadNamespace_TextureLumps)
+		if(lumpRef.ns != WadNamespace::TextureLumps)
 			continue;
 		Lump_c *lump = lumpRef.lump;
 
@@ -356,9 +356,9 @@ void Instance::W_LoadTextures()
 	{
 		LogPrintf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace_Global);
-		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace_Global);
-		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace_Global);
+		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
+		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
+		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -566,7 +566,7 @@ void Instance::W_LoadFlats()
 
 		for(const LumpRef &lumpRef : wf->directory)
 		{
-			if(lumpRef.ns != WadNamespace_Flats)
+			if(lumpRef.ns != WadNamespace::Flats)
 				continue;
 			Lump_c *lump = lumpRef.lump;
 

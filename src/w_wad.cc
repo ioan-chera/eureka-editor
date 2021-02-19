@@ -47,13 +47,13 @@ const char *WadNamespaceString(WadNamespace ns)
 {
 	switch(ns)
 	{
-		case WadNamespace_Flats:
+		case WadNamespace::Flats:
 			return "F";
-		case WadNamespace_Global:
+		case WadNamespace::Global:
 			return "(global)";
-		case WadNamespace_Sprites:
+		case WadNamespace::Sprites:
 			return "S";
-		case WadNamespace_TextureLumps:
+		case WadNamespace::TextureLumps:
 			return "TX";
 		default:
 			return "(invalid)";
@@ -680,13 +680,13 @@ static bool IsDummyMarker(const SString &name)
 
 void Wad_file::ProcessNamespaces()
 {
-	WadNamespace active = WadNamespace_Global;
+	WadNamespace active = WadNamespace::Global;
 
 	for (LumpRef &lumpRef : directory)
 	{
 		const SString &name = lumpRef.lump->name;
 
-		lumpRef.ns = WadNamespace_Global;	// default it to global
+		lumpRef.ns = WadNamespace::Global;	// default it to global
 
 		// skip the sub-namespace markers
 		if (IsDummyMarker(name))
@@ -694,56 +694,56 @@ void Wad_file::ProcessNamespaces()
 
 		if (name.noCaseEqual("S_START") || name.noCaseEqual("SS_START"))
 		{
-			if (active && active != WadNamespace_Sprites)
+			if (active != WadNamespace::Global && active != WadNamespace::Sprites)
 				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
-			active = WadNamespace_Sprites;
+			active = WadNamespace::Sprites;
 			continue;
 		}
 		if (name.noCaseEqual("S_END") || name.noCaseEqual("SS_END"))
 		{
-			if (active != WadNamespace_Sprites)
+			if (active != WadNamespace::Sprites)
 				LogPrintf("WARNING: stray S_END marker found.\n");
 
-			active = WadNamespace_Global;
+			active = WadNamespace::Global;
 			continue;
 		}
 
 		if (name.noCaseEqual("F_START") || name.noCaseEqual("FF_START"))
 		{
-			if (active && active != WadNamespace_Flats)
+			if (active != WadNamespace::Global && active != WadNamespace::Flats)
 				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
-			active = WadNamespace_Flats;
+			active = WadNamespace::Flats;
 			continue;
 		}
 		if (name.noCaseEqual("F_END") || name.noCaseEqual("FF_END"))
 		{
-			if (active != WadNamespace_Flats)
+			if (active != WadNamespace::Flats)
 				LogPrintf("WARNING: stray F_END marker found.\n");
 
-			active = WadNamespace_Global;
+			active = WadNamespace::Global;
 			continue;
 		}
 
 		if (name.noCaseEqual("TX_START"))
 		{
-			if (active && active != WadNamespace_TextureLumps)
+			if (active != WadNamespace::Global && active != WadNamespace::TextureLumps)
 				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
-			active = WadNamespace_TextureLumps;
+			active = WadNamespace::TextureLumps;
 			continue;
 		}
 		if (name.noCaseEqual("TX_END"))
 		{
-			if (active != WadNamespace_TextureLumps)
+			if (active != WadNamespace::TextureLumps)
 				LogPrintf("WARNING: stray TX_END marker found.\n");
 
-			active = WadNamespace_Global;
+			active = WadNamespace::Global;
 			continue;
 		}
 
-		if (active)
+		if (active != WadNamespace::Global)
 		{
 			if (lumpRef.lump->Length() == 0)
 			{
@@ -756,7 +756,7 @@ void Wad_file::ProcessNamespaces()
 		}
 	}
 
-	if (active)
+	if (active != WadNamespace::Global)
 		LogPrintf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
 }
 
@@ -1278,7 +1278,7 @@ Lump_c *Instance::W_FindGlobalLump(const SString &name) const
 {
 	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace_Global);
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1294,7 +1294,7 @@ Lump_c *Instance::W_FindSpriteLump(const SString &name) const
 {
 	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace_Sprites);
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
 		if (L)
 			return L;
 	}
