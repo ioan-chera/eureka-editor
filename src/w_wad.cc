@@ -31,6 +31,7 @@
 
 #include "Errors.h"
 #include "lib_adler.h"
+#include "m_files.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 
@@ -1382,6 +1383,126 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 		buf[i] = str[i];
 }
 
+//
+// Set lump name
+// TODO: long file name of lump, when supporting packs
+//
+void Lump::setName(const SString& name)
+{
+	SString lumpname = name.asUpper();
+	if (lumpname.length() > 8)
+		lumpname.erase(8, SString::npos);
+	strncpy(mName, lumpname.c_str(), 8);
+	mName[8] = 0;
+}
+
+//
+// Read a lump from path
+//
+bool Wad::readFromPath(const SString& path)
+{
+	FILE* f = fopen(path.c_str(), "rb");
+	if (!f)
+	{
+		LogPrintf("Couldn't open '%s'.\n", path.c_str());
+		return false;
+	}
+	
+	raw_wad_header_t header = {};
+	if (fread(&header, sizeof(header), 1, f) != 1)
+	{
+		LogPrintf("Error reading WAD header.\n");
+		fclose(f);
+		return false;
+	}
+
+	WadKind newKind = header.ident[0] == 'I' ? WadKind::IWAD : WadKind::PWAD;
+
+	int dirStart = LE_S32(header.dir_start);
+	int dirCount = LE_S32(header.num_entries);
+
+	if (dirCount < 0)
+	{
+		LogPrintf("Bad WAD header, invalid number of entries (%d)\n", dirCount);
+		fclose(f);
+		return false;
+	}
+
+	if (dirStart < 0 || fseek(f, dirStart, SEEK_SET) != 0)
+	{
+		LogPrintf("Error seeking to WAD directory at %d.\n", dirStart);
+		fclose(f);
+		return false;
+	}
+
+	std::vector<FailedWadReadEntry> failed;
+	auto addFailed = [&failed](int index, const char* name, int pos, int len)
+	{
+		FailedWadReadEntry fail = {};
+		fail.dirIndex = index;
+		strncpy(fail.name, name, 8);
+		fail.name[8] = 0;
+		fail.position = pos;
+		fail.length = len;
+		failed.push_back(fail);
+
+		LogPrintf("Bad lump '%s' at index %d, file position %d and length %d\n", fail.name, index, pos, len);
+	};
+
+	std::vector<Lump> lumps;
+	lumps.reserve(dirCount);
+	for (int i = 0; i < dirCount; ++i)
+	{
+		raw_wad_entry_t entry = {};
+		if (fread(&entry, sizeof(entry), 1, f) != 1)
+		{
+			LogPrintf("Error reading entry in WAD directory.\n");
+			fclose(f);
+			return false;
+		}
+
+		Lump lump;
+		long curpos = ftell(f);
+		int pos = LE_S32(entry.pos);
+		int len = LE_S32(entry.size);
+		if (pos < 0 || fseek(f, pos, SEEK_SET) != 0)
+		{
+			addFailed(i, entry.name, pos, len);
+			continue;
+		}
+
+		std::vector<byte> content;
+		if (len < 0 || !readBuffer(f, len, content))
+		{
+			addFailed(i, entry.name, pos, len);
+			if (fseek(f, curpos, SEEK_SET) != 0)
+			{
+				LogPrintf("Error seeking back to WAD directory at %d.\n", curpos);
+				fclose(f);
+				return false;
+			}
+			continue;
+		}
+
+		if (fseek(f, curpos, SEEK_SET) != 0)
+		{
+			LogPrintf("Error seeking back to WAD directory at %d.\n", curpos);
+			fclose(f);
+			return false;
+		}
+
+		lump.setName(SString(entry.name, 8));
+		lump.data = std::move(content);
+		lumps.push_back(std::move(lump));
+	}
+	fclose(f);
+	// All good
+	mKind = newKind;
+	mLumps = std::move(lumps);
+	mFailedReadEntries = std::move(failed);
+
+	return true;
+}
 
 bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
 {

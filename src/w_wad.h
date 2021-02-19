@@ -365,6 +365,57 @@ namespace global
 	extern bool udmf_testing;
 }
 
+//=============================================================================
+//
+// Wad and lump fully loaded in memory
+//
+
+//
+// Individual lump
+//
+class Lump
+{
+public:
+	//
+	// Get the name here
+	//
+	const char* getName() const
+	{
+		return mName;
+	}
+	void setName(const SString& name);
+
+	std::vector<byte> data;	// data (free to edit)
+private:
+	char mName[9] = {};	// lump name (not always limited by length)
+};
+
+//
+// Holds info of failed resource to read
+//
+struct FailedWadReadEntry
+{
+	int dirIndex;	// index in the directory
+	// content of directory
+	char name[9];
+	int position;
+	int length;
+};
+
+//
+// Wad of lumps
+//
+class Wad
+{
+public:
+	bool readFromPath(const SString& path);
+private:
+	WadKind mKind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
+	std::vector<Lump> mLumps;
+
+	std::vector<FailedWadReadEntry> mFailedReadEntries;
+};
+
 #endif  /* __EUREKA_W_WAD_H__ */
 
 //--- editor settings ---
