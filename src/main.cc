@@ -797,15 +797,20 @@ void Instance::LoadResourceFile(const SString &filename)
 }
 
 
-static void Main_LoadIWAD(Instance &inst)
+bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	inst.game_wad = Wad_file::Open(inst.Iwad_name, WadOpenMode_read);
-	if (!inst.game_wad)
-		ThrowException("Failed to open game IWAD: %s\n", inst.Iwad_name.c_str());
+	Wad_file *wad = Wad_file::Open(Iwad_name, WadOpenMode_read);
+	if (!wad)
+	{
+		LogPrintf("Failed to open game IWAD: %s\n", Iwad_name.c_str());
+		return false;
+	}
+	game_wad = wad;
 
-	inst.MasterDir_Add(inst.game_wad);
+	MasterDir_Add(game_wad);
+	return true;
 }
 
 
@@ -889,7 +894,8 @@ void Instance::Main_LoadResources()
 
 	MasterDir_CloseAll();
 
-	Main_LoadIWAD(*this);
+	// TODO: check result
+	Main_LoadIWAD();
 
 	// load all resource wads
 	for (const SString &resource : Resource_list)
@@ -1128,7 +1134,8 @@ int main(int argc, char *argv[])
 
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
-		Main_LoadIWAD(gInstance);
+		// TODO: check result
+		gInstance.Main_LoadIWAD();
 
 
 		// load the initial level

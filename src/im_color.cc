@@ -109,7 +109,7 @@ void Instance::W_LoadColormap()
 
 	if (! lump)
 	{
-		FatalError("COLORMAP lump not found.\n");
+		ThrowException("COLORMAP lump not found.\n");
 		return;
 	}
 

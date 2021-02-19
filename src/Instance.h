@@ -369,6 +369,7 @@ public:
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
 	SString Main_FileOpFolder() const;
+	bool Main_LoadIWAD();
 	void Main_LoadResources();
 
 	// R_RENDER
