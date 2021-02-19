@@ -349,6 +349,7 @@ public:
 	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
+	void ReplaceEditWad(Wad_file* new_wad);
 	bool M_SaveMap();
 	void ValidateVertexRefs(LineDef *ld, int num);
 	void ValidateSectorRef(SideDef *sd, int num);
