@@ -286,7 +286,7 @@ void Instance::CMD_NewProject()
 	LogPrintf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	Wad_file * wad = Wad_file::Open(filename, WadOpenMode_write);
+	Wad_file * wad = Wad_file::Open(filename, WadOpenMode::write);
 
 	if (! wad)
 	{
@@ -1038,7 +1038,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
 	{
-		wad = Wad_file::Open(filename, WadOpenMode_append);
+		wad = Wad_file::Open(filename, WadOpenMode::append);
 	}
 
 	if (! wad)
@@ -1734,7 +1734,7 @@ bool Instance::M_ExportMap()
 
 	if (exists)
 	{
-		wad = Wad_file::Open(filename, WadOpenMode_append);
+		wad = Wad_file::Open(filename, WadOpenMode::append);
 
 		if (wad && wad->IsReadOnly())
 		{
@@ -1756,7 +1756,7 @@ bool Instance::M_ExportMap()
 	}
 	else
 	{
-		wad = Wad_file::Open(filename, WadOpenMode_write);
+		wad = Wad_file::Open(filename, WadOpenMode::write);
 	}
 
 	if (! wad)

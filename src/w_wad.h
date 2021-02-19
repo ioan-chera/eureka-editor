@@ -40,11 +40,11 @@ enum WadNamespace
 	WadNamespace_TextureLumps
 };
 
-enum WadOpenMode
+enum class WadOpenMode
 {
-	WadOpenMode_read,
-	WadOpenMode_write,
-	WadOpenMode_append
+	read,
+	write,
+	append
 };
 
 enum WadKind
@@ -185,7 +185,7 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static Wad_file * Open(const SString &filename, WadOpenMode mode = WadOpenMode_append);
+	static Wad_file * Open(const SString &filename, WadOpenMode mode = WadOpenMode::append);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const SString &filename);
@@ -196,7 +196,7 @@ public:
 	}
 	bool IsReadOnly() const
 	{
-		return mode == WadOpenMode_read;
+		return mode == WadOpenMode::read;
 	}
 	bool IsIWAD() const
 	{

@@ -541,7 +541,7 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	Wad_file *wad = Wad_file::Open(filename, WadOpenMode_append);
+	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::append);
 
 	if (! wad)
 	{
