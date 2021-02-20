@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4FB348EC25E11825000F7F9E /* Errors.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB348EA25E11825000F7F9E /* Errors.cc */; };
 		4FB348EF25E1184E000F7F9E /* lib_util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB348EE25E1184E000F7F9E /* lib_util.cc */; };
+		4FB3490525E11CDD000F7F9E /* Lump.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB3490425E11CDD000F7F9E /* Lump.cc */; };
+		4FB3490925E11D0A000F7F9E /* LumpTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FB3490825E11D0A000F7F9E /* LumpTest.cpp */; };
 		4FBC5BC0258D3622005480CA /* gtest_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB6258D3621005480CA /* gtest_main.cc */; };
 		4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB7258D3621005480CA /* gtest-death-test.cc */; };
 		4FBC5BC2258D3622005480CA /* gtest.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC5BB8258D3621005480CA /* gtest.cc */; };
@@ -46,6 +48,9 @@
 		4FB348EA25E11825000F7F9E /* Errors.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Errors.cc; path = ../../src/Errors.cc; sourceTree = "<group>"; };
 		4FB348EB25E11825000F7F9E /* Errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Errors.h; path = ../../src/Errors.h; sourceTree = "<group>"; };
 		4FB348EE25E1184E000F7F9E /* lib_util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lib_util.cc; path = ../../src/lib_util.cc; sourceTree = "<group>"; };
+		4FB3490325E11CDD000F7F9E /* Lump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lump.h; path = ../../src/Lump.h; sourceTree = "<group>"; };
+		4FB3490425E11CDD000F7F9E /* Lump.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lump.cc; path = ../../src/Lump.cc; sourceTree = "<group>"; };
+		4FB3490825E11D0A000F7F9E /* LumpTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LumpTest.cpp; path = ../../test/LumpTest.cpp; sourceTree = "<group>"; };
 		4FBC5BB6258D3621005480CA /* gtest_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest_main.cc; path = ../../modules/googletest/googletest/src/gtest_main.cc; sourceTree = "<group>"; };
 		4FBC5BB7258D3621005480CA /* gtest-death-test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "gtest-death-test.cc"; path = "../../modules/googletest/googletest/src/gtest-death-test.cc"; sourceTree = "<group>"; };
 		4FBC5BB8258D3621005480CA /* gtest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gtest.cc; path = ../../modules/googletest/googletest/src/gtest.cc; sourceTree = "<group>"; };
@@ -112,6 +117,7 @@
 				4FBC5CBA258E8396005480CA /* m_bitvec_test.cpp */,
 				4FBC5CAB258E831A005480CA /* SStringTest.cpp */,
 				4FBC5CAA258E831A005480CA /* StringTableTest.cpp */,
+				4FB3490825E11D0A000F7F9E /* LumpTest.cpp */,
 			);
 			name = tests;
 			sourceTree = "<group>";
@@ -124,6 +130,8 @@
 				4FBC5CB2258E833E005480CA /* lib_file.cc */,
 				4FBC5CB5258E833E005480CA /* lib_file.h */,
 				4FB348EE25E1184E000F7F9E /* lib_util.cc */,
+				4FB3490425E11CDD000F7F9E /* Lump.cc */,
+				4FB3490325E11CDD000F7F9E /* Lump.h */,
 				4FBC5CBE258E83F5005480CA /* m_bitvec.cc */,
 				4FBC5CBD258E83F5005480CA /* m_bitvec.h */,
 				4FBC5CB0258E833E005480CA /* m_strings.cc */,
@@ -235,6 +243,7 @@
 				4FB348EF25E1184E000F7F9E /* lib_util.cc in Sources */,
 				4FBC5CBF258E83F6005480CA /* m_bitvec.cc in Sources */,
 				4FBC5CC6258F580F005480CA /* FatalHandler.cpp in Sources */,
+				4FB3490525E11CDD000F7F9E /* Lump.cc in Sources */,
 				4FBC5BC7258D3622005480CA /* gtest-printers.cc in Sources */,
 				4FBC5BC1258D3622005480CA /* gtest-death-test.cc in Sources */,
 				4FBC5CCA258F96AC005480CA /* TempDirContext.cpp in Sources */,
@@ -247,6 +256,7 @@
 				4FBC5BC2258D3622005480CA /* gtest.cc in Sources */,
 				4FBC5BC5258D3622005480CA /* gtest-matchers.cc in Sources */,
 				4FBC5CB7258E833E005480CA /* lib_file.cc in Sources */,
+				4FB3490925E11D0A000F7F9E /* LumpTest.cpp in Sources */,
 				4FBC5CAE258E831A005480CA /* SStringTest.cpp in Sources */,
 				4FBC5BC4258D3622005480CA /* gtest-port.cc in Sources */,
 			);
