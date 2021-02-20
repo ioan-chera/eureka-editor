@@ -562,6 +562,21 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 	wad->EndWrite();
 }
 
+//
+// Save the lump
+//
+void UI_TextEditor::SaveLump(Wad &wad, const SString &lump_name) const
+{
+	LogPrintf("Writing '%s' text lump\n", lump_name.c_str());
+
+	Lump *lump = wad.findLump(lump_name);
+	if(!lump)
+	{
+		lump = &wad.appendNewLump();
+		lump->setName(lump_name);
+	}
+	lump->setDataFromString(tbuf->text());
+}
 
 void UI_TextEditor::SaveMemory(std::vector<byte> &buf)
 {

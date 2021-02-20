@@ -67,6 +67,7 @@ public:
 	bool LoadLump(Wad_file *wad, const SString &lump_name);
 	bool LoadLump(const Wad &wad, const SString &lump_name);
 	void SaveLump(Wad_file *wad, const SString &lump_name);
+	void SaveLump(Wad &wad, const SString &lump_name) const;
 
 	void LoadMemory(std::vector<byte> &buf);
 	void SaveMemory(std::vector<byte> &buf);
