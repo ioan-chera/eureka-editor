@@ -564,6 +564,8 @@ public:	// will be private when we encapsulate everything
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
 	Wad_file *game_wad = nullptr;
+	Wad editWad;
+	bool haveEditWad = false;
 	Wad gameWad;
 	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	MapFormat Level_format = {};	// format of current map
