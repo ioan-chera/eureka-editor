@@ -397,6 +397,8 @@ public:
 	const Lump *findLump(const SString &name) const;
 	Lump *findLump(const SString &name);
 
+	Lump &appendNewLump();
+
 	//
 	// Returns the lump ID of the level header entry
 	//

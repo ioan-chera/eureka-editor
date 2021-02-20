@@ -1529,6 +1529,15 @@ Lump *Wad::findLump(const SString &name)
 }
 
 //
+// Appends an empty lump for editing
+//
+Lump &Wad::appendNewLump()
+{
+	mLumps.push_back(Lump());
+	return mLumps.back();
+}
+
+//
 // Detect the levels
 //
 void Wad::detectLevels()
