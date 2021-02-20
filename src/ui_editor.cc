@@ -491,6 +491,23 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 	return true;
 }
 
+//
+// Loads a lump from the file
+//
+bool UI_TextEditor::LoadLump(const Wad &wad, const SString &lump_name)
+{
+	const Lump *lump = wad.findLump(lump_name);
+
+	// NOTE: don't care if read only, we'll just save as another file
+	if(!lump)	// not found
+		return true;
+
+	LogPrintf("Reading '%s' text lump\n", lump_name.c_str());
+	tbuf->text(lump->getDataAsString());
+	is_new = false;
+	return true;
+}
+
 void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 {
 	// this code is slow, but simple
