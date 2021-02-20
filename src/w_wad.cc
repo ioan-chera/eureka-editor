@@ -1501,7 +1501,89 @@ bool Wad::readFromPath(const SString& path)
 	mLumps = std::move(lumps);
 	mFailedReadEntries = std::move(failed);
 
+	// Post processing
+	detectLevels();
+
 	return true;
+}
+
+//
+// Returns the index of a level lump the given name. Returns -1 if not found.
+//
+int Wad::levelFind(const SString &name) const
+{
+	for(int k = 0; k < static_cast<int>(mLevels.size()); ++k)
+	{
+		int index = mLevels[k];
+		SYS_ASSERT(0 <= index && index < static_cast<int>(mLumps.size()));
+
+		if(!y_stricmp(mLumps[index].getName(), name.c_str()))
+			return k;
+	}
+	return -1;	// not found
+}
+
+//
+// Detect the levels
+//
+void Wad::detectLevels()
+{
+	// Determine what lumps in the wad are level markers, based on
+	// the lumps which follow it.  Store the result in the 'levels'
+	// vector.  The test here is rather lax, as I'm told certain
+	// wads exist with a non-standard ordering of level lumps.
+	mLevels.clear();
+	for(int k = 0; k + 1 < (int)mLumps.size(); ++k)
+	{
+		// check for UDMF levels
+		if(global::udmf_testing && !y_stricmp(mLumps[k + 1].getName(), "TEXTMAP"))
+		{
+			mLevels.push_back(k);
+			DebugPrintf("Detected level: %s (UDMF)\n", mLumps[k].getName());
+			continue;
+		}
+
+		int part_mask  = 0;
+		int part_count = 0;
+
+		// check whether the next four lumps are level lumps
+		for(int i = 1; i <= 4; ++i)
+		{
+			if(k + i >= (int)mLumps.size())
+				break;
+			int part = WhatLevelPart(mLumps[k + i].getName());
+			if(!part)
+				break;
+			// do not allow duplicates
+			if(part_mask & (1 << part))
+				break;
+			part_mask |= (1 << part);
+			part_count++;
+		}
+		if(part_count == 4)
+		{
+			mLevels.push_back(k);
+			DebugPrintf("Detected level: %s\n", mLumps[k].getName());
+		}
+	}
+
+	// sort levels into alphabetical order
+	// (mainly for the 'N' next map and 'P' prev map commands)
+
+	sortLevels();
+}
+
+//
+// Sort levels by lump header name
+//
+void Wad::sortLevels()
+{
+	std::sort(mLevels.begin(), mLevels.end(), [this](int lev1, int lev2)
+			  {
+		SYS_ASSERT(0 <= lev1 && lev1 < (int)mLumps.size());
+		SYS_ASSERT(0 <= lev2 && lev2 < (int)mLumps.size());
+		return y_stricmp(mLumps[lev1].getName(), mLumps[lev2].getName()) < 0;
+	});
 }
 
 bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
