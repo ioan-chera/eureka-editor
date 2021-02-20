@@ -1033,15 +1033,16 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		return;
 
 
-	Wad_file *wad = NULL;
+	Wad wad;
+	bool openresult = false;
 
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
 	{
-		wad = Wad_file::Open(filename, WadOpenMode::append);
+		openresult = wad.readFromPath(filename);
 	}
 
-	if (! wad)
+	if (! openresult)
 	{
 		// FIXME: get an error message, add it here
 
@@ -1055,34 +1056,25 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	if (map_name.good())
 	{
-		lev_num = wad->LevelFind(map_name);
+		lev_num = wad.levelFind(map_name);
 	}
 
 	if (lev_num < 0)
 	{
-		lev_num = wad->LevelFindFirst();
+		lev_num = wad.levelFindFirst();
 	}
 
 	if (lev_num < 0)
 	{
 		DLG_Notify("No levels found in that WAD.");
-
-		delete wad;
 		return;
 	}
 
-	if (wad->FindLump(EUREKA_LUMP))
-	{
-		if (! gInstance.M_ParseEurekaLump(wad))
-		{
-			delete wad;
+	if (wad.findLump(EUREKA_LUMP))
+		if (! gInstance.parseEurekaLump(wad, filename))
 			return;
-		}
-	}
-
 
 	/* OK, open it */
-
 
 	// this wad replaces the current PWAD
 	gInstance.ReplaceEditWad(wad);
