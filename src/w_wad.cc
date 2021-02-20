@@ -1397,6 +1397,15 @@ void Lump::setName(const SString& name)
 }
 
 //
+// Assign the data by move
+//
+void Lump::setData(std::vector<byte> &&data)
+{
+	mData = std::move(data);
+	mData.push_back(0);	// add the null termination
+}
+
+//
 // Read a lump from path
 //
 bool Wad::readFromPath(const SString& path)
@@ -1492,7 +1501,7 @@ bool Wad::readFromPath(const SString& path)
 		}
 
 		lump.setName(SString(entry.name, 8));
-		lump.data = std::move(content);
+		lump.setData(std::move(content));
 		lumps.push_back(std::move(lump));
 	}
 	fclose(f);

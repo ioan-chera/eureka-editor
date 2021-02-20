@@ -385,10 +385,20 @@ public:
 	{
 		return mName;
 	}
-	void setName(const SString& name);
 
-	std::vector<byte> data;	// data (free to edit)
+	void setName(const SString& name);
+	void setData(std::vector<byte> &&data);
+
+	//
+	// Gets the data as a null-terminated string pointer. Safe since all data is 0-trailed
+	//
+	const char *getDataAsString() const
+	{
+		return reinterpret_cast<const char *>(mData.data());
+	}
+
 private:
+	std::vector<byte> mData = { 0 };	// lump data (also null-terminated)
 	char mName[9] = {};	// lump name (not always limited by length)
 };
 
