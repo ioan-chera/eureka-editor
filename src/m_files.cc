@@ -29,6 +29,7 @@
 
 #include "ui_window.h"
 
+#include <sstream>
 
 // list of known iwads (mapping GAME name --> PATH)
 
@@ -856,6 +857,150 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
+bool Instance::parseEurekaLump(const Wad& wad, const SString &wadpath, bool keep_cmd_line_args)
+{
+	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
+	const Lump* lump = wad.findLump(EUREKA_LUMP);
+	if (!lump)
+	{
+		LogPrintf("--> does not exist.\n");
+		return true;
+	}
+	SString new_iwad;
+	SString new_port;
+	std::vector<SString> new_resources;
+	std::istringstream ss(lump->getDataAsString());
+
+	while (!ss.eof())
+	{
+		std::string line0;
+		std::getline(ss, line0);
+		SString line(std::move(line0));
+		// comment?
+		if (line[0] == '#')
+			continue;
+
+		// comment?
+		if (line[0] == '#')
+			continue;
+
+		line.trimTrailingSpaces();
+
+		size_t pos = line.find(' ');
+
+		if (pos == std::string::npos || !pos)
+		{
+			LogPrintf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
+			continue;
+		}
+
+		SString value;
+		line.cutWithSpace(pos, &value);
+
+		if (line == "game")
+		{
+			if (!M_CanLoadDefinitions("games", value))
+			{
+				LogPrintf("  unknown game: %s\n", value.c_str() /* show full path */);
+
+				int res = DLG_Confirm("&Ignore|&Cancel Load",
+					"Warning: the pwad specifies an unsupported "
+					"game:\n\n          %s", value.c_str());
+				if (res == 1)
+					return false;
+			}
+			else
+			{
+				new_iwad = M_QueryKnownIWAD(value);
+
+				if (new_iwad.empty())
+				{
+					int res = DLG_Confirm("&Ignore|&Cancel Load",
+						"Warning: the pwad specifies an IWAD "
+						"which cannot be found:\n\n          %s.wad",
+						value.c_str());
+					if (res == 1)
+						return false;
+				}
+			}
+		}
+		else if (line == "resource")
+		{
+			SString res = value;
+
+			// if not found at absolute location, try same place as PWAD
+
+			if (!FileExists(res) && wadpath.good())
+			{
+				LogPrintf("  file not found: %s\n", value.c_str());
+
+				res = FilenameReposition(value, wadpath);
+				LogPrintf("  trying: %s\n", res.c_str());
+			}
+
+			if (!FileExists(res) && !new_iwad.empty())
+			{
+				res = FilenameReposition(value, new_iwad);
+				LogPrintf("  trying: %s\n", res.c_str());
+			}
+
+			if (FileExists(res))
+				new_resources.push_back(res);
+			else
+			{
+				DLG_Notify("Warning: the pwad specifies a resource "
+					"which cannot be found:\n\n%s", value.c_str());
+			}
+		}
+		else if (line == "port")
+		{
+			if (M_CanLoadDefinitions("ports", value))
+				new_port = value;
+			else
+			{
+				LogPrintf("  unknown port: %s\n", value.c_str());
+
+				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", value.c_str());
+			}
+		}
+		else
+		{
+			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", line.c_str(), EUREKA_LUMP);
+			continue;
+		}
+	}
+
+	/* OK */
+
+	// When 'keep_cmd_line_args' is true, we do not override any value which
+	// has been set via command line arguments.  In other words, cmd line
+	// arguments will override the EUREKA_LUMP.
+	//
+	// Resources are trickier, we merge the EUREKA_LUMP resources into the ones
+	// supplied on the command line, ensuring that we don't get any duplicates.
+
+	if (!new_iwad.empty())
+	{
+		if (!(keep_cmd_line_args && !Iwad_name.empty()))
+			Iwad_name = new_iwad;
+	}
+
+	if (!new_port.empty())
+	{
+		if (!(keep_cmd_line_args && !Port_name.empty()))
+			Port_name = new_port;
+	}
+
+	if (!keep_cmd_line_args)
+		Resource_list.clear();
+
+	for (const SString& resource : new_resources)
+	{
+		M_AddResource_Unique(*this, resource);
+	}
+
+	return true;
+}
 bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
