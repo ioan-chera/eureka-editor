@@ -511,7 +511,7 @@ int ScanDirectory(const SString &path, const std::function<void(const SString &,
 
 	DIR *handle = opendir(path.c_str());
 	if (handle == NULL)
-		return SCAN_ERR_NoExist;
+		return errno == ENOTDIR ? SCAN_ERR_NotDir : SCAN_ERR_NoExist;
 
 	for (;;)
 	{
