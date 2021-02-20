@@ -255,6 +255,9 @@
     <ClCompile Include="..\..\src\DocumentModule.cc">
       <Filter>Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Lump.cc">
+      <Filter>Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\e_basis.h">
@@ -471,6 +474,9 @@
       <Filter>Code</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\WindowsSanitization.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Lump.h">
       <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>
