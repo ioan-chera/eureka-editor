@@ -1533,6 +1533,24 @@ int Wad::levelFind(const SString &name) const
 }
 
 //
+// Gets the last lump with the given name. Returns nullptr if unfound
+//
+const Lump *Wad::findLump(const SString &name) const
+{
+	for(auto it = mLumps.rbegin(); it != mLumps.rend(); ++it)
+		if(!y_stricmp(it->getName(), name.c_str()))
+			return &*it;
+	return nullptr;
+}
+Lump *Wad::findLump(const SString &name)
+{
+	for(auto it = mLumps.rbegin(); it != mLumps.rend(); ++it)
+		if(!y_stricmp(it->getName(), name.c_str()))
+			return &*it;
+	return nullptr;
+}
+
+//
 // Detect the levels
 //
 void Wad::detectLevels()

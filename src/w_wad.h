@@ -423,6 +423,9 @@ public:
 	bool readFromPath(const SString& path);
 	int levelFind(const SString &name) const;
 
+	const Lump *findLump(const SString &name) const;
+	Lump *findLump(const SString &name);
+
 	//
 	// Returns the lump ID of the level header entry
 	//
