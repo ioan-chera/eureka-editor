@@ -252,7 +252,10 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap(Instance &inst) :
-	UI_Escapable_Window(420, 475, "Open Map"), inst(inst)
+	UI_Escapable_Window(420, 475, "Open Map"),
+	action(Action::none),
+	loaded_wad(NULL),
+	 using_wad(NULL), inst(inst)
 {
 	resizable(NULL);
 
@@ -362,7 +365,8 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 
 	// if we are not returning a pwad which got loaded, e.g. because
 	// the user cancelled or chose the game IWAD, then close it now.
-	delete loaded_wad;
+	if (loaded_wad)
+		delete loaded_wad;
 
 	return using_wad;
 }
@@ -641,7 +645,8 @@ void UI_OpenMap::LoadFile()
 
 
 	// replace existing one
-	delete loaded_wad;
+	if (loaded_wad)
+		delete loaded_wad;
 
 	loaded_wad = wad;
 
