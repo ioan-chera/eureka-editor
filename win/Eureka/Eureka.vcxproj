@@ -184,6 +184,7 @@
     <ClCompile Include="..\..\src\lib_file.cc" />
     <ClCompile Include="..\..\src\lib_tga.cc" />
     <ClCompile Include="..\..\src\lib_util.cc" />
+    <ClCompile Include="..\..\src\Lump.cc" />
     <ClCompile Include="..\..\src\main.cc" />
     <ClCompile Include="..\..\src\m_bitvec.cc" />
     <ClCompile Include="..\..\src\m_config.cc" />
@@ -254,6 +255,7 @@
     <ClInclude Include="..\..\src\lib_file.h" />
     <ClInclude Include="..\..\src\lib_tga.h" />
     <ClInclude Include="..\..\src\lib_util.h" />
+    <ClInclude Include="..\..\src\Lump.h" />
     <ClInclude Include="..\..\src\main.h" />
     <ClInclude Include="..\..\src\m_bitvec.h" />
     <ClInclude Include="..\..\src\m_config.h" />
