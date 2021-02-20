@@ -29,6 +29,7 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 #include "w_texture.h"
+#include "w_wad.h"
 
 #include <unordered_map>
 
@@ -36,7 +37,6 @@ class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
-class Wad_file;
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
@@ -564,6 +564,7 @@ public:	// will be private when we encapsulate everything
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
 	Wad_file *game_wad = nullptr;
+	Wad gameWad;
 	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
