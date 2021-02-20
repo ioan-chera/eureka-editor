@@ -32,6 +32,7 @@
 		4F7C61E61E2FFE15008B578F /* operations.cfg in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4F7C61E21E2FFDFB008B578F /* operations.cfg */; };
 		4F9C53A01A6CECFA001F4427 /* ui_default.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4F9C539C1A6CECFA001F4427 /* ui_default.cc */; };
 		4F9C53A11A6CECFA001F4427 /* ui_replace.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4F9C539E1A6CECFA001F4427 /* ui_replace.cc */; };
+		4FB348FE25E11B7D000F7F9E /* Lump.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB348FC25E11B7D000F7F9E /* Lump.cc */; };
 		4FB8211823F491F80044B1C3 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FB8211723F491F80044B1C3 /* OpenGL.framework */; };
 		4FB8211F23F4924A0044B1C3 /* r_opengl.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB8211B23F4924A0044B1C3 /* r_opengl.cc */; };
 		4FB8212023F4924A0044B1C3 /* r_software.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4FB8211C23F4924A0044B1C3 /* r_software.cc */; };
@@ -184,6 +185,8 @@
 		4F9C539D1A6CECFA001F4427 /* ui_default.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_default.h; path = ../../src/ui_default.h; sourceTree = "<group>"; };
 		4F9C539E1A6CECFA001F4427 /* ui_replace.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ui_replace.cc; path = ../../src/ui_replace.cc; sourceTree = "<group>"; };
 		4F9C539F1A6CECFA001F4427 /* ui_replace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ui_replace.h; path = ../../src/ui_replace.h; sourceTree = "<group>"; };
+		4FB348FC25E11B7D000F7F9E /* Lump.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Lump.cc; path = ../../src/Lump.cc; sourceTree = "<group>"; };
+		4FB348FD25E11B7D000F7F9E /* Lump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Lump.h; path = ../../src/Lump.h; sourceTree = "<group>"; };
 		4FB6558E22621A71002D7396 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		4FB8211723F491F80044B1C3 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		4FB8211923F4924A0044B1C3 /* r_subdiv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = r_subdiv.h; path = ../../src/r_subdiv.h; sourceTree = "<group>"; };
@@ -471,6 +474,8 @@
 				4FC7E6762592924E005EFDA1 /* Document.cc */,
 				4FC7E6772592924E005EFDA1 /* Document.h */,
 				4FC7E67B259292EA005EFDA1 /* DocumentModule.h */,
+				4FB348FC25E11B7D000F7F9E /* Lump.cc */,
+				4FB348FD25E11B7D000F7F9E /* Lump.h */,
 			);
 			name = Eureka;
 			sourceTree = "<group>";
@@ -889,6 +894,7 @@
 				FA85EEE916936A3A00CA6FC2 /* ui_file.cc in Sources */,
 				4F7C61C71E2FFD56008B578F /* bsp_util.cc in Sources */,
 				FA85EEEA16936A3A00CA6FC2 /* ui_prefs.cc in Sources */,
+				4FB348FE25E11B7D000F7F9E /* Lump.cc in Sources */,
 				FA4433D116AD9CB800525112 /* m_keys.cc in Sources */,
 				FADB99F316B017D600A28204 /* AppDelegate.mm in Sources */,
 				4FBC5BE6258D44EB005480CA /* Errors.cc in Sources */,

@@ -81,6 +81,7 @@ OBJS = \
 	$(OBJ_DIR)/lib_file.o  \
 	$(OBJ_DIR)/lib_tga.o   \
 	$(OBJ_DIR)/lib_util.o  \
+	$(OBJ_DIR)/Lump.o  \
 	$(OBJ_DIR)/main.o  \
 	$(OBJ_DIR)/m_bitvec.o  \
 	$(OBJ_DIR)/m_config.o  \

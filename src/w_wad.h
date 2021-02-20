@@ -28,6 +28,7 @@
 #define __EUREKA_W_WAD_H__
 
 #include "Errors.h"
+#include "Lump.h"
 
 class Wad_file;
 
@@ -371,36 +372,6 @@ namespace global
 //
 // Wad and lump fully loaded in memory
 //
-
-//
-// Individual lump
-//
-class Lump
-{
-public:
-	//
-	// Get the name here
-	//
-	const char* getName() const
-	{
-		return mName;
-	}
-
-	void setName(const SString& name);
-	void setData(std::vector<byte> &&data);
-
-	//
-	// Gets the data as a null-terminated string pointer. Safe since all data is 0-trailed
-	//
-	const char *getDataAsString() const
-	{
-		return reinterpret_cast<const char *>(mData.data());
-	}
-
-private:
-	std::vector<byte> mData = { 0 };	// lump data (also null-terminated)
-	char mName[9] = {};	// lump name (not always limited by length)
-};
 
 //
 // Holds info of failed resource to read

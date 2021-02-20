@@ -1384,28 +1384,6 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 }
 
 //
-// Set lump name
-// TODO: long file name of lump, when supporting packs
-//
-void Lump::setName(const SString& name)
-{
-	SString lumpname = name.asUpper();
-	if (lumpname.length() > 8)
-		lumpname.erase(8, SString::npos);
-	strncpy(mName, lumpname.c_str(), 8);
-	mName[8] = 0;
-}
-
-//
-// Assign the data by move
-//
-void Lump::setData(std::vector<byte> &&data)
-{
-	mData = std::move(data);
-	mData.push_back(0);	// add the null termination
-}
-
-//
 // Read a lump from path
 //
 bool Wad::readFromPath(const SString& path)
