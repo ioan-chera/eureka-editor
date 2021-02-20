@@ -52,7 +52,7 @@ static void dialog_button_callback(Fl_Widget *w, void *data)
 	auto context = static_cast<DialogContext *>(data);
 	auto it = std::find(context->buttons.begin(), context->buttons.end(), w);
 	SYS_ASSERT(it != context->buttons.end());
-	context->result = it - context->buttons.begin();
+	context->result = static_cast<int>(it - context->buttons.begin());
 }
 
 

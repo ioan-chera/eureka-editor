@@ -1477,7 +1477,7 @@ bool Wad::readFromPath(const SString& path)
 			addFailed(i, entry.name, pos, len);
 			if (fseek(f, curpos, SEEK_SET) != 0)
 			{
-				LogPrintf("Error seeking back to WAD directory at %d.\n", curpos);
+				LogPrintf("Error seeking back to WAD directory at %ld.\n", curpos);
 				fclose(f);
 				return false;
 			}
@@ -1486,7 +1486,7 @@ bool Wad::readFromPath(const SString& path)
 
 		if (fseek(f, curpos, SEEK_SET) != 0)
 		{
-			LogPrintf("Error seeking back to WAD directory at %d.\n", curpos);
+			LogPrintf("Error seeking back to WAD directory at %ld.\n", curpos);
 			fclose(f);
 			return false;
 		}
