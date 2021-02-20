@@ -90,15 +90,15 @@ private:
 		accept
 	};
 
-	Action action;
+	Action action = Action::none;
 
 	// the WAD file opened by the "Load" button (initially NULL)
-	Wad_file * loaded_wad;
+	Wad_file * loaded_wad = nullptr;
 
 	// the WAD file which we are showing map buttons for.
 	// can be the "game_wad" or "edit_wad" globals, the "loaded_wad"
 	// field above, or NULL.
-	Wad_file * using_wad;
+	Wad_file * using_wad = nullptr;
 
 	Instance &inst;
 

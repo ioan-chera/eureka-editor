@@ -251,11 +251,7 @@ void UI_ChooseMap::CheckMapName()
 //------------------------------------------------------------------------
 
 
-UI_OpenMap::UI_OpenMap(Instance &inst) :
-	UI_Escapable_Window(420, 475, "Open Map"),
-	action(Action::none),
-	loaded_wad(NULL),
-	 using_wad(NULL), inst(inst)
+UI_OpenMap::UI_OpenMap(Instance &inst) : UI_Escapable_Window(420, 475, "Open Map"), inst(inst)
 {
 	resizable(NULL);
 
