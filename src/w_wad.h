@@ -398,6 +398,11 @@ public:
 	Lump *findLump(const SString &name);
 
 	Lump &appendNewLump();
+	const Lump &getLump(int n) const
+	{
+		SYS_ASSERT(0 <= n && n < (int)mLumps.size());
+		return mLumps[n];
+	}
 
 	//
 	// Returns the lump ID of the level header entry
