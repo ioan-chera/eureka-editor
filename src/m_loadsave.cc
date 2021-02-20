@@ -275,12 +275,12 @@ void Instance::CMD_NewProject()
 	// determine map name (same as first level in the IWAD)
 	SString map_name = "MAP01";
 
-	int idx = game_wad->LevelFindFirst();
+	int idx = gameWad.levelFindFirst();
 
 	if (idx >= 0)
 	{
-		idx = game_wad->LevelHeader(idx);
-		map_name = game_wad->GetLump(idx)->Name();
+		idx = gameWad.levelHeader(idx);
+		map_name = gameWad.getLump(idx).getName();
 	}
 
 	LogPrintf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
