@@ -40,6 +40,7 @@ public:
 
 	void setName(const SString& name);
 	void setData(std::vector<uint8_t> &&data);
+	void setDataFromString(const SString &text);
 
 	//
 	// Gets the data as a null-terminated string pointer. Safe since all data is 0-trailed

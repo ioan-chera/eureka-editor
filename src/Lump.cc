@@ -41,3 +41,12 @@ void Lump::setData(std::vector<uint8_t> &&data)
 	mData = std::move(data);
 	mData.push_back(0);	// add the null termination
 }
+
+//
+// Store data from a given string
+//
+void Lump::setDataFromString(const SString &text)
+{
+	mData.resize(text.length() + 1);	// Null character is also in vector
+	memcpy(mData.data(), text.c_str(), mData.size());
+}
