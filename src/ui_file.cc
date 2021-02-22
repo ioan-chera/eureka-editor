@@ -107,7 +107,7 @@ UI_ChooseMap::~UI_ChooseMap()
 }
 
 
-void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
+void UI_ChooseMap::PopulateButtons(char format, const Wad *test_wad)
 {
 	int but_W = 60;
 
@@ -149,7 +149,7 @@ void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
 		but->copy_label(name_buf);
 		but->callback(button_callback, this);
 
-		if (test_wad && test_wad->LevelFind(name_buf) >= 0)
+		if (test_wad && test_wad->levelFind(name_buf) >= 0)
 		{
 			if (rename_wad)
 				but->deactivate();
@@ -263,7 +263,7 @@ UI_OpenMap::UI_OpenMap(Instance &inst) : UI_Escapable_Window(420, 475, "Open Map
 		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
 		look_where->callback(look_callback, this);
 
-		look_where->value(inst.edit_wad ? LOOK_PWad : LOOK_IWad);
+		look_where->value(inst.editWad.isLoaded() ? LOOK_PWad : LOOK_IWad);
 	}
 
 	{
@@ -327,13 +327,13 @@ UI_OpenMap::~UI_OpenMap()
 { }
 
 
-Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
+Wad * UI_OpenMap::Run(SString* map_v, bool * did_load)
 {
 	map_v->clear();
 	*did_load = false;
 
-	if (inst.edit_wad)
-		SetPWAD(inst.edit_wad->PathName());
+	if (inst.editWad.isLoaded())
+		SetPWAD(inst.editWad.path());
 
 	Populate();
 
@@ -352,17 +352,9 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 	{
 		*map_v = SString(map_name->value()).asUpper();
 
-		if (using_wad == loaded_wad)
-		{
+		if (using_wad == &loaded_wad)
 			*did_load  = true;
-			loaded_wad = NULL;
-		}
 	}
-
-	// if we are not returning a pwad which got loaded, e.g. because
-	// the user cancelled or chose the game IWAD, then close it now.
-	if (loaded_wad)
-		delete loaded_wad;
 
 	return using_wad;
 }
@@ -374,7 +366,7 @@ void UI_OpenMap::CheckMapName()
 
 	bool  is_valid = (using_wad != NULL) &&
 	                 ValidateMapName(map_name->value()) &&
-					 (using_wad->LevelFind(map_name->value()) >= 0);
+					 (using_wad->levelFind(map_name->value()) >= 0);
 
 	if (was_valid == is_valid)
 		return;
@@ -403,39 +395,32 @@ void UI_OpenMap::Populate()
 
 	if (look_where->value() == LOOK_IWad)
 	{
-		using_wad = inst.game_wad;
+		using_wad = &inst.gameWad;
 		PopulateButtons();
 	}
 	else if (look_where->value() >= LOOK_Resource)
 	{
-		int first = 1;
-		int last  = (int)inst.master_dir.size() - 1;
-
-		if (inst.edit_wad)
-			last--;
-
 		// we simply use the last resource which contains levels
 
 		// TODO: probably should collect ones with a map, add to look_where choices
-
-		for (int r = last ; r >= first ; r--)
+		for (auto it = inst.resourceWads.rbegin(); it != inst.resourceWads.rend(); ++it)
 		{
-			if (inst.master_dir[r]->LevelCount() >= 0)
+			if (it->levelCount() >= 0)
 			{
-				using_wad = inst.master_dir[r];
+				using_wad = &*it;
 				PopulateButtons();
 				break;
 			}
 		}
 	}
-	else if (loaded_wad)
+	else if (loaded_wad.isLoaded())
 	{
-		using_wad = loaded_wad;
+		using_wad = &loaded_wad;
 		PopulateButtons();
 	}
-	else if (inst.edit_wad)
+	else if (inst.editWad.isLoaded())
 	{
-		using_wad = inst.edit_wad;
+		using_wad = &inst.editWad;
 		PopulateButtons();
 	}
 
@@ -465,10 +450,10 @@ static bool DifferentEpisode(const char *A, const char *B)
 
 void UI_OpenMap::PopulateButtons()
 {
-	const Wad_file *wad = using_wad;
+	const Wad *wad = using_wad;
 	SYS_ASSERT(wad);
 
-	int num_levels = wad->LevelCount();
+	int num_levels = wad->levelCount();
 
 	if (num_levels == 0)
 		return;
@@ -479,9 +464,9 @@ void UI_OpenMap::PopulateButtons()
 
 	for (int lev = 0 ; lev < num_levels ; lev++)
 	{
-		Lump_c *lump = wad->GetLump(wad->LevelHeader(lev));
+		const Lump &lump = wad->getLump(wad->levelHeader(lev));
 
-		level_names.insert(lump->Name());
+		level_names.insert(lump.getName());
 	}
 
 	int cx_base = button_grp->x() + 25;
@@ -620,10 +605,10 @@ void UI_OpenMap::LoadFile()
 			break;  // OK
 	}
 
+	Wad wad;
+	bool loaded = wad.readFromPath(chooser.filename());
 
-	Wad_file * wad = Wad_file::Open(chooser.filename(), WadOpenMode::append);
-
-	if (! wad)
+	if (! loaded)
 	{
 		// FIXME: get an error message, add it here
 
@@ -632,7 +617,7 @@ void UI_OpenMap::LoadFile()
 		return;
 	}
 
-	if (wad->LevelCount() < 0)
+	if (wad.levelCount() <= 0)
 	{
 		DLG_Notify("The chosen WAD contains no levels.\n\n"
 				   "Please try again.");
@@ -641,16 +626,10 @@ void UI_OpenMap::LoadFile()
 
 
 	// replace existing one
-	if (loaded_wad)
-		delete loaded_wad;
 
-	loaded_wad = wad;
+	loaded_wad = std::move(wad);
 
-	SetPWAD(loaded_wad->PathName());
-
-	if (using_wad == loaded_wad)
-		using_wad = wad;
-
+	SetPWAD(chooser.filename());
 
 	// change the "Find map in ..." setting
 	look_where->value(LOOK_PWad);

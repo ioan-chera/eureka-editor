@@ -44,7 +44,7 @@
 //
 //    NUL  : unrecognized
 //
-char W_DetectImageFormat(Lump_c *lump);
+char W_DetectImageFormat(const Lump &lump);
 
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */

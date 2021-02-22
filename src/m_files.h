@@ -43,7 +43,7 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const char *filename);
 
-void M_BackupWad(Wad_file *wad);
+void M_BackupWad(const Wad &wad);
 
 
 struct port_path_info_t

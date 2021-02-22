@@ -449,48 +449,6 @@ void UI_TextEditor::text_modified_callback(int, int nInserted, int nDeleted, int
 		win->has_changes = true;
 }
 
-
-bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
-{
-	Lump_c * lump = wad->FindLump(lump_name);
-
-	// if the lump does not exist, we will create it
-	if (! lump)
-	{
-		if (read_only)
-		{
-			DLG_Notify("The %s lump does not exist, and it cannot be "
-						"created since the current wad is READ-ONLY.",
-					   lump_name.c_str());
-			return false;
-		}
-
-		return true;
-	}
-
-	LogPrintf("Reading '%s' text lump\n", lump_name.c_str());
-
-	if (! lump->Seek())
-	{
-		DLG_Notify("Read error while loading %s lump.", lump_name.c_str());
-		return false;
-	}
-
-	SString line;
-
-	while (lump->GetLine(line))
-	{
-		line.trimTrailingSpaces();
-
-		tbuf->append(line.c_str());
-		tbuf->append("\n");
-	}
-
-	is_new = false;
-
-	return true;
-}
-
 //
 // Loads a lump from the file
 //
@@ -528,38 +486,6 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 	}
 
 	is_new = false;
-}
-
-
-void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
-{
-	LogPrintf("Writing '%s' text lump\n", lump_name.c_str());
-
-	wad->BeginWrite();
-
-	int oldie = wad->FindLumpNum(lump_name);
-	if (oldie >= 0)
-		wad->RemoveLumps(oldie, 1);
-
-	Lump_c *lump = wad->AddLump(lump_name);
-
-	int len = tbuf->length();
-
-	for (int i = 0 ; i < len ; i++)
-	{
-		// this is not optimal (one byte at a time), but is adequate
-		byte ch = tbuf->byte_at(i);
-
-		// ignore NULs and CRs
-		if (ch == 0 || ch == '\r')
-			continue;
-
-		lump->Write(&ch, 1);
-	}
-
-	lump->Finish();
-
-	wad->EndWrite();
 }
 
 //

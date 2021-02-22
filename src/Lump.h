@@ -19,6 +19,8 @@
 #ifndef Lump_hpp
 #define Lump_hpp
 
+#include "PrintfMacros.h"
+
 #include <stdint.h>
 #include <vector>
 
@@ -40,7 +42,27 @@ public:
 
 	void setName(const SString& name);
 	void setData(std::vector<uint8_t> &&data);
+	void setData(const void *data, size_t size);
 	void setDataFromString(const SString &text);
+
+	void write(const void *data, size_t size);
+	void printf(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
+
+	//
+	// Get the data size
+	//
+	const uint8_t *getData() const
+	{
+		return mData.data();
+	}
+
+	//
+	// Get the data size
+	//
+	int getSize() const
+	{
+		return (int)mData.size() - 1;
+	}
 
 	//
 	// Gets the data as a null-terminated string pointer. Safe since all data is 0-trailed

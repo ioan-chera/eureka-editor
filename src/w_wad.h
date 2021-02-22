@@ -30,6 +30,8 @@
 #include "Errors.h"
 #include "Lump.h"
 
+#include "m_strings.h"
+
 class Wad_file;
 
 //
@@ -133,7 +135,6 @@ struct LumpRef
 	Lump_c *lump;
 	WadNamespace ns;
 };
-
 
 class Wad_file
 {
@@ -358,7 +359,6 @@ private:
 };
 
 // load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
 void W_FreeLumpData(byte ** buf_ptr);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
@@ -386,23 +386,56 @@ struct FailedWadReadEntry
 };
 
 //
+// Lump with namespace
+//
+struct NamespacedLump : Lump
+{
+	WadNamespace ns = WadNamespace::Global;
+};
+
+//
 // Wad of lumps
 //
 class Wad
 {
 public:
+	size_t totalSize() const;
+
 	bool readFromPath(const SString& path);
+	bool writeToPath(const SString& path) const;
+
 	int levelFind(const SString &name) const;
+	int levelFindByNumber(int number) const;
+	int levelCount() const
+	{
+		return (int)mLevels.size();
+	}
+	int levelLastLump(int lev_num) const;
+	int levelLookupLump(int lev_num, const char *name) const;
+	void removeGLNodes(int lev_num);
+
+	void removeLevel(int lev_num);
+	void removeZNodes(int lev_num);
 
 	const Lump *findLump(const SString &name) const;
 	Lump *findLump(const SString &name);
+	const Lump *findLumpInNamespace(const SString &name, WadNamespace group) const;
+	Lump *findLumpInNamespace(const SString &name, WadNamespace group);
 
 	Lump &appendNewLump();
+	Lump &insertNewLump(int position);
 	const Lump &getLump(int n) const
 	{
 		SYS_ASSERT(0 <= n && n < (int)mLumps.size());
 		return mLumps[n];
 	}
+	Lump &getLump(int n)
+	{
+		SYS_ASSERT(0 <= n && n < (int)mLumps.size());
+		return mLumps[n];
+	}
+	void removeLumps(int index, int count);
+	void destroy();
 
 	//
 	// Returns the lump ID of the level header entry
@@ -420,12 +453,40 @@ public:
 	{
 		return !mLevels.empty() ? 0 : -1;
 	}
+
+	//
+	// Check if wad is loaded (has path)
+	//
+	bool isLoaded() const
+	{
+		return mPath.good();
+	}
+
+	//
+	// Get the lumps
+	//
+	const std::vector<NamespacedLump> &getLumps() const
+	{
+		return mLumps;
+	}
+
+	//
+	// Get path
+	//
+	const SString &path() const
+	{
+		return mPath;
+	}
 private:
 	void detectLevels();
 	void sortLevels();
+	void processNamespaces();
+	void fixLevelGroup(int index, int num_added, int num_removed);
+
+	SString mPath;
 
 	WadKind mKind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
-	std::vector<Lump> mLumps;
+	std::vector<NamespacedLump> mLumps;
 
 	std::vector<FailedWadReadEntry> mFailedReadEntries;
 

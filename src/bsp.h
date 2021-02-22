@@ -27,7 +27,7 @@
 #include <vector>
 
 class Instance;
-class Lump_c;
+class Lump;
 class Sector;
 enum class Side;
 struct Document;
@@ -424,7 +424,7 @@ node_t    *NewNode();
 walltip_t *NewWallTip();
 
 // Zlib compression support
-void ZLibBeginLump(Lump_c *lump);
+void ZLibBeginLump(Lump *lump);
 void ZLibAppendLump(const void *data, int length);
 void ZLibFinishLump(void);
 

@@ -43,10 +43,40 @@ void Lump::setData(std::vector<uint8_t> &&data)
 }
 
 //
+// Set data
+//
+void Lump::setData(const void *data, size_t size)
+{
+	mData.resize(size);
+	memcpy(mData.data(), data, size);
+}
+
+//
 // Store data from a given string
 //
 void Lump::setDataFromString(const SString &text)
 {
 	mData.resize(text.length() + 1);	// Null character is also in vector
 	memcpy(mData.data(), text.c_str(), mData.size());
+}
+
+//
+// Add data
+//
+void Lump::write(const void *data, size_t size)
+{
+	mData.insert(mData.begin() + getSize(), (const uint8_t *)data, (const uint8_t *)data + size);
+}
+
+//
+// Print format
+//
+void Lump::printf(EUR_FORMAT_STRING(const char *msg), ...)
+{
+	va_list ap;
+	va_start(ap, msg);
+	SString result = SString::vprintf(msg, ap);
+	va_end(ap);
+
+	mData.insert(mData.begin() + getSize(), result.begin(), result.end());
 }

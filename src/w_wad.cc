@@ -444,7 +444,6 @@ int Wad_file::LevelLastLump(int lev_num)
 	return start + count - 1;
 }
 
-
 int Wad_file::LevelFindByNumber(int number)
 {
 	// sanity check
@@ -1275,11 +1274,22 @@ bool Wad_file::Backup(const char *new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *Instance::W_FindGlobalLump(const SString &name) const
+Lump *Instance::W_FindGlobalLump(const SString &name)
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)masterDirSize() - 1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump *L = masterDir(i).findLumpInNamespace(name, WadNamespace::Global);
+		if (L)
+			return L;
+	}
+
+	return NULL;  // not found
+}
+const Lump *Instance::W_FindGlobalLump(const SString &name) const
+{
+	for (int i = (int)masterDirSize() - 1 ; i >= 0 ; i--)
+	{
+		const Lump *L = masterDir(i).findLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1291,36 +1301,17 @@ Lump_c *Instance::W_FindGlobalLump(const SString &name) const
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
 //
-Lump_c *Instance::W_FindSpriteLump(const SString &name) const
+const Lump *Instance::W_FindSpriteLump(const SString &name) const
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)masterDirSize() - 1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
+		const Lump *L = masterDir(i).findLumpInNamespace(name, WadNamespace::Sprites);
 		if (L)
 			return L;
 	}
 
 	return NULL;  // not found
 }
-
-
-int W_LoadLumpData(Lump_c *lump, byte ** buf_ptr)
-{
-	// include an extra byte, used to NUL-terminate a text buffer
-	*buf_ptr = new byte[lump->Length() + 1];
-
-	if (lump->Length() > 0)
-	{
-		if (! lump->Seek() ||
-			! lump->Read(*buf_ptr, lump->Length()))
-			FatalError("W_LoadLumpData: read error loading lump.\n");
-	}
-
-	(*buf_ptr)[lump->Length()] = 0;
-
-	return lump->Length();
-}
-
 
 void W_FreeLumpData(byte ** buf_ptr)
 {
@@ -1333,38 +1324,6 @@ void W_FreeLumpData(byte ** buf_ptr)
 
 
 //------------------------------------------------------------------------
-
-void Instance::MasterDir_Add(Wad_file *wad)
-{
-	DebugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
-
-	master_dir.push_back(wad);
-}
-
-
-void Instance::MasterDir_Remove(Wad_file *wad)
-{
-	DebugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
-
-	std::vector<Wad_file *>::iterator ENDP;
-
-	ENDP = std::remove(master_dir.begin(), master_dir.end(), wad);
-
-	master_dir.erase(ENDP, master_dir.end());
-}
-
-
-void Instance::MasterDir_CloseAll()
-{
-	while (master_dir.size() > 0)
-	{
-		Wad_file *wad = master_dir.back();
-
-		master_dir.pop_back();
-
-		delete wad;
-	}
-}
 
 
 static bool W_FilenameAbsEqual(const SString &A, const SString &B)
@@ -1381,6 +1340,17 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 	for (size_t i = 0 ; i < buflen && str[i] ; i++)
 		buf[i] = str[i];
+}
+
+//
+// Returns the total file size
+//
+size_t Wad::totalSize() const
+{
+	size_t s = 12;
+	for(const Lump &lump : mLumps)
+		s += 16 + lump.getSize();
+	return s;
 }
 
 //
@@ -1436,7 +1406,7 @@ bool Wad::readFromPath(const SString& path)
 		LogPrintf("Bad lump '%s' at index %d, file position %d and length %d\n", fail.name, index, pos, len);
 	};
 
-	std::vector<Lump> lumps;
+	std::vector<NamespacedLump> lumps;
 	lumps.reserve(dirCount);
 	for (int i = 0; i < dirCount; ++i)
 	{
@@ -1448,7 +1418,7 @@ bool Wad::readFromPath(const SString& path)
 			return false;
 		}
 
-		Lump lump;
+		NamespacedLump lump;
 		long curpos = ftell(f);
 		int pos = LE_S32(entry.pos);
 		int len = LE_S32(entry.size);
@@ -1484,6 +1454,7 @@ bool Wad::readFromPath(const SString& path)
 	}
 	fclose(f);
 	// All good
+	mPath = path;
 	mKind = newKind;
 	mLumps = std::move(lumps);
 	mFailedReadEntries = std::move(failed);
@@ -1492,6 +1463,15 @@ bool Wad::readFromPath(const SString& path)
 	detectLevels();
 
 	return true;
+}
+
+//
+// Write to path
+//
+bool Wad::writeToPath(const SString& path) const
+{
+	// TODO
+	
 }
 
 //
@@ -1508,6 +1488,161 @@ int Wad::levelFind(const SString &name) const
 			return k;
 	}
 	return -1;	// not found
+}
+
+//
+// Returns level by number
+//
+int Wad::levelFindByNumber(int number) const
+{
+	// sanity check
+	if (number <= 0 || number > 99)
+		return -1;
+
+	int index;
+
+	 // try MAP## first
+	SString buffer = SString::printf("MAP%02d", number);
+
+	index = levelFind(buffer);
+	if (index >= 0)
+		return index;
+
+	// otherwise try E#M#
+	buffer = SString::printf("E%dM%d", MAX(1, number / 10), number % 10);
+
+	index = levelFind(buffer);
+	if (index >= 0)
+		return index;
+
+	return -1;  // not found
+}
+
+//
+// Last level lump
+//
+int Wad::levelLastLump(int lev_num) const
+{
+	int start = levelHeader(lev_num);
+	int count = 1;
+
+	// UDMF level?
+	if(!y_stricmp(mLumps[start + 1].getName(), "TEXTMAP"))
+	{
+		while(count < MAX_LUMPS_IN_A_LEVEL && start + count < (int)mLumps.size())
+		{
+			if(!y_stricmp(mLumps[start + count].getName(), "ENDMAP"))
+			{
+				count++;
+				break;
+			}
+			count++;
+		}
+		return start + count - 1;
+	}
+
+	// standard DOOM or HEXEN format
+	while(count < MAX_LUMPS_IN_A_LEVEL && start + count < (int)mLumps.size() &&
+		  (IsLevelLump(mLumps[start + count].getName()) ||
+		   IsGLNodeLump(mLumps[start + count].getName())))
+	{
+		count++;
+	}
+	return start + count - 1;
+}
+
+//
+// Lookup lump
+//
+int Wad::levelLookupLump(int lev_num, const char *name) const
+{
+	int start = levelHeader(lev_num);
+
+	// determine how far past the level marker (MAP01 etc) to search
+	int finish = levelLastLump(lev_num);
+
+	for (int k = start + 1 ; k <= finish ; k++)
+	{
+		SYS_ASSERT(0 <= k && k < (int)mLumps.size());
+
+		if (!y_stricmp(mLumps[k].getName(), name))
+			return k;
+	}
+
+	return -1;  // not found
+}
+
+//
+// Remove gl nodes
+//
+void Wad::removeGLNodes(int lev_num)
+{
+	SYS_ASSERT(0 <= lev_num && lev_num < levelCount());
+
+	int start  = levelHeader(lev_num);
+	int finish = levelLastLump(lev_num);
+
+	start++;
+
+	while (start <= finish &&
+		   IsLevelLump(mLumps[start].getName()))
+	{
+		start++;
+	}
+
+	int count = 0;
+
+	while (start + count <= finish &&
+		   IsGLNodeLump(mLumps[start+count].getName()))
+	{
+		count++;
+	}
+
+	if (count > 0)
+		removeLumps(start, count);
+}
+
+
+//
+// Remove level
+//
+void Wad::removeLevel(int lev_num)
+{
+	int start = levelHeader(lev_num);
+	int finish = levelLastLump(lev_num);
+
+	// NOTE: FixGroup() will remove the entry in levels[]
+
+	removeLumps(start, finish - start + 1);
+}
+
+//
+// Remove ZNodes
+//
+void Wad::removeZNodes(int lev_num)
+{
+	SYS_ASSERT(0 <= lev_num && lev_num < (int)mLevels.size());
+
+	int start  = levelHeader(lev_num);
+	int finish = levelLastLump(lev_num);
+
+	for ( ; start <= finish ; start++)
+	{
+		if (!y_stricmp(mLumps[start].getName(), "ZNODES"))
+		{
+			removeLumps(start, 1);
+			break;
+		}
+	}
+}
+
+
+//
+// Remove the wad completely
+//
+void Wad::destroy()
+{
+	*this = Wad();	// assign the wad
 }
 
 //
@@ -1529,12 +1664,62 @@ Lump *Wad::findLump(const SString &name)
 }
 
 //
+// Find in namespace
+//
+const Lump *Wad::findLumpInNamespace(const SString &name, WadNamespace group) const
+{
+	for(const NamespacedLump &lump : mLumps)
+	{
+		if(lump.ns != group || y_stricmp(lump.getName(), name.c_str()))
+			continue;
+		return &lump;
+	}
+
+	return nullptr; // not found!
+}
+Lump *Wad::findLumpInNamespace(const SString &name, WadNamespace group)
+{
+	for(NamespacedLump &lump : mLumps)
+	{
+		if(lump.ns != group || y_stricmp(lump.getName(), name.c_str()))
+			continue;
+		return &lump;
+	}
+
+	return nullptr; // not found!
+}
+
+//
 // Appends an empty lump for editing
 //
 Lump &Wad::appendNewLump()
 {
-	mLumps.push_back(Lump());
+	mLumps.push_back(NamespacedLump());
+	processNamespaces();
 	return mLumps.back();
+}
+
+//
+// Insert new lump
+//
+Lump &Wad::insertNewLump(int position)
+{
+	mLumps.insert(mLumps.begin() + position, NamespacedLump());
+	processNamespaces();
+	return mLumps[position];
+}
+
+//
+// Remove lumps
+//
+void Wad::removeLumps(int index, int count)
+{
+	SYS_ASSERT(0 <= index && index < (int)mLumps.size());
+	mLumps.erase(mLumps.begin() + index, mLumps.begin() + index + count);
+
+	fixLevelGroup(index, 0, count);
+
+	processNamespaces();
 }
 
 //
@@ -1585,6 +1770,7 @@ void Wad::detectLevels()
 	// (mainly for the 'N' next map and 'P' prev map commands)
 
 	sortLevels();
+	processNamespaces();
 }
 
 //
@@ -1600,17 +1786,147 @@ void Wad::sortLevels()
 	});
 }
 
+//
+// Process namespaces
+//
+void Wad::processNamespaces()
+{
+	WadNamespace active = WadNamespace::Global;
+
+	for(NamespacedLump &lump : mLumps)
+	{
+		const SString &name = lump.getName();
+		lump.ns = WadNamespace::Global;	// default it to global
+
+		// skip the sub-namespace markers
+		if(IsDummyMarker(name))
+			continue;
+
+		if(name.noCaseEqual("S_START") || name.noCaseEqual("SS_START"))
+		{
+			if(active != WadNamespace::Global && active != WadNamespace::Sprites)
+				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
+			active = WadNamespace::Sprites;
+			continue;
+		}
+		if(name.noCaseEqual("S_END") || name.noCaseEqual("SS_END"))
+		{
+			if(active != WadNamespace::Sprites)
+				LogPrintf("WARNING: stray S_END marker found.\n");
+			active = WadNamespace::Global;
+			continue;
+		}
+		if (name.noCaseEqual("F_START") || name.noCaseEqual("FF_START"))
+		{
+			if (active != WadNamespace::Global && active != WadNamespace::Flats)
+				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
+
+			active = WadNamespace::Flats;
+			continue;
+		}
+		if (name.noCaseEqual("F_END") || name.noCaseEqual("FF_END"))
+		{
+			if (active != WadNamespace::Flats)
+				LogPrintf("WARNING: stray F_END marker found.\n");
+
+			active = WadNamespace::Global;
+			continue;
+		}
+		if (name.noCaseEqual("TX_START"))
+		{
+			if (active != WadNamespace::Global && active != WadNamespace::TextureLumps)
+				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
+
+			active = WadNamespace::TextureLumps;
+			continue;
+		}
+		if (name.noCaseEqual("TX_END"))
+		{
+			if (active != WadNamespace::TextureLumps)
+				LogPrintf("WARNING: stray TX_END marker found.\n");
+
+			active = WadNamespace::Global;
+			continue;
+		}
+
+		if (active != WadNamespace::Global)
+		{
+			if (lump.getSize() == 0)
+			{
+				LogPrintf("WARNING: skipping empty lump %s in %s_START\n",
+						  name.c_str(), WadNamespaceString(active));
+				continue;
+			}
+
+			lump.ns = active;
+		}
+	}
+
+	if (active != WadNamespace::Global)
+		LogPrintf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
+}
+
+//
+// Fix level group
+//
+void Wad::fixLevelGroup(int index, int num_added, int num_removed)
+{
+	bool did_remove = false;
+	for(int k = 0; k < (int)mLevels.size(); ++k)
+	{
+		if(mLevels[k] < index)
+			continue;
+		if(mLevels[k] < index + num_removed)
+		{
+			mLevels[k] = -1;
+			did_remove = true;
+			continue;
+		}
+
+		mLevels[k] += num_added;
+		mLevels[k] -= num_removed;
+	}
+	if(did_remove)
+	{
+		std::vector<int>::iterator ENDP;
+		ENDP = std::remove(mLevels.begin(), mLevels.end(), -1);
+		mLevels.erase(ENDP, mLevels.end());
+	}
+}
+
 bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
+	for (unsigned int k = 0 ; k < masterDirSize() ; k++)
 	{
-		const SString &wad_path = master_dir[k]->PathName();
+		const SString &wad_path = masterDir(k).path();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;
 	}
 
 	return false;
+}
+
+//
+// Return the wads in the masterdir
+//
+Wad &Instance::masterDir(int n)
+{
+	if(!n)
+		return gameWad;
+	--n;
+	if(n >= 0 && n < (int)resourceWads.size())
+		return resourceWads[n];
+	return editWad;
+}
+const Wad &Instance::masterDir(int n) const
+{
+	if(!n)
+		return gameWad;
+	--n;
+	if(n >= 0 && n < (int)resourceWads.size())
+		return resourceWads[n];
+	return editWad;
 }
 
 

@@ -81,14 +81,14 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 }
 
 
-static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
+static bool CheckTexturesAreStrife(const byte *tex_data, int tex_length, int num_tex,
 								   bool skip_first)
 {
 	// we follow the ZDoom logic here: check ALL the texture entries
 	// assuming DOOM format, and if any have a patch_count of zero or
 	// the last two bytes of columndir are non-zero then assume Strife.
 
-	const s32_t *tex_data_s32 = (const s32_t *)tex_data;
+	const s32_t *tex_data_s32 = reinterpret_cast<const s32_t *>(tex_data);
 
 	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
@@ -98,7 +98,7 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 		if (offset < 4 * num_tex || offset >= tex_length)
 			continue;
 
-		const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
+		const raw_texture_t *raw = reinterpret_cast<const raw_texture_t *>(tex_data + offset);
 
 		if (LE_S16(raw->patch_count) <= 0)
 			return true;
@@ -111,10 +111,10 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 }
 
 
-void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
-									byte *pnames, int pname_size, bool skip_first)
+void Instance::LoadTextureEntry_Strife(const byte *tex_data, int tex_length, int offset,
+									   const byte *pnames, int pname_size, bool skip_first)
 {
-	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
+	const raw_strife_texture_t *raw = reinterpret_cast<const raw_strife_texture_t *>(tex_data + offset);
 
 	// create the new image
 	int width  = LE_U16(raw->width);
@@ -158,10 +158,10 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = W_FindGlobalLump(picname);
+		const Lump *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! LoadPicture(*img, *lump, picname, xofs, yofs))
 		{
 			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -176,8 +176,8 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 }
 
 
-void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
-									byte *pnames, int pname_size, bool skip_first)
+void Instance::LoadTextureEntry_DOOM(const byte *tex_data, int tex_length, int offset,
+									const byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
@@ -225,10 +225,10 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		picname[8] = 0;
 
 //DebugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = W_FindGlobalLump(picname);
+		const Lump *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! LoadPicture(*img, *lump, picname, xofs, yofs))
 		{
 			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -243,8 +243,8 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 }
 
 
-void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
-                             bool skip_first)
+void Instance::LoadTexturesLump(const Lump &lump, const byte *pnames, int pname_size,
+								bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
 
@@ -254,9 +254,8 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 	pname_size /= 8;
 
 	// load TEXTUREx data into memory for easier processing
-	byte *tex_data;
-
-	int tex_length = W_LoadLumpData(lump, &tex_data);
+	const byte *tex_data = lump.getData();
+	int tex_length = lump.getSize();
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	s32_t *tex_data_s32 = (s32_t *)tex_data;
@@ -266,7 +265,6 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 	// it seems having a count of zero is valid
 	if (num_tex == 0)
 	{
-		W_FreeLumpData(&tex_data);
 		return;
 	}
 
@@ -290,21 +288,18 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 		else
 			LoadTextureEntry_DOOM(tex_data, tex_length, offset, pnames, pname_size, skip_first);
 	}
-
-	W_FreeLumpData(&tex_data);
 }
 
 
-void Instance::W_LoadTextures_TX_START(Wad_file *wf)
+void Instance::W_LoadTextures_TX_START(const Wad &wf)
 {
-	for(const LumpRef &lumpRef : wf->directory)
+	for(const NamespacedLump &lump : wf.getLumps())
 	{
-		if(lumpRef.ns != WadNamespace::TextureLumps)
+		if(lump.ns != WadNamespace::TextureLumps)
 			continue;
-		Lump_c *lump = lumpRef.lump;
 
 		char img_fmt = W_DetectImageFormat(lump);
-		const SString &name = lump->Name();
+		const SString &name = lump.getName();
 		Img_c *img = NULL;
 
 		switch (img_fmt)
@@ -335,7 +330,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 				break;
 
 			default:
-				LogPrintf("Unsupported texture format in '%s' lump\n", lump->Name().c_str());
+				LogPrintf("Unsupported texture format in '%s' lump\n", lump.getName());
 				break;
 		}
 
@@ -352,13 +347,13 @@ void Instance::W_LoadTextures()
 {
 	W_ClearTextures();
 
-	for (int i = 0 ; i < (int)master_dir.size() ; i++)
+	for (int i = 0 ; i < masterDirSize() ; i++)
 	{
 		LogPrintf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
-		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
-		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
+		const Lump *pnames   = masterDir(i).findLumpInNamespace("PNAMES", WadNamespace::Global);
+		const Lump *texture1 = masterDir(i).findLumpInNamespace("TEXTURE1", WadNamespace::Global);
+		const Lump *texture2 = masterDir(i).findLumpInNamespace("TEXTURE2", WadNamespace::Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -369,21 +364,19 @@ void Instance::W_LoadTextures()
 
 		if (pnames)
 		{
-			byte *pname_data;
-			int pname_size = W_LoadLumpData(pnames, &pname_data);
+			const byte *pname_data = pnames->getData();
+			int pname_size = pnames->getSize();
 
 			if (texture1)
-				LoadTexturesLump(texture1, pname_data, pname_size, true);
+				LoadTexturesLump(*texture1, pname_data, pname_size, true);
 
 			if (texture2)
-				LoadTexturesLump(texture2, pname_data, pname_size, false);
-
-			W_FreeLumpData(&pname_data);
+				LoadTexturesLump(*texture2, pname_data, pname_size, false);
 		}
 
 		if (Features.tx_start)
 		{
-			W_LoadTextures_TX_START(master_dir[i]);
+			W_LoadTextures_TX_START(masterDir(i));
 		}
 	}
 }
@@ -525,7 +518,7 @@ void Instance::W_AddFlat(const SString &name, Img_c *img)
 }
 
 
-static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *lump)
+static Img_c * LoadFlatImage(const Instance &inst, const SString &name, const Lump &lump)
 {
 	// TODO: check size == 64*64
 
@@ -533,10 +526,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 
 	int size = 64 * 64;
 
-	byte *raw = new byte[size];
-
-	if (! (lump->Seek() && lump->Read(raw, size)))
-		FatalError("Error reading flat from WAD.\n");
+	const byte *raw = lump.getData();
 
 	for (int i = 0 ; i < size ; i++)
 	{
@@ -548,8 +538,6 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 		img->wbuf() [i] = pix;
 	}
 
-	delete[] raw;
-
 	return img;
 }
 
@@ -558,22 +546,21 @@ void Instance::W_LoadFlats()
 {
 	W_ClearFlats();
 
-	for (int i = 0 ; i < (int)master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)masterDirSize() ; i++)
 	{
 		LogPrintf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = master_dir[i];
+		const Wad &wf = masterDir(i);
 
-		for(const LumpRef &lumpRef : wf->directory)
+		for(const NamespacedLump &lump : wf.getLumps())
 		{
-			if(lumpRef.ns != WadNamespace::Flats)
+			if(lump.ns != WadNamespace::Flats)
 				continue;
-			Lump_c *lump = lumpRef.lump;
 
-			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
+			Img_c * img = LoadFlatImage(*this, lump.getName(), lump);
 
 			if (img)
-				W_AddFlat(lump->Name(), img);
+				W_AddFlat(lump.getName(), img);
 		}
 	}
 }
@@ -648,7 +635,7 @@ void Instance::W_ClearSprites()
 
 
 // find sprite by prefix
-static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
+static const Lump * Sprite_loc_by_root (const Instance &inst, const SString &name)
 {
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
@@ -661,7 +648,7 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 	if(buffer.length() == 5)
 		buffer += '0';
 
-	Lump_c *lump = inst.W_FindSpriteLump(buffer);
+	const Lump *lump = inst.W_FindSpriteLump(buffer);
 
 	if (! lump)
 	{
@@ -747,7 +734,7 @@ Img_c *Instance::W_GetSprite(int type)
 	}
 	else
 	{
-		Lump_c *lump = Sprite_loc_by_root(*this, info.sprite);
+		const Lump *lump = Sprite_loc_by_root(*this, info.sprite);
 		if (! lump)
 		{
 			// for the MBF dog, create our own sprite for it, since
@@ -763,7 +750,7 @@ Img_c *Instance::W_GetSprite(int type)
 		{
 			result = new Img_c(*this);
 
-			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(*result, *lump, info.sprite, 0, 0))
 			{
 				delete result;
 				result = NULL;

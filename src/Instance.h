@@ -31,6 +31,7 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
+#include <deque>
 #include <unordered_map>
 
 class Fl_RGB_Image;
@@ -319,7 +320,7 @@ public:
 
 	// M_FILES
 	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
-	bool parseEurekaLump(const Wad& wad, const SString &wadpath, bool keep_cmd_line_args = false);
+	bool parseEurekaLump(const Wad& wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
 	void M_WriteEurekaLump(Wad_file *wad) const;
@@ -346,11 +347,11 @@ public:
 
 	// M_LOADSAVE
 	Lump_c *Load_LookupAndSeek(const char *name) const;
-	void LoadLevel(Wad_file *wad, const SString &level);
+	void LoadLevel(const Wad &wad, const SString &level);
 	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
-	void ReplaceEditWad(Wad_file* new_wad);
+	void ReplaceEditWad(Wad &&new_wad);
 	bool M_SaveMap();
 	void ValidateVertexRefs(LineDef *ld, int num);
 	void ValidateSectorRef(SideDef *sd, int num);
@@ -365,7 +366,7 @@ public:
 
 	// M_UDMF
 	void UDMF_LoadLevel();
-	void UDMF_SaveLevel() const;
+	void UDMF_SaveLevel();
 
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
@@ -407,10 +408,10 @@ public:
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
 	// W_LOADPIC
-	Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name) const;
-	Img_c *LoadImage_PNG(Lump_c *lump, const SString &name) const;
-	Img_c *LoadImage_TGA(Lump_c *lump, const SString &name) const;
-	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
+	Img_c *LoadImage_JPEG(const Lump &lump, const SString &name) const;
+	Img_c *LoadImage_PNG(const Lump &lump, const SString &name) const;
+	Img_c *LoadImage_TGA(const Lump &lump, const SString &name) const;
+	bool LoadPicture(Img_c &dest, const Lump &lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
 	// W_TEXTURE
 	void W_AddFlat(const SString &name, Img_c *img);
@@ -421,7 +422,7 @@ public:
 	int W_GetTextureHeight(const SString &name) const;
 	void W_LoadFlats();
 	void W_LoadTextures();
-	void W_LoadTextures_TX_START(Wad_file *wf);
+	void W_LoadTextures_TX_START(const Wad &wf);
 	bool W_TextureCausesMedusa(const SString &name) const;
 	bool W_TextureIsKnown(const SString &name) const;
 
@@ -430,8 +431,9 @@ public:
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 	void MasterDir_Remove(Wad_file *wad);
-	Lump_c *W_FindGlobalLump(const SString &name) const;
-	Lump_c *W_FindSpriteLump(const SString &name) const;
+	const Lump *W_FindGlobalLump(const SString &name) const;
+	Lump *W_FindGlobalLump(const SString &name);
+	const Lump *W_FindSpriteLump(const SString &name) const;
 
 private:
 	// New private methods
@@ -543,9 +545,9 @@ private:
 	void StoreSelectedThing(int new_type);
 
 	// W_TEXTURE
-	void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
-	void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
-	void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size, bool skip_first);
+	void LoadTextureEntry_DOOM(const byte *tex_data, int tex_length, int offset, const byte *pnames, int pname_size, bool skip_first);
+	void LoadTextureEntry_Strife(const byte *tex_data, int tex_length, int offset, const byte *pnames, int pname_size, bool skip_first);
+	void LoadTexturesLump(const Lump &lump, const byte *pnames, int pname_size, bool skip_first);
 	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
 	void W_ClearFlats();
 	void W_ClearSprites();
@@ -563,12 +565,17 @@ public:	// will be private when we encapsulate everything
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
-	Wad_file *edit_wad = nullptr;
-	Wad_file *game_wad = nullptr;
-	Wad editWad;
-	bool haveEditWad = false;
 	Wad gameWad;
-	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
+	Wad editWad;
+	std::deque<Wad> resourceWads;
+
+	Wad &masterDir(int n);
+	const Wad &masterDir(int n) const;
+	int masterDirSize() const
+	{
+		return 1 + (int)resourceWads.size() + (editWad.isLoaded() ? 1 : 0);
+	}
+
 	MapFormat Level_format = {};	// format of current map
 	SString Level_name;	// Name of map lump we are editing
 	SString Port_name;	// Name of source port "vanilla", "boom", ...
@@ -635,7 +642,7 @@ public:	// will be private when we encapsulate everything
 	// CMD_BuildAllNodes from building that saved level twice.
 	bool inhibit_node_build = false;
 	int last_given_file = 0;
-	Wad_file *load_wad = nullptr;
+	Wad *load_wad = nullptr;
 	int loading_level = 0;
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;

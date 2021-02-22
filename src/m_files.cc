@@ -559,33 +559,33 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::append);
+	Wad wad;
+	bool loaded = wad.readFromPath(filename);
 
-	if (! wad)
+	if (! loaded)
 	{
 		LogPrintf("Failed to load most recent pwad: %s\n", filename.c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
-	if (wad->LevelCount() == 0)
+	if (wad.levelCount() == 0)
 	{
 		LogPrintf("No levels in most recent pwad: %s\n", filename.c_str());
 
-		delete wad;
 		return false;
 	}
 
 	/* -- OK -- */
 
-	if (wad->LevelFind(map_name) >= 0)
+	if (wad.levelFind(map_name) >= 0)
 		Level_name = map_name;
 	else
 		Level_name.clear();
 
 	Pwad_name = filename;
 
-	edit_wad = wad;
+	editWad = std::move(wad);
 
 	return true;
 }
@@ -785,14 +785,14 @@ SString Instance::M_PickDefaultIWAD() const
 	{
 		default_game = "doom";
 	}
-	else if (edit_wad)
+	else if (editWad.isLoaded())
 	{
-		int idx = edit_wad->LevelFindFirst();
+		int idx = editWad.levelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = edit_wad->LevelHeader(idx);
-			const SString &name = edit_wad->GetLump(idx)->Name();
+			idx = editWad.levelHeader(idx);
+			const SString &name = editWad.getLump(idx).getName();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";
@@ -857,7 +857,7 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
-bool Instance::parseEurekaLump(const Wad& wad, const SString &wadpath, bool keep_cmd_line_args)
+bool Instance::parseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
 	const Lump* lump = wad.findLump(EUREKA_LUMP);
@@ -930,11 +930,11 @@ bool Instance::parseEurekaLump(const Wad& wad, const SString &wadpath, bool keep
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (!FileExists(res) && wadpath.good())
+			if (!FileExists(res) && wad.path().good())
 			{
 				LogPrintf("  file not found: %s\n", value.c_str());
 
-				res = FilenameReposition(value, wadpath);
+				res = FilenameReposition(value, wad.path());
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
@@ -1228,7 +1228,7 @@ inline static SString Backup_Name(const SString &dir_name, int slot)
 }
 
 
-static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad_size)
+static void Backup_Prune(const SString &dir_name, int b_low, int b_high, size_t wad_size)
 {
 	// Note: the logic here for checking space is very crude, it assumes
 	//       all existing backups have the same size as the currrent wad.
@@ -1236,7 +1236,7 @@ static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad
 	// do calculations in KB units
 	wad_size = wad_size / 1024 + 1;
 
-	int backup_num = 2 + config::backup_max_space * 1024 / wad_size;
+	size_t backup_num = 2 + config::backup_max_space * 1024 / wad_size;
 
 	if (backup_num > config::backup_max_files)
 		backup_num = config::backup_max_files;
@@ -1248,7 +1248,7 @@ static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad
 }
 
 
-void M_BackupWad(Wad_file *wad)
+void M_BackupWad(const Wad &wad)
 {
 	// disabled ?
 	if (config::backup_max_files <= 0 || config::backup_max_space <= 0)
@@ -1256,7 +1256,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
+	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad.path().c_str());
 	SString dir_name = ReplaceExtension(filename, NULL);
 
 	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
@@ -1283,7 +1283,7 @@ void M_BackupWad(Wad_file *wad)
 
 	if (b_low < b_high)
 	{
-		int wad_size = wad->TotalSize();
+		size_t wad_size = wad.totalSize();
 
 		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}

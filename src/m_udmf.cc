@@ -693,36 +693,36 @@ void Instance::UDMF_LoadLevel()
 
 //----------------------------------------------------------------------
 
-static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
+static inline void WrFlag(Lump &lump, int flags, const char *name, int mask)
 {
 	if ((flags & mask) != 0)
 	{
-		lump->Printf("%s = true;\n", name);
+		lump.printf("%s = true;\n", name);
 	}
 }
 
-static void UDMF_WriteInfo(const Instance &inst, Lump_c *lump)
+static void UDMF_WriteInfo(const Instance &inst, Lump &lump)
 {
-	lump->Printf("namespace = \"%s\";\n\n", inst.Udmf_namespace.c_str());
+	lump.printf("namespace = \"%s\";\n\n", inst.Udmf_namespace.c_str());
 }
 
-static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
+static void UDMF_WriteThings(const Instance &inst, Lump &lump)
 {
 	for (int i = 0 ; i < inst.level.numThings() ; i++)
 	{
-		lump->Printf("thing // %d\n", i);
-		lump->Printf("{\n");
+		lump.printf("thing // %d\n", i);
+		lump.printf("{\n");
 
 		const Thing *th = inst.level.things[i];
 
-		lump->Printf("x = %1.3f;\n", th->x());
-		lump->Printf("y = %1.3f;\n", th->y());
+		lump.printf("x = %1.3f;\n", th->x());
+		lump.printf("y = %1.3f;\n", th->y());
 
 		if (th->raw_h != 0)
-			lump->Printf("height = %1.3f;\n", th->h());
+			lump.printf("height = %1.3f;\n", th->h());
 
-		lump->Printf("angle = %d;\n", th->angle);
-		lump->Printf("type = %d;\n", th->type);
+		lump.printf("angle = %d;\n", th->angle);
+		lump.printf("type = %d;\n", th->type);
 
 		// thing options
 		WrFlag(lump, th->options, "skill1", MTF_Easy);
@@ -746,56 +746,56 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 
 		// TODO Hexen special and args
 
-		lump->Printf("}\n\n");
+		lump.printf("}\n\n");
 	}
 }
 
-static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
+static void UDMF_WriteVertices(const Document &doc, Lump &lump)
 {
 	for (int i = 0 ; i < doc.numVertices(); i++)
 	{
-		lump->Printf("vertex // %d\n", i);
-		lump->Printf("{\n");
+		lump.printf("vertex // %d\n", i);
+		lump.printf("{\n");
 
 		const Vertex *vert = doc.vertices[i];
 
-		lump->Printf("x = %1.3f;\n", vert->x());
-		lump->Printf("y = %1.3f;\n", vert->y());
+		lump.printf("x = %1.3f;\n", vert->x());
+		lump.printf("y = %1.3f;\n", vert->y());
 
-		lump->Printf("}\n\n");
+		lump.printf("}\n\n");
 	}
 }
 
-static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
+static void UDMF_WriteLineDefs(const Instance &inst, Lump &lump)
 {
 	for (int i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		lump->Printf("linedef // %d\n", i);
-		lump->Printf("{\n");
+		lump.printf("linedef // %d\n", i);
+		lump.printf("{\n");
 
 		const LineDef *ld = inst.level.linedefs[i];
 
-		lump->Printf("v1 = %d;\n", ld->start);
-		lump->Printf("v2 = %d;\n", ld->end);
+		lump.printf("v1 = %d;\n", ld->start);
+		lump.printf("v2 = %d;\n", ld->end);
 
 		if (ld->right >= 0)
-			lump->Printf("sidefront = %d;\n", ld->right);
+			lump.printf("sidefront = %d;\n", ld->right);
 		if (ld->left >= 0)
-			lump->Printf("sideback = %d;\n", ld->left);
+			lump.printf("sideback = %d;\n", ld->left);
 
 		if (ld->type != 0)
-			lump->Printf("special = %d;\n", ld->type);
+			lump.printf("special = %d;\n", ld->type);
 
 		if (ld->tag != 0)
-			lump->Printf("arg0 = %d;\n", ld->tag);
+			lump.printf("arg0 = %d;\n", ld->tag);
 		if (ld->arg2 != 0)
-			lump->Printf("arg1 = %d;\n", ld->arg2);
+			lump.printf("arg1 = %d;\n", ld->arg2);
 		if (ld->arg3 != 0)
-			lump->Printf("arg2 = %d;\n", ld->arg3);
+			lump.printf("arg2 = %d;\n", ld->arg3);
 		if (ld->arg4 != 0)
-			lump->Printf("arg3 = %d;\n", ld->arg4);
+			lump.printf("arg3 = %d;\n", ld->arg4);
 		if (ld->arg5 != 0)
-			lump->Printf("arg4 = %d;\n", ld->arg5);
+			lump.printf("arg4 = %d;\n", ld->arg5);
 
 		// linedef flags
 		WrFlag(lump, ld->flags, "blocking",      MLF_Blocking);
@@ -820,69 +820,70 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 
 		// TODO : zdoom stuff
 
-		lump->Printf("}\n\n");
+		lump.printf("}\n\n");
 	}
 }
 
-static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
+static void UDMF_WriteSideDefs(const Document &doc, Lump &lump)
 {
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
 	{
-		lump->Printf("sidedef // %d\n", i);
-		lump->Printf("{\n");
+		lump.printf("sidedef // %d\n", i);
+		lump.printf("{\n");
 
 		const SideDef *side = doc.sidedefs[i];
 
-		lump->Printf("sector = %d;\n", side->sector);
+		lump.printf("sector = %d;\n", side->sector);
 
 		if (side->x_offset != 0)
-			lump->Printf("offsetx = %d;\n", side->x_offset);
+			lump.printf("offsetx = %d;\n", side->x_offset);
 		if (side->y_offset != 0)
-			lump->Printf("offsety = %d;\n", side->y_offset);
+			lump.printf("offsety = %d;\n", side->y_offset);
 
 		// use NormalizeTex to ensure no double quote
 
 		if (side->UpperTex() != "-")
-			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()).c_str());
+			lump.printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()).c_str());
 		if (side->LowerTex() != "-")
-			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()).c_str());
+			lump.printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()).c_str());
 		if (side->MidTex() != "-")
-			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()).c_str());
+			lump.printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()).c_str());
 
-		lump->Printf("}\n\n");
+		lump.printf("}\n\n");
 	}
 }
 
-static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
+static void UDMF_WriteSectors(const Document &doc, Lump &lump)
 {
 	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
-		lump->Printf("sector // %d\n", i);
-		lump->Printf("{\n");
+		lump.printf("sector // %d\n", i);
+		lump.printf("{\n");
 
 		const Sector *sec = doc.sectors[i];
 
-		lump->Printf("heightfloor = %d;\n", sec->floorh);
-		lump->Printf("heightceiling = %d;\n", sec->ceilh);
+		lump.printf("heightfloor = %d;\n", sec->floorh);
+		lump.printf("heightceiling = %d;\n", sec->ceilh);
 
 		// use NormalizeTex to ensure no double quote
 
-		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()).c_str());
-		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()).c_str());
+		lump.printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()).c_str());
+		lump.printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()).c_str());
 
-		lump->Printf("lightlevel = %d;\n", sec->light);
+		lump.printf("lightlevel = %d;\n", sec->light);
 		if (sec->type != 0)
-			lump->Printf("special = %d;\n", sec->type);
+			lump.printf("special = %d;\n", sec->type);
 		if (sec->tag != 0)
-			lump->Printf("id = %d;\n", sec->tag);
+			lump.printf("id = %d;\n", sec->tag);
 
-		lump->Printf("}\n\n");
+		lump.printf("}\n\n");
 	}
 }
 
-void Instance::UDMF_SaveLevel() const
+void Instance::UDMF_SaveLevel()
 {
-	Lump_c *lump = edit_wad->AddLump("TEXTMAP");
+	Lump &lump = editWad.appendNewLump();
+	lump.setName("TEXTMAP");
 
 	UDMF_WriteInfo(*this, lump);
 	UDMF_WriteThings(*this, lump);
@@ -891,10 +892,7 @@ void Instance::UDMF_SaveLevel() const
 	UDMF_WriteSideDefs(level, lump);
 	UDMF_WriteSectors(level, lump);
 
-	lump->Finish();
-
-	lump = edit_wad->AddLump("ENDMAP");
-	lump->Finish();
+	editWad.appendNewLump().setName("ENDMAP");
 }
 
 

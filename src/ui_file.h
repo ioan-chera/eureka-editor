@@ -49,7 +49,7 @@ public:
 	virtual ~UI_ChooseMap();
 
 	// format is 'E' for ExMx, or 'M' for MAPxx
-	void PopulateButtons(char format, Wad_file *test_wad = NULL);
+	void PopulateButtons(char format, const Wad *test_wad = NULL);
 
 	// returns map name on success, NULL on cancel
 	SString Run();
@@ -93,12 +93,12 @@ private:
 	Action action = Action::none;
 
 	// the WAD file opened by the "Load" button (initially NULL)
-	Wad_file * loaded_wad = nullptr;
+	Wad loaded_wad;
 
 	// the WAD file which we are showing map buttons for.
 	// can be the "game_wad" or "edit_wad" globals, the "loaded_wad"
 	// field above, or NULL.
-	Wad_file * using_wad = nullptr;
+	Wad * using_wad = nullptr;
 
 	Instance &inst;
 
@@ -115,7 +115,7 @@ public:
 	// "did_load" is true when the user loaded a new pwad and this
 	// method returned it.  It should become the next edit_wad.
 	//
-	Wad_file * Run(SString* map_v, bool * did_load);
+	Wad * Run(SString* map_v, bool * did_load);
 
 private:
 	void Populate();

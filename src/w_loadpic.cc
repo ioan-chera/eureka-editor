@@ -106,16 +106,14 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 }
 
 
-Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
+Img_c *Instance::LoadImage_PNG(const Lump &lump, const SString &name) const
 {
 	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
+	const byte *tex_data = lump.getData();
+	int tex_length = lump.getSize();
 
 	// pass it to FLTK for decoding
 	Fl_PNG_Image fltk_img(NULL, tex_data, tex_length);
-
-	W_FreeLumpData(&tex_data);
 
 	if (fltk_img.w() <= 0)
 	{
@@ -131,18 +129,13 @@ Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 }
 
 
-Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
+Img_c *Instance::LoadImage_JPEG(const Lump &lump, const SString &name) const
 {
 	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
-
-	(void) tex_length;
+	const byte *tex_data = lump.getData();
 
 	// pass it to FLTK for decoding
 	Fl_JPEG_Image fltk_img(NULL, tex_data);
-
-	W_FreeLumpData(&tex_data);
 
 	if (fltk_img.w() <= 0)
 	{
@@ -158,19 +151,17 @@ Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 }
 
 
-Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
+Img_c *Instance::LoadImage_TGA(const Lump &lump, const SString &name) const
 {
 	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
+	const byte *tex_data = lump.getData();
+	int tex_length = lump.getSize();
 
 	// decode it
 	int width;
 	int height;
 
 	rgba_color_t * rgba = TGA_DecodeImage(tex_data, (size_t)tex_length, width, height);
-
-	W_FreeLumpData(&tex_data);
 
 	if (! rgba)
 	{
@@ -229,7 +220,7 @@ static bool ComposePicture(Img_c& dest, Img_c *sub,
 //  Return true on success, false on failure.
 //
 bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
-	Lump_c *lump,
+	const Lump &lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
@@ -268,8 +259,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 	/* DOOM format */
 
-	byte *raw_data;
-	W_LoadLumpData(lump, &raw_data);
+	const byte *raw_data = lump.getData();
 
 	const patch_t *pat = (patch_t *) raw_data;
 
@@ -293,7 +283,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	{
 		int offset = LE_S32(pat->columnofs[x]);
 
-		if (offset < 0 || offset >= lump->Length())
+		if (offset < 0 || offset >= lump.getSize())
 		{
 			LogPrintf("WARNING: bad image offset 0x%08x in patch [%s]\n",
 			          offset, pic_name.c_str());
@@ -305,24 +295,17 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 		DrawColumn(*this, dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
-	W_FreeLumpData(&raw_data);
 	return true;
 }
 
 
-char W_DetectImageFormat(Lump_c *lump)
+char W_DetectImageFormat(const Lump &lump)
 {
-	byte header[20];
+	const byte *header = lump.getData();
 
-	int length = lump->Length();
+	int length = lump.getSize();
 
 	if (length < (int)sizeof(header))
-		return 0;
-
-	if (! lump->Seek())
-		return 0;
-
-	if (! lump->Read(header, (int)sizeof(header)))
 		return 0;
 
 	// PNG is clearly marked in the header, so check it first.
