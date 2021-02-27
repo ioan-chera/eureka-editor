@@ -15,7 +15,7 @@ PREFIX ?= /usr/local
 # flags controlling the dialect of C++
 CXX_DIALECT=-std=c++17 -fno-strict-aliasing -fwrapv
 
-WARNINGS=-Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
+WARNINGS=-Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-field-initializers
 OPTIMISE=-O2 -g
 STRIP_FLAGS=--strip-unneeded
 
