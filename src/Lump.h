@@ -77,4 +77,24 @@ private:
 	char mName[9] = {};	// lump name (not always limited by length)
 };
 
+//
+// Read from lump
+//
+class LumpInputStream
+{
+public:
+	LumpInputStream(const Lump &lump) : mLump(lump)
+	{
+	}
+
+	bool read(void *buffer, size_t size) const;
+	void reset()
+	{
+		mPos = 0;
+	}
+private:
+	const Lump &mLump;
+	int mPos = 0;
+};
+
 #endif /* Lump_hpp */

@@ -181,7 +181,6 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	global::app_has_focus = false;
 
 	// TODO: ALL instances. This is death.
-	gInstance.MasterDir_CloseAll();
 	LogClose();
 
 	exit(2);
@@ -389,7 +388,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! HasExtension(inst.Iwad_name))
 			inst.Iwad_name = ReplaceExtension(inst.Iwad_name, "wad");
 
-		if (! Wad_file::Validate(inst.Iwad_name))
+		if (! WadFileValidate(inst.Iwad_name))
 			FatalError("IWAD does not exist or is invalid: %s\n", inst.Iwad_name.c_str());
 
 		SString game = GameNameFromIWAD(inst.Iwad_name);
@@ -787,12 +786,12 @@ void Instance::LoadResourceFile(const SString &filename)
 	if (!Wad_file::Validate(filename))
 		throw WadReadException("Invalid WAD file: " + filename);
 
-	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::read);
-
-	if (!wad)
+	Wad wad;
+	bool loaded = wad.readFromPath(filename);
+	if(!loaded)
 		throw WadReadException("Cannot load resource: " + filename);
 
-	MasterDir_Add(wad);
+	resourceWads.push_back(std::move(wad));
 }
 
 
@@ -887,7 +886,7 @@ void Instance::Main_LoadResources()
 	ReadGameInfo();
 	ReadPortInfo();
 
-	MasterDir_CloseAll();
+	resourceWads.clear();
 
 	// TODO: check result
 	Main_LoadIWAD();
@@ -1146,7 +1145,6 @@ int main(int argc, char *argv[])
 		global::app_has_focus = false;
 
 		// TODO: all instances
-		gInstance.MasterDir_CloseAll();
 		LogClose();
 
 		return 0;

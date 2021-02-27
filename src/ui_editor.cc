@@ -498,7 +498,7 @@ void UI_TextEditor::SaveLump(Wad &wad, const SString &lump_name) const
 	Lump *lump = wad.findLump(lump_name);
 	if(!lump)
 	{
-		lump = &wad.appendNewLump();
+		lump = &wad.addNewLump();
 		lump->setName(lump_name);
 	}
 	lump->setDataFromString(tbuf->text());

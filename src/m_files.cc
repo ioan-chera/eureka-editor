@@ -434,7 +434,7 @@ static void ParseMiscConfig(std::istream &is)
 		map.cutWithSpace(pos, &path);
 		if(line == "recent")
 		{
-			if(Wad_file::Validate(path))
+			if(WadFileValidate(path))
 				global::recent_files.insert(path, map);
 			else
 				LogPrintf("  no longer exists: %s\n", path.c_str());
@@ -444,7 +444,7 @@ static void ParseMiscConfig(std::istream &is)
 			// ignore plain freedoom.wad (backwards compatibility)
 			if(map.noCaseEqual("freedoom"))
 				LogPrintf("  ignoring for compatibility: %s\n", path.c_str());
-			else if(Wad_file::Validate(path))
+			else if(WadFileValidate(path))
 				global::known_iwads[map] = path;
 			else
 				LogPrintf("  no longer exists: %s\n", path.c_str());
@@ -654,7 +654,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
-	if (Wad_file::Validate(name_buf))
+	if (WadFileValidate(name_buf))
 		return name_buf;
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
@@ -663,7 +663,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
-	if (Wad_file::Validate(name_buf))
+	if (WadFileValidate(name_buf))
 		return name_buf;
 
 	return "";
@@ -1001,187 +1001,36 @@ bool Instance::parseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 
 	return true;
 }
-bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
-{
-	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
 
-	Lump_c * lump = wad->FindLump(EUREKA_LUMP);
-
-	if (! lump)
-	{
-		LogPrintf("--> does not exist.\n");
-		return true;
-	}
-
-	if (! lump->Seek())
-	{
-		LogPrintf("--> error seeking.\n");
-		return true;
-	}
-
-
-	SString new_iwad;
-	SString new_port;
-
-	std::vector<SString> new_resources;
-
-	SString line;
-
-	while (lump->GetLine(line))
-	{
-		// comment?
-		if (line[0] == '#')
-			continue;
-
-		line.trimTrailingSpaces();
-
-		size_t pos = line.find(' ');
-
-		if(pos == std::string::npos || !pos)
-		{
-			LogPrintf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
-			continue;
-		}
-
-		SString value;
-		line.cutWithSpace(pos, &value);
-
-		if (line == "game")
-		{
-			if (! M_CanLoadDefinitions("games", value))
-			{
-				LogPrintf("  unknown game: %s\n", value.c_str() /* show full path */);
-
-				int res = DLG_Confirm("&Ignore|&Cancel Load",
-				                      "Warning: the pwad specifies an unsupported "
-									  "game:\n\n          %s", value.c_str());
-				if (res == 1)
-					return false;
-			}
-			else
-			{
-				new_iwad = M_QueryKnownIWAD(value);
-
-				if (new_iwad.empty())
-				{
-					int res = DLG_Confirm("&Ignore|&Cancel Load",
-					                      "Warning: the pwad specifies an IWAD "
-										  "which cannot be found:\n\n          %s.wad", 
-										  value.c_str());
-					if (res == 1)
-						return false;
-				}
-			}
-		}
-		else if (line == "resource")
-		{
-			SString res = value;
-
-			// if not found at absolute location, try same place as PWAD
-
-			if (! FileExists(res))
-			{
-				LogPrintf("  file not found: %s\n", value.c_str());
-
-				res = FilenameReposition(value, wad->PathName());
-				LogPrintf("  trying: %s\n", res.c_str());
-			}
-
-			if (! FileExists(res) && !new_iwad.empty())
-			{
-				res = FilenameReposition(value, new_iwad);
-				LogPrintf("  trying: %s\n", res.c_str());
-			}
-
-			if (FileExists(res))
-				new_resources.push_back(res);
-			else
-			{
-				DLG_Notify("Warning: the pwad specifies a resource "
-				           "which cannot be found:\n\n%s", value.c_str());
-			}
-		}
-		else if (line == "port")
-		{
-			if (M_CanLoadDefinitions("ports", value))
-				new_port = value;
-			else
-			{
-				LogPrintf("  unknown port: %s\n", value.c_str());
-
-				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", value.c_str());
-			}
-		}
-		else
-		{
-			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", line.c_str(), EUREKA_LUMP);
-			continue;
-		}
-	}
-
-	/* OK */
-
-	// When 'keep_cmd_line_args' is true, we do not override any value which
-	// has been set via command line arguments.  In other words, cmd line
-	// arguments will override the EUREKA_LUMP.
-	//
-	// Resources are trickier, we merge the EUREKA_LUMP resources into the ones
-	// supplied on the command line, ensuring that we don't get any duplicates.
-
-	if (!new_iwad.empty())
-	{
-		if (! (keep_cmd_line_args && !Iwad_name.empty()))
-			Iwad_name = new_iwad;
-	}
-
-	if (!new_port.empty())
-	{
-		if (! (keep_cmd_line_args && !Port_name.empty()))
-			Port_name = new_port;
-	}
-
-	if (! keep_cmd_line_args)
-		Resource_list.clear();
-
-	for (const SString &resource : new_resources)
-	{
-		M_AddResource_Unique(*this, resource);
-	}
-
-	return true;
-}
-
-
-void Instance::M_WriteEurekaLump(Wad_file *wad) const
+void Instance::M_WriteEurekaLump(Wad &wad) const
 {
 	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
 
-	wad->BeginWrite();
+	Lump *lump = wad.findLump(EUREKA_LUMP);
+	if(lump)
+		lump->setData({});
+	else
+	{
+		lump = &wad.addNewLump();
+		lump->setName(EUREKA_LUMP);
+	}
 
-	int oldie = wad->FindLumpNum(EUREKA_LUMP);
-	if (oldie >= 0)
-		wad->RemoveLumps(oldie, 1);
+	lump->printf("# Eureka project info\n");
 
-	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
+	if (Game_name.good())
+		lump->printf("game %s\n", Game_name.c_str());
 
-	lump->Printf("# Eureka project info\n");
-
-	if (!Game_name.empty())
-		lump->Printf("game %s\n", Game_name.c_str());
-
-	if (!Port_name.empty())
-		lump->Printf("port %s\n", Port_name.c_str());
+	if (Port_name.good())
+		lump->printf("port %s\n", Port_name.c_str());
 
 	for (const SString &resource : Resource_list)
 	{
 		SString absolute_name = GetAbsolutePath(resource);
 
-		lump->Printf("resource %s\n", absolute_name.c_str());
+		lump->printf("resource %s\n", absolute_name.c_str());
 	}
 
-	lump->Finish();
-
-	wad->EndWrite();
+	wad.resetInsertionPoint();
 }
 
 
@@ -1292,7 +1141,7 @@ void M_BackupWad(const Wad &wad)
 
 	SString dest_name = Backup_Name(dir_name, b_high + 1);
 
-	if (! wad->Backup(dest_name.c_str()))
+	if (! wad.writeToPath(dest_name))
 	{
 		// Hmmm, show a dialog ??
 		LogPrintf("WARNING: backup failed (cannot copy file)\n");

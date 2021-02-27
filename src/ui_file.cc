@@ -56,10 +56,9 @@ bool ValidateMapName(const char *p)
 
 
 UI_ChooseMap::UI_ChooseMap(const char *initial_name,
-						   Wad_file *_rename_wad) :
+						   Wad *_rename_wad) :
 	UI_Escapable_Window(420, 385, "Choose Map"),
-	rename_wad(_rename_wad),
-	action(ACT_none)
+	rename_wad(_rename_wad)
 {
 	resizable(NULL);
 
@@ -226,7 +225,7 @@ void UI_ChooseMap::CheckMapName()
 
 	if (rename_wad && is_valid)
 	{
-		if (rename_wad->LevelFind(map_name->value()) >= 0)
+		if (rename_wad->levelFind(map_name->value()) >= 0)
 			is_valid = false;
 	}
 

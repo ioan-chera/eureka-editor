@@ -135,7 +135,8 @@ public:
 class Udmf_Parser
 {
 private:
-	Lump_c *lump;
+	const Lump &lump;
+	LumpInputStream mStream;
 
 	// reached EOF or a file read error
 	bool done = false;
@@ -156,9 +157,9 @@ private:
 	Instance &inst;
 
 public:
-	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), inst(inst)
+	Udmf_Parser(Instance &inst, const Lump &_lump) : lump(_lump), mStream(_lump), inst(inst)
 	{
-		remaining = lump->Length();
+		remaining = lump.getSize();
 	}
 
 	Udmf_Token Next()
@@ -184,7 +185,7 @@ public:
 				if (want > remaining)
 					want = remaining;
 
-				if (! lump->Read(buffer + b_size, want))
+				if (! mStream.read(buffer + b_size, want))
 				{
 					// TODO mark error somewhere, show dialog later
 					done = true;
@@ -645,13 +646,13 @@ void Instance::ValidateLevel_UDMF()
 
 void Instance::UDMF_LoadLevel()
 {
-	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
+	const Lump *lump = Load_LookupAndSeek("TEXTMAP");
 	// we assume this cannot happen
 	if (! lump)
 		return;
 
 	// TODO: reduce stack!!
-	Udmf_Parser parser(*this, lump);
+	Udmf_Parser parser(*this, *lump);
 
 	for (;;)
 	{
@@ -882,7 +883,7 @@ static void UDMF_WriteSectors(const Document &doc, Lump &lump)
 
 void Instance::UDMF_SaveLevel()
 {
-	Lump &lump = editWad.appendNewLump();
+	Lump &lump = editWad.addNewLump();
 	lump.setName("TEXTMAP");
 
 	UDMF_WriteInfo(*this, lump);
@@ -892,7 +893,7 @@ void Instance::UDMF_SaveLevel()
 	UDMF_WriteSideDefs(level, lump);
 	UDMF_WriteSectors(level, lump);
 
-	editWad.appendNewLump().setName("ENDMAP");
+	editWad.addNewLump().setName("ENDMAP");
 }
 
 

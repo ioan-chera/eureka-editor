@@ -35,7 +35,6 @@
 #include <unordered_map>
 
 class Fl_RGB_Image;
-class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
 
@@ -319,11 +318,10 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
 	bool parseEurekaLump(const Wad& wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
-	void M_WriteEurekaLump(Wad_file *wad) const;
+	void M_WriteEurekaLump(Wad &wad) const;
 
 	// M_GAME
 	bool is_sky(const SString &flat) const;
@@ -346,9 +344,9 @@ public:
 	bool ExecuteKey(keycode_t key, key_context_e context);
 
 	// M_LOADSAVE
-	Lump_c *Load_LookupAndSeek(const char *name) const;
+	const Lump *Load_LookupAndSeek(const char *name) const;
 	void LoadLevel(const Wad &wad, const SString &level);
-	void LoadLevelNum(Wad_file *wad, int lev_num);
+	void LoadLevelNum(const Wad &wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
 	void ReplaceEditWad(Wad &&new_wad);
@@ -427,10 +425,7 @@ public:
 	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
-	void MasterDir_Add(Wad_file *wad);
-	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
-	void MasterDir_Remove(Wad_file *wad);
 	const Lump *W_FindGlobalLump(const SString &name) const;
 	Lump *W_FindGlobalLump(const SString &name);
 	const Lump *W_FindSpriteLump(const SString &name) const;
@@ -485,7 +480,7 @@ private:
 	// M_LOADSAVE
 	void CreateFallbackSector();
 	void CreateFallbackSideDef();
-	void EmptyLump(const char *name) const;
+	void EmptyLump(const char *name);
 	void FreshLevel();
 	void LoadBehavior();
 	void LoadHeader();
@@ -642,7 +637,7 @@ public:	// will be private when we encapsulate everything
 	// CMD_BuildAllNodes from building that saved level twice.
 	bool inhibit_node_build = false;
 	int last_given_file = 0;
-	Wad *load_wad = nullptr;
+	const Wad *load_wad = nullptr;
 	int loading_level = 0;
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;

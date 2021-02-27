@@ -83,7 +83,7 @@ enum build_result_e
 };
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst);
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst);
 
 
 //======================================================================

@@ -30,7 +30,7 @@ private:
 	Fl_Return_Button *ok_but;
 
 	// normally NULL, when present will prevent using an existing level name
-	Wad_file *rename_wad;
+	Wad *rename_wad;
 
 	enum
 	{
@@ -39,13 +39,13 @@ private:
 		ACT_ACCEPT
 	};
 
-	int action;
+	int action = ACT_none;
 
 	void CheckMapName();
 
 public:
 	UI_ChooseMap(const char *initial_name = "",
-			     Wad_file *_rename_wad = NULL);
+			     Wad *_rename_wad = NULL);
 	virtual ~UI_ChooseMap();
 
 	// format is 'E' for ExMx, or 'M' for MAPxx

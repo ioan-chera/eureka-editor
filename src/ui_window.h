@@ -51,7 +51,6 @@
 
 
 class Fl_Multi_Browser;
-class Wad_file;
 
 
 class UI_MainWindow : public Fl_Double_Window

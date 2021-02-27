@@ -80,3 +80,14 @@ void Lump::printf(EUR_FORMAT_STRING(const char *msg), ...)
 
 	mData.insert(mData.begin() + getSize(), result.begin(), result.end());
 }
+
+//
+// Read from lump
+//
+bool LumpInputStream::read(void *buffer, size_t size) const
+{
+	if(static_cast<size_t>(mPos) + size > mLump.getSize())
+		return false;
+	memcpy(buffer, mLump.getData() + mPos, size);
+	return true;
+}

@@ -73,7 +73,7 @@ static void W_CreateBrightMap(Instance &inst);
 
 void Instance::W_LoadPalette()
 {
-	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
+	const Lump *lump = W_FindGlobalLump("PLAYPAL");
 
 	if (! lump)
 	{
@@ -81,12 +81,8 @@ void Instance::W_LoadPalette()
 		return;
 	}
 
-	if (! lump->Seek() ||
-		! lump->Read(raw_palette, sizeof(raw_palette)))
-	{
-		LogPrintf("PLAYPAL: read error\n");
-		return;
-	}
+	size_t toCopy = sizeof(raw_palette) < lump->getSize() ? sizeof(raw_palette) : lump->getSize();
+	memcpy(raw_palette, lump->getData(), toCopy);
 
 	// find the colour closest to TRANS_PIXEL
 	byte tr = raw_palette[TRANS_PIXEL][0];
@@ -105,7 +101,7 @@ void Instance::W_LoadPalette()
 
 void Instance::W_LoadColormap()
 {
-	Lump_c *lump = W_FindGlobalLump("COLORMAP");
+	const Lump *lump = W_FindGlobalLump("COLORMAP");
 
 	if (! lump)
 	{
@@ -113,12 +109,8 @@ void Instance::W_LoadColormap()
 		return;
 	}
 
-	if (! lump->Seek() ||
-		! lump->Read(raw_colormap, sizeof(raw_colormap)))
-	{
-		LogPrintf("COLORMAP: read error\n");
-		return;
-	}
+	size_t toCopy = sizeof(raw_colormap) < lump->getSize() ? sizeof(raw_colormap) : lump->getSize();
+	memcpy(raw_colormap, lump->getData(), toCopy);
 
 	// ensure colormap does not transparent pixel
 	for (int i = 0 ; i < 32  ; i++)

@@ -61,232 +61,11 @@ const char *WadNamespaceString(WadNamespace ns)
 	}
 }
 
-
-//------------------------------------------------------------------------
-//  LUMP Handling
-//------------------------------------------------------------------------
-
-Lump_c::Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len) :
-	parent(_par), l_start(_start), l_length(_len)
-{
-	// ensure lump name is uppercase
-	name = _nam.asUpper();
-}
-
-
-Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
-	parent(_par)
-{
-	// handle the entry name, which can lack a terminating NUL
-	SString buffer(entry->name, 8);
-
-	name = buffer;
-
-	l_start  = LE_U32(entry->pos);
-	l_length = LE_U32(entry->size);
-
-//	DebugPrintf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
-
-	if (l_length == 0)
-		l_start = 0;
-}
-
-void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
-{
-	W_StoreString(entry->name, name, sizeof(entry->name));
-
-	entry->pos  = LE_U32(l_start);
-	entry->size = LE_U32(l_length);
-}
-
-
-void Lump_c::Rename(const char *new_name)
-{
-	name = SString(new_name).asUpper();
-}
-
-
-bool Lump_c::Seek(int offset)
-{
-	SYS_ASSERT(offset >= 0);
-
-	return (fseek(parent->fp, l_start + offset, SEEK_SET) == 0);
-}
-
-
-bool Lump_c::Read(void *data, int len)
-{
-	SYS_ASSERT(data && len > 0);
-
-	return (fread(data, len, 1, parent->fp) == 1);
-}
-
-//
-// read a line of text, returns true if OK, false on EOF
-//
-bool Lump_c::GetLine(SString &string)
-{
-	SYS_ASSERT(!!parent->fp);
-	long curPos = ftell(parent->fp);
-	if(curPos < 0)
-		return false;	// EOF
-
-	curPos -= l_start;
-
-	if (curPos >= l_length)
-		return false;	// EOF
-
-	string.clear();
-	for(; curPos < l_length; ++curPos)
-	{
-		string.push_back(fgetc(parent->fp));
-		if(string.back() == '\n')
-			break;
-		if(ferror(parent->fp))
-			return false;
-		if(feof(parent->fp))
-			break;
-	}
-	return true;	// OK
-}
-
-bool Lump_c::Write(const void *data, int len)
-{
-	SYS_ASSERT(data && len > 0);
-
-	l_length += len;
-
-	return (fwrite(data, len, 1, parent->fp) == 1);
-}
-
-
-void Lump_c::Printf(EUR_FORMAT_STRING(const char *msg), ...)
-{
-	va_list args;
-
-	va_start(args, msg);
-	SString buffer = SString::vprintf(msg, args);
-	va_end(args);
-
-	Write(buffer.c_str(), (int)buffer.length());
-}
-
-
-bool Lump_c::Finish()
-{
-	if (l_length == 0)
-		l_start = 0;
-
-	return parent->FinishLump(l_length);
-}
-
-
 //------------------------------------------------------------------------
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-Wad_file::~Wad_file()
-{
-	LogPrintf("Closing WAD file: %s\n", filename.c_str());
-
-	fclose(fp);
-
-	// free the directory
-	for (LumpRef &lumpRef : directory)
-		delete lumpRef.lump;
-
-	directory.clear();
-}
-
-
-Wad_file * Wad_file::Open(const SString &filename, WadOpenMode mode)
-{
-	SYS_ASSERT(mode == WadOpenMode::read || mode == WadOpenMode::write || mode == WadOpenMode::append);
-
-	if (mode == WadOpenMode::write)
-		return Create(filename, mode);
-
-	LogPrintf("Opening WAD file: %s\n", filename.c_str());
-
-	FILE *fp = NULL;
-
-retry:
-	// TODO: #55 unicode
-	fp = fopen(filename.c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
-
-	if (! fp)
-	{
-		// mimic the fopen() semantics
-		if (mode == WadOpenMode::append && errno == ENOENT)
-			return Create(filename, mode);
-
-		// if file is read-only, open in 'r' mode instead
-		if (mode == WadOpenMode::append && (errno == EACCES || errno == EROFS))
-		{
-			LogPrintf("Open r/w failed, trying again in read mode...\n");
-			mode = WadOpenMode::read;
-			goto retry;
-		}
-
-		int what = errno;
-		LogPrintf("Open failed: %s\n", GetErrorMessage(what).c_str());
-		return NULL;
-	}
-
-	Wad_file *w = new Wad_file(filename, mode, fp);
-
-	// determine total size (seek to end)
-	if (fseek(fp, 0, SEEK_END) != 0)
-		ThrowException("Error determining WAD size.\n");
-
-	w->total_size = (int)ftell(fp);
-
-	DebugPrintf("total_size = %d\n", w->total_size);
-
-	if (w->total_size < 0)
-		ThrowException("Error determining WAD size.\n");
-
-	if (! w->ReadDirectory())
-	{
-		delete w;
-		LogPrintf("Open wad failed (reading directory)\n");
-		return NULL;
-	}
-
-	w->DetectLevels();
-	w->ProcessNamespaces();
-
-	return w;
-}
-
-
-Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
-{
-	LogPrintf("Creating new WAD file: %s\n", filename.c_str());
-
-	// TODO: #55 unicode
-	FILE *fp = fopen(filename.c_str(), "w+b");
-	if (! fp)
-		return NULL;
-
-	Wad_file *w = new Wad_file(filename, mode, fp);
-
-	// write out base header
-	raw_wad_header_t header;
-
-	memset(&header, 0, sizeof(header));
-	memcpy(header.ident, "PWAD", 4);
-
-	fwrite(&header, sizeof(header), 1, fp);
-	fflush(fp);
-
-	w->total_size = (int)sizeof(header);
-
-	return w;
-}
-
-
-bool Wad_file::Validate(const SString &filename)
+bool WadFileValidate(const SString &filename)
 {
 	FILE *fp = fopen(filename.c_str(), "rb");
 
@@ -345,318 +124,6 @@ inline static bool IsGLNodeLump(const SString &name)
 }
 
 
-Lump_c * Wad_file::GetLump(int index) const
-{
-	SYS_ASSERT(0 <= index && index < NumLumps());
-	SYS_ASSERT(directory[index].lump);
-
-	return directory[index].lump;
-}
-
-
-Lump_c * Wad_file::FindLump(const SString &name)
-{
-	for (auto it = directory.rbegin(); it != directory.rend(); ++it)
-		if (it->lump->name.noCaseEqual(name))
-			return it->lump;
-
-	return nullptr;  // not found
-}
-
-int Wad_file::FindLumpNum(const SString &name)
-{
-	for (int k = NumLumps() - 1 ; k >= 0 ; k--)
-		if (directory[k].lump->name.noCaseEqual(name))
-			return k;
-
-	return -1;  // not found
-}
-
-
-int Wad_file::LevelLookupLump(int lev_num, const char *name)
-{
-	int start = LevelHeader(lev_num);
-
-	// determine how far past the level marker (MAP01 etc) to search
-	int finish = LevelLastLump(lev_num);
-
-	for (int k = start+1 ; k <= finish ; k++)
-	{
-		SYS_ASSERT(0 <= k && k < NumLumps());
-
-		if (directory[k].lump->name.noCaseEqual(name))
-			return k;
-	}
-
-	return -1;  // not found
-}
-
-
-int Wad_file::LevelFind(const SString &name)
-{
-	for (int k = 0 ; k < (int)levels.size() ; k++)
-	{
-		int index = levels[k];
-
-		SYS_ASSERT(0 <= index && index < NumLumps());
-		SYS_ASSERT(directory[index].lump);
-
-		if (directory[index].lump->name.noCaseEqual(name))
-			return k;
-	}
-
-	return -1;  // not found
-}
-
-
-int Wad_file::LevelLastLump(int lev_num)
-{
-	int start = LevelHeader(lev_num);
-
-	int count = 1;
-
-	// UDMF level?
-	if (directory[start + 1].lump->name.noCaseEqual("TEXTMAP"))
-	{
-		while (count < MAX_LUMPS_IN_A_LEVEL && start+count < NumLumps())
-		{
-			if (directory[start+count].lump->name.noCaseEqual("ENDMAP"))
-			{
-				count++;
-				break;
-			}
-
-			count++;
-		}
-
-		return start + count - 1;
-	}
-
-	// standard DOOM or HEXEN format
-	while (count < MAX_LUMPS_IN_A_LEVEL &&
-		   start+count < NumLumps() &&
-		   (IsLevelLump(directory[start+count].lump->name) ||
-			IsGLNodeLump(directory[start+count].lump->name)) )
-	{
-		count++;
-	}
-
-	return start + count - 1;
-}
-
-int Wad_file::LevelFindByNumber(int number)
-{
-	// sanity check
-	if (number <= 0 || number > 99)
-		return -1;
-
-	char buffer[16];
-	int index;
-
-	 // try MAP## first
-	snprintf(buffer, sizeof(buffer), "MAP%02d", number);
-
-	index = LevelFind(buffer);
-	if (index >= 0)
-		return index;
-
-	// otherwise try E#M#
-	snprintf(buffer, sizeof(buffer), "E%dM%d", MAX(1, number / 10), number % 10);
-
-	index = LevelFind(buffer);
-	if (index >= 0)
-		return index;
-
-	return -1;  // not found
-}
-
-
-int Wad_file::LevelFindFirst()
-{
-	if (levels.size() > 0)
-		return 0;
-	else
-		return -1;  // none
-}
-
-
-int Wad_file::LevelHeader(int lev_num) const
-{
-	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
-
-	return levels[lev_num];
-}
-
-
-MapFormat Wad_file::LevelFormat(int lev_num)
-{
-	int start = LevelHeader(lev_num);
-
-	if (directory[start+1].lump->name.noCaseEqual("TEXTMAP"))
-		return MapFormat::udmf;
-
-	if (start + LL_BEHAVIOR < NumLumps())
-	{
-		const SString &name = GetLump(start + LL_BEHAVIOR)->Name();
-
-		if (name.noCaseEqual("BEHAVIOR"))
-			return MapFormat::hexen;
-	}
-
-	return MapFormat::doom;
-}
-
-
-Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group)
-{
-	for(const LumpRef &lumpRef : directory)
-	{
-		if(lumpRef.ns != group || !lumpRef.lump->name.noCaseEqual(name))
-			continue;
-		return lumpRef.lump;
-	}
-
-	return nullptr; // not found!
-}
-
-
-bool Wad_file::ReadDirectory()
-{
-	rewind(fp);
-
-	raw_wad_header_t header;
-
-	if (fread(&header, sizeof(header), 1, fp) != 1)
-	{
-		LogPrintf("Error reading WAD header.\n");
-		return false;
-	}
-
-	kind = header.ident[0] == 'I' ? WadKind::IWAD : WadKind::PWAD;
-
-	dir_start = LE_S32(header.dir_start);
-	dir_count = LE_S32(header.num_entries);
-
-	if (dir_count < 0)
-	{
-		LogPrintf("Bad WAD header, invalid number of entries (%d)\n", dir_count);
-		return false;
-	}
-
-	crc32_c checksum;
-
-	if (fseek(fp, dir_start, SEEK_SET) != 0)
-	{
-		LogPrintf("Error seeking to WAD directory.\n");
-		return false;
-	}
-
-	for (int _ = 0 ; _ < dir_count ; _++)
-	{
-		raw_wad_entry_t entry;
-
-		if (fread(&entry, sizeof(entry), 1, fp) != 1)
-		{
-			LogPrintf("Error reading entry in WAD directory.\n");
-			return false;
-		}
-
-		// update the checksum with each _RAW_ entry
-		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
-
-		Lump_c *lump = new Lump_c(this, &entry);
-
-		// check if entry is valid
-		// [ the total_size value was computed in parent function ]
-		if (lump->l_length != 0)
-		{
-			const int max_size = 99999999;
-
-			if (lump->l_length < 0 || lump->l_start < 0 ||
-				lump->l_length >= max_size ||
-				lump->l_start > total_size ||
-				lump->l_start + lump->l_length > total_size)
-			{
-				LogPrintf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
-						  lump->name.c_str(), lump->l_start, lump->l_length, total_size);
-
-				lump->l_start = 0;
-				lump->l_length = 0;
-			}
-		}
-
-		LumpRef lumpRef = {};	// Currently not set, will set in ResolveNamespace
-		lumpRef.lump = lump;
-		directory.push_back(lumpRef);
-	}
-
-	dir_crc = checksum.raw;
-
-	DebugPrintf("Loaded directory. crc = %08x\n", dir_crc);
-	return true;
-}
-
-
-void Wad_file::DetectLevels()
-{
-	// Determine what lumps in the wad are level markers, based on
-	// the lumps which follow it.  Store the result in the 'levels'
-	// vector.  The test here is rather lax, as I'm told certain
-	// wads exist with a non-standard ordering of level lumps.
-
-	for (int k = 0 ; k+1 < NumLumps() ; k++)
-	{
-		int part_mask  = 0;
-		int part_count = 0;
-
-		// check for UDMF levels
-		if (global::udmf_testing && directory[k+1].lump->name.noCaseEqual("TEXTMAP"))
-		{
-			levels.push_back(k);
-			DebugPrintf("Detected level : %s (UDMF)\n", directory[k].lump->name.c_str());
-			continue;
-		}
-
-		// check whether the next four lumps are level lumps
-		for (int i = 1 ; i <= 4 ; i++)
-		{
-			if (k + i >= NumLumps())
-				break;
-
-			int part = WhatLevelPart(directory[k+i].lump->name);
-
-			if (part == 0)
-				break;
-
-			// do not allow duplicates
-			if (part_mask & (1 << part))
-				break;
-
-			part_mask |= (1 << part);
-			part_count++;
-		}
-
-		if (part_count == 4)
-		{
-			levels.push_back(k);
-
-			DebugPrintf("Detected level : %s\n", directory[k].lump->name.c_str());
-		}
-	}
-
-	// sort levels into alphabetical order
-	// (mainly for the 'N' next map and 'P' prev map commands)
-
-	SortLevels();
-}
-
-
-void Wad_file::SortLevels()
-{
-	std::sort(levels.begin(), levels.end(), level_name_CMP_pred(this));
-}
-
-
 static bool IsDummyMarker(const SString &name)
 {
 	// matches P1_START, F3_END etc...
@@ -677,516 +144,9 @@ static bool IsDummyMarker(const SString &name)
 	return false;
 }
 
-
-void Wad_file::ProcessNamespaces()
-{
-	WadNamespace active = WadNamespace::Global;
-
-	for (LumpRef &lumpRef : directory)
-	{
-		const SString &name = lumpRef.lump->name;
-
-		lumpRef.ns = WadNamespace::Global;	// default it to global
-
-		// skip the sub-namespace markers
-		if (IsDummyMarker(name))
-			continue;
-
-		if (name.noCaseEqual("S_START") || name.noCaseEqual("SS_START"))
-		{
-			if (active != WadNamespace::Global && active != WadNamespace::Sprites)
-				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
-
-			active = WadNamespace::Sprites;
-			continue;
-		}
-		if (name.noCaseEqual("S_END") || name.noCaseEqual("SS_END"))
-		{
-			if (active != WadNamespace::Sprites)
-				LogPrintf("WARNING: stray S_END marker found.\n");
-
-			active = WadNamespace::Global;
-			continue;
-		}
-
-		if (name.noCaseEqual("F_START") || name.noCaseEqual("FF_START"))
-		{
-			if (active != WadNamespace::Global && active != WadNamespace::Flats)
-				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
-
-			active = WadNamespace::Flats;
-			continue;
-		}
-		if (name.noCaseEqual("F_END") || name.noCaseEqual("FF_END"))
-		{
-			if (active != WadNamespace::Flats)
-				LogPrintf("WARNING: stray F_END marker found.\n");
-
-			active = WadNamespace::Global;
-			continue;
-		}
-
-		if (name.noCaseEqual("TX_START"))
-		{
-			if (active != WadNamespace::Global && active != WadNamespace::TextureLumps)
-				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
-
-			active = WadNamespace::TextureLumps;
-			continue;
-		}
-		if (name.noCaseEqual("TX_END"))
-		{
-			if (active != WadNamespace::TextureLumps)
-				LogPrintf("WARNING: stray TX_END marker found.\n");
-
-			active = WadNamespace::Global;
-			continue;
-		}
-
-		if (active != WadNamespace::Global)
-		{
-			if (lumpRef.lump->Length() == 0)
-			{
-				LogPrintf("WARNING: skipping empty lump %s in %s_START\n",
-						  name.c_str(), WadNamespaceString(active));
-				continue;
-			}
-
-			lumpRef.ns = active;
-		}
-	}
-
-	if (active != WadNamespace::Global)
-		LogPrintf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
-}
-
-
-bool Wad_file::WasExternallyModified()
-{
-	if (fseek(fp, 0, SEEK_END) != 0)
-		FatalError("Error determining WAD size.\n");
-
-	if (total_size != (int)ftell(fp))
-		return true;
-
-	rewind(fp);
-
-	raw_wad_header_t header;
-
-	if (fread(&header, sizeof(header), 1, fp) != 1)
-		FatalError("Error reading WAD header.\n");
-
-	if (dir_start != LE_S32(header.dir_start) ||
-		dir_count != LE_S32(header.num_entries))
-		return true;
-
-	fseek(fp, dir_start, SEEK_SET);
-
-	crc32_c checksum;
-
-	for (int _ = 0 ; _ < dir_count ; _++)
-	{
-		raw_wad_entry_t entry;
-
-		if (fread(&entry, sizeof(entry), 1, fp) != 1)
-			FatalError("Error reading WAD directory.\n");
-
-		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
-
-	}
-
-	DebugPrintf("New CRC : %08x\n", checksum.raw);
-
-	return (dir_crc != checksum.raw);
-}
-
-
 //------------------------------------------------------------------------
 //  WAD Writing Interface
 //------------------------------------------------------------------------
-
-void Wad_file::BeginWrite()
-{
-	if (mode == WadOpenMode::read)
-		BugError("Wad_file::BeginWrite() called on read-only file\n");
-
-	if (begun_write)
-		BugError("Wad_file::BeginWrite() called again without EndWrite()\n");
-
-	// put the size into a quantum state
-	total_size = 0;
-
-	begun_write = true;
-}
-
-
-void Wad_file::EndWrite()
-{
-	if (! begun_write)
-		BugError("Wad_file::EndWrite() called without BeginWrite()\n");
-
-	begun_write = false;
-
-	WriteDirectory();
-
-	// reset the insertion point
-	insert_point = -1;
-}
-
-
-void Wad_file::RenameLump(int index, const char *new_name)
-{
-	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= index && index < NumLumps());
-
-	Lump_c *lump = directory[index].lump;
-	SYS_ASSERT(lump);
-
-	lump->Rename(new_name);
-}
-
-
-void Wad_file::RemoveLumps(int index, int count)
-{
-	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= index && index < NumLumps());
-	SYS_ASSERT(directory[index].lump);
-
-	int i;
-
-	for (i = 0 ; i < count ; i++)
-	{
-		delete directory[index + i].lump;
-	}
-
-	for (i = index ; i+count < NumLumps() ; i++)
-		directory[i] = directory[i+count];
-
-	directory.resize(directory.size() - (size_t)count);
-
-	FixLevelGroup(index, 0, count);
-
-	// reset the insertion point
-	insert_point = -1;
-
-	ProcessNamespaces();
-}
-
-
-void Wad_file::RemoveLevel(int lev_num)
-{
-	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
-
-	int start  = LevelHeader(lev_num);
-	int finish = LevelLastLump(lev_num);
-
-	// NOTE: FixGroup() will remove the entry in levels[]
-
-	RemoveLumps(start, finish - start + 1);
-}
-
-
-void Wad_file::RemoveGLNodes(int lev_num)
-{
-	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
-
-	int start  = LevelHeader(lev_num);
-	int finish = LevelLastLump(lev_num);
-
-	start++;
-
-	while (start <= finish &&
-		   IsLevelLump(directory[start].lump->name))
-	{
-		start++;
-	}
-
-	int count = 0;
-
-	while (start+count <= finish &&
-		   IsGLNodeLump(directory[start+count].lump->name))
-	{
-		count++;
-	}
-
-	if (count > 0)
-		RemoveLumps(start, count);
-}
-
-
-void Wad_file::RemoveZNodes(int lev_num)
-{
-	SYS_ASSERT(begun_write);
-	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
-
-	int start  = LevelHeader(lev_num);
-	int finish = LevelLastLump(lev_num);
-
-	for ( ; start <= finish ; start++)
-	{
-		if (directory[start].lump->name.noCaseEqual("ZNODES"))
-		{
-			RemoveLumps(start, 1);
-			break;
-		}
-	}
-}
-
-
-void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
-{
-	bool did_remove = false;
-
-	for (int k = 0 ; k < (int)levels.size() ; k++)
-	{
-		if (levels[k] < index)
-			continue;
-
-		if (levels[k] < index + num_removed)
-		{
-			levels[k] = -1;
-			did_remove = true;
-			continue;
-		}
-
-		levels[k] += num_added;
-		levels[k] -= num_removed;
-	}
-
-	if (did_remove)
-	{
-		std::vector<int>::iterator ENDP;
-		ENDP = std::remove(levels.begin(), levels.end(), -1);
-		levels.erase(ENDP, levels.end());
-	}
-}
-
-
-Lump_c * Wad_file::AddLump(const SString &name, int max_size)
-{
-	SYS_ASSERT(begun_write);
-
-	begun_max_size = max_size;
-
-	int start = PositionForWrite(max_size);
-
-	Lump_c *lump = new Lump_c(this, name, start, 0);
-
-	// check if the insert_point is still valid
-	if (insert_point >= NumLumps())
-		insert_point = -1;
-
-	if (insert_point >= 0)
-	{
-		FixLevelGroup(insert_point, 1, 0);
-
-		LumpRef lumpRef = {};
-		lumpRef.lump = lump;
-		directory.insert(directory.begin() + insert_point, lumpRef);
-
-		insert_point++;
-	}
-	else  // add to end
-	{
-		LumpRef lumpRef = {};
-		lumpRef.lump = lump;
-		directory.push_back(lumpRef);
-	}
-
-	ProcessNamespaces();
-
-	return lump;
-}
-
-
-void Wad_file::RecreateLump(Lump_c *lump, int max_size)
-{
-	SYS_ASSERT(begun_write);
-
-	begun_max_size = max_size;
-
-	int start = PositionForWrite(max_size);
-
-	lump->l_start  = start;
-	lump->l_length = 0;
-}
-
-
-Lump_c * Wad_file::AddLevel(const SString &name, int max_size, int *lev_num)
-{
-	int actual_point = insert_point;
-
-	if (actual_point < 0 || actual_point > NumLumps())
-		actual_point = NumLumps();
-
-	Lump_c * lump = AddLump(name, max_size);
-
-	if (lev_num)
-	{
-		*lev_num = (int)levels.size();
-	}
-
-	levels.push_back(actual_point);
-
-	return lump;
-}
-
-
-void Wad_file::InsertPoint(int index)
-{
-	// this is validated on usage
-	insert_point = index;
-}
-
-
-int Wad_file::HighWaterMark()
-{
-	int offset = (int)sizeof(raw_wad_header_t);
-
-	for (const LumpRef &lumpRef : directory)
-	{
-		// ignore zero-length lumps (their offset could be anything)
-		const Lump_c *lump = lumpRef.lump;
-		if (lump->Length() <= 0)
-			continue;
-
-		int l_end = lump->l_start + lump->l_length;
-
-		l_end = ((l_end + 3) / 4) * 4;
-
-		if (offset < l_end)
-			offset = l_end;
-	}
-
-	return offset;
-}
-
-
-int Wad_file::FindFreeSpace(int length)
-{
-	length = ((length + 3) / 4) * 4;
-
-	// collect non-zero length lumps and sort by their offset
-	std::vector<Lump_c *> sorted_dir;
-
-	for (const LumpRef &lumpRef : directory)
-	{
-		Lump_c *lump = lumpRef.lump;
-		if (lump->Length() > 0)
-			sorted_dir.push_back(lump);
-	}
-
-	std::sort(sorted_dir.begin(), sorted_dir.end(), Lump_c::offset_CMP_pred());
-
-
-	int offset = (int)sizeof(raw_wad_header_t);
-
-	for (unsigned int k = 0 ; k < sorted_dir.size() ; k++)
-	{
-		Lump_c *lump = sorted_dir[k];
-
-		int l_start = lump->l_start;
-		int l_end   = lump->l_start + lump->l_length;
-
-		l_end = ((l_end + 3) / 4) * 4;
-
-		if (l_end <= offset)
-			continue;
-
-		if (l_start >= offset + length)
-			continue;
-
-		// the lump overlapped the current gap, so bump offset
-
-		offset = l_end;
-	}
-
-	return offset;
-}
-
-
-int Wad_file::PositionForWrite(int max_size)
-{
-	int want_pos;
-
-	if (max_size <= 0)
-		want_pos = HighWaterMark();
-	else
-		want_pos = FindFreeSpace(max_size);
-
-	// determine if position is past end of file
-	// (difference should only be a few bytes)
-	//
-	// Note: doing this for every new lump may be a little expensive,
-	//       but trying to optimise it away will just make the code
-	//       needlessly complex and hard to follow.
-
-	if (fseek(fp, 0, SEEK_END) < 0)
-		FatalError("Error seeking to new write position.\n");
-
-	total_size = (int)ftell(fp);
-
-	if (total_size < 0)
-		FatalError("Error seeking to new write position.\n");
-
-	if (want_pos > total_size)
-	{
-		if (want_pos >= total_size + 8)
-			FatalError("Internal Error: lump positions are beyond end of file\n(%d > %d)\n",
-				want_pos, total_size);
-
-		WritePadding(want_pos - total_size);
-	}
-	else if (want_pos == total_size)
-	{
-		/* ready to write */
-	}
-	else
-	{
-		if (fseek(fp, want_pos, SEEK_SET) < 0)
-			FatalError("Error seeking to new write position.\n");
-	}
-
-	DebugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
-
-	return want_pos;
-}
-
-
-bool Wad_file::FinishLump(int final_size)
-{
-	fflush(fp);
-
-	// sanity check
-	if (begun_max_size >= 0)
-		if (final_size > begun_max_size)
-			BugError("Internal Error: wrote too much in lump (%d > %d)\n",
-					 final_size, begun_max_size);
-
-	int pos = (int)ftell(fp);
-
-	if (pos & 3)
-	{
-		WritePadding(4 - (pos & 3));
-	}
-
-	fflush(fp);
-	return true;
-}
-
-
-int Wad_file::WritePadding(int count)
-{
-	static byte zeros[8] = { 0,0,0,0,0,0,0,0 };
-
-	SYS_ASSERT(1 <= count && count <= 8);
-
-	fwrite(zeros, count, 1, fp);
-
-	return count;
-}
 
 
 //
@@ -1201,70 +161,6 @@ int Wad_file::WritePadding(int count)
 //                 - instead of ftruncate, use _chsize() or _chsize_s()
 //                   [ investigate what the difference is.... ]
 //
-
-
-void Wad_file::WriteDirectory()
-{
-	dir_start = PositionForWrite();
-	dir_count = NumLumps();
-
-	DebugPrintf("WriteDirectory...\n");
-	DebugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
-
-	crc32_c checksum;
-
-	for (const LumpRef &lumpRef : directory)
-	{
-		Lump_c *lump = lumpRef.lump;
-		SYS_ASSERT(lump);
-
-		raw_wad_entry_t entry;
-
-		lump->MakeEntry(&entry);
-
-		// update the CRC
-		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
-
-		if (fwrite(&entry, sizeof(entry), 1, fp) != 1)
-			ThrowException("Error writing WAD directory.\n");
-	}
-
-	dir_crc = checksum.raw;
-	DebugPrintf("dir_crc: %08x\n", dir_crc);
-
-	fflush(fp);
-
-	total_size = (int)ftell(fp);
-	DebugPrintf("total_size: %d\n", total_size);
-
-	if (total_size < 0)
-		ThrowException("Error determining WAD size.\n");
-
-	// update header at start of file
-
-	rewind(fp);
-
-	raw_wad_header_t header;
-
-	memcpy(header.ident, (kind == WadKind::IWAD) ? "IWAD" : "PWAD", 4);
-
-	header.dir_start   = LE_U32(dir_start);
-	header.num_entries = LE_U32(dir_count);
-
-	if (fwrite(&header, sizeof(header), 1, fp) != 1)
-		ThrowException("Error writing WAD header.\n");
-
-	fflush(fp);
-}
-
-
-bool Wad_file::Backup(const char *new_filename)
-{
-	fflush(fp);
-
-	return FileCopy(PathName(), new_filename);
-}
-
 
 //------------------------------------------------------------------------
 //  GLOBAL API
@@ -1471,7 +367,65 @@ bool Wad::readFromPath(const SString& path)
 bool Wad::writeToPath(const SString& path) const
 {
 	// TODO
-	
+	FILE *f = fopen(path.c_str(), "wb");
+	if(!f)
+	{
+		LogPrintf("Couldn't open '%s' for writing.\n", path.c_str());
+		return false;
+	}
+
+	if(mKind == WadKind::IWAD)
+		fputs("IWAD", f);
+	else
+		fputs("PWAD", f);
+
+	int32_t data = static_cast<int32_t>(mLumps.size());
+	if(!fwrite(&data, 4, 1, f))
+	{
+		fclose(f);
+		return false;
+	}
+	size_t totallumpsize = 0;
+	for(const auto &lump : mLumps)
+		totallumpsize += lump.getSize();
+
+	data = static_cast<int32_t>(totallumpsize + 12);
+	if(!fwrite(&data, 4, 1, f))
+	{
+		fclose(f);
+		return false;
+	}
+	for(const auto &lump : mLumps)
+		if(fwrite(lump.getData(), 1, lump.getSize(), f) < lump.getSize())
+		{
+			fclose(f);
+			return false;
+		}
+	size_t filepos = 12;
+	for(const auto &lump : mLumps)
+	{
+		data = static_cast<uint32_t>(filepos);
+		if(!fwrite(&data, 4, 1, f))
+		{
+			fclose(f);
+			return false;
+		}
+		data = static_cast<uint32_t>(lump.getSize());
+		if(!fwrite(&data, 4, 1, f))
+		{
+			fclose(f);
+			return false;
+		}
+		filepos += lump.getSize();
+		if(fwrite(lump.getName(), 1, 8, f) < 8)
+		{
+			fclose(f);
+			return false;
+		}
+	}
+
+	fclose(f);
+	return true;
 }
 
 //
@@ -1602,6 +556,48 @@ void Wad::removeGLNodes(int lev_num)
 		removeLumps(start, count);
 }
 
+//
+// Level format
+//
+MapFormat Wad::levelFormat(int lev_num) const
+{
+	int start = levelHeader(lev_num);
+
+	if (!y_stricmp(mLumps[start + 1].getName(), "TEXTMAP"))
+		return MapFormat::udmf;
+
+	if (start + LL_BEHAVIOR < (int)mLumps.size())
+	{
+		const SString &name = getLump(start + LL_BEHAVIOR).getName();
+
+		if (name.noCaseEqual("BEHAVIOR"))
+			return MapFormat::hexen;
+	}
+
+	return MapFormat::doom;
+}
+
+//
+// Add level
+//
+Lump &Wad::addLevel(const SString &name, int max_size, int *lev_num)
+{
+	int actualPoint = mInsertionPoint;
+	if(actualPoint < 0 || actualPoint > (int)mLumps.size())
+		actualPoint = (int)mLumps.size();
+
+	Lump &lump = addNewLump();
+	lump.setName(name);
+
+	if (lev_num)
+	{
+		*lev_num = (int)mLevels.size();
+	}
+
+	mLevels.push_back(actualPoint);
+
+	return lump;
+}
 
 //
 // Remove level
@@ -1664,6 +660,18 @@ Lump *Wad::findLump(const SString &name)
 }
 
 //
+// Find lump number
+//
+int Wad::findLumpNum(const SString &name) const
+{
+	for (int k = (int)mLumps.size() - 1 ; k >= 0 ; k--)
+		if (!y_stricmp(mLumps[k].getName(), name.c_str()))
+			return k;
+
+	return -1;  // not found
+}
+
+//
 // Find in namespace
 //
 const Lump *Wad::findLumpInNamespace(const SString &name, WadNamespace group) const
@@ -1690,11 +698,29 @@ Lump *Wad::findLumpInNamespace(const SString &name, WadNamespace group)
 }
 
 //
+// Rename lump
+//
+void Wad::renameLump(int index, const SString &new_name)
+{
+	mLumps[index].setName(new_name);
+}
+
+//
 // Appends an empty lump for editing
 //
-Lump &Wad::appendNewLump()
+Lump &Wad::addNewLump()
 {
-	mLumps.push_back(NamespacedLump());
+	if(mInsertionPoint >= (int)mLumps.size())
+		mInsertionPoint = -1;
+	if(mInsertionPoint >= 0)
+	{
+		fixLevelGroup(mInsertionPoint, 1, 0);
+		mLumps.insert(mLumps.begin() + mInsertionPoint, NamespacedLump());
+		++mInsertionPoint;
+	}
+	else	// add to end
+		mLumps.push_back(NamespacedLump());
+
 	processNamespaces();
 	return mLumps.back();
 }
@@ -1718,6 +744,8 @@ void Wad::removeLumps(int index, int count)
 	mLumps.erase(mLumps.begin() + index, mLumps.begin() + index + count);
 
 	fixLevelGroup(index, 0, count);
+
+	mInsertionPoint = -1;
 
 	processNamespaces();
 }

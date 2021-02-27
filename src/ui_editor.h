@@ -26,7 +26,6 @@
 class Fl_Menu_Bar;
 class Fl_Text_Buffer;
 class Wad;
-class Wad_file;
 class UI_TedStatusBar;
 class UI_TedWrapper;
 

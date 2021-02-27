@@ -381,44 +381,37 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-Lump_c *Instance::Load_LookupAndSeek(const char *name) const
+const Lump *Instance::Load_LookupAndSeek(const char *name) const
 {
-	int idx = load_wad->LevelLookupLump(loading_level, name);
+	int idx = load_wad->levelLookupLump(loading_level, name);
 
 	if (idx < 0)
 		return NULL;
 
-	Lump_c *lump = load_wad->GetLump(idx);
+	const Lump &lump = load_wad->getLump(idx);
 
-	if (! lump->Seek())
-	{
-		LogPrintf("WARNING: failed to seek to %s lump!\n", name);
-	}
-
-	return lump;
+	return &lump;
 }
 
 
 void Instance::LoadVertices()
 {
-	Lump_c *lump = Load_LookupAndSeek("VERTEXES");
+	const Lump *lump = Load_LookupAndSeek("VERTEXES");
 	if (! lump)
 		ThrowException("No vertex lump!\n");
 
-	int count = lump->Length() / sizeof(raw_vertex_t);
+	int count = lump->getSize() / sizeof(raw_vertex_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
 	level.vertices.reserve(count);
+	auto rawvertices = reinterpret_cast<const raw_vertex_t *>(lump->getData());
 
 	for (int i = 0 ; i < count ; i++)
 	{
-		raw_vertex_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading vertices.\n");
+		const raw_vertex_t &raw = rawvertices[i];
 
 		Vertex *vert = new Vertex;
 
@@ -432,24 +425,22 @@ void Instance::LoadVertices()
 
 void Instance::LoadSectors()
 {
-	Lump_c *lump = Load_LookupAndSeek("SECTORS");
+	const Lump *lump = Load_LookupAndSeek("SECTORS");
 	if (! lump)
 		ThrowException("No sector lump!\n");
 
-	int count = lump->Length() / sizeof(raw_sector_t);
+	int count = lump->getSize() / sizeof(raw_sector_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetSectors: num = %d\n", count);
 # endif
 
 	level.sectors.reserve(count);
+	auto rawsectors = reinterpret_cast<const raw_sector_t *>(lump->getData());
 
 	for (int i = 0 ; i < count ; i++)
 	{
-		raw_sector_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading sectors.\n");
+		raw_sector_t raw = rawsectors[i];
 
 		Sector *sec = new Sector;
 
@@ -575,79 +566,60 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 
 void Instance::LoadHeader()
 {
-	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
+	const Lump &lump = load_wad->getLump(load_wad->levelHeader(loading_level));
 
-	int length = lump->Length();
+	int length = lump.getSize();
 
 	if (length == 0)
 		return;
 
-	level.headerData.resize(length);
-
-	if (! lump->Seek())
-		ThrowException("Error seeking to header lump!\n");
-
-	if (! lump->Read(&level.headerData[0], length))
-		ThrowException("Error reading header lump.\n");
+	level.headerData.assign(lump.getData(), lump.getData() + length);
 }
 
 
 void Instance::LoadBehavior()
 {
 	// IOANCH 9/2015: support Hexen maps
-	Lump_c *lump = Load_LookupAndSeek("BEHAVIOR");
+	const Lump *lump = Load_LookupAndSeek("BEHAVIOR");
 	if (! lump)
 		ThrowException("No BEHAVIOR lump!\n");
 
-	int length = lump->Length();
+	int length = lump->getSize();
 
-	level.behaviorData.resize(length);
-
-	if (length == 0)
-		return;
-
-	if (! lump->Read(&level.behaviorData[0], length))
-		ThrowException("Error reading BEHAVIOR.\n");
+	level.behaviorData.assign(lump->getData(), lump->getData() + length);
 }
 
 
 void Instance::LoadScripts()
 {
 	// the SCRIPTS lump is usually absent
-	Lump_c *lump = Load_LookupAndSeek("SCRIPTS");
+	const Lump *lump = Load_LookupAndSeek("SCRIPTS");
 	if (! lump)
 		return;
 
-	int length = lump->Length();
+	int length = lump->getSize();
 
-	level.scriptsData.resize(length);
-
-	if (length == 0)
-		return;
-
-	if (! lump->Read(&level.scriptsData[0], length))
-		ThrowException("Error reading SCRIPTS.\n");
+	level.scriptsData.assign(lump->getData(), lump->getData() + length);
 }
 
 
 void Instance::LoadThings()
 {
-	Lump_c *lump = Load_LookupAndSeek("THINGS");
+	const Lump *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
-	int count = lump->Length() / sizeof(raw_thing_t);
+	int count = lump->getSize() / sizeof(raw_thing_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
 
+	auto rawthings = reinterpret_cast<const raw_thing_t *>(lump->getData());
+
 	for (int i = 0 ; i < count ; i++)
 	{
-		raw_thing_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading things.\n");
+		const raw_thing_t &raw = rawthings[i];
 
 		Thing *th = new Thing;
 
@@ -666,22 +638,21 @@ void Instance::LoadThings()
 // IOANCH 9/2015
 void Instance::LoadThings_Hexen()
 {
-	Lump_c *lump = Load_LookupAndSeek("THINGS");
+	const Lump *lump = Load_LookupAndSeek("THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
-	int count = lump->Length() / sizeof(raw_hexen_thing_t);
+	int count = lump->getSize() / sizeof(raw_hexen_thing_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetThings: num = %d\n", count);
 # endif
 
+	auto rawthings = reinterpret_cast<const raw_hexen_thing_t *>(lump->getData());
+
 	for (int i = 0; i < count; ++i)
 	{
-		raw_hexen_thing_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading things.\n");
+		const raw_hexen_thing_t &raw = rawthings[i];
 
 		Thing *th = new Thing;
 
@@ -708,22 +679,21 @@ void Instance::LoadThings_Hexen()
 
 void Instance::LoadSideDefs()
 {
-	Lump_c *lump = Load_LookupAndSeek("SIDEDEFS");
+	const Lump *lump = Load_LookupAndSeek("SIDEDEFS");
 	if(!lump)
 		ThrowException("No sidedefs lump!\n");
 
-	int count = lump->Length() / sizeof(raw_sidedef_t);
+	int count = lump->getSize() / sizeof(raw_sidedef_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetSidedefs: num = %d\n", count);
 # endif
 
+	auto rawsides = reinterpret_cast<const raw_sidedef_t *>(lump->getData());
+
 	for (int i = 0 ; i < count ; i++)
 	{
-		raw_sidedef_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading sidedefs.\n");
+		raw_sidedef_t raw = rawsides[i];
 
 		SideDef *sd = new SideDef;
 
@@ -749,11 +719,11 @@ void Instance::LoadSideDefs()
 
 void Instance::LoadLineDefs()
 {
-	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
+	const Lump *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
-	int count = lump->Length() / sizeof(raw_linedef_t);
+	int count = lump->getSize() / sizeof(raw_linedef_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetLinedefs: num = %d\n", count);
@@ -762,12 +732,11 @@ void Instance::LoadLineDefs()
 	if (count == 0)
 		return;
 
+	auto rawlines = reinterpret_cast<const raw_linedef_t *>(lump->getData());
+
 	for (int i = 0 ; i < count ; i++)
 	{
-		raw_linedef_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading linedefs.\n");
+		const raw_linedef_t &raw = rawlines[i];
 
 		LineDef *ld = new LineDef;
 
@@ -795,11 +764,11 @@ void Instance::LoadLineDefs()
 // IOANCH 9/2015
 void Instance::LoadLineDefs_Hexen()
 {
-	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
+	const Lump *lump = Load_LookupAndSeek("LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
-	int count = lump->Length() / sizeof(raw_hexen_linedef_t);
+	int count = lump->getSize() / sizeof(raw_hexen_linedef_t);
 
 # if DEBUG_LOAD
 	PrintDebug("GetLinedefs: num = %d\n", count);
@@ -808,12 +777,11 @@ void Instance::LoadLineDefs_Hexen()
 	if (count == 0)
 		return;
 
+	auto rawlines = reinterpret_cast<const raw_hexen_linedef_t *>(lump->getData());
+
 	for (int i = 0 ; i < count ; i++)
 	{
-		raw_hexen_linedef_t raw;
-
-		if (! lump->Read(&raw, sizeof(raw)))
-			ThrowException("Error reading linedefs.\n");
+		const raw_hexen_linedef_t &raw = rawlines[i];
 
 		LineDef *ld = new LineDef;
 
@@ -926,7 +894,7 @@ void Instance::LoadLevel(const Wad &wad, const SString &level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		main_win->SetTitle(wad.path(), level, false);
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -947,12 +915,12 @@ void Instance::LoadLevel(const Wad &wad, const SString &level)
 }
 
 
-void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
+void Instance::LoadLevelNum(const Wad &wad, int lev_num)
 {
-	load_wad = wad;
+	load_wad = &wad;
 	loading_level = lev_num;
 
-	Level_format = load_wad->LevelFormat(loading_level);
+	Level_format = load_wad->levelFormat(loading_level);
 
 	level.basis.clearAll();
 
@@ -1064,12 +1032,12 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	/* OK, open it */
 
 	// this wad replaces the current PWAD
-	gInstance.ReplaceEditWad(wad);
+	gInstance.ReplaceEditWad(std::move(wad));
 
 	// always grab map_name from the actual level
 	{
-		int idx = gInstance.edit_wad->LevelHeader(lev_num);
-		map_name  = gInstance.edit_wad->GetLump(idx)->Name();
+		int idx = gInstance.editWad.levelHeader(lev_num);
+		map_name  = gInstance.editWad.getLump(idx).getName();
 	}
 
 	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.editWad.path().c_str());
@@ -1094,7 +1062,7 @@ void Instance::CMD_OpenMap()
 	SString map_name;
 	bool did_load = false;
 
-	const Wad *wad = dialog->Run(&map_name, &did_load);
+	Wad *wad = dialog->Run(&map_name, &did_load);
 
 	delete dialog;
 
@@ -1128,7 +1096,7 @@ void Instance::CMD_OpenMap()
 		SYS_ASSERT(wad != &editWad);
 		SYS_ASSERT(wad != &gameWad);
 
-		ReplaceEditWad(*wad);
+		ReplaceEditWad(std::move(*wad));
 		wad = &editWad;	// keep pointer
 
 		new_resources = true;
@@ -1216,7 +1184,7 @@ void Instance::CMD_FlipMap()
 		return;
 
 
-	const Wad &wad = editWad.hasLumps() ? editWad : gameWad;
+	const Wad &wad = editWad.isLoaded() ? editWad : gameWad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad.levelFind(Level_name);
@@ -1276,7 +1244,7 @@ void Instance::CMD_FlipMap()
 	int lump_idx = wad.levelHeader(lev_idx);
 	const Lump & lump  = wad.getLump(lump_idx);
 
-	const SString &map_name = lump->Name();
+	const SString &map_name = lump.getName();
 
 	LogPrintf("Flipping Map to : %s\n", map_name.c_str());
 
@@ -1292,14 +1260,12 @@ void Instance::SaveHeader(const SString &level)
 {
 	int size = (int)this->level.headerData.size();
 
-	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
+	Lump &lump = editWad.addLevel(level, size, &saving_level);
 
 	if (size > 0)
 	{
-		lump->Write(&this->level.headerData[0], size);
+		lump.write(&this->level.headerData[0], size);
 	}
-
-	lump->Finish();
 }
 
 
@@ -1307,14 +1273,13 @@ void Instance::SaveBehavior()
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = edit_wad->AddLump("BEHAVIOR", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("BEHAVIOR");
 
 	if (size > 0)
 	{
-		lump->Write(&level.behaviorData[0], size);
+		lump.write(&level.behaviorData[0], size);
 	}
-
-	lump->Finish();
 }
 
 
@@ -1324,19 +1289,18 @@ void Instance::SaveScripts()
 
 	if (size > 0)
 	{
-		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
+		Lump &lump = editWad.addNewLump();
+		lump.setName("SCRIPTS");
 
-		lump->Write(&level.scriptsData[0], size);
-		lump->Finish();
+		lump.write(&level.scriptsData[0], size);
 	}
 }
 
 
 void Instance::SaveVertices()
 {
-	int size = level.numVertices() * (int)sizeof(raw_vertex_t);
-
-	Lump_c *lump = edit_wad->AddLump("VERTEXES", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("VERTEXES");
 
 	for (const Vertex *vert : level.vertices)
 	{
@@ -1345,18 +1309,15 @@ void Instance::SaveVertices()
 		raw.x = LE_S16(COORD_TO_INT(vert->raw_x));
 		raw.y = LE_S16(COORD_TO_INT(vert->raw_y));
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveSectors()
 {
-	int size = level.numSectors() * (int)sizeof(raw_sector_t);
-
-	Lump_c *lump = edit_wad->AddLump("SECTORS", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("SECTORS");
 
 	for (const Sector *sec : level.sectors)
 	{
@@ -1372,18 +1333,15 @@ void Instance::SaveSectors()
 		raw.type  = LE_U16(sec->type);
 		raw.tag   = LE_U16(sec->tag);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveThings()
 {
-	int size = level.numThings() * (int)sizeof(raw_thing_t);
-
-	Lump_c *lump = edit_wad->AddLump("THINGS", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1396,19 +1354,16 @@ void Instance::SaveThings()
 		raw.type    = LE_U16(th->type);
 		raw.options = LE_U16(th->options);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 // IOANCH 9/2015
 void Instance::SaveThings_Hexen()
 {
-	int size = level.numThings() * (int)sizeof(raw_hexen_thing_t);
-
-	Lump_c *lump = edit_wad->AddLump("THINGS", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1431,18 +1386,15 @@ void Instance::SaveThings_Hexen()
 		raw.args[3] = th->arg4;
 		raw.args[4] = th->arg5;
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveSideDefs()
 {
-	int size = level.numSidedefs() * (int)sizeof(raw_sidedef_t);
-
-	Lump_c *lump = edit_wad->AddLump("SIDEDEFS", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("SIDEDEFS");
 
 	for (const SideDef *side : level.sidedefs)
 	{
@@ -1457,18 +1409,15 @@ void Instance::SaveSideDefs()
 
 		raw.sector = LE_U16(side->sector);
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveLineDefs()
 {
-	int size = level.numLinedefs() * (int)sizeof(raw_linedef_t);
-
-	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1484,19 +1433,16 @@ void Instance::SaveLineDefs()
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 // IOANCH 9/2015
 void Instance::SaveLineDefs_Hexen()
 {
-	int size = level.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
-
-	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
+	Lump &lump = editWad.addNewLump();
+	lump.setName("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1517,16 +1463,14 @@ void Instance::SaveLineDefs_Hexen()
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
 
-		lump->Write(&raw, sizeof(raw));
+		lump.write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
-void Instance::EmptyLump(const char *name) const
+void Instance::EmptyLump(const char *name)
 {
-	edit_wad->AddLump(name)->Finish();
+	editWad.addNewLump().setName(name);
 }
 
 
@@ -1539,20 +1483,18 @@ void Instance::SaveLevel(const SString &level)
 	// set global level name now (for debugging code)
 	Level_name = level.asUpper();
 
-	edit_wad->BeginWrite();
-
 	// remove previous version of level (if it exists)
-	int lev_num = edit_wad->LevelFind(level);
+	int lev_num = editWad.levelFind(level);
 	int level_lump = -1;
 
 	if (lev_num >= 0)
 	{
-		level_lump = edit_wad->LevelHeader(lev_num);
+		level_lump = editWad.levelHeader(lev_num);
 
-		edit_wad->RemoveLevel(lev_num);
+		editWad.removeLevel(lev_num);
 	}
 
-	edit_wad->InsertPoint(level_lump);
+	editWad.setInsertionPoint(level_lump);
 
 	SaveHeader(level);
 
@@ -1594,7 +1536,7 @@ void Instance::SaveLevel(const SString &level)
 	}
 
 	// write out the new directory
-	edit_wad->EndWrite();
+	editWad.resetInsertionPoint();
 
 
 	// build the nodes
@@ -1606,17 +1548,17 @@ void Instance::SaveLevel(const SString &level)
 
 	// this is mainly for Next/Prev-map commands
 	// [ it doesn't change the on-disk wad file at all ]
-	edit_wad->SortLevels();
+	editWad.sortLevels();
 
-	M_WriteEurekaLump(edit_wad);
+	M_WriteEurekaLump(editWad);
 
-	M_AddRecent(edit_wad->PathName(), Level_name);
+	M_AddRecent(editWad.path(), Level_name);
 
 	Status_Set("Saved %s", Level_name.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+		main_win->SetTitle(editWad.path(), Level_name, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1631,27 +1573,14 @@ bool Instance::M_SaveMap()
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
-	if (!edit_wad)
+	if (!editWad.isLoaded())
 	{
 		return M_ExportMap();
 	}
 
-	if (edit_wad->IsReadOnly())
-	{
-		if (DLG_Confirm("Cancel|&Export",
-		                "The current pwad is a READ-ONLY file. "
-						"Do you want to export this map into a new file?") <= 0)
-		{
-			return false;
-		}
+	M_BackupWad(editWad);
 
-		return M_ExportMap();
-	}
-
-
-	M_BackupWad(edit_wad);
-
-	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName().c_str());
+	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), editWad.path().c_str());
 
 	SaveLevel(Level_name);
 
@@ -1705,48 +1634,25 @@ bool Instance::M_ExportMap()
 	// does the file already exist?  if not, create it...
 	bool exists = FileExists(filename);
 
-	Wad_file *wad;
+	Wad wad;
 
 	if (exists)
 	{
-		wad = Wad_file::Open(filename, WadOpenMode::append);
-
-		if (wad && wad->IsReadOnly())
-		{
-			DLG_Notify("Cannot export the map into a READ-ONLY file.");
-
-			delete wad;
-			return false;
-		}
+		wad.readFromPath(filename);
 
 		// adopt iwad/port/resources of the target wad
-		if (wad->FindLump(EUREKA_LUMP))
+		if (wad.findLump(EUREKA_LUMP))
 		{
-			if (! M_ParseEurekaLump(wad))
-			{
-				delete wad;
+			if (! parseEurekaLump(wad))
 				return false;
-			}
 		}
 	}
-	else
-	{
-		wad = Wad_file::Open(filename, WadOpenMode::write);
-	}
-
-	if (! wad)
-	{
-		DLG_Notify("Unable to export the map:\n\n%s",
-		           "Error creating output file");
-		return false;
-	}
-
 
 	// ask user for map name
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
 
-	dialog->PopulateButtons(toupper(Level_name[0]), wad);
+	dialog->PopulateButtons(toupper(Level_name[0]), &wad);
 
 	SString map_name = dialog->Run();
 
@@ -1755,21 +1661,17 @@ bool Instance::M_ExportMap()
 
 	// cancelled?
 	if (map_name.empty())
-	{
-		delete wad;
 		return false;
-	}
 
 
 	// we will write into the chosen wad.
 	// however if the level already exists, get confirmation first
 
-	if (exists && wad->LevelFind(map_name) >= 0)
+	if (exists && wad.levelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm("Cancel|&Overwrite",
 		                overwrite_message, "selected") <= 0)
 		{
-			delete wad;
 			return false;
 		}
 	}
@@ -1781,10 +1683,10 @@ bool Instance::M_ExportMap()
 	}
 
 
-	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
+	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad.path().c_str());
 
 	// the new wad replaces the current PWAD
-	ReplaceEditWad(wad);
+	ReplaceEditWad(std::move(wad));
 
 	SaveLevel(map_name);
 
@@ -1813,23 +1715,17 @@ void Instance::CMD_ExportMap()
 
 void Instance::CMD_CopyMap()
 {
-	if (!edit_wad)
+	if (!editWad.isLoaded())
 	{
 		DLG_Notify("Cannot copy a map unless editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
-	{
-		DLG_Notify("Cannot copy map : file is read-only.");
-		return;
-	}
-
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), &editWad);
 
-	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
+	dialog->PopulateButtons(toupper(Level_name[0]), &editWad);
 
 	SString new_name = dialog->Run();
 
@@ -1858,38 +1754,31 @@ void Instance::CMD_CopyMap()
 
 void Instance::CMD_RenameMap()
 {
-	if (!edit_wad)
+	if (!editWad.isLoaded())
 	{
 		DLG_Notify("Cannot rename a map unless editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
-	{
-		DLG_Notify("Cannot rename map : file is read-only.");
-		return;
-	}
-
-
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), &editWad /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]
 	char format = 'M';
 	{
-		int idx = game_wad->LevelFindFirst();
+		int idx = gameWad.levelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = game_wad->LevelHeader(idx);
-			const SString &name = game_wad->GetLump(idx)->Name();
+			idx = gameWad.levelHeader(idx);
+			const SString &name = gameWad.getLump(idx).getName();
 			format = toupper(name[0]);
 		}
 	}
 
-	dialog->PopulateButtons(format, edit_wad);
+	dialog->PopulateButtons(format, &editWad);
 
 	SString new_name = dialog->Run();
 
@@ -1909,20 +1798,19 @@ void Instance::CMD_RenameMap()
 
 
 	// perform the rename
-	int lev_num = edit_wad->LevelFind(Level_name);
+	int lev_num = editWad.levelFind(Level_name);
 
 	if (lev_num >= 0)
 	{
-		int level_lump = edit_wad->LevelHeader(lev_num);
+		int level_lump = editWad.levelHeader(lev_num);
 
-		edit_wad->BeginWrite();
-		edit_wad->RenameLump(level_lump, new_name.c_str());
-		edit_wad->EndWrite();
+		editWad.renameLump(level_lump, new_name);
+		editWad.resetInsertionPoint();
 	}
 
 	Level_name = new_name.asUpper();
 
-	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+	main_win->SetTitle(editWad.path(), Level_name, false);
 
 	Status_Set("Renamed to %s", Level_name.c_str());
 }
@@ -1930,7 +1818,7 @@ void Instance::CMD_RenameMap()
 
 void Instance::CMD_DeleteMap()
 {
-	if (!editWad.hasLumps())
+	if (!editWad.isLoaded())
 	{
 		DLG_Notify("Cannot delete a map unless editing a PWAD.");
 		return;
@@ -1963,19 +1851,17 @@ void Instance::CMD_DeleteMap()
 
 
 	// kick it to the curb
-	edit_wad->BeginWrite();
-	edit_wad->RemoveLevel(lev_num);
-	edit_wad->EndWrite();
-
+	editWad.removeLevel(lev_num);
+	editWad.resetInsertionPoint();
 
 	// choose a new level to load
 	{
-		if (lev_num >= edit_wad->LevelCount())
-			lev_num = edit_wad->LevelCount() - 1;
+		if (lev_num >= editWad.levelCount())
+			lev_num = editWad.levelCount() - 1;
 
-		int lump_idx = edit_wad->LevelHeader(lev_num);
-		Lump_c * lump  = edit_wad->GetLump(lump_idx);
-		const SString &map_name = lump->Name();
+		int lump_idx = editWad.levelHeader(lev_num);
+		const Lump &lump  = editWad.getLump(lump_idx);
+		const SString &map_name = lump.getName();
 
 		LogPrintf("OK.  Loading : %s....\n", map_name.c_str());
 

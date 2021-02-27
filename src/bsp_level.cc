@@ -2310,7 +2310,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &i
 }  // namespace ajbsp
 
 
-build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, const Instance &inst)
+build_result_e AJBSP_BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &inst)
 {
 	return ajbsp::BuildLevel(info, lev_idx, inst);
 }
