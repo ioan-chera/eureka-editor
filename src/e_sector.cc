@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2017 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
