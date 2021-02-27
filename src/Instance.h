@@ -318,7 +318,7 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	bool parseEurekaLump(const Wad& wad, bool keep_cmd_line_args = false);
+	bool M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
 	void M_WriteEurekaLump(Wad &wad) const;

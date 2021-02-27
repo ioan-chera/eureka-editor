@@ -857,7 +857,7 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
-bool Instance::parseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
+bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
 	const Lump* lump = wad.findLump(EUREKA_LUMP);

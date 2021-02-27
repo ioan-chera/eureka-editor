@@ -1098,7 +1098,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.editWad.isLoaded())
 		{
-			if (! gInstance.parseEurekaLump(gInstance.editWad, true /* keep_cmd_line_args */))
+			if (! gInstance.M_ParseEurekaLump(gInstance.editWad, true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.RemoveEditWad();

@@ -1026,7 +1026,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	}
 
 	if (wad.findLump(EUREKA_LUMP))
-		if (! gInstance.parseEurekaLump(wad))
+		if (! gInstance.M_ParseEurekaLump(wad))
 			return;
 
 	/* OK, open it */
@@ -1081,7 +1081,7 @@ void Instance::CMD_OpenMap()
 
 	if (did_load && wad->findLump(EUREKA_LUMP))
 	{
-		if (! parseEurekaLump(*wad))
+		if (! M_ParseEurekaLump(*wad))
 		{
 			return;
 		}
@@ -1643,7 +1643,7 @@ bool Instance::M_ExportMap()
 		// adopt iwad/port/resources of the target wad
 		if (wad.findLump(EUREKA_LUMP))
 		{
-			if (! parseEurekaLump(wad))
+			if (! M_ParseEurekaLump(wad))
 				return false;
 		}
 	}
