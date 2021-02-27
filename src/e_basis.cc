@@ -203,7 +203,7 @@ int LineDef::WhatSector(Side side, const Document &doc) const
 			return Right(doc) ? Right(doc)->sector : -1;
 
 		default:
-			BugError("bad side : %d\n", side);
+			BugError("bad side : %d\n", (int)side);
 			return -1;
 	}
 }
@@ -219,7 +219,7 @@ int LineDef::WhatSideDef(Side side) const
 			return right;
 
 		default:
-			BugError("bad side : %d\n", side);
+			BugError("bad side : %d\n", (int)side);
 			return -1;
 	}
 }
@@ -693,7 +693,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum]);
 		break;
 	default:
-		BugError("Basis::EditOperation::rawChange: bad objtype %hhu\n", objtype);
+		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
 		return; /* NOT REACHED */
 	}
 	// TODO: CHANGE THIS TO A SAFER WAY!
@@ -740,7 +740,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 		return rawDeleteLinedef(basis.doc);
 
 	default:
-		BugError("Basis::EditOperation::rawDelete: bad objtype %hhu\n", objtype);
+		BugError("Basis::EditOperation::rawDelete: bad objtype %u\n", (unsigned)objtype);
 		return NULL; /* NOT REACHED */
 	}
 }
@@ -892,7 +892,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 		break;
 
 	default:
-		BugError("Basis::EditOperation::rawInsert: bad objtype %hhu\n", objtype);
+		BugError("Basis::EditOperation::rawInsert: bad objtype %u\n", (unsigned)objtype);
 	}
 }
 

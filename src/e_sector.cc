@@ -1122,7 +1122,7 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 
 	ld = doc.hover.getClosestLine_CastingHoriz(map_x, map_y, &side);
 
-	DebugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, side);
+	DebugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, (int)side);
 
 	while (ld >= 0)
 	{
@@ -1169,7 +1169,7 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 			ld   = new_ld;
 			side = new_side;
 
-			DebugPrintf("  trying again with line #%d, side %d\n", ld, side);
+			DebugPrintf("  trying again with line #%d, side %d\n", ld, (int)side);
 			break;
 		}
 	}
