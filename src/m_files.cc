@@ -1087,10 +1087,10 @@ static void Backup_Prune(const SString &dir_name, int b_low, int b_high, size_t 
 
 	size_t backup_num = 2 + config::backup_max_space * 1024 / wad_size;
 
-	if (backup_num > config::backup_max_files)
+	if ((int)backup_num > config::backup_max_files)
 		backup_num = config::backup_max_files;
 
-	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
+	for ( ; b_low <= b_high - (int)backup_num + 1 ; b_low++)
 	{
 		FileDelete(Backup_Name(dir_name, b_low));
 	}
