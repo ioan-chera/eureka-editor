@@ -782,7 +782,7 @@ void Instance::LoadResourceFile(const SString &filename)
 		return;
 	}
 
-	if (!Wad_file::Validate(filename))
+	if (!WadFileValidate(filename))
 		throw WadReadException("Invalid WAD file: " + filename);
 
 	Wad wad;

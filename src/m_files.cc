@@ -106,7 +106,7 @@ void M_ValidateGivenFiles()
 {
 	for (const SString &pwad : global::Pwad_list)
 	{
-		if (! Wad_file::Validate(pwad))
+		if (! WadFileValidate(pwad))
 			ThrowException("Given pwad does not exist or is invalid: %s\n",
 						   pwad.c_str());
 	}
