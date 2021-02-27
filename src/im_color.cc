@@ -81,7 +81,7 @@ void Instance::W_LoadPalette()
 		return;
 	}
 
-	size_t toCopy = sizeof(raw_palette) < lump->getSize() ? sizeof(raw_palette) : lump->getSize();
+	size_t toCopy = sizeof(raw_palette) < (size_t)lump->getSize() ? sizeof(raw_palette) : (size_t)lump->getSize();
 	memcpy(raw_palette, lump->getData(), toCopy);
 
 	// find the colour closest to TRANS_PIXEL
@@ -109,7 +109,7 @@ void Instance::W_LoadColormap()
 		return;
 	}
 
-	size_t toCopy = sizeof(raw_colormap) < lump->getSize() ? sizeof(raw_colormap) : lump->getSize();
+	size_t toCopy = sizeof(raw_colormap) < (size_t)lump->getSize() ? sizeof(raw_colormap) : (size_t)lump->getSize();
 	memcpy(raw_colormap, lump->getData(), toCopy);
 
 	// ensure colormap does not transparent pixel
