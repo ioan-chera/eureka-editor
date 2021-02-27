@@ -141,7 +141,7 @@ void Instance::Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 }
 
 
-void Instance::Editor_ClearNav() 
+void Instance::Editor_ClearNav()
 {
 	edit.nav_left  = 0;
 	edit.nav_right = 0;

@@ -339,7 +339,7 @@ void Basis::setMessageForSelection(const char *verb, const selection_c &list, co
 
 //
 // create a new object, returning its objnum.  It is safe to
-// directly set the new object's fields after calling BA_New(). 
+// directly set the new object's fields after calling BA_New().
 //
 int Basis::addNew(ObjType type)
 {

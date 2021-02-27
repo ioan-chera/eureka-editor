@@ -1858,7 +1858,7 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 
 void UI_Browser::WriteUser(std::ostream &os)
 {
-	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' : 
+	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' :
 								browsers[active]->GetKind()) << '\n';
 	for(int i = 0; i < 5; i++)
 	{
