@@ -271,12 +271,10 @@ static void Determine_HomeDir(const char *argv0)
 		global::cache_dir = path;
 
 #else  // UNIX
-	char * path = StringNew(FL_PATH_MAX + 4);
+	char path[FL_PATH_MAX + 4];
 
 	if (fl_filename_expand(path, "$HOME/.eureka"))
-		home_dir = path;
-
-		StringFree(path);
+		global::home_dir = path;
 #endif
 	}
 
@@ -531,23 +529,24 @@ int Main_key_handler(int event)
 #if !defined(WIN32) && !defined(__APPLE__)
 int x11_check_focus_change(void *xevent, void *data)
 {
-	if (main_win != NULL)
+	// TODO: get multiple windows
+	if (gInstance.main_win != NULL)
 	{
 		const XEvent *xev = (const XEvent *)xevent;
 
 		Window xid = xev->xany.window;
 
-		if (fl_find(xid) == main_win)
+		if (fl_find(xid) == gInstance.main_win)
 		{
 			switch (xev->type)
 			{
 				case FocusIn:
-					app_has_focus = true;
+					global::app_has_focus = true;
 					// fprintf(stderr, "** app_has_focus: TRUE **\n");
 					break;
 
 				case FocusOut:
-					app_has_focus = false;
+					global::app_has_focus = false;
 					// fprintf(stderr, "** app_has_focus: false **\n");
 					break;
 

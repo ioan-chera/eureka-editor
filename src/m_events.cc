@@ -761,7 +761,7 @@ int Instance::EV_HandleEvent(int event)
 
 struct operation_command_t
 {
-	const editor_command_t *cmd;
+	const editor_command_t *cmd = nullptr;
 
 	SString param[MAX_EXEC_PARAM];
 };
@@ -802,9 +802,6 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 	}
 
 	operation_command_t * info = new operation_command_t;
-
-	// this ensures all parameters are NUL terminated
-	memset(info, 0, sizeof(*info));
 
 	info->cmd = cmd;
 

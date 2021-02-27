@@ -1398,7 +1398,7 @@ static void Things_LogUnknown(const Instance &inst)
 }
 
 
-const void Things_RemoveUnknown(Instance &inst)
+void Things_RemoveUnknown(Instance &inst)
 {
 	selection_c sel;
 
@@ -1585,7 +1585,7 @@ static void Things_ShowDuds(Instance &inst)
 }
 
 
-const void Things_FixDuds(Instance &inst)
+void Things_FixDuds(Instance &inst)
 {
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed unspawnable things");
