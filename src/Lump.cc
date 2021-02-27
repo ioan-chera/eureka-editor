@@ -20,6 +20,8 @@
 
 #include "m_strings.h"
 
+#include <stdarg.h>
+
 //
 // Set lump name
 // TODO: long file name of lump, when supporting packs
