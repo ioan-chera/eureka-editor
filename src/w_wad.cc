@@ -396,7 +396,7 @@ bool Wad::writeToPath(const SString& path) const
 		return false;
 	}
 	for(const auto &lump : mLumps)
-		if(fwrite(lump.getData(), 1, lump.getSize(), f) < lump.getSize())
+		if((int)fwrite(lump.getData(), 1, lump.getSize(), f) < lump.getSize())
 		{
 			fclose(f);
 			return false;
@@ -924,7 +924,7 @@ void Wad::fixLevelGroup(int index, int num_added, int num_removed)
 
 bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < masterDirSize() ; k++)
+	for (int k = 0 ; k < masterDirSize() ; k++)
 	{
 		const SString &wad_path = masterDir(k).path();
 
