@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -203,7 +203,7 @@ int LineDef::WhatSector(Side side, const Document &doc) const
 			return Right(doc) ? Right(doc)->sector : -1;
 
 		default:
-			BugError("bad side : %d\n", side);
+			BugError("bad side : %d\n", (int)side);
 			return -1;
 	}
 }
@@ -219,7 +219,7 @@ int LineDef::WhatSideDef(Side side) const
 			return right;
 
 		default:
-			BugError("bad side : %d\n", side);
+			BugError("bad side : %d\n", (int)side);
 			return -1;
 	}
 }
@@ -339,7 +339,7 @@ void Basis::setMessageForSelection(const char *verb, const selection_c &list, co
 
 //
 // create a new object, returning its objnum.  It is safe to
-// directly set the new object's fields after calling BA_New(). 
+// directly set the new object's fields after calling BA_New().
 //
 int Basis::addNew(ObjType type)
 {
@@ -693,7 +693,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum]);
 		break;
 	default:
-		BugError("Basis::EditOperation::rawChange: bad objtype %hhu\n", objtype);
+		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
 		return; /* NOT REACHED */
 	}
 	// TODO: CHANGE THIS TO A SAFER WAY!
@@ -740,7 +740,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 		return rawDeleteLinedef(basis.doc);
 
 	default:
-		BugError("Basis::EditOperation::rawDelete: bad objtype %hhu\n", objtype);
+		BugError("Basis::EditOperation::rawDelete: bad objtype %u\n", (unsigned)objtype);
 		return NULL; /* NOT REACHED */
 	}
 }
@@ -892,7 +892,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 		break;
 
 	default:
-		BugError("Basis::EditOperation::rawInsert: bad objtype %hhu\n", objtype);
+		BugError("Basis::EditOperation::rawInsert: bad objtype %u\n", (unsigned)objtype);
 	}
 }
 

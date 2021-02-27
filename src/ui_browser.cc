@@ -643,30 +643,26 @@ void UI_Browser_Box::Sort()
 }
 
 
-const char * TidyLineDesc(const char *name)
+SString TidyLineDesc(const char *name)
 {
 	// escapes any '&' characters for FLTK
 
 	if (! strchr(name, '&'))
 		return name;
 
-	static char buffer[FL_PATH_MAX];
-
-	char *dest = buffer;
+	SString buffer;
 
 	for (const char *src = name ; *src ; src++)
 	{
 		if (*src == '&')
 		{
-			*dest++ = '&';
-			*dest++ = '&';
+			buffer += '&';
+			buffer += '&';
 			continue;
 		}
 
-		*dest++ = *src;
+		buffer += *src;
 	}
-
-	*dest = 0;
 
 	return buffer;
 }
@@ -844,7 +840,7 @@ void UI_Browser_Box::Populate_LineTypes()
 		const linetype_t &info = TI->second;
 
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first,
-				 TidyLineDesc(info.desc.c_str()));
+				 TidyLineDesc(info.desc.c_str()).c_str());
 
 		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
 											  TI->first, kind, info.group);
@@ -1858,7 +1854,7 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 
 void UI_Browser::WriteUser(std::ostream &os)
 {
-	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' : 
+	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' :
 								browsers[active]->GetKind()) << '\n';
 	for(int i = 0; i < 5; i++)
 	{

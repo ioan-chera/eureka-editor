@@ -23,6 +23,8 @@
 
 #include "PrintfMacros.h"
 
+#include <string.h>
+
 #include <ostream>
 #include <string>
 #include <vector>

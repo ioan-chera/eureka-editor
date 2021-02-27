@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2018 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ void Instance::Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 }
 
 
-void Instance::Editor_ClearNav() 
+void Instance::Editor_ClearNav()
 {
 	edit.nav_left  = 0;
 	edit.nav_right = 0;
@@ -761,7 +761,7 @@ int Instance::EV_HandleEvent(int event)
 
 struct operation_command_t
 {
-	const editor_command_t *cmd;
+	const editor_command_t *cmd = nullptr;
 
 	SString param[MAX_EXEC_PARAM];
 };
@@ -802,9 +802,6 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 	}
 
 	operation_command_t * info = new operation_command_t;
-
-	// this ensures all parameters are NUL terminated
-	memset(info, 0, sizeof(*info));
 
 	info->cmd = cmd;
 
