@@ -88,7 +88,7 @@ void Lump::printf(EUR_FORMAT_STRING(const char *msg), ...)
 //
 bool LumpInputStream::read(void *buffer, size_t size) const
 {
-	if(static_cast<size_t>(mPos) + size > mLump.getSize())
+	if(static_cast<size_t>(mPos) + size > (size_t)mLump.getSize())
 		return false;
 	memcpy(buffer, mLump.getData() + mPos, size);
 	return true;
