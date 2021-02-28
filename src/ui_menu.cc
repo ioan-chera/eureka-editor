@@ -364,7 +364,8 @@ static void checks_do_tags(Fl_Widget *w, void * data)
 
 static void tools_do_preferences(Fl_Widget *w, void * data)
 {
-	static_cast<Instance *>(data)->ExecuteCommand("PreferenceDialog");
+	// FIXME: this uses the global instance because it's also used globally on Mac
+	gInstance.ExecuteCommand("PreferenceDialog");
 }
 
 static void tools_do_build_nodes(Fl_Widget *w, void * data)
@@ -821,10 +822,13 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 
 	// for macOS, the preferences shall be in the app menu
 #ifdef __APPLE__
-	static const Fl_Menu_Item macPreferencesItem = {
-		"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
+	static const Fl_Menu_Item macPreferencesItem[] = {
+		{
+			"&Preferences\u2026", FL_COMMAND + ',', FCAL tools_do_preferences
+		},
+		{0}
 	};
-	Fl_Mac_App_Menu::custom_application_menu_items(&macPreferencesItem);
+	Fl_Mac_App_Menu::custom_application_menu_items(macPreferencesItem);
 #endif
 
 	return bar;
