@@ -698,10 +698,13 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 	SString secondButton = SString::printf("&%s", action);
 	// convert action string like "open a new map" to a simple "Open"
 	// string for the yes choice.
-	secondButton[1] = toupper(secondButton[1]);
-	size_t pos = secondButton.find(' ');
-	if (pos != SString::npos)
-		secondButton.erase(pos, SString::npos);
+	if (secondButton.size() >= 2)
+	{
+		secondButton[1] = toupper(secondButton[1]);
+		size_t pos = secondButton.find(' ');
+		if (pos != SString::npos)
+			secondButton.erase(pos, SString::npos);
+	}
 
 	if (DLG_Confirm({ "Cancel", secondButton },
 	                "You have unsaved changes.  "
