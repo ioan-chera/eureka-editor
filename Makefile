@@ -30,7 +30,7 @@ OPENGL = 1
 
 # general things needed by Eureka
 CXXFLAGS += $(CXX_DIALECT)
-LIBS += -lz -lm
+LIBS += -lz -lm -lXpm
 FLTK_CONFIG_FLAGS =
 
 ifeq ($(OPENGL),1)
