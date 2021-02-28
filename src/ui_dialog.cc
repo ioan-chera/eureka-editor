@@ -65,9 +65,13 @@ enum class MessageBoxIcon
 	question
 };
 
-static int DialogShowAndRun(MessageBoxIcon icon_type, const char *message, const char *title,
-		const char *link_title = NULL, const char *link_url = NULL,
-		std::vector<SString> *labels = NULL)
+static int DialogShowAndRun(
+	MessageBoxIcon icon_type, 
+	const SString &message, 
+	const SString &title, 
+	const SString &link_title = NULL, 
+	const SString &link_url = NULL,
+	std::vector<SString> *labels = NULL)
 {
 	DialogContext context = {};
 	context.result = -1;
@@ -77,7 +81,7 @@ static int DialogShowAndRun(MessageBoxIcon icon_type, const char *message, const
 	int mesg_H = 0;
 
 	fl_font(FL_HELVETICA, FONT_SIZE);
-	fl_measure(message, mesg_W, mesg_H);
+	fl_measure(message.c_str(), mesg_W, mesg_H);
 
 	if (mesg_W < 200)
 		mesg_W = 200;
@@ -92,14 +96,14 @@ static int DialogShowAndRun(MessageBoxIcon icon_type, const char *message, const
 	int total_W = 10 + ICON_W + 10 + mesg_W + 10;
 	int total_H = 10 + mesg_H + 10;
 
-	if (link_title && *link_title)
+	if (link_title.good())
 		total_H += FONT_SIZE + 8;
 
 	total_H += 12 + BUT_H + 12;
 
 
 	// create window...
-	UI_Escapable_Window *dialog = new UI_Escapable_Window(total_W, total_H, title);
+	UI_Escapable_Window *dialog = new UI_Escapable_Window(total_W, total_H, title.c_str());
 
 	dialog->size_range(total_W, total_H, total_W, total_H);
 	dialog->callback((Fl_Callback *) dialog_close_callback, &context);
@@ -133,7 +137,7 @@ static int DialogShowAndRun(MessageBoxIcon icon_type, const char *message, const
 	}
 
 	// create the message area...
-	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message);
+	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message.c_str());
 
 	box->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
 	box->labelfont(FL_HELVETICA);
@@ -141,12 +145,12 @@ static int DialogShowAndRun(MessageBoxIcon icon_type, const char *message, const
 
 
 	// create the hyperlink...
-	if (link_title && *link_title)
+	if (link_title.good())
 	{
-		SYS_ASSERT(link_url);
+		SYS_ASSERT(link_url.good());
 
 		UI_HyperLink *link = new UI_HyperLink(ICON_W + 20, 10 + mesg_H, mesg_W, 24,
-				link_title, link_url);
+				link_title.c_str(), link_url.c_str());
 		link->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 		link->labelfont(FL_HELVETICA);
 		link->labelsize(FONT_SIZE);
@@ -292,7 +296,7 @@ void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
 	SString linkURL;
 	ParseHyperLink(dialog_buffer, linkTitle, linkURL);
 
-	DialogShowAndRun(MessageBoxIcon::exclamation, dialog_buffer.c_str(), "Eureka - Fatal Error", linkTitle.c_str(), linkURL.c_str());
+	DialogShowAndRun(MessageBoxIcon::exclamation, dialog_buffer, "Eureka - Fatal Error", linkTitle, linkURL);
 }
 
 
@@ -304,7 +308,7 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer.c_str(), "Eureka - Notification");
+	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer, "Eureka - Notification");
 }
 
 
@@ -318,7 +322,7 @@ int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
 
 	std::vector<SString> labels = ParseButtons(buttons);
 
-	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer.c_str(), "Eureka - Confirmation",
+	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer, "Eureka - Confirmation",
 							NULL, NULL, &labels);
 }
 
