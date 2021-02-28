@@ -836,8 +836,6 @@ void FLFocusOnCreation(Fl_Widget *widget)
 	SString var2 = getenv("GDMSESSION");
 	if(var1 != "ratpoison" && var2 != "ratpoison")
 		Fl::focus(widget);
-	else
-		LogPrintf("ratpoison detected\n");
 #endif
 }
 
