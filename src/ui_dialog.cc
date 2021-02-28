@@ -55,8 +55,17 @@ static void dialog_button_callback(Fl_Widget *w, void *data)
 	context->result = static_cast<int>(it - context->buttons.begin());
 }
 
+//
+// Message box icon
+//
+enum class MessageBoxIcon
+{
+	information,
+	exclamation,
+	question
+};
 
-static int DialogShowAndRun(char icon_type, const char *message, const char *title,
+static int DialogShowAndRun(MessageBoxIcon icon_type, const char *message, const char *title,
 		const char *link_title = NULL, const char *link_url = NULL,
 		std::vector<SString> *labels = NULL)
 {
@@ -103,25 +112,25 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	icon->labelfont(FL_HELVETICA_BOLD);
 	icon->labelsize(26);
 
-	if (icon_type == '!')
+	switch (icon_type)
 	{
+	case MessageBoxIcon::exclamation:
 		icon->label("!");
 		icon->color(FL_RED, FL_RED);
 		icon->labelcolor(FL_WHITE);
-	}
-	else if (icon_type == '?')
-	{
+		break;
+	case MessageBoxIcon::question:
 		icon->label("?");
 		icon->color(FL_GREEN, FL_GREEN);
 		icon->labelcolor(FL_BLACK);
-	}
-	else
-	{
+		break;
+	case MessageBoxIcon::information:
+	default:
 		icon->label("i");
 		icon->color(FL_BLUE, FL_BLUE);
 		icon->labelcolor(FL_WHITE);
+		break;
 	}
-
 
 	// create the message area...
 	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message);
@@ -162,7 +171,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	for (int b = but_count - 1 ; b >= 0 ; b--)
 	{
 		const char *text = labels ? (*labels)[b].c_str() :
-		                   (icon_type == '?') ? "OK" : "Close";
+		                   (icon_type == MessageBoxIcon::question) ? "OK" : "Close";
 
 		int b_width = static_cast<int>(fl_width(text) + 20);
 
@@ -191,7 +200,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	dialog->set_modal();
 	dialog->show();
 
-	if (icon_type == '!')
+	if (icon_type == MessageBoxIcon::exclamation)
 		fl_beep();
 
 	if (focus_button)
@@ -283,7 +292,7 @@ void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
 	SString linkURL;
 	ParseHyperLink(dialog_buffer, linkTitle, linkURL);
 
-	DialogShowAndRun('!', dialog_buffer.c_str(), "Eureka - Fatal Error", linkTitle.c_str(), linkURL.c_str());
+	DialogShowAndRun(MessageBoxIcon::exclamation, dialog_buffer.c_str(), "Eureka - Fatal Error", linkTitle.c_str(), linkURL.c_str());
 }
 
 
@@ -295,7 +304,7 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	DialogShowAndRun('i', dialog_buffer.c_str(), "Eureka - Notification");
+	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer.c_str(), "Eureka - Notification");
 }
 
 
@@ -309,7 +318,7 @@ int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
 
 	std::vector<SString> labels = ParseButtons(buttons);
 
-	return DialogShowAndRun('?', dialog_buffer.c_str(), "Eureka - Confirmation",
+	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer.c_str(), "Eureka - Confirmation",
 							NULL, NULL, &labels);
 }
 
