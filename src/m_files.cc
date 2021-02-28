@@ -907,7 +907,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 			{
 				LogPrintf("  unknown game: %s\n", value.c_str() /* show full path */);
 
-				int res = DLG_Confirm("&Ignore|&Cancel Load",
+				int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
 				                      "Warning: the pwad specifies an unsupported "
 									  "game:\n\n          %s", value.c_str());
 				if (res == 1)
@@ -919,7 +919,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 				if (new_iwad.empty())
 				{
-					int res = DLG_Confirm("&Ignore|&Cancel Load",
+					int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
 					                      "Warning: the pwad specifies an IWAD "
 										  "which cannot be found:\n\n          %s.wad", 
 										  value.c_str());

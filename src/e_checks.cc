@@ -1037,7 +1037,7 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 
 	if ((false) /* confirm_it */)
 	{
-		if (DLG_Confirm("&No Change|&Unpack", unpack_confirm_message) <= 0)
+		if (DLG_Confirm({ "&No Change", "&Unpack" }, unpack_confirm_message) <= 0)
 			return;
 	}
 

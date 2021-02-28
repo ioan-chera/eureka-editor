@@ -55,10 +55,23 @@ static void dialog_button_callback(Fl_Widget *w, void *data)
 	context->result = static_cast<int>(it - context->buttons.begin());
 }
 
+//
+// Message box icon
+//
+enum class MessageBoxIcon
+{
+	information,
+	exclamation,
+	question
+};
 
-static int DialogShowAndRun(char icon_type, const char *message, const char *title,
-		const char *link_title = NULL, const char *link_url = NULL,
-		std::vector<SString> *labels = NULL)
+static int DialogShowAndRun(
+	MessageBoxIcon icon_type, 
+	const SString &message, 
+	const SString &title, 
+	const SString &link_title = NULL, 
+	const SString &link_url = NULL,
+	const std::vector<SString> *labels = NULL)
 {
 	DialogContext context = {};
 	context.result = -1;
@@ -68,7 +81,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	int mesg_H = 0;
 
 	fl_font(FL_HELVETICA, FONT_SIZE);
-	fl_measure(message, mesg_W, mesg_H);
+	fl_measure(message.c_str(), mesg_W, mesg_H);
 
 	if (mesg_W < 200)
 		mesg_W = 200;
@@ -83,14 +96,14 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	int total_W = 10 + ICON_W + 10 + mesg_W + 10;
 	int total_H = 10 + mesg_H + 10;
 
-	if (link_title && *link_title)
+	if (link_title.good())
 		total_H += FONT_SIZE + 8;
 
 	total_H += 12 + BUT_H + 12;
 
 
 	// create window...
-	UI_Escapable_Window *dialog = new UI_Escapable_Window(total_W, total_H, title);
+	UI_Escapable_Window *dialog = new UI_Escapable_Window(total_W, total_H, title.c_str());
 
 	dialog->size_range(total_W, total_H, total_W, total_H);
 	dialog->callback((Fl_Callback *) dialog_close_callback, &context);
@@ -103,28 +116,28 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	icon->labelfont(FL_HELVETICA_BOLD);
 	icon->labelsize(26);
 
-	if (icon_type == '!')
+	switch (icon_type)
 	{
+	case MessageBoxIcon::exclamation:
 		icon->label("!");
 		icon->color(FL_RED, FL_RED);
 		icon->labelcolor(FL_WHITE);
-	}
-	else if (icon_type == '?')
-	{
+		break;
+	case MessageBoxIcon::question:
 		icon->label("?");
 		icon->color(FL_GREEN, FL_GREEN);
 		icon->labelcolor(FL_BLACK);
-	}
-	else
-	{
+		break;
+	case MessageBoxIcon::information:
+	default:
 		icon->label("i");
 		icon->color(FL_BLUE, FL_BLUE);
 		icon->labelcolor(FL_WHITE);
+		break;
 	}
 
-
 	// create the message area...
-	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message);
+	Fl_Box *box = new Fl_Box(ICON_W + 20, 10, mesg_W, mesg_H, message.c_str());
 
 	box->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE | FL_ALIGN_WRAP);
 	box->labelfont(FL_HELVETICA);
@@ -132,12 +145,12 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 
 
 	// create the hyperlink...
-	if (link_title && *link_title)
+	if (link_title.good())
 	{
-		SYS_ASSERT(link_url);
+		SYS_ASSERT(link_url.good());
 
 		UI_HyperLink *link = new UI_HyperLink(ICON_W + 20, 10 + mesg_H, mesg_W, 24,
-				link_title, link_url);
+				link_title.c_str(), link_url.c_str());
 		link->align(FL_ALIGN_INSIDE | FL_ALIGN_LEFT);
 		link->labelfont(FL_HELVETICA);
 		link->labelsize(FONT_SIZE);
@@ -154,7 +167,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	b_group->end();
 
 	int but_count = labels ? (int)labels->size() : 1;
-	context.buttons.reserve(but_count);
+	context.buttons.resize(but_count);	// we'll fill it end to start
 
 	int but_x = total_W - 40;
 	int but_y = b_group->y() + 12;
@@ -162,13 +175,13 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	for (int b = but_count - 1 ; b >= 0 ; b--)
 	{
 		const char *text = labels ? (*labels)[b].c_str() :
-		                   (icon_type == '?') ? "OK" : "Close";
+		                   (icon_type == MessageBoxIcon::question) ? "OK" : "Close";
 
 		int b_width = static_cast<int>(fl_width(text) + 20);
 
 		Fl_Button *button = new Fl_Button(but_x - b_width, but_y, b_width, BUT_H, text);
 
-		context.buttons.push_back(button);
+		context.buttons[b] = button;
 
 		button->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 		button->callback((Fl_Callback *) dialog_button_callback, &context);
@@ -191,7 +204,7 @@ static int DialogShowAndRun(char icon_type, const char *message, const char *tit
 	dialog->set_modal();
 	dialog->show();
 
-	if (icon_type == '!')
+	if (icon_type == MessageBoxIcon::exclamation)
 		fl_beep();
 
 	if (focus_button)
@@ -244,29 +257,6 @@ static void ParseHyperLink(SString &message, SString &url, SString &linkTitle)
 		linkTitle.erase(pos, SString::npos);
 }
 
-static void ParseButtons(const char *buttons,
-                         std::vector<SString>& labels)
-{
-	for (;;)
-	{
-		const char *p = strchr(buttons, '|');
-
-		if (! p)
-		{
-			labels.push_back(buttons);
-			return;
-		}
-
-		int len = (int)(p - buttons);
-		SYS_ASSERT(len > 0);
-
-		labels.push_back(SString(buttons, len));
-
-		buttons = p + 1;
-	}
-}
-
-
 //------------------------------------------------------------------------
 
 void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
@@ -282,7 +272,7 @@ void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
 	SString linkURL;
 	ParseHyperLink(dialog_buffer, linkTitle, linkURL);
 
-	DialogShowAndRun('!', dialog_buffer.c_str(), "Eureka - Fatal Error", linkTitle.c_str(), linkURL.c_str());
+	DialogShowAndRun(MessageBoxIcon::exclamation, dialog_buffer, "Eureka - Fatal Error", linkTitle, linkURL);
 }
 
 
@@ -294,11 +284,11 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	DialogShowAndRun('i', dialog_buffer.c_str(), "Eureka - Notification");
+	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer, "Eureka - Notification");
 }
 
 
-int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
+int DLG_Confirm(const std::vector<SString>& buttons, EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 
@@ -306,12 +296,8 @@ int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	std::vector<SString> labels;
-
-	ParseButtons(buttons, labels);
-
-	return DialogShowAndRun('?', dialog_buffer.c_str(), "Eureka - Confirmation",
-							NULL, NULL, &labels);
+	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer, "Eureka - Confirmation",
+							NULL, NULL, &buttons);
 }
 
 

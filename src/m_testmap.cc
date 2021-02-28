@@ -336,7 +336,7 @@ void Instance::CMD_TestMap()
 {
 	if (MadeChanges)
 	{
-		if (DLG_Confirm("Cancel|&Save",
+		if (DLG_Confirm({ "Cancel", "&Save" },
 		                "You have unsaved changes, do you want to save them now "
 						"and build the nodes?") <= 0)
 		{
