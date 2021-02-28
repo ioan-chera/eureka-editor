@@ -71,7 +71,7 @@ static int DialogShowAndRun(
 	const SString &title, 
 	const SString &link_title = NULL, 
 	const SString &link_url = NULL,
-	std::vector<SString> *labels = NULL)
+	const std::vector<SString> *labels = NULL)
 {
 	DialogContext context = {};
 	context.result = -1;
@@ -257,30 +257,6 @@ static void ParseHyperLink(SString &message, SString &url, SString &linkTitle)
 		linkTitle.erase(pos, SString::npos);
 }
 
-static std::vector<SString> ParseButtons(const char *buttons)
-{
-	std::vector<SString> labels;
-	for (;;)
-	{
-		const char *p = strchr(buttons, '|');
-
-		if (! p)
-		{
-			labels.push_back(buttons);
-			return labels;
-		}
-
-		int len = (int)(p - buttons);
-		SYS_ASSERT(len > 0);
-
-		labels.push_back(SString(buttons, len));
-
-		buttons = p + 1;
-	}
-	return labels;
-}
-
-
 //------------------------------------------------------------------------
 
 void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...)
@@ -312,7 +288,7 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 }
 
 
-int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
+int DLG_Confirm(const std::vector<SString>& buttons, EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 
@@ -320,10 +296,8 @@ int DLG_Confirm(const char *buttons, EUR_FORMAT_STRING(const char *msg), ...)
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
-	std::vector<SString> labels = ParseButtons(buttons);
-
 	return DialogShowAndRun(MessageBoxIcon::question, dialog_buffer, "Eureka - Confirmation",
-							NULL, NULL, &labels);
+							NULL, NULL, &buttons);
 }
 
 

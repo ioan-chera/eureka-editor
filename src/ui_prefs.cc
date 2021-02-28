@@ -1336,7 +1336,7 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 
 	bool is_keys = (w == prefs->reset_keys);
 
-	int res = DLG_Confirm("Cancel|&Reset",
+	int res = DLG_Confirm({ "Cancel", "&Reset" },
 		"This will reset all %s to their default values, "
 		"removing any changes you may have made."
 		"\n\n"

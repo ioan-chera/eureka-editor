@@ -695,20 +695,15 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 	if (! MadeChanges)
 		return true;
 
-	char buttons[200];
-
-	snprintf(buttons, sizeof(buttons), "Cancel|&%s", action);
-
+	SString secondButton = SString::printf("&%s", action);
 	// convert action string like "open a new map" to a simple "Open"
 	// string for the yes choice.
+	secondButton[1] = toupper(secondButton[1]);
+	size_t pos = secondButton.find(' ');
+	if (pos != SString::npos)
+		secondButton.erase(pos, SString::npos);
 
-	buttons[8] = toupper(buttons[8]);
-
-	char *p = strchr(buttons, ' ');
-	if (p)
-		*p = 0;
-
-	if (DLG_Confirm(buttons,
+	if (DLG_Confirm({ "Cancel", secondButton },
 	                "You have unsaved changes.  "
 	                "Do you really want to %s?", action) == 1)
 	{
@@ -840,7 +835,7 @@ void Instance::ReadPortInfo()
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 			Port_name.c_str(), Game_name.c_str());
 
-		int res = DLG_Confirm("&vanilla|No Change",
+		int res = DLG_Confirm({ "&vanilla", "No Change" },
 						"Warning: the given port '%s' is not compatible with "
 						"this game (%s)."
 						"\n\n"

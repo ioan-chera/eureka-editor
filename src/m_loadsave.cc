@@ -361,7 +361,7 @@ void Instance::CMD_FreshMap()
 	// would this replace an existing map?
 	if (edit_wad->LevelFind(map_name) >= 0)
 	{
-		if (DLG_Confirm("Cancel|&Overwrite",
+		if (DLG_Confirm({ "Cancel", "&Overwrite" },
 		                overwrite_message, "current") <= 0)
 		{
 			return;
@@ -1663,7 +1663,7 @@ bool Instance::M_SaveMap()
 
 	if (edit_wad->IsReadOnly())
 	{
-		if (DLG_Confirm("Cancel|&Export",
+		if (DLG_Confirm({ "Cancel", "&Export" },
 		                "The current pwad is a READ-ONLY file. "
 						"Do you want to export this map into a new file?") <= 0)
 		{
@@ -1791,7 +1791,7 @@ bool Instance::M_ExportMap()
 
 	if (exists && wad->LevelFind(map_name) >= 0)
 	{
-		if (DLG_Confirm("Cancel|&Overwrite",
+		if (DLG_Confirm({ "Cancel", "&Overwrite" },
 		                overwrite_message, "selected") <= 0)
 		{
 			delete wad;
@@ -1975,7 +1975,7 @@ void Instance::CMD_DeleteMap()
 		return;
 	}
 
-	if (DLG_Confirm("Cancel|&Delete",
+	if (DLG_Confirm({ "Cancel", "&Delete" },
 	                "Are you sure you want to delete this map? "
 					"It will be permanently removed from the current PWAD.") <= 0)
 	{
