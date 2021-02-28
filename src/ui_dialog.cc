@@ -167,7 +167,7 @@ static int DialogShowAndRun(
 	b_group->end();
 
 	int but_count = labels ? (int)labels->size() : 1;
-	context.buttons.reserve(but_count);
+	context.buttons.resize(but_count);	// we'll fill it end to start
 
 	int but_x = total_W - 40;
 	int but_y = b_group->y() + 12;
@@ -181,7 +181,7 @@ static int DialogShowAndRun(
 
 		Fl_Button *button = new Fl_Button(but_x - b_width, but_y, b_width, BUT_H, text);
 
-		context.buttons.push_back(button);
+		context.buttons[b] = button;
 
 		button->align(FL_ALIGN_INSIDE | FL_ALIGN_CLIP);
 		button->callback((Fl_Callback *) dialog_button_callback, &context);
