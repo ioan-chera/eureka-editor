@@ -731,11 +731,13 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 
 		if(imkind == 'F')
 		{
+			pic->GetFlat(name);
 			item->setPicCallbackString(name);
 			pic->callback(Browser_Item::flat_callback, item);
 		}
 		else if(imkind == 'T')
 		{
+			pic->GetTex(name);
 			item->setPicCallbackString(name);
 			pic->callback(Browser_Item::texture_callback, item);
 		}
