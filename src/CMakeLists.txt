@@ -40,7 +40,17 @@ if(APPLE)
 endif()
 
 set(source_base
+    Document.cc
+    Document.h
+    DocumentModule.cc
+    DocumentModule.h
+    Errors.cc
+    Errors.h
     hdr_fltk.h
+    Instance.cc
+    Instance.h
+    Lump.cc
+    Lump.h
     main.cc
     main.h
     main.rc
@@ -105,7 +115,6 @@ set(source_m
     m_config.cc
     m_config.h
     m_editlump.cc
-    m_editlump.h
     m_events.cc
     m_events.h
     m_files.cc
@@ -117,14 +126,12 @@ set(source_m
     m_loadsave.cc
     m_loadsave.h
     m_nodes.cc
-    m_nodes.h
     m_select.cc
     m_select.h
     m_strings.cc
     m_strings.h
     m_testmap.cc
     m_udmf.cc
-    m_udmf.h
 )
 
 set(source_r
@@ -228,6 +235,9 @@ endif()
 target_link_libraries(eureka PRIVATE ${FLTK_LIBRARIES} ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES})
 if(APPLE)
     target_link_libraries(eureka PRIVATE ${JPEG_LIBRARIES} ${PNG_LIBRARIES})
+endif()
+if(UNIX AND NOT APPLE)  # Linux
+    target_link_libraries(eureka PRIVATE Xpm)
 endif()
 
 target_include_directories(eureka PRIVATE
