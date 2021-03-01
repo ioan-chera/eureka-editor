@@ -1,3 +1,68 @@
+set(resource_common
+    ../bindings.cfg
+    ../common
+    ../defaults.cfg
+    ../games
+    ../misc/about_logo.png
+    ../operations.cfg
+    ../ports
+)
+
+add_executable(eureka MACOSX_BUNDLE ${resource_common})
+
+set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+if(APPLE)
+    set(exe_display_name "Eureka Doom Editor")
+    set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
+else()
+    set(exe_display_name "eureka")
+endif()
+
+if(APPLE)
+    # Unfortunately we can't put set_source_files_properties in another file than the one with add_executable.
+    set(osxmaindir "osx/EurekaApp")
+    set(resource_mac
+        "../${osxmaindir}/Eureka Doom EditorIcon.icns"
+    )
+    set(source_mac
+        "../osx/EurekaApp/AppDelegate.h"
+        "../osx/EurekaApp/AppDelegate.mm"
+        "../osx/EurekaApp/OSXCalls.h"
+        "../osx/EurekaApp/OSXCalls.mm"
+    )
+
+    target_sources(eureka PRIVATE ${source_mac})
+
+    target_sources(eureka PRIVATE ${resource_mac})
+    source_group(macOS FILES ${source_mac})
+
+    # May be needed by files from other projects to find headers here
+    target_include_directories(eureka PRIVATE "../osx/EurekaApp/")
+
+    # Need to silence OpenGL deprecation warnings (they tell us what we know and can't fix)
+    target_compile_definitions(eureka PRIVATE
+        "GL_SILENCE_DEPRECATION"
+        "main=main_ORIGINAL"
+    )
+
+    set_target_properties(eureka PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST "../osx/EurekaApp/Eureka Doom Editor-Info.plist.in"
+
+        MACOSX_BUNDLE_BUNDLE_NAME "${exe_display_name}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_COPYRIGHT "Copyright © The Eureka Team"
+        MACOSX_BUNDLE_EXECUTABLE_NAME "${exe_display_name}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.eureka.Eureka-Doom-Editor"
+        MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_ICON_FILE "Eureka Doom EditorIcon"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+    )
+
+
+    set_source_files_properties(${resource_mac} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
 # TODO: update the main header file to include version
 # TODO: move these to where they can be reached by Visual Studio
 configure_file(main.rc.in main.rc)
@@ -267,3 +332,18 @@ source_group("r_ source" FILES ${source_r})
 source_group("sys_ source" FILES ${source_sys})
 source_group("ui_ source" FILES ${source_ui})
 source_group("w_ source" FILES ${source_w})
+
+set(eureka_install_dir "${CMAKE_INSTALL_PREFIX}/share/eureka")
+install(TARGETS eureka
+    RUNTIME DESTINATION "${BIN_DIR}")
+install(DIRECTORY ../games DESTINATION "${eureka_install_dir}" PATTERN "freedoom.ugh" EXCLUDE)
+install(DIRECTORY ../common DESTINATION "${eureka_install_dir}")
+install(DIRECTORY ../ports DESTINATION "${eureka_install_dir}")
+install(FILES ../bindings.cfg
+              ../defaults.cfg
+              ../misc/about_logo.png
+              ../operations.cfg
+              DESTINATION "${eureka_install_dir}")
+# TODO: run the full-install options
+# TODO: add full-uninstall to the uninstaller
+# TODO: add the warnings and warnings-as-errors
