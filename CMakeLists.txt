@@ -6,34 +6,15 @@ project(eureka-editor VERSION 2.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(resource_common
-    bindings.cfg
-    common
-    defaults.cfg
-    games
-    misc/about_logo.png
-    operations.cfg
-    ports
-)
-
-add_executable(eureka MACOSX_BUNDLE ${resource_common})
-
-set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
-if(APPLE)
-    set(exe_display_name "Eureka Doom Editor")
-    set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
-else()
-    set(exe_display_name "eureka")
-endif()
-
-if(APPLE)
-    # Unfortunately we can't put set_source_files_properties in another file than the one with add_executable.
-    set(osxmaindir "osx/EurekaApp")
-    set(resource_mac
-        "${CMAKE_CURRENT_SOURCE_DIR}/${osxmaindir}/Eureka Doom EditorIcon.icns"
-    )
-    add_subdirectory(osx)
-    set_source_files_properties(${resource_mac} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-endif()
 add_subdirectory(src)
+
+# uninstall target
+if(NOT TARGET uninstall)
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+  add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
