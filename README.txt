@@ -7,7 +7,7 @@ INTRODUCTION
 
 Eureka is a map editor for the classic DOOM games, and a few related
 games such as Heretic and Hexen.  The supported operating systems are
-Linux (and other Unix-likes), Windows and MacOS X.
+Linux (and other Unix-likes), Windows and macOS.
 
 
 WEB SITE
@@ -104,25 +104,25 @@ F1 : operation menu
 TAB : toggle the 3D preview on or off
 ESC : cancel the current operation
 
-t : enter Thing mode 
-l : enter Linedef mode 
-s : enter Sector mode 
-v : enter Vertex mode 
+t : enter Thing mode
+l : enter Linedef mode
+s : enter Sector mode
+v : enter Vertex mode
 
 b : toggle the Browser on or off
 
 1..9 : select the grid size (smallest to largest)
 
-CTRL-Z : undo (can be used multiple times) 
+CTRL-Z : undo (can be used multiple times)
 CTRL-Y : redo (i.e. undo the previous undo)
 
-CTRL-A : select all 
-CTRL-I : invert the selection 
+CTRL-A : select all
+CTRL-I : invert the selection
 CTRL-U : unselect all
 ` (backquote) : unselect all
 
-HOME : zoom 2D viewport to show the whole map 
-END  : move 2D viewport to camera location 
+HOME : zoom 2D viewport to show the whole map
+END  : move 2D viewport to camera location
 ' (quote) : move 3D camera to position of mouse pointer
 
 f : toggle free mode vs grid snapping
@@ -138,9 +138,9 @@ o : copy and paste the selected objects
 c : copy properties from selected --> highlighted object
 C : copy properties from highlighted --> selected objects
 
-H : mirror objects horizontally 
+H : mirror objects horizontally
 V : mirror objects vertically
-R : rotate objects 90 degrees clockwise 
+R : rotate objects 90 degrees clockwise
 W : rotate objects 90 degrees anti-clockwise
 
 a : scroll map with the mouse
@@ -173,7 +173,7 @@ SPACE : add a new thing
 d : disconnect things at the same location
 m : move selected things to occupy the same location
 
-w : rotate things 45 degrees anti-clockwise 
+w : rotate things 45 degrees anti-clockwise
 x : rotate things 45 degrees clockwise
 
 
@@ -199,10 +199,10 @@ Q : reshape selected vertices into a 240-degree arc
 Linedef Mode
 ------------
 
-e : select a chain of linedefs 
+e : select a chain of linedefs
 E : select a chain of linedefs with same textures
 
-w : flip linedefs 
+w : flip linedefs
 k : split linedefs in two
 A : auto-align offsets on all selected linedefs
 
@@ -224,13 +224,13 @@ w : swap floor and ceiling textures
 i : increase light level
 I : decrease light level
 
-e : select sectors with same floor height 
+e : select sectors with same floor height
 E : select sectors with same floor texture
 D : select sectors with same ceiling texture
 
-, and < : lower floor heights 
+, and < : lower floor heights
 . and > : raise floor heights
-[ and { : lower ceiling heights 
+[ and { : lower ceiling heights
 ] and } : raise ceiling heights
 
 
@@ -287,4 +287,3 @@ COPYRIGHT and LICENSE
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
-

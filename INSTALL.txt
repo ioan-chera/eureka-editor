@@ -3,7 +3,7 @@ COMPILING (Linux)
 =================
 
 Note: this section deals with compiling the Linux binary.
-For information on compiling for Windows and MacOS X, see below.
+For information on compiling for Windows and macOS, see below.
 
 
 Dependencies:
@@ -11,8 +11,8 @@ Dependencies:
 1. C++ compiler (GNU's G++) and associated tools
    packages: g++ binutils
 
-2. GNU make
-   package: make
+2. CMake
+   package: cmake
 
 3. FLTK 1.3
    website: http://www.fltk.org/
@@ -24,23 +24,28 @@ Dependencies:
                       libjpeg-dev
                       libpng-dev
 
-4. OpenGL
+4. libXpm
+   package: libxpm-dev
+
+5. OpenGL
    (recommended but not strictly necessary, see below)
 
-5. zlib
+6. zlib
    website: http://www.zlib.net/
    package: zlib1g-dev
 
-6. XDG Utils
+7. XDG Utils
    (only needed for Linux, to install the desktop and icon files)
    package: xdg-utils
 
 
 Assuming all those dependencies are met, then the following shell
-command will build the Eureka binary. (the '>' is just the prompt)
+commands will build the Eureka binary. (the '>' is just the prompt)
 
+   > mkdir build
+   > cd build
+   > cmake ..
    > make
-
 
 Some systems may need additional CFLAGS and/or LDFLAGS in order
 to find the required libraries (especially FLTK).  For example,
@@ -66,28 +71,32 @@ First make sure the Eureka binary was compiled successfully.
 Then become root (via the 'sudo' or 'su' command) and enter the
 following shell command:
 
-   > make full-install
+   > make install
 
 That will install the eureka binary, definition files for various
 games and source ports, and the desktop and icon files.
-
-There is also a plain "install" target which does not run the
-XDG utilities (which install the desktop and icon files).
 
 
 
 COMPILING (Windows)
 ===================
 
-The official windows executable is built using a "cross compiler"
-under Linux, using the MingW-w64 tools.
+Compiling under Windows is currently done with Visual Studio.
+Open the win\Eureka\Eureka.sln solution. You need to have several
+libraries and headers prepared under the prereqs\ folder. Please
+follow the Visual Studio project settings to find out which header
+paths and libraries are expected, downloading them as necessary.
 
-Sorry but compiling Eureka under Windows itself is not currently
-supported.  If you want to do this, you will have to figure it
-out on your own.
+IMPORTANT: currently CMakeLists.txt hasn't been prepared for
+Windows, but the plan is to use it universally. For now, please use
+the pre-build Visual Studio project.
 
 
-Dependencies:
+For previous versions the official Windows executable was built
+using a "cross compiler" under Linux, using the MingW-w64 tools.
+THIS IS NOT CURRENTLY SUPPORTED, so it may fail.
+
+Dependencies (if you still want to cross-compile):
 
 1. C++ cross compiler and tools
    package: mingw-w64
@@ -97,7 +106,6 @@ Dependencies:
 
 3. FLTK 1.3.5
    website: http://www.fltk.org/
-
 
 The FLTK library must be in a directory called "lib_win32" with the
 name "fltk-1.3.5" (it can be a symlink to the actual location), and
@@ -111,15 +119,16 @@ command will build the Eureka binary. (the '>' is just the prompt)
 
    > make -f Makefile.xming
 
+WARNING: at this moment, this Makefile.xming file may be outdated.
 
 
-COMPILING (MacOS X)
+COMPILING (macOS)
 ===================
 
-Compiling the MacOS X binary requires Xcode 4.
+For now, use the prebuilt Xcode project from osx/EurekaApp/
 
-See the documents in the osx/ folder for more information.
-
+IMPORTANT: CMakeLists.txt currently isn't prepared for macOS, but
+the plan is to use it universally.
 
 
 SETTING UP Eureka
@@ -149,4 +158,3 @@ Places where Eureka looks for IWADs:
      directory for the IWAD.
 
   5. You can specify the IWAD file directly with the --iwad option.
-
