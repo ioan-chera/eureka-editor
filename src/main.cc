@@ -53,6 +53,9 @@
 
 #ifndef WIN32
 #include <time.h>
+#ifndef __APPLE__
+#include <X11/xpm.h>	// for the window icon
+#endif
 #endif
 
 // IOANCH: be able to call OSX specific routines (needed for ~/Library)
@@ -633,6 +636,21 @@ static void Main_OpenWindow(Instance &inst)
 
 	inst.main_win->label("Eureka v" EUREKA_VERSION);
 
+#if !defined(__APPLE__) && !defined(_WIN32)
+#include "../misc/eureka.xpm"
+
+	// needed if display has not been previously opened
+	fl_open_display();
+
+	Pixmap pm, mask;
+	std::vector<char> localmodified;
+	localmodified.resize(sizeof(logo_E4_32x32_xpm));
+	memcpy(localmodified.data(), logo_E4_32x32_xpm, localmodified.size());
+	XpmCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
+	    const_cast<char**>(logo_E4_32x32_xpm), &pm, &mask, NULL);
+	inst.main_win->icon((char *)pm);
+#endif
+
 	// show window (pass some dummy arguments)
 	{
 		int   argc = 1;
@@ -647,6 +665,17 @@ static void Main_OpenWindow(Instance &inst)
 #endif
 		global::app_has_focus = true;
 	}
+
+#if !defined(__APPLE__) && !defined(_WIN32)
+	// read in the current window hints, then modify them to
+	// support icon transparency (make sure that transparency
+	// mask is enabled in the XPM icon)
+	XWMHints* hints = XGetWMHints(fl_display, fl_xid(inst.main_win));
+	hints->flags |= IconMaskHint;
+	hints->icon_mask = mask;
+	XSetWMHints(fl_display, fl_xid(inst.main_win), hints);
+	XFree(hints);
+#endif
 
 	// kill the stupid bright background of the "plastic" scheme
 	if (config::gui_scheme == 2)
@@ -693,20 +722,18 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 	if (! MadeChanges)
 		return true;
 
-	char buttons[200];
-
-	snprintf(buttons, sizeof(buttons), "Cancel|&%s", action);
-
+	SString secondButton = SString::printf("&%s", action);
 	// convert action string like "open a new map" to a simple "Open"
 	// string for the yes choice.
+	if (secondButton.size() >= 2)
+	{
+		secondButton[1] = toupper(secondButton[1]);
+		size_t pos = secondButton.find(' ');
+		if (pos != SString::npos)
+			secondButton.erase(pos, SString::npos);
+	}
 
-	buttons[8] = toupper(buttons[8]);
-
-	char *p = strchr(buttons, ' ');
-	if (p)
-		*p = 0;
-
-	if (DLG_Confirm(buttons,
+	if (DLG_Confirm({ "Cancel", secondButton },
 	                "You have unsaved changes.  "
 	                "Do you really want to %s?", action) == 1)
 	{
@@ -838,7 +865,7 @@ void Instance::ReadPortInfo()
 		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 			Port_name.c_str(), Game_name.c_str());
 
-		int res = DLG_Confirm("&vanilla|No Change",
+		int res = DLG_Confirm({ "&vanilla", "No Change" },
 						"Warning: the given port '%s' is not compatible with "
 						"this game (%s)."
 						"\n\n"

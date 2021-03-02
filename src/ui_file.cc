@@ -73,7 +73,7 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name,
 	map_name->callback(input_callback, this);
 	map_name->value(initial_name);
 
-	Fl::focus(map_name);
+	FLFocusOnCreation(map_name);
 
 	map_buttons = new Fl_Group(x(), y() + 60, w(), y() + 320);
 	map_buttons->end();

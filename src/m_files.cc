@@ -29,7 +29,6 @@
 
 #include "ui_window.h"
 
-#include <sstream>
 
 // list of known iwads (mapping GAME name --> PATH)
 
@@ -106,7 +105,7 @@ void M_ValidateGivenFiles()
 {
 	for (const SString &pwad : global::Pwad_list)
 	{
-		if (! WadFileValidate(pwad))
+		if (! Wad_file::Validate(pwad))
 			ThrowException("Given pwad does not exist or is invalid: %s\n",
 						   pwad.c_str());
 	}
@@ -434,7 +433,7 @@ static void ParseMiscConfig(std::istream &is)
 		map.cutWithSpace(pos, &path);
 		if(line == "recent")
 		{
-			if(WadFileValidate(path))
+			if(Wad_file::Validate(path))
 				global::recent_files.insert(path, map);
 			else
 				LogPrintf("  no longer exists: %s\n", path.c_str());
@@ -444,7 +443,7 @@ static void ParseMiscConfig(std::istream &is)
 			// ignore plain freedoom.wad (backwards compatibility)
 			if(map.noCaseEqual("freedoom"))
 				LogPrintf("  ignoring for compatibility: %s\n", path.c_str());
-			else if(WadFileValidate(path))
+			else if(Wad_file::Validate(path))
 				global::known_iwads[map] = path;
 			else
 				LogPrintf("  no longer exists: %s\n", path.c_str());
@@ -559,33 +558,33 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	Wad wad;
-	bool loaded = wad.readFromPath(filename);
+	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::append);
 
-	if (! loaded)
+	if (! wad)
 	{
 		LogPrintf("Failed to load most recent pwad: %s\n", filename.c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
-	if (wad.levelCount() == 0)
+	if (wad->LevelCount() == 0)
 	{
 		LogPrintf("No levels in most recent pwad: %s\n", filename.c_str());
 
+		delete wad;
 		return false;
 	}
 
 	/* -- OK -- */
 
-	if (wad.levelFind(map_name) >= 0)
+	if (wad->LevelFind(map_name) >= 0)
 		Level_name = map_name;
 	else
 		Level_name.clear();
 
 	Pwad_name = filename;
 
-	editWad = std::move(wad);
+	edit_wad = wad;
 
 	return true;
 }
@@ -654,7 +653,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
-	if (WadFileValidate(name_buf))
+	if (Wad_file::Validate(name_buf))
 		return name_buf;
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
@@ -663,7 +662,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	DebugPrintf("  trying: %s\n", name_buf);
 
-	if (WadFileValidate(name_buf))
+	if (Wad_file::Validate(name_buf))
 		return name_buf;
 
 	return "";
@@ -785,14 +784,14 @@ SString Instance::M_PickDefaultIWAD() const
 	{
 		default_game = "doom";
 	}
-	else if (editWad.isLoaded())
+	else if (edit_wad)
 	{
-		int idx = editWad.levelFindFirst();
+		int idx = edit_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = editWad.levelHeader(idx);
-			const SString &name = editWad.getLump(idx).getName();
+			idx = edit_wad->LevelHeader(idx);
+			const SString &name = edit_wad->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";
@@ -857,29 +856,34 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
-bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
+bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
 	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
-	const Lump* lump = wad.findLump(EUREKA_LUMP);
-	if (!lump)
+
+	Lump_c * lump = wad->FindLump(EUREKA_LUMP);
+
+	if (! lump)
 	{
 		LogPrintf("--> does not exist.\n");
 		return true;
 	}
+
+	if (! lump->Seek())
+	{
+		LogPrintf("--> error seeking.\n");
+		return true;
+	}
+
+
 	SString new_iwad;
 	SString new_port;
+
 	std::vector<SString> new_resources;
-	std::istringstream ss(lump->getDataAsString());
 
-	while (!ss.eof())
+	SString line;
+
+	while (lump->GetLine(line))
 	{
-		std::string line0;
-		std::getline(ss, line0);
-		SString line(std::move(line0));
-		// comment?
-		if (line[0] == '#')
-			continue;
-
 		// comment?
 		if (line[0] == '#')
 			continue;
@@ -888,7 +892,7 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 
 		size_t pos = line.find(' ');
 
-		if (pos == std::string::npos || !pos)
+		if(pos == std::string::npos || !pos)
 		{
 			LogPrintf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
 			continue;
@@ -899,13 +903,13 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 
 		if (line == "game")
 		{
-			if (!M_CanLoadDefinitions("games", value))
+			if (! M_CanLoadDefinitions("games", value))
 			{
 				LogPrintf("  unknown game: %s\n", value.c_str() /* show full path */);
 
-				int res = DLG_Confirm("&Ignore|&Cancel Load",
-					"Warning: the pwad specifies an unsupported "
-					"game:\n\n          %s", value.c_str());
+				int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
+				                      "Warning: the pwad specifies an unsupported "
+									  "game:\n\n          %s", value.c_str());
 				if (res == 1)
 					return false;
 			}
@@ -915,10 +919,10 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 
 				if (new_iwad.empty())
 				{
-					int res = DLG_Confirm("&Ignore|&Cancel Load",
-						"Warning: the pwad specifies an IWAD "
-						"which cannot be found:\n\n          %s.wad",
-						value.c_str());
+					int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
+					                      "Warning: the pwad specifies an IWAD "
+										  "which cannot be found:\n\n          %s.wad", 
+										  value.c_str());
 					if (res == 1)
 						return false;
 				}
@@ -930,15 +934,15 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 
 			// if not found at absolute location, try same place as PWAD
 
-			if (!FileExists(res) && wad.path().good())
+			if (! FileExists(res))
 			{
 				LogPrintf("  file not found: %s\n", value.c_str());
 
-				res = FilenameReposition(value, wad.path());
+				res = FilenameReposition(value, wad->PathName());
 				LogPrintf("  trying: %s\n", res.c_str());
 			}
 
-			if (!FileExists(res) && !new_iwad.empty())
+			if (! FileExists(res) && !new_iwad.empty())
 			{
 				res = FilenameReposition(value, new_iwad);
 				LogPrintf("  trying: %s\n", res.c_str());
@@ -949,7 +953,7 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
-					"which cannot be found:\n\n%s", value.c_str());
+				           "which cannot be found:\n\n%s", value.c_str());
 			}
 		}
 		else if (line == "port")
@@ -981,20 +985,20 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 
 	if (!new_iwad.empty())
 	{
-		if (!(keep_cmd_line_args && !Iwad_name.empty()))
+		if (! (keep_cmd_line_args && !Iwad_name.empty()))
 			Iwad_name = new_iwad;
 	}
 
 	if (!new_port.empty())
 	{
-		if (!(keep_cmd_line_args && !Port_name.empty()))
+		if (! (keep_cmd_line_args && !Port_name.empty()))
 			Port_name = new_port;
 	}
 
-	if (!keep_cmd_line_args)
+	if (! keep_cmd_line_args)
 		Resource_list.clear();
 
-	for (const SString& resource : new_resources)
+	for (const SString &resource : new_resources)
 	{
 		M_AddResource_Unique(*this, resource);
 	}
@@ -1002,35 +1006,37 @@ bool Instance::M_ParseEurekaLump(const Wad& wad, bool keep_cmd_line_args)
 	return true;
 }
 
-void Instance::M_WriteEurekaLump(Wad &wad) const
+
+void Instance::M_WriteEurekaLump(Wad_file *wad) const
 {
 	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
 
-	Lump *lump = wad.findLump(EUREKA_LUMP);
-	if(lump)
-		lump->setData({});
-	else
-	{
-		lump = &wad.addNewLump();
-		lump->setName(EUREKA_LUMP);
-	}
+	wad->BeginWrite();
 
-	lump->printf("# Eureka project info\n");
+	int oldie = wad->FindLumpNum(EUREKA_LUMP);
+	if (oldie >= 0)
+		wad->RemoveLumps(oldie, 1);
 
-	if (Game_name.good())
-		lump->printf("game %s\n", Game_name.c_str());
+	Lump_c *lump = wad->AddLump(EUREKA_LUMP);
 
-	if (Port_name.good())
-		lump->printf("port %s\n", Port_name.c_str());
+	lump->Printf("# Eureka project info\n");
+
+	if (!Game_name.empty())
+		lump->Printf("game %s\n", Game_name.c_str());
+
+	if (!Port_name.empty())
+		lump->Printf("port %s\n", Port_name.c_str());
 
 	for (const SString &resource : Resource_list)
 	{
 		SString absolute_name = GetAbsolutePath(resource);
 
-		lump->printf("resource %s\n", absolute_name.c_str());
+		lump->Printf("resource %s\n", absolute_name.c_str());
 	}
 
-	wad.resetInsertionPoint();
+	lump->Finish();
+
+	wad->EndWrite();
 }
 
 
@@ -1077,7 +1083,7 @@ inline static SString Backup_Name(const SString &dir_name, int slot)
 }
 
 
-static void Backup_Prune(const SString &dir_name, int b_low, int b_high, size_t wad_size)
+static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad_size)
 {
 	// Note: the logic here for checking space is very crude, it assumes
 	//       all existing backups have the same size as the currrent wad.
@@ -1085,19 +1091,19 @@ static void Backup_Prune(const SString &dir_name, int b_low, int b_high, size_t 
 	// do calculations in KB units
 	wad_size = wad_size / 1024 + 1;
 
-	size_t backup_num = 2 + config::backup_max_space * 1024 / wad_size;
+	int backup_num = 2 + config::backup_max_space * 1024 / wad_size;
 
-	if ((int)backup_num > config::backup_max_files)
+	if (backup_num > config::backup_max_files)
 		backup_num = config::backup_max_files;
 
-	for ( ; b_low <= b_high - (int)backup_num + 1 ; b_low++)
+	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
 		FileDelete(Backup_Name(dir_name, b_low));
 	}
 }
 
 
-void M_BackupWad(const Wad &wad)
+void M_BackupWad(Wad_file *wad)
 {
 	// disabled ?
 	if (config::backup_max_files <= 0 || config::backup_max_space <= 0)
@@ -1105,7 +1111,7 @@ void M_BackupWad(const Wad &wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad.path().c_str());
+	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
 	SString dir_name = ReplaceExtension(filename, NULL);
 
 	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
@@ -1132,7 +1138,7 @@ void M_BackupWad(const Wad &wad)
 
 	if (b_low < b_high)
 	{
-		size_t wad_size = wad.totalSize();
+		int wad_size = wad->TotalSize();
 
 		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
@@ -1141,7 +1147,7 @@ void M_BackupWad(const Wad &wad)
 
 	SString dest_name = Backup_Name(dir_name, b_high + 1);
 
-	if (! wad.writeToPath(dest_name))
+	if (! wad->Backup(dest_name.c_str()))
 	{
 		// Hmmm, show a dialog ??
 		LogPrintf("WARNING: backup failed (cannot copy file)\n");

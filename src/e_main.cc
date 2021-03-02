@@ -458,7 +458,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 	if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
 		Subdiv_InvalidateAll();
 
-	if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT))
+	if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT || field == LineDef::F_START || field == LineDef::F_END))
 		Subdiv_InvalidateAll();
 
 	if (type == ObjType::sectors && (field == Sector::F_FLOORH || field == Sector::F_CEILH))

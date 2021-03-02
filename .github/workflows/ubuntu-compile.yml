@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Dependencies
-      run: sudo apt-get install libfltk1.3-dev libz-dev
+      run: sudo apt-get install libfltk1.3-dev libxpm-dev libz-dev
     - name: make
       run: make

@@ -135,7 +135,7 @@ void UI_TextEditor::menu_do_save(Fl_Widget *w, void *data)
 
 	if (win->read_only)
 	{
-		if (DLG_Confirm("Cancel|&Export",
+		if (DLG_Confirm({ "Cancel", "&Export" },
 						"The current wad is READ-ONLY.  "
 						"Do you want to export the text into a new file?") == 1)
 		{
@@ -429,7 +429,7 @@ void UI_TextEditor::close_callback(Fl_Widget *w, void *data)
 
 	if (win->has_changes)
 	{
-		if (DLG_Confirm("Cancel|&Discard",
+		if (DLG_Confirm({ "Cancel", "&Discard" },
 						"You have unsaved changes to this lump.  "
 						"Are you sure you want to discard them?") <= 0)
 		{
@@ -726,7 +726,7 @@ bool UI_TextEditor::FindNext(int dir)
 	{
 		fl_beep();
 
-		if (DLG_Confirm("Cancel|&Search",
+		if (DLG_Confirm({ "Cancel", "&Search" },
 						"No more results.\n\n"
 						"Search again from the top?") <= 0)
 		{

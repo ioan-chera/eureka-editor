@@ -208,6 +208,7 @@ extern UI_LogViewer * log_viewer;
 
 void LogViewer_Open();
 
+void FLFocusOnCreation(Fl_Widget *widget);
 
 #endif  /* __EUREKA_UI_WINDOW_H__ */
 

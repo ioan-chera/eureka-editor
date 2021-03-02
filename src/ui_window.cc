@@ -820,6 +820,24 @@ void LogViewer_Open()
 	log_viewer->JumpEnd();
 }
 
+//
+// Executes Fl::Focus if safe to do so. ONLY NEEDED to be called during window setup.
+//
+// Under the ratpoison Linux desktop environment it has been seen to block drawing of other
+// controls.
+//
+void FLFocusOnCreation(Fl_Widget *widget)
+{
+#if defined(_WIN32) || defined(__APPLE__) || defined(__FreeBSD__)
+	Fl::focus(widget);
+#else
+	// Pick some known variables
+	SString var1 = getenv("DESKTOP_SESSION");
+	SString var2 = getenv("GDMSESSION");
+	if(var1 != "ratpoison" && var2 != "ratpoison")
+		Fl::focus(widget);
+#endif
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

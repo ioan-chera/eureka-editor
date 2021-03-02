@@ -184,7 +184,7 @@ UI_ChooseTextLump::UI_ChooseTextLump(Instance &inst) :
 	lump_name->when(FL_WHEN_CHANGED);
 	lump_name->callback(input_callback, this);
 
-	Fl::focus(lump_name);
+	FLFocusOnCreation(lump_name);
 
 	{
 		Fl_Box* o = new Fl_Box(15, 55, 270, 25, "Or select one of these lumps:");
