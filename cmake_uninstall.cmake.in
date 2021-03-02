@@ -19,3 +19,8 @@ foreach(file ${files})
     message(STATUS "File $ENV{DESTDIR}${file} does not exist.")
   endif()
 endforeach()
+
+execute_process(
+  COMMAND xdg-desktop-menu uninstall --novendor misc/eureka.desktop
+  COMMAND xdg-icon-resource uninstall --novendor --size 32 eureka
+)
