@@ -320,6 +320,13 @@ if(MSVC)
     target_compile_options(eureka PRIVATE "/MP")
 endif()
 
+if ( CMAKE_COMPILER_IS_GNUCC )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g")
+endif()
+if ( MSVC )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+endif()
+
 # FIXME: this doesn't work when in this file I only have "target_sources"
 source_group(bsp FILES ${source_bsp})
 source_group("e_ source" FILES ${source_e})
