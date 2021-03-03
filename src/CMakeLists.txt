@@ -1,11 +1,11 @@
 set(resource_common
-    ../bindings.cfg
-    ../common
-    ../defaults.cfg
-    ../games
-    ../misc/about_logo.png
-    ../operations.cfg
-    ../ports
+    "${CMAKE_SOURCE_DIR}/bindings.cfg"
+    "${CMAKE_SOURCE_DIR}/common"
+    "${CMAKE_SOURCE_DIR}/defaults.cfg"
+    "${CMAKE_SOURCE_DIR}/games"
+    "${CMAKE_SOURCE_DIR}/misc/about_logo.png"
+    "${CMAKE_SOURCE_DIR}/operations.cfg"
+    "${CMAKE_SOURCE_DIR}/ports"
 )
 
 add_executable(eureka MACOSX_BUNDLE ${resource_common})
@@ -23,13 +23,13 @@ if(APPLE)
     # Unfortunately we can't put set_source_files_properties in another file than the one with add_executable.
     set(osxmaindir "osx/EurekaApp")
     set(resource_mac
-        "../${osxmaindir}/Eureka Doom EditorIcon.icns"
+        "${CMAKE_SOURCE_DIR}/${osxmaindir}/Eureka Doom EditorIcon.icns"
     )
     set(source_mac
-        "../osx/EurekaApp/AppDelegate.h"
-        "../osx/EurekaApp/AppDelegate.mm"
-        "../osx/EurekaApp/OSXCalls.h"
-        "../osx/EurekaApp/OSXCalls.mm"
+        "${CMAKE_SOURCE_DIR}/osx/EurekaApp/AppDelegate.h"
+        "${CMAKE_SOURCE_DIR}/osx/EurekaApp/AppDelegate.mm"
+        "${CMAKE_SOURCE_DIR}/osx/EurekaApp/OSXCalls.h"
+        "${CMAKE_SOURCE_DIR}/osx/EurekaApp/OSXCalls.mm"
     )
 
     target_sources(eureka PRIVATE ${source_mac})
@@ -47,7 +47,7 @@ if(APPLE)
     )
 
     set_target_properties(eureka PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST "../osx/EurekaApp/Eureka Doom Editor-Info.plist.in"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/osx/EurekaApp/Eureka Doom Editor-Info.plist.in"
 
         MACOSX_BUNDLE_BUNDLE_NAME "${exe_display_name}"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
