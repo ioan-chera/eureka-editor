@@ -43,8 +43,6 @@ private:
 	int what_is_solid;
 	bool on_2S_line;
 
-	int m_x_tile_positions[2];	// positions of first two texture tiles, depending on user setting
-
 public:
 	Fl_Int_Input *x_ofs;
 	Fl_Int_Input *y_ofs;
@@ -86,6 +84,8 @@ private:
 	void UpdateLabel();
 	void UpdateHiding();
 	void UpdateAddDel();
+
+	int getMidTexX(int position) const;
 
 	static void    tex_callback(Fl_Widget *, void *);
 	static void dyntex_callback(Fl_Widget *, void *);

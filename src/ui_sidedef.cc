@@ -106,9 +106,6 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 		std::swap(UX, LX);
 	}
 
-	m_x_tile_positions[0] = std::min(LX, UX);
-	m_x_tile_positions[1] = MX;
-
 	l_pic = new UI_Pic(inst, LX, Y, 64, 64, "Lower");
 	u_pic = new UI_Pic(inst, UX, Y, 64, 64, "Upper");
 	r_pic = new UI_Pic(inst, MX, Y, 64, 64, "Rail");
@@ -543,6 +540,15 @@ void UI_SideBox::UpdateAddDel()
 	}
 }
 
+//
+// Get X position of midtex tile
+//
+int UI_SideBox::getMidTexX(int position) const
+{
+	if(position == 0)
+		return config::swap_sidedefs ? u_pic->x() : l_pic->x();
+	return (l_pic->x() + u_pic->x()) / 2;
+}
 
 void UI_SideBox::UpdateHiding()
 {
@@ -571,8 +577,8 @@ void UI_SideBox::UpdateHiding()
 
 		if (on_2S_line || config::show_full_one_sided)
 		{
-			r_pic->position(m_x_tile_positions[1], r_pic->y());
-			r_tex->Fl_Widget::position(m_x_tile_positions[1] - TEXTURE_TILE_OUTSET, r_tex->y());
+			r_pic->position(getMidTexX(1), r_pic->y());
+			r_tex->Fl_Widget::position(getMidTexX(1) - TEXTURE_TILE_OUTSET, r_tex->y());
 
 			l_tex->show();
 			u_tex->show();
@@ -582,8 +588,8 @@ void UI_SideBox::UpdateHiding()
 		}
 		else
 		{
-			r_pic->position(m_x_tile_positions[0], r_pic->y());
-			r_tex->Fl_Widget::position(m_x_tile_positions[0] - TEXTURE_TILE_OUTSET, r_tex->y());
+			r_pic->position(getMidTexX(0), r_pic->y());
+			r_tex->Fl_Widget::position(getMidTexX(0) - TEXTURE_TILE_OUTSET, r_tex->y());
 
 			l_tex->hide();
 			u_tex->hide();
