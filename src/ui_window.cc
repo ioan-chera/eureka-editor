@@ -828,14 +828,8 @@ void LogViewer_Open()
 //
 void FLFocusOnCreation(Fl_Widget *widget)
 {
-#if defined(_WIN32) || defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(_WIN32) || defined(__APPLE__)
 	Fl::focus(widget);
-#else
-	// Pick some known variables
-	SString var1 = getenv("DESKTOP_SESSION");
-	SString var2 = getenv("GDMSESSION");
-	if(var1 != "ratpoison" && var2 != "ratpoison")
-		Fl::focus(widget);
 #endif
 }
 
