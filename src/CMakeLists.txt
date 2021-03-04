@@ -59,7 +59,6 @@ if(APPLE)
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
     )
 
-
     set_source_files_properties(${resource_mac} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
@@ -79,10 +78,67 @@ else()
     target_compile_definitions(eureka PRIVATE NO_OPENGL)
 endif()
 
-find_package(ZLIB REQUIRED)
+if(APPLE OR WIN32)
+    message("Using local FLTK for portability.")
 
-find_package(FLTK)
-if(NOT FLTK_FOUND)
+    set(LOCAL_FLTK_VERSION "1.3.5")
+    set(LOCAL_FLTK_ARCHIVE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
+    set(LOCAL_FLTK_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}")
+    set(LOCAL_FLTK_BUILD "${LOCAL_FLTK_SOURCE}/build")
+
+    # Download it if not found
+    if(NOT EXISTS "${LOCAL_FLTK_ARCHIVE}")
+        message("Downloading ${LOCAL_FLTK_ARCHIVE}")
+        file(
+            DOWNLOAD "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz" 
+                "${LOCAL_FLTK_ARCHIVE}" 
+            EXPECTED_HASH MD5=e85017defd5a03ae82e634311db87bbf
+        )
+    endif()
+    if(NOT EXISTS "${LOCAL_FLTK_SOURCE}")
+        message("Extracting to ${LOCAL_FLTK_SOURCE}")
+        execute_process(
+            COMMAND "${CMAKE_COMMAND}" -E tar xzf "${LOCAL_FLTK_ARCHIVE}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+    endif()
+    if(NOT EXISTS "${LOCAL_FLTK_BUILD}/lib")
+                                
+        message("Building ${LOCAL_FLTK_SOURCE}")
+
+        set(LOCAL_FLTK_DEFS -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF -D OPTION_USE_SYSTEM_ZLIB=OFF)
+        if(FLTK_SKIP_OPENGL)
+            set(LOCAL_FLTK_DEFS "${LOCAL_FLTK_DEFS} -D OPTION_USE_GL=OFF")
+        endif()
+
+        execute_process(
+            COMMAND "${CMAKE_COMMAND}" -S "${LOCAL_FLTK_SOURCE}" -B "${LOCAL_FLTK_BUILD}" ${LOCAL_FLTK_DEFS}
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+        execute_process(
+            COMMAND "${CMAKE_COMMAND}" --build "${LOCAL_FLTK_BUILD}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+    endif()
+
+    set(FLTK_INCLUDE_DIR "${LOCAL_FLTK_SOURCE};${LOCAL_FLTK_BUILD}")
+    set(FLTK_LIBRARIES "${LOCAL_FLTK_BUILD}/lib/libfltk.a"
+                       "${LOCAL_FLTK_BUILD}/lib/libfltk_gl.a"
+                       "${LOCAL_FLTK_BUILD}/lib/libfltk_images.a"
+                       "${LOCAL_FLTK_BUILD}/lib/libfltk_jpeg.a"
+                       "${LOCAL_FLTK_BUILD}/lib/libfltk_z.a"
+                       "${LOCAL_FLTK_BUILD}/lib/libfltk_png.a")
+
+    if(APPLE)
+        # Need to link to them separately if FLTK is linked manually
+        find_library(CARBON_FRAMEWORK Carbon)
+        target_link_libraries(eureka PRIVATE ${CARBON_FRAMEWORK}) 
+        find_library(COCOA_FRAMEWORK Cocoa)
+        target_link_libraries(eureka PRIVATE ${COCOA_FRAMEWORK}) 
+        find_library(APPSERVICES_FRAMEWORK ApplicationServices)
+        target_link_libraries(eureka PRIVATE ${APPSERVICES_FRAMEWORK})
+    endif()
+
     if(WIN32)
         message("FLTK not found in standard location; looking in ${lookout_dir}/lib/x86")
         set(FLTK_LIBRARIES
@@ -96,12 +152,9 @@ if(NOT FLTK_FOUND)
         )
         set(FLTK_INCLUDE_DIR ${lookout_dir}/include)
     endif()
-endif()
-
-if(APPLE)
-    # Linking statically needs to also find extra dependencies
-    find_package(PNG REQUIRED)
-    find_package(JPEG REQUIRED)
+else()
+    # UNIX/Linux
+    find_package(FLTK REQUIRED)
 endif()
 
 set(source_base
@@ -290,17 +343,7 @@ target_sources(
     ${source_w}
 )
 
-if(APPLE)
-    # We need to link statically, not dynamically, if we want portability
-    string(REPLACE ".dylib" ".a" FLTK_LIBRARIES "${FLTK_LIBRARIES}" )
-    string(REPLACE ".dylib" ".a" JPEG_LIBRARIES "${JPEG_LIBRARIES}" )
-    string(REPLACE "libpng.dylib" "libpng.a" PNG_LIBRARIES "${PNG_LIBRARIES}" )
-endif()
-
-target_link_libraries(eureka PRIVATE ${FLTK_LIBRARIES} ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES})
-if(APPLE)
-    target_link_libraries(eureka PRIVATE ${JPEG_LIBRARIES} ${PNG_LIBRARIES})
-endif()
+target_link_libraries(eureka PRIVATE ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 if(UNIX AND NOT APPLE)  # Linux
     target_link_libraries(eureka PRIVATE Xpm)
 endif()
@@ -308,7 +351,6 @@ endif()
 target_include_directories(eureka PRIVATE
     ${PROJECT_SOURCE_DIR}
     ${FLTK_INCLUDE_DIR}
-    ${ZLIB_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
 )
 
