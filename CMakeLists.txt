@@ -6,6 +6,22 @@ project(eureka-editor VERSION 2.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# https://stackoverflow.com/a/57210768/11738219
+function(add_path_resource target folder)
+    file(GLOB_RECURSE resources "${CMAKE_CURRENT_SOURCE_DIR}/${folder}/*")
+    target_sources(${target} PRIVATE ${resources})
+    foreach(resfile ${resources})
+        #Get the relative path from the data-folder to the particular file
+        file(RELATIVE_PATH newfile "${CMAKE_CURRENT_SOURCE_DIR}/${folder}" ${resfile})
+
+        get_filename_component(newfilepath ${newfile} DIRECTORY)
+        #Set its location inside the app package (under Resources)
+        message("${resfile}...${newfile}: Resources/${newfilepath}")
+        set_property(SOURCE ${resfile} PROPERTY MACOSX_PACKAGE_LOCATION "Resources/${folder}/${newfilepath}")
+
+    endforeach()
+endfunction()
+
 set(resource_common
     bindings.cfg
     common
@@ -17,8 +33,10 @@ set(resource_common
 )
 
 set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
 add_executable(eureka MACOSX_BUNDLE ${resource_common})
+add_path_resource(eureka common)
+add_path_resource(eureka games)
+add_path_resource(eureka ports)
 
 if(APPLE)
     set(exe_display_name "Eureka Doom Editor")
