@@ -63,7 +63,6 @@ if(APPLE)
     set_source_files_properties(${resource_mac} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
-# TODO: update the main header file to include version
 # TODO: move these to where they can be reached by Visual Studio
 configure_file(main.rc.in main.rc)
 configure_file(version.h.in version.h)
@@ -71,6 +70,9 @@ configure_file(version.h.in version.h)
 set(lookout_dir ${PROJECT_SOURCE_DIR}/prereqs)
 
 option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
+
+# TODO: remove this when everything is moved to CMake
+target_compile_definitions(eureka PRIVATE BUILT_VIA_CMAKE)
 
 if(ENABLE_OPENGL)
     find_package(OpenGL REQUIRED)
