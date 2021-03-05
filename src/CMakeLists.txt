@@ -176,7 +176,7 @@ set(source_w
 )
 
 add_library(
-    eurekamain STATIC
+    eurekasrc STATIC
     ${source_base}
     ${source_bsp}
     ${source_e}
@@ -189,6 +189,9 @@ add_library(
     ${source_w}
 )
 
+# Needed for macOS release archiving!
+set_target_properties(eurekasrc PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/out/library)
+
 set(lookout_dir ${PROJECT_SOURCE_DIR}/prereqs)
 
 option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
@@ -196,13 +199,13 @@ option(ENABLE_OPENGL "Use OpenGL instead of software rendering" ON)
 # TODO: add library files
 
 # TODO: remove this when everything is moved to CMake
-target_compile_definitions(eurekamain PUBLIC BUILT_VIA_CMAKE)
+target_compile_definitions(eurekasrc PUBLIC BUILT_VIA_CMAKE)
 
 if(ENABLE_OPENGL)
     find_package(OpenGL REQUIRED)
 else()
     set(FLTK_SKIP_OPENGL TRUE)
-    target_compile_definitions(eurekamain PUBLIC NO_OPENGL)
+    target_compile_definitions(eurekasrc PUBLIC NO_OPENGL)
 endif()
 
 if(APPLE OR WIN32)
@@ -259,11 +262,11 @@ if(APPLE OR WIN32)
     if(APPLE)
         # Need to link to them separately if FLTK is linked manually
         find_library(CARBON_FRAMEWORK Carbon)
-        target_link_libraries(eurekamain PUBLIC ${CARBON_FRAMEWORK}) 
+        target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK}) 
         find_library(COCOA_FRAMEWORK Cocoa)
-        target_link_libraries(eurekamain PUBLIC ${COCOA_FRAMEWORK}) 
+        target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK}) 
         find_library(APPSERVICES_FRAMEWORK ApplicationServices)
-        target_link_libraries(eurekamain PUBLIC ${APPSERVICES_FRAMEWORK})
+        target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
     endif()
 
     if(WIN32)
@@ -284,30 +287,30 @@ else()
     find_package(FLTK REQUIRED)
 endif()
 
-target_link_libraries(eurekamain PUBLIC ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(eurekasrc PUBLIC ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 if(UNIX AND NOT APPLE)  # Linux
-    target_link_libraries(eurekamain PUBLIC Xpm)
+    target_link_libraries(eurekasrc PUBLIC Xpm)
 endif()
 
-target_include_directories(eurekamain PUBLIC
+target_include_directories(eurekasrc PUBLIC
     ${PROJECT_SOURCE_DIR}
     ${FLTK_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
 )
 
 # May be needed by files from other projects to find headers here
-target_include_directories(eurekamain PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_include_directories(eurekamain PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(eurekasrc PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(eurekasrc PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(MSVC)
-    target_compile_options(eurekamain PUBLIC "/MP")
+    target_compile_options(eurekasrc PUBLIC "/MP")
 endif()
 
 if ( CMAKE_COMPILER_IS_GNUCC )
-    target_compile_options(eurekamain PUBLIC "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g")
+    target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g")
 endif()
 if ( MSVC )
-    target_compile_options(eurekamain PUBLIC "${CMAKE_CXX_FLAGS} /W4")
+    target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS} /W4")
 endif()
 
 source_group(bsp FILES ${source_bsp})

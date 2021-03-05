@@ -6,11 +6,14 @@ set(source_mac
     OSXCalls.mm
 )
 
-add_library(macspecial STATIC ${source_mac})
+add_library(eurekamac STATIC ${source_mac})
 
-target_include_directories(macspecial INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+# Needed for macOS release archiving!
+set_target_properties(eurekamac PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/out/library)
+
+target_include_directories(eurekamac INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 # Need to silence OpenGL deprecation warnings (they tell us what we know and can't fix)
-target_compile_definitions(macspecial PUBLIC
+target_compile_definitions(eurekamac PUBLIC
     "GL_SILENCE_DEPRECATION"
     "main=main_ORIGINAL"
 )

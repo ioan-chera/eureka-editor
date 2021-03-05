@@ -16,7 +16,6 @@ function(add_path_resource target folder)
 
         get_filename_component(newfilepath ${newfile} DIRECTORY)
         #Set its location inside the app package (under Resources)
-        message("${resfile}...${newfile}: Resources/${newfilepath}")
         set_property(SOURCE ${resfile} PROPERTY MACOSX_PACKAGE_LOCATION "Resources/${folder}/${newfilepath}")
 
     endforeach()
@@ -43,8 +42,7 @@ if(APPLE)
     set_target_properties(eureka PROPERTIES OUTPUT_NAME "${exe_display_name}")
 
     add_subdirectory(osx)
-    target_link_libraries(eureka macspecial)
-    message("Resource mac ${resource_mac}")
+    target_link_libraries(eureka eurekamac)
     set_source_files_properties(${resource_mac} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(eureka PRIVATE ${resource_mac})
 
@@ -55,10 +53,16 @@ if(APPLE)
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
         MACOSX_BUNDLE_COPYRIGHT "Copyright © The Eureka Team"
         MACOSX_BUNDLE_EXECUTABLE_NAME "${exe_display_name}"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.eureka.Eureka-Doom-Editor"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "$(PRODUCT_BUNDLE_IDENTIFIER)"
         MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_ICON_FILE "Eureka Doom EditorIcon"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.eureka.Eureka-Doom-Editor"
+
+        XCODE_ATTRIBUTE_INSTALL_PATH "/Applications"
+        XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+        XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES"
     )
   
 else()
@@ -66,9 +70,9 @@ else()
 endif()
 
 add_subdirectory(src)
-target_link_libraries(eurekamain PRIVATE macspecial)
-target_link_libraries(macspecial PRIVATE eurekamain)
-target_link_libraries(eureka eurekamain)
+target_link_libraries(eurekasrc PRIVATE eurekamac)
+target_link_libraries(eurekamac PRIVATE eurekasrc)
+target_link_libraries(eureka eurekasrc)
 
 if(UNIX AND NOT APPLE)  # Linux
     set(eureka_install_dir "${CMAKE_INSTALL_PREFIX}/share/eureka")
