@@ -615,7 +615,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
+		const LineDef *L = inst.level.linedefs[hl.num];
 
 		int x_offset = 0;
 		int y_offset = 0;
