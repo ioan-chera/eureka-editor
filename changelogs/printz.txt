@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+05.03.2021
+* Fixed a crash happening when using R to change sidedef offset in 3D mode on a selected (but not highlighted) linedef.
+
+----------
 18.02.2021
 * Do not throw a fatal error when loading invalid project resource files (other than broken UGH files).
 
