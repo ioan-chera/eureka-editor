@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.13)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+
 project(eureka-editor VERSION 2.0.0)
 
 # Why not use the latest C++
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# https://stackoverflow.com/a/57210768/11738219
+# https://stackoverflow.com/a/66401708/11738219
 function(add_path_resource target folder)
     file(GLOB_RECURSE resources "${CMAKE_CURRENT_SOURCE_DIR}/${folder}/*")
     target_sources(${target} PRIVATE ${resources})
@@ -19,6 +21,7 @@ function(add_path_resource target folder)
         set_property(SOURCE ${resfile} PROPERTY MACOSX_PACKAGE_LOCATION "Resources/${folder}/${newfilepath}")
 
     endforeach()
+    source_group("eureka-res-clutter" FILES ${resources})
 endfunction()
 
 set(resource_common
@@ -30,6 +33,7 @@ set(resource_common
     operations.cfg
     ports
 )
+source_group("eureka-res" FILES ${resource_common})
 
 set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 add_executable(eureka MACOSX_BUNDLE ${resource_common})

@@ -236,7 +236,7 @@ if(APPLE OR WIN32)
                                 
         message(STATUS "Building ${LOCAL_FLTK_SOURCE}")
 
-        set(LOCAL_FLTK_DEFS -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF -D OPTION_USE_SYSTEM_ZLIB=OFF)
+        set(LOCAL_FLTK_DEFS -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF -D OPTION_USE_SYSTEM_ZLIB=OFF -D CMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
         if(FLTK_SKIP_OPENGL)
             set(LOCAL_FLTK_DEFS "${LOCAL_FLTK_DEFS} -D OPTION_USE_GL=OFF")
         endif()
@@ -245,8 +245,11 @@ if(APPLE OR WIN32)
             COMMAND "${CMAKE_COMMAND}" -S "${LOCAL_FLTK_SOURCE}" -B "${LOCAL_FLTK_BUILD}" ${LOCAL_FLTK_DEFS}
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         )
+        include(ProcessorCount)
+        ProcessorCount(nproc)
+        message(STATUS "${CMAKE_COMMAND} --build ${LOCAL_FLTK_BUILD} -j ${nproc}")
         execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build "${LOCAL_FLTK_BUILD}"
+            COMMAND "${CMAKE_COMMAND}" --build "${LOCAL_FLTK_BUILD}" -j ${nproc}
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         )
     endif()
