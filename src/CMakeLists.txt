@@ -220,8 +220,8 @@ if(APPLE OR WIN32)
     if(NOT EXISTS "${LOCAL_FLTK_ARCHIVE}")
         message(STATUS "Downloading ${LOCAL_FLTK_ARCHIVE}")
         file(
-            DOWNLOAD "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz" 
-                "${LOCAL_FLTK_ARCHIVE}" 
+            DOWNLOAD "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz"
+                "${LOCAL_FLTK_ARCHIVE}"
             EXPECTED_HASH MD5=e85017defd5a03ae82e634311db87bbf
         )
     endif()
@@ -233,7 +233,7 @@ if(APPLE OR WIN32)
         )
     endif()
     if(NOT EXISTS "${LOCAL_FLTK_BUILD}/lib")
-                                
+
         message(STATUS "Building ${LOCAL_FLTK_SOURCE}")
 
         set(LOCAL_FLTK_DEFS -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF -D OPTION_USE_SYSTEM_ZLIB=OFF -D CMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
@@ -265,9 +265,9 @@ if(APPLE OR WIN32)
     if(APPLE)
         # Need to link to them separately if FLTK is linked manually
         find_library(CARBON_FRAMEWORK Carbon)
-        target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK}) 
+        target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
         find_library(COCOA_FRAMEWORK Cocoa)
-        target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK}) 
+        target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK})
         find_library(APPSERVICES_FRAMEWORK ApplicationServices)
         target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
     endif()
