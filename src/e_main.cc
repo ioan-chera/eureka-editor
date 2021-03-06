@@ -985,7 +985,7 @@ void Instance::Selection_Add(Objid& obj) const
 
 	byte cur = edit.Selected->get_ext(obj.num);
 
-	cur = 1 | obj.parts;
+	cur = static_cast<byte>(1 | obj.parts);
 
 	edit.Selected->set_ext(obj.num, cur);
 }
@@ -1010,7 +1010,7 @@ void Instance::Selection_Toggle(Objid& obj) const
 		return;
 	}
 
-	cur = 1 | (cur ^ obj.parts);
+	cur = static_cast<byte>(1 | (cur ^ obj.parts));
 
 	// if we toggled off all the parts, then unset the object itself
 	if (cur == 1)

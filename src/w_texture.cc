@@ -479,7 +479,7 @@ SString NormalizeTex(const SString &name)
 		if (buffer[i] == '"')
 			buffer[i] = '_';
 		else
-			buffer[i] = toupper(buffer[i]);
+			buffer[i] = static_cast<char>(toupper(buffer[i]));
 	}
 
 	return buffer;
@@ -543,7 +543,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = inst.trans_replace;
+			pix = static_cast<img_pixel_t>(inst.trans_replace);
 
 		img->wbuf() [i] = pix;
 	}

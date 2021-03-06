@@ -485,7 +485,7 @@ void DetectOverlappingVertices(const Document &doc)
 	// sort array of indices
 	int i;
 	for (i=0 ; i < num_vertices ; i++)
-		array[i] = i;
+		array[i] = static_cast<u16_t>(i);
 
 	std::sort(array, array + num_vertices, [&doc](u16_t left, u16_t right)
 		{

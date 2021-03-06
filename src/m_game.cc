@@ -682,7 +682,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		info.group  = argv[2][0];
 		info.flags  = ParseThingdefFlags(argv[3]);
-		info.radius = atoi(argv[4]);
+		info.radius = static_cast<short>(atoi(argv[4]));
 		info.sprite = argv[5];
 		info.desc   = argv[6];
 		info.scale  = static_cast<float>((nargs >= 7) ? atof(argv[7]) : 1.0);
@@ -728,7 +728,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
 
-		if (inst.texture_groups.find(tolower(group)) == inst.texture_groups.end())
+		if (inst.texture_groups.find((char)tolower(group)) == inst.texture_groups.end())
 		{
 			LogPrintf("%s(%d): unknown texture group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, group);
@@ -745,7 +745,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
 
-		if (inst.texture_groups.find(tolower(group)) == inst.texture_groups.end())
+		if (inst.texture_groups.find((char)tolower(group)) == inst.texture_groups.end())
 		{
 			LogPrintf("%s(%d): unknown texture group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, group);

@@ -541,8 +541,10 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 
 			if (new_val > val1 || new_val > val2)
 			{
-				if (new_val > val1) vec[sec1] = new_val;
-				if (new_val > val2) vec[sec2] = new_val;
+				if (new_val > val1)
+                    vec[sec1] = static_cast<byte>(new_val);
+				if (new_val > val2)
+                    vec[sec2] = static_cast<byte>(new_val);
 
 				changes = true;
 			}

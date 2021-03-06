@@ -348,7 +348,7 @@ void Instance::CMD_FreshMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
 
-	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(Level_name[0])), edit_wad);
 
 	SString map_name = dialog->Run();
 
@@ -389,7 +389,7 @@ static void UpperCaseShortStr(char *buf, int max_len)
 {
 	for (int i = 0 ; (i < max_len) && buf[i] ; i++)
 	{
-		buf[i] = toupper(buf[i]);
+		buf[i] = static_cast<char>(toupper(buf[i]));
 	}
 }
 
@@ -1449,12 +1449,12 @@ void Instance::SaveThings_Hexen()
 		raw.type    = LE_U16(th->type);
 		raw.options = LE_U16(th->options);
 
-		raw.special = th->special;
-		raw.args[0] = th->arg1;
-		raw.args[1] = th->arg2;
-		raw.args[2] = th->arg3;
-		raw.args[3] = th->arg4;
-		raw.args[4] = th->arg5;
+		raw.special = static_cast<u8_t>(th->special);
+		raw.args[0] = static_cast<u8_t>(th->arg1);
+		raw.args[1] = static_cast<u8_t>(th->arg2);
+		raw.args[2] = static_cast<u8_t>(th->arg3);
+		raw.args[3] = static_cast<u8_t>(th->arg4);
+		raw.args[4] = static_cast<u8_t>(th->arg5);
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1531,13 +1531,13 @@ void Instance::SaveLineDefs_Hexen()
 		raw.end   = LE_U16(ld->end);
 
 		raw.flags = LE_U16(ld->flags);
-		raw.type  = ld->type;
+		raw.type  = static_cast<u8_t>(ld->type);
 
-		raw.args[0] = ld->tag;
-		raw.args[1] = ld->arg2;
-		raw.args[2] = ld->arg3;
-		raw.args[3] = ld->arg4;
-		raw.args[4] = ld->arg5;
+		raw.args[0] = static_cast<u8_t>(ld->tag);
+		raw.args[1] = static_cast<u8_t>(ld->arg2);
+		raw.args[2] = static_cast<u8_t>(ld->arg3);
+		raw.args[3] = static_cast<u8_t>(ld->arg4);
+		raw.args[4] = static_cast<u8_t>(ld->arg5);
 
 		raw.right = (ld->right >= 0) ? LE_U16(ld->right) : 0xFFFF;
 		raw.left  = (ld->left  >= 0) ? LE_U16(ld->left)  : 0xFFFF;
@@ -1771,7 +1771,7 @@ bool Instance::M_ExportMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
 
-	dialog->PopulateButtons(toupper(Level_name[0]), wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(Level_name[0])), wad);
 
 	SString map_name = dialog->Run();
 
@@ -1854,7 +1854,7 @@ void Instance::CMD_CopyMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad);
 
-	dialog->PopulateButtons(toupper(Level_name[0]), edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(Level_name[0])), edit_wad);
 
 	SString new_name = dialog->Run();
 
@@ -1910,7 +1910,7 @@ void Instance::CMD_RenameMap()
 		{
 			idx = game_wad->LevelHeader(idx);
 			const SString &name = game_wad->GetLump(idx)->Name();
-			format = toupper(name[0]);
+			format = static_cast<char>(toupper(name[0]));
 		}
 	}
 

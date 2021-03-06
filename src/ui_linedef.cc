@@ -644,7 +644,8 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeLinedef(*it, LineDef::F_TAG + arg_idx, new_value);
+			box->inst.level.basis.changeLinedef(*it, static_cast<byte>(LineDef::F_TAG + arg_idx),
+                                                new_value);
 		}
 
 		box->inst.level.basis.end();

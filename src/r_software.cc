@@ -59,7 +59,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 		g = (g * map) >> 5;
 		b = (b * map) >> 5;
 
-		return IMG_PIXEL_MAKE_RGB(r, g, b);
+		return static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
 	}
 	else
 	{
@@ -111,7 +111,7 @@ public:
 
 		if (inst.is_sky(fname))
 		{
-			col = inst.Misc_info.sky_color;
+			col = static_cast<img_pixel_t>(inst.Misc_info.sky_color);
 			fullbright = true;
 			return;
 		}
@@ -131,9 +131,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (inst.r_view.lighting)
-			col = inst.Misc_info.floor_colors[1];
+			col = static_cast<img_pixel_t>(inst.Misc_info.floor_colors[1]);
 		else
-			col = HashedPalColor(fname, inst.Misc_info.floor_colors);
+			col = static_cast<img_pixel_t>(HashedPalColor(fname, inst.Misc_info.floor_colors));
 	}
 
 	void FindTex(const SString & tname, LineDef *ld)
@@ -167,9 +167,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (inst.r_view.lighting)
-			col = inst.Misc_info.wall_colors[1];
+			col = static_cast<img_pixel_t>(inst.Misc_info.wall_colors[1]);
 		else
-			col = HashedPalColor(tname, inst.Misc_info.wall_colors);
+			col = static_cast<img_pixel_t>(HashedPalColor(tname, inst.Misc_info.wall_colors));
 	}
 };
 

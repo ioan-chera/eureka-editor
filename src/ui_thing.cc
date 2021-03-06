@@ -664,7 +664,8 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_ARG1 + arg_idx, new_value);
+			box->inst.level.basis.changeThing(*it, static_cast<byte>(Thing::F_ARG1 + arg_idx),
+                                              new_value);
 		}
 
 		box->inst.level.basis.end();
