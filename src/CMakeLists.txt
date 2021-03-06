@@ -238,6 +238,9 @@ if(APPLE OR WIN32)
                             -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF
                             -D OPTION_USE_SYSTEM_ZLIB=OFF
         )
+        if(CMAKE_GENERATOR_PLATFORM)
+            list(APPEND LOCAL_FLTK_DEFS -A ${CMAKE_GENERATOR_PLATFORM})
+        endif()
         if(FLTK_SKIP_OPENGL)
             list(APPEND LOCAL_FLTK_DEFS -D OPTION_USE_GL=OFF)
         endif()
