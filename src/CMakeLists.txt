@@ -288,11 +288,13 @@ if(APPLE OR WIN32)
 else()
     # UNIX/Linux
     find_package(FLTK REQUIRED)
+    find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
+    find_package(X11 REQUIRED)  # also libXPM
 endif()
 
 target_link_libraries(eurekasrc PUBLIC ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 if(UNIX AND NOT APPLE)  # Linux
-    target_link_libraries(eurekasrc PUBLIC Xpm)
+    target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
 endif()
 
 target_include_directories(eurekasrc PUBLIC
@@ -310,7 +312,7 @@ if(MSVC)
 endif()
 
 if ( CMAKE_COMPILER_IS_GNUCC )
-    target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g")
+    target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS}" -Wall -Wextra -Werror -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g)
 endif()
 if ( MSVC )
     target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS} /W4")
