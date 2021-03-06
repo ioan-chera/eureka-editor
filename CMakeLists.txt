@@ -41,6 +41,7 @@ foreach(dir ${resource_common_dirs})
 endforeach()
 
 if(WIN32)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT eureka)
     list(TRANSFORM resource_common_cfgs PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
     add_custom_command(
