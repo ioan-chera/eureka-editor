@@ -111,15 +111,8 @@ will be warned that the app isn't signed, and prompted to move it to Trash
 COMPILING (Windows)
 ===================
 
-Compiling under Windows is currently done with Visual Studio.
-Open the win\Eureka\Eureka.sln solution. You need to have several
-libraries and headers prepared under the prereqs\ folder. Please
-follow the Visual Studio project settings to find out which header
-paths and libraries are expected, downloading them as necessary.
-
-IMPORTANT: currently CMakeLists.txt hasn't been prepared for
-Windows, but the plan is to use it universally. For now, please use
-the pre-build Visual Studio project.
+Use CMake, same as on macOS. Similarly, the FLTK project shall be downloaded and
+built.
 
 
 For previous versions the official Windows executable was built
