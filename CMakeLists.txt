@@ -80,27 +80,28 @@ if(APPLE)
 endif()
 target_link_libraries(eureka eurekasrc)
 
+# Currently, installing via CMake is only supported on GNU/Linux and similar systems
 if(UNIX AND NOT APPLE)  # Linux
     set(eureka_install_dir "${CMAKE_INSTALL_PREFIX}/share/eureka")
     install(TARGETS eureka
-        RUNTIME DESTINATION "${BIN_DIR}")
-    install(DIRECTORY ../games DESTINATION "${eureka_install_dir}" PATTERN "freedoom.ugh" EXCLUDE)
-    install(DIRECTORY ../common DESTINATION "${eureka_install_dir}")
-    install(DIRECTORY ../ports DESTINATION "${eureka_install_dir}")
-    install(FILES ../bindings.cfg
-                ../defaults.cfg
-                ../misc/about_logo.png
-                ../operations.cfg
-                DESTINATION "${eureka_install_dir}")
+            RUNTIME DESTINATION "${BIN_DIR}"
+    )
+    install(DIRECTORY games DESTINATION "${eureka_install_dir}"
+            PATTERN "freedoom.ugh" EXCLUDE)
+    install(DIRECTORY common ports DESTINATION "${eureka_install_dir}")
+    install(FILES bindings.cfg
+                  defaults.cfg
+                  misc/about_logo.png
+                  operations.cfg
+            DESTINATION "${eureka_install_dir}"
+    )
     # The full-install sequence is here
     install(CODE "execute_process(
-        COMMAND xdg-desktop-menu install --novendor ../misc/eureka.desktop
-        COMMAND xdg-icon-resource install --novendor --size 32 ../misc/eureka.xpm
+        COMMAND xdg-desktop-menu install --novendor ${CMAKE_CURRENT_SOURCE_DIR}/misc/eureka.desktop
+        COMMAND xdg-icon-resource install --novendor --size 32 ${CMAKE_CURRENT_SOURCE_DIR}/misc/eureka.xpm
     )")
-endif()
 
-# uninstall target
-if(UNIX AND NOT APPLE)
+    # uninstall target
     if(NOT TARGET uninstall)
         configure_file(
             "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
