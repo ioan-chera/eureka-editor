@@ -36,7 +36,8 @@ set(resource_common
 source_group("eureka-res" FILES ${resource_common})
 
 set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-add_executable(eureka MACOSX_BUNDLE ${resource_common})
+# This is the main program. MACOSX_BUNDLE is needed for Mac, dummywin for Windows
+add_executable(eureka MACOSX_BUNDLE ${resource_common} win/dummywin.cpp)
 add_path_resource(eureka common)
 add_path_resource(eureka games)
 add_path_resource(eureka ports)
@@ -96,12 +97,18 @@ if(APPLE)
 
 else()
     set(exe_display_name "eureka")
+    if(WIN32)
+        add_subdirectory(win)
+    endif()
 endif()
 
 add_subdirectory(src)
 if(APPLE)
     target_link_libraries(eurekasrc PRIVATE eurekamac)
     target_link_libraries(eurekamac PRIVATE eurekasrc)
+endif()
+if(WIN32)
+    target_link_libraries(eurekasrc PRIVATE eurekawin)
 endif()
 target_link_libraries(eureka eurekasrc)
 
