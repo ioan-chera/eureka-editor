@@ -24,23 +24,45 @@ function(add_path_resource target folder)
     source_group("eureka-res-clutter" FILES ${resources})
 endfunction()
 
-set(resource_common
-    bindings.cfg
-    common
-    defaults.cfg
-    games
-    misc/about_logo.png
-    operations.cfg
-    ports
-)
+set(resource_common_dirs common games ports)
+set(resource_common_cfgs bindings.cfg defaults.cfg operations.cfg)
+set(resource_common_files ${resource_common_cfgs} misc/about_logo.png)
+
+set(resource_common ${resource_common_dirs} ${resource_common_files})
 source_group("eureka-res" FILES ${resource_common})
 
 set_source_files_properties(${resource_common} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 # This is the main program. MACOSX_BUNDLE is needed for Mac, dummywin for Windows
 add_executable(eureka MACOSX_BUNDLE ${resource_common} win/dummywin.cpp)
-add_path_resource(eureka common)
-add_path_resource(eureka games)
-add_path_resource(eureka ports)
+foreach(dir ${resource_common_dirs})
+    add_path_resource(eureka common)
+    add_path_resource(eureka games)
+    add_path_resource(eureka ports)
+endforeach()
+
+if(WIN32)
+    list(TRANSFORM resource_common_cfgs PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+
+    add_custom_command(
+        TARGET eureka
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${resource_common_cfgs} $<TARGET_FILE_DIR:eureka>
+    )
+    foreach(dir ${resource_common_dirs})
+        add_custom_command(
+            TARGET eureka
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/${dir}"
+                "$<TARGET_FILE_DIR:eureka>/${dir}"
+        )
+    endforeach()
+    add_custom_command(
+        TARGET eureka
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/misc/about_logo.png"
+            "$<TARGET_FILE_DIR:eureka>/common"
+    )
+endif()
 
 if(APPLE)
     set(exe_display_name "Eureka Doom Editor")
