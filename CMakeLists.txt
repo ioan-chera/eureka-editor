@@ -68,14 +68,16 @@ if(APPLE)
         XCODE_ATTRIBUTE_SKIP_INSTALL "No"
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME "YES"
     )
-  
+
 else()
     set(exe_display_name "eureka")
 endif()
 
 add_subdirectory(src)
-target_link_libraries(eurekasrc PRIVATE eurekamac)
-target_link_libraries(eurekamac PRIVATE eurekasrc)
+if(APPLE)
+    target_link_libraries(eurekasrc PRIVATE eurekamac)
+    target_link_libraries(eurekamac PRIVATE eurekasrc)
+endif()
 target_link_libraries(eureka eurekasrc)
 
 if(UNIX AND NOT APPLE)  # Linux
