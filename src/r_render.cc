@@ -495,7 +495,7 @@ static void AdjustOfs_Begin(Instance &inst)
 	else if (inst.edit.highlight.valid())
 	{
 		int  ld_num = inst.edit.highlight.num;
-		byte parts  = inst.edit.highlight.parts;
+		byte parts  = static_cast<byte>(inst.edit.highlight.parts);
 
 		if (parts >= 2)
 		{
@@ -1925,9 +1925,9 @@ void Instance::R3D_WHEEL_Move()
 		keycode_t mod = Fl::event_state() & EMOD_ALL_MASK;
 
 		if (mod == EMOD_SHIFT)
-			speed /= 4.0;
+			speed /= 4.0f;
 		else if (mod == EMOD_COMMAND)
-			speed *= 4.0;
+			speed *= 4.0f;
 	}
 
 	r_view.x += speed * (r_view.Cos * dy + r_view.Sin * dx);

@@ -47,15 +47,15 @@ void Instance::W_UpdateGamma()
 		byte g = raw_palette[c][1];
 		byte b = raw_palette[c][2];
 
-		byte r2 = gammatable[config::usegamma][r];
-		byte g2 = gammatable[config::usegamma][g];
-		byte b2 = gammatable[config::usegamma][b];
+		byte r2 = static_cast<byte>(gammatable[config::usegamma][r]);
+		byte g2 = static_cast<byte>(gammatable[config::usegamma][g]);
+		byte b2 = static_cast<byte>(gammatable[config::usegamma][b]);
 
 		palette[c] = fl_rgb_color(r2, g2, b2);
 
-		r2 = gammatable[config::panel_gamma][r];
-		g2 = gammatable[config::panel_gamma][g];
-		b2 = gammatable[config::panel_gamma][b];
+		r2 = static_cast<byte>(gammatable[config::panel_gamma][r]);
+		g2 = static_cast<byte>(gammatable[config::panel_gamma][g]);
+		b2 = static_cast<byte>(gammatable[config::panel_gamma][b]);
 
 		palette_medium[c] = fl_rgb_color(r2, g2, b2);
 	}
@@ -64,8 +64,8 @@ void Instance::W_UpdateGamma()
 	{
 		int i = d * 255 / 31;
 
-		rgb555_gamma [d] = gammatable[config::usegamma][i];
-		rgb555_medium[d] = gammatable[config::panel_gamma][i];
+		rgb555_gamma [d] = static_cast<byte>(gammatable[config::usegamma][i]);
+		rgb555_medium[d] = static_cast<byte>(gammatable[config::panel_gamma][i]);
 	}
 }
 
@@ -125,7 +125,7 @@ void Instance::W_LoadColormap()
 	for (int c = 0 ; c < 256 ; c++)
 	{
 		if (raw_colormap[i][c] == TRANS_PIXEL)
-			raw_colormap[i][c] = trans_replace;
+			raw_colormap[i][c] = static_cast<byte>(trans_replace);
 	}
 
 	// workaround for Harmony having a bugged colormap
@@ -145,7 +145,8 @@ rgb_color_t DarkerColor(rgb_color_t col)
 	int g = RGB_GREEN(col);
 	int b = RGB_BLUE(col);
 
-	return fl_rgb_color(r*2/3, g*2/3, b*2/3);
+	return fl_rgb_color(static_cast<uchar>(r*2/3), static_cast<uchar>(g*2/3),
+                        static_cast<uchar>(b*2/3));
 }
 
 
@@ -159,7 +160,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 	g = g * 13 / 16 + 48;
 	b = b * 13 / 16 + 48;
 
-	return fl_rgb_color(r, g, b);
+	return fl_rgb_color(static_cast<uchar>(r), static_cast<uchar>(g), static_cast<uchar>(b));
 }
 
 
@@ -186,7 +187,7 @@ byte Instance::W_FindPaletteColor(int r, int g, int b) const
 		}
 	}
 
-	return best;
+	return static_cast<byte>(best);
 }
 
 
@@ -223,7 +224,7 @@ rgb_color_t ParseColor(const SString &cstr)
 		int g = (number & 0x00FF00) >> 8;
 		int b = (number & 0x0000FF);
 
-		return fl_rgb_color(r, g, b);
+		return fl_rgb_color(static_cast<uchar>(r), static_cast<uchar>(g), static_cast<uchar>(b));
 	}
 	else  // short form: #rgb
 	{
@@ -233,7 +234,8 @@ rgb_color_t ParseColor(const SString &cstr)
 		int g = (number & 0x0F0) >> 4;
 		int b = (number & 0x00F);
 
-		return fl_rgb_color(r*17, g*17, b*17);
+		return fl_rgb_color(static_cast<uchar>(r*17), static_cast<uchar>(g*17),
+                            static_cast<uchar>(b*17));
 	}
 }
 

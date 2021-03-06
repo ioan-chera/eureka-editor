@@ -631,7 +631,11 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 
 
 	if (len == 0)  // ouch
-		return ".";
+    {
+        dir[0] = '.';
+        dir[1] = '\0';
+		return true;
+    }
 
 	// remove trailing slash
 	while (len > 1 && paths[len - 1] == DIR_SEP_CH)
@@ -641,7 +645,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 
 	dir[len] = 0;
 
-	return dir;
+	return true;
 }
 
 

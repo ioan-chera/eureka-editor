@@ -174,7 +174,7 @@ static void BlockAdd(int blk_num, int line_index)
 	}
 
 	// compute new checksum
-	cur[BK_XOR] = ((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index;
+	cur[BK_XOR] = static_cast<u16_t>(((cur[BK_XOR] << 4) | (cur[BK_XOR] >> 12)) ^ line_index);
 
 	cur[BK_FIRST + cur[BK_NUM]] = LE_U16(line_index);
 	cur[BK_NUM]++;
@@ -312,7 +312,7 @@ static void CompressBlockmap(void)
 	// of the blocklists in the BLOCKMAP lump.
 
 	for (i=0 ; i < block_count ; i++)
-		block_dups[i] = i;
+		block_dups[i] = static_cast<u16_t>(i);
 
 	qsort(block_dups, block_count, sizeof(u16_t), BlockCompare);
 
@@ -331,7 +331,7 @@ static void CompressBlockmap(void)
 		// empty block ?
 		if (block_lines[blk_num] == NULL)
 		{
-			block_ptrs[blk_num] = 4 + block_count;
+			block_ptrs[blk_num] = static_cast<u16_t>(4 + block_count);
 			block_dups[i] = DUMMY_DUP;
 
 			orig_size += 2;
@@ -346,7 +346,7 @@ static void CompressBlockmap(void)
 		if (i+1 < block_count &&
 				BlockCompare(block_dups + i, block_dups + i+1) == 0)
 		{
-			block_ptrs[blk_num] = cur_offset;
+			block_ptrs[blk_num] = static_cast<u16_t>(cur_offset);
 			block_dups[i] = DUMMY_DUP;
 
 			// free the memory of the duplicated block
@@ -362,7 +362,7 @@ static void CompressBlockmap(void)
 		// OK, this block is either the last of a series of duplicates, or
 		// just a singleton.
 
-		block_ptrs[blk_num] = cur_offset;
+		block_ptrs[blk_num] = static_cast<u16_t>(cur_offset);
 
 		cur_offset += count;
 
@@ -1577,7 +1577,7 @@ void PutZSegs()
 			u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
 
 			u16_t line = LE_U16(seg->linedef);
-			u8_t  side = seg->side;
+			u8_t  side = static_cast<u8_t>(seg->side);
 
 			ZLibAppendLump(&v1,   4);
 			ZLibAppendLump(&v2,   4);
@@ -1612,7 +1612,7 @@ void PutXGL3Segs()
 			u32_t v1   = LE_U32(VertexIndex_XNOD(seg->start));
 			u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
 			u32_t line = LE_U32(seg->linedef);
-			u8_t  side = seg->side;
+			u8_t  side = static_cast<u8_t>(seg->side);
 
 # if DEBUG_BSP
 			fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);

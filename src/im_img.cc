@@ -47,9 +47,9 @@ inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
 {
 	if (p & IS_RGB_PIXEL)
 	{
-		byte r = IMG_PIXEL_RED(p)   << 3;
-		byte g = IMG_PIXEL_GREEN(p) << 3;
-		byte b = IMG_PIXEL_BLUE(p)  << 3;
+		byte r = static_cast<byte>(IMG_PIXEL_RED(p)   << 3);
+		byte g = static_cast<byte>(IMG_PIXEL_GREEN(p) << 3);
+		byte b = static_cast<byte>(IMG_PIXEL_BLUE(p)  << 3);
 
 		return RGB_MAKE(r, g, b);
 	}
@@ -215,7 +215,7 @@ Img_c * Img_c::spectrify() const
 		img_pixel_t pix = src[y * W + x];
 
 		if (pix != TRANS_PIXEL)
-			pix = invis_start + (rand() >> 4) % invis_len;
+			pix = static_cast<img_pixel_t>(invis_start + (rand() >> 4) % invis_len);
 
 		dest[y * W + x] = pix;
 	}
@@ -292,7 +292,7 @@ Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 		{
 			int diff = pix - src1;
 
-			pix = targ1 + diff * (targ2 - targ1 + 1) / (src2 - src1 + 1);
+			pix = static_cast<img_pixel_t>(targ1 + diff * (targ2 - targ1 + 1) / (src2 - src1 + 1));
 		}
 
 		dest[y * W + x] = pix;
@@ -340,7 +340,7 @@ void Img_c::test_make_RGB()
 			byte g = RGB_GREEN(col) >> 3;
 			byte b = RGB_BLUE(col)  >> 3;
 
-			src[y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
+			src[y * W + x] = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
 		}
 	}
 }
@@ -545,7 +545,8 @@ static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg,
 	for (int y = 0 ; y < 64 ; y++)
 	for (int x = 0 ; x < 64 ; x++)
 	{
-		obuf[y * 64 + x] = data[((y/2) & 15 ) * 16 + ((x/2) & 15)] ? fg : bg;
+		obuf[y * 64 + x] = static_cast<img_pixel_t>(data[((y/2) & 15 ) * 16 + ((x/2) & 15)] ?
+                                                    fg : bg);
 	}
 
 	return omg;
@@ -641,7 +642,8 @@ Img_c *Instance::IM_UnknownSprite()
 		for (int y = 0 ; y < 64 ; y++)
 		for (int x = 0 ; x < 64 ; x++)
 		{
-			obuf[y * 64 + x] = unknown_graphic[(y/4) * 16 + (x/4)] ? unknown_sprite_color : TRANS_PIXEL;
+			obuf[y * 64 + x] = static_cast<img_pixel_t>(unknown_graphic[(y/4) * 16 + (x/4)] ?
+                                                        unknown_sprite_color : TRANS_PIXEL);
 		}
 	}
 
@@ -706,7 +708,7 @@ static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *con
 		int g = (RGB_GREEN(color) * ity) >> 11;
 		int b = (RGB_BLUE(color)  * ity) >> 11;
 
-		result->wbuf() [y * W + x] = IMG_PIXEL_MAKE_RGB(r, g, b);
+		result->wbuf() [y * W + x] = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
 	}
 
 	return result;
@@ -749,7 +751,7 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 			// TODO : a preference to palettize it
 			// dest_pix = W_FindPaletteColor(r, g, b);
 
-			dest_pix = IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3);
+			dest_pix = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3));
 		}
 
 		img->wbuf() [ y * W + x ] = dest_pix;
@@ -773,7 +775,7 @@ Img_c * Instance::IM_ConvertTGAImage(const rgba_color_t * data, int W, int H) co
 			byte g = RGB_GREEN(*data) >> 3;
 			byte b = RGB_BLUE( *data) >> 3;
 
-			*dest = IMG_PIXEL_MAKE_RGB(r, g, b);
+			*dest = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
 		}
 		else
 		{

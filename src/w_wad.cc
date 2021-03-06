@@ -139,7 +139,7 @@ bool Lump_c::GetLine(SString &string)
 	string.clear();
 	for(; curPos < l_length; ++curPos)
 	{
-		string.push_back(fgetc(parent->fp));
+		string.push_back(static_cast<char>(fgetc(parent->fp)));
 		if(string.back() == '\n')
 			break;
 		if(ferror(parent->fp))

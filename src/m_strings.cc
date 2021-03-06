@@ -79,7 +79,7 @@ void y_strupr(char *str)
 {
 	for ( ; *str ; str++)
 	{
-		*str = toupper(*str);
+		*str = static_cast<char>(toupper(*str));
 	}
 }
 
@@ -91,7 +91,7 @@ void y_strlowr(char *str)
 {
 	for ( ; *str ; str++)
 	{
-		*str = tolower(*str);
+		*str = static_cast<char>(tolower(*str));
 	}
 }
 
@@ -304,7 +304,7 @@ SString SString::asTitle() const
 {
 	SString result(*this);
 	if(result.good())
-		result[0] = toupper(result[0]);
+		result[0] = static_cast<char>(toupper(result[0]));
 	return result;
 }
 
@@ -315,7 +315,7 @@ SString SString::asLower() const
 {
 	SString result(*this);
 	for(char &c : result)
-		c = tolower(c);
+		c = static_cast<char>(tolower(c));
 	return result;
 }
 
@@ -326,7 +326,7 @@ SString SString::asUpper() const
 {
 	SString result(*this);
 	for(char &c : result)
-		c = toupper(c);
+		c = static_cast<char>(toupper(c));
 	return result;
 }
 

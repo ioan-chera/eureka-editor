@@ -64,7 +64,7 @@ void Instance::CMD_MetaKey()
 
 void Instance::CMD_EditMode()
 {
-	char mode = tolower(EXEC_Param[0][0]);
+	char mode = static_cast<char>(tolower(EXEC_Param[0][0]));
 
 	if (! mode || ! strchr("lstvr", mode))
 	{
@@ -361,7 +361,7 @@ void Instance::CMD_BrowserMode()
 		return;
 	}
 
-	char mode = toupper(EXEC_Param[0][0]);
+	char mode = static_cast<char>(toupper(EXEC_Param[0][0]));
 
 	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
 	       mode == 'T' || mode == 'F' || mode == 'G'))
@@ -994,9 +994,9 @@ void Instance::CMD_WHEEL_Scroll()
 		keycode_t mod = Fl::event_state() & EMOD_ALL_MASK;
 
 		if (mod & EMOD_SHIFT)
-			speed /= 3.0;
+			speed /= 3.0f;
 		else if (mod & EMOD_COMMAND)
-			speed *= 3.0;
+			speed *= 3.0f;
 	}
 
 	float delta_x = static_cast<float>(wheel_dx);

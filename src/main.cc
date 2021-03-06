@@ -729,7 +729,7 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 	// string for the yes choice.
 	if (secondButton.size() >= 2)
 	{
-		secondButton[1] = toupper(secondButton[1]);
+		secondButton[1] = static_cast<char>(toupper(secondButton[1]));
 		size_t pos = secondButton.find(' ');
 		if (pos != SString::npos)
 			secondButton.erase(pos, SString::npos);
