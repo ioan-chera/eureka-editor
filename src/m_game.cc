@@ -33,7 +33,7 @@
 #include <unordered_map>
 
 #include "im_color.h"
-#include "m_config.h"
+#include "m_streams.h"
 #include "m_game.h"
 #include "e_things.h"
 

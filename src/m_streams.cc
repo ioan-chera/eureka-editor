@@ -18,3 +18,22 @@ bool M_ReadTextLine(SString &string, std::istream &is)
     string.trimTrailingSpaces();
     return true;
 }
+
+//
+// Opens the file
+//
+bool LineFile::open(const SString &path) noexcept
+{
+    is.close();
+    is.open(path.get());
+    return is.is_open();
+}
+
+//
+// Close if out of scope
+//
+void LineFile::close() noexcept
+{
+    if(is.is_open())
+        is.close();
+}

@@ -28,7 +28,6 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
-#include "m_streams.h"
 
 #include <fstream>
 
@@ -129,44 +128,6 @@ void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
 void M_PrintCommandLineOptions();
-
-
-//
-// File to be read by line (encapsulated)
-//
-class LineFile
-{
-public:
-	//
-	// Read one line
-	//
-	bool readLine(SString &line)
-	{
-		return M_ReadTextLine(line, is);
-	}
-
-	bool open(const SString &path) noexcept;
-	void close() noexcept;
-	LineFile() = default;
-	explicit LineFile(const SString &path) noexcept
-	{
-		open(path);
-	}
-	~LineFile() noexcept
-	{
-		close();
-	}
-
-	//
-	// Easy check
-	//
-	operator bool() const noexcept
-	{
-		return is.is_open();
-	}
-private:
-	std::ifstream is;
-};
 
 //
 // Options for M_ParseLine

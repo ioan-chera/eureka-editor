@@ -35,6 +35,7 @@
 #include "im_color.h"
 #include "m_config.h"
 #include "m_loadsave.h"
+#include "m_streams.h"
 #include "r_grid.h"
 #include "r_render.h"
 #include "e_main.h"	  // RecUsed_xxx
@@ -818,25 +819,6 @@ static const opt_desc_t options[] =
 
 
 //------------------------------------------------------------------------
-
-//
-// Opens the file
-//
-bool LineFile::open(const SString &path) noexcept
-{
-	is.close();
-	is.open(path.get());
-	return is.is_open();
-}
-
-//
-// Close if out of scope
-//
-void LineFile::close() noexcept
-{
-	if(is.is_open())
-		is.close();
-}
 
 //
 // Parse config line from file

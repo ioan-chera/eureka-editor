@@ -21,10 +21,11 @@
 #include "Errors.h"
 #include "Instance.h"
 #include "main.h"
-#include "m_files.h"
 #include "m_config.h"
+#include "m_files.h"
 #include "m_game.h"
 #include "m_loadsave.h"
+#include "m_streams.h"
 #include "w_wad.h"
 
 #include "ui_window.h"

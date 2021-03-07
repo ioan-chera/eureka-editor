@@ -18,9 +18,47 @@
 //
 //------------------------------------------------------------------------
 
+#include <fstream>
 #include <istream>
 
 class SString;
 
 // returns true if ok, false on EOF or error
 bool M_ReadTextLine(SString &string, std::istream &is);
+
+//
+// File to be read by line (encapsulated)
+//
+class LineFile
+{
+public:
+    //
+    // Read one line
+    //
+    bool readLine(SString &line)
+    {
+        return M_ReadTextLine(line, is);
+    }
+
+    bool open(const SString &path) noexcept;
+    void close() noexcept;
+    LineFile() = default;
+    explicit LineFile(const SString &path) noexcept
+    {
+        open(path);
+    }
+    ~LineFile() noexcept
+    {
+        close();
+    }
+
+    //
+    // Easy check
+    //
+    operator bool() const noexcept
+    {
+        return is.is_open();
+    }
+private:
+    std::ifstream is;
+};
