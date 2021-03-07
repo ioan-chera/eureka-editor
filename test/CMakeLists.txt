@@ -79,6 +79,7 @@ if(ENABLE_UNIT_TESTS)
         lib_file_test.cpp
         SRC Errors.cc
             lib_file.cc
+            lib_util.cc
             m_strings.cc
         FLTK
     )
