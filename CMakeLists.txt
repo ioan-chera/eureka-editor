@@ -135,6 +135,12 @@ if(WIN32)
 endif()
 target_link_libraries(eureka eurekasrc)
 
+option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+if(ENABLE_UNIT_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
 # Currently, installing via CMake is only supported on GNU/Linux and similar systems
 if(UNIX AND NOT APPLE)  # Linux
     set(eureka_install_dir "${CMAKE_INSTALL_PREFIX}/share/eureka")

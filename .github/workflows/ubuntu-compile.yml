@@ -16,4 +16,6 @@ jobs:
     - name: Install Dependencies
       run: sudo apt-get install cmake libfltk1.3-dev libxpm-dev libz-dev
     - name: CMake
-      run: mkdir build && cd build && cmake .. && make
+      run: mkdir build && cd build && cmake .. && make -j$(nproc)
+    - name: Test
+      run: cd build && ctest --output-on-failure

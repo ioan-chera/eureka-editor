@@ -21,6 +21,7 @@
 #ifndef __LIB_FILE_H__
 #define __LIB_FILE_H__
 
+#include <stdint.h>
 #include <functional>
 #include <vector>
 
