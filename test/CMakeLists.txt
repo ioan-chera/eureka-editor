@@ -81,8 +81,15 @@ unit_test(lib_file
         m_strings.cc
     FLTK
 )
-unit_test(SString
+
+# Units independent on complex frameworks or libraries
+unit_test(independent
+    lib_util_test.cpp
+    m_bitvec_test.cpp
     SStringTest.cpp
+    StringTableTest.cpp
     SRC Errors.cc
+        lib_util.cc
+        m_bitvec.cc
         m_strings.cc
 )
