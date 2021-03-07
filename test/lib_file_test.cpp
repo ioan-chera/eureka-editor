@@ -296,6 +296,7 @@ TEST_F(LibFileTempDir, FileLoad)
 #ifndef _WIN32
 	// Mustn't read special files
 	ASSERT_FALSE(FileLoad("/dev/null", result));
+	ASSERT_FALSE(FileLoad("/dev/urandom", result));
 #endif
 }
 
