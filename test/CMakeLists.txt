@@ -23,12 +23,21 @@ get_target_property(fltk_libs eurekasrc LINK_LIBRARIES)
 get_target_property(eureka_compile_options eurekasrc COMPILE_OPTIONS)
 list(FILTER fltk_libs INCLUDE REGEX fltk)
 
+# This is the common testing library. Contains whatever's in testUtils and some very common
+# eurekasrc files
+
 set(_testUtils
     testUtils/FatalHandler.cpp
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
+    ${src}/Errors.cc
+    ${src}/m_strings.cc
 )
+add_library(testutils STATIC ${_testUtils})
+target_link_libraries(testutils PUBLIC gtest_main)
+target_include_directories(testutils PUBLIC ${src} ${src_includes})
+target_compile_options(testutils PUBLIC ${eureka_compile_options})
 
 #
 # The function to add a unit test
@@ -59,26 +68,25 @@ function(unit_test _name)
         endif()
     endforeach()
 
-    add_executable(${_name} ${_sources} ${_testUtils})
-    target_link_libraries(${_name} PRIVATE gtest_main)
-    target_include_directories(${_name} PRIVATE ${src} ${src_includes})
+    add_executable(${_name} ${_sources})
+    target_link_libraries(${_name} PRIVATE testutils)
+
     if(_use_fltk)
         target_link_libraries(${_name} PRIVATE ${fltk_libs})
     endif()
     if(WIN32 AND _windows_libs)
         target_link_libraries(${_name} PRIVATE ${_windows_libs})
     endif()
-    target_compile_options(${_name} PRIVATE ${eureka_compile_options})
 
     add_test(NAME ${_name} COMMAND $<TARGET_FILE:${_name}>)
 endfunction()
 
+# IMPORTANT: the eurekasrc files from testutils are already linked!
+
 unit_test(lib_file
     lib_file_test.cpp
-    SRC Errors.cc
-        lib_file.cc
+    SRC lib_file.cc
         lib_util.cc
-        m_strings.cc
     FLTK
 )
 
@@ -88,8 +96,6 @@ unit_test(independent
     m_bitvec_test.cpp
     SStringTest.cpp
     StringTableTest.cpp
-    SRC Errors.cc
-        lib_util.cc
+    SRC lib_util.cc
         m_bitvec.cc
-        m_strings.cc
 )
