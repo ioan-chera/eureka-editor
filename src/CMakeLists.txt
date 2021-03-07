@@ -316,7 +316,7 @@ if(MSVC)
     target_compile_options(eurekasrc PUBLIC "/MP")
 endif()
 
-if ( CMAKE_COMPILER_IS_GNUCC )
+if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
     target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS}" -Wall -Wextra -Werror
                            -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g)
 endif()
