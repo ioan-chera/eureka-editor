@@ -18,4 +18,4 @@ jobs:
     - name: CMake
       run: mkdir build && cd build && cmake .. && make -j$(nproc)
     - name: Test
-      run: ctest --output-on-failure
+      run: cd build && ctest --output-on-failure
