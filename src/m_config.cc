@@ -1248,10 +1248,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 //
 void M_PrintCommandLineOptions()
 {
-    FILE *fp = stdout;
 	const opt_desc_t *o;
 	int name_maxlen = 0;
-	int  arg_maxlen = 0;
 
 	for (o = options; o->opt_type != OPT_END; o++)
 	{
@@ -1263,14 +1261,11 @@ void M_PrintCommandLineOptions()
 		if (o->long_name)
 		{
 			len = (int)strlen (o->long_name);
-			name_maxlen = MAX(name_maxlen, len);
+			name_maxlen = std::max(name_maxlen, len);
 		}
 
 		if (o->arg_desc)
-		{
 			len = (int)strlen (o->arg_desc);
-			arg_maxlen = MAX(arg_maxlen, len);
-		}
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -1283,32 +1278,32 @@ void M_PrintCommandLineOptions()
 			continue;
 
 		if (o->short_name)
-			fprintf (fp, "  -%-3s ", o->short_name);
+			printf ("  -%-3s ", o->short_name);
 		else
-			fprintf (fp, "       ");
+			printf ("       ");
 
 		if (o->long_name)
-			fprintf (fp, "--%-*s   ", name_maxlen, o->long_name);
+			printf ("--%-*s   ", name_maxlen, o->long_name);
 		else
-			fprintf (fp, "%*s  ", name_maxlen + 2, "");
+			printf ("%*s  ", name_maxlen + 2, "");
 
 		if (o->arg_desc)
-			fprintf (fp, "%-12s", o->arg_desc);
+			printf ("%-12s", o->arg_desc);
 		else switch (o->opt_type)
 		{
-			case OPT_BOOLEAN:       fprintf (fp, "            "); break;
-			case OPT_INTEGER:       fprintf (fp, "<value>     "); break;
-			case OPT_COLOR:         fprintf (fp, "<color>     "); break;
+			case OPT_BOOLEAN:       printf ("            "); break;
+			case OPT_INTEGER:       printf ("<value>     "); break;
+			case OPT_COLOR:         printf ("<color>     "); break;
 
-			case OPT_STRING:      fprintf (fp, "<string>    "); break;
-			case OPT_STRING_LIST:   fprintf (fp, "<string> ..."); break;
+			case OPT_STRING:      printf ("<string>    "); break;
+			case OPT_STRING_LIST:   printf ("<string> ..."); break;
 			case OPT_END: ;  // This line is here only to silence a GCC warning.
 		}
 
-		fprintf (fp, " %s\n", o->desc);
+		printf (" %s\n", o->desc);
 
 		if (strchr(o->flags, '<'))
-			fprintf (fp, "\n");
+			printf ("\n");
 	}
 }
 
