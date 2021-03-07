@@ -410,6 +410,13 @@ bool FileMakeDir(const SString &dir_name)
 
 bool FileLoad(const SString &filename, std::vector<u8_t> &data)
 {
+	struct stat filestat = {};
+	int n = stat(filename.c_str(), &filestat);
+	if(n == -1)
+		return false;
+	if(!S_ISREG(filestat.st_mode))
+		return false;	// reject directories and unusual files
+
 	FILE *fp = fopen(filename.c_str(), "rb");
 
 	if(!fp)
