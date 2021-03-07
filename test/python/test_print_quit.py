@@ -16,6 +16,7 @@ def test_help_command():
                                          timeout=IMMEDIATE_RUN_TIMEOUT))
     assert 'Eureka is free software, under the terms of the GNU General' in result
     assert 'USAGE: ' in result
+    assert '--version' in result
 
 
 def test_version_command():
