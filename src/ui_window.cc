@@ -45,8 +45,7 @@
 //
 UI_MainWindow::UI_MainWindow(Instance &inst) :
 	Fl_Double_Window(WINDOW_MIN_W, WINDOW_MIN_H, EUREKA_TITLE),
-	cursor_shape(FL_CURSOR_DEFAULT),
-	last_x(0), last_y(0), last_w(0), last_h(0), mInstance(inst)
+	cursor_shape(FL_CURSOR_DEFAULT), mInstance(inst)
 {
 	end(); // cancel begin() in Fl_Group constructor
 

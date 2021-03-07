@@ -147,8 +147,6 @@ private:
 
 	int action;
 
-	Instance &inst;
-
 public:
 	explicit UI_ChooseTextLump(Instance &inst);
 
@@ -173,7 +171,7 @@ private:
 
 UI_ChooseTextLump::UI_ChooseTextLump(Instance &inst) :
 	UI_Escapable_Window(420, 385, "Choose Text Lump"),
-	action(ACT_none), inst(inst)
+	action(ACT_none)
 {
 	resizable(NULL);
 
