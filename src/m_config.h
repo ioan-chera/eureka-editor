@@ -131,7 +131,6 @@ void M_PrintCommandLineOptions();
 
 
 // returns true if ok, false on EOF or error
-bool M_ReadTextLine(char *buf, size_t size, FILE *fp) noexcept;
 bool M_ReadTextLine(SString &string, std::istream &is);
 
 //
