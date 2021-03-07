@@ -414,7 +414,7 @@ bool FileLoad(const SString &filename, std::vector<u8_t> &data)
 	int n = stat(filename.c_str(), &filestat);
 	if(n == -1)
 		return false;
-	if(!S_ISREG(filestat.st_mode))
+	if(filestat.st_mode & S_IFDIR || !(filestat.st_mode & S_IFREG))
 		return false;	// reject directories and unusual files
 
 	FILE *fp = fopen(filename.c_str(), "rb");
