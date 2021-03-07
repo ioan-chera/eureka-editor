@@ -135,6 +135,8 @@ if(WIN32)
 endif()
 target_link_libraries(eureka eurekasrc)
 
+add_subdirectory(test)
+
 # Currently, installing via CMake is only supported on GNU/Linux and similar systems
 if(UNIX AND NOT APPLE)  # Linux
     set(eureka_install_dir "${CMAKE_INSTALL_PREFIX}/share/eureka")
