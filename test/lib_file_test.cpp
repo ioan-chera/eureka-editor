@@ -266,7 +266,7 @@ TEST_F(LibFileTempDir, FileMakeDir)
 	ASSERT_FALSE(FileMakeDir(path));
 	// Disallow inexistent intermediary paths
 	ASSERT_FALSE(FileMakeDir(getChildPath("dir2/dir3")));
-	
+
 }
 
 TEST_F(LibFileTempDir, FileLoad)
@@ -306,7 +306,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	os.close();
 
 	SString filePath = path;
-	
+
 	path = getChildPath(".file");
 	os.open(path.c_str());
 	ASSERT_TRUE(os.is_open());
