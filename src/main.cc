@@ -986,7 +986,7 @@ static void ShowHelp()
 			"\n"
 			"Available options are:\n");
 
-	M_PrintCommandLineOptions(stdout);
+	M_PrintCommandLineOptions();
 
 	fflush(stdout);
 }

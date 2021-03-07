@@ -1246,8 +1246,9 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 //
 // print a list of all command line options (usage message).
 //
-void M_PrintCommandLineOptions(FILE *fp)
+void M_PrintCommandLineOptions()
 {
+    FILE *fp = stdout;
 	const opt_desc_t *o;
 	int name_maxlen = 0;
 	int  arg_maxlen = 0;

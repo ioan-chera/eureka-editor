@@ -127,7 +127,7 @@ int M_ParseDefaultConfigFile();
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
-void M_PrintCommandLineOptions(FILE *fp);
+void M_PrintCommandLineOptions();
 
 
 // returns true if ok, false on EOF or error
