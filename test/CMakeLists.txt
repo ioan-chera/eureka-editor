@@ -99,3 +99,14 @@ unit_test(independent
     SRC lib_util.cc
         m_bitvec.cc
 )
+
+find_package(Python3)
+if(NOT Python3_FOUND)
+    message(WARNING "Python 3 not found, will not run system tests.")
+else()
+    add_test(NAME system_test_print_quit COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/python/test_print_quit.py
+        --executable $<TARGET_FILE:eureka>
+        --version ${PROJECT_VERSION}
+    )
+endif()
