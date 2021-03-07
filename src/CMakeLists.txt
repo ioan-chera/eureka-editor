@@ -92,6 +92,8 @@ set(source_m
     m_nodes.cc
     m_select.cc
     m_select.h
+    m_streams.cc
+    m_streams.h
     m_strings.cc
     m_strings.h
     m_testmap.cc

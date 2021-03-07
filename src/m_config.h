@@ -28,6 +28,7 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
+#include "m_streams.h"
 
 #include <fstream>
 
@@ -129,9 +130,6 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
 void M_PrintCommandLineOptions();
 
-
-// returns true if ok, false on EOF or error
-bool M_ReadTextLine(SString &string, std::istream &is);
 
 //
 // File to be read by line (encapsulated)

@@ -820,27 +820,6 @@ static const opt_desc_t options[] =
 //------------------------------------------------------------------------
 
 //
-// this automatically strips CR/LF from the line.
-// returns true if ok, false on EOF or error.
-//
-// returns true if ok, false on EOF or error
-//
-bool M_ReadTextLine(SString &string, std::istream &is)
-{
-	std::getline(is, string.get());
-	if(is.eof() || is.bad() || is.fail())
-	{
-		string.clear();
-		return false;
-	}
-	if(string.substr(0, 3) == "\xef\xbb\xbf")
-		string.erase(0, 3);
-	string.trimTrailingSpaces();
-	return true;
-}
-
-
-//
 // Opens the file
 //
 bool LineFile::open(const SString &path) noexcept
