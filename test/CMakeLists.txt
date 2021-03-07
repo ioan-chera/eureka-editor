@@ -20,6 +20,7 @@ endif()
 set(src ${CMAKE_SOURCE_DIR}/src)
 get_target_property(src_includes eurekasrc INCLUDE_DIRECTORIES)
 get_target_property(fltk_libs eurekasrc LINK_LIBRARIES)
+get_target_property(eureka_compile_options eurekasrc COMPILE_OPTIONS)
 list(FILTER fltk_libs INCLUDE REGEX fltk)
 
 set(_testUtils
@@ -67,6 +68,7 @@ function(unit_test _name)
     if(WIN32 AND _windows_libs)
         target_link_libraries(${_name} PRIVATE ${_windows_libs})
     endif()
+    target_compile_options(${_name} PRIVATE ${eureka_compile_options})
 
     add_test(NAME ${_name} COMMAND $<TARGET_FILE:${_name}>)
 endfunction()
