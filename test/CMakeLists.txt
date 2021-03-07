@@ -34,7 +34,7 @@ set(_testUtils
 # The function to add a unit test
 #
 function(unit_test _name)
-    set(_name test${_name})
+    set(_name test_${_name})
     set(_use_src_files NO)
     set(_use_fltk NO)
     unset(_sources)
