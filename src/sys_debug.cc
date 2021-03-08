@@ -21,6 +21,7 @@
 #include "Errors.h"
 #include "m_strings.h"
 #include "sys_debug.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <vector>
 
