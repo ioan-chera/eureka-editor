@@ -93,6 +93,11 @@ unit_test(lib_file
     FLTK
 )
 
+unit_test(sys_debug
+    sys_debug_test.cpp
+    SRC sys_debug.cc
+)
+
 # Units independent on complex frameworks or libraries
 unit_test(independent
     lib_util_test.cpp

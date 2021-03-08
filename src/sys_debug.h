@@ -23,8 +23,11 @@
 
 #include <stdio.h>
 #include "PrintfMacros.h"
+#include <vector>
 
 #define MSG_BUF_LEN  1024
+
+class SString;
 
 namespace global
 {
@@ -42,6 +45,48 @@ void LogSaveTo(FILE *dest_fp);
 void LogPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
 
 void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
+
+//
+// Log controller
+//
+class Log
+{
+public:
+	typedef void (*WindowAddCallback)(const SString &text, void *userData);
+
+	bool openFile(const SString &filename);
+	void openWindow();
+	void close();
+	void printf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
+	void debugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
+	void saveTo(FILE *dest_fp) const;
+
+	//
+	// Callback setter
+	//
+	void setWindowAddCallback(WindowAddCallback callback, void *userData)
+	{
+		windowAdd = callback;
+		windowAddUserData = userData;
+	}
+
+	//
+	// Mark the error
+	//
+	void markFatalError()
+	{
+		inFatalError = true;
+	}
+private:
+	WindowAddCallback windowAdd = nullptr;
+	void *windowAddUserData = nullptr;
+
+	bool inFatalError = false;
+
+	bool log_window_open = false;
+	FILE *log_fp = nullptr;
+	std::vector<SString> kept_messages;
+};
 
 
 // -------- assertion macros --------

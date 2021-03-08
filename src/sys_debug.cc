@@ -56,6 +56,24 @@ void LogOpenFile(const char *filename)
 		fputs(message.c_str(), log_fp);
 }
 
+//
+// Open a file
+//
+bool Log::openFile(const SString &filename)
+{
+	log_fp = fopen(filename.c_str(), "w+");
+
+	if (! log_fp)
+		return false;
+
+	fprintf(log_fp, "======= START OF LOGS =======\n\n");
+
+	// add all messages saved so far
+
+	for (const SString &message : kept_messages)
+		fputs(message.c_str(), log_fp);
+	return true;
+}
 
 void LogOpenWindow()
 {
@@ -67,6 +85,19 @@ void LogOpenWindow()
 		LogViewer_AddLine(message.c_str());
 }
 
+//
+// Open a window
+//
+void Log::openWindow()
+{
+	log_window_open = true;
+
+	// retrieve all messages saved so far
+
+	if(windowAdd)
+		for (const SString &message : kept_messages)
+			windowAdd(message, windowAddUserData);
+}
 
 void LogClose()
 {
@@ -82,6 +113,22 @@ void LogClose()
 	log_window_open = false;
 }
 
+//
+// Close the file
+//
+void Log::close()
+{
+	if (log_fp)
+	{
+		fprintf(log_fp, "\n\n======== END OF LOGS ========\n");
+
+		fclose(log_fp);
+
+		log_fp = nullptr;
+	}
+
+	log_window_open = false;
+}
 
 void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 {
@@ -113,6 +160,34 @@ void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
 	}
 }
 
+//
+// Printf to log
+//
+void Log::printf(EUR_FORMAT_STRING(const char *str), ...)
+{
+	va_list args;
+
+	va_start(args, str);
+	SString buffer = SString::vprintf(str, args);
+	va_end(args);
+
+	if (log_fp)
+	{
+		fputs(buffer.c_str(), log_fp);
+		fflush(log_fp);
+	}
+
+	if (windowAdd && log_window_open && !inFatalError)
+		windowAdd(buffer, windowAddUserData);
+	else
+		kept_messages.push_back(buffer);
+
+	if (! global::Quiet)
+	{
+		fputs(buffer.c_str(), stdout);
+		fflush(stdout);
+	}
+}
 
 void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 {
@@ -152,6 +227,40 @@ void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 	}
 }
 
+//
+// Debug printf
+//
+void Log::debugPrintf(EUR_FORMAT_STRING(const char *str), ...)
+{
+	if (global::Debugging && log_fp)
+	{
+		va_list args;
+
+		va_start(args, str);
+		SString buffer = SString::vprintf(str, args);
+		va_end(args);
+
+		// prefix each debugging line with a special symbol
+
+		size_t index = 0;
+		size_t startpos = 0;
+		while(index < buffer.length())
+		{
+			index = buffer.find('\n', startpos);
+			if(index == SString::npos)
+				index = buffer.length();
+			SString fragment(buffer.c_str() + startpos, static_cast<int>(index - startpos));
+
+			fprintf(log_fp, "# %s\n", fragment.c_str());
+			fflush(log_fp);
+
+			if (! global::Quiet)
+				fprintf(stderr, "# %s\n", fragment.c_str());
+
+			startpos = index + 1;
+		}
+	}
+}
 
 void LogSaveTo(FILE *dest_fp)
 {
@@ -182,6 +291,34 @@ void LogSaveTo(FILE *dest_fp)
 	fseek(log_fp, 0L, SEEK_END);
 }
 
+void Log::saveTo(FILE *dest_fp) const
+{
+	uint8_t buffer[256];
+
+	if (! log_fp)
+	{
+		fprintf(dest_fp, "No logs.\n");
+		return;
+	}
+
+	// copy the log file
+
+	rewind(log_fp);
+
+	while (true)
+	{
+		size_t rlen = fread(buffer, 1, sizeof(buffer), log_fp);
+
+		if (rlen == 0)
+			break;
+
+		fwrite(buffer, 1, rlen, dest_fp);
+	}
+
+	// restore write position for the log file
+
+	fseek(log_fp, 0L, SEEK_END);
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
