@@ -24,27 +24,12 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
 #include "Instance.h"
-#include "main.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include "lib_adler.h"
-#include "im_color.h"
 #include "m_config.h"
-#include "m_loadsave.h"
 #include "m_parse.h"
 #include "m_streams.h"
-#include "r_grid.h"
-#include "r_render.h"
-#include "e_main.h"	  // RecUsed_xxx
-#include "w_wad.h"
-
-#include "ui_window.h"  // Browser_xxx, Props_xxx
-
-
 
 //------------------------------------------------------------------------
 

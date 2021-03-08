@@ -29,8 +29,6 @@
 
 #include "im_color.h"
 
-#include <fstream>
-
 /* ==== CONFIG VARIABLES ==================== */
 
 namespace config
