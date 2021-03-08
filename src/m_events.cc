@@ -30,7 +30,7 @@
 #include "e_hover.h"
 #include "Errors.h"
 #include "Instance.h"
-#include "m_config.h"
+#include "m_parse.h"
 #include "m_streams.h"
 #include "main.h"
 #include "r_render.h"

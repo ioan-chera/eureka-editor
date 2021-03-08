@@ -129,19 +129,6 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass);
 
 void M_PrintCommandLineOptions();
 
-//
-// Options for M_ParseLine
-//
-enum class ParseOptions
-{
-	noStrings,
-	haveStrings,
-	haveStringsKeepQuotes,
-};
-
-// returns number of tokens, zero for comment, negative on error
-int M_ParseLine(const SString &line, std::vector<SString> &tokens, ParseOptions options);
-
 #endif  /* __EUREKA_M_CONFIG_H__ */
 
 //--- editor settings ---

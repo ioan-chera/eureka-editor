@@ -90,6 +90,8 @@ set(source_m
     m_loadsave.cc
     m_loadsave.h
     m_nodes.cc
+    m_parse.cc
+    m_parse.h
     m_select.cc
     m_select.h
     m_streams.cc

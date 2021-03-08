@@ -21,7 +21,7 @@
 #include "Errors.h"
 #include "Instance.h"
 #include "main.h"
-#include "m_config.h"
+#include "m_parse.h"
 
 #include <algorithm>
 

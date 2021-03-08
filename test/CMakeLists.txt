@@ -94,11 +94,13 @@ unit_test(lib_file
 unit_test(independent
     lib_util_test.cpp
     m_bitvec_test.cpp
+    m_parse_test.cpp
     m_streams_test.cpp
     SStringTest.cpp
     StringTableTest.cpp
     SRC lib_util.cc
         m_bitvec.cc
+        m_parse.cc
         m_streams.cc
 )
 
