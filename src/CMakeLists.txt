@@ -325,7 +325,8 @@ if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GN
                            -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g)
 endif()
 if ( MSVC )
-    target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS} /W4")
+    # TODO: make remove /W3 if there and set /W4
+    #target_compile_options(eurekasrc PUBLIC ${CMAKE_CXX_FLAGS} /W4)
 endif()
 
 source_group(bsp FILES ${source_bsp})
