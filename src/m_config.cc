@@ -36,30 +36,30 @@
 //
 //  Structures for command line arguments and config settings
 //
-enum opt_type_t
+enum class OptType
 {
 	// End of the options description
-	OPT_END = 0,
+	end,
 
 	// Boolean (toggle)
 	// Receptacle is of type: bool
-	OPT_BOOLEAN,
+	boolean,
 
 	// Integer number,
 	// Receptacle is of type: int
-	OPT_INTEGER,
+	integer,
 
 	// A color value
 	// Receptacle is of type: rgb_color_t
-	OPT_COLOR,
+	color,
 
 	// String (not leaking)
 	// Receptacle is of type: SString
-	OPT_STRING,
+	string,
 
 	// List of strings (not leaking)
 	// Receptacle is of type: std::vector<SString>
-	OPT_STRING_LIST,
+	stringList,
 };
 
 
@@ -68,7 +68,7 @@ struct opt_desc_t
 	const char *long_name;  // Command line arg. or keyword
 	const char *short_name; // Abbreviated command line argument
 
-	opt_type_t opt_type;    // Type of this option
+	OptType opt_type;    // Type of this option
 	const char *flags;    // Flags for this option :
 	// '1' : process only on pass 1 of parse_command_line_options()
 	// 'f' : string is a filename
@@ -92,7 +92,7 @@ static const opt_desc_t options[] =
 
 	{	"home",
 		0,
-		OPT_STRING,
+        OptType::string,
 		"1",
 		"Home directory",
 		"<dir>",
@@ -101,7 +101,7 @@ static const opt_desc_t options[] =
 
 	{	"install",
 		0,
-		OPT_STRING,
+        OptType::string,
 		"1",
 		"Installation directory",
 		"<dir>",
@@ -110,7 +110,7 @@ static const opt_desc_t options[] =
 
 	{	"log",
 		0,
-		OPT_STRING,
+        OptType::string,
 		"1",
 		"Log messages to specified file",
 		"<file>",
@@ -119,7 +119,7 @@ static const opt_desc_t options[] =
 
 	{	"config",
 		0,
-		OPT_STRING,
+        OptType::string,
 		"1<",
 		"Config file to load / save",
 		"<file>",
@@ -128,7 +128,7 @@ static const opt_desc_t options[] =
 
 	{	"help",
 		"h",
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"1",
 		"Show usage summary",
 		NULL,
@@ -137,7 +137,7 @@ static const opt_desc_t options[] =
 
 	{	"version",
 		"v",
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"1",
 		"Show the version",
 		NULL,
@@ -146,7 +146,7 @@ static const opt_desc_t options[] =
 
 	{	"debug",
 		"d",
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"1",
 		"Enable debugging messages",
 		NULL,
@@ -155,7 +155,7 @@ static const opt_desc_t options[] =
 
 	{	"quiet",
 		"q",
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"1",
 		"Quiet mode (no messages on stdout)",
 		NULL,
@@ -168,7 +168,7 @@ static const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-		OPT_STRING_LIST,
+        OptType::stringList,
 		"",
 		"Wad file(s) to edit",
 		"<file>...",
@@ -177,7 +177,7 @@ static const opt_desc_t options[] =
 
 	{	"merge",
 		"m",
-		OPT_STRING_LIST,
+		OptType::stringList,
 		"",
 		"Resource file(s) to load",
 		"<file>...",
@@ -186,7 +186,7 @@ static const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-		OPT_STRING,
+        OptType::string,
 		"",
 		"The name of the IWAD (game data)",
 		"<file>",
@@ -195,7 +195,7 @@ static const opt_desc_t options[] =
 
 	{	"port",
 		"p",
-		OPT_STRING,
+        OptType::string,
 		"",
 		"Port (engine) name",
 		"<name>",
@@ -204,7 +204,7 @@ static const opt_desc_t options[] =
 
 	{	"warp",
 		"w",
-		OPT_STRING,
+        OptType::string,
 		"w<",
 		"Select level to edit",
 		"<map>",
@@ -213,7 +213,7 @@ static const opt_desc_t options[] =
 
 	{	"udmftest",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"H",
 		"Enable the unfinished UDMF support",
 		NULL,
@@ -224,7 +224,7 @@ static const opt_desc_t options[] =
 
 	{	"auto_load_recent",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"When no given files, load the most recent one saved",
 		NULL,
@@ -233,7 +233,7 @@ static const opt_desc_t options[] =
 
 	{	"begin_maximized",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Maximize the window when Eureka starts",
 		NULL,
@@ -242,7 +242,7 @@ static const opt_desc_t options[] =
 
 	{	"backup_max_files",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Maximum copies to make when backing up a wad",
 		NULL,
@@ -251,7 +251,7 @@ static const opt_desc_t options[] =
 
 	{	"backup_max_space",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Maximum space to use (in MB) when backing up a wad",
 		NULL,
@@ -260,7 +260,7 @@ static const opt_desc_t options[] =
 
 	{	"browser_combine_tex",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Combine flats and textures in a single browser",
 		NULL,
@@ -269,7 +269,7 @@ static const opt_desc_t options[] =
 
 	{	"browser_small_tex",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Show smaller (more compact) textures in the browser",
 		NULL,
@@ -278,7 +278,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_on_save",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: always build the nodes after saving",
 		NULL,
@@ -287,7 +287,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_fast",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
@@ -296,7 +296,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_warnings",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: show all warning messages",
 		NULL,
@@ -305,7 +305,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_split_factor",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Node building: seg splitting factor",
 		NULL,
@@ -314,7 +314,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_gl_nodes",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: build GL-Nodes",
 		NULL,
@@ -323,7 +323,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_force_v5",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: force V5 of GL-Nodes",
 		NULL,
@@ -332,7 +332,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_force_zdoom",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: force ZDoom format for normal nodes",
 		NULL,
@@ -341,7 +341,7 @@ static const opt_desc_t options[] =
 
 	{	"bsp_compressed",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Node building: force zlib compression of ZDoom nodes",
 		NULL,
@@ -350,7 +350,7 @@ static const opt_desc_t options[] =
 
 	{	"default_gamma",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Default gamma for images and 3D view (0..4)",
 		NULL,
@@ -359,7 +359,7 @@ static const opt_desc_t options[] =
 
 	{	"default_edit_mode",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Default editing mode: 0..3 = Th / Lin / Sec / Vt",
 		NULL,
@@ -368,7 +368,7 @@ static const opt_desc_t options[] =
 
 	{	"default_port",
 		0,
-		OPT_STRING,
+        OptType::string,
 		"v",
 		"Default port (engine) name",
 		NULL,
@@ -377,7 +377,7 @@ static const opt_desc_t options[] =
 
 	{	"dotty_axis_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"axis color for the dotty style grid",
 		NULL,
@@ -386,7 +386,7 @@ static const opt_desc_t options[] =
 
 	{	"dotty_major_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"major color for the dotty style grid",
 		NULL,
@@ -395,7 +395,7 @@ static const opt_desc_t options[] =
 
 	{	"dotty_minor_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"minor color for the dotty style grid",
 		NULL,
@@ -404,7 +404,7 @@ static const opt_desc_t options[] =
 
 	{	"dotty_point_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"point color for the dotty style grid",
 		NULL,
@@ -413,7 +413,7 @@ static const opt_desc_t options[] =
 
 	{	"floor_bump_small",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"distance for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
@@ -422,7 +422,7 @@ static const opt_desc_t options[] =
 
 	{	"floor_bump_medium",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"distance for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
@@ -431,7 +431,7 @@ static const opt_desc_t options[] =
 
 	{	"floor_bump_large",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
@@ -440,7 +440,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_default_mode",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
@@ -449,7 +449,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_default_size",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Default grid size",
 		NULL,
@@ -458,7 +458,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_default_snap",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Default grid snapping",
 		NULL,
@@ -467,7 +467,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_hide_in_free_mode",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"hide the grid in FREE mode",
 		NULL,
@@ -476,7 +476,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_ratio_high",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"custom grid ratio : high value (numerator)",
 		NULL,
@@ -485,7 +485,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_ratio_low",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"custom grid ratio : low value (denominator)",
 		NULL,
@@ -494,7 +494,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_snap_indicator",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"show a cross at the grid-snapped location",
 		NULL,
@@ -503,7 +503,7 @@ static const opt_desc_t options[] =
 
 	{	"grid_style",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"grid style : 0 = squares, 1 = dotty",
 		NULL,
@@ -512,7 +512,7 @@ static const opt_desc_t options[] =
 
 	{	"gui_theme",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
 		NULL,
@@ -521,7 +521,7 @@ static const opt_desc_t options[] =
 
 	{	"gui_color_set",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
 		NULL,
@@ -530,7 +530,7 @@ static const opt_desc_t options[] =
 
 	{	"gui_custom_bg",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"GUI custom background color",
 		NULL,
@@ -539,7 +539,7 @@ static const opt_desc_t options[] =
 
 	{	"gui_custom_ig",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"GUI custom input color",
 		NULL,
@@ -548,7 +548,7 @@ static const opt_desc_t options[] =
 
 	{	"gui_custom_fg",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"GUI custom foreground (text) color",
 		NULL,
@@ -557,7 +557,7 @@ static const opt_desc_t options[] =
 
 	{	"highlight_line_info",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Info drawn near a highlighted line (0 = nothing)",
 		NULL,
@@ -566,7 +566,7 @@ static const opt_desc_t options[] =
 
 	{	"leave_offsets_alone",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
@@ -575,7 +575,7 @@ static const opt_desc_t options[] =
 
 	{	"light_bump_small",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"light step for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
@@ -584,7 +584,7 @@ static const opt_desc_t options[] =
 
 	{	"light_bump_medium",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"light step for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
@@ -593,7 +593,7 @@ static const opt_desc_t options[] =
 
 	{	"light_bump_large",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"light step for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
@@ -602,7 +602,7 @@ static const opt_desc_t options[] =
 
 	{	"map_scroll_bars",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Enable scroll-bars for the map view",
 		NULL,
@@ -611,7 +611,7 @@ static const opt_desc_t options[] =
 
 	{	"minimum_drag_pixels",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Minimum distance to move mouse to drag an object (in pixels)",
 		NULL,
@@ -620,7 +620,7 @@ static const opt_desc_t options[] =
 
 	{	"new_sector_size",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Size of sector rectangles created outside of the map",
 		NULL,
@@ -629,7 +629,7 @@ static const opt_desc_t options[] =
 
 	{	"normal_axis_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"axis color for the normal grid",
 		NULL,
@@ -638,7 +638,7 @@ static const opt_desc_t options[] =
 
 	{	"normal_main_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"main color for the normal grid",
 		NULL,
@@ -647,7 +647,7 @@ static const opt_desc_t options[] =
 
 	{	"normal_flat_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"flat color for the normal grid",
 		NULL,
@@ -656,7 +656,7 @@ static const opt_desc_t options[] =
 
 	{	"normal_small_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"small color for the normal grid",
 		NULL,
@@ -665,7 +665,7 @@ static const opt_desc_t options[] =
 
 	{	"panel_gamma",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Gamma for images in the panels and the browser (0..4)",
 		NULL,
@@ -674,7 +674,7 @@ static const opt_desc_t options[] =
 
 	{	"render_pix_aspect",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
@@ -683,7 +683,7 @@ static const opt_desc_t options[] =
 
 	{	"render_far_clip",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Distance of far clip plane for 3D rendering",
 		NULL,
@@ -692,7 +692,7 @@ static const opt_desc_t options[] =
 
 	{	"render_high_detail",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Use highest detail when rendering 3D view (software mode)",
 		NULL,
@@ -701,7 +701,7 @@ static const opt_desc_t options[] =
 
 	{	"render_lock_gravity",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Locked gravity in 3D view -- cannot move up or down",
 		NULL,
@@ -710,7 +710,7 @@ static const opt_desc_t options[] =
 
 	{	"render_missing_bright",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Render the missing texture as fullbright",
 		NULL,
@@ -719,7 +719,7 @@ static const opt_desc_t options[] =
 
 	{	"render_unknown_bright",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Render the unknown texture as fullbright",
 		NULL,
@@ -728,7 +728,7 @@ static const opt_desc_t options[] =
 
 	{	"same_mode_clears_selection",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Clear the selection when entering the same mode",
 		NULL,
@@ -737,7 +737,7 @@ static const opt_desc_t options[] =
 
 	{	"sector_render_default",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Default sector rendering mode: 0 = NONE, 1 = floor, 2 = ceiling",
 		NULL,
@@ -746,7 +746,7 @@ static const opt_desc_t options[] =
 
 	{	"show_full_one_sided",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Show all textures on one-sided lines in the Linedef panel",
 		NULL,
@@ -755,7 +755,7 @@ static const opt_desc_t options[] =
 
 	{	"sidedef_add_del_buttons",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Show the ADD and DEL buttons in Sidedef panels",
 		NULL,
@@ -764,7 +764,7 @@ static const opt_desc_t options[] =
 
 	{	"thing_render_default",
 		0,
-		OPT_INTEGER,
+        OptType::integer,
 		"v",
 		"Default thing rendering mode: 0 = boxes, 1 = sprites",
 		NULL,
@@ -773,7 +773,7 @@ static const opt_desc_t options[] =
 
 	{	"transparent_col",
 		0,
-		OPT_COLOR,
+        OptType::color,
 		"v",
 		"color used to represent transparent pixels in textures",
 		NULL,
@@ -782,7 +782,7 @@ static const opt_desc_t options[] =
 
 	{	"swap_sidedefs",
 		0,
-		OPT_BOOLEAN,
+        OptType::boolean,
 		"v",
 		"Swap upper and lower sidedefs in the Linedef panel",
 		NULL,
@@ -795,7 +795,7 @@ static const opt_desc_t options[] =
 
 	{	0,
 		0,
-		OPT_END,
+        OptType::end,
 		0,
 		0,
 		0,
@@ -851,7 +851,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 
 	for (opt = options ; ; opt++)
 	{
-		if (opt->opt_type == OPT_END)
+		if (opt->opt_type == OptType::end)
 		{
 			LogPrintf("WARNING: %s(%u): invalid option '%s', skipping\n",
 					  basename.c_str(), lnum, line.c_str());
@@ -875,7 +875,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 
 	switch (opt->opt_type)
 	{
-		case OPT_BOOLEAN:
+        case OptType::boolean:
 			if(value.noCaseEqual("no") || value.noCaseEqual("false") || value.noCaseEqual("off") ||
 			   value.noCaseEqual("0"))
 			{
@@ -887,19 +887,19 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			}
 			break;
 
-		case OPT_INTEGER:
+        case OptType::integer:
 			*((int *) opt->data_ptr) = atoi(value);
 			break;
 
-		case OPT_COLOR:
+        case OptType::color:
 			*((rgb_color_t *) opt->data_ptr) = ParseColor(value);
 			break;
 
-		case OPT_STRING:
+        case OptType::string:
 			*static_cast<SString *>(opt->data_ptr) = value;
 			break;
 
-		case OPT_STRING_LIST:
+        case OptType::stringList:
 			while(value.good())
 			{
 				size_t spacepos = value.findSpace();
@@ -1057,7 +1057,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		// Which option is this?
 		for (o = options; ; o++)
 		{
-			if (o->opt_type == OPT_END)
+			if (o->opt_type == OptType::end)
 			{
 				ThrowException("unknown option: '%s'\n", argv[0]);
 				/* NOT REACHED */
@@ -1074,7 +1074,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 
 		switch (o->opt_type)
 		{
-			case OPT_BOOLEAN:
+            case OptType::boolean:
 				// -AJA- permit a following value
 				if (argc >= 2 && argv[1][0] != '-')
 				{
@@ -1102,7 +1102,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				}
 				break;
 
-			case OPT_INTEGER:
+            case OptType::integer:
 				if (argc < 2)
 				{
 					ThrowException("missing argument after '%s'\n", argv[0]);
@@ -1118,7 +1118,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				}
 				break;
 
-			case OPT_COLOR:
+            case OptType::color:
 				if (argc < 2)
 				{
 					ThrowException("missing argument after '%s'\n", argv[0]);
@@ -1134,7 +1134,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				}
 				break;
 
-			case OPT_STRING:
+            case OptType::string:
 				if (argc < 2)
 				{
 					ThrowException("missing argument after '%s'\n", argv[0]);
@@ -1160,7 +1160,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				break;
 
 
-			case OPT_STRING_LIST:
+            case OptType::stringList:
 				if (argc < 2)
 				{
 					ThrowException("missing argument after '%s'\n", argv[0]);
@@ -1198,7 +1198,7 @@ void M_PrintCommandLineOptions()
 	const opt_desc_t *o;
 	int name_maxlen = 0;
 
-	for (o = options; o->opt_type != OPT_END; o++)
+	for (o = options; o->opt_type != OptType::end; o++)
 	{
 		int len;
 
@@ -1216,7 +1216,7 @@ void M_PrintCommandLineOptions()
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
-	for (o = options; o->opt_type != OPT_END; o++)
+	for (o = options; o->opt_type != OptType::end; o++)
 	{
 		if (strchr(o->flags, 'v') || strchr(o->flags, 'H'))
 			continue;
@@ -1238,13 +1238,13 @@ void M_PrintCommandLineOptions()
 			printf ("%-12s", o->arg_desc);
 		else switch (o->opt_type)
 		{
-			case OPT_BOOLEAN:       printf ("            "); break;
-			case OPT_INTEGER:       printf ("<value>     "); break;
-			case OPT_COLOR:         printf ("<color>     "); break;
+            case OptType::boolean:       printf ("            "); break;
+            case OptType::integer:       printf ("<value>     "); break;
+            case OptType::color:         printf ("<color>     "); break;
 
-			case OPT_STRING:      printf ("<string>    "); break;
-			case OPT_STRING_LIST:   printf ("<string> ..."); break;
-			case OPT_END: ;  // This line is here only to silence a GCC warning.
+            case OptType::string:      printf ("<string>    "); break;
+            case OptType::stringList:   printf ("<string> ..."); break;
+            case OptType::end: ;  // This line is here only to silence a GCC warning.
 		}
 
 		printf (" %s\n", o->desc);
@@ -1272,7 +1272,7 @@ int M_WriteConfigFile()
 
 	const opt_desc_t *o;
 
-	for (o = options; o->opt_type != OPT_END; o++)
+	for (o = options; o->opt_type != OptType::end; o++)
 	{
 		if (! strchr(o->flags, 'v'))
 			continue;
@@ -1284,25 +1284,25 @@ int M_WriteConfigFile()
 
 		switch (o->opt_type)
 		{
-			case OPT_BOOLEAN:
+            case OptType::boolean:
 				os << (*((bool *)o->data_ptr) ? "1" : "0");
 				break;
 
-			case OPT_STRING:
+            case OptType::string:
 			{
 				const SString *str = static_cast<SString *>(o->data_ptr);
 				os << (str ? *str : "''");
 				break;
 			}
-			case OPT_INTEGER:
+            case OptType::integer:
 				os << *((int *)o->data_ptr);
 				break;
 
-			case OPT_COLOR:
+            case OptType::color:
 				os << SString::printf("%06x", *((rgb_color_t *)o->data_ptr) >> 8);
 				break;
 
-			case OPT_STRING_LIST:
+            case OptType::stringList:
 			{
 				auto list = static_cast<std::vector<SString> *>(o->data_ptr);
 
