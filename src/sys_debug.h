@@ -21,7 +21,8 @@
 #ifndef __SYS_DEBUG_H__
 #define __SYS_DEBUG_H__
 
-#include "main.h"
+#include <stdio.h>
+#include "PrintfMacros.h"
 
 #define MSG_BUF_LEN  1024
 
@@ -29,6 +30,7 @@ namespace global
 {
     extern bool Quiet;
     extern bool Debugging;
+    extern bool in_fatal_error;
 }
 
 void LogOpenFile(const char *filename);

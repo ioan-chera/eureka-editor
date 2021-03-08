@@ -70,7 +70,6 @@
 
 bool global::want_quit = false;
 bool global::app_has_focus = false;
-bool global::in_fatal_error = false;
 
 SString global::config_file;
 SString global::log_file;

@@ -28,6 +28,9 @@
 #define __EUREKA_IM_COLOR_H__
 
 #include "sys_macro.h"
+#include "sys_type.h"
+
+class SString;
 
 typedef u32_t rgb_color_t;
 

@@ -26,7 +26,7 @@
 
 bool global::Quiet = false;
 bool global::Debugging = false;
-
+bool global::in_fatal_error;
 
 static FILE * log_fp;
 
@@ -154,7 +154,7 @@ void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 
 void LogSaveTo(FILE *dest_fp)
 {
-	byte buffer[256];
+	uint8_t buffer[256];
 
 	if (! log_fp)
 	{

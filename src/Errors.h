@@ -24,6 +24,8 @@
 
 #include <stdexcept>
 
+#define BugError  ThrowException
+
 //
 // Wad read exception
 //

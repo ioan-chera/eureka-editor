@@ -129,8 +129,7 @@ namespace global
 {
 	extern bool want_quit;
 	extern bool app_has_focus;
-	extern bool in_fatal_error;
-
+	
 	extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
 	extern SString home_dir;      // home dir (e.g. $HOME/.eureka)
 	extern SString cache_dir;    // for caches and backups, can be same as home_dir
@@ -168,9 +167,6 @@ namespace global
 void Main_Quit();
 
 [[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
-
-#define BugError  ThrowException
-
 
 void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
