@@ -95,7 +95,8 @@ unit_test(lib_file
 
 unit_test(sys_debug
     sys_debug_test.cpp
-    SRC sys_debug.cc
+    SRC m_streams.cc
+        sys_debug.cc
 )
 
 # Units independent on complex frameworks or libraries

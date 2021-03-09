@@ -17,6 +17,8 @@
 //------------------------------------------------------------------------
 
 #include "sys_debug.h"
+
+#include "m_streams.h"
 #include "testUtils/TempDirContext.hpp"
 #include "gtest/gtest.h"
 
@@ -39,15 +41,175 @@ void LogViewer_AddLine(const char *str)
 
 TEST_F(SysDebugTempDir, LifeCycle)
 {
+	windowMessages.clear();
+
 	SString path = getChildPath("log.txt");
 	LogPrintf("Test message\n");
 	LogPrintf("Here it goes\n");
 	LogOpenFile(path.c_str());
+	mDeleteList.push(path);
 	LogPrintf("One more message\n");
+
+    SString savedPath = getChildPath("log2.txt");
+    FILE *f = fopen(savedPath.c_str(), "wb");
+    ASSERT_NE(f, nullptr);
+    mDeleteList.push(savedPath);
+    LogSaveTo(f);
+    fclose(f);
+
 	LogOpenWindow();
 	LogPrintf("Now we're on window\n");
 	LogPrintf("And again\n");
 	LogClose();
 
-	// TODO: read the file and assert here
+    auto checkFileLines = [](LineFile &file)
+    {
+        SString line;
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "======= START OF LOGS =======");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_TRUE(line.empty());
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Test message");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Here it goes");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "One more message");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Now we're on window");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "And again");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "");
+    };
+
+	{
+		LineFile file(path);
+		checkFileLines(file);
+        SString line;
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "======== END OF LOGS ========");
+        ASSERT_FALSE(file.readLine(line));
+	}
+
+    // Now check
+    {
+        SString line;
+        LineFile file(savedPath);
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "======= START OF LOGS =======");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_TRUE(line.empty());
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Test message");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Here it goes");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "One more message");
+        ASSERT_FALSE(file.readLine(line));  // stopped here
+    }
+
+	ASSERT_EQ(windowMessages.size(), 5);
+	ASSERT_EQ(windowMessages[0], "Test message\n");
+	ASSERT_EQ(windowMessages[1], "Here it goes\n");
+	ASSERT_EQ(windowMessages[2], "One more message\n");
+	ASSERT_EQ(windowMessages[3], "Now we're on window\n");
+	ASSERT_EQ(windowMessages[4], "And again\n");
+
+    windowMessages.clear();
+
+	// Now write more stuff
+	LogPrintf("Extra stuff one\n");
+    LogOpenWindow();
+	LogPrintf("Extra stuff two\n");
+	ASSERT_EQ(windowMessages.size(), 2);    // it didn't get added to missing window
+
+    // Now check saving current status works
+    f = fopen(savedPath.c_str(), "wb");
+    ASSERT_NE(f, nullptr);
+    LogSaveTo(f);
+    fclose(f);
+
+
+	LogOpenFile(path.c_str());
+    LogClose();
+
+    {
+        LineFile file(path);
+        SString line;
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "======= START OF LOGS =======");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_TRUE(line.empty());
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff one");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff two");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "======== END OF LOGS ========");
+        ASSERT_FALSE(file.readLine(line));
+    }
+
+    {
+        LineFile file(savedPath);
+        SString line;
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "======= START OF LOGS =======");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_TRUE(line.empty());
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff one");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff two");
+        ASSERT_FALSE(file.readLine(line));
+    }
+
+    ASSERT_EQ(windowMessages.size(), 2);
+    ASSERT_EQ(windowMessages[0], "Extra stuff one\n");
+    ASSERT_EQ(windowMessages[1], "Extra stuff two\n");
 }
+
+//TEST_F(SysDebugTempDir, WindowThenFile)
+//{
+//	windowMessages.clear();
+//
+//	SString path = getChildPath("log.txt");
+//	LogPrintf("Test message\n");
+//	LogPrintf("Here it goes\n");
+//	LogOpenWindow();
+//	LogPrintf("One more message\n");
+//	LogPrintf("Now we're on window\n");
+//	LogOpenFile(path.c_str());
+//	mDeleteList.push(path);
+//	LogPrintf("And again\n");
+//
+//	LineFile file(path);
+//	SString line;
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "======= START OF LOGS =======");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_TRUE(line.empty());
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "Test message");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "Here it goes");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "One more message");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "Now we're on window");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "And again");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "");
+//	ASSERT_TRUE(file.readLine(line));
+//	ASSERT_EQ(line, "======== END OF LOGS ========");
+//	ASSERT_FALSE(file.readLine(line));
+//}
