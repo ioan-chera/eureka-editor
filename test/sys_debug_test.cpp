@@ -41,11 +41,13 @@ void LogViewer_AddLine(const char *str)
 
 TEST_F(SysDebugTempDir, LifeCycle)
 {
+    global::in_fatal_error = false;
 	windowMessages.clear();
 
 	SString path = getChildPath("log.txt");
 	LogPrintf("Test message\n");
 	LogPrintf("Here it goes\n");
+    DebugPrintf("No text\n");
 	LogOpenFile(path.c_str());
 	mDeleteList.push(path);
 	LogPrintf("One more message\n");
@@ -124,6 +126,8 @@ TEST_F(SysDebugTempDir, LifeCycle)
 	LogPrintf("Extra stuff one\n");
     LogOpenWindow();
 	LogPrintf("Extra stuff two\n");
+    global::Debugging = true;
+    DebugPrintf("No print here\n");
     // Mark fatal error to see it doesn't get added
     global::in_fatal_error = true;
     LogPrintf("Extra stuff three\n");
@@ -137,6 +141,14 @@ TEST_F(SysDebugTempDir, LifeCycle)
 
 
 	LogOpenFile(path.c_str());
+    DebugPrintf("Debug writeout\n");
+    LogPrintf("Extra stuff four\n");
+    DebugPrintf("Debug\nwriteout2\n");
+    DebugPrintf("");    // this shall not be printed!
+    global::Debugging = false;
+    DebugPrintf("Debug writeout3\n");
+    DebugPrintf("Debug writeout4\n");
+    LogPrintf("Extra stuff five\n");
     LogClose();
 
     {
@@ -152,6 +164,16 @@ TEST_F(SysDebugTempDir, LifeCycle)
         ASSERT_EQ(line, "Extra stuff two");
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "Extra stuff three");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "# Debug writeout");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff four");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "# Debug");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "# writeout2");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff five");
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "");
         ASSERT_TRUE(file.readLine(line));
@@ -180,11 +202,14 @@ TEST_F(SysDebugTempDir, LifeCycle)
     ASSERT_EQ(windowMessages.size(), 2);
     ASSERT_EQ(windowMessages[0], "Extra stuff one\n");
     ASSERT_EQ(windowMessages[1], "Extra stuff two\n");
+    // Nothing after fatal
 }
 
 TEST_F(SysDebugTempDir, NewLifeCycle)
 {
     std::vector<SString> localWindowMessages;
+    global::Debugging = false;
+    global::in_fatal_error = false;
 
     Log log;
 
@@ -197,6 +222,7 @@ TEST_F(SysDebugTempDir, NewLifeCycle)
     SString path = getChildPath("log.txt");
     log.printf("Test message\n");
     log.printf("Here it goes\n");
+    log.debugPrintf("No text\n");
     ASSERT_TRUE(log.openFile(path.c_str()));
     mDeleteList.push(path);
     log.printf("One more message\n");
@@ -275,6 +301,9 @@ TEST_F(SysDebugTempDir, NewLifeCycle)
     log.printf("Extra stuff one\n");
     log.openWindow();
     log.printf("Extra stuff two\n");
+    global::Debugging = true;
+    log.debugPrintf("No print here\n");
+    // Mark fatal error to see it doesn't get added
     log.markFatalError();
     log.printf("Extra stuff three\n");
     ASSERT_EQ(localWindowMessages.size(), 2);    // it didn't get added to missing window
@@ -287,6 +316,14 @@ TEST_F(SysDebugTempDir, NewLifeCycle)
 
 
     log.openFile(path.c_str());
+    log.debugPrintf("Debug writeout\n");
+    log.printf("Extra stuff four\n");
+    log.debugPrintf("Debug\nwriteout2\n");
+    log.debugPrintf("");    // this shall not be printed!
+    global::Debugging = false;
+    log.debugPrintf("Debug writeout3\n");
+    log.debugPrintf("Debug writeout4\n");
+    log.printf("Extra stuff five\n");
     log.close();
 
     {
@@ -302,6 +339,16 @@ TEST_F(SysDebugTempDir, NewLifeCycle)
         ASSERT_EQ(line, "Extra stuff two");
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "Extra stuff three");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "# Debug writeout");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff four");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "# Debug");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "# writeout2");
+        ASSERT_TRUE(file.readLine(line));
+        ASSERT_EQ(line, "Extra stuff five");
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "");
         ASSERT_TRUE(file.readLine(line));

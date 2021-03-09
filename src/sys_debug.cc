@@ -249,6 +249,8 @@ void Log::debugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 			index = buffer.find('\n', startpos);
 			if(index == SString::npos)
 				index = buffer.length();
+            if(index == buffer.length() && startpos == index)
+                break;
 			SString fragment(buffer.c_str() + startpos, static_cast<int>(index - startpos));
 
 			fprintf(log_fp, "# %s\n", fragment.c_str());
