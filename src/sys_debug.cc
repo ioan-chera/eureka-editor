@@ -129,6 +129,7 @@ void Log::close()
 	}
 
 	log_window_open = false;
+    kept_messages.clear();
 }
 
 void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
@@ -179,8 +180,7 @@ void Log::printf(EUR_FORMAT_STRING(const char *str), ...)
 
 	if (windowAdd && log_window_open && !inFatalError)
 		windowAdd(buffer, windowAddUserData);
-	else
-		kept_messages.push_back(buffer);
+    kept_messages.push_back(buffer);
 
 	if (! global::Quiet)
 	{
@@ -277,31 +277,12 @@ void LogSaveTo(FILE *dest_fp)
 
 void Log::saveTo(FILE *dest_fp) const
 {
-	uint8_t buffer[256];
+    fprintf(dest_fp, "======= START OF LOGS =======\n\n");
 
-	if (! log_fp)
-	{
-		fprintf(dest_fp, "No logs.\n");
-		return;
-	}
+    // add all messages saved so far
 
-	// copy the log file
-
-	rewind(log_fp);
-
-	while (true)
-	{
-		size_t rlen = fread(buffer, 1, sizeof(buffer), log_fp);
-
-		if (rlen == 0)
-			break;
-
-		fwrite(buffer, 1, rlen, dest_fp);
-	}
-
-	// restore write position for the log file
-
-	fseek(log_fp, 0L, SEEK_END);
+    for (const SString &message : kept_messages)
+        fputs(message.c_str(), dest_fp);
 }
 
 //--- editor settings ---
