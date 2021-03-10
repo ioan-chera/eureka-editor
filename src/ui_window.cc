@@ -801,7 +801,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	LogSaveTo(fp);
+	gLog.saveTo(fp);
 
 	fclose(fp);
 }

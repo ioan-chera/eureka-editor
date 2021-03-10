@@ -53,6 +53,7 @@
 class Fl_Multi_Browser;
 class Wad_file;
 
+void LogViewer_AddLine(const char *str);
 
 class UI_MainWindow : public Fl_Double_Window
 {

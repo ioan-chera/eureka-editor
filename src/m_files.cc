@@ -437,17 +437,17 @@ static void ParseMiscConfig(std::istream &is)
 			if(Wad_file::Validate(path))
 				global::recent_files.insert(path, map);
 			else
-				LogPrintf("  no longer exists: %s\n", path.c_str());
+				gLog.printf("  no longer exists: %s\n", path.c_str());
 		}
 		else if(line == "known_iwad")
 		{
 			// ignore plain freedoom.wad (backwards compatibility)
 			if(map.noCaseEqual("freedoom"))
-				LogPrintf("  ignoring for compatibility: %s\n", path.c_str());
+				gLog.printf("  ignoring for compatibility: %s\n", path.c_str());
 			else if(Wad_file::Validate(path))
 				global::known_iwads[map] = path;
 			else
-				LogPrintf("  no longer exists: %s\n", path.c_str());
+				gLog.printf("  no longer exists: %s\n", path.c_str());
 		}
 		else if(line == "port_path")
 		{
@@ -469,11 +469,11 @@ void M_LoadRecent()
 	std::ifstream is(filename.get());
 	if(!is.is_open())
 	{
-		LogPrintf("No recent list at: %s\n", filename.c_str());
+		gLog.printf("No recent list at: %s\n", filename.c_str());
 		return;
 	}
 
-	LogPrintf("Reading recent list from: %s\n", filename.c_str());
+	gLog.printf("Reading recent list from: %s\n", filename.c_str());
 
 	global::recent_files.clear();
 	global::known_iwads.clear();
@@ -491,11 +491,11 @@ void M_SaveRecent()
 
 	if (! fp)
 	{
-		LogPrintf("Failed to save recent list to: %s\n", filename.c_str());
+		gLog.printf("Failed to save recent list to: %s\n", filename.c_str());
 		return;
 	}
 
-	LogPrintf("Writing recent list to: %s\n", filename.c_str());
+	gLog.printf("Writing recent list to: %s\n", filename.c_str());
 
 	fprintf(fp, "# Eureka miscellaneous stuff\n");
 
@@ -563,14 +563,14 @@ bool Instance::M_TryOpenMostRecent()
 
 	if (! wad)
 	{
-		LogPrintf("Failed to load most recent pwad: %s\n", filename.c_str());
+		gLog.printf("Failed to load most recent pwad: %s\n", filename.c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
 	if (wad->LevelCount() == 0)
 	{
-		LogPrintf("No levels in most recent pwad: %s\n", filename.c_str());
+		gLog.printf("No levels in most recent pwad: %s\n", filename.c_str());
 
 		delete wad;
 		return false;
@@ -656,7 +656,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name.c_str(), game.c_str());
 
-	DebugPrintf("  trying: %s\n", name_buf);
+	gLog.debugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
 		return name_buf;
@@ -665,7 +665,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	y_strupr(name_buf + dir_name.length() + 1);
 
-	DebugPrintf("  trying: %s\n", name_buf);
+	gLog.debugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
 		return name_buf;
@@ -676,7 +676,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 static SString SearchForIWAD(const SString &game)
 {
-	DebugPrintf("Searching for '%s' IWAD\n", game.c_str());
+	gLog.debugPrintf("Searching for '%s' IWAD\n", game.c_str());
 
 	static char dir_name[FL_PATH_MAX];
 
@@ -756,7 +756,7 @@ static SString SearchForIWAD(const SString &game)
 //
 void M_LookForIWADs()
 {
-	LogPrintf("Looking for IWADs....\n");
+	gLog.printf("Looking for IWADs....\n");
 
 	std::vector<SString> game_list = M_CollectKnownDefs("games");
 
@@ -770,7 +770,7 @@ void M_LookForIWADs()
 
 		if (!path.empty())
 		{
-			LogPrintf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
+			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
 
 			M_AddKnownIWAD(path);
 		}
@@ -803,7 +803,7 @@ SString Instance::M_PickDefaultIWAD() const
 		}
 	}
 
-	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
+	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
 	SString result;
 
@@ -818,7 +818,7 @@ SString Instance::M_PickDefaultIWAD() const
 	else
 		default_game = "freedoom2";
 
-	DebugPrintf("pick default iwad, trying: '%s'\n", default_game);
+	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
 	result = M_QueryKnownIWAD(default_game);
 	if (!result.empty())
@@ -826,7 +826,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	// try any known iwad
 
-	DebugPrintf("pick default iwad, trying first known iwad...\n");
+	gLog.debugPrintf("pick default iwad, trying first known iwad...\n");
 
 	std::map<SString, SString>::iterator KI;
 
@@ -836,7 +836,7 @@ SString Instance::M_PickDefaultIWAD() const
 		return KI->second;
 
 	// nothing left to try
-	DebugPrintf("pick default iwad failed.\n");
+	gLog.debugPrintf("pick default iwad failed.\n");
 
 	return "";
 }
@@ -863,19 +863,19 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 //
 bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 {
-	LogPrintf("Parsing '%s' lump\n", EUREKA_LUMP);
+	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
 	Lump_c * lump = wad->FindLump(EUREKA_LUMP);
 
 	if (! lump)
 	{
-		LogPrintf("--> does not exist.\n");
+		gLog.printf("--> does not exist.\n");
 		return true;
 	}
 
 	if (! lump->Seek())
 	{
-		LogPrintf("--> error seeking.\n");
+		gLog.printf("--> error seeking.\n");
 		return true;
 	}
 
@@ -899,7 +899,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 		if(pos == std::string::npos || !pos)
 		{
-			LogPrintf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
+			gLog.printf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
 			continue;
 		}
 
@@ -910,7 +910,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		{
 			if (! M_CanLoadDefinitions("games", value))
 			{
-				LogPrintf("  unknown game: %s\n", value.c_str() /* show full path */);
+				gLog.printf("  unknown game: %s\n", value.c_str() /* show full path */);
 
 				int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
 				                      "Warning: the pwad specifies an unsupported "
@@ -941,16 +941,16 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 			if (! FileExists(res))
 			{
-				LogPrintf("  file not found: %s\n", value.c_str());
+				gLog.printf("  file not found: %s\n", value.c_str());
 
 				res = FilenameReposition(value, wad->PathName());
-				LogPrintf("  trying: %s\n", res.c_str());
+				gLog.printf("  trying: %s\n", res.c_str());
 			}
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
 				res = FilenameReposition(value, new_iwad);
-				LogPrintf("  trying: %s\n", res.c_str());
+				gLog.printf("  trying: %s\n", res.c_str());
 			}
 
 			if (FileExists(res))
@@ -967,14 +967,14 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 				new_port = value;
 			else
 			{
-				LogPrintf("  unknown port: %s\n", value.c_str());
+				gLog.printf("  unknown port: %s\n", value.c_str());
 
 				DLG_Notify("Warning: the pwad specifies an unknown port:\n\n%s", value.c_str());
 			}
 		}
 		else
 		{
-			LogPrintf("WARNING: unknown keyword '%s' in %s lump\n", line.c_str(), EUREKA_LUMP);
+			gLog.printf("WARNING: unknown keyword '%s' in %s lump\n", line.c_str(), EUREKA_LUMP);
 			continue;
 		}
 	}
@@ -1014,7 +1014,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 void Instance::M_WriteEurekaLump(Wad_file *wad) const
 {
-	LogPrintf("Writing '%s' lump\n", EUREKA_LUMP);
+	gLog.printf("Writing '%s' lump\n", EUREKA_LUMP);
 
 	wad->BeginWrite();
 
@@ -1119,7 +1119,7 @@ void M_BackupWad(Wad_file *wad)
 	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
 	SString dir_name = ReplaceExtension(filename, NULL);
 
-	DebugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
+	gLog.debugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
 
 	// create the directory if it doesn't already exist
 	// (this will fail if it DOES already exist, but that's OK)
@@ -1134,7 +1134,7 @@ void M_BackupWad(Wad_file *wad)
 	if (ScanDirectory(dir_name, backup_scan_file, &scan_data) < 0)
 	{
 		// Hmmm, show a dialog ??
-		LogPrintf("WARNING: backup failed (cannot scan dir)\n");
+		gLog.printf("WARNING: backup failed (cannot scan dir)\n");
 		return;
 	}
 
@@ -1155,11 +1155,11 @@ void M_BackupWad(Wad_file *wad)
 	if (! wad->Backup(dest_name.c_str()))
 	{
 		// Hmmm, show a dialog ??
-		LogPrintf("WARNING: backup failed (cannot copy file)\n");
+		gLog.printf("WARNING: backup failed (cannot copy file)\n");
 		return;
 	}
 
-	LogPrintf("Backed up wad to: %s\n", dest_name.c_str());
+	gLog.printf("Backed up wad to: %s\n", dest_name.c_str());
 }
 
 //--- editor settings ---

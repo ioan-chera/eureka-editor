@@ -475,7 +475,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 	if (! temp.key)
 	{
-		LogPrintf("bindings.cfg: cannot parse key name: %s\n", tokens[1].c_str());
+		gLog.printf("bindings.cfg: cannot parse key name: %s\n", tokens[1].c_str());
 		return;
 	}
 
@@ -483,7 +483,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 	if (temp.context == KCTX_NONE)
 	{
-		LogPrintf("bindings.cfg: unknown context: %s\n", tokens[0].c_str());
+		gLog.printf("bindings.cfg: unknown context: %s\n", tokens[0].c_str());
 		return;
 	}
 
@@ -502,14 +502,14 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 	if (! temp.cmd)
 	{
-		LogPrintf("bindings.cfg: unknown function: %s\n", tokens[2].c_str());
+		gLog.printf("bindings.cfg: unknown function: %s\n", tokens[2].c_str());
 		return;
 	}
 
 	if (temp.cmd->req_context != KCTX_NONE &&
 	    temp.context != temp.cmd->req_context)
 	{
-		LogPrintf("bindings.cfg: function '%s' in wrong context '%s'\n",
+		gLog.printf("bindings.cfg: function '%s' in wrong context '%s'\n",
 				  tokens[2].c_str(), tokens[0].c_str());
 		return;
 	}
@@ -543,7 +543,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
 	}
 
-	LogPrintf("Reading key bindings from: %s\n", filename.c_str());
+	gLog.printf("Reading key bindings from: %s\n", filename.c_str());
 
 	while (! fp.eof())
 	{
@@ -558,7 +558,7 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 		if (num_tok < 3)
 		{
-			LogPrintf("Syntax error in bindings: %s\n", line.c_str());
+			gLog.printf("Syntax error in bindings: %s\n", line.c_str());
 			continue;
 		}
 
@@ -638,14 +638,14 @@ void M_SaveBindings()
 	std::ofstream os(filename.get(), std::ios::trunc);
 	if (! os.is_open())
 	{
-		LogPrintf("Failed to save key bindings to: %s\n", filename.c_str());
+		gLog.printf("Failed to save key bindings to: %s\n", filename.c_str());
 
 		DLG_Notify("Warning: failed to save key bindings\n"
 		           "(filename: %s)", filename.c_str());
 		return;
 	}
 
-	LogPrintf("Writing key bindings to: %s\n", filename.c_str());
+	gLog.printf("Writing key bindings to: %s\n", filename.c_str());
 
 	os << "# Eureka key bindings (local)\n";
 	os << "# vi:ts=16:noexpandtab\n\n";
@@ -1254,7 +1254,7 @@ void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 	va_end(arg_ptr);
 
 	Status_Set("%s", text.c_str());
-	LogPrintf("BEEP: %s\n", text.c_str());
+	gLog.printf("BEEP: %s\n", text.c_str());
 
 	fl_beep();
 

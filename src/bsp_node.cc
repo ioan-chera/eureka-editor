@@ -174,10 +174,10 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
 
 # if DEBUG_SPLIT
 	if (old_seg->linedef >= 0)
-		DebugPrintf("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
 				old_seg->linedef, old_seg, x, y);
 	else
-		DebugPrintf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
+		gLog.debugPrintf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 # endif
 
 	new_vert = NewVertexFromSplitSeg(old_seg, x, y, doc);
@@ -194,7 +194,7 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
 	new_seg->Recompute();
 
 # if DEBUG_SPLIT
-	DebugPrintf("Splitting Vertex is %04X at (%1.1f,%1.1f)\n",
+	gLog.debugPrintf("Splitting Vertex is %04X at (%1.1f,%1.1f)\n",
 			new_vert->index, new_vert->x, new_vert->y);
 # endif
 
@@ -203,7 +203,7 @@ static seg_t * SplitSeg(seg_t *old_seg, double x, double y, const Document &doc)
 	if (old_seg->partner)
 	{
 #   if DEBUG_SPLIT
-		DebugPrintf("Splitting Partner %p\n", old_seg->partner);
+		gLog.debugPrintf("Splitting Partner %p\n", old_seg->partner);
 #   endif
 
 		new_seg->partner = NewSeg();
@@ -555,7 +555,7 @@ static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Doc
 	if (info.real_left == 0 || info.real_right == 0)
 	{
 #   if DEBUG_PICKNODE
-		DebugPrintf("Eval : No real segs on %s%sside\n",
+		gLog.debugPrintf("Eval : No real segs on %s%sside\n",
 				info.real_left  ? "" : "left ",
 				info.real_right ? "" : "right ");
 #   endif
@@ -579,7 +579,7 @@ static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Doc
 		info.cost += 25;
 
 # if DEBUG_PICKNODE
-	DebugPrintf("Eval %p: splits=%d iffy=%d near=%d left=%d+%d right=%d+%d "
+	gLog.debugPrintf("Eval %p: splits=%d iffy=%d near=%d left=%d+%d right=%d+%d "
 			"cost=%d.%02d\n", part, info.splits, info.iffy, info.near_miss,
 			info.real_left, info.mini_left, info.real_right, info.mini_right,
 			info.cost / 100, info.cost % 100);
@@ -666,7 +666,7 @@ static seg_t *FindFastSeg(quadtree_c *tree, const Document &doc)
 		V_cost = EvalPartition(tree, best_V, 99999999, doc);
 
 # if DEBUG_PICKNODE
-	DebugPrintf("FindFastSeg: best_H=%p (cost %d) | best_V=%p (cost %d)\n",
+	gLog.debugPrintf("FindFastSeg: best_H=%p (cost %d) | best_V=%p (cost %d)\n",
 			best_H, H_cost, best_V, V_cost);
 # endif
 
@@ -691,7 +691,7 @@ static bool PickNodeWorker(quadtree_c *part_list,
 			return false;
 
 #   if DEBUG_PICKNODE
-		DebugPrintf("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				part->linedef >= 0 ? "" : "MINI", part,
 				part->start->x, part->start->y, part->end->x, part->end->y);
 #   endif
@@ -737,7 +737,7 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 	int best_cost=INT_MAX;
 
 # if DEBUG_PICKNODE
-	DebugPrintf("PickNode: BEGUN (depth %d)\n", depth);
+	gLog.debugPrintf("PickNode: BEGUN (depth %d)\n", depth);
 # endif
 
 	/* -AJA- here is the logic for "fast mode".  We look for segs which
@@ -747,7 +747,7 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 	if (cur_info->fast && tree->real_num >= SEG_FAST_THRESHHOLD)
 	{
 #   if DEBUG_PICKNODE
-		DebugPrintf("PickNode: Looking for Fast node...\n");
+		gLog.debugPrintf("PickNode: Looking for Fast node...\n");
 #   endif
 
 		best = FindFastSeg(tree, doc);
@@ -755,7 +755,7 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 		if (best)
 		{
 #     if DEBUG_PICKNODE
-			DebugPrintf("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+			gLog.debugPrintf("PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 					best->start->x, best->start->y, best->end->x, best->end->y);
 #     endif
 
@@ -772,11 +772,11 @@ static seg_t *PickNode(quadtree_c *tree, int depth, const Document &doc)
 # if DEBUG_PICKNODE
 	if (! best)
 	{
-		DebugPrintf("PickNode: NO BEST FOUND !\n");
+		gLog.debugPrintf("PickNode: NO BEST FOUND !\n");
 	}
 	else
 	{
-		DebugPrintf("PickNode: Best has score %d.%02d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("PickNode: Best has score %d.%02d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				best_cost / 100, best_cost % 100, best->start->x, best->start->y,
 				best->end->x, best->end->y);
 	}
@@ -951,13 +951,13 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 	seg_t *seg, *buddy;
 
 # if DEBUG_CUTLIST
-	DebugPrintf("CUT LIST:\n");
-	DebugPrintf("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n",
+	gLog.debugPrintf("CUT LIST:\n");
+	gLog.debugPrintf("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n",
 			part->psx, part->psy, part->pdx, part->pdy);
 
 	for (cur=cut_list ; cur ; cur=cur->next)
 	{
-		DebugPrintf("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
+		gLog.debugPrintf("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
 				cur->vertex->index, cur->vertex->x, cur->vertex->y,
 				cur->along_dist,
 				cur->open_before ? 1 : 0,
@@ -1021,10 +1021,10 @@ void AddMinisegs(intersection_t *cut_list, seg_t *part,
 		ListAddSeg(left_list, buddy);
 
 #   if DEBUG_CUTLIST
-		DebugPrintf("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				seg, seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 
-		DebugPrintf("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				buddy, buddy->start->x, buddy->start->y, buddy->end->x, buddy->end->y);
 #   endif
 	}
@@ -1453,7 +1453,7 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 	seg_t *seg;
 
 # if DEBUG_SUBSEC
-	DebugPrintf("Subsec: Clockwising %d\n", index);
+	gLog.debugPrintf("Subsec: Clockwising %d\n", index);
 # endif
 
 	// count segs and create an array to manipulate them
@@ -1548,11 +1548,11 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 		delete[] array;
 
 # if DEBUG_SORTER
-	DebugPrintf("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
+	gLog.debugPrintf("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
 
 	for (seg=seg_list ; seg ; seg=seg->next)
 	{
-		DebugPrintf("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				seg, seg->cmp_angle, seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 	}
 # endif
@@ -1576,14 +1576,14 @@ void subsec_t::SanityCheckClosed()
 
 	if (gaps > 0)
 	{
-		DebugPrintf("Subsector #%d near (%1.1f,%1.1f) is not closed "
+		gLog.debugPrintf("Subsector #%d near (%1.1f,%1.1f) is not closed "
 				"(%d gaps, %d segs)\n", index,
 				mid_x, mid_y, gaps, total);
 
 #   if DEBUG_SUBSEC
 		for (seg=seg_list ; seg ; seg=seg->next)
 		{
-			DebugPrintf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg,
+			gLog.debugPrintf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg,
 					seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 		}
 #   endif
@@ -1609,7 +1609,7 @@ void subsec_t::RenumberSegs()
 	seg_t *seg;
 
 # if DEBUG_SUBSEC
-	DebugPrintf("Subsec: Renumbering %d\n", index);
+	gLog.debugPrintf("Subsec: Renumbering %d\n", index);
 # endif
 
 	seg_count = 0;
@@ -1622,7 +1622,7 @@ void subsec_t::RenumberSegs()
 		seg_count++;
 
 #   if DEBUG_SUBSEC
-		DebugPrintf("Subsec:   %d: Seg %p  Index %d\n", seg_count,
+		gLog.debugPrintf("Subsec:   %d: Seg %p  Index %d\n", seg_count,
 				seg, seg->index);
 #   endif
 	}
@@ -1646,7 +1646,7 @@ static subsec_t *CreateSubsector(quadtree_c *tree)
 	sub->DetermineMiddle();
 
 # if DEBUG_SUBSEC
-	DebugPrintf("Subsec: Creating %d\n", sub->index);
+	gLog.debugPrintf("Subsec: Creating %d\n", sub->index);
 # endif
 
 	return sub;
@@ -1676,7 +1676,7 @@ static void DebugShowSegs(seg_t *list)
 	{
 		seg_t *seg = list;
 
-		DebugPrintf("Build:   %sSEG %p  linedef=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+		gLog.debugPrintf("Build:   %sSEG %p  linedef=%d  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
 				(seg->linedef >= 0) ? "" : "MINI", seg, seg->linedef,
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 	}
@@ -1694,7 +1694,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 		return BUILD_Cancelled;
 
 # if DEBUG_BUILDER
-	DebugPrintf("Build: BEGUN @ %d\n", depth);
+	gLog.debugPrintf("Build: BEGUN @ %d\n", depth);
 	DebugShowSegs(list);
 # endif
 
@@ -1710,7 +1710,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	if (part == NULL)
 	{
 #   if DEBUG_BUILDER
-		DebugPrintf("Build: CONVEX\n");
+		gLog.debugPrintf("Build: CONVEX\n");
 #   endif
 
 		*S = CreateSubsector(tree);
@@ -1724,7 +1724,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	}
 
 # if DEBUG_BUILDER
-	DebugPrintf("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n",
+	gLog.debugPrintf("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n",
 			part, part->start->x, part->start->y, part->end->x, part->end->y);
 # endif
 
@@ -1753,7 +1753,7 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 	node->SetPartition(part, inst);
 
 # if DEBUG_BUILDER
-	DebugPrintf("Build: Going LEFT\n");
+	gLog.debugPrintf("Build: Going LEFT\n");
 # endif
 
 	build_result_e ret;
@@ -1763,13 +1763,13 @@ build_result_e BuildNodes(seg_t *list, bbox_t *bounds /* output */,
 		return ret;
 
 # if DEBUG_BUILDER
-	DebugPrintf("Build: Going RIGHT\n");
+	gLog.debugPrintf("Build: Going RIGHT\n");
 # endif
 
 	ret = BuildNodes(rights, &node->r.bounds, &node->r.node, &node->r.subsec, depth+1, inst);
 
 # if DEBUG_BUILDER
-	DebugPrintf("Build: DONE\n");
+	gLog.debugPrintf("Build: DONE\n");
 # endif
 
 	return ret;
@@ -1801,7 +1801,7 @@ void subsec_t::Normalise()
 	seg_t *new_tail = NULL;
 
 # if DEBUG_SUBSEC
-	DebugPrintf("Subsec: Normalising %d\n", index);
+	gLog.debugPrintf("Subsec: Normalising %d\n", index);
 # endif
 
 	while (seg_list)
@@ -1814,7 +1814,7 @@ void subsec_t::Normalise()
 		if (seg->linedef < 0)
 		{
 #     if DEBUG_SUBSEC
-			DebugPrintf("Subsec: Removing miniseg %p\n", seg);
+			gLog.debugPrintf("Subsec: Removing miniseg %p\n", seg);
 #     endif
 
 			// this causes SortSegs() to remove the seg
@@ -1889,7 +1889,7 @@ void subsec_t::RoundOff()
 	int degen_total = 0;
 
 # if DEBUG_SUBSEC
-	DebugPrintf("Subsec: Rounding off %d\n", index);
+	gLog.debugPrintf("Subsec: Rounding off %d\n", index);
 # endif
 
 	// do an initial pass, just counting the degenerates
@@ -1913,7 +1913,7 @@ void subsec_t::RoundOff()
 	}
 
 # if DEBUG_SUBSEC
-	DebugPrintf("Subsec: degen=%d real=%d\n", degen_total, real_total);
+	gLog.debugPrintf("Subsec: degen=%d real=%d\n", degen_total, real_total);
 # endif
 
 	// handle the (hopefully rare) case where all of the real segs
@@ -1925,7 +1925,7 @@ void subsec_t::RoundOff()
 					index);
 
 #   if DEBUG_SUBSEC
-		DebugPrintf("Degenerate before: (%1.2f,%1.2f) -> (%1.2f,%1.2f)\n",
+		gLog.debugPrintf("Degenerate before: (%1.2f,%1.2f) -> (%1.2f,%1.2f)\n",
 				last_real_degen->start->x, last_real_degen->start->y,
 				last_real_degen->end->x, last_real_degen->end->y);
 #   endif
@@ -1935,7 +1935,7 @@ void subsec_t::RoundOff()
 				last_real_degen->start, last_real_degen->end);
 
 #   if DEBUG_SUBSEC
-		DebugPrintf("Degenerate after:  (%d,%d) -> (%d,%d)\n",
+		gLog.debugPrintf("Degenerate after:  (%d,%d) -> (%d,%d)\n",
 				I_ROUND(last_real_degen->start->x),
 				I_ROUND(last_real_degen->start->y),
 				I_ROUND(last_real_degen->end->x),
@@ -1955,7 +1955,7 @@ void subsec_t::RoundOff()
 		if (seg->is_degenerate)
 		{
 #     if DEBUG_SUBSEC
-			DebugPrintf("Subsec: Removing degenerate %p\n", seg);
+			gLog.debugPrintf("Subsec: Removing degenerate %p\n", seg);
 #     endif
 
 			// this causes SortSegs() to remove the seg

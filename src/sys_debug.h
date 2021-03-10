@@ -23,8 +23,11 @@
 
 #include <stdio.h>
 #include "PrintfMacros.h"
+#include <vector>
 
 #define MSG_BUF_LEN  1024
+
+class SString;
 
 namespace global
 {
@@ -33,16 +36,50 @@ namespace global
     extern bool in_fatal_error;
 }
 
-void LogOpenFile(const char *filename);
-void LogOpenWindow(void);
-void LogClose(void);
+//
+// Log controller
+//
+class Log
+{
+public:
+	typedef void (*WindowAddCallback)(const SString &text, void *userData);
 
-void LogSaveTo(FILE *dest_fp);
+	bool openFile(const SString &filename);
+	void openWindow();
+    void openWindow(WindowAddCallback callback, void *userData);
+	void close();
+	void printf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
+	void debugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
+	void saveTo(FILE *dest_fp) const;
 
-void LogPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
+	//
+	// Mark the error
+	//
+	void markFatalError()
+	{
+		inFatalError = true;
+	}
+private:
+    //
+    // Callback setter
+    //
+    void setWindowAddCallback(WindowAddCallback callback, void *userData)
+    {
+        windowAdd = callback;
+        windowAddUserData = userData;
+    }
 
-void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
+	WindowAddCallback windowAdd = nullptr;
+	void *windowAddUserData = nullptr;
 
+	bool inFatalError = false;
+
+	bool log_window_open = false;
+	FILE *log_fp = nullptr;
+	std::vector<SString> kept_messages;
+};
+
+extern Log gLog;
 
 // -------- assertion macros --------
 

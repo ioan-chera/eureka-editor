@@ -90,7 +90,14 @@ unit_test(lib_file
     lib_file_test.cpp
     SRC lib_file.cc
         lib_util.cc
+        sys_debug.cc
     FLTK
+)
+
+unit_test(sys_debug
+    sys_debug_test.cpp
+    SRC m_streams.cc
+        sys_debug.cc
 )
 
 # Units independent on complex frameworks or libraries

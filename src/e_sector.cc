@@ -627,7 +627,7 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 	}
 
 #ifdef DEBUG_LINELOOP
-	DebugPrintf("TRACE PATH: line:%d  side:%d  cur_vert:%d\n", ld, side, cur_vert);
+	gLog.debugPrintf("TRACE PATH: line:%d  side:%d  cur_vert:%d\n", ld, side, cur_vert);
 #endif
 
 	// check for an isolated line
@@ -695,7 +695,7 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 		}
 
 #ifdef DEBUG_LINELOOP
-		DebugPrintf("PATH NEXT: line:%d  side:%d  vert:%d  angle:%1.6f\n",
+		gLog.debugPrintf("PATH NEXT: line:%d  side:%d  vert:%d  angle:%1.6f\n",
 				next_line, next_side, next_vert, best_angle);
 #endif
 
@@ -732,7 +732,7 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 	loop.faces_outward = (average_angle >= 180.0);
 
 #ifdef DEBUG_LINELOOP
-	DebugPrintf("PATH CLOSED!  average_angle:%1.2f\n", average_angle);
+	gLog.debugPrintf("PATH CLOSED!  average_angle:%1.2f\n", average_angle);
 #endif
 
 	return true;
@@ -791,7 +791,7 @@ bool lineloop_c::LookForIsland()
 				continue;
 
 #ifdef DEBUG_LINELOOP
-DebugPrintf("Found line:%d side:%d <--> opp:%d opp_side:%d  us:%d them:%d\n",
+gLog.debugPrintf("Found line:%d side:%d <--> opp:%d opp_side:%d  us:%d them:%d\n",
 ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 #endif
 
@@ -858,14 +858,14 @@ void lineloop_c::FindIslands()
 
 void lineloop_c::Dump() const
 {
-	DebugPrintf("Lineloop %p : %zu lines, %zu islands\n",
+	gLog.debugPrintf("Lineloop %p : %zu lines, %zu islands\n",
 	            this, lines.size(), islands.size());
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
 		const LineDef *L = doc.linedefs[lines[i]];
 
-		DebugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
+		gLog.debugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
 					lines[i],
 					L->Start(doc)->x(), L->Start(doc)->y(),
@@ -1032,7 +1032,7 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 						   int new_lower, int new_upper,
 						   selection_c *flip) const
 {
-// DebugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
+// gLog.debugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = doc.linedefs[ld];
 
 	int sd_num   = (side == Side::right) ? L->right : L->left;
@@ -1122,7 +1122,7 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 
 	ld = doc.hover.getClosestLine_CastingHoriz(map_x, map_y, &side);
 
-	DebugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, (int)side);
+	gLog.debugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, (int)side);
 
 	while (ld >= 0)
 	{
@@ -1131,7 +1131,7 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 
 		if (! traceLineLoop(ld, side, loop))
 		{
-			DebugPrintf("Area is not closed (tracing a loop failed)\n");
+			gLog.debugPrintf("Area is not closed (tracing a loop failed)\n");
 			return false;
 		}
 
@@ -1141,7 +1141,7 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 			return true;
 		}
 
-		DebugPrintf("  hit island\n");
+		gLog.debugPrintf("  hit island\n");
 
 		// ensure we don't try any lines of this island
 		unsigned int k;
@@ -1169,12 +1169,12 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 			ld   = new_ld;
 			side = new_side;
 
-			DebugPrintf("  trying again with line #%d, side %d\n", ld, (int)side);
+			gLog.debugPrintf("  trying again with line #%d, side %d\n", ld, (int)side);
 			break;
 		}
 	}
 
-	DebugPrintf("Area is not closed (can see infinity)\n");
+	gLog.debugPrintf("Area is not closed (can see infinity)\n");
 	return false;
 }
 

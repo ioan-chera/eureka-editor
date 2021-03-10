@@ -378,7 +378,7 @@ void Instance::CMD_TestMap()
 	// change working directory to be same as the executable
 	SString folder = FilenameGetPath(info->exe_filename);
 
-	LogPrintf("Changing current dir to: %s\n", folder.c_str());
+	gLog.printf("Changing current dir to: %s\n", folder.c_str());
 
 	if (! FileChangeDir(folder))
 	{
@@ -394,8 +394,8 @@ void Instance::CMD_TestMap()
 										 CalcEXEName(info).c_str(), GrabWadNames(*this, info).c_str(),
 										 CalcWarpString(*this).c_str());
 
-	LogPrintf("Testing map using the following command:\n");
-	LogPrintf("--> %s\n", cmd_buffer.c_str());
+	gLog.printf("Testing map using the following command:\n");
+	gLog.printf("--> %s\n", cmd_buffer.c_str());
 
 	Status_Set("TESTING MAP");
 
@@ -413,7 +413,7 @@ void Instance::CMD_TestMap()
 	else
 		Status_Set("Result code: %d\n", status);
 
-	LogPrintf("--> result code: %d\n", status);
+	gLog.printf("--> result code: %d\n", status);
 
 
 	// restore previous working directory

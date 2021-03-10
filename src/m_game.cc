@@ -216,7 +216,7 @@ static void ParseColorDef(Instance &inst, char ** argv, int argc)
 	}
 	else
 	{
-		LogPrintf("unknown color keyword: '%s'\n", argv[0]);
+		gLog.printf("unknown color keyword: '%s'\n", argv[0]);
 	}
 }
 
@@ -341,7 +341,7 @@ static void ParseFeatureDef(Instance &inst, char **argv, int argc)
 			break;
 		}
 	if(!found)
-		LogPrintf("unknown feature keyword: '%s'\n", argv[0]);
+		gLog.printf("unknown feature keyword: '%s'\n", argv[0]);
 }
 
 
@@ -357,7 +357,7 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 
 		SString filename = base_dir + "/" + folder + "/" + name + ".ugh";
 
-		DebugPrintf("  trying: %s\n", filename.c_str());
+		gLog.debugPrintf("  trying: %s\n", filename.c_str());
 
 		if (FileExists(filename))
 			return filename;
@@ -388,14 +388,14 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 	char prettyname[256];
 	snprintf(prettyname, sizeof(prettyname), "%s/%s.ugh", folder.c_str(), name.c_str());
 
-	LogPrintf("Loading Definitions : %s\n", prettyname);
+	gLog.printf("Loading Definitions : %s\n", prettyname);
 
 	SString filename = FindDefinitionFile(folder, name);
 
 	if (filename.empty())
 		ThrowException("Cannot find definition file: %s\n", prettyname);
 
-	DebugPrintf("  found at: %s\n", filename.c_str());
+	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
 	M_ParseDefinitionFile(this, PURPOSE_Normal, nullptr, filename, folder, prettyname);
 }
@@ -636,7 +636,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		if (inst.line_groups.find( info.group) == inst.line_groups.end())
 		{
-			LogPrintf("%s(%d): unknown line group '%c'\n",
+			gLog.printf("%s(%d): unknown line group '%c'\n",
 					  pst->fname.c_str(), pst->lineno,  info.group);
 		}
 		else
@@ -696,7 +696,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		if (inst.thing_groups.find(info.group) == inst.thing_groups.end())
 		{
-			LogPrintf("%s(%d): unknown thing group '%c'\n",
+			gLog.printf("%s(%d): unknown thing group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, info.group);
 		}
 		else
@@ -730,7 +730,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		if (inst.texture_groups.find((char)tolower(group)) == inst.texture_groups.end())
 		{
-			LogPrintf("%s(%d): unknown texture group '%c'\n",
+			gLog.printf("%s(%d): unknown texture group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, group);
 		}
 		else
@@ -747,7 +747,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		if (inst.texture_groups.find((char)tolower(group)) == inst.texture_groups.end())
 		{
-			LogPrintf("%s(%d): unknown texture group '%c'\n",
+			gLog.printf("%s(%d): unknown texture group '%c'\n",
 					  pst->fname.c_str(), pst->lineno, group);
 		}
 		else
@@ -1155,7 +1155,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 	std::vector<SString> temp_list;
 	SString path;
 
-	//	DebugPrintf("M_CollectKnownDefs for: %d\n", folder);
+	//	gLog.debugPrintf("M_CollectKnownDefs for: %d\n", folder);
 	auto scanner_add_file = [&temp_list](const SString &name, int flags)
 	{
 		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
@@ -1277,7 +1277,7 @@ SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_
 		entry_id++;
 	}
 
-//	DebugPrintf( "RESULT = '%s'\n", result);
+//	gLog.debugPrintf( "RESULT = '%s'\n", result);
 
 	return result;
 }

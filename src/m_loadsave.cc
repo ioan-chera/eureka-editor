@@ -143,14 +143,14 @@ bool Instance::Project_AskFile(SString &filename) const
 	switch (chooser.show())
 	{
 		case -1:
-			LogPrintf("New Project: error choosing file:\n");
-			LogPrintf("   %s\n", chooser.errmsg());
+			gLog.printf("New Project: error choosing file:\n");
+			gLog.printf("   %s\n", chooser.errmsg());
 
 			DLG_Notify("Unable to create a new project:\n\n%s", chooser.errmsg());
 			return false;
 
 		case 1:
-			LogPrintf("New Project: cancelled by user\n");
+			gLog.printf("New Project: cancelled by user\n");
 			return false;
 
 		default:
@@ -283,7 +283,7 @@ void Instance::CMD_NewProject()
 		map_name = game_wad->GetLump(idx)->Name();
 	}
 
-	LogPrintf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
+	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
 	Wad_file * wad = Wad_file::Open(filename, WadOpenMode::write);
@@ -371,7 +371,7 @@ void Instance::CMD_FreshMap()
 
 	M_BackupWad(edit_wad);
 
-	LogPrintf("Created NEW map : %s\n", map_name.c_str());
+	gLog.printf("Created NEW map : %s\n", map_name.c_str());
 
 	// TODO: make this allow running another level
 	FreshLevel();
@@ -405,7 +405,7 @@ Lump_c *Instance::Load_LookupAndSeek(const char *name) const
 
 	if (! lump->Seek())
 	{
-		LogPrintf("WARNING: failed to seek to %s lump!\n", name);
+		gLog.printf("WARNING: failed to seek to %s lump!\n", name);
 	}
 
 	return lump;
@@ -486,7 +486,7 @@ void Instance::LoadSectors()
 
 void Instance::CreateFallbackSector()
 {
-	LogPrintf("Creating a fallback sector.\n");
+	gLog.printf("Creating a fallback sector.\n");
 
 	Sector *sec = new Sector;
 
@@ -501,7 +501,7 @@ void Instance::CreateFallbackSideDef()
 	if (level.numSectors() == 0)
 		CreateFallbackSector();
 
-	LogPrintf("Creating a fallback sidedef.\n");
+	gLog.printf("Creating a fallback sidedef.\n");
 
 	SideDef *sd = new SideDef;
 
@@ -512,7 +512,7 @@ void Instance::CreateFallbackSideDef()
 
 static void CreateFallbackVertices(Document &doc)
 {
-	LogPrintf("Creating two fallback vertices.\n");
+	gLog.printf("Creating two fallback vertices.\n");
 
 	Vertex *v1 = new Vertex;
 	Vertex *v2 = new Vertex;
@@ -532,7 +532,7 @@ void Instance::ValidateSidedefRefs(LineDef * ld, int num)
 {
 	if (ld->right >= level.numSidedefs() || ld->left >= level.numSidedefs())
 	{
-		LogPrintf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
+		gLog.printf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
 				  num, ld->right, ld->left);
 
 		bad_sidedef_refs++;
@@ -554,7 +554,7 @@ void Instance::ValidateVertexRefs(LineDef *ld, int num)
 	if (ld->start >= level.numVertices() || ld->end >= level.numVertices() ||
 	    ld->start == ld->end)
 	{
-		LogPrintf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
+		gLog.printf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
 		          num, ld->start, ld->end);
 
 		bad_linedef_count++;
@@ -572,7 +572,7 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 {
 	if (sd->sector >= level.numSectors())
 	{
-		LogPrintf("WARNING: sidedef #%d has invalid sector (%d)\n",
+		gLog.printf("WARNING: sidedef #%d has invalid sector (%d)\n",
 		          num, sd->sector);
 
 		bad_sector_refs++;
@@ -877,7 +877,7 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 	// normally kosher, but level loading is a special case).
 	if (new_count < doc.numVertices())
 	{
-		LogPrintf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
+		gLog.printf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
 
 		for (int i = new_count ; i < doc.numVertices(); i++)
 			delete doc.vertices[i];
@@ -889,10 +889,10 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 
 void Instance::ShowLoadProblem() const
 {
-	LogPrintf("Map load problems:\n");
-	LogPrintf("   %d linedefs with bad vertex refs\n", bad_linedef_count);
-	LogPrintf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
-	LogPrintf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
+	gLog.printf("Map load problems:\n");
+	gLog.printf("   %d linedefs with bad vertex refs\n", bad_linedef_count);
+	gLog.printf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
+	gLog.printf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
 
 	SString message;
 
@@ -1096,7 +1096,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		map_name  = gInstance.edit_wad->GetLump(idx)->Name();
 	}
 
-	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.edit_wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.edit_wad->PathName().c_str());
 
 	// TODO: new instance
 	gInstance.LoadLevel(gInstance.edit_wad, map_name);
@@ -1166,7 +1166,7 @@ void Instance::CMD_OpenMap()
 		new_resources = true;
 	}
 
-	LogPrintf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
 	LoadLevel(wad, map_name);
@@ -1303,7 +1303,7 @@ void Instance::CMD_FlipMap()
 	Lump_c * lump  = wad->GetLump(lump_idx);
 	const SString &map_name = lump->Name();
 
-	LogPrintf("Flipping Map to : %s\n", map_name.c_str());
+	gLog.printf("Flipping Map to : %s\n", map_name.c_str());
 
 	LoadLevel(wad, map_name);
 }
@@ -1676,7 +1676,7 @@ bool Instance::M_SaveMap()
 
 	M_BackupWad(edit_wad);
 
-	LogPrintf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName().c_str());
+	gLog.printf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName().c_str());
 
 	SaveLevel(Level_name);
 
@@ -1697,14 +1697,14 @@ bool Instance::M_ExportMap()
 	switch (chooser.show())
 	{
 		case -1:
-			LogPrintf("Export Map: error choosing file:\n");
-			LogPrintf("   %s\n", chooser.errmsg());
+			gLog.printf("Export Map: error choosing file:\n");
+			gLog.printf("   %s\n", chooser.errmsg());
 
 			DLG_Notify("Unable to export the map:\n\n%s", chooser.errmsg());
 			return false;
 
 		case 1:
-			LogPrintf("Export Map: cancelled by user\n");
+			gLog.printf("Export Map: cancelled by user\n");
 			return false;
 
 		default:
@@ -1806,7 +1806,7 @@ bool Instance::M_ExportMap()
 	}
 
 
-	LogPrintf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
@@ -1873,7 +1873,7 @@ void Instance::CMD_CopyMap()
 	}
 
 	// perform the copy (just a save)
-	LogPrintf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name.c_str());
+	gLog.printf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name.c_str());
 
 	SaveLevel(new_name);
 
@@ -1982,7 +1982,7 @@ void Instance::CMD_DeleteMap()
 		return;
 	}
 
-	LogPrintf("Deleting Map : %s...\n", Level_name.c_str());
+	gLog.printf("Deleting Map : %s...\n", Level_name.c_str());
 
 	int lev_num = edit_wad->LevelFind(Level_name);
 
@@ -2008,7 +2008,7 @@ void Instance::CMD_DeleteMap()
 		Lump_c * lump  = edit_wad->GetLump(lump_idx);
 		const SString &map_name = lump->Name();
 
-		LogPrintf("OK.  Loading : %s....\n", map_name.c_str());
+		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
 		LoadLevel(edit_wad, map_name);

@@ -393,7 +393,7 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
 	}
 
 	// SHOULD NOT GET HERE
-	LogPrintf("VERTEX MERGE FAILURE.\n");
+	gLog.printf("VERTEX MERGE FAILURE.\n");
 }
 
 
@@ -819,14 +819,14 @@ static void Sectors_LogUnknown(const Instance &inst)
 
 	Sectors_FindUnknown(sel, types, inst);
 
-	LogPrintf("\n");
-	LogPrintf("Unknown Sector Types:\n");
-	LogPrintf("{\n");
+	gLog.printf("\n");
+	gLog.printf("Unknown Sector Types:\n");
+	gLog.printf("{\n");
 
 	for (IT = types.begin() ; IT != types.end() ; IT++)
-		LogPrintf("  %5d  x %d\n", IT->first, IT->second);
+		gLog.printf("  %5d  x %d\n", IT->first, IT->second);
 
-	LogPrintf("}\n");
+	gLog.printf("}\n");
 
 	LogViewer_Open();
 }
@@ -1090,7 +1090,7 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 		doc.basis.end();
 	}
 
-	LogPrintf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), doc.numSidedefs());
+	gLog.printf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), doc.numSidedefs());
 }
 
 
@@ -1385,14 +1385,14 @@ static void Things_LogUnknown(const Instance &inst)
 
 	Things_FindUnknown(sel, types, inst);
 
-	LogPrintf("\n");
-	LogPrintf("Unknown Things:\n");
-	LogPrintf("{\n");
+	gLog.printf("\n");
+	gLog.printf("Unknown Things:\n");
+	gLog.printf("{\n");
 
 	for (IT = types.begin() ; IT != types.end() ; IT++)
-		LogPrintf("  %5d  x %d\n", IT->first, IT->second);
+		gLog.printf("  %5d  x %d\n", IT->first, IT->second);
 
-	LogPrintf("}\n");
+	gLog.printf("}\n");
 
 	LogViewer_Open();
 }
@@ -2352,14 +2352,14 @@ static void LineDefs_LogUnknown(const Instance &inst)
 
 	LineDefs_FindUnknown(sel, types, inst);
 
-	LogPrintf("\n");
-	LogPrintf("Unknown Line Types:\n");
-	LogPrintf("{\n");
+	gLog.printf("\n");
+	gLog.printf("Unknown Line Types:\n");
+	gLog.printf("{\n");
 
 	for (IT = types.begin() ; IT != types.end() ; IT++)
-		LogPrintf("  %5d  x %d\n", IT->first, IT->second);
+		gLog.printf("  %5d  x %d\n", IT->first, IT->second);
 
-	LogPrintf("}\n");
+	gLog.printf("}\n");
 
 	LogViewer_Open();
 }
@@ -3710,14 +3710,14 @@ static void Textures_LogTransparent(const Instance &inst)
 
 	Textures_FindTransparent(inst, sel, names);
 
-	LogPrintf("\n");
-	LogPrintf("Transparent textures on solid walls:\n");
-	LogPrintf("{\n");
+	gLog.printf("\n");
+	gLog.printf("Transparent textures on solid walls:\n");
+	gLog.printf("{\n");
 
 	for (IT = names.begin() ; IT != names.end() ; IT++)
-		LogPrintf("  %-9s x %d\n", IT->first.c_str(), IT->second);
+		gLog.printf("  %-9s x %d\n", IT->first.c_str(), IT->second);
 
-	LogPrintf("}\n");
+	gLog.printf("}\n");
 
 	LogViewer_Open();
 }
@@ -3811,14 +3811,14 @@ static void Textures_LogMedusa(const Instance &inst)
 
 	Textures_FindMedusa(sel, names, inst);
 
-	LogPrintf("\n");
-	LogPrintf("Medusa effect textures:\n");
-	LogPrintf("{\n");
+	gLog.printf("\n");
+	gLog.printf("Medusa effect textures:\n");
+	gLog.printf("{\n");
 
 	for (IT = names.begin() ; IT != names.end() ; IT++)
-		LogPrintf("  %-9s x %d\n", IT->first.c_str(), IT->second);
+		gLog.printf("  %-9s x %d\n", IT->first.c_str(), IT->second);
 
-	LogPrintf("}\n");
+	gLog.printf("}\n");
 
 	LogViewer_Open();
 }
@@ -3923,14 +3923,14 @@ static void Textures_LogUnknown(bool do_flat, const Instance &inst)
 	else
 		Textures_FindUnknownTex(sel, names, inst);
 
-	LogPrintf("\n");
-	LogPrintf("Unknown %s:\n", do_flat ? "Flats" : "Textures");
-	LogPrintf("{\n");
+	gLog.printf("\n");
+	gLog.printf("Unknown %s:\n", do_flat ? "Flats" : "Textures");
+	gLog.printf("{\n");
 
 	for (IT = names.begin() ; IT != names.end() ; IT++)
-		LogPrintf("  %-9s x %d\n", IT->first.c_str(), IT->second);
+		gLog.printf("  %-9s x %d\n", IT->first.c_str(), IT->second);
 
-	LogPrintf("}\n");
+	gLog.printf("}\n");
 
 	LogViewer_Open();
 }

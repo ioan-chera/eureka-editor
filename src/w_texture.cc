@@ -120,7 +120,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 	int width  = LE_U16(raw->width);
 	int height = LE_U16(raw->height);
 
-	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
+	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
 		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
@@ -150,7 +150,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 
 		if (pname_idx >= pname_size)
 		{
-			LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
+			gLog.printf("Invalid pname in texture '%.8s'\n", raw->name);
 			continue;
 		}
 
@@ -163,7 +163,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
 		{
-			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
+			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
 	}
 
@@ -185,7 +185,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 	int width  = LE_U16(raw->width);
 	int height = LE_U16(raw->height);
 
-	DebugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
+	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
 		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
@@ -216,7 +216,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 
 		if (pname_idx >= pname_size)
 		{
-			LogPrintf("Invalid pname in texture '%.8s'\n", raw->name);
+			gLog.printf("Invalid pname in texture '%.8s'\n", raw->name);
 			continue;
 		}
 
@@ -224,13 +224,13 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-//DebugPrintf("-- %d patch [%s]\n", j, picname);
+//gLog.debugPrintf("-- %d patch [%s]\n", j, picname);
 		Lump_c *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
 		{
-			LogPrintf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
+			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
 	}
 
@@ -331,11 +331,11 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 				break;
 
 			case 0:
-				LogPrintf("Unknown texture format in '%s' lump\n", name.c_str());
+				gLog.printf("Unknown texture format in '%s' lump\n", name.c_str());
 				break;
 
 			default:
-				LogPrintf("Unsupported texture format in '%s' lump\n", lump->Name().c_str());
+				gLog.printf("Unsupported texture format in '%s' lump\n", lump->Name().c_str());
 				break;
 		}
 
@@ -354,7 +354,7 @@ void Instance::W_LoadTextures()
 
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
-		LogPrintf("Loading Textures from WAD #%d\n", i+1);
+		gLog.printf("Loading Textures from WAD #%d\n", i+1);
 
 		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
 		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
@@ -560,7 +560,7 @@ void Instance::W_LoadFlats()
 
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
-		LogPrintf("Loading Flats from WAD #%d\n", i+1);
+		gLog.printf("Loading Flats from WAD #%d\n", i+1);
 
 		const Wad_file *wf = master_dir[i];
 
@@ -701,7 +701,7 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 		// TODO: verify lump is OK (size etc)
 		if (lump)
 		{
-			LogPrintf("WARNING: using sprite '%s' outside of S_START..S_END\n", name.c_str());
+			gLog.printf("WARNING: using sprite '%s' outside of S_START..S_END\n", name.c_str());
 		}
 	}
 
@@ -757,7 +757,7 @@ Img_c *Instance::W_GetSprite(int type)
 			if (info.sprite.noCaseEqual("DOGS"))
 				result = IM_CreateDogSprite();
 			else
-				LogPrintf("Sprite not found: '%s'\n", info.sprite.c_str());
+				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
 		else
 		{

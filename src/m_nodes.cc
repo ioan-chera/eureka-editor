@@ -290,7 +290,7 @@ void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const
 	if (nodeialog)
 		nodeialog->Print(message_buf.c_str());
 
-	LogPrintf("BSP: %s", message_buf.c_str());
+	gLog.printf("BSP: %s", message_buf.c_str());
 }
 
 
@@ -316,7 +316,7 @@ static void PrepareInfo(nodebuildinfo_t *info)
 
 build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 {
-	LogPrintf("\n");
+	gLog.printf("\n");
 
 	// sanity check
 
@@ -398,7 +398,7 @@ void Instance::BuildNodesAfterSave(int lev_idx)
 	// TODO : maybe print # of serious/minor warnings
 
 	if (ret != BUILD_OK)
-		LogPrintf("NODES FAILED TO FAILED.\n");
+		gLog.printf("NODES FAILED TO FAILED.\n");
 
 	delete nb_info;
 }

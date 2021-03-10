@@ -23,10 +23,6 @@
 #include "FL/filename.H"
 #include <fstream>
 
-void DebugPrintf(const char *str, ...)
-{
-}
-
 class LibFileTempDir : public TempDirContext
 {
 };
