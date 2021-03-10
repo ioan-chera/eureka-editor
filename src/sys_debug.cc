@@ -67,6 +67,11 @@ void Log::openWindow()
 		for (const SString &message : kept_messages)
 			windowAdd(message, windowAddUserData);
 }
+void Log::openWindow(WindowAddCallback callback, void *userData)
+{
+    setWindowAddCallback(callback, userData);
+    openWindow();
+}
 
 //
 // Close the file

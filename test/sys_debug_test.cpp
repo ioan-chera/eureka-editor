@@ -37,12 +37,6 @@ TEST_F(SysDebugTempDir, LifeCycle)
 
     Log log;
 
-    log.setWindowAddCallback([](const SString &text, void *userData)
-                             {
-        auto localWindowMessages = static_cast<std::vector<SString> *>(userData);
-        localWindowMessages->push_back(text);
-    }, &localWindowMessages);
-
     SString path = getChildPath("log.txt");
     log.printf("Test message\n");
     log.printf("Here it goes\n");
@@ -58,7 +52,11 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.saveTo(f);
     fclose(f);
 
-    log.openWindow();
+    log.openWindow([](const SString &text, void *userData)
+                   {
+        auto localWindowMessages = static_cast<std::vector<SString> *>(userData);
+        localWindowMessages->push_back(text);
+    }, &localWindowMessages);
     log.printf("Now we're on window\n");
     log.printf("And again\n");
     log.close();

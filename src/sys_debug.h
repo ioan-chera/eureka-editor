@@ -46,19 +46,11 @@ public:
 
 	bool openFile(const SString &filename);
 	void openWindow();
+    void openWindow(WindowAddCallback callback, void *userData);
 	void close();
 	void printf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 	void debugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 	void saveTo(FILE *dest_fp) const;
-
-	//
-	// Callback setter
-	//
-	void setWindowAddCallback(WindowAddCallback callback, void *userData)
-	{
-		windowAdd = callback;
-		windowAddUserData = userData;
-	}
 
 	//
 	// Mark the error
@@ -68,6 +60,15 @@ public:
 		inFatalError = true;
 	}
 private:
+    //
+    // Callback setter
+    //
+    void setWindowAddCallback(WindowAddCallback callback, void *userData)
+    {
+        windowAdd = callback;
+        windowAddUserData = userData;
+    }
+
 	WindowAddCallback windowAdd = nullptr;
 	void *windowAddUserData = nullptr;
 

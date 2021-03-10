@@ -697,11 +697,10 @@ static void Main_OpenWindow(Instance &inst)
 
 	log_viewer = new UI_LogViewer(gInstance);
 
-	gLog.setWindowAddCallback([](const SString &text, void *userData)
-							 {
-		LogViewer_AddLine(text.c_str());
-	}, nullptr);
-	gLog.openWindow();
+	gLog.openWindow([](const SString &text, void *userData)
+                    {
+        LogViewer_AddLine(text.c_str());
+    }, nullptr);
 
 	Fl::add_handler(Main_key_handler);
 
