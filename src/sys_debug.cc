@@ -159,14 +159,14 @@ void Log::debugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 //
 // Save the log so far to another file
 //
-void Log::saveTo(FILE *dest_fp) const
+void Log::saveTo(std::ostream &os) const
 {
-    fprintf(dest_fp, "======= START OF LOGS =======\n\n");
+    os << "======= START OF LOGS =======\n\n";
 
     // add all messages saved so far
 
     for (const SString &message : kept_messages)
-        fputs(message.c_str(), dest_fp);
+        os << message;
 }
 
 //--- editor settings ---

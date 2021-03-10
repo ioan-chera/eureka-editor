@@ -46,11 +46,11 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.printf("One more message\n");
 
     SString savedPath = getChildPath("log2.txt");
-    FILE *f = fopen(savedPath.c_str(), "wb");
-    ASSERT_NE(f, nullptr);
+    std::ofstream os(savedPath.c_str(), std::ios::trunc);
+    ASSERT_TRUE(os.is_open());
     mDeleteList.push(savedPath);
-    log.saveTo(f);
-    fclose(f);
+    log.saveTo(os);
+    os.close();
 
     log.openWindow([](const SString &text, void *userData)
                    {
@@ -131,10 +131,10 @@ TEST_F(SysDebugTempDir, LifeCycle)
     ASSERT_EQ(localWindowMessages.size(), 2);    // it didn't get added to missing window
 
     // Now check saving current status works
-    f = fopen(savedPath.c_str(), "wb");
-    ASSERT_NE(f, nullptr);
-    log.saveTo(f);
-    fclose(f);
+    os.open(savedPath.get(), std::ios::trunc);
+    ASSERT_TRUE(os.is_open());
+    log.saveTo(os);
+    os.close();
 
 
     log.openFile(path.c_str());

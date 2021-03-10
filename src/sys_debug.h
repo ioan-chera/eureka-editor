@@ -50,7 +50,7 @@ public:
 	void close();
 	void printf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
 	void debugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(2, 3);
-	void saveTo(FILE *dest_fp) const;
+	void saveTo(std::ostream &os) const;
 
 	//
 	// Mark the error

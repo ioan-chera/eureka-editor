@@ -791,9 +791,9 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 		filename += ".txt";
 
 	// TODO: #55
-	FILE *fp = fopen(filename.c_str(), "w");
+    std::ofstream os(filename.c_str(), std::ios::trunc);
 
-	if (! fp)
+	if (! os.is_open())
 	{
 		filename = GetErrorMessage(errno);
 
@@ -801,9 +801,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	gLog.saveTo(fp);
-
-	fclose(fp);
+	gLog.saveTo(os);
 }
 
 
