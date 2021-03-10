@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include "PrintfMacros.h"
+#include <ostream>
 #include <vector>
 
 #define MSG_BUF_LEN  1024
