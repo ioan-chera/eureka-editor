@@ -141,7 +141,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.debugPrintf("Debug writeout\n");
     log.printf("Extra stuff four\n");
     log.debugPrintf("Debug\nwriteout2\n");
-    log.debugPrintf("");    // this shall not be printed!
+    log.debugPrintf("%s", "");    // this shall not be printed!
     global::Debugging = false;
     log.debugPrintf("Debug writeout3\n");
     log.debugPrintf("Debug writeout4\n");
