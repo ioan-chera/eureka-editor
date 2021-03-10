@@ -90,6 +90,7 @@ unit_test(lib_file
     lib_file_test.cpp
     SRC lib_file.cc
         lib_util.cc
+        sys_debug.cc
     FLTK
 )
 

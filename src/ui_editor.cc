@@ -468,7 +468,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 		return true;
 	}
 
-	LogPrintf("Reading '%s' text lump\n", lump_name.c_str());
+	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
 
 	if (! lump->Seek())
 	{
@@ -502,7 +502,7 @@ bool UI_TextEditor::LoadLump(const Wad &wad, const SString &lump_name)
 	if(!lump)	// not found
 		return true;
 
-	LogPrintf("Reading '%s' text lump\n", lump_name.c_str());
+	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
 	tbuf->text(lump->getDataAsString());
 	is_new = false;
 	return true;
@@ -533,7 +533,7 @@ void UI_TextEditor::LoadMemory(std::vector<byte> &buf)
 
 void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 {
-	LogPrintf("Writing '%s' text lump\n", lump_name.c_str());
+	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
 
 	wad->BeginWrite();
 
@@ -567,7 +567,7 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 //
 void UI_TextEditor::SaveLump(Wad &wad, const SString &lump_name) const
 {
-	LogPrintf("Writing '%s' text lump\n", lump_name.c_str());
+	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
 
 	Lump *lump = wad.findLump(lump_name);
 	if(!lump)
@@ -669,7 +669,7 @@ void UI_TextEditor::InsertFile()
 		return;
 	}
 
-	LogPrintf("Reading text from file: %s\n", filename);
+	gLog.printf("Reading text from file: %s\n", filename);
 
 	int pos = ted->insert_position();
 
@@ -719,7 +719,7 @@ void UI_TextEditor::ExportToFile()
 		return;
 	}
 
-	LogPrintf("Writing text to file: %s\n", filename);
+	gLog.printf("Writing text to file: %s\n", filename);
 
 	int len = tbuf->length();
 

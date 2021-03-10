@@ -98,7 +98,7 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 	    targa_header.image_type != TGA_RGB &&
 		targa_header.image_type != TGA_RGB_RLE)
 	{
-		LogPrintf("Bad tga file: type %d is not supported\n", targa_header.image_type);
+		gLog.printf("Bad tga file: type %d is not supported\n", targa_header.image_type);
 		return NULL;
 	}
 
@@ -107,7 +107,7 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 
 	if (width == 0 || height == 0)
 	{
-		LogPrintf("Bad tga file: width or height is zero\n");
+		gLog.printf("Bad tga file: width or height is zero\n");
 		return NULL;
 	}
 
@@ -125,19 +125,19 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 	{
 		if (targa_header.colormap_type != 1)
 		{
-			LogPrintf("Bad tga file: colormap type != 1\n");
+			gLog.printf("Bad tga file: colormap type != 1\n");
 			return NULL;
 		}
 
 		if (targa_header.colormap_length > 256)
 		{
-			LogPrintf("Bad tga file: too many colors (over 256)\n");
+			gLog.printf("Bad tga file: too many colors (over 256)\n");
 			return NULL;
 		}
 
 		if (targa_header.pixel_bits != 8 || targa_header.colormap_bits < 24)
 		{
-			LogPrintf("Bad tga file: unsupported colormap size\n");
+			gLog.printf("Bad tga file: unsupported colormap size\n");
 			return NULL;
 		}
 
@@ -172,7 +172,7 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 	{
 		if (targa_header.pixel_bits != 24 && targa_header.pixel_bits != 32)
 		{
-			LogPrintf("Bad tga file: only 24 or 32 bit images supported\n");
+			gLog.printf("Bad tga file: only 24 or 32 bit images supported\n");
 			delete[] pixels;
 			return NULL;
 		}
@@ -204,7 +204,7 @@ rgba_color_t * TGA_DecodeImage(const byte *buffer, size_t length,
 	{
 		if (targa_header.pixel_bits != 24 && targa_header.pixel_bits != 32)
 		{
-			LogPrintf("Bad tga file: only 24 or 32 bit images supported\n");
+			gLog.printf("Bad tga file: only 24 or 32 bit images supported\n");
 			delete[] pixels;
 			return NULL;
 		}

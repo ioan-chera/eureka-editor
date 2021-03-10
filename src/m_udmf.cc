@@ -344,7 +344,7 @@ static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token&
 	}
 	else
 	{
-		LogPrintf("skipping unknown global '%s' in UDMF\n", name.c_str());
+		gLog.printf("skipping unknown global '%s' in UDMF\n", name.c_str());
 	}
 }
 
@@ -404,7 +404,7 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& fiel
 
 	else
 	{
-		DebugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
+		gLog.debugPrintf("thing #%d: unknown field '%s'\n", doc.numThings()-1, field.c_str());
 	}
 }
 
@@ -416,7 +416,7 @@ static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& fi
 		V->raw_y = value.DecodeCoord();
 	else
 	{
-		DebugPrintf("vertex #%d: unknown field '%s'\n", doc.numVertices()-1, field.c_str());
+		gLog.debugPrintf("vertex #%d: unknown field '%s'\n", doc.numVertices()-1, field.c_str());
 	}
 }
 
@@ -478,7 +478,7 @@ static void UDMF_ParseLinedefField(const Document &doc, LineDef *LD, Udmf_Token&
 
 	else
 	{
-		DebugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
+		gLog.debugPrintf("linedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
 
@@ -502,7 +502,7 @@ static void UDMF_ParseSidedefField(const Document &doc, SideDef *SD, Udmf_Token&
 		SD->y_offset = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sidedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
+		gLog.debugPrintf("sidedef #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
 
@@ -524,7 +524,7 @@ static void UDMF_ParseSectorField(const Document &doc, Sector *S, Udmf_Token& fi
 		S->tag = value.DecodeInt();
 	else
 	{
-		DebugPrintf("sector #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
+		gLog.debugPrintf("sector #%d: unknown field '%s'\n", doc.numVertices() -1, field.c_str());
 	}
 }
 
@@ -578,7 +578,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	if (!kind.valid())
 	{
 		// unknown object kind
-		LogPrintf("skipping unknown block '%s' in UDMF\n", name.c_str());
+		gLog.printf("skipping unknown block '%s' in UDMF\n", name.c_str());
 	}
 
 	for (;;)

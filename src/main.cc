@@ -145,12 +145,13 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 		fprintf(stderr, "\nERROR LOOP DETECTED!\n");
 		fflush(stderr);
 
-		LogClose();
+		gLog.close();
 		exit(4);
 	}
 
 	// minimise chance of a infinite loop of errors
 	global::in_fatal_error = true;
+	gLog.markFatalError();
 
 	if (init_progress == ProgressStatus::nothing || global::Quiet || !global::log_file.empty())
 	{
@@ -159,7 +160,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	if (init_progress >= ProgressStatus::early)
 	{
-		LogPrintf("\nFATAL ERROR: %s", buffer.c_str());
+		gLog.printf("\nFATAL ERROR: %s", buffer.c_str());
 	}
 
 	if (init_progress >= ProgressStatus::loaded)
@@ -184,7 +185,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	// TODO: ALL instances. This is death.
 	gInstance.MasterDir_CloseAll();
-	LogClose();
+	gLog.close();
 
 	exit(2);
 }
@@ -286,8 +287,8 @@ static void Determine_HomeDir(const char *argv0)
 	if (global::cache_dir.empty())
 		global::cache_dir = global::home_dir;
 
-	LogPrintf("Home  dir: %s\n", global::home_dir.c_str());
-	LogPrintf("Cache dir: %s\n", global::cache_dir.c_str());
+	gLog.printf("Home  dir: %s\n", global::home_dir.c_str());
+	gLog.printf("Cache dir: %s\n", global::cache_dir.c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();
@@ -320,8 +321,8 @@ static void Determine_InstallPath(const char *argv0)
 
 		SString filename = global::install_dir + "/games/doom2.ugh";
 
-		DebugPrintf("Trying install path: %s\n", global::install_dir.c_str());
-		DebugPrintf("   looking for file: %s\n", filename.c_str());
+		gLog.debugPrintf("Trying install path: %s\n", global::install_dir.c_str());
+		gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
 
 		bool exists = FileExists(filename);
 
@@ -343,7 +344,7 @@ static void Determine_InstallPath(const char *argv0)
 	if (global::install_dir.empty())
 		ThrowException("Unable to find install directory!\n");
 
-	LogPrintf("Install dir: %s\n", global::install_dir.c_str());
+	gLog.printf("Install dir: %s\n", global::install_dir.c_str());
 }
 
 
@@ -436,18 +437,18 @@ static void DeterminePort(Instance &inst)
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
 	{
-		LogPrintf("WARNING: Default port is empty, using vanilla.\n");
+		gLog.printf("WARNING: Default port is empty, using vanilla.\n");
 		config::default_port = "vanilla";
 	}
 	else if (! M_CanLoadDefinitions("ports", config::default_port))
 	{
-		LogPrintf("WARNING: Default port '%s' is unknown, using vanilla.\n",
+		gLog.printf("WARNING: Default port '%s' is unknown, using vanilla.\n",
 				  config::default_port.c_str());
 		config::default_port = "vanilla";
 	}
 	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
 	{
-		LogPrintf("WARNING: Default port '%s' not compatible with '%s'\n",
+		gLog.printf("WARNING: Default port '%s' not compatible with '%s'\n",
 				  config::default_port.c_str(), inst.Game_name.c_str());
 		config::default_port = "vanilla";
 	}
@@ -624,7 +625,7 @@ static void Main_SetupFLTK()
 	int screen_w = Fl::w();
 	int screen_h = Fl::h();
 
-	LogPrintf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
+	gLog.printf("Detected Screen Size: %dx%d\n", screen_w, screen_h);
 }
 
 
@@ -696,7 +697,11 @@ static void Main_OpenWindow(Instance &inst)
 
 	log_viewer = new UI_LogViewer(gInstance);
 
-	LogOpenWindow();
+	gLog.setWindowAddCallback([](const SString &text, void *userData)
+							 {
+		LogViewer_AddLine(text.c_str());
+	}, nullptr);
+	gLog.openWindow();
 
 	Fl::add_handler(Main_key_handler);
 
@@ -829,7 +834,7 @@ bool Instance::Main_LoadIWAD()
 	Wad_file *wad = Wad_file::Open(Iwad_name, WadOpenMode::read);
 	if (!wad)
 	{
-		LogPrintf("Failed to open game IWAD: %s\n", Iwad_name.c_str());
+		gLog.printf("Failed to open game IWAD: %s\n", Iwad_name.c_str());
 		return false;
 	}
 	game_wad = wad;
@@ -843,8 +848,8 @@ void Instance::ReadGameInfo()
 {
 	Game_name = GameNameFromIWAD(Iwad_name);
 
-	LogPrintf("Game name: '%s'\n", Game_name.c_str());
-	LogPrintf("IWAD file: '%s'\n", Iwad_name.c_str());
+	gLog.printf("Game name: '%s'\n", Game_name.c_str());
+	gLog.printf("IWAD file: '%s'\n", Iwad_name.c_str());
 
 	M_LoadDefinitions("games", Game_name);
 }
@@ -863,7 +868,7 @@ void Instance::ReadPortInfo()
 	// warn user if this port is incompatible with the game
 	if (! M_CheckPortSupportsGame(base_game, Port_name))
 	{
-		LogPrintf("WARNING: the port '%s' is not compatible with the game '%s'\n",
+		gLog.printf("WARNING: the port '%s' is not compatible with the game '%s'\n",
 			Port_name.c_str(), Game_name.c_str());
 
 		int res = DLG_Confirm({ "&vanilla", "No Change" },
@@ -881,7 +886,7 @@ void Instance::ReadPortInfo()
 		}
 	}
 
-	LogPrintf("Port name: '%s'\n", Port_name.c_str());
+	gLog.printf("Port name: '%s'\n", Port_name.c_str());
 
 	M_LoadDefinitions("ports", Port_name);
 
@@ -902,8 +907,8 @@ void Instance::ReadPortInfo()
 //
 void Instance::Main_LoadResources()
 {
-	LogPrintf("\n");
-	LogPrintf("----- Loading Resources -----\n");
+	gLog.printf("\n");
+	gLog.printf("----- Loading Resources -----\n");
 
 	M_ClearAllDefinitions();
 
@@ -931,7 +936,7 @@ void Instance::Main_LoadResources()
 		}
 		catch (const WadReadException& e)
 		{
-			LogPrintf("%s\n", e.what());
+			gLog.printf("%s\n", e.what());
 		}
 	}
 
@@ -946,8 +951,8 @@ void Instance::Main_LoadResources()
 	W_LoadTextures();
 	W_ClearSprites();
 
-	LogPrintf("--- DONE ---\n");
-	LogPrintf("\n");
+	gLog.printf("--- DONE ---\n");
+	gLog.printf("\n");
 
 	// reset sector info (for slopes and 3D floors)
 	Subdiv_InvalidateAll();
@@ -1006,7 +1011,7 @@ static void ShowTime()
 
 	GetSystemTime(&sys_time);
 
-	LogPrintf("Current time: %02d:%02d on %04d/%02d/%02d\n",
+	gLog.printf("Current time: %02d:%02d on %04d/%02d/%02d\n",
 			  sys_time.wHour, sys_time.wMinute,
 			  sys_time.wYear, sys_time.wMonth, sys_time.wDay);
 
@@ -1022,7 +1027,7 @@ static void ShowTime()
 	if (! calend_time)
 		return;
 
-	LogPrintf("Current time: %02d:%02d on %04d/%02d/%02d\n",
+	gLog.printf("Current time: %02d:%02d on %04d/%02d/%02d\n",
 			  calend_time->tm_hour, calend_time->tm_min,
 			  calend_time->tm_year + 1900, calend_time->tm_mon + 1,
 			  calend_time->tm_mday);
@@ -1058,9 +1063,9 @@ int main(int argc, char *argv[])
 		init_progress = ProgressStatus::early;
 
 
-		LogPrintf("\n");
-		LogPrintf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n");
-		LogPrintf("\n");
+		gLog.printf("\n");
+		gLog.printf("*** " EUREKA_TITLE " v" EUREKA_VERSION " (C) 2020 The Eureka Team ***\n");
+		gLog.printf("\n");
 
 		// sanity checks type sizes (useful when porting)
 		CheckTypeSizes();
@@ -1071,7 +1076,8 @@ int main(int argc, char *argv[])
 		Determine_InstallPath(argv[0]);
 		Determine_HomeDir(argv[0]);
 
-		LogOpenFile(global::log_file.c_str());
+		if(!gLog.openFile(global::log_file))
+			gLog.printf("WARNING: failed opening log file '%s'\n", global::log_file.c_str());
 
 
 		// load all the config settings
@@ -1167,7 +1173,7 @@ int main(int argc, char *argv[])
 		// TODO: first instance
 		gInstance.Level_name = DetermineLevel(gInstance);
 
-		LogPrintf("Loading initial map : %s\n", gInstance.Level_name.c_str());
+		gLog.printf("Loading initial map : %s\n", gInstance.Level_name.c_str());
 
 		// TODO: the first instance
 		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.Level_name);
@@ -1182,14 +1188,14 @@ int main(int argc, char *argv[])
 	quit:
 		/* that's all folks! */
 
-		LogPrintf("Quit\n");
+		gLog.printf("Quit\n");
 
 		init_progress = ProgressStatus::nothing;
 		global::app_has_focus = false;
 
 		// TODO: all instances
 		gInstance.MasterDir_CloseAll();
-		LogClose();
+		gLog.close();
 
 		return 0;
 	}

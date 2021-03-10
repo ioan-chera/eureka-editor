@@ -1393,7 +1393,7 @@ void UI_Preferences::Run()
 
 	if (want_discard)
 	{
-		LogPrintf("Preferences: discarded changes\n");
+		gLog.printf("Preferences: discarded changes\n");
 		return;
 	}
 

@@ -29,32 +29,11 @@ bool global::Quiet = false;
 bool global::Debugging = false;
 bool global::in_fatal_error;
 
-static FILE * log_fp;
-
-// need to keep an in-memory copy of logs until the log viewer is open
-static bool log_window_open;
-
-static std::vector<SString> kept_messages;
-
+// FIXME: make this a local entity passed to interested parties
+Log gLog;
 
 // hack here to avoid bringing in ui_window.h and FLTK headers
 extern void LogViewer_AddLine(const char *str);
-
-
-void LogOpenFile(const char *filename)
-{
-	log_fp = fopen(filename, "w+");
-
-	if (! log_fp)
-		ThrowException("Cannot open log file: %s\n", filename);
-
-	fprintf(log_fp, "======= START OF LOGS =======\n\n");
-
-	// add all messages saved so far
-
-	for (const SString &message : kept_messages)
-		fputs(message.c_str(), log_fp);
-}
 
 //
 // Open a file
@@ -75,16 +54,6 @@ bool Log::openFile(const SString &filename)
 	return true;
 }
 
-void LogOpenWindow()
-{
-	log_window_open = true;
-
-	// retrieve all messages saved so far
-
-	for (const SString &message : kept_messages)
-		LogViewer_AddLine(message.c_str());
-}
-
 //
 // Open a window
 //
@@ -97,21 +66,6 @@ void Log::openWindow()
 	if(windowAdd)
 		for (const SString &message : kept_messages)
 			windowAdd(message, windowAddUserData);
-}
-
-void LogClose()
-{
-	if (log_fp)
-	{
-		fprintf(log_fp, "\n\n======== END OF LOGS ========\n");
-
-		fclose(log_fp);
-
-		log_fp = NULL;
-	}
-
-	log_window_open = false;
-    kept_messages.clear();
 }
 
 //
@@ -130,35 +84,6 @@ void Log::close()
 
 	log_window_open = false;
     kept_messages.clear();
-}
-
-void LogPrintf(EUR_FORMAT_STRING(const char *str), ...)
-{
-	static char buffer[MSG_BUF_LEN];
-
-	va_list args;
-
-	va_start(args, str);
-	vsnprintf(buffer, MSG_BUF_LEN, str, args);
-	va_end(args);
-
-	buffer[MSG_BUF_LEN-1] = 0;
-
-	if (log_fp)
-	{
-		fputs(buffer, log_fp);
-		fflush(log_fp);
-	}
-
-	if (log_window_open && !global::in_fatal_error)
-		LogViewer_AddLine(buffer);
-    kept_messages.push_back(buffer);
-
-	if (! global::Quiet)
-	{
-		fputs(buffer, stdout);
-		fflush(stdout);
-	}
 }
 
 //
@@ -186,44 +111,6 @@ void Log::printf(EUR_FORMAT_STRING(const char *str), ...)
 	{
 		fputs(buffer.c_str(), stdout);
 		fflush(stdout);
-	}
-}
-
-void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...)
-{
-	if (global::Debugging && log_fp)
-	{
-		static char buffer[MSG_BUF_LEN];
-
-		va_list args;
-
-		va_start(args, str);
-		vsnprintf(buffer, MSG_BUF_LEN-1, str, args);
-		va_end(args);
-
-		buffer[MSG_BUF_LEN-2] = 0;
-
-		// prefix each debugging line with a special symbol
-
-		char *pos = buffer;
-		char *next;
-
-		while (pos && *pos)
-		{
-			next = strchr(pos, '\n');
-
-			if (next) *next++ = 0;
-
-			fprintf(log_fp, "# %s\n", pos);
-			fflush(log_fp);
-
-			if (! global::Quiet)
-			{
-				fprintf(stderr, "# %s\n", pos);
-			}
-
-			pos = next;
-		}
 	}
 }
 
@@ -267,16 +154,6 @@ void Log::debugPrintf(EUR_FORMAT_STRING(const char *str), ...)
 //
 // Save the log so far to another file
 //
-void LogSaveTo(FILE *dest_fp)
-{
-    fprintf(dest_fp, "======= START OF LOGS =======\n\n");
-
-    // add all messages saved so far
-
-    for (const SString &message : kept_messages)
-        fputs(message.c_str(), dest_fp);
-}
-
 void Log::saveTo(FILE *dest_fp) const
 {
     fprintf(dest_fp, "======= START OF LOGS =======\n\n");

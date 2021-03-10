@@ -85,7 +85,7 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
 	l_start  = LE_U32(entry->pos);
 	l_length = LE_U32(entry->size);
 
-//	DebugPrintf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
+//	gLog.debugPrintf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
 
 	if (l_length == 0)
 		l_start = 0;
@@ -187,7 +187,7 @@ bool Lump_c::Finish()
 
 Wad_file::~Wad_file()
 {
-	LogPrintf("Closing WAD file: %s\n", filename.c_str());
+	gLog.printf("Closing WAD file: %s\n", filename.c_str());
 
 	fclose(fp);
 
@@ -206,7 +206,7 @@ Wad_file * Wad_file::Open(const SString &filename, WadOpenMode mode)
 	if (mode == WadOpenMode::write)
 		return Create(filename, mode);
 
-	LogPrintf("Opening WAD file: %s\n", filename.c_str());
+	gLog.printf("Opening WAD file: %s\n", filename.c_str());
 
 	FILE *fp = NULL;
 
@@ -223,13 +223,13 @@ retry:
 		// if file is read-only, open in 'r' mode instead
 		if (mode == WadOpenMode::append && (errno == EACCES || errno == EROFS))
 		{
-			LogPrintf("Open r/w failed, trying again in read mode...\n");
+			gLog.printf("Open r/w failed, trying again in read mode...\n");
 			mode = WadOpenMode::read;
 			goto retry;
 		}
 
 		int what = errno;
-		LogPrintf("Open failed: %s\n", GetErrorMessage(what).c_str());
+		gLog.printf("Open failed: %s\n", GetErrorMessage(what).c_str());
 		return NULL;
 	}
 
@@ -241,7 +241,7 @@ retry:
 
 	w->total_size = (int)ftell(fp);
 
-	DebugPrintf("total_size = %d\n", w->total_size);
+	gLog.debugPrintf("total_size = %d\n", w->total_size);
 
 	if (w->total_size < 0)
 		ThrowException("Error determining WAD size.\n");
@@ -249,7 +249,7 @@ retry:
 	if (! w->ReadDirectory())
 	{
 		delete w;
-		LogPrintf("Open wad failed (reading directory)\n");
+		gLog.printf("Open wad failed (reading directory)\n");
 		return NULL;
 	}
 
@@ -262,7 +262,7 @@ retry:
 
 Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
 {
-	LogPrintf("Creating new WAD file: %s\n", filename.c_str());
+	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
 
 	// TODO: #55 unicode
 	FILE *fp = fopen(filename.c_str(), "w+b");
@@ -529,7 +529,7 @@ bool Wad_file::ReadDirectory()
 
 	if (fread(&header, sizeof(header), 1, fp) != 1)
 	{
-		LogPrintf("Error reading WAD header.\n");
+		gLog.printf("Error reading WAD header.\n");
 		return false;
 	}
 
@@ -540,7 +540,7 @@ bool Wad_file::ReadDirectory()
 
 	if (dir_count < 0)
 	{
-		LogPrintf("Bad WAD header, invalid number of entries (%d)\n", dir_count);
+		gLog.printf("Bad WAD header, invalid number of entries (%d)\n", dir_count);
 		return false;
 	}
 
@@ -548,7 +548,7 @@ bool Wad_file::ReadDirectory()
 
 	if (fseek(fp, dir_start, SEEK_SET) != 0)
 	{
-		LogPrintf("Error seeking to WAD directory.\n");
+		gLog.printf("Error seeking to WAD directory.\n");
 		return false;
 	}
 
@@ -558,7 +558,7 @@ bool Wad_file::ReadDirectory()
 
 		if (fread(&entry, sizeof(entry), 1, fp) != 1)
 		{
-			LogPrintf("Error reading entry in WAD directory.\n");
+			gLog.printf("Error reading entry in WAD directory.\n");
 			return false;
 		}
 
@@ -578,7 +578,7 @@ bool Wad_file::ReadDirectory()
 				lump->l_start > total_size ||
 				lump->l_start + lump->l_length > total_size)
 			{
-				LogPrintf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
+				gLog.printf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
 						  lump->name.c_str(), lump->l_start, lump->l_length, total_size);
 
 				lump->l_start = 0;
@@ -593,7 +593,7 @@ bool Wad_file::ReadDirectory()
 
 	dir_crc = checksum.raw;
 
-	DebugPrintf("Loaded directory. crc = %08x\n", dir_crc);
+	gLog.debugPrintf("Loaded directory. crc = %08x\n", dir_crc);
 	return true;
 }
 
@@ -614,7 +614,7 @@ void Wad_file::DetectLevels()
 		if (global::udmf_testing && directory[k+1].lump->name.noCaseEqual("TEXTMAP"))
 		{
 			levels.push_back(k);
-			DebugPrintf("Detected level : %s (UDMF)\n", directory[k].lump->name.c_str());
+			gLog.debugPrintf("Detected level : %s (UDMF)\n", directory[k].lump->name.c_str());
 			continue;
 		}
 
@@ -641,7 +641,7 @@ void Wad_file::DetectLevels()
 		{
 			levels.push_back(k);
 
-			DebugPrintf("Detected level : %s\n", directory[k].lump->name.c_str());
+			gLog.debugPrintf("Detected level : %s\n", directory[k].lump->name.c_str());
 		}
 	}
 
@@ -696,7 +696,7 @@ void Wad_file::ProcessNamespaces()
 		if (name.noCaseEqual("S_START") || name.noCaseEqual("SS_START"))
 		{
 			if (active != WadNamespace::Global && active != WadNamespace::Sprites)
-				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
+				gLog.printf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
 			active = WadNamespace::Sprites;
 			continue;
@@ -704,7 +704,7 @@ void Wad_file::ProcessNamespaces()
 		if (name.noCaseEqual("S_END") || name.noCaseEqual("SS_END"))
 		{
 			if (active != WadNamespace::Sprites)
-				LogPrintf("WARNING: stray S_END marker found.\n");
+				gLog.printf("WARNING: stray S_END marker found.\n");
 
 			active = WadNamespace::Global;
 			continue;
@@ -713,7 +713,7 @@ void Wad_file::ProcessNamespaces()
 		if (name.noCaseEqual("F_START") || name.noCaseEqual("FF_START"))
 		{
 			if (active != WadNamespace::Global && active != WadNamespace::Flats)
-				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
+				gLog.printf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
 			active = WadNamespace::Flats;
 			continue;
@@ -721,7 +721,7 @@ void Wad_file::ProcessNamespaces()
 		if (name.noCaseEqual("F_END") || name.noCaseEqual("FF_END"))
 		{
 			if (active != WadNamespace::Flats)
-				LogPrintf("WARNING: stray F_END marker found.\n");
+				gLog.printf("WARNING: stray F_END marker found.\n");
 
 			active = WadNamespace::Global;
 			continue;
@@ -730,7 +730,7 @@ void Wad_file::ProcessNamespaces()
 		if (name.noCaseEqual("TX_START"))
 		{
 			if (active != WadNamespace::Global && active != WadNamespace::TextureLumps)
-				LogPrintf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
+				gLog.printf("WARNING: missing %s_END marker.\n", WadNamespaceString(active));
 
 			active = WadNamespace::TextureLumps;
 			continue;
@@ -738,7 +738,7 @@ void Wad_file::ProcessNamespaces()
 		if (name.noCaseEqual("TX_END"))
 		{
 			if (active != WadNamespace::TextureLumps)
-				LogPrintf("WARNING: stray TX_END marker found.\n");
+				gLog.printf("WARNING: stray TX_END marker found.\n");
 
 			active = WadNamespace::Global;
 			continue;
@@ -748,7 +748,7 @@ void Wad_file::ProcessNamespaces()
 		{
 			if (lumpRef.lump->Length() == 0)
 			{
-				LogPrintf("WARNING: skipping empty lump %s in %s_START\n",
+				gLog.printf("WARNING: skipping empty lump %s in %s_START\n",
 						  name.c_str(), WadNamespaceString(active));
 				continue;
 			}
@@ -758,7 +758,7 @@ void Wad_file::ProcessNamespaces()
 	}
 
 	if (active != WadNamespace::Global)
-		LogPrintf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
+		gLog.printf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
 }
 
 
@@ -796,7 +796,7 @@ bool Wad_file::WasExternallyModified()
 
 	}
 
-	DebugPrintf("New CRC : %08x\n", checksum.raw);
+	gLog.debugPrintf("New CRC : %08x\n", checksum.raw);
 
 	return (dir_crc != checksum.raw);
 }
@@ -1150,7 +1150,7 @@ int Wad_file::PositionForWrite(int max_size)
 			FatalError("Error seeking to new write position.\n");
 	}
 
-	DebugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
+	gLog.debugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
 
 	return want_pos;
 }
@@ -1209,8 +1209,8 @@ void Wad_file::WriteDirectory()
 	dir_start = PositionForWrite();
 	dir_count = NumLumps();
 
-	DebugPrintf("WriteDirectory...\n");
-	DebugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
+	gLog.debugPrintf("WriteDirectory...\n");
+	gLog.debugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
 
 	crc32_c checksum;
 
@@ -1231,12 +1231,12 @@ void Wad_file::WriteDirectory()
 	}
 
 	dir_crc = checksum.raw;
-	DebugPrintf("dir_crc: %08x\n", dir_crc);
+	gLog.debugPrintf("dir_crc: %08x\n", dir_crc);
 
 	fflush(fp);
 
 	total_size = (int)ftell(fp);
-	DebugPrintf("total_size: %d\n", total_size);
+	gLog.debugPrintf("total_size: %d\n", total_size);
 
 	if (total_size < 0)
 		ThrowException("Error determining WAD size.\n");
@@ -1336,7 +1336,7 @@ void W_FreeLumpData(byte ** buf_ptr)
 
 void Instance::MasterDir_Add(Wad_file *wad)
 {
-	DebugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
+	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
 	master_dir.push_back(wad);
 }
@@ -1344,7 +1344,7 @@ void Instance::MasterDir_Add(Wad_file *wad)
 
 void Instance::MasterDir_Remove(Wad_file *wad)
 {
-	DebugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
+	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
 
 	std::vector<Wad_file *>::iterator ENDP;
 
@@ -1391,14 +1391,14 @@ bool Wad::readFromPath(const SString& path)
 	FILE* f = fopen(path.c_str(), "rb");
 	if (!f)
 	{
-		LogPrintf("Couldn't open '%s'.\n", path.c_str());
+		gLog.printf("Couldn't open '%s'.\n", path.c_str());
 		return false;
 	}
 	
 	raw_wad_header_t header = {};
 	if (fread(&header, sizeof(header), 1, f) != 1)
 	{
-		LogPrintf("Error reading WAD header.\n");
+		gLog.printf("Error reading WAD header.\n");
 		fclose(f);
 		return false;
 	}
@@ -1410,14 +1410,14 @@ bool Wad::readFromPath(const SString& path)
 
 	if (dirCount < 0)
 	{
-		LogPrintf("Bad WAD header, invalid number of entries (%d)\n", dirCount);
+		gLog.printf("Bad WAD header, invalid number of entries (%d)\n", dirCount);
 		fclose(f);
 		return false;
 	}
 
 	if (dirStart < 0 || fseek(f, dirStart, SEEK_SET) != 0)
 	{
-		LogPrintf("Error seeking to WAD directory at %d.\n", dirStart);
+		gLog.printf("Error seeking to WAD directory at %d.\n", dirStart);
 		fclose(f);
 		return false;
 	}
@@ -1433,7 +1433,7 @@ bool Wad::readFromPath(const SString& path)
 		fail.length = len;
 		failed.push_back(fail);
 
-		LogPrintf("Bad lump '%s' at index %d, file position %d and length %d\n", fail.name, index, pos, len);
+		gLog.printf("Bad lump '%s' at index %d, file position %d and length %d\n", fail.name, index, pos, len);
 	};
 
 	std::vector<Lump> lumps;
@@ -1443,7 +1443,7 @@ bool Wad::readFromPath(const SString& path)
 		raw_wad_entry_t entry = {};
 		if (fread(&entry, sizeof(entry), 1, f) != 1)
 		{
-			LogPrintf("Error reading entry in WAD directory.\n");
+			gLog.printf("Error reading entry in WAD directory.\n");
 			fclose(f);
 			return false;
 		}
@@ -1464,7 +1464,7 @@ bool Wad::readFromPath(const SString& path)
 			addFailed(i, entry.name, pos, len);
 			if (fseek(f, curpos, SEEK_SET) != 0)
 			{
-				LogPrintf("Error seeking back to WAD directory at %ld.\n", curpos);
+				gLog.printf("Error seeking back to WAD directory at %ld.\n", curpos);
 				fclose(f);
 				return false;
 			}
@@ -1473,7 +1473,7 @@ bool Wad::readFromPath(const SString& path)
 
 		if (fseek(f, curpos, SEEK_SET) != 0)
 		{
-			LogPrintf("Error seeking back to WAD directory at %ld.\n", curpos);
+			gLog.printf("Error seeking back to WAD directory at %ld.\n", curpos);
 			fclose(f);
 			return false;
 		}
@@ -1553,7 +1553,7 @@ void Wad::detectLevels()
 		if(global::udmf_testing && !y_stricmp(mLumps[k + 1].getName(), "TEXTMAP"))
 		{
 			mLevels.push_back(k);
-			DebugPrintf("Detected level: %s (UDMF)\n", mLumps[k].getName());
+			gLog.debugPrintf("Detected level: %s (UDMF)\n", mLumps[k].getName());
 			continue;
 		}
 
@@ -1577,7 +1577,7 @@ void Wad::detectLevels()
 		if(part_count == 4)
 		{
 			mLevels.push_back(k);
-			DebugPrintf("Detected level: %s\n", mLumps[k].getName());
+			gLog.debugPrintf("Detected level: %s\n", mLumps[k].getName());
 		}
 	}
 

@@ -120,7 +120,7 @@ Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 	if (fltk_img.w() <= 0)
 	{
 		// failed to decode
-		LogPrintf("Failed to decode PNG image in '%s' lump.\n", name.c_str());
+		gLog.printf("Failed to decode PNG image in '%s' lump.\n", name.c_str());
 		return NULL;
 	}
 
@@ -147,7 +147,7 @@ Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 	if (fltk_img.w() <= 0)
 	{
 		// failed to decode
-		LogPrintf("Failed to decode JPEG image in '%s' lump.\n", name.c_str());
+		gLog.printf("Failed to decode JPEG image in '%s' lump.\n", name.c_str());
 		return NULL;
 	}
 
@@ -175,7 +175,7 @@ Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
 	if (! rgba)
 	{
 		// failed to decode
-		LogPrintf("Failed to decode TGA image in '%s' lump.\n", name.c_str());
+		gLog.printf("Failed to decode TGA image in '%s' lump.\n", name.c_str());
 		return NULL;
 	}
 
@@ -258,11 +258,11 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
 	case 0:
-		LogPrintf("Unknown image format in '%s' lump\n", pic_name.c_str());
+		gLog.printf("Unknown image format in '%s' lump\n", pic_name.c_str());
 		return false;
 
 	default:
-		LogPrintf("Unsupported image format in '%s' lump\n", pic_name.c_str());
+		gLog.printf("Unsupported image format in '%s' lump\n", pic_name.c_str());
 		return false;
 	}
 
@@ -295,7 +295,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 		if (offset < 0 || offset >= lump->Length())
 		{
-			LogPrintf("WARNING: bad image offset 0x%08x in patch [%s]\n",
+			gLog.printf("WARNING: bad image offset 0x%08x in patch [%s]\n",
 			          offset, pic_name.c_str());
 			return false;
 		}

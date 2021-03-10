@@ -798,7 +798,7 @@ static void ParseOperationLine(const std::vector<SString> &tokens, Fl_Menu_Butto
 
 	if (! cmd)
 	{
-		LogPrintf("operations.cfg: unknown function: %s\n", tokens[2].c_str());
+		gLog.printf("operations.cfg: unknown function: %s\n", tokens[2].c_str());
 		return;
 	}
 
@@ -886,7 +886,7 @@ bool Instance::M_ParseOperationFile()
 
 		if (num_tok < 0)
 		{
-			LogPrintf("operations.cfg: failed parsing a line\n");
+			gLog.printf("operations.cfg: failed parsing a line\n");
 			continue;
 		}
 
@@ -894,7 +894,7 @@ bool Instance::M_ParseOperationFile()
 		{
 			if (num_tok < 3)
 			{
-				LogPrintf("operations.cfg: bad menu line\n");
+				gLog.printf("operations.cfg: bad menu line\n");
 				continue;
 			}
 
@@ -925,7 +925,7 @@ bool Instance::M_ParseOperationFile()
 
 void Instance::M_LoadOperationMenus()
 {
-	LogPrintf("Loading Operation menus...\n");
+	gLog.printf("Loading Operation menus...\n");
 
 	if (! M_ParseOperationFile())
 	{

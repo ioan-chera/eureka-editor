@@ -150,7 +150,7 @@ static void BlockAdd(int blk_num, int line_index)
 	u16_t *cur = block_lines[blk_num];
 
 # if DEBUG_BLOCKMAP
-	DebugPrintf("Block %d has line %d\n", blk_num, line_index);
+	gLog.debugPrintf("Block %d has line %d\n", blk_num, line_index);
 # endif
 
 	if (blk_num < 0 || blk_num >= block_count)
@@ -198,7 +198,7 @@ static void BlockAddLine(int line_index, const Document &doc)
 	int bx, by;
 
 # if DEBUG_BLOCKMAP
-	DebugPrintf("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
+	gLog.debugPrintf("BlockAddLine: %d (%d,%d) -> (%d,%d)\n", line_index,
 			x1, y1, x2, y2);
 # endif
 
@@ -377,7 +377,7 @@ static void CompressBlockmap(void)
 	}
 
 # if DEBUG_BLOCKMAP
-	DebugPrintf("Blockmap: Last ptr = %d  duplicates = %d\n",
+	gLog.debugPrintf("Blockmap: Last ptr = %d  duplicates = %d\n",
 			cur_offset, dup_count);
 # endif
 
@@ -534,7 +534,7 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 	}
 
 # if DEBUG_BLOCKMAP
-	DebugPrintf("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
+	gLog.debugPrintf("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
 # endif
 }
 
@@ -705,7 +705,7 @@ static void Reject_DebugGroups()
 			}
 		}
 
-		DebugPrintf("Group %4d : Sectors %d\n", group, count);
+		gLog.debugPrintf("Group %4d : Sectors %d\n", group, count);
 	}
 }
 #endif
@@ -1092,7 +1092,7 @@ static void PutSegs(const Instance &inst)
 		count++;
 
 #   if DEBUG_BSP
-		DebugPrintf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
+		gLog.debugPrintf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
 				"Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index,
 				LE_U16(raw.start), LE_U16(raw.end), LE_U16(raw.linedef),
 				seg->side ? "L" : "R", LE_U16(raw.angle),
@@ -1145,7 +1145,7 @@ static void PutGLSegs(const Instance &inst)
 		count++;
 
 #   if DEBUG_BSP
-		DebugPrintf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
+		gLog.debugPrintf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
 				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
 				seg->side ? "L" : "R", LE_U16(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
@@ -1195,7 +1195,7 @@ static void PutGLSegs_V5(const Instance &inst)
 		count++;
 
 #   if DEBUG_BSP
-		DebugPrintf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
+		gLog.debugPrintf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
 				"(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg->index, LE_U16(raw.linedef),
 				seg->side ? "L" : "R", LE_U32(raw.partner),
 				seg->start->x, seg->start->y, seg->end->x, seg->end->y);
@@ -1227,7 +1227,7 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 		lump->Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
-		DebugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
+		gLog.debugPrintf("PUT SUBSEC %04X  First %04X  Num %04X\n",
 				sub->index, LE_U16(raw.first), LE_U16(raw.num));
 #   endif
 	}
@@ -1260,7 +1260,7 @@ static void PutGLSubsecs_V5(const Instance &inst)
 		lump->Write(&raw, sizeof(raw));
 
 #   if DEBUG_BSP
-		DebugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
+		gLog.debugPrintf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n",
 					sub->index, LE_U32(raw.first), LE_U32(raw.num));
 #   endif
 	}
@@ -1314,7 +1314,7 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 	lump->Write(&raw, sizeof(raw));
 
 # if DEBUG_BSP
-	DebugPrintf("PUT NODE %04X  Left %04X  Right %04X  "
+	gLog.debugPrintf("PUT NODE %04X  Left %04X  Right %04X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, LE_U16(raw.left),
 			LE_U16(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
@@ -1366,7 +1366,7 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 	lump->Write(&raw, sizeof(raw));
 
 # if DEBUG_BSP
-	DebugPrintf("PUT V5 NODE %08X  Left %08X  Right %08X  "
+	gLog.debugPrintf("PUT V5 NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
 			LE_U32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);
@@ -1700,7 +1700,7 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	ZLibAppendLump(&raw.left,  4);
 
 # if DEBUG_BSP
-	DebugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
+	gLog.debugPrintf("PUT Z NODE %08X  Left %08X  Right %08X  "
 			"(%d,%d) -> (%d,%d)\n", node->index, LE_U32(raw.left),
 			LE_U32(raw.right), node->x, node->y,
 			node->x + node->dx, node->y + node->dy);

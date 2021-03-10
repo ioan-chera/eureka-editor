@@ -1434,7 +1434,7 @@ double LinedefModule::angleBetweenLines(int A, int B, int C) const
 		result += 360.0;
 
 #if 0  // DEBUGGING
-	DebugPrintf("ANGLE %1.6f  (%d,%d) -> (%d,%d) -> (%d,%d)\n", result,
+	gLog.debugPrintf("ANGLE %1.6f  (%d,%d) -> (%d,%d) -> (%d,%d)\n", result,
 			Vertices[A].x, Vertices[A].y,
 			Vertices[B].x, Vertices[B].y,
 			Vertices[C].x, Vertices[C].y);

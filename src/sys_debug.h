@@ -36,16 +36,6 @@ namespace global
     extern bool in_fatal_error;
 }
 
-void LogOpenFile(const char *filename);
-void LogOpenWindow(void);
-void LogClose(void);
-
-void LogSaveTo(FILE *dest_fp);
-
-void LogPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
-
-void DebugPrintf(EUR_FORMAT_STRING(const char *str), ...) EUR_PRINTF(1, 2);
-
 //
 // Log controller
 //
@@ -88,6 +78,7 @@ private:
 	std::vector<SString> kept_messages;
 };
 
+extern Log gLog;
 
 // -------- assertion macros --------
 

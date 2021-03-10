@@ -831,7 +831,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	size_t pos = line.find_first_not_of(IDENT_SET);
 	if(pos == std::string::npos || !isspace(line[pos]))
 	{
-		LogPrintf("WARNING: %s(%u): bad line, no space after keyword.\n", basename.c_str(), lnum);
+		gLog.printf("WARNING: %s(%u): bad line, no space after keyword.\n", basename.c_str(), lnum);
 		return 0;
 	}
 
@@ -842,7 +842,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	value.trimLeadingSpaces();
 	if(value.empty())
 	{
-		LogPrintf("WARNING: %s(%u): bad line, missing option value.\n", basename.c_str(), lnum);
+		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n", basename.c_str(), lnum);
 		return 0;
 	}
 
@@ -853,7 +853,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	{
 		if (opt->opt_type == OptType::end)
 		{
-			LogPrintf("WARNING: %s(%u): invalid option '%s', skipping\n",
+			gLog.printf("WARNING: %s(%u): invalid option '%s', skipping\n",
 					  basename.c_str(), lnum, line.c_str());
 			return 0;
 		}
@@ -864,7 +864,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 		// pre-pass options (like --help) don't make sense in a config file
 		if (strchr(opt->flags, '1'))
 		{
-			LogPrintf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
+			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
 					  basename.c_str(), lnum, line.c_str());
 			return 0;
 		}
@@ -975,11 +975,11 @@ int M_ParseConfigFile()
 
 	std::ifstream is(global::config_file.get());
 
-	LogPrintf("Reading config file: %s\n", global::config_file.c_str());
+	gLog.printf("Reading config file: %s\n", global::config_file.c_str());
 
 	if (!is.is_open())
 	{
-		LogPrintf("--> %s\n", GetErrorMessage(errno).c_str());
+		gLog.printf("--> %s\n", GetErrorMessage(errno).c_str());
 		return -1;
 	}
 
@@ -993,11 +993,11 @@ int M_ParseDefaultConfigFile()
 
 	std::ifstream is(filename.get());
 
-	LogPrintf("Reading config file: %s\n", filename.c_str());
+	gLog.printf("Reading config file: %s\n", filename.c_str());
 
 	if (!is.is_open())
 	{
-		LogPrintf("--> %s\n", GetErrorMessage(errno).c_str());
+		gLog.printf("--> %s\n", GetErrorMessage(errno).c_str());
 		return -1;
 	}
 
@@ -1259,13 +1259,13 @@ int M_WriteConfigFile()
 {
 	SYS_ASSERT(!global::config_file.empty());
 
-	LogPrintf("Writing config file: %s\n", global::config_file.c_str());
+	gLog.printf("Writing config file: %s\n", global::config_file.c_str());
 
 	std::ofstream os(global::config_file.get(), std::ios::trunc);
 
 	if (! os.is_open())
 	{
-		LogPrintf("--> %s\n", GetErrorMessage(errno).c_str());
+		gLog.printf("--> %s\n", GetErrorMessage(errno).c_str());
 		return -1;
 	}
 	os << "# Eureka configuration (local)\n";
@@ -1348,7 +1348,7 @@ bool Instance::M_LoadUserState()
 	if (! file)
 		return false;
 
-	LogPrintf("Loading user state from: %s\n", filename.c_str());
+	gLog.printf("Loading user state from: %s\n", filename.c_str());
 
 	SString line;
 
@@ -1363,7 +1363,7 @@ bool Instance::M_LoadUserState()
 
 		if (num_tok < 0)
 		{
-			LogPrintf("Error in persistent data: %s\n", line.c_str());
+			gLog.printf("Error in persistent data: %s\n", line.c_str());
 			continue;
 		}
 
@@ -1378,7 +1378,7 @@ bool Instance::M_LoadUserState()
 		}
 		else
 		{
-			LogPrintf("Unknown persistent data: %s\n", line.c_str());
+			gLog.printf("Unknown persistent data: %s\n", line.c_str());
 		}
 	}
 
@@ -1400,13 +1400,13 @@ bool Instance::M_SaveUserState() const
 
 	SString filename = PersistFilename(crc);
 
-	LogPrintf("Save user state to: %s\n", filename.c_str());
+	gLog.printf("Save user state to: %s\n", filename.c_str());
 
 	std::ofstream os(filename.get(), std::ios::trunc);
 
 	if (! os.is_open())
 	{
-		LogPrintf("--> FAILED! (%s)\n", GetErrorMessage(errno).c_str());
+		gLog.printf("--> FAILED! (%s)\n", GetErrorMessage(errno).c_str());
 		return false;
 	}
 

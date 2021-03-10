@@ -57,7 +57,7 @@ void Failure(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 	cur_info->total_warnings++;
 
 #if DEBUG_ENABLED
-	DebugPrintf("Failure: %s", message.c_str());
+	gLog.debugPrintf("Failure: %s", message.c_str());
 #endif
 }
 
@@ -76,7 +76,7 @@ void Warning(const Instance &inst, EUR_FORMAT_STRING(const char *fmt), ...)
 	cur_info->total_warnings++;
 
 #if DEBUG_ENABLED
-	DebugPrintf("Warning: %s", message.c_str());
+	gLog.debugPrintf("Warning: %s", message.c_str());
 #endif
 }
 
@@ -230,7 +230,7 @@ static void MarkPolyobjSector(int sector, const Document &doc)
 		return;
 
 # if DEBUG_POLYOBJ
-	DebugPrintf("  Marking SECTOR %d\n", sector);
+	gLog.debugPrintf("  Marking SECTOR %d\n", sector);
 # endif
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
@@ -277,7 +277,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 					(int) L->End(inst.level)->x(),   (int) L->End(inst.level)->y()))
 		{
 #     if DEBUG_POLYOBJ
-			DebugPrintf("  Touching line was %d\n", L->index);
+			gLog.debugPrintf("  Touching line was %d\n", L->index);
 #     endif
 
 			if (L->left >= 0)
@@ -341,7 +341,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 	y2 = best_ld->End(inst.level)->y();
 
 # if DEBUG_POLYOBJ
-	DebugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
+	gLog.debugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
 			best_match, y1, y2, best_dist);
 # endif
 
@@ -349,7 +349,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 # if DEBUG_POLYOBJ
 	if (fabs(best_dist) < EPSILON)
 	{
-		DebugPrintf("  Polyobj FAILURE: directly on the line (%d)\n", best_match);
+		gLog.debugPrintf("  Polyobj FAILURE: directly on the line (%d)\n", best_match);
 	}
 # endif
 
@@ -362,7 +362,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 		sector = (best_ld->left >= 0) ? best_ld->Left(inst.level)->sector : -1;
 
 # if DEBUG_POLYOBJ
-	DebugPrintf("  Sector %d contains the polyobj.\n", sector);
+	gLog.debugPrintf("  Sector %d contains the polyobj.\n", sector);
 # endif
 
 	if (sector < 0)
@@ -422,7 +422,7 @@ void DetectPolyobjSectors(const Instance &inst)
 	}
 
 # if DEBUG_POLYOBJ
-	DebugPrintf("Using %s style polyobj things\n",
+	gLog.debugPrintf("Using %s style polyobj things\n",
 			hexen_style ? "HEXEN" : "ZDOOM");
 # endif
 
@@ -448,7 +448,7 @@ void DetectPolyobjSectors(const Instance &inst)
 		}
 
 #   if DEBUG_POLYOBJ
-		DebugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
+		gLog.debugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #   endif
 
 		MarkPolyobjPoint(x, y, inst);
@@ -686,11 +686,11 @@ void CalculateWallTips(const Document &doc)
 	{
 		vertex_t *V = lev_vertices[i];
 
-		DebugPrintf("WallTips for vertex %d:\n", i);
+		gLog.debugPrintf("WallTips for vertex %d:\n", i);
 
 		for (walltip_t *tip = V->tip_set ; tip ; tip = tip->next)
 		{
-			DebugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
+			gLog.debugPrintf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
 					tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
 		}
 	}
