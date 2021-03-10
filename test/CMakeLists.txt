@@ -94,12 +94,6 @@ unit_test(lib_file
     FLTK
 )
 
-unit_test(sys_debug
-    sys_debug_test.cpp
-    SRC m_streams.cc
-        sys_debug.cc
-)
-
 # Units independent on complex frameworks or libraries
 unit_test(independent
     lib_util_test.cpp
@@ -108,10 +102,12 @@ unit_test(independent
     m_streams_test.cpp
     SStringTest.cpp
     StringTableTest.cpp
+    sys_debug_test.cpp
     SRC lib_util.cc
         m_bitvec.cc
         m_parse.cc
         m_streams.cc
+        sys_debug.cc
 )
 
 find_package(Python3)
