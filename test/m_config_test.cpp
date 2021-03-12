@@ -189,6 +189,26 @@ TEST_F(MConfig, MWriteConfig)
     config::dotty_axis_col = RGB_MAKE(0, 128, 255);
 }
 
+TEST(MConfigArgs, MParseCommandLine)
+{
+    // Test loose files
+    std::vector<const char *> argv;
+    argv = { "file1", "file 2", "" };
+    M_ParseCommandLine(3, argv.data(), 0);
+    ASSERT_EQ(global::Pwad_list.size(), 3);
+    ASSERT_EQ(global::Pwad_list[0], "file1");
+    ASSERT_EQ(global::Pwad_list[1], "file 2");
+    ASSERT_EQ(global::Pwad_list[2], "");
+    global::Pwad_list.clear();
+
+    // Test illegal argument
+    argv = { "file", "-unknown-abcxyz" };
+    ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(), 0); }), "unknown option");
+    global::Pwad_list.clear();
+
+    // TODO: keep testing
+}
+
 //========================================================================
 //
 // Mockups
