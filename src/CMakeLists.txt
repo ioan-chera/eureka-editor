@@ -322,7 +322,7 @@ endif()
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
     target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS}" -Wall -Wextra -Werror
-                           -Wno-unused-parameter -Wno-missing-field-initializers -O2 -g)
+                           -Wno-unused-parameter -Wno-missing-field-initializers)
 endif()
 if ( MSVC )
     # TODO: make remove /W3 if there and set /W4
