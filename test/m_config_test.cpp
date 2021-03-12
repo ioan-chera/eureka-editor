@@ -19,14 +19,107 @@
 #include "m_config.h"
 
 #include "testUtils/FatalHandler.hpp"
+#include "testUtils/TempDirContext.hpp"
 #include "Instance.h"
 #include "m_strings.h"
 #include "gtest/gtest.h"
 
-TEST(MConfig, MParseConfigFileNoPath)
+//
+// Fixture
+//
+class MConfig : public TempDirContext
+{
+protected:
+    void SetUp() override
+    {
+        TempDirContext::SetUp();
+        global::home_dir = mTempDir;
+    }
+
+    void TearDown() override
+    {
+        global::config_file.clear();
+        global::home_dir.clear();
+        TempDirContext::TearDown();
+    }
+};
+
+TEST(MConfigBlank, MParseConfigFileNoPath)
 {
     // We don't have the location set yet? Error out
     ASSERT_DEATH(Fatal([]{ M_ParseConfigFile(); }), "Home directory");
+}
+
+TEST_F(MConfig, MParseConfigFileNotFound)
+{
+    // Get an error result if we don't have the file itself
+    ASSERT_EQ(M_ParseConfigFile(), -1);
+}
+
+TEST_F(MConfig, MParseConfigFile)
+{
+    SString path = getChildPath("config.cfg");
+    std::ofstream os(path.get(), std::ios::trunc);
+    ASSERT_TRUE(os.is_open());
+    mDeleteList.push(path);
+    os.close();
+
+    // Check empty file is ok
+    ASSERT_EQ(M_ParseConfigFile(), 0);
+
+    os.open(path.get());
+    ASSERT_TRUE(os.is_open());
+    os << "\n";
+    os << "#\n";
+    os << "   # Test comment\n";
+    os << "Single\n";   // Safe to skip
+    os << "Single \n";   // Safe to skip
+    os << "home michael\n";  // Home must NOT be changed
+    os << "help 1\n";   // Also unchanged
+    os << "file file1 file2 file3\n";
+    os << "iwad doom 3.wad\n";
+    os << "udmftest yes\n";
+    os << "backup_max_files -999\n";
+    os << "bsp_on_save off\n";  // test "off"
+    os << "bsp_gl_nodes no\n";  // test "no"
+    os << "grid_snap_indicator false\n";    // test "false"
+    os << "leave_offsets_alone 0\n";    // test 0
+    os << "dotty_axis_col 123 45 67\n"; // NOTE: this format isn't the real one
+    os.close();
+
+    ASSERT_EQ(M_ParseConfigFile(), 0);
+    ASSERT_EQ(global::home_dir, mTempDir);  // Not changed
+    ASSERT_FALSE(global::show_help);
+
+    ASSERT_EQ(global::Pwad_list.size(), 3);
+    ASSERT_EQ(global::Pwad_list[0], "file1");
+    ASSERT_EQ(global::Pwad_list[1], "file2");
+    ASSERT_EQ(global::Pwad_list[2], "file3");
+    global::Pwad_list.clear();
+
+    ASSERT_EQ(gInstance.Iwad_name, "doom 3.wad");   // spaces get included
+    gInstance.Iwad_name.clear();
+
+    ASSERT_TRUE(global::udmf_testing);
+    global::udmf_testing = false;
+
+    ASSERT_EQ(config::backup_max_files, -999);
+    config::backup_max_files = 30;
+
+    ASSERT_FALSE(config::bsp_on_save);
+    config::bsp_on_save = true;
+
+    ASSERT_FALSE(config::bsp_gl_nodes);
+    config::bsp_gl_nodes = true;
+
+    ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(123, 45, 67));
+    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+
+    ASSERT_FALSE(config::grid_snap_indicator);
+    config::grid_snap_indicator = true;
+
+    ASSERT_FALSE(config::leave_offsets_alone);
+    config::leave_offsets_alone = true;
 }
 
 //========================================================================
@@ -135,7 +228,11 @@ void Props_LoadValues(const Instance &inst)
 //
 rgb_color_t ParseColor(const SString &cstr)
 {
-    return {};
+    // Use some independent example
+    std::istringstream ss(cstr.get());
+    int r, g, b;
+    ss >> r >> g >> b;
+    return RGB_MAKE(r, g, b);
 }
 
 void Instance::ZoomWholeMap()
