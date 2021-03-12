@@ -955,7 +955,8 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 
 inline static SString default_config_file()
 {
-	SYS_ASSERT(!global::home_dir.empty());
+    if(global::home_dir.empty())
+        ThrowException("Home directory not set.");
 
 	return global::home_dir + "/config.cfg";
 }

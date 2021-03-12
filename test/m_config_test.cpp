@@ -18,6 +18,7 @@
 
 #include "m_config.h"
 
+#include "testUtils/FatalHandler.hpp"
 #include "Instance.h"
 #include "m_strings.h"
 #include "gtest/gtest.h"
@@ -25,7 +26,7 @@
 TEST(MConfig, MParseConfigFileNoPath)
 {
     // We don't have the location set yet? Error out
-    ASSERT_EQ(M_ParseConfigFile(), -1);
+    ASSERT_DEATH(Fatal([]{ M_ParseConfigFile(); }), "Home directory");
 }
 
 //========================================================================
