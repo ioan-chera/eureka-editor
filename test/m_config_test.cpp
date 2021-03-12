@@ -84,7 +84,7 @@ TEST_F(MConfig, MParseConfigFile)
     os << "bsp_gl_nodes no\n";  // test "no"
     os << "grid_snap_indicator false\n";    // test "false"
     os << "leave_offsets_alone 0\n";    // test 0
-    os << "dotty_axis_col 123 45 67\n"; // NOTE: this format isn't the real one
+    os << "dotty_axis_col 7b2d43\n"; // NOTE: # not supported
     os.close();
 
     ASSERT_EQ(M_ParseConfigFile(), 0);
@@ -120,6 +120,61 @@ TEST_F(MConfig, MParseConfigFile)
 
     ASSERT_FALSE(config::leave_offsets_alone);
     config::leave_offsets_alone = true;
+}
+
+TEST(MConfigBlank, MWriteConfigFileNotSetup)
+{
+    ASSERT_DEATH(Fatal([]{ M_WriteConfigFile(); }), "Configuration file");
+}
+
+TEST_F(MConfig, MWriteConfig)
+{
+    config::auto_load_recent = true;
+    config::begin_maximized = true;
+    config::backup_max_files = 777;
+    config::default_port = "Doom \\ # Legacy    ";
+    config::dotty_axis_col = RGB_MAKE(99, 90, 80);
+
+    global::udmf_testing = true;    // this one shall not be saved
+    gInstance.Level_name = "NEW LEVEL";
+    global::Pwad_list = { "file1", "file2 file3" };
+
+    global::config_file = getChildPath("configx.cfg");  // pick any name
+
+    ASSERT_EQ(M_WriteConfigFile(), 0);
+    mDeleteList.push(global::config_file);
+
+    // Now unset them
+    config::auto_load_recent = false;
+    config::begin_maximized = false;
+    config::backup_max_files = 30;
+    config::default_port = "vanilla";
+    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+
+    global::udmf_testing = false;
+    gInstance.Level_name.clear();
+    global::Pwad_list.clear();
+
+    // Now read config back
+
+    ASSERT_EQ(M_ParseConfigFile(), 0);
+
+    ASSERT_TRUE(config::auto_load_recent);
+    ASSERT_TRUE(config::begin_maximized);
+    ASSERT_EQ(config::backup_max_files, 777);
+    ASSERT_EQ(config::default_port, "Doom \\ # Legacy");
+    ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(99, 90, 80));
+
+    ASSERT_FALSE(global::udmf_testing); // still false
+    ASSERT_TRUE(gInstance.Level_name.empty());
+    ASSERT_TRUE(global::Pwad_list.empty());
+
+    // Now unset them
+    config::auto_load_recent = false;
+    config::begin_maximized = false;
+    config::backup_max_files = 30;
+    config::default_port = "vanilla";
+    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
 }
 
 //========================================================================
@@ -229,10 +284,7 @@ void Props_LoadValues(const Instance &inst)
 rgb_color_t ParseColor(const SString &cstr)
 {
     // Use some independent example
-    std::istringstream ss(cstr.get());
-    int r, g, b;
-    ss >> r >> g >> b;
-    return RGB_MAKE(r, g, b);
+    return (rgb_color_t)strtol(cstr.c_str(), nullptr, 16) << 8;
 }
 
 void Instance::ZoomWholeMap()

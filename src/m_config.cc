@@ -1258,7 +1258,8 @@ void M_PrintCommandLineOptions()
 
 int M_WriteConfigFile()
 {
-	SYS_ASSERT(!global::config_file.empty());
+    if(global::config_file.empty())
+        ThrowException("Configuration file not initialized.");
 
 	gLog.printf("Writing config file: %s\n", global::config_file.c_str());
 
