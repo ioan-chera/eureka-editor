@@ -45,8 +45,10 @@ TEST(MParse, MParseLine)
         ASSERT_EQ(M_ParseLine("    # Hello comment", tokens, option), 0);
 
         // Newline should end the parsing
-        ASSERT_EQ(M_ParseLine(" # Hello comment \n Hello next line", tokens, option), 0);
-        ASSERT_EQ(M_ParseLine(" # Hello comment \r\n Hello next line", tokens, option), 0);
+        ASSERT_EQ(M_ParseLine(" # Hello comment \n Hello next line", tokens,
+							  option), 0);
+        ASSERT_EQ(M_ParseLine(" # Hello comment \r\n Hello next line", tokens,
+							  option), 0);
 
         // Except if it's after an empty line, then we just go ahead
         ASSERT_EQ(M_ParseLine("\n Hello next line", tokens, option), 3);
@@ -96,11 +98,11 @@ TEST(MParse, MParseLine)
     for(ParseOptions option : stringOptions)
     {
         // Check that unterminated quote is illegal
-        ASSERT_LE(M_ParseLine("Hello unterminated \"quote here", tokens, option), 0);
+        ASSERT_EQ(M_ParseLine("Hello unterminated \"quote here", tokens, option), ParseLine_stringError);
         // Check that simple quote is illegal
-        ASSERT_LE(M_ParseLine("\"", tokens, option), 0);
+        ASSERT_EQ(M_ParseLine("\"", tokens, option), ParseLine_stringError);
         // Check that newline in string is illegal
-        ASSERT_LE(M_ParseLine("Hello newline \"string\n here\"", tokens, option), 0);
+        ASSERT_EQ(M_ParseLine("Hello newline \"string\n here\"", tokens, option), ParseLine_stringError);
 
         // Now check string
         ASSERT_EQ(M_ParseLine("Hello, \"multi word string\" here!", tokens, option), 3);
@@ -127,6 +129,6 @@ TEST(MParse, MParseLine)
         assertQuoted(tokens[2], "strings", option);
 
         // Check that just three """ is illegal
-        ASSERT_LE(M_ParseLine("\"\"\"", tokens, option), 0);
+        ASSERT_EQ(M_ParseLine("\"\"\"", tokens, option), ParseLine_stringError);
     }
 }

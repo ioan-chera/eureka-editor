@@ -32,4 +32,10 @@ enum class ParseOptions
 	haveStringsKeepQuotes,
 };
 
-int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions options);
+enum
+{
+	ParseLine_stringError = -3,	// return value in case of unterminated string
+};
+
+int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
+				ParseOptions options);

@@ -27,7 +27,8 @@
 //
 // returns number of tokens, zero for comment, negative on error
 //
-int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions options)
+int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
+				ParseOptions options)
 {
 	// when do_strings == 2, string tokens keep their quotes.
 
@@ -101,7 +102,7 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions
 		}
 
 		if (in_string)  // ERROR: non-terminated string
-			return -3;
+			return ParseLine_stringError;
 
 		nexttoken = true;
 
