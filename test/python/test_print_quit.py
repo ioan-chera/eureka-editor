@@ -1,5 +1,6 @@
-import subprocess
 import argparse
+import re
+import subprocess
 
 # test script expects the executable as argument
 parser = argparse.ArgumentParser()
@@ -17,17 +18,28 @@ def test_help_command():
     assert 'Eureka is free software, under the terms of the GNU General' in result
     assert 'USAGE: ' in result
     assert '--version' in result
+
     lines = result.split('\n')
+
+    parms = set()
 
     # Check that all the <name> columns are aligned
     saved_pos = None
     for line in lines:
         pos = line.find('<')
+        match = re.search('--[a-z_]+', line)
+        if match:
+            parm = match.group()
+            parms.add(parm)
         if pos != -1:
             if saved_pos is not None:
                 assert pos == saved_pos
             else:
                 saved_pos = pos
+
+    assert parms == {'--home', '--install', '--log', '--config', '--help', '--version', '--debug',
+        '--quiet', '--file', '--merge', '--iwad', '--port', '--warp',
+    }
 
     # Check that '<' marked arguments (like -warp) have an extra newline after
     in_warp = False

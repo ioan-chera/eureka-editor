@@ -62,6 +62,14 @@ enum class OptType
 	stringList,
 };
 
+enum
+{
+	OptFlag_pass1 = 1 << 0,
+	OptFlag_helpNewline = 1 << 1,
+	OptFlag_preference = 1 << 2,
+	OptFlag_warp = 1 << 3,
+	OptFlag_hide = 1 << 4,
+};
 
 struct opt_desc_t
 {
@@ -69,9 +77,8 @@ struct opt_desc_t
 	const char *short_name; // Abbreviated command line argument
 
 	OptType opt_type;    // Type of this option
-	const char *flags;    // Flags for this option :
+	unsigned flags;    // Flags for this option :
 	// '1' : process only on pass 1 of parse_command_line_options()
-	// 'f' : string is a filename
 	// '<' : print extra newline after this option (when dumping)
 	// 'v' : a real variable (preference setting)
 	// 'w' : warp hack -- accept two numeric args
@@ -93,7 +100,7 @@ static const opt_desc_t options[] =
 	{	"home",
 		0,
         OptType::string,
-		"1",
+		OptFlag_pass1,
 		"Home directory",
 		"<dir>",
 		&global::home_dir
@@ -102,7 +109,7 @@ static const opt_desc_t options[] =
 	{	"install",
 		0,
         OptType::string,
-		"1",
+		OptFlag_pass1,
 		"Installation directory",
 		"<dir>",
 		&global::install_dir
@@ -111,7 +118,7 @@ static const opt_desc_t options[] =
 	{	"log",
 		0,
         OptType::string,
-		"1",
+		OptFlag_pass1,
 		"Log messages to specified file",
 		"<file>",
 		&global::log_file
@@ -120,7 +127,7 @@ static const opt_desc_t options[] =
 	{	"config",
 		0,
         OptType::string,
-		"1<",
+		OptFlag_pass1 | OptFlag_helpNewline,
 		"Config file to load / save",
 		"<file>",
 		&global::config_file
@@ -129,7 +136,7 @@ static const opt_desc_t options[] =
 	{	"help",
 		"h",
         OptType::boolean,
-		"1",
+		OptFlag_pass1,
 		"Show usage summary",
 		NULL,
 		&global::show_help
@@ -138,7 +145,7 @@ static const opt_desc_t options[] =
 	{	"version",
 		"v",
         OptType::boolean,
-		"1",
+		OptFlag_pass1,
 		"Show the version",
 		NULL,
 		&global::show_version
@@ -147,7 +154,7 @@ static const opt_desc_t options[] =
 	{	"debug",
 		"d",
         OptType::boolean,
-		"1",
+		OptFlag_pass1,
 		"Enable debugging messages",
 		NULL,
 		&global::Debugging
@@ -156,7 +163,7 @@ static const opt_desc_t options[] =
 	{	"quiet",
 		"q",
         OptType::boolean,
-		"1",
+		OptFlag_pass1,
 		"Quiet mode (no messages on stdout)",
 		NULL,
 		&global::Quiet
@@ -169,7 +176,7 @@ static const opt_desc_t options[] =
 	{	"file",
 		"f",
         OptType::stringList,
-		"",
+		0,
 		"Wad file(s) to edit",
 		"<file>...",
 		&global::Pwad_list
@@ -178,7 +185,7 @@ static const opt_desc_t options[] =
 	{	"merge",
 		"m",
 		OptType::stringList,
-		"",
+		0,
 		"Resource file(s) to load",
 		"<file>...",
 		&gInstance.Resource_list
@@ -187,7 +194,7 @@ static const opt_desc_t options[] =
 	{	"iwad",
 		"i",
         OptType::string,
-		"",
+		0,
 		"The name of the IWAD (game data)",
 		"<file>",
 		&gInstance.Iwad_name	// TODO: same deal
@@ -196,7 +203,7 @@ static const opt_desc_t options[] =
 	{	"port",
 		"p",
         OptType::string,
-		"",
+		0,
 		"Port (engine) name",
 		"<name>",
 		&gInstance.Port_name	// TODO: same deal
@@ -205,7 +212,7 @@ static const opt_desc_t options[] =
 	{	"warp",
 		"w",
         OptType::string,
-		"w<",
+		OptFlag_warp | OptFlag_helpNewline,
 		"Select level to edit",
 		"<map>",
 		&gInstance.Level_name	// TODO: this will need to work only for first instance
@@ -214,7 +221,7 @@ static const opt_desc_t options[] =
 	{	"udmftest",
 		0,
         OptType::boolean,
-		"H",
+		OptFlag_hide,
 		"Enable the unfinished UDMF support",
 		NULL,
 		&global::udmf_testing
@@ -225,7 +232,7 @@ static const opt_desc_t options[] =
 	{	"auto_load_recent",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"When no given files, load the most recent one saved",
 		NULL,
 		&config::auto_load_recent
@@ -234,7 +241,7 @@ static const opt_desc_t options[] =
 	{	"begin_maximized",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Maximize the window when Eureka starts",
 		NULL,
 		&config::begin_maximized
@@ -243,7 +250,7 @@ static const opt_desc_t options[] =
 	{	"backup_max_files",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Maximum copies to make when backing up a wad",
 		NULL,
 		&config::backup_max_files
@@ -252,7 +259,7 @@ static const opt_desc_t options[] =
 	{	"backup_max_space",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Maximum space to use (in MB) when backing up a wad",
 		NULL,
 		&config::backup_max_space
@@ -261,7 +268,7 @@ static const opt_desc_t options[] =
 	{	"browser_combine_tex",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Combine flats and textures in a single browser",
 		NULL,
 		&config::browser_combine_tex
@@ -270,7 +277,7 @@ static const opt_desc_t options[] =
 	{	"browser_small_tex",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Show smaller (more compact) textures in the browser",
 		NULL,
 		&config::browser_small_tex
@@ -279,7 +286,7 @@ static const opt_desc_t options[] =
 	{	"bsp_on_save",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: always build the nodes after saving",
 		NULL,
 		&config::bsp_on_save
@@ -288,7 +295,7 @@ static const opt_desc_t options[] =
 	{	"bsp_fast",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
 		&config::bsp_fast
@@ -297,7 +304,7 @@ static const opt_desc_t options[] =
 	{	"bsp_warnings",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: show all warning messages",
 		NULL,
 		&config::bsp_warnings
@@ -306,7 +313,7 @@ static const opt_desc_t options[] =
 	{	"bsp_split_factor",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Node building: seg splitting factor",
 		NULL,
 		&config::bsp_split_factor
@@ -315,7 +322,7 @@ static const opt_desc_t options[] =
 	{	"bsp_gl_nodes",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: build GL-Nodes",
 		NULL,
 		&config::bsp_gl_nodes
@@ -324,7 +331,7 @@ static const opt_desc_t options[] =
 	{	"bsp_force_v5",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: force V5 of GL-Nodes",
 		NULL,
 		&config::bsp_force_v5
@@ -333,7 +340,7 @@ static const opt_desc_t options[] =
 	{	"bsp_force_zdoom",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: force ZDoom format for normal nodes",
 		NULL,
 		&config::bsp_force_zdoom
@@ -342,7 +349,7 @@ static const opt_desc_t options[] =
 	{	"bsp_compressed",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Node building: force zlib compression of ZDoom nodes",
 		NULL,
 		&config::bsp_compressed
@@ -351,7 +358,7 @@ static const opt_desc_t options[] =
 	{	"default_gamma",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Default gamma for images and 3D view (0..4)",
 		NULL,
 		&config::usegamma
@@ -360,7 +367,7 @@ static const opt_desc_t options[] =
 	{	"default_edit_mode",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Default editing mode: 0..3 = Th / Lin / Sec / Vt",
 		NULL,
 		&config::default_edit_mode
@@ -369,7 +376,7 @@ static const opt_desc_t options[] =
 	{	"default_port",
 		0,
         OptType::string,
-		"v",
+		OptFlag_preference,
 		"Default port (engine) name",
 		NULL,
 		&config::default_port
@@ -378,7 +385,7 @@ static const opt_desc_t options[] =
 	{	"dotty_axis_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"axis color for the dotty style grid",
 		NULL,
 		&config::dotty_axis_col
@@ -387,7 +394,7 @@ static const opt_desc_t options[] =
 	{	"dotty_major_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"major color for the dotty style grid",
 		NULL,
 		&config::dotty_major_col
@@ -396,7 +403,7 @@ static const opt_desc_t options[] =
 	{	"dotty_minor_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"minor color for the dotty style grid",
 		NULL,
 		&config::dotty_minor_col
@@ -405,7 +412,7 @@ static const opt_desc_t options[] =
 	{	"dotty_point_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"point color for the dotty style grid",
 		NULL,
 		&config::dotty_point_col
@@ -414,7 +421,7 @@ static const opt_desc_t options[] =
 	{	"floor_bump_small",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"distance for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
 		&config::floor_bump_small
@@ -423,7 +430,7 @@ static const opt_desc_t options[] =
 	{	"floor_bump_medium",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"distance for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
 		&config::floor_bump_medium
@@ -432,7 +439,7 @@ static const opt_desc_t options[] =
 	{	"floor_bump_large",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
 		&config::floor_bump_large
@@ -441,7 +448,7 @@ static const opt_desc_t options[] =
 	{	"grid_default_mode",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
 		&config::grid_default_mode
@@ -450,7 +457,7 @@ static const opt_desc_t options[] =
 	{	"grid_default_size",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Default grid size",
 		NULL,
 		&config::grid_default_size
@@ -459,7 +466,7 @@ static const opt_desc_t options[] =
 	{	"grid_default_snap",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Default grid snapping",
 		NULL,
 		&config::grid_default_snap
@@ -468,7 +475,7 @@ static const opt_desc_t options[] =
 	{	"grid_hide_in_free_mode",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"hide the grid in FREE mode",
 		NULL,
 		&config::grid_hide_in_free_mode
@@ -477,7 +484,7 @@ static const opt_desc_t options[] =
 	{	"grid_ratio_high",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"custom grid ratio : high value (numerator)",
 		NULL,
 		&config::grid_ratio_high
@@ -486,7 +493,7 @@ static const opt_desc_t options[] =
 	{	"grid_ratio_low",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"custom grid ratio : low value (denominator)",
 		NULL,
 		&config::grid_ratio_low
@@ -495,7 +502,7 @@ static const opt_desc_t options[] =
 	{	"grid_snap_indicator",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"show a cross at the grid-snapped location",
 		NULL,
 		&config::grid_snap_indicator
@@ -504,7 +511,7 @@ static const opt_desc_t options[] =
 	{	"grid_style",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"grid style : 0 = squares, 1 = dotty",
 		NULL,
 		&config::grid_style
@@ -513,7 +520,7 @@ static const opt_desc_t options[] =
 	{	"gui_theme",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
 		NULL,
 		&config::gui_scheme
@@ -522,7 +529,7 @@ static const opt_desc_t options[] =
 	{	"gui_color_set",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
 		NULL,
 		&config::gui_color_set
@@ -531,7 +538,7 @@ static const opt_desc_t options[] =
 	{	"gui_custom_bg",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"GUI custom background color",
 		NULL,
 		&config::gui_custom_bg
@@ -540,7 +547,7 @@ static const opt_desc_t options[] =
 	{	"gui_custom_ig",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"GUI custom input color",
 		NULL,
 		&config::gui_custom_ig
@@ -549,7 +556,7 @@ static const opt_desc_t options[] =
 	{	"gui_custom_fg",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"GUI custom foreground (text) color",
 		NULL,
 		&config::gui_custom_fg
@@ -558,7 +565,7 @@ static const opt_desc_t options[] =
 	{	"highlight_line_info",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Info drawn near a highlighted line (0 = nothing)",
 		NULL,
 		&config::highlight_line_info
@@ -567,7 +574,7 @@ static const opt_desc_t options[] =
 	{	"leave_offsets_alone",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
 		&config::leave_offsets_alone
@@ -576,7 +583,7 @@ static const opt_desc_t options[] =
 	{	"light_bump_small",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"light step for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
 		&config::light_bump_small
@@ -585,7 +592,7 @@ static const opt_desc_t options[] =
 	{	"light_bump_medium",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"light step for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
 		&config::light_bump_medium
@@ -594,7 +601,7 @@ static const opt_desc_t options[] =
 	{	"light_bump_large",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"light step for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
 		&config::light_bump_large
@@ -603,7 +610,7 @@ static const opt_desc_t options[] =
 	{	"map_scroll_bars",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Enable scroll-bars for the map view",
 		NULL,
 		&config::map_scroll_bars
@@ -612,7 +619,7 @@ static const opt_desc_t options[] =
 	{	"minimum_drag_pixels",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Minimum distance to move mouse to drag an object (in pixels)",
 		NULL,
 		&config::minimum_drag_pixels
@@ -621,7 +628,7 @@ static const opt_desc_t options[] =
 	{	"new_sector_size",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Size of sector rectangles created outside of the map",
 		NULL,
 		&config::new_sector_size
@@ -630,7 +637,7 @@ static const opt_desc_t options[] =
 	{	"normal_axis_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"axis color for the normal grid",
 		NULL,
 		&config::normal_axis_col
@@ -639,7 +646,7 @@ static const opt_desc_t options[] =
 	{	"normal_main_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"main color for the normal grid",
 		NULL,
 		&config::normal_main_col
@@ -648,7 +655,7 @@ static const opt_desc_t options[] =
 	{	"normal_flat_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"flat color for the normal grid",
 		NULL,
 		&config::normal_flat_col
@@ -657,7 +664,7 @@ static const opt_desc_t options[] =
 	{	"normal_small_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"small color for the normal grid",
 		NULL,
 		&config::normal_small_col
@@ -666,7 +673,7 @@ static const opt_desc_t options[] =
 	{	"panel_gamma",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Gamma for images in the panels and the browser (0..4)",
 		NULL,
 		&config::panel_gamma
@@ -675,7 +682,7 @@ static const opt_desc_t options[] =
 	{	"render_pix_aspect",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
 		&config::render_pixel_aspect
@@ -684,7 +691,7 @@ static const opt_desc_t options[] =
 	{	"render_far_clip",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Distance of far clip plane for 3D rendering",
 		NULL,
 		&config::render_far_clip
@@ -693,7 +700,7 @@ static const opt_desc_t options[] =
 	{	"render_high_detail",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Use highest detail when rendering 3D view (software mode)",
 		NULL,
 		&config::render_high_detail
@@ -702,7 +709,7 @@ static const opt_desc_t options[] =
 	{	"render_lock_gravity",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Locked gravity in 3D view -- cannot move up or down",
 		NULL,
 		&config::render_lock_gravity
@@ -711,7 +718,7 @@ static const opt_desc_t options[] =
 	{	"render_missing_bright",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Render the missing texture as fullbright",
 		NULL,
 		&config::render_missing_bright
@@ -720,7 +727,7 @@ static const opt_desc_t options[] =
 	{	"render_unknown_bright",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Render the unknown texture as fullbright",
 		NULL,
 		&config::render_unknown_bright
@@ -729,7 +736,7 @@ static const opt_desc_t options[] =
 	{	"same_mode_clears_selection",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Clear the selection when entering the same mode",
 		NULL,
 		&config::same_mode_clears_selection
@@ -738,7 +745,7 @@ static const opt_desc_t options[] =
 	{	"sector_render_default",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Default sector rendering mode: 0 = NONE, 1 = floor, 2 = ceiling",
 		NULL,
 		&config::sector_render_default
@@ -747,7 +754,7 @@ static const opt_desc_t options[] =
 	{	"show_full_one_sided",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Show all textures on one-sided lines in the Linedef panel",
 		NULL,
 		&config::show_full_one_sided
@@ -756,7 +763,7 @@ static const opt_desc_t options[] =
 	{	"sidedef_add_del_buttons",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Show the ADD and DEL buttons in Sidedef panels",
 		NULL,
 		&config::sidedef_add_del_buttons
@@ -765,7 +772,7 @@ static const opt_desc_t options[] =
 	{	"thing_render_default",
 		0,
         OptType::integer,
-		"v",
+		OptFlag_preference,
 		"Default thing rendering mode: 0 = boxes, 1 = sprites",
 		NULL,
 		&config::thing_render_default
@@ -774,7 +781,7 @@ static const opt_desc_t options[] =
 	{	"transparent_col",
 		0,
         OptType::color,
-		"v",
+		OptFlag_preference,
 		"color used to represent transparent pixels in textures",
 		NULL,
 		&config::transparent_col
@@ -783,7 +790,7 @@ static const opt_desc_t options[] =
 	{	"swap_sidedefs",
 		0,
         OptType::boolean,
-		"v",
+		OptFlag_preference,
 		"Swap upper and lower sidedefs in the Linedef panel",
 		NULL,
 		&config::swap_sidedefs
@@ -862,7 +869,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			continue;
 
 		// pre-pass options (like --help) don't make sense in a config file
-		if (strchr(opt->flags, '1'))
+		if (opt->flags & OptFlag_pass1)
 		{
 			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
 					  basename.c_str(), lnum, line.c_str());
@@ -1071,7 +1078,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		}
 
 		// ignore options which are not meant for this pass
-		ignore = (strchr(o->flags, '1') != NULL) != (pass == 1);
+		ignore = !!(o->flags & OptFlag_pass1) != (pass == 1);
 
 		switch (o->opt_type)
 		{
@@ -1146,7 +1153,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 				if(!ignore)
 					*static_cast<SString *>(o->data_ptr) = argv[0];
 				// support two numeric values after -warp
-				if (strchr(o->flags, 'w') && isdigit(argv[0][0]) &&
+				if (o->flags & OptFlag_warp && isdigit(argv[0][0]) &&
 					argc > 1 && isdigit(argv[1][0]))
 				{
 					if (! ignore)
@@ -1203,7 +1210,7 @@ void M_PrintCommandLineOptions()
 	{
 		int len;
 
-		if (strchr(o->flags, 'v') || strchr(o->flags, 'H'))
+		if (o->flags & (OptFlag_preference | OptFlag_hide))
 			continue;
 
 		if (o->long_name)
@@ -1219,10 +1226,10 @@ void M_PrintCommandLineOptions()
 	for (int pass = 0 ; pass < 2 ; pass++)
 	for (o = options; o->opt_type != OptType::end; o++)
 	{
-		if (strchr(o->flags, 'v') || strchr(o->flags, 'H'))
+		if (o->flags & (OptFlag_preference | OptFlag_hide))
 			continue;
 
-		if ((strchr(o->flags, '1') ? 1 : 0) != pass)
+		if ((o->flags & OptFlag_pass1 ? 1 : 0) != pass)
 			continue;
 
 		if (o->short_name)
@@ -1250,7 +1257,7 @@ void M_PrintCommandLineOptions()
 
 		printf (" %s\n", o->desc);
 
-		if (strchr(o->flags, '<'))
+		if (o->flags & OptFlag_helpNewline)
 			printf ("\n");
 	}
 }
@@ -1276,7 +1283,7 @@ int M_WriteConfigFile()
 
 	for (o = options; o->opt_type != OptType::end; o++)
 	{
-		if (! strchr(o->flags, 'v'))
+		if (!(o->flags & OptFlag_preference))
 			continue;
 
 		if (! o->long_name)

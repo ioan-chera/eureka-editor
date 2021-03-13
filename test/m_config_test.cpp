@@ -191,6 +191,8 @@ TEST_F(MConfig, MWriteConfig)
 
 TEST(MConfigArgs, MParseCommandLine)
 {
+	// NOTE: check that both - and -- work and short name too
+
     // Test loose files
     std::vector<const char *> argv;
     argv = { "file1", "file 2", "" };
@@ -240,20 +242,24 @@ TEST(MConfigArgs, MParseCommandLine)
 	global::Pwad_list.clear();
 
 	// Test boolean assignment
-	argv = { "-version" };
+	argv = { "-v" };
 	M_ParseCommandLine(1, argv.data(), 1);
 	ASSERT_TRUE(global::show_version);
 	global::show_version = false;
 
+	// Reject double-dash short options
+	argv = { "--v" };
+	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(1, argv.data(), 1); }), "unknown option");
+
 	// Test that anything means true
-	argv = { "-version", "yeah" };
+	argv = { "--version", "yeah" };
 	M_ParseCommandLine(2, argv.data(), 1);
 	ASSERT_TRUE(global::show_version);
 	global::show_version = false;
 
 	// Test that second-pass options get ignored in pass 1.
 	// Also combine with loose stuff
-	argv = { "loose file.wad", "", "-file", "doom.wad", "landing page.wad" };
+	argv = { "loose file.wad", "", "--file", "doom.wad", "landing page.wad" };
 	M_ParseCommandLine(5, argv.data(), 1);
 	ASSERT_TRUE(global::Pwad_list.empty());
 	// On pass 2, they get combined
@@ -264,8 +270,8 @@ TEST(MConfigArgs, MParseCommandLine)
 	ASSERT_EQ(global::Pwad_list[2], "doom.wad");
 	ASSERT_EQ(global::Pwad_list[3], "landing page.wad");
 	global::Pwad_list.clear();
-	argv = { "loose file.wad", "", "-file", "doom.wad", "landing page.wad",
-		"-merge", "res1.wad", "res2.wad"
+	argv = { "loose file.wad", "", "-f", "doom.wad", "landing page.wad",
+		"--merge", "res1.wad", "res2.wad"
 	};
 	M_ParseCommandLine(8, argv.data(), 2);
 	ASSERT_EQ(global::Pwad_list.size(), 4);
@@ -280,7 +286,7 @@ TEST(MConfigArgs, MParseCommandLine)
 	gInstance.Resource_list.clear();
 
 	// Test integer stuff
-	argv = { "-backup_max_files", "-23", "-default_gamma", "25" };
+	argv = { "-backup_max_files", "-23", "--default_gamma", "25" };
 	M_ParseCommandLine(4, argv.data(), 2);
 	ASSERT_EQ(config::backup_max_files, -23);
 	ASSERT_EQ(config::usegamma, 25);
@@ -292,11 +298,11 @@ TEST(MConfigArgs, MParseCommandLine)
 	global::Quiet = true;
 	M_ParseCommandLine(2, argv.data(), 1);
 	ASSERT_FALSE(global::Quiet);
-	argv = { "-quiet", "no" };
+	argv = { "-q", "no" };
 	global::Quiet = true;
 	M_ParseCommandLine(2, argv.data(), 1);
 	ASSERT_FALSE(global::Quiet);
-	argv = { "-quiet", "false" };
+	argv = { "--quiet", "false" };
 	global::Quiet = true;
 	M_ParseCommandLine(2, argv.data(), 1);
 	ASSERT_FALSE(global::Quiet);
@@ -311,13 +317,13 @@ TEST(MConfigArgs, MParseCommandLine)
 	ASSERT_EQ(gInstance.Level_name, "map01");	// gets uppercase
 	gInstance.Level_name.clear();
 	// Check that one argument is valid
-	argv = { "-warp", "09" };
+	argv = { "--warp", "09" };
 	M_ParseCommandLine(2, argv.data(), 2);
 	ASSERT_EQ(gInstance.Level_name, "09");
 	gInstance.Level_name.clear();
 
 	// Check that loose files can be located within
-	argv = { "file1", "-warp", "map01", "file2", "-merge", "res1", "res2" };
+	argv = { "file1", "-warp", "map01", "file2", "--merge", "res1", "res2" };
 	M_ParseCommandLine(7, argv.data(), 2);
 	ASSERT_EQ(global::Pwad_list.size(), 2);
 	ASSERT_EQ(global::Pwad_list[0], "file1");
@@ -331,7 +337,7 @@ TEST(MConfigArgs, MParseCommandLine)
 	gInstance.Resource_list.clear();
 
 	// Check that loose files can be located within and arguments can be redone
-	argv = { "file1", "-warp", "map01", "file2", "-warp", "1", "3", "file3" };
+	argv = { "file1", "--warp", "map01", "file2", "-warp", "1", "3", "file3" };
 	M_ParseCommandLine(8, argv.data(), 2);
 	ASSERT_EQ(global::Pwad_list.size(), 3);
 	ASSERT_EQ(global::Pwad_list[0], "file1");
@@ -342,7 +348,7 @@ TEST(MConfigArgs, MParseCommandLine)
 	gInstance.Level_name.clear();
 
 	// Check that stringList options can be repeatedly argumented
-	argv = { "file1", "-file", "file2", "-merge", "res1", "-file", "file3",
+	argv = { "file1", "-file", "file2", "-merge", "res1", "--file", "file3",
 		"file4", "-merge", "res2", "res3" };
 	M_ParseCommandLine(11, argv.data(), 2);
 	ASSERT_EQ(global::Pwad_list.size(), 4);
