@@ -29,6 +29,15 @@ def test_help_command():
             else:
                 saved_pos = pos
 
+    # Check that '<' marked arguments (like -warp) have an extra newline after
+    in_warp = False
+    for line in lines:
+        if '-warp' in line:
+            in_warp = True
+            continue
+        if in_warp:
+            assert not line.strip() # check that we have an empty line here
+            in_warp = False
 
 def test_version_command():
     result = str(subprocess.check_output([args.executable, '--version'],
