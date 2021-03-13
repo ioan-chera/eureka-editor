@@ -955,8 +955,8 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 
 inline static SString default_config_file()
 {
-    if(global::home_dir.empty())
-        ThrowException("Home directory not set.");
+	if(global::home_dir.empty())
+		ThrowException("Home directory not set.");
 
 	return global::home_dir + "/config.cfg";
 }
@@ -1258,8 +1258,8 @@ void M_PrintCommandLineOptions()
 
 int M_WriteConfigFile()
 {
-    if(global::config_file.empty())
-        ThrowException("Configuration file not initialized.");
+	if(global::config_file.empty())
+		ThrowException("Configuration file not initialized.");
 
 	gLog.printf("Writing config file: %s\n", global::config_file.c_str());
 
