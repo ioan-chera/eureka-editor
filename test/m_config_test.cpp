@@ -358,6 +358,84 @@ TEST(MConfigArgs, MParseCommandLine)
 	gInstance.Resource_list.clear();
 }
 
+// M_PrintCommandLineOptions is tested in system testing
+
+static std::unordered_map<SString, std::vector<SString>> sUnitTokens;
+
+TEST_F(MConfig, InstanceMLoadUserState)
+{
+	Instance inst;
+	// crc32_c raw=1 extra=0
+	// Resulted filenme is cache_dir + "/cache/%08X%08X.dat"
+	// crc.extra, crc.raw
+	global::cache_dir = mTempDir;
+	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
+	mDeleteList.push(getChildPath("cache"));
+
+	// Try with no file: should fail
+	ASSERT_FALSE(inst.M_LoadUserState());
+
+	// Prepare cache file
+	std::ofstream os(getChildPath("cache/0000000000000001.dat").get(),
+					 std::ios::trunc);
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(getChildPath("cache/0000000000000001.dat"));
+	os << " # Stuff\n";
+	os << "\n";
+	os << "editor \"hello world\" again\n";
+	os << "whatever is this\n";	// unhandled by any of these
+	os << "recused\n";
+	os << "render3d image\n";
+	os << "browser preferred\n";
+	os << "grid high resolution\n";
+	os << "props properties \"\"\n";
+	os << "render3d again another rendering\n";
+	os << "grid low key\n";
+	os << " # Stuff\n";
+	os.close();
+
+	// We use the mockup handlers below to add to a map, which is global
+	// Now it should work
+	ASSERT_TRUE(inst.M_LoadUserState());
+
+	// TODO: check sUnitTokens
+	ASSERT_EQ(sUnitTokens["editor"].size(), 3);
+	ASSERT_EQ(sUnitTokens["editor"][0], "editor_editor");
+	ASSERT_EQ(sUnitTokens["editor"][1], "editor_hello world");
+	ASSERT_EQ(sUnitTokens["editor"][2], "editor_again");
+	ASSERT_EQ(sUnitTokens["recused"].size(), 1);
+	ASSERT_EQ(sUnitTokens["recused"][0], "recused_recused");
+	ASSERT_EQ(sUnitTokens["render3d"].size(), 6);
+	ASSERT_EQ(sUnitTokens["render3d"][0], "render3d_render3d");
+	ASSERT_EQ(sUnitTokens["render3d"][1], "render3d_image");
+	ASSERT_EQ(sUnitTokens["render3d"][2], "render3d_render3d");
+	ASSERT_EQ(sUnitTokens["render3d"][3], "render3d_again");
+	ASSERT_EQ(sUnitTokens["render3d"][4], "render3d_another");
+	ASSERT_EQ(sUnitTokens["render3d"][5], "render3d_rendering");
+	ASSERT_EQ(sUnitTokens["browser"].size(), 2);
+	ASSERT_EQ(sUnitTokens["browser"][0], "browser_browser");
+	ASSERT_EQ(sUnitTokens["browser"][1], "browser_preferred");
+	ASSERT_EQ(sUnitTokens["grid"].size(), 6);
+	ASSERT_EQ(sUnitTokens["grid"][0], "grid_grid");
+	ASSERT_EQ(sUnitTokens["grid"][1], "grid_high");
+	ASSERT_EQ(sUnitTokens["grid"][2], "grid_resolution");
+	ASSERT_EQ(sUnitTokens["grid"][3], "grid_grid");
+	ASSERT_EQ(sUnitTokens["grid"][4], "grid_low");
+	ASSERT_EQ(sUnitTokens["grid"][5], "grid_key");
+	// Keep in mind the last value gets called too
+	ASSERT_EQ(sUnitTokens["props"].size(), 4);
+	ASSERT_EQ(sUnitTokens["props"][0], "props_props");
+	ASSERT_EQ(sUnitTokens["props"][1], "props_properties");
+	ASSERT_EQ(sUnitTokens["props"][2], "props_");
+	ASSERT_EQ(sUnitTokens.size(), 6);	// only these got stuff
+
+	ASSERT_EQ(sUnitTokens["props"].size(), 4);	// check it got called
+	ASSERT_EQ(sUnitTokens["props"][3], "LoadValues");
+
+	global::cache_dir.clear();
+	sUnitTokens.clear();
+}
+
 //========================================================================
 //
 // Mockups
@@ -443,7 +521,11 @@ Instance gInstance;
 
 bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 {
-    return true;
+	if(tokens.empty() || tokens[0] != "browser")
+		return false;
+	for(const SString &token : tokens)
+		sUnitTokens["browser"].push_back("browser_" + token);
+	return true;
 }
 
 void Grid_State_c::Init()
@@ -452,11 +534,16 @@ void Grid_State_c::Init()
 
 bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 {
-    return true;
+	if(tokens.empty() || tokens[0] != "props")
+		return false;
+	for(const SString &token : tokens)
+		sUnitTokens["props"].push_back("props_" + token);
+	return true;
 }
 
 void Props_LoadValues(const Instance &inst)
 {
+	sUnitTokens["props"].push_back("LoadValues");
 }
 
 //
@@ -474,7 +561,11 @@ void Instance::ZoomWholeMap()
 
 bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 {
-    return false;
+	if(tokens.empty() || tokens[0] != "grid")
+		return false;
+	for(const SString &token : tokens)
+		sUnitTokens["grid"].push_back("grid_" + token);
+	return true;
 }
 
 void Instance::Render3D_Setup()
@@ -483,17 +574,29 @@ void Instance::Render3D_Setup()
 
 bool Instance::Editor_ParseUser(const std::vector<SString> &tokens)
 {
-    return false;
+	if(tokens.empty() || tokens[0] != "editor")
+		return false;
+	for(const SString &token : tokens)
+		sUnitTokens["editor"].push_back("editor_" + token);
+	return true;
 }
 
 bool Instance::RecUsed_ParseUser(const std::vector<SString> &tokens)
 {
-    return false;
+	if(tokens.empty() || tokens[0] != "recused")
+		return false;
+	for(const SString &token : tokens)
+		sUnitTokens["recused"].push_back("recused_" + token);
+	return true;
 }
 
 bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 {
-    return false;
+	if(tokens.empty() || tokens[0] != "render3d")
+		return false;
+	for(const SString &token : tokens)
+		sUnitTokens["render3d"].push_back("render3d_" + token);
+	return true;
 }
 
 void Instance::Editor_DefaultState()
