@@ -1046,7 +1046,7 @@ int main(int argc, char *argv[])
 
 		// a quick pass through the command line arguments
 		// to handle special options, like --help, --install, --config
-		M_ParseCommandLine(argc - 1, argv + 1, 1);
+		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early);
 
 		if (global::show_help)
 		{
@@ -1086,7 +1086,7 @@ int main(int argc, char *argv[])
 		M_ParseEnvironmentVars();
 
 		// and command line arguments will override both
-		M_ParseCommandLine(argc - 1, argv + 1, 2);
+		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal);
 
 		// TODO: create a new instance
 		gInstance.Editor_Init();

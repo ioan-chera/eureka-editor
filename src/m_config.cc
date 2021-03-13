@@ -1042,7 +1042,7 @@ static void M_AddPwadName(const char *filename)
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, int pass)
+void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
 {
 	const opt_desc_t *o;
 
@@ -1054,7 +1054,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		if (argv[0][0] != '-')
 		{
 			// this is a loose file, handle it now
-			if (pass != 1)
+			if (pass == CommandLinePass::normal)
 				M_AddPwadName(argv[0]);
 
 			argv++;
@@ -1078,7 +1078,8 @@ void M_ParseCommandLine(int argc, const char *const *argv, int pass)
 		}
 
 		// ignore options which are not meant for this pass
-		ignore = !!(o->flags & OptFlag_pass1) != (pass == 1);
+		ignore = !!(o->flags & OptFlag_pass1) !=
+				(pass == CommandLinePass::early);
 
 		switch (o->opt_type)
 		{

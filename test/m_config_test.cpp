@@ -197,10 +197,10 @@ TEST(MConfigArgs, MParseCommandLine)
     std::vector<const char *> argv;
     argv = { "file1", "file 2", "" };
     // First pass doesn't use it
-    M_ParseCommandLine(3, argv.data(), 1);
+    M_ParseCommandLine(3, argv.data(), CommandLinePass::early);
     ASSERT_TRUE(global::Pwad_list.empty());
     // Second pass uses it
-    M_ParseCommandLine(3, argv.data(), 2);
+    M_ParseCommandLine(3, argv.data(), CommandLinePass::normal);
     ASSERT_EQ(global::Pwad_list.size(), 3);
     ASSERT_EQ(global::Pwad_list[0], "file1");
     ASSERT_EQ(global::Pwad_list[1], "file 2");
@@ -210,21 +210,23 @@ TEST(MConfigArgs, MParseCommandLine)
     // Test illegal argument
     argv = { "file", "-unknown-abcxyz" };
 	// Both passes reject invalid settings
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(), 1); }),
+	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
+												   CommandLinePass::early); }),
 				 "unknown option");
-    ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(), 2); }),
+    ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
+												   CommandLinePass::normal); }),
 				 "unknown option");
     global::Pwad_list.clear();
 
     // Test file AND valid arg
 	// Pass 1
 	argv = { "file3", "-home", "home1" };
-	M_ParseCommandLine(3, argv.data(), 1);
+	M_ParseCommandLine(3, argv.data(), CommandLinePass::early);
 	ASSERT_TRUE(global::Pwad_list.empty());
 	ASSERT_EQ(global::home_dir, "home1");
 	global::home_dir.clear();
 	// Pass 2: ignore the -home arg but populate loose files
-	M_ParseCommandLine(3, argv.data(), 2);
+	M_ParseCommandLine(3, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(global::Pwad_list.size(), 1);
 	ASSERT_EQ(global::Pwad_list[0], "file3");
 	ASSERT_TRUE(global::home_dir.empty());
@@ -233,37 +235,41 @@ TEST(MConfigArgs, MParseCommandLine)
 	// Test that missing argument shows error
 	// First pass actively looks for -home
 	argv = { "file4", "-home" };
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(), 1); }),
+	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
+												   CommandLinePass::early); }),
 				 "missing argument");
 	global::Pwad_list.clear();
 	// Second pass still cares about integrity
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(), 2); }),
+	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
+												   CommandLinePass::normal); }),
 				 "missing argument");
 	global::Pwad_list.clear();
 
 	// Test boolean assignment
 	argv = { "-v" };
-	M_ParseCommandLine(1, argv.data(), 1);
+	M_ParseCommandLine(1, argv.data(), CommandLinePass::early);
 	ASSERT_TRUE(global::show_version);
 	global::show_version = false;
 
 	// Reject double-dash short options
 	argv = { "--v" };
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(1, argv.data(), 1); }), "unknown option");
+	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(1, argv.data(),
+												   CommandLinePass::early); }),
+				 "unknown option");
 
 	// Test that anything means true
 	argv = { "--version", "yeah" };
-	M_ParseCommandLine(2, argv.data(), 1);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
 	ASSERT_TRUE(global::show_version);
 	global::show_version = false;
 
 	// Test that second-pass options get ignored in pass 1.
 	// Also combine with loose stuff
 	argv = { "loose file.wad", "", "--file", "doom.wad", "landing page.wad" };
-	M_ParseCommandLine(5, argv.data(), 1);
+	M_ParseCommandLine(5, argv.data(), CommandLinePass::early);
 	ASSERT_TRUE(global::Pwad_list.empty());
 	// On pass 2, they get combined
-	M_ParseCommandLine(5, argv.data(), 2);
+	M_ParseCommandLine(5, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(global::Pwad_list.size(), 4);
 	ASSERT_EQ(global::Pwad_list[0], "loose file.wad");
 	ASSERT_EQ(global::Pwad_list[1], "");
@@ -273,7 +279,7 @@ TEST(MConfigArgs, MParseCommandLine)
 	argv = { "loose file.wad", "", "-f", "doom.wad", "landing page.wad",
 		"--merge", "res1.wad", "res2.wad"
 	};
-	M_ParseCommandLine(8, argv.data(), 2);
+	M_ParseCommandLine(8, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(global::Pwad_list.size(), 4);
 	ASSERT_EQ(global::Pwad_list[0], "loose file.wad");
 	ASSERT_EQ(global::Pwad_list[1], "");
@@ -287,7 +293,7 @@ TEST(MConfigArgs, MParseCommandLine)
 
 	// Test integer stuff
 	argv = { "-backup_max_files", "-23", "--default_gamma", "25" };
-	M_ParseCommandLine(4, argv.data(), 2);
+	M_ParseCommandLine(4, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(config::backup_max_files, -23);
 	ASSERT_EQ(config::usegamma, 25);
 	config::backup_max_files = 30;
@@ -296,35 +302,35 @@ TEST(MConfigArgs, MParseCommandLine)
 	// Test the boolean off options
 	argv = { "-quiet", "off" };
 	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), 1);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
 	ASSERT_FALSE(global::Quiet);
 	argv = { "-q", "no" };
 	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), 1);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
 	ASSERT_FALSE(global::Quiet);
 	argv = { "--quiet", "false" };
 	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), 1);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
 	ASSERT_FALSE(global::Quiet);
 	argv = { "-quiet", "0" };
 	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), 1);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
 	ASSERT_FALSE(global::Quiet);
 
 	// Test the special warp behaviour
 	argv = { "-warp", "map01" };
-	M_ParseCommandLine(2, argv.data(), 2);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(gInstance.Level_name, "map01");	// gets uppercase
 	gInstance.Level_name.clear();
 	// Check that one argument is valid
 	argv = { "--warp", "09" };
-	M_ParseCommandLine(2, argv.data(), 2);
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(gInstance.Level_name, "09");
 	gInstance.Level_name.clear();
 
 	// Check that loose files can be located within
 	argv = { "file1", "-warp", "map01", "file2", "--merge", "res1", "res2" };
-	M_ParseCommandLine(7, argv.data(), 2);
+	M_ParseCommandLine(7, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(global::Pwad_list.size(), 2);
 	ASSERT_EQ(global::Pwad_list[0], "file1");
 	ASSERT_EQ(global::Pwad_list[1], "file2");
@@ -338,7 +344,7 @@ TEST(MConfigArgs, MParseCommandLine)
 
 	// Check that loose files can be located within and arguments can be redone
 	argv = { "file1", "--warp", "map01", "file2", "-warp", "1", "3", "file3" };
-	M_ParseCommandLine(8, argv.data(), 2);
+	M_ParseCommandLine(8, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(global::Pwad_list.size(), 3);
 	ASSERT_EQ(global::Pwad_list[0], "file1");
 	ASSERT_EQ(global::Pwad_list[1], "file2");
@@ -350,7 +356,7 @@ TEST(MConfigArgs, MParseCommandLine)
 	// Check that stringList options can be repeatedly argumented
 	argv = { "file1", "-file", "file2", "-merge", "res1", "--file", "file3",
 		"file4", "-merge", "res2", "res3" };
-	M_ParseCommandLine(11, argv.data(), 2);
+	M_ParseCommandLine(11, argv.data(), CommandLinePass::normal);
 	ASSERT_EQ(global::Pwad_list.size(), 4);
 	ASSERT_EQ(global::Pwad_list[0], "file1");
 	ASSERT_EQ(global::Pwad_list[1], "file2");
