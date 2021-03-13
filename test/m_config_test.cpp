@@ -436,6 +436,44 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	sUnitTokens.clear();
 }
 
+TEST_F(MConfig, InstanceMSaveUserState)
+{
+	Instance inst;
+	ASSERT_FALSE(inst.M_SaveUserState());	// can't save if no location
+	sUnitTokens.clear();
+
+	global::cache_dir = mTempDir;
+	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
+	mDeleteList.push(getChildPath("cache"));
+
+	ASSERT_TRUE(inst.M_SaveUserState());
+	mDeleteList.push(getChildPath("cache/0000000000000001.dat"));
+	global::cache_dir.clear();
+
+	ASSERT_EQ(sUnitTokens["WriteUser"].size(), 6);
+	ASSERT_EQ(sUnitTokens["WriteUser"][0], "editor");
+	ASSERT_EQ(sUnitTokens["WriteUser"][1], "grid");
+	ASSERT_EQ(sUnitTokens["WriteUser"][2], "render3d");
+	ASSERT_EQ(sUnitTokens["WriteUser"][3], "browser");
+	ASSERT_EQ(sUnitTokens["WriteUser"][4], "props");
+	ASSERT_EQ(sUnitTokens["WriteUser"][5], "recused");
+	sUnitTokens.clear();
+}
+
+TEST(MConfigBlank, InstanceMDefaultUserState)
+{
+	sUnitTokens.clear();
+
+	Instance().M_DefaultUserState();
+
+	ASSERT_EQ(sUnitTokens["default"].size(), 4);
+	ASSERT_EQ(sUnitTokens["default"][0], "gridInit");
+	ASSERT_EQ(sUnitTokens["default"][1], "zoomWholeMap");
+	ASSERT_EQ(sUnitTokens["default"][2], "renderSetup");
+	ASSERT_EQ(sUnitTokens["default"][3], "editorDefaultState");
+	sUnitTokens.clear();
+}
+
 //========================================================================
 //
 // Mockups
@@ -530,6 +568,7 @@ bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 
 void Grid_State_c::Init()
 {
+	sUnitTokens["default"].push_back("gridInit");
 }
 
 bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
@@ -557,6 +596,7 @@ rgb_color_t ParseColor(const SString &cstr)
 
 void Instance::ZoomWholeMap()
 {
+	sUnitTokens["default"].push_back("zoomWholeMap");
 }
 
 bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
@@ -570,6 +610,7 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 
 void Instance::Render3D_Setup()
 {
+	sUnitTokens["default"].push_back("renderSetup");
 }
 
 bool Instance::Editor_ParseUser(const std::vector<SString> &tokens)
@@ -601,6 +642,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 
 void Instance::Editor_DefaultState()
 {
+	sUnitTokens["default"].push_back("editorDefaultState");
 }
 
 void Document::getLevelChecksum(crc32_c &crc) const
@@ -609,26 +651,32 @@ void Document::getLevelChecksum(crc32_c &crc) const
 
 void Instance::Grid_WriteUser(std::ostream &os) const
 {
+	sUnitTokens["WriteUser"].push_back("grid");
 }
 
 void Instance::Props_WriteUser(std::ostream &os) const
 {
+	sUnitTokens["WriteUser"].push_back("props");
 }
 
 void Instance::Editor_WriteUser(std::ostream &os) const
 {
+	sUnitTokens["WriteUser"].push_back("editor");
 }
 
 void Instance::Browser_WriteUser(std::ostream &os) const
 {
+	sUnitTokens["WriteUser"].push_back("browser");
 }
 
 void Instance::RecUsed_WriteUser(std::ostream &os) const
 {
+	sUnitTokens["WriteUser"].push_back("recused");
 }
 
 void Instance::Render3D_WriteUser(std::ostream &os) const
 {
+	sUnitTokens["WriteUser"].push_back("render3d");
 }
 
 Grid_State_c::Grid_State_c(Instance &inst) : inst(inst)
