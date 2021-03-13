@@ -40,18 +40,18 @@ int M_ParseLine(const SString &cline, std::vector<SString> &tokens, ParseOptions
 	tokens.clear();
 
 	// skip leading whitespace
-	const char *line = cline.c_str();
-	while (isspace(*line))
-		line++;
+	SString line = cline;
+	line.trimLeadingSpaces();
+	line.trimTrailingSpaces();
 
 	// blank line or comment line?
-	if (*line == 0 || *line == '\n' || *line == '#')
+	if (line.empty() || line[0] == '#')
 		return 0;
 
-	for (;;)
+	for(size_t i = 0; i <= line.size(); ++i)
 	{
-		char ch = *line++;
-
+		// This will also cover the null terminator
+		char ch = line.c_str()[i];
 		if (nexttoken)  // looking for a new token
 		{
 			SYS_ASSERT(!in_string);
