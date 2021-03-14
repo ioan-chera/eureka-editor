@@ -32,6 +32,7 @@ set(_testUtils
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
     ${src}/Errors.cc
+    ${src}/lib_util.cc
     ${src}/m_strings.cc
 )
 add_library(testutils STATIC ${_testUtils})
@@ -89,7 +90,6 @@ endfunction()
 unit_test(lib_file
     lib_file_test.cpp
     SRC lib_file.cc
-        lib_util.cc
         sys_debug.cc
     FLTK
 )
@@ -97,7 +97,6 @@ unit_test(lib_file
 unit_test(m_config
     m_config_test.cpp
     SRC lib_file.cc
-        lib_util.cc
         m_config.cc
         m_parse.cc
         m_streams.cc
@@ -114,8 +113,7 @@ unit_test(independent
     SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
-    SRC lib_util.cc
-        m_bitvec.cc
+    SRC m_bitvec.cc
         m_parse.cc
         m_streams.cc
         sys_debug.cc
