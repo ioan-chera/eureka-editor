@@ -112,6 +112,15 @@ unit_test(m_config
     FLTK
 )
 
+unit_test(m_game
+    m_game_test.cpp
+    SRC lib_file.cc
+        m_game.cc
+        m_parse.cc
+        m_streams.cc
+    FLTK
+)
+
 # Units independent on complex frameworks or libraries
 unit_test(independent
     lib_util_test.cpp
