@@ -339,7 +339,8 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 	SYS_ASSERT(folder.good() && name.good());
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SString &base_dir = (pass == 0) ? global::home_dir : global::install_dir;
+		const SString &base_dir = (pass == 0) ? global::home_dir :
+				global::install_dir;
 
 		if (base_dir.empty())
 			continue;
@@ -375,15 +376,14 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 		noexcept(false)
 {
 	// this is for error messages & debugging
-	char prettyname[256];
-	snprintf(prettyname, sizeof(prettyname), "%s/%s.ugh", folder.c_str(), name.c_str());
+	SString prettyname = folder + "/" + name + ".ugh";
 
-	gLog.printf("Loading Definitions : %s\n", prettyname);
+	gLog.printf("Loading Definitions : %s\n", prettyname.c_str());
 
 	SString filename = FindDefinitionFile(folder, name);
 
 	if (filename.empty())
-		ThrowException("Cannot find definition file: %s\n", prettyname);
+		ThrowException("Cannot find definition file: %s\n", prettyname.c_str());
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
@@ -909,7 +909,8 @@ static bool M_ParseConditional(parser_state_c *pst)
 		return op_not;
 	}
 
-	ThrowException("%s(%d): syntax error in if statement\n", pst->fname.c_str(), pst->lineno);
+	ThrowException("%s(%d): syntax error in if statement\n", pst->fname.c_str(),
+				   pst->lineno);
 	return false;
 }
 
@@ -920,7 +921,8 @@ static void M_ParseSetVar(parser_state_c *pst)
 	int    nargs = pst->argc - 1;
 
 	if (nargs != 2)
-		ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno, pst->argv[0], 1);
+		ThrowException(bad_arg_count, pst->fname.c_str(), pst->lineno,
+					   pst->argv[0], 1);
 
 	if (strlen(argv[0]) < 2 || argv[0][0] != '$')
 		ThrowException("%s(%d): variable name too short or lacks '$' prefix\n",
