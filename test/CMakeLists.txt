@@ -34,6 +34,7 @@ set(_testUtils
     ${src}/Errors.cc
     ${src}/lib_util.cc
     ${src}/m_strings.cc
+    ${src}/sys_debug.cc
 )
 add_library(testutils STATIC ${_testUtils})
 target_link_libraries(testutils PUBLIC gtest_main)
@@ -90,7 +91,6 @@ endfunction()
 unit_test(lib_file
     lib_file_test.cpp
     SRC lib_file.cc
-        sys_debug.cc
     FLTK
 )
 
@@ -100,7 +100,6 @@ unit_test(m_config
         m_config.cc
         m_parse.cc
         m_streams.cc
-        sys_debug.cc
     FLTK
 )
 
@@ -116,7 +115,6 @@ unit_test(independent
     SRC m_bitvec.cc
         m_parse.cc
         m_streams.cc
-        sys_debug.cc
 )
 
 find_package(Python3)
