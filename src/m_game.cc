@@ -24,19 +24,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Errors.h"
 #include "Instance.h"
-#include "main.h"
-
-#include <map>
-#include <algorithm>
-#include <unordered_map>
-
-#include "im_color.h"
 #include "m_streams.h"
-#include "m_game.h"
-#include "e_things.h"
-
 
 #define UNKNOWN_THING_RADIUS  16
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
