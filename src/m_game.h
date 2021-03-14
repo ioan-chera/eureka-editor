@@ -28,8 +28,9 @@
 #define __EUREKA_M_GAME_H__
 
 #include "im_color.h"
+#include "m_strings.h"
 
-#include <map>
+class Instance;
 
 // for this, set/clear/test bits using (1 << MAPF_xxx)
 typedef int map_format_bitset_t;
