@@ -551,7 +551,9 @@ private:
 	void W_ClearSprites();
 	void W_ClearTextures();
 
+
 public:	// will be private when we encapsulate everything
+	std::unordered_map<SString, SString> parse_vars;
 	Document level{*this};	// level data proper
 
 	UI_MainWindow *main_win = nullptr;

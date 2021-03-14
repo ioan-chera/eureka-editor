@@ -41,12 +41,6 @@ namespace global
 	static PortInfo_c *loading_Port;
 }
 
-// variables which are "set" in def files
-namespace global
-{
-	static std::map< SString, SString > parse_vars;
-}
-
 void PortInfo_c::AddSupportedGame(const SString &game)
 {
 	if (! SupportsGame(game))
@@ -90,7 +84,7 @@ void Instance::M_ClearAllDefinitions()
 
 	Misc_info = misc_info_t();
 	// TODO: #58
-	memset(&Features,  0, sizeof(Features));
+	Features = {};
 
 	Misc_info.player_r = 16;
 	Misc_info.player_h = 56;
@@ -107,20 +101,20 @@ void Instance::M_ClearAllDefinitions()
 
 void Instance::M_PrepareConfigVariables()
 {
-	global::parse_vars.clear();
+	parse_vars.clear();
 
 	switch (Level_format)
 	{
 		case MapFormat::doom:
-			global::parse_vars["$MAP_FORMAT"] = "DOOM";
+			parse_vars["$MAP_FORMAT"] = "DOOM";
 			break;
 
 		case MapFormat::hexen:
-			global::parse_vars["$MAP_FORMAT"] = "HEXEN";
+			parse_vars["$MAP_FORMAT"] = "HEXEN";
 			break;
 
 		case MapFormat::udmf:
-			global::parse_vars["$MAP_FORMAT"] = "UDMF";
+			parse_vars["$MAP_FORMAT"] = "UDMF";
 			break;
 
 		default:
@@ -129,23 +123,23 @@ void Instance::M_PrepareConfigVariables()
 
 	if (!Udmf_namespace.empty())
 	{
-		global::parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
+		parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
 	}
 
 	if (!Game_name.empty())
 	{
-		global::parse_vars["$GAME_NAME"] = Game_name;
+		parse_vars["$GAME_NAME"] = Game_name;
 
 		if (M_CanLoadDefinitions("games", Game_name))
 		{
-			SString base_game = M_GetBaseGame(Game_name);
-			global::parse_vars["$BASE_GAME"] = base_game;
+			SString base_game = M_GetBaseGame(*this, Game_name);
+			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
 	if (!Port_name.empty())
 	{
-		global::parse_vars["$PORT_NAME"] = Port_name;
+		parse_vars["$PORT_NAME"] = Port_name;
 	}
 }
 
@@ -387,7 +381,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(this, PURPOSE_Normal, nullptr, filename, folder,
+	M_ParseDefinitionFile(*this, PURPOSE_Normal, nullptr, filename, folder,
 						  prettyname);
 }
 
@@ -880,7 +874,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 }
 
 
-static bool M_ParseConditional(parser_state_c *pst)
+static bool M_ParseConditional(const Instance &inst, parser_state_c *pst)
 {
 	// returns the result of the "IF" test, true or false.
 
@@ -899,12 +893,16 @@ static bool M_ParseConditional(parser_state_c *pst)
 		// tokens are stored in pst->tokenbuf, so this is OK
 		y_strupr(argv[0]);
 
-		SString var_value = global::parse_vars[argv[0]];
+		auto it = inst.parse_vars.find(argv[0]);
+		if(it != inst.parse_vars.end())
+		{
+			const SString &var_value = it->second;
 
-		// test multiple values, only need one to succeed
-		for (int i = 2 ; i < nargs ; i++)
-			if (var_value.noCaseEqual(argv[i]))
-				return op_is;
+			// test multiple values, only need one to succeed
+			for (int i = 2 ; i < nargs ; i++)
+				if (var_value.noCaseEqual(argv[i]))
+					return op_is;
+		}
 
 		return op_not;
 	}
@@ -915,7 +913,7 @@ static bool M_ParseConditional(parser_state_c *pst)
 }
 
 
-static void M_ParseSetVar(parser_state_c *pst)
+static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 {
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
@@ -931,7 +929,7 @@ static void M_ParseSetVar(parser_state_c *pst)
 	// tokens are stored in pst->tokenbuf, so this is OK
 	y_strupr(argv[0]);
 
-	global::parse_vars[argv[0]] = argv[1];
+	inst.parse_vars[argv[0]] = argv[1];
 }
 
 
@@ -942,7 +940,7 @@ static void M_ParseSetVar(parser_state_c *pst)
 //  only minimal parsing occurs, in particular the "include", "set"
 //  and "if".."endif" directives are NOT handled.
 //
-void M_ParseDefinitionFile(Instance *inst,
+void M_ParseDefinitionFile(Instance &inst,
 						   const parse_purpose_e purpose,
 						   void *target,
 						   const SString &filename,
@@ -992,7 +990,8 @@ void M_ParseDefinitionFile(Instance *inst,
 		{
 			parsing_cond_state_t cst;
 
-			cst.cond = M_ParseConditional(pst) ? PCOND_Reading : PCOND_Skipping;
+			cst.cond = M_ParseConditional(inst, pst) ? PCOND_Reading :
+					PCOND_Skipping;
 			cst.start_line = pst->lineno;
 
 			pst->cond_stack.push_back(cst);
@@ -1025,7 +1024,7 @@ void M_ParseDefinitionFile(Instance *inst,
 		// handle setting variables
 		if (y_stricmp(pst->argv[0], "set") == 0)
 		{
-			M_ParseSetVar(pst);
+			M_ParseSetVar(inst, pst);
 			continue;
 		}
 
@@ -1071,10 +1070,9 @@ void M_ParseDefinitionFile(Instance *inst,
 			M_ParsePortInfoLine(pst);
 			continue;
 		}
-		SYS_ASSERT(inst);
 
 		// handle everything else
-		M_ParseNormalLine(*inst, pst);
+		M_ParseNormalLine(inst, pst);
 	}
 
 	// check for an unterminated conditional
@@ -1088,7 +1086,8 @@ void M_ParseDefinitionFile(Instance *inst,
 //
 // Load game info
 //
-static GameInfo M_LoadGameInfo(const SString &game) noexcept(false)
+static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
+		noexcept(false)
 {
 	// already loaded?
 	auto it = global::sLoadedGameDefs.find(game);
@@ -1099,7 +1098,7 @@ static GameInfo M_LoadGameInfo(const SString &game) noexcept(false)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(nullptr, PURPOSE_GameInfo, &loadingGame, filename,
+	M_ParseDefinitionFile(inst, PURPOSE_GameInfo, &loadingGame, filename,
 						  "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		ThrowException("Game definition for '%s' does not set base_game\n",
@@ -1110,7 +1109,7 @@ static GameInfo M_LoadGameInfo(const SString &game) noexcept(false)
 }
 
 
-PortInfo_c * M_LoadPortInfo(const SString &port)
+PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 {
 	std::map<SString, PortInfo_c *>::iterator IT;
 	IT = global::loaded_port_defs.find(port);
@@ -1124,7 +1123,8 @@ PortInfo_c * M_LoadPortInfo(const SString &port)
 
 	global::loading_Port = new PortInfo_c(port);
 
-	M_ParseDefinitionFile(nullptr, PURPOSE_PortInfo, nullptr, filename, "ports", NULL);
+	M_ParseDefinitionFile(inst, PURPOSE_PortInfo, nullptr, filename, "ports",
+						  NULL);
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port->supported_games.empty())
@@ -1188,18 +1188,19 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 
 }
 
-SString M_GetBaseGame(const SString &game)
+SString M_GetBaseGame(Instance &inst, const SString &game)
 {
-	GameInfo ginfo = M_LoadGameInfo(game);
+	GameInfo ginfo = M_LoadGameInfo(inst, game);
 	SYS_ASSERT(ginfo);
 
 	return ginfo.baseGame;
 }
 
 
-map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
+map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
+										  const char *port)
 {
-	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
 	if (pinfo && pinfo->formats != 0)
 		return pinfo->formats;
 
@@ -1211,7 +1212,8 @@ map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port)
 }
 
 
-bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
+bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
+							 const SString &port)
 {
 	if (port == "vanilla")
 	{
@@ -1220,7 +1222,7 @@ bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
 		return true;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(port);
+	PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
 	if (! pinfo)
 		return false;
 
@@ -1237,7 +1239,8 @@ bool M_CheckPortSupportsGame(const SString &base_game, const SString &port)
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name)
+SString M_CollectPortsForMenu(Instance &inst, const char *base_game,
+							  int *exist_val, const char *exist_name)
 {
 	std::vector<SString> list = M_CollectKnownDefs("ports");
 
@@ -1258,7 +1261,7 @@ SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(base_game, list[i]))
+		if (! M_CheckPortSupportsGame(inst, base_game, list[i]))
 			continue;
 
 		if (result[0])

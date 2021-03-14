@@ -263,7 +263,7 @@ enum parse_purpose_e
 	PURPOSE_PortInfo,		// load a PortInfo_c
 };
 
-void M_ParseDefinitionFile(Instance *inst,
+void M_ParseDefinitionFile(Instance &inst,
 						   parse_purpose_e purpose,
 						   void *purposeTarget,
 						   const SString &filename,
@@ -271,17 +271,19 @@ void M_ParseDefinitionFile(Instance *inst,
 						   const SString &prettyname = NULL,
                            int include_level = 0);
 
-PortInfo_c * M_LoadPortInfo(const SString &port);
+PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
-bool M_CheckPortSupportsGame(const SString &base_game, const SString &port);
+bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
+							 const SString &port);
 
 SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
 
-SString M_GetBaseGame(const SString &game);
+SString M_GetBaseGame(Instance &inst, const SString &game);
 
-map_format_bitset_t M_DetermineMapFormats(const char *game, const char *port);
+map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
+										  const char *port);
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"

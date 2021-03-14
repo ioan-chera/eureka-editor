@@ -436,12 +436,13 @@ static void DeterminePort(Instance &inst)
 	if (!inst.Port_name.empty())
 	{
 		if (! M_CanLoadDefinitions("ports", inst.Port_name))
-			ThrowException("Unknown port '%s' (no definition file)\n", inst.Port_name.c_str());
+			ThrowException("Unknown port '%s' (no definition file)\n",
+						   inst.Port_name.c_str());
 
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(inst.Game_name);
+	SString base_game = M_GetBaseGame(inst, inst.Game_name);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -455,7 +456,7 @@ static void DeterminePort(Instance &inst)
 				  config::default_port.c_str());
 		config::default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
+	else if (! M_CheckPortSupportsGame(inst, base_game, config::default_port))
 	{
 		gLog.printf("WARNING: Default port '%s' not compatible with '%s'\n",
 				  config::default_port.c_str(), inst.Game_name.c_str());
@@ -819,7 +820,7 @@ void Instance::LoadResourceFile(const SString &filename)
 	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(this, PURPOSE_Resource, nullptr, filename);
+		M_ParseDefinitionFile(*this, PURPOSE_Resource, nullptr, filename);
 		return;
 	}
 
@@ -871,10 +872,10 @@ void Instance::ReadPortInfo() noexcept(false)
 
 	SYS_ASSERT(!Port_name.empty());
 
-	SString base_game = M_GetBaseGame(Game_name);
+	SString base_game = M_GetBaseGame(*this, Game_name);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(base_game, Port_name))
+	if (! M_CheckPortSupportsGame(*this, base_game, Port_name))
 	{
 		gLog.printf("WARNING: the port '%s' is not compatible with the game "
 					"'%s'\n", Port_name.c_str(), Game_name.c_str());
