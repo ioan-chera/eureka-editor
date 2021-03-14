@@ -198,15 +198,18 @@ static void CreateHomeDirs()
 
 #ifdef __APPLE__
    // IOANCH 20130825: modified to use name-independent calls
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::library, nullptr).c_str());
-	FileMakeDir(dir_name);
-
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
+	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::library,
 														 nullptr).c_str());
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::libraryCache,
-														 nullptr).c_str());
+	fl_filename_expand(dir_name,
+					   OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
+											   nullptr).c_str());
+	FileMakeDir(dir_name);
+
+	fl_filename_expand(dir_name,
+					   OSX_UserDomainDirectory(macOSDirType::libraryCache,
+											   nullptr).c_str());
 	FileMakeDir(dir_name);
 #endif
 
@@ -235,7 +238,7 @@ static void CreateHomeDirs()
 }
 
 
-static void Determine_HomeDir(const char *argv0)
+static void Determine_HomeDir(const char *argv0) noexcept(false)
 {
 	// already set by cmd-line option?
 	if (global::home_dir.empty())
@@ -245,7 +248,8 @@ static void Determine_HomeDir(const char *argv0)
 	// if that fails, use a folder at the EXE location
 
 		wchar_t *wpath = nullptr;
-		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &wpath)))
+		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr,
+										  &wpath)))
 		{
 			global::home_dir = WideToUTF8(wpath) + "\\EurekaEditor";
 			CoTaskMemFree(wpath);
@@ -256,28 +260,31 @@ static void Determine_HomeDir(const char *argv0)
 			global::home_dir = global::install_dir + "\\app_data";
 		}
 		wpath = nullptr;
-		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &wpath)))
+		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr,
+										  &wpath)))
 		{
 			global::cache_dir = WideToUTF8(wpath) + "\\EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 
 #elif defined(__APPLE__)
-	char path[FL_PATH_MAX + 4];
+		char path[FL_PATH_MAX + 4];
 
-   fl_filename_expand(path, OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
-													"eureka-editor").c_str());
-   global::home_dir = path;
+		fl_filename_expand(path,
+						OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
+												"eureka-editor").c_str());
+		global::home_dir = path;
 
-   fl_filename_expand(path, OSX_UserDomainDirectory(macOSDirType::libraryCache,
-													"eureka-editor").c_str());
+		fl_filename_expand(path,
+						   OSX_UserDomainDirectory(macOSDirType::libraryCache,
+												   "eureka-editor").c_str());
 		global::cache_dir = path;
 
 #else  // UNIX
-	char path[FL_PATH_MAX + 4];
+		char path[FL_PATH_MAX + 4];
 
-	if (fl_filename_expand(path, "$HOME/.eureka"))
-		global::home_dir = path;
+		if (fl_filename_expand(path, "$HOME/.eureka"))
+			global::home_dir = path;
 #endif
 	}
 
@@ -298,7 +305,7 @@ static void Determine_HomeDir(const char *argv0)
 }
 
 
-static void Determine_InstallPath(const char *argv0)
+static void Determine_InstallPath(const char *argv0) noexcept(false)
 {
 	// already set by cmd-line option?
 	if (global::install_dir.empty())
@@ -307,30 +314,31 @@ static void Determine_InstallPath(const char *argv0)
 		global::install_dir = GetExecutablePath(argv0);
 
 #else
-	static const char *prefixes[] =
-	{
-		"/usr/local",
-		"/usr",
-		"/opt",
-		NULL
-	};
+		static const char *prefixes[] =
+		{
+			"/usr/local",
+			"/usr",
+			"/opt",
+			NULL
+		};
 
-	for (int i = 0 ; prefixes[i] ; i++)
-	{
-		global::install_dir = SString(prefixes[i]) + "/share/eureka";
+		for (int i = 0 ; prefixes[i] ; i++)
+		{
+			global::install_dir = SString(prefixes[i]) + "/share/eureka";
 
-		SString filename = global::install_dir + "/games/doom2.ugh";
+			SString filename = global::install_dir + "/games/doom2.ugh";
 
-		gLog.debugPrintf("Trying install path: %s\n", global::install_dir.c_str());
-		gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
+			gLog.debugPrintf("Trying install path: %s\n",
+							 global::install_dir.c_str());
+			gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
 
-		bool exists = FileExists(filename);
+			bool exists = FileExists(filename);
 
-		if (exists)
-			break;
+			if (exists)
+				break;
 
-		global::install_dir.clear();
-	}
+			global::install_dir.clear();
+		}
 #endif
 	}
 
@@ -351,7 +359,8 @@ static void Determine_InstallPath(const char *argv0)
 SString GameNameFromIWAD(const SString &iwad_name)
 {
 	char game_name[FL_PATH_MAX];
-	StringCopy(game_name, sizeof(game_name), fl_filename_name(iwad_name.c_str()));
+	StringCopy(game_name, sizeof(game_name),
+			   fl_filename_name(iwad_name.c_str()));
 
 	fl_filename_setext(game_name, "");
 
@@ -843,7 +852,7 @@ bool Instance::Main_LoadIWAD()
 }
 
 
-void Instance::ReadGameInfo()
+void Instance::ReadGameInfo() noexcept(false)
 {
 	Game_name = GameNameFromIWAD(Iwad_name);
 
@@ -854,7 +863,7 @@ void Instance::ReadGameInfo()
 }
 
 
-void Instance::ReadPortInfo()
+void Instance::ReadPortInfo() noexcept(false)
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
@@ -867,17 +876,18 @@ void Instance::ReadPortInfo()
 	// warn user if this port is incompatible with the game
 	if (! M_CheckPortSupportsGame(base_game, Port_name))
 	{
-		gLog.printf("WARNING: the port '%s' is not compatible with the game '%s'\n",
-			Port_name.c_str(), Game_name.c_str());
+		gLog.printf("WARNING: the port '%s' is not compatible with the game "
+					"'%s'\n", Port_name.c_str(), Game_name.c_str());
 
 		int res = DLG_Confirm({ "&vanilla", "No Change" },
-						"Warning: the given port '%s' is not compatible with "
-						"this game (%s)."
-						"\n\n"
-						"To prevent seeing invalid line and sector types, "
-						"it is recommended to reset the port to something valid.\n"
-						"Select a new port now?",
-			Port_name.c_str(), Game_name.c_str());
+							  "Warning: the given port '%s' is not compatible "
+							  "with this game (%s)."
+							  "\n\n"
+							  "To prevent seeing invalid line and sector "
+							  "types, it is recommended to reset the port to "
+							  "something valid.\n"
+							  "Select a new port now?",
+							  Port_name.c_str(), Game_name.c_str());
 
 		if (res == 0)
 		{
@@ -1053,7 +1063,7 @@ int main(int argc, char *argv[])
 			ShowHelp();
 			return 0;
 		}
-		else if (global::show_version)
+		if (global::show_version)
 		{
 			ShowVersion();
 			return 0;
@@ -1076,7 +1086,8 @@ int main(int argc, char *argv[])
 		Determine_HomeDir(argv[0]);
 
 		if(!gLog.openFile(global::log_file))
-			gLog.printf("WARNING: failed opening log file '%s'\n", global::log_file.c_str());
+			gLog.printf("WARNING: failed opening log file '%s'\n",
+						global::log_file.c_str());
 
 
 		// load all the config settings

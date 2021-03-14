@@ -123,7 +123,7 @@ enum class CommandLinePass
 
 /* ==== FUNCTIONS ==================== */
 
-int M_ParseConfigFile();
+int M_ParseConfigFile() noexcept(false);
 int M_WriteConfigFile();
 
 int M_ParseDefaultConfigFile();

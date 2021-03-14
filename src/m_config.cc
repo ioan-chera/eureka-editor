@@ -838,7 +838,8 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	size_t pos = line.find_first_not_of(IDENT_SET);
 	if(pos == std::string::npos || !isspace(line[pos]))
 	{
-		gLog.printf("WARNING: %s(%u): bad line, no space after keyword.\n", basename.c_str(), lnum);
+		gLog.printf("WARNING: %s(%u): bad line, no space after keyword.\n",
+					basename.c_str(), lnum);
 		return 0;
 	}
 
@@ -849,7 +850,8 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	value.trimLeadingSpaces();
 	if(value.empty())
 	{
-		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n", basename.c_str(), lnum);
+		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n",
+					basename.c_str(), lnum);
 		return 0;
 	}
 
@@ -861,7 +863,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 		if (opt->opt_type == OptType::end)
 		{
 			gLog.printf("WARNING: %s(%u): invalid option '%s', skipping\n",
-					  basename.c_str(), lnum, line.c_str());
+						basename.c_str(), lnum, line.c_str());
 			return 0;
 		}
 
@@ -871,8 +873,8 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 		// pre-pass options (like --help) don't make sense in a config file
 		if (opt->flags & OptFlag_pass1)
 		{
-			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config files.\n",
-					  basename.c_str(), lnum, line.c_str());
+			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config "
+						"files.\n", basename.c_str(), lnum, line.c_str());
 			return 0;
 		}
 
@@ -883,8 +885,8 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 	switch (opt->opt_type)
 	{
         case OptType::boolean:
-			if(value.noCaseEqual("no") || value.noCaseEqual("false") || value.noCaseEqual("off") ||
-			   value.noCaseEqual("0"))
+			if(value.noCaseEqual("no") || value.noCaseEqual("false") ||
+			   value.noCaseEqual("off") || value.noCaseEqual("0"))
 			{
 				*((bool *) (opt->data_ptr)) = false;
 			}
@@ -960,7 +962,7 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 }
 
 
-inline static SString default_config_file()
+inline static SString default_config_file() noexcept(false)
 {
 	if(global::home_dir.empty())
 		ThrowException("Home directory not set.");
@@ -974,7 +976,7 @@ inline static SString default_config_file()
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile()
+int M_ParseConfigFile() noexcept(false)
 {
 	if (global::config_file.empty())
 	{

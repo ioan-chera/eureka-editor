@@ -520,9 +520,10 @@ private:
 	// MAIN
 	void LoadResourceFile(const SString& filename);
 	void M_FreeAllDefinitions();
-	void M_LoadDefinitions(const SString &folder, const SString &name);
-	void ReadGameInfo();
-	void ReadPortInfo();
+	void M_LoadDefinitions(const SString &folder, const SString &name)
+			noexcept(false);
+	void ReadGameInfo() noexcept(false);
+	void ReadPortInfo() noexcept(false);
 
 	// R_GRID
 	bool Grid_ParseUser(const std::vector<SString> &tokens);

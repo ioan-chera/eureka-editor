@@ -383,6 +383,7 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 //           "ports" + "edge"
 //
 void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
+		noexcept(false)
 {
 	// this is for error messages & debugging
 	char prettyname[256];
@@ -397,7 +398,8 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(this, PURPOSE_Normal, nullptr, filename, folder, prettyname);
+	M_ParseDefinitionFile(this, PURPOSE_Normal, nullptr, filename, folder,
+						  prettyname);
 }
 
 
@@ -1095,7 +1097,7 @@ void M_ParseDefinitionFile(Instance *inst,
 //
 // Load game info
 //
-static GameInfo M_LoadGameInfo(const SString &game)
+static GameInfo M_LoadGameInfo(const SString &game) noexcept(false)
 {
 	// already loaded?
 	auto it = global::sLoadedGameDefs.find(game);
@@ -1106,9 +1108,11 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(nullptr, PURPOSE_GameInfo, &loadingGame, filename, "games", nullptr);
+	M_ParseDefinitionFile(nullptr, PURPOSE_GameInfo, &loadingGame, filename,
+						  "games", nullptr);
 	if(loadingGame.baseGame.empty())
-		ThrowException("Game definition for '%s' does not set base_game\n", game.c_str());
+		ThrowException("Game definition for '%s' does not set base_game\n",
+					   game.c_str());
 
 	global::sLoadedGameDefs[game] = loadingGame;
 	return loadingGame;
