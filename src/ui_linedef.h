@@ -26,10 +26,9 @@
 class UI_LineBox : public Fl_Group
 {
 private:
-	int obj;
-	int count;
+	int obj = -1;
+	int count = 0;
 
-public:
 	UI_Nombre *which;
 
 	UI_DynInput  *type;
@@ -66,10 +65,9 @@ public:
 	Instance &inst;
 
 public:
-	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
+	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
 	virtual ~UI_LineBox();
 
-public:
 	void SetObj(int _index, int _count);
 
 	int GetObj() const { return obj; }
@@ -108,7 +106,6 @@ private:
 
 	const char *GeneralizedDesc(int type_num);
 
-private:
 	static void    type_callback(Fl_Widget *, void *);
 	static void dyntype_callback(Fl_Widget *, void *);
 

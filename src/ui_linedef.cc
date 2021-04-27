@@ -59,8 +59,7 @@ public:
 // UI_LineBox Constructor
 //
 UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0), inst(inst)
+    Fl_Group(X, Y, W, H, label), inst(inst)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
