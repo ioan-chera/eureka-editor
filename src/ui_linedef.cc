@@ -37,6 +37,39 @@
 #define MLF_ALL_AUTOMAP  \
 	MLF_Secret | MLF_Mapped | MLF_DontDraw | MLF_XDoom_Translucent
 
+enum
+{
+	INSET_LEFT = 6,
+	INSET_TOP = 6,
+	INSET_RIGHT = 6,
+	INSET_BOTTOM = 5,
+
+	NOMBRE_INSET = 6,
+	NOMBRE_HEIGHT = 28,
+	SPACING_BELOW_NOMBRE = 4,
+
+	TYPE_INPUT_X = 58,
+	TYPE_INPUT_WIDTH = 75,
+	TYPE_INPUT_HEIGHT = 24,
+
+	BUTTON_SPACING = 10,
+	CHOOSE_BUTTON_WIDTH = 80,
+
+	GEN_BUTTON_WIDTH = 55,
+	GEN_BUTTON_RIGHT_PADDING = 10,
+
+	INPUT_SPACING = 2,
+
+	DESC_INSET = 10,
+	DESC_WIDTH = 48,
+
+	SPAC_WIDTH = 57,
+
+	TAG_WIDTH = 64,
+	ARG_WIDTH = 42,
+	ARG_PADDING = 5,
+};
+
 
 class line_flag_CB_data_c
 {
@@ -45,12 +78,8 @@ public:
 
 	int mask;
 
-public:
 	line_flag_CB_data_c(UI_LineBox *_parent, int _mask) :
 		parent(_parent), mask(_mask)
-	{ }
-
-	~line_flag_CB_data_c()
 	{ }
 };
 
@@ -64,41 +93,41 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
 
-	X += 6;
-	Y += 6;
+	X += INSET_LEFT;
+	Y += INSET_TOP;
 
-	W -= 12;
-	H -= 10;
-
-
-	which = new UI_Nombre(X+6, Y, W-12, 28, "Linedef");
-
-	Y += which->h() + 4;
+	W -= INSET_LEFT + INSET_RIGHT;
+	H -= INSET_TOP + INSET_BOTTOM;
 
 
-	type = new UI_DynInput(X+58, Y, 75, 24, "Type: ");
+	which = new UI_Nombre(X + NOMBRE_INSET, Y, W - 2 * NOMBRE_INSET, NOMBRE_HEIGHT, "Linedef");
+
+	Y += which->h() + SPACING_BELOW_NOMBRE;
+
+
+	type = new UI_DynInput(X + TYPE_INPUT_X, Y, TYPE_INPUT_WIDTH, TYPE_INPUT_HEIGHT, "Type: ");
 	type->align(FL_ALIGN_LEFT);
 	type->callback(type_callback, this);
 	type->callback2(dyntype_callback, this);
 	type->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	type->type(FL_INT_INPUT);
 
-	choose = new Fl_Button(X+W/2-5, Y, 80, 24, "Choose");
+	choose = new Fl_Button(type->x() + type->w() + BUTTON_SPACING, Y, CHOOSE_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Choose");
 	choose->callback(button_callback, this);
 
-	gen = new Fl_Button(X+W-60, Y, 50, 24, "Gen");
+	gen = new Fl_Button(choose->x() + choose->w() + BUTTON_SPACING, Y, GEN_BUTTON_WIDTH, TYPE_INPUT_HEIGHT, "Gen");
 	gen->callback(button_callback, this);
 
-	Y += type->h() + 2;
+	Y += type->h() + INPUT_SPACING;
 
 
-	new Fl_Box(FL_NO_BOX, X+10, Y, 48, 24, "Desc: ");
+	new Fl_Box(FL_NO_BOX, X + DESC_INSET, Y, DESC_WIDTH, TYPE_INPUT_HEIGHT, "Desc: ");
 
-	desc = new Fl_Output(type->x(), Y, W-66, 24);
+	desc = new Fl_Output(type->x(), Y, W - type->x(), TYPE_INPUT_HEIGHT);
 	desc->align(FL_ALIGN_LEFT);
 
 
-	actkind = new Fl_Choice(X+58, Y, 57, 24);
+	actkind = new Fl_Choice(type->x(), Y, SPAC_WIDTH, TYPE_INPUT_HEIGHT);
 	// this order must match the SPAC_XXX constants
 	actkind->add("W1|WR|S1|SR|M1|MR|G1|GR|P1|PR|X1|XR|??");
 	actkind->value(12);
@@ -106,16 +135,16 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	actkind->deactivate();
 	actkind->hide();
 
-	Y += desc->h() + 2;
+	Y += desc->h() + INPUT_SPACING;
 
 
-	tag = new Fl_Int_Input(X+58, Y, 64, 24, "Tag: ");
+	tag = new Fl_Int_Input(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	length = new Fl_Int_Input(X+W/2+58, Y, 64, 24, "Length: ");
+	length = new Fl_Int_Input(type->x() + W/2, Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Length: ");
 	length->align(FL_ALIGN_LEFT);
 	length->callback(length_callback, this);
 	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -123,7 +152,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new Fl_Int_Input(X+58+47*a, Y, 42, 24);
+		args[a] = new Fl_Int_Input(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
 		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
@@ -147,57 +176,40 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += flags->h() - 1;
 
+	static const int FW = 110;
 
-	int FW = 110;
+	auto addCheckBox = [this, &X, &Y, &W](bool right, const char *text, int flag)
+	{
+		auto check = new Fl_Check_Button(X + (right ? W - 120 : 28), Y + 2, FW, 20, text);
+		check->labelsize(12);
+		check->callback(flags_callback, new line_flag_CB_data_c(this, flag));
+		return check;
+	};
 
-	f_upper = new Fl_Check_Button(X+28, Y+2, FW, 20, "upper unpeg");
-	f_upper->labelsize(12);
-	f_upper->callback(flags_callback, new line_flag_CB_data_c(this, MLF_UpperUnpegged));
-
-	f_walk = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "impassible");
-	f_walk->labelsize(12);
-	f_walk->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Blocking));
-
-	Y += 19;
-
-
-	f_lower = new Fl_Check_Button(X+28, Y+2, FW, 20, "lower unpeg");
-	f_lower->labelsize(12);
-	f_lower->callback(flags_callback, new line_flag_CB_data_c(this, MLF_LowerUnpegged));
-
-	f_mons = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block mons");
-	f_mons->labelsize(12);
-	f_mons->callback(flags_callback, new line_flag_CB_data_c(this, MLF_BlockMonsters));
+	f_upper = addCheckBox(false, "upper unpeg", MLF_UpperUnpegged);
+	f_walk = addCheckBox(true, "impassable", MLF_Blocking);
 
 	Y += 19;
 
+	f_lower = addCheckBox(false, "lower unpeg", MLF_LowerUnpegged);
+	f_mons = addCheckBox(true, "block mons", MLF_BlockMonsters);
 
-	f_passthru = new Fl_Check_Button(X+28, Y+2, FW, 20, "pass thru");
-	f_passthru->labelsize(12);
-	f_passthru->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Boom_PassThru));
+	Y += 19;
+
+	f_passthru = addCheckBox(false, "pass thru", MLF_Boom_PassThru);
 	f_passthru->hide();
 
-	f_jumpover = new Fl_Check_Button(X+28, Y+2, FW, 20, "jump over");
-	f_jumpover->labelsize(12);
-	f_jumpover->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_JumpOver));
+	f_jumpover = addCheckBox(false, "jump over", MLF_Strife_JumpOver);
 	f_jumpover->hide();
 
-	f_sound = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "sound block");
-	f_sound->labelsize(12);
-	f_sound->callback(flags_callback, new line_flag_CB_data_c(this, MLF_SoundBlock));
+	f_sound = addCheckBox(true, "sound block", MLF_SoundBlock);
 
 	Y += 19;
 
-
-	f_3dmidtex = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "3D MidTex");
-	f_3dmidtex->labelsize(12);
-	f_3dmidtex->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Eternity_3DMidTex));
+	f_3dmidtex = addCheckBox(true, "3D MidTex", MLF_Eternity_3DMidTex);
 	f_3dmidtex->hide();
 
-
-	f_trans1 = new Fl_Check_Button(X+28, Y+2, FW, 20, "");
-	f_trans1->labelsize(12);
-	f_trans1->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent1));
+	f_trans1 = addCheckBox(false, "", MLF_Strife_Translucent1);
 	f_trans1->hide();
 
 	f_trans2 = new Fl_Check_Button(X+44, Y+2, FW, 20, "translucency");
@@ -205,10 +217,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	f_trans2->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_Translucent2));
 	f_trans2->hide();
 
-
-	f_flyers = new Fl_Check_Button(X+W-120, Y+2, FW, 20, "block flyers");
-	f_flyers->labelsize(12);
-	f_flyers->callback(flags_callback, new line_flag_CB_data_c(this, MLF_Strife_BlockFloaters));
+	f_flyers = addCheckBox(true, "block flyers", MLF_Strife_BlockFloaters);
 	f_flyers->hide();
 
 	Y += 29;
@@ -226,7 +235,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	end();
 
-	resizable(NULL);
+	resizable(nullptr);
 }
 
 
@@ -299,24 +308,32 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	{
 		if (L->OneSided())
 		{
-			if (parts & PART_RT_LOWER) inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (parts & PART_RT_UPPER) inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_LOWER) 
+				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_UPPER) 
+				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
 		}
 
 		if (L->Right(inst.level))
 		{
-			if (parts & PART_RT_LOWER) inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_RT_UPPER) inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_RT_RAIL)  inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_RT_LOWER) 
+				inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_RT_UPPER) 
+				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_RT_RAIL)  
+				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
 		if (L->Left(inst.level))
 		{
-			if (parts & PART_LF_LOWER) inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_LF_UPPER) inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_LF_RAIL)  inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
+			if (parts & PART_LF_LOWER) 
+				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+			if (parts & PART_LF_UPPER) 
+				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+			if (parts & PART_LF_RAIL)  
+				inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
 	}
