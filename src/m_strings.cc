@@ -121,10 +121,12 @@ char *StringDup(const char *orig, int limit)
 
 	if (limit < 0)
 	{
-		char *s = strdup(orig);
+		auto s = static_cast<char *>(malloc(strlen(orig) + 1));
 
 		if (! s)
 			ThrowException("Out of memory (copy string)\n");
+
+		strcpy(s, orig);
 
 		return s;
 	}

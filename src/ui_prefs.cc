@@ -225,7 +225,7 @@ private:
 
 			snprintf(buffer, sizeof(buffer), "%s/%s", cmd->group_name, cmd->name);
 
-			func_choose->add(buffer, 0, 0, (void *)(long)i, 0 /* flags */);
+			func_choose->add(buffer, 0, 0, (void *)(intptr_t)i, 0 /* flags */);
 
 			if (find_name && strcmp(cmd->name, find_name) == 0)
 			{
@@ -396,7 +396,7 @@ private:
 	{
 		UI_EditKey *dialog = (UI_EditKey *)data;
 
-		int cmd_index = (int)(long)w->mvalue()->user_data_;
+		int cmd_index = (int)(intptr_t)w->mvalue()->user_data_;
 		SYS_ASSERT(cmd_index >= 0);
 
 		dialog->SetNewFunction(cmd_index);

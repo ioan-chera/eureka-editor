@@ -8,6 +8,8 @@ project(eureka-editor VERSION 2.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+
 # https://stackoverflow.com/a/66401708/11738219
 function(add_path_resource target folder)
     file(GLOB_RECURSE resources "${CMAKE_CURRENT_SOURCE_DIR}/${folder}/*")

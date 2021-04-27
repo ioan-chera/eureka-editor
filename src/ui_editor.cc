@@ -676,7 +676,7 @@ void UI_TextEditor::InsertFile()
 	while (file.readLine(line))
 	{
 		tbuf->insert(pos, line.c_str());
-		pos += line.length();;
+		pos += static_cast<int>(line.length());
 
 		tbuf->insert(pos, "\n");
 		pos += 1;

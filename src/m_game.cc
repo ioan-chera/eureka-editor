@@ -1252,7 +1252,7 @@ SString M_CollectPortsForMenu(Instance &inst, const char *base_game,
 	unsigned int i;
 
 	for (i = 0 ; i < list.size() ; i++)
-		length += list[i].length();
+		length += static_cast<int>(list[i].length());
 
 	SString result;
 	result.reserve(length);
