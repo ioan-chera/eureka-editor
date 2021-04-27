@@ -509,7 +509,7 @@ void Instance::CheckBeginDrag()
 	int pixel_dx = Fl::event_x() - edit.click_screen_x;
 	int pixel_dy = Fl::event_y() - edit.click_screen_y;
 
-	if (MAX(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
+	if (std::max(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
 		return;
 
 	// if highlighted object is in selection, we drag the selection,
@@ -854,8 +854,8 @@ void Instance::Transform_Update()
 	{
 		case TRANS_K_Scale:
 		case TRANS_K_RotScale:
-			dx1 = MAX(abs(dx1), abs(dy1));
-			dx0 = MAX(abs(dx0), abs(dy0));
+			dx1 = std::max(abs(dx1), abs(dy1));
+			dx0 = std::max(abs(dx0), abs(dy0));
 
 			if (dx0)
 			{

@@ -462,7 +462,7 @@ int Wad_file::LevelFindByNumber(int number)
 		return index;
 
 	// otherwise try E#M#
-	snprintf(buffer, sizeof(buffer), "E%dM%d", MAX(1, number / 10), number % 10);
+	snprintf(buffer, sizeof(buffer), "E%dM%d", std::max(1, number / 10), number % 10);
 
 	index = LevelFind(buffer);
 	if (index >= 0)

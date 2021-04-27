@@ -155,7 +155,7 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 	double dx = var_x - start_x;
 	double dy = var_y - start_y;
 
-	double len = MAX(abs(dx), abs(dy));
+	double len = std::max(abs(dx), abs(dy));
 
 	int sign_x = (dx >= 0) ? +1 : -1;
 	int sign_y = (dy >= 0) ? +1 : -1;

@@ -1077,8 +1077,8 @@ static void backup_scan_file(const SString &name, int flags, void *priv_dat)
 
 	int num = atoi(name);
 
-	data->low  = MIN(data->low,  num);
-	data->high = MAX(data->high, num);
+	data->low  = std::min(data->low,  num);
+	data->high = std::max(data->high, num);
 }
 
 

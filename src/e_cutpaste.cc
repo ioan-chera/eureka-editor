@@ -941,7 +941,7 @@ static void UnusedLineDefs(const Document &doc, selection_c *sectors, selection_
 		int right_m = (L->right < 0) ? -1 : sectors->get(L->Right(doc)->sector) ? 0 : 1;
 		int  left_m = (L->left  < 0) ? -1 : sectors->get(L->Left(doc) ->sector) ? 0 : 1;
 
-		if (MAX(right_m, left_m) == 0)
+		if (std::max(right_m, left_m) == 0)
 		{
 			result->set(n);
 		}

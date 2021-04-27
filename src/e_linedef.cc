@@ -186,18 +186,18 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 
 	if (part == 'r')
 	{
-		*z1 = MAX(front->floorh, back->floorh);
-		*z2 = MIN(front->ceilh,  back->ceilh);
+		*z1 = std::max(front->floorh, back->floorh);
+		*z2 = std::min(front->ceilh,  back->ceilh);
 	}
 	else if (part == 'u')
 	{
 		*z2 = front->ceilh;
-		*z1 = MIN(*z2, back->ceilh);
+		*z1 = std::min(*z2, back->ceilh);
 	}
 	else  // part == 'l'
 	{
 		*z1 = front->floorh;
-		*z2 = MAX(*z1, back->floorh);
+		*z2 = std::max(*z1, back->floorh);
 	}
 }
 
@@ -225,7 +225,7 @@ int LinedefModule::scoreTextureMatch(const Objid& adj, const Objid& cur) const
 		return 1;
 
 	// no overlap?
-	int overlap = MIN(adj_z2, cur_z2) - MAX(adj_z1, cur_z1);
+	int overlap = std::min(adj_z2, cur_z2) - std::max(adj_z1, cur_z1);
 
 	if (overlap <= 0)
 		return 2;
@@ -1510,8 +1510,8 @@ bool Instance::LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef 
 	if (is_null_tex(rail_tex))
 		return false;
 
-	z1 = MAX(front->floorh, back->floorh);
-	z2 = MIN(front->ceilh,  back->ceilh);
+	z1 = std::max(front->floorh, back->floorh);
+	z2 = std::min(front->ceilh,  back->ceilh);
 
 	if (z2 <= z1)
 		return false;

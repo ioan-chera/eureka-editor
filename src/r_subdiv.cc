@@ -783,8 +783,10 @@ fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%
 			{
 				active_num++;
 
-				if (A->y1 > low_y) high_y = MIN(high_y, A->y1);
-				if (A->y2 > low_y) high_y = MIN(high_y, A->y2);
+				if (A->y1 > low_y) 
+					high_y = std::min(high_y, A->y1);
+				if (A->y2 > low_y) 
+					high_y = std::min(high_y, A->y2);
 			}
 		}
 

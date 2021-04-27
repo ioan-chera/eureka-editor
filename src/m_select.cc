@@ -388,7 +388,7 @@ void selection_c::RecomputeMaxObj()
 		// cannot optimise here, values are not sorted
 		for (int i = 0 ; i < count ; i++)
 		{
-			maxobj = MAX(maxobj, objs[i]);
+			maxobj = std::max(maxobj, objs[i]);
 		}
 	}
 }
@@ -401,7 +401,7 @@ void selection_c::ResizeExtended(int new_size)
 	byte *d = new byte[new_size];
 
 	// copy existing values
-	memcpy(d, extended, (size_t)MIN(ext_size, new_size));
+	memcpy(d, extended, (size_t)std::min(ext_size, new_size));
 
 	// clear values at top end
 	if (new_size > ext_size)

@@ -472,7 +472,7 @@ bool UI_Browser_Box::Filter(bool force_update)
 
 		cx += item->w();
 
-		highest = MAX(highest, item->h());
+		highest = std::max(highest, item->h());
 	}
 
 	scroll->Init_sizes();
@@ -698,12 +698,12 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 			snprintf(full_desc, sizeof(full_desc), "%-8s", name.c_str());
 
 		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
-		int pic_h = (kind == 'F') ? 64 : MIN(128, MAX(4, image->height()));
+		int pic_h = (kind == 'F') ? 64 : std::min(128, std::max(4, image->height()));
 
 		if (config::browser_small_tex && imkind == 'T')
 		{
 			pic_w = 64;
-			pic_h = MIN(64, MAX(4, image->height()));
+			pic_h = std::min(64, std::max(4, image->height()));
 		}
 
 		if (image->width() >= 256 && image->height() == 128)
@@ -712,8 +712,8 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 			pic_h = 64;
 		}
 
-		int item_w = 8 + MAX(pic_w, 64) + 2;
-		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
+		int item_w = 8 + std::max(pic_w, 64) + 2;
+		int item_h = 4 + std::max(pic_h, 16) + 2 + 24 + 4;
 
 		char item_cat = 0;
 
@@ -780,8 +780,8 @@ void UI_Browser_Box::Populate_Sprites()
 		int pic_w = 64;
 		int pic_h = 72;
 
-		int item_w = 8 + MAX(pic_w, 64) + 2;
-		int item_h = 4 + MAX(pic_h, 16) + 2 + 24 + 4;
+		int item_w = 8 + std::max(pic_w, 64) + 2;
+		int item_h = 4 + std::max(pic_h, 16) + 2 + 24 + 4;
 
 		UI_Pic *pic = new UI_Pic(inst, cx + 8, cy + 4, pic_w, pic_h);
 

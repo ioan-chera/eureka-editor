@@ -1702,10 +1702,10 @@ static bool ThingStuckInThing(const Instance &inst, const Thing *T1, const thing
 	int r2 = info2->radius;
 
 	if (info1->group == 'm' && info2->group != 'p')
-		r1 = MAX(4, r1 - MONSTER_STEP_DIST);
+		r1 = std::max(4, r1 - MONSTER_STEP_DIST);
 
 	else if (info2->group == 'm' && info1->group != 'p')
-		r2 = MAX(4, r2 - MONSTER_STEP_DIST);
+		r2 = std::max(4, r2 - MONSTER_STEP_DIST);
 
 	if (T1->x() - r1 >= T2->x() + r2) return false;
 	if (T1->y() - r1 >= T2->y() + r2) return false;
@@ -1768,8 +1768,8 @@ static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
 	const Sector *S1 = L->Right(doc)->SecRef(doc);
 	const Sector *S2 = L-> Left(doc)->SecRef(doc);
 
-	int f_max = MAX(S1->floorh, S2->floorh);
-	int c_min = MIN(S1-> ceilh, S2-> ceilh);
+	int f_max = std::max(S1->floorh, S2->floorh);
+	int c_min = std::min(S1-> ceilh, S2-> ceilh);
 
 	return (c_min < f_max + MONSTER_HEIGHT);
 }
@@ -1782,7 +1782,7 @@ static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &
 		return false;
 
 	if (group == 'm')
-		r = MAX(4, r - MONSTER_STEP_DIST);
+		r = std::max(4, r - MONSTER_STEP_DIST);
 
 	// shrink a tiny bit, because we need to find lines which CROSS the
 	// bounding box, not just touch it.
@@ -2445,8 +2445,8 @@ struct linedef_minx_CMP_pred
 		const LineDef *AL = doc.linedefs[A];
 		const LineDef *BL = doc.linedefs[B];
 
-		fixcoord_t A_x = MIN(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
-		fixcoord_t B_x = MIN(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
+		fixcoord_t A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
+		fixcoord_t B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
 
 		return A_x < B_x;
 	}
@@ -2549,14 +2549,14 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (MIN(AL->Start(doc)->raw_y, AL->End(doc)->raw_y) >
-	    MAX(BL->Start(doc)->raw_y, BL->End(doc)->raw_y))
+	if (std::min(AL->Start(doc)->raw_y, AL->End(doc)->raw_y) >
+		std::max(BL->Start(doc)->raw_y, BL->End(doc)->raw_y))
 	{
 		return 0;
 	}
 
-	if (MIN(BL->Start(doc)->raw_y, BL->End(doc)->raw_y) >
-	    MAX(AL->Start(doc)->raw_y, AL->End(doc)->raw_y))
+	if (std::min(BL->Start(doc)->raw_y, BL->End(doc)->raw_y) >
+		std::max(AL->Start(doc)->raw_y, AL->End(doc)->raw_y))
 	{
 		return 0;
 	}
@@ -2620,10 +2620,10 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 		d = AlongDist(bx2, by2,  ax1, ay1, ax2, ay2);
 		e = AlongDist(ax2, ay2,  ax1, ay1, ax2, ay2);	// just the length
 
-		if (MAX(c, d) < epsilon)
+		if (std::max(c, d) < epsilon)
 			return 0;
 
-		if (MIN(c, d) > e - epsilon)
+		if (std::min(c, d) > e - epsilon)
 			return 0;
 
 		// colinear and partially overlapping
@@ -2667,7 +2667,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 		const LineDef *L1 = doc.linedefs[n2];
 
-		fixcoord_t max_x = MAX(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
+		fixcoord_t max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
 
 		for (int k = n + 1 ; k < doc.numLinedefs(); k++)
 		{
@@ -2675,7 +2675,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 			const LineDef *L2 = doc.linedefs[k2];
 
-			fixcoord_t min_x = MIN(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
+			fixcoord_t min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)
@@ -2994,8 +2994,8 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 
 		if (tag > 0)
 		{
-			*min_tag = MIN(*min_tag, tag);
-			*max_tag = MAX(*max_tag, tag);
+			*min_tag = std::min(*min_tag, tag);
+			*max_tag = std::max(*max_tag, tag);
 		}
 	}
 
@@ -3009,8 +3009,8 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 
 		if (tag > 0)
 		{
-			*min_tag = MIN(*min_tag, tag);
-			*max_tag = MAX(*max_tag, tag);
+			*min_tag = std::min(*min_tag, tag);
+			*max_tag = std::max(*max_tag, tag);
 		}
 	}
 

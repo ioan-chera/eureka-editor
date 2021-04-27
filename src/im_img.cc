@@ -1074,7 +1074,7 @@ Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) cons
 
 		if (cx1 <= x && x <= cx2)
 		{
-			float dx = static_cast<float>(MIN(x - cx1, cx2 - x));
+			float dx = static_cast<float>(std::min(x - cx1, cx2 - x));
 			//float dy = MIN(abs(y - 4), abs(y - W));
 
 			float ity = 0.3f + dx / 14.0f;

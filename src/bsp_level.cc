@@ -190,10 +190,10 @@ static void BlockAddLine(int line_index, const Document &doc)
 	int x2 = (int) L->End(doc)->x();
 	int y2 = (int) L->End(doc)->y();
 
-	int bx1 = (MIN(x1,x2) - block_x) / 128;
-	int by1 = (MIN(y1,y2) - block_y) / 128;
-	int bx2 = (MAX(x1,x2) - block_x) / 128;
-	int by2 = (MAX(y1,y2) - block_y) / 128;
+	int bx1 = (std::min(x1,x2) - block_x) / 128;
+	int by1 = (std::min(y1,y2) - block_y) / 128;
+	int bx2 = (std::max(x1,x2) - block_x) / 128;
+	int by2 = (std::max(y1,y2) - block_y) / 128;
 
 	int bx, by;
 
@@ -511,10 +511,10 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 			double x2 = L->End(doc)->x();
 			double y2 = L->End(doc)->y();
 
-			int lx = (int)floor(MIN(x1, x2));
-			int ly = (int)floor(MIN(y1, y2));
-			int hx = (int)ceil(MAX(x1, x2));
-			int hy = (int)ceil(MAX(y1, y2));
+			int lx = (int)floor(std::min(x1, x2));
+			int ly = (int)floor(std::min(y1, y2));
+			int hx = (int)ceil(std::max(x1, x2));
+			int hy = (int)ceil(std::max(y1, y2));
 
 			if (lx < bbox->minx) bbox->minx = lx;
 			if (ly < bbox->miny) bbox->miny = ly;

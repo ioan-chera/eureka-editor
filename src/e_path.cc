@@ -273,8 +273,8 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 				continue;
 
 			// player wouldn't fit vertically?
-			int f_max = MAX(S1->floorh, S2->floorh);
-			int c_min = MIN(S1-> ceilh, S2-> ceilh);
+			int f_max = std::max(S1->floorh, S2->floorh);
+			int c_min = std::min(S1-> ceilh, S2-> ceilh);
 
 			if (c_min - f_max < inst.Misc_info.player_h)
 			{
@@ -525,8 +525,8 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 
 			// check for doors
 			if (!ignore_doors &&
-				(MIN(inst.level.sectors[sec1]->ceilh, inst.level.sectors[sec2]->ceilh) <=
-				 MAX(inst.level.sectors[sec1]->floorh, inst.level.sectors[sec2]->floorh)))
+				(std::min(inst.level.sectors[sec1]->ceilh, inst.level.sectors[sec2]->ceilh) <=
+				 std::max(inst.level.sectors[sec1]->floorh, inst.level.sectors[sec2]->floorh)))
 			{
 				continue;
 			}
@@ -534,7 +534,7 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 			int val1 = vec[sec1];
 			int val2 = vec[sec2];
 
-			int new_val = MAX(val1, val2);
+			int new_val = std::max(val1, val2);
 
 			if (L->flags & MLF_SoundBlock)
 				new_val -= 1;
@@ -569,7 +569,7 @@ static void CalcFinalPropagation(Instance &inst)
 				continue;
 			}
 
-			t1 = MIN(t1, t2);
+			t1 = std::min(t1, t2);
 		}
 
 		switch (t1)

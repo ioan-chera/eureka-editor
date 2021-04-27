@@ -118,7 +118,7 @@ public:
 			if (ny1 == ny2)
 				return;
 
-			if (MIN(ny1, ny2) > y || MAX(ny1, ny2) < y)
+			if (std::min(ny1, ny2) > y || std::max(ny1, ny2) < y)
 				return;
 
 			double dist = nx1 + (nx2 - nx1) * (y - ny1) / (ny2 - ny1) - x;
@@ -145,7 +145,7 @@ public:
 			if (nx1 == nx2)
 				return;
 
-			if (MIN(nx1, nx2) > x || MAX(nx1, nx2) < x)
+			if (std::min(nx1, nx2) > x || std::max(nx1, nx2) < x)
 				return;
 
 			double dist = ny1 + (ny2 - ny1) * (x - nx1) / (nx2 - nx1) - y;
@@ -238,8 +238,8 @@ public:
 		if (L->IsVertical(doc))
 			return;
 
-		double x1 = MIN(L->Start(doc)->x(), L->End(doc)->x());
-		double x2 = MAX(L->Start(doc)->x(), L->End(doc)->x());
+		double x1 = std::min(L->Start(doc)->x(), L->End(doc)->x());
+		double x2 = std::max(L->Start(doc)->x(), L->End(doc)->x());
 
 		AddLine_X(ld, (int)floor(x1), (int)ceil(x2));
 	}
@@ -273,8 +273,8 @@ public:
 		if (L->IsHorizontal(doc))
 			return;
 
-		double y1 = MIN(L->Start(doc)->y(), L->End(doc)->y());
-		double y2 = MAX(L->Start(doc)->y(), L->End(doc)->y());
+		double y1 = std::min(L->Start(doc)->y(), L->End(doc)->y());
+		double y2 = std::max(L->Start(doc)->y(), L->End(doc)->y());
 
 		AddLine_Y(ld, (int)floor(y1), (int)ceil(y2));
 	}
@@ -385,7 +385,7 @@ int Hover::getClosestLine_CastingHoriz(double x, double y, Side *side) const
 			continue;
 
 		// does the linedef cross the horizontal ray?
-		if(MIN(ly1, ly2) >= y || MAX(ly1, ly2) <= y)
+		if(std::min(ly1, ly2) >= y || std::max(ly1, ly2) <= y)
 			continue;
 
 		double lx1 = doc.linedefs[n]->Start(doc)->x();
@@ -435,7 +435,7 @@ int Hover::getClosestLine_CastingVert(double x, double y, Side *side) const
 			continue;
 
 		// does the linedef cross the vertical ray?
-		if(MIN(lx1, lx2) >= x || MAX(lx1, lx2) <= x)
+		if(std::min(lx1, lx2) >= x || std::max(lx1, lx2) <= x)
 			continue;
 
 		double ly1 = doc.linedefs[n]->Start(doc)->y();
@@ -677,7 +677,7 @@ bool Hover::isPointOutsideOfMap(double x, double y) const
 		double ly2 = doc.linedefs[n]->End(doc)->y();
 
 		// does the linedef cross the horizontal ray?
-		if(MIN(ly1, ly2) < y2 && MAX(ly1, ly2) > y2)
+		if(std::min(ly1, ly2) < y2 && std::max(ly1, ly2) > y2)
 		{
 			double dist = lx1 - x + (lx2 - lx1) * (y2 - ly1) / (ly2 - ly1);
 
@@ -687,7 +687,7 @@ bool Hover::isPointOutsideOfMap(double x, double y) const
 		}
 
 		// does the linedef cross the vertical ray?
-		if(MIN(lx1, lx2) < x2 && MAX(lx1, lx2) > x2)
+		if(std::min(lx1, lx2) < x2 && std::max(lx1, lx2) > x2)
 		{
 			double dist = ly1 - y + (ly2 - ly1) * (x2 - lx1) / (lx2 - lx1);
 
@@ -928,8 +928,8 @@ Objid Hover::getNearestLinedef(double x, double y) const
 		// Skip all lines of which all points are more than <mapslack>
 		// units away from (x,y).  In a typical level, this test will
 		// filter out all the linedefs but a handful.
-		if(MAX(x1, x2) < lx || MIN(x1, x2) > hx ||
-			MAX(y1, y2) < ly || MIN(y1, y2) > hy)
+		if(std::max(x1, x2) < lx || std::min(x1, x2) > hx ||
+		   std::max(y1, y2) < ly || std::min(y1, y2) > hy)
 			continue;
 
 		double dist = getApproximateDistanceToLinedef(*doc.linedefs[n], x, y);
@@ -1080,8 +1080,8 @@ Objid Hover::getNearestSplitLine(double x, double y, int ignore_vert) const
 		double x2 = L->End(doc)->x();
 		double y2 = L->End(doc)->y();
 
-		if(MAX(x1, x2) < lx || MIN(x1, x2) > hx ||
-			MAX(y1, y2) < ly || MIN(y1, y2) > hy)
+		if(std::max(x1, x2) < lx || std::min(x1, x2) > hx ||
+		   std::max(y1, y2) < ly || std::min(y1, y2) > hy)
 			continue;
 
 		// skip linedef if given point matches a vertex
@@ -1125,11 +1125,11 @@ void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int
 	double along2 = AlongDist(x2, y2,  cross.start_x, cross.start_y, cross.end_x, cross.end_y);
 
 	// bounding box of segment
-	double bbox_x1 = MIN(x1, x2) - 0.25;
-	double bbox_y1 = MIN(y1, y2) - 0.25;
+	double bbox_x1 = std::min(x1, x2) - 0.25;
+	double bbox_y1 = std::min(y1, y2) - 0.25;
 
-	double bbox_x2 = MAX(x1, x2) + 0.25;
-	double bbox_y2 = MAX(y1, y2) + 0.25;
+	double bbox_x2 = std::max(x1, x2) + 0.25;
+	double bbox_y2 = std::max(y1, y2) + 0.25;
 
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
@@ -1142,8 +1142,8 @@ void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int
 		double ly2 = L->End(doc)->y();
 
 		// bbox test -- eliminate most lines from consideration
-		if (MAX(lx1,lx2) < bbox_x1 || MIN(lx1,lx2) > bbox_x2 ||
-			MAX(ly1,ly2) < bbox_y1 || MIN(ly1,ly2) > bbox_y2)
+		if (std::max(lx1,lx2) < bbox_x1 || std::min(lx1,lx2) > bbox_x2 ||
+			std::max(ly1,ly2) < bbox_y1 || std::min(ly1,ly2) > bbox_y2)
 		{
 			continue;
 		}

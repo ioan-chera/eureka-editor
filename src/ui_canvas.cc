@@ -298,10 +298,10 @@ int UI_Canvas::ApproxBoxSize(int mx1, int my1, int mx2, int my2)
 		y1 < 8 || y2 > h() - 8)
 		return 1; // too big
 
-	float x_ratio = MAX(4, x2 - x1) / (float) MAX(4, w());
-	float y_ratio = MAX(4, y2 - y1) / (float) MAX(4, h());
+	float x_ratio = std::max(4, x2 - x1) / (float)std::max(4, w());
+	float y_ratio = std::max(4, y2 - y1) / (float)std::max(4, h());
 
-	if (MAX(x_ratio, y_ratio) < 0.25)
+	if (std::max(x_ratio, y_ratio) < 0.25)
 		return -1;  // too small
 
 	return 0;
@@ -714,7 +714,7 @@ void UI_Canvas::DrawLinedefs()
 		double x2 = L->End  (inst.level)->x();
 		double y2 = L->End  (inst.level)->y();
 
-		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
 		bool one_sided = (! L->Left(inst.level));
@@ -869,7 +869,7 @@ void UI_Canvas::DrawLinedefs()
 			double x2 = inst.level.linedefs[n]->End  (inst.level)->x();
 			double y2 = inst.level.linedefs[n]->End  (inst.level)->y();
 
-			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				continue;
 
 			DrawLineNumber(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2), Side::neither, n);
@@ -1368,7 +1368,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			double x2 = dx + inst.level.linedefs[objnum]->End  (inst.level)->x();
 			double y2 = dy + inst.level.linedefs[objnum]->End  (inst.level)->y();
 
-			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				break;
 
 			DrawMapVector(x1, y1, x2, y2);
@@ -1429,7 +1429,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 				double x2 = dx + L->End  (inst.level)->x();
 				double y2 = dy + L->End  (inst.level)->y();
 
-				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+				if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 					continue;
 
 				if (skip_lines)
@@ -1508,7 +1508,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			inst.edit.trans_param.Apply(&x1, &y1);
 			inst.edit.trans_param.Apply(&x2, &y2);
 
-			if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				break;
 
 			DrawMapVector(x1, y1, x2, y2);
@@ -1530,7 +1530,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 				inst.edit.trans_param.Apply(&x1, &y1);
 				inst.edit.trans_param.Apply(&x2, &y2);
 
-				if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+				if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 					continue;
 
 				DrawMapLine(x1, y1, x2, y2);
@@ -1577,7 +1577,7 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 		double x2 = dx + L->End  (inst.level)->x();
 		double y2 = dy + L->End  (inst.level)->y();
 
-		if (! Vis(MIN(x1,x2), MIN(y1,y2), MAX(x1,x2), MAX(y1,y2)))
+		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
 		if (L->right < 0 && L->left < 0)
@@ -1704,8 +1704,8 @@ void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, doub
    	int mx = (x1 + x2) / 2;
    	int my = (y1 + y2) / 2;
 
-	int len = MAX(abs(x2 - x1), abs(y2 - y1));
-	int want_len = MIN(12, len / 5);
+	int len = std::max(abs(x2 - x1), abs(y2 - y1));
+	int want_len = std::min(12, len / 5);
 
 	int dx = NORMALX(want_len, x2 - x1, y2 - y1);
 	int dy = NORMALY(want_len, x2 - x1, y2 - y1);
@@ -1789,7 +1789,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	int mx = (x1 + x2) / 2;
 	int my = (y1 + y2) / 2;
 
-	int klen = MAX(abs(x2 - x1), abs(y2 - y1));
+	int klen = std::max(abs(x2 - x1), abs(y2 - y1));
 	int want_len = CLAMP(12, klen / 4, 40);
 
 	int kx = NORMALX(want_len, x2 - x1, y2 - y1);
@@ -1965,10 +1965,10 @@ void UI_Canvas::DrawCurrentLine()
 
 bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 {
-	x1 = MIN(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	y1 = MIN(inst.edit.selbox_y1, inst.edit.selbox_y2);
-	x2 = MAX(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	y2 = MAX(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	x1 = std::min(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	y1 = std::min(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	x2 = std::max(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	y2 = std::max(inst.edit.selbox_y1, inst.edit.selbox_y2);
 
 	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
 	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
@@ -1983,10 +1983,10 @@ bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 
 void UI_Canvas::SelboxDraw()
 {
-	double x1 = MIN(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	double x2 = MAX(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	double y1 = MIN(inst.edit.selbox_y1, inst.edit.selbox_y2);
-	double y2 = MAX(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	double x1 = std::min(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	double x2 = std::max(inst.edit.selbox_x1, inst.edit.selbox_x2);
+	double y1 = std::min(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	double y2 = std::max(inst.edit.selbox_y1, inst.edit.selbox_y2);
 
 	RenderColor(FL_CYAN);
 
@@ -2007,7 +2007,7 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 
 	// check that we have moved far enough from the start position,
 	// giving the user the option to select the original place.
-	if (MAX(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels*2)
+	if (std::max(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels*2)
 	{
 		*dx = *dy = 0;
 		return;

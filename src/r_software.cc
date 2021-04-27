@@ -495,8 +495,8 @@ public:
 		front = sec;
 		back  = inst.level.sectors[back_sd->sector];
 
-		int c_h = MIN(front->ceilh,  back->ceilh);
-		int f_h = MAX(front->floorh, back->floorh);
+		int c_h = std::min(front->ceilh,  back->ceilh);
+		int f_h = std::max(front->floorh, back->floorh);
 		int r_h = rail.img->height();
 
 		if (f_h >= c_h)
@@ -525,14 +525,14 @@ public:
 				 back->ceil_tex == front->ceil_tex &&
 				 back->light == front->light)))
 		{
-			rail.h2 = MIN(c_h, rail.h2);
+			rail.h2 = std::min(c_h, rail.h2);
 		}
 
 		if (! (back->floorh == front->floorh &&
 			   back->floor_tex == front->floor_tex &&
 			   back->light == front->light))
 		{
-			rail.h1 = MAX(f_h, rail.h1);
+			rail.h1 = std::max(f_h, rail.h1);
 		}
 	}
 };
@@ -823,7 +823,7 @@ public:
 		double iz1 = cos(normal - angle1) / dist / cos(M_PI/2 - angle1);
 		double iz2 = cos(normal - angle2) / dist / cos(M_PI/2 - angle2);
 
-		double diz = (iz2 - iz1) / MAX(1, sx2 - sx1);
+		double diz = (iz2 - iz1) / std::max(1, sx2 - sx1);
 
 		// create drawwall structure
 
@@ -1037,13 +1037,13 @@ public:
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				z1 = MIN(front->floorh, back->floorh);
-				z2 = MAX(front->floorh, back->floorh);
+				z1 = std::min(front->floorh, back->floorh);
+				z2 = std::max(front->floorh, back->floorh);
 			}
 			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				z1 = MIN(front->ceilh, back->ceilh);
-				z2 = MAX(front->ceilh, back->ceilh);
+				z1 = std::min(front->ceilh, back->ceilh);
+				z2 = std::max(front->ceilh, back->ceilh);
 			}
 			else
 			{
@@ -1491,7 +1491,7 @@ public:
 		float hh = surf.tex_h - YToSecH(y1, dw->cur_iz);
 		float dh = surf.tex_h - YToSecH(y2, dw->cur_iz);
 
-		dh = (dh - hh) / MAX(1, y2 - y1);
+		dh = (dh - hh) / std::max(1, y2 - y1);
 		hh += 0.2f;
 
 		src  += tx;
@@ -1570,10 +1570,10 @@ public:
 
 		// update open region based on ends which are "solid"
 		if (surf.y_clip & DrawSurf::SOLID_ABOVE)
-			open_y1 = MAX(open_y1, y2 + 1);
+			open_y1 = std::max(open_y1, y2 + 1);
 
 		if (surf.y_clip & DrawSurf::SOLID_BELOW)
-			open_y2 = MIN(open_y2, y1 - 1);
+			open_y2 = std::min(open_y2, y1 - 1);
 
 		if (y1 > y2)
 			return;
@@ -1658,7 +1658,7 @@ public:
 		float hh = dw->ceil.h2 - YToSecH(y1, dw->cur_iz);
 		float dh = dw->ceil.h2 - YToSecH(y2, dw->cur_iz);
 
-		dh = (dh - hh) / MAX(1, y2 - y1);
+		dh = (dh - hh) / std::max(1, y2 - y1);
 
 		int thsec = inst.r_view.thing_sectors[dw->th];
 		int light = inst.level.isSector(thsec) ? inst.level.sectors[thsec]->light : 255;

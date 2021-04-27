@@ -661,7 +661,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	int old_cx = cx;
 	IB_String(cx, cy, ratio_name.c_str());
 
-	cx = MAX(cx+12, old_cx + 170);
+	cx = std::max(cx+12, old_cx + 170);
 
 	IB_Coord(cx, cy, "delta x", static_cast<float>(dx));
 	IB_Coord(cx, cy,       "y", static_cast<float>(dy));

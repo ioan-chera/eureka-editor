@@ -29,6 +29,8 @@
 
 #include "sys_macro.h"
 #include "sys_type.h"
+#include "WindowsSanitization.h"
+#include <algorithm>
 
 class SString;
 
@@ -71,7 +73,7 @@ inline int R_DoomLightingEquation(int L, float dist)
 
 	int min_L = CLAMP(0, 36 - L, 31);
 
-	int index = (59 - L) - int(1280 / MAX(1, dist));
+	int index = (59 - L) - int(1280 / std::max(1.0f, dist));
 
 	/* result is colormap index (0 bright .. 31 dark) */
 	return CLAMP(min_L, index, 31);

@@ -814,8 +814,8 @@ public:
 		}
 
 		// compute Z coords and texture coords
-		float z1 = static_cast<float>(MAX(front->floorh, back->floorh));
-		float z2 = static_cast<float>(MIN(front->ceilh,  back->ceilh));
+		float z1 = static_cast<float>(std::max(front->floorh, back->floorh));
+		float z2 = static_cast<float>(std::min(front->ceilh,  back->ceilh));
 
 		if (z2 <= z1)
 			return;
@@ -893,7 +893,7 @@ public:
 			return;
 
 		// too far away?
-		if (MIN(ty1, ty2) > config::render_far_clip)
+		if (std::min(ty1, ty2) > config::render_far_clip)
 			return;
 
 		float angle1 = PointToAngle(tx1, ty1);
@@ -1355,13 +1355,13 @@ public:
 		{
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				z1 = static_cast<float>(MIN(front->floorh, back->floorh));
-				z2 = static_cast<float>(MAX(front->floorh, back->floorh));
+				z1 = static_cast<float>(std::min(front->floorh, back->floorh));
+				z2 = static_cast<float>(std::max(front->floorh, back->floorh));
 			}
 			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				z1 = static_cast<float>(MIN(front->ceilh, back->ceilh));
-				z2 = static_cast<float>(MAX(front->ceilh, back->ceilh));
+				z1 = static_cast<float>(std::min(front->ceilh, back->ceilh));
+				z2 = static_cast<float>(std::max(front->ceilh, back->ceilh));
 			}
 			else
 			{

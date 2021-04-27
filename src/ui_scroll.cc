@@ -90,7 +90,7 @@ void UI_Scroll::resize(int X, int Y, int W, int H)
 
 	int total_h = bottom_y - top_y;
 
-	scrollbar->value(0, h(), 0, MAX(h(), total_h));
+	scrollbar->value(0, h(), 0, std::max(h(), total_h));
 
 
 	if (ow != W && resize_horiz_)
@@ -125,7 +125,7 @@ void UI_Scroll::do_scroll()
 
 	int total_h = bottom_y - top_y;
 
-	scrollbar->value(pos, h(), 0, MAX(h(), total_h));
+	scrollbar->value(pos, h(), 0, std::max(h(), total_h));
 
 	reposition_all(y() - pos);
 
@@ -151,8 +151,8 @@ void UI_Scroll::calc_extents()
 		if (! w->visible())
 			continue;
 
-		   top_y = MIN(top_y, w->y());
-		bottom_y = MAX(bottom_y, w->y() + w->h());
+		   top_y = std::min(top_y, w->y());
+		bottom_y = std::max(bottom_y, w->y() + w->h());
 	}
 }
 
@@ -180,11 +180,11 @@ void UI_Scroll::Scroll(int delta)
 	int line_size = scrollbar->linesize();
 
 	if (abs(delta) <= 1)
-		pixels = MAX(1, line_size / 4);
+		pixels = std::max(1, line_size / 4);
 	else if (abs(delta) == 2)
 		pixels = line_size;
 	else if (abs(delta) == 3)
-		pixels = MAX(h() - line_size / 2, h() * 2 / 3);
+		pixels = std::max(h() - line_size / 2, h() * 2 / 3);
 	else
 		pixels = HUGE_DIST;
 
@@ -207,7 +207,7 @@ void UI_Scroll::ScrollByPixels(int pixels)
 	if (pos < 0)
 		pos = 0;
 
-	scrollbar->value(pos, h(), 0, MAX(h(), total_h));
+	scrollbar->value(pos, h(), 0, std::max(h(), total_h));
 
 	reposition_all(y() - pos);
 
@@ -280,7 +280,7 @@ void UI_Scroll::Init_sizes()
 
 	int total_h = bottom_y - top_y;
 
-	scrollbar->value(0, h(), 0, MAX(h(), total_h));
+	scrollbar->value(0, h(), 0, std::max(h(), total_h));
 }
 
 

@@ -186,11 +186,11 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 	// shrink if too big
 	if (fit_x > 1.00 || fit_x > 1.00)
-		scale = scale / MAX(fit_x, fit_y);
+		scale = scale / std::max(fit_x, fit_y);
 
 	// enlarge if too small
 	if (fit_x < 0.4 && fit_y < 0.4)
-		scale = scale / (2.5f * MAX(fit_x, fit_y));
+		scale = scale / (2.5f * std::max(fit_x, fit_y));
 
 
 	uchar *buf = new uchar[nw * nh * 3];

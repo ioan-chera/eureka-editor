@@ -72,7 +72,7 @@ void Instance::zoom_fit()
 	if (Map_bound_y1 < Map_bound_y2)
 		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
 
-	grid.NearestScale(MIN(xzoom, yzoom));
+	grid.NearestScale(std::min(xzoom, yzoom));
 
 	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
 }

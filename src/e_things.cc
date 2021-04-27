@@ -114,7 +114,7 @@ static void MoveOverlapThing(Instance &inst, int th, int mid_x, int mid_y, int n
 	float vec_x = static_cast<float>(cos(angle * M_PI / 180.0));
 	float vec_y = static_cast<float>(sin(angle * M_PI / 180.0));
 
-	float dist = static_cast<float>(8 + 6 * MIN(100, total));
+	float dist = static_cast<float>(8 + 6 * std::min(100, total));
 
 	fixcoord_t fdx = inst.MakeValidCoord(vec_x * dist);
 	fixcoord_t fdy = inst.MakeValidCoord(vec_y * dist);

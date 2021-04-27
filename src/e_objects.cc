@@ -752,7 +752,7 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 
 				doc.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
 				doc.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				doc.basis.changeThing(*it, Thing::F_H, MAX(0, T->raw_h + fdz));
+				doc.basis.changeThing(*it, Thing::F_H, std::max(0, T->raw_h + fdz));
 			}
 			break;
 
@@ -1865,8 +1865,8 @@ void ObjectsModule::doScaleSectorHeights(selection_c *list, double scale_z, int 
 	{
 		const Sector * S = doc.sectors[*it];
 
-		lz = MIN(lz, S->floorh);
-		hz = MAX(hz, S->ceilh);
+		lz = std::min(lz, S->floorh);
+		hz = std::max(hz, S->ceilh);
 	}
 
 	int mid_z;

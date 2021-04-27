@@ -612,7 +612,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		info.group = argv[2][0];
 		info.desc  = argv[3];
 
-		int arg_count = MIN(nargs - 3, 5);
+		int arg_count = std::min(nargs - 3, 5);
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
@@ -672,7 +672,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		info.desc   = argv[6];
 		info.scale  = static_cast<float>((nargs >= 7) ? atof(argv[7]) : 1.0);
 
-		int arg_count = MIN(nargs - 7, 5);
+		int arg_count = std::min(nargs - 7, 5);
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[8 + i][0] != '-')
@@ -788,7 +788,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		field->name = argv[4];
 
 		// grab the keywords
-		field->num_keywords = MIN(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
+		field->num_keywords = std::min(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
 
 		for (int i = 0 ; i < field->num_keywords ; i++)
 		{

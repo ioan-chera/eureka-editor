@@ -71,8 +71,8 @@ namespace thing_sec_cache
 
 	void InvalidateThing(int th)
 	{
-		invalid_low  = MIN(invalid_low,  th);
-		invalid_high = MAX(invalid_high, th);
+		invalid_low  = std::min(invalid_low,  th);
+		invalid_high = std::max(invalid_high, th);
 	}
 
 	void InvalidateAll(const Document &doc)
@@ -136,7 +136,7 @@ void Render_View_t::FindGroundZ()
 					z = ex->f_plane.SlopeZ(test_x, test_y);
 			}
 
-			max_floor = MAX(max_floor, z);
+			max_floor = std::max(max_floor, z);
 			hit_something = true;
 		}
 	}
@@ -405,10 +405,10 @@ static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
 
-	inst.edit.adjust_bbox.x1 = MIN(inst.edit.adjust_bbox.x1, lx1);
-	inst.edit.adjust_bbox.y1 = MIN(inst.edit.adjust_bbox.y1, ly1);
-	inst.edit.adjust_bbox.x2 = MAX(inst.edit.adjust_bbox.x2, lx2);
-	inst.edit.adjust_bbox.y2 = MAX(inst.edit.adjust_bbox.y2, ly2);
+	inst.edit.adjust_bbox.x1 = std::min(inst.edit.adjust_bbox.x1, lx1);
+	inst.edit.adjust_bbox.y1 = std::min(inst.edit.adjust_bbox.y1, ly1);
+	inst.edit.adjust_bbox.x2 = std::max(inst.edit.adjust_bbox.x2, lx2);
+	inst.edit.adjust_bbox.y2 = std::max(inst.edit.adjust_bbox.y2, ly2);
 }
 
 static void AdjustOfs_CalcDistFactor(const Instance &inst, float& dx_factor, float& dy_factor)
@@ -1553,7 +1553,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 
 	if (tokens[0] == "gamma" && tokens.size() >= 2)
 	{
-		config::usegamma = MAX(0, atoi(tokens[1])) % 5;
+		config::usegamma = std::max(0, atoi(tokens[1])) % 5;
 
 		W_UpdateGamma();
 		return true;
