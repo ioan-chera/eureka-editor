@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+07.05.2021
+* Fixed a crash happening when starting a new project while a linedef is selected.
+
+----------
 05.03.2021
 * Fixed a crash happening when using R to change sidedef offset in 3D mode on a selected (but not highlighted) linedef.
 
