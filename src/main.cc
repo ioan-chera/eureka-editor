@@ -917,6 +917,9 @@ void Instance::ReadPortInfo() noexcept(false)
 //
 void Instance::Main_LoadResources()
 {
+	if(edit.Selected)
+		edit.Selected->clear_all();
+
 	gLog.printf("\n");
 	gLog.printf("----- Loading Resources -----\n");
 
