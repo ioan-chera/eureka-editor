@@ -456,6 +456,20 @@ void UI_JumpToDialog::input_callback(Fl_Widget *w, void *data)
 		that->ok_callback(w, data);
 }
 
+//
+// Handler for the dynamic int input
+//
+int UI_DynIntInput::handle(int event)
+{
+	int res = Fl_Int_Input::handle(event);
+
+	if((event == FL_KEYBOARD || event == FL_PASTE) && mCallback2)
+	{
+		mCallback2(this, mData2);
+	}
+
+	return res;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

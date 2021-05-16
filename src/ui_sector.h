@@ -23,6 +23,8 @@
 
 #include "e_cutpaste.h"
 
+class UI_DynIntInput;
+
 class UI_SectorBox : public Fl_Group
 {
 private:
@@ -36,14 +38,14 @@ public:
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
-	Fl_Int_Input *light;
-	Fl_Int_Input *tag;
+	UI_DynIntInput *light;
+	UI_DynIntInput *tag;
 
 	Fl_Button *fresh_tag;
 	Fl_Button *lt_down, *lt_up;
 
-	Fl_Int_Input *ceil_h;
-	Fl_Int_Input *floor_h;
+	UI_DynIntInput *ceil_h;
+	UI_DynIntInput *floor_h;
 
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
@@ -54,7 +56,7 @@ public:
 	UI_DynInput *f_tex;
 	UI_Pic      *f_pic;
 
-	Fl_Int_Input *headroom;
+	UI_DynIntInput *headroom;
 
 	enum
 	{
@@ -74,6 +76,32 @@ public:
 
 private:
 	Instance &inst;
+
+	bool mTypeFieldDirty = false;
+	bool mTagFieldDirty = false;
+	bool mFloorHeightFieldDirty = false;
+	bool mCeilingHeightFieldDirty = false;
+	bool mHeadRoomFieldDirty = false;
+	bool mFloorTextureFieldDirty = false;
+	bool mCeilingTextureFieldDirty = false;
+	bool mLightFieldDirty = false;
+
+	//
+	// Clears all the dirty markers
+	//
+	void clearFieldDirty()
+	{
+		mTypeFieldDirty = false;
+		mTagFieldDirty = false;
+		mFloorHeightFieldDirty = false;
+		mCeilingHeightFieldDirty = false;
+		mHeadRoomFieldDirty = false;
+		mFloorTextureFieldDirty = false;
+		mCeilingTextureFieldDirty = false;
+		mLightFieldDirty = false;
+	}
+
+	void checkDirtyFields();
 
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
@@ -126,6 +154,8 @@ private:
 	static void   light_callback(Fl_Widget *, void *);
 	static void     tag_callback(Fl_Widget *, void *);
 	static void  button_callback(Fl_Widget *, void *);
+
+	static void dirtify_callback(Fl_Widget *, void *);
 };
 
 #endif  /* __EUREKA_UI_SECTOR_H__ */

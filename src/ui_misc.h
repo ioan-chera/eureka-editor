@@ -22,6 +22,7 @@
 #define __EUREKA_UI_MISC_H__
 
 #include "ui_window.h"
+#include "FL/Fl_Int_Input.H"
 
 class Fl_Float_Input;
 
@@ -140,6 +141,31 @@ private:
 	static void input_callback(Fl_Widget *, void *);
 };
 
+//
+// Similar to UI_DynInput but for Fl_Int_Input
+//
+class UI_DynIntInput : public Fl_Int_Input
+{
+public:
+	UI_DynIntInput(int X, int Y, int W, int H, const char *L = nullptr) :
+		Fl_Int_Input(X, Y, W, H, L)
+	{
+	}
+
+	int handle(int event) override;
+
+	//
+	// Assign the change callback
+	//
+	void callback2(Fl_Callback *callback, void *data)
+	{
+		mCallback2 = callback;
+		mData2 = data;
+	}
+private:
+	Fl_Callback *mCallback2 = nullptr;
+	void *mData2 = nullptr;
+};
 
 #endif  /* __EUREKA_UI_MISC_H__ */
 
