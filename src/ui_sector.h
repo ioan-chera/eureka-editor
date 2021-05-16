@@ -78,10 +78,25 @@ public:
 private:
 	Instance &inst;
 
+	// Set of "dirty" edit fields. The rule is as such:
+	// - Add them to list when user writes text without exiting or pressing ENTER
+	//   (that's why they need to be UI_DynInput or UI_DynIntInput)
+	// - Remove them from list when their callback is invoked (caution: only for them)
+	// - Remove them from list when their value() is changed externally.
+	// - Before any basis.begin() or external function which does that, call checkDirtyFields()
 	std::unordered_set<Fl_Input *> mDirtyFields;
 
 	// Call it before starting basis
 	void checkDirtyFields();
+
+	//
+	// Convenience that also sets the dirty field. Only use it for targeted fields
+	//
+	void setInputValue(Fl_Input *input, const char *value)
+	{
+		input->value(value);
+		mDirtyFields.erase(input);
+	}
 
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);

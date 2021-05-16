@@ -298,9 +298,9 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 
 		box->inst.level.basis.end();
 
-		box-> floor_h->value(SString(f_h).c_str());
-		box->  ceil_h->value(SString(c_h).c_str());
-		box->headroom->value(SString(c_h - f_h).c_str());
+		box->setInputValue(box->floor_h, SString(f_h).c_str());
+		box->setInputValue(box->ceil_h, SString(c_h).c_str());
+		box->setInputValue(box->headroom, SString(c_h - f_h).c_str());
 	}
 }
 
@@ -448,16 +448,10 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 void UI_SectorBox::SetFlat(const SString &name, int parts)
 {
 	if(parts & PART_FLOOR)
-	{
-		f_tex->value(name.c_str());
-		mDirtyFields.erase(f_tex);
-	}
+		setInputValue(f_tex, name.c_str());
 
 	if(parts & PART_CEIL)
-	{
-		c_tex->value(name.c_str());
-		mDirtyFields.erase(c_tex);
-	}
+		setInputValue(c_tex, name.c_str());
 
 	InstallFlat(name, parts);
 }
@@ -587,8 +581,7 @@ void UI_SectorBox::SetSectorType(int new_type)
 
 
 	auto buffer = SString(new_type);
-	type->value(buffer.c_str());
-	mDirtyFields.erase(type);	// was updated by this
+	setInputValue(type, buffer.c_str());	// was updated by this
 
 	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 			   (inst.Features.gen_sectors == GenSectorFamily::boom) ? 31  : 65535;
@@ -670,7 +663,6 @@ void UI_SectorBox::FreshTag()
 
 	if(!inst.edit.Selected->empty())
 	{
-		mDirtyFields.erase(tag);	// This will update the tag field surely
 		inst.level.checks.tagsApplyNewValue(new_tag);
 	}
 }
@@ -752,8 +744,6 @@ void UI_SectorBox::SetObj(int _index, int _count)
 	if (obj == _index && count == _count)
 		return;
 
-	mDirtyFields.clear();
-
 	obj   = _index;
 	count = _count;
 
@@ -775,15 +765,15 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (inst.level.isSector(obj))
 		{
-			floor_h->value(SString(sector->floorh).c_str());
-			ceil_h->value(SString(sector->ceilh).c_str());
-			headroom->value(SString(sector->HeadRoom()).c_str());
+			setInputValue(floor_h, SString(sector->floorh).c_str());
+			setInputValue(ceil_h, SString(sector->ceilh).c_str());
+			setInputValue(headroom, SString(sector->HeadRoom()).c_str());
 		}
 		else
 		{
-			floor_h->value("");
-			ceil_h->value("");
-			headroom->value("");
+			setInputValue(floor_h, "");
+			setInputValue(ceil_h, "");
+			setInputValue(headroom, "");
 		}
 	}
 
@@ -791,8 +781,8 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (inst.level.isSector(obj))
 		{
-			f_tex->value(sector->FloorTex().c_str());
-			c_tex->value(sector->CeilTex().c_str());
+			setInputValue(f_tex, sector->FloorTex().c_str());
+			setInputValue(c_tex, sector->CeilTex().c_str());
 
 			f_pic->GetFlat(sector->FloorTex());
 			c_pic->GetFlat(sector->CeilTex());
@@ -802,8 +792,8 @@ void UI_SectorBox::UpdateField(int field)
 		}
 		else
 		{
-			f_tex->value("");
-			c_tex->value("");
+			setInputValue(f_tex, "");
+			setInputValue(c_tex, "");
 
 			f_pic->Clear();
 			c_pic->Clear();
@@ -826,7 +816,7 @@ void UI_SectorBox::UpdateField(int field)
 			int mask  = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 						(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
-			type->value(SString(value & mask).c_str());
+			setInputValue(type, SString(value & mask).c_str());
 
 			const sectortype_t &info = inst.M_GetSectorType(value & mask);
 			desc->value(info.desc.c_str());
@@ -845,7 +835,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 		else
 		{
-			type->value("");
+			setInputValue(type, "");
 			desc->value("");
 		}
 	}
@@ -854,13 +844,13 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (inst.level.isSector(obj))
 		{
-			light->value(SString(sector->light).c_str());
-			tag->value(SString(sector->tag).c_str());
+			setInputValue(light, SString(sector->light).c_str());
+			setInputValue(tag, SString(sector->tag).c_str());
 		}
 		else
 		{
-			light->value("");
-			tag->value("");
+			setInputValue(light, "");
+			setInputValue(tag, "");
 		}
 	}
 }
