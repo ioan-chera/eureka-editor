@@ -45,7 +45,7 @@ int config::light_bump_large  = 64;
 
 
 //TODO make these configurable
-int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
+static const int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 {
 	0, 64, 96, 128, 192, 256
 };
@@ -55,8 +55,7 @@ int headroom_presets[UI_SectorBox::HEADROOM_BUTTONS] =
 // UI_SectorBox Constructor
 //
 UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0), inst(inst)
+    Fl_Group(X, Y, W, H, label), inst(inst)
 {
 	box(FL_FLAT_BOX); // (FL_THIN_UP_BOX);
 
@@ -328,16 +327,16 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	bool is_floor = (w == box->f_pic || w == box->f_tex);
 
 	// MMB on ceiling flat image sets to sky
-	if (w == box->c_pic && Fl::event_button() == 2)
+	if (w == box->c_pic && Fl::event_button() == FL_MIDDLE_MOUSE)
 	{
 		box->SetFlat(box->inst.Misc_info.sky_flat, PART_CEIL);
 		return;
 	}
 
 	// LMB on the flat image just selects/unselects it (red border)
-	if (is_pic && Fl::event_button() != 3)
+	if (is_pic && Fl::event_button() != FL_RIGHT_MOUSE)
 	{
-		UI_Pic * pic = (UI_Pic *) w;
+		auto pic = static_cast<UI_Pic *>(w);
 
 		pic->Selected(! pic->Selected());
 
@@ -350,7 +349,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 	// right click sets to default value
 	// [ Note the 'is_pic' check prevents a bug when using RMB in browser ]
-	if (is_pic && Fl::event_button() == 3)
+	if (is_pic && Fl::event_button() == FL_RIGHT_MOUSE)
 		new_flat = is_floor ? box->inst.default_floor_tex : box->inst.default_ceil_tex;
 	else if (is_floor)
 		new_flat = NormalizeTex(box->f_tex->value());

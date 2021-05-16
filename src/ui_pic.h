@@ -98,15 +98,16 @@ class UI_DynInput : public Fl_Input
 	 */
 
 private:
-	Fl_Callback *callback2_;
-	void *data2_;
+	Fl_Callback *callback2_ = nullptr;
+	void *data2_ = nullptr;
 
 public:
-	UI_DynInput(int X, int Y, int W, int H, const char *L = NULL);
-	virtual ~UI_DynInput();
+	UI_DynInput(int X, int Y, int W, int H, const char *L = nullptr) : Fl_Input(X, Y, W, H, L)
+	{
+	}
 
 	// FLTK method for event handling
-	int handle(int event);
+	int handle(int event) override;
 
 	// main callback is done on ENTER or RELEASE, but this
 	// secondary callback is done on each change by the user.

@@ -26,8 +26,8 @@
 class UI_SectorBox : public Fl_Group
 {
 private:
-	int obj;
-	int count;
+	int obj = -1;
+	int count = 0;
 
 public:
 	UI_Nombre *which;

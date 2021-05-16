@@ -402,17 +402,6 @@ void UI_Pic::Unhighlight()
 
 //------------------------------------------------------------------------
 
-
-UI_DynInput::UI_DynInput(int X, int Y, int W, int H, const char *L) :
-	Fl_Input(X, Y, W, H, L),
-	callback2_(NULL), data2_(NULL)
-{ }
-
-
-UI_DynInput::~UI_DynInput()
-{ }
-
-
 int UI_DynInput::handle(int event)
 {
 	int res = Fl_Input::handle(event);
