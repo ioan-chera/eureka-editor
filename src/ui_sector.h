@@ -80,6 +80,7 @@ private:
 
 	std::unordered_set<Fl_Input *> mDirtyFields;
 
+	// Call it before starting basis
 	void checkDirtyFields();
 
 public:

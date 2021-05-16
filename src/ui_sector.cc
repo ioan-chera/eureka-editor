@@ -354,11 +354,9 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	bool is_pic   = (w == box->f_pic || w == box->c_pic);
 	bool is_floor = (w == box->f_pic || w == box->f_tex);
 
-	if(is_pic)
-		box->checkDirtyFields();	// do it now for bix
-	else if(is_floor)
+	if(is_floor)
 		box->mDirtyFields.erase(box->f_tex);
-	else
+	else if(!is_pic)
 		box->mDirtyFields.erase(box->c_tex);
 
 	// MMB on ceiling flat image sets to sky
@@ -449,13 +447,17 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 
 void UI_SectorBox::SetFlat(const SString &name, int parts)
 {
-	checkDirtyFields();
-
-	if (parts & PART_FLOOR)
+	if(parts & PART_FLOOR)
+	{
 		f_tex->value(name.c_str());
+		mDirtyFields.erase(f_tex);
+	}
 
-	if (parts & PART_CEIL)
+	if(parts & PART_CEIL)
+	{
 		c_tex->value(name.c_str());
+		mDirtyFields.erase(c_tex);
+	}
 
 	InstallFlat(name, parts);
 }
@@ -467,8 +469,6 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 
 	if(w == box->type)	// only when updating the edit field we clear the dirty flag
 		box->mDirtyFields.erase(box->type);
-	else
-		box->checkDirtyFields();
 
 	int mask  = 65535;
 	int value = atoi(box->type->value());
@@ -589,8 +589,6 @@ void UI_SectorBox::SetSectorType(int new_type)
 	auto buffer = SString(new_type);
 	type->value(buffer.c_str());
 	mDirtyFields.erase(type);	// was updated by this
-
-	checkDirtyFields();
 
 	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 			   (inst.Features.gen_sectors == GenSectorFamily::boom) ? 31  : 65535;
@@ -992,8 +990,6 @@ void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_st
 {
 	if (obj < 0)
 		return;
-
-	checkDirtyFields();
 
 	if (kind == 'F' || kind == 'T')
 	{
