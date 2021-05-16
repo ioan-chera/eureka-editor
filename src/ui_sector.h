@@ -22,6 +22,7 @@
 #define __EUREKA_UI_SECTOR_H__
 
 #include "e_cutpaste.h"
+#include <unordered_set>
 
 class UI_DynIntInput;
 
@@ -77,29 +78,7 @@ public:
 private:
 	Instance &inst;
 
-	bool mTypeFieldDirty = false;
-	bool mTagFieldDirty = false;
-	bool mFloorHeightFieldDirty = false;
-	bool mCeilingHeightFieldDirty = false;
-	bool mHeadRoomFieldDirty = false;
-	bool mFloorTextureFieldDirty = false;
-	bool mCeilingTextureFieldDirty = false;
-	bool mLightFieldDirty = false;
-
-	//
-	// Clears all the dirty markers
-	//
-	void clearFieldDirty()
-	{
-		mTypeFieldDirty = false;
-		mTagFieldDirty = false;
-		mFloorHeightFieldDirty = false;
-		mCeilingHeightFieldDirty = false;
-		mHeadRoomFieldDirty = false;
-		mFloorTextureFieldDirty = false;
-		mCeilingTextureFieldDirty = false;
-		mLightFieldDirty = false;
-	}
+	std::unordered_set<Fl_Input *> mDirtyFields;
 
 	void checkDirtyFields();
 

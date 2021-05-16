@@ -95,7 +95,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	tag = new UI_DynIntInput(X+70, Y, 64, 24, "Tag: ");
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
-	tag->callback2(dirtify_callback, &mTagFieldDirty);
+	tag->callback2(dirtify_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	fresh_tag = new Fl_Button(tag->x() + tag->w() + 20, Y+1, 64, 22, "fresh");
@@ -107,7 +107,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	light = new UI_DynIntInput(X+70, Y, 64, 24, "Light: ");
 	light->align(FL_ALIGN_LEFT);
 	light->callback(light_callback, this);
-	light->callback2(dirtify_callback, &mLightFieldDirty);
+	light->callback2(dirtify_callback, this);
 	light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	lt_down = new Fl_Button(light->x() + light->w() + 20, Y+1, 30, 22, "-");
@@ -145,7 +145,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	ceil_h = new UI_DynIntInput(X+70, Y, 64, 24, "");
 	ceil_h->align(FL_ALIGN_LEFT);
 	ceil_h->callback(height_callback, this);
-	ceil_h->callback2(dirtify_callback, &mCeilingHeightFieldDirty);
+	ceil_h->callback2(dirtify_callback, this);
 	ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	ce_down = new Fl_Button(X+28,  Y+1, 30, 22, "-");
@@ -165,7 +165,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	floor_h = new UI_DynIntInput(X+70, Y, 64, 24, "");
 	floor_h->align(FL_ALIGN_LEFT);
 	floor_h->callback(height_callback, this);
-	floor_h->callback2(dirtify_callback, &mFloorHeightFieldDirty);
+	floor_h->callback2(dirtify_callback, this);
 	floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	fl_down = new Fl_Button(X+28,  Y+1, 30, 22, "-");
@@ -194,7 +194,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	headroom = new UI_DynIntInput(X+100, Y, 56, 24, "Headroom: ");
 	headroom->align(FL_ALIGN_LEFT);
 	headroom->callback(headroom_callback, this);
-	headroom->callback2(dirtify_callback, &mHeadRoomFieldDirty);
+	headroom->callback2(dirtify_callback, this);
 	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
@@ -257,22 +257,11 @@ UI_SectorBox::~UI_SectorBox()
 //
 void UI_SectorBox::checkDirtyFields()
 {
-	if(mTypeFieldDirty)
-		type_callback(type, this);
-	if(mTagFieldDirty)
-		tag_callback(tag, this);
-	if(mFloorHeightFieldDirty)
-		height_callback(floor_h, this);
-	if(mCeilingHeightFieldDirty)
-		height_callback(ceil_h, this);
-	if(mHeadRoomFieldDirty)
-		headroom_callback(headroom, this);
-	if(mFloorTextureFieldDirty)
-		tex_callback(f_tex, this);
-	if(mCeilingTextureFieldDirty)
-		tex_callback(c_tex, this);
-	if(mLightFieldDirty)
-		light_callback(light, this);
+	while(!mDirtyFields.empty())
+	{
+		Fl_Input *input = *mDirtyFields.begin();
+		input->callback()(input, this);
+	}
 }
 
 void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
@@ -280,9 +269,9 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
 	if(w == box->floor_h)
-		box->mFloorHeightFieldDirty = false;
+		box->mDirtyFields.erase(box->floor_h);
 	else if(w == box->ceil_h)
-		box->mCeilingHeightFieldDirty = false;
+		box->mDirtyFields.erase(box->ceil_h);
 
 	int f_h = atoi(box->floor_h->value());
 	int c_h = atoi(box->ceil_h->value());
@@ -319,7 +308,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 	
-	box->mHeadRoomFieldDirty = false;	// the buttons don't care what's in the box
+	box->mDirtyFields.erase(box->headroom);	// the buttons don't care what's in the box
 
 	int room = atoi(box->headroom->value());
 
@@ -368,9 +357,9 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	if(is_pic)
 		box->checkDirtyFields();	// do it now for bix
 	else if(is_floor)
-		box->mFloorTextureFieldDirty = false;
+		box->mDirtyFields.erase(box->f_tex);
 	else
-		box->mCeilingTextureFieldDirty = false;
+		box->mDirtyFields.erase(box->c_tex);
 
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == FL_MIDDLE_MOUSE)
@@ -442,10 +431,7 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 	// change picture to match the input, BUT does not change the map
 
 	UI_SectorBox *box = (UI_SectorBox *)data;
-	if(w == box->f_tex)
-		box->mFloorTextureFieldDirty = true;
-	else if(w == box->c_tex)
-		box->mCeilingTextureFieldDirty = true;
+	dirtify_callback(w, data);
 
 	if (box->obj < 0)
 		return;
@@ -480,7 +466,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
 	if(w == box->type)	// only when updating the edit field we clear the dirty flag
-		box->mTypeFieldDirty = false;
+		box->mDirtyFields.erase(box->type);
 	else
 		box->checkDirtyFields();
 
@@ -571,10 +557,10 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
-	box->mTypeFieldDirty = true;
-
 	if (box->obj < 0)
 		return;
+
+	dirtify_callback(w, data);
 
 	int value = atoi(box->type->value());
 
@@ -602,7 +588,7 @@ void UI_SectorBox::SetSectorType(int new_type)
 
 	auto buffer = SString(new_type);
 	type->value(buffer.c_str());
-	mTypeFieldDirty = false;	// was updated by this
+	mDirtyFields.erase(type);	// was updated by this
 
 	checkDirtyFields();
 
@@ -617,7 +603,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
-	box->mLightFieldDirty = false;
+	box->mDirtyFields.erase(box->light);
 
 	int new_lt = atoi(box->light->value());
 
@@ -646,7 +632,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
-	box->mTagFieldDirty = false;
+	box->mDirtyFields.erase(box->tag);
 
 	int new_tag = atoi(box->tag->value());
 
@@ -661,8 +647,8 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 //
 void UI_SectorBox::dirtify_callback(Fl_Widget *w, void *data)
 {
-	auto flag = static_cast<bool *>(data);
-	*flag = true;
+	auto box = static_cast<UI_SectorBox *>(data);
+	box->mDirtyFields.insert(static_cast<Fl_Input *>(w));
 }
 
 void UI_SectorBox::FreshTag()
@@ -686,7 +672,7 @@ void UI_SectorBox::FreshTag()
 
 	if(!inst.edit.Selected->empty())
 	{
-		mTagFieldDirty = false;	// This will update the tag field surely
+		mDirtyFields.erase(tag);	// This will update the tag field surely
 		inst.level.checks.tagsApplyNewValue(new_tag);
 	}
 }
@@ -768,7 +754,7 @@ void UI_SectorBox::SetObj(int _index, int _count)
 	if (obj == _index && count == _count)
 		return;
 
-	clearFieldDirty();
+	mDirtyFields.clear();
 
 	obj   = _index;
 	count = _count;
