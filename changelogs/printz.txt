@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+16.05.2021
+* Fixed a bug where dragging a vertex into a neighbouring linedef to split it resulted in two overlapping lines.
+
+----------
 07.05.2021
 * Fixed a crash happening when starting a new project while a linedef is selected.
 
