@@ -83,7 +83,7 @@ int VertexModule::howManyLinedefs(int v_num) const
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		LineDef *L = doc.linedefs[n];
+		const LineDef *L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 			count++;
