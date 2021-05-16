@@ -103,6 +103,9 @@ private:
 	void quantizeThings(selection_c *list) const;
 	void quantizeVertices(selection_c *list) const;
 	bool spotInUse(ObjType obj_type, int x, int y) const;
+
+	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
+	void splitLinedefAndMergeSandwich(int splitLineID, int vertID, double delta_x, double delta_y) const;
 };
 
 

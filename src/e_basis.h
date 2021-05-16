@@ -280,6 +280,14 @@ public:
 		return (start == v_num) || (end == v_num);
 	}
 
+	//
+	// Assuming TouchesVertex(v_num), return the other one. Undefined otherwise.
+	//
+	int OtherVertex(int v_num) const
+	{
+		return start == v_num ? end : start;
+	}
+
 	bool TouchesCoord(fixcoord_t tx, fixcoord_t ty, const Document &doc) const
 	{
 		return Start(doc)->Matches(tx, ty) || End(doc)->Matches(tx, ty);

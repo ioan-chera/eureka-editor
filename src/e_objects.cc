@@ -817,6 +817,60 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 	doc.basis.end();
 }
 
+//
+// Returns, if found, a linedef ID between a given line and vertex, if existing.
+// Only returns the first one found, if multiple available.
+// Normally only 2 can exist, when there's a triangle between lineID and vertID.
+// 
+// Returns -1 if none found
+//
+int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
+{
+	for(int i = 0; i < doc.numLinedefs(); ++i)
+	{
+		const LineDef *otherLine = doc.linedefs[i];
+		if(!otherLine->TouchesVertex(vertID) || i == lineID)
+			continue;
+
+		// We have a linedef that is going to overlap the other one to be 
+		// split. We need to handle it like above, with merging vertices
+
+		// Identify the hinge, common vertex
+		int otherLineOtherVertexID = otherLine->OtherVertex(vertID);
+		if(!doc.linedefs[lineID]->TouchesVertex(otherLineOtherVertexID))
+			continue;	// not a hinge between them
+
+		return i;
+	}
+
+	return -1;
+}
+
+//
+// Splits a linedef while also considering resulted merged lines.
+// It needs delta_x and delta_y in order to properly merge sandwich linedefs.
+//
+void ObjectsModule::splitLinedefAndMergeSandwich(int splitLineID, int vertID, 
+												 double delta_x, double delta_y) const
+{
+	// Add a vertex there and do the split
+	int newVID = doc.basis.addNew(ObjType::vertices);
+	Vertex *newV = doc.vertices[newVID];
+	*newV = *doc.vertices[vertID];
+
+	// Move it to the actual destination
+	newV->raw_x += inst.MakeValidCoord(delta_x);
+	newV->raw_y += inst.MakeValidCoord(delta_y);
+
+	doc.linemod.splitLinedefAtVertex(splitLineID, newVID);
+
+	// Now merge the vertices
+	selection_c verts(ObjType::vertices);
+	verts.set(newVID);
+	verts.set(vertID);
+
+	doc.vertmod.mergeList(&verts);
+}
 
 void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
 {
@@ -857,8 +911,18 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 	if (inst.edit.split_line.valid())
 	{
 		did_split_line = inst.edit.split_line.num;
+		
+		// Check if it's actually a case of splitting a neighbouring linedef
+		if(findLineBetweenLineAndVertex(did_split_line, obj.num) >= 0)
+		{
+			// Alright, we got it
+			doc.basis.setMessage("split linedef #%d", did_split_line);
+			splitLinedefAndMergeSandwich(did_split_line, obj.num, delta_x, delta_y);
+			doc.basis.end();
+			return;
+		}
 
-		doc.linemod.splitLinedefAtVertex(inst.edit.split_line.num, obj.num);
+		doc.linemod.splitLinedefAtVertex(did_split_line, obj.num);
 
 		// now move the vertex!
 	}
