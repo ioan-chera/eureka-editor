@@ -147,6 +147,8 @@ set(source_ui
     ui_misc.h
     ui_nombre.cc
     ui_nombre.h
+    ui_panelinput.cc
+    ui_panelinput.h
     ui_pic.cc
     ui_pic.h
     ui_prefs.cc

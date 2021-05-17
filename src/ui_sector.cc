@@ -95,7 +95,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	tag = new UI_DynIntInput(X+70, Y, 64, 24, "Tag: ");
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
-	tag->callback2(dirtify_callback, this);
+	tag->callback2(mFixUp.dirtify_callback, &mFixUp);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	fresh_tag = new Fl_Button(tag->x() + tag->w() + 20, Y+1, 64, 22, "fresh");
@@ -107,7 +107,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	light = new UI_DynIntInput(X+70, Y, 64, 24, "Light: ");
 	light->align(FL_ALIGN_LEFT);
 	light->callback(light_callback, this);
-	light->callback2(dirtify_callback, this);
+	light->callback2(mFixUp.dirtify_callback, &mFixUp);
 	light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	lt_down = new Fl_Button(light->x() + light->w() + 20, Y+1, 30, 22, "-");
@@ -145,7 +145,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	ceil_h = new UI_DynIntInput(X+70, Y, 64, 24, "");
 	ceil_h->align(FL_ALIGN_LEFT);
 	ceil_h->callback(height_callback, this);
-	ceil_h->callback2(dirtify_callback, this);
+	ceil_h->callback2(mFixUp.dirtify_callback, &mFixUp);
 	ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	ce_down = new Fl_Button(X+28,  Y+1, 30, 22, "-");
@@ -165,7 +165,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	floor_h = new UI_DynIntInput(X+70, Y, 64, 24, "");
 	floor_h->align(FL_ALIGN_LEFT);
 	floor_h->callback(height_callback, this);
-	floor_h->callback2(dirtify_callback, this);
+	floor_h->callback2(mFixUp.dirtify_callback, &mFixUp);
 	floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	fl_down = new Fl_Button(X+28,  Y+1, 30, 22, "-");
@@ -194,7 +194,7 @@ UI_SectorBox::UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const cha
 	headroom = new UI_DynIntInput(X+100, Y, 56, 24, "Headroom: ");
 	headroom->align(FL_ALIGN_LEFT);
 	headroom->callback(headroom_callback, this);
-	headroom->callback2(dirtify_callback, this);
+	headroom->callback2(mFixUp.dirtify_callback, &mFixUp);
 	headroom->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 	for (int i = 0 ; i < HEADROOM_BUTTONS ; i++)
@@ -251,27 +251,14 @@ UI_SectorBox::~UI_SectorBox()
 
 //------------------------------------------------------------------------
 
-//
-// Check all dirty flags and calls the callbacks. Meant to be called before
-// any non-edit action!
-//
-void UI_SectorBox::checkDirtyFields()
-{
-	while(!mDirtyFields.empty())
-	{
-		Fl_Input *input = *mDirtyFields.begin();
-		input->callback()(input, this);
-	}
-}
-
 void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
 	if(w == box->floor_h)
-		box->mDirtyFields.erase(box->floor_h);
+		box->mFixUp.clear(box->floor_h);
 	else if(w == box->ceil_h)
-		box->mDirtyFields.erase(box->ceil_h);
+		box->mFixUp.clear(box->ceil_h);
 
 	int f_h = atoi(box->floor_h->value());
 	int c_h = atoi(box->ceil_h->value());
@@ -298,9 +285,9 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 
 		box->inst.level.basis.end();
 
-		box->setInputValue(box->floor_h, SString(f_h).c_str());
-		box->setInputValue(box->ceil_h, SString(c_h).c_str());
-		box->setInputValue(box->headroom, SString(c_h - f_h).c_str());
+		box->mFixUp.setInputValue(box->floor_h, SString(f_h).c_str());
+		box->mFixUp.setInputValue(box->ceil_h, SString(c_h).c_str());
+		box->mFixUp.setInputValue(box->headroom, SString(c_h - f_h).c_str());
 	}
 }
 
@@ -308,7 +295,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 	
-	box->mDirtyFields.erase(box->headroom);	// the buttons don't care what's in the box
+	box->mFixUp.clear(box->headroom);	// the buttons don't care what's in the box
 
 	int room = atoi(box->headroom->value());
 
@@ -323,7 +310,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->checkDirtyFields();
+		box->mFixUp.checkDirtyFields();
 
 		box->inst.level.basis.begin();
 		box->inst.level.basis.setMessageForSelection("edited headroom of", *box->inst.edit.Selected);
@@ -355,9 +342,9 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	bool is_floor = (w == box->f_pic || w == box->f_tex);
 
 	if(is_floor)
-		box->mDirtyFields.erase(box->f_tex);
+		box->mFixUp.clear(box->f_tex);
 	else if(!is_pic)
-		box->mDirtyFields.erase(box->c_tex);
+		box->mFixUp.clear(box->c_tex);
 
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == FL_MIDDLE_MOUSE)
@@ -399,7 +386,7 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 
 	if (! inst.edit.Selected->empty())
 	{
-		checkDirtyFields();
+		mFixUp.checkDirtyFields();
 
 		inst.level.basis.begin();
 		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
@@ -429,7 +416,7 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 	// change picture to match the input, BUT does not change the map
 
 	UI_SectorBox *box = (UI_SectorBox *)data;
-	dirtify_callback(w, data);
+	box->mFixUp.dirtify_callback(w, &box->mFixUp);
 
 	if (box->obj < 0)
 		return;
@@ -448,10 +435,10 @@ void UI_SectorBox::dyntex_callback(Fl_Widget *w, void *data)
 void UI_SectorBox::SetFlat(const SString &name, int parts)
 {
 	if(parts & PART_FLOOR)
-		setInputValue(f_tex, name.c_str());
+		mFixUp.setInputValue(f_tex, name.c_str());
 
 	if(parts & PART_CEIL)
-		setInputValue(c_tex, name.c_str());
+		mFixUp.setInputValue(c_tex, name.c_str());
 
 	InstallFlat(name, parts);
 }
@@ -462,7 +449,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
 	if(w == box->type)	// only when updating the edit field we clear the dirty flag
-		box->mDirtyFields.erase(box->type);
+		box->mFixUp.clear(box->type);
 
 	int mask  = 65535;
 	int value = atoi(box->type->value());
@@ -528,7 +515,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 
 	if (! inst.edit.Selected->empty())
 	{
-		checkDirtyFields();
+		mFixUp.checkDirtyFields();
 		inst.level.basis.begin();
 		inst.level.basis.setMessageForSelection("edited type of", *inst.edit.Selected);
 
@@ -554,7 +541,7 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 	if (box->obj < 0)
 		return;
 
-	dirtify_callback(w, data);
+	box->mFixUp.dirtify_callback(w, &box->mFixUp);
 
 	int value = atoi(box->type->value());
 
@@ -581,7 +568,7 @@ void UI_SectorBox::SetSectorType(int new_type)
 
 
 	auto buffer = SString(new_type);
-	setInputValue(type, buffer.c_str());	// was updated by this
+	mFixUp.setInputValue(type, buffer.c_str());	// was updated by this
 
 	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 			   (inst.Features.gen_sectors == GenSectorFamily::boom) ? 31  : 65535;
@@ -594,7 +581,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
-	box->mDirtyFields.erase(box->light);
+	box->mFixUp.clear(box->light);
 
 	int new_lt = atoi(box->light->value());
 
@@ -623,7 +610,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
-	box->mDirtyFields.erase(box->tag);
+	box->mFixUp.clear(box->tag);
 
 	int new_tag = atoi(box->tag->value());
 
@@ -633,18 +620,9 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 		box->inst.level.checks.tagsApplyNewValue(new_tag);
 }
 
-//
-// Just to mark a flag dirty. Data is a boolean field
-//
-void UI_SectorBox::dirtify_callback(Fl_Widget *w, void *data)
-{
-	auto box = static_cast<UI_SectorBox *>(data);
-	box->mDirtyFields.insert(static_cast<Fl_Input *>(w));
-}
-
 void UI_SectorBox::FreshTag()
 {
-	checkDirtyFields();
+	mFixUp.checkDirtyFields();
 
 	int min_tag, max_tag;
 	inst.level.checks.tagsUsedRange(&min_tag, &max_tag);
@@ -672,7 +650,7 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
 
-	box->checkDirtyFields();
+	box->mFixUp.checkDirtyFields();
 
 	if (w == box->choose)
 	{
@@ -765,15 +743,15 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (inst.level.isSector(obj))
 		{
-			setInputValue(floor_h, SString(sector->floorh).c_str());
-			setInputValue(ceil_h, SString(sector->ceilh).c_str());
-			setInputValue(headroom, SString(sector->HeadRoom()).c_str());
+			mFixUp.setInputValue(floor_h, SString(sector->floorh).c_str());
+			mFixUp.setInputValue(ceil_h, SString(sector->ceilh).c_str());
+			mFixUp.setInputValue(headroom, SString(sector->HeadRoom()).c_str());
 		}
 		else
 		{
-			setInputValue(floor_h, "");
-			setInputValue(ceil_h, "");
-			setInputValue(headroom, "");
+			mFixUp.setInputValue(floor_h, "");
+			mFixUp.setInputValue(ceil_h, "");
+			mFixUp.setInputValue(headroom, "");
 		}
 	}
 
@@ -781,8 +759,8 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (inst.level.isSector(obj))
 		{
-			setInputValue(f_tex, sector->FloorTex().c_str());
-			setInputValue(c_tex, sector->CeilTex().c_str());
+			mFixUp.setInputValue(f_tex, sector->FloorTex().c_str());
+			mFixUp.setInputValue(c_tex, sector->CeilTex().c_str());
 
 			f_pic->GetFlat(sector->FloorTex());
 			c_pic->GetFlat(sector->CeilTex());
@@ -792,8 +770,8 @@ void UI_SectorBox::UpdateField(int field)
 		}
 		else
 		{
-			setInputValue(f_tex, "");
-			setInputValue(c_tex, "");
+			mFixUp.setInputValue(f_tex, "");
+			mFixUp.setInputValue(c_tex, "");
 
 			f_pic->Clear();
 			c_pic->Clear();
@@ -816,7 +794,7 @@ void UI_SectorBox::UpdateField(int field)
 			int mask  = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 						(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
-			setInputValue(type, SString(value & mask).c_str());
+			mFixUp.setInputValue(type, SString(value & mask).c_str());
 
 			const sectortype_t &info = inst.M_GetSectorType(value & mask);
 			desc->value(info.desc.c_str());
@@ -835,7 +813,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 		else
 		{
-			setInputValue(type, "");
+			mFixUp.setInputValue(type, "");
 			desc->value("");
 		}
 	}
@@ -844,13 +822,13 @@ void UI_SectorBox::UpdateField(int field)
 	{
 		if (inst.level.isSector(obj))
 		{
-			setInputValue(light, SString(sector->light).c_str());
-			setInputValue(tag, SString(sector->tag).c_str());
+			mFixUp.setInputValue(light, SString(sector->light).c_str());
+			mFixUp.setInputValue(tag, SString(sector->tag).c_str());
 		}
 		else
 		{
-			setInputValue(light, "");
-			setInputValue(tag, "");
+			mFixUp.setInputValue(light, "");
+			mFixUp.setInputValue(tag, "");
 		}
 	}
 }
@@ -895,7 +873,7 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 	if (inst.edit.Selected->empty())
 		return;
 
-	checkDirtyFields();
+	mFixUp.checkDirtyFields();
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
@@ -919,7 +897,7 @@ void UI_SectorBox::CB_Cut(int parts)
 
 	if (! inst.edit.Selected->empty())
 	{
-		checkDirtyFields();
+		mFixUp.checkDirtyFields();
 
 		inst.level.basis.begin();
 		inst.level.basis.setMessageForSelection("cut texture on", *inst.edit.Selected);
