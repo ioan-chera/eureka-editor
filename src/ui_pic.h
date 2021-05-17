@@ -21,6 +21,7 @@
 #ifndef __EUREKA_UI_PIC_H__
 #define __EUREKA_UI_PIC_H__
 
+#include "ui_panelinput.h"
 #include "FL/Fl_Input.H"
 
 class Img_c;
@@ -91,7 +92,7 @@ private:
 //------------------------------------------------------------------------
 
 
-class UI_DynInput : public Fl_Input
+class UI_DynInput : public Fl_Input, public ICallback2
 {
 	/* this widget provides a secondary callback which can be
 	 * used to dynamically update a picture or description.
@@ -111,10 +112,20 @@ public:
 
 	// main callback is done on ENTER or RELEASE, but this
 	// secondary callback is done on each change by the user.
-	void callback2(Fl_Callback *cb, void *data)
+	void callback2(Fl_Callback *cb, void *data) override
 	{
 		callback2_ = cb; data2_ = data;
 	}
+	Fl_Callback *callback2() const override
+	{
+		return callback2_;
+	}
+	void *user_data2() const override
+	{
+		return data2_;
+	}
+
+	ICALLBACK2_BOILERPLATE()
 };
 
 #endif  /* __EUREKA_UI_PIC_H__ */

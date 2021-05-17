@@ -27,6 +27,25 @@
 #include "ui_panelinput.h"
 
 //
+// Given a list of fields, assigns secondary callbacks
+//
+void PanelFieldFixUp::loadFields(std::initializer_list<ICallback2 *> fields)
+{
+	for(ICallback2 *field : fields)
+	{
+		if(field->getMainCallback())
+			mOriginalCallbacks[field] = { field->getMainCallback(), field->getMainUserData() };
+		field->setMainCallback(clearDirtyCallback, this);
+		if(field->callback2())
+			mOriginalCallbacks2[field] = { field->callback2(), field->user_data2() };
+		field->callback2(setDirtyCallback, this);
+
+		mAsCallback2[field->asWidget()] = field;
+		mAsWidget[field] = field->asWidget();
+	}
+}
+
+//
 // Check all dirty flags and calls the callbacks. Meant to be called before
 // any non-edit action!
 //
@@ -34,25 +53,46 @@ void PanelFieldFixUp::checkDirtyFields()
 {
 	while(!mDirtyFields.empty())
 	{
-		Fl_Input *input = *mDirtyFields.begin();
-		input->callback()(input, mOwner);
+		ICallback2 *input = *mDirtyFields.begin();
+		input->getMainCallback()(mAsWidget[input], this);
 	}
 }
 
 //
 // Convenience that also sets the dirty field. Only use it for targeted fields
 //
-void PanelFieldFixUp::setInputValue(Fl_Input *input, const char *value)
+void PanelFieldFixUp::setInputValue(ICallback2 *input, const char *value)
 {
-	input->value(value);
+	input->setValue(value);
 	mDirtyFields.erase(input);
 }
 
 //
-// Just to mark a flag dirty. Data is a boolean field
+// Set-callback for this
 //
-void PanelFieldFixUp::dirtify_callback(Fl_Widget *w, void *data)
+void PanelFieldFixUp::setDirtyCallback(Fl_Widget *widget, void *data)
 {
 	auto fixup = static_cast<PanelFieldFixUp *>(data);
-	fixup->mDirtyFields.insert(static_cast<Fl_Input *>(w));
+	auto control = fixup->mAsCallback2[widget];
+	fixup->mDirtyFields.insert(control);
+
+	// Now also call its original one
+	auto it = fixup->mOriginalCallbacks2.find(control);
+	if(it != fixup->mOriginalCallbacks2.end())
+		it->second.callback(widget, it->second.data);
+}
+
+//
+// Clear-callback for this
+//
+void PanelFieldFixUp::clearDirtyCallback(Fl_Widget *widget, void *data)
+{
+	auto fixup = static_cast<PanelFieldFixUp *>(data);
+	auto control = fixup->mAsCallback2[widget];
+	fixup->mDirtyFields.erase(control);
+
+	// Now also call its original one
+	auto it = fixup->mOriginalCallbacks.find(control);
+	if(it != fixup->mOriginalCallbacks.end())
+		it->second.callback(widget, it->second.data);
 }

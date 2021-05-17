@@ -77,7 +77,7 @@ public:
 
 private:
 	Instance &inst;
-	PanelFieldFixUp mFixUp = PanelFieldFixUp(this);
+	PanelFieldFixUp mFixUp;
 
 public:
 	UI_SectorBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);

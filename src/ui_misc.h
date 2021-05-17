@@ -144,7 +144,7 @@ private:
 //
 // Similar to UI_DynInput but for Fl_Int_Input
 //
-class UI_DynIntInput : public Fl_Int_Input
+class UI_DynIntInput : public Fl_Int_Input, public ICallback2
 {
 public:
 	UI_DynIntInput(int X, int Y, int W, int H, const char *L = nullptr) :
@@ -157,11 +157,21 @@ public:
 	//
 	// Assign the change callback
 	//
-	void callback2(Fl_Callback *callback, void *data)
+	void callback2(Fl_Callback *callback, void *data) override
 	{
 		mCallback2 = callback;
 		mData2 = data;
 	}
+	Fl_Callback *callback2() const override
+	{
+		return mCallback2;
+	}
+	void *user_data2() const override
+	{
+		return mData2;
+	}
+
+	ICALLBACK2_BOILERPLATE()
 private:
 	Fl_Callback *mCallback2 = nullptr;
 	void *mData2 = nullptr;

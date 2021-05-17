@@ -28,7 +28,33 @@
 #define __EUREKA_UI_PANELINPUT_H__
 
 #include "FL/Fl_Input.H"
+#include <unordered_map>
 #include <unordered_set>
+
+//
+// Interface for providing "callback2" to controls
+//
+class ICallback2
+{
+public:
+	virtual void callback2(Fl_Callback *callback, void *data) = 0;
+	virtual Fl_Callback *callback2() const = 0;
+	virtual void *user_data2() const = 0;
+
+	// Necessary indicators for our task. Oh, boilerplate :(
+	virtual Fl_Callback *getMainCallback() const = 0;
+	virtual void *getMainUserData() const = 0;
+	virtual void setMainCallback(Fl_Callback *callback, void *data) = 0;
+	virtual void setValue(const char *value) = 0;
+	virtual Fl_Widget *asWidget() = 0;
+};
+
+#define ICALLBACK2_BOILERPLATE() \
+Fl_Callback *getMainCallback() const override { return callback(); } \
+void *getMainUserData() const override { return user_data(); } \
+void setMainCallback(Fl_Callback *cb, void *data) override { callback(cb, data); } \
+void setValue(const char *v) override { value(v); } \
+Fl_Widget *asWidget() override { return static_cast<Fl_Widget *>(this); }
 
 //
 // Fix-up class for panel fields to make sure they work as expected when clicking buttons
@@ -36,30 +62,37 @@
 class PanelFieldFixUp
 {
 public:
-	explicit PanelFieldFixUp(void *ownerContext) : mOwner(ownerContext)
-	{
-	}
+	void loadFields(std::initializer_list<ICallback2 *> fields);
 
 	// Call it before starting basis
 	void checkDirtyFields();
-	void setInputValue(Fl_Input *input, const char *value);
-
-	void clear(Fl_Input *input)
-	{
-		mDirtyFields.erase(input);
-	}
-
-	static void dirtify_callback(Fl_Widget *, void *);
+	void setInputValue(ICallback2 *input, const char *value);
 
 private:
+	//
+	// Callback info, for storage
+	//
+	struct CallbackInfo
+	{
+		Fl_Callback *callback;
+		void *data;
+	};
+
+	static void setDirtyCallback(Fl_Widget *widget, void *data);
+	static void clearDirtyCallback(Fl_Widget *widget, void *data);
+
+	std::unordered_map<ICallback2 *, CallbackInfo> mOriginalCallbacks;
+	std::unordered_map<ICallback2 *, CallbackInfo> mOriginalCallbacks2;
+	std::unordered_map<Fl_Widget *, ICallback2 *> mAsCallback2;
+	std::unordered_map<ICallback2 *, Fl_Widget *> mAsWidget;
+
 	// Set of "dirty" edit fields. The rule is as such:
 	// - Add them to list when user writes text without exiting or pressing ENTER
 	//   (that's why they need to be UI_DynInput or UI_DynIntInput)
 	// - Remove them from list when their callback is invoked (caution: only for them)
 	// - Remove them from list when their value() is changed externally.
 	// - Before any basis.begin() or external function which does that, call checkDirtyFields()
-	std::unordered_set<Fl_Input *> mDirtyFields;
-	void *const mOwner;	// who's the user data for the callbacks
+	std::unordered_set<ICallback2 *> mDirtyFields;
 };
 
 #endif
