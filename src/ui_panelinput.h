@@ -24,6 +24,9 @@
 //
 //------------------------------------------------------------------------
 
+#ifndef __EUREKA_UI_PANELINPUT_H__
+#define __EUREKA_UI_PANELINPUT_H__
+
 #include "FL/Fl_Input.H"
 #include <unordered_set>
 
@@ -58,3 +61,5 @@ private:
 	std::unordered_set<Fl_Input *> mDirtyFields;
 	void *const mOwner;	// who's the user data for the callbacks
 };
+
+#endif
