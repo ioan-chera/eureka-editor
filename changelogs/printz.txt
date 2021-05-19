@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+19.05.2021
+* Fixed so clicking a button while editing a panel field won't reset the field.
+
+----------
 16.05.2021
 * Fixed a bug where dragging a vertex into a neighbouring linedef to split it resulted in two overlapping lines.
 
