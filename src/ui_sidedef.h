@@ -48,7 +48,7 @@ private:
 	bool on_2S_line = false;
 
 public:
-	UI_DynIntInput *x_ofs;
+	Fl_Spinner *x_ofs;
 	Fl_Spinner *y_ofs;
 	UI_DynIntInput *sec;
 
