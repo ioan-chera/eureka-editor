@@ -66,6 +66,11 @@ void PanelFieldFixUp::setInputValue(ICallback2 *input, const char *value)
 	input->setValue(value);
 	mDirtyFields.erase(input);
 }
+void PanelFieldFixUp::setInputValue(ICallback2 *input, double value)
+{
+	input->setValue(value);
+	mDirtyFields.erase(input);
+}
 
 //
 // Set-callback for this

@@ -176,11 +176,53 @@ public:
 		return Fl_Int_Input::value();
 	}
 
-	ICALLBACK2_BOILERPLATE()
+	ICALLBACK2_BOILERPLATE_CSTRING()
 private:
 	void value(const char *s)	// prevent direct editing
 	{
 		Fl_Int_Input::value(s);
+	}
+
+	Fl_Callback *mCallback2 = nullptr;
+	void *mData2 = nullptr;
+};
+
+//
+// Variant for spinner
+//
+class UI_DynSpinner : public Fl_Spinner, public ICallback2
+{
+public:
+	UI_DynSpinner(int X, int Y, int W, int H, const char *L = nullptr) :
+		Fl_Spinner(X, Y, W, H, L)
+	{
+	}
+
+	int handle(int event) override;
+	void callback2(Fl_Callback *callback, void *data) override
+	{
+		mCallback2 = callback;
+		mData2 = data;
+	}
+	Fl_Callback *callback2() const override
+	{
+		return mCallback2;
+	}
+	void *user_data2() const override
+	{
+		return mData2;
+	}
+
+	double value() const
+	{
+		return Fl_Spinner::value();
+	}
+
+	ICALLBACK2_BOILERPLATE_DOUBLE()
+private:
+	void value(double v)	// prevent direct editing
+	{
+		Fl_Spinner::value(v);
 	}
 
 	Fl_Callback *mCallback2 = nullptr;

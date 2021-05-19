@@ -129,7 +129,7 @@ public:
 		return Fl_Input::value();
 	}
 
-	ICALLBACK2_BOILERPLATE()
+	ICALLBACK2_BOILERPLATE_CSTRING()
 private:
 	void value(const char *s)	// prevent direct editing
 	{

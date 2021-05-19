@@ -46,14 +46,24 @@ public:
 	virtual void *getMainUserData() const = 0;
 	virtual void setMainCallback(Fl_Callback *callback, void *data) = 0;
 	virtual void setValue(const char *value) = 0;
+	virtual void setValue(double value) = 0;
 	virtual Fl_Widget *asWidget() = 0;
 };
 
-#define ICALLBACK2_BOILERPLATE() \
+#define ICALLBACK2_BOILERPLATE_CSTRING() \
 Fl_Callback *getMainCallback() const override { return callback(); } \
 void *getMainUserData() const override { return user_data(); } \
 void setMainCallback(Fl_Callback *cb, void *data) override { callback(cb, data); } \
 void setValue(const char *v) override { value(v); } \
+void setValue(double v) override { } \
+Fl_Widget *asWidget() override { return static_cast<Fl_Widget *>(this); }
+
+#define ICALLBACK2_BOILERPLATE_DOUBLE() \
+Fl_Callback *getMainCallback() const override { return callback(); } \
+void *getMainUserData() const override { return user_data(); } \
+void setMainCallback(Fl_Callback *cb, void *data) override { callback(cb, data); } \
+void setValue(const char *v) override { } \
+void setValue(double v) override { value(v); } \
 Fl_Widget *asWidget() override { return static_cast<Fl_Widget *>(this); }
 
 //
@@ -67,6 +77,7 @@ public:
 	// Call it before starting basis
 	void checkDirtyFields();
 	void setInputValue(ICallback2 *input, const char *value);
+	void setInputValue(ICallback2 *input, double value);
 
 private:
 	//
