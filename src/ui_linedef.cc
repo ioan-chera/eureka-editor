@@ -303,7 +303,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	{
 		if (L->OneSided())
 		{
-			if (parts & PART_RT_LOWER) 
+			if (parts & PART_RT_RAIL) 
 				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 			if (parts & PART_RT_UPPER) 
 				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
