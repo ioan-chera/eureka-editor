@@ -34,7 +34,11 @@
 
 enum
 {
-	TEXTURE_TILE_OUTSET = 8
+	TEXTURE_TILE_OUTSET = 8,
+	// TODO: make these part of game definition
+	OFFSET_MIN = -32768,
+	OFFSET_MAX = 32767,
+	OFFSET_STEP = 8	// TODO: make this part of config
 };
 
 
@@ -88,7 +92,7 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 
 
 	x_ofs = new UI_DynIntInput(X+28,   Y, 52, 24, "x:");
-	y_ofs = new UI_DynIntInput(MX-20,  Y, 52, 24, "y:");
+	y_ofs = new Fl_Spinner(MX - 20, Y, 68, 24, "y:");
 	sec = new UI_DynIntInput(X+W-59, Y, 52, 24, "sec:");
 
 	x_ofs->align(FL_ALIGN_LEFT);
@@ -103,6 +107,9 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	y_ofs->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	sec  ->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
+	y_ofs->minimum(OFFSET_MIN);
+	y_ofs->maximum(OFFSET_MAX);
+	y_ofs->step(OFFSET_STEP);
 
 	Y += x_ofs->h() + 6;
 
@@ -145,7 +152,7 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	r_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
-	mFixUp.loadFields({ x_ofs, y_ofs, sec, l_tex, u_tex, r_tex });
+	mFixUp.loadFields({ x_ofs, sec, l_tex, u_tex, r_tex });
 
 	end();
 
@@ -369,7 +376,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 	UI_SideBox *box = (UI_SideBox *)data;
 
 	int new_x_ofs = atoi(box->x_ofs->value());
-	int new_y_ofs = atoi(box->y_ofs->value());
+	int new_y_ofs = static_cast<int>(round(box->y_ofs->value()));
 
 	// iterate over selected linedefs
 	if (!box->inst.edit.Selected->empty())
@@ -465,7 +472,7 @@ void UI_SideBox::UpdateField()
 		const SideDef *sd = inst.level.sidedefs[obj];
 
 		mFixUp.setInputValue(x_ofs, SString(sd->x_offset).c_str());
-		mFixUp.setInputValue(y_ofs, SString(sd->y_offset).c_str());
+		y_ofs->value(sd->y_offset);
 		mFixUp.setInputValue(sec, SString(sd->sector).c_str());
 
 		SString lower = sd->LowerTex();
@@ -497,7 +504,7 @@ void UI_SideBox::UpdateField()
 	else
 	{
 		mFixUp.setInputValue(x_ofs, "");
-		mFixUp.setInputValue(y_ofs, "");
+		y_ofs->value(0);
 		mFixUp.setInputValue(sec, "");
 
 		mFixUp.setInputValue(l_tex, "");

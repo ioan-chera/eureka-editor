@@ -22,6 +22,7 @@
 #define __EUREKA_UI_SIDEDEF_H__
 
 #include "ui_panelinput.h"
+#include <FL/Fl_Spinner.H>
 
 #define SETOBJ_NO_LINE  -2
 
@@ -48,7 +49,7 @@ private:
 
 public:
 	UI_DynIntInput *x_ofs;
-	UI_DynIntInput *y_ofs;
+	Fl_Spinner *y_ofs;
 	UI_DynIntInput *sec;
 
 	UI_Pic *l_pic;
