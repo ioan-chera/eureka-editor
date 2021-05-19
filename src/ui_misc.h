@@ -171,8 +171,18 @@ public:
 		return mData2;
 	}
 
+	const char *value() const
+	{
+		return Fl_Int_Input::value();
+	}
+
 	ICALLBACK2_BOILERPLATE()
 private:
+	void value(const char *s)	// prevent direct editing
+	{
+		Fl_Int_Input::value(s);
+	}
+
 	Fl_Callback *mCallback2 = nullptr;
 	void *mData2 = nullptr;
 };

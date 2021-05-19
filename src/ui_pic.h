@@ -124,8 +124,17 @@ public:
 	{
 		return data2_;
 	}
+	const char *value() const
+	{
+		return Fl_Input::value();
+	}
 
 	ICALLBACK2_BOILERPLATE()
+private:
+	void value(const char *s)	// prevent direct editing
+	{
+		Fl_Input::value(s);
+	}
 };
 
 #endif  /* __EUREKA_UI_PIC_H__ */

@@ -20,6 +20,7 @@
 
 #include "Instance.h"
 #include "main.h"
+#include "ui_misc.h"
 #include "ui_window.h"
 
 #include "e_main.h"
@@ -93,7 +94,7 @@ UI_DefaultProps::UI_DefaultProps(Instance &inst, int X, int Y, int W, int H) :
 	Y += c_tex->h() + 3;
 
 
-	ceil_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
+	ceil_h = new UI_DynIntInput(X+68, Y, 64, 24, "");
 	ceil_h->align(FL_ALIGN_LEFT);
 	ceil_h->callback(height_callback, this);
 	ceil_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -114,7 +115,7 @@ UI_DefaultProps::UI_DefaultProps(Instance &inst, int X, int Y, int W, int H) :
 
 	Y += ceil_h->h() + 8;
 
-	floor_h = new Fl_Int_Input(X+68, Y, 64, 24, "");
+	floor_h = new UI_DynIntInput(X+68, Y, 64, 24, "");
 	floor_h->align(FL_ALIGN_LEFT);
 	floor_h->callback(height_callback, this);
 	floor_h->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -143,7 +144,7 @@ UI_DefaultProps::UI_DefaultProps(Instance &inst, int X, int Y, int W, int H) :
 	Y += f_tex->h() + 8;
 
 
-	light = new Fl_Int_Input(X+68, Y, 64, 24, "Light:   ");
+	light = new UI_DynIntInput(X+68, Y, 64, 24, "Light:   ");
 	light->align(FL_ALIGN_LEFT);
 	light->callback(height_callback, this);
 	light->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -167,6 +168,8 @@ UI_DefaultProps::UI_DefaultProps(Instance &inst, int X, int Y, int W, int H) :
 
 
 	resizable(NULL);
+
+	mFixUp.loadFields({ w_tex, ceil_h, light, floor_h, c_tex, f_tex, thing });
 
 	end();
 }
@@ -202,7 +205,7 @@ void UI_DefaultProps::SetThing(int number)
 {
 	inst.default_thing = number;
 
-	thing->value(SString(inst.default_thing).c_str());
+	mFixUp.setInputValue(thing, SString(inst.default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -212,7 +215,7 @@ SString UI_DefaultProps::Normalize_and_Dup(UI_DynInput *w)
 {
 	SString normalized = NormalizeTex(w->value());
 
-	w->value(normalized.c_str());
+	mFixUp.setInputValue(w, normalized.c_str());
 
 	return normalized;
 }
@@ -236,7 +239,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 	if (w == box->w_tex)
 	{
-		box->inst.default_wall_tex = Normalize_and_Dup(box->w_tex);
+		box->inst.default_wall_tex = box->Normalize_and_Dup(box->w_tex);
 	}
 
 	box->w_pic->GetTex(box->w_tex->value());
@@ -261,10 +264,10 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 	}
 
 	if (w == box->f_tex)
-		box->inst.default_floor_tex = Normalize_and_Dup(box->f_tex);
+		box->inst.default_floor_tex = box->Normalize_and_Dup(box->f_tex);
 
 	if (w == box->c_tex)
-		box->inst.default_ceil_tex = Normalize_and_Dup(box->c_tex);
+		box->inst.default_ceil_tex = box->Normalize_and_Dup(box->c_tex);
 
 	box->f_pic->GetFlat(box->f_tex->value());
 	box->c_pic->GetFlat(box->c_tex->value());
@@ -302,6 +305,8 @@ void UI_DefaultProps::button_callback(Fl_Widget *w, void *data)
 		diff = 1;
 	else if (mod & EMOD_COMMAND)
 		diff = 64;
+
+	box->mFixUp.checkDirtyFields();
 
 	if (w == box->fl_up)
 		global::default_floor_h += diff;
@@ -361,9 +366,9 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 void UI_DefaultProps::LoadValues()
 {
-	w_tex->value(inst.default_wall_tex.c_str());
-	f_tex->value(inst.default_floor_tex.c_str());
-	c_tex->value(inst.default_ceil_tex.c_str());
+	mFixUp.setInputValue(w_tex, inst.default_wall_tex.c_str());
+	mFixUp.setInputValue(f_tex, inst.default_floor_tex.c_str());
+	mFixUp.setInputValue(c_tex, inst.default_ceil_tex.c_str());
 
 	w_pic->GetTex (w_tex->value());
 	f_pic->GetFlat(f_tex->value());
@@ -373,7 +378,7 @@ void UI_DefaultProps::LoadValues()
 	SetIntVal( ceil_h, global::default_ceil_h);
 	SetIntVal(  light, global::default_light_level);
 
-	thing->value(SString(inst.default_thing).c_str());
+	mFixUp.setInputValue(thing, SString(inst.default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -405,19 +410,22 @@ void UI_DefaultProps::CB_Paste(int sel_pics)
 {
 	if (sel_pics & 1)
 	{
-		f_tex->value(BA_GetString(inst.Texboard_GetFlatNum()).c_str());
+		mFixUp.setInputValue(f_tex, 
+							 BA_GetString(inst.Texboard_GetFlatNum()).c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(BA_GetString(inst.Texboard_GetFlatNum()).c_str());
+		mFixUp.setInputValue(c_tex, 
+							 BA_GetString(inst.Texboard_GetFlatNum()).c_str());
 		c_tex->do_callback();
 	}
 
 	if (sel_pics & 4)
 	{
-		w_tex->value(BA_GetString(inst.Texboard_GetTexNum()).c_str());
+		mFixUp.setInputValue(w_tex, 
+							 BA_GetString(inst.Texboard_GetTexNum()).c_str());
 		w_tex->do_callback();
 	}
 }
@@ -429,13 +437,13 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 
 	if (sel_pics & 1)
 	{
-		f_tex->value(inst.Misc_info.sky_flat.c_str());
+		mFixUp.setInputValue(f_tex, inst.Misc_info.sky_flat.c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		c_tex->value(inst.Misc_info.sky_flat.c_str());
+		mFixUp.setInputValue(c_tex, inst.Misc_info.sky_flat.c_str());
 		c_tex->do_callback();
 	}
 }
@@ -507,17 +515,17 @@ void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e
 
 	if (sel_pics & 1)
 	{
-		f_tex->value(name);
+		mFixUp.setInputValue(f_tex, name);
 		f_tex->do_callback();
 	}
 	if (sel_pics & 2)
 	{
-		c_tex->value(name);
+		mFixUp.setInputValue(c_tex, name);
 		c_tex->do_callback();
 	}
 	if (sel_pics & 4)
 	{
-		w_tex->value(name);
+		mFixUp.setInputValue(w_tex, name);
 		w_tex->do_callback();
 	}
 }

@@ -20,6 +20,7 @@
 
 #include "Instance.h"
 #include "main.h"
+#include "ui_misc.h"
 #include "ui_window.h"
 
 #include "e_hover.h"	// OppositeSector
@@ -43,12 +44,20 @@ bool config::show_full_one_sided = false;
 bool config::sidedef_add_del_buttons = false;
 
 //
+// Check dirty fields for the linedef panel
+//
+inline static void checkLinedefDirtyFields(const Instance &inst)
+{
+	inst.main_win->line_box->checkDirtyFields();
+}
+
+//
 // Constructor
 //
 UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	Fl_Group(X, Y, W, H),
-	obj(SETOBJ_NO_LINE), is_front(_side == 0),
-	on_2S_line(false), inst(inst)
+	is_front(_side == 0),
+	inst(inst)
 {
 	box(FL_FLAT_BOX); // FL_UP_BOX
 
@@ -78,9 +87,9 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	int MX = X + W/2;
 
 
-	x_ofs = new Fl_Int_Input(X+28,   Y, 52, 24, "x:");
-	y_ofs = new Fl_Int_Input(MX-20,  Y, 52, 24, "y:");
-	sec = new Fl_Int_Input(X+W-59, Y, 52, 24, "sec:");
+	x_ofs = new UI_DynIntInput(X+28,   Y, 52, 24, "x:");
+	y_ofs = new UI_DynIntInput(MX-20,  Y, 52, 24, "y:");
+	sec = new UI_DynIntInput(X+W-59, Y, 52, 24, "sec:");
 
 	x_ofs->align(FL_ALIGN_LEFT);
 	y_ofs->align(FL_ALIGN_LEFT);
@@ -136,6 +145,7 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 	u_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 	r_tex->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
+	mFixUp.loadFields({ x_ofs, y_ofs, sec, l_tex, u_tex, r_tex });
 
 	end();
 
@@ -146,13 +156,6 @@ UI_SideBox::UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side) :
 }
 
 
-//
-// Destructor
-//
-UI_SideBox::~UI_SideBox()
-{ }
-
-
 void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 {
 	UI_SideBox *box = (UI_SideBox *)data;
@@ -160,7 +163,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	if (box->obj < 0)
 		return;
 
-	if (Fl::event_button() != 3 &&
+	if (Fl::event_button() != FL_RIGHT_MOUSE &&
 		(w == box->l_pic || w == box->u_pic || w == box->r_pic))
 	{
 		UI_Pic * pic = (UI_Pic *)w;
@@ -173,9 +176,11 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	}
 
 	int new_tex;
+	box->mFixUp.checkDirtyFields();	// fine to do it here
+	checkLinedefDirtyFields(box->inst);
 
 	// right click sets to default value, "-" for rail
-	if (Fl::event_button() == 3)
+	if (Fl::event_button() == FL_RIGHT_MOUSE)
 	{
 		if (w == box->r_pic)
 			new_tex = BA_InternaliseString("-");
@@ -261,6 +266,9 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 {
 	UI_SideBox *box = (UI_SideBox *)data;
 
+	box->mFixUp.checkDirtyFields();
+	checkLinedefDirtyFields(box->inst);
+
 	if (box->obj >= 0)
 		return;
 
@@ -321,6 +329,9 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 {
 	UI_SideBox *box = (UI_SideBox *)data;
+
+	box->mFixUp.checkDirtyFields();
+	checkLinedefDirtyFields(box->inst);
 
 	if (box->obj < 0)
 		return;
@@ -453,17 +464,17 @@ void UI_SideBox::UpdateField()
 	{
 		const SideDef *sd = inst.level.sidedefs[obj];
 
-		x_ofs->value(SString(sd->x_offset).c_str());
-		y_ofs->value(SString(sd->y_offset).c_str());
-		  sec->value(SString(sd->sector).c_str());
+		mFixUp.setInputValue(x_ofs, SString(sd->x_offset).c_str());
+		mFixUp.setInputValue(y_ofs, SString(sd->y_offset).c_str());
+		mFixUp.setInputValue(sec, SString(sd->sector).c_str());
 
 		SString lower = sd->LowerTex();
 		SString rail  = sd->MidTex();
 		SString upper = sd->UpperTex();
 
-		l_tex->value(lower.c_str());
-		u_tex->value(upper.c_str());
-		r_tex->value(rail.c_str());
+		mFixUp.setInputValue(l_tex, lower.c_str());
+		mFixUp.setInputValue(u_tex, upper.c_str());
+		mFixUp.setInputValue(r_tex, rail.c_str());
 
 		l_pic->GetTex(lower);
 		u_pic->GetTex(upper);
@@ -485,13 +496,13 @@ void UI_SideBox::UpdateField()
 	}
 	else
 	{
-		x_ofs->value("");
-		y_ofs->value("");
-		  sec->value("");
+		mFixUp.setInputValue(x_ofs, "");
+		mFixUp.setInputValue(y_ofs, "");
+		mFixUp.setInputValue(sec, "");
 
-		l_tex->value("");
-		u_tex->value("");
-		r_tex->value("");
+		mFixUp.setInputValue(l_tex, "");
+		mFixUp.setInputValue(u_tex, "");
+		mFixUp.setInputValue(r_tex, "");
 
 		l_pic->Clear();
 		u_pic->Clear();

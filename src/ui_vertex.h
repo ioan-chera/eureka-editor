@@ -21,18 +21,23 @@
 #ifndef __EUREKA_UI_VERTEX_H__
 #define __EUREKA_UI_VERTEX_H__
 
+#include "ui_panelinput.h"
+
+class UI_DynIntInput;
 
 class UI_VertexBox : public Fl_Group
 {
 private:
-	int obj;
-	int count;
+	int obj = -1;
+	int count = 0;
+
+	PanelFieldFixUp	mFixUp;
 
 public:
 	UI_Nombre *which;
 
-	Fl_Int_Input *pos_x;
-	Fl_Int_Input *pos_y;
+	UI_DynIntInput *pos_x;
+	UI_DynIntInput *pos_y;
 
 	Fl_Button *move_left;
 	Fl_Button *move_right;
@@ -41,15 +46,11 @@ public:
 
 	Instance &inst;
 
-public:
 	UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_VertexBox();
 
-public:
 	int handle(int event);
 	// FLTK virtual method for handling input events.
 
-public:
 	void SetObj(int _index, int _count);
 
 	int GetObj() const { return obj; }

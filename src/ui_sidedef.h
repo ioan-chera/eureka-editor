@@ -21,8 +21,11 @@
 #ifndef __EUREKA_UI_SIDEDEF_H__
 #define __EUREKA_UI_SIDEDEF_H__
 
+#include "ui_panelinput.h"
 
 #define SETOBJ_NO_LINE  -2
+
+class UI_DynIntInput;
 
 // solid_mask bits : when set, that part requires a texture
 enum
@@ -37,16 +40,16 @@ enum
 class UI_SideBox : public Fl_Group
 {
 private:
-	int  obj;
+	int  obj = SETOBJ_NO_LINE;
 	bool is_front;
 
 	int what_is_solid;
-	bool on_2S_line;
+	bool on_2S_line = false;
 
 public:
-	Fl_Int_Input *x_ofs;
-	Fl_Int_Input *y_ofs;
-	Fl_Int_Input *sec;
+	UI_DynIntInput *x_ofs;
+	UI_DynIntInput *y_ofs;
+	UI_DynIntInput *sec;
 
 	UI_Pic *l_pic;
 	UI_Pic *u_pic;
@@ -61,9 +64,11 @@ public:
 
 	Instance &inst;
 
+private:
+	PanelFieldFixUp mFixUp;
+
 public:
 	UI_SideBox(Instance &inst, int X, int Y, int W, int H, int _side);
-	virtual ~UI_SideBox();
 
 public:
 	// this can be a sidedef number or -1 for none, or the special
@@ -79,6 +84,14 @@ public:
 	int GetHighlightedPics() const;
 
 	void UnselectPics();
+
+	//
+	// Forward to the fixup
+	//
+	void checkDirtyFields()
+	{
+		mFixUp.checkDirtyFields();
+	}
 
 private:
 	void UpdateLabel();

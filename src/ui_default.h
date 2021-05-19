@@ -22,9 +22,11 @@
 #define __EUREKA_UI_DEFAULT_H__
 
 #include "e_cutpaste.h"
+#include "ui_panelinput.h"
 
 class Fl_Int_Input;
 class Fl_Output;
+class UI_DynIntInput;
 
 class UI_DefaultProps : public Fl_Group
 {
@@ -32,9 +34,9 @@ private:
 	UI_Pic      *w_pic;
 	UI_DynInput *w_tex;
 
-	Fl_Int_Input *ceil_h;
-	Fl_Int_Input *light;
-	Fl_Int_Input *floor_h;
+	UI_DynIntInput *ceil_h;
+	UI_DynIntInput *light;
+	UI_DynIntInput *floor_h;
 
 	Fl_Button *ce_down, *ce_up;
 	Fl_Button *fl_down, *fl_up;
@@ -50,6 +52,7 @@ private:
 	UI_Pic		 *th_sprite;
 
 	Instance &inst;
+	PanelFieldFixUp mFixUp;
 
 public:
 	UI_DefaultProps(Instance &inst, int X, int Y, int W, int H);
@@ -72,7 +75,7 @@ private:
 	void CB_Paste (int sel_pics);
 	void CB_Delete(int sel_pics);
 
-	static SString Normalize_and_Dup(UI_DynInput *w);
+	SString Normalize_and_Dup(UI_DynInput *w);
 
 private:
 	static void   hide_callback(Fl_Widget *w, void *data);

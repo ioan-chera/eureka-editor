@@ -23,9 +23,10 @@
 #define __EUREKA_UI_THING_H__
 
 #include "e_cutpaste.h"
+#include "ui_panelinput.h"
 
 class Sticker;
-
+class UI_DynIntInput;
 
 class UI_ThingBox : public Fl_Group
 {
@@ -39,18 +40,18 @@ private:
 	Fl_Output    *desc;
 	Fl_Button    *choose;
 
-	Fl_Int_Input *angle;
+	UI_DynIntInput *angle;
 	Fl_Button    *ang_buts[8];
 
-	Fl_Int_Input *tid;
+	UI_DynIntInput *tid;
 
-	Fl_Int_Input *exfloor;
+	UI_DynIntInput *exfloor;
 	Fl_Button    *efl_down;
 	Fl_Button    *efl_up;
 
-	Fl_Int_Input *pos_x;
-	Fl_Int_Input *pos_y;
-	Fl_Int_Input *pos_z;
+	UI_DynIntInput *pos_x;
+	UI_DynIntInput *pos_y;
+	UI_DynIntInput *pos_z;
 
 	// Options
 	Fl_Check_Button *o_easy;
@@ -82,9 +83,10 @@ private:
 	UI_DynInput  *spec_type;
 	Fl_Button    *spec_choose;
 	Fl_Output    *spec_desc;
-	Fl_Int_Input *args[5];
+	UI_DynIntInput *args[5];
 
 	Instance &inst;
+	PanelFieldFixUp mFixUp;
 
 public:
 	UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);

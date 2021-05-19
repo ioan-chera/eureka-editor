@@ -22,6 +22,9 @@
 #define __EUREKA_UI_LINEDEF_H__
 
 #include "e_cutpaste.h"
+#include "ui_panelinput.h"
+
+class UI_DynIntInput;
 
 class UI_LineBox : public Fl_Group
 {
@@ -38,9 +41,9 @@ private:
 	Fl_Output    *desc;
 	Fl_Choice    *actkind;
 
-	Fl_Int_Input *length;
-	Fl_Int_Input *tag;
-	Fl_Int_Input *args[5];
+	UI_DynIntInput *length;
+	UI_DynIntInput *tag;
+	UI_DynIntInput *args[5];
 
 	UI_SideBox *front;
 	UI_SideBox *back;
@@ -63,10 +66,10 @@ private:
 	Fl_Check_Button *f_flyers;    // Strife
 
 	Instance &inst;
+	PanelFieldFixUp mFixUp;
 
 public:
 	UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *label = nullptr);
-	virtual ~UI_LineBox();
 
 	void SetObj(int _index, int _count);
 
@@ -89,6 +92,11 @@ public:
 
 	void UpdateGameInfo();
 
+	void checkDirtyFields()
+	{
+		mFixUp.checkDirtyFields();
+	}
+
 private:
 	void CalcLength();
 
@@ -103,6 +111,8 @@ private:
 	void SetLineType(int new_type);
 
 	int SolidMask(const LineDef *L, Side side) const;
+
+	void checkSidesDirtyFields();
 
 	const char *GeneralizedDesc(int type_num);
 

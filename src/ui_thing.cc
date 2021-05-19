@@ -21,6 +21,7 @@
 
 #include "Instance.h"
 #include "main.h"
+#include "ui_misc.h"
 #include "ui_window.h"
 
 #include "e_main.h"
@@ -41,8 +42,6 @@ public:
 		parent(_parent), mask(_mask)
 	{ }
 
-	~thing_opt_CB_data_c()
-	{ }
 };
 
 
@@ -110,9 +109,9 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	Y = Y + 10;
 
-	pos_x = new Fl_Int_Input(X+70, Y, 70, 24, "x: ");
-	pos_y = new Fl_Int_Input(X+70, Y + 28, 70, 24, "y: ");
-	pos_z = new Fl_Int_Input(X+70, Y + 28*2, 70, 24, "z: ");
+	pos_x = new UI_DynIntInput(X+70, Y, 70, 24, "x: ");
+	pos_y = new UI_DynIntInput(X+70, Y + 28, 70, 24, "y: ");
+	pos_z = new UI_DynIntInput(X+70, Y + 28*2, 70, 24, "z: ");
 	pos_z->hide();
 
 	pos_x->align(FL_ALIGN_LEFT);
@@ -131,7 +130,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 
 	// IOANCH 9/2015: TID
-	tid = new Fl_Int_Input(X+70, Y, 64, 24, "TID: ");
+	tid = new UI_DynIntInput(X+70, Y, 64, 24, "TID: ");
 	tid->align(FL_ALIGN_LEFT);
 	tid->callback(tid_callback, this);
 	tid->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -139,7 +138,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	Y = Y + tid->h() + 4;
 
 
-	angle = new Fl_Int_Input(X+70, Y, 64, 24, "Angle: ");
+	angle = new UI_DynIntInput(X+70, Y, 64, 24, "Angle: ");
 	angle->align(FL_ALIGN_LEFT);
 	angle->callback(angle_callback, this);
 	angle->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -262,7 +261,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 	Y = Y + 45;
 
 
-	exfloor = new Fl_Int_Input(X+84, Y, 64, 24, "3D Floor: ");
+	exfloor = new UI_DynIntInput(X+84, Y, 64, 24, "3D Floor: ");
 	exfloor->align(FL_ALIGN_LEFT);
 	exfloor->callback(option_callback, new thing_opt_CB_data_c(this, MTF_EXFLOOR_MASK));
 	exfloor->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -311,7 +310,7 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new Fl_Int_Input(X+74+43*a, Y, 39, 24);
+		args[a] = new UI_DynIntInput(X+74+43*a, Y, 39, 24);
 		args[a]->callback(args_callback, new thing_opt_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
@@ -319,6 +318,8 @@ UI_ThingBox::UI_ThingBox(Instance &inst, int X, int Y, int W, int H, const char 
 
 	args[0]->label("Args: ");
 
+	mFixUp.loadFields({type, angle, tid, exfloor, pos_x, pos_y, pos_z, spec_type,
+					  args[0], args[1], args[2], args[3], args[4]});
 
 	end();
 
@@ -449,7 +450,8 @@ void UI_ThingBox::SetThingType(int new_type)
 	char buffer[64];
 	snprintf(buffer, sizeof(buffer), "%d", new_type);
 
-	type->value(buffer);
+	mFixUp.checkDirtyFields();
+	mFixUp.setInputValue(type, buffer);
 	type->do_callback();
 }
 
@@ -462,7 +464,8 @@ void UI_ThingBox::SetSpecialType(int new_type)
 	char buffer[64];
 	snprintf(buffer, sizeof(buffer), "%d", new_type);
 
-	spec_type->value(buffer);
+	mFixUp.checkDirtyFields();
+	mFixUp.setInputValue(spec_type, buffer);
 	spec_type->do_callback();
 }
 
@@ -597,6 +600,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
+		box->mFixUp.checkDirtyFields();
 		box->inst.level.basis.begin();
 		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
@@ -630,6 +634,8 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 	if (w == box->spec_choose)
 		box->inst.main_win->BrowserMode('L');
 
+	box->mFixUp.checkDirtyFields();
+
 	// check for the angle buttons
 	for (int i = 0 ; i < 8 ; i++)
 	{
@@ -638,8 +644,8 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 			char buffer[64];
 			snprintf(buffer, sizeof(buffer), "%d", i * 45);
 
-			box->angle->value(buffer);
-
+			box->mFixUp.setInputValue(box->angle, buffer);
+			
 			angle_callback(box->angle, box);
 		}
 	}
@@ -681,10 +687,10 @@ void UI_ThingBox::AdjustExtraFloor(int dir)
 	int old_fl = atoi(exfloor->value());
 	int new_fl = (old_fl + dir) & 15;
 
-	if (new_fl)
-		exfloor->value(SString(new_fl).c_str());
+	if(new_fl)
+		mFixUp.setInputValue(exfloor, SString(new_fl).c_str());
 	else
-		exfloor->value("");
+		mFixUp.setInputValue(exfloor, "");
 
 	thing_opt_CB_data_c ocb(this, MTF_EXFLOOR_MASK);
 
@@ -725,10 +731,10 @@ void UI_ThingBox::OptionsFromInt(int options)
 	{
 		o_friend->value((options & MTF_Friend) ? 1 : 0);
 
-		if (options & MTF_EXFLOOR_MASK)
-			exfloor->value(SString((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
+		if(options & MTF_EXFLOOR_MASK)
+			mFixUp.setInputValue(exfloor, SString((options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT).c_str());
 		else
-			exfloor->value("");
+			mFixUp.setInputValue(exfloor, "");
 	}
 
 	if (inst.Features.strife_flags)
@@ -817,33 +823,33 @@ void UI_ThingBox::UpdateField(int field)
 			const Thing *T = inst.level.things[obj];
 
 			// @@ FIXME show decimals in UDMF
-			pos_x->value(SString(static_cast<int>(T->x())).c_str());
-			pos_y->value(SString(static_cast<int>(T->y())).c_str());
-			pos_z->value(SString(static_cast<int>(T->h())).c_str());
+			mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
+			mFixUp.setInputValue(pos_y, SString(static_cast<int>(T->y())).c_str());
+			mFixUp.setInputValue(pos_z, SString(static_cast<int>(T->h())).c_str());
 		}
 		else
 		{
-			pos_x->value("");
-			pos_y->value("");
-			pos_z->value("");
+			mFixUp.setInputValue(pos_x, "");
+			mFixUp.setInputValue(pos_y, "");
+			mFixUp.setInputValue(pos_z, "");
 		}
 	}
 
 	if (field < 0 || field == Thing::F_ANGLE)
 	{
-		if (inst.level.isThing(obj))
-			angle->value(SString(inst.level.things[obj]->angle).c_str());
+		if(inst.level.isThing(obj))
+			mFixUp.setInputValue(angle, SString(inst.level.things[obj]->angle).c_str());
 		else
-			angle->value("");
+			mFixUp.setInputValue(angle, "");
 	}
 
 	// IOANCH 9/2015
 	if (field < 0 || field == Thing::F_TID)
 	{
-		if (inst.level.isThing(obj))
-			tid->value(SString(inst.level.things[obj]->tid).c_str());
+		if(inst.level.isThing(obj))
+			mFixUp.setInputValue(tid, SString(inst.level.things[obj]->tid).c_str());
 		else
-			tid->value("");
+			mFixUp.setInputValue(tid, "");
 	}
 
 	if (field < 0 || field == Thing::F_TYPE)
@@ -852,12 +858,12 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const thingtype_t &info = inst.M_GetThingType(inst.level.things[obj]->type);
 			desc->value(info.desc.c_str());
-			type->value(SString(inst.level.things[obj]->type).c_str());
+			mFixUp.setInputValue(type, SString(inst.level.things[obj]->type).c_str());
 			sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
 		}
 		else
 		{
-			type ->value("");
+			mFixUp.setInputValue(type, "");
 			desc ->value("");
 			sprite->Clear();
 		}
@@ -880,11 +886,11 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const linetype_t &info = inst.M_GetLineType(inst.level.things[obj]->special);
 			spec_desc->value(info.desc.c_str());
-			spec_type->value(SString(inst.level.things[obj]->special).c_str());
+			mFixUp.setInputValue(spec_type, SString(inst.level.things[obj]->special).c_str());
 		}
 		else
 		{
-			spec_type->value("");
+			mFixUp.setInputValue(spec_type, "");
 			spec_desc->value("");
 		}
 	}
@@ -893,7 +899,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
-			args[a]->value("");
+			mFixUp.setInputValue(args[a], "");
 			args[a]->tooltip(NULL);
 			args[a]->textcolor(FL_BLACK);
 		}
@@ -912,7 +918,7 @@ void UI_ThingBox::UpdateField(int field)
 
 				if (T->special)
 				{
-					args[a]->value(SString(arg_val).c_str());
+					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 					if (!spec.args[a].empty())
 						args[a]->copy_tooltip(spec.args[a].c_str());
@@ -922,8 +928,8 @@ void UI_ThingBox::UpdateField(int field)
 				else
 				{
 					// spawn arguments
-					if (arg_val || !info.args[a].empty())
-						args[a]->value(SString(arg_val).c_str());
+					if(arg_val || !info.args[a].empty())
+						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 					if (!info.args[a].empty())
 						args[a]->copy_tooltip(info.args[a].c_str());

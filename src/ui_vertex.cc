@@ -20,6 +20,7 @@
 
 #include "Instance.h"
 #include "main.h"
+#include "ui_misc.h"
 #include "ui_window.h"
 
 #include "e_main.h"
@@ -40,8 +41,7 @@ extern const char *const *arrow_pixmaps[8];
 // UI_VertexBox Constructor
 //
 UI_VertexBox::UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const char *label) :
-    Fl_Group(X, Y, W, H, label),
-    obj(-1), count(0), inst(inst)
+    Fl_Group(X, Y, W, H, label), inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -58,8 +58,8 @@ UI_VertexBox::UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const cha
 	Y += which->h() + 8;
 
 
-	pos_x = new Fl_Int_Input(X + 64, Y,      75, 24, "x: ");
-	pos_y = new Fl_Int_Input(X + 64, Y + 28, 75, 24, "y: ");
+	pos_x = new UI_DynIntInput(X + 64, Y,      75, 24, "x: ");
+	pos_y = new UI_DynIntInput(X + 64, Y + 28, 75, 24, "y: ");
 
 	pos_x->align(FL_ALIGN_LEFT);
 	pos_y->align(FL_ALIGN_LEFT);
@@ -90,17 +90,11 @@ UI_VertexBox::UI_VertexBox(Instance &inst, int X, int Y, int W, int H, const cha
 	move_right->align(FL_ALIGN_CENTER);
 	move_right->callback(button_callback, this);
 
+	mFixUp.loadFields({pos_x, pos_y});
+
 	end();
 
 	resizable(NULL);
-}
-
-
-//
-// UI_VertexBox Destructor
-//
-UI_VertexBox::~UI_VertexBox()
-{
 }
 
 
@@ -177,6 +171,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		fixcoord_t fdx = box->inst.MakeValidCoord(dx * step);
 		fixcoord_t fdy = box->inst.MakeValidCoord(dy * step);
 
+		box->mFixUp.checkDirtyFields();
+
 		box->inst.level.basis.begin();
 		box->inst.level.basis.setMessage("adjusted"/*, inst.edit.Selected*/);
 
@@ -216,13 +212,13 @@ void UI_VertexBox::UpdateField()
 	if (inst.level.isVertex(obj))
 	{
 		// @@ FIXME show decimals in UDMF
-		pos_x->value(SString(static_cast<int>(inst.level.vertices[obj]->x())).c_str());
-		pos_y->value(SString(static_cast<int>(inst.level.vertices[obj]->y())).c_str());
+		mFixUp.setInputValue(pos_x, SString(static_cast<int>(inst.level.vertices[obj]->x())).c_str());
+		mFixUp.setInputValue(pos_y, SString(static_cast<int>(inst.level.vertices[obj]->y())).c_str());
 	}
 	else
 	{
-		pos_x->value("");
-		pos_y->value("");
+		mFixUp.setInputValue(pos_x, "");
+		mFixUp.setInputValue(pos_y, "");
 	}
 }
 

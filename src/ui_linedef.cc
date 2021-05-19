@@ -22,6 +22,7 @@
 #include "Instance.h"
 
 #include "main.h"
+#include "ui_misc.h"
 #include "ui_window.h"
 
 #include "e_checks.h"
@@ -138,13 +139,13 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 	Y += desc->h() + INPUT_SPACING;
 
 
-	tag = new Fl_Int_Input(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
+	tag = new UI_DynIntInput(type->x(), Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Tag: ");
 	tag->align(FL_ALIGN_LEFT);
 	tag->callback(tag_callback, this);
 	tag->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
 
-	length = new Fl_Int_Input(type->x() + W/2, Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Length: ");
+	length = new UI_DynIntInput(type->x() + W/2, Y, TAG_WIDTH, TYPE_INPUT_HEIGHT, "Length: ");
 	length->align(FL_ALIGN_LEFT);
 	length->callback(length_callback, this);
 	length->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
@@ -152,7 +153,7 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		args[a] = new Fl_Int_Input(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
+		args[a] = new UI_DynIntInput(type->x() + (ARG_WIDTH + ARG_PADDING) * a, Y, ARG_WIDTH, TYPE_INPUT_HEIGHT);
 		args[a]->callback(args_callback, new line_flag_CB_data_c(this, a));
 		args[a]->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 		args[a]->hide();
@@ -232,18 +233,12 @@ UI_LineBox::UI_LineBox(Instance &inst, int X, int Y, int W, int H, const char *l
 
 	Y += back->h();
 
+	mFixUp.loadFields({type, length, tag, args[0], args[1], args[2], args[3], args[4]});
 
 	end();
 
 	resizable(nullptr);
 }
-
-
-//
-// UI_LineBox Destructor
-//
-UI_LineBox::~UI_LineBox()
-{ }
 
 
 void UI_LineBox::type_callback(Fl_Widget *w, void *data)
@@ -409,6 +404,14 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 	}
 }
 
+//
+// Check sidedefs dirty fields
+//
+void UI_LineBox::checkSidesDirtyFields()
+{
+	front->checkDirtyFields();
+	back->checkDirtyFields();
+}
 
 void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 {
@@ -421,6 +424,9 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 	if (! inst.edit.Selected->empty())
 	{
+		mFixUp.checkDirtyFields();
+		checkSidesDirtyFields();
+
 		inst.level.basis.begin();
 		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
@@ -454,10 +460,12 @@ void UI_LineBox::SetLineType(int new_type)
 		return;
 	}
 
-	char buffer[64];
-	snprintf(buffer, sizeof(buffer), "%d", new_type);
+	auto buffer = SString(new_type);
 
-	type->value(buffer);
+	mFixUp.checkDirtyFields();
+	checkSidesDirtyFields();
+
+	mFixUp.setInputValue(type, buffer.c_str());
 	type->do_callback();
 }
 
@@ -466,6 +474,9 @@ void UI_LineBox::CB_Copy(int parts)
 {
 	// determine which sidedef texture to grab from
 	const char *name = NULL;
+
+	mFixUp.checkDirtyFields();
+	checkSidesDirtyFields();
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
@@ -504,6 +515,9 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 	// iterate over selected linedefs
 	if (inst.edit.Selected->empty())
 		return;
+
+	mFixUp.checkDirtyFields();
+	checkSidesDirtyFields();
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
@@ -625,6 +639,9 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 	if (! box->inst.edit.Selected->empty())
 	{
+		box->mFixUp.checkDirtyFields();
+		box->checkSidesDirtyFields();
+
 		box->inst.level.basis.begin();
 		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
@@ -726,17 +743,17 @@ void UI_LineBox::UpdateField(int field)
 {
 	if (field < 0 || field == LineDef::F_START || field == LineDef::F_END)
 	{
-		if (inst.level.isLinedef(obj))
+		if(inst.level.isLinedef(obj))
 			CalcLength();
 		else
-			length->value("");
+			mFixUp.setInputValue(length, "");
 	}
 
 	if (field < 0 || (field >= LineDef::F_TAG && field <= LineDef::F_ARG5))
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{
-			args[a]->value("");
+			mFixUp.setInputValue(args[a], "");
 			args[a]->tooltip(NULL);
 			args[a]->textcolor(FL_BLACK);
 		}
@@ -745,7 +762,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			const LineDef *L = inst.level.linedefs[obj];
 
-			tag->value(SString(inst.level.linedefs[obj]->tag).c_str());
+			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
 
 			const linetype_t &info = inst.M_GetLineType(L->type);
 
@@ -755,8 +772,8 @@ void UI_LineBox::UpdateField(int field)
 				{
 					int arg_val = L->Arg(1 + a);
 
-					if (arg_val || L->type)
-						args[a]->value(SString(arg_val).c_str());
+					if(arg_val || L->type)
+						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 					// set the tooltip
 					if (!info.args[a].empty())
@@ -768,8 +785,8 @@ void UI_LineBox::UpdateField(int field)
 		}
 		else
 		{
-			length->value("");
-			tag->value("");
+			mFixUp.setInputValue(length, "");
+			mFixUp.setInputValue(tag, "");
 		}
 	}
 
@@ -798,7 +815,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			int type_num = inst.level.linedefs[obj]->type;
 
-			type->value(SString(type_num).c_str());
+			mFixUp.setInputValue(type, SString(type_num).c_str());
 
 			const char *gen_desc = GeneralizedDesc(type_num);
 
@@ -816,7 +833,7 @@ void UI_LineBox::UpdateField(int field)
 		}
 		else
 		{
-			type->value("");
+			mFixUp.setInputValue(type, "");
 			desc->value("");
 			choose->label("Choose");
 
@@ -868,7 +885,7 @@ void UI_LineBox::CalcLength()
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);
 
-	length->value(buffer);
+	mFixUp.setInputValue(length, buffer);
 }
 
 
