@@ -3299,11 +3299,10 @@ static void Tags_ShowBeastMarks(Instance &inst)
 class UI_Check_Tags : public UI_Check_base
 {
 public:
-	int fresh_tag;
+	int fresh_tag = 0;
 
 	UI_Check_Tags(bool all_mode, Instance &inst) :
-		UI_Check_base(520, 326, all_mode, "Check : Tags", "Tag test results"),
-		fresh_tag(0), inst(inst)
+		UI_Check_base(520, 326, all_mode, "Check : Tags", "Tag test results"), inst(inst)
 	{ }
 
 	static void action_fresh_tag(Fl_Widget *w, void *data)
