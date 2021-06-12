@@ -3004,7 +3004,7 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 		int tag = doc.sectors[i]->tag;
 
 		// ignore special tags
-		if (inst.Features.tag_666 && (tag == 666 || tag == 667))
+		if (inst.Features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
 			continue;
 
 		if (tag > 0)
@@ -3130,7 +3130,7 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 
 		// DOOM and Heretic use tag #666 to open doors (etc) on the
 		// death of boss monsters.
-		if (inst.Features.tag_666 && (tag == 666 || tag == 667))
+		if (inst.Features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
 			continue;
 
 		if (! LD_tag_exists(tag, inst.level))
@@ -3226,7 +3226,7 @@ static void Tags_ShowMissingTags(Instance &inst)
 
 static bool SEC_check_beast_mark(int tag, const Instance &inst)
 {
-	if (! inst.Features.tag_666)
+	if (inst.Features.tag_666 == Tag666Rules::disabled)
 		return true;
 
 	if (tag == 667)
@@ -3238,7 +3238,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 	if (tag == 666)
 	{
 		// for Heretic, the map must be an end-of-episode map: ExM8
-		if (inst.Features.tag_666 == 2)
+		if (inst.Features.tag_666 == Tag666Rules::heretic)
 		{
 			if (inst.Level_name.length() != 4)
 				return false;

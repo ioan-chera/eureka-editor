@@ -143,6 +143,16 @@ enum class GenSectorFamily : int
 	zdoom	// ZDoom shifted Boom generalized sectors
 };
 
+//
+// Tag 666 rules. Mapped from the UGH file.
+//
+enum class Tag666Rules : int
+{
+	disabled = 0,
+	doom = 1,
+	heretic = 2,
+};
+
 struct port_features_t
 {
 	// NOTE: values here are generally 0 or 1, but some can be higher
@@ -166,7 +176,11 @@ struct port_features_t
 	int neg_patch_offsets;	// honors negative patch offsets in textures (ZDoom)
 
 	int no_need_players;	// having no players is OK (Things checker)
-	int tag_666;			// game uses tag 666 and 667 for special FX
+	union					// game uses tag 666 and 667 for special FX (type Tag666Rules)
+	{
+		int tag_666raw;
+		Tag666Rules tag_666;
+	};
 	int extra_floors;		// bitmask: +1 EDGE, +2 Legacy, +4 for ZDoom in Hexen format
 	int slopes;				// bitmask: +1 EDGE, +2 Eternity, +4 Odamex,
 							//          +8 for ZDoom in Hexen format, +16 ZDoom things
