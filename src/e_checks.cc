@@ -2985,8 +2985,8 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 {
 	int i;
 
-	*min_tag = +999999;
-	*max_tag = -999999;
+	*min_tag = INT_MAX;
+	*max_tag = INT_MIN;
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
