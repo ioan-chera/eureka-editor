@@ -68,6 +68,8 @@ private:
 	int copySidedef(int num) const;
 };
 
+int findFreeTag(const Instance &inst, bool forsector);
+
 #endif  /* __EUREKA_E_CHECKS_H__ */
 
 //--- editor settings ---

@@ -3074,11 +3074,17 @@ void Instance::CMD_ApplyTag()
 		return;
 	}
 
-	int min_tag, max_tag;
+	int new_tag;
+	if(do_last)
+	{
+		// TODO: replace this with tag memory
+		int min_tag, max_tag;
+		level.checks.tagsUsedRange(&min_tag, &max_tag);
+		new_tag = max_tag;
+	}
+	else
+		new_tag = findFreeTag(*this, edit.mode == ObjType::sectors);
 
-	level.checks.tagsUsedRange(&min_tag, &max_tag);
-
-	int new_tag = max_tag + (do_last ? 0 : 1);
 	if (new_tag <= 0)
 	{
 		Beep("No last tag");
@@ -3426,11 +3432,8 @@ CheckResult ChecksModule::checkTags(int min_severity) const
 		if ((inst.edit.mode == ObjType::linedefs || inst.edit.mode == ObjType::sectors) &&
 		    inst.edit.Selected->notempty())
 		{
-			dialog->fresh_tag = max_tag + 1;
-
-			// skip two special tag numbers
-			if (dialog->fresh_tag == 666)
-				dialog->fresh_tag = 670;
+			// always assume sector beastmark tags here
+			dialog->fresh_tag = findFreeTag(inst, true);
 
 			dialog->AddGap(10);
 			dialog->AddLine("Apply a fresh tag to the selection", 0, 250, "Apply",
@@ -4547,6 +4550,36 @@ void Debug_CheckUnusedStuff(Document &doc)
 	}
 }
 
+//
+// Finds a free tag. Doesn't care about limits at this point
+//
+int findFreeTag(const Instance &inst, bool forsector)
+{
+	std::unordered_set<int> tags;
+	int freetag = 0;
+
+	const auto &doc = inst.level;
+
+	auto addtag = [&tags, &freetag](int tag)
+	{
+		tags.insert(tag);
+		if(tag == freetag)
+			++freetag;	// raise if if we know it's there
+	};
+
+	for(int i = 0; i < doc.numLinedefs(); ++i)
+		addtag(doc.linedefs[i]->tag);
+	for(int i = 0; i < doc.numSectors(); ++i)
+		addtag(doc.sectors[i]->tag);
+
+	while(tags.count(freetag) || (forsector &&
+								  inst.Features.tag_666 != Tag666Rules::disabled &&
+								  (freetag == 666 || freetag == 667)))
+	{
+		++freetag;	// now raise it as necessary
+	}
+	return freetag;
+}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

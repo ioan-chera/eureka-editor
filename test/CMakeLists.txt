@@ -97,6 +97,12 @@ endfunction()
 
 # IMPORTANT: the eurekasrc files from testutils are already linked!
 
+unit_test(e_checks
+    e_checks_test.cpp
+    SRC e_checks.cc
+    FLTK
+)
+
 unit_test(lib_file
     lib_file_test.cpp
     SRC lib_file.cc

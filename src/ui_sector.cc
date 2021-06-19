@@ -599,14 +599,7 @@ void UI_SectorBox::FreshTag()
 {
 	mFixUp.checkDirtyFields();
 
-	int min_tag, max_tag;
-	inst.level.checks.tagsUsedRange(&min_tag, &max_tag);
-
-	int new_tag = max_tag + 1;
-
-	// skip some special tag numbers
-	if (new_tag == 666)
-		new_tag = 670;
+	int new_tag = findFreeTag(inst, true);
 
 	if (new_tag > 32767)
 	{
