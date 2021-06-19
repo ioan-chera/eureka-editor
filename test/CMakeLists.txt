@@ -99,7 +99,10 @@ endfunction()
 
 unit_test(e_checks
     e_checks_test.cpp
-    SRC e_checks.cc
+    SRC e_basis.cc
+        e_checks.cc
+        m_bitvec.cc
+        m_select.cc
     FLTK
 )
 

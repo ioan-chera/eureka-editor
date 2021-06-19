@@ -32,57 +32,27 @@
 //
 //==============================================================================
 
-int BA_InternaliseString(const SString &str)
-{
-	return 0;
-}
-
-void Basis::abort(bool keepChanges)
+void Clipboard_ClearLocals()
 {
 }
 
-int Basis::addNew(ObjType type)
-{
-	return 0;
-}
-
-void Basis::begin()
+void Clipboard_NotifyBegin()
 {
 }
 
-bool Basis::changeLinedef(int line, byte field, int value)
-{
-	return false;
-}
-
-bool Basis::changeSector(int sec, byte field, int value)
-{
-	return false;
-}
-
-bool Basis::changeSidedef(int side, byte field, int value)
-{
-	return false;
-}
-
-bool Basis::changeThing(int thing, byte field, int value)
-{
-	return false;
-}
-
-void Basis::EditOperation::destroy()
+void Clipboard_NotifyChange(ObjType type, int objnum, int field)
 {
 }
 
-void Basis::end()
+void Clipboard_NotifyDelete(ObjType type, int objnum)
 {
 }
 
-void Basis::setMessage(const char *format, ...)
+void Clipboard_NotifyEnd()
 {
 }
 
-void Basis::setMessageForSelection(const char *verb, const selection_c &list, const char *suffix)
+void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
 {
 }
 
@@ -146,6 +116,26 @@ void Instance::Editor_ChangeMode(char mode_char)
 {
 }
 
+void Instance::MapStuff_NotifyBegin()
+{
+}
+
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
+{
+}
+
+void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
+{
+}
+
+void Instance::MapStuff_NotifyEnd()
+{
+}
+
+void Instance::MapStuff_NotifyInsert(ObjType type, int objnum)
+{
+}
+
 const linetype_t &Instance::M_GetLineType(int type) const
 {
 	static linetype_t linetype;
@@ -173,6 +163,26 @@ bool Instance::is_sky(const SString &flat) const
 	return false;
 }
 
+void Instance::ObjectBox_NotifyBegin()
+{
+}
+
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+{
+}
+
+void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
+{
+}
+
+void Instance::ObjectBox_NotifyEnd() const
+{
+}
+
+void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
+{
+}
+
 void Instance::RedrawMap()
 {
 }
@@ -181,9 +191,29 @@ void Instance::Selection_Clear(bool no_save)
 {
 }
 
+void Instance::Selection_NotifyBegin()
+{
+}
+
+void Instance::Selection_NotifyDelete(ObjType type, int objnum)
+{
+}
+
+void Instance::Selection_NotifyEnd()
+{
+}
+
+void Instance::Selection_NotifyInsert(ObjType type, int objnum)
+{
+}
+
 SelectHighlight Instance::SelectionOrHighlight()
 {
 	return SelectHighlight::ok;
+}
+
+void Instance::Status_Set(const char *fmt, ...) const
+{
 }
 
 bool Instance::W_FlatIsKnown(const SString &name) const
@@ -216,41 +246,6 @@ bool is_special_tex(const SString &tex)
 	return false;
 }
 
-double LineDef::CalcLength(const Document &doc) const
-{
-	return 0;
-}
-
-SideDef * LineDef::Left(const Document &doc) const
-{
-	return nullptr;
-}
-
-SideDef * LineDef::Right(const Document &doc) const
-{
-	return nullptr;
-}
-
-Vertex * LineDef::End(const Document &doc) const
-{
-	return nullptr;
-}
-
-Vertex * LineDef::Start(const Document &doc) const
-{
-	return nullptr;
-}
-
-bool LineDef::TouchesSector(int sec_num, const Document &doc) const
-{
-	return false;
-}
-
-int LineDef::WhatSector(Side side, const Document &doc) const
-{
-	return 0;
-}
-
 void LogViewer_Open()
 {
 }
@@ -262,6 +257,14 @@ void ObjectsModule::del(selection_c *list) const
 bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
 	return false;
+}
+
+void Recently_used::insert(const SString &name)
+{
+}
+
+void Recently_used::insert_number(int val)
+{
 }
 
 Recently_used::Recently_used(Instance &inst) : inst(inst)
@@ -280,14 +283,24 @@ Render_View_t::~Render_View_t()
 {
 }
 
-SString Sector::CeilTex() const
+void Render3D_NotifyBegin()
 {
-	return SString();
 }
 
-SString Sector::FloorTex() const
+void Render3D_NotifyChange(ObjType type, int objnum, int field)
 {
-	return SString();
+}
+
+void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
+{
+}
+
+void Render3D_NotifyEnd(Instance &inst)
+{
+}
+
+void Render3D_NotifyInsert(ObjType type, int objnum)
+{
 }
 
 sector_3dfloors_c::sector_3dfloors_c()
@@ -302,81 +315,8 @@ sector_subdivision_c::~sector_subdivision_c()
 {
 }
 
-bool sel_iter_c::done() const
+void Selection_NotifyChange(ObjType type, int objnum, int field)
 {
-	return false;
-}
-
-void sel_iter_c::next()
-{
-}
-
-int sel_iter_c::operator* () const
-{
-	return 0;
-}
-
-sel_iter_c::sel_iter_c(const selection_c *_sel)
-{
-}
-
-sel_iter_c::sel_iter_c(const selection_c& _sel)
-{
-}
-
-void selection_c::change_type(ObjType new_type)
-{
-}
-
-int selection_c::count_obj() const
-{
-	return 0;
-}
-
-bool selection_c::empty() const
-{
-	return false;
-}
-
-void selection_c::frob_range(int n1, int n2, BitOp op)
-{
-}
-
-bool selection_c::get(int n) const
-{
-	return false;
-}
-
-selection_c::selection_c(ObjType type, bool extended)
-{
-}
-
-selection_c::~selection_c()
-{
-}
-
-void selection_c::set(int n)
-{
-}
-
-SString SideDef::LowerTex() const
-{
-	return SString();
-}
-
-SString SideDef::MidTex() const
-{
-	return SString();
-}
-
-Sector * SideDef::SecRef(const Document &doc) const
-{
-	return nullptr;
-}
-
-SString SideDef::UpperTex() const
-{
-	return SString();
 }
 
 slope_plane_c::slope_plane_c()
@@ -556,4 +496,87 @@ TEST(EChecks, FindFreeTag)
 	inst.Features.tag_666 = Tag666Rules::disabled;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 668);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
+}
+
+//
+// Test tagsApplyNewValue
+//
+TEST(EChecks, TagsApplyNewValue)
+{
+	Instance inst;
+
+	std::vector<LineDef> lines;
+	std::vector<Sector> sectors;
+
+	lines.resize(7);
+	sectors.resize(5);
+
+	for(LineDef &line : lines)
+		inst.level.linedefs.push_back(&line);
+	for(Sector &sector : sectors)
+		inst.level.sectors.push_back(&sector);
+
+	// Prepare the selection lists
+	auto linesel = std::make_unique<selection_c>(ObjType::linedefs);
+	auto secsel = std::make_unique<selection_c>(ObjType::sectors);
+
+	// Start with linedefs
+	inst.edit.mode = ObjType::linedefs;
+	inst.edit.Selected = linesel.get();
+
+	// Nothing selected: check that nothing happens
+	inst.level.checks.tagsApplyNewValue(1);
+	for(const LineDef &line : lines)
+		ASSERT_EQ(line.tag, 0);
+	for(const Sector &sector : sectors)
+		ASSERT_EQ(sector.tag, 0);
+	ASSERT_EQ(inst.level.checks.mLastTag, 0);	// didn't change
+
+	// Select a couple of lines
+	inst.edit.Selected->set(1);
+	inst.edit.Selected->set(2);
+	inst.level.checks.tagsApplyNewValue(1);
+	for(const LineDef &line : lines)
+		if(&line == &lines[1] || &line == &lines[2])
+			ASSERT_EQ(line.tag, 1);
+		else
+			ASSERT_EQ(line.tag, 0);
+	for(const Sector &sector : sectors)
+		ASSERT_EQ(sector.tag, 0);
+	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed
+
+	// Now select a couple of sectors
+	inst.edit.mode = ObjType::sectors;
+	inst.edit.Selected = secsel.get();
+	inst.edit.Selected->set(2);
+	inst.edit.Selected->set(4);
+	inst.level.checks.tagsApplyNewValue(2);
+	for(const LineDef &line : lines)
+		if(&line == &lines[1] || &line == &lines[2])
+			ASSERT_EQ(line.tag, 1);
+		else
+			ASSERT_EQ(line.tag, 0);
+	for(const Sector &sector : sectors)
+		if(&sector == &sectors[2] || &sector == &sectors[4])
+			ASSERT_EQ(sector.tag, 2);
+		else
+			ASSERT_EQ(sector.tag, 0);
+	ASSERT_EQ(inst.level.checks.mLastTag, 2);	// changed
+
+	inst.edit.Selected->clear(4);
+	inst.level.checks.tagsApplyNewValue(1);
+	for(const LineDef &line : lines)
+		if(&line == &lines[1] || &line == &lines[2])
+			ASSERT_EQ(line.tag, 1);
+		else
+			ASSERT_EQ(line.tag, 0);
+	for(const Sector &sector : sectors)
+		if(&sector == &sectors[2])
+			ASSERT_EQ(sector.tag, 1);
+		else if(&sector == &sectors[4])
+			ASSERT_EQ(sector.tag, 2);
+		else
+			ASSERT_EQ(sector.tag, 0);
+
+	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed again
 }

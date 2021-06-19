@@ -3022,9 +3022,11 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 }
 
 
-void ChecksModule::tagsApplyNewValue(int new_tag) const
+void ChecksModule::tagsApplyNewValue(int new_tag)
 {
 	// uses the current selection (caller must set it up)
+
+	bool changed = false;
 
 	doc.basis.begin();
 	doc.basis.setMessageForSelection("new tag for", *inst.edit.Selected);
@@ -3032,12 +3034,21 @@ void ChecksModule::tagsApplyNewValue(int new_tag) const
 	for (sel_iter_c it(inst.edit.Selected); !it.done(); it.next())
 	{
 		if (inst.edit.mode == ObjType::linedefs)
+		{
 			doc.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
+			changed = true;
+		}
 		else if (inst.edit.mode == ObjType::sectors)
+		{
 			doc.basis.changeSector(*it, Sector::F_TAG, new_tag);
+			changed = true;
+		}
 	}
 
 	doc.basis.end();
+
+	if(changed)
+		mLastTag = new_tag;
 }
 
 
@@ -3076,12 +3087,7 @@ void Instance::CMD_ApplyTag()
 
 	int new_tag;
 	if(do_last)
-	{
-		// TODO: replace this with tag memory
-		int min_tag, max_tag;
-		level.checks.tagsUsedRange(&min_tag, &max_tag);
-		new_tag = max_tag;
-	}
+		new_tag = level.checks.mLastTag;
 	else
 		new_tag = findFreeTag(*this, edit.mode == ObjType::sectors);
 

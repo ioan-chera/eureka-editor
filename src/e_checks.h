@@ -47,12 +47,14 @@ class ChecksModule : public DocumentModule
 {
 	friend class Instance;
 public:
+	int mLastTag = 0;
+
 	ChecksModule(Document &doc) : DocumentModule(doc)
 	{
 	}
 
 	void sidedefsUnpack(bool is_after_load) const;
-	void tagsApplyNewValue(int new_tag) const;
+	void tagsApplyNewValue(int new_tag);
 	void tagsUsedRange(int *min_tag, int *max_tag) const;
 
 private:
