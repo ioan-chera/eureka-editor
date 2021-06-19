@@ -126,16 +126,16 @@ class sel_iter_c
 friend class selection_c;
 
 private:
-	const selection_c *sel;
+	const selection_c *sel = nullptr;
 
 	// this is position in the objs[] array when there is no
 	// bit vector, otherwise it is the object number itself
 	// (and the corresponding bit will be one).
-	int pos;
+	int pos = -777777;
 
 public:
-	sel_iter_c();
-	sel_iter_c(const sel_iter_c& other);
+	sel_iter_c() = default;
+	sel_iter_c(const sel_iter_c& other) = default;
 
 	// creates an iterator object for iterating over all the
 	// object numbers contained in the given selection.

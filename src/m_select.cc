@@ -454,44 +454,25 @@ int selection_c::find_second() const
 //  ITERATOR STUFF
 //------------------------------------------------------------------------
 
-sel_iter_c::sel_iter_c()
+sel_iter_c::sel_iter_c(const selection_c *_sel) : sel(_sel), pos(0)
 {
-	// dummy values -- cannot use a bare iterator
-	sel = NULL;
-	pos = -777777;
-}
-
-
-sel_iter_c::sel_iter_c(const sel_iter_c& other)
-{
-	sel = other.sel;
-	pos = other.pos;
-}
-
-
-sel_iter_c::sel_iter_c(const selection_c *_sel)
-{
-	sel = _sel;
-	pos = 0;
-
 	if (sel->bv || sel->extended)
 	{
 		// for bit vector, need to find the first one bit.
 		// Note: this logic is slightly hacky...
 
-		pos = -1; next();
+		pos = -1;
+		next();
 	}
 }
 
 
-sel_iter_c::sel_iter_c(const selection_c& _sel)
+sel_iter_c::sel_iter_c(const selection_c& _sel) : sel(&_sel), pos(0)
 {
-	sel = &_sel;
-	pos = 0;
-
 	if (sel->bv || sel->extended)
 	{
-		pos = -1; next();
+		pos = -1;
+		next();
 	}
 }
 
