@@ -28,6 +28,7 @@
 #define __EUREKA_M_SELECT_H__
 
 #include "m_bitvec.h"
+#include "objid.h"
 
 class sel_iter_c;
 
@@ -131,7 +132,7 @@ private:
 	// this is position in the objs[] array when there is no
 	// bit vector, otherwise it is the object number itself
 	// (and the corresponding bit will be one).
-	int pos = -777777;
+	int pos = -777777;	// dummy values -- cannot use a bare iterator
 
 public:
 	sel_iter_c() = default;
