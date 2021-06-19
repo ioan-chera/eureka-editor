@@ -16,6 +16,8 @@
 //
 //------------------------------------------------------------------------
 
+#include "gtest/gtest.h"
+
 #include "e_checks.h"
 
 #include "e_basis.h"
@@ -23,11 +25,6 @@
 #include "Instance.h"
 #include "m_select.h"
 #include "ui_window.h"
-
-#ifdef None
-#undef None
-#endif
-#include "gtest/gtest.h"
 
 //==============================================================================
 //
