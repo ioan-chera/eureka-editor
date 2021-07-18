@@ -65,6 +65,11 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 {
 }
 
+int DLG_Confirm(const std::vector<SString> &buttons, EUR_FORMAT_STRING(const char *msg), ...)
+{
+	return 0;
+}
+
 void DLG_Notify(const char *msg, ...)
 {
 }
