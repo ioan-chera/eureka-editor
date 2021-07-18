@@ -30,6 +30,15 @@
 #define UNKNOWN_THING_RADIUS  16
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
+enum
+{
+	DEFAULT_PLAYER_RADIUS = 16,
+	DEFAULT_PLAYER_HEIGHT = 56,
+	DEFAULT_PLAYER_VIEW_HEIGHT = 41,
+	DEFAULT_MINIMUM_DEATHMATCH_STARTS = 4,
+	DEFAULT_MAXIMUM_DEATHMATCH_STARTS = 10
+};
+
 namespace global
 {
 	// all the game and port definitions and previously loaded
@@ -56,41 +65,33 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 	return false;
 }
 
-
-void Instance::M_FreeAllDefinitions()
-{
-	// TODO: prevent memory leak, delete contents of these maps
-
-    line_groups.clear();
-    line_types.clear();
-    sector_types.clear();
-
-    thing_groups.clear();
-    thing_types.clear();
-
-	texture_groups.clear();
-	texture_categories.clear();
-	flat_categories.clear();
-}
-
-
 //
 //  this is called each time the full set of definitions
 //  (game, port, resource files) are loaded.
 //
 void Instance::M_ClearAllDefinitions()
 {
-	M_FreeAllDefinitions();
+	// Free all definitions
+	line_groups.clear();
+	line_types.clear();
+	sector_types.clear();
+
+	thing_groups.clear();
+	thing_types.clear();
+
+	texture_groups.clear();
+	texture_categories.clear();
+	flat_categories.clear();
 
 	Misc_info = misc_info_t();
-	// TODO: #58
+
 	Features = {};
 
-	Misc_info.player_r = 16;
-	Misc_info.player_h = 56;
-	Misc_info.view_height = 41;
-	Misc_info.min_dm_starts = 4;
-	Misc_info.max_dm_starts = 10;
+	Misc_info.player_r = DEFAULT_PLAYER_RADIUS;
+	Misc_info.player_h = DEFAULT_PLAYER_HEIGHT;
+	Misc_info.view_height = DEFAULT_PLAYER_VIEW_HEIGHT;
+	Misc_info.min_dm_starts = DEFAULT_MINIMUM_DEATHMATCH_STARTS;
+	Misc_info.max_dm_starts = DEFAULT_MAXIMUM_DEATHMATCH_STARTS;
 
 	// reset generalized types
 	for(generalized_linetype_t &type : gen_linetypes)
@@ -98,7 +99,9 @@ void Instance::M_ClearAllDefinitions()
 	num_gen_linetypes = 0;
 }
 
-
+//
+// Called only from Main_LoadResources
+//
 void Instance::M_PrepareConfigVariables()
 {
 	parse_vars.clear();
@@ -327,19 +330,21 @@ static void ParseFeatureDef(Instance &inst, char **argv, int argc)
 		gLog.printf("unknown feature keyword: '%s'\n", argv[0]);
 }
 
-
+//
+// Finds a definition file in a given subpath under either the home or system install folder
+// Both strings are required
+// Returns "" if not found.
+//
 static SString FindDefinitionFile(const SString &folder, const SString &name)
 {
 	SYS_ASSERT(folder.good() && name.good());
-	for (int pass = 0 ; pass < 2 ; pass++)
+	static const SString *const lookupDirs[] = { &global::home_dir, &global::install_dir };
+	for (const SString *base_dir : lookupDirs)
 	{
-		const SString &base_dir = (pass == 0) ? global::home_dir :
-				global::install_dir;
-
-		if (base_dir.empty())
+		if (base_dir->empty())
 			continue;
 
-		SString filename = base_dir + "/" + folder + "/" + name + ".ugh";
+		SString filename = *base_dir + "/" + folder + "/" + name + ".ugh";
 
 		gLog.debugPrintf("  trying: %s\n", filename.c_str());
 

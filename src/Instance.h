@@ -519,7 +519,6 @@ private:
 
 	// MAIN
 	void LoadResourceFile(const SString& filename);
-	void M_FreeAllDefinitions();
 	void M_LoadDefinitions(const SString &folder, const SString &name)
 			noexcept(false);
 	void ReadGameInfo() noexcept(false);
