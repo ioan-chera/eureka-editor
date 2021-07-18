@@ -23,34 +23,35 @@
 
 class Instance;
 
-class Grid_State_c
+class Grid_State_c final
 {
 friend class Instance;
 
 public:
 	// the actual grid step (64, 128, etc)
-	int step;
+	int step = 64;
 
 	// if true, new and moved objects are forced to be on the grid
-	bool snap;
+	bool snap = true;
 
 	// if non-zero, new lines will be forced to have a certain ratio
-	int ratio;
+	int ratio = 0;
 
 	// whether the grid is being displayed or not.
-	bool shown;
+	bool shown = true;
 
 	// map coordinates for centre of canvas
-	double orig_x;
-	double orig_y;
+	double orig_x = 0.0;
+	double orig_y = 0.0;
 
 	// scale for drawing map
 	// (multiply a map coordinate by this to get a screen coord)
-	double Scale;
+	double Scale = 1.0;
 
 public:
-	explicit Grid_State_c(Instance &inst);
-	virtual ~Grid_State_c();
+	explicit Grid_State_c(Instance &inst) : inst(inst)
+	{
+	}
 
 public:
 	void Init();

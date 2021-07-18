@@ -201,16 +201,17 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 class Recently_used
 {
 private:
-	int size;
-	int keep_num;
+	int size = 0;
+	int keep_num = RECENTLY_USED_MAX - 2;
 
 	SString name_set[RECENTLY_USED_MAX];
 
 	Instance &inst;
 
 public:
-	explicit Recently_used(Instance &inst);
-	~Recently_used();
+	explicit Recently_used(Instance &inst) : inst(inst)
+	{
+	}
 
 	int find(const SString &name);
 	int find_number(int val);

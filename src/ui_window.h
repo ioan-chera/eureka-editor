@@ -163,8 +163,13 @@ private:
 class UI_Escapable_Window : public Fl_Double_Window
 {
 public:
-	UI_Escapable_Window(int W, int H, const char *L = NULL);
-	virtual ~UI_Escapable_Window();
+	UI_Escapable_Window(int W, int H, const char *L = NULL) : Fl_Double_Window(W, H, L)
+	{
+	}
+
+	virtual ~UI_Escapable_Window()
+	{
+	}
 
 public:
 	// FLTK event handling method

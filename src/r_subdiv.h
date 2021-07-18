@@ -42,9 +42,6 @@ public:
 	std::vector<sector_polygon_t> polygons;
 
 public:
-	sector_subdivision_c();
-	~sector_subdivision_c();
-
 	void Clear();
 
 	void AddPolygon(float lx1, float lx2, float low_y,
@@ -57,13 +54,9 @@ sector_subdivision_c *Subdiv_PolygonsForSector(Instance &inst, int num);
 class extrafloor_c
 {
 public:
-	int ld;     // linedef in the dummy sector
-	int sd;     // first sidedef of that line
-	int flags;  // bitmask of EXFL_XXX values
-
-public:
-	extrafloor_c();
-	~extrafloor_c();
+	int ld = -1;     // linedef in the dummy sector
+	int sd = -1;     // first sidedef of that line
+	int flags = 0;  // bitmask of EXFL_XXX values
 };
 
 
@@ -84,14 +77,11 @@ public:
 class slope_plane_c
 {
 public:
-	bool sloped;  // if false, no slope is active
+	bool sloped = false;  // if false, no slope is active
 
-	float xm, ym, zadd;
+	float xm = 0, ym = 0, zadd = 0;
 
 public:
-	slope_plane_c();
-	~slope_plane_c();
-
 	void Init(float height);
 	void Copy(const slope_plane_c& other);
 
@@ -108,7 +98,7 @@ class sector_3dfloors_c
 {
 public:
 	// this is -1 or a sector number of a BOOM 242 dummy sector
-	int heightsec;
+	int heightsec = -1;
 
 	std::vector< extrafloor_c > floors;
 
@@ -116,9 +106,6 @@ public:
 	slope_plane_c c_plane;
 
 public:
-	sector_3dfloors_c();
-	~sector_3dfloors_c();
-
 	void Clear();
 
 	inline double FloorZ(double x, double y) const

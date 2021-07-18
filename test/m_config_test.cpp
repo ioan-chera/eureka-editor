@@ -691,58 +691,10 @@ void Instance::Render3D_WriteUser(std::ostream &os) const
 	sUnitTokens["WriteUser"].push_back("render3d");
 }
 
-Grid_State_c::Grid_State_c(Instance &inst) : inst(inst)
-{
-}
-
-Grid_State_c::~Grid_State_c()
-{
-}
-
-Recently_used::Recently_used(Instance &inst) : inst(inst)
-{
-}
-
-Recently_used::~Recently_used()
-{
-}
-
-Render_View_t::Render_View_t(Instance &inst) : inst(inst)
-{
-}
-
-Render_View_t::~Render_View_t()
-{
-}
-
 DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 {
 }
 
-sector_3dfloors_c::sector_3dfloors_c()
-{
-}
-
-sector_3dfloors_c::~sector_3dfloors_c()
-{
-}
-
 void Basis::EditOperation::destroy()
-{
-}
-
-extrafloor_c::~extrafloor_c()
-{
-}
-
-slope_plane_c::slope_plane_c()
-{
-}
-
-slope_plane_c::~slope_plane_c()
-{
-}
-
-sector_subdivision_c::~sector_subdivision_c()
 {
 }

@@ -539,16 +539,6 @@ void UI_MainWindow::draw()
 
 //------------------------------------------------------------------------
 
-
-UI_Escapable_Window::UI_Escapable_Window(int W, int H, const char *L) :
-	Fl_Double_Window(W, H, L)
-{ }
-
-
-UI_Escapable_Window::~UI_Escapable_Window()
-{ }
-
-
 int UI_Escapable_Window::handle(int event)
 {
 	if (event == FL_KEYDOWN && Fl::event_key() == FL_Escape)

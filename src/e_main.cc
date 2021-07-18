@@ -1067,22 +1067,6 @@ void Instance::CMD_LastSelection()
 //------------------------------------------------------------------------
 
 
-Recently_used::Recently_used(Instance &inst) :
-	size(0),
-	keep_num(RECENTLY_USED_MAX - 2), inst(inst)
-{
-}
-
-
-Recently_used::~Recently_used()
-{
-	for (int i = 0 ; i < size ; i++)
-	{
-		name_set[i].clear();
-	}
-}
-
-
 int Recently_used::find(const SString &name)
 {
 	for (int k = 0 ; k < size ; k++)

@@ -84,20 +84,6 @@ namespace thing_sec_cache
 	void Update(Instance &inst);
 };
 
-Render_View_t::Render_View_t(Instance &inst) :
-	p_type(0), px(), py(),
-	x(), y(), z(),
-	angle(), Sin(), Cos(),
-	screen_w(), screen_h(), screen(NULL),
-	texturing(false), sprites(false), lighting(false),
-	gravity(true),
-	thing_sectors(),
-	mouse_x(-1), mouse_y(-1), inst(inst)
-{ }
-
-Render_View_t::~Render_View_t()
-{ }
-
 void Render_View_t::SetAngle(float new_ang)
 {
 	angle = new_ang;

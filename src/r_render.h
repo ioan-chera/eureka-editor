@@ -34,40 +34,41 @@ struct Render_View_t
 {
 public:
 	// player type and position.
-	int p_type;
-	double px, py;
+	int p_type = 0;
+	double px = 0.0, py = 0.0;
 
 	// view position.
-	double x, y, z;
+	double x = 0.0, y = 0.0, z = 0.0;
 
 	// view direction.  angle is in radians
-	double angle;
-	double Sin, Cos;
+	double angle = 0.0;
+	double Sin = 0.0, Cos = 0.0;
 
 	// screen buffer.
-	int screen_w, screen_h;
-	img_pixel_t *screen;
+	int screen_w = 0, screen_h = 0;
+	img_pixel_t *screen = nullptr;
 
 	float aspect_sh;
 	float aspect_sw;  // screen_w * aspect_ratio
 
-	bool texturing;
-	bool sprites;
-	bool lighting;
+	bool texturing = false;
+	bool sprites = false;
+	bool lighting = false;
 
-	bool gravity;  // when true, walk on ground
+	bool gravity = true;  // when true, walk on ground
 
 	std::vector<int> thing_sectors;
 
 	// current mouse coords (in window), invalid if -1
-	int mouse_x, mouse_y;
+	int mouse_x = -1, mouse_y = -1;
 
 private:
 	Instance &inst;
 
 public:
-	explicit Render_View_t(Instance &inst);
-	~Render_View_t();
+	explicit Render_View_t(Instance &inst) : inst(inst)
+	{
+	}
 
 	void SetAngle(float new_ang);
 	void FindGroundZ();

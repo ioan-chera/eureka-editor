@@ -78,18 +78,6 @@ DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 {
 }
 
-extrafloor_c::~extrafloor_c()
-{
-}
-
-Grid_State_c::Grid_State_c(Instance &inst) : inst(inst)
-{
-}
-
-Grid_State_c::~Grid_State_c()
-{
-}
-
 void Hover::fastOpposite_begin()
 {
 }
@@ -272,22 +260,6 @@ void Recently_used::insert_number(int val)
 {
 }
 
-Recently_used::Recently_used(Instance &inst) : inst(inst)
-{
-}
-
-Recently_used::~Recently_used()
-{
-}
-
-Render_View_t::Render_View_t(Instance &inst) : inst(inst)
-{
-}
-
-Render_View_t::~Render_View_t()
-{
-}
-
 void Render3D_NotifyBegin()
 {
 }
@@ -308,42 +280,13 @@ void Render3D_NotifyInsert(ObjType type, int objnum)
 {
 }
 
-sector_3dfloors_c::sector_3dfloors_c()
-{
-}
-
-sector_3dfloors_c::~sector_3dfloors_c()
-{
-}
-
-sector_subdivision_c::~sector_subdivision_c()
-{
-}
-
 void Selection_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-slope_plane_c::slope_plane_c()
-{
-}
-
-slope_plane_c::~slope_plane_c()
 {
 }
 
 int UI_Escapable_Window::handle(int event)
 {
 	return 0;
-}
-
-UI_Escapable_Window::UI_Escapable_Window(int W, int H, const char *L) :
-	Fl_Double_Window(W, H, L)
-{
-}
-
-UI_Escapable_Window::~UI_Escapable_Window()
-{
 }
 
 void UnusedVertices(const Document &doc, selection_c *lines, selection_c *result)

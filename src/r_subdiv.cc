@@ -37,13 +37,6 @@
 */
 
 
-sector_subdivision_c::sector_subdivision_c() :
-	polygons()
-{ }
-
-sector_subdivision_c::~sector_subdivision_c()
-{ }
-
 void sector_subdivision_c::Clear()
 {
 	polygons.clear();
@@ -906,14 +899,6 @@ sector_subdivision_c *Instance::Subdiv_PolygonsForSector(int num)
 //  3D Floor and Slope stuff
 //------------------------------------------------------------------------
 
-sector_3dfloors_c::sector_3dfloors_c() :
-	heightsec(-1)
-{ }
-
-sector_3dfloors_c::~sector_3dfloors_c()
-{ }
-
-
 void sector_3dfloors_c::Clear()
 {
 	heightsec = -1;
@@ -921,20 +906,6 @@ void sector_3dfloors_c::Clear()
 	f_plane.Init(-2);
 	c_plane.Init(-1);
 }
-
-
-extrafloor_c::extrafloor_c() : ld(-1), sd(-1), flags(0)
-{ }
-
-extrafloor_c::~extrafloor_c()
-{ }
-
-
-slope_plane_c::slope_plane_c() : sloped(false), xm(0), ym(0), zadd(0)
-{ }
-
-slope_plane_c::~slope_plane_c()
-{ }
 
 void slope_plane_c::Init(float height)
 {

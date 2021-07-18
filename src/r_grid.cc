@@ -46,18 +46,6 @@ bool config::grid_snap_indicator = true;
 int  config::grid_ratio_high = 3;  // custom ratio (high must be >= low)
 int  config::grid_ratio_low  = 1;  // (low must be > 0)
 
-
-Grid_State_c::Grid_State_c(Instance &inst) :
-	step(64 /* dummy */), snap(true),
-	ratio(0), shown(true),
-	orig_x(0.0), orig_y(0.0),
-	Scale(1.0), inst(inst)
-{ }
-
-Grid_State_c::~Grid_State_c()
-{ }
-
-
 void Grid_State_c::Init()
 {
 	step = config::grid_default_size;
