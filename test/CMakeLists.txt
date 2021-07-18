@@ -112,6 +112,17 @@ unit_test(lib_file
     FLTK
 )
 
+unit_test(m_game
+    m_game_test.cpp
+    SRC e_basis.cc
+        lib_file.cc
+        m_bitvec.cc
+        m_game.cc
+        m_select.cc
+        m_streams.cc
+    FLTK
+)
+
 unit_test(m_config
     m_config_test.cpp
     SRC lib_file.cc
