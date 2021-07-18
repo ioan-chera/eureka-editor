@@ -30,15 +30,6 @@
 #define UNKNOWN_THING_RADIUS  16
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
-enum
-{
-	DEFAULT_PLAYER_RADIUS = 16,
-	DEFAULT_PLAYER_HEIGHT = 56,
-	DEFAULT_PLAYER_VIEW_HEIGHT = 41,
-	DEFAULT_MINIMUM_DEATHMATCH_STARTS = 4,
-	DEFAULT_MAXIMUM_DEATHMATCH_STARTS = 10
-};
-
 namespace global
 {
 	// all the game and port definitions and previously loaded
@@ -86,12 +77,6 @@ void Instance::M_ClearAllDefinitions()
 	Misc_info = misc_info_t();
 
 	Features = {};
-
-	Misc_info.player_r = DEFAULT_PLAYER_RADIUS;
-	Misc_info.player_h = DEFAULT_PLAYER_HEIGHT;
-	Misc_info.view_height = DEFAULT_PLAYER_VIEW_HEIGHT;
-	Misc_info.min_dm_starts = DEFAULT_MINIMUM_DEATHMATCH_STARTS;
-	Misc_info.max_dm_starts = DEFAULT_MAXIMUM_DEATHMATCH_STARTS;
 
 	// reset generalized types
 	for(generalized_linetype_t &type : gen_linetypes)

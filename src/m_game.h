@@ -113,6 +113,15 @@ struct texturegroup_t
 
 struct misc_info_t
 {
+	enum
+	{
+		DEFAULT_PLAYER_RADIUS = 16,
+		DEFAULT_PLAYER_HEIGHT = 56,
+		DEFAULT_PLAYER_VIEW_HEIGHT = 41,
+		DEFAULT_MINIMUM_DEATHMATCH_STARTS = 4,
+		DEFAULT_MAXIMUM_DEATHMATCH_STARTS = 10
+	};
+
 	int  sky_color = 0;
 	SString sky_flat;
 
@@ -125,12 +134,12 @@ struct misc_info_t
 	int unknown_flat = 0;
 	int unknown_thing = 0;
 
-	int player_r = 0;
-	int player_h = 0;
-	int view_height = 0;
+	int player_r = DEFAULT_PLAYER_RADIUS;
+	int player_h = DEFAULT_PLAYER_HEIGHT;
+	int view_height = DEFAULT_PLAYER_VIEW_HEIGHT;
 
-	int min_dm_starts = 0;
-	int max_dm_starts = 0;
+	int min_dm_starts = DEFAULT_MINIMUM_DEATHMATCH_STARTS;
+	int max_dm_starts = DEFAULT_MAXIMUM_DEATHMATCH_STARTS;
 };
 
 //
