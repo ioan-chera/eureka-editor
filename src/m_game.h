@@ -276,6 +276,10 @@ struct generalized_linetype_t
 
 //------------------------------------------------------------------------
 
+// Standard directory names
+static const char GAMES_DIR[] = "games";
+static const char PORTS_DIR[] = "ports";
+
 bool M_CanLoadDefinitions(const SString &folder, const SString &name);
 
 enum parse_purpose_e

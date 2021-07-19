@@ -118,7 +118,7 @@ void Instance::M_PrepareConfigVariables()
 	{
 		parse_vars["$GAME_NAME"] = Game_name;
 
-		if (M_CanLoadDefinitions("games", Game_name))
+		if (M_CanLoadDefinitions(GAMES_DIR, Game_name))
 		{
 			SString base_game = M_GetBaseGame(*this, Game_name);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -1084,7 +1084,7 @@ static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	SString filename = FindDefinitionFile("games", game);
+	SString filename = FindDefinitionFile(GAMES_DIR, game);
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
@@ -1107,7 +1107,7 @@ PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 	if (IT != global::loaded_port_defs.end())
 		return IT->second;
 
-	SString filename = FindDefinitionFile("ports", port);
+	SString filename = FindDefinitionFile(PORTS_DIR, port);
 	if (filename.empty())
 		return NULL;
 

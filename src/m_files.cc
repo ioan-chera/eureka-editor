@@ -908,7 +908,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 		if (line == "game")
 		{
-			if (! M_CanLoadDefinitions("games", value))
+			if (! M_CanLoadDefinitions(GAMES_DIR, value))
 			{
 				gLog.printf("  unknown game: %s\n", value.c_str() /* show full path */);
 
@@ -963,7 +963,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (line == "port")
 		{
-			if (M_CanLoadDefinitions("ports", value))
+			if (M_CanLoadDefinitions(PORTS_DIR, value))
 				new_port = value;
 			else
 			{
