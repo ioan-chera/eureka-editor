@@ -282,16 +282,16 @@ static const char PORTS_DIR[] = "ports";
 
 bool M_CanLoadDefinitions(const SString &folder, const SString &name);
 
-enum parse_purpose_e
+enum class ParsePurpose
 {
-	PURPOSE_Normal = 0,		// normal loading, update everything
-	PURPOSE_Resource,		// as a resource file
-	PURPOSE_GameInfo,		// load a GameInfo
-	PURPOSE_PortInfo,		// load a PortInfo_c
+	normal,		// normal loading, update everything
+	resource,	// as a resource file
+	gameInfo,	// load a GameInfo
+	portInfo	// load a PortInfo_c
 };
 
 void M_ParseDefinitionFile(Instance &inst,
-						   parse_purpose_e purpose,
+						   ParsePurpose purpose,
 						   void *purposeTarget,
 						   const SString &filename,
 						   const SString &folder = NULL,

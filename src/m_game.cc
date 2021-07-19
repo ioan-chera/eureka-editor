@@ -371,7 +371,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(*this, PURPOSE_Normal, nullptr, filename, folder,
+	M_ParseDefinitionFile(*this, ParsePurpose::normal, nullptr, filename, folder,
 						  prettyname);
 }
 
@@ -931,7 +931,7 @@ static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 //  and "if".."endif" directives are NOT handled.
 //
 void M_ParseDefinitionFile(Instance &inst,
-						   const parse_purpose_e purpose,
+						   const ParsePurpose purpose,
 						   void *target,
 						   const SString &filename,
 						   const SString &cfolder,
@@ -1050,12 +1050,12 @@ void M_ParseDefinitionFile(Instance &inst,
 		}
 
 
-		if (purpose == PURPOSE_GameInfo)
+		if (purpose == ParsePurpose::gameInfo)
 		{
 			M_ParseGameInfoLine(pst, *static_cast<GameInfo *>(target));
 			continue;
 		}
-		if (purpose == PURPOSE_PortInfo)
+		if (purpose == ParsePurpose::portInfo)
 		{
 			M_ParsePortInfoLine(pst);
 			continue;
@@ -1088,7 +1088,7 @@ static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(inst, PURPOSE_GameInfo, &loadingGame, filename,
+	M_ParseDefinitionFile(inst, ParsePurpose::gameInfo, &loadingGame, filename,
 						  "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		ThrowException("Game definition for '%s' does not set base_game\n",
@@ -1113,7 +1113,7 @@ PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 
 	global::loading_Port = new PortInfo_c(port);
 
-	M_ParseDefinitionFile(inst, PURPOSE_PortInfo, nullptr, filename, "ports",
+	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, nullptr, filename, "ports",
 						  NULL);
 
 	// default is to support both Doom and Doom2
