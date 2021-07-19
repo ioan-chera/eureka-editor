@@ -1181,7 +1181,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 SString M_GetBaseGame(Instance &inst, const SString &game)
 {
 	GameInfo ginfo = M_LoadGameInfo(inst, game);
-	SYS_ASSERT(ginfo);
+	SYS_ASSERT(ginfo.isSet());
 
 	return ginfo.baseGame;
 }

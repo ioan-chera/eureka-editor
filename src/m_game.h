@@ -205,11 +205,11 @@ struct GameInfo
 
 	GameInfo() = default;
 
-	GameInfo(const SString &name): name(name)
+	explicit GameInfo(const SString &name): name(name)
 	{
 	}
 
-	operator bool() const
+	bool isSet() const
 	{
 		return name.good() && baseGame.good();
 	}
