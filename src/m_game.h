@@ -290,6 +290,18 @@ enum class ParsePurpose
 	portInfo	// load a PortInfo_c
 };
 
+//
+// Exception throwable by M_ParseDefinitionFile. Meant to be caught by parties 
+// who don't want the app to terminate suddenly.
+//
+class ParseException : public std::runtime_error
+{
+public:
+	ParseException(const SString &msg) : std::runtime_error(msg.c_str())
+	{
+	}
+};
+
 void M_ParseDefinitionFile(Instance &inst,
 						   ParsePurpose purpose,
 						   void *purposeTarget,
