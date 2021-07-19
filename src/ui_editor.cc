@@ -662,7 +662,7 @@ void UI_TextEditor::InsertFile()
 	// open file in binary mode (we handle CR/LF ourselves)
 	LineFile file(filename);
 
-	if (!file)
+	if (!file.isOpen())
 	{
 		line = GetErrorMessage(errno);
 		DLG_Notify("Unable to open text file:\n\n%s", line.c_str());

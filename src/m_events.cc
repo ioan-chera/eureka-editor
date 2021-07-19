@@ -858,14 +858,14 @@ bool Instance::M_ParseOperationFile()
 	LineFile file(filename);
 
 	// otherwise load it from the installation directory
-	if (! file)
+	if (! file.isOpen())
 	{
 		filename = global::install_dir + "/operations.cfg";
 
 		file.open(filename);
 	}
 
-	if (! file)
+	if (! file.isOpen())
 		return false;
 
 

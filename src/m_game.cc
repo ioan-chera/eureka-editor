@@ -965,7 +965,7 @@ void M_ParseDefinitionFile(Instance &inst,
 	// read the definition file, line by line
 
 	LineFile file(filename);
-	if (! file)
+	if (! file.isOpen())
 		ThrowException("Cannot open %s: %s\n", filename.c_str(), GetErrorMessage(errno).c_str());
 
 	while (file.readLine(pst->readstring))

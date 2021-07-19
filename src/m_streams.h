@@ -55,7 +55,7 @@ public:
     //
     // Easy check
     //
-    operator bool() const noexcept
+    bool isOpen() const noexcept
     {
         return is.is_open();
     }

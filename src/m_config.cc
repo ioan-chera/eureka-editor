@@ -1357,7 +1357,7 @@ bool Instance::M_LoadUserState()
 	SString filename = PersistFilename(crc);
 
 	LineFile file(filename);
-	if (! file)
+	if (! file.isOpen())
 		return false;
 
 	gLog.printf("Loading user state from: %s\n", filename.c_str());
