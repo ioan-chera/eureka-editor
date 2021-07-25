@@ -225,20 +225,18 @@ void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 void Instance::CMD_ManageProject()
 {
 	UI_ProjectSetup * dialog = new UI_ProjectSetup(*this, false /* new_project */, false /* is_startup */);
-
-	bool ok = dialog->Run();
-
-	if (ok)
+	try
 	{
-		try
+		bool ok = dialog->Run();
+
+		if (ok)
 		{
 			Project_ApplyChanges(dialog);
 		}
-		catch(const ParseException &e)
-		{
-			DLG_ShowError("Error reading configuration file: %s",
-						  e.std::exception::what());
-		}
+	}
+	catch(const ParseException &e)
+	{
+		DLG_ShowError(false, "Error reading configuration file: %s", e.what());
 	}
 
 	delete dialog;
