@@ -582,18 +582,18 @@ public:	// will be private when we encapsulate everything
 	SString default_ceil_tex = "FLAT1";
 	SString default_floor_tex = "FLAT1";
 	SString default_wall_tex = "GRAY1";
-	port_features_t Features = {};
 	std::map<SString, char> flat_categories;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
 	std::map<char, linegroup_t> line_groups;
 	std::map<int, linetype_t> line_types;
-	misc_info_t Misc_info = {};
 	int num_gen_linetypes = 0;
 	std::map<int, sectortype_t> sector_types;
 	std::map<SString, char> texture_categories;
 	std::map<char, texturegroup_t> texture_groups;
 	std::map<char, thinggroup_t> thing_groups;
 	std::map<int, thingtype_t> thing_types;
+
+	ConfigData conf;
 
 	//
 	// Panel stuff

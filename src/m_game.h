@@ -304,6 +304,26 @@ public:
 	}
 };
 
+//
+// Target for M_ParseDefinitionFile
+//
+struct ConfigData
+{
+	misc_info_t miscInfo = {};
+	port_features_t features = {};
+
+	SString default_wall_tex;
+	SString default_floor_tex;
+	SString default_ceil_tex;
+	int default_thing;
+
+	std::map<char, linegroup_t> line_groups;
+	std::map<int, linetype_t> line_types;
+};
+
+//
+// Generic parse target, depending on ParsePurpose
+//
 union ParseTarget
 {
 	ParseTarget(GameInfo *game) : game(game)
@@ -314,10 +334,15 @@ union ParseTarget
 	{
 	}
 
+	ParseTarget(ConfigData *config) : config(config)
+	{
+	}
+
 	ParseTarget() = default;
 
 	GameInfo *game;
 	PortInfo_c *port;
+	ConfigData *config;
 };
 
 void M_ParseDefinitionFile(Instance &inst,

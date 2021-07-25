@@ -333,7 +333,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 	// MMB on ceiling flat image sets to sky
 	if (w == box->c_pic && Fl::event_button() == FL_MIDDLE_MOUSE)
 	{
-		box->SetFlat(box->inst.Misc_info.sky_flat, PART_CEIL);
+		box->SetFlat(box->inst.conf.miscInfo.sky_flat, PART_CEIL);
 		return;
 	}
 
@@ -434,7 +434,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 	int mask  = 65535;
 	int value = atoi(box->type->value());
 
-	int gen_mask = (box->inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 : 31;
+	int gen_mask = (box->inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 : 31;
 
 	// when generalize sectors active, typing a low value (which does
 	// not touch any bitflags) should just update the TYPE part, and
@@ -446,7 +446,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		// update the WHOLE sector type.  If generalized sectors are
 		// active, then the panel will reinterpret the typed value.
 	}
-	else if (box->inst.Features.gen_sectors != GenSectorFamily::none)
+	else if (box->inst.conf.features.gen_sectors != GenSectorFamily::none)
 	{
 		// Boom and ZDoom generalized sectors
 
@@ -477,7 +477,7 @@ void UI_SectorBox::type_callback(Fl_Widget *w, void *data)
 		{
 			mask = gen_mask;
 		}
-		else if (box->inst.Features.gen_sectors == GenSectorFamily::zdoom)
+		else if (box->inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
 		{
 			// for ZDoom in Hexen mode, shift up 3 bits
 			mask  <<= 3;
@@ -526,9 +526,9 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 	// when generalize sectors in effect, the name should just
 	// show the TYPE part of the sector type.
 
-	if (box->inst.Features.gen_sectors != GenSectorFamily::none)
+	if (box->inst.conf.features.gen_sectors != GenSectorFamily::none)
 	{
-		int gen_mask = (box->inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 : 31;
+		int gen_mask = (box->inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 : 31;
 
 		value &= gen_mask;
 	}
@@ -548,8 +548,8 @@ void UI_SectorBox::SetSectorType(int new_type)
 	auto buffer = SString(new_type);
 	mFixUp.setInputValue(type, buffer.c_str());	// was updated by this
 
-	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-			   (inst.Features.gen_sectors == GenSectorFamily::boom) ? 31  : 65535;
+	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+			   (inst.conf.features.gen_sectors == GenSectorFamily::boom) ? 31  : 65535;
 
 	InstallSectorType(mask, new_type);
 }
@@ -759,17 +759,17 @@ void UI_SectorBox::UpdateField(int field)
 		if (inst.level.isSector(obj))
 		{
 			int value = sector->type;
-			int mask  = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-						(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+			int mask  = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+						(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 			mFixUp.setInputValue(type, SString(value & mask).c_str());
 
 			const sectortype_t &info = inst.M_GetSectorType(value & mask);
 			desc->value(info.desc.c_str());
 
-			if (inst.Features.gen_sectors != GenSectorFamily::none)
+			if (inst.conf.features.gen_sectors != GenSectorFamily::none)
 			{
-				if (inst.Features.gen_sectors == GenSectorFamily::zdoom)
+				if (inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
 					value >>= 3;
 
 				bm_damage->value((value >> 5) & 3);
@@ -914,7 +914,7 @@ bool UI_SectorBox::ClipboardOp(EditCommand op)
 
 		case EditCommand::del:
 			// abuse the delete function to turn sector ceilings into sky
-			CB_Paste(parts, BA_InternaliseString(inst.Misc_info.sky_flat));
+			CB_Paste(parts, BA_InternaliseString(inst.conf.miscInfo.sky_flat));
 			break;
 	}
 
@@ -971,9 +971,9 @@ void UI_SectorBox::UpdateTotal()
 
 void UI_SectorBox::UpdateGameInfo()
 {
-	if (inst.Features.gen_sectors != GenSectorFamily::none)
+	if (inst.conf.features.gen_sectors != GenSectorFamily::none)
 	{
-		if (inst.Features.gen_sectors == GenSectorFamily::zdoom)
+		if (inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
 			bm_title->label("ZDoom flags:");
 		else
 			bm_title->label("Boom flags:");

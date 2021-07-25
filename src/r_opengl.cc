@@ -149,7 +149,7 @@ public:
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			inst.IM_DecodePixel(static_cast<img_pixel_t>(inst.Misc_info.sky_color), r, g, b);
+			inst.IM_DecodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
 			return NULL;
 		}
 
@@ -161,9 +161,9 @@ public:
 
 			// when lighting and no texturing, use a single color
 			if (inst.r_view.lighting)
-				col = inst.Misc_info.floor_colors[1];
+				col = inst.conf.miscInfo.floor_colors[1];
 			else
-				col = HashedPalColor(fname, inst.Misc_info.floor_colors);
+				col = HashedPalColor(fname, inst.conf.miscInfo.floor_colors);
 
 			inst.IM_DecodePixel(static_cast<img_pixel_t>(col), r, g, b);
 			return NULL;
@@ -194,9 +194,9 @@ public:
 
 			// when lighting and no texturing, use a single color
 			if (inst.r_view.lighting)
-				col = inst.Misc_info.wall_colors[1];
+				col = inst.conf.miscInfo.wall_colors[1];
 			else
-				col = HashedPalColor(tname, inst.Misc_info.wall_colors);
+				col = HashedPalColor(tname, inst.conf.miscInfo.wall_colors);
 
 			inst.IM_DecodePixel(static_cast<img_pixel_t>(col), r, g, b);
 			return NULL;
@@ -689,7 +689,7 @@ public:
 		if (sky_upper && where == 'U')
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			inst.IM_DecodePixel(static_cast<img_pixel_t>(inst.Misc_info.sky_color), r, g, b);
+			inst.IM_DecodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
 		}
 		else
 		{

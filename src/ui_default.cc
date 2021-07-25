@@ -437,13 +437,13 @@ void UI_DefaultProps::CB_Delete(int sel_pics)
 
 	if (sel_pics & 1)
 	{
-		mFixUp.setInputValue(f_tex, inst.Misc_info.sky_flat.c_str());
+		mFixUp.setInputValue(f_tex, inst.conf.miscInfo.sky_flat.c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
-		mFixUp.setInputValue(c_tex, inst.Misc_info.sky_flat.c_str());
+		mFixUp.setInputValue(c_tex, inst.conf.miscInfo.sky_flat.c_str());
 		c_tex->do_callback();
 	}
 }

@@ -348,7 +348,7 @@ void Instance::Texboard_SetTex(const SString &new_tex) const
 {
 	tex_clipboard::tex = new_tex;
 
-	if (Features.mix_textures_flats)
+	if (conf.features.mix_textures_flats)
 		tex_clipboard::flat = new_tex;
 }
 
@@ -356,7 +356,7 @@ void Instance::Texboard_SetFlat(const SString &new_flat) const
 {
 	tex_clipboard::flat = new_flat;
 
-	if (Features.mix_textures_flats)
+	if (conf.features.mix_textures_flats)
 		tex_clipboard::tex = new_flat;
 }
 

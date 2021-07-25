@@ -196,8 +196,8 @@ Img_c * Img_c::spectrify() const
 {
 	Img_c *omg = new Img_c(inst, width(), height());
 
-	int invis_start = inst.Misc_info.invis_colors[0];
-	int invis_len   = inst.Misc_info.invis_colors[1] - invis_start + 1;
+	int invis_start = inst.conf.miscInfo.invis_colors[0];
+	int invis_len   = inst.conf.miscInfo.invis_colors[1] - invis_start + 1;
 
 	if (invis_len < 1)
 		invis_len = 1;
@@ -555,9 +555,9 @@ static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg,
 
 Img_c *Instance::IM_MissingTex()
 {
-	if (! missing_tex_image || missing_tex_color != Misc_info.missing_color)
+	if (! missing_tex_image || missing_tex_color != conf.miscInfo.missing_color)
 	{
-		missing_tex_color = Misc_info.missing_color;
+		missing_tex_color = conf.miscInfo.missing_color;
 
 		if (missing_tex_image)
 			delete missing_tex_image;
@@ -571,9 +571,9 @@ Img_c *Instance::IM_MissingTex()
 
 Img_c *Instance::IM_UnknownTex()
 {
-	if (! unknown_tex_image || unknown_tex_color != Misc_info.unknown_tex)
+	if (! unknown_tex_image || unknown_tex_color != conf.miscInfo.unknown_tex)
 	{
-		unknown_tex_color = Misc_info.unknown_tex;
+		unknown_tex_color = conf.miscInfo.unknown_tex;
 
 		if (unknown_tex_image)
 			delete unknown_tex_image;
@@ -608,9 +608,9 @@ Img_c *Instance::IM_SpecialTex()
 
 Img_c *Instance::IM_UnknownFlat()
 {
-	if (! unknown_flat_image || unknown_flat_color != Misc_info.unknown_flat)
+	if (! unknown_flat_image || unknown_flat_color != conf.miscInfo.unknown_flat)
 	{
-		unknown_flat_color = Misc_info.unknown_flat;
+		unknown_flat_color = conf.miscInfo.unknown_flat;
 
 		if (unknown_flat_image)
 			delete unknown_flat_image;
@@ -624,9 +624,9 @@ Img_c *Instance::IM_UnknownFlat()
 
 Img_c *Instance::IM_UnknownSprite()
 {
-	int unk_col = Misc_info.unknown_thing;
+	int unk_col = conf.miscInfo.unknown_thing;
 	if (unk_col == 0)
-		unk_col = Misc_info.unknown_tex;
+		unk_col = conf.miscInfo.unknown_tex;
 
 	if (! unknown_sprite_image || unknown_sprite_color != unk_col)
 	{

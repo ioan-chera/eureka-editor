@@ -111,7 +111,7 @@ public:
 
 		if (inst.is_sky(fname))
 		{
-			col = static_cast<img_pixel_t>(inst.Misc_info.sky_color);
+			col = static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color);
 			fullbright = true;
 			return;
 		}
@@ -131,9 +131,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (inst.r_view.lighting)
-			col = static_cast<img_pixel_t>(inst.Misc_info.floor_colors[1]);
+			col = static_cast<img_pixel_t>(inst.conf.miscInfo.floor_colors[1]);
 		else
-			col = static_cast<img_pixel_t>(HashedPalColor(fname, inst.Misc_info.floor_colors));
+			col = static_cast<img_pixel_t>(HashedPalColor(fname, inst.conf.miscInfo.floor_colors));
 	}
 
 	void FindTex(const SString & tname, LineDef *ld)
@@ -167,9 +167,9 @@ public:
 
 		// when lighting and no texturing, use a single color
 		if (inst.r_view.lighting)
-			col = static_cast<img_pixel_t>(inst.Misc_info.wall_colors[1]);
+			col = static_cast<img_pixel_t>(inst.conf.miscInfo.wall_colors[1]);
 		else
-			col = static_cast<img_pixel_t>(HashedPalColor(tname, inst.Misc_info.wall_colors));
+			col = static_cast<img_pixel_t>(HashedPalColor(tname, inst.conf.miscInfo.wall_colors));
 	}
 };
 

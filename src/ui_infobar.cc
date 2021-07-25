@@ -459,7 +459,7 @@ void UI_StatusBar::draw()
 	{
 		IB_Number(cx, cy, "x", I_ROUND(inst.r_view.x), 5);
 		IB_Number(cx, cy, "y", I_ROUND(inst.r_view.y), 5);
-		IB_Number(cx, cy, "z", I_ROUND(inst.r_view.z) - inst.Misc_info.view_height, 4);
+		IB_Number(cx, cy, "z", I_ROUND(inst.r_view.z) - inst.conf.miscInfo.view_height, 4);
 
 		// use less space when an action is occurring
 		if (inst.edit.action == ACT_NOTHING)

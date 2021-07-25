@@ -128,7 +128,7 @@ void Render_View_t::FindGroundZ()
 	}
 
 	if (hit_something)
-		z = max_floor + inst.Misc_info.view_height;
+		z = max_floor + inst.conf.miscInfo.view_height;
 }
 
 void Render_View_t::CalcAspect()

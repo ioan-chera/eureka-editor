@@ -763,7 +763,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 
 	list.change_type(ObjType::sectors);
 
-	int max_type = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
+	int max_type = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 8191 : 2047;
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
@@ -781,9 +781,9 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 		}
 
 		// Boom and ZDoom generalized sectors
-		if (inst.Features.gen_sectors == GenSectorFamily::zdoom)
+		if (inst.conf.features.gen_sectors == GenSectorFamily::zdoom)
 			type_num &= 255;
-		else if (inst.Features.gen_sectors != GenSectorFamily::none)
+		else if (inst.conf.features.gen_sectors != GenSectorFamily::none)
 			type_num &= 31;
 
 		const sectortype_t &info = inst.M_GetSectorType(type_num);
@@ -1555,7 +1555,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
-		else if (inst.Features.coop_dm_flags)
+		else if (inst.conf.features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
@@ -1616,7 +1616,7 @@ void Things_FixDuds(Instance &inst)
 			if (modes == 0)
 				new_options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
 		}
-		else if (inst.Features.coop_dm_flags)
+		else if (inst.conf.features.coop_dm_flags)
 		{
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 
@@ -1996,7 +1996,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 
 		mask = Things_FindStarts(&dm_num, doc);
 
-		if (inst.Features.no_need_players)
+		if (inst.conf.features.no_need_players)
 			dialog->AddLine("Player starts not needed, no check done");
 		else if (! (mask & 1))
 			dialog->AddLine("Player 1 start is missing!", 2);
@@ -2009,7 +2009,7 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		else
 			dialog->AddLine("Found all 4 player starts");
 
-		if (inst.Features.no_need_players)
+		if (inst.conf.features.no_need_players)
 		{
 			// leave a blank space
 		}
@@ -2017,16 +2017,16 @@ CheckResult ChecksModule::checkThings(int min_severity) const
 		{
 			dialog->AddLine("Map is missing deathmatch starts", 1);
 		}
-		else if (dm_num < inst.Misc_info.min_dm_starts)
+		else if (dm_num < inst.conf.miscInfo.min_dm_starts)
 		{
 			check_message = SString::printf("Found %d deathmatch starts -- need at least %d", dm_num,
-				inst.Misc_info.min_dm_starts);
+				inst.conf.miscInfo.min_dm_starts);
 			dialog->AddLine(check_message, 1);
 		}
-		else if (dm_num > inst.Misc_info.max_dm_starts)
+		else if (dm_num > inst.conf.miscInfo.max_dm_starts)
 		{
 			check_message = SString::printf("Found %d deathmatch starts -- maximum is %d", dm_num,
-				inst.Misc_info.max_dm_starts);
+				inst.conf.miscInfo.max_dm_starts);
 			dialog->AddLine(check_message, 2);
 		}
 		else
@@ -2317,7 +2317,7 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 		const linetype_t &info = inst.M_GetLineType(type_num);
 
 		// Boom generalized line type?
-		if (inst.Features.gen_types && is_genline(type_num))
+		if (inst.conf.features.gen_types && is_genline(type_num))
 			continue;
 
 		if (info.desc.startsWith("UNKNOWN"))
@@ -3004,7 +3004,7 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 		int tag = doc.sectors[i]->tag;
 
 		// ignore special tags
-		if (inst.Features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
+		if (inst.conf.features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
 			continue;
 
 		if (tag > 0)
@@ -3142,7 +3142,7 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 
 		// DOOM and Heretic use tag #666 to open doors (etc) on the
 		// death of boss monsters.
-		if (inst.Features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
+		if (inst.conf.features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
 			continue;
 
 		if (! LD_tag_exists(tag, inst.level))
@@ -3238,7 +3238,7 @@ static void Tags_ShowMissingTags(Instance &inst)
 
 static bool SEC_check_beast_mark(int tag, const Instance &inst)
 {
-	if (inst.Features.tag_666 == Tag666Rules::disabled)
+	if (inst.conf.features.tag_666 == Tag666Rules::disabled)
 		return true;
 
 	if (tag == 667)
@@ -3250,7 +3250,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 	if (tag == 666)
 	{
 		// for Heretic, the map must be an end-of-episode map: ExM8
-		if (inst.Features.tag_666 == Tag666Rules::heretic)
+		if (inst.conf.features.tag_666 == Tag666Rules::heretic)
 		{
 			if (inst.loaded.levelName.length() != 4)
 				return false;
@@ -4321,7 +4321,7 @@ CheckResult ChecksModule::checkTextures(int min_severity) const
 		}
 
 
-		if (! inst.Features.medusa_fixed)
+		if (! inst.conf.features.medusa_fixed)
 		{
 			Textures_FindMedusa(sel, names, inst);
 
@@ -4579,7 +4579,7 @@ int findFreeTag(const Instance &inst, bool forsector)
 		addtag(doc.sectors[i]->tag);
 
 	while(tags.count(freetag) || (forsector &&
-								  inst.Features.tag_666 != Tag666Rules::disabled &&
+								  inst.conf.features.tag_666 != Tag666Rules::disabled &&
 								  (freetag == 666 || freetag == 667)))
 	{
 		++freetag;	// now raise it as necessary

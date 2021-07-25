@@ -157,9 +157,9 @@ void Instance::M_ClearAllDefinitions()
 	texture_categories.clear();
 	flat_categories.clear();
 
-	Misc_info = misc_info_t();
+	conf.miscInfo = misc_info_t();
 
-	Features = {};
+	conf.features = {};
 
 	// reset generalized types
 	for(generalized_linetype_t &type : gen_linetypes)
@@ -231,42 +231,42 @@ static short ParseThingdefFlags(const char *s)
 }
 
 
-static void ParseColorDef(Instance &inst, char ** argv, int argc)
+static void ParseColorDef(ConfigData &config, char ** argv, int argc)
 {
 	if (y_stricmp(argv[0], "sky") == 0)
 	{
-		inst.Misc_info.sky_color = atoi(argv[1]);
+		config.miscInfo.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "wall") == 0)
 	{
-		inst.Misc_info.wall_colors[0] = atoi(argv[1]);
-		inst.Misc_info.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		config.miscInfo.wall_colors[0] = atoi(argv[1]);
+		config.miscInfo.wall_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "floor") == 0)
 	{
-		inst.Misc_info.floor_colors[0] = atoi(argv[1]);
-		inst.Misc_info.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		config.miscInfo.floor_colors[0] = atoi(argv[1]);
+		config.miscInfo.floor_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "invis") == 0)
 	{
-		inst.Misc_info.invis_colors[0] = atoi(argv[1]);
-		inst.Misc_info.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
+		config.miscInfo.invis_colors[0] = atoi(argv[1]);
+		config.miscInfo.invis_colors[1] = atoi(argv[(argc < 2) ? 1 : 2]);
 	}
 	else if (y_stricmp(argv[0], "missing") == 0)
 	{
-		inst.Misc_info.missing_color = atoi(argv[1]);
+		config.miscInfo.missing_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_tex") == 0)
 	{
-		inst.Misc_info.unknown_tex = atoi(argv[1]);
+		config.miscInfo.unknown_tex = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_flat") == 0)
 	{
-		inst.Misc_info.unknown_flat = atoi(argv[1]);
+		config.miscInfo.unknown_flat = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "unknown_thing") == 0)
 	{
-		inst.Misc_info.unknown_thing = atoi(argv[1]);
+		config.miscInfo.unknown_thing = atoi(argv[1]);
 	}
 	else
 	{
@@ -380,7 +380,7 @@ static const FeatureMapping skFeatureMappings[] =
 //
 // Parses features
 //
-static void ParseFeatureDef(Instance &inst, char **argv, int argc)
+static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
 {
 	bool found = false;
 	for(const FeatureMapping &mapping : skFeatureMappings)
@@ -389,9 +389,9 @@ static void ParseFeatureDef(Instance &inst, char **argv, int argc)
 			char *endptr = nullptr;
 			long val = strtol(argv[1], &endptr, 10);
 			if(endptr == argv[1] && mapping.converter)
-				inst.Features.*mapping.field = mapping.converter(argv[1]);
+				config.features.*mapping.field = mapping.converter(argv[1]);
 			else
-				inst.Features.*mapping.field = static_cast<int>(val);
+				config.features.*mapping.field = static_cast<int>(val);
 			found = true;
 			break;
 		}
@@ -458,8 +458,10 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(*this, ParsePurpose::normal, {}, filename, folder,
+	auto target = ConfigData(conf);
+	M_ParseDefinitionFile(*this, ParsePurpose::normal, &target, filename, folder,
 						  prettyname);
+	conf = target;
 }
 
 #define MAX_INCLUDE_LEVEL  10
@@ -546,7 +548,8 @@ void parser_state_c::tokenize()
 }
 
 
-static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
+static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
+							  ConfigData &config)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -567,53 +570,53 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		if (nargs != 3)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		inst.Misc_info.player_r    = atoi(argv[1]);
-		inst.Misc_info.player_h    = atoi(argv[2]);
-		inst.Misc_info.view_height = atoi(argv[3]);
+		config.miscInfo.player_r    = atoi(argv[1]);
+		config.miscInfo.player_h    = atoi(argv[2]);
+		config.miscInfo.view_height = atoi(argv[3]);
 	}
 	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
 	{
 		if (nargs != 1)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		inst.Misc_info.sky_color = atoi(argv[1]);
+		config.miscInfo.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "sky_flat") == 0)
 	{
 		if (nargs != 1)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		inst.Misc_info.sky_flat = argv[1];
+		config.miscInfo.sky_flat = argv[1];
 	}
 	else if (y_stricmp(argv[0], "color") == 0)
 	{
 		if (nargs < 2)
 			pst->fail(bad_arg_count_fail, argv[0], 2);
 
-		ParseColorDef(inst, pst->argv + 1, nargs);
+		ParseColorDef(config, pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "feature") == 0)
 	{
 		if (nargs < 2)
 			pst->fail(bad_arg_count_fail, argv[0], 2);
 
-		ParseFeatureDef(inst, pst->argv + 1, nargs);
+		ParseFeatureDef(config, pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "default_textures") == 0)
 	{
 		if (nargs != 3)
 			pst->fail(bad_arg_count_fail, argv[0], 3);
 
-		inst.default_wall_tex	= argv[1];
-		inst.default_floor_tex	= argv[2];
-		inst.default_ceil_tex	= argv[3];
+		config.default_wall_tex	= argv[1];
+		config.default_floor_tex	= argv[2];
+		config.default_ceil_tex	= argv[3];
 	}
 	else if (y_stricmp(argv[0], "default_thing") == 0)
 	{
 		if (nargs != 1)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		inst.default_thing = atoi(argv[1]);
+		config.default_thing = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "linegroup") == 0 ||
 			 y_stricmp(argv[0], "spec_group") == 0)
@@ -626,7 +629,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 		lg.group = argv[1][0];
 		lg.desc  = argv[2];
 
-		inst.line_groups[lg.group] = lg;
+		config.line_groups[lg.group] = lg;
 	}
 
 	else if (y_stricmp(argv[0], "line") == 0 ||
@@ -649,13 +652,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 				info.args[i] = argv[4 + i];
 		}
 
-		if (inst.line_groups.find( info.group) == inst.line_groups.end())
+		if (config.line_groups.find( info.group) == config.line_groups.end())
 		{
 			gLog.printf("%s(%d): unknown line group '%c'\n",
 					  pst->file(), pst->line(),  info.group);
 		}
 		else
-			inst.line_types[number] = info;
+			config.line_types[number] = info;
 	}
 
 	else if (y_stricmp(argv[0], "sector") == 0)
@@ -1086,7 +1089,7 @@ void M_ParseDefinitionFile(Instance &inst,
 		}
 
 		// handle everything else
-		M_ParseNormalLine(inst, pst);
+		M_ParseNormalLine(inst, pst, *target.config);
 	}
 
 	// check for an unterminated conditional
@@ -1298,7 +1301,7 @@ SString M_CollectPortsForMenu(Instance &inst, const char *base_game,
 // is this flat a sky?
 bool Instance::is_sky(const SString &flat) const
 {
-	return flat.noCaseEqual(Misc_info.sky_flat);
+	return flat.noCaseEqual(conf.miscInfo.sky_flat);
 }
 
 bool is_null_tex(const SString &tex)

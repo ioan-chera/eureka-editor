@@ -820,7 +820,10 @@ void Instance::LoadResourceFile(const SString &filename)
 	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(*this, ParsePurpose::resource, {}, filename);
+		auto target = conf;
+		M_ParseDefinitionFile(*this, ParsePurpose::resource, &target, filename);
+		conf = target;
+
 		return;
 	}
 
@@ -901,11 +904,11 @@ void Instance::ReadPortInfo() noexcept(false)
 	M_LoadDefinitions("ports", loaded.portName);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
-	if (Features.strife_flags)
+	if (conf.features.strife_flags)
 	{
-		Features.pass_through = 0;
-		Features.coop_dm_flags = 0;
-		Features.friend_flag = 0;
+		conf.features.pass_through = 0;
+		conf.features.coop_dm_flags = 0;
+		conf.features.friend_flag = 0;
 	}
 }
 

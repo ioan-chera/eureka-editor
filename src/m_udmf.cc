@@ -737,7 +737,7 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 
 		WrFlag(lump, th->options, "ambush", MTF_Ambush);
 
-		if (inst.Features.friend_flag)
+		if (inst.conf.features.friend_flag)
 			WrFlag(lump, th->options, "friend", MTF_Friend);
 
 		// TODO Hexen flags
@@ -808,10 +808,10 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		WrFlag(lump, ld->flags, "dontdraw",      MLF_DontDraw);
 		WrFlag(lump, ld->flags, "mapped",        MLF_Mapped);
 
-		if (inst.Features.pass_through)
+		if (inst.conf.features.pass_through)
 			WrFlag(lump, ld->flags, "passuse", MLF_Boom_PassThru);
 
-		if (inst.Features.midtex_3d)
+		if (inst.conf.features.midtex_3d)
 			WrFlag(lump, ld->flags, "midtex3d", MLF_Eternity_3DMidTex);
 
 		// TODO : hexen stuff (SPAC flags, etc)

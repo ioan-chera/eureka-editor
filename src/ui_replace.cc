@@ -490,7 +490,7 @@ void UI_FindAndReplace::UpdateWhatFilters()
 #undef SHOW_WIDGET_IF
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == 0 && ! inst.Features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)
+	if (x == 0 && ! inst.conf.features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)
 	{
 		  o_sp->hide();
 		o_coop->hide();
@@ -837,8 +837,8 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 		case 4: // Sectors by Type
 		{
-			int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-						(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+			int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+						(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 			const sectortype_t & info = inst.M_GetSectorType(type_num & mask);
 			desc->value(info.desc.c_str());
@@ -1555,8 +1555,8 @@ bool UI_FindAndReplace::Match_SectorType(int idx)
 {
 	const Sector *sector = inst.level.sectors[idx];
 
-	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 	if (! find_numbers->get(sector->type & mask))
 		return false;
@@ -1631,7 +1631,7 @@ void UI_FindAndReplace::ComputeFlagMask()
 	FLAG_FROM_WIDGET(o_medium, 1, MTF_Medium);
 	FLAG_FROM_WIDGET(  o_hard, 1, MTF_Hard);
 
-	if (inst.Features.coop_dm_flags)
+	if (inst.conf.features.coop_dm_flags)
 	{
 		FLAG_FROM_WIDGET(  o_sp, -1, MTF_Not_SP);
 		FLAG_FROM_WIDGET(o_coop, -1, MTF_Not_COOP);
@@ -1771,8 +1771,8 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 
 void UI_FindAndReplace::Replace_SectorType(int idx)
 {
-	int mask = (inst.Features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
-				(inst.Features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
+	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
+				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
 
 	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());

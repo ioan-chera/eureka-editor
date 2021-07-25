@@ -276,7 +276,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 			int f_max = std::max(S1->floorh, S2->floorh);
 			int c_min = std::min(S1-> ceilh, S2-> ceilh);
 
-			if (c_min - f_max < inst.Misc_info.player_h)
+			if (c_min - f_max < inst.conf.miscInfo.player_h)
 			{
 				// ... but allow doors
 				if (! (allow_doors && (S1->floorh == S1->ceilh || S2->floorh == S2->ceilh)))

@@ -414,34 +414,34 @@ TEST(EChecks, FindFreeTag)
 		lines[i].tag = i;
 		sectors[i].tag = i;
 	}
-	inst.Features.tag_666 = Tag666Rules::doom;	// enable it
+	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 666);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
-	inst.Features.tag_666 = Tag666Rules::heretic;	// essentially the same
+	inst.conf.features.tag_666 = Tag666Rules::heretic;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 666);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
-	inst.Features.tag_666 = Tag666Rules::disabled;	// essentially the same
+	inst.conf.features.tag_666 = Tag666Rules::disabled;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 666);
 	ASSERT_EQ(findFreeTag(inst, true), 666);
 	// Add one more and re-test
 	lines[666].tag = 666;
-	inst.Features.tag_666 = Tag666Rules::doom;	// enable it
+	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 667);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
-	inst.Features.tag_666 = Tag666Rules::heretic;	// essentially the same
+	inst.conf.features.tag_666 = Tag666Rules::heretic;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 667);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
-	inst.Features.tag_666 = Tag666Rules::disabled;	// essentially the same
+	inst.conf.features.tag_666 = Tag666Rules::disabled;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 667);
 	ASSERT_EQ(findFreeTag(inst, true), 667);
 	sectors[667].tag = 667;
-	inst.Features.tag_666 = Tag666Rules::doom;	// enable it
+	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 668);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
-	inst.Features.tag_666 = Tag666Rules::heretic;	// essentially the same
+	inst.conf.features.tag_666 = Tag666Rules::heretic;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 668);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
-	inst.Features.tag_666 = Tag666Rules::disabled;	// essentially the same
+	inst.conf.features.tag_666 = Tag666Rules::disabled;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 668);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
 }
