@@ -108,8 +108,8 @@ TEST_F(MConfig, MParseConfigFile)
         ASSERT_EQ(global::Pwad_list[2], "file3");
         global::Pwad_list.clear();
 
-        ASSERT_EQ(gInstance.Iwad_name, "doom 3.wad");   // spaces get included
-        gInstance.Iwad_name.clear();
+        ASSERT_EQ(gInstance.loaded.iwadName, "doom 3.wad");   // spaces get included
+        gInstance.loaded.iwadName.clear();
 
         ASSERT_TRUE(global::udmf_testing);
         global::udmf_testing = false;
@@ -148,7 +148,7 @@ TEST_F(MConfig, MWriteConfig)
     config::dotty_axis_col = RGB_MAKE(99, 90, 80);
 
     global::udmf_testing = true;    // this one shall not be saved
-    gInstance.Level_name = "NEW LEVEL";
+    gInstance.loaded.levelName = "NEW LEVEL";
     global::Pwad_list = { "file1", "file2 file3" };
 
     global::config_file = getChildPath("configx.cfg");  // pick any name
@@ -164,7 +164,7 @@ TEST_F(MConfig, MWriteConfig)
     config::dotty_axis_col = RGB_MAKE(0, 128, 255);
 
     global::udmf_testing = false;
-    gInstance.Level_name.clear();
+    gInstance.loaded.levelName.clear();
     global::Pwad_list.clear();
 
     // Now read config back
@@ -178,7 +178,7 @@ TEST_F(MConfig, MWriteConfig)
     ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(99, 90, 80));
 
     ASSERT_FALSE(global::udmf_testing); // still false
-    ASSERT_TRUE(gInstance.Level_name.empty());
+    ASSERT_TRUE(gInstance.loaded.levelName.empty());
     ASSERT_TRUE(global::Pwad_list.empty());
 
     // Now unset them
@@ -286,10 +286,10 @@ TEST(MConfigArgs, MParseCommandLine)
 	ASSERT_EQ(global::Pwad_list[2], "doom.wad");
 	ASSERT_EQ(global::Pwad_list[3], "landing page.wad");
 	global::Pwad_list.clear();
-	ASSERT_EQ(gInstance.Resource_list.size(), 2);
-	ASSERT_EQ(gInstance.Resource_list[0], "res1.wad");
-	ASSERT_EQ(gInstance.Resource_list[1], "res2.wad");
-	gInstance.Resource_list.clear();
+	ASSERT_EQ(gInstance.loaded.resourceList.size(), 2);
+	ASSERT_EQ(gInstance.loaded.resourceList[0], "res1.wad");
+	ASSERT_EQ(gInstance.loaded.resourceList[1], "res2.wad");
+	gInstance.loaded.resourceList.clear();
 
 	// Test integer stuff
 	argv = { "-backup_max_files", "-23", "--default_gamma", "25" };
@@ -320,13 +320,13 @@ TEST(MConfigArgs, MParseCommandLine)
 	// Test the special warp behaviour
 	argv = { "-warp", "map01" };
 	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(gInstance.Level_name, "map01");	// gets uppercase
-	gInstance.Level_name.clear();
+	ASSERT_EQ(gInstance.loaded.levelName, "map01");	// gets uppercase
+	gInstance.loaded.levelName.clear();
 	// Check that one argument is valid
 	argv = { "--warp", "09" };
 	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(gInstance.Level_name, "09");
-	gInstance.Level_name.clear();
+	ASSERT_EQ(gInstance.loaded.levelName, "09");
+	gInstance.loaded.levelName.clear();
 
 	// Check that loose files can be located within
 	argv = { "file1", "-warp", "map01", "file2", "--merge", "res1", "res2" };
@@ -334,13 +334,13 @@ TEST(MConfigArgs, MParseCommandLine)
 	ASSERT_EQ(global::Pwad_list.size(), 2);
 	ASSERT_EQ(global::Pwad_list[0], "file1");
 	ASSERT_EQ(global::Pwad_list[1], "file2");
-	ASSERT_EQ(gInstance.Level_name, "map01");
-	ASSERT_EQ(gInstance.Resource_list.size(), 2);
-	ASSERT_EQ(gInstance.Resource_list[0], "res1");
-	ASSERT_EQ(gInstance.Resource_list[1], "res2");
+	ASSERT_EQ(gInstance.loaded.levelName, "map01");
+	ASSERT_EQ(gInstance.loaded.resourceList.size(), 2);
+	ASSERT_EQ(gInstance.loaded.resourceList[0], "res1");
+	ASSERT_EQ(gInstance.loaded.resourceList[1], "res2");
 	global::Pwad_list.clear();
-	gInstance.Level_name.clear();
-	gInstance.Resource_list.clear();
+	gInstance.loaded.levelName.clear();
+	gInstance.loaded.resourceList.clear();
 
 	// Check that loose files can be located within and arguments can be redone
 	argv = { "file1", "--warp", "map01", "file2", "-warp", "1", "3", "file3" };
@@ -349,9 +349,9 @@ TEST(MConfigArgs, MParseCommandLine)
 	ASSERT_EQ(global::Pwad_list[0], "file1");
 	ASSERT_EQ(global::Pwad_list[1], "file2");
 	ASSERT_EQ(global::Pwad_list[2], "file3");
-	ASSERT_EQ(gInstance.Level_name, "13");
+	ASSERT_EQ(gInstance.loaded.levelName, "13");
 	global::Pwad_list.clear();
-	gInstance.Level_name.clear();
+	gInstance.loaded.levelName.clear();
 
 	// Check that stringList options can be repeatedly argumented
 	argv = { "file1", "-file", "file2", "-merge", "res1", "--file", "file3",
@@ -362,12 +362,12 @@ TEST(MConfigArgs, MParseCommandLine)
 	ASSERT_EQ(global::Pwad_list[1], "file2");
 	ASSERT_EQ(global::Pwad_list[2], "file3");
 	ASSERT_EQ(global::Pwad_list[3], "file4");
-	ASSERT_EQ(gInstance.Resource_list.size(), 3);
-	ASSERT_EQ(gInstance.Resource_list[0], "res1");
-	ASSERT_EQ(gInstance.Resource_list[1], "res2");
-	ASSERT_EQ(gInstance.Resource_list[2], "res3");
+	ASSERT_EQ(gInstance.loaded.resourceList.size(), 3);
+	ASSERT_EQ(gInstance.loaded.resourceList[0], "res1");
+	ASSERT_EQ(gInstance.loaded.resourceList[1], "res2");
+	ASSERT_EQ(gInstance.loaded.resourceList[2], "res3");
 	global::Pwad_list.clear();
-	gInstance.Resource_list.clear();
+	gInstance.loaded.resourceList.clear();
 }
 
 // M_PrintCommandLineOptions is tested in system testing

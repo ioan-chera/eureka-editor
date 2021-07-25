@@ -24,6 +24,7 @@
 #include "e_main.h"
 #include "im_img.h"
 #include "m_game.h"
+#include "m_loadsave.h"
 #include "main.h"
 #include "r_grid.h"
 #include "r_render.h"
@@ -570,14 +571,9 @@ public:	// will be private when we encapsulate everything
 	bool haveEditWad = false;
 	Wad gameWad;
 	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
-	MapFormat Level_format = {};	// format of current map
-	SString Level_name;	// Name of map lump we are editing
-	SString Port_name;	// Name of source port "vanilla", "boom", ...
 	SString Pwad_name;	// Filename of current wad
-	SString Iwad_name;	// Filename of the iwad
-	SString Game_name;	// Name of game "doom", "doom2", "heretic", ...
-	SString Udmf_namespace;	// for UDMF, the current namespace
-	std::vector<SString> Resource_list;
+
+	LoadingData loaded;
 
 	//
 	// Game-dependent (thus instance dependent) defaults

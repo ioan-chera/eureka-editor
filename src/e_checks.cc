@@ -1551,7 +1551,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 		int modes   = 1;
 		int classes = 1;
 
-		if (inst.Level_format != MapFormat::doom)
+		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 		}
@@ -1560,7 +1560,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 			modes = (~T->options) & (MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (inst.Level_format != MapFormat::doom)
+		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 		}
@@ -1609,7 +1609,7 @@ void Things_FixDuds(Instance &inst)
 		if (skills == 0)
 			new_options |= MTF_Easy | MTF_Medium | MTF_Hard;
 
-		if (inst.Level_format != MapFormat::doom)
+		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
 			modes = T->options & (MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM);
 
@@ -1624,7 +1624,7 @@ void Things_FixDuds(Instance &inst)
 				new_options &= ~(MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM);
 		}
 
-		if (inst.Level_format != MapFormat::doom)
+		if (inst.loaded.levelFormat != MapFormat::doom)
 		{
 			classes = T->options & (MTF_Hexen_Cleric | MTF_Hexen_Fighter | MTF_Hexen_Mage);
 
@@ -1721,7 +1721,7 @@ static bool ThingStuckInThing(const Instance &inst, const Thing *T1, const thing
 	int opt1 = T1->options;
 	int opt2 = T2->options;
 
-	if (inst.Level_format != MapFormat::doom)
+	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		if (info1->group == 'p') opt1 |= 0x7E7;
 		if (info2->group == 'p') opt2 |= 0x7E7;
@@ -3244,7 +3244,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 	if (tag == 667)
 	{
 		// tag #667 can only be used on MAP07
-		return inst.Level_name.noCaseEqual("MAP07");
+		return inst.loaded.levelName.noCaseEqual("MAP07");
 	}
 
 	if (tag == 666)
@@ -3252,16 +3252,16 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 		// for Heretic, the map must be an end-of-episode map: ExM8
 		if (inst.Features.tag_666 == Tag666Rules::heretic)
 		{
-			if (inst.Level_name.length() != 4)
+			if (inst.loaded.levelName.length() != 4)
 				return false;
 
-			return (inst.Level_name[3] == '8');
+			return (inst.loaded.levelName[3] == '8');
 		}
 
 		// for Doom, either need a particular map, or the presence
 		// of a KEEN thing.
-		if (inst.Level_name.noCaseEqual("E1M8") || inst.Level_name.noCaseEqual("E4M6") ||
-			inst.Level_name.noCaseEqual("E4M8") || inst.Level_name.noCaseEqual("MAP07"))
+		if (inst.loaded.levelName.noCaseEqual("E1M8") || inst.loaded.levelName.noCaseEqual("E4M6") ||
+			inst.loaded.levelName.noCaseEqual("E4M8") || inst.loaded.levelName.noCaseEqual("MAP07"))
 		{
 			return true;
 		}

@@ -174,7 +174,7 @@ void Instance::M_PrepareConfigVariables()
 {
 	parse_vars.clear();
 
-	switch (Level_format)
+	switch (loaded.levelFormat)
 	{
 		case MapFormat::doom:
 			parse_vars["$MAP_FORMAT"] = "DOOM";
@@ -192,25 +192,25 @@ void Instance::M_PrepareConfigVariables()
 			break;
 	}
 
-	if (!Udmf_namespace.empty())
+	if (!loaded.udmfNamespace.empty())
 	{
-		parse_vars["$UDMF_NAMESPACE"] = Udmf_namespace;
+		parse_vars["$UDMF_NAMESPACE"] = loaded.udmfNamespace;
 	}
 
-	if (!Game_name.empty())
+	if (!loaded.gameName.empty())
 	{
-		parse_vars["$GAME_NAME"] = Game_name;
+		parse_vars["$GAME_NAME"] = loaded.gameName;
 
-		if (M_CanLoadDefinitions(GAMES_DIR, Game_name))
+		if (M_CanLoadDefinitions(GAMES_DIR, loaded.gameName))
 		{
-			SString base_game = M_GetBaseGame(*this, Game_name);
+			SString base_game = M_GetBaseGame(*this, loaded.gameName);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
-	if (!Port_name.empty())
+	if (!loaded.portName.empty())
 	{
-		parse_vars["$PORT_NAME"] = Port_name;
+		parse_vars["$PORT_NAME"] = loaded.portName;
 	}
 }
 

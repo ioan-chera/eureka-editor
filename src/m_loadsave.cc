@@ -170,35 +170,30 @@ bool Instance::Project_AskFile(SString &filename) const
 
 void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
-	auto initialGameName = Game_name;
-	auto initialPortName = Port_name;
-	auto initialIwadName = Iwad_name;
-	auto initialLevelName = Level_name;
-	auto initialUdmfNamespace = Udmf_namespace;
-	auto initialResourceList = Resource_list;
+	auto initialLoaded = loaded;
 
 	try
 	{
 		// grab the new information
-		Game_name = dialog->game;
-		Port_name = dialog->port;
+		loaded.gameName = dialog->game;
+		loaded.portName = dialog->port;
 
-		SYS_ASSERT(!Game_name.empty());
+		SYS_ASSERT(!loaded.gameName.empty());
 
-		Iwad_name = M_QueryKnownIWAD(Game_name);
-		SYS_ASSERT(!Iwad_name.empty());
+		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
+		SYS_ASSERT(!loaded.iwadName.empty());
 
-		Level_format = dialog->map_format;
-		Udmf_namespace = dialog->name_space;
+		loaded.levelFormat = dialog->map_format;
+		loaded.udmfNamespace = dialog->name_space;
 
-		SYS_ASSERT(Level_format != MapFormat::invalid);
+		SYS_ASSERT(loaded.levelFormat != MapFormat::invalid);
 
-		Resource_list.clear();
+		loaded.resourceList.clear();
 
 		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
 		{
 			if (!dialog->res[i].empty())
-				Resource_list.push_back(dialog->res[i]);
+				loaded.resourceList.push_back(dialog->res[i]);
 		}
 
 		Fl::wait(0.1);
@@ -210,13 +205,7 @@ void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 	catch(const ParseException &)
 	{
 		// Restore
-		Game_name = initialGameName;
-		Port_name = initialPortName;
-		Iwad_name = initialPortName;
-		Level_name = initialLevelName;
-		Udmf_namespace = initialUdmfNamespace;
-		Resource_list = initialResourceList;
-
+		loaded = initialLoaded;
 		throw;
 	}
 }
@@ -342,11 +331,11 @@ bool Instance::MissingIWAD_Dialog()
 
 	if (ok)
 	{
-		Game_name = dialog->game;
-		SYS_ASSERT(!Game_name.empty());
+		loaded.gameName = dialog->game;
+		SYS_ASSERT(!loaded.gameName.empty());
 
-		Iwad_name = M_QueryKnownIWAD(Game_name);
-		SYS_ASSERT(!Iwad_name.empty());
+		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
+		SYS_ASSERT(!loaded.iwadName.empty());
 	}
 
 	delete dialog;
@@ -373,9 +362,9 @@ void Instance::CMD_FreshMap()
 		return;
 
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(Level_name[0])), edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad);
 
 	SString map_name = dialog->Run();
 
@@ -979,9 +968,9 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 		}
 	}
 
-	Level_name = level.asUpper();
+	loaded.levelName = level.asUpper();
 
-	Status_Set("Loaded %s", Level_name.c_str());
+	Status_Set("Loaded %s", loaded.levelName.c_str());
 
 	RedrawMap();
 }
@@ -992,7 +981,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 	load_wad = wad;
 	loading_level = lev_num;
 
-	Level_format = load_wad->LevelFormat(loading_level);
+	loaded.levelFormat = load_wad->LevelFormat(loading_level);
 
 	level.basis.clearAll();
 
@@ -1002,13 +991,13 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 
 	LoadHeader();
 
-	if (Level_format == MapFormat::udmf)
+	if (loaded.levelFormat == MapFormat::udmf)
 	{
 		UDMF_LoadLevel();
 	}
 	else
 	{
-		if (Level_format == MapFormat::hexen)
+		if (loaded.levelFormat == MapFormat::hexen)
 			LoadThings_Hexen();
 		else
 			LoadThings();
@@ -1017,7 +1006,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 		LoadSectors();
 		LoadSideDefs();
 
-		if (Level_format == MapFormat::hexen)
+		if (loaded.levelFormat == MapFormat::hexen)
 		{
 			LoadLineDefs_Hexen();
 
@@ -1272,7 +1261,7 @@ void Instance::CMD_FlipMap()
 	Wad_file *wad = edit_wad ? edit_wad : game_wad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
-	int lev_idx = wad->LevelFind(Level_name);
+	int lev_idx = wad->LevelFind(loaded.levelName);
 	int max_idx = wad->LevelCount() - 1;
 
 	if (max_idx < 0)
@@ -1589,7 +1578,7 @@ void Instance::EmptyLump(const char *name) const
 void Instance::SaveLevel(const SString &level)
 {
 	// set global level name now (for debugging code)
-	Level_name = level.asUpper();
+	loaded.levelName = level.asUpper();
 
 	edit_wad->BeginWrite();
 
@@ -1608,14 +1597,14 @@ void Instance::SaveLevel(const SString &level)
 
 	SaveHeader(level);
 
-	if (Level_format == MapFormat::udmf)
+	if (loaded.levelFormat == MapFormat::udmf)
 	{
 		UDMF_SaveLevel();
 	}
 	else
 	{
 		// IOANCH 9/2015: save Hexen format maps
-		if (Level_format == MapFormat::hexen)
+		if (loaded.levelFormat == MapFormat::hexen)
 		{
 			SaveThings_Hexen();
 			SaveLineDefs_Hexen();
@@ -1638,7 +1627,7 @@ void Instance::SaveLevel(const SString &level)
 		EmptyLump("REJECT");
 		EmptyLump("BLOCKMAP");
 
-		if (Level_format == MapFormat::hexen)
+		if (loaded.levelFormat == MapFormat::hexen)
 		{
 			SaveBehavior();
 			SaveScripts();
@@ -1662,13 +1651,13 @@ void Instance::SaveLevel(const SString &level)
 
 	M_WriteEurekaLump(edit_wad);
 
-	M_AddRecent(edit_wad->PathName(), Level_name);
+	M_AddRecent(edit_wad->PathName(), loaded.levelName);
 
-	Status_Set("Saved %s", Level_name.c_str());
+	Status_Set("Saved %s", loaded.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+		main_win->SetTitle(edit_wad->PathName(), loaded.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1703,9 +1692,9 @@ bool Instance::M_SaveMap()
 
 	M_BackupWad(edit_wad);
 
-	gLog.printf("Saving Map : %s in %s\n", Level_name.c_str(), edit_wad->PathName().c_str());
+	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), edit_wad->PathName().c_str());
 
-	SaveLevel(Level_name);
+	SaveLevel(loaded.levelName);
 
 	return true;
 }
@@ -1796,9 +1785,9 @@ bool Instance::M_ExportMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str());
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(Level_name[0])), wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad);
 
 	SString map_name = dialog->Run();
 
@@ -1879,9 +1868,9 @@ void Instance::CMD_CopyMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad);
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad);
 
-	dialog->PopulateButtons(static_cast<char>(toupper(Level_name[0])), edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad);
 
 	SString new_name = dialog->Run();
 
@@ -1893,18 +1882,18 @@ void Instance::CMD_CopyMap()
 
 	// sanity check that the name is different
 	// (should be prevented by the choose-map dialog)
-	if (y_stricmp(new_name.c_str(), Level_name.c_str()) == 0)
+	if (y_stricmp(new_name.c_str(), loaded.levelName.c_str()) == 0)
 	{
 		Beep("Name is same!?!");
 		return;
 	}
 
 	// perform the copy (just a save)
-	gLog.printf("Copying Map : %s --> %s\n", Level_name.c_str(), new_name.c_str());
+	gLog.printf("Copying Map : %s --> %s\n", loaded.levelName.c_str(), new_name.c_str());
 
 	SaveLevel(new_name);
 
-	Status_Set("Copied to %s", Level_name.c_str());
+	Status_Set("Copied to %s", loaded.levelName.c_str());
 }
 
 
@@ -1925,7 +1914,7 @@ void Instance::CMD_RenameMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(Level_name.c_str(), edit_wad /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]
@@ -1953,7 +1942,7 @@ void Instance::CMD_RenameMap()
 
 	// sanity check that the name is different
 	// (should be prevented by the choose-map dialog)
-	if (y_stricmp(new_name.c_str(), Level_name.c_str()) == 0)
+	if (y_stricmp(new_name.c_str(), loaded.levelName.c_str()) == 0)
 	{
 		Beep("Name is same!?!");
 		return;
@@ -1961,7 +1950,7 @@ void Instance::CMD_RenameMap()
 
 
 	// perform the rename
-	int lev_num = edit_wad->LevelFind(Level_name);
+	int lev_num = edit_wad->LevelFind(loaded.levelName);
 
 	if (lev_num >= 0)
 	{
@@ -1972,11 +1961,11 @@ void Instance::CMD_RenameMap()
 		edit_wad->EndWrite();
 	}
 
-	Level_name = new_name.asUpper();
+	loaded.levelName = new_name.asUpper();
 
-	main_win->SetTitle(edit_wad->PathName(), Level_name, false);
+	main_win->SetTitle(edit_wad->PathName(), loaded.levelName, false);
 
-	Status_Set("Renamed to %s", Level_name.c_str());
+	Status_Set("Renamed to %s", loaded.levelName.c_str());
 }
 
 
@@ -2009,9 +1998,9 @@ void Instance::CMD_DeleteMap()
 		return;
 	}
 
-	gLog.printf("Deleting Map : %s...\n", Level_name.c_str());
+	gLog.printf("Deleting Map : %s...\n", loaded.levelName.c_str());
 
-	int lev_num = edit_wad->LevelFind(Level_name);
+	int lev_num = edit_wad->LevelFind(loaded.levelName);
 
 	if (lev_num < 0)
 	{

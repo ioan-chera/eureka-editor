@@ -29,6 +29,7 @@
 
 #include "Errors.h"
 #include "Lump.h"
+#include "main.h"
 
 class Wad_file;
 

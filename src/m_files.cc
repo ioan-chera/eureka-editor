@@ -579,9 +579,9 @@ bool Instance::M_TryOpenMostRecent()
 	/* -- OK -- */
 
 	if (wad->LevelFind(map_name) >= 0)
-		Level_name = map_name;
+		loaded.levelName = map_name;
 	else
-		Level_name.clear();
+		loaded.levelName.clear();
 
 	Pwad_name = filename;
 
@@ -785,7 +785,7 @@ SString Instance::M_PickDefaultIWAD() const
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
 
-	if (!Level_name.empty() && toupper(Level_name[0]) == 'E')
+	if (!loaded.levelName.empty() && toupper(loaded.levelName[0]) == 'E')
 	{
 		default_game = "doom";
 	}
@@ -845,7 +845,7 @@ SString Instance::M_PickDefaultIWAD() const
 static void M_AddResource_Unique(Instance &inst, const SString & filename)
 {
 	// check if base filename (without path) already exists
-	for (const SString &resource : inst.Resource_list)
+	for (const SString &resource : inst.loaded.resourceList)
 	{
 		const char *A = fl_filename_name(filename.c_str());
 		const char *B = fl_filename_name(resource.c_str());
@@ -854,7 +854,7 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 			return;		// found it
 	}
 
-	inst.Resource_list.push_back(filename);
+	inst.loaded.resourceList.push_back(filename);
 }
 
 
@@ -990,18 +990,18 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 
 	if (!new_iwad.empty())
 	{
-		if (! (keep_cmd_line_args && !Iwad_name.empty()))
-			Iwad_name = new_iwad;
+		if (! (keep_cmd_line_args && !loaded.iwadName.empty()))
+			loaded.iwadName = new_iwad;
 	}
 
 	if (!new_port.empty())
 	{
-		if (! (keep_cmd_line_args && !Port_name.empty()))
-			Port_name = new_port;
+		if (! (keep_cmd_line_args && !loaded.portName.empty()))
+			loaded.portName = new_port;
 	}
 
 	if (! keep_cmd_line_args)
-		Resource_list.clear();
+		loaded.resourceList.clear();
 
 	for (const SString &resource : new_resources)
 	{
@@ -1026,13 +1026,13 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 
 	lump->Printf("# Eureka project info\n");
 
-	if (!Game_name.empty())
-		lump->Printf("game %s\n", Game_name.c_str());
+	if (!loaded.gameName.empty())
+		lump->Printf("game %s\n", loaded.gameName.c_str());
 
-	if (!Port_name.empty())
-		lump->Printf("port %s\n", Port_name.c_str());
+	if (!loaded.portName.empty())
+		lump->Printf("port %s\n", loaded.portName.c_str());
 
-	for (const SString &resource : Resource_list)
+	for (const SString &resource : loaded.resourceList)
 	{
 		SString absolute_name = GetAbsolutePath(resource);
 

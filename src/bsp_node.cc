@@ -1172,7 +1172,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 
 	if (fabs(dx) > 32000 || fabs(dy) > 32000)
 	{
-		if (inst.Level_format == MapFormat::udmf)
+		if (inst.loaded.levelFormat == MapFormat::udmf)
 		{
 			// XGL3 nodes are 16.16 fixed point, hence we still need
 			// to reduce the delta.

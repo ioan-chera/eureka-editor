@@ -210,7 +210,7 @@ void sector_info_cache_c::CheckBoom242(const LineDef *L)
 {
 	if (inst.Features.gen_types && (L->type == 242 || L->type == 280))
 	{ /* ok */ }
-	else if (inst.Level_format != MapFormat::doom && L->type == 209)
+	else if (inst.loaded.levelFormat != MapFormat::doom && L->type == 209)
 	{ /* ok */ }
 	else
 		return;
@@ -236,7 +236,7 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 	int sec_tag = L->tag;
 
 	// EDGE style
-	if (inst.Level_format == MapFormat::doom && (inst.Features.extra_floors & 1))
+	if (inst.loaded.levelFormat == MapFormat::doom && (inst.Features.extra_floors & 1))
 	{
 		switch (L->type)
 		{
@@ -256,7 +256,7 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 	}
 
 	// Legacy style
-	if (inst.Level_format == MapFormat::doom && (inst.Features.extra_floors & 2))
+	if (inst.loaded.levelFormat == MapFormat::doom && (inst.Features.extra_floors & 2))
 	{
 		switch (L->type)
 		{
@@ -272,7 +272,7 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 	}
 
 	// ZDoom style
-	if (inst.Level_format != MapFormat::doom && (inst.Features.extra_floors & 4))
+	if (inst.loaded.levelFormat != MapFormat::doom && (inst.Features.extra_floors & 4))
 	{
 		if (L->type != 160)
 			return;
@@ -310,7 +310,7 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 {
 	// EDGE style
-	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 1))
+	if (inst.loaded.levelFormat == MapFormat::doom && (inst.Features.slopes & 1))
 	{
 		switch (L->type)
 		{
@@ -322,7 +322,7 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 	}
 
 	// Eternity style
-	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 2))
+	if (inst.loaded.levelFormat == MapFormat::doom && (inst.Features.slopes & 2))
 	{
 		switch (L->type)
 		{
@@ -339,7 +339,7 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 	}
 
 	// Odamex and ZDoom style
-	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 4))
+	if (inst.loaded.levelFormat == MapFormat::doom && (inst.Features.slopes & 4))
 	{
 		switch (L->type)
 		{
@@ -356,7 +356,7 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 	}
 
 	// ZDoom (in hexen format)
-	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 8))
+	if (inst.loaded.levelFormat != MapFormat::doom && (inst.Features.slopes & 8))
 	{
 		if (L->type == 181)
 			PlaneAlign(L, L->tag, L->arg2);
@@ -366,7 +366,7 @@ void sector_info_cache_c::CheckLineSlope(const LineDef *L)
 void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 {
 	// Eternity style
-	if (inst.Level_format == MapFormat::doom && (inst.Features.slopes & 2))
+	if (inst.loaded.levelFormat == MapFormat::doom && (inst.Features.slopes & 2))
 	{
 		switch (L->type)
 		{
@@ -378,7 +378,7 @@ void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 	}
 
 	// ZDoom (in hexen format)
-	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 8))
+	if (inst.loaded.levelFormat != MapFormat::doom && (inst.Features.slopes & 8))
 	{
 		if (L->type == 118)
 			PlaneCopy(L, L->tag, L->arg2, L->arg3, L->arg4, L->arg5);
@@ -387,7 +387,7 @@ void sector_info_cache_c::CheckPlaneCopy(const LineDef *L)
 
 void sector_info_cache_c::CheckSlopeThing(const Thing *T)
 {
-	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 16))
+	if (inst.loaded.levelFormat != MapFormat::doom && (inst.Features.slopes & 16))
 	{
 		switch (T->type)
 		{
@@ -404,7 +404,7 @@ void sector_info_cache_c::CheckSlopeThing(const Thing *T)
 
 void sector_info_cache_c::CheckSlopeCopyThing(const Thing *T)
 {
-	if (inst.Level_format != MapFormat::doom && (inst.Features.slopes & 16))
+	if (inst.loaded.levelFormat != MapFormat::doom && (inst.Features.slopes & 16))
 	{
 		switch (T->type)
 		{

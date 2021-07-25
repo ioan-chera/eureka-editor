@@ -29,6 +29,20 @@
 
 #include "w_wad.h"
 
+//
+// Background loading data for Main_LoadResources
+//
+struct LoadingData
+{
+	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
+	SString portName;	// Name of source port "vanilla", "boom", ...
+	SString iwadName;	// Filename of the iwad
+	SString levelName;	// Name of map lump we are editing
+	SString udmfNamespace;	// for UDMF, the current namespace
+	std::vector<SString> resourceList;
+	MapFormat levelFormat = {};	// format of current map
+};
+
 void OpenFileMap(const SString &filename, const SString &map_name = "");
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */

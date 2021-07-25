@@ -448,7 +448,7 @@ void Instance::CMD_BuildAllNodes()
 
 
 	// remember current level
-	SString CurLevel(Level_name);
+	SString CurLevel(loaded.levelName);
 
 	// reset various editor state
 	Editor_ClearAction();

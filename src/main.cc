@@ -376,45 +376,45 @@ static bool DetermineIWAD(Instance &inst)
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (!inst.Iwad_name.empty() && FilenameIsBare(inst.Iwad_name))
+	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		inst.Iwad_name = inst.Iwad_name.asLower();
+		inst.loaded.iwadName = inst.loaded.iwadName.asLower();
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, inst.Iwad_name))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.Iwad_name.c_str());
+		if (! M_CanLoadDefinitions(GAMES_DIR, inst.loaded.iwadName))
+			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
 
-		SString path = M_QueryKnownIWAD(inst.Iwad_name);
+		SString path = M_QueryKnownIWAD(inst.loaded.iwadName);
 
 		if (path.empty())
-			ThrowException("Cannot find IWAD for game '%s'\n", inst.Iwad_name.c_str());
+			ThrowException("Cannot find IWAD for game '%s'\n", inst.loaded.iwadName.c_str());
 
-		inst.Iwad_name = path;
+		inst.loaded.iwadName = path;
 	}
-	else if (!inst.Iwad_name.empty())
+	else if (!inst.loaded.iwadName.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(inst.Iwad_name))
-			inst.Iwad_name = ReplaceExtension(inst.Iwad_name, "wad");
+		if (! HasExtension(inst.loaded.iwadName))
+			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
-		if (! Wad_file::Validate(inst.Iwad_name))
-			FatalError("IWAD does not exist or is invalid: %s\n", inst.Iwad_name.c_str());
+		if (! Wad_file::Validate(inst.loaded.iwadName))
+			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.c_str());
 
-		SString game = GameNameFromIWAD(inst.Iwad_name);
+		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.Iwad_name.c_str());
+			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
 
-		M_AddKnownIWAD(inst.Iwad_name);
+		M_AddKnownIWAD(inst.loaded.iwadName);
 		M_SaveRecent();
 	}
 	else
 	{
-		inst.Iwad_name = inst.M_PickDefaultIWAD();
+		inst.loaded.iwadName = inst.M_PickDefaultIWAD();
 
-		if (inst.Iwad_name.empty())
+		if (inst.loaded.iwadName.empty())
 		{
 			// show the "Missing IWAD!" dialog.
 			// if user cancels it, we have no choice but to quit.
@@ -423,7 +423,7 @@ static bool DetermineIWAD(Instance &inst)
 		}
 	}
 
-	inst.Game_name = GameNameFromIWAD(inst.Iwad_name);
+	inst.loaded.gameName = GameNameFromIWAD(inst.loaded.iwadName);
 
 	return true;
 }
@@ -433,16 +433,16 @@ static void DeterminePort(Instance &inst)
 {
 	// user supplied value?
 	// NOTE: values from the EUREKA_LUMP are already verified.
-	if (!inst.Port_name.empty())
+	if (!inst.loaded.portName.empty())
 	{
-		if (! M_CanLoadDefinitions(PORTS_DIR, inst.Port_name))
+		if (! M_CanLoadDefinitions(PORTS_DIR, inst.loaded.portName))
 			ThrowException("Unknown port '%s' (no definition file)\n",
-						   inst.Port_name.c_str());
+						   inst.loaded.portName.c_str());
 
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(inst, inst.Game_name);
+	SString base_game = M_GetBaseGame(inst, inst.loaded.gameName);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -459,11 +459,11 @@ static void DeterminePort(Instance &inst)
 	else if (! M_CheckPortSupportsGame(inst, base_game, config::default_port))
 	{
 		gLog.printf("WARNING: Default port '%s' not compatible with '%s'\n",
-				  config::default_port.c_str(), inst.Game_name.c_str());
+				  config::default_port.c_str(), inst.loaded.gameName.c_str());
 		config::default_port = "vanilla";
 	}
 
-	inst.Port_name = config::default_port;
+	inst.loaded.portName = config::default_port;
 }
 
 
@@ -477,12 +477,12 @@ static SString DetermineLevel(const Instance &inst)
 
 	int level_number = 0;
 
-	if (!inst.Level_name.empty())
+	if (!inst.loaded.levelName.empty())
 	{
-		if (! isdigit(inst.Level_name[0]))
-			return inst.Level_name.asUpper();
+		if (! isdigit(inst.loaded.levelName[0]))
+			return inst.loaded.levelName.asUpper();
 
-		level_number = atoi(inst.Level_name);
+		level_number = atoi(inst.loaded.levelName);
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
@@ -840,10 +840,10 @@ bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	Wad_file *wad = Wad_file::Open(Iwad_name, WadOpenMode::read);
+	Wad_file *wad = Wad_file::Open(loaded.iwadName, WadOpenMode::read);
 	if (!wad)
 	{
-		gLog.printf("Failed to open game IWAD: %s\n", Iwad_name.c_str());
+		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
 		return false;
 	}
 	game_wad = wad;
@@ -855,12 +855,12 @@ bool Instance::Main_LoadIWAD()
 
 void Instance::ReadGameInfo() noexcept(false)
 {
-	Game_name = GameNameFromIWAD(Iwad_name);
+	loaded.gameName = GameNameFromIWAD(loaded.iwadName);
 
-	gLog.printf("Game name: '%s'\n", Game_name.c_str());
-	gLog.printf("IWAD file: '%s'\n", Iwad_name.c_str());
+	gLog.printf("Game name: '%s'\n", loaded.gameName.c_str());
+	gLog.printf("IWAD file: '%s'\n", loaded.iwadName.c_str());
 
-	M_LoadDefinitions("games", Game_name);
+	M_LoadDefinitions("games", loaded.gameName);
 }
 
 
@@ -870,15 +870,15 @@ void Instance::ReadPortInfo() noexcept(false)
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(!Port_name.empty());
+	SYS_ASSERT(!loaded.portName.empty());
 
-	SString base_game = M_GetBaseGame(*this, Game_name);
+	SString base_game = M_GetBaseGame(*this, loaded.gameName);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(*this, base_game, Port_name))
+	if (! M_CheckPortSupportsGame(*this, base_game, loaded.portName))
 	{
 		gLog.printf("WARNING: the port '%s' is not compatible with the game "
-					"'%s'\n", Port_name.c_str(), Game_name.c_str());
+					"'%s'\n", loaded.portName.c_str(), loaded.gameName.c_str());
 
 		int res = DLG_Confirm({ "&vanilla", "No Change" },
 							  "Warning: the given port '%s' is not compatible "
@@ -888,17 +888,17 @@ void Instance::ReadPortInfo() noexcept(false)
 							  "types, it is recommended to reset the port to "
 							  "something valid.\n"
 							  "Select a new port now?",
-							  Port_name.c_str(), Game_name.c_str());
+							  loaded.portName.c_str(), loaded.gameName.c_str());
 
 		if (res == 0)
 		{
-			Port_name = "vanilla";
+			loaded.portName = "vanilla";
 		}
 	}
 
-	gLog.printf("Port name: '%s'\n", Port_name.c_str());
+	gLog.printf("Port name: '%s'\n", loaded.portName.c_str());
 
-	M_LoadDefinitions("ports", Port_name);
+	M_LoadDefinitions("ports", loaded.portName);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (Features.strife_flags)
@@ -941,7 +941,7 @@ void Instance::Main_LoadResources()
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (const SString &resource : Resource_list)
+	for (const SString &resource : loaded.resourceList)
 	{
 		try
 		{
@@ -1144,7 +1144,7 @@ int main(int argc, char *argv[])
 			gInstance.MasterDir_Add(gInstance.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
-		else if (config::auto_load_recent && ! (!gInstance.Iwad_name.empty() || !gInstance.Level_name.empty()))
+		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
@@ -1185,12 +1185,12 @@ int main(int argc, char *argv[])
 
 		// load the initial level
 		// TODO: first instance
-		gInstance.Level_name = DetermineLevel(gInstance);
+		gInstance.loaded.levelName = DetermineLevel(gInstance);
 
-		gLog.printf("Loading initial map : %s\n", gInstance.Level_name.c_str());
+		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.Level_name);
+		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

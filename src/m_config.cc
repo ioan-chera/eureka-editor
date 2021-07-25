@@ -188,7 +188,7 @@ static const opt_desc_t options[] =
 		0,
 		"Resource file(s) to load",
 		"<file>...",
-		&gInstance.Resource_list
+		&gInstance.loaded.resourceList
 	},
 
 	{	"iwad",
@@ -197,7 +197,7 @@ static const opt_desc_t options[] =
 		0,
 		"The name of the IWAD (game data)",
 		"<file>",
-		&gInstance.Iwad_name	// TODO: same deal
+		&gInstance.loaded.iwadName	// TODO: same deal
 	},
 
 	{	"port",
@@ -206,7 +206,7 @@ static const opt_desc_t options[] =
 		0,
 		"Port (engine) name",
 		"<name>",
-		&gInstance.Port_name	// TODO: same deal
+		&gInstance.loaded.portName	// TODO: same deal
 	},
 
 	{	"warp",
@@ -215,7 +215,7 @@ static const opt_desc_t options[] =
 		OptFlag_warp | OptFlag_helpNewline,
 		"Select level to edit",
 		"<map>",
-		&gInstance.Level_name	// TODO: this will need to work only for first instance
+		&gInstance.loaded.levelName	// TODO: this will need to work only for first instance
 	},
 
 	{	"udmftest",

@@ -241,33 +241,33 @@ static SString CalcEXEName(const port_path_info_t *info)
 
 static SString CalcWarpString(const Instance &inst)
 {
-	SYS_ASSERT(!inst.Level_name.empty());
+	SYS_ASSERT(!inst.loaded.levelName.empty());
 	// FIXME : EDGE allows a full name: -warp MAP03
 	//         Eternity too.
 	//         ZDOOM too, but different syntax: +map MAP03
 
 	// most common syntax is "MAP##" or "MAP###"
-	if(inst.Level_name.length() >= 4 && inst.Level_name.noCaseStartsWith("MAP") && isdigit(inst.Level_name[3]))
+	if(inst.loaded.levelName.length() >= 4 && inst.loaded.levelName.noCaseStartsWith("MAP") && isdigit(inst.loaded.levelName[3]))
 	{
-		long number = strtol(inst.Level_name.c_str() + 3, nullptr, 10);
+		long number = strtol(inst.loaded.levelName.c_str() + 3, nullptr, 10);
 		return SString::printf("-warp %ld", number);
 	}
 
 	// detect "E#M#" syntax of Ultimate-Doom and Heretic, which need
 	// a pair of numbers after -warp
-	if(inst.Level_name.length() >= 4 && !isdigit(inst.Level_name[0]) && isdigit(inst.Level_name[1]) &&
-	   !isdigit(inst.Level_name[2]) && isdigit(inst.Level_name[3]))
+	if(inst.loaded.levelName.length() >= 4 && !isdigit(inst.loaded.levelName[0]) && isdigit(inst.loaded.levelName[1]) &&
+	   !isdigit(inst.loaded.levelName[2]) && isdigit(inst.loaded.levelName[3]))
 	{
-		return SString::printf("-warp %c %s", inst.Level_name[1], inst.Level_name.c_str() + 3);
+		return SString::printf("-warp %c %s", inst.loaded.levelName[1], inst.loaded.levelName.c_str() + 3);
 	}
 
 	// map name is non-standard, find the first digit group and hope
 	// for the best...
 
-	size_t digitPos = inst.Level_name.findDigit();
+	size_t digitPos = inst.loaded.levelName.findDigit();
 	if(digitPos != std::string::npos)
 	{
-		return SString("-warp ") + (inst.Level_name.c_str() + digitPos);
+		return SString("-warp ") + (inst.loaded.levelName.c_str() + digitPos);
 	}
 
 	// no digits at all, oh shit!
@@ -301,7 +301,7 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 	// see if we should use the "-merge" parameter, which is
 	// required for Chocolate-Doom and derivates like Crispy Doom.
 	// TODO : is there a better way to do this?
-	if (inst.Port_name.noCaseEqual("vanilla"))
+	if (inst.loaded.portName.noCaseEqual("vanilla"))
 	{
 		use_merge = 1;
 	}
@@ -349,14 +349,15 @@ void Instance::CMD_TestMap()
 
 
 	// check if we know the executable path, if not then ask
-	port_path_info_t *info = M_QueryPortPath(QueryName(Port_name, Game_name));
+	port_path_info_t *info = M_QueryPortPath(QueryName(loaded.portName,
+													   loaded.gameName));
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(Port_name, Game_name))
+		if (! M_PortSetupDialog(loaded.portName, loaded.gameName))
 			return;
 
-		info = M_QueryPortPath(QueryName(Port_name, Game_name));
+		info = M_QueryPortPath(QueryName(loaded.portName, loaded.gameName));
 	}
 
 	// this generally can't happen, but we check anyway...

@@ -825,7 +825,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString prev_game = game;
 
 	if (prev_game.empty())
-		prev_game = inst.Game_name;
+		prev_game = inst.loaded.gameName;
 	if (prev_game.empty())
 		prev_game = "doom2";
 
@@ -862,7 +862,7 @@ void UI_ProjectSetup::PopulatePort()
 		prev_port = port_choice->mvalue()->text;
 
 	if (prev_port.empty())
-		prev_port = inst.Port_name;
+		prev_port = inst.loaded.portName;
 	if (!prev_port.empty())
 		prev_port = "vanilla";
 
@@ -880,8 +880,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (game_choice->mvalue())
 		base_game = M_GetBaseGame(inst, game_choice->mvalue()->text);
-	else if (!inst.Game_name.empty())
-		base_game = M_GetBaseGame(inst, inst.Game_name);
+	else if (!inst.loaded.gameName.empty())
+		base_game = M_GetBaseGame(inst, inst.loaded.gameName);
 
 	if (base_game.empty())
 		base_game = "doom2";
@@ -906,7 +906,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	MapFormat prev_fmt = map_format;
 
 	if (prev_fmt == MapFormat::invalid)
-		prev_fmt = inst.Level_format;
+		prev_fmt = inst.loaded.levelFormat;
 
 
 	format_choice->clear();
@@ -1043,9 +1043,9 @@ void UI_ProjectSetup::PopulateResources()
 		if (! res_name[r])
 			continue;
 
-		if (r < (int)inst.Resource_list.size())
+		if (r < (int)inst.loaded.resourceList.size())
 		{
-			res[r] = inst.Resource_list[r];
+			res[r] = inst.loaded.resourceList[r];
 
 			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}

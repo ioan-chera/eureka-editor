@@ -336,7 +336,7 @@ static void UDMF_ParseGlobalVar(Instance &inst, Udmf_Parser& parser, Udmf_Token&
 		// TODO : check if namespace is supported by current port
 		//        [ if not, show a dialog with some options ]
 
-		inst.Udmf_namespace = value.DecodeString();
+		inst.loaded.udmfNamespace = value.DecodeString();
 	}
 	else if (name.Match("ee_compat"))
 	{
@@ -703,7 +703,7 @@ static inline void WrFlag(Lump_c *lump, int flags, const char *name, int mask)
 
 static void UDMF_WriteInfo(const Instance &inst, Lump_c *lump)
 {
-	lump->Printf("namespace = \"%s\";\n\n", inst.Udmf_namespace.c_str());
+	lump->Printf("namespace = \"%s\";\n\n", inst.loaded.udmfNamespace.c_str());
 }
 
 static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)

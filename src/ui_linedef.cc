@@ -766,7 +766,7 @@ void UI_LineBox::UpdateField(int field)
 
 			const linetype_t &info = inst.M_GetLineType(L->type);
 
-			if (inst.Level_format != MapFormat::doom)
+			if (inst.loaded.levelFormat != MapFormat::doom)
 			{
 				for (int a = 0 ; a < 5 ; a++)
 				{
@@ -892,7 +892,7 @@ void UI_LineBox::CalcLength()
 void UI_LineBox::FlagsFromInt(int lineflags)
 {
 	// compute activation
-	if (inst.Level_format != MapFormat::doom)
+	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		int new_act = (lineflags & MLF_Activation) >> 9;
 
@@ -948,7 +948,7 @@ int UI_LineBox::CalcFlags() const
 	if (f_mons->value())  lineflags |= MLF_BlockMonsters;
 	if (f_sound->value()) lineflags |= MLF_SoundBlock;
 
-	if (inst.Level_format != MapFormat::doom)
+	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		int actval = actkind->value();
 		if (actval >= 12) actval = 0;
@@ -1024,7 +1024,7 @@ void UI_LineBox::UpdateGameInfo()
 {
 	choose->label("Choose");
 
-	if (inst.Level_format != MapFormat::doom)
+	if (inst.loaded.levelFormat != MapFormat::doom)
 	{
 		tag->hide();
 		length->hide();
@@ -1077,7 +1077,7 @@ void UI_LineBox::UpdateGameInfo()
 
 	for (int a = 0 ; a < 5 ; a++)
 	{
-		if (inst.Level_format != MapFormat::doom)
+		if (inst.loaded.levelFormat != MapFormat::doom)
 			args[a]->show();
 		else
 			args[a]->hide();
