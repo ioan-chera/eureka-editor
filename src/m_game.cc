@@ -1110,11 +1110,12 @@ static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(inst, ParsePurpose::gameInfo, &loadingGame, filename,
-						  "games", nullptr);
+	M_ParseDefinitionFile(inst, ParsePurpose::gameInfo, &loadingGame,
+						  filename, "games", nullptr);
 	if(loadingGame.baseGame.empty())
-		ThrowException("Game definition for '%s' does not set base_game\n",
-					   game.c_str());
+		throw ParseException(SString::printf("Game definition for '%s' does "
+											 "not set base_game\n",
+											 game.c_str()));
 
 	global::sLoadedGameDefs[game] = loadingGame;
 	return loadingGame;

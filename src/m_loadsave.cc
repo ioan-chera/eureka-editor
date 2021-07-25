@@ -170,34 +170,55 @@ bool Instance::Project_AskFile(SString &filename) const
 
 void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
-	// grab the new information
+	auto initialGameName = Game_name;
+	auto initialPortName = Port_name;
+	auto initialIwadName = Iwad_name;
+	auto initialLevelName = Level_name;
+	auto initialUdmfNamespace = Udmf_namespace;
+	auto initialResourceList = Resource_list;
 
-	Game_name = dialog->game;
-	Port_name = dialog->port;
-
-	SYS_ASSERT(!Game_name.empty());
-
-	Iwad_name = M_QueryKnownIWAD(Game_name);
-	SYS_ASSERT(!Iwad_name.empty());
-
-	Level_format = dialog->map_format;
-	Udmf_namespace = dialog->name_space;
-
-	SYS_ASSERT(Level_format != MapFormat::invalid);
-
-	Resource_list.clear();
-
-	for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
+	try
 	{
-		if (!dialog->res[i].empty())
-			Resource_list.push_back(dialog->res[i]);
+		// grab the new information
+		Game_name = dialog->game;
+		Port_name = dialog->port;
+
+		SYS_ASSERT(!Game_name.empty());
+
+		Iwad_name = M_QueryKnownIWAD(Game_name);
+		SYS_ASSERT(!Iwad_name.empty());
+
+		Level_format = dialog->map_format;
+		Udmf_namespace = dialog->name_space;
+
+		SYS_ASSERT(Level_format != MapFormat::invalid);
+
+		Resource_list.clear();
+
+		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
+		{
+			if (!dialog->res[i].empty())
+				Resource_list.push_back(dialog->res[i]);
+		}
+
+		Fl::wait(0.1);
+
+		Main_LoadResources();
+
+		Fl::wait(0.1);
 	}
+	catch(const ParseException &)
+	{
+		// Restore
+		Game_name = initialGameName;
+		Port_name = initialPortName;
+		Iwad_name = initialPortName;
+		Level_name = initialLevelName;
+		Udmf_namespace = initialUdmfNamespace;
+		Resource_list = initialResourceList;
 
-	Fl::wait(0.1);
-
-	Main_LoadResources();
-
-	Fl::wait(0.1);
+		throw;
+	}
 }
 
 
@@ -209,7 +230,15 @@ void Instance::CMD_ManageProject()
 
 	if (ok)
 	{
-		Project_ApplyChanges(dialog);
+		try
+		{
+			Project_ApplyChanges(dialog);
+		}
+		catch(const ParseException &e)
+		{
+			DLG_ShowError("Error reading configuration file: %s",
+						  e.std::exception::what());
+		}
 	}
 
 	delete dialog;
