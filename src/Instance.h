@@ -333,7 +333,7 @@ public:
 	char M_GetTextureType(const SString &name) const;
 	const thingtype_t &M_GetThingType(int type) const;
 	SString M_LineCategoryString(SString &letters) const;
-	void M_PrepareConfigVariables();
+	void M_PrepareConfigVariables(const LoadingData &loading);
 	SString M_TextureCategoryString(SString &letters, bool do_flats) const;
 	SString M_ThingCategoryString(SString &letters) const;
 
@@ -371,7 +371,7 @@ public:
 	bool Main_ConfirmQuit(const char *action) const;
 	SString Main_FileOpFolder() const;
 	bool Main_LoadIWAD();
-	void Main_LoadResources();
+	void Main_LoadResources(const LoadingData &loading);
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;

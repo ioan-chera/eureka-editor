@@ -179,7 +179,7 @@ void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 
 		Fl::wait(0.1);
 
-		Main_LoadResources();
+		Main_LoadResources(loaded);
 
 		Fl::wait(0.1);
 	}
@@ -1100,7 +1100,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
-	gInstance.Main_LoadResources();
+	gInstance.Main_LoadResources(gInstance.loaded);
 }
 
 
@@ -1173,7 +1173,7 @@ void Instance::CMD_OpenMap()
 		// this can invalidate the 'wad' var (since it closes/reopens
 		// all wads in the master_dir), so it MUST be after LoadLevel.
 		// less importantly, we need to know the Level_format.
-		Main_LoadResources();
+		Main_LoadResources(loaded);
 	}
 }
 
@@ -1811,7 +1811,7 @@ bool Instance::M_ExportMap()
 	SaveLevel(map_name);
 
 	// do this after the save (in case it fatal errors)
-	Main_LoadResources();
+	Main_LoadResources(loaded);
 
 	return true;
 }

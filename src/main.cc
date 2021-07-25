@@ -915,7 +915,7 @@ void Instance::ReadPortInfo() noexcept(false)
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources()
+void Instance::Main_LoadResources(const LoadingData &loading)
 {
 	if(edit.Selected)
 		edit.Selected->clear_all();
@@ -926,7 +926,7 @@ void Instance::Main_LoadResources()
 	M_ClearAllDefinitions();
 
 	// clear the parse variables, pre-set a few vars
-	M_PrepareConfigVariables();
+	M_PrepareConfigVariables(loading);
 
 	ReadGameInfo();
 	ReadPortInfo();
@@ -1194,7 +1194,7 @@ int main(int argc, char *argv[])
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
-		gInstance.Main_LoadResources();	// TODO: instance management
+		gInstance.Main_LoadResources(gInstance.loaded);	// TODO: instance management
 
 
 		Main_Loop();
