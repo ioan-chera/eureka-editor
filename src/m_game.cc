@@ -874,15 +874,12 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 	int    nargs = pst->argc - 1;
 
 	if (y_stricmp(argv[0], "base_game") == 0)
-	{
-		ThrowException("%s(%d): %s can only be used in game definitions\n",
-					   pst->file(), pst->line(), argv[0]);
-	}
+		pst->fail("%s can only be used in game definitions", argv[0]);
 
 	if (y_stricmp(argv[0], "supported_games") == 0)
 	{
 		if (nargs < 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
 			global::loading_Port->AddSupportedGame(SString(*argv).asLower());
@@ -890,14 +887,14 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		global::loading_Port->formats = ParseMapFormats(argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
 		if (nargs != 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		// want to preserve the case here
 		global::loading_Port->udmf_namespace = argv[1];
