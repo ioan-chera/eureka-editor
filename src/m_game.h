@@ -226,7 +226,9 @@ public:
 	SString udmf_namespace;
 
 public:
-	PortInfo_c(SString _name) : name(_name)
+	PortInfo_c() = default;
+
+	explicit PortInfo_c(SString _name) : name(_name)
 	{
 	}
 
@@ -310,7 +312,7 @@ void M_ParseDefinitionFile(Instance &inst,
 						   const SString &prettyname = NULL,
                            int include_level = 0);
 
-PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port);
+const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 

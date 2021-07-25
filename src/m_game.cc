@@ -34,11 +34,11 @@ namespace global
 {
 	// all the game and port definitions and previously loaded
 	static std::unordered_map<SString, GameInfo> sLoadedGameDefs;
-	static std::map<SString, PortInfo_c *> loaded_port_defs;
+	static std::map<SString, PortInfo_c> loaded_port_defs;
 
 	// the information being loaded for PURPOSE_GameInfo / PortInfo
 	// TODO : move into parser_state_c
-	static PortInfo_c *loading_Port;
+	static PortInfo_c loading_Port;
 }
 
 void PortInfo_c::AddSupportedGame(const SString &game)
@@ -882,14 +882,14 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-			global::loading_Port->AddSupportedGame(SString(*argv).asLower());
+			global::loading_Port.AddSupportedGame(SString(*argv).asLower());
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		global::loading_Port->formats = ParseMapFormats(argv + 1, nargs);
+		global::loading_Port.formats = ParseMapFormats(argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
@@ -897,7 +897,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		// want to preserve the case here
-		global::loading_Port->udmf_namespace = argv[1];
+		global::loading_Port.udmf_namespace = argv[1];
 	}
 }
 
@@ -1122,32 +1122,32 @@ static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 }
 
 
-PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
+const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 {
-	std::map<SString, PortInfo_c *>::iterator IT;
+	std::map<SString, PortInfo_c>::iterator IT;
 	IT = global::loaded_port_defs.find(port);
 
 	if (IT != global::loaded_port_defs.end())
-		return IT->second;
+		return &IT->second;
 
 	SString filename = FindDefinitionFile(PORTS_DIR, port);
 	if (filename.empty())
 		return NULL;
 
-	global::loading_Port = new PortInfo_c(port);
+	global::loading_Port = PortInfo_c(port);
 
 	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, nullptr, filename, "ports",
 						  NULL);
 
 	// default is to support both Doom and Doom2
-	if (global::loading_Port->supported_games.empty())
+	if (global::loading_Port.supported_games.empty())
 	{
-		global::loading_Port->supported_games.push_back("doom");
-		global::loading_Port->supported_games.push_back("doom2");
+		global::loading_Port.supported_games.push_back("doom");
+		global::loading_Port.supported_games.push_back("doom2");
 	}
 
 	global::loaded_port_defs[port] = global::loading_Port;
-	return global::loading_Port;
+	return &global::loaded_port_defs[port];
 }
 
 
@@ -1213,7 +1213,7 @@ SString M_GetBaseGame(Instance &inst, const SString &game)
 map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 										  const char *port)
 {
-	PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
+	const PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
 	if (pinfo && pinfo->formats != 0)
 		return pinfo->formats;
 
@@ -1235,7 +1235,7 @@ bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
 		return true;
 	}
 
-	PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
+	const PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
 	if (! pinfo)
 		return false;
 
