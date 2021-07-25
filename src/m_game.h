@@ -304,7 +304,7 @@ public:
 
 void M_ParseDefinitionFile(Instance &inst,
 						   ParsePurpose purpose,
-						   void *purposeTarget,
+						   GameInfo *purposeTarget,
 						   const SString &filename,
 						   const SString &folder = NULL,
 						   const SString &prettyname = NULL,

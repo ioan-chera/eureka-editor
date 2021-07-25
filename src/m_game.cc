@@ -968,7 +968,7 @@ static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 //
 void M_ParseDefinitionFile(Instance &inst,
 						   const ParsePurpose purpose,
-						   void *const target,
+						   GameInfo *const target,
 						   const SString &filename,
 						   const SString &cfolder,
 						   const SString &cprettyname,
@@ -1081,7 +1081,7 @@ void M_ParseDefinitionFile(Instance &inst,
 
 		if (purpose == ParsePurpose::gameInfo)
 		{
-			M_ParseGameInfoLine(pst, *static_cast<GameInfo *>(target));
+			M_ParseGameInfoLine(pst, *target);
 			continue;
 		}
 		if (purpose == ParsePurpose::portInfo)
