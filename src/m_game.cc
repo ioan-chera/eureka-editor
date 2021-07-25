@@ -868,7 +868,7 @@ static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 }
 
 
-static void M_ParsePortInfoLine(parser_state_c *pst)
+static void M_ParsePortInfoLine(parser_state_c *pst, PortInfo_c &port)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -882,14 +882,14 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		for (argv++ ; nargs > 0 ; argv++, nargs--)
-			global::loading_Port.AddSupportedGame(SString(*argv).asLower());
+			port.AddSupportedGame(SString(*argv).asLower());
 	}
 	else if (y_stricmp(argv[0], "map_formats") == 0)
 	{
 		if (nargs < 1)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		global::loading_Port.formats = ParseMapFormats(argv + 1, nargs);
+		port.formats = ParseMapFormats(argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
@@ -897,7 +897,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		// want to preserve the case here
-		global::loading_Port.udmf_namespace = argv[1];
+		port.udmf_namespace = argv[1];
 	}
 }
 
@@ -1083,7 +1083,7 @@ void M_ParseDefinitionFile(Instance &inst,
 		}
 		if (purpose == ParsePurpose::portInfo)
 		{
-			M_ParsePortInfoLine(pst);
+			M_ParsePortInfoLine(pst, *target.port);
 			continue;
 		}
 
@@ -1136,8 +1136,8 @@ const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 
 	global::loading_Port = PortInfo_c(port);
 
-	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, {}, filename, "ports",
-						  NULL);
+	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, &global::loading_Port,
+						  filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port.supported_games.empty())
