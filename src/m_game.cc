@@ -854,14 +854,13 @@ static void M_ParseGameInfoLine(parser_state_c *pst, GameInfo &loadingGame)
 		y_stricmp(argv[0], "supported_games") == 0 ||
 		y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
-		ThrowException("%s(%d): %s can only be used in port definitions\n",
-					   pst->file(), pst->line(), argv[0]);
+		pst->fail("%s can only be used in port definitions", argv[0]);
 	}
 
 	if (y_stricmp(argv[0], "base_game") == 0)
 	{
 		if (nargs < 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		loadingGame.baseGame = SString(argv[1]).asLower();
 	}
