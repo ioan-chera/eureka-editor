@@ -168,7 +168,7 @@ void Main_Quit();
 
 [[noreturn]] void FatalError(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(1, 2);
 
-void DLG_ShowError(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
+void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 int  DLG_Confirm(const std::vector<SString> &buttons, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 

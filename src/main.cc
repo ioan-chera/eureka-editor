@@ -167,7 +167,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	{
 		RemoveSingleNewlines(buffer);
 
-		DLG_ShowError("%s", buffer.c_str());
+		DLG_ShowError(true, "%s", buffer.c_str());
 
 		init_progress = ProgressStatus::early;
 	}
