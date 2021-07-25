@@ -968,7 +968,7 @@ static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 //
 void M_ParseDefinitionFile(Instance &inst,
 						   const ParsePurpose purpose,
-						   void *target,
+						   void *const target,
 						   const SString &filename,
 						   const SString &cfolder,
 						   const SString &cprettyname,
