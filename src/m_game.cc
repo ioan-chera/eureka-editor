@@ -451,7 +451,10 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 	SString filename = FindDefinitionFile(folder, name);
 
 	if (filename.empty())
-		ThrowException("Cannot find definition file: %s\n", prettyname.c_str());
+	{
+		throw ParseException(SString::printf("Cannot find definition file: %s",
+											 prettyname.c_str()));
+	}
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 

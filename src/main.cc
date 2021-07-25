@@ -853,14 +853,14 @@ bool Instance::Main_LoadIWAD()
 }
 
 
-void Instance::ReadGameInfo() noexcept(false)
+void Instance::ReadGameInfo(LoadingData &loading) noexcept(false)
 {
-	loaded.gameName = GameNameFromIWAD(loaded.iwadName);
+	loading.gameName = GameNameFromIWAD(loading.iwadName);
 
-	gLog.printf("Game name: '%s'\n", loaded.gameName.c_str());
-	gLog.printf("IWAD file: '%s'\n", loaded.iwadName.c_str());
+	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
+	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());
 
-	M_LoadDefinitions("games", loaded.gameName);
+	M_LoadDefinitions("games", loading.gameName);
 }
 
 
@@ -915,20 +915,22 @@ void Instance::ReadPortInfo() noexcept(false)
 // open all wads in the master directory.
 // read important content from the wads (palette, textures, etc).
 //
-void Instance::Main_LoadResources(const LoadingData &loading)
+void Instance::Main_LoadResources(LoadingData &loading)
 {
+	// FIXME: avoid doing this in case of error
 	if(edit.Selected)
 		edit.Selected->clear_all();
 
 	gLog.printf("\n");
 	gLog.printf("----- Loading Resources -----\n");
 
+	// TODO: postpone this until we pass loading
 	M_ClearAllDefinitions();
 
 	// clear the parse variables, pre-set a few vars
 	M_PrepareConfigVariables(loading);
 
-	ReadGameInfo();
+	ReadGameInfo(loading);
 	ReadPortInfo();
 
 	// reset the master directory

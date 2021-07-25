@@ -371,7 +371,7 @@ public:
 	bool Main_ConfirmQuit(const char *action) const;
 	SString Main_FileOpFolder() const;
 	bool Main_LoadIWAD();
-	void Main_LoadResources(const LoadingData &loading);
+	void Main_LoadResources(LoadingData &loading);
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
@@ -522,7 +522,7 @@ private:
 	void LoadResourceFile(const SString& filename);
 	void M_LoadDefinitions(const SString &folder, const SString &name)
 			noexcept(false);
-	void ReadGameInfo() noexcept(false);
+	void ReadGameInfo(LoadingData &loading) noexcept(false);
 	void ReadPortInfo() noexcept(false);
 
 	// R_GRID
