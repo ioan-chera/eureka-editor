@@ -478,10 +478,6 @@ void parser_state_c::fail(EUR_FORMAT_STRING(const char *format), ...) const
 	throw ParseException(prefix + ss);
 }
 
-
-static const char *const bad_arg_count =
-		"%s(%d): directive \"%s\" takes %d parameters\n";
-
 static const char *const bad_arg_count_fail = "directive \"%s\" takes %d parameters";
 
 
@@ -569,7 +565,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	if (y_stricmp(argv[0], "player_size") == 0)
 	{
 		if (nargs != 3)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		inst.Misc_info.player_r    = atoi(argv[1]);
 		inst.Misc_info.player_h    = atoi(argv[2]);
@@ -578,35 +574,35 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "sky_color") == 0)  // back compat
 	{
 		if (nargs != 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		inst.Misc_info.sky_color = atoi(argv[1]);
 	}
 	else if (y_stricmp(argv[0], "sky_flat") == 0)
 	{
 		if (nargs != 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		inst.Misc_info.sky_flat = argv[1];
 	}
 	else if (y_stricmp(argv[0], "color") == 0)
 	{
 		if (nargs < 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		ParseColorDef(inst, pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "feature") == 0)
 	{
 		if (nargs < 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		ParseFeatureDef(inst, pst->argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "default_textures") == 0)
 	{
 		if (nargs != 3)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 3);
+			pst->fail(bad_arg_count_fail, argv[0], 3);
 
 		inst.default_wall_tex	= argv[1];
 		inst.default_floor_tex	= argv[2];
@@ -615,7 +611,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "default_thing") == 0)
 	{
 		if (nargs != 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 1);
+			pst->fail(bad_arg_count_fail, argv[0], 1);
 
 		inst.default_thing = atoi(argv[1]);
 	}
@@ -623,7 +619,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 			 y_stricmp(argv[0], "spec_group") == 0)
 	{
 		if (nargs != 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		linegroup_t lg = {};
 
@@ -637,7 +633,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 			 y_stricmp(argv[0], "special") == 0)
 	{
 		if (nargs < 3)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 3);
+			pst->fail(bad_arg_count_fail, argv[0], 3);
 
 		linetype_t info = {};
 
@@ -665,7 +661,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "sector") == 0)
 	{
 		if (nargs != 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		int number = atoi(argv[1]);
 
@@ -679,7 +675,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "thinggroup") == 0)
 	{
 		if (nargs != 3)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 3);
+			pst->fail(bad_arg_count_fail, argv[0], 3);
 
 		thinggroup_t tg = {};
 
@@ -693,7 +689,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "thing") == 0)
 	{
 		if (nargs < 6)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 6);
+			pst->fail(bad_arg_count_fail, argv[0], 6);
 
 		thingtype_t info = {};
 
@@ -729,7 +725,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "texturegroup") == 0)
 	{
 		if (nargs != 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		texturegroup_t tg = {};
 
@@ -742,7 +738,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "texture") == 0)
 	{
 		if (nargs != 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
@@ -759,7 +755,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "flat") == 0)
 	{
 		if (nargs != 2)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
@@ -776,13 +772,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "gen_line") == 0)
 	{
 		if (nargs != 4)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 4);
+			pst->fail(bad_arg_count_fail, argv[0], 4);
 
 		pst->current_gen_line = inst.num_gen_linetypes;
 		inst.num_gen_linetypes++;
 
 		if (inst.num_gen_linetypes > MAX_GEN_NUM_TYPES)
-			ThrowException("%s(%d): too many gen_line definitions\n", pst->file(), pst->line());
+			pst->fail("too many gen_line definitions");
 
 		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
 
@@ -799,10 +795,10 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "gen_field") == 0)
 	{
 		if (nargs < 5)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 5);
+			pst->fail(bad_arg_count_fail, argv[0], 5);
 
 		if (pst->current_gen_line < 0)
-			ThrowException("%s(%d): gen_field used outside of a gen_line definition\n", pst->file(), pst->line());
+			pst->fail("gen_field used outside of a gen_line definition");
 
 		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
 
@@ -810,7 +806,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 
 		def->num_fields++;
 		if (def->num_fields > MAX_GEN_NUM_FIELDS)
-			ThrowException("%s(%d): too many fields in gen_line definition\n", pst->file(), pst->line());
+			pst->fail("too many fields in gen_line definition");
 
 		field->bits  = atoi(argv[1]);
 		field->shift = atoi(argv[2]);
@@ -832,7 +828,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst)
 	else if (y_stricmp(argv[0], "clear") == 0)
 	{
 		if (nargs < 1)
-			ThrowException(bad_arg_count, pst->file(), pst->line(), argv[0], 2);
+			pst->fail(bad_arg_count_fail, argv[0], 2);
 
 		ParseClearKeywords(inst, pst->argv + 1, nargs);
 	}
