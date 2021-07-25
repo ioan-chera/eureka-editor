@@ -371,7 +371,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(*this, ParsePurpose::normal, nullptr, filename, folder,
+	M_ParseDefinitionFile(*this, ParsePurpose::normal, {}, filename, folder,
 						  prettyname);
 }
 
@@ -965,7 +965,7 @@ static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 //
 void M_ParseDefinitionFile(Instance &inst,
 						   const ParsePurpose purpose,
-						   GameInfo *const target,
+						   ParseTarget target,
 						   const SString &filename,
 						   const SString &cfolder,
 						   const SString &cprettyname,
@@ -1078,7 +1078,7 @@ void M_ParseDefinitionFile(Instance &inst,
 
 		if (purpose == ParsePurpose::gameInfo)
 		{
-			M_ParseGameInfoLine(pst, *target);
+			M_ParseGameInfoLine(pst, *target.game);
 			continue;
 		}
 		if (purpose == ParsePurpose::portInfo)
@@ -1136,7 +1136,7 @@ const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 
 	global::loading_Port = PortInfo_c(port);
 
-	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, nullptr, filename, "ports",
+	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, {}, filename, "ports",
 						  NULL);
 
 	// default is to support both Doom and Doom2

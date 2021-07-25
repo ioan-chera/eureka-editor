@@ -820,7 +820,7 @@ void Instance::LoadResourceFile(const SString &filename)
 	// support loading "ugh" config files
 	if (MatchExtension(filename, "ugh"))
 	{
-		M_ParseDefinitionFile(*this, ParsePurpose::resource, nullptr, filename);
+		M_ParseDefinitionFile(*this, ParsePurpose::resource, {}, filename);
 		return;
 	}
 

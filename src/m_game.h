@@ -304,9 +304,25 @@ public:
 	}
 };
 
+union ParseTarget
+{
+	ParseTarget(GameInfo *game) : game(game)
+	{
+	}
+
+	ParseTarget(PortInfo_c *port) : port(port)
+	{
+	}
+
+	ParseTarget() = default;
+
+	GameInfo *game;
+	PortInfo_c *port;
+};
+
 void M_ParseDefinitionFile(Instance &inst,
 						   ParsePurpose purpose,
-						   GameInfo *purposeTarget,
+						   ParseTarget target,
 						   const SString &filename,
 						   const SString &folder = NULL,
 						   const SString &prettyname = NULL,
