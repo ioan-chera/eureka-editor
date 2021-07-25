@@ -1054,11 +1054,10 @@ void M_ParseDefinitionFile(Instance &inst,
 		if (y_stricmp(pst->argv[0], "include") == 0)
 		{
 			if (nargs != 1)
-				ThrowException(bad_arg_count, pst->file(), pst->line(), pst->argv[0], 1);
+				pst->fail(bad_arg_count_fail, pst->argv[0], 1);
 
 			if (include_level >= MAX_INCLUDE_LEVEL)
-				ThrowException("%s(%d): Too many includes (check for a loop)\n",
-							   pst->file(), pst->line());
+				pst->fail("Too many includes (check for a loop)");
 
 			SString new_folder = folder;
 			SString new_name = FindDefinitionFile(new_folder, pst->argv[1]);
@@ -1071,8 +1070,7 @@ void M_ParseDefinitionFile(Instance &inst,
 			}
 
 			if (new_name.empty())
-				ThrowException("%s(%d): Cannot find include file: %s.ugh\n",
-							   pst->file(), pst->line(), pst->argv[1]);
+				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
 			M_ParseDefinitionFile(inst, purpose, target, new_name, new_folder,
 								  NULL /* prettyname */,
@@ -1098,10 +1096,7 @@ void M_ParseDefinitionFile(Instance &inst,
 
 	// check for an unterminated conditional
 	if (! pst->cond_stack.empty())
-	{
-		ThrowException("%s(%d): Missing endif statement\n", pst->file(),
-			pst->cond_stack.back().start_line);
-	}
+		pst->fail("Missing endif statement");
 }
 
 //
