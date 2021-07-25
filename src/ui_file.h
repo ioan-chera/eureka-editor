@@ -208,6 +208,8 @@ public:
 
 	// returns true if something changed
 	bool Run();
+
+	LoadingData prepareLoadingData() const;
 };
 
 #endif  /* __EUREKA_UI_FILE_H__ */

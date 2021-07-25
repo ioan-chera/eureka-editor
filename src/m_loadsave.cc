@@ -175,26 +175,7 @@ void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 	try
 	{
 		// grab the new information
-		loaded.gameName = dialog->game;
-		loaded.portName = dialog->port;
-
-		SYS_ASSERT(!loaded.gameName.empty());
-
-		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
-		SYS_ASSERT(!loaded.iwadName.empty());
-
-		loaded.levelFormat = dialog->map_format;
-		loaded.udmfNamespace = dialog->name_space;
-
-		SYS_ASSERT(loaded.levelFormat != MapFormat::invalid);
-
-		loaded.resourceList.clear();
-
-		for (int i = 0 ; i < UI_ProjectSetup::RES_NUM ; i++)
-		{
-			if (!dialog->res[i].empty())
-				loaded.resourceList.push_back(dialog->res[i]);
-		}
+		loaded = dialog->prepareLoadingData();
 
 		Fl::wait(0.1);
 
