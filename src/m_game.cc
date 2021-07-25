@@ -27,6 +27,8 @@
 #include "Instance.h"
 #include "m_streams.h"
 
+#define MAX_TOKENS  30   /* tokens per line */
+
 #define UNKNOWN_THING_RADIUS  16
 #define UNKNOWN_THING_COLOR   fl_rgb_color(0,255,255)
 
@@ -40,6 +42,87 @@ namespace global
 	// TODO : move into parser_state_c
 	static PortInfo_c loading_Port;
 }
+
+enum class ParsingCondition
+{
+	none,
+	reading,
+	skipping
+};
+
+struct parsing_cond_state_t
+{
+	ParsingCondition cond;
+	int start_line;
+
+	void Toggle()
+	{
+		cond = (cond == ParsingCondition::reading) ? ParsingCondition::skipping : ParsingCondition::reading;
+	}
+};
+
+class parser_state_c
+{
+public:
+
+	// the line parsed into tokens
+	int    argc = 0;
+	char * argv[MAX_TOKENS] = {};
+
+	// state for handling if/else/endif
+	std::vector<parsing_cond_state_t> cond_stack;
+
+	// BOOM generalized linedef stuff
+	int current_gen_line = -1;
+
+	explicit parser_state_c(const SString &filename) : fname(filename)
+	{
+	}
+
+	bool HaveAnySkipping() const
+	{
+		for (size_t i = 0 ; i < cond_stack.size() ; i++)
+			if (cond_stack[i].cond == ParsingCondition::skipping)
+				return true;
+
+		return false;
+	}
+
+	const char *file() const
+	{
+		return fname.c_str();
+	}
+
+	bool readLine(LineFile &file)
+	{
+		bool result = file.readLine(readstring);
+		if(result)
+			++lineno;
+		return result;
+	}
+
+	void tokenize();
+
+	int line() const
+	{
+		return lineno;
+	}
+
+	void fail(EUR_FORMAT_STRING(const char *format), ...) const EUR_PRINTF(2, 3);
+
+private:
+	// filename for error messages (lacks the directory)
+	SString fname = nullptr;
+
+	// buffer containing the raw line
+	SString readstring;
+
+	// current line number
+	int lineno = 0;
+
+	// buffer storing the tokens
+	char tokenbuf[512] = {};
+};
 
 void PortInfo_c::AddSupportedGame(const SString &game)
 {
@@ -192,7 +275,8 @@ static void ParseColorDef(Instance &inst, char ** argv, int argc)
 }
 
 
-static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
+static map_format_bitset_t ParseMapFormats(parser_state_c *pst, char ** argv,
+										   int argc)
 {
 	map_format_bitset_t result = 0;
 
@@ -208,7 +292,7 @@ static map_format_bitset_t ParseMapFormats(char ** argv, int argc)
 			result |= (1 << static_cast<int>(MapFormat::udmf));
 
 		else
-			ThrowException("Unknown map format '%s' in definition file.\n", argv[0]);
+			pst->fail("Unknown map format '%s' in definition file.", argv[0]);
 	}
 
 	return result;
@@ -375,91 +459,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 						  prettyname);
 }
 
-enum class ParsingCondition
-{
-	none,
-	reading,
-	skipping
-};
-
-struct parsing_cond_state_t
-{
-	ParsingCondition cond;
-	int start_line;
-
-	void Toggle()
-	{
-		cond = (cond == ParsingCondition::reading) ? ParsingCondition::skipping : ParsingCondition::reading;
-	}
-};
-
-
-#define MAX_TOKENS  30   /* tokens per line */
-
 #define MAX_INCLUDE_LEVEL  10
-
-class parser_state_c
-{
-public:
-
-	// the line parsed into tokens
-	int    argc = 0;
-	char * argv[MAX_TOKENS] = {};
-
-	// state for handling if/else/endif
-	std::vector<parsing_cond_state_t> cond_stack;
-
-	// BOOM generalized linedef stuff
-	int current_gen_line = -1;
-
-	explicit parser_state_c(const SString &filename) : fname(filename)
-	{
-	}
-
-	bool HaveAnySkipping() const
-	{
-		for (size_t i = 0 ; i < cond_stack.size() ; i++)
-			if (cond_stack[i].cond == ParsingCondition::skipping)
-				return true;
-
-		return false;
-	}
-
-	const char *file() const
-	{
-		return fname.c_str();
-	}
-
-	bool readLine(LineFile &file)
-	{
-		bool result = file.readLine(readstring);
-		if(result)
-			++lineno;
-		return result;
-	}
-
-	void tokenize();
-
-	int line() const
-	{
-		return lineno;
-	}
-
-	void fail(EUR_FORMAT_STRING(const char *format), ...) const EUR_PRINTF(2, 3);
-
-private:
-	// filename for error messages (lacks the directory)
-	SString fname = nullptr;
-
-	// buffer containing the raw line
-	SString readstring;
-
-	// current line number
-	int lineno = 0;
-
-	// buffer storing the tokens
-	char tokenbuf[512] = {};
-};
 
 //
 // Fails with a ParseException
@@ -889,7 +889,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst, PortInfo_c &port)
 		if (nargs < 1)
 			pst->fail(bad_arg_count_fail, argv[0], 1);
 
-		port.formats = ParseMapFormats(argv + 1, nargs);
+		port.formats = ParseMapFormats(pst, argv + 1, nargs);
 	}
 	else if (y_stricmp(argv[0], "udmf_namespace") == 0)
 	{
