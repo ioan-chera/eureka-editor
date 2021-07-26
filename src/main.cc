@@ -951,7 +951,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (const SString &resource : loaded.resourceList)
+	for (const SString &resource : loading.resourceList)
 	{
 		try
 		{
