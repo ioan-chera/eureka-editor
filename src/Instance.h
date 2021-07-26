@@ -578,15 +578,6 @@ public:	// will be private when we encapsulate everything
 	//
 	// Game-dependent (thus instance dependent) defaults
 	//
-	std::map<SString, char> flat_categories;
-	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
-	int num_gen_linetypes = 0;
-	std::map<int, sectortype_t> sector_types;
-	std::map<SString, char> texture_categories;
-	std::map<char, texturegroup_t> texture_groups;
-	std::map<char, thinggroup_t> thing_groups;
-	std::map<int, thingtype_t> thing_types;
-
 	ConfigData conf;
 
 	//

@@ -180,14 +180,14 @@ TEST(MGame, MClearAllDefinitions)
 
     instance.conf.line_groups['a'] = linegroup_t();
     instance.conf.line_types[0] = linetype_t();
-    instance.sector_types[0] = sectortype_t();
+    instance.conf.sector_types[0] = sectortype_t();
 
-    instance.thing_groups['a'] = thinggroup_t();
-    instance.thing_types[0] = thingtype_t();
+    instance.conf.thing_groups['a'] = thinggroup_t();
+    instance.conf.thing_types[0] = thingtype_t();
 
-    instance.texture_groups['a'] = texturegroup_t();
-    instance.texture_categories["a"] = 'a';
-    instance.flat_categories["a"] = 'a';
+    instance.conf.texture_groups['a'] = texturegroup_t();
+    instance.conf.texture_categories["a"] = 'a';
+    instance.conf.flat_categories["a"] = 'a';
 
     instance.conf.miscInfo.sky_color = 1;
     instance.conf.miscInfo.sky_flat = "a";
@@ -225,22 +225,22 @@ TEST(MGame, MClearAllDefinitions)
     instance.conf.features.extra_floors = 1;
     instance.conf.features.slopes = 1;
 
-    instance.gen_linetypes[0].base = 1;
+    instance.conf.gen_linetypes[0].base = 1;
 
-    instance.num_gen_linetypes = 1;
+    instance.conf.num_gen_linetypes = 1;
 
     instance.M_ClearAllDefinitions();
 
     ASSERT_TRUE(instance.conf.line_groups.empty());
     ASSERT_TRUE(instance.conf.line_types.empty());
-    ASSERT_TRUE(instance.sector_types.empty());
+    ASSERT_TRUE(instance.conf.sector_types.empty());
 
-    ASSERT_TRUE(instance.thing_groups.empty());
-    ASSERT_TRUE(instance.thing_types.empty());
+    ASSERT_TRUE(instance.conf.thing_groups.empty());
+    ASSERT_TRUE(instance.conf.thing_types.empty());
 
-    ASSERT_TRUE(instance.texture_groups.empty());
-    ASSERT_TRUE(instance.texture_categories.empty());
-    ASSERT_TRUE(instance.flat_categories.empty());
+    ASSERT_TRUE(instance.conf.texture_groups.empty());
+    ASSERT_TRUE(instance.conf.texture_categories.empty());
+    ASSERT_TRUE(instance.conf.flat_categories.empty());
 
     misc_info_t emptyInfo = {};
 
@@ -284,7 +284,7 @@ TEST(MGame, MClearAllDefinitions)
     ASSERT_EQ(instance.conf.features.extra_floors, emptyFeats.extra_floors);
     ASSERT_EQ(instance.conf.features.slopes, emptyFeats.slopes);
 
-    ASSERT_EQ(instance.gen_linetypes[0].base, 0);
+    ASSERT_EQ(instance.conf.gen_linetypes[0].base, 0);
 
-    ASSERT_EQ(instance.num_gen_linetypes, 0);
+    ASSERT_EQ(instance.conf.num_gen_linetypes, 0);
 }

@@ -1094,9 +1094,9 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 
 	static char desc_buffer[256];
 
-	for (int i = 0 ; i < inst.num_gen_linetypes ; i++)
+	for (int i = 0 ; i < inst.conf.num_gen_linetypes ; i++)
 	{
-		const generalized_linetype_t *info = &inst.gen_linetypes[i];
+		const generalized_linetype_t *info = &inst.conf.gen_linetypes[i];
 
 		if (type_num >= info->base && type_num < (info->base + info->length))
 		{

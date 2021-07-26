@@ -764,7 +764,7 @@ void UI_Browser_Box::Populate_Sprites()
 
 	char full_desc[256];
 
-	for (TI = inst.thing_types.begin() ; TI != inst.thing_types.end() ; TI++)
+	for (TI = inst.conf.thing_types.begin() ; TI != inst.conf.thing_types.end() ; TI++)
 	{
 		const thingtype_t &info = TI->second;
 
@@ -810,7 +810,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 
 	char full_desc[256];
 
-	for (TI = inst.thing_types.begin() ; TI != inst.thing_types.end() ; TI++)
+	for (TI = inst.conf.thing_types.begin() ; TI != inst.conf.thing_types.end() ; TI++)
 	{
 		const thingtype_t &info = TI->second;
 
@@ -865,7 +865,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 
 	char full_desc[256];
 
-	for (TI = inst.sector_types.begin() ; TI != inst.sector_types.end() ; TI++)
+	for (TI = inst.conf.sector_types.begin() ; TI != inst.conf.sector_types.end() ; TI++)
 	{
 		const sectortype_t &info = TI->second;
 
@@ -1401,9 +1401,9 @@ void UI_Generalized_Box::CreatePages()
 
 	int X = x();  /// + (w() - MIN_BROWSER_W);
 
-	for (int i = 0 ; i < inst.num_gen_linetypes ; i++)
+	for (int i = 0 ; i < inst.conf.num_gen_linetypes ; i++)
 	{
-		const generalized_linetype_t *info = &inst.gen_linetypes[i];
+		const generalized_linetype_t *info = &inst.conf.gen_linetypes[i];
 
 		category->add(info->name.c_str());
 

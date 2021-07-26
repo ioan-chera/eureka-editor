@@ -148,23 +148,23 @@ void Instance::M_ClearAllDefinitions()
 	// Free all definitions
 	conf.line_groups.clear();
 	conf.line_types.clear();
-	sector_types.clear();
+	conf.sector_types.clear();
 
-	thing_groups.clear();
-	thing_types.clear();
+	conf.thing_groups.clear();
+	conf.thing_types.clear();
 
-	texture_groups.clear();
-	texture_categories.clear();
-	flat_categories.clear();
+	conf.texture_groups.clear();
+	conf.texture_categories.clear();
+	conf.flat_categories.clear();
 
 	conf.miscInfo = misc_info_t();
 
 	conf.features = {};
 
 	// reset generalized types
-	for(generalized_linetype_t &type : gen_linetypes)
+	for(generalized_linetype_t &type : conf.gen_linetypes)
 		type = {};
-	num_gen_linetypes = 0;
+	conf.num_gen_linetypes = 0;
 }
 
 //
@@ -299,33 +299,33 @@ static map_format_bitset_t ParseMapFormats(parser_state_c *pst, char ** argv,
 }
 
 
-static void ParseClearKeywords(Instance &inst, char ** argv, int argc)
+static void ParseClearKeywords(ConfigData &config, char ** argv, int argc, parser_state_c *pst)
 {
 	for ( ; argc > 0 ; argv++, argc--)
 	{
 		if (y_stricmp(argv[0], "lines") == 0)
 		{
-			inst.conf.line_groups.clear();
-			inst.conf.line_types.clear();
+			config.line_groups.clear();
+			config.line_types.clear();
 		}
 		else if (y_stricmp(argv[0], "sectors") == 0)
 		{
-			inst.sector_types.clear();
+			config.sector_types.clear();
 		}
 		else if (y_stricmp(argv[0], "things") == 0)
 		{
-			inst.thing_groups.clear();
-			inst.thing_types.clear();
+			config.thing_groups.clear();
+			config.thing_types.clear();
 		}
 		else if (y_stricmp(argv[0], "textures") == 0)
 		{
-			inst.texture_groups.clear();
-			inst.texture_categories.clear();
+			config.texture_groups.clear();
+			config.texture_categories.clear();
 
-			inst.flat_categories.clear();
+			config.flat_categories.clear();
 		}
 		else
-			ThrowException("Unknown clear keyword '%s' in definition file.\n", argv[0]);
+			pst->fail("Unknown clear keyword '%s' in definition file.", argv[0]);
 	}
 }
 
@@ -458,7 +458,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	auto target = ConfigData(conf);
+	auto target = conf;
 	M_ParseDefinitionFile(*this, ParsePurpose::normal, &target, filename, folder,
 						  prettyname);
 	conf = target;
@@ -548,8 +548,7 @@ void parser_state_c::tokenize()
 }
 
 
-static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
-							  ConfigData &config)
+static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 {
 	char **argv  = pst->argv;
 	int    nargs = pst->argc - 1;
@@ -672,7 +671,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 
 		info.desc = argv[2];
 
-		inst.sector_types[number] = info;
+		config.sector_types[number] = info;
 	}
 
 	else if (y_stricmp(argv[0], "thinggroup") == 0)
@@ -686,7 +685,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		tg.color = ParseColor(argv[2]);
 		tg.desc  = argv[3];
 
-		inst.thing_groups[tg.group] = tg;
+		config.thing_groups[tg.group] = tg;
 	}
 
 	else if (y_stricmp(argv[0], "thing") == 0)
@@ -712,16 +711,16 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 				info.args[i] = argv[8 + i];
 		}
 
-		if (inst.thing_groups.find(info.group) == inst.thing_groups.end())
+		if (config.thing_groups.find(info.group) == config.thing_groups.end())
 		{
 			gLog.printf("%s(%d): unknown thing group '%c'\n",
 					  pst->file(), pst->line(), info.group);
 		}
 		else
 		{
-			info.color = inst.thing_groups[info.group].color;
+			info.color = config.thing_groups[info.group].color;
 
-			inst.thing_types[number] = info;
+			config.thing_types[number] = info;
 		}
 	}
 
@@ -735,7 +734,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		tg.group = argv[1][0];
 		tg.desc  = argv[2];
 
-		inst.texture_groups[tg.group] = tg;
+		config.texture_groups[tg.group] = tg;
 	}
 
 	else if (y_stricmp(argv[0], "texture") == 0)
@@ -746,13 +745,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
 
-		if (inst.texture_groups.find((char)tolower(group)) == inst.texture_groups.end())
+		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
 					  pst->file(), pst->line(), group);
 		}
 		else
-			inst.texture_categories[name] = group;
+			config.texture_categories[name] = group;
 	}
 
 	else if (y_stricmp(argv[0], "flat") == 0)
@@ -763,13 +762,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		char group = argv[1][0];
 		SString name = SString(argv[2]);
 
-		if (inst.texture_groups.find((char)tolower(group)) == inst.texture_groups.end())
+		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
 					  pst->file(), pst->line(), group);
 		}
 		else
-			inst.flat_categories[name] = group;
+			config.flat_categories[name] = group;
 	}
 
 	else if (y_stricmp(argv[0], "gen_line") == 0)
@@ -777,13 +776,13 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		if (nargs != 4)
 			pst->fail(bad_arg_count_fail, argv[0], 4);
 
-		pst->current_gen_line = inst.num_gen_linetypes;
-		inst.num_gen_linetypes++;
+		pst->current_gen_line = config.num_gen_linetypes;
+		config.num_gen_linetypes++;
 
-		if (inst.num_gen_linetypes > MAX_GEN_NUM_TYPES)
+		if (config.num_gen_linetypes > MAX_GEN_NUM_TYPES)
 			pst->fail("too many gen_line definitions");
 
-		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
+		generalized_linetype_t *def = &config.gen_linetypes[pst->current_gen_line];
 
 		def->key = argv[1][0];
 
@@ -803,7 +802,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		if (pst->current_gen_line < 0)
 			pst->fail("gen_field used outside of a gen_line definition");
 
-		generalized_linetype_t *def = &inst.gen_linetypes[pst->current_gen_line];
+		generalized_linetype_t *def = &config.gen_linetypes[pst->current_gen_line];
 
 		generalized_field_t *field = &def->fields[def->num_fields];
 
@@ -833,7 +832,7 @@ static void M_ParseNormalLine(Instance &inst, parser_state_c *pst,
 		if (nargs < 1)
 			pst->fail(bad_arg_count_fail, argv[0], 2);
 
-		ParseClearKeywords(inst, pst->argv + 1, nargs);
+		ParseClearKeywords(config, pst->argv + 1, nargs, pst);
 	}
 
 /*  FIXME
@@ -1089,7 +1088,7 @@ void M_ParseDefinitionFile(Instance &inst,
 		}
 
 		// handle everything else
-		M_ParseNormalLine(inst, pst, *target.config);
+		M_ParseNormalLine(pst, *target.config);
 	}
 
 	// check for an unterminated conditional
@@ -1319,9 +1318,9 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
 {
 	std::map<int, sectortype_t>::const_iterator SI;
 
-	SI = sector_types.find(type);
+	SI = conf.sector_types.find(type);
 
-	if (SI != sector_types.end())
+	if (SI != conf.sector_types.end())
 		return SI->second;
 
 	static sectortype_t dummy_type =
@@ -1353,9 +1352,9 @@ const linetype_t &Instance::M_GetLineType(int type) const
 
 const thingtype_t &Instance::M_GetThingType(int type) const
 {
-	auto TI = thing_types.find(type);
+	auto TI = conf.thing_types.find(type);
 
-	if (TI != thing_types.end())
+	if (TI != conf.thing_types.end())
 		return TI->second;
 
 	static thingtype_t dummy_type =
@@ -1373,9 +1372,9 @@ char Instance::M_GetTextureType(const SString &name) const
 {
 	std::map<SString, char>::const_iterator TI;
 
-	TI = texture_categories.find(name);
+	TI = conf.texture_categories.find(name);
 
-	if (TI != texture_categories.end())
+	if (TI != conf.texture_categories.end())
 		return TI->second;
 
 	return '-';  // the OTHER category
@@ -1386,9 +1385,9 @@ char Instance::M_GetFlatType(const SString &name) const
 {
 	std::map<SString, char>::const_iterator TI;
 
-	TI = flat_categories.find(name);
+	TI = conf.flat_categories.find(name);
 
-	if (TI != flat_categories.end())
+	if (TI != conf.flat_categories.end())
 		return TI->second;
 
 	return '-';  // the OTHER category
@@ -1467,13 +1466,13 @@ SString Instance::M_LineCategoryString(SString &letters) const
 
 SString Instance::M_ThingCategoryString(SString &letters) const
 {
-	return M_CategoryString(letters, true, thing_groups, thing_types);
+	return M_CategoryString(letters, true, conf.thing_groups, conf.thing_types);
 }
 
 
 SString Instance::M_TextureCategoryString(SString &letters, bool do_flats) const
 {
-	return M_CategoryString(letters, true, texture_groups, do_flats ? flat_categories : texture_categories);
+	return M_CategoryString(letters, true, conf.texture_groups, do_flats ? conf.flat_categories : conf.texture_categories);
 }
 
 //--- editor settings ---
