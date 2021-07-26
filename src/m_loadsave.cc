@@ -44,6 +44,8 @@
 #include "ui_window.h"
 #include "ui_file.h"
 
+#include <memory>
+
 static const char overwrite_message[] =
 	"The %s PWAD already contains this map.  "
 	"This operation will destroy that map (overwrite it)."
