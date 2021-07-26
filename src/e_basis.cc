@@ -117,8 +117,8 @@ void Sector::SetDefaults(const Instance &inst)
 	floorh = global::default_floor_h;
 	 ceilh = global::default_ceil_h;
 
-	floor_tex = BA_InternaliseString(inst.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(inst.default_ceil_tex);
+	floor_tex = BA_InternaliseString(inst.conf.default_floor_tex);
+	 ceil_tex = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	light = global::default_light_level;
 }
@@ -142,7 +142,7 @@ SString SideDef::LowerTex() const
 void SideDef::SetDefaults(const Instance &inst, bool two_sided, int new_tex)
 {
 	if (new_tex < 0)
-		new_tex = BA_InternaliseString(inst.default_wall_tex);
+		new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	lower_tex = new_tex;
 	upper_tex = new_tex;

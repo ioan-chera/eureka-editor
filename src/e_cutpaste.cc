@@ -323,7 +323,7 @@ void Texboard_Clear()
 int Instance::Texboard_GetTexNum() const
 {
 	if (tex_clipboard::tex.empty())
-		tex_clipboard::tex = default_wall_tex;
+		tex_clipboard::tex = conf.default_wall_tex;
 
 	return BA_InternaliseString(tex_clipboard::tex);
 }
@@ -331,7 +331,7 @@ int Instance::Texboard_GetTexNum() const
 int Instance::Texboard_GetFlatNum() const
 {
 	if (tex_clipboard::flat.empty())
-		tex_clipboard::flat = default_floor_tex;
+		tex_clipboard::flat = conf.default_floor_tex;
 
 	return BA_InternaliseString(tex_clipboard::flat);
 }
@@ -339,7 +339,7 @@ int Instance::Texboard_GetFlatNum() const
 int Instance::Texboard_GetThing() const
 {
 	if (tex_clipboard::thing == 0)
-		return default_thing;
+		return conf.default_thing;
 
 	return tex_clipboard::thing;
 }

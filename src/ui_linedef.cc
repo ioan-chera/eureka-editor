@@ -586,7 +586,7 @@ bool UI_LineBox::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::cut:	// Cut
-			CB_Paste(parts, BA_InternaliseString(inst.default_wall_tex));
+			CB_Paste(parts, BA_InternaliseString(inst.conf.default_wall_tex));
 			break;
 
 		case EditCommand::del: // Delete

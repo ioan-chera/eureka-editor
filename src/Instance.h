@@ -578,14 +578,8 @@ public:	// will be private when we encapsulate everything
 	//
 	// Game-dependent (thus instance dependent) defaults
 	//
-	int default_thing = 2001;
-	SString default_ceil_tex = "FLAT1";
-	SString default_floor_tex = "FLAT1";
-	SString default_wall_tex = "GRAY1";
 	std::map<SString, char> flat_categories;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
-	std::map<char, linegroup_t> line_groups;
-	std::map<int, linetype_t> line_types;
 	int num_gen_linetypes = 0;
 	std::map<int, sectortype_t> sector_types;
 	std::map<SString, char> texture_categories;

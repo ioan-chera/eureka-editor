@@ -897,7 +897,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 
 	int null_tex  = BA_InternaliseString("-");
 
-	int def_lower = BA_InternaliseString(inst.default_wall_tex);
+	int def_lower = BA_InternaliseString(inst.conf.default_wall_tex);
 	int def_upper = def_lower;
 
 	unsigned int k;

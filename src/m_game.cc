@@ -146,8 +146,8 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 void Instance::M_ClearAllDefinitions()
 {
 	// Free all definitions
-	line_groups.clear();
-	line_types.clear();
+	conf.line_groups.clear();
+	conf.line_types.clear();
 	sector_types.clear();
 
 	thing_groups.clear();
@@ -305,8 +305,8 @@ static void ParseClearKeywords(Instance &inst, char ** argv, int argc)
 	{
 		if (y_stricmp(argv[0], "lines") == 0)
 		{
-			inst.line_groups.clear();
-			inst.line_types.clear();
+			inst.conf.line_groups.clear();
+			inst.conf.line_types.clear();
 		}
 		else if (y_stricmp(argv[0], "sectors") == 0)
 		{
@@ -1337,9 +1337,9 @@ const linetype_t &Instance::M_GetLineType(int type) const
 {
 	std::map<int, linetype_t>::const_iterator LI;
 
-	LI = line_types.find(type);
+	LI = conf.line_types.find(type);
 
-	if (LI != line_types.end())
+	if (LI != conf.line_types.end())
 		return LI->second;
 
 	static linetype_t dummy_type =
@@ -1461,7 +1461,7 @@ static SString M_CategoryString(SString &letters, bool recent, const std::map<ch
 
 SString Instance::M_LineCategoryString(SString &letters) const
 {
-	return M_CategoryString(letters, false, line_groups, line_types);
+	return M_CategoryString(letters, false, conf.line_groups, conf.line_types);
 }
 
 

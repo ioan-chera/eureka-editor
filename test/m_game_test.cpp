@@ -178,8 +178,8 @@ TEST(MGame, MClearAllDefinitions)
 {
     Instance instance;
 
-    instance.line_groups['a'] = linegroup_t();
-    instance.line_types[0] = linetype_t();
+    instance.conf.line_groups['a'] = linegroup_t();
+    instance.conf.line_types[0] = linetype_t();
     instance.sector_types[0] = sectortype_t();
 
     instance.thing_groups['a'] = thinggroup_t();
@@ -231,8 +231,8 @@ TEST(MGame, MClearAllDefinitions)
 
     instance.M_ClearAllDefinitions();
 
-    ASSERT_TRUE(instance.line_groups.empty());
-    ASSERT_TRUE(instance.line_types.empty());
+    ASSERT_TRUE(instance.conf.line_groups.empty());
+    ASSERT_TRUE(instance.conf.line_types.empty());
     ASSERT_TRUE(instance.sector_types.empty());
 
     ASSERT_TRUE(instance.thing_groups.empty());

@@ -837,7 +837,7 @@ void UI_Browser_Box::Populate_LineTypes()
 
 	char full_desc[256];
 
-	for (TI = inst.line_types.begin() ; TI != inst.line_types.end() ; TI++)
+	for (TI = inst.conf.line_types.begin() ; TI != inst.conf.line_types.end() ; TI++)
 	{
 		const linetype_t &info = TI->second;
 

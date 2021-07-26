@@ -1248,8 +1248,8 @@ void Instance::StoreDefaultedFlats()
 		return;
 	}
 
-	int floor_tex = BA_InternaliseString(default_floor_tex);
-	int ceil_tex  = BA_InternaliseString(default_ceil_tex);
+	int floor_tex = BA_InternaliseString(conf.default_floor_tex);
+	int ceil_tex  = BA_InternaliseString(conf.default_ceil_tex);
 
 	level.basis.begin();
 	level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
@@ -1277,7 +1277,7 @@ void Instance::StoreDefaultedFlats()
 int Instance::LD_GrabTex(const LineDef *L, int part) const
 {
 	if (L->NoSided())
-		return BA_InternaliseString(default_wall_tex);
+		return BA_InternaliseString(conf.default_wall_tex);
 
 	if (L->OneSided())
 		return L->Right(level)->mid_tex;
@@ -1468,7 +1468,7 @@ void Instance::Render3D_CB_Cut()
 	switch (edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(default_thing);
+		StoreSelectedThing(conf.default_thing);
 		break;
 
 	case ObjType::sectors:
@@ -1476,7 +1476,7 @@ void Instance::Render3D_CB_Cut()
 		break;
 
 	case ObjType::linedefs:
-		StoreSelectedTexture(BA_InternaliseString(default_wall_tex));
+		StoreSelectedTexture(BA_InternaliseString(conf.default_wall_tex));
 		break;
 
 	default:

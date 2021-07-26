@@ -138,7 +138,7 @@ void ObjectsModule::insertThing() const
 		*T = *doc.things[model];
 	else
 	{
-		T->type = inst.default_thing;
+		T->type = inst.conf.default_thing;
 		T->options = MTF_Easy | MTF_Medium | MTF_Hard;
 
 		if (inst.loaded.levelFormat != MapFormat::doom)

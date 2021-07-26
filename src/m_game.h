@@ -312,10 +312,10 @@ struct ConfigData
 	misc_info_t miscInfo = {};
 	port_features_t features = {};
 
-	SString default_wall_tex;
-	SString default_floor_tex;
-	SString default_ceil_tex;
-	int default_thing;
+	SString default_wall_tex = "GRAY1";
+	SString default_floor_tex = "FLAT1";
+	SString default_ceil_tex = "FLAT1";
+	int default_thing = 2001;
 
 	std::map<char, linegroup_t> line_groups;
 	std::map<int, linetype_t> line_types;

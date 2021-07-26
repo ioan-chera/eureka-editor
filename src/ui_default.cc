@@ -194,18 +194,18 @@ void UI_DefaultProps::SetIntVal(Fl_Int_Input *w, int value)
 
 void UI_DefaultProps::UpdateThingDesc()
 {
-	const thingtype_t &info = inst.M_GetThingType(inst.default_thing);
+	const thingtype_t &info = inst.M_GetThingType(inst.conf.default_thing);
 
 	th_desc->value(info.desc.c_str());
-	th_sprite->GetSprite(inst.default_thing, FL_DARK2);
+	th_sprite->GetSprite(inst.conf.default_thing, FL_DARK2);
 }
 
 
 void UI_DefaultProps::SetThing(int number)
 {
-	inst.default_thing = number;
+	inst.conf.default_thing = number;
 
-	mFixUp.setInputValue(thing, SString(inst.default_thing).c_str());
+	mFixUp.setInputValue(thing, SString(inst.conf.default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -239,7 +239,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 
 	if (w == box->w_tex)
 	{
-		box->inst.default_wall_tex = box->Normalize_and_Dup(box->w_tex);
+		box->inst.conf.default_wall_tex = box->Normalize_and_Dup(box->w_tex);
 	}
 
 	box->w_pic->GetTex(box->w_tex->value());
@@ -264,10 +264,10 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 	}
 
 	if (w == box->f_tex)
-		box->inst.default_floor_tex = box->Normalize_and_Dup(box->f_tex);
+		box->inst.conf.default_floor_tex = box->Normalize_and_Dup(box->f_tex);
 
 	if (w == box->c_tex)
-		box->inst.default_ceil_tex = box->Normalize_and_Dup(box->c_tex);
+		box->inst.conf.default_ceil_tex = box->Normalize_and_Dup(box->c_tex);
 
 	box->f_pic->GetFlat(box->f_tex->value());
 	box->c_pic->GetFlat(box->c_tex->value());
@@ -345,7 +345,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	box->inst.default_thing = atoi(box->thing->value());
+	box->inst.conf.default_thing = atoi(box->thing->value());
 
 	box->UpdateThingDesc();
 }
@@ -366,9 +366,9 @@ void UI_DefaultProps::dynthing_callback(Fl_Widget *w, void *data)
 
 void UI_DefaultProps::LoadValues()
 {
-	mFixUp.setInputValue(w_tex, inst.default_wall_tex.c_str());
-	mFixUp.setInputValue(f_tex, inst.default_floor_tex.c_str());
-	mFixUp.setInputValue(c_tex, inst.default_ceil_tex.c_str());
+	mFixUp.setInputValue(w_tex, inst.conf.default_wall_tex.c_str());
+	mFixUp.setInputValue(f_tex, inst.conf.default_floor_tex.c_str());
+	mFixUp.setInputValue(c_tex, inst.conf.default_ceil_tex.c_str());
 
 	w_pic->GetTex (w_tex->value());
 	f_pic->GetFlat(f_tex->value());
@@ -378,7 +378,7 @@ void UI_DefaultProps::LoadValues()
 	SetIntVal( ceil_h, global::default_ceil_h);
 	SetIntVal(  light, global::default_light_level);
 
-	mFixUp.setInputValue(thing, SString(inst.default_thing).c_str());
+	mFixUp.setInputValue(thing, SString(inst.conf.default_thing).c_str());
 
 	UpdateThingDesc();
 }
@@ -565,16 +565,16 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 		global::default_light_level = atoi(tokens[2]);
 
 	if (tokens[1] == "thing")
-		inst.default_thing = atoi(tokens[2]);
+		inst.conf.default_thing = atoi(tokens[2]);
 
 	if (tokens[1] == "floor_tex")
-		inst.default_floor_tex = tokens[2];
+		inst.conf.default_floor_tex = tokens[2];
 
 	if (tokens[1] == "ceil_tex")
-		inst.default_ceil_tex = tokens[2];
+		inst.conf.default_ceil_tex = tokens[2];
 
 	if (tokens[1] == "mid_tex")
-		inst.default_wall_tex = tokens[2];
+		inst.conf.default_wall_tex = tokens[2];
 
 	return true;
 }
@@ -586,11 +586,11 @@ void Instance::Props_WriteUser(std::ostream &os) const
 	os << "default floor_h " << global::default_floor_h << '\n';
 	os << "default ceil_h " << global::default_ceil_h << '\n';
 	os << "default light_level " << global::default_light_level << '\n';
-	os << "default thing " << default_thing << '\n';
+	os << "default thing " << conf.default_thing << '\n';
 	
-	os << "default mid_tex \"" << default_wall_tex.getTidy("\"") << "\"\n";
-	os << "default floor_tex \"" << default_floor_tex.getTidy("\"") << "\"\n";
-	os << "default ceil_tex \"" << default_ceil_tex.getTidy("\"") << "\"\n";
+	os << "default mid_tex \"" << conf.default_wall_tex.getTidy("\"") << "\"\n";
+	os << "default floor_tex \"" << conf.default_floor_tex.getTidy("\"") << "\"\n";
+	os << "default ceil_tex \"" << conf.default_ceil_tex.getTidy("\"") << "\"\n";
 }
 
 

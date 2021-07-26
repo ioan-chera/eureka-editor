@@ -3538,7 +3538,7 @@ static void Textures_ShowMissing(Instance &inst)
 
 static void Textures_FixMissing(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.default_wall_tex);
+	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed missing textures");
@@ -3659,7 +3659,7 @@ static void Textures_ShowTransparent(Instance &inst)
 
 static void Textures_FixTransparent(Instance &inst)
 {
-	SString new_tex = inst.default_wall_tex;
+	SString new_tex = inst.conf.default_wall_tex;
 
 	// do something reasonable if default wall is transparent
 	if (is_transparent(inst, new_tex))
@@ -3946,7 +3946,7 @@ static void Textures_LogUnknown(bool do_flat, const Instance &inst)
 
 static void Textures_FixUnknownTex(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.default_wall_tex);
+	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	int null_tex = BA_InternaliseString("-");
 
@@ -3983,8 +3983,8 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 static void Textures_FixUnknownFlat(Instance &inst)
 {
-	int new_floor = BA_InternaliseString(inst.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(inst.default_ceil_tex);
+	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
+	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed unknown flats");
@@ -4060,7 +4060,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 {
 	int null_tex = BA_InternaliseString("-");
 
-	SString new_tex = inst.default_wall_tex;
+	SString new_tex = inst.conf.default_wall_tex;
 
 	// do something reasonable if default wall is a switch
 	if (is_switch_tex(new_tex))
