@@ -229,7 +229,7 @@ TEST(MGame, MClearAllDefinitions)
 
     instance.conf.num_gen_linetypes = 1;
 
-    instance.M_ClearAllDefinitions();
+    instance.conf.clearExceptDefaults();
 
     ASSERT_TRUE(instance.conf.line_groups.empty());
     ASSERT_TRUE(instance.conf.line_types.empty());

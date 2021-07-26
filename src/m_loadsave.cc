@@ -194,22 +194,20 @@ void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 
 void Instance::CMD_ManageProject()
 {
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(*this, false /* new_project */, false /* is_startup */);
 	try
 	{
+		auto dialog = std::make_unique<UI_ProjectSetup>(*this, false /* new_project */, false /* is_startup */);
 		bool ok = dialog->Run();
 
 		if (ok)
 		{
-			Project_ApplyChanges(dialog);
+			Project_ApplyChanges(dialog.get());
 		}
 	}
 	catch(const ParseException &e)
 	{
 		DLG_ShowError(false, "Error reading configuration file: %s", e.what());
 	}
-
-	delete dialog;
 }
 
 
@@ -229,13 +227,12 @@ void Instance::CMD_NewProject()
 
 	/* second, query what Game, Port and Resources to use */
 	// TODO: new instance
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(*this, true /* new_project */, false /* is_startup */);
+	auto dialog = std::make_unique<UI_ProjectSetup>(*this, true /* new_project */, false /* is_startup */);
 
 	bool ok = dialog->Run();
 
 	if (! ok)
 	{
-		delete dialog;
 		return;
 	}
 
@@ -252,7 +249,6 @@ void Instance::CMD_NewProject()
 		{
 			DLG_Notify("Unable to delete the existing file.");
 
-			delete dialog;
 			return;
 		}
 
@@ -264,9 +260,9 @@ void Instance::CMD_NewProject()
 	RemoveEditWad();
 
 	// this calls Main_LoadResources which resets the master directory
-	Project_ApplyChanges(dialog);
+	Project_ApplyChanges(dialog.get());
 
-	delete dialog;
+	dialog.reset();
 
 
 	// determine map name (same as first level in the IWAD)

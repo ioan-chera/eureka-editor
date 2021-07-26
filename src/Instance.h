@@ -326,7 +326,6 @@ public:
 
 	// M_GAME
 	bool is_sky(const SString &flat) const;
-	void M_ClearAllDefinitions();
 	char M_GetFlatType(const SString &name) const;
 	const linetype_t &M_GetLineType(int type) const;
 	const sectortype_t &M_GetSectorType(int type) const;
@@ -520,10 +519,10 @@ private:
 
 	// MAIN
 	void LoadResourceFile(const SString& filename);
-	void M_LoadDefinitions(const SString &folder, const SString &name)
+	void M_LoadDefinitions(const SString &folder, const SString &name, ConfigData &config)
 			noexcept(false);
-	void ReadGameInfo(LoadingData &loading) noexcept(false);
-	void ReadPortInfo() noexcept(false);
+	void ReadGameInfo(LoadingData &loading, ConfigData &config) noexcept(false);
+	void ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(false);
 
 	// R_GRID
 	bool Grid_ParseUser(const std::vector<SString> &tokens);

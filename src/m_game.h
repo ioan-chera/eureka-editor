@@ -328,6 +328,8 @@ struct ConfigData
 
 	int num_gen_linetypes = 0;
 	generalized_linetype_t gen_linetypes[MAX_GEN_NUM_TYPES] = {};	// BOOM Generalized Lines
+
+	void clearExceptDefaults();
 };
 
 //

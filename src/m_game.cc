@@ -143,28 +143,28 @@ bool PortInfo_c::SupportsGame(const SString &game) const
 //  this is called each time the full set of definitions
 //  (game, port, resource files) are loaded.
 //
-void Instance::M_ClearAllDefinitions()
+void ConfigData::clearExceptDefaults()
 {
 	// Free all definitions
-	conf.line_groups.clear();
-	conf.line_types.clear();
-	conf.sector_types.clear();
+	line_groups.clear();
+	line_types.clear();
+	sector_types.clear();
 
-	conf.thing_groups.clear();
-	conf.thing_types.clear();
+	thing_groups.clear();
+	thing_types.clear();
 
-	conf.texture_groups.clear();
-	conf.texture_categories.clear();
-	conf.flat_categories.clear();
+	texture_groups.clear();
+	texture_categories.clear();
+	flat_categories.clear();
 
-	conf.miscInfo = misc_info_t();
+	miscInfo = misc_info_t();
 
-	conf.features = {};
+	features = {};
 
 	// reset generalized types
-	for(generalized_linetype_t &type : conf.gen_linetypes)
+	for(generalized_linetype_t &type : gen_linetypes)
 		type = {};
-	conf.num_gen_linetypes = 0;
+	num_gen_linetypes = 0;
 }
 
 //
@@ -440,7 +440,7 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 // Examples: "games" + "doom2"
 //           "ports" + "edge"
 //
-void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
+void Instance::M_LoadDefinitions(const SString &folder, const SString &name, ConfigData &config)
 		noexcept(false)
 {
 	// this is for error messages & debugging
@@ -458,10 +458,8 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name)
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	auto target = conf;
-	M_ParseDefinitionFile(*this, ParsePurpose::normal, &target, filename, folder,
+	M_ParseDefinitionFile(*this, ParsePurpose::normal, &config, filename, folder,
 						  prettyname);
-	conf = target;
 }
 
 #define MAX_INCLUDE_LEVEL  10

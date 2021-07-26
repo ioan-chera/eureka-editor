@@ -856,32 +856,32 @@ bool Instance::Main_LoadIWAD()
 }
 
 
-void Instance::ReadGameInfo(LoadingData &loading) noexcept(false)
+void Instance::ReadGameInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 {
 	loading.gameName = GameNameFromIWAD(loading.iwadName);
 
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
 	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());
 
-	M_LoadDefinitions("games", loading.gameName);
+	M_LoadDefinitions("games", loading.gameName, config);
 }
 
 
-void Instance::ReadPortInfo() noexcept(false)
+void Instance::ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
 	// the EUREKA_LUMP parsing code.
 
-	SYS_ASSERT(!loaded.portName.empty());
+	SYS_ASSERT(!loading.portName.empty());
 
-	SString base_game = M_GetBaseGame(*this, loaded.gameName);
+	SString base_game = M_GetBaseGame(*this, loading.gameName);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(*this, base_game, loaded.portName))
+	if (! M_CheckPortSupportsGame(*this, base_game, loading.portName))
 	{
 		gLog.printf("WARNING: the port '%s' is not compatible with the game "
-					"'%s'\n", loaded.portName.c_str(), loaded.gameName.c_str());
+					"'%s'\n", loading.portName.c_str(), loading.gameName.c_str());
 
 		int res = DLG_Confirm({ "&vanilla", "No Change" },
 							  "Warning: the given port '%s' is not compatible "
@@ -891,24 +891,24 @@ void Instance::ReadPortInfo() noexcept(false)
 							  "types, it is recommended to reset the port to "
 							  "something valid.\n"
 							  "Select a new port now?",
-							  loaded.portName.c_str(), loaded.gameName.c_str());
+							  loading.portName.c_str(), loading.gameName.c_str());
 
 		if (res == 0)
 		{
-			loaded.portName = "vanilla";
+			loading.portName = "vanilla";
 		}
 	}
 
-	gLog.printf("Port name: '%s'\n", loaded.portName.c_str());
+	gLog.printf("Port name: '%s'\n", loading.portName.c_str());
 
-	M_LoadDefinitions("ports", loaded.portName);
+	M_LoadDefinitions("ports", loading.portName, config);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
-	if (conf.features.strife_flags)
+	if (config.features.strife_flags)
 	{
-		conf.features.pass_through = 0;
-		conf.features.coop_dm_flags = 0;
-		conf.features.friend_flag = 0;
+		config.features.pass_through = 0;
+		config.features.coop_dm_flags = 0;
+		config.features.friend_flag = 0;
 	}
 }
 
@@ -928,13 +928,18 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	gLog.printf("----- Loading Resources -----\n");
 
 	// TODO: postpone this until we pass loading
-	M_ClearAllDefinitions();
+	ConfigData config = conf;
+	config.clearExceptDefaults();
 
 	// clear the parse variables, pre-set a few vars
 	M_PrepareConfigVariables(loading);
 
-	ReadGameInfo(loading);
-	ReadPortInfo();
+	ReadGameInfo(loading, config);
+	ReadPortInfo(loading, config);
+
+	// Commit it
+	// TODO: catch exceptions and do it later
+	conf = config;
 
 	// reset the master directory
 	if (edit_wad)
