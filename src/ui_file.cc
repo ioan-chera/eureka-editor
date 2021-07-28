@@ -997,7 +997,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	// determine the UDMF namespace
 	name_space = "";
 
-	const PortInfo_c *pinfo = M_LoadPortInfo(inst, port_choice->mvalue()->text);
+	const PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
 	if (pinfo)
 		name_space = pinfo->udmf_namespace;
 
@@ -1032,7 +1032,7 @@ void UI_ProjectSetup::PopulateNamespaces()
 	if (! port_choice->mvalue())
 		return;
 
-	PortInfo_c *pinfo = M_LoadPortInfo(inst, port_choice->mvalue()->text);
+	PortInfo_c *pinfo = M_LoadPortInfo(port_choice->mvalue()->text);
 	if (! pinfo)
 		return;
 

@@ -1123,7 +1123,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 }
 
 
-const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
+const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 {
 	std::map<SString, PortInfo_c>::iterator IT;
 	IT = global::loaded_port_defs.find(port);
@@ -1137,7 +1137,8 @@ const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 
 	global::loading_Port = PortInfo_c(port);
 
-	M_ParseDefinitionFile(inst.loaded.parse_vars, ParsePurpose::portInfo, &global::loading_Port,
+	std::unordered_map<SString, SString> empty_vars;
+	M_ParseDefinitionFile(empty_vars, ParsePurpose::portInfo, &global::loading_Port,
 						  filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2
@@ -1214,7 +1215,7 @@ SString M_GetBaseGame(const SString &game) noexcept(false)
 map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 										  const char *port)
 {
-	const PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
+	const PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (pinfo && pinfo->formats != 0)
 		return pinfo->formats;
 
@@ -1236,7 +1237,7 @@ bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
 		return true;
 	}
 
-	const PortInfo_c *pinfo = M_LoadPortInfo(inst, port);
+	const PortInfo_c *pinfo = M_LoadPortInfo(port);
 	if (! pinfo)
 		return false;
 

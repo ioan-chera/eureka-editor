@@ -364,7 +364,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   const SString &prettyname = NULL,
                            int include_level = 0);
 
-const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port);
+const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
