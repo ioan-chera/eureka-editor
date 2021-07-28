@@ -456,7 +456,7 @@ static void DeterminePort(Instance &inst)
 				  config::default_port.c_str());
 		config::default_port = "vanilla";
 	}
-	else if (! M_CheckPortSupportsGame(inst, base_game, config::default_port))
+	else if (! M_CheckPortSupportsGame(base_game, config::default_port))
 	{
 		gLog.printf("WARNING: Default port '%s' not compatible with '%s'\n",
 				  config::default_port.c_str(), inst.loaded.gameName.c_str());
@@ -878,7 +878,7 @@ void Instance::ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(f
 	SString base_game = M_GetBaseGame(loading.gameName);
 
 	// warn user if this port is incompatible with the game
-	if (! M_CheckPortSupportsGame(*this, base_game, loading.portName))
+	if (! M_CheckPortSupportsGame(base_game, loading.portName))
 	{
 		gLog.printf("WARNING: the port '%s' is not compatible with the game "
 					"'%s'\n", loading.portName.c_str(), loading.gameName.c_str());

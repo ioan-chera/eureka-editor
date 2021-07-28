@@ -1227,8 +1227,8 @@ map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 }
 
 
-bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
-							 const SString &port)
+bool M_CheckPortSupportsGame(const SString &base_game,
+							 const SString &port) noexcept(false)
 {
 	if (port == "vanilla")
 	{
@@ -1276,7 +1276,7 @@ SString M_CollectPortsForMenu(Instance &inst, const char *base_game,
 
 	for (i = 0 ; i < list.size() ; i++)
 	{
-		if (! M_CheckPortSupportsGame(inst, base_game, list[i]))
+		if (! M_CheckPortSupportsGame(base_game, list[i]))
 			continue;
 
 		if (result[0])

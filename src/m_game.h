@@ -368,8 +368,8 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false);
 
 std::vector<SString> M_CollectKnownDefs(const char *folder);
 
-bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
-							 const SString &port);
+bool M_CheckPortSupportsGame(const SString &base_game,
+							 const SString &port) noexcept(false);
 
 SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
 
