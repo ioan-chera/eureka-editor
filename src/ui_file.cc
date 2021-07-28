@@ -914,7 +914,7 @@ void UI_ProjectSetup::PopulatePort()
 
 	int menu_value = 0;
 
-	SString menu_string = M_CollectPortsForMenu(inst, base_game.c_str(), &menu_value, prev_port.c_str());
+	SString menu_string = M_CollectPortsForMenu(base_game.c_str(), &menu_value, prev_port.c_str());
 
 	if (!menu_string.empty())
 	{

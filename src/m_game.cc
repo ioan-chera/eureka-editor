@@ -1254,8 +1254,8 @@ bool M_CheckPortSupportsGame(const SString &base_game,
 // will also find an existing name, storing its index in 'exist_val'
 // (when not found, the value in 'exist_val' is not changed at all)
 
-SString M_CollectPortsForMenu(Instance &inst, const char *base_game,
-							  int *exist_val, const char *exist_name)
+SString M_CollectPortsForMenu(const char *base_game,
+							  int *exist_val, const char *exist_name) noexcept(false)
 {
 	std::vector<SString> list = M_CollectKnownDefs("ports");
 

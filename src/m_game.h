@@ -371,7 +371,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder);
 bool M_CheckPortSupportsGame(const SString &base_game,
 							 const SString &port) noexcept(false);
 
-SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
+SString M_CollectPortsForMenu(const char *base_game, int *exist_val, const char *exist_name) noexcept(false);
 
 SString M_GetBaseGame(const SString &game) noexcept(false);
 
