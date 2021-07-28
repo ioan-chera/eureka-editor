@@ -354,7 +354,7 @@ union ParseTarget
 	ConfigData *config;
 };
 
-void M_ParseDefinitionFile(Instance &inst,
+void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   ParsePurpose purpose,
 						   ParseTarget target,
 						   const SString &filename,

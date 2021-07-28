@@ -458,7 +458,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name, Con
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(*this, ParsePurpose::normal, &config, filename, folder,
+	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename, folder,
 						  prettyname);
 }
 
@@ -901,7 +901,7 @@ static void M_ParsePortInfoLine(parser_state_c *pst, PortInfo_c &port)
 }
 
 
-static ParsingCondition M_ParseConditional(const Instance &inst, parser_state_c *pst)
+static ParsingCondition M_ParseConditional(const std::unordered_map<SString, SString> &parse_vars, parser_state_c *pst)
 {
 	// returns the result of the "IF" test, true or false.
 
@@ -919,8 +919,8 @@ static ParsingCondition M_ParseConditional(const Instance &inst, parser_state_c 
 		// tokens are stored in pst->tokenbuf, so this is OK
 		y_strupr(argv[0]);
 
-		auto it = inst.parse_vars.find(argv[0]);
-		if(it != inst.parse_vars.end())
+		auto it = parse_vars.find(argv[0]);
+		if(it != parse_vars.end())
 		{
 			const SString &var_value = it->second;
 
@@ -938,7 +938,7 @@ static ParsingCondition M_ParseConditional(const Instance &inst, parser_state_c 
 }
 
 
-static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
+static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, parser_state_c *pst)
 {
 	char **argv  = pst->argv + 1;
 	int    nargs = pst->argc - 1;
@@ -952,7 +952,7 @@ static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 	// tokens are stored in pst->tokenbuf, so this is OK
 	y_strupr(argv[0]);
 
-	inst.parse_vars[argv[0]] = argv[1];
+	parse_vars[argv[0]] = argv[1];
 }
 
 //
@@ -962,7 +962,7 @@ static void M_ParseSetVar(Instance &inst, parser_state_c *pst)
 //  only minimal parsing occurs, in particular the "include", "set"
 //  and "if".."endif" directives are NOT handled.
 //
-void M_ParseDefinitionFile(Instance &inst,
+void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   const ParsePurpose purpose,
 						   ParseTarget target,
 						   const SString &filename,
@@ -1008,7 +1008,7 @@ void M_ParseDefinitionFile(Instance &inst,
 		{
 			parsing_cond_state_t cst;
 
-			cst.cond = M_ParseConditional(inst, pst);
+			cst.cond = M_ParseConditional(parse_vars, pst);
 			cst.start_line = pst->line();
 
 			pst->cond_stack.push_back(cst);
@@ -1041,7 +1041,7 @@ void M_ParseDefinitionFile(Instance &inst,
 		// handle setting variables
 		if (y_stricmp(pst->argv[0], "set") == 0)
 		{
-			M_ParseSetVar(inst, pst);
+			M_ParseSetVar(parse_vars, pst);
 			continue;
 		}
 
@@ -1068,7 +1068,7 @@ void M_ParseDefinitionFile(Instance &inst,
 			if (new_name.empty())
 				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
-			M_ParseDefinitionFile(inst, purpose, target, new_name, new_folder,
+			M_ParseDefinitionFile(parse_vars, purpose, target, new_name, new_folder,
 								  NULL /* prettyname */,
 								  include_level + 1);
 			continue;
@@ -1110,7 +1110,7 @@ static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(inst, ParsePurpose::gameInfo, &loadingGame,
+	M_ParseDefinitionFile(inst.parse_vars, ParsePurpose::gameInfo, &loadingGame,
 						  filename, "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
@@ -1136,7 +1136,7 @@ const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 
 	global::loading_Port = PortInfo_c(port);
 
-	M_ParseDefinitionFile(inst, ParsePurpose::portInfo, &global::loading_Port,
+	M_ParseDefinitionFile(inst.parse_vars, ParsePurpose::portInfo, &global::loading_Port,
 						  filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2
