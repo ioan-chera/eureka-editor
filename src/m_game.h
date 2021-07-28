@@ -258,8 +258,7 @@ struct generalized_field_t
 
 	SString name;
 
-	SString keywords[MAX_GEN_FIELD_KEYWORDS];
-	int num_keywords;
+	std::vector<SString> keywords;
 };
 
 
@@ -272,8 +271,7 @@ struct generalized_linetype_t
 
 	SString name;
 
-	generalized_field_t fields[MAX_GEN_NUM_FIELDS];
-	int num_fields;
+	std::vector<generalized_field_t> fields;
 };
 
 //------------------------------------------------------------------------

@@ -1101,7 +1101,7 @@ const char * UI_LineBox::GeneralizedDesc(int type_num)
 		if (type_num >= info->base && type_num < (info->base + info->length))
 		{
 			// grab trigger name (we assume it is first field)
-			if (info->num_fields < 1 || info->fields[0].num_keywords < 8)
+			if (info->fields.size() < 1 || info->fields[0].keywords.size() < 8)
 				return NULL;
 
 			const char *trigger = info->fields[0].keywords[type_num & 7].c_str();

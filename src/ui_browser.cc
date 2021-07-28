@@ -1136,9 +1136,9 @@ public:
 
 		copy_label(label_buf);
 
-		for (int i = 0 ; i < field->num_keywords ; i++)
+		for (const auto &keyword : field->keywords)
 		{
-			add(field->keywords[i].c_str());
+			add(keyword.c_str());
 		}
 
 		Reset();
@@ -1159,7 +1159,7 @@ public:
 
 	void Reset()
 	{
-		int def_val = CLAMP(0, field->default_val, field->num_keywords - 1);
+		int def_val = CLAMP(0, field->default_val, static_cast<int>(field->keywords.size()) - 1);
 
 		value(def_val);
 	}
@@ -1207,7 +1207,7 @@ public:
 
 		memset(items, 0, sizeof(items));
 
-		num_items = info->num_fields;
+		num_items = (int)info->fields.size();
 
 		Y += 5;
 

@@ -789,7 +789,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		def->length = static_cast<int>(strtol(argv[3], NULL, 0));
 
 		def->name = argv[4];
-		def->num_fields = 0;
+		def->fields.clear();
 	}
 
 	else if (y_stricmp(argv[0], "gen_field") == 0)
@@ -802,10 +802,10 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 
 		generalized_linetype_t *def = &config.gen_linetypes[pst->current_gen_line];
 
-		generalized_field_t *field = &def->fields[def->num_fields];
+		def->fields.push_back({});
+		generalized_field_t *field = &def->fields.back();
 
-		def->num_fields++;
-		if (def->num_fields > MAX_GEN_NUM_FIELDS)
+		if (def->fields.size() > MAX_GEN_NUM_FIELDS)
 			pst->fail("too many fields in gen_line definition");
 
 		field->bits  = atoi(argv[1]);
@@ -818,11 +818,12 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		field->name = argv[4];
 
 		// grab the keywords
-		field->num_keywords = std::min(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
+		int num_keywords = std::min(nargs - 4, MAX_GEN_FIELD_KEYWORDS);
+		field->keywords.reserve(num_keywords);
 
-		for (int i = 0 ; i < field->num_keywords ; i++)
+		for (int i = 0 ; i < num_keywords ; i++)
 		{
-			field->keywords[i] = argv[5 + i];
+			field->keywords.push_back(argv[5 + i]);
 		}
 	}
 	else if (y_stricmp(argv[0], "clear") == 0)
