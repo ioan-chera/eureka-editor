@@ -932,7 +932,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	config.clearExceptDefaults();
 
 	// clear the parse variables, pre-set a few vars
-	M_PrepareConfigVariables(loading);
+	loading.prepareConfigVariables();
 
 	ReadGameInfo(loading, config);
 	ReadPortInfo(loading, config);

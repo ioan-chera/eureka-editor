@@ -34,6 +34,8 @@
 //
 struct LoadingData
 {
+	void prepareConfigVariables();
+
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
 	SString portName;	// Name of source port "vanilla", "boom", ...
 	SString iwadName;	// Filename of the iwad

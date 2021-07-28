@@ -170,47 +170,47 @@ void ConfigData::clearExceptDefaults()
 //
 // Called only from Main_LoadResources
 //
-void Instance::M_PrepareConfigVariables(LoadingData &loading)
+void LoadingData::prepareConfigVariables()
 {
-	loading.parse_vars.clear();
+	parse_vars.clear();
 
-	switch (loading.levelFormat)
+	switch (levelFormat)
 	{
 		case MapFormat::doom:
-			loading.parse_vars["$MAP_FORMAT"] = "DOOM";
+			parse_vars["$MAP_FORMAT"] = "DOOM";
 			break;
 
 		case MapFormat::hexen:
-			loading.parse_vars["$MAP_FORMAT"] = "HEXEN";
+			parse_vars["$MAP_FORMAT"] = "HEXEN";
 			break;
 
 		case MapFormat::udmf:
-			loading.parse_vars["$MAP_FORMAT"] = "UDMF";
+			parse_vars["$MAP_FORMAT"] = "UDMF";
 			break;
 
 		default:
 			break;
 	}
 
-	if (!loading.udmfNamespace.empty())
+	if (!udmfNamespace.empty())
 	{
-		loading.parse_vars["$UDMF_NAMESPACE"] = loading.udmfNamespace;
+		parse_vars["$UDMF_NAMESPACE"] = udmfNamespace;
 	}
 
-	if (!loading.gameName.empty())
+	if (!gameName.empty())
 	{
-		loading.parse_vars["$GAME_NAME"] = loading.gameName;
+		parse_vars["$GAME_NAME"] = gameName;
 
-		if (M_CanLoadDefinitions(GAMES_DIR, loading.gameName))
+		if (M_CanLoadDefinitions(GAMES_DIR, gameName))
 		{
-			SString base_game = M_GetBaseGame(loading, loading.gameName);
-			loading.parse_vars["$BASE_GAME"] = base_game;
+			SString base_game = M_GetBaseGame(*this, gameName);
+			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
-	if (!loading.portName.empty())
+	if (!portName.empty())
 	{
-		loading.parse_vars["$PORT_NAME"] = loading.portName;
+		parse_vars["$PORT_NAME"] = portName;
 	}
 }
 

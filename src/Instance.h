@@ -332,7 +332,6 @@ public:
 	char M_GetTextureType(const SString &name) const;
 	const thingtype_t &M_GetThingType(int type) const;
 	SString M_LineCategoryString(SString &letters) const;
-	void M_PrepareConfigVariables(LoadingData &loading);
 	SString M_TextureCategoryString(SString &letters, bool do_flats) const;
 	SString M_ThingCategoryString(SString &letters) const;
 
