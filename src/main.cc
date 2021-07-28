@@ -821,7 +821,7 @@ void Instance::LoadResourceFile(const SString &filename)
 	if (MatchExtension(filename, "ugh"))
 	{
 		ConfigData target = conf;
-		M_ParseDefinitionFile(parse_vars, ParsePurpose::resource, &target, filename);
+		M_ParseDefinitionFile(loaded.parse_vars, ParsePurpose::resource, &target, filename);
 		conf = target;
 
 		return;

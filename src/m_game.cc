@@ -170,22 +170,22 @@ void ConfigData::clearExceptDefaults()
 //
 // Called only from Main_LoadResources
 //
-void Instance::M_PrepareConfigVariables(const LoadingData &loading)
+void Instance::M_PrepareConfigVariables(LoadingData &loading)
 {
-	parse_vars.clear();
+	loading.parse_vars.clear();
 
 	switch (loading.levelFormat)
 	{
 		case MapFormat::doom:
-			parse_vars["$MAP_FORMAT"] = "DOOM";
+			loading.parse_vars["$MAP_FORMAT"] = "DOOM";
 			break;
 
 		case MapFormat::hexen:
-			parse_vars["$MAP_FORMAT"] = "HEXEN";
+			loading.parse_vars["$MAP_FORMAT"] = "HEXEN";
 			break;
 
 		case MapFormat::udmf:
-			parse_vars["$MAP_FORMAT"] = "UDMF";
+			loading.parse_vars["$MAP_FORMAT"] = "UDMF";
 			break;
 
 		default:
@@ -194,23 +194,23 @@ void Instance::M_PrepareConfigVariables(const LoadingData &loading)
 
 	if (!loading.udmfNamespace.empty())
 	{
-		parse_vars["$UDMF_NAMESPACE"] = loading.udmfNamespace;
+		loading.parse_vars["$UDMF_NAMESPACE"] = loading.udmfNamespace;
 	}
 
 	if (!loading.gameName.empty())
 	{
-		parse_vars["$GAME_NAME"] = loading.gameName;
+		loading.parse_vars["$GAME_NAME"] = loading.gameName;
 
 		if (M_CanLoadDefinitions(GAMES_DIR, loading.gameName))
 		{
 			SString base_game = M_GetBaseGame(*this, loading.gameName);
-			parse_vars["$BASE_GAME"] = base_game;
+			loading.parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
 
 	if (!loading.portName.empty())
 	{
-		parse_vars["$PORT_NAME"] = loading.portName;
+		loading.parse_vars["$PORT_NAME"] = loading.portName;
 	}
 }
 
@@ -458,7 +458,7 @@ void Instance::M_LoadDefinitions(const SString &folder, const SString &name, Con
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename, folder,
+	M_ParseDefinitionFile(loaded.parse_vars, ParsePurpose::normal, &config, filename, folder,
 						  prettyname);
 }
 
@@ -1110,7 +1110,7 @@ static GameInfo M_LoadGameInfo(Instance &inst, const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(inst.parse_vars, ParsePurpose::gameInfo, &loadingGame,
+	M_ParseDefinitionFile(inst.loaded.parse_vars, ParsePurpose::gameInfo, &loadingGame,
 						  filename, "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
@@ -1136,7 +1136,7 @@ const PortInfo_c * M_LoadPortInfo(Instance &inst, const SString &port)
 
 	global::loading_Port = PortInfo_c(port);
 
-	M_ParseDefinitionFile(inst.parse_vars, ParsePurpose::portInfo, &global::loading_Port,
+	M_ParseDefinitionFile(inst.loaded.parse_vars, ParsePurpose::portInfo, &global::loading_Port,
 						  filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2

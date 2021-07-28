@@ -41,6 +41,8 @@ struct LoadingData
 	SString udmfNamespace;	// for UDMF, the current namespace
 	std::vector<SString> resourceList;
 	MapFormat levelFormat = {};	// format of current map
+
+	std::unordered_map<SString, SString> parse_vars;
 };
 
 void OpenFileMap(const SString &filename, const SString &map_name = "");

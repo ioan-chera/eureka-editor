@@ -332,7 +332,7 @@ public:
 	char M_GetTextureType(const SString &name) const;
 	const thingtype_t &M_GetThingType(int type) const;
 	SString M_LineCategoryString(SString &letters) const;
-	void M_PrepareConfigVariables(const LoadingData &loading);
+	void M_PrepareConfigVariables(LoadingData &loading);
 	SString M_TextureCategoryString(SString &letters, bool do_flats) const;
 	SString M_ThingCategoryString(SString &letters) const;
 
@@ -552,7 +552,6 @@ private:
 
 
 public:	// will be private when we encapsulate everything
-	std::unordered_map<SString, SString> parse_vars;
 	Document level{*this};	// level data proper
 
 	UI_MainWindow *main_win = nullptr;
