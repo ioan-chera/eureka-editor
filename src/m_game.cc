@@ -440,7 +440,7 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 // Examples: "games" + "doom2"
 //           "ports" + "edge"
 //
-void M_LoadDefinitions(LoadingData &loading, const SString &folder, const SString &name, ConfigData &config)
+void LoadingData::readConfiguration(const SString &folder, const SString &name, ConfigData &config)
 		noexcept(false)
 {
 	// this is for error messages & debugging
@@ -458,7 +458,7 @@ void M_LoadDefinitions(LoadingData &loading, const SString &folder, const SStrin
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::normal, &config, filename, folder,
+	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename, folder,
 						  prettyname);
 }
 

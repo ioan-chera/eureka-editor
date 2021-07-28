@@ -863,7 +863,7 @@ void Instance::ReadGameInfo(LoadingData &loading, ConfigData &config) noexcept(f
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
 	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());
 
-	M_LoadDefinitions(loading, "games", loading.gameName, config);
+	loading.readConfiguration("games", loading.gameName, config);
 }
 
 
@@ -901,7 +901,7 @@ void Instance::ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(f
 
 	gLog.printf("Port name: '%s'\n", loading.portName.c_str());
 
-	M_LoadDefinitions(loading, "ports", loading.portName, config);
+	loading.readConfiguration("ports", loading.portName, config);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (config.features.strife_flags)
