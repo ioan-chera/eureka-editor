@@ -518,8 +518,6 @@ private:
 
 	// MAIN
 	void LoadResourceFile(const SString& filename);
-	void M_LoadDefinitions(const SString &folder, const SString &name, ConfigData &config)
-			noexcept(false);
 	void ReadGameInfo(LoadingData &loading, ConfigData &config) noexcept(false);
 	void ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(false);
 

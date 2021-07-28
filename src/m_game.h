@@ -30,6 +30,7 @@
 #include "im_color.h"
 #include "m_strings.h"
 
+struct ConfigData;
 class Instance;
 struct LoadingData;
 
@@ -282,6 +283,7 @@ static const char GAMES_DIR[] = "games";
 static const char PORTS_DIR[] = "ports";
 
 bool M_CanLoadDefinitions(const SString &folder, const SString &name);
+void M_LoadDefinitions(LoadingData &loading, const SString &folder, const SString &name, ConfigData &config) noexcept(false);
 
 enum class ParsePurpose
 {
