@@ -373,7 +373,7 @@ bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
 
 SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
 
-SString M_GetBaseGame(LoadingData &loading, const SString &game);
+SString M_GetBaseGame(const SString &game) noexcept(false);
 
 map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 										  const char *port);

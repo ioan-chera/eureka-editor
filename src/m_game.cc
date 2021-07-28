@@ -203,7 +203,7 @@ void LoadingData::prepareConfigVariables()
 
 		if (M_CanLoadDefinitions(GAMES_DIR, gameName))
 		{
-			SString base_game = M_GetBaseGame(*this, gameName);
+			SString base_game = M_GetBaseGame(gameName);
 			parse_vars["$BASE_GAME"] = base_game;
 		}
 	}
@@ -1098,7 +1098,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 //
 // Load game info
 //
-static GameInfo M_LoadGameInfo(LoadingData &loading, const SString &game)
+static GameInfo M_LoadGameInfo(const SString &game)
 		noexcept(false)
 {
 	// already loaded?
@@ -1110,7 +1110,8 @@ static GameInfo M_LoadGameInfo(LoadingData &loading, const SString &game)
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
-	M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::gameInfo, &loadingGame,
+	std::unordered_map<SString, SString> empty_vars;
+	M_ParseDefinitionFile(empty_vars, ParsePurpose::gameInfo, &loadingGame,
 						  filename, "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
@@ -1201,9 +1202,9 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 
 }
 
-SString M_GetBaseGame(LoadingData &loading, const SString &game)
+SString M_GetBaseGame(const SString &game) noexcept(false)
 {
-	GameInfo ginfo = M_LoadGameInfo(loading, game);
+	GameInfo ginfo = M_LoadGameInfo(game);
 	SYS_ASSERT(ginfo.isSet());
 
 	return ginfo.baseGame;
