@@ -442,7 +442,7 @@ static void DeterminePort(Instance &inst)
 		return;
 	}
 
-	SString base_game = M_GetBaseGame(inst, inst.loaded.gameName);
+	SString base_game = M_GetBaseGame(inst.loaded, inst.loaded.gameName);
 
 	// ensure the 'default_port' value is OK
 	if (config::default_port.empty())
@@ -875,7 +875,7 @@ void Instance::ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(f
 
 	SYS_ASSERT(!loading.portName.empty());
 
-	SString base_game = M_GetBaseGame(*this, loading.gameName);
+	SString base_game = M_GetBaseGame(loading, loading.gameName);
 
 	// warn user if this port is incompatible with the game
 	if (! M_CheckPortSupportsGame(*this, base_game, loading.portName))

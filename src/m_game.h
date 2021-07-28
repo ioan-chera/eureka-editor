@@ -31,6 +31,7 @@
 #include "m_strings.h"
 
 class Instance;
+struct LoadingData;
 
 // for this, set/clear/test bits using (1 << MAPF_xxx)
 typedef int map_format_bitset_t;
@@ -371,7 +372,7 @@ bool M_CheckPortSupportsGame(Instance &inst, const SString &base_game,
 
 SString M_CollectPortsForMenu(Instance &inst, const char *base_game, int *exist_val, const char *exist_name);
 
-SString M_GetBaseGame(Instance &inst, const SString &game);
+SString M_GetBaseGame(LoadingData &loading, const SString &game);
 
 map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 										  const char *port);
