@@ -927,7 +927,6 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	gLog.printf("\n");
 	gLog.printf("----- Loading Resources -----\n");
 
-	// TODO: postpone this until we pass loading
 	ConfigData config = conf;
 	config.clearExceptDefaults();
 
