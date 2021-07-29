@@ -898,46 +898,53 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 //
 void Instance::Main_LoadResources(LoadingData &loading)
 {
-	// FIXME: avoid doing this in case of error
-	if(edit.Selected)
-		edit.Selected->clear_all();
-
-	gLog.printf("\n");
-	gLog.printf("----- Loading Resources -----\n");
-
 	ConfigData config = conf;
-	config.clearExceptDefaults();
-
-	// clear the parse variables, pre-set a few vars
-	loading.prepareConfigVariables();
-
-	readGameInfo(loading, config);
-	readPortInfo(loading, config);
-
 	std::vector<std::unique_ptr<Wad_file>> resourceWads;
-
-	for(const SString &resource : loading.resourceList)
+	try
 	{
-		if(MatchExtension(resource, "ugh"))
+		// FIXME: avoid doing this in case of error
+		if(edit.Selected)
+			edit.Selected->clear_all();
+
+		gLog.printf("\n");
+		gLog.printf("----- Loading Resources -----\n");
+
+		config.clearExceptDefaults();
+
+		// clear the parse variables, pre-set a few vars
+		loading.prepareConfigVariables();
+
+		readGameInfo(loading, config);
+		readPortInfo(loading, config);
+
+		for(const SString &resource : loading.resourceList)
 		{
-			M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
-								  &config, resource);
-			continue;
+			if(MatchExtension(resource, "ugh"))
+			{
+				M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
+									  &config, resource);
+				continue;
+			}
+			// Otherwise wad
+			if(!Wad_file::Validate(resource))
+				throw ParseException("Invalid WAD file: " + resource);
+
+			Wad_file *wad = Wad_file::Open(resource, WadOpenMode::read);
+			if(!wad)
+				throw ParseException("Cannot load resource: " + resource);
+
+			resourceWads.push_back(std::unique_ptr<Wad_file>(wad));
 		}
-		// Otherwise wad
-		if(!Wad_file::Validate(resource))
-			throw ParseException("Invalid WAD file: " + resource);
-
-		Wad_file *wad = Wad_file::Open(resource, WadOpenMode::read);
-		if(!wad)
-			throw ParseException("Cannot load resource: " + resource);
-
-		resourceWads.push_back(std::unique_ptr<Wad_file>(wad));
+	}
+	catch(const ParseException &e)
+	{
+		gLog.printf("Failed reloading wads: %s\n", e.what());
+		throw;
 	}
 
 	// Commit it
-	// TODO: catch exceptions and do it later
 	conf = config;
+	loaded = loading;
 
 	// reset the master directory
 	if (edit_wad)

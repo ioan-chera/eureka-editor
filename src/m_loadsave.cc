@@ -172,25 +172,11 @@ bool Instance::Project_AskFile(SString &filename) const
 
 void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
-	auto initialLoaded = loaded;
-
-	try
-	{
-		// grab the new information
-		loaded = dialog->prepareLoadingData();
-
-		Fl::wait(0.1);
-
-		Main_LoadResources(loaded);
-
-		Fl::wait(0.1);
-	}
-	catch(const ParseException &)
-	{
-		// Restore
-		loaded = initialLoaded;
-		throw;
-	}
+	// grab the new information
+	LoadingData loading = dialog->prepareLoadingData();
+	Fl::wait(0.1);
+	Main_LoadResources(loading);
+	Fl::wait(0.1);
 }
 
 
