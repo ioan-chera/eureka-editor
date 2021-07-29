@@ -856,14 +856,15 @@ bool Instance::Main_LoadIWAD()
 }
 
 
-void LoadingData::readGameInfo(ConfigData &config) noexcept(false)
+static void readGameInfo(LoadingData &loading, ConfigData &config)
+		noexcept(false)
 {
-	gameName = GameNameFromIWAD(iwadName);
+	loading.gameName = GameNameFromIWAD(loading.iwadName);
 
-	gLog.printf("Game name: '%s'\n", gameName.c_str());
-	gLog.printf("IWAD file: '%s'\n", iwadName.c_str());
+	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
+	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());
 
-	readConfiguration("games", gameName, config);
+	readConfiguration(loading.parse_vars, "games", loading.gameName, config);
 }
 
 
@@ -901,7 +902,7 @@ void Instance::ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(f
 
 	gLog.printf("Port name: '%s'\n", loading.portName.c_str());
 
-	loading.readConfiguration("ports", loading.portName, config);
+	readConfiguration(loading.parse_vars, "ports", loading.portName, config);
 
 	// prevent UI weirdness if the port is forced to BOOM / MBF
 	if (config.features.strife_flags)
@@ -933,7 +934,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	// clear the parse variables, pre-set a few vars
 	loading.prepareConfigVariables();
 
-	loading.readGameInfo(config);
+	readGameInfo(loading, config);
 	ReadPortInfo(loading, config);
 
 	// Commit it

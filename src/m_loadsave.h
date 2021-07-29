@@ -35,8 +35,6 @@
 struct LoadingData
 {
 	void prepareConfigVariables();
-	void readGameInfo(ConfigData &config) noexcept(false);
-	void readConfiguration(const SString &folder, const SString &name, ConfigData &config) noexcept(false);
 
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
 	SString portName;	// Name of source port "vanilla", "boom", ...

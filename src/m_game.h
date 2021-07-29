@@ -283,6 +283,9 @@ static const char GAMES_DIR[] = "games";
 static const char PORTS_DIR[] = "ports";
 
 bool M_CanLoadDefinitions(const SString &folder, const SString &name);
+void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
+					   const SString &folder, const SString &name,
+					   ConfigData &config) noexcept(false);
 
 enum class ParsePurpose
 {

@@ -440,8 +440,9 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 // Examples: "games" + "doom2"
 //           "ports" + "edge"
 //
-void LoadingData::readConfiguration(const SString &folder, const SString &name, ConfigData &config)
-		noexcept(false)
+void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
+					   const SString &folder, const SString &name,
+					   ConfigData &config) noexcept(false)
 {
 	// this is for error messages & debugging
 	SString prettyname = folder + "/" + name + ".ugh";
@@ -458,8 +459,8 @@ void LoadingData::readConfiguration(const SString &folder, const SString &name, 
 
 	gLog.debugPrintf("  found at: %s\n", filename.c_str());
 
-	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename, folder,
-						  prettyname);
+	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename,
+						  folder, prettyname);
 }
 
 #define MAX_INCLUDE_LEVEL  10
