@@ -815,30 +815,6 @@ void Main_Loop()
 }
 
 
-void Instance::LoadResourceFile(const SString &filename)
-{
-	// support loading "ugh" config files
-	if (MatchExtension(filename, "ugh"))
-	{
-		ConfigData target = conf;
-		M_ParseDefinitionFile(loaded.parse_vars, ParsePurpose::resource, &target, filename);
-		conf = target;
-
-		return;
-	}
-
-	if (!Wad_file::Validate(filename))
-		throw WadReadException("Invalid WAD file: " + filename);
-
-	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::read);
-
-	if (!wad)
-		throw WadReadException("Cannot load resource: " + filename);
-
-	MasterDir_Add(wad);
-}
-
-
 bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
@@ -937,6 +913,27 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	readGameInfo(loading, config);
 	readPortInfo(loading, config);
 
+	std::vector<std::unique_ptr<Wad_file>> resourceWads;
+
+	for(const SString &resource : loading.resourceList)
+	{
+		if(MatchExtension(resource, "ugh"))
+		{
+			M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
+								  &config, resource);
+			continue;
+		}
+		// Otherwise wad
+		if(!Wad_file::Validate(resource))
+			throw ParseException("Invalid WAD file: " + resource);
+
+		Wad_file *wad = Wad_file::Open(resource, WadOpenMode::read);
+		if(!wad)
+			throw ParseException("Cannot load resource: " + resource);
+
+		resourceWads.push_back(std::unique_ptr<Wad_file>(wad));
+	}
+
 	// Commit it
 	// TODO: catch exceptions and do it later
 	conf = config;
@@ -951,17 +948,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for (const SString &resource : loading.resourceList)
-	{
-		try
-		{
-			LoadResourceFile(resource);
-		}
-		catch (const WadReadException& e)
-		{
-			gLog.printf("%s\n", e.what());
-		}
-	}
+	for(const std::unique_ptr<Wad_file> &wad : resourceWads)
+		MasterDir_Add(wad.get());
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad);

@@ -516,9 +516,6 @@ private:
 	// M_UDMF
 	void ValidateLevel_UDMF();
 
-	// MAIN
-	void LoadResourceFile(const SString& filename);
-
 	// R_GRID
 	bool Grid_ParseUser(const std::vector<SString> &tokens);
 	void Grid_WriteUser(std::ostream &os) const;
