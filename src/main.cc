@@ -868,7 +868,7 @@ static void readGameInfo(LoadingData &loading, ConfigData &config)
 }
 
 
-void Instance::ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
+void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 {
 	// we assume that the port name is valid, i.e. a config file
 	// exists for it.  That is checked by DeterminePort() and
@@ -935,7 +935,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	loading.prepareConfigVariables();
 
 	readGameInfo(loading, config);
-	ReadPortInfo(loading, config);
+	readPortInfo(loading, config);
 
 	// Commit it
 	// TODO: catch exceptions and do it later

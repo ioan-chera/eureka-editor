@@ -518,7 +518,6 @@ private:
 
 	// MAIN
 	void LoadResourceFile(const SString& filename);
-	void ReadPortInfo(LoadingData &loading, ConfigData &config) noexcept(false);
 
 	// R_GRID
 	bool Grid_ParseUser(const std::vector<SString> &tokens);
