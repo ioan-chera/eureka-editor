@@ -158,7 +158,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = W_FindGlobalLump(picname);
+		Lump_c *lump = master.findGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -225,7 +225,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		picname[8] = 0;
 
 //gLog.debugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = W_FindGlobalLump(picname);
+		Lump_c *lump = master.findGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
@@ -689,13 +689,13 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = inst.W_FindGlobalLump(buffer);
+		lump = inst.master.findGlobalLump(buffer);
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = inst.W_FindGlobalLump(buffer);
+			lump = inst.master.findGlobalLump(buffer);
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -709,7 +709,7 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = inst.W_FindGlobalLump(name);
+		lump = inst.master.findGlobalLump(name);
 	}
 
 	return lump;

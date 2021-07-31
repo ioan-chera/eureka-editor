@@ -73,7 +73,7 @@ static void W_CreateBrightMap(Instance &inst);
 
 void Instance::W_LoadPalette()
 {
-	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
+	Lump_c *lump = master.findGlobalLump("PLAYPAL");
 
 	if (! lump)
 	{
@@ -105,7 +105,7 @@ void Instance::W_LoadPalette()
 
 void Instance::W_LoadColormap()
 {
-	Lump_c *lump = W_FindGlobalLump("COLORMAP");
+	Lump_c *lump = master.findGlobalLump("COLORMAP");
 
 	if (! lump)
 	{

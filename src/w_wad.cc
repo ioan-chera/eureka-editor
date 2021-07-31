@@ -1275,11 +1275,11 @@ bool Wad_file::Backup(const char *new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *Instance::W_FindGlobalLump(const SString &name) const
+Lump_c *MasterDirectory::findGlobalLump(const SString &name) const
 {
-	for (int i = (int)master.dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master.dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}

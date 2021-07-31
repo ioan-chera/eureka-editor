@@ -34,6 +34,8 @@ struct MasterDirectory
 
 	bool loadIwad(const SString &name);
 
+	Lump_c *findGlobalLump(const SString &name) const;
+
 	std::vector<Wad_file *> dir;	// the IWAD, never NULL, always at master_dir.front()
 	Wad_file *game_wad = nullptr;
 };

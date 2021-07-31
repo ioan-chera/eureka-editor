@@ -425,7 +425,6 @@ public:
 	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
-	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
 
 private:
