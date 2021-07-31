@@ -96,7 +96,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 			byte pix = *src++;
 
 			if (pix == TRANS_PIXEL)
-				pix = static_cast<byte>(inst.trans_replace);
+				pix = static_cast<byte>(inst.wad.trans_replace);
 
 			dest[top * W] = pix;
 		}

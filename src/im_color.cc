@@ -43,29 +43,29 @@ void Instance::W_UpdateGamma()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		byte r = raw_palette[c][0];
-		byte g = raw_palette[c][1];
-		byte b = raw_palette[c][2];
+		byte r = wad.raw_palette[c][0];
+		byte g = wad.raw_palette[c][1];
+		byte b = wad.raw_palette[c][2];
 
 		byte r2 = static_cast<byte>(gammatable[config::usegamma][r]);
 		byte g2 = static_cast<byte>(gammatable[config::usegamma][g]);
 		byte b2 = static_cast<byte>(gammatable[config::usegamma][b]);
 
-		palette[c] = fl_rgb_color(r2, g2, b2);
+		wad.palette[c] = fl_rgb_color(r2, g2, b2);
 
 		r2 = static_cast<byte>(gammatable[config::panel_gamma][r]);
 		g2 = static_cast<byte>(gammatable[config::panel_gamma][g]);
 		b2 = static_cast<byte>(gammatable[config::panel_gamma][b]);
 
-		palette_medium[c] = fl_rgb_color(r2, g2, b2);
+		wad.palette_medium[c] = fl_rgb_color(r2, g2, b2);
 	}
 
 	for (int d = 0 ; d < 32 ; d++)
 	{
 		int i = d * 255 / 31;
 
-		rgb555_gamma [d] = static_cast<byte>(gammatable[config::usegamma][i]);
-		rgb555_medium[d] = static_cast<byte>(gammatable[config::panel_gamma][i]);
+		wad.rgb555_gamma [d] = static_cast<byte>(gammatable[config::usegamma][i]);
+		wad.rgb555_medium[d] = static_cast<byte>(gammatable[config::panel_gamma][i]);
 	}
 }
 
@@ -82,18 +82,18 @@ void Instance::W_LoadPalette()
 	}
 
 	if (! lump->Seek() ||
-		! lump->Read(raw_palette, sizeof(raw_palette)))
+		! lump->Read(wad.raw_palette, sizeof(wad.raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return;
 	}
 
 	// find the colour closest to TRANS_PIXEL
-	byte tr = raw_palette[TRANS_PIXEL][0];
-	byte tg = raw_palette[TRANS_PIXEL][1];
-	byte tb = raw_palette[TRANS_PIXEL][2];
+	byte tr = wad.raw_palette[TRANS_PIXEL][0];
+	byte tg = wad.raw_palette[TRANS_PIXEL][1];
+	byte tb = wad.raw_palette[TRANS_PIXEL][2];
 
-	trans_replace = W_FindPaletteColor(tr, tg, tb);
+	wad.trans_replace = W_FindPaletteColor(tr, tg, tb);
 
 	W_UpdateGamma();
 
@@ -125,13 +125,13 @@ void Instance::W_LoadColormap()
 	for (int c = 0 ; c < 256 ; c++)
 	{
 		if (raw_colormap[i][c] == TRANS_PIXEL)
-			raw_colormap[i][c] = static_cast<byte>(trans_replace);
+			raw_colormap[i][c] = static_cast<byte>(wad.trans_replace);
 	}
 
 	// workaround for Harmony having a bugged colormap
-	if (raw_palette[0][0] == 0 &&
-		raw_palette[0][1] == 0 &&
-		raw_palette[0][2] == 0)
+	if (wad.raw_palette[0][0] == 0 &&
+		wad.raw_palette[0][1] == 0 &&
+		wad.raw_palette[0][2] == 0)
 	{
 		for (int k = 0 ; k < 32 ; k++)
 			raw_colormap[k][0] = 0;
@@ -174,9 +174,9 @@ byte Instance::W_FindPaletteColor(int r, int g, int b) const
 		if (c == TRANS_PIXEL)
 			continue;
 
-		int dr = r - (int)raw_palette[c][0];
-		int dg = g - (int)raw_palette[c][1];
-		int db = b - (int)raw_palette[c][2];
+		int dr = r - (int)wad.raw_palette[c][0];
+		int dg = g - (int)wad.raw_palette[c][1];
+		int db = b - (int)wad.raw_palette[c][2];
 
 		int dist = dr*dr + dg*dg + db*db;
 
@@ -195,9 +195,9 @@ static void W_CreateBrightMap(Instance &inst)
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		byte r = inst.raw_palette[c][0];
-		byte g = inst.raw_palette[c][1];
-		byte b = inst.raw_palette[c][2];
+		byte r = inst.wad.raw_palette[c][0];
+		byte g = inst.wad.raw_palette[c][1];
+		byte b = inst.wad.raw_palette[c][2];
 
 		rgb_color_t col = LighterColor(fl_rgb_color(r, g, b));
 
@@ -205,7 +205,7 @@ static void W_CreateBrightMap(Instance &inst)
 		g = RGB_GREEN(col);
 		b = RGB_BLUE(col);
 
-		inst.bright_map[c] = inst.W_FindPaletteColor(r, g, b);
+		inst.wad.bright_map[c] = inst.W_FindPaletteColor(r, g, b);
 	}
 }
 

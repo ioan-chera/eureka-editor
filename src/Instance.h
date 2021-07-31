@@ -31,6 +31,7 @@
 #include "r_subdiv.h"
 #include "w_texture.h"
 #include "w_wad.h"
+#include "WadData.h"
 
 #include <unordered_map>
 
@@ -265,13 +266,13 @@ public:
 	{
 		if(p & IS_RGB_PIXEL)
 		{
-			r = rgb555_gamma[IMG_PIXEL_RED(p)];
-			g = rgb555_gamma[IMG_PIXEL_GREEN(p)];
-			b = rgb555_gamma[IMG_PIXEL_BLUE(p)];
+			r = wad.rgb555_gamma[IMG_PIXEL_RED(p)];
+			g = wad.rgb555_gamma[IMG_PIXEL_GREEN(p)];
+			b = wad.rgb555_gamma[IMG_PIXEL_BLUE(p)];
 		}
 		else
 		{
-			const rgb_color_t col = palette[p];
+			const rgb_color_t col = wad.palette[p];
 
 			r = RGB_RED(col);
 			g = RGB_GREEN(col);
@@ -285,13 +286,13 @@ public:
 	{
 		if(p & IS_RGB_PIXEL)
 		{
-			r = rgb555_medium[IMG_PIXEL_RED(p)];
-			g = rgb555_medium[IMG_PIXEL_GREEN(p)];
-			b = rgb555_medium[IMG_PIXEL_BLUE(p)];
+			r = wad.rgb555_medium[IMG_PIXEL_RED(p)];
+			g = wad.rgb555_medium[IMG_PIXEL_GREEN(p)];
+			b = wad.rgb555_medium[IMG_PIXEL_BLUE(p)];
 		}
 		else
 		{
-			const rgb_color_t col = palette_medium[p];
+			const rgb_color_t col = wad.palette_medium[p];
 
 			r = RGB_RED(col);
 			g = RGB_GREEN(col);
@@ -618,6 +619,8 @@ public:	// will be private when we encapsulate everything
 	std::map<SString, int> medusa_textures;
 	sprite_map_t sprites;
 
+	WadData wad;
+
 	//
 	// Path stuff
 	//
@@ -630,21 +633,7 @@ public:	// will be private when we encapsulate everything
 	//
 	// Color stuff
 	//
-	byte bright_map[256] = {};
-	// this palette has the gamma setting applied
-	rgb_color_t palette[256] = {};
-	rgb_color_t palette_medium[256] = {};
 	byte raw_colormap[32][256] = {};
-	byte raw_palette[256][3] = {};
-	byte rgb555_gamma[32];
-	byte rgb555_medium[32];
-	// the palette color closest to what TRANS_PIXEL really is
-	int trans_replace = 0;
-	int missing_tex_color = 0;
-	int special_tex_color = 0;
-	int unknown_flat_color = 0;
-	int unknown_sprite_color = 0;
-	int unknown_tex_color = 0;
 
 	//
 	// Image stuff

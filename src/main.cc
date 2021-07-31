@@ -956,8 +956,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for(const std::unique_ptr<Wad_file> &wad : resourceWads)
-		MasterDir_Add(wad.get());
+	for(std::unique_ptr<Wad_file> &wad : resourceWads)
+		MasterDir_Add(wad.release());
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad);

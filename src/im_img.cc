@@ -55,9 +55,9 @@ inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
 	}
 	else
 	{
-		byte r = inst.raw_palette[p][0];
-		byte g = inst.raw_palette[p][1];
-		byte b = inst.raw_palette[p][2];
+		byte r = inst.wad.raw_palette[p][0];
+		byte g = inst.wad.raw_palette[p][1];
+		byte b = inst.wad.raw_palette[p][2];
 
 		return RGB_MAKE(r, g, b);
 	}
@@ -459,11 +459,11 @@ void Img_c::bind_gl()
 
 void Instance::IM_ResetDummyTextures()
 {
-	missing_tex_color  = -1;
-	unknown_tex_color  = -1;
-	special_tex_color  = -1;
-	unknown_flat_color = -1;
-	unknown_sprite_color = -1;
+	wad.missing_tex_color  = -1;
+	wad.unknown_tex_color  = -1;
+	wad.special_tex_color  = -1;
+	wad.unknown_flat_color = -1;
+	wad.unknown_sprite_color = -1;
 }
 
 
@@ -555,14 +555,14 @@ static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg,
 
 Img_c *Instance::IM_MissingTex()
 {
-	if (! missing_tex_image || missing_tex_color != conf.miscInfo.missing_color)
+	if (! missing_tex_image || wad.missing_tex_color != conf.miscInfo.missing_color)
 	{
-		missing_tex_color = conf.miscInfo.missing_color;
+		wad.missing_tex_color = conf.miscInfo.missing_color;
 
 		if (missing_tex_image)
 			delete missing_tex_image;
 
-		missing_tex_image = IM_CreateDummyTex(*this, missing_graphic, missing_tex_color, 0);
+		missing_tex_image = IM_CreateDummyTex(*this, missing_graphic, wad.missing_tex_color, 0);
 	}
 
 	return missing_tex_image;
@@ -571,14 +571,14 @@ Img_c *Instance::IM_MissingTex()
 
 Img_c *Instance::IM_UnknownTex()
 {
-	if (! unknown_tex_image || unknown_tex_color != conf.miscInfo.unknown_tex)
+	if (! unknown_tex_image || wad.unknown_tex_color != conf.miscInfo.unknown_tex)
 	{
-		unknown_tex_color = conf.miscInfo.unknown_tex;
+		wad.unknown_tex_color = conf.miscInfo.unknown_tex;
 
 		if (unknown_tex_image)
 			delete unknown_tex_image;
 
-		unknown_tex_image = IM_CreateDummyTex(*this, unknown_graphic, unknown_tex_color, 0);
+		unknown_tex_image = IM_CreateDummyTex(*this, unknown_graphic, wad.unknown_tex_color, 0);
 	}
 
 	return unknown_tex_image;
@@ -587,9 +587,9 @@ Img_c *Instance::IM_UnknownTex()
 
 Img_c *Instance::IM_SpecialTex()
 {
-	if (special_tex_color < 0)
+	if (wad.special_tex_color < 0)
 	{
-		special_tex_color = W_FindPaletteColor(192, 0, 192);
+		wad.special_tex_color = W_FindPaletteColor(192, 0, 192);
 
 		if (special_tex_image)
 		{
@@ -599,7 +599,7 @@ Img_c *Instance::IM_SpecialTex()
 	}
 
 	if (! special_tex_image)
-		special_tex_image = IM_CreateDummyTex(*this, unknown_graphic, special_tex_color,
+		special_tex_image = IM_CreateDummyTex(*this, unknown_graphic, wad.special_tex_color,
 			W_FindPaletteColor(255, 255, 255));
 
 	return special_tex_image;
@@ -608,14 +608,14 @@ Img_c *Instance::IM_SpecialTex()
 
 Img_c *Instance::IM_UnknownFlat()
 {
-	if (! unknown_flat_image || unknown_flat_color != conf.miscInfo.unknown_flat)
+	if (! unknown_flat_image || wad.unknown_flat_color != conf.miscInfo.unknown_flat)
 	{
-		unknown_flat_color = conf.miscInfo.unknown_flat;
+		wad.unknown_flat_color = conf.miscInfo.unknown_flat;
 
 		if (unknown_flat_image)
 			delete unknown_flat_image;
 
-		unknown_flat_image = IM_CreateDummyTex(*this, unknown_graphic, unknown_flat_color, 0);
+		unknown_flat_image = IM_CreateDummyTex(*this, unknown_graphic, wad.unknown_flat_color, 0);
 	}
 
 	return unknown_flat_image;
@@ -628,9 +628,9 @@ Img_c *Instance::IM_UnknownSprite()
 	if (unk_col == 0)
 		unk_col = conf.miscInfo.unknown_tex;
 
-	if (! unknown_sprite_image || unknown_sprite_color != unk_col)
+	if (! unknown_sprite_image || wad.unknown_sprite_color != unk_col)
 	{
-		unknown_sprite_color = unk_col;
+		wad.unknown_sprite_color = unk_col;
 
 		if (unknown_sprite_image)
 			delete unknown_sprite_image;
@@ -643,7 +643,7 @@ Img_c *Instance::IM_UnknownSprite()
 		for (int x = 0 ; x < 64 ; x++)
 		{
 			obuf[y * 64 + x] = static_cast<img_pixel_t>(unknown_graphic[(y/4) * 16 + (x/4)] ?
-                                                        unknown_sprite_color : TRANS_PIXEL);
+                                                        wad.unknown_sprite_color : TRANS_PIXEL);
 		}
 	}
 

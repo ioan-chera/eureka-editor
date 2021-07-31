@@ -20,6 +20,8 @@ set(source_base
     main.rc
     objid.h
     version.h
+    WadData.cc
+    WadData.h
 )
 
 set(source_bsp

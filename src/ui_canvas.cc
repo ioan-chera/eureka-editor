@@ -2107,7 +2107,7 @@ void UI_Canvas::RenderSector(int num)
 
 		if (inst.is_sky(tex_name))
 		{
-			RenderColor(inst.palette[inst.conf.miscInfo.sky_color]);
+			RenderColor(inst.wad.palette[inst.conf.miscInfo.sky_color]);
 		}
 		else
 		{

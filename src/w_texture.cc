@@ -543,7 +543,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = static_cast<img_pixel_t>(inst.trans_replace);
+			pix = static_cast<img_pixel_t>(inst.wad.trans_replace);
 
 		img->wbuf() [i] = pix;
 	}
