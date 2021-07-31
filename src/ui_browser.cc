@@ -914,7 +914,7 @@ void UI_Browser_Box::Populate()
 			if (config::browser_combine_tex)
 				Populate_Images('F', inst.wad.flats);
 
-			Populate_Images('T', inst.textures);
+			Populate_Images('T', inst.wad.textures);
 			break;
 
 		case 'F':

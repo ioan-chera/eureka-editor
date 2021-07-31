@@ -50,9 +50,9 @@ static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
 
 void Instance::W_ClearTextures()
 {
-	std::for_each(textures.begin(), textures.end(), DeleteTex);
+	std::for_each(wad.textures.begin(), wad.textures.end(), DeleteTex);
 
-	textures.clear();
+	wad.textures.clear();
 
 	medusa_textures.clear();
 }
@@ -64,9 +64,9 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 
 	SString tex_str = name;
 
-	std::map<SString, Img_c *>::iterator P = textures.find(tex_str);
+	std::map<SString, Img_c *>::iterator P = wad.textures.find(tex_str);
 
-	if (P != textures.end())
+	if (P != wad.textures.end())
 	{
 		delete P->second;
 
@@ -74,7 +74,7 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 	}
 	else
 	{
-		textures[tex_str] = img;
+		wad.textures[tex_str] = img;
 	}
 
 	medusa_textures[tex_str] = is_medusa ? 1 : 0;
@@ -398,9 +398,9 @@ Img_c * Instance::W_GetTexture(const SString &name, bool try_uppercase) const
 		return NULL;
 
 	SString t_str = name;
-	std::map<SString, Img_c *>::const_iterator P = textures.find(t_str);
+	std::map<SString, Img_c *>::const_iterator P = wad.textures.find(t_str);
 
-	if (P != textures.end())
+	if (P != wad.textures.end())
 		return P->second;
 
 	if (try_uppercase)
@@ -439,9 +439,9 @@ bool Instance::W_TextureIsKnown(const SString &name) const
 	if (name.empty())
 		return false;
 
-	std::map<SString, Img_c *>::const_iterator P = textures.find(name);
+	std::map<SString, Img_c *>::const_iterator P = wad.textures.find(name);
 
-	if (P != textures.end())
+	if (P != wad.textures.end())
 		return true;
 
 	if (conf.features.mix_textures_flats)
@@ -588,9 +588,9 @@ Img_c * Instance::W_GetFlat(const SString &name, bool try_uppercase) const
 
 	if (conf.features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::const_iterator P = textures.find(name);
+		std::map<SString, Img_c *>::const_iterator P = wad.textures.find(name);
 
-		if (P != textures.end())
+		if (P != wad.textures.end())
 			return P->second;
 	}
 
@@ -619,9 +619,9 @@ bool Instance::W_FlatIsKnown(const SString &name) const
 
 	if (conf.features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::const_iterator P = textures.find(name);
+		std::map<SString, Img_c *>::const_iterator P = wad.textures.find(name);
 
-		if (P != textures.end())
+		if (P != wad.textures.end())
 			return true;
 	}
 
@@ -841,7 +841,7 @@ static void UnloadSprite(const sprite_map_t::value_type& P)
 
 void Instance::W_UnloadAllTextures() const
 {
-	std::for_each(textures.begin(), textures.end(), UnloadTex);
+	std::for_each(wad.textures.begin(), wad.textures.end(), UnloadTex);
 	std::for_each(wad.flats.begin(), wad.flats.end(), UnloadFlat);
 	std::for_each( sprites.begin(),  sprites.end(), UnloadSprite);
 

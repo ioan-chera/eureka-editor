@@ -60,7 +60,9 @@ struct WadData
 
 	byte raw_colormap[32][256] = {};
 
+	// TODO: change this to unique_ptr
 	std::map<SString, Img_c *> flats;
+	std::map<SString, Img_c *> textures;
 };
 
 #endif /* WadData_h */
