@@ -256,12 +256,12 @@ void Instance::CMD_NewProject()
 	// determine map name (same as first level in the IWAD)
 	SString map_name = "MAP01";
 
-	int idx = game_wad->LevelFindFirst();
+	int idx = master.game_wad->LevelFindFirst();
 
 	if (idx >= 0)
 	{
-		idx = game_wad->LevelHeader(idx);
-		map_name = game_wad->GetLump(idx)->Name();
+		idx = master.game_wad->LevelHeader(idx);
+		map_name = master.game_wad->GetLump(idx)->Name();
 	}
 
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
@@ -1133,7 +1133,7 @@ void Instance::CMD_OpenMap()
 	if (did_load)
 	{
 		SYS_ASSERT(wad != edit_wad);
-		SYS_ASSERT(wad != game_wad);
+		SYS_ASSERT(wad != master.game_wad);
 
 		ReplaceEditWad(wad);
 
@@ -1223,7 +1223,7 @@ void Instance::CMD_FlipMap()
 		return;
 
 
-	Wad_file *wad = edit_wad ? edit_wad : game_wad;
+	Wad_file *wad = edit_wad ? edit_wad : master.game_wad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad->LevelFind(loaded.levelName);
@@ -1885,12 +1885,12 @@ void Instance::CMD_RenameMap()
 	// [ user may be trying to rename map after changing the IWAD ]
 	char format = 'M';
 	{
-		int idx = game_wad->LevelFindFirst();
+		int idx = master.game_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = game_wad->LevelHeader(idx);
-			const SString &name = game_wad->GetLump(idx)->Name();
+			idx = master.game_wad->LevelHeader(idx);
+			const SString &name = master.game_wad->GetLump(idx)->Name();
 			format = static_cast<char>(toupper(name[0]));
 		}
 	}

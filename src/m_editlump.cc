@@ -433,7 +433,7 @@ void Instance::CMD_EditLump()
 		return;
 	}
 
-	Wad_file *wad = edit_wad ? edit_wad : game_wad;
+	Wad_file *wad = edit_wad ? edit_wad : master.game_wad;
 
 	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor(*this);

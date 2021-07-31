@@ -32,7 +32,10 @@ struct MasterDirectory
 	bool haveFilename(const SString &chk_path) const;
 	void remove(Wad_file *wad);
 
+	bool loadIwad(const SString &name);
+
 	std::vector<Wad_file *> dir;	// the IWAD, never NULL, always at master_dir.front()
+	Wad_file *game_wad = nullptr;
 };
 
 #endif /* MasterDirectory_h */

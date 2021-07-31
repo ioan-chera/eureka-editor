@@ -370,7 +370,6 @@ public:
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
 	SString Main_FileOpFolder() const;
-	bool Main_LoadIWAD();
 	void Main_LoadResources(LoadingData &loading);
 
 	// R_RENDER
@@ -554,7 +553,6 @@ public:	// will be private when we encapsulate everything
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
-	Wad_file *game_wad = nullptr;
 	Wad editWad;
 	bool haveEditWad = false;
 	Wad gameWad;

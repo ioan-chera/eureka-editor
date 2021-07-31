@@ -488,7 +488,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.edit_wad : inst.game_wad;
+		Wad_file *wad = (pass == 0) ? inst.edit_wad : inst.master.game_wad;
 
 		if (! wad)
 			continue;
@@ -816,19 +816,19 @@ void Main_Loop()
 }
 
 
-bool Instance::Main_LoadIWAD()
+bool MasterDirectory::loadIwad(const SString &name)
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	Wad_file *wad = Wad_file::Open(loaded.iwadName, WadOpenMode::read);
+	Wad_file *wad = Wad_file::Open(name, WadOpenMode::read);
 	if (!wad)
 	{
-		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
+		gLog.printf("Failed to open game IWAD: %s\n", name.c_str());
 		return false;
 	}
 	game_wad = wad;
 
-	master.add(game_wad);
+	add(game_wad);
 	return true;
 }
 
@@ -953,7 +953,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	master.closeAll();
 
 	// TODO: check result
-	Main_LoadIWAD();
+	master.loadIwad(loading.iwadName);
 
 	// load all resource wads
 	for(std::unique_ptr<Wad_file> &wad : resourceWads)
@@ -1186,7 +1186,7 @@ int main(int argc, char *argv[])
 		// temporarily load the iwad, the following few functions need it.
 		// it will get loaded again in Main_LoadResources().
 		// TODO: check result
-		gInstance.Main_LoadIWAD();
+		gInstance.master.loadIwad(gInstance.loaded.iwadName);
 
 
 		// load the initial level
@@ -1196,7 +1196,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.master.game_wad, gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
