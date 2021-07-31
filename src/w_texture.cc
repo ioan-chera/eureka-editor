@@ -525,7 +525,7 @@ void WadData::addFlat(const SString &name, Img_c *img)
 }
 
 
-static std::unique_ptr<Img_c> LoadFlatImage(const Instance &inst, const SString &name, Lump_c *lump)
+static std::unique_ptr<Img_c> LoadFlatImage(const Instance &inst, const WadData &wad, const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
@@ -544,7 +544,7 @@ static std::unique_ptr<Img_c> LoadFlatImage(const Instance &inst, const SString 
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = static_cast<img_pixel_t>(inst.wad.trans_replace);
+			pix = static_cast<img_pixel_t>(wad.trans_replace);
 
 		img->wbuf() [i] = pix;
 	}
@@ -553,9 +553,9 @@ static std::unique_ptr<Img_c> LoadFlatImage(const Instance &inst, const SString 
 }
 
 
-void Instance::W_LoadFlats()
+void WadData::loadFlats(const Instance &inst, const MasterDirectory &master)
 {
-	wad.clearFlats();
+	clearFlats();
 
 	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{
@@ -569,11 +569,11 @@ void Instance::W_LoadFlats()
 				continue;
 			Lump_c *lump = lumpRef.lump;
 
-			std::unique_ptr<Img_c> img = LoadFlatImage(*this, lump->Name(), lump);
+			std::unique_ptr<Img_c> img = LoadFlatImage(inst, *this, lump->Name(), lump);
 
 			// TODO: use unique_ptr
 			if (img)
-				wad.addFlat(lump->Name(), img.release());
+				addFlat(lump->Name(), img.release());
 		}
 	}
 }

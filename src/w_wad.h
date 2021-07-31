@@ -140,6 +140,7 @@ class Wad_file
 {
 friend class Instance;
 friend class Lump_c;
+friend struct WadData;
 
 private:
 	SString filename;

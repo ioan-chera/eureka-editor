@@ -38,6 +38,7 @@ struct WadData
 
 	void clearFlats();
 	void addFlat(const SString &name, Img_c *img);
+	void loadFlats(const Instance &inst, const MasterDirectory &master);
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};

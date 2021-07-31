@@ -410,7 +410,6 @@ public:
 	Img_c *W_GetSprite(int type);
 	Img_c *W_GetTexture(const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const SString &name) const;
-	void W_LoadFlats();
 	void W_LoadTextures();
 	void W_LoadTextures_TX_START(Wad_file *wf);
 	bool W_TextureCausesMedusa(const SString &name) const;
