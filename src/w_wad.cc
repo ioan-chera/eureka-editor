@@ -1334,33 +1334,33 @@ void W_FreeLumpData(byte ** buf_ptr)
 
 //------------------------------------------------------------------------
 
-void Instance::MasterDir_Add(Wad_file *wad)
+void MasterDirectory::add(Wad_file *wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
-	master.dir.push_back(wad);
+	dir.push_back(wad);
 }
 
 
-void Instance::MasterDir_Remove(Wad_file *wad)
+void MasterDirectory::remove(Wad_file *wad)
 {
 	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
 
 	std::vector<Wad_file *>::iterator ENDP;
 
-	ENDP = std::remove(master.dir.begin(), master.dir.end(), wad);
+	ENDP = std::remove(dir.begin(), dir.end(), wad);
 
-	master.dir.erase(ENDP, master.dir.end());
+	dir.erase(ENDP, dir.end());
 }
 
 
-void Instance::MasterDir_CloseAll()
+void MasterDirectory::closeAll()
 {
-	while (master.dir.size() > 0)
+	while (dir.size() > 0)
 	{
-		Wad_file *wad = master.dir.back();
+		Wad_file *wad = dir.back();
 
-		master.dir.pop_back();
+		dir.pop_back();
 
 		delete wad;
 	}
@@ -1600,11 +1600,11 @@ void Wad::sortLevels()
 	});
 }
 
-bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
+bool MasterDirectory::haveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < master.dir.size() ; k++)
+	for (unsigned int k = 0 ; k < dir.size() ; k++)
 	{
-		const SString &wad_path = master.dir[k]->PathName();
+		const SString &wad_path = dir[k]->PathName();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

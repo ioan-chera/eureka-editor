@@ -185,7 +185,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	global::app_has_focus = false;
 
 	// TODO: ALL instances. This is death.
-	gInstance.MasterDir_CloseAll();
+	gInstance.master.closeAll();
 	gLog.close();
 
 	exit(2);
@@ -828,7 +828,7 @@ bool Instance::Main_LoadIWAD()
 	}
 	game_wad = wad;
 
-	MasterDir_Add(game_wad);
+	master.add(game_wad);
 	return true;
 }
 
@@ -948,19 +948,19 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 	// reset the master directory
 	if (edit_wad)
-		MasterDir_Remove(edit_wad);
+		master.remove(edit_wad);
 
-	MasterDir_CloseAll();
+	master.closeAll();
 
 	// TODO: check result
 	Main_LoadIWAD();
 
 	// load all resource wads
 	for(std::unique_ptr<Wad_file> &wad : resourceWads)
-		MasterDir_Add(wad.release());
+		master.add(wad.release());
 
 	if (edit_wad)
-		MasterDir_Add(edit_wad);
+		master.add(edit_wad);
 
 	// finally, load textures and stuff...
 	W_LoadPalette();
@@ -1147,14 +1147,14 @@ int main(int argc, char *argv[])
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.MasterDir_Add(gInstance.edit_wad);
+			gInstance.master.add(gInstance.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
-				gInstance.MasterDir_Add(gInstance.edit_wad);
+				gInstance.master.add(gInstance.edit_wad);
 			}
 		}
 
@@ -1214,7 +1214,7 @@ int main(int argc, char *argv[])
 		global::app_has_focus = false;
 
 		// TODO: all instances
-		gInstance.MasterDir_CloseAll();
+		gInstance.master.closeAll();
 		gLog.close();
 
 		return 0;

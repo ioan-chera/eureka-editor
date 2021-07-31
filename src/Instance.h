@@ -426,10 +426,6 @@ public:
 	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
-	void MasterDir_Add(Wad_file *wad);
-	void MasterDir_CloseAll();
-	bool MasterDir_HaveFilename(const SString &chk_path) const;
-	void MasterDir_Remove(Wad_file *wad);
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
 

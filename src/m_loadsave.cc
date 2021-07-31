@@ -58,7 +58,7 @@ void Instance::RemoveEditWad()
 	if (!edit_wad)
 		return;
 
-	MasterDir_Remove(edit_wad);
+	master.remove(edit_wad);
 	delete edit_wad;
 
 	edit_wad  = NULL;
@@ -74,7 +74,7 @@ void Instance::ReplaceEditWad(Wad_file *new_wad)
 
 	Pwad_name = edit_wad->PathName();
 
-	MasterDir_Add(edit_wad);
+	master.add(edit_wad);
 }
 
 
@@ -278,7 +278,7 @@ void Instance::CMD_NewProject()
 	edit_wad = wad;
 	Pwad_name = edit_wad->PathName();
 
-	MasterDir_Add(edit_wad);
+	master.add(edit_wad);
 
 	// TODO: new instance
 	FreshLevel();
@@ -1701,7 +1701,7 @@ bool Instance::M_ExportMap()
 
 
 	// don't export into a file we currently have open
-	if (MasterDir_HaveFilename(filename))
+	if (master.haveFilename(filename))
 	{
 		DLG_Notify("Unable to export the map:\n\nFile already in use");
 		return false;

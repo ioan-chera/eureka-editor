@@ -19,6 +19,7 @@
 #ifndef MasterDirectory_h
 #define MasterDirectory_h
 
+class SString;
 class Wad_file;
 
 //
@@ -26,6 +27,11 @@ class Wad_file;
 //
 struct MasterDirectory
 {
+	void add(Wad_file *wad);
+	void closeAll();
+	bool haveFilename(const SString &chk_path) const;
+	void remove(Wad_file *wad);
+
 	std::vector<Wad_file *> dir;	// the IWAD, never NULL, always at master_dir.front()
 };
 
