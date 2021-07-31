@@ -504,15 +504,15 @@ void WadData::clearFlats()
 }
 
 
-void Instance::W_AddFlat(const SString &name, Img_c *img)
+void WadData::addFlat(const SString &name, Img_c *img)
 {
 	// find any existing one with same name, and free it
 
 	SString flat_str = name;
 
-	std::map<SString, Img_c *>::iterator P = wad.flats.find(flat_str);
+	std::map<SString, Img_c *>::iterator P = flats.find(flat_str);
 
-	if (P != wad.flats.end())
+	if (P != flats.end())
 	{
 		delete P->second;
 
@@ -520,7 +520,7 @@ void Instance::W_AddFlat(const SString &name, Img_c *img)
 	}
 	else
 	{
-		wad.flats[flat_str] = img;
+		flats[flat_str] = img;
 	}
 }
 
@@ -573,7 +573,7 @@ void Instance::W_LoadFlats()
 
 			// TODO: use unique_ptr
 			if (img)
-				W_AddFlat(lump->Name(), img.release());
+				wad.addFlat(lump->Name(), img.release());
 		}
 	}
 }

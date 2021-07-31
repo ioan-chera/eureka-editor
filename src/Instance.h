@@ -405,7 +405,6 @@ public:
 	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
 	// W_TEXTURE
-	void W_AddFlat(const SString &name, Img_c *img);
 	bool W_FlatIsKnown(const SString &name) const;
 	Img_c *W_GetFlat(const SString &name, bool try_uppercase = false) const;
 	Img_c *W_GetSprite(int type);
