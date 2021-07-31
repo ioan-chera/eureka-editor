@@ -63,7 +63,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 	}
 	else
 	{
-		return inst.raw_colormap[map][pixel];
+		return inst.wad.raw_colormap[map][pixel];
 	}
 }
 
@@ -1689,7 +1689,7 @@ public:
 				if (*dest & IS_RGB_PIXEL)
 					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
 				else
-					*dest = inst.raw_colormap[14][*dest];
+					*dest = inst.wad.raw_colormap[14][*dest];
 				continue;
 			}
 

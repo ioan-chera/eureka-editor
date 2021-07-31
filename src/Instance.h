@@ -238,12 +238,6 @@ public:
 	void GoToSelection();
 	const byte *SoundPropagation(int start_sec);
 
-	// IM_COLOR
-	byte W_FindPaletteColor(int r, int g, int b) const;
-	void W_LoadColormap();
-	void W_LoadPalette();
-	void W_UpdateGamma();
-
 	// IM_IMG
 	Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src) const;
 	Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H) const;
@@ -253,7 +247,6 @@ public:
 	Img_c *IM_DigitFont_11x14();
 	Img_c *IM_DigitFont_14x19();
 	Img_c *IM_MissingTex();
-	void IM_ResetDummyTextures();
 	Img_c *IM_SpecialTex();
 	Img_c *IM_UnknownFlat();
 	Img_c *IM_UnknownSprite();
@@ -624,11 +617,6 @@ public:	// will be private when we encapsulate everything
 	std::vector<byte> sound_temp1_vec;
 	std::vector<byte> sound_temp2_vec;
 	int sound_start_sec = 0;
-
-	//
-	// Color stuff
-	//
-	byte raw_colormap[32][256] = {};
 
 	//
 	// Image stuff

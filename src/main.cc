@@ -942,29 +942,45 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		throw;
 	}
 
+	MasterDirectory newMaster;
+	newMaster.loadIwad(loading.iwadName);
+	for(std::unique_ptr<Wad_file> &wad : resourceWads)
+		newMaster.add(wad.release());
+
+	if(edit_wad)
+		newMaster.add(edit_wad);
+
+	WadData newWad;
+	newWad.loadPalette(newMaster);
+	newWad.loadColormap(newMaster);
+
 	// Commit it
 	conf = config;
 	loaded = loading;
+	master = newMaster;
+	wad = newWad;
+
+	// TODO: manage the files correctly
 
 	// reset the master directory
-	if (edit_wad)
-		master.remove(edit_wad);
-
-	master.closeAll();
-
-	// TODO: check result
-	master.loadIwad(loading.iwadName);
-
-	// load all resource wads
-	for(std::unique_ptr<Wad_file> &wad : resourceWads)
-		master.add(wad.release());
-
-	if (edit_wad)
-		master.add(edit_wad);
+//	if (edit_wad)
+//		master.remove(edit_wad);
+//
+//	master.closeAll();
+//
+//	// TODO: check result
+//	master.loadIwad(loading.iwadName);
+//
+//	// load all resource wads
+//	for(std::unique_ptr<Wad_file> &wad : resourceWads)
+//		master.add(wad.release());
+//
+//	if (edit_wad)
+//		master.add(edit_wad);
 
 	// finally, load textures and stuff...
-	W_LoadPalette();
-	W_LoadColormap();
+//	W_LoadPalette();
+//	W_LoadColormap();
 
 	W_LoadFlats();
 	W_LoadTextures();

@@ -457,13 +457,13 @@ void Img_c::bind_gl()
 //------------------------------------------------------------------------
 
 
-void Instance::IM_ResetDummyTextures()
+void WadData::resetDummyTextures() noexcept
 {
-	wad.missing_tex_color  = -1;
-	wad.unknown_tex_color  = -1;
-	wad.special_tex_color  = -1;
-	wad.unknown_flat_color = -1;
-	wad.unknown_sprite_color = -1;
+	missing_tex_color  = -1;
+	unknown_tex_color  = -1;
+	special_tex_color  = -1;
+	unknown_flat_color = -1;
+	unknown_sprite_color = -1;
 }
 
 
@@ -589,7 +589,7 @@ Img_c *Instance::IM_SpecialTex()
 {
 	if (wad.special_tex_color < 0)
 	{
-		wad.special_tex_color = W_FindPaletteColor(192, 0, 192);
+		wad.special_tex_color = wad.findPaletteColor(192, 0, 192);
 
 		if (special_tex_image)
 		{
@@ -600,7 +600,7 @@ Img_c *Instance::IM_SpecialTex()
 
 	if (! special_tex_image)
 		special_tex_image = IM_CreateDummyTex(*this, unknown_graphic, wad.special_tex_color,
-			W_FindPaletteColor(255, 255, 255));
+											  wad.findPaletteColor(255, 255, 255));
 
 	return special_tex_image;
 }
@@ -661,7 +661,7 @@ static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char 
 	byte *conv_palette = new byte[pal_size];
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = inst.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = inst.wad.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -1045,7 +1045,7 @@ Img_c *Instance::IM_CreateLightSprite() const
 			int g = static_cast<int>(235 * ity);
 			int b = static_cast<int>(90  * ity);
 
-			pix = W_FindPaletteColor(r, g, b);
+			pix = wad.findPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1084,7 +1084,7 @@ Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) cons
 			int g = static_cast<int>(base_g * ity);
 			int b = static_cast<int>(base_b * ity);
 
-			pix = W_FindPaletteColor(r, g, b);
+			pix = wad.findPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;

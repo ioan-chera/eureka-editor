@@ -22,11 +22,20 @@
 #include "im_color.h"
 #include "sys_type.h"
 
+struct MasterDirectory;
+
 //
 // Wad data, loaded during resource setup
 //
 struct WadData
 {
+	void loadPalette(const MasterDirectory &master) noexcept(false);
+	byte findPaletteColor(int r, int g, int b) const noexcept;
+	void updateGamma() noexcept;
+	void resetDummyTextures() noexcept;
+
+	void loadColormap(const MasterDirectory &master) noexcept(false);
+
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
 	rgb_color_t palette_medium[256] = {};
@@ -44,6 +53,8 @@ struct WadData
 	int special_tex_color = 0;
 	int unknown_flat_color = 0;
 	int unknown_sprite_color = 0;
+
+	byte raw_colormap[32][256] = {};
 };
 
 #endif /* WadData_h */
