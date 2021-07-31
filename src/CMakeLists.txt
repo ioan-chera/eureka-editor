@@ -18,9 +18,9 @@ set(source_base
     main.cc
     main.h
     main.rc
+    MasterDirectory.h
     objid.h
     version.h
-    WadData.cc
     WadData.h
 )
 

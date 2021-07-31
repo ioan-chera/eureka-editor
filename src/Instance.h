@@ -26,6 +26,7 @@
 #include "m_game.h"
 #include "m_loadsave.h"
 #include "main.h"
+#include "MasterDirectory.h"
 #include "r_grid.h"
 #include "r_render.h"
 #include "r_subdiv.h"
@@ -561,8 +562,9 @@ public:	// will be private when we encapsulate everything
 	Wad editWad;
 	bool haveEditWad = false;
 	Wad gameWad;
-	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	SString Pwad_name;	// Filename of current wad
+
+	MasterDirectory master;
 
 	LoadingData loaded;
 

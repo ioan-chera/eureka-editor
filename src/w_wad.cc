@@ -1277,9 +1277,9 @@ bool Wad_file::Backup(const char *new_filename)
 //
 Lump_c *Instance::W_FindGlobalLump(const SString &name) const
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master.dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = master.dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1293,9 +1293,9 @@ Lump_c *Instance::W_FindGlobalLump(const SString &name) const
 //
 Lump_c *Instance::W_FindSpriteLump(const SString &name) const
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master.dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
+		Lump_c *L = master.dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
 		if (L)
 			return L;
 	}
@@ -1338,7 +1338,7 @@ void Instance::MasterDir_Add(Wad_file *wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
-	master_dir.push_back(wad);
+	master.dir.push_back(wad);
 }
 
 
@@ -1348,19 +1348,19 @@ void Instance::MasterDir_Remove(Wad_file *wad)
 
 	std::vector<Wad_file *>::iterator ENDP;
 
-	ENDP = std::remove(master_dir.begin(), master_dir.end(), wad);
+	ENDP = std::remove(master.dir.begin(), master.dir.end(), wad);
 
-	master_dir.erase(ENDP, master_dir.end());
+	master.dir.erase(ENDP, master.dir.end());
 }
 
 
 void Instance::MasterDir_CloseAll()
 {
-	while (master_dir.size() > 0)
+	while (master.dir.size() > 0)
 	{
-		Wad_file *wad = master_dir.back();
+		Wad_file *wad = master.dir.back();
 
-		master_dir.pop_back();
+		master.dir.pop_back();
 
 		delete wad;
 	}
@@ -1602,9 +1602,9 @@ void Wad::sortLevels()
 
 bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < master_dir.size() ; k++)
+	for (unsigned int k = 0 ; k < master.dir.size() ; k++)
 	{
-		const SString &wad_path = master_dir[k]->PathName();
+		const SString &wad_path = master.dir[k]->PathName();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;
