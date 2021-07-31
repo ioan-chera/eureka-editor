@@ -48,13 +48,13 @@ static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
 	delete P.second;
 }
 
-void Instance::W_ClearTextures()
+void WadData::clearTextures()
 {
-	std::for_each(wad.textures.begin(), wad.textures.end(), DeleteTex);
+	std::for_each(textures.begin(), textures.end(), DeleteTex);
 
-	wad.textures.clear();
+	textures.clear();
 
-	wad.medusa_textures.clear();
+	medusa_textures.clear();
 }
 
 
@@ -350,7 +350,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 
 void Instance::W_LoadTextures()
 {
-	W_ClearTextures();
+	wad.clearTextures();
 
 	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{

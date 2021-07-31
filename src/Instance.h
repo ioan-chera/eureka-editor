@@ -526,8 +526,6 @@ private:
 	void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size, bool skip_first);
 	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
 	void W_ClearSprites();
-	void W_ClearTextures();
-
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
