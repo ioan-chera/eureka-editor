@@ -527,7 +527,6 @@ private:
 	void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
 	void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size, bool skip_first);
 	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
-	void W_ClearFlats();
 	void W_ClearSprites();
 	void W_ClearTextures();
 

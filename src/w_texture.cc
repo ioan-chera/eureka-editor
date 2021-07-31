@@ -496,11 +496,11 @@ static void DeleteFlat(const std::map<SString, Img_c *>::value_type& P)
 }
 
 
-void Instance::W_ClearFlats()
+void WadData::clearFlats()
 {
-	std::for_each(wad.flats.begin(), wad.flats.end(), DeleteFlat);
+	std::for_each(flats.begin(), flats.end(), DeleteFlat);
 
-	wad.flats.clear();
+	flats.clear();
 }
 
 
@@ -556,7 +556,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 
 void Instance::W_LoadFlats()
 {
-	W_ClearFlats();
+	wad.clearFlats();
 
 	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{
@@ -842,7 +842,7 @@ static void UnloadSprite(const sprite_map_t::value_type& P)
 void Instance::W_UnloadAllTextures() const
 {
 	std::for_each(textures.begin(), textures.end(), UnloadTex);
-	std::for_each(   wad.flats.begin(),    wad.flats.end(), UnloadFlat);
+	std::for_each(wad.flats.begin(), wad.flats.end(), UnloadFlat);
 	std::for_each( sprites.begin(),  sprites.end(), UnloadSprite);
 
 	IM_UnloadDummyTextures();

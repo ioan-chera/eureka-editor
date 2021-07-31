@@ -36,6 +36,8 @@ struct WadData
 
 	void loadColormap(const MasterDirectory &master) noexcept(false);
 
+	void clearFlats();
+
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
 	rgb_color_t palette_medium[256] = {};
