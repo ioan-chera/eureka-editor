@@ -942,6 +942,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		throw;
 	}
 
+	// TODO: manage the files correctly
 	MasterDirectory newMaster;
 	newMaster.loadIwad(loading.iwadName);
 	for(std::unique_ptr<Wad_file> &wad : resourceWads)
@@ -959,8 +960,6 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	loaded = loading;
 	master = newMaster;
 	wad = newWad;
-
-	// TODO: manage the files correctly
 
 	// reset the master directory
 //	if (edit_wad)

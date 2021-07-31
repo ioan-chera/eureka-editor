@@ -55,6 +55,8 @@ struct WadData
 	int unknown_sprite_color = 0;
 
 	byte raw_colormap[32][256] = {};
+
+	std::map<SString, Img_c *> flats;
 };
 
 #endif /* WadData_h */

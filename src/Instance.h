@@ -602,7 +602,6 @@ public:	// will be private when we encapsulate everything
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
 	std::map<SString, Img_c *> textures;
-	std::map<SString, Img_c *> flats;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
 	sprite_map_t sprites;

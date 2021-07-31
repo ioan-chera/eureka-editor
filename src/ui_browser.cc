@@ -912,7 +912,7 @@ void UI_Browser_Box::Populate()
 	{
 		case 'T':
 			if (config::browser_combine_tex)
-				Populate_Images('F', inst.flats);
+				Populate_Images('F', inst.wad.flats);
 
 			Populate_Images('T', inst.textures);
 			break;
@@ -920,7 +920,7 @@ void UI_Browser_Box::Populate()
 		case 'F':
 			// the flat browser is never used when combine-tex is enabled
 			if (! config::browser_combine_tex)
-				Populate_Images('F', inst.flats);
+				Populate_Images('F', inst.wad.flats);
 			break;
 
 		case 'O':
