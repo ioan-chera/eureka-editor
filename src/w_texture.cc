@@ -525,18 +525,19 @@ void Instance::W_AddFlat(const SString &name, Img_c *img)
 }
 
 
-static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *lump)
+static std::unique_ptr<Img_c> LoadFlatImage(const Instance &inst, const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
-	Img_c *img = new Img_c(inst, 64, 64, false);
+	auto img = std::make_unique<Img_c>(inst, 64, 64, false);
 
 	int size = 64 * 64;
 
-	byte *raw = new byte[size];
+	std::vector<byte> raw;
+	raw.resize(size);
 
-	if (! (lump->Seek() && lump->Read(raw, size)))
-		FatalError("Error reading flat from WAD.\n");
+	if (! (lump->Seek() && lump->Read(raw.data(), size)))
+		throw ParseException("Error reading flat from WAD.\n");
 
 	for (int i = 0 ; i < size ; i++)
 	{
@@ -547,8 +548,6 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 
 		img->wbuf() [i] = pix;
 	}
-
-	delete[] raw;
 
 	return img;
 }
@@ -570,10 +569,11 @@ void Instance::W_LoadFlats()
 				continue;
 			Lump_c *lump = lumpRef.lump;
 
-			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
+			std::unique_ptr<Img_c> img = LoadFlatImage(*this, lump->Name(), lump);
 
+			// TODO: use unique_ptr
 			if (img)
-				W_AddFlat(lump->Name(), img);
+				W_AddFlat(lump->Name(), img.release());
 		}
 	}
 }
