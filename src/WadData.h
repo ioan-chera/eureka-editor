@@ -21,6 +21,7 @@
 
 #include "im_color.h"
 #include "sys_type.h"
+#include <memory>
 
 class Img_c;
 struct MasterDirectory;
@@ -62,9 +63,8 @@ struct WadData
 
 	byte raw_colormap[32][256] = {};
 
-	// TODO: change this to unique_ptr
-	std::map<SString, Img_c *> flats;
-	std::map<SString, Img_c *> textures;
+	std::map<SString, std::unique_ptr<Img_c>> flats;
+	std::map<SString, std::unique_ptr<Img_c>> textures;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
 };

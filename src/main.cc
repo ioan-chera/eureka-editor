@@ -960,7 +960,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	conf = config;
 	loaded = loading;
 	master = newMaster;
-	wad = newWad;
+	wad = std::move(newWad);
 
 	// reset the master directory
 //	if (edit_wad)
