@@ -54,7 +54,7 @@ void Instance::W_ClearTextures()
 
 	wad.textures.clear();
 
-	medusa_textures.clear();
+	wad.medusa_textures.clear();
 }
 
 
@@ -77,7 +77,7 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 		wad.textures[tex_str] = img;
 	}
 
-	medusa_textures[tex_str] = is_medusa ? 1 : 0;
+	wad.medusa_textures[tex_str] = is_medusa ? 1 : 0;
 }
 
 
@@ -458,9 +458,9 @@ bool Instance::W_TextureIsKnown(const SString &name) const
 
 bool Instance::W_TextureCausesMedusa(const SString &name) const
 {
-	std::map<SString, int>::const_iterator P = medusa_textures.find(name);
+	std::map<SString, int>::const_iterator P = wad.medusa_textures.find(name);
 
-	return (P != medusa_textures.end() && P->second > 0);
+	return (P != wad.medusa_textures.end() && P->second > 0);
 }
 
 

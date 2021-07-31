@@ -22,6 +22,7 @@
 #include "im_color.h"
 #include "sys_type.h"
 
+class Img_c;
 struct MasterDirectory;
 
 //
@@ -63,6 +64,8 @@ struct WadData
 	// TODO: change this to unique_ptr
 	std::map<SString, Img_c *> flats;
 	std::map<SString, Img_c *> textures;
+	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
+	std::map<SString, int> medusa_textures;
 };
 
 #endif /* WadData_h */
