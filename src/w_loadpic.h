@@ -30,21 +30,22 @@
 #include "im_img.h"
 #include "w_wad.h"
 
+//
+// Image format
+//
+enum ImageFormat
+{
+	unknown,
+	png,
+	tga,
+	doom,
+	jpeg,
+	gif,
+	dds
+};
 
 // Determine the image format of the given wad lump.
-//
-// Return values are:
-//    'p'  : PNG format
-//    't'  : TGA (Targa) format
-//    'd'  : Doom patch
-//
-//    'j'  : JPEG
-//    'g'  : GIF
-//    's'  : DDS
-//
-//    NUL  : unrecognized
-//
-char W_DetectImageFormat(Lump_c *lump);
+ImageFormat W_DetectImageFormat(Lump_c *lump);
 
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */
