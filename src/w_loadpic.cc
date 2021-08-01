@@ -109,13 +109,11 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 {
 	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
+	std::vector<byte> tex_data;
+	int tex_length = loadLumpData(lump, tex_data);
 
 	// pass it to FLTK for decoding
-	Fl_PNG_Image fltk_img(NULL, tex_data, tex_length);
-
-	W_FreeLumpData(&tex_data);
+	Fl_PNG_Image fltk_img(NULL, tex_data.data(), tex_length);
 
 	if (fltk_img.w() <= 0)
 	{
@@ -134,15 +132,11 @@ Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 {
 	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
-
-	(void) tex_length;
+	std::vector<byte> tex_data;
+	loadLumpData(lump, tex_data);
 
 	// pass it to FLTK for decoding
-	Fl_JPEG_Image fltk_img(NULL, tex_data);
-
-	W_FreeLumpData(&tex_data);
+	Fl_JPEG_Image fltk_img(NULL, tex_data.data());
 
 	if (fltk_img.w() <= 0)
 	{
@@ -161,16 +155,15 @@ Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
 {
 	// load the raw data
-	byte *tex_data;
-	int tex_length = W_LoadLumpData(lump, &tex_data);
+	std::vector<byte> tex_data;
+	int tex_length = loadLumpData(lump, tex_data);
 
 	// decode it
 	int width;
 	int height;
 
-	rgba_color_t * rgba = TGA_DecodeImage(tex_data, (size_t)tex_length, width, height);
-
-	W_FreeLumpData(&tex_data);
+	rgba_color_t * rgba = TGA_DecodeImage(tex_data.data(), tex_length, width,
+										  height);
 
 	if (! rgba)
 	{
@@ -268,10 +261,10 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 	/* DOOM format */
 
-	byte *raw_data;
-	W_LoadLumpData(lump, &raw_data);
+	std::vector<byte> raw_data;
+	loadLumpData(lump, raw_data);
 
-	const patch_t *pat = (patch_t *) raw_data;
+	const patch_t *pat = (patch_t *) raw_data.data();
 
 	int width    = LE_S16(pat->width);
 	int height   = LE_S16(pat->height);
@@ -305,7 +298,6 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 		DrawColumn(*this, dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
-	W_FreeLumpData(&raw_data);
 	return true;
 }
 

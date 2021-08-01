@@ -1303,34 +1303,31 @@ Lump_c *Instance::W_FindSpriteLump(const SString &name) const
 	return NULL;  // not found
 }
 
-
-int W_LoadLumpData(Lump_c *lump, byte ** buf_ptr)
+//
+// C++ version. Outputs a NUL-terminated byte vector, for safety. Returns the
+// length without the NUL terminator.
+//
+int loadLumpData(Lump_c *lump, std::vector<byte> &buf_ptr)
 {
-	// include an extra byte, used to NUL-terminate a text buffer
-	*buf_ptr = new byte[lump->Length() + 1];
-
-	if (lump->Length() > 0)
+	std::vector<byte> result;
+	if(lump->Length() <= 0)
 	{
-		if (! lump->Seek() ||
-			! lump->Read(*buf_ptr, lump->Length()))
-			FatalError("W_LoadLumpData: read error loading lump.\n");
+		result.push_back(0);
+		buf_ptr = std::move(result);
+		return 0;
 	}
+	result.resize(lump->Length() + 1);
+	if(!lump->Seek() || !lump->Read(result.data(), (int)result.size()))
+	{
+		throw ParseException(SString::printf("%s: read error loading lump "
+											 "'%s'.\n", __func__,
+											 lump->Name().c_str()));
+	}
+	result[lump->Length()] = 0;
 
-	(*buf_ptr)[lump->Length()] = 0;
-
+	buf_ptr = std::move(result);
 	return lump->Length();
 }
-
-
-void W_FreeLumpData(byte ** buf_ptr)
-{
-	if (*buf_ptr)
-	{
-		delete[] *buf_ptr;
-		*buf_ptr = NULL;
-	}
-}
-
 
 //------------------------------------------------------------------------
 

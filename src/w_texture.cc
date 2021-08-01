@@ -235,26 +235,25 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 	pname_size /= 8;
 
 	// load TEXTUREx data into memory for easier processing
-	byte *tex_data;
+	std::vector<byte> tex_data;
 
-	int tex_length = W_LoadLumpData(lump, &tex_data);
+	int tex_length = loadLumpData(lump, tex_data);
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
-	s32_t *tex_data_s32 = (s32_t *)tex_data;
+	s32_t *tex_data_s32 = (s32_t *)tex_data.data();
 
 	int num_tex = LE_S32(tex_data_s32[0]);
 
 	// it seems having a count of zero is valid
 	if (num_tex == 0)
-	{
-		W_FreeLumpData(&tex_data);
 		return;
-	}
 
 	if (num_tex < 0 || num_tex > (1<<20))
-		FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
+		ThrowException("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad "
+					   "count.\n");
 
-	bool is_strife = CheckTexturesAreStrife(tex_data, tex_length, num_tex, skip_first);
+	bool is_strife = CheckTexturesAreStrife(tex_data.data(), tex_length,
+											num_tex, skip_first);
 
 	// Note: we skip the first entry (e.g. AASHITTY) which is not really
     //       usable (in the DOOM engine the #0 texture means "do not draw").
@@ -267,12 +266,16 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
-			LoadTextureEntry_Strife(tex_data, tex_length, offset, pnames, pname_size, skip_first);
+		{
+			LoadTextureEntry_Strife(tex_data.data(), tex_length, offset,
+									pnames, pname_size, skip_first);
+		}
 		else
-			LoadTextureEntry_DOOM(tex_data, tex_length, offset, pnames, pname_size, skip_first);
+		{
+			LoadTextureEntry_DOOM(tex_data.data(), tex_length, offset, pnames,
+								  pname_size, skip_first);
+		}
 	}
-
-	W_FreeLumpData(&tex_data);
 }
 
 
@@ -350,16 +353,14 @@ void Instance::W_LoadTextures()
 
 		if (pnames)
 		{
-			byte *pname_data;
-			int pname_size = W_LoadLumpData(pnames, &pname_data);
+			std::vector<byte> pname_data;
+			int pname_size = loadLumpData(pnames, pname_data);
 
 			if (texture1)
-				LoadTexturesLump(texture1, pname_data, pname_size, true);
+				LoadTexturesLump(texture1, pname_data.data(), pname_size, true);
 
 			if (texture2)
-				LoadTexturesLump(texture2, pname_data, pname_size, false);
-
-			W_FreeLumpData(&pname_data);
+				LoadTexturesLump(texture2, pname_data.data(), pname_size, false);
 		}
 
 		if (conf.features.tx_start)
