@@ -305,6 +305,9 @@ public:
 	ParseException(const SString &msg) : std::runtime_error(msg.c_str())
 	{
 	}
+
+	[[noreturn]] static void raise(EUR_FORMAT_STRING(const char *format), ...)
+			EUR_PRINTF(1, 2);
 };
 
 //

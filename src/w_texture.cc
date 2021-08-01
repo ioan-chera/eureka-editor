@@ -50,26 +50,26 @@ void WadData::clearTextures()
 }
 
 
-void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
+void WadData::addTexture(const SString &name, Img_c *img, bool is_medusa)
 {
 	// free any existing one with the same name
 
 	SString tex_str = name;
 
-	wad.textures[tex_str] = std::unique_ptr<Img_c>(img);
+	textures[tex_str] = std::unique_ptr<Img_c>(img);
 
-	wad.medusa_textures[tex_str] = is_medusa ? 1 : 0;
+	medusa_textures[tex_str] = is_medusa ? 1 : 0;
 }
 
 
-static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
-								   bool skip_first)
+static bool CheckTexturesAreStrife(const byte *tex_data, int tex_length,
+								   int num_tex, bool skip_first)
 {
 	// we follow the ZDoom logic here: check ALL the texture entries
 	// assuming DOOM format, and if any have a patch_count of zero or
 	// the last two bytes of columndir are non-zero then assume Strife.
 
-	const s32_t *tex_data_s32 = (const s32_t *)tex_data;
+	auto tex_data_s32 = reinterpret_cast<const s32_t *>(tex_data);
 
 	for (int n = skip_first ? 1 : 0 ; n < num_tex ; n++)
 	{
@@ -79,7 +79,7 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 		if (offset < 4 * num_tex || offset >= tex_length)
 			continue;
 
-		const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
+		auto raw = reinterpret_cast<const raw_texture_t *>(tex_data + offset);
 
 		if (LE_S16(raw->patch_count) <= 0)
 			return true;
@@ -92,10 +92,12 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 }
 
 
-void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
-									byte *pnames, int pname_size, bool skip_first)
+void Instance::LoadTextureEntry_Strife(const byte *tex_data, int tex_length,
+									   int offset, const byte *pnames,
+									   int pname_size, bool skip_first)
 {
-	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
+	auto raw = reinterpret_cast<const raw_strife_texture_t *>(tex_data +
+															  offset);
 
 	// create the new image
 	int width  = LE_U16(raw->width);
@@ -104,7 +106,10 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+	{
+		ParseException::raise("%s: Texture '%.8s' has zero size\n", __func__,
+							  raw->name);
+	}
 
 	Img_c *img = new Img_c(*this, width, height, false);
 	bool is_medusa = false;
@@ -113,9 +118,12 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		FatalError("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+	{
+		ParseException::raise("%s: Texture '%.8s' has no patches\n", __func__,
+							  raw->name);
+	}
 
-	const raw_strife_patchdef_t *patdef = (const raw_strife_patchdef_t *) & raw->patches[0];
+	const raw_strife_patchdef_t *patdef =  &raw->patches[0];
 
 	if (num_patches >= 2)
 		is_medusa = true;
@@ -144,7 +152,8 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 		if (! lump ||
 			! LoadPicture(*img, lump, picname, xofs, yofs))
 		{
-			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
+			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name,
+						picname);
 		}
 	}
 
@@ -153,12 +162,13 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	W_AddTexture(namebuf, img, is_medusa);
+	wad.addTexture(namebuf, img, is_medusa);
 }
 
 
-void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
-									byte *pnames, int pname_size, bool skip_first)
+void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
+									 int offset, const byte *pnames,
+									 int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
@@ -220,12 +230,12 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	W_AddTexture(namebuf, img, is_medusa);
+	wad.addTexture(namebuf, img, is_medusa);
 }
 
 
-void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
-                             bool skip_first)
+void Instance::LoadTexturesLump(Lump_c *lump, const byte *pnames,
+								int pname_size, bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
 
@@ -236,11 +246,10 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 
 	// load TEXTUREx data into memory for easier processing
 	std::vector<byte> tex_data;
-
 	int tex_length = loadLumpData(lump, tex_data);
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
-	s32_t *tex_data_s32 = (s32_t *)tex_data.data();
+	auto tex_data_s32 = reinterpret_cast<const s32_t *>(tex_data.data());
 
 	int num_tex = LE_S32(tex_data_s32[0]);
 
@@ -249,8 +258,10 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 		return;
 
 	if (num_tex < 0 || num_tex > (1<<20))
-		ThrowException("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad "
-					   "count.\n");
+	{
+		ParseException::raise("%s: TEXTURE1/2 lump is corrupt, bad count.",
+							  __func__);
+	}
 
 	bool is_strife = CheckTexturesAreStrife(tex_data.data(), tex_length,
 											num_tex, skip_first);
@@ -263,7 +274,10 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 		int offset = LE_S32(tex_data_s32[1 + n]);
 
 		if (offset < 4 * num_tex || offset >= tex_length)
-			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
+		{
+			ParseException::raise("%s: TEXTURE1/2 lump is corrupt, bad offset.",
+								  __func__);
+		}
 
 		if (is_strife)
 		{
@@ -326,7 +340,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 		// if we successfully loaded the texture, add it
 		if (img)
 		{
-			W_AddTexture(name, img, false /* is_medusa */);
+			wad.addTexture(name, img, false /* is_medusa */);
 		}
 	}
 }

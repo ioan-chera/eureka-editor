@@ -1477,5 +1477,17 @@ SString Instance::M_TextureCategoryString(SString &letters, bool do_flats) const
 	return M_CategoryString(letters, true, conf.texture_groups, do_flats ? conf.flat_categories : conf.texture_categories);
 }
 
+//
+// Convenience to cover more
+//
+void ParseException::raise(EUR_FORMAT_STRING(const char *format), ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	SString message = SString::vprintf(format, ap);
+	va_end(ap);
+	throw ParseException(message);
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab
