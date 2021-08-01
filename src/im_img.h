@@ -58,20 +58,36 @@ class Instance;
 class Img_c
 {
 private:
-	img_pixel_t *pixels;
+	img_pixel_t *pixels = nullptr;
 
-	int  w;  // Width
-	int  h;  // Height
+	int  w = 0;  // Width
+	int  h = 0;  // Height
 
 	// texture identifier for OpenGL, 0 if not uploaded yet
-	GLuint gl_tex;
+	GLuint gl_tex = 0;
 
 	const Instance &inst;
 
 public:
-	explicit Img_c(const Instance &inst);
-	 Img_c(const Instance &inst, int width, int height, bool _dummy = false);
-	~Img_c();
+	//
+	// default constructor, creating a null image
+	//
+	explicit Img_c(const Instance &inst) : inst(inst)
+	{
+	}
+
+	//
+	// a constructor with dimensions
+	//
+	 Img_c(const Instance &inst, int width, int height, bool _dummy = false) : inst(inst)
+	 {
+		 resize(width, height);
+	 }
+
+	 ~Img_c()
+	 {
+		 delete[]pixels;
+	}
 
 	inline bool is_null() const
 	{

@@ -63,33 +63,6 @@ inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
 	}
 }
 
-
-//
-// default constructor, creating a null image
-//
-Img_c::Img_c(const Instance &inst) : pixels(NULL), w(0), h(0), gl_tex(0), inst(inst)
-{ }
-
-
-//
-// a constructor with dimensions
-//
-Img_c::Img_c(const Instance &inst, int width, int height, bool _dummy) :
-	pixels(NULL), w(0), h(0), gl_tex(0), inst(inst)
-{
-	resize(width, height);
-}
-
-
-//
-// destructor
-//
-Img_c::~Img_c()
-{
-	delete []pixels;
-}
-
-
 //
 //  return a const pointer on the buffer.
 //  if the image is null, return a NULL pointer.
