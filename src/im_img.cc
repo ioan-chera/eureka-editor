@@ -64,33 +64,13 @@ inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
 }
 
 //
-//  return a const pointer on the buffer.
-//  if the image is null, return a NULL pointer.
-//
-const img_pixel_t *Img_c::buf() const
-{
-	return pixels;
-}
-
-
-//
-// return a writable pointer on the buffer.
-// if the image is null, return a NULL pointer.
-//
-img_pixel_t *Img_c::wbuf()
-{
-	return pixels;
-}
-
-
-//
 // clear the image to fully transparent
 //
 void Img_c::clear()
 {
-	if (pixels)
+	if (!pixels.empty())
 	{
-		img_pixel_t *dest = pixels;
+		img_pixel_t *dest = pixels.data();
 		img_pixel_t *dest_end = dest + (w * h);
 
 		for ( ; dest < dest_end ; dest++)
@@ -108,13 +88,6 @@ void Img_c::resize(int new_width, int new_height)
 	if (new_width == w && new_height == h)
 		return;
 
-	// unallocate old buffer
-	if (pixels)
-	{
-		delete[] pixels;
-		pixels = NULL;
-	}
-
 	// Is it a null image ?
 	if (new_width == 0 || new_height == 0)
 	{
@@ -126,7 +99,7 @@ void Img_c::resize(int new_width, int new_height)
 	w = new_width;
 	h = new_height;
 
-	pixels = new img_pixel_t[w * h + 10];  // Some slack
+	pixels.resize(w * h + 10);	// Some slack
 
 	clear();
 }

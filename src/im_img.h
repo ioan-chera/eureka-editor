@@ -58,7 +58,7 @@ class Instance;
 class Img_c
 {
 private:
-	img_pixel_t *pixels = nullptr;
+	std::vector<img_pixel_t> pixels;
 
 	int  w = 0;  // Width
 	int  h = 0;  // Height
@@ -84,14 +84,9 @@ public:
 		 resize(width, height);
 	 }
 
-	 ~Img_c()
-	 {
-		 delete[]pixels;
-	}
-
 	inline bool is_null() const
 	{
-		return (! pixels);
+		return pixels.empty();
 	}
 
 	inline int width() const
@@ -110,10 +105,24 @@ public:
 	}
 
 	// read access
-	const img_pixel_t *buf() const;
+	//
+	//  return a const pointer on the buffer.
+	//  if the image is null, return a NULL pointer.
+	//
+	const img_pixel_t *buf() const
+	{
+		return pixels.data();
+	}
 
 	// read/write access
-	img_pixel_t *wbuf();
+	//
+	// return a writable pointer on the buffer.
+	// if the image is null, return a NULL pointer.
+	//
+	img_pixel_t *wbuf()
+	{
+		return pixels.data();
+	}
 
 public:
 	// set all pixels to TRANS_PIXEL
