@@ -50,13 +50,14 @@ void WadData::clearTextures()
 }
 
 
-void WadData::addTexture(const SString &name, Img_c *img, bool is_medusa)
+void WadData::addTexture(const SString &name, std::unique_ptr<Img_c> &&img,
+						 bool is_medusa)
 {
 	// free any existing one with the same name
 
 	SString tex_str = name;
 
-	textures[tex_str] = std::unique_ptr<Img_c>(img);
+	textures[tex_str] = std::move(img);
 
 	medusa_textures[tex_str] = is_medusa ? 1 : 0;
 }
@@ -111,7 +112,7 @@ void Instance::LoadTextureEntry_Strife(const byte *tex_data, int tex_length,
 							  raw->name);
 	}
 
-	Img_c *img = new Img_c(*this, width, height, false);
+	auto img = std::make_unique<Img_c>(*this, width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -162,7 +163,7 @@ void Instance::LoadTextureEntry_Strife(const byte *tex_data, int tex_length,
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.addTexture(namebuf, img, is_medusa);
+	wad.addTexture(namebuf, std::move(img), is_medusa);
 }
 
 
@@ -181,7 +182,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 	if (width == 0 || height == 0)
 		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(*this, width, height, false);
+	auto img = std::make_unique<Img_c>(*this, width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -230,7 +231,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.addTexture(namebuf, img, is_medusa);
+	wad.addTexture(namebuf, std::move(img), is_medusa);
 }
 
 
@@ -303,16 +304,15 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 
 		char img_fmt = W_DetectImageFormat(lump);
 		const SString &name = lump->Name();
-		Img_c *img = NULL;
+		std::unique_ptr<Img_c> img = NULL;
 
 		switch (img_fmt)
 		{
 			case 'd': /* Doom patch */
-				img = new Img_c(*this);
+				img = std::make_unique<Img_c>(*this);
 				if (! LoadPicture(*img, lump, name, 0, 0))
 				{
-					delete img;
-					img = NULL;
+					img = nullptr;
 				}
 				break;
 
@@ -340,7 +340,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 		// if we successfully loaded the texture, add it
 		if (img)
 		{
-			wad.addTexture(name, img, false /* is_medusa */);
+			wad.addTexture(name, std::move(img), false /* is_medusa */);
 		}
 	}
 }

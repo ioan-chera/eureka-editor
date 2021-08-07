@@ -43,7 +43,8 @@ struct WadData
 	void loadFlats(const Instance &inst, const MasterDirectory &master);
 	void clearTextures();
 
-	void addTexture(const SString &name, Img_c *img, bool is_medusa);
+	void addTexture(const SString &name, std::unique_ptr<Img_c> &&img,
+					bool is_medusa);
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};

@@ -239,8 +239,9 @@ public:
 	const byte *SoundPropagation(int start_sec);
 
 	// IM_IMG
-	Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src) const;
-	Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H) const;
+	std::unique_ptr<Img_c> IM_ConvertRGBImage(Fl_RGB_Image *src) const;
+	std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t *data, int W,
+											  int H) const;
 	Img_c *IM_CreateDogSprite() const;
 	Img_c *IM_CreateLightSprite() const;
 	Img_c *IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;
@@ -399,9 +400,12 @@ public:
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
 	// W_LOADPIC
-	Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name) const;
-	Img_c *LoadImage_PNG(Lump_c *lump, const SString &name) const;
-	Img_c *LoadImage_TGA(Lump_c *lump, const SString &name) const;
+	std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump,
+										  const SString &name) const;
+	std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump,
+										 const SString &name) const;
+	std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump,
+										 const SString &name) const;
 	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
 	// W_TEXTURE

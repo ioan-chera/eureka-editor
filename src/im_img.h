@@ -132,7 +132,7 @@ public:
 
 	// paste a copy of another image into this one, but skip any
 	// transparent pixels.
-	void compose(Img_c *other, int x, int y);
+	void compose(const Img_c *other, int x, int y);
 
 	Img_c * spectrify() const;
 

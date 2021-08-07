@@ -106,7 +106,8 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 }
 
 
-Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
+std::unique_ptr<Img_c> Instance::LoadImage_PNG(Lump_c *lump,
+											   const SString &name) const
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -123,13 +124,14 @@ Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 	}
 
 	// convert it
-	Img_c *img = IM_ConvertRGBImage(&fltk_img);
+	std::unique_ptr<Img_c> img = IM_ConvertRGBImage(&fltk_img);
 
 	return img;
 }
 
 
-Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
+std::unique_ptr<Img_c> Instance::LoadImage_JPEG(Lump_c *lump,
+												const SString &name) const
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -146,13 +148,14 @@ Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 	}
 
 	// convert it
-	Img_c *img = IM_ConvertRGBImage(&fltk_img);
+	std::unique_ptr<Img_c> img = IM_ConvertRGBImage(&fltk_img);
 
 	return img;
 }
 
 
-Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
+std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c *lump,
+											   const SString &name) const
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -173,7 +176,7 @@ Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
 	}
 
 	// convert it
-	Img_c *img = IM_ConvertTGAImage(rgba, width, height);
+	std::unique_ptr<Img_c> img = IM_ConvertTGAImage(rgba, width, height);
 
 	TGA_FreeImage(rgba);
 
@@ -181,7 +184,7 @@ Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
 }
 
 
-static bool ComposePicture(Img_c& dest, Img_c *sub,
+static bool ComposePicture(Img_c& dest, const Img_c *sub,
 	int pic_x_offset, int pic_y_offset,
 	int *pic_width, int *pic_height)
 {
@@ -230,7 +233,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	int *pic_height) const   // (can be NULL)
 {
 	ImageFormat img_fmt = W_DetectImageFormat(lump);
-	Img_c *sub;
+	std::unique_ptr<Img_c> sub;
 
 	switch (img_fmt)
 	{
@@ -240,15 +243,18 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 	case ImageFormat::png:
 		sub = LoadImage_PNG(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
+							  pic_width, pic_height);
 
 	case ImageFormat::jpeg:
 		sub = LoadImage_JPEG(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
+							  pic_width, pic_height);
 
 	case ImageFormat::tga:
 		sub = LoadImage_TGA(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
+							  pic_width, pic_height);
 
 	case ImageFormat::unknown:
 		gLog.printf("Unknown image format in '%s' lump\n", pic_name.c_str());

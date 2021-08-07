@@ -105,7 +105,7 @@ void Img_c::resize(int new_width, int new_height)
 }
 
 
-void Img_c::compose(Img_c *other, int x, int y)
+void Img_c::compose(const Img_c *other, int x, int y)
 {
 	int W = width();
 	int H = height();
@@ -661,7 +661,7 @@ static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *con
 }
 
 
-Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
+std::unique_ptr<Img_c> Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 {
 	int W  = src->w();
 	int H  = src->h();
@@ -670,7 +670,7 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 
 	LD += W;
 
-	const byte * data = (const byte *) src->array;
+	auto data = reinterpret_cast<const byte *>(src->array);
 
 	if (! data)
 		return NULL;
@@ -678,7 +678,7 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 	if (! (D == 3 || D == 4))
 		return NULL;
 
-	Img_c *img = new Img_c(*this, W, H);
+	auto img = std::make_unique<Img_c>(*this, W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -697,7 +697,9 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 			// TODO : a preference to palettize it
 			// dest_pix = W_FindPaletteColor(r, g, b);
 
-			dest_pix = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3));
+			dest_pix = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r >> 3,
+																   g >> 3,
+																   b >> 3));
 		}
 
 		img->wbuf() [ y * W + x ] = dest_pix;
@@ -707,9 +709,10 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 }
 
 
-Img_c * Instance::IM_ConvertTGAImage(const rgba_color_t * data, int W, int H) const
+std::unique_ptr<Img_c> Instance::IM_ConvertTGAImage(const rgba_color_t * data,
+													int W, int H) const
 {
-	Img_c *img = new Img_c(*this, W, H);
+	auto img = std::make_unique<Img_c>(*this, W, H);
 
 	img_pixel_t *dest = img->wbuf();
 
