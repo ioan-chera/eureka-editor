@@ -140,7 +140,7 @@ void Img_c::compose(const Img_c *other, int x, int y)
 //
 Img_c * Img_c::spectrify(const ConfigData &config) const
 {
-	Img_c *omg = new Img_c(inst, width(), height());
+	Img_c *omg = new Img_c(width(), height());
 
 	int invis_start = config.miscInfo.invis_colors[0];
 	int invis_len   = config.miscInfo.invis_colors[1] - invis_start + 1;
@@ -183,7 +183,7 @@ Img_c * Img_c::scale_img(double scale) const
 	int owidth  = (int) (width()  * scale + 0.5);
 	int oheight = (int) (height() * scale + 0.5);
 
-	Img_c *omg = new Img_c(inst, owidth, oheight);
+	Img_c *omg = new Img_c(owidth, oheight);
 
 	const img_pixel_t *const ibuf = buf();
 	img_pixel_t       *const obuf = omg->wbuf();
@@ -220,7 +220,7 @@ Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img_c *omg = new Img_c(inst, width(), height());
+	Img_c *omg = new Img_c(width(), height());
 
 	int W = width();
 	int H = height();
@@ -484,7 +484,7 @@ static const byte missing_graphic[16 * 16] =
 
 static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg, int fg)
 {
-	Img_c *omg = new Img_c(inst, 64, 64, true);
+	Img_c *omg = new Img_c(64, 64, true);
 
 	img_pixel_t *obuf = omg->wbuf();
 
@@ -581,7 +581,7 @@ Img_c *Instance::IM_UnknownSprite()
 		if (unknown_sprite_image)
 			delete unknown_sprite_image;
 
-		unknown_sprite_image = new Img_c(*this, 64, 64, true);
+		unknown_sprite_image = new Img_c(64, 64, true);
 
 		img_pixel_t *obuf = unknown_sprite_image->wbuf();
 
@@ -599,7 +599,7 @@ Img_c *Instance::IM_UnknownSprite()
 
 static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
-	Img_c *result = new Img_c(inst, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
@@ -633,7 +633,7 @@ static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *con
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
-	Img_c *result = new Img_c(inst, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
@@ -678,7 +678,7 @@ std::unique_ptr<Img_c> Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 	if (! (D == 3 || D == 4))
 		return NULL;
 
-	auto img = std::make_unique<Img_c>(*this, W, H);
+	auto img = std::make_unique<Img_c>(W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -712,7 +712,7 @@ std::unique_ptr<Img_c> Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 std::unique_ptr<Img_c> Instance::IM_ConvertTGAImage(const rgba_color_t * data,
 													int W, int H) const
 {
-	auto img = std::make_unique<Img_c>(*this, W, H);
+	auto img = std::make_unique<Img_c>(W, H);
 
 	img_pixel_t *dest = img->wbuf();
 
@@ -967,7 +967,7 @@ Img_c *Instance::IM_CreateLightSprite() const
 	int W = 11;
 	int H = 11;
 
-	Img_c *result = new Img_c(*this, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
@@ -1009,7 +1009,7 @@ Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) cons
 	int W = 32;
 	int H = 32;
 
-	Img_c *result = new Img_c(*this, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 

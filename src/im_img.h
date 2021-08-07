@@ -68,20 +68,16 @@ private:
 	// texture identifier for OpenGL, 0 if not uploaded yet
 	GLuint gl_tex = 0;
 
-	const Instance &inst;
-
 public:
 	//
 	// default constructor, creating a null image
 	//
-	explicit Img_c(const Instance &inst) : inst(inst)
-	{
-	}
+	Img_c() = default;
 
 	//
 	// a constructor with dimensions
 	//
-	 Img_c(const Instance &inst, int width, int height, bool _dummy = false) : inst(inst)
+	 Img_c(int width, int height, bool _dummy = false)
 	 {
 		 resize(width, height);
 	 }
