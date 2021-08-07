@@ -351,7 +351,7 @@ void Img_c::load_gl()
 			{
 				byte r, g, b;
 
-				inst.IM_DecodePixel(pix, r, g, b);
+				IM_DecodePixel(inst.wad, pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 

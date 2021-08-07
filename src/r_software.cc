@@ -2054,7 +2054,7 @@ static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
-			inst.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			IM_DecodePixel(inst.wad, *src, dest[0], dest[1], dest[2]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy+ry, inst.r_view.screen_w, 1);
@@ -2077,8 +2077,8 @@ static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
-			inst.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
-			inst.IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
+			IM_DecodePixel(inst.wad, *src, dest[0], dest[1], dest[2]);
+			IM_DecodePixel(inst.wad, *src, dest[3], dest[4], dest[5]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);

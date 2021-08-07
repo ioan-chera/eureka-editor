@@ -255,26 +255,6 @@ public:
 	void W_UnloadAllTextures() const;
 	void IM_UnloadDummyTextures() const;
 
-	// this one applies the current gamma.
-	// for rendering the 3D view or the 2D sectors and sprites.
-	inline void IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
-	{
-		if(p & IS_RGB_PIXEL)
-		{
-			r = wad.rgb555_gamma[IMG_PIXEL_RED(p)];
-			g = wad.rgb555_gamma[IMG_PIXEL_GREEN(p)];
-			b = wad.rgb555_gamma[IMG_PIXEL_BLUE(p)];
-		}
-		else
-		{
-			const rgb_color_t col = wad.palette[p];
-
-			r = RGB_RED(col);
-			g = RGB_GREEN(col);
-			b = RGB_BLUE(col);
-		}
-	}
-
 	// this applies a constant gamma.
 	// for textures/flats/things in the browser and panels.
 	inline void IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const
@@ -657,6 +637,27 @@ public:	// will be private when we encapsulate everything
 	Render_View_t r_view{ *this };
 	sector_info_cache_c sector_info_cache{ *this };
 };
+
+// this one applies the current gamma.
+// for rendering the 3D view or the 2D sectors and sprites.
+inline void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g,
+						   byte &b)
+{
+	if(p & IS_RGB_PIXEL)
+	{
+		r = wad.rgb555_gamma[IMG_PIXEL_RED(p)];
+		g = wad.rgb555_gamma[IMG_PIXEL_GREEN(p)];
+		b = wad.rgb555_gamma[IMG_PIXEL_BLUE(p)];
+	}
+	else
+	{
+		const rgb_color_t col = wad.palette[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
+}
 
 extern Instance gInstance;	// for now we run with one instance, will have more for the MDI.
 
