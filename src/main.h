@@ -133,29 +133,16 @@ namespace global
 	extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
 	extern SString home_dir;      // home dir (e.g. $HOME/.eureka)
 	extern SString cache_dir;    // for caches and backups, can be same as home_dir
-}
 
-namespace global
-{
 	extern SString config_file; // Name of the configuration file, or NULL
 	extern SString log_file;    // Name of log file, or NULL
-}
 
-namespace global
-{
 	extern std::vector<SString> Pwad_list;
-}
 
-
-namespace global
-{
 	extern int	default_floor_h;
 	extern int	default_ceil_h;
 	extern int	default_light_level;
-}
 
-namespace global
-{
 	extern int   show_help;		// Print usage message and exit.
 	extern int   show_version;	// Print version info and exit.
 
