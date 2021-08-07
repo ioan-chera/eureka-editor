@@ -54,6 +54,7 @@ const img_pixel_t IS_RGB_PIXEL = 0x8000;
 const img_pixel_t TRANS_PIXEL = 255;
 
 class Instance;
+struct ConfigData;
 
 class Img_c
 {
@@ -134,7 +135,7 @@ public:
 	// transparent pixels.
 	void compose(const Img_c *other, int x, int y);
 
-	Img_c * spectrify() const;
+	Img_c * spectrify(const ConfigData &config) const;
 
 	Img_c * scale_img(double scale) const;
 
