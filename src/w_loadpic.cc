@@ -55,7 +55,8 @@ struct post_t
 #define P_SENTINEL  0xFF
 
 
-static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, int x, int y)
+static void DrawColumn(const WadData &wad, const ConfigData &config,
+					   Img_c& img, const post_t *column, int x, int y)
 {
 	SYS_ASSERT(column);
 
@@ -79,7 +80,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 		{
 			// The original DOOM did not honor negative y-offsets for
 			// patches but some ports like ZDoom do.
-			if (inst.conf.features.neg_patch_offsets)
+			if (config.features.neg_patch_offsets)
 				src -= top;
 			else
 				count += top;
@@ -96,7 +97,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 			byte pix = *src++;
 
 			if (pix == TRANS_PIXEL)
-				pix = static_cast<byte>(inst.wad.trans_replace);
+				pix = static_cast<byte>(wad.trans_replace);
 
 			dest[top * W] = pix;
 		}
@@ -301,7 +302,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
-		DrawColumn(*this, dest, column, pic_x_offset + x, pic_y_offset);
+		DrawColumn(wad, conf, dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
 	return true;
