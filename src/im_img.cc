@@ -300,7 +300,7 @@ void Img_c::bind_gl() {}
 
 #else
 
-void Img_c::load_gl()
+void Img_c::load_gl(const WadData &wad)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -351,7 +351,7 @@ void Img_c::load_gl()
 			{
 				byte r, g, b;
 
-				IM_DecodePixel(inst.wad, pix, r, g, b);
+				IM_DecodePixel(wad, pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
@@ -385,13 +385,13 @@ void Img_c::unload_gl(bool can_delete)
 }
 
 
-void Img_c::bind_gl()
+void Img_c::bind_gl(const WadData &wad)
 {
 	// create the GL texture if we haven't already
 	if (gl_tex == 0)
 	{
 		// this will do a glBindTexture
-		load_gl();
+		load_gl(wad);
 		return;
 	}
 
