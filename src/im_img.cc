@@ -266,7 +266,7 @@ bool Img_c::has_transparent() const
 }
 
 
-void Img_c::test_make_RGB()
+void Img_c::test_make_RGB(const WadData &wad)
 {
 	int W = width();
 	int H = height();
@@ -280,7 +280,7 @@ void Img_c::test_make_RGB()
 
 		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
 		{
-			const rgb_color_t col = IM_PixelToRGB(inst.wad, pix);
+			const rgb_color_t col = IM_PixelToRGB(wad, pix);
 
 			byte r = RGB_RED(col)   >> 3;
 			byte g = RGB_GREEN(col) >> 3;
