@@ -158,6 +158,10 @@ namespace global
 {
 	extern int   show_help;		// Print usage message and exit.
 	extern int   show_version;	// Print version info and exit.
+
+#ifndef NO_OPENGL
+	extern bool use_npot_textures;
+#endif
 }
 
 

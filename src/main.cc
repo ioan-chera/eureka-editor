@@ -81,6 +81,10 @@ SString global::cache_dir;
 
 std::vector<SString> global::Pwad_list;
 
+#ifndef NO_OPENGL
+bool global::use_npot_textures;
+#endif
+
 //
 // config items
 //

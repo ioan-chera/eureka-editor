@@ -139,7 +139,7 @@ void UI_Canvas::draw()
 	const GLubyte *strExt = glGetString(GL_EXTENSIONS);
 
 	if (strExt)
-		inst.use_npot_textures = gluCheckExtension((const GLubyte*) "GL_ARB_texture_non_power_of_two", strExt) == GLU_TRUE;
+		global::use_npot_textures = gluCheckExtension((const GLubyte*) "GL_ARB_texture_non_power_of_two", strExt) == GLU_TRUE;
 #endif
 #endif
 
@@ -1101,7 +1101,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	float ty1 = 0.0;
 	float tx2, ty2;
 
-	if (inst.use_npot_textures)
+	if (global::use_npot_textures)
 	{
 		tx2 = 1.0;
 		ty2 = 1.0;
@@ -2708,7 +2708,7 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 
 	int img_w, img_h;
 
-	if (inst.use_npot_textures)
+	if (global::use_npot_textures)
 	{
 		img_w = img->width();
 		img_h = img->height();
