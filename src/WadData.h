@@ -39,13 +39,6 @@ struct WadData
 
 	void loadFlats(const MasterDirectory &master);
 
-	void clearTextures();
-	void addTexture(const SString &name, std::unique_ptr<Img_c> &&img,
-					bool is_medusa);
-	void loadTexturesLump(Lump_c &lump, const byte *pnames, int pname_size,
-						  bool skip_first, const MasterDirectory &master,
-						  const ConfigData &config);
-	void loadTextures_TX_START(const Wad_file &wf, const ConfigData &config);
 	void loadTextures(const MasterDirectory &master, const ConfigData &config);
 
 	// this palette has the gamma setting applied
@@ -79,6 +72,10 @@ private:
 	void clearFlats();
 	void addFlat(const SString &name, std::unique_ptr<Img_c> &&img);
 
+	void clearTextures();
+	void loadTexturesLump(Lump_c &lump, const byte *pnames, int pname_size,
+						  bool skip_first, const MasterDirectory &master,
+						  const ConfigData &config);
 	void loadTextureEntry_Strife(const byte *tex_data, int tex_length,
 								 int offset, const byte *pnames, int pname_size,
 								 bool skip_first, const MasterDirectory &master,
@@ -87,6 +84,9 @@ private:
 							   const byte *pnames, int pname_size,
 							   bool skip_first, const MasterDirectory &master,
 							   const ConfigData &config);
+	void loadTextures_TX_START(const Wad_file &wf, const ConfigData &config);
+	void addTexture(const SString &name, std::unique_ptr<Img_c> &&img,
+					bool is_medusa);
 };
 
 #endif /* WadData_h */
