@@ -247,7 +247,7 @@ void Instance::LoadTexturesLump(Lump_c *lump, const byte *pnames,
 
 	// load TEXTUREx data into memory for easier processing
 	std::vector<byte> tex_data;
-	int tex_length = loadLumpData(lump, tex_data);
+	int tex_length = loadLumpData(*lump, tex_data);
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	auto tex_data_s32 = reinterpret_cast<const s32_t *>(tex_data.data());
@@ -368,7 +368,7 @@ void Instance::W_LoadTextures()
 		if (pnames)
 		{
 			std::vector<byte> pname_data;
-			int pname_size = loadLumpData(pnames, pname_data);
+			int pname_size = loadLumpData(*pnames, pname_data);
 
 			if (texture1)
 				LoadTexturesLump(texture1, pname_data.data(), pname_size, true);

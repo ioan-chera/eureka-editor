@@ -1307,26 +1307,26 @@ Lump_c *Instance::W_FindSpriteLump(const SString &name) const
 // C++ version. Outputs a NUL-terminated byte vector, for safety. Returns the
 // length without the NUL terminator.
 //
-int loadLumpData(Lump_c *lump, std::vector<byte> &buf_ptr)
+int loadLumpData(Lump_c &lump, std::vector<byte> &buf_ptr)
 {
 	std::vector<byte> result;
-	if(lump->Length() <= 0)
+	if(lump.Length() <= 0)
 	{
 		result.push_back(0);
 		buf_ptr = std::move(result);
 		return 0;
 	}
-	result.resize(lump->Length() + 1);
-	if(!lump->Seek() || !lump->Read(result.data(), (int)result.size()))
+	result.resize(lump.Length() + 1);
+	if(!lump.Seek() || !lump.Read(result.data(), (int)result.size()))
 	{
 		throw ParseException(SString::printf("%s: read error loading lump "
 											 "'%s'.\n", __func__,
-											 lump->Name().c_str()));
+											 lump.Name().c_str()));
 	}
-	result[lump->Length()] = 0;
+	result[lump.Length()] = 0;
 
 	buf_ptr = std::move(result);
-	return lump->Length();
+	return lump.Length();
 }
 
 //------------------------------------------------------------------------

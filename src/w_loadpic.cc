@@ -112,7 +112,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_PNG(Lump_c *lump,
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	int tex_length = loadLumpData(lump, tex_data);
+	int tex_length = loadLumpData(*lump, tex_data);
 
 	// pass it to FLTK for decoding
 	Fl_PNG_Image fltk_img(NULL, tex_data.data(), tex_length);
@@ -134,7 +134,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_JPEG(Lump_c *lump,
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	loadLumpData(lump, tex_data);
+	loadLumpData(*lump, tex_data);
 
 	// pass it to FLTK for decoding
 	Fl_JPEG_Image fltk_img(NULL, tex_data.data());
@@ -156,7 +156,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c *lump,
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	int tex_length = loadLumpData(lump, tex_data);
+	int tex_length = loadLumpData(*lump, tex_data);
 
 	// decode it
 	int width;
@@ -265,7 +265,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	/* DOOM format */
 
 	std::vector<byte> raw_data;
-	loadLumpData(lump, raw_data);
+	loadLumpData(*lump, raw_data);
 
 	const patch_t *pat = (patch_t *) raw_data.data();
 
