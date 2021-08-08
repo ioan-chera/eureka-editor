@@ -66,15 +66,15 @@ void MasterDirectory::removeEditWad()
 }
 
 
-void Instance::ReplaceEditWad(Wad_file *new_wad)
+void MasterDirectory::replaceEditWad(Wad_file *new_wad)
 {
-	master.removeEditWad();
+	removeEditWad();
 
-	master.edit_wad = new_wad;
+	edit_wad = new_wad;
 
-	master.Pwad_name = master.edit_wad->PathName();
+	Pwad_name = edit_wad->PathName();
 
-	master.add(master.edit_wad);
+	add(edit_wad);
 }
 
 
@@ -1066,7 +1066,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 
 	// this wad replaces the current PWAD
-	gInstance.ReplaceEditWad(wad);
+	gInstance.master.replaceEditWad(wad);
 
 	SYS_ASSERT(gInstance.master.edit_wad == wad);
 
@@ -1135,7 +1135,7 @@ void Instance::CMD_OpenMap()
 		SYS_ASSERT(wad != master.edit_wad);
 		SYS_ASSERT(wad != master.game_wad);
 
-		ReplaceEditWad(wad);
+		master.replaceEditWad(wad);
 
 		new_resources = true;
 	}
@@ -1790,7 +1790,7 @@ bool Instance::M_ExportMap()
 	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// the new wad replaces the current PWAD
-	ReplaceEditWad(wad);
+	master.replaceEditWad(wad);
 
 	SaveLevel(map_name);
 

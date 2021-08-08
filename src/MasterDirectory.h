@@ -36,6 +36,7 @@ struct MasterDirectory
 
 	Lump_c *findGlobalLump(const SString &name) const;
 	void removeEditWad();
+	void replaceEditWad(Wad_file* new_wad);
 
 	std::vector<Wad_file *> dir;
 	// the IWAD, never NULL, always at master_dir.front()
