@@ -40,7 +40,7 @@ struct WadData
 
 	void clearFlats();
 	void addFlat(const SString &name, Img_c *img);
-	void loadFlats(const Instance &inst, const MasterDirectory &master);
+	void loadFlats(const MasterDirectory &master);
 	void clearTextures();
 
 	void addTexture(const SString &name, std::unique_ptr<Img_c> &&img,

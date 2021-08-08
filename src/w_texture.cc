@@ -531,7 +531,7 @@ static std::unique_ptr<Img_c> LoadFlatImage(const WadData &wad,
 }
 
 
-void WadData::loadFlats(const Instance &inst, const MasterDirectory &master)
+void WadData::loadFlats(const MasterDirectory &master)
 {
 	clearFlats();
 

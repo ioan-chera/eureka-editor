@@ -958,7 +958,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	WadData newWad;
 	newWad.loadPalette(newMaster);
 	newWad.loadColormap(newMaster);
-	newWad.loadFlats(*this, newMaster);
+	newWad.loadFlats(newMaster);
 
 	// Commit it
 	conf = config;
