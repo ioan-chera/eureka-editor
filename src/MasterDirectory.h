@@ -43,6 +43,7 @@ struct MasterDirectory
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
+	SString Pwad_name;	// Filename of current wad
 };
 
 #endif /* MasterDirectory_h */

@@ -583,7 +583,7 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	Pwad_name = filename;
+	master.Pwad_name = filename;
 
 	master.edit_wad = wad;
 

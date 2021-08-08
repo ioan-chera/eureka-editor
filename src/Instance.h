@@ -503,8 +503,6 @@ public:	// will be private when we encapsulate everything
 	// Wad settings
 	//
 
-	SString Pwad_name;	// Filename of current wad
-
 	MasterDirectory master;
 
 	LoadingData loaded;

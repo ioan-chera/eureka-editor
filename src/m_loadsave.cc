@@ -62,7 +62,7 @@ void Instance::RemoveEditWad()
 	delete master.edit_wad;
 
 	master.edit_wad  = NULL;
-	Pwad_name.clear();
+	master.Pwad_name.clear();
 }
 
 
@@ -72,7 +72,7 @@ void Instance::ReplaceEditWad(Wad_file *new_wad)
 
 	master.edit_wad = new_wad;
 
-	Pwad_name = master.edit_wad->PathName();
+	master.Pwad_name = master.edit_wad->PathName();
 
 	master.add(master.edit_wad);
 }
@@ -276,7 +276,7 @@ void Instance::CMD_NewProject()
 	}
 
 	master.edit_wad = wad;
-	Pwad_name = master.edit_wad->PathName();
+	master.Pwad_name = master.edit_wad->PathName();
 
 	master.add(master.edit_wad);
 
