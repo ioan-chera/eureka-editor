@@ -107,12 +107,12 @@ static void DrawColumn(const WadData &wad, const ConfigData &config,
 }
 
 
-std::unique_ptr<Img_c> Instance::LoadImage_PNG(Lump_c *lump,
+std::unique_ptr<Img_c> Instance::LoadImage_PNG(Lump_c &lump,
 											   const SString &name) const
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	int tex_length = loadLumpData(*lump, tex_data);
+	int tex_length = loadLumpData(lump, tex_data);
 
 	// pass it to FLTK for decoding
 	Fl_PNG_Image fltk_img(NULL, tex_data.data(), tex_length);
@@ -239,7 +239,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 		break;
 
 	case ImageFormat::png:
-		sub = LoadImage_PNG(lump, pic_name);
+		sub = LoadImage_PNG(*lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 

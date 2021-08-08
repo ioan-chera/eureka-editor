@@ -317,7 +317,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 				break;
 
 			case 'p': /* PNG */
-				img = LoadImage_PNG(lump, name);
+				img = LoadImage_PNG(*lump, name);
 				break;
 
 			case 't': /* TGA */
