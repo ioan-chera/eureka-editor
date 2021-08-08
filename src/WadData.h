@@ -45,6 +45,7 @@ struct WadData
 	void loadTexturesLump(Lump_c &lump, const byte *pnames, int pname_size,
 						  bool skip_first, const MasterDirectory &master,
 						  const ConfigData &config);
+	void loadTextures_TX_START(const Wad_file &wf, const ConfigData &config);
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};

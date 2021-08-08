@@ -307,9 +307,10 @@ void WadData::loadTexturesLump(Lump_c &lump, const byte *pnames,
 }
 
 
-void Instance::W_LoadTextures_TX_START(Wad_file *wf)
+void WadData::loadTextures_TX_START(const Wad_file &wf,
+									const ConfigData &config)
 {
-	for(const LumpRef &lumpRef : wf->directory)
+	for(const LumpRef &lumpRef : wf.directory)
 	{
 		if(lumpRef.ns != WadNamespace::TextureLumps)
 			continue;
@@ -323,7 +324,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 		{
 			case 'd': /* Doom patch */
 				img = std::make_unique<Img_c>();
-				if (! img->loadPicture(wad, conf, *lump, name, 0, 0))
+				if (! img->loadPicture(*this, config, *lump, name, 0, 0))
 				{
 					img = nullptr;
 				}
@@ -353,7 +354,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 		// if we successfully loaded the texture, add it
 		if (img)
 		{
-			wad.addTexture(name, std::move(img), false /* is_medusa */);
+			addTexture(name, std::move(img), false /* is_medusa */);
 		}
 	}
 }
@@ -398,7 +399,7 @@ void Instance::W_LoadTextures()
 
 		if (conf.features.tx_start)
 		{
-			W_LoadTextures_TX_START(master.dir[i]);
+			wad.loadTextures_TX_START(*master.dir[i], conf);
 		}
 	}
 }
