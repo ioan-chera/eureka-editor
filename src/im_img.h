@@ -158,6 +158,8 @@ public:
 												const SString &name);
 	static std::unique_ptr<Img_c> loadImage_JPEG(Lump_c &lump,
 												 const SString &name);
+	static std::unique_ptr<Img_c> loadImage_TGA(Lump_c &lump,
+												const SString &name);
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it

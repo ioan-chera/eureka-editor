@@ -149,8 +149,7 @@ std::unique_ptr<Img_c> Img_c::loadImage_JPEG(Lump_c &lump, const SString &name)
 }
 
 
-std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c &lump,
-											   const SString &name) const
+std::unique_ptr<Img_c> Img_c::loadImage_TGA(Lump_c &lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -171,7 +170,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c &lump,
 	}
 
 	// convert it
-	return Img_c::convertTGAImage(rgba.get(), width, height);
+	return convertTGAImage(rgba.get(), width, height);
 }
 
 
@@ -243,7 +242,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 							  pic_width, pic_height);
 
 	case ImageFormat::tga:
-		sub = LoadImage_TGA(*lump, pic_name);
+		sub = Img_c::loadImage_TGA(*lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
