@@ -294,7 +294,7 @@ public:
 	// M_FILES
 	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
-	bool M_TryOpenMostRecent();
+	Wad_file *M_TryOpenMostRecent();
 	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME

@@ -546,10 +546,10 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 }
 
 
-bool Instance::M_TryOpenMostRecent()
+Wad_file *Instance::M_TryOpenMostRecent()
 {
 	if (global::recent_files.getSize() == 0)
-		return false;
+		return nullptr;
 
 	SString filename;
 	SString map_name;
@@ -564,7 +564,7 @@ bool Instance::M_TryOpenMostRecent()
 	if (! wad)
 	{
 		gLog.printf("Failed to load most recent pwad: %s\n", filename.c_str());
-		return false;
+		return nullptr;
 	}
 
 	// make sure at least one level can be loaded
@@ -573,7 +573,7 @@ bool Instance::M_TryOpenMostRecent()
 		gLog.printf("No levels in most recent pwad: %s\n", filename.c_str());
 
 		delete wad;
-		return false;
+		return nullptr;
 	}
 
 	/* -- OK -- */
@@ -583,11 +583,7 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	master.Pwad_name = filename;
-
-	master.edit_wad = wad;
-
-	return true;
+	return wad;
 }
 
 

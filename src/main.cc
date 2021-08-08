@@ -1173,10 +1173,9 @@ int main(int argc, char *argv[])
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
-			if (gInstance.M_TryOpenMostRecent())
-			{
-				gInstance.master.add(gInstance.master.edit_wad);
-			}
+			Wad_file *wad = gInstance.M_TryOpenMostRecent();
+			if (wad)
+				gInstance.master.replaceEditWad(wad);
 		}
 
 
