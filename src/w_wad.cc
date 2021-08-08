@@ -1348,6 +1348,9 @@ void MasterDirectory::remove(Wad_file *wad)
 	ENDP = std::remove(dir.begin(), dir.end(), wad);
 
 	dir.erase(ENDP, dir.end());
+
+	if(wad == game_wad)
+		game_wad = nullptr;
 }
 
 
@@ -1361,6 +1364,7 @@ void MasterDirectory::closeAll()
 
 		delete wad;
 	}
+	game_wad = nullptr;
 }
 
 
