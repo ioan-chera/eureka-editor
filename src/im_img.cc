@@ -709,8 +709,8 @@ std::unique_ptr<Img_c> Img_c::convertRGBImage(const Fl_RGB_Image *src)
 }
 
 
-std::unique_ptr<Img_c> Instance::IM_ConvertTGAImage(const rgba_color_t * data,
-													int W, int H) const
+std::unique_ptr<Img_c> Img_c::convertTGAImage(const rgba_color_t * data, int W,
+											  int H)
 {
 	auto img = std::make_unique<Img_c>(W, H);
 

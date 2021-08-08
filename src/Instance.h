@@ -239,8 +239,6 @@ public:
 	const byte *SoundPropagation(int start_sec);
 
 	// IM_IMG
-	std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t *data, int W,
-											  int H) const;
 	Img_c *IM_CreateDogSprite() const;
 	Img_c *IM_CreateLightSprite() const;
 	Img_c *IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;

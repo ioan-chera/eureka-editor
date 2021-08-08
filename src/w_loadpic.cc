@@ -171,7 +171,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c &lump,
 	}
 
 	// convert it
-	std::unique_ptr<Img_c> img = IM_ConvertTGAImage(rgba, width, height);
+	std::unique_ptr<Img_c> img = Img_c::convertTGAImage(rgba, width, height);
 
 	TGA_FreeImage(rgba);
 
