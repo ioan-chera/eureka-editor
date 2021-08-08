@@ -36,8 +36,13 @@ struct MasterDirectory
 
 	Lump_c *findGlobalLump(const SString &name) const;
 
-	std::vector<Wad_file *> dir;	// the IWAD, never NULL, always at master_dir.front()
+	std::vector<Wad_file *> dir;
+	// the IWAD, never NULL, always at master_dir.front()
 	Wad_file *game_wad = nullptr;
+
+	// the current PWAD, or NULL for none.
+	// when present it is also at master_dir.back()
+	Wad_file *edit_wad = nullptr;
 };
 
 #endif /* MasterDirectory_h */

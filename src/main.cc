@@ -492,7 +492,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.edit_wad : inst.master.game_wad;
+		Wad_file *wad = (pass == 0) ? inst.master.edit_wad : inst.master.game_wad;
 
 		if (! wad)
 			continue;
@@ -952,8 +952,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	for(std::unique_ptr<Wad_file> &wad : resourceWads)
 		newMaster.add(wad.release());
 
-	if(edit_wad)
-		newMaster.add(edit_wad);
+	if(master.edit_wad)
+		newMaster.add(master.edit_wad);
 
 	WadData newWad;
 	newWad.loadPalette(newMaster);
@@ -1162,20 +1162,20 @@ int main(int argc, char *argv[])
 			gInstance.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
-			gInstance.edit_wad = Wad_file::Open(gInstance.Pwad_name, WadOpenMode::append);
-			if (!gInstance.edit_wad)
+			gInstance.master.edit_wad = Wad_file::Open(gInstance.Pwad_name, WadOpenMode::append);
+			if (!gInstance.master.edit_wad)
 				ThrowException("Cannot load pwad: %s\n", gInstance.Pwad_name.c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.master.add(gInstance.edit_wad);
+			gInstance.master.add(gInstance.master.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
-				gInstance.master.add(gInstance.edit_wad);
+				gInstance.master.add(gInstance.master.edit_wad);
 			}
 		}
 
@@ -1187,9 +1187,9 @@ int main(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (gInstance.edit_wad)
+		if (gInstance.master.edit_wad)
 		{
-			if (! gInstance.M_ParseEurekaLump(gInstance.edit_wad, true /* keep_cmd_line_args */))
+			if (! gInstance.M_ParseEurekaLump(gInstance.master.edit_wad, true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.RemoveEditWad();
@@ -1217,7 +1217,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.master.game_wad, gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.master.edit_wad ? gInstance.master.edit_wad : gInstance.master.game_wad, gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

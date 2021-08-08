@@ -267,7 +267,7 @@ UI_OpenMap::UI_OpenMap(Instance &inst) :
 		look_where->add("the PWAD above|the Game IWAD|the Resource wads");
 		look_where->callback(look_callback, this);
 
-		look_where->value(inst.edit_wad ? LOOK_PWad : LOOK_IWad);
+		look_where->value(inst.master.edit_wad ? LOOK_PWad : LOOK_IWad);
 	}
 
 	{
@@ -336,8 +336,8 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 	map_v->clear();
 	*did_load = false;
 
-	if (inst.edit_wad)
-		SetPWAD(inst.edit_wad->PathName());
+	if (inst.master.edit_wad)
+		SetPWAD(inst.master.edit_wad->PathName());
 
 	Populate();
 
@@ -415,7 +415,7 @@ void UI_OpenMap::Populate()
 		int first = 1;
 		int last  = (int)inst.master.dir.size() - 1;
 
-		if (inst.edit_wad)
+		if (inst.master.edit_wad)
 			last--;
 
 		// we simply use the last resource which contains levels
@@ -437,9 +437,9 @@ void UI_OpenMap::Populate()
 		using_wad = loaded_wad;
 		PopulateButtons();
 	}
-	else if (inst.edit_wad)
+	else if (inst.master.edit_wad)
 	{
-		using_wad = inst.edit_wad;
+		using_wad = inst.master.edit_wad;
 		PopulateButtons();
 	}
 
