@@ -45,7 +45,7 @@ enum ImageFormat
 };
 
 // Determine the image format of the given wad lump.
-ImageFormat W_DetectImageFormat(Lump_c *lump);
+ImageFormat W_DetectImageFormat(Lump_c &lump);
 
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */

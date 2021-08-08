@@ -302,7 +302,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 			continue;
 		Lump_c *lump = lumpRef.lump;
 
-		char img_fmt = W_DetectImageFormat(lump);
+		char img_fmt = W_DetectImageFormat(*lump);
 		const SString &name = lump->Name();
 		std::unique_ptr<Img_c> img = NULL;
 

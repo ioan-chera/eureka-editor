@@ -229,7 +229,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	int *pic_width,    // To return the size of the picture
 	int *pic_height) const   // (can be NULL)
 {
-	ImageFormat img_fmt = W_DetectImageFormat(lump);
+	ImageFormat img_fmt = W_DetectImageFormat(*lump);
 	std::unique_ptr<Img_c> sub;
 
 	switch (img_fmt)
@@ -305,19 +305,19 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 }
 
 
-ImageFormat W_DetectImageFormat(Lump_c *lump)
+ImageFormat W_DetectImageFormat(Lump_c &lump)
 {
 	byte header[20];
 
-	int length = lump->Length();
+	int length = lump.Length();
 
 	if (length < (int)sizeof(header))
 		return ImageFormat::unknown;
 
-	if (! lump->Seek())
+	if (! lump.Seek())
 		return ImageFormat::unknown;
 
-	if (! lump->Read(header, (int)sizeof(header)))
+	if (! lump.Read(header, (int)sizeof(header)))
 		return ImageFormat::unknown;
 
 	// PNG is clearly marked in the header, so check it first.
