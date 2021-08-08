@@ -107,8 +107,7 @@ static void DrawColumn(const WadData &wad, const ConfigData &config,
 }
 
 
-std::unique_ptr<Img_c> Instance::LoadImage_PNG(Lump_c &lump,
-											   const SString &name) const
+std::unique_ptr<Img_c> Img_c::loadImage_PNG(Lump_c &lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -239,7 +238,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 		break;
 
 	case ImageFormat::png:
-		sub = LoadImage_PNG(*lump, pic_name);
+		sub = Img_c::loadImage_PNG(*lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
