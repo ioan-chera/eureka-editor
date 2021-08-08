@@ -275,10 +275,7 @@ void Instance::CMD_NewProject()
 		return;
 	}
 
-	master.edit_wad = wad;
-	master.Pwad_name = master.edit_wad->PathName();
-
-	master.add(master.edit_wad);
+	master.replaceEditWad(wad);
 
 	// TODO: new instance
 	FreshLevel();
