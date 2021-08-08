@@ -151,6 +151,8 @@ public:
 	// convert pixels to RGB mode, for testing other code
 	void test_make_RGB(const WadData &wad);
 
+	static std::unique_ptr<Img_c> convertRGBImage(const Fl_RGB_Image *src);
+
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it

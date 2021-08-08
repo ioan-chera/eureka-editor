@@ -125,9 +125,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_PNG(Lump_c *lump,
 	}
 
 	// convert it
-	std::unique_ptr<Img_c> img = IM_ConvertRGBImage(&fltk_img);
-
-	return img;
+	return Img_c::convertRGBImage(&fltk_img);
 }
 
 
@@ -149,9 +147,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_JPEG(Lump_c *lump,
 	}
 
 	// convert it
-	std::unique_ptr<Img_c> img = IM_ConvertRGBImage(&fltk_img);
-
-	return img;
+	return Img_c::convertRGBImage(&fltk_img);
 }
 
 
