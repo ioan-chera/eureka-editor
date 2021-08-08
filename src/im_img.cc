@@ -661,7 +661,8 @@ static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *con
 }
 
 
-std::unique_ptr<Img_c> Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
+std::unique_ptr<Img_c> Instance::IM_ConvertRGBImage(const Fl_RGB_Image *src)
+		const
 {
 	int W  = src->w();
 	int H  = src->h();
