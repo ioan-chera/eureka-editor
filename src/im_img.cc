@@ -105,13 +105,13 @@ void Img_c::resize(int new_width, int new_height)
 }
 
 
-void Img_c::compose(const Img_c *other, int x, int y)
+void Img_c::compose(const Img_c &other, int x, int y)
 {
 	int W = width();
 	int H = height();
 
-	int OW = other->width();
-	int OH = other->height();
+	int OW = other.width();
+	int OH = other.height();
 
 	for (int oy = 0 ; oy < OH ; oy++)
 	{
@@ -119,7 +119,7 @@ void Img_c::compose(const Img_c *other, int x, int y)
 		if (iy < 0 || iy >= H)
 			continue;
 
-		const img_pixel_t *src = other->buf() + oy * OW;
+		const img_pixel_t *src = other.buf() + oy * OW;
 		img_pixel_t *dest = wbuf() + iy * W;
 
 		for (int ox = 0 ; ox < OW ; ox++, src++)
