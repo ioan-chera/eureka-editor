@@ -182,7 +182,10 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 	gLog.debugPrintf("Texture [%.8s] : %dx%d\n", raw->name, width, height);
 
 	if (width == 0 || height == 0)
-		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
+	{
+		ParseException::raise("%s: Texture '%.8s' has zero size\n", __func__,
+							  raw->name);
+	}
 
 	auto img = std::make_unique<Img_c>(width, height, false);
 	bool is_medusa = false;
@@ -191,9 +194,12 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 	int num_patches = LE_S16(raw->patch_count);
 
 	if (! num_patches)
-		ThrowException("W_LoadTextures: Texture '%.8s' has no patches\n", raw->name);
+	{
+		ParseException::raise("%s: Texture '%.8s' has no patches\n", __func__,
+							  raw->name);
+	}
 
-	const raw_patchdef_t *patdef = (const raw_patchdef_t *) & raw->patches[0];
+	auto patdef = reinterpret_cast<const raw_patchdef_t *>(&raw->patches[0]);
 
 	// andrewj: this is not strictly correct, the Medusa Effect is only
 	//          triggered when multiple patches occupy a single column of
