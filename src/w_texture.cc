@@ -169,9 +169,11 @@ void WadData::loadTextureEntry_Strife(const byte *tex_data, int tex_length,
 }
 
 
-void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
-									 int offset, const byte *pnames,
-									 int pname_size, bool skip_first)
+void WadData::loadTextureEntry_DOOM(const byte *tex_data, int tex_length,
+									int offset, const byte *pnames,
+									int pname_size, bool skip_first,
+									const MasterDirectory &master,
+									const ConfigData &config)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
@@ -228,7 +230,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 		Lump_c *lump = master.findGlobalLump(picname);
 
 		if (! lump ||
-			! img->loadPicture(wad, conf, *lump, picname, xofs, yofs))
+			! img->loadPicture(*this, config, *lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -239,7 +241,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.addTexture(namebuf, std::move(img), is_medusa);
+	addTexture(namebuf, std::move(img), is_medusa);
 }
 
 
@@ -296,8 +298,9 @@ void Instance::LoadTexturesLump(Lump_c *lump, const byte *pnames,
 		}
 		else
 		{
-			LoadTextureEntry_DOOM(tex_data.data(), tex_length, offset, pnames,
-								  pname_size, skip_first);
+			wad.loadTextureEntry_DOOM(tex_data.data(), tex_length, offset,
+									  pnames, pname_size, skip_first, master,
+									  conf);
 		}
 	}
 }

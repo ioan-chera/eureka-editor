@@ -49,6 +49,10 @@ struct WadData
 								 int offset, const byte *pnames, int pname_size,
 								 bool skip_first, const MasterDirectory &master,
 								 const ConfigData &config);
+	void loadTextureEntry_DOOM(const byte *tex_data, int tex_length, int offset,
+							   const byte *pnames, int pname_size,
+							   bool skip_first, const MasterDirectory &master,
+							   const ConfigData &config);
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
