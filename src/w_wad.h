@@ -143,7 +143,7 @@ friend class Lump_c;
 friend struct WadData;
 
 private:
-	SString filename;
+	const SString filename;
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
