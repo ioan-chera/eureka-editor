@@ -379,7 +379,7 @@ public:
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
 	// W_LOADPIC
-	std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump,
+	std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c &lump,
 										  const SString &name) const;
 	std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump,
 										 const SString &name) const;
