@@ -215,14 +215,14 @@ static bool ComposePicture(Img_c& dest, const Img_c *sub,
 //  Return true on success, false on failure.
 //
 bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
-	Lump_c *lump,
+	Lump_c &lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
 	int *pic_height) const   // (can be NULL)
 {
-	ImageFormat img_fmt = W_DetectImageFormat(*lump);
+	ImageFormat img_fmt = W_DetectImageFormat(lump);
 	std::unique_ptr<Img_c> sub;
 
 	switch (img_fmt)
@@ -232,17 +232,17 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 		break;
 
 	case ImageFormat::png:
-		sub = Img_c::loadImage_PNG(*lump, pic_name);
+		sub = Img_c::loadImage_PNG(lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
 	case ImageFormat::jpeg:
-		sub = Img_c::loadImage_JPEG(*lump, pic_name);
+		sub = Img_c::loadImage_JPEG(lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
 	case ImageFormat::tga:
-		sub = Img_c::loadImage_TGA(*lump, pic_name);
+		sub = Img_c::loadImage_TGA(lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
@@ -258,7 +258,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	/* DOOM format */
 
 	std::vector<byte> raw_data;
-	loadLumpData(*lump, raw_data);
+	loadLumpData(lump, raw_data);
 
 	const patch_t *pat = (patch_t *) raw_data.data();
 
@@ -282,7 +282,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	{
 		int offset = LE_S32(pat->columnofs[x]);
 
-		if (offset < 0 || offset >= lump->Length())
+		if (offset < 0 || offset >= lump.Length())
 		{
 			gLog.printf("WARNING: bad image offset 0x%08x in patch [%s]\n",
 			          offset, pic_name.c_str());

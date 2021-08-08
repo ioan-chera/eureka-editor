@@ -151,7 +151,7 @@ void Instance::LoadTextureEntry_Strife(const byte *tex_data, int tex_length,
 		Lump_c *lump = master.findGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! LoadPicture(*img, *lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name,
 						picname);
@@ -220,7 +220,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length,
 		Lump_c *lump = master.findGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! LoadPicture(*img, *lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -310,7 +310,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 		{
 			case 'd': /* Doom patch */
 				img = std::make_unique<Img_c>();
-				if (! LoadPicture(*img, lump, name, 0, 0))
+				if (! LoadPicture(*img, *lump, name, 0, 0))
 				{
 					img = nullptr;
 				}
@@ -742,7 +742,7 @@ Img_c *Instance::W_GetSprite(int type)
 		{
 			result = new Img_c();
 
-			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(*result, *lump, info.sprite, 0, 0))
 			{
 				delete result;
 				result = NULL;

@@ -377,7 +377,7 @@ public:
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
 	// W_LOADPIC
-	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
+	bool LoadPicture(Img_c &dest, Lump_c &lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
 	// W_TEXTURE
 	bool W_FlatIsKnown(const SString &name) const;
