@@ -245,8 +245,10 @@ void WadData::loadTextureEntry_DOOM(const byte *tex_data, int tex_length,
 }
 
 
-void Instance::LoadTexturesLump(Lump_c *lump, const byte *pnames,
-								int pname_size, bool skip_first)
+void WadData::loadTexturesLump(Lump_c &lump, const byte *pnames,
+							   int pname_size, bool skip_first,
+							   const MasterDirectory &master,
+							   const ConfigData &config)
 {
 	// TODO : verify size word at front of PNAMES ??
 
@@ -257,7 +259,7 @@ void Instance::LoadTexturesLump(Lump_c *lump, const byte *pnames,
 
 	// load TEXTUREx data into memory for easier processing
 	std::vector<byte> tex_data;
-	int tex_length = loadLumpData(*lump, tex_data);
+	int tex_length = loadLumpData(lump, tex_data);
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	auto tex_data_s32 = reinterpret_cast<const s32_t *>(tex_data.data());
@@ -292,15 +294,14 @@ void Instance::LoadTexturesLump(Lump_c *lump, const byte *pnames,
 
 		if (is_strife)
 		{
-			wad.loadTextureEntry_Strife(tex_data.data(), tex_length, offset,
-										pnames, pname_size, skip_first, master,
-										conf);
+			loadTextureEntry_Strife(tex_data.data(), tex_length, offset,
+									pnames, pname_size, skip_first, master,
+									config);
 		}
 		else
 		{
-			wad.loadTextureEntry_DOOM(tex_data.data(), tex_length, offset,
-									  pnames, pname_size, skip_first, master,
-									  conf);
+			loadTextureEntry_DOOM(tex_data.data(), tex_length, offset, pnames,
+								  pname_size, skip_first, master, config);
 		}
 	}
 }
@@ -383,10 +384,16 @@ void Instance::W_LoadTextures()
 			int pname_size = loadLumpData(*pnames, pname_data);
 
 			if (texture1)
-				LoadTexturesLump(texture1, pname_data.data(), pname_size, true);
+			{
+				wad.loadTexturesLump(*texture1, pname_data.data(), pname_size,
+									 true, master, conf);
+			}
 
 			if (texture2)
-				LoadTexturesLump(texture2, pname_data.data(), pname_size, false);
+			{
+				wad.loadTexturesLump(*texture2, pname_data.data(), pname_size,
+									 false, master, conf);
+			}
 		}
 
 		if (conf.features.tx_start)
@@ -505,12 +512,12 @@ void WadData::clearFlats()
 }
 
 
-void WadData::addFlat(const SString &name, Img_c *img)
+void WadData::addFlat(const SString &name, std::unique_ptr<Img_c> &&img)
 {
 	// find any existing one with same name, and free it
 
 	SString flat_str = name;
-	flats[flat_str] = std::unique_ptr<Img_c>(img);
+	flats[flat_str] = std::move(img);
 }
 
 
@@ -564,7 +571,7 @@ void WadData::loadFlats(const MasterDirectory &master)
 
 			// TODO: use unique_ptr
 			if (img)
-				addFlat(lump->Name(), img.release());
+				addFlat(lump->Name(), std::move(img));
 		}
 	}
 }

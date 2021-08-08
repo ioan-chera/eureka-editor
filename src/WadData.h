@@ -34,25 +34,17 @@ struct WadData
 	void loadPalette(const MasterDirectory &master) noexcept(false);
 	byte findPaletteColor(int r, int g, int b) const noexcept;
 	void updateGamma() noexcept;
-	void resetDummyTextures() noexcept;
 
 	void loadColormap(const MasterDirectory &master) noexcept(false);
 
-	void clearFlats();
-	void addFlat(const SString &name, Img_c *img);
 	void loadFlats(const MasterDirectory &master);
-	void clearTextures();
 
+	void clearTextures();
 	void addTexture(const SString &name, std::unique_ptr<Img_c> &&img,
 					bool is_medusa);
-	void loadTextureEntry_Strife(const byte *tex_data, int tex_length,
-								 int offset, const byte *pnames, int pname_size,
-								 bool skip_first, const MasterDirectory &master,
-								 const ConfigData &config);
-	void loadTextureEntry_DOOM(const byte *tex_data, int tex_length, int offset,
-							   const byte *pnames, int pname_size,
-							   bool skip_first, const MasterDirectory &master,
-							   const ConfigData &config);
+	void loadTexturesLump(Lump_c &lump, const byte *pnames, int pname_size,
+						  bool skip_first, const MasterDirectory &master,
+						  const ConfigData &config);
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
@@ -78,6 +70,21 @@ struct WadData
 	std::map<SString, std::unique_ptr<Img_c>> textures;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
+
+private:
+	void resetDummyTextures() noexcept;
+
+	void clearFlats();
+	void addFlat(const SString &name, std::unique_ptr<Img_c> &&img);
+
+	void loadTextureEntry_Strife(const byte *tex_data, int tex_length,
+								 int offset, const byte *pnames, int pname_size,
+								 bool skip_first, const MasterDirectory &master,
+								 const ConfigData &config);
+	void loadTextureEntry_DOOM(const byte *tex_data, int tex_length, int offset,
+							   const byte *pnames, int pname_size,
+							   bool skip_first, const MasterDirectory &master,
+							   const ConfigData &config);
 };
 
 #endif /* WadData_h */

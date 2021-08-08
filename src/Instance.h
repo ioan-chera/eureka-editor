@@ -493,8 +493,6 @@ private:
 	void StoreSelectedThing(int new_type);
 
 	// W_TEXTURE
-	void LoadTexturesLump(Lump_c *lump, const byte *pnames, int pname_size,
-						  bool skip_first);
 	void W_ClearSprites();
 
 public:	// will be private when we encapsulate everything
