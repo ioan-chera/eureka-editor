@@ -496,9 +496,6 @@ private:
 	void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 							   const byte *pnames, int pname_size,
 							   bool skip_first);
-	void LoadTextureEntry_Strife(const byte *tex_data, int tex_length,
-								 int offset, const byte *pnames, int pname_size,
-								 bool skip_first);
 	void LoadTexturesLump(Lump_c *lump, const byte *pnames, int pname_size,
 						  bool skip_first);
 	void W_ClearSprites();
