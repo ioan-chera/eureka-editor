@@ -1159,16 +1159,17 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			gInstance.master.Pwad_name = global::Pwad_list[0];
-
-			// TODO: main instance
-			gInstance.master.edit_wad = Wad_file::Open(gInstance.master.Pwad_name, WadOpenMode::append);
-			if (!gInstance.master.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", gInstance.master.Pwad_name.c_str());
+			Wad_file *wad = Wad_file::Open(global::Pwad_list[0],
+										   WadOpenMode::append);
+			if (!wad)
+			{
+				ThrowException("Cannot load pwad: %s\n",
+							   global::Pwad_list[0].c_str());
+			}
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.master.add(gInstance.master.edit_wad);
+			gInstance.master.replaceEditWad(wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
