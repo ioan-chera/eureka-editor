@@ -959,6 +959,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	newWad.loadPalette(newMaster);
 	newWad.loadColormap(newMaster);
 	newWad.loadFlats(newMaster);
+	newWad.loadTextures(newMaster, config);
 
 	// Commit it
 	conf = config;
@@ -987,7 +988,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 //	W_LoadColormap();
 
 //	W_LoadFlats();
-	W_LoadTextures();
+//	W_LoadTextures();
 	W_ClearSprites();
 
 	gLog.printf("--- DONE ---\n");

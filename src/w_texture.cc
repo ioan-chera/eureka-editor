@@ -360,9 +360,10 @@ void WadData::loadTextures_TX_START(const Wad_file &wf,
 }
 
 
-void Instance::W_LoadTextures()
+void WadData::loadTextures(const MasterDirectory &master,
+						   const ConfigData &config)
 {
-	wad.clearTextures();
+	clearTextures();
 
 	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{
@@ -386,20 +387,20 @@ void Instance::W_LoadTextures()
 
 			if (texture1)
 			{
-				wad.loadTexturesLump(*texture1, pname_data.data(), pname_size,
-									 true, master, conf);
+				loadTexturesLump(*texture1, pname_data.data(), pname_size,
+									 true, master, config);
 			}
 
 			if (texture2)
 			{
-				wad.loadTexturesLump(*texture2, pname_data.data(), pname_size,
-									 false, master, conf);
+				loadTexturesLump(*texture2, pname_data.data(), pname_size,
+									 false, master, config);
 			}
 		}
 
-		if (conf.features.tx_start)
+		if (config.features.tx_start)
 		{
-			wad.loadTextures_TX_START(*master.dir[i], conf);
+			loadTextures_TX_START(*master.dir[i], config);
 		}
 	}
 }
