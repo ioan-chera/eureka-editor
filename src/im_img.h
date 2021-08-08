@@ -151,9 +151,6 @@ public:
 	// convert pixels to RGB mode, for testing other code
 	void test_make_RGB(const WadData &wad);
 
-	static std::unique_ptr<Img_c> convertRGBImage(const Fl_RGB_Image *src);
-	static std::unique_ptr<Img_c> convertTGAImage(const rgba_color_t *data,
-												  int W, int H);
 	static std::unique_ptr<Img_c> loadImage_PNG(Lump_c &lump,
 												const SString &name);
 	static std::unique_ptr<Img_c> loadImage_JPEG(Lump_c &lump,
@@ -163,6 +160,10 @@ public:
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it
+
+	static std::unique_ptr<Img_c> convertRGBImage(const Fl_RGB_Image *src);
+	static std::unique_ptr<Img_c> convertTGAImage(const rgba_color_t *data,
+												  int W, int H);
 };
 
 #endif  /* __EUREKA_IM_IMG_H__*/
