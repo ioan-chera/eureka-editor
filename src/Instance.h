@@ -379,7 +379,7 @@ public:
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
 	// W_LOADPIC
-	std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump,
+	std::unique_ptr<Img_c> LoadImage_TGA(Lump_c &lump,
 										 const SString &name) const;
 	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
 
