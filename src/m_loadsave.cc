@@ -53,22 +53,22 @@ static const char overwrite_message[] =
 	"Are you sure you want to continue?";
 
 
-void Instance::RemoveEditWad()
+void MasterDirectory::removeEditWad()
 {
-	if (!master.edit_wad)
+	if (!edit_wad)
 		return;
 
-	master.remove(master.edit_wad);
-	delete master.edit_wad;
+	remove(edit_wad);
+	delete edit_wad;
 
-	master.edit_wad  = NULL;
-	master.Pwad_name.clear();
+	edit_wad  = NULL;
+	Pwad_name.clear();
 }
 
 
 void Instance::ReplaceEditWad(Wad_file *new_wad)
 {
-	RemoveEditWad();
+	master.removeEditWad();
 
 	master.edit_wad = new_wad;
 
@@ -245,7 +245,7 @@ void Instance::CMD_NewProject()
 	}
 
 
-	RemoveEditWad();
+	master.removeEditWad();
 
 	// this calls Main_LoadResources which resets the master directory
 	Project_ApplyChanges(dialog.get());
@@ -1142,7 +1142,7 @@ void Instance::CMD_OpenMap()
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
 	else if (master.edit_wad && wad != master.edit_wad)
 	{
-		RemoveEditWad();
+		master.removeEditWad();
 
 		new_resources = true;
 	}

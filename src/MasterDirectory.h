@@ -35,6 +35,7 @@ struct MasterDirectory
 	bool loadIwad(const SString &name);
 
 	Lump_c *findGlobalLump(const SString &name) const;
+	void removeEditWad();
 
 	std::vector<Wad_file *> dir;
 	// the IWAD, never NULL, always at master_dir.front()
