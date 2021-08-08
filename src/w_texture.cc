@@ -502,7 +502,8 @@ void WadData::addFlat(const SString &name, Img_c *img)
 }
 
 
-static std::unique_ptr<Img_c> LoadFlatImage(const Instance &inst, const WadData &wad, const SString &name, Lump_c *lump)
+static std::unique_ptr<Img_c> LoadFlatImage(const WadData &wad,
+											const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
@@ -546,7 +547,8 @@ void WadData::loadFlats(const Instance &inst, const MasterDirectory &master)
 				continue;
 			Lump_c *lump = lumpRef.lump;
 
-			std::unique_ptr<Img_c> img = LoadFlatImage(inst, *this, lump->Name(), lump);
+			std::unique_ptr<Img_c> img = LoadFlatImage(*this, lump->Name(),
+													   lump);
 
 			// TODO: use unique_ptr
 			if (img)
