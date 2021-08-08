@@ -160,8 +160,8 @@ std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c &lump,
 	int width;
 	int height;
 
-	rgba_color_t * rgba = TGA_DecodeImage(tex_data.data(), tex_length, width,
-										  height);
+	std::unique_ptr<rgba_color_t[]> rgba;
+	rgba.reset(TGA_DecodeImage(tex_data.data(), tex_length, width, height));
 
 	if (! rgba)
 	{
@@ -171,11 +171,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_TGA(Lump_c &lump,
 	}
 
 	// convert it
-	std::unique_ptr<Img_c> img = Img_c::convertTGAImage(rgba, width, height);
-
-	TGA_FreeImage(rgba);
-
-	return img;
+	return Img_c::convertTGAImage(rgba.get(), width, height);
 }
 
 
