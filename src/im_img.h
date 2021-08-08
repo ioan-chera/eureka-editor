@@ -154,7 +154,8 @@ public:
 	static std::unique_ptr<Img_c> convertRGBImage(const Fl_RGB_Image *src);
 	static std::unique_ptr<Img_c> loadImage_PNG(Lump_c &lump,
 												const SString &name);
-
+	static std::unique_ptr<Img_c> loadImage_JPEG(Lump_c &lump,
+												 const SString &name);
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it

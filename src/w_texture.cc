@@ -325,7 +325,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 				break;
 
 			case 'j': /* JPEG */
-				img = LoadImage_JPEG(*lump, name);
+				img = Img_c::loadImage_JPEG(*lump, name);
 				break;
 
 			case 0:

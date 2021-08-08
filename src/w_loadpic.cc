@@ -124,12 +124,11 @@ std::unique_ptr<Img_c> Img_c::loadImage_PNG(Lump_c &lump, const SString &name)
 	}
 
 	// convert it
-	return Img_c::convertRGBImage(&fltk_img);
+	return convertRGBImage(&fltk_img);
 }
 
 
-std::unique_ptr<Img_c> Instance::LoadImage_JPEG(Lump_c &lump,
-												const SString &name) const
+std::unique_ptr<Img_c> Img_c::loadImage_JPEG(Lump_c &lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -146,7 +145,7 @@ std::unique_ptr<Img_c> Instance::LoadImage_JPEG(Lump_c &lump,
 	}
 
 	// convert it
-	return Img_c::convertRGBImage(&fltk_img);
+	return convertRGBImage(&fltk_img);
 }
 
 
@@ -243,7 +242,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 							  pic_width, pic_height);
 
 	case ImageFormat::jpeg:
-		sub = LoadImage_JPEG(*lump, pic_name);
+		sub = Img_c::loadImage_JPEG(*lump, pic_name);
 		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
