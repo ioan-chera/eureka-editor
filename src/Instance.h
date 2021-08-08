@@ -506,9 +506,6 @@ public:	// will be private when we encapsulate everything
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	Wad_file *edit_wad = nullptr;
-	Wad editWad;
-	bool haveEditWad = false;
-	Wad gameWad;
 	SString Pwad_name;	// Filename of current wad
 
 	MasterDirectory master;
