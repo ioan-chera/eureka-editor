@@ -214,13 +214,13 @@ static bool ComposePicture(Img_c& dest, const Img_c *sub,
 //
 //  Return true on success, false on failure.
 //
-bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
+bool Img_c::loadPicture(const WadData &wad, const ConfigData &config,
 	Lump_c &lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
-	int *pic_height) const   // (can be NULL)
+	int *pic_height)   // (can be NULL)
 {
 	ImageFormat img_fmt = W_DetectImageFormat(lump);
 	std::unique_ptr<Img_c> sub;
@@ -233,17 +233,17 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 	case ImageFormat::png:
 		sub = Img_c::loadImage_PNG(lump, pic_name);
-		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
+		return ComposePicture(*this, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
 	case ImageFormat::jpeg:
 		sub = Img_c::loadImage_JPEG(lump, pic_name);
-		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
+		return ComposePicture(*this, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
 	case ImageFormat::tga:
 		sub = Img_c::loadImage_TGA(lump, pic_name);
-		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset,
+		return ComposePicture(*this, sub.get(), pic_x_offset, pic_y_offset,
 							  pic_width, pic_height);
 
 	case ImageFormat::unknown:
@@ -272,10 +272,10 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 	if (pic_width)  *pic_width  = width;
 	if (pic_height) *pic_height = height;
 
-	if (dest.is_null())
+	if (is_null())
 	{
 		// our new image will be completely transparent
-		dest.resize (width, height);
+		resize (width, height);
 	}
 
 	for (int x = 0 ; x < width ; x++)
@@ -291,7 +291,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
-		DrawColumn(wad, conf, dest, column, pic_x_offset + x, pic_y_offset);
+		DrawColumn(wad, config, *this, column, pic_x_offset + x, pic_y_offset);
 	}
 
 	return true;

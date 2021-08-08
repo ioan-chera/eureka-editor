@@ -157,6 +157,11 @@ public:
 												 const SString &name);
 	static std::unique_ptr<Img_c> loadImage_TGA(Lump_c &lump,
 												const SString &name);
+
+	bool loadPicture(const WadData &wad, const ConfigData &config, Lump_c &lump,
+					 const SString &pic_name, int pic_x_offset,
+					 int pic_y_offset, int *pic_width = nullptr,
+					 int *pic_height = nullptr);
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it
