@@ -180,6 +180,45 @@ bool Lump_c::Finish()
 	return parent->FinishLump(l_length);
 }
 
+//
+// Moves the insertion point somewhere
+//
+void Lump_c::seekData(int position) noexcept
+{
+	mPos = position;
+	if(mPos < 0)
+		mPos = 0;
+	else if(mPos > (int)mData.size())
+		mPos = (int)mData.size();
+}
+
+//
+// Writes the data
+//
+void Lump_c::writeData(const void *vdata, int len)
+{
+	auto data = static_cast<const byte *>(vdata);
+	mData.insert(mData.begin() + mPos, data, data + len);
+	mPos += len;
+}
+
+//
+// Writes the data by freading from FILE. Returns the result of the involved
+// fread call, as number of bytes read. Be sure to check feof and ferror if not
+// as expected.
+//
+size_t Lump_c::writeData(FILE *f, int len)
+{
+	mData.insert(mData.begin() + mPos, len, 0);
+	size_t actualRead = fread(mData.data() + mPos, 1, len, f);
+	if((int)actualRead < len)
+	{
+		mData.erase(mData.begin() + mPos + actualRead,
+					mData.begin() + mPos + len);
+	}
+	mPos += (int)actualRead;
+	return actualRead;
+}
 
 //------------------------------------------------------------------------
 //  WAD Reading Interface

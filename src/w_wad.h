@@ -71,6 +71,9 @@ private:
 	int l_start;
 	int l_length;
 
+	std::vector<byte> mData;
+	int mPos = 0;	// insertion point for reading or writing
+
 	// constructor is private
 	Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len);
 	Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry);
@@ -110,6 +113,11 @@ public:
 
 	// mark the lump as finished (after writing data to it).
 	bool Finish();
+
+	// Memory buffer actions
+	void seekData(int position = 0) noexcept;
+	void writeData(const void *data, int len);
+	size_t writeData(FILE *f, int len);
 
 	// predicate for std::sort()
 	struct offset_CMP_pred
