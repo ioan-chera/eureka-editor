@@ -589,6 +589,8 @@ bool Wad_file::ReadDirectory()
 		return false;
 	}
 
+	directory.reserve(dir_count);
+
 	for (int _ = 0 ; _ < dir_count ; _++)
 	{
 		raw_wad_entry_t entry;
@@ -617,6 +619,36 @@ bool Wad_file::ReadDirectory()
 
 				lump->l_start = 0;
 				lump->l_length = 0;
+			}
+
+			if(lump->l_length > 0)
+			{
+				long curpos = ftell(fp);
+				if(curpos < 0)
+				{
+					gLog.printf("%s: ftell failed with error %d\n", __func__,
+								errno);
+					return false;
+				}
+				if(fseek(fp, lump->l_start, SEEK_SET) < 0)
+				{
+					gLog.printf("%s: fseek failed with error %d\n", __func__,
+								errno);
+					return false;
+				}
+				if((int)lump->writeData(fp, lump->l_length) < lump->l_length)
+				{
+					gLog.printf("%s: failed reading %d bytes for lump '%s'\n",
+								__func__, lump->l_length, lump->name.c_str());
+					return false;
+				}
+				lump->seekData();	// reset the insertion point
+				if(fseek(fp, curpos, SEEK_SET) < 0)
+				{
+					gLog.printf("%s: fseek back failed with error %d\n",
+								__func__, errno);
+					return false;
+				}
 			}
 		}
 
