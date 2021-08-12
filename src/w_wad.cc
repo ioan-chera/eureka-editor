@@ -181,6 +181,46 @@ bool Lump_c::Finish()
 }
 
 
+//
+// Moves the insertion point somewhere
+//
+void Lump_c::seekData(int position) noexcept
+{
+	mPos = position;
+	if(mPos < 0)
+		mPos = 0;
+	else if(mPos > (int)mData.size())
+		mPos = (int)mData.size();
+}
+
+//
+// Writes the data
+//
+void Lump_c::writeData(const void *vdata, int len)
+{
+	auto data = static_cast<const byte *>(vdata);
+	mData.insert(mData.begin() + mPos, data, data + len);
+	mPos += len;
+}
+
+//
+// Writes the data by freading from FILE. Returns the result of the involved
+// fread call, as number of bytes read. Be sure to check feof and ferror if not
+// as expected.
+//
+size_t Lump_c::writeData(FILE *f, int len)
+{
+	mData.insert(mData.begin() + mPos, len, 0);
+	size_t actualRead = fread(mData.data() + mPos, 1, len, f);
+	if((int)actualRead < len)
+	{
+		mData.erase(mData.begin() + mPos + actualRead,
+					mData.begin() + mPos + len);
+	}
+	mPos += (int)actualRead;
+	return actualRead;
+}
+
 //------------------------------------------------------------------------
 //  WAD Reading Interface
 //------------------------------------------------------------------------
@@ -544,13 +584,13 @@ bool Wad_file::ReadDirectory()
 		return false;
 	}
 
-	crc32_c checksum;
-
 	if (fseek(fp, dir_start, SEEK_SET) != 0)
 	{
 		gLog.printf("Error seeking to WAD directory.\n");
 		return false;
 	}
+
+	directory.reserve(dir_count);
 
 	for (int _ = 0 ; _ < dir_count ; _++)
 	{
@@ -561,9 +601,6 @@ bool Wad_file::ReadDirectory()
 			gLog.printf("Error reading entry in WAD directory.\n");
 			return false;
 		}
-
-		// update the checksum with each _RAW_ entry
-		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
 
 		Lump_c *lump = new Lump_c(this, &entry);
 
@@ -584,16 +621,42 @@ bool Wad_file::ReadDirectory()
 				lump->l_start = 0;
 				lump->l_length = 0;
 			}
+
+			if(lump->l_length > 0)
+			{
+				long curpos = ftell(fp);
+				if(curpos < 0)
+				{
+					gLog.printf("%s: ftell failed with error %d\n", __func__,
+								errno);
+					return false;
+				}
+				if(fseek(fp, lump->l_start, SEEK_SET) < 0)
+				{
+					gLog.printf("%s: fseek failed with error %d\n", __func__,
+								errno);
+					return false;
+				}
+				if((int)lump->writeData(fp, lump->l_length) < lump->l_length)
+				{
+					gLog.printf("%s: failed reading %d bytes for lump '%s'\n",
+								__func__, lump->l_length, lump->name.c_str());
+					return false;
+				}
+				lump->seekData();	// reset the insertion point
+				if(fseek(fp, curpos, SEEK_SET) < 0)
+				{
+					gLog.printf("%s: fseek back failed with error %d\n",
+								__func__, errno);
+					return false;
+				}
+			}
 		}
 
 		LumpRef lumpRef = {};	// Currently not set, will set in ResolveNamespace
 		lumpRef.lump = lump;
 		directory.push_back(lumpRef);
 	}
-
-	dir_crc = checksum.raw;
-
-	gLog.debugPrintf("Loaded directory. crc = %08x\n", dir_crc);
 	return true;
 }
 
@@ -759,46 +822,6 @@ void Wad_file::ProcessNamespaces()
 
 	if (active != WadNamespace::Global)
 		gLog.printf("WARNING: Missing %s_END marker (at EOF)\n", WadNamespaceString(active));
-}
-
-
-bool Wad_file::WasExternallyModified()
-{
-	if (fseek(fp, 0, SEEK_END) != 0)
-		FatalError("Error determining WAD size.\n");
-
-	if (total_size != (int)ftell(fp))
-		return true;
-
-	rewind(fp);
-
-	raw_wad_header_t header;
-
-	if (fread(&header, sizeof(header), 1, fp) != 1)
-		FatalError("Error reading WAD header.\n");
-
-	if (dir_start != LE_S32(header.dir_start) ||
-		dir_count != LE_S32(header.num_entries))
-		return true;
-
-	fseek(fp, dir_start, SEEK_SET);
-
-	crc32_c checksum;
-
-	for (int _ = 0 ; _ < dir_count ; _++)
-	{
-		raw_wad_entry_t entry;
-
-		if (fread(&entry, sizeof(entry), 1, fp) != 1)
-			FatalError("Error reading WAD directory.\n");
-
-		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
-
-	}
-
-	gLog.debugPrintf("New CRC : %08x\n", checksum.raw);
-
-	return (dir_crc != checksum.raw);
 }
 
 
@@ -1212,8 +1235,6 @@ void Wad_file::WriteDirectory()
 	gLog.debugPrintf("WriteDirectory...\n");
 	gLog.debugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
 
-	crc32_c checksum;
-
 	for (const LumpRef &lumpRef : directory)
 	{
 		Lump_c *lump = lumpRef.lump;
@@ -1223,15 +1244,9 @@ void Wad_file::WriteDirectory()
 
 		lump->MakeEntry(&entry);
 
-		// update the CRC
-		checksum.AddBlock((u8_t *) &entry, sizeof(entry));
-
 		if (fwrite(&entry, sizeof(entry), 1, fp) != 1)
 			ThrowException("Error writing WAD directory.\n");
 	}
-
-	dir_crc = checksum.raw;
-	gLog.debugPrintf("dir_crc: %08x\n", dir_crc);
 
 	fflush(fp);
 

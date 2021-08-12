@@ -71,6 +71,9 @@ private:
 	int l_start;
 	int l_length;
 
+	std::vector<byte> mData;
+	int mPos = 0;	// insertion point for reading or writing
+
 	// constructor is private
 	Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len);
 	Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry);
@@ -110,6 +113,11 @@ public:
 
 	// mark the lump as finished (after writing data to it).
 	bool Finish();
+
+	// Memory buffer actions
+	void seekData(int position = 0) noexcept;
+	void writeData(const void *data, int len);
+	size_t writeData(FILE *f, int len);
 
 	// predicate for std::sort()
 	struct offset_CMP_pred
@@ -159,7 +167,6 @@ private:
 
 	int dir_start = 0;
 	int dir_count = 0;
-	u32_t dir_crc = 0;
 
 	// these are lump indices (into 'directory' vector)
 	std::vector<int> levels;
@@ -240,12 +247,6 @@ public:
 	MapFormat LevelFormat(int lev_num);
 
 	void  SortLevels();
-
-	// check whether another program has modified this WAD, and return
-	// either true or false.  We test for change in file size, change
-	// in directory size or location, and directory contents (CRC).
-	// [ NOT USED YET.... ]
-	bool WasExternallyModified();
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
