@@ -79,7 +79,7 @@ private:
 	void MakeEntry(struct raw_wad_entry_s *entry);
 
 public:
-	const SString &Name() const
+	const SString &Name() const noexcept
 	{
 		return name;
 	}
@@ -194,20 +194,20 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const SString &filename);
 
-	const SString &PathName() const
+	const SString &PathName() const noexcept
 	{
 		return filename;
 	}
-	bool IsReadOnly() const
+	bool IsReadOnly() const noexcept
 	{
 		return mode == WadOpenMode::read;
 	}
-	bool IsIWAD() const
+	bool IsIWAD() const noexcept
 	{
 		return kind == WadKind::IWAD;
 	}
 
-	int TotalSize() const
+	int TotalSize() const noexcept
 	{
 		return total_size;
 	}
@@ -216,18 +216,19 @@ public:
 	{
 		return static_cast<int>(directory.size());
 	}
-	Lump_c * GetLump(int index) const;
+	Lump_c * GetLump(int index) const noexcept;
 	Lump_c * FindLump(const SString &name) const noexcept;
-	int FindLumpNum(const SString &name);
+	int FindLumpNum(const SString &name) const noexcept;
 
-	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group);
+	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
+			const noexcept;
 
 	int LevelCount() const noexcept
 	{
 		return (int)levels.size();
 	}
-	int LevelHeader(int lev_num) const;
-	int LevelLastLump(int lev_num);
+	int LevelHeader(int lev_num) const noexcept;
+	int LevelLastLump(int lev_num) const noexcept;
 
 	// these return a level number (0 .. count-1)
 	int LevelFind(const SString &name) const noexcept;
@@ -237,7 +238,7 @@ public:
 	// returns a lump index, -1 if not found
 	int LevelLookupLump(int lev_num, const char *name);
 
-	MapFormat LevelFormat(int lev_num);
+	MapFormat LevelFormat(int lev_num) const noexcept;
 
 	void  SortLevels();
 
@@ -341,7 +342,7 @@ private:
 		level_name_CMP_pred(Wad_file * _w) : wad(_w)
 		{ }
 
-		inline bool operator() (const int A, const int B) const
+		inline bool operator() (const int A, const int B) const noexcept
 		{
 			const Lump_c *L1 = wad->directory[A].lump;
 			const Lump_c *L2 = wad->directory[B].lump;

@@ -31,7 +31,7 @@
 //
 // a case-insensitive strcmp()
 //
-int y_stricmp(const char *s1, const char *s2)
+int y_stricmp(const char *s1, const char *s2) noexcept
 {
 	for (;;)
 	{
@@ -53,7 +53,7 @@ int y_stricmp(const char *s1, const char *s2)
 //
 // a case-insensitive strncmp()
 //
-int y_strnicmp(const char *s1, const char *s2, size_t len)
+int y_strnicmp(const char *s1, const char *s2, size_t len) noexcept
 {
 	SYS_ASSERT(len != 0);
 

@@ -305,7 +305,7 @@ bool Wad_file::Validate(const SString &filename)
 }
 
 
-static int WhatLevelPart(const SString &name)
+static int WhatLevelPart(const SString &name) noexcept
 {
 	if (name.noCaseEqual("THINGS")) return 1;
 	if (name.noCaseEqual("LINEDEFS")) return 2;
@@ -316,7 +316,7 @@ static int WhatLevelPart(const SString &name)
 	return 0;
 }
 
-static bool IsLevelLump(const SString &name)
+static bool IsLevelLump(const SString &name) noexcept
 {
 	if (name.noCaseEqual("SEGS")) return true;
 	if (name.noCaseEqual("SSECTORS")) return true;
@@ -329,13 +329,13 @@ static bool IsLevelLump(const SString &name)
 	return WhatLevelPart(name) != 0;
 }
 
-inline static bool IsGLNodeLump(const SString &name)
+inline static bool IsGLNodeLump(const SString &name) noexcept
 {
 	return name.noCaseStartsWith("GL_");
 }
 
 
-Lump_c * Wad_file::GetLump(int index) const
+Lump_c * Wad_file::GetLump(int index) const noexcept
 {
 	SYS_ASSERT(0 <= index && index < NumLumps());
 	SYS_ASSERT(directory[index].lump);
@@ -353,7 +353,7 @@ Lump_c * Wad_file::FindLump(const SString &name) const noexcept
 	return nullptr;  // not found
 }
 
-int Wad_file::FindLumpNum(const SString &name)
+int Wad_file::FindLumpNum(const SString &name) const noexcept
 {
 	for (int k = NumLumps() - 1 ; k >= 0 ; k--)
 		if (directory[k].lump->name.noCaseEqual(name))
@@ -399,7 +399,7 @@ int Wad_file::LevelFind(const SString &name) const noexcept
 }
 
 
-int Wad_file::LevelLastLump(int lev_num)
+int Wad_file::LevelLastLump(int lev_num) const noexcept
 {
 	int start = LevelHeader(lev_num);
 
@@ -471,7 +471,7 @@ int Wad_file::LevelFindFirst() const noexcept
 }
 
 
-int Wad_file::LevelHeader(int lev_num) const
+int Wad_file::LevelHeader(int lev_num) const noexcept
 {
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
@@ -479,7 +479,7 @@ int Wad_file::LevelHeader(int lev_num) const
 }
 
 
-MapFormat Wad_file::LevelFormat(int lev_num)
+MapFormat Wad_file::LevelFormat(int lev_num) const noexcept
 {
 	int start = LevelHeader(lev_num);
 
@@ -498,7 +498,7 @@ MapFormat Wad_file::LevelFormat(int lev_num)
 }
 
 
-Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group)
+Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) const noexcept
 {
 	for(const LumpRef &lumpRef : directory)
 	{
