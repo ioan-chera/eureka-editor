@@ -111,9 +111,6 @@ public:
 	// write some text to the lump
 	void Printf(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 
-	// mark the lump as finished (after writing data to it).
-	bool Finish();
-
 	// Memory buffer actions
 	size_t writeData(FILE *f, int len);
 

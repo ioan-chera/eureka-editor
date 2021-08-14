@@ -169,15 +169,6 @@ void Lump_c::Printf(EUR_FORMAT_STRING(const char *msg), ...)
 	Write(buffer.c_str(), (int)buffer.length());
 }
 
-
-bool Lump_c::Finish()
-{
-	if (l_length == 0)
-		l_start = 0;
-
-	return parent->FinishLump(l_length);
-}
-
 //
 // Writes the data by freading from FILE. Returns the result of the involved
 // fread call, as number of bytes read. Be sure to check feof and ferror if not

@@ -553,8 +553,6 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 		lump->Write(&ch, 1);
 	}
 
-	lump->Finish();
-
 	wad->EndWrite();
 }
 

@@ -473,8 +473,6 @@ static void WriteBlockmap(const Instance &inst)
 		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
 		lump->Write(&m_neg1, sizeof(u16_t));
 	}
-
-	lump->Finish();
 }
 
 
@@ -569,7 +567,7 @@ static void PutBlockmap(const Instance &inst)
 	if (! cur_info->do_blockmap || inst.level.numLinedefs() == 0)
 	{
 		// just create an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP")->Finish();
+		CreateLevelLump(inst, "BLOCKMAP");
 		return;
 	}
 
@@ -591,7 +589,7 @@ static void PutBlockmap(const Instance &inst)
 	if (block_overflowed)
 	{
 		// leave an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP")->Finish();
+		CreateLevelLump(inst, "BLOCKMAP");
 
 		Warning(inst, "Blockmap overflowed (lump will be empty)\n");
 	}
@@ -736,8 +734,6 @@ static void Reject_WriteLump(const Instance &inst)
 	Lump_c *lump = CreateLevelLump(inst, "REJECT", rej_total_size);
 
 	lump->Write(rej_matrix, rej_total_size);
-
-	lump->Finish();
 }
 
 
@@ -753,7 +749,7 @@ static void PutReject(const Instance &inst)
 	if (! cur_info->do_reject || inst.level.numSectors() == 0)
 	{
 		// just create an empty reject lump
-		CreateLevelLump(inst, "REJECT")->Finish();
+		CreateLevelLump(inst, "REJECT");
 		return;
 	}
 
@@ -1754,8 +1750,8 @@ static int CalcZDoomNodesSize()
 static void SaveZDFormat(const Instance &inst, node_t *root_node)
 {
 	// leave SEGS and SSECTORS empty
-	CreateLevelLump(inst, "SEGS")->Finish();
-	CreateLevelLump(inst, "SSECTORS")->Finish();
+	CreateLevelLump(inst, "SEGS");
+	CreateLevelLump(inst, "SSECTORS");
 
 	int max_size = CalcZDoomNodesSize();
 
@@ -1928,7 +1924,6 @@ static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 	}
 
 	marker->Printf("CHECKSUM=0x%08x\n", crc);
-	marker->Finish();
 }
 
 
@@ -1949,7 +1944,7 @@ static void AddMissingLump(const Instance &inst, const char *name, const char *a
 
 	inst.edit_wad->InsertPoint(exist + 1);
 
-	inst.edit_wad->AddLump(name)->Finish();
+	inst.edit_wad->AddLump(name);
 }
 
 static Lump_c *CreateGLMarker(const Instance &inst);
@@ -2005,7 +2000,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		PutNodes(inst, "GL_NODES", force_v5, root_node);
 
 		// -JL- Add empty PVS lump
-		CreateLevelLump(inst, "GL_PVS")->Finish();
+		CreateLevelLump(inst, "GL_PVS");
 	}
 
 
@@ -2252,8 +2247,6 @@ static Lump_c * CreateGLMarker(const Instance &inst)
 	inst.edit_wad->InsertPoint(last_idx + 1);
 
 	Lump_c *marker = inst.edit_wad->AddLump(name_buf);
-
-	marker->Finish();
 
 	return marker;
 }

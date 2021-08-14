@@ -1300,8 +1300,6 @@ void Instance::SaveHeader(const SString &level)
 	{
 		lump->Write(&this->level.headerData[0], size);
 	}
-
-	lump->Finish();
 }
 
 
@@ -1315,8 +1313,6 @@ void Instance::SaveBehavior()
 	{
 		lump->Write(&level.behaviorData[0], size);
 	}
-
-	lump->Finish();
 }
 
 
@@ -1329,7 +1325,6 @@ void Instance::SaveScripts()
 		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
 
 		lump->Write(&level.scriptsData[0], size);
-		lump->Finish();
 	}
 }
 
@@ -1349,8 +1344,6 @@ void Instance::SaveVertices()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
@@ -1376,8 +1369,6 @@ void Instance::SaveSectors()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
@@ -1400,8 +1391,6 @@ void Instance::SaveThings()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
@@ -1435,8 +1424,6 @@ void Instance::SaveThings_Hexen()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
@@ -1461,8 +1448,6 @@ void Instance::SaveSideDefs()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
@@ -1488,8 +1473,6 @@ void Instance::SaveLineDefs()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
@@ -1521,14 +1504,12 @@ void Instance::SaveLineDefs_Hexen()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::EmptyLump(const char *name) const
 {
-	edit_wad->AddLump(name)->Finish();
+	edit_wad->AddLump(name);
 }
 
 

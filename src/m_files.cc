@@ -1034,8 +1034,6 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 		lump->Printf("resource %s\n", absolute_name.c_str());
 	}
 
-	lump->Finish();
-
 	wad->EndWrite();
 }
 

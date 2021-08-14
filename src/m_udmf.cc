@@ -891,10 +891,7 @@ void Instance::UDMF_SaveLevel() const
 	UDMF_WriteSideDefs(level, lump);
 	UDMF_WriteSectors(level, lump);
 
-	lump->Finish();
-
 	lump = edit_wad->AddLump("ENDMAP");
-	lump->Finish();
 }
 
 
