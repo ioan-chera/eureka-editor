@@ -95,7 +95,7 @@ public:
 
 	// attempt to seek to a position within the lump (default is
 	// the beginning).  Returns true if OK, false on error.
-	bool Seek(int offset = 0);
+	void Seek(int offset = 0) noexcept;
 
 	// read some data from the lump, returning true if OK.
 	bool Read(void *data, int len);
@@ -115,7 +115,7 @@ public:
 	bool Finish();
 
 	// Memory buffer actions
-	void seekData(int position = 0) noexcept;
+	bool readData(void *data, int len) noexcept;
 	void writeData(const void *data, int len);
 	size_t writeData(FILE *f, int len);
 

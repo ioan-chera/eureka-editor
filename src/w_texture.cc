@@ -535,7 +535,8 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 
 	byte *raw = new byte[size];
 
-	if (! (lump->Seek() && lump->Read(raw, size)))
+	lump->Seek();
+	if (! lump->Read(raw, size))
 		FatalError("Error reading flat from WAD.\n");
 
 	for (int i = 0 ; i < size ; i++)

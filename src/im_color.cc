@@ -81,8 +81,8 @@ void Instance::W_LoadPalette()
 		return;
 	}
 
-	if (! lump->Seek() ||
-		! lump->Read(wad.raw_palette, sizeof(wad.raw_palette)))
+	lump->Seek();
+	if (! lump->Read(wad.raw_palette, sizeof(wad.raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return;
@@ -113,8 +113,8 @@ void Instance::W_LoadColormap()
 		return;
 	}
 
-	if (! lump->Seek() ||
-		! lump->Read(raw_colormap, sizeof(raw_colormap)))
+	lump->Seek();
+	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;

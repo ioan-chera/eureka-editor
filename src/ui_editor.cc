@@ -470,11 +470,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 
 	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
 
-	if (! lump->Seek())
-	{
-		DLG_Notify("Read error while loading %s lump.", lump_name.c_str());
-		return false;
-	}
+	lump->Seek();
 
 	SString line;
 

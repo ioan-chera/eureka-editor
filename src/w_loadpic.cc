@@ -319,8 +319,7 @@ char W_DetectImageFormat(Lump_c *lump)
 	if (length < (int)sizeof(header))
 		return 0;
 
-	if (! lump->Seek())
-		return 0;
+	lump->Seek();
 
 	if (! lump->Read(header, (int)sizeof(header)))
 		return 0;

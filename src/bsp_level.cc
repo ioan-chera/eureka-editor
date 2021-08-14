@@ -1867,8 +1867,8 @@ static u32_t CalcGLChecksum(const Instance &inst)
 	{
 		u8_t *data = new u8_t[lump->Length()];
 
-		if (! lump->Seek() ||
-		    ! lump->Read(data, lump->Length()))
+		lump->Seek();
+		if (! lump->Read(data, lump->Length()))
 			FatalError("Error reading vertices (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
@@ -1880,9 +1880,8 @@ static u32_t CalcGLChecksum(const Instance &inst)
 	if (lump && lump->Length() > 0)
 	{
 		u8_t *data = new u8_t[lump->Length()];
-
-		if (! lump->Seek() ||
-		    ! lump->Read(data, lump->Length()))
+		lump->Seek();
+		if (! lump->Read(data, lump->Length()))
 			FatalError("Error reading linedefs (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());

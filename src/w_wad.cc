@@ -106,11 +106,13 @@ void Lump_c::Rename(const char *new_name)
 }
 
 
-bool Lump_c::Seek(int offset)
+void Lump_c::Seek(int offset) noexcept
 {
-	SYS_ASSERT(offset >= 0);
-
-	return (fseek(parent->fp, l_start + offset, SEEK_SET) == 0);
+	mPos = offset;
+	if(mPos < 0)
+		mPos = 0;
+	else if(mPos > (int)mData.size())
+		mPos = (int)mData.size();
 }
 
 
@@ -180,17 +182,20 @@ bool Lump_c::Finish()
 	return parent->FinishLump(l_length);
 }
 
-
 //
-// Moves the insertion point somewhere
+// Read the data
 //
-void Lump_c::seekData(int position) noexcept
+bool Lump_c::readData(void *data, int len) noexcept
 {
-	mPos = position;
-	if(mPos < 0)
-		mPos = 0;
-	else if(mPos > (int)mData.size())
-		mPos = (int)mData.size();
+	bool result = true;
+	if(mPos + len > (int)mData.size())
+	{
+		result = false;
+		len = (int)mData.size() - mPos;
+	}
+	memcpy(data, mData.data() + mPos, len);
+	mPos += len;
+	return result;
 }
 
 //
@@ -643,7 +648,7 @@ bool Wad_file::ReadDirectory()
 								__func__, lump->l_length, lump->name.c_str());
 					return false;
 				}
-				lump->seekData();	// reset the insertion point
+				lump->Seek();	// reset the insertion point
 				if(fseek(fp, curpos, SEEK_SET) < 0)
 				{
 					gLog.printf("%s: fseek back failed with error %d\n",
@@ -1326,8 +1331,8 @@ int W_LoadLumpData(Lump_c *lump, byte ** buf_ptr)
 
 	if (lump->Length() > 0)
 	{
-		if (! lump->Seek() ||
-			! lump->Read(*buf_ptr, lump->Length()))
+		lump->Seek();
+		if (! lump->Read(*buf_ptr, lump->Length()))
 			FatalError("W_LoadLumpData: read error loading lump.\n");
 	}
 

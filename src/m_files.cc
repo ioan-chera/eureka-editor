@@ -873,12 +873,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		return true;
 	}
 
-	if (! lump->Seek())
-	{
-		gLog.printf("--> error seeking.\n");
-		return true;
-	}
-
+	lump->Seek();
 
 	SString new_iwad;
 	SString new_port;

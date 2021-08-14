@@ -384,10 +384,7 @@ Lump_c *Instance::Load_LookupAndSeek(const char *name) const
 
 	Lump_c *lump = load_wad->GetLump(idx);
 
-	if (! lump->Seek())
-	{
-		gLog.printf("WARNING: failed to seek to %s lump!\n", name);
-	}
+	lump->Seek();
 
 	return lump;
 }
@@ -578,8 +575,7 @@ void Instance::LoadHeader()
 
 	level.headerData.resize(length);
 
-	if (! lump->Seek())
-		ThrowException("Error seeking to header lump!\n");
+	lump->Seek();
 
 	if (! lump->Read(&level.headerData[0], length))
 		ThrowException("Error reading header lump.\n");
