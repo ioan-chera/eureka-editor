@@ -98,7 +98,7 @@ public:
 	void Seek(int offset = 0) noexcept;
 
 	// read some data from the lump, returning true if OK.
-	bool Read(void *data, int len);
+	bool Read(void *data, int len) noexcept;
 
 	// read a line of text, returns true if OK, false on EOF
 	bool GetLine(SString &string);
@@ -115,7 +115,6 @@ public:
 	bool Finish();
 
 	// Memory buffer actions
-	bool readData(void *data, int len) noexcept;
 	void writeData(const void *data, int len);
 	size_t writeData(FILE *f, int len);
 

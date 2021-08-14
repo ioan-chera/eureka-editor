@@ -116,11 +116,17 @@ void Lump_c::Seek(int offset) noexcept
 }
 
 
-bool Lump_c::Read(void *data, int len)
+bool Lump_c::Read(void *data, int len) noexcept
 {
-	SYS_ASSERT(data && len > 0);
-
-	return (fread(data, len, 1, parent->fp) == 1);
+	bool result = true;
+	if(mPos + len > (int)mData.size())
+	{
+		result = false;
+		len = (int)mData.size() - mPos;
+	}
+	memcpy(data, mData.data() + mPos, len);
+	mPos += len;
+	return result;
 }
 
 //
@@ -180,22 +186,6 @@ bool Lump_c::Finish()
 		l_start = 0;
 
 	return parent->FinishLump(l_length);
-}
-
-//
-// Read the data
-//
-bool Lump_c::readData(void *data, int len) noexcept
-{
-	bool result = true;
-	if(mPos + len > (int)mData.size())
-	{
-		result = false;
-		len = (int)mData.size() - mPos;
-	}
-	memcpy(data, mData.data() + mPos, len);
-	mPos += len;
-	return result;
 }
 
 //
