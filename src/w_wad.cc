@@ -132,28 +132,20 @@ bool Lump_c::Read(void *data, int len) noexcept
 //
 // read a line of text, returns true if OK, false on EOF
 //
-bool Lump_c::GetLine(SString &string)
+bool Lump_c::GetLine(SString &string) noexcept
 {
-	SYS_ASSERT(!!parent->fp);
-	long curPos = ftell(parent->fp);
-	if(curPos < 0)
-		return false;	// EOF
-
-	curPos -= l_start;
-
-	if (curPos >= l_length)
+	if(mPos >= (int)mData.size())
 		return false;	// EOF
 
 	string.clear();
-	for(; curPos < l_length; ++curPos)
+	for(; mPos < (int)mData.size(); ++mPos)
 	{
-		string.push_back(static_cast<char>(fgetc(parent->fp)));
+		string.push_back(static_cast<char>(mData[mPos]));
 		if(string.back() == '\n')
+		{
+			++mPos;
 			break;
-		if(ferror(parent->fp))
-			return false;
-		if(feof(parent->fp))
-			break;
+		}
 	}
 	return true;	// OK
 }

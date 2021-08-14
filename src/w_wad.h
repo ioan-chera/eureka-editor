@@ -101,7 +101,7 @@ public:
 	bool Read(void *data, int len) noexcept;
 
 	// read a line of text, returns true if OK, false on EOF
-	bool GetLine(SString &string);
+	bool GetLine(SString &string) noexcept;
 
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
