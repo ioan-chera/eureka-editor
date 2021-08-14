@@ -295,7 +295,7 @@ private:
 	static Wad_file * Create(const SString &filename, WadOpenMode mode);
 
 	// read the existing directory.
-	bool ReadDirectory();
+	bool ReadDirectory(FILE *fp);
 
 	void DetectLevels();
 	void ProcessNamespaces();
@@ -317,7 +317,6 @@ private:
 	// be no more than a few bytes).  Returns new position.
 	int PositionForWrite(int max_size = -1);
 
-	bool FinishLump(int final_size);
 	int  WritePadding(int count);
 
 	// write the new directory, updating the dir_xxx variables

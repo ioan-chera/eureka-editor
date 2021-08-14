@@ -194,8 +194,6 @@ Wad_file::~Wad_file()
 {
 	gLog.printf("Closing WAD file: %s\n", filename.c_str());
 
-	fclose(fp);
-
 	// free the directory
 	for (LumpRef &lumpRef : directory)
 		delete lumpRef.lump;
@@ -238,7 +236,7 @@ retry:
 		return NULL;
 	}
 
-	Wad_file *w = new Wad_file(filename, mode, fp);
+	Wad_file *w = new Wad_file(filename, mode, nullptr);
 
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
@@ -251,15 +249,18 @@ retry:
 	if (w->total_size < 0)
 		ThrowException("Error determining WAD size.\n");
 
-	if (! w->ReadDirectory())
+	if (! w->ReadDirectory(fp))
 	{
 		delete w;
 		gLog.printf("Open wad failed (reading directory)\n");
+		fclose(fp);
 		return NULL;
 	}
 
 	w->DetectLevels();
 	w->ProcessNamespaces();
+
+	fclose(fp);
 
 	return w;
 }
@@ -269,23 +270,7 @@ Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
 {
 	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
 
-	// TODO: #55 unicode
-	FILE *fp = fopen(filename.c_str(), "w+b");
-	if (! fp)
-		return NULL;
-
-	Wad_file *w = new Wad_file(filename, mode, fp);
-
-	// write out base header
-	raw_wad_header_t header;
-
-	memset(&header, 0, sizeof(header));
-	memcpy(header.ident, "PWAD", 4);
-
-	fwrite(&header, sizeof(header), 1, fp);
-	fflush(fp);
-
-	w->total_size = (int)sizeof(header);
+	Wad_file *w = new Wad_file(filename, mode, nullptr);
 
 	return w;
 }
@@ -526,7 +511,7 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group)
 }
 
 
-bool Wad_file::ReadDirectory()
+bool Wad_file::ReadDirectory(FILE *fp)
 {
 	rewind(fp);
 
@@ -1141,28 +1126,6 @@ int Wad_file::PositionForWrite(int max_size)
 	gLog.debugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
 
 	return want_pos;
-}
-
-
-bool Wad_file::FinishLump(int final_size)
-{
-	fflush(fp);
-
-	// sanity check
-	if (begun_max_size >= 0)
-		if (final_size > begun_max_size)
-			BugError("Internal Error: wrote too much in lump (%d > %d)\n",
-					 final_size, begun_max_size);
-
-	int pos = (int)ftell(fp);
-
-	if (pos & 3)
-	{
-		WritePadding(4 - (pos & 3));
-	}
-
-	fflush(fp);
-	return true;
 }
 
 
