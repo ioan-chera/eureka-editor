@@ -359,7 +359,7 @@ Lump_c * Wad_file::GetLump(int index) const
 }
 
 
-Lump_c * Wad_file::FindLump(const SString &name)
+Lump_c * Wad_file::FindLump(const SString &name) const noexcept
 {
 	for (auto it = directory.rbegin(); it != directory.rend(); ++it)
 		if (it->lump->name.noCaseEqual(name))
@@ -397,7 +397,7 @@ int Wad_file::LevelLookupLump(int lev_num, const char *name)
 }
 
 
-int Wad_file::LevelFind(const SString &name)
+int Wad_file::LevelFind(const SString &name) const noexcept
 {
 	for (int k = 0 ; k < (int)levels.size() ; k++)
 	{
@@ -450,7 +450,7 @@ int Wad_file::LevelLastLump(int lev_num)
 }
 
 
-int Wad_file::LevelFindByNumber(int number)
+int Wad_file::LevelFindByNumber(int number) const noexcept
 {
 	// sanity check
 	if (number <= 0 || number > 99)
@@ -477,7 +477,7 @@ int Wad_file::LevelFindByNumber(int number)
 }
 
 
-int Wad_file::LevelFindFirst()
+int Wad_file::LevelFindFirst() const noexcept
 {
 	if (levels.size() > 0)
 		return 0;

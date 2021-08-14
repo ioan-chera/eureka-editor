@@ -77,12 +77,12 @@ public:
 		return data.empty();
 	}
 
-	bool noCaseEqual(const SString &c) const
+	bool noCaseEqual(const SString &c) const noexcept
 	{
 		return noCaseEqual(c.c_str());
 	}
 
-	bool noCaseEqual(const char *c) const
+	bool noCaseEqual(const char *c) const noexcept
 	{
 		return !y_stricmp(data.c_str(), c ? c : "");
 	}
@@ -167,7 +167,7 @@ public:
 		return data.back();
 	}
 
-	const char *c_str() const
+	const char *c_str() const noexcept
 	{
 		return data.c_str();
 	}

@@ -212,17 +212,17 @@ public:
 		return total_size;
 	}
 
-	int NumLumps() const
+	int NumLumps() const noexcept
 	{
 		return static_cast<int>(directory.size());
 	}
 	Lump_c * GetLump(int index) const;
-	Lump_c * FindLump(const SString &name);
+	Lump_c * FindLump(const SString &name) const noexcept;
 	int FindLumpNum(const SString &name);
 
 	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group);
 
-	int LevelCount() const
+	int LevelCount() const noexcept
 	{
 		return (int)levels.size();
 	}
@@ -230,9 +230,9 @@ public:
 	int LevelLastLump(int lev_num);
 
 	// these return a level number (0 .. count-1)
-	int LevelFind(const SString &name);
-	int LevelFindByNumber(int number);
-	int LevelFindFirst();
+	int LevelFind(const SString &name) const noexcept;
+	int LevelFindByNumber(int number) const noexcept;
+	int LevelFindFirst() const noexcept;
 
 	// returns a lump index, -1 if not found
 	int LevelLookupLump(int lev_num, const char *name);
