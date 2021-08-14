@@ -64,8 +64,6 @@ class Lump_c
 friend class Wad_file;
 
 private:
-	Wad_file *parent;
-
 	SString name;
 
 	int l_start;

@@ -67,15 +67,14 @@ const char *WadNamespaceString(WadNamespace ns)
 //------------------------------------------------------------------------
 
 Lump_c::Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len) :
-	parent(_par), l_start(_start), l_length(_len)
+	l_start(_start), l_length(_len)
 {
 	// ensure lump name is uppercase
 	name = _nam.asUpper();
 }
 
 
-Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) :
-	parent(_par)
+Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry)
 {
 	// handle the entry name, which can lack a terminating NUL
 	SString buffer(entry->name, 8);
