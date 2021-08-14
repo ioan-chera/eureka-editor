@@ -363,7 +363,7 @@ int Wad_file::FindLumpNum(const SString &name) const noexcept
 }
 
 
-int Wad_file::LevelLookupLump(int lev_num, const char *name)
+int Wad_file::LevelLookupLump(int lev_num, const char *name) const noexcept
 {
 	int start = LevelHeader(lev_num);
 
@@ -665,7 +665,7 @@ void Wad_file::DetectLevels()
 }
 
 
-void Wad_file::SortLevels()
+void Wad_file::SortLevels() noexcept
 {
 	std::sort(levels.begin(), levels.end(), level_name_CMP_pred(this));
 }

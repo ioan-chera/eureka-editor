@@ -236,11 +236,11 @@ public:
 	int LevelFindFirst() const noexcept;
 
 	// returns a lump index, -1 if not found
-	int LevelLookupLump(int lev_num, const char *name);
+	int LevelLookupLump(int lev_num, const char *name) const noexcept;
 
 	MapFormat LevelFormat(int lev_num) const noexcept;
 
-	void  SortLevels();
+	void  SortLevels() noexcept;
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
