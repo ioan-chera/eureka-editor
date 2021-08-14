@@ -106,7 +106,7 @@ public:
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
 	// written to.
-	bool Write(const void *data, int len);
+	void Write(const void *data, int len);
 
 	// write some text to the lump
 	void Printf(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
@@ -115,7 +115,6 @@ public:
 	bool Finish();
 
 	// Memory buffer actions
-	void writeData(const void *data, int len);
 	size_t writeData(FILE *f, int len);
 
 	// predicate for std::sort()

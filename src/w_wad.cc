@@ -150,13 +150,11 @@ bool Lump_c::GetLine(SString &string) noexcept
 	return true;	// OK
 }
 
-bool Lump_c::Write(const void *data, int len)
+void Lump_c::Write(const void *vdata, int len)
 {
-	SYS_ASSERT(data && len > 0);
-
-	l_length += len;
-
-	return (fwrite(data, len, 1, parent->fp) == 1);
+	auto data = static_cast<const byte *>(vdata);
+	mData.insert(mData.begin() + mPos, data, data + len);
+	mPos += len;
 }
 
 
@@ -178,16 +176,6 @@ bool Lump_c::Finish()
 		l_start = 0;
 
 	return parent->FinishLump(l_length);
-}
-
-//
-// Writes the data
-//
-void Lump_c::writeData(const void *vdata, int len)
-{
-	auto data = static_cast<const byte *>(vdata);
-	mData.insert(mData.begin() + mPos, data, data + len);
-	mPos += len;
 }
 
 //
