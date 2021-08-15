@@ -46,7 +46,9 @@ bool SafeOutFile::openForWriting()
 	if(!makeValidRandomPath(mRandomPath))
 		return false;
 
+	SString randomPath = mRandomPath;
 	close();
+	mRandomPath = randomPath;
 
 	mFile = fopen(mRandomPath.c_str(), "wb");
 	if(!mFile)
@@ -60,6 +62,8 @@ bool SafeOutFile::openForWriting()
 //
 bool SafeOutFile::commit()
 {
+	if(!mFile)
+		return false;
 	// First, to be ultra-safe, make another temp path
 	SString safeRandomPath;
 	int i = 0;
@@ -79,20 +83,25 @@ bool SafeOutFile::commit()
 	// Now we need to close our work. Store the paths of interest in a variable
 	SString finalPath = mPath;
 	SString writtenPath = mRandomPath;
-	close();
+	if(mFile)
+	{
+		fclose(mFile);
+		mFile = nullptr;	// we can close it now
+	}
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
-	bool overwriteOldFile = false;
+	bool overwriteOldFile = true;
 	if(rename(finalPath.c_str(), safeRandomPath.c_str()))
 	{
 		if(errno != ENOENT)
 			return false;
-		overwriteOldFile = true;
+		overwriteOldFile = false;
 	}
 	if(rename(writtenPath.c_str(), finalPath.c_str()))
 		return false;
 	if(overwriteOldFile && remove(safeRandomPath.c_str()))
 		return false;
+	close();
 	return true;
 }
 
@@ -109,7 +118,6 @@ void SafeOutFile::close()
 	}
 	mFile = nullptr;
 	mRandomPath.clear();
-	mPath.clear();
 }
 
 //

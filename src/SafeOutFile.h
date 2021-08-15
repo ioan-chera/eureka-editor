@@ -33,7 +33,7 @@
 class SafeOutFile
 {
 public:
-	explicit SafeOutFile(const SString &path = nullptr);
+	explicit SafeOutFile(const SString &path);
 	~SafeOutFile()
 	{
 		close();
@@ -49,7 +49,7 @@ private:
 	SString generateRandomPath() const;
 	bool makeValidRandomPath(SString &path) const;
 
-	SString mPath;	// the target path
+	const SString mPath;	// the target path
 	// the random temporary path. Only valid if mFile non-null
 	SString mRandomPath;
 
