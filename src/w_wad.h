@@ -142,8 +142,6 @@ private:
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
-	FILE * fp;
-
 	WadKind kind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
 
 	std::vector<LumpRef> directory;
@@ -155,8 +153,8 @@ private:
 	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const SString &_name, WadOpenMode _mode, FILE * _fp) :
-	   filename(_name), mode(_mode), fp(_fp)
+	Wad_file(const SString &_name, WadOpenMode _mode) :
+	   filename(_name), mode(_mode)
 	{
 	}
 

@@ -224,7 +224,7 @@ retry:
 		return NULL;
 	}
 
-	Wad_file *w = new Wad_file(filename, mode, nullptr);
+	Wad_file *w = new Wad_file(filename, mode);
 
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
@@ -258,7 +258,7 @@ Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
 {
 	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
 
-	Wad_file *w = new Wad_file(filename, mode, nullptr);
+	Wad_file *w = new Wad_file(filename, mode);
 
 	return w;
 }
@@ -1032,8 +1032,6 @@ void Wad_file::InsertPoint(int index)
 
 bool Wad_file::Backup(const char *new_filename)
 {
-	fflush(fp);
-
 	return FileCopy(PathName(), new_filename);
 }
 
