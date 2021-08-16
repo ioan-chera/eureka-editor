@@ -186,6 +186,20 @@ size_t Lump_c::writeData(FILE *f, int len)
 	return actualRead;
 }
 
+//
+// Returns the name coded into 8 bytes
+//
+int64_t Lump_c::getName8() const noexcept
+{
+	union
+	{
+		char cbuf[8];
+		int64_t cint;
+	} buffer;
+	strncpy(buffer.cbuf, Name().c_str(), 8);
+	return buffer.cint;
+}
+
 //------------------------------------------------------------------------
 //  WAD Reading Interface
 //------------------------------------------------------------------------

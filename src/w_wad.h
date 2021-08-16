@@ -121,6 +121,8 @@ public:
 		}
 	};
 
+	int64_t getName8() const noexcept;
+
 private:
 	// deliberately don't implement these
 	Lump_c(const Lump_c& other);
