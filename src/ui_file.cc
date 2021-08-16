@@ -439,7 +439,7 @@ void UI_OpenMap::Populate()
 	}
 	else if (inst.edit_wad)
 	{
-		using_wad = inst.edit_wad;
+		using_wad = inst.edit_wad.get();
 		PopulateButtons();
 	}
 

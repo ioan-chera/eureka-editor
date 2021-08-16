@@ -585,7 +585,7 @@ bool Instance::M_TryOpenMostRecent()
 
 	Pwad_name = filename;
 
-	edit_wad = wad;
+	edit_wad.reset(wad);
 
 	return true;
 }

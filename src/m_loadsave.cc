@@ -58,10 +58,9 @@ void Instance::RemoveEditWad()
 	if (!edit_wad)
 		return;
 
-	MasterDir_Remove(edit_wad);
-	delete edit_wad;
+	MasterDir_Remove(edit_wad.get());
+	edit_wad.reset();
 
-	edit_wad  = NULL;
 	Pwad_name.clear();
 }
 
@@ -70,11 +69,11 @@ void Instance::ReplaceEditWad(Wad_file *new_wad)
 {
 	RemoveEditWad();
 
-	edit_wad = new_wad;
+	edit_wad.reset(new_wad);
 
 	Pwad_name = edit_wad->PathName();
 
-	MasterDir_Add(edit_wad);
+	MasterDir_Add(edit_wad.get());
 }
 
 
@@ -275,10 +274,10 @@ void Instance::CMD_NewProject()
 		return;
 	}
 
-	edit_wad = wad;
+	edit_wad.reset(wad);
 	Pwad_name = edit_wad->PathName();
 
-	MasterDir_Add(edit_wad);
+	MasterDir_Add(edit_wad.get());
 
 	// TODO: new instance
 	FreshLevel();
@@ -329,7 +328,7 @@ void Instance::CMD_FreshMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
 
 	SString map_name = dialog->Run();
 
@@ -350,7 +349,7 @@ void Instance::CMD_FreshMap()
 	}
 
 
-	M_BackupWad(edit_wad);
+	M_BackupWad(edit_wad.get());
 
 	gLog.printf("Created NEW map : %s\n", map_name.c_str());
 
@@ -1064,7 +1063,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	// this wad replaces the current PWAD
 	gInstance.ReplaceEditWad(wad);
 
-	SYS_ASSERT(gInstance.edit_wad == wad);
+	SYS_ASSERT(gInstance.edit_wad.get() == wad);
 
 
 	// always grab map_name from the actual level
@@ -1076,7 +1075,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.edit_wad->PathName().c_str());
 
 	// TODO: new instance
-	gInstance.LoadLevel(gInstance.edit_wad, map_name);
+	gInstance.LoadLevel(gInstance.edit_wad.get(), map_name);
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
@@ -1128,7 +1127,7 @@ void Instance::CMD_OpenMap()
 
 	if (did_load)
 	{
-		SYS_ASSERT(wad != edit_wad);
+		SYS_ASSERT(wad != edit_wad.get());
 		SYS_ASSERT(wad != game_wad);
 
 		ReplaceEditWad(wad);
@@ -1136,7 +1135,7 @@ void Instance::CMD_OpenMap()
 		new_resources = true;
 	}
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
-	else if (edit_wad && wad != edit_wad)
+	else if (edit_wad && wad != edit_wad.get())
 	{
 		RemoveEditWad();
 
@@ -1219,7 +1218,7 @@ void Instance::CMD_FlipMap()
 		return;
 
 
-	Wad_file *wad = edit_wad ? edit_wad : game_wad;
+	Wad_file *wad = edit_wad ? edit_wad.get() : game_wad;
 
 	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad->LevelFind(loaded.levelName);
@@ -1589,7 +1588,7 @@ void Instance::SaveLevel(const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	edit_wad->SortLevels();
 
-	M_WriteEurekaLump(edit_wad);
+	M_WriteEurekaLump(edit_wad.get());
 
 	M_AddRecent(edit_wad->PathName(), loaded.levelName);
 
@@ -1630,7 +1629,7 @@ bool Instance::M_SaveMap()
 	}
 
 
-	M_BackupWad(edit_wad);
+	M_BackupWad(edit_wad.get());
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), edit_wad->PathName().c_str());
 
@@ -1808,9 +1807,9 @@ void Instance::CMD_CopyMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad);
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad.get());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
 
 	SString new_name = dialog->Run();
 
@@ -1854,7 +1853,7 @@ void Instance::CMD_RenameMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad.get() /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]
@@ -1870,7 +1869,7 @@ void Instance::CMD_RenameMap()
 		}
 	}
 
-	dialog->PopulateButtons(format, edit_wad);
+	dialog->PopulateButtons(format, edit_wad.get());
 
 	SString new_name = dialog->Run();
 
@@ -1965,7 +1964,7 @@ void Instance::CMD_DeleteMap()
 		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
-		LoadLevel(edit_wad, map_name);
+		LoadLevel(edit_wad.get(), map_name);
 	}
 }
 

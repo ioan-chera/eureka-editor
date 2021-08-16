@@ -335,7 +335,7 @@ build_result_e Instance::BuildAllNodes(nodebuildinfo_t *info)
 	for (int n = 0 ; n < num_levels ; n++)
 	{
 		// load level
-		LoadLevelNum(edit_wad, n);
+		LoadLevelNum(edit_wad.get(), n);
 
 		ret = AJBSP_BuildLevel(info, n, *this);
 
@@ -499,7 +499,7 @@ void Instance::CMD_BuildAllNodes()
 
 	// reload the previous level
 	// TODO: improve this to NOT mean reloading the level
-	LoadLevel(edit_wad, CurLevel);
+	LoadLevel(edit_wad.get(), CurLevel);
 }
 
 

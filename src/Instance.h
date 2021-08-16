@@ -556,7 +556,7 @@ public:	// will be private when we encapsulate everything
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
-	Wad_file *edit_wad = nullptr;
+	std::unique_ptr<Wad_file> edit_wad;
 	Wad_file *game_wad = nullptr;
 	Wad editWad;
 	bool haveEditWad = false;
