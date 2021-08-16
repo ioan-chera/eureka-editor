@@ -825,7 +825,7 @@ void Wad_file::EndWrite()
 //
 // Writes the content to disk now
 //
-void Wad_file::writeToDisk() const noexcept(false)
+void Wad_file::writeToDisk() noexcept(false)
 {
 	auto check = [](bool action)
 	{
@@ -867,6 +867,9 @@ void Wad_file::writeToDisk() const noexcept(false)
 		check(sof.write(&nm, 8));
 	}
 	check(sof.commit());
+
+	// reset the insertion point
+	insert_point = -1;
 }
 
 
