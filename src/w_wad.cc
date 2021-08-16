@@ -223,6 +223,7 @@ retry:
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
 	{
+		delete w;
 		fclose(fp);
 		ThrowException("Error determining WAD size.\n");
 	}
@@ -233,6 +234,7 @@ retry:
 
 	if (total_size < 0)
 	{
+		delete w;
 		fclose(fp);
 		ThrowException("Error determining WAD size.\n");
 	}
