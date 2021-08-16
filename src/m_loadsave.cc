@@ -58,7 +58,7 @@ void Instance::RemoveEditWad()
 	if (!edit_wad)
 		return;
 
-	MasterDir_Remove(edit_wad.get());
+	MasterDir_Remove(edit_wad);
 	edit_wad.reset();
 
 	Pwad_name.clear();
@@ -73,7 +73,7 @@ void Instance::ReplaceEditWad(Wad_file *new_wad)
 
 	Pwad_name = edit_wad->PathName();
 
-	MasterDir_Add(edit_wad.get());
+	MasterDir_Add(edit_wad);
 }
 
 
@@ -277,7 +277,7 @@ void Instance::CMD_NewProject()
 	edit_wad.reset(wad);
 	Pwad_name = edit_wad->PathName();
 
-	MasterDir_Add(edit_wad.get());
+	MasterDir_Add(edit_wad);
 
 	// TODO: new instance
 	FreshLevel();

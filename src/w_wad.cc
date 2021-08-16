@@ -1088,7 +1088,7 @@ void W_FreeLumpData(byte ** buf_ptr)
 
 //------------------------------------------------------------------------
 
-void Instance::MasterDir_Add(Wad_file *wad)
+void Instance::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
@@ -1096,13 +1096,11 @@ void Instance::MasterDir_Add(Wad_file *wad)
 }
 
 
-void Instance::MasterDir_Remove(Wad_file *wad)
+void Instance::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
 
-	std::vector<Wad_file *>::iterator ENDP;
-
-	ENDP = std::remove(master_dir.begin(), master_dir.end(), wad);
+	auto ENDP = std::remove(master_dir.begin(), master_dir.end(), wad);
 
 	master_dir.erase(ENDP, master_dir.end());
 }
@@ -1110,14 +1108,7 @@ void Instance::MasterDir_Remove(Wad_file *wad)
 
 void Instance::MasterDir_CloseAll()
 {
-	while (master_dir.size() > 0)
-	{
-		Wad_file *wad = master_dir.back();
-
-		master_dir.pop_back();
-
-		delete wad;
-	}
+	master_dir.clear();
 }
 
 

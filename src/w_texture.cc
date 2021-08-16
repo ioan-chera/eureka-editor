@@ -383,7 +383,7 @@ void Instance::W_LoadTextures()
 
 		if (conf.features.tx_start)
 		{
-			W_LoadTextures_TX_START(master_dir[i]);
+			W_LoadTextures_TX_START(master_dir[i].get());
 		}
 	}
 }
@@ -563,7 +563,7 @@ void Instance::W_LoadFlats()
 	{
 		gLog.printf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = master_dir[i];
+		const Wad_file *wf = master_dir[i].get();
 
 		for(const LumpRef &lumpRef : wf->directory)
 		{

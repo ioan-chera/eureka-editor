@@ -426,7 +426,7 @@ void UI_OpenMap::Populate()
 		{
 			if (inst.master_dir[r]->LevelCount() >= 0)
 			{
-				using_wad = inst.master_dir[r];
+				using_wad = inst.master_dir[r].get();
 				PopulateButtons();
 				break;
 			}

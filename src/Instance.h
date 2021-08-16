@@ -425,10 +425,10 @@ public:
 	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
-	void MasterDir_Add(Wad_file *wad);
+	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
-	void MasterDir_Remove(Wad_file *wad);
+	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
 
@@ -561,7 +561,7 @@ public:	// will be private when we encapsulate everything
 	Wad editWad;
 	bool haveEditWad = false;
 	Wad gameWad;
-	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
+	std::vector<std::shared_ptr<Wad_file>> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	SString Pwad_name;	// Filename of current wad
 
 	LoadingData loaded;

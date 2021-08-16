@@ -828,7 +828,7 @@ bool Instance::Main_LoadIWAD()
 	}
 	game_wad.reset(wad);
 
-	MasterDir_Add(game_wad.get());
+	MasterDir_Add(game_wad);
 	return true;
 }
 
@@ -948,7 +948,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 	// reset the master directory
 	if (edit_wad)
-		MasterDir_Remove(edit_wad.get());
+		MasterDir_Remove(edit_wad);
 
 	MasterDir_CloseAll();
 
@@ -957,10 +957,10 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 	// load all resource wads
 	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-		MasterDir_Add(wad.get());
+		MasterDir_Add(wad);
 
 	if (edit_wad)
-		MasterDir_Add(edit_wad.get());
+		MasterDir_Add(edit_wad);
 
 	// finally, load textures and stuff...
 	W_LoadPalette();
@@ -1147,14 +1147,14 @@ int main(int argc, char *argv[])
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.MasterDir_Add(gInstance.edit_wad.get());
+			gInstance.MasterDir_Add(gInstance.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
-				gInstance.MasterDir_Add(gInstance.edit_wad.get());
+				gInstance.MasterDir_Add(gInstance.edit_wad);
 			}
 		}
 
