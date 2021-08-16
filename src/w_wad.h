@@ -262,6 +262,8 @@ public:
 	void BeginWrite();
 	void EndWrite();
 
+	void writeToDisk() const noexcept(false);
+
 	// change name of a lump (can be a level marker too)
 	void RenameLump(int index, const char *new_name);
 

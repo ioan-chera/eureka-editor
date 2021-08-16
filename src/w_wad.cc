@@ -32,6 +32,7 @@
 #include "Errors.h"
 #include "lib_adler.h"
 #include "m_files.h"
+#include "SafeOutFile.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 
@@ -819,6 +820,53 @@ void Wad_file::EndWrite()
 
 	// reset the insertion point
 	insert_point = -1;
+}
+
+//
+// Writes the content to disk now
+//
+void Wad_file::writeToDisk() const noexcept(false)
+{
+	auto check = [](bool action)
+	{
+		if(!action)
+			ThrowException("Failed writing WAD to file");
+	};
+
+	SafeOutFile sof(filename);
+	check(sof.openForWriting());
+	// Write the header
+	if(kind == WadKind::PWAD)
+		check(sof.write("PWAD", 4));
+	else
+		check(sof.write("IWAD", 4));
+
+	int32_t numlumps = (int32_t)directory.size();
+	check(sof.write(&numlumps, 4));
+
+	int32_t infotableofs = 12;
+	for(const LumpRef &ref : directory)
+		infotableofs += (int32_t)ref.lump->Length();
+
+	check(sof.write(&infotableofs, 4));
+	for(const LumpRef &ref : directory)
+	{
+		assert(ref.lump != nullptr);
+		const Lump_c &lump = *ref.lump;
+		check(sof.write(lump.getData(), lump.Length()));
+	}
+	infotableofs = 12;
+	for(const LumpRef &ref : directory)
+	{
+		check(sof.write(&infotableofs, 4));
+		const Lump_c &lump = *ref.lump;
+		numlumps = lump.Length();
+		check(sof.write(&numlumps, 4));
+		infotableofs += numlumps;
+		int64_t nm = lump.getName8();
+		check(sof.write(&nm, 8));
+	}
+	check(sof.commit());
 }
 
 
