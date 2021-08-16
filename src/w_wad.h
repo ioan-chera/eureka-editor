@@ -127,7 +127,7 @@ private:
 
 struct LumpRef
 {
-	Lump_c *lump;
+	std::unique_ptr<Lump_c> lump;
 	WadNamespace ns;
 };
 
@@ -292,8 +292,8 @@ private:
 
 		inline bool operator() (const int A, const int B) const noexcept
 		{
-			const Lump_c *L1 = wad->directory[A].lump;
-			const Lump_c *L2 = wad->directory[B].lump;
+			const Lump_c *L1 = wad->directory[A].lump.get();
+			const Lump_c *L2 = wad->directory[B].lump.get();
 
 			return L1->Name() < L2->Name();
 		}

@@ -301,7 +301,7 @@ void Instance::W_LoadTextures_TX_START(Wad_file *wf)
 	{
 		if(lumpRef.ns != WadNamespace::TextureLumps)
 			continue;
-		Lump_c *lump = lumpRef.lump;
+		Lump_c *lump = lumpRef.lump.get();
 
 		char img_fmt = W_DetectImageFormat(lump);
 		const SString &name = lump->Name();
@@ -569,7 +569,7 @@ void Instance::W_LoadFlats()
 		{
 			if(lumpRef.ns != WadNamespace::Flats)
 				continue;
-			Lump_c *lump = lumpRef.lump;
+			Lump_c *lump = lumpRef.lump.get();
 
 			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
 

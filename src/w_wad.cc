@@ -181,12 +181,6 @@ int64_t Lump_c::getName8() const noexcept
 Wad_file::~Wad_file()
 {
 	gLog.printf("Closing WAD file: %s\n", filename.c_str());
-
-	// free the directory
-	for (LumpRef &lumpRef : directory)
-		delete lumpRef.lump;
-
-	directory.clear();
 }
 
 
@@ -330,7 +324,7 @@ int Wad_file::TotalSize() const
 	int size = 12;
 	for(const LumpRef &ref : directory)
 	{
-		assert(ref.lump != nullptr);
+		assert(ref.lump.get() != nullptr);
 		size += ref.lump->Length();
 	}
 	size += (int)directory.size() * 16;
@@ -342,7 +336,7 @@ Lump_c * Wad_file::GetLump(int index) const noexcept
 	SYS_ASSERT(0 <= index && index < NumLumps());
 	SYS_ASSERT(directory[index].lump);
 
-	return directory[index].lump;
+	return directory[index].lump.get();
 }
 
 
@@ -350,7 +344,7 @@ Lump_c * Wad_file::FindLump(const SString &name) const noexcept
 {
 	for (auto it = directory.rbegin(); it != directory.rend(); ++it)
 		if (it->lump->name.noCaseEqual(name))
-			return it->lump;
+			return it->lump.get();
 
 	return nullptr;  // not found
 }
@@ -506,7 +500,7 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) 
 	{
 		if(lumpRef.ns != group || !lumpRef.lump->name.noCaseEqual(name))
 			continue;
-		return lumpRef.lump;
+		return lumpRef.lump.get();
 	}
 
 	return nullptr; // not found!
@@ -608,8 +602,8 @@ bool Wad_file::ReadDirectory(FILE *fp, int total_size)
 		}
 
 		LumpRef lumpRef = {};	// Currently not set, will set in ResolveNamespace
-		lumpRef.lump = lump;
-		directory.push_back(lumpRef);
+		lumpRef.lump.reset(lump);
+		directory.push_back(std::move(lumpRef));
 	}
 	return true;
 }
@@ -813,7 +807,7 @@ void Wad_file::writeToDisk() noexcept(false)
 	check(sof.write(&infotableofs, 4));
 	for(const LumpRef &ref : directory)
 	{
-		assert(ref.lump != nullptr);
+		assert(ref.lump.get() != nullptr);
 		const Lump_c &lump = *ref.lump;
 		check(sof.write(lump.getData(), lump.Length()));
 	}
@@ -839,7 +833,7 @@ void Wad_file::RenameLump(int index, const char *new_name)
 {
 	SYS_ASSERT(0 <= index && index < NumLumps());
 
-	Lump_c *lump = directory[index].lump;
+	Lump_c *lump = directory[index].lump.get();
 	SYS_ASSERT(lump);
 
 	lump->Rename(new_name);
@@ -851,17 +845,8 @@ void Wad_file::RemoveLumps(int index, int count)
 	SYS_ASSERT(0 <= index && index < NumLumps());
 	SYS_ASSERT(directory[index].lump);
 
-	int i;
-
-	for (i = 0 ; i < count ; i++)
-	{
-		delete directory[index + i].lump;
-	}
-
-	for (i = index ; i+count < NumLumps() ; i++)
-		directory[i] = directory[i+count];
-
-	directory.resize(directory.size() - (size_t)count);
+	directory.erase(directory.begin() + index,
+					directory.begin() + index + count);
 
 	FixLevelGroup(index, 0, count);
 
@@ -973,16 +958,16 @@ Lump_c * Wad_file::AddLump(const SString &name, int max_size)
 		FixLevelGroup(insert_point, 1, 0);
 
 		LumpRef lumpRef = {};
-		lumpRef.lump = lump;
-		directory.insert(directory.begin() + insert_point, lumpRef);
+		lumpRef.lump.reset(lump);
+		directory.insert(directory.begin() + insert_point, std::move(lumpRef));
 
 		insert_point++;
 	}
 	else  // add to end
 	{
 		LumpRef lumpRef = {};
-		lumpRef.lump = lump;
-		directory.push_back(lumpRef);
+		lumpRef.lump.reset(lump);
+		directory.push_back(std::move(lumpRef));
 	}
 
 	ProcessNamespaces();
