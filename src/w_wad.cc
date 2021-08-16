@@ -222,14 +222,20 @@ retry:
 
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
+	{
+		fclose(fp);
 		ThrowException("Error determining WAD size.\n");
+	}
 
 	int total_size = (int)ftell(fp);
 
 	gLog.debugPrintf("total_size = %d\n", total_size);
 
 	if (total_size < 0)
+	{
+		fclose(fp);
 		ThrowException("Error determining WAD size.\n");
+	}
 
 	if (! w->ReadDirectory(fp, total_size))
 	{
@@ -252,9 +258,7 @@ Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
 {
 	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
 
-	Wad_file *w = new Wad_file(filename, mode);
-
-	return w;
+	return new Wad_file(filename, mode);
 }
 
 
