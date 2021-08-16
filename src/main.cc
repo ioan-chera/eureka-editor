@@ -899,7 +899,7 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 void Instance::Main_LoadResources(LoadingData &loading)
 {
 	ConfigData config = conf;
-	std::vector<std::unique_ptr<Wad_file>> resourceWads;
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
 	try
 	{
 		// FIXME: avoid doing this in case of error
@@ -933,7 +933,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(!wad)
 				throw ParseException("Cannot load resource: " + resource);
 
-			resourceWads.push_back(std::unique_ptr<Wad_file>(wad));
+			resourceWads.push_back(std::shared_ptr<Wad_file>(wad));
 		}
 	}
 	catch(const ParseException &e)
@@ -956,8 +956,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for(std::unique_ptr<Wad_file> &wad : resourceWads)
-		MasterDir_Add(wad.release());
+	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
+		MasterDir_Add(wad.get());
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad.get());
