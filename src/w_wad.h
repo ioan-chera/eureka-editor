@@ -85,7 +85,7 @@ public:
 	}
 	int Length() const
 	{
-		return l_length;
+		return (int)mData.size();
 	}
 
 	// do not call this directly, use Wad_file::RenameLump()
