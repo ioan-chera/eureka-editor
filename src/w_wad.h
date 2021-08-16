@@ -121,6 +121,14 @@ public:
 		}
 	};
 
+	//
+	// Gets the data from lump without moving the insertion point.
+	//
+	const void *getData() const noexcept
+	{
+		return mData.data();
+	}
+
 	int64_t getName8() const noexcept;
 
 private:
