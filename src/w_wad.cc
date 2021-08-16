@@ -829,6 +829,7 @@ void Wad_file::writeToDisk() noexcept(false)
 {
 	auto check = [](bool action)
 	{
+		// TODO: throw a proper exception, it needs to be handled
 		if(!action)
 			ThrowException("Failed writing WAD to file");
 	};
