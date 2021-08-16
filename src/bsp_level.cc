@@ -1898,14 +1898,9 @@ inline static SString CalcOptionsString()
 
 static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 {
-	// this is very conservative, around 4 times the actual size
-	const int max_size = 512;
-
 	// we *must* compute the checksum BEFORE (re)creating the lump
 	// [ otherwise we write data into the wrong part of the file ]
 	u32_t crc = CalcGLChecksum(inst);
-
-	inst.edit_wad->RecreateLump(marker, max_size);
 
 	// when original name is long, need to specify it here
 	if (lev_current_name.length() > 5)
@@ -1952,8 +1947,6 @@ static Lump_c *CreateGLMarker(const Instance &inst);
 static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 {
 	// Note: root_node may be NULL
-
-	inst.edit_wad->BeginWrite();
 
 	// remove any existing GL-Nodes
 	inst.edit_wad->RemoveGLNodes(lev_current_idx);
@@ -2058,8 +2051,6 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 
 static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 {
-	inst.edit_wad->BeginWrite();
-
 	// remove any existing ZNODES lump
 	inst.edit_wad->RemoveZNodes(lev_current_idx);
 
@@ -2206,11 +2197,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name, int max_
 	// look for existing one
 	Lump_c *lump = FindLevelLump(inst, name);
 
-	if (lump)
-	{
-		inst.edit_wad->RecreateLump(lump, max_size);
-	}
-	else
+	if(!lump)
 	{
 		int last_idx = inst.edit_wad->LevelLastLump(lev_current_idx);
 

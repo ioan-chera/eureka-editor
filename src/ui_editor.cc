@@ -531,8 +531,6 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 {
 	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
 
-	wad->BeginWrite();
-
 	int oldie = wad->FindLumpNum(lump_name);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);

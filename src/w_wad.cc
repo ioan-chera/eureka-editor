@@ -67,38 +67,11 @@ const char *WadNamespaceString(WadNamespace ns)
 //  LUMP Handling
 //------------------------------------------------------------------------
 
-Lump_c::Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len) :
-	l_start(_start), l_length(_len)
+Lump_c::Lump_c(const SString &_nam)
 {
 	// ensure lump name is uppercase
 	name = _nam.asUpper();
 }
-
-
-Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry)
-{
-	// handle the entry name, which can lack a terminating NUL
-	SString buffer(entry->name, 8);
-
-	name = buffer;
-
-	l_start  = LE_U32(entry->pos);
-	l_length = LE_U32(entry->size);
-
-//	gLog.debugPrintf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
-
-	if (l_length == 0)
-		l_start = 0;
-}
-
-void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
-{
-	W_StoreString(entry->name, name, sizeof(entry->name));
-
-	entry->pos  = LE_U32(l_start);
-	entry->size = LE_U32(l_length);
-}
-
 
 void Lump_c::Rename(const char *new_name)
 {
@@ -257,14 +230,14 @@ retry:
 	if (fseek(fp, 0, SEEK_END) != 0)
 		ThrowException("Error determining WAD size.\n");
 
-	w->total_size = (int)ftell(fp);
+	int total_size = (int)ftell(fp);
 
-	gLog.debugPrintf("total_size = %d\n", w->total_size);
+	gLog.debugPrintf("total_size = %d\n", total_size);
 
-	if (w->total_size < 0)
+	if (total_size < 0)
 		ThrowException("Error determining WAD size.\n");
 
-	if (! w->ReadDirectory(fp))
+	if (! w->ReadDirectory(fp, total_size))
 	{
 		delete w;
 		gLog.printf("Open wad failed (reading directory)\n");
@@ -349,6 +322,20 @@ inline static bool IsGLNodeLump(const SString &name) noexcept
 	return name.noCaseStartsWith("GL_");
 }
 
+//
+// Wad total size
+//
+int Wad_file::TotalSize() const
+{
+	int size = 12;
+	for(const LumpRef &ref : directory)
+	{
+		assert(ref.lump != nullptr);
+		size += ref.lump->Length();
+	}
+	size += (int)directory.size() * 16;
+	return size;
+}
 
 Lump_c * Wad_file::GetLump(int index) const noexcept
 {
@@ -526,7 +513,7 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) 
 }
 
 
-bool Wad_file::ReadDirectory(FILE *fp)
+bool Wad_file::ReadDirectory(FILE *fp, int total_size)
 {
 	rewind(fp);
 
@@ -540,8 +527,8 @@ bool Wad_file::ReadDirectory(FILE *fp)
 
 	kind = header.ident[0] == 'I' ? WadKind::IWAD : WadKind::PWAD;
 
-	dir_start = LE_S32(header.dir_start);
-	dir_count = LE_S32(header.num_entries);
+	int dir_start = LE_S32(header.dir_start);
+	int dir_count = LE_S32(header.num_entries);
 
 	if (dir_count < 0)
 	{
@@ -567,27 +554,29 @@ bool Wad_file::ReadDirectory(FILE *fp)
 			return false;
 		}
 
-		Lump_c *lump = new Lump_c(this, &entry);
+		Lump_c *lump = new Lump_c(SString(entry.name, 8));
+		int l_length = LE_U32(entry.size);
+		int l_start = LE_U32(entry.pos);
+		if(l_length == 0)
+			l_start = 0;
 
 		// check if entry is valid
 		// [ the total_size value was computed in parent function ]
-		if (lump->l_length != 0)
+		if (l_length != 0)
 		{
 			const int max_size = 99999999;
 
-			if (lump->l_length < 0 || lump->l_start < 0 ||
-				lump->l_length >= max_size ||
-				lump->l_start > total_size ||
-				lump->l_start + lump->l_length > total_size)
+			if (l_length < 0 || l_start < 0 || l_length >= max_size ||
+				l_start > total_size || l_start + l_length > total_size)
 			{
 				gLog.printf("WARNING: clearing lump '%s' with invalid position (%d+%d > %d)\n",
-						  lump->name.c_str(), lump->l_start, lump->l_length, total_size);
+						  lump->name.c_str(), l_start, l_length, total_size);
 
-				lump->l_start = 0;
-				lump->l_length = 0;
+				l_start = 0;
+				l_length = 0;
 			}
 
-			if(lump->l_length > 0)
+			if(l_length > 0)
 			{
 				long curpos = ftell(fp);
 				if(curpos < 0)
@@ -596,16 +585,16 @@ bool Wad_file::ReadDirectory(FILE *fp)
 								errno);
 					return false;
 				}
-				if(fseek(fp, lump->l_start, SEEK_SET) < 0)
+				if(fseek(fp, l_start, SEEK_SET) < 0)
 				{
 					gLog.printf("%s: fseek failed with error %d\n", __func__,
 								errno);
 					return false;
 				}
-				if((int)lump->writeData(fp, lump->l_length) < lump->l_length)
+				if((int)lump->writeData(fp, l_length) < l_length)
 				{
 					gLog.printf("%s: failed reading %d bytes for lump '%s'\n",
-								__func__, lump->l_length, lump->name.c_str());
+								__func__, l_length, lump->name.c_str());
 					return false;
 				}
 				lump->Seek();	// reset the insertion point
@@ -794,20 +783,6 @@ void Wad_file::ProcessNamespaces()
 //  WAD Writing Interface
 //------------------------------------------------------------------------
 
-void Wad_file::BeginWrite()
-{
-	if (mode == WadOpenMode::read)
-		BugError("Wad_file::BeginWrite() called on read-only file\n");
-
-	if (begun_write)
-		BugError("Wad_file::BeginWrite() called again without EndWrite()\n");
-
-	// put the size into a quantum state
-	total_size = 0;
-
-	begun_write = true;
-}
-
 //
 // Writes the content to disk now
 //
@@ -862,7 +837,6 @@ void Wad_file::writeToDisk() noexcept(false)
 
 void Wad_file::RenameLump(int index, const char *new_name)
 {
-	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= index && index < NumLumps());
 
 	Lump_c *lump = directory[index].lump;
@@ -874,7 +848,6 @@ void Wad_file::RenameLump(int index, const char *new_name)
 
 void Wad_file::RemoveLumps(int index, int count)
 {
-	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= index && index < NumLumps());
 	SYS_ASSERT(directory[index].lump);
 
@@ -901,7 +874,6 @@ void Wad_file::RemoveLumps(int index, int count)
 
 void Wad_file::RemoveLevel(int lev_num)
 {
-	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
 	int start  = LevelHeader(lev_num);
@@ -915,7 +887,6 @@ void Wad_file::RemoveLevel(int lev_num)
 
 void Wad_file::RemoveGLNodes(int lev_num)
 {
-	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
 	int start  = LevelHeader(lev_num);
@@ -944,7 +915,6 @@ void Wad_file::RemoveGLNodes(int lev_num)
 
 void Wad_file::RemoveZNodes(int lev_num)
 {
-	SYS_ASSERT(begun_write);
 	SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
 
 	int start  = LevelHeader(lev_num);
@@ -992,13 +962,7 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 
 Lump_c * Wad_file::AddLump(const SString &name, int max_size)
 {
-	SYS_ASSERT(begun_write);
-
-	begun_max_size = max_size;
-
-	int start = PositionForWrite(max_size);
-
-	Lump_c *lump = new Lump_c(this, name, start, 0);
+	Lump_c *lump = new Lump_c(name);
 
 	// check if the insert_point is still valid
 	if (insert_point >= NumLumps())
@@ -1026,20 +990,6 @@ Lump_c * Wad_file::AddLump(const SString &name, int max_size)
 	return lump;
 }
 
-
-void Wad_file::RecreateLump(Lump_c *lump, int max_size)
-{
-	SYS_ASSERT(begun_write);
-
-	begun_max_size = max_size;
-
-	int start = PositionForWrite(max_size);
-
-	lump->l_start  = start;
-	lump->l_length = 0;
-}
-
-
 Lump_c * Wad_file::AddLevel(const SString &name, int max_size, int *lev_num)
 {
 	int actual_point = insert_point;
@@ -1066,133 +1016,6 @@ void Wad_file::InsertPoint(int index)
 	insert_point = index;
 }
 
-
-int Wad_file::HighWaterMark()
-{
-	int offset = (int)sizeof(raw_wad_header_t);
-
-	for (const LumpRef &lumpRef : directory)
-	{
-		// ignore zero-length lumps (their offset could be anything)
-		const Lump_c *lump = lumpRef.lump;
-		if (lump->Length() <= 0)
-			continue;
-
-		int l_end = lump->l_start + lump->l_length;
-
-		l_end = ((l_end + 3) / 4) * 4;
-
-		if (offset < l_end)
-			offset = l_end;
-	}
-
-	return offset;
-}
-
-
-int Wad_file::FindFreeSpace(int length)
-{
-	length = ((length + 3) / 4) * 4;
-
-	// collect non-zero length lumps and sort by their offset
-	std::vector<Lump_c *> sorted_dir;
-
-	for (const LumpRef &lumpRef : directory)
-	{
-		Lump_c *lump = lumpRef.lump;
-		if (lump->Length() > 0)
-			sorted_dir.push_back(lump);
-	}
-
-	std::sort(sorted_dir.begin(), sorted_dir.end(), Lump_c::offset_CMP_pred());
-
-
-	int offset = (int)sizeof(raw_wad_header_t);
-
-	for (unsigned int k = 0 ; k < sorted_dir.size() ; k++)
-	{
-		Lump_c *lump = sorted_dir[k];
-
-		int l_start = lump->l_start;
-		int l_end   = lump->l_start + lump->l_length;
-
-		l_end = ((l_end + 3) / 4) * 4;
-
-		if (l_end <= offset)
-			continue;
-
-		if (l_start >= offset + length)
-			continue;
-
-		// the lump overlapped the current gap, so bump offset
-
-		offset = l_end;
-	}
-
-	return offset;
-}
-
-
-int Wad_file::PositionForWrite(int max_size)
-{
-	int want_pos;
-
-	if (max_size <= 0)
-		want_pos = HighWaterMark();
-	else
-		want_pos = FindFreeSpace(max_size);
-
-	// determine if position is past end of file
-	// (difference should only be a few bytes)
-	//
-	// Note: doing this for every new lump may be a little expensive,
-	//       but trying to optimise it away will just make the code
-	//       needlessly complex and hard to follow.
-
-	if (fseek(fp, 0, SEEK_END) < 0)
-		FatalError("Error seeking to new write position.\n");
-
-	total_size = (int)ftell(fp);
-
-	if (total_size < 0)
-		FatalError("Error seeking to new write position.\n");
-
-	if (want_pos > total_size)
-	{
-		if (want_pos >= total_size + 8)
-			FatalError("Internal Error: lump positions are beyond end of file\n(%d > %d)\n",
-				want_pos, total_size);
-
-		WritePadding(want_pos - total_size);
-	}
-	else if (want_pos == total_size)
-	{
-		/* ready to write */
-	}
-	else
-	{
-		if (fseek(fp, want_pos, SEEK_SET) < 0)
-			FatalError("Error seeking to new write position.\n");
-	}
-
-	gLog.debugPrintf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
-
-	return want_pos;
-}
-
-
-int Wad_file::WritePadding(int count)
-{
-	static byte zeros[8] = { 0,0,0,0,0,0,0,0 };
-
-	SYS_ASSERT(1 <= count && count <= 8);
-
-	fwrite(zeros, count, 1, fp);
-
-	return count;
-}
-
-
 //
 // IDEA : Truncate file to "total_size" after writing the directory.
 //
@@ -1205,53 +1028,6 @@ int Wad_file::WritePadding(int count)
 //                 - instead of ftruncate, use _chsize() or _chsize_s()
 //                   [ investigate what the difference is.... ]
 //
-
-
-void Wad_file::WriteDirectory()
-{
-	dir_start = PositionForWrite();
-	dir_count = NumLumps();
-
-	gLog.debugPrintf("WriteDirectory...\n");
-	gLog.debugPrintf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
-
-	for (const LumpRef &lumpRef : directory)
-	{
-		Lump_c *lump = lumpRef.lump;
-		SYS_ASSERT(lump);
-
-		raw_wad_entry_t entry;
-
-		lump->MakeEntry(&entry);
-
-		if (fwrite(&entry, sizeof(entry), 1, fp) != 1)
-			ThrowException("Error writing WAD directory.\n");
-	}
-
-	fflush(fp);
-
-	total_size = (int)ftell(fp);
-	gLog.debugPrintf("total_size: %d\n", total_size);
-
-	if (total_size < 0)
-		ThrowException("Error determining WAD size.\n");
-
-	// update header at start of file
-
-	rewind(fp);
-
-	raw_wad_header_t header;
-
-	memcpy(header.ident, (kind == WadKind::IWAD) ? "IWAD" : "PWAD", 4);
-
-	header.dir_start   = LE_U32(dir_start);
-	header.num_entries = LE_U32(dir_count);
-
-	if (fwrite(&header, sizeof(header), 1, fp) != 1)
-		ThrowException("Error writing WAD header.\n");
-
-	fflush(fp);
-}
 
 
 bool Wad_file::Backup(const char *new_filename)

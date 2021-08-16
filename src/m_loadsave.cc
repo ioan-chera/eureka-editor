@@ -1522,8 +1522,6 @@ void Instance::SaveLevel(const SString &level)
 	// set global level name now (for debugging code)
 	loaded.levelName = level.asUpper();
 
-	edit_wad->BeginWrite();
-
 	// remove previous version of level (if it exists)
 	int lev_num = edit_wad->LevelFind(level);
 	int level_lump = -1;
@@ -1898,7 +1896,6 @@ void Instance::CMD_RenameMap()
 	{
 		int level_lump = edit_wad->LevelHeader(lev_num);
 
-		edit_wad->BeginWrite();
 		edit_wad->RenameLump(level_lump, new_name.c_str());
 		edit_wad->writeToDisk();
 	}
@@ -1952,7 +1949,6 @@ void Instance::CMD_DeleteMap()
 
 
 	// kick it to the curb
-	edit_wad->BeginWrite();
 	edit_wad->RemoveLevel(lev_num);
 	edit_wad->writeToDisk();
 

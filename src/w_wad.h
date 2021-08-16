@@ -66,17 +66,11 @@ friend class Wad_file;
 private:
 	SString name;
 
-	int l_start;
-	int l_length;
-
 	std::vector<byte> mData;
 	int mPos = 0;	// insertion point for reading or writing
 
 	// constructor is private
-	Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len);
-	Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry);
-
-	void MakeEntry(struct raw_wad_entry_s *entry);
+	explicit Lump_c(const SString &_nam);
 
 public:
 	const SString &Name() const noexcept
@@ -111,15 +105,6 @@ public:
 
 	// Memory buffer actions
 	size_t writeData(FILE *f, int len);
-
-	// predicate for std::sort()
-	struct offset_CMP_pred
-	{
-		inline bool operator() (const Lump_c * A, const Lump_c * B) const
-		{
-			return A->l_start < B->l_start;
-		}
-	};
 
 	//
 	// Gets the data from lump without moving the insertion point.
@@ -161,21 +146,10 @@ private:
 
 	WadKind kind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
 
-	// zero means "currently unknown", which only occurs after a
-	// call to BeginWrite() and before any call to AddLump() or
-	// the finalizing EndWrite().
-	int total_size = 0;
-
 	std::vector<LumpRef> directory;
-
-	int dir_start = 0;
-	int dir_count = 0;
 
 	// these are lump indices (into 'directory' vector)
 	std::vector<int> levels;
-
-	bool begun_write = false;
-	int  begun_max_size;
 
 	// when >= 0, the next added lump is placed _before_ this
 	int insert_point = -1;
@@ -217,10 +191,7 @@ public:
 		return kind == WadKind::IWAD;
 	}
 
-	int TotalSize() const noexcept
-	{
-		return total_size;
-	}
+	int TotalSize() const;
 
 	int NumLumps() const noexcept
 	{
@@ -256,11 +227,6 @@ public:
 	// returns true if successful, false on error.
 	bool Backup(const char *new_filename);
 
-	// all changes to the wad must occur between calls to BeginWrite()
-	// and EndWrite() methods.  the on-disk wad directory may be trashed
-	// during this period, it will be re-written by EndWrite().
-	void BeginWrite();
-
 	void writeToDisk() noexcept(false);
 
 	// change name of a lump (can be a level marker too)
@@ -290,10 +256,6 @@ public:
 	Lump_c * AddLump (const SString &name, int max_size = -1);
 	Lump_c * AddLevel(const SString &name, int max_size = -1, int *lev_num = nullptr);
 
-	// setup lump to write new data to it.
-	// the old contents are lost.
-	void RecreateLump(Lump_c *lump, int max_size = -1);
-
 	// set the insertion point -- the next lump will be added _before_
 	// this index, and it will be incremented so that a sequence of
 	// AddLump() calls produces lumps in the same order.
@@ -307,33 +269,10 @@ private:
 	static Wad_file * Create(const SString &filename, WadOpenMode mode);
 
 	// read the existing directory.
-	bool ReadDirectory(FILE *fp);
+	bool ReadDirectory(FILE *fp, int totalSize);
 
 	void DetectLevels();
 	void ProcessNamespaces();
-
-	// look at all the lumps and determine the lowest offset from
-	// start of file where we can write new data.  The directory itself
-	// is ignored for this.
-	int HighWaterMark();
-
-	// look at all lumps in directory and determine the lowest offset
-	// where a lump of the given length will fit.  Returns same as
-	// HighWaterMark() when no largest gaps exist.  The directory itself
-	// is ignored since it will be re-written at EndWrite().
-	int FindFreeSpace(int length);
-
-	// find a place (possibly at end of WAD) where we can write some
-	// data of max_size (-1 means unlimited), and seek to that spot
-	// (possibly writing some padding zeros -- the difference should
-	// be no more than a few bytes).  Returns new position.
-	int PositionForWrite(int max_size = -1);
-
-	int  WritePadding(int count);
-
-	// write the new directory, updating the dir_xxx variables
-	// (including the CRC).
-	void WriteDirectory();
 
 	void FixLevelGroup(int index, int num_added, int num_removed);
 

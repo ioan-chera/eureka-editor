@@ -1011,8 +1011,6 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 {
 	gLog.printf("Writing '%s' lump\n", EUREKA_LUMP);
 
-	wad->BeginWrite();
-
 	int oldie = wad->FindLumpNum(EUREKA_LUMP);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
