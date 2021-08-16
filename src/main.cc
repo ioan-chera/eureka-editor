@@ -488,7 +488,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.edit_wad.get() : inst.game_wad;
+		Wad_file *wad = (pass == 0) ? inst.edit_wad.get() : inst.game_wad.get();
 
 		if (! wad)
 			continue;
@@ -826,9 +826,9 @@ bool Instance::Main_LoadIWAD()
 		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
 		return false;
 	}
-	game_wad = wad;
+	game_wad.reset(wad);
 
-	MasterDir_Add(game_wad);
+	MasterDir_Add(game_wad.get());
 	return true;
 }
 
@@ -1196,7 +1196,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad.get() : gInstance.game_wad, gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad.get() : gInstance.game_wad.get(), gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

@@ -1128,7 +1128,7 @@ void Instance::CMD_OpenMap()
 	if (did_load)
 	{
 		SYS_ASSERT(wad != edit_wad.get());
-		SYS_ASSERT(wad != game_wad);
+		SYS_ASSERT(wad != game_wad.get());
 
 		ReplaceEditWad(wad);
 
@@ -1218,7 +1218,7 @@ void Instance::CMD_FlipMap()
 		return;
 
 
-	Wad_file *wad = edit_wad ? edit_wad.get() : game_wad;
+	Wad_file *wad = edit_wad ? edit_wad.get() : game_wad.get();
 
 	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad->LevelFind(loaded.levelName);
