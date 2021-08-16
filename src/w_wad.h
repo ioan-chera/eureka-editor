@@ -138,7 +138,7 @@ friend class Instance;
 friend class Lump_c;
 
 private:
-	SString filename;
+	const SString filename;
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
