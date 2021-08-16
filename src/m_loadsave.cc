@@ -1577,7 +1577,7 @@ void Instance::SaveLevel(const SString &level)
 	}
 
 	// write out the new directory
-	edit_wad->EndWrite();
+	edit_wad->writeToDisk();
 
 
 	// build the nodes
@@ -1900,7 +1900,7 @@ void Instance::CMD_RenameMap()
 
 		edit_wad->BeginWrite();
 		edit_wad->RenameLump(level_lump, new_name.c_str());
-		edit_wad->EndWrite();
+		edit_wad->writeToDisk();
 	}
 
 	loaded.levelName = new_name.asUpper();
@@ -1954,7 +1954,7 @@ void Instance::CMD_DeleteMap()
 	// kick it to the curb
 	edit_wad->BeginWrite();
 	edit_wad->RemoveLevel(lev_num);
-	edit_wad->EndWrite();
+	edit_wad->writeToDisk();
 
 
 	// choose a new level to load

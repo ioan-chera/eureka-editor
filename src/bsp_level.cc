@@ -2042,7 +2042,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		UpdateGLMarker(inst, gl_marker);
 	}
 
-	inst.edit_wad->EndWrite();
+	inst.edit_wad->writeToDisk();
 
 	if (lev_overflows > 0)
 	{
@@ -2070,7 +2070,7 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 		SaveXGL3Format(inst, root_node);
 	}
 
-	inst.edit_wad->EndWrite();
+	inst.edit_wad->writeToDisk();
 
 	if (lev_overflows > 0)
 	{

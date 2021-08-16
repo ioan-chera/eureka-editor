@@ -260,7 +260,6 @@ public:
 	// and EndWrite() methods.  the on-disk wad directory may be trashed
 	// during this period, it will be re-written by EndWrite().
 	void BeginWrite();
-	void EndWrite();
 
 	void writeToDisk() noexcept(false);
 

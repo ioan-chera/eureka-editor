@@ -808,20 +808,6 @@ void Wad_file::BeginWrite()
 	begun_write = true;
 }
 
-
-void Wad_file::EndWrite()
-{
-	if (! begun_write)
-		BugError("Wad_file::EndWrite() called without BeginWrite()\n");
-
-	begun_write = false;
-
-	WriteDirectory();
-
-	// reset the insertion point
-	insert_point = -1;
-}
-
 //
 // Writes the content to disk now
 //
