@@ -559,7 +559,8 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::append);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
+												   WadOpenMode::append);
 
 	if (! wad)
 	{
@@ -572,7 +573,6 @@ bool Instance::M_TryOpenMostRecent()
 	{
 		gLog.printf("No levels in most recent pwad: %s\n", filename.c_str());
 
-		delete wad;
 		return false;
 	}
 
@@ -585,7 +585,7 @@ bool Instance::M_TryOpenMostRecent()
 
 	Pwad_name = filename;
 
-	edit_wad.reset(wad);
+	edit_wad = wad;
 
 	return true;
 }

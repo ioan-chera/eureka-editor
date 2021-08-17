@@ -171,7 +171,9 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static Wad_file * Open(const SString &filename, WadOpenMode mode = WadOpenMode::append);
+	static std::shared_ptr<Wad_file> Open(const SString &filename,
+										  WadOpenMode mode
+										  = WadOpenMode::append);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const SString &filename);
@@ -264,7 +266,8 @@ public:
 	void InsertPoint(int index = -1);
 
 private:
-	static Wad_file * Create(const SString &filename, WadOpenMode mode);
+	static std::shared_ptr<Wad_file> Create(const SString &filename,
+											WadOpenMode mode);
 
 	// read the existing directory.
 	bool ReadDirectory(FILE *fp, int totalSize);

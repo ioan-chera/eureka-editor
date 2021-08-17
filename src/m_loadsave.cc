@@ -65,11 +65,11 @@ void Instance::RemoveEditWad()
 }
 
 
-void Instance::ReplaceEditWad(Wad_file *new_wad)
+void Instance::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 {
 	RemoveEditWad();
 
-	edit_wad.reset(new_wad);
+	edit_wad = new_wad;
 
 	Pwad_name = edit_wad->PathName();
 
@@ -266,7 +266,8 @@ void Instance::CMD_NewProject()
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	Wad_file * wad = Wad_file::Open(filename, WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
+												   WadOpenMode::write);
 
 	if (! wad)
 	{
@@ -274,7 +275,7 @@ void Instance::CMD_NewProject()
 		return;
 	}
 
-	edit_wad.reset(wad);
+	edit_wad = wad;
 	Pwad_name = edit_wad->PathName();
 
 	MasterDir_Add(edit_wad);
@@ -1009,7 +1010,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		return;
 
 
-	Wad_file *wad = NULL;
+	std::shared_ptr<Wad_file> wad;
 
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
@@ -1043,15 +1044,13 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	{
 		DLG_Notify("No levels found in that WAD.");
 
-		delete wad;
 		return;
 	}
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! gInstance.M_ParseEurekaLump(wad))
+		if (! gInstance.M_ParseEurekaLump(wad.get()))
 		{
-			delete wad;
 			return;
 		}
 	}
@@ -1063,7 +1062,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	// this wad replaces the current PWAD
 	gInstance.ReplaceEditWad(wad);
 
-	SYS_ASSERT(gInstance.edit_wad.get() == wad);
+	SYS_ASSERT(gInstance.edit_wad == wad);
 
 
 	// always grab map_name from the actual level
@@ -1094,7 +1093,7 @@ void Instance::CMD_OpenMap()
 	SString map_name;
 	bool did_load = false;
 
-	Wad_file *wad = dialog->Run(&map_name, &did_load);
+	std::shared_ptr<Wad_file> wad = dialog->Run(&map_name, &did_load);
 
 	delete dialog;
 
@@ -1107,18 +1106,14 @@ void Instance::CMD_OpenMap()
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 
-		delete wad;
 		return;
 	}
 
 
 	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
-		if (! M_ParseEurekaLump(wad))
-		{
-			delete wad;
+		if (! M_ParseEurekaLump(wad.get()))
 			return;
-		}
 	}
 
 
@@ -1127,15 +1122,15 @@ void Instance::CMD_OpenMap()
 
 	if (did_load)
 	{
-		SYS_ASSERT(wad != edit_wad.get());
-		SYS_ASSERT(wad != game_wad.get());
+		SYS_ASSERT(wad != edit_wad);
+		SYS_ASSERT(wad != game_wad);
 
 		ReplaceEditWad(wad);
 
 		new_resources = true;
 	}
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
-	else if (edit_wad && wad != edit_wad.get())
+	else if (edit_wad && wad != edit_wad)
 	{
 		RemoveEditWad();
 
@@ -1145,7 +1140,7 @@ void Instance::CMD_OpenMap()
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
-	LoadLevel(wad, map_name);
+	LoadLevel(wad.get(), map_name);
 
 	if (new_resources)
 	{
@@ -1685,7 +1680,7 @@ bool Instance::M_ExportMap()
 	// does the file already exist?  if not, create it...
 	bool exists = FileExists(filename);
 
-	Wad_file *wad;
+	std::shared_ptr<Wad_file> wad;
 
 	if (exists)
 	{
@@ -1695,18 +1690,14 @@ bool Instance::M_ExportMap()
 		{
 			DLG_Notify("Cannot export the map into a READ-ONLY file.");
 
-			delete wad;
 			return false;
 		}
 
 		// adopt iwad/port/resources of the target wad
 		if (wad->FindLump(EUREKA_LUMP))
 		{
-			if (! M_ParseEurekaLump(wad))
-			{
-				delete wad;
+			if (! M_ParseEurekaLump(wad.get()))
 				return false;
-			}
 		}
 	}
 	else
@@ -1726,7 +1717,8 @@ bool Instance::M_ExportMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])),
+							wad.get());
 
 	SString map_name = dialog->Run();
 
@@ -1736,7 +1728,6 @@ bool Instance::M_ExportMap()
 	// cancelled?
 	if (map_name.empty())
 	{
-		delete wad;
 		return false;
 	}
 
@@ -1749,7 +1740,6 @@ bool Instance::M_ExportMap()
 		if (DLG_Confirm({ "Cancel", "&Overwrite" },
 		                overwrite_message, "selected") <= 0)
 		{
-			delete wad;
 			return false;
 		}
 	}
@@ -1757,7 +1747,7 @@ bool Instance::M_ExportMap()
 	// back-up an existing wad
 	if (exists)
 	{
-		M_BackupWad(wad);
+		M_BackupWad(wad.get());
 	}
 
 

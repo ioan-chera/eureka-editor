@@ -184,7 +184,8 @@ Wad_file::~Wad_file()
 }
 
 
-Wad_file * Wad_file::Open(const SString &filename, WadOpenMode mode)
+std::shared_ptr<Wad_file> Wad_file::Open(const SString &filename,
+										 WadOpenMode mode)
 {
 	SYS_ASSERT(mode == WadOpenMode::read || mode == WadOpenMode::write || mode == WadOpenMode::append);
 
@@ -218,12 +219,13 @@ retry:
 		return NULL;
 	}
 
-	Wad_file *w = new Wad_file(filename, mode);
+	auto wraw = new Wad_file(filename, mode);
+
+	auto w = std::shared_ptr<Wad_file>(wraw);
 
 	// determine total size (seek to end)
 	if (fseek(fp, 0, SEEK_END) != 0)
 	{
-		delete w;
 		fclose(fp);
 		ThrowException("Error determining WAD size.\n");
 	}
@@ -234,14 +236,12 @@ retry:
 
 	if (total_size < 0)
 	{
-		delete w;
 		fclose(fp);
 		ThrowException("Error determining WAD size.\n");
 	}
 
 	if (! w->ReadDirectory(fp, total_size))
 	{
-		delete w;
 		gLog.printf("Open wad failed (reading directory)\n");
 		fclose(fp);
 		return NULL;
@@ -256,11 +256,12 @@ retry:
 }
 
 
-Wad_file * Wad_file::Create(const SString &filename, WadOpenMode mode)
+std::shared_ptr<Wad_file> Wad_file::Create(const SString &filename,
+										   WadOpenMode mode)
 {
 	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
 
-	return new Wad_file(filename, mode);
+	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
 }
 
 

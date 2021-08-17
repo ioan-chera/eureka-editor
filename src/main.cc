@@ -820,13 +820,14 @@ bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	Wad_file *wad = Wad_file::Open(loaded.iwadName, WadOpenMode::read);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName,
+												   WadOpenMode::read);
 	if (!wad)
 	{
 		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
 		return false;
 	}
-	game_wad.reset(wad);
+	game_wad = wad;
 
 	MasterDir_Add(game_wad);
 	return true;
@@ -929,11 +930,12 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(!Wad_file::Validate(resource))
 				throw ParseException("Invalid WAD file: " + resource);
 
-			Wad_file *wad = Wad_file::Open(resource, WadOpenMode::read);
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+														   WadOpenMode::read);
 			if(!wad)
 				throw ParseException("Cannot load resource: " + resource);
 
-			resourceWads.push_back(std::shared_ptr<Wad_file>(wad));
+			resourceWads.push_back(wad);
 		}
 	}
 	catch(const ParseException &e)
@@ -1141,7 +1143,8 @@ int main(int argc, char *argv[])
 			gInstance.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
-			gInstance.edit_wad.reset(Wad_file::Open(gInstance.Pwad_name, WadOpenMode::append));
+			gInstance.edit_wad = Wad_file::Open(gInstance.Pwad_name,
+												WadOpenMode::append);
 			if (!gInstance.edit_wad)
 				ThrowException("Cannot load pwad: %s\n", gInstance.Pwad_name.c_str());
 

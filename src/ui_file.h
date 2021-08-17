@@ -90,15 +90,15 @@ private:
 		accept
 	};
 
-	Action action;
+	Action action = Action::none;
 
 	// the WAD file opened by the "Load" button (initially NULL)
-	Wad_file * loaded_wad;
+	std::shared_ptr<Wad_file> loaded_wad;
 
 	// the WAD file which we are showing map buttons for.
 	// can be the "game_wad" or "edit_wad" globals, the "loaded_wad"
 	// field above, or NULL.
-	Wad_file * using_wad;
+	std::shared_ptr<Wad_file> using_wad;
 
 	Instance &inst;
 
@@ -115,7 +115,7 @@ public:
 	// "did_load" is true when the user loaded a new pwad and this
 	// method returned it.  It should become the next edit_wad.
 	//
-	Wad_file * Run(SString* map_v, bool * did_load);
+	std::shared_ptr<Wad_file> Run(SString* map_v, bool * did_load);
 
 private:
 	void Populate();
