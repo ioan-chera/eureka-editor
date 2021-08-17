@@ -30,7 +30,7 @@ private:
 	Fl_Return_Button *ok_but;
 
 	// normally NULL, when present will prevent using an existing level name
-	Wad_file *rename_wad;
+	std::shared_ptr<const Wad_file> rename_wad;
 
 	enum
 	{
@@ -45,7 +45,7 @@ private:
 
 public:
 	UI_ChooseMap(const char *initial_name = "",
-			     Wad_file *_rename_wad = NULL);
+			     const std::shared_ptr<const Wad_file> &_rename_wad = NULL);
 	virtual ~UI_ChooseMap();
 
 	// format is 'E' for ExMx, or 'M' for MAPxx

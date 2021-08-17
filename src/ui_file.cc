@@ -56,7 +56,7 @@ bool ValidateMapName(const char *p)
 
 
 UI_ChooseMap::UI_ChooseMap(const char *initial_name,
-						   Wad_file *_rename_wad) :
+						   const std::shared_ptr<const Wad_file> &_rename_wad) :
 	UI_Escapable_Window(420, 385, "Choose Map"),
 	rename_wad(_rename_wad),
 	action(ACT_none)

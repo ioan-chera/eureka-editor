@@ -1797,7 +1797,8 @@ void Instance::CMD_CopyMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad.get());
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(),
+											 edit_wad);
 
 	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
 
@@ -1843,7 +1844,8 @@ void Instance::CMD_RenameMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), edit_wad.get() /* rename_wad */);
+	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(),
+											 edit_wad /* rename_wad */);
 
 	// pick level format from the IWAD
 	// [ user may be trying to rename map after changing the IWAD ]

@@ -295,7 +295,7 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 }
 
 
-void Instance::W_LoadTextures_TX_START(Wad_file *wf)
+void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 {
 	for(const LumpRef &lumpRef : wf->directory)
 	{
