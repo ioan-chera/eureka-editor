@@ -274,8 +274,9 @@ void Basis::end()
 		mCurrentGroup.reset();
 	else
 	{
+		SString message = mCurrentGroup.getMessage();
 		mUndoHistory.push(std::move(mCurrentGroup));
-		inst.Status_Set("%s", mCurrentGroup.getMessage().c_str());
+		inst.Status_Set("%s", message.c_str());
 	}
 	doProcessChangeStatus();
 }
