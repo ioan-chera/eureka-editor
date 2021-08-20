@@ -1065,31 +1065,21 @@ Lump_c *Instance::W_FindSpriteLump(const SString &name) const
 }
 
 
-int W_LoadLumpData(Lump_c *lump, byte ** buf_ptr)
+int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
 {
 	// include an extra byte, used to NUL-terminate a text buffer
-	*buf_ptr = new byte[lump->Length() + 1];
+	buffer.resize(lump->Length() + 1);
 
 	if (lump->Length() > 0)
 	{
 		lump->Seek();
-		if (! lump->Read(*buf_ptr, lump->Length()))
-			FatalError("W_LoadLumpData: read error loading lump.\n");
+		if (! lump->Read(buffer.data(), lump->Length()))
+			ThrowException("W_LoadLumpData: read error loading lump.\n");
 	}
 
-	(*buf_ptr)[lump->Length()] = 0;
+	buffer[lump->Length()] = 0;
 
 	return lump->Length();
-}
-
-
-void W_FreeLumpData(byte ** buf_ptr)
-{
-	if (*buf_ptr)
-	{
-		delete[] *buf_ptr;
-		*buf_ptr = NULL;
-	}
 }
 
 

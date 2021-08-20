@@ -303,8 +303,7 @@ private:
 };
 
 // load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
-void W_FreeLumpData(byte ** buf_ptr);
+int  W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
 
