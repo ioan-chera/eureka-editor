@@ -133,9 +133,6 @@ struct LumpRef
 
 class Wad_file
 {
-friend class Instance;
-friend class Lump_c;
-
 private:
 	const SString filename;
 
@@ -263,6 +260,11 @@ public:
 	// insertion point -- future lumps get added at the END.
 	// RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
 	void InsertPoint(int index = -1);
+
+	const std::vector<LumpRef> &getDir() const
+	{
+		return directory;
+	}
 
 private:
 	static std::shared_ptr<Wad_file> Create(const SString &filename,

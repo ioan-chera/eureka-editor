@@ -294,7 +294,7 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 
 void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 {
-	for(const LumpRef &lumpRef : wf->directory)
+	for(const LumpRef &lumpRef : wf->getDir())
 	{
 		if(lumpRef.ns != WadNamespace::TextureLumps)
 			continue;
@@ -560,7 +560,7 @@ void Instance::W_LoadFlats()
 
 		const Wad_file *wf = master_dir[i].get();
 
-		for(const LumpRef &lumpRef : wf->directory)
+		for(const LumpRef &lumpRef : wf->getDir())
 		{
 			if(lumpRef.ns != WadNamespace::Flats)
 				continue;
