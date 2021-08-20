@@ -142,10 +142,12 @@ unit_test(independent
     SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
+    w_wad_test.cpp
     SRC m_bitvec.cc
         m_parse.cc
         m_streams.cc
         SafeOutFile.cc
+        w_wad.cc
 )
 
 find_package(Python3)
