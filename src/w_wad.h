@@ -28,7 +28,6 @@
 #define __EUREKA_W_WAD_H__
 
 #include "Errors.h"
-#include "Lump.h"
 #include "main.h"
 
 class Wad_file;
@@ -329,54 +328,6 @@ struct FailedWadReadEntry
 	char name[9];
 	int position;
 	int length;
-};
-
-//
-// Wad of lumps
-//
-class Wad
-{
-public:
-	bool readFromPath(const SString& path);
-	int levelFind(const SString &name) const;
-
-	const Lump *findLump(const SString &name) const;
-	Lump *findLump(const SString &name);
-
-	Lump &appendNewLump();
-	const Lump &getLump(int n) const
-	{
-		SYS_ASSERT(0 <= n && n < (int)mLumps.size());
-		return mLumps[n];
-	}
-
-	//
-	// Returns the lump ID of the level header entry
-	//
-	int levelHeader(int levelNum) const
-	{
-		SYS_ASSERT(0 <= levelNum && levelNum < (int)mLevels.size());
-		return mLevels[levelNum];
-	}
-
-	//
-	// Return the first level, if available. Otherwise -1.
-	//
-	int levelFindFirst() const
-	{
-		return !mLevels.empty() ? 0 : -1;
-	}
-private:
-	void detectLevels();
-	void sortLevels();
-
-	WadKind mKind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
-	std::vector<Lump> mLumps;
-
-	std::vector<FailedWadReadEntry> mFailedReadEntries;
-
-	// these are lump indices (into 'directory' vector)
-	std::vector<int> mLevels;
 };
 
 #endif  /* __EUREKA_W_WAD_H__ */
