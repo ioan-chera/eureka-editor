@@ -24,220 +24,70 @@ class WadFileTest : public TempDirContext
 {
 };
 
+//
+// Reads data from path.
+//
+// NOTE: Google Test doesn't allow its assertion macros to be called in non-void
+// functions.
+//
+static void readFromPath(const SString &path, std::vector<uint8_t> &data)
+{
+	FILE *f = fopen(path.c_str(), "rb");
+	ASSERT_NE(f, nullptr);
+	uint8_t buffer[4096];
+	data.clear();
+	while(!feof(f))
+	{
+		size_t n = fread(buffer, 1, 4096, f);
+		ASSERT_FALSE(ferror(f));
+		if(n > 0)
+			data.insert(data.end(), buffer, buffer + n);
+	}
+	ASSERT_EQ(fclose(f), 0);
+}
+
+//
+// Convenience test of vector vs string
+//
+static void assertVecString(const std::vector<uint8_t> &data, const char *text)
+{
+	// WARNING: cannot assert the strlen, because the string can also have nul
+	ASSERT_FALSE(memcmp(data.data(), text, data.size()));
+}
+
 TEST_F(WadFileTest, Open)
 {
 	std::shared_ptr<Wad_file> wad;
 
+	// Opening a missing file for reading should fail
 	wad = Wad_file::Open(getChildPath("inexistent.wad"), WadOpenMode::read);
 	ASSERT_FALSE(wad);
 
+	// Opening for writing or appending should be fine.
 	wad = Wad_file::Open(getChildPath("newwad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
-	// File won't get created per se
+	// File won't get created per se, so don't add it to the delete list.
+	// Zero lumps for the new file.
+	ASSERT_EQ(wad->NumLumps(), 0);
 
 	wad = Wad_file::Open(getChildPath("appendwad.wad"), WadOpenMode::append);
-	ASSERT_TRUE(wad);	// File needs to exist? Not necessarily
-	// File won't get created per se
-}
-
-TEST_F(WadFileTest, WriteIntegrity)
-{
-	std::shared_ptr<Wad_file> wad;
-
-	// Prepare something
-	SString path = getChildPath("newwad.wad");
-	wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
-
-	// Write it lumpless
-	wad->writeToDisk();
-	mDeleteList.push(path);
-
-	// Now add some data to it
-	Lump_c *lump = wad->AddLump("Hello");
-	ASSERT_NE(lump, nullptr);
-	ASSERT_EQ(lump->Name(), "HELLO");
-
-	// Check that it doesn't get written right off the bat
-
-	// Check its content
-	FILE *f = fopen(path.c_str(), "rb");
-	ASSERT_NE(f, nullptr);
-
-	uint8_t data[16];
-	size_t r = fread(data, 1, 12, f);
-	ASSERT_EQ(r, 12);
-	r = fread(data, 1, 1, f);
-	ASSERT_EQ(r, 0);
-	ASSERT_TRUE(feof(f));
-
-	int rc = fclose(f);
-	ASSERT_EQ(rc, 0);
-	ASSERT_FALSE(memcmp("PWAD", data, 4));
-	auto d32 = reinterpret_cast<const int32_t *>(data);
-	ASSERT_EQ(d32[1], 0);
-	ASSERT_EQ(d32[2], 12);
-
-	// Now write it with the new name
-	wad->writeToDisk();
-	f = fopen(path.c_str(), "rb");
-	ASSERT_NE(f, nullptr);
-
-	// header
-	r = fread(data, 1, 4, f);
-	ASSERT_EQ(r, 4);
-	ASSERT_FALSE(memcmp("PWAD", data, 4));
-	int32_t i32;
-	// numlumps
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 1);
-	// infotableofs
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12);
-	// Blank lump follows
-	// filepos
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12);
-
-	// Size
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 0);
-
-	// name
-	r = fread(data, 1, 8, f);
-	ASSERT_EQ(r, 8);
-	ASSERT_FALSE(memcmp("HELLO\0\0\0", data, 8));
-
-	// eof
-	r = fread(data, 1, 1, f);
-	ASSERT_EQ(r, 0);
-	rc = fclose(f);
-	ASSERT_EQ(rc, 0);
-
-	// Now add data to that lump
-	lump->Printf("Hello world, %d", 3);
-	wad->writeToDisk();
-
-	// Check again
-	f = fopen(path.c_str(), "rb");
-	ASSERT_NE(f, nullptr);
-
-	// header
-	r = fread(data, 1, 4, f);
-	ASSERT_EQ(r, 4);
-	ASSERT_FALSE(memcmp("PWAD", data, 4));
-	// numlumps
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 1);
-	// infotableofs
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12 + strlen("Hello world, 3"));
-
-	// The lump
-	r = fread(data, 1, strlen("Hello world, 3"), f);
-	ASSERT_FALSE(memcmp(data, "Hello world, 3", strlen("Hello world, 3")));
-
-	// Now the directory
-	// filepos
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12);
-
-	// Size
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, strlen("Hello world, 3"));
-
-	// name
-	r = fread(data, 1, 8, f);
-	ASSERT_EQ(r, 8);
-	ASSERT_FALSE(memcmp("HELLO\0\0\0", data, 8));
-
-	// eof
-	r = fread(data, 1, 1, f);
-	ASSERT_EQ(r, 0);
-	rc = fclose(f);
-	ASSERT_EQ(rc, 0);
-
-	// Now add yet another lump
-	lump = wad->AddLump("LUMPLUMP");
-	ASSERT_NE(lump, nullptr);
-	lump->Printf("Ah");
-	wad->writeToDisk();
-
-	// Check again
-	f = fopen(path.c_str(), "rb");
-	ASSERT_NE(f, nullptr);
-
-	// header
-	r = fread(data, 1, 4, f);
-	ASSERT_EQ(r, 4);
-	ASSERT_FALSE(memcmp("PWAD", data, 4));
-	// numlumps
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 2);
-	// infotableofs
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12 + strlen("Hello world, 3Ah"));
-
-	// The lumps
-	r = fread(data, 1, strlen("Hello world, 3Ah"), f);
-	ASSERT_FALSE(memcmp(data, "Hello world, 3Ah", strlen("Hello world, 3Ah")));
-
-	// Now the directory
-	// filepos
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12);
-
-	// Size
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, strlen("Hello world, 3"));
-
-	// name
-	r = fread(data, 1, 8, f);
-	ASSERT_EQ(r, 8);
-	ASSERT_FALSE(memcmp("HELLO\0\0\0", data, 8));
-
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, 12 + strlen("Hello world, 3"));
-
-	// Size
-	r = fread(&i32, 4, 1, f);
-	ASSERT_EQ(r, 1);
-	ASSERT_EQ(i32, strlen("Ah"));
-
-	// name
-	r = fread(data, 1, 8, f);
-	ASSERT_EQ(r, 8);
-	ASSERT_FALSE(memcmp("LUMPLUMP", data, 8));
-
-	// eof
-	r = fread(data, 1, 1, f);
-	ASSERT_EQ(r, 0);
-	rc = fclose(f);
-	ASSERT_EQ(rc, 0);
+	// Same as with writing, no file created unless "writeToDisk". In addition,
+	// check that it's empty, just like the writing mode.
+	ASSERT_EQ(wad->NumLumps(), 0);
 }
 
+//
+// Tests that whatever we write is formatted correctly, and that reading it will
+// bring back the correct data.
+//
 TEST_F(WadFileTest, WriteRead)
 {
-	// Same as above, but just reads the wad
 	std::shared_ptr<Wad_file> wad;
 	std::shared_ptr<Wad_file> read;
 
-	// Prepare something
+	// Prepare the test path
 	SString path = getChildPath("newwad.wad");
-
 	wad = Wad_file::Open(path, WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
@@ -245,50 +95,102 @@ TEST_F(WadFileTest, WriteRead)
 	wad->writeToDisk();
 	mDeleteList.push(path);
 
-	// Now add some data to it
-	Lump_c *lump = wad->AddLump("Hello");
+	// Right now add some data to it. Since writeToDisk won't be called yet,
+	// the lump should only be there in memory.
+	Lump_c *lump = wad->AddLump("HelloWorld");
 	ASSERT_NE(lump, nullptr);
-	ASSERT_EQ(lump->Name(), "HELLO");
+	// Check that the name gets upper-cased and truncated.
+	ASSERT_EQ(lump->Name(), "HELLOWOR");
 
-	// Check that it's read as such
+	// Check that what we wrote was _before_ adding the lump.
+
+	// Check the lump-less wad content
+	std::vector<uint8_t> data;
+	std::vector<uint8_t> wadReadData;	// this is when loading a Wad_file
+	readFromPath(path, data);
+	ASSERT_EQ(data.size(), 12);
+	assertVecString(data, "PWAD\0\0\0\0\x0c\0\0\0");
+
+	// The read wad
 	read = Wad_file::Open(path, WadOpenMode::read);
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 0);
 
+	// Now write it with the new lump.
 	wad->writeToDisk();
+	readFromPath(path, data);
+	ASSERT_EQ(data.size(), 12 + 16);	// header and one dir entry
+	assertVecString(data, "PWAD\x01\0\0\0\x0c\0\0\0"
+					"\x0c\0\0\0\0\0\0\0HELLOWOR");
+	// And the wad
 	read = Wad_file::Open(path, WadOpenMode::read);
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 1);
-	ASSERT_EQ(read->GetLump(0)->Name(), "HELLO");
+	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
+	ASSERT_EQ(read->GetLump(0)->Length(), 0);
 
-	// Now add data to that lump
-	lump->Printf("Hello world, %d", 3);
-	wad->writeToDisk();
+	// Now add some data to that lump
+	lump->Printf("Hello, world!");
+	wad->writeToDisk();	// and update the disk entry
 
+	// Check again
+	readFromPath(path, data);
+	ASSERT_EQ(data.size(), 12 + 16 + 13);	// header, dir entry and content
+	// Info table ofs: 12 + 13 = 25 (0x19)
+	assertVecString(data, "PWAD\x01\0\0\0\x19\0\0\0"
+					"Hello, world!"
+					"\x0c\0\0\0\x0d\0\0\0HELLOWOR");
+
+	// And the wad
 	read = Wad_file::Open(path, WadOpenMode::read);
 	ASSERT_TRUE(read);
 	ASSERT_EQ(read->NumLumps(), 1);
-	ASSERT_EQ(read->GetLump(0)->Name(), "HELLO");
-	std::vector<byte> vdat;
+	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
+	ASSERT_EQ(read->GetLump(0)->Length(), 13);
+	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	assertVecString(wadReadData, "Hello, world!");
 
-	W_LoadLumpData(read->GetLump(0), vdat);
-	ASSERT_STREQ((const char *)vdat.data(), "Hello world, 3");
+	// Now add yet another lump at the end
+	lump = wad->AddLump("LUMPLUMP");
+	ASSERT_NE(lump, nullptr);
+	lump->Printf("Ah");
 
-	wad->AddLump("LUMPLUMP")->Printf("Ah");
+	// Also add a lump in the middle. Test the insertion point feature
+	wad->InsertPoint(1);
+	lump = wad->AddLump("MIDLump");
+	ASSERT_NE(lump, nullptr);
+	lump->Printf("Doom");
+
 	wad->writeToDisk();
+
+	// Check
+	readFromPath(path, data);
+	ASSERT_EQ(data.size(), 12 + 13 + 4 + 2 + 48);
+	// Info table ofs: 12 + 13 + 4 + 2 = 25 + 6 = 31 = 0x1f
+	assertVecString(data, "PWAD\x03\0\0\0\x1f\0\0\0"
+					"Hello, world!"
+					   "Doom"
+					   "Ah"
+					   "\x0c\0\0\0\x0d\0\0\0HELLOWOR"
+					   "\x19\0\0\0\x04\0\0\0MIDLUMP\0"
+					"\x1d\0\0\0\x02\0\0\0LUMPLUMP");
+
+	// And check the wad
 	read = Wad_file::Open(path, WadOpenMode::read);
 	ASSERT_TRUE(read);
-	ASSERT_EQ(read->NumLumps(), 2);
-	ASSERT_EQ(read->GetLump(0)->Name(), "HELLO");
-	ASSERT_EQ(read->GetLump(1)->Name(), "LUMPLUMP");
-	W_LoadLumpData(read->GetLump(0), vdat);
-	ASSERT_STREQ((const char *)vdat.data(), "Hello world, 3");
-	W_LoadLumpData(read->GetLump(1), vdat);
-	ASSERT_STREQ((const char *)vdat.data(), "Ah");
-
-	// Also check TotalSize
-	ASSERT_EQ(wad->TotalSize(), 12 + strlen("Hello world, 3Ah") + 32);
-	ASSERT_EQ(read->TotalSize(), 12 + strlen("Hello world, 3Ah") + 32);
+	ASSERT_EQ(read->NumLumps(), 3);
+	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
+	ASSERT_EQ(read->GetLump(0)->Length(), 13);
+	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	assertVecString(wadReadData, "Hello, world!");
+	ASSERT_EQ(read->GetLump(1)->Name(), "MIDLUMP");
+	ASSERT_EQ(read->GetLump(1)->Length(), 4);
+	ASSERT_EQ(W_LoadLumpData(read->GetLump(1), wadReadData), 4);
+	assertVecString(wadReadData, "Doom");
+	ASSERT_EQ(read->GetLump(2)->Name(), "LUMPLUMP");
+	ASSERT_EQ(read->GetLump(2)->Length(), 2);
+	ASSERT_EQ(W_LoadLumpData(read->GetLump(2), wadReadData), 2);
+	assertVecString(wadReadData, "Ah");
 }
 
 TEST_F(WadFileTest, Validate)
