@@ -71,11 +71,15 @@ Lump_c::Lump_c(const SString &_nam)
 {
 	// ensure lump name is uppercase
 	name = _nam.asUpper();
+	if(name.length() > 8)
+		name.erase(8, std::string::npos);
 }
 
 void Lump_c::Rename(const char *new_name)
 {
 	name = SString(new_name).asUpper();
+	if(name.length() > 8)
+		name.erase(8, std::string::npos);
 }
 
 
