@@ -18,6 +18,9 @@
 
 #include "w_wad.h"
 #include "testUtils/TempDirContext.hpp"
+#ifdef None	// fix pollution
+#undef None
+#endif
 #include "gtest/gtest.h"
 
 class WadFileTest : public TempDirContext
