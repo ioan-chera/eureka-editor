@@ -46,6 +46,9 @@
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #include "WindowsInclude.h"
 #endif
+#ifdef None
+#undef None
+#endif
 
 #include "PrintfMacros.h"
 
