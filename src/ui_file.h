@@ -39,17 +39,19 @@ private:
 		ACT_ACCEPT
 	};
 
-	int action;
+	int action = ACT_none;
 
 	void CheckMapName();
 
 public:
 	UI_ChooseMap(const char *initial_name = "",
 			     const std::shared_ptr<const Wad_file> &_rename_wad = NULL);
-	virtual ~UI_ChooseMap();
+	virtual ~UI_ChooseMap()
+	{
+	}
 
 	// format is 'E' for ExMx, or 'M' for MAPxx
-	void PopulateButtons(char format, Wad_file *test_wad = NULL);
+	void PopulateButtons(char format, const Wad_file *test_wad = NULL);
 
 	// returns map name on success, NULL on cancel
 	SString Run();

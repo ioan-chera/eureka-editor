@@ -58,8 +58,7 @@ bool ValidateMapName(const char *p)
 UI_ChooseMap::UI_ChooseMap(const char *initial_name,
 						   const std::shared_ptr<const Wad_file> &_rename_wad) :
 	UI_Escapable_Window(420, 385, "Choose Map"),
-	rename_wad(_rename_wad),
-	action(ACT_none)
+	rename_wad(_rename_wad)
 {
 	resizable(NULL);
 
@@ -101,13 +100,7 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name,
 	CheckMapName();
 }
 
-
-UI_ChooseMap::~UI_ChooseMap()
-{
-}
-
-
-void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
+void UI_ChooseMap::PopulateButtons(char format, const Wad_file *test_wad)
 {
 	int but_W = 60;
 

@@ -1664,7 +1664,7 @@ bool Instance::M_ExportMap()
 	// if extension is missing then add ".wad"
 	SString filename = chooser.filename();
 
-	char *pos = (char *)fl_filename_ext(filename.c_str());
+	const char *pos = fl_filename_ext(filename.c_str());
 	if(!*pos)
 		filename += ".wad";
 
@@ -1715,15 +1715,15 @@ bool Instance::M_ExportMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
+	SString map_name;
+	{
+		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])),
-							wad.get());
+		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])),
+								wad.get());
 
-	SString map_name = dialog->Run();
-
-	delete dialog;
-
+		map_name = dialog->Run();
+	}
 
 	// cancelled?
 	if (map_name.empty())
@@ -1797,14 +1797,15 @@ void Instance::CMD_CopyMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(),
-											 edit_wad);
+	SString new_name;
+	{
+		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str(),
+													 edit_wad);
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
+		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
 
-	SString new_name = dialog->Run();
-
-	delete dialog;
+		new_name = dialog->Run();
+	}
 
 	// cancelled?
 	if (new_name.empty())
@@ -1843,29 +1844,29 @@ void Instance::CMD_RenameMap()
 
 
 	// ask user for map name
-
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(),
-											 edit_wad /* rename_wad */);
-
-	// pick level format from the IWAD
-	// [ user may be trying to rename map after changing the IWAD ]
-	char format = 'M';
+	SString new_name;
 	{
-		int idx = game_wad->LevelFindFirst();
+		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str(),
+													 edit_wad /* rename_wad */);
 
-		if (idx >= 0)
+		// pick level format from the IWAD
+		// [ user may be trying to rename map after changing the IWAD ]
+		char format = 'M';
 		{
-			idx = game_wad->LevelHeader(idx);
-			const SString &name = game_wad->GetLump(idx)->Name();
-			format = static_cast<char>(toupper(name[0]));
+			int idx = game_wad->LevelFindFirst();
+
+			if (idx >= 0)
+			{
+				idx = game_wad->LevelHeader(idx);
+				const SString &name = game_wad->GetLump(idx)->Name();
+				format = static_cast<char>(toupper(name[0]));
+			}
 		}
+
+		dialog->PopulateButtons(format, edit_wad.get());
+
+		new_name = dialog->Run();
 	}
-
-	dialog->PopulateButtons(format, edit_wad.get());
-
-	SString new_name = dialog->Run();
-
-	delete dialog;
 
 	// cancelled?
 	if (new_name.empty())
