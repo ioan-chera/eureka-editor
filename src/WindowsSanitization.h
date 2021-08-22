@@ -18,6 +18,10 @@
 
 // Cleans up all the pollution caused by Windows and Linux
 
+// Clear out X11 pollution
+#ifdef Bool
+#undef Bool
+#endif
 #ifdef None
 #undef None
 #endif
