@@ -800,6 +800,12 @@ void Wad_file::writeToDisk() noexcept(false)
 			ThrowException("Failed writing WAD to file");
 	};
 
+	if(IsReadOnly())
+	{
+		ThrowException("Cannot overwrite a read-only file (%s)!",
+					   filename.c_str());
+	}
+
 	SafeOutFile sof(filename);
 	check(sof.openForWriting());
 	// Write the header
