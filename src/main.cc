@@ -55,13 +55,15 @@
 #ifndef WIN32
 #include <time.h>
 #ifndef __APPLE__
-#ifdef X11_POLLUTION_BOOL
-#define Bool X11_POLLUTION_BOOL
+
+#ifndef Bool
+#define Bool int	// redefine more crap
 #endif
+
 #include <X11/xpm.h>	// for the window icon
-#ifdef X11_POLLUTION_BOOL
+
 #undef Bool
-#endif
+
 #endif
 #endif
 

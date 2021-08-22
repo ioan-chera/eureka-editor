@@ -20,7 +20,6 @@
 
 // Clear out X11 pollution
 #ifdef Bool
-#define X11_POLLUTION_BOOL Bool
 #undef Bool
 #endif
 #ifdef None
