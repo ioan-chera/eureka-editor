@@ -535,6 +535,11 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 	{
 		gLog.printf("%s: flat '%s' is too small, should be at least %d.\n",
 					__func__, name.c_str(), size);
+		int smallsize = lump->Length();
+		if(smallsize > 0)
+			memset(raw + smallsize, raw[smallsize - 1], size - smallsize);
+		else
+			memset(raw, 0, size);
 	}
 
 	for (int i = 0 ; i < size ; i++)
