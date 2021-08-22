@@ -48,9 +48,9 @@ template<typename T>
 [[noreturn]] void raise(EUR_FORMAT_STRING(const char *format), ...)
 {
 	va_list ap;
-	va_start(ap, format);
+	::va_start(ap, format);
 	SString text = SString::vprintf(format, ap);
-	va_end(ap);
+	::va_end(ap);
 	throw T(text);
 }
 
