@@ -207,6 +207,11 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->FindLumpInNamespace("HelloWor", WadNamespace::Flats),
 			  nullptr);
 	ASSERT_EQ(read->LevelCount(), 0);
+	ASSERT_EQ(read->LevelFindFirst(), -1);
+
+	// Test renaming
+	read->RenameLump(read->FindLumpNum("LumpLump"), "BaronOfHell");
+	ASSERT_EQ(read->GetLump(2)->Name(), "BARONOFH");
 }
 
 TEST_F(WadFileTest, Validate)
@@ -300,4 +305,148 @@ TEST_F(WadFileTest, FindLumpInNamespace)
 			  wad->GetLump(16));
 	ASSERT_EQ(wad->FindLumpInNamespace("LUMP", WadNamespace::TextureLumps),
 			  wad->GetLump(19));
+}
+
+//
+// Query levels
+//
+TEST_F(WadFileTest, LevelQuery)
+{
+	SString path = getChildPath("wad.wad");
+	auto wad = Wad_file::Open(path, WadOpenMode::write);
+	ASSERT_TRUE(wad);
+
+	// Classic Doom map. Give it a nonstandard name
+	// NOTE: when adding, we must explicitly state if the lump is a level
+	ASSERT_TRUE(wad->AddLevel("MAP45"));	// 0 (deliberately after UDMF)
+	ASSERT_TRUE(wad->AddLump("THINGS"));
+	ASSERT_TRUE(wad->AddLump("LINEDEFS"));
+	ASSERT_TRUE(wad->AddLump("SIDEDEFS"));
+	ASSERT_TRUE(wad->AddLump("VERTEXES"));	// 4
+	ASSERT_TRUE(wad->AddLump("SEGS"));
+	ASSERT_TRUE(wad->AddLump("SSECTORS"));
+	ASSERT_TRUE(wad->AddLump("NODES"));
+	ASSERT_TRUE(wad->AddLump("SECTORS"));	// 8
+	ASSERT_TRUE(wad->AddLump("REJECT"));
+	ASSERT_TRUE(wad->AddLump("BLOCKMAP"));
+	ASSERT_TRUE(wad->AddLump("BEHAVIOR"));
+	ASSERT_TRUE(wad->AddLump("GL_JACK"));	// 12, random name
+	// UDMF map
+	ASSERT_TRUE(wad->AddLevel("E2M4"));
+	ASSERT_TRUE(wad->AddLump("TEXTMAP"));
+	ASSERT_TRUE(wad->AddLump("ZNODES"));
+	ASSERT_TRUE(wad->AddLump("BLOCKMAP"));	// 16, give these rarely-used lumps
+	ASSERT_TRUE(wad->AddLump("REJECT"));
+	ASSERT_TRUE(wad->AddLump("ENDMAP"));
+
+	// Test the sorting...
+	ASSERT_EQ(wad->LevelHeader(0), 0);
+	ASSERT_EQ(wad->LevelHeader(1), 13);
+	wad->SortLevels();
+	ASSERT_EQ(wad->LevelHeader(0), 13);
+	ASSERT_EQ(wad->LevelHeader(1), 0);
+
+	wad->writeToDisk();
+	mDeleteList.push(path);
+
+	// For this test, let's assume UDMF is active
+	global::udmf_testing = true;
+
+	// Also check how a wad read from file behaves
+	auto read = Wad_file::Open(path, WadOpenMode::read);
+	ASSERT_TRUE(read);
+
+	// Test both wads. The second one shall autodetect
+	for(const std::shared_ptr<Wad_file> &w : { wad, read })
+	{
+		if(w.get() == wad.get())
+			puts("Testing WRITTEN file");
+		else
+			puts("Testing READ file");
+		// Check the simple queries
+		ASSERT_EQ(w->LevelCount(), 2);
+		// NOTE: check that they get sorted
+		ASSERT_EQ(w->LevelHeader(0), 13);
+		ASSERT_EQ(w->LevelLastLump(0), 18);
+		ASSERT_EQ(w->LevelHeader(1), 0);
+		ASSERT_EQ(w->LevelLastLump(1), 12);
+
+		ASSERT_EQ(w->LevelFind("E2M4"), 0);
+		ASSERT_EQ(w->LevelFind("MAP45"), 1);
+		ASSERT_EQ(w->LevelFind("OTHER"), -1);
+
+		ASSERT_EQ(w->LevelFindByNumber(24), 0);
+		ASSERT_EQ(w->LevelFindByNumber(45), 1);
+		ASSERT_EQ(w->LevelFindByNumber(23), -1);
+
+		// the other kind is for no-level wads
+		ASSERT_EQ(w->LevelFindFirst(), 0);
+
+		ASSERT_EQ(w->LevelLookupLump(0, "BLOCKMAP"), 16);
+		ASSERT_EQ(w->LevelLookupLump(0, "ENDMAP"), 18);
+		ASSERT_EQ(w->LevelLookupLump(0, "ZNODES"), 15);
+		ASSERT_EQ(w->LevelLookupLump(1, "BLOCKMAP"), 10);
+		ASSERT_EQ(w->LevelLookupLump(1, "ZNODES"), -1);
+
+		ASSERT_EQ(w->LevelFormat(0), MapFormat::udmf);
+		ASSERT_EQ(w->LevelFormat(1), MapFormat::hexen);
+	}
+
+	// Now remove behaviour and check the new format and level indices
+	wad->RemoveLumps(11, 2);	// Behavior and GL_jack
+	ASSERT_EQ(wad->LevelFormat(0), MapFormat::udmf);
+	ASSERT_EQ(wad->LevelFormat(1), MapFormat::doom);	// no behavior: doom
+	ASSERT_EQ(wad->LevelHeader(0), 11);
+	ASSERT_EQ(wad->LevelLastLump(0), 16);
+	ASSERT_EQ(wad->LevelHeader(1), 0);
+	ASSERT_EQ(wad->LevelLastLump(1), 10);
+
+	// Now remove the second level (first from directory)
+	wad->RemoveLevel(1);
+	ASSERT_EQ(wad->LevelCount(), 1);
+	ASSERT_EQ(wad->LevelFormat(0), MapFormat::udmf);
+	ASSERT_EQ(wad->LevelHeader(0), 0);
+	ASSERT_EQ(wad->LevelLastLump(0), 5);
+
+	// Since we already removed stuff from the wad, we should now test the read
+	read->RemoveGLNodes(0);	// also test levels lacking it
+	read->RemoveGLNodes(1);
+	ASSERT_EQ(read->LevelHeader(0), 12);
+	ASSERT_EQ(read->LevelLastLump(0), 17);
+	ASSERT_EQ(read->LevelHeader(1), 0);
+	ASSERT_EQ(read->LevelLastLump(1), 11);
+	read->RemoveZNodes(0);
+	read->RemoveZNodes(1);
+	ASSERT_EQ(read->LevelHeader(0), 12);
+	ASSERT_EQ(read->LevelLastLump(0), 16);
+	ASSERT_EQ(read->LevelHeader(1), 0);
+	ASSERT_EQ(read->LevelLastLump(1), 11);
+}
+
+//
+// Tests that the backup will write exactly like writeToDisk.
+//
+TEST_F(WadFileTest, Backup)
+{
+	SString path = getChildPath("wad.wad");
+	SString path2 = getChildPath("wad2.wad");
+	auto wad = Wad_file::Open(path, WadOpenMode::write);
+	ASSERT_TRUE(wad);
+
+	ASSERT_TRUE(wad->AddLump("LUMP1"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("Hello, world!");
+	ASSERT_TRUE(wad->AddLump("LUMP2"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("Goodbye!");
+
+	ASSERT_TRUE(wad->Backup(path2.c_str()));
+	mDeleteList.push(path2);
+	wad->writeToDisk();
+	mDeleteList.push(path);
+
+	// Test it now
+	std::vector<uint8_t> data, data2;
+	readFromPath(path, data);
+	readFromPath(path2, data2);
+	ASSERT_FALSE(data.empty());
+	ASSERT_EQ(data, data2);
 }
