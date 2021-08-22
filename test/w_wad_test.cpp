@@ -212,6 +212,12 @@ TEST_F(WadFileTest, WriteRead)
 	// Test renaming
 	read->RenameLump(read->FindLumpNum("LumpLump"), "BaronOfHell");
 	ASSERT_EQ(read->GetLump(2)->Name(), "BARONOFH");
+
+	// Test name8
+	int64_t nm8 = read->GetLump(2)->getName8();
+	char buf[9] = {};
+	memcpy(buf, &nm8, 8);
+	ASSERT_STREQ(buf, "BARONOFH");
 }
 
 TEST_F(WadFileTest, Validate)
@@ -449,4 +455,62 @@ TEST_F(WadFileTest, Backup)
 	readFromPath(path2, data2);
 	ASSERT_FALSE(data.empty());
 	ASSERT_EQ(data, data2);
+}
+
+TEST_F(WadFileTest, LumpIO)
+{
+	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	Lump_c *lump = wad->AddLump("LUMP");
+	ASSERT_TRUE(lump);
+
+	lump->Printf("Hello, world!");
+	lump->Seek(7);
+	char data[20] = {};
+	ASSERT_TRUE(lump->Read(data, 5));
+	ASSERT_STREQ(data, "world");
+	// Won't accept post-EOF
+	ASSERT_FALSE(lump->Read(data, 2));
+	// If we got false, we're now at EOF and must rewind
+	ASSERT_FALSE(lump->Read(data, 1));
+
+	lump->Seek();
+	memset(data, 0, sizeof(data));
+	ASSERT_TRUE(lump->Read(data, 5));
+	ASSERT_TRUE(lump->Read(data + 5, 7));
+	ASSERT_STREQ(data, "Hello, world");
+
+	// Now test GetLine
+	Lump_c *lump2 = wad->AddLump("LUMP2");
+	ASSERT_TRUE(lump2);
+	lump2->Printf("Hello\nworld\nand you!");
+	lump2->Seek();
+	SString line;
+	ASSERT_TRUE(lump2->GetLine(line));
+	ASSERT_EQ(line, "Hello\n");
+	ASSERT_TRUE(lump2->GetLine(line));
+	ASSERT_EQ(line, "world\n");
+	ASSERT_TRUE(lump2->GetLine(line));
+	ASSERT_EQ(line, "and you!");
+	ASSERT_FALSE(lump2->GetLine(line));
+}
+
+TEST_F(WadFileTest, LumpFromFile)
+{
+	SString path = getChildPath("wad.wad");
+	auto wad = Wad_file::Open(path, WadOpenMode::write);
+	ASSERT_TRUE(wad);
+	wad->writeToDisk();
+	mDeleteList.push(path);
+
+	Lump_c *lump = wad->AddLump("Test");
+	ASSERT_TRUE(lump);
+
+	FILE *f = fopen(path.c_str(), "rb");
+	ASSERT_TRUE(f);
+	ASSERT_EQ(lump->writeData(f, 32), 12);
+	ASSERT_EQ(fclose(f), 0);
+
+	ASSERT_EQ(lump->Length(), 12);
+	// Test getData
+	ASSERT_FALSE(memcmp(lump->getData(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
 }
