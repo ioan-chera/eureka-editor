@@ -89,6 +89,9 @@ TEST_F(WadFileTest, WriteRead)
 	// Prepare the test path
 	SString path = getChildPath("newwad.wad");
 	wad = Wad_file::Open(path, WadOpenMode::write);
+	ASSERT_EQ(wad->PathName(), path);
+	ASSERT_FALSE(wad->IsReadOnly());
+	ASSERT_FALSE(wad->IsIWAD());
 	ASSERT_TRUE(wad);
 
 	// Write it lumpless
@@ -161,6 +164,7 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_NE(lump, nullptr);
 	lump->Printf("Doom");
 
+	ASSERT_EQ(wad->TotalSize(), 12 + 13 + 4 + 2 + 48);
 	wad->writeToDisk();
 
 	// Check
@@ -190,7 +194,19 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->GetLump(2)->Name(), "LUMPLUMP");
 	ASSERT_EQ(read->GetLump(2)->Length(), 2);
 	ASSERT_EQ(W_LoadLumpData(read->GetLump(2), wadReadData), 2);
+	ASSERT_EQ(read->TotalSize(), 12 + 13 + 4 + 2 + 48);
 	assertVecString(wadReadData, "Ah");
+
+	// Lump lookup tests
+	ASSERT_EQ(read->FindLump("MIDLuMP"), read->GetLump(1));
+	ASSERT_EQ(read->FindLump("MIXLUMP"), nullptr);
+	ASSERT_EQ(read->FindLumpNum("LUMPLump"), 2);
+	ASSERT_EQ(read->FindLumpNum("LUMPLuma"), -1);
+	ASSERT_EQ(read->FindLumpInNamespace("HelloWor", WadNamespace::Global),
+			  read->GetLump(0));
+	ASSERT_EQ(read->FindLumpInNamespace("HelloWor", WadNamespace::Flats),
+			  nullptr);
+	ASSERT_EQ(read->LevelCount(), 0);
 }
 
 TEST_F(WadFileTest, Validate)
