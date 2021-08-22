@@ -363,6 +363,7 @@ texturegroup c "Castle"
 texturegroup d "Door && Metal"
 texturegroup g "Grating"
 texturegroup l "Liquid"
+texturegroup m "Magic"
 texturegroup v "Village"
 texturegroup - "OTHER"
 
