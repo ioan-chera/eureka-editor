@@ -250,7 +250,7 @@ public:
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
 	Lump_c * AddLump (const SString &name);
-	Lump_c * AddLevel(const SString &name, int max_size = -1, int *lev_num = nullptr);
+	Lump_c * AddLevel(const SString &name, int *lev_num = nullptr);
 
 	// set the insertion point -- the next lump will be added _before_
 	// this index, and it will be incremented so that a sequence of

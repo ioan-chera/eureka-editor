@@ -1288,7 +1288,7 @@ void Instance::SaveHeader(const SString &level)
 {
 	int size = (int)this->level.headerData.size();
 
-	Lump_c *lump = edit_wad->AddLevel(level, size, &saving_level);
+	Lump_c *lump = edit_wad->AddLevel(level, &saving_level);
 
 	if (size > 0)
 	{

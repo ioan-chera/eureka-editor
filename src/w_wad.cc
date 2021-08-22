@@ -1011,7 +1011,7 @@ Lump_c * Wad_file::AddLump(const SString &name)
 	return lump;
 }
 
-Lump_c * Wad_file::AddLevel(const SString &name, int max_size, int *lev_num)
+Lump_c * Wad_file::AddLevel(const SString &name, int *lev_num)
 {
 	int actual_point = insert_point;
 
