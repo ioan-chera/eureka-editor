@@ -22,6 +22,7 @@
 #include "PrintfMacros.h"
 #include "m_strings.h"
 
+#include <stdarg.h>
 #include <stdexcept>
 
 #define BugError  ThrowException
