@@ -29,7 +29,6 @@
 
 #include "sys_macro.h"
 #include "sys_type.h"
-#include "WindowsSanitization.h"
 #include <algorithm>
 
 class SString;
