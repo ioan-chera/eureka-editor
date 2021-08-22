@@ -981,7 +981,7 @@ void Wad_file::writeToPath(const SString &path) const noexcept(false)
 }
 
 
-Lump_c * Wad_file::AddLump(const SString &name, int max_size)
+Lump_c * Wad_file::AddLump(const SString &name)
 {
 	Lump_c *lump = new Lump_c(name);
 
@@ -1018,7 +1018,7 @@ Lump_c * Wad_file::AddLevel(const SString &name, int max_size, int *lev_num)
 	if (actual_point < 0 || actual_point > NumLumps())
 		actual_point = NumLumps();
 
-	Lump_c * lump = AddLump(name, max_size);
+	Lump_c * lump = AddLump(name);
 
 	if (lev_num)
 	{

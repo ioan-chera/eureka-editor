@@ -1301,7 +1301,7 @@ void Instance::SaveBehavior()
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = edit_wad->AddLump("BEHAVIOR", size);
+	Lump_c *lump = edit_wad->AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
@@ -1316,7 +1316,7 @@ void Instance::SaveScripts()
 
 	if (size > 0)
 	{
-		Lump_c *lump = edit_wad->AddLump("SCRIPTS", size);
+		Lump_c *lump = edit_wad->AddLump("SCRIPTS");
 
 		lump->Write(&level.scriptsData[0], size);
 	}
@@ -1325,9 +1325,7 @@ void Instance::SaveScripts()
 
 void Instance::SaveVertices()
 {
-	int size = level.numVertices() * (int)sizeof(raw_vertex_t);
-
-	Lump_c *lump = edit_wad->AddLump("VERTEXES", size);
+	Lump_c *lump = edit_wad->AddLump("VERTEXES");
 
 	for (const Vertex *vert : level.vertices)
 	{
@@ -1343,9 +1341,7 @@ void Instance::SaveVertices()
 
 void Instance::SaveSectors()
 {
-	int size = level.numSectors() * (int)sizeof(raw_sector_t);
-
-	Lump_c *lump = edit_wad->AddLump("SECTORS", size);
+	Lump_c *lump = edit_wad->AddLump("SECTORS");
 
 	for (const Sector *sec : level.sectors)
 	{
@@ -1368,9 +1364,7 @@ void Instance::SaveSectors()
 
 void Instance::SaveThings()
 {
-	int size = level.numThings() * (int)sizeof(raw_thing_t);
-
-	Lump_c *lump = edit_wad->AddLump("THINGS", size);
+	Lump_c *lump = edit_wad->AddLump("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1391,9 +1385,7 @@ void Instance::SaveThings()
 // IOANCH 9/2015
 void Instance::SaveThings_Hexen()
 {
-	int size = level.numThings() * (int)sizeof(raw_hexen_thing_t);
-
-	Lump_c *lump = edit_wad->AddLump("THINGS", size);
+	Lump_c *lump = edit_wad->AddLump("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1423,9 +1415,7 @@ void Instance::SaveThings_Hexen()
 
 void Instance::SaveSideDefs()
 {
-	int size = level.numSidedefs() * (int)sizeof(raw_sidedef_t);
-
-	Lump_c *lump = edit_wad->AddLump("SIDEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("SIDEDEFS");
 
 	for (const SideDef *side : level.sidedefs)
 	{
@@ -1447,9 +1437,7 @@ void Instance::SaveSideDefs()
 
 void Instance::SaveLineDefs()
 {
-	int size = level.numLinedefs() * (int)sizeof(raw_linedef_t);
-
-	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1473,9 +1461,7 @@ void Instance::SaveLineDefs()
 // IOANCH 9/2015
 void Instance::SaveLineDefs_Hexen()
 {
-	int size = level.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
-
-	Lump_c *lump = edit_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = edit_wad->AddLump("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
