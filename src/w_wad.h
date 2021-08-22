@@ -30,6 +30,8 @@
 #include "Errors.h"
 #include "main.h"
 
+#include <memory>
+
 class Wad_file;
 
 //
