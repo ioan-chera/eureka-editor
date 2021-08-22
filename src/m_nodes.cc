@@ -56,17 +56,19 @@ public:
 
 	Fl_Button * button;
 
-	int cur_prog;
+	int cur_prog = -1;
 	char prog_label[64];
 
-	bool finished;
+	bool finished = false;
 
-	bool want_cancel;
-	bool want_close;
+	bool want_cancel = false;
+	bool want_close = false;
 
 public:
 	UI_NodeDialog();
-	virtual ~UI_NodeDialog();
+	virtual ~UI_NodeDialog()
+	{
+	}
 
 	/* FLTK method */
 	int handle(int event);
@@ -119,11 +121,7 @@ void UI_NodeDialog::button_callback(Fl_Widget *w, void *data)
 //  Constructor
 //
 UI_NodeDialog::UI_NodeDialog() :
-	    Fl_Double_Window(400, 400, "Building Nodes"),
-		cur_prog(-1),
-		finished(false),
-		want_cancel(false),
-		want_close(false)
+	    Fl_Double_Window(400, 400, "Building Nodes")
 {
 	size_range(w(), h());
 
@@ -157,13 +155,6 @@ UI_NodeDialog::UI_NodeDialog() :
 
 	resizable(browser);
 }
-
-
-//
-//  Destructor
-//
-UI_NodeDialog::~UI_NodeDialog()
-{ }
 
 
 int UI_NodeDialog::handle(int event)
