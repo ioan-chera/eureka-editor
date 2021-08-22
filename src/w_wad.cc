@@ -1038,22 +1038,19 @@ void Wad_file::InsertPoint(int index)
 }
 
 //
-// IDEA : Truncate file to "total_size" after writing the directory.
+// This one merely saves it as a new filename
 //
-//        On Linux / MacOSX, this can be done as follows:
-//                 - fflush(fp)   -- ensure STDIO has empty buffers
-//                 - ftruncate(fileno(fp), total_size);
-//                 - freopen(fp)
-//
-//        On Windows:
-//                 - instead of ftruncate, use _chsize() or _chsize_s()
-//                   [ investigate what the difference is.... ]
-//
-
-
 bool Wad_file::Backup(const char *new_filename)
 {
-	return FileCopy(PathName(), new_filename);
+	try
+	{
+		writeToPath(new_filename);
+	}
+	catch(const WadWriteException &)
+	{
+		return false;
+	}
+	return true;
 }
 
 
