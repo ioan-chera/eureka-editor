@@ -532,7 +532,10 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 
 	lump->Seek();
 	if (! lump->Read(raw, size))
-		FatalError("Error reading flat from WAD.\n");
+	{
+		gLog.printf("%s: flat '%s' is too small, should be at least %d.\n",
+					__func__, name.c_str(), size);
+	}
 
 	for (int i = 0 ; i < size ; i++)
 	{
