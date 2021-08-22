@@ -243,3 +243,61 @@ TEST_F(WadFileTest, Validate)
 	// Will not be validated due to length
 	ASSERT_FALSE(Wad_file::Validate(path));
 }
+
+//
+// Test FindLumpInNamespace
+//
+TEST_F(WadFileTest, FindLumpInNamespace)
+{
+	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	ASSERT_TRUE(wad);
+
+	// Print data for each new lump so it gets namespaced correctly
+	ASSERT_TRUE(wad->AddLump("F_START"));	// 0
+	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("F_END"));
+	ASSERT_TRUE(wad->AddLump("FF_START"));
+	ASSERT_TRUE(wad->AddLump("LUMP2"));		// 4
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("F_END"));
+	ASSERT_TRUE(wad->AddLump("FF_START"));
+	ASSERT_TRUE(wad->AddLump("LUMP3"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("FF_END"));	// 8
+	ASSERT_TRUE(wad->AddLump("S_START"));
+	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("S_END"));
+	ASSERT_TRUE(wad->AddLump("SS_START"));	// 12
+	ASSERT_TRUE(wad->AddLump("LUMP2"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("S_END"));
+	ASSERT_TRUE(wad->AddLump("SS_START"));
+	ASSERT_TRUE(wad->AddLump("LUMP3"));		// 16
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("SS_END"));
+	ASSERT_TRUE(wad->AddLump("TX_START"));
+	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+	ASSERT_TRUE(wad->AddLump("TX_END"));	// 20
+	ASSERT_TRUE(wad->AddLump("LUMP"));
+	wad->GetLump(wad->NumLumps() - 1)->Printf("data");
+
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP", WadNamespace::Global),
+			  wad->GetLump(21));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP", WadNamespace::Flats),
+			  wad->GetLump(1));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP2", WadNamespace::Flats),
+			  wad->GetLump(4));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP3", WadNamespace::Flats),
+			  wad->GetLump(7));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP", WadNamespace::Sprites),
+			  wad->GetLump(10));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP2", WadNamespace::Sprites),
+			  wad->GetLump(13));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP3", WadNamespace::Sprites),
+			  wad->GetLump(16));
+	ASSERT_EQ(wad->FindLumpInNamespace("LUMP", WadNamespace::TextureLumps),
+			  wad->GetLump(19));
+}
