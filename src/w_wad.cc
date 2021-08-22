@@ -36,6 +36,8 @@
 #include "w_rawdef.h"
 #include "w_wad.h"
 
+#include <assert.h>
+
 // UDMF support is unfinished and hence disabled by default.
 bool global::udmf_testing = false;
 
