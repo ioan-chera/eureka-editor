@@ -793,53 +793,14 @@ void Wad_file::ProcessNamespaces()
 //
 void Wad_file::writeToDisk() noexcept(false)
 {
-	auto check = [](bool action)
-	{
-		// TODO: throw a proper exception, it needs to be handled
-		if(!action)
-			ThrowException("Failed writing WAD to file");
-	};
-
 	if(IsReadOnly())
 	{
 		ThrowException("Cannot overwrite a read-only file (%s)!",
 					   filename.c_str());
 	}
 
-	SafeOutFile sof(filename);
-	check(sof.openForWriting());
-	// Write the header
-	if(kind == WadKind::PWAD)
-		check(sof.write("PWAD", 4));
-	else
-		check(sof.write("IWAD", 4));
-
-	int32_t numlumps = (int32_t)directory.size();
-	check(sof.write(&numlumps, 4));
-
-	int32_t infotableofs = 12;
-	for(const LumpRef &ref : directory)
-		infotableofs += (int32_t)ref.lump->Length();
-
-	check(sof.write(&infotableofs, 4));
-	for(const LumpRef &ref : directory)
-	{
-		assert(ref.lump.get() != nullptr);
-		const Lump_c &lump = *ref.lump;
-		check(sof.write(lump.getData(), lump.Length()));
-	}
-	infotableofs = 12;
-	for(const LumpRef &ref : directory)
-	{
-		check(sof.write(&infotableofs, 4));
-		const Lump_c &lump = *ref.lump;
-		numlumps = lump.Length();
-		check(sof.write(&numlumps, 4));
-		infotableofs += numlumps;
-		int64_t nm = lump.getName8();
-		check(sof.write(&nm, 8));
-	}
-	check(sof.commit());
+	// Write to our path now
+	writeToPath(filename);
 
 	// reset the insertion point
 	insert_point = -1;
@@ -959,6 +920,64 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 		ENDP = std::remove(levels.begin(), levels.end(), -1);
 		levels.erase(ENDP, levels.end());
 	}
+}
+
+//
+// Wad writing exception
+//
+class WadWriteException : public std::runtime_error
+{
+public:
+	WadWriteException(const SString &msg) : std::runtime_error(msg.c_str())
+	{
+	}
+};
+
+//
+// Writes to the given path
+//
+void Wad_file::writeToPath(const SString &path) const noexcept(false)
+{
+	auto check = [](bool action)
+	{
+		if(!action)
+			throw WadWriteException("Failed writing WAD to file");
+	};
+
+	SafeOutFile sof(path);
+	check(sof.openForWriting());
+	// Write the header
+	if(kind == WadKind::PWAD)
+		check(sof.write("PWAD", 4));
+	else
+		check(sof.write("IWAD", 4));
+
+	int32_t numlumps = (int32_t)directory.size();
+	check(sof.write(&numlumps, 4));
+
+	int32_t infotableofs = 12;
+	for(const LumpRef &ref : directory)
+		infotableofs += (int32_t)ref.lump->Length();
+
+	check(sof.write(&infotableofs, 4));
+	for(const LumpRef &ref : directory)
+	{
+		assert(ref.lump.get() != nullptr);
+		const Lump_c &lump = *ref.lump;
+		check(sof.write(lump.getData(), lump.Length()));
+	}
+	infotableofs = 12;
+	for(const LumpRef &ref : directory)
+	{
+		check(sof.write(&infotableofs, 4));
+		const Lump_c &lump = *ref.lump;
+		numlumps = lump.Length();
+		check(sof.write(&numlumps, 4));
+		infotableofs += numlumps;
+		int64_t nm = lump.getName8();
+		check(sof.write(&nm, 8));
+	}
+	check(sof.commit());
 }
 
 

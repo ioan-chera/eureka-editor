@@ -278,6 +278,8 @@ private:
 
 	void FixLevelGroup(int index, int num_added, int num_removed);
 
+	void writeToPath(const SString &path) const noexcept(false);
+
 private:
 	// deliberately don't implement these
 	Wad_file(const Wad_file& other);
