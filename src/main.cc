@@ -57,7 +57,7 @@
 #ifndef __APPLE__
 
 #ifndef Bool
-#define Bool int	// redefine more crap
+#define Bool int	// We need some pollutants back for the following include
 #endif
 
 #include <X11/xpm.h>	// for the window icon
