@@ -31,8 +31,8 @@
 
 class SString;
 
-int y_stricmp (const char *s1, const char *s2);
-int y_strnicmp (const char *s1, const char *s2, size_t len);
+int y_stricmp (const char *s1, const char *s2) noexcept;
+int y_strnicmp (const char *s1, const char *s2, size_t len) noexcept;
 
 void y_strupr (char *str);
 void y_strlowr (char *str);
@@ -77,22 +77,22 @@ public:
 		return data.empty();
 	}
 
-	bool noCaseEqual(const SString &c) const
+	bool noCaseEqual(const SString &c) const noexcept
 	{
 		return noCaseEqual(c.c_str());
 	}
 
-	bool noCaseEqual(const char *c) const
+	bool noCaseEqual(const char *c) const noexcept
 	{
 		return !y_stricmp(data.c_str(), c ? c : "");
 	}
 
-	int noCaseCompare(const SString &other) const
+	int noCaseCompare(const SString &other) const noexcept
 	{
 		return y_stricmp(data.c_str(), other.c_str());
 	}
 
-	bool noCaseStartsWith(const char *c, int pos = 0) const
+	bool noCaseStartsWith(const char *c, int pos = 0) const noexcept
 	{
 		return !y_strnicmp(data.c_str() + pos, c ? c : "", c ? strlen(c) : 0);
 	}
@@ -167,7 +167,7 @@ public:
 		return data.back();
 	}
 
-	const char *c_str() const
+	const char *c_str() const noexcept
 	{
 		return data.c_str();
 	}

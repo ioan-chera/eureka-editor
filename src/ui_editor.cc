@@ -470,11 +470,7 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 
 	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
 
-	if (! lump->Seek())
-	{
-		DLG_Notify("Read error while loading %s lump.", lump_name.c_str());
-		return false;
-	}
+	lump->Seek();
 
 	SString line;
 
@@ -488,23 +484,6 @@ bool UI_TextEditor::LoadLump(Wad_file *wad, const SString &lump_name)
 
 	is_new = false;
 
-	return true;
-}
-
-//
-// Loads a lump from the file
-//
-bool UI_TextEditor::LoadLump(const Wad &wad, const SString &lump_name)
-{
-	const Lump *lump = wad.findLump(lump_name);
-
-	// NOTE: don't care if read only, we'll just save as another file
-	if(!lump)	// not found
-		return true;
-
-	gLog.printf("Reading '%s' text lump\n", lump_name.c_str());
-	tbuf->text(lump->getDataAsString());
-	is_new = false;
 	return true;
 }
 
@@ -535,8 +514,6 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 {
 	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
 
-	wad->BeginWrite();
-
 	int oldie = wad->FindLumpNum(lump_name);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
@@ -557,25 +534,7 @@ void UI_TextEditor::SaveLump(Wad_file *wad, const SString &lump_name)
 		lump->Write(&ch, 1);
 	}
 
-	lump->Finish();
-
-	wad->EndWrite();
-}
-
-//
-// Save the lump
-//
-void UI_TextEditor::SaveLump(Wad &wad, const SString &lump_name) const
-{
-	gLog.printf("Writing '%s' text lump\n", lump_name.c_str());
-
-	Lump *lump = wad.findLump(lump_name);
-	if(!lump)
-	{
-		lump = &wad.appendNewLump();
-		lump->setName(lump_name);
-	}
-	lump->setDataFromString(tbuf->text());
+	wad->writeToDisk();
 }
 
 void UI_TextEditor::SaveMemory(std::vector<byte> &buf)

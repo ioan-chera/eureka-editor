@@ -28,8 +28,9 @@
 #define __EUREKA_W_WAD_H__
 
 #include "Errors.h"
-#include "Lump.h"
 #include "main.h"
+
+#include <memory>
 
 class Wad_file;
 
@@ -64,27 +65,22 @@ class Lump_c
 friend class Wad_file;
 
 private:
-	Wad_file *parent;
-
 	SString name;
 
-	int l_start;
-	int l_length;
+	std::vector<byte> mData;
+	int mPos = 0;	// insertion point for reading or writing
 
 	// constructor is private
-	Lump_c(Wad_file *_par, const SString &_nam, int _start, int _len);
-	Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry);
-
-	void MakeEntry(struct raw_wad_entry_s *entry);
+	explicit Lump_c(const SString &_nam);
 
 public:
-	const SString &Name() const
+	const SString &Name() const noexcept
 	{
 		return name;
 	}
 	int Length() const
 	{
-		return l_length;
+		return (int)mData.size();
 	}
 
 	// do not call this directly, use Wad_file::RenameLump()
@@ -92,33 +88,34 @@ public:
 
 	// attempt to seek to a position within the lump (default is
 	// the beginning).  Returns true if OK, false on error.
-	bool Seek(int offset = 0);
+	void Seek(int offset = 0) noexcept;
 
 	// read some data from the lump, returning true if OK.
-	bool Read(void *data, int len);
+	bool Read(void *data, int len) noexcept;
 
 	// read a line of text, returns true if OK, false on EOF
-	bool GetLine(SString &string);
+	bool GetLine(SString &string) noexcept;
 
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
 	// written to.
-	bool Write(const void *data, int len);
+	void Write(const void *data, int len);
 
 	// write some text to the lump
 	void Printf(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 
-	// mark the lump as finished (after writing data to it).
-	bool Finish();
+	// Memory buffer actions
+	size_t writeData(FILE *f, int len);
 
-	// predicate for std::sort()
-	struct offset_CMP_pred
+	//
+	// Gets the data from lump without moving the insertion point.
+	//
+	const void *getData() const noexcept
 	{
-		inline bool operator() (const Lump_c * A, const Lump_c * B) const
-		{
-			return A->l_start < B->l_start;
-		}
-	};
+		return mData.data();
+	}
+
+	int64_t getName8() const noexcept;
 
 private:
 	// deliberately don't implement these
@@ -131,48 +128,31 @@ private:
 
 struct LumpRef
 {
-	Lump_c *lump;
+	std::unique_ptr<Lump_c> lump;
 	WadNamespace ns;
 };
 
 
 class Wad_file
 {
-friend class Instance;
-friend class Lump_c;
-
 private:
-	SString filename;
+	const SString filename;
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
-	FILE * fp;
-
 	WadKind kind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
-
-	// zero means "currently unknown", which only occurs after a
-	// call to BeginWrite() and before any call to AddLump() or
-	// the finalizing EndWrite().
-	int total_size = 0;
 
 	std::vector<LumpRef> directory;
 
-	int dir_start = 0;
-	int dir_count = 0;
-	u32_t dir_crc = 0;
-
 	// these are lump indices (into 'directory' vector)
 	std::vector<int> levels;
-
-	bool begun_write = false;
-	int  begun_max_size;
 
 	// when >= 0, the next added lump is placed _before_ this
 	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const SString &_name, WadOpenMode _mode, FILE * _fp) :
-	   filename(_name), mode(_mode), fp(_fp)
+	Wad_file(const SString &_name, WadOpenMode _mode) :
+	   filename(_name), mode(_mode)
 	{
 	}
 
@@ -189,73 +169,63 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static Wad_file * Open(const SString &filename, WadOpenMode mode = WadOpenMode::append);
+	static std::shared_ptr<Wad_file> Open(const SString &filename,
+										  WadOpenMode mode
+										  = WadOpenMode::append);
 
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const SString &filename);
 
-	const SString &PathName() const
+	const SString &PathName() const noexcept
 	{
 		return filename;
 	}
-	bool IsReadOnly() const
+	bool IsReadOnly() const noexcept
 	{
 		return mode == WadOpenMode::read;
 	}
-	bool IsIWAD() const
+	bool IsIWAD() const noexcept
 	{
 		return kind == WadKind::IWAD;
 	}
 
-	int TotalSize() const
-	{
-		return total_size;
-	}
+	int TotalSize() const;
 
-	int NumLumps() const
+	int NumLumps() const noexcept
 	{
 		return static_cast<int>(directory.size());
 	}
-	Lump_c * GetLump(int index) const;
-	Lump_c * FindLump(const SString &name);
-	int FindLumpNum(const SString &name);
+	Lump_c * GetLump(int index) const noexcept;
+	Lump_c * FindLump(const SString &name) const noexcept;
+	int FindLumpNum(const SString &name) const noexcept;
 
-	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group);
+	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
+			const noexcept;
 
-	int LevelCount() const
+	int LevelCount() const noexcept
 	{
 		return (int)levels.size();
 	}
-	int LevelHeader(int lev_num) const;
-	int LevelLastLump(int lev_num);
+	int LevelHeader(int lev_num) const noexcept;
+	int LevelLastLump(int lev_num) const noexcept;
 
 	// these return a level number (0 .. count-1)
-	int LevelFind(const SString &name);
-	int LevelFindByNumber(int number);
-	int LevelFindFirst();
+	int LevelFind(const SString &name) const noexcept;
+	int LevelFindByNumber(int number) const noexcept;
+	int LevelFindFirst() const noexcept;
 
 	// returns a lump index, -1 if not found
-	int LevelLookupLump(int lev_num, const char *name);
+	int LevelLookupLump(int lev_num, const char *name) const noexcept;
 
-	MapFormat LevelFormat(int lev_num);
+	MapFormat LevelFormat(int lev_num) const noexcept;
 
-	void  SortLevels();
-
-	// check whether another program has modified this WAD, and return
-	// either true or false.  We test for change in file size, change
-	// in directory size or location, and directory contents (CRC).
-	// [ NOT USED YET.... ]
-	bool WasExternallyModified();
+	void  SortLevels() noexcept;
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
 	bool Backup(const char *new_filename);
 
-	// all changes to the wad must occur between calls to BeginWrite()
-	// and EndWrite() methods.  the on-disk wad directory may be trashed
-	// during this period, it will be re-written by EndWrite().
-	void BeginWrite();
-	void EndWrite();
+	void writeToDisk() noexcept(false);
 
 	// change name of a lump (can be a level marker too)
 	void RenameLump(int index, const char *new_name);
@@ -281,12 +251,8 @@ public:
 	// The 'max_size' parameter (if >= 0) specifies the most data
 	// you will write into the lump -- writing more will corrupt
 	// something else in the WAD.
-	Lump_c * AddLump (const SString &name, int max_size = -1);
-	Lump_c * AddLevel(const SString &name, int max_size = -1, int *lev_num = nullptr);
-
-	// setup lump to write new data to it.
-	// the old contents are lost.
-	void RecreateLump(Lump_c *lump, int max_size = -1);
+	Lump_c * AddLump (const SString &name);
+	Lump_c * AddLevel(const SString &name, int *lev_num = nullptr);
 
 	// set the insertion point -- the next lump will be added _before_
 	// this index, and it will be incremented so that a sequence of
@@ -297,40 +263,24 @@ public:
 	// RemoveLumps(), RemoveLevel() and EndWrite() also reset it.
 	void InsertPoint(int index = -1);
 
+	const std::vector<LumpRef> &getDir() const
+	{
+		return directory;
+	}
+
 private:
-	static Wad_file * Create(const SString &filename, WadOpenMode mode);
+	static std::shared_ptr<Wad_file> Create(const SString &filename,
+											WadOpenMode mode);
 
 	// read the existing directory.
-	bool ReadDirectory();
+	bool ReadDirectory(FILE *fp, int totalSize);
 
 	void DetectLevels();
 	void ProcessNamespaces();
 
-	// look at all the lumps and determine the lowest offset from
-	// start of file where we can write new data.  The directory itself
-	// is ignored for this.
-	int HighWaterMark();
-
-	// look at all lumps in directory and determine the lowest offset
-	// where a lump of the given length will fit.  Returns same as
-	// HighWaterMark() when no largest gaps exist.  The directory itself
-	// is ignored since it will be re-written at EndWrite().
-	int FindFreeSpace(int length);
-
-	// find a place (possibly at end of WAD) where we can write some
-	// data of max_size (-1 means unlimited), and seek to that spot
-	// (possibly writing some padding zeros -- the difference should
-	// be no more than a few bytes).  Returns new position.
-	int PositionForWrite(int max_size = -1);
-
-	bool FinishLump(int final_size);
-	int  WritePadding(int count);
-
-	// write the new directory, updating the dir_xxx variables
-	// (including the CRC).
-	void WriteDirectory();
-
 	void FixLevelGroup(int index, int num_added, int num_removed);
+
+	void writeToPath(const SString &path) const noexcept(false);
 
 private:
 	// deliberately don't implement these
@@ -348,10 +298,10 @@ private:
 		level_name_CMP_pred(Wad_file * _w) : wad(_w)
 		{ }
 
-		inline bool operator() (const int A, const int B) const
+		inline bool operator() (const int A, const int B) const noexcept
 		{
-			const Lump_c *L1 = wad->directory[A].lump;
-			const Lump_c *L2 = wad->directory[B].lump;
+			const Lump_c *L1 = wad->directory[A].lump.get();
+			const Lump_c *L2 = wad->directory[B].lump.get();
 
 			return L1->Name() < L2->Name();
 		}
@@ -359,8 +309,7 @@ private:
 };
 
 // load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, byte ** buf_ptr);
-void W_FreeLumpData(byte ** buf_ptr);
+int  W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
 
@@ -384,54 +333,6 @@ struct FailedWadReadEntry
 	char name[9];
 	int position;
 	int length;
-};
-
-//
-// Wad of lumps
-//
-class Wad
-{
-public:
-	bool readFromPath(const SString& path);
-	int levelFind(const SString &name) const;
-
-	const Lump *findLump(const SString &name) const;
-	Lump *findLump(const SString &name);
-
-	Lump &appendNewLump();
-	const Lump &getLump(int n) const
-	{
-		SYS_ASSERT(0 <= n && n < (int)mLumps.size());
-		return mLumps[n];
-	}
-
-	//
-	// Returns the lump ID of the level header entry
-	//
-	int levelHeader(int levelNum) const
-	{
-		SYS_ASSERT(0 <= levelNum && levelNum < (int)mLevels.size());
-		return mLevels[levelNum];
-	}
-
-	//
-	// Return the first level, if available. Otherwise -1.
-	//
-	int levelFindFirst() const
-	{
-		return !mLevels.empty() ? 0 : -1;
-	}
-private:
-	void detectLevels();
-	void sortLevels();
-
-	WadKind mKind = WadKind::PWAD;  // 'P' for PWAD, 'I' for IWAD
-	std::vector<Lump> mLumps;
-
-	std::vector<FailedWadReadEntry> mFailedReadEntries;
-
-	// these are lump indices (into 'directory' vector)
-	std::vector<int> mLevels;
 };
 
 #endif  /* __EUREKA_W_WAD_H__ */

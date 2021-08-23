@@ -643,9 +643,9 @@ void Instance::ValidateLevel_UDMF()
 }
 
 
-void Instance::UDMF_LoadLevel()
+void Instance::UDMF_LoadLevel(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("TEXTMAP");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "TEXTMAP");
 	// we assume this cannot happen
 	if (! lump)
 		return;
@@ -891,10 +891,7 @@ void Instance::UDMF_SaveLevel() const
 	UDMF_WriteSideDefs(level, lump);
 	UDMF_WriteSectors(level, lump);
 
-	lump->Finish();
-
 	lump = edit_wad->AddLump("ENDMAP");
-	lump->Finish();
 }
 
 

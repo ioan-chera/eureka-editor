@@ -13,12 +13,12 @@ set(source_base
     hdr_fltk.h
     Instance.cc
     Instance.h
-    Lump.cc
-    Lump.h
     main.cc
     main.h
     main.rc
     objid.h
+    SafeOutFile.cc
+    SafeOutFile.h
     version.h
     WadData.cc
     WadData.h

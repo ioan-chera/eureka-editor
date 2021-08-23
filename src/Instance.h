@@ -320,7 +320,7 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	bool M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args = false);
+	bool M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
 	void M_WriteEurekaLump(Wad_file *wad) const;
@@ -344,12 +344,12 @@ public:
 	bool ExecuteKey(keycode_t key, key_context_e context);
 
 	// M_LOADSAVE
-	Lump_c *Load_LookupAndSeek(const char *name) const;
+	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
 	void LoadLevel(Wad_file *wad, const SString &level);
 	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
 	void RemoveEditWad();
-	void ReplaceEditWad(Wad_file* new_wad);
+	void ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
 	bool M_SaveMap();
 	void ValidateVertexRefs(LineDef *ld, int num);
 	void ValidateSectorRef(SideDef *sd, int num);
@@ -363,7 +363,7 @@ public:
 	bool M_PortSetupDialog(const SString& port, const SString& game);
 
 	// M_UDMF
-	void UDMF_LoadLevel();
+	void UDMF_LoadLevel(const Wad_file *load_wad);
 	void UDMF_SaveLevel() const;
 
 	// MAIN
@@ -420,15 +420,15 @@ public:
 	int W_GetTextureHeight(const SString &name) const;
 	void W_LoadFlats();
 	void W_LoadTextures();
-	void W_LoadTextures_TX_START(Wad_file *wf);
+	void W_LoadTextures_TX_START(const Wad_file *wf);
 	bool W_TextureCausesMedusa(const SString &name) const;
 	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
-	void MasterDir_Add(Wad_file *wad);
+	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
-	void MasterDir_Remove(Wad_file *wad);
+	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
 
@@ -484,16 +484,16 @@ private:
 	void CreateFallbackSideDef();
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
-	void LoadBehavior();
-	void LoadHeader();
-	void LoadLineDefs();
-	void LoadLineDefs_Hexen();
-	void LoadScripts();
-	void LoadSectors();
-	void LoadSideDefs();
-	void LoadThings();
-	void LoadThings_Hexen();
-	void LoadVertices();
+	void LoadBehavior(const Wad_file *load_wad);
+	void LoadHeader(const Wad_file *load_wad);
+	void LoadLineDefs(const Wad_file *load_wad);
+	void LoadLineDefs_Hexen(const Wad_file *load_wad);
+	void LoadScripts(const Wad_file *load_wad);
+	void LoadSectors(const Wad_file *load_wad);
+	void LoadSideDefs(const Wad_file *load_wad);
+	void LoadThings(const Wad_file *load_wad);
+	void LoadThings_Hexen(const Wad_file *load_wad);
+	void LoadVertices(const Wad_file *load_wad);
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
@@ -556,12 +556,10 @@ public:	// will be private when we encapsulate everything
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
-	Wad_file *edit_wad = nullptr;
-	Wad_file *game_wad = nullptr;
-	Wad editWad;
+	std::shared_ptr<Wad_file> edit_wad;
+	std::shared_ptr<Wad_file> game_wad;
 	bool haveEditWad = false;
-	Wad gameWad;
-	std::vector<Wad_file *> master_dir;	// the IWAD, never NULL, always at master_dir.front()
+	std::vector<std::shared_ptr<Wad_file>> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	SString Pwad_name;	// Filename of current wad
 
 	LoadingData loaded;
@@ -608,7 +606,6 @@ public:	// will be private when we encapsulate everything
 	// CMD_BuildAllNodes from building that saved level twice.
 	bool inhibit_node_build = false;
 	int last_given_file = 0;
-	Wad_file *load_wad = nullptr;
 	int loading_level = 0;
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;

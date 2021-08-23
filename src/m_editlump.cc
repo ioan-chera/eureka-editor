@@ -433,7 +433,7 @@ void Instance::CMD_EditLump()
 		return;
 	}
 
-	Wad_file *wad = edit_wad ? edit_wad : game_wad;
+	Wad_file *wad = edit_wad ? edit_wad.get() : game_wad.get();
 
 	// create the editor window
 	UI_TextEditor *editor = new UI_TextEditor(*this);
@@ -471,7 +471,7 @@ void Instance::CMD_EditLump()
 		if (res != UI_TextEditor::RUN_Save)
 			break;
 
-		SYS_ASSERT(wad == edit_wad);
+		SYS_ASSERT(wad == edit_wad.get());
 
 		if (lump_name == EDLUMP_HEADER)
 		{

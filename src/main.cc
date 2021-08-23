@@ -55,7 +55,15 @@
 #ifndef WIN32
 #include <time.h>
 #ifndef __APPLE__
+
+#ifndef Bool
+#define Bool int	// We need some pollutants back for the following include
+#endif
+
 #include <X11/xpm.h>	// for the window icon
+
+#undef Bool
+
 #endif
 #endif
 
@@ -488,7 +496,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.edit_wad : inst.game_wad;
+		Wad_file *wad = (pass == 0) ? inst.edit_wad.get() : inst.game_wad.get();
 
 		if (! wad)
 			continue;
@@ -820,7 +828,8 @@ bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	Wad_file *wad = Wad_file::Open(loaded.iwadName, WadOpenMode::read);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName,
+												   WadOpenMode::read);
 	if (!wad)
 	{
 		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
@@ -899,7 +908,7 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 void Instance::Main_LoadResources(LoadingData &loading)
 {
 	ConfigData config = conf;
-	std::vector<std::unique_ptr<Wad_file>> resourceWads;
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
 	try
 	{
 		// FIXME: avoid doing this in case of error
@@ -929,11 +938,12 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(!Wad_file::Validate(resource))
 				throw ParseException("Invalid WAD file: " + resource);
 
-			Wad_file *wad = Wad_file::Open(resource, WadOpenMode::read);
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+														   WadOpenMode::read);
 			if(!wad)
 				throw ParseException("Cannot load resource: " + resource);
 
-			resourceWads.push_back(std::unique_ptr<Wad_file>(wad));
+			resourceWads.push_back(wad);
 		}
 	}
 	catch(const ParseException &e)
@@ -956,8 +966,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	Main_LoadIWAD();
 
 	// load all resource wads
-	for(std::unique_ptr<Wad_file> &wad : resourceWads)
-		MasterDir_Add(wad.release());
+	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
+		MasterDir_Add(wad);
 
 	if (edit_wad)
 		MasterDir_Add(edit_wad);
@@ -1141,7 +1151,8 @@ int main(int argc, char *argv[])
 			gInstance.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
-			gInstance.edit_wad = Wad_file::Open(gInstance.Pwad_name, WadOpenMode::append);
+			gInstance.edit_wad = Wad_file::Open(gInstance.Pwad_name,
+												WadOpenMode::append);
 			if (!gInstance.edit_wad)
 				ThrowException("Cannot load pwad: %s\n", gInstance.Pwad_name.c_str());
 
@@ -1168,7 +1179,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.edit_wad)
 		{
-			if (! gInstance.M_ParseEurekaLump(gInstance.edit_wad, true /* keep_cmd_line_args */))
+			if (! gInstance.M_ParseEurekaLump(gInstance.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.RemoveEditWad();
@@ -1196,7 +1207,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad : gInstance.game_wad, gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.edit_wad ? gInstance.edit_wad.get() : gInstance.game_wad.get(), gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.
