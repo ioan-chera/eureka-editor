@@ -642,20 +642,6 @@ bool Instance::W_FlatIsKnown(const SString &name) const
 //    SPRITE HANDLING
 //----------------------------------------------------------------------
 
-static void DeleteSprite(const sprite_map_t::value_type& P)
-{
-	// Note that P.second can be NULL here
-	delete P.second;
-}
-
-void Instance::W_ClearSprites()
-{
-	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
-
-	sprites.clear();
-}
-
-
 // find sprite by prefix
 static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 {
@@ -727,16 +713,16 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 
 Img_c *Instance::W_GetSprite(int type)
 {
-	sprite_map_t::const_iterator P = sprites.find(type);
+	auto P = wad.sprites.find(type);
 
-	if (P != sprites.end())
-		return P->second;
+	if (P != wad.sprites.end())
+		return P->second.get();
 
 	// sprite not in the list yet.  Add it.
 
 	const thingtype_t &info = M_GetThingType(type);
 
-	Img_c *result = NULL;
+	std::unique_ptr<Img_c> result;
 
 	if (info.desc.startsWith("UNKNOWN"))
 	{
@@ -770,12 +756,11 @@ Img_c *Instance::W_GetSprite(int type)
 		}
 		else
 		{
-			result = new Img_c();
+			result = std::make_unique<Img_c>();
 
 			if (! result->loadPicture(wad, conf, *lump, info.sprite, 0, 0))
 			{
-				delete result;
-				result = NULL;
+				result.reset();
 			}
 		}
 	}
@@ -784,7 +769,7 @@ Img_c *Instance::W_GetSprite(int type)
 	// [ FIXME : put colors into game definition file ]
 	if (result && info.group == 'p')
 	{
-		Img_c *new_img = NULL;
+		std::unique_ptr<Img_c> new_img;
 
 		switch (type)
 		{
@@ -814,17 +799,15 @@ Img_c *Instance::W_GetSprite(int type)
 		}
 
 		if (new_img)
-		{
-			std::swap(result, new_img);
-			delete new_img;
-		}
+			result = std::move(new_img);
 	}
 
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
-	sprites[type] = result;
-	return result;
+	Img_c *ret = result.get();
+	wad.sprites[type] = std::move(result);
+	return ret;
 }
 
 
@@ -852,7 +835,7 @@ void Instance::W_UnloadAllTextures() const
 {
 	std::for_each(wad.textures.begin(), wad.textures.end(), UnloadTex);
 	std::for_each(wad.flats.begin(), wad.flats.end(), UnloadFlat);
-	std::for_each( sprites.begin(),  sprites.end(), UnloadSprite);
+	std::for_each(wad.sprites.begin(), wad.sprites.end(), UnloadSprite);
 
 	IM_UnloadDummyTextures();
 }

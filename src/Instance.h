@@ -239,9 +239,9 @@ public:
 	const byte *SoundPropagation(int start_sec);
 
 	// IM_IMG
-	Img_c *IM_CreateDogSprite() const;
-	Img_c *IM_CreateLightSprite() const;
-	Img_c *IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;
+	std::unique_ptr<Img_c> IM_CreateDogSprite() const;
+	std::unique_ptr<Img_c> IM_CreateLightSprite() const;
+	std::unique_ptr<Img_c> IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;
 	Img_c *IM_DigitFont_11x14();
 	Img_c *IM_DigitFont_14x19();
 	Img_c *IM_MissingTex();
@@ -488,9 +488,6 @@ private:
 	void StoreSelectedTexture(int new_tex);
 	void StoreSelectedThing(int new_type);
 
-	// W_TEXTURE
-	void W_ClearSprites();
-
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
 
@@ -551,7 +548,6 @@ public:	// will be private when we encapsulate everything
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
-	sprite_map_t sprites;
 
 	WadData wad;
 

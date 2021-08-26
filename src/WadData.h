@@ -26,6 +26,9 @@
 class Img_c;
 struct MasterDirectory;
 
+// maps type number to an image
+typedef std::map<int, std::unique_ptr<Img_c>> sprite_map_t;
+
 //
 // Wad data, loaded during resource setup
 //
@@ -40,6 +43,14 @@ struct WadData
 	void loadFlats(const MasterDirectory &master);
 
 	void loadTextures(const MasterDirectory &master, const ConfigData &config);
+
+	//
+	// Remove all current sprites. Will be lazily loaded later
+	//
+	void clearSprites()
+	{
+		sprites.clear();
+	}
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
@@ -65,6 +76,8 @@ struct WadData
 	std::map<SString, std::unique_ptr<Img_c>> textures;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
+	sprite_map_t sprites;
+
 
 private:
 	void resetDummyTextures() noexcept;

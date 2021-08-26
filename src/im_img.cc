@@ -215,12 +215,12 @@ Img_c * Img_c::scale_img(double scale) const
 //
 // TODO : make it work with RGB pixels (find nearest in palette).
 //
-Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
+std::unique_ptr<Img_c> Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img_c *omg = new Img_c(width(), height());
+	auto omg = std::make_unique<Img_c>(width(), height());
 
 	int W = width();
 	int H = height();
@@ -597,14 +597,14 @@ Img_c *Instance::IM_UnknownSprite()
 }
 
 
-static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+static std::unique_ptr<Img_c> IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 
 	// translate colors to current palette
-	byte *conv_palette = new byte[pal_size];
+	auto conv_palette = std::unique_ptr<byte[]>(new byte[pal_size]);
 
 	for (int c = 0 ; c < pal_size ; c++)
 		conv_palette[c] = inst.wad.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
@@ -622,8 +622,6 @@ static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char 
 
 		result->wbuf() [y * W + x] = conv_palette[ch - 'a'];
 	}
-
-	delete[] conv_palette;
 
 	return result;
 }
@@ -954,7 +952,7 @@ static const char *const dog_image_text[] =
 };
 
 
-Img_c *Instance::IM_CreateDogSprite() const
+std::unique_ptr<Img_c> Instance::IM_CreateDogSprite() const
 {
 	return IM_CreateFromText(*this, 44, 26, dog_image_text, dog_palette, 7);
 }
@@ -962,12 +960,12 @@ Img_c *Instance::IM_CreateDogSprite() const
 
 //------------------------------------------------------------------------
 
-Img_c *Instance::IM_CreateLightSprite() const
+std::unique_ptr<Img_c> Instance::IM_CreateLightSprite() const
 {
 	int W = 11;
 	int H = 11;
 
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 
@@ -1004,12 +1002,12 @@ Img_c *Instance::IM_CreateLightSprite() const
 }
 
 
-Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const
+std::unique_ptr<Img_c> Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const
 {
 	int W = 32;
 	int H = 32;
 
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 

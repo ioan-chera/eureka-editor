@@ -136,7 +136,7 @@ public:
 
 	Img_c * scale_img(double scale) const;
 
-	Img_c * color_remap(int src1, int src2, int targ1, int targ2) const;
+	std::unique_ptr<Img_c> color_remap(int src1, int src2, int targ1, int targ2) const;
 
 	bool has_transparent() const;
 
