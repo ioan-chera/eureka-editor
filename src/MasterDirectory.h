@@ -38,6 +38,8 @@ struct MasterDirectory
 	void removeEditWad();
 	void replaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
 
+	std::shared_ptr<Wad_file> findReadOnly(const SString &path) const;
+
 	std::vector<std::shared_ptr<Wad_file>> dir;
 	// the IWAD, never NULL, always at master_dir.front()
 	std::shared_ptr<Wad_file> game_wad;

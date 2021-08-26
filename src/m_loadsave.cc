@@ -76,6 +76,17 @@ void MasterDirectory::replaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 	add(edit_wad);
 }
 
+//
+// Returns true if we already have a wad with the given-path
+//
+std::shared_ptr<Wad_file> MasterDirectory::findReadOnly(const SString &path)
+		const
+{
+	for(const std::shared_ptr<Wad_file> &wad : dir)
+		if(wad->IsReadOnly() && wad->PathName() == path)
+			return wad;
+	return nullptr;
+}
 
 void Instance::FreshLevel()
 {
