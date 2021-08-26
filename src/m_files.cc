@@ -546,7 +546,7 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 }
 
 
-Wad_file *Instance::M_TryOpenMostRecent()
+std::shared_ptr<Wad_file> Instance::M_TryOpenMostRecent()
 {
 	if (global::recent_files.getSize() == 0)
 		return nullptr;
@@ -559,7 +559,8 @@ Wad_file *Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	Wad_file *wad = Wad_file::Open(filename, WadOpenMode::append);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
+												   WadOpenMode::append);
 
 	if (! wad)
 	{
@@ -572,7 +573,6 @@ Wad_file *Instance::M_TryOpenMostRecent()
 	{
 		gLog.printf("No levels in most recent pwad: %s\n", filename.c_str());
 
-		delete wad;
 		return nullptr;
 	}
 
@@ -857,7 +857,7 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
-bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
+bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -869,12 +869,7 @@ bool Instance::M_ParseEurekaLump(Wad_file *wad, bool keep_cmd_line_args)
 		return true;
 	}
 
-	if (! lump->Seek())
-	{
-		gLog.printf("--> error seeking.\n");
-		return true;
-	}
-
+	lump->Seek();
 
 	SString new_iwad;
 	SString new_port;
@@ -1012,8 +1007,6 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 {
 	gLog.printf("Writing '%s' lump\n", EUREKA_LUMP);
 
-	wad->BeginWrite();
-
 	int oldie = wad->FindLumpNum(EUREKA_LUMP);
 	if (oldie >= 0)
 		wad->RemoveLumps(oldie, 1);
@@ -1035,9 +1028,7 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 		lump->Printf("resource %s\n", absolute_name.c_str());
 	}
 
-	lump->Finish();
-
-	wad->EndWrite();
+	wad->writeToDisk();
 }
 
 

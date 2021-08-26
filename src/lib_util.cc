@@ -160,7 +160,14 @@ SString GetErrorMessage(int errorNumber)
 	char message[256];
 	errno_t result = strerror_s(message, errorNumber);
 	if(result)
-		return "(FAILED GETTING ERROR MESSAGE)";
+		return SString::printf("other error (%d)", errorNumber);
+	return message;
+#elif defined __APPLE__
+	char message[256] = {};
+	int result = strerror_r(errorNumber, message, 256);
+	message[255] = 0;
+	if(result)
+		return SString::printf("other error (%d)", errorNumber);
 	return message;
 #else
 	// TODO: use the threadsafe method

@@ -369,7 +369,7 @@ static const FeatureMapping skFeatureMappings[] =
 	MAPPING(medusa_fixed),
 	MAPPING(lax_sprites),
 	MAPPING(no_need_players),
-	MAPPING(tag_666raw),
+	{ "tag_666", &port_features_t::tag_666raw },
 	MAPPING(mix_textures_flats),
 	MAPPING(neg_patch_offsets),
 	MAPPING(extra_floors),

@@ -310,11 +310,11 @@ void WadData::loadTexturesLump(Lump_c &lump, const byte *pnames,
 void WadData::loadTextures_TX_START(const Wad_file &wf,
 									const ConfigData &config)
 {
-	for(const LumpRef &lumpRef : wf.directory)
+	for(const LumpRef &lumpRef : wf.getDir())
 	{
 		if(lumpRef.ns != WadNamespace::TextureLumps)
 			continue;
-		Lump_c *lump = lumpRef.lump;
+		Lump_c *lump = lumpRef.lump.get();
 
 		char img_fmt = W_DetectImageFormat(*lump);
 		const SString &name = lump->Name();
@@ -400,7 +400,7 @@ void WadData::loadTextures(const MasterDirectory &master,
 
 		if (config.features.tx_start)
 		{
-			loadTextures_TX_START(*master.dir[i], config);
+			loadTextures_TX_START(*master.dir[i].get(), config);
 		}
 	}
 }
@@ -535,8 +535,17 @@ static std::unique_ptr<Img_c> LoadFlatImage(const WadData &wad,
 	std::vector<byte> raw;
 	raw.resize(size);
 
-	if (! (lump->Seek() && lump->Read(raw.data(), size)))
-		throw ParseException("Error reading flat from WAD.\n");
+	lump->Seek();
+	if (! lump->Read(raw.data(), size))
+	{
+		gLog.printf("%s: flat '%s' is too small, should be at least %d.\n",
+					__func__, name.c_str(), size);
+		int smallsize = lump->Length();
+		if(smallsize > 0)
+			memset(raw.data() + smallsize, raw[smallsize - 1], size - smallsize);
+		else
+			memset(raw.data(), 0, size);
+	}
 
 	for (int i = 0 ; i < size ; i++)
 	{
@@ -560,13 +569,13 @@ void WadData::loadFlats(const MasterDirectory &master)
 	{
 		gLog.printf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = master.dir[i];
+		const Wad_file *wf = master.dir[i].get();
 
-		for(const LumpRef &lumpRef : wf->directory)
+		for(const LumpRef &lumpRef : wf->getDir())
 		{
 			if(lumpRef.ns != WadNamespace::Flats)
 				continue;
-			Lump_c *lump = lumpRef.lump;
+			Lump_c *lump = lumpRef.lump.get();
 
 			std::unique_ptr<Img_c> img = LoadFlatImage(*this, lump->Name(),
 													   lump);

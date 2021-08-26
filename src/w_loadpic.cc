@@ -307,8 +307,7 @@ ImageFormat W_DetectImageFormat(Lump_c &lump)
 	if (length < (int)sizeof(header))
 		return ImageFormat::unknown;
 
-	if (! lump.Seek())
-		return ImageFormat::unknown;
+	lump.Seek();
 
 	if (! lump.Read(header, (int)sizeof(header)))
 		return ImageFormat::unknown;

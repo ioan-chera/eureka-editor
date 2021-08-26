@@ -78,8 +78,8 @@ void WadData::loadPalette(const MasterDirectory &master) noexcept(false)
 	if (! lump)
 		throw ParseException("PLAYPAL lump not found.\n");
 
-	if (! lump->Seek() ||
-		! lump->Read(raw_palette, sizeof(raw_palette)))
+	lump->Seek();
+	if (! lump->Read(raw_palette, sizeof(raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return;
@@ -107,8 +107,8 @@ void WadData::loadColormap(const MasterDirectory &master) noexcept(false)
 	if (! lump)
 		throw ParseException("COLORMAP lump not found.\n");
 
-	if (! lump->Seek() ||
-		! lump->Read(raw_colormap, sizeof(raw_colormap)))
+	lump->Seek();
+	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;

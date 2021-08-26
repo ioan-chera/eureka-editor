@@ -27,24 +27,24 @@ class Wad_file;
 //
 struct MasterDirectory
 {
-	void add(Wad_file *wad);
+	void add(const std::shared_ptr<Wad_file> &wad);
 	void closeAll();
 	bool haveFilename(const SString &chk_path) const;
-	void remove(Wad_file *wad);
+	void remove(const std::shared_ptr<Wad_file> &wad);
 
 	bool loadIwad(const SString &name);
 
 	Lump_c *findGlobalLump(const SString &name) const;
 	void removeEditWad();
-	void replaceEditWad(Wad_file* new_wad);
+	void replaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
 
-	std::vector<Wad_file *> dir;
+	std::vector<std::shared_ptr<Wad_file>> dir;
 	// the IWAD, never NULL, always at master_dir.front()
-	Wad_file *game_wad = nullptr;
+	std::shared_ptr<Wad_file> game_wad;
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
-	Wad_file *edit_wad = nullptr;
+	std::shared_ptr<Wad_file> edit_wad;
 	SString Pwad_name;	// Filename of current wad
 };
 

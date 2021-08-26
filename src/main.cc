@@ -55,7 +55,15 @@
 #ifndef WIN32
 #include <time.h>
 #ifndef __APPLE__
+
+#ifndef Bool
+#define Bool int	// We need some pollutants back for the following include
+#endif
+
 #include <X11/xpm.h>	// for the window icon
+
+#undef Bool
+
 #endif
 #endif
 
@@ -492,7 +500,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.master.edit_wad : inst.master.game_wad;
+		Wad_file *wad = (pass == 0) ? inst.master.edit_wad.get() : inst.master.game_wad.get();
 
 		if (! wad)
 			continue;
@@ -824,7 +832,7 @@ bool MasterDirectory::loadIwad(const SString &name)
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	Wad_file *wad = Wad_file::Open(name, WadOpenMode::read);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(name, WadOpenMode::read);
 	if (!wad)
 	{
 		gLog.printf("Failed to open game IWAD: %s\n", name.c_str());
@@ -903,7 +911,7 @@ void readPortInfo(LoadingData &loading, ConfigData &config) noexcept(false)
 void Instance::Main_LoadResources(LoadingData &loading)
 {
 	ConfigData config = conf;
-	std::vector<std::unique_ptr<Wad_file>> resourceWads;
+	std::vector<std::shared_ptr<Wad_file>> resourceWads;
 	try
 	{
 		// FIXME: avoid doing this in case of error
@@ -933,11 +941,12 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(!Wad_file::Validate(resource))
 				throw ParseException("Invalid WAD file: " + resource);
 
-			Wad_file *wad = Wad_file::Open(resource, WadOpenMode::read);
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+														   WadOpenMode::read);
 			if(!wad)
 				throw ParseException("Cannot load resource: " + resource);
 
-			resourceWads.push_back(std::unique_ptr<Wad_file>(wad));
+			resourceWads.push_back(wad);
 		}
 	}
 	catch(const ParseException &e)
@@ -949,8 +958,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	// TODO: manage the files correctly
 	MasterDirectory newMaster;
 	newMaster.loadIwad(loading.iwadName);
-	for(std::unique_ptr<Wad_file> &wad : resourceWads)
-		newMaster.add(wad.release());
+	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
+		newMaster.add(wad);
 
 	if(master.edit_wad)
 		newMaster.add(master.edit_wad);
@@ -977,8 +986,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 //	master.loadIwad(loading.iwadName);
 //
 //	// load all resource wads
-//	for(std::unique_ptr<Wad_file> &wad : resourceWads)
-//		master.add(wad.release());
+//	for(std::shared_ptr<Wad_file> &wad : resourceWads)
+//		master.add(wad);
 //
 //	if (edit_wad)
 //		master.add(edit_wad);
@@ -1159,7 +1168,7 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			Wad_file *wad = Wad_file::Open(global::Pwad_list[0],
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(global::Pwad_list[0],
 										   WadOpenMode::append);
 			if (!wad)
 			{
@@ -1174,7 +1183,7 @@ int main(int argc, char *argv[])
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
-			Wad_file *wad = gInstance.M_TryOpenMostRecent();
+			std::shared_ptr<Wad_file> wad = gInstance.M_TryOpenMostRecent();
 			if (wad)
 				gInstance.master.replaceEditWad(wad);
 		}
@@ -1189,7 +1198,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.master.edit_wad)
 		{
-			if (! gInstance.M_ParseEurekaLump(gInstance.master.edit_wad, true /* keep_cmd_line_args */))
+			if (! gInstance.M_ParseEurekaLump(gInstance.master.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.master.removeEditWad();
@@ -1217,7 +1226,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.master.edit_wad ? gInstance.master.edit_wad : gInstance.master.game_wad, gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.master.edit_wad ? gInstance.master.edit_wad.get() : gInstance.master.game_wad.get(), gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

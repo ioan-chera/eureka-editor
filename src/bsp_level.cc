@@ -388,46 +388,13 @@ static void CompressBlockmap(void)
 		block_compression = 0;
 }
 
-
-static int CalcBlockmapSize()
-{
-	// compute size of final BLOCKMAP lump.
-	// it does not need to be exact, but it *does* need to be bigger
-	// (or equal) to the actual size of the lump.
-
-	// header + null_block + a bit extra
-	int size = 20;
-
-	// the pointers (offsets to the line lists)
-	size = size + block_count * 2;
-
-	// add size of each block
-	for (int i=0 ; i < block_count ; i++)
-	{
-		int blk_num = block_dups[i];
-
-		// ignore duplicate or empty blocks
-		if (blk_num == DUMMY_DUP)
-			continue;
-
-		u16_t *blk = block_lines[blk_num];
-		SYS_ASSERT(blk);
-
-		size += (1 + (int)(blk[BK_NUM]) + 1) * 2;
-	}
-
-	return size;
-}
-
-static Lump_c *CreateLevelLump(const Instance &inst, const char *name, int max_size = -1);
+static Lump_c *CreateLevelLump(const Instance &inst, const char *name);
 
 static void WriteBlockmap(const Instance &inst)
 {
 	int i;
 
-	int max_size = CalcBlockmapSize();
-
-	Lump_c *lump = CreateLevelLump(inst, "BLOCKMAP", max_size);
+	Lump_c *lump = CreateLevelLump(inst, "BLOCKMAP");
 
 	u16_t null_block[2] = { 0x0000, 0xFFFF };
 	u16_t m_zero = 0x0000;
@@ -473,8 +440,6 @@ static void WriteBlockmap(const Instance &inst)
 		lump->Write(blk + BK_FIRST, blk[BK_NUM] * sizeof(u16_t));
 		lump->Write(&m_neg1, sizeof(u16_t));
 	}
-
-	lump->Finish();
 }
 
 
@@ -569,7 +534,7 @@ static void PutBlockmap(const Instance &inst)
 	if (! cur_info->do_blockmap || inst.level.numLinedefs() == 0)
 	{
 		// just create an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP")->Finish();
+		CreateLevelLump(inst, "BLOCKMAP");
 		return;
 	}
 
@@ -591,7 +556,7 @@ static void PutBlockmap(const Instance &inst)
 	if (block_overflowed)
 	{
 		// leave an empty blockmap lump
-		CreateLevelLump(inst, "BLOCKMAP")->Finish();
+		CreateLevelLump(inst, "BLOCKMAP");
 
 		Warning(inst, "Blockmap overflowed (lump will be empty)\n");
 	}
@@ -733,11 +698,9 @@ static void Reject_ProcessSectors(const Document &doc)
 
 static void Reject_WriteLump(const Instance &inst)
 {
-	Lump_c *lump = CreateLevelLump(inst, "REJECT", rej_total_size);
+	Lump_c *lump = CreateLevelLump(inst, "REJECT");
 
 	lump->Write(rej_matrix, rej_total_size);
-
-	lump->Finish();
 }
 
 
@@ -753,7 +716,7 @@ static void PutReject(const Instance &inst)
 	if (! cur_info->do_reject || inst.level.numSectors() == 0)
 	{
 		// just create an empty reject lump
-		CreateLevelLump(inst, "REJECT")->Finish();
+		CreateLevelLump(inst, "REJECT");
 		return;
 	}
 
@@ -966,10 +929,7 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 {
 	int count, i;
 
-	// this size is worst-case scenario
-	int size = num_vertices * (int)sizeof(raw_vertex_t);
-
-	Lump_c *lump = CreateLevelLump(inst, name, size);
+	Lump_c *lump = CreateLevelLump(inst, name);
 
 	for (i=0, count=0 ; i < num_vertices ; i++)
 	{
@@ -1006,10 +966,7 @@ static void PutGLVertices(const Instance &inst, int do_v5)
 {
 	int count, i;
 
-	// this size is worst-case scenario
-	int size = 4 + num_vertices * (int)sizeof(raw_v2_vertex_t);
-
-	Lump_c *lump = CreateLevelLump(inst, "GL_VERT", size);
+	Lump_c *lump = CreateLevelLump(inst, "GL_VERT");
 
 	if (do_v5)
 		lump->Write(lev_v5_magic, 4);
@@ -1069,10 +1026,7 @@ static void PutSegs(const Instance &inst)
 {
 	int i, count;
 
-	// this size is worst-case scenario
-	int size = num_segs * (int)sizeof(raw_seg_t);
-
-	Lump_c *lump = CreateLevelLump(inst, "SEGS", size);
+	Lump_c *lump = CreateLevelLump(inst, "SEGS");
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1115,10 +1069,7 @@ static void PutGLSegs(const Instance &inst)
 {
 	int i, count;
 
-	// this size is worst-case scenario
-	int size = num_segs * (int)sizeof(raw_gl_seg_t);
-
-	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS", size);
+	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS");
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1164,10 +1115,7 @@ static void PutGLSegs_V5(const Instance &inst)
 {
 	int i, count;
 
-	// this size is worst-case scenario
-	int size = num_segs * (int)sizeof(raw_v5_seg_t);
-
-	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS", size);
+	Lump_c *lump = CreateLevelLump(inst, "GL_SEGS");
 
 	for (i=0, count=0 ; i < num_segs ; i++)
 	{
@@ -1211,9 +1159,7 @@ static void PutSubsecs(const Instance &inst, const char *name, int do_gl)
 {
 	int i;
 
-	int size = num_subsecs * (int)sizeof(raw_subsec_t);
-
-	Lump_c * lump = CreateLevelLump(inst, name, size);
+	Lump_c * lump = CreateLevelLump(inst, name);
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1244,9 +1190,7 @@ static void PutGLSubsecs_V5(const Instance &inst)
 {
 	int i;
 
-	int size = num_subsecs * (int)sizeof(raw_v5_subsec_t);
-
-	Lump_c *lump = CreateLevelLump(inst, "GL_SSECT", size);
+	Lump_c *lump = CreateLevelLump(inst, "GL_SSECT");
 
 	for (i=0 ; i < num_subsecs ; i++)
 	{
@@ -1376,12 +1320,7 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
 void PutNodes(const Instance &inst, const char *name, int do_v5, node_t *root)
 {
-	int struct_size = do_v5 ? (int)sizeof(raw_v5_node_t) : (int)sizeof(raw_node_t);
-
-	// this can be bigger than the actual size, but never smaller
-	int max_size = (num_nodes + 1) * struct_size;
-
-	Lump_c *lump = CreateLevelLump(inst, name, max_size);
+	Lump_c *lump = CreateLevelLump(inst, name);
 
 	node_cur_index = 0;
 
@@ -1724,42 +1663,13 @@ void PutZNodes(node_t *root, bool do_xgl3)
 				node_cur_index, num_nodes);
 }
 
-
-static int CalcZDoomNodesSize()
-{
-	// compute size of the ZDoom format nodes.
-	// it does not need to be exact, but it *does* need to be bigger
-	// (or equal) to the actual size of the lump.
-
-	int size = 32;  // header + a bit extra
-
-	size += 8 + num_vertices * 8;
-	size += 4 + num_subsecs  * 4;
-	size += 4 + num_segs     * 11;
-	size += 4 + num_nodes    * sizeof(raw_v5_node_t);
-
-	if (cur_info->force_compress)
-	{
-		// according to RFC1951, the zlib compression worst-case
-		// scenario is 5 extra bytes per 32KB (0.015% increase).
-		// we are significantly more conservative!
-
-		size += ((size + 255) >> 5);
-	}
-
-	return size;
-}
-
-
 static void SaveZDFormat(const Instance &inst, node_t *root_node)
 {
 	// leave SEGS and SSECTORS empty
-	CreateLevelLump(inst, "SEGS")->Finish();
-	CreateLevelLump(inst, "SSECTORS")->Finish();
+	CreateLevelLump(inst, "SEGS");
+	CreateLevelLump(inst, "SSECTORS");
 
-	int max_size = CalcZDoomNodesSize();
-
-	Lump_c *lump = CreateLevelLump(inst, "NODES", max_size);
+	Lump_c *lump = CreateLevelLump(inst, "NODES");
 
 	if (cur_info->force_compress)
 		lump->Write(lev_ZNOD_magic, 4);
@@ -1782,7 +1692,7 @@ static void SaveXGL3Format(const Instance &inst, node_t *root_node)
 {
 	// WISH : compute a max_size
 
-	Lump_c *lump = CreateLevelLump(inst, "ZNODES", -1);
+	Lump_c *lump = CreateLevelLump(inst, "ZNODES");
 
 	lump->Write(lev_XGL3_magic, 4);
 
@@ -1867,8 +1777,8 @@ static u32_t CalcGLChecksum(const Instance &inst)
 	{
 		u8_t *data = new u8_t[lump->Length()];
 
-		if (! lump->Seek() ||
-		    ! lump->Read(data, lump->Length()))
+		lump->Seek();
+		if (! lump->Read(data, lump->Length()))
 			FatalError("Error reading vertices (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
@@ -1880,9 +1790,8 @@ static u32_t CalcGLChecksum(const Instance &inst)
 	if (lump && lump->Length() > 0)
 	{
 		u8_t *data = new u8_t[lump->Length()];
-
-		if (! lump->Seek() ||
-		    ! lump->Read(data, lump->Length()))
+		lump->Seek();
+		if (! lump->Read(data, lump->Length()))
 			FatalError("Error reading linedefs (for checksum).\n");
 
 		Adler32_AddBlock(&crc, data, lump->Length());
@@ -1903,14 +1812,9 @@ inline static SString CalcOptionsString()
 
 static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 {
-	// this is very conservative, around 4 times the actual size
-	const int max_size = 512;
-
 	// we *must* compute the checksum BEFORE (re)creating the lump
 	// [ otherwise we write data into the wrong part of the file ]
 	u32_t crc = CalcGLChecksum(inst);
-
-	inst.master.edit_wad->RecreateLump(marker, max_size);
 
 	// when original name is long, need to specify it here
 	if (lev_current_name.length() > 5)
@@ -1929,7 +1833,6 @@ static void UpdateGLMarker(const Instance &inst, Lump_c *marker)
 	}
 
 	marker->Printf("CHECKSUM=0x%08x\n", crc);
-	marker->Finish();
 }
 
 
@@ -1950,7 +1853,7 @@ static void AddMissingLump(const Instance &inst, const char *name, const char *a
 
 	inst.master.edit_wad->InsertPoint(exist + 1);
 
-	inst.master.edit_wad->AddLump(name)->Finish();
+	inst.master.edit_wad->AddLump(name);
 }
 
 static Lump_c *CreateGLMarker(const Instance &inst);
@@ -1958,8 +1861,6 @@ static Lump_c *CreateGLMarker(const Instance &inst);
 static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 {
 	// Note: root_node may be NULL
-
-	inst.master.edit_wad->BeginWrite();
 
 	// remove any existing GL-Nodes
 	inst.master.edit_wad->RemoveGLNodes(lev_current_idx);
@@ -2006,7 +1907,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		PutNodes(inst, "GL_NODES", force_v5, root_node);
 
 		// -JL- Add empty PVS lump
-		CreateLevelLump(inst, "GL_PVS")->Finish();
+		CreateLevelLump(inst, "GL_PVS");
 	}
 
 
@@ -2048,7 +1949,7 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 		UpdateGLMarker(inst, gl_marker);
 	}
 
-	inst.master.edit_wad->EndWrite();
+	inst.master.edit_wad->writeToDisk();
 
 	if (lev_overflows > 0)
 	{
@@ -2064,8 +1965,6 @@ static build_result_e SaveLevel(node_t *root_node, const Instance &inst)
 
 static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 {
-	inst.master.edit_wad->BeginWrite();
-
 	// remove any existing ZNODES lump
 	inst.master.edit_wad->RemoveZNodes(lev_current_idx);
 
@@ -2076,7 +1975,7 @@ static build_result_e SaveUDMF(const Instance &inst, node_t *root_node)
 		SaveXGL3Format(inst, root_node);
 	}
 
-	inst.master.edit_wad->EndWrite();
+	inst.master.edit_wad->writeToDisk();
 
 	if (lev_overflows > 0)
 	{
@@ -2207,16 +2106,12 @@ static Lump_c * FindLevelLump(const Instance &inst, const char *name)
 }
 
 
-static Lump_c * CreateLevelLump(const Instance &inst, const char *name, int max_size)
+static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
 {
 	// look for existing one
 	Lump_c *lump = FindLevelLump(inst, name);
 
-	if (lump)
-	{
-		inst.master.edit_wad->RecreateLump(lump, max_size);
-	}
-	else
+	if(!lump)
 	{
 		int last_idx = inst.master.edit_wad->LevelLastLump(lev_current_idx);
 
@@ -2227,7 +2122,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name, int max_
 
 		inst.master.edit_wad->InsertPoint(last_idx);
 
-		lump = inst.master.edit_wad->AddLump(name, max_size);
+		lump = inst.master.edit_wad->AddLump(name);
 	}
 
 	return lump;
@@ -2253,8 +2148,6 @@ static Lump_c * CreateGLMarker(const Instance &inst)
 	inst.master.edit_wad->InsertPoint(last_idx + 1);
 
 	Lump_c *marker = inst.master.edit_wad->AddLump(name_buf);
-
-	marker->Finish();
 
 	return marker;
 }

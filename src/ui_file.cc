@@ -56,10 +56,9 @@ bool ValidateMapName(const char *p)
 
 
 UI_ChooseMap::UI_ChooseMap(const char *initial_name,
-						   Wad_file *_rename_wad) :
+						   const std::shared_ptr<const Wad_file> &_rename_wad) :
 	UI_Escapable_Window(420, 385, "Choose Map"),
-	rename_wad(_rename_wad),
-	action(ACT_none)
+	rename_wad(_rename_wad)
 {
 	resizable(NULL);
 
@@ -101,13 +100,7 @@ UI_ChooseMap::UI_ChooseMap(const char *initial_name,
 	CheckMapName();
 }
 
-
-UI_ChooseMap::~UI_ChooseMap()
-{
-}
-
-
-void UI_ChooseMap::PopulateButtons(char format, Wad_file *test_wad)
+void UI_ChooseMap::PopulateButtons(char format, const Wad_file *test_wad)
 {
 	int but_W = 60;
 
@@ -252,10 +245,7 @@ void UI_ChooseMap::CheckMapName()
 
 
 UI_OpenMap::UI_OpenMap(Instance &inst) :
-	UI_Escapable_Window(420, 475, "Open Map"),
-	action(Action::none),
-	loaded_wad(NULL),
-	 using_wad(NULL), inst(inst)
+	UI_Escapable_Window(420, 475, "Open Map"), inst(inst)
 {
 	resizable(NULL);
 
@@ -331,7 +321,7 @@ UI_OpenMap::~UI_OpenMap()
 { }
 
 
-Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
+std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 {
 	map_v->clear();
 	*did_load = false;
@@ -350,7 +340,7 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 	}
 
 	if (action != Action::accept)
-		using_wad = NULL;
+		using_wad.reset();
 
 	if (using_wad)
 	{
@@ -359,14 +349,13 @@ Wad_file * UI_OpenMap::Run(SString* map_v, bool * did_load)
 		if (using_wad == loaded_wad)
 		{
 			*did_load  = true;
-			loaded_wad = NULL;
+			loaded_wad.reset();
 		}
 	}
 
 	// if we are not returning a pwad which got loaded, e.g. because
 	// the user cancelled or chose the game IWAD, then close it now.
-	if (loaded_wad)
-		delete loaded_wad;
+	loaded_wad.reset();
 
 	return using_wad;
 }
@@ -376,7 +365,7 @@ void UI_OpenMap::CheckMapName()
 {
 	bool was_valid = ok_but->active();
 
-	bool  is_valid = (using_wad != NULL) &&
+	bool  is_valid = using_wad &&
 	                 ValidateMapName(map_name->value()) &&
 					 (using_wad->LevelFind(map_name->value()) >= 0);
 
@@ -403,7 +392,7 @@ void UI_OpenMap::Populate()
 	button_grp->label("\n\n\n\n\nNO   MAPS   FOUND");
 	button_grp->Remove_all();
 
-	using_wad = NULL;
+	using_wad.reset();
 
 	if (look_where->value() == LOOK_IWad)
 	{
@@ -469,7 +458,7 @@ static bool DifferentEpisode(const char *A, const char *B)
 
 void UI_OpenMap::PopulateButtons()
 {
-	const Wad_file *wad = using_wad;
+	std::shared_ptr<const Wad_file> wad = using_wad;
 	SYS_ASSERT(wad);
 
 	int num_levels = wad->LevelCount();
@@ -625,7 +614,8 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	Wad_file * wad = Wad_file::Open(chooser.filename(), WadOpenMode::append);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(chooser.filename(),
+												   WadOpenMode::append);
 
 	if (! wad)
 	{
@@ -645,8 +635,6 @@ void UI_OpenMap::LoadFile()
 
 
 	// replace existing one
-	if (loaded_wad)
-		delete loaded_wad;
 
 	loaded_wad = wad;
 

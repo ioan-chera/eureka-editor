@@ -59,14 +59,13 @@ void MasterDirectory::removeEditWad()
 		return;
 
 	remove(edit_wad);
-	delete edit_wad;
+	edit_wad.reset();
 
-	edit_wad  = NULL;
 	Pwad_name.clear();
 }
 
 
-void MasterDirectory::replaceEditWad(Wad_file *new_wad)
+void MasterDirectory::replaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 {
 	removeEditWad();
 
@@ -267,7 +266,8 @@ void Instance::CMD_NewProject()
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	Wad_file * wad = Wad_file::Open(filename, WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
+												   WadOpenMode::write);
 
 	if (! wad)
 	{
@@ -326,7 +326,7 @@ void Instance::CMD_FreshMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), master.edit_wad);
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), master.edit_wad.get());
 
 	SString map_name = dialog->Run();
 
@@ -347,7 +347,7 @@ void Instance::CMD_FreshMap()
 	}
 
 
-	M_BackupWad(master.edit_wad);
+	M_BackupWad(master.edit_wad.get());
 
 	gLog.printf("Created NEW map : %s\n", map_name.c_str());
 
@@ -372,7 +372,8 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-Lump_c *Instance::Load_LookupAndSeek(const char *name) const
+Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
+		const
 {
 	int idx = load_wad->LevelLookupLump(loading_level, name);
 
@@ -381,18 +382,15 @@ Lump_c *Instance::Load_LookupAndSeek(const char *name) const
 
 	Lump_c *lump = load_wad->GetLump(idx);
 
-	if (! lump->Seek())
-	{
-		gLog.printf("WARNING: failed to seek to %s lump!\n", name);
-	}
+	lump->Seek();
 
 	return lump;
 }
 
 
-void Instance::LoadVertices()
+void Instance::LoadVertices(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("VERTEXES");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "VERTEXES");
 	if (! lump)
 		ThrowException("No vertex lump!\n");
 
@@ -421,9 +419,9 @@ void Instance::LoadVertices()
 }
 
 
-void Instance::LoadSectors()
+void Instance::LoadSectors(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("SECTORS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "SECTORS");
 	if (! lump)
 		ThrowException("No sector lump!\n");
 
@@ -564,7 +562,7 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 }
 
 
-void Instance::LoadHeader()
+void Instance::LoadHeader(const Wad_file *load_wad)
 {
 	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
 
@@ -575,18 +573,17 @@ void Instance::LoadHeader()
 
 	level.headerData.resize(length);
 
-	if (! lump->Seek())
-		ThrowException("Error seeking to header lump!\n");
+	lump->Seek();
 
 	if (! lump->Read(&level.headerData[0], length))
 		ThrowException("Error reading header lump.\n");
 }
 
 
-void Instance::LoadBehavior()
+void Instance::LoadBehavior(const Wad_file *load_wad)
 {
 	// IOANCH 9/2015: support Hexen maps
-	Lump_c *lump = Load_LookupAndSeek("BEHAVIOR");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "BEHAVIOR");
 	if (! lump)
 		ThrowException("No BEHAVIOR lump!\n");
 
@@ -602,10 +599,10 @@ void Instance::LoadBehavior()
 }
 
 
-void Instance::LoadScripts()
+void Instance::LoadScripts(const Wad_file *load_wad)
 {
 	// the SCRIPTS lump is usually absent
-	Lump_c *lump = Load_LookupAndSeek("SCRIPTS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "SCRIPTS");
 	if (! lump)
 		return;
 
@@ -621,9 +618,9 @@ void Instance::LoadScripts()
 }
 
 
-void Instance::LoadThings()
+void Instance::LoadThings(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("THINGS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
@@ -655,9 +652,9 @@ void Instance::LoadThings()
 
 
 // IOANCH 9/2015
-void Instance::LoadThings_Hexen()
+void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("THINGS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
@@ -697,9 +694,9 @@ void Instance::LoadThings_Hexen()
 }
 
 
-void Instance::LoadSideDefs()
+void Instance::LoadSideDefs(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("SIDEDEFS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "SIDEDEFS");
 	if(!lump)
 		ThrowException("No sidedefs lump!\n");
 
@@ -738,9 +735,9 @@ void Instance::LoadSideDefs()
 }
 
 
-void Instance::LoadLineDefs()
+void Instance::LoadLineDefs(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
@@ -784,9 +781,9 @@ void Instance::LoadLineDefs()
 
 
 // IOANCH 9/2015
-void Instance::LoadLineDefs_Hexen()
+void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek("LINEDEFS");
+	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
@@ -940,10 +937,9 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 
 void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 {
-	load_wad = wad;
 	loading_level = lev_num;
 
-	loaded.levelFormat = load_wad->LevelFormat(loading_level);
+	loaded.levelFormat = wad->LevelFormat(loading_level);
 
 	level.basis.clearAll();
 
@@ -951,33 +947,33 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader();
+	LoadHeader(wad);
 
 	if (loaded.levelFormat == MapFormat::udmf)
 	{
-		UDMF_LoadLevel();
+		UDMF_LoadLevel(wad);
 	}
 	else
 	{
 		if (loaded.levelFormat == MapFormat::hexen)
-			LoadThings_Hexen();
+			LoadThings_Hexen(wad);
 		else
-			LoadThings();
+			LoadThings(wad);
 
-		LoadVertices();
-		LoadSectors();
-		LoadSideDefs();
+		LoadVertices(wad);
+		LoadSectors(wad);
+		LoadSideDefs(wad);
 
 		if (loaded.levelFormat == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen();
+			LoadLineDefs_Hexen(wad);
 
-			LoadBehavior();
-			LoadScripts();
+			LoadBehavior(wad);
+			LoadScripts(wad);
 		}
 		else
 		{
-			LoadLineDefs();
+			LoadLineDefs(wad);
 		}
 	}
 
@@ -1011,7 +1007,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		return;
 
 
-	Wad_file *wad = NULL;
+	std::shared_ptr<Wad_file> wad;
 
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
@@ -1045,15 +1041,13 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	{
 		DLG_Notify("No levels found in that WAD.");
 
-		delete wad;
 		return;
 	}
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! gInstance.M_ParseEurekaLump(wad))
+		if (! gInstance.M_ParseEurekaLump(wad.get()))
 		{
-			delete wad;
 			return;
 		}
 	}
@@ -1077,7 +1071,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.master.edit_wad->PathName().c_str());
 
 	// TODO: new instance
-	gInstance.LoadLevel(gInstance.master.edit_wad, map_name);
+	gInstance.LoadLevel(gInstance.master.edit_wad.get(), map_name);
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
@@ -1096,7 +1090,7 @@ void Instance::CMD_OpenMap()
 	SString map_name;
 	bool did_load = false;
 
-	Wad_file *wad = dialog->Run(&map_name, &did_load);
+	std::shared_ptr<Wad_file> wad = dialog->Run(&map_name, &did_load);
 
 	delete dialog;
 
@@ -1109,18 +1103,14 @@ void Instance::CMD_OpenMap()
 	{
 		DLG_Notify("Hmmmm, cannot find that map !?!");
 
-		delete wad;
 		return;
 	}
 
 
 	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
-		if (! M_ParseEurekaLump(wad))
-		{
-			delete wad;
+		if (! M_ParseEurekaLump(wad.get()))
 			return;
-		}
 	}
 
 
@@ -1147,7 +1137,7 @@ void Instance::CMD_OpenMap()
 	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
-	LoadLevel(wad, map_name);
+	LoadLevel(wad.get(), map_name);
 
 	if (new_resources)
 	{
@@ -1220,7 +1210,8 @@ void Instance::CMD_FlipMap()
 		return;
 
 
-	Wad_file *wad = master.edit_wad ? master.edit_wad : master.game_wad;
+	Wad_file *wad = master.edit_wad ? master.edit_wad.get() :
+			master.game_wad.get();
 
 	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad->LevelFind(loaded.levelName);
@@ -1295,14 +1286,12 @@ void Instance::SaveHeader(const SString &level)
 {
 	int size = (int)this->level.headerData.size();
 
-	Lump_c *lump = master.edit_wad->AddLevel(level, size, &saving_level);
+	Lump_c *lump = master.edit_wad->AddLevel(level, &saving_level);
 
 	if (size > 0)
 	{
 		lump->Write(&this->level.headerData[0], size);
 	}
-
-	lump->Finish();
 }
 
 
@@ -1310,14 +1299,12 @@ void Instance::SaveBehavior()
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = master.edit_wad->AddLump("BEHAVIOR", size);
+	Lump_c *lump = master.edit_wad->AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
 		lump->Write(&level.behaviorData[0], size);
 	}
-
-	lump->Finish();
 }
 
 
@@ -1327,19 +1314,16 @@ void Instance::SaveScripts()
 
 	if (size > 0)
 	{
-		Lump_c *lump = master.edit_wad->AddLump("SCRIPTS", size);
+		Lump_c *lump = master.edit_wad->AddLump("SCRIPTS");
 
 		lump->Write(&level.scriptsData[0], size);
-		lump->Finish();
 	}
 }
 
 
 void Instance::SaveVertices()
 {
-	int size = level.numVertices() * (int)sizeof(raw_vertex_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("VERTEXES", size);
+	Lump_c *lump = master.edit_wad->AddLump("VERTEXES");
 
 	for (const Vertex *vert : level.vertices)
 	{
@@ -1350,16 +1334,12 @@ void Instance::SaveVertices()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveSectors()
 {
-	int size = level.numSectors() * (int)sizeof(raw_sector_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("SECTORS", size);
+	Lump_c *lump = master.edit_wad->AddLump("SECTORS");
 
 	for (const Sector *sec : level.sectors)
 	{
@@ -1377,16 +1357,12 @@ void Instance::SaveSectors()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveThings()
 {
-	int size = level.numThings() * (int)sizeof(raw_thing_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("THINGS", size);
+	Lump_c *lump = master.edit_wad->AddLump("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1401,17 +1377,13 @@ void Instance::SaveThings()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 // IOANCH 9/2015
 void Instance::SaveThings_Hexen()
 {
-	int size = level.numThings() * (int)sizeof(raw_hexen_thing_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("THINGS", size);
+	Lump_c *lump = master.edit_wad->AddLump("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1436,16 +1408,12 @@ void Instance::SaveThings_Hexen()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveSideDefs()
 {
-	int size = level.numSidedefs() * (int)sizeof(raw_sidedef_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("SIDEDEFS", size);
+	Lump_c *lump = master.edit_wad->AddLump("SIDEDEFS");
 
 	for (const SideDef *side : level.sidedefs)
 	{
@@ -1462,16 +1430,12 @@ void Instance::SaveSideDefs()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::SaveLineDefs()
 {
-	int size = level.numLinedefs() * (int)sizeof(raw_linedef_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = master.edit_wad->AddLump("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1489,17 +1453,13 @@ void Instance::SaveLineDefs()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 // IOANCH 9/2015
 void Instance::SaveLineDefs_Hexen()
 {
-	int size = level.numLinedefs() * (int)sizeof(raw_hexen_linedef_t);
-
-	Lump_c *lump = master.edit_wad->AddLump("LINEDEFS", size);
+	Lump_c *lump = master.edit_wad->AddLump("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1522,14 +1482,12 @@ void Instance::SaveLineDefs_Hexen()
 
 		lump->Write(&raw, sizeof(raw));
 	}
-
-	lump->Finish();
 }
 
 
 void Instance::EmptyLump(const char *name) const
 {
-	master.edit_wad->AddLump(name)->Finish();
+	master.edit_wad->AddLump(name);
 }
 
 
@@ -1541,8 +1499,6 @@ void Instance::SaveLevel(const SString &level)
 {
 	// set global level name now (for debugging code)
 	loaded.levelName = level.asUpper();
-
-	master.edit_wad->BeginWrite();
 
 	// remove previous version of level (if it exists)
 	int lev_num = master.edit_wad->LevelFind(level);
@@ -1597,7 +1553,7 @@ void Instance::SaveLevel(const SString &level)
 	}
 
 	// write out the new directory
-	master.edit_wad->EndWrite();
+	master.edit_wad->writeToDisk();
 
 
 	// build the nodes
@@ -1611,7 +1567,7 @@ void Instance::SaveLevel(const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	master.edit_wad->SortLevels();
 
-	M_WriteEurekaLump(master.edit_wad);
+	M_WriteEurekaLump(master.edit_wad.get());
 
 	M_AddRecent(master.edit_wad->PathName(), loaded.levelName);
 
@@ -1652,7 +1608,7 @@ bool Instance::M_SaveMap()
 	}
 
 
-	M_BackupWad(master.edit_wad);
+	M_BackupWad(master.edit_wad.get());
 
 	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), master.edit_wad->PathName().c_str());
 
@@ -1692,7 +1648,7 @@ bool Instance::M_ExportMap()
 	// if extension is missing then add ".wad"
 	SString filename = chooser.filename();
 
-	char *pos = (char *)fl_filename_ext(filename.c_str());
+	const char *pos = fl_filename_ext(filename.c_str());
 	if(!*pos)
 		filename += ".wad";
 
@@ -1708,7 +1664,7 @@ bool Instance::M_ExportMap()
 	// does the file already exist?  if not, create it...
 	bool exists = FileExists(filename);
 
-	Wad_file *wad;
+	std::shared_ptr<Wad_file> wad;
 
 	if (exists)
 	{
@@ -1718,18 +1674,14 @@ bool Instance::M_ExportMap()
 		{
 			DLG_Notify("Cannot export the map into a READ-ONLY file.");
 
-			delete wad;
 			return false;
 		}
 
 		// adopt iwad/port/resources of the target wad
 		if (wad->FindLump(EUREKA_LUMP))
 		{
-			if (! M_ParseEurekaLump(wad))
-			{
-				delete wad;
+			if (! M_ParseEurekaLump(wad.get()))
 				return false;
-			}
 		}
 	}
 	else
@@ -1747,19 +1699,19 @@ bool Instance::M_ExportMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
+	SString map_name;
+	{
+		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad);
+		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])),
+								wad.get());
 
-	SString map_name = dialog->Run();
-
-	delete dialog;
-
+		map_name = dialog->Run();
+	}
 
 	// cancelled?
 	if (map_name.empty())
 	{
-		delete wad;
 		return false;
 	}
 
@@ -1772,7 +1724,6 @@ bool Instance::M_ExportMap()
 		if (DLG_Confirm({ "Cancel", "&Overwrite" },
 		                overwrite_message, "selected") <= 0)
 		{
-			delete wad;
 			return false;
 		}
 	}
@@ -1780,7 +1731,7 @@ bool Instance::M_ExportMap()
 	// back-up an existing wad
 	if (exists)
 	{
-		M_BackupWad(wad);
+		M_BackupWad(wad.get());
 	}
 
 
@@ -1830,13 +1781,15 @@ void Instance::CMD_CopyMap()
 
 	// ask user for map name
 
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), master.edit_wad);
+	SString new_name;
+	{
+		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str(),
+													 master.edit_wad);
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), master.edit_wad);
+		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), master.edit_wad.get());
 
-	SString new_name = dialog->Run();
-
-	delete dialog;
+		new_name = dialog->Run();
+	}
 
 	// cancelled?
 	if (new_name.empty())
@@ -1875,28 +1828,29 @@ void Instance::CMD_RenameMap()
 
 
 	// ask user for map name
-
-	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str(), master.edit_wad /* rename_wad */);
-
-	// pick level format from the IWAD
-	// [ user may be trying to rename map after changing the IWAD ]
-	char format = 'M';
+	SString new_name;
 	{
-		int idx = master.game_wad->LevelFindFirst();
+		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str(),
+													 master.edit_wad /* rename_wad */);
 
-		if (idx >= 0)
+		// pick level format from the IWAD
+		// [ user may be trying to rename map after changing the IWAD ]
+		char format = 'M';
 		{
-			idx = master.game_wad->LevelHeader(idx);
-			const SString &name = master.game_wad->GetLump(idx)->Name();
-			format = static_cast<char>(toupper(name[0]));
+			int idx = master.game_wad->LevelFindFirst();
+
+			if (idx >= 0)
+			{
+				idx = master.game_wad->LevelHeader(idx);
+				const SString &name = master.game_wad->GetLump(idx)->Name();
+				format = static_cast<char>(toupper(name[0]));
+			}
 		}
+
+		dialog->PopulateButtons(format, master.edit_wad.get());
+
+		new_name = dialog->Run();
 	}
-
-	dialog->PopulateButtons(format, master.edit_wad);
-
-	SString new_name = dialog->Run();
-
-	delete dialog;
 
 	// cancelled?
 	if (new_name.empty())
@@ -1918,9 +1872,8 @@ void Instance::CMD_RenameMap()
 	{
 		int level_lump = master.edit_wad->LevelHeader(lev_num);
 
-		master.edit_wad->BeginWrite();
 		master.edit_wad->RenameLump(level_lump, new_name.c_str());
-		master.edit_wad->EndWrite();
+		master.edit_wad->writeToDisk();
 	}
 
 	loaded.levelName = new_name.asUpper();
@@ -1972,9 +1925,8 @@ void Instance::CMD_DeleteMap()
 
 
 	// kick it to the curb
-	master.edit_wad->BeginWrite();
 	master.edit_wad->RemoveLevel(lev_num);
-	master.edit_wad->EndWrite();
+	master.edit_wad->writeToDisk();
 
 
 	// choose a new level to load
@@ -1989,7 +1941,7 @@ void Instance::CMD_DeleteMap()
 		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
-		LoadLevel(master.edit_wad, map_name);
+		LoadLevel(master.edit_wad.get(), map_name);
 	}
 }
 
