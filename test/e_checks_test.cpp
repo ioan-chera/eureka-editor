@@ -141,12 +141,6 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
 	return sectortype;
 }
 
-const thingtype_t &Instance::M_GetThingType(int type) const
-{
-	static thingtype_t thingtype;
-	return thingtype;
-}
-
 void Instance::GoToErrors()
 {
 }
