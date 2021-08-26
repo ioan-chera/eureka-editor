@@ -171,6 +171,11 @@ private:
 												  int W, int H);
 };
 
+std::unique_ptr<Img_c> IM_CreateDogSprite(const WadData &wad);
+std::unique_ptr<Img_c> IM_CreateLightSprite(const WadData &wad);
+std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const WadData &wad, int base_r,
+											  int base_g, int base_b);
+
 #endif  /* __EUREKA_IM_IMG_H__*/
 
 //--- editor settings ---

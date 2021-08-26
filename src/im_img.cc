@@ -597,7 +597,7 @@ Img_c *Instance::IM_UnknownSprite()
 }
 
 
-static std::unique_ptr<Img_c> IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+static std::unique_ptr<Img_c> IM_CreateFromText(const WadData &wad, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
 	auto result = std::make_unique<Img_c>(W, H);
 
@@ -607,7 +607,7 @@ static std::unique_ptr<Img_c> IM_CreateFromText(const Instance &inst, int W, int
 	auto conv_palette = std::unique_ptr<byte[]>(new byte[pal_size]);
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = inst.wad.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = wad.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -952,15 +952,15 @@ static const char *const dog_image_text[] =
 };
 
 
-std::unique_ptr<Img_c> Instance::IM_CreateDogSprite() const
+std::unique_ptr<Img_c> IM_CreateDogSprite(const WadData &wad)
 {
-	return IM_CreateFromText(*this, 44, 26, dog_image_text, dog_palette, 7);
+	return IM_CreateFromText(wad, 44, 26, dog_image_text, dog_palette, 7);
 }
 
 
 //------------------------------------------------------------------------
 
-std::unique_ptr<Img_c> Instance::IM_CreateLightSprite() const
+std::unique_ptr<Img_c> IM_CreateLightSprite(const WadData &wad)
 {
 	int W = 11;
 	int H = 11;
@@ -1002,7 +1002,7 @@ std::unique_ptr<Img_c> Instance::IM_CreateLightSprite() const
 }
 
 
-std::unique_ptr<Img_c> Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const
+std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b)
 {
 	int W = 32;
 	int H = 32;
