@@ -941,10 +941,15 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(!Wad_file::Validate(resource))
 				throw ParseException("Invalid WAD file: " + resource);
 
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
-														   WadOpenMode::read);
+			// Check if we already have some wads open
+			std::shared_ptr<Wad_file> wad = master.findReadOnly(resource);
+			// If not already loaded, set it up now
 			if(!wad)
-				throw ParseException("Cannot load resource: " + resource);
+			{
+				wad = Wad_file::Open(resource, WadOpenMode::read);
+				if(!wad)
+					throw ParseException("Cannot load resource: " + resource);
+			}
 
 			resourceWads.push_back(wad);
 		}
@@ -955,9 +960,16 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		throw;
 	}
 
-	// TODO: manage the files correctly
+	// Prepare the new master directory
 	MasterDirectory newMaster;
-	newMaster.loadIwad(loading.iwadName);
+
+	newMaster.game_wad = master.findReadOnly(loading.iwadName);
+	if(newMaster.game_wad)
+		newMaster.add(newMaster.game_wad);
+	else
+		newMaster.loadIwad(loading.iwadName);	// load from file if not already
+
+	// Add the resource wads
 	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
 		newMaster.add(wad);
 
