@@ -1472,9 +1472,9 @@ SString Instance::M_ThingCategoryString(SString &letters) const
 }
 
 
-SString Instance::M_TextureCategoryString(SString &letters, bool do_flats) const
+SString ConfigData::textureCategoryString(SString &letters, bool do_flats) const
 {
-	return M_CategoryString(letters, true, conf.texture_groups, do_flats ? conf.flat_categories : conf.texture_categories);
+	return M_CategoryString(letters, true, texture_groups, do_flats ? flat_categories : texture_categories);
 }
 
 //

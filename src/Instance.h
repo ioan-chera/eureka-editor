@@ -295,7 +295,6 @@ public:
 	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
-	SString M_TextureCategoryString(SString &letters, bool do_flats) const;
 	SString M_ThingCategoryString(SString &letters) const;
 
 	// M_KEYS

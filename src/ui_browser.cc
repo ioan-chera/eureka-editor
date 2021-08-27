@@ -1570,10 +1570,10 @@ void UI_Browser::Populate()
 
 	SString letters;
 
-	SString tex_cats = inst.M_TextureCategoryString(letters, false);
+	SString tex_cats = inst.conf.textureCategoryString(letters, false);
 	browsers[0]->SetCategories(tex_cats, letters);
 
-	SString flat_cats = inst.M_TextureCategoryString(letters, true);
+	SString flat_cats = inst.conf.textureCategoryString(letters, true);
 	browsers[1]->SetCategories(flat_cats, letters);
 
 	SString thing_cats = inst.M_ThingCategoryString(letters);
