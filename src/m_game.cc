@@ -1383,13 +1383,13 @@ char ConfigData::getTextureType(const SString &name) const
 }
 
 
-char Instance::M_GetFlatType(const SString &name) const
+char ConfigData::getFlatType(const SString &name) const
 {
 	std::map<SString, char>::const_iterator TI;
 
-	TI = conf.flat_categories.find(name);
+	TI = flat_categories.find(name);
 
-	if (TI != conf.flat_categories.end())
+	if (TI != flat_categories.end())
 		return TI->second;
 
 	return '-';  // the OTHER category

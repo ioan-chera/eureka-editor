@@ -720,7 +720,7 @@ void UI_Browser_Box::Populate_Images(char imkind, const std::map<SString, std::u
 		UI_Pic *pic = new UI_Pic(inst, cx + 8, cy + 4, pic_w, pic_h);
 
 		if (imkind == 'F')
-			item_cat = inst.M_GetFlatType(name);
+			item_cat = inst.conf.getFlatType(name);
 		else if (imkind == 'T')
 			item_cat = inst.conf.getTextureType(name);
 
