@@ -337,6 +337,7 @@ struct ConfigData
 
 	void clearExceptDefaults();
 	bool is_sky(const SString &flat) const;
+	const sectortype_t &getSectorType(int type) const;
 	const linetype_t &getLineType(int type) const;
 	const thingtype_t &getThingType(int type) const;
 	char getTextureType(const SString &name) const;

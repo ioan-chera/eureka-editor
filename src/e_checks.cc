@@ -786,7 +786,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 		else if (inst.conf.features.gen_sectors != GenSectorFamily::none)
 			type_num &= 31;
 
-		const sectortype_t &info = inst.M_GetSectorType(type_num);
+		const sectortype_t &info = inst.conf.getSectorType(type_num);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{

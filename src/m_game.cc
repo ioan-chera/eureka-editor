@@ -1316,13 +1316,13 @@ bool is_special_tex(const SString &tex)
 }
 
 
-const sectortype_t &Instance::M_GetSectorType(int type) const
+const sectortype_t &ConfigData::getSectorType(int type) const
 {
 	std::map<int, sectortype_t>::const_iterator SI;
 
-	SI = conf.sector_types.find(type);
+	SI = sector_types.find(type);
 
-	if (SI != conf.sector_types.end())
+	if (SI != sector_types.end())
 		return SI->second;
 
 	static sectortype_t dummy_type =

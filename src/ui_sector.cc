@@ -533,7 +533,7 @@ void UI_SectorBox::dyntype_callback(Fl_Widget *w, void *data)
 		value &= gen_mask;
 	}
 
-	const sectortype_t &info = box->inst.M_GetSectorType(value);
+	const sectortype_t &info = box->inst.conf.getSectorType(value);
 
 	box->desc->value(info.desc.c_str());
 }
@@ -764,7 +764,7 @@ void UI_SectorBox::UpdateField(int field)
 
 			mFixUp.setInputValue(type, SString(value & mask).c_str());
 
-			const sectortype_t &info = inst.M_GetSectorType(value & mask);
+			const sectortype_t &info = inst.conf.getSectorType(value & mask);
 			desc->value(info.desc.c_str());
 
 			if (inst.conf.features.gen_sectors != GenSectorFamily::none)

@@ -129,12 +129,6 @@ void Instance::MapStuff_NotifyInsert(ObjType type, int objnum)
 {
 }
 
-const sectortype_t &Instance::M_GetSectorType(int type) const
-{
-	static sectortype_t sectortype;
-	return sectortype;
-}
-
 void Instance::GoToErrors()
 {
 }
