@@ -2148,7 +2148,7 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Instance &inst)
 		if (L->left >= 0)
 			continue;
 
-		const linetype_t &info = inst.M_GetLineType(L->type);
+		const linetype_t &info = inst.conf.getLineType(L->type);
 
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
@@ -2182,7 +2182,7 @@ static void LineDefs_FixManualDoors(Instance &inst)
 		if (L->type <= 0 || L->left >= 0)
 			continue;
 
-		const linetype_t &info = inst.M_GetLineType(L->type);
+		const linetype_t &info = inst.conf.getLineType(L->type);
 
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
@@ -2314,7 +2314,7 @@ static void LineDefs_FindUnknown(selection_c& list, std::map<int, int>& types, c
 		if (type_num == 0)
 			continue;
 
-		const linetype_t &info = inst.M_GetLineType(type_num);
+		const linetype_t &info = inst.conf.getLineType(type_num);
 
 		// Boom generalized line type?
 		if (inst.conf.features.gen_types && is_genline(type_num))
@@ -3213,7 +3213,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 		// e.g. D1, DR, --, and lowercase first letter all mean "no tag".
 
 		// TODO: boom generalized manual doors (etc??)
-		const linetype_t &info = inst.M_GetLineType(L->type);
+		const linetype_t &info = inst.conf.getLineType(L->type);
 
 		char first = info.desc[0];
 

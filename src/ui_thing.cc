@@ -399,7 +399,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->spec_type->value());
 
-	const linetype_t &info = box->inst.M_GetLineType(new_type);
+	const linetype_t &info = box->inst.conf.getLineType(new_type);
 
 	if (new_type == 0)
 		box->spec_desc->value("");
@@ -432,7 +432,7 @@ void UI_ThingBox::dynspec_callback(Fl_Widget *w, void *data)
 
 	if (value)
 	{
-		const linetype_t &info = box->inst.M_GetLineType(value);
+		const linetype_t &info = box->inst.conf.getLineType(value);
 		box->spec_desc->value(info.desc.c_str());
 	}
 	else
@@ -884,7 +884,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
 		{
-			const linetype_t &info = inst.M_GetLineType(inst.level.things[obj]->special);
+			const linetype_t &info = inst.conf.getLineType(inst.level.things[obj]->special);
 			spec_desc->value(info.desc.c_str());
 			mFixUp.setInputValue(spec_type, SString(inst.level.things[obj]->special).c_str());
 		}
@@ -909,7 +909,7 @@ void UI_ThingBox::UpdateField(int field)
 			const Thing *T = inst.level.things[obj];
 
 			const thingtype_t &info = inst.conf.getThingType(T->type);
-			const linetype_t  &spec = inst.M_GetLineType (T->special);
+			const linetype_t  &spec = inst.conf.getLineType(T->special);
 
 			// set argument values and tooltips
 			for (int a = 0 ; a < 5 ; a++)

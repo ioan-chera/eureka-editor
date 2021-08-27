@@ -129,12 +129,6 @@ void Instance::MapStuff_NotifyInsert(ObjType type, int objnum)
 {
 }
 
-const linetype_t &Instance::M_GetLineType(int type) const
-{
-	static linetype_t linetype;
-	return linetype;
-}
-
 const sectortype_t &Instance::M_GetSectorType(int type) const
 {
 	static sectortype_t sectortype;

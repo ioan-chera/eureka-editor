@@ -1334,13 +1334,13 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
 }
 
 
-const linetype_t &Instance::M_GetLineType(int type) const
+const linetype_t &ConfigData::getLineType(int type) const
 {
 	std::map<int, linetype_t>::const_iterator LI;
 
-	LI = conf.line_types.find(type);
+	LI = line_types.find(type);
 
-	if (LI != conf.line_types.end())
+	if (LI != line_types.end())
 		return LI->second;
 
 	static linetype_t dummy_type =

@@ -284,7 +284,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 	}
 	else
 	{
-		const linetype_t &info = box->inst.M_GetLineType(new_type);
+		const linetype_t &info = box->inst.conf.getLineType(new_type);
 		box->desc->value(info.desc.c_str());
 	}
 
@@ -764,7 +764,7 @@ void UI_LineBox::UpdateField(int field)
 
 			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj]->tag).c_str());
 
-			const linetype_t &info = inst.M_GetLineType(L->type);
+			const linetype_t &info = inst.conf.getLineType(L->type);
 
 			if (inst.loaded.levelFormat != MapFormat::doom)
 			{
@@ -825,7 +825,7 @@ void UI_LineBox::UpdateField(int field)
 			}
 			else
 			{
-				const linetype_t &info = inst.M_GetLineType(type_num);
+				const linetype_t &info = inst.conf.getLineType(type_num);
 				desc->value(info.desc.c_str());
 			}
 
