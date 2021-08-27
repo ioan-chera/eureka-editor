@@ -109,7 +109,7 @@ public:
 	{
 		fullbright = false;
 
-		if (inst.is_sky(fname))
+		if (inst.conf.is_sky(fname))
 		{
 			col = static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color);
 			fullbright = true;
@@ -397,10 +397,10 @@ public:
 			}
 		}
 
-		bool sky_upper = back && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex());
+		bool sky_upper = back && inst.conf.is_sky(front->CeilTex()) && inst.conf.is_sky(back->CeilTex());
 		bool self_ref  = (front == back) ? true : false;
 
-		if ((front->ceilh > inst.r_view.z || inst.is_sky(front->CeilTex()))
+		if ((front->ceilh > inst.r_view.z || inst.conf.is_sky(front->CeilTex()))
 		    && ! sky_upper && ! self_ref)
 		{
 			ceil.kind = DrawSurf::K_FLAT;

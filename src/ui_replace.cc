@@ -1528,8 +1528,8 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 	SString ceil_tex = sector->CeilTex();
 
-	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
-								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
+	if (!filter_toggle->value() || (!inst.conf.is_sky(ceil_tex) && o_ceilings->value())
+								|| (inst.conf.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
 			return true;
 
@@ -1754,8 +1754,8 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 
 	SString ceil_tex = sector->CeilTex();
 
-	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
-								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
+	if (!filter_toggle->value() || (!inst.conf.is_sky(ceil_tex) && o_ceilings->value())
+								|| (inst.conf.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
 			inst.level.basis.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
 }

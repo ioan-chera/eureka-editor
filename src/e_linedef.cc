@@ -124,7 +124,7 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 		std::swap(front, back);
 
 	// ignore sky walls
-	if (part == 'u' && inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+	if (part == 'u' && inst.conf.is_sky(front->CeilTex()) && inst.conf.is_sky(back->CeilTex()))
 		return false;
 
 	if (part == 'l')

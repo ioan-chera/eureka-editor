@@ -3512,7 +3512,7 @@ static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
-			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+			if (inst.conf.is_sky(front->CeilTex()) && inst.conf.is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
@@ -3565,7 +3565,7 @@ static void Textures_FixMissing(Instance &inst)
 				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
-			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+			if (inst.conf.is_sky(front->CeilTex()) && inst.conf.is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))

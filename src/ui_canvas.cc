@@ -2105,7 +2105,7 @@ void UI_Canvas::RenderSector(int num)
 		else
 			tex_name = inst.level.sectors[num]->FloorTex();
 
-		if (inst.is_sky(tex_name))
+		if (inst.conf.is_sky(tex_name))
 		{
 			RenderColor(inst.wad.palette[inst.conf.miscInfo.sky_color]);
 		}

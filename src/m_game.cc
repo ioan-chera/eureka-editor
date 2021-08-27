@@ -1300,9 +1300,9 @@ SString M_CollectPortsForMenu(const char *base_game,
 //------------------------------------------------------------------------
 
 // is this flat a sky?
-bool Instance::is_sky(const SString &flat) const
+bool ConfigData::is_sky(const SString &flat) const
 {
-	return flat.noCaseEqual(conf.miscInfo.sky_flat);
+	return flat.noCaseEqual(miscInfo.sky_flat);
 }
 
 bool is_null_tex(const SString &tex)

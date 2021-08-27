@@ -144,7 +144,7 @@ public:
 	{
 		fullbright = false;
 
-		if (inst.is_sky(fname))
+		if (inst.conf.is_sky(fname))
 		{
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -999,7 +999,7 @@ public:
 
 		const Sector *front = sd ? sd->SecRef(inst.level) : NULL;
 
-		bool sky_front = inst.is_sky(front->CeilTex());
+		bool sky_front = inst.conf.is_sky(front->CeilTex());
 		bool sky_upper = false;
 
 		if (ld->OneSided())
@@ -1014,7 +1014,7 @@ public:
 			const SideDef *sd_back = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
 			const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
 
-			sky_upper = sky_front && inst.is_sky(back->CeilTex());
+			sky_upper = sky_front && inst.conf.is_sky(back->CeilTex());
 
 			// check for BOOM 242 invisible platforms
 			bool invis_back = false;
@@ -1157,7 +1157,7 @@ public:
 				// invisible platform
 				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
-				if (!inst.is_sky(sec->CeilTex()))
+				if (!inst.conf.is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else
@@ -1165,7 +1165,7 @@ public:
 				// space B : normal
 				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
-				if (!inst.is_sky(sec->CeilTex()))
+				if (!inst.conf.is_sky(sec->CeilTex()))
 					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 		} else {
@@ -1173,7 +1173,7 @@ public:
 			// normal sector
 			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
 
-			if (!inst.is_sky(sec->CeilTex()))
+			if (!inst.conf.is_sky(sec->CeilTex()))
 				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
 		}
 

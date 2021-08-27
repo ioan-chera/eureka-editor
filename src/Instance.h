@@ -295,7 +295,6 @@ public:
 	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
-	bool is_sky(const SString &flat) const;
 	const sectortype_t &M_GetSectorType(int type) const;
 	SString M_LineCategoryString(SString &letters) const;
 	SString M_TextureCategoryString(SString &letters, bool do_flats) const;

@@ -1011,7 +1011,7 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 		mask |= SOLID_LOWER;
 
 	// upper texture of "-" is OK between two skies
-	bool two_skies = inst.is_sky(right->CeilTex()) && inst.is_sky(left->CeilTex());
+	bool two_skies = inst.conf.is_sky(right->CeilTex()) && inst.conf.is_sky(left->CeilTex());
 
 	if (right-> ceilh > left-> ceilh && !two_skies)
 		mask |= SOLID_UPPER;
