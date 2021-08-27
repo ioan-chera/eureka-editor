@@ -1576,7 +1576,7 @@ void UI_Browser::Populate()
 	SString flat_cats = inst.conf.textureCategoryString(letters, true);
 	browsers[1]->SetCategories(flat_cats, letters);
 
-	SString thing_cats = inst.M_ThingCategoryString(letters);
+	SString thing_cats = inst.conf.thingCategoryString(letters);
 	browsers[2]->SetCategories(thing_cats, letters);
 
 	SString line_cats = inst.conf.lineCategoryString(letters);

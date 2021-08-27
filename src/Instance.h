@@ -294,9 +294,6 @@ public:
 	std::shared_ptr<Wad_file> M_TryOpenMostRecent();
 	void M_WriteEurekaLump(Wad_file *wad) const;
 
-	// M_GAME
-	SString M_ThingCategoryString(SString &letters) const;
-
 	// M_KEYS
 	void Beep(EUR_FORMAT_STRING(const char *fmt), ...) EUR_PRINTF(2, 3);
 	bool Exec_HasFlag(const char *flag) const;

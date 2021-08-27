@@ -1466,9 +1466,9 @@ SString ConfigData::lineCategoryString(SString &letters) const
 }
 
 
-SString Instance::M_ThingCategoryString(SString &letters) const
+SString ConfigData::thingCategoryString(SString &letters) const
 {
-	return M_CategoryString(letters, true, conf.thing_groups, conf.thing_types);
+	return M_CategoryString(letters, true, thing_groups, thing_types);
 }
 
 

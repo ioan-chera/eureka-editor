@@ -343,6 +343,7 @@ struct ConfigData
 	char getTextureType(const SString &name) const;
 	char getFlatType(const SString &name) const;
 	SString lineCategoryString(SString &letters) const;
+	SString thingCategoryString(SString &letters) const;
 	SString textureCategoryString(SString &letters, bool do_flats) const;
 };
 
