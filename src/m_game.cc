@@ -1460,9 +1460,9 @@ static SString M_CategoryString(SString &letters, bool recent, const std::map<ch
 	return buffer;
 }
 
-SString Instance::M_LineCategoryString(SString &letters) const
+SString ConfigData::lineCategoryString(SString &letters) const
 {
-	return M_CategoryString(letters, false, conf.line_groups, conf.line_types);
+	return M_CategoryString(letters, false, line_groups, line_types);
 }
 
 

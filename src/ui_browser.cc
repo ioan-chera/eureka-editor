@@ -1579,7 +1579,7 @@ void UI_Browser::Populate()
 	SString thing_cats = inst.M_ThingCategoryString(letters);
 	browsers[2]->SetCategories(thing_cats, letters);
 
-	SString line_cats = inst.M_LineCategoryString(letters);
+	SString line_cats = inst.conf.lineCategoryString(letters);
 	browsers[3]->SetCategories(line_cats, letters);
 
 	// TODO: sector_cats

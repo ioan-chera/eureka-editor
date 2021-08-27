@@ -342,6 +342,7 @@ struct ConfigData
 	const thingtype_t &getThingType(int type) const;
 	char getTextureType(const SString &name) const;
 	char getFlatType(const SString &name) const;
+	SString lineCategoryString(SString &letters) const;
 };
 
 //
