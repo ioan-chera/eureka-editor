@@ -722,7 +722,7 @@ void UI_Browser_Box::Populate_Images(char imkind, const std::map<SString, std::u
 		if (imkind == 'F')
 			item_cat = inst.M_GetFlatType(name);
 		else if (imkind == 'T')
-			item_cat = inst.M_GetTextureType(name);
+			item_cat = inst.conf.getTextureType(name);
 
 		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
 		                                      full_desc, name, 0 /* num */,

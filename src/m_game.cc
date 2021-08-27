@@ -1370,13 +1370,13 @@ const thingtype_t &ConfigData::getThingType(int type) const
 }
 
 
-char Instance::M_GetTextureType(const SString &name) const
+char ConfigData::getTextureType(const SString &name) const
 {
 	std::map<SString, char>::const_iterator TI;
 
-	TI = conf.texture_categories.find(name);
+	TI = texture_categories.find(name);
 
-	if (TI != conf.texture_categories.end())
+	if (TI != texture_categories.end())
 		return TI->second;
 
 	return '-';  // the OTHER category
