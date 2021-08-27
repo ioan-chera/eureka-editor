@@ -530,7 +530,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 {
 	SYS_ASSERT(priv_data);
 
-	recent_file_data_c *data = (recent_file_data_c *)priv_data;
+	auto data = reinterpret_cast<const recent_file_data_c *>(priv_data);
 
 	OpenFileMap(data->file, data->map);
 }
@@ -838,10 +838,10 @@ SString Instance::M_PickDefaultIWAD() const
 }
 
 
-static void M_AddResource_Unique(Instance &inst, const SString & filename)
+static void M_AddResource_Unique(LoadingData &loading, const SString & filename)
 {
 	// check if base filename (without path) already exists
-	for (const SString &resource : inst.loaded.resourceList)
+	for (const SString &resource : loading.resourceList)
 	{
 		const char *A = fl_filename_name(filename.c_str());
 		const char *B = fl_filename_name(resource.c_str());
@@ -850,7 +850,7 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 			return;		// found it
 	}
 
-	inst.loaded.resourceList.push_back(filename);
+	loading.resourceList.push_back(filename);
 }
 
 
@@ -996,7 +996,7 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	for (const SString &resource : new_resources)
 	{
-		M_AddResource_Unique(*this, resource);
+		M_AddResource_Unique(loaded, resource);
 	}
 
 	return true;
