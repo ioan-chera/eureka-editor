@@ -857,7 +857,8 @@ static void M_AddResource_Unique(LoadingData &loading, const SString & filename)
 //
 // returns false if user wants to cancel the load
 //
-bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
+bool M_ParseEurekaLump(LoadingData &loading, const Wad_file *wad,
+					   bool keep_cmd_line_args)
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -981,22 +982,22 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	if (!new_iwad.empty())
 	{
-		if (! (keep_cmd_line_args && !loaded.iwadName.empty()))
-			loaded.iwadName = new_iwad;
+		if (! (keep_cmd_line_args && !loading.iwadName.empty()))
+			loading.iwadName = new_iwad;
 	}
 
 	if (!new_port.empty())
 	{
-		if (! (keep_cmd_line_args && !loaded.portName.empty()))
-			loaded.portName = new_port;
+		if (! (keep_cmd_line_args && !loading.portName.empty()))
+			loading.portName = new_port;
 	}
 
 	if (! keep_cmd_line_args)
-		loaded.resourceList.clear();
+		loading.resourceList.clear();
 
 	for (const SString &resource : new_resources)
 	{
-		M_AddResource_Unique(loaded, resource);
+		M_AddResource_Unique(loading, resource);
 	}
 
 	return true;

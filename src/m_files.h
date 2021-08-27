@@ -42,7 +42,8 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
 
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const char *filename);
-
+bool M_ParseEurekaLump(LoadingData &loading, const Wad_file *wad,
+					   bool keep_cmd_line_args = false);
 void M_BackupWad(Wad_file *wad);
 
 
