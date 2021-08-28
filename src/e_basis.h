@@ -352,9 +352,7 @@ public:
 class BasisListener
 {
 public:
-	virtual void basisAddRecentFlat(const SString &name) = 0;
-	virtual void basisAddRecentTexture(const SString &name) = 0;
-	virtual void basisAddRecentThing(int type) = 0;
+	virtual void basisOnChangeItem(ObjType type, int field, int value) = 0;
 	virtual void basisSetStatus(const SString &text) = 0;
 
 	virtual void basisMadeChanges() = 0;

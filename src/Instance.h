@@ -477,9 +477,7 @@ private:
 	void StoreSelectedThing(int new_type);
 
 	// BasisListener
-	virtual void basisAddRecentFlat(const SString &name) override;
-	virtual void basisAddRecentTexture(const SString &name) override;
-	virtual void basisAddRecentThing(int type) override;
+	virtual void basisOnChangeItem(ObjType type, int field, int value) override;
 	virtual void basisSetStatus(const SString &text) override;
 
 	virtual void basisMadeChanges() override;

@@ -474,11 +474,30 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 }
 
 //
-// Add the recent thing
+// Called when change is called
 //
-void Instance::basisAddRecentThing(int type)
+void Instance::basisOnChangeItem(ObjType type, int field, int value)
 {
-	recent_things.insert_number(type);
+	switch(type)
+	{
+		case ObjType::things:
+			if(field == Thing::F_TYPE)
+				recent_things.insert_number(value);
+			break;
+		case ObjType::sectors:
+			if(field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
+				recent_flats.insert(BA_GetString(value));
+			break;
+		case ObjType::sidedefs:
+			if(field == SideDef::F_LOWER_TEX || field == SideDef::F_UPPER_TEX ||
+				field == SideDef::F_MID_TEX)
+			{
+				recent_textures.insert(BA_GetString(value));
+			}
+			break;
+		default:
+			break;
+	}
 }
 
 //
@@ -489,8 +508,7 @@ bool Basis::changeThing(int thing, byte field, int value)
 	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
 	SYS_ASSERT(field <= Thing::F_ARG5);
 
-	if(field == Thing::F_TYPE)
-		listener.basisAddRecentThing(value);
+	listener.basisOnChangeItem(ObjType::things, field, value);
 
 	return change(ObjType::things, thing, field, value);
 }
@@ -503,15 +521,9 @@ bool Basis::changeVertex(int vert, byte field, int value)
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
 	SYS_ASSERT(field <= Vertex::F_Y);
 
-	return change(ObjType::vertices, vert, field, value);
-}
+//	listener.basisOnChangeItem(ObjType::vertices, field, value);
 
-//
-// Add recent flat
-//
-void Instance::basisAddRecentFlat(const SString &name)
-{
-	recent_flats.insert(name);
+	return change(ObjType::vertices, vert, field, value);
 }
 
 //
@@ -522,18 +534,9 @@ bool Basis::changeSector(int sec, byte field, int value)
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
 	SYS_ASSERT(field <= Sector::F_TAG);
 
-	if(field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
-		listener.basisAddRecentFlat(BA_GetString(value));
+	listener.basisOnChangeItem(ObjType::sectors, field, value);
 
 	return change(ObjType::sectors, sec, field, value);
-}
-
-//
-// Add recent texture
-//
-void Instance::basisAddRecentTexture(const SString &name)
-{
-	recent_textures.insert(name);
 }
 
 //
@@ -544,11 +547,7 @@ bool Basis::changeSidedef(int side, byte field, int value)
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
 	SYS_ASSERT(field <= SideDef::F_SECTOR);
 
-	if(field == SideDef::F_LOWER_TEX || field == SideDef::F_UPPER_TEX ||
-		field == SideDef::F_MID_TEX)
-	{
-		listener.basisAddRecentTexture(BA_GetString(value));
-	}
+	listener.basisOnChangeItem(ObjType::sidedefs, field, value);
 
 	return change(ObjType::sidedefs, side, field, value);
 }
@@ -560,6 +559,8 @@ bool Basis::changeLinedef(int line, byte field, int value)
 {
 	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
 	SYS_ASSERT(field <= LineDef::F_ARG5);
+
+//	listener.basisOnChangeItem(ObjType::linedefs, field, value);
 
 	return change(ObjType::linedefs, line, field, value);
 }
