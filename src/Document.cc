@@ -118,3 +118,19 @@ void Document::getLevelChecksum(crc32_c &crc) const
 	for(i = 0; i < numLinedefs(); i++)
 		ChecksumLineDef(crc, linedefs[i].get(), *this);
 }
+
+//
+// Updates map bounds by a single point, raising them if necessary.
+//
+void Document::updateMapBoundsByPoint(double x, double y)
+{
+	if (x < Map_bound_x1)
+		Map_bound_x1 = x;
+	if (y < Map_bound_y1)
+		Map_bound_y1 = y;
+
+	if (x > Map_bound_x2)
+		Map_bound_x2 = x;
+	if (y > Map_bound_y2)
+		Map_bound_y2 = y;
+}

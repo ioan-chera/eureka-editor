@@ -48,6 +48,12 @@ public:
 	std::vector<byte> behaviorData;
 	std::vector<byte> scriptsData;
 
+	// Secondary information
+	double Map_bound_x1 = 32767;   /* minimum X value of map */
+	double Map_bound_y1 = 32767;   /* minimum Y value of map */
+	double Map_bound_x2 = -32767;   /* maximum X value of map */
+	double Map_bound_y2 = -32767;   /* maximum Y value of map */
+
 	Basis basis;
 	ChecksModule checks;
 	Hover hover;
@@ -109,6 +115,7 @@ public:
 	void getLevelChecksum(crc32_c &crc) const;
 
 	void loadHeader(const Wad_file &loadingWad, int loadingLevel);
+	void updateMapBoundsByPoint(double x, double y);
 
 private:
 	friend class DocumentModule;

@@ -515,10 +515,6 @@ public:	// will be private when we encapsulate everything
 	// Document stuff
 	//
 	bool MadeChanges = false;
-	double Map_bound_x1 = 32767;   /* minimum X value of map */
-	double Map_bound_y1 = 32767;   /* minimum Y value of map */
-	double Map_bound_x2 = -32767;   /* maximum X value of map */
-	double Map_bound_y2 = -32767;   /* maximum Y value of map */
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;

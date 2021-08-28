@@ -66,15 +66,16 @@ void Instance::zoom_fit()
 	int ScrMaxX = main_win->canvas->w();
 	int ScrMaxY = main_win->canvas->h();
 
-	if (Map_bound_x1 < Map_bound_x2)
-		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
+	if (level.Map_bound_x1 < level.Map_bound_x2)
+		xzoom = ScrMaxX / (level.Map_bound_x2 - level.Map_bound_x1);
 
-	if (Map_bound_y1 < Map_bound_y2)
-		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
+	if (level.Map_bound_y1 < level.Map_bound_y2)
+		yzoom = ScrMaxY / (level.Map_bound_y2 - level.Map_bound_y1);
 
 	grid.NearestScale(std::min(xzoom, yzoom));
 
-	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
+	grid.MoveTo((level.Map_bound_x1 + level.Map_bound_x2) / 2,
+				(level.Map_bound_y1 + level.Map_bound_y2) / 2);
 }
 
 
@@ -378,16 +379,7 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
 		const auto &V = inst.level.vertices[i];
-
-		if (V->x() < inst.Map_bound_x1)
-			inst.Map_bound_x1 = V->x();
-		if (V->y() < inst.Map_bound_y1)
-			inst.Map_bound_y1 = V->y();
-
-		if (V->x() > inst.Map_bound_x2)
-			inst.Map_bound_x2 = V->x();
-		if (V->y() > inst.Map_bound_y2)
-			inst.Map_bound_y2 = V->y();
+		inst.level.updateMapBoundsByPoint(V->x(), V->y());
 	}
 }
 
@@ -395,15 +387,15 @@ void Instance::CalculateLevelBounds()
 {
 	if (level.numVertices() == 0)
 	{
-		Map_bound_x1 = Map_bound_x2 = 0;
-		Map_bound_y1 = Map_bound_y2 = 0;
+		level.Map_bound_x1 = level.Map_bound_x2 = 0;
+		level.Map_bound_y1 = level.Map_bound_y2 = 0;
 		return;
 	}
 
-	Map_bound_x1 = 32767;
-	Map_bound_x2 = -32767;
-	Map_bound_y1 = 32767;
-	Map_bound_y2 = -32767;
+	level.Map_bound_x1 = 32767;
+	level.Map_bound_x2 = -32767;
+	level.Map_bound_y1 = 32767;
+	level.Map_bound_y2 = -32767;
 
 	UpdateLevelBounds(*this, 0);
 }
@@ -450,16 +442,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		moved_vertex_count++;
 
 		const auto &V = level.vertices[objnum];
-
-		if (V->x() < Map_bound_x1)
-			Map_bound_x1 = V->x();
-		if (V->y() < Map_bound_y1)
-			Map_bound_y1 = V->y();
-
-		if (V->x() > Map_bound_x2)
-			Map_bound_x2 = V->x();
-		if (V->y() > Map_bound_y2)
-			Map_bound_y2 = V->y();
+		level.updateMapBoundsByPoint(V->x(), V->y());
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
