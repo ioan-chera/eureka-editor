@@ -592,21 +592,23 @@ void Instance::ValidateSectorRef(SideDef *sd, int num,
 }
 
 
-void Instance::LoadHeader(int loading_level, const Wad_file *load_wad)
+void Document::loadHeader(const Wad_file &load_wad, int loading_level)
 {
-	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
+	Lump_c *lump = load_wad.GetLump(load_wad.LevelHeader(loading_level));
 
 	int length = lump->Length();
 
 	if (length == 0)
+	{
+		headerData.clear();
 		return;
+	}
 
-	level.headerData.resize(length);
+	headerData.resize(length);
 
 	lump->Seek();
 
-	if (! lump->Read(&level.headerData[0], length))
-		ThrowException("Error reading header lump.\n");
+	lump->Read(headerData.data(), length);
 }
 
 
@@ -978,7 +980,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 
 	LevelLoadProblems problems = {};
 
-	LoadHeader(loading_level, wad);
+	level.loadHeader(*wad, loading_level);
 
 	if (loaded.levelFormat == MapFormat::udmf)
 	{

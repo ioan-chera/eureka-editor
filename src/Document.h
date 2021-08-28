@@ -108,6 +108,8 @@ public:
 	int numObjects(ObjType type) const;
 	void getLevelChecksum(crc32_c &crc) const;
 
+	void loadHeader(const Wad_file &loadingWad, int loadingLevel);
+
 private:
 	friend class DocumentModule;
 };

@@ -428,7 +428,6 @@ private:
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
 	void LoadBehavior(int loading_level, const Wad_file *load_wad);
-	void LoadHeader(int loading_level, const Wad_file *load_wad);
 	void LoadLineDefs(int loading_level, const Wad_file *load_wad,
 					  LevelLoadProblems &problems);
 	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad,
