@@ -399,11 +399,8 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 	{
 		recalc_map_bounds = true;
 
-		if (edit.action == ACT_DRAW_LINE &&
-			edit.draw_from.num == objnum)
-		{
+		if (edit.action == ACT_DRAW_LINE && edit.draw_from.num == objnum)
 			Editor_ClearAction();
-		}
 	}
 }
 
