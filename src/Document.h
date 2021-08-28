@@ -116,6 +116,8 @@ public:
 
 	void loadHeader(const Wad_file &loadingWad, int loadingLevel);
 	void updateMapBoundsByPoint(double x, double y);
+	void updateMapBoundsStartingFromVertex(int start_vert);
+	void calculateMapBounds();
 
 private:
 	friend class DocumentModule;

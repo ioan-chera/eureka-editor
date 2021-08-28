@@ -82,7 +82,7 @@ void Instance::zoom_fit()
 void Instance::ZoomWholeMap()
 {
 	if (MadeChanges)
-		CalculateLevelBounds();
+		level.calculateMapBounds();
 
 	zoom_fit();
 
@@ -373,34 +373,6 @@ void Instance::Editor_ChangeMode(char mode_char)
 
 //------------------------------------------------------------------------
 
-
-static void UpdateLevelBounds(Document &doc, int start_vert)
-{
-	for(int i = start_vert; i < doc.numVertices(); i++)
-	{
-		const auto &V = doc.vertices[i];
-		doc.updateMapBoundsByPoint(V->x(), V->y());
-	}
-}
-
-void Instance::CalculateLevelBounds()
-{
-	if (level.numVertices() == 0)
-	{
-		level.Map_bound_x1 = level.Map_bound_x2 = 0;
-		level.Map_bound_y1 = level.Map_bound_y2 = 0;
-		return;
-	}
-
-	level.Map_bound_x1 = 32767;
-	level.Map_bound_x2 = -32767;
-	level.Map_bound_y1 = 32767;
-	level.Map_bound_y2 = -32767;
-
-	UpdateLevelBounds(level, 0);
-}
-
-
 void Instance::MapStuff_NotifyBegin()
 {
 	recalc_map_bounds  = false;
@@ -469,11 +441,11 @@ void Instance::MapStuff_NotifyEnd()
 {
 	if (recalc_map_bounds || moved_vertex_count > 10)  // TODO: CONFIG
 	{
-		CalculateLevelBounds();
+		level.calculateMapBounds();
 	}
 	else if (new_vertex_minimum >= 0)
 	{
-		UpdateLevelBounds(level, new_vertex_minimum);
+		level.updateMapBoundsStartingFromVertex(new_vertex_minimum);
 	}
 }
 

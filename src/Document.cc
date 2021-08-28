@@ -134,3 +134,35 @@ void Document::updateMapBoundsByPoint(double x, double y)
 	if (y > Map_bound_y2)
 		Map_bound_y2 = y;
 }
+
+//
+// Updates the map bounds from all vertices starting from one
+//
+void Document::updateMapBoundsStartingFromVertex(int start_vert)
+{
+	for(int i = start_vert; i < numVertices(); i++)
+	{
+		const auto &V = vertices[i];
+		updateMapBoundsByPoint(V->x(), V->y());
+	}
+}
+
+//
+// Initializes and calculates the map bounds from all vertices
+//
+void Document::calculateMapBounds()
+{
+	if (numVertices() == 0)
+	{
+		Map_bound_x1 = Map_bound_x2 = 0;
+		Map_bound_y1 = Map_bound_y2 = 0;
+		return;
+	}
+
+	Map_bound_x1 = 32767;
+	Map_bound_x2 = -32767;
+	Map_bound_y1 = 32767;
+	Map_bound_y2 = -32767;
+
+	updateMapBoundsStartingFromVertex(0);
+}

@@ -143,7 +143,7 @@ void Instance::FreshLevel()
 		level.things.push_back(std::move(th));
 	}
 
-	CalculateLevelBounds();
+	level.calculateMapBounds();
 
 	ZoomWholeMap();
 
@@ -1014,7 +1014,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 
 	level.checks.sidedefsUnpack(true);
 
-	CalculateLevelBounds();
+	level.calculateMapBounds();
 	Subdiv_InvalidateAll();
 
 	MadeChanges = false;
