@@ -642,7 +642,7 @@ void ConvertSelection(const Document &doc, const selection_c * src, selection_c 
 	{
 		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
-			const Thing *T = doc.things[t];
+			const Thing *T = doc.things[t].get();
 
 			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
@@ -840,7 +840,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::things:
 			for (int n = 0 ; n < doc.numThings() ; n++)
 			{
-				const Thing *T = doc.things[n];
+				const Thing *T = doc.things[n].get();
 
 				double tx = T->x();
 				double ty = T->y();

@@ -136,14 +136,15 @@ void Instance::FreshLevel()
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
 	{
-		Thing *th = new Thing;
-		level.things.push_back(th);
+		auto th = std::make_unique<Thing>();
 
 		th->type  = pl;
 		th->angle = 90;
 
 		th->SetRawX(*this, (pl == 1) ? 0 : (pl - 3) * 48);
 		th->SetRawY(*this, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+
+		level.things.push_back(std::move(th));
 	}
 
 	CalculateLevelBounds();
@@ -668,7 +669,7 @@ void Instance::LoadThings(int loading_level, const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
-		Thing *th = new Thing;
+		auto th = std::make_unique<Thing>();
 
 		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
 		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
@@ -677,7 +678,7 @@ void Instance::LoadThings(int loading_level, const Wad_file *load_wad)
 		th->type    = LE_U16(raw.type);
 		th->options = LE_U16(raw.options);
 
-		level.things.push_back(th);
+		level.things.push_back(std::move(th));
 	}
 }
 
@@ -702,7 +703,7 @@ void Instance::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading things.\n");
 
-		Thing *th = new Thing;
+		auto th = std::make_unique<Thing>();
 
 		th->tid = LE_S16(raw.tid);
 		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
@@ -720,7 +721,7 @@ void Instance::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 		th->arg4 = raw.args[3];
 		th->arg5 = raw.args[4];
 
-		level.things.push_back(th);
+		level.things.push_back(std::move(th));
 	}
 }
 
@@ -1396,7 +1397,7 @@ void Instance::SaveThings()
 {
 	Lump_c *lump = master.edit_wad->AddLump("THINGS");
 
-	for (const Thing *th : level.things)
+	for (const std::unique_ptr<Thing> &th : level.things)
 	{
 		raw_thing_t raw;
 
@@ -1417,7 +1418,7 @@ void Instance::SaveThings_Hexen()
 {
 	Lump_c *lump = master.edit_wad->AddLump("THINGS");
 
-	for (const Thing *th : level.things)
+	for (const std::unique_ptr<Thing> &th : level.things)
 	{
 		raw_hexen_thing_t raw;
 

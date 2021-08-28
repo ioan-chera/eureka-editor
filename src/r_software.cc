@@ -282,8 +282,8 @@ public:
 		else if (A->th >= 0 && B->th >= 0)
 		{
 			// prevent two things at same location from flickering
-			const Thing *const TA = inst.level.things[A->th];
-			const Thing *const TB = inst.level.things[B->th];
+			const Thing *const TA = inst.level.things[A->th].get();
+			const Thing *const TB = inst.level.things[B->th].get();
 
 			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
@@ -865,7 +865,7 @@ public:
 
 	void AddThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		Thing *th = inst.level.things[th_index].get();
 
 		const thingtype_t &info = inst.conf.getThingType(th->type);
 
@@ -1278,7 +1278,7 @@ public:
 				float dy = static_cast<float>(inst.edit.drag_cur_y - inst.edit.drag_start_y);
 				float dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
 
-				const Thing *T = inst.level.things[dw->th];
+				const Thing *T = inst.level.things[dw->th].get();
 
 				float x = static_cast<float>(T->x() + dx - inst.r_view.x);
 				float y = static_cast<float>(T->y() + dy - inst.r_view.y);

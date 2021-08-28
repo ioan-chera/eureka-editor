@@ -541,7 +541,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 		kind = Objid(ObjType::things, 1);
 		new_T = new Thing;
 		new_T->options = MTF_Not_SP | MTF_Not_COOP | MTF_Not_DM;
-		doc.things.push_back(new_T);
+		doc.things.push_back(std::unique_ptr<Thing>(new_T));
 	}
 	else if (name.Match("vertex"))
 	{
@@ -711,7 +711,7 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("thing // %d\n", i);
 		lump->Printf("{\n");
 
-		const Thing *th = inst.level.things[i];
+		const Thing *th = inst.level.things[i].get();
 
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());

@@ -192,7 +192,7 @@ static Thing *FindPlayer(const Document &doc, int typenum)
 
 	for ( int i = doc.numThings()-1 ; i >= 0 ; i--)
 		if (doc.things[i]->type == typenum)
-			return doc.things[i];
+			return doc.things[i].get();
 
 	return NULL;  // not found
 }
@@ -345,7 +345,7 @@ private:
 		switch (type)
 		{
 			case ObjType::things:
-				return reinterpret_cast<int*>(inst.level.things[objnum]);
+				return reinterpret_cast<int*>(inst.level.things[objnum].get());
 
 			case ObjType::vertices:
 				return reinterpret_cast<int *>(inst.level.vertices[objnum]);
@@ -895,7 +895,7 @@ static void DragThings_Update(Instance &inst)
 	}
 #endif
 
-	const Thing *T = inst.level.things[inst.edit.drag_thing_num];
+	const Thing *T = inst.level.things[inst.edit.drag_thing_num].get();
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -1105,7 +1105,7 @@ int Instance::GrabSelectedThing()
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = level.things[*it];
+			const Thing *T = level.things[*it].get();
 			if (result >= 0 && T->type != result)
 			{
 				Beep("multiple thing types");

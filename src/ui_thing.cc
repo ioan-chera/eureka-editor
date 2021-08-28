@@ -606,7 +606,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const Thing *T = box->inst.level.things[*it];
+			const Thing *T = box->inst.level.things[*it].get();
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
@@ -820,7 +820,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj))
 		{
-			const Thing *T = inst.level.things[obj];
+			const Thing *T = inst.level.things[obj].get();
 
 			// @@ FIXME show decimals in UDMF
 			mFixUp.setInputValue(pos_x, SString(static_cast<int>(T->x())).c_str());
@@ -906,7 +906,7 @@ void UI_ThingBox::UpdateField(int field)
 
 		if (inst.level.isThing(obj))
 		{
-			const Thing *T = inst.level.things[obj];
+			const Thing *T = inst.level.things[obj].get();
 
 			const thingtype_t &info = inst.conf.getThingType(T->type);
 			const linetype_t  &spec = inst.conf.getLineType(T->special);

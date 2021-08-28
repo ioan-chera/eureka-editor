@@ -813,7 +813,7 @@ Objid Hover::getNearestThing(double x, double y) const
 
 	for(int n = 0; n < doc.numThings(); n++)
 	{
-		const Thing *thing = doc.things[n];
+		const Thing *thing = doc.things[n].get();
 		double tx = thing->x();
 		double ty = thing->y();
 

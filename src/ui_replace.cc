@@ -1454,7 +1454,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 bool UI_FindAndReplace::Match_Thing(int idx)
 {
-	const Thing *T = inst.level.things[idx];
+	const Thing *T = inst.level.things[idx].get();
 
 	if (! find_numbers->get(T->type))
 		return false;

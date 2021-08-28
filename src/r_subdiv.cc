@@ -191,13 +191,13 @@ void sector_info_cache_c::Rebuild()
 		}
 	}
 
-	for (const Thing *thing : inst.level.things)
+	for (const std::unique_ptr<Thing> &thing : inst.level.things)
 	{
-		CheckSlopeThing(thing);
+		CheckSlopeThing(thing.get());
 	}
-	for (const Thing *thing : inst.level.things)
+	for (const std::unique_ptr<Thing> &thing : inst.level.things)
 	{
-		CheckSlopeCopyThing(thing);
+		CheckSlopeCopyThing(thing.get());
 	}
 
 	for (const LineDef *linedef : inst.level.linedefs)

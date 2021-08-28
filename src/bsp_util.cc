@@ -411,7 +411,7 @@ void DetectPolyobjSectors(const Instance &inst)
 
 	for (i = 0 ; i < inst.level.numThings() ; i++)
 	{
-		const Thing *T = inst.level.things[i];
+		const Thing *T = inst.level.things[i].get();
 
 		if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
 		{
@@ -428,7 +428,7 @@ void DetectPolyobjSectors(const Instance &inst)
 
 	for (i = 0 ; i < inst.level.numThings(); i++)
 	{
-		const Thing *T = inst.level.things[i];
+		const Thing *T = inst.level.things[i].get();
 
 		double x = T->x();
 		double y = T->y();

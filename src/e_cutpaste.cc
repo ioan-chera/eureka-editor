@@ -472,7 +472,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
 			Thing * T = new Thing;
-			*T = *doc.things[*it];
+			*T = *doc.things[*it].get();
 			clip_board->things.push_back(T);
 		}
 	}
@@ -499,7 +499,7 @@ bool Instance::Clipboard_DoCopy()
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Thing * T = new Thing;
-				*T = *level.things[*it];
+				*T = *level.things[*it].get();
 				clip_board->things.push_back(T);
 			}
 			break;
@@ -638,7 +638,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = inst.level.basis.addNew(ObjType::things);
-		Thing * T = inst.level.things[new_t];
+		Thing * T = inst.level.things[new_t].get();
 
 		*T = *clip_board->things[i];
 
@@ -746,7 +746,7 @@ bool Instance::Clipboard_DoPaste()
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
 				int new_t = level.basis.addNew(ObjType::things);
-				Thing * T = level.things[new_t];
+				Thing * T = level.things[new_t].get();
 
 				*T = *clip_board->things[i];
 

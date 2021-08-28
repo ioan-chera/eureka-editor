@@ -914,7 +914,7 @@ void UI_Canvas::DrawThings()
 	else if (inst.edit.error_mode)
 		RenderColor(LIGHTGREY);
 
-	for (const Thing *thing : inst.level.things)
+	for (const std::unique_ptr<Thing> &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -965,7 +965,7 @@ void UI_Canvas::DrawThingBodies()
 	if (inst.edit.error_mode)
 		return;
 
-	for (const Thing *thing : inst.level.things)
+	for (const std::unique_ptr<Thing> &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -999,7 +999,7 @@ void UI_Canvas::DrawThingSprites()
 	glAlphaFunc(GL_GREATER, 0.5);
 #endif
 
-	for (const Thing *thing : inst.level.things)
+	for (const std::unique_ptr<Thing> &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();

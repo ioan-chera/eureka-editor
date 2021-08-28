@@ -38,7 +38,7 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
-	std::vector<Thing *> things;
+	std::vector<std::unique_ptr<Thing>> things;
 	std::vector<Vertex *> vertices;
 	std::vector<Sector *> sectors;
 	std::vector<SideDef *> sidedefs;

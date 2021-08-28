@@ -132,7 +132,7 @@ void ObjectsModule::insertThing() const
 	doc.basis.begin();
 
 	int new_t = doc.basis.addNew(ObjType::things);
-	Thing *T = doc.things[new_t];
+	Thing *T = doc.things[new_t].get();
 
 	if(model >= 0)
 		*T = *doc.things[model];
@@ -748,7 +748,7 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 		case ObjType::things:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing * T = doc.things[*it];
+				const Thing * T = doc.things[*it].get();
 
 				doc.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
 				doc.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
@@ -944,7 +944,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 
 void ObjectsModule::transferThingProperties(int src_thing, int dest_thing) const
 {
-	const Thing * T = doc.things[src_thing];
+	const Thing * T = doc.things[src_thing].get();
 
 	doc.basis.changeThing(dest_thing, Thing::F_TYPE,    T->type);
 	doc.basis.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
@@ -1504,7 +1504,7 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing *T = doc.things[*it];
+				const Thing *T = doc.things[*it].get();
 				double Tx = T->x();
 				double Ty = T->y();
 
@@ -1558,7 +1558,7 @@ void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const Thing * T = doc.things[*it].get();
 
 		if (is_vert)
 		{
@@ -1675,7 +1675,7 @@ void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const Thing * T = doc.things[*it].get();
 
 		fixcoord_t old_x = T->raw_x;
 		fixcoord_t old_y = T->raw_y;
@@ -1774,7 +1774,7 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const Thing * T = doc.things[*it].get();
 
 		double new_x = T->x();
 		double new_y = T->y();
@@ -2004,7 +2004,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	switch (obj_type)
 	{
 		case ObjType::things:
-			for (const Thing *thing : doc.things)
+			for (const std::unique_ptr<Thing> &thing : doc.things)
 				if (I_ROUND(thing->x()) == x && I_ROUND(thing->y()) == y)
 					return true;
 			return false;
@@ -2101,7 +2101,7 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const Thing * T = doc.things[*it].get();
 
 		if (inst.grid.OnGrid(T->x(), T->y()))
 		{

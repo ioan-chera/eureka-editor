@@ -69,7 +69,7 @@ void Instance::CMD_TH_SpinThings()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Thing *T = level.things[*it];
+		const Thing *T = level.things[*it].get();
 
 		level.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
 	}
@@ -85,8 +85,8 @@ void Instance::CMD_TH_SpinThings()
 
 static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 {
-	const Thing *T1 = doc.things[th1];
-	const Thing *T2 = doc.things[th2];
+	const Thing *T1 = doc.things[th1].get();
+	const Thing *T2 = doc.things[th2].get();
 
 	double dx = abs(T1->x() - T2->x());
 	double dy = abs(T1->y() - T2->y());
@@ -119,7 +119,7 @@ static void MoveOverlapThing(Instance &inst, int th, int mid_x, int mid_y, int n
 	fixcoord_t fdx = inst.MakeValidCoord(vec_x * dist);
 	fixcoord_t fdy = inst.MakeValidCoord(vec_y * dist);
 
-	const Thing *T = inst.level.things[th];
+	const Thing *T = inst.level.things[th].get();
 
 	inst.level.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
 	inst.level.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);

@@ -589,8 +589,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(Thing *thing : doc.things)
-		delete thing;
 	for(Vertex *vertex : doc.vertices)
 		delete vertex;
 	for(Sector *sector : doc.sectors)
@@ -675,7 +673,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 	{
 	case ObjType::things:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(basis.doc.things[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
@@ -753,7 +751,7 @@ Thing *Basis::EditOperation::rawDeleteThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
 
-	Thing *result = doc.things[objnum];
+	Thing *result = doc.things[objnum].release();
 	doc.things.erase(doc.things.begin() + objnum);
 
 	return result;
@@ -903,7 +901,8 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 void Basis::EditOperation::rawInsertThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
-	doc.things.insert(doc.things.begin() + objnum, thing);
+	doc.things.insert(doc.things.begin() + objnum,
+					  std::unique_ptr<Thing>(thing));
 }
 
 //
