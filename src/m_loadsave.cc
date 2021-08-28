@@ -46,6 +46,21 @@
 
 #include <memory>
 
+//
+// Holds any problems during level loading
+//
+struct LevelLoadProblems
+{
+	bool exist() const noexcept
+	{
+		return bad_linedef_count || bad_sector_refs || bad_sidedef_refs;
+	}
+
+	int bad_linedef_count;
+	int bad_sector_refs;
+	int bad_sidedef_refs;
+};
+
 static const char overwrite_message[] =
 	"The %s PWAD already contains this map.  "
 	"This operation will destroy that map (overwrite it)."
@@ -516,14 +531,15 @@ static void CreateFallbackVertices(Document &doc)
 }
 
 
-void Instance::ValidateSidedefRefs(LineDef * ld, int num)
+void Instance::ValidateSidedefRefs(LineDef * ld, int num,
+								   LevelLoadProblems &problems)
 {
 	if (ld->right >= level.numSidedefs() || ld->left >= level.numSidedefs())
 	{
 		gLog.printf("WARNING: linedef #%d has invalid sidedefs (%d / %d)\n",
 				  num, ld->right, ld->left);
 
-		bad_sidedef_refs++;
+		problems.bad_sidedef_refs++;
 
 		// ensure we have a usable sidedef
 		if (level.numSidedefs() == 0)
@@ -537,7 +553,8 @@ void Instance::ValidateSidedefRefs(LineDef * ld, int num)
 	}
 }
 
-void Instance::ValidateVertexRefs(LineDef *ld, int num)
+void Instance::ValidateVertexRefs(LineDef *ld, int num,
+								  LevelLoadProblems &problems)
 {
 	if (ld->start >= level.numVertices() || ld->end >= level.numVertices() ||
 	    ld->start == ld->end)
@@ -545,7 +562,7 @@ void Instance::ValidateVertexRefs(LineDef *ld, int num)
 		gLog.printf("WARNING: linedef #%d has invalid vertices (%d -> %d)\n",
 		          num, ld->start, ld->end);
 
-		bad_linedef_count++;
+		problems.bad_linedef_count++;
 
 		// ensure we have a valid vertex
 		if (level.numVertices() < 2)
@@ -556,14 +573,15 @@ void Instance::ValidateVertexRefs(LineDef *ld, int num)
 	}
 }
 
-void Instance::ValidateSectorRef(SideDef *sd, int num)
+void Instance::ValidateSectorRef(SideDef *sd, int num,
+								 LevelLoadProblems &problems)
 {
 	if (sd->sector >= level.numSectors())
 	{
 		gLog.printf("WARNING: sidedef #%d has invalid sector (%d)\n",
 		          num, sd->sector);
 
-		bad_sector_refs++;
+		problems.bad_sector_refs++;
 
 		// ensure we have a valid sector
 		if (level.numSectors() == 0)
@@ -706,7 +724,8 @@ void Instance::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 }
 
 
-void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad)
+void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad,
+							LevelLoadProblems &problems)
 {
 	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SIDEDEFS");
 	if(!lump)
@@ -740,14 +759,15 @@ void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad)
 
 		sd->sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(sd, i);
+		ValidateSectorRef(sd, i, problems);
 
 		level.sidedefs.push_back(sd);
 	}
 }
 
 
-void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad)
+void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad,
+							LevelLoadProblems &problems)
 {
 	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "LINEDEFS");
 	if (! lump)
@@ -784,8 +804,8 @@ void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad)
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i);
-		ValidateSidedefRefs(ld, i);
+		ValidateVertexRefs(ld, i, problems);
+		ValidateSidedefRefs(ld, i, problems);
 
 		level.linedefs.push_back(ld);
 	}
@@ -793,7 +813,8 @@ void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad)
 
 
 // IOANCH 9/2015
-void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad)
+void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad,
+								  LevelLoadProblems &problems)
 {
 	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "LINEDEFS");
 	if (! lump)
@@ -834,8 +855,8 @@ void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad)
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i);
-		ValidateSidedefRefs(ld, i);
+		ValidateVertexRefs(ld, i, problems);
+		ValidateSidedefRefs(ld, i, problems);
 
 		level.linedefs.push_back(ld);
 	}
@@ -874,26 +895,26 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 }
 
 
-void Instance::ShowLoadProblem() const
+void Instance::ShowLoadProblem(const LevelLoadProblems &problems) const
 {
 	gLog.printf("Map load problems:\n");
-	gLog.printf("   %d linedefs with bad vertex refs\n", bad_linedef_count);
-	gLog.printf("   %d linedefs with bad sidedef refs\n", bad_sidedef_refs);
-	gLog.printf("   %d sidedefs with bad sector refs\n", bad_sector_refs);
+	gLog.printf("   %d linedefs with bad vertex refs\n", problems.bad_linedef_count);
+	gLog.printf("   %d linedefs with bad sidedef refs\n", problems.bad_sidedef_refs);
+	gLog.printf("   %d sidedefs with bad sector refs\n", problems.bad_sector_refs);
 
 	SString message;
 
-	if (bad_linedef_count > 0)
+	if (problems.bad_linedef_count > 0)
 	{
 		message = SString::printf("Found %d linedefs with bad vertex references.\n"
 			"These references have been replaced.",
-			bad_linedef_count);
+								  problems.bad_linedef_count);
 	}
 	else
 	{
 		message = SString::printf("Found %d bad sector refs, %d bad sidedef refs.\n"
 			"These references have been replaced.",
-			bad_sector_refs, bad_sidedef_refs);
+								  problems.bad_sector_refs, problems.bad_sidedef_refs);
 	}
 
 	DLG_Notify("Map validation report:\n\n%s", message.c_str());
@@ -955,15 +976,13 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 
 	level.basis.clearAll();
 
-	bad_linedef_count = 0;
-	bad_sector_refs   = 0;
-	bad_sidedef_refs  = 0;
+	LevelLoadProblems problems = {};
 
 	LoadHeader(loading_level, wad);
 
 	if (loaded.levelFormat == MapFormat::udmf)
 	{
-		UDMF_LoadLevel(loading_level, wad);
+		UDMF_LoadLevel(loading_level, wad, problems);
 	}
 	else
 	{
@@ -974,24 +993,24 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 
 		LoadVertices(loading_level, wad);
 		LoadSectors(loading_level, wad);
-		LoadSideDefs(loading_level, wad);
+		LoadSideDefs(loading_level, wad, problems);
 
 		if (loaded.levelFormat == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen(loading_level, wad);
+			LoadLineDefs_Hexen(loading_level, wad, problems);
 
 			LoadBehavior(loading_level, wad);
 			LoadScripts(loading_level, wad);
 		}
 		else
 		{
-			LoadLineDefs(loading_level, wad);
+			LoadLineDefs(loading_level, wad, problems);
 		}
 	}
 
-	if (bad_linedef_count || bad_sector_refs || bad_sidedef_refs)
+	if (problems.exist())
 	{
-		ShowLoadProblem();
+		ShowLoadProblem(problems);
 	}
 
 	// Node builders create a lot of new vertices for segs.

@@ -626,24 +626,25 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 }
 
 
-void Instance::ValidateLevel_UDMF()
+void Instance::ValidateLevel_UDMF(LevelLoadProblems &problems)
 {
 	for (int n = 0 ; n < level.numSidedefs() ; n++)
 	{
-		ValidateSectorRef(level.sidedefs[n], n);
+		ValidateSectorRef(level.sidedefs[n], n, problems);
 	}
 
 	for (int n = 0 ; n < level.numLinedefs(); n++)
 	{
 		LineDef *L = level.linedefs[n];
 
-		ValidateVertexRefs(L, n);
-		ValidateSidedefRefs(L, n);
+		ValidateVertexRefs(L, n, problems);
+		ValidateSidedefRefs(L, n, problems);
 	}
 }
 
 
-void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad)
+void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad,
+							  LevelLoadProblems &problems)
 {
 	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "TEXTMAP");
 	// we assume this cannot happen
@@ -687,7 +688,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad)
 		parser.SkipToEOLN();
 	}
 
-	ValidateLevel_UDMF();
+	ValidateLevel_UDMF(problems);
 }
 
 
