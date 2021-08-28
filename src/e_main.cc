@@ -374,12 +374,12 @@ void Instance::Editor_ChangeMode(char mode_char)
 //------------------------------------------------------------------------
 
 
-static void UpdateLevelBounds(Instance &inst, int start_vert)
+static void UpdateLevelBounds(Document &doc, int start_vert)
 {
-	for(int i = start_vert; i < inst.level.numVertices(); i++)
+	for(int i = start_vert; i < doc.numVertices(); i++)
 	{
-		const auto &V = inst.level.vertices[i];
-		inst.level.updateMapBoundsByPoint(V->x(), V->y());
+		const auto &V = doc.vertices[i];
+		doc.updateMapBoundsByPoint(V->x(), V->y());
 	}
 }
 
@@ -397,7 +397,7 @@ void Instance::CalculateLevelBounds()
 	level.Map_bound_y1 = 32767;
 	level.Map_bound_y2 = -32767;
 
-	UpdateLevelBounds(*this, 0);
+	UpdateLevelBounds(level, 0);
 }
 
 
@@ -473,7 +473,7 @@ void Instance::MapStuff_NotifyEnd()
 	}
 	else if (new_vertex_minimum >= 0)
 	{
-		UpdateLevelBounds(*this, new_vertex_minimum);
+		UpdateLevelBounds(level, new_vertex_minimum);
 	}
 }
 
