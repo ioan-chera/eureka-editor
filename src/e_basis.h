@@ -36,6 +36,7 @@
 
 class crc32_c;
 class selection_c;
+struct ConfigData;
 struct Document;
 
 //
@@ -216,7 +217,7 @@ public:
 		return ceilh - floorh;
 	}
 
-	void SetDefaults(const Instance &inst);
+	void SetDefaults(const ConfigData &config);
 };
 
 

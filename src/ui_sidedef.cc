@@ -286,7 +286,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	{
 		int new_sec = box->inst.level.basis.addNew(ObjType::sectors);
 
-		box->inst.level.sectors[new_sec]->SetDefaults(box->inst);
+		box->inst.level.sectors[new_sec]->SetDefaults(box->inst.conf);
 	}
 
 	for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())

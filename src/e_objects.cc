@@ -83,7 +83,7 @@ void ObjectsModule::createSquare(int model) const
 	if (model >= 0)
 		*doc.sectors[new_sec] = *doc.sectors[model];
 	else
-		doc.sectors[new_sec]->SetDefaults(inst);
+		doc.sectors[new_sec]->SetDefaults(inst.conf);
 
 	double x1 = inst.grid.QuantSnapX(inst.edit.map_x, false);
 	double y1 = inst.grid.QuantSnapX(inst.edit.map_y, false);
@@ -172,7 +172,7 @@ int ObjectsModule::sectorNew(int model, int model2, int model3) const
 	if (model < 0) model = model3;
 
 	if (model < 0)
-		doc.sectors[new_sec]->SetDefaults(inst);
+		doc.sectors[new_sec]->SetDefaults(inst.conf);
 	else
 		*doc.sectors[new_sec] = *doc.sectors[model];
 
