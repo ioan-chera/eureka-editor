@@ -67,7 +67,7 @@ public:
 
 	std::vector<std::unique_ptr<Thing>>   things;
 	std::vector<std::unique_ptr<Vertex>>  verts;
-	std::vector<Sector *>  sectors;
+	std::vector<std::unique_ptr<Sector>>  sectors;
 	std::vector<SideDef *> sides;
 	std::vector<LineDef *> lines;
 
@@ -80,8 +80,6 @@ public:
 
 	~clipboard_data_c()
 	{
-		for(Sector *sector : sectors)
-			delete sector;
 		for(SideDef *sidedef : sides)
 			delete sidedef;
 		for(LineDef *linedef : lines)
@@ -409,9 +407,9 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 		{
 			sector_map[*it] = (int)clip_board->sectors.size();
 
-			Sector * S = new Sector;
+			auto S = std::make_unique<Sector>();
 			*S = *doc.sectors[*it].get();
-			clip_board->sectors.push_back(S);
+			clip_board->sectors.push_back(std::move(S));
 		}
 	}
 
