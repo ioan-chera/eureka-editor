@@ -616,16 +616,14 @@ void UI_Canvas::DrawAxes(Fl_Color col)
 void UI_Canvas::DrawMapBounds()
 {
 	RenderColor(FL_RED);
+	double x1, y1, x2, y2;
+	inst.level.mapBound.get(x1, y1, x2, y2);
 
-	DrawMapLine(inst.level.mapBound.x1, inst.level.mapBound.y1,
-				inst.level.mapBound.x2, inst.level.mapBound.y1);
-	DrawMapLine(inst.level.mapBound.x1, inst.level.mapBound.y2,
-				inst.level.mapBound.x2, inst.level.mapBound.y2);
+	DrawMapLine(x1, y1, x2, y1);
+	DrawMapLine(x1, y2, x2, y2);
 
-	DrawMapLine(inst.level.mapBound.x1, inst.level.mapBound.y1,
-				inst.level.mapBound.x1, inst.level.mapBound.y2);
-	DrawMapLine(inst.level.mapBound.x2, inst.level.mapBound.y1,
-				inst.level.mapBound.x2, inst.level.mapBound.y2);
+	DrawMapLine(x1, y1, x1, y2);
+	DrawMapLine(x2, y1, x2, y2);
 }
 
 

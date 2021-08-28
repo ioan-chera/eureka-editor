@@ -32,12 +32,15 @@ class Instance;
 //
 // Bounding box, expanded by added points
 //
-struct BoundingBox
+class BoundingBox
 {
+public:
 	void addPoint(double x, double y);
 	void zeroOut();
 	void reset();
 
+	void get(double &x1, double &y1, double &x2, double &y2) const;
+private:
 	double x1 = 32767;
 	double y1 = 32767;
 	double x2 = -32767;

@@ -55,6 +55,17 @@ void BoundingBox::reset()
 }
 
 //
+// The read-only access
+//
+void BoundingBox::get(double &x1, double &y1, double &x2, double &y2) const
+{
+	x1 = this->x1;
+	y1 = this->y1;
+	x2 = this->x2;
+	y2 = this->y2;
+}
+
+//
 // Get number of objects based on enum
 //
 int Document::numObjects(ObjType type) const

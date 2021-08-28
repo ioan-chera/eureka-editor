@@ -390,19 +390,20 @@ void UI_CanvasScroll::UpdateBounds()
 
 void UI_CanvasScroll::UpdateBounds_X()
 {
-	if (last_bounds[0] == mInstance.level.mapBound.x1 &&
-		last_bounds[1] == mInstance.level.mapBound.x2)
+	double x1, y1, x2, y2;
+	mInstance.level.mapBound.get(x1, y1, x2, y2);
+	if (last_bounds[0] == x1 && last_bounds[1] == x2)
 	{
 		return;
 	}
 
-	last_bounds[0] = static_cast<int>(mInstance.level.mapBound.x1);
-	last_bounds[1] = static_cast<int>(mInstance.level.mapBound.x2);
+	last_bounds[0] = static_cast<int>(x1);
+	last_bounds[1] = static_cast<int>(x2);
 
-	int expand = static_cast<int>(512 + (mInstance.level.mapBound.x2 - mInstance.level.mapBound.x1) / 8);
+	int expand = static_cast<int>(512 + (x2 - x1) / 8);
 
-	bound_x1 = static_cast<int>(mInstance.level.mapBound.x1 - expand);
-	bound_x2 = static_cast<int>(mInstance.level.mapBound.x2 + expand);
+	bound_x1 = static_cast<int>(x1 - expand);
+	bound_x2 = static_cast<int>(x2 + expand);
 
 	Adjust_X();
 }
@@ -410,19 +411,20 @@ void UI_CanvasScroll::UpdateBounds_X()
 
 void UI_CanvasScroll::UpdateBounds_Y()
 {
-	if (last_bounds[2] == mInstance.level.mapBound.y1 &&
-		last_bounds[3] == mInstance.level.mapBound.y2)
+	double x1, y1, x2, y2;
+	mInstance.level.mapBound.get(x1, y1, x2, y2);
+	if (last_bounds[2] == y1 && last_bounds[3] == y2)
 	{
 		return;
 	}
 
-	last_bounds[2] = static_cast<int>(mInstance.level.mapBound.y1);
-	last_bounds[3] = static_cast<int>(mInstance.level.mapBound.y2);
+	last_bounds[2] = static_cast<int>(y1);
+	last_bounds[3] = static_cast<int>(y2);
 
-	int expand = static_cast<int>(512 + (mInstance.level.mapBound.y2 - mInstance.level.mapBound.y1) / 8);
+	int expand = static_cast<int>(512 + (y2 - y1) / 8);
 
-	bound_y1 = static_cast<int>(mInstance.level.mapBound.y1 - expand);
-	bound_y2 = static_cast<int>(mInstance.level.mapBound.y2 + expand);
+	bound_y1 = static_cast<int>(y1 - expand);
+	bound_y2 = static_cast<int>(y2 + expand);
 
 	Adjust_Y();
 }

@@ -66,16 +66,18 @@ void Instance::zoom_fit()
 	int ScrMaxX = main_win->canvas->w();
 	int ScrMaxY = main_win->canvas->h();
 
-	if (level.mapBound.x1 < level.mapBound.x2)
-		xzoom = ScrMaxX / (level.mapBound.x2 - level.mapBound.x1);
+	double x1, y1, x2, y2;
+	level.mapBound.get(x1, y1, x2, y2);
 
-	if (level.mapBound.y1 < level.mapBound.y2)
-		yzoom = ScrMaxY / (level.mapBound.y2 - level.mapBound.y1);
+	if (x1 < x2)
+		xzoom = ScrMaxX / (x2 - x1);
+
+	if (y1 < y2)
+		yzoom = ScrMaxY / (y2 - y1);
 
 	grid.NearestScale(std::min(xzoom, yzoom));
 
-	grid.MoveTo((level.mapBound.x1 + level.mapBound.x2) / 2,
-				(level.mapBound.y1 + level.mapBound.y2) / 2);
+	grid.MoveTo((x1 + x2) / 2, (y1 + y2) / 2);
 }
 
 
