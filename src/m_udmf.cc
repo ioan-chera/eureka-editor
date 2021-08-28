@@ -569,7 +569,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 		kind = Objid(ObjType::sectors, 1);
 		new_S = new Sector;
 		new_S->light = 160;
-		doc.sectors.push_back(new_S);
+		doc.sectors.push_back(std::unique_ptr<Sector>(new_S));
 	}
 
 	if (!kind.valid())
@@ -858,7 +858,7 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 		lump->Printf("sector // %d\n", i);
 		lump->Printf("{\n");
 
-		const Sector *sec = doc.sectors[i];
+		const Sector *sec = doc.sectors[i].get();
 
 		lump->Printf("heightfloor = %d;\n", sec->floorh);
 		lump->Printf("heightceiling = %d;\n", sec->ceilh);

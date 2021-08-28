@@ -374,7 +374,7 @@ public:
 
 		SideDef *back_sd = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
 		if (back_sd)
-			back = inst.level.sectors[back_sd->sector];
+			back = inst.level.sectors[back_sd->sector].get();
 
 		// support for BOOM's 242 "transfer heights" line type
 		Sector temp_front;
@@ -383,7 +383,7 @@ public:
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
-			const Sector *dummy = inst.level.sectors[exfloor->heightsec];
+			const Sector *dummy = inst.level.sectors[exfloor->heightsec].get();
 			front = Boom242Sector(front, &temp_front, dummy);
 		}
 
@@ -392,7 +392,7 @@ public:
 			exfloor = inst.Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
+				const Sector *dummy = inst.level.sectors[exfloor->heightsec].get();
 				back = Boom242Sector(back, &temp_back, dummy);
 			}
 		}
@@ -493,7 +493,7 @@ public:
 			return;
 
 		front = sec;
-		back  = inst.level.sectors[back_sd->sector];
+		back  = inst.level.sectors[back_sd->sector].get();
 
 		int c_h = std::min(front->ceilh,  back->ceilh);
 		int f_h = std::max(front->floorh, back->floorh);
@@ -920,8 +920,8 @@ public:
 			sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(thsec);
 			if (inst.level.isSector(exfloor->heightsec))
 			{
-				const Sector *real  = inst.level.sectors[thsec];
-				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
+				const Sector *real  = inst.level.sectors[thsec].get();
+				const Sector *dummy = inst.level.sectors[exfloor->heightsec].get();
 
 				if (dummy->floorh > real->floorh &&
 					inst.r_view.z > dummy->floorh &&
@@ -1141,7 +1141,7 @@ public:
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-		const Sector *S = inst.level.sectors[sec_index];
+		const Sector *S = inst.level.sectors[sec_index].get();
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 

@@ -414,7 +414,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 			sector_map[*it] = (int)clip_board->sectors.size();
 
 			Sector * S = new Sector;
-			*S = *doc.sectors[*it];
+			*S = *doc.sectors[*it].get();
 			clip_board->sectors.push_back(S);
 		}
 	}
@@ -566,7 +566,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = inst.level.basis.addNew(ObjType::sectors);
-		Sector * S = inst.level.sectors[new_s];
+		Sector * S = inst.level.sectors[new_s].get();
 
 		sector_map[i] = new_s;
 

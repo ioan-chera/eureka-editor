@@ -1022,7 +1022,7 @@ public:
 			sector_3dfloors_c *b_ex = inst.Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
-				dummy = inst.level.sectors[b_ex->heightsec];
+				dummy = inst.level.sectors[b_ex->heightsec].get();
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
@@ -1032,7 +1032,7 @@ public:
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
-				dummy = inst.level.sectors[f_ex->heightsec];
+				dummy = inst.level.sectors[f_ex->heightsec].get();
 				if (dummy->floorh < front->floorh)
 				{
 					dummy_fp.Init(static_cast<float>(dummy->floorh));
@@ -1066,7 +1066,7 @@ public:
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
 					const SideDef *ef_sd = inst.level.sidedefs[EF.sd];
-					const Sector *dummy = inst.level.sectors[ef_sd->sector];
+					const Sector *dummy = inst.level.sectors[ef_sd->sector].get();
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1121,7 +1121,7 @@ public:
 		if (! subdiv)
 			return;
 
-		const Sector *sec = inst.level.sectors[sec_index];
+		const Sector *sec = inst.level.sectors[sec_index].get();
 		const Sector *dummy = NULL;
 
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sec_index);
@@ -1131,7 +1131,7 @@ public:
 		// support for BOOM's 242 "transfer heights" line type
 		if (exfloor->heightsec >= 0)
 		{
-			dummy = inst.level.sectors[exfloor->heightsec];
+			dummy = inst.level.sectors[exfloor->heightsec].get();
 
 			if (dummy->floorh > sec->floorh && inst.r_view.z < dummy->floorh)
 			{
@@ -1181,7 +1181,7 @@ public:
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const Sector *dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
+			const Sector *dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector].get();
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.
@@ -1394,7 +1394,7 @@ public:
 
 	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = inst.level.sectors[sec_index];
+		const Sector *sec = inst.level.sectors[sec_index].get();
 
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 

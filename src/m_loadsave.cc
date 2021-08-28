@@ -107,10 +107,9 @@ void Instance::FreshLevel()
 {
 	level.basis.clearAll();
 
-	Sector *sec = new Sector;
-	level.sectors.push_back(sec);
-
+	auto sec = std::make_unique<Sector>();
 	sec->SetDefaults(conf);
+	level.sectors.push_back(std::move(sec));
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
@@ -466,7 +465,7 @@ void Instance::LoadSectors(int loading_level, const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading sectors.\n");
 
-		Sector *sec = new Sector;
+		auto sec = std::make_unique<Sector>();
 
 		sec->floorh = LE_S16(raw.floorh);
 		sec->ceilh  = LE_S16(raw.ceilh);
@@ -481,7 +480,7 @@ void Instance::LoadSectors(int loading_level, const Wad_file *load_wad)
 		sec->type  = LE_U16(raw.type);
 		sec->tag   = LE_S16(raw.tag);
 
-		level.sectors.push_back(sec);
+		level.sectors.push_back(std::move(sec));
 	}
 }
 
@@ -490,11 +489,11 @@ void Instance::CreateFallbackSector()
 {
 	gLog.printf("Creating a fallback sector.\n");
 
-	Sector *sec = new Sector;
+	auto sec = std::make_unique<Sector>();
 
 	sec->SetDefaults(conf);
 
-	level.sectors.push_back(sec);
+	level.sectors.push_back(std::move(sec));
 }
 
 void Instance::CreateFallbackSideDef()
@@ -1370,7 +1369,7 @@ void Instance::SaveSectors()
 {
 	Lump_c *lump = master.edit_wad->AddLump("SECTORS");
 
-	for (const Sector *sec : level.sectors)
+	for (const auto &sec : level.sectors)
 	{
 		raw_sector_t raw;
 

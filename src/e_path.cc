@@ -256,8 +256,8 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 		if (sec1 == sec2)
 			continue;
 
-		Sector *S1 = inst.level.sectors[sec1];
-		Sector *S2 = inst.level.sectors[sec2];
+		Sector *S1 = inst.level.sectors[sec1].get();
+		Sector *S2 = inst.level.sectors[sec2].get();
 
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))

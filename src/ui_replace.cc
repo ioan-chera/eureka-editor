@@ -1515,7 +1515,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 bool UI_FindAndReplace::Match_Sector(int idx)
 {
-	const Sector *sector = inst.level.sectors[idx];
+	const Sector *sector = inst.level.sectors[idx].get();
 
 	if (! Filter_Tag(sector->tag))
 		return false;
@@ -1553,7 +1553,7 @@ bool UI_FindAndReplace::Match_LineType(int idx)
 
 bool UI_FindAndReplace::Match_SectorType(int idx)
 {
-	const Sector *sector = inst.level.sectors[idx];
+	const Sector *sector = inst.level.sectors[idx].get();
 
 	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
@@ -1744,7 +1744,7 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 
 void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 {
-	const Sector *sector = inst.level.sectors[idx];
+	const Sector *sector = inst.level.sectors[idx].get();
 
 	const char *pattern = find_match->value();
 

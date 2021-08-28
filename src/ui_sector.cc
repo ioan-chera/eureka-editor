@@ -706,7 +706,7 @@ void UI_SectorBox::SetObj(int _index, int _count)
 
 void UI_SectorBox::UpdateField(int field)
 {
-	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj] : nullptr;
+	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj].get() : nullptr;
 	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
 	{
 		if (inst.level.isSector(obj))

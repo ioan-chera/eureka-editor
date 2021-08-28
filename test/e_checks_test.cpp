@@ -305,7 +305,11 @@ TEST(EChecks, FindFreeTag)
 	{
 		inst.level.sectors.clear();
 		for(Sector &sector : sectors)
-			inst.level.sectors.push_back(&sector);
+		{
+			Sector *newSector = new Sector;
+			*newSector = sector;
+			inst.level.sectors.push_back(std::unique_ptr<Sector>(newSector));
+		}
 	};
 
 	// Check a level just with lines
@@ -444,7 +448,11 @@ TEST(EChecks, TagsApplyNewValue)
 	for(LineDef &line : lines)
 		inst.level.linedefs.push_back(&line);
 	for(Sector &sector : sectors)
-		inst.level.sectors.push_back(&sector);
+	{
+		Sector *newSector = new Sector;
+		*newSector = sector;
+		inst.level.sectors.push_back(std::unique_ptr<Sector>(newSector));
+	}
 
 	// Prepare the selection lists
 	auto linesel = std::make_unique<selection_c>(ObjType::linedefs);
