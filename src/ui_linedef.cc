@@ -389,7 +389,7 @@ void UI_LineBox::SetTexOnLine(int ld, int new_tex, int e_state, int parts)
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		SideDef *S = inst.level.sidedefs[sd1];
+		SideDef *S = inst.level.sidedefs[sd1].get();
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).

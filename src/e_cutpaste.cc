@@ -424,7 +424,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 		side_map[*it] = (int)clip_board->sides.size();
 
 		SideDef * SD = new SideDef;
-		*SD = *doc.sidedefs[*it];
+		*SD = *doc.sidedefs[*it].get();
 		clip_board->sides.push_back(SD);
 
 		// adjust sector references, if needed
@@ -583,7 +583,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 		}
 
 		int new_sd = inst.level.basis.addNew(ObjType::sidedefs);
-		SideDef * SD = inst.level.sidedefs[new_sd];
+		SideDef * SD = inst.level.sidedefs[new_sd].get();
 
 		side_map[i] = new_sd;
 
@@ -918,7 +918,7 @@ void UnusedSideDefs(const Document &doc, selection_c *lines, selection_c *secs, 
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
 	{
-		const SideDef *SD = doc.sidedefs[i];
+		const SideDef *SD = doc.sidedefs[i].get();
 
 		if (secs && secs->get(SD->sector))
 			result->set(i);

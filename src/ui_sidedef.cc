@@ -462,7 +462,7 @@ void UI_SideBox::UpdateField()
 {
 	if (inst.level.isSidedef(obj))
 	{
-		const SideDef *sd = inst.level.sidedefs[obj];
+		const SideDef *sd = inst.level.sidedefs[obj].get();
 
 		mFixUp.setInputValue(x_ofs, SString(sd->x_offset).c_str());
 		mFixUp.setInputValue(y_ofs, SString(sd->y_offset).c_str());

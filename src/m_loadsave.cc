@@ -118,10 +118,9 @@ void Instance::FreshLevel()
 		v->SetRawY(*this, (i==1 || i==2) ? 256 :-256);
 		level.vertices.push_back(std::move(v));
 
-		SideDef *sd = new SideDef;
-		level.sidedefs.push_back(sd);
-
+		auto sd = std::make_unique<SideDef>();
 		sd->SetDefaults(*this, false);
+		level.sidedefs.push_back(std::move(sd));
 
 		LineDef *ld = new LineDef;
 		level.linedefs.push_back(ld);
@@ -504,11 +503,11 @@ void Instance::CreateFallbackSideDef()
 
 	gLog.printf("Creating a fallback sidedef.\n");
 
-	SideDef *sd = new SideDef;
+	auto sd = std::make_unique<SideDef>();
 
 	sd->SetDefaults(*this, false);
 
-	level.sidedefs.push_back(sd);
+	level.sidedefs.push_back(std::move(sd));
 }
 
 static void CreateFallbackVertices(Document &doc)
@@ -744,7 +743,7 @@ void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad,
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading sidedefs.\n");
 
-		SideDef *sd = new SideDef;
+		auto sd = std::make_unique<SideDef>();
 
 		sd->x_offset = LE_S16(raw.x_offset);
 		sd->y_offset = LE_S16(raw.y_offset);
@@ -759,9 +758,9 @@ void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad,
 
 		sd->sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(sd, i, problems);
+		ValidateSectorRef(sd.get(), i, problems);
 
-		level.sidedefs.push_back(sd);
+		level.sidedefs.push_back(std::move(sd));
 	}
 }
 
@@ -1443,7 +1442,7 @@ void Instance::SaveSideDefs()
 {
 	Lump_c *lump = master.edit_wad->AddLump("SIDEDEFS");
 
-	for (const SideDef *side : level.sidedefs)
+	for (const auto &side : level.sidedefs)
 	{
 		raw_sidedef_t raw;
 

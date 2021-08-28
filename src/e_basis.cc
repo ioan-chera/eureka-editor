@@ -171,12 +171,12 @@ Vertex * LineDef::End(const Document &doc) const
 
 SideDef * LineDef::Right(const Document &doc) const
 {
-	return (right >= 0) ? doc.sidedefs[right] : nullptr;
+	return (right >= 0) ? doc.sidedefs[right].get() : nullptr;
 }
 
 SideDef * LineDef::Left(const Document &doc) const
 {
-	return (left >= 0) ? doc.sidedefs[left] : nullptr;
+	return (left >= 0) ? doc.sidedefs[left].get() : nullptr;
 }
 
 
@@ -589,8 +589,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(SideDef *sidedef : doc.sidedefs)
-		delete sidedef;
 	for(LineDef *linedef : doc.linedefs)
 		delete linedef;
 
@@ -681,7 +679,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 		break;
 	case ObjType::sidedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
@@ -798,7 +796,7 @@ Sector *Basis::EditOperation::rawDeleteSector(Document &doc) const
 	{
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = doc.sidedefs[n];
+			SideDef *S = doc.sidedefs[n].get();
 
 			if(S->sector > objnum)
 				S->sector--;
@@ -815,7 +813,7 @@ SideDef *Basis::EditOperation::rawDeleteSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSidedefs());
 
-	SideDef *result = doc.sidedefs[objnum];
+	SideDef *result = doc.sidedefs[objnum].release();
 	doc.sidedefs.erase(doc.sidedefs.begin() + objnum);
 
 	// fix the linedefs references
@@ -942,7 +940,7 @@ void Basis::EditOperation::rawInsertSector(Document &doc) const
 	{
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = doc.sidedefs[n];
+			SideDef *S = doc.sidedefs[n].get();
 
 			if(S->sector >= objnum)
 				S->sector++;
@@ -956,7 +954,8 @@ void Basis::EditOperation::rawInsertSector(Document &doc) const
 void Basis::EditOperation::rawInsertSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSidedefs());
-	doc.sidedefs.insert(doc.sidedefs.begin() + objnum, sidedef);
+	doc.sidedefs.insert(doc.sidedefs.begin() + objnum,
+						std::unique_ptr<SideDef>(sidedef));
 
 	// fix the linedefs references
 

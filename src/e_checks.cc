@@ -3964,7 +3964,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 			if (sd_num < 0)
 				continue;
 
-			const SideDef *SD = inst.level.sidedefs[sd_num];
+			const SideDef *SD = inst.level.sidedefs[sd_num].get();
 
 			if (! inst.W_TextureIsKnown(SD->LowerTex()))
 				inst.level.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
