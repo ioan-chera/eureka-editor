@@ -178,7 +178,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const Vertex *V = box->inst.level.vertices[*it];
+			const Vertex *V = box->inst.level.vertices[*it].get();
 
 			box->inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
 			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);

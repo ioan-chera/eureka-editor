@@ -403,7 +403,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 		vert_map[*it] = (int)clip_board->verts.size();
 
 		Vertex * SD = new Vertex;
-		*SD = *doc.vertices[*it];
+		*SD = *doc.vertices[*it].get();
 		clip_board->verts.push_back(SD);
 	}
 
@@ -508,7 +508,7 @@ bool Instance::Clipboard_DoCopy()
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
 				Vertex * V = new Vertex;
-				*V = *level.vertices[*it];
+				*V = *level.vertices[*it].get();
 				clip_board->verts.push_back(V);
 			}
 			break;
@@ -553,7 +553,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = inst.level.basis.addNew(ObjType::vertices);
-		Vertex * V = inst.level.vertices[new_v];
+		Vertex * V = inst.level.vertices[new_v].get();
 
 		vert_map[i] = new_v;
 
@@ -766,7 +766,7 @@ bool Instance::Clipboard_DoPaste()
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
 				int new_v = level.basis.addNew(ObjType::vertices);
-				Vertex * V = level.vertices[new_v];
+				Vertex * V = level.vertices[new_v].get();
 
 				*V = *clip_board->verts[i];
 

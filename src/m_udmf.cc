@@ -547,7 +547,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	{
 		kind = Objid(ObjType::vertices, 1);
 		new_V = new Vertex;
-		doc.vertices.push_back(new_V);
+		doc.vertices.push_back(std::unique_ptr<Vertex>(new_V));
 	}
 	else if (name.Match("linedef"))
 	{
@@ -755,7 +755,7 @@ static void UDMF_WriteVertices(const Document &doc, Lump_c *lump)
 		lump->Printf("vertex // %d\n", i);
 		lump->Printf("{\n");
 
-		const Vertex *vert = doc.vertices[i];
+		const Vertex *vert = doc.vertices[i].get();
 
 		lump->Printf("x = %1.3f;\n", vert->x());
 		lump->Printf("y = %1.3f;\n", vert->y());

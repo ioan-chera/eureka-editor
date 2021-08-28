@@ -755,7 +755,7 @@ void Instance::CMD_ACT_Click()
 
 		int new_vert = level.basis.addNew(ObjType::vertices);
 
-		Vertex *V = level.vertices[new_vert];
+		Vertex *V = level.vertices[new_vert].get();
 
 		V->SetRawXY(*this, edit.split_x, edit.split_y);
 

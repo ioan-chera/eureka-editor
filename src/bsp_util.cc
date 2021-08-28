@@ -466,8 +466,8 @@ static int VertexCompare(const Document &doc, const void *p1, const void *p2)
 	if (vert1 == vert2)
 		return 0;
 
-	const Vertex *A = doc.vertices[vert1];
-	const Vertex *B = doc.vertices[vert2];
+	const Vertex *A = doc.vertices[vert1].get();
+	const Vertex *B = doc.vertices[vert2].get();
 
 	if (A->raw_x != B->raw_x)
 		return A->raw_x - B->raw_x;

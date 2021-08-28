@@ -647,7 +647,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! inst.edit.draw_from.valid())
 		return;
 
-	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num];
+	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num].get();
 
 	double dx = inst.edit.draw_to_x - V->x();
 	double dy = inst.edit.draw_to_y - V->y();

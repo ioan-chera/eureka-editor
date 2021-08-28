@@ -900,7 +900,7 @@ void Instance::CMD_LIN_SwapSides()
 int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
 {
 	LineDef * L = doc.linedefs[ld];
-	Vertex  * V = doc.vertices[new_v];
+	Vertex  * V = doc.vertices[new_v].get();
 
 	// create new linedef
 	int new_l = doc.basis.addNew(ObjType::linedefs);
@@ -961,7 +961,7 @@ bool LinedefModule::doSplitLineDef(int ld) const
 
 	int new_v = doc.basis.addNew(ObjType::vertices);
 
-	Vertex * V = doc.vertices[new_v];
+	Vertex * V = doc.vertices[new_v].get();
 
 	V->SetRawXY(inst, new_x, new_y);
 

@@ -94,7 +94,7 @@ void ObjectsModule::createSquare(int model) const
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = doc.basis.addNew(ObjType::vertices);
-		Vertex *V = doc.vertices[new_v];
+		Vertex *V = doc.vertices[new_v].get();
 
 		V->SetRawX(inst, (i >= 2) ? x2 : x1);
 		V->SetRawY(inst, (i==1 || i==2) ? y2 : y1);
@@ -503,7 +503,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	{
 		new_vert = doc.basis.addNew(ObjType::vertices);
 
-		Vertex *V = doc.vertices[new_vert];
+		Vertex *V = doc.vertices[new_vert].get();
 
 		V->SetRawXY(inst, new_x, new_y);
 
@@ -759,7 +759,7 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 		case ObjType::vertices:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex * V = doc.vertices[*it];
+				const Vertex * V = doc.vertices[*it].get();
 
 				doc.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
 				doc.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
@@ -855,7 +855,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(int splitLineID, int vertID,
 {
 	// Add a vertex there and do the split
 	int newVID = doc.basis.addNew(ObjType::vertices);
-	Vertex *newV = doc.vertices[newVID];
+	Vertex *newV = doc.vertices[newVID].get();
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
@@ -1523,7 +1523,7 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex *V = doc.vertices[*it];
+				const Vertex *V = doc.vertices[*it].get();
 				double Vx = V->x();
 				double Vy = V->y();
 
@@ -1590,7 +1590,7 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const Vertex * V = doc.vertices[*it].get();
 
 		if (is_vert)
 			doc.basis.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
@@ -1745,7 +1745,7 @@ void Instance::CMD_Rotate90()
 
 		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
-			const Vertex * V = level.vertices[*it];
+			const Vertex * V = level.vertices[*it].get();
 
 			fixcoord_t old_x = V->raw_x;
 			fixcoord_t old_y = V->raw_y;
@@ -1803,7 +1803,7 @@ void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) co
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const Vertex * V = doc.vertices[*it].get();
 
 		double new_x = V->x();
 		double new_y = V->y();
@@ -2010,7 +2010,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 			return false;
 
 		case ObjType::vertices:
-			for (const Vertex *vertex : doc.vertices)
+			for (const std::unique_ptr<Vertex> &vertex : doc.vertices)
 				if (I_ROUND(vertex->x()) == x && I_ROUND(vertex->y()) == y)
 					return true;
 			return false;
@@ -2189,7 +2189,7 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const Vertex * V = doc.vertices[*it].get();
 
 		if (inst.grid.OnGrid(V->x(), V->y()))
 		{

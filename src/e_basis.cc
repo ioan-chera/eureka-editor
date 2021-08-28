@@ -161,12 +161,12 @@ Sector * SideDef::SecRef(const Document &doc) const
 
 Vertex * LineDef::Start(const Document &doc) const
 {
-	return doc.vertices[start];
+	return doc.vertices[start].get();
 }
 
 Vertex * LineDef::End(const Document &doc) const
 {
-	return doc.vertices[end];
+	return doc.vertices[end].get();
 }
 
 SideDef * LineDef::Right(const Document &doc) const
@@ -589,8 +589,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(Vertex *vertex : doc.vertices)
-		delete vertex;
 	for(Sector *sector : doc.sectors)
 		delete sector;
 	for(SideDef *sidedef : doc.sidedefs)
@@ -677,7 +675,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
-		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
 		break;
 	case ObjType::sectors:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
@@ -764,7 +762,7 @@ Vertex *Basis::EditOperation::rawDeleteVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
-	Vertex *result = doc.vertices[objnum];
+	Vertex *result = doc.vertices[objnum].release();
 	doc.vertices.erase(doc.vertices.begin() + objnum);
 
 	// fix the linedef references
@@ -911,7 +909,8 @@ void Basis::EditOperation::rawInsertThing(Document &doc) const
 void Basis::EditOperation::rawInsertVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
-	doc.vertices.insert(doc.vertices.begin() + objnum, vertex);
+	doc.vertices.insert(doc.vertices.begin() + objnum,
+						std::unique_ptr<Vertex>(vertex));
 
 	// fix references in linedefs
 

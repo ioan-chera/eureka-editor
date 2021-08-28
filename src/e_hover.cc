@@ -486,7 +486,7 @@ Objid Hover::findSplitLine(double &out_x, double &out_y, double ptr_x, double pt
 
 	if(inst.grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE)
 	{
-		const Vertex *V = doc.vertices[inst.edit.draw_from.num];
+		const Vertex *V = doc.vertices[inst.edit.draw_from.num].get();
 
 		// convert ratio into a vector, use it to intersect the linedef
 		double px1 = V->x();
@@ -741,7 +741,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		if(v == possible_v1 || v == possible_v2)
 			continue;
 
-		const Vertex *VC = doc.vertices[v];
+		const Vertex *VC = doc.vertices[v].get();
 
 		// ignore vertices at same coordinates as v1 or v2
 		if(VC->Matches(TO_COORD(x1), TO_COORD(y1)) ||
@@ -1255,7 +1255,7 @@ void crossing_state_c::SplitAllLines()
 		{
 			points[i].vert = inst.level.basis.addNew(ObjType::vertices);
 
-			Vertex *V = inst.level.vertices[points[i].vert];
+			Vertex *V = inst.level.vertices[points[i].vert].get();
 
 			V->SetRawXY(inst, points[i].x, points[i].y);
 

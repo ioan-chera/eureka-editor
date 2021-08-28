@@ -114,11 +114,10 @@ void Instance::FreshLevel()
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		Vertex *v = new Vertex;
-		level.vertices.push_back(v);
-
+		auto v = std::make_unique<Vertex>();
 		v->SetRawX(*this, (i >= 2) ? 256 : -256);
 		v->SetRawY(*this, (i==1 || i==2) ? 256 :-256);
+		level.vertices.push_back(std::move(v));
 
 		SideDef *sd = new SideDef;
 		level.sidedefs.push_back(sd);
@@ -436,12 +435,12 @@ void Instance::LoadVertices(int loading_level, const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading vertices.\n");
 
-		Vertex *vert = new Vertex;
+		auto vert = std::make_unique<Vertex>();
 
 		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
 		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
 
-		level.vertices.push_back(vert);
+		level.vertices.push_back(std::move(vert));
 	}
 }
 
@@ -517,8 +516,8 @@ static void CreateFallbackVertices(Document &doc)
 {
 	gLog.printf("Creating two fallback vertices.\n");
 
-	Vertex *v1 = new Vertex;
-	Vertex *v2 = new Vertex;
+	auto v1 = std::make_unique<Vertex>();
+	auto v2 = std::make_unique<Vertex>();
 
 	v1->raw_x = INT_TO_COORD(-777);
 	v1->raw_y = INT_TO_COORD(-777);
@@ -526,8 +525,8 @@ static void CreateFallbackVertices(Document &doc)
 	v2->raw_x = INT_TO_COORD(555);
 	v2->raw_y = INT_TO_COORD(555);
 
-	doc.vertices.push_back(v1);
-	doc.vertices.push_back(v2);
+	doc.vertices.push_back(std::move(v1));
+	doc.vertices.push_back(std::move(v2));
 }
 
 
@@ -888,9 +887,6 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 	if (new_count < doc.numVertices())
 	{
 		gLog.printf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
-
-		for (int i = new_count ; i < doc.numVertices(); i++)
-			delete doc.vertices[i];
 
 		doc.vertices.resize(new_count);
 	}
@@ -1358,7 +1354,7 @@ void Instance::SaveVertices()
 {
 	Lump_c *lump = master.edit_wad->AddLump("VERTEXES");
 
-	for (const Vertex *vert : level.vertices)
+	for (const std::unique_ptr<Vertex> &vert : level.vertices)
 	{
 		raw_vertex_t raw;
 

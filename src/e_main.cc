@@ -169,7 +169,7 @@ void Instance::UpdateDrawLine()
 	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
 		return;
 
-	const Vertex *V = level.vertices[edit.draw_from.num];
+	const Vertex *V = level.vertices[edit.draw_from.num].get();
 
 	double new_x = edit.map_x;
 	double new_y = edit.map_y;
@@ -273,8 +273,8 @@ void Instance::UpdateHighlight()
 		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = level.vertices[edit.highlight.num];
-			const Vertex *S = level.vertices[edit.draw_from.num];
+			const Vertex *V = level.vertices[edit.highlight.num].get();
+			const Vertex *S = level.vertices[edit.draw_from.num].get();
 
 			double vx = V->x();
 			double vy = V->y();
@@ -377,7 +377,7 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 {
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
-		const Vertex * V = inst.level.vertices[i];
+		const Vertex * V = inst.level.vertices[i].get();
 
 		if (V->x() < inst.Map_bound_x1) inst.Map_bound_x1 = V->x();
 		if (V->y() < inst.Map_bound_y1) inst.Map_bound_y1 = V->y();
@@ -443,7 +443,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = level.vertices[objnum];
+		const Vertex * V = level.vertices[objnum].get();
 
 		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
 		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
@@ -855,7 +855,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::vertices:
 			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const Vertex *V = doc.vertices[n];
+				const Vertex *V = doc.vertices[n].get();
 
 				double vx = V->x();
 				double vy = V->y();
