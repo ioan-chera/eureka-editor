@@ -377,13 +377,17 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 {
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
-		const Vertex * V = inst.level.vertices[i].get();
+		const auto &V = inst.level.vertices[i];
 
-		if (V->x() < inst.Map_bound_x1) inst.Map_bound_x1 = V->x();
-		if (V->y() < inst.Map_bound_y1) inst.Map_bound_y1 = V->y();
+		if (V->x() < inst.Map_bound_x1)
+			inst.Map_bound_x1 = V->x();
+		if (V->y() < inst.Map_bound_y1)
+			inst.Map_bound_y1 = V->y();
 
-		if (V->x() > inst.Map_bound_x2) inst.Map_bound_x2 = V->x();
-		if (V->y() > inst.Map_bound_y2) inst.Map_bound_y2 = V->y();
+		if (V->x() > inst.Map_bound_x2)
+			inst.Map_bound_x2 = V->x();
+		if (V->y() > inst.Map_bound_y2)
+			inst.Map_bound_y2 = V->y();
 	}
 }
 
@@ -396,8 +400,10 @@ void Instance::CalculateLevelBounds()
 		return;
 	}
 
-	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
-	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
+	Map_bound_x1 = 32767;
+	Map_bound_x2 = -32767;
+	Map_bound_y1 = 32767;
+	Map_bound_y2 = -32767;
 
 	UpdateLevelBounds(*this, 0);
 }
