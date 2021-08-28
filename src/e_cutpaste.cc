@@ -68,7 +68,7 @@ public:
 	std::vector<std::unique_ptr<Thing>>   things;
 	std::vector<std::unique_ptr<Vertex>>  verts;
 	std::vector<std::unique_ptr<Sector>>  sectors;
-	std::vector<SideDef *> sides;
+	std::vector<std::unique_ptr<SideDef>> sides;
 	std::vector<LineDef *> lines;
 
 public:
@@ -80,8 +80,6 @@ public:
 
 	~clipboard_data_c()
 	{
-		for(SideDef *sidedef : sides)
-			delete sidedef;
 		for(LineDef *linedef : lines)
 			delete linedef;
 	}
@@ -155,7 +153,7 @@ public:
 		if (! uses_real_sectors)
 			return false;
 
-		for (const SideDef *side : sides)
+		for (const auto &side : sides)
 		{
 			if (s1 <= side->sector && side->sector <= s2)
 				return true;
@@ -169,7 +167,7 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (SideDef *side : sides)
+		for (auto &side : sides)
 		{
 			if (side->sector >= snum)
 				side->sector++;
@@ -181,7 +179,7 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (SideDef *side : sides)
+		for (auto &side : sides)
 		{
 			if (side->sector == snum)
 				side->sector = INVALID_SECTOR;
@@ -195,7 +193,7 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (SideDef *side : sides)
+		for (auto &side : sides)
 		{
 			if (side->sector >= 0)
 				side->sector = INVALID_SECTOR;
@@ -419,7 +417,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 
 		SideDef * SD = new SideDef;
 		*SD = *doc.sidedefs[*it].get();
-		clip_board->sides.push_back(SD);
+		clip_board->sides.push_back(std::unique_ptr<SideDef>(SD));
 
 		// adjust sector references, if needed
 		if (is_sectors && list->get(SD->sector))
