@@ -398,9 +398,8 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-Lump_c *Instance::Load_LookupAndSeek(int loading_level,
-									 const Wad_file *load_wad, const char *name)
-		const
+Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *load_wad,
+						   const char *name)
 {
 	int idx = load_wad->LevelLookupLump(loading_level, name);
 

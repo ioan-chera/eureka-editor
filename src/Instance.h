@@ -303,8 +303,6 @@ public:
 	bool ExecuteKey(keycode_t key, key_context_e context);
 
 	// M_LOADSAVE
-	Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *wad,
-							   const char *name) const;
 	void LoadLevel(Wad_file *wad, const SString &level);
 	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();

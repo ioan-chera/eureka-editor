@@ -47,6 +47,8 @@ struct LoadingData
 	std::unordered_map<SString, SString> parse_vars;
 };
 
+Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *wad,
+						   const char *name);
 void OpenFileMap(const SString &filename, const SString &map_name = "");
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
