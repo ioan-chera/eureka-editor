@@ -30,6 +30,21 @@
 class Instance;
 
 //
+// Bounding box, expanded by added points
+//
+struct BoundingBox
+{
+	void addPoint(double x, double y);
+	void zeroOut();
+	void reset();
+
+	double x1 = 32767;
+	double y1 = 32767;
+	double x2 = -32767;
+	double y2 = -32767;
+};
+
+//
 // The document associated with a file. All stuff will go here
 //
 struct Document
@@ -49,10 +64,7 @@ public:
 	std::vector<byte> scriptsData;
 
 	// Secondary information
-	double Map_bound_x1 = 32767;   /* minimum X value of map */
-	double Map_bound_y1 = 32767;   /* minimum Y value of map */
-	double Map_bound_x2 = -32767;   /* maximum X value of map */
-	double Map_bound_y2 = -32767;   /* maximum Y value of map */
+	BoundingBox mapBound;
 
 	Basis basis;
 	ChecksModule checks;
@@ -115,7 +127,6 @@ public:
 	void getLevelChecksum(crc32_c &crc) const;
 
 	void loadHeader(const Wad_file &loadingWad, int loadingLevel);
-	void updateMapBoundsByPoint(double x, double y);
 	void updateMapBoundsStartingFromVertex(int start_vert);
 	void calculateMapBounds();
 

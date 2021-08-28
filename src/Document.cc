@@ -20,6 +20,41 @@
 #include "lib_adler.h"
 
 //
+// Adds a point to the bounding box, expanding it as needed
+//
+void BoundingBox::addPoint(double x, double y)
+{
+	if (x < x1)
+		x1 = x;
+	if (y < y1)
+		y1 = y;
+
+	if (x > x2)
+		x2 = x;
+	if (y > y2)
+		y2 = y;
+}
+
+//
+// Clears the bounding box. Typical when no data is available.
+//
+void BoundingBox::zeroOut()
+{
+	x1 = y1 = x2 = y2 = 0;
+}
+
+//
+// Resets to the default value
+//
+void BoundingBox::reset()
+{
+	x1 = 32767;
+	y1 = 32767;
+	x2 = -32767;
+	y2 = -32767;
+}
+
+//
 // Get number of objects based on enum
 //
 int Document::numObjects(ObjType type) const
@@ -120,22 +155,6 @@ void Document::getLevelChecksum(crc32_c &crc) const
 }
 
 //
-// Updates map bounds by a single point, raising them if necessary.
-//
-void Document::updateMapBoundsByPoint(double x, double y)
-{
-	if (x < Map_bound_x1)
-		Map_bound_x1 = x;
-	if (y < Map_bound_y1)
-		Map_bound_y1 = y;
-
-	if (x > Map_bound_x2)
-		Map_bound_x2 = x;
-	if (y > Map_bound_y2)
-		Map_bound_y2 = y;
-}
-
-//
 // Updates the map bounds from all vertices starting from one
 //
 void Document::updateMapBoundsStartingFromVertex(int start_vert)
@@ -143,7 +162,7 @@ void Document::updateMapBoundsStartingFromVertex(int start_vert)
 	for(int i = start_vert; i < numVertices(); i++)
 	{
 		const auto &V = vertices[i];
-		updateMapBoundsByPoint(V->x(), V->y());
+		mapBound.addPoint(V->x(), V->y());
 	}
 }
 
@@ -154,15 +173,10 @@ void Document::calculateMapBounds()
 {
 	if (numVertices() == 0)
 	{
-		Map_bound_x1 = Map_bound_x2 = 0;
-		Map_bound_y1 = Map_bound_y2 = 0;
+		mapBound.zeroOut();
 		return;
 	}
 
-	Map_bound_x1 = 32767;
-	Map_bound_x2 = -32767;
-	Map_bound_y1 = 32767;
-	Map_bound_y2 = -32767;
-
+	mapBound.reset();
 	updateMapBoundsStartingFromVertex(0);
 }

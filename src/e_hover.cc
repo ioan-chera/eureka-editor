@@ -635,8 +635,8 @@ void Hover::fastOpposite_begin()
 
 	doc.calculateMapBounds();
 
-	m_fastopp_X_tree = new fastopp_node_c(static_cast<int>(inst.level.Map_bound_x1 - 8), static_cast<int>(inst.level.Map_bound_x2 + 8), doc);
-	m_fastopp_Y_tree = new fastopp_node_c(static_cast<int>(inst.level.Map_bound_y1 - 8), static_cast<int>(inst.level.Map_bound_y2 + 8), doc);
+	m_fastopp_X_tree = new fastopp_node_c(static_cast<int>(inst.level.mapBound.x1 - 8), static_cast<int>(inst.level.mapBound.x2 + 8), doc);
+	m_fastopp_Y_tree = new fastopp_node_c(static_cast<int>(inst.level.mapBound.y1 - 8), static_cast<int>(inst.level.mapBound.y2 + 8), doc);
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{

@@ -66,16 +66,16 @@ void Instance::zoom_fit()
 	int ScrMaxX = main_win->canvas->w();
 	int ScrMaxY = main_win->canvas->h();
 
-	if (level.Map_bound_x1 < level.Map_bound_x2)
-		xzoom = ScrMaxX / (level.Map_bound_x2 - level.Map_bound_x1);
+	if (level.mapBound.x1 < level.mapBound.x2)
+		xzoom = ScrMaxX / (level.mapBound.x2 - level.mapBound.x1);
 
-	if (level.Map_bound_y1 < level.Map_bound_y2)
-		yzoom = ScrMaxY / (level.Map_bound_y2 - level.Map_bound_y1);
+	if (level.mapBound.y1 < level.mapBound.y2)
+		yzoom = ScrMaxY / (level.mapBound.y2 - level.mapBound.y1);
 
 	grid.NearestScale(std::min(xzoom, yzoom));
 
-	grid.MoveTo((level.Map_bound_x1 + level.Map_bound_x2) / 2,
-				(level.Map_bound_y1 + level.Map_bound_y2) / 2);
+	grid.MoveTo((level.mapBound.x1 + level.mapBound.x2) / 2,
+				(level.mapBound.y1 + level.mapBound.y2) / 2);
 }
 
 
@@ -414,7 +414,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		moved_vertex_count++;
 
 		const auto &V = level.vertices[objnum];
-		level.updateMapBoundsByPoint(V->x(), V->y());
+		level.mapBound.addPoint(V->x(), V->y());
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
