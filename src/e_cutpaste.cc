@@ -69,19 +69,13 @@ public:
 	std::vector<std::unique_ptr<Vertex>>  verts;
 	std::vector<std::unique_ptr<Sector>>  sectors;
 	std::vector<std::unique_ptr<SideDef>> sides;
-	std::vector<LineDef *> lines;
+	std::vector<std::unique_ptr<LineDef>> lines;
 
 public:
 	clipboard_data_c(ObjType mode) : mode(mode)
 	{
 		if(mode == ObjType::linedefs || mode == ObjType::sectors)
 			uses_real_sectors = true;
-	}
-
-	~clipboard_data_c()
-	{
-		for(LineDef *linedef : lines)
-			delete linedef;
 	}
 
 	int TotalSize() const
@@ -431,7 +425,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 	{
 		LineDef * L = new LineDef;
 		*L = *doc.linedefs[*it].get();
-		clip_board->lines.push_back(L);
+		clip_board->lines.push_back(std::unique_ptr<LineDef>(L));
 
 		// adjust vertex references
 		SYS_ASSERT(vert_map.find(L->start) != vert_map.end());
