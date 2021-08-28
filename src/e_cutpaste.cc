@@ -65,7 +65,7 @@ public:
 
 	bool uses_real_sectors = false;
 
-	std::vector<Thing *>   things;
+	std::vector<std::unique_ptr<Thing>>   things;
 	std::vector<Vertex *>  verts;
 	std::vector<Sector *>  sectors;
 	std::vector<SideDef *> sides;
@@ -80,8 +80,6 @@ public:
 
 	~clipboard_data_c()
 	{
-		for(Thing *thing : things)
-			delete thing;
 		for(Vertex *vertex : verts)
 			delete vertex;
 		for(Sector *sector : sectors)
@@ -133,7 +131,7 @@ public:
 	}
 
 	template<typename T>
-	void CentreOfPointObjects(const std::vector<T *> &list, double *cx, double *cy) const
+	void CentreOfPointObjects(const std::vector<T> &list, double *cx, double *cy) const
 	{
 		*cx = *cy = 0;
 
@@ -143,7 +141,7 @@ public:
 		double sum_x = 0;
 		double sum_y = 0;
 
-		for (const T *object : list)
+		for (const T &object : list)
 		{
 			sum_x += object->x();
 			sum_y += object->y();
@@ -471,9 +469,9 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
-			Thing * T = new Thing;
-			*T = *doc.things[*it].get();
-			clip_board->things.push_back(T);
+			auto T = std::make_unique<Thing>();
+			*T = *doc.things[*it];
+			clip_board->things.push_back(std::move(T));
 		}
 	}
 }
@@ -498,9 +496,9 @@ bool Instance::Clipboard_DoCopy()
 		case ObjType::things:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
-				Thing * T = new Thing;
-				*T = *level.things[*it].get();
-				clip_board->things.push_back(T);
+				auto T = std::make_unique<Thing>();
+				*T = *level.things[*it];
+				clip_board->things.push_back(std::move(T));
 			}
 			break;
 
