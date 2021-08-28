@@ -347,12 +347,32 @@ public:
 };
 
 //
-// Editor command manager, handles undo/redo
+// Interface for Basis listeners
 //
-class Basis : public DocumentModule
+class BasisListener
 {
 public:
-	Basis(Document &doc) : DocumentModule(doc)
+	virtual void basisAddRecentFlat(const SString &name) = 0;
+	virtual void basisAddRecentTexture(const SString &name) = 0;
+	virtual void basisAddRecentThing(int type) = 0;
+	virtual void basisSetStatus(const SString &text) = 0;
+
+	virtual void basisMadeChanges() = 0;
+
+	virtual void basisNotifyBegin() = 0;
+	virtual void basisNotifyInsert(ObjType type, int objnum) = 0;
+	virtual void basisNotifyChange(ObjType type, int objnum, int field) = 0;
+	virtual void basisNotifyDelete(ObjType type, int objnum) = 0;
+	virtual void basisNotifyEnd() = 0;
+};
+
+//
+// Editor command manager, handles undo/redo
+//
+class Basis
+{
+public:
+	Basis(BasisListener &listener, Document &doc) : listener(listener), doc(doc)
 	{
 	}
 
@@ -524,6 +544,9 @@ private:
 	std::stack<UndoGroup> mRedoFuture;
 
 	bool mDidMakeChanges = false;
+
+	BasisListener &listener;
+	Document &doc;
 };
 
 const char *NameForObjectType(ObjType type, bool plural = false);

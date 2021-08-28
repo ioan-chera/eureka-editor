@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "Document.h"
+#include "Instance.h"
 #include "lib_adler.h"
 
 //
@@ -63,6 +64,15 @@ void BoundingBox::get(double &x1, double &y1, double &x2, double &y2) const
 	y1 = this->y1;
 	x2 = this->x2;
 	y2 = this->y2;
+}
+
+//
+// Constructor
+//
+Document::Document(Instance &inst) : inst(inst), basis(inst, *this),
+		checks(*this), hover(*this), linemod(*this), vertmod(*this),
+		secmod(*this), objects(*this)
+{
 }
 
 //

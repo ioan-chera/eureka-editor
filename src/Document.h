@@ -77,10 +77,7 @@ public:
 	SectorModule secmod;
 	ObjectsModule objects;
 
-	explicit Document(Instance &inst) : inst(inst), basis(*this), checks(*this), hover(*this),
-	linemod(*this), vertmod(*this), secmod(*this), objects(*this)
-	{
-	}
+	explicit Document(Instance &inst);
 
 	//
 	// Count map objects

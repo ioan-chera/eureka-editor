@@ -47,7 +47,7 @@ struct LevelLoadProblems;
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-class Instance
+class Instance : public BasisListener
 {
 public:
 	// E_BASIS
@@ -475,6 +475,21 @@ private:
 	void StoreSelectedFlat(int new_tex);
 	void StoreSelectedTexture(int new_tex);
 	void StoreSelectedThing(int new_type);
+
+	// BasisListener
+	virtual void basisAddRecentFlat(const SString &name) override;
+	virtual void basisAddRecentTexture(const SString &name) override;
+	virtual void basisAddRecentThing(int type) override;
+	virtual void basisSetStatus(const SString &text) override;
+
+	virtual void basisMadeChanges() override;
+
+	virtual void basisNotifyBegin() override;
+	virtual void basisNotifyInsert(ObjType type, int objnum) override;
+	virtual void basisNotifyChange(ObjType type, int objnum, int field)
+			override;
+	virtual void basisNotifyDelete(ObjType type, int objnum) override;
+	virtual void basisNotifyEnd() override;
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper

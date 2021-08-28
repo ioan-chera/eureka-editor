@@ -262,6 +262,14 @@ void Basis::begin()
 }
 
 //
+// Set the status
+//
+void Instance::basisSetStatus(const SString &text)
+{
+	Status_Set("%s", text.c_str());
+}
+
+//
 // finish a group of operations.
 //
 void Basis::end()
@@ -276,7 +284,7 @@ void Basis::end()
 	{
 		SString message = mCurrentGroup.getMessage();
 		mUndoHistory.push(std::move(mCurrentGroup));
-		inst.Status_Set("%s", message.c_str());
+		listener.basisSetStatus(message);
 	}
 	doProcessChangeStatus();
 }
@@ -466,6 +474,14 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 }
 
 //
+// Add the recent thing
+//
+void Instance::basisAddRecentThing(int type)
+{
+	recent_things.insert_number(type);
+}
+
+//
 // Change thing
 //
 bool Basis::changeThing(int thing, byte field, int value)
@@ -474,7 +490,7 @@ bool Basis::changeThing(int thing, byte field, int value)
 	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	if(field == Thing::F_TYPE)
-		inst.recent_things.insert_number(value);
+		listener.basisAddRecentThing(value);
 
 	return change(ObjType::things, thing, field, value);
 }
@@ -491,6 +507,14 @@ bool Basis::changeVertex(int vert, byte field, int value)
 }
 
 //
+// Add recent flat
+//
+void Instance::basisAddRecentFlat(const SString &name)
+{
+	recent_flats.insert(name);
+}
+
+//
 // Change sector
 //
 bool Basis::changeSector(int sec, byte field, int value)
@@ -498,13 +522,18 @@ bool Basis::changeSector(int sec, byte field, int value)
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
 	SYS_ASSERT(field <= Sector::F_TAG);
 
-	if(field == Sector::F_FLOOR_TEX ||
-		field == Sector::F_CEIL_TEX)
-	{
-		inst.recent_flats.insert(BA_GetString(value));
-	}
+	if(field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
+		listener.basisAddRecentFlat(BA_GetString(value));
 
 	return change(ObjType::sectors, sec, field, value);
+}
+
+//
+// Add recent texture
+//
+void Instance::basisAddRecentTexture(const SString &name)
+{
+	recent_textures.insert(name);
 }
 
 //
@@ -515,11 +544,10 @@ bool Basis::changeSidedef(int side, byte field, int value)
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
 	SYS_ASSERT(field <= SideDef::F_SECTOR);
 
-	if(field == SideDef::F_LOWER_TEX ||
-		field == SideDef::F_UPPER_TEX ||
+	if(field == SideDef::F_LOWER_TEX || field == SideDef::F_UPPER_TEX ||
 		field == SideDef::F_MID_TEX)
 	{
-		inst.recent_textures.insert(BA_GetString(value));
+		listener.basisAddRecentTexture(BA_GetString(value));
 	}
 
 	return change(ObjType::sidedefs, side, field, value);
@@ -550,7 +578,8 @@ bool Basis::undo()
 	UndoGroup grp = std::move(mUndoHistory.top());
 	mUndoHistory.pop();
 
-	inst.Status_Set("UNDO: %s", grp.getMessage().c_str());
+	listener.basisSetStatus(SString::printf("UNDO: %s",
+											grp.getMessage().c_str()));
 
 	grp.reapply(*this);
 
@@ -574,7 +603,8 @@ bool Basis::redo()
 	UndoGroup grp = std::move(mRedoFuture.top());
 	mRedoFuture.pop();
 
-	inst.Status_Set("Redo: %s", grp.getMessage().c_str());
+	listener.basisSetStatus(SString::printf("Redo: %s",
+											grp.getMessage().c_str()));
 
 	grp.reapply(*this);
 
@@ -655,6 +685,18 @@ void Basis::EditOperation::destroy()
 }
 
 //
+// Notify change
+//
+void Instance::basisNotifyChange(ObjType objtype, int objnum, int field)
+{
+	Clipboard_NotifyChange(objtype, objnum, field);
+	Selection_NotifyChange(objtype, objnum, field);
+	MapStuff_NotifyChange(objtype, objnum, field);
+	Render3D_NotifyChange(objtype, objnum, field);
+	ObjectBox_NotifyChange(objtype, objnum, field);
+}
+
+//
 // Execute the raw change
 //
 void Basis::EditOperation::rawChange(Basis &basis)
@@ -691,11 +733,19 @@ void Basis::EditOperation::rawChange(Basis &basis)
 	basis.mDidMakeChanges = true;
 
 	// TODO: their modules
-	Clipboard_NotifyChange(objtype, objnum, field);
-	Selection_NotifyChange(objtype, objnum, field);
-	basis.inst.MapStuff_NotifyChange(objtype, objnum, field);
-	Render3D_NotifyChange(objtype, objnum, field);
-	basis.inst.ObjectBox_NotifyChange(objtype, objnum, field);
+	basis.listener.basisNotifyChange(objtype, objnum, field);
+}
+
+//
+// Notify delete
+//
+void Instance::basisNotifyDelete(ObjType objtype, int objnum)
+{
+	Clipboard_NotifyDelete(objtype, objnum);
+	Selection_NotifyDelete(objtype, objnum);
+	MapStuff_NotifyDelete(objtype, objnum);
+	Render3D_NotifyDelete(level, objtype, objnum);
+	ObjectBox_NotifyDelete(objtype, objnum);
 }
 
 //
@@ -706,11 +756,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 	basis.mDidMakeChanges = true;
 
 	// TODO: their own modules
-	Clipboard_NotifyDelete(objtype, objnum);
-	basis.inst.Selection_NotifyDelete(objtype, objnum);
-	basis.inst.MapStuff_NotifyDelete(objtype, objnum);
-	Render3D_NotifyDelete(basis.doc, objtype, objnum);
-	basis.inst.ObjectBox_NotifyDelete(objtype, objnum);
+	basis.listener.basisNotifyDelete(objtype, objnum);
 
 	switch(objtype)
 	{
@@ -845,6 +891,15 @@ LineDef *Basis::EditOperation::rawDeleteLinedef(Document &doc) const
 	return result;
 }
 
+void Instance::basisNotifyInsert(ObjType objtype, int objnum)
+{
+	Clipboard_NotifyInsert(level, objtype, objnum);
+	Selection_NotifyInsert(objtype, objnum);
+	MapStuff_NotifyInsert(objtype, objnum);
+	Render3D_NotifyInsert(objtype, objnum);
+	ObjectBox_NotifyInsert(objtype, objnum);
+}
+
 //
 // Insert operation
 //
@@ -853,11 +908,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 	basis.mDidMakeChanges = true;
 
 	// TODO: their module
-	Clipboard_NotifyInsert(basis.doc, objtype, objnum);
-	basis.inst.Selection_NotifyInsert(objtype, objnum);
-	basis.inst.MapStuff_NotifyInsert(objtype, objnum);
-	Render3D_NotifyInsert(objtype, objnum);
-	basis.inst.ObjectBox_NotifyInsert(objtype, objnum);
+	basis.listener.basisNotifyInsert(objtype, objnum);
 
 	switch(objtype)
 	{
@@ -1048,18 +1099,46 @@ void Basis::UndoGroup::reapply(Basis &basis)
 }
 
 //
+// Start of operation
+//
+void Instance::basisNotifyBegin()
+{
+	Clipboard_NotifyBegin();
+	Selection_NotifyBegin();
+	MapStuff_NotifyBegin();
+	Render3D_NotifyBegin();
+	ObjectBox_NotifyBegin();
+}
+
+//
 // Clear change status
 //
 void Basis::doClearChangeStatus()
 {
 	mDidMakeChanges = false;
 
-	// TODO: these shall go to other modules
-	Clipboard_NotifyBegin();
-	inst.Selection_NotifyBegin();
-	inst.MapStuff_NotifyBegin();
-	Render3D_NotifyBegin();
-	inst.ObjectBox_NotifyBegin();
+	listener.basisNotifyBegin();
+}
+
+//
+// End of operation
+//
+void Instance::basisNotifyEnd()
+{
+	Clipboard_NotifyEnd();
+	Selection_NotifyEnd();
+	MapStuff_NotifyEnd();
+	Render3D_NotifyEnd(*this);
+	ObjectBox_NotifyEnd();
+}
+
+//
+// Mark changes
+//
+void Instance::basisMadeChanges()
+{
+	MadeChanges = true;
+	RedrawMap();
 }
 
 //
@@ -1068,17 +1147,9 @@ void Basis::doClearChangeStatus()
 void Basis::doProcessChangeStatus() const
 {
 	if(mDidMakeChanges)
-	{
-		// TODO: the other modules
-		inst.MadeChanges = true;
-		inst.RedrawMap();
-	}
+		listener.basisMadeChanges();
 
-	Clipboard_NotifyEnd();
-	inst.Selection_NotifyEnd();
-	inst.MapStuff_NotifyEnd();
-	Render3D_NotifyEnd(inst);
-	inst.ObjectBox_NotifyEnd();
+	listener.basisNotifyEnd();
 }
 
 //--- editor settings ---
