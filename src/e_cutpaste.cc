@@ -66,7 +66,7 @@ public:
 	bool uses_real_sectors = false;
 
 	std::vector<std::unique_ptr<Thing>>   things;
-	std::vector<Vertex *>  verts;
+	std::vector<std::unique_ptr<Vertex>>  verts;
 	std::vector<Sector *>  sectors;
 	std::vector<SideDef *> sides;
 	std::vector<LineDef *> lines;
@@ -80,8 +80,6 @@ public:
 
 	~clipboard_data_c()
 	{
-		for(Vertex *vertex : verts)
-			delete vertex;
 		for(Sector *sector : sectors)
 			delete sector;
 		for(SideDef *sidedef : sides)
@@ -400,9 +398,9 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 	{
 		vert_map[*it] = (int)clip_board->verts.size();
 
-		Vertex * SD = new Vertex;
-		*SD = *doc.vertices[*it].get();
-		clip_board->verts.push_back(SD);
+		auto SD = std::make_unique<Vertex>();
+		*SD = *doc.vertices[*it];
+		clip_board->verts.push_back(std::move(SD));
 	}
 
 	if (is_sectors)
@@ -505,9 +503,9 @@ bool Instance::Clipboard_DoCopy()
 		case ObjType::vertices:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 			{
-				Vertex * V = new Vertex;
-				*V = *level.vertices[*it].get();
-				clip_board->verts.push_back(V);
+				auto V = std::make_unique<Vertex>();
+				*V = *level.vertices[*it];
+				clip_board->verts.push_back(std::move(V));
 			}
 			break;
 
