@@ -301,7 +301,8 @@ public:
 	bool ExecuteKey(keycode_t key, key_context_e context);
 
 	// M_LOADSAVE
-	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
+	Lump_c *Load_LookupAndSeek(int loading_level, const Wad_file *wad,
+							   const char *name) const;
 	void LoadLevel(Wad_file *wad, const SString &level);
 	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
@@ -318,7 +319,7 @@ public:
 	bool M_PortSetupDialog(const SString& port, const SString& game);
 
 	// M_UDMF
-	void UDMF_LoadLevel(const Wad_file *load_wad);
+	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad);
 	void UDMF_SaveLevel() const;
 
 	// MAIN
@@ -423,16 +424,16 @@ private:
 	void CreateFallbackSideDef();
 	void EmptyLump(const char *name) const;
 	void FreshLevel();
-	void LoadBehavior(const Wad_file *load_wad);
-	void LoadHeader(const Wad_file *load_wad);
-	void LoadLineDefs(const Wad_file *load_wad);
-	void LoadLineDefs_Hexen(const Wad_file *load_wad);
-	void LoadScripts(const Wad_file *load_wad);
-	void LoadSectors(const Wad_file *load_wad);
-	void LoadSideDefs(const Wad_file *load_wad);
-	void LoadThings(const Wad_file *load_wad);
-	void LoadThings_Hexen(const Wad_file *load_wad);
-	void LoadVertices(const Wad_file *load_wad);
+	void LoadBehavior(int loading_level, const Wad_file *load_wad);
+	void LoadHeader(int loading_level, const Wad_file *load_wad);
+	void LoadLineDefs(int loading_level, const Wad_file *load_wad);
+	void LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad);
+	void LoadScripts(int loading_level, const Wad_file *load_wad);
+	void LoadSectors(int loading_level, const Wad_file *load_wad);
+	void LoadSideDefs(int loading_level, const Wad_file *load_wad);
+	void LoadThings(int loading_level, const Wad_file *load_wad);
+	void LoadThings_Hexen(int loading_level, const Wad_file *load_wad);
+	void LoadVertices(int loading_level, const Wad_file *load_wad);
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
@@ -529,7 +530,6 @@ public:	// will be private when we encapsulate everything
 	// CMD_BuildAllNodes from building that saved level twice.
 	bool inhibit_node_build = false;
 	int last_given_file = 0;
-	int loading_level = 0;
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;

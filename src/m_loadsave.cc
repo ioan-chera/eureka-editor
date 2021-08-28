@@ -383,7 +383,8 @@ static void UpperCaseShortStr(char *buf, int max_len)
 }
 
 
-Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
+Lump_c *Instance::Load_LookupAndSeek(int loading_level,
+									 const Wad_file *load_wad, const char *name)
 		const
 {
 	int idx = load_wad->LevelLookupLump(loading_level, name);
@@ -399,9 +400,9 @@ Lump_c *Instance::Load_LookupAndSeek(const Wad_file *load_wad, const char *name)
 }
 
 
-void Instance::LoadVertices(const Wad_file *load_wad)
+void Instance::LoadVertices(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "VERTEXES");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "VERTEXES");
 	if (! lump)
 		ThrowException("No vertex lump!\n");
 
@@ -430,9 +431,9 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 }
 
 
-void Instance::LoadSectors(const Wad_file *load_wad)
+void Instance::LoadSectors(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "SECTORS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SECTORS");
 	if (! lump)
 		ThrowException("No sector lump!\n");
 
@@ -573,7 +574,7 @@ void Instance::ValidateSectorRef(SideDef *sd, int num)
 }
 
 
-void Instance::LoadHeader(const Wad_file *load_wad)
+void Instance::LoadHeader(int loading_level, const Wad_file *load_wad)
 {
 	Lump_c *lump = load_wad->GetLump(load_wad->LevelHeader(loading_level));
 
@@ -591,10 +592,10 @@ void Instance::LoadHeader(const Wad_file *load_wad)
 }
 
 
-void Instance::LoadBehavior(const Wad_file *load_wad)
+void Instance::LoadBehavior(int loading_level, const Wad_file *load_wad)
 {
 	// IOANCH 9/2015: support Hexen maps
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "BEHAVIOR");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "BEHAVIOR");
 	if (! lump)
 		ThrowException("No BEHAVIOR lump!\n");
 
@@ -610,10 +611,10 @@ void Instance::LoadBehavior(const Wad_file *load_wad)
 }
 
 
-void Instance::LoadScripts(const Wad_file *load_wad)
+void Instance::LoadScripts(int loading_level, const Wad_file *load_wad)
 {
 	// the SCRIPTS lump is usually absent
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "SCRIPTS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SCRIPTS");
 	if (! lump)
 		return;
 
@@ -629,9 +630,9 @@ void Instance::LoadScripts(const Wad_file *load_wad)
 }
 
 
-void Instance::LoadThings(const Wad_file *load_wad)
+void Instance::LoadThings(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
@@ -663,9 +664,9 @@ void Instance::LoadThings(const Wad_file *load_wad)
 
 
 // IOANCH 9/2015
-void Instance::LoadThings_Hexen(const Wad_file *load_wad)
+void Instance::LoadThings_Hexen(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "THINGS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "THINGS");
 	if (! lump)
 		ThrowException("No things lump!\n");
 
@@ -705,9 +706,9 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 }
 
 
-void Instance::LoadSideDefs(const Wad_file *load_wad)
+void Instance::LoadSideDefs(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "SIDEDEFS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "SIDEDEFS");
 	if(!lump)
 		ThrowException("No sidedefs lump!\n");
 
@@ -746,9 +747,9 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 }
 
 
-void Instance::LoadLineDefs(const Wad_file *load_wad)
+void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
@@ -792,9 +793,9 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 
 
 // IOANCH 9/2015
-void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
+void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad)
 {
-	Lump_c *lump = Load_LookupAndSeek(load_wad, "LINEDEFS");
+	Lump_c *lump = Load_LookupAndSeek(loading_level, load_wad, "LINEDEFS");
 	if (! lump)
 		ThrowException("No linedefs lump!\n");
 
@@ -948,7 +949,7 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 
 void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 {
-	loading_level = lev_num;
+	int loading_level = lev_num;
 
 	loaded.levelFormat = wad->LevelFormat(loading_level);
 
@@ -958,33 +959,33 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 	bad_sector_refs   = 0;
 	bad_sidedef_refs  = 0;
 
-	LoadHeader(wad);
+	LoadHeader(loading_level, wad);
 
 	if (loaded.levelFormat == MapFormat::udmf)
 	{
-		UDMF_LoadLevel(wad);
+		UDMF_LoadLevel(loading_level, wad);
 	}
 	else
 	{
 		if (loaded.levelFormat == MapFormat::hexen)
-			LoadThings_Hexen(wad);
+			LoadThings_Hexen(loading_level, wad);
 		else
-			LoadThings(wad);
+			LoadThings(loading_level, wad);
 
-		LoadVertices(wad);
-		LoadSectors(wad);
-		LoadSideDefs(wad);
+		LoadVertices(loading_level, wad);
+		LoadSectors(loading_level, wad);
+		LoadSideDefs(loading_level, wad);
 
 		if (loaded.levelFormat == MapFormat::hexen)
 		{
-			LoadLineDefs_Hexen(wad);
+			LoadLineDefs_Hexen(loading_level, wad);
 
-			LoadBehavior(wad);
-			LoadScripts(wad);
+			LoadBehavior(loading_level, wad);
+			LoadScripts(loading_level, wad);
 		}
 		else
 		{
-			LoadLineDefs(wad);
+			LoadLineDefs(loading_level, wad);
 		}
 	}
 
