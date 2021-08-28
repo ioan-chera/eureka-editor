@@ -384,7 +384,7 @@ void UI_Canvas::DrawEverything()
 
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
-			const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
+			const auto &L = inst.level.linedefs[inst.edit.highlight.num];
 			DrawLineInfo(L->Start(inst.level)->x(), L->Start(inst.level)->y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
 		}
 
@@ -707,7 +707,7 @@ void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		double x1 = L->Start(inst.level)->x();
 		double y1 = L->Start(inst.level)->y();
@@ -1403,7 +1403,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::sectors:
 		{
-			for (const LineDef *L : inst.level.linedefs)
+			for (const auto &L : inst.level.linedefs)
 			{
 				if (! L->TouchesSector(objnum, inst.level))
 					continue;
@@ -1517,7 +1517,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::sectors:
 		{
-			for (const LineDef *linedef : inst.level.linedefs)
+			for (const auto &linedef : inst.level.linedefs)
 			{
 				if (!linedef->TouchesSector(objnum, inst.level))
 					continue;
@@ -1570,7 +1570,7 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 {
 	// color and line thickness have been set by caller
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		double x1 = dx + L->Start(inst.level)->x();
 		double y1 = dy + L->Start(inst.level)->y();

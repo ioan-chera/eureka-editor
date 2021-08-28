@@ -298,7 +298,11 @@ TEST(EChecks, FindFreeTag)
 	{
 		inst.level.linedefs.clear();
 		for(LineDef &line : lines)
-			inst.level.linedefs.push_back(&line);
+		{
+			LineDef *newLine = new LineDef;
+			*newLine = line;
+			inst.level.linedefs.push_back(std::unique_ptr<LineDef>(newLine));
+		}
 	};
 	std::vector<Sector> sectors;
 	auto assignSectors = [&inst, &sectors]()
@@ -446,7 +450,11 @@ TEST(EChecks, TagsApplyNewValue)
 	sectors.resize(5);
 
 	for(LineDef &line : lines)
-		inst.level.linedefs.push_back(&line);
+	{
+		LineDef *newLine = new LineDef;
+		*newLine = line;
+		inst.level.linedefs.push_back(std::unique_ptr<LineDef>(newLine));
+	}
 	for(Sector &sector : sectors)
 	{
 		Sector *newSector = new Sector;

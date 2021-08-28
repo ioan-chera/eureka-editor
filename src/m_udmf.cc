@@ -553,7 +553,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	{
 		kind = Objid(ObjType::linedefs, 1);
 		new_LD = new LineDef;
-		doc.linedefs.push_back(new_LD);
+		doc.linedefs.push_back(std::unique_ptr<LineDef>(new_LD));
 	}
 	else if (name.Match("sidedef"))
 	{
@@ -632,10 +632,10 @@ void Instance::ValidateLevel_UDMF(LevelLoadProblems &problems)
 
 	for (int n = 0 ; n < level.numLinedefs(); n++)
 	{
-		LineDef *L = level.linedefs[n];
+		auto &L = level.linedefs[n];
 
-		ValidateVertexRefs(L, n, problems);
-		ValidateSidedefRefs(L, n, problems);
+		ValidateVertexRefs(L.get(), n, problems);
+		ValidateSidedefRefs(L.get(), n, problems);
 	}
 }
 
@@ -771,7 +771,7 @@ static void UDMF_WriteLineDefs(const Instance &inst, Lump_c *lump)
 		lump->Printf("linedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const LineDef *ld = inst.level.linedefs[i];
+		const auto &ld = inst.level.linedefs[i];
 
 		lump->Printf("v1 = %d;\n", ld->start);
 		lump->Printf("v2 = %d;\n", ld->end);

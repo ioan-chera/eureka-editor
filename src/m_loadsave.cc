@@ -122,13 +122,12 @@ void Instance::FreshLevel()
 		sd->SetDefaults(*this, false);
 		level.sidedefs.push_back(std::move(sd));
 
-		LineDef *ld = new LineDef;
-		level.linedefs.push_back(ld);
-
+		auto ld = std::make_unique<LineDef>();
 		ld->start = i;
 		ld->end   = (i+1) % 4;
 		ld->flags = MLF_Blocking;
 		ld->right = i;
+		level.linedefs.push_back(std::move(ld));
 	}
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
@@ -788,7 +787,7 @@ void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad,
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		LineDef *ld = new LineDef;
+		auto ld = std::make_unique<LineDef>();
 
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
@@ -803,10 +802,10 @@ void Instance::LoadLineDefs(int loading_level, const Wad_file *load_wad,
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i, problems);
-		ValidateSidedefRefs(ld, i, problems);
+		ValidateVertexRefs(ld.get(), i, problems);
+		ValidateSidedefRefs(ld.get(), i, problems);
 
-		level.linedefs.push_back(ld);
+		level.linedefs.push_back(std::move(ld));
 	}
 }
 
@@ -835,7 +834,7 @@ void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad,
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading linedefs.\n");
 
-		LineDef *ld = new LineDef;
+		auto ld = std::make_unique<LineDef>();
 
 		ld->start = LE_U16(raw.start);
 		ld->end   = LE_U16(raw.end);
@@ -854,10 +853,10 @@ void Instance::LoadLineDefs_Hexen(int loading_level, const Wad_file *load_wad,
 		if (ld->right == 0xFFFF) ld->right = -1;
 		if (ld-> left == 0xFFFF) ld-> left = -1;
 
-		ValidateVertexRefs(ld, i, problems);
-		ValidateSidedefRefs(ld, i, problems);
+		ValidateVertexRefs(ld.get(), i, problems);
+		ValidateSidedefRefs(ld.get(), i, problems);
 
-		level.linedefs.push_back(ld);
+		level.linedefs.push_back(std::move(ld));
 	}
 }
 
@@ -869,7 +868,7 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 
 	bitvec_c used_verts(doc.numVertices());
 
-	for (const LineDef *linedef : doc.linedefs)
+	for (const auto &linedef : doc.linedefs)
 	{
 		used_verts.set(linedef->start);
 		used_verts.set(linedef->end);
@@ -1464,7 +1463,7 @@ void Instance::SaveLineDefs()
 {
 	Lump_c *lump = master.edit_wad->AddLump("LINEDEFS");
 
-	for (const LineDef *ld : level.linedefs)
+	for (const auto &ld : level.linedefs)
 	{
 		raw_linedef_t raw;
 
@@ -1488,7 +1487,7 @@ void Instance::SaveLineDefs_Hexen()
 {
 	Lump_c *lump = master.edit_wad->AddLump("LINEDEFS");
 
-	for (const LineDef *ld : level.linedefs)
+	for (const auto &ld : level.linedefs)
 	{
 		raw_hexen_linedef_t raw;
 

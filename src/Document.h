@@ -42,7 +42,7 @@ public:
 	std::vector<std::unique_ptr<Vertex>> vertices;
 	std::vector<std::unique_ptr<Sector>> sectors;
 	std::vector<std::unique_ptr<SideDef>> sidedefs;
-	std::vector<LineDef *> linedefs;
+	std::vector<std::unique_ptr<LineDef>> linedefs;
 
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;

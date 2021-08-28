@@ -409,7 +409,7 @@ void Basis::del(ObjType type, int objnum)
 		// unbind sidedef from any linedefs using it
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			LineDef *L = doc.linedefs[n].get();
 
 			if(L->right == objnum)
 				changeLinedef(n, LineDef::F_RIGHT, -1);
@@ -423,7 +423,7 @@ void Basis::del(ObjType type, int objnum)
 		// delete any linedefs bound to this vertex
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			LineDef *L = doc.linedefs[n].get();
 
 			if(L->start == objnum || L->end == objnum)
 				del(ObjType::linedefs, n);
@@ -589,9 +589,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(LineDef *linedef : doc.linedefs)
-		delete linedef;
-
 	doc.things.clear();
 	doc.vertices.clear();
 	doc.sectors.clear();
@@ -683,7 +680,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
-		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
 		break;
 	default:
 		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
@@ -767,7 +764,7 @@ Vertex *Basis::EditOperation::rawDeleteVertex(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			LineDef *L = doc.linedefs[n].get();
 
 			if(L->start > objnum)
 				L->start--;
@@ -822,7 +819,7 @@ SideDef *Basis::EditOperation::rawDeleteSidedef(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			LineDef *L = doc.linedefs[n].get();
 
 			if(L->right > objnum)
 				L->right--;
@@ -842,7 +839,7 @@ LineDef *Basis::EditOperation::rawDeleteLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numLinedefs());
 
-	LineDef *result = doc.linedefs[objnum];
+	LineDef *result = doc.linedefs[objnum].release();
 	doc.linedefs.erase(doc.linedefs.begin() + objnum);
 
 	return result;
@@ -914,7 +911,7 @@ void Basis::EditOperation::rawInsertVertex(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			LineDef *L = doc.linedefs[n].get();
 
 			if(L->start >= objnum)
 				L->start++;
@@ -963,7 +960,7 @@ void Basis::EditOperation::rawInsertSidedef(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			LineDef *L = doc.linedefs[n].get();
 
 			if(L->right >= objnum)
 				L->right++;
@@ -980,7 +977,8 @@ void Basis::EditOperation::rawInsertSidedef(Document &doc) const
 void Basis::EditOperation::rawInsertLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
-	doc.linedefs.insert(doc.linedefs.begin() + objnum, linedef);
+	doc.linedefs.insert(doc.linedefs.begin() + objnum,
+						std::unique_ptr<LineDef>(linedef));
 }
 
 //

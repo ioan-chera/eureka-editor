@@ -263,7 +263,7 @@ static void Vertex_FindDanglers(selection_c& sel, const Document &doc)
 
 	memset(line_counts, 0, doc.numVertices());
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		int v1 = L->start;
 		int v2 = L->end;
@@ -380,7 +380,7 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
 
 		for (int ld = 0 ; ld < doc.numLinedefs(); ld++)
 		{
-			LineDef *L = doc.linedefs[ld];
+			LineDef *L = doc.linedefs[ld].get();
 
 			if (L->start == idx)
 				doc.basis.changeLinedef(ld, LineDef::F_START, n);
@@ -437,7 +437,7 @@ static void Vertex_FindUnused(selection_c& sel, const Document &doc)
 	if (doc.numVertices() == 0)
 		return;
 
-	for (const LineDef *linedef : doc.linedefs)
+	for (const auto &linedef : doc.linedefs)
 	{
 		sel.set(linedef->start);
 		sel.set(linedef->end);
@@ -618,7 +618,7 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 
 		// for each sidedef bound to the Sector, store a "1" in the "ends"
 		// array for its starting vertex, and a "2" for its ending vertex.
-		for (const LineDef *L : doc.linedefs)
+		for (const auto &L : doc.linedefs)
 		{
 			if (! L->TouchesSector(s, doc))
 				continue;
@@ -701,7 +701,7 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->right >= 0)
 		{
@@ -856,7 +856,7 @@ void Sectors_FindUnused(selection_c& sel, const Document &doc)
 	if (doc.numSectors() == 0)
 		return;
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		if (L->left >= 0)
 			sel.set(L->Left(doc)->sector);
@@ -938,7 +938,7 @@ static void SideDefs_FindUnused(selection_c& sel, const Document &doc)
 	if (doc.numSidedefs() == 0)
 		return;
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		if (L->left  >= 0) sel.set(L->left);
 		if (L->right >= 0) sel.set(L->right);
@@ -971,8 +971,8 @@ static void SideDefs_FindPacking(selection_c& sides, selection_c& lines, const D
 	for (int i = 0 ; i < doc.numLinedefs(); i++)
 	for (int k = 0 ; k < i ; k++)
 	{
-		const LineDef * A = doc.linedefs[i];
-		const LineDef * B = doc.linedefs[k];
+		const auto &A = doc.linedefs[i];
+		const auto &B = doc.linedefs[k];
 
 		bool AA = (A->left  >= 0 && A->left == A->right);
 
@@ -1054,7 +1054,7 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 
 		for (first = 0 ; first < doc.numLinedefs(); first++)
 		{
-			const LineDef *F = doc.linedefs[first];
+			const auto &F = doc.linedefs[first];
 
 			if (F->left == sd || F->right == sd)
 				break;
@@ -1795,9 +1795,9 @@ static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
-		if (! LD_is_blocking(L, doc))
+		if (! LD_is_blocking(L.get(), doc))
 			continue;
 
 		if (doc.objects.lineTouchesBox(n, x1, y1, x2, y2))
@@ -2140,7 +2140,7 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -2177,7 +2177,7 @@ static void LineDefs_FixManualDoors(Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0 || L->left >= 0)
 			continue;
@@ -2201,7 +2201,7 @@ static void LineDefs_FindLackImpass(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 			lines.set(n);
@@ -2227,7 +2227,7 @@ static void LineDefs_FixLackImpass(Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 		{
@@ -2247,7 +2247,7 @@ static void LineDefs_FindBad2SFlag(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			lines.set(n);
@@ -2276,7 +2276,7 @@ static void LineDefs_FixBad2SFlag(Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			doc.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
@@ -2387,8 +2387,8 @@ static void LineDefs_ClearUnknown(Instance &inst)
 
 static int linedef_pos_cmp(int A, int B, const Document &doc)
 {
-	const LineDef *AL = doc.linedefs[A];
-	const LineDef *BL = doc.linedefs[B];
+	const auto &AL = doc.linedefs[A];
+	const auto &BL = doc.linedefs[B];
 
 	int A_x1 = static_cast<int>(AL->Start(doc)->x());
 	int A_y1 = static_cast<int>(AL->Start(doc)->y());
@@ -2442,8 +2442,8 @@ struct linedef_minx_CMP_pred
 
 	inline bool operator() (int A, int B) const
 	{
-		const LineDef *AL = doc.linedefs[A];
-		const LineDef *BL = doc.linedefs[B];
+		const auto &AL = doc.linedefs[A];
+		const auto &BL = doc.linedefs[B];
 
 		fixcoord_t A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
 		fixcoord_t B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
@@ -2532,8 +2532,8 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 
 	SYS_ASSERT(A != B);
 
-	const LineDef *AL = doc.linedefs[A];
-	const LineDef *BL = doc.linedefs[B];
+	const auto &AL = doc.linedefs[A];
+	const auto &BL = doc.linedefs[B];
 
 	// ignore zero-length lines
 	if (AL->IsZeroLength(doc) || BL->IsZeroLength(doc))
@@ -2665,7 +2665,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 	{
 		int n2 = sorted_list[n];
 
-		const LineDef *L1 = doc.linedefs[n2];
+		const auto &L1 = doc.linedefs[n2];
 
 		fixcoord_t max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
 
@@ -2673,7 +2673,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 		{
 			int k2 = sorted_list[k];
 
-			const LineDef *L2 = doc.linedefs[k2];
+			const auto &L2 = doc.linedefs[k2];
 
 			fixcoord_t min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
 
@@ -3111,7 +3111,7 @@ void Instance::CMD_ApplyTag()
 
 static bool LD_tag_exists(int tag, const Document &doc)
 {
-	for (const LineDef *linedef : doc.linedefs)
+	for (const auto &linedef : doc.linedefs)
 		if (linedef->tag == tag)
 			return true;
 
@@ -3157,7 +3157,7 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->tag <= 0)
 			continue;
@@ -3201,7 +3201,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -3490,7 +3490,7 @@ static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->right < 0)
 			continue;
@@ -3543,7 +3543,7 @@ static void Textures_FixMissing(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed missing textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (L->right < 0)
 			continue;
@@ -3619,7 +3619,7 @@ static void Textures_FindTransparent(const Instance &inst, selection_c& lines,
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->right < 0)
 			continue;
@@ -3679,7 +3679,7 @@ static void Textures_FixTransparent(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed transparent textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (L->right < 0)
 			continue;
@@ -3754,7 +3754,7 @@ static void Textures_FindMedusa(selection_c& lines,
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
@@ -3790,7 +3790,7 @@ static void Textures_RemoveMedusa(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed medusa textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (L->right < 0 || L->left < 0)
 			continue;
@@ -3841,7 +3841,7 @@ static void Textures_FindUnknownTex(selection_c& lines,
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
@@ -3953,7 +3953,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed unknown textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		bool two_sided = L->TwoSided();
 
@@ -4021,7 +4021,7 @@ static void Textures_FindDupSwitches(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		// only check lines with a special
 		if (! L->type)
@@ -4080,7 +4080,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("fixed non-animating switches");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		// only check lines with a special
 		if (! L->type)

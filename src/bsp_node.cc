@@ -1151,7 +1151,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const LineDef *part_L = inst.level.linedefs[part->linedef];
+	const LineDef *part_L = inst.level.linedefs[part->linedef].get();
 
 	if (part->side == 0)  /* right side */
 	{
@@ -1359,7 +1359,7 @@ seg_t *CreateSegs(const Instance &inst)
 
 	for (int i=0 ; i < inst.level.numLinedefs() ; i++)
 	{
-		const LineDef *line = inst.level.linedefs[i];
+		const LineDef *line = inst.level.linedefs[i].get();
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
