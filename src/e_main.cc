@@ -443,13 +443,17 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = level.vertices[objnum].get();
+		const auto &V = level.vertices[objnum];
 
-		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
-		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
+		if (V->x() < Map_bound_x1)
+			Map_bound_x1 = V->x();
+		if (V->y() < Map_bound_y1)
+			Map_bound_y1 = V->y();
 
-		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
-		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
+		if (V->x() > Map_bound_x2)
+			Map_bound_x2 = V->x();
+		if (V->y() > Map_bound_y2)
+			Map_bound_y2 = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -458,11 +462,18 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 	if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
 		Subdiv_InvalidateAll();
 
-	if (type == ObjType::linedefs && (field == LineDef::F_LEFT || field == LineDef::F_RIGHT || field == LineDef::F_START || field == LineDef::F_END))
+	if (type == ObjType::linedefs &&
+		(field == LineDef::F_LEFT || field == LineDef::F_RIGHT ||
+		 field == LineDef::F_START || field == LineDef::F_END))
+	{
 		Subdiv_InvalidateAll();
+	}
 
-	if (type == ObjType::sectors && (field == Sector::F_FLOORH || field == Sector::F_CEILH))
+	if (type == ObjType::sectors &&
+		(field == Sector::F_FLOORH || field == Sector::F_CEILH))
+	{
 		Subdiv_InvalidateAll();
+	}
 }
 
 void Instance::MapStuff_NotifyEnd()
