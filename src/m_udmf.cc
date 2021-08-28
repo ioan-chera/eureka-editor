@@ -34,13 +34,11 @@ private:
 	// empty means EOF
 	SString text;
 
-	Instance &inst;
-
 public:
-	Udmf_Token(Instance &inst, const char *str) : text(str), inst(inst)
+	Udmf_Token(const char *str) : text(str)
 	{ }
 
-	Udmf_Token(Instance &inst, const char *str, int len) : text(str, len), inst(inst)
+	Udmf_Token(const char *str, int len) : text(str, len)
 	{ }
 
 	const char *c_str()
@@ -99,7 +97,7 @@ public:
 
 	fixcoord_t DecodeCoord() const
 	{
-		return inst.MakeValidCoord(DecodeFloat());
+		return TO_COORD(DecodeFloat());
 	}
 
 	int DecodeTexture() const
@@ -153,10 +151,8 @@ private:
 	int b_pos = 0;
 	int b_size = 0;
 
-	Instance &inst;
-
 public:
-	Udmf_Parser(Instance &inst, Lump_c *_lump) : lump(_lump), inst(inst)
+	Udmf_Parser(Lump_c *_lump) : lump(_lump)
 	{
 		remaining = lump->Length();
 	}
@@ -166,7 +162,7 @@ public:
 		for (;;)
 		{
 			if (done)
-				return Udmf_Token(inst, "");
+				return Udmf_Token("");
 
 			// when position reaches half-way point, shift buffer down
 			if (b_pos >= U_BUF_SIZE/2)
@@ -273,7 +269,7 @@ public:
 					b_pos++;
 				}
 
-				return Udmf_Token(inst, buffer+start, b_pos - start);
+				return Udmf_Token(buffer+start, b_pos - start);
 			}
 
 			// is it a identifier or number?
@@ -292,13 +288,13 @@ public:
 					break;
 				}
 
-				return Udmf_Token(inst, buffer+start, b_pos - start);
+				return Udmf_Token(buffer+start, b_pos - start);
 			}
 
 			// it must be a symbol, such as '{' or '}'
 			b_pos++;
 
-			return Udmf_Token(inst, buffer+start, 1);
+			return Udmf_Token(buffer+start, 1);
 		}
 	}
 
@@ -652,7 +648,7 @@ void Instance::UDMF_LoadLevel(int loading_level, const Wad_file *load_wad,
 		return;
 
 	// TODO: reduce stack!!
-	Udmf_Parser parser(*this, lump);
+	Udmf_Parser parser(lump);
 
 	for (;;)
 	{
