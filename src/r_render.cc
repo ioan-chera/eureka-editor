@@ -244,10 +244,10 @@ void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 		thing_sec_cache::InvalidateAll(doc);
 }
 
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
+void Render3D_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 	if (type == ObjType::things &&
-		(field == Thing::F_X || field == Thing::F_Y))
+		(field.thing == &Thing::raw_x || field.thing == &Thing::raw_y))
 	{
 		thing_sec_cache::InvalidateThing(objnum);
 	}
@@ -265,15 +265,12 @@ class save_obj_field_c
 {
 public:
 	int obj;    // object number (SaveBucket::type is the type)
-	int field;  // e.g. Thing::F_X
+	ItemField field;  // e.g. Thing::F_X
 	int value;  // the saved value
 
 public:
-	save_obj_field_c(int _obj, int _field, int _value) :
+	save_obj_field_c(int _obj, ItemField _field, int _value) :
 		obj(_obj), field(_field), value(_value)
-	{ }
-
-	~save_obj_field_c()
 	{ }
 };
 
@@ -299,11 +296,11 @@ public:
 		fields.clear();
 	}
 
-	void Save(int obj, int field)
+	void Save(int obj, ItemField field)
 	{
 		// is it already saved?
 		for (size_t i = 0 ; i < fields.size() ; i++)
-			if (fields[i].obj == obj && fields[i].field == field)
+			if (fields[i].obj == obj && fields[i].field.raw == field.raw)
 				return;
 
 		int value = RawGet(obj, field);
@@ -319,61 +316,57 @@ public:
 		}
 	}
 
-	void ApplyTemp(int field, int delta)
+	void ApplyTemp(ItemField field, int delta)
 	{
 		for (size_t i = 0 ; i < fields.size() ; i++)
 		{
-			if (fields[i].field == field)
+			if (fields[i].field.raw == field.raw)
 				RawSet(fields[i].obj, field, fields[i].value + delta);
 		}
 	}
 
-	void ApplyToBasis(int field, int delta)
+	void ApplyToBasis(ItemField field, int delta)
 	{
 		for (size_t i = 0 ; i < fields.size() ; i++)
 		{
-			if (fields[i].field == field)
+			if (fields[i].field.raw == field.raw)
 			{
-				inst.level.basis.change(type, fields[i].obj, (byte)field, fields[i].value + delta);
+				inst.level.basis.change(type, fields[i].obj, field,
+                                        fields[i].value + delta);
 			}
 		}
 	}
 
 private:
-	int * RawObjPointer(int objnum)
+    int *RawObjField(int objnum, ItemField field)
+    {
+        switch(type)
+        {
+            case ObjType::things:
+                return &(inst.level.things[objnum].get()->*field.thing);
+            case ObjType::vertices:
+                return &(inst.level.vertices[objnum].get()->*field.vertex);
+            case ObjType::sectors:
+                return &(inst.level.sectors[objnum].get()->*field.sector);
+            case ObjType::sidedefs:
+                return &(inst.level.sidedefs[objnum].get()->*field.side);
+            case ObjType::linedefs:
+                return &(inst.level.linedefs[objnum].get()->*field.line);
+            default:
+                BugError("SaveBucket with bad mode\n");
+                return NULL; /* NOT REACHED */
+        }
+    }
+
+	int RawGet(int objnum, ItemField field)
 	{
-		switch (type)
-		{
-			case ObjType::things:
-				return reinterpret_cast<int*>(inst.level.things[objnum].get());
-
-			case ObjType::vertices:
-				return reinterpret_cast<int *>(inst.level.vertices[objnum].get());
-
-			case ObjType::sectors:
-				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());
-
-			case ObjType::sidedefs:
-				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
-
-			case ObjType::linedefs:
-				return reinterpret_cast<int *>(inst.level.linedefs[objnum].get());
-
-			default:
-				BugError("SaveBucket with bad mode\n");
-				return NULL; /* NOT REACHED */
-		}
-	}
-
-	int RawGet(int objnum, int field)
-	{
-		int *ptr = RawObjPointer(objnum) + field;
+		int *ptr = RawObjField(objnum, field);
 		return *ptr;
 	}
 
-	void RawSet(int objnum, int field, int value)
+	void RawSet(int objnum, ItemField field, int value)
 	{
-		int *ptr = RawObjPointer(objnum) + field;
+		int *ptr = RawObjField(objnum, field);
 		*ptr = value;
 	}
 };
@@ -433,8 +426,11 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 
 	// TODO : UDMF ports can allow full control over each part
 
-	inst.edit.adjust_bucket->Save(sd_num, SideDef::F_X_OFFSET);
-	inst.edit.adjust_bucket->Save(sd_num, SideDef::F_Y_OFFSET);
+    ItemField ife;
+    ife.side = &SideDef::x_offset;
+	inst.edit.adjust_bucket->Save(sd_num, ife);
+    ife.side = &SideDef::y_offset;
+	inst.edit.adjust_bucket->Save(sd_num, ife);
 }
 
 static void AdjustOfs_Begin(Instance &inst)
@@ -521,8 +517,11 @@ static void AdjustOfs_Finish(Instance &inst)
 		inst.level.basis.begin();
 		inst.level.basis.setMessage("adjusted offsets");
 
-		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
-		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
+        ItemField ife;
+        ife.side = &SideDef::x_offset;
+		inst.edit.adjust_bucket->ApplyToBasis(ife, dx);
+        ife.side = &SideDef::y_offset;
+		inst.edit.adjust_bucket->ApplyToBasis(ife, dy);
 
 		inst.level.basis.end();
 	}
@@ -576,8 +575,11 @@ static void AdjustOfs_RenderAnte(const Instance &inst)
 		int dy = I_ROUND(inst.edit.adjust_dy);
 
 		// change it temporarily (just for the render)
-		inst.edit.adjust_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
-		inst.edit.adjust_bucket->ApplyTemp(SideDef::F_Y_OFFSET, dy);
+        ItemField ife;
+        ife.side = &SideDef::x_offset;
+		inst.edit.adjust_bucket->ApplyTemp(ife, dx);
+        ife.side = &SideDef::y_offset;
+		inst.edit.adjust_bucket->ApplyTemp(ife, dy);
 	}
 }
 
@@ -1139,7 +1141,7 @@ void Instance::StoreSelectedThing(int new_type)
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		level.basis.changeThing(*it, Thing::F_TYPE, new_type);
+		level.basis.changeThing(*it, &Thing::type, new_type);
 	}
 
 	level.basis.end();
@@ -1224,10 +1226,10 @@ void Instance::StoreSelectedFlat(int new_tex)
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+			level.basis.changeSector(*it, &Sector::floor_tex, new_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
+			level.basis.changeSector(*it, &Sector::ceil_tex, new_tex);
 	}
 
 	level.basis.end();
@@ -1259,10 +1261,10 @@ void Instance::StoreDefaultedFlats()
 		byte parts = edit.Selected->get_ext(*it);
 
 		if (parts == 1 || (parts & PART_FLOOR))
-			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
+			level.basis.changeSector(*it, &Sector::floor_tex, floor_tex);
 
 		if (parts == 1 || (parts & PART_CEIL))
-			level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
+			level.basis.changeSector(*it, &Sector::ceil_tex, ceil_tex);
 	}
 
 	level.basis.end();
@@ -1375,29 +1377,29 @@ void Instance::StoreSelectedTexture(int new_tex)
 
 		if (L->OneSided())
 		{
-			level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+			level.basis.changeSidedef(L->right, &SideDef::mid_tex, new_tex);
 			continue;
 		}
 
 		/* right side */
 		if (parts == 1 || (parts & PART_RT_LOWER))
-			level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+			level.basis.changeSidedef(L->right, &SideDef::lower_tex, new_tex);
 
 		if (parts == 1 || (parts & PART_RT_UPPER))
-			level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+			level.basis.changeSidedef(L->right, &SideDef::upper_tex, new_tex);
 
 		if (parts & PART_RT_RAIL)
-			level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+			level.basis.changeSidedef(L->right, &SideDef::mid_tex, new_tex);
 
 		/* left side */
 		if (parts == 1 || (parts & PART_LF_LOWER))
-			level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+			level.basis.changeSidedef(L->left, &SideDef::lower_tex, new_tex);
 
 		if (parts == 1 || (parts & PART_LF_UPPER))
-			level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+			level.basis.changeSidedef(L->left, &SideDef::upper_tex, new_tex);
 
 		if (parts & PART_LF_RAIL)
-			level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
+			level.basis.changeSidedef(L->left, &SideDef::mid_tex, new_tex);
 	}
 
 	level.basis.end();

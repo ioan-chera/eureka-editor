@@ -117,7 +117,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeVertex(*it, Vertex::F_X, box->inst.MakeValidCoord(new_x));
+			box->inst.level.basis.changeVertex(*it, &Vertex::raw_x, box->inst.MakeValidCoord(new_x));
 		}
 
 		box->inst.level.basis.end();
@@ -137,7 +137,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, box->inst.MakeValidCoord(new_y));
+			box->inst.level.basis.changeVertex(*it, &Vertex::raw_y, box->inst.MakeValidCoord(new_y));
 		}
 
 		box->inst.level.basis.end();
@@ -180,8 +180,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		{
 			const Vertex *V = box->inst.level.vertices[*it].get();
 
-			box->inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+			box->inst.level.basis.changeVertex(*it, &Vertex::raw_x, V->raw_x + fdx);
+			box->inst.level.basis.changeVertex(*it, &Vertex::raw_y, V->raw_y + fdy);
 		}
 
 		box->inst.level.basis.end();

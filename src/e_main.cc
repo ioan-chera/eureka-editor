@@ -404,7 +404,7 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 	}
 }
 
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 	if (type == ObjType::vertices)
 	{
@@ -419,18 +419,18 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		Subdiv_InvalidateAll();
 	}
 
-	if (type == ObjType::sidedefs && field == SideDef::F_SECTOR)
+	if (type == ObjType::sidedefs && field.side == &SideDef::sector)
 		Subdiv_InvalidateAll();
 
 	if (type == ObjType::linedefs &&
-		(field == LineDef::F_LEFT || field == LineDef::F_RIGHT ||
-		 field == LineDef::F_START || field == LineDef::F_END))
+		(field.line == &LineDef::left || field.line == &LineDef::right ||
+		 field.line == &LineDef::start || field.line == &LineDef::end))
 	{
 		Subdiv_InvalidateAll();
 	}
 
 	if (type == ObjType::sectors &&
-		(field == Sector::F_FLOORH || field == Sector::F_CEILH))
+		(field.sector == &Sector::floorh || field.sector == &Sector::ceilh))
 	{
 		Subdiv_InvalidateAll();
 	}
@@ -491,7 +491,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 }
 
 
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 	if (type != edit.mode)
 		return;
@@ -565,7 +565,7 @@ void Instance::Selection_NotifyDelete(ObjType type, int objnum)
 }
 
 
-void Selection_NotifyChange(ObjType type, int objnum, int field)
+void Selection_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 	// field changes never affect the current selection
 }

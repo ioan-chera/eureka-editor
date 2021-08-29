@@ -218,15 +218,15 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 				if (lower)
 				{
-					box->inst.level.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+					box->inst.level.basis.changeSidedef(sd, &SideDef::lower_tex, new_tex);
 				}
 				else if (upper)
 				{
-					box->inst.level.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+					box->inst.level.basis.changeSidedef(sd, &SideDef::upper_tex, new_tex);
 				}
 				else if (rail)
 				{
-					box->inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex);
+					box->inst.level.basis.changeSidedef(sd, &SideDef::mid_tex,   new_tex);
 				}
 			}
 		}
@@ -277,7 +277,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 	// iterate over selected linedefs
 
-	int field = box->is_front ? LineDef::F_RIGHT : LineDef::F_LEFT;
+	int LineDef::*field = box->is_front ? &LineDef::right : &LineDef::left;
 
 	box->inst.level.basis.begin();
 
@@ -312,7 +312,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		box->inst.level.sidedefs[sd]->SetDefaults(box->inst, other >= 0);
 		box->inst.level.sidedefs[sd]->sector = new_sec;
 
-		box->inst.level.basis.changeLinedef(*it, static_cast<byte>(field), sd);
+		box->inst.level.basis.changeLinedef(*it, field, sd);
 
 		if (other >= 0)
 			box->inst.level.linemod.addSecondSidedef(*it, sd, other);
@@ -321,7 +321,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 	box->inst.level.basis.setMessageForSelection("added sidedef to", *box->inst.edit.Selected);
 	box->inst.level.basis.end();
 
-	box->inst.main_win->line_box->UpdateField();
+	box->inst.main_win->line_box->UpdateField(false, nullptr);
 	box->inst.main_win->line_box->UpdateSides();
 }
 
@@ -359,7 +359,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 	box->inst.level.basis.setMessageForSelection("deleted sidedef from", *box->inst.edit.Selected);
 	box->inst.level.basis.end();
 
-	box->inst.main_win->line_box->UpdateField();
+	box->inst.main_win->line_box->UpdateField(false, nullptr);
 	box->inst.main_win->line_box->UpdateSides();
 }
 
@@ -390,9 +390,9 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 			if (box->inst.level.isSidedef(sd))
 			{
 				if (w == box->x_ofs)
-					box->inst.level.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_x_ofs);
+					box->inst.level.basis.changeSidedef(sd, &SideDef::x_offset, new_x_ofs);
 				else
-					box->inst.level.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, new_y_ofs);
+					box->inst.level.basis.changeSidedef(sd, &SideDef::y_offset, new_y_ofs);
 			}
 		}
 
@@ -422,7 +422,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 			int sd = box->is_front ? L->right : L->left;
 
 			if (box->inst.level.isSidedef(sd))
-				box->inst.level.basis.changeSidedef(sd, SideDef::F_SECTOR, new_sec);
+				box->inst.level.basis.changeSidedef(sd, &SideDef::sector, new_sec);
 		}
 
 		box->inst.level.basis.end();

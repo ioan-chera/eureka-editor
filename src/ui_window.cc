@@ -307,16 +307,16 @@ void UI_MainWindow::InvalidatePanelObj()
 void UI_MainWindow::UpdatePanelObj()
 {
 	if (thing_box->visible())
-		thing_box->UpdateField();
+		thing_box->UpdateField(false, nullptr);
 
 	if (line_box->visible())
 	{
-		line_box->UpdateField();
+		line_box->UpdateField(false, nullptr);
 		line_box->UpdateSides();
 	}
 
 	if (sec_box->visible())
-		sec_box->UpdateField();
+		sec_box->UpdateField(false, nullptr);
 
 	if (vert_box->visible())
 		vert_box->UpdateField();

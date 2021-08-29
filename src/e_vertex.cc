@@ -131,11 +131,11 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 
 	if (same_left)
 	{
-		doc.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+		doc.basis.changeLinedef(ld2, &LineDef::left, L1->right);
 	}
 	else if (same_right)
 	{
-		doc.basis.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
+		doc.basis.changeLinedef(ld2, &LineDef::right, L1->left);
 	}
 	else
 	{
@@ -153,7 +153,7 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 
 	if (L2->OneSided() && new_mid_tex > 0)
 	{
-		doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+		doc.basis.changeSidedef(L2->right, &SideDef::mid_tex, new_mid_tex);
 	}
 
 	// fix flags of remaining linedef
@@ -170,7 +170,7 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 		new_flags |=  MLF_Blocking;
 	}
 
-	doc.basis.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
+	doc.basis.changeLinedef(ld2, &LineDef::flags, new_flags);
 }
 
 
@@ -232,10 +232,10 @@ void VertexModule::doMergeVertex(int v1, int v2, selection_c& del_lines) const
 		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
-			doc.basis.changeLinedef(n, LineDef::F_START, v2);
+			doc.basis.changeLinedef(n, &LineDef::start, v2);
 
 		if (L->end == v1)
-			doc.basis.changeLinedef(n, LineDef::F_END, v2);
+			doc.basis.changeLinedef(n, &LineDef::end, v2);
 
 		if (L->start == v2 && L->end == v2)
 			del_lines.set(n);
@@ -475,14 +475,14 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 				doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
 
 				if (L->start == v_num)
-					doc.basis.changeLinedef(n, LineDef::F_START, new_v);
+					doc.basis.changeLinedef(n, &LineDef::start, new_v);
 				else
-					doc.basis.changeLinedef(n, LineDef::F_END, new_v);
+					doc.basis.changeLinedef(n, &LineDef::end, new_v);
 			}
 			else
 			{
-				doc.basis.changeVertex(v_num, Vertex::F_X, inst.MakeValidCoord(new_x));
-				doc.basis.changeVertex(v_num, Vertex::F_Y, inst.MakeValidCoord(new_y));
+				doc.basis.changeVertex(v_num, &Vertex::raw_x, inst.MakeValidCoord(new_x));
+				doc.basis.changeVertex(v_num, &Vertex::raw_y, inst.MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -574,10 +574,10 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 		auto &L2 = doc.linedefs[*it];
 
 		if (L2->start == v_num)
-			doc.basis.changeLinedef(*it, LineDef::F_START, new_v);
+			doc.basis.changeLinedef(*it, &LineDef::start, new_v);
 
 		if (L2->end == v_num)
-			doc.basis.changeLinedef(*it, LineDef::F_END, new_v);
+			doc.basis.changeLinedef(*it, &LineDef::end, new_v);
 	}
 
 	*seen_one = true;
@@ -707,7 +707,7 @@ void VertexModule::DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in
 		doc.linemod.flipLinedef(ld_num);
 	}
 
-	doc.basis.changeLinedef(ld_num, LineDef::F_LEFT, -1);
+	doc.basis.changeLinedef(ld_num, &LineDef::left, -1);
 
 
 	// determine new flags
@@ -717,7 +717,7 @@ void VertexModule::DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	doc.basis.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
+	doc.basis.changeLinedef(ld_num, &LineDef::flags, new_flags);
 
 	L2->flags = L1->flags;
 
@@ -733,7 +733,7 @@ void VertexModule::DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	doc.basis.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
+	doc.basis.changeSidedef(L1->right, &SideDef::mid_tex, tex);
 
 
 	// now fix the second line's textures
@@ -745,7 +745,7 @@ void VertexModule::DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	doc.basis.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
+	doc.basis.changeSidedef(lost_sd, &SideDef::mid_tex, tex);
 }
 
 
@@ -866,10 +866,10 @@ void Instance::commandSectorDisconnect()
 		else
 		{
 			if (start2 >= 0)
-				level.basis.changeLinedef(n, LineDef::F_START, start2);
+				level.basis.changeLinedef(n, &LineDef::start, start2);
 
 			if (end2 >= 0)
-				level.basis.changeLinedef(n, LineDef::F_END, end2);
+				level.basis.changeLinedef(n, &LineDef::end, end2);
 		}
 	}
 
@@ -885,8 +885,8 @@ void Instance::commandSectorDisconnect()
 	{
 		const Vertex * V = level.vertices[*it].get();
 
-		level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-		level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
+		level.basis.changeVertex(*it, &Vertex::raw_x, V->raw_x + MakeValidCoord(move_dx));
+		level.basis.changeVertex(*it, &Vertex::raw_y, V->raw_y + MakeValidCoord(move_dy));
 	}
 
 	level.basis.end();
@@ -1093,8 +1093,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
-		level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
+		level.basis.changeVertex(along_list[i].vert_num, &Vertex::raw_x, MakeValidCoord(nx));
+		level.basis.changeVertex(along_list[i].vert_num, &Vertex::raw_y, MakeValidCoord(ny));
 	}
 
 	level.basis.end();
@@ -1163,8 +1163,8 @@ double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_X, inst.MakeValidCoord(new_x));
-			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, inst.MakeValidCoord(new_y));
+			doc.basis.changeVertex(along_list[k].vert_num, &Vertex::raw_x, inst.MakeValidCoord(new_x));
+			doc.basis.changeVertex(along_list[k].vert_num, &Vertex::raw_y, inst.MakeValidCoord(new_y));
 		}
 		else
 		{

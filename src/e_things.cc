@@ -71,12 +71,12 @@ void Instance::CMD_TH_SpinThings()
 	{
 		const Thing *T = level.things[*it].get();
 
-		level.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+		level.basis.changeThing(*it, &Thing::angle, calc_new_angle(T->angle, degrees));
 	}
 
 	level.basis.end();
 
-	main_win->thing_box->UpdateField(Thing::F_ANGLE);
+	main_win->thing_box->UpdateField(true, &Thing::angle);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -121,8 +121,8 @@ static void MoveOverlapThing(Instance &inst, int th, int mid_x, int mid_y, int n
 
 	const Thing *T = inst.level.things[th].get();
 
-	inst.level.basis.changeThing(th, Thing::F_X, T->raw_x + fdx);
-	inst.level.basis.changeThing(th, Thing::F_Y, T->raw_y + fdy);
+	inst.level.basis.changeThing(th, &Thing::raw_x, T->raw_x + fdx);
+	inst.level.basis.changeThing(th, &Thing::raw_y, T->raw_y + fdy);
 }
 
 
@@ -195,8 +195,8 @@ void CMD_TH_Merge(Instance &inst)
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		inst.level.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid_x));
-		inst.level.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid_y));
+		inst.level.basis.changeThing(*it, &Thing::raw_x, inst.MakeValidCoord(mid_x));
+		inst.level.basis.changeThing(*it, &Thing::raw_y, inst.MakeValidCoord(mid_y));
 	}
 
 	inst.level.basis.end();

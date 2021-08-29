@@ -28,6 +28,7 @@
 #define __EUREKA_OBJ_ID_H__
 
 #include "sys_type.h"
+#include <stdlib.h>
 
 // main kinds of objects
 enum class ObjType : byte
@@ -37,6 +38,25 @@ enum class ObjType : byte
 	sidedefs,
 	vertices,
 	sectors
+};
+
+class Thing;
+class LineDef;
+class SideDef;
+class Vertex;
+class Sector;
+
+//
+// Undoable changeable map item field
+//
+union ItemField
+{
+    size_t raw;
+    int Thing::*thing;
+    int LineDef::*line;
+    int SideDef::*side;
+    int Vertex::*vertex;
+    int Sector::*sector;
 };
 
 // special object number for "NONE"

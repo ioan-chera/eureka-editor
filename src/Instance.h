@@ -208,12 +208,12 @@ public:
 	bool Editor_ParseUser(const std::vector<SString> &tokens);
 	void Editor_WriteUser(std::ostream &os) const;
 	void MapStuff_NotifyBegin();
-	void MapStuff_NotifyChange(ObjType type, int objnum, int field);
+	void MapStuff_NotifyChange(ObjType type, int objnum, ItemField field);
 	void MapStuff_NotifyDelete(ObjType type, int objnum);
 	void MapStuff_NotifyEnd();
 	void MapStuff_NotifyInsert(ObjType type, int objnum);
 	void ObjectBox_NotifyBegin();
-	void ObjectBox_NotifyChange(ObjType type, int objnum, int field);
+	void ObjectBox_NotifyChange(ObjType type, int objnum, ItemField field);
 	void ObjectBox_NotifyDelete(ObjType type, int objnum);
 	void ObjectBox_NotifyEnd() const;
 	void ObjectBox_NotifyInsert(ObjType type, int objnum);
@@ -477,14 +477,14 @@ private:
 	void StoreSelectedThing(int new_type);
 
 	// BasisListener
-	virtual void basisOnChangeItem(ObjType type, int field, int value) override;
+	virtual void basisOnChangeItem(ObjType type, ItemField field, int value) override;
 	virtual void basisSetStatus(const SString &text) override;
 
 	virtual void basisMadeChanges() override;
 
 	virtual void basisNotifyBegin() override;
 	virtual void basisNotifyInsert(ObjType type, int objnum) override;
-	virtual void basisNotifyChange(ObjType type, int objnum, int field)
+	virtual void basisNotifyChange(ObjType type, int objnum, ItemField field)
 			override;
 	virtual void basisNotifyDelete(ObjType type, int objnum) override;
 	virtual void basisNotifyEnd() override;

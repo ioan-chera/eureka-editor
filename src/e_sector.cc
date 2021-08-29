@@ -77,10 +77,10 @@ void SectorModule::safeRaiseLower(int sec, int parts, int dz) const
 	}
 
 	if (parts & PART_FLOOR)
-		doc.basis.changeSector(sec, Sector::F_FLOORH, f);
+		doc.basis.changeSector(sec, &Sector::floorh, f);
 
 	if (parts & PART_CEIL)
-		doc.basis.changeSector(sec, Sector::F_CEILH, c);
+		doc.basis.changeSector(sec, &Sector::ceilh, c);
 }
 
 
@@ -110,12 +110,12 @@ void Instance::CMD_SEC_Floor()
 
 		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
-		level.basis.changeSector(*it, Sector::F_FLOORH, new_h);
+		level.basis.changeSector(*it, &Sector::floorh, new_h);
 	}
 
 	level.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_FLOORH);
+	main_win->sec_box->UpdateField(true, &Sector::floorh);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -148,12 +148,12 @@ void Instance::CMD_SEC_Ceil()
 
 		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
-		level.basis.changeSector(*it, Sector::F_CEILH, new_h);
+		level.basis.changeSector(*it, &Sector::ceilh, new_h);
 	}
 
 	level.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_CEILH);
+	main_win->sec_box->UpdateField(true, &Sector::ceilh);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -197,12 +197,12 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 		int new_lt = light_add_delta(S->light, delta);
 
-		doc.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
+		doc.basis.changeSector(*it, &Sector::light, new_lt);
 	}
 
 	doc.basis.end();
 
-	inst.main_win->sec_box->UpdateField(Sector::F_LIGHT);
+	inst.main_win->sec_box->UpdateField(true, &Sector::light);
 }
 
 
@@ -249,14 +249,14 @@ void Instance::CMD_SEC_SwapFlats()
 		int floor_tex = S->floor_tex;
 		int  ceil_tex = S->ceil_tex;
 
-		level.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
-		level.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
+		level.basis.changeSector(*it, &Sector::floor_tex, ceil_tex);
+		level.basis.changeSector(*it, &Sector::ceil_tex, floor_tex);
 	}
 
 	level.basis.end();
 
-	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
-	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
+	main_win->sec_box->UpdateField(true, &Sector::floor_tex);
+	main_win->sec_box->UpdateField(true, &Sector::ceil_tex);
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -289,7 +289,7 @@ void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
 
 		if (sd->sector == old_sec)
 		{
-			doc.basis.changeSidedef(i, SideDef::F_SECTOR, new_sec);
+			doc.basis.changeSidedef(i, &SideDef::sector, new_sec);
 		}
 	}
 }
@@ -333,14 +333,14 @@ void Instance::commandSectorMerge()
 	{
 		const Sector *ref = level.sectors[first].get();
 
-		level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-		level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-		level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-		level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+		level.basis.changeSector(new_sec, &Sector::floorh,    ref->floorh);
+		level.basis.changeSector(new_sec, &Sector::floor_tex, ref->floor_tex);
+		level.basis.changeSector(new_sec, &Sector::ceilh,     ref->ceilh);
+		level.basis.changeSector(new_sec, &Sector::ceil_tex,  ref->ceil_tex);
 
-		level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
-		level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
-		level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+		level.basis.changeSector(new_sec, &Sector::light, ref->light);
+		level.basis.changeSector(new_sec, &Sector::type,  ref->type);
+		level.basis.changeSector(new_sec, &Sector::tag,   ref->tag);
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
@@ -1040,7 +1040,7 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 
 	if (sd_num >= 0)
 	{
-		doc.basis.changeSidedef(sd_num, SideDef::F_SECTOR, new_sec);
+		doc.basis.changeSidedef(sd_num, &SideDef::sector, new_sec);
 		return;
 	}
 
@@ -1080,9 +1080,9 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 	SD->sector = new_sec;
 
 	if (side == Side::right)
-		doc.basis.changeLinedef(ld, LineDef::F_RIGHT, new_sd);
+		doc.basis.changeLinedef(ld, &LineDef::right, new_sd);
 	else
-		doc.basis.changeLinedef(ld, LineDef::F_LEFT, new_sd);
+		doc.basis.changeLinedef(ld, &LineDef::left, new_sd);
 
 	// if we're adding a second side to the linedef, clear out some
 	// of the properties that aren't needed anymore: middle texture,

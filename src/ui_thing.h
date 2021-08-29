@@ -99,7 +99,7 @@ public:
 
 	// call this if the thing was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(bool usefield, int Thing::*field);
 
 	void UpdateTotal();
 

@@ -280,7 +280,7 @@ void Clipboard_NotifyDelete(ObjType type, int objnum)
 }
 
 
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
+void Clipboard_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 	// field changes never affect the clipboard
 }
@@ -1091,9 +1091,9 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	doc.basis.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
-		doc.basis.changeLinedef(ld1, LineDef::F_START, v2);
+		doc.basis.changeLinedef(ld1, &LineDef::start, v2);
 	else
-		doc.basis.changeLinedef(ld1, LineDef::F_END, v2);
+		doc.basis.changeLinedef(ld1, &LineDef::end, v2);
 
 	// NOT-DO: update X offsets on existing linedef
 

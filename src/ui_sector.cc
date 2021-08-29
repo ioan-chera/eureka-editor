@@ -269,9 +269,9 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			if (w == box->floor_h)
-				box->inst.level.basis.changeSector(*it, Sector::F_FLOORH, f_h);
+				box->inst.level.basis.changeSector(*it, &Sector::floorh, f_h);
 			else
-				box->inst.level.basis.changeSector(*it, Sector::F_CEILH, c_h);
+				box->inst.level.basis.changeSector(*it, &Sector::ceilh, c_h);
 		}
 
 		box->inst.level.basis.end();
@@ -310,12 +310,12 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 			new_h = CLAMP(-32767, new_h, 32767);
 
-			box->inst.level.basis.changeSector(*it, Sector::F_CEILH, new_h);
+			box->inst.level.basis.changeSector(*it, &Sector::ceilh, new_h);
 		}
 
 		box->inst.level.basis.end();
 
-		box->UpdateField();
+		box->UpdateField(false, nullptr);
 	}
 }
 
@@ -382,16 +382,16 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 				parts = filter_parts;
 
 			if (parts & filter_parts & PART_FLOOR)
-				inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, tex_num);
+				inst.level.basis.changeSector(*it, &Sector::floor_tex, tex_num);
 
 			if (parts & filter_parts & parts & PART_CEIL)
-				inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX, tex_num);
+				inst.level.basis.changeSector(*it, &Sector::ceil_tex, tex_num);
 		}
 
 		inst.level.basis.end();
 	}
 
-	UpdateField();
+	UpdateField(false, nullptr);
 }
 
 
@@ -503,14 +503,14 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 		{
 			int old_type = inst.level.sectors[*it]->type;
 
-			inst.level.basis.changeSector(*it, Sector::F_TYPE, (old_type & ~mask) | value);
+			inst.level.basis.changeSector(*it, &Sector::type, (old_type & ~mask) | value);
 		}
 
 		inst.level.basis.end();
 	}
 
 	// update the description
-	UpdateField(Sector::F_TYPE);
+	UpdateField(true, &Sector::type);
 }
 
 
@@ -575,7 +575,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
+			box->inst.level.basis.changeSector(*it, &Sector::light, new_lt);
 		}
 
 		box->inst.level.basis.end();
@@ -696,7 +696,7 @@ void UI_SectorBox::SetObj(int _index, int _count)
 	which->SetIndex(obj);
 	which->SetSelected(count);
 
-	UpdateField();
+	UpdateField(false, nullptr);
 
 	if (obj < 0)
 		UnselectPics();
@@ -704,10 +704,10 @@ void UI_SectorBox::SetObj(int _index, int _count)
 	redraw();
 }
 
-void UI_SectorBox::UpdateField(int field)
+void UI_SectorBox::UpdateField(bool usefield, int Sector::*field)
 {
 	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj].get() : nullptr;
-	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
+	if (!usefield || field == &Sector::floorh || field == &Sector::ceilh)
 	{
 		if (inst.level.isSector(obj))
 		{
@@ -723,7 +723,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
+	if (!usefield || field == &Sector::floor_tex || field == &Sector::ceil_tex)
 	{
 		if (inst.level.isSector(obj))
 		{
@@ -749,7 +749,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Sector::F_TYPE)
+	if (!usefield || field == &Sector::type)
 	{
 		bm_damage->value(0);
 		bm_secret->value(0);
@@ -786,7 +786,7 @@ void UI_SectorBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Sector::F_LIGHT || field == Sector::F_TAG)
+	if (!usefield || field == &Sector::light || field == &Sector::tag)
 	{
 		if (inst.level.isSector(obj))
 		{
@@ -848,13 +848,13 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		if (parts & PART_FLOOR) inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
-		if (parts & PART_CEIL)  inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX,  new_tex);
+		if (parts & PART_FLOOR) inst.level.basis.changeSector(*it, &Sector::floor_tex, new_tex);
+		if (parts & PART_CEIL)  inst.level.basis.changeSector(*it, &Sector::ceil_tex,  new_tex);
 	}
 
 	inst.level.basis.end();
 
-	UpdateField();
+	UpdateField(false, nullptr);
 }
 
 
@@ -872,13 +872,13 @@ void UI_SectorBox::CB_Cut(int parts)
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			if (parts & PART_FLOOR) inst.level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_floor);
-			if (parts & PART_CEIL)  inst.level.basis.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil);
+			if (parts & PART_FLOOR) inst.level.basis.changeSector(*it, &Sector::floor_tex, new_floor);
+			if (parts & PART_CEIL)  inst.level.basis.changeSector(*it, &Sector::ceil_tex,  new_ceil);
 		}
 
 		inst.level.basis.end();
 
-		UpdateField();
+		UpdateField(false, nullptr);
 	}
 }
 
@@ -995,7 +995,7 @@ void UI_SectorBox::UpdateGameInfo()
 		bm_wind->hide();
 	}
 
-	UpdateField();
+	UpdateField(false, nullptr);
 
 	redraw();
 }

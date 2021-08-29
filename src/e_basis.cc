@@ -420,10 +420,10 @@ void Basis::del(ObjType type, int objnum)
 			LineDef *L = doc.linedefs[n].get();
 
 			if(L->right == objnum)
-				changeLinedef(n, LineDef::F_RIGHT, -1);
+				changeLinedef(n, &LineDef::right, -1);
 
 			if(L->left == objnum)
-				changeLinedef(n, LineDef::F_LEFT, -1);
+				changeLinedef(n, &LineDef::left, -1);
 		}
 	}
 	else if(type == ObjType::vertices)
@@ -455,7 +455,7 @@ void Basis::del(ObjType type, int objnum)
 // same as before, nothing happens and false is returned.
 // Otherwise returns true.
 //
-void Basis::change(ObjType type, int objnum, byte field, int value)
+void Basis::change(ObjType type, int objnum, ItemField field, int value)
 {
 	// TODO: optimise, check whether value actually changes
 
@@ -475,21 +475,25 @@ void Basis::change(ObjType type, int objnum, byte field, int value)
 //
 // Called when change is called
 //
-void Instance::basisOnChangeItem(ObjType type, int field, int value)
+void Instance::basisOnChangeItem(ObjType type, ItemField field, int value)
 {
 	switch(type)
 	{
 		case ObjType::things:
-			if(field == Thing::F_TYPE)
+			if(field.thing == &Thing::type)
 				recent_things.insert_number(value);
 			break;
 		case ObjType::sectors:
-			if(field == Sector::F_FLOOR_TEX || field == Sector::F_CEIL_TEX)
+			if(field.sector == &Sector::floor_tex ||
+               field.sector == &Sector::ceil_tex)
+            {
 				recent_flats.insert(BA_GetString(value));
+            }
 			break;
 		case ObjType::sidedefs:
-			if(field == SideDef::F_LOWER_TEX || field == SideDef::F_UPPER_TEX ||
-				field == SideDef::F_MID_TEX)
+			if(field.side == &SideDef::lower_tex ||
+               field.side == &SideDef::upper_tex ||
+               field.side == &SideDef::mid_tex)
 			{
 				recent_textures.insert(BA_GetString(value));
 			}
@@ -502,66 +506,71 @@ void Instance::basisOnChangeItem(ObjType type, int field, int value)
 //
 // Change thing
 //
-void Basis::changeThing(int thing, byte field, int value)
+void Basis::changeThing(int thing, int Thing::*field, int value)
 {
 	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
-	SYS_ASSERT(field <= Thing::F_ARG5);
 
-	listener.basisOnChangeItem(ObjType::things, field, value);
+    ItemField ife;
+    ife.thing = field;
+	listener.basisOnChangeItem(ObjType::things, ife, value);
 
-	change(ObjType::things, thing, field, value);
+	change(ObjType::things, thing, ife, value);
 }
 
 //
 // Change vertex
 //
-void Basis::changeVertex(int vert, byte field, int value)
+void Basis::changeVertex(int vert, int Vertex::*field, int value)
 {
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
-	SYS_ASSERT(field <= Vertex::F_Y);
 
+    ItemField ife;
+    ife.vertex = field;
 //	listener.basisOnChangeItem(ObjType::vertices, field, value);
 
-	change(ObjType::vertices, vert, field, value);
+	change(ObjType::vertices, vert, ife, value);
 }
 
 //
 // Change sector
 //
-void Basis::changeSector(int sec, byte field, int value)
+void Basis::changeSector(int sec, int Sector::*field, int value)
 {
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
-	SYS_ASSERT(field <= Sector::F_TAG);
 
-	listener.basisOnChangeItem(ObjType::sectors, field, value);
+    ItemField ife;
+    ife.sector = field;
+	listener.basisOnChangeItem(ObjType::sectors, ife, value);
 
-	change(ObjType::sectors, sec, field, value);
+	change(ObjType::sectors, sec, ife, value);
 }
 
 //
 // Change sidedef
 //
-void Basis::changeSidedef(int side, byte field, int value)
+void Basis::changeSidedef(int side, int SideDef::*field, int value)
 {
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
-	SYS_ASSERT(field <= SideDef::F_SECTOR);
 
-	listener.basisOnChangeItem(ObjType::sidedefs, field, value);
+    ItemField ife;
+    ife.side = field;
+	listener.basisOnChangeItem(ObjType::sidedefs, ife, value);
 
-	change(ObjType::sidedefs, side, field, value);
+	change(ObjType::sidedefs, side, ife, value);
 }
 
 //
 // Change linedef
 //
-void Basis::changeLinedef(int line, byte field, int value)
+void Basis::changeLinedef(int line, int LineDef::*field, int value)
 {
 	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
-	SYS_ASSERT(field <= LineDef::F_ARG5);
 
+    ItemField ife;
+    ife.line = field;
 //	listener.basisOnChangeItem(ObjType::linedefs, field, value);
 
-	change(ObjType::linedefs, line, field, value);
+	change(ObjType::linedefs, line, ife, value);
 }
 
 //
@@ -687,7 +696,7 @@ void Basis::EditOperation::destroy()
 //
 // Notify change
 //
-void Instance::basisNotifyChange(ObjType objtype, int objnum, int field)
+void Instance::basisNotifyChange(ObjType objtype, int objnum, ItemField field)
 {
 	Clipboard_NotifyChange(objtype, objnum, field);
 	Selection_NotifyChange(objtype, objnum, field);
@@ -701,35 +710,33 @@ void Instance::basisNotifyChange(ObjType objtype, int objnum, int field)
 //
 void Basis::EditOperation::rawChange(Basis &basis)
 {
-	int *pos = nullptr;
 	switch(objtype)
 	{
 	case ObjType::things:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
+        std::swap(basis.doc.things[objnum].get()->*field.thing, value);
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
-		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
+        std::swap(basis.doc.vertices[objnum].get()->*field.vertex, value);
 		break;
 	case ObjType::sectors:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
-		pos = reinterpret_cast<int *>(basis.doc.sectors[objnum].get());
+        std::swap(basis.doc.sectors[objnum].get()->*field.sector, value);
 		break;
 	case ObjType::sidedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
+        std::swap(basis.doc.sidedefs[objnum].get()->*field.side, value);
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
-		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
+        std::swap(basis.doc.linedefs[objnum].get()->*field.line, value);
 		break;
 	default:
 		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
 		return; /* NOT REACHED */
 	}
 	// TODO: CHANGE THIS TO A SAFER WAY!
-	std::swap(pos[field], value);
 	basis.mDidMakeChanges = true;
 
 	// TODO: their modules

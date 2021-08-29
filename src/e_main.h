@@ -167,7 +167,7 @@ struct Editor_State_t
 	struct { float x1, y1, x2, y2; } adjust_bbox;
 };
 
-void Selection_NotifyChange(ObjType type, int objnum, int field);
+void Selection_NotifyChange(ObjType type, int objnum, ItemField field);
 
 
 void DumpSelection (selection_c * list);

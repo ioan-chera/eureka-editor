@@ -109,10 +109,6 @@ public:
 	int special = 0;
 	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
 
-	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
-	       F_H, F_TID, F_SPECIAL,
-		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
-
 public:
 	inline double x() const
 	{
@@ -156,8 +152,6 @@ class Vertex
 public:
 	fixcoord_t raw_x = 0;
 	fixcoord_t raw_y = 0;
-
-	enum { F_X, F_Y };
 
 public:
 	inline double x() const
@@ -206,8 +200,6 @@ public:
 	int type = 0;
 	int tag = 0;
 
-	enum { F_FLOORH, F_CEILH, F_FLOOR_TEX, F_CEIL_TEX, F_LIGHT, F_TYPE, F_TAG };
-
 public:
 	SString FloorTex() const;
 	SString CeilTex() const;
@@ -230,8 +222,6 @@ public:
 	int mid_tex = 0;
 	int lower_tex = 0;
 	int sector = 0;
-
-	enum { F_X_OFFSET, F_Y_OFFSET, F_UPPER_TEX, F_MID_TEX, F_LOWER_TEX, F_SECTOR };
 
 public:
 
@@ -263,10 +253,6 @@ public:
 	int arg3 = 0;
 	int arg4 = 0;
 	int arg5 = 0;
-
-	enum { F_START, F_END, F_RIGHT, F_LEFT,
-	       F_FLAGS, F_TYPE, F_TAG,
-		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
 	Vertex *Start(const Document &doc) const;
@@ -352,14 +338,15 @@ public:
 class BasisListener
 {
 public:
-	virtual void basisOnChangeItem(ObjType type, int field, int value) = 0;
+	virtual void basisOnChangeItem(ObjType type, ItemField field, int value) = 0;
 	virtual void basisSetStatus(const SString &text) = 0;
 
 	virtual void basisMadeChanges() = 0;
 
 	virtual void basisNotifyBegin() = 0;
 	virtual void basisNotifyInsert(ObjType type, int objnum) = 0;
-	virtual void basisNotifyChange(ObjType type, int objnum, int field) = 0;
+	virtual void basisNotifyChange(ObjType type, int objnum, ItemField field)
+            = 0;
 	virtual void basisNotifyDelete(ObjType type, int objnum) = 0;
 	virtual void basisNotifyEnd() = 0;
 };
@@ -381,12 +368,12 @@ public:
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
 	void del(ObjType type, int objnum);
-	void change(ObjType type, int objnum, byte field, int value);
-	void changeThing(int thing, byte field, int value);
-	void changeVertex(int vert, byte field, int value);
-	void changeSector(int sec, byte field, int value);
-	void changeSidedef(int side, byte field, int value);
-	void changeLinedef(int line, byte field, int value);
+	void change(ObjType type, int objnum, ItemField field, int value);
+	void changeThing(int thing, int Thing::*field, int value);
+	void changeVertex(int vert, int Vertex::*field, int value);
+	void changeSector(int sec, int Sector::*field, int value);
+	void changeSidedef(int side, int SideDef::*field, int value);
+	void changeLinedef(int line, int LineDef::*field, int value);
 	bool undo();
 	bool redo();
 	void clearAll();
@@ -410,7 +397,7 @@ private:
 	{
 		EditType action = EditType::none;
 		ObjType objtype = ObjType::things;
-		byte field = 0;
+        ItemField field = {};
 		int objnum = 0;
 		union
 		{

@@ -77,7 +77,7 @@ public:
 
 	// call this if the linedef was externally changed.
 	// -1 means "all fields"
-	void UpdateField(int field = -1);
+	void UpdateField(bool usefield, int LineDef::*field);
 
 	// call this is the linedef's sides were externally modified.
 	void UpdateSides();

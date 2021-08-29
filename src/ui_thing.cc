@@ -345,7 +345,7 @@ void UI_ThingBox::SetObj(int _index, int _count)
 	which->SetIndex(obj);
 	which->SetSelected(count);
 
-	UpdateField();
+	UpdateField(false, nullptr);
 
 	redraw();
 }
@@ -369,7 +369,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
+			box->inst.level.basis.changeThing(*it, &Thing::type, new_type);
 		}
 
 		box->inst.level.basis.end();
@@ -413,7 +413,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_SPECIAL, new_type);
+			box->inst.level.basis.changeThing(*it, &Thing::special, new_type);
 		}
 
 		box->inst.level.basis.end();
@@ -504,7 +504,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_ANGLE, new_ang);
+			box->inst.level.basis.changeThing(*it, &Thing::angle, new_ang);
 		}
 
 		box->inst.level.basis.end();
@@ -526,7 +526,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_TID, new_tid);
+			box->inst.level.basis.changeThing(*it, &Thing::tid, new_tid);
 		}
 
 		box->inst.level.basis.end();
@@ -546,7 +546,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		box->inst.level.basis.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, Thing::F_X, box->inst.MakeValidCoord(new_x));
+			box->inst.level.basis.changeThing(*it, &Thing::raw_x, box->inst.MakeValidCoord(new_x));
 
 		box->inst.level.basis.end();
 	}
@@ -564,7 +564,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		box->inst.level.basis.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, Thing::F_Y, box->inst.MakeValidCoord(new_y));
+			box->inst.level.basis.changeThing(*it, &Thing::raw_y, box->inst.MakeValidCoord(new_y));
 
 		box->inst.level.basis.end();
 	}
@@ -582,7 +582,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		box->inst.level.basis.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
+			box->inst.level.basis.changeThing(*it, &Thing::raw_h, INT_TO_COORD(new_h));
 
 		box->inst.level.basis.end();
 	}
@@ -610,7 +610,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			box->inst.level.basis.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
+			box->inst.level.basis.changeThing(*it, &Thing::options, (T->options & ~mask) | (new_opts & mask));
 		}
 
 		box->inst.level.basis.end();
@@ -663,6 +663,14 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 	new_value = CLAMP(0, new_value, 255);
 
+    static int Thing::*const argmap[5] = {
+        &Thing::arg1,
+        &Thing::arg2,
+        &Thing::arg3,
+        &Thing::arg4,
+        &Thing::arg5,
+    };
+
 	if (!box->inst.edit.Selected->empty())
 	{
 		box->inst.level.basis.begin();
@@ -670,7 +678,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, static_cast<byte>(Thing::F_ARG1 + arg_idx),
+			box->inst.level.basis.changeThing(*it, argmap[arg_idx],
                                               new_value);
 		}
 
@@ -811,12 +819,10 @@ int UI_ThingBox::CalcOptions() const
 }
 
 
-void UI_ThingBox::UpdateField(int field)
+void UI_ThingBox::UpdateField(bool usefield, int Thing::*field)
 {
-	if (field < 0 ||
-		field == Thing::F_X ||
-		field == Thing::F_Y ||
-		field == Thing::F_H)
+	if (!usefield || field == &Thing::raw_x || field == &Thing::raw_y ||
+		field == &Thing::raw_h)
 	{
 		if (inst.level.isThing(obj))
 		{
@@ -835,7 +841,7 @@ void UI_ThingBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Thing::F_ANGLE)
+	if (!usefield || field == &Thing::angle)
 	{
 		if(inst.level.isThing(obj))
 			mFixUp.setInputValue(angle, SString(inst.level.things[obj]->angle).c_str());
@@ -844,7 +850,7 @@ void UI_ThingBox::UpdateField(int field)
 	}
 
 	// IOANCH 9/2015
-	if (field < 0 || field == Thing::F_TID)
+	if (!usefield || field == &Thing::tid)
 	{
 		if(inst.level.isThing(obj))
 			mFixUp.setInputValue(tid, SString(inst.level.things[obj]->tid).c_str());
@@ -852,7 +858,7 @@ void UI_ThingBox::UpdateField(int field)
 			mFixUp.setInputValue(tid, "");
 	}
 
-	if (field < 0 || field == Thing::F_TYPE)
+	if (!usefield || field == &Thing::type)
 	{
 		if (inst.level.isThing(obj))
 		{
@@ -869,7 +875,7 @@ void UI_ThingBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || field == Thing::F_OPTIONS)
+	if (!usefield || field == &Thing::options)
 	{
 		if (inst.level.isThing(obj))
 			OptionsFromInt(inst.level.things[obj]->options);
@@ -880,7 +886,7 @@ void UI_ThingBox::UpdateField(int field)
 	if (inst.loaded.levelFormat == MapFormat::doom)
 		return;
 
-	if (field < 0 || field == Thing::F_SPECIAL)
+	if (!usefield || field == &Thing::special)
 	{
 		if (inst.level.isThing(obj) && inst.level.things[obj]->special)
 		{
@@ -895,7 +901,8 @@ void UI_ThingBox::UpdateField(int field)
 		}
 	}
 
-	if (field < 0 || (field >= Thing::F_ARG1 && field <= Thing::F_ARG5))
+	if (!usefield || field == &Thing::arg1 || field == &Thing::arg2 ||
+        field == &Thing::arg3 || field == &Thing::arg4 || field == &Thing::arg5)
 	{
 		for (int a = 0 ; a < 5 ; a++)
 		{

@@ -750,9 +750,9 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 			{
 				const Thing * T = doc.things[*it].get();
 
-				doc.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				doc.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				doc.basis.changeThing(*it, Thing::F_H, std::max(0, T->raw_h + fdz));
+				doc.basis.changeThing(*it, &Thing::raw_x, T->raw_x + fdx);
+				doc.basis.changeThing(*it, &Thing::raw_y, T->raw_y + fdy);
+				doc.basis.changeThing(*it, &Thing::raw_h, std::max(0, T->raw_h + fdz));
 			}
 			break;
 
@@ -761,8 +761,8 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 			{
 				const Vertex * V = doc.vertices[*it].get();
 
-				doc.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-				doc.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+				doc.basis.changeVertex(*it, &Vertex::raw_x, V->raw_x + fdx);
+				doc.basis.changeVertex(*it, &Vertex::raw_y, V->raw_y + fdy);
 			}
 			break;
 
@@ -772,8 +772,8 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 			{
 				const Sector * S = doc.sectors[*it].get();
 
-				doc.basis.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
-				doc.basis.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
+				doc.basis.changeSector(*it, &Sector::floorh, S->floorh + (int)delta_z);
+				doc.basis.changeSector(*it, &Sector::ceilh,  S->ceilh  + (int)delta_z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -946,18 +946,18 @@ void ObjectsModule::transferThingProperties(int src_thing, int dest_thing) const
 {
 	const Thing * T = doc.things[src_thing].get();
 
-	doc.basis.changeThing(dest_thing, Thing::F_TYPE,    T->type);
-	doc.basis.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
+	doc.basis.changeThing(dest_thing, &Thing::type,    T->type);
+	doc.basis.changeThing(dest_thing, &Thing::options, T->options);
 //	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
-	doc.basis.changeThing(dest_thing, Thing::F_TID,     T->tid);
-	doc.basis.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
+	doc.basis.changeThing(dest_thing, &Thing::tid,     T->tid);
+	doc.basis.changeThing(dest_thing, &Thing::special, T->special);
 
-	doc.basis.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
+	doc.basis.changeThing(dest_thing, &Thing::arg1, T->arg1);
+	doc.basis.changeThing(dest_thing, &Thing::arg2, T->arg2);
+	doc.basis.changeThing(dest_thing, &Thing::arg3, T->arg3);
+	doc.basis.changeThing(dest_thing, &Thing::arg4, T->arg4);
+	doc.basis.changeThing(dest_thing, &Thing::arg5, T->arg5);
 }
 
 
@@ -965,14 +965,14 @@ void ObjectsModule::transferSectorProperties(int src_sec, int dest_sec) const
 {
 	const Sector * sector = doc.sectors[src_sec].get();
 
-	doc.basis.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	doc.basis.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
-	doc.basis.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	doc.basis.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
+	doc.basis.changeSector(dest_sec, &Sector::floorh,    sector->floorh);
+	doc.basis.changeSector(dest_sec, &Sector::floor_tex, sector->floor_tex);
+	doc.basis.changeSector(dest_sec, &Sector::ceilh,     sector->ceilh);
+	doc.basis.changeSector(dest_sec, &Sector::ceil_tex,  sector->ceil_tex);
 
-	doc.basis.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
-	doc.basis.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
-	doc.basis.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
+	doc.basis.changeSector(dest_sec, &Sector::light,  sector->light);
+	doc.basis.changeSector(dest_sec, &Sector::type,   sector->type);
+	doc.basis.changeSector(dest_sec, &Sector::tag,    sector->tag);
 }
 
 
@@ -1008,15 +1008,15 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 			if (! L2->Left(doc))
 			{
-				doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				doc.basis.changeSidedef(L2->right, &SideDef::mid_tex, tex);
 			}
 			else
 			{
-				doc.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
-				doc.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
+				doc.basis.changeSidedef(L2->right, &SideDef::lower_tex, tex);
+				doc.basis.changeSidedef(L2->right, &SideDef::upper_tex, tex);
 
-				doc.basis.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
-				doc.basis.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
+				doc.basis.changeSidedef(L2->left,  &SideDef::lower_tex, tex);
+				doc.basis.changeSidedef(L2->left,  &SideDef::upper_tex, tex);
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
@@ -1055,7 +1055,7 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 			if (tex > 0)
 			{
-				doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				doc.basis.changeSidedef(L2->right, &SideDef::mid_tex, tex);
 			}
 		}
 		else
@@ -1094,25 +1094,25 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			doc.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
-			doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
-			doc.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+			doc.basis.changeSidedef(L2->right, &SideDef::lower_tex, RS->lower_tex);
+			doc.basis.changeSidedef(L2->right, &SideDef::mid_tex,   RS->mid_tex);
+			doc.basis.changeSidedef(L2->right, &SideDef::upper_tex, RS->upper_tex);
 
-			doc.basis.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
-			doc.basis.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
-			doc.basis.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
+			doc.basis.changeSidedef(L2->left, &SideDef::lower_tex, LS->lower_tex);
+			doc.basis.changeSidedef(L2->left, &SideDef::mid_tex,   LS->mid_tex);
+			doc.basis.changeSidedef(L2->left, &SideDef::upper_tex, LS->upper_tex);
 		}
 	}
 
-	doc.basis.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
+	doc.basis.changeLinedef(dest_line, &LineDef::flags, flags);
 
-	doc.basis.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
-	doc.basis.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
+	doc.basis.changeLinedef(dest_line, &LineDef::type, L1->type);
+	doc.basis.changeLinedef(dest_line, &LineDef::tag,  L1->tag);
 
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
+	doc.basis.changeLinedef(dest_line, &LineDef::arg2, L1->arg2);
+	doc.basis.changeLinedef(dest_line, &LineDef::arg3, L1->arg3);
+	doc.basis.changeLinedef(dest_line, &LineDef::arg4, L1->arg4);
+	doc.basis.changeLinedef(dest_line, &LineDef::arg5, L1->arg5);
 }
 
 
@@ -1562,19 +1562,19 @@ void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x
 
 		if (is_vert)
 		{
-			doc.basis.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
+			doc.basis.changeThing(*it, &Thing::raw_y, 2*fix_my - T->raw_y);
 
 			if (T->angle != 0)
-				doc.basis.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
+				doc.basis.changeThing(*it, &Thing::angle, 360 - T->angle);
 		}
 		else
 		{
-			doc.basis.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
+			doc.basis.changeThing(*it, &Thing::raw_x, 2*fix_mx - T->raw_x);
 
 			if (T->angle > 180)
-				doc.basis.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
+				doc.basis.changeThing(*it, &Thing::angle, 540 - T->angle);
 			else
-				doc.basis.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
+				doc.basis.changeThing(*it, &Thing::angle, 180 - T->angle);
 		}
 	}
 }
@@ -1593,9 +1593,9 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 		const Vertex * V = doc.vertices[*it].get();
 
 		if (is_vert)
-			doc.basis.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
+			doc.basis.changeVertex(*it, &Vertex::raw_y, 2*fix_my - V->raw_y);
 		else
-			doc.basis.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
+			doc.basis.changeVertex(*it, &Vertex::raw_x, 2*fix_mx - V->raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1609,8 +1609,8 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 		int start = L->start;
 		int end   = L->end;
 
-		doc.basis.changeLinedef(*it, LineDef::F_START, end);
-		doc.basis.changeLinedef(*it, LineDef::F_END, start);
+		doc.basis.changeLinedef(*it, &LineDef::start, end);
+		doc.basis.changeLinedef(*it, &LineDef::end, start);
 	}
 }
 
@@ -1682,17 +1682,17 @@ void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
 
 		if (anti_clockwise)
 		{
-			doc.basis.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			doc.basis.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			doc.basis.changeThing(*it, &Thing::raw_x, fix_mx - old_y + fix_my);
+			doc.basis.changeThing(*it, &Thing::raw_y, fix_my + old_x - fix_mx);
 
-			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
+			doc.basis.changeThing(*it, &Thing::angle, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			doc.basis.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			doc.basis.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			doc.basis.changeThing(*it, &Thing::raw_x, fix_mx + old_y - fix_my);
+			doc.basis.changeThing(*it, &Thing::raw_y, fix_my - old_x + fix_mx);
 
-			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
+			doc.basis.changeThing(*it, &Thing::angle, calc_new_angle(T->angle, -90));
 		}
 	}
 }
@@ -1752,13 +1752,13 @@ void Instance::CMD_Rotate90()
 
 			if (anti_clockwise)
 			{
-				level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-				level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+				level.basis.changeVertex(*it, &Vertex::raw_x, fix_mx - old_y + fix_my);
+				level.basis.changeVertex(*it, &Vertex::raw_y, fix_my + old_x - fix_mx);
 			}
 			else
 			{
-				level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-				level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+				level.basis.changeVertex(*it, &Vertex::raw_x, fix_mx + old_y - fix_my);
+				level.basis.changeVertex(*it, &Vertex::raw_y, fix_my - old_x + fix_mx);
 			}
 		}
 	}
@@ -1781,8 +1781,8 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 
 		param.Apply(&new_x, &new_y);
 
-		doc.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
-		doc.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
+		doc.basis.changeThing(*it, &Thing::raw_x, inst.MakeValidCoord(new_x));
+		doc.basis.changeThing(*it, &Thing::raw_y, inst.MakeValidCoord(new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1790,7 +1790,7 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 
 		if (ang_diff)
 		{
-			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
+			doc.basis.changeThing(*it, &Thing::angle, calc_new_angle(T->angle, ang_diff));
 		}
 	}
 }
@@ -1810,8 +1810,8 @@ void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) co
 
 		param.Apply(&new_x, &new_y);
 
-		doc.basis.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
-		doc.basis.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
+		doc.basis.changeVertex(*it, &Vertex::raw_x, inst.MakeValidCoord(new_x));
+		doc.basis.changeVertex(*it, &Vertex::raw_y, inst.MakeValidCoord(new_y));
 	}
 }
 
@@ -1951,8 +1951,8 @@ void ObjectsModule::doScaleSectorHeights(selection_c *list, double scale_z, int 
 		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
 
-		doc.basis.changeSector(*it, Sector::F_FLOORH, new_f);
-		doc.basis.changeSector(*it, Sector::F_CEILH,  new_c);
+		doc.basis.changeSector(*it, &Sector::floorh, new_f);
+		doc.basis.changeSector(*it, &Sector::ceilh,  new_c);
 	}
 }
 
@@ -2116,8 +2116,8 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				doc.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
-				doc.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
+				doc.basis.changeThing(*it, &Thing::raw_x, inst.MakeValidCoord(new_x));
+				doc.basis.changeThing(*it, &Thing::raw_y, inst.MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2218,8 +2218,8 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				doc.basis.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
-				doc.basis.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
+				doc.basis.changeVertex(*it, &Vertex::raw_x, inst.MakeValidCoord(new_x));
+				doc.basis.changeVertex(*it, &Vertex::raw_y, inst.MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;

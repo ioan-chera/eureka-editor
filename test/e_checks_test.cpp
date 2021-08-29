@@ -40,7 +40,7 @@ void Clipboard_NotifyBegin()
 {
 }
 
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
+void Clipboard_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 }
 
@@ -113,7 +113,7 @@ void Instance::MapStuff_NotifyBegin()
 {
 }
 
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
+void Instance::MapStuff_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 }
 
@@ -142,7 +142,7 @@ void Instance::ObjectBox_NotifyBegin()
 {
 }
 
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
+void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 }
 
@@ -246,7 +246,7 @@ void Render3D_NotifyBegin()
 {
 }
 
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
+void Render3D_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 }
 
@@ -262,7 +262,7 @@ void Render3D_NotifyInsert(ObjType type, int objnum)
 {
 }
 
-void Selection_NotifyChange(ObjType type, int objnum, int field)
+void Selection_NotifyChange(ObjType type, int objnum, ItemField field)
 {
 }
 
