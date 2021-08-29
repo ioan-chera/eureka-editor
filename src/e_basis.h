@@ -381,12 +381,12 @@ public:
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
 	void del(ObjType type, int objnum);
-	bool change(ObjType type, int objnum, byte field, int value);
-	bool changeThing(int thing, byte field, int value);
-	bool changeVertex(int vert, byte field, int value);
-	bool changeSector(int sec, byte field, int value);
-	bool changeSidedef(int side, byte field, int value);
-	bool changeLinedef(int line, byte field, int value);
+	void change(ObjType type, int objnum, byte field, int value);
+	void changeThing(int thing, byte field, int value);
+	void changeVertex(int vert, byte field, int value);
+	void changeSector(int sec, byte field, int value);
+	void changeSidedef(int side, byte field, int value);
+	void changeLinedef(int line, byte field, int value);
 	bool undo();
 	bool redo();
 	void clearAll();

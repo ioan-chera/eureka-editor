@@ -455,7 +455,7 @@ void Basis::del(ObjType type, int objnum)
 // same as before, nothing happens and false is returned.
 // Otherwise returns true.
 //
-bool Basis::change(ObjType type, int objnum, byte field, int value)
+void Basis::change(ObjType type, int objnum, byte field, int value)
 {
 	// TODO: optimise, check whether value actually changes
 
@@ -470,7 +470,6 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 	SYS_ASSERT(mCurrentGroup.isActive());
 
 	mCurrentGroup.addApply(op, *this);
-	return true;
 }
 
 //
@@ -503,66 +502,66 @@ void Instance::basisOnChangeItem(ObjType type, int field, int value)
 //
 // Change thing
 //
-bool Basis::changeThing(int thing, byte field, int value)
+void Basis::changeThing(int thing, byte field, int value)
 {
 	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
 	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	listener.basisOnChangeItem(ObjType::things, field, value);
 
-	return change(ObjType::things, thing, field, value);
+	change(ObjType::things, thing, field, value);
 }
 
 //
 // Change vertex
 //
-bool Basis::changeVertex(int vert, byte field, int value)
+void Basis::changeVertex(int vert, byte field, int value)
 {
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
 	SYS_ASSERT(field <= Vertex::F_Y);
 
 //	listener.basisOnChangeItem(ObjType::vertices, field, value);
 
-	return change(ObjType::vertices, vert, field, value);
+	change(ObjType::vertices, vert, field, value);
 }
 
 //
 // Change sector
 //
-bool Basis::changeSector(int sec, byte field, int value)
+void Basis::changeSector(int sec, byte field, int value)
 {
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
 	SYS_ASSERT(field <= Sector::F_TAG);
 
 	listener.basisOnChangeItem(ObjType::sectors, field, value);
 
-	return change(ObjType::sectors, sec, field, value);
+	change(ObjType::sectors, sec, field, value);
 }
 
 //
 // Change sidedef
 //
-bool Basis::changeSidedef(int side, byte field, int value)
+void Basis::changeSidedef(int side, byte field, int value)
 {
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
 	SYS_ASSERT(field <= SideDef::F_SECTOR);
 
 	listener.basisOnChangeItem(ObjType::sidedefs, field, value);
 
-	return change(ObjType::sidedefs, side, field, value);
+	change(ObjType::sidedefs, side, field, value);
 }
 
 //
 // Change linedef
 //
-bool Basis::changeLinedef(int line, byte field, int value)
+void Basis::changeLinedef(int line, byte field, int value)
 {
 	SYS_ASSERT(line >= 0 && line < doc.numLinedefs());
 	SYS_ASSERT(field <= LineDef::F_ARG5);
 
 //	listener.basisOnChangeItem(ObjType::linedefs, field, value);
 
-	return change(ObjType::linedefs, line, field, value);
+	change(ObjType::linedefs, line, field, value);
 }
 
 //
