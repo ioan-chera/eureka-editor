@@ -81,25 +81,17 @@ fixcoord_t Instance::MakeValidCoord(double x) const
 //
 // Set raw x/y/height
 //
-void Thing::SetRawX(const Instance &inst, double x)
+void PointItem::SetRawX(const Instance &inst, double x)
 {
 	raw_x = inst.MakeValidCoord(x);
 }
-void Thing::SetRawY(const Instance &inst, double y)
+void PointItem::SetRawY(const Instance &inst, double y)
 {
 	raw_y = inst.MakeValidCoord(y);
 }
 void Thing::SetRawH(const Instance &inst, double h)
 {
 	raw_h = inst.MakeValidCoord(h);
-}
-void Vertex::SetRawX(const Instance &inst, double x)
-{
-	raw_x = inst.MakeValidCoord(x);
-}
-void Vertex::SetRawY(const Instance &inst, double y)
-{
-	raw_y = inst.MakeValidCoord(y);
 }
 
 SString Sector::FloorTex() const

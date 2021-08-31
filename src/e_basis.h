@@ -91,13 +91,36 @@ inline static Side operator * (Side side1, Side side2)
 
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
-
-class Thing
+//
+// Superclass for XY items
+//
+class PointItem
 {
 public:
-	fixcoord_t raw_x = 0;
-	fixcoord_t raw_y = 0;
+    inline double x() const
+    {
+        return FROM_COORD(raw_x);
+    }
+    inline double y() const
+    {
+        return FROM_COORD(raw_y);
+    }
+    // these handle rounding to integer in non-UDMF mode
+    void SetRawX(const Instance &inst, double x);
+    void SetRawY(const Instance &inst, double y);
+    void SetRawXY(const Instance &inst, double x, double y)
+    {
+        SetRawX(inst, x);
+        SetRawY(inst, y);
+    }
 
+    fixcoord_t raw_x = 0;
+    fixcoord_t raw_y = 0;
+};
+
+class Thing : public PointItem
+{
+public:
 	int angle = 0;
 	int type = 0;
 	int options = 0;
@@ -110,29 +133,13 @@ public:
 	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
 
 public:
-	inline double x() const
-	{
-		return FROM_COORD(raw_x);
-	}
-	inline double y() const
-	{
-		return FROM_COORD(raw_y);
-	}
 	inline double h() const
 	{
 		return FROM_COORD(raw_h);
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(const Instance &inst, double x);
-	void SetRawY(const Instance &inst, double y);
 	void SetRawH(const Instance &inst, double h);
-
-	void SetRawXY(const Instance &inst, double x, double y)
-	{
-		SetRawX(inst, x);
-		SetRawY(inst, y);
-	}
 
 	int Arg(int which /* 1..5 */) const
 	{
@@ -147,32 +154,9 @@ public:
 };
 
 
-class Vertex
+class Vertex : public PointItem
 {
 public:
-	fixcoord_t raw_x = 0;
-	fixcoord_t raw_y = 0;
-
-public:
-	inline double x() const
-	{
-		return FROM_COORD(raw_x);
-	}
-	inline double y() const
-	{
-		return FROM_COORD(raw_y);
-	}
-
-	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(const Instance &inst, double x);
-	void SetRawY(const Instance &inst, double y);
-
-	void SetRawXY(const Instance &inst, double x, double y)
-	{
-		SetRawX(inst, x);
-		SetRawY(inst, y);
-	}
-
 	bool Matches(fixcoord_t ox, fixcoord_t oy) const
 	{
 		return (raw_x == ox) && (raw_y == oy);
