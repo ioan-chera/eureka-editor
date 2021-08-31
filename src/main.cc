@@ -974,7 +974,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		newMaster.add(wad);
 
 	if(master.edit_wad)
-		newMaster.add(master.edit_wad);
+		newMaster.replaceEditWad(master.edit_wad);
 
 	WadData newWad;
 	newWad.loadPalette(newMaster);
