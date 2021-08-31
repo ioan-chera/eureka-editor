@@ -316,11 +316,6 @@ UI_OpenMap::UI_OpenMap(Instance &inst) :
 	CheckMapName();
 }
 
-
-UI_OpenMap::~UI_OpenMap()
-{ }
-
-
 std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 {
 	map_v->clear();

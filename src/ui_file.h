@@ -106,7 +106,9 @@ private:
 
 public:
 	UI_OpenMap(Instance &inst);
-	virtual ~UI_OpenMap();
+	virtual ~UI_OpenMap()
+	{
+	}
 
 	// Run the dialog and return an opened wad (from Wad_file::Open)
 	// or edit_wad/game_wad, or NULL if the user cancelled.

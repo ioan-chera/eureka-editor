@@ -1110,15 +1110,14 @@ void Instance::CMD_OpenMap()
 	if (! Main_ConfirmQuit("open another map"))
 		return;
 
-
-	UI_OpenMap * dialog = new UI_OpenMap(*this);
-
+	std::shared_ptr<Wad_file> wad;
 	SString map_name;
 	bool did_load = false;
 
-	std::shared_ptr<Wad_file> wad = dialog->Run(&map_name, &did_load);
-
-	delete dialog;
+	{
+		auto dialog = std::make_unique<UI_OpenMap>(*this);
+		wad = dialog->Run(&map_name, &did_load);
+	}
 
 	if (! wad)	// cancelled
 		return;
