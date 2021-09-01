@@ -938,7 +938,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	if (port_choice->mvalue())
 		c_port = port_choice->mvalue()->text;
 
-	usable_formats = M_DetermineMapFormats(inst, c_game, c_port);
+	usable_formats = M_DetermineMapFormats(c_game, c_port);
 
 	SYS_ASSERT(usable_formats != 0);
 
