@@ -202,28 +202,29 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	else
 		name_buf = port.asTitle();
 
-	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf, *this);
+    bool ok;
+    {
+        auto dialog = std::make_unique<UI_PortPathDialog>(name_buf, *this);
 
-	// populate the EXE name from existing info, if exists
-	port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
+        // populate the EXE name from existing info, if exists
+        port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
 
-	if (info && info->exe_filename.good())
-		dialog->SetEXE(info->exe_filename);
+        if (info && info->exe_filename.good())
+            dialog->SetEXE(info->exe_filename);
 
-	bool ok = dialog->Run();
+        ok = dialog->Run();
 
-	if (ok)
-	{
-		// persist the new port settings
-		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
+        if (ok)
+        {
+            // persist the new port settings
+            info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
-		// FIXME: check result??
-		info->exe_filename = GetAbsolutePath(dialog->exe_name);
+            // FIXME: check result??
+            info->exe_filename = GetAbsolutePath(dialog->exe_name);
 
-		M_SaveRecent();
-	}
-
-	delete dialog;
+            M_SaveRecent();
+        }
+    }
 	return ok;
 }
 
