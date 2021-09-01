@@ -105,10 +105,7 @@ private:
     const MasterDirectory &master;
 
 public:
-	UI_OpenMap(const MasterDirectory &master);
-	virtual ~UI_OpenMap()
-	{
-	}
+	explicit UI_OpenMap(const MasterDirectory &master);
 
 	// Run the dialog and return an opened wad (from Wad_file::Open)
 	// or edit_wad/game_wad, or NULL if the user cancelled.

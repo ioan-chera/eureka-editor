@@ -37,7 +37,7 @@
 
 
 // TODO: find a better home for this
-bool ValidateMapName(const char *p)
+static bool ValidateMapName(const char *p)
 {
 	size_t len = strlen(p);
 
