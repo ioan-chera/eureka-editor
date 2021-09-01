@@ -61,7 +61,7 @@ public:
 
 	bool want_close;
 
-	Instance& inst;
+    SString openFolder;
 
 public:
 	void SetEXE(const SString &newbie)
@@ -107,7 +107,7 @@ public:
 
 		// FIXME : if we have an exe_filename already, and folder exists, go there
 		//         [ especially for vanilla -- look in path of Iwad_name ]
-		chooser.directory(that->inst.master.fileOpFolder().c_str());
+		chooser.directory(that->openFolder.c_str());
 
 		switch (chooser.show())
 		{
@@ -128,9 +128,9 @@ public:
 	}
 
 public:
-	UI_PortPathDialog(const SString &port_name, Instance &inst) :
+	UI_PortPathDialog(const SString &port_name, const SString &openFolder) :
 		UI_Escapable_Window(560, 250, "Port Settings"),
-		want_close(false), inst(inst)
+		want_close(false), openFolder(openFolder)
 	{
 		char message_buf[256];
 
@@ -204,7 +204,8 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 
     bool ok;
     {
-        auto dialog = std::make_unique<UI_PortPathDialog>(name_buf, *this);
+        auto dialog = std::make_unique<UI_PortPathDialog>(name_buf,
+                                                          master.fileOpFolder());
 
         // populate the EXE name from existing info, if exists
         port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
