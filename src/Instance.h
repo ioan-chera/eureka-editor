@@ -324,7 +324,6 @@ public:
 
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
-	SString Main_FileOpFolder() const;
 	void Main_LoadResources(LoadingData &loading);
 
 	// R_RENDER

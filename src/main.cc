@@ -776,10 +776,10 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 // the directory we should use for a file open/save operation.
 // returns NULL when not sure.
 //
-SString Instance::Main_FileOpFolder() const
+SString MasterDirectory::fileOpFolder() const
 {
-	if (master.Pwad_name.good())
-		return FilenameGetPath(master.Pwad_name);
+	if (Pwad_name.good())
+		return FilenameGetPath(Pwad_name);
 
 	return "";
 }

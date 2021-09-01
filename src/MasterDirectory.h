@@ -40,6 +40,8 @@ struct MasterDirectory
 
 	std::shared_ptr<Wad_file> findReadOnly(const SString &path) const;
 
+    SString fileOpFolder() const;
+
 	std::vector<std::shared_ptr<Wad_file>> dir;
 	// the IWAD, never NULL, always at master_dir.front()
 	std::shared_ptr<Wad_file> game_wad;
