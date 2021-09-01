@@ -102,10 +102,10 @@ private:
 	// field above, or NULL.
 	std::shared_ptr<Wad_file> using_wad;
 
-	Instance &inst;
+    const MasterDirectory &master;
 
 public:
-	UI_OpenMap(Instance &inst);
+	UI_OpenMap(const MasterDirectory &master);
 	virtual ~UI_OpenMap()
 	{
 	}

@@ -1115,7 +1115,7 @@ void Instance::CMD_OpenMap()
 	bool did_load = false;
 
 	{
-		auto dialog = std::make_unique<UI_OpenMap>(*this);
+		auto dialog = std::make_unique<UI_OpenMap>(master);
 		wad = dialog->Run(&map_name, &did_load);
 	}
 
