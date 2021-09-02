@@ -61,7 +61,7 @@ public:
 
 	bool want_close;
 
-    SString openFolder;
+    const SString openFolder;
 
 public:
 	void SetEXE(const SString &newbie)
@@ -191,7 +191,8 @@ public:
 };
 
 
-bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
+bool M_PortSetupDialog(const SString &port, const SString &game,
+                       const SString &openFolder)
 {
 	SString name_buf;
 
@@ -204,8 +205,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 
     bool ok;
     {
-        auto dialog = std::make_unique<UI_PortPathDialog>(name_buf,
-                                                          master.fileOpFolder());
+        auto dialog = std::make_unique<UI_PortPathDialog>(name_buf, openFolder);
 
         // populate the EXE name from existing info, if exists
         port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
@@ -356,8 +356,11 @@ void Instance::CMD_TestMap()
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
-		if (! M_PortSetupDialog(loaded.portName, loaded.gameName))
+		if (! M_PortSetupDialog(loaded.portName, loaded.gameName,
+                                master.fileOpFolder()))
+        {
 			return;
+        }
 
 		info = M_QueryPortPath(QueryName(loaded.portName, loaded.gameName));
 	}

@@ -1182,6 +1182,9 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	that->PopulateMapFormat();
 }
 
+bool M_PortSetupDialog(const SString& port, const SString& game,
+                       const SString &openFolder);
+
 void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
@@ -1193,7 +1196,7 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	that->inst.M_PortSetupDialog(that->port, that->game);
+	M_PortSetupDialog(that->port, that->game, that->inst.master.fileOpFolder());
 }
 
 

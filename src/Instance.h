@@ -314,9 +314,6 @@ public:
 	void BuildNodesAfterSave(int lev_idx);
 	void GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const EUR_PRINTF(2, 3);
 
-	// M_TESTMAP
-	bool M_PortSetupDialog(const SString& port, const SString& game);
-
 	// M_UDMF
 	void UDMF_LoadLevel(int loading_level, const Wad_file *load_wad,
 						LevelLoadProblems &problems);
