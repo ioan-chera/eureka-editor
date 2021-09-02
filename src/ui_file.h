@@ -165,7 +165,7 @@ private:
 		accept
 	};
 
-	Action action;
+	Action action = Action::none;
 
 	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);
@@ -193,7 +193,7 @@ public:
 	SString game;
 	SString port;
 
-	MapFormat map_format;
+	MapFormat map_format = MapFormat::invalid;
 	SString  name_space;
 
 	SString res[RES_NUM];
@@ -205,7 +205,9 @@ public:
 
 public:
 	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
-	virtual ~UI_ProjectSetup();
+	virtual ~UI_ProjectSetup()
+    {
+    }
 
 	// returns true if something changed
 	bool Run();

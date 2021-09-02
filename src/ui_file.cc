@@ -653,8 +653,7 @@ void UI_OpenMap::LoadFile()
 
 UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
-	action(Action::none),
-	map_format(MapFormat::invalid), name_space(), inst(inst)
+	inst(inst)
 {
 	callback(close_callback, this);
 
@@ -771,11 +770,6 @@ UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_start
 	}
 
 	end();
-}
-
-
-UI_ProjectSetup::~UI_ProjectSetup()
-{
 }
 
 
