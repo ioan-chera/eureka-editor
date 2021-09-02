@@ -158,14 +158,14 @@ private:
 
 	map_format_bitset_t usable_formats;
 
-	enum
+	enum class Action
 	{
-		ACT_none = 0,
-		ACT_CANCEL,
-		ACT_ACCEPT
+		none,
+		cancel,
+		accept
 	};
 
-	int action;
+	Action action;
 
 	static void   game_callback(Fl_Choice*, void*);
 	static void   port_callback(Fl_Choice*, void*);

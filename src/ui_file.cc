@@ -653,7 +653,7 @@ void UI_OpenMap::LoadFile()
 
 UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
-	action(ACT_none),
+	action(Action::none),
 	map_format(MapFormat::invalid), name_space(), inst(inst)
 {
 	callback(close_callback, this);
@@ -790,12 +790,12 @@ bool UI_ProjectSetup::Run()
 
 	show();
 
-	while (action == ACT_none)
+	while (action == Action::none)
 	{
 		Fl::wait(0.2);
 	}
 
-	return (action == ACT_ACCEPT);
+	return (action == Action::accept);
 }
 
 //
@@ -1065,7 +1065,7 @@ void UI_ProjectSetup::close_callback(Fl_Widget *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->action = ACT_CANCEL;
+	that->action = Action::cancel;
 }
 
 
@@ -1073,7 +1073,7 @@ void UI_ProjectSetup::use_callback(Fl_Button *w, void *data)
 {
 	UI_ProjectSetup * that = (UI_ProjectSetup *)data;
 
-	that->action = ACT_ACCEPT;
+	that->action = Action::accept;
 }
 
 
