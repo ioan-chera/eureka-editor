@@ -310,7 +310,7 @@ void Instance::CMD_NewProject()
 
 bool Instance::MissingIWAD_Dialog()
 {
-	UI_ProjectSetup * dialog = new UI_ProjectSetup(*this, false /* new_project */, true /* is_startup */);
+	auto dialog = std::make_unique<UI_ProjectSetup>(*this, false /* new_project */, true /* is_startup */);
 
 	bool ok = dialog->Run();
 
@@ -322,8 +322,6 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
 		SYS_ASSERT(!loaded.iwadName.empty());
 	}
-
-	delete dialog;
 
 	return ok;
 }
