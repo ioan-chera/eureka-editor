@@ -201,10 +201,12 @@ public:
 	Fl_Button* mResourceButtons[RES_NUM] = {};
 	Fl_Button* mClearButtons[RES_NUM] = {};
 
-	Instance &inst;
+    const LoadingData &loaded;
+    SString openFolder;
 
 public:
-	UI_ProjectSetup(Instance &inst, bool new_project = false, bool is_startup = false);
+	UI_ProjectSetup(const LoadingData &loaded, const SString &openFolder,
+                    bool new_project = false, bool is_startup = false);
 	virtual ~UI_ProjectSetup()
     {
     }

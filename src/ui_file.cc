@@ -651,9 +651,11 @@ void UI_OpenMap::LoadFile()
 #define STARTUP_MSG  "No IWADs could be found."
 
 
-UI_ProjectSetup::UI_ProjectSetup(Instance &inst, bool new_project, bool is_startup) :
+UI_ProjectSetup::UI_ProjectSetup(const LoadingData &loaded,
+                                 const SString &openFolder, bool new_project,
+                                 bool is_startup) :
 	UI_Escapable_Window(400, is_startup ? 200 : 440, new_project ? "New Project" : "Manage Project"),
-	inst(inst)
+	loaded(loaded), openFolder(openFolder)
 {
 	callback(close_callback, this);
 
@@ -799,23 +801,23 @@ LoadingData UI_ProjectSetup::prepareLoadingData() const
 {
 	SYS_ASSERT(game.good());
 
-	LoadingData loaded;
-	loaded.gameName = game;
-	loaded.portName = port;
+	LoadingData loading;
+    loading.gameName = game;
+    loading.portName = port;
 
-	loaded.iwadName = M_QueryKnownIWAD(game);
-	SYS_ASSERT(loaded.iwadName.good());
+    loading.iwadName = M_QueryKnownIWAD(game);
+	SYS_ASSERT(loading.iwadName.good());
 
-	loaded.levelFormat = map_format;
-	loaded.udmfNamespace = name_space;
+    loading.levelFormat = map_format;
+    loading.udmfNamespace = name_space;
 
-	SYS_ASSERT(loaded.levelFormat != MapFormat::invalid);
+	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
 
 	for(int i = 0; i < RES_NUM; ++i)
 		if(res[i].good())
-			loaded.resourceList.push_back(res[i]);
+            loading.resourceList.push_back(res[i]);
 
-	return loaded;
+	return loading;
 }
 
 void UI_ProjectSetup::PopulateIWADs()
@@ -827,7 +829,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString prev_game = game;
 
 	if (prev_game.empty())
-		prev_game = inst.loaded.gameName;
+		prev_game = loaded.gameName;
 	if (prev_game.empty())
 		prev_game = "doom2";
 
@@ -864,7 +866,7 @@ void UI_ProjectSetup::PopulatePort()
 		prev_port = port_choice->mvalue()->text;
 
 	if (prev_port.empty())
-		prev_port = inst.loaded.portName;
+		prev_port = loaded.portName;
 	if (!prev_port.empty())
 		prev_port = "vanilla";
 
@@ -882,8 +884,8 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (game_choice->mvalue())
 		base_game = M_GetBaseGame(game_choice->mvalue()->text);
-	else if (!inst.loaded.gameName.empty())
-		base_game = M_GetBaseGame(inst.loaded.gameName);
+	else if (!loaded.gameName.empty())
+		base_game = M_GetBaseGame(loaded.gameName);
 
 	if (base_game.empty())
 		base_game = "doom2";
@@ -908,7 +910,7 @@ void UI_ProjectSetup::PopulateMapFormat()
 	MapFormat prev_fmt = map_format;
 
 	if (prev_fmt == MapFormat::invalid)
-		prev_fmt = inst.loaded.levelFormat;
+		prev_fmt = loaded.levelFormat;
 
 
 	format_choice->clear();
@@ -1045,9 +1047,9 @@ void UI_ProjectSetup::PopulateResources()
 		if (! res_name[r])
 			continue;
 
-		if (r < (int)inst.loaded.resourceList.size())
+		if (r < (int)loaded.resourceList.size())
 		{
-			res[r] = inst.loaded.resourceList[r];
+			res[r] = loaded.resourceList[r];
 
 			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}
@@ -1139,7 +1141,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(that->inst.master.fileOpFolder().c_str());
+	chooser.directory(that->openFolder.c_str());
 
 	switch (chooser.show())
 	{
@@ -1190,7 +1192,7 @@ void UI_ProjectSetup::setup_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-	M_PortSetupDialog(that->port, that->game, that->inst.master.fileOpFolder());
+	M_PortSetupDialog(that->port, that->game, that->openFolder);
 }
 
 
@@ -1210,7 +1212,7 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 	chooser.title("Pick file to open");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	chooser.filter("Wads\t*.wad\nEureka defs\t*.ugh");
-	chooser.directory(that->inst.master.fileOpFolder().c_str());
+	chooser.directory(that->openFolder.c_str());
 
 	switch (chooser.show())
 	{

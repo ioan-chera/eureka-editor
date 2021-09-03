@@ -206,7 +206,10 @@ void Instance::CMD_ManageProject()
 {
 	try
 	{
-		auto dialog = std::make_unique<UI_ProjectSetup>(*this, false /* new_project */, false /* is_startup */);
+		auto dialog = std::make_unique<UI_ProjectSetup>(loaded,
+                                                        master.fileOpFolder(),
+                                                        false /* new_project */,
+                                                        false /* is_startup */);
 		bool ok = dialog->Run();
 
 		if (ok)
@@ -237,7 +240,10 @@ void Instance::CMD_NewProject()
 
 	/* second, query what Game, Port and Resources to use */
 	// TODO: new instance
-	auto dialog = std::make_unique<UI_ProjectSetup>(*this, true /* new_project */, false /* is_startup */);
+	auto dialog = std::make_unique<UI_ProjectSetup>(loaded,
+                                                    master.fileOpFolder(),
+                                                    true /* new_project */,
+                                                    false /* is_startup */);
 
 	bool ok = dialog->Run();
 
@@ -310,7 +316,10 @@ void Instance::CMD_NewProject()
 
 bool Instance::MissingIWAD_Dialog()
 {
-	auto dialog = std::make_unique<UI_ProjectSetup>(*this, false /* new_project */, true /* is_startup */);
+	auto dialog = std::make_unique<UI_ProjectSetup>(loaded,
+                                                    master.fileOpFolder(),
+                                                    false /* new_project */,
+                                                    true /* is_startup */);
 
 	bool ok = dialog->Run();
 
