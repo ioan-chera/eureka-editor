@@ -225,7 +225,7 @@ void LogViewer_Open()
 {
 }
 
-void ObjectsModule::del(selection_c *list) const
+void ObjectsModule::del(const selection_c &list) const
 {
 }
 

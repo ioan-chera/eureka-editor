@@ -54,14 +54,14 @@ int  config::new_sector_size = 128;
 //  this is very raw, e.g. it does not check for stuff that will
 //  remain unused afterwards.
 //
-void ObjectsModule::del(selection_c *list) const
+void ObjectsModule::del(const selection_c &list) const
 {
 	// we need to process the object numbers from highest to lowest,
 	// because each deletion invalidates all higher-numbered refs
 	// in the selection.  Our selection iterator cannot give us
 	// what we need, hence put them into a vector for sorting.
 
-	if (list->empty())
+	if (list.empty())
 		return;
 
 	std::vector<int> objnums;
@@ -72,7 +72,7 @@ void ObjectsModule::del(selection_c *list) const
 	std::sort(objnums.begin(), objnums.end());
 
 	for (int i = (int)objnums.size()-1 ; i >= 0 ; i--)
-		doc.basis.del(list->what_type(), objnums[i]);
+		doc.basis.del(list.what_type(), objnums[i]);
 }
 
 

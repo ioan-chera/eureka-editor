@@ -406,7 +406,7 @@ static void Vertex_MergeOverlaps(Instance &inst)
 	}
 
 	// nothing should reference these vertices now
-	inst.level.objects.del(&verts);
+	inst.level.objects.del(verts);
 
 	inst.level.basis.end();
 
@@ -451,7 +451,7 @@ static void Vertex_RemoveUnused(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unused vertices");
 
-	doc.objects.del(&sel);
+	doc.objects.del(sel);
 
 	doc.basis.end();
 }
@@ -867,7 +867,7 @@ static void Sectors_RemoveUnused(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unused sectors");
 
-	doc.objects.del(&sel);
+	doc.objects.del(sel);
 
 	doc.basis.end();
 }
@@ -946,7 +946,7 @@ static void SideDefs_RemoveUnused(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed unused sidedefs");
 
-	doc.objects.del(&sel);
+	doc.objects.del(sel);
 
 	doc.basis.end();
 }
@@ -1398,7 +1398,7 @@ void Things_RemoveUnknown(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("removed unknown things");
 
-	inst.level.objects.del(&sel);
+	inst.level.objects.del(sel);
 
 	inst.level.basis.end();
 }
@@ -1490,7 +1490,7 @@ static void Things_RemoveInVoid(Instance &inst)
 	inst.level.basis.begin();
 	inst.level.basis.setMessage("removed things in the void");
 
-	inst.level.objects.del(&sel);
+	inst.level.objects.del(sel);
 
 	inst.level.basis.end();
 }
@@ -2500,8 +2500,8 @@ static void LineDefs_RemoveOverlaps(Document &doc)
 	doc.basis.begin();
 	doc.basis.setMessage("removed overlapping lines");
 
-	doc.objects.del(&lines);
-	doc.objects.del(&unused_verts);
+	doc.objects.del(lines);
+	doc.objects.del(unused_verts);
 
 	doc.basis.end();
 }

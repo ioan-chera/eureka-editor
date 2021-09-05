@@ -276,7 +276,7 @@ void VertexModule::mergeList(selection_c *verts) const
 
 	// all these vertices will be unused now, hence this call
 	// shouldn't kill any other objects.
-	doc.objects.del(verts);
+	doc.objects.del(*verts);
 
 	// we NEED to keep unused vertices here, otherwise we can merge
 	// all vertices of an isolated sector and end up with NOTHING!

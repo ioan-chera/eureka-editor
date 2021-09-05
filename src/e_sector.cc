@@ -357,7 +357,7 @@ void Instance::commandSectorMerge()
 		unused_secs.set(old_sec);
 	}
 
-	level.objects.del(&unused_secs);
+	level.objects.del(unused_secs);
 
 	if (! keep_common_lines)
 	{
@@ -1233,7 +1233,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 			unused.clear(L->WhatSector(Side::right, doc));
 	}
 
-	doc.objects.del(&unused);
+	doc.objects.del(unused);
 
 	return true;
 }
