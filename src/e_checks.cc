@@ -519,7 +519,7 @@ private:
 
 CheckResult ChecksModule::checkVertices(int min_severity) const
 {
-	UI_Check_Vertices *dialog = new UI_Check_Vertices(min_severity > 0, inst);
+	auto dialog = std::make_unique<UI_Check_Vertices>(min_severity > 0, inst);
 
 	selection_c  sel;
 
@@ -570,11 +570,7 @@ CheckResult ChecksModule::checkVertices(int min_severity) const
 
 		// in "ALL" mode, just continue if not too severe
 		if (dialog->WorstSeverity() < min_severity)
-		{
-			delete dialog;
-
 			return CheckResult::ok;
-		}
 
 		CheckResult result = dialog->Run();
 
@@ -584,8 +580,6 @@ CheckResult ChecksModule::checkVertices(int min_severity) const
 			dialog->Reset();
 			continue;
 		}
-
-		delete dialog;
 
 		return result;
 	}
