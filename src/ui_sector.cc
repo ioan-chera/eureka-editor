@@ -259,22 +259,22 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 
 	if (! box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
+		box->inst.basis.begin();
 
 		if (w == box->floor_h)
-			box->inst.level.basis.setMessageForSelection("edited floor of", *box->inst.edit.Selected);
+			box->inst.basis.setMessageForSelection("edited floor of", *box->inst.edit.Selected);
 		else
-			box->inst.level.basis.setMessageForSelection("edited ceiling of", *box->inst.edit.Selected);
+			box->inst.basis.setMessageForSelection("edited ceiling of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			if (w == box->floor_h)
-				box->inst.level.basis.changeSector(*it, &Sector::floorh, f_h);
+				box->inst.basis.changeSector(*it, &Sector::floorh, f_h);
 			else
-				box->inst.level.basis.changeSector(*it, &Sector::ceilh, c_h);
+				box->inst.basis.changeSector(*it, &Sector::ceilh, c_h);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 
 		box->mFixUp.setInputValue(box->floor_h, SString(f_h).c_str());
 		box->mFixUp.setInputValue(box->ceil_h, SString(c_h).c_str());
@@ -301,8 +301,8 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 	{
 		box->mFixUp.checkDirtyFields();
 
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited headroom of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited headroom of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -310,10 +310,10 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 			new_h = CLAMP(-32767, new_h, 32767);
 
-			box->inst.level.basis.changeSector(*it, &Sector::ceilh, new_h);
+			box->inst.basis.changeSector(*it, &Sector::ceilh, new_h);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 
 		box->UpdateField(false, nullptr);
 	}
@@ -372,8 +372,8 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 	{
 		mFixUp.checkDirtyFields();
 
-		inst.level.basis.begin();
-		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
+		inst.basis.begin();
+		inst.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -382,13 +382,13 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 				parts = filter_parts;
 
 			if (parts & filter_parts & PART_FLOOR)
-				inst.level.basis.changeSector(*it, &Sector::floor_tex, tex_num);
+				inst.basis.changeSector(*it, &Sector::floor_tex, tex_num);
 
 			if (parts & filter_parts & parts & PART_CEIL)
-				inst.level.basis.changeSector(*it, &Sector::ceil_tex, tex_num);
+				inst.basis.changeSector(*it, &Sector::ceil_tex, tex_num);
 		}
 
-		inst.level.basis.end();
+		inst.basis.end();
 	}
 
 	UpdateField(false, nullptr);
@@ -496,17 +496,17 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 	if (! inst.edit.Selected->empty())
 	{
 		mFixUp.checkDirtyFields();
-		inst.level.basis.begin();
-		inst.level.basis.setMessageForSelection("edited type of", *inst.edit.Selected);
+		inst.basis.begin();
+		inst.basis.setMessageForSelection("edited type of", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			int old_type = inst.level.sectors[*it]->type;
 
-			inst.level.basis.changeSector(*it, &Sector::type, (old_type & ~mask) | value);
+			inst.basis.changeSector(*it, &Sector::type, (old_type & ~mask) | value);
 		}
 
-		inst.level.basis.end();
+		inst.basis.end();
 	}
 
 	// update the description
@@ -570,15 +570,15 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited light of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited light of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeSector(*it, &Sector::light, new_lt);
+			box->inst.basis.changeSector(*it, &Sector::light, new_lt);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -843,16 +843,16 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 
 	mFixUp.checkDirtyFields();
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
+	inst.basis.begin();
+	inst.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		if (parts & PART_FLOOR) inst.level.basis.changeSector(*it, &Sector::floor_tex, new_tex);
-		if (parts & PART_CEIL)  inst.level.basis.changeSector(*it, &Sector::ceil_tex,  new_tex);
+		if (parts & PART_FLOOR) inst.basis.changeSector(*it, &Sector::floor_tex, new_tex);
+		if (parts & PART_CEIL)  inst.basis.changeSector(*it, &Sector::ceil_tex,  new_tex);
 	}
 
-	inst.level.basis.end();
+	inst.basis.end();
 
 	UpdateField(false, nullptr);
 }
@@ -867,16 +867,16 @@ void UI_SectorBox::CB_Cut(int parts)
 	{
 		mFixUp.checkDirtyFields();
 
-		inst.level.basis.begin();
-		inst.level.basis.setMessageForSelection("cut texture on", *inst.edit.Selected);
+		inst.basis.begin();
+		inst.basis.setMessageForSelection("cut texture on", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			if (parts & PART_FLOOR) inst.level.basis.changeSector(*it, &Sector::floor_tex, new_floor);
-			if (parts & PART_CEIL)  inst.level.basis.changeSector(*it, &Sector::ceil_tex,  new_ceil);
+			if (parts & PART_FLOOR) inst.basis.changeSector(*it, &Sector::floor_tex, new_floor);
+			if (parts & PART_CEIL)  inst.basis.changeSector(*it, &Sector::ceil_tex,  new_ceil);
 		}
 
-		inst.level.basis.end();
+		inst.basis.end();
 
 		UpdateField(false, nullptr);
 	}

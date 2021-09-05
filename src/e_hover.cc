@@ -1258,7 +1258,7 @@ void crossing_state_c::SplitAllLines()
 	{
 		if (points[i].ld >= 0)
 		{
-			points[i].vert = inst.level.basis.addNew(ObjType::vertices);
+			points[i].vert = inst.basis.addNew(ObjType::vertices);
 
 			Vertex *V = inst.level.vertices[points[i].vert].get();
 

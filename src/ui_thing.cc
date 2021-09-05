@@ -364,15 +364,15 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			box->inst.level.basis.changeThing(*it, &Thing::type, new_type);
+			box->inst.basis.changeThing(*it, &Thing::type, new_type);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -408,15 +408,15 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited special of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited special of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			box->inst.level.basis.changeThing(*it, &Thing::special, new_type);
+			box->inst.basis.changeThing(*it, &Thing::special, new_type);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -499,15 +499,15 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited angle of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited angle of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, &Thing::angle, new_ang);
+			box->inst.basis.changeThing(*it, &Thing::angle, new_ang);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -521,15 +521,15 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited TID of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited TID of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, &Thing::tid, new_tid);
+			box->inst.basis.changeThing(*it, &Thing::tid, new_tid);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -542,13 +542,13 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited X of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, &Thing::raw_x, box->inst.MakeValidCoord(new_x));
+			box->inst.basis.changeThing(*it, &Thing::raw_x, box->inst.MakeValidCoord(new_x));
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -560,13 +560,13 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, &Thing::raw_y, box->inst.MakeValidCoord(new_y));
+			box->inst.basis.changeThing(*it, &Thing::raw_y, box->inst.MakeValidCoord(new_y));
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -578,13 +578,13 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, &Thing::raw_h, INT_TO_COORD(new_h));
+			box->inst.basis.changeThing(*it, &Thing::raw_h, INT_TO_COORD(new_h));
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -601,8 +601,8 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		box->mFixUp.checkDirtyFields();
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -610,10 +610,10 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			box->inst.level.basis.changeThing(*it, &Thing::options, (T->options & ~mask) | (new_opts & mask));
+			box->inst.basis.changeThing(*it, &Thing::options, (T->options & ~mask) | (new_opts & mask));
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -673,16 +673,16 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
+		box->inst.basis.begin();
+		box->inst.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, argmap[arg_idx],
+			box->inst.basis.changeThing(*it, argmap[arg_idx],
                                               new_value);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 

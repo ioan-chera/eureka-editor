@@ -85,7 +85,7 @@ public:
 		return (int)num;
 	}
 
-	void Paste_BA_Message(Document &doc) const
+	void Paste_BA_Message(Instance &inst) const
 	{
 		size_t t = things.size();
 		size_t v = verts.size();
@@ -95,26 +95,26 @@ public:
 		if (s > 0)
 		{
 			const char *name = NameForObjectType(ObjType::sectors, s != 1);
-			doc.basis.setMessage("pasted %zu %s", s, name);
+			inst.basis.setMessage("pasted %zu %s", s, name);
 		}
 		else if (l > 0)
 		{
 			const char *name = NameForObjectType(ObjType::linedefs, l != 1);
-			doc.basis.setMessage("pasted %zu %s", l, name);
+            inst.basis.setMessage("pasted %zu %s", l, name);
 		}
 		else if (t > 0)
 		{
 			const char *name = NameForObjectType(ObjType::things, t != 1);
-			doc.basis.setMessage("pasted %zu %s", t, name);
+            inst.basis.setMessage("pasted %zu %s", t, name);
 		}
 		else if (v > 0)
 		{
 			const char *name = NameForObjectType(ObjType::vertices, v != 1);
-			doc.basis.setMessage("pasted %zu %s", v, name);
+            inst.basis.setMessage("pasted %zu %s", v, name);
 		}
 		else
 		{
-			doc.basis.setMessage("pasted something");
+            inst.basis.setMessage("pasted something");
 		}
 	}
 
@@ -538,7 +538,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
-		int new_v = inst.level.basis.addNew(ObjType::vertices);
+		int new_v = inst.basis.addNew(ObjType::vertices);
 		Vertex * V = inst.level.vertices[new_v].get();
 
 		vert_map[i] = new_v;
@@ -551,7 +551,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
-		int new_s = inst.level.basis.addNew(ObjType::sectors);
+		int new_s = inst.basis.addNew(ObjType::sectors);
 		Sector * S = inst.level.sectors[new_s].get();
 
 		sector_map[i] = new_s;
@@ -568,7 +568,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 			continue;
 		}
 
-		int new_sd = inst.level.basis.addNew(ObjType::sidedefs);
+		int new_sd = inst.basis.addNew(ObjType::sidedefs);
 		SideDef * SD = inst.level.sidedefs[new_sd].get();
 
 		side_map[i] = new_sd;
@@ -585,7 +585,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
-		int new_l = inst.level.basis.addNew(ObjType::linedefs);
+		int new_l = inst.basis.addNew(ObjType::linedefs);
 		auto & L = inst.level.linedefs[new_l];
 
 		*L = *clip_board->lines[i];
@@ -623,7 +623,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
-		int new_t = inst.level.basis.addNew(ObjType::things);
+		int new_t = inst.basis.addNew(ObjType::things);
 		Thing * T = inst.level.things[new_t].get();
 
 		*T = *clip_board->things[i];
@@ -717,8 +717,8 @@ bool Instance::Clipboard_DoPaste()
 	pos_x = grid.SnapX(pos_x);
 	pos_y = grid.SnapY(pos_y);
 
-	level.basis.begin();
-	clip_board->Paste_BA_Message(level);
+	basis.begin();
+	clip_board->Paste_BA_Message(*this);
 
 	clip_doing_paste = true;
 
@@ -731,7 +731,7 @@ bool Instance::Clipboard_DoPaste()
 
 			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 			{
-				int new_t = level.basis.addNew(ObjType::things);
+				int new_t = basis.addNew(ObjType::things);
 				Thing * T = level.things[new_t].get();
 
 				*T = *clip_board->things[i];
@@ -751,7 +751,7 @@ bool Instance::Clipboard_DoPaste()
 
 			for (i = 0 ; i < clip_board->verts.size() ; i++)
 			{
-				int new_v = level.basis.addNew(ObjType::vertices);
+				int new_v = basis.addNew(ObjType::vertices);
 				Vertex * V = level.vertices[new_v].get();
 
 				*V = *clip_board->verts[i];
@@ -775,7 +775,7 @@ bool Instance::Clipboard_DoPaste()
 
 	clip_doing_paste = false;
 
-	level.basis.end();
+	basis.end();
 
 	edit.error_mode = false;
 
@@ -1033,7 +1033,7 @@ static void FixupLineDefs(const Document &doc, selection_c *lines, selection_c *
 }
 
 
-static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
+static bool DeleteVertex_MergeLineDefs(Instance &inst, int v_num)
 {
 	// returns true if OK, false if would create an overlapping linedef
 	// [ meaning the vertex should be deleted normally ]
@@ -1042,9 +1042,9 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	int ld1 = -1;
 	int ld2 = -1;
 
-	for (int n = 0 ; n < doc.numLinedefs(); n++)
+	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
@@ -1060,11 +1060,11 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	SYS_ASSERT(ld1 >= 0);
 	SYS_ASSERT(ld2 >= 0);
 
-	auto &L1 = doc.linedefs[ld1];
-	auto &L2 = doc.linedefs[ld2];
+	auto &L1 = inst.level.linedefs[ld1];
+	auto &L2 = inst.level.linedefs[ld2];
 
 	// we merge L2 into L1, unless L1 is significantly shorter
-	if (L1->CalcLength(doc) < L2->CalcLength(doc) * 0.7)
+	if (L1->CalcLength(inst.level) < L2->CalcLength(inst.level) * 0.7)
 	{
 		std::swap(ld1, ld2);
 		std::swap(L1,  L2);
@@ -1075,7 +1075,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	int v2 = (L2->start == v_num) ? L2->end : L2->start;
 
 	// ensure we don't create two directly overlapping linedefs
-	if (doc.linemod.linedefAlreadyExists(v1, v2))
+	if (inst.level.linemod.linedefAlreadyExists(v1, v2))
 		return false;
 
 	// see what sidedefs would become unused
@@ -1084,25 +1084,25 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 
 	line_sel.set(ld2);
 
-	UnusedSideDefs(doc, &line_sel, NULL /* sec_sel */, &side_sel);
+	UnusedSideDefs(inst.level, &line_sel, NULL /* sec_sel */, &side_sel);
 
 
-	doc.basis.begin();
-	doc.basis.setMessage("deleted vertex #%d\n", v_num);
+	inst.basis.begin();
+    inst.basis.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
-		doc.basis.changeLinedef(ld1, &LineDef::start, v2);
+        inst.basis.changeLinedef(ld1, &LineDef::start, v2);
 	else
-		doc.basis.changeLinedef(ld1, &LineDef::end, v2);
+        inst.basis.changeLinedef(ld1, &LineDef::end, v2);
 
 	// NOT-DO: update X offsets on existing linedef
 
-	doc.basis.del(ObjType::linedefs, ld2);
-	doc.basis.del(ObjType::vertices, v_num);
+    inst.basis.del(ObjType::linedefs, ld2);
+    inst.basis.del(ObjType::vertices, v_num);
 
-	doc.objects.del(side_sel);
+    inst.level.objects.del(side_sel);
 
-	doc.basis.end();
+	inst.basis.end();
 
 	return true;
 }
@@ -1225,19 +1225,19 @@ void Instance::CMD_Delete()
 
 		if (level.vertmod.howManyLinedefs(v_num) == 2)
 		{
-			if (DeleteVertex_MergeLineDefs(level, v_num))
+			if (DeleteVertex_MergeLineDefs(*this, v_num))
 				goto success;
 		}
 
 		// delete vertex normally
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("deleted", *edit.Selected);
+	basis.begin();
+	basis.setMessageForSelection("deleted", *edit.Selected);
 
 	DeleteObjects_WithUnused(level, edit.Selected, keep, false /* keep_verts */, keep);
 
-	level.basis.end();
+	basis.end();
 
 success:
 	Editor_ClearAction();

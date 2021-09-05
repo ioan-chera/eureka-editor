@@ -77,10 +77,10 @@ void SectorModule::safeRaiseLower(int sec, int parts, int dz) const
 	}
 
 	if (parts & PART_FLOOR)
-		doc.basis.changeSector(sec, &Sector::floorh, f);
+        inst.basis.changeSector(sec, &Sector::floorh, f);
 
 	if (parts & PART_CEIL)
-		doc.basis.changeSector(sec, &Sector::ceilh, c);
+        inst.basis.changeSector(sec, &Sector::ceilh, c);
 }
 
 
@@ -101,8 +101,8 @@ void Instance::CMD_SEC_Floor()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
+	basis.begin();
+	basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -110,10 +110,10 @@ void Instance::CMD_SEC_Floor()
 
 		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
-		level.basis.changeSector(*it, &Sector::floorh, new_h);
+		basis.changeSector(*it, &Sector::floorh, new_h);
 	}
 
-	level.basis.end();
+	basis.end();
 
 	main_win->sec_box->UpdateField(true, &Sector::floorh);
 
@@ -139,8 +139,8 @@ void Instance::CMD_SEC_Ceil()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
+	basis.begin();
+	basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -148,10 +148,10 @@ void Instance::CMD_SEC_Ceil()
 
 		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
-		level.basis.changeSector(*it, &Sector::ceilh, new_h);
+		basis.changeSector(*it, &Sector::ceilh, new_h);
 	}
 
-	level.basis.end();
+	basis.end();
 
 	main_win->sec_box->UpdateField(true, &Sector::ceilh);
 
@@ -188,8 +188,8 @@ void SectorModule::sectorsAdjustLight(int delta) const
 	if (inst.edit.Selected->empty())
 		return;
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
+    inst.basis.begin();
+    inst.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
@@ -197,10 +197,10 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 		int new_lt = light_add_delta(S->light, delta);
 
-		doc.basis.changeSector(*it, &Sector::light, new_lt);
+        inst.basis.changeSector(*it, &Sector::light, new_lt);
 	}
 
-	doc.basis.end();
+    inst.basis.end();
 
 	inst.main_win->sec_box->UpdateField(true, &Sector::light);
 }
@@ -239,8 +239,8 @@ void Instance::CMD_SEC_SwapFlats()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("swapped flats in", *edit.Selected);
+	basis.begin();
+	basis.setMessageForSelection("swapped flats in", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
@@ -249,11 +249,11 @@ void Instance::CMD_SEC_SwapFlats()
 		int floor_tex = S->floor_tex;
 		int  ceil_tex = S->ceil_tex;
 
-		level.basis.changeSector(*it, &Sector::floor_tex, ceil_tex);
-		level.basis.changeSector(*it, &Sector::ceil_tex, floor_tex);
+		basis.changeSector(*it, &Sector::floor_tex, ceil_tex);
+		basis.changeSector(*it, &Sector::ceil_tex, floor_tex);
 	}
 
-	level.basis.end();
+	basis.end();
 
 	main_win->sec_box->UpdateField(true, &Sector::floor_tex);
 	main_win->sec_box->UpdateField(true, &Sector::ceil_tex);
@@ -289,7 +289,7 @@ void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
 
 		if (sd->sector == old_sec)
 		{
-			doc.basis.changeSidedef(i, &SideDef::sector, new_sec);
+            inst.basis.changeSidedef(i, &SideDef::sector, new_sec);
 		}
 	}
 }
@@ -325,22 +325,22 @@ void Instance::commandSectorMerge()
 	selection_c common_lines(ObjType::linedefs);
 	selection_c unused_secs (ObjType::sectors);
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("merged", *edit.Selected);
+	basis.begin();
+	basis.setMessageForSelection("merged", *edit.Selected);
 
 	// keep the properties of the first selected sector
 	if (new_sec != first)
 	{
 		const Sector *ref = level.sectors[first].get();
 
-		level.basis.changeSector(new_sec, &Sector::floorh,    ref->floorh);
-		level.basis.changeSector(new_sec, &Sector::floor_tex, ref->floor_tex);
-		level.basis.changeSector(new_sec, &Sector::ceilh,     ref->ceilh);
-		level.basis.changeSector(new_sec, &Sector::ceil_tex,  ref->ceil_tex);
+		basis.changeSector(new_sec, &Sector::floorh,    ref->floorh);
+		basis.changeSector(new_sec, &Sector::floor_tex, ref->floor_tex);
+		basis.changeSector(new_sec, &Sector::ceilh,     ref->ceilh);
+		basis.changeSector(new_sec, &Sector::ceil_tex,  ref->ceil_tex);
 
-		level.basis.changeSector(new_sec, &Sector::light, ref->light);
-		level.basis.changeSector(new_sec, &Sector::type,  ref->type);
-		level.basis.changeSector(new_sec, &Sector::tag,   ref->tag);
+		basis.changeSector(new_sec, &Sector::light, ref->light);
+		basis.changeSector(new_sec, &Sector::type,  ref->type);
+		basis.changeSector(new_sec, &Sector::tag,   ref->tag);
 	}
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
@@ -364,7 +364,7 @@ void Instance::commandSectorMerge()
 		DeleteObjects_WithUnused(level, &common_lines, false, false, false);
 	}
 
-	level.basis.end();
+	basis.end();
 
 	// re-select the final sector
 	Selection_Clear(true /* no_save */);
@@ -1040,7 +1040,7 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 
 	if (sd_num >= 0)
 	{
-		doc.basis.changeSidedef(sd_num, &SideDef::sector, new_sec);
+        inst.basis.changeSidedef(sd_num, &SideDef::sector, new_sec);
 		return;
 	}
 
@@ -1058,7 +1058,7 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 	SYS_ASSERT(new_upper >= 0);
 
 	// create new sidedef
-	int new_sd = doc.basis.addNew(ObjType::sidedefs);
+	int new_sd = inst.basis.addNew(ObjType::sidedefs);
 
 	SideDef * SD = doc.sidedefs[new_sd].get();
 
@@ -1080,9 +1080,9 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 	SD->sector = new_sec;
 
 	if (side == Side::right)
-		doc.basis.changeLinedef(ld, &LineDef::right, new_sd);
+        inst.basis.changeLinedef(ld, &LineDef::right, new_sd);
 	else
-		doc.basis.changeLinedef(ld, &LineDef::left, new_sd);
+        inst.basis.changeLinedef(ld, &LineDef::left, new_sd);
 
 	// if we're adding a second side to the linedef, clear out some
 	// of the properties that aren't needed anymore: middle texture,
@@ -1202,7 +1202,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 
 	if (new_sec < 0)
 	{
-		new_sec = doc.basis.addNew(ObjType::sectors);
+		new_sec = inst.basis.addNew(ObjType::sectors);
 
 		if (model < 0)
 			model = loop.NeighboringSector();

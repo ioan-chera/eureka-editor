@@ -105,7 +105,7 @@ std::shared_ptr<Wad_file> MasterDirectory::findReadOnly(const SString &path)
 
 void Instance::FreshLevel()
 {
-	level.basis.clearAll();
+	basis.clearAll();
 
 	auto sec = std::make_unique<Sector>();
 	sec->SetDefaults(conf);
@@ -976,7 +976,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 
 	loaded.levelFormat = wad->LevelFormat(loading_level);
 
-	level.basis.clearAll();
+	basis.clearAll();
 
 	LevelLoadProblems problems = {};
 

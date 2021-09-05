@@ -64,17 +64,17 @@ void Instance::CMD_TH_SpinThings()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("spun", *edit.Selected);
+	basis.begin();
+	basis.setMessageForSelection("spun", *edit.Selected);
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
 		const Thing *T = level.things[*it].get();
 
-		level.basis.changeThing(*it, &Thing::angle, calc_new_angle(T->angle, degrees));
+		basis.changeThing(*it, &Thing::angle, calc_new_angle(T->angle, degrees));
 	}
 
-	level.basis.end();
+	basis.end();
 
 	main_win->thing_box->UpdateField(true, &Thing::angle);
 
@@ -121,8 +121,8 @@ static void MoveOverlapThing(Instance &inst, int th, int mid_x, int mid_y, int n
 
 	const Thing *T = inst.level.things[th].get();
 
-	inst.level.basis.changeThing(th, &Thing::raw_x, T->raw_x + fdx);
-	inst.level.basis.changeThing(th, &Thing::raw_y, T->raw_y + fdy);
+	inst.basis.changeThing(th, &Thing::raw_x, T->raw_x + fdx);
+	inst.basis.changeThing(th, &Thing::raw_y, T->raw_y + fdy);
 }
 
 
@@ -140,8 +140,8 @@ void CMD_TH_Disconnect(Instance &inst)
 		return;
 	}
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
+	inst.basis.begin();
+	inst.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
 
 	while (!inst.edit.Selected->empty())
 	{
@@ -167,7 +167,7 @@ void CMD_TH_Disconnect(Instance &inst)
 		}
 	}
 
-	inst.level.basis.end();
+	inst.basis.end();
 }
 
 
@@ -190,16 +190,16 @@ void CMD_TH_Merge(Instance &inst)
 	double mid_x, mid_y;
 	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
+	inst.basis.begin();
+	inst.basis.setMessageForSelection("merged", *inst.edit.Selected);
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		inst.level.basis.changeThing(*it, &Thing::raw_x, inst.MakeValidCoord(mid_x));
-		inst.level.basis.changeThing(*it, &Thing::raw_y, inst.MakeValidCoord(mid_y));
+		inst.basis.changeThing(*it, &Thing::raw_x, inst.MakeValidCoord(mid_x));
+		inst.basis.changeThing(*it, &Thing::raw_y, inst.MakeValidCoord(mid_y));
 	}
 
-	inst.level.basis.end();
+	inst.basis.end();
 }
 
 

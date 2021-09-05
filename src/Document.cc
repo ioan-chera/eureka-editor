@@ -69,7 +69,7 @@ void BoundingBox::get(double &x1, double &y1, double &x2, double &y2) const
 //
 // Constructor
 //
-Document::Document(Instance &inst) : inst(inst), basis(inst, *this),
+Document::Document(Instance &inst) : inst(inst),
 		checks(*this), hover(*this), linemod(*this), vertmod(*this),
 		secmod(*this), objects(*this)
 {

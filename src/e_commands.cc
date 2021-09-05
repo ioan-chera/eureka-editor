@@ -158,7 +158,7 @@ void Instance::CMD_Quit()
 
 void Instance::CMD_Undo()
 {
-	if (! level.basis.undo())
+	if (! basis.undo())
 	{
 		Beep("No operation to undo");
 		return;
@@ -171,7 +171,7 @@ void Instance::CMD_Undo()
 
 void Instance::CMD_Redo()
 {
-	if (! level.basis.redo())
+	if (! basis.redo())
 	{
 		Beep("No operation to redo");
 		return;
@@ -750,10 +750,10 @@ void Instance::CMD_ACT_Click()
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 
-		level.basis.begin();
-		level.basis.setMessage("split linedef #%d", split_ld);
+		basis.begin();
+		basis.setMessage("split linedef #%d", split_ld);
 
-		int new_vert = level.basis.addNew(ObjType::vertices);
+		int new_vert = basis.addNew(ObjType::vertices);
 
 		Vertex *V = level.vertices[new_vert].get();
 
@@ -761,7 +761,7 @@ void Instance::CMD_ACT_Click()
 
 		level.linemod.splitLinedefAtVertex(split_ld, new_vert);
 
-		level.basis.end();
+		basis.end();
 
 		if (want_select)
 			edit.Selected->set(new_vert);

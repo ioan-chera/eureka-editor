@@ -487,6 +487,7 @@ private:
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper
+    Basis basis{*this, level};
 
 	UI_MainWindow *main_win = nullptr;
 	Editor_State_t edit = {};

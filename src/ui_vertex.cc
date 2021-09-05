@@ -112,15 +112,15 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessage("edited X of"/*, inst.edit.Selected*/);
+		box->inst.basis.begin();
+		box->inst.basis.setMessage("edited X of"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeVertex(*it, &Vertex::raw_x, box->inst.MakeValidCoord(new_x));
+			box->inst.basis.changeVertex(*it, &Vertex::raw_x, box->inst.MakeValidCoord(new_x));
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -132,15 +132,15 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessage("edited Y of"/*, inst.edit.Selected*/);
+		box->inst.basis.begin();
+		box->inst.basis.setMessage("edited Y of"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeVertex(*it, &Vertex::raw_y, box->inst.MakeValidCoord(new_y));
+			box->inst.basis.changeVertex(*it, &Vertex::raw_y, box->inst.MakeValidCoord(new_y));
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 
@@ -173,18 +173,18 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 		box->mFixUp.checkDirtyFields();
 
-		box->inst.level.basis.begin();
-		box->inst.level.basis.setMessage("adjusted"/*, inst.edit.Selected*/);
+		box->inst.basis.begin();
+		box->inst.basis.setMessage("adjusted"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			const Vertex *V = box->inst.level.vertices[*it].get();
 
-			box->inst.level.basis.changeVertex(*it, &Vertex::raw_x, V->raw_x + fdx);
-			box->inst.level.basis.changeVertex(*it, &Vertex::raw_y, V->raw_y + fdy);
+			box->inst.basis.changeVertex(*it, &Vertex::raw_x, V->raw_x + fdx);
+			box->inst.basis.changeVertex(*it, &Vertex::raw_y, V->raw_y + fdy);
 		}
 
-		box->inst.level.basis.end();
+		box->inst.basis.end();
 	}
 }
 

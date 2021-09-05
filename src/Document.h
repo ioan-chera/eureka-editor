@@ -69,7 +69,6 @@ public:
 	// Secondary information
 	BoundingBox mapBound;
 
-	Basis basis;
 	ChecksModule checks;
 	Hover hover;
 	LinedefModule linemod;

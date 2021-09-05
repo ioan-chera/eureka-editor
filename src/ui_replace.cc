@@ -1296,12 +1296,12 @@ void UI_FindAndReplace::DoReplace()
 
 	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
+	inst.basis.begin();
+	inst.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
 	ApplyReplace(cur_obj.num, replace_tex_id);
 
-	inst.level.basis.end();
+	inst.basis.end();
 
 	// move onto next object
 	FindNext();
@@ -1390,7 +1390,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	{
 		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-		inst.level.basis.begin();
+		inst.basis.begin();
 	}
 
 	// we select objects even in REPLACE mode
@@ -1428,8 +1428,8 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		inst.level.basis.setMessageForSelection("replacement in", *inst.edit.Selected);
-		inst.level.basis.end();
+		inst.basis.setMessageForSelection("replacement in", *inst.edit.Selected);
+		inst.basis.end();
 	}
 
 	if (count > 0)
@@ -1695,7 +1695,7 @@ void UI_FindAndReplace::Replace_Thing(int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	inst.level.basis.changeThing(idx, &Thing::type, new_type);
+	inst.basis.changeThing(idx, &Thing::type, new_type);
 }
 
 
@@ -1722,22 +1722,22 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))
-					inst.level.basis.changeSidedef(sd_num, &SideDef::mid_tex, new_tex);
+					inst.basis.changeSidedef(sd_num, &SideDef::mid_tex, new_tex);
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex.good() && Pattern_Match(L_tex, pattern))
-				inst.level.basis.changeSidedef(sd_num, &SideDef::lower_tex, new_tex);
+				inst.basis.changeSidedef(sd_num, &SideDef::lower_tex, new_tex);
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex.good() && Pattern_Match(U_tex, pattern))
-				inst.level.basis.changeSidedef(sd_num, &SideDef::upper_tex, new_tex);
+				inst.basis.changeSidedef(sd_num, &SideDef::upper_tex, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
-				inst.level.basis.changeSidedef(sd_num, &SideDef::mid_tex, new_tex);
+				inst.basis.changeSidedef(sd_num, &SideDef::mid_tex, new_tex);
 	}
 }
 
@@ -1750,14 +1750,14 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(sector->FloorTex(), pattern))
-			inst.level.basis.changeSector(idx, &Sector::floor_tex, new_tex);
+			inst.basis.changeSector(idx, &Sector::floor_tex, new_tex);
 
 	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!inst.conf.is_sky(ceil_tex) && o_ceilings->value())
 								|| (inst.conf.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
-			inst.level.basis.changeSector(idx, &Sector::ceil_tex, new_tex);
+			inst.basis.changeSector(idx, &Sector::ceil_tex, new_tex);
 }
 
 
@@ -1765,7 +1765,7 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	inst.level.basis.changeLinedef(idx, &LineDef::type, new_type);
+	inst.basis.changeLinedef(idx, &LineDef::type, new_type);
 }
 
 
@@ -1777,7 +1777,7 @@ void UI_FindAndReplace::Replace_SectorType(int idx)
 	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());
 
-	inst.level.basis.changeSector(idx, &Sector::type, (old_type & ~mask) | (new_type & mask));
+	inst.basis.changeSector(idx, &Sector::type, (old_type & ~mask) | (new_type & mask));
 }
 
 //--- editor settings ---
