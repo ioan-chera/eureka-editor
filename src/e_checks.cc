@@ -352,7 +352,8 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 }
 
 
-static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
+static void Vertex_MergeOne(int idx, const selection_c& merge_verts,
+                            Document &doc)
 {
 	const Vertex *V = doc.vertices[idx].get();
 
