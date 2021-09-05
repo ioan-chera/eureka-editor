@@ -54,22 +54,23 @@
 class UI_Check_base : public UI_Escapable_Window
 {
 protected:
-	bool want_close;
+	bool want_close = false;
 
-	CheckResult  user_action;
-
-	Fl_Group *line_group;
-
-	int cy;
-	int worst_severity;
+	CheckResult user_action = CheckResult::ok;
 
 private:
 	static void close_callback(Fl_Widget *, void *);
 
+    Fl_Group *line_group;
+    int cy;
+    int worst_severity = 0;
+
 public:
 	UI_Check_base(int W, int H, bool all_mode, const char *L,
 		const char *header_txt);
-	virtual ~UI_Check_base();
+	virtual ~UI_Check_base()
+    {
+    }
 
 	void Reset();
 
@@ -100,9 +101,7 @@ void UI_Check_base::close_callback(Fl_Widget *w, void *data)
 
 UI_Check_base::UI_Check_base(int W, int H, bool all_mode,
                              const char *L, const char *header_txt) :
-	UI_Escapable_Window(W, H, L),
-	want_close(false), user_action(CheckResult::ok),
-	worst_severity(0)
+	UI_Escapable_Window(W, H, L)
 {
 	cy = 10;
 
@@ -139,10 +138,6 @@ UI_Check_base::UI_Check_base(int W, int H, bool all_mode,
 
 	end();
 }
-
-
-UI_Check_base::~UI_Check_base()
-{ }
 
 
 void UI_Check_base::Reset()
