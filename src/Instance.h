@@ -47,7 +47,7 @@ struct LevelLoadProblems;
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
-class Instance : public BasisListener
+class Instance : public BasisListener, public GridStateListener
 {
 public:
 	// E_BASIS
@@ -484,6 +484,14 @@ private:
 			override;
 	virtual void basisNotifyDelete(ObjType type, int objnum) override;
 	virtual void basisNotifyEnd() override;
+
+    // GridStateListener
+    virtual void gridStateSetGrid(int step, bool redraw) override;
+    virtual void gridStateUpdateSnap(bool redraw) override;
+    virtual void gridStateUpdatePos(bool adjustScroll, bool setScale,
+                                    double scale) override;
+    virtual void gridStateSimpleRedraw() override;
+    virtual void gridStateBeep(const char *message) override;
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper

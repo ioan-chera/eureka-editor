@@ -23,6 +23,20 @@
 
 class Instance;
 
+//
+// Listener for the Grid_State_c object
+//
+class GridStateListener
+{
+public:
+    virtual void gridStateSetGrid(int step, bool redraw) = 0;
+    virtual void gridStateUpdateSnap(bool redraw) = 0;
+    virtual void gridStateUpdatePos(bool adjustScroll, bool setScale,
+                                    double scale) = 0;
+    virtual void gridStateSimpleRedraw() = 0;
+    virtual void gridStateBeep(const char *message) = 0;
+};
+
 class Grid_State_c final
 {
 friend class Instance;
@@ -49,7 +63,7 @@ public:
 	double Scale = 1.0;
 
 public:
-	explicit Grid_State_c(Instance &inst) : inst(inst)
+	explicit Grid_State_c(GridStateListener &listener) : listener(listener)
 	{
 	}
 
@@ -129,7 +143,7 @@ private:
 	static const int digit_scales[];
 	static const int grid_values[];
 
-	Instance &inst;
+    GridStateListener &listener;
 };
 
 #endif  /* __EUREKA_R_GRID_H__ */
