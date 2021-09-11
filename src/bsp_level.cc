@@ -2125,6 +2125,7 @@ static Lump_c * CreateLevelLump(const Instance &inst, const char *name)
 		lump = inst.edit_wad->AddLump(name);
 	}
 
+    lump->clearData();
 	return lump;
 }
 
