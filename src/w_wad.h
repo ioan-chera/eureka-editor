@@ -107,6 +107,15 @@ public:
 	// Memory buffer actions
 	size_t writeData(FILE *f, int len);
 
+    //
+    // Clear the lump data
+    //
+    void clearData()
+    {
+        mData.clear();
+        mPos = 0;
+    }
+
 	//
 	// Gets the data from lump without moving the insertion point.
 	//
