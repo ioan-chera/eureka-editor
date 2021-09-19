@@ -421,6 +421,16 @@ void Instance::GoToObject(const Objid& objid)
 	GoToSelection();
 }
 
+//
+// Allow going to multiple objects
+//
+void goToMultipleObjects(Instance &inst, const std::vector<int> &items)
+{
+    inst.Selection_Clear();
+    for(int index : items)
+        inst.edit.Selected->set(index);
+    inst.GoToSelection();
+}
 
 void Instance::CMD_JumpToObject()
 {
@@ -432,19 +442,20 @@ void Instance::CMD_JumpToObject()
 		return;
 	}
 
-	UI_JumpToDialog *dialog = new UI_JumpToDialog(NameForObjectType(edit.mode), total - 1);
+    std::vector<int> nums;
+    {
+        auto dialog = std::make_unique<UI_JumpToDialog>(NameForObjectType(edit.mode), total - 1);
 
-	int num = dialog->Run();
+        nums = dialog->Run();
+    }
 
-	delete dialog;
-
-	if (num < 0)	// cancelled
+	if (nums.empty())	// cancelled
 		return;
 
 	// this is guaranteed by the dialog
-	SYS_ASSERT(num < total);
-
-	GoToObject(Objid(edit.mode, num));
+    for(int num : nums)
+        assert(num >= 0 && num < total);
+    goToMultipleObjects(*this, nums);
 }
 
 

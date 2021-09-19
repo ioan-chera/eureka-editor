@@ -118,22 +118,24 @@ private:
 class UI_JumpToDialog : public UI_Escapable_Window
 {
 private:
-	Fl_Int_Input *input;
+	Fl_Input *input;
 
 	Fl_Button *ok_but;
 	Fl_Button *cancel_but;
 
-	bool want_close;
+	bool want_close = false;
 
 	int limit;
-	int result;
+    std::vector<int> result;
 
 public:
 	UI_JumpToDialog(const char *_objname, int _limit);
-	virtual ~UI_JumpToDialog();
+	virtual ~UI_JumpToDialog()
+    {
+    }
 
 	// returns the typed number, or -1 if cancelled
-	int Run();
+	std::vector<int> Run();
 
 private:
 	static void    ok_callback(Fl_Widget *, void *);

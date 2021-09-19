@@ -4,6 +4,10 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+19.09.2021
+* Now the Jump to Objects dialog allows you to choose multiple items.
+
+----------
 22.08.2021
 * Fixed missing 'm' texture category from heretic.ugh. Added it and named it "magic".
 

@@ -515,7 +515,7 @@ static Fl_Menu_Item menu_items[] =
 		{ "&Find / Replace",   FL_COMMAND + 'f', FCAL view_do_find },
 		{ "Find &Next",        FL_COMMAND + 'g', FCAL view_do_next },
 		{ "Go to &Camera",     0, FCAL view_do_camera_pos },
-		{ "&Jump to Object",   0, FCAL view_do_jump },
+		{ "&Jump to Objects",  0, FCAL view_do_jump },
 		{ 0 },
 
 	{ "&Browser", 0, 0, 0, FL_SUBMENU },

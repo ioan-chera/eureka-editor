@@ -353,22 +353,20 @@ void UI_RotateDialog::ok_callback(Fl_Widget *w, void *data)
 
 
 UI_JumpToDialog::UI_JumpToDialog(const char *_objname, int _limit) :
-	UI_Escapable_Window(360, 175, "Jump To Object"),
-	want_close(false),
-	limit(_limit),
-	result(-1)
+	UI_Escapable_Window(380, 175, "Jump to Objects"),
+	limit(_limit)
 {
 	SYS_ASSERT(limit >= 0);
 
 	char descript[300];
-	snprintf(descript, sizeof(descript), "Enter the %s number (0 - %d)\n", _objname, limit);
+	snprintf(descript, sizeof(descript), "Enter one or more %s numbers (each 0 - %d)\n", _objname, limit);
 
     Fl_Box *title = new Fl_Box(10, 11, w() - 20, 32, NULL);
 	title->copy_label(descript);
 	title->labelsize(16);
-	title->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
+	title->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
 
-	input = new Fl_Int_Input(145, 55, 90, 25,  "index: ");
+	input = new Fl_Input(145, 55, 90, 25,  "index: ");
 	input->when(FL_WHEN_CHANGED | FL_WHEN_ENTER_KEY_ALWAYS);
 	input->callback(input_callback, this);
 
@@ -395,11 +393,7 @@ UI_JumpToDialog::UI_JumpToDialog(const char *_objname, int _limit) :
 }
 
 
-UI_JumpToDialog::~UI_JumpToDialog()
-{ }
-
-
-int UI_JumpToDialog::Run()
+std::vector<int> UI_JumpToDialog::Run()
 {
 	set_modal();
 	show();
@@ -420,12 +414,37 @@ void UI_JumpToDialog::close_callback(Fl_Widget *w, void *data)
 	that->want_close = true;
 }
 
+//
+// Parse a value into a list of integers
+//
+static std::vector<int> parseValueList(const char *text)
+{
+    assert(text);
+    // Parse strictly numbers
+    std::vector<int> result;
+
+    const char *end = text + strlen(text);
+    while(text < end)
+    {
+        char *endptr;
+        long value = strtol(text, &endptr, 10);
+        if(endptr == text)
+        {
+            ++text;
+            continue;
+        }
+        result.push_back((int)value);
+        text = endptr;
+    }
+
+    return result;
+}
 
 void UI_JumpToDialog::ok_callback(Fl_Widget *w, void *data)
 {
 	UI_JumpToDialog * that = (UI_JumpToDialog *)data;
 
-	that->result = atoi(that->input->value());
+	that->result = parseValueList(that->input->value());
 	that->want_close = true;
 }
 
@@ -433,20 +452,31 @@ void UI_JumpToDialog::ok_callback(Fl_Widget *w, void *data)
 void UI_JumpToDialog::input_callback(Fl_Widget *w, void *data)
 {
 	UI_JumpToDialog * that = (UI_JumpToDialog *)data;
+    auto disable = [that]()
+    {
+        that->input->textcolor(FL_RED);
+        that->input->redraw();
+        that->ok_but->deactivate();
+    };
 
 	// this is slightly hacky
 	bool was_enter = (Fl::event_key() == FL_Enter ||
 					  Fl::event_key() == FL_KP_Enter);
 
-	int value = atoi(that->input->value());
+    std::vector<int> values = parseValueList(that->input->value());
 
-	if (value < 0 || value > that->limit || strlen(that->input->value()) == 0)
-	{
-		that->input->textcolor(FL_RED);
-		that->input->redraw();
-		that->ok_but->deactivate();
-		return;
-	}
+    if(values.empty())
+    {
+        disable();
+        return;
+    }
+
+    for(int value : values)
+        if (value < 0 || value > that->limit)
+        {
+            disable();
+            return;
+        }
 
 	that->input->textcolor(FL_FOREGROUND_COLOR);
 	that->input->redraw();
