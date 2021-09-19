@@ -40,6 +40,7 @@
 #include "ui_window.h"
 #include "ui_misc.h"
 
+#include <assert.h>
 
 typedef enum
 {
