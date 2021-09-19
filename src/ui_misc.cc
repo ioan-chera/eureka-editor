@@ -26,6 +26,8 @@
 
 #include "main.h"
 
+#include <assert.h>
+
 UI_MoveDialog::UI_MoveDialog(Instance &inst, bool want_dz) :
 	UI_Escapable_Window(360, 205, "Move Objects"),
 	want_close(false), inst(inst)
@@ -472,11 +474,13 @@ void UI_JumpToDialog::input_callback(Fl_Widget *w, void *data)
     }
 
     for(int value : values)
+    {
         if (value < 0 || value > that->limit)
         {
             disable();
             return;
         }
+    }
 
 	that->input->textcolor(FL_FOREGROUND_COLOR);
 	that->input->redraw();
