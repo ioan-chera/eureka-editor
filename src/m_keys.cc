@@ -1161,7 +1161,7 @@ bool Instance::ExecuteKey(keycode_t key, key_context_e context)
 	if (idx < 0)
 		return false;
 
-	key_binding_t& bind = global::all_bindings[idx];
+	const key_binding_t& bind = global::all_bindings[idx];
 
 	int p_idx = 0;
 	int f_idx = 0;
