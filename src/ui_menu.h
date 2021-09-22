@@ -21,6 +21,8 @@
 #ifndef __EUREKA_UI_MENU_H__
 #define __EUREKA_UI_MENU_H__
 
+void updateMenuBindings();
+
 #endif  /* __EUREKA_UI_MENU_H__ */
 
 //--- editor settings ---

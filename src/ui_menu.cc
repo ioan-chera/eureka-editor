@@ -417,80 +417,87 @@ static void help_do_about(Fl_Widget *w, void * data)
 // Bindings from commands to function names
 //------------------------------------------------------------------------
 
-static std::unordered_map<SString, void(*)(Fl_Widget *, void *)> s_menu_command_map =
+struct MenuCommand
 {
-	{"NewProject", file_do_new_project},
-	{"ManageProject", file_do_manage_project},
-	{"OpenMap", file_do_open},
-	{"SaveMap", file_do_save},
-	{"ExportMap", file_do_export},
-	{"FreshMap", file_do_fresh_map},
-	{"CopyMap", file_do_copy_map},
-	{"RenameMap", file_do_rename},
-	{"DeleteMap", file_do_delete},
+	const char *const command;
+	const char * param[MAX_EXEC_PARAM];	// can't put const because of errors elsewhere
+};
+
+static std::unordered_map<void(*)(Fl_Widget *, void *), MenuCommand> s_menu_command_map =
+{
+	{file_do_new_project, {"NewProject"} },
+	{file_do_manage_project, {"ManageProject"} },
+	{file_do_open, {"OpenMap"} },
+	{file_do_save, {"SaveMap"} },
+	{file_do_export, {"ExportMap"} },
+	{file_do_fresh_map, {"FreshMap"} },
+	{file_do_copy_map, {"CopyMap"} },
+	{file_do_rename, {"RenameMap"} },
+	{file_do_delete, {"DeleteMap"} },
 	// given and recent don't have direct commands
-	{"Quit", file_do_quit},
+	{file_do_quit, {"Quit"} },
 
-	{"Undo", edit_do_undo},
-	{"Redo", edit_do_redo},
-	{"Clipboard_Cut", edit_do_cut},
-	{"Clipboard_Copy", edit_do_copy},
-	{"Clipboard_Paste", edit_do_paste},
-	{"Delete", edit_do_delete},
-	{"SelectAll", edit_do_select_all},
-	{"UnselectAll", edit_do_unselect_all},
-	{"InvertSelection", edit_do_invert_sel},
-	{"LastSelection", edit_do_last_sel},
-	{"OpMenu", edit_do_op_menu},
-	{"MoveObjectsDialog", edit_do_move},
-	{"ScaleObjectsDialog", edit_do_scale},
-	{"RotateObjectsDialog", edit_do_rotate},
-	{"Mirror horiz", edit_do_mirror_horiz},
-	{"Mirror vert", edit_do_mirror_vert},
+	{edit_do_undo, {"Undo"} },
+	{edit_do_redo, {"Redo"} },
+	{edit_do_cut, {"Clipboard_Cut"} },
+	{edit_do_copy, {"Clipboard_Copy"} },
+	{edit_do_paste, {"Clipboard_Paste"} },
+	{edit_do_delete, {"Delete"} },
+	{edit_do_select_all, {"SelectAll"} },
+	{edit_do_unselect_all, {"UnselectAll"} },
+	{edit_do_invert_sel, {"InvertSelection"} },
+	{edit_do_last_sel, {"LastSelection"} },
+	{edit_do_op_menu, {"OpMenu"} },
+	{edit_do_move, {"MoveObjectsDialog"} },
+	{edit_do_scale, {"ScaleObjectsDialog"} },
+	{edit_do_rotate, {"RotateObjectsDialog"} },
+	{edit_do_mirror_horiz, {"Mirror", {"horiz"}} },
+	{edit_do_mirror_vert, {"Mirror", {"vert"}} },
 
-	{"Zoom +1 /center", view_do_zoom_in},
-	{"Zoom -1 /center", view_do_zoom_out},
-	{"ZoomWholeMap", view_do_whole_map},
-	{"ZoomSelection", view_do_whole_selection},
-	{"GoToCamera", view_do_camera_pos},
-	{"Toggle 3d", view_do_toggle_3d},
-	{"Toggle obj_nums", view_do_object_nums},
-	{"Toggle sprites", view_do_sprites},
-	{"Toggle gamma", view_do_gamma},
-	{"DefaultProps", view_do_default_props},
-	{"FindDialog", view_do_find},
-	{"FindNext", view_do_next},
-	{"JumpToObject", view_do_jump},
+	{view_do_zoom_in, {"Zoom", {"+1", "/center"}} },
+	{view_do_zoom_out, {"Zoom", {"-1", "/center"}} },
+	{view_do_whole_map, {"ZoomWholeMap"} },
+	{view_do_whole_selection, {"ZoomSelection"} },
+	{view_do_camera_pos, {"GoToCamera"} },
+	{view_do_toggle_3d, {"Toggle", {"3d"}} },
+	{view_do_object_nums, {"Toggle", {"obj_nums"}} },
+	{view_do_sprites, {"Toggle", {"sprites"}} },
+	{view_do_gamma, {"Toggle", {"gamma"}} },
+	{view_do_default_props, {"DefaultProps"} },
+	{view_do_find, {"FindDialog"} },
+	{view_do_next, {"FindNext"} },
+	{view_do_jump, {"JumpToObject"} },
 
-	{"BrowserMode T", browser_do_textures},
-	{"BrowserMode F", browser_do_flats},
-	{"BrowserMode O", browser_do_things},
-	{"BrowserMode L", browser_do_lines},
-	{"BrowserMode S", browser_do_sectors},
-	{"BrowserMode G", browser_do_gen_types},
-	{"BrowserMode T /recent", browser_do_recent_tex},
-	{"BrowserMode F /recent", browser_do_recent_flats},
-	{"BrowserMode O /recent", browser_do_recent_things},
-	{"Set browser 0", browser_hide},
+	{browser_do_textures, {"BrowserMode", {"T"}} },
+	{browser_do_flats, {"BrowserMode", {"F"}} },
+	{browser_do_things, {"BrowserMode", {"O"}} },
+	{browser_do_lines, {"BrowserMode", {"L"}} },
+	{browser_do_sectors, {"BrowserMode", {"S"}} },
+	{browser_do_gen_types, {"BrowserMode", {"G"}}, },
+	{browser_do_recent_tex, {"BrowserMode", {"T", "/recent"}} },
+	{browser_do_recent_flats, {"BrowserMode", {"F", "/recent"}} },
+	{browser_do_recent_things, {"BrowserMode", {"O", "/recent"}} },
+	{browser_hide, {"Set", {"browser", "0"}} },
 	
-	{"MapCheck all", checks_do_all},
-	{"MapCheck major", checks_do_major},
-	{"MapCheck vertices", checks_do_vertices},
-	{"MapCheck sectors", checks_do_sectors},
-	{"MapCheck linedefs", checks_do_linedefs},
-	{"MapCheck things", checks_do_things},
-	{"MapCheck textures", checks_do_textures},
-	{"MapCheck tags", checks_do_tags},
+	{checks_do_all, {"MapCheck", {"all"}} },
+	{checks_do_major, {"MapCheck", {"major"}} },
+	{checks_do_vertices, {"MapCheck", {"vertices"}} },
+	{checks_do_sectors, {"MapCheck", {"sectors"}} },
+	{checks_do_linedefs, {"MapCheck", {"linedefs"}} },
+	{checks_do_things, {"MapCheck", {"things"}} },
+	{checks_do_textures, {"MapCheck", {"textures"}} },
+	{checks_do_tags, {"MapCheck", {"tags"}} },
 
-	{"PreferenceDialog", tools_do_preferences},
-	{"BuildAllNodes", tools_do_build_nodes},
-	{"TestMap", tools_do_test_map},
-	{"EditLump", tools_do_lump_editor},
-	{"AddBehavior", tools_do_add_behavior},
-	{"LogViewer", tools_do_view_logs},
-	{"RecalcSectors", tools_do_recalc_sectors},
-	{"OnlineDocs", help_do_online_docs},
-	{"AboutDialog", help_do_about}
+	{tools_do_preferences, {"PreferenceDialog"} },
+	{tools_do_build_nodes, {"BuildAllNodes"} },
+	{tools_do_test_map, {"TestMap"} },
+	{tools_do_lump_editor, {"EditLump"} },
+	{tools_do_add_behavior, {"AddBehavior"} },
+	{tools_do_view_logs, {"LogViewer"} },
+	{tools_do_recalc_sectors, {"RecalcSectors"} },
+
+	{help_do_online_docs, {"OnlineDocs"} },
+	{help_do_about, {"AboutDialog"} }
 };
 
 #define M_GIVEN_FILES	"&Given Files"
@@ -909,6 +916,41 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 #endif
 
 	return bar;
+}
+
+//
+// Update all the menu shortcut displays after all_bindings got updated
+//
+void updateMenuBindings()
+{
+	// If window not made yet, it will call this itself
+	if(!gInstance.main_win || !gInstance.main_win->menu_bar)
+		return;
+
+	Fl_Menu_Bar *bar = gInstance.main_win->menu_bar;
+	int menuSize = bar->size();
+	const Fl_Menu_Item *items = bar->menu();
+
+	for(int i = 0; i < menuSize; ++i)
+	{
+		auto it = s_menu_command_map.find(items[i].callback());
+		if(it == s_menu_command_map.end())
+			continue;
+		MenuCommand &command = it->second;	// can't put const because of error
+		keycode_t code;
+		if(!findKeyCodeForCommandName(command.command, command.param, &code))
+			continue;
+
+		// Convert Eureka code to FLTK code
+		if(code & EMOD_COMMAND)
+			code = code & ~EMOD_COMMAND | FL_COMMAND;
+		if(code & EMOD_META)
+			code = code & ~EMOD_META | FL_META;
+		if(code & EMOD_ALT)
+			code = code & ~EMOD_ALT | FL_ALT;
+
+		bar->shortcut(i, code);
+	}
 }
 
 

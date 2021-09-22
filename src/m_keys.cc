@@ -628,6 +628,8 @@ void M_LoadBindings()
 	CopyInstallBindings();
 
 	LoadBindingsFromPath(global::home_dir.c_str(), false);
+
+	updateMenuBindings();
 }
 
 
@@ -737,6 +739,8 @@ void M_ApplyBindings()
 
 	for (unsigned int i = 0 ; i < global::pref_binds.size() ; i++)
 		global::all_bindings.push_back(global::pref_binds[i]);
+
+	updateMenuBindings();
 }
 
 
@@ -1259,6 +1263,43 @@ void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 	fl_beep();
 
 	EXEC_Errno = 1;
+}
+
+//
+// Finds key code for given command name
+//
+bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM], 
+							   keycode_t *code)
+{
+	// NOTE: seems that reverse order is good
+	for(auto it = global::all_bindings.rbegin(); it != global::all_bindings.rend(); ++it)
+	{
+		const key_binding_t &binding = *it;
+		if(y_stricmp(binding.cmd->name, command))
+			continue;
+		
+		bool skip = false;
+		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
+		{
+			if(!params[i] ^ binding.param[i].empty())
+			{
+				skip = true;
+				break;
+			}
+			if(!params[i] && binding.param[i].empty())
+				break;
+			if(!binding.param[i].noCaseEqual(params[i]))
+			{
+				skip = true;
+				break;
+			}
+		}
+		if(skip)
+			continue;
+		*code = binding.key;
+		return true;
+	}
+	return false;
 }
 
 //--- editor settings ---

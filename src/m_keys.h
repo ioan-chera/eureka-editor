@@ -156,10 +156,12 @@ const editor_command_t *   FindEditorCommand(const SString &name);
 const editor_command_t * LookupEditorCommand(int index);
 
 
-
 // parameter(s) for command function -- must be valid strings
 #define MAX_EXEC_PARAM   16
 #define MAX_BIND_LENGTH  64
+
+bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM],
+							   keycode_t *code);
 
 #endif  /* __EUREKA_M_KEYS_H__ */
 
