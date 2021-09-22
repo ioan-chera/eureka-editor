@@ -413,8 +413,85 @@ static void help_do_about(Fl_Widget *w, void * data)
 	static_cast<Instance *>(data)->ExecuteCommand("AboutDialog");
 }
 
-
 //------------------------------------------------------------------------
+// Bindings from commands to function names
+//------------------------------------------------------------------------
+
+static std::unordered_map<SString, void(*)(Fl_Widget *, void *)> s_menu_command_map =
+{
+	{"NewProject", file_do_new_project},
+	{"ManageProject", file_do_manage_project},
+	{"OpenMap", file_do_open},
+	{"SaveMap", file_do_save},
+	{"ExportMap", file_do_export},
+	{"FreshMap", file_do_fresh_map},
+	{"CopyMap", file_do_copy_map},
+	{"RenameMap", file_do_rename},
+	{"DeleteMap", file_do_delete},
+	// given and recent don't have direct commands
+	{"Quit", file_do_quit},
+
+	{"Undo", edit_do_undo},
+	{"Redo", edit_do_redo},
+	{"Clipboard_Cut", edit_do_cut},
+	{"Clipboard_Copy", edit_do_copy},
+	{"Clipboard_Paste", edit_do_paste},
+	{"Delete", edit_do_delete},
+	{"SelectAll", edit_do_select_all},
+	{"UnselectAll", edit_do_unselect_all},
+	{"InvertSelection", edit_do_invert_sel},
+	{"LastSelection", edit_do_last_sel},
+	{"OpMenu", edit_do_op_menu},
+	{"MoveObjectsDialog", edit_do_move},
+	{"ScaleObjectsDialog", edit_do_scale},
+	{"RotateObjectsDialog", edit_do_rotate},
+	{"Mirror horiz", edit_do_mirror_horiz},
+	{"Mirror vert", edit_do_mirror_vert},
+
+	{"Zoom +1 /center", view_do_zoom_in},
+	{"Zoom -1 /center", view_do_zoom_out},
+	{"ZoomWholeMap", view_do_whole_map},
+	{"ZoomSelection", view_do_whole_selection},
+	{"GoToCamera", view_do_camera_pos},
+	{"Toggle 3d", view_do_toggle_3d},
+	{"Toggle obj_nums", view_do_object_nums},
+	{"Toggle sprites", view_do_sprites},
+	{"Toggle gamma", view_do_gamma},
+	{"DefaultProps", view_do_default_props},
+	{"FindDialog", view_do_find},
+	{"FindNext", view_do_next},
+	{"JumpToObject", view_do_jump},
+
+	{"BrowserMode T", browser_do_textures},
+	{"BrowserMode F", browser_do_flats},
+	{"BrowserMode O", browser_do_things},
+	{"BrowserMode L", browser_do_lines},
+	{"BrowserMode S", browser_do_sectors},
+	{"BrowserMode G", browser_do_gen_types},
+	{"BrowserMode T /recent", browser_do_recent_tex},
+	{"BrowserMode F /recent", browser_do_recent_flats},
+	{"BrowserMode O /recent", browser_do_recent_things},
+	{"Set browser 0", browser_hide},
+	
+	{"MapCheck all", checks_do_all},
+	{"MapCheck major", checks_do_major},
+	{"MapCheck vertices", checks_do_vertices},
+	{"MapCheck sectors", checks_do_sectors},
+	{"MapCheck linedefs", checks_do_linedefs},
+	{"MapCheck things", checks_do_things},
+	{"MapCheck textures", checks_do_textures},
+	{"MapCheck tags", checks_do_tags},
+
+	{"PreferenceDialog", tools_do_preferences},
+	{"BuildAllNodes", tools_do_build_nodes},
+	{"TestMap", tools_do_test_map},
+	{"EditLump", tools_do_lump_editor},
+	{"AddBehavior", tools_do_add_behavior},
+	{"LogViewer", tools_do_view_logs},
+	{"RecalcSectors", tools_do_recalc_sectors},
+	{"OnlineDocs", help_do_online_docs},
+	{"AboutDialog", help_do_about}
+};
 
 #define M_GIVEN_FILES	"&Given Files"
 #define M_RECENT_FILES	"&Recent Files"
