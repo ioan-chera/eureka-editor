@@ -1281,12 +1281,12 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 		bool skip = false;
 		for(int i = 0; i < MAX_EXEC_PARAM; ++i)
 		{
-			if(!params[i] ^ binding.param[i].empty())
+			if(CSTRING_EMPTY(params[i]) ^ binding.param[i].empty())
 			{
 				skip = true;
 				break;
 			}
-			if(!params[i] && binding.param[i].empty())
+			if(CSTRING_EMPTY(params[i]) && binding.param[i].empty())
 				break;
 			if(!binding.param[i].noCaseEqual(params[i]))
 			{
