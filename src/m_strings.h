@@ -29,6 +29,9 @@
 #include <string>
 #include <vector>
 
+// Helper to treat nullptr char* the same as ""
+#define CSTRING_EMPTY(string) (!(string) || !*(string))
+
 class SString;
 
 int y_stricmp (const char *s1, const char *s2) noexcept;
