@@ -458,7 +458,7 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
     auto it = std::remove_if(global::all_bindings.begin(), global::all_bindings.end(),
                              KeyBindLookup{key, context});
     // there should never be more than one
-    assert(it >= global::all_bindings.end() - 1);
+    assert(it + 1 >= global::all_bindings.end());
 
     global::all_bindings.erase(it, global::all_bindings.end());
 }
@@ -1091,7 +1091,7 @@ static const key_binding_t *FindBinding(keycode_t key, key_context_e context, bo
 			continue;
 
 		// match modifiers "loosely" for certain commands (esp. NAV_xxx)
-		bool is_lax = (bind.key & MOD_LAX_SHIFTCTRL) ? true : false;
+		bool is_lax = !!(bind.key & MOD_LAX_SHIFTCTRL);
 
 		if (lax_only != is_lax)
 			continue;
