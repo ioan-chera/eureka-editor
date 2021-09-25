@@ -432,37 +432,35 @@ namespace global
 	static std::vector<key_binding_t> install_binds;
 }
 
+//
+// Helper for the predicates looking for the binding
+//
+struct KeyBindLookup
+{
+    const keycode_t key;
+    const key_context_e context;
+
+    bool operator()(const key_binding_t &bind)
+    {
+        return bind.key == key && bind.context == context;
+    }
+};
 
 bool M_IsKeyBound(keycode_t key, key_context_e context)
 {
-	for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
-	{
-		const key_binding_t& bind = global::all_bindings[i];
-
-		if (bind.key == key && bind.context == context)
-			return true;
-	}
-
-	return false;
+    return std::any_of(global::all_bindings.begin(), global::all_bindings.end(),
+                       KeyBindLookup{key, context});
 }
 
 
 void M_RemoveBinding(keycode_t key, key_context_e context)
 {
-	std::vector<key_binding_t>::iterator IT;
+    auto it = std::remove_if(global::all_bindings.begin(), global::all_bindings.end(),
+                             KeyBindLookup{key, context});
+    // there should never be more than one
+    assert(it >= global::all_bindings.end() - 1);
 
-	for (IT = global::all_bindings.begin() ; IT != global::all_bindings.end() ; IT++)
-	{
-		if (IT->key == key && IT->context == context)
-		{
-			// found it
-			global::all_bindings.erase(IT);
-
-			// there should never be more than one
-			// (besides, our iterator is now invalid)
-			return;
-		}
-	}
+    global::all_bindings.erase(it, global::all_bindings.end());
 }
 
 
@@ -530,9 +528,9 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 #define MAX_TOKENS  (MAX_EXEC_PARAM + 8)
 
-static bool LoadBindingsFromPath(const char *path, bool required)
+static bool LoadBindingsFromPath(const SString &path, bool required)
 {
-	SString filename = SString(path) + "/bindings.cfg";
+	SString filename = path + "/bindings.cfg";
 
 	std::ifstream fp(filename.c_str());
 	if(!fp.is_open())
@@ -571,22 +569,15 @@ static bool LoadBindingsFromPath(const char *path, bool required)
 
 static void CopyInstallBindings()
 {
-	global::install_binds.clear();
-
-	for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
-	{
-		global::install_binds.push_back(global::all_bindings[i]);
-	}
+    global::install_binds = global::all_bindings;
 }
 
 
 static bool BindingExists(std::vector<key_binding_t>& list, const key_binding_t& bind,
                           bool full_match)
 {
-	for (unsigned int i = 0 ; i < list.size() ; i++)
+	for (const key_binding_t &other : list)
 	{
-		const key_binding_t& other = list[i];
-
 		if (bind.key != other.key)
 			continue;
 
@@ -622,12 +613,12 @@ void M_LoadBindings()
 {
 	global::all_bindings.clear();
 
-	LoadBindingsFromPath(global::install_dir.c_str(), true /* required */);
+	LoadBindingsFromPath(global::install_dir, true /* required */);
 
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(global::home_dir.c_str(), false);
+	LoadBindingsFromPath(global::home_dir, false);
 
 	updateMenuBindings();
 }
@@ -656,10 +647,8 @@ void M_SaveBindings()
 	{
 		int count = 0;
 
-		for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
+		for (const key_binding_t &bind : global::all_bindings)
 		{
-			const key_binding_t& bind = global::all_bindings[i];
-
 			if (bind.context != (key_context_e)ctx)
 				continue;
 
@@ -717,28 +706,13 @@ namespace global
 void M_CopyBindings(bool from_defaults)
 {
 	// returns # of bindings
-
-	global::pref_binds.clear();
-
-	if (from_defaults)
-	{
-		for (unsigned int i = 0 ; i < global::install_binds.size() ; i++)
-			global::pref_binds.push_back(global::install_binds[i]);
-	}
-	else
-	{
-		for (unsigned int i = 0 ; i < global::all_bindings.size() ; i++)
-			global::pref_binds.push_back(global::all_bindings[i]);
-	}
+    global::pref_binds = from_defaults ? global::install_binds : global::all_bindings;
 }
 
 
 void M_ApplyBindings()
 {
-	global::all_bindings.clear();
-
-	for (unsigned int i = 0 ; i < global::pref_binds.size() ; i++)
-		global::all_bindings.push_back(global::pref_binds[i]);
+    global::all_bindings = global::pref_binds;
 
 	updateMenuBindings();
 }
@@ -1107,12 +1081,10 @@ void Instance::DoExecuteCommand(const editor_command_t *cmd)
 }
 
 
-static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
+static const key_binding_t *FindBinding(keycode_t key, key_context_e context, bool lax_only)
 {
-	for (int i = 0 ; i < (int)global::all_bindings.size() ; i++)
+	for (const key_binding_t &bind : global::all_bindings)
 	{
-		const key_binding_t& bind = global::all_bindings[i];
-
 		SYS_ASSERT(bind.cmd);
 
 		if (bind.context != context)
@@ -1137,11 +1109,11 @@ static int FindBinding(keycode_t key, key_context_e context, bool lax_only)
 			continue;
 
 		// found a match
-		return i;
+		return &bind;
 	}
 
 	// not found
-	return -1;
+	return nullptr;
 }
 
 
@@ -1157,42 +1129,40 @@ bool Instance::ExecuteKey(keycode_t key, key_context_e context)
 
 	// this logic means we only use a LAX binding if an exact match
 	// could not be found.
-	int idx = FindBinding(key, context, false);
+    const key_binding_t *bind = FindBinding(key, context, false);
 
-	if (idx < 0)
-		idx = FindBinding(key, context, true);
+	if (!bind)
+		bind = FindBinding(key, context, true);
 
-	if (idx < 0)
+	if (!bind)
 		return false;
-
-	const key_binding_t& bind = global::all_bindings[idx];
 
 	int p_idx = 0;
 	int f_idx = 0;
 
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{
-		if (! bind.param[p][0])
+		if (! bind->param[p][0])
 			break;
 
 		// separate flags from normal parameters
-		if (bind.param[p][0] == '/')
-			EXEC_Flags[f_idx++] = bind.param[p];
+		if (bind->param[p][0] == '/')
+			EXEC_Flags[f_idx++] = bind->param[p];
 		else
-			EXEC_Param[p_idx++] = bind.param[p];
+			EXEC_Param[p_idx++] = bind->param[p];
 	}
 
 	EXEC_CurKey = key;
 
 	// commands can test for LAX mode via a special flag
-	bool is_lax = (bind.key & MOD_LAX_SHIFTCTRL) ? true : false;
+	bool is_lax = (bind->key & MOD_LAX_SHIFTCTRL) ? true : false;
 
 	if (is_lax && f_idx < MAX_EXEC_PARAM)
 	{
 		EXEC_Flags[f_idx++] = "/LAX";
 	}
 
-	DoExecuteCommand(bind.cmd);
+	DoExecuteCommand(bind->cmd);
 
 	return true;
 }
