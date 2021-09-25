@@ -943,11 +943,11 @@ void updateMenuBindings()
 
 		// Convert Eureka code to FLTK code
 		if(code & EMOD_COMMAND)
-			code = code & ~EMOD_COMMAND | FL_COMMAND;
+			code = (code & ~EMOD_COMMAND) | FL_COMMAND;
 		if(code & EMOD_META)
-			code = code & ~EMOD_META | FL_META;
+			code = (code & ~EMOD_META) | FL_META;
 		if(code & EMOD_ALT)
-			code = code & ~EMOD_ALT | FL_ALT;
+			code = (code & ~EMOD_ALT) | FL_ALT;
 
 		bar->shortcut(i, code);
 	}
