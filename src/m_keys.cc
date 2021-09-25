@@ -23,6 +23,7 @@
 #include "main.h"
 #include "m_parse.h"
 
+#include <assert.h>
 #include <algorithm>
 
 // this fake mod represents the "LAX-" prefix and is NOT used
