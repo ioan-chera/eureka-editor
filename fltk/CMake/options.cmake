@@ -78,7 +78,7 @@ option(OPTION_BUILD_SHARED_LIBS
     )
 
 #######################################################################
-option(OPTION_BUILD_EXAMPLES "build example programs" ON)
+option(OPTION_BUILD_EXAMPLES "build example programs" OFF)
 
 #######################################################################
 if(DOXYGEN_FOUND)
