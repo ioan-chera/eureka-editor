@@ -128,6 +128,8 @@ else()
     endif()
 endif()
 
+add_subdirectory(fltk EXCLUDE_FROM_ALL)
+
 add_subdirectory(src)
 if(APPLE)
     target_link_libraries(eurekasrc PRIVATE eurekamac)
