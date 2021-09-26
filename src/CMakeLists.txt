@@ -230,7 +230,15 @@ endif()
 set(FLTK_INCLUDE_DIR ${CMAKE_BINARY_DIR}/fltk ${CMAKE_SOURCE_DIR}/fltk)
 message(STATUS "We got FLTK include dir ${FLTK_INCLUDE_DIR}")
 
-target_link_libraries(eurekasrc PUBLIC fltk fltk_gl fltk_images fltk_jpeg ${FLTK_ZLIB_LIBRARIES} fltk_png ${OPENGL_LIBRARIES})
+target_link_libraries(eurekasrc PUBLIC
+    fltk
+    fltk_gl
+    fltk_images
+    ${FLTK_JPEG_LIBRARIES}
+    ${FLTK_ZLIB_LIBRARIES}
+    ${FLTK_PNG_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+)
 if(UNIX AND NOT APPLE)  # Linux
     target_link_libraries(eurekasrc PUBLIC ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
 endif()
