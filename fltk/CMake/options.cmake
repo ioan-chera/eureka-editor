@@ -204,7 +204,7 @@ if(OPTION_LARGE_FILE)
 endif(OPTION_LARGE_FILE)
 
 #######################################################################
-option(OPTION_USE_SYSTEM_ZLIB "use system zlib" ON)
+option(OPTION_USE_SYSTEM_ZLIB "use system zlib" OFF)
 
 if(OPTION_USE_SYSTEM_ZLIB AND LIB_zlib)
    include(FindZLIB)
@@ -229,7 +229,7 @@ endif(OPTION_USE_SYSTEM_ZLIB AND NOT ZLIB_FOUND)
 set(HAVE_LIBZ 1)
 
 #######################################################################
-option(OPTION_USE_SYSTEM_LIBJPEG "use system libjpeg" ON)
+option(OPTION_USE_SYSTEM_LIBJPEG "use system libjpeg" OFF)
 
 if(OPTION_USE_SYSTEM_LIBJPEG AND LIB_jpeg)
    include(FindJPEG)
@@ -253,7 +253,7 @@ endif(OPTION_USE_SYSTEM_LIBJPEG AND NOT JPEG_FOUND)
 set(HAVE_LIBJPEG 1)
 
 #######################################################################
-option(OPTION_USE_SYSTEM_LIBPNG "use system libpng" ON)
+option(OPTION_USE_SYSTEM_LIBPNG "use system libpng" OFF)
 
 if(OPTION_USE_SYSTEM_LIBPNG AND LIB_png)
    include(FindPNG)
