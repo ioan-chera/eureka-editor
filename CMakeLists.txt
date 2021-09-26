@@ -130,6 +130,14 @@ endif()
 
 add_subdirectory(fltk EXCLUDE_FROM_ALL)
 
+# Need to silence stuff around
+if(APPLE)
+    set_target_properties(fltk fltk_images fltk_jpeg fltk_z PROPERTIES
+        XCODE_ATTRIBUTE_CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION NO
+        XCODE_ATTRIBUTE_GCC_WARN_64_TO_32_BIT_CONVERSION NO
+    )
+endif()
+
 add_subdirectory(src)
 if(APPLE)
     target_link_libraries(eurekasrc PRIVATE eurekamac)
