@@ -160,7 +160,7 @@ void Fl_Image_Surface::set_current()
 #if defined(__APPLE__)
   fl_gc = offscreen; fl_window = 0;
   Fl_Surface_Device::set_current();
-  Fl_X::set_high_resolution( CGBitmapContextGetWidth(offscreen) > width );
+  Fl_X::set_high_resolution( static_cast<int>(CGBitmapContextGetWidth(offscreen)) > width );
 #elif defined(WIN32)
   _sgc=fl_gc; 
   _sw=fl_window;
