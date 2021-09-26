@@ -1,18 +1,19 @@
 #
-# PNG library Makefile for the Fast Light Toolkit (FLTK).
+# "$Id$"
+#
+# PNG library makefile for the Fast Light Toolkit (FLTK).
 #
 # Copyright 1997-2011 by Easy Software Products.
-# Copyright 2012-2020 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
 # file is missing or damaged, see the license at:
 #
-#     https://www.fltk.org/COPYING.php
+#     http://www.fltk.org/COPYING.php
 #
-# Please see the following page on how to report bugs and issues:
+# Please report all bugs and problems on the following page:
 #
-#     https://www.fltk.org/bugs.php
+#     http://www.fltk.org/str.php
 #
 
 include ../makeinclude
@@ -23,8 +24,7 @@ include ../makeinclude
 
 OBJS	=	png.o pngset.o pngget.o pngrutil.o pngtrans.o pngwutil.o \
 		pngread.o pngrio.o pngwio.o pngwrite.o pngrtran.o \
-		pngwtran.o pngmem.o pngerror.o pngpread.o \
-		arm/arm_init.o arm/filter_neon_intrinsics.o arm/palette_neon_intrinsics.o
+		pngwtran.o pngmem.o pngerror.o pngpread.o
 
 LIBPNG	=	../lib/libfltk_png$(LIBEXT)
 
@@ -95,3 +95,8 @@ depend:	$(OBJS:.o=.c)
 include makedepend
 
 $(OBJS):	../makeinclude
+
+
+#
+# End of "$Id$".
+#

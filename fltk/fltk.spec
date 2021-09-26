@@ -1,20 +1,22 @@
 #
+# "$Id$"
+#
 # RPM spec file for FLTK.
 #
-# Copyright 1998-2021 by Bill Spitzak and others.
+# Copyright 1998-2015 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
 # file is missing or damaged, see the license at:
 #
-#      https://www.fltk.org/COPYING.php
+#      http://www.fltk.org/COPYING.php
 #
-# Please see the following page on how to report bugs and issues:
+# Please report all bugs and problems on the following page:
 #
-#      https://www.fltk.org/bugs.php
+#      http://www.fltk.org/str.php
 #
 
-%define version @FLTK_VERSION_MAJOR@.@FLTK_VERSION_MINOR@.@FLTK_VERSION_PATCH@
+%define version @FL_MAJOR_VERSION@.@FL_MINOR_VERSION@.@FL_PATCH_VERSION@
 %define release 1
 %define prefix /usr
 
@@ -24,8 +26,8 @@ Version: %{version}
 Release: %{release}
 License: LGPL
 Group: System Environment/Libraries
-Source: https://www.fltk.org/pub/fltk/1.3.7/fltk-1.3.7-source.tar.gz
-URL: https://www.fltk.org/
+Source: https://www.fltk.org/pub/fltk/1.3.5/fltk-1.3.5-source.tar.gz
+URL: http://www.fltk.org/
 Packager: FLTK Developer <fltk@fltk.org>
 # use BuildRoot so as not to disturb the version already installed
 BuildRoot: /var/tmp/fltk-%{PACKAGE_VERSION}
@@ -42,7 +44,7 @@ Summary: FLTK Development Environment
 Group: Development/Libraries
 
 %description devel
-Install fltk-devel if you need to develop FLTK applications.
+Install fltk-devel if you need to develop FLTK applications. 
 You'll need to install the fltk package if you plan to run
 dynamically linked applications.
 
@@ -128,3 +130,7 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/share/icons/hicolor/*/apps/blocks.png
 %{prefix}/share/icons/hicolor/*/apps/checkers.png
 %{prefix}/share/icons/hicolor/*/apps/sudoku.png
+
+#
+# End of "$Id$".
+#

@@ -27,39 +27,18 @@ set(decompression_SRCS
 
 list(APPEND BUILD_SRCS "${systemdependent_SRCS};${common_SRCS}")
 list(APPEND BUILD_SRCS "${compression_SRCS};${decompression_SRCS}")
-
 #######################################################################
-
-# Suppress some Visual Studio compiler warnings
-set (msvc_warnings /wd4267)
-
-#######################################################################
-# Build the static library
-#######################################################################
-
-FL_ADD_LIBRARY (fltk_jpeg STATIC "${BUILD_SRCS}")
-
-if (MSVC)
-  target_compile_options (fltk_jpeg PRIVATE ${msvc_warnings})
-endif (MSVC)
-
-#######################################################################
-# Build the shared library (optional)
-#######################################################################
-
-if (OPTION_BUILD_SHARED_LIBS)
-  FL_ADD_LIBRARY (fltk_jpeg SHARED "${BUILD_SRCS}")
-
-  if (MSVC)
-    target_compile_options (fltk_jpeg_SHARED PRIVATE ${msvc_warnings})
-  endif (MSVC)
-
-endif (OPTION_BUILD_SHARED_LIBS)
-
-#######################################################################
-# Install the library headers
-#######################################################################
-
-install (FILES jconfig.h jerror.h jmorecfg.h jpeglib.h
-         DESTINATION ${FLTK_INCLUDEDIR}/FL/images
+FL_ADD_LIBRARY(fltk_jpeg STATIC "${BUILD_SRCS}")
+# install the jpeg headers
+install(FILES jconfig.h;jerror.h;jmorecfg.h;jpeglib.h
+    DESTINATION ${FLTK_INCLUDEDIR}/FL/images
 )
+
+#######################################################################
+if(OPTION_BUILD_SHARED_LIBS)
+#######################################################################
+FL_ADD_LIBRARY(fltk_jpeg SHARED "${BUILD_SRCS}")
+
+#######################################################################
+endif(OPTION_BUILD_SHARED_LIBS)
+#######################################################################

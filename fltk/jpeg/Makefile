@@ -2,6 +2,8 @@
 #  FLTK - DO NOT CHANGE when upgrading the JPEG library, unless required. *
 # *************************************************************************
 #
+# "$Id$"
+#
 # JPEG library makefile for the Fast Light Toolkit (FLTK).
 #
 # Copyright 1997-2011 by Bill Spitzak and others.
@@ -10,11 +12,11 @@
 # the file "COPYING" which should have been included with this file.  If this
 # file is missing or damaged, see the license at:
 #
-#     https://www.fltk.org/COPYING.php
+#     http://www.fltk.org/COPYING.php
 #
-# Please see the following page on how to report bugs and issues:
+# Please report all bugs and problems on the following page:
 #
-#     https://www.fltk.org/bugs.php
+#     http://www.fltk.org/str.php
 #
 
 include ../makeinclude
@@ -143,3 +145,7 @@ depend:	$(OBJS:.o=.c)
 include makedepend
 
 $(OBJS):	../makeinclude
+
+#
+# End of "$Id$".
+#

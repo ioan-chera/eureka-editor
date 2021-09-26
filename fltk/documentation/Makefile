@@ -1,17 +1,19 @@
 #
+# "$Id$"
+#
 # Makefile for the Fast Light Tool Kit (FLTK) documentation.
 #
-# Copyright 1998-2020 by Bill Spitzak and others.
+# Copyright 1998-2015 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
 # file is missing or damaged, see the license at:
 #
-#     https://www.fltk.org/COPYING.php
+#     http://www.fltk.org/COPYING.php
 #
-# Please see the following page on how to report bugs and issues:
+# Please report all bugs and problems on the following page:
 #
-#      https://www.fltk.org/bugs.php
+#      http://www.fltk.org/str.php
 #
 
 # Get configuration stuff...
@@ -66,7 +68,7 @@ dist:	docs
 
 clean:
 	$(RM) Doxyfile Doxybook
-	$(RM) fltk.pdf refman.pdf src/fltk-book.tex src/fltk-book.tex.in
+	$(RM) fltk.pdf refman.pdf src/fltk-book.tex
 	$(RMDIR) html latex
 	$(RM) *~ *.bck *.bak *.log
 	$(RM) $(MANPAGES) $(SRC_DOCDIR)/*.0
@@ -132,22 +134,22 @@ uninstall-linux uninstall-osx:
 
 Doxyfile: Doxyfile.in
 	echo "Generating Doxyfile ..."
-	sed -e's,@FLTK_VERSION@,$(FLTK_VERSION),' \
+	sed -e's,@FL_VERSION@,$(FL_VERSION),' \
 	    -e's,@GENERATE_HTML@,YES,' \
 	    -e's,@GENERATE_LATEX@,NO,' \
 	    -e's, @LATEX_HEADER@,,' \
 	    -e's,@CMAKE_CURRENT_SOURCE_DIR@/,,' \
-	    -e's,@FLTK_SOURCE_DIR@/,../,' \
+	    -e's,@CMAKE_SOURCE_DIR@/,../,' \
 	    < $< > $@
 
 Doxybook: Doxyfile.in
 	echo "Generating Doxybook ..."
-	sed -e's,@FLTK_VERSION@,$(FLTK_VERSION),' \
+	sed -e's,@FL_VERSION@,$(FL_VERSION),' \
 	    -e's,@GENERATE_HTML@,NO,' \
 	    -e's,@GENERATE_LATEX@,YES,' \
 	    -e's,@LATEX_HEADER@,src/fltk-book.tex,' \
 	    -e's,@CMAKE_CURRENT_SOURCE_DIR@/,,' \
-	    -e's,@FLTK_SOURCE_DIR@/,../,' \
+	    -e's,@CMAKE_SOURCE_DIR@/,../,' \
 	    < $< > $@
 
 # The HTML files are generated using doxygen, and this needs
@@ -180,14 +182,13 @@ refman.pdf: $(HTMLFILES) Doxybook src/fltk-book.tex
 	./make_pdf
 
 src/fltk-book.tex: src/fltk-book.tex.in
-	echo "Generating $@ ..."
-	DOXY_VERSION=`$(DOXYDOC) --version|cut -f1 -d' '`; \
+	DOXY_VERSION=`$(DOXYDOC) --version`; \
 	YEAR=`date +%Y`; \
 	sed -e"s/@YEAR@/$$YEAR/g" \
-	    -e"s/@FLTK_VERSION@/$(FLTK_VERSION)/g" \
+	    -e"s/@FL_VERSION@/$(FL_VERSION)/g" \
 	    -e"s/@DOXY_VERSION@/$$DOXY_VERSION/g" \
 	< $< > $@
 
-src/fltk-book.tex.in: src/fltk-title.tex.in
-	echo "Generating $@ ..."
-	./make_header src/fltk-title.tex.in src/fltk-book.tex.in
+#
+# End of "$Id$".
+#

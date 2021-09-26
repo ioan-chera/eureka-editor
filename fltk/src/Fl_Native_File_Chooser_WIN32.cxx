@@ -420,7 +420,7 @@ int Fl_Native_File_Chooser::showfile() {
     if ( exterr == 0 ) return(1);	// user hit cancel
     // Otherwise, an error occurred..
     char msg[80];
-    sprintf(msg, "CommDlgExtendedError() code=%d", exterr);
+    sprintf(msg, "CommDlgExtendedError() code=%d", err);
     errmsg(msg);
     return(-1);
   }

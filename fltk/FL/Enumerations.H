@@ -1,17 +1,19 @@
 //
+// "$Id$"
+//
 // Enumerations for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2021 by Bill Spitzak and others.
+// Copyright 1998-2017 by Bill Spitzak and others.
 //
 // This library is free software. Distribution and use rights are outlined in
 // the file "COPYING" which should have been included with this file.  If this
 // file is missing or damaged, see the license at:
 //
-//     https://www.fltk.org/COPYING.php
+//     http://www.fltk.org/COPYING.php
 //
-// Please see the following page on how to report bugs and issues:
+// Please report all bugs and problems on the following page:
 //
-//     https://www.fltk.org/bugs.php
+//     http://www.fltk.org/str.php
 //
 
 /** \file
@@ -73,7 +75,7 @@
 
    FLTK remains binary compatible between patches.
  */
-#define FL_PATCH_VERSION	7
+#define FL_PATCH_VERSION	5
 
 /**
     The FLTK version number as a \em double.

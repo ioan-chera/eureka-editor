@@ -138,8 +138,6 @@ void ExternalCodeEditor::close_editor() {
   // Wait until editor is closed + reaped
   while ( is_editing() ) {
     switch ( reap_editor() ) {
-      case -2:  // no editor running (unlikely to happen)
-        return;
       case -1:  // error
         fl_alert("Error reaping external editor\n"
                  "pid=%ld file=%s", long(pinfo_.dwProcessId), filename());
@@ -157,7 +155,7 @@ void ExternalCodeEditor::close_editor() {
 	    continue;
 	}
         break;
-      case 1:   // process reaped
+      default:  // process reaped
         return;
     }
   }
@@ -179,7 +177,7 @@ void ExternalCodeEditor::kill_editor() {
     }
     case 0: {  // success -- process reaped
       DWORD pid = pinfo_.dwProcessId;     // save pid
-      reap_cleanup();			  // clears pinfo_
+      reap_cleanup();
       if ( G_debug )
         printf("*** kill_editor() REAP pid=%ld #open=%ld\n",
                long(pid), long(L_editors_open));
@@ -448,7 +446,7 @@ int ExternalCodeEditor::start_editor(const char *editor_cmd,
 // [Protected] Cleanup after editor reaped:
 //    > Remove tmpfile, zeroes mtime/size/filename
 //    > Close process handles
-//    > Zeroes out pinfo_
+//    > Zero out process info
 //    > Decrease editor count
 //
 void ExternalCodeEditor::reap_cleanup() {
@@ -461,19 +459,15 @@ void ExternalCodeEditor::reap_cleanup() {
 }
 
 // [Public] Try to reap external editor process
-// If 'pid_reaped' not NULL, returns PID of reaped editor.
 // Returns:
 //   -2 -- editor not open
 //   -1 -- WaitForSingleObject() failed (get_ms_errmsg() has reason)
 //    0 -- process still running
-//    1 -- process finished + reaped ('pid_reaped' has pid), pinfo_ set to 0.
+//   >0 -- process finished + reaped (value is pid)
 //         Handles removing tmpfile/zeroing file_mtime/file_size/filename
 //
-// If return value <=0, 'pid_reaped' is set to zero.
-//
-int ExternalCodeEditor::reap_editor(DWORD *pid_reaped) {
-  if ( pid_reaped ) *pid_reaped = 0;
-  if ( !is_editing() ) return -2;
+DWORD ExternalCodeEditor::reap_editor() {
+  if ( pinfo_.dwProcessId == 0 ) return -2;
   int err;
   DWORD msecs_wait = 50;   // .05 sec
   switch ( err = WaitForSingleObject(pinfo_.hProcess, msecs_wait) ) {
@@ -481,12 +475,11 @@ int ExternalCodeEditor::reap_editor(DWORD *pid_reaped) {
       return 0;
     }
     case WAIT_OBJECT_0: {  // reaped
-      DWORD wpid = pinfo_.dwProcessId;      // save pid
-      reap_cleanup();			    // clears pinfo_
-      if ( pid_reaped ) *pid_reaped = wpid; // return pid to caller
+      DWORD pid = pinfo_.dwProcessId;      // save pid
+      reap_cleanup();
       if ( G_debug ) printf("*** EDITOR REAPED: pid=%ld #open=%d\n",
-                            long(wpid), L_editors_open);
-      return 1;
+                            long(pid), L_editors_open);
+      return pid;
     }
     case WAIT_FAILED: {    // failed
       return -1;
@@ -514,10 +507,8 @@ int ExternalCodeEditor::open_editor(const char *editor_cmd,
   if ( is_file(filename()) ) {
     if ( is_editing() ) {
       // See if editor recently closed but not reaped; try to reap
-      DWORD wpid;
-      switch ( reap_editor(&wpid) ) {
-        case -2:	// no editor running (unlikely to happen)
-	  break;
+      DWORD wpid = reap_editor();
+      switch (wpid) {
         case -1:        // wait failed
           fl_alert("ERROR: WaitForSingleObject() failed: %s\nfile='%s', pid=%ld",
             get_ms_errmsg(), filename(), long(pinfo_.dwProcessId));
@@ -526,7 +517,7 @@ int ExternalCodeEditor::open_editor(const char *editor_cmd,
           fl_alert("Editor Already Open\n  file='%s'\n  pid=%ld",
             filename(), long(pinfo_.dwProcessId));
           return 0;
-        case 1:         // process reaped, wpid is pid reaped
+        default:        // process reaped, wpid is pid reaped
           if ( G_debug )
             printf("*** REAPED EXTERNAL EDITOR: PID %ld\n", long(wpid));
           break;        // fall thru to open new editor instance
