@@ -213,99 +213,6 @@ else()
     target_compile_definitions(eurekasrc PUBLIC NO_OPENGL)
 endif()
 
-# if(APPLE OR WIN32)
-#     message(STATUS "Using local FLTK for portability.")
-
-#     set(LOCAL_FLTK_VERSION "1.3.7")
-#     set(LOCAL_FLTK_MD5_HASH 8483e58b2312a348c0f66101eead1409)
-#     set(LOCAL_FLTK_ARCHIVE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
-#     set(LOCAL_FLTK_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}")
-#     set(LOCAL_FLTK_BUILD "${LOCAL_FLTK_SOURCE}/build")
-
-#     # Download it if not found
-#     if(NOT EXISTS "${LOCAL_FLTK_ARCHIVE}")
-#         set(download_url "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
-#         message(STATUS "Downloading FLTK from ${download_url}")
-#         file(
-#             DOWNLOAD ${download_url} "${LOCAL_FLTK_ARCHIVE}"
-#             EXPECTED_HASH MD5=${LOCAL_FLTK_MD5_HASH}
-#         )
-#     endif()
-#     if(NOT EXISTS "${LOCAL_FLTK_SOURCE}")
-#         message(STATUS "Extracting to ${LOCAL_FLTK_SOURCE}")
-#         execute_process(
-#             COMMAND "${CMAKE_COMMAND}" -E tar xzf "${LOCAL_FLTK_ARCHIVE}"
-#             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-#         )
-#     endif()
-#     if(NOT EXISTS "${LOCAL_FLTK_BUILD}/lib")
-
-#         message(STATUS "Building ${LOCAL_FLTK_SOURCE}")
-
-#         set(LOCAL_FLTK_DEFS -D CMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
-#                             -D CMAKE_BUILD_TYPE=Release
-#                             -D OPTION_USE_SYSTEM_LIBJPEG=OFF -D OPTION_USE_SYSTEM_LIBPNG=OFF
-#                             -D OPTION_USE_SYSTEM_ZLIB=OFF
-#         )
-#         if(CMAKE_GENERATOR_PLATFORM)
-#             list(APPEND LOCAL_FLTK_DEFS -A ${CMAKE_GENERATOR_PLATFORM})
-#         endif()
-#         if(FLTK_SKIP_OPENGL)
-#             list(APPEND LOCAL_FLTK_DEFS -D OPTION_USE_GL=OFF)
-#         endif()
-#         if(WIN32)
-#             list(APPEND LOCAL_FLTK_DEFS -G ${CMAKE_GENERATOR})
-#         endif()
-
-#         execute_process(
-#             COMMAND "${CMAKE_COMMAND}" -S "${LOCAL_FLTK_SOURCE}" -B "${LOCAL_FLTK_BUILD}"
-#                     ${LOCAL_FLTK_DEFS}
-#             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-#         )
-#         include(ProcessorCount)
-#         ProcessorCount(nproc)
-#         message(STATUS "Building...")
-#         execute_process(
-#             COMMAND "${CMAKE_COMMAND}" --build "${LOCAL_FLTK_BUILD}" -j ${nproc} --config Release
-#             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-#         )
-#     endif()
-
-#     set(FLTK_INCLUDE_DIR "${LOCAL_FLTK_SOURCE};${LOCAL_FLTK_BUILD}")
-#     if(WIN32)
-#         set(FLTK_LIBRARIES "${LOCAL_FLTK_BUILD}/lib/Release/fltk.lib"
-#                            "${LOCAL_FLTK_BUILD}/lib/Release/fltk_gl.lib"
-#                            "${LOCAL_FLTK_BUILD}/lib/Release/fltk_images.lib"
-#                            "${LOCAL_FLTK_BUILD}/lib/Release/fltk_jpeg.lib"
-#                            "${LOCAL_FLTK_BUILD}/lib/Release/fltk_png.lib"
-#                            "${LOCAL_FLTK_BUILD}/lib/Release/fltk_z.lib"
-#         )
-#         target_include_directories(eurekasrc PUBLIC "${LOCAL_FLTK_SOURCE}/zlib")
-#     else()  # APPLE
-#         set(FLTK_LIBRARIES "${LOCAL_FLTK_BUILD}/lib/libfltk.a"
-#                            "${LOCAL_FLTK_BUILD}/lib/libfltk_gl.a"
-#                            "${LOCAL_FLTK_BUILD}/lib/libfltk_images.a"
-#                            "${LOCAL_FLTK_BUILD}/lib/libfltk_jpeg.a"
-#                            "${LOCAL_FLTK_BUILD}/lib/libfltk_z.a"
-#                            "${LOCAL_FLTK_BUILD}/lib/libfltk_png.a"
-#         )
-
-#         # Need to link to them separately if FLTK is linked manually
-#         find_library(CARBON_FRAMEWORK Carbon)
-#         target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
-#         find_library(COCOA_FRAMEWORK Cocoa)
-#         target_link_libraries(eurekasrc PUBLIC ${COCOA_FRAMEWORK})
-#         find_library(APPSERVICES_FRAMEWORK ApplicationServices)
-#         target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
-#     endif()
-
-# else()
-#     # UNIX/Linux
-#     find_package(FLTK REQUIRED)
-#     find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
-#     find_package(X11 REQUIRED)  # also libXPM
-# endif()
-
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     target_link_libraries(eurekasrc PUBLIC ${CARBON_FRAMEWORK})
@@ -314,7 +221,10 @@ if(APPLE)
     find_library(APPSERVICES_FRAMEWORK ApplicationServices)
     target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
 elseif(UNIX)
-
+    find_package(FLTK REQUIRED)
+    # Commented this out because it may not be required. Testing pending.
+#   find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
+    find_package(X11 REQUIRED)  # also libXPM
 endif()
 
 set(FLTK_INCLUDE_DIR ${CMAKE_BINARY_DIR}/fltk ${CMAKE_SOURCE_DIR}/fltk)
