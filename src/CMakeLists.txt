@@ -1,5 +1,3 @@
-
-# TODO: move these to where they can be reached by Visual Studio
 configure_file(main.rc.in main.rc)
 configure_file(version.h.in version.h)
 
