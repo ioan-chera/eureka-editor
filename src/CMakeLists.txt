@@ -221,7 +221,6 @@ if(APPLE)
     find_library(APPSERVICES_FRAMEWORK ApplicationServices)
     target_link_libraries(eurekasrc PUBLIC ${APPSERVICES_FRAMEWORK})
 elseif(UNIX)
-    find_package(FLTK REQUIRED)
     # Commented this out because it may not be required. Testing pending.
 #   find_package(ZLIB REQUIRED) # ZLIB is expected on Linux separately from FLTK
     find_package(X11 REQUIRED)  # also libXPM
