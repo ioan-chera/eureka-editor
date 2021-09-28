@@ -927,7 +927,7 @@ void updateMenuBindings()
 	if(!gInstance.main_win || !gInstance.main_win->menu_bar)
 		return;
 
-	Fl_Menu_Bar *bar = gInstance.main_win->menu_bar;
+	Fl_Sys_Menu_Bar *bar = gInstance.main_win->menu_bar;
 	int menuSize = bar->size();
 	const Fl_Menu_Item *items = bar->menu();
 
