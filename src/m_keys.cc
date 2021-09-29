@@ -1242,10 +1242,10 @@ void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM], 
 							   keycode_t *code)
 {
-	// NOTE: seems that reverse order is good
-	for(auto it = global::all_bindings.rbegin(); it != global::all_bindings.rend(); ++it)
+    assert(!!code);
+    *code = UINT_MAX;
+    for(const key_binding_t &binding : global::all_bindings)
 	{
-		const key_binding_t &binding = *it;
 		if(y_stricmp(binding.cmd->name, command))
 			continue;
 		
@@ -1267,10 +1267,12 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 		}
 		if(skip)
 			continue;
-		*code = binding.key;
-		return true;
+        if(binding.key < *code)
+            *code = binding.key;
+        // Continue looking until we find the lowest numbered key code. That is the smallest ASCII
+        // character with no shortcut keys
 	}
-	return false;
+	return *code < UINT_MAX;
 }
 
 //--- editor settings ---
