@@ -919,47 +919,6 @@ Fl_Sys_Menu_Bar *Instance::Menu_Create(int x, int y, int w, int h)
 }
 
 //
-// Corrects the shortcut, if needed for certain platforms. Only needed for Fl_Sys_Menu_Bar.
-//
-// https://cool8jay.github.io/shortcut-nemenuitem-nsbutton/
-//
-static int shortcutCorrection(int code)
-{
-#ifdef __APPLE__
-    switch(code)
-    {
-        case FL_BackSpace:
-            return 8;
-        case FL_Tab:
-            return 9;
-        case FL_Enter:
-            return 0xd;
-        case FL_Escape:
-            return 0x1b;
-        case FL_Left:
-            return 0x1c;
-        case FL_Right:
-            return 0x1d;
-        case FL_Up:
-            return 0x1e;
-        case FL_Down:
-            return 0x1f;
-        case FL_Delete:
-            return 0x7f;
-        case FL_Home:
-            return 0x2196;
-        case FL_Page_Up:
-            return 0x21de;
-        case FL_Page_Down:
-            return 0x21df;
-        case FL_End:
-            return 0x2198;
-    }
-#endif
-    return code;
-}
-
-//
 // Update all the menu shortcut displays after all_bindings got updated
 //
 void updateMenuBindings()
@@ -990,7 +949,7 @@ void updateMenuBindings()
 		if(code & EMOD_ALT)
 			code = (code & ~EMOD_ALT) | FL_ALT;
 
-		bar->shortcut(i, shortcutCorrection(code));
+		bar->shortcut(i, code);
 	}
 }
 
