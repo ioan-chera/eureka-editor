@@ -214,18 +214,25 @@ endif()
 if(APPLE OR WIN32)
     message(STATUS "Using local FLTK for portability.")
 
-    set(LOCAL_FLTK_VERSION "1.3.7")
-    set(LOCAL_FLTK_MD5_HASH 8483e58b2312a348c0f66101eead1409)
+    if(APPLE)
+        set(LOCAL_FLTK_VERSION "1.3.7.1")
+        set(LOCAL_FLTK_URL "https://github.com/ioan-chera/fltk/archive/refs/tags/mac-fix-${LOCAL_FLTK_VERSION}.tar.gz")
+        set(LOCAL_FLTK_MD5_HASH 6d3a9bc1f3538bc964915fee9afe1e53)
+        set(LOCAL_FLTK_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/fltk-mac-fix-${LOCAL_FLTK_VERSION}")
+    else()
+        set(LOCAL_FLTK_VERSION "1.3.7")
+        set(LOCAL_FLTK_URL "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
+        set(LOCAL_FLTK_MD5_HASH 8483e58b2312a348c0f66101eead1409)
+        set(LOCAL_FLTK_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}")
+    endif()
     set(LOCAL_FLTK_ARCHIVE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
-    set(LOCAL_FLTK_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/fltk-${LOCAL_FLTK_VERSION}")
     set(LOCAL_FLTK_BUILD "${LOCAL_FLTK_SOURCE}/build")
 
     # Download it if not found
     if(NOT EXISTS "${LOCAL_FLTK_ARCHIVE}")
-        set(download_url "https://www.fltk.org/pub/fltk/${LOCAL_FLTK_VERSION}/fltk-${LOCAL_FLTK_VERSION}-source.tar.gz")
-        message(STATUS "Downloading FLTK from ${download_url}")
+        message(STATUS "Downloading FLTK from ${LOCAL_FLTK_URL}")
         file(
-            DOWNLOAD ${download_url} "${LOCAL_FLTK_ARCHIVE}"
+            DOWNLOAD ${LOCAL_FLTK_URL} "${LOCAL_FLTK_ARCHIVE}"
             EXPECTED_HASH MD5=${LOCAL_FLTK_MD5_HASH}
         )
     endif()
