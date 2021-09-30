@@ -1237,6 +1237,75 @@ void Instance::Beep(EUR_FORMAT_STRING(const char *fmt), ...)
 }
 
 //
+// True if the given shortcut can really show up on menu, instead of garbage
+//
+static bool canShowUpOnMenu(keycode_t code)
+{
+    code &= FL_KEY_MASK;
+    // All plats
+    switch(code)
+    {
+        case FL_Iso_Key:
+        case FL_WheelUp:
+        case FL_WheelDown:
+        case FL_WheelLeft:
+        case FL_WheelRight:
+            return false;
+    }
+    // Try and pick as many buttons
+    if(code >= FL_Button && code <= FL_Button + 9)
+        return false;
+    // For the macOS menu, don't show any fake unicode
+#ifdef __APPLE__
+    switch(code)
+    {
+        case FL_Button:
+        case FL_Iso_Key:
+        case FL_Pause:
+        case FL_Scroll_Lock:
+        case FL_Kana:
+        case FL_Eisu:
+        case FL_Yen:
+        case FL_JIS_Underscore:
+        case FL_Print:
+        case FL_Insert:
+        case FL_Menu:
+        case FL_Help:
+        case FL_Num_Lock:
+        case FL_Shift_L:
+        case FL_Shift_R:
+        case FL_Control_L:
+        case FL_Control_R:
+        case FL_Caps_Lock:
+        case FL_Meta_L:
+        case FL_Meta_R:
+        case FL_Alt_L:
+        case FL_Alt_R:
+        case FL_Volume_Down:
+        case FL_Volume_Mute:
+        case FL_Volume_Up:
+        case FL_Media_Play:
+        case FL_Media_Stop:
+        case FL_Media_Prev:
+        case FL_Media_Next:
+        case FL_Home_Page:
+        case FL_Mail:
+        case FL_Search:
+        case FL_Back:
+        case FL_Forward:
+        case FL_Stop:
+        case FL_Refresh:
+        case FL_Sleep:
+        case FL_Favorites:
+            return false;
+    }
+    if(code >= FL_KP && code <= FL_KP_Last)
+        return false;
+#endif
+    return true;
+}
+
+//
 // Finds key code for given command name
 //
 bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_PARAM], 
@@ -1267,7 +1336,7 @@ bool findKeyCodeForCommandName(const char *command, const char *params[MAX_EXEC_
 		}
 		if(skip)
 			continue;
-        if(binding.key < *code)
+        if(canShowUpOnMenu(binding.key) && binding.key < *code)
             *code = binding.key;
         // Continue looking until we find the lowest numbered key code. That is the smallest ASCII
         // character with no shortcut keys
