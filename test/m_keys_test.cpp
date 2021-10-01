@@ -131,3 +131,12 @@ TEST_F(MKeys, MIsKeyBound)
     ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KCTX_Line));
     ASSERT_FALSE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_Render));
 }
+
+TEST_F(MKeys, MRemoveBinding)
+{
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
+    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KCTX_Vertex);
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
+    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KCTX_General);
+    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
+}
