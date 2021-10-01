@@ -20,6 +20,12 @@
 #include "testUtils/TempDirContext.hpp"
 #include "Instance.h"
 
+#ifdef __APPLE__
+#define CMD "CMD"
+#else
+#define CMD "CTRL"
+#endif
+
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 {
 }
@@ -120,7 +126,7 @@ void MKeys::writeBindingsFile()
 
 TEST_F(MKeys, MKeyToString)
 {
-    ASSERT_EQ(M_KeyToString(EMOD_COMMAND | 'a'), "CMD-a");
+    ASSERT_EQ(M_KeyToString(EMOD_COMMAND | 'a'), CMD "-a");
     ASSERT_EQ(M_KeyToString(EMOD_SHIFT | 'a'), "A");
     ASSERT_EQ(M_KeyToString(EMOD_SHIFT | FL_Page_Up), "SHIFT-PGUP");
     ASSERT_EQ(M_KeyToString(EMOD_META | FL_Page_Down), "META-PGDN");
