@@ -327,23 +327,18 @@ static const char *ModName_Space(keycode_t mod)
 }
 
 
-const char * M_KeyToString(keycode_t key)
+SString M_KeyToString(keycode_t key)
 {
-	static char buffer[200];
-
 	// convert SHIFT + letter --> uppercase letter
 	if ((key & EMOD_ALL_MASK) == EMOD_SHIFT &&
 		(key & FL_KEY_MASK)  <  127 &&
 		isalpha(key & FL_KEY_MASK))
 	{
-		snprintf(buffer, sizeof(buffer), "%c", toupper(key & FL_KEY_MASK));
-		return buffer;
+        return SString::printf("%c", toupper(key & FL_KEY_MASK));
 	}
 
-	snprintf(buffer, sizeof(buffer), "%s%s", ModName_Dash(key),
-		BareKeyName(key & FL_KEY_MASK).c_str());
-
-	return buffer;
+    return SString::printf("%s%s", ModName_Dash(key),
+                           BareKeyName(key & FL_KEY_MASK).c_str());
 }
 
 

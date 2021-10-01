@@ -88,7 +88,7 @@ key_context_e M_ParseKeyContext(const SString &str);
 const char * M_KeyContextString(key_context_e context);
 
 keycode_t M_ParseKeyString(const SString &str);
-const char * M_KeyToString(keycode_t key);
+SString M_KeyToString(keycode_t key);
 
 
 keycode_t M_TranslateKey(int key, int state);
