@@ -24,8 +24,10 @@ void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 {
 }
 
+static int sUpdates;
 void updateMenuBindings()
 {
+    ++sUpdates;
 }
 
 void Instance::Status_Set(EUR_FORMAT_STRING(const char *fmt), ...) const
@@ -68,7 +70,7 @@ protected:
 
         writeBindingsFile();
         M_LoadBindings();
-
+        --sUpdates; // don't increment it here
     }
 
     void TearDown() override
@@ -76,6 +78,7 @@ protected:
         global::config_file.clear();
         global::install_dir.clear();
         global::home_dir.clear();
+        sUpdates = 0;   // reset it to 0
         TempDirContext::TearDown();
     }
 private:
@@ -156,4 +159,47 @@ TEST_F(MKeys, MRemoveBindingAndSave)
     ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_Delete, KCTX_General));
     ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
     ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_General));
+
+}
+
+TEST_F(MKeys, FindKeyCodeForCommandName)
+{
+    const char *params[MAX_EXEC_PARAM] = {};
+    keycode_t code = 0;
+
+    params[0] = "-3";
+    ASSERT_TRUE(findKeyCodeForCommandName("BR_Scroll", params, &code));
+    ASSERT_EQ(code, FL_Page_Up);
+
+    params[0] = "+3";
+    ASSERT_TRUE(findKeyCodeForCommandName("BR_Scroll", params, &code));
+    ASSERT_EQ(code, FL_Page_Down);
+
+    params[0] = nullptr;
+    ASSERT_FALSE(findKeyCodeForCommandName("Mirror", params, &code));
+    params[0] = "horiz";
+    ASSERT_TRUE(findKeyCodeForCommandName("Mirror", params, &code));
+    ASSERT_EQ(code, EMOD_COMMAND | 'k');
+}
+
+TEST_F(MKeys, UpdateMenuBindingsCall)
+{
+    ASSERT_EQ(sUpdates, 0);
+    M_LoadBindings();
+    ASSERT_EQ(sUpdates, 1);
+
+    // Restore
+    M_CopyBindings();
+    ASSERT_EQ(sUpdates, 1);
+    M_ChangeBindingKey(0, 'a');
+    ASSERT_EQ(sUpdates, 1);
+
+    M_ApplyBindings();
+    ASSERT_EQ(sUpdates, 2);
+
+    const char *params[MAX_EXEC_PARAM] = {};
+    keycode_t code = 0;
+    ASSERT_TRUE(findKeyCodeForCommandName("BR_ClearSearch", params, &code));
+    ASSERT_EQ(code, 'a');
+    ASSERT_EQ(sUpdates, 2);
 }
