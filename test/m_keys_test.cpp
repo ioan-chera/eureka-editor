@@ -115,9 +115,14 @@ void MKeys::writeBindingsFile()
     ASSERT_EQ(n, 0);
 }
 
-//
-// Check if key is bound
-//
+TEST_F(MKeys, MKeyToString)
+{
+    ASSERT_EQ(M_KeyToString(EMOD_COMMAND | 'a'), "CMD-a");
+    ASSERT_EQ(M_KeyToString(EMOD_SHIFT | 'a'), "A");
+    ASSERT_EQ(M_KeyToString(EMOD_SHIFT | FL_Page_Up), "SHIFT-PGUP");
+    ASSERT_EQ(M_KeyToString(EMOD_META | FL_Page_Down), "META-PGDN");
+}
+
 TEST_F(MKeys, MIsKeyBound)
 {
     ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KCTX_Browser));
