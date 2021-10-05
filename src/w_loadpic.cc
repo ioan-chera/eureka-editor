@@ -81,8 +81,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 			// patches but some ports like ZDoom do.
 			if (inst.conf.features.neg_patch_offsets)
 				src -= top;
-			else
-				count += top;
+            count += top;
 
 			top = 0;
 		}

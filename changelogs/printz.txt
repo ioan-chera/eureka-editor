@@ -4,6 +4,14 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+05.10.2021
+* Fixed an access violation happening when starting a new ZDoom project.
+
+----------
+01.10.2021
+* Now the menu commands show their actual shortcuts as set in user preferences.
+
+----------
 19.09.2021
 * Now the Jump to Objects dialog allows you to choose multiple items.
 
