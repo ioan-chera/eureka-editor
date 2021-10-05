@@ -1549,12 +1549,28 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 	// color has been set by caller
 
 	// handle tagged linedefs : show matching sector(s)
-	if (objtype == ObjType::linedefs && inst.level.linedefs[objnum]->tag > 0)
-	{
-		for (int m = 0 ; m < inst.level.numSectors(); m++)
-			if (inst.level.sectors[m]->tag == inst.level.linedefs[objnum]->tag)
-				DrawHighlight(ObjType::sectors, m);
-	}
+
+	if (objtype == ObjType::linedefs)
+    {
+        const LineDef *line = inst.level.linedefs[objnum];
+        assert(line);
+        const int args[5] = {line->tag, line->arg2, line->arg3, line->arg4, line->arg5};
+        int tags[5];
+        int numtags = 0;
+
+        auto it = inst.conf.line_types.find(line->type);
+        if(it == inst.conf.line_types.end())
+            return;
+        for(int i = 0; i < (int)lengthof(it->second.args); ++i)
+            if(it->second.args[i].type == SpecialArgType::tag && args[i] > 0)
+                tags[numtags++] = args[i];
+        if(numtags)
+            for (int m = 0 ; m < inst.level.numSectors(); m++)
+                if(inst.level.sectors[m]->tag > 0)
+                    for(int i = 0; i < numtags; ++i)
+                        if (inst.level.sectors[m]->tag == tags[i])
+                            DrawHighlight(ObjType::sectors, m);
+    }
 
 	// handle tagged sectors : show matching line(s)
 	if (objtype == ObjType::sectors && inst.level.sectors[objnum]->tag > 0)
