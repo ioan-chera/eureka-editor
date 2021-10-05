@@ -49,13 +49,35 @@ struct linegroup_t
 	SString desc;
 };
 
+//
+// Special arg type
+//
+enum class SpecialArgType
+{
+    generic,
+    tag,
+    tag_hi,
+    line_id,
+    line_id_hi,
+    tid,
+    po
+};
+
+//
+// Argument type
+//
+struct SpecialArg
+{
+    SString name;
+    SpecialArgType type = SpecialArgType::generic;
+};
 
 // line <number> <group> <description>  [ arg1 .. arg5 ]
 struct linetype_t
 {
 	char group;
 	SString desc;
-	SString args[5];
+	SpecialArg args[5];
 };
 
 

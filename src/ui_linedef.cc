@@ -776,8 +776,8 @@ void UI_LineBox::UpdateField(int field)
 						mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
 					// set the tooltip
-					if (!info.args[a].empty())
-						args[a]->copy_tooltip(info.args[a].c_str());
+					if (!info.args[a].name.empty())
+						args[a]->copy_tooltip(info.args[a].name.c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}

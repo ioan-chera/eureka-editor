@@ -920,8 +920,8 @@ void UI_ThingBox::UpdateField(int field)
 				{
 					mFixUp.setInputValue(args[a], SString(arg_val).c_str());
 
-					if (!spec.args[a].empty())
-						args[a]->copy_tooltip(spec.args[a].c_str());
+					if (!spec.args[a].name.empty())
+						args[a]->copy_tooltip(spec.args[a].name.c_str());
 					else
 						args[a]->textcolor(fl_rgb_color(160,160,160));
 				}
