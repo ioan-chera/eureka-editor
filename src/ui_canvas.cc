@@ -1557,6 +1557,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         const int args[5] = {line->tag, line->arg2, line->arg3, line->arg4, line->arg5};
         int tags[5];
         int numtags = 0;
+        int hitags = 0;
 
         auto it = inst.conf.line_types.find(line->type);
         if(it == inst.conf.line_types.end())
@@ -1564,6 +1565,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         for(int i = 0; i < (int)lengthof(it->second.args); ++i)
             if(it->second.args[i].type == SpecialArgType::tag && args[i] > 0)
                 tags[numtags++] = args[i];
+            else if(it->second.args[i].type == SpecialArgType::tag_hi)
+                tags[hitags++] += 256 * args[i];    // add 256*i to corresponding regular tag
         if(numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
                 if(inst.level.sectors[m]->tag > 0)
