@@ -1554,30 +1554,33 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     {
         const LineDef *line = inst.level.linedefs[objnum];
         assert(line);
-        const int args[5] = {line->tag, line->arg2, line->arg3, line->arg4, line->arg5};
+        if(line->type <= 0)
+            return;
+        auto it = inst.conf.line_types.find(line->type);
+        if(it == inst.conf.line_types.end())
+            return;
+
         int tags[5];
         int numtags = 0;
         int hitags = 0;
         int tids[5];
         int numtids = 0;
 
-        auto it = inst.conf.line_types.find(line->type);
-        if(it == inst.conf.line_types.end())
-            return;
         for(int i = 0; i < (int)lengthof(it->second.args); ++i)
         {
-            if(args[i] == 0)
+            int arg = line->Arg(i + 1);
+            if(arg <= 0)
                 continue;
             switch(it->second.args[i].type)
             {
                 case SpecialArgType::tag:
-                    tags[numtags++] = args[i];
+                    tags[numtags++] = arg;
                     break;
                 case SpecialArgType::tag_hi:
-                    tags[hitags++] += 256 * args[i];    // add 256*i to corresponding regular tag
+                    tags[hitags++] += 256 * arg;    // add 256*i to corresponding regular tag
                     break;
                 case SpecialArgType::tid:
-                    tids[numtids++] = args[i];
+                    tids[numtids++] = arg;
                     break;
                 default:
                     break;
