@@ -1543,6 +1543,49 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 	}
 }
 
+//
+// Information gathered from a linedef with a special
+//
+struct LineTagInfo
+{
+    int tags[5];
+    int numtags = 0;
+    int hitags = 0;
+    int tids[5];
+    int numtids = 0;
+};
+
+//
+// Get the tag info here. Returns true if available and sets the output argument.
+//
+static bool getLineTagInfo(const LineDef &line, const ConfigData &config, LineTagInfo &info)
+{
+    if(line.type <= 0)
+        return false;
+    auto it = config.line_types.find(line.type);
+    if(it == config.line_types.end())
+        return false;
+    info = {};
+    for(int i = 0; i < (int)lengthof(it->second.args); ++i)
+    {
+        int arg = line.Arg(i + 1);
+        switch(it->second.args[i].type)
+        {
+            case SpecialArgType::tag:
+                info.tags[info.numtags++] = arg;
+                break;
+            case SpecialArgType::tag_hi:
+                info.tags[info.hitags++] += 256 * arg;    // add 256*i to corresponding regular tag
+                break;
+            case SpecialArgType::tid:
+                info.tids[info.numtids++] = arg;
+                break;
+            default:
+                break;
+        }
+    }
+    return true;
+}
 
 void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 {
@@ -1554,59 +1597,41 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     {
         const LineDef *line = inst.level.linedefs[objnum];
         assert(line);
-        if(line->type <= 0)
-            return;
-        auto it = inst.conf.line_types.find(line->type);
-        if(it == inst.conf.line_types.end())
+        LineTagInfo info;
+        if(!getLineTagInfo(*line, inst.conf, info))
             return;
 
-        int tags[5];
-        int numtags = 0;
-        int hitags = 0;
-        int tids[5];
-        int numtids = 0;
-
-        for(int i = 0; i < (int)lengthof(it->second.args); ++i)
-        {
-            int arg = line->Arg(i + 1);
-            if(arg <= 0)
-                continue;
-            switch(it->second.args[i].type)
-            {
-                case SpecialArgType::tag:
-                    tags[numtags++] = arg;
-                    break;
-                case SpecialArgType::tag_hi:
-                    tags[hitags++] += 256 * arg;    // add 256*i to corresponding regular tag
-                    break;
-                case SpecialArgType::tid:
-                    tids[numtids++] = arg;
-                    break;
-                default:
-                    break;
-            }
-        }
-        if(numtags)
+        if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
                 if(inst.level.sectors[m]->tag > 0)
-                    for(int i = 0; i < numtags; ++i)
-                        if (inst.level.sectors[m]->tag == tags[i])
+                    for(int i = 0; i < info.numtags; ++i)
+                        if (inst.level.sectors[m]->tag == info.tags[i])
                             DrawHighlight(ObjType::sectors, m);
-        if(numtids)
+        if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
                 if(inst.level.things[m]->tid > 0)
-                    for(int i = 0; i < numtids; ++i)
-                        if(inst.level.things[m]->tid == tids[i])
+                    for(int i = 0; i < info.numtids; ++i)
+                        if(inst.level.things[m]->tid == info.tids[i])
                             DrawHighlight(ObjType::things, m);
     }
 
 	// handle tagged sectors : show matching line(s)
 	if (objtype == ObjType::sectors && inst.level.sectors[objnum]->tag > 0)
-	{
 		for (int m = 0 ; m < inst.level.numLinedefs(); m++)
-			if (inst.level.linedefs[m]->tag == inst.level.sectors[objnum]->tag)
-				DrawHighlight(ObjType::linedefs, m);
-	}
+        {
+            const LineDef *line = inst.level.linedefs[m];
+            assert(line);
+            LineTagInfo info;
+            if(!getLineTagInfo(*line, inst.conf, info))
+                continue;
+
+            for(int i = 0; i < info.numtags; ++i)
+                if(inst.level.sectors[objnum]->tag == info.tags[i])
+                {
+                    DrawHighlight(ObjType::linedefs, m);
+                    break;
+                }
+        }
 }
 
 
