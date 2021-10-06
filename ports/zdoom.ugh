@@ -501,28 +501,28 @@ line 279 n "G1 FraggleScript Exec"
 line 336 r "-- ZD: Line Mirror"
 line 337 r "-- ZD: Line Horizon"
 
-line 280 r "-- ZD: Transfer Heights /swim"
-line 350 r "-- ZD: Transfer_Heights"
-line 351 r "-- ZD: Transfer_Heights /clip"
+line 280 r "-- ZD: Transfer Heights /swim" :tag
+line 350 r "-- ZD: Transfer_Heights"       :tag
+line 351 r "-- ZD: Transfer_Heights /clip" :tag
 
-line 284 r "-- LEG: Translucent 50%"
-line 285 r "-- LEG: Translucent 75%"
-line 286 r "-- LEG: Translucent 25%"
-line 287 r "-- LEG: Translucent 50% /additive"
-line 288 r "-- LEG: Translucent FX1"
+line 284 r "-- LEG: Translucent 50%"            :line_id
+line 285 r "-- LEG: Translucent 75%"            :line_id
+line 286 r "-- LEG: Translucent 25%"            :line_id
+line 287 r "-- LEG: Translucent 50% /additive"  :line_id
+line 288 r "-- LEG: Translucent FX1"            :line_id
 
-line 409 r "-- EDGE: Translucent 80%"
-line 410 r "-- EDGE: Translucent 60%"
-line 411 r "-- EDGE: Translucent 40%"
-line 412 r "-- EDGE: Translucent 20%"
+line 409 r "-- EDGE: Translucent 80%"           :line_id
+line 410 r "-- EDGE: Translucent 60%"           :line_id
+line 411 r "-- EDGE: Translucent 40%"           :line_id
+line 412 r "-- EDGE: Translucent 20%"           :line_id
 
 # Animated
-line 338 a "W1 ZD: Floor_Waggle /24"
-line 339 a "W1 ZD: Floor_Waggle /12"
+line 338 a "W1 ZD: Floor_Waggle /24"    :tag
+line 339 a "W1 ZD: Floor_Waggle /12"    :tag
 
-line 352 a "-- ZD: Copy scroller /ceil"
-line 353 a "-- ZD: Copy scroller /floor"
-line 354 a "-- ZD: Copy scroller /carry"
+line 352 a "-- ZD: Copy scroller /ceil"     :tag
+line 353 a "-- ZD: Copy scroller /floor"    :tag
+line 354 a "-- ZD: Copy scroller /carry"    :tag
 
 line 422 a "-- EDGE: Scroll right"
 line 423 a "-- EDGE: Scroll up"
@@ -533,38 +533,38 @@ line 427 a "-- EDGE: Scroll right/up"
 line 428 a "-- EDGE: Scroll right/down"
 
 # 3D Floors
-line 281 y "-- LEG: 3D Floor"
-line 289 y "-- LEG: 3D Floor /unlit"
-line 300 y "-- LEG: 3D Floor 50%"
-line 301 y "-- LEG: 3D Floor 50% /swim"
-line 302 y "-- LEG: 3D Floor 50% /fog"
-line 303 y "-- LEG: 3D Floor /invis"
-line 304 y "-- LEG: 3D Floor /swim"
-line 305 y "-- LEG: 3D Floor /invis"
-line 306 y "-- LEG: 3D Floor /solid /invis"
+line 281 y "-- LEG: 3D Floor"               :tag
+line 289 y "-- LEG: 3D Floor /unlit"        :tag
+line 300 y "-- LEG: 3D Floor 50%"           :tag
+line 301 y "-- LEG: 3D Floor 50% /swim"     :tag
+line 302 y "-- LEG: 3D Floor 50% /fog"      :tag
+line 303 y "-- LEG: 3D Floor /invis"        :tag
+line 304 y "-- LEG: 3D Floor /swim"         :tag
+line 305 y "-- LEG: 3D Floor /invis"        :tag
+line 306 y "-- LEG: 3D Floor /solid /invis" :tag
 
-line 400 y "-- EDGE: 3D Floor"
-line 401 y "-- EDGE: 3D Floor /upper"
-line 402 y "-- EDGE: 3D Floor /lower"
+line 400 y "-- EDGE: 3D Floor"              :tag
+line 401 y "-- EDGE: 3D Floor /upper"       :tag
+line 402 y "-- EDGE: 3D Floor /lower"       :tag
 
-line 403 y "-- EDGE: Liquid"
-line 404 y "-- EDGE: Liquid 80%"
-line 405 y "-- EDGE: Liquid 60%"
-line 406 y "-- EDGE: Liquid 40%"
-line 407 y "-- EDGE: Liquid 20%"
-line 408 y "-- EDGE: Liquid  0%"
+line 403 y "-- EDGE: Liquid"        :tag
+line 404 y "-- EDGE: Liquid 80%"    :tag
+line 405 y "-- EDGE: Liquid 60%"    :tag
+line 406 y "-- EDGE: Liquid 40%"    :tag
+line 407 y "-- EDGE: Liquid 20%"    :tag
+line 408 y "-- EDGE: Liquid  0%"    :tag
 
-line 413 y "-- EDGE: Thin 3D floor"
-line 414 y "-- EDGE: Thin 3D floor 80%"
-line 415 y "-- EDGE: Thin 3D floor 60%"
-line 416 y "-- EDGE: Thin 3D floor 40%"
-line 417 y "-- EDGE: Thin 3D floor 20%"
+line 413 y "-- EDGE: Thin 3D floor"     :tag
+line 414 y "-- EDGE: Thin 3D floor 80%" :tag
+line 415 y "-- EDGE: Thin 3D floor 60%" :tag
+line 416 y "-- EDGE: Thin 3D floor 40%" :tag
+line 417 y "-- EDGE: Thin 3D floor 20%" :tag
 
 # Sector Effects
-line 282 - "-- ZD: Set Light & Fog /rgb"
-line 334 - "-- ZD: Set Light & Fog /rgb"
-line 333 - "-- ZD: Set Gravity /length"
-line 335 - "-- ZD: Set Damage /length"
+line 282 - "-- ZD: Set Light & Fog /rgb"    :tag
+line 334 - "-- ZD: Set Light & Fog /rgb"    :tag
+line 333 - "-- ZD: Set Gravity /length"     :tag
+line 335 - "-- ZD: Set Damage /length"      :tag
 
 # Slopes
 line 340 s "-- ZD: Slope front floor"
