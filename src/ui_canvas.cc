@@ -1623,6 +1623,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                         if(inst.level.things[m]->tid == info.tids[i])
                             DrawHighlight(ObjType::things, m);
     };
+
+    //
+    // Look for all the tagging things
+    //
     auto highlightTaggingTriggers = [this, getLineArg, getThingArg](int tag,
                                                                     int (SpecialTagInfo::*tags)[5],
                                                                     int SpecialTagInfo::*numtags)
