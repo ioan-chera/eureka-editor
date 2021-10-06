@@ -35,6 +35,6 @@ thing  888 - -  12 DOGS   "Dog (MBF)"
 
 #---- LINETYPES ----------
 
-line 271 - "-- MBF: Transfer sky"
-line 272 - "-- MBF: Mirror sky"
+line 271 - "-- MBF: Transfer sky"   :tag
+line 272 - "-- MBF: Mirror sky"     :tag
 

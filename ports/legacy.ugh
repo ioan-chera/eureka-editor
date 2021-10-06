@@ -69,18 +69,18 @@ thing 4028 p - 16 NULL "Player 32 start"
 
 #---- LEGACY LINETYPES ----------
 
-line 290 f "-- LEG: Instant lower floor"
-line 291 c "-- LEG: Instant raise ceil"
+line 290 f "-- LEG: Instant lower floor"    :tag
+line 291 c "-- LEG: Instant raise ceil"     :tag
 
-line 284 r "-- LEG: Translucent MED"
-line 285 r "-- LEG: Translucent MORE"
-line 286 r "-- LEG: Translucent HI"
-line 287 r "-- LEG: Translucent FIRE"
-line 288 r "-- LEG: Translucent FX1 "
+line 284 r "-- LEG: Translucent MED"    :line_id
+line 285 r "-- LEG: Translucent MORE"   :line_id
+line 286 r "-- LEG: Translucent HI"     :line_id
+line 287 r "-- LEG: Translucent FIRE"   :line_id
+line 288 r "-- LEG: Translucent FX1 "   :line_id
 
-line 280 r "-- LEG: Swim Water"
+line 280 r "-- LEG: Swim Water" :tag
 
-line 282 r "-- LEG: Gen Colormap #UML"
+line 282 r "-- LEG: Gen Colormap #UML"  :tag
 # side1 upper texture: #rrggbba ( or texture name ) Color
 # where:
 # rr, gg, bb= red, green, blue (hex 00..FF)
@@ -94,28 +94,28 @@ line 282 r "-- LEG: Gen Colormap #UML"
 # where:
 # rr, gg, bb= red, green, blue (hex 00..FF)
 
-line 283 r "-- LEG: Fog sheet"
+line 283 r "-- LEG: Fog sheet"  :tag
 
-line 281 y "-- LEG: Floor Solid shadow"
-line 289 y "-- LEG: Floor Solid"
+line 281 y "-- LEG: Floor Solid shadow" :tag
+line 289 y "-- LEG: Floor Solid"        :tag
 
-line 300 y "-- LEG: Floor Trans #U"
+line 300 y "-- LEG: Floor Trans #U" :tag
 # side1 upper texture: #aaa ( or texture name ) Alpha
 # where: aaa= alpha (0..255)
 
-line 301 y "-- LEG: 3d Water Translu #U"
+line 301 y "-- LEG: 3d Water Translu #U"    :tag
 # side1 upper texture: #aaaf ( or texture name ) Alpha
 # where:
 # aaa= alpha (0..255)
 # f= fog effect (letter 'A'..'F')
 
-line 304 y "-- LEG: 3d Water Opaque #U"
+line 304 y "-- LEG: 3d Water Opaque #U" :tag
 # side1 upper texture: #aaaf ( or texture name ) Alpha inside water
 # where:
 # aaa= alpha (0..255)
 # f= fog effect (letter 'A'..'F')
 
-line 302 y "-- LEG: 3d Fog #U"
+line 302 y "-- LEG: 3d Fog #U"  :tag
 # side1 upper texture: #aaaf ( or texture name ) Alpha inside water
 # where:
 # aaa= alpha (0..255)
@@ -131,9 +131,9 @@ line 302 y "-- LEG: 3d Fog #U"
 # 'G'= Fog distance
 # 'H'= Fog fluid
 
-line 303 y "-- LEG: 3d Ceiling Light"
-line 305 y "-- LEG: 3d Light Slab"
-line 306 y "-- LEG: Floor Invisible"
+line 303 y "-- LEG: 3d Ceiling Light"   :tag
+line 305 y "-- LEG: 3d Light Slab"      :tag
+line 306 y "-- LEG: Floor Invisible"    :tag
 
 # not in DoomLegacy
 line 271 - "-- (Unsupported)"

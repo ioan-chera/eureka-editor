@@ -80,22 +80,22 @@ thing 7103 m -  48 FATTH  "EDGE: Mancubus mkII"
 linegroup b "Hubs"
 linegroup w "Sliding Door"
 
-line 400 y "-- EDGE: 3D Floor"
-line 401 y "-- EDGE: 3D Floor /upper"
-line 402 y "-- EDGE: 3D Floor /lower"
+line 400 y "-- EDGE: 3D Floor"          :tag
+line 401 y "-- EDGE: 3D Floor /upper"   :tag
+line 402 y "-- EDGE: 3D Floor /lower"   :tag
 
-line 403 y "-- EDGE: Liquid"
-line 404 y "-- EDGE: Liquid 80%"
-line 405 y "-- EDGE: Liquid 60%"
-line 406 y "-- EDGE: Liquid 40%"
-line 407 y "-- EDGE: Liquid 20%"
-line 408 y "-- EDGE: Liquid  0%"
+line 403 y "-- EDGE: Liquid"            :tag
+line 404 y "-- EDGE: Liquid 80%"        :tag
+line 405 y "-- EDGE: Liquid 60%"        :tag
+line 406 y "-- EDGE: Liquid 40%"        :tag
+line 407 y "-- EDGE: Liquid 20%"        :tag
+line 408 y "-- EDGE: Liquid  0%"        :tag
 
-line 413 y "-- EDGE: Thin 3D floor"
-line 414 y "-- EDGE: Thin 3D floor 80%"
-line 415 y "-- EDGE: Thin 3D floor 60%"
-line 416 y "-- EDGE: Thin 3D floor 40%"
-line 417 y "-- EDGE: Thin 3D floor 20%"
+line 413 y "-- EDGE: Thin 3D floor"     :tag
+line 414 y "-- EDGE: Thin 3D floor 80%" :tag
+line 415 y "-- EDGE: Thin 3D floor 60%" :tag
+line 416 y "-- EDGE: Thin 3D floor 40%" :tag
+line 417 y "-- EDGE: Thin 3D floor 20%" :tag
 
 line 422 a "-- EDGE: Scroll right"
 line 423 a "-- EDGE: Scroll up"
@@ -106,10 +106,10 @@ line 427 a "-- EDGE: Scroll right/up"
 line 428 a "-- EDGE: Scroll right/down"
 
 
-line 409 r "-- EDGE: Translucency 80%"
-line 410 r "-- EDGE: Translucency 60%"
-line 411 r "-- EDGE: Translucency 40%"
-line 412 r "-- EDGE: Translucency 20%"
+line 409 r "-- EDGE: Translucency 80%"  :line_id
+line 410 r "-- EDGE: Translucency 60%"  :line_id
+line 411 r "-- EDGE: Translucency 40%"  :line_id
+line 412 r "-- EDGE: Translucency 20%"  :line_id
 
 
 line 567 s "-- EDGE: Slope Floor"
@@ -133,33 +133,33 @@ line 452 w "DR Sliding door CENTER /fast"
 line 453 w "D1 Sliding door CENTER"
 
 
-line 418 n "S1 EDGE: Enable RTS"
-line 419 n "SR EDGE: Enable RTS"
-line 420 n "W1 EDGE: Enable RTS"
-line 421 n "WR EDGE: Enable RTS"
-line 440 n "G1 EDGE: Enable RTS"
-line 441 n "GR EDGE: Enable RTS"
-line 454 n "W1 EDGE: Enable RTS /mon"
-line 455 n "WR EDGE: Enable RTS /mon"
-line 456 n "GR EDGE: Enable RTS /mon"
+line 418 n "S1 EDGE: Enable RTS"        :tag
+line 419 n "SR EDGE: Enable RTS"        :tag
+line 420 n "W1 EDGE: Enable RTS"        :tag
+line 421 n "WR EDGE: Enable RTS"        :tag
+line 440 n "G1 EDGE: Enable RTS"        :tag
+line 441 n "GR EDGE: Enable RTS"        :tag
+line 454 n "W1 EDGE: Enable RTS /mon"   :tag
+line 455 n "WR EDGE: Enable RTS /mon"   :tag
+line 456 n "GR EDGE: Enable RTS /mon"   :tag
 
-line 457 n "SR EDGE: DISABLE RTS"
-line 458 n "WR EDGE: DISABLE RTS"
-line 459 n "GR EDGE: DISABLE RTS"
-line 460 n "WR EDGE: DISABLE RTS /mon"
-line 461 n "GR EDGE: DISABLE RTS /mon"
+line 457 n "SR EDGE: DISABLE RTS"       :tag
+line 458 n "WR EDGE: DISABLE RTS"       :tag
+line 459 n "GR EDGE: DISABLE RTS"       :tag
+line 460 n "WR EDGE: DISABLE RTS /mon"  :tag
+line 461 n "GR EDGE: DISABLE RTS /mon"  :tag
 
 
-line 470 s "-- EDGE: Ladder,  48 high"
-line 471 s "-- EDGE: Ladder,  80 high"
-line 472 s "-- EDGE: Ladder, 120 high"
-line 473 s "-- EDGE: Ladder, 160 high"
-line 474 s "-- EDGE: Ladder, 192 high"
-line 475 s "-- EDGE: Ladder, 256 high"
-line 476 s "-- EDGE: Ladder, 384 high"
-line 477 s "-- EDGE: Ladder, 512 high"
-line 478 s "-- EDGE: Ladder, 768 high"
-line 479 s "-- EDGE: Ladder, no limit"
+line 470 s "-- EDGE: Ladder,  48 high"  :tag
+line 471 s "-- EDGE: Ladder,  80 high"  :tag
+line 472 s "-- EDGE: Ladder, 120 high"  :tag
+line 473 s "-- EDGE: Ladder, 160 high"  :tag
+line 474 s "-- EDGE: Ladder, 192 high"  :tag
+line 475 s "-- EDGE: Ladder, 256 high"  :tag
+line 476 s "-- EDGE: Ladder, 384 high"  :tag
+line 477 s "-- EDGE: Ladder, 512 high"  :tag
+line 478 s "-- EDGE: Ladder, 768 high"  :tag
+line 479 s "-- EDGE: Ladder, no limit"  :tag
 
 
 line 462 r "-- EDGE: Mirror"
@@ -168,17 +168,17 @@ line 464 r "-- EDGE: Mirror /blue"
 line 465 r "-- EDGE: Mirror /red"
 line 466 r "-- EDGE: Mirror /green"
 
-line 480 r "-- EDGE: Portal /dark"
-line 481 r "-- EDGE: Portal /light"
-line 482 r "-- EDGE: Portal /light2"
-line 483 r "-- EDGE: Portal /blue"
-line 484 r "-- EDGE: Portal /green"
+line 480 r "-- EDGE: Portal /dark"      :tag
+line 481 r "-- EDGE: Portal /light"     :tag
+line 482 r "-- EDGE: Portal /light2"    :tag
+line 483 r "-- EDGE: Portal /blue"      :tag
+line 484 r "-- EDGE: Portal /green"     :tag
 
-line 485 r "-- EDGE: Camera Portal"
-line 486 r "-- EDGE: Camera Portal /white"
-line 487 r "-- EDGE: Camera Portal /cyan"
-line 488 r "-- EDGE: Camera Portal /rusty"
-line 489 r "-- EDGE: Camera Portal /green"
+line 485 r "-- EDGE: Camera Portal"         :tag
+line 486 r "-- EDGE: Camera Portal /white"  :tag
+line 487 r "-- EDGE: Camera Portal /cyan"   :tag
+line 488 r "-- EDGE: Camera Portal /rusty"  :tag
+line 489 r "-- EDGE: Camera Portal /green"  :tag
 
 
 line 501 b "WR Hub Exit to MAP01 / E1M1"
@@ -227,19 +227,19 @@ line 539 b "WR Hub Exit to MAP39 / E4M9"
 
 line 490 d "DR EDGE: Green key door"
 line 491 d "D1 EDGE: Green key door"
-line 492 d "SR EDGE: Green key door"
-line 493 d "S1 EDGE: Green key door"
+line 492 d "SR EDGE: Green key door"        :tag
+line 493 d "S1 EDGE: Green key door"        :tag
 line 494 d "D1 EDGE: Green key door /fast"
 
 line 580 d "DR EDGE: Gold key door"
 line 581 d "D1 EDGE: Gold key door"
-line 582 d "SR EDGE: Gold key door"
-line 583 d "S1 EDGE: Gold key door"
+line 582 d "SR EDGE: Gold key door" :tag
+line 583 d "S1 EDGE: Gold key door" :tag
 
 line 584 d "DR EDGE: Silver key door"
 line 585 d "D1 EDGE: Silver key door"
-line 586 d "SR EDGE: Silver key door"
-line 587 d "S1 EDGE: Silver key door"
+line 586 d "SR EDGE: Silver key door"   :tag
+line 587 d "S1 EDGE: Silver key door"   :tag
 
 line 588 d "DR EDGE: Brass key door"
 line 589 d "D1 EDGE: Brass key door"
@@ -256,26 +256,26 @@ line 598 d "DR EDGE: Water key door"
 line 599 d "D1 EDGE: Water key door"
 
 
-line 800 a "-- EDGE: Align F1"
-line 801 a "-- EDGE: Align F2"
-line 802 a "-- EDGE: Align C1"
-line 803 a "-- EDGE: Align C2"
-line 804 a "-- EDGE: Align F1 + C1"
-line 805 a "-- EDGE: Align F2 + C2"
+line 800 a "-- EDGE: Align F1"              :tag
+line 801 a "-- EDGE: Align F2"              :tag
+line 802 a "-- EDGE: Align C1"              :tag
+line 803 a "-- EDGE: Align C2"              :tag
+line 804 a "-- EDGE: Align F1 + C1"         :tag
+line 805 a "-- EDGE: Align F2 + C2"         :tag
 
-line 810 a "-- EDGE: Align, scale F1"
-line 811 a "-- EDGE: Align, scale F2"
-line 812 a "-- EDGE: Align, scale C1"
-line 813 a "-- EDGE: Align, scale C2"
-line 814 a "-- EDGE: Align, scale F1 + C1"
-line 815 a "-- EDGE: Align, scale C2 + C2"
+line 810 a "-- EDGE: Align, scale F1"       :tag
+line 811 a "-- EDGE: Align, scale F2"       :tag
+line 812 a "-- EDGE: Align, scale C1"       :tag
+line 813 a "-- EDGE: Align, scale C2"       :tag
+line 814 a "-- EDGE: Align, scale F1 + C1"  :tag
+line 815 a "-- EDGE: Align, scale C2 + C2"  :tag
 
-line 820 a "-- EDGE: Scale F1"
-line 821 a "-- EDGE: Scale F2"
-line 822 a "-- EDGE: Scale C1"
-line 823 a "-- EDGE: Scale C2"
-line 824 a "-- EDGE: Scale F1 + C1"
-line 825 a "-- EDGE: Scale F2 + C2"
+line 820 a "-- EDGE: Scale F1"              :tag
+line 821 a "-- EDGE: Scale F2"              :tag
+line 822 a "-- EDGE: Scale C1"              :tag
+line 823 a "-- EDGE: Scale C2"              :tag
+line 824 a "-- EDGE: Scale F1 + C1"         :tag
+line 825 a "-- EDGE: Scale F2 + C2"         :tag
 
 
 # not in EDGE
