@@ -1546,7 +1546,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 //
 // Information gathered from a linedef with a special
 //
-struct LineTagInfo
+struct SpecialTagInfo
 {
     int tags[5];
     int numtags = 0;
@@ -1558,17 +1558,18 @@ struct LineTagInfo
 //
 // Get the tag info here. Returns true if available and sets the output argument.
 //
-static bool getLineTagInfo(const LineDef &line, const ConfigData &config, LineTagInfo &info)
+static bool getSpecialTagInfo(int special, int (*getArg)(int n, const void *data), const void *data,
+                              const ConfigData &config, SpecialTagInfo &info)
 {
-    if(line.type <= 0)
+    if(special <= 0)
         return false;
-    auto it = config.line_types.find(line.type);
+    auto it = config.line_types.find(special);
     if(it == config.line_types.end())
         return false;
     info = {};
     for(int i = 0; i < (int)lengthof(it->second.args); ++i)
     {
-        int arg = line.Arg(i + 1);
+        int arg = getArg(i + 1, data);
         switch(it->second.args[i].type)
         {
             case SpecialArgType::tag:
@@ -1593,14 +1594,22 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 
 	// handle tagged linedefs : show matching sector(s)
 
-	if (objtype == ObjType::linedefs)
+    auto getLineArg = [](int index, const void *data)
     {
-        const LineDef *line = inst.level.linedefs[objnum];
-        assert(line);
-        LineTagInfo info;
-        if(!getLineTagInfo(*line, inst.conf, info))
-            return;
+        auto line = static_cast<const LineDef *>(data);
+        return line->Arg(index);
+    };
+    auto getThingArg = [](int index, const void *data)
+    {
+        auto thing = static_cast<const Thing *>(data);
+        return thing->Arg(index);
+    };
 
+    //
+    // Highlight tagged items now
+    //
+    auto highlightTaggedItems = [this](const SpecialTagInfo &info)
+    {
         if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
                 if(inst.level.sectors[m]->tag > 0)
@@ -1613,25 +1622,69 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                     for(int i = 0; i < info.numtids; ++i)
                         if(inst.level.things[m]->tid == info.tids[i])
                             DrawHighlight(ObjType::things, m);
-    }
-
-	// handle tagged sectors : show matching line(s)
-	if (objtype == ObjType::sectors && inst.level.sectors[objnum]->tag > 0)
-		for (int m = 0 ; m < inst.level.numLinedefs(); m++)
+    };
+    auto highlightTaggingTriggers = [this, getLineArg, getThingArg](int tag,
+                                                                    int (SpecialTagInfo::*tags)[5],
+                                                                    int SpecialTagInfo::*numtags)
+    {
+        if(tag <= 0)
+            return;
+        for (int m = 0 ; m < inst.level.numLinedefs(); m++)
         {
             const LineDef *line = inst.level.linedefs[m];
             assert(line);
-            LineTagInfo info;
-            if(!getLineTagInfo(*line, inst.conf, info))
+            SpecialTagInfo info;
+            if(!getSpecialTagInfo(line->type, getLineArg, line, inst.conf, info))
                 continue;
 
-            for(int i = 0; i < info.numtags; ++i)
-                if(inst.level.sectors[objnum]->tag == info.tags[i])
+            for(int i = 0; i < info.*numtags; ++i)
+                if((info.*tags)[i] == tag)
                 {
                     DrawHighlight(ObjType::linedefs, m);
                     break;
                 }
         }
+        if(inst.loaded.levelFormat == MapFormat::doom)
+            return;
+        for (int m = 0 ; m < inst.level.numThings(); m++)
+        {
+            const Thing *thing = inst.level.things[m];
+            assert(thing);
+            SpecialTagInfo info;
+            if(!getSpecialTagInfo(thing->special, getThingArg, thing, inst.conf, info))
+                continue;
+
+            for(int i = 0; i < info.*numtags; ++i)
+                if((info.*tags)[i] == tag)
+                {
+                    DrawHighlight(ObjType::things, m);
+                    break;
+                }
+        }
+    };
+
+	if (objtype == ObjType::linedefs)
+    {
+        const LineDef *line = inst.level.linedefs[objnum];
+        assert(line);
+        SpecialTagInfo info;
+        if(getSpecialTagInfo(line->type, getLineArg, line, inst.conf, info))
+            highlightTaggedItems(info);
+    }
+    else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
+    {
+        const Thing *thing = inst.level.things[objnum];
+        assert(thing);
+        SpecialTagInfo info;
+        if(getSpecialTagInfo(thing->special, getThingArg, thing, inst.conf, info))
+            highlightTaggedItems(info);
+        highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
+    }
+	else if (objtype == ObjType::sectors)
+    {
+        highlightTaggingTriggers(inst.level.sectors[objnum]->tag, &SpecialTagInfo::tags,
+                                 &SpecialTagInfo::numtags);
+    }
 }
 
 
