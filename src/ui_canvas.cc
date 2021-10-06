@@ -1558,21 +1558,43 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         int tags[5];
         int numtags = 0;
         int hitags = 0;
+        int tids[5];
+        int numtids = 0;
 
         auto it = inst.conf.line_types.find(line->type);
         if(it == inst.conf.line_types.end())
             return;
         for(int i = 0; i < (int)lengthof(it->second.args); ++i)
-            if(it->second.args[i].type == SpecialArgType::tag && args[i] > 0)
-                tags[numtags++] = args[i];
-            else if(it->second.args[i].type == SpecialArgType::tag_hi)
-                tags[hitags++] += 256 * args[i];    // add 256*i to corresponding regular tag
+        {
+            if(args[i] == 0)
+                continue;
+            switch(it->second.args[i].type)
+            {
+                case SpecialArgType::tag:
+                    tags[numtags++] = args[i];
+                    break;
+                case SpecialArgType::tag_hi:
+                    tags[hitags++] += 256 * args[i];    // add 256*i to corresponding regular tag
+                    break;
+                case SpecialArgType::tid:
+                    tids[numtids++] = args[i];
+                    break;
+                default:
+                    break;
+            }
+        }
         if(numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
                 if(inst.level.sectors[m]->tag > 0)
                     for(int i = 0; i < numtags; ++i)
                         if (inst.level.sectors[m]->tag == tags[i])
                             DrawHighlight(ObjType::sectors, m);
+        if(numtids)
+            for(int m = 0; m < inst.level.numThings(); m++)
+                if(inst.level.things[m]->tid > 0)
+                    for(int i = 0; i < numtids; ++i)
+                        if(inst.level.things[m]->tid == tids[i])
+                            DrawHighlight(ObjType::things, m);
     }
 
 	// handle tagged sectors : show matching line(s)
