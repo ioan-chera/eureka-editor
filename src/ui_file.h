@@ -211,7 +211,7 @@ public:
 	// returns true if something changed
 	bool Run();
 
-	LoadingData prepareLoadingData() const;
+	void prepareLoadingData(LoadingData &loading) const;
 };
 
 #endif  /* __EUREKA_UI_FILE_H__ */

@@ -806,27 +806,24 @@ bool UI_ProjectSetup::Run()
 //
 // Gets all the loading data from the dialog box
 //
-LoadingData UI_ProjectSetup::prepareLoadingData() const
+void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
 {
 	SYS_ASSERT(game.good());
 
-	LoadingData loaded;
-	loaded.gameName = game;
-	loaded.portName = port;
+    loading.gameName = game;
+    loading.portName = port;
 
-	loaded.iwadName = M_QueryKnownIWAD(game);
-	SYS_ASSERT(loaded.iwadName.good());
+    loading.iwadName = M_QueryKnownIWAD(game);
+	SYS_ASSERT(loading.iwadName.good());
 
-	loaded.levelFormat = map_format;
-	loaded.udmfNamespace = name_space;
+    loading.levelFormat = map_format;
+    loading.udmfNamespace = name_space;
 
-	SYS_ASSERT(loaded.levelFormat != MapFormat::invalid);
+	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
 
 	for(int i = 0; i < RES_NUM; ++i)
 		if(res[i].good())
-			loaded.resourceList.push_back(res[i]);
-
-	return loaded;
+            loading.resourceList.push_back(res[i]);
 }
 
 void UI_ProjectSetup::PopulateIWADs()
