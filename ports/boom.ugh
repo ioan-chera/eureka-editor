@@ -53,6 +53,18 @@ thing 5002 - nv  20 NULL  "BOOM: Point puller"
 
 #---- BOOM LINETYPES ----------
 
+# Modify the manual doors to support light_tag
+line  31 d "D1 Open and stay open"  :tag
+line   1 d "DR Open door"   :tag
+line 117 d "DR Open door /fast" :tag
+line 118 d "D1 Open and stay /fast" :tag
+line  26 k "DR Open blue door"  :tag
+line  27 k "DR Open yellow door"    :tag
+line  28 k "DR Open red door"   :tag
+line  32 k "D1 Open blue door (stay)"   :tag
+line  33 k "D1 Open red door (stay)"    :tag
+line  34 k "D1 Open yellow door (stay)" :tag
+
 line  85 - "-- BOOM: Scroll Wall Right"
 
 line 191 - "SR BOOM: Donut" :tag
