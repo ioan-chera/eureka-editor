@@ -1562,6 +1562,9 @@ struct SpecialTagInfo
     int numlineids = 0;
 
     int selflineid = 0;
+
+    int po; // NOTE: currently only one po is given. Will add later as development happens
+    int selfpo;
 };
 
 //
@@ -1620,6 +1623,12 @@ static bool getSpecialTagInfo(ObjType objtype, int objnum, int special,
                 break;
             case SpecialArgType::self_line_id_hi:
                 info.selflineid += 256 * arg;
+                break;
+            case SpecialArgType::po:
+                info.po = arg;
+                break;
+            case SpecialArgType::self_po:
+                info.selfpo = arg;
                 break;
             default:
                 break;
@@ -1697,6 +1706,24 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 }
                 // TODO: also handle UDMF.
             }
+        }
+
+        if(info.po > 0)
+        {
+            // Highlight the linedefs with selfpo
+            if(info.po != info.selfpo)
+                for(int m = 0; m < inst.level.numLinedefs(); ++m)
+                {
+                    const LineDef &line = *inst.level.linedefs[m];
+                    SpecialTagInfo linfo;
+                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, getLineArg, &line,
+                                          inst.conf, linfo) || linfo.selfpo != info.po)
+                    {
+                        continue;
+                    }
+                    DrawHighlight(ObjType::linedefs, m);
+                }
+            // TODO: also things
         }
     };
 

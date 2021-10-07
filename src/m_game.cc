@@ -577,6 +577,8 @@ static bool parseArg(const char *text, SpecialArg &arg)
         arg.type = SpecialArgType::tid;
     else if(!strcmp(type, "po"))
         arg.type = SpecialArgType::po;
+    else if(!strcmp(type, "self_po"))
+        arg.type = SpecialArgType::self_po;
     else    // error
         return false;
     return true;
