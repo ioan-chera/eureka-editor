@@ -58,7 +58,8 @@ enum class SpecialArgType
     tag,
     tag_hi,
     line_id,
-    line_id_hi,
+    self_line_id,
+    self_line_id_hi,
     tid,
     po
 };

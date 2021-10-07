@@ -1560,7 +1560,8 @@ struct SpecialTagInfo
 
     int lineids[5];
     int numlineids = 0;
-    int hilineids = 0;
+
+    int selflineid = 0;
 };
 
 //
@@ -1614,8 +1615,11 @@ static bool getSpecialTagInfo(ObjType objtype, int objnum, int special,
             case SpecialArgType::line_id:
                 info.lineids[info.numlineids++] = arg;
                 break;
-            case SpecialArgType::line_id_hi:
-                info.lineids[info.hilineids++] += 256 * arg;
+            case SpecialArgType::self_line_id:
+                info.selflineid = arg;
+                break;
+            case SpecialArgType::self_line_id_hi:
+                info.selflineid += 256 * arg;
                 break;
             default:
                 break;
@@ -1644,7 +1648,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     //
     // Highlight tagged items now
     //
-    auto highlightTaggedItems = [this](const SpecialTagInfo &info)
+    auto highlightTaggedItems = [this, getLineArg](const SpecialTagInfo &info)
     {
         if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
@@ -1663,17 +1667,37 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                             DrawHighlight(ObjType::things, m);
                 }
 
-        // TODO: also handle the advanced format. UDMF will also be a thing.
-        if(inst.loaded.levelFormat == MapFormat::doom && info.numlineids)
+        if(info.numlineids)
+        {
             for(int m = 0; m < inst.level.numLinedefs(); ++m)
-                if(inst.level.linedefs[m]->tag > 0)
+            {
+                if(info.type == ObjType::linedefs && info.objnum == m)
+                    continue;   // don't highlight the trigger again
+                const LineDef &line = *inst.level.linedefs[m];
+                if(inst.loaded.levelFormat == MapFormat::doom)
                 {
-                    if(info.type == ObjType::linedefs && info.objnum == m)
-                        continue;   // don't highlight the trigger again
+                    if(line.tag > 0)
+                    {
+                        for(int i = 0; i < info.numlineids; ++i)
+                            if(line.tag == info.lineids[i])
+                                DrawHighlight(ObjType::linedefs, m);
+                    }
+                }
+                else if(inst.loaded.levelFormat == MapFormat::hexen)
+                {
+                    SpecialTagInfo linfo;
+                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, getLineArg, &line,
+                                          inst.conf, linfo) || linfo.selflineid <= 0)
+                    {
+                        continue;
+                    }
                     for(int i = 0; i < info.numlineids; ++i)
-                        if(inst.level.linedefs[m]->tag == info.lineids[i])
+                        if(linfo.selflineid == info.lineids[i])
                             DrawHighlight(ObjType::linedefs, m);
                 }
+                // TODO: also handle UDMF.
+            }
+        }
     };
 
     //

@@ -569,8 +569,10 @@ static bool parseArg(const char *text, SpecialArg &arg)
         arg.type = SpecialArgType::tag_hi;
     else if(!strcmp(type, "line_id"))
         arg.type = SpecialArgType::line_id;
-    else if(!strcmp(type, "line_id_hi"))
-        arg.type = SpecialArgType::line_id_hi;
+    else if(!strcmp(type, "self_line_id"))
+        arg.type = SpecialArgType::self_line_id;
+    else if(!strcmp(type, "self_line_id_hi"))
+        arg.type = SpecialArgType::self_line_id_hi;
     else if(!strcmp(type, "tid"))
         arg.type = SpecialArgType::tid;
     else if(!strcmp(type, "po"))

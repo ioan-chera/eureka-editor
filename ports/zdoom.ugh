@@ -278,11 +278,11 @@ special  32 q "Stairs_BuildUpSync"         :tag  speed  height  reset_delay
 special 217 q "Stairs_BuildUpDoom"         :tag  speed  height  delay  reset_delay
 
 # Sector
-special 181 s "Plane_Align"                floor_side  ceil_side  line_id
+special 181 s "Plane_Align"                floor_side  ceil_side  line_id:self_line_id
 special 118 s "Plane_Copy"                 front_floor_tag:tag  front_ceil_tag:tag  back_floor_tag:tag  back_ceil_tag:tag  share_flags
 special 160 s "Sector_Set3DFloor"          :tag  type  flags  opacity  :tag_hi
 special  51 s "Sector_SetLink"             control_tag:tag  :tag  ceiling?  move_flags
-special 190 s "Static_Init"                :line_id  property  ceil_flip?  move_flags
+special 190 s "Static_Init"                :tag  property  ceil_flip?  move_flags
 special  54 s "Sector_ChangeFlags"         :tag  set_flags  clear_flags
 special 140 s "Sector_ChangeSound"         :tag  sound_seq
 special 185 s "Sector_SetRotation"         :tag  floor_angle  ceil_angle
@@ -327,7 +327,7 @@ special  76 u "TeleportOther"          :tid  :tid  fog?
 special  77 u "TeleportGroup"          group_tid:tid  source_tid:tid  dest_tid:tid  move_source?   fog?
 special  78 u "TeleportInSector"       :tag  source_tid:tid  dest_tid:tid  fog?  group_tid:tid
 special 154 u "Teleport_NoStop"        dest_tid:tid  :tag  no_fog?
-special 215 u "Teleport_Line"          source_line_id:line_id  dest_line_id:line_id  flip_180?
+special 215 u "Teleport_Line"          source_line_id:self_line_id  dest_line_id:line_id  flip_180?
 special  39 u "Teleport_ZombieChanger" :tid  :tag
 
 # Things
@@ -359,9 +359,9 @@ special 180 t "Thing_SetTranslation"   :tid  translation
 special 229 t "Thing_SetGoal"          :tid  goal_tid  delay  no_stray?
 
 # Lines
-special 121 - "Line_SetIdent"          :line_id  flags  -  - :line_id_hi
+special 121 - "Line_SetIdent"           line_id:self_line_id  flags  -  - line_id_hi:self_line_id_hi
 special  55 - "Line_SetBlocking"       :line_id  set_flags  clear_flags
-special 156 - "Line_SetPortal"          target_id:line_id  this_id  type  anchor
+special 156 - "Line_SetPortal"          target_id:line_id  this_id:self_line_id  type  anchor
 special 107 - "Line_SetPortalTarget"    source_id:line_id  target_id:line_id
 special  33 - "ForceField"
 special  34 - "ClearForceField"        :tag
@@ -383,7 +383,7 @@ special  58 a "Sector_CopyScroller"    :tag  flags
 
 # PolyObjects
 special   1 p "PolyObject Start Line"   po  mirror_po:po  sound_seq
-special   5 p "Polyobj_ExplicitLine"    po  render_order  mirror_po:po  sound_seq :line_id
+special   5 p "Polyobj_ExplicitLine"    po  render_order  mirror_po:po  sound_seq line_id:self_line_id
 special   2 p "Polyobj_RotateLeft"     :po  speed  angle
 special  90 p "Polyobj_OR_RotateLeft"  :po  speed  angle
 special   3 p "Polyobj_RotateRight"    :po  speed  angle
