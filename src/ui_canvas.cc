@@ -1703,14 +1703,16 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     //
     // Look for all the tagging things
     //
-    auto highlightTaggingTriggers = [this, getLineArg, getThingArg](int tag,
-                                                                    int (SpecialTagInfo::*tags)[5],
-                                                                    int SpecialTagInfo::*numtags)
+    auto highlightTaggingTriggers = [this, getLineArg, getThingArg,
+                                     objnum, objtype](int tag, int (SpecialTagInfo::*tags)[5],
+                                                      int SpecialTagInfo::*numtags)
     {
         if(tag <= 0)
             return;
         for (int m = 0 ; m < inst.level.numLinedefs(); m++)
         {
+            if(objtype == ObjType::linedefs && m == objnum)
+                continue;
             const LineDef *line = inst.level.linedefs[m];
             assert(line);
             SpecialTagInfo info;
@@ -1731,6 +1733,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             return;
         for (int m = 0 ; m < inst.level.numThings(); m++)
         {
+            if(objtype == ObjType::things && m == objnum)
+                continue;
             const Thing *thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
