@@ -1563,6 +1563,23 @@ static bool getSpecialTagInfo(int special, int (*getArg)(int n, const void *data
 {
     if(special <= 0)
         return false;
+
+    assert(getArg);
+
+    // First try generalized
+    for(int i = 0; i < config.num_gen_linetypes; ++i)
+    {
+        const generalized_linetype_t &type = config.gen_linetypes[i];
+        if(special >= type.base && special < type.base + type.length)
+        {
+            info = {};
+            info.numtags = 1;
+            info.tags[0] = getArg(1, data);
+            return true;
+        }
+    }
+
+    // Now try individual specials, including parameterized
     auto it = config.line_types.find(special);
     if(it == config.line_types.end())
         return false;
