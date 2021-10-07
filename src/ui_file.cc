@@ -873,7 +873,7 @@ void UI_ProjectSetup::PopulatePort()
 
 	if (prev_port.empty())
 		prev_port = inst.loaded.portName;
-	if (!prev_port.empty())
+	if (prev_port.empty())
 		prev_port = "vanilla";
 
 
