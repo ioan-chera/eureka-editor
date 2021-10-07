@@ -172,7 +172,8 @@ bool Instance::Project_AskFile(SString &filename) const
 void Instance::Project_ApplyChanges(UI_ProjectSetup *dialog)
 {
 	// grab the new information
-	LoadingData loading = dialog->prepareLoadingData();
+    LoadingData loading = loaded;
+    dialog->prepareLoadingData(loading);
 	Fl::wait(0.1);
 	Main_LoadResources(loading);
 	Fl::wait(0.1);
