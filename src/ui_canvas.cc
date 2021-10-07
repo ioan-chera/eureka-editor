@@ -1761,6 +1761,16 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
                                      &SpecialTagInfo::numlineids);
         }
+        else if(inst.loaded.levelFormat == MapFormat::hexen)
+        {
+            SpecialTagInfo linfo;
+            if(getSpecialTagInfo(objtype, objnum, line->type, getLineArg, line, inst.conf, linfo) &&
+               linfo.selflineid > 0)
+            {
+                highlightTaggingTriggers(linfo.selflineid, &SpecialTagInfo::lineids,
+                                         &SpecialTagInfo::numlineids);
+            }
+        }
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
