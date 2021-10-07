@@ -1548,17 +1548,26 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 //
 struct SpecialTagInfo
 {
+    ObjType type;
+    int objnum;
+
     int tags[5];
     int numtags = 0;
     int hitags = 0;
+
     int tids[5];
     int numtids = 0;
+
+    int lineids[5];
+    int numlineids = 0;
+    int hilineids = 0;
 };
 
 //
 // Get the tag info here. Returns true if available and sets the output argument.
 //
-static bool getSpecialTagInfo(int special, int (*getArg)(int n, const void *data), const void *data,
+static bool getSpecialTagInfo(ObjType objtype, int objnum, int special,
+                              int (*getArg)(int n, const void *data), const void *data,
                               const ConfigData &config, SpecialTagInfo &info)
 {
     if(special <= 0)
@@ -1573,6 +1582,8 @@ static bool getSpecialTagInfo(int special, int (*getArg)(int n, const void *data
         if(special >= type.base && special < type.base + type.length)
         {
             info = {};
+            info.type = objtype;
+            info.objnum = objnum;
             info.numtags = 1;
             info.tags[0] = getArg(1, data);
             return true;
@@ -1584,6 +1595,8 @@ static bool getSpecialTagInfo(int special, int (*getArg)(int n, const void *data
     if(it == config.line_types.end())
         return false;
     info = {};
+    info.type = objtype;
+    info.objnum = objnum;
     for(int i = 0; i < (int)lengthof(it->second.args); ++i)
     {
         int arg = getArg(i + 1, data);
@@ -1597,6 +1610,12 @@ static bool getSpecialTagInfo(int special, int (*getArg)(int n, const void *data
                 break;
             case SpecialArgType::tid:
                 info.tids[info.numtids++] = arg;
+                break;
+            case SpecialArgType::line_id:
+                info.lineids[info.numlineids++] = arg;
+                break;
+            case SpecialArgType::line_id_hi:
+                info.lineids[info.hilineids++] += 256 * arg;
                 break;
             default:
                 break;
@@ -1636,9 +1655,25 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
                 if(inst.level.things[m]->tid > 0)
+                {
+                    if(info.type == ObjType::things && info.objnum == m)
+                        continue;   // don't highlight the trigger again
                     for(int i = 0; i < info.numtids; ++i)
                         if(inst.level.things[m]->tid == info.tids[i])
                             DrawHighlight(ObjType::things, m);
+                }
+
+        // TODO: also handle the advanced format. UDMF will also be a thing.
+        if(inst.loaded.levelFormat == MapFormat::doom && info.numlineids)
+            for(int m = 0; m < inst.level.numLinedefs(); ++m)
+                if(inst.level.linedefs[m]->tag > 0)
+                {
+                    if(info.type == ObjType::linedefs && info.objnum == m)
+                        continue;   // don't highlight the trigger again
+                    for(int i = 0; i < info.numlineids; ++i)
+                        if(inst.level.linedefs[m]->tag == info.lineids[i])
+                            DrawHighlight(ObjType::linedefs, m);
+                }
     };
 
     //
@@ -1655,8 +1690,11 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             const LineDef *line = inst.level.linedefs[m];
             assert(line);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(line->type, getLineArg, line, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, getLineArg, line, inst.conf,
+                                  info))
+            {
                 continue;
+            }
 
             for(int i = 0; i < info.*numtags; ++i)
                 if((info.*tags)[i] == tag)
@@ -1672,8 +1710,11 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             const Thing *thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(thing->special, getThingArg, thing, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::things, m, thing->special, getThingArg, thing, inst.conf,
+                                  info))
+            {
                 continue;
+            }
 
             for(int i = 0; i < info.*numtags; ++i)
                 if((info.*tags)[i] == tag)
@@ -1689,15 +1730,20 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         const LineDef *line = inst.level.linedefs[objnum];
         assert(line);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(line->type, getLineArg, line, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, line->type, getLineArg, line, inst.conf, info))
             highlightTaggedItems(info);
+        if(inst.loaded.levelFormat == MapFormat::doom)
+        {
+            highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
+                                     &SpecialTagInfo::numlineids);
+        }
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
         const Thing *thing = inst.level.things[objnum];
         assert(thing);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(thing->special, getThingArg, thing, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, thing->special, getThingArg, thing, inst.conf, info))
             highlightTaggedItems(info);
         highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
     }
