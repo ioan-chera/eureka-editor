@@ -1618,7 +1618,17 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                     }
                     DrawHighlight(ObjType::linedefs, m);
                 }
-            // TODO: also things
+
+            for(int m = 0; m < inst.level.numThings(); ++m)
+            {
+                const Thing &thing = *inst.level.things[m];
+                if(thing.angle != info.po)  // early out
+                    continue;
+                const thingtype_t *type = get(inst.conf.thing_types, thing.type);
+                if(!type || !(type->flags & THINGDEF_POLYSPOT))
+                    continue;
+                DrawHighlight(ObjType::things, m);
+            }
         }
     };
 
@@ -1716,6 +1726,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
             highlightTaggedItems(info);
         highlightTaggingTriggers(thing->tid, false, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
+        const thingtype_t *type = get(inst.conf.thing_types, thing->type);
+        if(type && type->flags & THINGDEF_POLYSPOT)
+            highlightTaggingTriggers(thing->angle, true, nullptr, nullptr);
     }
 	else if (objtype == ObjType::sectors)
     {
