@@ -47,6 +47,8 @@
 #include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
 
+#include <assert.h>
+
 
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)
 
