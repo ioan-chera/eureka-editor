@@ -98,8 +98,8 @@ special 137 t "Thing_Spawn /silent" :tid  type  angle
 
 # Polyobj specials
 
-special 1 p "Polyobj_Start"       po  mirror  sound_seq
-special 5 p "Polyobj_Explicit"    po  order  mirror  sound_seq
+special 1 p "Polyobj_Start"       po:self_po  mirror:po  sound_seq
+special 5 p "Polyobj_Explicit"    po:self_po  order  mirror:po  sound_seq
 
 special 2 p "Polyobj_RotateL"     :po  speed  angle
 special 3 p "Polyobj_RotateR"     :po  speed  angle
@@ -129,7 +129,7 @@ special 83 k "ACS_Execute /lock" script  map  param1  param2  lock
 special 81 k "ACS_Suspend"       script  map
 special 82 k "ACS_Terminate"     script  map
 
-special 121 - "Line_SetIdent"  id_number
+special 121 - "Line_SetIdent"  id_number:self_line_id
 
 special 100 a "Scroll_Left"   speed
 special 101 a "Scroll_Right"  speed
