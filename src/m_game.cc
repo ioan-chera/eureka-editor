@@ -433,6 +433,17 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 	return !filename.empty();
 }
 
+//
+// Returns true if this is a polyobject source line
+//
+bool linetype_t::isPolyObjectDefinition() const
+{
+    for(const SpecialArg &arg : args)
+        if(arg.type == SpecialArgType::self_po)
+            return true;
+    return false;
+}
+
 
 //
 // Loads a definition file.  The ".ugh" extension is added.

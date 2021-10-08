@@ -395,8 +395,8 @@ void DetectPolyobjSectors(const Instance &inst)
 	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
 		const LineDef *L = inst.level.linedefs[i];
-
-		if (L->type == HEXTYPE_POLY_START || L->type == HEXTYPE_POLY_EXPLICIT)
+        const linetype_t *type = get(inst.conf.line_types, L->type);
+        if(type && type->isPolyObjectDefinition())
 			break;
 	}
 

@@ -77,6 +77,8 @@ struct SpecialArg
 // line <number> <group> <description>  [ arg1 .. arg5 ]
 struct linetype_t
 {
+    bool isPolyObjectDefinition() const;
+
 	char group;
 	SString desc;
 	SpecialArg args[5];

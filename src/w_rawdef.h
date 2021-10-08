@@ -535,8 +535,6 @@ enum strife_option_e
 //
 // Polyobject stuff
 //
-#define HEXTYPE_POLY_START     1
-#define HEXTYPE_POLY_EXPLICIT  5
 
 // -JL- Hexen polyobj thing types
 #define PO_ANCHOR_TYPE      3000
