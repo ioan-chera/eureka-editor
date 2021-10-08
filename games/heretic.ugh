@@ -191,22 +191,22 @@ line 99 a "-- Scroll Right"
 
 line  31 d "D1 Open door (stays open)"
 line   1 d "DR Open door"
-line  46 d "GR Open door (stays open)"
-line  50 d "S1 Close door"
-line 103 d "S1 Open door (stays open)"
-line  29 d "S1 Open door"
-line  42 d "SR Close door"
-line  61 d "SR Open door (stays open)"
-line  63 d "SR Open door"
-line   3 d "W1 Close door"
-line  16 d "W1 Close door for 30 seconds"
-line   2 d "W1 Open door (stays open)"
-line   4 d "W1 Open door"
-line  75 d "WR Close door"
-line  76 d "WR Close door for 30 seconds"
-line  86 d "WR Open door (stays open)"
-line  90 d "WR Open door"
-line 100 d "WR Open door (turbo)"
+line  46 d "GR Open door (stays open)"  :tag
+line  50 d "S1 Close door"  :tag
+line 103 d "S1 Open door (stays open)"  :tag
+line  29 d "S1 Open door"   :tag
+line  42 d "SR Close door"  :tag
+line  61 d "SR Open door (stays open)"  :tag
+line  63 d "SR Open door"   :tag
+line   3 d "W1 Close door"  :tag
+line  16 d "W1 Close door for 30 seconds"   :tag
+line   2 d "W1 Open door (stays open)"  :tag
+line   4 d "W1 Open door"   :tag
+line  75 d "WR Close door"  :tag
+line  76 d "WR Close door for 30 seconds"   :tag
+line  86 d "WR Open door (stays open)"  :tag
+line  90 d "WR Open door"   :tag
+line 100 d "WR Open door (turbo)"   :tag
 
 line  32 k "D1 Open blue door (stays open)"
 line  26 k "DR Open blue door"
@@ -222,90 +222,90 @@ line  51 e "s1 Secret exit"
 line  52 e "w1 Exit level"
 line 105 e "w1 Secret exit"
 
-line  71 f "S1 Lower turbo floor to HEF + 8"
-line 102 f "S1 Lower floor to HEF"
-line  23 f "S1 Lower floor to LEF"
-line  70 f "SR Lower turbo floor to HEF + 8"
-line  45 f "SR Lower floor to HEF"
-line  60 f "SR Lower floor to LEF"
-line  36 f "W1 Lower turbo floor to HEF + 8"
-line  37 f "W1 Lower floor to LEF (NXP)"
-line  19 f "W1 Lower floor to HEF"
-line  38 f "W1 Lower floor to LEF"
-line  98 f "WR Lower turbo floor to HEF + 8"
-line  84 f "WR Lower floor to LEF (NXP)"
-line  83 f "WR Lower floor to HEF"
-line  82 f "WR Lower floor to LEF"
+line  71 f "S1 Lower turbo floor to HEF + 8"    :tag
+line 102 f "S1 Lower floor to HEF"  :tag
+line  23 f "S1 Lower floor to LEF"  :tag
+line  70 f "SR Lower turbo floor to HEF + 8"    :tag
+line  45 f "SR Lower floor to HEF"  :tag
+line  60 f "SR Lower floor to LEF"  :tag
+line  36 f "W1 Lower turbo floor to HEF + 8"    :tag
+line  37 f "W1 Lower floor to LEF (NXP)"    :tag
+line  19 f "W1 Lower floor to HEF"  :tag
+line  38 f "W1 Lower floor to LEF"  :tag
+line  98 f "WR Lower turbo floor to HEF + 8"    :tag
+line  84 f "WR Lower floor to LEF (NXP)"    :tag
+line  83 f "WR Lower floor to HEF"  :tag
+line  82 f "WR Lower floor to LEF"  :tag
 
-line  21 p "S1 Lower lift"
-line  62 p "SR Lower lift"
-line  10 p "W1 Lower lift"
-line  88 p "WR Lower lift"
+line  21 p "S1 Lower lift"  :tag
+line  62 p "SR Lower lift"  :tag
+line  10 p "W1 Lower lift"  :tag
+line  88 p "WR Lower lift"  :tag
 
-line  53 m "W1 Start Moving Floor"
-line  54 m "W1 Stop  Moving Floor"
-line  87 m "WR Start Moving Floor"
-line  89 m "WR Stop  Moving Floor"
+line  53 m "W1 Start Moving Floor"  :tag
+line  54 m "W1 Stop  Moving Floor"  :tag
+line  87 m "WR Start Moving Floor"  :tag
+line  89 m "WR Stop  Moving Floor"  :tag
 
-line   7 s "S1 Raise stairs by 8"
-line 107 s "S1 Raise stairs by 16"
-line   8 s "W1 Raise stairs by 8"
-line 106 s "W1 Raise stairs by 16"
+line   7 s "S1 Raise stairs by 8"   :tag
+line 107 s "S1 Raise stairs by 16"  :tag
+line   8 s "W1 Raise stairs by 8"   :tag
+line 106 s "W1 Raise stairs by 16"  :tag
 
-line  39 - "W1 Teleport"
-line  97 - "WR Teleport"
+line  39 - "W1 Teleport"    :tag
+line  97 - "WR Teleport"    :tag
 
-line   6 h "W1 Crusher"
-line  77 h "WR Crusher"
-line  25 h "W1 Crusher /slow"
-line  73 h "WR Crusher /slow"
-line  57 h "W1 Stop Crusher"
-line  74 h "WR Stop Crusher"
+line   6 h "W1 Crusher" :tag
+line  77 h "WR Crusher" :tag
+line  25 h "W1 Crusher /slow"   :tag
+line  73 h "WR Crusher /slow"   :tag
+line  57 h "W1 Stop Crusher"    :tag
+line  74 h "WR Stop Crusher"    :tag
 
-line  47 g "G1 Raise floor to nhEF (TX)"
-line  24 g "G1 Raise floor to LIC"
-line  55 g "S1 Raise floor to LIC - 8, crush"
-line 101 g "S1 Raise floor to LIC"
-line  18 g "S1 Raise floor to nhEF"
-line  20 g "S1 Raise floor to nhEF (TX)"
-line  15 g "S1 Raise floor by 24 (TX)"
-line  14 g "S1 Raise floor by 32 (TX)"
-line  65 g "SR Raise floor to LIC - 8, crush"
-line  69 g "SR Raise floor to nhEF"
-line  64 g "SR Raise floor to LIC"
-line  66 g "SR Raise floor by 24 (TX)"
-line  67 g "SR Raise floor by 32 (TX)"
-line  68 g "SR Raise floor to nhEF (TX)"
-line  59 g "W1 Raise floor by 24 (TXP)"
-line  58 g "W1 Raise floor by 24"
-line   5 g "W1 Raise floor to LIC"
-line  30 g "W1 Raise floor by ShortestLowerTexture"
-line  22 g "W1 Raise floor to nhEF (TX)"
-line  56 g "W1 Raise floor to LIC - 8, crush"
-line  93 g "WR Raise floor by 24 (TXP)"
-line  94 g "WR Raise floor to LIC - 8, crush"
-line  95 g "WR Raise floor to nhEF (TX)"
-line  92 g "WR Raise floor by 24"
-line  91 g "WR Raise floor to LIC"
-line  96 g "WR Raise floor by ShortestLowerTexture"
+line  47 g "G1 Raise floor to nhEF (TX)"    :tag
+line  24 g "G1 Raise floor to LIC"  :tag
+line  55 g "S1 Raise floor to LIC - 8, crush"   :tag
+line 101 g "S1 Raise floor to LIC"  :tag
+line  18 g "S1 Raise floor to nhEF" :tag
+line  20 g "S1 Raise floor to nhEF (TX)"    :tag
+line  15 g "S1 Raise floor by 24 (TX)"  :tag
+line  14 g "S1 Raise floor by 32 (TX)"  :tag
+line  65 g "SR Raise floor to LIC - 8, crush"   :tag
+line  69 g "SR Raise floor to nhEF" :tag
+line  64 g "SR Raise floor to LIC"  :tag
+line  66 g "SR Raise floor by 24 (TX)"  :tag
+line  67 g "SR Raise floor by 32 (TX)"  :tag
+line  68 g "SR Raise floor to nhEF (TX)"    :tag
+line  59 g "W1 Raise floor by 24 (TXP)" :tag
+line  58 g "W1 Raise floor by 24"   :tag
+line   5 g "W1 Raise floor to LIC"  :tag
+line  30 g "W1 Raise floor by ShortestLowerTexture" :tag
+line  22 g "W1 Raise floor to nhEF (TX)"    :tag
+line  56 g "W1 Raise floor to LIC - 8, crush"   :tag
+line  93 g "WR Raise floor by 24 (TXP)" :tag
+line  94 g "WR Raise floor to LIC - 8, crush"   :tag
+line  95 g "WR Raise floor to nhEF (TX)"    :tag
+line  92 g "WR Raise floor by 24"   :tag
+line  91 g "WR Raise floor to LIC"  :tag
+line  96 g "WR Raise floor by ShortestLowerTexture" :tag
 
-line  13 l "W1 Light level goes to 255"
-line  35 l "W1 Light level goes to 35"
-line  12 l "W1 Light level goes to HE"
-line 104 l "W1 Light level goes to LE"
-line  81 l "WR Light level goes to 255"
-line  79 l "WR Light level goes to 35"
-line  80 l "WR Light level goes to HE"
-line  17 l "W1 Lignt blinking 1 Hz"
+line  13 l "W1 Light level goes to 255" :tag
+line  35 l "W1 Light level goes to 35"  :tag
+line  12 l "W1 Light level goes to HE"  :tag
+line 104 l "W1 Light level goes to LE"  :tag
+line  81 l "WR Light level goes to 255" :tag
+line  79 l "WR Light level goes to 35"  :tag
+line  80 l "WR Light level goes to HE"  :tag
+line  17 l "W1 Lignt blinking 1 Hz" :tag
 
-line  49 c "S1 Lower ceiling to floor + 8"
-line  41 c "S1 Lower ceiling to floor"
-line  43 c "SR Lower ceiling to floor"
-line  44 c "W1 Lower ceiling to floor + 8"
-line  40 c "W1 Raise ceiling to HEC, floor to LEF"
-line  72 c "WR Lower ceiling to floor + 8"
+line  49 c "S1 Lower ceiling to floor + 8"  :tag
+line  41 c "S1 Lower ceiling to floor"  :tag
+line  43 c "SR Lower ceiling to floor"  :tag
+line  44 c "W1 Lower ceiling to floor + 8"  :tag
+line  40 c "W1 Raise ceiling to HEC, floor to LEF"  :tag
+line  72 c "WR Lower ceiling to floor + 8"  :tag
 
-line   9 - "S1 Donut (lower outer, raise inner)"
+line   9 - "S1 Donut (lower outer, raise inner)"    :tag
 
 
 #---- SECTOR TYPES -----------

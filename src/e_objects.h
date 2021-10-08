@@ -30,7 +30,7 @@
 #include "DocumentModule.h"
 
 class selection_c;
-
+struct ConfigData;
 
 struct transform_t
 {
@@ -119,6 +119,33 @@ enum transform_keyword_e
 	TRANS_K_RotScale,		// rotate and scale at same time
 	TRANS_K_Skew			// skew (shear) along an axis
 };
+
+//
+// Information gathered from a linedef with a special
+//
+struct SpecialTagInfo
+{
+    ObjType type;
+    int objnum;
+
+    int tags[5];
+    int numtags = 0;
+    int hitags = 0;
+
+    int tids[5];
+    int numtids = 0;
+
+    int lineids[5];
+    int numlineids = 0;
+
+    int selflineid = 0;
+
+    int po[5];
+    int numpo = 0;
+};
+
+bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj,
+                       const ConfigData &config, SpecialTagInfo &info);
 
 #endif  /* __EUREKA_OBJECTS_H__ */
 

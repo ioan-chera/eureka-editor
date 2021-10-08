@@ -531,23 +531,6 @@ enum strife_option_e
 	MTF_Strife_AltVis	= 512,
 };
 
-
-//
-// Polyobject stuff
-//
-#define HEXTYPE_POLY_START     1
-#define HEXTYPE_POLY_EXPLICIT  5
-
-// -JL- Hexen polyobj thing types
-#define PO_ANCHOR_TYPE      3000
-#define PO_SPAWN_TYPE       3001
-#define PO_SPAWNCRUSH_TYPE  3002
-
-// -JL- ZDoom polyobj thing types
-#define ZDOOM_PO_ANCHOR_TYPE      9300
-#define ZDOOM_PO_SPAWN_TYPE       9301
-#define ZDOOM_PO_SPAWNCRUSH_TYPE  9302
-
 #endif  /* __EUREKA_W_RAWDEF_H__ */
 
 //--- editor settings ---

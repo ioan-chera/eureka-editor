@@ -2280,5 +2280,79 @@ void Instance::CMD_Quantize()
 	edit.error_mode = true;
 }
 
+//
+// Get the tag info here. Returns true if available and sets the output argument.
+//
+bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj,
+                       const ConfigData &config, SpecialTagInfo &info)
+{
+    if(special <= 0)
+        return false;
+
+    auto getArg = [objtype, obj](int index)
+    {
+        if(objtype == ObjType::things)
+            return static_cast<const Thing *>(obj)->Arg(index);
+        if(objtype == ObjType::linedefs)
+            return static_cast<const LineDef *>(obj)->Arg(index);
+        return 0;
+    };
+
+    // First try generalized
+    for(int i = 0; i < config.num_gen_linetypes; ++i)
+    {
+        const generalized_linetype_t &type = config.gen_linetypes[i];
+        if(special >= type.base && special < type.base + type.length)
+        {
+            info = {};
+            info.type = objtype;
+            info.objnum = objnum;
+            info.numtags = 1;
+            info.tags[0] = getArg(1);
+            return true;
+        }
+    }
+
+    // Now try individual specials, including parameterized
+    auto it = config.line_types.find(special);
+    if(it == config.line_types.end())
+        return false;
+    info = {};
+    info.type = objtype;
+    info.objnum = objnum;
+    for(int i = 0; i < (int)lengthof(it->second.args); ++i)
+    {
+        int arg = getArg(i + 1);
+
+        switch(it->second.args[i].type)
+        {
+            case SpecialArgType::tag:
+                info.tags[info.numtags++] = arg;
+                break;
+            case SpecialArgType::tag_hi:
+                info.tags[info.hitags++] += 256 * arg;    // add 256*i to corresponding regular tag
+                break;
+            case SpecialArgType::tid:
+                info.tids[info.numtids++] = arg;
+                break;
+            case SpecialArgType::line_id:
+                info.lineids[info.numlineids++] = arg;
+                break;
+            case SpecialArgType::self_line_id:
+                info.selflineid = arg;
+                break;
+            case SpecialArgType::self_line_id_hi:
+                info.selflineid += 256 * arg;
+                break;
+            case SpecialArgType::po:
+                info.po[info.numpo++] = arg;
+                break;
+            default:
+                break;
+        }
+    }
+    return true;
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

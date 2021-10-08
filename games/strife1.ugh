@@ -396,7 +396,7 @@ linegroup j "Split Door"
 
 
 line   0 - "-- NOTHING"
-line   9 - "S1 Donut (raise outer, lower inner)"
+line   9 - "S1 Donut (raise outer, lower inner)"    :tag
 
 line  48 a "-- Scroll Wall Left"
 line 142 a "-- Scroll Wall Up"
@@ -412,11 +412,11 @@ line 145 e "WR Exit to Hub Spot"
 
 line 182 - "G1 Break Glass"
 line 228 - "W1 Entity Taunt"
-line 165 - "SR Fake Door 1"
-line 205 - "SR Fake Door 2"
-line 147 - "S1 Forcefield Clear"
-line 187 - "W1 Forcefield Clear If Quest"
-line 148 - "SR Forcefield Damage"
+line 165 - "SR Fake Door 1" :tag
+line 205 - "SR Fake Door 2" :tag
+line 147 - "S1 Forcefield Clear"    :tag
+line 187 - "W1 Forcefield Clear If Quest"   :tag
+line 148 - "SR Forcefield Damage"   :tag
 
 line 202 - "W1 Message #Tag"
 line 201 - "W1 Message #Tag /front"
@@ -425,125 +425,125 @@ line 211 - "SR Message #Tag /nolog"
 line 215 - "W1 Message If Quest Item"
 line 204 - "W1 Music Change"
 line 203 - "WR Music Change"
-line 150 - "WR Noise Alert"
-line 175 - "WR Noise Alert /onfloor"
-line 198 - "WR Noise Alert /uniform"
-line 208 - "WR Noise Alert /flamethrower"
-line 206 - "WR Noise Alert /chalice"
+line 150 - "WR Noise Alert"                 :tag
+line 175 - "WR Noise Alert /onfloor"        :tag
+line 198 - "WR Noise Alert /uniform"        :tag
+line 208 - "WR Noise Alert /flamethrower"   :tag
+line 206 - "WR Noise Alert /chalice"        :tag
 
-line  39 t "W1 Teleport"
-line 125 t "W1 Teleport /mon"
-line  97 t "WR Teleport"
-line 126 t "WR Teleport /mon"
-line 185 t "WR Teleport /silent"
-line 231 t "WR Teleport /silent-src"
-line 195 t "WR Teleport /zombie"
+line  39 t "W1 Teleport"        :tag
+line 125 t "W1 Teleport /mon"   :tag
+line  97 t "WR Teleport"        :tag
+line 126 t "WR Teleport /mon"   :tag
+line 185 t "WR Teleport /silent"    :tag
+line 231 t "WR Teleport /silent-src"    :tag
+line 195 t "WR Teleport /zombie"    :tag
 
-line   8 s "W1 Stair Raise 8"
-line   7 s "S1 Stair Raise 8"
-line 100 s "W1 Stair Raise 16 /crush"
-line 127 s "S1 Stair Raise 16 /crush"
-line 178 s "W1 Stair Lower 16"
-line 146 s "S1 Stair Lower 16"
-line 209 s "S1 Stair Lower 16 /chalice"
+line   8 s "W1 Stair Raise 8"   :tag
+line   7 s "S1 Stair Raise 8"   :tag
+line 100 s "W1 Stair Raise 16 /crush"   :tag
+line 127 s "S1 Stair Raise 16 /crush"   :tag
+line 178 s "W1 Stair Lower 16"  :tag
+line 146 s "S1 Stair Lower 16"  :tag
+line 209 s "S1 Stair Lower 16 /chalice" :tag
 
-line  13 l "W1 Light to 255"
-line  81 l "WR Light to 255"
-line 138 l "SR Light to 255"
-line  35 l "W1 Light to 35"
-line  79 l "WR Light to 35"
-line 139 l "SR Light to 35"
-line  12 l "W1 Light to highest nb"
-line  80 l "WR Light to highest nb"
-line 104 l "W1 Light to lowest nb"
-line  17 l "W1 Light blink 1 Hz"
+line  13 l "W1 Light to 255"    :tag
+line  81 l "WR Light to 255"    :tag
+line 138 l "SR Light to 255"    :tag
+line  35 l "W1 Light to 35" :tag
+line  79 l "WR Light to 35" :tag
+line 139 l "SR Light to 35" :tag
+line  12 l "W1 Light to highest nb" :tag
+line  80 l "WR Light to highest nb" :tag
+line 104 l "W1 Light to lowest nb"  :tag
+line  17 l "W1 Light blink 1 Hz"    :tag
 
-line 179 c "W1 Ceiling close"
-line  41 c "S1 Ceiling close"
-line  43 c "SR Ceiling close "
-line  49 c "S1 Ceiling close flr+8 /cont"
-line 199 c "S1 Ceiling close /crush"
+line 179 c "W1 Ceiling close"   :tag
+line  41 c "S1 Ceiling close"   :tag
+line  43 c "SR Ceiling close "  :tag
+line  49 c "S1 Ceiling close flr+8 /cont"   :tag
+line 199 c "S1 Ceiling close /crush"    :tag
 
-line   6 h "W1 Crusher /fast"
-line  77 h "WR Crusher /fast"
-line  25 h "W1 Crusher /slow"
-line  73 h "WR Crusher /slow"
-line  44 h "W1 Crusher /oneshot"
-line  72 h "WR Crusher /oneshot"
-line 141 h "W1 Crusher /silent"
-line  57 h "W1 Stop crusher"
-line  74 h "WR Stop crusher"
+line   6 h "W1 Crusher /fast"   :tag
+line  77 h "WR Crusher /fast"   :tag
+line  25 h "W1 Crusher /slow"   :tag
+line  73 h "WR Crusher /slow"   :tag
+line  44 h "W1 Crusher /oneshot"    :tag
+line  72 h "WR Crusher /oneshot"    :tag
+line 141 h "W1 Crusher /silent" :tag
+line  57 h "W1 Stop crusher"    :tag
+line  74 h "WR Stop crusher"    :tag
 
-line  53 m "W1 Start Moving Floor"
-line  87 m "WR Start Moving Floor"
-line  54 m "W1 Stop Moving Floor"
-line  89 m "WR Stop Moving Floor"
+line  53 m "W1 Start Moving Floor"  :tag
+line  87 m "WR Start Moving Floor"  :tag
+line  54 m "W1 Stop Moving Floor"   :tag
+line  89 m "WR Stop Moving Floor"   :tag
 
-line  21 p "S1 Lift Lower"
-line  62 p "SR Lift Lower"
-line 184 p "WR Lift Lower"
-line  10 p "W1 Lift Lower /mon"
-line  88 p "WR Lift Lower /mon"
-line 121 p "W1 Lift Lower /fast"
-line 120 p "WR Lift Lower /fast"
-line 122 p "S1 Lift Lower /fast"
-line 123 p "SR Lift Lower /fast"
-line 214 p "SR Lift Lower /slow"
-line 154 p "SR Lift Lower /goldkey"
-line 177 p "SR Lift Lower /power3key"
-line 155 p "SR Lift Raise"
+line  21 p "S1 Lift Lower"  :tag
+line  62 p "SR Lift Lower"  :tag
+line 184 p "WR Lift Lower"  :tag
+line  10 p "W1 Lift Lower /mon" :tag
+line  88 p "WR Lift Lower /mon" :tag
+line 121 p "W1 Lift Lower /fast"    :tag
+line 120 p "WR Lift Lower /fast"    :tag
+line 122 p "S1 Lift Lower /fast"    :tag
+line 123 p "SR Lift Lower /fast"    :tag
+line 214 p "SR Lift Lower /slow"    :tag
+line 154 p "SR Lift Lower /goldkey" :tag
+line 177 p "SR Lift Lower /power3key"   :tag
+line 155 p "SR Lift Raise"  :tag
 
 line   1 d "DR Door"
-line  29 d "S1 Door"
-line  46 d "GR Door"
-line  63 d "SR Door"
-line  90 d "WR Door"
-line 103 d "S1 Door /stay"
-line   2 d "W1 Door /stay"
+line  29 d "S1 Door"    :tag
+line  46 d "GR Door"    :tag
+line  63 d "SR Door"    :tag
+line  90 d "WR Door"    :tag
+line 103 d "S1 Door /stay"  :tag
+line   2 d "W1 Door /stay"  :tag
 line  31 d "D1 Door /stay"
-line  61 d "SR Door /stay"
-line  86 d "WR Door /stay"
-line 105 d "WR Door /fast"
-line 108 d "W1 Door /fast"
-line 111 d "S1 Door /fast"
-line 114 d "SR Door /fast"
+line  61 d "SR Door /stay"  :tag
+line  86 d "WR Door /stay"  :tag
+line 105 d "WR Door /fast"  :tag
+line 108 d "W1 Door /fast"  :tag
+line 111 d "S1 Door /fast"  :tag
+line 114 d "SR Door /fast"  :tag
 line 117 d "DR Door /fast"
-line 106 d "WR Door /fast /stay"
-line 109 d "W1 Door /fast /stay"
-line 112 d "S1 Door /fast /stay"
-line 115 d "SR Door /fast /stay"
+line 106 d "WR Door /fast /stay"    :tag
+line 109 d "W1 Door /fast /stay"    :tag
+line 112 d "S1 Door /fast /stay"    :tag
+line 115 d "SR Door /fast /stay"    :tag
 line 118 d "D1 Door /fast /stay"
 
-line   4 d "W1 Door /mon"
-line 200 d "W1 Door /sigil"
+line   4 d "W1 Door /mon"   :tag
+line 200 d "W1 Door /sigil" :tag
 line 144 d "DR Door /animated"
-line 207 d "SR Door /animated"
-line 229 d "SR Door /animated /sigil"
-line 234 d "SR Door If Irale Unlocked"
-line 230 d "W1 Door If Quest Item"
-line 216 d "WR Door If Quest Item"
-line 188 d "W1 Door If Quest Item 16"
-line 194 d "S1 Door Free Prisoners /stay"
+line 207 d "SR Door /animated"  :tag
+line 229 d "SR Door /animated /sigil"   :tag
+line 234 d "SR Door If Irale Unlocked"  :tag
+line 230 d "W1 Door If Quest Item"  :tag
+line 216 d "WR Door If Quest Item"  :tag
+line 188 d "W1 Door If Quest Item 16"   :tag
+line 194 d "S1 Door Free Prisoners /stay"   :tag
 
-line   3 d "W1 Close Door"
-line  42 d "SR Close Door"
-line  50 d "S1 Close Door"
-line  75 d "WR Close Door"
-line 107 d "WR Close Door /fast"
-line 110 d "W1 Close Door /fast"
-line 113 d "S1 Close Door /fast"
-line 116 d "SR Close Door /fast"
-line 197 d "W1 Close Door /fast /pieces"
-line 227 d "W1 Close Door If Quest Item"
-line  16 d "W1 Close Door Then Open"
-line  76 d "WR Close Door Then Open"
+line   3 d "W1 Close Door"  :tag
+line  42 d "SR Close Door"  :tag
+line  50 d "S1 Close Door"  :tag
+line  75 d "WR Close Door"  :tag
+line 107 d "WR Close Door /fast"    :tag
+line 110 d "W1 Close Door /fast"    :tag
+line 113 d "S1 Close Door /fast"    :tag
+line 116 d "SR Close Door /fast"    :tag
+line 197 d "W1 Close Door /fast /pieces"    :tag
+line 227 d "W1 Close Door If Quest Item"    :tag
+line  16 d "W1 Close Door Then Open"    :tag
+line  76 d "WR Close Door Then Open"    :tag
 
-line 174 j "W1 Split Door"
-line  40 j "S1 Split Door"
-line 183 j "W1 Split Door /nearest"
-line 235 j "S1 Split Door /sigil"
-line 233 j "SR Split Door Log Msg 70"
-line 189 j "S1 Split Door Oracle Key"
+line 174 j "W1 Split Door"  :tag
+line  40 j "S1 Split Door"  :tag
+line 183 j "W1 Split Door /nearest" :tag
+line 235 j "S1 Split Door /sigil"   :tag
+line 233 j "SR Split Door Log Msg 70"   :tag
+line 189 j "S1 Split Door Oracle Key"   :tag
 
 line 169 k "DR Door Base Key"
 line 225 k "DR Door Catacomb Key"
@@ -552,102 +552,102 @@ line 224 k "DR Door Chapel Key"
 line 217 k "DR Door Core Key"
 line 170 k "DR Door Govs Key"
 line 221 k "DR Door Mauler Key"
-line 191 k "SR Door Military ID"
-line 223 k "SR Door Mine Key"
+line 191 k "SR Door Military ID"    :tag
+line 223 k "SR Door Mine Key"   :tag
 line 232 k "DR Door Oracle Pass"
 line 190 k "DR Door Order Key"
-line 172 k "SR Door Power 1 Key"
-line 173 k "SR Door Power 2 Key"
-line 176 k "SR Door Power 3 Key"
-line 171 k "S1 Door Prison Key"
-line 192 k "SR Door Warehouse Key"
+line 172 k "SR Door Power 1 Key"    :tag
+line 173 k "SR Door Power 2 Key"    :tag
+line 176 k "SR Door Power 3 Key"    :tag
+line 171 k "S1 Door Prison Key" :tag
+line 192 k "SR Door Warehouse Key"  :tag
 
 line 161 k "DR Door Brass Key"
-line 152 k "SR Door Brass Key /fast"
-line 162 k "S1 Door Brass Key /fast"
+line 152 k "SR Door Brass Key /fast"    :tag
+line 162 k "S1 Door Brass Key /fast"    :tag
 line 156 k "D1 Door Brass Key /stay"
 line 159 k "DR Door Gold Key"
-line 151 k "SR Door Gold Key /fast"
-line 164 k "S1 Door Gold Key /fast"
+line 151 k "SR Door Gold Key /fast" :tag
+line 164 k "S1 Door Gold Key /fast" :tag
 line 158 k "D1 Door Gold Key /stay"
 line  26 k "DR Door ID Badge"
-line 133 k "S1 Door ID Badge /fast"
-line  99 k "SR Door ID Badge /fast"
+line 133 k "S1 Door ID Badge /fast" :tag
+line  99 k "SR Door ID Badge /fast" :tag
 line  32 k "D1 Door ID Badge /stay"
 line  28 k "DR Door ID Card"
-line 134 k "SR Door ID Card /fast"
-line 135 k "S1 Door ID Card /fast"
+line 134 k "SR Door ID Card /fast"  :tag
+line 135 k "S1 Door ID Card /fast"  :tag
 line  33 k "D1 Door ID Card /stay"
 line  27 k "DR Door Passcard"
-line 136 k "SR Door Passcard /fast"
-line 137 k "S1 Door Passcard /fast"
+line 136 k "SR Door Passcard /fast" :tag
+line 137 k "S1 Door Passcard /fast" :tag
 line  34 k "D1 Door Passcard /stay"
 line 166 k "DR Door Severed Hand"
-line 167 k "S1 Door Severed Hand /fast"
-line 168 k "SR Door Severed Hand /fast"
+line 167 k "S1 Door Severed Hand /fast" :tag
+line 168 k "SR Door Severed Hand /fast" :tag
 line 160 k "DR Door Silver Key"
-line 153 k "SR Door Silver Key /fast"
-line 163 k "S1 Door Silver Key /fast"
+line 153 k "SR Door Silver Key /fast"   :tag
+line 163 k "S1 Door Silver Key /fast"   :tag
 line 157 k "D1 Door Silver Key /stay"
 
-line 102 f "S1 Floor down HEF"
-line  19 f "W1 Floor down HEF"
-line  45 f "SR Floor down HEF"
-line  83 f "WR Floor down HEF"
-line  36 f "W1 Floor down HEF /fast"
-line  70 f "SR Floor down HEF /fast"
-line  71 f "S1 Floor down HEF /fast"
-line  98 f "WR Floor down HEF /fast"
-line 219 f "S1 Floor down HEF If Blue Crystal"
-line 220 f "S1 Floor down HEF If Red Crystal"
-line 226 f "S1 Floor down HEF Training Area"
+line 102 f "S1 Floor down HEF"  :tag
+line  19 f "W1 Floor down HEF"  :tag
+line  45 f "SR Floor down HEF"  :tag
+line  83 f "WR Floor down HEF"  :tag
+line  36 f "W1 Floor down HEF /fast"    :tag
+line  70 f "SR Floor down HEF /fast"    :tag
+line  71 f "S1 Floor down HEF /fast"    :tag
+line  98 f "WR Floor down HEF /fast"    :tag
+line 219 f "S1 Floor down HEF If Blue Crystal"  :tag
+line 220 f "S1 Floor down HEF If Red Crystal"   :tag
+line 226 f "S1 Floor down HEF Training Area"    :tag
 
-line  23 f "S1 Floor down LEF"
-line  38 f "W1 Floor down LEF"
-line  60 f "SR Floor down LEF"
-line  82 f "WR Floor down LEF"
-line  37 f "W1 Floor down LEF /NXP"
-line  84 f "WR Floor down LEF /NXP"
-line 196 f "W1 Floor down LEF If Sigil Pieces"
-line 212 f "W1 Floor down LEF If Flamethrower"
-line 193 f "W1 Floor down LEF If Quest Item"
+line  23 f "S1 Floor down LEF"  :tag
+line  38 f "W1 Floor down LEF"  :tag
+line  60 f "SR Floor down LEF"  :tag
+line  82 f "WR Floor down LEF"  :tag
+line  37 f "W1 Floor down LEF /NXP" :tag
+line  84 f "WR Floor down LEF /NXP" :tag
+line 196 f "W1 Floor down LEF If Sigil Pieces"  :tag
+line 212 f "W1 Floor down LEF If Flamethrower"  :tag
+line 193 f "W1 Floor down LEF If Quest Item"    :tag
 
-line   5 g "W1 Floor up LIC"
-line  24 g "G1 Floor up LIC"
-line 101 g "S1 Floor up LIC"
-line  64 g "SR Floor up LIC"
-line  91 g "WR Floor up LIC"
-line  55 g "S1 Floor up LIC-8 /crush"
-line  56 g "W1 Floor up LIC-8 /crush"
-line  65 g "SR Floor up LIC-8 /crush"
-line  94 g "WR Floor up LIC-8 /crush"
-line 119 g "W1 Floor up nhEF"
-line 128 g "WR Floor up nhEF"
-line  18 g "S1 Floor up nhEF"
-line  69 g "SR Floor up nhEF"
-line  22 g "W1 Floor up nhEF /TX"
-line  47 g "G1 Floor up nhEF /TX"
-line  95 g "WR Floor up nhEF /TX"
-line  20 g "S1 Floor up nhEF /TX"
-line  68 g "SR Floor up nhEF /TX"
-line 129 g "WR Floor up nhEF /fast"
-line 130 g "W1 Floor up nhEF /fast"
-line 131 g "S1 Floor up nhEF /fast"
-line 132 g "SR Floor up nhEF /fast"
+line   5 g "W1 Floor up LIC"    :tag
+line  24 g "G1 Floor up LIC"    :tag
+line 101 g "S1 Floor up LIC"    :tag
+line  64 g "SR Floor up LIC"    :tag
+line  91 g "WR Floor up LIC"    :tag
+line  55 g "S1 Floor up LIC-8 /crush"   :tag
+line  56 g "W1 Floor up LIC-8 /crush"   :tag
+line  65 g "SR Floor up LIC-8 /crush"   :tag
+line  94 g "WR Floor up LIC-8 /crush"   :tag
+line 119 g "W1 Floor up nhEF"   :tag
+line 128 g "WR Floor up nhEF"   :tag
+line  18 g "S1 Floor up nhEF"   :tag
+line  69 g "SR Floor up nhEF"   :tag
+line  22 g "W1 Floor up nhEF /TX"   :tag
+line  47 g "G1 Floor up nhEF /TX"   :tag
+line  95 g "WR Floor up nhEF /TX"   :tag
+line  20 g "S1 Floor up nhEF /TX"   :tag
+line  68 g "SR Floor up nhEF /TX"   :tag
+line 129 g "WR Floor up nhEF /fast" :tag
+line 130 g "W1 Floor up nhEF /fast" :tag
+line 131 g "S1 Floor up nhEF /fast" :tag
+line 132 g "SR Floor up nhEF /fast" :tag
 
-line  15 g "S1 Floor up 24 /TX"
-line  66 g "SR Floor up 24 /TX"
-line  59 g "W1 Floor up 24 /TXP"
-line  93 g "WR Floor up 24 /TXP"
-line  14 g "S1 Floor up 32 /TX"
-line  67 g "SR Floor up 32 /TX"
-line  58 g "W1 Floor up 64"
-line  92 g "WR Floor up 64"
-line 140 g "S1 Floor up 512"
-line 180 g "G1 Floor up 512 /TXP"
-line 181 g "S1 Floor up 512 /TXP"
-line  30 g "W1 Floor up lowest tex"
-line  96 g "WR Floor up lowest tex"
+line  15 g "S1 Floor up 24 /TX" :tag
+line  66 g "SR Floor up 24 /TX" :tag
+line  59 g "W1 Floor up 24 /TXP"    :tag
+line  93 g "WR Floor up 24 /TXP"    :tag
+line  14 g "S1 Floor up 32 /TX" :tag
+line  67 g "SR Floor up 32 /TX" :tag
+line  58 g "W1 Floor up 64" :tag
+line  92 g "WR Floor up 64" :tag
+line 140 g "S1 Floor up 512"    :tag
+line 180 g "G1 Floor up 512 /TXP"   :tag
+line 181 g "S1 Floor up 512 /TXP"   :tag
+line  30 g "W1 Floor up lowest tex" :tag
+line  96 g "WR Floor up lowest tex" :tag
 
 
 #---- TEXTURE CATEGORIES ----------------

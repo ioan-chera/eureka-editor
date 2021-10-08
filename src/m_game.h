@@ -49,13 +49,38 @@ struct linegroup_t
 	SString desc;
 };
 
+//
+// Special arg type
+//
+enum class SpecialArgType
+{
+    generic,
+    tag,
+    tag_hi,
+    line_id,
+    self_line_id,
+    self_line_id_hi,
+    tid,
+    po
+};
+
+//
+// Argument type
+//
+struct SpecialArg
+{
+    SString name;
+    SpecialArgType type = SpecialArgType::generic;
+};
 
 // line <number> <group> <description>  [ arg1 .. arg5 ]
 struct linetype_t
 {
+    bool isPolyObjectSpecial() const;
+
 	char group;
 	SString desc;
-	SString args[5];
+	SpecialArg args[5];
 };
 
 
@@ -98,6 +123,7 @@ enum thingdef_flags_e
 	THINGDEF_PASS    = (1 << 3),  // non-blocking
 	THINGDEF_VOID    = (1 << 4),  // can exist in the void
 	THINGDEF_TELEPT  = (1 << 5),  // teleport dest, can overlap certain things
+    THINGDEF_POLYSPOT= (1 << 6),  // polyobject spawn spot, tagging & BSP
 };
 
 

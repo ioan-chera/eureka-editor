@@ -61,9 +61,9 @@ thing 9033 d n  16 NULL   "ODAMEX: Fountain 7"
 
 #---- ODAMEX LINE TYPES ----------
 
-line 333 - "-- ODAMEX: Init Gravity"
-line 334 - "-- ODAMEX: Init Color"
-line 335 - "-- ODAMEX: Init Damage"
+line 333 - "-- ODAMEX: Init Gravity"    :tag
+line 334 - "-- ODAMEX: Init Color"      :tag
+line 335 - "-- ODAMEX: Init Damage"     :tag
 
 line 340 s "-- ODAMEX: Slope F1"
 line 341 s "-- ODAMEX: Slope C1"

@@ -64,6 +64,8 @@
 #define PACKEDATTR
 #endif
 
+#define lengthof(x) (sizeof(x) / sizeof(*(x)))
+
 #endif  /* __SYS_MACRO_H__ */
 
 //--- editor settings ---

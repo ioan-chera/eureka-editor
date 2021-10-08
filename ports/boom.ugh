@@ -53,153 +53,165 @@ thing 5002 - nv  20 NULL  "BOOM: Point puller"
 
 #---- BOOM LINETYPES ----------
 
+# Modify the manual doors to support light_tag
+line  31 d "D1 Open and stay open"  :tag
+line   1 d "DR Open door"   :tag
+line 117 d "DR Open door /fast" :tag
+line 118 d "D1 Open and stay /fast" :tag
+line  26 k "DR Open blue door"  :tag
+line  27 k "DR Open yellow door"    :tag
+line  28 k "DR Open red door"   :tag
+line  32 k "D1 Open blue door (stay)"   :tag
+line  33 k "D1 Open red door (stay)"    :tag
+line  34 k "D1 Open yellow door (stay)" :tag
+
 line  85 - "-- BOOM: Scroll Wall Right"
 
-line 191 - "SR BOOM: Donut"
-line 146 - "W1 BOOM: Donut"
-line 155 - "WR BOOM: Donut"
+line 191 - "SR BOOM: Donut" :tag
+line 146 - "W1 BOOM: Donut" :tag
+line 155 - "WR BOOM: Donut" :tag
 
-line 241 - "S1 BOOM: Floor Transfer /NXP"
-line 189 - "S1 BOOM: Floor Transfer /TXP"
-line 190 - "SR BOOM: Floor Transfer /TXP"
-line 239 - "W1 BOOM: Floor Transfer /NXP"
-line 153 - "W1 BOOM: Floor Transfer /TXP"
-line 240 - "WR BOOM: Floor Transfer /NXP"
-line 154 - "WR BOOM: Floor Transfer /TXP"
+line 241 - "S1 BOOM: Floor Transfer /NXP"   :tag
+line 189 - "S1 BOOM: Floor Transfer /TXP"   :tag
+line 190 - "SR BOOM: Floor Transfer /TXP"   :tag
+line 239 - "W1 BOOM: Floor Transfer /NXP"   :tag
+line 153 - "W1 BOOM: Floor Transfer /TXP"   :tag
+line 240 - "WR BOOM: Floor Transfer /NXP"   :tag
+line 154 - "WR BOOM: Floor Transfer /TXP"   :tag
 
-line 164 h "S1 BOOM: Crusher"
-line 183 h "SR BOOM: Crusher"
-line 184 h "SR BOOM: Crusher /slow"
-line 165 h "S1 BOOM: Crusher /silent"
-line 185 h "SR BOOM: Crusher /silent"
-line 150 h "WR BOOM: Crusher /silent"
-line 188 h "SR BOOM: Stop Crusher"
-line 168 h "S1 BOOM: Stop Crusher"
+line 164 h "S1 BOOM: Crusher"   :tag
+line 183 h "SR BOOM: Crusher"   :tag
+line 184 h "SR BOOM: Crusher /slow"     :tag
+line 165 h "S1 BOOM: Crusher /silent"   :tag
+line 185 h "SR BOOM: Crusher /silent"   :tag
+line 150 h "WR BOOM: Crusher /silent"   :tag
+line 188 h "SR BOOM: Stop Crusher"  :tag
+line 168 h "S1 BOOM: Stop Crusher"  :tag
 
-line 160 g "S1 BOOM: Floor up 24 /TXP"
-line 161 g "S1 BOOM: Floor up 24"
-line 158 g "S1 BOOM: Floor up lowest tex"
-line 179 g "SR BOOM: Floor up 24 /TXP"
-line 180 g "SR BOOM: Floor up 24"
-line 178 g "SR BOOM: Floor up 512"
-line 176 g "SR BOOM: Floor up lowest tex"
-line 142 g "W1 BOOM: Floor up 512"
-line 147 g "WR BOOM: Floor up 512"
+line 160 g "S1 BOOM: Floor up 24 /TXP"  :tag
+line 161 g "S1 BOOM: Floor up 24"       :tag
+line 158 g "S1 BOOM: Floor up lowest tex"   :tag
+line 179 g "SR BOOM: Floor up 24 /TXP"      :tag
+line 180 g "SR BOOM: Floor up 24"   :tag
+line 178 g "SR BOOM: Floor up 512"  :tag
+line 176 g "SR BOOM: Floor up lowest tex"   :tag
+line 142 g "W1 BOOM: Floor up 512"  :tag
+line 147 g "WR BOOM: Floor up 512"  :tag
 
-line 170 l "S1 BOOM: Light to 35"
-line 171 l "S1 BOOM: Light to 255"
-line 169 l "S1 BOOM: Light to highest nb"
-line 173 l "S1 BOOM: Light to lowest nb"
-line 192 l "SR BOOM: Light to highest nb"
-line 194 l "SR BOOM: Light to lowest nb"
-line 157 l "WR BOOM: Light to lowest nb"
-line 172 l "S1 BOOM: Light Blinking"
-line 193 l "SR BOOM: Light Blinking"
-line 156 l "WR BOOM: Light Blinking"
+line 170 l "S1 BOOM: Light to 35"   :tag
+line 171 l "S1 BOOM: Light to 255"  :tag
+line 169 l "S1 BOOM: Light to highest nb"   :tag
+line 173 l "S1 BOOM: Light to lowest nb"    :tag
+line 192 l "SR BOOM: Light to highest nb"   :tag
+line 194 l "SR BOOM: Light to lowest nb"    :tag
+line 157 l "WR BOOM: Light to lowest nb"    :tag
+line 172 l "S1 BOOM: Light Blinking"    :tag
+line 193 l "SR BOOM: Light Blinking"    :tag
+line 156 l "WR BOOM: Light Blinking"    :tag
 
-line 167 c "S1 BOOM: Ceiling close flr+8"
-line 204 c "S1 BOOM: Ceiling down HEF"
-line 203 c "S1 BOOM: Ceiling down LEC"
-line 166 c "S1 BOOM: Ceiling up HEC"
-line 187 c "SR BOOM: Ceiling close flr+8"
-line 206 c "SR BOOM: Ceiling down HEF"
-line 205 c "SR BOOM: Ceiling down LEC"
-line 186 c "SR BOOM: Ceiling up HEC"
-line 145 c "W1 BOOM: Ceiling close"
-line 200 c "W1 BOOM: Ceiling down HEF"
-line 199 c "W1 BOOM: Ceiling down LEC"
-line 152 c "WR BOOM: Ceiling close"
-line 202 c "WR BOOM: Ceiling down HEF"
-line 201 c "WR BOOM: Ceiling down LEC"
-line 151 c "WR BOOM: Ceiling up HEC"
+line 167 c "S1 BOOM: Ceiling close flr+8"   :tag
+line 204 c "S1 BOOM: Ceiling down HEF"  :tag
+line 203 c "S1 BOOM: Ceiling down LEC"  :tag
+line 166 c "S1 BOOM: Ceiling up HEC"    :tag
+line 187 c "SR BOOM: Ceiling close flr+8"   :tag
+line 206 c "SR BOOM: Ceiling down HEF"  :tag
+line 205 c "SR BOOM: Ceiling down LEC"  :tag
+line 186 c "SR BOOM: Ceiling up HEC"    :tag
+line 145 c "W1 BOOM: Ceiling close" :tag
+line 200 c "W1 BOOM: Ceiling down HEF"  :tag
+line 199 c "W1 BOOM: Ceiling down LEC"  :tag
+line 152 c "WR BOOM: Ceiling close" :tag
+line 202 c "WR BOOM: Ceiling down HEF"  :tag
+line 201 c "WR BOOM: Ceiling down LEC"  :tag
+line 151 c "WR BOOM: Ceiling up HEC"    :tag
 
-line 175 d "S1 BOOM: Close for 30s"
-line 196 d "SR BOOM: Close for 30s"
+line 175 d "S1 BOOM: Close for 30s" :tag
+line 196 d "SR BOOM: Close for 30s" :tag
 
 line 197 e "g1 BOOM: Exit level"
 line 198 e "g1 BOOM: Secret exit"
 
-line 159 f "S1 BOOM: Floor down LEF /NX"
-line 221 f "S1 BOOM: Floor down nlEF"
-line 177 f "SR BOOM: Floor down LEF /NX"
-line 222 f "SR BOOM: Floor down nlEF"
-line 219 f "W1 BOOM: Floor down nlEF"
-line 220 f "WR BOOM: Floor down nlEF"
+line 159 f "S1 BOOM: Floor down LEF /NX"    :tag
+line 221 f "S1 BOOM: Floor down nlEF"   :tag
+line 177 f "SR BOOM: Floor down LEF /NX"    :tag
+line 222 f "SR BOOM: Floor down nlEF"   :tag
+line 219 f "W1 BOOM: Floor down nlEF"   :tag
+line 220 f "WR BOOM: Floor down nlEF"   :tag
 
-line 143 p "W1 BOOM: Floor up 24 /TX"
-line 148 p "WR BOOM: Floor up 24 /TX"
-line 144 p "W1 BOOM: Floor up 32 /TX"
-line 149 p "WR BOOM: Floor up 32 /TX"
+line 143 p "W1 BOOM: Floor up 24 /TX"   :tag
+line 148 p "WR BOOM: Floor up 24 /TX"   :tag
+line 144 p "W1 BOOM: Floor up 32 /TX"   :tag
+line 149 p "WR BOOM: Floor up 32 /TX"   :tag
 
-line 162 m "S1 BOOM: Start Moving Floor"
-line 181 m "SR BOOM: Start Moving Floor"
-line 163 m "S1 BOOM: Stop Moving Floor"
-line 182 m "SR BOOM: Stop Moving Floor"
-line 211 m "SR BOOM: Floor Toggle"
-line 212 m "WR BOOM: Floor Toggle"
+line 162 m "S1 BOOM: Start Moving Floor"    :tag
+line 181 m "SR BOOM: Start Moving Floor"    :tag
+line 163 m "S1 BOOM: Stop Moving Floor" :tag
+line 182 m "SR BOOM: Stop Moving Floor" :tag
+line 211 m "SR BOOM: Floor Toggle"  :tag
+line 212 m "WR BOOM: Floor Toggle"  :tag
 
-line 209 t "S1 BOOM: Teleport /keepdir"
-line 174 t "S1 BOOM: Teleport"
-line 210 t "SR BOOM: Teleport /keepdir"
-line 195 t "SR BOOM: Teleport"
-line 207 t "W1 BOOM: Teleport /keepdir"
-line 243 t "W1 BOOM: Teleport Line"
-line 208 t "WR BOOM: Teleport /keepdir"
-line 244 t "WR BOOM: Teleport Line"
+line 209 t "S1 BOOM: Teleport /keepdir" :tag
+line 174 t "S1 BOOM: Teleport"          :tag
+line 210 t "SR BOOM: Teleport /keepdir" :tag
+line 195 t "SR BOOM: Teleport"          :tag
+line 207 t "W1 BOOM: Teleport /keepdir" :tag
+line 243 t "W1 BOOM: Teleport Line" :line_id
+line 208 t "WR BOOM: Teleport /keepdir" :tag
+line 244 t "WR BOOM: Teleport Line" :line_id
 
-line 213 l "-- BOOM: Transfer floor light"
-line 261 l "-- BOOM: Transfer ceil light"
+line 213 l "-- BOOM: Transfer floor light"  :tag
+line 261 l "-- BOOM: Transfer ceil light"   :tag
 
-line 223 - "-- BOOM: Friction"
-line 224 - "-- BOOM: Wind force"
-line 225 - "-- BOOM: Current force"
-line 226 - "-- BOOM: Point force"
-line 242 - "-- BOOM: Deep water"
-line 260 - "-- BOOM: Translucent"
+line 223 - "-- BOOM: Friction"  :tag
+line 224 - "-- BOOM: Wind force"    :tag
+line 225 - "-- BOOM: Current force" :tag
+line 226 - "-- BOOM: Point force"   :tag
+line 242 - "-- BOOM: Deep water"    :tag
+line 260 - "-- BOOM: Translucent"   :line_id
 
-line 227 v "W1 BOOM: Elevator up"
-line 228 v "WR BOOM: Elevator up"
-line 229 v "S1 BOOM: Elevator up"
-line 230 v "SR BOOM: Elevator up"
-line 231 v "W1 BOOM: Elevator down"
-line 232 v "WR BOOM: Elevator down"
-line 233 v "S1 BOOM: Elevator down"
-line 234 v "SR BOOM: Elevator down"
-line 235 v "W1 BOOM: Elevator to trigger"
-line 236 v "WR BOOM: Elevator to trigger"
-line 237 v "S1 BOOM: Elevator to trigger"
-line 238 v "SR BOOM: Elevator to trigger"
+line 227 v "W1 BOOM: Elevator up"   :tag
+line 228 v "WR BOOM: Elevator up"   :tag
+line 229 v "S1 BOOM: Elevator up"   :tag
+line 230 v "SR BOOM: Elevator up"   :tag
+line 231 v "W1 BOOM: Elevator down" :tag
+line 232 v "WR BOOM: Elevator down" :tag
+line 233 v "S1 BOOM: Elevator down" :tag
+line 234 v "SR BOOM: Elevator down" :tag
+line 235 v "W1 BOOM: Elevator to trigger"   :tag
+line 236 v "WR BOOM: Elevator to trigger"   :tag
+line 237 v "S1 BOOM: Elevator to trigger"   :tag
+line 238 v "SR BOOM: Elevator to trigger"   :tag
 
-line 252 a "-- BOOM: Push floor"
-line 216 a "-- BOOM: Push floor /accel"
-line 247 a "-- BOOM: Push floor /disp"
-line 253 a "-- BOOM: Push/Scr floor"
-line 217 a "-- BOOM: Push/Scr floor /acc"
-line 248 a "-- BOOM: Push/Scr floor /dis"
+line 252 a "-- BOOM: Push floor"    :tag
+line 216 a "-- BOOM: Push floor /accel" :tag
+line 247 a "-- BOOM: Push floor /disp"  :tag
+line 253 a "-- BOOM: Push/Scr floor"    :tag
+line 217 a "-- BOOM: Push/Scr floor /acc"   :tag
+line 248 a "-- BOOM: Push/Scr floor /dis"   :tag
 line 255 a "-- BOOM: Scroll X/Y offsets"
-line 254 a "-- BOOM: Scroll Wall /sync"
-line 214 a "-- BOOM: Scroll Ceil /accel"
-line 245 a "-- BOOM: Scroll Ceil /disp"
-line 250 a "-- BOOM: Scroll Ceil"
-line 215 a "-- BOOM: Scroll Floor /accel"
-line 246 a "-- BOOM: Scroll Floor /disp"
-line 251 a "-- BOOM: Scroll Floor"
-line 218 a "-- BOOM: Scroll Wall /accel"
-line 249 a "-- BOOM: Scroll Wall /disp"
+line 254 a "-- BOOM: Scroll Wall /sync" :line_id
+line 214 a "-- BOOM: Scroll Ceil /accel"    :tag
+line 245 a "-- BOOM: Scroll Ceil /disp" :tag
+line 250 a "-- BOOM: Scroll Ceil"   :tag
+line 215 a "-- BOOM: Scroll Floor /accel"   :tag
+line 246 a "-- BOOM: Scroll Floor /disp"    :tag
+line 251 a "-- BOOM: Scroll Floor"  :tag
+line 218 a "-- BOOM: Scroll Wall /accel"    :line_id
+line 249 a "-- BOOM: Scroll Wall /disp" :line_id
 
-line 256 s "WR BOOM: Stair Raise 8"
-line 257 s "WR BOOM: Stair Raise 16"
-line 258 s "SR BOOM: Stair Raise 8"
-line 259 s "SR BOOM: Stair Raise 16"
+line 256 s "WR BOOM: Stair Raise 8" :tag
+line 257 s "WR BOOM: Stair Raise 16"    :tag
+line 258 s "SR BOOM: Stair Raise 8" :tag
+line 259 s "SR BOOM: Stair Raise 16"    :tag
 
-line 262 t "W1 BOOM: Teleport Line /r"
-line 263 t "WR BOOM: Teleport Line /r"
-line 264 t "W1 BOOM: Teleport Line /mon/r"
-line 265 t "WR BOOM: Teleport Line /mon/r"
-line 266 t "W1 BOOM: Teleport Line /mon"
-line 267 t "WR BOOM: Teleport Line /mon"
-line 268 t "W1 BOOM: Teleport /mon"
-line 269 t "WR BOOM: Teleport /mon"
+line 262 t "W1 BOOM: Teleport Line /r"  :line_id
+line 263 t "WR BOOM: Teleport Line /r"  :line_id
+line 264 t "W1 BOOM: Teleport Line /mon/r"  :line_id
+line 265 t "WR BOOM: Teleport Line /mon/r"  :line_id
+line 266 t "W1 BOOM: Teleport Line /mon"    :line_id
+line 267 t "WR BOOM: Teleport Line /mon"    :line_id
+line 268 t "W1 BOOM: Teleport /mon" :tag
+line 269 t "WR BOOM: Teleport /mon" :tag
 
 
 #---- GENERALIZED LINETYPES ----------

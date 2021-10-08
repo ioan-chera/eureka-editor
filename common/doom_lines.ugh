@@ -31,100 +31,100 @@
 #
 
 line   0 - "-- NOTHING"
-line   9 - "S1 Donut (raise outer, lower inner)"
-line  78 - "SR Floor Transfer /NXP"
+line   9 - "S1 Donut (raise outer, lower inner)"    :tag
+line  78 - "SR Floor Transfer /NXP" :tag
 line  48 a "-- Scroll Wall Left"
 
-line  77 h "WR Crusher"
-line   6 h "W1 Crusher /fast"
-line  25 h "W1 Crusher /slow"
-line  73 h "WR Crusher /slow"
-line 141 h "W1 Crusher /silent"
-line  57 h "W1 Stop crusher"
-line  74 h "WR Stop crusher"
+line  77 h "WR Crusher" :tag
+line   6 h "W1 Crusher /fast"   :tag
+line  25 h "W1 Crusher /slow"   :tag
+line  73 h "WR Crusher /slow"   :tag
+line 141 h "W1 Crusher /silent" :tag
+line  57 h "W1 Stop crusher"    :tag
+line  74 h "WR Stop crusher"    :tag
 
-line  24 g "G1 Floor up LIC"
-line  47 g "G1 Floor up nhEF /TX"
-line 101 g "S1 Floor up LIC"
-line  55 g "S1 Floor up LIC-8 /cr"
-line  18 g "S1 Floor up nhEF"
-line  15 g "S1 Floor up 24 /TX"
-line  14 g "S1 Floor up 32 /TX"
-line  20 g "S1 Floor up nhEF /TX"
-line  64 g "SR Floor up LIC"
-line  65 g "SR Floor up LIC-8 /cr"
-line  69 g "SR Floor up nhEF"
-line  66 g "SR Floor up 24 /TX"
-line  67 g "SR Floor up 32 /TX"
-line  68 g "SR Floor up nhEF /TX"
-line  59 g "W1 Floor up 24 /TXP"
-line  58 g "W1 Floor up 24"
-line   5 g "W1 Floor up LIC"
-line  30 g "W1 Floor up lowest tex"
-line  56 g "W1 Floor up LIC-8 /cr"
-line  22 g "W1 Floor up nhEF /TX"
-line  93 g "WR Floor up 24 /TXP"
-line  92 g "WR Floor up 24"
-line  91 g "WR Floor up LIC"
-line  94 g "WR Floor up LIC-8 /cr"
-line  96 g "WR Floor up lowest tex"
-line  95 g "WR Floor up nhEF /TX"
-line 119 g "W1 Floor up nhEF"
-line 128 g "WR Floor up nhEF"
-line 129 g "WR Floor UP nhEF /fast"
-line 130 g "W1 Floor UP nhEF /fast"
-line 131 g "S1 Floor UP nhEF /fast"
-line 132 g "SR Floor UP nhEF /fast"
-line 140 g "S1 Floor up 512"
+line  24 g "G1 Floor up LIC"    :tag
+line  47 g "G1 Floor up nhEF /TX"   :tag
+line 101 g "S1 Floor up LIC"    :tag
+line  55 g "S1 Floor up LIC-8 /cr"  :tag
+line  18 g "S1 Floor up nhEF"   :tag
+line  15 g "S1 Floor up 24 /TX" :tag
+line  14 g "S1 Floor up 32 /TX" :tag
+line  20 g "S1 Floor up nhEF /TX"   :tag
+line  64 g "SR Floor up LIC"    :tag
+line  65 g "SR Floor up LIC-8 /cr"  :tag
+line  69 g "SR Floor up nhEF"   :tag
+line  66 g "SR Floor up 24 /TX" :tag
+line  67 g "SR Floor up 32 /TX" :tag
+line  68 g "SR Floor up nhEF /TX"   :tag
+line  59 g "W1 Floor up 24 /TXP"    :tag
+line  58 g "W1 Floor up 24" :tag
+line   5 g "W1 Floor up LIC"    :tag
+line  30 g "W1 Floor up lowest tex" :tag
+line  56 g "W1 Floor up LIC-8 /cr"  :tag
+line  22 g "W1 Floor up nhEF /TX"   :tag
+line  93 g "WR Floor up 24 /TXP"    :tag
+line  92 g "WR Floor up 24" :tag
+line  91 g "WR Floor up LIC"    :tag
+line  94 g "WR Floor up LIC-8 /cr"  :tag
+line  96 g "WR Floor up lowest tex" :tag
+line  95 g "WR Floor up nhEF /TX"   :tag
+line 119 g "W1 Floor up nhEF"   :tag
+line 128 g "WR Floor up nhEF"   :tag
+line 129 g "WR Floor UP nhEF /fast" :tag
+line 130 g "W1 Floor UP nhEF /fast" :tag
+line 131 g "S1 Floor UP nhEF /fast" :tag
+line 132 g "SR Floor UP nhEF /fast" :tag
+line 140 g "S1 Floor up 512"    :tag
 
-line  13 l "W1 Light to 255"
-line  81 l "WR Light to 255"
-line 138 l "SR Light to 255"
-line  35 l "W1 Light to 35"
-line  79 l "WR Light to 35"
-line 139 l "SR Light to 35"
-line  12 l "W1 Light to highest nb"
-line  80 l "WR Light to highest nb"
-line 104 l "W1 Light to lowest nb"
-line  17 l "W1 Light blink 1 Hz"
+line  13 l "W1 Light to 255"    :tag
+line  81 l "WR Light to 255"    :tag
+line 138 l "SR Light to 255"    :tag
+line  35 l "W1 Light to 35" :tag
+line  79 l "WR Light to 35" :tag
+line 139 l "SR Light to 35" :tag
+line  12 l "W1 Light to highest nb" :tag
+line  80 l "WR Light to highest nb" :tag
+line 104 l "W1 Light to lowest nb"  :tag
+line  17 l "W1 Light blink 1 Hz"    :tag
 
-line  49 c "S1 Ceiling close flr+8"
-line  41 c "S1 Ceiling close"
-line  43 c "SR Ceiling close"
-line  44 c "W1 Ceiling close flr+8"
-line  72 c "WR Ceiling close flr+8"
-line  40 c "W1 Ceiling up HEC"
+line  49 c "S1 Ceiling close flr+8" :tag
+line  41 c "S1 Ceiling close"   :tag
+line  43 c "SR Ceiling close"   :tag
+line  44 c "W1 Ceiling close flr+8" :tag
+line  72 c "WR Ceiling close flr+8" :tag
+line  40 c "W1 Ceiling up HEC"  :tag
 
 line  31 d "D1 Open and stay open"
 line   1 d "DR Open door"
-line  46 d "GR Open and stay"
-line  50 d "S1 Close door"
-line 103 d "S1 Open and stay"
-line  29 d "S1 Open door"
-line  42 d "SR Close door"
-line  61 d "SR Open and stay"
-line  63 d "SR Open door"
-line   3 d "W1 Close door"
-line  16 d "W1 Close for 30s"
-line   2 d "W1 Open and stay open"
-line   4 d "W1 Open door"
-line  75 d "WR Close door"
-line  76 d "WR Close for 30s"
-line  86 d "WR Open and stay"
-line  90 d "WR Open door"
+line  46 d "GR Open and stay"   :tag
+line  50 d "S1 Close door"  :tag
+line 103 d "S1 Open and stay"   :tag
+line  29 d "S1 Open door"   :tag
+line  42 d "SR Close door"  :tag
+line  61 d "SR Open and stay"   :tag
+line  63 d "SR Open door"   :tag
+line   3 d "W1 Close door"  :tag
+line  16 d "W1 Close for 30s"   :tag
+line   2 d "W1 Open and stay open"  :tag
+line   4 d "W1 Open door"   :tag
+line  75 d "WR Close door"  :tag
+line  76 d "WR Close for 30s"   :tag
+line  86 d "WR Open and stay"   :tag
+line  90 d "WR Open door"   :tag
 
-line 105 d "WR Open door /fast"
-line 106 d "WR Open and stay /fast"
-line 107 d "WR Close door /fast"
-line 108 d "W1 Open door /fast"
-line 109 d "W1 Open and stay /fast"
-line 110 d "W1 Close door /fast"
-line 111 d "S1 Open door /fast"
-line 112 d "S1 Open and stay /fast"
-line 113 d "S1 Close door /fast"
-line 114 d "SR Open door /fast"
-line 115 d "SR Open and stay /fast"
-line 116 d "SR Close door /fast"
+line 105 d "WR Open door /fast" :tag
+line 106 d "WR Open and stay /fast" :tag
+line 107 d "WR Close door /fast"    :tag
+line 108 d "W1 Open door /fast" :tag
+line 109 d "W1 Open and stay /fast" :tag
+line 110 d "W1 Close door /fast"    :tag
+line 111 d "S1 Open door /fast" :tag
+line 112 d "S1 Open and stay /fast" :tag
+line 113 d "S1 Close door /fast"    :tag
+line 114 d "SR Open door /fast" :tag
+line 115 d "SR Open and stay /fast" :tag
+line 116 d "SR Close door /fast"    :tag
 line 117 d "DR Open door /fast"
 line 118 d "D1 Open and stay /fast"
 
@@ -134,12 +134,12 @@ line  28 k "DR Open red door"
 line  32 k "D1 Open blue door (stay)"
 line  33 k "D1 Open red door (stay)"
 line  34 k "D1 Open yellow door (stay)"
-line  99 k "SR Open blue door /fast"
-line 133 k "S1 Open blue door /fast"
-line 134 k "SR Open red door /fast"
-line 135 k "S1 Open red door /fast"
-line 136 k "SR Open yellow door /fast"
-line 137 k "S1 Open yellow door /fast"
+line  99 k "SR Open blue door /fast"    :tag
+line 133 k "S1 Open blue door /fast"    :tag
+line 134 k "SR Open red door /fast" :tag
+line 135 k "S1 Open red door /fast" :tag
+line 136 k "SR Open yellow door /fast"  :tag
+line 137 k "S1 Open yellow door /fast"  :tag
 
 # the "S1" and "W1" are lowercase here to inhibit the map checking
 # functions complaining about missing tag numbers.
@@ -148,43 +148,43 @@ line  51 e "s1 Secret exit"
 line  52 e "w1 Exit level"
 line 124 e "w1 Secret exit"
 
-line 102 f "S1 Floor down HEF"
-line  71 f "S1 Floor down HEF+8 /fast"
-line  23 f "S1 Floor down LEF"
-line  45 f "SR Floor down HEF"
-line  70 f "SR Floor down HEF+8 /fast"
-line  60 f "SR Floor down LEF"
-line  19 f "W1 Floor down HEF"
-line  36 f "W1 Floor down HEF+8"
-line  37 f "W1 Floor down LEF /NXP"
-line  38 f "W1 Floor down LEF"
-line  98 f "WR Floor dn HEF+8 /fast"
-line  83 f "WR Floor down HEF"
-line  84 f "WR Floor down LEF /NXP"
-line  82 f "WR Floor down LEF"
+line 102 f "S1 Floor down HEF"  :tag
+line  71 f "S1 Floor down HEF+8 /fast"  :tag
+line  23 f "S1 Floor down LEF"  :tag
+line  45 f "SR Floor down HEF"  :tag
+line  70 f "SR Floor down HEF+8 /fast"  :tag
+line  60 f "SR Floor down LEF"  :tag
+line  19 f "W1 Floor down HEF"  :tag
+line  36 f "W1 Floor down HEF+8"    :tag
+line  37 f "W1 Floor down LEF /NXP" :tag
+line  38 f "W1 Floor down LEF"  :tag
+line  98 f "WR Floor dn HEF+8 /fast"    :tag
+line  83 f "WR Floor down HEF"  :tag
+line  84 f "WR Floor down LEF /NXP" :tag
+line  82 f "WR Floor down LEF"  :tag
 
-line  21 p "S1 Lift Lower"
-line  62 p "SR Lift Lower"
-line  10 p "W1 Lift Lower"
-line  88 p "WR Lift Lower"
-line 120 p "WR Lift Lower /fast"
-line 121 p "W1 Lift Lower /fast"
-line 122 p "S1 Lift Lower /fast"
-line 123 p "SR Lift Lower /fast"
+line  21 p "S1 Lift Lower"  :tag
+line  62 p "SR Lift Lower"  :tag
+line  10 p "W1 Lift Lower"  :tag
+line  88 p "WR Lift Lower"  :tag
+line 120 p "WR Lift Lower /fast"    :tag
+line 121 p "W1 Lift Lower /fast"    :tag
+line 122 p "S1 Lift Lower /fast"    :tag
+line 123 p "SR Lift Lower /fast"    :tag
 
-line  53 m "W1 Start Moving Floor"
-line  87 m "WR Start Moving Floor"
-line  54 m "W1 Stop Moving Floor"
-line  89 m "WR Stop Moving Floor"
+line  53 m "W1 Start Moving Floor"  :tag
+line  87 m "WR Start Moving Floor"  :tag
+line  54 m "W1 Stop Moving Floor"   :tag
+line  89 m "WR Stop Moving Floor"   :tag
 
-line   7 s "S1 Stair Raise 8"
-line 100 s "W1 Stair Raise 16"
-line   8 s "W1 Stair Raise 8"
+line   7 s "S1 Stair Raise 8"   :tag
+line 100 s "W1 Stair Raise 16"  :tag
+line   8 s "W1 Stair Raise 8"   :tag
 
-line  39 t "W1 Teleport"
-line  97 t "WR Teleport"
+line  39 t "W1 Teleport"    :tag
+line  97 t "WR Teleport"    :tag
 
-line 125 t "W1 Teleport /mon"
-line 126 t "WR Teleport /mon"
-line 127 s "S1 Stair Raise 16"
+line 125 t "W1 Teleport /mon"   :tag
+line 126 t "WR Teleport /mon"   :tag
+line 127 s "S1 Stair Raise 16"  :tag
 

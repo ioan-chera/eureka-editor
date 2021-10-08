@@ -47,6 +47,8 @@
 #include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
 
+#include <assert.h>
+
 
 #define CAMERA_COLOR  fl_rgb_color(255, 192, 255)
 
@@ -1543,26 +1545,167 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 	}
 }
 
-
 void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 {
 	// color has been set by caller
 
 	// handle tagged linedefs : show matching sector(s)
-	if (objtype == ObjType::linedefs && inst.level.linedefs[objnum]->tag > 0)
-	{
-		for (int m = 0 ; m < inst.level.numSectors(); m++)
-			if (inst.level.sectors[m]->tag == inst.level.linedefs[objnum]->tag)
-				DrawHighlight(ObjType::sectors, m);
-	}
 
-	// handle tagged sectors : show matching line(s)
-	if (objtype == ObjType::sectors && inst.level.sectors[objnum]->tag > 0)
-	{
-		for (int m = 0 ; m < inst.level.numLinedefs(); m++)
-			if (inst.level.linedefs[m]->tag == inst.level.sectors[objnum]->tag)
-				DrawHighlight(ObjType::linedefs, m);
-	}
+    //
+    // Highlight tagged items now
+    //
+    auto highlightTaggedItems = [this](const SpecialTagInfo &info)
+    {
+        if(info.numtags)
+            for (int m = 0 ; m < inst.level.numSectors(); m++)
+                if(inst.level.sectors[m]->tag > 0)
+                    for(int i = 0; i < info.numtags; ++i)
+                        if (inst.level.sectors[m]->tag == info.tags[i])
+                            DrawHighlight(ObjType::sectors, m);
+        if(info.numtids)
+            for(int m = 0; m < inst.level.numThings(); m++)
+                if(inst.level.things[m]->tid > 0)
+                {
+                    if(info.type == ObjType::things && info.objnum == m)
+                        continue;   // don't highlight the trigger again
+                    for(int i = 0; i < info.numtids; ++i)
+                        if(inst.level.things[m]->tid == info.tids[i])
+                            DrawHighlight(ObjType::things, m);
+                }
+
+        if(info.numlineids)
+        {
+            for(int m = 0; m < inst.level.numLinedefs(); ++m)
+            {
+                if(info.type == ObjType::linedefs && info.objnum == m)
+                    continue;   // don't highlight the trigger again
+                const LineDef &line = *inst.level.linedefs[m];
+                if(inst.loaded.levelFormat == MapFormat::doom)
+                {
+                    if(line.tag > 0)
+                    {
+                        for(int i = 0; i < info.numlineids; ++i)
+                            if(line.tag == info.lineids[i])
+                                DrawHighlight(ObjType::linedefs, m);
+                    }
+                }
+                else if(inst.loaded.levelFormat == MapFormat::hexen)
+                {
+                    SpecialTagInfo linfo;
+                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, &line, inst.conf, linfo)
+                       || linfo.selflineid <= 0)
+                    {
+                        continue;
+                    }
+                    for(int i = 0; i < info.numlineids; ++i)
+                        if(linfo.selflineid == info.lineids[i])
+                            DrawHighlight(ObjType::linedefs, m);
+                }
+                // TODO: also handle UDMF.
+            }
+        }
+
+        if(info.numpo)
+            for(int m = 0; m < inst.level.numThings(); ++m)
+            {
+                const Thing &thing = *inst.level.things[m];
+                const thingtype_t *type = get(inst.conf.thing_types, thing.type);
+                if(!type || !(type->flags & THINGDEF_POLYSPOT))
+                    continue;
+                for(int i = 0; i < info.numpo; ++i)
+                    if(info.po[i] == thing.angle)
+                        DrawHighlight(ObjType::things, m);
+            }
+    };
+
+    //
+    // Look for all the tagging things
+    //
+    auto highlightTaggingTriggers = [this, objnum, objtype](int tag, int (SpecialTagInfo::*tags)[5],
+                                                            int SpecialTagInfo::*numtags)
+    {
+        if(tag <= 0)
+            return;
+        for (int m = 0 ; m < inst.level.numLinedefs(); m++)
+        {
+            if(objtype == ObjType::linedefs && m == objnum)
+                continue;
+            const LineDef *line = inst.level.linedefs[m];
+            assert(line);
+            SpecialTagInfo info;
+            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line, inst.conf, info))
+                continue;
+
+            for(int i = 0; i < info.*numtags; ++i)
+                if((info.*tags)[i] == tag)
+                {
+                    DrawHighlight(ObjType::linedefs, m);
+                    break;
+                }
+        }
+        if(inst.loaded.levelFormat == MapFormat::doom)
+            return;
+        for (int m = 0 ; m < inst.level.numThings(); m++)
+        {
+            if(objtype == ObjType::things && m == objnum)
+                continue;
+            const Thing *thing = inst.level.things[m];
+            assert(thing);
+            SpecialTagInfo info;
+            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing, inst.conf, info))
+                continue;
+
+            for(int i = 0; i < info.*numtags; ++i)
+                if((info.*tags)[i] == tag)
+                {
+                    DrawHighlight(ObjType::things, m);
+                    break;
+                }
+        }
+    };
+
+	if (objtype == ObjType::linedefs)
+    {
+        const LineDef *line = inst.level.linedefs[objnum];
+        assert(line);
+        SpecialTagInfo info;
+        if(getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, info))
+            highlightTaggedItems(info);
+        if(inst.loaded.levelFormat == MapFormat::doom)
+        {
+            highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
+                                     &SpecialTagInfo::numlineids);
+        }
+        else
+        {
+            SpecialTagInfo linfo;
+            if(!getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, linfo))
+                return;
+            // TODO: also UDMF line ID
+            if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
+            {
+                highlightTaggingTriggers(linfo.selflineid, &SpecialTagInfo::lineids,
+                                         &SpecialTagInfo::numlineids);
+            }
+        }
+    }
+    else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
+    {
+        const Thing *thing = inst.level.things[objnum];
+        assert(thing);
+        SpecialTagInfo info;
+        if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
+            highlightTaggedItems(info);
+        highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
+        const thingtype_t *type = get(inst.conf.thing_types, thing->type);
+        if(type && type->flags & THINGDEF_POLYSPOT)
+            highlightTaggingTriggers(thing->angle, &SpecialTagInfo::po, &SpecialTagInfo::numpo);
+    }
+	else if (objtype == ObjType::sectors)
+    {
+        highlightTaggingTriggers(inst.level.sectors[objnum]->tag, &SpecialTagInfo::tags,
+                                 &SpecialTagInfo::numtags);
+    }
 }
 
 

@@ -33,6 +33,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include <map>
 #include <string>
 
 class SString;
@@ -52,6 +53,15 @@ double AlongDist(double x, double y, /* coord to test */
 int RoundPOW2(int x);
 
 SString GetErrorMessage(int errorNumber);
+
+template <typename K, typename V>
+const V *get(const std::map<K, V> &map, const K &key)
+{
+    auto it = map.find(key);
+    if(it == map.end())
+        return nullptr;
+    return &it->second;
+}
 
 /*
  *  y_isident - return true iff <c> is one of a-z, A-Z, 0-9 or "_".

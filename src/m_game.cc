@@ -26,6 +26,7 @@
 
 #include "Instance.h"
 #include "m_streams.h"
+#include <assert.h>
 
 #define MAX_TOKENS  30   /* tokens per line */
 
@@ -226,6 +227,7 @@ static short ParseThingdefFlags(const char *s)
 	if (strchr(s, 'n')) flags |= THINGDEF_PASS;
 	if (strchr(s, 'v')) flags |= THINGDEF_VOID;
 	if (strchr(s, 't')) flags |= THINGDEF_TELEPT;
+    if (strchr(s, 'p')) flags |= THINGDEF_POLYSPOT;
 
 	return flags;
 }
@@ -432,6 +434,17 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 	return !filename.empty();
 }
 
+//
+// Returns true if this is a polyobject source line
+//
+bool linetype_t::isPolyObjectSpecial() const
+{
+    for(const SpecialArg &arg : args)
+        if(arg.type == SpecialArgType::po)
+            return true;
+    return false;
+}
+
 
 //
 // Loads a definition file.  The ".ugh" extension is added.
@@ -546,6 +559,40 @@ void parser_state_c::tokenize()
 		fail("unmatched double quote");
 }
 
+//
+// Parses an arg string. Will return true and populate arg if successful
+//
+static bool parseArg(const char *text, SpecialArg &arg)
+{
+    assert(!!text);
+    const char *pos = strchr(text, ':');
+    if(!pos)
+    {
+        arg.name = text;
+        arg.type = SpecialArgType::generic;
+        return true;
+    }
+    const char *type = pos + 1;
+    // Either use whatever's before the colon, or the type name if empty.
+    arg.name = pos == text ? type : SString(text, (int)(pos - text));
+    if(!strcmp(type, "tag"))
+        arg.type = SpecialArgType::tag;
+    else if(!strcmp(type, "tag_hi"))
+        arg.type = SpecialArgType::tag_hi;
+    else if(!strcmp(type, "line_id"))
+        arg.type = SpecialArgType::line_id;
+    else if(!strcmp(type, "self_line_id"))
+        arg.type = SpecialArgType::self_line_id;
+    else if(!strcmp(type, "self_line_id_hi"))
+        arg.type = SpecialArgType::self_line_id_hi;
+    else if(!strcmp(type, "tid"))
+        arg.type = SpecialArgType::tid;
+    else if(!strcmp(type, "po"))
+        arg.type = SpecialArgType::po;
+    else    // error
+        return false;
+    return true;
+}
 
 static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 {
@@ -647,7 +694,10 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		for (int i = 0 ; i < arg_count ; i++)
 		{
 			if (argv[4 + i][0] != '-')
-				info.args[i] = argv[4 + i];
+            {
+                if(!parseArg(argv[4 + i], info.args[i]))
+                    pst->fail("invalid arg type \"%s\"", argv[4 + i]);
+            }
 		}
 
 		if (config.line_groups.find( info.group) == config.line_groups.end())

@@ -312,8 +312,8 @@ thing 9001  - n   20  _MSP "Map spot"
 thing 9013  - n   20  _MSP "Map spot /gravity"
 
 thing 3000  - nv 8 NULL "Polyobject anchor"
-thing 3001  - nv 8 NULL "Polyobject spot"
-thing 3002  - nv 8 NULL "Polyobject spot /crush"
+thing 3001  - npv 8 NULL "Polyobject spot"
+thing 3002  - npv 8 NULL "Polyobject spot /crush"
 
 thing 1400  s n 8 NULL "Sndtype Stone"
 thing 1401  s n 8 NULL "Sndtype Heavy"
