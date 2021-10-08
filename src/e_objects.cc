@@ -2345,7 +2345,7 @@ bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj
                 info.selflineid += 256 * arg;
                 break;
             case SpecialArgType::po:
-                info.po = arg;
+                info.po[info.numpo++] = arg;
                 break;
             default:
                 break;

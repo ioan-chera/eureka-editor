@@ -76,7 +76,7 @@ struct SpecialArg
 // line <number> <group> <description>  [ arg1 .. arg5 ]
 struct linetype_t
 {
-    bool isPolyObjectDefinition() const;
+    bool isPolyObjectSpecial() const;
 
 	char group;
 	SString desc;

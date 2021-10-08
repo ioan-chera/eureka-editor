@@ -1603,24 +1603,23 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             }
         }
 
-        if(info.po > 0)
+        if(info.numpo)
             for(int m = 0; m < inst.level.numThings(); ++m)
             {
                 const Thing &thing = *inst.level.things[m];
-                if(thing.angle != info.po)  // early out
-                    continue;
                 const thingtype_t *type = get(inst.conf.thing_types, thing.type);
                 if(!type || !(type->flags & THINGDEF_POLYSPOT))
                     continue;
-                DrawHighlight(ObjType::things, m);
+                for(int i = 0; i < info.numpo; ++i)
+                    if(info.po[i] == thing.angle)
+                        DrawHighlight(ObjType::things, m);
             }
     };
 
     //
     // Look for all the tagging things
     //
-    auto highlightTaggingTriggers = [this, objnum, objtype](int tag, bool usepo,
-                                                            int (SpecialTagInfo::*tags)[5],
+    auto highlightTaggingTriggers = [this, objnum, objtype](int tag, int (SpecialTagInfo::*tags)[5],
                                                             int SpecialTagInfo::*numtags)
     {
         if(tag <= 0)
@@ -1635,12 +1634,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line, inst.conf, info))
                 continue;
 
-            if(usepo)
-            {
-                if(info.po == tag)
-                    DrawHighlight(ObjType::linedefs, m);
-                continue;
-            }
             for(int i = 0; i < info.*numtags; ++i)
                 if((info.*tags)[i] == tag)
                 {
@@ -1660,12 +1653,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing, inst.conf, info))
                 continue;
 
-            if(usepo)
-            {
-                if(info.po == tag)
-                    DrawHighlight(ObjType::things, m);
-                continue;
-            }
             for(int i = 0; i < info.*numtags; ++i)
                 if((info.*tags)[i] == tag)
                 {
@@ -1684,7 +1671,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
-            highlightTaggingTriggers(line->tag, false, &SpecialTagInfo::lineids,
+            highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
                                      &SpecialTagInfo::numlineids);
         }
         else
@@ -1695,7 +1682,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             // TODO: also UDMF line ID
             if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
             {
-                highlightTaggingTriggers(linfo.selflineid, false, &SpecialTagInfo::lineids,
+                highlightTaggingTriggers(linfo.selflineid, &SpecialTagInfo::lineids,
                                          &SpecialTagInfo::numlineids);
             }
         }
@@ -1707,14 +1694,14 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         SpecialTagInfo info;
         if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
             highlightTaggedItems(info);
-        highlightTaggingTriggers(thing->tid, false, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
+        highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
         const thingtype_t *type = get(inst.conf.thing_types, thing->type);
         if(type && type->flags & THINGDEF_POLYSPOT)
-            highlightTaggingTriggers(thing->angle, true, nullptr, nullptr);
+            highlightTaggingTriggers(thing->angle, &SpecialTagInfo::po, &SpecialTagInfo::numpo);
     }
 	else if (objtype == ObjType::sectors)
     {
-        highlightTaggingTriggers(inst.level.sectors[objnum]->tag, false, &SpecialTagInfo::tags,
+        highlightTaggingTriggers(inst.level.sectors[objnum]->tag, &SpecialTagInfo::tags,
                                  &SpecialTagInfo::numtags);
     }
 }

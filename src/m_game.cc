@@ -437,7 +437,7 @@ bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 //
 // Returns true if this is a polyobject source line
 //
-bool linetype_t::isPolyObjectDefinition() const
+bool linetype_t::isPolyObjectSpecial() const
 {
     for(const SpecialArg &arg : args)
         if(arg.type == SpecialArgType::po)

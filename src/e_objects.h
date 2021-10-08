@@ -140,7 +140,8 @@ struct SpecialTagInfo
 
     int selflineid = 0;
 
-    int po; // NOTE: currently only one po is given. Will add later as development happens
+    int po[5];
+    int numpo = 0;
 };
 
 bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj,
