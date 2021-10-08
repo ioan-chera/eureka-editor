@@ -406,21 +406,6 @@ void DetectPolyobjSectors(const Instance &inst)
 		return;
 	}
 
-	// -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
-	bool hexen_style = true;
-
-	for (i = 0 ; i < inst.level.numThings() ; i++)
-	{
-		const Thing *T = inst.level.things[i];
-
-		if (T->type == ZDOOM_PO_SPAWN_TYPE || T->type == ZDOOM_PO_SPAWNCRUSH_TYPE)
-		{
-			// -JL- A ZDoom style polyobj thing found
-			hexen_style = false;
-			break;
-		}
-	}
-
 # if DEBUG_POLYOBJ
 	gLog.debugPrintf("Using %s style polyobj things\n",
 			hexen_style ? "HEXEN" : "ZDOOM");
@@ -433,19 +418,10 @@ void DetectPolyobjSectors(const Instance &inst)
 		double x = T->x();
 		double y = T->y();
 
-		// ignore everything except polyobj start spots
-		if (hexen_style)
-		{
-			// -JL- Hexen style polyobj things
-			if (T->type != PO_SPAWN_TYPE && T->type != PO_SPAWNCRUSH_TYPE)
-				continue;
-		}
-		else
-		{
-			// -JL- ZDoom style polyobj things
-			if (T->type != ZDOOM_PO_SPAWN_TYPE && T->type != ZDOOM_PO_SPAWNCRUSH_TYPE)
-				continue;
-		}
+        // ignore everything except polyobj start spots
+        const thingtype_t *type = get(inst.conf.thing_types, T->type);
+        if(!type || !(type->flags & THINGDEF_POLYSPOT))
+            continue;
 
 #   if DEBUG_POLYOBJ
 		gLog.debugPrintf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);

@@ -124,6 +124,7 @@ enum thingdef_flags_e
 	THINGDEF_PASS    = (1 << 3),  // non-blocking
 	THINGDEF_VOID    = (1 << 4),  // can exist in the void
 	THINGDEF_TELEPT  = (1 << 5),  // teleport dest, can overlap certain things
+    THINGDEF_POLYSPOT= (1 << 6),  // polyobject spawn spot, tagging & BSP
 };
 
 

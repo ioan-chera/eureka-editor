@@ -72,9 +72,9 @@ thing 1409 - nv 16 NULL "Sound Sequence 9"
 thing 1411 - nv 16 NULL "Sound Sequence arg"
 
 thing 9300 - n  16 NULL "ZD: PolyObj Anchor"
-thing 9301 - n  16 NULL "ZD: PolyObject"
-thing 9302 - n  16 NULL "ZD: PolyObject /crush"
-thing 9303 - n  16 NULL "ZD: PolyObject /burn"
+thing 9301 - npv  16 NULL "ZD: PolyObject"
+thing 9302 - npv  16 NULL "ZD: PolyObject /crush"
+thing 9303 - npv  16 NULL "ZD: PolyObject /burn"
 
 thing 1500 - n  16 NULL "ZD: Floor slope"
 thing 1501 - n  16 NULL "ZD: Ceil slope"

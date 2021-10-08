@@ -227,6 +227,7 @@ static short ParseThingdefFlags(const char *s)
 	if (strchr(s, 'n')) flags |= THINGDEF_PASS;
 	if (strchr(s, 'v')) flags |= THINGDEF_VOID;
 	if (strchr(s, 't')) flags |= THINGDEF_TELEPT;
+    if (strchr(s, 'p')) flags |= THINGDEF_POLYSPOT;
 
 	return flags;
 }
