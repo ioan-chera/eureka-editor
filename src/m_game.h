@@ -61,8 +61,7 @@ enum class SpecialArgType
     self_line_id,
     self_line_id_hi,
     tid,
-    po,
-    self_po
+    po
 };
 
 //

@@ -1604,21 +1604,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         }
 
         if(info.po > 0)
-        {
-            // Highlight the linedefs with selfpo
-            if(info.po != info.selfpo)
-                for(int m = 0; m < inst.level.numLinedefs(); ++m)
-                {
-                    const LineDef &line = *inst.level.linedefs[m];
-                    SpecialTagInfo linfo;
-                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, &line, inst.conf, linfo)
-                       || linfo.selfpo != info.po)
-                    {
-                        continue;
-                    }
-                    DrawHighlight(ObjType::linedefs, m);
-                }
-
             for(int m = 0; m < inst.level.numThings(); ++m)
             {
                 const Thing &thing = *inst.level.things[m];
@@ -1629,7 +1614,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                     continue;
                 DrawHighlight(ObjType::things, m);
             }
-        }
     };
 
     //
@@ -1714,8 +1698,6 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 highlightTaggingTriggers(linfo.selflineid, false, &SpecialTagInfo::lineids,
                                          &SpecialTagInfo::numlineids);
             }
-            if(linfo.selfpo > 0)
-                highlightTaggingTriggers(linfo.selfpo, true, nullptr, nullptr);
         }
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)

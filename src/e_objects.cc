@@ -2347,9 +2347,6 @@ bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj
             case SpecialArgType::po:
                 info.po = arg;
                 break;
-            case SpecialArgType::self_po:
-                info.selfpo = arg;
-                break;
             default:
                 break;
         }

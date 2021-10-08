@@ -98,8 +98,8 @@ special 137 t "Thing_Spawn /silent" :tid  type  angle
 
 # Polyobj specials
 
-special 1 p "Polyobj_Start"       po:self_po  mirror:po  sound_seq
-special 5 p "Polyobj_Explicit"    po:self_po  order  mirror:po  sound_seq
+special 1 p "Polyobj_Start"       :po  mirror:po  sound_seq
+special 5 p "Polyobj_Explicit"    :po  order  mirror:po  sound_seq
 
 special 2 p "Polyobj_RotateL"     :po  speed  angle
 special 3 p "Polyobj_RotateR"     :po  speed  angle

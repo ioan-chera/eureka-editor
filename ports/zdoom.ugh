@@ -382,8 +382,8 @@ special 224 a "Scroll_Ceiling"         :tag  tex_flags  -  x_speed  y_speed
 special  58 a "Sector_CopyScroller"    :tag  flags
 
 # PolyObjects
-special   1 p "PolyObject Start Line"   po:self_po  mirror_po:po  sound_seq
-special   5 p "Polyobj_ExplicitLine"    po:self_po  render_order  mirror_po:po  sound_seq line_id:self_line_id
+special   1 p "PolyObject Start Line"  :po  mirror_po:po  sound_seq
+special   5 p "Polyobj_ExplicitLine"   :po  render_order  mirror_po:po  sound_seq line_id:self_line_id
 special   2 p "Polyobj_RotateLeft"     :po  speed  angle
 special  90 p "Polyobj_OR_RotateLeft"  :po  speed  angle
 special   3 p "Polyobj_RotateRight"    :po  speed  angle
