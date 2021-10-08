@@ -1570,14 +1570,20 @@ struct SpecialTagInfo
 //
 // Get the tag info here. Returns true if available and sets the output argument.
 //
-static bool getSpecialTagInfo(ObjType objtype, int objnum, int special,
-                              int (*getArg)(int n, const void *data), const void *data,
+static bool getSpecialTagInfo(ObjType objtype, int objnum, int special, const void *obj,
                               const ConfigData &config, SpecialTagInfo &info)
 {
     if(special <= 0)
         return false;
 
-    assert(getArg);
+    auto getArg = [objtype, obj](int index)
+    {
+        if(objtype == ObjType::things)
+            return static_cast<const Thing *>(obj)->Arg(index);
+        if(objtype == ObjType::linedefs)
+            return static_cast<const LineDef *>(obj)->Arg(index);
+        return 0;
+    };
 
     // First try generalized
     for(int i = 0; i < config.num_gen_linetypes; ++i)
@@ -1589,7 +1595,7 @@ static bool getSpecialTagInfo(ObjType objtype, int objnum, int special,
             info.type = objtype;
             info.objnum = objnum;
             info.numtags = 1;
-            info.tags[0] = getArg(1, data);
+            info.tags[0] = getArg(1);
             return true;
         }
     }
@@ -1603,7 +1609,8 @@ static bool getSpecialTagInfo(ObjType objtype, int objnum, int special,
     info.objnum = objnum;
     for(int i = 0; i < (int)lengthof(it->second.args); ++i)
     {
-        int arg = getArg(i + 1, data);
+        int arg = getArg(i + 1);
+
         switch(it->second.args[i].type)
         {
             case SpecialArgType::tag:
@@ -1643,21 +1650,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 
 	// handle tagged linedefs : show matching sector(s)
 
-    auto getLineArg = [](int index, const void *data)
-    {
-        auto line = static_cast<const LineDef *>(data);
-        return line->Arg(index);
-    };
-    auto getThingArg = [](int index, const void *data)
-    {
-        auto thing = static_cast<const Thing *>(data);
-        return thing->Arg(index);
-    };
-
     //
     // Highlight tagged items now
     //
-    auto highlightTaggedItems = [this, getLineArg](const SpecialTagInfo &info)
+    auto highlightTaggedItems = [this](const SpecialTagInfo &info)
     {
         if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
@@ -1695,8 +1691,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 else if(inst.loaded.levelFormat == MapFormat::hexen)
                 {
                     SpecialTagInfo linfo;
-                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, getLineArg, &line,
-                                          inst.conf, linfo) || linfo.selflineid <= 0)
+                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, &line, inst.conf, linfo)
+                       || linfo.selflineid <= 0)
                     {
                         continue;
                     }
@@ -1716,8 +1712,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 {
                     const LineDef &line = *inst.level.linedefs[m];
                     SpecialTagInfo linfo;
-                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, getLineArg, &line,
-                                          inst.conf, linfo) || linfo.selfpo != info.po)
+                    if(!getSpecialTagInfo(ObjType::linedefs, m, line.type, &line, inst.conf, linfo)
+                       || linfo.selfpo != info.po)
                     {
                         continue;
                     }
@@ -1730,10 +1726,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     //
     // Look for all the tagging things
     //
-    auto highlightTaggingTriggers = [this, getLineArg, getThingArg,
-                                     objnum, objtype](int tag, bool usepo,
-                                                      int (SpecialTagInfo::*tags)[5],
-                                                      int SpecialTagInfo::*numtags)
+    auto highlightTaggingTriggers = [this, objnum, objtype](int tag, bool usepo,
+                                                            int (SpecialTagInfo::*tags)[5],
+                                                            int SpecialTagInfo::*numtags)
     {
         if(tag <= 0)
             return;
@@ -1744,11 +1739,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             const LineDef *line = inst.level.linedefs[m];
             assert(line);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, getLineArg, line, inst.conf,
-                                  info))
-            {
+            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line, inst.conf, info))
                 continue;
-            }
 
             if(usepo)
             {
@@ -1772,11 +1764,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             const Thing *thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::things, m, thing->special, getThingArg, thing, inst.conf,
-                                  info))
-            {
+            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing, inst.conf, info))
                 continue;
-            }
 
             if(usepo)
             {
@@ -1798,7 +1787,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         const LineDef *line = inst.level.linedefs[objnum];
         assert(line);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, line->type, getLineArg, line, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, info))
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
@@ -1808,7 +1797,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         else
         {
             SpecialTagInfo linfo;
-            if(!getSpecialTagInfo(objtype, objnum, line->type, getLineArg, line, inst.conf, linfo))
+            if(!getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, linfo))
                 return;
             // TODO: also UDMF line ID
             if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
@@ -1825,7 +1814,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         const Thing *thing = inst.level.things[objnum];
         assert(thing);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, thing->special, getThingArg, thing, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
             highlightTaggedItems(info);
         highlightTaggingTriggers(thing->tid, false, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
     }
