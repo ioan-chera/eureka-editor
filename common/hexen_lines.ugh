@@ -24,4 +24,125 @@
 #
 #------------------------------------------------------------------------
 
-include "param_specials"
+# Floors and lifts
+
+special 20 f "Floor_Lower"          :tag  speed  dist
+special 21 f "Floor_Lower /lowest"  :tag  speed
+special 22 f "Floor_Lower /nearest" :tag  speed
+special 23 f "Floor_Raise"          :tag  speed  dist
+special 24 f "Floor_Raise /highest" :tag  speed
+special 25 f "Floor_Raise /nearest" :tag  speed
+special 28 f "Floor_Raise /crush"   :tag  speed  damage
+special 35 f "Floor_Raise x8"       :tag  speed  dist_x8
+special 36 f "Floor_Lower x8"       :tag  speed  dist_x8
+special 66 f "Floor_Lower /instant" :tag  -  dist
+special 67 f "Floor_Raise /instant" :tag  -  dist
+special 68 f "Floor_MoveTo x8"      :tag  speed  height_x8  negate?
+special 46 f "Floor_CrushStop"      :tag
+
+special 138 f "Floor_Waggle"        :tag  amp  speed  offset  time
+
+special 62 g "Plat_DownWaitUp"  :tag  speed  delay
+special 63 g "Plat_Down"        :tag  speed  delay  dist
+special 64 g "Plat_UpWaitDown"  :tag  speed  delay
+special 65 g "Plat_Up"          :tag  speed  delay  dist
+special 60 g "Plat_Perpetual"   :tag  speed  delay
+special 61 g "Plat_Stop"        :tag
+
+special 26 q "Stairs_Down"        :tag  speed  dist  delay  reset
+special 27 q "Stairs_Up"          :tag  speed  dist  delay  reset
+special 31 q "Stairs_Down /sync"  :tag  speed  dist  reset
+special 32 q "Stairs_Up   /sync"  :tag  speed  dist  reset
+
+# Ceiling and doors
+
+special 40 c "Ceiling_Lower"      :tag  speed  dist
+special 41 c "Ceiling_Raise"      :tag  speed  dist
+special 69 c "Ceiling_MoveTo x8"  :tag  speed  height_x8  negate?
+
+special 42 c "Ceiling_Crush /perpet"  :tag  speed  damage
+special 43 c "Ceiling_Crush "         :tag  speed  damage
+special 45 c "Ceiling_CrushAndUp"     :tag  speed  damage
+special 44 c "Ceiling_CrushStop"      :tag
+
+special 10 d "Door_Close"   :tag  speed
+special 11 d "Door_Open"    :tag  speed
+special 12 d "Door_Raise"   :tag  speed  delay
+special 13 d "Door_Locked"  :tag  speed  delay  lock
+
+# Lighting
+
+special 110 l "Light_Raise"   :tag  light
+special 111 l "Light_Lower"   :tag  light
+special 112 l "Light_Set"     :tag  light
+special 113 l "Light_Fade"    :tag  light  time
+special 114 l "Light_Glow"    :tag  high  low  time
+special 115 l "Light_Flicker" :tag  high  low
+special 116 l "Light_Strobe"  :tag  high  low  hightime  lowtime
+
+special 109 l "Force Lightning"  mode
+
+# Thing specials
+
+special 72 t "Push Thing"    angle  dist
+special 73 t "Damage Thing"  damage
+
+special 130 t "Thing_Activate"      :tid
+special 131 t "Thing_Deactivate"    :tid
+special 132 t "Thing_Remove"        :tid
+special 133 t "Thing_Destroy"       :tid
+special 134 t "Thing_Launch"        :tid  type  angle  speed  vspeed
+special 136 t "Thing_Launch /grav"  :tid  type  angle  speed  vspeed
+special 135 t "Thing_Spawn"         :tid  type  angle
+special 137 t "Thing_Spawn /silent" :tid  type  angle
+
+# Polyobj specials
+
+special 1 p "Polyobj_Start"       :po  mirror:po  sound_seq
+special 5 p "Polyobj_Explicit"    :po  order  mirror:po  sound_seq
+
+special 2 p "Polyobj_RotateL"     :po  speed  angle
+special 3 p "Polyobj_RotateR"     :po  speed  angle
+special 4 p "Polyobj_Move"        :po  speed  angle  dist
+special 6 p "Polyobj_Move x8"     :po  speed  angle  dist
+special 7 p "Polyobj_DoorSwing"   :po  speed  angle  delay
+special 8 p "Polyobj_DoorSlide"   :po  speed  angle  dist  delay
+
+special 90 p "Polyobj_RotateL /OR"  :po  speed  angle
+special 91 p "Polyobj_RotateR /OR"  :po  speed  angle
+special 92 p "Polyobj_Move /OR"     :po  speed  angle  dist
+special 93 p "Polyobj_Move x8 /OR"  :po  speed  angle  dist
+
+# Miscellaneous
+
+special 0  - "NOTHING"
+
+special 29 e "Pillar_Build"  :tag  speed  dist
+special 30 e "Pillar_Open"   :tag  speed  f_dist  c_dist
+special 94 e "Pillar_Crush"  :tag  speed  dist  damage
+
+special 95 e "Elevator_Lower"    :tag  speed  dist
+special 96 e "Elevator_Raise"    :tag  speed  dist
+
+special 80 k "ACS_Execute"       script  map  param1  param2  param3
+special 83 k "ACS_Execute /lock" script  map  param1  param2  lock
+special 81 k "ACS_Suspend"       script  map
+special 82 k "ACS_Terminate"     script  map
+
+special 121 - "Line_SetIdent"  id_number:self_line_id
+
+special 100 a "Scroll_Left"   speed
+special 101 a "Scroll_Right"  speed
+special 102 a "Scroll_Up"     speed
+special 103 a "Scroll_Down"   speed
+
+special 129 - "UsePuzzleItem"  item  script  param1  param2  param3
+special 140 - "Change Sound"  :tag  sound_seq
+special 120 - "Earthquake"  intensity  duration  damrad  tremrad  :tid
+
+special 70 u "Teleport"          :tid
+special 71 u "Teleport /silent"  :tid
+
+special 74 x "Exit_ToMap"  map  position
+special 75 x "End_Game"
+
