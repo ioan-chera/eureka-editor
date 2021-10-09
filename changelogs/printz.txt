@@ -4,6 +4,11 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+09.10.2021
+* Removed the Hexen format support from Eternity. This format is only meant for vanilla Hexen wads
+  and should not be used for new maps when UDMF is available.
+
+----------
 08.10.2021
 * Now the tagged items (regardless of type) get highlighted properly, depending on the triggering
   special.

@@ -38,7 +38,7 @@ if $ALLOW_BOOM is 1
 endif
 
 
-map_formats DOOM HEXEN UDMF
+map_formats DOOM UDMF
 
 supported_games doom doom2 heretic hexen strife
 
