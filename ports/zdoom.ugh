@@ -200,6 +200,7 @@ special 239 f "Floor_RaiseByValueTxTy"     :tag  speed  dist
 special 240 f "Floor_RaiseByTexture"       :tag  speed
 special  67 f "Floor_RaiseInstant"         :tag  -  dist_x8
 special  28 f "Floor_RaiseAndCrush"        :tag  speed  damage  crush_mode
+special  99 f "Floor_RaiseAndCrushDoom"    :tag  speed  damage  crush_mode
 special  46 f "Floor_CrushStop"            :tag
 special  37 f "Floor_MoveToValue"          :tag  speed  dist  negate?
 special  68 f "Floor_MoveToValueTimes8"    :tag  speed  dist_x8  negate?
