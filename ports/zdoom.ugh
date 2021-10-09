@@ -254,7 +254,7 @@ special  64 g "Plat_UpWaitDownStay"          :tag  speed  delay
 special 172 g "Plat_UpNearestWaitDownStay"   :tag  speed  delay
 special  65 g "Plat_UpByValue"               :tag  speed  delay  dist_x8
 special 230 g "Plat_UpByValueStayTx"         :tag  speed  dist_x8
-special 228 g "Plat_RaiseAndStayTx0"         :tag  speed
+special 228 g "Plat_RaiseAndStayTx0"         :tag  speed  lockout
 special  60 g "Plat_PerpetualRaise"          :tag  speed  delay
 special 207 g "Plat_PerpetualRaiseLip"       :tag  speed  delay  lip
 special 231 g "Plat_ToggleCeiling"           :tag

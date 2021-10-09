@@ -362,53 +362,54 @@ include "hexen_sectors"
 special 0 - "NOTHING"
 
 # Floors
-special  22 f "Floor_LowerToNearest"       :tag  speed
-special  21 f "Floor_LowerToLowest"        :tag  speed
+special  22 f "Floor_LowerToNearest"       :tag  speed  change
+special  21 f "Floor_LowerToLowest"        :tag  speed  change
 special 242 f "Floor_LowerToHighest"       :tag  speed  lip  adjust?
-special  20 f "Floor_LowerByValue"         :tag  speed  dist
-special  36 f "Floor_LowerByValueTimes8"   :tag  speed  dist_x8
-special  66 f "Floor_LowerInstant"         :tag  -  dist_x8
-special  25 f "Floor_RaiseToNearest"       :tag  speed
-special  24 f "Floor_RaiseToHighest"       :tag  speed
-special 238 f "Floor_RaiseToLowestCeiling" :tag  speed
-special  23 f "Floor_RaiseByValue"         :tag  speed  dist
-special  35 f "Floor_RaiseByValueTimes8"   :tag  speed  dist_x8
-special 240 f "Floor_RaiseByTexture"       :tag  speed
-special  67 f "Floor_RaiseInstant"         :tag  -  dist_x8
-special  28 f "Floor_RaiseAndCrush"        :tag  speed  damage  crush_mode
+special  20 f "Floor_LowerByValue"         :tag  speed  dist  change
+special  36 f "Floor_LowerByValueTimes8"   :tag  speed  dist_x8  change
+special  66 f "Floor_LowerInstant"         :tag  -  dist_x8  change
+special  25 f "Floor_RaiseToNearest"       :tag  speed  change  crush
+special  24 f "Floor_RaiseToHighest"       :tag  speed  change  crush
+special 238 f "Floor_RaiseToLowestCeiling" :tag  speed  change  crush  gap
+special  23 f "Floor_RaiseByValue"         :tag  speed  dist  change  crush
+special  35 f "Floor_RaiseByValueTimes8"   :tag  speed  dist_x8  change  crush
+special 240 f "Floor_RaiseByTexture"       :tag  speed  change  crush
+special  67 f "Floor_RaiseInstant"         :tag  -  dist_x8 change crush
+special  28 f "Floor_RaiseAndCrush"        :tag  speed  damage
 special  46 f "Floor_CrushStop"            :tag
-special  37 f "Floor_MoveToValue"          :tag  speed  dist  negate?
-special  68 f "Floor_MoveToValueTimes8"    :tag  speed  dist_x8  negate?
+special  37 f "Floor_MoveToValue"          :tag  speed  dist  negate?  change
+special  68 f "Floor_MoveToValueTimes8"    :tag  speed  height_x8  negate? change
 special 250 f "Floor_Donut"                :tag  speed  speed
 special 138 f "Floor_Waggle"               :tag  amp  speed  offset  time
 special 235 f "Floor_TransferTrigger"      :tag
 special 236 f "Floor_TransferNumeric"      :tag
+# NOTE: specials above 255 can't be used in Hexen format.
 
 # Ceilings
-special 253 c "Ceiling_LowerToLowest"        :tag  speed
-special 254 c "Ceiling_LowerToFloor"         :tag  speed
-special 192 c "Ceiling_LowerToHighestFloor"  :tag  speed
-special  40 c "Ceiling_LowerByValue"         :tag  speed  dist
-special 199 c "Ceiling_LowerByValueTimes8"   :tag  speed  dist_x8
-special 193 c "Ceiling_LowerInstant"         :tag  -  dist_x8
-special 252 c "Ceiling_RaiseToNearest"       :tag  speed
-special  41 c "Ceiling_RaiseByValue"         :tag  speed  dist
-special 198 c "Ceiling_RaiseByValueTimes8"   :tag  speed  dist_x8
-special 194 c "Ceiling_RaiseInstant"         :tag  -  dist_x8
-special  47 c "Ceiling_MoveToValue"          :tag  speed  dist  negate?
-special  69 c "Ceiling_MoveToValueTimes8"    :tag  speed  dist_x8  negate?
+special 253 c "Ceiling_LowerToLowest"        :tag  speed change crush
+special 254 c "Ceiling_LowerToFloor"         :tag  speed change crush gap
+special 192 c "Ceiling_LowerToHighestFloor"  :tag  speed  change  crush gap
+special  40 c "Ceiling_LowerByValue"         :tag  speed  dist change crush
+special 199 c "Ceiling_LowerByValueTimes8"   :tag  speed  dist_x8 change crush
+special 193 c "Ceiling_LowerInstant"         :tag  -  dist_x8 change crush
+special 252 c "Ceiling_RaiseToNearest"       :tag  speed change
+special  41 c "Ceiling_RaiseByValue"         :tag  speed  dist change
+special 198 c "Ceiling_RaiseByValueTimes8"   :tag  speed  dist_x8 change
+special 194 c "Ceiling_RaiseInstant"         :tag  -  dist_x8 change
+special  47 c "Ceiling_MoveToValue"          :tag  speed  height  negate? change
+special  69 c "Ceiling_MoveToValueTimes8"    :tag  speed  height_x8  negate? change
 special  38 c "Ceiling_Waggle"               :tag  amp  speed  offset  time
 special  43 c "Ceiling_LowerAndCrush"        :tag  speed  damage  crush_mode
-special  97 c "Ceiling_LowerAndCrushDist"    :tag  speed  damage  height  crush_mode
+special  97 c "Ceiling_LowerAndCrushDist"    :tag  speed  damage  gap  crush_mode
 special  42 c "Ceiling_CrushAndRaise"        :tag  speed  damage  crush_mode
 special 196 c "Ceiling_CrushAndRaiseA"       :tag  down_speed  up_speed  damage  crush_mode
 special 197 c "Ceiling_CrushAndRaiseSilentA" :tag  down_speed  up_speed  damage  crush_mode
-special 168 c "Ceiling_CrushAndRaiseDist"    :tag  height  speed  damage  crush_mode
-special 104 c "Ceiling_CrushAndRaiseSilentDist" :tag  height  speed  damage  crush_mode
+special 168 c "Ceiling_CrushAndRaiseDist"    :tag  gap  speed  damage  crush_mode
+special 104 c "Ceiling_CrushAndRaiseSilentDist" :tag  gap  speed  damage  crush_mode
 special  45 c "Ceiling_CrushRaiseAndStay"    :tag  speed  damage  crush_mode
-special 195 c "Ceiling_CrushRaiseAndStayA"   :tag  speed  speed  damage  crush_mode
-special 255 c "Ceiling_CrushRaiseAndStaySilA"  :tag  speed  speed  damage  crush_mode
-special  44 c "Ceiling_CrushStop"            :tag
+special 195 c "Ceiling_CrushRaiseAndStayA"   :tag  down_speed  up_speed  damage  crush_mode
+special 255 c "Ceiling_CrushRaiseAndStaySilA"  :tag  down_speed  up_speed  damage  crush_mode
+special  44 c "Ceiling_CrushStop"            :tag  stop_mode
 
 # Doors
 special  12 d "Door_Raise"            :tag  speed  delay  light_tag:tag
@@ -426,39 +427,39 @@ special  63 g "Plat_DownByValue"             :tag  speed  delay  dist_x8
 special  64 g "Plat_UpWaitDownStay"          :tag  speed  delay
 special  65 g "Plat_UpByValue"               :tag  speed  delay  dist_x8
 special 230 g "Plat_UpByValueStayTx"         :tag  speed  dist_x8
-special 228 g "Plat_RaiseAndStayTx0"         :tag  speed
+special 228 g "Plat_RaiseAndStayTx0"         :tag  speed  lock_out
 special  60 g "Plat_PerpetualRaise"          :tag  speed  delay
 special 207 g "Plat_PerpetualRaiseLip"       :tag  speed  delay  lip
 special 231 g "Plat_ToggleCeiling"           :tag
-special  61 g "Plat_Stop"                    :tag
+special  61 g "Plat_Stop"                    :tag  stop_mode
 
 # Elevators & Pillars
-special  95 e "Elevator_Lower"             :tag  speed  dist
-special  96 e "Elevator_Raise"             :tag  speed  dist
-special 251 e "FloorAndCeiling_LowerRaise" :tag  floor_speed  ceil_speed
+special  95 e "FloorAndCeiling_LowerByValue" :tag  speed  dist
+special  96 e "FloorAndCeiling_RaiseByValue" :tag  speed  dist
+special 251 e "FloorAndCeiling_LowerRaise" :tag  floor_speed  ceil_speed boom_emu
 special 247 e "Elevator_LowerToNearest"    :tag  speed
 special 245 e "Elevator_RaiseToNearest"    :tag  speed
 special 246 e "Elevator_MoveToFloor"       :tag  speed
 special  30 e "Pillar_Open"                :tag  speed  floor_dist  ceil_dist
 special  29 e "Pillar_Build"               :tag  speed  dist
-special  94 e "Pillar_BuildAndCrush"       :tag  speed  dist  damage  crush_mode
+special  94 e "Pillar_BuildAndCrush"       :tag  speed  dist  damage
 
 # Stairs
 special  27 q "Stairs_BuildUp"             :tag  speed  height  delay  reset_delay
 special 217 q "Stairs_BuildUpDoom"         :tag  speed  height  delay  reset_delay
 
 # Sector
-special 181 s "Plane_Align"                floor_side  ceil_side  line_id:self_line_id
+special 181 s "Plane_Align"                floor_side  ceil_side
 special 118 s "Plane_Copy"                 front_floor_tag:tag  front_ceil_tag:tag  back_floor_tag:tag  back_ceil_tag:tag  share_flags
-special 190 s "Static_Init"                :line_id  property  ceil_flip?  move_flags
+special 190 s "Sky transfer"                :line_id  255  sky_flip?
 special 140 s "Sector_ChangeSound"         :tag  sound_seq
 special 185 s "Sector_SetRotation"         :tag  floor_angle  ceil_angle
-special 187 s "Sector_SetFloorPanning"     :tag  x_offset  y_offset  x_frac  y_frac
-special 186 s "Sector_SetCeilingPanning"   :tag  x_offset  y_offset  x_frac  y_frac
-special 218 s "Sector_SetWind"             :tag  strength  angle  use_line_angle?
-special 219 s "Sector_SetFriction"         :tag  friction
-special 220 s "Sector_SetCurrent"          :tag  strength  angle  use_line_angle?
-special 227 s "PointPush_SetForce"         :tag  :tid  strength  use_line_angle?
+special 187 s "Sector_SetFloorPanning"     :tag  x_offset  x_frac  y_offset  y_frac
+special 186 s "Sector_SetCeilingPanning"   :tag  x_offset  x_frac  y_offset  y_frac
+special 218 s "Sector_SetWind"             :tag  force  angle  flags
+special 219 s "Sector_SetFriction"         :tag
+special 220 s "Sector_SetCurrent"          :tag  force  angle  flags
+special 227 s "PointPush_SetForce"         :tag  :tid  force  use_line_angle?
 
 # Lighting
 special 233 l "Light_MinNeighbor"      :tag
@@ -473,9 +474,9 @@ special 116 l "Light_Strobe"           :tag  high  low  high_time  low_time
 special 232 l "Light_StrobeDoom"       :tag  high_time  low_time
 
 # Teleporters
-special  70 u "Teleport"               :tid  :tag  no_fog?
-special  71 u "Teleport_NoFog"         :tid  set_angle?  :tag
-special 215 u "Teleport_Line"          source_line_id:self_line_id  dest_line_id:line_id  flip_180?
+special  70 u "Teleport"               :tid  :tag
+special  71 u "Teleport_NoFog"         :tid  use_angle?  :tag keep_height
+special 215 u "Teleport_Line"          -  :line_id  flip_180?
 
 # Things
 special 130 t "Thing_Activate"          :tid
@@ -486,34 +487,34 @@ special 137 t "Thing_SpawnNoFog"        :tid  type_id  angle  new_id
 special 134 t "Thing_Projectile"        :tid  type_id  angle  speed  up_speed
 special 136 t "Thing_ProjectileGravity" :tid  type_id  angle  speed  up_speed
 
-special 248 t "HealThing"               :tid  health
-special  73 t "DamageThing"             damage  death_type
-special 119 t "Thing_Damage"            :tid  damage  death_type
-special 133 t "Thing_Destroy"           :tid  extreme_damage?  :tag
+special 248 t "HealThing"               amount  max_health
+special  73 t "DamageThing"             damage  damage_type
+special 119 t "Thing_Damage"            :tid  damage  damage_type
+special 133 t "Thing_Destroy"           :tid  -  :tag
 special 132 t "Thing_Remove"            :tid
-special  72 t "ThrustThing"             angle  thrust  unlimited?  :tid
+special  72 t "ThrustThing"             angle  thrust  -  :tid
 special 128 t "ThrustThingZ"            :tid  thrust  down?  additive?
 special  19 t "Thing_Stop"              :tid
 special 176 t "Thing_ChangeTID"         :tid  new_tid
 
 # Lines
-special 121 - "Line_SetIdent"           line_id:self_line_id  flags  -  -  line_id_hi:self_line_id_hi
+special 121 - "Line_SetIdent"           line_id:self_line_id
 special 156 - "Line_SetPortal"          target_id:line_id  this_id:self_line_id  type  anchor
-special  48 - "Attach3dMidtex"          :line_id  :tag  ceiling?
+special  48 - "Sector_Attach3dMidtex"  :line_id  :tag  ceiling?
 
 # Animated
-special 102 a "Scroll_Texture_Up"       speed  tex_flags
-special 103 a "Scroll_Texture_Down"     speed  tex_flags
-special 100 a "Scroll_Texture_Left"     speed  tex_flags
-special 101 a "Scroll_Texture_Right"    speed  tex_flags
-special 225 a "Scroll_Texture_Offsets"  tex_flags
-special 222 a "Scroll_Texture_Model"    :line_id  flags
-special 223 a "Scroll_Floor"            :tag  tex_flags  push?  x_speed  y_speed
+special 102 a "Scroll_Texture_Up"       speed
+special 103 a "Scroll_Texture_Down"     speed
+special 100 a "Scroll_Texture_Left"     speed
+special 101 a "Scroll_Texture_Right"    speed
+special 225 a "Scroll_Texture_Offsets"
+special 222 a "Scroll_Texture_Model"    :line_id  kind
+special 223 a "Scroll_Floor"            :tag  kind  push?  x_speed  y_speed
 special 224 a "Scroll_Ceiling"          :tag  tex_flags  -  x_speed  y_speed
 
 # PolyObjects
 special   1 p "PolyObject Start Line"   :po  mirror_po:po  sound_seq
-special   5 p "Polyobj_ExplicitLine"    :po  render_order  mirror_po:po  sound_seq  line_id:self_line_id
+special   5 p "Polyobj_ExplicitLine"    :po  render_order  mirror_po:po  sound_seq
 special   2 p "Polyobj_RotateLeft"      :po  speed  angle
 special  90 p "Polyobj_OR_RotateLeft"   :po  speed  angle
 special   3 p "Polyobj_RotateRight"     :po  speed  angle
@@ -533,17 +534,17 @@ special  87 p "Polyobj_Stop"            :po
 ## coordinates will be limited to the range 0-255.
 
 # Exits
-special 243 x "Exit_Normal"             pos_arg0
-special 244 x "Exit_Secret"             pos_arg0
-special  74 x "Exit_ToMap"              map  pos_arg0  keep_angle?
-special  75 x "End_Game"
+special 243 x "Exit_Normal"
+special 244 x "Exit_Secret"
+special  74 x "Teleport_NewMap"         map
+special  75 x "Teleport_EndGame"
 
 # Renderer
 special   9 r "Line_Horizon"
 special 210 r "Transfer_FloorLight"     :tag
 special 211 r "Transfer_CeilingLight"   :tag
 special  57 r "Sector_SetPortal"        :tag  portal_type  plane  misc  opacity
-special 209 r "Transfer_Heights"        :tag  flags
+special 209 r "Transfer_Heights"        :tag
 
 # Scripting
 special  80 k "ACS_Execute"             script  map  param1  param2  param3
