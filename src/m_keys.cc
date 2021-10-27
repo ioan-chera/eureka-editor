@@ -454,7 +454,7 @@ void M_RemoveBinding(keycode_t key, key_context_e context)
     auto it = std::remove_if(global::all_bindings.begin(), global::all_bindings.end(),
                              KeyBindLookup{key, context});
     // there should never be more than one
-    assert(it + 1 >= global::all_bindings.end());
+    assert(it == global::all_bindings.end() || it + 1 == global::all_bindings.end());
 
     global::all_bindings.erase(it, global::all_bindings.end());
 }
