@@ -26,6 +26,11 @@
 //
 struct Vec2d
 {
+	bool operator == (const Vec2d &other) const
+	{
+		return x == other.x && y == other.y;
+	}
+
 	double x, y;
 };
 
