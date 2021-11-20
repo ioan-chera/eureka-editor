@@ -100,6 +100,7 @@ set(source_m
     m_strings.h
     m_testmap.cc
     m_udmf.cc
+    m_vector.h
 )
 
 set(source_r
