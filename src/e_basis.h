@@ -525,6 +525,26 @@ private:
 	bool mDidMakeChanges = false;
 };
 
+//
+// Helper class to trigger an undoable change within a scope safely
+//
+class BasisScope
+{
+public:
+	explicit BasisScope(Basis &basis) : basis(basis)
+	{
+		basis.begin();
+	}
+
+	~BasisScope()
+	{
+		basis.end();
+	}
+
+private:
+	Basis &basis;
+};
+
 const char *NameForObjectType(ObjType type, bool plural = false);
 
 /* BASIS API */
