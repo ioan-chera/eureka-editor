@@ -880,8 +880,6 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 {
 	/* move a single vertex */
 
-	doc.basis.begin();
-
 	int did_split_line = -1;
 
 	// handle a single vertex merging onto an existing one
@@ -898,7 +896,6 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 
 		doc.vertmod.mergeList(&verts);
 
-		doc.basis.end();
 		return;
 	}
 
@@ -913,7 +910,6 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 			// Alright, we got it
 			doc.basis.setMessage("split linedef #%d", did_split_line);
 			splitLinedefAndMergeSandwich(did_split_line, obj.num, delta_x, delta_y);
-			doc.basis.end();
 			return;
 		}
 
@@ -932,8 +928,6 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 		doc.basis.setMessage("split linedef #%d", did_split_line);
 	else
 		doc.basis.setMessageForSelection("moved", list);
-
-	doc.basis.end();
 }
 
 void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
@@ -946,6 +940,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		selection_c vertices(ObjType::vertices);
 		ConvertSelection(doc, &source, &vertices);
 
+		BasisScope scope(doc.basis);
 		for(sel_iter_c it(vertices); !it.done(); it.next())
 			moveVertexPostDrag(Objid(ObjType::vertices, *it), delta_x, delta_y, delta_z);
 		return;
@@ -958,6 +953,8 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		doc.objects.move(&list, delta_x, delta_y, delta_z);
 		return;
 	}
+
+	BasisScope scope(doc.basis);
 	moveVertexPostDrag(obj, delta_x, delta_y, delta_z);
 }
 
