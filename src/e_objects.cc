@@ -938,6 +938,18 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 
 void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
 {
+	if(inst.edit.mode == ObjType::sectors || inst.edit.mode == ObjType::linedefs)
+	{
+		selection_c source(inst.edit.mode);
+		source.set(obj.num);
+
+		selection_c vertices(ObjType::vertices);
+		ConvertSelection(doc, &source, &vertices);
+
+		for(sel_iter_c it(vertices); !it.done(); it.next())
+			moveVertexPostDrag(Objid(ObjType::vertices, *it), delta_x, delta_y, delta_z);
+		return;
+	}
 	if (inst.edit.mode != ObjType::vertices)
 	{
 		selection_c list(inst.edit.mode);
