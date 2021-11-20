@@ -127,11 +127,9 @@ unit_test(m_config_keys
     m_config_test.cpp
     m_keys_test.cpp
     SRC lib_file.cc
-        m_bitvec.cc
         m_config.cc
         m_keys.cc
         m_parse.cc
-        m_select.cc
         m_streams.cc
     FLTK
 )

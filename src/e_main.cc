@@ -174,6 +174,8 @@ void Instance::UpdateDrawLine()
 	double new_x = edit.map_x;
 	double new_y = edit.map_y;
 
+	auto split_it = edit.split_lines.begin();
+
 	if (grid.ratio > 0)
 	{
 		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
@@ -183,10 +185,10 @@ void Instance::UpdateDrawLine()
 		new_x = level.vertices[edit.highlight.num]->x();
 		new_y = level.vertices[edit.highlight.num]->y();
 	}
-	else if (edit.split_lines.notempty())
+	else if (split_it != edit.split_lines.end())
 	{
-		new_x = edit.split_x;
-		new_y = edit.split_y;
+		new_x = split_it->second.x;
+		new_y = split_it->second.y;
 	}
 	else
 	{
@@ -218,7 +220,7 @@ void Instance::UpdateDrawLine()
 
 static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 {
-	inst.edit.split_lines.clear_all();
+	inst.edit.split_lines.clear();
 
 	// splitting usually disabled while dragging stuff, EXCEPT a single vertex
 	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
@@ -231,10 +233,11 @@ static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 		inst.edit.pointer_in_window &&
 	    inst.edit.highlight.is_nil())
 	{
-		Objid splitLine = inst.level.hover.findSplitLine(inst.edit.split_x, inst.edit.split_y,
+		Vec2d split;
+		Objid splitLine = inst.level.hover.findSplitLine(split.x, split.y,
 					  map_x, map_y, inst.edit.dragged.num);
 		if(splitLine.valid())
-			inst.edit.split_lines.set(splitLine.num);
+			inst.edit.split_lines[splitLine.num] = split;
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -322,7 +325,7 @@ void Instance::Editor_ChangeMode_Raw(ObjType new_mode)
 	Editor_ClearErrorMode();
 
 	edit.highlight.clear();
-	edit.split_lines.clear_all();
+	edit.split_lines.clear();
 }
 
 
@@ -1264,7 +1267,7 @@ void Instance::Editor_Init()
 	edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 	edit.highlight.clear();
-	edit.split_lines.clear_all();
+	edit.split_lines.clear();
 	edit.clicked.clear();
 
 	grid.Init();

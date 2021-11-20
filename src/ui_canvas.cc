@@ -89,8 +89,6 @@ UI_Canvas::UI_Canvas(Instance &inst, int X, int Y, int W, int H, const char *lab
 	Fl_Gl_Window(X, Y, W, H),
 #endif
 	last_highlight(),
-	last_splitter(-1),
-	last_split_x(), last_split_y(),
 	snap_x(-1), snap_y(-1),
 	seen_sectors(),
 	inst(inst)
@@ -730,7 +728,7 @@ void UI_Canvas::DrawLinedefs()
 		{
 			case ObjType::vertices:
 			{
-				if (inst.edit.split_lines.get(n))
+				if (get(inst.edit.split_lines, n))
 					col = HI_AND_SEL_COL;
 				else if (inst.edit.error_mode)
 					col = LIGHTGREY;
@@ -739,13 +737,13 @@ void UI_Canvas::DrawLinedefs()
 				else if (one_sided)
 					col = WHITE;
 
-				if (inst.edit.split_lines.get(n))
+				if (get(inst.edit.split_lines, n))
 					line_kind = 's';
 				else
 					line_kind = 'k';
 
 				// show info of last four added lines
-				if (!inst.edit.split_lines.get(n) && n >= (inst.level.numLinedefs() - 4) &&
+				if (!get(inst.edit.split_lines, n) && n >= (inst.level.numLinedefs() - 4) &&
 					!inst.edit.show_object_numbers)
 				{
 					DrawLineInfo(x1, y1, x2, y2, false);
@@ -856,7 +854,8 @@ void UI_Canvas::DrawLinedefs()
 				break;
 
 			case 's':
-				DrawSplitLine(x1, y1, x2, y2);
+				assert(get(inst.edit.split_lines, n));
+				DrawSplitLine(x1, y1, x2, y2, inst.edit.split_lines[n]);
 				break;
 		}
 	}
@@ -1315,13 +1314,11 @@ void UI_Canvas::UpdateHighlight()
 		changes = true;
 	}
 
-	int new_ld = inst.edit.split_lines.find_first();
+	auto new_it = inst.edit.split_lines.begin();
 
-	if (! (last_splitter == new_ld && last_split_x == inst.edit.split_x && last_split_y == inst.edit.split_y))
+	if(inst.edit.split_lines != last_split_lines)
 	{
-		last_splitter = new_ld;
-		last_split_x  = inst.edit.split_x;
-		last_split_y  = inst.edit.split_y;
+		last_split_lines = inst.edit.split_lines;
 		changes = true;
 	}
 
@@ -1883,7 +1880,7 @@ void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
 }
 
 
-void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2)
+void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2, Vec2d split)
 {
 	// show how and where the line will be split
 
@@ -1894,24 +1891,24 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 	int scr_x2 = SCREENX(map_x2);
 	int scr_y2 = SCREENY(map_y2);
 
-	int scr_mx = SCREENX(inst.edit.split_x);
-	int scr_my = SCREENY(inst.edit.split_y);
+	int scr_mx = SCREENX(split.x);
+	int scr_my = SCREENY(split.y);
 
 	RenderLine(scr_x1, scr_y1, scr_mx, scr_my);
 	RenderLine(scr_x2, scr_y2, scr_mx, scr_my);
 
 	if (! inst.edit.show_object_numbers)
 	{
-		double len1 = hypot(map_x1 - inst.edit.split_x, map_y1 - inst.edit.split_y);
-		double len2 = hypot(map_x2 - inst.edit.split_x, map_y2 - inst.edit.split_y);
+		double len1 = hypot(map_x1 - split.x, map_y1 - split.y);
+		double len2 = hypot(map_x2 - split.x, map_y2 - split.y);
 
-		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split_x), static_cast<int>(inst.edit.split_y), Side::neither, I_ROUND(len1));
-		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split_x), static_cast<int>(inst.edit.split_y), Side::neither, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(split.x), static_cast<int>(split.y), Side::neither, I_ROUND(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(split.x), static_cast<int>(split.y), Side::neither, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);
 
-	DrawSplitPoint(inst.edit.split_x, inst.edit.split_y);
+	DrawSplitPoint(split.x, split.y);
 }
 
 
@@ -2043,7 +2040,7 @@ void UI_Canvas::DrawSnapPoint()
 	if (inst.edit.action != ACT_NOTHING)
 		return;
 
-	if (inst.edit.split_lines.notempty())
+	if (!inst.edit.split_lines.empty())
 		return;
 
 	if (! Vis(snap_x, snap_y, 10))
@@ -2070,7 +2067,7 @@ void UI_Canvas::DrawCurrentLine()
 	double new_y = inst.edit.draw_to_y;
 
 	// should draw a vertex?
-	if (! (inst.edit.highlight.valid() || inst.edit.split_lines.notempty()))
+	if (! (inst.edit.highlight.valid() || !inst.edit.split_lines.empty()))
 	{
 		RenderColor(FL_GREEN);
 		DrawVertex(new_x, new_y, vertex_radius(inst.grid.Scale));
@@ -2093,7 +2090,7 @@ void UI_Canvas::DrawCurrentLine()
 		cross_point_t& point = cross.points[k];
 
 		// ignore current split line (what new vertex is sitting on)
-		if (point.ld >= 0 && inst.edit.split_lines.get(point.ld))
+		if (point.ld >= 0 && get(inst.edit.split_lines, point.ld))
 			continue;
 
 		if (point.vert >= 0)

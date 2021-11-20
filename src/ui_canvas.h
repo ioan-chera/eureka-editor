@@ -31,8 +31,11 @@
 #include "r_grid.h"
 #include "sys_macro.h"
 
+#include <map>
+
 class Img_c;
 enum class Side;
+struct Vec2d;
 
 #ifdef NO_OPENGL
 class UI_Canvas : public Fl_Widget
@@ -47,9 +50,7 @@ private:
 
 	// this is used to detect changes in inst.edit.split_line (etc)
 	// [ to prevent unnecessary redraws ]
-	int last_splitter;
-	double last_split_x;
-	double last_split_y;
+	std::map<int, Vec2d> last_split_lines;
 
 	// this is the cached grid-snap position
 	double snap_x, snap_y;
@@ -133,7 +134,7 @@ private:
 	void DrawMapArrow(double map_x1, double map_y1, int r, int angle);
 
 	void DrawKnobbyLine(double map_x1, double map_y1, double map_x2, double map_y2, bool reverse = false);
-	void DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2);
+	void DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2, Vec2d split);
 	void DrawSplitPoint(double map_x, double map_y);
 	void DrawVertex(double map_x, double map_y, int r);
 	void DrawThing(double map_x, double map_y, int r, int angle, bool big_arrow);

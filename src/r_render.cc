@@ -1012,7 +1012,7 @@ void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 void Instance::Render3D_UpdateHighlight()
 {
 	edit.highlight.clear();
-	edit.split_lines.clear_all();
+	edit.split_lines.clear();
 
 	if (edit.pointer_in_window && r_view.mouse_x >= 0 &&
 		edit.action != ACT_DRAG)

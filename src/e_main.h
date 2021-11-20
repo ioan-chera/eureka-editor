@@ -27,10 +27,11 @@
 #ifndef __EUREKA_LEVELS_H__
 #define __EUREKA_LEVELS_H__
 
+#include <map>
 #include <string>
 
 #include "m_events.h"
-#include "m_select.h"
+#include "m_vector.h"
 #include "e_objects.h"
 #include "e_things.h"
 
@@ -70,13 +71,10 @@ struct Editor_State_t
 
 	Objid highlight;   // the highlighted object
 
-	// linedefs which would be split by a new or dragged vertices
-	selection_c split_lines = selection_c(ObjType::linedefs, false);
+	// linedefs which would be split by a new or dragged vertices. Must be an
+	// ordered map because we often seek just the first item.
+	std::map<int, Vec2d> split_lines;
 	
-	// TODO: check if these need multiple entries too
-	double split_x;
-	double split_y;
-
 
 	/* rendering stuff */
 

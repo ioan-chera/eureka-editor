@@ -735,13 +735,15 @@ void Instance::CMD_ACT_Click()
 		return;
 	}
 
+	auto split_it = edit.split_lines.begin();
+
 	// check for splitting a line, and ensure we can drag the vertex
 	if (! Exec_HasFlag("/nosplit") &&
 		edit.mode == ObjType::vertices &&
-		edit.split_lines.notempty() &&
+		split_it != edit.split_lines.end() &&
 		edit.action != ACT_DRAW_LINE)
 	{
-		int split_ld = edit.split_lines.find_first();
+		int split_ld = split_it->first;
 		assert(split_ld >= 0);
 
 		edit.click_force_single = true;   // if drag vertex, force single-obj mode
@@ -760,7 +762,7 @@ void Instance::CMD_ACT_Click()
 
 		Vertex *V = level.vertices[new_vert];
 
-		V->SetRawXY(*this, edit.split_x, edit.split_y);
+		V->SetRawXY(*this, split_it->second.x, split_it->second.y);
 
 		level.linemod.splitLinedefAtVertex(split_ld, new_vert);
 

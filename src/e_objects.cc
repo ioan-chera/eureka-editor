@@ -414,16 +414,16 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	}
 
 	// a linedef which we are splitting (usually none)
-	int split_ld = inst.edit.split_lines.find_first();
+	auto split_it = inst.edit.split_lines.begin();
 
-	if (split_ld >= 0)
+	if (split_it != inst.edit.split_lines.end())
 	{
-		new_x = inst.edit.split_x;
-		new_y = inst.edit.split_y;
+		new_x = split_it->second.x;
+		new_y = split_it->second.y;
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
-			doc.linedefs[split_ld]->TouchesVertex(old_vert))
+			doc.linedefs[split_it->first]->TouchesVertex(old_vert))
 		{
 			old_vert = -1;
 		}
@@ -511,10 +511,10 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		inst.edit.Selected->set(new_vert);
 
 		// splitting an existing line?
-		if (split_ld >= 0)
+		if (split_it != inst.edit.split_lines.end())
 		{
-			doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
-			doc.basis.setMessage("split linedef #%d", split_ld);
+			doc.linemod.splitLinedefAtVertex(split_it->first, new_vert);
+			doc.basis.setMessage("split linedef #%d", split_it->first);
 		}
 		else
 		{
@@ -903,9 +903,9 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 	}
 
 	// handle a single vertex splitting a linedef
-	if (inst.edit.split_lines.notempty())
+	if (!inst.edit.split_lines.empty())
 	{
-		did_split_line = inst.edit.split_lines.find_first();
+		did_split_line = inst.edit.split_lines.begin()->first;
 		
 		// Check if it's actually a case of splitting a neighbouring linedef
 		if(findLineBetweenLineAndVertex(did_split_line, obj.num) >= 0)
