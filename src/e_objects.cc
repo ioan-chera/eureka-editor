@@ -922,7 +922,7 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 		// now move the vertex!
 	}
 
-	selection_c list(inst.edit.mode);
+	selection_c list(ObjType::vertices);
 
 	list.set(obj.num);
 
