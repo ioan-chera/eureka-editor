@@ -183,7 +183,7 @@ void Instance::UpdateDrawLine()
 		new_x = level.vertices[edit.highlight.num]->x();
 		new_y = level.vertices[edit.highlight.num]->y();
 	}
-	else if (edit.split_line.valid())
+	else if (edit.split_lines.notempty())
 	{
 		new_x = edit.split_x;
 		new_y = edit.split_y;
@@ -198,7 +198,7 @@ void Instance::UpdateDrawLine()
 	edit.draw_to_y = new_y;
 
 	// when drawing mode, highlight a vertex at the snap position
-	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
+	if (grid.snap && edit.highlight.is_nil() && edit.split_lines.empty())
 	{
 		int near_vert = level.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
 		if (near_vert >= 0)
@@ -218,7 +218,7 @@ void Instance::UpdateDrawLine()
 
 static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 {
-	inst.edit.split_line.clear();
+	inst.edit.split_lines.clear_all();
 
 	// splitting usually disabled while dragging stuff, EXCEPT a single vertex
 	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
@@ -231,8 +231,10 @@ static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 		inst.edit.pointer_in_window &&
 	    inst.edit.highlight.is_nil())
 	{
-		inst.edit.split_line = inst.level.hover.findSplitLine(inst.edit.split_x, inst.edit.split_y,
+		Objid splitLine = inst.level.hover.findSplitLine(inst.edit.split_x, inst.edit.split_y,
 					  map_x, map_y, inst.edit.dragged.num);
+		if(splitLine.valid())
+			inst.edit.split_lines.set(splitLine.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -320,7 +322,7 @@ void Instance::Editor_ChangeMode_Raw(ObjType new_mode)
 	Editor_ClearErrorMode();
 
 	edit.highlight.clear();
-	edit.split_line.clear();
+	edit.split_lines.clear_all();
 }
 
 
@@ -1262,7 +1264,7 @@ void Instance::Editor_Init()
 	edit.Selected = new selection_c(edit.mode, true /* extended */);
 
 	edit.highlight.clear();
-	edit.split_line.clear();
+	edit.split_lines.clear_all();
 	edit.clicked.clear();
 
 	grid.Init();

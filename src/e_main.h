@@ -30,6 +30,7 @@
 #include <string>
 
 #include "m_events.h"
+#include "m_select.h"
 #include "e_objects.h"
 #include "e_things.h"
 
@@ -69,7 +70,10 @@ struct Editor_State_t
 
 	Objid highlight;   // the highlighted object
 
-	Objid split_line;  // linedef which would be split by a new vertex
+	// linedefs which would be split by a new or dragged vertices
+	selection_c split_lines = selection_c(ObjType::linedefs, false);
+	
+	// TODO: check if these need multiple entries too
 	double split_x;
 	double split_y;
 

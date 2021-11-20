@@ -37,6 +37,8 @@
 #include "ui_misc.h"
 #include "ui_prefs.h"
 
+#include <assert.h>
+
 
 // config items
 int config::minimum_drag_pixels = 5;
@@ -736,10 +738,11 @@ void Instance::CMD_ACT_Click()
 	// check for splitting a line, and ensure we can drag the vertex
 	if (! Exec_HasFlag("/nosplit") &&
 		edit.mode == ObjType::vertices &&
-		edit.split_line.valid() &&
+		edit.split_lines.notempty() &&
 		edit.action != ACT_DRAW_LINE)
 	{
-		int split_ld = edit.split_line.num;
+		int split_ld = edit.split_lines.find_first();
+		assert(split_ld >= 0);
 
 		edit.click_force_single = true;   // if drag vertex, force single-obj mode
 		edit.click_check_select = false;  // do NOT select the new vertex

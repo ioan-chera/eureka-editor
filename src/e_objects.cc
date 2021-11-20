@@ -414,7 +414,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	}
 
 	// a linedef which we are splitting (usually none)
-	int split_ld = inst.edit.split_line.valid() ? inst.edit.split_line.num : -1;
+	int split_ld = inst.edit.split_lines.find_first();
 
 	if (split_ld >= 0)
 	{
@@ -903,9 +903,9 @@ void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double 
 	}
 
 	// handle a single vertex splitting a linedef
-	if (inst.edit.split_line.valid())
+	if (inst.edit.split_lines.notempty())
 	{
-		did_split_line = inst.edit.split_line.num;
+		did_split_line = inst.edit.split_lines.find_first();
 		
 		// Check if it's actually a case of splitting a neighbouring linedef
 		if(findLineBetweenLineAndVertex(did_split_line, obj.num) >= 0)

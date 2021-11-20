@@ -730,7 +730,7 @@ void UI_Canvas::DrawLinedefs()
 		{
 			case ObjType::vertices:
 			{
-				if (n == inst.edit.split_line.num)
+				if (inst.edit.split_lines.get(n))
 					col = HI_AND_SEL_COL;
 				else if (inst.edit.error_mode)
 					col = LIGHTGREY;
@@ -739,13 +739,13 @@ void UI_Canvas::DrawLinedefs()
 				else if (one_sided)
 					col = WHITE;
 
-				if (n == inst.edit.split_line.num)
+				if (inst.edit.split_lines.get(n))
 					line_kind = 's';
 				else
 					line_kind = 'k';
 
 				// show info of last four added lines
-				if (n != inst.edit.split_line.num && n >= (inst.level.numLinedefs() - 4) &&
+				if (!inst.edit.split_lines.get(n) && n >= (inst.level.numLinedefs() - 4) &&
 					!inst.edit.show_object_numbers)
 				{
 					DrawLineInfo(x1, y1, x2, y2, false);
@@ -1315,7 +1315,7 @@ void UI_Canvas::UpdateHighlight()
 		changes = true;
 	}
 
-	int new_ld = inst.edit.split_line.valid() ? inst.edit.split_line.num : -1;
+	int new_ld = inst.edit.split_lines.find_first();
 
 	if (! (last_splitter == new_ld && last_split_x == inst.edit.split_x && last_split_y == inst.edit.split_y))
 	{
@@ -2043,7 +2043,7 @@ void UI_Canvas::DrawSnapPoint()
 	if (inst.edit.action != ACT_NOTHING)
 		return;
 
-	if (inst.edit.split_line.valid())
+	if (inst.edit.split_lines.notempty())
 		return;
 
 	if (! Vis(snap_x, snap_y, 10))
@@ -2070,7 +2070,7 @@ void UI_Canvas::DrawCurrentLine()
 	double new_y = inst.edit.draw_to_y;
 
 	// should draw a vertex?
-	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
+	if (! (inst.edit.highlight.valid() || inst.edit.split_lines.notempty()))
 	{
 		RenderColor(FL_GREEN);
 		DrawVertex(new_x, new_y, vertex_radius(inst.grid.Scale));
@@ -2093,7 +2093,7 @@ void UI_Canvas::DrawCurrentLine()
 		cross_point_t& point = cross.points[k];
 
 		// ignore current split line (what new vertex is sitting on)
-		if (point.ld >= 0 && point.ld == inst.edit.split_line.num)
+		if (point.ld >= 0 && inst.edit.split_lines.get(point.ld))
 			continue;
 
 		if (point.vert >= 0)

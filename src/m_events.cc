@@ -443,7 +443,7 @@ void Instance::EV_EscapeKey()
 
 	edit.clicked.clear();
 	edit.dragged.clear();
-	edit.split_line.clear();
+	edit.split_lines.clear_all();
 	edit.draw_from.clear();
 
 	UpdateHighlight();

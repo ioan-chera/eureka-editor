@@ -1260,7 +1260,7 @@ success:
 	Selection_Clear();
 
 	edit.highlight.clear();
-	edit.split_line.clear();
+	edit.split_lines.clear_all();
 
 	RedrawMap();
 }
