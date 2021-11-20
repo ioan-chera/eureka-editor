@@ -872,17 +872,12 @@ void ObjectsModule::splitLinedefAndMergeSandwich(int splitLineID, int vertID,
 	doc.vertmod.mergeList(&verts);
 }
 
-void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
+//
+// Move the vertex after having performed a drag
+//
+void ObjectsModule::moveVertexPostDrag(const Objid &obj, double delta_x, double delta_y,
+									   double delta_z) const
 {
-	if (inst.edit.mode != ObjType::vertices)
-	{
-		selection_c list(inst.edit.mode);
-		list.set(obj.num);
-
-		doc.objects.move(&list, delta_x, delta_y, delta_z);
-		return;
-	}
-
 	/* move a single vertex */
 
 	doc.basis.begin();
@@ -939,6 +934,19 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		doc.basis.setMessageForSelection("moved", list);
 
 	doc.basis.end();
+}
+
+void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
+{
+	if (inst.edit.mode != ObjType::vertices)
+	{
+		selection_c list(inst.edit.mode);
+		list.set(obj.num);
+
+		doc.objects.move(&list, delta_x, delta_y, delta_z);
+		return;
+	}
+	moveVertexPostDrag(obj, delta_x, delta_y, delta_z);
 }
 
 

@@ -106,6 +106,7 @@ private:
 
 	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
 	void splitLinedefAndMergeSandwich(int splitLineID, int vertID, double delta_x, double delta_y) const;
+	void moveVertexPostDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const;
 };
 
 
