@@ -1314,8 +1314,6 @@ void UI_Canvas::UpdateHighlight()
 		changes = true;
 	}
 
-	auto new_it = inst.edit.split_lines.begin();
-
 	if(inst.edit.split_lines != last_split_lines)
 	{
 		last_split_lines = inst.edit.split_lines;
