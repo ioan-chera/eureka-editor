@@ -346,7 +346,7 @@ int Basis::addNew(ObjType type)
 {
 	SYS_ASSERT(mCurrentGroup.isActive());
 
-	EditOperation op;
+	EditUnit op;
 
 	op.action = EditType::insert;
 	op.objtype = type;
@@ -396,7 +396,7 @@ void Basis::del(ObjType type, int objnum)
 {
 	SYS_ASSERT(mCurrentGroup.isActive());
 
-	EditOperation op;
+	EditUnit op;
 
 	op.action = EditType::del;
 	op.objtype = type;
@@ -451,7 +451,7 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 {
 	// TODO: optimise, check whether value actually changes
 
-	EditOperation op;
+	EditUnit op;
 
 	op.action = EditType::change;
 	op.objtype = type;
@@ -625,7 +625,7 @@ void Basis::clearAll()
 //
 // Execute the operation
 //
-void Basis::EditOperation::apply(Basis &basis)
+void Basis::EditUnit::apply(Basis &basis)
 {
 	switch(action)
 	{
@@ -649,7 +649,7 @@ void Basis::EditOperation::apply(Basis &basis)
 //
 // Destroy an inst.inst.edit operation
 //
-void Basis::EditOperation::destroy()
+void Basis::EditUnit::destroy()
 {
 	switch(action)
 	{
@@ -668,7 +668,7 @@ void Basis::EditOperation::destroy()
 //
 // Execute the raw change
 //
-void Basis::EditOperation::rawChange(Basis &basis)
+void Basis::EditUnit::rawChange(Basis &basis)
 {
 	int *pos = nullptr;
 	switch(objtype)
@@ -712,7 +712,7 @@ void Basis::EditOperation::rawChange(Basis &basis)
 //
 // Deletion operation
 //
-void *Basis::EditOperation::rawDelete(Basis &basis) const
+void *Basis::EditUnit::rawDelete(Basis &basis) const
 {
 	basis.mDidMakeChanges = true;
 
@@ -749,7 +749,7 @@ void *Basis::EditOperation::rawDelete(Basis &basis) const
 //
 // Thing deletion
 //
-Thing *Basis::EditOperation::rawDeleteThing(Document &doc) const
+Thing *Basis::EditUnit::rawDeleteThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
 
@@ -762,7 +762,7 @@ Thing *Basis::EditOperation::rawDeleteThing(Document &doc) const
 //
 // Vertex deletion (and update linedef refs)
 //
-Vertex *Basis::EditOperation::rawDeleteVertex(Document &doc) const
+Vertex *Basis::EditUnit::rawDeleteVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
@@ -791,7 +791,7 @@ Vertex *Basis::EditOperation::rawDeleteVertex(Document &doc) const
 //
 // Raw delete sector (and update sidedef refs)
 //
-Sector *Basis::EditOperation::rawDeleteSector(Document &doc) const
+Sector *Basis::EditUnit::rawDeleteSector(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSectors());
 
@@ -817,7 +817,7 @@ Sector *Basis::EditOperation::rawDeleteSector(Document &doc) const
 //
 // Delete sidedef (and update linedef references)
 //
-SideDef *Basis::EditOperation::rawDeleteSidedef(Document &doc) const
+SideDef *Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSidedefs());
 
@@ -846,7 +846,7 @@ SideDef *Basis::EditOperation::rawDeleteSidedef(Document &doc) const
 //
 // Raw delete linedef
 //
-LineDef *Basis::EditOperation::rawDeleteLinedef(Document &doc) const
+LineDef *Basis::EditUnit::rawDeleteLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numLinedefs());
 
@@ -859,7 +859,7 @@ LineDef *Basis::EditOperation::rawDeleteLinedef(Document &doc) const
 //
 // Insert operation
 //
-void Basis::EditOperation::rawInsert(Basis &basis) const
+void Basis::EditUnit::rawInsert(Basis &basis) const
 {
 	basis.mDidMakeChanges = true;
 
@@ -900,7 +900,7 @@ void Basis::EditOperation::rawInsert(Basis &basis) const
 //
 // Thing insertion
 //
-void Basis::EditOperation::rawInsertThing(Document &doc) const
+void Basis::EditUnit::rawInsertThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
 	doc.things.insert(doc.things.begin() + objnum, thing);
@@ -909,7 +909,7 @@ void Basis::EditOperation::rawInsertThing(Document &doc) const
 //
 // Vertex insertion
 //
-void Basis::EditOperation::rawInsertVertex(Document &doc) const
+void Basis::EditUnit::rawInsertVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
 	doc.vertices.insert(doc.vertices.begin() + objnum, vertex);
@@ -934,7 +934,7 @@ void Basis::EditOperation::rawInsertVertex(Document &doc) const
 //
 // Sector insertion
 //
-void Basis::EditOperation::rawInsertSector(Document &doc) const
+void Basis::EditUnit::rawInsertSector(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSectors());
 	doc.sectors.insert(doc.sectors.begin() + objnum, sector);
@@ -956,7 +956,7 @@ void Basis::EditOperation::rawInsertSector(Document &doc) const
 //
 // Sidedef insertion
 //
-void Basis::EditOperation::rawInsertSidedef(Document &doc) const
+void Basis::EditUnit::rawInsertSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSidedefs());
 	doc.sidedefs.insert(doc.sidedefs.begin() + objnum, sidedef);
@@ -981,7 +981,7 @@ void Basis::EditOperation::rawInsertSidedef(Document &doc) const
 //
 // Linedef insertion
 //
-void Basis::EditOperation::rawInsertLinedef(Document &doc) const
+void Basis::EditUnit::rawInsertLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
 	doc.linedefs.insert(doc.linedefs.begin() + objnum, linedef);
@@ -990,7 +990,7 @@ void Basis::EditOperation::rawInsertLinedef(Document &doc) const
 //
 // Action to do on destruction of insert operation
 //
-void Basis::EditOperation::deleteFinally()
+void Basis::EditUnit::deleteFinally()
 {
 	switch(objtype)
 	{
@@ -1031,7 +1031,7 @@ void Basis::UndoGroup::reset()
 //
 // Add and apply
 //
-void Basis::UndoGroup::addApply(const EditOperation &op, Basis &basis)
+void Basis::UndoGroup::addApply(const EditUnit &op, Basis &basis)
 {
 	mOps.push_back(op);
 	mOps.back().apply(basis);

@@ -695,6 +695,6 @@ DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
 {
 }
 
-void Basis::EditOperation::destroy()
+void Basis::EditUnit::destroy()
 {
 }

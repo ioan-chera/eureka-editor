@@ -387,7 +387,7 @@ private:
 	//
 	// Edit operation
 	//
-	struct EditOperation
+	struct EditUnit
 	{
 		EditType action = EditType::none;
 		ObjType objtype = ObjType::things;
@@ -426,7 +426,7 @@ private:
 
 		void deleteFinally();
 	};
-	friend struct EditOperation;
+	friend struct EditUnit;
 
 	//
 	// Undo operation group
@@ -480,7 +480,7 @@ private:
 			return mOps.empty();
 		}
 
-		void addApply(const EditOperation &op, Basis &basis);
+		void addApply(const EditUnit &op, Basis &basis);
 
 		//
 		// End current action
@@ -509,7 +509,7 @@ private:
 		}
 
 	private:
-		std::vector<EditOperation> mOps;
+		std::vector<EditUnit> mOps;
 		SString mMessage = DEFAULT_UNDO_GROUP_MESSAGE;
 		int mDir = 0;	// dir must be +1 or -1 if active
 	};
