@@ -518,13 +518,11 @@ static void AdjustOfs_Finish(Instance &inst)
 
 	if (dx || dy)
 	{
-		inst.level.basis.begin();
+		EditOperation op(inst.level.basis);
 		inst.level.basis.setMessage("adjusted offsets");
 
 		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
 		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
-
-		inst.level.basis.end();
 	}
 
 	delete inst.edit.adjust_bucket;
@@ -802,7 +800,7 @@ void Render3D_DragSectors(Instance &inst)
 	if (dz == 0)
 		return;
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 
 	if (dz > 0)
 		inst.level.basis.setMessage("raised sectors");
@@ -825,8 +823,6 @@ void Render3D_DragSectors(Instance &inst)
 			inst.level.secmod.safeRaiseLower(*it, parts, dz);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -1134,15 +1130,15 @@ void Instance::StoreSelectedThing(int new_type)
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("pasted type of", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		level.basis.changeThing(*it, Thing::F_TYPE, new_type);
-	}
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("pasted type of", *edit.Selected);
 
-	level.basis.end();
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			level.basis.changeThing(*it, Thing::F_TYPE, new_type);
+		}
+	}
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1216,21 +1212,21 @@ void Instance::StoreSelectedFlat(int new_tex)
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("pasted flat to", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		byte parts = edit.Selected->get_ext(*it);
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("pasted flat to", *edit.Selected);
 
-		if (parts == 1 || (parts & PART_FLOOR))
-			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			byte parts = edit.Selected->get_ext(*it);
 
-		if (parts == 1 || (parts & PART_CEIL))
-			level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
+			if (parts == 1 || (parts & PART_FLOOR))
+				level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+
+			if (parts == 1 || (parts & PART_CEIL))
+				level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
+		}
 	}
-
-	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1251,21 +1247,21 @@ void Instance::StoreDefaultedFlats()
 	int floor_tex = BA_InternaliseString(conf.default_floor_tex);
 	int ceil_tex  = BA_InternaliseString(conf.default_ceil_tex);
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		byte parts = edit.Selected->get_ext(*it);
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
 
-		if (parts == 1 || (parts & PART_FLOOR))
-			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			byte parts = edit.Selected->get_ext(*it);
 
-		if (parts == 1 || (parts & PART_CEIL))
-			level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
+			if (parts == 1 || (parts & PART_FLOOR))
+				level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
+
+			if (parts == 1 || (parts & PART_CEIL))
+				level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
+		}
 	}
-
-	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1362,45 +1358,46 @@ void Instance::StoreSelectedTexture(int new_tex)
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("pasted tex to", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = level.linedefs[*it];
-		byte parts = edit.Selected->get_ext(*it);
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("pasted tex to", *edit.Selected);
 
-		if (L->NoSided())
-			continue;
-
-		if (L->OneSided())
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
-			continue;
+			const LineDef *L = level.linedefs[*it];
+			byte parts = edit.Selected->get_ext(*it);
+
+			if (L->NoSided())
+				continue;
+
+			if (L->OneSided())
+			{
+				level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+				continue;
+			}
+
+			/* right side */
+			if (parts == 1 || (parts & PART_RT_LOWER))
+				level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+
+			if (parts == 1 || (parts & PART_RT_UPPER))
+				level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+
+			if (parts & PART_RT_RAIL)
+				level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+
+			/* left side */
+			if (parts == 1 || (parts & PART_LF_LOWER))
+				level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+
+			if (parts == 1 || (parts & PART_LF_UPPER))
+				level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+
+			if (parts & PART_LF_RAIL)
+				level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 		}
 
-		/* right side */
-		if (parts == 1 || (parts & PART_RT_LOWER))
-			level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
-
-		if (parts == 1 || (parts & PART_RT_UPPER))
-			level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
-
-		if (parts & PART_RT_RAIL)
-			level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
-
-		/* left side */
-		if (parts == 1 || (parts & PART_LF_LOWER))
-			level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
-
-		if (parts == 1 || (parts & PART_LF_UPPER))
-			level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
-
-		if (parts & PART_LF_RAIL)
-			level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 	}
-
-	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);

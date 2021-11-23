@@ -299,12 +299,12 @@ void Instance::commandVertexMerge()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("merged", *edit.Selected);
+	{
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("merged", *edit.Selected);
 
-	level.vertmod.mergeList(edit.Selected);
-
-	level.basis.end();
+		level.vertmod.mergeList(edit.Selected);
+	}
 
 	Selection_Clear(true /* no_save */);
 }
@@ -355,17 +355,17 @@ bool VertexModule::tryFixDangler(int v_num) const
 		fprintf(stderr, "Vertex_TryFixDangler : merge vert %d onto %d\n", v_num, v_other);
 #endif
 
-		doc.basis.begin();
-		doc.basis.setMessage("merged dangling vertex #%d\n", v_num);
+		{
+			EditOperation op(doc.basis);
+			doc.basis.setMessage("merged dangling vertex #%d\n", v_num);
 
-		selection_c list(ObjType::vertices);
+			selection_c list(ObjType::vertices);
 
-		list.set(v_other);	// first one is the one kept
-		list.set(v_num);
+			list.set(v_other);	// first one is the one kept
+			list.set(v_num);
 
-		mergeList(&list);
-
-		doc.basis.end();
+			mergeList(&list);
+		}
 
 		inst.edit.Selected->set(v_other);
 
@@ -402,12 +402,10 @@ bool VertexModule::tryFixDangler(int v_num) const
 	fprintf(stderr, "Vertex_TryFixDangler : split linedef %d with vert %d\n", line_obj.num, v_num);
 #endif
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("split linedef #%d\n", line_obj.num);
 
 	doc.linemod.splitLinedefAtVertex(line_obj.num, v_num);
-
-	doc.basis.end();
 
 	// no vertices were added or removed, hence can continue Insert_Vertex
 	return false;
@@ -506,28 +504,28 @@ void Instance::commandVertexDisconnect()
 
 	bool seen_one = false;
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("disconnected", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		int v_num = *it;
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
-		// nothing to do unless vertex has 2 or more linedefs
-		int num_lines = level.vertmod.howManyLinedefs(*it);
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			int v_num = *it;
 
-		if (num_lines < 2)
-			continue;
+			// nothing to do unless vertex has 2 or more linedefs
+			int num_lines = level.vertmod.howManyLinedefs(*it);
 
-		level.vertmod.doDisconnectVertex(v_num, num_lines);
+			if (num_lines < 2)
+				continue;
 
-		seen_one = true;
+			level.vertmod.doDisconnectVertex(v_num, num_lines);
+
+			seen_one = true;
+		}
+
+		if (! seen_one)
+			Beep("Nothing was disconnected");
 	}
-
-	if (! seen_one)
-		Beep("Nothing was disconnected");
-
-	level.basis.end();
 
 	Selection_Clear(true);
 }
@@ -602,16 +600,16 @@ void Instance::commandLineDisconnect()
 
 	bool seen_one = false;
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("disconnected", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
-		level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
-	}
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
-	level.basis.end();
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
+			level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
+		}
+	}
 
 	if (! seen_one)
 		Beep("Nothing was disconnected");
@@ -819,77 +817,77 @@ void Instance::commandSectorDisconnect()
 	level.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
 
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("disconnected", *edit.Selected);
-
-	// create new vertices, and a mapping from old --> new
-
-	int * mapping = new int[level.numVertices()];
-
-	for (n = 0 ; n < level.numVertices(); n++)
-		mapping[n] = -1;
-
-	for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 	{
-		int new_v = level.basis.addNew(ObjType::vertices);
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("disconnected", *edit.Selected);
 
-		mapping[*it] = new_v;
+		// create new vertices, and a mapping from old --> new
 
-		Vertex *newbie = level.vertices[new_v];
+		int * mapping = new int[level.numVertices()];
 
-		*newbie = *level.vertices[*it];
-	}
+		for (n = 0 ; n < level.numVertices(); n++)
+			mapping[n] = -1;
 
-	// update linedefs, creating new ones where necessary
-	// (go backwards so we don't visit newly created lines)
-
-	for (n = level.numLinedefs() -1 ; n >= 0 ; n--)
-	{
-		const LineDef * L = level.linedefs[n];
-
-		// only process lines which touch a selected sector
-		bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
-		bool right_in = L->Right(level) && edit.Selected->get(L->Right(level)->sector);
-
-		if (! (left_in || right_in))
-			continue;
-
-		bool between_two = (left_in && right_in);
-
-		int start2 = mapping[L->start];
-		int end2   = mapping[L->end];
-
-		if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
+		for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 		{
-			level.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
+			int new_v = level.basis.addNew(ObjType::vertices);
+
+			mapping[*it] = new_v;
+
+			Vertex *newbie = level.vertices[new_v];
+
+			*newbie = *level.vertices[*it];
 		}
-		else
+
+		// update linedefs, creating new ones where necessary
+		// (go backwards so we don't visit newly created lines)
+
+		for (n = level.numLinedefs() -1 ; n >= 0 ; n--)
 		{
-			if (start2 >= 0)
-				level.basis.changeLinedef(n, LineDef::F_START, start2);
+			const LineDef * L = level.linedefs[n];
 
-			if (end2 >= 0)
-				level.basis.changeLinedef(n, LineDef::F_END, end2);
+			// only process lines which touch a selected sector
+			bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
+			bool right_in = L->Right(level) && edit.Selected->get(L->Right(level)->sector);
+
+			if (! (left_in || right_in))
+				continue;
+
+			bool between_two = (left_in && right_in);
+
+			int start2 = mapping[L->start];
+			int end2   = mapping[L->end];
+
+			if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
+			{
+				level.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
+			}
+			else
+			{
+				if (start2 >= 0)
+					level.basis.changeLinedef(n, LineDef::F_START, start2);
+
+				if (end2 >= 0)
+					level.basis.changeLinedef(n, LineDef::F_END, end2);
+			}
+		}
+
+		delete[] mapping;
+
+		// finally move all vertices of selected sectors
+
+		selection_c all_verts(ObjType::vertices);
+
+		ConvertSelection(level, edit.Selected, &all_verts);
+
+		for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
+		{
+			const Vertex * V = level.vertices[*it];
+
+			level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+			level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 		}
 	}
-
-	delete[] mapping;
-
-	// finally move all vertices of selected sectors
-
-	selection_c all_verts(ObjType::vertices);
-
-	ConvertSelection(level, edit.Selected, &all_verts);
-
-	for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
-	{
-		const Vertex * V = level.vertices[*it];
-
-		level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-		level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
-	}
-
-	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1075,8 +1073,7 @@ void Instance::CMD_VT_ShapeLine()
 		ay = ay + along1 * unit_y;
 	}
 
-
-	level.basis.begin();
+	EditOperation op(level.basis);
 	level.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
@@ -1096,8 +1093,6 @@ void Instance::CMD_VT_ShapeLine()
 		level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
 		level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
-
-	level.basis.end();
 }
 
 
@@ -1338,13 +1333,11 @@ void Instance::CMD_VT_ShapeArc()
 
 	// actually move stuff now
 
-	level.basis.begin();
+	EditOperation op(level.basis);
 	level.basis.setMessage("shaped %d vertices", (int)along_list.size());
 
 	level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
-
-	level.basis.end();
 }
 
 

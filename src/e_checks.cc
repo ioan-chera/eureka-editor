@@ -402,18 +402,18 @@ static void Vertex_MergeOverlaps(Instance &inst)
 	selection_c verts;
 	Vertex_FindOverlaps(verts, inst.level);
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("merged overlapping vertices");
-
-	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		Vertex_MergeOne(*it, verts, inst.level);
+		EditOperation op(inst.level.basis);
+		inst.level.basis.setMessage("merged overlapping vertices");
+
+		for (sel_iter_c it(verts) ; !it.done() ; it.next())
+		{
+			Vertex_MergeOne(*it, verts, inst.level);
+		}
+
+		// nothing should reference these vertices now
+		inst.level.objects.del(&verts);
 	}
-
-	// nothing should reference these vertices now
-	inst.level.objects.del(&verts);
-
-	inst.level.basis.end();
 
 	inst.RedrawMap();
 }
@@ -453,12 +453,10 @@ static void Vertex_RemoveUnused(Document &doc)
 
 	Vertex_FindUnused(sel, doc);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("removed unused vertices");
 
 	doc.objects.del(&sel);
-
-	doc.basis.end();
 }
 
 
@@ -839,13 +837,11 @@ static void Sectors_ClearUnknown(Instance &inst)
 
 	Sectors_FindUnknown(sel, types, inst);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("cleared unknown sector types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
 		inst.level.basis.changeSector(*it, Sector::F_TYPE, 0);
-
-	inst.level.basis.end();
 }
 
 
@@ -875,12 +871,10 @@ static void Sectors_RemoveUnused(Document &doc)
 
 	Sectors_FindUnused(sel, doc);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("removed unused sectors");
 
 	doc.objects.del(&sel);
-
-	doc.basis.end();
 }
 
 
@@ -905,7 +899,7 @@ static void Sectors_FixBadCeil(Document &doc)
 
 	Sectors_FindBadCeil(sel, doc);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("fixed bad sector heights");
 
 	for (int i = 0 ; i < doc.numSectors(); i++)
@@ -915,8 +909,6 @@ static void Sectors_FixBadCeil(Document &doc)
 			doc.basis.changeSector(i, Sector::F_CEILH, doc.sectors[i]->floorh);
 		}
 	}
-
-	doc.basis.end();
 }
 
 
@@ -954,12 +946,10 @@ static void SideDefs_RemoveUnused(Document &doc)
 
 	SideDefs_FindUnused(sel, doc);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("removed unused sidedefs");
 
 	doc.objects.del(&sel);
-
-	doc.basis.end();
 }
 
 
@@ -1041,53 +1031,53 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 			return;
 	}
 
-
-	doc.basis.begin();
-
-	for (int sd = 0 ; sd < doc.numSidedefs(); sd++)
 	{
-		if (! sides.get(sd))
-			continue;
+		EditOperation op(doc.basis);
 
-		// find the first linedef which uses this sidedef
-		int first;
-
-		for (first = 0 ; first < doc.numLinedefs(); first++)
+		for (int sd = 0 ; sd < doc.numSidedefs(); sd++)
 		{
-			const LineDef *F = doc.linedefs[first];
+			if (! sides.get(sd))
+				continue;
 
-			if (F->left == sd || F->right == sd)
-				break;
+			// find the first linedef which uses this sidedef
+			int first;
+
+			for (first = 0 ; first < doc.numLinedefs(); first++)
+			{
+				const LineDef *F = doc.linedefs[first];
+
+				if (F->left == sd || F->right == sd)
+					break;
+			}
+
+			if (first >= doc.numLinedefs())
+				continue;
+
+			// handle it when first linedef uses sidedef on both sides
+			if (doc.linedefs[first]->left == doc.linedefs[first]->right)
+			{
+				doc.basis.changeLinedef(first, LineDef::F_LEFT, copySidedef(sd));
+			}
+
+			// duplicate any remaining references
+			for (int ld = first + 1 ; ld < doc.numLinedefs(); ld++)
+			{
+				if (doc.linedefs[ld]->left == sd)
+					doc.basis.changeLinedef(ld, LineDef::F_LEFT, copySidedef(sd));
+
+				if (doc.linedefs[ld]->right == sd)
+					doc.basis.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(sd));
+			}
 		}
 
-		if (first >= doc.numLinedefs())
-			continue;
-
-		// handle it when first linedef uses sidedef on both sides
-		if (doc.linedefs[first]->left == doc.linedefs[first]->right)
+		if (is_after_load)
 		{
-			doc.basis.changeLinedef(first, LineDef::F_LEFT, copySidedef(sd));
+			op.setAbort(true /* keep changes */);
 		}
-
-		// duplicate any remaining references
-		for (int ld = first + 1 ; ld < doc.numLinedefs(); ld++)
+		else
 		{
-			if (doc.linedefs[ld]->left == sd)
-				doc.basis.changeLinedef(ld, LineDef::F_LEFT, copySidedef(sd));
-
-			if (doc.linedefs[ld]->right == sd)
-				doc.basis.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(sd));
+			doc.basis.setMessage("unpacked all sidedefs");
 		}
-	}
-
-	if (is_after_load)
-	{
-		doc.basis.abort(true /* keep changes */);
-	}
-	else
-	{
-		doc.basis.setMessage("unpacked all sidedefs");
-		doc.basis.end();
 	}
 
 	gLog.printf("Unpacked %d shared sidedefs --> %d\n", sides.count_obj(), doc.numSidedefs());
@@ -1406,12 +1396,10 @@ void Things_RemoveUnknown(Instance &inst)
 
 	Things_FindUnknown(sel, types, inst);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("removed unknown things");
 
 	inst.level.objects.del(&sel);
-
-	inst.level.basis.end();
 }
 
 
@@ -1498,12 +1486,10 @@ static void Things_RemoveInVoid(Instance &inst)
 
 	Things_FindInVoid(sel, inst);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("removed things in the void");
 
 	inst.level.objects.del(&sel);
-
-	inst.level.basis.end();
 }
 
 
@@ -1587,7 +1573,7 @@ static void Things_ShowDuds(Instance &inst)
 
 void Things_FixDuds(Instance &inst)
 {
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed unspawnable things");
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
@@ -1637,8 +1623,6 @@ void Things_FixDuds(Instance &inst)
 			inst.level.basis.changeThing(n, Thing::F_OPTIONS, new_options);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -2083,7 +2067,7 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 			lines.set(n);
 	}
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("removed zero-len linedefs");
 
 	// NOTE: the vertex overlapping test handles cases where the
@@ -2091,8 +2075,6 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 	//       need to be merged.
 
 	DeleteObjects_WithUnused(doc, &lines, false, false, false);
-
-	doc.basis.end();
 }
 
 
@@ -2172,7 +2154,7 @@ static void LineDefs_ShowManualDoors(Instance &inst)
 
 static void LineDefs_FixManualDoors(Instance &inst)
 {
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed manual doors");
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
@@ -2190,8 +2172,6 @@ static void LineDefs_FixManualDoors(Instance &inst)
 			inst.level.basis.changeLinedef(n, LineDef::F_TYPE, 0);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -2222,7 +2202,7 @@ static void LineDefs_ShowLackImpass(Instance &inst)
 
 static void LineDefs_FixLackImpass(Document &doc)
 {
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("fixed impassible flags");
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
@@ -2236,8 +2216,6 @@ static void LineDefs_FixLackImpass(Document &doc)
 			doc.basis.changeLinedef(n, LineDef::F_FLAGS, new_flags);
 		}
 	}
-
-	doc.basis.end();
 }
 
 
@@ -2271,7 +2249,7 @@ static void LineDefs_ShowBad2SFlag(Instance &inst)
 
 static void LineDefs_FixBad2SFlag(Document &doc)
 {
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("fixed two-sided flags");
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
@@ -2284,8 +2262,6 @@ static void LineDefs_FixBad2SFlag(Document &doc)
 		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
 			doc.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
 	}
-
-	doc.basis.end();
 }
 
 
@@ -2372,13 +2348,11 @@ static void LineDefs_ClearUnknown(Instance &inst)
 
 	LineDefs_FindUnknown(sel, types, inst);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
 		inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
-
-	inst.level.basis.end();
 }
 
 
@@ -2508,13 +2482,11 @@ static void LineDefs_RemoveOverlaps(Document &doc)
 
 	UnusedVertices(doc, &lines, &unused_verts);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("removed overlapping lines");
 
 	doc.objects.del(&lines);
 	doc.objects.del(&unused_verts);
-
-	doc.basis.end();
 }
 
 
@@ -3028,25 +3000,24 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 
 	bool changed = false;
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection("new tag for", *inst.edit.Selected);
-
-	for (sel_iter_c it(inst.edit.Selected); !it.done(); it.next())
 	{
-		if (inst.edit.mode == ObjType::linedefs)
+		EditOperation op(doc.basis);
+		doc.basis.setMessageForSelection("new tag for", *inst.edit.Selected);
+
+		for (sel_iter_c it(inst.edit.Selected); !it.done(); it.next())
 		{
-			doc.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
-			changed = true;
-		}
-		else if (inst.edit.mode == ObjType::sectors)
-		{
-			doc.basis.changeSector(*it, Sector::F_TAG, new_tag);
-			changed = true;
+			if (inst.edit.mode == ObjType::linedefs)
+			{
+				doc.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
+				changed = true;
+			}
+			else if (inst.edit.mode == ObjType::sectors)
+			{
+				doc.basis.changeSector(*it, Sector::F_TAG, new_tag);
+				changed = true;
+			}
 		}
 	}
-
-	doc.basis.end();
-
 	if(changed)
 		mLastTag = new_tag;
 }
@@ -3540,7 +3511,7 @@ static void Textures_FixMissing(Instance &inst)
 {
 	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed missing textures");
 
 	for (const LineDef *L : inst.level.linedefs)
@@ -3575,8 +3546,6 @@ static void Textures_FixMissing(Instance &inst)
 				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -3676,7 +3645,7 @@ static void Textures_FixTransparent(Instance &inst)
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed transparent textures");
 
 	for (const LineDef *L : inst.level.linedefs)
@@ -3704,8 +3673,6 @@ static void Textures_FixTransparent(Instance &inst)
 				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -3787,7 +3754,7 @@ static void Textures_RemoveMedusa(Instance &inst)
 
 	std::map<SString, int> names;
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed medusa textures");
 
 	for (const LineDef *L : inst.level.linedefs)
@@ -3805,8 +3772,6 @@ static void Textures_RemoveMedusa(Instance &inst)
 			inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -3950,7 +3915,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 	int null_tex = BA_InternaliseString("-");
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed unknown textures");
 
 	for (const LineDef *L : inst.level.linedefs)
@@ -3976,8 +3941,6 @@ static void Textures_FixUnknownTex(Instance &inst)
 				inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -3986,7 +3949,7 @@ static void Textures_FixUnknownFlat(Instance &inst)
 	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
 	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed unknown flats");
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
@@ -3999,8 +3962,6 @@ static void Textures_FixUnknownFlat(Instance &inst)
 		if (!inst.W_FlatIsKnown(S->CeilTex()))
 			inst.level.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -4077,7 +4038,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 
 	int new_wall = BA_InternaliseString(new_tex);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessage("fixed non-animating switches");
 
 	for (const LineDef *L : inst.level.linedefs)
@@ -4143,8 +4104,6 @@ static void Textures_FixDupSwitches(Instance &inst)
 			count--;
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 

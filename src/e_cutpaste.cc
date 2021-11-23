@@ -731,65 +731,66 @@ bool Instance::Clipboard_DoPaste()
 	pos_x = grid.SnapX(pos_x);
 	pos_y = grid.SnapY(pos_y);
 
-	level.basis.begin();
-	clip_board->Paste_BA_Message(level);
-
-	clip_doing_paste = true;
-
-	switch (clip_board->mode)
 	{
-		case ObjType::things:
-		{
-			double cx, cy;
-			clip_board->CentreOfPointObjects(clip_board->things, &cx, &cy);
+		EditOperation op(level.basis);
+		clip_board->Paste_BA_Message(level);
 
-			for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
+		clip_doing_paste = true;
+
+		switch (clip_board->mode)
+		{
+			case ObjType::things:
 			{
-				int new_t = level.basis.addNew(ObjType::things);
-				Thing * T = level.things[new_t];
+				double cx, cy;
+				clip_board->CentreOfPointObjects(clip_board->things, &cx, &cy);
 
-				*T = *clip_board->things[i];
+				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
+				{
+					int new_t = level.basis.addNew(ObjType::things);
+					Thing * T = level.things[new_t];
 
-				T->SetRawX(*this, T->x() + pos_x - cx);
-				T->SetRawY(*this, T->y() + pos_y - cy);
+					*T = *clip_board->things[i];
 
-				recent_things.insert_number(T->type);
+					T->SetRawX(*this, T->x() + pos_x - cx);
+					T->SetRawY(*this, T->y() + pos_y - cy);
+
+					recent_things.insert_number(T->type);
+				}
+				break;
 			}
-			break;
-		}
 
-		case ObjType::vertices:
-		{
-			double cx, cy;
-			clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
-
-			for (i = 0 ; i < clip_board->verts.size() ; i++)
+			case ObjType::vertices:
 			{
-				int new_v = level.basis.addNew(ObjType::vertices);
-				Vertex * V = level.vertices[new_v];
+				double cx, cy;
+				clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
 
-				*V = *clip_board->verts[i];
+				for (i = 0 ; i < clip_board->verts.size() ; i++)
+				{
+					int new_v = level.basis.addNew(ObjType::vertices);
+					Vertex * V = level.vertices[new_v];
 
-				V->SetRawX(*this, V->x() + pos_x - cx);
-				V->SetRawY(*this, V->y() + pos_y - cy);
+					*V = *clip_board->verts[i];
+
+					V->SetRawX(*this, V->x() + pos_x - cx);
+					V->SetRawY(*this, V->y() + pos_y - cy);
+				}
+				break;
 			}
-			break;
+
+			case ObjType::linedefs:
+			case ObjType::sectors:
+			{
+				PasteGroupOfObjects(*this, pos_x, pos_y);
+				break;
+			}
+
+			default:
+				break;
 		}
 
-		case ObjType::linedefs:
-		case ObjType::sectors:
-		{
-			PasteGroupOfObjects(*this, pos_x, pos_y);
-			break;
-		}
+		clip_doing_paste = false;
 
-		default:
-			break;
 	}
-
-	clip_doing_paste = false;
-
-	level.basis.end();
 
 	edit.error_mode = false;
 
@@ -1101,7 +1102,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	UnusedSideDefs(doc, &line_sel, NULL /* sec_sel */, &side_sel);
 
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
@@ -1115,8 +1116,6 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	doc.basis.del(ObjType::vertices, v_num);
 
 	doc.objects.del(&side_sel);
-
-	doc.basis.end();
 
 	return true;
 }
@@ -1246,12 +1245,12 @@ void Instance::CMD_Delete()
 		// delete vertex normally
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("deleted", *edit.Selected);
+	{
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("deleted", *edit.Selected);
 
-	DeleteObjects_WithUnused(level, edit.Selected, keep, false /* keep_verts */, keep);
-
-	level.basis.end();
+		DeleteObjects_WithUnused(level, edit.Selected, keep, false /* keep_verts */, keep);
+	}
 
 success:
 	Editor_ClearAction();

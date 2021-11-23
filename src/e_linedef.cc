@@ -768,16 +768,15 @@ void Instance::CMD_LIN_Align()
 		return;
 	}
 
-	level.basis.begin();
+	{
+		EditOperation op(level.basis);
+		level.linemod.alignGroup(group, align_flags);
 
-	level.linemod.alignGroup(group, align_flags);
-
-	if (do_clear)
-		level.basis.setMessage("cleared offsets");
-	else
-		level.basis.setMessage("aligned offsets");
-
-	level.basis.end();
+		if (do_clear)
+			level.basis.setMessage("cleared offsets");
+		else
+			level.basis.setMessage("aligned offsets");
+	}
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -854,18 +853,18 @@ void Instance::CMD_LIN_Flip()
 
 	bool force_it = Exec_HasFlag("/force");
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("flipped", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		if (force_it)
-			level.linemod.flipLinedef(*it);
-		else
-			level.linemod.flipLinedef_safe(*it);
-	}
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("flipped", *edit.Selected);
 
-	level.basis.end();
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			if (force_it)
+				level.linemod.flipLinedef(*it);
+			else
+				level.linemod.flipLinedef_safe(*it);
+		}
+	}
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -880,15 +879,15 @@ void Instance::CMD_LIN_SwapSides()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("swapped sides on", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		level.linemod.flipLine_sides(*it);
-	}
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("swapped sides on", *edit.Selected);
 
-	level.basis.end();
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			level.linemod.flipLine_sides(*it);
+		}
+	}
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -985,16 +984,17 @@ void Instance::CMD_LIN_SplitHalf()
 	int new_first = level.numLinedefs();
 	int new_count = 0;
 
-	level.basis.begin();
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		if (level.linemod.doSplitLineDef(*it))
-			new_count++;
-	}
+		EditOperation op(level.basis);
 
-	level.basis.setMessage("halved %d lines", new_count);
-	level.basis.end();
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			if (level.linemod.doSplitLineDef(*it))
+				new_count++;
+		}
+
+		level.basis.setMessage("halved %d lines", new_count);
+	}
 
 	// Hmmmmm -- should abort early if some lines are too short??
 	if (new_count < edit.Selected->count_obj())
@@ -1182,7 +1182,7 @@ void Instance::commandLinedefMergeTwo()
 	Selection_Clear(true);
 
 
-	level.basis.begin();
+	EditOperation op(level.basis);
 
 	// ld2 steals the sidedef from ld1
 
@@ -1220,7 +1220,6 @@ void Instance::commandLinedefMergeTwo()
 	DeleteObjects_WithUnused(level, &del_line, false, false, false);
 
 	level.basis.setMessage("merged two linedefs");
-	level.basis.end();
 }
 
 //
@@ -1370,7 +1369,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 		angles[n] = atan2(L->End(doc)->y() - L->Start(doc)->y(), L->End(doc)->x() - L->Start(doc)->x());
 	}
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessageForSelection("set length of", list);
 
 	while (! list.empty())
@@ -1381,8 +1380,6 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 		linedefSetLength(ld, new_len, angles[ld]);
 	}
-
-	doc.basis.end();
 }
 
 //

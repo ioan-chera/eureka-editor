@@ -128,33 +128,34 @@ void ObjectsModule::insertThing() const
 	if (inst.edit.Selected->notempty())
 		model = inst.edit.Selected->find_first();
 
-
-	doc.basis.begin();
-
-	int new_t = doc.basis.addNew(ObjType::things);
-	Thing *T = doc.things[new_t];
-
-	if(model >= 0)
-		*T = *doc.things[model];
-	else
+	int new_t;
 	{
-		T->type = inst.conf.default_thing;
-		T->options = MTF_Easy | MTF_Medium | MTF_Hard;
+		EditOperation op(doc.basis);
 
-		if (inst.loaded.levelFormat != MapFormat::doom)
+		new_t = doc.basis.addNew(ObjType::things);
+		Thing *T = doc.things[new_t];
+
+		if(model >= 0)
+			*T = *doc.things[model];
+		else
 		{
-			T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
-			T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+			T->type = inst.conf.default_thing;
+			T->options = MTF_Easy | MTF_Medium | MTF_Hard;
+
+			if (inst.loaded.levelFormat != MapFormat::doom)
+			{
+				T->options |= MTF_Hexen_SP | MTF_Hexen_COOP | MTF_Hexen_DM;
+				T->options |= MTF_Hexen_Fighter | MTF_Hexen_Cleric | MTF_Hexen_Mage;
+			}
 		}
+
+		T->SetRawX(inst, inst.grid.SnapX(inst.edit.map_x));
+		T->SetRawY(inst, inst.grid.SnapY(inst.edit.map_y));
+
+		inst.recent_things.insert_number(T->type);
+
+		doc.basis.setMessage("added thing #%d", new_t);
 	}
-
-	T->SetRawX(inst, inst.grid.SnapX(inst.edit.map_x));
-	T->SetRawY(inst, inst.grid.SnapY(inst.edit.map_y));
-
-	inst.recent_things.insert_number(T->type);
-
-	doc.basis.setMessage("added thing #%d", new_t);
-	doc.basis.end();
 
 
 	// select it
@@ -496,63 +497,61 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	}
 
 
-	doc.basis.begin();
-
-
-	if (new_vert < 0)
 	{
-		new_vert = doc.basis.addNew(ObjType::vertices);
+		EditOperation op(doc.basis);
 
-		Vertex *V = doc.vertices[new_vert];
-
-		V->SetRawXY(inst, new_x, new_y);
-
-		inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
-		inst.edit.Selected->set(new_vert);
-
-		// splitting an existing line?
-		if (split_ld >= 0)
+		if (new_vert < 0)
 		{
-			doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
-			doc.basis.setMessage("split linedef #%d", split_ld);
+			new_vert = doc.basis.addNew(ObjType::vertices);
+
+			Vertex *V = doc.vertices[new_vert];
+
+			V->SetRawXY(inst, new_x, new_y);
+
+			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+			inst.edit.Selected->set(new_vert);
+
+			// splitting an existing line?
+			if (split_ld >= 0)
+			{
+				doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
+				doc.basis.setMessage("split linedef #%d", split_ld);
+			}
+			else
+			{
+				doc.basis.setMessage("added vertex #%d", new_vert);
+			}
+		}
+
+
+		if (old_vert < 0)
+		{
+			// there is no starting vertex, therefore no linedef can be added
+			old_vert = new_vert;
+			new_vert = -1;
 		}
 		else
 		{
-			doc.basis.setMessage("added vertex #%d", new_vert);
+			// closing a loop?
+			if (!force_continue && doc.vertmod.howManyLinedefs(new_vert) > 0)
+			{
+				closed_a_loop = true;
+			}
+
+			//
+			// adding a linedef
+			//
+			SYS_ASSERT(old_vert != new_vert);
+
+			// this can make new sectors too
+			insertLinedefAutosplit(old_vert, new_vert, no_fill);
+
+			doc.basis.setMessage("added linedef");
+
+			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+			inst.edit.Selected->set(new_vert);
 		}
 	}
-
-
-	if (old_vert < 0)
-	{
-		// there is no starting vertex, therefore no linedef can be added
-		old_vert = new_vert;
-		new_vert = -1;
-	}
-	else
-	{
-		// closing a loop?
-		if (!force_continue && doc.vertmod.howManyLinedefs(new_vert) > 0)
-		{
-			closed_a_loop = true;
-		}
-
-		//
-		// adding a linedef
-		//
-		SYS_ASSERT(old_vert != new_vert);
-
-		// this can make new sectors too
-		insertLinedefAutosplit(old_vert, new_vert, no_fill);
-
-		doc.basis.setMessage("added linedef");
-
-		inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
-		inst.edit.Selected->set(new_vert);
-	}
-
-
-	doc.basis.end();
 
 
 begin_drawing:
@@ -606,7 +605,7 @@ void ObjectsModule::insertSector() const
 	// if outside of the map, create a square
 	if (doc.hover.isPointOutsideOfMap(inst.edit.map_x, inst.edit.map_y))
 	{
-		doc.basis.begin();
+		EditOperation op(doc.basis);
 		doc.basis.setMessage("added sector (outside map)");
 
 		int model = -1;
@@ -614,8 +613,6 @@ void ObjectsModule::insertSector() const
 			model = inst.edit.Selected->find_first();
 
 		createSquare(model);
-
-		doc.basis.end();
 		return;
 	}
 
@@ -632,14 +629,13 @@ void ObjectsModule::insertSector() const
 	else
 		model = -1;  // look for a neighbor to copy
 
+	bool ok;
+	{
+		EditOperation op(doc.basis);
+		doc.basis.setMessage("added new sector");
 
-	doc.basis.begin();
-	doc.basis.setMessage("added new sector");
-
-	bool ok = doc.secmod.assignSectorToSpace(inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
-
-	doc.basis.end();
-
+		ok = doc.secmod.assignSectorToSpace(inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
+	}
 	// select the new sector
 	if (ok)
 	{
@@ -798,7 +794,7 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 	if (list->empty())
 		return;
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessageForSelection("moved", *list);
 
 	// move things in sectors too (must do it _before_ moving the
@@ -813,8 +809,6 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 	}
 
 	doMoveObjects(list, delta_x, delta_y, delta_z);
-
-	doc.basis.end();
 }
 
 //
@@ -885,7 +879,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 
 	/* move a single vertex */
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 
 	int did_split_line = -1;
 
@@ -902,8 +896,6 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		verts.set(obj.num);
 
 		doc.vertmod.mergeList(&verts);
-
-		doc.basis.end();
 		return;
 	}
 
@@ -918,7 +910,6 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 			// Alright, we got it
 			doc.basis.setMessage("split linedef #%d", did_split_line);
 			splitLinedefAndMergeSandwich(did_split_line, obj.num, delta_x, delta_y);
-			doc.basis.end();
 			return;
 		}
 
@@ -937,8 +928,6 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		doc.basis.setMessage("split linedef #%d", did_split_line);
 	else
 		doc.basis.setMessageForSelection("moved", list);
-
-	doc.basis.end();
 }
 
 
@@ -1152,7 +1141,7 @@ void Instance::CMD_CopyProperties()
 		if (source == target)
 			return;
 
-		level.basis.begin();
+		EditOperation op(level.basis);
 		level.basis.setMessage("copied properties");
 
 		switch (edit.mode)
@@ -1171,9 +1160,6 @@ void Instance::CMD_CopyProperties()
 
 			default: break;
 		}
-
-		level.basis.end();
-
 	}
 	else  /* reverse mode, HILITE --> SEL */
 	{
@@ -1185,7 +1171,7 @@ void Instance::CMD_CopyProperties()
 
 		int source = edit.highlight.num;
 
-		level.basis.begin();
+		EditOperation op(level.basis);
 		level.basis.setMessage("copied properties");
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
@@ -1210,8 +1196,6 @@ void Instance::CMD_CopyProperties()
 				default: break;
 			}
 		}
-
-		level.basis.end();
 	}
 }
 
@@ -1655,12 +1639,13 @@ void Instance::CMD_Mirror()
 	double mid_x, mid_y;
 	level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
+	{
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
-	level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
+		level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
-	level.basis.end();
+	}
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1718,52 +1703,52 @@ void Instance::CMD_Rotate90()
 	double mid_x, mid_y;
 	level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
-
-	if (edit.mode == ObjType::things)
 	{
-		level.objects.doRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
-	}
-	else
-	{
-		// handle things inside sectors
-		if (edit.mode == ObjType::sectors)
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
+
+		if (edit.mode == ObjType::things)
 		{
-			selection_c things(ObjType::things);
-			ConvertSelection(level, edit.Selected, &things);
-
-			level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
+			level.objects.doRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
 		}
-
-		// everything else just rotates the vertices
-		selection_c verts(ObjType::vertices);
-		ConvertSelection(level, edit.Selected, &verts);
-
-		fixcoord_t fix_mx = MakeValidCoord(mid_x);
-		fixcoord_t fix_my = MakeValidCoord(mid_y);
-
-		for (sel_iter_c it(verts) ; !it.done() ; it.next())
+		else
 		{
-			const Vertex * V = level.vertices[*it];
-
-			fixcoord_t old_x = V->raw_x;
-			fixcoord_t old_y = V->raw_y;
-
-			if (anti_clockwise)
+			// handle things inside sectors
+			if (edit.mode == ObjType::sectors)
 			{
-				level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-				level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+				selection_c things(ObjType::things);
+				ConvertSelection(level, edit.Selected, &things);
+
+				level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
 			}
-			else
+
+			// everything else just rotates the vertices
+			selection_c verts(ObjType::vertices);
+			ConvertSelection(level, edit.Selected, &verts);
+
+			fixcoord_t fix_mx = MakeValidCoord(mid_x);
+			fixcoord_t fix_my = MakeValidCoord(mid_y);
+
+			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
-				level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-				level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+				const Vertex * V = level.vertices[*it];
+
+				fixcoord_t old_x = V->raw_x;
+				fixcoord_t old_y = V->raw_y;
+
+				if (anti_clockwise)
+				{
+					level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+					level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+				}
+				else
+				{
+					level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+					level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+				}
 			}
 		}
 	}
-
-	level.basis.end();
 
 	if (unselect == SelectHighlight::unselect)
 		Selection_Clear(true /* nosave */);
@@ -1845,7 +1830,7 @@ void ObjectsModule::transform(transform_t& param) const
 
 	SYS_ASSERT(inst.edit.Selected->notempty());
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
 
 	if (param.scale_x < 0)
@@ -1861,8 +1846,6 @@ void ObjectsModule::transform(transform_t& param) const
 	}
 
 	doScaleTwoStuff(inst.edit.Selected, param);
-
-	doc.basis.end();
 }
 
 
@@ -1908,12 +1891,11 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 
 	determineOrigin(param, pos_x, pos_y);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(inst.edit.Selected, param);
 	}
-	doc.basis.end();
 }
 
 
@@ -1970,13 +1952,12 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 
 	determineOrigin(param, pos_x, pos_y);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(inst.edit.Selected, param);
 		doScaleSectorHeights(inst.edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
-	doc.basis.end();
 }
 
 
@@ -1990,12 +1971,11 @@ void ObjectsModule::rotate3(double deg, double pos_x, double pos_y) const
 
 	determineOrigin(param, pos_x, pos_y);
 
-	doc.basis.begin();
+	EditOperation op(doc.basis);
 	doc.basis.setMessageForSelection("rotated", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(inst.edit.Selected, param);
 	}
-	doc.basis.end();
 }
 
 
@@ -2070,12 +2050,12 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 		param.mid_y = ly + (hy - ly) / 2;
 	}
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
+	{
+		EditOperation op(doc.basis);
+		doc.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
 
-	doScaleTwoStuff(inst.edit.Selected, param);
-
-	doc.basis.end();
+		doScaleTwoStuff(inst.edit.Selected, param);
+	}
 
 	if (unselect == SelectHighlight::unselect)
 		inst.Selection_Clear(true /* nosave */);
@@ -2249,33 +2229,33 @@ void Instance::CMD_Quantize()
 		Selection_Add(edit.highlight);
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("quantized", *edit.Selected);
-
-	switch (edit.mode)
 	{
-		case ObjType::things:
-			level.objects.quantizeThings(edit.Selected);
-			break;
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("quantized", *edit.Selected);
 
-		case ObjType::vertices:
-			level.objects.quantizeVertices(edit.Selected);
-			break;
-
-		// everything else merely quantizes vertices
-		default:
+		switch (edit.mode)
 		{
-			selection_c verts(ObjType::vertices);
-			ConvertSelection(level, edit.Selected, &verts);
+			case ObjType::things:
+				level.objects.quantizeThings(edit.Selected);
+				break;
 
-			level.objects.quantizeVertices(&verts);
+			case ObjType::vertices:
+				level.objects.quantizeVertices(edit.Selected);
+				break;
 
-			Selection_Clear();
-			break;
+			// everything else merely quantizes vertices
+			default:
+			{
+				selection_c verts(ObjType::vertices);
+				ConvertSelection(level, edit.Selected, &verts);
+
+				level.objects.quantizeVertices(&verts);
+
+				Selection_Clear();
+				break;
+			}
 		}
 	}
-
-	level.basis.end();
 
 	edit.error_mode = true;
 }

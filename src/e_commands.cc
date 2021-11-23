@@ -749,19 +749,19 @@ void Instance::CMD_ACT_Click()
 		const LineDef *L = level.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
+		int new_vert;
+		{
+			EditOperation op(level.basis);
+			level.basis.setMessage("split linedef #%d", split_ld);
 
-		level.basis.begin();
-		level.basis.setMessage("split linedef #%d", split_ld);
+			new_vert = level.basis.addNew(ObjType::vertices);
 
-		int new_vert = level.basis.addNew(ObjType::vertices);
+			Vertex *V = level.vertices[new_vert];
 
-		Vertex *V = level.vertices[new_vert];
+			V->SetRawXY(*this, edit.split_x, edit.split_y);
 
-		V->SetRawXY(*this, edit.split_x, edit.split_y);
-
-		level.linemod.splitLinedefAtVertex(split_ld, new_vert);
-
-		level.basis.end();
+			level.linemod.splitLinedefAtVertex(split_ld, new_vert);
+		}
 
 		if (want_select)
 			edit.Selected->set(new_vert);

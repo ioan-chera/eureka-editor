@@ -101,19 +101,19 @@ void Instance::CMD_SEC_Floor()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = level.sectors[*it];
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
-		int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			const Sector *S = level.sectors[*it];
 
-		level.basis.changeSector(*it, Sector::F_FLOORH, new_h);
+			int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
+
+			level.basis.changeSector(*it, Sector::F_FLOORH, new_h);
+		}
 	}
-
-	level.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOORH);
 
@@ -139,19 +139,19 @@ void Instance::CMD_SEC_Ceil()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = level.sectors[*it];
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
-		int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			const Sector *S = level.sectors[*it];
 
-		level.basis.changeSector(*it, Sector::F_CEILH, new_h);
+			int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
+
+			level.basis.changeSector(*it, Sector::F_CEILH, new_h);
+		}
 	}
-
-	level.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_CEILH);
 
@@ -188,19 +188,19 @@ void SectorModule::sectorsAdjustLight(int delta) const
 	if (inst.edit.Selected->empty())
 		return;
 
-	doc.basis.begin();
-	doc.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
-
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = doc.sectors[*it];
+		EditOperation op(doc.basis);
+		doc.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
 
-		int new_lt = light_add_delta(S->light, delta);
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
+		{
+			const Sector *S = doc.sectors[*it];
 
-		doc.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
+			int new_lt = light_add_delta(S->light, delta);
+
+			doc.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
+		}
 	}
-
-	doc.basis.end();
 
 	inst.main_win->sec_box->UpdateField(Sector::F_LIGHT);
 }
@@ -239,21 +239,21 @@ void Instance::CMD_SEC_SwapFlats()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("swapped flats in", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Sector *S = level.sectors[*it];
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("swapped flats in", *edit.Selected);
 
-		int floor_tex = S->floor_tex;
-		int  ceil_tex = S->ceil_tex;
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			const Sector *S = level.sectors[*it];
 
-		level.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
-		level.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
+			int floor_tex = S->floor_tex;
+			int  ceil_tex = S->ceil_tex;
+
+			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
+			level.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
+		}
 	}
-
-	level.basis.end();
 
 	main_win->sec_box->UpdateField(Sector::F_FLOOR_TEX);
 	main_win->sec_box->UpdateField(Sector::F_CEIL_TEX);
@@ -325,46 +325,47 @@ void Instance::commandSectorMerge()
 	selection_c common_lines(ObjType::linedefs);
 	selection_c unused_secs (ObjType::sectors);
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("merged", *edit.Selected);
-
-	// keep the properties of the first selected sector
-	if (new_sec != first)
 	{
-		const Sector *ref = level.sectors[first];
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("merged", *edit.Selected);
 
-		level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-		level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-		level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-		level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+		// keep the properties of the first selected sector
+		if (new_sec != first)
+		{
+			const Sector *ref = level.sectors[first];
 
-		level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
-		level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
-		level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+			level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
+			level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+			level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
+			level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+
+			level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
+			level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
+			level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+		}
+
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			int old_sec = *it;
+
+			if (old_sec == new_sec)
+				continue;
+
+			level.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
+
+			level.secmod.replaceSectorRefs(old_sec, new_sec);
+
+			unused_secs.set(old_sec);
+		}
+
+		level.objects.del(&unused_secs);
+
+		if (! keep_common_lines)
+		{
+			DeleteObjects_WithUnused(level, &common_lines, false, false, false);
+		}
+
 	}
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-	{
-		int old_sec = *it;
-
-		if (old_sec == new_sec)
-			continue;
-
-		level.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
-
-		level.secmod.replaceSectorRefs(old_sec, new_sec);
-
-		unused_secs.set(old_sec);
-	}
-
-	level.objects.del(&unused_secs);
-
-	if (! keep_common_lines)
-	{
-		DeleteObjects_WithUnused(level, &common_lines, false, false, false);
-	}
-
-	level.basis.end();
 
 	// re-select the final sector
 	Selection_Clear(true /* no_save */);

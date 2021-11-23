@@ -498,14 +498,12 @@ void Instance::CMD_PruneUnused()
 		return;
 	}
 
-	level.basis.begin();
+	EditOperation op(level.basis);
 	level.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
 	level.objects.del(&used_sides);
 	level.objects.del(&used_secs);
 	level.objects.del(&used_verts);
-
-	level.basis.end();
 }
 
 

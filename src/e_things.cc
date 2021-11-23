@@ -64,17 +64,17 @@ void Instance::CMD_TH_SpinThings()
 		return;
 	}
 
-	level.basis.begin();
-	level.basis.setMessageForSelection("spun", *edit.Selected);
-
-	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Thing *T = level.things[*it];
+		EditOperation op(level.basis);
+		level.basis.setMessageForSelection("spun", *edit.Selected);
 
-		level.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
+		{
+			const Thing *T = level.things[*it];
+
+			level.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, degrees));
+		}
 	}
-
-	level.basis.end();
 
 	main_win->thing_box->UpdateField(Thing::F_ANGLE);
 
@@ -140,7 +140,7 @@ void CMD_TH_Disconnect(Instance &inst)
 		return;
 	}
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
 
 	while (!inst.edit.Selected->empty())
@@ -166,8 +166,6 @@ void CMD_TH_Disconnect(Instance &inst)
 			MoveOverlapThing(inst, *it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
 		}
 	}
-
-	inst.level.basis.end();
 }
 
 
@@ -190,7 +188,7 @@ void CMD_TH_Merge(Instance &inst)
 	double mid_x, mid_y;
 	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
 
-	inst.level.basis.begin();
+	EditOperation op(inst.level.basis);
 	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
@@ -198,8 +196,6 @@ void CMD_TH_Merge(Instance &inst)
 		inst.level.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid_x));
 		inst.level.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid_y));
 	}
-
-	inst.level.basis.end();
 }
 
 
