@@ -250,15 +250,13 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 
 	if (! box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
+		EditOperation op(box->inst.level.basis);
 		box->inst.level.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
 			box->inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, new_type);
 		}
-
-		box->inst.level.basis.end();
 	}
 
 	// update description
@@ -427,7 +425,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 		mFixUp.checkDirtyFields();
 		checkSidesDirtyFields();
 
-		inst.level.basis.begin();
+		EditOperation op(inst.level.basis);
 		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
@@ -441,8 +439,6 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 
 			SetTexOnLine(*it, new_tex, e_state, p2);
 		}
-
-		inst.level.basis.end();
 	}
 
 	UpdateField();
@@ -519,41 +515,41 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 	mFixUp.checkDirtyFields();
 	checkSidesDirtyFields();
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
-
-	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		const LineDef *L = inst.level.linedefs[*it];
+		EditOperation op(inst.level.basis);
+		inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
-		for (int pass = 0 ; pass < 2 ; pass++)
+		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			int sd = (pass == 0) ? L->right : L->left;
-			if (sd < 0)
-				continue;
+			const LineDef *L = inst.level.linedefs[*it];
 
-			int parts2 = pass ? (parts >> 4) : parts;
-
-			if (L->TwoSided())
+			for (int pass = 0 ; pass < 2 ; pass++)
 			{
-				if (parts2 & PART_RT_LOWER)
-					inst.level.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+				int sd = (pass == 0) ? L->right : L->left;
+				if (sd < 0)
+					continue;
 
-				if (parts2 & PART_RT_UPPER)
-					inst.level.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+				int parts2 = pass ? (parts >> 4) : parts;
 
-				if (parts2 & PART_RT_RAIL)
-					inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
-			}
-			else  // one-sided line
-			{
-				if (parts2 & PART_RT_LOWER)
-					inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
+				if (L->TwoSided())
+				{
+					if (parts2 & PART_RT_LOWER)
+						inst.level.basis.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+
+					if (parts2 & PART_RT_UPPER)
+						inst.level.basis.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+
+					if (parts2 & PART_RT_RAIL)
+						inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
+				}
+				else  // one-sided line
+				{
+					if (parts2 & PART_RT_LOWER)
+						inst.level.basis.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
+				}
 			}
 		}
 	}
-
-	inst.level.basis.end();
 
 	UpdateField();
 	UpdateSides();
@@ -642,7 +638,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		box->mFixUp.checkDirtyFields();
 		box->checkSidesDirtyFields();
 
-		box->inst.level.basis.begin();
+		EditOperation op(box->inst.level.basis);
 		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
@@ -653,8 +649,6 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 			// this is important when multiple linedefs are selected.
 			box->inst.level.basis.changeLinedef(*it, LineDef::F_FLAGS, (L->flags & ~mask) | (new_flags & mask));
 		}
-
-		box->inst.level.basis.end();
 	}
 }
 
@@ -672,7 +666,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 
 	if (! box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
+		EditOperation op(box->inst.level.basis);
 		box->inst.level.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
@@ -680,8 +674,6 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 			box->inst.level.basis.changeLinedef(*it, static_cast<byte>(LineDef::F_TAG + arg_idx),
                                                 new_value);
 		}
-
-		box->inst.level.basis.end();
 	}
 }
 

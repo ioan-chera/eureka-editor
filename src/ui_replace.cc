@@ -1296,12 +1296,12 @@ void UI_FindAndReplace::DoReplace()
 
 	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-	inst.level.basis.begin();
-	inst.level.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
+	{
+		EditOperation op(inst.level.basis);
+		inst.level.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
-	ApplyReplace(cur_obj.num, replace_tex_id);
-
-	inst.level.basis.end();
+		ApplyReplace(cur_obj.num, replace_tex_id);
+	}
 
 	// move onto next object
 	FindNext();
@@ -1386,11 +1386,12 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	int replace_tex_id = 0;
 
+	EditOperation *op;	// hackish way to control lifetime
 	if (replace)
 	{
 		replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
-		inst.level.basis.begin();
+		op = new EditOperation(inst.level.basis);
 	}
 
 	// we select objects even in REPLACE mode
@@ -1429,7 +1430,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (replace)
 	{
 		inst.level.basis.setMessageForSelection("replacement in", *inst.edit.Selected);
-		inst.level.basis.end();
+		delete op;
 	}
 
 	if (count > 0)

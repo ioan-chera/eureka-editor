@@ -112,15 +112,13 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
+		EditOperation op(box->inst.level.basis);
 		box->inst.level.basis.setMessage("edited X of"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeVertex(*it, Vertex::F_X, box->inst.MakeValidCoord(new_x));
 		}
-
-		box->inst.level.basis.end();
 	}
 }
 
@@ -132,15 +130,13 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		box->inst.level.basis.begin();
+		EditOperation op(box->inst.level.basis);
 		box->inst.level.basis.setMessage("edited Y of"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
 			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, box->inst.MakeValidCoord(new_y));
 		}
-
-		box->inst.level.basis.end();
 	}
 }
 
@@ -173,7 +169,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 		box->mFixUp.checkDirtyFields();
 
-		box->inst.level.basis.begin();
+		EditOperation op(box->inst.level.basis);
 		box->inst.level.basis.setMessage("adjusted"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
@@ -183,8 +179,6 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 			box->inst.level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
 			box->inst.level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 		}
-
-		box->inst.level.basis.end();
 	}
 }
 
