@@ -525,6 +525,36 @@ private:
 	bool mDidMakeChanges = false;
 };
 
+//
+// Undo/redo operation
+//
+class EditOperation
+{
+public:
+	EditOperation(Basis &basis) : basis(basis)
+	{
+		basis.begin();
+	}
+	~EditOperation()
+	{
+		if(abort)
+			basis.abort(abortKeepChanges);
+		else
+			basis.end();
+	}
+
+	void setAbort(bool keepChanges)
+	{
+		abort = true;
+		abortKeepChanges = keepChanges;
+	}
+
+private:
+	Basis &basis;
+	bool abort = false;
+	bool abortKeepChanges = false;
+};
+
 const char *NameForObjectType(ObjType type, bool plural = false);
 
 /* BASIS API */
