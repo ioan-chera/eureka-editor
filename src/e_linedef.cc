@@ -773,9 +773,9 @@ void Instance::CMD_LIN_Align()
 		level.linemod.alignGroup(group, align_flags);
 
 		if (do_clear)
-			level.basis.setMessage("cleared offsets");
+			op.setMessage("cleared offsets");
 		else
-			level.basis.setMessage("aligned offsets");
+			op.setMessage("aligned offsets");
 	}
 
 	if (unselect == SelectHighlight::unselect)
@@ -855,7 +855,7 @@ void Instance::CMD_LIN_Flip()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("flipped", *edit.Selected);
+		op.setMessageForSelection("flipped", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -881,7 +881,7 @@ void Instance::CMD_LIN_SwapSides()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("swapped sides on", *edit.Selected);
+		op.setMessageForSelection("swapped sides on", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -993,7 +993,7 @@ void Instance::CMD_LIN_SplitHalf()
 				new_count++;
 		}
 
-		level.basis.setMessage("halved %d lines", new_count);
+		op.setMessage("halved %d lines", new_count);
 	}
 
 	// Hmmmmm -- should abort early if some lines are too short??
@@ -1219,7 +1219,7 @@ void Instance::commandLinedefMergeTwo()
 
 	DeleteObjects_WithUnused(level, &del_line, false, false, false);
 
-	level.basis.setMessage("merged two linedefs");
+	op.setMessage("merged two linedefs");
 }
 
 //
@@ -1370,7 +1370,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 	}
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessageForSelection("set length of", list);
+	op.setMessageForSelection("set length of", list);
 
 	while (! list.empty())
 	{

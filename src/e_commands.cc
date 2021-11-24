@@ -752,7 +752,7 @@ void Instance::CMD_ACT_Click()
 		int new_vert;
 		{
 			EditOperation op(level.basis);
-			level.basis.setMessage("split linedef #%d", split_ld);
+			op.setMessage("split linedef #%d", split_ld);
 
 			new_vert = level.basis.addNew(ObjType::vertices);
 

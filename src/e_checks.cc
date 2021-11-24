@@ -404,7 +404,7 @@ static void Vertex_MergeOverlaps(Instance &inst)
 
 	{
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessage("merged overlapping vertices");
+		op.setMessage("merged overlapping vertices");
 
 		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
@@ -454,7 +454,7 @@ static void Vertex_RemoveUnused(Document &doc)
 	Vertex_FindUnused(sel, doc);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("removed unused vertices");
+	op.setMessage("removed unused vertices");
 
 	doc.objects.del(&sel);
 }
@@ -838,7 +838,7 @@ static void Sectors_ClearUnknown(Instance &inst)
 	Sectors_FindUnknown(sel, types, inst);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("cleared unknown sector types");
+	op.setMessage("cleared unknown sector types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
 		inst.level.basis.changeSector(*it, Sector::F_TYPE, 0);
@@ -872,7 +872,7 @@ static void Sectors_RemoveUnused(Document &doc)
 	Sectors_FindUnused(sel, doc);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("removed unused sectors");
+	op.setMessage("removed unused sectors");
 
 	doc.objects.del(&sel);
 }
@@ -900,7 +900,7 @@ static void Sectors_FixBadCeil(Document &doc)
 	Sectors_FindBadCeil(sel, doc);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("fixed bad sector heights");
+	op.setMessage("fixed bad sector heights");
 
 	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
@@ -947,7 +947,7 @@ static void SideDefs_RemoveUnused(Document &doc)
 	SideDefs_FindUnused(sel, doc);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("removed unused sidedefs");
+	op.setMessage("removed unused sidedefs");
 
 	doc.objects.del(&sel);
 }
@@ -1076,7 +1076,7 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 		}
 		else
 		{
-			doc.basis.setMessage("unpacked all sidedefs");
+			op.setMessage("unpacked all sidedefs");
 		}
 	}
 
@@ -1397,7 +1397,7 @@ void Things_RemoveUnknown(Instance &inst)
 	Things_FindUnknown(sel, types, inst);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("removed unknown things");
+	op.setMessage("removed unknown things");
 
 	inst.level.objects.del(&sel);
 }
@@ -1487,7 +1487,7 @@ static void Things_RemoveInVoid(Instance &inst)
 	Things_FindInVoid(sel, inst);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("removed things in the void");
+	op.setMessage("removed things in the void");
 
 	inst.level.objects.del(&sel);
 }
@@ -1574,7 +1574,7 @@ static void Things_ShowDuds(Instance &inst)
 void Things_FixDuds(Instance &inst)
 {
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed unspawnable things");
+	op.setMessage("fixed unspawnable things");
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
@@ -2068,7 +2068,7 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 	}
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("removed zero-len linedefs");
+	op.setMessage("removed zero-len linedefs");
 
 	// NOTE: the vertex overlapping test handles cases where the
 	//       vertices of other lines joining a zero-length one
@@ -2155,7 +2155,7 @@ static void LineDefs_ShowManualDoors(Instance &inst)
 static void LineDefs_FixManualDoors(Instance &inst)
 {
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed manual doors");
+	op.setMessage("fixed manual doors");
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
@@ -2203,7 +2203,7 @@ static void LineDefs_ShowLackImpass(Instance &inst)
 static void LineDefs_FixLackImpass(Document &doc)
 {
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("fixed impassible flags");
+	op.setMessage("fixed impassible flags");
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
@@ -2250,7 +2250,7 @@ static void LineDefs_ShowBad2SFlag(Instance &inst)
 static void LineDefs_FixBad2SFlag(Document &doc)
 {
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("fixed two-sided flags");
+	op.setMessage("fixed two-sided flags");
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
@@ -2349,7 +2349,7 @@ static void LineDefs_ClearUnknown(Instance &inst)
 	LineDefs_FindUnknown(sel, types, inst);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("cleared unknown line types");
+	op.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
 		inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
@@ -2483,7 +2483,7 @@ static void LineDefs_RemoveOverlaps(Document &doc)
 	UnusedVertices(doc, &lines, &unused_verts);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("removed overlapping lines");
+	op.setMessage("removed overlapping lines");
 
 	doc.objects.del(&lines);
 	doc.objects.del(&unused_verts);
@@ -3002,7 +3002,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 
 	{
 		EditOperation op(doc.basis);
-		doc.basis.setMessageForSelection("new tag for", *inst.edit.Selected);
+		op.setMessageForSelection("new tag for", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected); !it.done(); it.next())
 		{
@@ -3512,7 +3512,7 @@ static void Textures_FixMissing(Instance &inst)
 	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed missing textures");
+	op.setMessage("fixed missing textures");
 
 	for (const LineDef *L : inst.level.linedefs)
 	{
@@ -3646,7 +3646,7 @@ static void Textures_FixTransparent(Instance &inst)
 	int new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed transparent textures");
+	op.setMessage("fixed transparent textures");
 
 	for (const LineDef *L : inst.level.linedefs)
 	{
@@ -3755,7 +3755,7 @@ static void Textures_RemoveMedusa(Instance &inst)
 	std::map<SString, int> names;
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed medusa textures");
+	op.setMessage("fixed medusa textures");
 
 	for (const LineDef *L : inst.level.linedefs)
 	{
@@ -3916,7 +3916,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 	int null_tex = BA_InternaliseString("-");
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed unknown textures");
+	op.setMessage("fixed unknown textures");
 
 	for (const LineDef *L : inst.level.linedefs)
 	{
@@ -3950,7 +3950,7 @@ static void Textures_FixUnknownFlat(Instance &inst)
 	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed unknown flats");
+	op.setMessage("fixed unknown flats");
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
@@ -4039,7 +4039,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 	int new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessage("fixed non-animating switches");
+	op.setMessage("fixed non-animating switches");
 
 	for (const LineDef *L : inst.level.linedefs)
 	{

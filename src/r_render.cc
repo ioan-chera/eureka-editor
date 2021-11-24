@@ -519,7 +519,7 @@ static void AdjustOfs_Finish(Instance &inst)
 	if (dx || dy)
 	{
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessage("adjusted offsets");
+		op.setMessage("adjusted offsets");
 
 		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
 		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
@@ -803,9 +803,9 @@ void Render3D_DragSectors(Instance &inst)
 	EditOperation op(inst.level.basis);
 
 	if (dz > 0)
-		inst.level.basis.setMessage("raised sectors");
+		op.setMessage("raised sectors");
 	else
-		inst.level.basis.setMessage("lowered sectors");
+		op.setMessage("lowered sectors");
 
 	if (inst.edit.dragged.valid())
 	{

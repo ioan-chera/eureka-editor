@@ -499,7 +499,7 @@ void Instance::CMD_PruneUnused()
 	}
 
 	EditOperation op(level.basis);
-	level.basis.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
+	op.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
 	level.objects.del(&used_sides);
 	level.objects.del(&used_secs);

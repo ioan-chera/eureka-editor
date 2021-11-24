@@ -357,7 +357,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 		{
 			EditOperation op(doc.basis);
-			doc.basis.setMessage("merged dangling vertex #%d\n", v_num);
+			op.setMessage("merged dangling vertex #%d\n", v_num);
 
 			selection_c list(ObjType::vertices);
 
@@ -403,7 +403,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 #endif
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("split linedef #%d\n", line_obj.num);
+	op.setMessage("split linedef #%d\n", line_obj.num);
 
 	doc.linemod.splitLinedefAtVertex(line_obj.num, v_num);
 
@@ -1074,7 +1074,7 @@ void Instance::CMD_VT_ShapeLine()
 	}
 
 	EditOperation op(level.basis);
-	level.basis.setMessage("shaped %d vertices", (int)along_list.size());
+	op.setMessage("shaped %d vertices", (int)along_list.size());
 
 	for (unsigned int i = 0 ; i < along_list.size() ; i++)
 	{
@@ -1334,7 +1334,7 @@ void Instance::CMD_VT_ShapeArc()
 	// actually move stuff now
 
 	EditOperation op(level.basis);
-	level.basis.setMessage("shaped %d vertices", (int)along_list.size());
+	op.setMessage("shaped %d vertices", (int)along_list.size());
 
 	level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);

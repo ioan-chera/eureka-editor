@@ -99,7 +99,7 @@ public:
 		return (int)num;
 	}
 
-	void Paste_BA_Message(Document &doc) const
+	void Paste_BA_Message(EditOperation &op, Document &doc) const
 	{
 		size_t t = things.size();
 		size_t v = verts.size();
@@ -109,26 +109,26 @@ public:
 		if (s > 0)
 		{
 			const char *name = NameForObjectType(ObjType::sectors, s != 1);
-			doc.basis.setMessage("pasted %zu %s", s, name);
+			op.setMessage("pasted %zu %s", s, name);
 		}
 		else if (l > 0)
 		{
 			const char *name = NameForObjectType(ObjType::linedefs, l != 1);
-			doc.basis.setMessage("pasted %zu %s", l, name);
+			op.setMessage("pasted %zu %s", l, name);
 		}
 		else if (t > 0)
 		{
 			const char *name = NameForObjectType(ObjType::things, t != 1);
-			doc.basis.setMessage("pasted %zu %s", t, name);
+			op.setMessage("pasted %zu %s", t, name);
 		}
 		else if (v > 0)
 		{
 			const char *name = NameForObjectType(ObjType::vertices, v != 1);
-			doc.basis.setMessage("pasted %zu %s", v, name);
+			op.setMessage("pasted %zu %s", v, name);
 		}
 		else
 		{
-			doc.basis.setMessage("pasted something");
+			op.setMessage("pasted something");
 		}
 	}
 
@@ -733,7 +733,7 @@ bool Instance::Clipboard_DoPaste()
 
 	{
 		EditOperation op(level.basis);
-		clip_board->Paste_BA_Message(level);
+		clip_board->Paste_BA_Message(op, level);
 
 		clip_doing_paste = true;
 
@@ -1103,7 +1103,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessage("deleted vertex #%d\n", v_num);
+	op.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
 		doc.basis.changeLinedef(ld1, LineDef::F_START, v2);
@@ -1247,7 +1247,7 @@ void Instance::CMD_Delete()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("deleted", *edit.Selected);
+		op.setMessageForSelection("deleted", *edit.Selected);
 
 		DeleteObjects_WithUnused(level, edit.Selected, keep, false /* keep_verts */, keep);
 	}

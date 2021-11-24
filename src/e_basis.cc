@@ -1087,5 +1087,16 @@ void Basis::doProcessChangeStatus() const
 	inst.ObjectBox_NotifyEnd();
 }
 
+//
+// Set operation message
+//
+void EditOperation::setMessage(EUR_FORMAT_STRING(const char *format), ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	basis.setMessage("%s", SString::vprintf(format, ap).c_str());
+	va_end(ap);
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -113,7 +113,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessage("edited X of"/*, inst.edit.Selected*/);
+		op.setMessage("edited X of"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -131,7 +131,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessage("edited Y of"/*, inst.edit.Selected*/);
+		op.setMessage("edited Y of"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -170,7 +170,7 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		box->mFixUp.checkDirtyFields();
 
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessage("adjusted"/*, inst.edit.Selected*/);
+		op.setMessage("adjusted"/*, inst.edit.Selected*/);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{

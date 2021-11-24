@@ -1298,7 +1298,7 @@ void UI_FindAndReplace::DoReplace()
 
 	{
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
+		op.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
 		ApplyReplace(cur_obj.num, replace_tex_id);
 	}

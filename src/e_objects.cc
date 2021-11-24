@@ -154,7 +154,7 @@ void ObjectsModule::insertThing() const
 
 		inst.recent_things.insert_number(T->type);
 
-		doc.basis.setMessage("added thing #%d", new_t);
+		op.setMessage("added thing #%d", new_t);
 	}
 
 
@@ -515,11 +515,11 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			if (split_ld >= 0)
 			{
 				doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
-				doc.basis.setMessage("split linedef #%d", split_ld);
+				op.setMessage("split linedef #%d", split_ld);
 			}
 			else
 			{
-				doc.basis.setMessage("added vertex #%d", new_vert);
+				op.setMessage("added vertex #%d", new_vert);
 			}
 		}
 
@@ -546,7 +546,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			// this can make new sectors too
 			insertLinedefAutosplit(old_vert, new_vert, no_fill);
 
-			doc.basis.setMessage("added linedef");
+			op.setMessage("added linedef");
 
 			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
@@ -606,7 +606,7 @@ void ObjectsModule::insertSector() const
 	if (doc.hover.isPointOutsideOfMap(inst.edit.map_x, inst.edit.map_y))
 	{
 		EditOperation op(doc.basis);
-		doc.basis.setMessage("added sector (outside map)");
+		op.setMessage("added sector (outside map)");
 
 		int model = -1;
 		if (sel_count > 0)
@@ -632,7 +632,7 @@ void ObjectsModule::insertSector() const
 	bool ok;
 	{
 		EditOperation op(doc.basis);
-		doc.basis.setMessage("added new sector");
+		op.setMessage("added new sector");
 
 		ok = doc.secmod.assignSectorToSpace(inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
 	}
@@ -795,7 +795,7 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 		return;
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessageForSelection("moved", *list);
+	op.setMessageForSelection("moved", *list);
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -886,7 +886,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 	// handle a single vertex merging onto an existing one
 	if (inst.edit.highlight.valid())
 	{
-		doc.basis.setMessage("merge vertex #%d", obj.num);
+		op.setMessage("merge vertex #%d", obj.num);
 
 		SYS_ASSERT(obj.num != inst.edit.highlight.num);
 
@@ -908,7 +908,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		if(findLineBetweenLineAndVertex(did_split_line, obj.num) >= 0)
 		{
 			// Alright, we got it
-			doc.basis.setMessage("split linedef #%d", did_split_line);
+			op.setMessage("split linedef #%d", did_split_line);
 			splitLinedefAndMergeSandwich(did_split_line, obj.num, delta_x, delta_y);
 			return;
 		}
@@ -925,9 +925,9 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 	doMoveObjects(&list, delta_x, delta_y, delta_z);
 
 	if (did_split_line >= 0)
-		doc.basis.setMessage("split linedef #%d", did_split_line);
+		op.setMessage("split linedef #%d", did_split_line);
 	else
-		doc.basis.setMessageForSelection("moved", list);
+		op.setMessageForSelection("moved", list);
 }
 
 
@@ -1142,7 +1142,7 @@ void Instance::CMD_CopyProperties()
 			return;
 
 		EditOperation op(level.basis);
-		level.basis.setMessage("copied properties");
+		op.setMessage("copied properties");
 
 		switch (edit.mode)
 		{
@@ -1172,7 +1172,7 @@ void Instance::CMD_CopyProperties()
 		int source = edit.highlight.num;
 
 		EditOperation op(level.basis);
-		level.basis.setMessage("copied properties");
+		op.setMessage("copied properties");
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -1641,7 +1641,7 @@ void Instance::CMD_Mirror()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
+		op.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
 		level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
 
@@ -1705,7 +1705,7 @@ void Instance::CMD_Rotate90()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
+		op.setMessageForSelection("rotated", *edit.Selected, anti_clockwise ? " anti-clockwise" : " clockwise");
 
 		if (edit.mode == ObjType::things)
 		{

@@ -355,9 +355,6 @@ public:
 	{
 	}
 
-	void begin();
-	void end();
-	void abort(bool keepChanges);
 	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
@@ -426,6 +423,8 @@ private:
 
 		void deleteFinally();
 	};
+
+	friend class EditOperation;
 	friend struct EditUnit;
 
 	//
@@ -514,6 +513,11 @@ private:
 		int mDir = 0;	// dir must be +1 or -1 if active
 	};
 
+	// Called exclusively from friend class
+	void begin();
+	void end();
+	void abort(bool keepChanges);
+
 	void doClearChangeStatus();
 	void doProcessChangeStatus() const;
 
@@ -541,6 +545,12 @@ public:
 			basis.abort(abortKeepChanges);
 		else
 			basis.end();
+	}
+
+	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
+	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "")
+	{
+		basis.setMessageForSelection(verb, list, suffix);
 	}
 
 	void setAbort(bool keepChanges)

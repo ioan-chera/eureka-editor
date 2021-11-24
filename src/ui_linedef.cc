@@ -517,7 +517,7 @@ void UI_LineBox::CB_Paste(int parts, int new_tex)
 
 	{
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessage("pasted %s", BA_GetString(new_tex).c_str());
+		op.setMessage("pasted %s", BA_GetString(new_tex).c_str());
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
