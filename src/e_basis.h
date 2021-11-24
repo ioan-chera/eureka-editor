@@ -355,8 +355,6 @@ public:
 	{
 	}
 
-	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
-	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
 	void del(ObjType type, int objnum);
 	bool change(ObjType type, int objnum, byte field, int value);
@@ -515,6 +513,8 @@ private:
 
 	// Called exclusively from friend class
 	void begin();
+	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
+	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	void end();
 	void abort(bool keepChanges);
 
