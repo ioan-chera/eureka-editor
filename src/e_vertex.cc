@@ -301,7 +301,7 @@ void Instance::commandVertexMerge()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("merged", *edit.Selected);
+		op.setMessageForSelection("merged", *edit.Selected);
 
 		level.vertmod.mergeList(edit.Selected);
 	}
@@ -506,7 +506,7 @@ void Instance::commandVertexDisconnect()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("disconnected", *edit.Selected);
+		op.setMessageForSelection("disconnected", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -602,7 +602,7 @@ void Instance::commandLineDisconnect()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("disconnected", *edit.Selected);
+		op.setMessageForSelection("disconnected", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -819,7 +819,7 @@ void Instance::commandSectorDisconnect()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("disconnected", *edit.Selected);
+		op.setMessageForSelection("disconnected", *edit.Selected);
 
 		// create new vertices, and a mapping from old --> new
 

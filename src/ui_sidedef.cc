@@ -202,7 +202,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 	{
 		{
 			EditOperation op(box->inst.level.basis);
-			box->inst.level.basis.setMessageForSelection("edited texture on", *box->inst.edit.Selected);
+			op.setMessageForSelection("edited texture on", *box->inst.edit.Selected);
 
 			for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 			{
@@ -319,7 +319,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 				box->inst.level.linemod.addSecondSidedef(*it, sd, other);
 		}
 
-		box->inst.level.basis.setMessageForSelection("added sidedef to", *box->inst.edit.Selected);
+		op.setMessageForSelection("added sidedef to", *box->inst.edit.Selected);
 	}
 
 	box->inst.main_win->line_box->UpdateField();
@@ -358,7 +358,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 			box->inst.level.linemod.removeSidedef(*it, box->is_front ? Side::right : Side::left);
 		}
 
-		box->inst.level.basis.setMessageForSelection("deleted sidedef from", *box->inst.edit.Selected);
+		op.setMessageForSelection("deleted sidedef from", *box->inst.edit.Selected);
 	}
 
 	box->inst.main_win->line_box->UpdateField();
@@ -379,9 +379,9 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 		EditOperation op(box->inst.level.basis);
 
 		if (w == box->x_ofs)
-			box->inst.level.basis.setMessageForSelection("edited X offset on", *box->inst.edit.Selected);
+			op.setMessageForSelection("edited X offset on", *box->inst.edit.Selected);
 		else
-			box->inst.level.basis.setMessageForSelection("edited Y offset on", *box->inst.edit.Selected);
+			op.setMessageForSelection("edited Y offset on", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -413,7 +413,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited sector-ref on", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited sector-ref on", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{

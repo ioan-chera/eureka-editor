@@ -1132,7 +1132,7 @@ void Instance::StoreSelectedThing(int new_type)
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("pasted type of", *edit.Selected);
+		op.setMessageForSelection("pasted type of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -1214,7 +1214,7 @@ void Instance::StoreSelectedFlat(int new_tex)
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("pasted flat to", *edit.Selected);
+		op.setMessageForSelection("pasted flat to", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -1249,7 +1249,7 @@ void Instance::StoreDefaultedFlats()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("defaulted flat in", *edit.Selected);
+		op.setMessageForSelection("defaulted flat in", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -1360,7 +1360,7 @@ void Instance::StoreSelectedTexture(int new_tex)
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("pasted tex to", *edit.Selected);
+		op.setMessageForSelection("pasted tex to", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{

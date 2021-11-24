@@ -1429,7 +1429,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 	if (replace)
 	{
-		inst.level.basis.setMessageForSelection("replacement in", *inst.edit.Selected);
+		op->setMessageForSelection("replacement in", *inst.edit.Selected);
 		delete op;
 	}
 

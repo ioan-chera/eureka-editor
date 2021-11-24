@@ -365,7 +365,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -407,7 +407,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited special of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited special of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -496,7 +496,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited angle of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited angle of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -516,7 +516,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited TID of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited TID of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -535,7 +535,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited X of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			box->inst.level.basis.changeThing(*it, Thing::F_X, box->inst.MakeValidCoord(new_x));
@@ -552,7 +552,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			box->inst.level.basis.changeThing(*it, Thing::F_Y, box->inst.MakeValidCoord(new_y));
@@ -568,7 +568,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			box->inst.level.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
@@ -589,7 +589,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 	{
 		box->mFixUp.checkDirtyFields();
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -651,7 +651,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{

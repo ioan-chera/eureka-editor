@@ -263,9 +263,9 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 			EditOperation op(box->inst.level.basis);
 
 			if (w == box->floor_h)
-				box->inst.level.basis.setMessageForSelection("edited floor of", *box->inst.edit.Selected);
+				op.setMessageForSelection("edited floor of", *box->inst.edit.Selected);
 			else
-				box->inst.level.basis.setMessageForSelection("edited ceiling of", *box->inst.edit.Selected);
+				op.setMessageForSelection("edited ceiling of", *box->inst.edit.Selected);
 
 			for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			{
@@ -303,7 +303,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 		{
 			EditOperation op(box->inst.level.basis);
-			box->inst.level.basis.setMessageForSelection("edited headroom of", *box->inst.edit.Selected);
+			op.setMessageForSelection("edited headroom of", *box->inst.edit.Selected);
 
 			for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			{
@@ -373,7 +373,7 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 		mFixUp.checkDirtyFields();
 
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
+		op.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -495,7 +495,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 	{
 		mFixUp.checkDirtyFields();
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessageForSelection("edited type of", *inst.edit.Selected);
+		op.setMessageForSelection("edited type of", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -567,7 +567,7 @@ void UI_SectorBox::light_callback(Fl_Widget *w, void *data)
 	if (!box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited light of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited light of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -863,7 +863,7 @@ void UI_SectorBox::CB_Cut(int parts)
 
 		{
 			EditOperation op(inst.level.basis);
-			inst.level.basis.setMessageForSelection("cut texture on", *inst.edit.Selected);
+			op.setMessageForSelection("cut texture on", *inst.edit.Selected);
 
 			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 			{

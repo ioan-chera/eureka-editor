@@ -251,7 +251,7 @@ void UI_LineBox::type_callback(Fl_Widget *w, void *data)
 	if (! box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited type of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited type of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -426,7 +426,7 @@ void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 		checkSidesDirtyFields();
 
 		EditOperation op(inst.level.basis);
-		inst.level.basis.setMessageForSelection("edited texture on", *inst.edit.Selected);
+		op.setMessageForSelection("edited texture on", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -639,7 +639,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 		box->checkSidesDirtyFields();
 
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited flags of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
@@ -667,7 +667,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	if (! box->inst.edit.Selected->empty())
 	{
 		EditOperation op(box->inst.level.basis);
-		box->inst.level.basis.setMessageForSelection("edited args of", *box->inst.edit.Selected);
+		op.setMessageForSelection("edited args of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{

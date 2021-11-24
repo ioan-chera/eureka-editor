@@ -1831,7 +1831,7 @@ void ObjectsModule::transform(transform_t& param) const
 	SYS_ASSERT(inst.edit.Selected->notempty());
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
+	op.setMessageForSelection("scaled", *inst.edit.Selected);
 
 	if (param.scale_x < 0)
 	{
@@ -1892,7 +1892,7 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 	determineOrigin(param, pos_x, pos_y);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
+	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(inst.edit.Selected, param);
 	}
@@ -1953,7 +1953,7 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 	determineOrigin(param, pos_x, pos_y);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessageForSelection("scaled", *inst.edit.Selected);
+	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(inst.edit.Selected, param);
 		doScaleSectorHeights(inst.edit.Selected, scale_z, static_cast<int>(pos_z));
@@ -1972,7 +1972,7 @@ void ObjectsModule::rotate3(double deg, double pos_x, double pos_y) const
 	determineOrigin(param, pos_x, pos_y);
 
 	EditOperation op(doc.basis);
-	doc.basis.setMessageForSelection("rotated", *inst.edit.Selected);
+	op.setMessageForSelection("rotated", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(inst.edit.Selected, param);
 	}
@@ -2052,7 +2052,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 
 	{
 		EditOperation op(doc.basis);
-		doc.basis.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
+		op.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
 
 		doScaleTwoStuff(inst.edit.Selected, param);
 	}
@@ -2231,7 +2231,7 @@ void Instance::CMD_Quantize()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("quantized", *edit.Selected);
+		op.setMessageForSelection("quantized", *edit.Selected);
 
 		switch (edit.mode)
 		{

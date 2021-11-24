@@ -103,7 +103,7 @@ void Instance::CMD_SEC_Floor()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
+		op.setMessageForSelection(diff < 0 ? "lowered floor of" : "raised floor of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -141,7 +141,7 @@ void Instance::CMD_SEC_Ceil()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
+		op.setMessageForSelection(diff < 0 ? "lowered ceil of" : "raised ceil of", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -190,7 +190,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 	{
 		EditOperation op(doc.basis);
-		doc.basis.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
+		op.setMessageForSelection(delta < 0 ? "darkened" : "brightened", *inst.edit.Selected);
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
@@ -241,7 +241,7 @@ void Instance::CMD_SEC_SwapFlats()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("swapped flats in", *edit.Selected);
+		op.setMessageForSelection("swapped flats in", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -327,7 +327,7 @@ void Instance::commandSectorMerge()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("merged", *edit.Selected);
+		op.setMessageForSelection("merged", *edit.Selected);
 
 		// keep the properties of the first selected sector
 		if (new_sec != first)

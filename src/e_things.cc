@@ -66,7 +66,7 @@ void Instance::CMD_TH_SpinThings()
 
 	{
 		EditOperation op(level.basis);
-		level.basis.setMessageForSelection("spun", *edit.Selected);
+		op.setMessageForSelection("spun", *edit.Selected);
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
@@ -141,7 +141,7 @@ void CMD_TH_Disconnect(Instance &inst)
 	}
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessageForSelection("disconnected", *inst.edit.Selected);
+	op.setMessageForSelection("disconnected", *inst.edit.Selected);
 
 	while (!inst.edit.Selected->empty())
 	{
@@ -189,7 +189,7 @@ void CMD_TH_Merge(Instance &inst)
 	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
 
 	EditOperation op(inst.level.basis);
-	inst.level.basis.setMessageForSelection("merged", *inst.edit.Selected);
+	op.setMessageForSelection("merged", *inst.edit.Selected);
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
