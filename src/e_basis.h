@@ -553,6 +553,11 @@ public:
 		basis.setMessageForSelection(verb, list, suffix);
 	}
 
+	int addNew(ObjType type)
+	{
+		return basis.addNew(type);
+	}
+
 	void setAbort(bool keepChanges)
 	{
 		abort = true;

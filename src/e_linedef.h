@@ -46,7 +46,7 @@ public:
 
 	bool linedefAlreadyExists(int v1, int v2) const;
 
-	int splitLinedefAtVertex(int ld, int v_idx) const;
+	int splitLinedefAtVertex(EditOperation &op, int ld, int v_idx) const;
 
 	void moveCoordOntoLinedef(int ld, double *x, double *y) const;
 
@@ -87,7 +87,7 @@ private:
 	int alignPickNextSurface(const std::vector<Objid> & group,
 							  const std::vector<byte>& seen, bool do_right) const;
 
-	bool doSplitLineDef(int ld) const;
+	bool doSplitLineDef(EditOperation &op, int ld) const;
 
 	void mergedSecondSidedef(int ld) const;
 };

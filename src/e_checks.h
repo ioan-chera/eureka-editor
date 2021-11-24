@@ -67,7 +67,7 @@ private:
 	CheckResult checkTags(int minSeverity) const;
 	CheckResult checkTextures(int minSeverity) const;
 
-	int copySidedef(int num) const;
+	int copySidedef(EditOperation &op, int num) const;
 };
 
 int findFreeTag(const Instance &inst, bool forsector);

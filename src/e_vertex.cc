@@ -405,7 +405,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 	EditOperation op(doc.basis);
 	op.setMessage("split linedef #%d\n", line_obj.num);
 
-	doc.linemod.splitLinedefAtVertex(line_obj.num, v_num);
+	doc.linemod.splitLinedefAtVertex(op, line_obj.num, v_num);
 
 	// no vertices were added or removed, hence can continue Insert_Vertex
 	return false;

@@ -896,13 +896,13 @@ void Instance::CMD_LIN_SwapSides()
 //
 // Split linedef at vertex
 //
-int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
+int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) const
 {
 	LineDef * L = doc.linedefs[ld];
 	Vertex  * V = doc.vertices[new_v];
 
 	// create new linedef
-	int new_l = doc.basis.addNew(ObjType::linedefs);
+	int new_l = op.addNew(ObjType::linedefs);
 
 	LineDef * L2 = doc.linedefs[new_l];
 
@@ -923,7 +923,7 @@ int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
 
 	if (L->Right(doc))
 	{
-		L2->right = doc.basis.addNew(ObjType::sidedefs);
+		L2->right = op.addNew(ObjType::sidedefs);
 		*L2->Right(doc) = *L->Right(doc);
 
 		if (! config::leave_offsets_alone)
@@ -932,7 +932,7 @@ int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
 
 	if (L->Left(doc))
 	{
-		L2->left = doc.basis.addNew(ObjType::sidedefs);
+		L2->left = op.addNew(ObjType::sidedefs);
 		*L2->Left(doc) = *L->Left(doc);
 
 		if (! config::leave_offsets_alone)
@@ -946,7 +946,7 @@ int LinedefModule::splitLinedefAtVertex(int ld, int new_v) const
 	return new_l;
 }
 
-bool LinedefModule::doSplitLineDef(int ld) const
+bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 {
 	LineDef * L = doc.linedefs[ld];
 
@@ -958,13 +958,13 @@ bool LinedefModule::doSplitLineDef(int ld) const
 	double new_x = (L->Start(doc)->x() + L->End(doc)->x()) / 2;
 	double new_y = (L->Start(doc)->y() + L->End(doc)->y()) / 2;
 
-	int new_v = doc.basis.addNew(ObjType::vertices);
+	int new_v = op.addNew(ObjType::vertices);
 
 	Vertex * V = doc.vertices[new_v];
 
 	V->SetRawXY(inst, new_x, new_y);
 
-	splitLinedefAtVertex(ld, new_v);
+	splitLinedefAtVertex(op, ld, new_v);
 
 	return true;
 }
@@ -989,7 +989,7 @@ void Instance::CMD_LIN_SplitHalf()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			if (level.linemod.doSplitLineDef(*it))
+			if (level.linemod.doSplitLineDef(op, *it))
 				new_count++;
 		}
 

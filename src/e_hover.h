@@ -121,7 +121,7 @@ public:
 
 	void Sort();
 
-	void SplitAllLines();
+	void SplitAllLines(EditOperation &op);
 
 private:
 	struct point_CMP

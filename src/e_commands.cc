@@ -754,13 +754,13 @@ void Instance::CMD_ACT_Click()
 			EditOperation op(level.basis);
 			op.setMessage("split linedef #%d", split_ld);
 
-			new_vert = level.basis.addNew(ObjType::vertices);
+			new_vert = op.addNew(ObjType::vertices);
 
 			Vertex *V = level.vertices[new_vert];
 
 			V->SetRawXY(*this, edit.split_x, edit.split_y);
 
-			level.linemod.splitLinedefAtVertex(split_ld, new_vert);
+			level.linemod.splitLinedefAtVertex(op, split_ld, new_vert);
 		}
 
 		if (want_select)

@@ -76,9 +76,9 @@ void ObjectsModule::del(selection_c *list) const
 }
 
 
-void ObjectsModule::createSquare(int model) const
+void ObjectsModule::createSquare(EditOperation &op, int model) const
 {
-	int new_sec = doc.basis.addNew(ObjType::sectors);
+	int new_sec = op.addNew(ObjType::sectors);
 
 	if (model >= 0)
 		*doc.sectors[new_sec] = *doc.sectors[model];
@@ -93,18 +93,18 @@ void ObjectsModule::createSquare(int model) const
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		int new_v = doc.basis.addNew(ObjType::vertices);
+		int new_v = op.addNew(ObjType::vertices);
 		Vertex *V = doc.vertices[new_v];
 
 		V->SetRawX(inst, (i >= 2) ? x2 : x1);
 		V->SetRawY(inst, (i==1 || i==2) ? y2 : y1);
 
-		int new_sd = doc.basis.addNew(ObjType::sidedefs);
+		int new_sd = op.addNew(ObjType::sidedefs);
 
 		doc.sidedefs[new_sd]->SetDefaults(inst, false);
 		doc.sidedefs[new_sd]->sector = new_sec;
 
-		int new_ld = doc.basis.addNew(ObjType::linedefs);
+		int new_ld = op.addNew(ObjType::linedefs);
 
 		LineDef * L = doc.linedefs[new_ld];
 
@@ -132,7 +132,7 @@ void ObjectsModule::insertThing() const
 	{
 		EditOperation op(doc.basis);
 
-		new_t = doc.basis.addNew(ObjType::things);
+		new_t = op.addNew(ObjType::things);
 		Thing *T = doc.things[new_t];
 
 		if(model >= 0)
@@ -165,9 +165,9 @@ void ObjectsModule::insertThing() const
 }
 
 
-int ObjectsModule::sectorNew(int model, int model2, int model3) const
+int ObjectsModule::sectorNew(EditOperation &op, int model, int model2, int model3) const
 {
-	int new_sec = doc.basis.addNew(ObjType::sectors);
+	int new_sec = op.addNew(ObjType::sectors);
 
 	if (model < 0) model = model2;
 	if (model < 0) model = model3;
@@ -181,7 +181,7 @@ int ObjectsModule::sectorNew(int model, int model2, int model3) const
 }
 
 
-bool ObjectsModule::checkClosedLoop(int new_ld, int v1, int v2, selection_c *flip) const
+bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c *flip) const
 {
 	// returns true if we assigned a sector (so drawing should stop)
 
@@ -279,7 +279,7 @@ bool ObjectsModule::checkClosedLoop(int new_ld, int v1, int v2, selection_c *fli
 		lineloop_c& innie = left.loop.faces_outward ? right.loop : left.loop;
 
 		// TODO : REVIEW NeighboringSector(), it's a bit random what we get
-		int new_sec = sectorNew(innie.NeighboringSector(), -1, -1);
+		int new_sec = sectorNew(op, innie.NeighboringSector(), -1, -1);
 
 		innie.AssignSector(new_sec, flip);
 		return true;
@@ -308,7 +308,7 @@ bool ObjectsModule::checkClosedLoop(int new_ld, int v1, int v2, selection_c *fli
 
 	if (left.length < right.length)
 	{
-		int new_sec = sectorNew(left.sec, right.sec, left.loop.NeighboringSector());
+		int new_sec = sectorNew(op, left.sec, right.sec, left.loop.NeighboringSector());
 
 		if (right.sec >= 0)
 			right.loop.AssignSector(right.sec, flip);
@@ -317,7 +317,7 @@ bool ObjectsModule::checkClosedLoop(int new_ld, int v1, int v2, selection_c *fli
 	}
 	else
 	{
-		int new_sec = sectorNew(right.sec, left.sec, right.loop.NeighboringSector());
+		int new_sec = sectorNew(op, right.sec, left.sec, right.loop.NeighboringSector());
 
 		right.loop.AssignSector(new_sec, flip);
 
@@ -329,12 +329,12 @@ bool ObjectsModule::checkClosedLoop(int new_ld, int v1, int v2, selection_c *fli
 }
 
 
-void ObjectsModule::insertLinedef(int v1, int v2, bool no_fill) const
+void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fill) const
 {
 	if (doc.linemod.linedefAlreadyExists(v1, v2))
 		return;
 
-	int new_ld = doc.basis.addNew(ObjType::linedefs);
+	int new_ld = op.addNew(ObjType::linedefs);
 
 	LineDef * L = doc.linedefs[new_ld];
 
@@ -350,14 +350,14 @@ void ObjectsModule::insertLinedef(int v1, int v2, bool no_fill) const
 	{
 		selection_c flip(ObjType::linedefs);
 
-		checkClosedLoop(new_ld, v1, v2, &flip);
+		checkClosedLoop(op, new_ld, v1, v2, &flip);
 
 		doc.linemod.flipLinedefGroup(&flip);
 	}
 }
 
 
-void ObjectsModule::insertLinedefAutosplit(int v1, int v2, bool no_fill) const
+void ObjectsModule::insertLinedefAutosplit(EditOperation &op, int v1, int v2, bool no_fill) const
 {
 	// Find a linedef which this new line would cross, and if it exists
 	// add a vertex there and create TWO lines.  Also handle a vertex
@@ -371,7 +371,7 @@ void ObjectsModule::insertLinedefAutosplit(int v1, int v2, bool no_fill) const
 		doc.vertices[v1]->x(), doc.vertices[v1]->y(), v1,
 		doc.vertices[v2]->x(), doc.vertices[v2]->y(), v2);
 
-	cross.SplitAllLines();
+	cross.SplitAllLines(op);
 
 	int cur_v = v1;
 
@@ -382,12 +382,12 @@ void ObjectsModule::insertLinedefAutosplit(int v1, int v2, bool no_fill) const
 		SYS_ASSERT(next_v != v1);
 		SYS_ASSERT(next_v != v2);
 
-		insertLinedef(cur_v, next_v, no_fill);
+		insertLinedef(op, cur_v, next_v, no_fill);
 
 		cur_v = next_v;
 	}
 
-	insertLinedef(cur_v, v2, no_fill);
+	insertLinedef(op, cur_v, v2, no_fill);
 }
 
 
@@ -502,7 +502,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		if (new_vert < 0)
 		{
-			new_vert = doc.basis.addNew(ObjType::vertices);
+			new_vert = op.addNew(ObjType::vertices);
 
 			Vertex *V = doc.vertices[new_vert];
 
@@ -514,7 +514,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			// splitting an existing line?
 			if (split_ld >= 0)
 			{
-				doc.linemod.splitLinedefAtVertex(split_ld, new_vert);
+				doc.linemod.splitLinedefAtVertex(op, split_ld, new_vert);
 				op.setMessage("split linedef #%d", split_ld);
 			}
 			else
@@ -544,7 +544,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			SYS_ASSERT(old_vert != new_vert);
 
 			// this can make new sectors too
-			insertLinedefAutosplit(old_vert, new_vert, no_fill);
+			insertLinedefAutosplit(op, old_vert, new_vert, no_fill);
 
 			op.setMessage("added linedef");
 
@@ -612,7 +612,7 @@ void ObjectsModule::insertSector() const
 		if (sel_count > 0)
 			model = inst.edit.Selected->find_first();
 
-		createSquare(model);
+		createSquare(op, model);
 		return;
 	}
 
@@ -844,11 +844,11 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 // Splits a linedef while also considering resulted merged lines.
 // It needs delta_x and delta_y in order to properly merge sandwich linedefs.
 //
-void ObjectsModule::splitLinedefAndMergeSandwich(int splitLineID, int vertID, 
+void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID,
 												 double delta_x, double delta_y) const
 {
 	// Add a vertex there and do the split
-	int newVID = doc.basis.addNew(ObjType::vertices);
+	int newVID = op.addNew(ObjType::vertices);
 	Vertex *newV = doc.vertices[newVID];
 	*newV = *doc.vertices[vertID];
 
@@ -856,7 +856,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(int splitLineID, int vertID,
 	newV->raw_x += inst.MakeValidCoord(delta_x);
 	newV->raw_y += inst.MakeValidCoord(delta_y);
 
-	doc.linemod.splitLinedefAtVertex(splitLineID, newVID);
+	doc.linemod.splitLinedefAtVertex(op, splitLineID, newVID);
 
 	// Now merge the vertices
 	selection_c verts(ObjType::vertices);
@@ -909,11 +909,11 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		{
 			// Alright, we got it
 			op.setMessage("split linedef #%d", did_split_line);
-			splitLinedefAndMergeSandwich(did_split_line, obj.num, delta_x, delta_y);
+			splitLinedefAndMergeSandwich(op, did_split_line, obj.num, delta_x, delta_y);
 			return;
 		}
 
-		doc.linemod.splitLinedefAtVertex(did_split_line, obj.num);
+		doc.linemod.splitLinedefAtVertex(op, did_split_line, obj.num);
 
 		// now move the vertex!
 	}

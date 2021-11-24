@@ -998,9 +998,9 @@ static void SideDefs_ShowPacked(Instance &inst)
 }
 
 
-int ChecksModule::copySidedef(int num) const
+int ChecksModule::copySidedef(EditOperation &op, int num) const
 {
-	int sd = doc.basis.addNew(ObjType::sidedefs);
+	int sd = op.addNew(ObjType::sidedefs);
 
 	*doc.sidedefs[sd] = *doc.sidedefs[num];
 
@@ -1056,17 +1056,17 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 			// handle it when first linedef uses sidedef on both sides
 			if (doc.linedefs[first]->left == doc.linedefs[first]->right)
 			{
-				doc.basis.changeLinedef(first, LineDef::F_LEFT, copySidedef(sd));
+				doc.basis.changeLinedef(first, LineDef::F_LEFT, copySidedef(op, sd));
 			}
 
 			// duplicate any remaining references
 			for (int ld = first + 1 ; ld < doc.numLinedefs(); ld++)
 			{
 				if (doc.linedefs[ld]->left == sd)
-					doc.basis.changeLinedef(ld, LineDef::F_LEFT, copySidedef(sd));
+					doc.basis.changeLinedef(ld, LineDef::F_LEFT, copySidedef(op, sd));
 
 				if (doc.linedefs[ld]->right == sd)
-					doc.basis.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(sd));
+					doc.basis.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(op, sd));
 			}
 		}
 

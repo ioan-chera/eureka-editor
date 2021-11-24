@@ -29,6 +29,7 @@
 
 #include "DocumentModule.h"
 
+class EditOperation;
 class selection_c;
 struct ConfigData;
 
@@ -73,13 +74,13 @@ public:
 
 private:
 	void insertSector() const;
-	void createSquare(int model) const;
+	void createSquare(EditOperation &op, int model) const;
 	void insertThing() const;
 	void insertVertex(bool force_continue, bool no_fill) const;
-	void insertLinedefAutosplit(int v1, int v2, bool no_fill) const;
-	void insertLinedef(int v1, int v2, bool no_fill) const;
-	bool checkClosedLoop(int new_ld, int v1, int v2, selection_c *flip) const;
-	int sectorNew(int model, int model2, int model3) const;
+	void insertLinedefAutosplit(EditOperation &op, int v1, int v2, bool no_fill) const;
+	void insertLinedef(EditOperation &op, int v1, int v2, bool no_fill) const;
+	bool checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c *flip) const;
+	int sectorNew(EditOperation &op, int model, int model2, int model3) const;
 	void doMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z) const;
 	void transferThingProperties(int src_thing, int dest_thing) const;
 	void transferSectorProperties(int src_sec, int dest_sec) const;
@@ -105,7 +106,7 @@ private:
 	bool spotInUse(ObjType obj_type, int x, int y) const;
 
 	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
-	void splitLinedefAndMergeSandwich(int splitLineID, int vertID, double delta_x, double delta_y) const;
+	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, double delta_x, double delta_y) const;
 };
 
 

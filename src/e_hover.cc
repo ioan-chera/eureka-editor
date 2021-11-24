@@ -1247,19 +1247,19 @@ void crossing_state_c::Sort()
 }
 
 
-void crossing_state_c::SplitAllLines()
+void crossing_state_c::SplitAllLines(EditOperation &op)
 {
 	for (unsigned int i = 0 ; i < points.size() ; i++)
 	{
 		if (points[i].ld >= 0)
 		{
-			points[i].vert = inst.level.basis.addNew(ObjType::vertices);
+			points[i].vert = op.addNew(ObjType::vertices);
 
 			Vertex *V = inst.level.vertices[points[i].vert];
 
 			V->SetRawXY(inst, points[i].x, points[i].y);
 
-			inst.level.linemod.splitLinedefAtVertex(points[i].ld, points[i].vert);
+			inst.level.linemod.splitLinedefAtVertex(op, points[i].ld, points[i].vert);
 		}
 	}
 }

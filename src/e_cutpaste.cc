@@ -538,7 +538,7 @@ bool Instance::Clipboard_DoCopy()
 
 //------------------------------------------------------------------------
 
-static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
+static void PasteGroupOfObjects(EditOperation &op, Instance &inst, double pos_x, double pos_y)
 {
 	double cx, cy;
 	clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
@@ -552,7 +552,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
-		int new_v = inst.level.basis.addNew(ObjType::vertices);
+		int new_v = op.addNew(ObjType::vertices);
 		Vertex * V = inst.level.vertices[new_v];
 
 		vert_map[i] = new_v;
@@ -565,7 +565,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
-		int new_s = inst.level.basis.addNew(ObjType::sectors);
+		int new_s = op.addNew(ObjType::sectors);
 		Sector * S = inst.level.sectors[new_s];
 
 		sector_map[i] = new_s;
@@ -582,7 +582,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 			continue;
 		}
 
-		int new_sd = inst.level.basis.addNew(ObjType::sidedefs);
+		int new_sd = op.addNew(ObjType::sidedefs);
 		SideDef * SD = inst.level.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
@@ -599,7 +599,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
-		int new_l = inst.level.basis.addNew(ObjType::linedefs);
+		int new_l = op.addNew(ObjType::linedefs);
 		LineDef * L = inst.level.linedefs[new_l];
 
 		*L = *clip_board->lines[i];
@@ -637,7 +637,7 @@ static void PasteGroupOfObjects(Instance &inst, double pos_x, double pos_y)
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
-		int new_t = inst.level.basis.addNew(ObjType::things);
+		int new_t = op.addNew(ObjType::things);
 		Thing * T = inst.level.things[new_t];
 
 		*T = *clip_board->things[i];
@@ -746,7 +746,7 @@ bool Instance::Clipboard_DoPaste()
 
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
-					int new_t = level.basis.addNew(ObjType::things);
+					int new_t = op.addNew(ObjType::things);
 					Thing * T = level.things[new_t];
 
 					*T = *clip_board->things[i];
@@ -766,7 +766,7 @@ bool Instance::Clipboard_DoPaste()
 
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
-					int new_v = level.basis.addNew(ObjType::vertices);
+					int new_v = op.addNew(ObjType::vertices);
 					Vertex * V = level.vertices[new_v];
 
 					*V = *clip_board->verts[i];
@@ -780,7 +780,7 @@ bool Instance::Clipboard_DoPaste()
 			case ObjType::linedefs:
 			case ObjType::sectors:
 			{
-				PasteGroupOfObjects(*this, pos_x, pos_y);
+				PasteGroupOfObjects(op, *this, pos_x, pos_y);
 				break;
 			}
 
