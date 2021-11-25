@@ -60,7 +60,7 @@ public:
 	}
 	void move(selection_c *list, double delta_x, double delta_y, double delta_z) const;
 	void singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const;
-	void del(selection_c *list) const;
+	void del(EditOperation &op, selection_c *list) const;
 	bool lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const;
 	void getDragFocus(double *x, double *y, double ptr_x, double ptr_y) const;
 	void calcMiddle(selection_c *list, double *x, double *y) const;

@@ -358,11 +358,11 @@ void Instance::commandSectorMerge()
 			unused_secs.set(old_sec);
 		}
 
-		level.objects.del(&unused_secs);
+		level.objects.del(op, &unused_secs);
 
 		if (! keep_common_lines)
 		{
-			DeleteObjects_WithUnused(level, &common_lines, false, false, false);
+			DeleteObjects_WithUnused(op, level, &common_lines, false, false, false);
 		}
 
 	}
@@ -1234,7 +1234,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double m
 			unused.clear(L->WhatSector(Side::right, doc));
 	}
 
-	doc.objects.del(&unused);
+	doc.objects.del(op, &unused);
 
 	return true;
 }

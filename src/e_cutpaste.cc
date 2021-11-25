@@ -1112,16 +1112,16 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 
 	// NOT-DO: update X offsets on existing linedef
 
-	doc.basis.del(ObjType::linedefs, ld2);
-	doc.basis.del(ObjType::vertices, v_num);
+	op.del(ObjType::linedefs, ld2);
+	op.del(ObjType::vertices, v_num);
 
-	doc.objects.del(&side_sel);
+	doc.objects.del(op, &side_sel);
 
 	return true;
 }
 
 
-void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_things,
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_c *list, bool keep_things,
 							  bool keep_verts, bool keep_lines)
 {
 	selection_c vert_sel(ObjType::vertices);
@@ -1144,7 +1144,7 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 			break;
 
 		default: /* OBJ_THINGS or OBJ_SIDEDEFS */
-			doc.objects.del(list);
+			doc.objects.del(op, list);
 			return;
 	}
 
@@ -1191,7 +1191,7 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 		selection_c thing_sel(ObjType::things);
 
 		ConvertSelection(doc, &sec_sel, &thing_sel);
-		doc.objects.del(&thing_sel);
+		doc.objects.del(op, &thing_sel);
 	}
 
 	// perform linedef fixups here (when sectors get removed)
@@ -1208,10 +1208,10 @@ void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_
 	}
 
 	// actually delete stuff, in the correct order
-	doc.objects.del(&line_sel);
-	doc.objects.del(&side_sel);
-	doc.objects.del(&vert_sel);
-	doc.objects.del( &sec_sel);
+	doc.objects.del(op, &line_sel);
+	doc.objects.del(op, &side_sel);
+	doc.objects.del(op, &vert_sel);
+	doc.objects.del(op,  &sec_sel);
 }
 
 
@@ -1249,7 +1249,7 @@ void Instance::CMD_Delete()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("deleted", *edit.Selected);
 
-		DeleteObjects_WithUnused(level, edit.Selected, keep, false /* keep_verts */, keep);
+		DeleteObjects_WithUnused(op, level, edit.Selected, keep, false /* keep_verts */, keep);
 	}
 
 success:

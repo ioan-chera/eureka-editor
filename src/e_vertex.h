@@ -42,7 +42,7 @@ public:
 	int findExact(fixcoord_t fx, fixcoord_t fy) const;
 	int findDragOther(int v_num) const;
 	int howManyLinedefs(int v_num) const;
-	void mergeList(selection_c *list) const;
+	void mergeList(EditOperation &op, selection_c *list) const;
 	bool tryFixDangler(int v_num) const;
 
 private:

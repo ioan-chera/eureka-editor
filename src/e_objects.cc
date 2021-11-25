@@ -54,7 +54,7 @@ int  config::new_sector_size = 128;
 //  this is very raw, e.g. it does not check for stuff that will
 //  remain unused afterwards.
 //
-void ObjectsModule::del(selection_c *list) const
+void ObjectsModule::del(EditOperation &op, selection_c *list) const
 {
 	// we need to process the object numbers from highest to lowest,
 	// because each deletion invalidates all higher-numbered refs
@@ -72,7 +72,7 @@ void ObjectsModule::del(selection_c *list) const
 	std::sort(objnums.begin(), objnums.end());
 
 	for (int i = (int)objnums.size()-1 ; i >= 0 ; i--)
-		doc.basis.del(list->what_type(), objnums[i]);
+		op.del(list->what_type(), objnums[i]);
 }
 
 
@@ -863,7 +863,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	verts.set(newVID);
 	verts.set(vertID);
 
-	doc.vertmod.mergeList(&verts);
+	doc.vertmod.mergeList(op, &verts);
 }
 
 void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
@@ -895,7 +895,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		verts.set(inst.edit.highlight.num);	// keep the highlight
 		verts.set(obj.num);
 
-		doc.vertmod.mergeList(&verts);
+		doc.vertmod.mergeList(op, &verts);
 		return;
 	}
 
