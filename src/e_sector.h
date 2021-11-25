@@ -102,7 +102,7 @@ public:
 	// the 'flip' parameter will contain lines that should be flipped
 	// afterwards (to ensure it has a valid right side).
 	// 'new_sec' MUST be a valid sector number.
-	void AssignSector(int new_sec, selection_c *flip);
+	void AssignSector(EditOperation &op, int new_sec, selection_c *flip);
 
 	void Dump() const;
 
@@ -124,7 +124,7 @@ public:
 	}
 
 	bool traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false) const;
-	bool assignSectorToSpace(double map_x, double map_y, int new_sec = -1, int model = -1) const;
+	bool assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec = -1, int model = -1) const;
 	void sectorsAdjustLight(int delta) const;
 	void safeRaiseLower(int sec, int parts, int dz) const;
 
@@ -137,7 +137,7 @@ private:
 	void determineNewTextures(lineloop_c& loop,
 									 std::vector<int>& lower_texs,
 							  std::vector<int>& upper_texs) const;
-	void doAssignSector(int ld, Side side, int new_sec,
+	void doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
 							   int new_lower, int new_upper,
 						selection_c *flip) const;
 	bool getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const;

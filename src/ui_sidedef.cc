@@ -285,7 +285,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		// make sure we have a fallback sector to use
 		if (box->inst.level.numSectors() == 0)
 		{
-			int new_sec = box->inst.level.basis.addNew(ObjType::sectors);
+			int new_sec = op.addNew(ObjType::sectors);
 
 			box->inst.level.sectors[new_sec]->SetDefaults(box->inst);
 		}
@@ -308,7 +308,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 				new_sec = box->inst.level.numSectors() - 1;
 
 			// create the new sidedef
-			sd = box->inst.level.basis.addNew(ObjType::sidedefs);
+			sd = op.addNew(ObjType::sidedefs);
 
 			box->inst.level.sidedefs[sd]->SetDefaults(box->inst, other >= 0);
 			box->inst.level.sidedefs[sd]->sector = new_sec;

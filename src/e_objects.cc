@@ -259,11 +259,11 @@ bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v
 
 	if (left.loop.faces_outward && left.sec >= 0)
 	{
-		left.loop.AssignSector(left.sec, flip);
+		left.loop.AssignSector(op, left.sec, flip);
 	}
 	else if (right.loop.faces_outward && right.sec >= 0)
 	{
-		right.loop.AssignSector(right.sec, flip);
+		right.loop.AssignSector(op, right.sec, flip);
 	}
 
 	// create a void island when drawing anti-clockwise inside an
@@ -281,7 +281,7 @@ bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v
 		// TODO : REVIEW NeighboringSector(), it's a bit random what we get
 		int new_sec = sectorNew(op, innie.NeighboringSector(), -1, -1);
 
-		innie.AssignSector(new_sec, flip);
+		innie.AssignSector(op, new_sec, flip);
 		return true;
 	}
 
@@ -294,8 +294,8 @@ bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v
 
 	if (left.sec != right.sec)
 	{
-		if (right.sec >= 0) right.loop.AssignSector(right.sec, flip);
-		if ( left.sec >= 0)  left.loop.AssignSector( left.sec, flip);
+		if (right.sec >= 0) right.loop.AssignSector(op, right.sec, flip);
+		if ( left.sec >= 0)  left.loop.AssignSector(op,  left.sec, flip);
 
 		return true;
 	}
@@ -311,18 +311,18 @@ bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v
 		int new_sec = sectorNew(op, left.sec, right.sec, left.loop.NeighboringSector());
 
 		if (right.sec >= 0)
-			right.loop.AssignSector(right.sec, flip);
+			right.loop.AssignSector(op, right.sec, flip);
 
-		left.loop.AssignSector(new_sec, flip);
+		left.loop.AssignSector(op, new_sec, flip);
 	}
 	else
 	{
 		int new_sec = sectorNew(op, right.sec, left.sec, right.loop.NeighboringSector());
 
-		right.loop.AssignSector(new_sec, flip);
+		right.loop.AssignSector(op, new_sec, flip);
 
 		if (left.sec >= 0)
-			left.loop.AssignSector(left.sec, flip);
+			left.loop.AssignSector(op, left.sec, flip);
 	}
 
 	return true;
@@ -634,7 +634,7 @@ void ObjectsModule::insertSector() const
 		EditOperation op(doc.basis);
 		op.setMessage("added new sector");
 
-		ok = doc.secmod.assignSectorToSpace(inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
+		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
 	}
 	// select the new sector
 	if (ok)

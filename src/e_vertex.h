@@ -49,10 +49,10 @@ private:
 	void mergeSandwichLines(int ld1, int ld2, int v, selection_c &del_lines) const;
 	void doMergeVertex(int v1, int v2, selection_c &del_lines) const;
 	void calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const;
-	void doDisconnectVertex(int v_num, int num_lines) const;
-	void doDisconnectLinedef(int ld, int which_vert, bool *seen_one) const;
+	void doDisconnectVertex(EditOperation &op, int v_num, int num_lines) const;
+	void doDisconnectLinedef(EditOperation &op, int ld, int which_vert, bool *seen_one) const;
 	void verticesOfDetachableSectors(selection_c &verts) const;
-	void DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side) const;
+	void DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2, int end2, Side in_side) const;
 	void DETSEC_CalcMoveVector(selection_c *detach_verts, double *dx, double *dy) const;
 	double evaluateCircle(double mid_x, double mid_y, double r,
 		std::vector< vert_along_t > &along_list,

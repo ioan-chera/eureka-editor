@@ -451,7 +451,7 @@ void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, d
 }
 
 
-void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
+void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_lines) const
 {
 	int which = 0;
 
@@ -468,7 +468,7 @@ void VertexModule::doDisconnectVertex(int v_num, int num_lines) const
 			// need a new one.
 			if (which != num_lines-1)
 			{
-				int new_v = doc.basis.addNew(ObjType::vertices);
+				int new_v = op.addNew(ObjType::vertices);
 
 				doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
 
@@ -518,7 +518,7 @@ void Instance::commandVertexDisconnect()
 			if (num_lines < 2)
 				continue;
 
-			level.vertmod.doDisconnectVertex(v_num, num_lines);
+			level.vertmod.doDisconnectVertex(op, v_num, num_lines);
 
 			seen_one = true;
 		}
@@ -531,7 +531,7 @@ void Instance::commandVertexDisconnect()
 }
 
 
-void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) const
+void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert, bool *seen_one) const
 {
 	const LineDef *L = doc.linedefs[ld];
 
@@ -562,7 +562,7 @@ void VertexModule::doDisconnectLinedef(int ld, int which_vert, bool *seen_one) c
 	double new_x, new_y;
 	calcDisconnectCoord(doc.linedefs[ld], v_num, &new_x, &new_y);
 
-	int new_v = doc.basis.addNew(ObjType::vertices);
+	int new_v = op.addNew(ObjType::vertices);
 
 	doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
 
@@ -606,8 +606,8 @@ void Instance::commandLineDisconnect()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			level.vertmod.doDisconnectLinedef(*it, 0, &seen_one);
-			level.vertmod.doDisconnectLinedef(*it, 1, &seen_one);
+			level.vertmod.doDisconnectLinedef(op, *it, 0, &seen_one);
+			level.vertmod.doDisconnectLinedef(op, *it, 1, &seen_one);
 		}
 	}
 
@@ -677,11 +677,11 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 }
 
 
-void VertexModule::DETSEC_SeparateLine(int ld_num, int start2, int end2, Side in_side) const
+void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2, int end2, Side in_side) const
 {
 	const LineDef * L1 = doc.linedefs[ld_num];
 
-	int new_ld = doc.basis.addNew(ObjType::linedefs);
+	int new_ld = op.addNew(ObjType::linedefs);
 	int lost_sd;
 
 	LineDef * L2 = doc.linedefs[new_ld];
@@ -830,7 +830,7 @@ void Instance::commandSectorDisconnect()
 
 		for (sel_iter_c it(detach_verts) ; !it.done() ; it.next())
 		{
-			int new_v = level.basis.addNew(ObjType::vertices);
+			int new_v = op.addNew(ObjType::vertices);
 
 			mapping[*it] = new_v;
 
@@ -860,7 +860,7 @@ void Instance::commandSectorDisconnect()
 
 			if (start2 >= 0 && end2 >= 0 && L->TwoSided() && ! between_two)
 			{
-				level.vertmod.DETSEC_SeparateLine(n, start2, end2, left_in ? Side::left : Side::right);
+				level.vertmod.DETSEC_SeparateLine(op, n, start2, end2, left_in ? Side::left : Side::right);
 			}
 			else
 			{

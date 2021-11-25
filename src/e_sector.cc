@@ -1029,7 +1029,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 // update the side on a single linedef, using the given sector
 // reference, and creating a new sidedef if necessary.
 //
-void SectorModule::doAssignSector(int ld, Side side, int new_sec,
+void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
 						   int new_lower, int new_upper,
 						   selection_c *flip) const
 {
@@ -1059,7 +1059,7 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 	SYS_ASSERT(new_upper >= 0);
 
 	// create new sidedef
-	int new_sd = doc.basis.addNew(ObjType::sidedefs);
+	int new_sd = op.addNew(ObjType::sidedefs);
 
 	SideDef * SD = doc.sidedefs[new_sd];
 
@@ -1094,7 +1094,7 @@ void SectorModule::doAssignSector(int ld, Side side, int new_sec,
 }
 
 
-void lineloop_c::AssignSector(int new_sec, selection_c *flip)
+void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c *flip)
 {
 	std::vector<int> lower_texs(lines.size());
 	std::vector<int> upper_texs(lines.size());
@@ -1103,13 +1103,13 @@ void lineloop_c::AssignSector(int new_sec, selection_c *flip)
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		doc.secmod.doAssignSector(lines[k], sides[k], new_sec,
+		doc.secmod.doAssignSector(op, lines[k], sides[k], new_sec,
 					   lower_texs[k], upper_texs[k], flip);
 	}
 
 	for (unsigned int i = 0 ; i < islands.size() ; i++)
 	{
-		islands[i]->AssignSector(new_sec, flip);
+		islands[i]->AssignSector(op, new_sec, flip);
 	}
 }
 
@@ -1189,7 +1189,7 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 // the 'model' is what properties to use for a new sector, < 0 means
 // look for a neighboring sector to copy.
 //
-bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, int model) const
+bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec, int model) const
 {
 	lineloop_c loop(doc);
 
@@ -1203,7 +1203,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 
 	if (new_sec < 0)
 	{
-		new_sec = doc.basis.addNew(ObjType::sectors);
+		new_sec = op.addNew(ObjType::sectors);
 
 		if (model < 0)
 			model = loop.NeighboringSector();
@@ -1219,7 +1219,7 @@ bool SectorModule::assignSectorToSpace(double map_x, double map_y, int new_sec, 
 
 	loop.GetAllSectors(&unused);
 
-	loop.AssignSector(new_sec, &flip);
+	loop.AssignSector(op, new_sec, &flip);
 
 	doc.linemod.flipLinedefGroup(&flip);
 
