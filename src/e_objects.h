@@ -92,17 +92,17 @@ private:
 		bool only_grid) const;
 	void doMirrorThings(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
 	void doMirrorStuff(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
-	void doMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorVertices(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
 	void doRotate90Things(EditOperation &op, selection_c *list, bool anti_clockwise,
 		double mid_x, double mid_y) const;
 	void doEnlargeOrShrink(bool do_shrink) const;
 	void doScaleTwoThings(EditOperation &op, selection_c *list, transform_t &param) const;
 	void doScaleTwoStuff(EditOperation &op, selection_c *list, transform_t &param) const;
-	void doScaleTwoVertices(selection_c *list, transform_t &param) const;
+	void doScaleTwoVertices(EditOperation &op, selection_c *list, transform_t &param) const;
 	void determineOrigin(transform_t &param, double pos_x, double pos_y) const;
 	void doScaleSectorHeights(selection_c *list, double scale_z, int pos_z) const;
 	void quantizeThings(EditOperation &op, selection_c *list) const;
-	void quantizeVertices(selection_c *list) const;
+	void quantizeVertices(EditOperation &op, selection_c *list) const;
 	bool spotInUse(ObjType obj_type, int x, int y) const;
 
 	int findLineBetweenLineAndVertex(int lineID, int vertID) const;

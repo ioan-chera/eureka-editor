@@ -355,7 +355,6 @@ public:
 	{
 	}
 
-	bool changeVertex(int vert, byte field, int value);
 	bool changeSector(int sec, byte field, int value);
 	bool changeSidedef(int side, byte field, int value);
 	bool changeLinedef(int line, byte field, int value);
@@ -514,6 +513,7 @@ private:
 	int addNew(ObjType type);
 	bool change(ObjType type, int objnum, byte field, int value);
 	bool changeThing(int thing, byte field, int value);
+	bool changeVertex(int vert, byte field, int value);
 	void del(ObjType type, int objnum);
 	void end();
 	void abort(bool keepChanges);
@@ -566,6 +566,11 @@ public:
 	bool changeThing(int thing, byte field, int value)
 	{
 		return basis.changeThing(thing, field, value);
+	}
+
+	bool changeVertex(int vert, byte field, int value)
+	{
+		return basis.changeVertex(vert, field, value);
 	}
 
 	void del(ObjType type, int objnum)

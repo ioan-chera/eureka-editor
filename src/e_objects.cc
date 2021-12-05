@@ -757,8 +757,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double d
 			{
 				const Vertex * V = doc.vertices[*it];
 
-				doc.basis.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-				doc.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+				op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
+				op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 			}
 			break;
 
@@ -1564,7 +1564,7 @@ void ObjectsModule::doMirrorThings(EditOperation &op, selection_c *list, bool is
 }
 
 
-void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y) const
+void ObjectsModule::doMirrorVertices(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
 	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
@@ -1577,9 +1577,9 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 		const Vertex * V = doc.vertices[*it];
 
 		if (is_vert)
-			doc.basis.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
+			op.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
 		else
-			doc.basis.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
+			op.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1618,7 +1618,7 @@ void ObjectsModule::doMirrorStuff(EditOperation &op, selection_c *list, bool is_
 		doMirrorThings(op, &things, is_vert, mid_x, mid_y);
 	}
 
-	doMirrorVertices(list, is_vert, mid_x, mid_y);
+	doMirrorVertices(op, list, is_vert, mid_x, mid_y);
 }
 
 
@@ -1738,13 +1738,13 @@ void Instance::CMD_Rotate90()
 
 				if (anti_clockwise)
 				{
-					level.basis.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-					level.basis.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+					op.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+					op.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
 				}
 				else
 				{
-					level.basis.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-					level.basis.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+					op.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+					op.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
 				}
 			}
 		}
@@ -1781,7 +1781,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, selection_c *list, trans
 }
 
 
-void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) const 
+void ObjectsModule::doScaleTwoVertices(EditOperation &op, selection_c *list, transform_t& param) const
 {
 	selection_c verts(ObjType::vertices);
 	ConvertSelection(doc, list, &verts);
@@ -1795,8 +1795,8 @@ void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) co
 
 		param.Apply(&new_x, &new_y);
 
-		doc.basis.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
-		doc.basis.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
+		op.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
+		op.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
 	}
 }
 
@@ -1820,7 +1820,7 @@ void ObjectsModule::doScaleTwoStuff(EditOperation &op, selection_c *list, transf
 		doScaleTwoThings(op, &things, param);
 	}
 
-	doScaleTwoVertices(list, param);
+	doScaleTwoVertices(op, list, param);
 }
 
 
@@ -2112,7 +2112,7 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c *list) const
 }
 
 
-void ObjectsModule::quantizeVertices(selection_c *list) const
+void ObjectsModule::quantizeVertices(EditOperation &op, selection_c *list) const
 {
 	// first : do an analysis pass, remember vertices that are part
 	// of a horizontal or vertical line (and both in the selection)
@@ -2198,8 +2198,8 @@ void ObjectsModule::quantizeVertices(selection_c *list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				doc.basis.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
-				doc.basis.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
+				op.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
+				op.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2240,7 +2240,7 @@ void Instance::CMD_Quantize()
 				break;
 
 			case ObjType::vertices:
-				level.objects.quantizeVertices(edit.Selected);
+				level.objects.quantizeVertices(op, edit.Selected);
 				break;
 
 			// everything else merely quantizes vertices
@@ -2249,7 +2249,7 @@ void Instance::CMD_Quantize()
 				selection_c verts(ObjType::vertices);
 				ConvertSelection(level, edit.Selected, &verts);
 
-				level.objects.quantizeVertices(&verts);
+				level.objects.quantizeVertices(op, &verts);
 
 				Selection_Clear();
 				break;

@@ -63,7 +63,7 @@ private:
 	int pickLinedefToExtend(selection_c& list, bool moving_start) const;
 	bool linedefEndWillBeMoved(int ld, selection_c &list) const;
 	bool linedefStartWillBeMoved(int ld, selection_c &list) const;
-	void linedefSetLength(int ld, int new_len, double angle) const;
+	void linedefSetLength(EditOperation &op, int ld, int new_len, double angle) const;
 
 	bool alignOffsets(const Objid& obj, int align_flags) const;
 	void alignGroup(const std::vector<Objid> & group, int align_flags) const;

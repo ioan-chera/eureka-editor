@@ -479,8 +479,8 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			}
 			else
 			{
-				doc.basis.changeVertex(v_num, Vertex::F_X, inst.MakeValidCoord(new_x));
-				doc.basis.changeVertex(v_num, Vertex::F_Y, inst.MakeValidCoord(new_y));
+				op.changeVertex(v_num, Vertex::F_X, inst.MakeValidCoord(new_x));
+				op.changeVertex(v_num, Vertex::F_Y, inst.MakeValidCoord(new_y));
 			}
 
 			which++;
@@ -884,8 +884,8 @@ void Instance::commandSectorDisconnect()
 		{
 			const Vertex * V = level.vertices[*it];
 
-			level.basis.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-			level.basis.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
+			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
+			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
 		}
 	}
 
@@ -1090,8 +1090,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		level.basis.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
-		level.basis.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
+		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
+		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
 	}
 }
 
@@ -1133,7 +1133,7 @@ static double BiggestGapAngle(std::vector< vert_along_t > &along_list,
 }
 
 
-double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
+double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_y, double r,
 	std::vector< vert_along_t > &along_list,
 	unsigned int start_idx, double arc_rad,
 	double ang_offset /* radians */,
@@ -1158,8 +1158,8 @@ double VertexModule::evaluateCircle(double mid_x, double mid_y, double r,
 
 		if (move_vertices)
 		{
-			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_X, inst.MakeValidCoord(new_x));
-			doc.basis.changeVertex(along_list[k].vert_num, Thing::F_Y, inst.MakeValidCoord(new_y));
+			op->changeVertex(along_list[k].vert_num, Thing::F_X, inst.MakeValidCoord(new_x));
+			op->changeVertex(along_list[k].vert_num, Thing::F_Y, inst.MakeValidCoord(new_y));
 		}
 		else
 		{
@@ -1319,7 +1319,7 @@ void Instance::CMD_VT_ShapeArc()
 		{
 			double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
-			double cost = level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list,
+			double cost = level.vertmod.evaluateCircle(nullptr, mid_x, mid_y, r, along_list,
 										 start_idx, arc_rad, ang_offset, false);
 
 			if (cost < best_cost)
@@ -1336,7 +1336,7 @@ void Instance::CMD_VT_ShapeArc()
 	EditOperation op(level.basis);
 	op.setMessage("shaped %d vertices", (int)along_list.size());
 
-	level.vertmod.evaluateCircle(mid_x, mid_y, r, along_list, start_idx, arc_rad,
+	level.vertmod.evaluateCircle(&op, mid_x, mid_y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 }
 

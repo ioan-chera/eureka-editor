@@ -1311,7 +1311,7 @@ int LinedefModule::pickLinedefToExtend(selection_c &list, bool moving_start) con
 //
 // Set linedef length
 //
-void LinedefModule::linedefSetLength(int ld, int new_len, double angle) const
+void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, double angle) const
 {
 	// the 'new_len' parameter can be negative, which means move
 	// the start vertex instead of the end vertex.
@@ -1335,13 +1335,13 @@ void LinedefModule::linedefSetLength(int ld, int new_len, double angle) const
 
 	if (new_len < 0)
 	{
-		doc.basis.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - INT_TO_COORD(idx));
-		doc.basis.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - INT_TO_COORD(idy));
+		op.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - INT_TO_COORD(idx));
+		op.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - INT_TO_COORD(idy));
 	}
 	else
 	{
-		doc.basis.changeVertex(L->end, Vertex::F_X, L->Start(doc)->raw_x + INT_TO_COORD(idx));
-		doc.basis.changeVertex(L->end, Vertex::F_Y, L->Start(doc)->raw_y + INT_TO_COORD(idy));
+		op.changeVertex(L->end, Vertex::F_X, L->Start(doc)->raw_x + INT_TO_COORD(idx));
+		op.changeVertex(L->end, Vertex::F_Y, L->Start(doc)->raw_y + INT_TO_COORD(idy));
 	}
 }
 
@@ -1378,7 +1378,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 		list.clear(ld);
 
-		linedefSetLength(ld, new_len, angles[ld]);
+		linedefSetLength(op, ld, new_len, angles[ld]);
 	}
 }
 
