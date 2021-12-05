@@ -126,7 +126,7 @@ public:
 	bool traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false) const;
 	bool assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec = -1, int model = -1) const;
 	void sectorsAdjustLight(int delta) const;
-	void safeRaiseLower(int sec, int parts, int dz) const;
+	void safeRaiseLower(EditOperation &op, int sec, int parts, int dz) const;
 
 private:
 	friend class lineloop_c;

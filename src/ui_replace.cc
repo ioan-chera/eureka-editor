@@ -1347,7 +1347,7 @@ void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
 			break;
 
 		case 2: // Sectors (texturing)
-			Replace_Sector(idx, new_tex);
+			Replace_Sector(op, idx, new_tex);
 			break;
 
 		case 3: // Lines by Type
@@ -1355,7 +1355,7 @@ void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
 			break;
 
 		case 4: // Sectors by Type
-			Replace_SectorType(idx);
+			Replace_SectorType(op, idx);
 			break;
 
 		default: break;
@@ -1743,7 +1743,7 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 }
 
 
-void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
+void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, int new_tex)
 {
 	const Sector *sector = inst.level.sectors[idx];
 
@@ -1751,14 +1751,14 @@ void UI_FindAndReplace::Replace_Sector(int idx, int new_tex)
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(sector->FloorTex(), pattern))
-			inst.level.basis.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
+			op.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
 
 	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
 								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
-			inst.level.basis.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
+			op.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
 
@@ -1770,7 +1770,7 @@ void UI_FindAndReplace::Replace_LineType(int idx)
 }
 
 
-void UI_FindAndReplace::Replace_SectorType(int idx)
+void UI_FindAndReplace::Replace_SectorType(EditOperation &op, int idx)
 {
 	int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 				(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
@@ -1778,7 +1778,7 @@ void UI_FindAndReplace::Replace_SectorType(int idx)
 	int old_type = inst.level.sectors[idx]->type;
 	int new_type = atoi(rep_value->value());
 
-	inst.level.basis.changeSector(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
+	op.changeSector(idx, Sector::F_TYPE, (old_type & ~mask) | (new_type & mask));
 }
 
 //--- editor settings ---

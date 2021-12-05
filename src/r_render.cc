@@ -811,7 +811,7 @@ void Render3D_DragSectors(Instance &inst)
 	{
 		int parts = inst.edit.dragged.parts;
 
-		inst.level.secmod.safeRaiseLower(inst.edit.dragged.num, parts, dz);
+		inst.level.secmod.safeRaiseLower(op, inst.edit.dragged.num, parts, dz);
 	}
 	else
 	{
@@ -820,7 +820,7 @@ void Render3D_DragSectors(Instance &inst)
 			int parts = inst.edit.Selected->get_ext(*it);
 			parts &= ~1;
 
-			inst.level.secmod.safeRaiseLower(*it, parts, dz);
+			inst.level.secmod.safeRaiseLower(op, *it, parts, dz);
 		}
 	}
 }
@@ -1221,10 +1221,10 @@ void Instance::StoreSelectedFlat(int new_tex)
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (parts == 1 || (parts & PART_FLOOR))
-				level.basis.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+				op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_CEIL))
-				level.basis.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
+				op.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
 		}
 	}
 
@@ -1256,10 +1256,10 @@ void Instance::StoreDefaultedFlats()
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (parts == 1 || (parts & PART_FLOOR))
-				level.basis.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
+				op.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
 
 			if (parts == 1 || (parts & PART_CEIL))
-				level.basis.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
+				op.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
 		}
 	}
 

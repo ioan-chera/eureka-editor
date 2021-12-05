@@ -841,7 +841,7 @@ static void Sectors_ClearUnknown(Instance &inst)
 	op.setMessage("cleared unknown sector types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		inst.level.basis.changeSector(*it, Sector::F_TYPE, 0);
+		op.changeSector(*it, Sector::F_TYPE, 0);
 }
 
 
@@ -906,7 +906,7 @@ static void Sectors_FixBadCeil(Document &doc)
 	{
 		if (doc.sectors[i]->ceilh < doc.sectors[i]->floorh)
 		{
-			doc.basis.changeSector(i, Sector::F_CEILH, doc.sectors[i]->floorh);
+			op.changeSector(i, Sector::F_CEILH, doc.sectors[i]->floorh);
 		}
 	}
 }
@@ -3013,7 +3013,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 			}
 			else if (inst.edit.mode == ObjType::sectors)
 			{
-				doc.basis.changeSector(*it, Sector::F_TAG, new_tag);
+				op.changeSector(*it, Sector::F_TAG, new_tag);
 				changed = true;
 			}
 		}
@@ -3957,10 +3957,10 @@ static void Textures_FixUnknownFlat(Instance &inst)
 		const Sector *S = inst.level.sectors[s];
 
 		if (! inst.W_FlatIsKnown(S->FloorTex()))
-			inst.level.basis.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
+			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
 		if (!inst.W_FlatIsKnown(S->CeilTex()))
-			inst.level.basis.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
+			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 }
 

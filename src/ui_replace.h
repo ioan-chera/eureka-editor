@@ -162,8 +162,8 @@ private:
 	void Replace_Thing(EditOperation &op, int idx);
 	void Replace_LineDef(int idx, int new_tex);
 	void Replace_LineType(int idx);
-	void Replace_Sector(int idx, int new_tex);
-	void Replace_SectorType(int idx);
+	void Replace_Sector(EditOperation &op, int idx, int new_tex);
+	void Replace_SectorType(EditOperation &op, int idx);
 
 	// clipboard stuff
 	void CB_Copy(bool is_replace);

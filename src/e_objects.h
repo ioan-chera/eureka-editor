@@ -83,7 +83,7 @@ private:
 	int sectorNew(EditOperation &op, int model, int model2, int model3) const;
 	void doMoveObjects(EditOperation &op, selection_c *list, double delta_x, double delta_y, double delta_z) const;
 	void transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const;
-	void transferSectorProperties(int src_sec, int dest_sec) const;
+	void transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const;
 	void transferLinedefProperties(int src_line, int dest_line, bool do_tex) const;
 	void dragCountOnGrid(int *count, int *total) const;
 	void dragCountOnGridWorker(ObjType obj_type, int objnum, int *count, int *total) const;
@@ -100,7 +100,7 @@ private:
 	void doScaleTwoStuff(EditOperation &op, selection_c *list, transform_t &param) const;
 	void doScaleTwoVertices(EditOperation &op, selection_c *list, transform_t &param) const;
 	void determineOrigin(transform_t &param, double pos_x, double pos_y) const;
-	void doScaleSectorHeights(selection_c *list, double scale_z, int pos_z) const;
+	void doScaleSectorHeights(EditOperation &op, selection_c *list, double scale_z, int pos_z) const;
 	void quantizeThings(EditOperation &op, selection_c *list) const;
 	void quantizeVertices(EditOperation &op, selection_c *list) const;
 	bool spotInUse(ObjType obj_type, int x, int y) const;

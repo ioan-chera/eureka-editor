@@ -44,7 +44,7 @@
 
 
 // this function ensures that sector won't get floor > ceil
-void SectorModule::safeRaiseLower(int sec, int parts, int dz) const
+void SectorModule::safeRaiseLower(EditOperation &op, int sec, int parts, int dz) const
 {
 	if (parts == 0)
 		parts = PART_FLOOR | PART_CEIL;
@@ -77,10 +77,10 @@ void SectorModule::safeRaiseLower(int sec, int parts, int dz) const
 	}
 
 	if (parts & PART_FLOOR)
-		doc.basis.changeSector(sec, Sector::F_FLOORH, f);
+		op.changeSector(sec, Sector::F_FLOORH, f);
 
 	if (parts & PART_CEIL)
-		doc.basis.changeSector(sec, Sector::F_CEILH, c);
+		op.changeSector(sec, Sector::F_CEILH, c);
 }
 
 
@@ -111,7 +111,7 @@ void Instance::CMD_SEC_Floor()
 
 			int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
 
-			level.basis.changeSector(*it, Sector::F_FLOORH, new_h);
+			op.changeSector(*it, Sector::F_FLOORH, new_h);
 		}
 	}
 
@@ -149,7 +149,7 @@ void Instance::CMD_SEC_Ceil()
 
 			int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
 
-			level.basis.changeSector(*it, Sector::F_CEILH, new_h);
+			op.changeSector(*it, Sector::F_CEILH, new_h);
 		}
 	}
 
@@ -198,7 +198,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 			int new_lt = light_add_delta(S->light, delta);
 
-			doc.basis.changeSector(*it, Sector::F_LIGHT, new_lt);
+			op.changeSector(*it, Sector::F_LIGHT, new_lt);
 		}
 	}
 
@@ -250,8 +250,8 @@ void Instance::CMD_SEC_SwapFlats()
 			int floor_tex = S->floor_tex;
 			int  ceil_tex = S->ceil_tex;
 
-			level.basis.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
-			level.basis.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
+			op.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
+			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
 		}
 	}
 
@@ -334,14 +334,14 @@ void Instance::commandSectorMerge()
 		{
 			const Sector *ref = level.sectors[first];
 
-			level.basis.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-			level.basis.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-			level.basis.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-			level.basis.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+			op.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
+			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
+			op.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
+			op.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
 
-			level.basis.changeSector(new_sec, Sector::F_LIGHT, ref->light);
-			level.basis.changeSector(new_sec, Sector::F_TYPE,  ref->type);
-			level.basis.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+			op.changeSector(new_sec, Sector::F_LIGHT, ref->light);
+			op.changeSector(new_sec, Sector::F_TYPE,  ref->type);
+			op.changeSector(new_sec, Sector::F_TAG,   ref->tag);
 		}
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())

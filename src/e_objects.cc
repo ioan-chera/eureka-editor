@@ -768,8 +768,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double d
 			{
 				const Sector * S = doc.sectors[*it];
 
-				doc.basis.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
-				doc.basis.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
+				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
+				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -950,18 +950,18 @@ void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, in
 }
 
 
-void ObjectsModule::transferSectorProperties(int src_sec, int dest_sec) const
+void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const
 {
 	const Sector * sector = doc.sectors[src_sec];
 
-	doc.basis.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	doc.basis.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
-	doc.basis.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	doc.basis.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
+	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
+	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
+	op.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
+	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
 
-	doc.basis.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
-	doc.basis.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
-	doc.basis.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
+	op.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
+	op.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
+	op.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
 }
 
 
@@ -1147,7 +1147,7 @@ void Instance::CMD_CopyProperties()
 		switch (edit.mode)
 		{
 			case ObjType::sectors:
-				level.objects.transferSectorProperties(source, target);
+				level.objects.transferSectorProperties(op, source, target);
 				break;
 
 			case ObjType::things:
@@ -1182,7 +1182,7 @@ void Instance::CMD_CopyProperties()
 			switch (edit.mode)
 			{
 				case ObjType::sectors:
-					level.objects.transferSectorProperties(source, *it);
+					level.objects.transferSectorProperties(op, source, *it);
 					break;
 
 				case ObjType::things:
@@ -1899,7 +1899,7 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 }
 
 
-void ObjectsModule::doScaleSectorHeights(selection_c *list, double scale_z, int pos_z) const
+void ObjectsModule::doScaleSectorHeights(EditOperation &op, selection_c *list, double scale_z, int pos_z) const
 {
 	SYS_ASSERT(! list->empty());
 
@@ -1933,8 +1933,8 @@ void ObjectsModule::doScaleSectorHeights(selection_c *list, double scale_z, int 
 		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
 
-		doc.basis.changeSector(*it, Sector::F_FLOORH, new_f);
-		doc.basis.changeSector(*it, Sector::F_CEILH,  new_c);
+		op.changeSector(*it, Sector::F_FLOORH, new_f);
+		op.changeSector(*it, Sector::F_CEILH,  new_c);
 	}
 }
 
@@ -1956,7 +1956,7 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
 		doScaleTwoStuff(op, inst.edit.Selected, param);
-		doScaleSectorHeights(inst.edit.Selected, scale_z, static_cast<int>(pos_z));
+		doScaleSectorHeights(op, inst.edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
 }
 
