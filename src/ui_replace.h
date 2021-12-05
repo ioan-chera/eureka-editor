@@ -133,7 +133,7 @@ private:
 	void rawShowFilter(int value);
 
 	bool MatchesObject(int idx);
-	void ApplyReplace (int idx, int new_tex);
+	void ApplyReplace (EditOperation &op, int idx, int new_tex);
 
 	void DoReplace();
 	void DoAll(bool replace);
@@ -159,7 +159,7 @@ private:
 	bool Filter_Sides(const LineDef *L);
 	bool Filter_PrevSel(int idx);
 
-	void Replace_Thing(int idx);
+	void Replace_Thing(EditOperation &op, int idx);
 	void Replace_LineDef(int idx, int new_tex);
 	void Replace_LineType(int idx);
 	void Replace_Sector(int idx, int new_tex);

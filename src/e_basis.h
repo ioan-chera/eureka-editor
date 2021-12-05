@@ -355,8 +355,6 @@ public:
 	{
 	}
 
-	bool change(ObjType type, int objnum, byte field, int value);
-	bool changeThing(int thing, byte field, int value);
 	bool changeVertex(int vert, byte field, int value);
 	bool changeSector(int sec, byte field, int value);
 	bool changeSidedef(int side, byte field, int value);
@@ -514,6 +512,8 @@ private:
 	void setMessage(EUR_FORMAT_STRING(const char *format), ...) EUR_PRINTF(2, 3);
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
+	bool change(ObjType type, int objnum, byte field, int value);
+	bool changeThing(int thing, byte field, int value);
 	void del(ObjType type, int objnum);
 	void end();
 	void abort(bool keepChanges);
@@ -556,6 +556,16 @@ public:
 	int addNew(ObjType type)
 	{
 		return basis.addNew(type);
+	}
+
+	bool change(ObjType type, int objnum, byte field, int value)
+	{
+		return basis.change(type, objnum, field, value);
+	}
+
+	bool changeThing(int thing, byte field, int value)
+	{
+		return basis.changeThing(thing, field, value);
 	}
 
 	void del(ObjType type, int objnum)

@@ -328,13 +328,13 @@ public:
 		}
 	}
 
-	void ApplyToBasis(int field, int delta)
+	void ApplyToBasis(EditOperation &op, int field, int delta)
 	{
 		for (size_t i = 0 ; i < fields.size() ; i++)
 		{
 			if (fields[i].field == field)
 			{
-				inst.level.basis.change(type, fields[i].obj, (byte)field, fields[i].value + delta);
+				op.change(type, fields[i].obj, (byte)field, fields[i].value + delta);
 			}
 		}
 	}
@@ -521,8 +521,8 @@ static void AdjustOfs_Finish(Instance &inst)
 		EditOperation op(inst.level.basis);
 		op.setMessage("adjusted offsets");
 
-		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_X_OFFSET, dx);
-		inst.edit.adjust_bucket->ApplyToBasis(SideDef::F_Y_OFFSET, dy);
+		inst.edit.adjust_bucket->ApplyToBasis(op, SideDef::F_X_OFFSET, dx);
+		inst.edit.adjust_bucket->ApplyToBasis(op, SideDef::F_Y_OFFSET, dy);
 	}
 
 	delete inst.edit.adjust_bucket;
@@ -1136,7 +1136,7 @@ void Instance::StoreSelectedThing(int new_type)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			level.basis.changeThing(*it, Thing::F_TYPE, new_type);
+			op.changeThing(*it, Thing::F_TYPE, new_type);
 		}
 	}
 

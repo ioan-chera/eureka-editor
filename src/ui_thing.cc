@@ -369,7 +369,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_TYPE, new_type);
+			op.changeThing(*it, Thing::F_TYPE, new_type);
 		}
 	}
 }
@@ -411,7 +411,7 @@ void UI_ThingBox::spec_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_SPECIAL, new_type);
+			op.changeThing(*it, Thing::F_SPECIAL, new_type);
 		}
 	}
 }
@@ -500,7 +500,7 @@ void UI_ThingBox::angle_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_ANGLE, new_ang);
+			op.changeThing(*it, Thing::F_ANGLE, new_ang);
 		}
 	}
 }
@@ -520,7 +520,7 @@ void UI_ThingBox::tid_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, Thing::F_TID, new_tid);
+			op.changeThing(*it, Thing::F_TID, new_tid);
 		}
 	}
 }
@@ -538,7 +538,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, Thing::F_X, box->inst.MakeValidCoord(new_x));
+			op.changeThing(*it, Thing::F_X, box->inst.MakeValidCoord(new_x));
 
 	}
 }
@@ -555,7 +555,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, Thing::F_Y, box->inst.MakeValidCoord(new_y));
+			op.changeThing(*it, Thing::F_Y, box->inst.MakeValidCoord(new_y));
 	}
 }
 
@@ -571,7 +571,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			box->inst.level.basis.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
+			op.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
 	}
 }
 
@@ -597,7 +597,7 @@ void UI_ThingBox::option_callback(Fl_Widget *w, void *data)
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple things are selected.
-			box->inst.level.basis.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
+			op.changeThing(*it, Thing::F_OPTIONS, (T->options & ~mask) | (new_opts & mask));
 		}
 	}
 }
@@ -655,7 +655,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			box->inst.level.basis.changeThing(*it, static_cast<byte>(Thing::F_ARG1 + arg_idx),
+			op.changeThing(*it, static_cast<byte>(Thing::F_ARG1 + arg_idx),
                                               new_value);
 		}
 	}

@@ -733,7 +733,7 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 }
 
 
-void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double delta_x, double delta_y, double delta_z) const
 {
 	fixcoord_t fdx = inst.MakeValidCoord(delta_x);
 	fixcoord_t fdy = inst.MakeValidCoord(delta_y);
@@ -746,9 +746,9 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 			{
 				const Thing * T = doc.things[*it];
 
-				doc.basis.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				doc.basis.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				doc.basis.changeThing(*it, Thing::F_H, std::max(0, T->raw_h + fdz));
+				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
+				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
+				op.changeThing(*it, Thing::F_H, std::max(0, T->raw_h + fdz));
 			}
 			break;
 
@@ -779,7 +779,7 @@ void ObjectsModule::doMoveObjects(selection_c *list, double delta_x, double delt
 				selection_c verts(ObjType::vertices);
 				ConvertSelection(doc, list, &verts);
 
-				doMoveObjects(&verts, delta_x, delta_y, delta_z);
+				doMoveObjects(op, &verts, delta_x, delta_y, delta_z);
 			}
 			break;
 
@@ -805,10 +805,10 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 		selection_c thing_sel(ObjType::things);
 		ConvertSelection(doc, list, &thing_sel);
 
-		doMoveObjects(&thing_sel, delta_x, delta_y, 0);
+		doMoveObjects(op, &thing_sel, delta_x, delta_y, 0);
 	}
 
-	doMoveObjects(list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, list, delta_x, delta_y, delta_z);
 }
 
 //
@@ -922,7 +922,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 
 	list.set(obj.num);
 
-	doMoveObjects(&list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, &list, delta_x, delta_y, delta_z);
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
@@ -931,22 +931,22 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 }
 
 
-void ObjectsModule::transferThingProperties(int src_thing, int dest_thing) const
+void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const
 {
 	const Thing * T = doc.things[src_thing];
 
-	doc.basis.changeThing(dest_thing, Thing::F_TYPE,    T->type);
-	doc.basis.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
+	op.changeThing(dest_thing, Thing::F_TYPE,    T->type);
+	op.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
 //	BA_ChangeTH(dest_thing, Thing::F_ANGLE,   T->angle);
 
-	doc.basis.changeThing(dest_thing, Thing::F_TID,     T->tid);
-	doc.basis.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
+	op.changeThing(dest_thing, Thing::F_TID,     T->tid);
+	op.changeThing(dest_thing, Thing::F_SPECIAL, T->special);
 
-	doc.basis.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
-	doc.basis.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
+	op.changeThing(dest_thing, Thing::F_ARG1, T->arg1);
+	op.changeThing(dest_thing, Thing::F_ARG2, T->arg2);
+	op.changeThing(dest_thing, Thing::F_ARG3, T->arg3);
+	op.changeThing(dest_thing, Thing::F_ARG4, T->arg4);
+	op.changeThing(dest_thing, Thing::F_ARG5, T->arg5);
 }
 
 
@@ -1151,7 +1151,7 @@ void Instance::CMD_CopyProperties()
 				break;
 
 			case ObjType::things:
-				level.objects.transferThingProperties(source, target);
+				level.objects.transferThingProperties(op, source, target);
 				break;
 
 			case ObjType::linedefs:
@@ -1186,7 +1186,7 @@ void Instance::CMD_CopyProperties()
 					break;
 
 				case ObjType::things:
-					level.objects.transferThingProperties(source, *it);
+					level.objects.transferThingProperties(op, source, *it);
 					break;
 
 				case ObjType::linedefs:
@@ -1535,7 +1535,7 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 }
 
 
-void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y) const
+void ObjectsModule::doMirrorThings(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
 	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
@@ -1546,19 +1546,19 @@ void ObjectsModule::doMirrorThings(selection_c *list, bool is_vert, double mid_x
 
 		if (is_vert)
 		{
-			doc.basis.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
+			op.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
 
 			if (T->angle != 0)
-				doc.basis.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
+				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			doc.basis.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
+			op.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
 
 			if (T->angle > 180)
-				doc.basis.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
+				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
 			else
-				doc.basis.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
+				op.changeThing(*it, Thing::F_ANGLE, 180 - T->angle);
 		}
 	}
 }
@@ -1599,11 +1599,11 @@ void ObjectsModule::doMirrorVertices(selection_c *list, bool is_vert, double mid
 }
 
 
-void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y) const
+void ObjectsModule::doMirrorStuff(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const
 {
 	if (inst.edit.mode == ObjType::things)
 	{
-		doMirrorThings(list, is_vert, mid_x, mid_y);
+		doMirrorThings(op, list, is_vert, mid_x, mid_y);
 		return;
 	}
 
@@ -1615,7 +1615,7 @@ void ObjectsModule::doMirrorStuff(selection_c *list, bool is_vert, double mid_x,
 		selection_c things(ObjType::things);
 		ConvertSelection(doc, list, &things);
 
-		doMirrorThings(&things, is_vert, mid_x, mid_y);
+		doMirrorThings(op, &things, is_vert, mid_x, mid_y);
 	}
 
 	doMirrorVertices(list, is_vert, mid_x, mid_y);
@@ -1643,7 +1643,7 @@ void Instance::CMD_Mirror()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
-		level.objects.doMirrorStuff(edit.Selected, is_vert, mid_x, mid_y);
+		level.objects.doMirrorStuff(op, edit.Selected, is_vert, mid_x, mid_y);
 
 	}
 
@@ -1652,7 +1652,7 @@ void Instance::CMD_Mirror()
 }
 
 
-void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
+void ObjectsModule::doRotate90Things(EditOperation &op, selection_c *list, bool anti_clockwise,
 							 double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
@@ -1667,17 +1667,17 @@ void ObjectsModule::doRotate90Things(selection_c *list, bool anti_clockwise,
 
 		if (anti_clockwise)
 		{
-			doc.basis.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			doc.basis.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
+			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
-			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			doc.basis.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			doc.basis.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
+			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
-			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
 	}
 }
@@ -1709,7 +1709,7 @@ void Instance::CMD_Rotate90()
 
 		if (edit.mode == ObjType::things)
 		{
-			level.objects.doRotate90Things(edit.Selected, anti_clockwise, mid_x, mid_y);
+			level.objects.doRotate90Things(op, edit.Selected, anti_clockwise, mid_x, mid_y);
 		}
 		else
 		{
@@ -1719,7 +1719,7 @@ void Instance::CMD_Rotate90()
 				selection_c things(ObjType::things);
 				ConvertSelection(level, edit.Selected, &things);
 
-				level.objects.doRotate90Things(&things, anti_clockwise, mid_x, mid_y);
+				level.objects.doRotate90Things(op, &things, anti_clockwise, mid_x, mid_y);
 			}
 
 			// everything else just rotates the vertices
@@ -1755,7 +1755,7 @@ void Instance::CMD_Rotate90()
 }
 
 
-void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) const
+void ObjectsModule::doScaleTwoThings(EditOperation &op, selection_c *list, transform_t& param) const
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1766,8 +1766,8 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 
 		param.Apply(&new_x, &new_y);
 
-		doc.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
-		doc.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
+		op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
+		op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1775,7 +1775,7 @@ void ObjectsModule::doScaleTwoThings(selection_c *list, transform_t& param) cons
 
 		if (ang_diff)
 		{
-			doc.basis.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
+			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, ang_diff));
 		}
 	}
 }
@@ -1801,11 +1801,11 @@ void ObjectsModule::doScaleTwoVertices(selection_c *list, transform_t& param) co
 }
 
 
-void ObjectsModule::doScaleTwoStuff(selection_c *list, transform_t& param) const
+void ObjectsModule::doScaleTwoStuff(EditOperation &op, selection_c *list, transform_t& param) const
 {
 	if (inst.edit.mode == ObjType::things)
 	{
-		doScaleTwoThings(list, param);
+		doScaleTwoThings(op, list, param);
 		return;
 	}
 
@@ -1817,7 +1817,7 @@ void ObjectsModule::doScaleTwoStuff(selection_c *list, transform_t& param) const
 		selection_c things(ObjType::things);
 		ConvertSelection(doc, list, &things);
 
-		doScaleTwoThings(&things, param);
+		doScaleTwoThings(op, &things, param);
 	}
 
 	doScaleTwoVertices(list, param);
@@ -1836,16 +1836,16 @@ void ObjectsModule::transform(transform_t& param) const
 	if (param.scale_x < 0)
 	{
 		param.scale_x = -param.scale_x;
-		doMirrorStuff(inst.edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(op, inst.edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
 	}
 
 	if (param.scale_y < 0)
 	{
 		param.scale_y = -param.scale_y;
-		doMirrorStuff(inst.edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(op, inst.edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
 	}
 
-	doScaleTwoStuff(inst.edit.Selected, param);
+	doScaleTwoStuff(op, inst.edit.Selected, param);
 }
 
 
@@ -1894,7 +1894,7 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(inst.edit.Selected, param);
+		doScaleTwoStuff(op, inst.edit.Selected, param);
 	}
 }
 
@@ -1955,7 +1955,7 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(inst.edit.Selected, param);
+		doScaleTwoStuff(op, inst.edit.Selected, param);
 		doScaleSectorHeights(inst.edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
 }
@@ -1974,7 +1974,7 @@ void ObjectsModule::rotate3(double deg, double pos_x, double pos_y) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("rotated", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(inst.edit.Selected, param);
+		doScaleTwoStuff(op, inst.edit.Selected, param);
 	}
 }
 
@@ -2054,7 +2054,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 		EditOperation op(doc.basis);
 		op.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
 
-		doScaleTwoStuff(inst.edit.Selected, param);
+		doScaleTwoStuff(op, inst.edit.Selected, param);
 	}
 
 	if (unselect == SelectHighlight::unselect)
@@ -2073,7 +2073,7 @@ void Instance::CMD_Shrink()
 }
 
 
-void ObjectsModule::quantizeThings(selection_c *list) const
+void ObjectsModule::quantizeThings(EditOperation &op, selection_c *list) const
 {
 	// remember the things which we moved
 	// (since we cannot modify the selection while we iterate over it)
@@ -2096,8 +2096,8 @@ void ObjectsModule::quantizeThings(selection_c *list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				doc.basis.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
-				doc.basis.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
+				op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
+				op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
 
 				moved.set(*it);
 				break;
@@ -2236,7 +2236,7 @@ void Instance::CMD_Quantize()
 		switch (edit.mode)
 		{
 			case ObjType::things:
-				level.objects.quantizeThings(edit.Selected);
+				level.objects.quantizeThings(op, edit.Selected);
 				break;
 
 			case ObjType::vertices:

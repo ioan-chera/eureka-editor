@@ -81,8 +81,8 @@ private:
 	void insertLinedef(EditOperation &op, int v1, int v2, bool no_fill) const;
 	bool checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c *flip) const;
 	int sectorNew(EditOperation &op, int model, int model2, int model3) const;
-	void doMoveObjects(selection_c *list, double delta_x, double delta_y, double delta_z) const;
-	void transferThingProperties(int src_thing, int dest_thing) const;
+	void doMoveObjects(EditOperation &op, selection_c *list, double delta_x, double delta_y, double delta_z) const;
+	void transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const;
 	void transferSectorProperties(int src_sec, int dest_sec) const;
 	void transferLinedefProperties(int src_line, int dest_line, bool do_tex) const;
 	void dragCountOnGrid(int *count, int *total) const;
@@ -90,18 +90,18 @@ private:
 	void dragUpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,
 		double *best_dist, double ptr_x, double ptr_y,
 		bool only_grid) const;
-	void doMirrorThings(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
-	void doMirrorStuff(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorThings(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorStuff(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
 	void doMirrorVertices(selection_c *list, bool is_vert, double mid_x, double mid_y) const;
-	void doRotate90Things(selection_c *list, bool anti_clockwise,
+	void doRotate90Things(EditOperation &op, selection_c *list, bool anti_clockwise,
 		double mid_x, double mid_y) const;
 	void doEnlargeOrShrink(bool do_shrink) const;
-	void doScaleTwoThings(selection_c *list, transform_t &param) const;
-	void doScaleTwoStuff(selection_c *list, transform_t &param) const;
+	void doScaleTwoThings(EditOperation &op, selection_c *list, transform_t &param) const;
+	void doScaleTwoStuff(EditOperation &op, selection_c *list, transform_t &param) const;
 	void doScaleTwoVertices(selection_c *list, transform_t &param) const;
 	void determineOrigin(transform_t &param, double pos_x, double pos_y) const;
 	void doScaleSectorHeights(selection_c *list, double scale_z, int pos_z) const;
-	void quantizeThings(selection_c *list) const;
+	void quantizeThings(EditOperation &op, selection_c *list) const;
 	void quantizeVertices(selection_c *list) const;
 	bool spotInUse(ObjType obj_type, int x, int y) const;
 

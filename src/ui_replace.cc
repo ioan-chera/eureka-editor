@@ -1300,7 +1300,7 @@ void UI_FindAndReplace::DoReplace()
 		EditOperation op(inst.level.basis);
 		op.setMessage("replacement in %s #%d", NameForObjectType(cur_obj.type), cur_obj.num);
 
-		ApplyReplace(cur_obj.num, replace_tex_id);
+		ApplyReplace(op, cur_obj.num, replace_tex_id);
 	}
 
 	// move onto next object
@@ -1332,14 +1332,14 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 }
 
 
-void UI_FindAndReplace::ApplyReplace(int idx, int new_tex)
+void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
 {
 	SYS_ASSERT(idx >= 0);
 
 	switch (what->value())
 	{
 		case 0: // Things
-			Replace_Thing(idx);
+			Replace_Thing(op, idx);
 			break;
 
 		case 1: // LineDefs (texturing)
@@ -1417,7 +1417,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 		count++;
 
 		if (replace)
-			ApplyReplace(idx, replace_tex_id);
+			ApplyReplace(*op, idx, replace_tex_id);
 
 		inst.edit.Selected->set(idx);
 	}
@@ -1692,11 +1692,11 @@ bool UI_FindAndReplace::Pattern_Match(const SString &tex, const SString &pattern
 //    REPLACE METHODS
 //------------------------------------------------------------------------
 
-void UI_FindAndReplace::Replace_Thing(int idx)
+void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	inst.level.basis.changeThing(idx, Thing::F_TYPE, new_type);
+	op.changeThing(idx, Thing::F_TYPE, new_type);
 }
 
 
