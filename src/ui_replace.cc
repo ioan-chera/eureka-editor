@@ -290,7 +290,6 @@ struct WhatDef
 {
 	const char *label;
 	Fl_Color color;
-	Fl_Widget **filterWidgets;
 };
 
 static const WhatDef sk_whatDefs[NUM_What] =
@@ -298,9 +297,6 @@ static const WhatDef sk_whatDefs[NUM_What] =
 	{
 		"Things",
 		THING_MODE_COL,
-		{
-			o_
-		},
 	},
 	{ "Line Textures", LINE_MODE_COL },
 	{ "Sector Flats", SECTOR_MODE_COL },
