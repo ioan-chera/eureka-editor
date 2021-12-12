@@ -460,11 +460,11 @@ void UI_FindAndReplace::UpdateWhatColor()
 {
 	switch (what->value())
 	{
-		case 0: /* Things      */ what->color(THING_MODE_COL); break;
-		case 1: /* Line Tex    */ what->color(LINE_MODE_COL); break;
-		case 2: /* Sector Flat */ what->color(SECTOR_MODE_COL); break;
-		case 3: /* Line Type   */ what->color(FL_GREEN); break;
-		case 4: /* Sector Type */ what->color(fl_rgb_color(255,160,0)); break;
+		case What_things: /* Things      */ what->color(THING_MODE_COL); break;
+		case What_lineTextures: /* Line Tex    */ what->color(LINE_MODE_COL); break;
+		case What_sectorFlats: /* Sector Flat */ what->color(SECTOR_MODE_COL); break;
+		case What_linesByType: /* Line Type   */ what->color(FL_GREEN); break;
+		case What_sectorsByType: /* Sector Type */ what->color(fl_rgb_color(255,160,0)); break;
 	}
 }
 
@@ -472,13 +472,13 @@ void UI_FindAndReplace::UpdateWhatColor()
 
 void UI_FindAndReplace::UpdateWhatFilters()
 {
-	int x = what->value();
+	auto x = static_cast<What>(what->value());
 
 #define SHOW_WIDGET_IF(w, test)  \
 	if (test) (w)->show(); else (w)->hide();
 
 	// common stuff
-	if (x == 0 && inst.loaded.levelFormat == MapFormat::doom)
+	if (x == What_things && inst.loaded.levelFormat == MapFormat::doom)
 	{
 		tag_input->deactivate();
 		tag_input->value("");
@@ -489,31 +489,31 @@ void UI_FindAndReplace::UpdateWhatFilters()
 	}
 
 	// thing stuff
-	SHOW_WIDGET_IF(o_easy,   x == 0);
-	SHOW_WIDGET_IF(o_medium, x == 0);
-	SHOW_WIDGET_IF(o_hard,   x == 0);
+	SHOW_WIDGET_IF(o_easy,   x == What_things);
+	SHOW_WIDGET_IF(o_medium, x == What_things);
+	SHOW_WIDGET_IF(o_hard,   x == What_things);
 
-	SHOW_WIDGET_IF(o_sp,     x == 0);
-	SHOW_WIDGET_IF(o_coop,   x == 0);
-	SHOW_WIDGET_IF(o_dm,     x == 0);
+	SHOW_WIDGET_IF(o_sp,     x == What_things);
+	SHOW_WIDGET_IF(o_coop,   x == What_things);
+	SHOW_WIDGET_IF(o_dm,     x == What_things);
 
 	// sector stuff
-	SHOW_WIDGET_IF(o_floors,   x == 2);
-	SHOW_WIDGET_IF(o_ceilings, x == 2);
-	SHOW_WIDGET_IF(o_skies,    x == 2);
+	SHOW_WIDGET_IF(o_floors,   x == What_sectorFlats);
+	SHOW_WIDGET_IF(o_ceilings, x == What_sectorFlats);
+	SHOW_WIDGET_IF(o_skies,    x == What_sectorFlats);
 
 	// linedef stuff
-	SHOW_WIDGET_IF(o_lowers, x == 1);
-	SHOW_WIDGET_IF(o_uppers, x == 1);
-	SHOW_WIDGET_IF(o_rails,  x == 1);
+	SHOW_WIDGET_IF(o_lowers, x == What_lineTextures);
+	SHOW_WIDGET_IF(o_uppers, x == What_lineTextures);
+	SHOW_WIDGET_IF(o_rails,  x == What_lineTextures);
 
-	SHOW_WIDGET_IF(o_one_sided, x == 1 || x == 3);
-	SHOW_WIDGET_IF(o_two_sided, x == 1 || x == 3);
+	SHOW_WIDGET_IF(o_one_sided, x == What_lineTextures || x == What_linesByType);
+	SHOW_WIDGET_IF(o_two_sided, x == What_lineTextures || x == What_linesByType);
 
 #undef SHOW_WIDGET_IF
 
 	// vanilla DOOM : always hide SP and COOP flags
-	if (x == 0 && ! inst.conf.features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)
+	if (x == What_things && ! inst.conf.features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)
 	{
 		  o_sp->hide();
 		o_coop->hide();
@@ -556,11 +556,11 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 
 	switch (box->what->value())
 	{
-		case 0: box->cur_obj.type = ObjType::things; break;
-		case 1: box->cur_obj.type = ObjType::linedefs; want_descs = false; break;
-		case 2: box->cur_obj.type = ObjType::sectors;  want_descs = false; break;
-		case 3: box->cur_obj.type = ObjType::linedefs; break;
-		case 4: box->cur_obj.type = ObjType::sectors; break;
+		case What_things: box->cur_obj.type = ObjType::things; break;
+		case What_lineTextures: box->cur_obj.type = ObjType::linedefs; want_descs = false; break;
+		case What_sectorFlats: box->cur_obj.type = ObjType::sectors;  want_descs = false; break;
+		case What_linesByType: box->cur_obj.type = ObjType::linedefs; break;
+		case What_sectorsByType: box->cur_obj.type = ObjType::sectors; break;
 
 		default: break;
 	}
@@ -667,9 +667,9 @@ bool UI_FindAndReplace::WhatFromEditMode()
 {
 	switch (inst.edit.mode)
 	{
-		case ObjType::things:   what->value(0); return true;
-		case ObjType::linedefs: what->value(1); return true;
-		case ObjType::sectors:  what->value(2); return true;
+		case ObjType::things:   what->value(What_things); return true;
+		case ObjType::linedefs: what->value(What_lineTextures); return true;
+		case ObjType::sectors:  what->value(What_sectorFlats); return true;
 
 		default: return false;
 	}
@@ -786,14 +786,14 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 
 	// Line Textures
-	if (what->value() == 1)
+	if (what->value() == What_lineTextures)
 	{
 		pic->GetTex(inp_text);
 		return true;
 	}
 
 	// Sector Flats
-	if (what->value() == 2)
+	if (what->value() == What_sectorFlats)
 	{
 		pic->GetFlat(inp_text);
 		return true;
@@ -843,7 +843,7 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 
 	switch (what->value())
 	{
-		case 0: // Things
+		case What_things: // Things
 		{
 			const thingtype_t &info = inst.M_GetThingType(type_num);
 			desc->value(info.desc.c_str());
@@ -851,14 +851,14 @@ bool UI_FindAndReplace::CheckInput(Fl_Input *w, Fl_Output *desc, UI_Pic *pic, nu
 			break;
 		}
 
-		case 3: // Lines by Type
+		case What_linesByType: // Lines by Type
 		{
 			const linetype_t &info = inst.M_GetLineType(type_num);
 			desc->value(info.desc.c_str());
 			break;
 		}
 
-		case 4: // Sectors by Type
+		case What_sectorsByType: // Sectors by Type
 		{
 			int mask = (inst.conf.features.gen_sectors == GenSectorFamily::zdoom) ? 255 :
 						(inst.conf.features.gen_sectors != GenSectorFamily::none) ? 31 : 65535;
@@ -919,7 +919,7 @@ char UI_FindAndReplace::GetKind()
 {
 	// these letters are same as the Browser uses
 
-	int v = what->value();
+	auto v = static_cast<What>(what->value());
 
 	if (v < 0 || v >= 5)
 		return '?';
@@ -994,7 +994,7 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 
 	if (tex_name[0])
 	{
-		bool is_known = (what->value() == 1) ?
+		bool is_known = (what->value() == What_lineTextures) ?
 			inst.W_TextureIsKnown(tex_name) : inst.W_FlatIsKnown(tex_name);
 
 		if (!is_known)
@@ -1007,7 +1007,7 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 		return;
 	}
 
-	if (what->value() == 1)
+	if (what->value() == What_lineTextures)
 		inst.Texboard_SetTex(tex_name);
 	else
 		inst.Texboard_SetFlat(tex_name);
@@ -1018,7 +1018,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 {
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
-	int tex_num = (what->value() == 1) ?
+	int tex_num = (what->value() == What_lineTextures) ?
 		inst.Texboard_GetTexNum() : inst.Texboard_GetFlatNum();
 
 	SString tex_name = BA_GetString(tex_num);
@@ -1335,19 +1335,19 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 {
 	switch (what->value())
 	{
-		case 0: // Things
+		case What_things: // Things
 			return Match_Thing(idx);
 
-		case 1: // LineDefs (texturing)
+		case What_lineTextures: // LineDefs (texturing)
 			return Match_LineDef(idx);
 
-		case 2: // Sectors (texturing)
+		case What_sectorFlats: // Sectors (texturing)
 			return Match_Sector(idx);
 
-		case 3: // Lines by Type
+		case What_linesByType: // Lines by Type
 			return Match_LineType(idx);
 
-		case 4: // Sectors by Type
+		case What_sectorsByType: // Sectors by Type
 			return Match_SectorType(idx);
 
 		default: return false;
@@ -1361,23 +1361,23 @@ void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
 
 	switch (what->value())
 	{
-		case 0: // Things
+		case What_things: // Things
 			Replace_Thing(op, idx);
 			break;
 
-		case 1: // LineDefs (texturing)
+		case What_lineTextures: // LineDefs (texturing)
 			Replace_LineDef(op, idx, new_tex);
 			break;
 
-		case 2: // Sectors (texturing)
+		case What_sectorFlats: // Sectors (texturing)
 			Replace_Sector(op, idx, new_tex);
 			break;
 
-		case 3: // Lines by Type
+		case What_linesByType: // Lines by Type
 			Replace_LineType(op, idx);
 			break;
 
-		case 4: // Sectors by Type
+		case What_sectorsByType: // Sectors by Type
 			Replace_SectorType(op, idx);
 			break;
 
