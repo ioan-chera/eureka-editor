@@ -33,6 +33,7 @@
 #include "w_rawdef.h"
 #include "w_texture.h"
 
+#include <assert.h>
 
 class number_group_c
 {
@@ -289,11 +290,18 @@ struct WhatDef
 {
 	const char *label;
 	Fl_Color color;
+	Fl_Widget **filterWidgets;
 };
 
 static const WhatDef sk_whatDefs[NUM_What] =
 {
-	{ "Things", THING_MODE_COL },
+	{
+		"Things",
+		THING_MODE_COL,
+		{
+			o_
+		},
+	},
 	{ "Line Textures", LINE_MODE_COL },
 	{ "Sector Flats", SECTOR_MODE_COL },
 	{ "Lines by Type", FL_GREEN },
