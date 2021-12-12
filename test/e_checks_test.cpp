@@ -60,7 +60,7 @@ void ConvertSelection(const Document &doc, const selection_c * src, selection_c 
 {
 }
 
-void DeleteObjects_WithUnused(const Document &doc, selection_c *list, bool keep_things,
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_c *list, bool keep_things,
 							  bool keep_verts, bool keep_lines)
 {
 }
@@ -243,7 +243,7 @@ void LogViewer_Open()
 {
 }
 
-void ObjectsModule::del(selection_c *list) const
+void ObjectsModule::del(EditOperation &op, selection_c *list) const
 {
 }
 
