@@ -270,6 +270,11 @@ public:
 
 //------------------------------------------------------------------------
 
+enum
+{
+	WHAT_TEXT_SIZE = 17,
+};
+
 enum What
 {
 	What_things,
@@ -320,7 +325,7 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 
 		what = new Fl_Choice(X+60, Y+46, W - 120, 33);
-		what->textsize(17);
+		what->textsize(WHAT_TEXT_SIZE);
 		what->add(joined("|", sk_whatLabels, NUM_What).c_str());
 		what->value(0);
 		what->callback(what_kind_callback, this);
