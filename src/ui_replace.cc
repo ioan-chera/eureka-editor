@@ -270,6 +270,24 @@ public:
 
 //------------------------------------------------------------------------
 
+enum What
+{
+	What_things,
+	What_lineTextures,
+	What_sectorFlats,
+	What_linesByType,
+	What_sectorsByType,
+	NUM_What
+};
+
+static const char *sk_whatLabels[NUM_What] =
+{
+	"Things",
+	"Line Textures",
+	"Sector Flats",
+	"Lines by Type",
+	"Sectors by Type"
+};
 
 #define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
@@ -303,7 +321,7 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 		what = new Fl_Choice(X+60, Y+46, W - 120, 33);
 		what->textsize(17);
-		what->add("Things|Line Textures|Sector Flats|Lines by Type|Sectors by Type");
+		what->add(joined("|", sk_whatLabels, NUM_What).c_str());
 		what->value(0);
 		what->callback(what_kind_callback, this);
 
