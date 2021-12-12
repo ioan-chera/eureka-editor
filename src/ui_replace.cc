@@ -285,13 +285,19 @@ enum What
 	NUM_What
 };
 
-static const char *sk_whatLabels[NUM_What] =
+struct WhatDef
 {
-	"Things",
-	"Line Textures",
-	"Sector Flats",
-	"Lines by Type",
-	"Sectors by Type"
+	const char *label;
+	Fl_Color color;
+};
+
+static const WhatDef sk_whatDefs[NUM_What] =
+{
+	{ "Things", THING_MODE_COL },
+	{ "Line Textures", LINE_MODE_COL },
+	{ "Sector Flats", SECTOR_MODE_COL },
+	{ "Lines by Type", FL_GREEN },
+	{ "Sectors by Type", fl_rgb_color(255,160,0) }
 };
 
 #define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
@@ -326,8 +332,8 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 		what = new Fl_Choice(X+60, Y+46, W - 120, 33);
 		what->textsize(WHAT_TEXT_SIZE);
-		what->add(joined("|", sk_whatLabels, NUM_What).c_str());
-		what->value(0);
+		what->add(joined("|", sk_whatDefs, NUM_What, [](const auto &def){ return def.label; }).c_str());
+		what->value(What_things);
 		what->callback(what_kind_callback, this);
 
 		UpdateWhatColor();
@@ -458,14 +464,9 @@ void UI_FindAndReplace::hide_callback(Fl_Widget *w, void *data)
 
 void UI_FindAndReplace::UpdateWhatColor()
 {
-	switch (what->value())
-	{
-		case What_things: /* Things      */ what->color(THING_MODE_COL); break;
-		case What_lineTextures: /* Line Tex    */ what->color(LINE_MODE_COL); break;
-		case What_sectorFlats: /* Sector Flat */ what->color(SECTOR_MODE_COL); break;
-		case What_linesByType: /* Line Type   */ what->color(FL_GREEN); break;
-		case What_sectorsByType: /* Sector Type */ what->color(fl_rgb_color(255,160,0)); break;
-	}
+	auto value = static_cast<What>(what->value());
+	assert(value >= 0 && value < NUM_What);
+	what->color(sk_whatDefs[value].color);
 }
 
 
