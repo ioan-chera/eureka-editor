@@ -132,7 +132,7 @@ private:
 	friend class lineloop_c;
 
 	void linedefsBetweenSectors(selection_c *list, int sec1, int sec2) const;
-	void replaceSectorRefs(int old_sec, int new_sec) const;
+	void replaceSectorRefs(EditOperation &op, int old_sec, int new_sec) const;
 	inline bool willBeTwoSided(int ld, Side side) const;
 	void determineNewTextures(lineloop_c& loop,
 									 std::vector<int>& lower_texs,

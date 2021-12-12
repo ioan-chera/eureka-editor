@@ -352,7 +352,7 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 
 		checkClosedLoop(op, new_ld, v1, v2, &flip);
 
-		doc.linemod.flipLinedefGroup(&flip);
+		doc.linemod.flipLinedefGroup(op, &flip);
 	}
 }
 
@@ -967,7 +967,7 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 
 #define LINEDEF_FLAG_KEEP  (MLF_Blocking + MLF_TwoSided)
 
-void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool do_tex) const
+void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const
 {
 	const LineDef * L1 = doc.linedefs[src_line];
 	const LineDef * L2 = doc.linedefs[dest_line];
@@ -997,15 +997,15 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 			if (! L2->Left(doc))
 			{
-				doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 			else
 			{
-				doc.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
-				doc.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
 
-				doc.basis.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
-				doc.basis.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
+				op.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
+				op.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
@@ -1044,7 +1044,7 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 			if (tex > 0)
 			{
-				doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 		}
 		else
@@ -1083,25 +1083,25 @@ void ObjectsModule::transferLinedefProperties(int src_line, int dest_line, bool 
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			doc.basis.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
-			doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
-			doc.basis.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+			op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
+			op.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
+			op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
 
-			doc.basis.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
-			doc.basis.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
-			doc.basis.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
+			op.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
+			op.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
+			op.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
 		}
 	}
 
-	doc.basis.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
+	op.changeLinedef(dest_line, LineDef::F_FLAGS, flags);
 
-	doc.basis.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
-	doc.basis.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
+	op.changeLinedef(dest_line, LineDef::F_TYPE, L1->type);
+	op.changeLinedef(dest_line, LineDef::F_TAG,  L1->tag);
 
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
-	doc.basis.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
+	op.changeLinedef(dest_line, LineDef::F_ARG2, L1->arg2);
+	op.changeLinedef(dest_line, LineDef::F_ARG3, L1->arg3);
+	op.changeLinedef(dest_line, LineDef::F_ARG4, L1->arg4);
+	op.changeLinedef(dest_line, LineDef::F_ARG5, L1->arg5);
 }
 
 
@@ -1155,7 +1155,7 @@ void Instance::CMD_CopyProperties()
 				break;
 
 			case ObjType::linedefs:
-				level.objects.transferLinedefProperties(source, target, true /* do_tex */);
+				level.objects.transferLinedefProperties(op, source, target, true /* do_tex */);
 				break;
 
 			default: break;
@@ -1190,7 +1190,7 @@ void Instance::CMD_CopyProperties()
 					break;
 
 				case ObjType::linedefs:
-					level.objects.transferLinedefProperties(source, *it, true /* do_tex */);
+					level.objects.transferLinedefProperties(op, source, *it, true /* do_tex */);
 					break;
 
 				default: break;
@@ -1593,8 +1593,8 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, selection_c *list, bool 
 		int start = L->start;
 		int end   = L->end;
 
-		doc.basis.changeLinedef(*it, LineDef::F_START, end);
-		doc.basis.changeLinedef(*it, LineDef::F_END, start);
+		op.changeLinedef(*it, LineDef::F_START, end);
+		op.changeLinedef(*it, LineDef::F_END, start);
 	}
 }
 

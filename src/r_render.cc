@@ -1372,29 +1372,29 @@ void Instance::StoreSelectedTexture(int new_tex)
 
 			if (L->OneSided())
 			{
-				level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 				continue;
 			}
 
 			/* right side */
 			if (parts == 1 || (parts & PART_RT_LOWER))
-				level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_RT_UPPER))
-				level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			if (parts & PART_RT_RAIL)
-				level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 
 			/* left side */
 			if (parts == 1 || (parts & PART_LF_LOWER))
-				level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_LF_UPPER))
-				level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
 
 			if (parts & PART_LF_RAIL)
-				level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 		}
 
 	}

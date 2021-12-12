@@ -98,7 +98,7 @@ int VertexModule::howManyLinedefs(int v_num) const
 // vertex 'v' is the shared vertex (the "hinge").
 // to prevent an overlap, we merge ld1 into ld2.
 //
-void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_lines) const
+void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v, selection_c& del_lines) const
 {
 	LineDef *L1 = doc.linedefs[ld1];
 	LineDef *L2 = doc.linedefs[ld2];
@@ -113,7 +113,7 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 	// endpoint) but going the opposite direction.
 	if ((L2->end == v) == (L1->end == v))
 	{
-		doc.linemod.flipLinedef(ld1);
+		doc.linemod.flipLinedef(op, ld1);
 	}
 
 	bool same_left  = (L2->WhatSector(Side::left, doc)  == L1->WhatSector(Side::left, doc));
@@ -131,11 +131,11 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 
 	if (same_left)
 	{
-		doc.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+		op.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
 	}
 	else if (same_right)
 	{
-		doc.basis.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
+		op.changeLinedef(ld2, LineDef::F_RIGHT, L1->left);
 	}
 	else
 	{
@@ -148,12 +148,12 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 	// fix orientation of remaining linedef if needed
 	if (L2->Left(doc) && ! L2->Right(doc))
 	{
-		doc.linemod.flipLinedef(ld2);
+		doc.linemod.flipLinedef(op, ld2);
 	}
 
 	if (L2->OneSided() && new_mid_tex > 0)
 	{
-		doc.basis.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
 	// fix flags of remaining linedef
@@ -170,14 +170,14 @@ void VertexModule::mergeSandwichLines(int ld1, int ld2, int v, selection_c& del_
 		new_flags |=  MLF_Blocking;
 	}
 
-	doc.basis.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld2, LineDef::F_FLAGS, new_flags);
 }
 
 
 //
 // merge v1 into v2
 //
-void VertexModule::doMergeVertex(int v1, int v2, selection_c& del_lines) const
+void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c& del_lines) const
 {
 	SYS_ASSERT(v1 >= 0 && v2 >= 0);
 	SYS_ASSERT(v1 != v2);
@@ -216,7 +216,7 @@ void VertexModule::doMergeVertex(int v1, int v2, selection_c& del_lines) const
 
 		if (found >= 0 && ! del_lines.get(found))
 		{
-			mergeSandwichLines(n, found, v3, del_lines);
+			mergeSandwichLines(op, n, found, v3, del_lines);
 			break;
 		}
 	}
@@ -232,10 +232,10 @@ void VertexModule::doMergeVertex(int v1, int v2, selection_c& del_lines) const
 		// [ to-be-deleted lines will get start == end, that is OK ]
 
 		if (L->start == v1)
-			doc.basis.changeLinedef(n, LineDef::F_START, v2);
+			op.changeLinedef(n, LineDef::F_START, v2);
 
 		if (L->end == v1)
-			doc.basis.changeLinedef(n, LineDef::F_END, v2);
+			op.changeLinedef(n, LineDef::F_END, v2);
 
 		if (L->start == v2 && L->end == v2)
 			del_lines.set(n);
@@ -271,7 +271,7 @@ void VertexModule::mergeList(EditOperation &op, selection_c *verts) const
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		doMergeVertex(*it, v, del_lines);
+		doMergeVertex(op, *it, v, del_lines);
 	}
 
 	// all these vertices will be unused now, hence this call
@@ -473,9 +473,9 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 				doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
 
 				if (L->start == v_num)
-					doc.basis.changeLinedef(n, LineDef::F_START, new_v);
+					op.changeLinedef(n, LineDef::F_START, new_v);
 				else
-					doc.basis.changeLinedef(n, LineDef::F_END, new_v);
+					op.changeLinedef(n, LineDef::F_END, new_v);
 			}
 			else
 			{
@@ -572,10 +572,10 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		LineDef *L2 = doc.linedefs[*it];
 
 		if (L2->start == v_num)
-			doc.basis.changeLinedef(*it, LineDef::F_START, new_v);
+			op.changeLinedef(*it, LineDef::F_START, new_v);
 
 		if (L2->end == v_num)
-			doc.basis.changeLinedef(*it, LineDef::F_END, new_v);
+			op.changeLinedef(*it, LineDef::F_END, new_v);
 	}
 
 	*seen_one = true;
@@ -702,10 +702,10 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 		lost_sd = L1->right;
 
-		doc.linemod.flipLinedef(ld_num);
+		doc.linemod.flipLinedef(op, ld_num);
 	}
 
-	doc.basis.changeLinedef(ld_num, LineDef::F_LEFT, -1);
+	op.changeLinedef(ld_num, LineDef::F_LEFT, -1);
 
 
 	// determine new flags
@@ -715,7 +715,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	doc.basis.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld_num, LineDef::F_FLAGS, new_flags);
 
 	L2->flags = L1->flags;
 
@@ -731,7 +731,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	doc.basis.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
 
 
 	// now fix the second line's textures
@@ -743,7 +743,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	doc.basis.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
 }
 
 
@@ -865,10 +865,10 @@ void Instance::commandSectorDisconnect()
 			else
 			{
 				if (start2 >= 0)
-					level.basis.changeLinedef(n, LineDef::F_START, start2);
+					op.changeLinedef(n, LineDef::F_START, start2);
 
 				if (end2 >= 0)
-					level.basis.changeLinedef(n, LineDef::F_END, end2);
+					op.changeLinedef(n, LineDef::F_END, end2);
 			}
 		}
 

@@ -281,7 +281,7 @@ void SectorModule::linedefsBetweenSectors(selection_c *list, int sec1, int sec2)
 }
 
 
-void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
+void SectorModule::replaceSectorRefs(EditOperation &op, int old_sec, int new_sec) const
 {
 	for (int i = 0 ; i < doc.numSidedefs() ; i++)
 	{
@@ -289,7 +289,7 @@ void SectorModule::replaceSectorRefs(int old_sec, int new_sec) const
 
 		if (sd->sector == old_sec)
 		{
-			doc.basis.changeSidedef(i, SideDef::F_SECTOR, new_sec);
+			op.changeSidedef(i, SideDef::F_SECTOR, new_sec);
 		}
 	}
 }
@@ -353,7 +353,7 @@ void Instance::commandSectorMerge()
 
 			level.secmod.linedefsBetweenSectors(&common_lines, old_sec, new_sec);
 
-			level.secmod.replaceSectorRefs(old_sec, new_sec);
+			level.secmod.replaceSectorRefs(op, old_sec, new_sec);
 
 			unused_secs.set(old_sec);
 		}
@@ -1041,7 +1041,7 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 
 	if (sd_num >= 0)
 	{
-		doc.basis.changeSidedef(sd_num, SideDef::F_SECTOR, new_sec);
+		op.changeSidedef(sd_num, SideDef::F_SECTOR, new_sec);
 		return;
 	}
 
@@ -1081,16 +1081,16 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	SD->sector = new_sec;
 
 	if (side == Side::right)
-		doc.basis.changeLinedef(ld, LineDef::F_RIGHT, new_sd);
+		op.changeLinedef(ld, LineDef::F_RIGHT, new_sd);
 	else
-		doc.basis.changeLinedef(ld, LineDef::F_LEFT, new_sd);
+		op.changeLinedef(ld, LineDef::F_LEFT, new_sd);
 
 	// if we're adding a second side to the linedef, clear out some
 	// of the properties that aren't needed anymore: middle texture,
 	// two-sided flag, and impassible flag.
 
 	if (other_sd >= 0)
-		doc.linemod.addSecondSidedef(ld, new_sd, other_sd);
+		doc.linemod.addSecondSidedef(op, ld, new_sd, other_sd);
 }
 
 
@@ -1221,7 +1221,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double m
 
 	loop.AssignSector(op, new_sec, &flip);
 
-	doc.linemod.flipLinedefGroup(&flip);
+	doc.linemod.flipLinedefGroup(op, &flip);
 
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)

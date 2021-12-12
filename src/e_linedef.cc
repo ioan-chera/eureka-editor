@@ -422,7 +422,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 }
 
 
-void LinedefModule::doAlignX(const Objid& cur,
+void LinedefModule::doAlignX(EditOperation &op, const Objid& cur,
 					 const Objid& adj, int align_flags) const
 {
 	const LineDef *cur_L  = pointer(cur);
@@ -453,11 +453,11 @@ void LinedefModule::doAlignX(const Objid& cur,
 
 	int sd = cur_L->WhatSideDef(where);
 
-	doc.basis.changeSidedef(sd, SideDef::F_X_OFFSET, new_offset);
+	op.changeSidedef(sd, SideDef::F_X_OFFSET, new_offset);
 }
 
 
-void LinedefModule::doAlignY(const Objid& cur, const Objid& adj, int align_flags) const
+void LinedefModule::doAlignY(EditOperation &op, const Objid& cur, const Objid& adj, int align_flags) const
 {
 	const LineDef *L  = pointer(cur);
 	const SideDef *SD = sidedefPointer(cur);
@@ -507,18 +507,18 @@ void LinedefModule::doAlignY(const Objid& cur, const Objid& adj, int align_flags
 
 	int sd = L->WhatSideDef(where);
 
-	doc.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, new_offset);
+	op.changeSidedef(sd, SideDef::F_Y_OFFSET, new_offset);
 
 	if (new_flags != L->flags)
 	{
-		doc.basis.changeLinedef(cur.num, LineDef::F_FLAGS, new_flags);
+		op.changeLinedef(cur.num, LineDef::F_FLAGS, new_flags);
 	}
 }
 
 //
 // Clear offsets
 //
-void LinedefModule::doClearOfs(const Objid& cur, int align_flags) const
+void LinedefModule::doClearOfs(EditOperation &op, const Objid& cur, int align_flags) const
 {
 	Side where = (cur.parts & PART_LF_ALL) ? Side::left : Side::right;
 
@@ -532,13 +532,13 @@ void LinedefModule::doClearOfs(const Objid& cur, int align_flags) const
 		// when the /right flag is used, make the texture end at the right side
 		// (whereas zero makes it begin at the left side)
 		if (align_flags & LINALIGN_Right)
-			doc.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(pointer(cur)->CalcLength(doc)));
+			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(pointer(cur)->CalcLength(doc)));
 		else
-			doc.basis.changeSidedef(sd, SideDef::F_X_OFFSET, 0);
+			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0);
 	}
 
 	if (align_flags & LINALIGN_Y)
-		doc.basis.changeSidedef(sd, SideDef::F_Y_OFFSET, 0);
+		op.changeSidedef(sd, SideDef::F_Y_OFFSET, 0);
 }
 
 //
@@ -547,11 +547,11 @@ void LinedefModule::doClearOfs(const Objid& cur, int align_flags) const
 // The given flags control which stuff to change, and where
 // to look for the surface to align with.
 //
-bool LinedefModule::alignOffsets(const Objid& obj, int align_flags) const
+bool LinedefModule::alignOffsets(EditOperation &op, const Objid& obj, int align_flags) const
 {
 	if (align_flags & LINALIGN_Clear)
 	{
-		doClearOfs(obj, align_flags);
+		doClearOfs(op, obj, align_flags);
 		return true;
 	}
 
@@ -562,10 +562,10 @@ bool LinedefModule::alignOffsets(const Objid& obj, int align_flags) const
 		return false;
 
 	if (align_flags & LINALIGN_X)
-		doAlignX(obj, adj, align_flags);
+		doAlignX(op, obj, adj, align_flags);
 
 	if (align_flags & LINALIGN_Y)
-		doAlignY(obj, adj, align_flags);
+		doAlignY(op, obj, adj, align_flags);
 
 	return true;
 }
@@ -640,7 +640,7 @@ int LinedefModule::alignPickNextSurface(const std::vector<Objid> & group,
 //
 // Align group
 //
-void LinedefModule::alignGroup(const std::vector<Objid> & group, int align_flags) const
+void LinedefModule::alignGroup(EditOperation &op, const std::vector<Objid> & group, int align_flags) const
 {
 	// we will do each surface in the selection one-by-one,
 	// and the order is significant when doing X offsets, so
@@ -667,7 +667,7 @@ void LinedefModule::alignGroup(const std::vector<Objid> & group, int align_flags
 		// mark it seen
 		seen[n] = 1;
 
-		alignOffsets(group[n], align_flags);
+		alignOffsets(op, group[n], align_flags);
 	}
 }
 
@@ -770,7 +770,7 @@ void Instance::CMD_LIN_Align()
 
 	{
 		EditOperation op(level.basis);
-		level.linemod.alignGroup(group, align_flags);
+		level.linemod.alignGroup(op, group, align_flags);
 
 		if (do_clear)
 			op.setMessage("cleared offsets");
@@ -787,55 +787,55 @@ void Instance::CMD_LIN_Align()
 //
 // Flip vertices of linedef
 //
-void LinedefModule::flipLine_verts(int ld) const
+void LinedefModule::flipLine_verts(EditOperation &op, int ld) const
 {
 	int old_start = doc.linedefs[ld]->start;
 	int old_end   = doc.linedefs[ld]->end;
 
-	doc.basis.changeLinedef(ld, LineDef::F_START, old_end);
-	doc.basis.changeLinedef(ld, LineDef::F_END, old_start);
+	op.changeLinedef(ld, LineDef::F_START, old_end);
+	op.changeLinedef(ld, LineDef::F_END, old_start);
 }
 
 //
 // Flip sides of linedef
 //
-void LinedefModule::flipLine_sides(int ld) const
+void LinedefModule::flipLine_sides(EditOperation &op, int ld) const
 {
 	int old_right = doc.linedefs[ld]->right;
 	int old_left  = doc.linedefs[ld]->left;
 
-	doc.basis.changeLinedef(ld, LineDef::F_RIGHT, old_left);
-	doc.basis.changeLinedef(ld, LineDef::F_LEFT, old_right);
+	op.changeLinedef(ld, LineDef::F_RIGHT, old_left);
+	op.changeLinedef(ld, LineDef::F_LEFT, old_right);
 }
 
 
 //
 // Flip linedef
 //
-void LinedefModule::flipLinedef(int ld) const
+void LinedefModule::flipLinedef(EditOperation &op, int ld) const
 {
-	flipLine_verts(ld);
-	flipLine_sides(ld);
+	flipLine_verts(op, ld);
+	flipLine_sides(op, ld);
 }
 
-void LinedefModule::flipLinedef_safe(int ld) const
+void LinedefModule::flipLinedef_safe(EditOperation &op, int ld) const
 {
 	// this avoids creating a linedef with only a left side (no right)
 
-	flipLine_verts(ld);
+	flipLine_verts(op, ld);
 
 	if (!doc.linedefs[ld]->OneSided())
-		flipLine_sides(ld);
+		flipLine_sides(op, ld);
 }
 
 //
 // Flip linedef group
 //
-void LinedefModule::flipLinedefGroup(const selection_c *flip) const
+void LinedefModule::flipLinedefGroup(EditOperation &op, const selection_c *flip) const
 {
 	for (sel_iter_c it(flip) ; !it.done() ; it.next())
 	{
-		flipLinedef(*it);
+		flipLinedef(op, *it);
 	}
 }
 
@@ -860,9 +860,9 @@ void Instance::CMD_LIN_Flip()
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
 			if (force_it)
-				level.linemod.flipLinedef(*it);
+				level.linemod.flipLinedef(op, *it);
 			else
-				level.linemod.flipLinedef_safe(*it);
+				level.linemod.flipLinedef_safe(op, *it);
 		}
 	}
 
@@ -885,7 +885,7 @@ void Instance::CMD_LIN_SwapSides()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			level.linemod.flipLine_sides(*it);
+			level.linemod.flipLine_sides(op, *it);
 		}
 	}
 
@@ -913,7 +913,7 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 	L2->end   = L->end;
 
 	// update vertex on original line
-	doc.basis.changeLinedef(ld, LineDef::F_END, new_v);
+	op.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
 	int orig_length = I_ROUND(L->CalcLength(doc));
@@ -939,7 +939,7 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 		{
 			int new_x_ofs = L->Left(doc)->x_offset + orig_length - new_length;
 
-			doc.basis.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
+			op.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
 		}
 	}
 
@@ -1013,7 +1013,7 @@ void Instance::CMD_LIN_SplitHalf()
 //
 // Add second sidedef
 //
-void LinedefModule::addSecondSidedef(int ld, int new_sd, int other_sd) const
+void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int other_sd) const
 {
 	const LineDef * L  = doc.linedefs[ld];
 	SideDef * SD = doc.sidedefs[new_sd];
@@ -1023,7 +1023,7 @@ void LinedefModule::addSecondSidedef(int ld, int new_sd, int other_sd) const
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
 
-	doc.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
@@ -1035,10 +1035,10 @@ void LinedefModule::addSecondSidedef(int ld, int new_sd, int other_sd) const
 		SD->lower_tex = other->mid_tex;
 		SD->upper_tex = other->mid_tex;
 
-		doc.basis.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
-		doc.basis.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
+		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
+		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
 
-		doc.basis.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
+		op.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
 	}
 	else
 	{
@@ -1047,7 +1047,7 @@ void LinedefModule::addSecondSidedef(int ld, int new_sd, int other_sd) const
 	}
 }
 
-void LinedefModule::mergedSecondSidedef(int ld) const
+void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 {
 	// similar to above, but with existing sidedefs
 
@@ -1060,7 +1060,7 @@ void LinedefModule::mergedSecondSidedef(int ld) const
 	new_flags |=  MLF_TwoSided;
 	new_flags &= ~MLF_Blocking;
 
-	doc.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
 	int null_tex = BA_InternaliseString("-");
@@ -1085,20 +1085,20 @@ void LinedefModule::mergedSecondSidedef(int ld) const
 		right_tex = left_tex;
 	}
 
-	doc.basis.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex);
-	doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+	op.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex);
+	op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 
-	doc.basis.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex);
-	doc.basis.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex);
+	op.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex);
+	op.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex);
 
-	doc.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex);
-	doc.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex);
+	op.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex);
+	op.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex);
 }
 
 //
 // Remove sidedef
 //
-void LinedefModule::removeSidedef(int ld, Side ld_side) const
+void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 {
 	const LineDef *L = doc.linedefs[ld];
 
@@ -1106,9 +1106,9 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 	int other_sd = (ld_side == Side::right) ? L->left : L->right;
 
 	if (ld_side == Side::right)
-		doc.basis.changeLinedef(ld, LineDef::F_RIGHT, -1);
+		op.changeLinedef(ld, LineDef::F_RIGHT, -1);
 	else
-		doc.basis.changeLinedef(ld, LineDef::F_LEFT, -1);
+		op.changeLinedef(ld, LineDef::F_LEFT, -1);
 
 	if (other_sd < 0)
 		return;
@@ -1125,7 +1125,7 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 	new_flags &= ~MLF_TwoSided;
 	new_flags |=  MLF_Blocking;
 
-	doc.basis.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
+	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// FIXME: if sidedef is shared, either don't modify it _OR_ duplicate it
 
@@ -1148,7 +1148,7 @@ void LinedefModule::removeSidedef(int ld, Side ld_side) const
 			new_tex = SD->upper_tex;
 	}
 
-	doc.basis.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex);
+	op.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex);
 }
 
 
@@ -1186,10 +1186,10 @@ void Instance::commandLinedefMergeTwo()
 
 	// ld2 steals the sidedef from ld1
 
-	level.basis.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
-	level.basis.changeLinedef(ld1, LineDef::F_RIGHT, -1);
+	op.changeLinedef(ld2, LineDef::F_LEFT, L1->right);
+	op.changeLinedef(ld1, LineDef::F_RIGHT, -1);
 
-	level.linemod.mergedSecondSidedef(ld2);
+	level.linemod.mergedSecondSidedef(op, ld2);
 
 	// fix existing lines connected to ld1 : reconnect to ld2
 
@@ -1201,14 +1201,14 @@ void Instance::commandLinedefMergeTwo()
 		const LineDef * L = level.linedefs[n];
 
 		if (L->start == L1->start)
-			level.basis.changeLinedef(n, LineDef::F_START, L2->end);
+			op.changeLinedef(n, LineDef::F_START, L2->end);
 		else if (L->start == L1->end)
-			level.basis.changeLinedef(n, LineDef::F_START, L2->start);
+			op.changeLinedef(n, LineDef::F_START, L2->start);
 
 		if (L->end == L1->start)
-			level.basis.changeLinedef(n, LineDef::F_END, L2->end);
+			op.changeLinedef(n, LineDef::F_END, L2->end);
 		else if (L->end == L1->end)
-			level.basis.changeLinedef(n, LineDef::F_END, L2->start);
+			op.changeLinedef(n, LineDef::F_END, L2->start);
 	}
 
 	// delete ld1 and any unused vertices
@@ -1385,7 +1385,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 //
 // Fix for a lost side
 //
-void LinedefModule::fixForLostSide(int ld) const
+void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 {
 	LineDef * L = doc.linedefs[ld];
 
@@ -1400,7 +1400,7 @@ void LinedefModule::fixForLostSide(int ld) const
 	else
 		tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	doc.basis.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
 }
 
 //

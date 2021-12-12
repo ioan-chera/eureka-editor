@@ -39,8 +39,8 @@ public:
 	{
 	}
 
-	void flipLinedef(int ld) const;
-	void flipLinedefGroup(const selection_c *flip) const;
+	void flipLinedef(EditOperation &op, int ld) const;
+	void flipLinedefGroup(EditOperation &op, const selection_c *flip) const;
 
 	void setLinedefsLength(int new_len) const;
 
@@ -50,26 +50,26 @@ public:
 
 	void moveCoordOntoLinedef(int ld, double *x, double *y) const;
 
-	void addSecondSidedef(int ld, int new_sd, int other_sd) const;
-	void removeSidedef(int ld, Side ld_side) const;
-	void fixForLostSide(int ld) const;
+	void addSecondSidedef(EditOperation &op, int ld, int new_sd, int other_sd) const;
+	void removeSidedef(EditOperation &op, int ld, Side ld_side) const;
+	void fixForLostSide(EditOperation &op, int ld) const;
 
 	double angleBetweenLines(int A, int B, int C) const;
 
 private:
-	void flipLine_verts(int ld) const;
-	void flipLine_sides(int ld) const;
-	void flipLinedef_safe(int ld) const;
+	void flipLine_verts(EditOperation &op, int ld) const;
+	void flipLine_sides(EditOperation &op, int ld) const;
+	void flipLinedef_safe(EditOperation &op, int ld) const;
 	int pickLinedefToExtend(selection_c& list, bool moving_start) const;
 	bool linedefEndWillBeMoved(int ld, selection_c &list) const;
 	bool linedefStartWillBeMoved(int ld, selection_c &list) const;
 	void linedefSetLength(EditOperation &op, int ld, int new_len, double angle) const;
 
-	bool alignOffsets(const Objid& obj, int align_flags) const;
-	void alignGroup(const std::vector<Objid> & group, int align_flags) const;
-	void doClearOfs(const Objid& cur, int align_flags) const;
-	void doAlignX(const Objid &cur, const Objid &adj, int align_flags) const;
-	void doAlignY(const Objid& cur, const Objid& adj, int align_flags) const;
+	bool alignOffsets(EditOperation &op, const Objid& obj, int align_flags) const;
+	void alignGroup(EditOperation &op, const std::vector<Objid> & group, int align_flags) const;
+	void doClearOfs(EditOperation &op, const Objid& cur, int align_flags) const;
+	void doAlignX(EditOperation &op, const Objid &cur, const Objid &adj, int align_flags) const;
+	void doAlignY(EditOperation &op, const Objid& cur, const Objid& adj, int align_flags) const;
 
 	inline const LineDef *pointer(const Objid &obj) const;
 	inline const SideDef *sidedefPointer(const Objid &obj) const;
@@ -89,7 +89,7 @@ private:
 
 	bool doSplitLineDef(EditOperation &op, int ld) const;
 
-	void mergedSecondSidedef(int ld) const;
+	void mergedSecondSidedef(EditOperation &op, int ld) const;
 };
 
 SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);

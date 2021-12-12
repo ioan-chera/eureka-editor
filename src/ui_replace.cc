@@ -1343,7 +1343,7 @@ void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
 			break;
 
 		case 1: // LineDefs (texturing)
-			Replace_LineDef(idx, new_tex);
+			Replace_LineDef(op, idx, new_tex);
 			break;
 
 		case 2: // Sectors (texturing)
@@ -1351,7 +1351,7 @@ void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
 			break;
 
 		case 3: // Lines by Type
-			Replace_LineType(idx);
+			Replace_LineType(op, idx);
 			break;
 
 		case 4: // Sectors by Type
@@ -1700,7 +1700,7 @@ void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 }
 
 
-void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
+void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, int new_tex)
 {
 	const LineDef *L = inst.level.linedefs[idx];
 
@@ -1723,22 +1723,22 @@ void UI_FindAndReplace::Replace_LineDef(int idx, int new_tex)
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))
-					inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
+					op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex.good() && Pattern_Match(L_tex, pattern))
-				inst.level.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex.good() && Pattern_Match(U_tex, pattern))
-				inst.level.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
-				inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 	}
 }
 
@@ -1762,11 +1762,11 @@ void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, int new_tex)
 }
 
 
-void UI_FindAndReplace::Replace_LineType(int idx)
+void UI_FindAndReplace::Replace_LineType(EditOperation &op, int idx)
 {
 	int new_type = atoi(rep_value->value());
 
-	inst.level.basis.changeLinedef(idx, LineDef::F_TYPE, new_type);
+	op.changeLinedef(idx, LineDef::F_TYPE, new_type);
 }
 
 

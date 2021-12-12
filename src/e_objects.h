@@ -84,7 +84,7 @@ private:
 	void doMoveObjects(EditOperation &op, selection_c *list, double delta_x, double delta_y, double delta_z) const;
 	void transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const;
 	void transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const;
-	void transferLinedefProperties(int src_line, int dest_line, bool do_tex) const;
+	void transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const;
 	void dragCountOnGrid(int *count, int *total) const;
 	void dragCountOnGridWorker(ObjType obj_type, int objnum, int *count, int *total) const;
 	void dragUpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,

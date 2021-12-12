@@ -160,8 +160,8 @@ private:
 	bool Filter_PrevSel(int idx);
 
 	void Replace_Thing(EditOperation &op, int idx);
-	void Replace_LineDef(int idx, int new_tex);
-	void Replace_LineType(int idx);
+	void Replace_LineDef(EditOperation &op, int idx, int new_tex);
+	void Replace_LineType(EditOperation &op, int idx);
 	void Replace_Sector(EditOperation &op, int idx, int new_tex);
 	void Replace_SectorType(EditOperation &op, int idx);
 

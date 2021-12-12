@@ -46,8 +46,8 @@ public:
 	bool tryFixDangler(int v_num) const;
 
 private:
-	void mergeSandwichLines(int ld1, int ld2, int v, selection_c &del_lines) const;
-	void doMergeVertex(int v1, int v2, selection_c &del_lines) const;
+	void mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v, selection_c &del_lines) const;
+	void doMergeVertex(EditOperation &op, int v1, int v2, selection_c &del_lines) const;
 	void calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const;
 	void doDisconnectVertex(EditOperation &op, int v_num, int num_lines) const;
 	void doDisconnectLinedef(EditOperation &op, int ld, int which_vert, bool *seen_one) const;

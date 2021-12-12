@@ -627,12 +627,12 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, double pos_x,
 		// flip linedef if necessary
 		if (L->Left(inst.level) && ! L->Right(inst.level))
 		{
-			inst.level.linemod.flipLinedef(new_l);
+			inst.level.linemod.flipLinedef(op, new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
 		if (L->OneSided() && is_null_tex(L->Right(inst.level)->MidTex()))
-			inst.level.linemod.fixForLostSide(new_l);
+			inst.level.linemod.fixForLostSide(op, new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
@@ -1015,7 +1015,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 }
 
 
-static void FixupLineDefs(const Document &doc, selection_c *lines, selection_c *sectors)
+static void FixupLineDefs(EditOperation &op, const Document &doc, selection_c *lines, selection_c *sectors)
 {
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
@@ -1032,17 +1032,17 @@ static void FixupLineDefs(const Document &doc, selection_c *lines, selection_c *
 
 		if (do_right && do_left)
 		{
-			doc.linemod.removeSidedef(*it, Side::right);
-			doc.linemod.removeSidedef(*it, Side::left);
+			doc.linemod.removeSidedef(op, *it, Side::right);
+			doc.linemod.removeSidedef(op, *it, Side::left);
 		}
 		else if (do_right)
 		{
-			doc.linemod.removeSidedef(*it, Side::right);
-			doc.linemod.flipLinedef(*it);
+			doc.linemod.removeSidedef(op, *it, Side::right);
+			doc.linemod.flipLinedef(op, *it);
 		}
 		else // do_left
 		{
-			doc.linemod.removeSidedef(*it, Side::left);
+			doc.linemod.removeSidedef(op, *it, Side::left);
 		}
 	}
 }
@@ -1106,9 +1106,9 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	op.setMessage("deleted vertex #%d\n", v_num);
 
 	if (L1->start == v_num)
-		doc.basis.changeLinedef(ld1, LineDef::F_START, v2);
+		op.changeLinedef(ld1, LineDef::F_START, v2);
 	else
-		doc.basis.changeLinedef(ld1, LineDef::F_END, v2);
+		op.changeLinedef(ld1, LineDef::F_END, v2);
 
 	// NOT-DO: update X offsets on existing linedef
 
@@ -1204,7 +1204,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 		// skip lines which will get deleted
 		fixups.unmerge(line_sel);
 
-		FixupLineDefs(doc, &fixups, &sec_sel);
+		FixupLineDefs(op, doc, &fixups, &sec_sel);
 	}
 
 	// actually delete stuff, in the correct order

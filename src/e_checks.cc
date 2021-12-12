@@ -357,7 +357,7 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 }
 
 
-static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
+static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts, Document &doc)
 {
 	const Vertex *V = doc.vertices[idx];
 
@@ -383,10 +383,10 @@ static void Vertex_MergeOne(int idx, selection_c& merge_verts, Document &doc)
 			LineDef *L = doc.linedefs[ld];
 
 			if (L->start == idx)
-				doc.basis.changeLinedef(ld, LineDef::F_START, n);
+				op.changeLinedef(ld, LineDef::F_START, n);
 
 			if (L->end == idx)
-				doc.basis.changeLinedef(ld, LineDef::F_END, n);
+				op.changeLinedef(ld, LineDef::F_END, n);
 		}
 
 		return;
@@ -408,7 +408,7 @@ static void Vertex_MergeOverlaps(Instance &inst)
 
 		for (sel_iter_c it(verts) ; !it.done() ; it.next())
 		{
-			Vertex_MergeOne(*it, verts, inst.level);
+			Vertex_MergeOne(op, *it, verts, inst.level);
 		}
 
 		// nothing should reference these vertices now
@@ -1056,17 +1056,17 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 			// handle it when first linedef uses sidedef on both sides
 			if (doc.linedefs[first]->left == doc.linedefs[first]->right)
 			{
-				doc.basis.changeLinedef(first, LineDef::F_LEFT, copySidedef(op, sd));
+				op.changeLinedef(first, LineDef::F_LEFT, copySidedef(op, sd));
 			}
 
 			// duplicate any remaining references
 			for (int ld = first + 1 ; ld < doc.numLinedefs(); ld++)
 			{
 				if (doc.linedefs[ld]->left == sd)
-					doc.basis.changeLinedef(ld, LineDef::F_LEFT, copySidedef(op, sd));
+					op.changeLinedef(ld, LineDef::F_LEFT, copySidedef(op, sd));
 
 				if (doc.linedefs[ld]->right == sd)
-					doc.basis.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(op, sd));
+					op.changeLinedef(ld, LineDef::F_RIGHT, copySidedef(op, sd));
 			}
 		}
 
@@ -2169,7 +2169,7 @@ static void LineDefs_FixManualDoors(Instance &inst)
 		if (info.desc[0] == 'D' &&
 			(info.desc[1] == '1' || info.desc[1] == 'R'))
 		{
-			inst.level.basis.changeLinedef(n, LineDef::F_TYPE, 0);
+			op.changeLinedef(n, LineDef::F_TYPE, 0);
 		}
 	}
 }
@@ -2213,7 +2213,7 @@ static void LineDefs_FixLackImpass(Document &doc)
 		{
 			int new_flags = L->flags | MLF_Blocking;
 
-			doc.basis.changeLinedef(n, LineDef::F_FLAGS, new_flags);
+			op.changeLinedef(n, LineDef::F_FLAGS, new_flags);
 		}
 	}
 }
@@ -2257,10 +2257,10 @@ static void LineDefs_FixBad2SFlag(Document &doc)
 		const LineDef *L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
-			doc.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
+			op.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
 
 		if (L->TwoSided() && ! (L->flags & MLF_TwoSided))
-			doc.basis.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
+			op.changeLinedef(n, LineDef::F_FLAGS, L->flags | MLF_TwoSided);
 	}
 }
 
@@ -2352,7 +2352,7 @@ static void LineDefs_ClearUnknown(Instance &inst)
 	op.setMessage("cleared unknown line types");
 
 	for (sel_iter_c it(sel) ; !it.done() ; it.next())
-		inst.level.basis.changeLinedef(*it, LineDef::F_TYPE, 0);
+		op.changeLinedef(*it, LineDef::F_TYPE, 0);
 }
 
 
@@ -3008,7 +3008,7 @@ void ChecksModule::tagsApplyNewValue(int new_tag)
 		{
 			if (inst.edit.mode == ObjType::linedefs)
 			{
-				doc.basis.changeLinedef(*it, LineDef::F_TAG, new_tag);
+				op.changeLinedef(*it, LineDef::F_TAG, new_tag);
 				changed = true;
 			}
 			else if (inst.edit.mode == ObjType::sectors)
@@ -3522,7 +3522,7 @@ static void Textures_FixMissing(Instance &inst)
 		if (L->OneSided())
 		{
 			if (is_null_tex(L->Right(inst.level)->MidTex()))
-				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
@@ -3530,20 +3530,20 @@ static void Textures_FixMissing(Instance &inst)
 			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
 
 			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
-				inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
-				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
-				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
 			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
-				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 }
@@ -3656,21 +3656,21 @@ static void Textures_FixTransparent(Instance &inst)
 		if (L->OneSided())
 		{
 			if (is_transparent(inst, L->Right(inst.level)->MidTex()))
-				inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
 			if (is_transparent(inst, L->Left(inst.level)->LowerTex()))
-				inst.level.basis.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(inst, L->Left(inst.level)->UpperTex()))
-				inst.level.basis.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
 			if (is_transparent(inst, L->Right(inst.level)->LowerTex()))
-				inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(inst, L->Right(inst.level)->UpperTex()))
-				inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 }
@@ -3764,12 +3764,12 @@ static void Textures_RemoveMedusa(Instance &inst)
 
 		if (check_medusa(inst, L->Right(inst.level)->MidTex(), names))
 		{
-			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
 		if (check_medusa(inst, L-> Left(inst.level)->MidTex(), names))
 		{
-			inst.level.basis.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
+			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
 	}
 }
@@ -3932,13 +3932,13 @@ static void Textures_FixUnknownTex(Instance &inst)
 			const SideDef *SD = inst.level.sidedefs[sd_num];
 
 			if (! inst.W_TextureIsKnown(SD->LowerTex()))
-				inst.level.basis.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
 			if (!inst.W_TextureIsKnown(SD->UpperTex()))
-				inst.level.basis.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
 			if (!inst.W_TextureIsKnown(SD->MidTex()))
-				inst.level.basis.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
+				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
 }
@@ -4065,8 +4065,8 @@ static void Textures_FixDupSwitches(Instance &inst)
 		if (L->OneSided())
 		{
 			// we don't care if "mid" is not a switch
-			inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
-			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			continue;
 		}
 
@@ -4078,28 +4078,28 @@ static void Textures_FixDupSwitches(Instance &inst)
 
 		if (count >= 2 && upper && !upper_vis)
 		{
-			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			upper = false;
 			count--;
 		}
 
 		if (count >= 2 && lower && !lower_vis)
 		{
-			inst.level.basis.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
 			lower = false;
 			count--;
 		}
 
 		if (count >= 2 && mid)
 		{
-			inst.level.basis.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 			mid = false;
 			count--;
 		}
 
 		if (count >= 2)
 		{
-			inst.level.basis.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 			upper = false;
 			count--;
 		}
