@@ -44,6 +44,8 @@ char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 void StringCopy(char *buffer, size_t size, const SString &source);
 
+SString joined(const char *sep, const char **strlist, int listlen);
+
 //
 // Safe string: doesn't crash if given NULL (can happen due to refactoring old "char *" code.
 // Also enforces null-terminated strings: can't contain NUL inside the string.

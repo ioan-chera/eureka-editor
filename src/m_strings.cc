@@ -150,6 +150,23 @@ void StringCopy(char *buffer, size_t size, const SString &source)
 }
 
 //
+// Produces a string by joining multiple substrings by a separator
+//
+SString joined(const char *sep, const char **strlist, int listlen)
+{
+	assert(sep && strlist);
+	SString result;
+	for(int i = 0; i < listlen; ++i)
+	{
+		if(i >= 1)
+			result += sep;
+		assert(strlist[i]);
+		result += strlist[i];
+	}
+	return result;
+}
+
+//
 // Make a SString from printf format
 //
 SString SString::printf(EUR_FORMAT_STRING(const char *format), ...)
