@@ -44,8 +44,6 @@ char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 void StringCopy(char *buffer, size_t size, const SString &source);
 
-SString joined(const char *sep, const char **strlist, int listlen);
-
 //
 // Safe string: doesn't crash if given NULL (can happen due to refactoring old "char *" code.
 // Also enforces null-terminated strings: can't contain NUL inside the string.
@@ -377,6 +375,24 @@ inline static std::ostream &operator<<(std::ostream &os, const SString &str)
 {
 	os << str.get();
 	return os;
+}
+
+SString joined(const char *sep, const char **strlist, int listlen);
+
+//
+// Variant of joined which accepts a lambda for each item
+//
+template<typename T, typename C>
+SString joined(const char *sep, const T *items, int listlen, C &&func)
+{
+	SString result;
+	for(int i = 0; i < listlen; ++i)
+	{
+		if(i >= 1)
+			result += sep;
+		result += func(items[i]);
+	}
+	return result;
 }
 
 namespace std
