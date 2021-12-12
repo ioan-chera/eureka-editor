@@ -21,6 +21,7 @@
 #include "Errors.h"
 #include "m_strings.h"
 #include "sys_debug.h"
+#include <assert.h>
 #include <stdarg.h>
 #ifdef _WIN32
 #include <Windows.h>
