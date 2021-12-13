@@ -276,34 +276,6 @@ enum
 	WHAT_TEXT_SIZE = 17,
 };
 
-enum What
-{
-	What_things,
-	What_lineTextures,
-	What_sectorFlats,
-	What_linesByType,
-	What_sectorsByType,
-	NUM_What
-};
-
-struct WhatDef
-{
-	const char *label;
-	Fl_Color color;
-};
-
-static const WhatDef sk_whatDefs[NUM_What] =
-{
-	{
-		"Things",
-		THING_MODE_COL,
-	},
-	{ "Line Textures", LINE_MODE_COL },
-	{ "Sector Flats", SECTOR_MODE_COL },
-	{ "Lines by Type", FL_GREEN },
-	{ "Sectors by Type", fl_rgb_color(255,160,0) }
-};
-
 #define HIDE_BG  (config::gui_scheme == 2 ? FL_DARK3 : FL_DARK1)
 
 
@@ -311,7 +283,18 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 	Fl_Group(X, Y, W, H, NULL),
 	cur_obj(),
 	find_numbers(new number_group_c),
-	 tag_numbers(new number_group_c), inst(inst)
+	 tag_numbers(new number_group_c),
+
+	whatDefs
+	{
+		{ "Things", THING_MODE_COL, {}},
+		{ "Line Textures", LINE_MODE_COL, {}},
+		{ "Sector Flats", SECTOR_MODE_COL, {}},
+		{ "Lines by Type", FL_GREEN, {}},
+		{ "Sectors by Type", fl_rgb_color(255,160,0), {}}
+	},
+
+	inst(inst)
 {
 	box(FL_FLAT_BOX);
 
@@ -336,7 +319,7 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 		what = new Fl_Choice(X+60, Y+46, W - 120, 33);
 		what->textsize(WHAT_TEXT_SIZE);
-		what->add(joined("|", sk_whatDefs, NUM_What, [](const auto &def){ return def.label; }).c_str());
+		what->add(joined("|", whatDefs, NUM_What, [](const auto &def){ return def.label; }).c_str());
 		what->value(What_things);
 		what->callback(what_kind_callback, this);
 
@@ -470,17 +453,31 @@ void UI_FindAndReplace::UpdateWhatColor()
 {
 	auto value = static_cast<What>(what->value());
 	assert(value >= 0 && value < NUM_What);
-	what->color(sk_whatDefs[value].color);
+	what->color(whatDefs[value].color);
 }
 
+//
+// Initializes the dynamic fields of the whatDefs if not made already
+//
+void UI_FindAndReplace::ensureInitWhatFilters()
+{
+	if(initializedWhatWidgets)
+		return;
+	initializedWhatWidgets = true;
 
+	whatDefs[What_things].filterWidgets = { o_easy, o_medium, o_hard, o_sp, o_coop, o_dm };
+	whatDefs[What_lineTextures].filterWidgets =
+	{
+		o_lowers, o_uppers, o_rails, o_one_sided, o_two_sided
+	};
+	whatDefs[What_sectorFlats].filterWidgets = { o_floors, o_ceilings, o_skies };
+	whatDefs[What_linesByType].filterWidgets = { o_one_sided, o_two_sided };
+}
 
 void UI_FindAndReplace::UpdateWhatFilters()
 {
+	ensureInitWhatFilters();
 	auto x = static_cast<What>(what->value());
-
-#define SHOW_WIDGET_IF(w, test)  \
-	if (test) (w)->show(); else (w)->hide();
 
 	// common stuff
 	if (x == What_things && inst.loaded.levelFormat == MapFormat::doom)
@@ -493,29 +490,12 @@ void UI_FindAndReplace::UpdateWhatFilters()
 		tag_input->activate();
 	}
 
-	// thing stuff
-	SHOW_WIDGET_IF(o_easy,   x == What_things);
-	SHOW_WIDGET_IF(o_medium, x == What_things);
-	SHOW_WIDGET_IF(o_hard,   x == What_things);
-
-	SHOW_WIDGET_IF(o_sp,     x == What_things);
-	SHOW_WIDGET_IF(o_coop,   x == What_things);
-	SHOW_WIDGET_IF(o_dm,     x == What_things);
-
-	// sector stuff
-	SHOW_WIDGET_IF(o_floors,   x == What_sectorFlats);
-	SHOW_WIDGET_IF(o_ceilings, x == What_sectorFlats);
-	SHOW_WIDGET_IF(o_skies,    x == What_sectorFlats);
-
-	// linedef stuff
-	SHOW_WIDGET_IF(o_lowers, x == What_lineTextures);
-	SHOW_WIDGET_IF(o_uppers, x == What_lineTextures);
-	SHOW_WIDGET_IF(o_rails,  x == What_lineTextures);
-
-	SHOW_WIDGET_IF(o_one_sided, x == What_lineTextures || x == What_linesByType);
-	SHOW_WIDGET_IF(o_two_sided, x == What_lineTextures || x == What_linesByType);
-
-#undef SHOW_WIDGET_IF
+	for(int whatVal = 0; whatVal < NUM_What; ++whatVal)
+		if(x != whatVal)
+			for(Fl_Widget *widget : whatDefs[whatVal].filterWidgets)
+				widget->hide();
+	for(Fl_Widget *widget : whatDefs[x].filterWidgets)
+		widget->show();
 
 	// vanilla DOOM : always hide SP and COOP flags
 	if (x == What_things && ! inst.conf.features.coop_dm_flags && inst.loaded.levelFormat == MapFormat::doom)

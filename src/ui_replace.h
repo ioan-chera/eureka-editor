@@ -33,6 +33,28 @@ class UI_TripleCheckButton;
 class UI_FindAndReplace : public Fl_Group
 {
 private:
+	enum What
+	{
+		What_things,
+		What_lineTextures,
+		What_sectorFlats,
+		What_linesByType,
+		What_sectorsByType,
+		NUM_What
+	};
+
+	enum
+	{
+		NUM_FILTER_WIDGETS = 7
+	};
+
+	struct WhatDef
+	{
+		const char *label;
+		Fl_Color color;
+		std::vector<Fl_Widget *> filterWidgets;
+	};
+
 	// object kind we are finding / replacing
 	Fl_Choice *what;
 
@@ -99,6 +121,9 @@ private:
 	Fl_Check_Button *o_one_sided;
 	Fl_Check_Button *o_two_sided;
 
+	WhatDef whatDefs[NUM_What];
+	bool initializedWhatWidgets = false;
+
 public:
 	UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H);
 	virtual ~UI_FindAndReplace();
@@ -114,6 +139,8 @@ public:
 	void BrowsedItem(char kind, int number, const char *name, int e_state);
 
 private:
+	void ensureInitWhatFilters();
+
 	void Clear();
 	void ResetFilters();
 
