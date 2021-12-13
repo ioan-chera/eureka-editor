@@ -43,6 +43,11 @@ private:
 		NUM_What
 	};
 
+	enum WhatFlags
+	{
+		WF_WANT_DESC = 1
+	};
+
 	enum
 	{
 		NUM_FILTER_WIDGETS = 7
@@ -52,6 +57,8 @@ private:
 	{
 		const char *label;
 		Fl_Color color;
+		ObjType type;
+		unsigned flags;
 		std::vector<Fl_Widget *> filterWidgets;
 	};
 

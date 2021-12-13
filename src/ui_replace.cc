@@ -287,11 +287,11 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 	whatDefs
 	{
-		{ "Things", THING_MODE_COL, {}},
-		{ "Line Textures", LINE_MODE_COL, {}},
-		{ "Sector Flats", SECTOR_MODE_COL, {}},
-		{ "Lines by Type", FL_GREEN, {}},
-		{ "Sectors by Type", fl_rgb_color(255,160,0), {}}
+		{ "Things", THING_MODE_COL, ObjType::things, WF_WANT_DESC, {}},
+		{ "Line Textures", LINE_MODE_COL, ObjType::linedefs, 0, {}},
+		{ "Sector Flats", SECTOR_MODE_COL, ObjType::sectors, 0, {}},
+		{ "Lines by Type", FL_GREEN, ObjType::linedefs, WF_WANT_DESC, {}},
+		{ "Sectors by Type", fl_rgb_color(255,160,0), ObjType::sectors, WF_WANT_DESC, {}}
 	},
 
 	inst(inst)
@@ -539,16 +539,10 @@ void UI_FindAndReplace::what_kind_callback(Fl_Widget *w, void *data)
 
 	bool want_descs = true;
 
-	switch (box->what->value())
-	{
-		case What_things: box->cur_obj.type = ObjType::things; break;
-		case What_lineTextures: box->cur_obj.type = ObjType::linedefs; want_descs = false; break;
-		case What_sectorFlats: box->cur_obj.type = ObjType::sectors;  want_descs = false; break;
-		case What_linesByType: box->cur_obj.type = ObjType::linedefs; break;
-		case What_sectorsByType: box->cur_obj.type = ObjType::sectors; break;
-
-		default: break;
-	}
+	auto value = static_cast<What>(box->what->value());
+	assert(value >= 0 && value < NUM_What);
+	box->cur_obj.type = box->whatDefs[value].type;
+	want_descs = !!(box->whatDefs[value].flags & WF_WANT_DESC);
 
 	// only clear everything when type changes
 	if (prev_type != box->cur_obj.type)
