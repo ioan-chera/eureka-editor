@@ -644,14 +644,13 @@ void UI_FindAndReplace::ResetFilters()
 
 bool UI_FindAndReplace::WhatFromEditMode()
 {
-	switch (inst.edit.mode)
-	{
-		case ObjType::things:   what->value(What_things); return true;
-		case ObjType::linedefs: what->value(What_lineTextures); return true;
-		case ObjType::sectors:  what->value(What_sectorFlats); return true;
-
-		default: return false;
-	}
+	for(int whatType = 0; whatType < NUM_What; ++whatType)
+		if(inst.edit.mode == whatDefs[whatType].type)
+		{
+			what->value(whatType);
+			return true;
+		}
+	return false;
 }
 
 
