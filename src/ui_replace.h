@@ -59,6 +59,8 @@ private:
 		Fl_Color color;
 		ObjType type;
 		unsigned flags;
+		char browserLetter;
+		bool (UI_FindAndReplace::*match)(int idx);
 		std::vector<Fl_Widget *> filterWidgets;
 	};
 

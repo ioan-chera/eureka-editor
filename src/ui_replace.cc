@@ -287,11 +287,26 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 	whatDefs
 	{
-		{ "Things", THING_MODE_COL, ObjType::things, WF_WANT_DESC, {}},
-		{ "Line Textures", LINE_MODE_COL, ObjType::linedefs, 0, {}},
-		{ "Sector Flats", SECTOR_MODE_COL, ObjType::sectors, 0, {}},
-		{ "Lines by Type", FL_GREEN, ObjType::linedefs, WF_WANT_DESC, {}},
-		{ "Sectors by Type", fl_rgb_color(255,160,0), ObjType::sectors, WF_WANT_DESC, {}}
+		{
+			"Things", THING_MODE_COL, ObjType::things, WF_WANT_DESC, 'O',
+			&UI_FindAndReplace::Match_Thing, {}
+		},
+		{
+			"Line Textures", LINE_MODE_COL, ObjType::linedefs, 0, 'T',
+			&UI_FindAndReplace::Match_LineDef, {}
+		},
+		{
+			"Sector Flats", SECTOR_MODE_COL, ObjType::sectors, 0, 'F',
+			&UI_FindAndReplace::Match_Sector, {}
+		},
+		{
+			"Lines by Type", FL_GREEN, ObjType::linedefs, WF_WANT_DESC, 'L',
+			&UI_FindAndReplace::Match_LineType, {}
+		},
+		{
+			"Sectors by Type", fl_rgb_color(255,160,0), ObjType::sectors, WF_WANT_DESC, 'S',
+			&UI_FindAndReplace::Match_SectorType, {}
+		}
 	},
 
 	inst(inst)
@@ -899,12 +914,9 @@ char UI_FindAndReplace::GetKind()
 
 	auto v = static_cast<What>(what->value());
 
-	if (v < 0 || v >= 5)
+	if (v < 0 || v >= NUM_What)
 		return '?';
-
-	const char *kinds = "OTFLS";
-
-	return kinds[v];
+	return whatDefs[v].browserLetter;
 }
 
 
@@ -1311,25 +1323,10 @@ void UI_FindAndReplace::DoReplace()
 
 bool UI_FindAndReplace::MatchesObject(int idx)
 {
-	switch (what->value())
-	{
-		case What_things: // Things
-			return Match_Thing(idx);
-
-		case What_lineTextures: // LineDefs (texturing)
-			return Match_LineDef(idx);
-
-		case What_sectorFlats: // Sectors (texturing)
-			return Match_Sector(idx);
-
-		case What_linesByType: // Lines by Type
-			return Match_LineType(idx);
-
-		case What_sectorsByType: // Sectors by Type
-			return Match_SectorType(idx);
-
-		default: return false;
-	}
+	auto value = static_cast<What>(what->value());
+	if(value < 0 || value >= NUM_What)
+		return false;
+	return (this->*whatDefs[value].match)(idx);
 }
 
 
