@@ -29,6 +29,15 @@ class Browser_Button;
 class Fl_Check_Button;
 class Fl_Choice;
 
+enum class BrowserMode
+{
+	textures,
+	flats,
+	things,
+	lineTypes,
+	sectorTypes,
+	generalized
+};
 
 class Browser_Item : public Fl_Group
 {
@@ -40,14 +49,14 @@ public:
 
 	int number;
 
-	char kind;  // generally matches browser kind: T/F/O/S/L
+	BrowserMode kind;  // generally matches browser kind: T/F/O/S/L
 	char category;
 
-	int recent_idx;
+	int recent_idx = -2;
 
-	Browser_Button * button;
+	Browser_Button * button = nullptr;
 
-	UI_Pic *pic;
+	UI_Pic *pic = nullptr;
 	SString mPicCallbackString;	// optional, storage for callback data string
 
 	Instance &inst;
@@ -56,12 +65,12 @@ public:
 	// this constructor makes a simple text button
 	Browser_Item(Instance &inst, int X, int Y, int W, int H,
 	             const SString &_desc, const SString &_realname,
-				 int _num, char _kind, char _category);
+				 int _num, BrowserMode _kind, char _category);
 
 	// this constructor makes a picture with a text label below it
 	Browser_Item(Instance &inst, int X, int Y, int W, int H,
 				 const SString &_desc, const SString &_realname,
-				 int _num, char _kind, char _category,
+				 int _num, BrowserMode _kind, char _category,
 	             int pic_w, int pic_h, UI_Pic *_pic);
 
 	virtual ~Browser_Item();
@@ -84,16 +93,6 @@ public:
 	static void  sector_callback(Fl_Widget *w, void *data);
 
 private:
-};
-
-enum class BrowserMode
-{
-	textures,
-	flats,
-	things,
-	lineTypes,
-	sectorTypes,
-	generalized
 };
 
 class UI_Browser_Box : public Fl_Group
@@ -119,8 +118,7 @@ private:
 	Instance &inst;
 
 public:
-	UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const char *label, char _kind);
-	virtual ~UI_Browser_Box();
+	UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const char *label, BrowserMode _kind);
 
 	/* FLTK method */
 	void resize(int X, int Y, int W, int H);
@@ -155,7 +153,7 @@ private:
 
 	bool SearchMatch(Browser_Item *item) const;
 
-	void Populate_Images(char imkind, std::map<SString, Img_c *> & img_list);
+	void Populate_Images(BrowserMode imkind, std::map<SString, Img_c *> & img_list);
 	void Populate_Sprites();
 
 	void Populate_ThingTypes();
