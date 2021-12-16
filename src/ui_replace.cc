@@ -454,7 +454,10 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 
 
 UI_FindAndReplace::~UI_FindAndReplace()
-{ }
+{
+	delete tag_numbers;
+	delete find_numbers;
+}
 
 
 void UI_FindAndReplace::hide_callback(Fl_Widget *w, void *data)
