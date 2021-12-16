@@ -225,10 +225,57 @@ void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 
 //------------------------------------------------------------------------
 
+static BrowserMode charToBrowserMode(char c)
+{
+	switch(c)
+	{
+		case 'T':
+			return BrowserMode::textures;
+		case 'F':
+			return BrowserMode::flats;
+		case 'O':
+			return BrowserMode::things;
+		case 'L':
+			return BrowserMode::lineTypes;
+		case 'S':
+			return BrowserMode::sectorTypes;
+		case 'G':
+			return BrowserMode::generalized;
+		default:
+			assert(false);
+			return (BrowserMode)0;
+	}
+}
+
+static char browserModeToChar(BrowserMode mode)
+{
+	switch(mode)
+	{
+		case BrowserMode::textures:
+			return 'T';
+		case BrowserMode::flats:
+			return 'F';
+		case BrowserMode::things:
+			return 'O';
+		case BrowserMode::lineTypes:
+			return 'L';
+		case BrowserMode::sectorTypes:
+			return 'S';
+		case BrowserMode::generalized:
+			return 'G';
+		default:
+			return '?';
+	}
+}
+
+inline static bool isGraphicsMode(BrowserMode mode)
+{
+	return mode == BrowserMode::textures || mode == BrowserMode::flats;
+}
 
 UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const char *label, char _kind) :
     Fl_Group(X, Y, W, H, NULL),
-	kind(_kind), pic_mode(false), inst(inst)
+	kind(charToBrowserMode(_kind)), pic_mode(false), inst(inst)
 {
 	end(); // cancel begin() in Fl_Group constructor
 
@@ -278,18 +325,18 @@ UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const
 
 	alpha = NULL;
 
-	if (strchr("OSL", kind))
+	if (!isGraphicsMode(kind))
 	{
 		alpha = new Fl_Check_Button(cx, cy, 75, 22, " Alpha");
 
 		// things need to repopulate (in picture mode anyway)
-		if (kind == 'O')
+		if (kind == BrowserMode::things)
 			alpha->callback(repop_callback, this);
 		else
 			alpha->callback(sort_callback, this);
 
 		// things usually show pics (with sprite name), so want alpha
-		if (kind == 'O')
+		if (kind == BrowserMode::things)
 			alpha->value(1);
 
 		add(alpha);
@@ -298,7 +345,7 @@ UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const
 
 	pics = NULL;
 
-	if (kind == 'O')
+	if (kind == BrowserMode::things)
 	{
 		pics = new Fl_Check_Button(X+172, cy, 64, 22, " Pics");
 		pics->value(1);
@@ -311,7 +358,7 @@ UI_Browser_Box::UI_Browser_Box(Instance &inst, int X, int Y, int W, int H, const
 	do_flats = NULL;
 	do_tex   = NULL;
 
-	if (kind == 'T')
+	if (kind == BrowserMode::textures)
 	{
 		do_tex = new Fl_Check_Button(X+86, cy, 64, 22, " Tex");
 		do_tex->value(1);
@@ -484,7 +531,7 @@ bool UI_Browser_Box::Filter(bool force_update)
 
 bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 {
-	if (config::browser_combine_tex && kind == 'T')
+	if (config::browser_combine_tex && kind == BrowserMode::textures)
 	{
 		if (item->kind == 'T' && !do_tex->value())
 			return false;
@@ -513,7 +560,7 @@ bool UI_Browser_Box::SearchMatch(Browser_Item *item) const
 
 	const char *pattern = search->value();
 
-	if (kind == 'T' || kind == 'F')
+	if (isGraphicsMode(kind))
 		return Texture_MatchPattern(item->real_name.c_str(), pattern);
 
 	return Texture_MatchPattern(item->desc.c_str(), pattern);
@@ -626,7 +673,7 @@ void UI_Browser_Box::Sort()
 		method = SOM_Recent;
 	else if (alpha && ! alpha->value())
 		method = SOM_Numeric;
-	else if (kind == 'L')
+	else if (kind == BrowserMode::lineTypes)
 		method = SOM_AlphaSkip;
 
 	// shell sort
@@ -697,8 +744,8 @@ void UI_Browser_Box::Populate_Images(char imkind, std::map<SString, Img_c *> & i
 		else
 			snprintf(full_desc, sizeof(full_desc), "%-8s", name.c_str());
 
-		int pic_w = (kind == 'F' || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
-		int pic_h = (kind == 'F') ? 64 : std::min(128, std::max(4, image->height()));
+		int pic_w = (kind == BrowserMode::flats || image->width() <= 64) ? 64 : 128; // MIN(128, MAX(4, image->width()));
+		int pic_h = (kind == BrowserMode::flats) ? 64 : std::min(128, std::max(4, image->height()));
 
 		if (config::browser_small_tex && imkind == 'T')
 		{
@@ -789,7 +836,7 @@ void UI_Browser_Box::Populate_Sprites()
 
 		Browser_Item *item = new Browser_Item(inst, cx, cy, item_w, item_h,
 		                                      full_desc, "", TI->first,
-											  kind, info.group,
+											  browserModeToChar(kind), info.group,
 		                                      pic_w, pic_h, pic);
 
 		pic->callback(Browser_Item::thing_callback, item);
@@ -817,7 +864,7 @@ void UI_Browser_Box::Populate_ThingTypes()
 		snprintf(full_desc, sizeof(full_desc), "%4d/ %s", TI->first, info.desc.c_str());
 
 		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
-											  TI->first, kind, info.group);
+											  TI->first, browserModeToChar(kind), info.group);
 
 		item->button->callback(Browser_Item::thing_callback, item);
 
@@ -845,7 +892,7 @@ void UI_Browser_Box::Populate_LineTypes()
 				 TidyLineDesc(info.desc.c_str()).c_str());
 
 		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
-											  TI->first, kind, info.group);
+											  TI->first, browserModeToChar(kind), info.group);
 
 		item->button->callback(Browser_Item::line_callback, item);
 
@@ -872,7 +919,7 @@ void UI_Browser_Box::Populate_SectorTypes()
 		snprintf(full_desc, sizeof(full_desc), "%3d/ %s", TI->first, info.desc.c_str());
 
 		Browser_Item *item = new Browser_Item(inst, mx, y, mw, 24, full_desc, "",
-											  TI->first, kind, 0 /* cat */);
+											  TI->first, browserModeToChar(kind), 0 /* cat */);
 
 		item->button->callback(Browser_Item::sector_callback, item);
 
@@ -892,7 +939,7 @@ void UI_Browser_Box::Populate()
 	scroll->Line_size(24 * 2);
 
 	// handle changes to combine-tex preference
-	if (kind == 'T')
+	if (kind == BrowserMode::textures)
 	{
 		if (config::browser_combine_tex)
 		{
@@ -910,31 +957,31 @@ void UI_Browser_Box::Populate()
 
 	switch (kind)
 	{
-		case 'T':
+		case BrowserMode::textures:
 			if (config::browser_combine_tex)
 				Populate_Images('F', inst.flats);
 
 			Populate_Images('T', inst.textures);
 			break;
 
-		case 'F':
+		case BrowserMode::flats:
 			// the flat browser is never used when combine-tex is enabled
 			if (! config::browser_combine_tex)
 				Populate_Images('F', inst.flats);
 			break;
 
-		case 'O':
+		case BrowserMode::things:
 			if (pics->value())
 				Populate_Sprites();
 			else
 				Populate_ThingTypes();
 			break;
 
-		case 'L':
+		case BrowserMode::lineTypes:
 			Populate_LineTypes();
 			break;
 
-		case 'S':
+		case BrowserMode::sectorTypes:
 			Populate_SectorTypes();
 			break;
 
@@ -1026,7 +1073,7 @@ void UI_Browser_Box::ClearSearchBox()
 
 void UI_Browser_Box::JumpToTex(const char *tex_name)
 {
-	if (! (kind == 'T' || kind == 'F'))
+	if (!isGraphicsMode(kind))
 		return;
 
 	for (int i = 0 ; i < scroll->Children() ; i++)
@@ -1048,7 +1095,7 @@ void UI_Browser_Box::JumpToTex(const char *tex_name)
 
 void UI_Browser_Box::JumpToValue(int value)
 {
-	if (! (kind == 'O' || kind == 'S' || kind == 'L'))
+	if (isGraphicsMode(kind))
 		return;
 
 	for (int i = 0 ; i < scroll->Children() ; i++)
@@ -1772,7 +1819,7 @@ bool UI_Browser_Box::ParseUser(const std::vector<SString> &tokens)
 	if (tokens[0] != "browser")
 		return false;
 
-	if (tokens[1][0] != kind)
+	if (tokens[1][0] != browserModeToChar(kind))
 		return false;
 
 	size_t num_tok = tokens.size() - 2;
@@ -1823,16 +1870,16 @@ void UI_Browser_Box::WriteUser(std::ostream &os)
 {
 	char cat = cat_letters[category->value()];
 	if(isprint(cat))
-		os << "browser " << kind << " cat " << cat << '\n';
+		os << "browser " << browserModeToChar(kind) << " cat " << cat << '\n';
 	if(alpha)
-		os << "browser " << kind << " sort " << static_cast<int>(1 - alpha->value()) << '\n';
-	os << "browser " << kind << " search \"" << SString(search->value()).getTidy("\"") << "\"\n";
+		os << "browser " << browserModeToChar(kind) << " sort " << static_cast<int>(1 - alpha->value()) << '\n';
+	os << "browser " << browserModeToChar(kind) << " search \"" << SString(search->value()).getTidy("\"") << "\"\n";
 	if(pics)
-		os << "browser " << kind << " pics " << static_cast<int>(pics->value()) << '\n';
+		os << "browser " << browserModeToChar(kind) << " pics " << static_cast<int>(pics->value()) << '\n';
 	if(do_flats)
 	{
-		os << "browser " << kind << " do_flats " << static_cast<int>(do_flats->value()) << '\n';
-		os << "browser " << kind << " do_tex " << static_cast<int>(do_tex->value()) << '\n';
+		os << "browser " << browserModeToChar(kind) << " do_flats " << static_cast<int>(do_flats->value()) << '\n';
+		os << "browser " << browserModeToChar(kind) << " do_tex " << static_cast<int>(do_tex->value()) << '\n';
 	}
 }
 
@@ -1857,7 +1904,7 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 void UI_Browser::WriteUser(std::ostream &os)
 {
 	os << "\nopen_browser " << (!visible() ? '-' : active >= ACTIVE_GENERALIZED ? 'G' :
-								browsers[active]->GetKind()) << '\n';
+								browserModeToChar(browsers[active]->GetKind())) << '\n';
 	for(int i = 0; i < 5; i++)
 	{
 		browsers[i]->WriteUser(os);

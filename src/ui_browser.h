@@ -86,11 +86,20 @@ public:
 private:
 };
 
+enum class BrowserMode
+{
+	textures,
+	flats,
+	things,
+	lineTypes,
+	sectorTypes,
+	generalized
+};
 
 class UI_Browser_Box : public Fl_Group
 {
 private:
-	char kind;
+	BrowserMode kind;
 
 	Fl_Choice *category;
 	Fl_Input  *search;
@@ -126,7 +135,7 @@ public:
 	void ClearSearchBox();
 	void Scroll(int delta);
 
-	char GetKind() const { return kind; }
+	BrowserMode GetKind() const { return kind; }
 
 	// ensure the given texture or type/special is visible
 	void JumpToTex(const char *tex_name);
