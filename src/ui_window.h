@@ -116,7 +116,7 @@ public:
 	// show or hide the Browser panel.
 	// kind is NUL or '-' to hide, '/' to toggle, 'T' for textures, 'F' flats,
 	//         'O' for thing types, 'L' line types, 'S' sector types.
-	void BrowserMode(char kind);
+	void BrowserMode(::BrowserMode kind);
 
 	void ShowDefaultProps();
 	void ShowFindAndReplace();
@@ -146,7 +146,7 @@ public:
 
 	// this is used by the browser when user clicks on an entry.
 	// kind == 'T' for textures (etc... as above)
-	void BrowsedItem(char kind, int number, const char *name, int e_state);
+	void BrowsedItem(::BrowserMode kind, int number, const char *name, int e_state);
 
 	// this is called when game_info changes (in Main_LoadResources)
 	// and can enable / disable stuff in the panels.

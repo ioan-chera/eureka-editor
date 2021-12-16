@@ -36,7 +36,11 @@ enum class BrowserMode
 	things,
 	lineTypes,
 	sectorTypes,
-	generalized
+	generalized,
+
+	invalid,
+	hide,
+	toggle
 };
 
 class Browser_Item : public Fl_Group
@@ -246,8 +250,8 @@ public:
 
 	void SetActive(int new_active);
 
-	char GetMode() const;
-	void ChangeMode(char new_mode);
+	BrowserMode GetMode() const;
+	void ChangeMode(BrowserMode new_mode);
 	void NewEditMode(ObjType edit_mode);
 
 	// ensure the given texture or type/special is visible
@@ -277,6 +281,9 @@ private:
 
 
 bool Browser_ParseUser(Instance &inst, const std::vector<SString> &tokens);
+
+BrowserMode charToBrowserMode(char c);
+bool charMapsToSpecificBrowserMode(char c);
 
 #endif  /* __EUREKA_UI_BROWSER_H__ */
 

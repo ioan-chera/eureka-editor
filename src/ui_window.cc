@@ -176,14 +176,14 @@ void UI_MainWindow::SetCursor(Fl_Cursor shape)
 }
 
 
-void UI_MainWindow::BrowserMode(char kind)
+void UI_MainWindow::BrowserMode(::BrowserMode kind)
 {
 	bool is_visible = browser->visible() ? true : false;
 
-	if (kind == '-' || (is_visible && kind == '/'))
-		kind = 0;
+	if (is_visible && kind == ::BrowserMode::toggle)
+		kind = ::BrowserMode::hide;
 
-	bool want_visible = (kind != 0) ? true : false;
+	bool want_visible = (kind != ::BrowserMode::hide) ? true : false;
 
 	if (is_visible != want_visible)
 	{
@@ -197,7 +197,7 @@ void UI_MainWindow::BrowserMode(char kind)
 //??		UnselectPics();
 	}
 
-	if (kind != 0 && kind != '/')
+	if (kind != ::BrowserMode::hide && kind != ::BrowserMode::toggle)
 	{
 		browser->ChangeMode(kind);
 	}
@@ -423,7 +423,7 @@ bool UI_MainWindow::ClipboardOp(EditCommand op)
 }
 
 
-void UI_MainWindow::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_MainWindow::BrowsedItem(::BrowserMode kind, int number, const char *name, int e_state)
 {
 //	fprintf(stderr, "BrowsedItem: kind '%c' --> %d / \"%s\"\n", kind, number, name);
 

@@ -231,7 +231,7 @@ void Instance::CMD_SetVar()
 		int is_visible = main_win->browser->visible() ? 1 : 0;
 
 		if (want_vis != is_visible)
-			main_win->BrowserMode('/');
+			main_win->BrowserMode(BrowserMode::toggle);
 	}
 	else if (var_name.noCaseEqual("grid"))
 	{
@@ -300,7 +300,7 @@ void Instance::CMD_ToggleVar()
 	{
 		Editor_ClearAction();
 
-		main_win->BrowserMode('/');
+		main_win->BrowserMode(BrowserMode::toggle);
 	}
 	else if (var_name.noCaseEqual("recent"))
 	{
@@ -361,14 +361,14 @@ void Instance::CMD_BrowserMode()
 		return;
 	}
 
-	char mode = static_cast<char>(toupper(EXEC_Param[0][0]));
+	char modeChar = static_cast<char>(toupper(EXEC_Param[0][0]));
 
-	if (! (mode == 'L' || mode == 'S' || mode == 'O' ||
-	       mode == 'T' || mode == 'F' || mode == 'G'))
+	if (!charMapsToSpecificBrowserMode(modeChar))
 	{
 		Beep("Unknown browser mode: %s", EXEC_Param[0].c_str());
 		return;
 	}
+	BrowserMode mode = charToBrowserMode(modeChar);
 
 	// if that browser is already open, close it now
 	if (main_win->browser->visible() &&
@@ -376,7 +376,7 @@ void Instance::CMD_BrowserMode()
 		! Exec_HasFlag("/force") &&
 		! Exec_HasFlag("/recent"))
 	{
-		main_win->BrowserMode(0);
+		main_win->BrowserMode(BrowserMode::hide);
 		return;
 	}
 

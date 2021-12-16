@@ -59,7 +59,7 @@ private:
 		Fl_Color color;
 		ObjType type;
 		unsigned flags;
-		char browserLetter;
+		BrowserMode browserMode;
 		bool (UI_FindAndReplace::*match)(int idx);
 		std::vector<Fl_Widget *> filterWidgets;
 	};
@@ -139,13 +139,13 @@ public:
 
 	void Open();
 
-	char GetKind();	 // same as browser : 'O' 'T' 'F' 'L' 'S'
+	BrowserMode GetKind();	 // same as browser : 'O' 'T' 'F' 'L' 'S'
 
 	// called by "Find" button in here, or CTRL-G shortcut
 	bool FindNext();
 
 	bool ClipboardOp(EditCommand op);
-	void BrowsedItem(char kind, int number, const char *name, int e_state);
+	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
 private:
 	void ensureInitWhatFilters();

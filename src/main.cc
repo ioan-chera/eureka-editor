@@ -726,7 +726,7 @@ static void Main_OpenWindow(Instance &inst)
 
 	Fl::add_handler(Main_key_handler);
 
-	inst.main_win->BrowserMode(0);
+	inst.main_win->BrowserMode(BrowserMode::hide);
 	inst.main_win->NewEditMode(inst.edit.mode);
 
 	// allow processing keyboard events, even before the mouse

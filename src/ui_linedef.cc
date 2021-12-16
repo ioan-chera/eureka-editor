@@ -594,9 +594,9 @@ bool UI_LineBox::ClipboardOp(EditCommand op)
 }
 
 
-void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_LineBox::BrowsedItem(BrowserMode kind, int number, const char *name, int e_state)
 {
-	if (kind == 'T' || kind == 'F')
+	if (kind == BrowserMode::textures || kind == BrowserMode::flats)
 	{
 		int front_pics = front->GetSelectedPics();
 		int  back_pics =  back->GetSelectedPics();
@@ -606,7 +606,7 @@ void UI_LineBox::BrowsedItem(char kind, int number, const char *name, int e_stat
 
 		SetTexture(name, e_state, parts);
 	}
-	else if (kind == 'L')
+	else if (kind == BrowserMode::lineTypes)
 	{
 		SetLineType(number);
 	}
@@ -697,13 +697,13 @@ void UI_LineBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		box->inst.main_win->BrowserMode('L');
+		box->inst.main_win->BrowserMode(BrowserMode::lineTypes);
 		return;
 	}
 
 	if (w == box->gen)
 	{
-		box->inst.main_win->BrowserMode('G');
+		box->inst.main_win->BrowserMode(BrowserMode::generalized);
 		return;
 	}
 }

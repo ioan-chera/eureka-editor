@@ -474,13 +474,13 @@ bool UI_ThingBox::ClipboardOp(EditCommand op)
 }
 
 
-void UI_ThingBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_ThingBox::BrowsedItem(BrowserMode kind, int number, const char *name, int e_state)
 {
-	if (kind == 'O')
+	if (kind == BrowserMode::things)
 	{
 		SetThingType(number);
 	}
-	else if (kind == 'L' && inst.loaded.levelFormat != MapFormat::doom)
+	else if (kind == BrowserMode::lineTypes && inst.loaded.levelFormat != MapFormat::doom)
 	{
 		SetSpecialType(number);
 	}
@@ -614,10 +614,10 @@ void UI_ThingBox::button_callback(Fl_Widget *w, void *data)
 		box->AdjustExtraFloor(+1);
 
 	if (w == box->choose || w == box->sprite)
-		box->inst.main_win->BrowserMode('O');
+		box->inst.main_win->BrowserMode(BrowserMode::things);
 
 	if (w == box->spec_choose)
-		box->inst.main_win->BrowserMode('L');
+		box->inst.main_win->BrowserMode(BrowserMode::lineTypes);
 
 	box->mFixUp.checkDirtyFields();
 

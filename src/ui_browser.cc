@@ -143,6 +143,49 @@ static char browserModeToChar(BrowserMode mode)
 	}
 }
 
+BrowserMode charToBrowserMode(char c)
+{
+	switch(c)
+	{
+	case 'T':
+		return BrowserMode::textures;
+	case 'F':
+		return BrowserMode::flats;
+	case 'O':
+		return BrowserMode::things;
+	case 'L':
+		return BrowserMode::lineTypes;
+	case 'S':
+		return BrowserMode::sectorTypes;
+	case 'G':
+		return BrowserMode::generalized;
+	case '-':
+	case 0:
+		return BrowserMode::hide;
+	case '/':
+		return BrowserMode::toggle;
+	default:
+		return BrowserMode::invalid;
+	}
+}
+
+bool charMapsToSpecificBrowserMode(char c)
+{
+	BrowserMode mode = charToBrowserMode(c);
+	switch(mode)
+	{
+	case BrowserMode::textures:
+	case BrowserMode::flats:
+	case BrowserMode::things:
+	case BrowserMode::lineTypes:
+	case BrowserMode::sectorTypes:
+	case BrowserMode::generalized:
+		return true;
+	default:
+		return false;
+	}
+}
+
 /* text item */
 
 Browser_Item::Browser_Item(Instance &inst, int X, int Y, int W, int H,
@@ -207,14 +250,14 @@ bool Browser_Item::MatchName(const char *name) const
 void Browser_Item::texture_callback(Fl_Widget *w, void *data)
 {
 	auto item = static_cast<const Browser_Item *>(data);
-	item->inst.main_win->BrowsedItem('T', 0, item->mPicCallbackString.c_str(), Fl::event_state());
+	item->inst.main_win->BrowsedItem(BrowserMode::textures, 0, item->mPicCallbackString.c_str(), Fl::event_state());
 }
 
 
 void Browser_Item::flat_callback(Fl_Widget *w, void *data)
 {
 	auto item = static_cast<const Browser_Item *>(data);
-	item->inst.main_win->BrowsedItem('F', 0, item->mPicCallbackString.c_str(), Fl::event_state());
+	item->inst.main_win->BrowsedItem(BrowserMode::flats, 0, item->mPicCallbackString.c_str(), Fl::event_state());
 }
 
 
@@ -222,7 +265,7 @@ void Browser_Item::thing_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	item->inst.main_win->BrowsedItem('O', item->number, "", Fl::event_state());
+	item->inst.main_win->BrowsedItem(BrowserMode::things, item->number, "", Fl::event_state());
 }
 
 
@@ -230,7 +273,7 @@ void Browser_Item::line_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	item->inst.main_win->BrowsedItem('L', item->number, "", Fl::event_state());
+	item->inst.main_win->BrowsedItem(BrowserMode::lineTypes, item->number, "", Fl::event_state());
 }
 
 
@@ -238,7 +281,7 @@ void Browser_Item::sector_callback(Fl_Widget *w, void *data)
 {
 	Browser_Item * item = (Browser_Item *) data;
 
-	item->inst.main_win->BrowsedItem('S', item->number, "", Fl::event_state());
+	item->inst.main_win->BrowsedItem(BrowserMode::sectorTypes, item->number, "", Fl::event_state());
 }
 
 
@@ -411,7 +454,7 @@ void UI_Browser_Box::search_callback(Fl_Widget *w, void *data)
 void UI_Browser_Box::hide_callback(Fl_Widget *w, void *data)
 {
 	auto box = static_cast<const UI_Browser_Box *>(data);
-	box->inst.main_win->BrowserMode(0);
+	box->inst.main_win->BrowserMode(BrowserMode::hide);
 }
 
 
@@ -1493,7 +1536,7 @@ void UI_Generalized_Box::UpdateGenType(int line_type)
 void UI_Generalized_Box::hide_callback(Fl_Widget *w, void *data)
 {
 	auto box = static_cast<UI_Generalized_Box *>(data);
-	box->inst.main_win->BrowserMode(0);
+	box->inst.main_win->BrowserMode(BrowserMode::hide);
 }
 
 void UI_Generalized_Box::cat_callback(Fl_Widget *w, void *data)
@@ -1526,7 +1569,7 @@ void UI_Generalized_Box::edit_callback(Fl_Widget *w, void *data)
 	{
 		int line_type = box->ComputeType();
 
-		box->inst.main_win->BrowsedItem('L', line_type, "", 0);
+		box->inst.main_win->BrowsedItem(BrowserMode::lineTypes, line_type, "", 0);
 	}
 	box->in_update = false;
 }
@@ -1633,34 +1676,34 @@ void UI_Browser::SetActive(int new_active)
 }
 
 
-char UI_Browser::GetMode() const
+BrowserMode UI_Browser::GetMode() const
 {
 	switch (active)
 	{
-		case 0:  return 'T';
-		case 1:  return 'F';
-		case 2:  return 'O';
-		case 3:  return 'L';
-		case 4:  return 'S';
-		default: return 'G';
+		case 0:  return BrowserMode::textures;
+		case 1:  return BrowserMode::flats;
+		case 2:  return BrowserMode::things;
+		case 3:  return BrowserMode::lineTypes;
+		case 4:  return BrowserMode::sectorTypes;
+		default: return BrowserMode::generalized;
 	}
 }
 
 
-void UI_Browser::ChangeMode(char new_mode)
+void UI_Browser::ChangeMode(BrowserMode new_mode)
 {
-	if (config::browser_combine_tex && new_mode == 'F')
-		new_mode = 'T';
+	if (config::browser_combine_tex && new_mode == BrowserMode::flats)
+		new_mode = BrowserMode::textures;
 
 	switch (new_mode)
 	{
-		case 'T': SetActive(0); break;  // TEXTURES
-		case 'F': SetActive(1); break;  // FLATS
-		case 'O': SetActive(2); break;  // THINGS (Objects)
-		case 'L': SetActive(3); break;  // LINE TYPES
-		case 'S': SetActive(4); break;  // SECTOR TYPES
+		case BrowserMode::textures: SetActive(0); break;  // TEXTURES
+		case BrowserMode::flats: SetActive(1); break;  // FLATS
+		case BrowserMode::things: SetActive(2); break;  // THINGS (Objects)
+		case BrowserMode::lineTypes: SetActive(3); break;  // LINE TYPES
+		case BrowserMode::sectorTypes: SetActive(4); break;  // SECTOR TYPES
 
-		case 'G': SetActive(ACTIVE_GENERALIZED); break;
+		case BrowserMode::generalized: SetActive(ACTIVE_GENERALIZED); break;
 
 		default: break;
 	}
@@ -1759,7 +1802,7 @@ void UI_Browser::ToggleRecent(bool force_recent)
 	// show browser if hidden [ and then force the RECENT category ]
 	if (! visible())
 	{
-		inst.main_win->BrowserMode('/');
+		inst.main_win->BrowserMode(BrowserMode::toggle);
 
 		force_recent = true;
 	}
@@ -1859,7 +1902,7 @@ bool UI_Browser::ParseUser(const std::vector<SString> &tokens)
 {
 	if (tokens[0] == "open_browser" && tokens.size() >= 2)
 	{
-		inst.main_win->BrowserMode(tokens[1][0]);
+		inst.main_win->BrowserMode(charToBrowserMode(tokens[1][0]));
 		return true;
 	}
 

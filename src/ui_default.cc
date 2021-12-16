@@ -232,7 +232,7 @@ void UI_DefaultProps::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			box->inst.main_win->BrowserMode('T');
+			box->inst.main_win->BrowserMode(BrowserMode::textures);
 
 		return;
 	}
@@ -258,7 +258,7 @@ void UI_DefaultProps::flat_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			box->inst.main_win->BrowserMode('F');
+			box->inst.main_win->BrowserMode(BrowserMode::flats);
 
 		return;
 	}
@@ -341,7 +341,7 @@ void UI_DefaultProps::thing_callback(Fl_Widget *w, void *data)
 
 	if (w == box->th_sprite)
 	{
-		box->inst.main_win->BrowserMode('O');
+		box->inst.main_win->BrowserMode(BrowserMode::things);
 		return;
 	}
 
@@ -489,15 +489,15 @@ bool UI_DefaultProps::ClipboardOp(EditCommand op)
 	return true;
 }
 
-void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_DefaultProps::BrowsedItem(BrowserMode kind, int number, const char *name, int e_state)
 {
-	if (kind == 'O')
+	if (kind == BrowserMode::things)
 	{
 		SetThing(number);
 		return;
 	}
 
-	if (! (kind == 'T' || kind == 'F'))
+	if (! (kind == BrowserMode::textures || kind == BrowserMode::flats))
 		return;
 
 	int sel_pics =	(f_pic->Selected() ? 1 : 0) |
@@ -506,7 +506,7 @@ void UI_DefaultProps::BrowsedItem(char kind, int number, const char *name, int e
 
 	if (sel_pics == 0)
 	{
-		if (kind == 'T')
+		if (kind == BrowserMode::textures)
 			sel_pics = 4;
 		else
 			sel_pics = (e_state & FL_BUTTON3) ? 2 : 1;

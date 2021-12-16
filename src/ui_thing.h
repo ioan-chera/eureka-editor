@@ -105,7 +105,7 @@ public:
 
 	// see ui_window.h for description of these two methods
 	bool ClipboardOp(EditCommand op);
-	void BrowsedItem(char kind, int number, const char *name, int e_state);
+	void BrowsedItem(BrowserMode kind, int number, const char *name, int e_state);
 
 	void UpdateGameInfo();
 	void UnselectPics();

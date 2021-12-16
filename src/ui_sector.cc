@@ -345,7 +345,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			box->inst.main_win->BrowserMode('F');
+			box->inst.main_win->BrowserMode(BrowserMode::flats);
 		return;
 	}
 
@@ -616,7 +616,7 @@ void UI_SectorBox::button_callback(Fl_Widget *w, void *data)
 
 	if (w == box->choose)
 	{
-		box->inst.main_win->BrowserMode('S');
+		box->inst.main_win->BrowserMode(BrowserMode::sectorTypes);
 		return;
 	}
 
@@ -916,12 +916,12 @@ bool UI_SectorBox::ClipboardOp(EditCommand op)
 }
 
 
-void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_SectorBox::BrowsedItem(BrowserMode kind, int number, const char *name, int e_state)
 {
 	if (obj < 0)
 		return;
 
-	if (kind == 'F' || kind == 'T')
+	if (kind == BrowserMode::flats || kind == BrowserMode::textures)
 	{
 		int parts = GetSelectedPics();
 
@@ -939,7 +939,7 @@ void UI_SectorBox::BrowsedItem(char kind, int number, const char *name, int e_st
 
 		SetFlat(name, parts);
 	}
-	else if (kind == 'S')
+	else if (kind == BrowserMode::sectorTypes)
 	{
 		SetSectorType(number);
 	}

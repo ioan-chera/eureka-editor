@@ -288,23 +288,23 @@ UI_FindAndReplace::UI_FindAndReplace(Instance &inst, int X, int Y, int W, int H)
 	whatDefs
 	{
 		{
-			"Things", THING_MODE_COL, ObjType::things, WF_WANT_DESC, 'O',
+			"Things", THING_MODE_COL, ObjType::things, WF_WANT_DESC, BrowserMode::things,
 			&UI_FindAndReplace::Match_Thing, {}
 		},
 		{
-			"Line Textures", LINE_MODE_COL, ObjType::linedefs, 0, 'T',
+			"Line Textures", LINE_MODE_COL, ObjType::linedefs, 0, BrowserMode::textures,
 			&UI_FindAndReplace::Match_LineDef, {}
 		},
 		{
-			"Sector Flats", SECTOR_MODE_COL, ObjType::sectors, 0, 'F',
+			"Sector Flats", SECTOR_MODE_COL, ObjType::sectors, 0, BrowserMode::flats,
 			&UI_FindAndReplace::Match_Sector, {}
 		},
 		{
-			"Lines by Type", FL_GREEN, ObjType::linedefs, WF_WANT_DESC, 'L',
+			"Lines by Type", FL_GREEN, ObjType::linedefs, WF_WANT_DESC, BrowserMode::lineTypes,
 			&UI_FindAndReplace::Match_LineType, {}
 		},
 		{
-			"Sectors by Type", fl_rgb_color(255,160,0), ObjType::sectors, WF_WANT_DESC, 'S',
+			"Sectors by Type", fl_rgb_color(255,160,0), ObjType::sectors, WF_WANT_DESC, BrowserMode::sectorTypes,
 			&UI_FindAndReplace::Match_SectorType, {}
 		}
 	},
@@ -911,15 +911,15 @@ bool UI_FindAndReplace::CheckNumberInput(Fl_Input *w, number_group_c *num_grp)
 //------------------------------------------------------------------------
 
 
-char UI_FindAndReplace::GetKind()
+BrowserMode UI_FindAndReplace::GetKind()
 {
 	// these letters are same as the Browser uses
 
 	auto v = static_cast<What>(what->value());
 
 	if (v < 0 || v >= NUM_What)
-		return '?';
-	return whatDefs[v].browserLetter;
+		return BrowserMode::invalid;
+	return whatDefs[v].browserMode;
 }
 
 
@@ -1039,14 +1039,14 @@ void UI_FindAndReplace::CB_Delete(bool is_replace)
 }
 
 
-void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int e_state)
+void UI_FindAndReplace::BrowsedItem(BrowserMode kind, int number, const char *name, int e_state)
 {
-	if (kind == 'F')
-		kind = 'T';
+	if (kind == BrowserMode::flats)
+		kind = BrowserMode::textures;
 
 	if (kind != GetKind())
 	{
-		if (kind == 'T' && GetKind() == 'F')
+		if (kind == BrowserMode::textures && GetKind() == BrowserMode::flats)
 		{
 			/* ok */
 		}
@@ -1084,7 +1084,7 @@ void UI_FindAndReplace::BrowsedItem(char kind, int number, const char *name, int
 
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
-	if (kind == 'T' || kind == 'F')
+	if (kind == BrowserMode::textures || kind == BrowserMode::flats)
 	{
 		InsertName(inp, append, name);
 	}

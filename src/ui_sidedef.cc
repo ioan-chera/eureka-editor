@@ -171,7 +171,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		pic->Selected(! pic->Selected());
 
 		if (pic->Selected())
-			box->inst.main_win->BrowserMode('T');
+			box->inst.main_win->BrowserMode(BrowserMode::textures);
 		return;
 	}
 
