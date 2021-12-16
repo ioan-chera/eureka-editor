@@ -236,13 +236,12 @@ private:
 	};
 
  	// currently active browser box (may be hidden though)
-	int active;
+	int active = 2;
 
 	Instance &inst;
 
 public:
 	UI_Browser(Instance &inst, int X, int Y, int W, int H, const char *label = NULL);
-	virtual ~UI_Browser();
 
 public:
 	void Populate();

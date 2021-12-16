@@ -1567,7 +1567,7 @@ void UI_Generalized_Box::edit_callback(Fl_Widget *w, void *data)
 
 UI_Browser::UI_Browser(Instance &inst, int X, int Y, int W, int H, const char *label) :
     Fl_Group(X, Y, W, H, label),
-	active(2), inst(inst)
+	inst(inst)
 {
 	// create each browser box
 
@@ -1595,12 +1595,6 @@ UI_Browser::UI_Browser(Instance &inst, int X, int Y, int W, int H, const char *l
 
 
 	end();
-}
-
-
-UI_Browser::~UI_Browser()
-{
-	// nothing needed
 }
 
 
