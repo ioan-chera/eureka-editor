@@ -176,7 +176,7 @@ void CMD_TH_Merge(Instance &inst)
 {
 	if (inst.edit.Selected->count_obj() == 1 && inst.edit.highlight.valid())
 	{
-		inst.edit.Selection_Add(inst.edit.highlight);
+		inst.edit.Selection_AddHighlighted();
 	}
 
 	if (inst.edit.Selected->count_obj() < 2)

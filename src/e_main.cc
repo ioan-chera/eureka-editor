@@ -816,7 +816,7 @@ SelectHighlight Instance::SelectionOrHighlight()
 
 	if (edit.highlight.valid())
 	{
-		edit.Selection_Add(edit.highlight);
+		edit.Selection_AddHighlighted();
 		return SelectHighlight::unselect;
 	}
 
@@ -967,8 +967,9 @@ void Instance::Selection_Clear(bool no_save)
 }
 
 
-void Editor_State_t::Selection_Add(Objid& obj)
+void Editor_State_t::Selection_AddHighlighted()
 {
+	Objid &obj = highlight;
 	// validate the mode is correct
 	if (obj.type != mode)
 		return;
@@ -990,23 +991,23 @@ void Editor_State_t::Selection_Add(Objid& obj)
 	Selected->set_ext(obj.num, cur);
 }
 
-void Instance::Selection_Toggle(Objid& obj) const
+void Editor_State_t::Selection_Toggle(Objid& obj)
 {
-	if (obj.type != edit.mode)
+	if (obj.type != mode)
 		return;
 
 	if (obj.parts == 0)
 	{
-		edit.Selected->toggle(obj.num);
+		Selected->toggle(obj.num);
 		return;
 	}
 
-	byte cur = edit.Selected->get_ext(obj.num);
+	byte cur = Selected->get_ext(obj.num);
 
 	// if object was simply selected, then just clear it
 	if (cur == 1)
 	{
-		edit.Selected->clear(obj.num);
+		Selected->clear(obj.num);
 		return;
 	}
 
@@ -1016,7 +1017,7 @@ void Instance::Selection_Toggle(Objid& obj) const
 	if (cur == 1)
 		cur = 0;
 
-	edit.Selected->set_ext(obj.num, cur);
+	Selected->set_ext(obj.num, cur);
 }
 
 

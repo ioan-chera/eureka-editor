@@ -54,7 +54,8 @@ typedef enum
 //
 struct Editor_State_t
 {
-	void Selection_Add(Objid &obj);
+	void Selection_AddHighlighted();
+	void Selection_Toggle(Objid &obj);
 
 	ObjType mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 

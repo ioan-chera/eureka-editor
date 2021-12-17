@@ -91,7 +91,7 @@ void Instance::CMD_Select()
 		return;
 	}
 
-	Selection_Toggle(edit.highlight);
+	edit.Selection_Toggle(edit.highlight);
 	RedrawMap();
 }
 
@@ -682,7 +682,7 @@ void Instance::ACT_Click_release()
 			near_obj = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
 
 		if (near_obj.num == click_obj.num)
-			Selection_Toggle(click_obj);
+			edit.Selection_Toggle(click_obj);
 	}
 
 	Editor_ClearAction();

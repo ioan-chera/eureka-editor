@@ -300,7 +300,7 @@ void Instance::commandSectorMerge()
 	// need a selection
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		edit.Selection_Add(edit.highlight);
+		edit.Selection_AddHighlighted();
 	}
 
 	if (edit.Selected->count_obj() < 2)
