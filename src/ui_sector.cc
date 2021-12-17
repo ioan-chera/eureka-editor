@@ -824,7 +824,7 @@ void UI_SectorBox::CB_Copy(int parts)
 	else
 		name = f_tex->value();
 
-	inst.Texboard_SetFlat(name);
+	Texboard_SetFlat(name, inst.conf);
 
 	inst.Status_Set("copied %s", name);
 }
@@ -899,7 +899,7 @@ bool UI_SectorBox::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::paste:
-			CB_Paste(parts, inst.Texboard_GetFlatNum());
+			CB_Paste(parts, Texboard_GetFlatNum(inst.conf));
 			break;
 
 		case EditCommand::cut:

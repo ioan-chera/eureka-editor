@@ -186,12 +186,6 @@ public:
 	void R3D_WHEEL_Move();
 	void Transform_Update();
 
-	// E_CUTPASTE
-	int Texboard_GetFlatNum() const;
-	int Texboard_GetTexNum() const;
-	void Texboard_SetFlat(const SString &new_flat) const;
-	void Texboard_SetTex(const SString &new_tex) const;
-
 	// E_LINEDEF
 	bool LD_RailHeights(int &z1, int &z2, const LineDef *L, const SideDef *sd,
 		const Sector *front, const Sector *back) const;
@@ -445,7 +439,6 @@ private:
 	bool Clipboard_DoCopy();
 	bool Clipboard_DoPaste();
 	void ReselectGroup();
-	int Texboard_GetThing() const;
 
 	// E_LINEDEF
 	void commandLinedefMergeTwo();

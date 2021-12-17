@@ -320,43 +320,43 @@ void Texboard_Clear()
 	tex_clipboard::thing = 0;
 }
 
-int Instance::Texboard_GetTexNum() const
+int Texboard_GetTexNum(const ConfigData &config)
 {
 	if (tex_clipboard::tex.empty())
-		tex_clipboard::tex = conf.default_wall_tex;
+		tex_clipboard::tex = config.default_wall_tex;
 
 	return BA_InternaliseString(tex_clipboard::tex);
 }
 
-int Instance::Texboard_GetFlatNum() const
+int Texboard_GetFlatNum(const ConfigData &config)
 {
 	if (tex_clipboard::flat.empty())
-		tex_clipboard::flat = conf.default_floor_tex;
+		tex_clipboard::flat = config.default_floor_tex;
 
 	return BA_InternaliseString(tex_clipboard::flat);
 }
 
-int Instance::Texboard_GetThing() const
+int Texboard_GetThing(const ConfigData &config)
 {
 	if (tex_clipboard::thing == 0)
-		return conf.default_thing;
+		return config.default_thing;
 
 	return tex_clipboard::thing;
 }
 
-void Instance::Texboard_SetTex(const SString &new_tex) const
+void Texboard_SetTex(const SString &new_tex, const ConfigData &config)
 {
 	tex_clipboard::tex = new_tex;
 
-	if (conf.features.mix_textures_flats)
+	if (config.features.mix_textures_flats)
 		tex_clipboard::flat = new_tex;
 }
 
-void Instance::Texboard_SetFlat(const SString &new_flat) const
+void Texboard_SetFlat(const SString &new_flat, const ConfigData &config)
 {
 	tex_clipboard::flat = new_flat;
 
-	if (conf.features.mix_textures_flats)
+	if (config.features.mix_textures_flats)
 		tex_clipboard::tex = new_flat;
 }
 

@@ -1001,9 +1001,9 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 	}
 
 	if (what->value() == What_lineTextures)
-		inst.Texboard_SetTex(tex_name);
+		Texboard_SetTex(tex_name, inst.conf);
 	else
-		inst.Texboard_SetFlat(tex_name);
+		Texboard_SetFlat(tex_name, inst.conf);
 }
 
 
@@ -1012,7 +1012,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
 	int tex_num = (what->value() == What_lineTextures) ?
-		inst.Texboard_GetTexNum() : inst.Texboard_GetFlatNum();
+		Texboard_GetTexNum(inst.conf) : Texboard_GetFlatNum(inst.conf);
 
 	SString tex_name = BA_GetString(tex_num);
 

@@ -26,6 +26,7 @@
 class EditOperation;
 class selection_c;
 class SString;
+struct ConfigData;
 struct Document;
 class Instance;
 
@@ -63,8 +64,12 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 
 void Texboard_Clear();
 
+int Texboard_GetFlatNum(const ConfigData &config);
+int Texboard_GetTexNum(const ConfigData &config);
+int Texboard_GetThing(const ConfigData &config);
+void Texboard_SetFlat(const SString &new_flat, const ConfigData &config);
+void Texboard_SetTex(const SString &new_tex, const ConfigData &config);
 void Texboard_SetThing(int new_id);
-
 
 #endif  /* __EUREKA_E_CUTPASTE_H__ */
 

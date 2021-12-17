@@ -1421,13 +1421,13 @@ void Instance::Render3D_CB_Copy()
 	case ObjType::sectors:
 		num = GrabSelectedFlat();
 		if (num >= 0)
-			Texboard_SetFlat(BA_GetString(num));
+			Texboard_SetFlat(BA_GetString(num), conf);
 		break;
 
 	case ObjType::linedefs:
 		num = GrabSelectedTexture();
 		if (num >= 0)
-			Texboard_SetTex(BA_GetString(num));
+			Texboard_SetTex(BA_GetString(num), conf);
 		break;
 
 	default:
@@ -1441,15 +1441,15 @@ void Instance::Render3D_CB_Paste()
 	switch (edit.mode)
 	{
 	case ObjType::things:
-		StoreSelectedThing(Texboard_GetThing());
+		StoreSelectedThing(Texboard_GetThing(conf));
 		break;
 
 	case ObjType::sectors:
-		StoreSelectedFlat(Texboard_GetFlatNum());
+		StoreSelectedFlat(Texboard_GetFlatNum(conf));
 		break;
 
 	case ObjType::linedefs:
-		StoreSelectedTexture(Texboard_GetTexNum());
+		StoreSelectedTexture(Texboard_GetTexNum(conf));
 		break;
 
 	default:

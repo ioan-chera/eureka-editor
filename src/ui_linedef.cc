@@ -500,7 +500,7 @@ void UI_LineBox::CB_Copy(int parts)
 		}
 	}
 
-	inst.Texboard_SetTex(name);
+	Texboard_SetTex(name, inst.conf);
 
 	inst.Status_Set("copied %s", name);
 }
@@ -578,7 +578,7 @@ bool UI_LineBox::ClipboardOp(EditCommand op)
 			break;
 
 		case EditCommand::paste:
-			CB_Paste(parts, inst.Texboard_GetTexNum());
+			CB_Paste(parts, Texboard_GetTexNum(inst.conf));
 			break;
 
 		case EditCommand::cut:	// Cut

@@ -400,9 +400,9 @@ void UI_DefaultProps::CB_Copy(int sel_pics)
 	}
 
 	if (sel_pics & 4)
-		inst.Texboard_SetTex(name);
+		Texboard_SetTex(name, inst.conf);
 	else
-		inst.Texboard_SetFlat(name);
+		Texboard_SetFlat(name, inst.conf);
 }
 
 
@@ -411,21 +411,21 @@ void UI_DefaultProps::CB_Paste(int sel_pics)
 	if (sel_pics & 1)
 	{
 		mFixUp.setInputValue(f_tex, 
-							 BA_GetString(inst.Texboard_GetFlatNum()).c_str());
+							 BA_GetString(Texboard_GetFlatNum(inst.conf)).c_str());
 		f_tex->do_callback();
 	}
 
 	if (sel_pics & 2)
 	{
 		mFixUp.setInputValue(c_tex, 
-							 BA_GetString(inst.Texboard_GetFlatNum()).c_str());
+							 BA_GetString(Texboard_GetFlatNum(inst.conf)).c_str());
 		c_tex->do_callback();
 	}
 
 	if (sel_pics & 4)
 	{
 		mFixUp.setInputValue(w_tex, 
-							 BA_GetString(inst.Texboard_GetTexNum()).c_str());
+							 BA_GetString(Texboard_GetTexNum(inst.conf)).c_str());
 		w_tex->do_callback();
 	}
 }
