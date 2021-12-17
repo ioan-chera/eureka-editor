@@ -54,6 +54,8 @@ typedef enum
 //
 struct Editor_State_t
 {
+	void Selection_Add(Objid &obj);
+
 	ObjType mode;  // current mode (OBJ_LINEDEFS, OBJ_SECTORS, etc...)
 
 	bool render3d;     // 3D view is active

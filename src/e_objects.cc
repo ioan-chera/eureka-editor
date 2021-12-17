@@ -2226,7 +2226,7 @@ void Instance::CMD_Quantize()
 			return;
 		}
 
-		Selection_Add(edit.highlight);
+		edit.Selection_Add(edit.highlight);
 	}
 
 	{

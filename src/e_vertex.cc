@@ -290,7 +290,7 @@ void Instance::commandVertexMerge()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		edit.Selection_Add(edit.highlight);
 	}
 
 	if (edit.Selected->count_obj() < 2)
@@ -499,7 +499,7 @@ void Instance::commandVertexDisconnect()
 			return;
 		}
 
-		Selection_Add(edit.highlight);
+		edit.Selection_Add(edit.highlight);
 	}
 
 	bool seen_one = false;

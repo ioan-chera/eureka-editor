@@ -212,7 +212,6 @@ public:
 	bool RecUsed_ParseUser(const std::vector<SString> &tokens);
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
-	void Selection_Add(Objid &obj) const;
 	void Selection_Clear(bool no_save = false);
 	void Selection_InvalidateLast();
 	void Selection_NotifyBegin();

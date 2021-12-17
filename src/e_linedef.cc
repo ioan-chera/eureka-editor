@@ -1156,7 +1156,7 @@ void Instance::commandLinedefMergeTwo()
 {
 	if (edit.Selected->count_obj() == 1 && edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		edit.Selection_Add(edit.highlight);
 	}
 
 	if (edit.Selected->count_obj() != 2)

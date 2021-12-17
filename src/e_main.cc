@@ -816,7 +816,7 @@ SelectHighlight Instance::SelectionOrHighlight()
 
 	if (edit.highlight.valid())
 	{
-		Selection_Add(edit.highlight);
+		edit.Selection_Add(edit.highlight);
 		return SelectHighlight::unselect;
 	}
 
@@ -967,10 +967,10 @@ void Instance::Selection_Clear(bool no_save)
 }
 
 
-void Instance::Selection_Add(Objid& obj) const
+void Editor_State_t::Selection_Add(Objid& obj)
 {
 	// validate the mode is correct
-	if (obj.type != edit.mode)
+	if (obj.type != mode)
 		return;
 
 	if (obj.parts == 0)
@@ -978,16 +978,16 @@ void Instance::Selection_Add(Objid& obj) const
 		// ignore the add if object is already set.
 		// [ since the selection may have parts, and we don't want to
 		//   forget those parts ]
-		if (! edit.Selected->get(obj.num))
-			edit.Selected->set(obj.num);
+		if (! Selected->get(obj.num))
+			Selected->set(obj.num);
 		return;
 	}
 
-	byte cur = edit.Selected->get_ext(obj.num);
+	byte cur = Selected->get_ext(obj.num);
 
 	cur = static_cast<byte>(1 | obj.parts);
 
-	edit.Selected->set_ext(obj.num, cur);
+	Selected->set_ext(obj.num, cur);
 }
 
 void Instance::Selection_Toggle(Objid& obj) const
