@@ -161,7 +161,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 		Lump_c *lump = wad.W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(wad, config, *img, lump, picname, xofs, yofs))
+			! LoadPicture(wad.palette, config, *img, lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -228,7 +228,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 		Lump_c *lump = wad.W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(wad, config, *img, lump, picname, xofs, yofs))
+			! LoadPicture(wad.palette, config, *img, lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -308,7 +308,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 		{
 			case 'd': /* Doom patch */
 				img = new Img_c;
-				if (! LoadPicture(wad, config, *img, lump, name, 0, 0))
+				if (! LoadPicture(wad.palette, config, *img, lump, name, 0, 0))
 				{
 					delete img;
 					img = NULL;
@@ -739,15 +739,15 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 	}
 	else if (info.sprite.noCaseEqual("_LYT"))
 	{
-		result = IM_CreateLightSprite(*this);
+		result = IM_CreateLightSprite(palette);
 	}
 	else if (info.sprite.noCaseEqual("_MSP"))
 	{
-		result = IM_CreateMapSpotSprite(*this, 0, 255, 0);
+		result = IM_CreateMapSpotSprite(palette, 0, 255, 0);
 	}
 	else if (info.sprite.noCaseEqual("NULL"))
 	{
-		result = IM_CreateMapSpotSprite(*this, 70, 70, 255);
+		result = IM_CreateMapSpotSprite(palette, 70, 70, 255);
 	}
 	else
 	{
@@ -759,7 +759,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 			// missing sprite looks ugly in the thing browser.
 
 			if (info.sprite.noCaseEqual("DOGS"))
-				result = IM_CreateDogSprite(*this);
+				result = IM_CreateDogSprite(palette);
 			else
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
@@ -767,7 +767,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 		{
 			result = new Img_c;
 
-			if (! LoadPicture(*this, config, *result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(palette, config, *result, lump, info.sprite, 0, 0))
 			{
 				delete result;
 				result = NULL;

@@ -211,7 +211,7 @@ public:
 		}
 		else if (is_special_tex(tname))
 		{
-			img = inst.wad.IM_SpecialTex();
+			img = inst.wad.images.IM_SpecialTex(inst.wad.palette);
 		}
 		else
 		{

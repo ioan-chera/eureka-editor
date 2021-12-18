@@ -30,6 +30,7 @@
 
 class Img_c;
 class Lump_c;
+class Palette;
 class Wad_file;
 struct ConfigData;
 
@@ -42,6 +43,7 @@ typedef std::map<int, Img_c *> sprite_map_t;
 class ImageSet
 {
 public:
+	Img_c *IM_SpecialTex(const Palette &palette);
 	Img_c *IM_MissingTex(const ConfigData &config);
 	Img_c *IM_UnknownTex(const ConfigData &config);
 	Img_c *IM_UnknownFlat(const ConfigData &config);
@@ -152,7 +154,7 @@ public:	// TODO: make private
 //
 struct WadData
 {
-	Img_c *IM_SpecialTex();	// TODO: solve the images/palette dependency
+	
 	
 	void W_LoadTextures(const ConfigData &config);
 

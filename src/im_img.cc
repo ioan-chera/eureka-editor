@@ -574,24 +574,21 @@ Img_c *ImageSet::IM_UnknownTex(const ConfigData &config)
 }
 
 
-Img_c *WadData::IM_SpecialTex()
+Img_c *ImageSet::IM_SpecialTex(const Palette &palette)
 {
-	if (images.special_tex_color < 0)
+	if (special_tex_color < 0)
 	{
-		images.special_tex_color = palette.W_FindPaletteColor(192, 0, 192);
+		special_tex_color = palette.W_FindPaletteColor(192, 0, 192);
 
-		if (images.special_tex_image)
-		{
-			delete images.special_tex_image;
-			images.special_tex_image = NULL;
-		}
+		delete special_tex_image;
+		special_tex_image = NULL;
 	}
 
-	if (!images.special_tex_image)
-		images.special_tex_image = IM_CreateDummyTex(unknown_graphic, images.special_tex_color,
+	if (!special_tex_image)
+		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
 			palette.W_FindPaletteColor(255, 255, 255));
 
-	return images.special_tex_image;
+	return special_tex_image;
 }
 
 
@@ -638,7 +635,7 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 }
 
 
-static Img_c * IM_CreateFromText(const WadData &wad, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+static Img_c * IM_CreateFromText(const Palette &pal, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
 	Img_c *result = new Img_c(W, H);
 
@@ -648,7 +645,7 @@ static Img_c * IM_CreateFromText(const WadData &wad, int W, int H, const char * 
 	byte *conv_palette = new byte[pal_size];
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = wad.palette.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = pal.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -992,15 +989,15 @@ static const char *const dog_image_text[] =
 };
 
 
-Img_c *IM_CreateDogSprite(const WadData &wad)
+Img_c *IM_CreateDogSprite(const Palette &pal)
 {
-	return IM_CreateFromText(wad, 44, 26, dog_image_text, dog_palette, 7);
+	return IM_CreateFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
 }
 
 
 //------------------------------------------------------------------------
 
-Img_c *IM_CreateLightSprite(const WadData &wad)
+Img_c *IM_CreateLightSprite(const Palette &palette)
 {
 	int W = 11;
 	int H = 11;
@@ -1032,7 +1029,7 @@ Img_c *IM_CreateLightSprite(const WadData &wad)
 			int g = static_cast<int>(235 * ity);
 			int b = static_cast<int>(90  * ity);
 
-			pix = wad.palette.W_FindPaletteColor(r, g, b);
+			pix = palette.W_FindPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1042,7 +1039,7 @@ Img_c *IM_CreateLightSprite(const WadData &wad)
 }
 
 
-Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b)
+Img_c *IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b)
 {
 	int W = 32;
 	int H = 32;
@@ -1071,7 +1068,7 @@ Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int ba
 			int g = static_cast<int>(base_g * ity);
 			int b = static_cast<int>(base_b * ity);
 
-			pix = wad.palette.W_FindPaletteColor(r, g, b);
+			pix = pal.W_FindPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;

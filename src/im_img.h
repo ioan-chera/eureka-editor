@@ -55,6 +55,7 @@ const img_pixel_t TRANS_PIXEL = 255;
 
 class Fl_RGB_Image;
 class Instance;
+class Palette;
 struct ConfigData;
 struct WadData;
 
@@ -134,9 +135,9 @@ private:
 	Img_c& operator= (const Img_c&);  // No need to implement it
 };
 
-Img_c *IM_CreateDogSprite(const WadData &wad);
-Img_c *IM_CreateLightSprite(const WadData &wad);
-Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b);
+Img_c *IM_CreateDogSprite(const Palette &pal);
+Img_c *IM_CreateLightSprite(const Palette &palette);
+Img_c *IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b);
 Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 

@@ -55,7 +55,7 @@ struct post_t
 #define P_SENTINEL  0xFF
 
 
-static void DrawColumn(const WadData &wad, const ConfigData &config,Img_c& img, const post_t *column, int x, int y)
+static void DrawColumn(const Palette &pal, const ConfigData &config,Img_c& img, const post_t *column, int x, int y)
 {
 	SYS_ASSERT(column);
 
@@ -95,7 +95,7 @@ static void DrawColumn(const WadData &wad, const ConfigData &config,Img_c& img, 
 			byte pix = *src++;
 
 			if (pix == TRANS_PIXEL)
-				pix = static_cast<byte>(wad.palette.getTransReplace());
+				pix = static_cast<byte>(pal.getTransReplace());
 
 			dest[top * W] = pix;
 		}
@@ -222,7 +222,7 @@ static bool ComposePicture(Img_c& dest, Img_c *sub,
 //
 //  Return true on success, false on failure.
 //
-bool LoadPicture(const WadData &wad, const ConfigData &config, Img_c& dest,      // image to load picture into
+bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,      // image to load picture into
 	Lump_c *lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
@@ -296,7 +296,7 @@ bool LoadPicture(const WadData &wad, const ConfigData &config, Img_c& dest,     
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
-		DrawColumn(wad, config, dest, column, pic_x_offset + x, pic_y_offset);
+		DrawColumn(pal, config, dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
 	return true;
