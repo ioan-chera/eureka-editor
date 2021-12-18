@@ -702,7 +702,7 @@ static Img_c * IM_CreateFont(int W, int H, const char *const *text,
 }
 
 
-Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
+Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src)
 {
 	int W  = src->w();
 	int H  = src->h();
@@ -748,7 +748,7 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 }
 
 
-Img_c * Instance::IM_ConvertTGAImage(const rgba_color_t * data, int W, int H) const
+Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 {
 	Img_c *img = new Img_c(W, H);
 
@@ -1137,26 +1137,26 @@ static const char *const digit_14x19_text[] =
 };
 
 
-Img_c *Instance::IM_DigitFont_11x14()
+Img_c *WadData::IM_DigitFont_11x14()
 {
-	if (! wad.digit_font_11x14)
+	if (! digit_font_11x14)
 	{
-		wad.digit_font_11x14 = IM_CreateFont(11*14, 14, digit_11x14_text,
+		digit_font_11x14 = IM_CreateFont(11*14, 14, digit_11x14_text,
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return wad.digit_font_11x14;
+	return digit_font_11x14;
 }
 
-Img_c *Instance::IM_DigitFont_14x19()
+Img_c *WadData::IM_DigitFont_14x19()
 {
-	if (! wad.digit_font_14x19)
+	if (! digit_font_14x19)
 	{
-		wad.digit_font_14x19 = IM_CreateFont(14*14, 19, digit_14x19_text,
+		digit_font_14x19 = IM_CreateFont(14*14, 19, digit_14x19_text,
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return wad.digit_font_14x19;
+	return digit_font_14x19;
 }
 
 // this one applies the current gamma.

@@ -2259,7 +2259,7 @@ void UI_Canvas::RenderSector(int num)
 		}
 		else
 		{
-			img = inst.W_GetFlat(tex_name);
+			img = inst.wad.W_GetFlat(inst.conf, tex_name);
 
 			if (! img)
 			{
@@ -2758,14 +2758,14 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 
 	if (cur_font < 17)
 	{
-		font_img  = inst.IM_DigitFont_11x14();
+		font_img  = inst.wad.IM_DigitFont_11x14();
 		font_cw   = 11;
 		font_ch   = 14;
 		font_step = font_cw - 2;
 	}
 	else
 	{
-		font_img  = inst.IM_DigitFont_14x19();
+		font_img  = inst.wad.IM_DigitFont_14x19();
 		font_cw   = 14;
 		font_ch   = 19;
 		font_step = font_cw - 2;

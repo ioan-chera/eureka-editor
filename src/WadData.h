@@ -21,9 +21,13 @@
 
 #include "im_color.h"
 #include "sys_type.h"
+#include <map>
 
 class Img_c;
 struct ConfigData;
+
+// maps type number to an image
+typedef std::map<int, Img_c *> sprite_map_t;
 
 //
 // Wad data, loaded during resource setup
@@ -35,6 +39,16 @@ struct WadData
 	Img_c *IM_SpecialTex();
 	Img_c *IM_UnknownFlat(const ConfigData &config);
 	Img_c *IM_UnknownSprite(const ConfigData &config);
+	Img_c *IM_DigitFont_11x14();
+	Img_c *IM_DigitFont_14x19();
+
+	Img_c *W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
+	bool W_TextureIsKnown(const ConfigData &config, const SString &name) const;
+	bool W_TextureCausesMedusa(const SString &name) const;
+
+	Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	bool W_FlatIsKnown(const ConfigData &config, const SString &name) const;
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
@@ -61,6 +75,12 @@ struct WadData
 	Img_c *unknown_flat_image = nullptr;
 	Img_c *unknown_sprite_image = nullptr;
 	Img_c *unknown_tex_image = nullptr;
+
+	std::map<SString, Img_c *> textures;
+	std::map<SString, Img_c *> flats;
+	sprite_map_t sprites;
+	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
+	std::map<SString, int> medusa_textures;
 };
 
 #endif /* WadData_h */

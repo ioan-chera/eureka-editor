@@ -50,11 +50,11 @@ static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
 
 void Instance::W_ClearTextures()
 {
-	std::for_each(textures.begin(), textures.end(), DeleteTex);
+	std::for_each(wad.textures.begin(), wad.textures.end(), DeleteTex);
 
-	textures.clear();
+	wad.textures.clear();
 
-	medusa_textures.clear();
+	wad.medusa_textures.clear();
 }
 
 
@@ -64,9 +64,9 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 
 	SString tex_str = name;
 
-	std::map<SString, Img_c *>::iterator P = textures.find(tex_str);
+	std::map<SString, Img_c *>::iterator P = wad.textures.find(tex_str);
 
-	if (P != textures.end())
+	if (P != wad.textures.end())
 	{
 		delete P->second;
 
@@ -74,10 +74,10 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 	}
 	else
 	{
-		textures[tex_str] = img;
+		wad.textures[tex_str] = img;
 	}
 
-	medusa_textures[tex_str] = is_medusa ? 1 : 0;
+	wad.medusa_textures[tex_str] = is_medusa ? 1 : 0;
 }
 
 
@@ -384,7 +384,7 @@ void Instance::W_LoadTextures()
 }
 
 
-Img_c * Instance::W_GetTexture(const SString &name, bool try_uppercase) const
+Img_c * WadData::W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	if (is_null_tex(name))
 		return NULL;
@@ -400,10 +400,10 @@ Img_c * Instance::W_GetTexture(const SString &name, bool try_uppercase) const
 
 	if (try_uppercase)
 	{
-		return W_GetTexture(NormalizeTex(name), false);
+		return W_GetTexture(config, NormalizeTex(name), false);
 	}
 
-	if (conf.features.mix_textures_flats)
+	if (config.features.mix_textures_flats)
 	{
 		std::map<SString, Img_c *>::const_iterator P = flats.find(t_str);
 
@@ -415,9 +415,9 @@ Img_c * Instance::W_GetTexture(const SString &name, bool try_uppercase) const
 }
 
 
-int Instance::W_GetTextureHeight(const SString &name) const
+int WadData::W_GetTextureHeight(const ConfigData &config, const SString &name) const
 {
-	Img_c *img = W_GetTexture(name);
+	Img_c *img = W_GetTexture(config, name);
 
 	if (! img)
 		return 128;
@@ -426,7 +426,7 @@ int Instance::W_GetTextureHeight(const SString &name) const
 }
 
 // accepts "-", "#xxxx" or an existing texture name
-bool Instance::W_TextureIsKnown(const SString &name) const
+bool WadData::W_TextureIsKnown(const ConfigData &config, const SString &name) const
 {
 	if (is_null_tex(name) || is_special_tex(name))
 		return true;
@@ -439,7 +439,7 @@ bool Instance::W_TextureIsKnown(const SString &name) const
 	if (P != textures.end())
 		return true;
 
-	if (conf.features.mix_textures_flats)
+	if (config.features.mix_textures_flats)
 	{
 		std::map<SString, Img_c *>::const_iterator P = flats.find(name);
 
@@ -451,7 +451,7 @@ bool Instance::W_TextureIsKnown(const SString &name) const
 }
 
 
-bool Instance::W_TextureCausesMedusa(const SString &name) const
+bool WadData::W_TextureCausesMedusa(const SString &name) const
 {
 	std::map<SString, int>::const_iterator P = medusa_textures.find(name);
 
@@ -493,9 +493,9 @@ static void DeleteFlat(const std::map<SString, Img_c *>::value_type& P)
 
 void Instance::W_ClearFlats()
 {
-	std::for_each(flats.begin(), flats.end(), DeleteFlat);
+	std::for_each(wad.flats.begin(), wad.flats.end(), DeleteFlat);
 
-	flats.clear();
+	wad.flats.clear();
 }
 
 
@@ -505,9 +505,9 @@ void Instance::W_AddFlat(const SString &name, Img_c *img)
 
 	SString flat_str = name;
 
-	std::map<SString, Img_c *>::iterator P = flats.find(flat_str);
+	std::map<SString, Img_c *>::iterator P = wad.flats.find(flat_str);
 
-	if (P != flats.end())
+	if (P != wad.flats.end())
 	{
 		delete P->second;
 
@@ -515,7 +515,7 @@ void Instance::W_AddFlat(const SString &name, Img_c *img)
 	}
 	else
 	{
-		flats[flat_str] = img;
+		wad.flats[flat_str] = img;
 	}
 }
 
@@ -583,14 +583,14 @@ void Instance::W_LoadFlats()
 }
 
 
-Img_c * Instance::W_GetFlat(const SString &name, bool try_uppercase) const
+Img_c * WadData::W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	std::map<SString, Img_c *>::const_iterator P = flats.find(name);
 
 	if (P != flats.end())
 		return P->second;
 
-	if (conf.features.mix_textures_flats)
+	if (config.features.mix_textures_flats)
 	{
 		std::map<SString, Img_c *>::const_iterator P = textures.find(name);
 
@@ -600,14 +600,14 @@ Img_c * Instance::W_GetFlat(const SString &name, bool try_uppercase) const
 
 	if (try_uppercase)
 	{
-		return W_GetFlat(NormalizeTex(name), false);
+		return W_GetFlat(config, NormalizeTex(name), false);
 	}
 
 	return NULL;
 }
 
 
-bool Instance::W_FlatIsKnown(const SString &name) const
+bool WadData::W_FlatIsKnown(const ConfigData &config, const SString &name) const
 {
 	// sectors do not support "-" (but our code can make it)
 	if (is_null_tex(name))
@@ -621,7 +621,7 @@ bool Instance::W_FlatIsKnown(const SString &name) const
 	if (P != flats.end())
 		return true;
 
-	if (conf.features.mix_textures_flats)
+	if (config.features.mix_textures_flats)
 	{
 		std::map<SString, Img_c *>::const_iterator P = textures.find(name);
 
@@ -645,9 +645,9 @@ static void DeleteSprite(const sprite_map_t::value_type& P)
 
 void Instance::W_ClearSprites()
 {
-	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
+	std::for_each(wad.sprites.begin(), wad.sprites.end(), DeleteSprite);
 
-	sprites.clear();
+	wad.sprites.clear();
 }
 
 
@@ -722,9 +722,9 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 
 Img_c *Instance::W_GetSprite(int type)
 {
-	sprite_map_t::const_iterator P = sprites.find(type);
+	sprite_map_t::const_iterator P = wad.sprites.find(type);
 
-	if (P != sprites.end())
+	if (P != wad.sprites.end())
 		return P->second;
 
 	// sprite not in the list yet.  Add it.
@@ -818,7 +818,7 @@ Img_c *Instance::W_GetSprite(int type)
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
-	sprites[type] = result;
+	wad.sprites[type] = result;
 	return result;
 }
 
@@ -845,9 +845,9 @@ static void UnloadSprite(const sprite_map_t::value_type& P)
 
 void Instance::W_UnloadAllTextures() const
 {
-	std::for_each(textures.begin(), textures.end(), UnloadTex);
-	std::for_each(   flats.begin(),    flats.end(), UnloadFlat);
-	std::for_each( sprites.begin(),  sprites.end(), UnloadSprite);
+	std::for_each(wad.textures.begin(), wad.textures.end(), UnloadTex);
+	std::for_each(wad.flats.begin(),    wad.flats.end(), UnloadFlat);
+	std::for_each(wad.sprites.begin(),  wad.sprites.end(), UnloadSprite);
 
 	IM_UnloadDummyTextures();
 }

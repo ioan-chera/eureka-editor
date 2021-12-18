@@ -169,7 +169,7 @@ public:
 			return NULL;
 		}
 
-		Img_c *img = inst.W_GetFlat(fname);
+		Img_c *img = inst.wad.W_GetFlat(inst.conf, fname);
 		if (! img)
 		{
 			img = inst.wad.IM_UnknownFlat(inst.conf);
@@ -215,7 +215,7 @@ public:
 		}
 		else
 		{
-			img = inst.W_GetTexture(tname);
+			img = inst.wad.W_GetTexture(inst.conf, tname);
 
 			if (! img)
 			{

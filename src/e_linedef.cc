@@ -388,7 +388,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 		const Sector *front = SD->SecRef(doc);
 
 		if (L->flags & MLF_LowerUnpegged)
-			return front->floorh + inst.W_GetTextureHeight(SD->MidTex());
+			return front->floorh + inst.wad.W_GetTextureHeight(inst.conf, SD->MidTex());
 
 		return front->ceilh;
 	}
@@ -406,7 +406,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 	if (obj.parts & (PART_RT_UPPER | PART_LF_UPPER))
 	{
 		if (! (L->flags & MLF_UpperUnpegged))
-			return back->ceilh + inst.W_GetTextureHeight(SD->UpperTex());
+			return back->ceilh + inst.wad.W_GetTextureHeight(inst.conf, SD->UpperTex());
 
 		return front->ceilh;
 	}
@@ -1513,7 +1513,7 @@ bool Instance::LD_RailHeights(int& z1, int& z2, const LineDef *L, const SideDef 
 	if (z2 <= z1)
 		return false;
 
-	int img_h = W_GetTextureHeight(rail_tex);
+	int img_h = wad.W_GetTextureHeight(conf, rail_tex);
 
 	if (L->flags & MLF_LowerUnpegged)
 	{

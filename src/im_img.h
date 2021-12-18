@@ -138,6 +138,8 @@ void IM_ResetDummyTextures(WadData &wad);
 Img_c *IM_CreateDogSprite(const WadData &wad);
 Img_c *IM_CreateLightSprite(const WadData &wad);
 Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b);
+Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
+Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

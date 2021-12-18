@@ -118,7 +118,7 @@ public:
 
 		if (inst.r_view.texturing)
 		{
-			img = inst.W_GetFlat(fname);
+			img = inst.wad.W_GetFlat(inst.conf, fname);
 
 			if (! img)
 			{
@@ -154,7 +154,7 @@ public:
 				return;
 			}
 
-			img = inst.W_GetTexture(tname);
+			img = inst.wad.W_GetTexture(inst.conf, tname);
 
 			if (! img)
 			{

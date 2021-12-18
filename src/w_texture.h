@@ -35,8 +35,7 @@ SString NormalizeTex(const SString &name);
 
 /* ---- SPRITES ---- */
 
-// maps type number to an image
-typedef std::map<int, Img_c *> sprite_map_t;
+
 
 #endif  /* __EUREKA_W_TEXTURE_H__ */
 

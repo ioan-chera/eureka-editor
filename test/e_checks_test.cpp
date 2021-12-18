@@ -209,22 +209,22 @@ void Instance::Status_Set(const char *fmt, ...) const
 {
 }
 
-bool Instance::W_FlatIsKnown(const SString &name) const
+bool WadData::W_FlatIsKnown(const ConfigData &config, const SString &name) const
 {
 	return false;
 }
 
-Img_c * Instance::W_GetTexture(const SString &name, bool try_uppercase) const
+Img_c * WadData::W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	return nullptr;
 }
 
-bool Instance::W_TextureCausesMedusa(const SString &name) const
+bool WadData::W_TextureCausesMedusa(const SString &name) const
 {
 	return false;
 }
 
-bool Instance::W_TextureIsKnown(const SString &name) const
+bool WadData::W_TextureIsKnown(const ConfigData &config, const SString &name) const
 {
 	return false;
 }

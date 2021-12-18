@@ -233,10 +233,10 @@ public:
 	void W_LoadPalette();
 
 	// IM_IMG
-	Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src) const;
-	Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H) const;
-	Img_c *IM_DigitFont_11x14();
-	Img_c *IM_DigitFont_14x19();
+	
+	
+	
+	
 	void W_UnloadAllTextures() const;
 	void IM_UnloadDummyTextures() const;
 
@@ -352,16 +352,10 @@ public:
 
 	// W_TEXTURE
 	void W_AddFlat(const SString &name, Img_c *img);
-	bool W_FlatIsKnown(const SString &name) const;
-	Img_c *W_GetFlat(const SString &name, bool try_uppercase = false) const;
 	Img_c *W_GetSprite(int type);
-	Img_c *W_GetTexture(const SString &name, bool try_uppercase = false) const;
-	int W_GetTextureHeight(const SString &name) const;
 	void W_LoadFlats();
 	void W_LoadTextures();
 	void W_LoadTextures_TX_START(const Wad_file *wf);
-	bool W_TextureCausesMedusa(const SString &name) const;
-	bool W_TextureIsKnown(const SString &name) const;
 
 	// W_WAD
 	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
@@ -548,11 +542,6 @@ public:	// will be private when we encapsulate everything
 	int saving_level = 0;
 	UI_NodeDialog *nodeialog = nullptr;
 	nodebuildinfo_t *nb_info = nullptr;
-	std::map<SString, Img_c *> textures;
-	std::map<SString, Img_c *> flats;
-	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
-	std::map<SString, int> medusa_textures;
-	sprite_map_t sprites;
 
 	WadData wad;
 
