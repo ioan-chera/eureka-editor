@@ -176,7 +176,7 @@ public:
 			fullbright = config::render_unknown_bright;
 		}
 
-		img->bind_gl();
+		img->bind_gl(inst.wad);
 
 		r = g = b = 255;
 		return img;
@@ -224,7 +224,7 @@ public:
 			}
 		}
 
-		img->bind_gl();
+		img->bind_gl(inst.wad);
 
 		r = g = b = 255;
 		return img;
@@ -1285,7 +1285,7 @@ public:
 		}
 
 		// bind the sprite image (upload it to OpenGL if needed)
-		img->bind_gl();
+		img->bind_gl(inst.wad);
 
 		// choose texture coords based on image size
 		tx1 = 0.0;

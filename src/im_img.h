@@ -59,19 +59,17 @@ struct WadData;
 class Img_c
 {
 private:
-	img_pixel_t *pixels;
+	img_pixel_t *pixels = nullptr;
 
-	int  w;  // Width
-	int  h;  // Height
+	int  w = 0;  // Width
+	int  h = 0;  // Height
 
 	// texture identifier for OpenGL, 0 if not uploaded yet
-	GLuint gl_tex;
-
-	const Instance &inst;
+	GLuint gl_tex = 0;
 
 public:
-	explicit Img_c(const Instance &inst);
-	 Img_c(const Instance &inst, int width, int height, bool _dummy = false);
+	 Img_c() = default;
+	 Img_c(int width, int height, bool _dummy = false);
 	~Img_c();
 
 	inline bool is_null() const
@@ -110,7 +108,7 @@ public:
 	// transparent pixels.
 	void compose(Img_c *other, int x, int y);
 
-	Img_c * spectrify() const;
+	Img_c * spectrify(const ConfigData &config) const;
 
 	Img_c * scale_img(double scale) const;
 
@@ -119,15 +117,15 @@ public:
 	bool has_transparent() const;
 
 	// upload to OpenGL, overwriting 'gl_tex' field.
-	void load_gl();
+	void load_gl(const WadData &wad);
 
 	// invalidate the 'gl_tex' field, deleting old texture if possible.
 	void unload_gl(bool can_delete);
 
-	void bind_gl();
+	void bind_gl(const WadData &wad);
 
 	// convert pixels to RGB mode, for testing other code
-	void test_make_RGB();
+	void test_make_RGB(const WadData &wad);
 
 private:
 	Img_c            (const Img_c&);  // No need to implement it

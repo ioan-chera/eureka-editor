@@ -1101,7 +1101,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	if (by2 <= by1) by2 = by1 + 1;
 
 	// bind the sprite image (upload it to OpenGL if needed)
-	img->bind_gl();
+	img->bind_gl(inst.wad);
 
 	// choose texture coords based on image size
 	float tx1 = 0.0;
@@ -2397,7 +2397,7 @@ void UI_Canvas::RenderSector(int num)
 
 		glAlphaFunc(GL_GREATER, 0.5);
 
-		img->bind_gl();
+		img->bind_gl(inst.wad);
 	}
 	else
 	{
@@ -2778,7 +2778,7 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 	glAlphaFunc(GL_GREATER, 0.5);
 
 	// bind the sprite image (upload it to OpenGL if needed)
-	font_img->bind_gl();
+	font_img->bind_gl(inst.wad);
 #endif
 
 	// compute total size

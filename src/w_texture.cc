@@ -125,7 +125,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 	if (width == 0 || height == 0)
 		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(*this, width, height, false);
+	Img_c *img = new Img_c(width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -190,7 +190,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 	if (width == 0 || height == 0)
 		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(*this, width, height, false);
+	Img_c *img = new Img_c(width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -307,7 +307,7 @@ void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 		switch (img_fmt)
 		{
 			case 'd': /* Doom patch */
-				img = new Img_c(*this);
+				img = new Img_c;
 				if (! LoadPicture(*img, lump, name, 0, 0))
 				{
 					delete img;
@@ -524,7 +524,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 {
 	// TODO: check size == 64*64
 
-	Img_c *img = new Img_c(inst, 64, 64, false);
+	Img_c *img = new Img_c(64, 64, false);
 
 	int size = 64 * 64;
 
@@ -765,7 +765,7 @@ Img_c *Instance::W_GetSprite(int type)
 		}
 		else
 		{
-			result = new Img_c(*this);
+			result = new Img_c;
 
 			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
 			{

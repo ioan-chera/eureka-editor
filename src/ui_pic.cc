@@ -166,7 +166,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 
 	if (info.flags & THINGDEF_INVIS)
 	{
-		img = img->spectrify();
+		img = img->spectrify(inst.conf);
 		new_img = true;
 	}
 

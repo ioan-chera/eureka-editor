@@ -63,19 +63,10 @@ inline static rgb_color_t IM_PixelToRGB(const WadData &wad, img_pixel_t p)
 	}
 }
 
-
-//
-// default constructor, creating a null image
-//
-Img_c::Img_c(const Instance &inst) : pixels(NULL), w(0), h(0), gl_tex(0), inst(inst)
-{ }
-
-
 //
 // a constructor with dimensions
 //
-Img_c::Img_c(const Instance &inst, int width, int height, bool _dummy) :
-	pixels(NULL), w(0), h(0), gl_tex(0), inst(inst)
+Img_c::Img_c(int width, int height, bool _dummy)
 {
 	resize(width, height);
 }
@@ -192,12 +183,12 @@ void Img_c::compose(Img_c *other, int x, int y)
 //
 // make a game image look vaguely like a spectre
 //
-Img_c * Img_c::spectrify() const
+Img_c * Img_c::spectrify(const ConfigData &config) const
 {
-	Img_c *omg = new Img_c(inst, width(), height());
+	Img_c *omg = new Img_c(width(), height());
 
-	int invis_start = inst.conf.miscInfo.invis_colors[0];
-	int invis_len   = inst.conf.miscInfo.invis_colors[1] - invis_start + 1;
+	int invis_start = config.miscInfo.invis_colors[0];
+	int invis_len   = config.miscInfo.invis_colors[1] - invis_start + 1;
 
 	if (invis_len < 1)
 		invis_len = 1;
@@ -237,7 +228,7 @@ Img_c * Img_c::scale_img(double scale) const
 	int owidth  = (int) (width()  * scale + 0.5);
 	int oheight = (int) (height() * scale + 0.5);
 
-	Img_c *omg = new Img_c(inst, owidth, oheight);
+	Img_c *omg = new Img_c(owidth, oheight);
 
 	const img_pixel_t *const ibuf = buf();
 	img_pixel_t       *const obuf = omg->wbuf();
@@ -274,7 +265,7 @@ Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img_c *omg = new Img_c(inst, width(), height());
+	Img_c *omg = new Img_c(width(), height());
 
 	int W = width();
 	int H = height();
@@ -320,7 +311,7 @@ bool Img_c::has_transparent() const
 }
 
 
-void Img_c::test_make_RGB()
+void Img_c::test_make_RGB(const WadData &wad)
 {
 	int W = width();
 	int H = height();
@@ -334,7 +325,7 @@ void Img_c::test_make_RGB()
 
 		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
 		{
-			const rgb_color_t col = IM_PixelToRGB(inst.wad, pix);
+			const rgb_color_t col = IM_PixelToRGB(wad, pix);
 
 			byte r = RGB_RED(col)   >> 3;
 			byte g = RGB_GREEN(col) >> 3;
@@ -354,7 +345,7 @@ void Img_c::bind_gl() {}
 
 #else
 
-void Img_c::load_gl()
+void Img_c::load_gl(const WadData &wad)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -405,7 +396,7 @@ void Img_c::load_gl()
 			{
 				byte r, g, b;
 
-				IM_DecodePixel(inst.wad, pix, r, g, b);
+				IM_DecodePixel(wad, pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
@@ -439,13 +430,13 @@ void Img_c::unload_gl(bool can_delete)
 }
 
 
-void Img_c::bind_gl()
+void Img_c::bind_gl(const WadData &wad)
 {
 	// create the GL texture if we haven't already
 	if (gl_tex == 0)
 	{
 		// this will do a glBindTexture
-		load_gl();
+		load_gl(wad);
 		return;
 	}
 
@@ -538,7 +529,7 @@ static const byte missing_graphic[16 * 16] =
 
 static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg, int fg)
 {
-	Img_c *omg = new Img_c(inst, 64, 64, true);
+	Img_c *omg = new Img_c(64, 64, true);
 
 	img_pixel_t *obuf = omg->wbuf();
 
@@ -635,7 +626,7 @@ Img_c *Instance::IM_UnknownSprite()
 		if (unknown_sprite_image)
 			delete unknown_sprite_image;
 
-		unknown_sprite_image = new Img_c(*this, 64, 64, true);
+		unknown_sprite_image = new Img_c(64, 64, true);
 
 		img_pixel_t *obuf = unknown_sprite_image->wbuf();
 
@@ -653,7 +644,7 @@ Img_c *Instance::IM_UnknownSprite()
 
 static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
-	Img_c *result = new Img_c(inst, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
@@ -687,7 +678,7 @@ static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *con
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
-	Img_c *result = new Img_c(inst, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
@@ -732,7 +723,7 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 	if (! (D == 3 || D == 4))
 		return NULL;
 
-	Img_c *img = new Img_c(*this, W, H);
+	Img_c *img = new Img_c(W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -763,7 +754,7 @@ Img_c *Instance::IM_ConvertRGBImage(Fl_RGB_Image *src) const
 
 Img_c * Instance::IM_ConvertTGAImage(const rgba_color_t * data, int W, int H) const
 {
-	Img_c *img = new Img_c(*this, W, H);
+	Img_c *img = new Img_c(W, H);
 
 	img_pixel_t *dest = img->wbuf();
 
@@ -1018,7 +1009,7 @@ Img_c *Instance::IM_CreateLightSprite() const
 	int W = 11;
 	int H = 11;
 
-	Img_c *result = new Img_c(*this, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
@@ -1060,7 +1051,7 @@ Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) cons
 	int W = 32;
 	int H = 32;
 
-	Img_c *result = new Img_c(*this, W, H);
+	Img_c *result = new Img_c(W, H);
 
 	result->clear();
 
