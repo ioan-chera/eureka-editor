@@ -709,7 +709,7 @@ public:
 			float img_h  = static_cast<float>(img->height());
 			float img_tw, img_th;
 
-			if (inst.use_npot_textures)
+			if (global::use_npot_textures)
 			{
 				img_tw = img_w;
 				img_th = img_h;
@@ -802,7 +802,7 @@ public:
 		float img_h  = static_cast<float>(img->height());
 		float img_tw, img_th;
 
-		if (inst.use_npot_textures)
+		if (global::use_npot_textures)
 		{
 			img_tw = img_w;
 			img_th = img_h;
@@ -1291,7 +1291,7 @@ public:
 		tx1 = 0.0;
 		ty1 = 0.0;
 
-		if (inst.use_npot_textures)
+		if (global::use_npot_textures)
 		{
 			tx2 = 1.0;
 			ty2 = 1.0;

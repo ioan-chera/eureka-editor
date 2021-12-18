@@ -363,7 +363,7 @@ void Img_c::load_gl()
 
 	// construct a power-of-two sized bottom-up RGBA image
 	int tw, th;
-	if (inst.use_npot_textures)
+	if (global::use_npot_textures)
 	{
 		tw = w;
 		th = h;

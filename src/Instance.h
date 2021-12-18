@@ -591,9 +591,6 @@ public:	// will be private when we encapsulate everything
 	Img_c *unknown_flat_image = nullptr;
 	Img_c *unknown_sprite_image = nullptr;
 	Img_c *unknown_tex_image = nullptr;
-#ifndef NO_OPENGL
-	bool use_npot_textures = false;
-#endif
 
 	//
 	// IO stuff

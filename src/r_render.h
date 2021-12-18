@@ -85,6 +85,11 @@ public:
 	float AdjustDistFactor(float view_x, float view_y);
 };
 
+namespace global
+{
+	extern bool use_npot_textures;
+};
+
 void Render3D_RegisterCommands();
 
 void Render3D_Enable(Instance &inst, bool _enable);

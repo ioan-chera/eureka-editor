@@ -59,6 +59,8 @@ int  config::render_far_clip = 32768;
 // as the pixel aspect ratio.
 int  config::render_pixel_aspect = 83;  //  100 * width / height
 
+bool global::use_npot_textures;
+
 namespace thing_sec_cache
 {
 	int invalid_low, invalid_high;
