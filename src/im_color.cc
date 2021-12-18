@@ -39,7 +39,7 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-void Instance::W_UpdateGamma()
+void W_UpdateGamma(WadData &wad)
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
@@ -69,7 +69,7 @@ void Instance::W_UpdateGamma()
 	}
 }
 
-static void W_CreateBrightMap(Instance &inst);
+static void W_CreateBrightMap(WadData &wad);
 
 void Instance::W_LoadPalette()
 {
@@ -93,13 +93,13 @@ void Instance::W_LoadPalette()
 	byte tg = wad.raw_palette[TRANS_PIXEL][1];
 	byte tb = wad.raw_palette[TRANS_PIXEL][2];
 
-	wad.trans_replace = W_FindPaletteColor(tr, tg, tb);
+	wad.trans_replace = W_FindPaletteColor(wad, tr, tg, tb);
 
-	W_UpdateGamma();
+	W_UpdateGamma(wad);
 
-	W_CreateBrightMap(*this);
+	W_CreateBrightMap(wad);
 
-	IM_ResetDummyTextures();
+	IM_ResetDummyTextures(wad);
 }
 
 
@@ -164,7 +164,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 }
 
 
-byte Instance::W_FindPaletteColor(int r, int g, int b) const
+byte W_FindPaletteColor(const WadData &wad, int r, int g, int b)
 {
 	int best = 0;
 	int best_dist = (1 << 30);
@@ -191,13 +191,13 @@ byte Instance::W_FindPaletteColor(int r, int g, int b) const
 }
 
 
-static void W_CreateBrightMap(Instance &inst)
+static void W_CreateBrightMap(WadData &wad)
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		byte r = inst.wad.raw_palette[c][0];
-		byte g = inst.wad.raw_palette[c][1];
-		byte b = inst.wad.raw_palette[c][2];
+		byte r = wad.raw_palette[c][0];
+		byte g = wad.raw_palette[c][1];
+		byte b = wad.raw_palette[c][2];
 
 		rgb_color_t col = LighterColor(fl_rgb_color(r, g, b));
 
@@ -205,7 +205,7 @@ static void W_CreateBrightMap(Instance &inst)
 		g = RGB_GREEN(col);
 		b = RGB_BLUE(col);
 
-		inst.wad.bright_map[c] = inst.W_FindPaletteColor(r, g, b);
+		wad.bright_map[c] = W_FindPaletteColor(wad, r, g, b);
 	}
 }
 

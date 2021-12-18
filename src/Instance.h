@@ -229,25 +229,14 @@ public:
 	const byte *SoundPropagation(int start_sec);
 
 	// IM_COLOR
-	byte W_FindPaletteColor(int r, int g, int b) const;
 	void W_LoadColormap();
 	void W_LoadPalette();
-	void W_UpdateGamma();
 
 	// IM_IMG
 	Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src) const;
 	Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H) const;
-	Img_c *IM_CreateDogSprite() const;
-	Img_c *IM_CreateLightSprite() const;
-	Img_c *IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const;
 	Img_c *IM_DigitFont_11x14();
 	Img_c *IM_DigitFont_14x19();
-	Img_c *IM_MissingTex();
-	void IM_ResetDummyTextures();
-	Img_c *IM_SpecialTex();
-	Img_c *IM_UnknownFlat();
-	Img_c *IM_UnknownSprite();
-	Img_c *IM_UnknownTex();
 	void W_UnloadAllTextures() const;
 	void IM_UnloadDummyTextures() const;
 
@@ -580,17 +569,6 @@ public:	// will be private when we encapsulate everything
 	// Color stuff
 	//
 	byte raw_colormap[32][256] = {};
-
-	//
-	// Image stuff
-	//
-	Img_c *digit_font_11x14 = nullptr;
-	Img_c *digit_font_14x19 = nullptr;
-	Img_c *missing_tex_image = nullptr;
-	Img_c *special_tex_image = nullptr;
-	Img_c *unknown_flat_image = nullptr;
-	Img_c *unknown_sprite_image = nullptr;
-	Img_c *unknown_tex_image = nullptr;
 
 	//
 	// IO stuff

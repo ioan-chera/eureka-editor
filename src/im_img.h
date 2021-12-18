@@ -134,6 +134,10 @@ private:
 
 void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b);
 void IM_DecodePixel_medium(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b);
+void IM_ResetDummyTextures(WadData &wad);
+Img_c *IM_CreateDogSprite(const WadData &wad);
+Img_c *IM_CreateLightSprite(const WadData &wad);
+Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b);
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

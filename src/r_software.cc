@@ -122,7 +122,7 @@ public:
 
 			if (! img)
 			{
-				img = inst.IM_UnknownFlat();
+				img = inst.wad.IM_UnknownFlat(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -144,13 +144,13 @@ public:
 		{
 			if (is_null_tex(tname))
 			{
-				img = inst.IM_MissingTex();
+				img = inst.wad.IM_MissingTex(inst.conf);
 				fullbright = config::render_missing_bright;
 				return;
 			}
 			else if (is_special_tex(tname))
 			{
-				img = inst.IM_SpecialTex();
+				img = inst.wad.IM_SpecialTex();
 				return;
 			}
 
@@ -158,7 +158,7 @@ public:
 
 			if (! img)
 			{
-				img = inst.IM_UnknownTex();
+				img = inst.wad.IM_UnknownTex(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -886,7 +886,7 @@ public:
 		Img_c *sprite = inst.W_GetSprite(th->type);
 		if (! sprite)
 		{
-			sprite = inst.IM_UnknownSprite();
+			sprite = inst.wad.IM_UnknownSprite(inst.conf);
 			is_unknown = true;
 			scale = 0.33f;
 		}

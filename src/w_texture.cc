@@ -739,15 +739,15 @@ Img_c *Instance::W_GetSprite(int type)
 	}
 	else if (info.sprite.noCaseEqual("_LYT"))
 	{
-		result = IM_CreateLightSprite();
+		result = IM_CreateLightSprite(wad);
 	}
 	else if (info.sprite.noCaseEqual("_MSP"))
 	{
-		result = IM_CreateMapSpotSprite(0, 255, 0);
+		result = IM_CreateMapSpotSprite(wad, 0, 255, 0);
 	}
 	else if (info.sprite.noCaseEqual("NULL"))
 	{
-		result = IM_CreateMapSpotSprite(70, 70, 255);
+		result = IM_CreateMapSpotSprite(wad, 70, 70, 255);
 	}
 	else
 	{
@@ -759,7 +759,7 @@ Img_c *Instance::W_GetSprite(int type)
 			// missing sprite looks ugly in the thing browser.
 
 			if (info.sprite.noCaseEqual("DOGS"))
-				result = IM_CreateDogSprite();
+				result = IM_CreateDogSprite(wad);
 			else
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}

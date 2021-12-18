@@ -448,7 +448,7 @@ void Img_c::bind_gl(const WadData &wad)
 //------------------------------------------------------------------------
 
 
-void Instance::IM_ResetDummyTextures()
+void IM_ResetDummyTextures(WadData &wad)
 {
 	wad.missing_tex_color  = -1;
 	wad.unknown_tex_color  = -1;
@@ -462,26 +462,26 @@ void Instance::IM_UnloadDummyTextures() const
 {
 	bool can_delete = false;
 
-	if (missing_tex_image)
-		missing_tex_image->unload_gl(can_delete);
+	if (wad.missing_tex_image)
+		wad.missing_tex_image->unload_gl(can_delete);
 
-	if (unknown_tex_image)
-		unknown_tex_image->unload_gl(can_delete);
+	if (wad.unknown_tex_image)
+		wad.unknown_tex_image->unload_gl(can_delete);
 
-	if (special_tex_image)
-		special_tex_image->unload_gl(can_delete);
+	if (wad.special_tex_image)
+		wad.special_tex_image->unload_gl(can_delete);
 
-	if (unknown_flat_image)
-		unknown_flat_image->unload_gl(can_delete);
+	if (wad.unknown_flat_image)
+		wad.unknown_flat_image->unload_gl(can_delete);
 
-	if (unknown_sprite_image)
-		unknown_sprite_image->unload_gl(can_delete);
+	if (wad.unknown_sprite_image)
+		wad.unknown_sprite_image->unload_gl(can_delete);
 
-	if (digit_font_11x14)
-		digit_font_11x14->unload_gl(can_delete);
+	if (wad.digit_font_11x14)
+		wad.digit_font_11x14->unload_gl(can_delete);
 
-	if (digit_font_14x19)
-		digit_font_14x19->unload_gl(can_delete);
+	if (wad.digit_font_14x19)
+		wad.digit_font_14x19->unload_gl(can_delete);
 }
 
 
@@ -527,7 +527,7 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg, int fg)
+static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
 {
 	Img_c *omg = new Img_c(64, 64, true);
 
@@ -544,43 +544,41 @@ static Img_c * IM_CreateDummyTex(const Instance &inst, const byte *data, int bg,
 }
 
 
-Img_c *Instance::IM_MissingTex()
+Img_c *WadData::IM_MissingTex(const ConfigData &config)
 {
-	if (! missing_tex_image || wad.missing_tex_color != conf.miscInfo.missing_color)
+	if (! missing_tex_image || missing_tex_color != config.miscInfo.missing_color)
 	{
-		wad.missing_tex_color = conf.miscInfo.missing_color;
+		missing_tex_color = config.miscInfo.missing_color;
 
-		if (missing_tex_image)
-			delete missing_tex_image;
+		delete missing_tex_image;
 
-		missing_tex_image = IM_CreateDummyTex(*this, missing_graphic, wad.missing_tex_color, 0);
+		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
 	}
 
 	return missing_tex_image;
 }
 
 
-Img_c *Instance::IM_UnknownTex()
+Img_c *WadData::IM_UnknownTex(const ConfigData &config)
 {
-	if (! unknown_tex_image || wad.unknown_tex_color != conf.miscInfo.unknown_tex)
+	if (! unknown_tex_image || unknown_tex_color != config.miscInfo.unknown_tex)
 	{
-		wad.unknown_tex_color = conf.miscInfo.unknown_tex;
+		unknown_tex_color = config.miscInfo.unknown_tex;
 
-		if (unknown_tex_image)
-			delete unknown_tex_image;
+		delete unknown_tex_image;
 
-		unknown_tex_image = IM_CreateDummyTex(*this, unknown_graphic, wad.unknown_tex_color, 0);
+		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
 	}
 
 	return unknown_tex_image;
 }
 
 
-Img_c *Instance::IM_SpecialTex()
+Img_c *WadData::IM_SpecialTex()
 {
-	if (wad.special_tex_color < 0)
+	if (special_tex_color < 0)
 	{
-		wad.special_tex_color = W_FindPaletteColor(192, 0, 192);
+		special_tex_color = W_FindPaletteColor(*this, 192, 0, 192);
 
 		if (special_tex_image)
 		{
@@ -590,41 +588,39 @@ Img_c *Instance::IM_SpecialTex()
 	}
 
 	if (! special_tex_image)
-		special_tex_image = IM_CreateDummyTex(*this, unknown_graphic, wad.special_tex_color,
-			W_FindPaletteColor(255, 255, 255));
+		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
+			W_FindPaletteColor(*this, 255, 255, 255));
 
 	return special_tex_image;
 }
 
 
-Img_c *Instance::IM_UnknownFlat()
+Img_c *WadData::IM_UnknownFlat(const ConfigData &config)
 {
-	if (! unknown_flat_image || wad.unknown_flat_color != conf.miscInfo.unknown_flat)
+	if (! unknown_flat_image || unknown_flat_color != config.miscInfo.unknown_flat)
 	{
-		wad.unknown_flat_color = conf.miscInfo.unknown_flat;
+		unknown_flat_color = config.miscInfo.unknown_flat;
 
-		if (unknown_flat_image)
-			delete unknown_flat_image;
+		delete unknown_flat_image;
 
-		unknown_flat_image = IM_CreateDummyTex(*this, unknown_graphic, wad.unknown_flat_color, 0);
+		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
 	}
 
 	return unknown_flat_image;
 }
 
 
-Img_c *Instance::IM_UnknownSprite()
+Img_c *WadData::IM_UnknownSprite(const ConfigData &config)
 {
-	int unk_col = conf.miscInfo.unknown_thing;
+	int unk_col = config.miscInfo.unknown_thing;
 	if (unk_col == 0)
-		unk_col = conf.miscInfo.unknown_tex;
+		unk_col = config.miscInfo.unknown_tex;
 
-	if (! unknown_sprite_image || wad.unknown_sprite_color != unk_col)
+	if (! unknown_sprite_image || unknown_sprite_color != unk_col)
 	{
-		wad.unknown_sprite_color = unk_col;
+		unknown_sprite_color = unk_col;
 
-		if (unknown_sprite_image)
-			delete unknown_sprite_image;
+		delete unknown_sprite_image;
 
 		unknown_sprite_image = new Img_c(64, 64, true);
 
@@ -634,7 +630,7 @@ Img_c *Instance::IM_UnknownSprite()
 		for (int x = 0 ; x < 64 ; x++)
 		{
 			obuf[y * 64 + x] = static_cast<img_pixel_t>(unknown_graphic[(y/4) * 16 + (x/4)] ?
-                                                        wad.unknown_sprite_color : TRANS_PIXEL);
+                                                        unknown_sprite_color : TRANS_PIXEL);
 		}
 	}
 
@@ -642,7 +638,7 @@ Img_c *Instance::IM_UnknownSprite()
 }
 
 
-static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+static Img_c * IM_CreateFromText(const WadData &wad, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
 	Img_c *result = new Img_c(W, H);
 
@@ -652,7 +648,7 @@ static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char 
 	byte *conv_palette = new byte[pal_size];
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = inst.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = W_FindPaletteColor(wad, RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -674,7 +670,7 @@ static Img_c * IM_CreateFromText(const Instance &inst, int W, int H, const char 
 }
 
 
-static Img_c * IM_CreateFont(const Instance &inst, int W, int H, const char *const *text,
+static Img_c * IM_CreateFont(int W, int H, const char *const *text,
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
@@ -996,15 +992,15 @@ static const char *const dog_image_text[] =
 };
 
 
-Img_c *Instance::IM_CreateDogSprite() const
+Img_c *IM_CreateDogSprite(const WadData &wad)
 {
-	return IM_CreateFromText(*this, 44, 26, dog_image_text, dog_palette, 7);
+	return IM_CreateFromText(wad, 44, 26, dog_image_text, dog_palette, 7);
 }
 
 
 //------------------------------------------------------------------------
 
-Img_c *Instance::IM_CreateLightSprite() const
+Img_c *IM_CreateLightSprite(const WadData &wad)
 {
 	int W = 11;
 	int H = 11;
@@ -1036,7 +1032,7 @@ Img_c *Instance::IM_CreateLightSprite() const
 			int g = static_cast<int>(235 * ity);
 			int b = static_cast<int>(90  * ity);
 
-			pix = W_FindPaletteColor(r, g, b);
+			pix = W_FindPaletteColor(wad, r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1046,7 +1042,7 @@ Img_c *Instance::IM_CreateLightSprite() const
 }
 
 
-Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) const
+Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b)
 {
 	int W = 32;
 	int H = 32;
@@ -1075,7 +1071,7 @@ Img_c *Instance::IM_CreateMapSpotSprite(int base_r, int base_g, int base_b) cons
 			int g = static_cast<int>(base_g * ity);
 			int b = static_cast<int>(base_b * ity);
 
-			pix = W_FindPaletteColor(r, g, b);
+			pix = W_FindPaletteColor(wad, r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1143,24 +1139,24 @@ static const char *const digit_14x19_text[] =
 
 Img_c *Instance::IM_DigitFont_11x14()
 {
-	if (! digit_font_11x14)
+	if (! wad.digit_font_11x14)
 	{
-		digit_font_11x14 = IM_CreateFont(*this, 11*14, 14, digit_11x14_text,
+		wad.digit_font_11x14 = IM_CreateFont(11*14, 14, digit_11x14_text,
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_11x14;
+	return wad.digit_font_11x14;
 }
 
 Img_c *Instance::IM_DigitFont_14x19()
 {
-	if (! digit_font_14x19)
+	if (! wad.digit_font_14x19)
 	{
-		digit_font_14x19 = IM_CreateFont(*this, 14*14, 19, digit_14x19_text,
+		wad.digit_font_14x19 = IM_CreateFont(14*14, 19, digit_14x19_text,
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_14x19;
+	return wad.digit_font_14x19;
 }
 
 // this one applies the current gamma.

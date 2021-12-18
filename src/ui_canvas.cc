@@ -1021,7 +1021,7 @@ void UI_Canvas::DrawThingSprites()
 
 		if (! sprite)
 		{
-			sprite = inst.IM_UnknownSprite();
+			sprite = inst.wad.IM_UnknownSprite(inst.conf);
 			scale = 0.66f;
 		}
 
@@ -2263,7 +2263,7 @@ void UI_Canvas::RenderSector(int num)
 
 			if (! img)
 			{
-				img = inst.IM_UnknownTex();
+				img = inst.wad.IM_UnknownTex(inst.conf);
 			}
 		}
 	}
