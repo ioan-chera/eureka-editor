@@ -1064,11 +1064,11 @@ bool Wad_file::Backup(const char *new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *Instance::W_FindGlobalLump(const SString &name) const
+Lump_c *WadData::W_FindGlobalLump(const SString &name) const
 {
-	for (int i = (int)wad.master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = wad.master_dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1080,11 +1080,11 @@ Lump_c *Instance::W_FindGlobalLump(const SString &name) const
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
 //
-Lump_c *Instance::W_FindSpriteLump(const SString &name) const
+Lump_c *WadData::W_FindSpriteLump(const SString &name) const
 {
-	for (int i = (int)wad.master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = wad.master_dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
+		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
 		if (L)
 			return L;
 	}

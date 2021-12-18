@@ -1236,7 +1236,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.W_GetSprite(th->type);
+		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.IM_UnknownSprite(inst.conf);
@@ -1453,7 +1453,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.W_GetSprite(th->type);
+		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.IM_UnknownSprite(inst.conf);

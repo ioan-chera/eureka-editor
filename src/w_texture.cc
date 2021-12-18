@@ -111,7 +111,7 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 }
 
 
-void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset,
+static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte *tex_data, int tex_length, int offset,
 									byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
@@ -158,10 +158,10 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = W_FindGlobalLump(picname);
+		Lump_c *lump = wad.W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(wad, conf, *img, lump, picname, xofs, yofs))
+			! LoadPicture(wad, config, *img, lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -176,7 +176,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 }
 
 
-void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
+static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *tex_data, int tex_length, int offset,
 									byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
@@ -225,10 +225,10 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		picname[8] = 0;
 
 //gLog.debugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = W_FindGlobalLump(picname);
+		Lump_c *lump = wad.W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(wad, conf, *img, lump, picname, xofs, yofs))
+			! LoadPicture(wad, config, *img, lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -243,7 +243,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 }
 
 
-void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
+static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lump, byte *pnames, int pname_size,
                              bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
@@ -285,14 +285,14 @@ void Instance::LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size,
 			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
-			LoadTextureEntry_Strife(tex_data.data(), tex_length, offset, pnames, pname_size, skip_first);
+			LoadTextureEntry_Strife(wad, config, tex_data.data(), tex_length, offset, pnames, pname_size, skip_first);
 		else
-			LoadTextureEntry_DOOM(tex_data.data(), tex_length, offset, pnames, pname_size, skip_first);
+			LoadTextureEntry_DOOM(wad, config, tex_data.data(), tex_length, offset, pnames, pname_size, skip_first);
 	}
 }
 
 
-void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
+static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, const Wad_file *wf)
 {
 	for(const LumpRef &lumpRef : wf->getDir())
 	{
@@ -308,7 +308,7 @@ void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 		{
 			case 'd': /* Doom patch */
 				img = new Img_c;
-				if (! LoadPicture(wad, conf, *img, lump, name, 0, 0))
+				if (! LoadPicture(wad, config, *img, lump, name, 0, 0))
 				{
 					delete img;
 					img = NULL;
@@ -345,17 +345,17 @@ void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 }
 
 
-void Instance::W_LoadTextures()
+void WadData::W_LoadTextures(const ConfigData &config)
 {
-	wad.W_ClearTextures();
+	W_ClearTextures();
 
-	for (int i = 0 ; i < (int)wad.master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
 		gLog.printf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = wad.master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
-		Lump_c *texture1 = wad.master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
-		Lump_c *texture2 = wad.master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
+		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
+		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
+		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -370,15 +370,15 @@ void Instance::W_LoadTextures()
 			int pname_size = W_LoadLumpData(pnames, pname_data);
 
 			if (texture1)
-				LoadTexturesLump(texture1, pname_data.data(), pname_size, true);
+				LoadTexturesLump(*this, config, texture1, pname_data.data(), pname_size, true);
 
 			if (texture2)
-				LoadTexturesLump(texture2, pname_data.data(), pname_size, false);
+				LoadTexturesLump(*this, config, texture2, pname_data.data(), pname_size, false);
 		}
 
-		if (conf.features.tx_start)
+		if (config.features.tx_start)
 		{
-			W_LoadTextures_TX_START(wad.master_dir[i].get());
+			W_LoadTextures_TX_START(*this, config, master_dir[i].get());
 		}
 	}
 }
@@ -520,7 +520,7 @@ void WadData::W_AddFlat(const SString &name, Img_c *img)
 }
 
 
-static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *lump)
+static Img_c * LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
@@ -547,7 +547,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = static_cast<img_pixel_t>(inst.wad.trans_replace);
+			pix = static_cast<img_pixel_t>(wad.trans_replace);
 
 		img->wbuf() [i] = pix;
 	}
@@ -558,15 +558,15 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 }
 
 
-void Instance::W_LoadFlats()
+void WadData::W_LoadFlats()
 {
-	wad.W_ClearFlats();
+	W_ClearFlats();
 
-	for (int i = 0 ; i < (int)wad.master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
 		gLog.printf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = wad.master_dir[i].get();
+		const Wad_file *wf = master_dir[i].get();
 
 		for(const LumpRef &lumpRef : wf->getDir())
 		{
@@ -577,7 +577,7 @@ void Instance::W_LoadFlats()
 			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
 
 			if (img)
-				wad.W_AddFlat(lump->Name(), img);
+				W_AddFlat(lump->Name(), img);
 		}
 	}
 }
@@ -652,7 +652,7 @@ void WadData::W_ClearSprites()
 
 
 // find sprite by prefix
-static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
+static Lump_c * Sprite_loc_by_root (const WadData &wad, const ConfigData &config, const SString &name)
 {
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
@@ -665,19 +665,19 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 	if(buffer.length() == 5)
 		buffer += '0';
 
-	Lump_c *lump = inst.W_FindSpriteLump(buffer);
+	Lump_c *lump = wad.W_FindSpriteLump(buffer);
 
 	if (! lump)
 	{
 		if(buffer.length() >= 6)
 			buffer[5] = '1';
-		lump = inst.W_FindSpriteLump(buffer);
+		lump = wad.W_FindSpriteLump(buffer);
 	}
 
 	if (! lump)
 	{
 		buffer += "D1";
-		lump = inst.W_FindSpriteLump(buffer);
+		lump = wad.W_FindSpriteLump(buffer);
 	}
 
 	if (lump)
@@ -685,7 +685,7 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 
 	// check outside of the sprite namespace...
 
-	if (inst.conf.features.lax_sprites)
+	if (config.features.lax_sprites)
 	{
 		buffer = name;
 		if(buffer.length() == 4)
@@ -693,13 +693,13 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = inst.W_FindGlobalLump(buffer);
+		lump = wad.W_FindGlobalLump(buffer);
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = inst.W_FindGlobalLump(buffer);
+			lump = wad.W_FindGlobalLump(buffer);
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -713,23 +713,23 @@ static Lump_c * Sprite_loc_by_root (const Instance &inst, const SString &name)
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = inst.W_FindGlobalLump(name);
+		lump = wad.W_FindGlobalLump(name);
 	}
 
 	return lump;
 }
 
 
-Img_c *Instance::W_GetSprite(int type)
+Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 {
-	sprite_map_t::const_iterator P = wad.sprites.find(type);
+	sprite_map_t::const_iterator P = sprites.find(type);
 
-	if (P != wad.sprites.end())
+	if (P != sprites.end())
 		return P->second;
 
 	// sprite not in the list yet.  Add it.
 
-	const thingtype_t &info = M_GetThingType(conf, type);
+	const thingtype_t &info = M_GetThingType(config, type);
 
 	Img_c *result = NULL;
 
@@ -739,19 +739,19 @@ Img_c *Instance::W_GetSprite(int type)
 	}
 	else if (info.sprite.noCaseEqual("_LYT"))
 	{
-		result = IM_CreateLightSprite(wad);
+		result = IM_CreateLightSprite(*this);
 	}
 	else if (info.sprite.noCaseEqual("_MSP"))
 	{
-		result = IM_CreateMapSpotSprite(wad, 0, 255, 0);
+		result = IM_CreateMapSpotSprite(*this, 0, 255, 0);
 	}
 	else if (info.sprite.noCaseEqual("NULL"))
 	{
-		result = IM_CreateMapSpotSprite(wad, 70, 70, 255);
+		result = IM_CreateMapSpotSprite(*this, 70, 70, 255);
 	}
 	else
 	{
-		Lump_c *lump = Sprite_loc_by_root(*this, info.sprite);
+		Lump_c *lump = Sprite_loc_by_root(*this, config, info.sprite);
 		if (! lump)
 		{
 			// for the MBF dog, create our own sprite for it, since
@@ -759,7 +759,7 @@ Img_c *Instance::W_GetSprite(int type)
 			// missing sprite looks ugly in the thing browser.
 
 			if (info.sprite.noCaseEqual("DOGS"))
-				result = IM_CreateDogSprite(wad);
+				result = IM_CreateDogSprite(*this);
 			else
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
@@ -767,7 +767,7 @@ Img_c *Instance::W_GetSprite(int type)
 		{
 			result = new Img_c;
 
-			if (! LoadPicture(wad, conf, *result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(*this, config, *result, lump, info.sprite, 0, 0))
 			{
 				delete result;
 				result = NULL;
@@ -818,7 +818,7 @@ Img_c *Instance::W_GetSprite(int type)
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
-	wad.sprites[type] = result;
+	sprites[type] = result;
 	return result;
 }
 

@@ -336,20 +336,13 @@ public:
 	// UI_MENU
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
-	// W_TEXTURE
-	
-	Img_c *W_GetSprite(int type);
-	void W_LoadFlats();
-	void W_LoadTextures();
-	void W_LoadTextures_TX_START(const Wad_file *wf);
-
 	// W_WAD
 	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
-	Lump_c *W_FindGlobalLump(const SString &name) const;
-	Lump_c *W_FindSpriteLump(const SString &name) const;
+	
+	
 
 private:
 	// New private methods
@@ -451,12 +444,6 @@ private:
 	void StoreSelectedFlat(int new_tex);
 	void StoreSelectedTexture(int new_tex);
 	void StoreSelectedThing(int new_type);
-
-	// W_TEXTURE
-	void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
-	void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
-	void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size, bool skip_first);
-
 
 public:	// will be private when we encapsulate everything
 	Document level{*this};	// level data proper

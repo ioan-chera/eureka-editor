@@ -27,6 +27,7 @@
 #include <vector>
 
 class Img_c;
+class Lump_c;
 class Wad_file;
 struct ConfigData;
 
@@ -47,6 +48,7 @@ struct WadData
 	Img_c *IM_DigitFont_14x19();
 	void IM_UnloadDummyTextures() const;
 
+	void W_LoadTextures(const ConfigData &config);
 	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
 	Img_c *W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
@@ -59,12 +61,21 @@ struct WadData
 		return textures;
 	}
 
+	void W_LoadFlats();
 	void W_AddFlat(const SString &name, Img_c *img);
 	Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	bool W_FlatIsKnown(const ConfigData &config, const SString &name) const;
 	void W_ClearFlats();
+	const std::map<SString, Img_c *> &getFlats() const
+	{
+		return flats;
+	}
 
+	Img_c *W_GetSprite(const ConfigData &config, int type);
 	void W_ClearSprites();
+
+	Lump_c *W_FindGlobalLump(const SString &name) const;
+	Lump_c *W_FindSpriteLump(const SString &name) const;
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
@@ -92,8 +103,6 @@ struct WadData
 	Img_c *unknown_sprite_image = nullptr;
 	Img_c *unknown_tex_image = nullptr;
 
-	
-	std::map<SString, Img_c *> flats;
 	sprite_map_t sprites;
 
 	// the current PWAD, or NULL for none.
@@ -105,6 +114,7 @@ struct WadData
 
 private:
 	std::map<SString, Img_c *> textures;
+	std::map<SString, Img_c *> flats;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
 };

@@ -979,8 +979,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	W_LoadPalette();
 	W_LoadColormap();
 
-	W_LoadFlats();
-	W_LoadTextures();
+	wad.W_LoadFlats();
+	wad.W_LoadTextures(conf);
 	wad.W_ClearSprites();
 
 	gLog.printf("--- DONE ---\n");

@@ -883,7 +883,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *sprite = inst.W_GetSprite(th->type);
+		Img_c *sprite = inst.wad.W_GetSprite(inst.conf, th->type);
 		if (! sprite)
 		{
 			sprite = inst.wad.IM_UnknownSprite(inst.conf);
