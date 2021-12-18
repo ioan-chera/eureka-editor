@@ -988,7 +988,7 @@ void UI_FindAndReplace::CB_Copy(bool is_replace)
 	if (tex_name[0])
 	{
 		bool is_known = (what->value() == What_lineTextures) ?
-			inst.wad.W_TextureIsKnown(inst.conf, tex_name) : inst.wad.W_FlatIsKnown(inst.conf, tex_name);
+			inst.wad.images.W_TextureIsKnown(inst.conf, tex_name) : inst.wad.images.W_FlatIsKnown(inst.conf, tex_name);
 
 		if (!is_known)
 			tex_name = "";

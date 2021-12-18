@@ -63,7 +63,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 	}
 	else
 	{
-		return inst.raw_colormap[map][pixel];
+		return inst.wad.getColormapIndex(map, pixel);
 	}
 }
 
@@ -118,11 +118,11 @@ public:
 
 		if (inst.r_view.texturing)
 		{
-			img = inst.wad.W_GetFlat(inst.conf, fname);
+			img = inst.wad.images.W_GetFlat(inst.conf, fname);
 
 			if (! img)
 			{
-				img = inst.wad.IM_UnknownFlat(inst.conf);
+				img = inst.wad.images.IM_UnknownFlat(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -144,7 +144,7 @@ public:
 		{
 			if (is_null_tex(tname))
 			{
-				img = inst.wad.IM_MissingTex(inst.conf);
+				img = inst.wad.images.IM_MissingTex(inst.conf);
 				fullbright = config::render_missing_bright;
 				return;
 			}
@@ -154,11 +154,11 @@ public:
 				return;
 			}
 
-			img = inst.wad.W_GetTexture(inst.conf, tname);
+			img = inst.wad.images.W_GetTexture(inst.conf, tname);
 
 			if (! img)
 			{
-				img = inst.wad.IM_UnknownTex(inst.conf);
+				img = inst.wad.images.IM_UnknownTex(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -886,7 +886,7 @@ public:
 		Img_c *sprite = inst.wad.W_GetSprite(inst.conf, th->type);
 		if (! sprite)
 		{
-			sprite = inst.wad.IM_UnknownSprite(inst.conf);
+			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
 			is_unknown = true;
 			scale = 0.33f;
 		}
@@ -1686,10 +1686,10 @@ public:
 
 			if (dw->thingFlags & THINGDEF_INVIS)
 			{
-				if (*dest & IS_RGB_PIXEL)
+				if(*dest & IS_RGB_PIXEL)
 					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
 				else
-					*dest = inst.raw_colormap[14][*dest];
+					*dest = inst.wad.getColormapIndex(14, *dest);
 				continue;
 			}
 
@@ -2054,7 +2054,7 @@ static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
-			IM_DecodePixel(inst.wad, *src, dest[0], dest[1], dest[2]);
+			inst.wad.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy+ry, inst.r_view.screen_w, 1);
@@ -2077,8 +2077,8 @@ static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
-			IM_DecodePixel(inst.wad, *src, dest[0], dest[1], dest[2]);
-			IM_DecodePixel(inst.wad, *src, dest[3], dest[4], dest[5]);
+			inst.wad.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			inst.wad.IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);

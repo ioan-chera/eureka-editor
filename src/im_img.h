@@ -53,7 +53,9 @@ const img_pixel_t IS_RGB_PIXEL = 0x8000;
 // the color number used to represent transparent pixels in an Img_c.
 const img_pixel_t TRANS_PIXEL = 255;
 
+class Fl_RGB_Image;
 class Instance;
+struct ConfigData;
 struct WadData;
 
 class Img_c
@@ -132,9 +134,6 @@ private:
 	Img_c& operator= (const Img_c&);  // No need to implement it
 };
 
-void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b);
-void IM_DecodePixel_medium(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b);
-void IM_ResetDummyTextures(WadData &wad);
 Img_c *IM_CreateDogSprite(const WadData &wad);
 Img_c *IM_CreateLightSprite(const WadData &wad);
 Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int base_b);

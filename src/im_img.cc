@@ -43,7 +43,7 @@
 #define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
 
-inline static rgb_color_t IM_PixelToRGB(const WadData &wad, img_pixel_t p)
+rgb_color_t WadData::IM_PixelToRGB(img_pixel_t p) const
 {
 	if (p & IS_RGB_PIXEL)
 	{
@@ -55,9 +55,9 @@ inline static rgb_color_t IM_PixelToRGB(const WadData &wad, img_pixel_t p)
 	}
 	else
 	{
-		byte r = wad.raw_palette[p][0];
-		byte g = wad.raw_palette[p][1];
-		byte b = wad.raw_palette[p][2];
+		byte r = raw_palette[p][0];
+		byte g = raw_palette[p][1];
+		byte b = raw_palette[p][2];
 
 		return RGB_MAKE(r, g, b);
 	}
@@ -325,7 +325,7 @@ void Img_c::test_make_RGB(const WadData &wad)
 
 		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
 		{
-			const rgb_color_t col = IM_PixelToRGB(wad, pix);
+			const rgb_color_t col = wad.IM_PixelToRGB(pix);
 
 			byte r = RGB_RED(col)   >> 3;
 			byte g = RGB_GREEN(col) >> 3;
@@ -396,7 +396,7 @@ void Img_c::load_gl(const WadData &wad)
 			{
 				byte r, g, b;
 
-				IM_DecodePixel(wad, pix, r, g, b);
+				wad.IM_DecodePixel(pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
@@ -448,17 +448,17 @@ void Img_c::bind_gl(const WadData &wad)
 //------------------------------------------------------------------------
 
 
-void IM_ResetDummyTextures(WadData &wad)
+void ImageSet::IM_ResetDummyTextures()
 {
-	wad.missing_tex_color  = -1;
-	wad.unknown_tex_color  = -1;
-	wad.special_tex_color  = -1;
-	wad.unknown_flat_color = -1;
-	wad.unknown_sprite_color = -1;
+	missing_tex_color  = -1;
+	unknown_tex_color  = -1;
+	special_tex_color  = -1;
+	unknown_flat_color = -1;
+	unknown_sprite_color = -1;
 }
 
 
-void WadData::IM_UnloadDummyTextures() const
+void ImageSet::IM_UnloadDummyTextures() const
 {
 	bool can_delete = false;
 
@@ -544,9 +544,9 @@ static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
 }
 
 
-Img_c *WadData::IM_MissingTex(const ConfigData &config)
+Img_c *ImageSet::IM_MissingTex(const ConfigData &config)
 {
-	if (! missing_tex_image || missing_tex_color != config.miscInfo.missing_color)
+	if (!missing_tex_image || missing_tex_color != config.miscInfo.missing_color)
 	{
 		missing_tex_color = config.miscInfo.missing_color;
 
@@ -559,9 +559,9 @@ Img_c *WadData::IM_MissingTex(const ConfigData &config)
 }
 
 
-Img_c *WadData::IM_UnknownTex(const ConfigData &config)
+Img_c *ImageSet::IM_UnknownTex(const ConfigData &config)
 {
-	if (! unknown_tex_image || unknown_tex_color != config.miscInfo.unknown_tex)
+	if (!unknown_tex_image || unknown_tex_color != config.miscInfo.unknown_tex)
 	{
 		unknown_tex_color = config.miscInfo.unknown_tex;
 
@@ -576,28 +576,28 @@ Img_c *WadData::IM_UnknownTex(const ConfigData &config)
 
 Img_c *WadData::IM_SpecialTex()
 {
-	if (special_tex_color < 0)
+	if (images.special_tex_color < 0)
 	{
-		special_tex_color = W_FindPaletteColor(*this, 192, 0, 192);
+		images.special_tex_color = W_FindPaletteColor(192, 0, 192);
 
-		if (special_tex_image)
+		if (images.special_tex_image)
 		{
-			delete special_tex_image;
-			special_tex_image = NULL;
+			delete images.special_tex_image;
+			images.special_tex_image = NULL;
 		}
 	}
 
-	if (! special_tex_image)
-		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
-			W_FindPaletteColor(*this, 255, 255, 255));
+	if (!images.special_tex_image)
+		images.special_tex_image = IM_CreateDummyTex(unknown_graphic, images.special_tex_color,
+			W_FindPaletteColor(255, 255, 255));
 
-	return special_tex_image;
+	return images.special_tex_image;
 }
 
 
-Img_c *WadData::IM_UnknownFlat(const ConfigData &config)
+Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
 {
-	if (! unknown_flat_image || unknown_flat_color != config.miscInfo.unknown_flat)
+	if (!unknown_flat_image || unknown_flat_color != config.miscInfo.unknown_flat)
 	{
 		unknown_flat_color = config.miscInfo.unknown_flat;
 
@@ -610,13 +610,13 @@ Img_c *WadData::IM_UnknownFlat(const ConfigData &config)
 }
 
 
-Img_c *WadData::IM_UnknownSprite(const ConfigData &config)
+Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 {
 	int unk_col = config.miscInfo.unknown_thing;
 	if (unk_col == 0)
 		unk_col = config.miscInfo.unknown_tex;
 
-	if (! unknown_sprite_image || unknown_sprite_color != unk_col)
+	if (!unknown_sprite_image || unknown_sprite_color != unk_col)
 	{
 		unknown_sprite_color = unk_col;
 
@@ -630,7 +630,7 @@ Img_c *WadData::IM_UnknownSprite(const ConfigData &config)
 		for (int x = 0 ; x < 64 ; x++)
 		{
 			obuf[y * 64 + x] = static_cast<img_pixel_t>(unknown_graphic[(y/4) * 16 + (x/4)] ?
-                                                        unknown_sprite_color : TRANS_PIXEL);
+				unknown_sprite_color : TRANS_PIXEL);
 		}
 	}
 
@@ -648,7 +648,7 @@ static Img_c * IM_CreateFromText(const WadData &wad, int W, int H, const char * 
 	byte *conv_palette = new byte[pal_size];
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = W_FindPaletteColor(wad, RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = wad.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -1032,7 +1032,7 @@ Img_c *IM_CreateLightSprite(const WadData &wad)
 			int g = static_cast<int>(235 * ity);
 			int b = static_cast<int>(90  * ity);
 
-			pix = W_FindPaletteColor(wad, r, g, b);
+			pix = wad.W_FindPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1071,7 +1071,7 @@ Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int ba
 			int g = static_cast<int>(base_g * ity);
 			int b = static_cast<int>(base_b * ity);
 
-			pix = W_FindPaletteColor(wad, r, g, b);
+			pix = wad.W_FindPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1137,9 +1137,9 @@ static const char *const digit_14x19_text[] =
 };
 
 
-Img_c *WadData::IM_DigitFont_11x14()
+Img_c *ImageSet::IM_DigitFont_11x14()
 {
-	if (! digit_font_11x14)
+	if (!digit_font_11x14)
 	{
 		digit_font_11x14 = IM_CreateFont(11*14, 14, digit_11x14_text,
 										 digit_font_intensities, 20,
@@ -1148,9 +1148,9 @@ Img_c *WadData::IM_DigitFont_11x14()
 	return digit_font_11x14;
 }
 
-Img_c *WadData::IM_DigitFont_14x19()
+Img_c *ImageSet::IM_DigitFont_14x19()
 {
-	if (! digit_font_14x19)
+	if (!digit_font_14x19)
 	{
 		digit_font_14x19 = IM_CreateFont(14*14, 19, digit_14x19_text,
 										 digit_font_intensities, 20,
@@ -1161,17 +1161,17 @@ Img_c *WadData::IM_DigitFont_14x19()
 
 // this one applies the current gamma.
 // for rendering the 3D view or the 2D sectors and sprites.
-void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b)
+void WadData::IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
 {
 	if(p & IS_RGB_PIXEL)
 	{
-		r = wad.rgb555_gamma[IMG_PIXEL_RED(p)];
-		g = wad.rgb555_gamma[IMG_PIXEL_GREEN(p)];
-		b = wad.rgb555_gamma[IMG_PIXEL_BLUE(p)];
+		r = rgb555_gamma[IMG_PIXEL_RED(p)];
+		g = rgb555_gamma[IMG_PIXEL_GREEN(p)];
+		b = rgb555_gamma[IMG_PIXEL_BLUE(p)];
 	}
 	else
 	{
-		const rgb_color_t col = wad.palette[p];
+		const rgb_color_t col = palette[p];
 
 		r = RGB_RED(col);
 		g = RGB_GREEN(col);
@@ -1181,17 +1181,17 @@ void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b
 
 // this applies a constant gamma.
 // for textures/flats/things in the browser and panels.
-void IM_DecodePixel_medium(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b)
+void WadData::IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const
 {
 	if(p & IS_RGB_PIXEL)
 	{
-		r = wad.rgb555_medium[IMG_PIXEL_RED(p)];
-		g = wad.rgb555_medium[IMG_PIXEL_GREEN(p)];
-		b = wad.rgb555_medium[IMG_PIXEL_BLUE(p)];
+		r = rgb555_medium[IMG_PIXEL_RED(p)];
+		g = rgb555_medium[IMG_PIXEL_GREEN(p)];
+		b = rgb555_medium[IMG_PIXEL_BLUE(p)];
 	}
 	else
 	{
-		const rgb_color_t col = wad.palette_medium[p];
+		const rgb_color_t col = palette_medium[p];
 
 		r = RGB_RED(col);
 		g = RGB_GREEN(col);

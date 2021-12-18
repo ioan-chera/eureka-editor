@@ -976,12 +976,12 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		MasterDir_Add(wad.edit_wad);
 
 	// finally, load textures and stuff...
-	W_LoadPalette();
-	W_LoadColormap();
+	wad.W_LoadPalette();
+	wad.W_LoadColormap();
 
 	wad.W_LoadFlats();
 	wad.W_LoadTextures(conf);
-	wad.W_ClearSprites();
+	wad.images.W_ClearSprites();
 
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");

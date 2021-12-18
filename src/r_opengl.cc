@@ -149,7 +149,7 @@ public:
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			IM_DecodePixel(inst.wad, static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
+			inst.wad.IM_DecodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
 			return NULL;
 		}
 
@@ -165,14 +165,14 @@ public:
 			else
 				col = HashedPalColor(fname, inst.conf.miscInfo.floor_colors);
 
-			IM_DecodePixel(inst.wad, static_cast<img_pixel_t>(col), r, g, b);
+			inst.wad.IM_DecodePixel(static_cast<img_pixel_t>(col), r, g, b);
 			return NULL;
 		}
 
-		Img_c *img = inst.wad.W_GetFlat(inst.conf, fname);
+		Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname);
 		if (! img)
 		{
-			img = inst.wad.IM_UnknownFlat(inst.conf);
+			img = inst.wad.images.IM_UnknownFlat(inst.conf);
 			fullbright = config::render_unknown_bright;
 		}
 
@@ -198,7 +198,7 @@ public:
 			else
 				col = HashedPalColor(tname, inst.conf.miscInfo.wall_colors);
 
-			IM_DecodePixel(inst.wad, static_cast<img_pixel_t>(col), r, g, b);
+			inst.wad.IM_DecodePixel(static_cast<img_pixel_t>(col), r, g, b);
 			return NULL;
 		}
 
@@ -206,7 +206,7 @@ public:
 
 		if (is_null_tex(tname))
 		{
-			img = inst.wad.IM_MissingTex(inst.conf);
+			img = inst.wad.images.IM_MissingTex(inst.conf);
 			fullbright = config::render_missing_bright;
 		}
 		else if (is_special_tex(tname))
@@ -215,11 +215,11 @@ public:
 		}
 		else
 		{
-			img = inst.wad.W_GetTexture(inst.conf, tname);
+			img = inst.wad.images.W_GetTexture(inst.conf, tname);
 
 			if (! img)
 			{
-				img = inst.wad.IM_UnknownTex(inst.conf);
+				img = inst.wad.images.IM_UnknownTex(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 		}
@@ -689,7 +689,7 @@ public:
 		if (sky_upper && where == 'U')
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			IM_DecodePixel(inst.wad, static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
+			inst.wad.IM_DecodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
 		}
 		else
 		{
@@ -1239,7 +1239,7 @@ public:
 		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
 		if (! img)
 		{
-			img = inst.wad.IM_UnknownSprite(inst.conf);
+			img = inst.wad.images.IM_UnknownSprite(inst.conf);
 			fullbright = true;
 			scale = 0.33f;
 		}
@@ -1456,7 +1456,7 @@ public:
 		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
 		if (! img)
 		{
-			img = inst.wad.IM_UnknownSprite(inst.conf);
+			img = inst.wad.images.IM_UnknownSprite(inst.conf);
 			scale = 0.33f;
 		}
 

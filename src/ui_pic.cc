@@ -123,7 +123,7 @@ void UI_Pic::MarkSpecial()
 
 void UI_Pic::GetFlat(const SString & fname)
 {
-	Img_c *img = inst.wad.W_GetFlat(inst.conf, fname, true /* try_uppercase */);
+	Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname, true /* try_uppercase */);
 
 	TiledImg(img);
 }
@@ -142,7 +142,7 @@ void UI_Pic::GetTex(const SString & tname)
 		return;
 	}
 
-	Img_c *img = inst.wad.W_GetTexture(inst.conf, tname, true /* try_uppercase */);
+	Img_c *img = inst.wad.images.W_GetTexture(inst.conf, tname, true /* try_uppercase */);
 
 	TiledImg(img);
 }
@@ -227,7 +227,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		}
 		else
 		{
-			IM_DecodePixel_medium(inst.wad, pix, dest[0], dest[1], dest[2]);
+			inst.wad.IM_DecodePixel_medium(pix, dest[0], dest[1], dest[2]);
 		}
 	}
 
@@ -286,7 +286,7 @@ void UI_Pic::TiledImg(Img_c *img)
 		}
 		else
 		{
-			IM_DecodePixel_medium(inst.wad, pix, dest[0], dest[1], dest[2]);
+			inst.wad.IM_DecodePixel_medium(pix, dest[0], dest[1], dest[2]);
 		}
 	}
 

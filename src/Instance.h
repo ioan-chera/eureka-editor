@@ -228,10 +228,6 @@ public:
 	void GoToSelection();
 	const byte *SoundPropagation(int start_sec);
 
-	// IM_COLOR
-	void W_LoadColormap();
-	void W_LoadPalette();
-	
 	// M_CONFIG
 	void M_DefaultUserState();
 	bool M_LoadUserState();
@@ -514,11 +510,6 @@ public:	// will be private when we encapsulate everything
 	std::vector<byte> sound_temp1_vec;
 	std::vector<byte> sound_temp2_vec;
 	int sound_start_sec = 0;
-
-	//
-	// Color stuff
-	//
-	byte raw_colormap[32][256] = {};
 
 	//
 	// IO stuff

@@ -39,41 +39,39 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-void W_UpdateGamma(WadData &wad)
+void WadData::W_UpdateGamma()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		byte r = wad.raw_palette[c][0];
-		byte g = wad.raw_palette[c][1];
-		byte b = wad.raw_palette[c][2];
+		byte r = raw_palette[c][0];
+		byte g = raw_palette[c][1];
+		byte b = raw_palette[c][2];
 
 		byte r2 = static_cast<byte>(gammatable[config::usegamma][r]);
 		byte g2 = static_cast<byte>(gammatable[config::usegamma][g]);
 		byte b2 = static_cast<byte>(gammatable[config::usegamma][b]);
 
-		wad.palette[c] = fl_rgb_color(r2, g2, b2);
+		palette[c] = fl_rgb_color(r2, g2, b2);
 
 		r2 = static_cast<byte>(gammatable[config::panel_gamma][r]);
 		g2 = static_cast<byte>(gammatable[config::panel_gamma][g]);
 		b2 = static_cast<byte>(gammatable[config::panel_gamma][b]);
 
-		wad.palette_medium[c] = fl_rgb_color(r2, g2, b2);
+		palette_medium[c] = fl_rgb_color(r2, g2, b2);
 	}
 
 	for (int d = 0 ; d < 32 ; d++)
 	{
 		int i = d * 255 / 31;
 
-		wad.rgb555_gamma [d] = static_cast<byte>(gammatable[config::usegamma][i]);
-		wad.rgb555_medium[d] = static_cast<byte>(gammatable[config::panel_gamma][i]);
+		rgb555_gamma [d] = static_cast<byte>(gammatable[config::usegamma][i]);
+		rgb555_medium[d] = static_cast<byte>(gammatable[config::panel_gamma][i]);
 	}
 }
 
-static void W_CreateBrightMap(WadData &wad);
-
-void Instance::W_LoadPalette()
+void WadData::W_LoadPalette()
 {
-	Lump_c *lump = wad.W_FindGlobalLump("PLAYPAL");
+	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
 
 	if (! lump)
 	{
@@ -82,30 +80,30 @@ void Instance::W_LoadPalette()
 	}
 
 	lump->Seek();
-	if (! lump->Read(wad.raw_palette, sizeof(wad.raw_palette)))
+	if (! lump->Read(raw_palette, sizeof(raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return;
 	}
 
 	// find the colour closest to TRANS_PIXEL
-	byte tr = wad.raw_palette[TRANS_PIXEL][0];
-	byte tg = wad.raw_palette[TRANS_PIXEL][1];
-	byte tb = wad.raw_palette[TRANS_PIXEL][2];
+	byte tr = raw_palette[TRANS_PIXEL][0];
+	byte tg = raw_palette[TRANS_PIXEL][1];
+	byte tb = raw_palette[TRANS_PIXEL][2];
 
-	wad.trans_replace = W_FindPaletteColor(wad, tr, tg, tb);
+	trans_replace = W_FindPaletteColor(tr, tg, tb);
 
-	W_UpdateGamma(wad);
+	W_UpdateGamma();
 
-	W_CreateBrightMap(wad);
+	W_CreateBrightMap();
 
-	IM_ResetDummyTextures(wad);
+	images.IM_ResetDummyTextures();
 }
 
 
-void Instance::W_LoadColormap()
+void WadData::W_LoadColormap()
 {
-	Lump_c *lump = wad.W_FindGlobalLump("COLORMAP");
+	Lump_c *lump = W_FindGlobalLump("COLORMAP");
 
 	if (! lump)
 	{
@@ -125,13 +123,13 @@ void Instance::W_LoadColormap()
 	for (int c = 0 ; c < 256 ; c++)
 	{
 		if (raw_colormap[i][c] == TRANS_PIXEL)
-			raw_colormap[i][c] = static_cast<byte>(wad.trans_replace);
+			raw_colormap[i][c] = static_cast<byte>(trans_replace);
 	}
 
 	// workaround for Harmony having a bugged colormap
-	if (wad.raw_palette[0][0] == 0 &&
-		wad.raw_palette[0][1] == 0 &&
-		wad.raw_palette[0][2] == 0)
+	if (raw_palette[0][0] == 0 &&
+		raw_palette[0][1] == 0 &&
+		raw_palette[0][2] == 0)
 	{
 		for (int k = 0 ; k < 32 ; k++)
 			raw_colormap[k][0] = 0;
@@ -164,7 +162,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 }
 
 
-byte W_FindPaletteColor(const WadData &wad, int r, int g, int b)
+byte WadData::W_FindPaletteColor(int r, int g, int b) const
 {
 	int best = 0;
 	int best_dist = (1 << 30);
@@ -174,9 +172,9 @@ byte W_FindPaletteColor(const WadData &wad, int r, int g, int b)
 		if (c == TRANS_PIXEL)
 			continue;
 
-		int dr = r - (int)wad.raw_palette[c][0];
-		int dg = g - (int)wad.raw_palette[c][1];
-		int db = b - (int)wad.raw_palette[c][2];
+		int dr = r - (int)raw_palette[c][0];
+		int dg = g - (int)raw_palette[c][1];
+		int db = b - (int)raw_palette[c][2];
 
 		int dist = dr*dr + dg*dg + db*db;
 
@@ -191,13 +189,13 @@ byte W_FindPaletteColor(const WadData &wad, int r, int g, int b)
 }
 
 
-static void W_CreateBrightMap(WadData &wad)
+void WadData::W_CreateBrightMap()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		byte r = wad.raw_palette[c][0];
-		byte g = wad.raw_palette[c][1];
-		byte b = wad.raw_palette[c][2];
+		byte r = raw_palette[c][0];
+		byte g = raw_palette[c][1];
+		byte b = raw_palette[c][2];
 
 		rgb_color_t col = LighterColor(fl_rgb_color(r, g, b));
 
@@ -205,7 +203,7 @@ static void W_CreateBrightMap(WadData &wad)
 		g = RGB_GREEN(col);
 		b = RGB_BLUE(col);
 
-		wad.bright_map[c] = W_FindPaletteColor(wad, r, g, b);
+		bright_map[c] = W_FindPaletteColor(r, g, b);
 	}
 }
 

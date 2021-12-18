@@ -186,7 +186,7 @@ static void SetGamma(Instance &inst, int new_val)
 {
 	config::usegamma = CLAMP(0, new_val, 4);
 
-	W_UpdateGamma(inst.wad);
+	inst.wad.W_UpdateGamma();
 
 	// for OpenGL, need to reload all images
 	if (inst.main_win && inst.main_win->canvas)

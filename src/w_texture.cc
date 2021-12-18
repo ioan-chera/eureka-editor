@@ -48,7 +48,7 @@ static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
 	delete P.second;
 }
 
-void WadData::W_ClearTextures()
+void ImageSet::W_ClearTextures()
 {
 	std::for_each(textures.begin(), textures.end(), DeleteTex);
 
@@ -58,7 +58,7 @@ void WadData::W_ClearTextures()
 }
 
 
-void WadData::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
+void ImageSet::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 {
 	// free any existing one with the same name
 
@@ -172,7 +172,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.W_AddTexture(namebuf, img, is_medusa);
+	wad.images.W_AddTexture(namebuf, img, is_medusa);
 }
 
 
@@ -239,7 +239,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.W_AddTexture(namebuf, img, is_medusa);
+	wad.images.W_AddTexture(namebuf, img, is_medusa);
 }
 
 
@@ -339,7 +339,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 		// if we successfully loaded the texture, add it
 		if (img)
 		{
-			wad.W_AddTexture(name, img, false /* is_medusa */);
+			wad.images.W_AddTexture(name, img, false /* is_medusa */);
 		}
 	}
 }
@@ -347,7 +347,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 
 void WadData::W_LoadTextures(const ConfigData &config)
 {
-	W_ClearTextures();
+	images.W_ClearTextures();
 
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
@@ -384,7 +384,7 @@ void WadData::W_LoadTextures(const ConfigData &config)
 }
 
 
-Img_c * WadData::W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
+Img_c * ImageSet::W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	if (is_null_tex(name))
 		return NULL;
@@ -415,7 +415,7 @@ Img_c * WadData::W_GetTexture(const ConfigData &config, const SString &name, boo
 }
 
 
-int WadData::W_GetTextureHeight(const ConfigData &config, const SString &name) const
+int ImageSet::W_GetTextureHeight(const ConfigData &config, const SString &name) const
 {
 	Img_c *img = W_GetTexture(config, name);
 
@@ -426,7 +426,7 @@ int WadData::W_GetTextureHeight(const ConfigData &config, const SString &name) c
 }
 
 // accepts "-", "#xxxx" or an existing texture name
-bool WadData::W_TextureIsKnown(const ConfigData &config, const SString &name) const
+bool ImageSet::W_TextureIsKnown(const ConfigData &config, const SString &name) const
 {
 	if (is_null_tex(name) || is_special_tex(name))
 		return true;
@@ -451,7 +451,7 @@ bool WadData::W_TextureIsKnown(const ConfigData &config, const SString &name) co
 }
 
 
-bool WadData::W_TextureCausesMedusa(const SString &name) const
+bool ImageSet::W_TextureCausesMedusa(const SString &name) const
 {
 	std::map<SString, int>::const_iterator P = medusa_textures.find(name);
 
@@ -491,7 +491,7 @@ static void DeleteFlat(const std::map<SString, Img_c *>::value_type& P)
 }
 
 
-void WadData::W_ClearFlats()
+void ImageSet::W_ClearFlats()
 {
 	std::for_each(flats.begin(), flats.end(), DeleteFlat);
 
@@ -499,7 +499,7 @@ void WadData::W_ClearFlats()
 }
 
 
-void WadData::W_AddFlat(const SString &name, Img_c *img)
+void ImageSet::W_AddFlat(const SString &name, Img_c *img)
 {
 	// find any existing one with same name, and free it
 
@@ -547,7 +547,7 @@ static Img_c * LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lu
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = static_cast<img_pixel_t>(wad.trans_replace);
+			pix = static_cast<img_pixel_t>(wad.getTransReplace());
 
 		img->wbuf() [i] = pix;
 	}
@@ -560,7 +560,7 @@ static Img_c * LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lu
 
 void WadData::W_LoadFlats()
 {
-	W_ClearFlats();
+	images.W_ClearFlats();
 
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
@@ -577,13 +577,13 @@ void WadData::W_LoadFlats()
 			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
 
 			if (img)
-				W_AddFlat(lump->Name(), img);
+				images.W_AddFlat(lump->Name(), img);
 		}
 	}
 }
 
 
-Img_c * WadData::W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase) const
+Img_c * ImageSet::W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	std::map<SString, Img_c *>::const_iterator P = flats.find(name);
 
@@ -607,7 +607,7 @@ Img_c * WadData::W_GetFlat(const ConfigData &config, const SString &name, bool t
 }
 
 
-bool WadData::W_FlatIsKnown(const ConfigData &config, const SString &name) const
+bool ImageSet::W_FlatIsKnown(const ConfigData &config, const SString &name) const
 {
 	// sectors do not support "-" (but our code can make it)
 	if (is_null_tex(name))
@@ -643,7 +643,7 @@ static void DeleteSprite(const sprite_map_t::value_type& P)
 	delete P.second;
 }
 
-void WadData::W_ClearSprites()
+void ImageSet::W_ClearSprites()
 {
 	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
 
@@ -722,9 +722,9 @@ static Lump_c * Sprite_loc_by_root (const WadData &wad, const ConfigData &config
 
 Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 {
-	sprite_map_t::const_iterator P = sprites.find(type);
+	sprite_map_t::const_iterator P = images.sprites.find(type);
 
-	if (P != sprites.end())
+	if (P != images.sprites.end())
 		return P->second;
 
 	// sprite not in the list yet.  Add it.
@@ -818,7 +818,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
-	sprites[type] = result;
+	images.sprites[type] = result;
 	return result;
 }
 
@@ -843,11 +843,11 @@ static void UnloadSprite(const sprite_map_t::value_type& P)
 		P.second->unload_gl(false);
 }
 
-void WadData::W_UnloadAllTextures() const
+void ImageSet::W_UnloadAllTextures() const
 {
 	std::for_each(textures.begin(), textures.end(), UnloadTex);
 	std::for_each(flats.begin(),    flats.end(), UnloadFlat);
-	std::for_each(sprites.begin(),  sprites.end(), UnloadSprite);
+	std::for_each(sprites.begin(), sprites.end(), UnloadSprite);
 
 	IM_UnloadDummyTextures();
 }

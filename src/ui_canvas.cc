@@ -134,7 +134,7 @@ void UI_Canvas::draw()
 		// reset the 'gl_tex' field of all loaded images, as the value
 		// belongs to a context which was (probably) just deleted and
 		// hence refer to textures which no longer exist.
-		inst.wad.W_UnloadAllTextures();
+		inst.wad.images.W_UnloadAllTextures();
 	}
 
 #ifndef _WIN32	// TODO: #56: reenable this for Windows
@@ -1021,7 +1021,7 @@ void UI_Canvas::DrawThingSprites()
 
 		if (! sprite)
 		{
-			sprite = inst.wad.IM_UnknownSprite(inst.conf);
+			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
 			scale = 0.66f;
 		}
 
@@ -2255,15 +2255,15 @@ void UI_Canvas::RenderSector(int num)
 
 		if (inst.is_sky(tex_name))
 		{
-			RenderColor(inst.wad.palette[inst.conf.miscInfo.sky_color]);
+			RenderColor(inst.wad.getPaletteColor(inst.conf.miscInfo.sky_color));
 		}
 		else
 		{
-			img = inst.wad.W_GetFlat(inst.conf, tex_name);
+			img = inst.wad.images.W_GetFlat(inst.conf, tex_name);
 
 			if (! img)
 			{
-				img = inst.wad.IM_UnknownTex(inst.conf);
+				img = inst.wad.images.IM_UnknownTex(inst.conf);
 			}
 		}
 	}
@@ -2758,14 +2758,14 @@ void UI_Canvas::RenderNumString(int x, int y, const char *s)
 
 	if (cur_font < 17)
 	{
-		font_img  = inst.wad.IM_DigitFont_11x14();
+		font_img  = inst.wad.images.IM_DigitFont_11x14();
 		font_cw   = 11;
 		font_ch   = 14;
 		font_step = font_cw - 2;
 	}
 	else
 	{
-		font_img  = inst.wad.IM_DigitFont_14x19();
+		font_img  = inst.wad.images.IM_DigitFont_14x19();
 		font_cw   = 14;
 		font_ch   = 19;
 		font_step = font_cw - 2;

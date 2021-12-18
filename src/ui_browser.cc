@@ -972,15 +972,15 @@ void UI_Browser_Box::Populate()
 	{
 		case BrowserMode::textures:
 			if (config::browser_combine_tex)
-				Populate_Images(BrowserMode::flats, inst.wad.getFlats());
+				Populate_Images(BrowserMode::flats, inst.wad.images.getFlats());
 
-			Populate_Images(BrowserMode::textures, inst.wad.getTextures());
+			Populate_Images(BrowserMode::textures, inst.wad.images.getTextures());
 			break;
 
 		case BrowserMode::flats:
 			// the flat browser is never used when combine-tex is enabled
 			if (! config::browser_combine_tex)
-				Populate_Images(BrowserMode::flats, inst.wad.getFlats());
+				Populate_Images(BrowserMode::flats, inst.wad.images.getFlats());
 			break;
 
 		case BrowserMode::things:

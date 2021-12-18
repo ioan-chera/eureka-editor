@@ -1540,7 +1540,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 	{
 		config::usegamma = std::max(0, atoi(tokens[1])) % 5;
 
-		W_UpdateGamma(wad);
+		wad.W_UpdateGamma();
 		return true;
 	}
 

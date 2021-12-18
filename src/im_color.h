@@ -66,9 +66,6 @@ rgb_color_t SectorLightColor(int light);
 
 int HashedPalColor(const SString &name, const int *cols);
 
-byte W_FindPaletteColor(const WadData &wad, int r, int g, int b);
-void W_UpdateGamma(WadData &wad);
-
 inline int R_DoomLightingEquation(int L, float dist)
 {
 	/* L in the range 0 to 256 */

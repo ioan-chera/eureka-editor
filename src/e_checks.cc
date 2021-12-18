@@ -3557,7 +3557,7 @@ static bool is_transparent(const Instance &inst, const SString &tex)
 	if (is_null_tex(tex))
 		return false;
 
-	Img_c *img = inst.wad.W_GetTexture(inst.conf, tex);
+	Img_c *img = inst.wad.images.W_GetTexture(inst.conf, tex);
 	if (! img)
 		return false;
 
@@ -3633,11 +3633,11 @@ static void Textures_FixTransparent(Instance &inst)
 	// do something reasonable if default wall is transparent
 	if (is_transparent(inst, new_tex))
 	{
-		if (inst.wad.W_TextureIsKnown(inst.conf, "SANDSQ2"))
+		if (inst.wad.images.W_TextureIsKnown(inst.conf, "SANDSQ2"))
 			new_tex = "SANDSQ2";	// Heretic
-		else if (inst.wad.W_TextureIsKnown(inst.conf, "CASTLE07"))
+		else if (inst.wad.images.W_TextureIsKnown(inst.conf, "CASTLE07"))
 			new_tex = "CASTLE07";	// Hexen
-		else if (inst.wad.W_TextureIsKnown(inst.conf, "BRKBRN02"))
+		else if (inst.wad.images.W_TextureIsKnown(inst.conf, "BRKBRN02"))
 			new_tex = "BRKBRN02";	// Strife
 		else
 			new_tex = "GRAY1";		// Doom
@@ -3704,7 +3704,7 @@ static int check_medusa(const WadData &wad, const SString &tex,
 	if (is_null_tex(tex) || is_special_tex(tex))
 		return 0;
 
-	if (! wad.W_TextureCausesMedusa(tex))
+	if (! wad.images.W_TextureCausesMedusa(tex))
 		return 0;
 
 	bump_unknown_name(names, tex);
@@ -3820,7 +3820,7 @@ static void Textures_FindUnknownTex(selection_c& lines,
 				SString tex = (part == 0) ? SD->LowerTex() :
 							  (part == 1) ? SD->UpperTex() : SD->MidTex();
 
-				if (! inst.wad.W_TextureIsKnown(inst.conf, tex))
+				if (! inst.wad.images.W_TextureIsKnown(inst.conf, tex))
 				{
 					bump_unknown_name(names, tex);
 
@@ -3847,7 +3847,7 @@ static void Textures_FindUnknownFlat(selection_c& secs,
 		{
 			SString flat = part ? S->CeilTex() : S->FloorTex();
 
-			if (! inst.wad.W_FlatIsKnown(inst.conf, flat))
+			if (! inst.wad.images.W_FlatIsKnown(inst.conf, flat))
 			{
 				bump_unknown_name(names, flat);
 
@@ -3931,13 +3931,13 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 			const SideDef *SD = inst.level.sidedefs[sd_num];
 
-			if (! inst.wad.W_TextureIsKnown(inst.conf, SD->LowerTex()))
+			if (! inst.wad.images.W_TextureIsKnown(inst.conf, SD->LowerTex()))
 				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
-			if (!inst.wad.W_TextureIsKnown(inst.conf, SD->UpperTex()))
+			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->UpperTex()))
 				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
-			if (!inst.wad.W_TextureIsKnown(inst.conf, SD->MidTex()))
+			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->MidTex()))
 				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
@@ -3956,10 +3956,10 @@ static void Textures_FixUnknownFlat(Instance &inst)
 	{
 		const Sector *S = inst.level.sectors[s];
 
-		if (! inst.wad.W_FlatIsKnown(inst.conf, S->FloorTex()))
+		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S->FloorTex()))
 			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
-		if (!inst.wad.W_FlatIsKnown(inst.conf, S->CeilTex()))
+		if (!inst.wad.images.W_FlatIsKnown(inst.conf, S->CeilTex()))
 			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 }
@@ -4026,11 +4026,11 @@ static void Textures_FixDupSwitches(Instance &inst)
 	// do something reasonable if default wall is a switch
 	if (is_switch_tex(new_tex))
 	{
-		if (inst.wad.W_TextureIsKnown(inst.conf, "SANDSQ2"))
+		if (inst.wad.images.W_TextureIsKnown(inst.conf, "SANDSQ2"))
 			new_tex = "SANDSQ2";	// Heretic
-		else if (inst.wad.W_TextureIsKnown(inst.conf, "CASTLE07"))
+		else if (inst.wad.images.W_TextureIsKnown(inst.conf, "CASTLE07"))
 			new_tex = "CASTLE07";	// Hexen
-		else if (inst.wad.W_TextureIsKnown(inst.conf, "BRKBRN02"))
+		else if (inst.wad.images.W_TextureIsKnown(inst.conf, "BRKBRN02"))
 			new_tex = "BRKBRN02";	// Strife
 		else
 			new_tex = "GRAY1";		// Doom
