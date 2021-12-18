@@ -39,7 +39,7 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-void WadData::W_UpdateGamma()
+void Palette::W_UpdateGamma()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
@@ -80,22 +80,22 @@ void WadData::W_LoadPalette()
 	}
 
 	lump->Seek();
-	if (! lump->Read(raw_palette, sizeof(raw_palette)))
+	if (! lump->Read(palette.raw_palette, sizeof(palette.raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return;
 	}
 
 	// find the colour closest to TRANS_PIXEL
-	byte tr = raw_palette[TRANS_PIXEL][0];
-	byte tg = raw_palette[TRANS_PIXEL][1];
-	byte tb = raw_palette[TRANS_PIXEL][2];
+	byte tr = palette.raw_palette[TRANS_PIXEL][0];
+	byte tg = palette.raw_palette[TRANS_PIXEL][1];
+	byte tb = palette.raw_palette[TRANS_PIXEL][2];
 
-	trans_replace = W_FindPaletteColor(tr, tg, tb);
+	palette.trans_replace = palette.W_FindPaletteColor(tr, tg, tb);
 
-	W_UpdateGamma();
+	palette.W_UpdateGamma();
 
-	W_CreateBrightMap();
+	palette.W_CreateBrightMap();
 
 	images.IM_ResetDummyTextures();
 }
@@ -112,7 +112,7 @@ void WadData::W_LoadColormap()
 	}
 
 	lump->Seek();
-	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
+	if (! lump->Read(palette.raw_colormap, sizeof(palette.raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;
@@ -122,17 +122,17 @@ void WadData::W_LoadColormap()
 	for (int i = 0 ; i < 32  ; i++)
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		if (raw_colormap[i][c] == TRANS_PIXEL)
-			raw_colormap[i][c] = static_cast<byte>(trans_replace);
+		if (palette.raw_colormap[i][c] == TRANS_PIXEL)
+			palette.raw_colormap[i][c] = static_cast<byte>(palette.trans_replace);
 	}
 
 	// workaround for Harmony having a bugged colormap
-	if (raw_palette[0][0] == 0 &&
-		raw_palette[0][1] == 0 &&
-		raw_palette[0][2] == 0)
+	if (palette.raw_palette[0][0] == 0 &&
+		palette.raw_palette[0][1] == 0 &&
+		palette.raw_palette[0][2] == 0)
 	{
 		for (int k = 0 ; k < 32 ; k++)
-			raw_colormap[k][0] = 0;
+			palette.raw_colormap[k][0] = 0;
 	}
 }
 
@@ -162,7 +162,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 }
 
 
-byte WadData::W_FindPaletteColor(int r, int g, int b) const
+byte Palette::W_FindPaletteColor(int r, int g, int b) const
 {
 	int best = 0;
 	int best_dist = (1 << 30);
@@ -189,7 +189,7 @@ byte WadData::W_FindPaletteColor(int r, int g, int b) const
 }
 
 
-void WadData::W_CreateBrightMap()
+void Palette::W_CreateBrightMap()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{

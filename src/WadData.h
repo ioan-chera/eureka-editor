@@ -109,7 +109,42 @@ public:	// TODO: make private
 class Palette
 {
 public:
-private:
+	void W_UpdateGamma();
+	void IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void W_CreateBrightMap();
+
+	rgb_color_t getPaletteColor(int index) const
+	{
+		return palette[index];
+	}
+
+	
+	
+	byte W_FindPaletteColor(int r, int g, int b) const;
+	rgb_color_t IM_PixelToRGB(img_pixel_t p) const;
+	byte getColormapIndex(int cmap, int pos) const
+	{
+		return raw_colormap[cmap][pos];
+	}
+
+	int getTransReplace() const
+	{
+		return trans_replace;
+	}
+
+public:	// TODO: make private
+	// this palette has the gamma setting applied
+	rgb_color_t palette[256] = {};
+	rgb_color_t palette_medium[256] = {};
+	byte rgb555_gamma[32];
+	byte rgb555_medium[32];
+	byte bright_map[256] = {};
+	byte raw_palette[256][3] = {};
+	byte raw_colormap[32][256] = {};
+	// the palette color closest to what TRANS_PIXEL really is
+	int trans_replace = 0;
+
 };
 
 //
@@ -129,29 +164,8 @@ struct WadData
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
 
-	void W_UpdateGamma();
-	void IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void W_CreateBrightMap();
-
-	rgb_color_t getPaletteColor(int index) const
-	{
-		return palette[index];
-	}
-	
 	void W_LoadPalette();
 	void W_LoadColormap();
-	byte W_FindPaletteColor(int r, int g, int b) const;
-	rgb_color_t IM_PixelToRGB(img_pixel_t p) const;
-	byte getColormapIndex(int cmap, int pos) const
-	{
-		return raw_colormap[cmap][pos];
-	}
-
-	int getTransReplace() const
-	{
-		return trans_replace;
-	}
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
@@ -161,18 +175,7 @@ struct WadData
 	SString Pwad_name;	// Filename of current wad
 
 	ImageSet images;
-
-private:
-	// this palette has the gamma setting applied
-	rgb_color_t palette[256] = {};
-	rgb_color_t palette_medium[256] = {};
-	byte rgb555_gamma[32];
-	byte rgb555_medium[32];
-	byte bright_map[256] = {};
-	byte raw_palette[256][3] = {};
-	byte raw_colormap[32][256] = {};
-	// the palette color closest to what TRANS_PIXEL really is
-	int trans_replace = 0;
+	Palette palette;
 };
 
 #endif /* WadData_h */

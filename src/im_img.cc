@@ -43,7 +43,7 @@
 #define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
 
-rgb_color_t WadData::IM_PixelToRGB(img_pixel_t p) const
+rgb_color_t Palette::IM_PixelToRGB(img_pixel_t p) const
 {
 	if (p & IS_RGB_PIXEL)
 	{
@@ -325,7 +325,7 @@ void Img_c::test_make_RGB(const WadData &wad)
 
 		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
 		{
-			const rgb_color_t col = wad.IM_PixelToRGB(pix);
+			const rgb_color_t col = wad.palette.IM_PixelToRGB(pix);
 
 			byte r = RGB_RED(col)   >> 3;
 			byte g = RGB_GREEN(col) >> 3;
@@ -396,7 +396,7 @@ void Img_c::load_gl(const WadData &wad)
 			{
 				byte r, g, b;
 
-				wad.IM_DecodePixel(pix, r, g, b);
+				wad.palette.IM_DecodePixel(pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
@@ -578,7 +578,7 @@ Img_c *WadData::IM_SpecialTex()
 {
 	if (images.special_tex_color < 0)
 	{
-		images.special_tex_color = W_FindPaletteColor(192, 0, 192);
+		images.special_tex_color = palette.W_FindPaletteColor(192, 0, 192);
 
 		if (images.special_tex_image)
 		{
@@ -589,7 +589,7 @@ Img_c *WadData::IM_SpecialTex()
 
 	if (!images.special_tex_image)
 		images.special_tex_image = IM_CreateDummyTex(unknown_graphic, images.special_tex_color,
-			W_FindPaletteColor(255, 255, 255));
+			palette.W_FindPaletteColor(255, 255, 255));
 
 	return images.special_tex_image;
 }
@@ -648,7 +648,7 @@ static Img_c * IM_CreateFromText(const WadData &wad, int W, int H, const char * 
 	byte *conv_palette = new byte[pal_size];
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = wad.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+		conv_palette[c] = wad.palette.W_FindPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -1032,7 +1032,7 @@ Img_c *IM_CreateLightSprite(const WadData &wad)
 			int g = static_cast<int>(235 * ity);
 			int b = static_cast<int>(90  * ity);
 
-			pix = wad.W_FindPaletteColor(r, g, b);
+			pix = wad.palette.W_FindPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1071,7 +1071,7 @@ Img_c *IM_CreateMapSpotSprite(const WadData &wad, int base_r, int base_g, int ba
 			int g = static_cast<int>(base_g * ity);
 			int b = static_cast<int>(base_b * ity);
 
-			pix = wad.W_FindPaletteColor(r, g, b);
+			pix = wad.palette.W_FindPaletteColor(r, g, b);
 		}
 
 		result->wbuf() [ y * W + x ] = pix;
@@ -1161,7 +1161,7 @@ Img_c *ImageSet::IM_DigitFont_14x19()
 
 // this one applies the current gamma.
 // for rendering the 3D view or the 2D sectors and sprites.
-void WadData::IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
+void Palette::IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
 {
 	if(p & IS_RGB_PIXEL)
 	{
@@ -1181,7 +1181,7 @@ void WadData::IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const
 
 // this applies a constant gamma.
 // for textures/flats/things in the browser and panels.
-void WadData::IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const
+void Palette::IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const
 {
 	if(p & IS_RGB_PIXEL)
 	{

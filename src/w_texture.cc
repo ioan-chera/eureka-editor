@@ -547,7 +547,7 @@ static Img_c * LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lu
 		img_pixel_t pix = raw[i];
 
 		if (pix == TRANS_PIXEL)
-			pix = static_cast<img_pixel_t>(wad.getTransReplace());
+			pix = static_cast<img_pixel_t>(wad.palette.getTransReplace());
 
 		img->wbuf() [i] = pix;
 	}

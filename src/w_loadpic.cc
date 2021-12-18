@@ -95,7 +95,7 @@ static void DrawColumn(const WadData &wad, const ConfigData &config,Img_c& img, 
 			byte pix = *src++;
 
 			if (pix == TRANS_PIXEL)
-				pix = static_cast<byte>(wad.getTransReplace());
+				pix = static_cast<byte>(wad.palette.getTransReplace());
 
 			dest[top * W] = pix;
 		}

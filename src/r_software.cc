@@ -63,7 +63,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 	}
 	else
 	{
-		return inst.wad.getColormapIndex(map, pixel);
+		return inst.wad.palette.getColormapIndex(map, pixel);
 	}
 }
 
@@ -1689,7 +1689,7 @@ public:
 				if(*dest & IS_RGB_PIXEL)
 					*dest = IS_RGB_PIXEL | ((*dest & 0x7bde) >> 1);
 				else
-					*dest = inst.wad.getColormapIndex(14, *dest);
+					*dest = inst.wad.palette.getColormapIndex(14, *dest);
 				continue;
 			}
 
@@ -2054,7 +2054,7 @@ static void BlitHires(const Instance &inst, int ox, int oy, int ow, int oh)
 
 		for ( ; dest < dest_end  ; dest += 3, src++)
 		{
-			inst.wad.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			inst.wad.palette.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy+ry, inst.r_view.screen_w, 1);
@@ -2077,8 +2077,8 @@ static void BlitLores(const Instance &inst, int ox, int oy, int ow, int oh)
 
 		for (; dest < dest_end ; dest += 6, src++)
 		{
-			inst.wad.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
-			inst.wad.IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
+			inst.wad.palette.IM_DecodePixel(*src, dest[0], dest[1], dest[2]);
+			inst.wad.palette.IM_DecodePixel(*src, dest[3], dest[4], dest[5]);
 		}
 
 		fl_draw_image(line_rgb, ox, oy + ry*2, ow, 1);
