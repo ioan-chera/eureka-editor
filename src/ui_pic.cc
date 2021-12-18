@@ -227,7 +227,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		}
 		else
 		{
-			inst.IM_DecodePixel_medium(pix, dest[0], dest[1], dest[2]);
+			IM_DecodePixel_medium(inst.wad, pix, dest[0], dest[1], dest[2]);
 		}
 	}
 
@@ -286,7 +286,7 @@ void UI_Pic::TiledImg(Img_c *img)
 		}
 		else
 		{
-			inst.IM_DecodePixel_medium(pix, dest[0], dest[1], dest[2]);
+			IM_DecodePixel_medium(inst.wad, pix, dest[0], dest[1], dest[2]);
 		}
 	}
 

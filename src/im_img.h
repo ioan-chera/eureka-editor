@@ -54,6 +54,7 @@ const img_pixel_t IS_RGB_PIXEL = 0x8000;
 const img_pixel_t TRANS_PIXEL = 255;
 
 class Instance;
+struct WadData;
 
 class Img_c
 {
@@ -132,6 +133,9 @@ private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it
 };
+
+void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b);
+void IM_DecodePixel_medium(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b);
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

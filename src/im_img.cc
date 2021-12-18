@@ -405,7 +405,7 @@ void Img_c::load_gl()
 			{
 				byte r, g, b;
 
-				inst.IM_DecodePixel(pix, r, g, b);
+				IM_DecodePixel(inst.wad, pix, r, g, b);
 
 				byte *dest = rgba + (y*tw + x) * 4;
 
@@ -1170,6 +1170,46 @@ Img_c *Instance::IM_DigitFont_14x19()
 										 DIGIT_FONT_COLOR);
 	}
 	return digit_font_14x19;
+}
+
+// this one applies the current gamma.
+// for rendering the 3D view or the 2D sectors and sprites.
+void IM_DecodePixel(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b)
+{
+	if(p & IS_RGB_PIXEL)
+	{
+		r = wad.rgb555_gamma[IMG_PIXEL_RED(p)];
+		g = wad.rgb555_gamma[IMG_PIXEL_GREEN(p)];
+		b = wad.rgb555_gamma[IMG_PIXEL_BLUE(p)];
+	}
+	else
+	{
+		const rgb_color_t col = wad.palette[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
+}
+
+// this applies a constant gamma.
+// for textures/flats/things in the browser and panels.
+void IM_DecodePixel_medium(const WadData &wad, img_pixel_t p, byte &r, byte &g, byte &b)
+{
+	if(p & IS_RGB_PIXEL)
+	{
+		r = wad.rgb555_medium[IMG_PIXEL_RED(p)];
+		g = wad.rgb555_medium[IMG_PIXEL_GREEN(p)];
+		b = wad.rgb555_medium[IMG_PIXEL_BLUE(p)];
+	}
+	else
+	{
+		const rgb_color_t col = wad.palette_medium[p];
+
+		r = RGB_RED(col);
+		g = RGB_GREEN(col);
+		b = RGB_BLUE(col);
+	}
 }
 
 //--- editor settings ---
