@@ -1341,7 +1341,7 @@ void Things_FindUnknown(selection_c& list, std::map<int, int>& types, const Inst
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const thingtype_t &info = inst.M_GetThingType(inst.level.things[n]->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[n]->type);
 
 		if (info.desc.startsWith("UNKNOWN"))
 		{
@@ -1444,7 +1444,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 			continue;
 
 		// allow certain things in the void (Heretic sounds)
-		const thingtype_t &info = inst.M_GetThingType(inst.level.things[n]->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[n]->type);
 
 		if (info.flags & THINGDEF_VOID)
 			continue;
@@ -1497,7 +1497,7 @@ static void Things_RemoveInVoid(Instance &inst)
 // (i.e. the skill-flags and mode-flags are ignored).
 static bool TH_always_spawned(const Instance &inst, int type)
 {
-	const thingtype_t &info = inst.M_GetThingType(type);
+	const thingtype_t &info = M_GetThingType(inst.conf, type);
 
 	// a player?
 	if (1 <= type && type <= 4)
@@ -1635,7 +1635,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 	{
 		const Thing *T = inst.level.things[n];
 
-		const thingtype_t &info = inst.M_GetThingType(T->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, T->type);
 
 		if (info.flags & THINGDEF_PASS)
 			continue;
@@ -1805,7 +1805,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 	{
 		const Thing *T = inst.level.things[blockers[n]];
 
-		const thingtype_t &info = inst.M_GetThingType(T->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, T->type);
 
 		if (ThingStuckInWall(T, info.radius, info.group, inst.level))
 			list.set(blockers[n]);
@@ -1814,7 +1814,7 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 		{
 			const Thing *T2 = inst.level.things[blockers[n2]];
 
-			const thingtype_t &info2 = inst.M_GetThingType(T2->type);
+			const thingtype_t &info2 = M_GetThingType(inst.conf, T2->type);
 
 			if (ThingStuckInThing(inst, T, &info, T2, &info2))
 				list.set(blockers[n]);
@@ -3239,7 +3239,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 
 		for (const Thing *thing : inst.level.things)
 		{
-			const thingtype_t &info = inst.M_GetThingType(thing->type);
+			const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
 
 			if (info.desc.noCaseEqual("Commander Keen"))
 				return true;

@@ -867,7 +867,7 @@ public:
 	{
 		Thing *th = inst.level.things[th_index];
 
-		const thingtype_t &info = inst.M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
 
 		float x = static_cast<float>(th->x() - inst.r_view.x);
 		float y = static_cast<float>(th->y() - inst.r_view.y);

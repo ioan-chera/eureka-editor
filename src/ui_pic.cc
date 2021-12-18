@@ -160,7 +160,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		return;
 	}
 
-	const thingtype_t &info = inst.M_GetThingType(type);
+	const thingtype_t &info = M_GetThingType(inst.conf, type);
 
 	bool new_img = false;
 

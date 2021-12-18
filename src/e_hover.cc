@@ -822,7 +822,7 @@ Objid Hover::getNearestThing(double x, double y) const
 		if(tx < lx || tx > hx || ty < ly || ty > hy)
 			continue;
 
-		const thingtype_t &info = inst.M_GetThingType(thing->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
 
 		// more accurate bbox test using the real radius
 		double r = info.radius + mapslack;

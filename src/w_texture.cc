@@ -729,7 +729,7 @@ Img_c *Instance::W_GetSprite(int type)
 
 	// sprite not in the list yet.  Add it.
 
-	const thingtype_t &info = M_GetThingType(type);
+	const thingtype_t &info = M_GetThingType(conf, type);
 
 	Img_c *result = NULL;
 

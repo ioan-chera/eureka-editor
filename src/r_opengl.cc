@@ -1213,7 +1213,7 @@ public:
 	{
 		Thing *th = inst.level.things[th_index];
 
-		const thingtype_t &info = inst.M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
 
 		// project sprite to check if it is off-screen
 
@@ -1449,7 +1449,7 @@ public:
 			drag_dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
 		}
 
-		const thingtype_t &info = inst.M_GetThingType(th->type);
+		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
 
 		float scale = info.scale;
 
