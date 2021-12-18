@@ -121,7 +121,8 @@ public:
 		return palette[index];
 	}
 
-	
+	void W_LoadPalette(Lump_c *lump);
+	void W_LoadColormap(Lump_c *lump);
 	
 	byte W_FindPaletteColor(int r, int g, int b) const;
 	rgb_color_t IM_PixelToRGB(img_pixel_t p) const;
@@ -135,7 +136,7 @@ public:
 		return trans_replace;
 	}
 
-public:	// TODO: make private
+private:
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};
 	rgb_color_t palette_medium[256] = {};
@@ -154,8 +155,6 @@ public:	// TODO: make private
 //
 struct WadData
 {
-	
-	
 	void W_LoadTextures(const ConfigData &config);
 
 	void W_LoadFlats();
@@ -166,8 +165,16 @@ struct WadData
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
 
-	void W_LoadPalette();
-	void W_LoadColormap();
+	void W_LoadPalette()
+	{
+		palette.W_LoadPalette(W_FindGlobalLump("PLAYPAL"));
+		images.IM_ResetDummyTextures();
+	}
+
+	void W_LoadColormap()
+	{
+		palette.W_LoadColormap(W_FindGlobalLump("COLORMAP"));
+	}
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()

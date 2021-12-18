@@ -69,10 +69,8 @@ void Palette::W_UpdateGamma()
 	}
 }
 
-void WadData::W_LoadPalette()
+void Palette::W_LoadPalette(Lump_c *lump)
 {
-	Lump_c *lump = W_FindGlobalLump("PLAYPAL");
-
 	if (! lump)
 	{
 		ThrowException("PLAYPAL lump not found.\n");
@@ -80,31 +78,27 @@ void WadData::W_LoadPalette()
 	}
 
 	lump->Seek();
-	if (! lump->Read(palette.raw_palette, sizeof(palette.raw_palette)))
+	if (! lump->Read(raw_palette, sizeof(raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
 		return;
 	}
 
 	// find the colour closest to TRANS_PIXEL
-	byte tr = palette.raw_palette[TRANS_PIXEL][0];
-	byte tg = palette.raw_palette[TRANS_PIXEL][1];
-	byte tb = palette.raw_palette[TRANS_PIXEL][2];
+	byte tr = raw_palette[TRANS_PIXEL][0];
+	byte tg = raw_palette[TRANS_PIXEL][1];
+	byte tb = raw_palette[TRANS_PIXEL][2];
 
-	palette.trans_replace = palette.W_FindPaletteColor(tr, tg, tb);
+	trans_replace = W_FindPaletteColor(tr, tg, tb);
 
-	palette.W_UpdateGamma();
+	W_UpdateGamma();
 
-	palette.W_CreateBrightMap();
-
-	images.IM_ResetDummyTextures();
+	W_CreateBrightMap();
 }
 
 
-void WadData::W_LoadColormap()
+void Palette::W_LoadColormap(Lump_c *lump)
 {
-	Lump_c *lump = W_FindGlobalLump("COLORMAP");
-
 	if (! lump)
 	{
 		ThrowException("COLORMAP lump not found.\n");
@@ -112,7 +106,7 @@ void WadData::W_LoadColormap()
 	}
 
 	lump->Seek();
-	if (! lump->Read(palette.raw_colormap, sizeof(palette.raw_colormap)))
+	if (! lump->Read(raw_colormap, sizeof(raw_colormap)))
 	{
 		gLog.printf("COLORMAP: read error\n");
 		return;
@@ -122,17 +116,17 @@ void WadData::W_LoadColormap()
 	for (int i = 0 ; i < 32  ; i++)
 	for (int c = 0 ; c < 256 ; c++)
 	{
-		if (palette.raw_colormap[i][c] == TRANS_PIXEL)
-			palette.raw_colormap[i][c] = static_cast<byte>(palette.trans_replace);
+		if (raw_colormap[i][c] == TRANS_PIXEL)
+			raw_colormap[i][c] = static_cast<byte>(trans_replace);
 	}
 
 	// workaround for Harmony having a bugged colormap
-	if (palette.raw_palette[0][0] == 0 &&
-		palette.raw_palette[0][1] == 0 &&
-		palette.raw_palette[0][2] == 0)
+	if (raw_palette[0][0] == 0 &&
+		raw_palette[0][1] == 0 &&
+		raw_palette[0][2] == 0)
 	{
 		for (int k = 0 ; k < 32 ; k++)
-			palette.raw_colormap[k][0] = 0;
+			raw_colormap[k][0] = 0;
 	}
 }
 
