@@ -48,25 +48,25 @@ static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
 	delete P.second;
 }
 
-void Instance::W_ClearTextures()
+void WadData::W_ClearTextures()
 {
-	std::for_each(wad.textures.begin(), wad.textures.end(), DeleteTex);
+	std::for_each(textures.begin(), textures.end(), DeleteTex);
 
-	wad.textures.clear();
+	textures.clear();
 
-	wad.medusa_textures.clear();
+	medusa_textures.clear();
 }
 
 
-void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
+void WadData::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 {
 	// free any existing one with the same name
 
 	SString tex_str = name;
 
-	std::map<SString, Img_c *>::iterator P = wad.textures.find(tex_str);
+	std::map<SString, Img_c *>::iterator P = textures.find(tex_str);
 
-	if (P != wad.textures.end())
+	if (P != textures.end())
 	{
 		delete P->second;
 
@@ -74,10 +74,10 @@ void Instance::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
 	}
 	else
 	{
-		wad.textures[tex_str] = img;
+		textures[tex_str] = img;
 	}
 
-	wad.medusa_textures[tex_str] = is_medusa ? 1 : 0;
+	medusa_textures[tex_str] = is_medusa ? 1 : 0;
 }
 
 
@@ -161,7 +161,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 		Lump_c *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! LoadPicture(wad, conf, *img, lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -172,7 +172,7 @@ void Instance::LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offse
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	W_AddTexture(namebuf, img, is_medusa);
+	wad.W_AddTexture(namebuf, img, is_medusa);
 }
 
 
@@ -228,7 +228,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 		Lump_c *lump = W_FindGlobalLump(picname);
 
 		if (! lump ||
-			! LoadPicture(*img, lump, picname, xofs, yofs))
+			! LoadPicture(wad, conf, *img, lump, picname, xofs, yofs))
 		{
 			gLog.printf("texture '%.8s': patch '%.8s' not found.\n", raw->name, picname);
 		}
@@ -239,7 +239,7 @@ void Instance::LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset,
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	W_AddTexture(namebuf, img, is_medusa);
+	wad.W_AddTexture(namebuf, img, is_medusa);
 }
 
 
@@ -308,7 +308,7 @@ void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 		{
 			case 'd': /* Doom patch */
 				img = new Img_c;
-				if (! LoadPicture(*img, lump, name, 0, 0))
+				if (! LoadPicture(wad, conf, *img, lump, name, 0, 0))
 				{
 					delete img;
 					img = NULL;
@@ -339,7 +339,7 @@ void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 		// if we successfully loaded the texture, add it
 		if (img)
 		{
-			W_AddTexture(name, img, false /* is_medusa */);
+			wad.W_AddTexture(name, img, false /* is_medusa */);
 		}
 	}
 }
@@ -347,7 +347,7 @@ void Instance::W_LoadTextures_TX_START(const Wad_file *wf)
 
 void Instance::W_LoadTextures()
 {
-	W_ClearTextures();
+	wad.W_ClearTextures();
 
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
@@ -491,23 +491,23 @@ static void DeleteFlat(const std::map<SString, Img_c *>::value_type& P)
 }
 
 
-void Instance::W_ClearFlats()
+void WadData::W_ClearFlats()
 {
-	std::for_each(wad.flats.begin(), wad.flats.end(), DeleteFlat);
+	std::for_each(flats.begin(), flats.end(), DeleteFlat);
 
-	wad.flats.clear();
+	flats.clear();
 }
 
 
-void Instance::W_AddFlat(const SString &name, Img_c *img)
+void WadData::W_AddFlat(const SString &name, Img_c *img)
 {
 	// find any existing one with same name, and free it
 
 	SString flat_str = name;
 
-	std::map<SString, Img_c *>::iterator P = wad.flats.find(flat_str);
+	std::map<SString, Img_c *>::iterator P = flats.find(flat_str);
 
-	if (P != wad.flats.end())
+	if (P != flats.end())
 	{
 		delete P->second;
 
@@ -515,7 +515,7 @@ void Instance::W_AddFlat(const SString &name, Img_c *img)
 	}
 	else
 	{
-		wad.flats[flat_str] = img;
+		flats[flat_str] = img;
 	}
 }
 
@@ -560,7 +560,7 @@ static Img_c * LoadFlatImage(const Instance &inst, const SString &name, Lump_c *
 
 void Instance::W_LoadFlats()
 {
-	W_ClearFlats();
+	wad.W_ClearFlats();
 
 	for (int i = 0 ; i < (int)master_dir.size() ; i++)
 	{
@@ -577,7 +577,7 @@ void Instance::W_LoadFlats()
 			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
 
 			if (img)
-				W_AddFlat(lump->Name(), img);
+				wad.W_AddFlat(lump->Name(), img);
 		}
 	}
 }
@@ -643,11 +643,11 @@ static void DeleteSprite(const sprite_map_t::value_type& P)
 	delete P.second;
 }
 
-void Instance::W_ClearSprites()
+void WadData::W_ClearSprites()
 {
-	std::for_each(wad.sprites.begin(), wad.sprites.end(), DeleteSprite);
+	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
 
-	wad.sprites.clear();
+	sprites.clear();
 }
 
 
@@ -767,7 +767,7 @@ Img_c *Instance::W_GetSprite(int type)
 		{
 			result = new Img_c;
 
-			if (! LoadPicture(*result, lump, info.sprite, 0, 0))
+			if (! LoadPicture(wad, conf, *result, lump, info.sprite, 0, 0))
 			{
 				delete result;
 				result = NULL;

@@ -344,14 +344,8 @@ public:
 	// UI_MENU
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
 
-	// W_LOADPIC
-	Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name) const;
-	Img_c *LoadImage_PNG(Lump_c *lump, const SString &name) const;
-	Img_c *LoadImage_TGA(Lump_c *lump, const SString &name) const;
-	bool LoadPicture(Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr) const;
-
 	// W_TEXTURE
-	void W_AddFlat(const SString &name, Img_c *img);
+	
 	Img_c *W_GetSprite(int type);
 	void W_LoadFlats();
 	void W_LoadTextures();
@@ -470,10 +464,6 @@ private:
 	void LoadTextureEntry_DOOM(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
 	void LoadTextureEntry_Strife(byte *tex_data, int tex_length, int offset, byte *pnames, int pname_size, bool skip_first);
 	void LoadTexturesLump(Lump_c *lump, byte *pnames, int pname_size, bool skip_first);
-	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
-	void W_ClearFlats();
-	void W_ClearSprites();
-	void W_ClearTextures();
 
 
 public:	// will be private when we encapsulate everything

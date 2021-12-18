@@ -42,13 +42,19 @@ struct WadData
 	Img_c *IM_DigitFont_11x14();
 	Img_c *IM_DigitFont_14x19();
 
+	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
 	Img_c *W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
 	bool W_TextureIsKnown(const ConfigData &config, const SString &name) const;
 	bool W_TextureCausesMedusa(const SString &name) const;
+	void W_ClearTextures();
 
+	void W_AddFlat(const SString &name, Img_c *img);
 	Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	bool W_FlatIsKnown(const ConfigData &config, const SString &name) const;
+	void W_ClearFlats();
+
+	void W_ClearSprites();
 
 	// this palette has the gamma setting applied
 	rgb_color_t palette[256] = {};

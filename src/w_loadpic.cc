@@ -55,7 +55,7 @@ struct post_t
 #define P_SENTINEL  0xFF
 
 
-static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, int x, int y)
+static void DrawColumn(const WadData &wad, const ConfigData &config,Img_c& img, const post_t *column, int x, int y)
 {
 	SYS_ASSERT(column);
 
@@ -79,7 +79,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 		{
 			// The original DOOM did not honor negative y-offsets for
 			// patches but some ports like ZDoom do.
-			if (inst.conf.features.neg_patch_offsets)
+			if (config.features.neg_patch_offsets)
 				src -= top;
             count += top;
 
@@ -95,7 +95,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 			byte pix = *src++;
 
 			if (pix == TRANS_PIXEL)
-				pix = static_cast<byte>(inst.wad.trans_replace);
+				pix = static_cast<byte>(wad.trans_replace);
 
 			dest[top * W] = pix;
 		}
@@ -105,7 +105,7 @@ static void DrawColumn(const Instance &inst, Img_c& img, const post_t *column, i
 }
 
 
-Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
+Img_c *LoadImage_PNG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -128,7 +128,7 @@ Img_c *Instance::LoadImage_PNG(Lump_c *lump, const SString &name) const
 }
 
 
-Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
+Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -153,7 +153,7 @@ Img_c *Instance::LoadImage_JPEG(Lump_c *lump, const SString &name) const
 }
 
 
-Img_c *Instance::LoadImage_TGA(Lump_c *lump, const SString &name) const
+Img_c *LoadImage_TGA(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
@@ -222,13 +222,13 @@ static bool ComposePicture(Img_c& dest, Img_c *sub,
 //
 //  Return true on success, false on failure.
 //
-bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
+bool LoadPicture(const WadData &wad, const ConfigData &config, Img_c& dest,      // image to load picture into
 	Lump_c *lump,
 	const SString &pic_name,   // picture name (for messages)
 	int pic_x_offset,    // coordinates of top left corner of picture
 	int pic_y_offset,    // relative to top left corner of buffer
 	int *pic_width,    // To return the size of the picture
-	int *pic_height) const   // (can be NULL)
+	int *pic_height)   // (can be NULL)
 {
 	char img_fmt = W_DetectImageFormat(lump);
 	Img_c *sub;
@@ -296,7 +296,7 @@ bool Instance::LoadPicture(Img_c& dest,      // image to load picture into
 
 		const post_t *column = (const post_t *) ((const byte *)pat + offset);
 
-		DrawColumn(*this, dest, column, pic_x_offset + x, pic_y_offset);
+		DrawColumn(wad, config, dest, column, pic_x_offset + x, pic_y_offset);
 	}
 
 	return true;

@@ -981,7 +981,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 	W_LoadFlats();
 	W_LoadTextures();
-	W_ClearSprites();
+	wad.W_ClearSprites();
 
 	gLog.printf("--- DONE ---\n");
 	gLog.printf("\n");
