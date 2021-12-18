@@ -48,12 +48,22 @@ typedef enum
 
 } sector_rendering_mode_e;
 
+//
+// When using editor
+//
+enum class SelectHighlight
+{
+	ok,			// using selection, nothing else needed
+	unselect,	// using highlight, must unselect at end
+	empty		// both selection or highlight are empty
+};
 
 //
 // this holds some important editor state
 //
 struct Editor_State_t
 {
+	SelectHighlight SelectionOrHighlight();
 	void Selection_AddHighlighted();
 	void Selection_Toggle(Objid &obj);
 
@@ -176,16 +186,6 @@ void Selection_NotifyChange(ObjType type, int objnum, int field);
 void DumpSelection (selection_c * list);
 
 void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest);
-
-//
-// When using editor
-//
-enum class SelectHighlight
-{
-	ok,			// using selection, nothing else needed
-	unselect,	// using highlight, must unselect at end
-	empty		// both selection or highlight are empty
-};
 
 void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
 

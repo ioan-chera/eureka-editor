@@ -200,7 +200,7 @@ void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 {
 }
 
-SelectHighlight Instance::SelectionOrHighlight()
+SelectHighlight Editor_State_t::SelectionOrHighlight()
 {
 	return SelectHighlight::ok;
 }

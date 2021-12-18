@@ -481,7 +481,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 
 bool Instance::Clipboard_DoCopy()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 		return false;
 
@@ -1220,7 +1220,7 @@ void Instance::CMD_Delete()
 	if (main_win->ClipboardOp(EditCommand::del))
 		return;
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to delete");

@@ -57,7 +57,7 @@ void Instance::CMD_TH_SpinThings()
 	if (! degrees)
 		degrees = +45;
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No things to spin");
@@ -133,7 +133,7 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 //
 void CMD_TH_Disconnect(Instance &inst)
 {
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = inst.edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No vertices to disconnect");

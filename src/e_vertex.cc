@@ -591,7 +591,7 @@ void Instance::commandLineDisconnect()
 	//
 	// Hence need separate code for this.
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to disconnect");
@@ -790,7 +790,7 @@ void Instance::commandSectorDisconnect()
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to disconnect");

@@ -3049,7 +3049,7 @@ void Instance::CMD_ApplyTag()
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("ApplyTag: nothing selected");

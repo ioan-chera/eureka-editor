@@ -697,7 +697,7 @@ void Instance::CMD_LIN_Align()
 	if (do_clear) align_flags |= LINALIGN_Clear;
 
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (edit.mode != ObjType::linedefs || unselect == SelectHighlight::empty)
 	{
 		Beep("no lines to align");
@@ -844,7 +844,7 @@ void LinedefModule::flipLinedefGroup(EditOperation &op, const selection_c *flip)
 //
 void Instance::CMD_LIN_Flip()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No lines to flip");
@@ -872,7 +872,7 @@ void Instance::CMD_LIN_Flip()
 
 void Instance::CMD_LIN_SwapSides()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No lines to swap sides");
@@ -974,7 +974,7 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 //
 void Instance::CMD_LIN_SplitHalf()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No lines to split");

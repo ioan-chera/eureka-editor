@@ -1154,7 +1154,7 @@ void Instance::CMD_PlaceCamera()
 
 void Instance::CMD_MoveObjects_Dialog()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to move");
@@ -1179,7 +1179,7 @@ void Instance::CMD_MoveObjects_Dialog()
 
 void Instance::CMD_ScaleObjects_Dialog()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to scale");
@@ -1199,7 +1199,7 @@ void Instance::CMD_ScaleObjects_Dialog()
 
 void Instance::CMD_RotateObjects_Dialog()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("Nothing to rotate");

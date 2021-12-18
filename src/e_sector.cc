@@ -94,7 +94,7 @@ void Instance::CMD_SEC_Floor()
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to move");
@@ -132,7 +132,7 @@ void Instance::CMD_SEC_Ceil()
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to move");
@@ -216,7 +216,7 @@ void Instance::CMD_SEC_Light()
 		return;
 	}
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to adjust light");
@@ -232,7 +232,7 @@ void Instance::CMD_SEC_Light()
 
 void Instance::CMD_SEC_SwapFlats()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No sectors to swap");

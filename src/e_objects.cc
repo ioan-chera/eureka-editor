@@ -1624,7 +1624,7 @@ void ObjectsModule::doMirrorStuff(EditOperation &op, selection_c *list, bool is_
 
 void Instance::CMD_Mirror()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No objects to mirror");
@@ -1693,7 +1693,7 @@ void Instance::CMD_Rotate90()
 
 	bool anti_clockwise = (tolower(EXEC_Param[0][0]) == 'a');
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("No objects to rotate");
@@ -2029,7 +2029,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	param.scale_y = mul;
 
 
-	SelectHighlight unselect = inst.SelectionOrHighlight();
+	SelectHighlight unselect = inst.edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		inst.Beep("No objects to %s", do_shrink ? "shrink" : "enlarge");

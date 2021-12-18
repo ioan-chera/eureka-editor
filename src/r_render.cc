@@ -1123,7 +1123,7 @@ void Instance::StoreSelectedThing(int new_type)
 	// this code is similar to code in UI_Thing::type_callback(),
 	// but here we must handle a highlighted object.
 
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no things for paste type");
@@ -1205,7 +1205,7 @@ int Instance::GrabSelectedFlat()
 
 void Instance::StoreSelectedFlat(int new_tex)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no sectors for paste flat");
@@ -1237,7 +1237,7 @@ void Instance::StoreSelectedFlat(int new_tex)
 
 void Instance::StoreDefaultedFlats()
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no sectors for default");
@@ -1351,7 +1351,7 @@ int Instance::GrabSelectedTexture()
 
 void Instance::StoreSelectedTexture(int new_tex)
 {
-	SelectHighlight unselect = SelectionOrHighlight();
+	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
 	{
 		Beep("no linedefs for paste tex");

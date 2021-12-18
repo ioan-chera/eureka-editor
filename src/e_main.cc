@@ -809,14 +809,14 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 // selection if it is non-empty, otherwise the highlight.
 // Returns false if both selection and highlight are empty.
 //
-SelectHighlight Instance::SelectionOrHighlight()
+SelectHighlight Editor_State_t::SelectionOrHighlight()
 {
-	if(!edit.Selected->empty())
+	if(!Selected->empty())
 		return SelectHighlight::ok;
 
-	if (edit.highlight.valid())
+	if (highlight.valid())
 	{
-		edit.Selection_AddHighlighted();
+		Selection_AddHighlighted();
 		return SelectHighlight::unselect;
 	}
 

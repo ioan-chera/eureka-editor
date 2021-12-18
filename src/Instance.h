@@ -219,7 +219,6 @@ public:
 	void Selection_NotifyEnd();
 	void Selection_NotifyInsert(ObjType type, int objnum);
 	void Selection_Push();
-	SelectHighlight SelectionOrHighlight();
 	void UpdateHighlight();
 	void ZoomWholeMap();
 
