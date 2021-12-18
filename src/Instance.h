@@ -476,13 +476,6 @@ public:	// will be private when we encapsulate everything
 	// Wad settings
 	//
 
-	// the current PWAD, or NULL for none.
-	// when present it is also at master_dir.back()
-	std::shared_ptr<Wad_file> edit_wad;
-	std::shared_ptr<Wad_file> game_wad;
-	std::vector<std::shared_ptr<Wad_file>> master_dir;	// the IWAD, never NULL, always at master_dir.front()
-	SString Pwad_name;	// Filename of current wad
-
 	LoadingData loaded;
 
 	//

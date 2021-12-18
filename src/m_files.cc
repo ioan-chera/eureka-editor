@@ -583,9 +583,9 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	Pwad_name = filename;
+	this->wad.Pwad_name = filename;
 
-	edit_wad = wad;
+	this->wad.edit_wad = wad;
 
 	return true;
 }
@@ -789,14 +789,14 @@ SString Instance::M_PickDefaultIWAD() const
 	{
 		default_game = "doom";
 	}
-	else if (edit_wad)
+	else if (wad.edit_wad)
 	{
-		int idx = edit_wad->LevelFindFirst();
+		int idx = wad.edit_wad->LevelFindFirst();
 
 		if (idx >= 0)
 		{
-			idx = edit_wad->LevelHeader(idx);
-			const SString &name = edit_wad->GetLump(idx)->Name();
+			idx = wad.edit_wad->LevelHeader(idx);
+			const SString &name = wad.edit_wad->GetLump(idx)->Name();
 
 			if (toupper(name[0]) == 'E')
 				default_game = "doom";

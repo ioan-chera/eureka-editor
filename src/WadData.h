@@ -20,10 +20,14 @@
 #define WadData_h
 
 #include "im_color.h"
+#include "m_strings.h"
 #include "sys_type.h"
 #include <map>
+#include <memory>
+#include <vector>
 
 class Img_c;
+class Wad_file;
 struct ConfigData;
 
 // maps type number to an image
@@ -87,6 +91,13 @@ struct WadData
 	sprite_map_t sprites;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
+
+	// the current PWAD, or NULL for none.
+	// when present it is also at master_dir.back()
+	std::shared_ptr<Wad_file> edit_wad;
+	std::shared_ptr<Wad_file> game_wad;
+	std::vector<std::shared_ptr<Wad_file>> master_dir;	// the IWAD, never NULL, always at master_dir.front()
+	SString Pwad_name;	// Filename of current wad
 };
 
 #endif /* WadData_h */

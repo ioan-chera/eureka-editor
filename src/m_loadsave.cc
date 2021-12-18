@@ -55,13 +55,13 @@ static const char overwrite_message[] =
 
 void Instance::RemoveEditWad()
 {
-	if (!edit_wad)
+	if (!wad.edit_wad)
 		return;
 
-	MasterDir_Remove(edit_wad);
-	edit_wad.reset();
+	MasterDir_Remove(wad.edit_wad);
+	wad.edit_wad.reset();
 
-	Pwad_name.clear();
+	wad.Pwad_name.clear();
 }
 
 
@@ -69,11 +69,11 @@ void Instance::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 {
 	RemoveEditWad();
 
-	edit_wad = new_wad;
+	wad.edit_wad = new_wad;
 
-	Pwad_name = edit_wad->PathName();
+	wad.Pwad_name = wad.edit_wad->PathName();
 
-	MasterDir_Add(edit_wad);
+	MasterDir_Add(wad.edit_wad);
 }
 
 
@@ -256,12 +256,12 @@ void Instance::CMD_NewProject()
 	// determine map name (same as first level in the IWAD)
 	SString map_name = "MAP01";
 
-	int idx = game_wad->LevelFindFirst();
+	int idx = wad.game_wad->LevelFindFirst();
 
 	if (idx >= 0)
 	{
-		idx = game_wad->LevelHeader(idx);
-		map_name = game_wad->GetLump(idx)->Name();
+		idx = wad.game_wad->LevelHeader(idx);
+		map_name = wad.game_wad->GetLump(idx)->Name();
 	}
 
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
@@ -276,10 +276,10 @@ void Instance::CMD_NewProject()
 		return;
 	}
 
-	edit_wad = wad;
-	Pwad_name = edit_wad->PathName();
+	this->wad.edit_wad = wad;
+	this->wad.Pwad_name = this->wad.edit_wad->PathName();
 
-	MasterDir_Add(edit_wad);
+	MasterDir_Add(this->wad.edit_wad);
 
 	// TODO: new instance
 	FreshLevel();
@@ -312,13 +312,13 @@ bool Instance::MissingIWAD_Dialog()
 
 void Instance::CMD_FreshMap()
 {
-	if (!edit_wad)
+	if (!wad.edit_wad)
 	{
 		DLG_Notify("Cannot create a fresh map unless editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
+	if (wad.edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot create a fresh map : file is read-only.");
 		return;
@@ -330,7 +330,7 @@ void Instance::CMD_FreshMap()
 
 	UI_ChooseMap * dialog = new UI_ChooseMap(loaded.levelName.c_str());
 
-	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
+	dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad.edit_wad.get());
 
 	SString map_name = dialog->Run();
 
@@ -341,7 +341,7 @@ void Instance::CMD_FreshMap()
 		return;
 
 	// would this replace an existing map?
-	if (edit_wad->LevelFind(map_name) >= 0)
+	if (wad.edit_wad->LevelFind(map_name) >= 0)
 	{
 		if (DLG_Confirm({ "Cancel", "&Overwrite" },
 		                overwrite_message, "current") <= 0)
@@ -351,7 +351,7 @@ void Instance::CMD_FreshMap()
 	}
 
 
-	M_BackupWad(edit_wad.get());
+	M_BackupWad(wad.edit_wad.get());
 
 	gLog.printf("Created NEW map : %s\n", map_name.c_str());
 
@@ -1063,19 +1063,19 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	// this wad replaces the current PWAD
 	gInstance.ReplaceEditWad(wad);
 
-	SYS_ASSERT(gInstance.edit_wad == wad);
+	SYS_ASSERT(gInstance.wad.edit_wad == wad);
 
 
 	// always grab map_name from the actual level
 	{
-		int idx = gInstance.edit_wad->LevelHeader(lev_num);
-		map_name  = gInstance.edit_wad->GetLump(idx)->Name();
+		int idx = gInstance.wad.edit_wad->LevelHeader(lev_num);
+		map_name  = gInstance.wad.edit_wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.edit_wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.edit_wad->PathName().c_str());
 
 	// TODO: new instance
-	gInstance.LoadLevel(gInstance.edit_wad.get(), map_name);
+	gInstance.LoadLevel(gInstance.wad.edit_wad.get(), map_name);
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
@@ -1123,15 +1123,15 @@ void Instance::CMD_OpenMap()
 
 	if (did_load)
 	{
-		SYS_ASSERT(wad != edit_wad);
-		SYS_ASSERT(wad != game_wad);
+		SYS_ASSERT(wad != this->wad.edit_wad);
+		SYS_ASSERT(wad != this->wad.game_wad);
 
 		ReplaceEditWad(wad);
 
 		new_resources = true;
 	}
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
-	else if (edit_wad && wad != edit_wad)
+	else if (this->wad.edit_wad && wad != this->wad.edit_wad)
 	{
 		RemoveEditWad();
 
@@ -1214,7 +1214,7 @@ void Instance::CMD_FlipMap()
 		return;
 
 
-	Wad_file *wad = edit_wad ? edit_wad.get() : game_wad.get();
+	Wad_file *wad = this->wad.edit_wad ? this->wad.edit_wad.get() : this->wad.game_wad.get();
 
 	// the level might not be found (lev_num < 0) -- that is OK
 	int lev_idx = wad->LevelFind(loaded.levelName);
@@ -1289,7 +1289,7 @@ void Instance::SaveHeader(const SString &level)
 {
 	int size = (int)this->level.headerData.size();
 
-	Lump_c *lump = edit_wad->AddLevel(level, &saving_level);
+	Lump_c *lump = wad.edit_wad->AddLevel(level, &saving_level);
 
 	if (size > 0)
 	{
@@ -1302,7 +1302,7 @@ void Instance::SaveBehavior()
 {
 	int size = (int)level.behaviorData.size();
 
-	Lump_c *lump = edit_wad->AddLump("BEHAVIOR");
+	Lump_c *lump = wad.edit_wad->AddLump("BEHAVIOR");
 
 	if (size > 0)
 	{
@@ -1317,7 +1317,7 @@ void Instance::SaveScripts()
 
 	if (size > 0)
 	{
-		Lump_c *lump = edit_wad->AddLump("SCRIPTS");
+		Lump_c *lump = wad.edit_wad->AddLump("SCRIPTS");
 
 		lump->Write(&level.scriptsData[0], size);
 	}
@@ -1326,7 +1326,7 @@ void Instance::SaveScripts()
 
 void Instance::SaveVertices()
 {
-	Lump_c *lump = edit_wad->AddLump("VERTEXES");
+	Lump_c *lump = wad.edit_wad->AddLump("VERTEXES");
 
 	for (const Vertex *vert : level.vertices)
 	{
@@ -1342,7 +1342,7 @@ void Instance::SaveVertices()
 
 void Instance::SaveSectors()
 {
-	Lump_c *lump = edit_wad->AddLump("SECTORS");
+	Lump_c *lump = wad.edit_wad->AddLump("SECTORS");
 
 	for (const Sector *sec : level.sectors)
 	{
@@ -1365,7 +1365,7 @@ void Instance::SaveSectors()
 
 void Instance::SaveThings()
 {
-	Lump_c *lump = edit_wad->AddLump("THINGS");
+	Lump_c *lump = wad.edit_wad->AddLump("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1386,7 +1386,7 @@ void Instance::SaveThings()
 // IOANCH 9/2015
 void Instance::SaveThings_Hexen()
 {
-	Lump_c *lump = edit_wad->AddLump("THINGS");
+	Lump_c *lump = wad.edit_wad->AddLump("THINGS");
 
 	for (const Thing *th : level.things)
 	{
@@ -1416,7 +1416,7 @@ void Instance::SaveThings_Hexen()
 
 void Instance::SaveSideDefs()
 {
-	Lump_c *lump = edit_wad->AddLump("SIDEDEFS");
+	Lump_c *lump = wad.edit_wad->AddLump("SIDEDEFS");
 
 	for (const SideDef *side : level.sidedefs)
 	{
@@ -1438,7 +1438,7 @@ void Instance::SaveSideDefs()
 
 void Instance::SaveLineDefs()
 {
-	Lump_c *lump = edit_wad->AddLump("LINEDEFS");
+	Lump_c *lump = wad.edit_wad->AddLump("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1462,7 +1462,7 @@ void Instance::SaveLineDefs()
 // IOANCH 9/2015
 void Instance::SaveLineDefs_Hexen()
 {
-	Lump_c *lump = edit_wad->AddLump("LINEDEFS");
+	Lump_c *lump = wad.edit_wad->AddLump("LINEDEFS");
 
 	for (const LineDef *ld : level.linedefs)
 	{
@@ -1490,7 +1490,7 @@ void Instance::SaveLineDefs_Hexen()
 
 void Instance::EmptyLump(const char *name) const
 {
-	edit_wad->AddLump(name);
+	wad.edit_wad->AddLump(name);
 }
 
 
@@ -1504,17 +1504,17 @@ void Instance::SaveLevel(const SString &level)
 	loaded.levelName = level.asUpper();
 
 	// remove previous version of level (if it exists)
-	int lev_num = edit_wad->LevelFind(level);
+	int lev_num = wad.edit_wad->LevelFind(level);
 	int level_lump = -1;
 
 	if (lev_num >= 0)
 	{
-		level_lump = edit_wad->LevelHeader(lev_num);
+		level_lump = wad.edit_wad->LevelHeader(lev_num);
 
-		edit_wad->RemoveLevel(lev_num);
+		wad.edit_wad->RemoveLevel(lev_num);
 	}
 
-	edit_wad->InsertPoint(level_lump);
+	wad.edit_wad->InsertPoint(level_lump);
 
 	SaveHeader(level);
 
@@ -1556,7 +1556,7 @@ void Instance::SaveLevel(const SString &level)
 	}
 
 	// write out the new directory
-	edit_wad->writeToDisk();
+	wad.edit_wad->writeToDisk();
 
 
 	// build the nodes
@@ -1568,17 +1568,17 @@ void Instance::SaveLevel(const SString &level)
 
 	// this is mainly for Next/Prev-map commands
 	// [ it doesn't change the on-disk wad file at all ]
-	edit_wad->SortLevels();
+	wad.edit_wad->SortLevels();
 
-	M_WriteEurekaLump(edit_wad.get());
+	M_WriteEurekaLump(wad.edit_wad.get());
 
-	M_AddRecent(edit_wad->PathName(), loaded.levelName);
+	M_AddRecent(wad.edit_wad->PathName(), loaded.levelName);
 
 	Status_Set("Saved %s", loaded.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(edit_wad->PathName(), loaded.levelName, false);
+		main_win->SetTitle(wad.edit_wad->PathName(), loaded.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1593,12 +1593,12 @@ bool Instance::M_SaveMap()
 	// we require a wad file to save into.
 	// if there is none, then need to create one via Export function.
 
-	if (!edit_wad)
+	if (!wad.edit_wad)
 	{
 		return M_ExportMap();
 	}
 
-	if (edit_wad->IsReadOnly())
+	if (wad.edit_wad->IsReadOnly())
 	{
 		if (DLG_Confirm({ "Cancel", "&Export" },
 		                "The current pwad is a READ-ONLY file. "
@@ -1611,9 +1611,9 @@ bool Instance::M_SaveMap()
 	}
 
 
-	M_BackupWad(edit_wad.get());
+	M_BackupWad(wad.edit_wad.get());
 
-	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), edit_wad->PathName().c_str());
+	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.edit_wad->PathName().c_str());
 
 	SaveLevel(loaded.levelName);
 
@@ -1770,13 +1770,13 @@ void Instance::CMD_ExportMap()
 
 void Instance::CMD_CopyMap()
 {
-	if (!edit_wad)
+	if (!wad.edit_wad)
 	{
 		DLG_Notify("Cannot copy a map unless editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
+	if (wad.edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot copy map : file is read-only.");
 		return;
@@ -1787,9 +1787,9 @@ void Instance::CMD_CopyMap()
 	SString new_name;
 	{
 		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str(),
-													 edit_wad);
+													 wad.edit_wad);
 
-		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), edit_wad.get());
+		dialog->PopulateButtons(static_cast<char>(toupper(loaded.levelName[0])), wad.edit_wad.get());
 
 		new_name = dialog->Run();
 	}
@@ -1817,13 +1817,13 @@ void Instance::CMD_CopyMap()
 
 void Instance::CMD_RenameMap()
 {
-	if (!edit_wad)
+	if (!wad.edit_wad)
 	{
 		DLG_Notify("Cannot rename a map unless editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
+	if (wad.edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot rename map : file is read-only.");
 		return;
@@ -1834,23 +1834,23 @@ void Instance::CMD_RenameMap()
 	SString new_name;
 	{
 		auto dialog = std::make_unique<UI_ChooseMap>(loaded.levelName.c_str(),
-													 edit_wad /* rename_wad */);
+													 wad.edit_wad /* rename_wad */);
 
 		// pick level format from the IWAD
 		// [ user may be trying to rename map after changing the IWAD ]
 		char format = 'M';
 		{
-			int idx = game_wad->LevelFindFirst();
+			int idx = wad.game_wad->LevelFindFirst();
 
 			if (idx >= 0)
 			{
-				idx = game_wad->LevelHeader(idx);
-				const SString &name = game_wad->GetLump(idx)->Name();
+				idx = wad.game_wad->LevelHeader(idx);
+				const SString &name = wad.game_wad->GetLump(idx)->Name();
 				format = static_cast<char>(toupper(name[0]));
 			}
 		}
 
-		dialog->PopulateButtons(format, edit_wad.get());
+		dialog->PopulateButtons(format, wad.edit_wad.get());
 
 		new_name = dialog->Run();
 	}
@@ -1869,19 +1869,19 @@ void Instance::CMD_RenameMap()
 
 
 	// perform the rename
-	int lev_num = edit_wad->LevelFind(loaded.levelName);
+	int lev_num = wad.edit_wad->LevelFind(loaded.levelName);
 
 	if (lev_num >= 0)
 	{
-		int level_lump = edit_wad->LevelHeader(lev_num);
+		int level_lump = wad.edit_wad->LevelHeader(lev_num);
 
-		edit_wad->RenameLump(level_lump, new_name.c_str());
-		edit_wad->writeToDisk();
+		wad.edit_wad->RenameLump(level_lump, new_name.c_str());
+		wad.edit_wad->writeToDisk();
 	}
 
 	loaded.levelName = new_name.asUpper();
 
-	main_win->SetTitle(edit_wad->PathName(), loaded.levelName, false);
+	main_win->SetTitle(wad.edit_wad->PathName(), loaded.levelName, false);
 
 	Status_Set("Renamed to %s", loaded.levelName.c_str());
 }
@@ -1889,19 +1889,19 @@ void Instance::CMD_RenameMap()
 
 void Instance::CMD_DeleteMap()
 {
-	if (!edit_wad)
+	if (!wad.edit_wad)
 	{
 		DLG_Notify("Cannot delete a map unless editing a PWAD.");
 		return;
 	}
 
-	if (edit_wad->IsReadOnly())
+	if (wad.edit_wad->IsReadOnly())
 	{
 		DLG_Notify("Cannot delete map : file is read-only.");
 		return;
 	}
 
-	if (edit_wad->LevelCount() < 2)
+	if (wad.edit_wad->LevelCount() < 2)
 	{
 		// perhaps ask either to Rename map, or Delete the file (and Eureka will shut down)
 
@@ -1918,7 +1918,7 @@ void Instance::CMD_DeleteMap()
 
 	gLog.printf("Deleting Map : %s...\n", loaded.levelName.c_str());
 
-	int lev_num = edit_wad->LevelFind(loaded.levelName);
+	int lev_num = wad.edit_wad->LevelFind(loaded.levelName);
 
 	if (lev_num < 0)
 	{
@@ -1928,23 +1928,23 @@ void Instance::CMD_DeleteMap()
 
 
 	// kick it to the curb
-	edit_wad->RemoveLevel(lev_num);
-	edit_wad->writeToDisk();
+	wad.edit_wad->RemoveLevel(lev_num);
+	wad.edit_wad->writeToDisk();
 
 
 	// choose a new level to load
 	{
-		if (lev_num >= edit_wad->LevelCount())
-			lev_num = edit_wad->LevelCount() - 1;
+		if (lev_num >= wad.edit_wad->LevelCount())
+			lev_num = wad.edit_wad->LevelCount() - 1;
 
-		int lump_idx = edit_wad->LevelHeader(lev_num);
-		Lump_c * lump  = edit_wad->GetLump(lump_idx);
+		int lump_idx = wad.edit_wad->LevelHeader(lev_num);
+		Lump_c * lump  = wad.edit_wad->GetLump(lump_idx);
 		const SString &map_name = lump->Name();
 
 		gLog.printf("OK.  Loading : %s....\n", map_name.c_str());
 
 		// TODO: overhaul the interface to NOT go back to the IWAD
-		LoadLevel(edit_wad.get(), map_name);
+		LoadLevel(wad.edit_wad.get(), map_name);
 	}
 }
 
