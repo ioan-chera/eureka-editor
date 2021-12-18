@@ -458,30 +458,30 @@ void IM_ResetDummyTextures(WadData &wad)
 }
 
 
-void Instance::IM_UnloadDummyTextures() const
+void WadData::IM_UnloadDummyTextures() const
 {
 	bool can_delete = false;
 
-	if (wad.missing_tex_image)
-		wad.missing_tex_image->unload_gl(can_delete);
+	if (missing_tex_image)
+		missing_tex_image->unload_gl(can_delete);
 
-	if (wad.unknown_tex_image)
-		wad.unknown_tex_image->unload_gl(can_delete);
+	if (unknown_tex_image)
+		unknown_tex_image->unload_gl(can_delete);
 
-	if (wad.special_tex_image)
-		wad.special_tex_image->unload_gl(can_delete);
+	if (special_tex_image)
+		special_tex_image->unload_gl(can_delete);
 
-	if (wad.unknown_flat_image)
-		wad.unknown_flat_image->unload_gl(can_delete);
+	if (unknown_flat_image)
+		unknown_flat_image->unload_gl(can_delete);
 
-	if (wad.unknown_sprite_image)
-		wad.unknown_sprite_image->unload_gl(can_delete);
+	if (unknown_sprite_image)
+		unknown_sprite_image->unload_gl(can_delete);
 
-	if (wad.digit_font_11x14)
-		wad.digit_font_11x14->unload_gl(can_delete);
+	if (digit_font_11x14)
+		digit_font_11x14->unload_gl(can_delete);
 
-	if (wad.digit_font_14x19)
-		wad.digit_font_14x19->unload_gl(can_delete);
+	if (digit_font_14x19)
+		digit_font_14x19->unload_gl(can_delete);
 }
 
 

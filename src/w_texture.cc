@@ -843,11 +843,11 @@ static void UnloadSprite(const sprite_map_t::value_type& P)
 		P.second->unload_gl(false);
 }
 
-void Instance::W_UnloadAllTextures() const
+void WadData::W_UnloadAllTextures() const
 {
-	std::for_each(wad.textures.begin(), wad.textures.end(), UnloadTex);
-	std::for_each(wad.flats.begin(),    wad.flats.end(), UnloadFlat);
-	std::for_each(wad.sprites.begin(),  wad.sprites.end(), UnloadSprite);
+	std::for_each(textures.begin(), textures.end(), UnloadTex);
+	std::for_each(flats.begin(),    flats.end(), UnloadFlat);
+	std::for_each(sprites.begin(),  sprites.end(), UnloadSprite);
 
 	IM_UnloadDummyTextures();
 }

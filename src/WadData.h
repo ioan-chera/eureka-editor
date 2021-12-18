@@ -45,13 +45,19 @@ struct WadData
 	Img_c *IM_UnknownSprite(const ConfigData &config);
 	Img_c *IM_DigitFont_11x14();
 	Img_c *IM_DigitFont_14x19();
+	void IM_UnloadDummyTextures() const;
 
 	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
 	Img_c *W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
 	bool W_TextureIsKnown(const ConfigData &config, const SString &name) const;
 	bool W_TextureCausesMedusa(const SString &name) const;
+	void W_UnloadAllTextures() const;
 	void W_ClearTextures();
+	const std::map<SString, Img_c *> &getTextures() const
+	{
+		return textures;
+	}
 
 	void W_AddFlat(const SString &name, Img_c *img);
 	Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
@@ -86,11 +92,9 @@ struct WadData
 	Img_c *unknown_sprite_image = nullptr;
 	Img_c *unknown_tex_image = nullptr;
 
-	std::map<SString, Img_c *> textures;
+	
 	std::map<SString, Img_c *> flats;
 	sprite_map_t sprites;
-	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
-	std::map<SString, int> medusa_textures;
 
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
@@ -98,6 +102,11 @@ struct WadData
 	std::shared_ptr<Wad_file> game_wad;
 	std::vector<std::shared_ptr<Wad_file>> master_dir;	// the IWAD, never NULL, always at master_dir.front()
 	SString Pwad_name;	// Filename of current wad
+
+private:
+	std::map<SString, Img_c *> textures;
+	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
+	std::map<SString, int> medusa_textures;
 };
 
 #endif /* WadData_h */

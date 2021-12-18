@@ -728,7 +728,7 @@ SString TidyLineDesc(const char *name)
 }
 
 
-void UI_Browser_Box::Populate_Images(BrowserMode imkind, std::map<SString, Img_c *> & img_list)
+void UI_Browser_Box::Populate_Images(BrowserMode imkind, const std::map<SString, Img_c *> & img_list)
 {
 	/* Note: the side-by-side packing is done in Filter() method */
 
@@ -738,7 +738,7 @@ void UI_Browser_Box::Populate_Images(BrowserMode imkind, std::map<SString, Img_c
 	scroll->resize_horiz(false);
 	scroll->Line_size(98);
 
-	std::map<SString, Img_c *>::iterator TI;
+	std::map<SString, Img_c *>::const_iterator TI;
 
 	int cx = scroll->x() + SBAR_W;
 	int cy = scroll->y();
@@ -974,7 +974,7 @@ void UI_Browser_Box::Populate()
 			if (config::browser_combine_tex)
 				Populate_Images(BrowserMode::flats, inst.wad.flats);
 
-			Populate_Images(BrowserMode::textures, inst.wad.textures);
+			Populate_Images(BrowserMode::textures, inst.wad.getTextures());
 			break;
 
 		case BrowserMode::flats:

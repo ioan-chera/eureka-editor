@@ -134,7 +134,7 @@ void UI_Canvas::draw()
 		// reset the 'gl_tex' field of all loaded images, as the value
 		// belongs to a context which was (probably) just deleted and
 		// hence refer to textures which no longer exist.
-		inst.W_UnloadAllTextures();
+		inst.wad.W_UnloadAllTextures();
 	}
 
 #ifndef _WIN32	// TODO: #56: reenable this for Windows

@@ -231,15 +231,7 @@ public:
 	// IM_COLOR
 	void W_LoadColormap();
 	void W_LoadPalette();
-
-	// IM_IMG
 	
-	
-	
-	
-	void W_UnloadAllTextures() const;
-	void IM_UnloadDummyTextures() const;
-
 	// M_CONFIG
 	void M_DefaultUserState();
 	bool M_LoadUserState();
