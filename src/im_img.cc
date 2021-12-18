@@ -43,7 +43,7 @@
 #define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
 
 
-inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
+inline static rgb_color_t IM_PixelToRGB(const WadData &wad, img_pixel_t p)
 {
 	if (p & IS_RGB_PIXEL)
 	{
@@ -55,9 +55,9 @@ inline static rgb_color_t IM_PixelToRGB(const Instance &inst, img_pixel_t p)
 	}
 	else
 	{
-		byte r = inst.wad.raw_palette[p][0];
-		byte g = inst.wad.raw_palette[p][1];
-		byte b = inst.wad.raw_palette[p][2];
+		byte r = wad.raw_palette[p][0];
+		byte g = wad.raw_palette[p][1];
+		byte b = wad.raw_palette[p][2];
 
 		return RGB_MAKE(r, g, b);
 	}
@@ -334,7 +334,7 @@ void Img_c::test_make_RGB()
 
 		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
 		{
-			const rgb_color_t col = IM_PixelToRGB(inst, pix);
+			const rgb_color_t col = IM_PixelToRGB(inst.wad, pix);
 
 			byte r = RGB_RED(col)   >> 3;
 			byte g = RGB_GREEN(col) >> 3;
