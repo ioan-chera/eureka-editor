@@ -1113,27 +1113,27 @@ int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
 
 //------------------------------------------------------------------------
 
-void Instance::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
+void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
-	this->wad.master.dir.push_back(wad);
+	dir.push_back(wad);
 }
 
 
-void Instance::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
+void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
 
-	auto ENDP = std::remove(this->wad.master.dir.begin(), this->wad.master.dir.end(), wad);
+	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
 
-	this->wad.master.dir.erase(ENDP, this->wad.master.dir.end());
+	dir.erase(ENDP, dir.end());
 }
 
 
-void Instance::MasterDir_CloseAll()
+void MasterDir::MasterDir_CloseAll()
 {
-	wad.master.dir.clear();
+	dir.clear();
 }
 
 
@@ -1153,11 +1153,11 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 		buf[i] = str[i];
 }
 
-bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
+bool MasterDir::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < wad.master.dir.size() ; k++)
+	for (unsigned int k = 0 ; k < dir.size() ; k++)
 	{
-		const SString &wad_path = wad.master.dir[k]->PathName();
+		const SString &wad_path = dir[k]->PathName();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

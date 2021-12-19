@@ -193,7 +193,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 	global::app_has_focus = false;
 
 	// TODO: ALL instances. This is death.
-	gInstance.MasterDir_CloseAll();
+	gInstance.wad.master.MasterDir_CloseAll();
 	gLog.close();
 
 	exit(2);
@@ -840,7 +840,7 @@ bool Instance::Main_LoadIWAD()
 	}
 	this->wad.master.game_wad = wad;
 
-	MasterDir_Add(this->wad.master.game_wad);
+	this->wad.master.MasterDir_Add(this->wad.master.game_wad);
 	return true;
 }
 
@@ -961,19 +961,19 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 	// reset the master directory
 	if (wad.master.edit_wad)
-		MasterDir_Remove(wad.master.edit_wad);
+		wad.master.MasterDir_Remove(wad.master.edit_wad);
 
-	MasterDir_CloseAll();
+	wad.master.MasterDir_CloseAll();
 
 	// TODO: check result
 	Main_LoadIWAD();
 
 	// load all resource wads
 	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
-		MasterDir_Add(wad);
+		this->wad.master.MasterDir_Add(wad);
 
 	if (wad.master.edit_wad)
-		MasterDir_Add(wad.master.edit_wad);
+		wad.master.MasterDir_Add(wad.master.edit_wad);
 
 	// finally, load textures and stuff...
 	wad.W_LoadPalette();
@@ -1161,14 +1161,14 @@ int main(int argc, char *argv[])
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.MasterDir_Add(gInstance.wad.master.edit_wad);
+			gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
-				gInstance.MasterDir_Add(gInstance.wad.master.edit_wad);
+				gInstance.wad.master.MasterDir_Add(gInstance.wad.master.edit_wad);
 			}
 		}
 
@@ -1185,7 +1185,7 @@ int main(int argc, char *argv[])
 			if (! gInstance.M_ParseEurekaLump(gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
-				gInstance.RemoveEditWad();
+				gInstance.wad.master.RemoveEditWad();
 			}
 		}
 
@@ -1228,7 +1228,7 @@ int main(int argc, char *argv[])
 		global::app_has_focus = false;
 
 		// TODO: all instances
-		gInstance.MasterDir_CloseAll();
+		gInstance.wad.master.MasterDir_CloseAll();
 		gLog.close();
 
 		return 0;

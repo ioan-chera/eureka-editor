@@ -53,27 +53,27 @@ static const char overwrite_message[] =
 	"Are you sure you want to continue?";
 
 
-void Instance::RemoveEditWad()
+void MasterDir::RemoveEditWad()
 {
-	if (!wad.master.edit_wad)
+	if (!edit_wad)
 		return;
 
-	MasterDir_Remove(wad.master.edit_wad);
-	wad.master.edit_wad.reset();
+	MasterDir_Remove(edit_wad);
+	edit_wad.reset();
 
-	wad.master.Pwad_name.clear();
+	Pwad_name.clear();
 }
 
 
 void Instance::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 {
-	RemoveEditWad();
+	wad.master.RemoveEditWad();
 
 	wad.master.edit_wad = new_wad;
 
 	wad.master.Pwad_name = wad.master.edit_wad->PathName();
 
-	MasterDir_Add(wad.master.edit_wad);
+	wad.master.MasterDir_Add(wad.master.edit_wad);
 }
 
 
@@ -245,7 +245,7 @@ void Instance::CMD_NewProject()
 	}
 
 
-	RemoveEditWad();
+	wad.master.RemoveEditWad();
 
 	// this calls Main_LoadResources which resets the master directory
 	Project_ApplyChanges(dialog.get());
@@ -279,7 +279,7 @@ void Instance::CMD_NewProject()
 	this->wad.master.edit_wad = wad;
 	this->wad.master.Pwad_name = this->wad.master.edit_wad->PathName();
 
-	MasterDir_Add(this->wad.master.edit_wad);
+	this->wad.master.MasterDir_Add(this->wad.master.edit_wad);
 
 	// TODO: new instance
 	FreshLevel();
@@ -1133,7 +1133,7 @@ void Instance::CMD_OpenMap()
 	// ...or does it remove the edit_wad? (e.g. wad == game_wad)
 	else if (this->wad.master.edit_wad && wad != this->wad.master.edit_wad)
 	{
-		RemoveEditWad();
+		this->wad.master.RemoveEditWad();
 
 		new_resources = true;
 	}
@@ -1657,7 +1657,7 @@ bool Instance::M_ExportMap()
 
 
 	// don't export into a file we currently have open
-	if (MasterDir_HaveFilename(filename))
+	if (wad.master.MasterDir_HaveFilename(filename))
 	{
 		DLG_Notify("Unable to export the map:\n\nFile already in use");
 		return false;

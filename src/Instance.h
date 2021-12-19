@@ -275,7 +275,6 @@ public:
 	void LoadLevel(Wad_file *wad, const SString &level);
 	void LoadLevelNum(Wad_file *wad, int lev_num);
 	bool MissingIWAD_Dialog();
-	void RemoveEditWad();
 	void ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
 	bool M_SaveMap();
 	void ValidateVertexRefs(LineDef *ld, int num);
@@ -331,14 +330,6 @@ public:
 
 	// UI_MENU
 	Fl_Sys_Menu_Bar *Menu_Create(int x, int y, int w, int h);
-
-	// W_WAD
-	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
-	void MasterDir_CloseAll();
-	bool MasterDir_HaveFilename(const SString &chk_path) const;
-	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
-	
-	
 
 private:
 	// New private methods

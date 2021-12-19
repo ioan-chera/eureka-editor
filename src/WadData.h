@@ -156,6 +156,11 @@ private:
 class MasterDir
 {
 public:
+	void RemoveEditWad();
+	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
+	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
+	void MasterDir_CloseAll();
+	bool MasterDir_HaveFilename(const SString &chk_path) const;
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
