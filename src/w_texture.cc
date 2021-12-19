@@ -349,13 +349,13 @@ void WadData::W_LoadTextures(const ConfigData &config)
 {
 	images.W_ClearTextures();
 
-	for (int i = 0 ; i < (int)master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{
 		gLog.printf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = master_dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
-		Lump_c *texture1 = master_dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
-		Lump_c *texture2 = master_dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
+		Lump_c *pnames   = master.dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
+		Lump_c *texture1 = master.dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
+		Lump_c *texture2 = master.dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -378,7 +378,7 @@ void WadData::W_LoadTextures(const ConfigData &config)
 
 		if (config.features.tx_start)
 		{
-			W_LoadTextures_TX_START(*this, config, master_dir[i].get());
+			W_LoadTextures_TX_START(*this, config, master.dir[i].get());
 		}
 	}
 }
@@ -562,11 +562,11 @@ void WadData::W_LoadFlats()
 {
 	images.W_ClearFlats();
 
-	for (int i = 0 ; i < (int)master_dir.size() ; i++)
+	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{
 		gLog.printf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = master_dir[i].get();
+		const Wad_file *wf = master.dir[i].get();
 
 		for(const LumpRef &lumpRef : wf->getDir())
 		{

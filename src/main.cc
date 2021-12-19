@@ -496,7 +496,7 @@ static SString DetermineLevel(const Instance &inst)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		Wad_file *wad = (pass == 0) ? inst.wad.edit_wad.get() : inst.wad.game_wad.get();
+		Wad_file *wad = (pass == 0) ? inst.wad.master.edit_wad.get() : inst.wad.master.game_wad.get();
 
 		if (! wad)
 			continue;
@@ -777,8 +777,8 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 //
 SString Instance::Main_FileOpFolder() const
 {
-	if (wad.Pwad_name.good())
-		return FilenameGetPath(wad.Pwad_name);
+	if (wad.master.Pwad_name.good())
+		return FilenameGetPath(wad.master.Pwad_name);
 
 	return "";
 }
@@ -838,9 +838,9 @@ bool Instance::Main_LoadIWAD()
 		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
 		return false;
 	}
-	this->wad.game_wad = wad;
+	this->wad.master.game_wad = wad;
 
-	MasterDir_Add(this->wad.game_wad);
+	MasterDir_Add(this->wad.master.game_wad);
 	return true;
 }
 
@@ -960,8 +960,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	loaded = loading;
 
 	// reset the master directory
-	if (wad.edit_wad)
-		MasterDir_Remove(wad.edit_wad);
+	if (wad.master.edit_wad)
+		MasterDir_Remove(wad.master.edit_wad);
 
 	MasterDir_CloseAll();
 
@@ -972,8 +972,8 @@ void Instance::Main_LoadResources(LoadingData &loading)
 	for(const std::shared_ptr<Wad_file> &wad : resourceWads)
 		MasterDir_Add(wad);
 
-	if (wad.edit_wad)
-		MasterDir_Add(wad.edit_wad);
+	if (wad.master.edit_wad)
+		MasterDir_Add(wad.master.edit_wad);
 
 	// finally, load textures and stuff...
 	wad.W_LoadPalette();
@@ -1151,24 +1151,24 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			gInstance.wad.Pwad_name = global::Pwad_list[0];
+			gInstance.wad.master.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
-			gInstance.wad.edit_wad = Wad_file::Open(gInstance.wad.Pwad_name,
+			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,
 												WadOpenMode::append);
-			if (!gInstance.wad.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", gInstance.wad.Pwad_name.c_str());
+			if (!gInstance.wad.master.edit_wad)
+				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
-			gInstance.MasterDir_Add(gInstance.wad.edit_wad);
+			gInstance.MasterDir_Add(gInstance.wad.master.edit_wad);
 		}
 		// don't auto-load when --iwad or --warp was used on the command line
 		else if (config::auto_load_recent && ! (!gInstance.loaded.iwadName.empty() || !gInstance.loaded.levelName.empty()))
 		{
 			if (gInstance.M_TryOpenMostRecent())
 			{
-				gInstance.MasterDir_Add(gInstance.wad.edit_wad);
+				gInstance.MasterDir_Add(gInstance.wad.master.edit_wad);
 			}
 		}
 
@@ -1180,9 +1180,9 @@ int main(int argc, char *argv[])
 		// Note: there is logic in M_ParseEurekaLump() to ensure that command
 		// line arguments can override the EUREKA_LUMP values.
 
-		if (gInstance.wad.edit_wad)
+		if (gInstance.wad.master.edit_wad)
 		{
-			if (! gInstance.M_ParseEurekaLump(gInstance.wad.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance.M_ParseEurekaLump(gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.RemoveEditWad();
@@ -1210,7 +1210,7 @@ int main(int argc, char *argv[])
 		gLog.printf("Loading initial map : %s\n", gInstance.loaded.levelName.c_str());
 
 		// TODO: the first instance
-		gInstance.LoadLevel(gInstance.wad.edit_wad ? gInstance.wad.edit_wad.get() : gInstance.wad.game_wad.get(), gInstance.loaded.levelName);
+		gInstance.LoadLevel(gInstance.wad.master.edit_wad ? gInstance.wad.master.edit_wad.get() : gInstance.wad.master.game_wad.get(), gInstance.loaded.levelName);
 
 		// do this *after* loading the level, since config file parsing
 		// can depend on the map format and UDMF namespace.

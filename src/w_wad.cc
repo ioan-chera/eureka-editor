@@ -1066,9 +1066,9 @@ bool Wad_file::Backup(const char *new_filename)
 //
 Lump_c *WadData::W_FindGlobalLump(const SString &name) const
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master.dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = master.dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1082,9 +1082,9 @@ Lump_c *WadData::W_FindGlobalLump(const SString &name) const
 //
 Lump_c *WadData::W_FindSpriteLump(const SString &name) const
 {
-	for (int i = (int)master_dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)master.dir.size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = master_dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
+		Lump_c *L = master.dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
 		if (L)
 			return L;
 	}
@@ -1117,7 +1117,7 @@ void Instance::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
 
-	this->wad.master_dir.push_back(wad);
+	this->wad.master.dir.push_back(wad);
 }
 
 
@@ -1125,15 +1125,15 @@ void Instance::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
 
-	auto ENDP = std::remove(this->wad.master_dir.begin(), this->wad.master_dir.end(), wad);
+	auto ENDP = std::remove(this->wad.master.dir.begin(), this->wad.master.dir.end(), wad);
 
-	this->wad.master_dir.erase(ENDP, this->wad.master_dir.end());
+	this->wad.master.dir.erase(ENDP, this->wad.master.dir.end());
 }
 
 
 void Instance::MasterDir_CloseAll()
 {
-	wad.master_dir.clear();
+	wad.master.dir.clear();
 }
 
 
@@ -1155,9 +1155,9 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 bool Instance::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < wad.master_dir.size() ; k++)
+	for (unsigned int k = 0 ; k < wad.master.dir.size() ; k++)
 	{
-		const SString &wad_path = wad.master_dir[k]->PathName();
+		const SString &wad_path = wad.master.dir[k]->PathName();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

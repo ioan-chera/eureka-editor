@@ -151,6 +151,21 @@ private:
 };
 
 //
+// Manages the WAD loading
+//
+class MasterDir
+{
+public:
+public:	// TODO: make private
+	// the current PWAD, or NULL for none.
+	// when present it is also at master_dir.back()
+	std::shared_ptr<Wad_file> edit_wad;
+	std::shared_ptr<Wad_file> game_wad;
+	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
+	SString Pwad_name;	// Filename of current wad
+};
+
+//
 // Wad data, loaded during resource setup
 //
 struct WadData
@@ -176,15 +191,9 @@ struct WadData
 		palette.loadColormap(W_FindGlobalLump("COLORMAP"));
 	}
 
-	// the current PWAD, or NULL for none.
-	// when present it is also at master_dir.back()
-	std::shared_ptr<Wad_file> edit_wad;
-	std::shared_ptr<Wad_file> game_wad;
-	std::vector<std::shared_ptr<Wad_file>> master_dir;	// the IWAD, never NULL, always at master_dir.front()
-	SString Pwad_name;	// Filename of current wad
-
 	ImageSet images;
 	Palette palette;
+	MasterDir master;
 };
 
 #endif /* WadData_h */
