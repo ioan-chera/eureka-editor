@@ -111,21 +111,21 @@ public:	// TODO: make private
 class Palette
 {
 public:
-	void W_UpdateGamma();
-	void IM_DecodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void IM_DecodePixel_medium(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void W_CreateBrightMap();
+	void updateGamma();
+	void decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const;
+	void createBrightMap();
 
 	rgb_color_t getPaletteColor(int index) const
 	{
 		return palette[index];
 	}
 
-	void W_LoadPalette(Lump_c *lump);
-	void W_LoadColormap(Lump_c *lump);
+	void loadPalette(Lump_c *lump);
+	void loadColormap(Lump_c *lump);
 	
-	byte W_FindPaletteColor(int r, int g, int b) const;
-	rgb_color_t IM_PixelToRGB(img_pixel_t p) const;
+	byte findPaletteColor(int r, int g, int b) const;
+	rgb_color_t pixelToRGB(img_pixel_t p) const;
 	byte getColormapIndex(int cmap, int pos) const
 	{
 		return raw_colormap[cmap][pos];
@@ -167,13 +167,13 @@ struct WadData
 
 	void W_LoadPalette()
 	{
-		palette.W_LoadPalette(W_FindGlobalLump("PLAYPAL"));
+		palette.loadPalette(W_FindGlobalLump("PLAYPAL"));
 		images.IM_ResetDummyTextures();
 	}
 
 	void W_LoadColormap()
 	{
-		palette.W_LoadColormap(W_FindGlobalLump("COLORMAP"));
+		palette.loadColormap(W_FindGlobalLump("COLORMAP"));
 	}
 
 	// the current PWAD, or NULL for none.

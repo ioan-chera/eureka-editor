@@ -149,7 +149,7 @@ public:
 			fullbright = true;
 			glBindTexture(GL_TEXTURE_2D, 0);
 
-			inst.wad.palette.IM_DecodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
+			inst.wad.palette.decodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
 			return NULL;
 		}
 
@@ -165,7 +165,7 @@ public:
 			else
 				col = HashedPalColor(fname, inst.conf.miscInfo.floor_colors);
 
-			inst.wad.palette.IM_DecodePixel(static_cast<img_pixel_t>(col), r, g, b);
+			inst.wad.palette.decodePixel(static_cast<img_pixel_t>(col), r, g, b);
 			return NULL;
 		}
 
@@ -198,7 +198,7 @@ public:
 			else
 				col = HashedPalColor(tname, inst.conf.miscInfo.wall_colors);
 
-			inst.wad.palette.IM_DecodePixel(static_cast<img_pixel_t>(col), r, g, b);
+			inst.wad.palette.decodePixel(static_cast<img_pixel_t>(col), r, g, b);
 			return NULL;
 		}
 
@@ -689,7 +689,7 @@ public:
 		if (sky_upper && where == 'U')
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			inst.wad.palette.IM_DecodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
+			inst.wad.palette.decodePixel(static_cast<img_pixel_t>(inst.conf.miscInfo.sky_color), r, g, b);
 		}
 		else
 		{

@@ -39,7 +39,7 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-void Palette::W_UpdateGamma()
+void Palette::updateGamma()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
@@ -69,7 +69,7 @@ void Palette::W_UpdateGamma()
 	}
 }
 
-void Palette::W_LoadPalette(Lump_c *lump)
+void Palette::loadPalette(Lump_c *lump)
 {
 	if (! lump)
 	{
@@ -89,15 +89,15 @@ void Palette::W_LoadPalette(Lump_c *lump)
 	byte tg = raw_palette[TRANS_PIXEL][1];
 	byte tb = raw_palette[TRANS_PIXEL][2];
 
-	trans_replace = W_FindPaletteColor(tr, tg, tb);
+	trans_replace = findPaletteColor(tr, tg, tb);
 
-	W_UpdateGamma();
+	updateGamma();
 
-	W_CreateBrightMap();
+	createBrightMap();
 }
 
 
-void Palette::W_LoadColormap(Lump_c *lump)
+void Palette::loadColormap(Lump_c *lump)
 {
 	if (! lump)
 	{
@@ -156,7 +156,7 @@ rgb_color_t LighterColor(rgb_color_t col)
 }
 
 
-byte Palette::W_FindPaletteColor(int r, int g, int b) const
+byte Palette::findPaletteColor(int r, int g, int b) const
 {
 	int best = 0;
 	int best_dist = (1 << 30);
@@ -183,7 +183,7 @@ byte Palette::W_FindPaletteColor(int r, int g, int b) const
 }
 
 
-void Palette::W_CreateBrightMap()
+void Palette::createBrightMap()
 {
 	for (int c = 0 ; c < 256 ; c++)
 	{
@@ -197,7 +197,7 @@ void Palette::W_CreateBrightMap()
 		g = RGB_GREEN(col);
 		b = RGB_BLUE(col);
 
-		bright_map[c] = W_FindPaletteColor(r, g, b);
+		bright_map[c] = findPaletteColor(r, g, b);
 	}
 }
 
