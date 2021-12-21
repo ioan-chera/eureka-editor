@@ -161,6 +161,9 @@ public:
 	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
+
+	Lump_c *W_FindGlobalLump(const SString &name) const;
+	Lump_c *W_FindSpriteLump(const SString &name) const;
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
@@ -179,21 +182,17 @@ struct WadData
 
 	void W_LoadFlats();
 
-	// TODO: solve the palette problem
 	Img_c *W_GetSprite(const ConfigData &config, int type);
 	
-	Lump_c *W_FindGlobalLump(const SString &name) const;
-	Lump_c *W_FindSpriteLump(const SString &name) const;
-
 	void W_LoadPalette()
 	{
-		palette.loadPalette(W_FindGlobalLump("PLAYPAL"));
+		palette.loadPalette(master.W_FindGlobalLump("PLAYPAL"));
 		images.IM_ResetDummyTextures();
 	}
 
 	void W_LoadColormap()
 	{
-		palette.loadColormap(W_FindGlobalLump("COLORMAP"));
+		palette.loadColormap(master.W_FindGlobalLump("COLORMAP"));
 	}
 
 	ImageSet images;

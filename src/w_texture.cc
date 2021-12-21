@@ -158,7 +158,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = wad.W_FindGlobalLump(picname);
+		Lump_c *lump = wad.master.W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(wad.palette, config, *img, lump, picname, xofs, yofs))
@@ -225,7 +225,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 		picname[8] = 0;
 
 //gLog.debugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = wad.W_FindGlobalLump(picname);
+		Lump_c *lump = wad.master.W_FindGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(wad.palette, config, *img, lump, picname, xofs, yofs))
@@ -652,7 +652,7 @@ void ImageSet::W_ClearSprites()
 
 
 // find sprite by prefix
-static Lump_c * Sprite_loc_by_root (const WadData &wad, const ConfigData &config, const SString &name)
+static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &config, const SString &name)
 {
 	// first look for one in the sprite namespace (S_START..S_END),
 	// only if that fails do we check the whole wad.
@@ -665,19 +665,19 @@ static Lump_c * Sprite_loc_by_root (const WadData &wad, const ConfigData &config
 	if(buffer.length() == 5)
 		buffer += '0';
 
-	Lump_c *lump = wad.W_FindSpriteLump(buffer);
+	Lump_c *lump = master.W_FindSpriteLump(buffer);
 
 	if (! lump)
 	{
 		if(buffer.length() >= 6)
 			buffer[5] = '1';
-		lump = wad.W_FindSpriteLump(buffer);
+		lump = master.W_FindSpriteLump(buffer);
 	}
 
 	if (! lump)
 	{
 		buffer += "D1";
-		lump = wad.W_FindSpriteLump(buffer);
+		lump = master.W_FindSpriteLump(buffer);
 	}
 
 	if (lump)
@@ -693,13 +693,13 @@ static Lump_c * Sprite_loc_by_root (const WadData &wad, const ConfigData &config
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = wad.W_FindGlobalLump(buffer);
+		lump = master.W_FindGlobalLump(buffer);
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = wad.W_FindGlobalLump(buffer);
+			lump = master.W_FindGlobalLump(buffer);
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -713,7 +713,7 @@ static Lump_c * Sprite_loc_by_root (const WadData &wad, const ConfigData &config
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = wad.W_FindGlobalLump(name);
+		lump = master.W_FindGlobalLump(name);
 	}
 
 	return lump;
@@ -751,7 +751,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 	}
 	else
 	{
-		Lump_c *lump = Sprite_loc_by_root(*this, config, info.sprite);
+		Lump_c *lump = Sprite_loc_by_root(master, config, info.sprite);
 		if (! lump)
 		{
 			// for the MBF dog, create our own sprite for it, since
