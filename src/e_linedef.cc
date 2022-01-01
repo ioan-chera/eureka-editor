@@ -894,12 +894,28 @@ void Instance::CMD_LIN_SwapSides()
 }
 
 //
+// Return the tile width for computing auto-offset modulus
+//
+static int getTileWidth(const SideDef &side, const ImageSet &images, const ConfigData &config)
+{
+	const Img_c *upper = images.getTexture(config, side.UpperTex());
+	const Img_c *mid = images.getTexture(config, side.MidTex());
+	const Img_c *lower = images.getTexture(config, side.LowerTex());
+
+	int upperWidth = upper ? upper->width() : 1;
+	int midWidth = mid ? mid->width() : 1;
+	int lowerWidth = lower ? lower->width() : 1;
+
+	// Make sure it's at least 1
+	return std::max({1, upperWidth, midWidth, lowerWidth});
+}
+
+//
 // Split linedef at vertex
 //
 int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) const
 {
 	LineDef * L = doc.linedefs[ld];
-	Vertex  * V = doc.vertices[new_v];
 
 	// create new linedef
 	int new_l = op.addNew(ObjType::linedefs);
@@ -912,12 +928,13 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 	L2->start = new_v;
 	L2->end   = L->end;
 
+	int orig_length = I_ROUND(L->CalcLength(doc));
+
 	// update vertex on original line
 	op.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
-	int orig_length = I_ROUND(L->CalcLength(doc));
-	int new_length  = I_ROUND(hypot(L->Start(doc)->x() - V->x(), L->Start(doc)->y() - V->y()));
+	int new_length  = I_ROUND(L->CalcLength(doc));
 
 	// update sidedefs
 
@@ -927,7 +944,11 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 		*L2->Right(doc) = *L->Right(doc);
 
 		if (! config::leave_offsets_alone)
+		{
 			L2->Right(doc)->x_offset += new_length;
+			int width = getTileWidth(*L2->Right(doc), inst.wad.images, inst.conf);
+			L2->Right(doc)->x_offset %= width;
+		}
 	}
 
 	if (L->Left(doc))
@@ -938,6 +959,8 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 		if (! config::leave_offsets_alone)
 		{
 			int new_x_ofs = L->Left(doc)->x_offset + orig_length - new_length;
+			int width = getTileWidth(*L->Left(doc), inst.wad.images, inst.conf);
+			new_x_ofs %= width;
 
 			op.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
 		}
