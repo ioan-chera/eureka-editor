@@ -215,7 +215,7 @@ public:
 		}
 		else
 		{
-			img = inst.wad.images.W_GetTexture(inst.conf, tname);
+			img = inst.wad.images.getTexture(inst.conf, tname);
 
 			if (! img)
 			{

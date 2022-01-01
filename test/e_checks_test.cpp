@@ -214,7 +214,7 @@ bool ImageSet::W_FlatIsKnown(const ConfigData &config, const SString &name) cons
 	return false;
 }
 
-Img_c * ImageSet::W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
+Img_c * ImageSet::getTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	return nullptr;
 }

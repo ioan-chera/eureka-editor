@@ -56,7 +56,7 @@ public:
 	void IM_ResetDummyTextures();
 
 	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
-	Img_c *W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	Img_c *getTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
 	bool W_TextureCausesMedusa(const SString &name) const;
 	bool W_TextureIsKnown(const ConfigData &config, const SString &name) const;

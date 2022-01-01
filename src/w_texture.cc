@@ -384,7 +384,7 @@ void WadData::W_LoadTextures(const ConfigData &config)
 }
 
 
-Img_c * ImageSet::W_GetTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
+Img_c * ImageSet::getTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
 	if (is_null_tex(name))
 		return NULL;
@@ -400,7 +400,7 @@ Img_c * ImageSet::W_GetTexture(const ConfigData &config, const SString &name, bo
 
 	if (try_uppercase)
 	{
-		return W_GetTexture(config, NormalizeTex(name), false);
+		return getTexture(config, NormalizeTex(name), false);
 	}
 
 	if (config.features.mix_textures_flats)
@@ -417,7 +417,7 @@ Img_c * ImageSet::W_GetTexture(const ConfigData &config, const SString &name, bo
 
 int ImageSet::W_GetTextureHeight(const ConfigData &config, const SString &name) const
 {
-	Img_c *img = W_GetTexture(config, name);
+	Img_c *img = getTexture(config, name);
 
 	if (! img)
 		return 128;

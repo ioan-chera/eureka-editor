@@ -142,7 +142,7 @@ void UI_Pic::GetTex(const SString & tname)
 		return;
 	}
 
-	Img_c *img = inst.wad.images.W_GetTexture(inst.conf, tname, true /* try_uppercase */);
+	Img_c *img = inst.wad.images.getTexture(inst.conf, tname, true /* try_uppercase */);
 
 	TiledImg(img);
 }
