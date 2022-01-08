@@ -974,18 +974,17 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 	LineDef * L = doc.linedefs[ld];
 
 	// prevent creating tiny lines (especially zero-length)
-	if (abs(L->Start(doc)->x() - L->End(doc)->x()) < 4 &&
-		abs(L->Start(doc)->y() - L->End(doc)->y()) < 4)
+	if (fabs(L->Start(doc)->x() - L->End(doc)->x()) < 4 &&
+		fabs(L->Start(doc)->y() - L->End(doc)->y()) < 4)
 		return false;
 
-	double new_x = (L->Start(doc)->x() + L->End(doc)->x()) / 2;
-	double new_y = (L->Start(doc)->y() + L->End(doc)->y()) / 2;
+	v2double_t new_p = (L->Start(doc)->xy() + L->End(doc)->xy()) / 2;
 
 	int new_v = op.addNew(ObjType::vertices);
 
 	Vertex * V = doc.vertices[new_v];
 
-	V->SetRawXY(inst, { new_x, new_y });
+	V->SetRawXY(inst, new_p);
 
 	splitLinedefAtVertex(op, ld, new_v);
 
