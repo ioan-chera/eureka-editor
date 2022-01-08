@@ -185,7 +185,7 @@ void Selection_NotifyChange(ObjType type, int objnum, int field);
 
 void DumpSelection (selection_c * list);
 
-void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest);
+void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest);
 
 void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
 

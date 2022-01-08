@@ -366,7 +366,7 @@ void Instance::GoToSelection()
 		Render3D_Enable(*this, false);
 
 	double x1, y1, x2, y2;
-	level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
 
 	double mid_x = (x1 + x2) / 2;
 	double mid_y = (y1 + y2) / 2;
@@ -501,9 +501,9 @@ void Instance::CMD_PruneUnused()
 	EditOperation op(level.basis);
 	op.setMessage("pruned %d objects", num_secs + num_sides + num_verts);
 
-	level.objects.del(op, &used_sides);
-	level.objects.del(op, &used_secs);
-	level.objects.del(op, &used_verts);
+	level.objects.del(op, used_sides);
+	level.objects.del(op, used_secs);
+	level.objects.del(op, used_verts);
 }
 
 

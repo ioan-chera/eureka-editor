@@ -158,7 +158,7 @@ void CMD_TH_Disconnect(Instance &inst)
 			continue;
 
 		double mid_x, mid_y;
-		inst.level.objects.calcMiddle(&overlaps, &mid_x, &mid_y);
+		inst.level.objects.calcMiddle(overlaps, &mid_x, &mid_y);
 
 		int n = 0;
 		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
@@ -186,7 +186,7 @@ void CMD_TH_Merge(Instance &inst)
 	}
 
 	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(inst.edit.Selected, &mid_x, &mid_y);
+	inst.level.objects.calcMiddle(*inst.edit.Selected, &mid_x, &mid_y);
 
 	EditOperation op(inst.level.basis);
 	op.setMessageForSelection("merged", *inst.edit.Selected);

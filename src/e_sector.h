@@ -102,7 +102,7 @@ public:
 	// the 'flip' parameter will contain lines that should be flipped
 	// afterwards (to ensure it has a valid right side).
 	// 'new_sec' MUST be a valid sector number.
-	void AssignSector(EditOperation &op, int new_sec, selection_c *flip);
+	void AssignSector(EditOperation &op, int new_sec, selection_c &flip);
 
 	void Dump() const;
 
@@ -139,7 +139,7 @@ private:
 							  std::vector<int>& upper_texs) const;
 	void doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
 							   int new_lower, int new_upper,
-						selection_c *flip) const;
+						selection_c &flip) const;
 	bool getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const;
 };
 

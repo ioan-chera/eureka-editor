@@ -412,7 +412,7 @@ static void Vertex_MergeOverlaps(Instance &inst)
 		}
 
 		// nothing should reference these vertices now
-		inst.level.objects.del(op, &verts);
+		inst.level.objects.del(op, verts);
 	}
 
 	inst.RedrawMap();
@@ -456,7 +456,7 @@ static void Vertex_RemoveUnused(Document &doc)
 	EditOperation op(doc.basis);
 	op.setMessage("removed unused vertices");
 
-	doc.objects.del(op, &sel);
+	doc.objects.del(op, sel);
 }
 
 
@@ -874,7 +874,7 @@ static void Sectors_RemoveUnused(Document &doc)
 	EditOperation op(doc.basis);
 	op.setMessage("removed unused sectors");
 
-	doc.objects.del(op, &sel);
+	doc.objects.del(op, sel);
 }
 
 
@@ -949,7 +949,7 @@ static void SideDefs_RemoveUnused(Document &doc)
 	EditOperation op(doc.basis);
 	op.setMessage("removed unused sidedefs");
 
-	doc.objects.del(op, &sel);
+	doc.objects.del(op, sel);
 }
 
 
@@ -1399,7 +1399,7 @@ void Things_RemoveUnknown(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("removed unknown things");
 
-	inst.level.objects.del(op, &sel);
+	inst.level.objects.del(op, sel);
 }
 
 
@@ -1489,7 +1489,7 @@ static void Things_RemoveInVoid(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("removed things in the void");
 
-	inst.level.objects.del(op, &sel);
+	inst.level.objects.del(op, sel);
 }
 
 
@@ -2074,7 +2074,7 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 	//       vertices of other lines joining a zero-length one
 	//       need to be merged.
 
-	DeleteObjects_WithUnused(op, doc, &lines, false, false, false);
+	DeleteObjects_WithUnused(op, doc, lines, false, false, false);
 }
 
 
@@ -2087,7 +2087,7 @@ static void LineDefs_ShowZeroLen(Instance &inst)
 
 	LineDefs_FindZeroLen(sel, inst.level);
 
-	ConvertSelection(inst.level, &sel, inst.edit.Selected);
+	ConvertSelection(inst.level, sel, *inst.edit.Selected);
 
 	inst.GoToErrors();
 }
@@ -2480,13 +2480,13 @@ static void LineDefs_RemoveOverlaps(Document &doc)
 
 	LineDefs_FindOverlaps(lines, doc);
 
-	UnusedVertices(doc, &lines, &unused_verts);
+	UnusedVertices(doc, lines, unused_verts);
 
 	EditOperation op(doc.basis);
 	op.setMessage("removed overlapping lines");
 
-	doc.objects.del(op, &lines);
-	doc.objects.del(op, &unused_verts);
+	doc.objects.del(op, lines);
+	doc.objects.del(op, unused_verts);
 }
 
 

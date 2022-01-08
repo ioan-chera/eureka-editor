@@ -1240,7 +1240,7 @@ void Instance::commandLinedefMergeTwo()
 
 	del_line.set(ld1);
 
-	DeleteObjects_WithUnused(op, level, &del_line, false, false, false);
+	DeleteObjects_WithUnused(op, level, del_line, false, false, false);
 
 	op.setMessage("merged two linedefs");
 }
@@ -1377,7 +1377,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 	// use a copy of the selection
 	selection_c list(ObjType::linedefs);
-	ConvertSelection(doc, inst.edit.Selected, &list);
+	ConvertSelection(doc, *inst.edit.Selected, list);
 
 	if (list.empty())
 		return;

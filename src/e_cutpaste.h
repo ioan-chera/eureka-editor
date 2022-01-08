@@ -50,10 +50,10 @@ void Clipboard_NotifyDelete(ObjType type, int objnum);
 void Clipboard_NotifyChange(ObjType type, int objnum, int field);
 void Clipboard_NotifyEnd();
 
-void UnusedVertices(const Document &doc, selection_c *lines, selection_c *result);
-void UnusedSideDefs(const Document &doc, selection_c *lines, selection_c *secs, selection_c *result);
+void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &result);
+void UnusedSideDefs(const Document &doc, const selection_c &lines, const selection_c *secs, selection_c &result);
 
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_c *list,
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list,
 			bool keep_things,
 			bool keep_verts ,
 			bool keep_lines );

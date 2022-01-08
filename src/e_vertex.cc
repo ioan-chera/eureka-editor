@@ -267,7 +267,7 @@ void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
 	selection_c del_lines(ObjType::linedefs);
 
 	// this prevents unnecessary sandwich mergers
-	ConvertSelection(doc, &verts, &del_lines);
+	ConvertSelection(doc, verts, del_lines);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -276,11 +276,11 @@ void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
 
 	// all these vertices will be unused now, hence this call
 	// shouldn't kill any other objects.
-	doc.objects.del(op, &verts);
+	doc.objects.del(op, verts);
 
 	// we NEED to keep unused vertices here, otherwise we can merge
 	// all vertices of an isolated sector and end up with NOTHING!
-	DeleteObjects_WithUnused(op, doc, &del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
+	DeleteObjects_WithUnused(op, doc, del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
 
 	verts.clear_all();
 }
@@ -747,13 +747,13 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 }
 
 
-void VertexModule::DETSEC_CalcMoveVector(selection_c * detach_verts, double * dx, double * dy) const
+void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, double * dx, double * dy) const
 {
 	double det_mid_x, sec_mid_x;
 	double det_mid_y, sec_mid_y;
 
 	doc.objects.calcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
-	doc.objects.calcMiddle(inst.edit.Selected, &sec_mid_x, &sec_mid_y);
+	doc.objects.calcMiddle(*inst.edit.Selected, &sec_mid_x, &sec_mid_y);
 
 	*dx = sec_mid_x - det_mid_x;
 	*dy = sec_mid_y - det_mid_y;
@@ -814,7 +814,7 @@ void Instance::commandSectorDisconnect()
 
 	// determine vector to move the detach coords
 	double move_dx, move_dy;
-	level.vertmod.DETSEC_CalcMoveVector(&detach_verts, &move_dx, &move_dy);
+	level.vertmod.DETSEC_CalcMoveVector(detach_verts, &move_dx, &move_dy);
 
 
 	{
@@ -878,7 +878,7 @@ void Instance::commandSectorDisconnect()
 
 		selection_c all_verts(ObjType::vertices);
 
-		ConvertSelection(level, edit.Selected, &all_verts);
+		ConvertSelection(level, *edit.Selected, all_verts);
 
 		for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 		{
@@ -957,7 +957,7 @@ void Instance::CMD_VT_ShapeLine()
 	// determine orientation and position of the line
 
 	double x1, y1, x2, y2;
-	level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;
@@ -1202,7 +1202,7 @@ void Instance::CMD_VT_ShapeArc()
 
 	// determine middle point for circle
 	double x1, y1, x2, y2;
-	level.objects.calcBBox(edit.Selected, &x1, &y1, &x2, &y2);
+	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
 
 	double width  = x2 - x1;
 	double height = y2 - y1;

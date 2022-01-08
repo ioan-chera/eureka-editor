@@ -351,7 +351,7 @@ void Instance::Editor_ChangeMode(char mode_char)
 		selection_c *prev_sel = edit.Selected;
 		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
-		ConvertSelection(level, prev_sel, edit.Selected);
+		ConvertSelection(level, *prev_sel, *edit.Selected);
 		delete prev_sel;
 	}
 	else if (main_win->isSpecialPanelShown())
@@ -629,16 +629,16 @@ void DumpSelection(selection_c * list)
 }
 
 
-void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest)
+void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest)
 {
-	if (src->what_type() == dest->what_type())
+	if (src.what_type() == dest.what_type())
 	{
-		dest->merge(*src);
+		dest.merge(src);
 		return;
 	}
 
 
-	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::things)
+	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::things)
 	{
 		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
@@ -646,94 +646,94 @@ void ConvertSelection(const Document &doc, const selection_c * src, selection_c 
 
 			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
 
-			if (! obj.is_nil() && src->get(obj.num))
+			if (! obj.is_nil() && src.get(obj.num))
 			{
-				dest->set(t);
+				dest.set(t);
 			}
 		}
 		return;
 	}
 
 
-	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::linedefs)
+	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::linedefs)
 	{
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
 			const LineDef *L = doc.linedefs[l];
 
-			if ( (L->Right(doc) && src->get(L->Right(doc)->sector)) ||
-				 (L->Left(doc)  && src->get(L->Left(doc)->sector)) )
+			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
+				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
 			{
-				dest->set(l);
+				dest.set(l);
 			}
 		}
 		return;
 	}
 
 
-	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::vertices)
+	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::vertices)
 	{
 		for (const LineDef *L : doc.linedefs)
 		{
-			if ( (L->Right(doc) && src->get(L->Right(doc)->sector)) ||
-				 (L->Left(doc)  && src->get(L->Left(doc)->sector)) )
+			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
+				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
 			{
-				dest->set(L->start);
-				dest->set(L->end);
+				dest.set(L->start);
+				dest.set(L->end);
 			}
 		}
 		return;
 	}
 
 
-	if (src->what_type() == ObjType::linedefs && dest->what_type() == ObjType::sidedefs)
+	if (src.what_type() == ObjType::linedefs && dest.what_type() == ObjType::sidedefs)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
 			const LineDef *L = doc.linedefs[*it];
 
-			if (L->Right(doc)) dest->set(L->right);
-			if (L->Left(doc))  dest->set(L->left);
+			if (L->Right(doc)) dest.set(L->right);
+			if (L->Left(doc))  dest.set(L->left);
 		}
 		return;
 	}
 
-	if (src->what_type() == ObjType::sectors && dest->what_type() == ObjType::sidedefs)
+	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::sidedefs)
 	{
 		for (int n = 0 ; n < doc.numSidedefs(); n++)
 		{
 			const SideDef * SD = doc.sidedefs[n];
 
-			if (src->get(SD->sector))
-				dest->set(n);
+			if (src.get(SD->sector))
+				dest.set(n);
 		}
 		return;
 	}
 
 
-	if (src->what_type() == ObjType::linedefs && dest->what_type() == ObjType::vertices)
+	if (src.what_type() == ObjType::linedefs && dest.what_type() == ObjType::vertices)
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
 			const LineDef *L = doc.linedefs[*it];
 
-			dest->set(L->start);
-			dest->set(L->end);
+			dest.set(L->start);
+			dest.set(L->end);
 		}
 		return;
 	}
 
 
-	if (src->what_type() == ObjType::vertices && dest->what_type() == ObjType::linedefs)
+	if (src.what_type() == ObjType::vertices && dest.what_type() == ObjType::linedefs)
 	{
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
 			const LineDef *L = doc.linedefs[l];
 
-			if (src->get(L->start) && src->get(L->end))
+			if (src.get(L->start) && src.get(L->end))
 			{
-				dest->set(l);
+				dest.set(l);
 			}
 		}
 	}
@@ -741,10 +741,10 @@ void ConvertSelection(const Document &doc, const selection_c * src, selection_c 
 
 	// remaining conversions are L->S and V->S
 
-	if (dest->what_type() != ObjType::sectors)
+	if (dest.what_type() != ObjType::sectors)
 		return;
 
-	if (src->what_type() != ObjType::linedefs && src->what_type() != ObjType::vertices)
+	if (src.what_type() != ObjType::linedefs && src.what_type() != ObjType::vertices)
 		return;
 
 
@@ -755,8 +755,8 @@ void ConvertSelection(const Document &doc, const selection_c * src, selection_c 
 	{
 		const LineDef *L = doc.linedefs[l];
 
-		if (L->Right(doc)) dest->set(L->Right(doc)->sector);
-		if (L->Left(doc))  dest->set(L->Left(doc)->sector);
+		if (L->Right(doc)) dest.set(L->Right(doc)->sector);
+		if (L->Left(doc))  dest.set(L->Left(doc)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
@@ -765,19 +765,19 @@ void ConvertSelection(const Document &doc, const selection_c * src, selection_c 
 	{
 		const LineDef *L = doc.linedefs[l];
 
-		if (src->what_type() == ObjType::vertices)
+		if (src.what_type() == ObjType::vertices)
 		{
-			if (src->get(L->start) && src->get(L->end))
+			if (src.get(L->start) && src.get(L->end))
 				continue;
 		}
 		else
 		{
-			if (src->get(l))
+			if (src.get(l))
 				continue;
 		}
 
-		if (L->Right(doc)) dest->clear(L->Right(doc)->sector);
-		if (L->Left(doc))  dest->clear(L->Left(doc)->sector);
+		if (L->Right(doc)) dest.clear(L->Right(doc)->sector);
+		if (L->Left(doc))  dest.clear(L->Left(doc)->sector);
 	}
 }
 

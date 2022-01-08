@@ -58,13 +58,13 @@ public:
 	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
 	{
 	}
-	void move(selection_c &list, double delta_x, double delta_y, double delta_z) const;
+	void move(const selection_c &list, double delta_x, double delta_y, double delta_z) const;
 	void singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const;
-	void del(EditOperation &op, selection_c *list) const;
+	void del(EditOperation &op, const selection_c &list) const;
 	bool lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const;
 	void getDragFocus(double *x, double *y, double ptr_x, double ptr_y) const;
-	void calcMiddle(selection_c *list, double *x, double *y) const;
-	void calcBBox(selection_c *list, double *x1, double *y1, double *x2, double *y2) const;
+	void calcMiddle(const selection_c &list, double *x, double *y) const;
+	void calcBBox(const selection_c &list, double *x1, double *y1, double *x2, double *y2) const;
 	void transform(transform_t &param) const;
 	void scale3(double scale_x, double scale_y, double pos_x, double pos_y) const;
 	void scale4(double scale_x, double scale_y, double scale_z,
@@ -79,9 +79,9 @@ private:
 	void insertVertex(bool force_continue, bool no_fill) const;
 	void insertLinedefAutosplit(EditOperation &op, int v1, int v2, bool no_fill) const;
 	void insertLinedef(EditOperation &op, int v1, int v2, bool no_fill) const;
-	bool checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c *flip) const;
+	bool checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c &flip) const;
 	int sectorNew(EditOperation &op, int model, int model2, int model3) const;
-	void doMoveObjects(EditOperation &op, selection_c *list, double delta_x, double delta_y, double delta_z) const;
+	void doMoveObjects(EditOperation &op, const selection_c &list, double delta_x, double delta_y, double delta_z) const;
 	void transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const;
 	void transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const;
 	void transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const;
@@ -90,19 +90,19 @@ private:
 	void dragUpdateCurrentDist(ObjType obj_type, int objnum, double *x, double *y,
 		double *best_dist, double ptr_x, double ptr_y,
 		bool only_grid) const;
-	void doMirrorThings(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
-	void doMirrorStuff(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
-	void doMirrorVertices(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const;
-	void doRotate90Things(EditOperation &op, selection_c *list, bool anti_clockwise,
+	void doMirrorThings(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorStuff(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const;
+	void doMirrorVertices(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const;
+	void doRotate90Things(EditOperation &op, const selection_c &list, bool anti_clockwise,
 		double mid_x, double mid_y) const;
 	void doEnlargeOrShrink(bool do_shrink) const;
-	void doScaleTwoThings(EditOperation &op, selection_c *list, transform_t &param) const;
-	void doScaleTwoStuff(EditOperation &op, selection_c *list, transform_t &param) const;
-	void doScaleTwoVertices(EditOperation &op, selection_c *list, transform_t &param) const;
+	void doScaleTwoThings(EditOperation &op, const selection_c &list, transform_t &param) const;
+	void doScaleTwoStuff(EditOperation &op, const selection_c &list, transform_t &param) const;
+	void doScaleTwoVertices(EditOperation &op, const selection_c &list, transform_t &param) const;
 	void determineOrigin(transform_t &param, double pos_x, double pos_y) const;
-	void doScaleSectorHeights(EditOperation &op, selection_c *list, double scale_z, int pos_z) const;
-	void quantizeThings(EditOperation &op, selection_c *list) const;
-	void quantizeVertices(EditOperation &op, selection_c *list) const;
+	void doScaleSectorHeights(EditOperation &op, const selection_c &list, double scale_z, int pos_z) const;
+	void quantizeThings(EditOperation &op, selection_c &list) const;
+	void quantizeVertices(EditOperation &op, selection_c &list) const;
 	bool spotInUse(ObjType obj_type, int x, int y) const;
 
 	int findLineBetweenLineAndVertex(int lineID, int vertID) const;

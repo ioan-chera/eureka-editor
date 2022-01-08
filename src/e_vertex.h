@@ -53,7 +53,7 @@ private:
 	void doDisconnectLinedef(EditOperation &op, int ld, int which_vert, bool *seen_one) const;
 	void verticesOfDetachableSectors(selection_c &verts) const;
 	void DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2, int end2, Side in_side) const;
-	void DETSEC_CalcMoveVector(selection_c *detach_verts, double *dx, double *dy) const;
+	void DETSEC_CalcMoveVector(const selection_c &detach_verts, double *dx, double *dy) const;
 	double evaluateCircle(EditOperation *op, double mid_x, double mid_y, double r,
 		std::vector< vert_along_t > &along_list,
 		unsigned int start_idx, double arc_rad,

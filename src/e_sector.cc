@@ -358,11 +358,11 @@ void Instance::commandSectorMerge()
 			unused_secs.set(old_sec);
 		}
 
-		level.objects.del(op, &unused_secs);
+		level.objects.del(op, unused_secs);
 
 		if (! keep_common_lines)
 		{
-			DeleteObjects_WithUnused(op, level, &common_lines, false, false, false);
+			DeleteObjects_WithUnused(op, level, common_lines, false, false, false);
 		}
 
 	}
@@ -1031,7 +1031,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 //
 void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
 						   int new_lower, int new_upper,
-						   selection_c *flip) const
+						   selection_c &flip) const
 {
 // gLog.debugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
 	const LineDef * L = doc.linedefs[ld];
@@ -1051,9 +1051,9 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	// left side but no right side.
 
 	if (side == Side::left && other_sd < 0)
-		flip->set(ld);
+		flip.set(ld);
 	else
-		flip->clear(ld);
+		flip.clear(ld);
 
 	SYS_ASSERT(new_lower >= 0);
 	SYS_ASSERT(new_upper >= 0);
@@ -1094,7 +1094,7 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 }
 
 
-void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c *flip)
+void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c &flip)
 {
 	std::vector<int> lower_texs(lines.size());
 	std::vector<int> upper_texs(lines.size());
@@ -1219,7 +1219,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double m
 
 	loop.GetAllSectors(&unused);
 
-	loop.AssignSector(op, new_sec, &flip);
+	loop.AssignSector(op, new_sec, flip);
 
 	doc.linemod.flipLinedefGroup(op, &flip);
 
@@ -1234,7 +1234,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double m
 			unused.clear(L->WhatSector(Side::right, doc));
 	}
 
-	doc.objects.del(op, &unused);
+	doc.objects.del(op, unused);
 
 	return true;
 }

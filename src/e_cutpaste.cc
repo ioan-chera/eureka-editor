@@ -368,19 +368,19 @@ void Texboard_SetThing(int new_id)
 
 //------------------------------------------------------------------------
 
-static void CopyGroupOfObjects(const Document &doc, selection_c *list)
+static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 {
 	// this is used for LineDefs and Sectors, where we need to copy
 	// groups of objects and create internal references between them.
 
-	bool is_sectors = list->what_type() == ObjType::sectors;
+	bool is_sectors = list.what_type() == ObjType::sectors;
 
 	selection_c vert_sel(ObjType::vertices);
 	selection_c side_sel(ObjType::sidedefs);
 	selection_c line_sel(ObjType::linedefs);
 
-	ConvertSelection(doc, list, &line_sel);
-	ConvertSelection(doc, &line_sel, &vert_sel);
+	ConvertSelection(doc, list, line_sel);
+	ConvertSelection(doc, line_sel, vert_sel);
 
 	// determine needed sidedefs
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
@@ -428,7 +428,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 		clip_board->sides.push_back(SD);
 
 		// adjust sector references, if needed
-		if (is_sectors && list->get(SD->sector))
+		if (is_sectors && list.get(SD->sector))
 		{
 			SYS_ASSERT(sector_map.find(SD->sector) != sector_map.end());
 			SD->sector = -1 - sector_map[SD->sector];
@@ -467,7 +467,7 @@ static void CopyGroupOfObjects(const Document &doc, selection_c *list)
 	{
 		selection_c thing_sel(ObjType::things);
 
-		ConvertSelection(doc, list, &thing_sel);
+		ConvertSelection(doc, list, thing_sel);
 
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
 		{
@@ -515,7 +515,7 @@ bool Instance::Clipboard_DoCopy()
 
 		case ObjType::linedefs:
 		case ObjType::sectors:
-			CopyGroupOfObjects(level, edit.Selected);
+			CopyGroupOfObjects(level, *edit.Selected);
 			break;
 
 		default:
@@ -704,7 +704,7 @@ void Instance::ReselectGroup()
 
 	Selection_Clear();
 
-	ConvertSelection(level, &new_sel, edit.Selected);
+	ConvertSelection(level, new_sel, *edit.Selected);
 }
 
 
@@ -879,42 +879,42 @@ void Instance::CMD_Clipboard_Paste()
 
 //------------------------------------------------------------------------
 
-void UnusedVertices(const Document &doc, selection_c *lines, selection_c *result)
+void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &result)
 {
-	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
+	SYS_ASSERT(lines.what_type() == ObjType::linedefs);
 
 	ConvertSelection(doc, lines, result);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
 		// we are interested in the lines we are NOT deleting
-		if (lines->get(n))
+		if (lines.get(n))
 			continue;
 
 		const LineDef *L = doc.linedefs[n];
 
-		result->clear(L->start);
-		result->clear(L->end);
+		result.clear(L->start);
+		result.clear(L->end);
 	}
 }
 
 
-void UnusedSideDefs(const Document &doc, selection_c *lines, selection_c *secs, selection_c *result)
+void UnusedSideDefs(const Document &doc, const selection_c &lines, const selection_c *secs, selection_c &result)
 {
-	SYS_ASSERT(lines->what_type() == ObjType::linedefs);
+	SYS_ASSERT(lines.what_type() == ObjType::linedefs);
 
 	ConvertSelection(doc, lines, result);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
 		// we are interested in the lines we are NOT deleting
-		if (lines->get(n))
+		if (lines.get(n))
 			continue;
 
 		const LineDef *L = doc.linedefs[n];
 
-		if (L->Right(doc)) result->clear(L->right);
-		if (L->Left(doc))  result->clear(L->left);
+		if (L->Right(doc)) result.clear(L->right);
+		if (L->Left(doc))  result.clear(L->left);
 	}
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
@@ -922,14 +922,14 @@ void UnusedSideDefs(const Document &doc, selection_c *lines, selection_c *secs, 
 		const SideDef *SD = doc.sidedefs[i];
 
 		if (secs && secs->get(SD->sector))
-			result->set(i);
+			result.set(i);
 	}
 }
 
 
-static void UnusedLineDefs(const Document &doc, selection_c *sectors, selection_c *result)
+static void UnusedLineDefs(const Document &doc, const selection_c &sectors, selection_c &result)
 {
-	SYS_ASSERT(sectors->what_type() == ObjType::sectors);
+	SYS_ASSERT(sectors.what_type() == ObjType::sectors);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
@@ -939,18 +939,18 @@ static void UnusedLineDefs(const Document &doc, selection_c *sectors, selection_
 		//    -1 : no side
 		//     0 : deleted side
 		//    +1 : kept side
-		int right_m = (L->right < 0) ? -1 : sectors->get(L->Right(doc)->sector) ? 0 : 1;
-		int  left_m = (L->left  < 0) ? -1 : sectors->get(L->Left(doc) ->sector) ? 0 : 1;
+		int right_m = (L->right < 0) ? -1 : sectors.get(L->Right(doc)->sector) ? 0 : 1;
+		int  left_m = (L->left  < 0) ? -1 : sectors.get(L->Left(doc) ->sector) ? 0 : 1;
 
 		if (std::max(right_m, left_m) == 0)
 		{
-			result->set(n);
+			result.set(n);
 		}
 	}
 }
 
 
-static void DuddedSectors(const Document &doc, const selection_c &verts, const selection_c &lines, selection_c *result)
+static void DuddedSectors(const Document &doc, const selection_c &verts, const selection_c &lines, selection_c &result)
 {
 	SYS_ASSERT(verts.what_type() == ObjType::vertices);
 	SYS_ASSERT(lines.what_type() == ObjType::linedefs);
@@ -968,9 +968,9 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 			del_lines.set(n);
 
 			if (linedef->WhatSector(Side::left, doc) >= 0)
-				result->set(linedef->WhatSector(Side::left, doc));
+				result.set(linedef->WhatSector(Side::left, doc));
 			if (linedef->WhatSector(Side::right, doc) >= 0)
-				result->set(linedef->WhatSector(Side::right, doc));
+				result.set(linedef->WhatSector(Side::right, doc));
 		}
 	}
 
@@ -993,7 +993,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 			// skip sectors that are not potentials for removal,
 			// and prevent the expensive tests below...
-			if (! result->get(sec_num))
+			if (! result.get(sec_num))
 				continue;
 
 			// check if the linedef opposite faces this sector (BUT
@@ -1009,7 +1009,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 			const LineDef *oppositeLinedef = doc.linedefs[opp_ld];
 
 			if (oppositeLinedef->WhatSector(opp_side, doc) == sec_num)
-				result->clear(sec_num);
+				result.clear(sec_num);
 		}
 	}
 }
@@ -1099,7 +1099,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 
 	line_sel.set(ld2);
 
-	UnusedSideDefs(doc, &line_sel, NULL /* sec_sel */, &side_sel);
+	UnusedSideDefs(doc, line_sel, NULL /* sec_sel */, side_sel);
 
 
 	EditOperation op(doc.basis);
@@ -1115,13 +1115,13 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	op.del(ObjType::linedefs, ld2);
 	op.del(ObjType::vertices, v_num);
 
-	doc.objects.del(op, &side_sel);
+	doc.objects.del(op, side_sel);
 
 	return true;
 }
 
 
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_c *list, bool keep_things,
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
 							  bool keep_verts, bool keep_lines)
 {
 	selection_c vert_sel(ObjType::vertices);
@@ -1129,18 +1129,18 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 	selection_c line_sel(ObjType::linedefs);
 	selection_c  sec_sel(ObjType::sectors);
 
-	switch (list->what_type())
+	switch (list.what_type())
 	{
 		case ObjType::vertices:
-			vert_sel.merge(*list);
+			vert_sel.merge(list);
 			break;
 
 		case ObjType::linedefs:
-			line_sel.merge(*list);
+			line_sel.merge(list);
 			break;
 
 		case ObjType::sectors:
-			sec_sel.merge(*list);
+			sec_sel.merge(list);
 			break;
 
 		default: /* OBJ_THINGS or OBJ_SIDEDEFS */
@@ -1148,41 +1148,41 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 			return;
 	}
 
-	if (list->what_type() == ObjType::vertices)
+	if (list.what_type() == ObjType::vertices)
 	{
 		for (int n = 0 ; n < doc.numLinedefs(); n++)
 		{
 			const LineDef *L = doc.linedefs[n];
 
-			if (list->get(L->start) || list->get(L->end))
+			if (list.get(L->start) || list.get(L->end))
 				line_sel.set(n);
 		}
 	}
 
-	if (!keep_lines && list->what_type() == ObjType::sectors)
+	if (!keep_lines && list.what_type() == ObjType::sectors)
 	{
-		UnusedLineDefs(doc, &sec_sel, &line_sel);
+		UnusedLineDefs(doc, sec_sel, line_sel);
 
 		if (line_sel.notempty())
 		{
-			UnusedSideDefs(doc, &line_sel, &sec_sel, &side_sel);
+			UnusedSideDefs(doc, line_sel, &sec_sel, side_sel);
 
 			if (!keep_verts)
-				UnusedVertices(doc, &line_sel, &vert_sel);
+				UnusedVertices(doc, line_sel, vert_sel);
 		}
 	}
 
-	if (!keep_verts && list->what_type() == ObjType::linedefs)
+	if (!keep_verts && list.what_type() == ObjType::linedefs)
 	{
-		UnusedVertices(doc, &line_sel, &vert_sel);
+		UnusedVertices(doc, line_sel, vert_sel);
 	}
 
 	// try to detect sectors that become "dudded", where all the
 	// remaining linedefs of the sector face into the void.
-	if (list->what_type() == ObjType::vertices || list->what_type() == ObjType::linedefs)
+	if (list.what_type() == ObjType::vertices || list.what_type() == ObjType::linedefs)
 	{
-		DuddedSectors(doc, vert_sel, line_sel, &sec_sel);
-		UnusedSideDefs(doc, &line_sel, &sec_sel, &side_sel);
+		DuddedSectors(doc, vert_sel, line_sel, sec_sel);
+		UnusedSideDefs(doc, line_sel, &sec_sel, side_sel);
 	}
 
 	// delete things from each deleted sector
@@ -1190,8 +1190,8 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 	{
 		selection_c thing_sel(ObjType::things);
 
-		ConvertSelection(doc, &sec_sel, &thing_sel);
-		doc.objects.del(op, &thing_sel);
+		ConvertSelection(doc, sec_sel, thing_sel);
+		doc.objects.del(op, thing_sel);
 	}
 
 	// perform linedef fixups here (when sectors get removed)
@@ -1199,7 +1199,7 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 	{
 		selection_c fixups(ObjType::linedefs);
 
-		ConvertSelection(doc, &sec_sel, &fixups);
+		ConvertSelection(doc, sec_sel, fixups);
 
 		// skip lines which will get deleted
 		fixups.unmerge(line_sel);
@@ -1208,10 +1208,10 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_
 	}
 
 	// actually delete stuff, in the correct order
-	doc.objects.del(op, &line_sel);
-	doc.objects.del(op, &side_sel);
-	doc.objects.del(op, &vert_sel);
-	doc.objects.del(op,  &sec_sel);
+	doc.objects.del(op, line_sel);
+	doc.objects.del(op, side_sel);
+	doc.objects.del(op, vert_sel);
+	doc.objects.del(op,  sec_sel);
 }
 
 
@@ -1249,7 +1249,7 @@ void Instance::CMD_Delete()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("deleted", *edit.Selected);
 
-		DeleteObjects_WithUnused(op, level, edit.Selected, keep, false /* keep_verts */, keep);
+		DeleteObjects_WithUnused(op, level, *edit.Selected, keep, false /* keep_verts */, keep);
 	}
 
 success:

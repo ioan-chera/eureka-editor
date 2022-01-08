@@ -56,11 +56,11 @@ void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
 {
 }
 
-void ConvertSelection(const Document &doc, const selection_c * src, selection_c * dest)
+void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest)
 {
 }
 
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, selection_c *list, bool keep_things,
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
 							  bool keep_verts, bool keep_lines)
 {
 }
@@ -243,7 +243,7 @@ void LogViewer_Open()
 {
 }
 
-void ObjectsModule::del(EditOperation &op, selection_c *list) const
+void ObjectsModule::del(EditOperation &op, const selection_c &list) const
 {
 }
 
@@ -289,7 +289,7 @@ int UI_Escapable_Window::handle(int event)
 	return 0;
 }
 
-void UnusedVertices(const Document &doc, selection_c *lines, selection_c *result)
+void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &result)
 {
 }
 

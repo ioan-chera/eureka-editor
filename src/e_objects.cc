@@ -54,14 +54,14 @@ int  config::new_sector_size = 128;
 //  this is very raw, e.g. it does not check for stuff that will
 //  remain unused afterwards.
 //
-void ObjectsModule::del(EditOperation &op, selection_c *list) const
+void ObjectsModule::del(EditOperation &op, const selection_c &list) const
 {
 	// we need to process the object numbers from highest to lowest,
 	// because each deletion invalidates all higher-numbered refs
 	// in the selection.  Our selection iterator cannot give us
 	// what we need, hence put them into a vector for sorting.
 
-	if (list->empty())
+	if (list.empty())
 		return;
 
 	std::vector<int> objnums;
@@ -72,7 +72,7 @@ void ObjectsModule::del(EditOperation &op, selection_c *list) const
 	std::sort(objnums.begin(), objnums.end());
 
 	for (int i = (int)objnums.size()-1 ; i >= 0 ; i--)
-		op.del(list->what_type(), objnums[i]);
+		op.del(list.what_type(), objnums[i]);
 }
 
 
@@ -181,7 +181,7 @@ int ObjectsModule::sectorNew(EditOperation &op, int model, int model2, int model
 }
 
 
-bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c *flip) const
+bool ObjectsModule::checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c &flip) const
 {
 	// returns true if we assigned a sector (so drawing should stop)
 
@@ -350,7 +350,7 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 	{
 		selection_c flip(ObjType::linedefs);
 
-		checkClosedLoop(op, new_ld, v1, v2, &flip);
+		checkClosedLoop(op, new_ld, v1, v2, flip);
 
 		doc.linemod.flipLinedefGroup(op, &flip);
 	}
@@ -586,7 +586,7 @@ begin_drawing:
 		sel.set(doc.numSectors() - 1);
 
 		inst.edit.Selected->change_type(inst.edit.mode);
-		ConvertSelection(doc, &sel, inst.edit.Selected);
+		ConvertSelection(doc, sel, *inst.edit.Selected);
 	}
 
 	inst.RedrawMap();
@@ -733,13 +733,13 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 }
 
 
-void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, double delta_x, double delta_y, double delta_z) const
 {
 	fixcoord_t fdx = inst.MakeValidCoord(delta_x);
 	fixcoord_t fdy = inst.MakeValidCoord(delta_y);
 	fixcoord_t fdz = inst.MakeValidCoord(delta_z);
 
-	switch (list->what_type())
+	switch (list.what_type())
 	{
 		case ObjType::things:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
@@ -777,9 +777,9 @@ void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double d
 		case ObjType::linedefs:
 			{
 				selection_c verts(ObjType::vertices);
-				ConvertSelection(doc, list, &verts);
+				ConvertSelection(doc, list, verts);
 
-				doMoveObjects(op, &verts, delta_x, delta_y, delta_z);
+				doMoveObjects(op, verts, delta_x, delta_y, delta_z);
 			}
 			break;
 
@@ -789,7 +789,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double d
 }
 
 
-void ObjectsModule::move(selection_c &list, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::move(const selection_c &list, double delta_x, double delta_y, double delta_z) const
 {
 	if (list.empty())
 		return;
@@ -803,12 +803,12 @@ void ObjectsModule::move(selection_c &list, double delta_x, double delta_y, doub
 	if (inst.edit.mode == ObjType::sectors)
 	{
 		selection_c thing_sel(ObjType::things);
-		ConvertSelection(doc, &list, &thing_sel);
+		ConvertSelection(doc, list, thing_sel);
 
-		doMoveObjects(op, &thing_sel, delta_x, delta_y, 0);
+		doMoveObjects(op, thing_sel, delta_x, delta_y, 0);
 	}
 
-	doMoveObjects(op, &list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, list, delta_x, delta_y, delta_z);
 }
 
 //
@@ -922,7 +922,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 
 	list.set(obj.num);
 
-	doMoveObjects(op, &list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, list, delta_x, delta_y, delta_z);
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
@@ -1414,11 +1414,11 @@ void transform_t::Apply(double *x, double *y) const
 // often give a different result than using the middle of the bounding
 // box.
 //
-void ObjectsModule::calcMiddle(selection_c * list, double *x, double *y) const
+void ObjectsModule::calcMiddle(const selection_c & list, double *x, double *y) const
 {
 	*x = *y = 0;
 
-	if (list->empty())
+	if (list.empty())
 		return;
 
 	double sum_x = 0;
@@ -1426,7 +1426,7 @@ void ObjectsModule::calcMiddle(selection_c * list, double *x, double *y) const
 
 	int count = 0;
 
-	switch (list->what_type())
+	switch (list.what_type())
 	{
 		case ObjType::things:
 		{
@@ -1452,9 +1452,9 @@ void ObjectsModule::calcMiddle(selection_c * list, double *x, double *y) const
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(doc, list, &verts);
+			ConvertSelection(doc, list, verts);
 
-			calcMiddle(&verts, x, y);
+			calcMiddle(verts, x, y);
 			return;
 		}
 	}
@@ -1470,9 +1470,9 @@ void ObjectsModule::calcMiddle(selection_c * list, double *x, double *y) const
 // returns a bounding box that completely includes a list of objects.
 // when the list is empty, bottom-left coordinate is arbitrary.
 //
-void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double *x2, double *y2) const
+void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, double *x2, double *y2) const
 {
-	if (list->empty())
+	if (list.empty())
 	{
 		*x1 = *y1 = 0;
 		*x2 = *y2 = 0;
@@ -1482,7 +1482,7 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 	*x1 = *y1 = +9e9;
 	*x2 = *y2 = -9e9;
 
-	switch (list->what_type())
+	switch (list.what_type())
 	{
 		case ObjType::things:
 		{
@@ -1523,9 +1523,9 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 		default:
 		{
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(doc, list, &verts);
+			ConvertSelection(doc, list, verts);
 
-			calcBBox(&verts, x1, y1, x2, y2);
+			calcBBox(verts, x1, y1, x2, y2);
 			return;
 		}
 	}
@@ -1535,7 +1535,7 @@ void ObjectsModule::calcBBox(selection_c * list, double *x1, double *y1, double 
 }
 
 
-void ObjectsModule::doMirrorThings(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const
+void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
 	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
@@ -1564,13 +1564,13 @@ void ObjectsModule::doMirrorThings(EditOperation &op, selection_c *list, bool is
 }
 
 
-void ObjectsModule::doMirrorVertices(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const
+void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
 	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
 
 	selection_c verts(ObjType::vertices);
-	ConvertSelection(doc, list, &verts);
+	ConvertSelection(doc, list, verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -1584,7 +1584,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, selection_c *list, bool 
 
 	// flip linedefs too !!
 	selection_c lines(ObjType::linedefs);
-	ConvertSelection(doc, &verts, &lines);
+	ConvertSelection(doc, verts, lines);
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
@@ -1599,7 +1599,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, selection_c *list, bool 
 }
 
 
-void ObjectsModule::doMirrorStuff(EditOperation &op, selection_c *list, bool is_vert, double mid_x, double mid_y) const
+void ObjectsModule::doMirrorStuff(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
 	if (inst.edit.mode == ObjType::things)
 	{
@@ -1613,9 +1613,9 @@ void ObjectsModule::doMirrorStuff(EditOperation &op, selection_c *list, bool is_
 	{
 		// handle things in Sectors mode too
 		selection_c things(ObjType::things);
-		ConvertSelection(doc, list, &things);
+		ConvertSelection(doc, list, things);
 
-		doMirrorThings(op, &things, is_vert, mid_x, mid_y);
+		doMirrorThings(op, things, is_vert, mid_x, mid_y);
 	}
 
 	doMirrorVertices(op, list, is_vert, mid_x, mid_y);
@@ -1637,13 +1637,13 @@ void Instance::CMD_Mirror()
 		is_vert = true;
 
 	double mid_x, mid_y;
-	level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
+	level.objects.calcMiddle(*edit.Selected, &mid_x, &mid_y);
 
 	{
 		EditOperation op(level.basis);
 		op.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
-		level.objects.doMirrorStuff(op, edit.Selected, is_vert, mid_x, mid_y);
+		level.objects.doMirrorStuff(op, *edit.Selected, is_vert, mid_x, mid_y);
 
 	}
 
@@ -1652,7 +1652,7 @@ void Instance::CMD_Mirror()
 }
 
 
-void ObjectsModule::doRotate90Things(EditOperation &op, selection_c *list, bool anti_clockwise,
+void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list, bool anti_clockwise,
 							 double mid_x, double mid_y) const
 {
 	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
@@ -1701,7 +1701,7 @@ void Instance::CMD_Rotate90()
 	}
 
 	double mid_x, mid_y;
-	level.objects.calcMiddle(edit.Selected, &mid_x, &mid_y);
+	level.objects.calcMiddle(*edit.Selected, &mid_x, &mid_y);
 
 	{
 		EditOperation op(level.basis);
@@ -1709,7 +1709,7 @@ void Instance::CMD_Rotate90()
 
 		if (edit.mode == ObjType::things)
 		{
-			level.objects.doRotate90Things(op, edit.Selected, anti_clockwise, mid_x, mid_y);
+			level.objects.doRotate90Things(op, *edit.Selected, anti_clockwise, mid_x, mid_y);
 		}
 		else
 		{
@@ -1717,14 +1717,14 @@ void Instance::CMD_Rotate90()
 			if (edit.mode == ObjType::sectors)
 			{
 				selection_c things(ObjType::things);
-				ConvertSelection(level, edit.Selected, &things);
+				ConvertSelection(level, *edit.Selected, things);
 
-				level.objects.doRotate90Things(op, &things, anti_clockwise, mid_x, mid_y);
+				level.objects.doRotate90Things(op, things, anti_clockwise, mid_x, mid_y);
 			}
 
 			// everything else just rotates the vertices
 			selection_c verts(ObjType::vertices);
-			ConvertSelection(level, edit.Selected, &verts);
+			ConvertSelection(level, *edit.Selected, verts);
 
 			fixcoord_t fix_mx = MakeValidCoord(mid_x);
 			fixcoord_t fix_my = MakeValidCoord(mid_y);
@@ -1755,7 +1755,7 @@ void Instance::CMD_Rotate90()
 }
 
 
-void ObjectsModule::doScaleTwoThings(EditOperation &op, selection_c *list, transform_t& param) const
+void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list, transform_t& param) const
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1781,10 +1781,10 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, selection_c *list, trans
 }
 
 
-void ObjectsModule::doScaleTwoVertices(EditOperation &op, selection_c *list, transform_t& param) const
+void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &list, transform_t& param) const
 {
 	selection_c verts(ObjType::vertices);
-	ConvertSelection(doc, list, &verts);
+	ConvertSelection(doc, list, verts);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -1801,7 +1801,7 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, selection_c *list, tra
 }
 
 
-void ObjectsModule::doScaleTwoStuff(EditOperation &op, selection_c *list, transform_t& param) const
+void ObjectsModule::doScaleTwoStuff(EditOperation &op, const selection_c &list, transform_t& param) const
 {
 	if (inst.edit.mode == ObjType::things)
 	{
@@ -1815,9 +1815,9 @@ void ObjectsModule::doScaleTwoStuff(EditOperation &op, selection_c *list, transf
 	{
 		// handle things in Sectors mode too
 		selection_c things(ObjType::things);
-		ConvertSelection(doc, list, &things);
+		ConvertSelection(doc, list, things);
 
-		doScaleTwoThings(op, &things, param);
+		doScaleTwoThings(op, things, param);
 	}
 
 	doScaleTwoVertices(op, list, param);
@@ -1836,16 +1836,16 @@ void ObjectsModule::transform(transform_t& param) const
 	if (param.scale_x < 0)
 	{
 		param.scale_x = -param.scale_x;
-		doMirrorStuff(op, inst.edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(op, *inst.edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
 	}
 
 	if (param.scale_y < 0)
 	{
 		param.scale_y = -param.scale_y;
-		doMirrorStuff(op, inst.edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
+		doMirrorStuff(op, *inst.edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
 	}
 
-	doScaleTwoStuff(op, inst.edit.Selected, param);
+	doScaleTwoStuff(op, *inst.edit.Selected, param);
 }
 
 
@@ -1853,13 +1853,13 @@ void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
-		doc.objects.calcMiddle(inst.edit.Selected, &param.mid_x, &param.mid_y);
+		doc.objects.calcMiddle(*inst.edit.Selected, &param.mid_x, &param.mid_y);
 		return;
 	}
 
 	double lx, ly, hx, hy;
 
-	doc.objects.calcBBox(inst.edit.Selected, &lx, &ly, &hx, &hy);
+	doc.objects.calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
 
 	if (pos_x < 0)
 		param.mid_x = lx;
@@ -1894,14 +1894,14 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(op, inst.edit.Selected, param);
+		doScaleTwoStuff(op, *inst.edit.Selected, param);
 	}
 }
 
 
-void ObjectsModule::doScaleSectorHeights(EditOperation &op, selection_c *list, double scale_z, int pos_z) const
+void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &list, double scale_z, int pos_z) const
 {
-	SYS_ASSERT(! list->empty());
+	SYS_ASSERT(! list.empty());
 
 	// determine Z range and origin
 	int lz = +99999;
@@ -1955,8 +1955,8 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("scaled", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(op, inst.edit.Selected, param);
-		doScaleSectorHeights(op, inst.edit.Selected, scale_z, static_cast<int>(pos_z));
+		doScaleTwoStuff(op, *inst.edit.Selected, param);
+		doScaleSectorHeights(op, *inst.edit.Selected, scale_z, static_cast<int>(pos_z));
 	}
 }
 
@@ -1974,7 +1974,7 @@ void ObjectsModule::rotate3(double deg, double pos_x, double pos_y) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("rotated", *inst.edit.Selected);
 	{
-		doScaleTwoStuff(op, inst.edit.Selected, param);
+		doScaleTwoStuff(op, *inst.edit.Selected, param);
 	}
 }
 
@@ -2039,12 +2039,12 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	// TODO: CONFIG ITEM (or FLAG)
 	if ((true))
 	{
-		calcMiddle(inst.edit.Selected, &param.mid_x, &param.mid_y);
+		calcMiddle(*inst.edit.Selected, &param.mid_x, &param.mid_y);
 	}
 	else
 	{
 		double lx, ly, hx, hy;
-		calcBBox(inst.edit.Selected, &lx, &ly, &hx, &hy);
+		calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
 
 		param.mid_x = lx + (hx - lx) / 2;
 		param.mid_y = ly + (hy - ly) / 2;
@@ -2054,7 +2054,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 		EditOperation op(doc.basis);
 		op.setMessageForSelection(do_shrink ? "shrunk" : "enlarged", *inst.edit.Selected);
 
-		doScaleTwoStuff(op, inst.edit.Selected, param);
+		doScaleTwoStuff(op, *inst.edit.Selected, param);
 	}
 
 	if (unselect == SelectHighlight::unselect)
@@ -2073,11 +2073,11 @@ void Instance::CMD_Shrink()
 }
 
 
-void ObjectsModule::quantizeThings(EditOperation &op, selection_c *list) const
+void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 {
 	// remember the things which we moved
 	// (since we cannot modify the selection while we iterate over it)
-	selection_c moved(list->what_type());
+	selection_c moved(list.what_type());
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -2105,14 +2105,14 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c *list) const
 		}
 	}
 
-	list->unmerge(moved);
+	list.unmerge(moved);
 
-	if (! list->empty())
-		inst.Beep("Quantize: could not move %d things", list->count_obj());
+	if (! list.empty())
+		inst.Beep("Quantize: could not move %d things", list.count_obj());
 }
 
 
-void ObjectsModule::quantizeVertices(EditOperation &op, selection_c *list) const
+void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 {
 	// first : do an analysis pass, remember vertices that are part
 	// of a horizontal or vertical line (and both in the selection)
@@ -2132,7 +2132,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c *list) const
 	for (const LineDef *L : doc.linedefs)
 	{
 		// require both vertices of the linedef to be in the selection
-		if (! (list->get(L->start) && list->get(L->end)))
+		if (! (list.get(L->start) && list.get(L->end)))
 			continue;
 
 		// IDEA: make this a method of LineDef
@@ -2165,7 +2165,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c *list) const
 
 	// remember the vertices which we moved
 	// (since we cannot modify the selection while we iterate over it)
-	selection_c moved(list->what_type());
+	selection_c moved(list.what_type());
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -2209,10 +2209,10 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c *list) const
 
 	delete[] vert_modes;
 
-	list->unmerge(moved);
+	list.unmerge(moved);
 
-	if (list->notempty())
-		inst.Beep("Quantize: could not move %d vertices", list->count_obj());
+	if (list.notempty())
+		inst.Beep("Quantize: could not move %d vertices", list.count_obj());
 }
 
 
@@ -2236,20 +2236,20 @@ void Instance::CMD_Quantize()
 		switch (edit.mode)
 		{
 			case ObjType::things:
-				level.objects.quantizeThings(op, edit.Selected);
+				level.objects.quantizeThings(op, *edit.Selected);
 				break;
 
 			case ObjType::vertices:
-				level.objects.quantizeVertices(op, edit.Selected);
+				level.objects.quantizeVertices(op, *edit.Selected);
 				break;
 
 			// everything else merely quantizes vertices
 			default:
 			{
 				selection_c verts(ObjType::vertices);
-				ConvertSelection(level, edit.Selected, &verts);
+				ConvertSelection(level, *edit.Selected, verts);
 
-				level.objects.quantizeVertices(op, &verts);
+				level.objects.quantizeVertices(op, verts);
 
 				Selection_Clear();
 				break;

@@ -140,7 +140,7 @@ void Instance::CMD_InvertSelection()
 		selection_c *prev_sel = edit.Selected;
 		edit.Selected = new selection_c(edit.mode, true /* extended */);
 
-		ConvertSelection(level, prev_sel, edit.Selected);
+		ConvertSelection(level, *prev_sel, *edit.Selected);
 		delete prev_sel;
 	}
 
@@ -570,7 +570,7 @@ void Instance::DoBeginDrag()
 	if (edit.mode == ObjType::vertices)
 	{
 		edit.drag_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(level, edit.Selected, edit.drag_lines);
+		ConvertSelection(level, *edit.Selected, *edit.drag_lines);
 
 		// find opposite end-point when dragging a single vertex
 		if (edit.dragged.valid())
@@ -959,7 +959,7 @@ void Instance::CMD_ACT_Transform()
 
 
 	double middle_x, middle_y;
-	level.objects.calcMiddle(edit.Selected, &middle_x, &middle_y);
+	level.objects.calcMiddle(*edit.Selected, &middle_x, &middle_y);
 
 	edit.trans_mode = mode;
 	edit.trans_start_x = edit.map_x;
@@ -978,7 +978,7 @@ void Instance::CMD_ACT_Transform()
 	if (edit.mode == ObjType::vertices)
 	{
 		edit.trans_lines = new selection_c(ObjType::linedefs);
-		ConvertSelection(level, edit.Selected, edit.trans_lines);
+		ConvertSelection(level, *edit.Selected, *edit.trans_lines);
 	}
 
 	Editor_SetAction(ACT_TRANSFORM);
