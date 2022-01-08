@@ -102,7 +102,7 @@ void UI_MoveDialog::ok_callback(Fl_Widget *w, void *data)
 	int delta_y = atoi(that->delta_y->value());
 	int delta_z = atoi(that->delta_z->value());
 
-	that->inst.level.objects.move(that->inst.edit.Selected, delta_x, delta_y, delta_z);
+	that->inst.level.objects.move(*that->inst.edit.Selected, delta_x, delta_y, delta_z);
 
 	that->want_close = true;
 }

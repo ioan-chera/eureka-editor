@@ -915,7 +915,7 @@ static int getTileWidth(const SideDef &side, const ImageSet &images, const Confi
 //
 int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) const
 {
-	LineDef * L = doc.linedefs[ld];
+	const LineDef * L = doc.linedefs[ld];
 
 	// create new linedef
 	int new_l = op.addNew(ObjType::linedefs);

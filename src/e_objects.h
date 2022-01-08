@@ -58,7 +58,7 @@ public:
 	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
 	{
 	}
-	void move(selection_c *list, double delta_x, double delta_y, double delta_z) const;
+	void move(selection_c &list, double delta_x, double delta_y, double delta_z) const;
 	void singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const;
 	void del(EditOperation &op, selection_c *list) const;
 	bool lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const;

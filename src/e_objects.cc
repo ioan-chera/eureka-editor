@@ -789,13 +789,13 @@ void ObjectsModule::doMoveObjects(EditOperation &op, selection_c *list, double d
 }
 
 
-void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::move(selection_c &list, double delta_x, double delta_y, double delta_z) const
 {
-	if (list->empty())
+	if (list.empty())
 		return;
 
 	EditOperation op(doc.basis);
-	op.setMessageForSelection("moved", *list);
+	op.setMessageForSelection("moved", list);
 
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
@@ -803,12 +803,12 @@ void ObjectsModule::move(selection_c *list, double delta_x, double delta_y, doub
 	if (inst.edit.mode == ObjType::sectors)
 	{
 		selection_c thing_sel(ObjType::things);
-		ConvertSelection(doc, list, &thing_sel);
+		ConvertSelection(doc, &list, &thing_sel);
 
 		doMoveObjects(op, &thing_sel, delta_x, delta_y, 0);
 	}
 
-	doMoveObjects(op, list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, &list, delta_x, delta_y, delta_z);
 }
 
 //
@@ -873,7 +873,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		selection_c list(inst.edit.mode);
 		list.set(obj.num);
 
-		doc.objects.move(&list, delta_x, delta_y, delta_z);
+		doc.objects.move(list, delta_x, delta_y, delta_z);
 		return;
 	}
 

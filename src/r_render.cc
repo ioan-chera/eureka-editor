@@ -946,11 +946,11 @@ void Render3D_DragThings(Instance &inst)
 		selection_c sel(ObjType::things);
 		sel.set(inst.edit.dragged.num);
 
-		inst.level.objects.move(&sel, dx, dy, dz);
+		inst.level.objects.move(sel, dx, dy, dz);
 	}
 	else
 	{
-		inst.level.objects.move(inst.edit.Selected, dx, dy, dz);
+		inst.level.objects.move(*inst.edit.Selected, dx, dy, dz);
 	}
 
 	inst.RedrawMap();

@@ -640,7 +640,7 @@ void Instance::ACT_Drag_release()
 		if (dragged.valid())
 			level.objects.singleDrag(dragged, dx, dy, 0);
 		else
-			level.objects.move(edit.Selected, dx, dy, 0);
+			level.objects.move(*edit.Selected, dx, dy, 0);
 	}
 
 	Editor_ClearAction();
