@@ -247,12 +247,12 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 // the first vertex is kept, all the other vertices are deleted
 // (after fixing the attached linedefs).
 //
-void VertexModule::mergeList(EditOperation &op, selection_c *verts) const
+void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
 {
-	if (verts->count_obj() < 2)
+	if (verts.count_obj() < 2)
 		return;
 
-	int v = verts->find_first();
+	int v = verts.find_first();
 
 #if 0
 	double new_x, new_y;
@@ -262,12 +262,12 @@ void VertexModule::mergeList(EditOperation &op, selection_c *verts) const
 	BA_ChangeVT(v, Vertex::F_Y, MakeValidCoord(new_y));
 #endif
 
-	verts->clear(v);
+	verts.clear(v);
 
 	selection_c del_lines(ObjType::linedefs);
 
 	// this prevents unnecessary sandwich mergers
-	ConvertSelection(doc, verts, &del_lines);
+	ConvertSelection(doc, &verts, &del_lines);
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
@@ -276,13 +276,13 @@ void VertexModule::mergeList(EditOperation &op, selection_c *verts) const
 
 	// all these vertices will be unused now, hence this call
 	// shouldn't kill any other objects.
-	doc.objects.del(op, verts);
+	doc.objects.del(op, &verts);
 
 	// we NEED to keep unused vertices here, otherwise we can merge
 	// all vertices of an isolated sector and end up with NOTHING!
 	DeleteObjects_WithUnused(op, doc, &del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
 
-	verts->clear_all();
+	verts.clear_all();
 }
 
 
@@ -303,7 +303,7 @@ void Instance::commandVertexMerge()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("merged", *edit.Selected);
 
-		level.vertmod.mergeList(op, edit.Selected);
+		level.vertmod.mergeList(op, *edit.Selected);
 	}
 
 	Selection_Clear(true /* no_save */);
@@ -364,7 +364,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 			list.set(v_other);	// first one is the one kept
 			list.set(v_num);
 
-			mergeList(op, &list);
+			mergeList(op, list);
 		}
 
 		inst.edit.Selected->set(v_other);

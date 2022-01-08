@@ -863,7 +863,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	verts.set(newVID);
 	verts.set(vertID);
 
-	doc.vertmod.mergeList(op, &verts);
+	doc.vertmod.mergeList(op, verts);
 }
 
 void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
@@ -895,7 +895,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		verts.set(inst.edit.highlight.num);	// keep the highlight
 		verts.set(obj.num);
 
-		doc.vertmod.mergeList(op, &verts);
+		doc.vertmod.mergeList(op, verts);
 		return;
 	}
 
