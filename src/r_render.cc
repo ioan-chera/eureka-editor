@@ -40,6 +40,7 @@
 #include "m_config.h"
 #include "m_game.h"
 #include "m_events.h"
+#include "m_vector.h"
 #include "r_render.h"
 #include "r_subdiv.h"
 #include "ui_window.h"
@@ -113,7 +114,7 @@ void Render_View_t::FindGroundZ()
 		double test_x = x + dx * 8;
 		double test_y = y + dy * 8;
 
-		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, test_x, test_y);
+		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { test_x, test_y });
 
 		if (o.num >= 0)
 		{
@@ -140,12 +141,12 @@ void Render_View_t::CalcAspect()
 	aspect_sh = screen_w / (config::render_pixel_aspect / 100.0f);
 }
 
-double Render_View_t::DistToViewPlane(double map_x, double map_y)
+double Render_View_t::DistToViewPlane(v2double_t map)
 {
-	map_x -= x;
-	map_y -= y;
+	map.x -= x;
+	map.y -= y;
 
-	return map_x * Cos + map_y * Sin;
+	return map.x * Cos + map.y * Sin;
 }
 
 void Render_View_t::UpdateScreen(int ow, int oh)
@@ -220,7 +221,7 @@ namespace thing_sec_cache
 
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
-			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.level.things[i]->x(), inst.level.things[i]->y());
+			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, { inst.level.things[i]->x(), inst.level.things[i]->y() });
 
 			inst.r_view.thing_sectors[i] = obj.num;
 		}
@@ -717,7 +718,7 @@ void Render3D_Enable(Instance &inst, bool _enable)
 	else
 	{
 		inst.main_win->canvas->PointerPos();
-		inst.main_win->info_bar->SetMouse(inst.edit.map_x, inst.edit.map_y);
+		inst.main_win->info_bar->SetMouse(inst.edit.map.x, inst.edit.map.y);
 	}
 
 	inst.RedrawMap();
@@ -847,15 +848,15 @@ static void DragThings_Update(Instance &inst)
 		float map_dz = -inst.edit.drag_screen_dy * y_factor;
 
 		// final result is in drag_cur_x/y/z
-		inst.edit.drag_cur_x = inst.edit.drag_start_x;
-		inst.edit.drag_cur_y = inst.edit.drag_start_y;
-		inst.edit.drag_cur_z = inst.edit.drag_start_z + map_dz;
+		inst.edit.drag_cur.x = inst.edit.drag_start.x;
+		inst.edit.drag_cur.y = inst.edit.drag_start.y;
+		inst.edit.drag_cur.z = inst.edit.drag_start.z + map_dz;
 		return;
 	}
 
 	/* move thing around XY plane */
 
-	inst.edit.drag_cur_z = inst.edit.drag_start_z;
+	inst.edit.drag_cur.z = inst.edit.drag_start.z;
 
 	// vectors for view camera
 	double fwd_vx = inst.r_view.Cos;
@@ -870,8 +871,8 @@ static void DragThings_Update(Instance &inst)
 	// this usually won't happen, but is a reasonable fallback...
 	if (inst.edit.drag_thing_num < 0)
 	{
-		inst.edit.drag_cur_x = inst.edit.drag_start_x + dx * side_vx + dy * fwd_vx;
-		inst.edit.drag_cur_y = inst.edit.drag_start_y + dx * side_vy + dy * fwd_vy;
+		inst.edit.drag_cur.x = inst.edit.drag_start.x + dx * side_vx + dy * fwd_vx;
+		inst.edit.drag_cur.y = inst.edit.drag_start.y + dx * side_vy + dy * fwd_vy;
 		return;
 	}
 
@@ -913,9 +914,9 @@ static void DragThings_Update(Instance &inst)
 	new_y = static_cast<float>(new_y + dy * fwd_vy / fwd_len);
 
 	// handle a change in floor height
-	Objid old_sec = inst.level.hover.getNearbyObject(ObjType::sectors, old_x, old_y);
+	Objid old_sec = inst.level.hover.getNearbyObject(ObjType::sectors, { old_x, old_y });
 
-	Objid new_sec = inst.level.hover.getNearbyObject(ObjType::sectors, new_x, new_y);
+	Objid new_sec = inst.level.hover.getNearbyObject(ObjType::sectors, { new_x, new_y });
 
 	if (old_sec.valid() && new_sec.valid())
 	{
@@ -924,33 +925,34 @@ static void DragThings_Update(Instance &inst)
 
 		// intent here is to show proper position, NOT raise/lower things.
 		// [ perhaps add a new variable? ]
-		inst.edit.drag_cur_z += (new_z - old_z);
+		inst.edit.drag_cur.z += (new_z - old_z);
 	}
 
-	inst.edit.drag_cur_x = inst.edit.drag_start_x + new_x - old_x;
-	inst.edit.drag_cur_y = inst.edit.drag_start_y + new_y - old_y;
+	inst.edit.drag_cur.x = inst.edit.drag_start.x + new_x - old_x;
+	inst.edit.drag_cur.y = inst.edit.drag_start.y + new_y - old_y;
 }
 
 void Render3D_DragThings(Instance &inst)
 {
-	double dx = inst.edit.drag_cur_x - inst.edit.drag_start_x;
-	double dy = inst.edit.drag_cur_y - inst.edit.drag_start_y;
-	double dz = inst.edit.drag_cur_z - inst.edit.drag_start_z;
+	v3double_t delta;
+	delta.x = inst.edit.drag_cur.x - inst.edit.drag_start.x;
+	delta.y = inst.edit.drag_cur.y - inst.edit.drag_start.y;
+	delta.z = inst.edit.drag_cur.z - inst.edit.drag_start.z;
 
 	// for movement in XY plane, ensure we don't raise/lower things
 	if (! inst.edit.drag_thing_up_down)
-		dz = 0.0;
+		delta.z = 0.0;
 
 	if (inst.edit.dragged.valid())
 	{
 		selection_c sel(ObjType::things);
 		sel.set(inst.edit.dragged.num);
 
-		inst.level.objects.move(sel, dx, dy, dz);
+		inst.level.objects.move(sel, delta);
 	}
 	else
 	{
-		inst.level.objects.move(*inst.edit.Selected, dx, dy, dz);
+		inst.level.objects.move(*inst.edit.Selected, delta);
 	}
 
 	inst.RedrawMap();
@@ -989,8 +991,8 @@ void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		edit.drag_screen_dx = x - edit.click_screen_x;
 		edit.drag_screen_dy = y - edit.click_screen_y;
 
-		edit.drag_cur_x = edit.map_x;
-		edit.drag_cur_y = edit.map_y;
+		edit.drag_cur.x = edit.map.x;
+		edit.drag_cur.y = edit.map.y;
 
 		if (edit.mode == ObjType::sectors)
 			DragSectors_Update(*this);
@@ -1484,10 +1486,10 @@ void Instance::Render3D_CB_Cut()
 }
 
 
-void Instance::Render3D_SetCameraPos(double new_x, double new_y)
+void Instance::Render3D_SetCameraPos(const v2double_t &newpos)
 {
-	r_view.x = new_x;
-	r_view.y = new_y;
+	r_view.x = newpos.x;
+	r_view.y = newpos.y;
 
 	r_view.FindGroundZ();
 }

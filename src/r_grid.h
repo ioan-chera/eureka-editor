@@ -21,6 +21,8 @@
 #ifndef __EUREKA_R_GRID_H__
 #define __EUREKA_R_GRID_H__
 
+#include "m_vector.h"
+
 class Instance;
 
 class Grid_State_c final
@@ -41,8 +43,7 @@ public:
 	bool shown = true;
 
 	// map coordinates for centre of canvas
-	double orig_x = 0.0;
-	double orig_y = 0.0;
+	v2double_t orig = {};
 
 	// scale for drawing map
 	// (multiply a map coordinate by this to get a screen coord)
@@ -75,7 +76,7 @@ public:
 
 	// move the origin so that the focus point of the last zoom
 	// operation (scale change) is map_x/y.
-	void RefocusZoom(double map_x, double map_y, float before_Scale);
+	void RefocusZoom(const v2double_t &map, float before_Scale);
 
 	// choose the scale nearest to (and less than) the wanted one
 	void NearestScale(double want_scale);
@@ -95,14 +96,22 @@ public:
 	// (or unchanged is the 'snap' flag is off)
 	double SnapX(double map_x) const;
 	double SnapY(double map_y) const;
+	v2double_t Snap(const v2double_t &map) const
+	{
+		return { SnapX(map.x), SnapY(map.y) };
+	}
 
 	// return X/Y coordinate snapped to grid (always)
 	int ForceSnapX(double map_x) const;
 	int ForceSnapY(double map_y) const;
+	v2int_t ForceSnap(const v2double_t map) const
+	{
+		return v2int_t{ ForceSnapX(map.x), ForceSnapX(map.y) };
+	}
 
 	// snap X/Y coordinate to ratio lock
 	// (unchanged is the ratio snapping is off)
-	void RatioSnapXY(double& var_x, double& var_y, double start_x, double start_y) const;
+	void RatioSnapXY(v2double_t& var, const v2double_t &start) const;
 
 	// quantization snap, can pick coordinate on other side
 	int QuantSnapX(double map_x, bool want_furthest, int *dir = NULL) const;

@@ -35,6 +35,7 @@ class fastopp_node_c;
 class LineDef;
 class Objid;
 enum class Side;
+struct v2double_t;
 
 //
 // The hover module
@@ -46,12 +47,12 @@ public:
 	{
 	}
 
-	Objid getNearbyObject(ObjType type, double x, double y) const;
+	Objid getNearbyObject(ObjType type, const v2double_t &pos) const;
 
-	int getClosestLine_CastingHoriz(double x, double y, Side *side) const;
-	int getClosestLine_CastingVert(double x, double y, Side *side) const;
+	int getClosestLine_CastingHoriz(v2double_t pos, Side *side) const;
+	int getClosestLine_CastingVert(v2double_t pos, Side *side) const;
 
-	Objid findSplitLine(double &out_x, double &out_y, double ptr_x, double ptr_y, int ignore_vert) const;
+	Objid findSplitLine(v2double_t &out, const v2double_t &ptr, int ignore_vert) const;
 	Objid findSplitLineForDangler(int v_num) const;
 
 	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
@@ -62,18 +63,18 @@ public:
 	bool isPointOutsideOfMap(double x, double y) const;
 
 	void findCrossingPoints(crossing_state_c &cross,
-		double x1, double y1, int possible_v1,
-		double x2, double y2, int possible_v2) const;
+		v2double_t p1, int possible_v1,
+		v2double_t p2, int possible_v2) const;
 
 private:
-	Objid getNearestThing(double x, double y) const;
-	Objid getNearestVertex(double x, double y) const;
-	Objid getNearestLinedef(double x, double y) const;
-	Objid getNearestSector(double x, double y) const;
+	Objid getNearestThing(const v2double_t &pos) const;
+	Objid getNearestVertex(const v2double_t &pos) const;
+	Objid getNearestLinedef(const v2double_t &pos) const;
+	Objid getNearestSector(const v2double_t &pos) const;
 
-	double getApproximateDistanceToLinedef(const LineDef &line, double x, double y) const;
+	double getApproximateDistanceToLinedef(const LineDef &line, const v2double_t &pos) const;
 
-	Objid getNearestSplitLine(double x, double y, int ignore_vert) const;
+	Objid getNearestSplitLine(const v2double_t &pos, int ignore_vert) const;
 
 	void findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const;
 

@@ -37,17 +37,18 @@
 #include <string>
 
 class SString;
+struct v2double_t;
 
 void CheckTypeSizes();
 
 void TimeDelay(unsigned int millies);
 unsigned int TimeGetMillies();
 
-double PerpDist(double x, double y,  /* coord to test */
-                double x1, double y1, double x2, double y2 /* line */);
+double PerpDist(v2double_t v,  /* coord to test */
+                v2double_t v1, v2double_t v2 /* line */);
 
-double AlongDist(double x, double y, /* coord to test */
-                 double x1, double y1, double x2, double y2 /* line */);
+double AlongDist(v2double_t v, /* coord to test */
+                 v2double_t v1, v2double_t v2 /* line */);
 
 // round a positive value up to the nearest power of two
 int RoundPOW2(int x);

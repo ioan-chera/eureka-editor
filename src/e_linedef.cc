@@ -985,7 +985,7 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 
 	Vertex * V = doc.vertices[new_v];
 
-	V->SetRawXY(inst, new_x, new_y);
+	V->SetRawXY(inst, { new_x, new_y });
 
 	splitLinedefAtVertex(op, ld, new_v);
 
@@ -1248,28 +1248,24 @@ void Instance::commandLinedefMergeTwo()
 //
 // Move coordinate into linedef
 //
-void LinedefModule::moveCoordOntoLinedef(int ld, double *x, double *y) const
+void LinedefModule::moveCoordOntoLinedef(int ld, v2double_t &v) const
 {
 	const LineDef *L = doc.linedefs[ld];
+	
+	v2double_t v1 = L->Start(doc)->xy();
+	v2double_t v2 = L->End(doc)->xy();
 
-	double x1 = L->Start(doc)->x();
-	double y1 = L->Start(doc)->y();
-	double x2 = L->End(doc)->x();
-	double y2 = L->End(doc)->y();
+	v2double_t dv = v2 - v1;
 
-	double dx = x2 - x1;
-	double dy = y2 - y1;
-
-	double len_squared = dx*dx + dy*dy;
+	double len_squared = dv.hypot();
 
 	SYS_ASSERT(len_squared > 0);
 
 	// compute along distance
-	double along = (*x - x1) * dx + (*y - y1) * dy;
+	double along = (v - v1) * dv;
 
 	// result = start + along * line unit vector
-	*x = x1 + along * dx / len_squared;
-	*y = y1 + along * dy / len_squared;
+	v = v1 + dv * along / len_squared;
 }
 
 //

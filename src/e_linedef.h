@@ -48,7 +48,7 @@ public:
 
 	int splitLinedefAtVertex(EditOperation &op, int ld, int v_idx) const;
 
-	void moveCoordOntoLinedef(int ld, double *x, double *y) const;
+	void moveCoordOntoLinedef(int ld, v2double_t &v) const;
 
 	void addSecondSidedef(EditOperation &op, int ld, int new_sd, int other_sd) const;
 	void removeSidedef(EditOperation &op, int ld, Side ld_side) const;

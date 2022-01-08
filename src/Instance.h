@@ -39,6 +39,8 @@ class Fl_RGB_Image;
 class Lump_c;
 class UI_NodeDialog;
 class UI_ProjectSetup;
+struct v2double_t;
+struct v2int_t;
 
 //
 // An instance with a document, holding all other associated data, such as the window reference, the
@@ -303,7 +305,7 @@ public:
 	void Render3D_GetCameraPos(double *x, double *y, float *angle) const;
 	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
 	bool Render3D_ParseUser(const std::vector<SString> &tokens);
-	void Render3D_SetCameraPos(double new_x, double new_y);
+	void Render3D_SetCameraPos(const v2double_t &newpos);
 	void Render3D_Setup();
 	void Render3D_UpdateHighlight();
 	void Render3D_WriteUser(std::ostream &os) const;
@@ -363,7 +365,7 @@ private:
 	void commandVertexMerge();
 
 	// M_EVENTS
-	void Editor_Zoom(int delta, int mid_x, int mid_y);
+	void Editor_Zoom(int delta, v2int_t mid);
 	void EV_EnterWindow();
 	void EV_LeaveWindow();
 	void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);

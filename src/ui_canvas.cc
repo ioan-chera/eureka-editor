@@ -41,6 +41,7 @@
 #include "im_img.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "m_vector.h"
 #include "r_grid.h"
 #include "r_subdiv.h"
 #include "r_render.h"
@@ -251,12 +252,12 @@ inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + I_ROUND
 inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
 #else
 // convert GL coordinates to map coordinates
-inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig_x + (sx - w() / 2) / inst.grid.Scale; }
-inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig_y + (sy - h() / 2) / inst.grid.Scale; }
+inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2) / inst.grid.Scale; }
+inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (sy - h() / 2) / inst.grid.Scale; }
 
 // convert map coordinates to GL coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + I_ROUND((mx - inst.grid.orig_x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + I_ROUND((my - inst.grid.orig_y) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + I_ROUND((mx - inst.grid.orig.x) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + I_ROUND((my - inst.grid.orig.y) * inst.grid.Scale)); }
 #endif
 
 void UI_Canvas::PointerPos(bool in_event)
@@ -279,14 +280,14 @@ void UI_Canvas::PointerPos(bool in_event)
 	raw_x -= x_root();
 	raw_y -= y_root();
 
-	inst.edit.map_x = MAPX(raw_x);
-	inst.edit.map_y = MAPY(h() - 1 - raw_y);
+	inst.edit.map.x = MAPX(raw_x);
+	inst.edit.map.y = MAPY(h() - 1 - raw_y);
 #endif
 
-	inst.grid.NaturalSnapXY(inst.edit.map_x, inst.edit.map_y);
+	inst.grid.NaturalSnapXY(inst.edit.map.x, inst.edit.map.y);
 
 	// no Z coord with the 2D map view
-	inst.edit.map_z = -1;
+	inst.edit.map.z = -1;
 }
 
 
@@ -337,9 +338,7 @@ void UI_Canvas::DrawEverything()
 
 	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
 	{
-		double dx = 0;
-		double dy = 0;
-		DragDelta(&dx, &dy);
+		v2double_t delta = DragDelta();
 
 		if (inst.edit.mode == ObjType::vertices)
 			RenderColor(HI_AND_SEL_COL);
@@ -349,7 +348,7 @@ void UI_Canvas::DrawEverything()
 		if (inst.edit.mode == ObjType::linedefs || inst.edit.mode == ObjType::sectors)
 			RenderThickness(2);
 
-		DrawHighlight(inst.edit.mode, inst.edit.dragged.num, false /* skip_lines */, dx, dy);
+		DrawHighlight(inst.edit.mode, inst.edit.dragged.num, false /* skip_lines */, delta.x, delta.y);
 
 		if (inst.edit.mode == ObjType::vertices && inst.edit.highlight.valid())
 		{
@@ -366,9 +365,9 @@ void UI_Canvas::DrawEverything()
 			const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
 
 			RenderColor(RED);
-			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy);
+			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y);
 
-			DrawLineInfo(v0->x(), v0->y(), v1->x() + dx, v1->y() + dy, true);
+			DrawLineInfo(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y, true);
 		}
 	}
 	else if (inst.edit.highlight.valid())
@@ -1297,8 +1296,8 @@ void UI_Canvas::CheckGridSnap()
 	if (!inst.grid.snap || !config::grid_snap_indicator)
 		return;
 
-	double new_snap_x = inst.grid.SnapX(inst.edit.map_x);
-	double new_snap_y = inst.grid.SnapY(inst.edit.map_y);
+	double new_snap_x = inst.grid.SnapX(inst.edit.map.x);
+	double new_snap_y = inst.grid.SnapY(inst.edit.map.y);
 
 	if (snap_x == new_snap_x && snap_y == new_snap_y)
 		return;
@@ -1322,11 +1321,11 @@ void UI_Canvas::UpdateHighlight()
 
 	int new_ld = inst.edit.split_line.valid() ? inst.edit.split_line.num : -1;
 
-	if (! (last_splitter == new_ld && last_split_x == inst.edit.split_x && last_split_y == inst.edit.split_y))
+	if (! (last_splitter == new_ld && last_split_x == inst.edit.split.x && last_split_y == inst.edit.split.y))
 	{
 		last_splitter = new_ld;
-		last_split_x  = inst.edit.split_x;
-		last_split_y  = inst.edit.split_y;
+		last_split_x  = inst.edit.split.x;
+		last_split_y  = inst.edit.split.y;
 		changes = true;
 	}
 
@@ -1777,12 +1776,11 @@ void UI_Canvas::DrawSelection(selection_c * list)
 		return;
 	}
 
-	double dx = 0;
-	double dy = 0;
+	v2double_t delta = {};
 
 	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
 	{
-		DragDelta(&dx, &dy);
+		delta = DragDelta();
 	}
 
 	RenderColor(inst.edit.error_mode ? FL_RED : SEL_COL);
@@ -1793,17 +1791,17 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	// special case when we have many sectors
 	if (list->what_type() == ObjType::sectors && list->count_obj() > MAX_STORE_SEL)
 	{
-		DrawSectorSelection(list, dx, dy);
+		DrawSectorSelection(list, delta.x, delta.y);
 	}
 	else
 	{
 		for (sel_iter_c it(list) ; !it.done() ; it.next())
 		{
-			DrawHighlight(list->what_type(), *it, true /* skip_lines */, dx, dy);
+			DrawHighlight(list->what_type(), *it, true /* skip_lines */, delta.x, delta.y);
 		}
 	}
 
-	if (! inst.edit.error_mode && dx == 0 && dy == 0)
+	if (! inst.edit.error_mode && delta.x == 0 && delta.y == 0)
 	{
 		RenderColor(LIGHTRED);
 
@@ -1899,24 +1897,24 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 	int scr_x2 = SCREENX(map_x2);
 	int scr_y2 = SCREENY(map_y2);
 
-	int scr_mx = SCREENX(inst.edit.split_x);
-	int scr_my = SCREENY(inst.edit.split_y);
+	int scr_mx = SCREENX(inst.edit.split.x);
+	int scr_my = SCREENY(inst.edit.split.y);
 
 	RenderLine(scr_x1, scr_y1, scr_mx, scr_my);
 	RenderLine(scr_x2, scr_y2, scr_mx, scr_my);
 
 	if (! inst.edit.show_object_numbers)
 	{
-		double len1 = hypot(map_x1 - inst.edit.split_x, map_y1 - inst.edit.split_y);
-		double len2 = hypot(map_x2 - inst.edit.split_x, map_y2 - inst.edit.split_y);
+		double len1 = hypot(map_x1 - inst.edit.split.x, map_y1 - inst.edit.split.y);
+		double len2 = hypot(map_x2 - inst.edit.split.x, map_y2 - inst.edit.split.y);
 
-		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split_x), static_cast<int>(inst.edit.split_y), Side::neither, I_ROUND(len1));
-		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split_x), static_cast<int>(inst.edit.split_y), Side::neither, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, I_ROUND(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, I_ROUND(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);
 
-	DrawSplitPoint(inst.edit.split_x, inst.edit.split_y);
+	DrawSplitPoint(inst.edit.split.x, inst.edit.split.y);
 }
 
 
@@ -2090,8 +2088,8 @@ void UI_Canvas::DrawCurrentLine()
 	crossing_state_c cross(inst);
 
 	inst.level.hover.findCrossingPoints(cross,
-					   V->x(), V->y(), inst.edit.draw_from.num,
-					   new_x, new_y, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
+					   V->xy(), inst.edit.draw_from.num,
+		{ new_x, new_y }, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{
@@ -2113,10 +2111,10 @@ void UI_Canvas::DrawCurrentLine()
 
 bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 {
-	x1 = std::min(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	y1 = std::min(inst.edit.selbox_y1, inst.edit.selbox_y2);
-	x2 = std::max(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	y2 = std::max(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	x1 = std::min(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	y1 = std::min(inst.edit.selbox1.y, inst.edit.selbox2.y);
+	x2 = std::max(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	y2 = std::max(inst.edit.selbox1.y, inst.edit.selbox2.y);
 
 	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
 	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
@@ -2131,10 +2129,10 @@ bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
 
 void UI_Canvas::SelboxDraw()
 {
-	double x1 = std::min(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	double x2 = std::max(inst.edit.selbox_x1, inst.edit.selbox_x2);
-	double y1 = std::min(inst.edit.selbox_y1, inst.edit.selbox_y2);
-	double y2 = std::max(inst.edit.selbox_y1, inst.edit.selbox_y2);
+	double x1 = std::min(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	double x2 = std::max(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	double y1 = std::min(inst.edit.selbox1.y, inst.edit.selbox2.y);
+	double y2 = std::max(inst.edit.selbox1.y, inst.edit.selbox2.y);
 
 	RenderColor(FL_CYAN);
 
@@ -2145,20 +2143,17 @@ void UI_Canvas::SelboxDraw()
 }
 
 
-void UI_Canvas::DragDelta(double *dx, double *dy)
+v2double_t UI_Canvas::DragDelta()
 {
-	*dx = inst.edit.drag_cur_x - inst.edit.drag_start_x;
-	*dy = inst.edit.drag_cur_y - inst.edit.drag_start_y;
+	v2double_t result = inst.edit.drag_cur.xy - inst.edit.drag_start.xy;
 
-	float pixel_dx = static_cast<float>(*dx * inst.grid.Scale);
-	float pixel_dy = static_cast<float>(*dy * inst.grid.Scale);
+	v2double_t pixel_dpos = result * inst.grid.Scale;
 
 	// check that we have moved far enough from the start position,
 	// giving the user the option to select the original place.
-	if (std::max(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels*2)
+	if (std::max(fabs(pixel_dpos.x), fabs(pixel_dpos.y)) < config::minimum_drag_pixels*2)
 	{
-		*dx = *dy = 0;
-		return;
+		return {};
 	}
 
 	// handle ratio-lock of a single dragged vertex
@@ -2168,36 +2163,29 @@ void UI_Canvas::DragDelta(double *dx, double *dy)
 		const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
 		const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
 
-		double new_x = inst.edit.drag_cur_x;
-		double new_y = inst.edit.drag_cur_y;
+		v2double_t newpos = inst.edit.drag_cur.xy;
 
-		inst.grid.RatioSnapXY(new_x, new_y, v0->x(), v0->y());
+		inst.grid.RatioSnapXY(newpos, v0->xy());
 
-		*dx = new_x - v1->x();
-		*dy = new_y - v1->y();
-		return;
+		return newpos - v1->xy();
 	}
 
 	if (inst.grid.ratio > 0)
 	{
-		double new_x = inst.edit.drag_cur_x;
-		double new_y = inst.edit.drag_cur_y;
+		v2double_t newpos = inst.edit.drag_cur.xy;
 
-		inst.grid.RatioSnapXY(new_x, new_y, inst.edit.drag_start_x, inst.edit.drag_start_y);
+		inst.grid.RatioSnapXY(newpos, inst.edit.drag_start.xy);
 
-		*dx = new_x - inst.edit.drag_start_x;
-		*dy = new_y - inst.edit.drag_start_y;
-		return;
+		return newpos - inst.edit.drag_start.xy;
 	}
 
 	if (inst.grid.snap)
 	{
-		double focus_x = inst.edit.drag_focus_x + *dx;
-		double focus_y = inst.edit.drag_focus_y + *dy;
+		v2double_t focus = inst.edit.drag_focus.xy + result;
 
-		*dx = inst.grid.SnapX(focus_x) - inst.edit.drag_focus_x;
-		*dy = inst.grid.SnapY(focus_y) - inst.edit.drag_focus_y;
+		result = inst.grid.Snap(focus) - inst.edit.drag_focus.xy;
 	}
+	return result;
 }
 
 

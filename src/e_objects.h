@@ -28,6 +28,7 @@
 #define __EUREKA_OBJECTS_H__
 
 #include "DocumentModule.h"
+#include "m_vector.h"
 
 class EditOperation;
 class selection_c;
@@ -36,9 +37,9 @@ struct ConfigData;
 struct transform_t
 {
 public:
-	double mid_x, mid_y;
-	double scale_x, scale_y;
-	double skew_x, skew_y;
+	v2double_t mid;
+	v2double_t scale;
+	v2double_t skew;
 
 	double rotate;	// radians
 
@@ -58,12 +59,12 @@ public:
 	explicit ObjectsModule(Document &doc) : DocumentModule(doc)
 	{
 	}
-	void move(const selection_c &list, double delta_x, double delta_y, double delta_z) const;
-	void singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const;
+	void move(const selection_c &list, const v3double_t &delta) const;
+	void singleDrag(const Objid &obj, const v3double_t &delta) const;
 	void del(EditOperation &op, const selection_c &list) const;
 	bool lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const;
-	void getDragFocus(double *x, double *y, double ptr_x, double ptr_y) const;
-	void calcMiddle(const selection_c &list, double *x, double *y) const;
+	v2double_t getDragFocus(const v2double_t &ptr) const;
+	v2double_t calcMiddle(const selection_c &list) const;
 	void calcBBox(const selection_c &list, double *x1, double *y1, double *x2, double *y2) const;
 	void transform(transform_t &param) const;
 	void scale3(double scale_x, double scale_y, double pos_x, double pos_y) const;
@@ -81,7 +82,7 @@ private:
 	void insertLinedef(EditOperation &op, int v1, int v2, bool no_fill) const;
 	bool checkClosedLoop(EditOperation &op, int new_ld, int v1, int v2, selection_c &flip) const;
 	int sectorNew(EditOperation &op, int model, int model2, int model3) const;
-	void doMoveObjects(EditOperation &op, const selection_c &list, double delta_x, double delta_y, double delta_z) const;
+	void doMoveObjects(EditOperation &op, const selection_c &list, const v3double_t &delta) const;
 	void transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const;
 	void transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const;
 	void transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const;
@@ -106,7 +107,7 @@ private:
 	bool spotInUse(ObjType obj_type, int x, int y) const;
 
 	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
-	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, double delta_x, double delta_y) const;
+	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, const v2double_t &delta) const;
 };
 
 

@@ -157,13 +157,12 @@ void CMD_TH_Disconnect(Instance &inst)
 		if (total < 2)
 			continue;
 
-		double mid_x, mid_y;
-		inst.level.objects.calcMiddle(overlaps, &mid_x, &mid_y);
+		v2double_t mid = inst.level.objects.calcMiddle(overlaps);
 
 		int n = 0;
 		for (sel_iter_c it(overlaps) ; !it.done() ; it.next(), n++)
 		{
-			MoveOverlapThing(op, inst, *it, static_cast<int>(mid_x), static_cast<int>(mid_y), n, total);
+			MoveOverlapThing(op, inst, *it, static_cast<int>(mid.x), static_cast<int>(mid.y), n, total);
 		}
 	}
 }
@@ -185,16 +184,15 @@ void CMD_TH_Merge(Instance &inst)
 		return;
 	}
 
-	double mid_x, mid_y;
-	inst.level.objects.calcMiddle(*inst.edit.Selected, &mid_x, &mid_y);
+	v2double_t mid = inst.level.objects.calcMiddle(*inst.edit.Selected);
 
 	EditOperation op(inst.level.basis);
 	op.setMessageForSelection("merged", *inst.edit.Selected);
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid_x));
-		op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid_y));
+		op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid.x));
+		op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid.y));
 	}
 }
 

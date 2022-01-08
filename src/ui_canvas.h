@@ -33,6 +33,7 @@
 
 class Img_c;
 enum class Side;
+struct v2double_t;
 
 #ifdef NO_OPENGL
 class UI_Canvas : public Fl_Widget
@@ -104,7 +105,7 @@ public:
 	// returns true if ok, false if box was very small
 	bool SelboxGet(double& x1, double& y1, double& x2, double& y2);
 
-	void DragDelta(double *dx, double *dy);
+	v2double_t DragDelta();
 
 	void PointerPos(bool in_event = false);
 

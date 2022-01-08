@@ -467,7 +467,7 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
 				const Vertex *v2 = pass ? L2->End(inst.level) : L2->Start(inst.level);
-				double dist = PerpDist(v2->x(), v2->y(), lx1,ly1, lx2,ly2);
+				double dist = PerpDist(v2->xy(), v2double_t{ lx1,ly1 }, v2double_t{ lx2, ly2 });
 
 				if (dist > best_dist)
 				{
@@ -555,7 +555,7 @@ void sector_info_cache_c::PlaneCopyFromThing(const Thing *T, int plane)
 		return;
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { T->x(), T->y() });
 
 	if (!o.valid())
 		return;
@@ -580,7 +580,7 @@ void sector_info_cache_c::PlaneTiltByThing(const Thing *T, int plane)
 	double ty = T->y();
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, tx, ty);
+	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { tx, ty });
 
 	if (!o.valid())
 		return;

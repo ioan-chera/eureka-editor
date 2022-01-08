@@ -91,13 +91,13 @@ void Instance::Editor_SetAction(editor_action_e  new_action)
 }
 
 
-void Instance::Editor_Zoom(int delta, int mid_x, int mid_y)
+void Instance::Editor_Zoom(int delta, v2int_t mid)
 {
     float S1 = static_cast<float>(grid.Scale);
 
     grid.AdjustScale(delta);
 
-    grid.RefocusZoom(mid_x, mid_y, S1);
+    grid.RefocusZoom(v2double_t(mid), S1);
 }
 
 
@@ -467,7 +467,7 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	main_win->info_bar->SetMouse(edit.map_x, edit.map_y);
+	main_win->info_bar->SetMouse(edit.map.x, edit.map.y);
 
 	if (edit.action == ACT_TRANSFORM)
 	{
@@ -484,8 +484,7 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.action == ACT_SELBOX)
 	{
-		edit.selbox_x2 = edit.map_x;
-		edit.selbox_y2 = edit.map_y;
+		edit.selbox2 = edit.map.xy;
 
 		main_win->canvas->redraw();
 		return;
@@ -496,8 +495,8 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		edit.drag_screen_dx = x - edit.click_screen_x;
 		edit.drag_screen_dy = y - edit.click_screen_y;
 
-		edit.drag_cur_x = edit.map_x;
-		edit.drag_cur_y = edit.map_y;
+		edit.drag_cur.x = edit.map.x;
+		edit.drag_cur.y = edit.map.y;
 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta

@@ -26,6 +26,7 @@
 #include "e_linedef.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "m_vector.h"
 #include "r_grid.h"
 #include "r_render.h"
 
@@ -480,8 +481,8 @@ void UI_StatusBar::draw()
 	}
 	else  // 2D view
 	{
-		float mx = static_cast<float>(inst.grid.SnapX(inst.edit.map_x));
-		float my = static_cast<float>(inst.grid.SnapY(inst.edit.map_y));
+		float mx = static_cast<float>(inst.grid.SnapX(inst.edit.map.x));
+		float my = static_cast<float>(inst.grid.SnapY(inst.edit.map.y));
 
 		mx = CLAMP(-32767, mx, 32767);
 		my = CLAMP(-32767, my, 32767);
@@ -537,25 +538,25 @@ void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 	}
 	if (inst.edit.render3d && inst.edit.mode == ObjType::things && inst.edit.drag_thing_up_down)
 	{
-		double dz = inst.edit.drag_cur_z - inst.edit.drag_start_z;
+		double dz = inst.edit.drag_cur.z - inst.edit.drag_start.z;
 		IB_Number(cx, cy, "raise delta", I_ROUND(dz), 4);
 		return;
 	}
 
-	double dx, dy;
+	v2double_t delta;
 
 	if (inst.edit.render3d)
 	{
-		dx = inst.edit.drag_cur_x - inst.edit.drag_start_x;
-		dy = inst.edit.drag_cur_y - inst.edit.drag_start_y;
+		delta.x = inst.edit.drag_cur.x - inst.edit.drag_start.x;
+		delta.y = inst.edit.drag_cur.y - inst.edit.drag_start.y;
 	}
 	else
 	{
-		inst.main_win->canvas->DragDelta(&dx, &dy);
+		delta = inst.main_win->canvas->DragDelta();
 	}
 
-	IB_Coord(cx, cy, "dragging delta x", static_cast<float>(dx));
-	IB_Coord(cx, cy,                "y", static_cast<float>(dy));
+	IB_Coord(cx, cy, "dragging delta x", static_cast<float>(delta.x));
+	IB_Coord(cx, cy,                "y", static_cast<float>(delta.y));
 }
 
 
@@ -566,12 +567,12 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 	switch (inst.edit.trans_mode)
 	{
 	case TRANS_K_Scale:
-		IB_Coord(cx, cy, "scale by", static_cast<float>(inst.edit.trans_param.scale_x));
+		IB_Coord(cx, cy, "scale by", static_cast<float>(inst.edit.trans_param.scale.x));
 		break;
 
 	case TRANS_K_Stretch:
-		IB_Coord(cx, cy, "stretch x", static_cast<float>(inst.edit.trans_param.scale_x));
-		IB_Coord(cx, cy,         "y", static_cast<float>(inst.edit.trans_param.scale_y));
+		IB_Coord(cx, cy, "stretch x", static_cast<float>(inst.edit.trans_param.scale.x));
+		IB_Coord(cx, cy,         "y", static_cast<float>(inst.edit.trans_param.scale.y));
 		break;
 
 	case TRANS_K_Rotate:
@@ -581,13 +582,13 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 		break;
 
 	case TRANS_K_Skew:
-		IB_Coord(cx, cy, "skew x", static_cast<float>(inst.edit.trans_param.skew_x));
-		IB_Coord(cx, cy,      "y", static_cast<float>(inst.edit.trans_param.skew_y));
+		IB_Coord(cx, cy, "skew x", static_cast<float>(inst.edit.trans_param.skew.x));
+		IB_Coord(cx, cy,      "y", static_cast<float>(inst.edit.trans_param.skew.y));
 		break;
 	}
 
 	if (inst.edit.trans_mode == TRANS_K_RotScale)
-		IB_Coord(cx, cy, "scale", static_cast<float>(inst.edit.trans_param.scale_x));
+		IB_Coord(cx, cy, "scale", static_cast<float>(inst.edit.trans_param.scale.x));
 }
 
 

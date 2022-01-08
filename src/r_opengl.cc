@@ -1443,10 +1443,10 @@ public:
 		if (inst.edit.action == ACT_DRAG &&
 			(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 		{
-			tx += static_cast<float>(inst.edit.drag_cur_x - inst.edit.drag_start_x);
-			ty += static_cast<float>(inst.edit.drag_cur_y - inst.edit.drag_start_y);
+			tx += static_cast<float>(inst.edit.drag_cur.x - inst.edit.drag_start.x);
+			ty += static_cast<float>(inst.edit.drag_cur.y - inst.edit.drag_start.y);
 
-			drag_dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
+			drag_dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 		}
 
 		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
@@ -1593,7 +1593,7 @@ public:
 
 	void MarkCameraSector()
 	{
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.r_view.x, inst.r_view.y);
+		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, { inst.r_view.x, inst.r_view.y });
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);

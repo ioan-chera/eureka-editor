@@ -29,6 +29,7 @@
 
 #include "DocumentModule.h"
 #include "m_strings.h"
+#include "m_vector.h"
 #include "objid.h"
 #include <stack>
 
@@ -125,16 +126,20 @@ public:
 	{
 		return FROM_COORD(raw_h);
 	}
+	inline v2double_t xy() const
+	{
+		return { x(), y() };
+	}
 
 	// these handle rounding to integer in non-UDMF mode
 	void SetRawX(const Instance &inst, double x);
 	void SetRawY(const Instance &inst, double y);
 	void SetRawH(const Instance &inst, double h);
 
-	void SetRawXY(const Instance &inst, double x, double y)
+	void SetRawXY(const Instance &inst, const v2double_t &pos)
 	{
-		SetRawX(inst, x);
-		SetRawY(inst, y);
+		SetRawX(inst, pos.x);
+		SetRawY(inst, pos.y);
 	}
 
 	int Arg(int which /* 1..5 */) const
@@ -167,15 +172,19 @@ public:
 	{
 		return FROM_COORD(raw_y);
 	}
+	inline v2double_t xy() const
+	{
+		return { x(), y() };
+	}
 
 	// these handle rounding to integer in non-UDMF mode
 	void SetRawX(const Instance &inst, double x);
 	void SetRawY(const Instance &inst, double y);
 
-	void SetRawXY(const Instance &inst, double x, double y)
+	void SetRawXY(const Instance &inst, const v2double_t &pos)
 	{
-		SetRawX(inst, x);
-		SetRawY(inst, y);
+		SetRawX(inst, pos.x);
+		SetRawY(inst, pos.y);
 	}
 
 	bool Matches(fixcoord_t ox, fixcoord_t oy) const

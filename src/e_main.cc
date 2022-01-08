@@ -171,36 +171,32 @@ void Instance::UpdateDrawLine()
 
 	const Vertex *V = level.vertices[edit.draw_from.num];
 
-	double new_x = edit.map_x;
-	double new_y = edit.map_y;
+	v2double_t newpos = edit.map.xy;
 
 	if (grid.ratio > 0)
 	{
-		grid.RatioSnapXY(new_x, new_y, V->x(), V->y());
+		grid.RatioSnapXY(newpos, V->xy());
 	}
 	else if (edit.highlight.valid())
 	{
-		new_x = level.vertices[edit.highlight.num]->x();
-		new_y = level.vertices[edit.highlight.num]->y();
+		newpos = level.vertices[edit.highlight.num]->xy();
 	}
 	else if (edit.split_line.valid())
 	{
-		new_x = edit.split_x;
-		new_y = edit.split_y;
+		newpos = edit.split;
 	}
 	else
 	{
-		new_x = grid.SnapX(new_x);
-		new_y = grid.SnapY(new_y);
+		newpos = grid.Snap(newpos);
 	}
 
-	edit.draw_to_x = new_x;
-	edit.draw_to_y = new_y;
+	edit.draw_to_x = newpos.x;
+	edit.draw_to_y = newpos.y;
 
 	// when drawing mode, highlight a vertex at the snap position
 	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int near_vert = level.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
+		int near_vert = level.vertmod.findExact(TO_COORD(newpos.x), TO_COORD(newpos.y));
 		if (near_vert >= 0)
 		{
 			edit.highlight = Objid(ObjType::vertices, near_vert);
@@ -216,7 +212,7 @@ void Instance::UpdateDrawLine()
 }
 
 
-static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
+static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 {
 	inst.edit.split_line.clear();
 
@@ -231,8 +227,7 @@ static void UpdateSplitLine(Instance &inst, double map_x, double map_y)
 		inst.edit.pointer_in_window &&
 	    inst.edit.highlight.is_nil())
 	{
-		inst.edit.split_line = inst.level.hover.findSplitLine(inst.edit.split_x, inst.edit.split_y,
-					  map_x, map_y, inst.edit.dragged.num);
+		inst.edit.split_line = inst.level.hover.findSplitLine(inst.edit.split, map, inst.edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -259,7 +254,7 @@ void Instance::UpdateHighlight()
 	if (edit.pointer_in_window &&
 	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		edit.highlight = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+		edit.highlight = level.hover.getNearbyObject(edit.mode, edit.map.xy);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
@@ -276,20 +271,19 @@ void Instance::UpdateHighlight()
 			const Vertex *V = level.vertices[edit.highlight.num];
 			const Vertex *S = level.vertices[edit.draw_from.num];
 
-			double vx = V->x();
-			double vy = V->y();
+			v2double_t vpos = V->xy();
 
-			grid.RatioSnapXY(vx, vy, S->x(), S->y());
+			grid.RatioSnapXY(vpos, S->xy());
 
-			if (MakeValidCoord(vx) != V->raw_x ||
-				MakeValidCoord(vy) != V->raw_y)
+			if (MakeValidCoord(vpos.x) != V->raw_x ||
+				MakeValidCoord(vpos.y) != V->raw_y)
 			{
 				edit.highlight.clear();
 			}
 		}
 	}
 
-	UpdateSplitLine(*this, edit.map_x, edit.map_y);
+	UpdateSplitLine(*this, edit.map.xy);
 	UpdateDrawLine();
 
 	main_win->canvas->UpdateHighlight();
@@ -644,7 +638,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const Thing *T = doc.things[t];
 
-			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, { T->x(), T->y() });
 
 			if (! obj.is_nil() && src.get(obj.num))
 			{
@@ -1256,9 +1250,7 @@ void Instance::Editor_Init()
 	Nav_Clear();
 
 	edit.pointer_in_window = false;
-	edit.map_x = 0;
-	edit.map_y = 0;
-	edit.map_z = -1;
+	edit.map = { 0, 0, -1 };
 
 	edit.Selected = new selection_c(edit.mode, true /* extended */);
 

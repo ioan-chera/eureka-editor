@@ -1435,10 +1435,9 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		double x = inst.level.things[n]->x();
-		double y = inst.level.things[n]->y();
+		v2double_t pos = inst.level.things[n]->xy();
 
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, x, y);
+		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, pos);
 
 		if (! obj.is_nil())
 			continue;
@@ -1454,10 +1453,9 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 
 		for (int corner = 0 ; corner < 4 ; corner++)
 		{
-			double x2 = x + ((corner & 1) ? -4 : +4);
-			double y2 = y + ((corner & 2) ? -4 : +4);
+			v2double_t pos2 = pos + v2double_t{ corner & 1 ? -4.0 : +4.0, corner & 2 ? -4.0 : +4.0 };
 
-			obj = inst.level.hover.getNearbyObject(ObjType::sectors, x2, y2);
+			obj = inst.level.hover.getNearbyObject(ObjType::sectors, pos2);
 
 			if (obj.is_nil())
 				out_count++;
@@ -2536,18 +2534,14 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 
 	// precise (but slower) intersection test
 
-	double ax1 = AL->Start(doc)->x();
-	double ay1 = AL->Start(doc)->y();
-	double ax2 = AL->End(doc)->x();
-	double ay2 = AL->End(doc)->y();
+	v2double_t av1 = AL->Start(doc)->xy();
+	v2double_t av2 = AL->End(doc)->xy();
 
-	double bx1 = BL->Start(doc)->x();
-	double by1 = BL->Start(doc)->y();
-	double bx2 = BL->End(doc)->x();
-	double by2 = BL->End(doc)->y();
+	v2double_t bv1 = BL->Start(doc)->xy();
+	v2double_t bv2 = BL->End(doc)->xy();
 
-	double c = PerpDist(bx1, by1,  ax1, ay1, ax2, ay2);
-	double d = PerpDist(bx2, by2,  ax1, ay1, ax2, ay2);
+	double c = PerpDist(bv1,  av1, av2);
+	double d = PerpDist(bv2,  av1, av2);
 
 	int c_side = (c < -epsilon) ? -1 : (c > epsilon) ? +1 : 0;
 	int d_side = (d < -epsilon) ? -1 : (d > epsilon) ? +1 : 0;
@@ -2555,8 +2549,8 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 	if (c_side != 0 && c_side == d_side)
 		return 0;
 
-	double e = PerpDist(ax1, ay1,  bx1, by1, bx2, by2);
-	double f = PerpDist(ax2, ay2,  bx1, by1, bx2, by2);
+	double e = PerpDist(av1,  bv1, bv2);
+	double f = PerpDist(av2,  bv1, bv2);
 
 	int e_side = (e < -epsilon) ? -1 : (e > epsilon) ? +1 : 0;
 	int f_side = (f < -epsilon) ? -1 : (f > epsilon) ? +1 : 0;
@@ -2582,15 +2576,15 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 		// choose longest line as the measuring stick
 		if (AL->CalcLength(doc) < BL->CalcLength(doc))
 		{
-			std::swap(ax1, bx1);  std::swap(ax2, bx2);
-			std::swap(ay1, by1);  std::swap(ay2, by2);
+			std::swap(av1, bv1);
+			std::swap(av2, bv2);
 
 			// A, B, AL, BL should not be used from here on!
 		}
 
-		c = AlongDist(bx1, by1,  ax1, ay1, ax2, ay2);
-		d = AlongDist(bx2, by2,  ax1, ay1, ax2, ay2);
-		e = AlongDist(ax2, ay2,  ax1, ay1, ax2, ay2);	// just the length
+		c = AlongDist(bv1,  av1, av2);
+		d = AlongDist(bv2,  av1, av2);
+		e = AlongDist(av2,  av1, av2);	// just the length
 
 		if (std::max(c, d) < epsilon)
 			return 0;

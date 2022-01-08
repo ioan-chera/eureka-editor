@@ -82,12 +82,12 @@ void Grid_State_c::Init()
 void Grid_State_c::MoveTo(double x, double y)
 {
 	// no change?
-	if (fabs(x - orig_x) < 0.01 &&
-	    fabs(y - orig_y) < 0.01)
+	if (fabs(x - orig.x) < 0.01 &&
+	    fabs(y - orig.y) < 0.01)
 		return;
 
-	orig_x = x;
-	orig_y = y;
+	orig.x = x;
+	orig.y = y;
 
 	if (inst.main_win)
 	{
@@ -101,7 +101,7 @@ void Grid_State_c::MoveTo(double x, double y)
 
 void Grid_State_c::Scroll(double delta_x, double delta_y)
 {
-	MoveTo(orig_x + delta_x, orig_y + delta_y);
+	MoveTo(orig.x + delta_x, orig.y + delta_y);
 }
 
 
@@ -133,15 +133,13 @@ double Grid_State_c::SnapY(double map_y) const
 }
 
 
-void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
-							   double start_x, double start_y) const
+void Grid_State_c::RatioSnapXY(v2double_t& var, const v2double_t &start) const
 {
 	// snap first, otherwise we lose the ratio
-	var_x = SnapX(var_x);
-	var_y = SnapY(var_y);
+	var = Snap(var);
 
-	double dx = var_x - start_x;
-	double dy = var_y - start_y;
+	double dx = var.x - start.x;
+	double dy = var.y - start.y;
 
 	double len = std::max(abs(dx), abs(dy));
 
@@ -158,121 +156,121 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 	case 1: // 1:1 (45 degrees) + axis aligned
 		if (fabs(dx) * 2 < fabs(dy))
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (fabs(dy) * 2 < fabs(dx))
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len;
 		}
 		break;
 
 	case 2: // 2:1 + axis aligned
 		if (fabs(dx) * 4 < fabs(dy))
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (fabs(dy) * 4 < fabs(dx))
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else if (fabs(dx) < fabs(dy))
 		{
-			var_x = start_x + sign_x * len * 0.5;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len * 0.5;
+			var.y = start.y + sign_y * len;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len * 0.5;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len * 0.5;
 		}
 		break;
 
 	case 3: // 4:1 + axis aligned
 		if (fabs(dx) * 8 < fabs(dy))
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (fabs(dy) * 8 < fabs(dx))
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else if (fabs(dx) < fabs(dy))
 		{
-			var_x = start_x + sign_x * len * 0.25;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len * 0.25;
+			var.y = start.y + sign_y * len;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len * 0.25;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len * 0.25;
 		}
 		break;
 
 	case 4: // 8:1 + axis aligned
 		if (fabs(dx) * 16 < fabs(dy))
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (fabs(dy) * 16 < fabs(dx))
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else if (fabs(dx) < fabs(dy))
 		{
-			var_x = start_x + sign_x * len * 0.125;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len * 0.125;
+			var.y = start.y + sign_y * len;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len * 0.125;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len * 0.125;
 		}
 		break;
 
 	case 5: // 5:4 + axis aligned
 		if (fabs(dx) * 3 < fabs(dy))
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (fabs(dy) * 3 < fabs(dx))
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else if (fabs(dx) < fabs(dy))
 		{
-			var_x = start_x + sign_x * len * 0.8;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len * 0.8;
+			var.y = start.y + sign_y * len;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len * 0.8;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len * 0.8;
 		}
 		break;
 
 	case 6: // 7:4 + axis aligned
 		if (fabs(dx) * 3 < fabs(dy))
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (fabs(dy) * 3 < fabs(dx))
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else if (fabs(dx) < fabs(dy))
 		{
-			var_x = start_x + sign_x * len * 4 / 7;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len * 4 / 7;
+			var.y = start.y + sign_y * len;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len * 4 / 7;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len * 4 / 7;
 		}
 		break;
 
@@ -286,21 +284,21 @@ void Grid_State_c::RatioSnapXY(double& var_x, double& var_y,
 
 		if (custom > 0.1 && fabs(dx) < fabs(dy) * custom * 0.3)
 		{
-			var_x = start_x;
+			var.x = start.x;
 		}
 		else if (custom > 0.1 && fabs(dy) < fabs(dx) * custom * 0.3)
 		{
-			var_y = start_y;
+			var.y = start.y;
 		}
 		else if (fabs(dx) < fabs(dy))
 		{
-			var_x = start_x + sign_x * len * custom;
-			var_y = start_y + sign_y * len;
+			var.x = start.x + sign_x * len * custom;
+			var.y = start.y + sign_y * len;
 		}
 		else
 		{
-			var_x = start_x + sign_x * len;
-			var_y = start_y + sign_y * len * custom;
+			var.x = start.x + sign_x * len;
+			var.y = start.y + sign_y * len * custom;
 		}
 	}
 }
@@ -391,12 +389,12 @@ bool Grid_State_c::OnGrid(double map_x, double map_y) const
 }
 
 
-void Grid_State_c::RefocusZoom(double map_x, double map_y, float before_Scale)
+void Grid_State_c::RefocusZoom(const v2double_t &map, float before_Scale)
 {
 	double dist_factor = (1.0 - before_Scale / Scale);
 
-	orig_x += (map_x - orig_x) * dist_factor;
-	orig_y += (map_y - orig_y) * dist_factor;
+	orig.x += (map.x - orig.x) * dist_factor;
+	orig.y += (map.y - orig.y) * dist_factor;
 
 	if (inst.main_win)
 	{
@@ -710,7 +708,7 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 
 void Instance::Grid_WriteUser(std::ostream &os) const
 {
-	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.orig_x, grid.orig_y, grid.Scale) <<
+	os << "map_pos " << SString::printf("%1.0f %1.0f %1.6f", grid.orig.x, grid.orig.y, grid.Scale) <<
 		'\n';
 	os << "grid " << (grid.shown ? 1 : 0) << ' ' << (config::grid_style ? 0 : 1) << ' ' << 
 		grid.step << '\n';

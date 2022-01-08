@@ -133,27 +133,19 @@ public:
 	}
 
 	template<typename T>
-	void CentreOfPointObjects(const std::vector<T *> &list, double *cx, double *cy) const
+	v2double_t CentreOfPointObjects(const std::vector<T *> &list) const
 	{
-		*cx = *cy = 0;
-
 		if (list.empty())
-			return;
+			return {};
 
-		double sum_x = 0;
-		double sum_y = 0;
+		v2double_t sum = {};
 
 		for (const T *object : list)
-		{
-			sum_x += object->x();
-			sum_y += object->y();
-		}
+			sum += object->xy();
 
-		sum_x /= (double)list.size();
-		sum_y /= (double)list.size();
+		sum /= (double)list.size();
 
-		*cx = sum_x;
-		*cy = sum_y;
+		return sum;
 	}
 
 	bool HasSectorRefs(int s1, int s2)
@@ -538,10 +530,9 @@ bool Instance::Clipboard_DoCopy()
 
 //------------------------------------------------------------------------
 
-static void PasteGroupOfObjects(EditOperation &op, Instance &inst, double pos_x, double pos_y)
+static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2double_t &pos)
 {
-	double cx, cy;
-	clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
+	v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->verts);
 
 	// these hold the mapping from clipboard index --> real index
 	std::map<int, int> vert_map;
@@ -559,8 +550,7 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, double pos_x,
 
 		*V = *clip_board->verts[i];
 
-		V->SetRawX(inst, V->x() + pos_x - cx);
-		V->SetRawY(inst, V->y() + pos_y - cy);
+		V->SetRawXY(inst, V->xy() + pos - cpos);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
@@ -642,8 +632,7 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, double pos_x,
 
 		*T = *clip_board->things[i];
 
-		T->SetRawX(inst, T->x() + pos_x - cx);
-		T->SetRawY(inst, T->y() + pos_y - cy);
+		T->SetRawXY(inst, T->xy() + pos - cpos);
 	}
 }
 
@@ -718,18 +707,15 @@ bool Instance::Clipboard_DoPaste()
 		return false;
 
 	// figure out where to put stuff
-	double pos_x = edit.map_x;
-	double pos_y = edit.map_y;
+	v2double_t pos = edit.map.xy;
 
 	if (! edit.pointer_in_window)
 	{
-		pos_x = grid.orig_x;
-		pos_y = grid.orig_y;
+		pos = grid.orig;
 	}
 
 	// honor the grid snapping setting
-	pos_x = grid.SnapX(pos_x);
-	pos_y = grid.SnapY(pos_y);
+	pos = grid.Snap(pos);
 
 	{
 		EditOperation op(level.basis);
@@ -741,8 +727,7 @@ bool Instance::Clipboard_DoPaste()
 		{
 			case ObjType::things:
 			{
-				double cx, cy;
-				clip_board->CentreOfPointObjects(clip_board->things, &cx, &cy);
+				v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->things);
 
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
@@ -751,8 +736,7 @@ bool Instance::Clipboard_DoPaste()
 
 					*T = *clip_board->things[i];
 
-					T->SetRawX(*this, T->x() + pos_x - cx);
-					T->SetRawY(*this, T->y() + pos_y - cy);
+					T->SetRawXY(*this, T->xy() + pos - cpos);
 
 					recent_things.insert_number(T->type);
 				}
@@ -761,8 +745,7 @@ bool Instance::Clipboard_DoPaste()
 
 			case ObjType::vertices:
 			{
-				double cx, cy;
-				clip_board->CentreOfPointObjects(clip_board->verts, &cx, &cy);
+				v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->verts);
 
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
@@ -771,8 +754,7 @@ bool Instance::Clipboard_DoPaste()
 
 					*V = *clip_board->verts[i];
 
-					V->SetRawX(*this, V->x() + pos_x - cx);
-					V->SetRawY(*this, V->y() + pos_y - cy);
+					V->SetRawXY(*this, V->xy() + pos - cpos);
 				}
 				break;
 			}
@@ -780,7 +762,7 @@ bool Instance::Clipboard_DoPaste()
 			case ObjType::linedefs:
 			case ObjType::sectors:
 			{
-				PasteGroupOfObjects(op, *this, pos_x, pos_y);
+				PasteGroupOfObjects(op, *this, pos);
 				break;
 			}
 

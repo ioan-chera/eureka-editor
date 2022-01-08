@@ -32,6 +32,7 @@
 #include "m_events.h"
 #include "e_objects.h"
 #include "e_things.h"
+#include "m_vector.h"
 
 class SaveBucket_c;
 class selection_c;
@@ -76,15 +77,14 @@ struct Editor_State_t
 	keycode_t sticky_mod;  // if != 0, waiting for next key  (fake meta)
 
 	bool pointer_in_window;  // whether the mouse is over the 2D/3D view
-	double map_x, map_y, map_z;  // map coordinates of pointer (no Z in 2D)
+	v3double_t map;  // map coordinates of pointer (no Z in 2D)
 
 	selection_c *Selected;    // all selected objects (usually empty)
 
 	Objid highlight;   // the highlighted object
 
 	Objid split_line;  // linedef which would be split by a new vertex
-	double split_x;
-	double split_y;
+	v2double_t split;
 
 
 	/* rendering stuff */
@@ -118,7 +118,7 @@ struct Editor_State_t
 
 	int click_screen_x, click_screen_y;  // screen coord of the click
 
-	double click_map_x, click_map_y, click_map_z;  // location of the click
+	v3double_t click_map;	// location of the click
 
 	bool click_check_drag;
 	bool click_check_select;
@@ -134,14 +134,13 @@ struct Editor_State_t
 
 	/* selection-box stuff (ACT_SELBOX) */
 
-	double selbox_x1, selbox_y1;  // map coords
-	double selbox_x2, selbox_y2;
+	v2double_t selbox1;  // map coords
+	v2double_t selbox2;
 
 
 	/* transforming state (ACT_TRANSFORM) */
 
-	double trans_start_x;
-	double trans_start_y;
+	v2double_t trans_start;
 
 	transform_keyword_e trans_mode;
 	transform_t trans_param;
@@ -155,9 +154,9 @@ struct Editor_State_t
 
 	int drag_screen_dx, drag_screen_dy;
 
-	double drag_start_x, drag_start_y, drag_start_z;
-	double drag_focus_x, drag_focus_y, drag_focus_z;
-	double drag_cur_x,   drag_cur_y,   drag_cur_z;
+	v3double_t drag_start;
+	v3double_t drag_focus;
+	v3double_t drag_cur;
 
 	float drag_point_dist;
 	float drag_sector_dz;

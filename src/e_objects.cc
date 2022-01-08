@@ -38,6 +38,7 @@
 #include "e_vertex.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "m_vector.h"
 #include "e_objects.h"
 #include "r_grid.h"
 #include "w_rawdef.h"
@@ -85,8 +86,8 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	else
 		doc.sectors[new_sec]->SetDefaults(inst);
 
-	double x1 = inst.grid.QuantSnapX(inst.edit.map_x, false);
-	double y1 = inst.grid.QuantSnapX(inst.edit.map_y, false);
+	double x1 = inst.grid.QuantSnapX(inst.edit.map.x, false);
+	double y1 = inst.grid.QuantSnapX(inst.edit.map.y, false);
 
 	double x2 = x1 + config::new_sector_size;
 	double y2 = y1 + config::new_sector_size;
@@ -149,8 +150,8 @@ void ObjectsModule::insertThing() const
 			}
 		}
 
-		T->SetRawX(inst, inst.grid.SnapX(inst.edit.map_x));
-		T->SetRawY(inst, inst.grid.SnapY(inst.edit.map_y));
+		T->SetRawX(inst, inst.grid.SnapX(inst.edit.map.x));
+		T->SetRawY(inst, inst.grid.SnapY(inst.edit.map.y));
 
 		inst.recent_things.insert_number(T->type);
 
@@ -367,9 +368,7 @@ void ObjectsModule::insertLinedefAutosplit(EditOperation &op, int v1, int v2, bo
 
 	crossing_state_c cross(inst);
 
-	doc.hover.findCrossingPoints(cross,
-		doc.vertices[v1]->x(), doc.vertices[v1]->y(), v1,
-		doc.vertices[v2]->x(), doc.vertices[v2]->y(), v2);
+	doc.hover.findCrossingPoints(cross, doc.vertices[v1]->xy(), v1, doc.vertices[v2]->xy(), v2);
 
 	cross.SplitAllLines(op);
 
@@ -399,8 +398,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	int old_vert = -1;
 	int new_vert = -1;
 
-	double new_x = inst.grid.SnapX(inst.edit.map_x);
-	double new_y = inst.grid.SnapY(inst.edit.map_y);
+	double new_x = inst.grid.SnapX(inst.edit.map.x);
+	double new_y = inst.grid.SnapY(inst.edit.map.y);
 
 	int orig_num_sectors = doc.numSectors();
 
@@ -419,8 +418,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	if (split_ld >= 0)
 	{
-		new_x = inst.edit.split_x;
-		new_y = inst.edit.split_y;
+		new_x = inst.edit.split.x;
+		new_y = inst.edit.split.y;
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
@@ -506,7 +505,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			Vertex *V = doc.vertices[new_vert];
 
-			V->SetRawXY(inst, new_x, new_y);
+			V->SetRawXY(inst, { new_x, new_y });
 
 			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
@@ -603,7 +602,7 @@ void ObjectsModule::insertSector() const
 	}
 
 	// if outside of the map, create a square
-	if (doc.hover.isPointOutsideOfMap(inst.edit.map_x, inst.edit.map_y))
+	if (doc.hover.isPointOutsideOfMap(inst.edit.map.x, inst.edit.map.y))
 	{
 		EditOperation op(doc.basis);
 		op.setMessage("added sector (outside map)");
@@ -634,7 +633,7 @@ void ObjectsModule::insertSector() const
 		EditOperation op(doc.basis);
 		op.setMessage("added new sector");
 
-		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map_x, inst.edit.map_y, -1 /* create */, model);
+		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map.x, inst.edit.map.y, -1 /* create */, model);
 	}
 	// select the new sector
 	if (ok)
@@ -733,11 +732,11 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 }
 
 
-void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, const v3double_t &delta) const
 {
-	fixcoord_t fdx = inst.MakeValidCoord(delta_x);
-	fixcoord_t fdy = inst.MakeValidCoord(delta_y);
-	fixcoord_t fdz = inst.MakeValidCoord(delta_z);
+	fixcoord_t fdx = inst.MakeValidCoord(delta.x);
+	fixcoord_t fdy = inst.MakeValidCoord(delta.y);
+	fixcoord_t fdz = inst.MakeValidCoord(delta.z);
 
 	switch (list.what_type())
 	{
@@ -768,8 +767,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, do
 			{
 				const Sector * S = doc.sectors[*it];
 
-				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta_z);
-				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta_z);
+				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta.z);
+				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta.z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -779,7 +778,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, do
 				selection_c verts(ObjType::vertices);
 				ConvertSelection(doc, list, verts);
 
-				doMoveObjects(op, verts, delta_x, delta_y, delta_z);
+				doMoveObjects(op, verts, delta);
 			}
 			break;
 
@@ -789,7 +788,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, do
 }
 
 
-void ObjectsModule::move(const selection_c &list, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 {
 	if (list.empty())
 		return;
@@ -805,10 +804,10 @@ void ObjectsModule::move(const selection_c &list, double delta_x, double delta_y
 		selection_c thing_sel(ObjType::things);
 		ConvertSelection(doc, list, thing_sel);
 
-		doMoveObjects(op, thing_sel, delta_x, delta_y, 0);
+		doMoveObjects(op, thing_sel, { delta.x, delta.y, 0.0 });
 	}
 
-	doMoveObjects(op, list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, list, delta);
 }
 
 //
@@ -845,7 +844,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 // It needs delta_x and delta_y in order to properly merge sandwich linedefs.
 //
 void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID,
-												 double delta_x, double delta_y) const
+												 const v2double_t &delta) const
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
@@ -853,8 +852,8 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
-	newV->raw_x += inst.MakeValidCoord(delta_x);
-	newV->raw_y += inst.MakeValidCoord(delta_y);
+	newV->raw_x += inst.MakeValidCoord(delta.x);
+	newV->raw_y += inst.MakeValidCoord(delta.y);
 
 	doc.linemod.splitLinedefAtVertex(op, splitLineID, newVID);
 
@@ -866,14 +865,14 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	doc.vertmod.mergeList(op, verts);
 }
 
-void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y, double delta_z) const
+void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 {
 	if (inst.edit.mode != ObjType::vertices)
 	{
 		selection_c list(inst.edit.mode);
 		list.set(obj.num);
 
-		doc.objects.move(list, delta_x, delta_y, delta_z);
+		doc.objects.move(list, delta);
 		return;
 	}
 
@@ -909,7 +908,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 		{
 			// Alright, we got it
 			op.setMessage("split linedef #%d", did_split_line);
-			splitLinedefAndMergeSandwich(op, did_split_line, obj.num, delta_x, delta_y);
+			splitLinedefAndMergeSandwich(op, did_split_line, obj.num, delta.xy);
 			return;
 		}
 
@@ -922,7 +921,7 @@ void ObjectsModule::singleDrag(const Objid &obj, double delta_x, double delta_y,
 
 	list.set(obj.num);
 
-	doMoveObjects(op, list, delta_x, delta_y, delta_z);
+	doMoveObjects(op, list, delta);
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
@@ -1324,10 +1323,9 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 // allows a mostly-grid-snapped set of objects to stay snapped
 // to the grid.
 //
-void ObjectsModule::getDragFocus(double *x, double *y, double ptr_x, double ptr_y) const
+v2double_t ObjectsModule::getDragFocus(const v2double_t &ptr) const
 {
-	*x = 0;
-	*y = 0;
+	v2double_t result = {};
 
 	// determine whether a majority of the object(s) are already on
 	// the grid.  If they are, then pick a coordinate that also lies
@@ -1351,16 +1349,17 @@ void ObjectsModule::getDragFocus(double *x, double *y, double ptr_x, double ptr_
 
 	if (inst.edit.dragged.valid())  // a single object
 	{
-		dragUpdateCurrentDist(inst.edit.mode, inst.edit.dragged.num, x, y, &best_dist,
-							   ptr_x, ptr_y, only_grid);
-		return;
+		dragUpdateCurrentDist(inst.edit.mode, inst.edit.dragged.num, &result.x, &result.y, &best_dist,
+							   ptr.x, ptr.y, only_grid);
+		return result;
 	}
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		dragUpdateCurrentDist(inst.edit.mode, *it, x, y, &best_dist,
-							   ptr_x, ptr_y, only_grid);
+		dragUpdateCurrentDist(inst.edit.mode, *it, &result.x, &result.y, &best_dist,
+							   ptr.x, ptr.y, only_grid);
 	}
+	return result;
 }
 
 
@@ -1369,17 +1368,17 @@ void ObjectsModule::getDragFocus(double *x, double *y, double ptr_x, double ptr_
 
 void transform_t::Clear()
 {
-	mid_x = mid_y = 0;
-	scale_x = scale_y = 1;
-	skew_x = skew_y = 0;
+	mid = {};
+	scale = { 1.0, 1.0 };
+	skew = {};
 	rotate = 0;
 }
 
 
 void transform_t::Apply(double *x, double *y) const
 {
-	double x0 = *x - mid_x;
-	double y0 = *y - mid_y;
+	double x0 = *x - mid.x;
+	double y0 = *y - mid.y;
 
 	if (rotate)
 	{
@@ -1393,17 +1392,17 @@ void transform_t::Apply(double *x, double *y) const
 		y0 = y1 * c + x1 * s;
 	}
 
-	if (skew_x || skew_y)
+	if (skew.nonzero())
 	{
 		double x1 = x0;
 		double y1 = y0;
 
-		x0 = x1 + y1 * skew_x;
-		y0 = y1 + x1 * skew_y;
+		x0 = x1 + y1 * skew.x;
+		y0 = y1 + x1 * skew.y;
 	}
 
-	*x = mid_x + x0 * scale_x;
-	*y = mid_y + y0 * scale_y;
+	*x = mid.x + x0 * scale.x;
+	*y = mid.y + y0 * scale.y;
 }
 
 
@@ -1414,12 +1413,12 @@ void transform_t::Apply(double *x, double *y) const
 // often give a different result than using the middle of the bounding
 // box.
 //
-void ObjectsModule::calcMiddle(const selection_c & list, double *x, double *y) const
+v2double_t ObjectsModule::calcMiddle(const selection_c & list) const
 {
-	*x = *y = 0;
+	v2double_t result = {};
 
 	if (list.empty())
-		return;
+		return result;
 
 	double sum_x = 0;
 	double sum_y = 0;
@@ -1454,15 +1453,15 @@ void ObjectsModule::calcMiddle(const selection_c & list, double *x, double *y) c
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(doc, list, verts);
 
-			calcMiddle(verts, x, y);
-			return;
+			return calcMiddle(verts);
 		}
 	}
 
 	SYS_ASSERT(count > 0);
 
-	*x = sum_x / count;
-	*y = sum_y / count;
+	result.x = sum_x / count;
+	result.y = sum_y / count;
+	return result;
 }
 
 
@@ -1636,14 +1635,13 @@ void Instance::CMD_Mirror()
 	if (tolower(EXEC_Param[0][0]) == 'v')
 		is_vert = true;
 
-	double mid_x, mid_y;
-	level.objects.calcMiddle(*edit.Selected, &mid_x, &mid_y);
+	v2double_t mid = level.objects.calcMiddle(*edit.Selected);
 
 	{
 		EditOperation op(level.basis);
 		op.setMessageForSelection("mirrored", *edit.Selected, is_vert ? " vertically" : " horizontally");
 
-		level.objects.doMirrorStuff(op, *edit.Selected, is_vert, mid_x, mid_y);
+		level.objects.doMirrorStuff(op, *edit.Selected, is_vert, mid.x, mid.y);
 
 	}
 
@@ -1700,8 +1698,7 @@ void Instance::CMD_Rotate90()
 		return;
 	}
 
-	double mid_x, mid_y;
-	level.objects.calcMiddle(*edit.Selected, &mid_x, &mid_y);
+	v2double_t mid = level.objects.calcMiddle(*edit.Selected);
 
 	{
 		EditOperation op(level.basis);
@@ -1709,7 +1706,7 @@ void Instance::CMD_Rotate90()
 
 		if (edit.mode == ObjType::things)
 		{
-			level.objects.doRotate90Things(op, *edit.Selected, anti_clockwise, mid_x, mid_y);
+			level.objects.doRotate90Things(op, *edit.Selected, anti_clockwise, mid.x, mid.y);
 		}
 		else
 		{
@@ -1719,15 +1716,15 @@ void Instance::CMD_Rotate90()
 				selection_c things(ObjType::things);
 				ConvertSelection(level, *edit.Selected, things);
 
-				level.objects.doRotate90Things(op, things, anti_clockwise, mid_x, mid_y);
+				level.objects.doRotate90Things(op, things, anti_clockwise, mid.x, mid.y);
 			}
 
 			// everything else just rotates the vertices
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(level, *edit.Selected, verts);
 
-			fixcoord_t fix_mx = MakeValidCoord(mid_x);
-			fixcoord_t fix_my = MakeValidCoord(mid_y);
+			fixcoord_t fix_mx = MakeValidCoord(mid.x);
+			fixcoord_t fix_my = MakeValidCoord(mid.y);
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
@@ -1833,16 +1830,16 @@ void ObjectsModule::transform(transform_t& param) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("scaled", *inst.edit.Selected);
 
-	if (param.scale_x < 0)
+	if (param.scale.x < 0)
 	{
-		param.scale_x = -param.scale_x;
-		doMirrorStuff(op, *inst.edit.Selected, false /* is_vert */, param.mid_x, param.mid_y);
+		param.scale.x = -param.scale.x;
+		doMirrorStuff(op, *inst.edit.Selected, false /* is_vert */, param.mid.x, param.mid.y);
 	}
 
-	if (param.scale_y < 0)
+	if (param.scale.y < 0)
 	{
-		param.scale_y = -param.scale_y;
-		doMirrorStuff(op, *inst.edit.Selected, true /* is_vert */, param.mid_x, param.mid_y);
+		param.scale.y = -param.scale.y;
+		doMirrorStuff(op, *inst.edit.Selected, true /* is_vert */, param.mid.x, param.mid.y);
 	}
 
 	doScaleTwoStuff(op, *inst.edit.Selected, param);
@@ -1853,7 +1850,7 @@ void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
-		doc.objects.calcMiddle(*inst.edit.Selected, &param.mid_x, &param.mid_y);
+		param.mid = doc.objects.calcMiddle(*inst.edit.Selected);
 		return;
 	}
 
@@ -1862,18 +1859,18 @@ void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos
 	doc.objects.calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
 
 	if (pos_x < 0)
-		param.mid_x = lx;
+		param.mid.x = lx;
 	else if (pos_x > 0)
-		param.mid_x = hx;
+		param.mid.x = hx;
 	else
-		param.mid_x = lx + (hx - lx) / 2;
+		param.mid.x = lx + (hx - lx) / 2;
 
 	if (pos_y < 0)
-		param.mid_y = ly;
+		param.mid.y = ly;
 	else if (pos_y > 0)
-		param.mid_y = hy;
+		param.mid.y = hy;
 	else
-		param.mid_y = ly + (hy - ly) / 2;
+		param.mid.y = ly + (hy - ly) / 2;
 }
 
 
@@ -1886,8 +1883,8 @@ void ObjectsModule::scale3(double scale_x, double scale_y, double pos_x, double 
 
 	param.Clear();
 
-	param.scale_x = scale_x;
-	param.scale_y = scale_y;
+	param.scale.x = scale_x;
+	param.scale.y = scale_y;
 
 	determineOrigin(param, pos_x, pos_y);
 
@@ -1947,8 +1944,8 @@ void ObjectsModule::scale4(double scale_x, double scale_y, double scale_z,
 
 	param.Clear();
 
-	param.scale_x = scale_x;
-	param.scale_y = scale_y;
+	param.scale.x = scale_x;
+	param.scale.y = scale_y;
 
 	determineOrigin(param, pos_x, pos_y);
 
@@ -2025,8 +2022,7 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 
 	param.Clear();
 
-	param.scale_x = mul;
-	param.scale_y = mul;
+	param.scale = { mul, mul };
 
 
 	SelectHighlight unselect = inst.edit.SelectionOrHighlight();
@@ -2039,15 +2035,15 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	// TODO: CONFIG ITEM (or FLAG)
 	if ((true))
 	{
-		calcMiddle(*inst.edit.Selected, &param.mid_x, &param.mid_y);
+		param.mid = calcMiddle(*inst.edit.Selected);
 	}
 	else
 	{
 		double lx, ly, hx, hy;
 		calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
 
-		param.mid_x = lx + (hx - lx) / 2;
-		param.mid_y = ly + (hy - ly) / 2;
+		param.mid.x = lx + (hx - lx) / 2;
+		param.mid.y = ly + (hy - ly) / 2;
 	}
 
 	{

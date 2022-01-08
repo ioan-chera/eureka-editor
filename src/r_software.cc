@@ -1274,9 +1274,9 @@ public:
 				(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 			{
 				// re-project thing onto the viewplane
-				float dx = static_cast<float>(inst.edit.drag_cur_x - inst.edit.drag_start_x);
-				float dy = static_cast<float>(inst.edit.drag_cur_y - inst.edit.drag_start_y);
-				float dz = static_cast<float>(inst.edit.drag_cur_z - inst.edit.drag_start_z);
+				float dx = static_cast<float>(inst.edit.drag_cur.x - inst.edit.drag_start.x);
+				float dy = static_cast<float>(inst.edit.drag_cur.y - inst.edit.drag_start.y);
+				float dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 
 				const Thing *T = inst.level.things[dw->th];
 
@@ -2126,9 +2126,9 @@ bool Instance::SW_QueryPoint(Objid& hl, int qx, int qy)
 
 	if (rend.query_map_x != 0)
 	{
-		edit.map_x = rend.query_map_x;
-		edit.map_y = rend.query_map_y;
-		edit.map_z = rend.query_map_z;
+		edit.map.x = rend.query_map_x;
+		edit.map.y = rend.query_map_y;
+		edit.map.z = rend.query_map_z;
 	}
 
 	if (! rend.query_result.valid())

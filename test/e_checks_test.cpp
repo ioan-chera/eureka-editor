@@ -86,7 +86,7 @@ void Hover::fastOpposite_finish()
 {
 }
 
-Objid Hover::getNearbyObject(ObjType type, double x, double y) const
+Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
 {
 	return Objid();
 }

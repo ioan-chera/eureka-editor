@@ -77,7 +77,7 @@ public:
 	void UpdateScreen(int ow, int oh);
 	void PrepareToRender(int ow, int oh);
 
-	double DistToViewPlane(double map_x, double map_y);
+	double DistToViewPlane(v2double_t map);
 
 	/* r_editing_info_t stuff */
 

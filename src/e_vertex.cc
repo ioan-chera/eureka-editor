@@ -470,7 +470,7 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			{
 				int new_v = op.addNew(ObjType::vertices);
 
-				doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
+				doc.vertices[new_v]->SetRawXY(inst, { new_x, new_y });
 
 				if (L->start == v_num)
 					op.changeLinedef(n, LineDef::F_START, new_v);
@@ -564,7 +564,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	doc.vertices[new_v]->SetRawXY(inst, new_x, new_y);
+	doc.vertices[new_v]->SetRawXY(inst, { new_x, new_y });
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
@@ -749,14 +749,11 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, double * dx, double * dy) const
 {
-	double det_mid_x, sec_mid_x;
-	double det_mid_y, sec_mid_y;
+	v2double_t det_mid = doc.objects.calcMiddle(detach_verts);
+	v2double_t sec_mid = doc.objects.calcMiddle(*inst.edit.Selected);
 
-	doc.objects.calcMiddle(detach_verts,  &det_mid_x, &det_mid_y);
-	doc.objects.calcMiddle(*inst.edit.Selected, &sec_mid_x, &sec_mid_y);
-
-	*dx = sec_mid_x - det_mid_x;
-	*dy = sec_mid_y - det_mid_y;
+	*dx = sec_mid.x - det_mid.x;
+	*dy = sec_mid.y - det_mid.y;
 
 	// avoid moving perfectly horizontal or vertical
 	// (also handes the case of dx == dy == 0)
@@ -1041,7 +1038,7 @@ void Instance::CMD_VT_ShapeLine()
 	{
 		const Vertex *V = level.vertices[*it];
 
-		vert_along_t ALONG(*it, AlongDist(V->x(), V->y(), ax,ay, bx,by));
+		vert_along_t ALONG(*it, AlongDist(V->xy(), { ax,ay }, { bx, by }));
 
 		along_list.push_back(ALONG);
 	}

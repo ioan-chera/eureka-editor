@@ -108,31 +108,29 @@ void CheckTypeSizes()
 }
 
 
-double PerpDist(double x, double y,
-                double x1, double y1, double x2, double y2)
+double PerpDist(v2double_t v, v2double_t v1, v2double_t v2)
 {
-	x  -= x1; y  -= y1;
-	x2 -= x1; y2 -= y1;
+	v -= v1;
+	v2 -= v1;
 
-	double len = sqrt(x2*x2 + y2*y2);
+	double len = v2.hypot();
 
 	SYS_ASSERT(len > 0);
 
-	return (x * y2 - y * x2) / len;
+	return (v.x * v2.y - v.y * v2.x) / len;
 }
 
 
-double AlongDist(double x, double y,
-                 double x1, double y1, double x2, double y2)
+double AlongDist(v2double_t v, v2double_t v1, v2double_t v2)
 {
-	x  -= x1; y  -= y1;
-	x2 -= x1; y2 -= y1;
+	v -= v1;
+	v2 -= v1;
 
-	double len = sqrt(x2*x2 + y2*y2);
+	double len = v2.hypot();
 
 	SYS_ASSERT(len > 0);
 
-	return (x * x2 + y * y2) / len;
+	return (v.x * v2.x + v.y * v2.y) / len;
 }
 
 //

@@ -31,6 +31,7 @@
 #include "e_path.h"
 #include "m_config.h"
 #include "m_loadsave.h"
+#include "m_vector.h"
 #include "r_render.h"
 #include "r_subdiv.h"
 #include "ui_about.h"
@@ -525,16 +526,14 @@ void Instance::CheckBeginDrag()
 
 void Instance::DoBeginDrag()
 {
-	edit.drag_start_x = edit.drag_cur_x = edit.click_map_x;
-	edit.drag_start_y = edit.drag_cur_y = edit.click_map_y;
-	edit.drag_start_z = edit.drag_cur_z = edit.click_map_z;
+	edit.drag_start = edit.drag_cur = edit.click_map;
 
 	edit.drag_screen_dx  = edit.drag_screen_dy = 0;
 	edit.drag_thing_num  = -1;
 	edit.drag_other_vert = -1;
 
 	// the focus is only used when grid snapping is on
-	level.objects.getDragFocus(&edit.drag_focus_x, &edit.drag_focus_y, edit.click_map_x, edit.click_map_y);
+	edit.drag_focus.xy = level.objects.getDragFocus(edit.click_map.xy);
 
 	if (edit.render3d)
 	{
@@ -544,7 +543,7 @@ void Instance::DoBeginDrag()
 		if (edit.mode == ObjType::things)
 		{
 			edit.drag_thing_num = edit.clicked.num;
-			edit.drag_thing_floorh = static_cast<float>(edit.drag_start_z);
+			edit.drag_thing_floorh = static_cast<float>(edit.drag_start.z);
 			edit.drag_thing_up_down = (loaded.levelFormat != MapFormat::doom && !grid.snap);
 
 			// get thing's floor
@@ -552,7 +551,7 @@ void Instance::DoBeginDrag()
 			{
 				const Thing *T = level.things[edit.drag_thing_num];
 
-				Objid sec = level.hover.getNearbyObject(ObjType::sectors, T->x(), T->y());
+				Objid sec = level.hover.getNearbyObject(ObjType::sectors, T->xy());
 
 				if (sec.valid())
 					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num]->floorh);
@@ -626,8 +625,7 @@ void Instance::ACT_Drag_release()
 	}
 
 	// note: DragDelta needs inst.edit.dragged
-	double dx, dy;
-	main_win->canvas->DragDelta(&dx, &dy);
+	v2double_t delta = main_win->canvas->DragDelta();
 
 	Objid dragged(edit.dragged);
 	edit.dragged.clear();
@@ -635,12 +633,12 @@ void Instance::ACT_Drag_release()
 	if (edit.drag_lines)
 		edit.drag_lines->clear_all();
 
-	if (! edit.render3d && (dx || dy))
+	if (! edit.render3d && delta.nonzero())
 	{
 		if (dragged.valid())
-			level.objects.singleDrag(dragged, dx, dy, 0);
+			level.objects.singleDrag(dragged, v3double_t(delta));
 		else
-			level.objects.move(*edit.Selected, dx, dy, 0);
+			level.objects.move(*edit.Selected, v3double_t(delta));
 	}
 
 	Editor_ClearAction();
@@ -679,7 +677,7 @@ void Instance::ACT_Click_release()
 		if (edit.render3d)
 			near_obj = edit.highlight;
 		else
-			near_obj = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+			near_obj = level.hover.getNearbyObject(edit.mode, edit.map.xy);
 
 		if (near_obj.num == click_obj.num)
 			edit.Selection_Toggle(click_obj);
@@ -711,9 +709,7 @@ void Instance::CMD_ACT_Click()
 	edit.click_screen_x = Fl::event_x();
 	edit.click_screen_y = Fl::event_y();
 
-	edit.click_map_x = edit.map_x;
-	edit.click_map_y = edit.map_y;
-	edit.click_map_z = edit.map_z;
+	edit.click_map = edit.map;
 
 	// handle 3D mode, skip stuff below which only makes sense in 2D
 	if (edit.render3d)
@@ -721,11 +717,11 @@ void Instance::CMD_ACT_Click()
 		if (edit.highlight.type == ObjType::things)
 		{
 			const Thing *T = level.things[edit.highlight.num];
-			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->x(), T->y()));
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->xy()));
 		}
 		else
 		{
-			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(edit.map_x, edit.map_y));
+			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(edit.map.xy));
 		}
 
 		edit.clicked = edit.highlight;
@@ -758,7 +754,7 @@ void Instance::CMD_ACT_Click()
 
 			Vertex *V = level.vertices[new_vert];
 
-			V->SetRawXY(*this, edit.split_x, edit.split_y);
+			V->SetRawXY(*this, edit.split);
 
 			level.linemod.splitLinedefAtVertex(op, split_ld, new_vert);
 		}
@@ -774,13 +770,12 @@ void Instance::CMD_ACT_Click()
 	}
 
 	// find the object under the pointer.
-	edit.clicked = level.hover.getNearbyObject(edit.mode, edit.map_x, edit.map_y);
+	edit.clicked = level.hover.getNearbyObject(edit.mode, edit.map.xy);
 
 	// clicking on an empty space starts a new selection box
 	if (edit.click_check_select && edit.clicked.is_nil())
 	{
-		edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
-		edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
+		edit.selbox1 = edit.selbox2 = edit.map.xy;
 
 		Editor_SetAction(ACT_SELBOX);
 		return;
@@ -801,8 +796,7 @@ void Instance::CMD_ACT_SelectBox()
 	if (! Nav_ActionKey(EXEC_CurKey, &Instance::ACT_SelectBox_release))
 		return;
 
-	edit.selbox_x1 = edit.selbox_x2 = edit.map_x;
-	edit.selbox_y1 = edit.selbox_y2 = edit.map_y;
+	edit.selbox1 = edit.selbox2 = edit.map.xy;
 
 	Editor_SetAction(ACT_SELBOX);
 }
@@ -831,19 +825,16 @@ void Instance::CMD_ACT_Drag()
 
 void Instance::Transform_Update()
 {
-	double dx1 = edit.map_x - edit.trans_param.mid_x;
-	double dy1 = edit.map_y - edit.trans_param.mid_y;
+	v2double_t dv1 = edit.map.xy - edit.trans_param.mid;
+	v2double_t dv0 = edit.trans_start - edit.trans_param.mid;
 
-	double dx0 = edit.trans_start_x - edit.trans_param.mid_x;
-	double dy0 = edit.trans_start_y - edit.trans_param.mid_y;
-
-	edit.trans_param.scale_x = edit.trans_param.scale_y = 1;
-	edit.trans_param.skew_x  = edit.trans_param.skew_y  = 0;
+	edit.trans_param.scale = { 1.0, 1.0 };
+	edit.trans_param.skew = {};
 	edit.trans_param.rotate  = 0;
 
 	if (edit.trans_mode == TRANS_K_Rotate || edit.trans_mode == TRANS_K_RotScale)
 	{
-		double angle[2] = { atan2(dy1, dx1), atan2(dy0, dx0) };
+		double angle[2] = { dv1.atan2(), dv0.atan2() };
 
 		edit.trans_param.rotate = angle[1] - angle[0];
 
@@ -854,19 +845,21 @@ void Instance::Transform_Update()
 	{
 		case TRANS_K_Scale:
 		case TRANS_K_RotScale:
-			dx1 = std::max(abs(dx1), abs(dy1));
-			dx0 = std::max(abs(dx0), abs(dy0));
+			dv1.x = std::max(fabs(dv1.x), fabs(dv1.y));
+			dv0.x = std::max(fabs(dv0.x), fabs(dv0.y));
 
-			if (dx0)
+			if (dv0.x)
 			{
-				edit.trans_param.scale_x = dx1 / (float)dx0;
-				edit.trans_param.scale_y = edit.trans_param.scale_x;
+				edit.trans_param.scale.x = dv1.x / dv0.x;
+				edit.trans_param.scale.y = edit.trans_param.scale.x;
 			}
 			break;
 
 		case TRANS_K_Stretch:
-			if (dx0) edit.trans_param.scale_x = dx1 / (float)dx0;
-			if (dy0) edit.trans_param.scale_y = dy1 / (float)dy0;
+			if (dv0.x)
+				edit.trans_param.scale.x = dv1.x / dv0.x;
+			if (dv0.y) 
+				edit.trans_param.scale.y = dv1.y / dv0.y;
 			break;
 
 		case TRANS_K_Rotate:
@@ -874,13 +867,15 @@ void Instance::Transform_Update()
 			break;
 
 		case TRANS_K_Skew:
-			if (abs(dx0) >= abs(dy0))
+			if (fabs(dv0.x) >= fabs(dv0.y))
 			{
-				if (dx0) edit.trans_param.skew_y = (dy1 - dy0) / (float)dx0;
+				if (dv0.x)
+					edit.trans_param.skew.y = (dv1.y - dv0.y) / (float)dv0.x;
 			}
 			else
 			{
-				if (dy0) edit.trans_param.skew_x = (dx1 - dx0) / (float)dy0;
+				if (dv0.y)
+					edit.trans_param.skew.x = (dv1.x - dv0.x) / (float)dv0.y;
 			}
 			break;
 	}
@@ -958,16 +953,13 @@ void Instance::CMD_ACT_Transform()
 		return;
 
 
-	double middle_x, middle_y;
-	level.objects.calcMiddle(*edit.Selected, &middle_x, &middle_y);
+	v2double_t middle = level.objects.calcMiddle(*edit.Selected);
 
 	edit.trans_mode = mode;
-	edit.trans_start_x = edit.map_x;
-	edit.trans_start_y = edit.map_y;
+	edit.trans_start = edit.map.xy;
 
 	edit.trans_param.Clear();
-	edit.trans_param.mid_x = middle_x;
-	edit.trans_param.mid_y = middle_y;
+	edit.trans_param.mid = middle;
 
 	if (edit.trans_lines)
 	{
@@ -1074,16 +1066,12 @@ void Instance::CMD_Zoom()
 		return;
 	}
 
-	int mid_x = static_cast<int>(edit.map_x);
-	int mid_y = static_cast<int>(edit.map_y);
+	auto mid = v2int_t(edit.map.xy);
 
 	if (Exec_HasFlag("/center"))
-	{
-		mid_x = I_ROUND(grid.orig_x);
-		mid_y = I_ROUND(grid.orig_y);
-	}
+		mid = grid.orig.iround();
 
-	Editor_Zoom(delta, mid_x, mid_y);
+	Editor_Zoom(delta, mid);
 }
 
 
@@ -1138,10 +1126,7 @@ void Instance::CMD_PlaceCamera()
 		return;
 	}
 
-	double x = edit.map_x;
-	double y = edit.map_y;
-
-	Render3D_SetCameraPos(x, y);
+	Render3D_SetCameraPos(edit.map.xy);
 
 	if (Exec_HasFlag("/open3d"))
 	{
@@ -1260,7 +1245,7 @@ void Instance::CMD_GRID_Zoom()
 
 	grid.NearestScale(scale);
 
-	grid.RefocusZoom(edit.map_x, edit.map_y, S1);
+	grid.RefocusZoom(edit.map.xy, S1);
 }
 
 
