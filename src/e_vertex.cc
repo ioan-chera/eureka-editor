@@ -249,7 +249,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 // the first vertex is kept, all the other vertices are deleted
 // (after fixing the attached linedefs).
 //
-void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
+void VertexModule::mergeList(EditOperation &op, selection_c &verts, selection_c *delResultList) const
 {
 	if (verts.count_obj() < 2)
 		return;
@@ -284,6 +284,12 @@ void VertexModule::mergeList(EditOperation &op, selection_c &verts) const
 	// all vertices of an isolated sector and end up with NOTHING!
 	DeleteObjects_WithUnused(op, doc, del_lines, false /* keep_things */, true /* keep_verts */, false /* keep_lines */);
 
+	if(delResultList)
+	{
+		delResultList->clear_all();
+		delResultList->change_type(ObjType::vertices);
+		delResultList->merge(verts);
+	}
 	verts.clear_all();
 }
 
@@ -305,7 +311,7 @@ void Instance::commandVertexMerge()
 		EditOperation op(level.basis);
 		op.setMessageForSelection("merged", *edit.Selected);
 
-		level.vertmod.mergeList(op, *edit.Selected);
+		level.vertmod.mergeList(op, *edit.Selected, nullptr);
 	}
 
 	Selection_Clear(true /* no_save */);
@@ -366,7 +372,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 			list.set(v_other);	// first one is the one kept
 			list.set(v_num);
 
-			mergeList(op, list);
+			mergeList(op, list, nullptr);
 		}
 
 		inst.edit.Selected->set(v_other);

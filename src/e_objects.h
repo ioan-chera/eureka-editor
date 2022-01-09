@@ -73,7 +73,7 @@ public:
 	void rotate3(double deg, double pos_x, double pos_y) const;
 
 	int findLineBetweenLineAndVertex(int lineID, int vertID) const;
-	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, const v2double_t &delta) const;
+	void splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID, const v2double_t &delta, selection_c *delResultList) const;
 
 private:
 	void insertSector() const;

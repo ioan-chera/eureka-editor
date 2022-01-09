@@ -734,9 +734,10 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 //
 // Move a single vertex, without depending on the user interface highlighting
 //
-static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, const v2double_t &delta)
+static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, const v2double_t &delta, int &deletedVertexID)
 {
 	const Vertex &vertex = *inst.level.vertices[vertexID];
+	deletedVertexID = -1;
 
 	v2double_t dest = vertex.xy() + delta;
 
@@ -745,10 +746,14 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 	{
 		// Vertex merging
 		// TODO: messaging
+		selection_c del_list;
+
 		selection_c verts(ObjType::vertices);
 		verts.set(obj.num);
 		verts.set(vertexID);
-		inst.level.vertmod.mergeList(op, verts);
+		inst.level.vertmod.mergeList(op, verts, &del_list);
+
+		deletedVertexID = del_list.find_first();
 		return;
 	}
 
@@ -761,7 +766,9 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 		if(inst.level.objects.findLineBetweenLineAndVertex(splitLine, vertexID) >= 0)
 		{
 			// TODO: messaging
-			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta);
+			selection_c del_list;
+			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta, &del_list);
+			deletedVertexID = del_list.find_first();
 			return;
 		}
 		inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
@@ -777,6 +784,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 	fixcoord_t fdy = inst.MakeValidCoord(delta.y);
 	fixcoord_t fdz = inst.MakeValidCoord(delta.z);
 
+	int decrementCount = 0;	// if stuff within our set gets deleted, we need to decrement the index
+
 	switch (list.what_type())
 	{
 		case ObjType::things:
@@ -791,8 +800,13 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			break;
 
 		case ObjType::vertices:
-			for (sel_iter_c it(list) ; !it.done() ; it.next())
-				doMoveVertex(op, inst, *it, delta.xy);
+			for(sel_iter_c it(list); !it.done(); it.next())
+			{
+				int deletedVertex = -1;
+				doMoveVertex(op, inst, *it - decrementCount, delta.xy, deletedVertex);
+				if(deletedVertex >= 0 && deletedVertex <= *it)
+					++decrementCount;
+			}
 			break;
 
 		case ObjType::sectors:
@@ -878,7 +892,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 // It needs delta_x and delta_y in order to properly merge sandwich linedefs.
 //
 void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLineID, int vertID,
-												 const v2double_t &delta) const
+												 const v2double_t &delta, selection_c *delResultList) const
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
@@ -896,7 +910,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	verts.set(newVID);
 	verts.set(vertID);
 
-	doc.vertmod.mergeList(op, verts);
+	doc.vertmod.mergeList(op, verts, delResultList);
 }
 
 //
@@ -920,7 +934,7 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 		verts.set(inst.edit.highlight.num);	// keep the highlight
 		verts.set(vertexID);
 
-		inst.level.vertmod.mergeList(op, verts);
+		inst.level.vertmod.mergeList(op, verts, nullptr);
 		return;
 	}
 
@@ -934,7 +948,7 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 		{
 			// Alright, we got it
 			op.setMessage("split linedef #%d", did_split_line);
-			inst.level.objects.splitLinedefAndMergeSandwich(op, did_split_line, vertexID, delta);
+			inst.level.objects.splitLinedefAndMergeSandwich(op, did_split_line, vertexID, delta, nullptr);
 			return;
 		}
 
