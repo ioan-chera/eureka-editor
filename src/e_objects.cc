@@ -865,6 +865,64 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	doc.vertmod.mergeList(op, verts);
 }
 
+//
+// Move a single vertex, splitting as necessary
+//
+static void singleDragVertex(Instance &inst, const int vertexID, const v3double_t &delta)
+{
+	EditOperation op(inst.level.basis);
+
+	int did_split_line = -1;
+
+	// handle a single vertex merging onto an existing one
+	if (inst.edit.highlight.valid())
+	{
+		op.setMessage("merge vertex #%d", vertexID);
+
+		SYS_ASSERT(vertexID != inst.edit.highlight.num);
+
+		selection_c verts(ObjType::vertices);
+
+		verts.set(inst.edit.highlight.num);	// keep the highlight
+		verts.set(vertexID);
+
+		inst.level.vertmod.mergeList(op, verts);
+		return;
+	}
+
+	// handle a single vertex splitting a linedef
+	if (inst.edit.split_line.valid())
+	{
+		did_split_line = inst.edit.split_line.num;
+		
+		// Check if it's actually a case of splitting a neighbouring linedef
+		if(inst.level.objects.findLineBetweenLineAndVertex(did_split_line, vertexID) >= 0)
+		{
+			// Alright, we got it
+			op.setMessage("split linedef #%d", did_split_line);
+			inst.level.objects.splitLinedefAndMergeSandwich(op, did_split_line, vertexID, delta.xy);
+			return;
+		}
+
+		inst.level.linemod.splitLinedefAtVertex(op, did_split_line, vertexID);
+
+		// now move the vertex!
+	}
+
+	const Vertex &vertex = *inst.level.vertices[vertexID];
+	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + inst.MakeValidCoord(delta.x));
+	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + inst.MakeValidCoord(delta.y));
+
+	if (did_split_line >= 0)
+		op.setMessage("split linedef #%d", did_split_line);
+	else
+	{
+		selection_c list(inst.edit.mode);
+		list.set(vertexID);
+		op.setMessageForSelection("moved", list);
+	}
+}
+
 void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 {
 	if (inst.edit.mode != ObjType::vertices)
@@ -877,58 +935,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 	}
 
 	/* move a single vertex */
-
-	EditOperation op(doc.basis);
-
-	int did_split_line = -1;
-
-	// handle a single vertex merging onto an existing one
-	if (inst.edit.highlight.valid())
-	{
-		op.setMessage("merge vertex #%d", obj.num);
-
-		SYS_ASSERT(obj.num != inst.edit.highlight.num);
-
-		selection_c verts(ObjType::vertices);
-
-		verts.set(inst.edit.highlight.num);	// keep the highlight
-		verts.set(obj.num);
-
-		doc.vertmod.mergeList(op, verts);
-		return;
-	}
-
-	// handle a single vertex splitting a linedef
-	if (inst.edit.split_line.valid())
-	{
-		did_split_line = inst.edit.split_line.num;
-		
-		// Check if it's actually a case of splitting a neighbouring linedef
-		if(findLineBetweenLineAndVertex(did_split_line, obj.num) >= 0)
-		{
-			// Alright, we got it
-			op.setMessage("split linedef #%d", did_split_line);
-			splitLinedefAndMergeSandwich(op, did_split_line, obj.num, delta.xy);
-			return;
-		}
-
-		doc.linemod.splitLinedefAtVertex(op, did_split_line, obj.num);
-
-		// now move the vertex!
-	}
-
-	const Vertex &vertex = *doc.vertices[obj.num];
-	op.changeVertex(obj.num, Thing::F_X, vertex.raw_x + inst.MakeValidCoord(delta.x));
-	op.changeVertex(obj.num, Thing::F_Y, vertex.raw_y + inst.MakeValidCoord(delta.y));
-
-	if (did_split_line >= 0)
-		op.setMessage("split linedef #%d", did_split_line);
-	else
-	{
-		selection_c list(inst.edit.mode);
-		list.set(obj.num);
-		op.setMessageForSelection("moved", list);
-	}
+	singleDragVertex(inst, obj.num, delta);
 }
 
 
