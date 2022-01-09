@@ -16,6 +16,8 @@
 //
 //------------------------------------------------------------------------
 
+#include "lib_util.h"
+#include "Errors.h"
 #include "SafeOutFile.h"
 
 #include <chrono>
@@ -41,10 +43,11 @@ SafeOutFile::SafeOutFile(const SString &path) : mPath(path)
 //
 // Open the file for writing
 //
-bool SafeOutFile::openForWriting()
+ReportedResult SafeOutFile::openForWriting()
 {
-	if(!makeValidRandomPath(mRandomPath))
-		return false;
+	ReportedResult result;
+	if(!(result = makeValidRandomPath(mRandomPath)).success)
+		return result;
 
 	SString randomPath = mRandomPath;
 	close();
@@ -52,25 +55,26 @@ bool SafeOutFile::openForWriting()
 
 	mFile = fopen(mRandomPath.c_str(), "wb");
 	if(!mFile)
-		return false;
+		return { false, GetErrorMessage(errno) };
 
-	return true;
+	return { true };
 }
 
 //
 // Commit the writing to the final file.
 //
-bool SafeOutFile::commit()
+ReportedResult SafeOutFile::commit()
 {
+	ReportedResult result;
 	if(!mFile)
-		return false;
+		return { false, "couldn't create the file." };
 	// First, to be ultra-safe, make another temp path
 	SString safeRandomPath;
 	int i = 0;
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
-		if(!makeValidRandomPath(safeRandomPath))
-			return false;
+		if(!(result = makeValidRandomPath(safeRandomPath)).success)
+			return result;
 		if(!safeRandomPath.noCaseEqual(mRandomPath))
 		{
 			// also make sure it doesn't collide with ours
@@ -78,31 +82,32 @@ bool SafeOutFile::commit()
 		}
 	}
 	if(i == RANDOM_PATH_ATTEMPTS)
-		return false;
+		return { false, "failed on several attempts." };
 
 	// Now we need to close our work. Store the paths of interest in a variable
 	SString finalPath = mPath;
-	SString writtenPath = mRandomPath;
-	if(mFile)
-	{
-		fclose(mFile);
-		mFile = nullptr;	// we can close it now
-	}
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
 	bool overwriteOldFile = true;
 	if(rename(finalPath.c_str(), safeRandomPath.c_str()))
 	{
 		if(errno != ENOENT)
-			return false;
+			return { false, GetErrorMessage(errno) };
 		overwriteOldFile = false;
 	}
+
+	SString writtenPath = mRandomPath;
+	if(mFile)
+	{
+		fclose(mFile);
+		mFile = nullptr;	// we can close it now
+	}
 	if(rename(writtenPath.c_str(), finalPath.c_str()))
-		return false;
+		return { false, GetErrorMessage(errno) };
 	if(overwriteOldFile && remove(safeRandomPath.c_str()))
-		return false;
+		return { false, GetErrorMessage(errno) };
 	close();
-	return true;
+	return { true };
 }
 
 //
@@ -123,11 +128,11 @@ void SafeOutFile::close()
 //
 // Writes data to file
 //
-bool SafeOutFile::write(const void *data, size_t size) const
+ReportedResult SafeOutFile::write(const void *data, size_t size) const
 {
 	if(!mFile)
-		return false;
-	return fwrite(data, 1, size, mFile) == size;
+		return { false, "file wasn't created." };
+	return { fwrite(data, 1, size, mFile) == size, "failed writing the entire data." };
 }
 
 //
@@ -144,7 +149,7 @@ SString SafeOutFile::generateRandomPath() const
 //
 // Try to make a random path for writing
 //
-bool SafeOutFile::makeValidRandomPath(SString &path) const
+ReportedResult SafeOutFile::makeValidRandomPath(SString &path) const
 {
 	SString randomPath;
 	int i = 0;
@@ -157,7 +162,7 @@ bool SafeOutFile::makeValidRandomPath(SString &path) const
 		fclose(checkExisting);
 	}
 	if(i == RANDOM_PATH_ATTEMPTS)
-		return false;
+		return { false, "failed writing after several attempts." };
 	path = std::move(randomPath);
-	return true;
+	return { true };
 }

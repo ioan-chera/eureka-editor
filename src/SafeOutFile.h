@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <random>
 
+struct ReportedResult;
+
 //
 // Exception-safe, atomic file writer. It starts by writing everything to an
 // authorized temp path, only replacing the target path by committing to it.
@@ -39,15 +41,15 @@ public:
 		close();
 	}
 
-	bool openForWriting();
-	bool commit();
+	ReportedResult openForWriting();
+	ReportedResult commit();
 	void close();
 
-	bool write(const void *data, size_t size) const;
+	ReportedResult write(const void *data, size_t size) const;
 
 private:
 	SString generateRandomPath() const;
-	bool makeValidRandomPath(SString &path) const;
+	ReportedResult makeValidRandomPath(SString &path) const;
 
 	const SString mPath;	// the target path
 	// the random temporary path. Only valid if mFile non-null

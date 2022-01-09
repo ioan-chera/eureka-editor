@@ -925,25 +925,14 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 }
 
 //
-// Wad writing exception
-//
-class WadWriteException : public std::runtime_error
-{
-public:
-	WadWriteException(const SString &msg) : std::runtime_error(msg.c_str())
-	{
-	}
-};
-
-//
 // Writes to the given path
 //
 void Wad_file::writeToPath(const SString &path) const noexcept(false)
 {
-	auto check = [](bool action)
+	auto check = [&path](const ReportedResult &result)
 	{
-		if(!action)
-			throw WadWriteException("Failed writing WAD to file");
+		if(!result.success)
+			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.c_str(), result.message.c_str()));
 	};
 
 	SafeOutFile sof(path);

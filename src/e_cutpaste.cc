@@ -961,6 +961,9 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
+		if(result.empty())	// stop looking if there's nothing else to remove
+			return;
+
 		const LineDef *linedef = doc.linedefs[n];
 
 		if (lines.get(n) || verts.get(linedef->start) || verts.get(linedef->end))

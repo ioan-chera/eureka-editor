@@ -39,6 +39,15 @@ public:
 };
 
 //
+// Result with message in case of failure
+//
+struct ReportedResult
+{
+	bool success;
+	SString message;
+};
+
+//
 // Raises an exception with the given format
 //
 template<typename T>

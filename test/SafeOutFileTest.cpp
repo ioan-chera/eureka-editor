@@ -16,6 +16,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "Errors.h"
 #include "SafeOutFile.h"
 #include "testUtils/TempDirContext.hpp"
 #include "gtest/gtest.h"
@@ -47,32 +48,32 @@ TEST_F(SafeOutFileTest, Stuff)
 
 	{
 		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting());	// opening should work
-		ASSERT_TRUE(sof.write("Hello, world!", 13));	// and this
-		ASSERT_TRUE(sof.write(" more.", 6));	// and this
+		ASSERT_TRUE(sof.openForWriting().success);	// opening should work
+		ASSERT_TRUE(sof.write("Hello, world!", 13).success);	// and this
+		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
 		// forget about commiting.
 		// Tearing down should not be blocked by child folder
 		sof.close();
 
-		ASSERT_TRUE(sof.openForWriting());	// reopen it
-		ASSERT_TRUE(sof.write("Hello, world!", 13));	// and this
-		ASSERT_TRUE(sof.write(" more.", 6));	// and this
+		ASSERT_TRUE(sof.openForWriting().success);	// reopen it
+		ASSERT_TRUE(sof.write("Hello, world!", 13).success);	// and this
+		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
 		// Check the destructor too
 	}
 
 	{
 		// Check that writing to an unopen file will fail
 		SafeOutFile sof(path);
-		ASSERT_FALSE(sof.write("Hello, world2!", 14));	// and this
-		ASSERT_FALSE(sof.commit());
+		ASSERT_FALSE(sof.write("Hello, world2!", 14).success);	// and this
+		ASSERT_FALSE(sof.commit().success);
 	}
 	{
 		// Now it will work
 		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting());
-		ASSERT_TRUE(sof.write("Hello, world2!", 14));	// and this
-		ASSERT_TRUE(sof.write(" more.", 6));	// and this
-		ASSERT_TRUE(sof.commit());
+		ASSERT_TRUE(sof.openForWriting().success);
+		ASSERT_TRUE(sof.write("Hello, world2!", 14).success);	// and this
+		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
+		ASSERT_TRUE(sof.commit().success);
 	}
 	mDeleteList.push(path);	// the delete list
 
@@ -82,8 +83,8 @@ TEST_F(SafeOutFileTest, Stuff)
 	{
 		// Check that forgetting to commit won't overwrite the original
 		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting());
-		ASSERT_TRUE(sof.write("New stuff!", 10));
+		ASSERT_TRUE(sof.openForWriting().success);
+		ASSERT_TRUE(sof.write("New stuff!", 10).success);
 		sof.close();	// no commit
 	}
 
@@ -92,9 +93,9 @@ TEST_F(SafeOutFileTest, Stuff)
 	{
 		// Check that we can overwrite an old file
 		SafeOutFile sof(path);
-		ASSERT_TRUE(sof.openForWriting());
-		ASSERT_TRUE(sof.write("New stuff!", 10));
-		ASSERT_TRUE(sof.commit());
+		ASSERT_TRUE(sof.openForWriting().success);
+		ASSERT_TRUE(sof.write("New stuff!", 10).success);
+		ASSERT_TRUE(sof.commit().success);
 		sof.close();	// no commit
 	}
 

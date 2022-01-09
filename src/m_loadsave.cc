@@ -1754,7 +1754,14 @@ bool Instance::M_ExportMap()
 
 void Instance::CMD_SaveMap()
 {
-	M_SaveMap();
+	try
+	{
+		M_SaveMap();
+	}
+	catch(const WadWriteException &e)
+	{
+		DLG_ShowError(false, "%s", e.what());
+	}
 }
 
 
