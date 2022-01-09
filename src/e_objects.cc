@@ -731,6 +731,45 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 	return false;
 }
 
+//
+// Move a single vertex, without depending on the user interface highlighting
+//
+static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, const v2double_t &delta)
+{
+	const Vertex &vertex = *inst.level.vertices[vertexID];
+
+	v2double_t dest = vertex.xy() + delta;
+
+	Objid obj = inst.level.hover.getNearbyObject(ObjType::vertices, dest);
+	if(obj.valid() && obj.num != vertexID)
+	{
+		// Vertex merging
+		// TODO: messaging
+		selection_c verts(ObjType::vertices);
+		verts.set(obj.num);
+		verts.set(vertexID);
+		inst.level.vertmod.mergeList(op, verts);
+		return;
+	}
+
+	v2double_t splitPoint;
+	int splitLine = -1;
+	obj = inst.level.hover.findSplitLine(splitPoint, dest, vertexID);
+	if(obj.valid())
+	{
+		splitLine = obj.num;
+		if(inst.level.objects.findLineBetweenLineAndVertex(splitLine, vertexID) >= 0)
+		{
+			// TODO: messaging
+			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta);
+			return;
+		}
+		inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
+	}
+
+	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + inst.MakeValidCoord(delta.x));
+	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + inst.MakeValidCoord(delta.y));
+}
 
 void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, const v3double_t &delta) const
 {
@@ -753,12 +792,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 
 		case ObjType::vertices:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
-			{
-				const Vertex * V = doc.vertices[*it];
-
-				op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-				op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
-			}
+				doMoveVertex(op, inst, *it, delta.xy);
 			break;
 
 		case ObjType::sectors:
