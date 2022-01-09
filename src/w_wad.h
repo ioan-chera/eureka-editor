@@ -58,6 +58,17 @@ enum class WadKind
 	IWAD
 };
 
+//
+// Wad writing exception
+//
+class WadWriteException : public std::runtime_error
+{
+public:
+	WadWriteException(const SString &msg) : std::runtime_error(msg.c_str())
+	{
+	}
+};
+
 const char *WadNamespaceString(WadNamespace ns);
 
 class Lump_c

@@ -925,17 +925,6 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 }
 
 //
-// Wad writing exception
-//
-class WadWriteException : public std::runtime_error
-{
-public:
-	WadWriteException(const SString &msg) : std::runtime_error(msg.c_str())
-	{
-	}
-};
-
-//
 // Writes to the given path
 //
 void Wad_file::writeToPath(const SString &path) const noexcept(false)
