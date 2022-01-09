@@ -82,12 +82,6 @@ bool SafeOutFile::commit()
 
 	// Now we need to close our work. Store the paths of interest in a variable
 	SString finalPath = mPath;
-	SString writtenPath = mRandomPath;
-	if(mFile)
-	{
-		fclose(mFile);
-		mFile = nullptr;	// we can close it now
-	}
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
 	bool overwriteOldFile = true;
@@ -96,6 +90,13 @@ bool SafeOutFile::commit()
 		if(errno != ENOENT)
 			return false;
 		overwriteOldFile = false;
+	}
+
+	SString writtenPath = mRandomPath;
+	if(mFile)
+	{
+		fclose(mFile);
+		mFile = nullptr;	// we can close it now
 	}
 	if(rename(writtenPath.c_str(), finalPath.c_str()))
 		return false;
