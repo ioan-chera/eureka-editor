@@ -868,7 +868,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 //
 // Move a single vertex, splitting as necessary
 //
-static void singleDragVertex(Instance &inst, const int vertexID, const v3double_t &delta)
+static void singleDragVertex(Instance &inst, const int vertexID, const v2double_t &delta)
 {
 	EditOperation op(inst.level.basis);
 
@@ -900,7 +900,7 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v3double_
 		{
 			// Alright, we got it
 			op.setMessage("split linedef #%d", did_split_line);
-			inst.level.objects.splitLinedefAndMergeSandwich(op, did_split_line, vertexID, delta.xy);
+			inst.level.objects.splitLinedefAndMergeSandwich(op, did_split_line, vertexID, delta);
 			return;
 		}
 
@@ -935,7 +935,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 	}
 
 	/* move a single vertex */
-	singleDragVertex(inst, obj.num, delta);
+	singleDragVertex(inst, obj.num, delta.xy);
 }
 
 
