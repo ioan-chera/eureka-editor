@@ -185,6 +185,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 	// check if two linedefs would overlap after the merge
 	// [ but ignore lines already marked for deletion ]
 
+	int sandwichesMerged = 0;
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
 		const LineDef *L = doc.linedefs[n];
@@ -217,7 +218,8 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 		if (found >= 0 && ! del_lines.get(found))
 		{
 			mergeSandwichLines(op, n, found, v3, del_lines);
-			break;
+			if(++sandwichesMerged == 2)	// can't have more than two, on each side
+				break;
 		}
 	}
 
