@@ -29,6 +29,7 @@
 
 #include "m_bitvec.h"
 #include "objid.h"
+#include <vector>
 
 class sel_iter_c;
 
@@ -114,6 +115,8 @@ public:
 	// these return -1 if there is no first or second
 	int find_first()  const;
 	int find_second() const;
+
+	std::vector<int> asArray() const;
 
 private:
 	void ConvertToBitvec();

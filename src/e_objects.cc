@@ -784,8 +784,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 	fixcoord_t fdy = inst.MakeValidCoord(delta.y);
 	fixcoord_t fdz = inst.MakeValidCoord(delta.z);
 
-	int decrementCount = 0;	// if stuff within our set gets deleted, we need to decrement the index
 
+	std::vector<int> sel;
 	switch (list.what_type())
 	{
 		case ObjType::things:
@@ -800,12 +800,17 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			break;
 
 		case ObjType::vertices:
-			for(sel_iter_c it(list); !it.done(); it.next())
+			// We need the selection list as an array so we can easily modify it during iteration
+			sel = list.asArray();
+			
+			for(auto it = sel.begin(); it != sel.end(); ++it)
 			{
 				int deletedVertex = -1;
-				doMoveVertex(op, inst, *it - decrementCount, delta.xy, deletedVertex);
-				if(deletedVertex >= 0 && deletedVertex <= *it)
-					++decrementCount;
+				doMoveVertex(op, inst, *it, delta.xy, deletedVertex);
+				if(deletedVertex >= 0 && deletedVertex < list.max_obj())
+					for(auto jt = it + 1; jt != sel.end(); ++jt)
+						if(*jt > deletedVertex)
+							-- *jt;
 			}
 			break;
 
@@ -844,6 +849,10 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 	EditOperation op(doc.basis);
 	op.setMessageForSelection("moved", list);
 
+	int objectsBeforeMoving;
+	if(inst.edit.Selected)
+		objectsBeforeMoving = doc.numObjects(inst.edit.Selected->what_type());
+
 	// move things in sectors too (must do it _before_ moving the
 	// sectors, otherwise we fail trying to determine which sectors
 	// each thing is in).
@@ -856,6 +865,10 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 	}
 
 	doMoveObjects(op, list, delta);
+
+	// We must invalidate the selection if the moving resulted in invalidation
+	if(inst.edit.Selected && doc.numObjects(inst.edit.Selected->what_type()) < objectsBeforeMoving)
+		inst.Selection_Clear(true);	// no save
 }
 
 //

@@ -449,6 +449,19 @@ int selection_c::find_second() const
 	return it.done() ? -1 : *it;
 }
 
+//
+// Converts selection to array list.
+//
+std::vector<int> selection_c::asArray() const
+{
+	std::vector<int> result;
+	result.reserve(count_obj());
+	for(sel_iter_c it(this); !it.done(); it.next())
+	{
+		result.push_back(*it);
+	}
+	return result;
+}
 
 //------------------------------------------------------------------------
 //  ITERATOR STUFF
