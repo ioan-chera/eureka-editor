@@ -917,16 +917,18 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 		// now move the vertex!
 	}
 
-	selection_c list(inst.edit.mode);
-
-	list.set(obj.num);
-
-	doMoveObjects(op, list, delta);
+	const Vertex &vertex = *doc.vertices[obj.num];
+	op.changeVertex(obj.num, Thing::F_X, vertex.raw_x + inst.MakeValidCoord(delta.x));
+	op.changeVertex(obj.num, Thing::F_Y, vertex.raw_y + inst.MakeValidCoord(delta.y));
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
 	else
+	{
+		selection_c list(inst.edit.mode);
+		list.set(obj.num);
 		op.setMessageForSelection("moved", list);
+	}
 }
 
 
