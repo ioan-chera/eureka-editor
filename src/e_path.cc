@@ -455,7 +455,10 @@ void Instance::CMD_JumpToObject()
 
 	// this is guaranteed by the dialog
     for(int num : nums)
+	{
+		(void)num;
         assert(num >= 0 && num < total);
+	}
     goToMultipleObjects(*this, nums);
 }
 
