@@ -646,7 +646,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 	int arg_idx = ocb->mask;
 	int new_value = atoi(box->args[arg_idx]->value());
 
-	new_value = CLAMP(0, new_value, 255);
+	new_value = clamp(0, new_value, 255);
 
 	if (!box->inst.edit.Selected->empty())
 	{

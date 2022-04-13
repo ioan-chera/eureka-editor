@@ -715,7 +715,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 	// when zooming out, make it easier to hit a vertex
 	double close_dist = 4 * sqrt(1.0 / inst.grid.Scale);
 
-	close_dist = CLAMP(1.0, close_dist, 12.0);
+	close_dist = clamp(1.0, close_dist, 12.0);
 
 
 	double dx = p2.x - p1.x;

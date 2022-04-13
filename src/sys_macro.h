@@ -42,10 +42,11 @@ inline static int iround(float x)
 	return static_cast<int>(roundf(x));
 }
 
-#ifndef CLAMP
-#define CLAMP(low,x,high)  \
-    ((x) < (low) ? (low) : (x) > (high) ? (high) : (x))
-#endif
+template<typename T>
+inline static T clamp(const T &low, const T &x, const T &high)
+{
+	return x < low ? low : x > high ? high : x;
+}
 
 //
 // The packed attribute forces structures to be packed into the minimum

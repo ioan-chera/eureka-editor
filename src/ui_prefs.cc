@@ -1452,8 +1452,8 @@ void UI_Preferences::LoadValues()
 	/* Edit Tab */
 
 	edit_def_port->value(config::default_port.c_str());
-	edit_def_mode->value(CLAMP(0, config::default_edit_mode, 3));
-	edit_lineinfo->value(CLAMP(0, config::highlight_line_info, 5));
+	edit_def_mode->value(clamp(0, config::default_edit_mode, 3));
+	edit_lineinfo->value(clamp(0, config::highlight_line_info, 5));
 
 	edit_sectorsize->value(SString(config::new_sector_size).c_str());
 	edit_samemode->value(config::same_mode_clears_selection ? 1 : 0);
@@ -1500,7 +1500,7 @@ void UI_Preferences::LoadValues()
 
 	/* 3D Tab */
 
-	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
+	config::render_pixel_aspect = clamp(25, config::render_pixel_aspect, 400);
 
 	char aspect_buf[64];
 	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", config::render_pixel_aspect / 100.0);
@@ -1604,7 +1604,7 @@ void UI_Preferences::SaveValues()
 	config::highlight_line_info = edit_lineinfo->value();
 
 	config::new_sector_size = atoi(edit_sectorsize->value());
-	config::new_sector_size = CLAMP(4, config::new_sector_size, 8192);
+	config::new_sector_size = clamp(4, config::new_sector_size, 8192);
 
 	config::same_mode_clears_selection = edit_samemode->value() ? true : false;
 	config::sidedef_add_del_buttons = !!edit_add_del->value();
@@ -1680,7 +1680,7 @@ void UI_Preferences::SaveValues()
 	/* Other Tab */
 
 	config::render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
-	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
+	config::render_pixel_aspect = clamp(25, config::render_pixel_aspect, 400);
 
 	config::render_high_detail  = rend_high_detail->value() ? true : false;
 	config::render_lock_gravity = rend_lock_grav->value() ? true : false;

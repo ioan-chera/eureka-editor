@@ -109,7 +109,7 @@ void Instance::CMD_SEC_Floor()
 		{
 			const Sector *S = level.sectors[*it];
 
-			int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
+			int new_h = clamp(-32767, S->floorh + diff, S->ceilh);
 
 			op.changeSector(*it, Sector::F_FLOORH, new_h);
 		}
@@ -147,7 +147,7 @@ void Instance::CMD_SEC_Ceil()
 		{
 			const Sector *S = level.sectors[*it];
 
-			int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
+			int new_h = clamp(S->floorh, S->ceilh + diff, 32767);
 
 			op.changeSector(*it, Sector::F_CEILH, new_h);
 		}
@@ -177,7 +177,7 @@ static int light_add_delta(int level, int delta)
 		level = (level - 1) & ~(abs(delta)-1);
 	}
 
-	return CLAMP(0, level, 255);
+	return clamp(0, level, 255);
 }
 
 

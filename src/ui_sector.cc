@@ -254,8 +254,8 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 	int f_h = atoi(box->floor_h->value());
 	int c_h = atoi(box->ceil_h->value());
 
-	f_h = CLAMP(-32767, f_h, 32767);
-	c_h = CLAMP(-32767, c_h, 32767);
+	f_h = clamp(-32767, f_h, 32767);
+	c_h = clamp(-32767, c_h, 32767);
 
 	if (! box->inst.edit.Selected->empty())
 	{
@@ -309,7 +309,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 			{
 				int new_h = box->inst.level.sectors[*it]->floorh + room;
 
-				new_h = CLAMP(-32767, new_h, 32767);
+				new_h = clamp(-32767, new_h, 32767);
 
 				op.changeSector(*it, Sector::F_CEILH, new_h);
 			}
@@ -583,7 +583,7 @@ void UI_SectorBox::tag_callback(Fl_Widget *w, void *data)
 
 	int new_tag = atoi(box->tag->value());
 
-	new_tag = CLAMP(-32767, new_tag, 32767);
+	new_tag = clamp(-32767, new_tag, 32767);
 
 	if (!box->inst.edit.Selected->empty())
 		box->inst.level.checks.tagsApplyNewValue(new_tag);

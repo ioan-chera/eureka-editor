@@ -416,7 +416,7 @@ static void AdjustOfs_CalcDistFactor(const Instance &inst, float& dx_factor, flo
 
 	float dist = hypot(dx, dy);
 
-	dist = CLAMP(20, dist, 1000);
+	dist = clamp(20.f, dist, 1000.f);
 
 	dx_factor = dist / inst.r_view.aspect_sw;
 	dy_factor = dist / inst.r_view.aspect_sh;
@@ -784,7 +784,7 @@ static void DragSectors_Update(Instance &inst)
 	float ow = static_cast<float>(inst.main_win->canvas->w());
 	float x_slope = 100.0f / config::render_pixel_aspect;
 
-	float factor = static_cast<float>(CLAMP(20, inst.edit.drag_point_dist, 1000) / (ow * x_slope * 0.5));
+	float factor = static_cast<float>(clamp(20.f, inst.edit.drag_point_dist, 1000.f) / (ow * x_slope * 0.5));
 	float map_dz = -inst.edit.drag_screen_dy * factor;
 
 	float step = 8.0;  // TODO config item
@@ -837,7 +837,7 @@ static void DragThings_Update(Instance &inst)
 	float x_slope = 100.0f / config::render_pixel_aspect;
 //	float y_slope = (float)oh / (float)ow;
 
-	float dist = CLAMP(20, inst.edit.drag_point_dist, 1000);
+	float dist = clamp(20.f, inst.edit.drag_point_dist, 1000.f);
 
 	float x_factor = dist / (ow * 0.5f);
 	float y_factor = dist / (ow * x_slope * 0.5f);
@@ -1075,7 +1075,7 @@ void Instance::Render3D_Navigate()
 		float dang = (edit.nav_turn_L - edit.nav_turn_R);
 
 		dang = dang * mod_factor * delay_ms;
-		dang = CLAMP(-90, dang, 90);
+		dang = clamp(-90.f, dang, 90.f);
 
 		r_view.SetAngle(static_cast<float>(r_view.angle + dang));
 	}

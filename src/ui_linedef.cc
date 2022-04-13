@@ -662,7 +662,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	int arg_idx = l_f_c->mask;
 	int new_value = atoi(box->args[arg_idx]->value());
 
-	new_value = CLAMP(0, new_value, 255);
+	new_value = clamp(0, new_value, 255);
 
 	if (! box->inst.edit.Selected->empty())
 	{
@@ -685,7 +685,7 @@ void UI_LineBox::length_callback(Fl_Widget *w, void *data)
 	int new_len = atoi(box->length->value());
 
 	// negative values are allowed, it moves the start vertex
-	new_len = CLAMP(-32768, new_len, 32768);
+	new_len = clamp(-32768, new_len, 32768);
 
 	box->inst.level.linemod.setLinedefsLength(new_len);
 }

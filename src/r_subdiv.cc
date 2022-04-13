@@ -596,7 +596,7 @@ void sector_info_cache_c::PlaneTiltByThing(const Thing *T, int plane)
 	// get slope angle.
 	// when arg1 < 90, a point on plane in front of thing has lower Z.
 	int slope_ang = T->arg1 - 90;
-	slope_ang = CLAMP(-89, slope_ang, 89);
+	slope_ang = clamp(-89, slope_ang, 89);
 
 	double az = sin(slope_ang * M_PI / 180.0);
 

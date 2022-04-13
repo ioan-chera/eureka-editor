@@ -1076,8 +1076,8 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 			int ix = W * (rx - bx1) / (bx2 - bx1);
 			int iy = H * (ry - by1) / (by2 - by1);
 
-			ix = CLAMP(0, ix, W - 1);
-			iy = CLAMP(0, iy, H - 1);
+			ix = clamp(0, ix, W - 1);
+			iy = clamp(0, iy, H - 1);
 
 			img_pixel_t pix = img->buf()[iy * W + ix];
 
@@ -1155,12 +1155,12 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, Side side, in
 	int sy = (y1 + y2) / 2;
 
 	// normally draw line numbers on back of line
-	int want_len = static_cast<int>(-16 * CLAMP(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
 
 	// for sectors, draw closer and on sector side
 	if (side != Side::neither)
 	{
-		want_len = static_cast<int>(2 + 12 * CLAMP(0.25, inst.grid.Scale, 1.0));
+		want_len = static_cast<int>(2 + 12 * clamp(0.25, inst.grid.Scale, 1.0));
 
 		if (side == Side::left)
 			want_len = -want_len;
@@ -1217,7 +1217,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	}
 
 	// back of line is best place, no knob getting in the way
-	int want_len = static_cast<int>(-16 * CLAMP(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
 
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
@@ -1936,7 +1936,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	int my = (y1 + y2) / 2;
 
 	int klen = std::max(abs(x2 - x1), abs(y2 - y1));
-	int want_len = CLAMP(12, klen / 4, 40);
+	int want_len = clamp(12, klen / 4, 40);
 
 	int kx = NORMALX(want_len, x2 - x1, y2 - y1);
 	int ky = NORMALY(want_len, x2 - x1, y2 - y1);
@@ -1949,7 +1949,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	if (r2 < 1.0)
 		r2 = 1.0;
 
-	double len = CLAMP(6.0, r2 / 10.0, 24.0);
+	double len = clamp(6.0, r2 / 10.0, 24.0);
 
 	int dx = (int) (len * (x1 - x2) / r2);
 	int dy = (int) (len * (y1 - y2) / r2);

@@ -287,7 +287,7 @@ void Instance::GB_PrintMsg(EUR_FORMAT_STRING(const char *str), ...) const
 
 static void PrepareInfo(nodebuildinfo_t *info)
 {
-	info->factor	= CLAMP(1, config::bsp_split_factor, 31);
+	info->factor	= clamp(1, config::bsp_split_factor, 31);
 
 	info->gl_nodes	= config::bsp_gl_nodes;
 	info->fast		= config::bsp_fast;

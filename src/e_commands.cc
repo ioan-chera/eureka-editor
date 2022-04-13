@@ -185,7 +185,7 @@ void Instance::CMD_Redo()
 
 static void SetGamma(Instance &inst, int new_val)
 {
-	config::usegamma = CLAMP(0, new_val, 4);
+	config::usegamma = clamp(0, new_val, 4);
 
 	inst.wad.palette.updateGamma();
 
@@ -258,13 +258,13 @@ void Instance::CMD_SetVar()
 	}
 	else if (var_name.noCaseEqual("ratio"))
 	{
-		grid.ratio = CLAMP(0, int_val, 7);
+		grid.ratio = clamp(0, int_val, 7);
 		main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
-		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
+		int_val = clamp(0, int_val, (int)SREND_SoundProp);
 		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
 
 		if (edit.render3d)

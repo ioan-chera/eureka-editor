@@ -407,7 +407,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 	int new_sec = atoi(box->sec->value());
 
-	new_sec = CLAMP(0, new_sec, box->inst.level.numSectors() -1);
+	new_sec = clamp(0, new_sec, box->inst.level.numSectors() -1);
 
 	// iterate over selected linedefs
 	if (!box->inst.edit.Selected->empty())

@@ -484,8 +484,8 @@ void UI_StatusBar::draw()
 		float mx = static_cast<float>(inst.grid.SnapX(inst.edit.map.x));
 		float my = static_cast<float>(inst.grid.SnapY(inst.edit.map.y));
 
-		mx = CLAMP(-32767, mx, 32767);
-		my = CLAMP(-32767, my, 32767);
+		mx = clamp(-32767.f, mx, 32767.f);
+		my = clamp(-32767.f, my, 32767.f);
 
 		IB_Coord(cx, cy, "x", mx);
 		IB_Coord(cx, cy, "y", my);
