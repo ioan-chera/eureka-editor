@@ -75,7 +75,7 @@ fixcoord_t Instance::MakeValidCoord(double x) const
 		return TO_COORD(x);
 
 	// in standard format, coordinates must be integral
-	return TO_COORD(I_ROUND(x));
+	return TO_COORD(round(x));
 }
 
 //

@@ -22,6 +22,8 @@
 #ifndef __SYS_MACRO_H__
 #define __SYS_MACRO_H__
 
+#include <math.h>
+
 // basic macros
 
 #ifndef M_PI
@@ -40,9 +42,17 @@
 #define SGN(a)  ((a) < 0 ? -1 : (a) > 0 ? +1 : 0)
 #endif
 
-#ifndef I_ROUND
-#define I_ROUND(x)  ((int)round(x))
-#endif
+//
+// Concise round() cast to int
+//
+inline static int iround(double x)
+{
+	return static_cast<int>(round(x));
+}
+inline static int iround(float x)
+{
+	return static_cast<int>(roundf(x));
+}
 
 #ifndef CLAMP
 #define CLAMP(low,x,high)  \

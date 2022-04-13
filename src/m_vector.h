@@ -129,7 +129,7 @@ inline v2double_t::v2double_t(v2int_t v2) : x(v2.x), y(v2.y)
 
 inline v2int_t v2double_t::iround() const
 {
-	return { I_ROUND(x), I_ROUND(y) };
+	return { ::iround(x), ::iround(y) };
 }
 
 struct v3double_t

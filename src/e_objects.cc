@@ -1768,7 +1768,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
-		int ang_diff = static_cast<int>(I_ROUND(rot1) * 45.0);
+		int ang_diff = static_cast<int>(roundf(rot1) * 45.0);
 
 		if (ang_diff)
 		{
@@ -1927,8 +1927,8 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 	{
 		const Sector * S = doc.sectors[*it];
 
-		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
-		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
+		int new_f = mid_z + iround((S->floorh - mid_z) * scale_z);
+		int new_c = mid_z + iround((S-> ceilh - mid_z) * scale_z);
 
 		op.changeSector(*it, Sector::F_FLOORH, new_f);
 		op.changeSector(*it, Sector::F_CEILH,  new_c);
@@ -1982,13 +1982,13 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	{
 		case ObjType::things:
 			for (const Thing *thing : doc.things)
-				if (I_ROUND(thing->x()) == x && I_ROUND(thing->y()) == y)
+				if (iround(thing->x()) == x && iround(thing->y()) == y)
 					return true;
 			return false;
 
 		case ObjType::vertices:
 			for (const Vertex *vertex : doc.vertices)
-				if (I_ROUND(vertex->x()) == x && I_ROUND(vertex->y()) == y)
+				if (iround(vertex->x()) == x && iround(vertex->y()) == y)
 					return true;
 			return false;
 

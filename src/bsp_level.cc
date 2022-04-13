@@ -888,8 +888,8 @@ static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 	double ly = seg->side ? L->End(doc)->y() : L->Start(doc)->y();
 
 	// use the "true" starting coord (as stored in the wad)
-	double sx = I_ROUND(seg->start->x);
-	double sy = I_ROUND(seg->start->y);
+	double sx = round(seg->start->x);
+	double sy = round(seg->start->y);
 
 	return (int) floor(hypot(sx - lx, sy - ly) + 0.5);
 }
@@ -897,8 +897,8 @@ static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 static inline int VanillaSegAngle(const seg_t *seg)
 {
 	// compute the "true" delta
-	double dx = I_ROUND(seg->end->x) - I_ROUND(seg->start->x);
-	double dy = I_ROUND(seg->end->y) - I_ROUND(seg->start->y);
+	double dx = round(seg->end->x) - round(seg->start->x);
+	double dy = round(seg->end->y) - round(seg->start->y);
 
 	double angle = UtilComputeAngle(dx, dy);
 
@@ -942,8 +942,8 @@ static void PutVertices(const Instance &inst, const char *name, int do_gl)
 			continue;
 		}
 
-		raw.x = LE_S16(I_ROUND(vert->x));
-		raw.y = LE_S16(I_ROUND(vert->y));
+		raw.x = LE_S16(iround(vert->x));
+		raw.y = LE_S16(iround(vert->y));
 
 		lump->Write(&raw, sizeof(raw));
 
@@ -1226,10 +1226,10 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 	node->index = node_cur_index++;
 
 	// Note that x/y/dx/dy are always integral in non-UDMF maps
-	raw.x  = LE_S16(I_ROUND(node->x));
-	raw.y  = LE_S16(I_ROUND(node->y));
-	raw.dx = LE_S16(I_ROUND(node->dx));
-	raw.dy = LE_S16(I_ROUND(node->dy));
+	raw.x  = LE_S16(iround(node->x));
+	raw.y  = LE_S16(iround(node->y));
+	raw.dx = LE_S16(iround(node->dx));
+	raw.dy = LE_S16(iround(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1278,10 +1278,10 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
 	node->index = node_cur_index++;
 
-	raw.x  = LE_S16(I_ROUND(node->x));
-	raw.y  = LE_S16(I_ROUND(node->y));
-	raw.dx = LE_S16(I_ROUND(node->dx));
-	raw.dy = LE_S16(I_ROUND(node->dy));
+	raw.x  = LE_S16(iround(node->x));
+	raw.y  = LE_S16(iround(node->y));
+	raw.dx = LE_S16(iround(node->dx));
+	raw.dy = LE_S16(iround(node->dy));
 
 	raw.b1.minx = LE_S16(node->r.bounds.minx);
 	raw.b1.miny = LE_S16(node->r.bounds.miny);
@@ -1442,8 +1442,8 @@ void PutZVertices()
 		if (! vert->is_new)
 			continue;
 
-		raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
-		raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
+		raw.x = LE_S32(iround(vert->x * 65536.0));
+		raw.y = LE_S32(iround(vert->y * 65536.0));
 
 		ZLibAppendLump(&raw, sizeof(raw));
 
@@ -1585,10 +1585,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 
 	if (do_xgl3)
 	{
-		u32_t x  = LE_S32(I_ROUND(node->x  * 65536.0));
-		u32_t y  = LE_S32(I_ROUND(node->y  * 65536.0));
-		u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
-		u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
+		u32_t x  = LE_S32(iround(node->x  * 65536.0));
+		u32_t y  = LE_S32(iround(node->y  * 65536.0));
+		u32_t dx = LE_S32(iround(node->dx * 65536.0));
+		u32_t dy = LE_S32(iround(node->dy * 65536.0));
 
 		ZLibAppendLump(&x,  4);
 		ZLibAppendLump(&y,  4);
@@ -1597,10 +1597,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 	}
 	else
 	{
-		raw.x  = LE_S16(I_ROUND(node->x));
-		raw.y  = LE_S16(I_ROUND(node->y));
-		raw.dx = LE_S16(I_ROUND(node->dx));
-		raw.dy = LE_S16(I_ROUND(node->dy));
+		raw.x  = LE_S16(iround(node->x));
+		raw.y  = LE_S16(iround(node->y));
+		raw.dx = LE_S16(iround(node->dx));
+		raw.dy = LE_S16(iround(node->dy));
 
 		ZLibAppendLump(&raw.x,  2);
 		ZLibAppendLump(&raw.y,  2);

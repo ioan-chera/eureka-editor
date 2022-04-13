@@ -1896,8 +1896,8 @@ void subsec_t::RoundOff()
 	for (seg=seg_list ; seg ; seg=seg->next)
 	{
 		// is the seg degenerate ?
-		if (I_ROUND(seg->start->x) == I_ROUND(seg->end->x) &&
-			I_ROUND(seg->start->y) == I_ROUND(seg->end->y))
+		if (iround(seg->start->x) == iround(seg->end->x) &&
+			iround(seg->start->y) == iround(seg->end->y))
 		{
 			seg->is_degenerate = true;
 
@@ -1936,10 +1936,10 @@ void subsec_t::RoundOff()
 
 #   if DEBUG_SUBSEC
 		gLog.debugPrintf("Degenerate after:  (%d,%d) -> (%d,%d)\n",
-				I_ROUND(last_real_degen->start->x),
-				I_ROUND(last_real_degen->start->y),
-				I_ROUND(last_real_degen->end->x),
-				I_ROUND(last_real_degen->end->y));
+						 iround(last_real_degen->start->x),
+						 iround(last_real_degen->start->y),
+						 iround(last_real_degen->end->x),
+						 iround(last_real_degen->end->y));
 #   endif
 
 		last_real_degen->is_degenerate = false;

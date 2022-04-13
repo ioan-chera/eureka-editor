@@ -734,8 +734,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	dx /= dlen;
 	dy /= dlen;
 
-	while (I_ROUND(vert->x) == I_ROUND(start->x) &&
-		   I_ROUND(vert->y) == I_ROUND(start->y))
+	while (iround(vert->x) == iround(start->x) &&
+		   iround(vert->y) == iround(start->y))
 	{
 		vert->x += dx;
 		vert->y += dy;

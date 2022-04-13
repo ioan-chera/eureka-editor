@@ -180,7 +180,7 @@ void UI_Canvas::draw()
 
 	// Note: this crud is a workaround for retina displays on MacOS
 	Fl::use_high_res_GL(true);
-	int pix = I_ROUND(inst.main_win->canvas->pixels_per_unit());
+	int pix = iround(inst.main_win->canvas->pixels_per_unit());
 	Fl::use_high_res_GL(false);
 
 	glLoadIdentity();
@@ -224,7 +224,7 @@ int UI_Canvas::NORMALX(int len, double dx, double dy)
 	if (got_len < 0.01)
 		return 0;
 
-	return I_ROUND(res * len / got_len);
+	return iround(res * len / got_len);
 }
 
 int UI_Canvas::NORMALY(int len, double dx, double dy)
@@ -239,7 +239,7 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 	if (got_len < 0.01)
 		return 0;
 
-	return I_ROUND(res * len / got_len);
+	return iround(res * len / got_len);
 }
 
 #ifdef NO_OPENGL
@@ -248,16 +248,16 @@ inline double UI_Canvas::MAPX(int sx) const { return grid.orig_x + (sx - w() / 2
 inline double UI_Canvas::MAPY(int sy) const { return grid.orig_y + (h() / 2 - sy + y()) / grid.Scale; }
 
 // convert map coordinates to screen coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - grid.orig_x) * grid.Scale)); }
+inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((grid.orig_y - my) * grid.Scale)); }
 #else
 // convert GL coordinates to map coordinates
 inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2) / inst.grid.Scale; }
 inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (sy - h() / 2) / inst.grid.Scale; }
 
 // convert map coordinates to GL coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + I_ROUND((mx - inst.grid.orig.x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + I_ROUND((my - inst.grid.orig.y) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + iround((my - inst.grid.orig.y) * inst.grid.Scale)); }
 #endif
 
 void UI_Canvas::PointerPos(bool in_event)
@@ -1908,8 +1908,8 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		double len1 = hypot(map_x1 - inst.edit.split.x, map_y1 - inst.edit.split.y);
 		double len2 = hypot(map_x2 - inst.edit.split.x, map_y2 - inst.edit.split.y);
 
-		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, I_ROUND(len1));
-		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, iround(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, iround(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);

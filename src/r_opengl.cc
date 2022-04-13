@@ -1637,7 +1637,7 @@ public:
 
 		// Note: this crud is a workaround for retina displays on MacOS
 		Fl::use_high_res_GL(true);
-		int pix = I_ROUND(inst.main_win->canvas->pixels_per_unit());
+		int pix = iround(inst.main_win->canvas->pixels_per_unit());
 		Fl::use_high_res_GL(false);
 
 		glViewport(0, 0, ow * pix, oh * pix);

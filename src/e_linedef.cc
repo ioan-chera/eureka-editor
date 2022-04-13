@@ -436,14 +436,14 @@ void LinedefModule::doAlignX(EditOperation &op, const Objid& cur,
 
 	if (on_left)
 	{
-		new_offset += I_ROUND(adj_L->CalcLength(doc));
+		new_offset += iround(adj_L->CalcLength(doc));
 
 		if (new_offset > 0)
 			new_offset &= 1023;
 	}
 	else
 	{
-		new_offset -= I_ROUND(cur_L->CalcLength(doc));
+		new_offset -= iround(cur_L->CalcLength(doc));
 
 		if (new_offset < 0)
 			new_offset = - (-new_offset & 1023);
@@ -532,7 +532,7 @@ void LinedefModule::doClearOfs(EditOperation &op, const Objid& cur, int align_fl
 		// when the /right flag is used, make the texture end at the right side
 		// (whereas zero makes it begin at the left side)
 		if (align_flags & LINALIGN_Right)
-			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(pointer(cur)->CalcLength(doc)));
+			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - iround(pointer(cur)->CalcLength(doc)));
 		else
 			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0);
 	}
@@ -928,13 +928,13 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 	L2->start = new_v;
 	L2->end   = L->end;
 
-	int orig_length = I_ROUND(L->CalcLength(doc));
+	int orig_length = iround(L->CalcLength(doc));
 
 	// update vertex on original line
 	op.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
-	int new_length  = I_ROUND(L->CalcLength(doc));
+	int new_length  = iround(L->CalcLength(doc));
 
 	// update sidedefs
 
@@ -1339,8 +1339,8 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 	double dx = abs(new_len) * cos(angle);
 	double dy = abs(new_len) * sin(angle);
 
-	int idx = I_ROUND(dx);
-	int idy = I_ROUND(dy);
+	int idx = iround(dx);
+	int idy = iround(dy);
 
 	if (idx == 0 && idy == 0)
 	{

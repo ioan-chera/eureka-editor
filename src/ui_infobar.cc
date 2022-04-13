@@ -458,14 +458,14 @@ void UI_StatusBar::draw()
 
 	if (inst.edit.render3d)
 	{
-		IB_Number(cx, cy, "x", I_ROUND(inst.r_view.x), 5);
-		IB_Number(cx, cy, "y", I_ROUND(inst.r_view.y), 5);
-		IB_Number(cx, cy, "z", I_ROUND(inst.r_view.z) - inst.conf.miscInfo.view_height, 4);
+		IB_Number(cx, cy, "x", iround(inst.r_view.x), 5);
+		IB_Number(cx, cy, "y", iround(inst.r_view.y), 5);
+		IB_Number(cx, cy, "z", iround(inst.r_view.z) - inst.conf.miscInfo.view_height, 4);
 
 		// use less space when an action is occurring
 		if (inst.edit.action == ACT_NOTHING)
 		{
-			int ang = I_ROUND(inst.r_view.angle * 180 / M_PI);
+			int ang = iround(inst.r_view.angle * 180 / M_PI);
 			if (ang < 0) ang += 360;
 
 			IB_Number(cx, cy, "ang", ang, 3);
@@ -533,13 +533,13 @@ void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 {
 	if (inst.edit.render3d && inst.edit.mode == ObjType::sectors)
 	{
-		IB_Number(cx, cy, "raise delta", I_ROUND(inst.edit.drag_sector_dz), 4);
+		IB_Number(cx, cy, "raise delta", iround(inst.edit.drag_sector_dz), 4);
 		return;
 	}
 	if (inst.edit.render3d && inst.edit.mode == ObjType::things && inst.edit.drag_thing_up_down)
 	{
 		double dz = inst.edit.drag_cur.z - inst.edit.drag_start.z;
-		IB_Number(cx, cy, "raise delta", I_ROUND(dz), 4);
+		IB_Number(cx, cy, "raise delta", iround(dz), 4);
 		return;
 	}
 
@@ -594,8 +594,8 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 
 void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 {
-	int dx = I_ROUND(inst.edit.adjust_dx);
-	int dy = I_ROUND(inst.edit.adjust_dy);
+	int dx = iround(inst.edit.adjust_dx);
+	int dy = iround(inst.edit.adjust_dy);
 
 	Objid hl = inst.edit.highlight;
 

@@ -64,7 +64,7 @@ inline static double fromCoord(fixcoord_t fx)
 	return fx / 4096.0;
 }
 
-#define    TO_COORD(db)  ((fixcoord_t) I_ROUND((db) * 4096.0))
+#define    TO_COORD(db)  ((fixcoord_t) iround((db) * 4096.0))
 
 #define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
 #define COORD_TO_INT(i)  ((int) ((i) / 4096))

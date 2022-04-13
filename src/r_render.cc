@@ -516,8 +516,8 @@ static void AdjustOfs_Finish(Instance &inst)
 		return;
 	}
 
-	int dx = I_ROUND(inst.edit.adjust_dx);
-	int dy = I_ROUND(inst.edit.adjust_dy);
+	int dx = iround(inst.edit.adjust_dx);
+	int dy = iround(inst.edit.adjust_dy);
 
 	if (dx || dy)
 	{
@@ -573,8 +573,8 @@ static void AdjustOfs_RenderAnte(const Instance &inst)
 {
 	if (inst.edit.action == ACT_ADJUST_OFS && inst.edit.adjust_bucket)
 	{
-		int dx = I_ROUND(inst.edit.adjust_dx);
-		int dy = I_ROUND(inst.edit.adjust_dy);
+		int dx = iround(inst.edit.adjust_dx);
+		int dy = iround(inst.edit.adjust_dy);
 
 		// change it temporarily (just for the render)
 		inst.edit.adjust_bucket->ApplyTemp(SideDef::F_X_OFFSET, dx);
@@ -799,7 +799,7 @@ static void DragSectors_Update(Instance &inst)
 
 void Render3D_DragSectors(Instance &inst)
 {
-	int dz = I_ROUND(inst.edit.drag_sector_dz);
+	int dz = iround(inst.edit.drag_sector_dz);
 	if (dz == 0)
 		return;
 
