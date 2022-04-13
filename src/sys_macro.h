@@ -34,10 +34,6 @@
 #define M_SQRT2  1.41421356237309504880
 #endif
 
-#ifndef ABS
-#define ABS(a)  ((a) < 0 ? -(a) : (a))
-#endif
-
 #ifndef SGN
 #define SGN(a)  ((a) < 0 ? -1 : (a) > 0 ? +1 : 0)
 #endif
