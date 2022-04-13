@@ -1229,7 +1229,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	if (info == LINFO_Length || info >= LINFO_Length_Angle)
 	{
-		double length = hypot(FROM_COORD(idx), FROM_COORD(idy));
+		double length = hypot(fromCoord(idx), fromCoord(idy));
 
 		if (length > 0.1)
 		{
@@ -1246,8 +1246,8 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	if (info == LINFO_Angle || info == LINFO_Length_Angle)
 	{
-		double dx = FROM_COORD(idx);
-		double dy = FROM_COORD(idy);
+		double dx = fromCoord(idx);
+		double dy = fromCoord(idy);
 
 		int degrees = (int)round(atan2(dy, dx) * 180.0 / M_PI);
 		if (degrees < 0)

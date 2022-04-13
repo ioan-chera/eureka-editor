@@ -59,7 +59,11 @@ struct Document;
 // a fixed-point coordinate with 12 bits of fractional part.
 typedef int fixcoord_t;
 
-#define  FROM_COORD(fx)  ((double)(fx) / 4096.0)
+inline static double fromCoord(fixcoord_t fx)
+{
+	return fx / 4096.0;
+}
+
 #define    TO_COORD(db)  ((fixcoord_t) I_ROUND((db) * 4096.0))
 
 #define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
@@ -116,15 +120,15 @@ public:
 public:
 	inline double x() const
 	{
-		return FROM_COORD(raw_x);
+		return fromCoord(raw_x);
 	}
 	inline double y() const
 	{
-		return FROM_COORD(raw_y);
+		return fromCoord(raw_y);
 	}
 	inline double h() const
 	{
-		return FROM_COORD(raw_h);
+		return fromCoord(raw_h);
 	}
 	inline v2double_t xy() const
 	{
@@ -166,11 +170,11 @@ public:
 public:
 	inline double x() const
 	{
-		return FROM_COORD(raw_x);
+		return fromCoord(raw_x);
 	}
 	inline double y() const
 	{
-		return FROM_COORD(raw_y);
+		return fromCoord(raw_y);
 	}
 	inline v2double_t xy() const
 	{
