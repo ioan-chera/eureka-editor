@@ -415,8 +415,8 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 
 		Vertex *vert = new Vertex;
 
-		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
-		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
+		vert->raw_x = intToCoord(LE_S16(raw.x));
+		vert->raw_y = intToCoord(LE_S16(raw.y));
 
 		level.vertices.push_back(vert);
 	}
@@ -497,11 +497,11 @@ static void CreateFallbackVertices(Document &doc)
 	Vertex *v1 = new Vertex;
 	Vertex *v2 = new Vertex;
 
-	v1->raw_x = INT_TO_COORD(-777);
-	v1->raw_y = INT_TO_COORD(-777);
+	v1->raw_x = intToCoord(-777);
+	v1->raw_y = intToCoord(-777);
 
-	v2->raw_x = INT_TO_COORD(555);
-	v2->raw_y = INT_TO_COORD(555);
+	v2->raw_x = intToCoord(555);
+	v2->raw_y = intToCoord(555);
 
 	doc.vertices.push_back(v1);
 	doc.vertices.push_back(v2);
@@ -643,8 +643,8 @@ void Instance::LoadThings(const Wad_file *load_wad)
 
 		Thing *th = new Thing;
 
-		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
-		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
+		th->raw_x = intToCoord(LE_S16(raw.x));
+		th->raw_y = intToCoord(LE_S16(raw.y));
 
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
@@ -678,9 +678,9 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		Thing *th = new Thing;
 
 		th->tid = LE_S16(raw.tid);
-		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
-		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
-		th->raw_h = INT_TO_COORD(LE_S16(raw.height));
+		th->raw_x = intToCoord(LE_S16(raw.x));
+		th->raw_y = intToCoord(LE_S16(raw.y));
+		th->raw_h = intToCoord(LE_S16(raw.height));
 
 		th->angle = LE_U16(raw.angle);
 		th->type = LE_U16(raw.type);

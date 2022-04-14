@@ -75,7 +75,14 @@ inline static fixcoord_t toCoord(double db)
 	return static_cast<fixcoord_t>(iround(db * 4096.0));
 }
 
-#define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
+//
+// Scales an integer to fixed-point coordinates.
+//
+inline static fixcoord_t intToCoord(int i)
+{
+	return static_cast<fixcoord_t>(i * 4096);
+}
+
 #define COORD_TO_INT(i)  ((int) ((i) / 4096))
 
 enum class Side

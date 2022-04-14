@@ -571,7 +571,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
+			op.changeThing(*it, Thing::F_H, intToCoord(new_h));
 	}
 }
 
