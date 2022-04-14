@@ -59,12 +59,16 @@ struct Document;
 // a fixed-point coordinate with 12 bits of fractional part.
 typedef int fixcoord_t;
 
+// The fraction unit
+static constexpr int kFracUnit = 4096;
+static constexpr double kFracUnitD = static_cast<double>(kFracUnit);
+
 //
 // Fixcoord to double
 //
 inline static double fromCoord(fixcoord_t fx)
 {
-	return fx / 4096.0;
+	return fx / kFracUnitD;
 }
 
 //
@@ -72,7 +76,7 @@ inline static double fromCoord(fixcoord_t fx)
 //
 inline static fixcoord_t toCoord(double db)
 {
-	return static_cast<fixcoord_t>(iround(db * 4096.0));
+	return static_cast<fixcoord_t>(iround(db * kFracUnitD));
 }
 
 //
@@ -80,7 +84,7 @@ inline static fixcoord_t toCoord(double db)
 //
 inline static fixcoord_t intToCoord(int i)
 {
-	return static_cast<fixcoord_t>(i * 4096);
+	return static_cast<fixcoord_t>(i * kFracUnit);
 }
 
 //
@@ -88,7 +92,7 @@ inline static fixcoord_t intToCoord(int i)
 //
 inline static int coordToInt(fixcoord_t i)
 {
-	return static_cast<int>(i / 4096);
+	return static_cast<int>(i / kFracUnit);
 }
 
 enum class Side
