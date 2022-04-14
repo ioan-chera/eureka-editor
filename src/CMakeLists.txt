@@ -8,6 +8,7 @@ set(source_base
     DocumentModule.h
     Errors.cc
     Errors.h
+    FixedPoint.h
     hdr_fltk.h
     Instance.cc
     Instance.h

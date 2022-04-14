@@ -28,6 +28,7 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
+#include "FixedPoint.h"
 #include "m_strings.h"
 #include "m_vector.h"
 #include "objid.h"
@@ -54,46 +55,6 @@ struct Document;
 // -1 to mean "no sidedef", but note that a missing right sidedef
 // can cause problems or crashes when playing the map in DOOM.
 //
-
-
-// a fixed-point coordinate with 12 bits of fractional part.
-typedef int fixcoord_t;
-
-// The fraction unit
-static constexpr int kFracUnit = 4096;
-static constexpr double kFracUnitD = static_cast<double>(kFracUnit);
-
-//
-// Fixcoord to double
-//
-inline static double fromCoord(fixcoord_t fx)
-{
-	return fx / kFracUnitD;
-}
-
-//
-// Double to fixcoord
-//
-inline static fixcoord_t toCoord(double db)
-{
-	return static_cast<fixcoord_t>(iround(db * kFracUnitD));
-}
-
-//
-// Scales an integer to fixed-point coordinates.
-//
-inline static fixcoord_t intToCoord(int i)
-{
-	return static_cast<fixcoord_t>(i * kFracUnit);
-}
-
-//
-// Truncates fixed-point coordinates to integer
-//
-inline static int coordToInt(fixcoord_t i)
-{
-	return static_cast<int>(i / kFracUnit);
-}
 
 enum class Side
 {
