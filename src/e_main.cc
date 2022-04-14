@@ -196,7 +196,7 @@ void Instance::UpdateDrawLine()
 	// when drawing mode, highlight a vertex at the snap position
 	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int near_vert = level.vertmod.findExact(TO_COORD(newpos.x), TO_COORD(newpos.y));
+		int near_vert = level.vertmod.findExact(toCoord(newpos.x), toCoord(newpos.y));
 		if (near_vert >= 0)
 		{
 			edit.highlight = Objid(ObjType::vertices, near_vert);

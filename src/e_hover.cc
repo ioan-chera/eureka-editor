@@ -520,7 +520,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 		out_pos = v2double_t(inst.grid.ForceSnap(ptr));
 
 		// snapped onto an end point?
-		if(L->TouchesCoord(TO_COORD(out_pos.x), TO_COORD(out_pos.y), doc))
+		if(L->TouchesCoord(toCoord(out_pos.x), toCoord(out_pos.y), doc))
 			return Objid();
 
 		// require snap coordinate be not TOO FAR from the line
@@ -738,8 +738,8 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		const Vertex *VC = doc.vertices[v];
 
 		// ignore vertices at same coordinates as v1 or v2
-		if(VC->Matches(TO_COORD(p1.x), TO_COORD(p1.y)) ||
-			VC->Matches(TO_COORD(p2.x), TO_COORD(p2.y)))
+		if(VC->Matches(toCoord(p1.x), toCoord(p1.y)) ||
+			VC->Matches(toCoord(p2.x), toCoord(p2.y)))
 			continue;
 
 		// is this vertex sitting on the line?

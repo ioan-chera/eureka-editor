@@ -438,7 +438,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
-			new_vert = doc.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
+			new_vert = doc.vertmod.findExact(toCoord(new_x), toCoord(new_y));
 
 		//
 		// handle a highlighted/snapped vertex.

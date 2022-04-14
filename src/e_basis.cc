@@ -72,10 +72,10 @@ SString BA_GetString(int offset)
 fixcoord_t Instance::MakeValidCoord(double x) const
 {
 	if (loaded.levelFormat == MapFormat::udmf)
-		return TO_COORD(x);
+		return toCoord(x);
 
 	// in standard format, coordinates must be integral
-	return TO_COORD(round(x));
+	return toCoord(round(x));
 }
 
 //

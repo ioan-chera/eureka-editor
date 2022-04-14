@@ -59,12 +59,21 @@ struct Document;
 // a fixed-point coordinate with 12 bits of fractional part.
 typedef int fixcoord_t;
 
+//
+// Fixcoord to double
+//
 inline static double fromCoord(fixcoord_t fx)
 {
 	return fx / 4096.0;
 }
 
-#define    TO_COORD(db)  ((fixcoord_t) iround((db) * 4096.0))
+//
+// Double to fixcoord
+//
+inline static fixcoord_t toCoord(double db)
+{
+	return static_cast<fixcoord_t>(iround(db * 4096.0));
+}
 
 #define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
 #define COORD_TO_INT(i)  ((int) ((i) / 4096))
