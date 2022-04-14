@@ -83,7 +83,13 @@ inline static fixcoord_t intToCoord(int i)
 	return static_cast<fixcoord_t>(i * 4096);
 }
 
-#define COORD_TO_INT(i)  ((int) ((i) / 4096))
+//
+// Truncates fixed-point coordinates to integer
+//
+inline static int coordToInt(fixcoord_t i)
+{
+	return static_cast<int>(i / 4096);
+}
 
 enum class Side
 {

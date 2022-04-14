@@ -1332,8 +1332,8 @@ void Instance::SaveVertices()
 	{
 		raw_vertex_t raw;
 
-		raw.x = LE_S16(COORD_TO_INT(vert->raw_x));
-		raw.y = LE_S16(COORD_TO_INT(vert->raw_y));
+		raw.x = LE_S16(coordToInt(vert->raw_x));
+		raw.y = LE_S16(coordToInt(vert->raw_y));
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1371,8 +1371,8 @@ void Instance::SaveThings()
 	{
 		raw_thing_t raw;
 
-		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
-		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
+		raw.x = LE_S16(coordToInt(th->raw_x));
+		raw.y = LE_S16(coordToInt(th->raw_y));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1394,9 +1394,9 @@ void Instance::SaveThings_Hexen()
 
 		raw.tid = LE_S16(th->tid);
 
-		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
-		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
-		raw.height = LE_S16(COORD_TO_INT(th->raw_h));
+		raw.x = LE_S16(coordToInt(th->raw_x));
+		raw.y = LE_S16(coordToInt(th->raw_y));
+		raw.height = LE_S16(coordToInt(th->raw_h));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
