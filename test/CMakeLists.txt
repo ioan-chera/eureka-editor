@@ -144,6 +144,7 @@ unit_test(w_wad
 
 # Units independent on complex frameworks or libraries
 unit_test(independent
+    FixedPointTest.cpp
     lib_util_test.cpp
     m_bitvec_test.cpp
     m_parse_test.cpp
