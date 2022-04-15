@@ -79,17 +79,6 @@ fixcoord_t Instance::MakeValidCoord(double x) const
 	return toCoord(round(x));
 }
 
-//
-// Set raw x/y/height
-//
-void Vertex::SetRawX(const Instance &inst, double x)
-{
-	raw_x = inst.MakeValidCoord(x);
-}
-void Vertex::SetRawY(const Instance &inst, double y)
-{
-	raw_y = inst.MakeValidCoord(y);
-}
 
 SString Sector::FloorTex() const
 {

@@ -22,6 +22,8 @@ set(source_base
     Thing.cc
     Thing.h
     version.h
+    Vertex.cc
+    Vertex.h
     WadData.cc
     WadData.h
 )
