@@ -38,6 +38,7 @@
 #include "r_grid.h"
 #include "m_game.h"
 #include "e_objects.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 
 #include <algorithm>

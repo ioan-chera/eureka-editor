@@ -19,6 +19,8 @@ set(source_base
     SafeOutFile.cc
     SafeOutFile.h
     Side.h
+    Thing.cc
+    Thing.h
     version.h
     WadData.cc
     WadData.h

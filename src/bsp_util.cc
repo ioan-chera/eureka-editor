@@ -22,6 +22,7 @@
 #include "Instance.h"
 #include "main.h"
 #include "bsp.h"
+#include "Thing.h"
 
 #include "w_rawdef.h"
 

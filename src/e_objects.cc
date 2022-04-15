@@ -41,6 +41,7 @@
 #include "m_vector.h"
 #include "e_objects.h"
 #include "r_grid.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"

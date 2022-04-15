@@ -40,6 +40,7 @@
 #include "e_objects.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
+#include "Thing.h"
 #include "ui_window.h"
 
 

@@ -35,6 +35,7 @@
 #include "m_config.h"
 #include "m_game.h"
 #include "m_bitvec.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "r_render.h"

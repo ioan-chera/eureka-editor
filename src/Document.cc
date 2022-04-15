@@ -18,6 +18,7 @@
 
 #include "Document.h"
 #include "lib_adler.h"
+#include "Thing.h"
 
 //
 // Get number of objects based on enum

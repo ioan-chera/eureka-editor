@@ -35,6 +35,7 @@
 #include "e_main.h"		// Map_bound_xxx
 #include "m_game.h"
 #include "r_grid.h"
+#include "Thing.h"
 
 
 extern int vertex_radius(double scale);

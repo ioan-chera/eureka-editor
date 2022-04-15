@@ -29,6 +29,7 @@
 #include "e_hover.h"
 #include "m_game.h"
 #include "r_subdiv.h"
+#include "Thing.h"
 
 
 /* This file contains code for subdividing map sectors into a set

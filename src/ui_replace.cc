@@ -30,6 +30,7 @@
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "r_render.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 

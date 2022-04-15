@@ -31,6 +31,7 @@
 #include "e_things.h"
 #include "e_main.h"
 #include "m_bitvec.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"

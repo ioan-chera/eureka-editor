@@ -29,6 +29,7 @@
 #include "Errors.h"
 #include "Instance.h"
 #include "main.h"
+#include "Thing.h"
 
 // need these for the XXX_Notify() prototypes
 #include "r_render.h"
@@ -81,18 +82,6 @@ fixcoord_t Instance::MakeValidCoord(double x) const
 //
 // Set raw x/y/height
 //
-void Thing::SetRawX(const Instance &inst, double x)
-{
-	raw_x = inst.MakeValidCoord(x);
-}
-void Thing::SetRawY(const Instance &inst, double y)
-{
-	raw_y = inst.MakeValidCoord(y);
-}
-void Thing::SetRawH(const Instance &inst, double h)
-{
-	raw_h = inst.MakeValidCoord(h);
-}
 void Vertex::SetRawX(const Instance &inst, double x)
 {
 	raw_x = inst.MakeValidCoord(x);

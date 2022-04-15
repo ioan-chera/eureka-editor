@@ -27,6 +27,7 @@
 #include "e_main.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 
 
