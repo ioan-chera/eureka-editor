@@ -29,6 +29,7 @@
 
 #include "DocumentModule.h"
 #include "FixedPoint.h"
+#include "Side.h"
 #include "m_strings.h"
 #include "m_vector.h"
 #include "objid.h"
@@ -56,29 +57,6 @@ struct Document;
 // can cause problems or crashes when playing the map in DOOM.
 //
 
-enum class Side
-{
-	right,
-	left,
-	neither
-};
-static const Side kSides[] = { Side::right, Side::left };
-inline static Side operator - (Side side)
-{
-	if(side == Side::right)
-		return Side::left;
-	if(side == Side::left)
-		return Side::right;
-	return side;
-}
-inline static Side operator * (Side side1, Side side2)
-{
-	if(side1 == Side::neither || side2 == Side::neither)
-		return Side::neither;
-	if(side1 != side2)
-		return Side::left;
-	return Side::right;
-}
 
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 

@@ -18,6 +18,7 @@ set(source_base
     objid.h
     SafeOutFile.cc
     SafeOutFile.h
+    Side.h
     version.h
     WadData.cc
     WadData.h
