@@ -149,6 +149,7 @@ unit_test(independent
     m_parse_test.cpp
     m_streams_test.cpp
     SafeOutFileTest.cpp
+    SideTest.cpp
     SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
