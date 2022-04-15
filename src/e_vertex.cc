@@ -327,7 +327,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 		double dx = doc.vertices[v_num]->x() - doc.vertices[i]->x();
 		double dy = doc.vertices[v_num]->y() - doc.vertices[i]->y();
 
-		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
+		if (fabs(dx) <= max_dist && fabs(dy) <= max_dist &&
 			!doc.linemod.linedefAlreadyExists(v_num, v_other))
 		{
 			v_other = i;
@@ -428,24 +428,24 @@ void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, d
 		dy = -dy;
 	}
 
-	if (abs(dx) < 4 && abs(dy) < 4)
+	if (fabs(dx) < 4 && fabs(dy) < 4)
 	{
 		dx = dx / 2;
 		dy = dy / 2;
 	}
-	else if (abs(dx) < 16 && abs(dy) < 16)
+	else if (fabs(dx) < 16 && fabs(dy) < 16)
 	{
 		dx = dx / 4;
 		dy = dy / 4;
 	}
-	else if (abs(dx) >= abs(dy))
+	else if (fabs(dx) >= fabs(dy))
 	{
-		dy = dy * 8 / abs(dx);
+		dy = dy * 8 / fabs(dx);
 		dx = (dx < 0) ? -8 : 8;
 	}
 	else
 	{
-		dx = dx * 8 / abs(dy);
+		dx = dx * 8 / fabs(dy);
 		dy = (dy < 0) ? -8 : 8;
 	}
 
@@ -761,7 +761,7 @@ void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, doubl
 	// avoid moving perfectly horizontal or vertical
 	// (also handes the case of dx == dy == 0)
 
-	if (abs(*dx) > abs(*dy))
+	if (fabs(*dx) > fabs(*dy))
 	{
 		*dx = (*dx < 0) ? -9 : +9;
 		*dy = (*dy < 0) ? -5 : +5;
@@ -772,8 +772,8 @@ void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, doubl
 		*dy = (*dy < 0) ? -9 : +9;
 	}
 
-	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
-	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
+	if (fabs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
+	if (fabs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
 	double mul = 1.0 / clamp(0.25, inst.grid.Scale, 1.0);
 

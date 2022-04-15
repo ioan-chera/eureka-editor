@@ -89,8 +89,8 @@ static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 	const Thing *T1 = doc.things[th1];
 	const Thing *T2 = doc.things[th2];
 
-	double dx = abs(T1->x() - T2->x());
-	double dy = abs(T1->y() - T2->y());
+	double dx = fabs(T1->x() - T2->x());
+	double dy = fabs(T1->y() - T2->y());
 
 	return (dx < 8 && dy < 8);
 }

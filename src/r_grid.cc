@@ -141,7 +141,7 @@ void Grid_State_c::RatioSnapXY(v2double_t& var, const v2double_t &start) const
 	double dx = var.x - start.x;
 	double dy = var.y - start.y;
 
-	double len = std::max(abs(dx), abs(dy));
+	double len = std::max(fabs(dx), fabs(dy));
 
 	int sign_x = (dx >= 0) ? +1 : -1;
 	int sign_y = (dy >= 0) ? +1 : -1;
