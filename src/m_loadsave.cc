@@ -85,7 +85,7 @@ void Instance::FreshLevel()
 	Sector *sec = new Sector;
 	level.sectors.push_back(sec);
 
-	sec->SetDefaults(*this);
+	sec->SetDefaults(conf);
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
@@ -471,7 +471,7 @@ void Instance::CreateFallbackSector()
 
 	Sector *sec = new Sector;
 
-	sec->SetDefaults(*this);
+	sec->SetDefaults(conf);
 
 	level.sectors.push_back(sec);
 }

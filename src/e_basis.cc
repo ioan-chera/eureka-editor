@@ -90,13 +90,13 @@ SString Sector::CeilTex() const
 	return global::basis_strtab.get(ceil_tex);
 }
 
-void Sector::SetDefaults(const Instance &inst)
+void Sector::SetDefaults(const ConfigData &config)
 {
 	floorh = global::default_floor_h;
 	 ceilh = global::default_ceil_h;
 
-	floor_tex = BA_InternaliseString(inst.conf.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(inst.conf.default_ceil_tex);
+	floor_tex = BA_InternaliseString(config.default_floor_tex);
+	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
 
 	light = global::default_light_level;
 }

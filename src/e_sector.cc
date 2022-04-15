@@ -1209,7 +1209,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double m
 			model = loop.NeighboringSector();
 
 		if (model < 0)
-			doc.sectors[new_sec]->SetDefaults(inst);
+			doc.sectors[new_sec]->SetDefaults(inst.conf);
 		else
 			*doc.sectors[new_sec] = *doc.sectors[model];
 	}
