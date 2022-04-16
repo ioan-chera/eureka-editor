@@ -151,8 +151,8 @@ void ObjectsModule::insertThing() const
 			}
 		}
 
-		T->SetRawX(inst, inst.grid.SnapX(inst.edit.map.x));
-		T->SetRawY(inst, inst.grid.SnapY(inst.edit.map.y));
+		T->SetRawX(inst.loaded.levelFormat, inst.grid.SnapX(inst.edit.map.x));
+		T->SetRawY(inst.loaded.levelFormat, inst.grid.SnapY(inst.edit.map.y));
 
 		inst.recent_things.insert_number(T->type);
 

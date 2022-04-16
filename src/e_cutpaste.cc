@@ -633,7 +633,7 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 
 		*T = *clip_board->things[i];
 
-		T->SetRawXY(inst, T->xy() + pos - cpos);
+		T->SetRawXY(inst.loaded.levelFormat, T->xy() + pos - cpos);
 	}
 }
 
@@ -737,7 +737,7 @@ bool Instance::Clipboard_DoPaste()
 
 					*T = *clip_board->things[i];
 
-					T->SetRawXY(*this, T->xy() + pos - cpos);
+					T->SetRawXY(loaded.levelFormat, T->xy() + pos - cpos);
 
 					recent_things.insert_number(T->type);
 				}

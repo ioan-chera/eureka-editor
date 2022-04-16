@@ -117,8 +117,8 @@ void Instance::FreshLevel()
 		th->type  = pl;
 		th->angle = 90;
 
-		th->SetRawX(*this, (pl == 1) ? 0 : (pl - 3) * 48);
-		th->SetRawY(*this, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		th->SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
 	CalculateLevelBounds();

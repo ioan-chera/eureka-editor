@@ -17,18 +17,22 @@
 //------------------------------------------------------------------------
 
 #include "Thing.h"
-#include "Instance.h"
 
-void Thing::SetRawX(const Instance &inst, double x)
+void Thing::SetRawX(MapFormat format, double x)
 {
-	raw_x = MakeValidCoord(inst.loaded.levelFormat, x);
+	raw_x = MakeValidCoord(format, x);
 }
-void Thing::SetRawY(const Instance &inst, double y)
+void Thing::SetRawY(MapFormat format, double y)
 {
-	raw_y = MakeValidCoord(inst.loaded.levelFormat, y);
+	raw_y = MakeValidCoord(format, y);
 }
-void Thing::SetRawH(const Instance &inst, double h)
+void Thing::SetRawH(MapFormat format, double h)
 {
-	raw_h = MakeValidCoord(inst.loaded.levelFormat, h);
+	raw_h = MakeValidCoord(format, h);
 }
 
+void Thing::SetRawXY(MapFormat format, const v2double_t &pos)
+{
+	SetRawX(format, pos.x);
+	SetRawY(format, pos.y);
+}

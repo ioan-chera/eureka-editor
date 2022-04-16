@@ -19,10 +19,7 @@
 #ifndef THING_H_
 #define THING_H_
 
-#include "FixedPoint.h"
-#include "m_vector.h"
-
-class Instance;
+#include "e_basis.h"
 
 class Thing
 {
@@ -64,15 +61,11 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(const Instance &inst, double x);
-	void SetRawY(const Instance &inst, double y);
-	void SetRawH(const Instance &inst, double h);
+	void SetRawX(MapFormat format, double x);
+	void SetRawY(MapFormat format, double y);
+	void SetRawH(MapFormat format, double h);
 
-	void SetRawXY(const Instance &inst, const v2double_t &pos)
-	{
-		SetRawX(inst, pos.x);
-		SetRawY(inst, pos.y);
-	}
+	void SetRawXY(MapFormat format, const v2double_t &pos);
 
 	int Arg(int which /* 1..5 */) const
 	{
