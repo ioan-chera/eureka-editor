@@ -100,7 +100,7 @@ void Instance::FreshLevel()
 		SideDef *sd = new SideDef;
 		level.sidedefs.push_back(sd);
 
-		sd->SetDefaults(*this, false);
+		sd->SetDefaults(conf, false);
 
 		LineDef *ld = new LineDef;
 		level.linedefs.push_back(ld);
@@ -488,7 +488,7 @@ void Instance::CreateFallbackSideDef()
 
 	SideDef *sd = new SideDef;
 
-	sd->SetDefaults(*this, false);
+	sd->SetDefaults(conf, false);
 
 	level.sidedefs.push_back(sd);
 }

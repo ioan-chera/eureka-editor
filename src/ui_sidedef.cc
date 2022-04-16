@@ -312,7 +312,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			// create the new sidedef
 			sd = op.addNew(ObjType::sidedefs);
 
-			box->inst.level.sidedefs[sd]->SetDefaults(box->inst, other >= 0);
+			box->inst.level.sidedefs[sd]->SetDefaults(box->inst.conf, other >= 0);
 			box->inst.level.sidedefs[sd]->sector = new_sec;
 
 			op.changeLinedef(*it, static_cast<byte>(field), sd);

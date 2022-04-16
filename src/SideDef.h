@@ -19,9 +19,9 @@
 #ifndef SIDEDEF_H_
 #define SIDEDEF_H_
 
-class Instance;
 class Sector;
 class SString;
+struct ConfigData;
 struct Document;
 
 class SideDef
@@ -45,7 +45,7 @@ public:
 	Sector *SecRef(const Document &doc) const;
 
 	// use new_tex when >= 0, otherwise use default_wall_tex
-	void SetDefaults(const Instance &inst, bool two_sided, int new_tex = -1);
+	void SetDefaults(const ConfigData &config, bool two_sided, int new_tex = -1);
 };
 
 #endif

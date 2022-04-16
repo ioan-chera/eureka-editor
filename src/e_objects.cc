@@ -105,7 +105,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 
 		int new_sd = op.addNew(ObjType::sidedefs);
 
-		doc.sidedefs[new_sd]->SetDefaults(inst, false);
+		doc.sidedefs[new_sd]->SetDefaults(inst.conf, false);
 		doc.sidedefs[new_sd]->sector = new_sec;
 
 		int new_ld = op.addNew(ObjType::linedefs);
