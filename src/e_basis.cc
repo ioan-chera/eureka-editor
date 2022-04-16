@@ -30,6 +30,7 @@
 #include "Instance.h"
 #include "main.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "Thing.h"
 
 // need these for the XXX_Notify() prototypes
@@ -77,41 +78,6 @@ fixcoord_t MakeValidCoord(MapFormat format, double x)
 	return toCoord(round(x));
 }
 
-
-SString SideDef::UpperTex() const
-{
-	return global::basis_strtab.get(upper_tex);
-}
-
-SString SideDef::MidTex() const
-{
-	return global::basis_strtab.get(mid_tex);
-}
-
-SString SideDef::LowerTex() const
-{
-	return global::basis_strtab.get(lower_tex);
-}
-
-void SideDef::SetDefaults(const Instance &inst, bool two_sided, int new_tex)
-{
-	if (new_tex < 0)
-		new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
-
-	lower_tex = new_tex;
-	upper_tex = new_tex;
-
-	if (two_sided)
-		mid_tex = BA_InternaliseString("-");
-	else
-		mid_tex = new_tex;
-}
-
-
-Sector * SideDef::SecRef(const Document &doc) const
-{
-	return doc.sectors[sector];
-}
 
 Vertex * LineDef::Start(const Document &doc) const
 {

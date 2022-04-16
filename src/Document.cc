@@ -19,6 +19,7 @@
 #include "Document.h"
 #include "lib_adler.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "Thing.h"
 
 //

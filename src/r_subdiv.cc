@@ -30,6 +30,7 @@
 #include "m_game.h"
 #include "r_subdiv.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "Thing.h"
 
 

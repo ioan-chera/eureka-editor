@@ -36,6 +36,7 @@
 #include "m_game.h"
 #include "m_bitvec.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "Thing.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

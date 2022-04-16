@@ -39,6 +39,7 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "SideDef.h"
 #include "bsp.h"
 
 #include "w_rawdef.h"

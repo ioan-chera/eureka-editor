@@ -44,6 +44,7 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "Thing.h"
 #include "ui_window.h"
 

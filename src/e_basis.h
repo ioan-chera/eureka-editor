@@ -41,6 +41,7 @@
 class crc32_c;
 class Sector;
 class selection_c;
+class SideDef;
 class Thing;
 struct ConfigData;
 struct Document;
@@ -82,31 +83,6 @@ enum class MapFormat
 };
 
 fixcoord_t MakeValidCoord(MapFormat format, double x);
-
-class SideDef
-{
-public:
-	int x_offset = 0;
-	int y_offset = 0;
-	int upper_tex = 0;
-	int mid_tex = 0;
-	int lower_tex = 0;
-	int sector = 0;
-
-	enum { F_X_OFFSET, F_Y_OFFSET, F_UPPER_TEX, F_MID_TEX, F_LOWER_TEX, F_SECTOR };
-
-public:
-
-	SString UpperTex() const;
-	SString MidTex()   const;
-	SString LowerTex() const;
-
-	Sector *SecRef(const Document &doc) const;
-
-	// use new_tex when >= 0, otherwise use default_wall_tex
-	void SetDefaults(const Instance &inst, bool two_sided, int new_tex = -1);
-};
-
 
 class LineDef
 {

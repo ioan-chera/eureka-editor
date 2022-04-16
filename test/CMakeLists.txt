@@ -104,6 +104,7 @@ unit_test(e_checks
         m_bitvec.cc
         m_select.cc
         Sector.cc
+        SideDef.cc
     FLTK
 )
 

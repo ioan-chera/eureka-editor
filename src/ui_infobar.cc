@@ -29,6 +29,7 @@
 #include "m_vector.h"
 #include "r_grid.h"
 #include "r_render.h"
+#include "SideDef.h"
 
 
 #define SNAP_COLOR  (config::gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))

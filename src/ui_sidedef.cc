@@ -30,6 +30,7 @@
 #include "m_game.h"
 #include "r_render.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 

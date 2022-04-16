@@ -46,6 +46,7 @@
 #include "r_subdiv.h"
 #include "r_render.h"
 #include "Sector.h"
+#include "SideDef.h"
 #include "Thing.h"
 #include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
