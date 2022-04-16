@@ -31,6 +31,7 @@
 #include "e_main.h"
 #include "e_things.h"
 #include "m_game.h"
+#include "Sector.h"
 #include "w_rawdef.h"
 #include "w_rawdef.h"
 

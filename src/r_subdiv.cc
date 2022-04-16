@@ -29,6 +29,7 @@
 #include "e_hover.h"
 #include "m_game.h"
 #include "r_subdiv.h"
+#include "Sector.h"
 #include "Thing.h"
 
 

@@ -38,6 +38,7 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "r_subdiv.h"
+#include "Sector.h"
 #include "Thing.h"
 #include "w_rawdef.h"
 #include "w_wad.h"

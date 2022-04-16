@@ -29,6 +29,7 @@
 #include "Errors.h"
 #include "Instance.h"
 #include "main.h"
+#include "Sector.h"
 #include "Thing.h"
 
 // need these for the XXX_Notify() prototypes
@@ -38,10 +39,7 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-namespace global
-{
-	static StringTable basis_strtab;
-}
+StringTable global::basis_strtab;
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -77,28 +75,6 @@ fixcoord_t MakeValidCoord(MapFormat format, double x)
 
 	// in standard format, coordinates must be integral
 	return toCoord(round(x));
-}
-
-
-SString Sector::FloorTex() const
-{
-	return global::basis_strtab.get(floor_tex);
-}
-
-SString Sector::CeilTex() const
-{
-	return global::basis_strtab.get(ceil_tex);
-}
-
-void Sector::SetDefaults(const ConfigData &config)
-{
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
-
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
-
-	light = global::default_light_level;
 }
 
 

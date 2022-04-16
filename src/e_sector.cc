@@ -31,6 +31,7 @@
 #include <map>
 
 #include "m_bitvec.h"
+#include "Sector.h"
 #include "w_rawdef.h"
 #include "e_cutpaste.h"
 #include "e_hover.h"

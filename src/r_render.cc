@@ -43,6 +43,7 @@
 #include "m_vector.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "Sector.h"
 #include "Thing.h"
 #include "ui_window.h"
 

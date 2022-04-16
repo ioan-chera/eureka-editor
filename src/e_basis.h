@@ -39,10 +39,20 @@
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
 class crc32_c;
+class Sector;
 class selection_c;
 class Thing;
 struct ConfigData;
 struct Document;
+
+namespace global
+{
+	extern StringTable basis_strtab;
+
+	extern int	default_floor_h;
+	extern int	default_ceil_h;
+	extern int	default_light_level;
+}
 
 //
 // DESIGN NOTES
@@ -72,32 +82,6 @@ enum class MapFormat
 };
 
 fixcoord_t MakeValidCoord(MapFormat format, double x);
-
-class Sector
-{
-public:
-	int floorh = 0;
-	int ceilh = 0;
-	int floor_tex = 0;
-	int ceil_tex = 0;
-	int light = 0;
-	int type = 0;
-	int tag = 0;
-
-	enum { F_FLOORH, F_CEILH, F_FLOOR_TEX, F_CEIL_TEX, F_LIGHT, F_TYPE, F_TAG };
-
-public:
-	SString FloorTex() const;
-	SString CeilTex() const;
-
-	int HeadRoom() const
-	{
-		return ceilh - floorh;
-	}
-
-	void SetDefaults(const ConfigData &config);
-};
-
 
 class SideDef
 {

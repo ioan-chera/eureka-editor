@@ -35,6 +35,7 @@
 #include "e_objects.h"
 #include "r_grid.h"
 #include "r_render.h"
+#include "Sector.h"
 #include "Thing.h"
 #include "w_rawdef.h"
 

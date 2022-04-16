@@ -142,14 +142,6 @@ namespace global
 	extern std::vector<SString> Pwad_list;
 }
 
-
-namespace global
-{
-	extern int	default_floor_h;
-	extern int	default_ceil_h;
-	extern int	default_light_level;
-}
-
 namespace global
 {
 	extern int   show_help;		// Print usage message and exit.

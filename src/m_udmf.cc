@@ -22,6 +22,7 @@
 #include "main.h"
 
 #include "m_game.h"
+#include "Sector.h"
 #include "Thing.h"
 #include "w_rawdef.h"
 #include "w_texture.h"

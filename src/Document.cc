@@ -18,6 +18,7 @@
 
 #include "Document.h"
 #include "lib_adler.h"
+#include "Sector.h"
 #include "Thing.h"
 
 //

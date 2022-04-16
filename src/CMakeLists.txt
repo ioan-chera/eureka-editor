@@ -18,6 +18,8 @@ set(source_base
     objid.h
     SafeOutFile.cc
     SafeOutFile.h
+    Sector.cc
+    Sector.h
     Side.h
     Thing.h
     version.h
