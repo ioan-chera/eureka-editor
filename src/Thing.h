@@ -61,11 +61,24 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(MapFormat format, double x);
-	void SetRawY(MapFormat format, double y);
-	void SetRawH(MapFormat format, double h);
+	void SetRawX(MapFormat format, double x)
+	{
+		raw_x = MakeValidCoord(format, x);
+	}
+	void SetRawY(MapFormat format, double y)
+	{
+		raw_y = MakeValidCoord(format, y);
+	}
+	void SetRawH(MapFormat format, double h)
+	{
+		raw_h = MakeValidCoord(format, h);
+	}
 
-	void SetRawXY(MapFormat format, const v2double_t &pos);
+	void SetRawXY(MapFormat format, const v2double_t &pos)
+	{
+		SetRawX(format, pos.x);
+		SetRawY(format, pos.y);
+	}
 
 	int Arg(int which /* 1..5 */) const
 	{
