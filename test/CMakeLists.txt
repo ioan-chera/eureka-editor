@@ -103,6 +103,7 @@ unit_test(e_checks
         e_checks.cc
         m_bitvec.cc
         m_select.cc
+        Sector.cc
     FLTK
 )
 
