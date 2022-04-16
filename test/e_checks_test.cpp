@@ -24,6 +24,7 @@
 #include "e_hover.h"
 #include "Instance.h"
 #include "m_select.h"
+#include "Sector.h"
 #include "ui_window.h"
 
 //==============================================================================
