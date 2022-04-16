@@ -53,7 +53,7 @@ TEST(Thing, RawToDouble)
 	ASSERT_EQ(thing.h(), -0.5);
 }
 
-
+// TODO: once we manage an independence for Basis and all
 
 //TEST(Thing, SetCoordinateClassicFormat)
 //{
@@ -74,3 +74,25 @@ TEST(Thing, RawToDouble)
 //	thing.SetRawX(MapFormat::udmf, 12.75);
 //	ASSERT_EQ(thing.x(), 12.75);
 //}
+
+TEST(Thing, Arg)
+{
+	Thing thing;
+
+	thing.arg1 = 2;
+	thing.arg2 = 5;
+	thing.arg3 = -4;
+	thing.arg4 = 22;
+	thing.arg5 = 93;
+
+	// Out of bounds values will just default to 0
+	ASSERT_EQ(thing.Arg(0), 0);
+	ASSERT_EQ(thing.Arg(1), 2);
+	ASSERT_EQ(thing.Arg(2), 5);
+	ASSERT_EQ(thing.Arg(3), -4);
+	ASSERT_EQ(thing.Arg(4), 22);
+	ASSERT_EQ(thing.Arg(5), 93);
+	ASSERT_EQ(thing.Arg(6), 0);
+	ASSERT_EQ(thing.Arg(7), 0);
+	ASSERT_EQ(thing.Arg(8), 0);
+}
