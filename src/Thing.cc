@@ -21,14 +21,14 @@
 
 void Thing::SetRawX(const Instance &inst, double x)
 {
-	raw_x = inst.MakeValidCoord(x);
+	raw_x = MakeValidCoord(inst.loaded.levelFormat, x);
 }
 void Thing::SetRawY(const Instance &inst, double y)
 {
-	raw_y = inst.MakeValidCoord(y);
+	raw_y = MakeValidCoord(inst.loaded.levelFormat, y);
 }
 void Thing::SetRawH(const Instance &inst, double h)
 {
-	raw_h = inst.MakeValidCoord(h);
+	raw_h = MakeValidCoord(inst.loaded.levelFormat, h);
 }
 

@@ -49,9 +49,6 @@ struct v2int_t;
 class Instance
 {
 public:
-	// E_BASIS
-	fixcoord_t MakeValidCoord(double x) const;
-
 	// E_COMMANDS
 	void ACT_Click_release();
 	void ACT_Drag_release();

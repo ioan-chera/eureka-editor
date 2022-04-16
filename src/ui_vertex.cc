@@ -117,7 +117,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeVertex(*it, Vertex::F_X, box->inst.MakeValidCoord(new_x));
+			op.changeVertex(*it, Vertex::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x));
 		}
 	}
 }
@@ -135,7 +135,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeVertex(*it, Vertex::F_Y, box->inst.MakeValidCoord(new_y));
+			op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y));
 		}
 	}
 }
@@ -164,8 +164,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		fixcoord_t fdx = box->inst.MakeValidCoord(dx * step);
-		fixcoord_t fdy = box->inst.MakeValidCoord(dy * step);
+		fixcoord_t fdx = MakeValidCoord(box->inst.loaded.levelFormat, dx * step);
+		fixcoord_t fdy = MakeValidCoord(box->inst.loaded.levelFormat, dy * step);
 
 		box->mFixUp.checkDirtyFields();
 

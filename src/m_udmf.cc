@@ -100,7 +100,7 @@ public:
 
 	fixcoord_t DecodeCoord() const
 	{
-		return inst.MakeValidCoord(DecodeFloat());
+		return MakeValidCoord(inst.loaded.levelFormat, DecodeFloat());
 	}
 
 	int DecodeTexture() const

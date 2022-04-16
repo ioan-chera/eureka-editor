@@ -24,9 +24,9 @@
 //
 void Vertex::SetRawX(const Instance &inst, double x)
 {
-	raw_x = inst.MakeValidCoord(x);
+	raw_x = MakeValidCoord(inst.loaded.levelFormat, x);
 }
 void Vertex::SetRawY(const Instance &inst, double y)
 {
-	raw_y = inst.MakeValidCoord(y);
+	raw_y = MakeValidCoord(inst.loaded.levelFormat, y);
 }

@@ -117,14 +117,6 @@
 
 typedef std::vector< const char * > string_list_t;
 
-enum class MapFormat
-{
-	invalid,
-	doom,
-	hexen,
-	udmf
-};
-
 /*
  *  Interfile global variables
  */

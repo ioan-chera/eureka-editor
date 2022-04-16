@@ -276,8 +276,8 @@ void Instance::UpdateHighlight()
 
 			grid.RatioSnapXY(vpos, S->xy());
 
-			if (MakeValidCoord(vpos.x) != V->raw_x ||
-				MakeValidCoord(vpos.y) != V->raw_y)
+			if (MakeValidCoord(loaded.levelFormat, vpos.x) != V->raw_x ||
+				MakeValidCoord(loaded.levelFormat, vpos.y) != V->raw_y)
 			{
 				edit.highlight.clear();
 			}

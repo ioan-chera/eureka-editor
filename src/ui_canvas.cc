@@ -1225,8 +1225,8 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	/* length */
 
-	fixcoord_t idx = inst.MakeValidCoord(map_x2) - inst.MakeValidCoord(map_x1);
-	fixcoord_t idy = inst.MakeValidCoord(map_y2) - inst.MakeValidCoord(map_y1);
+	fixcoord_t idx = MakeValidCoord(inst.loaded.levelFormat, map_x2) - MakeValidCoord(inst.loaded.levelFormat, map_x1);
+	fixcoord_t idy = MakeValidCoord(inst.loaded.levelFormat, map_y2) - MakeValidCoord(inst.loaded.levelFormat, map_y1);
 
 	if (info == LINFO_Length || info >= LINFO_Length_Angle)
 	{

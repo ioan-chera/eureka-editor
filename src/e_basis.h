@@ -62,6 +62,16 @@ struct Document;
 
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
+// E_BASIS
+enum class MapFormat
+{
+	invalid,
+	doom,
+	hexen,
+	udmf
+};
+
+fixcoord_t MakeValidCoord(MapFormat format, double x);
 
 class Sector
 {

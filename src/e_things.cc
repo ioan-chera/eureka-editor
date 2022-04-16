@@ -117,8 +117,8 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 
 	float dist = static_cast<float>(8 + 6 * std::min(100, total));
 
-	fixcoord_t fdx = inst.MakeValidCoord(vec_x * dist);
-	fixcoord_t fdy = inst.MakeValidCoord(vec_y * dist);
+	fixcoord_t fdx = MakeValidCoord(inst.loaded.levelFormat, vec_x * dist);
+	fixcoord_t fdy = MakeValidCoord(inst.loaded.levelFormat, vec_y * dist);
 
 	const Thing *T = inst.level.things[th];
 
@@ -192,8 +192,8 @@ void CMD_TH_Merge(Instance &inst)
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid.x));
-		op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid.y));
+		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, mid.x));
+		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, mid.y));
 	}
 }
 
