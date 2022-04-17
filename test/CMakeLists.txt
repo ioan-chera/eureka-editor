@@ -101,6 +101,7 @@ unit_test(e_checks
     e_checks_test.cpp
     SRC e_basis.cc
         e_checks.cc
+        LineDef.cc
         m_bitvec.cc
         m_select.cc
         Sector.cc
