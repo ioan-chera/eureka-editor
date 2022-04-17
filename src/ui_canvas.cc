@@ -49,6 +49,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
 

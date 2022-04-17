@@ -25,6 +25,7 @@
 
 #include "e_main.h"
 #include "m_game.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 
 

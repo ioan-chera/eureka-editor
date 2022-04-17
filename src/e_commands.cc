@@ -40,6 +40,7 @@
 #include "ui_about.h"
 #include "ui_misc.h"
 #include "ui_prefs.h"
+#include "Vertex.h"
 
 
 // config items

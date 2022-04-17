@@ -42,6 +42,7 @@
 #include "e_objects.h"
 #include "e_sector.h"
 #include "e_vertex.h"
+#include "Vertex.h"
 
 #include "ui_window.h"
 

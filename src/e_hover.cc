@@ -38,6 +38,7 @@
 #include "r_grid.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 
 
 extern int vertex_radius(double scale);

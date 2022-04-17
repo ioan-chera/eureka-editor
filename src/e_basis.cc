@@ -33,6 +33,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 
 // need these for the XXX_Notify() prototypes
 #include "r_render.h"

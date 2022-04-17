@@ -41,6 +41,7 @@
 #include "e_objects.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 
 #include <algorithm>

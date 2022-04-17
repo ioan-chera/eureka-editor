@@ -33,6 +33,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 
 
 /* This file contains code for subdividing map sectors into a set
@@ -896,6 +897,15 @@ sector_subdivision_c *Instance::Subdiv_PolygonsForSector(int num)
 	}
 
 	return &exinfo.sub;
+}
+
+void sector_extra_info_t::AddVertex(const Vertex *V)
+{
+	bound_x1 = std::min(bound_x1, V->x());
+	bound_y1 = std::min(bound_y1, V->y());
+
+	bound_x2 = std::max(bound_x2, V->x());
+	bound_y2 = std::max(bound_y2, V->y());
 }
 
 

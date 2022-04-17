@@ -25,6 +25,7 @@
 #include "bsp.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 
 #include "w_rawdef.h"
 

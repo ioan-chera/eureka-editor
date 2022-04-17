@@ -21,6 +21,7 @@
 #include "Document.h"
 #include "Errors.h"
 #include "SideDef.h"
+#include "Vertex.h"
 
 Vertex * LineDef::Start(const Document &doc) const
 {

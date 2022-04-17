@@ -48,6 +48,7 @@
 #include "SideDef.h"
 #include "Thing.h"
 #include "ui_window.h"
+#include "Vertex.h"
 
 
 // config items

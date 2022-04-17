@@ -46,6 +46,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 
 static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, img_pixel_t pixel)
 {

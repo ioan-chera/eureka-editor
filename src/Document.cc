@@ -22,6 +22,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 
 //
 // Get number of objects based on enum

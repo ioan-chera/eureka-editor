@@ -38,6 +38,7 @@
 #include "e_objects.h"
 #include "Sector.h"
 #include "SideDef.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 

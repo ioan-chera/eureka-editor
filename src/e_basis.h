@@ -29,8 +29,6 @@
 
 #include "DocumentModule.h"
 #include "FixedPoint.h"
-#include "Side.h"
-#include "Vertex.h"
 #include "m_strings.h"
 #include "m_vector.h"
 #include "objid.h"
@@ -38,14 +36,12 @@
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
-class crc32_c;
 class Sector;
 class selection_c;
 class LineDef;
 class SideDef;
 class Thing;
-struct ConfigData;
-struct Document;
+class Vertex;
 
 namespace global
 {

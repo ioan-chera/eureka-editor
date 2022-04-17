@@ -26,6 +26,7 @@
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
