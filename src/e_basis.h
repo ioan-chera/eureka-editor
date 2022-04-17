@@ -30,7 +30,6 @@
 #include "DocumentModule.h"
 #include "FixedPoint.h"
 #include "m_strings.h"
-#include "m_vector.h"
 #include "objid.h"
 #include <stack>
 
