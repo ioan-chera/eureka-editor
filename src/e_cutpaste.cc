@@ -31,6 +31,7 @@
 #include "e_sector.h"
 #include "e_vertex.h"
 #include "Errors.h"
+#include "LineDef.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "r_grid.h"

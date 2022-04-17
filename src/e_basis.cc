@@ -28,6 +28,7 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "LineDef.h"
 #include "main.h"
 #include "Sector.h"
 #include "SideDef.h"
@@ -76,86 +77,6 @@ fixcoord_t MakeValidCoord(MapFormat format, double x)
 
 	// in standard format, coordinates must be integral
 	return toCoord(round(x));
-}
-
-
-Vertex * LineDef::Start(const Document &doc) const
-{
-	return doc.vertices[start];
-}
-
-Vertex * LineDef::End(const Document &doc) const
-{
-	return doc.vertices[end];
-}
-
-SideDef * LineDef::Right(const Document &doc) const
-{
-	return (right >= 0) ? doc.sidedefs[right] : nullptr;
-}
-
-SideDef * LineDef::Left(const Document &doc) const
-{
-	return (left >= 0) ? doc.sidedefs[left] : nullptr;
-}
-
-
-bool LineDef::TouchesSector(int sec_num, const Document &doc) const
-{
-	if (right >= 0 && doc.sidedefs[right]->sector == sec_num)
-		return true;
-
-	if (left >= 0 && doc.sidedefs[left]->sector == sec_num)
-		return true;
-
-	return false;
-}
-
-
-int LineDef::WhatSector(Side side, const Document &doc) const
-{
-	switch (side)
-	{
-		case Side::left:
-			return Left(doc) ? Left(doc)->sector : -1;
-
-		case Side::right:
-			return Right(doc) ? Right(doc)->sector : -1;
-
-		default:
-			BugError("bad side : %d\n", (int)side);
-			return -1;
-	}
-}
-
-
-int LineDef::WhatSideDef(Side side) const
-{
-	switch (side)
-	{
-		case Side::left:
-			return left;
-		case Side::right:
-			return right;
-
-		default:
-			BugError("bad side : %d\n", (int)side);
-			return -1;
-	}
-}
-
-bool LineDef::IsSelfRef(const Document &doc) const
-{
-	return (left >= 0) && (right >= 0) &&
-		doc.sidedefs[left]->sector == doc.sidedefs[right]->sector;
-}
-
-double LineDef::CalcLength(const Document &doc) const
-{
-	double dx = Start(doc)->x() - End(doc)->x();
-	double dy = Start(doc)->y() - End(doc)->y();
-
-	return hypot(dx, dy);
 }
 
 

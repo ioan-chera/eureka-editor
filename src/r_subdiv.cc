@@ -27,6 +27,7 @@
 
 #include "e_basis.h"
 #include "e_hover.h"
+#include "LineDef.h"
 #include "m_game.h"
 #include "r_subdiv.h"
 #include "Sector.h"

@@ -32,6 +32,7 @@
 #include "e_linedef.h"
 #include "e_main.h"
 #include "im_img.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "e_objects.h"

@@ -39,6 +39,7 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "LineDef.h"
 #include "SideDef.h"
 #include "bsp.h"
 

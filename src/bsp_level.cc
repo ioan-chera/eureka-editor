@@ -20,6 +20,7 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "LineDef.h"
 #include "main.h"
 #include "bsp.h"
 #include "SideDef.h"

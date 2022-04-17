@@ -37,6 +37,7 @@
 #include "e_linedef.h"
 #include "e_sector.h"
 #include "e_main.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_events.h"

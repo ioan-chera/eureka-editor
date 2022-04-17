@@ -26,6 +26,7 @@
 #include "e_hover.h"	// OppositeSector
 #include "e_linedef.h"
 #include "e_main.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "r_render.h"

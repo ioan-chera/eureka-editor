@@ -36,6 +36,7 @@
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "w_rawdef.h"

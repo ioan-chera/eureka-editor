@@ -30,6 +30,7 @@
 
 #include <map>
 
+#include "LineDef.h"
 #include "m_bitvec.h"
 #include "Sector.h"
 #include "SideDef.h"

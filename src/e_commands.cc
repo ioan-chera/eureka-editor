@@ -29,6 +29,7 @@
 
 #include "e_main.h"
 #include "e_path.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_loadsave.h"
 #include "m_vector.h"

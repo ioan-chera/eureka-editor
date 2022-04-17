@@ -21,6 +21,7 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "LineDef.h"
 #include "m_game.h"
 #include "Sector.h"
 #include "SideDef.h"

@@ -28,6 +28,7 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "LineDef.h"
 #include "m_bitvec.h"
 #include "m_config.h"
 #include "m_game.h"

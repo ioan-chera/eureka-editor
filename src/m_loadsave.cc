@@ -34,6 +34,7 @@
 #include "e_basis.h"
 #include "e_checks.h"
 #include "e_main.h"  // CalculateLevelBounds()
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"

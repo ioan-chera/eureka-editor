@@ -12,6 +12,8 @@ set(source_base
     hdr_fltk.h
     Instance.cc
     Instance.h
+    LineDef.cc
+    LineDef.h
     main.cc
     main.h
     main.rc

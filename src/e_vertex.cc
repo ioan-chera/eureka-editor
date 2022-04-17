@@ -34,6 +34,7 @@
 #include "e_main.h"
 #include "e_objects.h"
 #include "e_vertex.h"
+#include "LineDef.h"
 #include "m_bitvec.h"
 #include "r_grid.h"
 #include "m_game.h"

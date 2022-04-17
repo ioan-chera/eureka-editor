@@ -28,6 +28,7 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "LineDef.h"
 #include "m_bitvec.h"
 #include "e_main.h"
 #include "e_objects.h"

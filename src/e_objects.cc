@@ -36,6 +36,7 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_vertex.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_vector.h"

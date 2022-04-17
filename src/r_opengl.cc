@@ -32,6 +32,7 @@
 #include "e_main.h"
 #include "e_hover.h"  // PointOnLineSide
 #include "e_linedef.h"  // LD_RailHeights
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_bitvec.h"

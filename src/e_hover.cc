@@ -33,6 +33,7 @@
 #include "e_hover.h"
 #include "e_linedef.h"	// SplitLineDefAtVertex()
 #include "e_main.h"		// Map_bound_xxx
+#include "LineDef.h"
 #include "m_game.h"
 #include "r_grid.h"
 #include "SideDef.h"

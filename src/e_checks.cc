@@ -36,6 +36,7 @@
 #include "e_main.h"
 #include "e_path.h"
 #include "e_vertex.h"
+#include "LineDef.h"
 #include "m_game.h"
 #include "e_objects.h"
 #include "Sector.h"

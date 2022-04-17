@@ -27,6 +27,7 @@
 #include "e_cutpaste.h"  // Texboard_XX
 #include "e_path.h"  // GoToObject
 #include "e_main.h"  // Selection_Clear
+#include "LineDef.h"
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "r_render.h"

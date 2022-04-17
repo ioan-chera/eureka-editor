@@ -39,6 +39,7 @@
 #include "e_path.h"	  // SoundPropagation
 #include "im_color.h"
 #include "im_img.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_vector.h"

@@ -30,6 +30,7 @@
 #include "e_linedef.h"
 #include "e_main.h"
 #include "e_things.h"
+#include "LineDef.h"
 #include "m_game.h"
 #include "Sector.h"
 #include "SideDef.h"
