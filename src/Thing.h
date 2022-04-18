@@ -20,6 +20,7 @@
 #define THING_H_
 
 #include "e_basis.h"
+#include "m_vector.h"
 
 class Thing
 {
