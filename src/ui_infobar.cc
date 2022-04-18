@@ -657,8 +657,8 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	double dy = inst.edit.draw_to_y - V->y();
 
 	// show a ratio value
-	fixcoord_t fdx = toCoord(dx);
-	fixcoord_t fdy = toCoord(dy);
+	FFixedPoint fdx = FFixedPoint(dx);
+	FFixedPoint fdy = FFixedPoint(dy);
 
 	SString ratio_name = LD_RatioName(fdx, fdy, false);
 

@@ -41,15 +41,15 @@ TEST(Thing, RawToDouble)
 {
 	Thing thing;
 
-	thing.raw_x = static_cast<fixcoord_t>(123.75 * kFracUnitD);
+	thing.raw_x = FFixedPoint(123.75);
 	ASSERT_EQ(thing.x(), 123.75);
 
-	thing.raw_y = static_cast<fixcoord_t>(-234.875 * kFracUnitD);
+	thing.raw_y = FFixedPoint(-234.875);
 	ASSERT_EQ(thing.y(), -234.875);
 
 	ASSERT_EQ(thing.xy(), v2double_t(123.75, -234.875));
 
-	thing.raw_h = static_cast<fixcoord_t>(-0.5 * kFracUnitD);
+	thing.raw_h = FFixedPoint(-0.5);
 	ASSERT_EQ(thing.h(), -0.5);
 }
 

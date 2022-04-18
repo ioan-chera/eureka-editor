@@ -1357,13 +1357,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - intToCoord(idx));
-		op.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - intToCoord(idy));
+		op.changeVertex(L->start, Vertex::F_X, (L->End(doc)->raw_x - FFixedPoint(idx)).raw());
+		op.changeVertex(L->start, Vertex::F_Y, (L->End(doc)->raw_y - FFixedPoint(idy)).raw());
 	}
 	else
 	{
-		op.changeVertex(L->end, Vertex::F_X, L->Start(doc)->raw_x + intToCoord(idx));
-		op.changeVertex(L->end, Vertex::F_Y, L->Start(doc)->raw_y + intToCoord(idy));
+		op.changeVertex(L->end, Vertex::F_X, (L->Start(doc)->raw_x + FFixedPoint(idx)).raw());
+		op.changeVertex(L->end, Vertex::F_Y, (L->Start(doc)->raw_y + FFixedPoint(idy)).raw());
 	}
 }
 
@@ -1463,26 +1463,26 @@ double LinedefModule::angleBetweenLines(int A, int B, int C) const
 }
 
 
-SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
+SString LD_RatioName(FFixedPoint idx, FFixedPoint idy, bool number_only)
 {
-	idx = abs(idx);
-	idy = abs(idy);
+	idx = idx.abs();
+	idy = idy.abs();
 
-	if (idx == 0 && idy == 0)
+	if (!idx && !idy)
 	{
 		if (number_only)
 			return "0:0";
 		else
 			return "zero-len";
 	}
-	else if (idx == 0)
+	else if (!idx)
 	{
 		if (number_only)
 			return "1:0";
 		else
 			return "vertical";
 	}
-	else if (idy == 0)
+	else if (!idy)
 	{
 		if (number_only)
 			return "0:1";
@@ -1491,8 +1491,8 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 	}
 
 	// compute the greatest common divisor
-	int a = idx;
-	int b = idy;
+	FFixedPoint a = idx;
+	FFixedPoint b = idy;
 	int gcd = 1;
 
 	for (;;)
@@ -1503,7 +1503,7 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 			b -= a;
 		else
 		{
-			gcd = a;
+			gcd = a.raw();
 			break;
 		}
 	}
@@ -1512,11 +1512,11 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 	idy /= gcd;
 
 	// if ratio is really complex, it isn't worth showing
-	if (idx > 999 || idy > 999)
+	if (idx.raw() > 999 || idy.raw() > 999)
 		return SString("---");
 
 	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx, idy);
+	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx.raw(), idy.raw());
 
 	return SString(buffer);
 }

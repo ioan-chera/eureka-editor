@@ -539,7 +539,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x));
+			op.changeThing(*it, Thing::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x).raw());
 
 	}
 }
@@ -556,7 +556,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y));
+			op.changeThing(*it, Thing::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y).raw());
 	}
 }
 
@@ -572,7 +572,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_H, intToCoord(new_h));
+			op.changeThing(*it, Thing::F_H, FFixedPoint(new_h).raw());
 	}
 }
 

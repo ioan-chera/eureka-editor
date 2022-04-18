@@ -92,7 +92,7 @@ private:
 	void mergedSecondSidedef(EditOperation &op, int ld) const;
 };
 
-SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);
+SString LD_RatioName(FFixedPoint idx, FFixedPoint idy, bool number_only);
 
 enum linedef_align_flag_e
 {

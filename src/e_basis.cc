@@ -71,13 +71,13 @@ SString BA_GetString(int offset)
 }
 
 
-fixcoord_t MakeValidCoord(MapFormat format, double x)
+FFixedPoint MakeValidCoord(MapFormat format, double x)
 {
 	if (format == MapFormat::udmf)
-		return toCoord(x);
+		return FFixedPoint(x);
 
 	// in standard format, coordinates must be integral
-	return toCoord(round(x));
+	return FFixedPoint(round(x));
 }
 
 

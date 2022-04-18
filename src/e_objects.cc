@@ -443,7 +443,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
-			new_vert = doc.vertmod.findExact(toCoord(new_x), toCoord(new_y));
+			new_vert = doc.vertmod.findExact(FFixedPoint(new_x), FFixedPoint(new_y));
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -739,9 +739,9 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 
 void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, const v3double_t &delta) const
 {
-	fixcoord_t fdx = MakeValidCoord(inst.loaded.levelFormat, delta.x);
-	fixcoord_t fdy = MakeValidCoord(inst.loaded.levelFormat, delta.y);
-	fixcoord_t fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
+	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, delta.x);
+	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, delta.y);
+	FFixedPoint fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
 
 	switch (list.what_type())
 	{
@@ -750,9 +750,9 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const Thing * T = doc.things[*it];
 
-				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				op.changeThing(*it, Thing::F_H, std::max(0, T->raw_h + fdz));
+				op.changeThing(*it, Thing::F_X, (T->raw_x + fdx).raw());
+				op.changeThing(*it, Thing::F_Y, (T->raw_y + fdy).raw());
+				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz).raw());
 			}
 			break;
 
@@ -761,8 +761,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const Vertex * V = doc.vertices[*it];
 
-				op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-				op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+				op.changeVertex(*it, Vertex::F_X, (V->raw_x + fdx).raw());
+				op.changeVertex(*it, Vertex::F_Y, (V->raw_y + fdy).raw());
 			}
 			break;
 
@@ -1541,8 +1541,8 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 
 void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
-	fixcoord_t fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
+	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
+	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1550,14 +1550,14 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 		if (is_vert)
 		{
-			op.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
+			op.changeThing(*it, Thing::F_Y, (fix_my * 2 - T->raw_y).raw());
 
 			if (T->angle != 0)
 				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
+			op.changeThing(*it, Thing::F_X, (fix_mx * 2 - T->raw_x).raw());
 
 			if (T->angle > 180)
 				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
@@ -1570,8 +1570,8 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
-	fixcoord_t fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
+	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
+	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
 
 	selection_c verts(ObjType::vertices);
 	ConvertSelection(doc, list, verts);
@@ -1581,9 +1581,9 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 		const Vertex * V = doc.vertices[*it];
 
 		if (is_vert)
-			op.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
+			op.changeVertex(*it, Vertex::F_Y, (fix_my * 2 - V->raw_y).raw());
 		else
-			op.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
+			op.changeVertex(*it, Vertex::F_X, (fix_mx * 2 - V->raw_x).raw());
 	}
 
 	// flip linedefs too !!
@@ -1658,27 +1658,27 @@ void Instance::CMD_Mirror()
 void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list, bool anti_clockwise,
 							 double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
-	fixcoord_t fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
+	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
+	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Thing * T = doc.things[*it];
 
-		fixcoord_t old_x = T->raw_x;
-		fixcoord_t old_y = T->raw_y;
+		FFixedPoint old_x = T->raw_x;
+		FFixedPoint old_y = T->raw_y;
 
 		if (anti_clockwise)
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			op.changeThing(*it, Thing::F_X, (fix_mx - old_y + fix_my).raw());
+			op.changeThing(*it, Thing::F_Y, (fix_my + old_x - fix_mx).raw());
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			op.changeThing(*it, Thing::F_X, (fix_mx + old_y - fix_my).raw());
+			op.changeThing(*it, Thing::F_Y, (fix_my - old_x + fix_mx).raw());
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
@@ -1728,25 +1728,25 @@ void Instance::CMD_Rotate90()
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(level, *edit.Selected, verts);
 
-			fixcoord_t fix_mx = MakeValidCoord(loaded.levelFormat, mid.x);
-			fixcoord_t fix_my = MakeValidCoord(loaded.levelFormat, mid.y);
+			FFixedPoint fix_mx = MakeValidCoord(loaded.levelFormat, mid.x);
+			FFixedPoint fix_my = MakeValidCoord(loaded.levelFormat, mid.y);
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
 				const Vertex * V = level.vertices[*it];
 
-				fixcoord_t old_x = V->raw_x;
-				fixcoord_t old_y = V->raw_y;
+				FFixedPoint old_x = V->raw_x;
+				FFixedPoint old_y = V->raw_y;
 
 				if (anti_clockwise)
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+					op.changeVertex(*it, Vertex::F_X, (fix_mx - old_y + fix_my).raw());
+					op.changeVertex(*it, Vertex::F_Y, (fix_my + old_x - fix_mx).raw());
 				}
 				else
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+					op.changeVertex(*it, Vertex::F_X, (fix_mx + old_y - fix_my).raw());
+					op.changeVertex(*it, Vertex::F_Y, (fix_my - old_x + fix_mx).raw());
 				}
 			}
 		}
@@ -1768,8 +1768,8 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1797,8 +1797,8 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 	}
 }
 
@@ -2097,8 +2097,8 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 
 				moved.set(*it);
 				break;
@@ -2199,8 +2199,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
-				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
+				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 
 				moved.set(*it);
 				break;

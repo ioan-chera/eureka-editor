@@ -32,40 +32,48 @@ TEST(FixedPoint, FracUnitIsPowerOf2)
 
 TEST(FixedPoint, FromCoord)
 {
-	auto number = static_cast<fixcoord_t>(123.25 * kFracUnit);
-	ASSERT_EQ(fromCoord(number), 123.25);
+	auto number = FFixedPoint(123.25);
+	ASSERT_EQ(static_cast<double>(number), 123.25);
 
 	// now try negative
 
-	number = static_cast<fixcoord_t>(-67.75 * kFracUnit);
-	ASSERT_EQ(fromCoord(number), -67.75);
+	number = FFixedPoint(-67.75);
+	ASSERT_EQ(static_cast<double>(number), -67.75);
 }
 
-TEST(FixedPoint, ToCoord)
+TEST(FixedPoint, ToCoordRaw)
 {
 	double number = 123.25;
-	ASSERT_EQ(toCoord(number), static_cast<fixcoord_t>(123.25 * kFracUnit));
+	ASSERT_EQ(FFixedPoint(number).raw(), static_cast<int>(123.25 * kFracUnit));
 
 	number = -67.75;
-	ASSERT_EQ(toCoord(number), static_cast<fixcoord_t>(-67.75 * kFracUnit));
+	ASSERT_EQ(FFixedPoint(number).raw(), static_cast<int>(-67.75 * kFracUnit));
 }
 
 TEST(FixedPoint, IntToCoord)
 {
 	int number = 123;
-	ASSERT_EQ(intToCoord(number), 123 * kFracUnit);
+	ASSERT_EQ(FFixedPoint(number).raw(), 123 * kFracUnit);
 
 	number = -67;
-	ASSERT_EQ(intToCoord(number), -67 * kFracUnit);
+	ASSERT_EQ(FFixedPoint(number).raw(), -67 * kFracUnit);
 }
 
 TEST(FixedPoint, CoordToInt)
 {
-	auto number = static_cast<fixcoord_t>(123 * kFracUnit);
-	ASSERT_EQ(coordToInt(number), 123);
+	auto number = FFixedPoint(123);
+	ASSERT_EQ(static_cast<int>(number), 123);
 
 	// now try negative
 
-	number = static_cast<fixcoord_t>(-67 * kFracUnit);
-	ASSERT_EQ(coordToInt(number), -67);
+	number = FFixedPoint(-67);
+	ASSERT_EQ(static_cast<int>(number), -67);
+}
+
+TEST(FixedPoint, ZeroInit)
+{
+	FFixedPoint point = {};
+	ASSERT_EQ(point.raw(), 0);
+
+	ASSERT_EQ(FFixedPoint{}.raw(), 0);
 }

@@ -27,19 +27,19 @@ class Instance;
 class Vertex
 {
 public:
-	fixcoord_t raw_x = 0;
-	fixcoord_t raw_y = 0;
+	FFixedPoint raw_x = {};
+	FFixedPoint raw_y = {};
 
 	enum { F_X, F_Y };
 
 public:
 	inline double x() const
 	{
-		return fromCoord(raw_x);
+		return static_cast<double>(raw_x);
 	}
 	inline double y() const
 	{
-		return fromCoord(raw_y);
+		return static_cast<double>(raw_y);
 	}
 	inline v2double_t xy() const
 	{
@@ -56,7 +56,7 @@ public:
 		SetRawY(inst, pos.y);
 	}
 
-	bool Matches(fixcoord_t ox, fixcoord_t oy) const
+	bool Matches(FFixedPoint ox, FFixedPoint oy) const
 	{
 		return (raw_x == ox) && (raw_y == oy);
 	}

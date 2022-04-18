@@ -43,7 +43,7 @@ SideDef * LineDef::Left(const Document &doc) const
 	return (left >= 0) ? doc.sidedefs[left] : nullptr;
 }
 
-bool LineDef::TouchesCoord(fixcoord_t tx, fixcoord_t ty, const Document &doc) const
+bool LineDef::TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const
 {
 	return Start(doc)->Matches(tx, ty) || End(doc)->Matches(tx, ty);
 }

@@ -70,7 +70,7 @@ public:
 		return start == v_num ? end : start;
 	}
 
-	bool TouchesCoord(fixcoord_t tx, fixcoord_t ty, const Document &doc) const;
+	bool TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const;
 
 	bool TouchesSector(int sec_num, const Document &doc) const;
 

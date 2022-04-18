@@ -1229,12 +1229,12 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	/* length */
 
-	fixcoord_t idx = MakeValidCoord(inst.loaded.levelFormat, map_x2) - MakeValidCoord(inst.loaded.levelFormat, map_x1);
-	fixcoord_t idy = MakeValidCoord(inst.loaded.levelFormat, map_y2) - MakeValidCoord(inst.loaded.levelFormat, map_y1);
+	FFixedPoint idx = MakeValidCoord(inst.loaded.levelFormat, map_x2) - MakeValidCoord(inst.loaded.levelFormat, map_x1);
+	FFixedPoint idy = MakeValidCoord(inst.loaded.levelFormat, map_y2) - MakeValidCoord(inst.loaded.levelFormat, map_y1);
 
 	if (info == LINFO_Length || info >= LINFO_Length_Angle)
 	{
-		double length = hypot(fromCoord(idx), fromCoord(idy));
+		double length = hypot(static_cast<double>(idx), static_cast<double>(idy));
 
 		if (length > 0.1)
 		{
@@ -1251,8 +1251,8 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	if (info == LINFO_Angle || info == LINFO_Length_Angle)
 	{
-		double dx = fromCoord(idx);
-		double dy = fromCoord(idy);
+		double dx = static_cast<double>(idx);
+		double dy = static_cast<double>(idy);
 
 		int degrees = (int)round(atan2(dy, dx) * 180.0 / M_PI);
 		if (degrees < 0)
@@ -1268,7 +1268,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	if (info == LINFO_Ratio || info == LINFO_Length_Ratio)
 	{
-		if (idx != 0 && idy != 0)
+		if (idx != FFixedPoint{} && idy != FFixedPoint{})
 		{
 			SString ratio_name = LD_RatioName(idx, idy, true);
 

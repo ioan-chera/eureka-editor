@@ -2422,8 +2422,8 @@ struct linedef_minx_CMP_pred
 		const LineDef *AL = doc.linedefs[A];
 		const LineDef *BL = doc.linedefs[B];
 
-		fixcoord_t A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
-		fixcoord_t B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
+		FFixedPoint A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
+		FFixedPoint B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
 
 		return A_x < B_x;
 	}
@@ -2638,7 +2638,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 		const LineDef *L1 = doc.linedefs[n2];
 
-		fixcoord_t max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
+		FFixedPoint max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
 
 		for (int k = n + 1 ; k < doc.numLinedefs(); k++)
 		{
@@ -2646,7 +2646,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 			const LineDef *L2 = doc.linedefs[k2];
 
-			fixcoord_t min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
+			FFixedPoint min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)

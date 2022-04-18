@@ -420,8 +420,8 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 
 		Vertex *vert = new Vertex;
 
-		vert->raw_x = intToCoord(LE_S16(raw.x));
-		vert->raw_y = intToCoord(LE_S16(raw.y));
+		vert->raw_x = FFixedPoint(LE_S16(raw.x));
+		vert->raw_y = FFixedPoint(LE_S16(raw.y));
 
 		level.vertices.push_back(vert);
 	}
@@ -502,11 +502,11 @@ static void CreateFallbackVertices(Document &doc)
 	Vertex *v1 = new Vertex;
 	Vertex *v2 = new Vertex;
 
-	v1->raw_x = intToCoord(-777);
-	v1->raw_y = intToCoord(-777);
+	v1->raw_x = FFixedPoint(-777);
+	v1->raw_y = FFixedPoint(-777);
 
-	v2->raw_x = intToCoord(555);
-	v2->raw_y = intToCoord(555);
+	v2->raw_x = FFixedPoint(555);
+	v2->raw_y = FFixedPoint(555);
 
 	doc.vertices.push_back(v1);
 	doc.vertices.push_back(v2);
@@ -648,8 +648,8 @@ void Instance::LoadThings(const Wad_file *load_wad)
 
 		Thing *th = new Thing;
 
-		th->raw_x = intToCoord(LE_S16(raw.x));
-		th->raw_y = intToCoord(LE_S16(raw.y));
+		th->raw_x = FFixedPoint(LE_S16(raw.x));
+		th->raw_y = FFixedPoint(LE_S16(raw.y));
 
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
@@ -683,9 +683,9 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		Thing *th = new Thing;
 
 		th->tid = LE_S16(raw.tid);
-		th->raw_x = intToCoord(LE_S16(raw.x));
-		th->raw_y = intToCoord(LE_S16(raw.y));
-		th->raw_h = intToCoord(LE_S16(raw.height));
+		th->raw_x = FFixedPoint(LE_S16(raw.x));
+		th->raw_y = FFixedPoint(LE_S16(raw.y));
+		th->raw_h = FFixedPoint(LE_S16(raw.height));
 
 		th->angle = LE_U16(raw.angle);
 		th->type = LE_U16(raw.type);
@@ -1337,8 +1337,8 @@ void Instance::SaveVertices()
 	{
 		raw_vertex_t raw;
 
-		raw.x = LE_S16(coordToInt(vert->raw_x));
-		raw.y = LE_S16(coordToInt(vert->raw_y));
+		raw.x = LE_S16(static_cast<int>(vert->raw_x));
+		raw.y = LE_S16(static_cast<int>(vert->raw_y));
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1376,8 +1376,8 @@ void Instance::SaveThings()
 	{
 		raw_thing_t raw;
 
-		raw.x = LE_S16(coordToInt(th->raw_x));
-		raw.y = LE_S16(coordToInt(th->raw_y));
+		raw.x = LE_S16(static_cast<int>(th->raw_x));
+		raw.y = LE_S16(static_cast<int>(th->raw_y));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1399,9 +1399,9 @@ void Instance::SaveThings_Hexen()
 
 		raw.tid = LE_S16(th->tid);
 
-		raw.x = LE_S16(coordToInt(th->raw_x));
-		raw.y = LE_S16(coordToInt(th->raw_y));
-		raw.height = LE_S16(coordToInt(th->raw_h));
+		raw.x = LE_S16(static_cast<int>(th->raw_x));
+		raw.y = LE_S16(static_cast<int>(th->raw_y));
+		raw.height = LE_S16(static_cast<int>(th->raw_h));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);

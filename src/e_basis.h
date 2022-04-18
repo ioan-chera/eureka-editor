@@ -78,7 +78,7 @@ enum class MapFormat
 	udmf
 };
 
-fixcoord_t MakeValidCoord(MapFormat format, double x);
+FFixedPoint MakeValidCoord(MapFormat format, double x);
 
 //
 // Editor command manager, handles undo/redo

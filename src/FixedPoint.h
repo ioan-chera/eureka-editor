@@ -21,43 +21,108 @@
 
 #include "sys_macro.h"
 
-// a fixed-point coordinate with 12 bits of fractional part.
-typedef int fixcoord_t;
-
 // The fraction unit
 static constexpr int kFracUnit = 4096;
 static constexpr double kFracUnitD = static_cast<double>(kFracUnit);
 
 //
-// Fixcoord to double
+// Type safe fixed point number
 //
-inline static double fromCoord(fixcoord_t fx)
+class FFixedPoint
 {
-	return fx / kFracUnitD;
-}
+public:
+	FFixedPoint() = default;
+	explicit FFixedPoint(double value) : value(iround(value * kFracUnitD))
+	{
+	}
+	explicit FFixedPoint(int value) : value(value * kFracUnit)
+	{
+	}
 
-//
-// Double to fixcoord
-//
-inline static fixcoord_t toCoord(double db)
-{
-	return static_cast<fixcoord_t>(iround(db * kFracUnitD));
-}
+	int raw() const
+	{
+		return value;
+	}
 
-//
-// Scales an integer to fixed-point coordinates.
-//
-inline static fixcoord_t intToCoord(int i)
-{
-	return static_cast<fixcoord_t>(i * kFracUnit);
-}
+	bool operator == (FFixedPoint other) const
+	{
+		return value == other.value;
+	}
 
-//
-// Truncates fixed-point coordinates to integer
-//
-inline static int coordToInt(fixcoord_t i)
-{
-	return static_cast<int>(i / kFracUnit);
-}
+	bool operator != (FFixedPoint other) const
+	{
+		return value != other.value;
+	}
+
+	bool operator < (FFixedPoint other) const
+	{
+		return value < other.value;
+	}
+	bool operator > (FFixedPoint other) const
+	{
+		return value > other.value;
+	}
+
+	FFixedPoint operator + (FFixedPoint other) const
+	{
+		FFixedPoint result;
+		result.value = value + other.value;
+		return result;
+	}
+	FFixedPoint operator - (FFixedPoint other) const
+	{
+		FFixedPoint result;
+		result.value = value - other.value;
+		return result;
+	}
+	FFixedPoint &operator += (FFixedPoint other)
+	{
+		value += other.value;
+		return *this;
+	}
+	FFixedPoint &operator -= (FFixedPoint other)
+	{
+		value -= other.value;
+		return *this;
+	}
+	FFixedPoint &operator /= (int factor)
+	{
+		value /= factor;
+		return *this;
+	}
+
+	FFixedPoint operator * (int factor) const
+	{
+		FFixedPoint result;
+		result.value = value * factor;
+		return result;
+	}
+
+	explicit operator double() const
+	{
+		return value / kFracUnitD;
+	}
+	explicit operator int() const
+	{
+		return value / kFracUnit;
+	}
+
+	bool operator ! () const
+	{
+		return !value;
+	}
+
+	FFixedPoint abs() const
+	{
+		FFixedPoint result;
+		result.value = ::abs(value);
+		return result;
+	}
+private:
+	int value;
+};
+
+static_assert(sizeof(FFixedPoint) == sizeof(int), "FixedPoint must be same size as int");
+
 
 #endif

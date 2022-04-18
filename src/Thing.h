@@ -25,15 +25,15 @@
 class Thing
 {
 public:
-	fixcoord_t raw_x = 0;
-	fixcoord_t raw_y = 0;
+	FFixedPoint raw_x = {};
+	FFixedPoint raw_y = {};
 
 	int angle = 0;
 	int type = 0;
 	int options = 0;
 
 	// Hexen stuff
-	fixcoord_t raw_h = 0;
+	FFixedPoint raw_h = {};
 
 	int tid = 0;
 	int special = 0;
@@ -46,15 +46,15 @@ public:
 public:
 	inline double x() const
 	{
-		return fromCoord(raw_x);
+		return static_cast<double>(raw_x);
 	}
 	inline double y() const
 	{
-		return fromCoord(raw_y);
+		return static_cast<double>(raw_y);
 	}
 	inline double h() const
 	{
-		return fromCoord(raw_h);
+		return static_cast<double>(raw_h);
 	}
 	inline v2double_t xy() const
 	{

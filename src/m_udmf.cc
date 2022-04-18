@@ -102,7 +102,7 @@ public:
 		return string;
 	}
 
-	fixcoord_t DecodeCoord() const
+	FFixedPoint DecodeCoord() const
 	{
 		return MakeValidCoord(inst.loaded.levelFormat, DecodeFloat());
 	}
@@ -723,7 +723,7 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
 
-		if (th->raw_h != 0)
+		if (th->raw_h != FFixedPoint{})
 			lump->Printf("height = %1.3f;\n", th->h());
 
 		lump->Printf("angle = %d;\n", th->angle);
