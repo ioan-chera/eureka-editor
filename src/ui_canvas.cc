@@ -2069,13 +2069,13 @@ void UI_Canvas::DrawSnapPoint()
 
 void UI_Canvas::DrawCurrentLine()
 {
-	if (inst.edit.draw_from.is_nil())
+	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex * V = inst.level.vertices[inst.edit.draw_from.num];
+	const Vertex * V = inst.level.vertices[inst.edit.drawLine.from.num];
 
-	double new_x = inst.edit.draw_to_x;
-	double new_y = inst.edit.draw_to_y;
+	double new_x = inst.edit.drawLine.to.x;
+	double new_y = inst.edit.drawLine.to.y;
 
 	// should draw a vertex?
 	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
@@ -2093,7 +2093,7 @@ void UI_Canvas::DrawCurrentLine()
 	crossing_state_c cross(inst);
 
 	inst.level.hover.findCrossingPoints(cross,
-					   V->xy(), inst.edit.draw_from.num,
+					   V->xy(), inst.edit.drawLine.from.num,
 		{ new_x, new_y }, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)

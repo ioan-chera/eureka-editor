@@ -648,13 +648,13 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 {
-	if (! inst.edit.draw_from.valid())
+	if (! inst.edit.drawLine.from.valid())
 		return;
 
-	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num];
+	const Vertex *V = inst.level.vertices[inst.edit.drawLine.from.num];
 
-	double dx = inst.edit.draw_to_x - V->x();
-	double dy = inst.edit.draw_to_y - V->y();
+	double dx = inst.edit.drawLine.to.x - V->x();
+	double dy = inst.edit.drawLine.to.y - V->y();
 
 	// show a ratio value
 	FFixedPoint fdx = FFixedPoint(dx);

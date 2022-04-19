@@ -171,10 +171,10 @@ static void UpdatePanel(const Instance &inst)
 
 void Instance::UpdateDrawLine()
 {
-	if (edit.action != EditorAction::drawLine || edit.draw_from.is_nil())
+	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex *V = level.vertices[edit.draw_from.num];
+	const Vertex *V = level.vertices[edit.drawLine.from.num];
 
 	v2double_t newpos = edit.map.xy;
 
@@ -195,8 +195,8 @@ void Instance::UpdateDrawLine()
 		newpos = grid.Snap(newpos);
 	}
 
-	edit.draw_to_x = newpos.x;
-	edit.draw_to_y = newpos.y;
+	edit.drawLine.to.x = newpos.x;
+	edit.drawLine.to.y = newpos.y;
 
 	// when drawing mode, highlight a vertex at the snap position
 	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
@@ -209,8 +209,8 @@ void Instance::UpdateDrawLine()
 	}
 
 	// never highlight the vertex we are drawing from
-	if (edit.draw_from.valid() &&
-		edit.draw_from == edit.highlight)
+	if (edit.drawLine.from.valid() &&
+		edit.drawLine.from == edit.highlight)
 	{
 		edit.highlight.clear();
 	}
@@ -274,7 +274,7 @@ void Instance::UpdateHighlight()
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			const Vertex *V = level.vertices[edit.highlight.num];
-			const Vertex *S = level.vertices[edit.draw_from.num];
+			const Vertex *S = level.vertices[edit.drawLine.from.num];
 
 			v2double_t vpos = V->xy();
 
@@ -427,7 +427,7 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 		recalc_map_bounds = true;
 
 		if (edit.action == EditorAction::drawLine &&
-			edit.draw_from.num == objnum)
+			edit.drawLine.from.num == objnum)
 		{
 			Editor_ClearAction();
 		}
@@ -1279,7 +1279,7 @@ void Instance::Editor_DefaultState()
 	edit.is_panning = false;
 
 	edit.dragged.clear();
-	edit.draw_from.clear();
+	edit.drawLine.from.clear();
 
 	edit.error_mode = false;
 	edit.show_object_numbers = false;

@@ -412,10 +412,10 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	// are we drawing a line?
 	if (inst.edit.action == EditorAction::drawLine)
 	{
-		old_vert = inst.edit.draw_from.num;
+		old_vert = inst.edit.drawLine.from.num;
 
-		new_x = inst.edit.draw_to_x;
-		new_y = inst.edit.draw_to_y;
+		new_x = inst.edit.drawLine.to.x;
+		new_y = inst.edit.drawLine.to.y;
 	}
 
 	// a linedef which we are splitting (usually none)
@@ -482,7 +482,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			if (doc.linemod.linedefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+				inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 				inst.edit.Selected->set(new_vert);
 				return;
 			}
@@ -512,7 +512,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			V->SetRawXY(inst, { new_x, new_y });
 
-			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
 
 			// splitting an existing line?
@@ -552,7 +552,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			op.setMessage("added linedef");
 
-			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
 		}
 	}
@@ -565,11 +565,11 @@ begin_drawing:
 	{
 		inst.Selection_Clear();
 
-		inst.edit.draw_from = Objid(ObjType::vertices, old_vert);
+		inst.edit.drawLine.from = Objid(ObjType::vertices, old_vert);
 		inst.edit.Selected->set(old_vert);
 
-		inst.edit.draw_to_x = doc.vertices[old_vert]->x();
-		inst.edit.draw_to_y = doc.vertices[old_vert]->y();
+		inst.edit.drawLine.to.x = doc.vertices[old_vert]->x();
+		inst.edit.drawLine.to.y = doc.vertices[old_vert]->y();
 
 		inst.Editor_SetAction(EditorAction::drawLine);
 	}

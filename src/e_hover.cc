@@ -490,7 +490,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 
 	if(inst.grid.ratio > 0 && inst.edit.action == EditorAction::drawLine)
 	{
-		const Vertex *V = doc.vertices[inst.edit.draw_from.num];
+		const Vertex *V = doc.vertices[inst.edit.drawLine.from.num];
 
 		// convert ratio into a vector, use it to intersect the linedef
 		v2double_t ppos1 = V->xy();

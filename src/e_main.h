@@ -60,6 +60,15 @@ enum class SelectHighlight
 };
 
 //
+// line drawing stuff (EditorAction::drawLine)
+//
+struct DrawLineState
+{
+	Objid from;	// the vertex we are drawing a line from
+	v2double_t to;	// target coordinate of current line
+};
+
+//
 // this holds some important editor state
 //
 struct Editor_State_t
@@ -126,11 +135,7 @@ struct Editor_State_t
 
 
 	/* line drawing stuff (EditorAction::drawLine) */
-
-	Objid draw_from;  // the vertex we are drawing a line from
-
-	double draw_to_x, draw_to_y;  // target coordinate of current line
-
+	DrawLineState drawLine;
 
 	/* selection-box stuff (EditorAction::selbox) */
 

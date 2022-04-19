@@ -444,7 +444,7 @@ void Instance::EV_EscapeKey()
 	edit.clicked.clear();
 	edit.dragged.clear();
 	edit.split_line.clear();
-	edit.draw_from.clear();
+	edit.drawLine.from.clear();
 
 	UpdateHighlight();
 	RedrawMap();
