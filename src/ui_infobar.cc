@@ -653,12 +653,11 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 
 	const Vertex *V = inst.level.vertices[inst.edit.drawLine.from.num];
 
-	double dx = inst.edit.drawLine.to.x - V->x();
-	double dy = inst.edit.drawLine.to.y - V->y();
+	v2double_t dv = inst.edit.drawLine.to - V->xy();
 
 	// show a ratio value
-	FFixedPoint fdx = FFixedPoint(dx);
-	FFixedPoint fdy = FFixedPoint(dy);
+	FFixedPoint fdx = FFixedPoint(dv.x);
+	FFixedPoint fdy = FFixedPoint(dv.y);
 
 	SString ratio_name = LD_RatioName(fdx, fdy, false);
 
@@ -667,8 +666,8 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 
 	cx = std::max(cx+12, old_cx + 170);
 
-	IB_Coord(cx, cy, "delta x", static_cast<float>(dx));
-	IB_Coord(cx, cy,       "y", static_cast<float>(dy));
+	IB_Coord(cx, cy, "delta x", static_cast<float>(dv.x));
+	IB_Coord(cx, cy,       "y", static_cast<float>(dv.y));
 }
 
 

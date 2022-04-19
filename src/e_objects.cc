@@ -403,8 +403,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	int old_vert = -1;
 	int new_vert = -1;
 
-	double new_x = inst.grid.SnapX(inst.edit.map.x);
-	double new_y = inst.grid.SnapY(inst.edit.map.y);
+	v2double_t newpos = inst.grid.Snap(inst.edit.map.xy);
 
 	int orig_num_sectors = doc.numSectors();
 
@@ -414,8 +413,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	{
 		old_vert = inst.edit.drawLine.from.num;
 
-		new_x = inst.edit.drawLine.to.x;
-		new_y = inst.edit.drawLine.to.y;
+		newpos = inst.edit.drawLine.to;
 	}
 
 	// a linedef which we are splitting (usually none)
@@ -423,8 +421,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	if (split_ld >= 0)
 	{
-		new_x = inst.edit.split.x;
-		new_y = inst.edit.split.y;
+		newpos = inst.edit.split;
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
@@ -443,7 +440,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		// if no highlight, look for a vertex at snapped coord
 		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == EditorAction::drawLine))
-			new_vert = doc.vertmod.findExact(FFixedPoint(new_x), FFixedPoint(new_y));
+			new_vert = doc.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -494,7 +491,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	// would we create a new vertex on top of an existing one?
 	if (new_vert < 0 && old_vert >= 0 &&
-		doc.vertices[old_vert]->Matches(MakeValidCoord(inst.loaded.levelFormat, new_x), MakeValidCoord(inst.loaded.levelFormat, new_y)))
+		doc.vertices[old_vert]->Matches(MakeValidCoord(inst.loaded.levelFormat, newpos.x), MakeValidCoord(inst.loaded.levelFormat, newpos.y)))
 	{
 		inst.edit.Selected->set(old_vert);
 		return;
@@ -510,7 +507,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			Vertex *V = doc.vertices[new_vert];
 
-			V->SetRawXY(inst, { new_x, new_y });
+			V->SetRawXY(inst, newpos);
 
 			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
@@ -568,8 +565,7 @@ begin_drawing:
 		inst.edit.drawLine.from = Objid(ObjType::vertices, old_vert);
 		inst.edit.Selected->set(old_vert);
 
-		inst.edit.drawLine.to.x = doc.vertices[old_vert]->x();
-		inst.edit.drawLine.to.y = doc.vertices[old_vert]->y();
+		inst.edit.drawLine.to = doc.vertices[old_vert]->xy();
 
 		inst.Editor_SetAction(EditorAction::drawLine);
 	}

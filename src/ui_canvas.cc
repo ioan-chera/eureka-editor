@@ -2074,27 +2074,26 @@ void UI_Canvas::DrawCurrentLine()
 
 	const Vertex * V = inst.level.vertices[inst.edit.drawLine.from.num];
 
-	double new_x = inst.edit.drawLine.to.x;
-	double new_y = inst.edit.drawLine.to.y;
+	v2double_t newpos = inst.edit.drawLine.to;
 
 	// should draw a vertex?
 	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
 	{
 		RenderColor(FL_GREEN);
-		DrawVertex(new_x, new_y, vertex_radius(inst.grid.Scale));
+		DrawVertex(newpos.x, newpos.y, vertex_radius(inst.grid.Scale));
 	}
 
 	RenderColor(RED);
-	DrawKnobbyLine(V->x(), V->y(), new_x, new_y);
+	DrawKnobbyLine(V->x(), V->y(), newpos.x, newpos.y);
 
-	DrawLineInfo(V->x(), V->y(), new_x, new_y, inst.grid.ratio > 0);
+	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.ratio > 0);
 
 	// draw all the crossing points
 	crossing_state_c cross(inst);
 
 	inst.level.hover.findCrossingPoints(cross,
 					   V->xy(), inst.edit.drawLine.from.num,
-		{ new_x, new_y }, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
+		newpos, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{

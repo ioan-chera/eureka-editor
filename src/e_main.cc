@@ -195,8 +195,7 @@ void Instance::UpdateDrawLine()
 		newpos = grid.Snap(newpos);
 	}
 
-	edit.drawLine.to.x = newpos.x;
-	edit.drawLine.to.y = newpos.y;
+	edit.drawLine.to = newpos;
 
 	// when drawing mode, highlight a vertex at the snap position
 	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
