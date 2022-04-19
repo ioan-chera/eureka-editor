@@ -129,7 +129,7 @@ static void UpdatePanel(const Instance &inst)
 	int obj_count = inst.edit.Selected->count_obj();
 
 	// the highlight is usually turned off when dragging, so compensate
-	if (obj_idx < 0 && inst.edit.action == ACT_DRAG)
+	if (obj_idx < 0 && inst.edit.action == EditorAction::drag)
 		obj_idx = inst.edit.dragged.num;
 
 	if (obj_idx >= 0)
@@ -171,7 +171,7 @@ static void UpdatePanel(const Instance &inst)
 
 void Instance::UpdateDrawLine()
 {
-	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
+	if (edit.action != EditorAction::drawLine || edit.draw_from.is_nil())
 		return;
 
 	const Vertex *V = level.vertices[edit.draw_from.num];
@@ -222,7 +222,7 @@ static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 	inst.edit.split_line.clear();
 
 	// splitting usually disabled while dragging stuff, EXCEPT a single vertex
-	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
+	if (inst.edit.action == EditorAction::drag && inst.edit.dragged.is_nil())
 		goto done;
 
 	// in vertex mode, see if there is a linedef which would be split by
@@ -257,12 +257,12 @@ void Instance::UpdateHighlight()
 
 	// don't highlight when dragging, EXCEPT when dragging a single vertex
 	if (edit.pointer_in_window &&
-	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
+	    (edit.action != EditorAction::drag || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
 		edit.highlight = level.hover.getNearbyObject(edit.mode, edit.map.xy);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
+		if (edit.action == EditorAction::drag && edit.dragged.valid() &&
 			edit.highlight.valid() && edit.dragged.num == edit.highlight.num)
 		{
 			edit.highlight.clear();
@@ -270,7 +270,7 @@ void Instance::UpdateHighlight()
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
+		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			const Vertex *V = level.vertices[edit.highlight.num];
@@ -426,7 +426,7 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 	{
 		recalc_map_bounds = true;
 
-		if (edit.action == ACT_DRAW_LINE &&
+		if (edit.action == EditorAction::drawLine &&
 			edit.draw_from.num == objnum)
 		{
 			Editor_ClearAction();
@@ -1274,7 +1274,7 @@ void Instance::Editor_Init()
 
 void Instance::Editor_DefaultState()
 {
-	edit.action = ACT_NOTHING;
+	edit.action = EditorAction::nothing;
 	edit.sticky_mod = 0;
 	edit.is_panning = false;
 

@@ -488,7 +488,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 
 	double len = (v2 - v1).hypot();
 
-	if(inst.grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE)
+	if(inst.grid.ratio > 0 && inst.edit.action == EditorAction::drawLine)
 	{
 		const Vertex *V = doc.vertices[inst.edit.draw_from.num];
 

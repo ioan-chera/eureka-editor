@@ -50,10 +50,10 @@ void Instance::Editor_ClearAction()
 {
 	switch (edit.action)
 	{
-		case ACT_NOTHING:
+		case EditorAction::nothing:
 			return;
 
-		case ACT_ADJUST_OFS:
+		case EditorAction::adjustOfs:
 			main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
 
@@ -62,11 +62,11 @@ void Instance::Editor_ClearAction()
 			break;
 	}
 
-	edit.action = ACT_NOTHING;
+	edit.action = EditorAction::nothing;
 }
 
 
-void Instance::Editor_SetAction(editor_action_e  new_action)
+void Instance::Editor_SetAction(EditorAction  new_action)
 {
 	Editor_ClearAction();
 
@@ -74,10 +74,10 @@ void Instance::Editor_SetAction(editor_action_e  new_action)
 
 	switch (edit.action)
 	{
-		case ACT_NOTHING:
+		case EditorAction::nothing:
 			return;
 
-		case ACT_ADJUST_OFS:
+		case EditorAction::adjustOfs:
 			mouse_last_x = Fl::event_x();
 			mouse_last_y = Fl::event_y();
 
@@ -426,7 +426,7 @@ void Instance::EV_LeaveWindow()
 	edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
-	if (edit.action == ACT_DRAW_LINE)
+	if (edit.action == EditorAction::drawLine)
 		Editor_ClearAction();
 
 	// this will update (disable) any current highlight
@@ -469,20 +469,20 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	main_win->info_bar->SetMouse(edit.map.x, edit.map.y);
 
-	if (edit.action == ACT_TRANSFORM)
+	if (edit.action == EditorAction::transform)
 	{
 		Transform_Update();
 		return;
 	}
 
-	if (edit.action == ACT_DRAW_LINE)
+	if (edit.action == EditorAction::drawLine)
 	{
 		// this calls UpdateHighlight() which updates inst.edit.draw_to_x/y
 		RedrawMap();
 		return;
 	}
 
-	if (edit.action == ACT_SELBOX)
+	if (edit.action == EditorAction::selbox)
 	{
 		edit.selbox2 = edit.map.xy;
 
@@ -490,7 +490,7 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	if (edit.action == ACT_DRAG)
+	if (edit.action == EditorAction::drag)
 	{
 		edit.drag_screen_dx = x - edit.click_screen_x;
 		edit.drag_screen_dy = y - edit.click_screen_y;
@@ -508,7 +508,7 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 
 	// begin dragging?
-	if (edit.action == ACT_CLICK)
+	if (edit.action == EditorAction::click)
 	{
 		CheckBeginDrag();
 	}

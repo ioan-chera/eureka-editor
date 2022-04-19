@@ -410,7 +410,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 
 	// are we drawing a line?
-	if (inst.edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == EditorAction::drawLine)
 	{
 		old_vert = inst.edit.draw_from.num;
 
@@ -442,7 +442,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			new_vert = inst.edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
+		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == EditorAction::drawLine))
 			new_vert = doc.vertmod.findExact(FFixedPoint(new_x), FFixedPoint(new_y));
 
 		//
@@ -459,7 +459,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			}
 
 			// a plain INSERT will attempt to fix a dangling vertex
-			if (inst.edit.action == ACT_NOTHING)
+			if (inst.edit.action == EditorAction::nothing)
 			{
 				if (doc.vertmod.tryFixDangler(new_vert))
 				{
@@ -560,7 +560,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 begin_drawing:
 	// begin drawing mode?
-	if (inst.edit.action == ACT_NOTHING && !closed_a_loop &&
+	if (inst.edit.action == EditorAction::nothing && !closed_a_loop &&
 		old_vert >= 0 && new_vert < 0)
 	{
 		inst.Selection_Clear();
@@ -571,7 +571,7 @@ begin_drawing:
 		inst.edit.draw_to_x = doc.vertices[old_vert]->x();
 		inst.edit.draw_to_y = doc.vertices[old_vert]->y();
 
-		inst.Editor_SetAction(ACT_DRAW_LINE);
+		inst.Editor_SetAction(EditorAction::drawLine);
 	}
 
 	// stop drawing mode?

@@ -72,7 +72,7 @@ struct Editor_State_t
 
 	bool render3d;     // 3D view is active
 
-	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
+	EditorAction  action;  // an in-progress action, usually EditorAction::nothing
 
 	keycode_t sticky_mod;  // if != 0, waiting for next key  (fake meta)
 
@@ -112,7 +112,7 @@ struct Editor_State_t
 	bool  panning_lax;
 
 
-	/* click stuff (ACT_CLICK) */
+	/* click stuff (EditorAction::click) */
 
 	Objid clicked;    // object under the pointer when ACT_Click occurred
 
@@ -125,20 +125,20 @@ struct Editor_State_t
 	bool click_force_single;
 
 
-	/* line drawing stuff (ACT_DRAW_LINE) */
+	/* line drawing stuff (EditorAction::drawLine) */
 
 	Objid draw_from;  // the vertex we are drawing a line from
 
 	double draw_to_x, draw_to_y;  // target coordinate of current line
 
 
-	/* selection-box stuff (ACT_SELBOX) */
+	/* selection-box stuff (EditorAction::selbox) */
 
 	v2double_t selbox1;  // map coords
 	v2double_t selbox2;
 
 
-	/* transforming state (ACT_TRANSFORM) */
+	/* transforming state (EditorAction::transform) */
 
 	v2double_t trans_start;
 
@@ -148,7 +148,7 @@ struct Editor_State_t
 	selection_c *trans_lines;
 
 
-	/* dragging state (ACT_DRAG) */
+	/* dragging state (EditorAction::drag) */
 
 	Objid dragged;    // the object we are dragging, or nil for whole selection
 
@@ -169,7 +169,7 @@ struct Editor_State_t
 	selection_c *drag_lines;
 
 
-	/* adjusting state (ACT_ADJUST_OFS) */
+	/* adjusting state (EditorAction::adjustOfs) */
 
 	float adjust_dx, adjust_dy;
 	bool  adjust_lax;

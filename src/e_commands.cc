@@ -120,8 +120,8 @@ void Instance::CMD_UnselectAll()
 {
 	Editor_ClearErrorMode();
 
-	if (edit.action == ACT_DRAW_LINE ||
-		edit.action == ACT_TRANSFORM)
+	if (edit.action == EditorAction::drawLine ||
+		edit.action == EditorAction::transform)
 	{
 		Editor_ClearAction();
 	}
@@ -582,7 +582,7 @@ void Instance::DoBeginDrag()
 
 	edit.clicked.clear();
 
-	Editor_SetAction(ACT_DRAG);
+	Editor_SetAction(EditorAction::drag);
 
 	main_win->canvas->redraw();
 }
@@ -591,7 +591,7 @@ void Instance::DoBeginDrag()
 void Instance::ACT_SelectBox_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_SELBOX)
+	if (edit.action != EditorAction::selbox)
 		return;
 
 	Editor_ClearAction();
@@ -613,7 +613,7 @@ void Instance::ACT_SelectBox_release()
 void Instance::ACT_Drag_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_DRAG)
+	if (edit.action != EditorAction::drag)
 	{
 		edit.dragged.clear();
 		return;
@@ -659,19 +659,19 @@ void Instance::ACT_Click_release()
 	edit.click_check_drag = false;
 
 
-	if (edit.action == ACT_SELBOX)
+	if (edit.action == EditorAction::selbox)
 	{
 		ACT_SelectBox_release();
 		return;
 	}
-	else if (edit.action == ACT_DRAG)
+	else if (edit.action == EditorAction::drag)
 	{
 		ACT_Drag_release();
 		return;
 	}
 
 	// check if cancelled or overridden
-	if (edit.action != ACT_CLICK)
+	if (edit.action != EditorAction::click)
 		return;
 
 	if (edit.click_check_select && click_obj.valid())
@@ -729,7 +729,7 @@ void Instance::CMD_ACT_Click()
 		}
 
 		edit.clicked = edit.highlight;
-		Editor_SetAction(ACT_CLICK);
+		Editor_SetAction(EditorAction::click);
 		return;
 	}
 
@@ -737,7 +737,7 @@ void Instance::CMD_ACT_Click()
 	if (! Exec_HasFlag("/nosplit") &&
 		edit.mode == ObjType::vertices &&
 		edit.split_line.valid() &&
-		edit.action != ACT_DRAW_LINE)
+		edit.action != EditorAction::drawLine)
 	{
 		int split_ld = edit.split_line.num;
 
@@ -767,7 +767,7 @@ void Instance::CMD_ACT_Click()
 			edit.Selected->set(new_vert);
 
 		edit.clicked = Objid(ObjType::vertices, new_vert);
-		Editor_SetAction(ACT_CLICK);
+		Editor_SetAction(EditorAction::click);
 
 		RedrawMap();
 		return;
@@ -781,11 +781,11 @@ void Instance::CMD_ACT_Click()
 	{
 		edit.selbox1 = edit.selbox2 = edit.map.xy;
 
-		Editor_SetAction(ACT_SELBOX);
+		Editor_SetAction(EditorAction::selbox);
 		return;
 	}
 
-	Editor_SetAction(ACT_CLICK);
+	Editor_SetAction(EditorAction::click);
 }
 
 
@@ -802,7 +802,7 @@ void Instance::CMD_ACT_SelectBox()
 
 	edit.selbox1 = edit.selbox2 = edit.map.xy;
 
-	Editor_SetAction(ACT_SELBOX);
+	Editor_SetAction(EditorAction::selbox);
 }
 
 
@@ -891,7 +891,7 @@ void Instance::Transform_Update()
 void Instance::ACT_Transform_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_TRANSFORM)
+	if (edit.action != EditorAction::transform)
 		return;
 
 	if (edit.trans_lines)
@@ -977,7 +977,7 @@ void Instance::CMD_ACT_Transform()
 		ConvertSelection(level, *edit.Selected, *edit.trans_lines);
 	}
 
-	Editor_SetAction(ACT_TRANSFORM);
+	Editor_SetAction(EditorAction::transform);
 }
 
 

@@ -336,12 +336,12 @@ void UI_Canvas::DrawEverything()
 
 	DrawSelection(inst.edit.Selected);
 
-	if (inst.edit.action == ACT_DRAG && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
+	if (inst.edit.action == EditorAction::drag && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
 		DrawSelection(inst.edit.drag_lines);
-	else if (inst.edit.action == ACT_TRANSFORM && inst.edit.trans_lines != NULL)
+	else if (inst.edit.action == EditorAction::transform && inst.edit.trans_lines != NULL)
 		DrawSelection(inst.edit.trans_lines);
 
-	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+	if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 	{
 		v2double_t delta = DragDelta();
 
@@ -377,7 +377,7 @@ void UI_Canvas::DrawEverything()
 	}
 	else if (inst.edit.highlight.valid())
 	{
-		if (inst.edit.action != ACT_DRAW_LINE && inst.edit.Selected->get(inst.edit.highlight.num))
+		if (inst.edit.action != EditorAction::drawLine && inst.edit.Selected->get(inst.edit.highlight.num))
 			RenderColor(HI_AND_SEL_COL);
 		else
 			RenderColor(HI_COL);
@@ -402,10 +402,10 @@ void UI_Canvas::DrawEverything()
 		RenderThickness(1);
 	}
 
-	if (inst.edit.action == ACT_SELBOX)
+	if (inst.edit.action == EditorAction::selbox)
 		SelboxDraw();
 
-	if (inst.edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == EditorAction::drawLine)
 		DrawCurrentLine();
 }
 
@@ -1765,7 +1765,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	if (! list || list->empty())
 		return;
 
-	if (inst.edit.action == ACT_TRANSFORM)
+	if (inst.edit.action == EditorAction::transform)
 	{
 		RenderColor(SEL_COL);
 
@@ -1783,7 +1783,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	v2double_t delta = {};
 
-	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
+	if (inst.edit.action == EditorAction::drag && inst.edit.dragged.is_nil())
 	{
 		delta = DragDelta();
 	}
@@ -2048,7 +2048,7 @@ void UI_Canvas::DrawCamera()
 void UI_Canvas::DrawSnapPoint()
 {
 	// don't draw if an action is occurring
-	if (inst.edit.action != ACT_NOTHING)
+	if (inst.edit.action != EditorAction::nothing)
 		return;
 
 	if (inst.edit.split_line.valid())

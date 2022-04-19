@@ -236,7 +236,7 @@ public:
 	void ClearStickyMod();
 	void Editor_ClearNav();
 	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
-	void Editor_SetAction(editor_action_e new_action);
+	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();
 	int EV_HandleEvent(int event);
 	void M_LoadOperationMenus();

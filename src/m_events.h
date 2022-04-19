@@ -31,16 +31,16 @@
 
 #define MAX_NAV_ACTIVE_KEYS  20
 
-enum editor_action_e
+enum class EditorAction
 {
-	ACT_NOTHING = 0,
+	nothing,
 
-	ACT_CLICK,			// user has clicked on something
-	ACT_SELBOX,			// user is outlining a selection box
-	ACT_DRAG,			// user is dragging some objects
-	ACT_TRANSFORM,		// user is scaling/rotating some objects
-	ACT_ADJUST_OFS,		// user is adjusting the offsets on a sidedef
-	ACT_DRAW_LINE,		// user is drawing a new line
+	click,			// user has clicked on something
+	selbox,			// user is outlining a selection box
+	drag,			// user is dragging some objects
+	transform,		// user is scaling/rotating some objects
+	adjustOfs,		// user is adjusting the offsets on a sidedef
+	drawLine,		// user is drawing a new line
 };
 
 typedef void (Instance:: *nav_release_func_t)();
@@ -59,8 +59,6 @@ struct nav_active_key_t
 	keycode_t  lax_mod;
 
 };
-
-void Editor_SetAction(Instance &inst, editor_action_e new_action);
 
 void Editor_UpdateFromScroll();
 

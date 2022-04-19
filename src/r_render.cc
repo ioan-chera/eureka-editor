@@ -510,7 +510,7 @@ static void AdjustOfs_Begin(Instance &inst)
 
 	inst.edit.adjust_lax = inst.Exec_HasFlag("/LAX");
 
-	inst.Editor_SetAction(ACT_ADJUST_OFS);
+	inst.Editor_SetAction(EditorAction::adjustOfs);
 }
 
 static void AdjustOfs_Finish(Instance &inst)
@@ -576,7 +576,7 @@ static void AdjustOfs_Delta(Instance &inst, int dx, int dy)
 
 static void AdjustOfs_RenderAnte(const Instance &inst)
 {
-	if (inst.edit.action == ACT_ADJUST_OFS && inst.edit.adjust_bucket)
+	if (inst.edit.action == EditorAction::adjustOfs && inst.edit.adjust_bucket)
 	{
 		int dx = iround(inst.edit.adjust_dx);
 		int dy = iround(inst.edit.adjust_dy);
@@ -589,7 +589,7 @@ static void AdjustOfs_RenderAnte(const Instance &inst)
 
 static void AdjustOfs_RenderPost(const Instance &inst)
 {
-	if (inst.edit.action == ACT_ADJUST_OFS && inst.edit.adjust_bucket)
+	if (inst.edit.action == EditorAction::adjustOfs && inst.edit.adjust_bucket)
 	{
 		inst.edit.adjust_bucket->RestoreAll();
 	}
@@ -977,17 +977,17 @@ void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		Editor_ScrollMap(0, dx, dy, mod);
 		return;
 	}
-	else if (edit.action == ACT_ADJUST_OFS)
+	else if (edit.action == EditorAction::adjustOfs)
 	{
 		AdjustOfs_Delta(*this, dx, dy);
 		return;
 	}
 
-	if (edit.action == ACT_CLICK)
+	if (edit.action == EditorAction::click)
 	{
 		CheckBeginDrag();
 	}
-	else if (edit.action == ACT_DRAG)
+	else if (edit.action == EditorAction::drag)
 	{
 		// get the latest map_x/y/z coordinates
 		Objid unused_hl;
@@ -1020,7 +1020,7 @@ void Instance::Render3D_UpdateHighlight()
 	edit.split_line.clear();
 
 	if (edit.pointer_in_window && r_view.mouse_x >= 0 &&
-		edit.action != ACT_DRAG)
+		edit.action != EditorAction::drag)
 	{
 		Objid current_hl;
 
@@ -1796,7 +1796,7 @@ void Instance::R3D_NAV_TurnRight()
 void Instance::ACT_AdjustOfs_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_ADJUST_OFS)
+	if (edit.action != EditorAction::adjustOfs)
 		return;
 
 	AdjustOfs_Finish(*this);

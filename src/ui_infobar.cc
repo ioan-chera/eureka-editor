@@ -466,7 +466,7 @@ void UI_StatusBar::draw()
 		IB_Number(cx, cy, "z", iround(inst.r_view.z) - inst.conf.miscInfo.view_height, 4);
 
 		// use less space when an action is occurring
-		if (inst.edit.action == ACT_NOTHING)
+		if (inst.edit.action == EditorAction::nothing)
 		{
 			int ang = iround(inst.r_view.angle * 180 / M_PI);
 			if (ang < 0) ang += 360;
@@ -507,19 +507,19 @@ void UI_StatusBar::draw()
 
 	switch (inst.edit.action)
 	{
-	case ACT_DRAG:
+	case EditorAction::drag:
 		IB_ShowDrag(cx, cy);
 		break;
 
-	case ACT_TRANSFORM:
+	case EditorAction::transform:
 		IB_ShowTransform(cx, cy);
 		break;
 
-	case ACT_ADJUST_OFS:
+	case EditorAction::adjustOfs:
 		IB_ShowOffsets(cx, cy);
 		break;
 
-	case ACT_DRAW_LINE:
+	case EditorAction::drawLine:
 		IB_ShowDrawLine(cx, cy);
 		break;
 

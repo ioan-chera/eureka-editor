@@ -1404,7 +1404,7 @@ public:
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
 		// are we dragging this surface?
-		if (inst.edit.action == ACT_DRAG &&
+		if (inst.edit.action == EditorAction::drag &&
 			(!inst.edit.dragged.valid() ||
 			 (inst.edit.dragged.num == sec_index &&
 			  (inst.edit.dragged.parts == 0 || (inst.edit.dragged.parts & part)) )))
@@ -1445,7 +1445,7 @@ public:
 
 		float drag_dz = 0;
 
-		if (inst.edit.action == ACT_DRAG &&
+		if (inst.edit.action == EditorAction::drag &&
 			(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 		{
 			tx += static_cast<float>(inst.edit.drag_cur.x - inst.edit.drag_start.x);
@@ -1588,7 +1588,7 @@ public:
 
 		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-		if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+		if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 			HighlightObject(inst.edit.dragged);
 		else
 			HighlightObject(inst.edit.highlight);
