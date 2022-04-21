@@ -49,11 +49,8 @@ selection_c::selection_c(ObjType type, bool extended) : type(type)
 
 selection_c::~selection_c()
 {
-	if (bv)
-		delete bv;
-
-	if (extended)
-		delete[] extended;
+	delete bv;
+	delete[] extended;
 }
 
 
