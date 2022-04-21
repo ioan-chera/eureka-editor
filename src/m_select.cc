@@ -26,10 +26,9 @@
 
 #include "Errors.h"
 
-#include "main.h"
+#include "sys_debug.h"
 
 #include "m_select.h"
-#include "e_objects.h"
 
 
 //#define NEED_SLOW_CLEAR
