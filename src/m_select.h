@@ -124,8 +124,6 @@ private:
 
 class sel_iter_c
 {
-friend class selection_c;
-
 private:
 	const selection_c *sel = nullptr;
 
@@ -135,14 +133,12 @@ private:
 	int pos = -777777;	// dummy values -- cannot use a bare iterator
 
 public:
-	sel_iter_c() = default;
-	sel_iter_c(const sel_iter_c& other) = default;
 
 	// creates an iterator object for iterating over all the
 	// object numbers contained in the given selection.
 	// NOTE: modifying the selection is NOT ALLOWED during a traversal.
-	sel_iter_c(const selection_c *_sel);
-	sel_iter_c(const selection_c& _sel);
+	explicit sel_iter_c(const selection_c *_sel);
+	explicit sel_iter_c(const selection_c& _sel);
 
 	bool done() const;
 	void next();
