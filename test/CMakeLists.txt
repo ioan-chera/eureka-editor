@@ -151,6 +151,7 @@ unit_test(independent
     lib_util_test.cpp
     m_bitvec_test.cpp
     m_parse_test.cpp
+    m_select_test.cpp
     m_streams_test.cpp
     SafeOutFileTest.cpp
     SideTest.cpp
@@ -160,6 +161,7 @@ unit_test(independent
     ThingTest.cpp
     SRC m_bitvec.cc
         m_parse.cc
+        m_select.cc
         m_streams.cc
         SafeOutFile.cc
 )
