@@ -385,6 +385,49 @@ TEST(MSelect, FrobRange)
 	ASSERT_TRUE(selection.get(10));
 }
 
-// TODO: extended lists, frob, set operations, finding 1st and 2nd, iterators
+TEST(MSelect, Merge)
+{
+	selection_c selection;
+	selection.set(2);
+	selection.set(3);
+	selection.set(5);
+
+	selection_c selection2;
+	selection2.set(5);
+	selection2.set(9);
+	selection2.set(1);
+
+	selection.merge(selection2);
+	ASSERT_EQ(selection.count_obj(), 5);
+	ASSERT_TRUE(selection.get(2));
+	ASSERT_TRUE(selection.get(3));
+	ASSERT_TRUE(selection.get(5));
+	ASSERT_TRUE(selection.get(9));
+	ASSERT_TRUE(selection.get(1));
+}
+
+TEST(MSelect, MergeAllowsDifferentTypes)
+{
+	selection_c selection(ObjType::things);
+	selection.set(2);
+	selection.set(3);
+	selection.set(5);
+
+	selection_c selection2(ObjType::vertices);
+	selection2.set(5);
+	selection2.set(9);
+	selection2.set(1);
+
+	selection.merge(selection2);
+	ASSERT_EQ(selection.what_type(), ObjType::things);
+	ASSERT_EQ(selection.count_obj(), 5);
+	ASSERT_TRUE(selection.get(2));
+	ASSERT_TRUE(selection.get(3));
+	ASSERT_TRUE(selection.get(5));
+	ASSERT_TRUE(selection.get(9));
+	ASSERT_TRUE(selection.get(1));
+}
+
+// TODO: set operations, finding 1st and 2nd, iterators
 // TODO: MAX_STORE_SEL stability
 // TODO: extended list extension past its initial size
