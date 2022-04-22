@@ -342,8 +342,34 @@ TEST(MSelect, Frob)
 TEST(MSelect, FrobRange)
 {
 	selection_c selection;
+
 	selection.frob_range(1, 10, BitOp::add);
+	ASSERT_FALSE(selection.get(0));
+	ASSERT_TRUE(selection.get(1));
+	ASSERT_TRUE(selection.get(2));
+	ASSERT_TRUE(selection.get(3));
+	ASSERT_TRUE(selection.get(4));
+	ASSERT_TRUE(selection.get(5));
+	ASSERT_TRUE(selection.get(6));
+	ASSERT_TRUE(selection.get(7));
+	ASSERT_TRUE(selection.get(8));
+	ASSERT_TRUE(selection.get(9));
+	ASSERT_TRUE(selection.get(10));
+
 	selection.frob_range(3, 6, BitOp::remove);
+	ASSERT_FALSE(selection.get(0));
+	ASSERT_TRUE(selection.get(1));
+	ASSERT_TRUE(selection.get(2));
+	ASSERT_FALSE(selection.get(3));
+	ASSERT_FALSE(selection.get(4));
+	ASSERT_FALSE(selection.get(5));
+	ASSERT_FALSE(selection.get(6));
+	ASSERT_TRUE(selection.get(7));
+	ASSERT_TRUE(selection.get(8));
+	ASSERT_TRUE(selection.get(9));
+	ASSERT_TRUE(selection.get(10));
+
+
 	selection.frob_range(5, 9, BitOp::toggle);
 
 	ASSERT_FALSE(selection.get(0));
