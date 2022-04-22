@@ -462,6 +462,14 @@ TEST(MSelect, Unmerge)
 	selection.unmerge(selection2);
 	ASSERT_EQ(selection.count_obj(), 1);
 	ASSERT_TRUE(selection.get(2));
+
+	// restore it
+	selection.set(3);
+	selection.set(5);
+
+	selection2.unmerge(selection);
+	ASSERT_EQ(selection2.count_obj(), 1);
+	ASSERT_TRUE(selection2.get(1));
 }
 
 // TODO: set operations, finding 1st and 2nd, iterators
