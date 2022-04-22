@@ -62,6 +62,9 @@ private:
 	int first_obj = -1;
 
 public:
+	// since we don't use the copy constructor and the default is unsafe, let's hide it
+	selection_c(const selection_c &other) = delete;
+
 	 selection_c(ObjType type = ObjType::things, bool extended = false);
 	~selection_c();
 
