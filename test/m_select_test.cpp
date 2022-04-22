@@ -428,6 +428,42 @@ TEST(MSelect, MergeAllowsDifferentTypes)
 	ASSERT_TRUE(selection.get(1));
 }
 
+TEST(MSelect, MergingExtendedSelections)
+{
+	selection_c selection(ObjType::things, true);
+	selection.set_ext(2, 12);
+	selection.set_ext(3, 23);
+	selection.set_ext(5, 45);
+
+	selection_c selection2(ObjType::things, true);
+	selection2.set_ext(5, 67);
+	selection2.set_ext(3, 89);
+	selection2.set_ext(1, 90);
+
+	selection.merge(selection2);
+	ASSERT_EQ(selection.get_ext(2), 12);
+	ASSERT_EQ(selection.get_ext(3), 95);	// OR between the values
+	ASSERT_EQ(selection.get_ext(5), 111);	// OR between the values
+	ASSERT_EQ(selection.get_ext(1), 90);
+}
+
+TEST(MSelect, Unmerge)
+{
+	selection_c selection(ObjType::things, true);
+	selection.set(2);
+	selection.set(3);
+	selection.set(5);
+
+	selection_c selection2(ObjType::things, true);
+	selection2.set(5);
+	selection2.set(3);
+	selection2.set(1);
+
+	selection.unmerge(selection2);
+	ASSERT_EQ(selection.count_obj(), 1);
+	ASSERT_TRUE(selection.get(2));
+}
+
 // TODO: set operations, finding 1st and 2nd, iterators
 // TODO: MAX_STORE_SEL stability
 // TODO: extended list extension past its initial size
