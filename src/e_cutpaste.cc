@@ -104,22 +104,6 @@ public:
 		}
 	}
 
-	template<typename T>
-	v2double_t CentreOfPointObjects(const std::vector<T> &list) const
-	{
-		if (list.empty())
-			return {};
-
-		v2double_t sum = {};
-
-		for (const T &object : list)
-			sum += object.xy();
-
-		sum /= (double)list.size();
-
-		return sum;
-	}
-
 	bool HasSectorRefs(int s1, int s2)
 	{
 		if (! uses_real_sectors)
@@ -481,9 +465,26 @@ bool Instance::Clipboard_DoCopy()
 
 //------------------------------------------------------------------------
 
+template<typename T>
+static v2double_t CentreOfPointObjects(const std::vector<T> &list)
+{
+	if (list.empty())
+		return {};
+
+	v2double_t sum = {};
+
+	for (const T &object : list)
+		sum += object.xy();
+
+	sum /= (double)list.size();
+
+	return sum;
+}
+
+
 static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2double_t &pos)
 {
-	v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->verts);
+	v2double_t cpos = CentreOfPointObjects(clip_board->verts);
 
 	// these hold the mapping from clipboard index --> real index
 	std::map<int, int> vert_map;
@@ -678,7 +679,7 @@ bool Instance::Clipboard_DoPaste()
 		{
 			case ObjType::things:
 			{
-				v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->things);
+				v2double_t cpos = CentreOfPointObjects(clip_board->things);
 
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
@@ -696,7 +697,7 @@ bool Instance::Clipboard_DoPaste()
 
 			case ObjType::vertices:
 			{
-				v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->verts);
+				v2double_t cpos = CentreOfPointObjects(clip_board->verts);
 
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
