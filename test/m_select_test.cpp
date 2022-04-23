@@ -566,6 +566,63 @@ TEST(MSelect, FindFirstSecond)
 
 }
 
+TEST(MSelect, Iterator)
+{
+	selection_c selection;
+	selection.set(2);
+	selection.set(5);
+	selection.set(9);
+	selection.set(13);
+	selection.set(7);
+	selection.set(12);
+
+	selection_c checkSelection;
+	int runs = 0;
+	for(sel_iter_c iter(selection); !iter.done(); iter.next())
+	{
+		++runs;
+		checkSelection.set(*iter);
+		ASSERT_EQ(checkSelection.count_obj(), runs);
+		// Check that intersecting does nothing
+		checkSelection.intersect(selection);
+		ASSERT_EQ(checkSelection.count_obj(), runs);
+	}
+
+	// We ended up filling it
+	ASSERT_TRUE(checkSelection.test_equal(selection));
+}
+
+TEST(MSelect, IteratorExtended)
+{
+	selection_c selection(ObjType::things, true);
+	selection.set_ext(2, 12);
+	selection.set_ext(5, 23);
+	selection.set_ext(9, 34);
+	selection.set_ext(13, 45);
+	selection.set_ext(7, 56);
+	selection.set_ext(12, 67);
+
+	selection_c checkSelection(ObjType::things, true);
+	int runs = 0;
+	for(sel_iter_c iter(selection); !iter.done(); iter.next())
+	{
+		++runs;
+		checkSelection.set_ext(*iter, selection.get_ext(*iter));
+		ASSERT_EQ(checkSelection.count_obj(), runs);
+		// Check that intersecting does nothing
+		checkSelection.intersect(selection);
+		ASSERT_EQ(checkSelection.count_obj(), runs);
+	}
+
+	// Now check we preserve the content
+	ASSERT_EQ(checkSelection.get_ext(2), 12);
+	ASSERT_EQ(checkSelection.get_ext(5), 23);
+	ASSERT_EQ(checkSelection.get_ext(9), 34);
+	ASSERT_EQ(checkSelection.get_ext(13), 45);
+	ASSERT_EQ(checkSelection.get_ext(7), 56);
+	ASSERT_EQ(checkSelection.get_ext(12), 67);
+}
+
 // TODO: set operations, finding 1st and 2nd, iterators
 // TODO: MAX_STORE_SEL stability
 // TODO: extended list extension past its initial size
