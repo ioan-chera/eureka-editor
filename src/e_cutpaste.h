@@ -28,7 +28,6 @@ class selection_c;
 class SString;
 struct ConfigData;
 struct Document;
-class Instance;
 
 //
 // Edit menu command
