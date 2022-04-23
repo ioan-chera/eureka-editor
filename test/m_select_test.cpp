@@ -534,6 +534,38 @@ TEST(MSelect, Equality)
 
 	ASSERT_TRUE(selection.test_equal(selection2));
 }
+
+TEST(MSelect, FindFirstSecond)
+{
+	selection_c selection;
+	ASSERT_EQ(selection.find_first(), -1);
+	ASSERT_EQ(selection.find_second(), -1);
+
+	selection.set(4);
+	ASSERT_EQ(selection.find_first(), 4);
+	ASSERT_EQ(selection.find_second(), -1);
+
+	selection.set(2);
+	ASSERT_EQ(selection.find_first(), 4);	// we must keep the first selected
+	ASSERT_EQ(selection.find_second(), 2);
+
+	selection.set(5);
+	ASSERT_EQ(selection.find_first(), 4);
+	ASSERT_EQ(selection.find_second(), 2);
+
+	selection.clear(4);
+	// Once clearing, all bets are off about order
+	ASSERT_NE(selection.find_first(), -1);
+	ASSERT_NE(selection.find_second(), -1);
+	ASSERT_NE(selection.find_second(), selection.find_first());
+
+	selection.clear(2);
+
+	ASSERT_EQ(selection.find_first(), 5);
+	ASSERT_EQ(selection.find_second(), -1);
+
+}
+
 // TODO: set operations, finding 1st and 2nd, iterators
 // TODO: MAX_STORE_SEL stability
 // TODO: extended list extension past its initial size
