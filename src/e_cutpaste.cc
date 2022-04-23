@@ -19,31 +19,12 @@
 //------------------------------------------------------------------------
 
 #include "Instance.h"
-#include "main.h"
 
-#include <map>
-
-#include "e_basis.h"
-#include "e_cutpaste.h"
-#include "e_hover.h"
-#include "e_linedef.h"
-#include "e_main.h"
-#include "e_sector.h"
-#include "e_vertex.h"
-#include "Errors.h"
 #include "LineDef.h"
-#include "m_game.h"
-#include "e_objects.h"
-#include "r_grid.h"
-#include "r_render.h"
 #include "Sector.h"
 #include "SideDef.h"
 #include "Thing.h"
 #include "Vertex.h"
-#include "w_rawdef.h"
-
-#include "ui_window.h"
-
 
 #define INVALID_SECTOR  (-999999)
 
