@@ -623,6 +623,37 @@ TEST(MSelect, IteratorExtended)
 	ASSERT_EQ(checkSelection.get_ext(12), 67);
 }
 
-// TODO: set operations, finding 1st and 2nd, iterators
-// TODO: MAX_STORE_SEL stability
-// TODO: extended list extension past its initial size
+TEST(MSelect, InternalToBitvec)
+{
+	selection_c selection;
+	for(int i = 0; i < MAX_STORE_SEL * 2; ++i)
+		selection.set(i * i);
+
+	// Check everything got in
+	ASSERT_EQ(selection.count_obj(), MAX_STORE_SEL * 2);
+	for(int i = 0; i < MAX_STORE_SEL * 2; ++i)
+		ASSERT_TRUE(selection.get(i * i));
+}
+
+TEST(MSelect, BitvecRealloc)
+{
+	selection_c selection;
+	for(int i = 0; i < 2048; ++i)
+		selection.set(i);
+
+	ASSERT_EQ(selection.count_obj(), 2048);
+	for(int i = 0; i < 2048; ++i)
+		ASSERT_TRUE(selection.get(i));
+}
+
+TEST(MSelect, ExtendedSizeCanGrow)
+{
+	selection_c selection(ObjType::things, true);
+	// Must avoid setting ext to 0, so we still have 1024 selected
+	for(int i = 0; i < 1024; ++i)
+		selection.set_ext(i, static_cast<byte>((i * i + 1) % 256));
+
+	ASSERT_EQ(selection.count_obj(), 1024);
+	for(int i = 0; i < 1024; ++i)
+		ASSERT_EQ(selection.get_ext(i), static_cast<byte>((i * i + 1) % 256));
+}
