@@ -214,11 +214,8 @@ static bool clip_doing_paste;
 
 void Clipboard_Clear()
 {
-	if (clip_board)
-	{
-		delete clip_board;
-		clip_board = NULL;
-	}
+	delete clip_board;
+	clip_board = NULL;
 }
 
 
