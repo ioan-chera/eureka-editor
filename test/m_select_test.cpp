@@ -449,12 +449,12 @@ TEST(MSelect, MergingExtendedSelections)
 
 TEST(MSelect, Unmerge)
 {
-	selection_c selection(ObjType::things, true);
+	selection_c selection;
 	selection.set(2);
 	selection.set(3);
 	selection.set(5);
 
-	selection_c selection2(ObjType::things, true);
+	selection_c selection2;
 	selection2.set(5);
 	selection2.set(3);
 	selection2.set(1);
@@ -472,6 +472,68 @@ TEST(MSelect, Unmerge)
 	ASSERT_TRUE(selection2.get(1));
 }
 
+TEST(MSelect, Intersect)
+{
+	selection_c selection;
+	selection.set(2);
+	selection.set(3);
+	selection.set(5);
+
+	selection_c selection2;
+	selection2.set(5);
+	selection2.set(3);
+	selection2.set(1);
+
+	selection.intersect(selection2);
+
+	ASSERT_EQ(selection.count_obj(), 2);
+	ASSERT_TRUE(selection.get(3));
+	ASSERT_TRUE(selection.get(5));
+}
+
+TEST(MSelect, DifferentTypesAreNotEqual)
+{
+	selection_c selection(ObjType::things);
+	selection.set(2);
+	selection.set(3);
+	selection.set(5);
+
+	selection_c selection2(ObjType::vertices);
+	selection2.set(2);
+	selection2.set(3);
+	selection2.set(5);
+
+	ASSERT_FALSE(selection.test_equal(selection2));
+}
+
+TEST(MSelect, Inequality)
+{
+	selection_c selection;
+	selection.set(2);
+	selection.set(5);
+
+	selection_c selection2;
+	selection2.set(2);
+	selection2.set(3);
+	selection2.set(5);
+
+	ASSERT_FALSE(selection.test_equal(selection2));
+}
+
+TEST(MSelect, Equality)
+{
+	selection_c selection;
+	selection.set(2);
+	selection.set(3);
+	selection.set(5);
+
+	selection_c selection2;
+	selection2.set(2);
+	selection2.set(3);
+	selection2.set(5);
+
+	ASSERT_TRUE(selection.test_equal(selection2));
+}
 // TODO: set operations, finding 1st and 2nd, iterators
 // TODO: MAX_STORE_SEL stability
 // TODO: extended list extension past its initial size
