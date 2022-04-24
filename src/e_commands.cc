@@ -758,7 +758,7 @@ void Instance::CMD_ACT_Click()
 
 			Vertex *V = level.vertices[new_vert];
 
-			V->SetRawXY(*this, edit.split);
+			V->SetRawXY(loaded.levelFormat, edit.split);
 
 			level.linemod.splitLinedefAtVertex(op, split_ld, new_vert);
 		}

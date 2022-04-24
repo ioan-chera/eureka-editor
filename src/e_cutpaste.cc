@@ -473,7 +473,7 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 
 		*V = clip_board->verts[i];
 
-		V->SetRawXY(inst, V->xy() + pos - cpos);
+		V->SetRawXY(inst.loaded.levelFormat, V->xy() + pos - cpos);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
@@ -677,7 +677,7 @@ bool Instance::Clipboard_DoPaste()
 
 					*V = clip_board->verts[i];
 
-					V->SetRawXY(*this, V->xy() + pos - cpos);
+					V->SetRawXY(loaded.levelFormat, V->xy() + pos - cpos);
 				}
 				break;
 			}

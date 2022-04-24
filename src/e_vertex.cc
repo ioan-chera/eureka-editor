@@ -476,7 +476,7 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			{
 				int new_v = op.addNew(ObjType::vertices);
 
-				doc.vertices[new_v]->SetRawXY(inst, { new_x, new_y });
+				doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 				if (L->start == v_num)
 					op.changeLinedef(n, LineDef::F_START, new_v);
@@ -570,7 +570,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	doc.vertices[new_v]->SetRawXY(inst, { new_x, new_y });
+	doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())

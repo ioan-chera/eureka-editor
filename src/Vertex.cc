@@ -17,16 +17,15 @@
 //------------------------------------------------------------------------
 
 #include "Vertex.h"
-#include "Instance.h"
 
 //
 // Set raw x/y/height
 //
-void Vertex::SetRawX(const Instance &inst, double x)
+void Vertex::SetRawX(MapFormat format, double x)
 {
-	raw_x = MakeValidCoord(inst.loaded.levelFormat, x);
+	raw_x = MakeValidCoord(format, x);
 }
-void Vertex::SetRawY(const Instance &inst, double y)
+void Vertex::SetRawY(MapFormat format, double y)
 {
-	raw_y = MakeValidCoord(inst.loaded.levelFormat, y);
+	raw_y = MakeValidCoord(format, y);
 }

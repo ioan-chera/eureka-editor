@@ -1232,7 +1232,7 @@ void crossing_state_c::SplitAllLines(EditOperation &op)
 
 			Vertex *V = inst.level.vertices[points[i].vert];
 
-			V->SetRawXY(inst, { points[i].x, points[i].y });
+			V->SetRawXY(inst.loaded.levelFormat, { points[i].x, points[i].y });
 
 			inst.level.linemod.splitLinedefAtVertex(op, points[i].ld, points[i].vert);
 		}

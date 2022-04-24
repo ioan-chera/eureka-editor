@@ -102,8 +102,8 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 		int new_v = op.addNew(ObjType::vertices);
 		Vertex *V = doc.vertices[new_v];
 
-		V->SetRawX(inst, (i >= 2) ? x2 : x1);
-		V->SetRawY(inst, (i==1 || i==2) ? y2 : y1);
+		V->SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
+		V->SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
 
 		int new_sd = op.addNew(ObjType::sidedefs);
 
@@ -507,7 +507,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			Vertex *V = doc.vertices[new_vert];
 
-			V->SetRawXY(inst, newpos);
+			V->SetRawXY(inst.loaded.levelFormat, newpos);
 
 			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);

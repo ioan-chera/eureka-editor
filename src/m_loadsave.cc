@@ -96,8 +96,8 @@ void Instance::FreshLevel()
 		Vertex *v = new Vertex;
 		level.vertices.push_back(v);
 
-		v->SetRawX(*this, (i >= 2) ? 256 : -256);
-		v->SetRawY(*this, (i==1 || i==2) ? 256 :-256);
+		v->SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
+		v->SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
 		level.sidedefs.push_back(sd);

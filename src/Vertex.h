@@ -19,6 +19,7 @@
 #ifndef VERTEX_H_
 #define VERTEX_H_
 
+#include "e_basis.h"
 #include "FixedPoint.h"
 #include "m_vector.h"
 
@@ -47,13 +48,13 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(const Instance &inst, double x);
-	void SetRawY(const Instance &inst, double y);
+	void SetRawX(MapFormat format, double x);
+	void SetRawY(MapFormat format, double y);
 
-	void SetRawXY(const Instance &inst, const v2double_t &pos)
+	void SetRawXY(MapFormat format, const v2double_t &pos)
 	{
-		SetRawX(inst, pos.x);
-		SetRawY(inst, pos.y);
+		SetRawX(format, pos.x);
+		SetRawY(format, pos.y);
 	}
 
 	bool Matches(FFixedPoint ox, FFixedPoint oy) const
