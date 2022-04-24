@@ -453,7 +453,7 @@ static v2double_t CentreOfPointObjects(const std::vector<T> &list)
 }
 
 
-static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2double_t &pos)
+static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2double_t &pos)
 {
 	v2double_t cpos = CentreOfPointObjects(clip_board->verts);
 
@@ -467,19 +467,19 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		Vertex * V = inst.level.vertices[new_v];
+		Vertex * V = op.doc.vertices[new_v];
 
 		vert_map[i] = new_v;
 
 		*V = clip_board->verts[i];
 
-		V->SetRawXY(inst.loaded.levelFormat, V->xy() + pos - cpos);
+		V->SetRawXY(format, V->xy() + pos - cpos);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = op.addNew(ObjType::sectors);
-		Sector * S = inst.level.sectors[new_s];
+		Sector * S = op.doc.sectors[new_s];
 
 		sector_map[i] = new_s;
 
@@ -496,7 +496,7 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 		}
 
 		int new_sd = op.addNew(ObjType::sidedefs);
-		SideDef * SD = inst.level.sidedefs[new_sd];
+		SideDef * SD = op.doc.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
@@ -513,7 +513,7 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
 		int new_l = op.addNew(ObjType::linedefs);
-		LineDef * L = inst.level.linedefs[new_l];
+		LineDef * L = op.doc.linedefs[new_l];
 
 		*L = clip_board->lines[i];
 
@@ -525,37 +525,37 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->Right(inst.level))
+		if (L->Right(op.doc))
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
 		}
 
-		if (L->Left(inst.level))
+		if (L->Left(op.doc))
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
 		}
 
 		// flip linedef if necessary
-		if (L->Left(inst.level) && ! L->Right(inst.level))
+		if (L->Left(op.doc) && ! L->Right(op.doc))
 		{
-			inst.level.linemod.flipLinedef(op, new_l);
+			op.doc.linemod.flipLinedef(op, new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(L->Right(inst.level)->MidTex()))
-			inst.level.linemod.fixForLostSide(op, new_l);
+		if (L->OneSided() && is_null_tex(L->Right(op.doc)->MidTex()))
+			op.doc.linemod.fixForLostSide(op, new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = op.addNew(ObjType::things);
-		Thing * T = inst.level.things[new_t];
+		Thing * T = op.doc.things[new_t];
 
 		*T = clip_board->things[i];
 
-		T->SetRawXY(inst.loaded.levelFormat, T->xy() + pos - cpos);
+		T->SetRawXY(format, T->xy() + pos - cpos);
 	}
 }
 
@@ -685,7 +685,7 @@ bool Instance::Clipboard_DoPaste()
 			case ObjType::linedefs:
 			case ObjType::sectors:
 			{
-				PasteGroupOfObjects(op, *this, pos);
+				PasteGroupOfObjects(op, loaded.levelFormat, pos);
 				break;
 			}
 
