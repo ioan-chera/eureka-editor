@@ -270,7 +270,7 @@ private:
 class EditOperation
 {
 public:
-	EditOperation(Basis &basis) : basis(basis)
+	EditOperation(Basis &basis) : doc(basis.doc), basis(basis)
 	{
 		basis.begin();
 	}
@@ -333,6 +333,8 @@ public:
 		abort = true;
 		abortKeepChanges = keepChanges;
 	}
+
+	Document &doc;	// convenience reference to doc
 
 private:
 	Basis &basis;
