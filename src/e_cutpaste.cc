@@ -33,7 +33,7 @@ class clipboard_data_c
 {
 public:
 	// the mode used when the objects were Copied
-	ObjType mode;
+	const ObjType mode;
 
 	// NOTE:
 	//
@@ -49,7 +49,7 @@ public:
 	// map (linedefs or sectors) to "fit in" with nearby sections of
 	// the map.
 
-	bool uses_real_sectors = false;
+	const bool uses_real_sectors;
 
 	std::vector<Thing>   things;
 	std::vector<Vertex>  verts;
@@ -58,10 +58,9 @@ public:
 	std::vector<LineDef> lines;
 
 public:
-	explicit clipboard_data_c(ObjType mode) : mode(mode)
+	explicit clipboard_data_c(ObjType mode) : mode(mode),
+			uses_real_sectors(mode == ObjType::linedefs || mode == ObjType::sectors)
 	{
-		if(mode == ObjType::linedefs || mode == ObjType::sectors)
-			uses_real_sectors = true;
 	}
 
 	int TotalSize() const
@@ -71,7 +70,7 @@ public:
 		return (int)num;
 	}
 
-	void Paste_BA_Message(EditOperation &op, Document &doc) const
+	void Paste_BA_Message(EditOperation &op) const
 	{
 		size_t t = things.size();
 		size_t v = verts.size();
@@ -102,20 +101,6 @@ public:
 		{
 			op.setMessage("pasted something");
 		}
-	}
-
-	bool HasSectorRefs(int s1, int s2)
-	{
-		if (! uses_real_sectors)
-			return false;
-
-		for (const SideDef &side : sides)
-		{
-			if (s1 <= side.sector && side.sector <= s2)
-				return true;
-		}
-
-		return false;
 	}
 
 	void InsertRealSector(int snum)
@@ -163,13 +148,6 @@ static clipboard_data_c * clip_board;
 static bool clip_doing_paste;
 
 
-void Clipboard_Clear()
-{
-	delete clip_board;
-	clip_board = NULL;
-}
-
-
 //
 // this remove sidedefs which refer to local sectors, allowing the
 // clipboard geometry to persist when changing maps.
@@ -211,14 +189,7 @@ void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
 		SYS_ASSERT(! clip_doing_paste);
 	}
 
-#if 0  // OLD WAY
-	if (clip_board->HasSectorRefs(objnum, doc.numSectors() -1))
-	{
-		Clipboard_Clear();
-	}
-#else
 	clip_board->InsertRealSector(objnum);
-#endif
 }
 
 
@@ -671,7 +642,7 @@ bool Instance::Clipboard_DoPaste()
 
 	{
 		EditOperation op(level.basis);
-		clip_board->Paste_BA_Message(op, level);
+		clip_board->Paste_BA_Message(op);
 
 		clip_doing_paste = true;
 

@@ -40,7 +40,6 @@ enum class EditCommand
 	del
 };
 
-void Clipboard_Clear();
 void Clipboard_ClearLocals();
 
 void Clipboard_NotifyBegin();
