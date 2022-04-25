@@ -135,7 +135,7 @@ private:
 
 	void DrawKnobbyLine(double map_x1, double map_y1, double map_x2, double map_y2, bool reverse = false);
 	void DrawSplitLine(double map_x1, double map_y1, double map_x2, double map_y2);
-	void DrawSplitPoint(double map_x, double map_y);
+	void DrawSplitPoint(const v2double_t &map_pos);
 	void DrawVertex(double map_x, double map_y, int r);
 	void DrawThing(double map_x, double map_y, int r, int angle, bool big_arrow);
 	void DrawCamera();

@@ -1868,10 +1868,10 @@ void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, doub
 }
 
 
-void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
+void UI_Canvas::DrawSplitPoint(const v2double_t &map_pos)
 {
-	int sx = SCREENX(map_x);
-	int sy = SCREENY(map_y);
+	int sx = SCREENX(map_pos.x);
+	int sy = SCREENY(map_pos.y);
 
 	int size = (inst.grid.Scale >= 5.0) ? 9 : (inst.grid.Scale >= 1.0) ? 7 : 5;
 
@@ -1919,7 +1919,7 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 
 	RenderColor(HI_AND_SEL_COL);
 
-	DrawSplitPoint(inst.edit.split.x, inst.edit.split.y);
+	DrawSplitPoint(inst.edit.split);
 }
 
 
@@ -2108,7 +2108,7 @@ void UI_Canvas::DrawCurrentLine()
 		else
 			RenderColor(HI_AND_SEL_COL);
 
-		DrawSplitPoint(point.pos.x, point.pos.y);
+		DrawSplitPoint(point.pos);
 	}
 }
 
