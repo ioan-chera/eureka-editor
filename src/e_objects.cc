@@ -634,7 +634,7 @@ void ObjectsModule::insertSector() const
 		EditOperation op(doc.basis);
 		op.setMessage("added new sector");
 
-		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map.x, inst.edit.map.y, -1 /* create */, model);
+		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map.xy, -1 /* create */, model);
 	}
 	// select the new sector
 	if (ok)

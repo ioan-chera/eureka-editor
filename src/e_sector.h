@@ -124,7 +124,7 @@ public:
 	}
 
 	bool traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false) const;
-	bool assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec = -1, int model = -1) const;
+	bool assignSectorToSpace(EditOperation &op, const v2double_t &map, int new_sec = -1, int model = -1) const;
 	void sectorsAdjustLight(int delta) const;
 	void safeRaiseLower(EditOperation &op, int sec, int parts, int dz) const;
 

@@ -1193,11 +1193,11 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 // the 'model' is what properties to use for a new sector, < 0 means
 // look for a neighboring sector to copy.
 //
-bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec, int model) const
+bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map, int new_sec, int model) const
 {
 	lineloop_c loop(doc);
 
-	if (! getLoopForSpace(map_x, map_y, loop))
+	if (! getLoopForSpace(map.x, map.y, loop))
 	{
 		inst.Beep("Area is not closed");
 		return false;
