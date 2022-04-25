@@ -670,7 +670,7 @@ void Hover::fastOpposite_finish()
 //
 // whether point is outside of map
 //
-bool Hover::isPointOutsideOfMap(double x, double y) const
+bool hover::isPointOutsideOfMap(const Document &doc, double x, double y)
 {
 	// this keeps track of directions tested
 	int dirs = 0;

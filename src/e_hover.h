@@ -51,6 +51,7 @@ int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side)
 Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
 					  const Grid_State_c &grid, const v2double_t &pos);
 Objid getNearestSector(const Document &doc, const v2double_t &pos);
+bool isPointOutsideOfMap(const Document &doc, double x, double y);
 }
 
 //
@@ -67,8 +68,6 @@ public:
 	int getOppositeSector(int ld, Side ld_side) const;
 	void fastOpposite_begin();
 	void fastOpposite_finish();
-
-	bool isPointOutsideOfMap(double x, double y) const;
 
 	void findCrossingPoints(crossing_state_c &cross,
 		v2double_t p1, int possible_v1,
