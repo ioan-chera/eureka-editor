@@ -560,7 +560,7 @@ void sector_info_cache_c::PlaneCopyFromThing(const Thing *T, int plane)
 		return;
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, T->xy());
+	Objid o = hover::getNearestSector(inst.level, T->xy());
 
 	if (!o.valid())
 		return;
@@ -585,7 +585,7 @@ void sector_info_cache_c::PlaneTiltByThing(const Thing *T, int plane)
 	double ty = T->y();
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { tx, ty });
+	Objid o = hover::getNearestSector(inst.level, { tx, ty });
 
 	if (!o.valid())
 		return;

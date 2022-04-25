@@ -1442,7 +1442,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 	{
 		v2double_t pos = inst.level.things[n]->xy();
 
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, pos);
+		Objid obj = hover::getNearestSector(inst.level, pos);
 
 		if (! obj.is_nil())
 			continue;
@@ -1460,7 +1460,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 		{
 			v2double_t pos2 = pos + v2double_t{ corner & 1 ? -4.0 : +4.0, corner & 2 ? -4.0 : +4.0 };
 
-			obj = inst.level.hover.getNearbyObject(ObjType::sectors, pos2);
+			obj = hover::getNearestSector(inst.level, pos2);
 
 			if (obj.is_nil())
 				out_count++;

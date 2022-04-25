@@ -40,6 +40,7 @@ struct v2double_t;
 namespace hover
 {
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
+Objid getNearestSector(const Document &doc, const v2double_t &pos);
 }
 
 //

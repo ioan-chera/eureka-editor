@@ -555,7 +555,7 @@ void Instance::DoBeginDrag()
 			{
 				const Thing *T = level.things[edit.drag_thing_num];
 
-				Objid sec = level.hover.getNearbyObject(ObjType::sectors, T->xy());
+				Objid sec = hover::getNearestSector(level, T->xy());
 
 				if (sec.valid())
 					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num]->floorh);

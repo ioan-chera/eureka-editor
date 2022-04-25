@@ -1598,7 +1598,7 @@ public:
 
 	void MarkCameraSector()
 	{
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, { inst.r_view.x, inst.r_view.y });
+		Objid obj = hover::getNearestSector(inst.level, { inst.r_view.x, inst.r_view.y });
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);

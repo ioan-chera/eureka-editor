@@ -642,7 +642,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const Thing *T = doc.things[t];
 
-			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, T->xy());
+			Objid obj = hover::getNearestSector(doc, T->xy());
 
 			if (! obj.is_nil() && src.get(obj.num))
 			{

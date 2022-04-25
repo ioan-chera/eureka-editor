@@ -119,7 +119,7 @@ void Render_View_t::FindGroundZ()
 		double test_x = x + dx * 8;
 		double test_y = y + dy * 8;
 
-		Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { test_x, test_y });
+		Objid o = hover::getNearestSector(inst.level, { test_x, test_y });
 
 		if (o.num >= 0)
 		{
@@ -226,7 +226,7 @@ namespace thing_sec_cache
 
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
-			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.level.things[i]->xy());
+			Objid obj = hover::getNearestSector(inst.level, inst.level.things[i]->xy());
 
 			inst.r_view.thing_sectors[i] = obj.num;
 		}
@@ -919,10 +919,10 @@ static void DragThings_Update(Instance &inst)
 	new_y = static_cast<float>(new_y + dy * fwd_vy / fwd_len);
 
 	// handle a change in floor height
-	Objid old_sec = inst.level.hover.getNearbyObject(ObjType::sectors, { old_x, old_y });
+	Objid old_sec = hover::getNearestSector(inst.level, { old_x, old_y });
 
-	Objid new_sec = inst.level.hover.getNearbyObject(ObjType::sectors, { new_x, new_y });
-
+	Objid new_sec = hover::getNearestSector(inst.level, { new_x, new_y });
+	
 	if (old_sec.valid() && new_sec.valid())
 	{
 		float old_z = static_cast<float>(inst.level.sectors[old_sec.num]->floorh);
