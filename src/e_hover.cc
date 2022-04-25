@@ -898,6 +898,8 @@ static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, con
 	return Objid();
 }
 
+static double getApproximateDistanceToLinedef(const Document &doc, const LineDef &line, const v2double_t &pos);
+
 //
 // determine which linedef is under the pointer
 //
@@ -924,7 +926,7 @@ Objid Hover::getNearestLinedef(const v2double_t &pos) const
 		   std::max(pos1.y, pos2.y) < lpos.y || std::min(pos1.y, pos2.y) > hpos.y)
 			continue;
 
-		double dist = getApproximateDistanceToLinedef(*doc.linedefs[n], pos);
+		double dist = getApproximateDistanceToLinedef(doc, *doc.linedefs[n], pos);
 
 		if(dist > mapslack)
 			continue;
@@ -967,8 +969,8 @@ Objid Hover::getNearestSector(const v2double_t &pos) const
 		/* nothing needed */
 	}
 	else if(line1 < 0 ||
-		getApproximateDistanceToLinedef(*doc.linedefs[line2], pos) <
-		getApproximateDistanceToLinedef(*doc.linedefs[line1], pos))
+		getApproximateDistanceToLinedef(doc, *doc.linedefs[line2], pos) <
+		getApproximateDistanceToLinedef(doc, *doc.linedefs[line1], pos))
 	{
 		line1 = line2;
 		side1 = side2;
@@ -991,7 +993,7 @@ Objid Hover::getNearestSector(const v2double_t &pos) const
 //
 // Gets an approximate distance from a point to a linedef
 //
-double Hover::getApproximateDistanceToLinedef(const LineDef &line, const v2double_t &pos) const
+static double getApproximateDistanceToLinedef(const Document &doc, const LineDef &line, const v2double_t &pos)
 {
 	v2double_t pos1 = line.Start(doc)->xy();
 	v2double_t pos2 = line.End(doc)->xy();
@@ -1072,7 +1074,7 @@ Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
 		if(fabs(pos2.x - pos1.x) < too_small && fabs(pos2.y - pos1.y) < too_small)
 			continue;
 
-		double dist = getApproximateDistanceToLinedef(*L, pos);
+		double dist = getApproximateDistanceToLinedef(doc, *L, pos);
 
 		if(dist > mapslack)
 			continue;
