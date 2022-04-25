@@ -344,6 +344,7 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 							 const Grid_State_c &grid, const v2double_t &pos);
 static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
 static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
+static Objid getNearestSector(const Document &doc, const v2double_t &pos);
 
 //
 //  Returns the object which is under the pointer at the given
@@ -364,7 +365,7 @@ Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
 		return getNearestLinedef(doc, inst.grid, pos);
 
 	case ObjType::sectors:
-		return getNearestSector(pos);
+		return getNearestSector(doc, pos);
 
 	default:
 		BugError("Hover::getNearbyObject: bad objtype %d\n", (int)type);
@@ -951,7 +952,7 @@ static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, co
 //
 //  determine which sector is under the pointer
 //
-Objid Hover::getNearestSector(const v2double_t &pos) const
+static Objid getNearestSector(const Document &doc, const v2double_t &pos)
 {
 	/* hack, hack...  I look for the first LineDef crossing
 	   an horizontal half-line drawn from the cursor */
