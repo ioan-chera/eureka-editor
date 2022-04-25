@@ -481,11 +481,13 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 //
 // Finds a split line
 //
-Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const
+Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
+						   const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
+						   int ignore_vert)
 {
 	out_pos = {};
 
-	Objid out = getNearestSplitLine(doc, inst.loaded.levelFormat, inst.grid, ptr, ignore_vert);
+	Objid out = getNearestSplitLine(doc, format, grid, ptr, ignore_vert);
 
 	if(!out.valid())
 		return Objid();
@@ -497,15 +499,15 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 
 	double len = (v2 - v1).hypot();
 
-	if(inst.grid.ratio > 0 && inst.edit.action == EditorAction::drawLine)
+	if(grid.ratio > 0 && edit.action == EditorAction::drawLine)
 	{
-		const Vertex *V = doc.vertices[inst.edit.drawLine.from.num];
+		const Vertex *V = doc.vertices[edit.drawLine.from.num];
 
 		// convert ratio into a vector, use it to intersect the linedef
 		v2double_t ppos1 = V->xy();
 		v2double_t ppos2 = ptr;
 
-		inst.grid.RatioSnapXY(ppos2, ppos1);
+		grid.RatioSnapXY(ppos2, ppos1);
 
 		if(fabs(ppos1.x - ppos2.x) < 0.1 && fabs(ppos1.y - ppos2.y) < 0.1)
 			return Objid();
@@ -524,13 +526,13 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 
 		out_pos = v1 + (v2 - v1) * c;
 	}
-	else if(inst.grid.snap)
+	else if(grid.snap)
 	{
 		// don't highlight the line if the new vertex would snap onto
 		// the same coordinate as the start or end of the linedef.
 		// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
 
-		out_pos = v2double_t(inst.grid.ForceSnap(ptr));
+		out_pos = v2double_t(grid.ForceSnap(ptr));
 
 		// snapped onto an end point?
 		if(L->TouchesCoord(FFixedPoint(out_pos.x), FFixedPoint(out_pos.y), doc))

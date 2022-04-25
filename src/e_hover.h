@@ -35,11 +35,16 @@ class fastopp_node_c;
 class Grid_State_c;
 class LineDef;
 class Objid;
+enum class MapFormat;
 enum class Side;
+struct Editor_State_t;
 struct v2double_t;
 
 namespace hover
 {
+Objid findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
+					const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
+					int ignore_vert);
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
 Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
 					  const Grid_State_c &grid, const v2double_t &pos);
@@ -56,7 +61,6 @@ public:
 	{
 	}
 
-	Objid findSplitLine(v2double_t &out, const v2double_t &ptr, int ignore_vert) const;
 	Objid findSplitLineForDangler(int v_num) const;
 
 	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
