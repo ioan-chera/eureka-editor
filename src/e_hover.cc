@@ -340,6 +340,10 @@ public:
 	}
 };
 
+static Objid getNearestThing(const Document &doc, const ConfigData &config,
+							 const Grid_State_c &grid, const v2double_t &pos);
+static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
+
 //
 //  Returns the object which is under the pointer at the given
 //  coordinates.  When several objects are close, the smallest
@@ -350,10 +354,10 @@ Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
 	switch(type)
 	{
 	case ObjType::things:
-		return getNearestThing(pos);
+		return getNearestThing(doc, inst.conf, inst.grid, pos);
 
 	case ObjType::vertices:
-		return getNearestVertex(pos);
+		return getNearestVertex(doc, inst.grid, pos);
 
 	case ObjType::linedefs:
 		return getNearestLinedef(pos);
@@ -795,9 +799,10 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 //
 // determine which thing is under the mouse pointer
 //
-Objid Hover::getNearestThing(const v2double_t &pos) const
+static Objid getNearestThing(const Document &doc, const ConfigData &config,
+							 const Grid_State_c &grid, const v2double_t &pos)
 {
-	double mapslack = 1 + 16.0f / inst.grid.Scale;
+	double mapslack = 1 + 16.0f / grid.Scale;
 
 	double max_radius = MAX_RADIUS + ceil(mapslack);
 
@@ -817,7 +822,7 @@ Objid Hover::getNearestThing(const v2double_t &pos) const
 		if(!tpos.inbounds(lpos, hpos))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = M_GetThingType(config, thing->type);
 
 		// more accurate bbox test using the real radius
 		double r = info.radius + mapslack;
@@ -848,15 +853,15 @@ Objid Hover::getNearestThing(const v2double_t &pos) const
 //
 // determine which vertex is under the pointer
 //
-Objid Hover::getNearestVertex(const v2double_t &pos) const
+static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
 {
-	const int screen_pix = vertex_radius(inst.grid.Scale);
+	const int screen_pix = vertex_radius(grid.Scale);
 
-	double mapslack = 1 + (4 + screen_pix) / inst.grid.Scale;
+	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
 
 	// workaround for overly zealous highlighting when zoomed in far
-	if(inst.grid.Scale >= 15.0) mapslack *= 0.7;
-	if(inst.grid.Scale >= 31.0) mapslack *= 0.5;
+	if(grid.Scale >= 15.0) mapslack *= 0.7;
+	if(grid.Scale >= 31.0) mapslack *= 0.5;
 
 	v2double_t lpos = pos - v2double_t(mapslack + 0.5);
 	v2double_t hpos = pos + v2double_t(mapslack + 0.5);

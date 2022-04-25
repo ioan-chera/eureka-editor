@@ -67,8 +67,6 @@ public:
 		v2double_t p2, int possible_v2) const;
 
 private:
-	Objid getNearestThing(const v2double_t &pos) const;
-	Objid getNearestVertex(const v2double_t &pos) const;
 	Objid getNearestLinedef(const v2double_t &pos) const;
 	Objid getNearestSector(const v2double_t &pos) const;
 
