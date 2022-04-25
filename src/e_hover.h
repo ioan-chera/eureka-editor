@@ -67,7 +67,6 @@ public:
 		v2double_t p2, int possible_v2) const;
 
 private:
-	Objid getNearestLinedef(const v2double_t &pos) const;
 	Objid getNearestSector(const v2double_t &pos) const;
 
 	Objid getNearestSplitLine(const v2double_t &pos, int ignore_vert) const;
