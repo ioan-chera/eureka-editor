@@ -2113,15 +2113,15 @@ void UI_Canvas::DrawCurrentLine()
 }
 
 
-bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
+bool UI_Canvas::SelboxGet(v2double_t &pos1, v2double_t &pos2)
 {
-	x1 = std::min(inst.edit.selbox1.x, inst.edit.selbox2.x);
-	y1 = std::min(inst.edit.selbox1.y, inst.edit.selbox2.y);
-	x2 = std::max(inst.edit.selbox1.x, inst.edit.selbox2.x);
-	y2 = std::max(inst.edit.selbox1.y, inst.edit.selbox2.y);
+	pos1.x = std::min(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	pos1.y = std::min(inst.edit.selbox1.y, inst.edit.selbox2.y);
+	pos2.x = std::max(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	pos2.y = std::max(inst.edit.selbox1.y, inst.edit.selbox2.y);
 
-	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
-	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
+	int scr_dx = abs(SCREENX(pos2.x) - SCREENX(pos1.x));
+	int scr_dy = abs(SCREENY(pos2.y) - SCREENY(pos1.y));
 
 	// small boxes should be ignored (treated as a click + release)
 	if (scr_dx < 5 && scr_dy < 5)

@@ -827,13 +827,13 @@ SelectHighlight Editor_State_t::SelectionOrHighlight()
 //
 // select all objects inside a given box
 //
-void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2)
+void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, v2double_t pos1, v2double_t pos2)
 {
-	if (x2 < x1)
-		std::swap(x1, x2);
+	if (pos2.x < pos1.x)
+		std::swap(pos1.x, pos2.x);
 
-	if (y2 < y1)
-		std::swap(y1, y2);
+	if (pos2.y < pos1.y)
+		std::swap(pos1.y, pos2.y);
 
 	switch (objtype)
 	{
@@ -842,13 +842,10 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 			{
 				const Thing *T = doc.things[n];
 
-				double tx = T->x();
-				double ty = T->y();
+				v2double_t tpos = T->xy();
 
-				if (x1 <= tx && tx <= x2 && y1 <= ty && ty <= y2)
-				{
+				if(tpos.inbounds(pos1, pos2))
 					list->toggle(n);
-				}
 			}
 			break;
 
@@ -857,13 +854,10 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 			{
 				const Vertex *V = doc.vertices[n];
 
-				double vx = V->x();
-				double vy = V->y();
+				v2double_t vpos = V->xy();
 
-				if (x1 <= vx && vx <= x2 && y1 <= vy && vy <= y2)
-				{
+				if(vpos.inbounds(pos1, pos2))
 					list->toggle(n);
-				}
 			}
 			break;
 
@@ -873,10 +867,8 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				const LineDef *L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if (x1 <= L->Start(doc)->x() && L->Start(doc)->x() <= x2 &&
-				    y1 <= L->Start(doc)->y() && L->Start(doc)->y() <= y2 &&
-				    x1 <= L->End(doc)->x()   && L->End(doc)->x() <= x2 &&
-				    y1 <= L->End(doc)->y()   && L->End(doc)->y() <= y2)
+				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
+				   L->End(doc)->xy().inbounds(pos1, pos2))
 				{
 					list->toggle(n);
 				}
@@ -896,10 +888,8 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
 				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
 
-				if (x1 <= L->Start(doc)->x() && L->Start(doc)->x() <= x2 &&
-				    y1 <= L->Start(doc)->y() && L->Start(doc)->y() <= y2 &&
-				    x1 <= L->End(doc)->x()   && L->End(doc)->x() <= x2 &&
-				    y1 <= L->End(doc)->y()   && L->End(doc)->y() <= y2)
+				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
+				   L->End(doc)->xy().inbounds(pos1, pos2))
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);

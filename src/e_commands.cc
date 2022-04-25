@@ -598,14 +598,15 @@ void Instance::ACT_SelectBox_release()
 	Editor_ClearErrorMode();
 
 	// a mere click and release will unselect everything
-	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-	if (!main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	v2double_t pos1 = {};
+	v2double_t pos2 = {};
+	if (!main_win->canvas->SelboxGet(pos1, pos2))
 	{
 		ExecuteCommand("UnselectAll");
 		return;
 	}
 
-	SelectObjectsInBox(level, edit.Selected, edit.mode, x1, y1, x2, y2);
+	SelectObjectsInBox(level, edit.Selected, edit.mode, pos1, pos2);
 	RedrawMap();
 }
 

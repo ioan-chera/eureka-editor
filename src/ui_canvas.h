@@ -103,7 +103,7 @@ public:
 	void DrawTagged(ObjType objtype, int objnum);
 
 	// returns true if ok, false if box was very small
-	bool SelboxGet(double& x1, double& y1, double& x2, double& y2);
+	bool SelboxGet(v2double_t &pos1, v2double_t &pos2);
 
 	v2double_t DragDelta();
 

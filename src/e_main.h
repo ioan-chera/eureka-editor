@@ -191,7 +191,7 @@ void DumpSelection (selection_c * list);
 
 void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest);
 
-void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
+void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, v2double_t pos1, v2double_t pos2);
 
 //----------------------------------------------------------------------
 //  Helper for handling either the highlight or selection
