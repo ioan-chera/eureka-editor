@@ -226,7 +226,7 @@ namespace thing_sec_cache
 
 		for (int i = invalid_low ; i <= invalid_high ; i++)
 		{
-			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, { inst.level.things[i]->x(), inst.level.things[i]->y() });
+			Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, inst.level.things[i]->xy());
 
 			inst.r_view.thing_sectors[i] = obj.num;
 		}

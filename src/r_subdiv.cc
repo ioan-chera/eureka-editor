@@ -560,7 +560,7 @@ void sector_info_cache_c::PlaneCopyFromThing(const Thing *T, int plane)
 		return;
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { T->x(), T->y() });
+	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, T->xy());
 
 	if (!o.valid())
 		return;
