@@ -74,7 +74,7 @@ public:
 		v2double_t p2, int possible_v2) const;
 
 private:
-	void findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const;
+	void findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, int possible_v1, const v2double_t &pos2, int possible_v2) const;
 
 	fastopp_node_c *m_fastopp_X_tree = nullptr;
 	fastopp_node_c *m_fastopp_Y_tree = nullptr;
@@ -89,7 +89,7 @@ struct cross_point_t
 	int vert;	// >= 0 when we hit a vertex
 	int ld;     // >= 0 when we hit a linedef instead
 
-	double x, y;	// coordinate of line split point
+	v2double_t pos;	// coordinates of line split point
 	double dist;
 };
 
@@ -100,8 +100,8 @@ public:
 	std::vector< cross_point_t > points;
 
 	// the start/end coordinates of the whole tested line
-	double start_x = 0, start_y = 0;
-	double   end_x = 0,   end_y = 0;
+	v2double_t start = {};
+	v2double_t end = {};
 
 	Instance &inst;
 
@@ -113,7 +113,7 @@ public:
 	void clear();
 
 	void add_vert(int v, double dist);
-	void add_line(int ld, double new_x, double new_y, double dist);
+	void add_line(int ld, const v2double_t &newpos, double dist);
 
 	bool HasVertex(int v) const;
 	bool HasLine(int ld)  const;

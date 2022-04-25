@@ -719,11 +719,8 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 {
 	cross.clear();
 
-	cross.start_x = p1.x;
-	cross.start_y = p1.y;
-	cross.end_x = p2.x;
-	cross.end_y = p2.y;
-
+	cross.start = p1;
+	cross.end = p2;
 
 	// when zooming out, make it easier to hit a vertex
 	double close_dist = 4 * sqrt(1.0 / inst.grid.Scale);
@@ -774,8 +771,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 
 	/* process each pair of adjacent vertices to find split lines */
 
-	double cur_x1 = p1.x;
-	double cur_y1 = p1.y;
+	v2double_t cur_pos1 = p1;
 	int    cur_v = possible_v1;
 
 	// grab number of points now, since we will adding split points
@@ -784,19 +780,17 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 
 	for(size_t k = 0; k < num_verts; k++)
 	{
-		double next_x2 = cross.points[k].x;
-		double next_y2 = cross.points[k].y;
+		v2double_t next_pos2 = cross.points[k].pos;
 		double next_v = cross.points[k].vert;
 
-		findCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
-			next_x2, next_y2, static_cast<int>(next_v));
+		findCrossingLines(cross, cur_pos1, static_cast<int>(cur_v),
+						  next_pos2, static_cast<int>(next_v));
 
-		cur_x1 = next_x2;
-		cur_y1 = next_y2;
+		cur_pos1 = next_pos2;
 		cur_v = static_cast<int>(next_v);
 	}
 
-	findCrossingLines(cross, cur_x1, cur_y1, cur_v, p2.x, p2.y, possible_v2);
+	findCrossingLines(cross, cur_pos1, cur_v, p2, possible_v2);
 
 	cross.Sort();
 }
@@ -1102,36 +1096,38 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 //
 // Find crossing lines
 //
-void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const
+void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, int possible_v1, const v2double_t &pos2, int possible_v2) const
 {
 	// this could happen when two vertices are overlapping
-	if (fabs(x1 - x2) < ALONG_EPSILON && fabs(y1 - y2) < ALONG_EPSILON)
+	if (fabs(pos1.x - pos2.x) < ALONG_EPSILON && fabs(pos1.y - pos2.y) < ALONG_EPSILON)
 		return;
 
 	// distances along WHOLE original line for this segment
-	double along1 = AlongDist({ x1, y1 }, { cross.start_x, cross.start_y }, { cross.end_x, cross.end_y });
-	double along2 = AlongDist({ x2, y2 }, { cross.start_x, cross.start_y }, { cross.end_x, cross.end_y });
+	double along1 = AlongDist(pos1, cross.start, cross.end);
+	double along2 = AlongDist(pos2, cross.start, cross.end);
 
 	// bounding box of segment
-	double bbox_x1 = std::min(x1, x2) - 0.25;
-	double bbox_y1 = std::min(y1, y2) - 0.25;
+	const v2double_t bbox1 = {
+		std::min(pos1.x, pos2.x) - 0.25,
+		std::min(pos1.y, pos2.y) - 0.25
+	};
 
-	double bbox_x2 = std::max(x1, x2) + 0.25;
-	double bbox_y2 = std::max(y1, y2) + 0.25;
+	const v2double_t bbox2 = {
+		std::max(pos1.x, pos2.x) + 0.25,
+		std::max(pos1.y, pos2.y) + 0.25
+	};
 
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
 		const LineDef * L = doc.linedefs[ld];
 
-		double lx1 = L->Start(doc)->x();
-		double ly1 = L->Start(doc)->y();
-		double lx2 = L->End(doc)->x();
-		double ly2 = L->End(doc)->y();
+		v2double_t lpos1 = L->Start(doc)->xy();
+		v2double_t lpos2 = L->End(doc)->xy();
 
 		// bbox test -- eliminate most lines from consideration
-		if (std::max(lx1,lx2) < bbox_x1 || std::min(lx1,lx2) > bbox_x2 ||
-			std::max(ly1,ly2) < bbox_y1 || std::min(ly1,ly2) > bbox_y2)
+		if (std::max(lpos1.x,lpos2.x) < bbox1.x || std::min(lpos1.x,lpos2.x) > bbox2.x ||
+			std::max(lpos1.y,lpos2.y) < bbox1.y || std::min(lpos1.y,lpos2.y) > bbox2.y)
 		{
 			continue;
 		}
@@ -1150,8 +1146,8 @@ void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int
 		// only need to handle cases where this linedef distinctly crosses
 		// the new line (i.e. start and end are clearly on opposite sides).
 
-		double a = PerpDist(v2double_t{ lx1,ly1 }, v2double_t{ x1, y1 }, v2double_t{ x2, y2 });
-		double b = PerpDist(v2double_t{ lx2,ly2 }, v2double_t{ x1, y1 }, v2double_t{ x2, y2 });
+		double a = PerpDist(lpos1, pos1, pos2);
+		double b = PerpDist(lpos2, pos1, pos2);
 
 		if (! ((a < -CROSSING_EPSILON && b >  CROSSING_EPSILON) ||
 			   (a >  CROSSING_EPSILON && b < -CROSSING_EPSILON)))
@@ -1162,15 +1158,14 @@ void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int
 		// compute intersection point
 		double l_along = a / (a - b);
 
-		double new_x = lx1 + l_along * (lx2 - lx1);
-		double new_y = ly1 + l_along * (ly2 - ly1);
+		v2double_t newpos = lpos1 + (lpos2 - lpos1) * l_along;
 
-		double along = AlongDist({ new_x, new_y }, { cross.start_x, cross.start_y }, { cross.end_x, cross.end_y });
+		double along = AlongDist(newpos, cross.start, cross.end);
 
 		// ensure new vertex lies within this segment (and not too close to ends)
 		if (along > along1 + ALONG_EPSILON && along < along2 - ALONG_EPSILON)
 		{
-			cross.add_line(ld, new_x, new_y, along);
+			cross.add_line(ld, newpos, along);
 		}
 	}
 }
@@ -1189,21 +1184,19 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.x    = inst.level.vertices[v]->x();
-	pt.y    = inst.level.vertices[v]->y();
+	pt.pos  = inst.level.vertices[v]->xy();
 	pt.dist = dist;
 
 	points.push_back(pt);
 }
 
-void crossing_state_c::add_line(int ld, double new_x, double new_y, double dist)
+void crossing_state_c::add_line(int ld, const v2double_t &newpos, double dist)
 {
 	cross_point_t pt;
 
 	pt.vert = -1;
 	pt.ld   = ld;
-	pt.x    = new_x;
-	pt.y    = new_y;
+	pt.pos  = newpos;
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1245,7 +1238,7 @@ void crossing_state_c::SplitAllLines(EditOperation &op)
 
 			Vertex *V = inst.level.vertices[points[i].vert];
 
-			V->SetRawXY(inst.loaded.levelFormat, { points[i].x, points[i].y });
+			V->SetRawXY(inst.loaded.levelFormat, points[i].pos);
 
 			inst.level.linemod.splitLinedefAtVertex(op, points[i].ld, points[i].vert);
 		}

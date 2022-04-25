@@ -2108,7 +2108,7 @@ void UI_Canvas::DrawCurrentLine()
 		else
 			RenderColor(HI_AND_SEL_COL);
 
-		DrawSplitPoint(point.x, point.y);
+		DrawSplitPoint(point.pos.x, point.pos.y);
 	}
 }
 
