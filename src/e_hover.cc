@@ -375,7 +375,7 @@ Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
 //
 // Get the closest line, by casting horizontally
 //
-int Hover::getClosestLine_CastingHoriz(v2double_t pos, Side *side) const
+int hover::getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side)
 {
 	int    best_match = -1;
 	double best_dist = 9e9;
@@ -962,7 +962,7 @@ Objid Hover::getNearestSector(const v2double_t &pos) const
 
 	Side side1, side2;
 
-	int line1 = getClosestLine_CastingHoriz(pos, &side1);
+	int line1 = hover::getClosestLine_CastingHoriz(doc, pos, &side1);
 	int line2 = getClosestLine_CastingVert(pos, &side2);
 
 	if(line2 < 0)

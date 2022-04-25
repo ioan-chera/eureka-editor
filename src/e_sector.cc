@@ -1125,7 +1125,7 @@ bool SectorModule::getLoopForSpace(const v2double_t &map, lineloop_c& loop) cons
 	int ld;
 	Side side;
 
-	ld = doc.hover.getClosestLine_CastingHoriz(map, &side);
+	ld = hover::getClosestLine_CastingHoriz(doc, map, &side);
 
 	gLog.debugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, (int)side);
 

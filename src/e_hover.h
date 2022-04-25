@@ -37,6 +37,11 @@ class Objid;
 enum class Side;
 struct v2double_t;
 
+namespace hover
+{
+int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
+}
+
 //
 // The hover module
 //
@@ -49,7 +54,6 @@ public:
 
 	Objid getNearbyObject(ObjType type, const v2double_t &pos) const;
 
-	int getClosestLine_CastingHoriz(v2double_t pos, Side *side) const;
 	int getClosestLine_CastingVert(v2double_t pos, Side *side) const;
 
 	Objid findSplitLine(v2double_t &out, const v2double_t &ptr, int ignore_vert) const;
