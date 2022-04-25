@@ -547,7 +547,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 		// in FREE mode, ensure split point is directly on the linedef
 		out_pos = ptr;
 
-		doc.linemod.moveCoordOntoLinedef(out.num, out_pos);
+		linemod::moveCoordOntoLinedef(doc, out.num, out_pos);
 	}
 
 	// always ensure result is along the linedef (not off the ends)

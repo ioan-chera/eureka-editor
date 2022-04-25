@@ -1251,7 +1251,7 @@ void Instance::commandLinedefMergeTwo()
 //
 // Move coordinate into linedef
 //
-void LinedefModule::moveCoordOntoLinedef(int ld, v2double_t &v) const
+void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 {
 	const LineDef *L = doc.linedefs[ld];
 	
