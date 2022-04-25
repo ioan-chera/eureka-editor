@@ -603,7 +603,7 @@ void ObjectsModule::insertSector() const
 	}
 
 	// if outside of the map, create a square
-	if (hover::isPointOutsideOfMap(doc, inst.edit.map.x, inst.edit.map.y))
+	if (hover::isPointOutsideOfMap(doc, inst.edit.map.xy))
 	{
 		EditOperation op(doc.basis);
 		op.setMessage("added sector (outside map)");

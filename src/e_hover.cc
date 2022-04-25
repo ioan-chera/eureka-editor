@@ -670,26 +670,23 @@ void Hover::fastOpposite_finish()
 //
 // whether point is outside of map
 //
-bool hover::isPointOutsideOfMap(const Document &doc, double x, double y)
+bool hover::isPointOutsideOfMap(const Document &doc, const v2double_t &v)
 {
 	// this keeps track of directions tested
 	int dirs = 0;
 
 	// most end-points will be integral, so look in-between
-	double x2 = x + 0.04;
-	double y2 = y + 0.04;
+	v2double_t v2 = v + v2double_t{ 0.04, 0.04 };
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		double lx1 = doc.linedefs[n]->Start(doc)->x();
-		double ly1 = doc.linedefs[n]->Start(doc)->y();
-		double lx2 = doc.linedefs[n]->End(doc)->x();
-		double ly2 = doc.linedefs[n]->End(doc)->y();
+		v2double_t lv1 = doc.linedefs[n]->Start(doc)->xy();
+		v2double_t lv2 = doc.linedefs[n]->End(doc)->xy();
 
 		// does the linedef cross the horizontal ray?
-		if(std::min(ly1, ly2) < y2 && std::max(ly1, ly2) > y2)
+		if(std::min(lv1.y, lv2.y) < v2.y && std::max(lv1.y, lv2.y) > v2.y)
 		{
-			double dist = lx1 - x + (lx2 - lx1) * (y2 - ly1) / (ly2 - ly1);
+			double dist = lv1.x - v.x + (lv2.x - lv1.x) * (v2.y - lv1.y) / (lv2.y - lv1.y);
 
 			dirs |= (dist < 0) ? 1 : 2;
 
@@ -697,9 +694,9 @@ bool hover::isPointOutsideOfMap(const Document &doc, double x, double y)
 		}
 
 		// does the linedef cross the vertical ray?
-		if(std::min(lx1, lx2) < x2 && std::max(lx1, lx2) > x2)
+		if(std::min(lv1.x, lv2.x) < v2.x && std::max(lv1.x, lv2.x) > v2.x)
 		{
-			double dist = ly1 - y + (ly2 - ly1) * (x2 - lx1) / (lx2 - lx1);
+			double dist = lv1.y - v.y + (lv2.y - lv1.y) * (v2.x - lv1.x) / (lv2.x - lv1.x);
 
 			dirs |= (dist < 0) ? 4 : 8;
 
