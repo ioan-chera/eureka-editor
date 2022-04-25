@@ -258,7 +258,7 @@ void Instance::UpdateHighlight()
 	if (edit.pointer_in_window &&
 	    (edit.action != EditorAction::drag || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		edit.highlight = level.hover.getNearbyObject(edit.mode, edit.map.xy);
+		edit.highlight = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
 
 		// guarantee that we cannot drag a vertex onto itself
 		if (edit.action == EditorAction::drag && edit.dragged.valid() &&

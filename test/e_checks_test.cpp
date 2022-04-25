@@ -88,7 +88,13 @@ void Hover::fastOpposite_finish()
 {
 }
 
-Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
+Objid hover::getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
+							 const Grid_State_c &grid, const v2double_t &pos)
+{
+	return Objid();
+}
+
+Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
 {
 	return Objid();
 }

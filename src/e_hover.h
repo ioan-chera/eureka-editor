@@ -32,6 +32,7 @@
 class bitvec_c;
 class crossing_state_c;
 class fastopp_node_c;
+class Grid_State_c;
 class LineDef;
 class Objid;
 enum class Side;
@@ -40,6 +41,8 @@ struct v2double_t;
 namespace hover
 {
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
+Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
+					  const Grid_State_c &grid, const v2double_t &pos);
 Objid getNearestSector(const Document &doc, const v2double_t &pos);
 }
 
@@ -52,8 +55,6 @@ public:
 	Hover(Document &doc) : DocumentModule(doc)
 	{
 	}
-
-	Objid getNearbyObject(ObjType type, const v2double_t &pos) const;
 
 	Objid findSplitLine(v2double_t &out, const v2double_t &ptr, int ignore_vert) const;
 	Objid findSplitLineForDangler(int v_num) const;
