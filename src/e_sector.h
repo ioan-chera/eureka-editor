@@ -140,7 +140,7 @@ private:
 	void doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
 							   int new_lower, int new_upper,
 						selection_c &flip) const;
-	bool getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const;
+	bool getLoopForSpace(const v2double_t &map, lineloop_c& loop) const;
 };
 
 

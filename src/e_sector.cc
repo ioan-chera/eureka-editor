@@ -1118,14 +1118,14 @@ void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c &flip)
 }
 
 
-bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const
+bool SectorModule::getLoopForSpace(const v2double_t &map, lineloop_c& loop) const
 {
 	selection_c seen_lines(ObjType::linedefs);
 
 	int ld;
 	Side side;
 
-	ld = doc.hover.getClosestLine_CastingHoriz({ map_x, map_y }, &side);
+	ld = doc.hover.getClosestLine_CastingHoriz(map, &side);
 
 	gLog.debugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, (int)side);
 
@@ -1197,7 +1197,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map,
 {
 	lineloop_c loop(doc);
 
-	if (! getLoopForSpace(map.x, map.y, loop))
+	if (! getLoopForSpace(map, loop))
 	{
 		inst.Beep("Area is not closed");
 		return false;
