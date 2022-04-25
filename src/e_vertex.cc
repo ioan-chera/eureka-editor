@@ -399,7 +399,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 	// see if vertex is sitting on a line
 
-	Objid line_obj = doc.hover.findSplitLineForDangler(v_num);
+	Objid line_obj = hover::findSplitLineForDangler(doc, inst.loaded.levelFormat, inst.grid, v_num);
 
 	if (! line_obj.valid())
 		return false;

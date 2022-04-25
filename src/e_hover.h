@@ -45,6 +45,8 @@ namespace hover
 Objid findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
 					const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
 					int ignore_vert);
+Objid findSplitLineForDangler(const Document &doc, MapFormat format,
+							  const Grid_State_c &grid, int v_num);
 int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
 Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
 					  const Grid_State_c &grid, const v2double_t &pos);
@@ -60,8 +62,6 @@ public:
 	Hover(Document &doc) : DocumentModule(doc)
 	{
 	}
-
-	Objid findSplitLineForDangler(int v_num) const;
 
 	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
 	int getOppositeSector(int ld, Side ld_side) const;

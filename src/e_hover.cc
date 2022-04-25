@@ -564,9 +564,10 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 //
 // Find a split line for a dangling vertex
 //
-Objid Hover::findSplitLineForDangler(int v_num) const
+Objid hover::findSplitLineForDangler(const Document &doc, MapFormat format,
+									 const Grid_State_c &grid, int v_num)
 {
-	return getNearestSplitLine(doc, inst.loaded.levelFormat, inst.grid, doc.vertices[v_num]->xy(), v_num);
+	return getNearestSplitLine(doc, format, grid, doc.vertices[v_num]->xy(), v_num);
 }
 
 //
