@@ -475,6 +475,9 @@ static int getClosestLine_CastingVert(const Document &doc, v2double_t pos, Side 
 	return best_match;
 }
 
+static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Grid_State_c &grid,
+								 const v2double_t &pos, int ignore_vert);
+
 //
 // Finds a split line
 //
@@ -482,7 +485,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 {
 	out_pos = {};
 
-	Objid out = getNearestSplitLine(ptr, ignore_vert);
+	Objid out = getNearestSplitLine(doc, inst.loaded.levelFormat, inst.grid, ptr, ignore_vert);
 
 	if(!out.valid())
 		return Objid();
@@ -561,7 +564,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 //
 Objid Hover::findSplitLineForDangler(int v_num) const
 {
-	return getNearestSplitLine(doc.vertices[v_num]->xy(), v_num);
+	return getNearestSplitLine(doc, inst.loaded.levelFormat, inst.grid, doc.vertices[v_num]->xy(), v_num);
 }
 
 //
@@ -1041,10 +1044,11 @@ static double getApproximateDistanceToLinedef(const Document &doc, const LineDef
 // determine which linedef would be split if a new vertex were
 // added at the given coordinates.
 //
-Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
+static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Grid_State_c &grid,
+								 const v2double_t &pos, int ignore_vert)
 {
 	// slack in map units
-	double mapslack = 1.5 + ceil(8.0f / inst.grid.Scale);
+	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);
@@ -1052,7 +1056,7 @@ Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
 	int    best = -1;
 	double best_dist = 9e9;
 
-	double too_small = (inst.loaded.levelFormat == MapFormat::udmf) ? 0.2 : 4.0;
+	double too_small = (format == MapFormat::udmf) ? 0.2 : 4.0;
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{

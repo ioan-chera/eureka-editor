@@ -71,8 +71,6 @@ public:
 		v2double_t p2, int possible_v2) const;
 
 private:
-	Objid getNearestSplitLine(const v2double_t &pos, int ignore_vert) const;
-
 	void findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const;
 
 	fastopp_node_c *m_fastopp_X_tree = nullptr;
