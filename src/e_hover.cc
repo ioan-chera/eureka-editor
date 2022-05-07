@@ -1099,7 +1099,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, int possible_v1, const v2double_t &pos2, int possible_v2) const
 {
 	// this could happen when two vertices are overlapping
-	if (fabs(pos1.x - pos2.x) < ALONG_EPSILON && fabs(pos1.y - pos2.y) < ALONG_EPSILON)
+	if((pos1 - pos2).chebyshev() < ALONG_EPSILON)
 		return;
 
 	// distances along WHOLE original line for this segment

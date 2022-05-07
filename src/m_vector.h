@@ -107,6 +107,11 @@ struct v2double_t
 	}
 	inline v2int_t iround() const;
 
+	double chebyshev() const
+	{
+		return fmax(fabs(x), fabs(y));
+	}
+
 	double x, y;
 };
 
