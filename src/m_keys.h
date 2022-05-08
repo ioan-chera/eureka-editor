@@ -152,7 +152,7 @@ struct editor_command_t
 
 void M_RegisterCommandList(editor_command_t * list);
 
-const editor_command_t *   FindEditorCommand(const SString &name);
+const editor_command_t *   FindEditorCommand(SString name);
 const editor_command_t * LookupEditorCommand(int index);
 
 

@@ -84,10 +84,9 @@ void M_RegisterCommandList(editor_command_t * list)
 }
 
 
-const editor_command_t * FindEditorCommand(const SString &namem)
+const editor_command_t * FindEditorCommand(SString name)
 {
 	// backwards compatibility
-	SString name = namem;
 	if (name.noCaseEqual("GRID_Step"))
 		name = "GRID_Bump";
 	else if (name.noCaseEqual("Check"))
@@ -99,9 +98,9 @@ const editor_command_t * FindEditorCommand(const SString &namem)
 	else if (name.noCaseEqual("OperationMenu"))
 		name = "OpMenu";
 
-	for (unsigned int i = 0 ; i < global::all_commands.size() ; i++)
-		if (name.noCaseEqual(global::all_commands[i]->name))
-			return global::all_commands[i];
+	for (const editor_command_t *command : global::all_commands)
+		if (name.noCaseEqual(command->name))
+			return command;
 
 	return NULL;
 }
