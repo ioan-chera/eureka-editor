@@ -464,6 +464,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 	// this ensures all parameters are NUL terminated
 	key_binding_t temp = {};
 
+	assert(tokens.size() >= 2);
 	temp.key = M_ParseKeyString(tokens[1]);
 
 	if (! temp.key)
@@ -482,6 +483,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 
 	// handle un-bound keys
+	assert(tokens.size() >= 3);
 	if (tokens[2].noCaseEqual("UNBOUND"))
 	{
 #if 0
