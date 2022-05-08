@@ -267,7 +267,7 @@ public:
 	bool Exec_HasFlag(const char *flag) const;
 	bool ExecuteCommand(const editor_command_t *cmd, const SString &param1 = "", const SString &param2 = "", const SString &param3 = "", const SString &param4 = "");
 	bool ExecuteCommand(const SString &name, const SString &param1 = "", const SString &param2 = "", const SString &param3 = "", const SString &param4 = "");
-	bool ExecuteKey(keycode_t key, key_context_e context);
+	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
 	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;

@@ -63,29 +63,40 @@ typedef unsigned int keycode_t;
 bool is_mouse_wheel (keycode_t key);
 bool is_mouse_button(keycode_t key);
 
-
-enum key_context_e
+enum class KeyContext
 {
-	KCTX_NONE = 0,  /* INVALID */
+	none,	// INVALID
 
-	KCTX_Browser,
-	KCTX_Render,
+	browser,
+	render,
 
-	KCTX_Vertex,
-	KCTX_Thing,
-	KCTX_Sector,
-	KCTX_Line,
+	vertex,
+	thing,
+	sector,
+	line,
 
-	KCTX_General
+	general
 };
 
+inline constexpr KeyContext validKeyContexts[] =
+{
+	KeyContext::browser,
+	KeyContext::render,
+
+	KeyContext::vertex,
+	KeyContext::thing,
+	KeyContext::sector,
+	KeyContext::line,
+	
+	KeyContext::general
+};
 
 /* --- general manipulation --- */
 
 int M_KeyCmp(keycode_t A, keycode_t B);
 
-key_context_e M_ParseKeyContext(const SString &str);
-const char * M_KeyContextString(key_context_e context);
+KeyContext M_ParseKeyContext(const SString &str);
+const char * M_KeyContextString(KeyContext context);
 
 keycode_t M_ParseKeyString(const SString &str);
 SString M_KeyToString(keycode_t key);
@@ -95,7 +106,7 @@ keycode_t M_TranslateKey(int key, int state);
 
 int M_KeyToShortcut(keycode_t key);
 
-key_context_e M_ModeToKeyContext(ObjType mode);
+KeyContext M_ModeToKeyContext(ObjType mode);
 
 
 /* --- preferences dialog stuff --- */
@@ -110,12 +121,12 @@ void M_DetectConflictingBinds();
 SString M_StringForFunc(int index);
 const char * M_StringForBinding(int index, bool changing_key = false);
 
-void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context);
+void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context);
 
 void M_ChangeBindingKey(int index, keycode_t key);
-const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
+const char * M_SetLocalBinding(int index, keycode_t key, KeyContext context,
                                const SString &func_str);
-const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
+const char * M_AddLocalBinding(int after, keycode_t key, KeyContext context,
                                const char *func_str);
 void M_DeleteLocalBinding(int index);
 
@@ -123,8 +134,8 @@ void M_DeleteLocalBinding(int index);
 void M_LoadBindings();
 void M_SaveBindings();
 
-bool M_IsKeyBound   (keycode_t key, key_context_e context);
-void M_RemoveBinding(keycode_t key, key_context_e context);
+bool M_IsKeyBound   (keycode_t key, KeyContext context);
+void M_RemoveBinding(keycode_t key, KeyContext context);
 
 
 /* --- command execution stuff --- */
@@ -145,7 +156,7 @@ struct editor_command_t
 	const char *const keyword_list;
 
 	// this value is computed when registering
-	key_context_e req_context;
+	KeyContext req_context;
 
 };
 

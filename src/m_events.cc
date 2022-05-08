@@ -615,16 +615,16 @@ int Instance::EV_RawKey(int event)
 
 	// keyboard propagation logic
 
-	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+	if (main_win->browser->visible() && ExecuteKey(key, KeyContext::browser))
 		return 1;
 
-	if (edit.render3d && ExecuteKey(key, KCTX_Render))
+	if (edit.render3d && ExecuteKey(key, KeyContext::render))
 		return 1;
 
 	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
 		return 1;
 
-	if (ExecuteKey(key, KCTX_General))
+	if (ExecuteKey(key, KeyContext::general))
 		return 1;
 
 
