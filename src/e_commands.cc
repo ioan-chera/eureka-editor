@@ -397,10 +397,9 @@ void Instance::CMD_BrowserMode()
 void Instance::CMD_Scroll()
 {
 	// these are percentages
-	float delta_x = static_cast<float>(atof(EXEC_Param[0]));
-	float delta_y = static_cast<float>(atof(EXEC_Param[1]));
+	v2double_t delta = { atof(EXEC_Param[0]), atof(EXEC_Param[1]) };
 
-	if (delta_x == 0 && delta_y == 0)
+	if (!delta)
 	{
 		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
 		return;
@@ -408,16 +407,15 @@ void Instance::CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
-	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
+	delta *= base_size / 100.0 / grid.Scale;
 
-	grid.Scroll(delta_x, delta_y);
+	grid.Scroll(delta);
 }
 
 
 void Instance::NAV_Scroll_Left_release()
 {
-	edit.nav_left = 0;
+	edit.nav.left = 0;
 }
 
 //
@@ -440,39 +438,39 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 
 void Instance::CMD_NAV_Scroll_Left()
 {
-	navigationScroll(&edit.nav_left, &Instance::NAV_Scroll_Left_release);
+	navigationScroll(&edit.nav.left, &Instance::NAV_Scroll_Left_release);
 }
 
 void Instance::NAV_Scroll_Right_release()
 {
-	edit.nav_right = 0;
+	edit.nav.right = 0;
 }
 
 void Instance::CMD_NAV_Scroll_Right()
 {
-	navigationScroll(&edit.nav_right, &Instance::NAV_Scroll_Right_release);
+	navigationScroll(&edit.nav.right, &Instance::NAV_Scroll_Right_release);
 }
 
 
 void Instance::NAV_Scroll_Up_release()
 {
-	edit.nav_up = 0;
+	edit.nav.up = 0;
 }
 
 void Instance::CMD_NAV_Scroll_Up()
 {
-	navigationScroll(&edit.nav_up, &Instance::NAV_Scroll_Up_release);
+	navigationScroll(&edit.nav.up, &Instance::NAV_Scroll_Up_release);
 }
 
 
 void Instance::NAV_Scroll_Down_release()
 {
-	edit.nav_down = 0;
+	edit.nav.down = 0;
 }
 
 void Instance::CMD_NAV_Scroll_Down()
 {
-	navigationScroll(&edit.nav_down, &Instance::NAV_Scroll_Down_release);
+	navigationScroll(&edit.nav.down, &Instance::NAV_Scroll_Down_release);
 }
 
 
@@ -511,10 +509,12 @@ void Instance::CheckBeginDrag()
 	if (edit.render3d && !(edit.mode == ObjType::things || edit.mode == ObjType::sectors))
 		return;
 
-	int pixel_dx = Fl::event_x() - edit.click_screen_x;
-	int pixel_dy = Fl::event_y() - edit.click_screen_y;
+	v2int_t pixel_dpos = {
+		Fl::event_x() - edit.click_screen_pos.x,
+		Fl::event_y() - edit.click_screen_pos.y
+	};
 
-	if (std::max(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
+	if (pixel_dpos.chebyshev() < config::minimum_drag_pixels)
 		return;
 
 	// if highlighted object is in selection, we drag the selection,
@@ -532,7 +532,7 @@ void Instance::DoBeginDrag()
 {
 	edit.drag_start = edit.drag_cur = edit.click_map;
 
-	edit.drag_screen_dx  = edit.drag_screen_dy = 0;
+	edit.drag_screen_dpos = {};
 	edit.drag_thing_num  = -1;
 	edit.drag_other_vert = -1;
 
@@ -711,8 +711,8 @@ void Instance::CMD_ACT_Click()
 	edit.click_force_single = false;
 
 	// remember some state (for drag detection)
-	edit.click_screen_x = Fl::event_x();
-	edit.click_screen_y = Fl::event_y();
+	edit.click_screen_pos.x = Fl::event_x();
+	edit.click_screen_pos.y = Fl::event_y();
 
 	edit.click_map = edit.map;
 
@@ -996,14 +996,16 @@ void Instance::CMD_WHEEL_Scroll()
 			speed *= 3.0f;
 	}
 
-	float delta_x = static_cast<float>(wheel_dx);
-	float delta_y = static_cast<float>(0 - wheel_dy);
+	v2double_t delta = {
+		static_cast<double>(wheel_dpos.x),
+		static_cast<double>(-wheel_dpos.y)
+	};
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
 	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
-	grid.Scroll(delta_x * speed, delta_y * speed);
+	grid.Scroll(delta * speed);
 }
 
 
@@ -1106,10 +1108,11 @@ void Instance::CMD_GoToCamera()
 	if (edit.render3d)
 		Render3D_Enable(*this, false);
 
-	double x, y; float angle;
-	Render3D_GetCameraPos(&x, &y, &angle);
+	v2double_t pos;
+	float angle;
+	Render3D_GetCameraPos(pos, &angle);
 
-	grid.MoveTo(x, y);
+	grid.MoveTo(pos);
 
 	RedrawMap();
 }

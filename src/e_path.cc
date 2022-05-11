@@ -368,18 +368,16 @@ void Instance::GoToSelection()
 	if (edit.render3d)
 		Render3D_Enable(*this, false);
 
-	double x1, y1, x2, y2;
-	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
+	v2double_t pos1, pos2;
+	level.objects.calcBBox(*edit.Selected, pos1, pos2);
+	v2double_t mid = (pos1 + pos2) / 2;
 
-	double mid_x = (x1 + x2) / 2;
-	double mid_y = (y1 + y2) / 2;
-
-	grid.MoveTo(mid_x, mid_y);
+	grid.MoveTo(mid);
 
 	// zoom out until selected objects fit on screen
 	for (int loop = 0 ; loop < 30 ; loop++)
 	{
-		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(pos1.x), static_cast<int>(pos1.y), static_cast<int>(pos2.x), static_cast<int>(pos2.y));
 
 		if (eval <= 0)
 			break;
@@ -393,7 +391,7 @@ void Instance::GoToSelection()
 		if (grid.Scale >= 1.0)
 			break;
 
-		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(x1), static_cast<int>(y1), static_cast<int>(x2), static_cast<int>(y2));
+		int eval = main_win->canvas->ApproxBoxSize(static_cast<int>(pos1.x), static_cast<int>(pos1.y), static_cast<int>(pos2.x), static_cast<int>(pos2.y));
 
 		if (eval >= 0)
 			break;

@@ -65,21 +65,18 @@ void Instance::zoom_fit()
 	if (level.numVertices() == 0)
 		return;
 
-	double xzoom = 1;
-	double yzoom = 1;
+	v2double_t zoom = { 1, 1 };
+	v2int_t ScrMax = { main_win->canvas->w(), main_win->canvas->h() };
 
-	int ScrMaxX = main_win->canvas->w();
-	int ScrMaxY = main_win->canvas->h();
+	if (Map_bound1.x < Map_bound2.x)
+		zoom.x = ScrMax.x / (Map_bound2.x - Map_bound1.x);
 
-	if (Map_bound_x1 < Map_bound_x2)
-		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
+	if (Map_bound1.y < Map_bound2.y)
+		zoom.y = ScrMax.y / (Map_bound2.y - Map_bound1.y);
 
-	if (Map_bound_y1 < Map_bound_y2)
-		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
+	grid.NearestScale(std::min(zoom.x, zoom.y));
 
-	grid.NearestScale(std::min(xzoom, yzoom));
-
-	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
+	grid.MoveTo((Map_bound1 + Map_bound2) / 2);
 }
 
 
@@ -379,11 +376,11 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 	{
 		const Vertex * V = inst.level.vertices[i];
 
-		if (V->x() < inst.Map_bound_x1) inst.Map_bound_x1 = V->x();
-		if (V->y() < inst.Map_bound_y1) inst.Map_bound_y1 = V->y();
+		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
+		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
 
-		if (V->x() > inst.Map_bound_x2) inst.Map_bound_x2 = V->x();
-		if (V->y() > inst.Map_bound_y2) inst.Map_bound_y2 = V->y();
+		if (V->x() > inst.Map_bound2.x) inst.Map_bound2.x = V->x();
+		if (V->y() > inst.Map_bound2.y) inst.Map_bound2.y = V->y();
 	}
 }
 
@@ -391,13 +388,13 @@ void Instance::CalculateLevelBounds()
 {
 	if (level.numVertices() == 0)
 	{
-		Map_bound_x1 = Map_bound_x2 = 0;
-		Map_bound_y1 = Map_bound_y2 = 0;
+		Map_bound1.x = Map_bound2.x = 0;
+		Map_bound1.y = Map_bound2.y = 0;
 		return;
 	}
 
-	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
-	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
+	Map_bound1.x = 32767; Map_bound2.x = -32767;
+	Map_bound1.y = 32767; Map_bound2.y = -32767;
 
 	UpdateLevelBounds(*this, 0);
 }
@@ -445,11 +442,11 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 
 		const Vertex * V = level.vertices[objnum];
 
-		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
-		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
+		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
+		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
 
-		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
-		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
+		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
+		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();

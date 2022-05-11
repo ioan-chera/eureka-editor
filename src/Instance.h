@@ -235,7 +235,7 @@ public:
 	// M_EVENTS
 	void ClearStickyMod();
 	void Editor_ClearNav();
-	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
+	void Editor_ScrollMap(int mode, v2int_t dpos = {}, keycode_t mod = 0);
 	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();
 	int EV_HandleEvent(int event);
@@ -299,8 +299,8 @@ public:
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
-	void Render3D_GetCameraPos(double *x, double *y, float *angle) const;
-	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	void Render3D_GetCameraPos(v2double_t &pos, float *angle) const;
+	void Render3D_MouseMotion(v2int_t pos, keycode_t mod, v2int_t dpos);
 	bool Render3D_ParseUser(const std::vector<SString> &tokens);
 	void Render3D_SetCameraPos(const v2double_t &newpos);
 	void Render3D_Setup();
@@ -365,7 +365,7 @@ private:
 	void Editor_Zoom(int delta, v2int_t mid);
 	void EV_EnterWindow();
 	void EV_LeaveWindow();
-	void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	void EV_MouseMotion(v2int_t pos, keycode_t mod, v2int_t dpos);
 	int EV_RawButton(int event);
 	int EV_RawKey(int event);
 	int EV_RawMouse(int event);
@@ -467,10 +467,8 @@ public:	// will be private when we encapsulate everything
 	// Document stuff
 	//
 	bool MadeChanges = false;
-	double Map_bound_x1 = 32767;   /* minimum X value of map */
-	double Map_bound_y1 = 32767;   /* minimum Y value of map */
-	double Map_bound_x2 = -32767;   /* maximum X value of map */
-	double Map_bound_y2 = -32767;   /* maximum Y value of map */
+	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
+	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;
@@ -506,15 +504,13 @@ public:	// will be private when we encapsulate everything
 	//
 	nav_active_key_t cur_action_key = {};
 	bool in_operation_menu = false;
-	int mouse_last_x = 0;
-	int mouse_last_y = 0;
+	v2int_t mouse_last_pos = {};
 	nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS] = {};
 	unsigned nav_time = 0;
 	bool no_operation_cfg = false;
 	std::unordered_map<SString, Fl_Menu_Button *> op_all_menus;
 	// these are grabbed from FL_MOUSEWHEEL events
-	int wheel_dx = 0;
-	int wheel_dy = 0;
+	v2int_t wheel_dpos = {};
 
 	// key or mouse button pressed for command, 0 when none
 	keycode_t EXEC_CurKey = {};

@@ -46,7 +46,7 @@ public:
 public:
 	void NewEditMode(ObjType new_mode);
 
-	void SetMouse(double mx, double my);
+	void SetMouse();
 
 	void SetScale(double new_scale);
 	void SetGrid(int new_step);

@@ -715,7 +715,7 @@ void Render3D_Enable(Instance &inst, bool _enable)
 
 	if (inst.edit.render3d)
 	{
-		inst.main_win->info_bar->SetMouse(inst.r_view.x, inst.r_view.y);
+		inst.main_win->info_bar->SetMouse();
 
 		// TODO: ideally query this, like code in PointerPos
 		inst.r_view.mouse_x = inst.r_view.mouse_y = -1;
@@ -723,14 +723,14 @@ void Render3D_Enable(Instance &inst, bool _enable)
 	else
 	{
 		inst.main_win->canvas->PointerPos();
-		inst.main_win->info_bar->SetMouse(inst.edit.map.x, inst.edit.map.y);
+		inst.main_win->info_bar->SetMouse();
 	}
 
 	inst.RedrawMap();
 }
 
 
-void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
+void Render3D_ScrollMap(Instance &inst, v2int_t dpos, keycode_t mod)
 {
 	// we separate the movement into either turning or moving up/down
 	// (never both at the same time : CONFIG IT THOUGH).
@@ -739,10 +739,10 @@ void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 
 	if (force_one_dir)
 	{
-		if (abs(dx) >= abs(dy))
-			dy = 0;
+		if (abs(dpos.x) >= abs(dpos.y))
+			dpos.y = 0;
 		else
-			dx = 0;
+			dpos.x = 0;
 	}
 
 	bool is_strafe = (mod & EMOD_ALT) ? true : false;
@@ -755,31 +755,31 @@ void Render3D_ScrollMap(Instance &inst, int dx, int dy, keycode_t mod)
 
 	if (is_strafe)
 	{
-		inst.r_view.x += inst.r_view.Sin * dx * mod_factor;
-		inst.r_view.y -= inst.r_view.Cos * dx * mod_factor;
+		inst.r_view.x += inst.r_view.Sin * dpos.x * mod_factor;
+		inst.r_view.y -= inst.r_view.Cos * dpos.x * mod_factor;
 	}
 	else  // turn camera
 	{
-		double d_ang = dx * speed * M_PI / 480.0;
+		double d_ang = dpos.x * speed * M_PI / 480.0;
 
 		inst.r_view.SetAngle(static_cast<float>(inst.r_view.angle - d_ang));
 	}
 
-	dy = -dy;  //TODO CONFIG ITEM
+	dpos.y = -dpos.y;  //TODO CONFIG ITEM
 
 	if (is_strafe)
 	{
-		inst.r_view.x += inst.r_view.Cos * dy * mod_factor;
-		inst.r_view.y += inst.r_view.Sin * dy * mod_factor;
+		inst.r_view.x += inst.r_view.Cos * dpos.y * mod_factor;
+		inst.r_view.y += inst.r_view.Sin * dpos.y * mod_factor;
 	}
 	else if (! (config::render_lock_gravity && inst.r_view.gravity))
 	{
-		inst.r_view.z += dy * speed * 0.75;
+		inst.r_view.z += dpos.y * speed * 0.75;
 
 		inst.r_view.gravity = false;
 	}
 
-	inst.main_win->info_bar->SetMouse(inst.r_view.x, inst.r_view.y);
+	inst.main_win->info_bar->SetMouse();
 	inst.RedrawMap();
 }
 
@@ -790,7 +790,7 @@ static void DragSectors_Update(Instance &inst)
 	float x_slope = 100.0f / config::render_pixel_aspect;
 
 	float factor = static_cast<float>(clamp(20.f, inst.edit.drag_point_dist, 1000.f) / (ow * x_slope * 0.5));
-	float map_dz = -inst.edit.drag_screen_dy * factor;
+	float map_dz = -inst.edit.drag_screen_dpos.y * factor;
 
 	float step = 8.0;  // TODO config item
 
@@ -850,7 +850,7 @@ static void DragThings_Update(Instance &inst)
 	if (inst.edit.drag_thing_up_down)
 	{
 		// vertical positioning in Hexen and UDMF formats
-		float map_dz = -inst.edit.drag_screen_dy * y_factor;
+		float map_dz = -inst.edit.drag_screen_dpos.y * y_factor;
 
 		// final result is in drag_cur_x/y/z
 		inst.edit.drag_cur.x = inst.edit.drag_start.x;
@@ -870,8 +870,8 @@ static void DragThings_Update(Instance &inst)
 	double side_vx =  fwd_vy;
 	double side_vy = -fwd_vx;
 
-	double dx =  inst.edit.drag_screen_dx * x_factor;
-	double dy = -inst.edit.drag_screen_dy * y_factor * 2.0;
+	double dx =  inst.edit.drag_screen_dpos.x * x_factor;
+	double dy = -inst.edit.drag_screen_dpos.y * y_factor * 2.0;
 
 	// this usually won't happen, but is a reasonable fallback...
 	if (inst.edit.drag_thing_num < 0)
@@ -964,22 +964,22 @@ void Render3D_DragThings(Instance &inst)
 }
 
 
-void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+void Instance::Render3D_MouseMotion(v2int_t pos, keycode_t mod, v2int_t dpos)
 {
 	edit.pointer_in_window = true;
 
 	// save position for Render3D_UpdateHighlight
-	r_view.mouse_x = x;
-	r_view.mouse_y = y;
+	r_view.mouse_x = pos.x;
+	r_view.mouse_y = pos.y;
 
 	if (edit.is_panning)
 	{
-		Editor_ScrollMap(0, dx, dy, mod);
+		Editor_ScrollMap(0, dpos, mod);
 		return;
 	}
 	else if (edit.action == EditorAction::adjustOfs)
 	{
-		AdjustOfs_Delta(*this, dx, dy);
+		AdjustOfs_Delta(*this, dpos.x, dpos.y);
 		return;
 	}
 
@@ -991,10 +991,9 @@ void Instance::Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	{
 		// get the latest map_x/y/z coordinates
 		Objid unused_hl;
-		Render3D_Query(*this, unused_hl, x, y);
+		Render3D_Query(*this, unused_hl, pos.x, pos.y);
 
-		edit.drag_screen_dx = x - edit.click_screen_x;
-		edit.drag_screen_dy = y - edit.click_screen_y;
+		edit.drag_screen_dpos = pos - edit.click_screen_pos;
 
 		edit.drag_cur.x = edit.map.x;
 		edit.drag_cur.y = edit.map.y;
@@ -1046,17 +1045,17 @@ void Instance::Render3D_Navigate()
 
 	keycode_t mod = 0;
 
-	if (edit.nav_lax)
+	if (edit.nav.lax)
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
 	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
-	if (edit.nav_fwd || edit.nav_back || edit.nav_right || edit.nav_left)
+	if (edit.nav.fwd || edit.nav.back || edit.nav.right || edit.nav.left)
 	{
-		float fwd   = edit.nav_fwd   - edit.nav_back;
-		float right = edit.nav_right - edit.nav_left;
+		float fwd   = edit.nav.fwd   - edit.nav.back;
+		float right = edit.nav.right - edit.nav.left;
 
 		float dx = static_cast<float>(r_view.Cos * fwd + r_view.Sin * right);
 		float dy = static_cast<float>(r_view.Sin * fwd - r_view.Cos * right);
@@ -1068,16 +1067,16 @@ void Instance::Render3D_Navigate()
 		r_view.y += dy * delay_ms;
 	}
 
-	if (edit.nav_up || edit.nav_down)
+	if (edit.nav.up || edit.nav.down)
 	{
-		float dz = (edit.nav_up - edit.nav_down);
+		float dz = (edit.nav.up - edit.nav.down);
 
 		r_view.z += dz * mod_factor * delay_ms;
 	}
 
-	if (edit.nav_turn_L || edit.nav_turn_R)
+	if (edit.nav.turn_L || edit.nav.turn_R)
 	{
-		float dang = (edit.nav_turn_L - edit.nav_turn_R);
+		float dang = (edit.nav.turn_L - edit.nav.turn_R);
 
 		dang = dang * mod_factor * delay_ms;
 		dang = clamp(-90.f, dang, 90.f);
@@ -1085,7 +1084,7 @@ void Instance::Render3D_Navigate()
 		r_view.SetAngle(static_cast<float>(r_view.angle + dang));
 	}
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	main_win->info_bar->SetMouse();
 	RedrawMap();
 }
 
@@ -1500,10 +1499,10 @@ void Instance::Render3D_SetCameraPos(const v2double_t &newpos)
 }
 
 
-void Instance::Render3D_GetCameraPos(double *x, double *y, float *angle) const
+void Instance::Render3D_GetCameraPos(v2double_t &pos, float *angle) const
 {
-	*x = r_view.x;
-	*y = r_view.y;
+	pos.x = r_view.x;
+	pos.y = r_view.y;
 
 	// convert angle from radians to degrees
 	*angle = static_cast<float>(r_view.angle * 180.0 / M_PI);
@@ -1576,7 +1575,7 @@ void Instance::R3D_Forward()
 	r_view.x += r_view.Cos * dist;
 	r_view.y += r_view.Sin * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	main_win->info_bar->SetMouse();
 	RedrawMap();
 }
 
@@ -1587,7 +1586,7 @@ void Instance::R3D_Backward()
 	r_view.x -= r_view.Cos * dist;
 	r_view.y -= r_view.Sin * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	main_win->info_bar->SetMouse();
 	RedrawMap();
 }
 
@@ -1598,7 +1597,7 @@ void Instance::R3D_Left()
 	r_view.x -= r_view.Sin * dist;
 	r_view.y += r_view.Cos * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	main_win->info_bar->SetMouse();
 	RedrawMap();
 }
 
@@ -1609,7 +1608,7 @@ void Instance::R3D_Right()
 	r_view.x += r_view.Sin * dist;
 	r_view.y -= r_view.Cos * dist;
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	main_win->info_bar->SetMouse();
 	RedrawMap();
 }
 
@@ -1671,7 +1670,7 @@ void Instance::R3D_DropToFloor()
 
 void Instance::R3D_NAV_Forward_release()
 {
-	edit.nav_fwd = 0;
+	edit.nav.fwd = 0;
 }
 
 //
@@ -1713,83 +1712,83 @@ void Instance::navigation3DTurn(float *editNav, nav_release_func_t func)
 
 void Instance::R3D_NAV_Forward()
 {
-	navigation3DMove(&edit.nav_fwd, &Instance::R3D_NAV_Forward_release, false);
+	navigation3DMove(&edit.nav.fwd, &Instance::R3D_NAV_Forward_release, false);
 }
 
 
 void Instance::R3D_NAV_Back_release()
 {
-	edit.nav_back = 0;
+	edit.nav.back = 0;
 }
 
 void Instance::R3D_NAV_Back()
 {
-	navigation3DMove(&edit.nav_back, &Instance::R3D_NAV_Back_release, false);
+	navigation3DMove(&edit.nav.back, &Instance::R3D_NAV_Back_release, false);
 }
 
 
 void Instance::R3D_NAV_Right_release()
 {
-	edit.nav_right = 0;
+	edit.nav.right = 0;
 }
 
 void Instance::R3D_NAV_Right()
 {
-	navigation3DMove(&edit.nav_right, &Instance::R3D_NAV_Right_release, false);
+	navigation3DMove(&edit.nav.right, &Instance::R3D_NAV_Right_release, false);
 }
 
 
 void Instance::R3D_NAV_Left_release()
 {
-	edit.nav_left = 0;
+	edit.nav.left = 0;
 }
 
 void Instance::R3D_NAV_Left()
 {
-	navigation3DMove(&edit.nav_left, &Instance::R3D_NAV_Left_release, false);
+	navigation3DMove(&edit.nav.left, &Instance::R3D_NAV_Left_release, false);
 }
 
 
 void Instance::R3D_NAV_Up_release()
 {
-	edit.nav_up = 0;
+	edit.nav.up = 0;
 }
 
 void Instance::R3D_NAV_Up()
 {
-	navigation3DMove(&edit.nav_up, &Instance::R3D_NAV_Up_release, true);
+	navigation3DMove(&edit.nav.up, &Instance::R3D_NAV_Up_release, true);
 }
 
 
 void Instance::R3D_NAV_Down_release()
 {
-	edit.nav_down = 0;
+	edit.nav.down = 0;
 }
 
 void Instance::R3D_NAV_Down()
 {
-	navigation3DMove(&edit.nav_down, &Instance::R3D_NAV_Down_release, true);
+	navigation3DMove(&edit.nav.down, &Instance::R3D_NAV_Down_release, true);
 }
 
 void Instance::R3D_NAV_TurnLeft_release()
 {
-	edit.nav_turn_L = 0;
+	edit.nav.turn_L = 0;
 }
 
 void Instance::R3D_NAV_TurnLeft()
 {
-	navigation3DTurn(&edit.nav_turn_L, &Instance::R3D_NAV_TurnLeft_release);
+	navigation3DTurn(&edit.nav.turn_L, &Instance::R3D_NAV_TurnLeft_release);
 }
 
 
 void Instance::R3D_NAV_TurnRight_release()
 {
-	edit.nav_turn_R = 0;
+	edit.nav.turn_R = 0;
 }
 
 void Instance::R3D_NAV_TurnRight()
 {
-	navigation3DTurn(&edit.nav_turn_R, &Instance::R3D_NAV_TurnRight_release);
+	navigation3DTurn(&edit.nav.turn_R, &Instance::R3D_NAV_TurnRight_release);
 }
 
 
@@ -1925,7 +1924,7 @@ void Instance::R3D_WHEEL_Move()
 	r_view.x += speed * (r_view.Cos * dy + r_view.Sin * dx);
 	r_view.y += speed * (r_view.Sin * dy - r_view.Cos * dx);
 
-	main_win->info_bar->SetMouse(r_view.x, r_view.y);
+	main_win->info_bar->SetMouse();
 	RedrawMap();
 }
 
