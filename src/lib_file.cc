@@ -336,7 +336,9 @@ SString GetAbsolutePath(const SString &path)
 	return stringBuffer.data();
 }
 
-//assuming fl_filename_relative can be safely wrapped the same way filename_absolute is
+// Thu 12 May 2022
+// Assuming fl_filename_relative can be safely wrapped as above
+//
 SString GetRelativePath(const SString &path)
 {
         size_t sz = 64;

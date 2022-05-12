@@ -1027,9 +1027,9 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 
 	for (const SString &resource : loaded.resourceList)
 	{
-		SString absolute_name = GetAbsolutePath(resource);
+		SString relative_name = GetRelativePath(resource);
 
-		lump->Printf("resource %s\n", absolute_name.c_str());
+		lump->Printf("resource %s\n", relative_name.c_str());
 	}
 
 	wad->writeToDisk();
