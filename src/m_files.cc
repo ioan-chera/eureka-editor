@@ -1025,12 +1025,30 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 	if (!loaded.portName.empty())
 		lump->Printf("port %s\n", loaded.portName.c_str());
 
+        //remember pwd
+        static char old_dir[FL_PATH_MAX];
+
+        if (cwd(old_dir, sizeof(old_dir)) == NULL)
+        {
+                old_dir[0] = 0;
+        }
+
+        //assuming the edit_wad is the pwad currently being edited
+        SString current_pwad_dir = FilenameGetPath(wad.master.edit_wad);
+        FileChangeDir(current_pwad_dir);
+
 	for (const SString &resource : loaded.resourceList)
 	{
 		SString relative_name = GetRelativePath(resource);
 
 		lump->Printf("resource %s\n", relative_name.c_str());
 	}
+
+        //restore pwd
+        if (old_dir[0])
+        {
+                FileChangeDir(old_dir);
+        }
 
 	wad->writeToDisk();
 }
