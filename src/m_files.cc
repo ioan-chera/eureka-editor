@@ -1028,14 +1028,13 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
         //remember pwd
         static char old_dir[FL_PATH_MAX];
 
-        if (cwd(old_dir, sizeof(old_dir)) == NULL)
+        if (getcwd(old_dir, sizeof(old_dir)) == NULL)
         {
                 old_dir[0] = 0;
         }
 
-        //assuming the edit_wad is the pwad currently being edited
-        SString current_pwad_dir = FilenameGetPath(wad.master.edit_wad);
-        FileChangeDir(current_pwad_dir);
+        SString current_pwad_path = FilenameGetPath(wad->PathName());
+        FileChangeDir(current_pwad_path);
 
 	for (const SString &resource : loaded.resourceList)
 	{
