@@ -1470,17 +1470,17 @@ v2double_t ObjectsModule::calcMiddle(const selection_c & list) const
 // returns a bounding box that completely includes a list of objects.
 // when the list is empty, bottom-left coordinate is arbitrary.
 //
-void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, double *x2, double *y2) const
+void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2double_t &pos2) const
 {
 	if (list.empty())
 	{
-		*x1 = *y1 = 0;
-		*x2 = *y2 = 0;
+		pos1 = {};
+		pos2 = {};
 		return;
 	}
 
-	*x1 = *y1 = +9e9;
-	*x2 = *y2 = -9e9;
+	pos1 = { +9e9, +9e9 };
+	pos2 = { -9e9, -9e9 };
 
 	switch (list.what_type())
 	{
@@ -1495,10 +1495,10 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 				const thingtype_t &info = M_GetThingType(inst.conf, T->type);
 				int r = info.radius;
 
-				if (Tx - r < *x1) *x1 = Tx - r;
-				if (Ty - r < *y1) *y1 = Ty - r;
-				if (Tx + r > *x2) *x2 = Tx + r;
-				if (Ty + r > *y2) *y2 = Ty + r;
+				if (Tx - r < pos1.x) pos1.x = Tx - r;
+				if (Ty - r < pos1.y) pos1.y = Ty - r;
+				if (Tx + r > pos2.x) pos2.x = Tx + r;
+				if (Ty + r > pos2.y) pos2.y = Ty + r;
 			}
 			break;
 		}
@@ -1511,10 +1511,10 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 				double Vx = V->x();
 				double Vy = V->y();
 
-				if (Vx < *x1) *x1 = Vx;
-				if (Vy < *y1) *y1 = Vy;
-				if (Vx > *x2) *x2 = Vx;
-				if (Vy > *y2) *y2 = Vy;
+				if (Vx < pos1.x) pos1.x = Vx;
+				if (Vy < pos1.y) pos1.y = Vy;
+				if (Vx > pos2.x) pos2.x = Vx;
+				if (Vy > pos2.y) pos2.y = Vy;
 			}
 			break;
 		}
@@ -1525,13 +1525,13 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(doc, list, verts);
 
-			calcBBox(verts, x1, y1, x2, y2);
+			calcBBox(verts, pos1, pos2);
 			return;
 		}
 	}
 
-	SYS_ASSERT(*x1 <= *x2);
-	SYS_ASSERT(*y1 <= *y2);
+	SYS_ASSERT(pos1.x <= pos2.x);
+	SYS_ASSERT(pos1.y <= pos2.y);
 }
 
 
@@ -1855,23 +1855,23 @@ void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos
 		return;
 	}
 
-	double lx, ly, hx, hy;
+	v2double_t lpos, hpos;
 
-	doc.objects.calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
+	doc.objects.calcBBox(*inst.edit.Selected, lpos, hpos);
 
 	if (pos_x < 0)
-		param.mid.x = lx;
+		param.mid.x = lpos.x;
 	else if (pos_x > 0)
-		param.mid.x = hx;
+		param.mid.x = hpos.x;
 	else
-		param.mid.x = lx + (hx - lx) / 2;
+		param.mid.x = lpos.x + (hpos.x - lpos.x) / 2;
 
 	if (pos_y < 0)
-		param.mid.y = ly;
+		param.mid.y = lpos.y;
 	else if (pos_y > 0)
-		param.mid.y = hy;
+		param.mid.y = hpos.y;
 	else
-		param.mid.y = ly + (hy - ly) / 2;
+		param.mid.y = lpos.y + (hpos.y - lpos.y) / 2;
 }
 
 
@@ -2040,11 +2040,10 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	}
 	else
 	{
-		double lx, ly, hx, hy;
-		calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
+		v2double_t lpos, hpos;
+		calcBBox(*inst.edit.Selected, lpos, hpos);
 
-		param.mid.x = lx + (hx - lx) / 2;
-		param.mid.y = ly + (hy - ly) / 2;
+		param.mid = lpos + (hpos - lpos) / 2;
 	}
 
 	{

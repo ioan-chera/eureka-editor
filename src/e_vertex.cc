@@ -959,11 +959,11 @@ void Instance::CMD_VT_ShapeLine()
 
 	// determine orientation and position of the line
 
-	double x1, y1, x2, y2;
-	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
+	v2double_t pos1, pos2;
+	level.objects.calcBBox(*edit.Selected, pos1, pos2);
 
-	double width  = x2 - x1;
-	double height = y2 - y1;
+	double width  = pos2.x - pos1.x;
+	double height = pos2.y - pos1.y;
 
 	if (width < 4 && height < 4)
 	{
@@ -988,7 +988,7 @@ void Instance::CMD_VT_ShapeLine()
 	{
 		const Vertex *V = level.vertices[*it];
 
-		double weight = WeightForVertex(V, x1,y1, x2,y2, width,height, -1);
+		double weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
 
 		if (weight > 0)
 		{
@@ -998,7 +998,7 @@ void Instance::CMD_VT_ShapeLine()
 			a_total += weight;
 		}
 
-		weight = WeightForVertex(V, x1,y1, x2,y2, width,height, +1);
+		weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
 
 		if (weight > 0)
 		{
@@ -1204,20 +1204,18 @@ void Instance::CMD_VT_ShapeArc()
 
 
 	// determine middle point for circle
-	double x1, y1, x2, y2;
-	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
+	v2double_t pos1, pos2;
+	level.objects.calcBBox(*edit.Selected, pos1, pos2);
 
-	double width  = x2 - x1;
-	double height = y2 - y1;
+	double width  = pos2.x - pos1.x;
+	double height = pos2.y - pos1.y;
 
 	if (width < 4 && height < 4)
 	{
 		Beep("Too small");
 		return;
 	}
-
-	double mid_x = (x1 + x2) * 0.5;
-	double mid_y = (y1 + y2) * 0.5;
+	v2double_t mid = (pos1 + pos2) * 0.5;
 
 
 	// collect all vertices and determine their angle (in radians),
@@ -1234,8 +1232,8 @@ void Instance::CMD_VT_ShapeArc()
 	{
 		const Vertex *V = level.vertices[*it];
 
-		double dx = V->x() - mid_x;
-		double dy = V->y() - mid_y;
+		double dx = V->x() - mid.x;
+		double dy = V->y() - mid.y;
 
 		double dist = hypot(dx, dy);
 
@@ -1288,8 +1286,7 @@ void Instance::CMD_VT_ShapeArc()
 
 	if (arc_deg < 360)
 	{
-		mid_x = (start_V->x() + end_V->x()) * 0.5;
-		mid_y = (start_V->y() + end_V->y()) * 0.5;
+		mid = (start_V->xy() + end_V->xy()) * 0.5;
 
 		r = start_end_dist * 0.5;
 
@@ -1306,12 +1303,12 @@ void Instance::CMD_VT_ShapeArc()
 
 		double away = r * tan(theta);
 
-		mid_x += dx * away;
-		mid_y += dy * away;
+		mid.x += dx * away;
+		mid.y += dy * away;
 
 		r = hypot(r, away);
 
-		best_offset = atan2(start_V->y() - mid_y, start_V->x() - mid_x);
+		best_offset = atan2(start_V->y() - mid.y, start_V->x() - mid.x);
 	}
 	else
 	{
@@ -1322,7 +1319,7 @@ void Instance::CMD_VT_ShapeArc()
 		{
 			double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
-			double cost = level.vertmod.evaluateCircle(nullptr, mid_x, mid_y, r, along_list,
+			double cost = level.vertmod.evaluateCircle(nullptr, mid.x, mid.y, r, along_list,
 										 start_idx, arc_rad, ang_offset, false);
 
 			if (cost < best_cost)
@@ -1339,7 +1336,7 @@ void Instance::CMD_VT_ShapeArc()
 	EditOperation op(level.basis);
 	op.setMessage("shaped %d vertices", (int)along_list.size());
 
-	level.vertmod.evaluateCircle(&op, mid_x, mid_y, r, along_list, start_idx, arc_rad,
+	level.vertmod.evaluateCircle(&op, mid.x, mid.y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 }
 

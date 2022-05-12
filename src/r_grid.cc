@@ -79,15 +79,15 @@ void Grid_State_c::Init()
 }
 
 
-void Grid_State_c::MoveTo(double x, double y)
+void Grid_State_c::MoveTo(const v2double_t &pos)
 {
 	// no change?
-	if (fabs(x - orig.x) < 0.01 &&
-	    fabs(y - orig.y) < 0.01)
+	if (fabs(pos.x - orig.x) < 0.01 &&
+	    fabs(pos.y - orig.y) < 0.01)
 		return;
 
-	orig.x = x;
-	orig.y = y;
+	orig.x = pos.x;
+	orig.y = pos.y;
 
 	if (inst.main_win)
 	{
@@ -99,9 +99,9 @@ void Grid_State_c::MoveTo(double x, double y)
 }
 
 
-void Grid_State_c::Scroll(double delta_x, double delta_y)
+void Grid_State_c::Scroll(const v2double_t &delta)
 {
-	MoveTo(orig.x + delta_x, orig.y + delta_y);
+	MoveTo(orig + delta);
 }
 
 
@@ -668,7 +668,7 @@ bool Instance::Grid_ParseUser(const std::vector<SString> &tokens)
 		double x = atof(tokens[1]);
 		double y = atof(tokens[2]);
 
-		grid.MoveTo(x, y);
+		grid.MoveTo({ x, y });
 
 		double new_scale = atof(tokens[3]);
 

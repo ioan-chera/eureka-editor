@@ -69,6 +69,18 @@ struct DrawLineState
 };
 
 //
+// Navigation state
+//
+struct Navigation
+{
+	float fwd,    back;
+	float left,   right;
+	float up,     down;
+	float turn_L, turn_R;
+	bool  lax;
+};
+
+//
 // this holds some important editor state
 //
 struct Editor_State_t
@@ -111,11 +123,7 @@ struct Editor_State_t
 	bool is_navigating;  // user is holding down a navigation key
 	bool is_panning;     // user is panning the map (turning in 3D) via RMB
 
-	float nav_fwd,    nav_back;
-	float nav_left,   nav_right;
-	float nav_up,     nav_down;
-	float nav_turn_L, nav_turn_R;
-	bool  nav_lax;
+	Navigation nav;
 
 	float panning_speed;
 	bool  panning_lax;
@@ -125,7 +133,7 @@ struct Editor_State_t
 
 	Objid clicked;    // object under the pointer when ACT_Click occurred
 
-	int click_screen_x, click_screen_y;  // screen coord of the click
+	v2int_t click_screen_pos;	// screen coord of the click
 
 	v3double_t click_map;	// location of the click
 
@@ -157,7 +165,7 @@ struct Editor_State_t
 
 	Objid dragged;    // the object we are dragging, or nil for whole selection
 
-	int drag_screen_dx, drag_screen_dy;
+	v2int_t drag_screen_dpos;
 
 	v3double_t drag_start;
 	v3double_t drag_focus;

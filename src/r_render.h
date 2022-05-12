@@ -102,7 +102,7 @@ void Render3D_Draw(Instance &inst, int ox, int oy, int ow, int oh);
 // [ see the struct definition for more details... ]
 bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy, int ox, int oy, int ow, int oh);
 
-void Render3D_ScrollMap(Instance &inst, int dx = 0, int dy = 0, keycode_t mod = 0);
+void Render3D_ScrollMap(Instance &inst, v2int_t dpos = {}, keycode_t mod = 0);
 
 void Render3D_DragThings(Instance &inst);
 void Render3D_DragSectors(Instance &inst);

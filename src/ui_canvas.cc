@@ -628,11 +628,11 @@ void UI_Canvas::DrawMapBounds()
 {
 	RenderColor(FL_RED);
 
-	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y1, inst.Map_bound_x2, inst.Map_bound_y1);
-	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y2, inst.Map_bound_x2, inst.Map_bound_y2);
+	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound1.y);
+	DrawMapLine(inst.Map_bound1.x, inst.Map_bound2.y, inst.Map_bound2.x, inst.Map_bound2.y);
 
-	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y1, inst.Map_bound_x1, inst.Map_bound_y2);
-	DrawMapLine(inst.Map_bound_x2, inst.Map_bound_y1, inst.Map_bound_x2, inst.Map_bound_y2);
+	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound1.x, inst.Map_bound2.y);
+	DrawMapLine(inst.Map_bound2.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound2.y);
 }
 
 
@@ -1995,13 +1995,13 @@ void UI_Canvas::DrawMapArrow(double map_x1, double map_y1, int r, int angle)
 
 void UI_Canvas::DrawCamera()
 {
-	double map_x, map_y;
+	v2double_t map_pos;
 	float angle;
 
-	inst.Render3D_GetCameraPos(&map_x, &map_y, &angle);
+	inst.Render3D_GetCameraPos(map_pos, &angle);
 
-	float mx = static_cast<float>(map_x);
-	float my = static_cast<float>(map_y);
+	float mx = static_cast<float>(map_pos.x);
+	float my = static_cast<float>(map_pos.y);
 
 	float r = static_cast<float>(40.0 / sqrt(inst.grid.Scale));
 

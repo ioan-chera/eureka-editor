@@ -302,7 +302,7 @@ void UI_InfoBar::NewEditMode(ObjType new_mode)
 }
 
 
-void UI_InfoBar::SetMouse(double mx, double my)
+void UI_InfoBar::SetMouse()
 {
 	// TODO this method should go away
 

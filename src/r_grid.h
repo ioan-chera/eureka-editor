@@ -70,9 +70,9 @@ public:
 
 	// change the view so that the map coordinates (x, y)
 	// appear at the centre of the window
-	void MoveTo(double new_x, double new_y);
+	void MoveTo(const v2double_t &newpos);
 
-	void Scroll(double delta_x, double delta_y);
+	void Scroll(const v2double_t &delta);
 
 	// move the origin so that the focus point of the last zoom
 	// operation (scale change) is map_x/y.
