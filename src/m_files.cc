@@ -931,6 +931,7 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 		else if (line == "resource")
 		{
 			SString res = value;
+                        SString resBackup = res;
 
 			// if not found at absolute location, try same place as PWAD
 
@@ -941,6 +942,15 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 				res = FilenameReposition(value, wad->PathName());
 				gLog.printf("  trying: %s\n", res.c_str());
 			}
+
+                        if (! FileExists(res))
+                        {
+                                //now try relative to PWAD by prepending PWAD path
+                                SString pwadPath = FilenameGetPath(wad->PathName());
+                                pwadPath += DIR_SEP_STR;
+                                res = (pwadPath += resBackup);
+                                gLog.printf("  trying: %s\n", res.c_str());
+                        }
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
