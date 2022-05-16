@@ -1036,7 +1036,7 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 		lump->Printf("port %s\n", loaded.portName.c_str());
 
         //remember pwd
-        static char old_dir[FL_PATH_MAX];
+        char old_dir[FL_PATH_MAX];
 
         if (getcwd(old_dir, sizeof(old_dir)) == NULL)
         {
