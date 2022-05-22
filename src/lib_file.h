@@ -41,6 +41,7 @@ bool MatchExtension(const SString &filename, const SString &ext);
 SString ReplaceExtension(const SString &filename, const SString &ext);
 SString GetBaseName(const SString &path);
 bool FilenameIsBare(const SString &filename);
+void FilenameStripBase(SString &path);
 SString FilenameReposition(const SString &filename, const SString &othername);
 SString FilenameGetPath(const SString &filename);
 SString GetAbsolutePath(const SString &path);

@@ -921,7 +921,7 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 				{
 					int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
 					                      "Warning: the pwad specifies an IWAD "
-										  "which cannot be found:\n\n          %s.wad", 
+										  "which cannot be found:\n\n          %s.wad",
 										  value.c_str());
 					if (res == 1)
 						return false;
@@ -931,7 +931,7 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 		else if (line == "resource")
 		{
 			SString res = value;
-                        SString resBackup = res;
+            SString resBackup = res;
 
 			// if not found at absolute location, try same place as PWAD
 
@@ -943,14 +943,16 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 				gLog.printf("  trying: %s\n", res.c_str());
 			}
 
-                        if (! FileExists(res))
-                        {
-                                //now try relative to PWAD by prepending PWAD path
-                                SString pwadPath = FilenameGetPath(wad->PathName());
-                                pwadPath += DIR_SEP_STR;
-                                res = (pwadPath += resBackup);
-                                gLog.printf("  trying: %s\n", res.c_str());
-                        }
+			//now try relative to PWAD by prepending PWAD path
+
+            if (! FileExists(res))
+            {
+    			SString pwadPath = wad->PathName();
+				FilenameStripBase(pwadPath);
+				pwadPath += DIR_SEP_STR;
+                res = (pwadPath += resBackup);
+                gLog.printf("  trying: %s\n", res.c_str());
+            }
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
@@ -1035,29 +1037,19 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 	if (!loaded.portName.empty())
 		lump->Printf("port %s\n", loaded.portName.c_str());
 
-        //remember pwd
-        char old_dir[FL_PATH_MAX];
-
-        if (getcwd(old_dir, sizeof(old_dir)) == NULL)
-        {
-                old_dir[0] = 0;
-        }
-
-        SString current_pwad_path = FilenameGetPath(wad->PathName());
-        FileChangeDir(current_pwad_path);
+	SString pwadpath = wad->PathName();
+	FilenameStripBase(pwadpath);
+	pwadpath += DIR_SEP_STR;
 
 	for (const SString &resource : loaded.resourceList)
 	{
-		SString relative_name = GetRelativePath(resource);
+		SString relative_name = GetAbsolutePath(resource);
+		
+		size_t seppos = pwadpath.find_last_of(DIR_SEP_STR);
+		relative_name.erase(0, seppos + 1);
 
 		lump->Printf("resource %s\n", relative_name.c_str());
 	}
-
-        //restore pwd
-        if (old_dir[0])
-        {
-                FileChangeDir(old_dir);
-        }
 
 	wad->writeToDisk();
 }

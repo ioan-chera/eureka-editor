@@ -220,7 +220,7 @@ static void FilenameStripBase(char *buffer)
 //
 // Clears the basename
 //
-static void FilenameStripBase(SString &path)
+void FilenameStripBase(SString &path)
 {
 	if(path.empty())
 	{
