@@ -45,8 +45,11 @@
 #include "Thing.h"
 #include "Vertex.h"
 #include "w_rawdef.h"
+#include "WadData.h"
 
 #include "ui_window.h"
+
+#include <algorithm>
 
 // config items
 int config::default_edit_mode = 3;  // Vertices
@@ -953,6 +956,108 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
+void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool forward)
+{
+	LineDef *line1 = level.linedefs[objnum];
+	bool frontside = parts < PART_LF_LOWER;
+	
+	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
+	{
+		if (objnum == i || edit.Selected->get(i))
+			continue;
+			
+		LineDef *line2 = level.linedefs[i];
+			
+		if ((forward && line2->start == line1->end)
+			|| (!forward && line2->end == line1->start))
+		{
+			SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
+			SideDef *side2 = frontside ? line2->Right(level) : line2->Left(level);
+			
+			bool match = false;
+			
+			if (option == "texture")
+			{
+				if (line1->OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
+				{
+					match = (side2->MidTex() == side1->MidTex() && side2->MidTex() != "-");
+				}
+				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
+				{
+					match = (side2->LowerTex() == side1->LowerTex() && side2->LowerTex() != "-");
+				}
+				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
+				{
+					match = (side2->UpperTex() == side1->UpperTex() && side2->UpperTex() != "-");
+				}
+			}
+			else
+			{
+				if (line1->OneSided() != line2->OneSided())
+					continue;
+				
+				Sector *l1front = line1->Right(level)->SecRef(level);
+				Sector *l2front = line2->Right(level)->SecRef(level);
+				Sector *l1back = NULL, *l2back = NULL;
+				
+				if (!line1->OneSided())
+				{
+					l1back = line1->Left(level)->SecRef(level);
+					l2back = line2->Left(level)->SecRef(level);
+				}
+				if (line1->OneSided())
+				{
+					match = (l1front->floorh == l2front->floorh && l1front->ceilh == l2front->ceilh);
+				}
+				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
+				{
+					match = (l1front->floorh == l2front->floorh && l1back->floorh == l2back->floorh);
+				}
+				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
+				{
+					match = (l1front->ceilh == l2front->ceilh && l1back->ceilh == l2back->ceilh);
+				}
+				else
+				{
+					int lowestceil1 = std::min(l1front->ceilh, l1back->ceilh);
+					int highestfloor1 = std::max(l1front->floorh, l1back->floorh);
+					int midheight1 = lowestceil1 - highestfloor1;
+					
+					int lowestceil2 = std::min(l2front->ceilh, l2back->ceilh);
+					int highestfloor2 = std::max(l2front->floorh, l2back->floorh);
+					int midheight2 = lowestceil2 - highestfloor2;
+					
+					int texheight1 = wad.images.W_GetTextureHeight(conf, side1->MidTex());
+					int texheight2 = wad.images.W_GetTextureHeight(conf, side2->MidTex());
+					
+					if (midheight1 == midheight2 && midheight1 < std::min(texheight1, texheight2)
+						&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2) 
+					{
+						match = true;
+					}
+					else if (texheight1 == texheight2 && texheight1 < std::min(midheight1, midheight2)
+						&& (side1->x_offset == side2->x_offset && side1->y_offset == side2->y_offset))
+					{
+						match = true;
+					}
+				}
+			}
+			
+			if (match)
+			{
+				edit.Selected->set_ext(i, parts);
+				SelectNeighborLines(i, option, parts, true);
+				SelectNeighborLines(i, option, parts, false);
+			}
+		}
+	}
+}
+
+void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
+{	
+	Beep("Sectors");
+
+}
 
 void Editor_State_t::Selection_AddHighlighted()
 {

@@ -137,6 +137,7 @@ public:
 	void CMD_SEC_SwapFlats();
 	void CMD_Select();
 	void CMD_SelectAll();
+	void CMD_SelectNeighbors();
 	void CMD_SetVar();
 	void CMD_Shrink();
 	void CMD_TestMap();
@@ -211,6 +212,8 @@ public:
 	bool RecUsed_ParseUser(const std::vector<SString> &tokens);
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
+	void SelectNeighborLines(int objnum, SString option, byte parts, bool forward);
+	void SelectNeighborSectors(int objnum, SString option, byte parts);
 	void Selection_Clear(bool no_save = false);
 	void Selection_InvalidateLast();
 	void Selection_NotifyBegin();

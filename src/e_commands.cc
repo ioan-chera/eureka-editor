@@ -131,6 +131,39 @@ void Instance::CMD_UnselectAll()
 	RedrawMap();
 }
 
+void Instance::CMD_SelectNeighbors()
+{
+	SString option = EXEC_Param[0];
+
+	if (edit.mode != ObjType::linedefs && edit.mode != ObjType::sectors)
+		return;
+	
+	if (option != "height" && option != "texture")
+		return;
+		
+	int num = edit.highlight.num;
+	byte parts = edit.highlight.parts;
+		
+	if (edit.Selected->get(num) && edit.Selected->get_ext(num) & parts)
+	{
+		CMD_UnselectAll();
+	}
+	else
+	{
+		edit.Selected->set_ext(num, edit.Selected->get_ext(num) | parts);
+		if (edit.mode == ObjType::linedefs)
+		{
+			SelectNeighborLines(num, option, parts, true);
+			SelectNeighborLines(num, option, parts, false);
+		}
+		else
+		{
+			SelectNeighborSectors(num, option, parts);
+		}
+		
+	}
+	RedrawMap();
+}
 
 void Instance::CMD_InvertSelection()
 {
@@ -1539,6 +1572,13 @@ static editor_command_t  command_table[] =
 
 	{	"UnselectAll",	"Edit",
 		&Instance::CMD_UnselectAll
+	},
+	
+	{
+		"SelectNeighbors", "Edit",
+		&Instance::CMD_SelectNeighbors,
+		/* flags */ NULL,
+		/* keywords */ "height texture"
 	},
 
 	{	"InvertSelection",	"Edit",
