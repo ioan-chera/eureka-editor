@@ -141,6 +141,9 @@ void Instance::CMD_SelectNeighbors()
 	if (option != "height" && option != "texture")
 		return;
 		
+	if (edit.highlight.num < 0)
+		return;
+		
 	int num = edit.highlight.num;
 	byte parts = edit.highlight.parts;
 		
