@@ -966,8 +966,11 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 		if (objnum == i || edit.Selected->get(i))
 			continue;
 			
-		LineDef *line2 = level.linedefs[i];
-			
+		LineDef *line2 = level.linedefs[i];		
+				
+		if (line1->OneSided() != line2->OneSided())
+					continue;
+				
 		if ((forward && line2->start == line1->end) || (!forward && line2->end == line1->start))
 		{
 			SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
@@ -989,9 +992,6 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 			}
 			else
 			{
-				if (line1->OneSided() != line2->OneSided())
-					continue;
-				
 				Sector *l1front = line1->Right(level)->SecRef(level);
 				Sector *l2front = line2->Right(level)->SecRef(level);
 				Sector *l1back = NULL, *l2back = NULL;
