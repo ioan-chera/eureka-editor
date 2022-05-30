@@ -968,8 +968,7 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 			
 		LineDef *line2 = level.linedefs[i];
 			
-		if ((forward && line2->start == line1->end)
-			|| (!forward && line2->end == line1->start))
+		if ((forward && line2->start == line1->end) || (!forward && line2->end == line1->start))
 		{
 			SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
 			SideDef *side2 = frontside ? line2->Right(level) : line2->Left(level);
@@ -979,17 +978,14 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 			if (option == "texture")
 			{
 				if (line1->OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
-				{
 					match = (side2->MidTex() == side1->MidTex() && side2->MidTex() != "-");
-				}
+
 				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
-				{
 					match = (side2->LowerTex() == side1->LowerTex() && side2->LowerTex() != "-");
-				}
+
 				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
-				{
 					match = (side2->UpperTex() == side1->UpperTex() && side2->UpperTex() != "-");
-				}
+
 			}
 			else
 			{
@@ -1006,17 +1002,14 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 					l2back = line2->Left(level)->SecRef(level);
 				}
 				if (line1->OneSided())
-				{
 					match = (l1front->floorh == l2front->floorh && l1front->ceilh == l2front->ceilh);
-				}
+
 				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
-				{
 					match = (l1front->floorh == l2front->floorh && l1back->floorh == l2back->floorh);
-				}
+
 				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
-				{
 					match = (l1front->ceilh == l2front->ceilh && l1back->ceilh == l2back->ceilh);
-				}
+
 				else
 				{
 					int lowestceil1 = std::min(l1front->ceilh, l1back->ceilh);
@@ -1055,7 +1048,58 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 
 void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 {	
-	Beep("Sectors");
+	Sector *sector1 = level.sectors[objnum];
+	
+	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
+	{
+		LineDef *line = level.linedefs[i];
+		
+		if (line->OneSided())
+			continue;
+			
+		if (line->Right(level)->sector == objnum || line->Left(level)->sector == objnum)
+		{
+			Sector *sector2;
+			int sectornum;
+			
+			bool match = false;
+			
+			if (line->Right(level)->sector == objnum)
+			{
+				sector2 = line->Left(level)->SecRef(level);
+				sectornum = line->Left(level)->sector;
+			}
+			else
+			{
+				sector2 = line->Right(level)->SecRef(level);
+				sectornum = line->Right(level)->sector;
+			}
+			
+			if (edit.Selected->get(sectornum))
+				continue;
+				
+			if (option == "texture")
+			{
+				if (parts & PART_FLOOR)
+					match = (sector1->FloorTex() == sector2->FloorTex());
+				else
+					match = (sector1->CeilTex() == sector2->CeilTex());
+			}
+			else
+			{
+				if (parts & PART_FLOOR)
+					match = (sector1->floorh == sector2->floorh);
+				else
+					match = (sector1->ceilh == sector2->ceilh);
+			}
+			
+			if (match)
+			{
+				edit.Selected->set_ext(sectornum, parts);
+				SelectNeighborSectors(sectornum, option, parts);
+			}
+		}
+	}
 
 }
 
