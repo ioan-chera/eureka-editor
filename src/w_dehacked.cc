@@ -27,6 +27,7 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "dehconsts.h"
 #include "m_game.h"
 #include "m_parse.h"
 #include "m_streams.h"
@@ -67,18 +68,21 @@ void readDehacked(std::istream *is, ConfigData &config)
 		bool morelines = M_ReadTextLine(dehline, *is);
 		std::map<int, dehthing_t> deh_things;
 		std::map<int, dehframe_t> spawn_frames;
-		
+		std::map<SString, SString> renamed_sprites;
 		
 		while (morelines)
 		{
+			
+			//Get Dehacked Thing
 			if (dehline.startsWith("Thing"))
 			{
 				std::vector<SString> tokens;
 				M_ParseLine(dehline, tokens, ParseOptions::noStrings);
 				
 				dehthing_t newthing;
-				int newthingid = DEH_THING_NUM_TO_TYPE[atoi(tokens[1])];
-				newthing.spawnframenum = -1;
+				int dehnum = atoi(tokens[1]);
+				int newthingid = DEH_THING_NUM_TO_TYPE[dehnum];
+				newthing.spawnframenum = DEH_THING_NUM_TO_SPRITE[dehnum];
 				
 				readThing(is, config, &newthing, &newthingid);
 				newthing.thing.desc = thingName(tokens);
@@ -87,11 +91,65 @@ void readDehacked(std::istream *is, ConfigData &config)
 				if (newthingid == -1)
 					config.thing_types.erase(newthingid);
 				else
-					config.thing_types[newthingid] = newthing.thing;				
+					deh_things[newthingid] = newthing;
+			}
+			
+			//Get Dehacked Frame
+			else if (dehline.startsWith("Frame"))
+			{
+				std::vector<SString> tokens;
+				M_ParseLine(dehline, tokens, ParseOptions::noStrings);
+				
+				int framenum = atoi(tokens[1]);
+				dehframe_t frame = DEH_FRAMES[framenum]; //Init with default value
+				readFrame(is, &frame);
+				
+				spawn_frames[framenum] = frame;
+			}
+			
+			//Get changed sprite names
+			else if (dehline == "Text 4 4")
+			{
+				morelines = M_ReadTextLine(dehline, *is);
+				
+				if (morelines)
+				{
+					SString oldname = dehline.substr(0, 4);
+					SString newname = dehline.substr(4, 4);
+					renamed_sprites[oldname] = newname;
+				}
 			}
 			
 			morelines = M_ReadTextLine(dehline, *is);
 		}	
+		
+
+		//Apply DEHACKED things to editor config
+		for (std::map<int, dehthing_t>::iterator it = deh_things.begin(); it != deh_things.end(); it++)
+		{
+			std::cout << it->second.thing.desc;
+			int spawnframenum = it->second.spawnframenum;
+			dehframe_t spawnframe;
+			
+			if (spawn_frames.find(spawnframenum) != spawn_frames.end())
+				spawnframe = spawn_frames[spawnframenum];
+			
+			else
+				spawnframe = DEH_FRAMES[spawnframenum]; //Get default
+				
+			std::cout << "Frame: Sprite" << spawnframe.spritenum << " Subsprite " << spawnframe.subspritenum << "\n";
+				
+			SString sprite = SPRITE_BY_INDEX[spawnframe.spritenum];
+			
+			if (renamed_sprites.find(sprite) != renamed_sprites.end())
+			{
+				sprite = renamed_sprites[sprite];
+			}
+			
+			it->second.thing.sprite = sprite;
+			config.thing_types[it->first] = it->second.thing;
+		}
+		//config.thing_types[newthingid] = newthing.thing;	
 }
 
 void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *newthingid)
@@ -106,7 +164,7 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 	{
 		if (dehline.startsWith(DEH_FIELDS[SPAWNFRAME]))
 			newthing->spawnframenum = atoi(dehline.substr(dehline.find("=") + 2));
-		
+
 		else if (dehline.startsWith(DEH_FIELDS[RADIUS]))
 			newthing->thing.radius = (short)atoi(dehline.substr(dehline.find("=") + 2));
 
@@ -127,16 +185,21 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 			if (vanillabits)
 			{
 				int bits = atoi(dehbits);
-				newthing->thing.flags = 0;
 				
 				if (bits ^ SOLID)
 					thing.flags |= THINGDEF_PASS;
+				else
+					thing.flags &= ~THINGDEF_PASS;
 					
 				if (bits & SPAWNCEILING)
 					thing.flags |= THINGDEF_CEIL;
+				else
+					thing.flags &= ~THINGDEF_CEIL;
 					
 				if (bits & SHADOW)
 					thing.flags |= THINGDEF_INVIS;
+				else
+					thing.flags &= ~THINGDEF_INVIS;
 			}
 		}
 			
@@ -144,6 +207,23 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 	}
 	
 	newthing->thing = thing;
+}
+
+void readFrame(std::istream *is, dehframe_t *frame)
+{
+	SString dehline;
+	bool morelines = M_ReadTextLine(dehline, *is);
+	
+	while(dehline.good() && morelines)
+	{
+		if (dehline.startsWith(DEH_FIELDS[SPRITENUM]))
+			frame->spritenum = atoi(dehline.substr(dehline.find("=") + 2));
+			
+		else if (dehline.startsWith(DEH_FIELDS[SUBSPRITENUM]))
+			frame->subspritenum = atoi(dehline.substr(dehline.find("=") + 2));
+			
+		morelines = M_ReadTextLine(dehline, *is);
+	}
 }
 
 SString thingName(std::vector<SString> tokens)
