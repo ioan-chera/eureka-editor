@@ -185,6 +185,8 @@ set(source_ui
 )
 
 set(source_w
+    w_dehacked.cc
+    w_dehacked.h
     w_loadpic.cc
     w_loadpic.h
     w_rawdef.h

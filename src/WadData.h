@@ -178,6 +178,8 @@ public:	// TODO: make private
 //
 struct WadData
 {
+	void W_LoadDehacked(ConfigData &config);
+	
 	void W_LoadTextures(const ConfigData &config);
 
 	void W_LoadFlats();

@@ -44,6 +44,7 @@
 #include "r_render.h"
 #include "r_subdiv.h"
 
+#include "w_dehacked.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
@@ -937,6 +938,11 @@ void Instance::Main_LoadResources(LoadingData &loading)
 									  &config, resource);
 				continue;
 			}
+			if(MatchExtension(resource, "deh") || MatchExtension(resource, "bex"))
+			{
+				loadDehackedFile(resource, config);
+				continue;
+			}
 			// Otherwise wad
 			if(!Wad_file::Validate(resource))
 				throw ParseException("Invalid WAD file: " + resource);
@@ -976,6 +982,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		wad.master.MasterDir_Add(wad.master.edit_wad);
 
 	// finally, load textures and stuff...
+	wad.W_LoadDehacked(conf);
 	wad.W_LoadPalette();
 	wad.W_LoadColormap();
 
