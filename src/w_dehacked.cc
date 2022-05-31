@@ -65,8 +65,8 @@ void readDehacked(std::istream *is, ConfigData &config)
 {
 		SString dehline;
 		bool morelines = M_ReadTextLine(dehline, *is);
-		std::map<int, thingtype_t> deh_thing_types;
-		std::map<int, dehframe_t> frame_sprite_nums; // We use this to get new spawn sprites
+		std::map<int, dehthing_t> deh_things;
+		std::map<int, dehframe_t> spawn_frames;
 		
 		
 		while (morelines)
@@ -75,30 +75,26 @@ void readDehacked(std::istream *is, ConfigData &config)
 			{
 				std::vector<SString> tokens;
 				M_ParseLine(dehline, tokens, ParseOptions::noStrings);
-				thingtype_t newthing;
+				
+				dehthing_t newthing;
 				int newthingid = DEH_THING_NUM_TO_TYPE[atoi(tokens[1])];
+				newthing.spawnframenum = -1;
+				
 				readThing(is, config, &newthing, &newthingid);
-				newthing.desc = "";
+				newthing.thing.desc = thingName(tokens);
 				
-				//Get name from tokens
-				for (int i = 2; (long unsigned int)i < tokens.size(); i++)
-				{
-					newthing.desc += tokens[i];
-					
-					if ((long unsigned int)i != tokens.size()-1)
-						newthing.desc += " ";
-				}
-				newthing.desc = newthing.desc.substr(1, newthing.desc.length()-2);
-				
-				if (newthingid != -1)
-					config.thing_types[newthingid] = newthing;				
+				//No things with DoomEd Number -1
+				if (newthingid == -1)
+					config.thing_types.erase(newthingid);
+				else
+					config.thing_types[newthingid] = newthing.thing;				
 			}
 			
 			morelines = M_ReadTextLine(dehline, *is);
 		}	
 }
 
-void readThing(std::istream *is, ConfigData &config, thingtype_t *newthing, int *newthingid)
+void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *newthingid)
 {
 	thingtype_t thing = config.thing_types[*newthingid];
 	thing.sprite = config.thing_types[*newthingid].sprite;
@@ -108,8 +104,57 @@ void readThing(std::istream *is, ConfigData &config, thingtype_t *newthing, int 
 	
 	while(dehline.good() && morelines)
 	{
+		if (dehline.startsWith(DEH_FIELDS[SPAWNFRAME]))
+			newthing->spawnframenum = atoi(dehline.substr(dehline.find("=") + 2));
+		
+		else if (dehline.startsWith(DEH_FIELDS[RADIUS]))
+			newthing->thing.radius = (short)atoi(dehline.substr(dehline.find("=") + 2));
+
+		else if (dehline.startsWith(DEH_FIELDS[ID]))
+			*newthingid = atoi(dehline.substr(dehline.find("=") + 2));
+			
+		else if (dehline.startsWith(DEH_FIELDS[FLAGS]))
+		{
+			SString dehbits = dehline.substr(dehline.find("=") + 2);
+			bool vanillabits = true;
+			
+			for (int i = 0; (size_t)i < dehbits.length(); i++)
+			{
+				if (dehbits[i] < '0' || dehbits[i] > '9')
+					vanillabits = false;
+			}
+			
+			if (vanillabits)
+			{
+				int bits = atoi(dehbits);
+				newthing->thing.flags = 0;
+				
+				if (bits ^ SOLID)
+					thing.flags |= THINGDEF_PASS;
+					
+				if (bits & SPAWNCEILING)
+					thing.flags |= THINGDEF_CEIL;
+					
+				if (bits & SHADOW)
+					thing.flags |= THINGDEF_INVIS;
+			}
+		}
+			
 		morelines = M_ReadTextLine(dehline, *is);
 	}
 	
-	*newthing = thing;
+	newthing->thing = thing;
+}
+
+SString thingName(std::vector<SString> tokens)
+{
+	SString ret = "";
+	for (int i = 2; (size_t)i < tokens.size(); i++)
+	{
+		ret += tokens[i];
+		
+		if ((long unsigned int)i != tokens.size()-1)
+			ret += " ";
+	}
+	return ret.substr(1, ret.length()-2);
 }

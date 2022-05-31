@@ -31,32 +31,47 @@
 
 #include <istream>
 
-void loadDehackedFile(SString resource, ConfigData &config);
-void readDehacked(std::istream *is, ConfigData &config);
-void readThing(std::istream *is, ConfigData &config, thingtype_t *newthing, int *newthingid);
-
 //Relevant DEH values for editor things
 enum
 {
-	SPAWNFRAME,
-	FLAGS,
+	SPAWNFRAME = 0,
 	RADIUS,
-	ID
+	ID,
+	FLAGS
 };
 
-const SString DEH_FIELDS[] =
+inline const char* DEH_FIELDS[] =
 {
 	"Initial frame = ",
-	"Bits = ",
 	"Width = ",
-	"ID # = "
+	"ID # = ",
+	"Bits = "
+};
+
+enum
+{
+	SOLID = 1 << 1,	
+	SPAWNCEILING = 1 << 8,
+	SHADOW = 1 << 18
+};
+struct dehthing_t
+{
+	thingtype_t thing;
+	int spawnframenum;
 };
 
 struct dehframe_t
 {
-	int number;
-	int subnumber;
+	int spritenum;
+	int subspritenum;
 };
+
+void loadDehackedFile(SString resource, ConfigData &config);
+void readDehacked(std::istream *is, ConfigData &config);
+void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *newthingid);
+SString thingName(std::vector<SString> tokens);
+
+// Consts
 
 const int DEH_THING_NUM_TO_TYPE[] = 
 {
@@ -69,6 +84,33 @@ const int DEH_THING_NUM_TO_TYPE[] =
 	21, 23, 20, 19, 10, 12, 28, 24, 27, 29, 25, 26, 54, 70, 73, 74, 75, 76, 77, 78, 79,
 	80, 81
 };
+
+inline const SString SPRITE_BY_INDEX[] =
+{
+	"TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2",
+	"CHGG", "CHGF", "MISG", "MISF", "SAWG", "PLSG", "PLSF",
+	"BFGG", "BFGF", "BLUD", "PUFF", "BAL1", "BAL2", "PLSS",
+	"PLSE", "MISL", "BFS1", "BFE1", "BFE2", "TFOG", "IFOG",
+	"PLAY", "POSS", "SPOS", "VILE", "FIRE", "FATB", "FBXP",
+	"SKEL", "MANF", "FATT", "CPOS", "SARG", "HEAD", "BAL7",
+	"BOSS", "BOS2", "SKUL", "SPID", "BSPI", "APLS", "APBX",
+	"CYBR", "PAIN", "SSWV", "KEEN", "BBRN", "BOSF", "ARM1",
+	"ARM2", "BAR1", "BEXP", "FCAN", "BON1", "BON2", "BKEY",
+	"RKEY", "YKEY", "BSKU", "RSKU", "YSKU", "STIM", "MEDI",
+	"SOUL", "PINV", "PSTR", "PINS", "MEGA", "SUIT", "PMAP",
+	"PVIS", "CLIP", "AMMO", "ROCK", "BROK", "CELL", "CELP",
+	"SHEL", "SBOX", "BPAK", "BFUG", "MGUN", "CSAW", "LAUN",
+	"PLAS", "SHOT", "SGN2", "COLU", "SMT2", "GOR1", "POL2",
+	"POL5", "POL4", "POL3", "POL1", "POL6", "GOR2", "GOR3",
+	"GOR4", "GOR5", "SMIT", "COL1", "COL2", "COL3", "COL4",
+	"CAND", "CBRA", "COL6", "TRE1", "TRE2", "ELEC", "CEYE",
+	"FSKU", "COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT",
+	"SMRT", "HDB1", "HDB2", "HDB3", "HDB4", "HDB5", "HDB6",
+	"POB1", "POB2", "BRS1", "TLMP", "TLP2", "TNT1", "DOGS",
+	"PLS1", "PLS2", "BON3", "BON4"
+};
+
+
 
 #endif  /* __EUREKA_W_DEHACKED_H__ */
 
