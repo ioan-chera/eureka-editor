@@ -27,13 +27,16 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "m_game.h"
 #include "m_parse.h"
 #include "m_streams.h"
 #include "w_dehacked.h"
 
 #include <istream>
 #include <iostream>
+#include <map>
 #include <sstream>
+#include <string>
 
 void WadData::W_LoadDehacked(ConfigData &config)
 {
@@ -62,12 +65,51 @@ void readDehacked(std::istream *is, ConfigData &config)
 {
 		SString dehline;
 		bool morelines = M_ReadTextLine(dehline, *is);
+		std::map<int, thingtype_t> deh_thing_types;
+		std::map<int, dehframe_t> frame_sprite_nums; // We use this to get new spawn sprites
+		
 		
 		while (morelines)
 		{
-			std::cout << dehline << "\n";
+			if (dehline.startsWith("Thing"))
+			{
+				std::vector<SString> tokens;
+				M_ParseLine(dehline, tokens, ParseOptions::noStrings);
+				thingtype_t newthing;
+				int newthingid = DEH_THING_NUM_TO_TYPE[atoi(tokens[1])];
+				readThing(is, config, &newthing, &newthingid);
+				newthing.desc = "";
+				
+				//Get name from tokens
+				for (int i = 2; (long unsigned int)i < tokens.size(); i++)
+				{
+					newthing.desc += tokens[i];
+					
+					if ((long unsigned int)i != tokens.size()-1)
+						newthing.desc += " ";
+				}
+				newthing.desc = newthing.desc.substr(1, newthing.desc.length()-2);
+				
+				if (newthingid != -1)
+					config.thing_types[newthingid] = newthing;				
+			}
 			
 			morelines = M_ReadTextLine(dehline, *is);
 		}	
 }
 
+void readThing(std::istream *is, ConfigData &config, thingtype_t *newthing, int *newthingid)
+{
+	thingtype_t thing = config.thing_types[*newthingid];
+	thing.sprite = config.thing_types[*newthingid].sprite;
+	
+	SString dehline;
+	bool morelines = M_ReadTextLine(dehline, *is);
+	
+	while(dehline.good() && morelines)
+	{
+		morelines = M_ReadTextLine(dehline, *is);
+	}
+	
+	*newthing = thing;
+}
