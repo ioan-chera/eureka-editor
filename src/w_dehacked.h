@@ -71,6 +71,7 @@ struct dehframe_t
 {
 	int spritenum;
 	int subspritenum;
+	bool bright;
 };
 
 void loadDehackedFile(SString resource, ConfigData &config);

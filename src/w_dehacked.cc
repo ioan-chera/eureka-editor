@@ -137,6 +137,11 @@ void readDehacked(std::istream *is, ConfigData &config)
 			else
 				spawnframe = DEH_FRAMES[spawnframenum]; //Get default
 				
+			if (spawnframe.bright)
+				it->second.thing.flags |= THINGDEF_LIT;
+			else
+				it->second.thing.flags &= ~THINGDEF_LIT;
+				
 			std::cout << "Frame: Sprite" << spawnframe.spritenum << " Subsprite " << spawnframe.subspritenum << "\n";
 				
 			SString sprite = SPRITE_BY_INDEX[spawnframe.spritenum];
@@ -149,7 +154,6 @@ void readDehacked(std::istream *is, ConfigData &config)
 			it->second.thing.sprite = sprite;
 			config.thing_types[it->first] = it->second.thing;
 		}
-		//config.thing_types[newthingid] = newthing.thing;	
 }
 
 void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *newthingid)
@@ -220,7 +224,17 @@ void readFrame(std::istream *is, dehframe_t *frame)
 			frame->spritenum = atoi(dehline.substr(dehline.find("=") + 2));
 			
 		else if (dehline.startsWith(DEH_FIELDS[SUBSPRITENUM]))
-			frame->subspritenum = atoi(dehline.substr(dehline.find("=") + 2));
+		{
+			int subnumber = atoi(dehline.substr(dehline.find("=") + 2));
+			
+			if (subnumber & 0x8000)
+			{
+				frame->bright = true;
+				subnumber &= ~0x8000;
+			}
+			
+			frame->subspritenum = subnumber;
+		}
 			
 		morelines = M_ReadTextLine(dehline, *is);
 	}
