@@ -43,14 +43,11 @@ void WadData::W_LoadDehacked(ConfigData &config)
 {
 	for (int i = 0 ; i < (int)master.dir.size() ; i++)
 	{
-		std::cout << "Checking for DEHACKED in " << master.dir[i]->PathName() << "\n";
 		Lump_c *dehlump = master.dir[i]->FindLump("DEHACKED");
 		
 		if (!dehlump)
-		{
-			std::cout << "None found.\n";
 			continue;
-		}
+			
 		std::istringstream iss((char*)dehlump->getData());
 		readDehacked(&iss, config);
 	}
@@ -81,7 +78,10 @@ void readDehacked(std::istream *is, ConfigData &config)
 				
 				dehthing_t newthing;
 				int dehnum = atoi(tokens[1]);
-				int newthingid = DEH_THING_NUM_TO_TYPE[dehnum];
+				int newthingid = -1;
+				
+				if (dehnum < 145)
+					newthingid = DEH_THING_NUM_TO_TYPE[dehnum];
 				newthing.spawnframenum = DEH_THING_NUM_TO_SPRITE[dehnum];
 				
 				readThing(is, config, &newthing, &newthingid);
@@ -101,7 +101,15 @@ void readDehacked(std::istream *is, ConfigData &config)
 				M_ParseLine(dehline, tokens, ParseOptions::noStrings);
 				
 				int framenum = atoi(tokens[1]);
-				dehframe_t frame = DEH_FRAMES[framenum]; //Init with default value
+				dehframe_t frame;
+				
+				if (framenum < 1089)
+					frame = DEH_FRAMES[framenum]; //Init with default value
+				
+				else
+					frame = DEHEXTRA_FRAME;
+					
+					
 				readFrame(is, &frame);
 				
 				spawn_frames[framenum] = frame;
@@ -123,33 +131,48 @@ void readDehacked(std::istream *is, ConfigData &config)
 			morelines = M_ReadTextLine(dehline, *is);
 		}	
 		
-
 		//Apply DEHACKED things to editor config
 		for (std::map<int, dehthing_t>::iterator it = deh_things.begin(); it != deh_things.end(); it++)
 		{
-			std::cout << it->second.thing.desc;
 			int spawnframenum = it->second.spawnframenum;
 			dehframe_t spawnframe;
 			
 			if (spawn_frames.find(spawnframenum) != spawn_frames.end())
 				spawnframe = spawn_frames[spawnframenum];
 			
-			else
+			else if (spawnframenum < 1089)
 				spawnframe = DEH_FRAMES[spawnframenum]; //Get default
+			
+			else
+				spawnframe = DEHEXTRA_FRAME;
 				
 			if (spawnframe.bright)
 				it->second.thing.flags |= THINGDEF_LIT;
 			else
 				it->second.thing.flags &= ~THINGDEF_LIT;
 				
-			std::cout << "Frame: Sprite" << spawnframe.spritenum << " Subsprite " << spawnframe.subspritenum << "\n";
-				
-			SString sprite = SPRITE_BY_INDEX[spawnframe.spritenum];
+			SString sprite = ""; 
+			
+			if (spawnframe.spritenum < 145)
+				sprite = SPRITE_BY_INDEX[spawnframe.spritenum];
+			else if (spawnframe.spritenum < 155)
+				sprite = "SP0" + std::to_string(spawnframe.spritenum - 145);
+			else if (spawnframe.spritenum < 244)
+				sprite = "SP" + std::to_string(spawnframe.spritenum - 145);
 			
 			if (renamed_sprites.find(sprite) != renamed_sprites.end())
 			{
 				sprite = renamed_sprites[sprite];
 			}
+			
+			//This shouldn't happen.
+			if (sprite.empty())
+				continue;
+			
+			if (spawnframe.subspritenum > 0)
+				sprite += ('A' + spawnframe.subspritenum);
+			
+			std::cout << it->second.thing.desc << ": " << sprite << "\n" << "Subsprite: " << spawnframe.subspritenum << "\n";
 			
 			it->second.thing.sprite = sprite;
 			config.thing_types[it->first] = it->second.thing;
@@ -230,7 +253,7 @@ void readFrame(std::istream *is, dehframe_t *frame)
 			if (subnumber & 0x8000)
 			{
 				frame->bright = true;
-				subnumber &= ~0x8000;
+				subnumber &= (~0x8000);
 			}
 			
 			frame->subspritenum = subnumber;

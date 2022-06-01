@@ -38,7 +38,7 @@ inline const int DEH_THING_NUM_TO_TYPE[] =
 	2006, 2002, 2005, 2003, 2004, 2001, 82, 85, 86, 2028, 30, 31, 32, 33, 37, 36, 41, 42,
 	43, 44, 45, 46, 55, 56, 57, 47, 48, 34, 35, 49, 50, 51, 52, 53, 59, 60, 61, 62, 63, 22, 15, 18,
 	21, 23, 20, 19, 10, 12, 28, 24, 27, 29, 25, 26, 54, 70, 73, 74, 75, 76, 77, 78, 79,
-	80, 81
+	80, 81, 5001, 5002, 888, -1, -1, 2016, 2017
 };
 
 inline const int DEH_THING_NUM_TO_SPRITE[] =
@@ -263,6 +263,9 @@ inline const dehframe_t DEH_FRAMES[] =
 	{144, 3, false}, {144, 4, false}, {144, 5, false}, {144, 6, false}, {144, 7, false}, {17, 0, true}, 
 	{17, 1, false}, {17, 2, false}, {17, 3, false}, {138, 0, false}
 };
+
+//Default DEHEXTRA frame
+inline const dehframe_t DEHEXTRA_FRAME = {138, 0, false};
 
 #endif  /* __EUREKA_W_DEHACKED_H__ */
 
