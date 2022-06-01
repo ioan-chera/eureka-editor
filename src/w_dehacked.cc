@@ -228,6 +228,23 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 				else
 					thing.flags &= ~THINGDEF_INVIS;
 			}
+			else
+			{	if (dehbits.find("SOLID") != std::string::npos)
+					thing.flags |= THINGDEF_PASS;
+				else
+					thing.flags &= ~THINGDEF_PASS;
+					
+				if (dehbits.find("SPAWNCEILING") != std::string::npos)
+					thing.flags |= THINGDEF_CEIL;
+				else
+					thing.flags &= ~THINGDEF_CEIL;
+					
+				if (dehbits.find("SHADOW") != std::string::npos)
+					thing.flags |= THINGDEF_INVIS;
+				else
+					thing.flags &= ~THINGDEF_INVIS;
+					
+			}
 		}
 			
 		morelines = M_ReadTextLine(dehline, *is);
