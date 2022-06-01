@@ -127,6 +127,7 @@ void readDehacked(std::istream *is, ConfigData &config)
 					renamed_sprites[oldname] = newname;
 				}
 			}
+			//Read DSDHacked sprites table
 			else if (dehline == "[SPRITES]")
 			{
 				morelines = M_ReadTextLine(dehline, *is);
@@ -195,6 +196,7 @@ void readDehacked(std::istream *is, ConfigData &config)
 void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *newthingid)
 {
 	thingtype_t thing = config.thing_types[*newthingid];
+	thing.group = '-';
 	thing.scale = 1.0;
 	thing.sprite = config.thing_types[*newthingid].sprite;
 	
@@ -260,6 +262,19 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 					
 			}
 		}
+		else if (dehline.startsWith("#$Editor category = "))
+		{
+			SString category = dehline.substr(dehline.find("=") + 2);
+			
+			for (int i = 0; i < 9; i++)
+			{
+				if (category == DB_CATEGORIES[i].cat)
+				{
+					thing.group = DB_CATEGORIES[i].group;
+					break;
+				}
+			}
+		}
 			
 		morelines = M_ReadTextLine(dehline, *is);
 	}
@@ -272,7 +287,6 @@ void readFrame(std::istream *is, dehframe_t *frame)
 	SString dehline;
 	bool morelines = M_ReadTextLine(dehline, *is);
 	
-	gLog.printf("%s\n", dehline.c_str());
 	while(dehline.good() && morelines)
 	{
 		if (dehline.startsWith(DEH_FIELDS[SPRITENUM]))

@@ -55,6 +55,20 @@ inline const char* DEH_FIELDS[] =
 	"Sprite subnumber = "
 };
 
+
+inline const struct {SString cat; char group;} DB_CATEGORIES[] =
+{
+	{"Monsters", 'm'},
+	{"Weapons", 'w'},
+	{"Ammunition", 'a'},
+	{"Health and Armor", 'h'},
+	{"Powerups", 'b'},
+	{"Keys", 'k'},
+	{"Obstacles", 'd'},
+	{"Light sources", 'l'},
+	{"Decoration", 'g'}
+};
+
 enum
 {
 	SOLID = 1 << 1,	
