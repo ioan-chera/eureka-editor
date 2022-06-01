@@ -179,6 +179,7 @@ void readDehacked(std::istream *is, ConfigData &config)
 void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *newthingid)
 {
 	thingtype_t thing = config.thing_types[*newthingid];
+	thing.scale = 1.0;
 	thing.sprite = config.thing_types[*newthingid].sprite;
 	
 	SString dehline;
@@ -190,10 +191,7 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 			newthing->spawnframenum = atoi(dehline.substr(dehline.find("=") + 2));
 
 		else if (dehline.startsWith(DEH_FIELDS[RADIUS]))
-		{
-			newthing->thing.radius = (short)(atoi(dehline.substr(dehline.find("=") + 2)) >> 16);
-			gLog.printf("%d\n", newthing->thing.radius);
-		}
+			thing.radius = (short)(atoi(dehline.substr(dehline.find("=") + 2)) >> 16);
 
 		else if (dehline.startsWith(DEH_FIELDS[ID]))
 			*newthingid = atoi(dehline.substr(dehline.find("=") + 2));
