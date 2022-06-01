@@ -820,6 +820,8 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
     loading.udmfNamespace = name_space;
 
 	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
+	
+	loading.resourceList.clear();
 
 	for(int i = 0; i < RES_NUM; ++i)
 		if(res[i].good())
