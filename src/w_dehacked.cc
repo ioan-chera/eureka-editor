@@ -34,7 +34,6 @@
 #include "w_dehacked.h"
 
 #include <istream>
-#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -171,8 +170,6 @@ void readDehacked(std::istream *is, ConfigData &config)
 			
 			if (spawnframe.subspritenum > 0)
 				sprite += ('A' + spawnframe.subspritenum);
-			
-			std::cout << it->second.thing.desc << ": " << sprite << "\n" << "Subsprite: " << spawnframe.subspritenum << "\n";
 			
 			it->second.thing.sprite = sprite;
 			config.thing_types[it->first] = it->second.thing;
