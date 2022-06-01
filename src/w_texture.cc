@@ -760,7 +760,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 
 			if (info.sprite.noCaseEqual("DOGS"))
 				result = IM_CreateDogSprite(palette);
-			else
+			else if (!info.sprite.noCaseEqual("TNT1"))
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
 		else

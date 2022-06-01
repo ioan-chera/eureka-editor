@@ -190,7 +190,10 @@ void readThing(std::istream *is, ConfigData &config, dehthing_t *newthing, int *
 			newthing->spawnframenum = atoi(dehline.substr(dehline.find("=") + 2));
 
 		else if (dehline.startsWith(DEH_FIELDS[RADIUS]))
-			newthing->thing.radius = (short)atoi(dehline.substr(dehline.find("=") + 2));
+		{
+			newthing->thing.radius = (short)(atoi(dehline.substr(dehline.find("=") + 2)) >> 16);
+			gLog.printf("%d\n", newthing->thing.radius);
+		}
 
 		else if (dehline.startsWith(DEH_FIELDS[ID]))
 			*newthingid = atoi(dehline.substr(dehline.find("=") + 2));
