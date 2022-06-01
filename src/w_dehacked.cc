@@ -64,6 +64,7 @@ void readDehacked(std::istream *is, ConfigData &config)
 		bool morelines = M_ReadTextLine(dehline, *is);
 		std::map<int, dehthing_t> deh_things;
 		std::map<int, dehframe_t> spawn_frames;
+		std::map<int, SString> dsdhacked_sprites;
 		std::map<SString, SString> renamed_sprites;
 		
 		while (morelines)
@@ -126,6 +127,19 @@ void readDehacked(std::istream *is, ConfigData &config)
 					renamed_sprites[oldname] = newname;
 				}
 			}
+			else if (dehline == "[SPRITES]")
+			{
+				morelines = M_ReadTextLine(dehline, *is);
+				
+				while(morelines && dehline.good())
+				{
+					std::vector<SString> tokens;
+					M_ParseLine(dehline, tokens, ParseOptions::noStrings);
+					int spritenum = atoi(tokens[0]);
+					dsdhacked_sprites[spritenum] = tokens[2];
+					morelines = M_ReadTextLine(dehline, *is);
+				}
+			}
 			
 			morelines = M_ReadTextLine(dehline, *is);
 		}	
@@ -152,7 +166,9 @@ void readDehacked(std::istream *is, ConfigData &config)
 				
 			SString sprite = ""; 
 			
-			if (spawnframe.spritenum < 145)
+			if (dsdhacked_sprites.find(spawnframe.spritenum) != dsdhacked_sprites.end())
+				sprite = dsdhacked_sprites[spawnframe.spritenum];
+			else if (spawnframe.spritenum < 145)
 				sprite = SPRITE_BY_INDEX[spawnframe.spritenum];
 			else if (spawnframe.spritenum < 155)
 				sprite = "SP0" + std::to_string(spawnframe.spritenum - 145);
@@ -256,6 +272,7 @@ void readFrame(std::istream *is, dehframe_t *frame)
 	SString dehline;
 	bool morelines = M_ReadTextLine(dehline, *is);
 	
+	gLog.printf("%s\n", dehline.c_str());
 	while(dehline.good() && morelines)
 	{
 		if (dehline.startsWith(DEH_FIELDS[SPRITENUM]))
