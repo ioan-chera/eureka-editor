@@ -34,30 +34,6 @@
 //
 //==============================================================================
 
-void Clipboard_ClearLocals()
-{
-}
-
-void Clipboard_NotifyBegin()
-{
-}
-
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Clipboard_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Clipboard_NotifyEnd()
-{
-}
-
-void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
-{
-}
-
 void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest)
 {
 }
@@ -198,26 +174,6 @@ void ObjectsModule::del(EditOperation &op, const selection_c &list) const
 bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
 	return false;
-}
-
-void Render3D_NotifyBegin()
-{
-}
-
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
-{
-}
-
-void Render3D_NotifyEnd(Instance &inst)
-{
-}
-
-void Render3D_NotifyInsert(ObjType type, int objnum)
-{
 }
 
 int UI_Escapable_Window::handle(int event)
