@@ -144,83 +144,14 @@ unit_test(m_config_keys
 )
 
 unit_test(thing
+    stub/e_cutpaste_stub.cpp
+    stub/e_main_stub.cpp
+    stub/r_render_stub.cpp
+    stub/ui_infobar_stub.cpp
     ThingTest.cpp
-    SRC bsp_level.cc
-        bsp_node.cc
-        bsp_util.cc
-        Document.cc
-        DocumentModule.cc
-        e_basis.cc
-        e_checks.cc
-        e_commands.cc
-        e_cutpaste.cc
-        e_hover.cc
-        e_linedef.cc
-        e_main.cc
-        e_objects.cc
-        e_path.cc
-        e_sector.cc
-        e_things.cc
-        e_vertex.cc
-        im_color.cc
-        im_img.cc
-        Instance.cc
-        lib_adler.cc
-        lib_file.cc
-        lib_tga.cc
-        Linedef.cc
+    SRC e_basis.cc
         m_bitvec.cc
-        m_config.cc
-        m_events.cc
-        m_game.cc
-        m_editlump.cc
-        m_files.cc
-        m_keys.cc
-        m_loadsave.cc
-        m_nodes.cc
-        m_parse.cc
         m_select.cc
-        m_streams.cc
-        m_testmap.cc
-        m_udmf.cc
-        main.cc
-        r_grid.cc
-        r_opengl.cc
-        r_render.cc
-        r_software.cc
-        r_subdiv.cc
-        SafeOutFile.cc
-        Sector.cc
-        SideDef.cc
-        ui_about.cc
-        ui_browser.cc
-        ui_canvas.cc
-        ui_default.cc
-        ui_dialog.cc
-        ui_editor.cc
-        ui_file.cc
-        ui_hyper.cc
-        ui_infobar.cc
-        ui_linedef.cc
-        ui_menu.cc
-        ui_misc.cc
-        ui_nombre.cc
-        ui_panelinput.cc
-        ui_pic.cc
-        ui_prefs.cc
-        ui_replace.cc
-        ui_scroll.cc
-        ui_sector.cc
-        ui_sidedef.cc
-        ui_thing.cc
-        ui_tile.cc
-        ui_vertex.cc
-        ui_window.cc
-        Vertex.cc
-        w_loadpic.cc
-        w_texture.cc
-        w_wad.cc
-    FLTK
 )
 
 unit_test(w_wad
