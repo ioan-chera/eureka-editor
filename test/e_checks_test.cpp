@@ -117,26 +117,6 @@ void Instance::Editor_ChangeMode(char mode_char)
 {
 }
 
-void Instance::MapStuff_NotifyBegin()
-{
-}
-
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Instance::MapStuff_NotifyEnd()
-{
-}
-
-void Instance::MapStuff_NotifyInsert(ObjType type, int objnum)
-{
-}
-
 const linetype_t &Instance::M_GetLineType(int type) const
 {
 	static linetype_t linetype;
@@ -164,47 +144,7 @@ bool Instance::is_sky(const SString &flat) const
 	return false;
 }
 
-void Instance::ObjectBox_NotifyBegin()
-{
-}
-
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Instance::ObjectBox_NotifyEnd() const
-{
-}
-
-void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
-{
-}
-
-void Instance::RedrawMap()
-{
-}
-
 void Instance::Selection_Clear(bool no_save)
-{
-}
-
-void Instance::Selection_NotifyBegin()
-{
-}
-
-void Instance::Selection_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Instance::Selection_NotifyEnd()
-{
-}
-
-void Instance::Selection_NotifyInsert(ObjType type, int objnum)
 {
 }
 
@@ -260,14 +200,6 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 	return false;
 }
 
-void Recently_used::insert(const SString &name)
-{
-}
-
-void Recently_used::insert_number(int val)
-{
-}
-
 void Render3D_NotifyBegin()
 {
 }
@@ -285,10 +217,6 @@ void Render3D_NotifyEnd(Instance &inst)
 }
 
 void Render3D_NotifyInsert(ObjType type, int objnum)
-{
-}
-
-void Selection_NotifyChange(ObjType type, int objnum, int field)
 {
 }
 

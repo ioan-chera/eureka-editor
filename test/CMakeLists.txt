@@ -105,6 +105,7 @@ endfunction()
 
 unit_test(e_checks
     e_checks_test.cpp
+    stub/e_main_stub.cpp
     SRC e_basis.cc
         e_checks.cc
         LineDef.cc
