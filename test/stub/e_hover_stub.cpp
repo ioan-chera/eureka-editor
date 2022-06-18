@@ -16,37 +16,28 @@
 //
 //------------------------------------------------------------------------
 
-#include "objid.h"
+#include "e_hover.h"
 
-class EditOperation;
-class selection_c;
-struct Document;
-
-void Clipboard_ClearLocals()
+void Hover::fastOpposite_begin()
 {
 }
 
-void Clipboard_NotifyBegin()
+void Hover::fastOpposite_finish()
 {
 }
 
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
+Objid hover::getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
+                      const Grid_State_c &grid, const v2double_t &pos)
 {
+   return Objid();
 }
 
-void Clipboard_NotifyDelete(ObjType type, int objnum)
+Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
 {
+   return Objid();
 }
 
-void Clipboard_NotifyEnd()
+int Hover::getOppositeSector(int ld, Side ld_side) const
 {
-}
-
-void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
-{
-}
-
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
-                       bool keep_verts, bool keep_lines)
-{
+   return 0;
 }

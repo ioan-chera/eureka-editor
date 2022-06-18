@@ -106,9 +106,17 @@ endfunction()
 unit_test(e_checks
     e_checks_test.cpp
     stub/e_cutpaste_stub.cpp
+    stub/e_hover_stub.cpp
     stub/e_main_stub.cpp
+    stub/e_path_stub.cpp
+    stub/im_img_stub.cpp
+    stub/m_game_stub.cpp
+    stub/m_keys_stub.cpp
     stub/r_render_stub.cpp
-    SRC e_basis.cc
+    stub/ui_dialog_stub.cpp
+    stub/ui_infobar_stub.cpp
+    SRC DocumentModule.cc
+        e_basis.cc
         e_checks.cc
         LineDef.cc
         m_bitvec.cc

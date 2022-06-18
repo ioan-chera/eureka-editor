@@ -16,37 +16,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "objid.h"
+#include "Instance.h"
 
-class EditOperation;
-class selection_c;
-struct Document;
-
-void Clipboard_ClearLocals()
-{
-}
-
-void Clipboard_NotifyBegin()
-{
-}
-
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Clipboard_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Clipboard_NotifyEnd()
-{
-}
-
-void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
-{
-}
-
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
-                       bool keep_verts, bool keep_lines)
+void Instance::Beep(const char *fmt, ...)
 {
 }

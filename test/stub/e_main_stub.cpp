@@ -20,6 +20,19 @@
 #include "Instance.h"
 #include "objid.h"
 
+void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest)
+{
+}
+
+SelectHighlight Editor_State_t::SelectionOrHighlight()
+{
+   return SelectHighlight::ok;
+}
+
+void Instance::Editor_ChangeMode(char mode_char)
+{
+}
+
 void Instance::MapStuff_NotifyBegin()
 {
 }
@@ -61,6 +74,10 @@ void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
 }
 
 void Instance::RedrawMap()
+{
+}
+
+void Instance::Selection_Clear(bool no_save)
 {
 }
 

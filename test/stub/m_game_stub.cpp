@@ -16,37 +16,28 @@
 //
 //------------------------------------------------------------------------
 
-#include "objid.h"
+#include "Instance.h"
+#include "m_game.h"
 
-class EditOperation;
-class selection_c;
-struct Document;
-
-void Clipboard_ClearLocals()
+bool Instance::is_sky(const SString &flat) const
 {
+   return false;
 }
 
-void Clipboard_NotifyBegin()
+const linetype_t &Instance::M_GetLineType(int type) const
 {
+   static linetype_t linetype;
+   return linetype;
 }
 
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
+const sectortype_t &Instance::M_GetSectorType(int type) const
 {
+   static sectortype_t sectortype;
+   return sectortype;
 }
 
-void Clipboard_NotifyDelete(ObjType type, int objnum)
+const thingtype_t &M_GetThingType(const ConfigData &config, int type)
 {
-}
-
-void Clipboard_NotifyEnd()
-{
-}
-
-void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
-{
-}
-
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
-                       bool keep_verts, bool keep_lines)
-{
+   static thingtype_t thingtype;
+   return thingtype;
 }

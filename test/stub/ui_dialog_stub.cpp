@@ -16,37 +16,13 @@
 //
 //------------------------------------------------------------------------
 
-#include "objid.h"
+#include "m_strings.h"
 
-class EditOperation;
-class selection_c;
-struct Document;
-
-void Clipboard_ClearLocals()
+int DLG_Confirm(const std::vector<SString> &buttons, EUR_FORMAT_STRING(const char *msg), ...)
 {
+   return 0;
 }
 
-void Clipboard_NotifyBegin()
-{
-}
-
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Clipboard_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Clipboard_NotifyEnd()
-{
-}
-
-void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
-{
-}
-
-void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
-                       bool keep_verts, bool keep_lines)
+void DLG_Notify(const char *msg, ...)
 {
 }
