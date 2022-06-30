@@ -39,7 +39,7 @@ class Sector;
 class selection_c;
 class LineDef;
 class SideDef;
-class Thing;
+struct Thing;
 class Vertex;
 
 namespace global

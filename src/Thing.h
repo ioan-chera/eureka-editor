@@ -22,9 +22,8 @@
 #include "e_basis.h"
 #include "m_vector.h"
 
-class Thing
+struct Thing
 {
-public:
 	FFixedPoint raw_x = {};
 	FFixedPoint raw_y = {};
 
@@ -43,7 +42,6 @@ public:
 		   F_H, F_TID, F_SPECIAL,
 		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
-public:
 	inline double x() const
 	{
 		return static_cast<double>(raw_x);
