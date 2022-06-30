@@ -186,7 +186,6 @@ unit_test(independent
     SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
-    ThingTest.cpp
     SRC m_bitvec.cc
         m_parse.cc
         m_select.cc
