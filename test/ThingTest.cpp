@@ -53,27 +53,25 @@ TEST(Thing, RawToDouble)
 	ASSERT_EQ(thing.h(), -0.5);
 }
 
-// TODO: once we manage an independence for Basis and all
+TEST(Thing, SetCoordinateClassicFormat)
+{
+	Thing thing;
 
-//TEST(Thing, SetCoordinateClassicFormat)
-//{
-//	Thing thing;
-//
-//	thing.SetRawX(MapFormat::doom, 12.75);
-//	ASSERT_EQ(thing.x(), 13);
-//
-//	thing.SetRawY(MapFormat::hexen, -24.23);
-//	ASSERT_EQ(thing.y(), -24);
-//
-//	thing.SetRawX(MapFormat::hexen, -24.73);
-//	ASSERT_EQ(thing.x(), -25);
-//
-//	// UDMF keeps decimals though
-//	thing.SetRawY(MapFormat::udmf, -24.75);
-//	ASSERT_EQ(thing.y(), -24.75);
-//	thing.SetRawX(MapFormat::udmf, 12.75);
-//	ASSERT_EQ(thing.x(), 12.75);
-//}
+	thing.SetRawX(MapFormat::doom, 12.75);
+	ASSERT_EQ(thing.x(), 13);
+
+	thing.SetRawY(MapFormat::hexen, -24.23);
+	ASSERT_EQ(thing.y(), -24);
+
+	thing.SetRawX(MapFormat::hexen, -24.73);
+	ASSERT_EQ(thing.x(), -25);
+
+	// UDMF keeps decimals though
+	thing.SetRawY(MapFormat::udmf, -24.75);
+	ASSERT_EQ(thing.y(), -24.75);
+	thing.SetRawX(MapFormat::udmf, 12.75);
+	ASSERT_EQ(thing.x(), 12.75);
+}
 
 TEST(Thing, Arg)
 {
