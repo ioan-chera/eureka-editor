@@ -348,10 +348,10 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 
 // add this string to the basis string table (if it doesn't
 // already exist) and return its integer offset.
-int BA_InternaliseString(const SString &str);
+StringID BA_InternaliseString(const SString &str);
 
 // get the string from the basis string table.
-SString BA_GetString(int offset);
+SString BA_GetString(StringID offset);
 
 #endif  /* __EUREKA_E_BASIS_H__ */
 

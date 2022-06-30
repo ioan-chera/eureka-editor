@@ -955,9 +955,9 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 	const Sector * sector = doc.sectors[src_sec];
 
 	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
+	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex.get());
 	op.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
+	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex.get());
 
 	op.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
 	op.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
@@ -993,19 +993,19 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 */
 		if (! L1->Left(doc))
 		{
-			int tex = L1->Right(doc)->mid_tex;
+			StringID tex = L1->Right(doc)->mid_tex;
 
 			if (! L2->Left(doc))
 			{
-				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex.get());
 			}
 			else
 			{
-				op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
-				op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex.get());
+				op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex.get());
 
-				op.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
-				op.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
+				op.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex.get());
+				op.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex.get());
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
@@ -1019,32 +1019,32 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			const Sector *front = L1->Right(doc)->SecRef(doc);
 			const Sector *back  = L1-> Left(doc)->SecRef(doc);
 
-			int f_l = L1->Right(doc)->lower_tex;
-			int f_u = L1->Right(doc)->upper_tex;
-			int b_l = L1-> Left(doc)->lower_tex;
-			int b_u = L1-> Left(doc)->upper_tex;
+			StringID f_l = L1->Right(doc)->lower_tex;
+			StringID f_u = L1->Right(doc)->upper_tex;
+			StringID b_l = L1-> Left(doc)->lower_tex;
+			StringID b_u = L1-> Left(doc)->upper_tex;
 
 			// ignore missing textures
-			if (is_null_tex(BA_GetString(f_l))) f_l = 0;
-			if (is_null_tex(BA_GetString(f_u))) f_u = 0;
-			if (is_null_tex(BA_GetString(b_l))) b_l = 0;
-			if (is_null_tex(BA_GetString(b_u))) b_u = 0;
+			if (is_null_tex(BA_GetString(f_l))) f_l = StringID();
+			if (is_null_tex(BA_GetString(f_u))) f_u = StringID();
+			if (is_null_tex(BA_GetString(b_l))) b_l = StringID();
+			if (is_null_tex(BA_GetString(b_u))) b_u = StringID();
 
 			// try hard to find a usable texture
-			int tex = -1;
+			StringID tex = StringID(-1);
 
-				 if (front->floorh < back->floorh && f_l > 0) tex = f_l;
-			else if (front->floorh > back->floorh && b_l > 0) tex = b_l;
-			else if (front-> ceilh > back-> ceilh && f_u > 0) tex = f_u;
-			else if (front-> ceilh < back-> ceilh && b_u > 0) tex = b_u;
-			else if (f_l > 0) tex = f_l;
-			else if (b_l > 0) tex = b_l;
-			else if (f_u > 0) tex = f_u;
-			else if (b_u > 0) tex = b_u;
+				 if (front->floorh < back->floorh && f_l.get() > 0) tex = f_l;
+			else if (front->floorh > back->floorh && b_l.get() > 0) tex = b_l;
+			else if (front-> ceilh > back-> ceilh && f_u.get() > 0) tex = f_u;
+			else if (front-> ceilh < back-> ceilh && b_u.get() > 0) tex = b_u;
+			else if (f_l.get() > 0) tex = f_l;
+			else if (b_l.get() > 0) tex = b_l;
+			else if (f_u.get() > 0) tex = f_u;
+			else if (b_u.get() > 0) tex = b_u;
 
-			if (tex > 0)
+			if (tex.get() > 0)
 			{
-				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex.get());
 			}
 		}
 		else
@@ -1083,13 +1083,13 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
-			op.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
-			op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
+			op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex.get());
+			op.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex.get());
+			op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex.get());
 
-			op.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
-			op.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
-			op.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
+			op.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex.get());
+			op.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex.get());
+			op.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex.get());
 		}
 	}
 

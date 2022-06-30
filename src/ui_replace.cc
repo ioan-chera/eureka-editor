@@ -1015,7 +1015,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 {
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
-	int tex_num = (what->value() == What_lineTextures) ?
+	StringID tex_num = (what->value() == What_lineTextures) ?
 		Texboard_GetTexNum(inst.conf) : Texboard_GetFlatNum(inst.conf);
 
 	SString tex_name = BA_GetString(tex_num);
@@ -1314,7 +1314,7 @@ void UI_FindAndReplace::DoReplace()
 		return;
 	}
 
-	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
+	StringID replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
 	{
 		EditOperation op(inst.level.basis);
@@ -1337,7 +1337,7 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 }
 
 
-void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
+void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, StringID new_tex)
 {
 	SYS_ASSERT(idx >= 0);
 
@@ -1389,7 +1389,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (cur_obj.type != inst.edit.mode)
 		inst.Editor_ChangeMode_Raw(cur_obj.type);
 
-	int replace_tex_id = 0;
+	StringID replace_tex_id;
 
 	EditOperation *op;	// hackish way to control lifetime
 	if (replace)
@@ -1705,7 +1705,7 @@ void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 }
 
 
-void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, int new_tex)
+void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new_tex)
 {
 	const LineDef *L = inst.level.linedefs[idx];
 
@@ -1728,27 +1728,27 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, int new_tex)
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))
-					op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
+					op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex.get());
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex.good() && Pattern_Match(L_tex, pattern))
-				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
+				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex.get());
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex.good() && Pattern_Match(U_tex, pattern))
-				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
+				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex.get());
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
-				op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
+				op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex.get());
 	}
 }
 
 
-void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, int new_tex)
+void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, StringID new_tex)
 {
 	const Sector *sector = inst.level.sectors[idx];
 
@@ -1756,14 +1756,14 @@ void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, int new_tex)
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(sector->FloorTex(), pattern))
-			op.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
+			op.changeSector(idx, Sector::F_FLOOR_TEX, new_tex.get());
 
 	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
 								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
-			op.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
+			op.changeSector(idx, Sector::F_CEIL_TEX, new_tex.get());
 }
 
 

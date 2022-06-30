@@ -37,9 +37,9 @@ SString SideDef::LowerTex() const
 	return global::basis_strtab.get(lower_tex);
 }
 
-void SideDef::SetDefaults(const ConfigData &config, bool two_sided, int new_tex)
+void SideDef::SetDefaults(const ConfigData &config, bool two_sided, StringID new_tex)
 {
-	if (new_tex < 0)
+	if (new_tex.get() < 0)
 		new_tex = BA_InternaliseString(config.default_wall_tex);
 
 	lower_tex = new_tex;

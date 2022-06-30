@@ -60,12 +60,12 @@ const char *NameForObjectType(ObjType type, bool plural)
 	}
 }
 
-int BA_InternaliseString(const SString &str)
+StringID BA_InternaliseString(const SString &str)
 {
 	return global::basis_strtab.add(str);
 }
 
-SString BA_GetString(int offset)
+SString BA_GetString(StringID offset)
 {
 	return global::basis_strtab.get(offset);
 }
@@ -343,7 +343,7 @@ bool Basis::changeSector(int sec, byte field, int value)
 	if(field == Sector::F_FLOOR_TEX ||
 		field == Sector::F_CEIL_TEX)
 	{
-		inst.recent_flats.insert(BA_GetString(value));
+		inst.recent_flats.insert(BA_GetString(StringID(value)));
 	}
 
 	return change(ObjType::sectors, sec, field, value);
@@ -361,7 +361,7 @@ bool Basis::changeSidedef(int side, byte field, int value)
 		field == SideDef::F_UPPER_TEX ||
 		field == SideDef::F_MID_TEX)
 	{
-		inst.recent_textures.insert(BA_GetString(value));
+		inst.recent_textures.insert(BA_GetString(StringID(value)));
 	}
 
 	return change(ObjType::sidedefs, side, field, value);

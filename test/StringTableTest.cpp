@@ -23,15 +23,15 @@
 TEST(StringTable, Test)
 {
     StringTable table;
-    int index = table.add("Jackson");
+    StringID index = table.add("Jackson");
     ASSERT_EQ(table.get(index), "Jackson");
-    int index2 = table.add("Jackson");
+	StringID index2 = table.add("Jackson");
     ASSERT_EQ(index2, index);
-    int index3 = table.add("Michael");
+	StringID index3 = table.add("Michael");
     ASSERT_NE(index3, index2);
     ASSERT_EQ(table.get(index3), "Michael");
 
-    int index4 = table.add("jackson");
+	StringID index4 = table.add("jackson");
     ASSERT_NE(index4, index);
     ASSERT_EQ(table.get(index), "Jackson");
     ASSERT_EQ(table.get(index4), "jackson");

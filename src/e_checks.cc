@@ -3508,7 +3508,7 @@ static void Textures_ShowMissing(Instance &inst)
 
 static void Textures_FixMissing(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed missing textures");
@@ -3521,7 +3521,7 @@ static void Textures_FixMissing(Instance &inst)
 		if (L->OneSided())
 		{
 			if (is_null_tex(L->Right(inst.level)->MidTex()))
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall.get());
 		}
 		else  // Two Sided
 		{
@@ -3529,20 +3529,20 @@ static void Textures_FixMissing(Instance &inst)
 			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
 
 			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall.get());
 
 			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall.get());
 
 			// missing uppers are OK when between two sky ceilings
 			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall.get());
 
 			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall.get());
 		}
 	}
 }
@@ -3642,7 +3642,7 @@ static void Textures_FixTransparent(Instance &inst)
 			new_tex = "GRAY1";		// Doom
 	}
 
-	int new_wall = BA_InternaliseString(new_tex);
+	StringID new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed transparent textures");
@@ -3655,21 +3655,21 @@ static void Textures_FixTransparent(Instance &inst)
 		if (L->OneSided())
 		{
 			if (is_transparent(inst, L->Right(inst.level)->MidTex()))
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall.get());
 		}
 		else  // Two Sided
 		{
 			if (is_transparent(inst, L->Left(inst.level)->LowerTex()))
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall.get());
 
 			if (is_transparent(inst, L->Left(inst.level)->UpperTex()))
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall.get());
 
 			if (is_transparent(inst, L->Right(inst.level)->LowerTex()))
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall.get());
 
 			if (is_transparent(inst, L->Right(inst.level)->UpperTex()))
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall.get());
 		}
 	}
 }
@@ -3749,7 +3749,7 @@ static void Textures_ShowMedusa(Instance &inst)
 
 static void Textures_RemoveMedusa(Instance &inst)
 {
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	std::map<SString, int> names;
 
@@ -3763,12 +3763,12 @@ static void Textures_RemoveMedusa(Instance &inst)
 
 		if (check_medusa(inst.wad, L->Right(inst.level)->MidTex(), names))
 		{
-			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex.get());
 		}
 
 		if (check_medusa(inst.wad, L-> Left(inst.level)->MidTex(), names))
 		{
-			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
+			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex.get());
 		}
 	}
 }
@@ -3910,9 +3910,9 @@ static void Textures_LogUnknown(bool do_flat, const Instance &inst)
 
 static void Textures_FixUnknownTex(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown textures");
@@ -3931,13 +3931,13 @@ static void Textures_FixUnknownTex(Instance &inst)
 			const SideDef *SD = inst.level.sidedefs[sd_num];
 
 			if (! inst.wad.images.W_TextureIsKnown(inst.conf, SD->LowerTex()))
-				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
+				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall.get());
 
 			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->UpperTex()))
-				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
+				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall.get());
 
 			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->MidTex()))
-				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
+				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex.get() : new_wall.get());
 		}
 	}
 }
@@ -3945,8 +3945,8 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 static void Textures_FixUnknownFlat(Instance &inst)
 {
-	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
+	StringID new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
+	StringID new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown flats");
@@ -3956,10 +3956,10 @@ static void Textures_FixUnknownFlat(Instance &inst)
 		const Sector *S = inst.level.sectors[s];
 
 		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S->FloorTex()))
-			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
+			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor.get());
 
 		if (!inst.wad.images.W_FlatIsKnown(inst.conf, S->CeilTex()))
-			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
+			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil.get());
 	}
 }
 
@@ -4018,7 +4018,7 @@ static void Textures_ShowDupSwitches(Instance &inst)
 
 static void Textures_FixDupSwitches(Instance &inst)
 {
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	SString new_tex = inst.conf.default_wall_tex;
 
@@ -4035,7 +4035,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 			new_tex = "GRAY1";		// Doom
 	}
 
-	int new_wall = BA_InternaliseString(new_tex);
+	StringID new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed non-animating switches");
@@ -4064,8 +4064,8 @@ static void Textures_FixDupSwitches(Instance &inst)
 		if (L->OneSided())
 		{
 			// we don't care if "mid" is not a switch
-			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
-			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex.get());
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex.get());
 			continue;
 		}
 
@@ -4077,28 +4077,28 @@ static void Textures_FixDupSwitches(Instance &inst)
 
 		if (count >= 2 && upper && !upper_vis)
 		{
-			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex.get());
 			upper = false;
 			count--;
 		}
 
 		if (count >= 2 && lower && !lower_vis)
 		{
-			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex.get());
 			lower = false;
 			count--;
 		}
 
 		if (count >= 2 && mid)
 		{
-			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex.get());
 			mid = false;
 			count--;
 		}
 
 		if (count >= 2)
 		{
-			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall.get());
 			upper = false;
 			count--;
 		}

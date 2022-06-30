@@ -135,10 +135,10 @@ private:
 	void replaceSectorRefs(EditOperation &op, int old_sec, int new_sec) const;
 	inline bool willBeTwoSided(int ld, Side side) const;
 	void determineNewTextures(lineloop_c& loop,
-									 std::vector<int>& lower_texs,
-							  std::vector<int>& upper_texs) const;
+									 std::vector<StringID>& lower_texs,
+									std::vector<StringID>& upper_texs) const;
 	void doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
-							   int new_lower, int new_upper,
+						StringID new_lower, StringID new_upper,
 						selection_c &flip) const;
 	bool getLoopForSpace(const v2double_t &map, lineloop_c& loop) const;
 };

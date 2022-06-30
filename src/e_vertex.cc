@@ -110,8 +110,8 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	int new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
-					  (ld2_onesided) ? L2->Right(doc)->mid_tex : 0;
+	StringID new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
+			     		  (ld2_onesided) ? L2->Right(doc)->mid_tex : StringID();
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
@@ -155,9 +155,9 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		doc.linemod.flipLinedef(op, ld2);
 	}
 
-	if (L2->OneSided() && new_mid_tex > 0)
+	if (L2->OneSided() && new_mid_tex.get() > 0)
 	{
-		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
+		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex.get());
 	}
 
 	// fix flags of remaining linedef
@@ -728,7 +728,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	// fix the first line's textures
 
-	int tex = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	const SideDef * SD = doc.sidedefs[L1->right];
 
@@ -737,7 +737,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	op.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(L1->right, SideDef::F_MID_TEX, tex.get());
 
 
 	// now fix the second line's textures
@@ -749,7 +749,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	op.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex.get());
 }
 
 

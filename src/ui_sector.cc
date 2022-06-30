@@ -367,7 +367,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 {
-	int tex_num = BA_InternaliseString(name);
+	StringID tex_num = BA_InternaliseString(name);
 
 	if (! inst.edit.Selected->empty())
 	{
@@ -383,10 +383,10 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 				parts = filter_parts;
 
 			if (parts & filter_parts & PART_FLOOR)
-				op.changeSector(*it, Sector::F_FLOOR_TEX, tex_num);
+				op.changeSector(*it, Sector::F_FLOOR_TEX, tex_num.get());
 
 			if (parts & filter_parts & parts & PART_CEIL)
-				op.changeSector(*it, Sector::F_CEIL_TEX, tex_num);
+				op.changeSector(*it, Sector::F_CEIL_TEX, tex_num.get());
 		}
 	}
 
@@ -831,7 +831,7 @@ void UI_SectorBox::CB_Copy(int parts)
 }
 
 
-void UI_SectorBox::CB_Paste(int parts, int new_tex)
+void UI_SectorBox::CB_Paste(int parts, StringID new_tex)
 {
 	if (inst.edit.Selected->empty())
 		return;
@@ -844,8 +844,8 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
-			if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_tex);
+			if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex.get());
+			if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_tex.get());
 		}
 	}
 
@@ -855,8 +855,8 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 
 void UI_SectorBox::CB_Cut(int parts)
 {
-	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
+	StringID new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
+	StringID new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	if (! inst.edit.Selected->empty())
 	{
@@ -868,8 +868,8 @@ void UI_SectorBox::CB_Cut(int parts)
 
 			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 			{
-				if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_floor);
-				if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil);
+				if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_floor.get());
+				if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil.get());
 			}
 		}
 

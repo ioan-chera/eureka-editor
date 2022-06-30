@@ -19,6 +19,8 @@
 #ifndef SECTOR_H_
 #define SECTOR_H_
 
+#include "m_strings.h"
+
 class SString;
 struct ConfigData;
 
@@ -27,8 +29,8 @@ class Sector
 public:
 	int floorh = 0;
 	int ceilh = 0;
-	int floor_tex = 0;
-	int ceil_tex = 0;
+	StringID floor_tex;
+	StringID ceil_tex;
 	int light = 0;
 	int type = 0;
 	int tag = 0;

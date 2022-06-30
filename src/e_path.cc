@@ -65,7 +65,7 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 		return L1->Right(doc) == L2->Right(doc);
 
 	// determine texture to match from first line
-	int texture = 0;
+	StringID texture;
 
 	if (! L1->TwoSided())
 	{

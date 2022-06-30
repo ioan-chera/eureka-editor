@@ -169,7 +169,7 @@ private:
 	void rawShowFilter(int value);
 
 	bool MatchesObject(int idx);
-	void ApplyReplace (EditOperation &op, int idx, int new_tex);
+	void ApplyReplace (EditOperation &op, int idx, StringID new_tex);
 
 	void DoReplace();
 	void DoAll(bool replace);
@@ -196,9 +196,9 @@ private:
 	bool Filter_PrevSel(int idx);
 
 	void Replace_Thing(EditOperation &op, int idx);
-	void Replace_LineDef(EditOperation &op, int idx, int new_tex);
+	void Replace_LineDef(EditOperation &op, int idx, StringID new_tex);
 	void Replace_LineType(EditOperation &op, int idx);
-	void Replace_Sector(EditOperation &op, int idx, int new_tex);
+	void Replace_Sector(EditOperation &op, int idx, StringID new_tex);
 	void Replace_SectorType(EditOperation &op, int idx);
 
 	// clipboard stuff

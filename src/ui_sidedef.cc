@@ -178,7 +178,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	int new_tex;
+	StringID new_tex;
 	box->mFixUp.checkDirtyFields();	// fine to do it here
 	checkLinedefDirtyFields(box->inst);
 
@@ -222,15 +222,15 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 					if (lower)
 					{
-						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
+						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex.get());
 					}
 					else if (upper)
 					{
-						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
+						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex.get());
 					}
 					else if (rail)
 					{
-						op.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex);
+						op.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex.get());
 					}
 				}
 			}

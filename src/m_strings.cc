@@ -395,29 +395,29 @@ size_t SString::findDigit() const
 //
 // Add a text
 //
-int StringTable::add(const SString &text)
+StringID StringTable::add(const SString &text)
 {
 	int index = 0;
 	for(const SString &string : mStrings)
 	{
 		if(string == text)	// this should also cover "" === 0
-			return index;
+			return StringID(index);
 		++index;
 	}
 	mStrings.push_back(text);
-	return (int)mStrings.size() - 1;
+	return StringID((int)mStrings.size() - 1);
 }
 
 //
 // Get a text (handle it robustly)
 //
-SString StringTable::get(int offset) const
+SString StringTable::get(StringID offset) const
 {
 	// this should never happen
 	// [ but handle it gracefully, for the sake of robustness ]
-	if(offset < 0 || offset >= (int)mStrings.size())
+	if(offset.get() < 0 || offset.get() >= (int)mStrings.size())
 		return "???ERROR";
-	return mStrings[offset];
+	return mStrings[offset.get()];
 }
 
 #ifdef _WIN32

@@ -1052,7 +1052,7 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	const SideDef *other = doc.sidedefs[other_sd];
 
@@ -1061,10 +1061,10 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 		SD->lower_tex = other->mid_tex;
 		SD->upper_tex = other->mid_tex;
 
-		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
-		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
+		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex.get());
+		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex.get());
 
-		op.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
+		op.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex.get());
 	}
 	else
 	{
@@ -1089,11 +1089,11 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	// determine textures for each side
-	int  left_tex = 0;
-	int right_tex = 0;
+	StringID  left_tex;
+	StringID right_tex;
 
 	if (! is_null_tex(L->Left(doc)->MidTex()))
 		left_tex = L->Left(doc)->mid_tex;
@@ -1101,24 +1101,24 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	if (! is_null_tex(L->Right(doc)->MidTex()))
 		right_tex = L->Right(doc)->mid_tex;
 
-	if (! left_tex)  left_tex = right_tex;
-	if (! right_tex) right_tex = left_tex;
+	if (! left_tex.get())  left_tex = right_tex;
+	if (! right_tex.get()) right_tex = left_tex;
 
 	// use default texture if both sides are empty
-	if (! left_tex)
+	if (! left_tex.get())
 	{
 		left_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 		right_tex = left_tex;
 	}
 
-	op.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex);
-	op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
+	op.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex.get());
+	op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex.get());
 
-	op.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex);
-	op.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex);
+	op.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex.get());
+	op.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex.get());
 
-	op.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex);
-	op.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex);
+	op.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex.get());
+	op.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex.get());
 }
 
 //
@@ -1157,7 +1157,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 
 	const SideDef *SD = doc.sidedefs[other_sd];
 
-	int new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -1174,7 +1174,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 			new_tex = SD->upper_tex;
 	}
 
-	op.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex);
+	op.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex.get());
 }
 
 
@@ -1413,7 +1413,7 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 
 	SYS_ASSERT(L->Right(doc));
 
-	int tex;
+	StringID tex;
 
 	if (! is_null_tex(L->Right(doc)->LowerTex()))
 		tex = L->Right(doc)->lower_tex;
@@ -1422,7 +1422,7 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 	else
 		tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	op.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
+	op.changeSidedef(L->right, SideDef::F_MID_TEX, tex.get());
 }
 
 //
