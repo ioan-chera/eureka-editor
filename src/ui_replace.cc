@@ -1728,22 +1728,22 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 		{
 			if (!filter_toggle->value() || o_lowers->value())
 				if (R_tex.good() && Pattern_Match(R_tex, pattern))
-					op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex.get());
+					op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 
 			continue;
 		}
 
 		if (!filter_toggle->value() || o_lowers->value())
 			if (L_tex.good() && Pattern_Match(L_tex, pattern))
-				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex.get());
+				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_uppers->value())
 			if (U_tex.good() && Pattern_Match(U_tex, pattern))
-				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex.get());
+				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_tex);
 
 		if (!filter_toggle->value() || o_rails->value())
 			if (R_tex.good() && Pattern_Match(R_tex, pattern, true /* is_rail */))
-				op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex.get());
+				op.changeSidedef(sd_num, SideDef::F_MID_TEX, new_tex);
 	}
 }
 

@@ -1380,29 +1380,29 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 
 			if (L->OneSided())
 			{
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 				continue;
 			}
 
 			/* right side */
 			if (parts == 1 || (parts & PART_RT_LOWER))
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_RT_UPPER))
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			if (parts & PART_RT_RAIL)
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 
 			/* left side */
 			if (parts == 1 || (parts & PART_LF_LOWER))
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex.get());
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_LF_UPPER))
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex.get());
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
 
 			if (parts & PART_LF_RAIL)
-				op.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex.get());
+				op.changeSidedef(L->left, SideDef::F_MID_TEX, new_tex);
 		}
 
 	}

@@ -1061,10 +1061,10 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 		SD->lower_tex = other->mid_tex;
 		SD->upper_tex = other->mid_tex;
 
-		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex.get());
-		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex.get());
+		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
+		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
 
-		op.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex.get());
+		op.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
 	}
 	else
 	{
@@ -1111,14 +1111,14 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 		right_tex = left_tex;
 	}
 
-	op.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex.get());
-	op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex.get());
+	op.changeSidedef(L->left,  SideDef::F_MID_TEX, null_tex);
+	op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 
-	op.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex.get());
-	op.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex.get());
+	op.changeSidedef(L->left,  SideDef::F_LOWER_TEX, left_tex);
+	op.changeSidedef(L->left,  SideDef::F_UPPER_TEX, left_tex);
 
-	op.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex.get());
-	op.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex.get());
+	op.changeSidedef(L->right, SideDef::F_LOWER_TEX, right_tex);
+	op.changeSidedef(L->right, SideDef::F_UPPER_TEX, right_tex);
 }
 
 //
@@ -1174,7 +1174,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 			new_tex = SD->upper_tex;
 	}
 
-	op.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex.get());
+	op.changeSidedef(other_sd, SideDef::F_MID_TEX, new_tex);
 }
 
 
@@ -1422,7 +1422,7 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 	else
 		tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	op.changeSidedef(L->right, SideDef::F_MID_TEX, tex.get());
+	op.changeSidedef(L->right, SideDef::F_MID_TEX, tex);
 }
 
 //

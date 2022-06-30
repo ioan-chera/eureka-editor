@@ -305,9 +305,9 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (L->OneSided())
 		{
 			if (parts & PART_RT_RAIL) 
-				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 			if (parts & PART_RT_UPPER) 
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
 		}
@@ -315,21 +315,21 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (L->Right(inst.level))
 		{
 			if (parts & PART_RT_LOWER) 
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
 			if (parts & PART_RT_UPPER) 
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 			if (parts & PART_RT_RAIL)  
-				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex.get());
+				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
 		if (L->Left(inst.level))
 		{
 			if (parts & PART_LF_LOWER) 
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex.get());
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
 			if (parts & PART_LF_UPPER) 
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex.get());
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
 			if (parts & PART_LF_RAIL)  
-				op.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex.get());
+				op.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
 	}
@@ -348,8 +348,8 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 			op.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
 
-		op.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex.get());
-		op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex.get());
+		op.changeSidedef(L->left,  SideDef::F_MID_TEX, new_tex);
+		op.changeSidedef(L->right, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
@@ -361,7 +361,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (sd < 0)
 			return;
 
-		op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex.get());
+		op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 		return;
 	}
 
@@ -378,7 +378,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		op.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex.get());
+		op.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 	}
 	// modify a lower texture
 	else
@@ -399,9 +399,9 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		// impossible to set them to different textures).
 
 		if (S->lower_tex == S->upper_tex)
-			op.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex.get());
+			op.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 
-		op.changeSidedef(sd1, SideDef::F_LOWER_TEX, new_tex.get());
+		op.changeSidedef(sd1, SideDef::F_LOWER_TEX, new_tex);
 	}
 }
 
@@ -537,18 +537,18 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 				if (L->TwoSided())
 				{
 					if (parts2 & PART_RT_LOWER)
-						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex.get());
+						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 
 					if (parts2 & PART_RT_UPPER)
-						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex.get());
+						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 
 					if (parts2 & PART_RT_RAIL)
-						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex.get());
+						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 				}
 				else  // one-sided line
 				{
 					if (parts2 & PART_RT_LOWER)
-						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex.get());
+						op.changeSidedef(sd, SideDef::F_MID_TEX, new_tex);
 				}
 			}
 		}

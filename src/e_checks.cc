@@ -3521,7 +3521,7 @@ static void Textures_FixMissing(Instance &inst)
 		if (L->OneSided())
 		{
 			if (is_null_tex(L->Right(inst.level)->MidTex()))
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall.get());
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
@@ -3529,20 +3529,20 @@ static void Textures_FixMissing(Instance &inst)
 			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
 
 			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall.get());
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall.get());
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
 			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
 				continue;
 
 			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall.get());
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
 			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall.get());
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 }
@@ -3655,21 +3655,21 @@ static void Textures_FixTransparent(Instance &inst)
 		if (L->OneSided())
 		{
 			if (is_transparent(inst, L->Right(inst.level)->MidTex()))
-				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall.get());
+				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
 			if (is_transparent(inst, L->Left(inst.level)->LowerTex()))
-				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall.get());
+				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(inst, L->Left(inst.level)->UpperTex()))
-				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall.get());
+				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
 			if (is_transparent(inst, L->Right(inst.level)->LowerTex()))
-				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall.get());
+				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
 			if (is_transparent(inst, L->Right(inst.level)->UpperTex()))
-				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall.get());
+				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
 }
@@ -3763,12 +3763,12 @@ static void Textures_RemoveMedusa(Instance &inst)
 
 		if (check_medusa(inst.wad, L->Right(inst.level)->MidTex(), names))
 		{
-			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex.get());
+			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
 		if (check_medusa(inst.wad, L-> Left(inst.level)->MidTex(), names))
 		{
-			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex.get());
+			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
 	}
 }
@@ -3931,13 +3931,13 @@ static void Textures_FixUnknownTex(Instance &inst)
 			const SideDef *SD = inst.level.sidedefs[sd_num];
 
 			if (! inst.wad.images.W_TextureIsKnown(inst.conf, SD->LowerTex()))
-				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall.get());
+				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
 			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->UpperTex()))
-				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall.get());
+				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
 			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->MidTex()))
-				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex.get() : new_wall.get());
+				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}
 }
@@ -4064,8 +4064,8 @@ static void Textures_FixDupSwitches(Instance &inst)
 		if (L->OneSided())
 		{
 			// we don't care if "mid" is not a switch
-			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex.get());
-			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex.get());
+			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			continue;
 		}
 
@@ -4077,28 +4077,28 @@ static void Textures_FixDupSwitches(Instance &inst)
 
 		if (count >= 2 && upper && !upper_vis)
 		{
-			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex.get());
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, null_tex);
 			upper = false;
 			count--;
 		}
 
 		if (count >= 2 && lower && !lower_vis)
 		{
-			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex.get());
+			op.changeSidedef(L->right, SideDef::F_LOWER_TEX, null_tex);
 			lower = false;
 			count--;
 		}
 
 		if (count >= 2 && mid)
 		{
-			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex.get());
+			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 			mid = false;
 			count--;
 		}
 
 		if (count >= 2)
 		{
-			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall.get());
+			op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 			upper = false;
 			count--;
 		}

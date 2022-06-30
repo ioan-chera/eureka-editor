@@ -222,15 +222,15 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 					if (lower)
 					{
-						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex.get());
+						op.changeSidedef(sd, SideDef::F_LOWER_TEX, new_tex);
 					}
 					else if (upper)
 					{
-						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex.get());
+						op.changeSidedef(sd, SideDef::F_UPPER_TEX, new_tex);
 					}
 					else if (rail)
 					{
-						op.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex.get());
+						op.changeSidedef(sd, SideDef::F_MID_TEX,   new_tex);
 					}
 				}
 			}

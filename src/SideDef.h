@@ -35,7 +35,19 @@ public:
 	StringID lower_tex;
 	int sector = 0;
 
-	enum { F_X_OFFSET, F_Y_OFFSET, F_UPPER_TEX, F_MID_TEX, F_LOWER_TEX, F_SECTOR };
+	enum IntAddress
+	{
+		F_X_OFFSET,
+		F_Y_OFFSET,
+		F_SECTOR = 5,
+	};
+
+	enum StringIDAddress
+	{
+		F_UPPER_TEX = 2,
+		F_MID_TEX,
+		F_LOWER_TEX,
+	};
 
 public:
 

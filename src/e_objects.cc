@@ -997,15 +997,15 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 
 			if (! L2->Left(doc))
 			{
-				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex.get());
+				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 			else
 			{
-				op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex.get());
-				op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex.get());
+				op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, tex);
+				op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, tex);
 
-				op.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex.get());
-				op.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex.get());
+				op.changeSidedef(L2->left,  SideDef::F_LOWER_TEX, tex);
+				op.changeSidedef(L2->left,  SideDef::F_UPPER_TEX, tex);
 
 				// this is debatable....   CONFIG ITEM?
 				flags |= MLF_LowerUnpegged;
@@ -1044,7 +1044,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 
 			if (tex.get() > 0)
 			{
-				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex.get());
+				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
 		}
 		else
@@ -1083,13 +1083,13 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 
 			// TODO; review if we should copy '-' into lowers or uppers
 
-			op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex.get());
-			op.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex.get());
-			op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex.get());
+			op.changeSidedef(L2->right, SideDef::F_LOWER_TEX, RS->lower_tex);
+			op.changeSidedef(L2->right, SideDef::F_MID_TEX,   RS->mid_tex);
+			op.changeSidedef(L2->right, SideDef::F_UPPER_TEX, RS->upper_tex);
 
-			op.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex.get());
-			op.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex.get());
-			op.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex.get());
+			op.changeSidedef(L2->left, SideDef::F_LOWER_TEX, LS->lower_tex);
+			op.changeSidedef(L2->left, SideDef::F_MID_TEX,   LS->mid_tex);
+			op.changeSidedef(L2->left, SideDef::F_UPPER_TEX, LS->upper_tex);
 		}
 	}
 

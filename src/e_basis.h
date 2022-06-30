@@ -31,6 +31,7 @@
 #include "FixedPoint.h"
 #include "m_strings.h"
 #include "objid.h"
+#include "SideDef.h"
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
@@ -247,7 +248,8 @@ private:
 	bool changeThing(int thing, byte field, int value);
 	bool changeVertex(int vert, byte field, int value);
 	bool changeSector(int sec, byte field, int value);
-	bool changeSidedef(int side, byte field, int value);
+	bool changeSidedef(int side, SideDef::IntAddress field, int value);
+	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
 	void del(ObjType type, int objnum);
 	void end();
@@ -313,7 +315,11 @@ public:
 		return basis.changeSector(sec, field, value);
 	}
 
-	bool changeSidedef(int side, byte field, int value)
+	bool changeSidedef(int side, SideDef::IntAddress field, int value)
+	{
+		return basis.changeSidedef(side, field, value);
+	}
+	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
 	{
 		return basis.changeSidedef(side, field, value);
 	}

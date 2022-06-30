@@ -352,19 +352,19 @@ bool Basis::changeSector(int sec, byte field, int value)
 //
 // Change sidedef
 //
-bool Basis::changeSidedef(int side, byte field, int value)
+bool Basis::changeSidedef(int side, SideDef::IntAddress field, int value)
 {
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
-	SYS_ASSERT(field <= SideDef::F_SECTOR);
-
-	if(field == SideDef::F_LOWER_TEX ||
-		field == SideDef::F_UPPER_TEX ||
-		field == SideDef::F_MID_TEX)
-	{
-		inst.recent_textures.insert(BA_GetString(StringID(value)));
-	}
 
 	return change(ObjType::sidedefs, side, field, value);
+}
+bool Basis::changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
+{
+	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
+
+	inst.recent_textures.insert(BA_GetString(value));
+
+	return change(ObjType::sidedefs, side, field, value.get());
 }
 
 //

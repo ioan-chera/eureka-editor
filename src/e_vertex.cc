@@ -157,7 +157,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 	if (L2->OneSided() && new_mid_tex.get() > 0)
 	{
-		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex.get());
+		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
 
 	// fix flags of remaining linedef
@@ -737,7 +737,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	op.changeSidedef(L1->right, SideDef::F_MID_TEX, tex.get());
+	op.changeSidedef(L1->right, SideDef::F_MID_TEX, tex);
 
 
 	// now fix the second line's textures
@@ -749,7 +749,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 	else if (! is_null_tex(SD->UpperTex()))
 		tex = SD->upper_tex;
 
-	op.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex.get());
+	op.changeSidedef(lost_sd, SideDef::F_MID_TEX, tex);
 }
 
 
