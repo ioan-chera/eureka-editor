@@ -40,7 +40,7 @@ class selection_c;
 class LineDef;
 class SideDef;
 struct Thing;
-class Vertex;
+struct Vertex;
 
 namespace global
 {

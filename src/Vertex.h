@@ -25,15 +25,13 @@
 
 class Instance;
 
-class Vertex
+struct Vertex
 {
-public:
 	FFixedPoint raw_x = {};
 	FFixedPoint raw_y = {};
 
 	enum { F_X, F_Y };
 
-public:
 	inline double x() const
 	{
 		return static_cast<double>(raw_x);

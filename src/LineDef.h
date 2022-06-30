@@ -24,7 +24,7 @@
 #include "Side.h"
 
 class SideDef;
-class Vertex;
+struct Vertex;
 struct Document;
 
 class LineDef
