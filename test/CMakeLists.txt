@@ -154,12 +154,13 @@ unit_test(m_config_keys
     FLTK
 )
 
-unit_test(thing
+unit_test(thing_vertex
     stub/e_cutpaste_stub.cpp
     stub/e_main_stub.cpp
     stub/r_render_stub.cpp
     stub/ui_infobar_stub.cpp
     ThingTest.cpp
+    VertexTest.cpp
     SRC e_basis.cc
         m_bitvec.cc
         m_select.cc
