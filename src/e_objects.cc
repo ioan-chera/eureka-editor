@@ -1033,16 +1033,16 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			// try hard to find a usable texture
 			StringID tex = StringID(-1);
 
-				 if (front->floorh < back->floorh && f_l.get() > 0) tex = f_l;
-			else if (front->floorh > back->floorh && b_l.get() > 0) tex = b_l;
-			else if (front-> ceilh > back-> ceilh && f_u.get() > 0) tex = f_u;
-			else if (front-> ceilh < back-> ceilh && b_u.get() > 0) tex = b_u;
-			else if (f_l.get() > 0) tex = f_l;
-			else if (b_l.get() > 0) tex = b_l;
-			else if (f_u.get() > 0) tex = f_u;
-			else if (b_u.get() > 0) tex = b_u;
+				 if (front->floorh < back->floorh && f_l.hasContent()) tex = f_l;
+			else if (front->floorh > back->floorh && b_l.hasContent()) tex = b_l;
+			else if (front-> ceilh > back-> ceilh && f_u.hasContent()) tex = f_u;
+			else if (front-> ceilh < back-> ceilh && b_u.hasContent()) tex = b_u;
+			else if (f_l.hasContent()) tex = f_l;
+			else if (b_l.hasContent()) tex = b_l;
+			else if (f_u.hasContent()) tex = f_u;
+			else if (b_u.hasContent()) tex = b_u;
 
-			if (tex.get() > 0)
+			if (tex.hasContent())
 			{
 				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}

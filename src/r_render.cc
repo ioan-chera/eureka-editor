@@ -1194,7 +1194,7 @@ StringID Instance::GrabSelectedFlat()
 
 			StringID tex = SEC_GrabFlat(S, parts & ~1);
 
-			if (result.get() >= 0 && tex != result)
+			if (result.isValid() && tex != result)
 			{
 				Beep("multiple flats present");
 				return StringID(-2);
@@ -1204,7 +1204,7 @@ StringID Instance::GrabSelectedFlat()
 		}
 	}
 
-	if (result.get() >= 0)
+	if (result.isValid())
 		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
@@ -1340,7 +1340,7 @@ StringID Instance::GrabSelectedTexture()
 
 			StringID tex = LD_GrabTex(L, parts & ~1);
 
-			if (result.get() >= 0 && tex != result)
+			if (result.isValid() && tex != result)
 			{
 				Beep("multiple textures present");
 				return StringID(-2);
@@ -1350,7 +1350,7 @@ StringID Instance::GrabSelectedTexture()
 		}
 	}
 
-	if (result.get() >= 0)
+	if (result.isValid())
 		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
@@ -1429,13 +1429,13 @@ void Instance::Render3D_CB_Copy()
 
 	case ObjType::sectors:
 		num = GrabSelectedFlat();
-		if (num.get() >= 0)
+		if (num.isValid())
 			Texboard_SetFlat(BA_GetString(num), conf);
 		break;
 
 	case ObjType::linedefs:
 		num = GrabSelectedTexture();
-		if (num.get() >= 0)
+		if (num.isValid())
 			Texboard_SetTex(BA_GetString(num), conf);
 		break;
 

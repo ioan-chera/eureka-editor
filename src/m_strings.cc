@@ -415,7 +415,7 @@ SString StringTable::get(StringID offset) const
 {
 	// this should never happen
 	// [ but handle it gracefully, for the sake of robustness ]
-	if(offset.get() < 0 || offset.get() >= (int)mStrings.size())
+	if(offset.isInvalid() || offset.get() >= (int)mStrings.size())
 		return "???ERROR";
 	return mStrings[offset.get()];
 }

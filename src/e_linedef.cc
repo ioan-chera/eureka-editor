@@ -1101,11 +1101,11 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	if (! is_null_tex(L->Right(doc)->MidTex()))
 		right_tex = L->Right(doc)->mid_tex;
 
-	if (! left_tex.get())  left_tex = right_tex;
-	if (! right_tex.get()) right_tex = left_tex;
+	if (! left_tex)  left_tex = right_tex;
+	if (! right_tex) right_tex = left_tex;
 
 	// use default texture if both sides are empty
-	if (! left_tex.get())
+	if (! left_tex)
 	{
 		left_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 		right_tex = left_tex;

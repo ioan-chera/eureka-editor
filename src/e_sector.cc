@@ -985,7 +985,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	{
 		for (k = 0 ; k < total ; k++)
 		{
-			if (lower_texs[k].get() >= 0)
+			if (lower_texs[k].isValid())
 				continue;
 
 			// next and previous line indices
@@ -1005,8 +1005,8 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			}
 
 			// disable p or n if there is no texture there yet
-			if (p < total && lower_texs[p].get() < 0) p = total;
-			if (n < total && lower_texs[n].get() < 0) n = total;
+			if (p < total && lower_texs[p].isInvalid()) p = total;
+			if (n < total && lower_texs[n].isInvalid()) n = total;
 
 			if (p == total && n == total)
 				continue;
@@ -1023,8 +1023,8 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	// lastly, ensure all textures are valid
 	for (k = 0 ; k < total ; k++)
 	{
-		if (lower_texs[k].get() < 0) lower_texs[k] = def_lower;
-		if (upper_texs[k].get() < 0) upper_texs[k] = def_upper;
+		if (lower_texs[k].isInvalid()) lower_texs[k] = def_lower;
+		if (upper_texs[k].isInvalid()) upper_texs[k] = def_upper;
 	}
 }
 
@@ -1059,8 +1059,8 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	else
 		flip.clear(ld);
 
-	SYS_ASSERT(new_lower.get() >= 0);
-	SYS_ASSERT(new_upper.get() >= 0);
+	SYS_ASSERT(new_lower.isValid());
+	SYS_ASSERT(new_upper.isValid());
 
 	// create new sidedef
 	int new_sd = op.addNew(ObjType::sidedefs);

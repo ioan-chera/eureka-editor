@@ -155,7 +155,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		doc.linemod.flipLinedef(op, ld2);
 	}
 
-	if (L2->OneSided() && new_mid_tex.get() > 0)
+	if (L2->OneSided() && new_mid_tex.hasContent())
 	{
 		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}

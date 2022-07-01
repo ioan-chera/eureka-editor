@@ -444,6 +444,23 @@ public:
 	{
 		return num != other.num;
 	}
+	bool operator ! () const
+	{
+		return !num;
+	}
+	bool isValid() const
+	{
+		return num >= 0;
+	}
+	bool isInvalid() const
+	{
+		return num < 0;
+	}
+	bool hasContent() const
+	{
+		return num > 0;
+	}
+
 private:
 	int num = 0;
 };
