@@ -42,7 +42,7 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-StringTable global::basis_strtab;
+static StringTable basis_strtab;
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -62,12 +62,12 @@ const char *NameForObjectType(ObjType type, bool plural)
 
 StringID BA_InternaliseString(const SString &str)
 {
-	return global::basis_strtab.add(str);
+	return basis_strtab.add(str);
 }
 
 SString BA_GetString(StringID offset)
 {
-	return global::basis_strtab.get(offset);
+	return basis_strtab.get(offset);
 }
 
 

@@ -44,8 +44,6 @@ struct Vertex;
 
 namespace global
 {
-	extern StringTable basis_strtab;
-
 	extern int	default_floor_h;
 	extern int	default_ceil_h;
 	extern int	default_light_level;

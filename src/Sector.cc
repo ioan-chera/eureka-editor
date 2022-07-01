@@ -23,12 +23,12 @@
 
 SString Sector::FloorTex() const
 {
-	return global::basis_strtab.get(floor_tex);
+	return BA_GetString(floor_tex);
 }
 
 SString Sector::CeilTex() const
 {
-	return global::basis_strtab.get(ceil_tex);
+	return BA_GetString(ceil_tex);
 }
 
 void Sector::SetDefaults(const ConfigData &config)
