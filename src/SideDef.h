@@ -25,9 +25,8 @@ struct Sector;
 struct ConfigData;
 struct Document;
 
-class SideDef
+struct SideDef
 {
-public:
 	int x_offset = 0;
 	int y_offset = 0;
 	StringID upper_tex;
@@ -48,8 +47,6 @@ public:
 		F_MID_TEX,
 		F_LOWER_TEX,
 	};
-
-public:
 
 	SString UpperTex() const;
 	SString MidTex()   const;
