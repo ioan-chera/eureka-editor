@@ -19,7 +19,6 @@
 #include "Sector.h"
 #include "e_basis.h"
 #include "m_game.h"
-#include "m_strings.h"
 
 SString Sector::FloorTex() const
 {

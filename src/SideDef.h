@@ -21,7 +21,7 @@
 
 #include "m_strings.h"
 
-class Sector;
+struct Sector;
 struct ConfigData;
 struct Document;
 

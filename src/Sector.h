@@ -21,12 +21,10 @@
 
 #include "m_strings.h"
 
-class SString;
 struct ConfigData;
 
-class Sector
+struct Sector
 {
-public:
 	int floorh = 0;
 	int ceilh = 0;
 	StringID floor_tex;
@@ -50,7 +48,6 @@ public:
 		F_CEIL_TEX = 3,
 	};
 
-public:
 	SString FloorTex() const;
 	SString CeilTex() const;
 
