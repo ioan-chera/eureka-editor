@@ -1756,14 +1756,14 @@ void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, StringID new_
 
 	if (!filter_toggle->value() || o_floors->value())
 		if (Pattern_Match(sector->FloorTex(), pattern))
-			op.changeSector(idx, Sector::F_FLOOR_TEX, new_tex.get());
+			op.changeSector(idx, Sector::F_FLOOR_TEX, new_tex);
 
 	SString ceil_tex = sector->CeilTex();
 
 	if (!filter_toggle->value() || (!inst.is_sky(ceil_tex) && o_ceilings->value())
 								|| (inst.is_sky(ceil_tex) && o_skies->value()) )
 		if (Pattern_Match(ceil_tex, pattern))
-			op.changeSector(idx, Sector::F_CEIL_TEX, new_tex.get());
+			op.changeSector(idx, Sector::F_CEIL_TEX, new_tex);
 }
 
 

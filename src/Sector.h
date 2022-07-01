@@ -35,7 +35,20 @@ public:
 	int type = 0;
 	int tag = 0;
 
-	enum { F_FLOORH, F_CEILH, F_FLOOR_TEX, F_CEIL_TEX, F_LIGHT, F_TYPE, F_TAG };
+	enum IntAddress
+	{
+		F_FLOORH,
+		F_CEILH,
+		F_LIGHT = 4,
+		F_TYPE,
+		F_TAG,
+	};
+
+	enum StringIDAddress
+	{
+		F_FLOOR_TEX = 2,
+		F_CEIL_TEX = 3,
+	};
 
 public:
 	SString FloorTex() const;

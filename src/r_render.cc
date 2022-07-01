@@ -1229,10 +1229,10 @@ void Instance::StoreSelectedFlat(StringID new_tex)
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (parts == 1 || (parts & PART_FLOOR))
-				op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex.get());
+				op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
 
 			if (parts == 1 || (parts & PART_CEIL))
-				op.changeSector(*it, Sector::F_CEIL_TEX, new_tex.get());
+				op.changeSector(*it, Sector::F_CEIL_TEX, new_tex);
 		}
 	}
 
@@ -1264,10 +1264,10 @@ void Instance::StoreDefaultedFlats()
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (parts == 1 || (parts & PART_FLOOR))
-				op.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex.get());
+				op.changeSector(*it, Sector::F_FLOOR_TEX, floor_tex);
 
 			if (parts == 1 || (parts & PART_CEIL))
-				op.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex.get());
+				op.changeSector(*it, Sector::F_CEIL_TEX, ceil_tex);
 		}
 	}
 

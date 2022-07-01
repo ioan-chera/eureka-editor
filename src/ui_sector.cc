@@ -383,10 +383,10 @@ void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 				parts = filter_parts;
 
 			if (parts & filter_parts & PART_FLOOR)
-				op.changeSector(*it, Sector::F_FLOOR_TEX, tex_num.get());
+				op.changeSector(*it, Sector::F_FLOOR_TEX, tex_num);
 
 			if (parts & filter_parts & parts & PART_CEIL)
-				op.changeSector(*it, Sector::F_CEIL_TEX, tex_num.get());
+				op.changeSector(*it, Sector::F_CEIL_TEX, tex_num);
 		}
 	}
 
@@ -844,8 +844,8 @@ void UI_SectorBox::CB_Paste(int parts, StringID new_tex)
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex.get());
-			if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_tex.get());
+			if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_tex);
+			if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_tex);
 		}
 	}
 
@@ -868,8 +868,8 @@ void UI_SectorBox::CB_Cut(int parts)
 
 			for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 			{
-				if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_floor.get());
-				if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil.get());
+				if (parts & PART_FLOOR) op.changeSector(*it, Sector::F_FLOOR_TEX, new_floor);
+				if (parts & PART_CEIL)  op.changeSector(*it, Sector::F_CEIL_TEX,  new_ceil);
 			}
 		}
 

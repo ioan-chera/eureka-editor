@@ -335,18 +335,19 @@ bool Basis::changeVertex(int vert, byte field, int value)
 //
 // Change sector
 //
-bool Basis::changeSector(int sec, byte field, int value)
+bool Basis::changeSector(int sec, Sector::IntAddress field, int value)
 {
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
-	SYS_ASSERT(field <= Sector::F_TAG);
-
-	if(field == Sector::F_FLOOR_TEX ||
-		field == Sector::F_CEIL_TEX)
-	{
-		inst.recent_flats.insert(BA_GetString(StringID(value)));
-	}
 
 	return change(ObjType::sectors, sec, field, value);
+}
+bool Basis::changeSector(int sec, Sector::StringIDAddress field, StringID value)
+{
+	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
+
+	inst.recent_flats.insert(BA_GetString(value));
+
+	return change(ObjType::sectors, sec, field, value.get());
 }
 
 //

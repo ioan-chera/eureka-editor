@@ -31,15 +31,14 @@
 #include "FixedPoint.h"
 #include "m_strings.h"
 #include "objid.h"
+#include "Sector.h"
 #include "SideDef.h"
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
-class Sector;
 class selection_c;
 class LineDef;
-class SideDef;
 struct Thing;
 struct Vertex;
 
@@ -247,7 +246,8 @@ private:
 	bool change(ObjType type, int objnum, byte field, int value);
 	bool changeThing(int thing, byte field, int value);
 	bool changeVertex(int vert, byte field, int value);
-	bool changeSector(int sec, byte field, int value);
+	bool changeSector(int sec, Sector::IntAddress field, int value);
+	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
 	bool changeSidedef(int side, SideDef::IntAddress field, int value);
 	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
@@ -310,7 +310,11 @@ public:
 		return basis.changeVertex(vert, field, value);
 	}
 
-	bool changeSector(int sec, byte field, int value)
+	bool changeSector(int sec, Sector::IntAddress field, int value)
+	{
+		return basis.changeSector(sec, field, value);
+	}
+	bool changeSector(int sec, Sector::StringIDAddress field, StringID value)
 	{
 		return basis.changeSector(sec, field, value);
 	}

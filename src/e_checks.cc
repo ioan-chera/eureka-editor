@@ -3956,10 +3956,10 @@ static void Textures_FixUnknownFlat(Instance &inst)
 		const Sector *S = inst.level.sectors[s];
 
 		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S->FloorTex()))
-			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor.get());
+			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
 		if (!inst.wad.images.W_FlatIsKnown(inst.conf, S->CeilTex()))
-			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil.get());
+			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 }
 

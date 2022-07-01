@@ -955,9 +955,9 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 	const Sector * sector = doc.sectors[src_sec];
 
 	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex.get());
+	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
 	op.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex.get());
+	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
 
 	op.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
 	op.changeSector(dest_sec, Sector::F_TYPE,   sector->type);

@@ -254,8 +254,8 @@ void Instance::CMD_SEC_SwapFlats()
 			StringID floor_tex = S->floor_tex;
 			StringID  ceil_tex = S->ceil_tex;
 
-			op.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex.get());
-			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex.get());
+			op.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
+			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
 		}
 	}
 
@@ -339,9 +339,9 @@ void Instance::commandSectorMerge()
 			const Sector *ref = level.sectors[first];
 
 			op.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex.get());
+			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
 			op.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-			op.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex.get());
+			op.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
 
 			op.changeSector(new_sec, Sector::F_LIGHT, ref->light);
 			op.changeSector(new_sec, Sector::F_TYPE,  ref->type);
