@@ -32,6 +32,7 @@ set(_testUtils
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
     ${src}/Errors.cc
+    ${src}/lib_adler.cc
     ${src}/lib_util.cc
     ${src}/m_strings.cc
     ${src}/sys_debug.cc
@@ -102,6 +103,22 @@ function(unit_test _name)
 endfunction()
 
 # IMPORTANT: the eurekasrc files from testutils are already linked!
+
+unit_test(document
+    DocumentTest.cpp
+    stub/e_cutpaste_stub.cpp
+    stub/e_main_stub.cpp
+    stub/r_render_stub.cpp
+    stub/ui_infobar_stub.cpp
+    SRC Document.cc
+        DocumentModule.cc
+        e_basis.cc
+        LineDef.cc
+        m_bitvec.cc
+        m_select.cc
+        Sector.cc
+        SideDef.cc
+)
 
 unit_test(e_checks
     e_checks_test.cpp
