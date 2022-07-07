@@ -329,12 +329,12 @@ bool Basis::changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint v
 //
 // Change vertex
 //
-bool Basis::changeVertex(int vert, byte field, int value)
+bool Basis::changeVertex(int vert, byte field, FFixedPoint value)
 {
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
 	SYS_ASSERT(field <= Vertex::F_Y);
 
-	return change(ObjType::vertices, vert, field, value);
+	return change(ObjType::vertices, vert, field, value.raw());
 }
 
 //
