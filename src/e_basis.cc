@@ -310,26 +310,31 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 //
 // Change thing
 //
-bool Basis::changeThing(int thing, byte field, int value)
+bool Basis::changeThing(int thing, Thing::IntAddress field, int value)
 {
 	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
-	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	if(field == Thing::F_TYPE)
 		inst.recent_things.insert_number(value);
 
 	return change(ObjType::things, thing, field, value);
 }
+bool Basis::changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value)
+{
+	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
+
+	return change(ObjType::things, thing, field, value.raw());
+}
 
 //
 // Change vertex
 //
-bool Basis::changeVertex(int vert, byte field, int value)
+bool Basis::changeVertex(int vert, byte field, FFixedPoint value)
 {
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
 	SYS_ASSERT(field <= Vertex::F_Y);
 
-	return change(ObjType::vertices, vert, field, value);
+	return change(ObjType::vertices, vert, field, value.raw());
 }
 
 //
