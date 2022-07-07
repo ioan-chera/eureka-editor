@@ -25,6 +25,7 @@ set(source_base
     Side.h
     SideDef.cc
     SideDef.h
+    Thing.cc
     Thing.h
     version.h
     Vertex.h

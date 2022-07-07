@@ -28,18 +28,17 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
-#include "FixedPoint.h"
 #include "m_strings.h"
 #include "objid.h"
 #include "Sector.h"
 #include "SideDef.h"
+#include "Thing.h"
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
 class selection_c;
 class LineDef;
-struct Thing;
 struct Vertex;
 
 namespace global
@@ -68,13 +67,6 @@ namespace global
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
 // E_BASIS
-enum class MapFormat
-{
-	invalid,
-	doom,
-	hexen,
-	udmf
-};
 
 FFixedPoint MakeValidCoord(MapFormat format, double x);
 
@@ -242,7 +234,8 @@ private:
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
 	bool change(ObjType type, int objnum, byte field, int value);
-	bool changeThing(int thing, byte field, int value);
+	bool changeThing(int thing, Thing::IntAddress field, int value);
+	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value);
 	bool changeVertex(int vert, byte field, int value);
 	bool changeSector(int sec, Sector::IntAddress field, int value);
 	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
@@ -298,7 +291,12 @@ public:
 		return basis.change(type, objnum, field, value);
 	}
 
-	bool changeThing(int thing, byte field, int value)
+	bool changeThing(int thing, Thing::IntAddress field, int value)
+	{
+		return basis.changeThing(thing, field, value);
+	}
+
+	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value)
 	{
 		return basis.changeThing(thing, field, value);
 	}

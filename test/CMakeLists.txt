@@ -121,6 +121,7 @@ unit_test(document
         m_select.cc
         Sector.cc
         SideDef.cc
+        Thing.cc
 )
 
 unit_test(e_checks

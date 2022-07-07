@@ -746,9 +746,9 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const Thing * T = doc.things[*it];
 
-				op.changeThing(*it, Thing::F_X, (T->raw_x + fdx).raw());
-				op.changeThing(*it, Thing::F_Y, (T->raw_y + fdy).raw());
-				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz).raw());
+				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
+				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
+				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz));
 			}
 			break;
 
@@ -1546,14 +1546,14 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 		if (is_vert)
 		{
-			op.changeThing(*it, Thing::F_Y, (fix_my * 2 - T->raw_y).raw());
+			op.changeThing(*it, Thing::F_Y, fix_my * 2 - T->raw_y);
 
 			if (T->angle != 0)
 				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, (fix_mx * 2 - T->raw_x).raw());
+			op.changeThing(*it, Thing::F_X, fix_mx * 2 - T->raw_x);
 
 			if (T->angle > 180)
 				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
@@ -1666,15 +1666,15 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 
 		if (anti_clockwise)
 		{
-			op.changeThing(*it, Thing::F_X, (fix_mx - old_y + fix_my).raw());
-			op.changeThing(*it, Thing::F_Y, (fix_my + old_x - fix_mx).raw());
+			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
+			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, (fix_mx + old_y - fix_my).raw());
-			op.changeThing(*it, Thing::F_Y, (fix_my - old_x + fix_mx).raw());
+			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
+			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
@@ -1764,8 +1764,8 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -2092,8 +2092,8 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 
 				moved.set(*it);
 				break;
