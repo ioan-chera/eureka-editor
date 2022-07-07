@@ -24,11 +24,14 @@
 
 #include "e_main.h"
 #include "e_linedef.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_vector.h"
 #include "r_grid.h"
 #include "r_render.h"
+#include "SideDef.h"
+#include "Vertex.h"
 
 
 #define SNAP_COLOR  (config::gui_scheme == 2 ? fl_rgb_color(255,96,0) : fl_rgb_color(255, 96, 0))
@@ -299,7 +302,7 @@ void UI_InfoBar::NewEditMode(ObjType new_mode)
 }
 
 
-void UI_InfoBar::SetMouse(double mx, double my)
+void UI_InfoBar::SetMouse()
 {
 	// TODO this method should go away
 
@@ -458,14 +461,14 @@ void UI_StatusBar::draw()
 
 	if (inst.edit.render3d)
 	{
-		IB_Number(cx, cy, "x", I_ROUND(inst.r_view.x), 5);
-		IB_Number(cx, cy, "y", I_ROUND(inst.r_view.y), 5);
-		IB_Number(cx, cy, "z", I_ROUND(inst.r_view.z) - inst.conf.miscInfo.view_height, 4);
+		IB_Number(cx, cy, "x", iround(inst.r_view.x), 5);
+		IB_Number(cx, cy, "y", iround(inst.r_view.y), 5);
+		IB_Number(cx, cy, "z", iround(inst.r_view.z) - inst.conf.miscInfo.view_height, 4);
 
 		// use less space when an action is occurring
-		if (inst.edit.action == ACT_NOTHING)
+		if (inst.edit.action == EditorAction::nothing)
 		{
-			int ang = I_ROUND(inst.r_view.angle * 180 / M_PI);
+			int ang = iround(inst.r_view.angle * 180 / M_PI);
 			if (ang < 0) ang += 360;
 
 			IB_Number(cx, cy, "ang", ang, 3);
@@ -484,8 +487,8 @@ void UI_StatusBar::draw()
 		float mx = static_cast<float>(inst.grid.SnapX(inst.edit.map.x));
 		float my = static_cast<float>(inst.grid.SnapY(inst.edit.map.y));
 
-		mx = CLAMP(-32767, mx, 32767);
-		my = CLAMP(-32767, my, 32767);
+		mx = clamp(-32767.f, mx, 32767.f);
+		my = clamp(-32767.f, my, 32767.f);
 
 		IB_Coord(cx, cy, "x", mx);
 		IB_Coord(cx, cy, "y", my);
@@ -504,19 +507,19 @@ void UI_StatusBar::draw()
 
 	switch (inst.edit.action)
 	{
-	case ACT_DRAG:
+	case EditorAction::drag:
 		IB_ShowDrag(cx, cy);
 		break;
 
-	case ACT_TRANSFORM:
+	case EditorAction::transform:
 		IB_ShowTransform(cx, cy);
 		break;
 
-	case ACT_ADJUST_OFS:
+	case EditorAction::adjustOfs:
 		IB_ShowOffsets(cx, cy);
 		break;
 
-	case ACT_DRAW_LINE:
+	case EditorAction::drawLine:
 		IB_ShowDrawLine(cx, cy);
 		break;
 
@@ -533,13 +536,13 @@ void UI_StatusBar::IB_ShowDrag(int cx, int cy)
 {
 	if (inst.edit.render3d && inst.edit.mode == ObjType::sectors)
 	{
-		IB_Number(cx, cy, "raise delta", I_ROUND(inst.edit.drag_sector_dz), 4);
+		IB_Number(cx, cy, "raise delta", iround(inst.edit.drag_sector_dz), 4);
 		return;
 	}
 	if (inst.edit.render3d && inst.edit.mode == ObjType::things && inst.edit.drag_thing_up_down)
 	{
 		double dz = inst.edit.drag_cur.z - inst.edit.drag_start.z;
-		IB_Number(cx, cy, "raise delta", I_ROUND(dz), 4);
+		IB_Number(cx, cy, "raise delta", iround(dz), 4);
 		return;
 	}
 
@@ -594,8 +597,8 @@ void UI_StatusBar::IB_ShowTransform(int cx, int cy)
 
 void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 {
-	int dx = I_ROUND(inst.edit.adjust_dx);
-	int dy = I_ROUND(inst.edit.adjust_dy);
+	int dx = iround(inst.edit.adjust_dx);
+	int dy = iround(inst.edit.adjust_dy);
 
 	Objid hl = inst.edit.highlight;
 
@@ -645,17 +648,16 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 {
-	if (! inst.edit.draw_from.valid())
+	if (! inst.edit.drawLine.from.valid())
 		return;
 
-	const Vertex *V = inst.level.vertices[inst.edit.draw_from.num];
+	const Vertex *V = inst.level.vertices[inst.edit.drawLine.from.num];
 
-	double dx = inst.edit.draw_to_x - V->x();
-	double dy = inst.edit.draw_to_y - V->y();
+	v2double_t dv = inst.edit.drawLine.to - V->xy();
 
 	// show a ratio value
-	fixcoord_t fdx = TO_COORD(dx);
-	fixcoord_t fdy = TO_COORD(dy);
+	FFixedPoint fdx = FFixedPoint(dv.x);
+	FFixedPoint fdy = FFixedPoint(dv.y);
 
 	SString ratio_name = LD_RatioName(fdx, fdy, false);
 
@@ -664,8 +666,8 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 
 	cx = std::max(cx+12, old_cx + 170);
 
-	IB_Coord(cx, cy, "delta x", static_cast<float>(dx));
-	IB_Coord(cx, cy,       "y", static_cast<float>(dy));
+	IB_Coord(cx, cy, "delta x", static_cast<float>(dv.x));
+	IB_Coord(cx, cy,       "y", static_cast<float>(dv.y));
 }
 
 

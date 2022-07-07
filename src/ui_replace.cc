@@ -27,9 +27,13 @@
 #include "e_cutpaste.h"  // Texboard_XX
 #include "e_path.h"  // GoToObject
 #include "e_main.h"  // Selection_Clear
+#include "LineDef.h"
 #include "m_config.h"	// gui_scheme
 #include "m_game.h"
 #include "r_render.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -1011,7 +1015,7 @@ void UI_FindAndReplace::CB_Paste(bool is_replace)
 {
 	Fl_Input *inp = is_replace ? rep_value : find_match;
 
-	int tex_num = (what->value() == What_lineTextures) ?
+	StringID tex_num = (what->value() == What_lineTextures) ?
 		Texboard_GetTexNum(inst.conf) : Texboard_GetFlatNum(inst.conf);
 
 	SString tex_name = BA_GetString(tex_num);
@@ -1310,7 +1314,7 @@ void UI_FindAndReplace::DoReplace()
 		return;
 	}
 
-	int replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
+	StringID replace_tex_id = BA_InternaliseString(NormalizeTex(rep_value->value()));
 
 	{
 		EditOperation op(inst.level.basis);
@@ -1333,7 +1337,7 @@ bool UI_FindAndReplace::MatchesObject(int idx)
 }
 
 
-void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, int new_tex)
+void UI_FindAndReplace::ApplyReplace(EditOperation &op, int idx, StringID new_tex)
 {
 	SYS_ASSERT(idx >= 0);
 
@@ -1385,7 +1389,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 	if (cur_obj.type != inst.edit.mode)
 		inst.Editor_ChangeMode_Raw(cur_obj.type);
 
-	int replace_tex_id = 0;
+	StringID replace_tex_id;
 
 	EditOperation *op;	// hackish way to control lifetime
 	if (replace)
@@ -1701,7 +1705,7 @@ void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 }
 
 
-void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, int new_tex)
+void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new_tex)
 {
 	const LineDef *L = inst.level.linedefs[idx];
 
@@ -1744,7 +1748,7 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, int new_tex)
 }
 
 
-void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, int new_tex)
+void UI_FindAndReplace::Replace_Sector(EditOperation &op, int idx, StringID new_tex)
 {
 	const Sector *sector = inst.level.sectors[idx];
 

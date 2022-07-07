@@ -36,11 +36,16 @@
 #include "e_sector.h"
 #include "e_things.h"
 #include "e_vertex.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_vector.h"
 #include "e_objects.h"
 #include "r_grid.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -84,7 +89,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	if (model >= 0)
 		*doc.sectors[new_sec] = *doc.sectors[model];
 	else
-		doc.sectors[new_sec]->SetDefaults(inst);
+		doc.sectors[new_sec]->SetDefaults(inst.conf);
 
 	double x1 = inst.grid.QuantSnapX(inst.edit.map.x, false);
 	double y1 = inst.grid.QuantSnapX(inst.edit.map.y, false);
@@ -97,12 +102,12 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 		int new_v = op.addNew(ObjType::vertices);
 		Vertex *V = doc.vertices[new_v];
 
-		V->SetRawX(inst, (i >= 2) ? x2 : x1);
-		V->SetRawY(inst, (i==1 || i==2) ? y2 : y1);
+		V->SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
+		V->SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
 
 		int new_sd = op.addNew(ObjType::sidedefs);
 
-		doc.sidedefs[new_sd]->SetDefaults(inst, false);
+		doc.sidedefs[new_sd]->SetDefaults(inst.conf, false);
 		doc.sidedefs[new_sd]->sector = new_sec;
 
 		int new_ld = op.addNew(ObjType::linedefs);
@@ -150,8 +155,8 @@ void ObjectsModule::insertThing() const
 			}
 		}
 
-		T->SetRawX(inst, inst.grid.SnapX(inst.edit.map.x));
-		T->SetRawY(inst, inst.grid.SnapY(inst.edit.map.y));
+		T->SetRawX(inst.loaded.levelFormat, inst.grid.SnapX(inst.edit.map.x));
+		T->SetRawY(inst.loaded.levelFormat, inst.grid.SnapY(inst.edit.map.y));
 
 		inst.recent_things.insert_number(T->type);
 
@@ -174,7 +179,7 @@ int ObjectsModule::sectorNew(EditOperation &op, int model, int model2, int model
 	if (model < 0) model = model3;
 
 	if (model < 0)
-		doc.sectors[new_sec]->SetDefaults(inst);
+		doc.sectors[new_sec]->SetDefaults(inst.conf);
 	else
 		*doc.sectors[new_sec] = *doc.sectors[model];
 
@@ -398,19 +403,17 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 	int old_vert = -1;
 	int new_vert = -1;
 
-	double new_x = inst.grid.SnapX(inst.edit.map.x);
-	double new_y = inst.grid.SnapY(inst.edit.map.y);
+	v2double_t newpos = inst.grid.Snap(inst.edit.map.xy);
 
 	int orig_num_sectors = doc.numSectors();
 
 
 	// are we drawing a line?
-	if (inst.edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == EditorAction::drawLine)
 	{
-		old_vert = inst.edit.draw_from.num;
+		old_vert = inst.edit.drawLine.from.num;
 
-		new_x = inst.edit.draw_to_x;
-		new_y = inst.edit.draw_to_y;
+		newpos = inst.edit.drawLine.to;
 	}
 
 	// a linedef which we are splitting (usually none)
@@ -418,8 +421,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	if (split_ld >= 0)
 	{
-		new_x = inst.edit.split.x;
-		new_y = inst.edit.split.y;
+		newpos = inst.edit.split;
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
@@ -437,8 +439,8 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			new_vert = inst.edit.highlight.num;
 
 		// if no highlight, look for a vertex at snapped coord
-		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == ACT_DRAW_LINE))
-			new_vert = doc.vertmod.findExact(TO_COORD(new_x), TO_COORD(new_y));
+		if (new_vert < 0 && inst.grid.snap && ! (inst.edit.action == EditorAction::drawLine))
+			new_vert = doc.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 
 		//
 		// handle a highlighted/snapped vertex.
@@ -454,7 +456,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			}
 
 			// a plain INSERT will attempt to fix a dangling vertex
-			if (inst.edit.action == ACT_NOTHING)
+			if (inst.edit.action == EditorAction::nothing)
 			{
 				if (doc.vertmod.tryFixDangler(new_vert))
 				{
@@ -477,7 +479,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 			if (doc.linemod.linedefAlreadyExists(old_vert, new_vert))
 			{
 				// just continue drawing from the second vertex
-				inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+				inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 				inst.edit.Selected->set(new_vert);
 				return;
 			}
@@ -489,7 +491,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	// would we create a new vertex on top of an existing one?
 	if (new_vert < 0 && old_vert >= 0 &&
-		doc.vertices[old_vert]->Matches(inst.MakeValidCoord(new_x), inst.MakeValidCoord(new_y)))
+		doc.vertices[old_vert]->Matches(MakeValidCoord(inst.loaded.levelFormat, newpos.x), MakeValidCoord(inst.loaded.levelFormat, newpos.y)))
 	{
 		inst.edit.Selected->set(old_vert);
 		return;
@@ -505,9 +507,9 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			Vertex *V = doc.vertices[new_vert];
 
-			V->SetRawXY(inst, { new_x, new_y });
+			V->SetRawXY(inst.loaded.levelFormat, newpos);
 
-			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
 
 			// splitting an existing line?
@@ -547,7 +549,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 			op.setMessage("added linedef");
 
-			inst.edit.draw_from = Objid(ObjType::vertices, new_vert);
+			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
 		}
 	}
@@ -555,18 +557,17 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 begin_drawing:
 	// begin drawing mode?
-	if (inst.edit.action == ACT_NOTHING && !closed_a_loop &&
+	if (inst.edit.action == EditorAction::nothing && !closed_a_loop &&
 		old_vert >= 0 && new_vert < 0)
 	{
 		inst.Selection_Clear();
 
-		inst.edit.draw_from = Objid(ObjType::vertices, old_vert);
+		inst.edit.drawLine.from = Objid(ObjType::vertices, old_vert);
 		inst.edit.Selected->set(old_vert);
 
-		inst.edit.draw_to_x = doc.vertices[old_vert]->x();
-		inst.edit.draw_to_y = doc.vertices[old_vert]->y();
+		inst.edit.drawLine.to = doc.vertices[old_vert]->xy();
 
-		inst.Editor_SetAction(ACT_DRAW_LINE);
+		inst.Editor_SetAction(EditorAction::drawLine);
 	}
 
 	// stop drawing mode?
@@ -602,7 +603,7 @@ void ObjectsModule::insertSector() const
 	}
 
 	// if outside of the map, create a square
-	if (doc.hover.isPointOutsideOfMap(inst.edit.map.x, inst.edit.map.y))
+	if (hover::isPointOutsideOfMap(doc, inst.edit.map.xy))
 	{
 		EditOperation op(doc.basis);
 		op.setMessage("added sector (outside map)");
@@ -633,7 +634,7 @@ void ObjectsModule::insertSector() const
 		EditOperation op(doc.basis);
 		op.setMessage("added new sector");
 
-		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map.x, inst.edit.map.y, -1 /* create */, model);
+		ok = doc.secmod.assignSectorToSpace(op, inst.edit.map.xy, -1 /* create */, model);
 	}
 	// select the new sector
 	if (ok)
@@ -741,7 +742,7 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 
 	v2double_t dest = vertex.xy() + delta;
 
-	Objid obj = inst.level.hover.getNearbyObject(ObjType::vertices, dest);
+	Objid obj = hover::getNearbyObject(ObjType::vertices, inst.level, inst.conf, inst.grid, dest);
 	if(obj.valid() && obj.num != vertexID)
 	{
 		// Vertex merging
@@ -759,7 +760,7 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 
 	v2double_t splitPoint;
 	int splitLine = -1;
-	obj = inst.level.hover.findSplitLine(splitPoint, dest, vertexID);
+	obj = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit, inst.grid, splitPoint, dest, vertexID);
 	if(obj.valid())
 	{
 		splitLine = obj.num;
@@ -774,15 +775,15 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 		inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
 	}
 
-	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + inst.MakeValidCoord(delta.x));
-	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + inst.MakeValidCoord(delta.y));
+	op.changeVertex(vertexID, Thing::F_X, (vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat, delta.x)).raw());
+	op.changeVertex(vertexID, Thing::F_Y, (vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat, delta.y)).raw());
 }
 
 void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, const v3double_t &delta) const
 {
-	fixcoord_t fdx = inst.MakeValidCoord(delta.x);
-	fixcoord_t fdy = inst.MakeValidCoord(delta.y);
-	fixcoord_t fdz = inst.MakeValidCoord(delta.z);
+	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, delta.x);
+	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, delta.y);
+	FFixedPoint fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
 
 
 	std::vector<int> sel;
@@ -793,9 +794,9 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const Thing * T = doc.things[*it];
 
-				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
-				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
-				op.changeThing(*it, Thing::F_H, std::max(0, T->raw_h + fdz));
+				op.changeThing(*it, Thing::F_X, (T->raw_x + fdx).raw());
+				op.changeThing(*it, Thing::F_Y, (T->raw_y + fdy).raw());
+				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz).raw());
 			}
 			break;
 
@@ -913,8 +914,8 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
-	newV->raw_x += inst.MakeValidCoord(delta.x);
-	newV->raw_y += inst.MakeValidCoord(delta.y);
+	newV->raw_x += MakeValidCoord(inst.loaded.levelFormat, delta.x);
+	newV->raw_y += MakeValidCoord(inst.loaded.levelFormat, delta.y);
 
 	doc.linemod.splitLinedefAtVertex(op, splitLineID, newVID);
 
@@ -971,8 +972,8 @@ static void singleDragVertex(Instance &inst, const int vertexID, const v2double_
 	}
 
 	const Vertex &vertex = *inst.level.vertices[vertexID];
-	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + inst.MakeValidCoord(delta.x));
-	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + inst.MakeValidCoord(delta.y));
+	op.changeVertex(vertexID, Thing::F_X, (vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat, delta.x)).raw());
+	op.changeVertex(vertexID, Thing::F_Y, (vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat, delta.y)).raw());
 
 	if (did_split_line >= 0)
 		op.setMessage("split linedef #%d", did_split_line);
@@ -1062,7 +1063,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 */
 		if (! L1->Left(doc))
 		{
-			int tex = L1->Right(doc)->mid_tex;
+			StringID tex = L1->Right(doc)->mid_tex;
 
 			if (! L2->Left(doc))
 			{
@@ -1088,30 +1089,30 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			const Sector *front = L1->Right(doc)->SecRef(doc);
 			const Sector *back  = L1-> Left(doc)->SecRef(doc);
 
-			int f_l = L1->Right(doc)->lower_tex;
-			int f_u = L1->Right(doc)->upper_tex;
-			int b_l = L1-> Left(doc)->lower_tex;
-			int b_u = L1-> Left(doc)->upper_tex;
+			StringID f_l = L1->Right(doc)->lower_tex;
+			StringID f_u = L1->Right(doc)->upper_tex;
+			StringID b_l = L1-> Left(doc)->lower_tex;
+			StringID b_u = L1-> Left(doc)->upper_tex;
 
 			// ignore missing textures
-			if (is_null_tex(BA_GetString(f_l))) f_l = 0;
-			if (is_null_tex(BA_GetString(f_u))) f_u = 0;
-			if (is_null_tex(BA_GetString(b_l))) b_l = 0;
-			if (is_null_tex(BA_GetString(b_u))) b_u = 0;
+			if (is_null_tex(BA_GetString(f_l))) f_l = StringID();
+			if (is_null_tex(BA_GetString(f_u))) f_u = StringID();
+			if (is_null_tex(BA_GetString(b_l))) b_l = StringID();
+			if (is_null_tex(BA_GetString(b_u))) b_u = StringID();
 
 			// try hard to find a usable texture
-			int tex = -1;
+			StringID tex = StringID(-1);
 
-				 if (front->floorh < back->floorh && f_l > 0) tex = f_l;
-			else if (front->floorh > back->floorh && b_l > 0) tex = b_l;
-			else if (front-> ceilh > back-> ceilh && f_u > 0) tex = f_u;
-			else if (front-> ceilh < back-> ceilh && b_u > 0) tex = b_u;
-			else if (f_l > 0) tex = f_l;
-			else if (b_l > 0) tex = b_l;
-			else if (f_u > 0) tex = f_u;
-			else if (b_u > 0) tex = b_u;
+				 if (front->floorh < back->floorh && f_l.hasContent()) tex = f_l;
+			else if (front->floorh > back->floorh && b_l.hasContent()) tex = b_l;
+			else if (front-> ceilh > back-> ceilh && f_u.hasContent()) tex = f_u;
+			else if (front-> ceilh < back-> ceilh && b_u.hasContent()) tex = b_u;
+			else if (f_l.hasContent()) tex = f_l;
+			else if (b_l.hasContent()) tex = b_l;
+			else if (f_u.hasContent()) tex = f_u;
+			else if (b_u.hasContent()) tex = b_u;
 
-			if (tex > 0)
+			if (tex.hasContent())
 			{
 				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
@@ -1539,17 +1540,17 @@ v2double_t ObjectsModule::calcMiddle(const selection_c & list) const
 // returns a bounding box that completely includes a list of objects.
 // when the list is empty, bottom-left coordinate is arbitrary.
 //
-void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, double *x2, double *y2) const
+void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2double_t &pos2) const
 {
 	if (list.empty())
 	{
-		*x1 = *y1 = 0;
-		*x2 = *y2 = 0;
+		pos1 = {};
+		pos2 = {};
 		return;
 	}
 
-	*x1 = *y1 = +9e9;
-	*x2 = *y2 = -9e9;
+	pos1 = { +9e9, +9e9 };
+	pos2 = { -9e9, -9e9 };
 
 	switch (list.what_type())
 	{
@@ -1564,10 +1565,10 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 				const thingtype_t &info = M_GetThingType(inst.conf, T->type);
 				int r = info.radius;
 
-				if (Tx - r < *x1) *x1 = Tx - r;
-				if (Ty - r < *y1) *y1 = Ty - r;
-				if (Tx + r > *x2) *x2 = Tx + r;
-				if (Ty + r > *y2) *y2 = Ty + r;
+				if (Tx - r < pos1.x) pos1.x = Tx - r;
+				if (Ty - r < pos1.y) pos1.y = Ty - r;
+				if (Tx + r > pos2.x) pos2.x = Tx + r;
+				if (Ty + r > pos2.y) pos2.y = Ty + r;
 			}
 			break;
 		}
@@ -1580,10 +1581,10 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 				double Vx = V->x();
 				double Vy = V->y();
 
-				if (Vx < *x1) *x1 = Vx;
-				if (Vy < *y1) *y1 = Vy;
-				if (Vx > *x2) *x2 = Vx;
-				if (Vy > *y2) *y2 = Vy;
+				if (Vx < pos1.x) pos1.x = Vx;
+				if (Vy < pos1.y) pos1.y = Vy;
+				if (Vx > pos2.x) pos2.x = Vx;
+				if (Vy > pos2.y) pos2.y = Vy;
 			}
 			break;
 		}
@@ -1594,20 +1595,20 @@ void ObjectsModule::calcBBox(const selection_c & list, double *x1, double *y1, d
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(doc, list, verts);
 
-			calcBBox(verts, x1, y1, x2, y2);
+			calcBBox(verts, pos1, pos2);
 			return;
 		}
 	}
 
-	SYS_ASSERT(*x1 <= *x2);
-	SYS_ASSERT(*y1 <= *y2);
+	SYS_ASSERT(pos1.x <= pos2.x);
+	SYS_ASSERT(pos1.y <= pos2.y);
 }
 
 
 void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
-	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
+	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
+	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
@@ -1615,14 +1616,14 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 		if (is_vert)
 		{
-			op.changeThing(*it, Thing::F_Y, 2*fix_my - T->raw_y);
+			op.changeThing(*it, Thing::F_Y, (fix_my * 2 - T->raw_y).raw());
 
 			if (T->angle != 0)
 				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, 2*fix_mx - T->raw_x);
+			op.changeThing(*it, Thing::F_X, (fix_mx * 2 - T->raw_x).raw());
 
 			if (T->angle > 180)
 				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
@@ -1635,8 +1636,8 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list, bool is_vert, double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
-	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
+	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
+	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
 
 	selection_c verts(ObjType::vertices);
 	ConvertSelection(doc, list, verts);
@@ -1646,9 +1647,9 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 		const Vertex * V = doc.vertices[*it];
 
 		if (is_vert)
-			op.changeVertex(*it, Vertex::F_Y, 2*fix_my - V->raw_y);
+			op.changeVertex(*it, Vertex::F_Y, (fix_my * 2 - V->raw_y).raw());
 		else
-			op.changeVertex(*it, Vertex::F_X, 2*fix_mx - V->raw_x);
+			op.changeVertex(*it, Vertex::F_X, (fix_mx * 2 - V->raw_x).raw());
 	}
 
 	// flip linedefs too !!
@@ -1723,27 +1724,27 @@ void Instance::CMD_Mirror()
 void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list, bool anti_clockwise,
 							 double mid_x, double mid_y) const
 {
-	fixcoord_t fix_mx = inst.MakeValidCoord(mid_x);
-	fixcoord_t fix_my = inst.MakeValidCoord(mid_y);
+	FFixedPoint fix_mx = MakeValidCoord(inst.loaded.levelFormat, mid_x);
+	FFixedPoint fix_my = MakeValidCoord(inst.loaded.levelFormat, mid_y);
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
 		const Thing * T = doc.things[*it];
 
-		fixcoord_t old_x = T->raw_x;
-		fixcoord_t old_y = T->raw_y;
+		FFixedPoint old_x = T->raw_x;
+		FFixedPoint old_y = T->raw_y;
 
 		if (anti_clockwise)
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
-			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
+			op.changeThing(*it, Thing::F_X, (fix_mx - old_y + fix_my).raw());
+			op.changeThing(*it, Thing::F_Y, (fix_my + old_x - fix_mx).raw());
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
-			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
+			op.changeThing(*it, Thing::F_X, (fix_mx + old_y - fix_my).raw());
+			op.changeThing(*it, Thing::F_Y, (fix_my - old_x + fix_mx).raw());
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
@@ -1793,25 +1794,25 @@ void Instance::CMD_Rotate90()
 			selection_c verts(ObjType::vertices);
 			ConvertSelection(level, *edit.Selected, verts);
 
-			fixcoord_t fix_mx = MakeValidCoord(mid.x);
-			fixcoord_t fix_my = MakeValidCoord(mid.y);
+			FFixedPoint fix_mx = MakeValidCoord(loaded.levelFormat, mid.x);
+			FFixedPoint fix_my = MakeValidCoord(loaded.levelFormat, mid.y);
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
 				const Vertex * V = level.vertices[*it];
 
-				fixcoord_t old_x = V->raw_x;
-				fixcoord_t old_y = V->raw_y;
+				FFixedPoint old_x = V->raw_x;
+				FFixedPoint old_y = V->raw_y;
 
 				if (anti_clockwise)
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
+					op.changeVertex(*it, Vertex::F_X, (fix_mx - old_y + fix_my).raw());
+					op.changeVertex(*it, Vertex::F_Y, (fix_my + old_x - fix_mx).raw());
 				}
 				else
 				{
-					op.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
-					op.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
+					op.changeVertex(*it, Vertex::F_X, (fix_mx + old_y - fix_my).raw());
+					op.changeVertex(*it, Vertex::F_Y, (fix_my - old_x + fix_mx).raw());
 				}
 			}
 		}
@@ -1833,12 +1834,12 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
-		op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
+		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
-		int ang_diff = static_cast<int>(I_ROUND(rot1) * 45.0);
+		int ang_diff = static_cast<int>(roundf(rot1) * 45.0);
 
 		if (ang_diff)
 		{
@@ -1862,8 +1863,8 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
-		op.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
+		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 	}
 }
 
@@ -1924,23 +1925,23 @@ void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos
 		return;
 	}
 
-	double lx, ly, hx, hy;
+	v2double_t lpos, hpos;
 
-	doc.objects.calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
+	doc.objects.calcBBox(*inst.edit.Selected, lpos, hpos);
 
 	if (pos_x < 0)
-		param.mid.x = lx;
+		param.mid.x = lpos.x;
 	else if (pos_x > 0)
-		param.mid.x = hx;
+		param.mid.x = hpos.x;
 	else
-		param.mid.x = lx + (hx - lx) / 2;
+		param.mid.x = lpos.x + (hpos.x - lpos.x) / 2;
 
 	if (pos_y < 0)
-		param.mid.y = ly;
+		param.mid.y = lpos.y;
 	else if (pos_y > 0)
-		param.mid.y = hy;
+		param.mid.y = hpos.y;
 	else
-		param.mid.y = ly + (hy - ly) / 2;
+		param.mid.y = lpos.y + (hpos.y - lpos.y) / 2;
 }
 
 
@@ -1997,8 +1998,8 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 	{
 		const Sector * S = doc.sectors[*it];
 
-		int new_f = mid_z + I_ROUND((S->floorh - mid_z) * scale_z);
-		int new_c = mid_z + I_ROUND((S-> ceilh - mid_z) * scale_z);
+		int new_f = mid_z + iround((S->floorh - mid_z) * scale_z);
+		int new_c = mid_z + iround((S-> ceilh - mid_z) * scale_z);
 
 		op.changeSector(*it, Sector::F_FLOORH, new_f);
 		op.changeSector(*it, Sector::F_CEILH,  new_c);
@@ -2052,13 +2053,13 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	{
 		case ObjType::things:
 			for (const Thing *thing : doc.things)
-				if (I_ROUND(thing->x()) == x && I_ROUND(thing->y()) == y)
+				if (iround(thing->x()) == x && iround(thing->y()) == y)
 					return true;
 			return false;
 
 		case ObjType::vertices:
 			for (const Vertex *vertex : doc.vertices)
-				if (I_ROUND(vertex->x()) == x && I_ROUND(vertex->y()) == y)
+				if (iround(vertex->x()) == x && iround(vertex->y()) == y)
 					return true;
 			return false;
 
@@ -2109,11 +2110,10 @@ void ObjectsModule::doEnlargeOrShrink(bool do_shrink) const
 	}
 	else
 	{
-		double lx, ly, hx, hy;
-		calcBBox(*inst.edit.Selected, &lx, &ly, &hx, &hy);
+		v2double_t lpos, hpos;
+		calcBBox(*inst.edit.Selected, lpos, hpos);
 
-		param.mid.x = lx + (hx - lx) / 2;
-		param.mid.y = ly + (hy - ly) / 2;
+		param.mid = lpos + (hpos - lpos) / 2;
 	}
 
 	{
@@ -2162,8 +2162,8 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(new_x));
-				op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(new_y));
+				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 
 				moved.set(*it);
 				break;
@@ -2264,8 +2264,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				op.changeVertex(*it, Vertex::F_X, inst.MakeValidCoord(new_x));
-				op.changeVertex(*it, Vertex::F_Y, inst.MakeValidCoord(new_y));
+				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 
 				moved.set(*it);
 				break;

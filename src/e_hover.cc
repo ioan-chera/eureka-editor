@@ -33,8 +33,12 @@
 #include "e_hover.h"
 #include "e_linedef.h"	// SplitLineDefAtVertex()
 #include "e_main.h"		// Map_bound_xxx
+#include "LineDef.h"
 #include "m_game.h"
 #include "r_grid.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 
 extern int vertex_radius(double scale);
@@ -336,26 +340,32 @@ public:
 	}
 };
 
+static Objid getNearestThing(const Document &doc, const ConfigData &config,
+							 const Grid_State_c &grid, const v2double_t &pos);
+static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
+static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, const v2double_t &pos);
+
 //
 //  Returns the object which is under the pointer at the given
 //  coordinates.  When several objects are close, the smallest
 //  is chosen.
 //
-Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
+Objid hover::getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
+							 const Grid_State_c &grid, const v2double_t &pos)
 {
 	switch(type)
 	{
 	case ObjType::things:
-		return getNearestThing(pos);
+		return getNearestThing(doc, config, grid, pos);
 
 	case ObjType::vertices:
-		return getNearestVertex(pos);
+		return getNearestVertex(doc, grid, pos);
 
 	case ObjType::linedefs:
-		return getNearestLinedef(pos);
+		return getNearestLinedef(doc, grid, pos);
 
 	case ObjType::sectors:
-		return getNearestSector(pos);
+		return getNearestSector(doc, pos);
 
 	default:
 		BugError("Hover::getNearbyObject: bad objtype %d\n", (int)type);
@@ -366,7 +376,7 @@ Objid Hover::getNearbyObject(ObjType type, const v2double_t &pos) const
 //
 // Get the closest line, by casting horizontally
 //
-int Hover::getClosestLine_CastingHoriz(v2double_t pos, Side *side) const
+int hover::getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side)
 {
 	int    best_match = -1;
 	double best_dist = 9e9;
@@ -417,7 +427,7 @@ int Hover::getClosestLine_CastingHoriz(v2double_t pos, Side *side) const
 //
 // Gets the closest line, casting vertically
 //
-int Hover::getClosestLine_CastingVert(v2double_t pos, Side *side) const
+static int getClosestLine_CastingVert(const Document &doc, v2double_t pos, Side *side)
 {
 	int    best_match = -1;
 	double best_dist = 9e9;
@@ -465,14 +475,19 @@ int Hover::getClosestLine_CastingVert(v2double_t pos, Side *side) const
 	return best_match;
 }
 
+static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Grid_State_c &grid,
+								 const v2double_t &pos, int ignore_vert);
+
 //
 // Finds a split line
 //
-Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignore_vert) const
+Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
+						   const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
+						   int ignore_vert)
 {
 	out_pos = {};
 
-	Objid out = getNearestSplitLine(ptr, ignore_vert);
+	Objid out = getNearestSplitLine(doc, format, grid, ptr, ignore_vert);
 
 	if(!out.valid())
 		return Objid();
@@ -484,15 +499,15 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 
 	double len = (v2 - v1).hypot();
 
-	if(inst.grid.ratio > 0 && inst.edit.action == ACT_DRAW_LINE)
+	if(grid.ratio > 0 && edit.action == EditorAction::drawLine)
 	{
-		const Vertex *V = doc.vertices[inst.edit.draw_from.num];
+		const Vertex *V = doc.vertices[edit.drawLine.from.num];
 
 		// convert ratio into a vector, use it to intersect the linedef
 		v2double_t ppos1 = V->xy();
 		v2double_t ppos2 = ptr;
 
-		inst.grid.RatioSnapXY(ppos2, ppos1);
+		grid.RatioSnapXY(ppos2, ppos1);
 
 		if(fabs(ppos1.x - ppos2.x) < 0.1 && fabs(ppos1.y - ppos2.y) < 0.1)
 			return Objid();
@@ -511,16 +526,16 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 
 		out_pos = v1 + (v2 - v1) * c;
 	}
-	else if(inst.grid.snap)
+	else if(grid.snap)
 	{
 		// don't highlight the line if the new vertex would snap onto
 		// the same coordinate as the start or end of the linedef.
 		// [ I tried a bbox test here, but it was bad for axis-aligned lines ]
 
-		out_pos = v2double_t(inst.grid.ForceSnap(ptr));
+		out_pos = v2double_t(grid.ForceSnap(ptr));
 
 		// snapped onto an end point?
-		if(L->TouchesCoord(TO_COORD(out_pos.x), TO_COORD(out_pos.y), doc))
+		if(L->TouchesCoord(FFixedPoint(out_pos.x), FFixedPoint(out_pos.y), doc))
 			return Objid();
 
 		// require snap coordinate be not TOO FAR from the line
@@ -534,7 +549,7 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 		// in FREE mode, ensure split point is directly on the linedef
 		out_pos = ptr;
 
-		doc.linemod.moveCoordOntoLinedef(out.num, out_pos);
+		linemod::moveCoordOntoLinedef(doc, out.num, out_pos);
 	}
 
 	// always ensure result is along the linedef (not off the ends)
@@ -549,9 +564,10 @@ Objid Hover::findSplitLine(v2double_t &out_pos, const v2double_t &ptr, int ignor
 //
 // Find a split line for a dangling vertex
 //
-Objid Hover::findSplitLineForDangler(int v_num) const
+Objid hover::findSplitLineForDangler(const Document &doc, MapFormat format,
+									 const Grid_State_c &grid, int v_num)
 {
-	return getNearestSplitLine(doc.vertices[v_num]->xy(), v_num);
+	return getNearestSplitLine(doc, format, grid, doc.vertices[v_num]->xy(), v_num);
 }
 
 //
@@ -629,8 +645,8 @@ void Hover::fastOpposite_begin()
 
 	inst.CalculateLevelBounds();
 
-	m_fastopp_X_tree = new fastopp_node_c(static_cast<int>(inst.Map_bound_x1 - 8), static_cast<int>(inst.Map_bound_x2 + 8), doc);
-	m_fastopp_Y_tree = new fastopp_node_c(static_cast<int>(inst.Map_bound_y1 - 8), static_cast<int>(inst.Map_bound_y2 + 8), doc);
+	m_fastopp_X_tree = new fastopp_node_c(static_cast<int>(inst.Map_bound1.x - 8), static_cast<int>(inst.Map_bound2.x + 8), doc);
+	m_fastopp_Y_tree = new fastopp_node_c(static_cast<int>(inst.Map_bound1.y - 8), static_cast<int>(inst.Map_bound2.y + 8), doc);
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
@@ -654,26 +670,23 @@ void Hover::fastOpposite_finish()
 //
 // whether point is outside of map
 //
-bool Hover::isPointOutsideOfMap(double x, double y) const
+bool hover::isPointOutsideOfMap(const Document &doc, const v2double_t &v)
 {
 	// this keeps track of directions tested
 	int dirs = 0;
 
 	// most end-points will be integral, so look in-between
-	double x2 = x + 0.04;
-	double y2 = y + 0.04;
+	v2double_t v2 = v + v2double_t{ 0.04, 0.04 };
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		double lx1 = doc.linedefs[n]->Start(doc)->x();
-		double ly1 = doc.linedefs[n]->Start(doc)->y();
-		double lx2 = doc.linedefs[n]->End(doc)->x();
-		double ly2 = doc.linedefs[n]->End(doc)->y();
+		v2double_t lv1 = doc.linedefs[n]->Start(doc)->xy();
+		v2double_t lv2 = doc.linedefs[n]->End(doc)->xy();
 
 		// does the linedef cross the horizontal ray?
-		if(std::min(ly1, ly2) < y2 && std::max(ly1, ly2) > y2)
+		if(std::min(lv1.y, lv2.y) < v2.y && std::max(lv1.y, lv2.y) > v2.y)
 		{
-			double dist = lx1 - x + (lx2 - lx1) * (y2 - ly1) / (ly2 - ly1);
+			double dist = lv1.x - v.x + (lv2.x - lv1.x) * (v2.y - lv1.y) / (lv2.y - lv1.y);
 
 			dirs |= (dist < 0) ? 1 : 2;
 
@@ -681,9 +694,9 @@ bool Hover::isPointOutsideOfMap(double x, double y) const
 		}
 
 		// does the linedef cross the vertical ray?
-		if(std::min(lx1, lx2) < x2 && std::max(lx1, lx2) > x2)
+		if(std::min(lv1.x, lv2.x) < v2.x && std::max(lv1.x, lv2.x) > v2.x)
 		{
-			double dist = ly1 - y + (ly2 - ly1) * (x2 - lx1) / (lx2 - lx1);
+			double dist = lv1.y - v.y + (lv2.y - lv1.y) * (v2.x - lv1.x) / (lv2.x - lv1.x);
 
 			dirs |= (dist < 0) ? 4 : 8;
 
@@ -706,16 +719,13 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 {
 	cross.clear();
 
-	cross.start_x = p1.x;
-	cross.start_y = p1.y;
-	cross.end_x = p2.x;
-	cross.end_y = p2.y;
-
+	cross.start = p1;
+	cross.end = p2;
 
 	// when zooming out, make it easier to hit a vertex
 	double close_dist = 4 * sqrt(1.0 / inst.grid.Scale);
 
-	close_dist = CLAMP(1.0, close_dist, 12.0);
+	close_dist = clamp(1.0, close_dist, 12.0);
 
 
 	double dx = p2.x - p1.x;
@@ -738,8 +748,8 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		const Vertex *VC = doc.vertices[v];
 
 		// ignore vertices at same coordinates as v1 or v2
-		if(VC->Matches(TO_COORD(p1.x), TO_COORD(p1.y)) ||
-			VC->Matches(TO_COORD(p2.x), TO_COORD(p2.y)))
+		if(VC->Matches(FFixedPoint(p1.x), FFixedPoint(p1.y)) ||
+			VC->Matches(FFixedPoint(p2.x), FFixedPoint(p2.y)))
 			continue;
 
 		// is this vertex sitting on the line?
@@ -761,8 +771,7 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 
 	/* process each pair of adjacent vertices to find split lines */
 
-	double cur_x1 = p1.x;
-	double cur_y1 = p1.y;
+	v2double_t cur_pos1 = p1;
 	int    cur_v = possible_v1;
 
 	// grab number of points now, since we will adding split points
@@ -771,19 +780,17 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 
 	for(size_t k = 0; k < num_verts; k++)
 	{
-		double next_x2 = cross.points[k].x;
-		double next_y2 = cross.points[k].y;
+		v2double_t next_pos2 = cross.points[k].pos;
 		double next_v = cross.points[k].vert;
 
-		findCrossingLines(cross, cur_x1, cur_y1, static_cast<int>(cur_v),
-			next_x2, next_y2, static_cast<int>(next_v));
+		findCrossingLines(cross, cur_pos1, static_cast<int>(cur_v),
+						  next_pos2, static_cast<int>(next_v));
 
-		cur_x1 = next_x2;
-		cur_y1 = next_y2;
+		cur_pos1 = next_pos2;
 		cur_v = static_cast<int>(next_v);
 	}
 
-	findCrossingLines(cross, cur_x1, cur_y1, cur_v, p2.x, p2.y, possible_v2);
+	findCrossingLines(cross, cur_pos1, cur_v, p2, possible_v2);
 
 	cross.Sort();
 }
@@ -791,9 +798,10 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 //
 // determine which thing is under the mouse pointer
 //
-Objid Hover::getNearestThing(const v2double_t &pos) const
+static Objid getNearestThing(const Document &doc, const ConfigData &config,
+							 const Grid_State_c &grid, const v2double_t &pos)
 {
-	double mapslack = 1 + 16.0f / inst.grid.Scale;
+	double mapslack = 1 + 16.0f / grid.Scale;
 
 	double max_radius = MAX_RADIUS + ceil(mapslack);
 
@@ -813,7 +821,7 @@ Objid Hover::getNearestThing(const v2double_t &pos) const
 		if(!tpos.inbounds(lpos, hpos))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = M_GetThingType(config, thing->type);
 
 		// more accurate bbox test using the real radius
 		double r = info.radius + mapslack;
@@ -844,15 +852,15 @@ Objid Hover::getNearestThing(const v2double_t &pos) const
 //
 // determine which vertex is under the pointer
 //
-Objid Hover::getNearestVertex(const v2double_t &pos) const
+static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
 {
-	const int screen_pix = vertex_radius(inst.grid.Scale);
+	const int screen_pix = vertex_radius(grid.Scale);
 
-	double mapslack = 1 + (4 + screen_pix) / inst.grid.Scale;
+	double mapslack = 1 + (4 + screen_pix) / grid.Scale;
 
 	// workaround for overly zealous highlighting when zoomed in far
-	if(inst.grid.Scale >= 15.0) mapslack *= 0.7;
-	if(inst.grid.Scale >= 31.0) mapslack *= 0.5;
+	if(grid.Scale >= 15.0) mapslack *= 0.7;
+	if(grid.Scale >= 31.0) mapslack *= 0.5;
 
 	v2double_t lpos = pos - v2double_t(mapslack + 0.5);
 	v2double_t hpos = pos + v2double_t(mapslack + 0.5);
@@ -889,13 +897,15 @@ Objid Hover::getNearestVertex(const v2double_t &pos) const
 	return Objid();
 }
 
+static double getApproximateDistanceToLinedef(const Document &doc, const LineDef &line, const v2double_t &pos);
+
 //
 // determine which linedef is under the pointer
 //
-Objid Hover::getNearestLinedef(const v2double_t &pos) const
+static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, const v2double_t &pos)
 {
 	// slack in map units
-	double mapslack = 2.5 + 16.0f / inst.grid.Scale;
+	double mapslack = 2.5 + 16.0f / grid.Scale;
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);
@@ -915,7 +925,7 @@ Objid Hover::getNearestLinedef(const v2double_t &pos) const
 		   std::max(pos1.y, pos2.y) < lpos.y || std::min(pos1.y, pos2.y) > hpos.y)
 			continue;
 
-		double dist = getApproximateDistanceToLinedef(*doc.linedefs[n], pos);
+		double dist = getApproximateDistanceToLinedef(doc, *doc.linedefs[n], pos);
 
 		if(dist > mapslack)
 			continue;
@@ -939,7 +949,7 @@ Objid Hover::getNearestLinedef(const v2double_t &pos) const
 //
 //  determine which sector is under the pointer
 //
-Objid Hover::getNearestSector(const v2double_t &pos) const
+Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
 {
 	/* hack, hack...  I look for the first LineDef crossing
 	   an horizontal half-line drawn from the cursor */
@@ -950,16 +960,16 @@ Objid Hover::getNearestSector(const v2double_t &pos) const
 
 	Side side1, side2;
 
-	int line1 = getClosestLine_CastingHoriz(pos, &side1);
-	int line2 = getClosestLine_CastingVert(pos, &side2);
+	int line1 = hover::getClosestLine_CastingHoriz(doc, pos, &side1);
+	int line2 = getClosestLine_CastingVert(doc, pos, &side2);
 
 	if(line2 < 0)
 	{
 		/* nothing needed */
 	}
 	else if(line1 < 0 ||
-		getApproximateDistanceToLinedef(*doc.linedefs[line2], pos) <
-		getApproximateDistanceToLinedef(*doc.linedefs[line1], pos))
+		getApproximateDistanceToLinedef(doc, *doc.linedefs[line2], pos) <
+		getApproximateDistanceToLinedef(doc, *doc.linedefs[line1], pos))
 	{
 		line1 = line2;
 		side1 = side2;
@@ -982,7 +992,7 @@ Objid Hover::getNearestSector(const v2double_t &pos) const
 //
 // Gets an approximate distance from a point to a linedef
 //
-double Hover::getApproximateDistanceToLinedef(const LineDef &line, const v2double_t &pos) const
+static double getApproximateDistanceToLinedef(const Document &doc, const LineDef &line, const v2double_t &pos)
 {
 	v2double_t pos1 = line.Start(doc)->xy();
 	v2double_t pos2 = line.End(doc)->xy();
@@ -1028,10 +1038,11 @@ double Hover::getApproximateDistanceToLinedef(const LineDef &line, const v2doubl
 // determine which linedef would be split if a new vertex were
 // added at the given coordinates.
 //
-Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
+static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Grid_State_c &grid,
+								 const v2double_t &pos, int ignore_vert)
 {
 	// slack in map units
-	double mapslack = 1.5 + ceil(8.0f / inst.grid.Scale);
+	double mapslack = 1.5 + ceil(8.0f / grid.Scale);
 
 	v2double_t lpos = pos - v2double_t(mapslack);
 	v2double_t hpos = pos + v2double_t(mapslack);
@@ -1039,7 +1050,7 @@ Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
 	int    best = -1;
 	double best_dist = 9e9;
 
-	double too_small = (inst.loaded.levelFormat == MapFormat::udmf) ? 0.2 : 4.0;
+	double too_small = (format == MapFormat::udmf) ? 0.2 : 4.0;
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
@@ -1063,7 +1074,7 @@ Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
 		if(fabs(pos2.x - pos1.x) < too_small && fabs(pos2.y - pos1.y) < too_small)
 			continue;
 
-		double dist = getApproximateDistanceToLinedef(*L, pos);
+		double dist = getApproximateDistanceToLinedef(doc, *L, pos);
 
 		if(dist > mapslack)
 			continue;
@@ -1085,36 +1096,38 @@ Objid Hover::getNearestSplitLine(const v2double_t &pos, int ignore_vert) const
 //
 // Find crossing lines
 //
-void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const
+void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, int possible_v1, const v2double_t &pos2, int possible_v2) const
 {
 	// this could happen when two vertices are overlapping
-	if (fabs(x1 - x2) < ALONG_EPSILON && fabs(y1 - y2) < ALONG_EPSILON)
+	if((pos1 - pos2).chebyshev() < ALONG_EPSILON)
 		return;
 
 	// distances along WHOLE original line for this segment
-	double along1 = AlongDist({ x1, y1 }, { cross.start_x, cross.start_y }, { cross.end_x, cross.end_y });
-	double along2 = AlongDist({ x2, y2 }, { cross.start_x, cross.start_y }, { cross.end_x, cross.end_y });
+	double along1 = AlongDist(pos1, cross.start, cross.end);
+	double along2 = AlongDist(pos2, cross.start, cross.end);
 
 	// bounding box of segment
-	double bbox_x1 = std::min(x1, x2) - 0.25;
-	double bbox_y1 = std::min(y1, y2) - 0.25;
+	const v2double_t bbox1 = {
+		std::min(pos1.x, pos2.x) - 0.25,
+		std::min(pos1.y, pos2.y) - 0.25
+	};
 
-	double bbox_x2 = std::max(x1, x2) + 0.25;
-	double bbox_y2 = std::max(y1, y2) + 0.25;
+	const v2double_t bbox2 = {
+		std::max(pos1.x, pos2.x) + 0.25,
+		std::max(pos1.y, pos2.y) + 0.25
+	};
 
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
 		const LineDef * L = doc.linedefs[ld];
 
-		double lx1 = L->Start(doc)->x();
-		double ly1 = L->Start(doc)->y();
-		double lx2 = L->End(doc)->x();
-		double ly2 = L->End(doc)->y();
+		v2double_t lpos1 = L->Start(doc)->xy();
+		v2double_t lpos2 = L->End(doc)->xy();
 
 		// bbox test -- eliminate most lines from consideration
-		if (std::max(lx1,lx2) < bbox_x1 || std::min(lx1,lx2) > bbox_x2 ||
-			std::max(ly1,ly2) < bbox_y1 || std::min(ly1,ly2) > bbox_y2)
+		if (std::max(lpos1.x,lpos2.x) < bbox1.x || std::min(lpos1.x,lpos2.x) > bbox2.x ||
+			std::max(lpos1.y,lpos2.y) < bbox1.y || std::min(lpos1.y,lpos2.y) > bbox2.y)
 		{
 			continue;
 		}
@@ -1133,8 +1146,8 @@ void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int
 		// only need to handle cases where this linedef distinctly crosses
 		// the new line (i.e. start and end are clearly on opposite sides).
 
-		double a = PerpDist(v2double_t{ lx1,ly1 }, v2double_t{ x1, y1 }, v2double_t{ x2, y2 });
-		double b = PerpDist(v2double_t{ lx2,ly2 }, v2double_t{ x1, y1 }, v2double_t{ x2, y2 });
+		double a = PerpDist(lpos1, pos1, pos2);
+		double b = PerpDist(lpos2, pos1, pos2);
 
 		if (! ((a < -CROSSING_EPSILON && b >  CROSSING_EPSILON) ||
 			   (a >  CROSSING_EPSILON && b < -CROSSING_EPSILON)))
@@ -1145,15 +1158,14 @@ void Hover::findCrossingLines(crossing_state_c &cross, double x1, double y1, int
 		// compute intersection point
 		double l_along = a / (a - b);
 
-		double new_x = lx1 + l_along * (lx2 - lx1);
-		double new_y = ly1 + l_along * (ly2 - ly1);
+		v2double_t newpos = lpos1 + (lpos2 - lpos1) * l_along;
 
-		double along = AlongDist({ new_x, new_y }, { cross.start_x, cross.start_y }, { cross.end_x, cross.end_y });
+		double along = AlongDist(newpos, cross.start, cross.end);
 
 		// ensure new vertex lies within this segment (and not too close to ends)
 		if (along > along1 + ALONG_EPSILON && along < along2 - ALONG_EPSILON)
 		{
-			cross.add_line(ld, new_x, new_y, along);
+			cross.add_line(ld, newpos, along);
 		}
 	}
 }
@@ -1172,21 +1184,19 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.x    = inst.level.vertices[v]->x();
-	pt.y    = inst.level.vertices[v]->y();
+	pt.pos  = inst.level.vertices[v]->xy();
 	pt.dist = dist;
 
 	points.push_back(pt);
 }
 
-void crossing_state_c::add_line(int ld, double new_x, double new_y, double dist)
+void crossing_state_c::add_line(int ld, const v2double_t &newpos, double dist)
 {
 	cross_point_t pt;
 
 	pt.vert = -1;
 	pt.ld   = ld;
-	pt.x    = new_x;
-	pt.y    = new_y;
+	pt.pos  = newpos;
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1228,7 +1238,7 @@ void crossing_state_c::SplitAllLines(EditOperation &op)
 
 			Vertex *V = inst.level.vertices[points[i].vert];
 
-			V->SetRawXY(inst, { points[i].x, points[i].y });
+			V->SetRawXY(inst.loaded.levelFormat, points[i].pos);
 
 			inst.level.linemod.splitLinedefAtVertex(op, points[i].ld, points[i].vert);
 		}

@@ -32,9 +32,14 @@
 #include "e_main.h"
 #include "e_hover.h"  // PointOnLineSide
 #include "e_linedef.h"  // LD_RailHeights
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_bitvec.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "r_render.h"
@@ -1399,7 +1404,7 @@ public:
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 
 		// are we dragging this surface?
-		if (inst.edit.action == ACT_DRAG &&
+		if (inst.edit.action == EditorAction::drag &&
 			(!inst.edit.dragged.valid() ||
 			 (inst.edit.dragged.num == sec_index &&
 			  (inst.edit.dragged.parts == 0 || (inst.edit.dragged.parts & part)) )))
@@ -1440,7 +1445,7 @@ public:
 
 		float drag_dz = 0;
 
-		if (inst.edit.action == ACT_DRAG &&
+		if (inst.edit.action == EditorAction::drag &&
 			(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 		{
 			tx += static_cast<float>(inst.edit.drag_cur.x - inst.edit.drag_start.x);
@@ -1583,7 +1588,7 @@ public:
 
 		gl_color(saw_hl ? HI_AND_SEL_COL : HI_COL);
 
-		if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+		if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 			HighlightObject(inst.edit.dragged);
 		else
 			HighlightObject(inst.edit.highlight);
@@ -1593,7 +1598,7 @@ public:
 
 	void MarkCameraSector()
 	{
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, { inst.r_view.x, inst.r_view.y });
+		Objid obj = hover::getNearestSector(inst.level, { inst.r_view.x, inst.r_view.y });
 
 		if (obj.valid())
 			seen_sectors.set(obj.num);
@@ -1637,7 +1642,7 @@ public:
 
 		// Note: this crud is a workaround for retina displays on MacOS
 		Fl::use_high_res_GL(true);
-		int pix = I_ROUND(inst.main_win->canvas->pixels_per_unit());
+		int pix = iround(inst.main_win->canvas->pixels_per_unit());
 		Fl::use_high_res_GL(false);
 
 		glViewport(0, 0, ow * pix, oh * pix);

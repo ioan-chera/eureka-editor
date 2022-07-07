@@ -169,14 +169,7 @@ struct sector_extra_info_t
 			last_line = n;
 	}
 
-	void AddVertex(const Vertex *V)
-	{
-		bound_x1 = std::min(bound_x1, V->x());
-		bound_y1 = std::min(bound_y1, V->y());
-
-		bound_x2 = std::max(bound_x2, V->x());
-		bound_y2 = std::max(bound_y2, V->y());
-	}
+	void AddVertex(const Vertex *V);
 };
 
 //

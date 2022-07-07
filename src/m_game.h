@@ -29,6 +29,8 @@
 
 #include "im_color.h"
 #include "m_strings.h"
+#include <map>
+#include <unordered_map>
 
 struct ConfigData;
 class Instance;

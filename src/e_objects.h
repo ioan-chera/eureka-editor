@@ -65,7 +65,7 @@ public:
 	bool lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const;
 	v2double_t getDragFocus(const v2double_t &ptr) const;
 	v2double_t calcMiddle(const selection_c &list) const;
-	void calcBBox(const selection_c &list, double *x1, double *y1, double *x2, double *y2) const;
+	void calcBBox(const selection_c &list, v2double_t &pos1, v2double_t &pos2) const;
 	void transform(transform_t &param) const;
 	void scale3(double scale_x, double scale_y, double pos_x, double pos_y) const;
 	void scale4(double scale_x, double scale_y, double scale_z,

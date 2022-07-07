@@ -36,12 +36,17 @@
 #include "e_hover.h"
 #include "e_linedef.h"
 #include "e_main.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, img_pixel_t pixel)
 {
@@ -1146,7 +1151,7 @@ public:
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 
 		// are we dragging this surface?
-		if (inst.edit.action == ACT_DRAG &&
+		if (inst.edit.action == EditorAction::drag &&
 			(!inst.edit.dragged.valid() ||
 			 (inst.edit.dragged.num == sec_index &&
 			  (inst.edit.dragged.parts == 0 || (inst.edit.dragged.parts & part)) )))
@@ -1270,7 +1275,7 @@ public:
 			int y1 = DistToY(dw->iz1, h2);
 			int y2 = DistToY(dw->iz1, h1);
 
-			if (inst.edit.action == ACT_DRAG &&
+			if (inst.edit.action == EditorAction::drag &&
 				(!inst.edit.dragged.valid() || inst.edit.dragged.num == th_index))
 			{
 				// re-project thing onto the viewplane
@@ -1340,7 +1345,7 @@ public:
 			HighlightThings(-1);
 
 			hl_color = HI_COL;
-			if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+			if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 			{
 				HighlightThings(inst.edit.dragged.num);
 			}
@@ -1357,7 +1362,7 @@ public:
 			HighlightSectors(-1, -1);
 
 			hl_color = HI_COL;
-			if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+			if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 			{
 				HighlightSectors(inst.edit.dragged.num, inst.edit.dragged.parts);
 			}
@@ -1374,7 +1379,7 @@ public:
 			HighlightLines(-1, -1);
 
 			hl_color = HI_COL;
-			if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+			if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 			{
 				if (inst.edit.Selected->get(inst.edit.highlight.num))
 					hl_color = HI_AND_SEL_COL;

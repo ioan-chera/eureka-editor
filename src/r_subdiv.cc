@@ -27,8 +27,13 @@
 
 #include "e_basis.h"
 #include "e_hover.h"
+#include "LineDef.h"
 #include "m_game.h"
 #include "r_subdiv.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 
 /* This file contains code for subdividing map sectors into a set
@@ -555,7 +560,7 @@ void sector_info_cache_c::PlaneCopyFromThing(const Thing *T, int plane)
 		return;
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { T->x(), T->y() });
+	Objid o = hover::getNearestSector(inst.level, T->xy());
 
 	if (!o.valid())
 		return;
@@ -580,7 +585,7 @@ void sector_info_cache_c::PlaneTiltByThing(const Thing *T, int plane)
 	double ty = T->y();
 
 	// find sector containing the thing
-	Objid o = inst.level.hover.getNearbyObject(ObjType::sectors, { tx, ty });
+	Objid o = hover::getNearestSector(inst.level, { tx, ty });
 
 	if (!o.valid())
 		return;
@@ -596,7 +601,7 @@ void sector_info_cache_c::PlaneTiltByThing(const Thing *T, int plane)
 	// get slope angle.
 	// when arg1 < 90, a point on plane in front of thing has lower Z.
 	int slope_ang = T->arg1 - 90;
-	slope_ang = CLAMP(-89, slope_ang, 89);
+	slope_ang = clamp(-89, slope_ang, 89);
 
 	double az = sin(slope_ang * M_PI / 180.0);
 
@@ -892,6 +897,15 @@ sector_subdivision_c *Instance::Subdiv_PolygonsForSector(int num)
 	}
 
 	return &exinfo.sub;
+}
+
+void sector_extra_info_t::AddVertex(const Vertex *V)
+{
+	bound_x1 = std::min(bound_x1, V->x());
+	bound_y1 = std::min(bound_y1, V->y());
+
+	bound_x2 = std::max(bound_x2, V->x());
+	bound_y2 = std::max(bound_y2, V->y());
 }
 
 

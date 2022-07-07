@@ -29,14 +29,18 @@
 
 #include "e_main.h"
 #include "e_path.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_loadsave.h"
 #include "m_vector.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "Sector.h"
+#include "Thing.h"
 #include "ui_about.h"
 #include "ui_misc.h"
 #include "ui_prefs.h"
+#include "Vertex.h"
 
 
 // config items
@@ -116,8 +120,8 @@ void Instance::CMD_UnselectAll()
 {
 	Editor_ClearErrorMode();
 
-	if (edit.action == ACT_DRAW_LINE ||
-		edit.action == ACT_TRANSFORM)
+	if (edit.action == EditorAction::drawLine ||
+		edit.action == EditorAction::transform)
 	{
 		Editor_ClearAction();
 	}
@@ -185,7 +189,7 @@ void Instance::CMD_Redo()
 
 static void SetGamma(Instance &inst, int new_val)
 {
-	config::usegamma = CLAMP(0, new_val, 4);
+	config::usegamma = clamp(0, new_val, 4);
 
 	inst.wad.palette.updateGamma();
 
@@ -258,13 +262,13 @@ void Instance::CMD_SetVar()
 	}
 	else if (var_name.noCaseEqual("ratio"))
 	{
-		grid.ratio = CLAMP(0, int_val, 7);
+		grid.ratio = clamp(0, int_val, 7);
 		main_win->info_bar->UpdateRatio();
 		RedrawMap();
 	}
 	else if (var_name.noCaseEqual("sec_render"))
 	{
-		int_val = CLAMP(0, int_val, (int)SREND_SoundProp);
+		int_val = clamp(0, int_val, (int)SREND_SoundProp);
 		edit.sector_render_mode = (sector_rendering_mode_e) int_val;
 
 		if (edit.render3d)
@@ -393,10 +397,9 @@ void Instance::CMD_BrowserMode()
 void Instance::CMD_Scroll()
 {
 	// these are percentages
-	float delta_x = static_cast<float>(atof(EXEC_Param[0]));
-	float delta_y = static_cast<float>(atof(EXEC_Param[1]));
+	v2double_t delta = { atof(EXEC_Param[0]), atof(EXEC_Param[1]) };
 
-	if (delta_x == 0 && delta_y == 0)
+	if (!delta)
 	{
 		Beep("Bad parameter to Scroll: '%s' %s'", EXEC_Param[0].c_str(), EXEC_Param[1].c_str());
 		return;
@@ -404,16 +407,15 @@ void Instance::CMD_Scroll()
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
-	delta_x = static_cast<float>(delta_x * base_size / 100.0 / grid.Scale);
-	delta_y = static_cast<float>(delta_y * base_size / 100.0 / grid.Scale);
+	delta *= base_size / 100.0 / grid.Scale;
 
-	grid.Scroll(delta_x, delta_y);
+	grid.Scroll(delta);
 }
 
 
 void Instance::NAV_Scroll_Left_release()
 {
-	edit.nav_left = 0;
+	edit.nav.left = 0;
 }
 
 //
@@ -436,39 +438,39 @@ void Instance::navigationScroll(float *editNav, nav_release_func_t func)
 
 void Instance::CMD_NAV_Scroll_Left()
 {
-	navigationScroll(&edit.nav_left, &Instance::NAV_Scroll_Left_release);
+	navigationScroll(&edit.nav.left, &Instance::NAV_Scroll_Left_release);
 }
 
 void Instance::NAV_Scroll_Right_release()
 {
-	edit.nav_right = 0;
+	edit.nav.right = 0;
 }
 
 void Instance::CMD_NAV_Scroll_Right()
 {
-	navigationScroll(&edit.nav_right, &Instance::NAV_Scroll_Right_release);
+	navigationScroll(&edit.nav.right, &Instance::NAV_Scroll_Right_release);
 }
 
 
 void Instance::NAV_Scroll_Up_release()
 {
-	edit.nav_up = 0;
+	edit.nav.up = 0;
 }
 
 void Instance::CMD_NAV_Scroll_Up()
 {
-	navigationScroll(&edit.nav_up, &Instance::NAV_Scroll_Up_release);
+	navigationScroll(&edit.nav.up, &Instance::NAV_Scroll_Up_release);
 }
 
 
 void Instance::NAV_Scroll_Down_release()
 {
-	edit.nav_down = 0;
+	edit.nav.down = 0;
 }
 
 void Instance::CMD_NAV_Scroll_Down()
 {
-	navigationScroll(&edit.nav_down, &Instance::NAV_Scroll_Down_release);
+	navigationScroll(&edit.nav.down, &Instance::NAV_Scroll_Down_release);
 }
 
 
@@ -507,10 +509,12 @@ void Instance::CheckBeginDrag()
 	if (edit.render3d && !(edit.mode == ObjType::things || edit.mode == ObjType::sectors))
 		return;
 
-	int pixel_dx = Fl::event_x() - edit.click_screen_x;
-	int pixel_dy = Fl::event_y() - edit.click_screen_y;
+	v2int_t pixel_dpos = {
+		Fl::event_x() - edit.click_screen_pos.x,
+		Fl::event_y() - edit.click_screen_pos.y
+	};
 
-	if (std::max(abs(pixel_dx), abs(pixel_dy)) < config::minimum_drag_pixels)
+	if (pixel_dpos.chebyshev() < config::minimum_drag_pixels)
 		return;
 
 	// if highlighted object is in selection, we drag the selection,
@@ -528,7 +532,7 @@ void Instance::DoBeginDrag()
 {
 	edit.drag_start = edit.drag_cur = edit.click_map;
 
-	edit.drag_screen_dx  = edit.drag_screen_dy = 0;
+	edit.drag_screen_dpos = {};
 	edit.drag_thing_num  = -1;
 	edit.drag_other_vert = -1;
 
@@ -551,7 +555,7 @@ void Instance::DoBeginDrag()
 			{
 				const Thing *T = level.things[edit.drag_thing_num];
 
-				Objid sec = level.hover.getNearbyObject(ObjType::sectors, T->xy());
+				Objid sec = hover::getNearestSector(level, T->xy());
 
 				if (sec.valid())
 					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num]->floorh);
@@ -578,7 +582,7 @@ void Instance::DoBeginDrag()
 
 	edit.clicked.clear();
 
-	Editor_SetAction(ACT_DRAG);
+	Editor_SetAction(EditorAction::drag);
 
 	main_win->canvas->redraw();
 }
@@ -587,21 +591,22 @@ void Instance::DoBeginDrag()
 void Instance::ACT_SelectBox_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_SELBOX)
+	if (edit.action != EditorAction::selbox)
 		return;
 
 	Editor_ClearAction();
 	Editor_ClearErrorMode();
 
 	// a mere click and release will unselect everything
-	double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-	if (!main_win->canvas->SelboxGet(x1, y1, x2, y2))
+	v2double_t pos1 = {};
+	v2double_t pos2 = {};
+	if (!main_win->canvas->SelboxGet(pos1, pos2))
 	{
 		ExecuteCommand("UnselectAll");
 		return;
 	}
 
-	SelectObjectsInBox(level, edit.Selected, edit.mode, x1, y1, x2, y2);
+	SelectObjectsInBox(level, edit.Selected, edit.mode, pos1, pos2);
 	RedrawMap();
 }
 
@@ -609,7 +614,7 @@ void Instance::ACT_SelectBox_release()
 void Instance::ACT_Drag_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_DRAG)
+	if (edit.action != EditorAction::drag)
 	{
 		edit.dragged.clear();
 		return;
@@ -655,19 +660,19 @@ void Instance::ACT_Click_release()
 	edit.click_check_drag = false;
 
 
-	if (edit.action == ACT_SELBOX)
+	if (edit.action == EditorAction::selbox)
 	{
 		ACT_SelectBox_release();
 		return;
 	}
-	else if (edit.action == ACT_DRAG)
+	else if (edit.action == EditorAction::drag)
 	{
 		ACT_Drag_release();
 		return;
 	}
 
 	// check if cancelled or overridden
-	if (edit.action != ACT_CLICK)
+	if (edit.action != EditorAction::click)
 		return;
 
 	if (edit.click_check_select && click_obj.valid())
@@ -677,7 +682,7 @@ void Instance::ACT_Click_release()
 		if (edit.render3d)
 			near_obj = edit.highlight;
 		else
-			near_obj = level.hover.getNearbyObject(edit.mode, edit.map.xy);
+			near_obj = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
 
 		if (near_obj.num == click_obj.num)
 			edit.Selection_Toggle(click_obj);
@@ -706,8 +711,8 @@ void Instance::CMD_ACT_Click()
 	edit.click_force_single = false;
 
 	// remember some state (for drag detection)
-	edit.click_screen_x = Fl::event_x();
-	edit.click_screen_y = Fl::event_y();
+	edit.click_screen_pos.x = Fl::event_x();
+	edit.click_screen_pos.y = Fl::event_y();
 
 	edit.click_map = edit.map;
 
@@ -725,7 +730,7 @@ void Instance::CMD_ACT_Click()
 		}
 
 		edit.clicked = edit.highlight;
-		Editor_SetAction(ACT_CLICK);
+		Editor_SetAction(EditorAction::click);
 		return;
 	}
 
@@ -733,7 +738,7 @@ void Instance::CMD_ACT_Click()
 	if (! Exec_HasFlag("/nosplit") &&
 		edit.mode == ObjType::vertices &&
 		edit.split_line.valid() &&
-		edit.action != ACT_DRAW_LINE)
+		edit.action != EditorAction::drawLine)
 	{
 		int split_ld = edit.split_line.num;
 
@@ -754,7 +759,7 @@ void Instance::CMD_ACT_Click()
 
 			Vertex *V = level.vertices[new_vert];
 
-			V->SetRawXY(*this, edit.split);
+			V->SetRawXY(loaded.levelFormat, edit.split);
 
 			level.linemod.splitLinedefAtVertex(op, split_ld, new_vert);
 		}
@@ -763,25 +768,25 @@ void Instance::CMD_ACT_Click()
 			edit.Selected->set(new_vert);
 
 		edit.clicked = Objid(ObjType::vertices, new_vert);
-		Editor_SetAction(ACT_CLICK);
+		Editor_SetAction(EditorAction::click);
 
 		RedrawMap();
 		return;
 	}
 
 	// find the object under the pointer.
-	edit.clicked = level.hover.getNearbyObject(edit.mode, edit.map.xy);
+	edit.clicked = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
 
 	// clicking on an empty space starts a new selection box
 	if (edit.click_check_select && edit.clicked.is_nil())
 	{
 		edit.selbox1 = edit.selbox2 = edit.map.xy;
 
-		Editor_SetAction(ACT_SELBOX);
+		Editor_SetAction(EditorAction::selbox);
 		return;
 	}
 
-	Editor_SetAction(ACT_CLICK);
+	Editor_SetAction(EditorAction::click);
 }
 
 
@@ -798,7 +803,7 @@ void Instance::CMD_ACT_SelectBox()
 
 	edit.selbox1 = edit.selbox2 = edit.map.xy;
 
-	Editor_SetAction(ACT_SELBOX);
+	Editor_SetAction(EditorAction::selbox);
 }
 
 
@@ -887,7 +892,7 @@ void Instance::Transform_Update()
 void Instance::ACT_Transform_release()
 {
 	// check if cancelled or overridden
-	if (edit.action != ACT_TRANSFORM)
+	if (edit.action != EditorAction::transform)
 		return;
 
 	if (edit.trans_lines)
@@ -973,7 +978,7 @@ void Instance::CMD_ACT_Transform()
 		ConvertSelection(level, *edit.Selected, *edit.trans_lines);
 	}
 
-	Editor_SetAction(ACT_TRANSFORM);
+	Editor_SetAction(EditorAction::transform);
 }
 
 
@@ -991,14 +996,16 @@ void Instance::CMD_WHEEL_Scroll()
 			speed *= 3.0f;
 	}
 
-	float delta_x = static_cast<float>(wheel_dx);
-	float delta_y = static_cast<float>(0 - wheel_dy);
+	v2double_t delta = {
+		static_cast<double>(wheel_dpos.x),
+		static_cast<double>(-wheel_dpos.y)
+	};
 
 	int base_size = (main_win->canvas->w() + main_win->canvas->h()) / 2;
 
 	speed = static_cast<float>(speed * base_size / 100.0 / grid.Scale);
 
-	grid.Scroll(delta_x * speed, delta_y * speed);
+	grid.Scroll(delta * speed);
 }
 
 
@@ -1101,10 +1108,11 @@ void Instance::CMD_GoToCamera()
 	if (edit.render3d)
 		Render3D_Enable(*this, false);
 
-	double x, y; float angle;
-	Render3D_GetCameraPos(&x, &y, &angle);
+	v2double_t pos;
+	float angle;
+	Render3D_GetCameraPos(pos, &angle);
 
-	grid.MoveTo(x, y);
+	grid.MoveTo(pos);
 
 	RedrawMap();
 }

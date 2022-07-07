@@ -28,6 +28,7 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "LineDef.h"
 #include "m_bitvec.h"
 #include "m_config.h"
 #include "m_game.h"
@@ -39,6 +40,10 @@
 #include "e_vertex.h"
 #include "r_render.h"
 #include "r_subdiv.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -60,21 +65,18 @@ void Instance::zoom_fit()
 	if (level.numVertices() == 0)
 		return;
 
-	double xzoom = 1;
-	double yzoom = 1;
+	v2double_t zoom = { 1, 1 };
+	v2int_t ScrMax = { main_win->canvas->w(), main_win->canvas->h() };
 
-	int ScrMaxX = main_win->canvas->w();
-	int ScrMaxY = main_win->canvas->h();
+	if (Map_bound1.x < Map_bound2.x)
+		zoom.x = ScrMax.x / (Map_bound2.x - Map_bound1.x);
 
-	if (Map_bound_x1 < Map_bound_x2)
-		xzoom = ScrMaxX / (Map_bound_x2 - Map_bound_x1);
+	if (Map_bound1.y < Map_bound2.y)
+		zoom.y = ScrMax.y / (Map_bound2.y - Map_bound1.y);
 
-	if (Map_bound_y1 < Map_bound_y2)
-		yzoom = ScrMaxY / (Map_bound_y2 - Map_bound_y1);
+	grid.NearestScale(std::min(zoom.x, zoom.y));
 
-	grid.NearestScale(std::min(xzoom, yzoom));
-
-	grid.MoveTo((Map_bound_x1 + Map_bound_x2) / 2, (Map_bound_y1 + Map_bound_y2) / 2);
+	grid.MoveTo((Map_bound1 + Map_bound2) / 2);
 }
 
 
@@ -124,7 +126,7 @@ static void UpdatePanel(const Instance &inst)
 	int obj_count = inst.edit.Selected->count_obj();
 
 	// the highlight is usually turned off when dragging, so compensate
-	if (obj_idx < 0 && inst.edit.action == ACT_DRAG)
+	if (obj_idx < 0 && inst.edit.action == EditorAction::drag)
 		obj_idx = inst.edit.dragged.num;
 
 	if (obj_idx >= 0)
@@ -166,10 +168,10 @@ static void UpdatePanel(const Instance &inst)
 
 void Instance::UpdateDrawLine()
 {
-	if (edit.action != ACT_DRAW_LINE || edit.draw_from.is_nil())
+	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex *V = level.vertices[edit.draw_from.num];
+	const Vertex *V = level.vertices[edit.drawLine.from.num];
 
 	v2double_t newpos = edit.map.xy;
 
@@ -190,13 +192,12 @@ void Instance::UpdateDrawLine()
 		newpos = grid.Snap(newpos);
 	}
 
-	edit.draw_to_x = newpos.x;
-	edit.draw_to_y = newpos.y;
+	edit.drawLine.to = newpos;
 
 	// when drawing mode, highlight a vertex at the snap position
 	if (grid.snap && edit.highlight.is_nil() && edit.split_line.is_nil())
 	{
-		int near_vert = level.vertmod.findExact(TO_COORD(newpos.x), TO_COORD(newpos.y));
+		int near_vert = level.vertmod.findExact(FFixedPoint(newpos.x), FFixedPoint(newpos.y));
 		if (near_vert >= 0)
 		{
 			edit.highlight = Objid(ObjType::vertices, near_vert);
@@ -204,8 +205,8 @@ void Instance::UpdateDrawLine()
 	}
 
 	// never highlight the vertex we are drawing from
-	if (edit.draw_from.valid() &&
-		edit.draw_from == edit.highlight)
+	if (edit.drawLine.from.valid() &&
+		edit.drawLine.from == edit.highlight)
 	{
 		edit.highlight.clear();
 	}
@@ -217,7 +218,7 @@ static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 	inst.edit.split_line.clear();
 
 	// splitting usually disabled while dragging stuff, EXCEPT a single vertex
-	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
+	if (inst.edit.action == EditorAction::drag && inst.edit.dragged.is_nil())
 		goto done;
 
 	// in vertex mode, see if there is a linedef which would be split by
@@ -227,7 +228,9 @@ static void UpdateSplitLine(Instance &inst, const v2double_t &map)
 		inst.edit.pointer_in_window &&
 	    inst.edit.highlight.is_nil())
 	{
-		inst.edit.split_line = inst.level.hover.findSplitLine(inst.edit.split, map, inst.edit.dragged.num);
+		inst.edit.split_line = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit,
+													inst.grid, inst.edit.split, map,
+													inst.edit.dragged.num);
 
 		// NOTE: OK if the split line has one of its vertices selected
 		//       (that case is handled by Insert_Vertex)
@@ -252,12 +255,12 @@ void Instance::UpdateHighlight()
 
 	// don't highlight when dragging, EXCEPT when dragging a single vertex
 	if (edit.pointer_in_window &&
-	    (edit.action != ACT_DRAG || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
+	    (edit.action != EditorAction::drag || (edit.mode == ObjType::vertices && edit.dragged.valid()) ))
 	{
-		edit.highlight = level.hover.getNearbyObject(edit.mode, edit.map.xy);
+		edit.highlight = hover::getNearbyObject(edit.mode, level, conf, grid, edit.map.xy);
 
 		// guarantee that we cannot drag a vertex onto itself
-		if (edit.action == ACT_DRAG && edit.dragged.valid() &&
+		if (edit.action == EditorAction::drag && edit.dragged.valid() &&
 			edit.highlight.valid() && edit.dragged.num == edit.highlight.num)
 		{
 			edit.highlight.clear();
@@ -265,18 +268,18 @@ void Instance::UpdateHighlight()
 
 		// if drawing a line and ratio lock is ON, only highlight a
 		// vertex if it is *exactly* the right ratio.
-		if (grid.ratio > 0 && edit.action == ACT_DRAW_LINE &&
+		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
 			const Vertex *V = level.vertices[edit.highlight.num];
-			const Vertex *S = level.vertices[edit.draw_from.num];
+			const Vertex *S = level.vertices[edit.drawLine.from.num];
 
 			v2double_t vpos = V->xy();
 
 			grid.RatioSnapXY(vpos, S->xy());
 
-			if (MakeValidCoord(vpos.x) != V->raw_x ||
-				MakeValidCoord(vpos.y) != V->raw_y)
+			if (MakeValidCoord(loaded.levelFormat, vpos.x) != V->raw_x ||
+				MakeValidCoord(loaded.levelFormat, vpos.y) != V->raw_y)
 			{
 				edit.highlight.clear();
 			}
@@ -373,11 +376,11 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 	{
 		const Vertex * V = inst.level.vertices[i];
 
-		if (V->x() < inst.Map_bound_x1) inst.Map_bound_x1 = V->x();
-		if (V->y() < inst.Map_bound_y1) inst.Map_bound_y1 = V->y();
+		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
+		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
 
-		if (V->x() > inst.Map_bound_x2) inst.Map_bound_x2 = V->x();
-		if (V->y() > inst.Map_bound_y2) inst.Map_bound_y2 = V->y();
+		if (V->x() > inst.Map_bound2.x) inst.Map_bound2.x = V->x();
+		if (V->y() > inst.Map_bound2.y) inst.Map_bound2.y = V->y();
 	}
 }
 
@@ -385,13 +388,13 @@ void Instance::CalculateLevelBounds()
 {
 	if (level.numVertices() == 0)
 	{
-		Map_bound_x1 = Map_bound_x2 = 0;
-		Map_bound_y1 = Map_bound_y2 = 0;
+		Map_bound1.x = Map_bound2.x = 0;
+		Map_bound1.y = Map_bound2.y = 0;
 		return;
 	}
 
-	Map_bound_x1 = 32767; Map_bound_x2 = -32767;
-	Map_bound_y1 = 32767; Map_bound_y2 = -32767;
+	Map_bound1.x = 32767; Map_bound2.x = -32767;
+	Map_bound1.y = 32767; Map_bound2.y = -32767;
 
 	UpdateLevelBounds(*this, 0);
 }
@@ -421,8 +424,8 @@ void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
 	{
 		recalc_map_bounds = true;
 
-		if (edit.action == ACT_DRAW_LINE &&
-			edit.draw_from.num == objnum)
+		if (edit.action == EditorAction::drawLine &&
+			edit.drawLine.from.num == objnum)
 		{
 			Editor_ClearAction();
 		}
@@ -439,11 +442,11 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 
 		const Vertex * V = level.vertices[objnum];
 
-		if (V->x() < Map_bound_x1) Map_bound_x1 = V->x();
-		if (V->y() < Map_bound_y1) Map_bound_y1 = V->y();
+		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
+		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
 
-		if (V->x() > Map_bound_x2) Map_bound_x2 = V->x();
-		if (V->y() > Map_bound_y2) Map_bound_y2 = V->y();
+		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
+		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -638,7 +641,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const Thing *T = doc.things[t];
 
-			Objid obj = doc.hover.getNearbyObject(ObjType::sectors, { T->x(), T->y() });
+			Objid obj = hover::getNearestSector(doc, T->xy());
 
 			if (! obj.is_nil() && src.get(obj.num))
 			{
@@ -821,13 +824,13 @@ SelectHighlight Editor_State_t::SelectionOrHighlight()
 //
 // select all objects inside a given box
 //
-void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2)
+void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, v2double_t pos1, v2double_t pos2)
 {
-	if (x2 < x1)
-		std::swap(x1, x2);
+	if (pos2.x < pos1.x)
+		std::swap(pos1.x, pos2.x);
 
-	if (y2 < y1)
-		std::swap(y1, y2);
+	if (pos2.y < pos1.y)
+		std::swap(pos1.y, pos2.y);
 
 	switch (objtype)
 	{
@@ -836,13 +839,10 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 			{
 				const Thing *T = doc.things[n];
 
-				double tx = T->x();
-				double ty = T->y();
+				v2double_t tpos = T->xy();
 
-				if (x1 <= tx && tx <= x2 && y1 <= ty && ty <= y2)
-				{
+				if(tpos.inbounds(pos1, pos2))
 					list->toggle(n);
-				}
 			}
 			break;
 
@@ -851,13 +851,10 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 			{
 				const Vertex *V = doc.vertices[n];
 
-				double vx = V->x();
-				double vy = V->y();
+				v2double_t vpos = V->xy();
 
-				if (x1 <= vx && vx <= x2 && y1 <= vy && vy <= y2)
-				{
+				if(vpos.inbounds(pos1, pos2))
 					list->toggle(n);
-				}
 			}
 			break;
 
@@ -867,10 +864,8 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				const LineDef *L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if (x1 <= L->Start(doc)->x() && L->Start(doc)->x() <= x2 &&
-				    y1 <= L->Start(doc)->y() && L->Start(doc)->y() <= y2 &&
-				    x1 <= L->End(doc)->x()   && L->End(doc)->x() <= x2 &&
-				    y1 <= L->End(doc)->y()   && L->End(doc)->y() <= y2)
+				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
+				   L->End(doc)->xy().inbounds(pos1, pos2))
 				{
 					list->toggle(n);
 				}
@@ -890,10 +885,8 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
 				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
 
-				if (x1 <= L->Start(doc)->x() && L->Start(doc)->x() <= x2 &&
-				    y1 <= L->Start(doc)->y() && L->Start(doc)->y() <= y2 &&
-				    x1 <= L->End(doc)->x()   && L->End(doc)->x() <= x2 &&
-				    y1 <= L->End(doc)->y()   && L->End(doc)->y() <= y2)
+				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
+				   L->End(doc)->xy().inbounds(pos1, pos2))
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);
@@ -1269,12 +1262,12 @@ void Instance::Editor_Init()
 
 void Instance::Editor_DefaultState()
 {
-	edit.action = ACT_NOTHING;
+	edit.action = EditorAction::nothing;
 	edit.sticky_mod = 0;
 	edit.is_panning = false;
 
 	edit.dragged.clear();
-	edit.draw_from.clear();
+	edit.drawLine.from.clear();
 
 	edit.error_mode = false;
 	edit.show_object_numbers = false;

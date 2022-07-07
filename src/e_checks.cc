@@ -36,8 +36,13 @@
 #include "e_main.h"
 #include "e_path.h"
 #include "e_vertex.h"
+#include "LineDef.h"
 #include "m_game.h"
 #include "e_objects.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "ui_window.h"
@@ -1437,7 +1442,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 	{
 		v2double_t pos = inst.level.things[n]->xy();
 
-		Objid obj = inst.level.hover.getNearbyObject(ObjType::sectors, pos);
+		Objid obj = hover::getNearestSector(inst.level, pos);
 
 		if (! obj.is_nil())
 			continue;
@@ -1455,7 +1460,7 @@ static void Things_FindInVoid(selection_c& list, const Instance &inst)
 		{
 			v2double_t pos2 = pos + v2double_t{ corner & 1 ? -4.0 : +4.0, corner & 2 ? -4.0 : +4.0 };
 
-			obj = inst.level.hover.getNearbyObject(ObjType::sectors, pos2);
+			obj = hover::getNearestSector(inst.level, pos2);
 
 			if (obj.is_nil())
 				out_count++;
@@ -2417,8 +2422,8 @@ struct linedef_minx_CMP_pred
 		const LineDef *AL = doc.linedefs[A];
 		const LineDef *BL = doc.linedefs[B];
 
-		fixcoord_t A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
-		fixcoord_t B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
+		FFixedPoint A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
+		FFixedPoint B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
 
 		return A_x < B_x;
 	}
@@ -2633,7 +2638,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 		const LineDef *L1 = doc.linedefs[n2];
 
-		fixcoord_t max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
+		FFixedPoint max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
 
 		for (int k = n + 1 ; k < doc.numLinedefs(); k++)
 		{
@@ -2641,7 +2646,7 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 
 			const LineDef *L2 = doc.linedefs[k2];
 
-			fixcoord_t min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
+			FFixedPoint min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)
@@ -3503,7 +3508,7 @@ static void Textures_ShowMissing(Instance &inst)
 
 static void Textures_FixMissing(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed missing textures");
@@ -3637,7 +3642,7 @@ static void Textures_FixTransparent(Instance &inst)
 			new_tex = "GRAY1";		// Doom
 	}
 
-	int new_wall = BA_InternaliseString(new_tex);
+	StringID new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed transparent textures");
@@ -3744,7 +3749,7 @@ static void Textures_ShowMedusa(Instance &inst)
 
 static void Textures_RemoveMedusa(Instance &inst)
 {
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	std::map<SString, int> names;
 
@@ -3905,9 +3910,9 @@ static void Textures_LogUnknown(bool do_flat, const Instance &inst)
 
 static void Textures_FixUnknownTex(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown textures");
@@ -3940,8 +3945,8 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 static void Textures_FixUnknownFlat(Instance &inst)
 {
-	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
+	StringID new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
+	StringID new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown flats");
@@ -4013,7 +4018,7 @@ static void Textures_ShowDupSwitches(Instance &inst)
 
 static void Textures_FixDupSwitches(Instance &inst)
 {
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	SString new_tex = inst.conf.default_wall_tex;
 
@@ -4030,7 +4035,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 			new_tex = "GRAY1";		// Doom
 	}
 
-	int new_wall = BA_InternaliseString(new_tex);
+	StringID new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed non-animating switches");

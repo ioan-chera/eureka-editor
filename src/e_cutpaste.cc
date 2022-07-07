@@ -19,26 +19,12 @@
 //------------------------------------------------------------------------
 
 #include "Instance.h"
-#include "main.h"
 
-#include <map>
-
-#include "e_basis.h"
-#include "e_cutpaste.h"
-#include "e_hover.h"
-#include "e_linedef.h"
-#include "e_main.h"
-#include "e_sector.h"
-#include "e_vertex.h"
-#include "Errors.h"
-#include "m_game.h"
-#include "e_objects.h"
-#include "r_grid.h"
-#include "r_render.h"
-#include "w_rawdef.h"
-
-#include "ui_window.h"
-
+#include "LineDef.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 #define INVALID_SECTOR  (-999999)
 
@@ -47,7 +33,7 @@ class clipboard_data_c
 {
 public:
 	// the mode used when the objects were Copied
-	ObjType mode;
+	const ObjType mode;
 
 	// NOTE:
 	//
@@ -63,33 +49,18 @@ public:
 	// map (linedefs or sectors) to "fit in" with nearby sections of
 	// the map.
 
-	bool uses_real_sectors = false;
+	const bool uses_real_sectors;
 
-	std::vector<Thing *>   things;
-	std::vector<Vertex *>  verts;
-	std::vector<Sector *>  sectors;
-	std::vector<SideDef *> sides;
-	std::vector<LineDef *> lines;
+	std::vector<Thing>   things;
+	std::vector<Vertex>  verts;
+	std::vector<Sector>  sectors;
+	std::vector<SideDef> sides;
+	std::vector<LineDef> lines;
 
 public:
-	clipboard_data_c(ObjType mode) : mode(mode)
+	explicit clipboard_data_c(ObjType mode) : mode(mode),
+			uses_real_sectors(mode == ObjType::linedefs || mode == ObjType::sectors)
 	{
-		if(mode == ObjType::linedefs || mode == ObjType::sectors)
-			uses_real_sectors = true;
-	}
-
-	~clipboard_data_c()
-	{
-		for(Thing *thing : things)
-			delete thing;
-		for(Vertex *vertex : verts)
-			delete vertex;
-		for(Sector *sector : sectors)
-			delete sector;
-		for(SideDef *sidedef : sides)
-			delete sidedef;
-		for(LineDef *linedef : lines)
-			delete linedef;
 	}
 
 	int TotalSize() const
@@ -99,7 +70,7 @@ public:
 		return (int)num;
 	}
 
-	void Paste_BA_Message(EditOperation &op, Document &doc) const
+	void Paste_BA_Message(EditOperation &op) const
 	{
 		size_t t = things.size();
 		size_t v = verts.size();
@@ -132,45 +103,15 @@ public:
 		}
 	}
 
-	template<typename T>
-	v2double_t CentreOfPointObjects(const std::vector<T *> &list) const
-	{
-		if (list.empty())
-			return {};
-
-		v2double_t sum = {};
-
-		for (const T *object : list)
-			sum += object->xy();
-
-		sum /= (double)list.size();
-
-		return sum;
-	}
-
-	bool HasSectorRefs(int s1, int s2)
-	{
-		if (! uses_real_sectors)
-			return false;
-
-		for (const SideDef *side : sides)
-		{
-			if (s1 <= side->sector && side->sector <= s2)
-				return true;
-		}
-
-		return false;
-	}
-
 	void InsertRealSector(int snum)
 	{
 		if (! uses_real_sectors)
 			return;
 
-		for (SideDef *side : sides)
+		for (SideDef &side : sides)
 		{
-			if (side->sector >= snum)
-				side->sector++;
+			if (side.sector >= snum)
+				side.sector++;
 		}
 	}
 
@@ -179,12 +120,12 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (SideDef *side : sides)
+		for (SideDef &side : sides)
 		{
-			if (side->sector == snum)
-				side->sector = INVALID_SECTOR;
-			else if (side->sector > snum)
-				side->sector--;
+			if (side.sector == snum)
+				side.sector = INVALID_SECTOR;
+			else if (side.sector > snum)
+				side.sector--;
 		}
 	}
 
@@ -193,10 +134,10 @@ public:
 		if (! uses_real_sectors)
 			return;
 
-		for (SideDef *side : sides)
+		for (SideDef &side : sides)
 		{
-			if (side->sector >= 0)
-				side->sector = INVALID_SECTOR;
+			if (side.sector >= 0)
+				side.sector = INVALID_SECTOR;
 		}
 	}
 };
@@ -205,16 +146,6 @@ public:
 static clipboard_data_c * clip_board;
 
 static bool clip_doing_paste;
-
-
-void Clipboard_Clear()
-{
-	if (clip_board)
-	{
-		delete clip_board;
-		clip_board = NULL;
-	}
-}
 
 
 //
@@ -258,14 +189,7 @@ void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
 		SYS_ASSERT(! clip_doing_paste);
 	}
 
-#if 0  // OLD WAY
-	if (clip_board->HasSectorRefs(objnum, doc.numSectors() -1))
-	{
-		Clipboard_Clear();
-	}
-#else
 	clip_board->InsertRealSector(objnum);
-#endif
 }
 
 
@@ -312,7 +236,7 @@ void Texboard_Clear()
 	tex_clipboard::thing = 0;
 }
 
-int Texboard_GetTexNum(const ConfigData &config)
+StringID Texboard_GetTexNum(const ConfigData &config)
 {
 	if (tex_clipboard::tex.empty())
 		tex_clipboard::tex = config.default_wall_tex;
@@ -320,7 +244,7 @@ int Texboard_GetTexNum(const ConfigData &config)
 	return BA_InternaliseString(tex_clipboard::tex);
 }
 
-int Texboard_GetFlatNum(const ConfigData &config)
+StringID Texboard_GetFlatNum(const ConfigData &config)
 {
 	if (tex_clipboard::flat.empty())
 		tex_clipboard::flat = config.default_floor_tex;
@@ -394,9 +318,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	{
 		vert_map[*it] = (int)clip_board->verts.size();
 
-		Vertex * SD = new Vertex;
-		*SD = *doc.vertices[*it];
-		clip_board->verts.push_back(SD);
+		clip_board->verts.push_back(*doc.vertices[*it]);
 	}
 
 	if (is_sectors)
@@ -405,9 +327,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		{
 			sector_map[*it] = (int)clip_board->sectors.size();
 
-			Sector * S = new Sector;
-			*S = *doc.sectors[*it];
-			clip_board->sectors.push_back(S);
+			clip_board->sectors.push_back(*doc.sectors[*it]);
 		}
 	}
 
@@ -415,42 +335,40 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	{
 		side_map[*it] = (int)clip_board->sides.size();
 
-		SideDef * SD = new SideDef;
-		*SD = *doc.sidedefs[*it];
-		clip_board->sides.push_back(SD);
+		clip_board->sides.push_back(*doc.sidedefs[*it]);
+		SideDef &SD = clip_board->sides.back();
 
 		// adjust sector references, if needed
-		if (is_sectors && list.get(SD->sector))
+		if (is_sectors && list.get(SD.sector))
 		{
-			SYS_ASSERT(sector_map.find(SD->sector) != sector_map.end());
-			SD->sector = -1 - sector_map[SD->sector];
+			SYS_ASSERT(sector_map.find(SD.sector) != sector_map.end());
+			SD.sector = -1 - sector_map[SD.sector];
 		}
 	}
 
 	for (sel_iter_c it(line_sel) ; !it.done() ; it.next())
 	{
-		LineDef * L = new LineDef;
-		*L = *doc.linedefs[*it];
-		clip_board->lines.push_back(L);
+		clip_board->lines.push_back(*doc.linedefs[*it]);
+		LineDef &L = clip_board->lines.back();
 
 		// adjust vertex references
-		SYS_ASSERT(vert_map.find(L->start) != vert_map.end());
-		SYS_ASSERT(vert_map.find(L->end)   != vert_map.end());
+		SYS_ASSERT(vert_map.find(L.start) != vert_map.end());
+		SYS_ASSERT(vert_map.find(L.end)   != vert_map.end());
 
-		L->start = vert_map[L->start];
-		L->end   = vert_map[L->end  ];
+		L.start = vert_map[L.start];
+		L.end   = vert_map[L.end  ];
 
 		// adjust sidedef references
-		if (L->right >= 0)
+		if (L.right >= 0)
 		{
-			SYS_ASSERT(side_map.find(L->right) != side_map.end());
-			L->right = side_map[L->right];
+			SYS_ASSERT(side_map.find(L.right) != side_map.end());
+			L.right = side_map[L.right];
 		}
 
-		if (L->left >= 0)
+		if (L.left >= 0)
 		{
-			SYS_ASSERT(side_map.find(L->left) != side_map.end());
-			L->left = side_map[L->left];
+			SYS_ASSERT(side_map.find(L.left) != side_map.end());
+			L.left = side_map[L.left];
 		}
 	}
 
@@ -462,11 +380,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		ConvertSelection(doc, list, thing_sel);
 
 		for (sel_iter_c it(thing_sel) ; !it.done() ; it.next())
-		{
-			Thing * T = new Thing;
-			*T = *doc.things[*it];
-			clip_board->things.push_back(T);
-		}
+			clip_board->things.push_back(*doc.things[*it]);
 	}
 }
 
@@ -489,20 +403,12 @@ bool Instance::Clipboard_DoCopy()
 	{
 		case ObjType::things:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-			{
-				Thing * T = new Thing;
-				*T = *level.things[*it];
-				clip_board->things.push_back(T);
-			}
+				clip_board->things.push_back(*level.things[*it]);
 			break;
 
 		case ObjType::vertices:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-			{
-				Vertex * V = new Vertex;
-				*V = *level.vertices[*it];
-				clip_board->verts.push_back(V);
-			}
+				clip_board->verts.push_back(*level.vertices[*it]);
 			break;
 
 		case ObjType::linedefs:
@@ -530,9 +436,26 @@ bool Instance::Clipboard_DoCopy()
 
 //------------------------------------------------------------------------
 
-static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2double_t &pos)
+template<typename T>
+static v2double_t CentreOfPointObjects(const std::vector<T> &list)
 {
-	v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->verts);
+	if (list.empty())
+		return {};
+
+	v2double_t sum = {};
+
+	for (const T &object : list)
+		sum += object.xy();
+
+	sum /= (double)list.size();
+
+	return sum;
+}
+
+
+static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2double_t &pos)
+{
+	v2double_t cpos = CentreOfPointObjects(clip_board->verts);
 
 	// these hold the mapping from clipboard index --> real index
 	std::map<int, int> vert_map;
@@ -544,40 +467,40 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		Vertex * V = inst.level.vertices[new_v];
+		Vertex * V = op.doc.vertices[new_v];
 
 		vert_map[i] = new_v;
 
-		*V = *clip_board->verts[i];
+		*V = clip_board->verts[i];
 
-		V->SetRawXY(inst, V->xy() + pos - cpos);
+		V->SetRawXY(format, V->xy() + pos - cpos);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = op.addNew(ObjType::sectors);
-		Sector * S = inst.level.sectors[new_s];
+		Sector * S = op.doc.sectors[new_s];
 
 		sector_map[i] = new_s;
 
-		*S = *clip_board->sectors[i];
+		*S = clip_board->sectors[i];
 	}
 
 	for (i = 0 ; i < clip_board->sides.size() ; i++)
 	{
 		// handle invalidated sectors (as if sidedef had been deleted)
-		if (clip_board->sides[i]->sector == INVALID_SECTOR)
+		if (clip_board->sides[i].sector == INVALID_SECTOR)
 		{
 			side_map[i] = -1;
 			continue;
 		}
 
 		int new_sd = op.addNew(ObjType::sidedefs);
-		SideDef * SD = inst.level.sidedefs[new_sd];
+		SideDef * SD = op.doc.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
-		*SD = *clip_board->sides[i];
+		*SD = clip_board->sides[i];
 
 		if (SD->sector < 0)
 		{
@@ -590,9 +513,9 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 	for (i = 0 ; i < clip_board->lines.size() ; i++)
 	{
 		int new_l = op.addNew(ObjType::linedefs);
-		LineDef * L = inst.level.linedefs[new_l];
+		LineDef * L = op.doc.linedefs[new_l];
 
-		*L = *clip_board->lines[i];
+		*L = clip_board->lines[i];
 
 		// adjust vertex references
 		SYS_ASSERT(vert_map.find(L->start) != vert_map.end());
@@ -602,37 +525,37 @@ static void PasteGroupOfObjects(EditOperation &op, Instance &inst, const v2doubl
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->Right(inst.level))
+		if (L->Right(op.doc))
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
 		}
 
-		if (L->Left(inst.level))
+		if (L->Left(op.doc))
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
 		}
 
 		// flip linedef if necessary
-		if (L->Left(inst.level) && ! L->Right(inst.level))
+		if (L->Left(op.doc) && ! L->Right(op.doc))
 		{
-			inst.level.linemod.flipLinedef(op, new_l);
+			op.doc.linemod.flipLinedef(op, new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(L->Right(inst.level)->MidTex()))
-			inst.level.linemod.fixForLostSide(op, new_l);
+		if (L->OneSided() && is_null_tex(L->Right(op.doc)->MidTex()))
+			op.doc.linemod.fixForLostSide(op, new_l);
 	}
 
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = op.addNew(ObjType::things);
-		Thing * T = inst.level.things[new_t];
+		Thing * T = op.doc.things[new_t];
 
-		*T = *clip_board->things[i];
+		*T = clip_board->things[i];
 
-		T->SetRawXY(inst, T->xy() + pos - cpos);
+		T->SetRawXY(format, T->xy() + pos - cpos);
 	}
 }
 
@@ -719,7 +642,7 @@ bool Instance::Clipboard_DoPaste()
 
 	{
 		EditOperation op(level.basis);
-		clip_board->Paste_BA_Message(op, level);
+		clip_board->Paste_BA_Message(op);
 
 		clip_doing_paste = true;
 
@@ -727,16 +650,16 @@ bool Instance::Clipboard_DoPaste()
 		{
 			case ObjType::things:
 			{
-				v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->things);
+				v2double_t cpos = CentreOfPointObjects(clip_board->things);
 
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
 					int new_t = op.addNew(ObjType::things);
 					Thing * T = level.things[new_t];
 
-					*T = *clip_board->things[i];
+					*T = clip_board->things[i];
 
-					T->SetRawXY(*this, T->xy() + pos - cpos);
+					T->SetRawXY(loaded.levelFormat, T->xy() + pos - cpos);
 
 					recent_things.insert_number(T->type);
 				}
@@ -745,16 +668,16 @@ bool Instance::Clipboard_DoPaste()
 
 			case ObjType::vertices:
 			{
-				v2double_t cpos = clip_board->CentreOfPointObjects(clip_board->verts);
+				v2double_t cpos = CentreOfPointObjects(clip_board->verts);
 
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
 					int new_v = op.addNew(ObjType::vertices);
 					Vertex * V = level.vertices[new_v];
 
-					*V = *clip_board->verts[i];
+					*V = clip_board->verts[i];
 
-					V->SetRawXY(*this, V->xy() + pos - cpos);
+					V->SetRawXY(loaded.levelFormat, V->xy() + pos - cpos);
 				}
 				break;
 			}
@@ -762,7 +685,7 @@ bool Instance::Clipboard_DoPaste()
 			case ObjType::linedefs:
 			case ObjType::sectors:
 			{
-				PasteGroupOfObjects(op, *this, pos);
+				PasteGroupOfObjects(op, loaded.levelFormat, pos);
 				break;
 			}
 

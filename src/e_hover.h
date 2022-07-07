@@ -28,14 +28,36 @@
 #define __EUREKA_X_HOVER_H__
 
 #include "DocumentModule.h"
+#include "m_vector.h"
+#include "objid.h"
+#include <vector>
 
 class bitvec_c;
 class crossing_state_c;
+class EditOperation;
 class fastopp_node_c;
+class Grid_State_c;
 class LineDef;
 class Objid;
+enum class MapFormat;
 enum class Side;
+struct ConfigData;
+struct Editor_State_t;
 struct v2double_t;
+
+namespace hover
+{
+Objid findSplitLine(const Document &doc, MapFormat format, const Editor_State_t &edit,
+					const Grid_State_c &grid, v2double_t &out_pos, const v2double_t &ptr,
+					int ignore_vert);
+Objid findSplitLineForDangler(const Document &doc, MapFormat format,
+							  const Grid_State_c &grid, int v_num);
+int getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side *side);
+Objid getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
+					  const Grid_State_c &grid, const v2double_t &pos);
+Objid getNearestSector(const Document &doc, const v2double_t &pos);
+bool isPointOutsideOfMap(const Document &doc, const v2double_t &v);
+}
 
 //
 // The hover module
@@ -47,36 +69,17 @@ public:
 	{
 	}
 
-	Objid getNearbyObject(ObjType type, const v2double_t &pos) const;
-
-	int getClosestLine_CastingHoriz(v2double_t pos, Side *side) const;
-	int getClosestLine_CastingVert(v2double_t pos, Side *side) const;
-
-	Objid findSplitLine(v2double_t &out, const v2double_t &ptr, int ignore_vert) const;
-	Objid findSplitLineForDangler(int v_num) const;
-
 	int getOppositeLinedef(int ld, Side ld_side, Side *result_side, const bitvec_c *ignore_lines) const;
 	int getOppositeSector(int ld, Side ld_side) const;
 	void fastOpposite_begin();
 	void fastOpposite_finish();
-
-	bool isPointOutsideOfMap(double x, double y) const;
 
 	void findCrossingPoints(crossing_state_c &cross,
 		v2double_t p1, int possible_v1,
 		v2double_t p2, int possible_v2) const;
 
 private:
-	Objid getNearestThing(const v2double_t &pos) const;
-	Objid getNearestVertex(const v2double_t &pos) const;
-	Objid getNearestLinedef(const v2double_t &pos) const;
-	Objid getNearestSector(const v2double_t &pos) const;
-
-	double getApproximateDistanceToLinedef(const LineDef &line, const v2double_t &pos) const;
-
-	Objid getNearestSplitLine(const v2double_t &pos, int ignore_vert) const;
-
-	void findCrossingLines(crossing_state_c &cross, double x1, double y1, int possible_v1, double x2, double y2, int possible_v2) const;
+	void findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, int possible_v1, const v2double_t &pos2, int possible_v2) const;
 
 	fastopp_node_c *m_fastopp_X_tree = nullptr;
 	fastopp_node_c *m_fastopp_Y_tree = nullptr;
@@ -91,7 +94,7 @@ struct cross_point_t
 	int vert;	// >= 0 when we hit a vertex
 	int ld;     // >= 0 when we hit a linedef instead
 
-	double x, y;	// coordinate of line split point
+	v2double_t pos;	// coordinates of line split point
 	double dist;
 };
 
@@ -102,8 +105,8 @@ public:
 	std::vector< cross_point_t > points;
 
 	// the start/end coordinates of the whole tested line
-	double start_x = 0, start_y = 0;
-	double   end_x = 0,   end_y = 0;
+	v2double_t start = {};
+	v2double_t end = {};
 
 	Instance &inst;
 
@@ -115,7 +118,7 @@ public:
 	void clear();
 
 	void add_vert(int v, double dist);
-	void add_line(int ld, double new_x, double new_y, double dist);
+	void add_line(int ld, const v2double_t &newpos, double dist);
 
 	bool HasVertex(int v) const;
 	bool HasLine(int ld)  const;

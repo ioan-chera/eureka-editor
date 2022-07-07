@@ -117,14 +117,6 @@
 
 typedef std::vector< const char * > string_list_t;
 
-enum class MapFormat
-{
-	invalid,
-	doom,
-	hexen,
-	udmf
-};
-
 /*
  *  Interfile global variables
  */
@@ -148,14 +140,6 @@ namespace global
 namespace global
 {
 	extern std::vector<SString> Pwad_list;
-}
-
-
-namespace global
-{
-	extern int	default_floor_h;
-	extern int	default_ceil_h;
-	extern int	default_light_level;
 }
 
 namespace global

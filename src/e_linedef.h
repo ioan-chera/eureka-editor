@@ -31,6 +31,11 @@
 
 class selection_c;
 
+namespace linemod
+{
+void moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v);
+}
+
 class LinedefModule : public DocumentModule
 {
 	friend class Instance;
@@ -47,8 +52,6 @@ public:
 	bool linedefAlreadyExists(int v1, int v2) const;
 
 	int splitLinedefAtVertex(EditOperation &op, int ld, int v_idx) const;
-
-	void moveCoordOntoLinedef(int ld, v2double_t &v) const;
 
 	void addSecondSidedef(EditOperation &op, int ld, int new_sd, int other_sd) const;
 	void removeSidedef(EditOperation &op, int ld, Side ld_side) const;
@@ -92,7 +95,7 @@ private:
 	void mergedSecondSidedef(EditOperation &op, int ld) const;
 };
 
-SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only);
+SString LD_RatioName(FFixedPoint idx, FFixedPoint idy, bool number_only);
 
 enum linedef_align_flag_e
 {

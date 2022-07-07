@@ -22,32 +22,31 @@
 #ifndef __SYS_MACRO_H__
 #define __SYS_MACRO_H__
 
+#include <math.h>
+
 // basic macros
 
 #ifndef M_PI
 #define M_PI  3.14159265358979323846
 #endif
 
-#ifndef M_SQRT2
-#define M_SQRT2  1.41421356237309504880
-#endif
+//
+// Concise round() cast to int
+//
+inline static int iround(double x)
+{
+	return static_cast<int>(round(x));
+}
+inline static int iround(float x)
+{
+	return static_cast<int>(roundf(x));
+}
 
-#ifndef ABS
-#define ABS(a)  ((a) < 0 ? -(a) : (a))
-#endif
-
-#ifndef SGN
-#define SGN(a)  ((a) < 0 ? -1 : (a) > 0 ? +1 : 0)
-#endif
-
-#ifndef I_ROUND
-#define I_ROUND(x)  ((int)round(x))
-#endif
-
-#ifndef CLAMP
-#define CLAMP(low,x,high)  \
-    ((x) < (low) ? (low) : (x) > (high) ? (high) : (x))
-#endif
+template<typename T>
+inline static T clamp(const T &low, const T &x, const T &high)
+{
+	return x < low ? low : x > high ? high : x;
+}
 
 //
 // The packed attribute forces structures to be packed into the minimum

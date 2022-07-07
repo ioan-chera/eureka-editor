@@ -124,7 +124,7 @@ public:
 	}
 
 	bool traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignore_bare = false) const;
-	bool assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec = -1, int model = -1) const;
+	bool assignSectorToSpace(EditOperation &op, const v2double_t &map, int new_sec = -1, int model = -1) const;
 	void sectorsAdjustLight(int delta) const;
 	void safeRaiseLower(EditOperation &op, int sec, int parts, int dz) const;
 
@@ -135,12 +135,12 @@ private:
 	void replaceSectorRefs(EditOperation &op, int old_sec, int new_sec) const;
 	inline bool willBeTwoSided(int ld, Side side) const;
 	void determineNewTextures(lineloop_c& loop,
-									 std::vector<int>& lower_texs,
-							  std::vector<int>& upper_texs) const;
+									 std::vector<StringID>& lower_texs,
+									std::vector<StringID>& upper_texs) const;
 	void doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
-							   int new_lower, int new_upper,
+						StringID new_lower, StringID new_upper,
 						selection_c &flip) const;
-	bool getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const;
+	bool getLoopForSpace(const v2double_t &map, lineloop_c& loop) const;
 };
 
 

@@ -1219,7 +1219,7 @@ public:
 
 	void Reset()
 	{
-		int def_val = CLAMP(0, field->default_val, static_cast<int>(field->keywords.size()) - 1);
+		int def_val = clamp(0, field->default_val, static_cast<int>(field->keywords.size()) - 1);
 
 		value(def_val);
 	}

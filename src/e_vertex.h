@@ -39,7 +39,7 @@ public:
 	{
 	}
 
-	int findExact(fixcoord_t fx, fixcoord_t fy) const;
+	int findExact(FFixedPoint fx, FFixedPoint fy) const;
 	int findDragOther(int v_num) const;
 	int howManyLinedefs(int v_num) const;
 	void mergeList(EditOperation &op, selection_c &list, selection_c *deletedResultList) const;

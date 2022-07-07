@@ -20,8 +20,12 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "LineDef.h"
 #include "main.h"
 #include "bsp.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 #include "w_rawdef.h"
 
@@ -140,7 +144,7 @@ angle_g UtilComputeAngle(double dx, double dy)
 	if (dx == 0)
 		return (dy > 0) ? 90.0 : 270.0;
 
-	angle = atan2((double) dy, (double) dx) * 180.0 / M_PI;
+	angle = atan2(dy, dx) * 180.0 / M_PI;
 
 	if (angle < 0)
 		angle += 360.0;
@@ -434,13 +438,13 @@ void DetectPolyobjSectors(const Instance &inst)
 
 /* ----- analysis routines ----------------------------- */
 
-static int VertexCompare(const Document &doc, const void *p1, const void *p2)
+static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int vert1 = static_cast<const u16_t *>(p1)[0];
 	int vert2 = static_cast<const u16_t *>(p2)[0];
 
 	if (vert1 == vert2)
-		return 0;
+		return FFixedPoint{};
 
 	const Vertex *A = doc.vertices[vert1];
 	const Vertex *B = doc.vertices[vert2];
@@ -465,13 +469,13 @@ void DetectOverlappingVertices(const Document &doc)
 
 	std::sort(array, array + num_vertices, [&doc](u16_t left, u16_t right)
 		{
-			return VertexCompare(doc, &left, &right) < 0;
+			return VertexCompare(doc, &left, &right).raw() < 0;
 		});
 
 	// now mark them off
 	for (i=0 ; i < num_vertices - 1 ; i++)
 	{
-		if (VertexCompare(doc, array + i, array + i + 1) == 0)
+		if (VertexCompare(doc, array + i, array + i + 1).raw() == 0)
 		{
 			// found an overlap!
 
@@ -496,13 +500,13 @@ static inline int LineVertexLowest(const Document &doc, const LineDef *L)
 			 L->Start(doc)->raw_y <  L->End(doc)->raw_y)) ? 0 : 1;
 }
 
-static int LineStartCompare(const Document &doc, const void *p1, const void *p2)
+static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
 	if (line1 == line2)
-		return 0;
+		return FFixedPoint();
 
 	const LineDef *A = doc.linedefs[line1];
 	const LineDef *B = doc.linedefs[line2];
@@ -517,13 +521,13 @@ static int LineStartCompare(const Document &doc, const void *p1, const void *p2)
 	return C->raw_y - D->raw_y;
 }
 
-static int LineEndCompare(const Document &doc, const void *p1, const void *p2)
+static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const void *p2)
 {
 	int line1 = ((const int *) p1)[0];
 	int line2 = ((const int *) p2)[0];
 
 	if (line1 == line2)
-		return 0;
+		return FFixedPoint{};
 
 	const LineDef *A = doc.linedefs[line1];
 	const LineDef *B = doc.linedefs[line2];
@@ -556,7 +560,7 @@ void DetectOverlappingLines(const Document &doc)
 
 	std::sort(array, array + doc.numLinedefs(), [&doc](int left, int right)
 		{
-			return LineStartCompare(doc, &left, &right) < 0;
+			return LineStartCompare(doc, &left, &right).raw() < 0;
 		});
 
 	for (i=0 ; i < doc.numLinedefs() - 1 ; i++)
@@ -565,10 +569,10 @@ void DetectOverlappingLines(const Document &doc)
 
 		for (j = i+1 ; j < doc.numLinedefs(); j++)
 		{
-			if (LineStartCompare(doc, array + i, array + j) != 0)
+			if (LineStartCompare(doc, array + i, array + j).raw() != 0)
 				break;
 
-			if (LineEndCompare(doc, array + i, array + j) == 0)
+			if (LineEndCompare(doc, array + i, array + j).raw() == 0)
 			{
 				// found an overlap !
 
@@ -734,8 +738,8 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
 	dx /= dlen;
 	dy /= dlen;
 
-	while (I_ROUND(vert->x) == I_ROUND(start->x) &&
-		   I_ROUND(vert->y) == I_ROUND(start->y))
+	while (iround(vert->x) == iround(start->x) &&
+		   iround(vert->y) == iround(start->y))
 	{
 		vert->x += dx;
 		vert->y += dy;

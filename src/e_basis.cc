@@ -28,7 +28,12 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "LineDef.h"
 #include "main.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 // need these for the XXX_Notify() prototypes
 #include "r_render.h"
@@ -37,10 +42,7 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-namespace global
-{
-	static StringTable basis_strtab;
-}
+static StringTable basis_strtab;
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -58,184 +60,24 @@ const char *NameForObjectType(ObjType type, bool plural)
 	}
 }
 
-int BA_InternaliseString(const SString &str)
+StringID BA_InternaliseString(const SString &str)
 {
-	return global::basis_strtab.add(str);
+	return basis_strtab.add(str);
 }
 
-SString BA_GetString(int offset)
+SString BA_GetString(StringID offset)
 {
-	return global::basis_strtab.get(offset);
+	return basis_strtab.get(offset);
 }
 
 
-fixcoord_t Instance::MakeValidCoord(double x) const
+FFixedPoint MakeValidCoord(MapFormat format, double x)
 {
-	if (loaded.levelFormat == MapFormat::udmf)
-		return TO_COORD(x);
+	if (format == MapFormat::udmf)
+		return FFixedPoint(x);
 
 	// in standard format, coordinates must be integral
-	return TO_COORD(I_ROUND(x));
-}
-
-//
-// Set raw x/y/height
-//
-void Thing::SetRawX(const Instance &inst, double x)
-{
-	raw_x = inst.MakeValidCoord(x);
-}
-void Thing::SetRawY(const Instance &inst, double y)
-{
-	raw_y = inst.MakeValidCoord(y);
-}
-void Thing::SetRawH(const Instance &inst, double h)
-{
-	raw_h = inst.MakeValidCoord(h);
-}
-void Vertex::SetRawX(const Instance &inst, double x)
-{
-	raw_x = inst.MakeValidCoord(x);
-}
-void Vertex::SetRawY(const Instance &inst, double y)
-{
-	raw_y = inst.MakeValidCoord(y);
-}
-
-SString Sector::FloorTex() const
-{
-	return global::basis_strtab.get(floor_tex);
-}
-
-SString Sector::CeilTex() const
-{
-	return global::basis_strtab.get(ceil_tex);
-}
-
-void Sector::SetDefaults(const Instance &inst)
-{
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
-
-	floor_tex = BA_InternaliseString(inst.conf.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(inst.conf.default_ceil_tex);
-
-	light = global::default_light_level;
-}
-
-
-SString SideDef::UpperTex() const
-{
-	return global::basis_strtab.get(upper_tex);
-}
-
-SString SideDef::MidTex() const
-{
-	return global::basis_strtab.get(mid_tex);
-}
-
-SString SideDef::LowerTex() const
-{
-	return global::basis_strtab.get(lower_tex);
-}
-
-void SideDef::SetDefaults(const Instance &inst, bool two_sided, int new_tex)
-{
-	if (new_tex < 0)
-		new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
-
-	lower_tex = new_tex;
-	upper_tex = new_tex;
-
-	if (two_sided)
-		mid_tex = BA_InternaliseString("-");
-	else
-		mid_tex = new_tex;
-}
-
-
-Sector * SideDef::SecRef(const Document &doc) const
-{
-	return doc.sectors[sector];
-}
-
-Vertex * LineDef::Start(const Document &doc) const
-{
-	return doc.vertices[start];
-}
-
-Vertex * LineDef::End(const Document &doc) const
-{
-	return doc.vertices[end];
-}
-
-SideDef * LineDef::Right(const Document &doc) const
-{
-	return (right >= 0) ? doc.sidedefs[right] : nullptr;
-}
-
-SideDef * LineDef::Left(const Document &doc) const
-{
-	return (left >= 0) ? doc.sidedefs[left] : nullptr;
-}
-
-
-bool LineDef::TouchesSector(int sec_num, const Document &doc) const
-{
-	if (right >= 0 && doc.sidedefs[right]->sector == sec_num)
-		return true;
-
-	if (left >= 0 && doc.sidedefs[left]->sector == sec_num)
-		return true;
-
-	return false;
-}
-
-
-int LineDef::WhatSector(Side side, const Document &doc) const
-{
-	switch (side)
-	{
-		case Side::left:
-			return Left(doc) ? Left(doc)->sector : -1;
-
-		case Side::right:
-			return Right(doc) ? Right(doc)->sector : -1;
-
-		default:
-			BugError("bad side : %d\n", (int)side);
-			return -1;
-	}
-}
-
-
-int LineDef::WhatSideDef(Side side) const
-{
-	switch (side)
-	{
-		case Side::left:
-			return left;
-		case Side::right:
-			return right;
-
-		default:
-			BugError("bad side : %d\n", (int)side);
-			return -1;
-	}
-}
-
-bool LineDef::IsSelfRef(const Document &doc) const
-{
-	return (left >= 0) && (right >= 0) &&
-		doc.sidedefs[left]->sector == doc.sidedefs[right]->sector;
-}
-
-double LineDef::CalcLength(const Document &doc) const
-{
-	double dx = Start(doc)->x() - End(doc)->x();
-	double dy = Start(doc)->y() - End(doc)->y();
-
-	return hypot(dx, dy);
+	return FFixedPoint(round(x));
 }
 
 
@@ -493,36 +335,37 @@ bool Basis::changeVertex(int vert, byte field, int value)
 //
 // Change sector
 //
-bool Basis::changeSector(int sec, byte field, int value)
+bool Basis::changeSector(int sec, Sector::IntAddress field, int value)
 {
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
-	SYS_ASSERT(field <= Sector::F_TAG);
-
-	if(field == Sector::F_FLOOR_TEX ||
-		field == Sector::F_CEIL_TEX)
-	{
-		inst.recent_flats.insert(BA_GetString(value));
-	}
 
 	return change(ObjType::sectors, sec, field, value);
+}
+bool Basis::changeSector(int sec, Sector::StringIDAddress field, StringID value)
+{
+	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
+
+	inst.recent_flats.insert(BA_GetString(value));
+
+	return change(ObjType::sectors, sec, field, value.get());
 }
 
 //
 // Change sidedef
 //
-bool Basis::changeSidedef(int side, byte field, int value)
+bool Basis::changeSidedef(int side, SideDef::IntAddress field, int value)
 {
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
-	SYS_ASSERT(field <= SideDef::F_SECTOR);
-
-	if(field == SideDef::F_LOWER_TEX ||
-		field == SideDef::F_UPPER_TEX ||
-		field == SideDef::F_MID_TEX)
-	{
-		inst.recent_textures.insert(BA_GetString(value));
-	}
 
 	return change(ObjType::sidedefs, side, field, value);
+}
+bool Basis::changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
+{
+	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
+
+	inst.recent_textures.insert(BA_GetString(value));
+
+	return change(ObjType::sidedefs, side, field, value.get());
 }
 
 //

@@ -21,6 +21,7 @@
 
 #include "sys_macro.h"
 #include <math.h>
+#include <algorithm>
 
 struct v2int_t;
 
@@ -76,6 +77,13 @@ struct v2double_t
 		return *this;
 	}
 
+	v2double_t &operator *= (double val)
+	{
+		x *= val;
+		y *= val;
+		return *this;
+	}
+
 	v2double_t operator + (const v2double_t &other) const
 	{
 		return { x + other.x, y + other.y };
@@ -107,6 +115,16 @@ struct v2double_t
 	}
 	inline v2int_t iround() const;
 
+	double chebyshev() const
+	{
+		return fmax(fabs(x), fabs(y));
+	}
+
+	bool operator ! () const
+	{
+		return !x && !y;
+	}
+
 	double x, y;
 };
 
@@ -120,6 +138,21 @@ struct v2int_t
 	{
 	}
 
+	bool operator!() const
+	{
+		return !x && !y;
+	}
+
+	v2int_t operator - (v2int_t other) const
+	{
+		return { x - other.x, y - other.y };
+	}
+
+	double chebyshev() const
+	{
+		return std::max(abs(x), abs(y));
+	}
+
 	int x, y;
 };
 
@@ -129,7 +162,7 @@ inline v2double_t::v2double_t(v2int_t v2) : x(v2.x), y(v2.y)
 
 inline v2int_t v2double_t::iround() const
 {
-	return { I_ROUND(x), I_ROUND(y) };
+	return { ::iround(x), ::iround(y) };
 }
 
 struct v3double_t

@@ -50,10 +50,10 @@ void Instance::Editor_ClearAction()
 {
 	switch (edit.action)
 	{
-		case ACT_NOTHING:
+		case EditorAction::nothing:
 			return;
 
-		case ACT_ADJUST_OFS:
+		case EditorAction::adjustOfs:
 			main_win->SetCursor(FL_CURSOR_DEFAULT);
 			break;
 
@@ -62,11 +62,11 @@ void Instance::Editor_ClearAction()
 			break;
 	}
 
-	edit.action = ACT_NOTHING;
+	edit.action = EditorAction::nothing;
 }
 
 
-void Instance::Editor_SetAction(editor_action_e  new_action)
+void Instance::Editor_SetAction(EditorAction  new_action)
 {
 	Editor_ClearAction();
 
@@ -74,12 +74,12 @@ void Instance::Editor_SetAction(editor_action_e  new_action)
 
 	switch (edit.action)
 	{
-		case ACT_NOTHING:
+		case EditorAction::nothing:
 			return;
 
-		case ACT_ADJUST_OFS:
-			mouse_last_x = Fl::event_x();
-			mouse_last_y = Fl::event_y();
+		case EditorAction::adjustOfs:
+			mouse_last_pos.x = Fl::event_x();
+			mouse_last_pos.y = Fl::event_y();
 
 			main_win->SetCursor(FL_CURSOR_HAND);
 			break;
@@ -102,7 +102,7 @@ void Instance::Editor_Zoom(int delta, v2int_t mid)
 
 
 // this is only used for mouse scrolling
-void Instance::Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
+void Instance::Editor_ScrollMap(int mode, v2int_t dpos, keycode_t mod)
 {
 	// started?
 	if (mode < 0)
@@ -123,38 +123,30 @@ void Instance::Editor_ScrollMap(int mode, int dx, int dy, keycode_t mod)
 	if (! edit.panning_lax)
 		mod = 0;
 
-	if (dx == 0 && dy == 0)
+	if (!dpos)
 		return;
 
 	if (edit.render3d)
 	{
-		Render3D_ScrollMap(*this, dx, dy, mod);
+		Render3D_ScrollMap(*this, dpos, mod);
 	}
 	else
 	{
 		float speed = static_cast<float>(edit.panning_speed / grid.Scale);
 
-		double delta_x = ((double) -dx * speed);
-		double delta_y = ((double)  dy * speed);
+		v2double_t delta = {
+			((double) -dpos.x * speed),
+			((double)  dpos.y * speed)
+		};
 
-		grid.Scroll(delta_x, delta_y);
+		grid.Scroll(delta);
 	}
 }
 
 
 void Instance::Editor_ClearNav()
 {
-	edit.nav_left  = 0;
-	edit.nav_right = 0;
-	edit.nav_up    = 0;
-	edit.nav_down  = 0;
-
-	edit.nav_fwd    = 0;
-	edit.nav_back   = 0;
-	edit.nav_turn_L = 0;
-	edit.nav_turn_R = 0;
-
-	edit.nav_lax = false;
+	edit.nav = {};
 }
 
 
@@ -166,23 +158,24 @@ void Instance::Navigate2D()
 
 	keycode_t mod = 0;
 
-	if (edit.nav_lax)
+	if (edit.nav.lax)
 		mod = M_ReadLaxModifiers();
 
 	float mod_factor = 1.0;
 	if (mod & EMOD_SHIFT)   mod_factor = 0.5;
 	if (mod & EMOD_COMMAND) mod_factor = 2.0;
 
-	if (edit.nav_left || edit.nav_right ||
-		edit.nav_up   || edit.nav_down)
+	if (edit.nav.left || edit.nav.right ||
+		edit.nav.up   || edit.nav.down)
 	{
-		float delta_x = (edit.nav_right - edit.nav_left);
-		float delta_y = (edit.nav_up    - edit.nav_down);
+		v2double_t delta = {
+			edit.nav.right - edit.nav.left,
+			edit.nav.up    - edit.nav.down
+		};
 
-		delta_x = delta_x * mod_factor * delay_ms;
-		delta_y = delta_y * mod_factor * delay_ms;
+		delta *= mod_factor * delay_ms;
 
-		grid.Scroll(delta_x, delta_y);
+		grid.Scroll(delta);
 	}
 
 	RedrawMap();
@@ -215,8 +208,8 @@ bool Instance::Nav_SetKey(keycode_t key, nav_release_func_t func)
 
 	keycode_t lax_mod = 0;
 
-	edit.nav_lax = Exec_HasFlag("/LAX");
-	if (edit.nav_lax)
+	edit.nav.lax = Exec_HasFlag("/LAX");
+	if (edit.nav.lax)
 		lax_mod = EMOD_SHIFT | EMOD_COMMAND;
 
 	edit.is_navigating = true;
@@ -426,7 +419,7 @@ void Instance::EV_LeaveWindow()
 	edit.pointer_in_window = false;
 
 	// this offers a handy way to get out of drawing mode
-	if (edit.action == ACT_DRAW_LINE)
+	if (edit.action == EditorAction::drawLine)
 		Editor_ClearAction();
 
 	// this will update (disable) any current highlight
@@ -444,14 +437,14 @@ void Instance::EV_EscapeKey()
 	edit.clicked.clear();
 	edit.dragged.clear();
 	edit.split_line.clear();
-	edit.draw_from.clear();
+	edit.drawLine.from.clear();
 
 	UpdateHighlight();
 	RedrawMap();
 }
 
 
-void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
+void Instance::EV_MouseMotion(v2int_t pos, keycode_t mod, v2int_t dpos)
 {
 	// this is probably redundant, as we generally shouldn't get here
 	// unless the mouse is in the 2D/3D view (or began a drag there).
@@ -463,26 +456,26 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 
 	if (edit.is_panning)
 	{
-		Editor_ScrollMap(0, dx, dy, mod);
+		Editor_ScrollMap(0, dpos, mod);
 		return;
 	}
 
-	main_win->info_bar->SetMouse(edit.map.x, edit.map.y);
+	main_win->info_bar->SetMouse();
 
-	if (edit.action == ACT_TRANSFORM)
+	if (edit.action == EditorAction::transform)
 	{
 		Transform_Update();
 		return;
 	}
 
-	if (edit.action == ACT_DRAW_LINE)
+	if (edit.action == EditorAction::drawLine)
 	{
 		// this calls UpdateHighlight() which updates inst.edit.draw_to_x/y
 		RedrawMap();
 		return;
 	}
 
-	if (edit.action == ACT_SELBOX)
+	if (edit.action == EditorAction::selbox)
 	{
 		edit.selbox2 = edit.map.xy;
 
@@ -490,13 +483,11 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 		return;
 	}
 
-	if (edit.action == ACT_DRAG)
+	if (edit.action == EditorAction::drag)
 	{
-		edit.drag_screen_dx = x - edit.click_screen_x;
-		edit.drag_screen_dy = y - edit.click_screen_y;
+		edit.drag_screen_dpos = pos - edit.click_screen_pos;
 
-		edit.drag_cur.x = edit.map.x;
-		edit.drag_cur.y = edit.map.y;
+		edit.drag_cur.xy = edit.map.xy;
 
 		// if dragging a single vertex, update the possible split_line.
 		// Note: ratio-lock is handled in UI_Canvas::DragDelta
@@ -508,7 +499,7 @@ void Instance::EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy)
 	}
 
 	// begin dragging?
-	if (edit.action == ACT_CLICK)
+	if (edit.action == EditorAction::click)
 	{
 		CheckBeginDrag();
 	}
@@ -615,16 +606,16 @@ int Instance::EV_RawKey(int event)
 
 	// keyboard propagation logic
 
-	if (main_win->browser->visible() && ExecuteKey(key, KCTX_Browser))
+	if (main_win->browser->visible() && ExecuteKey(key, KeyContext::browser))
 		return 1;
 
-	if (edit.render3d && ExecuteKey(key, KCTX_Render))
+	if (edit.render3d && ExecuteKey(key, KeyContext::render))
 		return 1;
 
 	if (ExecuteKey(key, M_ModeToKeyContext(edit.mode)))
 		return 1;
 
-	if (ExecuteKey(key, KCTX_General))
+	if (ExecuteKey(key, KeyContext::general))
 		return 1;
 
 
@@ -651,10 +642,10 @@ int Instance::EV_RawWheel(int event)
 	// ensure we zoom from correct place
 	main_win->canvas->PointerPos(true /* in_event */);
 
-	wheel_dx = Fl::event_dx();
-	wheel_dy = Fl::event_dy();
+	wheel_dpos.x = Fl::event_dx();
+	wheel_dpos.y = Fl::event_dy();
 
-	if (wheel_dx == 0 && wheel_dy == 0)
+	if (!wheel_dpos)
 		return 1;
 
 	EV_RawKey(FL_MOUSEWHEEL);
@@ -694,20 +685,22 @@ int Instance::EV_RawMouse(int event)
 
 	int mod = Fl::event_state() & EMOD_ALL_MASK;
 
-	int dx = Fl::event_x() - mouse_last_x;
-	int dy = Fl::event_y() - mouse_last_y;
+	v2int_t dpos = {
+		Fl::event_x() - mouse_last_pos.x,
+		Fl::event_y() - mouse_last_pos.y
+	};
 
 	if (edit.render3d)
 	{
-		Render3D_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		Render3D_MouseMotion({ Fl::event_x(), Fl::event_y() }, mod, dpos);
 	}
 	else
 	{
-		EV_MouseMotion(Fl::event_x(), Fl::event_y(), mod, dx, dy);
+		EV_MouseMotion({ Fl::event_x(), Fl::event_y() }, mod, dpos);
 	}
 
-	mouse_last_x = Fl::event_x();
-	mouse_last_y = Fl::event_y();
+	mouse_last_pos.x = Fl::event_x();
+	mouse_last_pos.y = Fl::event_y();
 
 	return 1;
 }

@@ -34,16 +34,20 @@
 #include "e_main.h"
 #include "e_objects.h"
 #include "e_vertex.h"
+#include "LineDef.h"
 #include "m_bitvec.h"
 #include "r_grid.h"
 #include "m_game.h"
 #include "e_objects.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 
 #include <algorithm>
 
 
-int VertexModule::findExact(fixcoord_t fx, fixcoord_t fy) const
+int VertexModule::findExact(FFixedPoint fx, FFixedPoint fy) const
 {
 	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
@@ -106,8 +110,8 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	int new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
-					  (ld2_onesided) ? L2->Right(doc)->mid_tex : 0;
+	StringID new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
+			     		  (ld2_onesided) ? L2->Right(doc)->mid_tex : StringID();
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
@@ -151,7 +155,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		doc.linemod.flipLinedef(op, ld2);
 	}
 
-	if (L2->OneSided() && new_mid_tex > 0)
+	if (L2->OneSided() && new_mid_tex.hasContent())
 	{
 		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
@@ -332,7 +336,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 		double dx = doc.vertices[v_num]->x() - doc.vertices[i]->x();
 		double dy = doc.vertices[v_num]->y() - doc.vertices[i]->y();
 
-		if (abs(dx) <= max_dist && abs(dy) <= max_dist &&
+		if (fabs(dx) <= max_dist && fabs(dy) <= max_dist &&
 			!doc.linemod.linedefAlreadyExists(v_num, v_other))
 		{
 			v_other = i;
@@ -401,7 +405,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 	// see if vertex is sitting on a line
 
-	Objid line_obj = doc.hover.findSplitLineForDangler(v_num);
+	Objid line_obj = hover::findSplitLineForDangler(doc, inst.loaded.levelFormat, inst.grid, v_num);
 
 	if (! line_obj.valid())
 		return false;
@@ -433,24 +437,24 @@ void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, d
 		dy = -dy;
 	}
 
-	if (abs(dx) < 4 && abs(dy) < 4)
+	if (fabs(dx) < 4 && fabs(dy) < 4)
 	{
 		dx = dx / 2;
 		dy = dy / 2;
 	}
-	else if (abs(dx) < 16 && abs(dy) < 16)
+	else if (fabs(dx) < 16 && fabs(dy) < 16)
 	{
 		dx = dx / 4;
 		dy = dy / 4;
 	}
-	else if (abs(dx) >= abs(dy))
+	else if (fabs(dx) >= fabs(dy))
 	{
-		dy = dy * 8 / abs(dx);
+		dy = dy * 8 / fabs(dx);
 		dx = (dx < 0) ? -8 : 8;
 	}
 	else
 	{
-		dx = dx * 8 / abs(dy);
+		dx = dx * 8 / fabs(dy);
 		dy = (dy < 0) ? -8 : 8;
 	}
 
@@ -478,7 +482,7 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			{
 				int new_v = op.addNew(ObjType::vertices);
 
-				doc.vertices[new_v]->SetRawXY(inst, { new_x, new_y });
+				doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 				if (L->start == v_num)
 					op.changeLinedef(n, LineDef::F_START, new_v);
@@ -487,8 +491,8 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			}
 			else
 			{
-				op.changeVertex(v_num, Vertex::F_X, inst.MakeValidCoord(new_x));
-				op.changeVertex(v_num, Vertex::F_Y, inst.MakeValidCoord(new_y));
+				op.changeVertex(v_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+				op.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 			}
 
 			which++;
@@ -572,7 +576,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	doc.vertices[new_v]->SetRawXY(inst, { new_x, new_y });
+	doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
@@ -730,7 +734,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	// fix the first line's textures
 
-	int tex = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	const SideDef * SD = doc.sidedefs[L1->right];
 
@@ -766,7 +770,7 @@ void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, doubl
 	// avoid moving perfectly horizontal or vertical
 	// (also handes the case of dx == dy == 0)
 
-	if (abs(*dx) > abs(*dy))
+	if (fabs(*dx) > fabs(*dy))
 	{
 		*dx = (*dx < 0) ? -9 : +9;
 		*dy = (*dy < 0) ? -5 : +5;
@@ -777,10 +781,10 @@ void VertexModule::DETSEC_CalcMoveVector(const selection_c & detach_verts, doubl
 		*dy = (*dy < 0) ? -9 : +9;
 	}
 
-	if (abs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
-	if (abs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
+	if (fabs(*dx) < 2) *dx = (*dx < 0) ? -2 : +2;
+	if (fabs(*dy) < 4) *dy = (*dy < 0) ? -4 : +4;
 
-	double mul = 1.0 / CLAMP(0.25, inst.grid.Scale, 1.0);
+	double mul = 1.0 / clamp(0.25, inst.grid.Scale, 1.0);
 
 	*dx = (*dx) * mul;
 	*dy = (*dy) * mul;
@@ -889,8 +893,8 @@ void Instance::commandSectorDisconnect()
 		{
 			const Vertex * V = level.vertices[*it];
 
-			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(move_dx));
-			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(move_dy));
+			op.changeVertex(*it, Vertex::F_X, (V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx)).raw());
+			op.changeVertex(*it, Vertex::F_Y, (V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy)).raw());
 		}
 	}
 
@@ -961,11 +965,11 @@ void Instance::CMD_VT_ShapeLine()
 
 	// determine orientation and position of the line
 
-	double x1, y1, x2, y2;
-	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
+	v2double_t pos1, pos2;
+	level.objects.calcBBox(*edit.Selected, pos1, pos2);
 
-	double width  = x2 - x1;
-	double height = y2 - y1;
+	double width  = pos2.x - pos1.x;
+	double height = pos2.y - pos1.y;
 
 	if (width < 4 && height < 4)
 	{
@@ -990,7 +994,7 @@ void Instance::CMD_VT_ShapeLine()
 	{
 		const Vertex *V = level.vertices[*it];
 
-		double weight = WeightForVertex(V, x1,y1, x2,y2, width,height, -1);
+		double weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
 
 		if (weight > 0)
 		{
@@ -1000,7 +1004,7 @@ void Instance::CMD_VT_ShapeLine()
 			a_total += weight;
 		}
 
-		weight = WeightForVertex(V, x1,y1, x2,y2, width,height, +1);
+		weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
 
 		if (weight > 0)
 		{
@@ -1095,8 +1099,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(nx));
-		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(ny));
+		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(loaded.levelFormat, nx).raw());
+		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(loaded.levelFormat, ny).raw());
 	}
 }
 
@@ -1163,8 +1167,8 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 
 		if (move_vertices)
 		{
-			op->changeVertex(along_list[k].vert_num, Thing::F_X, inst.MakeValidCoord(new_x));
-			op->changeVertex(along_list[k].vert_num, Thing::F_Y, inst.MakeValidCoord(new_y));
+			op->changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
+			op->changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
 		}
 		else
 		{
@@ -1206,20 +1210,18 @@ void Instance::CMD_VT_ShapeArc()
 
 
 	// determine middle point for circle
-	double x1, y1, x2, y2;
-	level.objects.calcBBox(*edit.Selected, &x1, &y1, &x2, &y2);
+	v2double_t pos1, pos2;
+	level.objects.calcBBox(*edit.Selected, pos1, pos2);
 
-	double width  = x2 - x1;
-	double height = y2 - y1;
+	double width  = pos2.x - pos1.x;
+	double height = pos2.y - pos1.y;
 
 	if (width < 4 && height < 4)
 	{
 		Beep("Too small");
 		return;
 	}
-
-	double mid_x = (x1 + x2) * 0.5;
-	double mid_y = (y1 + y2) * 0.5;
+	v2double_t mid = (pos1 + pos2) * 0.5;
 
 
 	// collect all vertices and determine their angle (in radians),
@@ -1236,8 +1238,8 @@ void Instance::CMD_VT_ShapeArc()
 	{
 		const Vertex *V = level.vertices[*it];
 
-		double dx = V->x() - mid_x;
-		double dy = V->y() - mid_y;
+		double dx = V->x() - mid.x;
+		double dy = V->y() - mid.y;
 
 		double dist = hypot(dx, dy);
 
@@ -1290,8 +1292,7 @@ void Instance::CMD_VT_ShapeArc()
 
 	if (arc_deg < 360)
 	{
-		mid_x = (start_V->x() + end_V->x()) * 0.5;
-		mid_y = (start_V->y() + end_V->y()) * 0.5;
+		mid = (start_V->xy() + end_V->xy()) * 0.5;
 
 		r = start_end_dist * 0.5;
 
@@ -1308,12 +1309,12 @@ void Instance::CMD_VT_ShapeArc()
 
 		double away = r * tan(theta);
 
-		mid_x += dx * away;
-		mid_y += dy * away;
+		mid.x += dx * away;
+		mid.y += dy * away;
 
 		r = hypot(r, away);
 
-		best_offset = atan2(start_V->y() - mid_y, start_V->x() - mid_x);
+		best_offset = atan2(start_V->y() - mid.y, start_V->x() - mid.x);
 	}
 	else
 	{
@@ -1324,7 +1325,7 @@ void Instance::CMD_VT_ShapeArc()
 		{
 			double ang_offset = pos * M_PI * 2.0 / 1000.0;
 
-			double cost = level.vertmod.evaluateCircle(nullptr, mid_x, mid_y, r, along_list,
+			double cost = level.vertmod.evaluateCircle(nullptr, mid.x, mid.y, r, along_list,
 										 start_idx, arc_rad, ang_offset, false);
 
 			if (cost < best_cost)
@@ -1341,7 +1342,7 @@ void Instance::CMD_VT_ShapeArc()
 	EditOperation op(level.basis);
 	op.setMessage("shaped %d vertices", (int)along_list.size());
 
-	level.vertmod.evaluateCircle(&op, mid_x, mid_y, r, along_list, start_idx, arc_rad,
+	level.vertmod.evaluateCircle(&op, mid.x, mid.y, r, along_list, start_idx, arc_rad,
 				   best_offset, true);
 }
 

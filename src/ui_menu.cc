@@ -698,7 +698,7 @@ static void Menu_RemovedBoundKeys(Fl_Menu_Item *items)
 		else if (shortcut & FL_META)    key |= EMOD_META;
 		else if (shortcut & FL_ALT)     key |= EMOD_ALT;
 
-		if (M_IsKeyBound(key, KCTX_General))
+		if (M_IsKeyBound(key, KeyContext::general))
 			items[i].shortcut_ = 0;
 	}
 }

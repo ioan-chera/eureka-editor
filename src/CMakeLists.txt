@@ -8,16 +8,26 @@ set(source_base
     DocumentModule.h
     Errors.cc
     Errors.h
+    FixedPoint.h
     hdr_fltk.h
     Instance.cc
     Instance.h
+    LineDef.cc
+    LineDef.h
     main.cc
     main.h
     main.rc
     objid.h
     SafeOutFile.cc
     SafeOutFile.h
+    Sector.cc
+    Sector.h
+    Side.h
+    SideDef.cc
+    SideDef.h
+    Thing.h
     version.h
+    Vertex.h
     WadData.cc
     WadData.h
 )
@@ -328,7 +338,7 @@ endif()
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
     target_compile_options(eurekasrc PUBLIC "${CMAKE_CXX_FLAGS}" -Wall -Wextra -Werror
-                           -Wno-unused-parameter -Wno-missing-field-initializers)
+                           -Wno-unused-parameter -Wno-missing-field-initializers -Wunused-variable)
 endif()
 if ( MSVC )
     # TODO: make remove /W3 if there and set /W4

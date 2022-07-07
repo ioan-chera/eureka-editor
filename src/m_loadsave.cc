@@ -34,10 +34,15 @@
 #include "e_basis.h"
 #include "e_checks.h"
 #include "e_main.h"  // CalculateLevelBounds()
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_files.h"
 #include "m_loadsave.h"
 #include "r_subdiv.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_wad.h"
 
@@ -84,20 +89,20 @@ void Instance::FreshLevel()
 	Sector *sec = new Sector;
 	level.sectors.push_back(sec);
 
-	sec->SetDefaults(*this);
+	sec->SetDefaults(conf);
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		Vertex *v = new Vertex;
 		level.vertices.push_back(v);
 
-		v->SetRawX(*this, (i >= 2) ? 256 : -256);
-		v->SetRawY(*this, (i==1 || i==2) ? 256 :-256);
+		v->SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
+		v->SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
 
 		SideDef *sd = new SideDef;
 		level.sidedefs.push_back(sd);
 
-		sd->SetDefaults(*this, false);
+		sd->SetDefaults(conf, false);
 
 		LineDef *ld = new LineDef;
 		level.linedefs.push_back(ld);
@@ -116,8 +121,8 @@ void Instance::FreshLevel()
 		th->type  = pl;
 		th->angle = 90;
 
-		th->SetRawX(*this, (pl == 1) ? 0 : (pl - 3) * 48);
-		th->SetRawY(*this, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
+		th->SetRawX(loaded.levelFormat, (pl == 1) ? 0 : (pl - 3) * 48);
+		th->SetRawY(loaded.levelFormat, (pl == 1) ? 48 : (pl == 3) ? -48 : 0);
 	}
 
 	CalculateLevelBounds();
@@ -415,8 +420,8 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 
 		Vertex *vert = new Vertex;
 
-		vert->raw_x = INT_TO_COORD(LE_S16(raw.x));
-		vert->raw_y = INT_TO_COORD(LE_S16(raw.y));
+		vert->raw_x = FFixedPoint(LE_S16(raw.x));
+		vert->raw_y = FFixedPoint(LE_S16(raw.y));
 
 		level.vertices.push_back(vert);
 	}
@@ -470,7 +475,7 @@ void Instance::CreateFallbackSector()
 
 	Sector *sec = new Sector;
 
-	sec->SetDefaults(*this);
+	sec->SetDefaults(conf);
 
 	level.sectors.push_back(sec);
 }
@@ -485,7 +490,7 @@ void Instance::CreateFallbackSideDef()
 
 	SideDef *sd = new SideDef;
 
-	sd->SetDefaults(*this, false);
+	sd->SetDefaults(conf, false);
 
 	level.sidedefs.push_back(sd);
 }
@@ -497,11 +502,11 @@ static void CreateFallbackVertices(Document &doc)
 	Vertex *v1 = new Vertex;
 	Vertex *v2 = new Vertex;
 
-	v1->raw_x = INT_TO_COORD(-777);
-	v1->raw_y = INT_TO_COORD(-777);
+	v1->raw_x = FFixedPoint(-777);
+	v1->raw_y = FFixedPoint(-777);
 
-	v2->raw_x = INT_TO_COORD(555);
-	v2->raw_y = INT_TO_COORD(555);
+	v2->raw_x = FFixedPoint(555);
+	v2->raw_y = FFixedPoint(555);
 
 	doc.vertices.push_back(v1);
 	doc.vertices.push_back(v2);
@@ -643,8 +648,8 @@ void Instance::LoadThings(const Wad_file *load_wad)
 
 		Thing *th = new Thing;
 
-		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
-		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
+		th->raw_x = FFixedPoint(LE_S16(raw.x));
+		th->raw_y = FFixedPoint(LE_S16(raw.y));
 
 		th->angle   = LE_U16(raw.angle);
 		th->type    = LE_U16(raw.type);
@@ -678,9 +683,9 @@ void Instance::LoadThings_Hexen(const Wad_file *load_wad)
 		Thing *th = new Thing;
 
 		th->tid = LE_S16(raw.tid);
-		th->raw_x = INT_TO_COORD(LE_S16(raw.x));
-		th->raw_y = INT_TO_COORD(LE_S16(raw.y));
-		th->raw_h = INT_TO_COORD(LE_S16(raw.height));
+		th->raw_x = FFixedPoint(LE_S16(raw.x));
+		th->raw_y = FFixedPoint(LE_S16(raw.y));
+		th->raw_h = FFixedPoint(LE_S16(raw.height));
 
 		th->angle = LE_U16(raw.angle);
 		th->type = LE_U16(raw.type);
@@ -1332,8 +1337,8 @@ void Instance::SaveVertices()
 	{
 		raw_vertex_t raw;
 
-		raw.x = LE_S16(COORD_TO_INT(vert->raw_x));
-		raw.y = LE_S16(COORD_TO_INT(vert->raw_y));
+		raw.x = LE_S16(static_cast<int>(vert->raw_x));
+		raw.y = LE_S16(static_cast<int>(vert->raw_y));
 
 		lump->Write(&raw, sizeof(raw));
 	}
@@ -1371,8 +1376,8 @@ void Instance::SaveThings()
 	{
 		raw_thing_t raw;
 
-		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
-		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
+		raw.x = LE_S16(static_cast<int>(th->raw_x));
+		raw.y = LE_S16(static_cast<int>(th->raw_y));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);
@@ -1394,9 +1399,9 @@ void Instance::SaveThings_Hexen()
 
 		raw.tid = LE_S16(th->tid);
 
-		raw.x = LE_S16(COORD_TO_INT(th->raw_x));
-		raw.y = LE_S16(COORD_TO_INT(th->raw_y));
-		raw.height = LE_S16(COORD_TO_INT(th->raw_h));
+		raw.x = LE_S16(static_cast<int>(th->raw_x));
+		raw.y = LE_S16(static_cast<int>(th->raw_y));
+		raw.height = LE_S16(static_cast<int>(th->raw_h));
 
 		raw.angle   = LE_U16(th->angle);
 		raw.type    = LE_U16(th->type);

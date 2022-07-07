@@ -39,12 +39,17 @@
 #include "e_path.h"	  // SoundPropagation
 #include "im_color.h"
 #include "im_img.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "m_vector.h"
 #include "r_grid.h"
 #include "r_subdiv.h"
 #include "r_render.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"	// MLF_xxx
 #include "w_texture.h"
 
@@ -180,7 +185,7 @@ void UI_Canvas::draw()
 
 	// Note: this crud is a workaround for retina displays on MacOS
 	Fl::use_high_res_GL(true);
-	int pix = I_ROUND(inst.main_win->canvas->pixels_per_unit());
+	int pix = iround(inst.main_win->canvas->pixels_per_unit());
 	Fl::use_high_res_GL(false);
 
 	glLoadIdentity();
@@ -224,7 +229,7 @@ int UI_Canvas::NORMALX(int len, double dx, double dy)
 	if (got_len < 0.01)
 		return 0;
 
-	return I_ROUND(res * len / got_len);
+	return iround(res * len / got_len);
 }
 
 int UI_Canvas::NORMALY(int len, double dx, double dy)
@@ -239,7 +244,7 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 	if (got_len < 0.01)
 		return 0;
 
-	return I_ROUND(res * len / got_len);
+	return iround(res * len / got_len);
 }
 
 #ifdef NO_OPENGL
@@ -248,16 +253,16 @@ inline double UI_Canvas::MAPX(int sx) const { return grid.orig_x + (sx - w() / 2
 inline double UI_Canvas::MAPY(int sy) const { return grid.orig_y + (h() / 2 - sy + y()) / grid.Scale; }
 
 // convert map coordinates to screen coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + I_ROUND((mx - grid.orig_x) * grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + I_ROUND((grid.orig_y - my) * grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - grid.orig_x) * grid.Scale)); }
+inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((grid.orig_y - my) * grid.Scale)); }
 #else
 // convert GL coordinates to map coordinates
 inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2) / inst.grid.Scale; }
 inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (sy - h() / 2) / inst.grid.Scale; }
 
 // convert map coordinates to GL coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + I_ROUND((mx - inst.grid.orig.x) * inst.grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + I_ROUND((my - inst.grid.orig.y) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENY(double my) const { return (h() / 2 + iround((my - inst.grid.orig.y) * inst.grid.Scale)); }
 #endif
 
 void UI_Canvas::PointerPos(bool in_event)
@@ -331,12 +336,12 @@ void UI_Canvas::DrawEverything()
 
 	DrawSelection(inst.edit.Selected);
 
-	if (inst.edit.action == ACT_DRAG && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
+	if (inst.edit.action == EditorAction::drag && !inst.edit.dragged.valid() && inst.edit.drag_lines != NULL)
 		DrawSelection(inst.edit.drag_lines);
-	else if (inst.edit.action == ACT_TRANSFORM && inst.edit.trans_lines != NULL)
+	else if (inst.edit.action == EditorAction::transform && inst.edit.trans_lines != NULL)
 		DrawSelection(inst.edit.trans_lines);
 
-	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.valid())
+	if (inst.edit.action == EditorAction::drag && inst.edit.dragged.valid())
 	{
 		v2double_t delta = DragDelta();
 
@@ -372,7 +377,7 @@ void UI_Canvas::DrawEverything()
 	}
 	else if (inst.edit.highlight.valid())
 	{
-		if (inst.edit.action != ACT_DRAW_LINE && inst.edit.Selected->get(inst.edit.highlight.num))
+		if (inst.edit.action != EditorAction::drawLine && inst.edit.Selected->get(inst.edit.highlight.num))
 			RenderColor(HI_AND_SEL_COL);
 		else
 			RenderColor(HI_COL);
@@ -397,10 +402,10 @@ void UI_Canvas::DrawEverything()
 		RenderThickness(1);
 	}
 
-	if (inst.edit.action == ACT_SELBOX)
+	if (inst.edit.action == EditorAction::selbox)
 		SelboxDraw();
 
-	if (inst.edit.action == ACT_DRAW_LINE)
+	if (inst.edit.action == EditorAction::drawLine)
 		DrawCurrentLine();
 }
 
@@ -623,11 +628,11 @@ void UI_Canvas::DrawMapBounds()
 {
 	RenderColor(FL_RED);
 
-	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y1, inst.Map_bound_x2, inst.Map_bound_y1);
-	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y2, inst.Map_bound_x2, inst.Map_bound_y2);
+	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound1.y);
+	DrawMapLine(inst.Map_bound1.x, inst.Map_bound2.y, inst.Map_bound2.x, inst.Map_bound2.y);
 
-	DrawMapLine(inst.Map_bound_x1, inst.Map_bound_y1, inst.Map_bound_x1, inst.Map_bound_y2);
-	DrawMapLine(inst.Map_bound_x2, inst.Map_bound_y1, inst.Map_bound_x2, inst.Map_bound_y2);
+	DrawMapLine(inst.Map_bound1.x, inst.Map_bound1.y, inst.Map_bound1.x, inst.Map_bound2.y);
+	DrawMapLine(inst.Map_bound2.x, inst.Map_bound1.y, inst.Map_bound2.x, inst.Map_bound2.y);
 }
 
 
@@ -1076,8 +1081,8 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 			int ix = W * (rx - bx1) / (bx2 - bx1);
 			int iy = H * (ry - by1) / (by2 - by1);
 
-			ix = CLAMP(0, ix, W - 1);
-			iy = CLAMP(0, iy, H - 1);
+			ix = clamp(0, ix, W - 1);
+			iy = clamp(0, iy, H - 1);
 
 			img_pixel_t pix = img->buf()[iy * W + ix];
 
@@ -1155,12 +1160,12 @@ void UI_Canvas::DrawLineNumber(int mx1, int my1, int mx2, int my2, Side side, in
 	int sy = (y1 + y2) / 2;
 
 	// normally draw line numbers on back of line
-	int want_len = static_cast<int>(-16 * CLAMP(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
 
 	// for sectors, draw closer and on sector side
 	if (side != Side::neither)
 	{
-		want_len = static_cast<int>(2 + 12 * CLAMP(0.25, inst.grid.Scale, 1.0));
+		want_len = static_cast<int>(2 + 12 * clamp(0.25, inst.grid.Scale, 1.0));
 
 		if (side == Side::left)
 			want_len = -want_len;
@@ -1217,19 +1222,19 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 	}
 
 	// back of line is best place, no knob getting in the way
-	int want_len = static_cast<int>(-16 * CLAMP(0.25, inst.grid.Scale, 1.0));
+	int want_len = static_cast<int>(-16 * clamp(0.25, inst.grid.Scale, 1.0));
 
 	sx += NORMALX(want_len*2, x2 - x1, y2 - y1);
 	sy += NORMALY(want_len,   x2 - x1, y2 - y1);
 
 	/* length */
 
-	fixcoord_t idx = inst.MakeValidCoord(map_x2) - inst.MakeValidCoord(map_x1);
-	fixcoord_t idy = inst.MakeValidCoord(map_y2) - inst.MakeValidCoord(map_y1);
+	FFixedPoint idx = MakeValidCoord(inst.loaded.levelFormat, map_x2) - MakeValidCoord(inst.loaded.levelFormat, map_x1);
+	FFixedPoint idy = MakeValidCoord(inst.loaded.levelFormat, map_y2) - MakeValidCoord(inst.loaded.levelFormat, map_y1);
 
 	if (info == LINFO_Length || info >= LINFO_Length_Angle)
 	{
-		double length = hypot(FROM_COORD(idx), FROM_COORD(idy));
+		double length = hypot(static_cast<double>(idx), static_cast<double>(idy));
 
 		if (length > 0.1)
 		{
@@ -1246,8 +1251,8 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	if (info == LINFO_Angle || info == LINFO_Length_Angle)
 	{
-		double dx = FROM_COORD(idx);
-		double dy = FROM_COORD(idy);
+		double dx = static_cast<double>(idx);
+		double dy = static_cast<double>(idy);
 
 		int degrees = (int)round(atan2(dy, dx) * 180.0 / M_PI);
 		if (degrees < 0)
@@ -1263,7 +1268,7 @@ void UI_Canvas::DrawLineInfo(double map_x1, double map_y1, double map_x2, double
 
 	if (info == LINFO_Ratio || info == LINFO_Length_Ratio)
 	{
-		if (idx != 0 && idy != 0)
+		if (idx != FFixedPoint{} && idy != FFixedPoint{})
 		{
 			SString ratio_name = LD_RatioName(idx, idy, true);
 
@@ -1760,7 +1765,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 	if (! list || list->empty())
 		return;
 
-	if (inst.edit.action == ACT_TRANSFORM)
+	if (inst.edit.action == EditorAction::transform)
 	{
 		RenderColor(SEL_COL);
 
@@ -1778,7 +1783,7 @@ void UI_Canvas::DrawSelection(selection_c * list)
 
 	v2double_t delta = {};
 
-	if (inst.edit.action == ACT_DRAG && inst.edit.dragged.is_nil())
+	if (inst.edit.action == EditorAction::drag && inst.edit.dragged.is_nil())
 	{
 		delta = DragDelta();
 	}
@@ -1863,10 +1868,10 @@ void UI_Canvas::DrawKnobbyLine(double map_x1, double map_y1, double map_x2, doub
 }
 
 
-void UI_Canvas::DrawSplitPoint(double map_x, double map_y)
+void UI_Canvas::DrawSplitPoint(const v2double_t &map_pos)
 {
-	int sx = SCREENX(map_x);
-	int sy = SCREENY(map_y);
+	int sx = SCREENX(map_pos.x);
+	int sy = SCREENY(map_pos.y);
 
 	int size = (inst.grid.Scale >= 5.0) ? 9 : (inst.grid.Scale >= 1.0) ? 7 : 5;
 
@@ -1908,13 +1913,13 @@ void UI_Canvas::DrawSplitLine(double map_x1, double map_y1, double map_x2, doubl
 		double len1 = hypot(map_x1 - inst.edit.split.x, map_y1 - inst.edit.split.y);
 		double len2 = hypot(map_x2 - inst.edit.split.x, map_y2 - inst.edit.split.y);
 
-		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, I_ROUND(len1));
-		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, I_ROUND(len2));
+		DrawLineNumber(static_cast<int>(map_x1), static_cast<int>(map_y1), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, iround(len1));
+		DrawLineNumber(static_cast<int>(map_x2), static_cast<int>(map_y2), static_cast<int>(inst.edit.split.x), static_cast<int>(inst.edit.split.y), Side::neither, iround(len2));
 	}
 
 	RenderColor(HI_AND_SEL_COL);
 
-	DrawSplitPoint(inst.edit.split.x, inst.edit.split.y);
+	DrawSplitPoint(inst.edit.split);
 }
 
 
@@ -1936,7 +1941,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	int my = (y1 + y2) / 2;
 
 	int klen = std::max(abs(x2 - x1), abs(y2 - y1));
-	int want_len = CLAMP(12, klen / 4, 40);
+	int want_len = clamp(12, klen / 4, 40);
 
 	int kx = NORMALX(want_len, x2 - x1, y2 - y1);
 	int ky = NORMALY(want_len, x2 - x1, y2 - y1);
@@ -1949,7 +1954,7 @@ void UI_Canvas::DrawMapVector(double map_x1, double map_y1, double map_x2, doubl
 	if (r2 < 1.0)
 		r2 = 1.0;
 
-	double len = CLAMP(6.0, r2 / 10.0, 24.0);
+	double len = clamp(6.0, r2 / 10.0, 24.0);
 
 	int dx = (int) (len * (x1 - x2) / r2);
 	int dy = (int) (len * (y1 - y2) / r2);
@@ -1990,13 +1995,13 @@ void UI_Canvas::DrawMapArrow(double map_x1, double map_y1, int r, int angle)
 
 void UI_Canvas::DrawCamera()
 {
-	double map_x, map_y;
+	v2double_t map_pos;
 	float angle;
 
-	inst.Render3D_GetCameraPos(&map_x, &map_y, &angle);
+	inst.Render3D_GetCameraPos(map_pos, &angle);
 
-	float mx = static_cast<float>(map_x);
-	float my = static_cast<float>(map_y);
+	float mx = static_cast<float>(map_pos.x);
+	float my = static_cast<float>(map_pos.y);
 
 	float r = static_cast<float>(40.0 / sqrt(inst.grid.Scale));
 
@@ -2043,7 +2048,7 @@ void UI_Canvas::DrawCamera()
 void UI_Canvas::DrawSnapPoint()
 {
 	// don't draw if an action is occurring
-	if (inst.edit.action != ACT_NOTHING)
+	if (inst.edit.action != EditorAction::nothing)
 		return;
 
 	if (inst.edit.split_line.valid())
@@ -2064,32 +2069,31 @@ void UI_Canvas::DrawSnapPoint()
 
 void UI_Canvas::DrawCurrentLine()
 {
-	if (inst.edit.draw_from.is_nil())
+	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex * V = inst.level.vertices[inst.edit.draw_from.num];
+	const Vertex * V = inst.level.vertices[inst.edit.drawLine.from.num];
 
-	double new_x = inst.edit.draw_to_x;
-	double new_y = inst.edit.draw_to_y;
+	v2double_t newpos = inst.edit.drawLine.to;
 
 	// should draw a vertex?
 	if (! (inst.edit.highlight.valid() || inst.edit.split_line.valid()))
 	{
 		RenderColor(FL_GREEN);
-		DrawVertex(new_x, new_y, vertex_radius(inst.grid.Scale));
+		DrawVertex(newpos.x, newpos.y, vertex_radius(inst.grid.Scale));
 	}
 
 	RenderColor(RED);
-	DrawKnobbyLine(V->x(), V->y(), new_x, new_y);
+	DrawKnobbyLine(V->x(), V->y(), newpos.x, newpos.y);
 
-	DrawLineInfo(V->x(), V->y(), new_x, new_y, inst.grid.ratio > 0);
+	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.ratio > 0);
 
 	// draw all the crossing points
 	crossing_state_c cross(inst);
 
 	inst.level.hover.findCrossingPoints(cross,
-					   V->xy(), inst.edit.draw_from.num,
-		{ new_x, new_y }, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
+					   V->xy(), inst.edit.drawLine.from.num,
+		newpos, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
 	{
@@ -2104,20 +2108,20 @@ void UI_Canvas::DrawCurrentLine()
 		else
 			RenderColor(HI_AND_SEL_COL);
 
-		DrawSplitPoint(point.x, point.y);
+		DrawSplitPoint(point.pos);
 	}
 }
 
 
-bool UI_Canvas::SelboxGet(double& x1, double& y1, double& x2, double& y2)
+bool UI_Canvas::SelboxGet(v2double_t &pos1, v2double_t &pos2)
 {
-	x1 = std::min(inst.edit.selbox1.x, inst.edit.selbox2.x);
-	y1 = std::min(inst.edit.selbox1.y, inst.edit.selbox2.y);
-	x2 = std::max(inst.edit.selbox1.x, inst.edit.selbox2.x);
-	y2 = std::max(inst.edit.selbox1.y, inst.edit.selbox2.y);
+	pos1.x = std::min(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	pos1.y = std::min(inst.edit.selbox1.y, inst.edit.selbox2.y);
+	pos2.x = std::max(inst.edit.selbox1.x, inst.edit.selbox2.x);
+	pos2.y = std::max(inst.edit.selbox1.y, inst.edit.selbox2.y);
 
-	int scr_dx = abs(SCREENX(x2) - SCREENX(x1));
-	int scr_dy = abs(SCREENY(y2) - SCREENY(y1));
+	int scr_dx = abs(SCREENX(pos2.x) - SCREENX(pos1.x));
+	int scr_dy = abs(SCREENY(pos2.y) - SCREENY(pos1.y));
 
 	// small boxes should be ignored (treated as a click + release)
 	if (scr_dx < 5 && scr_dy < 5)

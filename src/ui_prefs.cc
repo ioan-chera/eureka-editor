@@ -151,25 +151,25 @@ private:
 	};
 
 	// need this because menu is in reverse order
-	key_context_e ContextFromMenu()
+	KeyContext ContextFromMenu()
 	{
 		int i = context->value();
 		SYS_ASSERT(i >= 0 && i <= 6);
-		return (key_context_e)((int)KCTX_General - i);
+		return (KeyContext)((int)KeyContext::general - i);
 	}
 
-	void SetContext(key_context_e ctx)
+	void SetContext(KeyContext ctx)
 	{
-		int i = (int)KCTX_General - (int)ctx;
+		int i = (int)KeyContext::general - (int)ctx;
 		SYS_ASSERT(i >= 0 && i <= 6);
 		context->value(i);
 	}
 
-	void AddContextToMenu(const char *lab, key_context_e ctx, key_context_e limit_ctx)
+	void AddContextToMenu(const char *lab, KeyContext ctx, KeyContext limit_ctx)
 	{
 		int flags = 0;
 
-		if (limit_ctx != KCTX_NONE && ctx != limit_ctx)
+		if (limit_ctx != KeyContext::none && ctx != limit_ctx)
 		{
 			flags = FL_MENU_INACTIVE;
 		}
@@ -177,25 +177,25 @@ private:
 		context->add(lab, 0, 0, 0, flags);
 	}
 
-	void PopulateContextMenu(key_context_e want_ctx)
+	void PopulateContextMenu(KeyContext want_ctx)
 	{
-		key_context_e limit_ctx = KCTX_NONE;
+		KeyContext limit_ctx = KeyContext::none;
 
-		if (cur_cmd && cur_cmd->req_context != KCTX_NONE)
+		if (cur_cmd && cur_cmd->req_context != KeyContext::none)
 			limit_ctx = cur_cmd->req_context;
 
 		context->clear();
 
-		AddContextToMenu("General (Any)",  KCTX_General, limit_ctx);
+		AddContextToMenu("General (Any)",  KeyContext::general, limit_ctx);
 
-		AddContextToMenu("Linedefs",  KCTX_Line,    limit_ctx);
-		AddContextToMenu("Sectors",   KCTX_Sector,  limit_ctx);
-		AddContextToMenu("Things",    KCTX_Thing,   limit_ctx);
-		AddContextToMenu("Vertices",  KCTX_Vertex,  limit_ctx);
-		AddContextToMenu("3D View",   KCTX_Render,  limit_ctx);
-		AddContextToMenu("Browser",   KCTX_Browser, limit_ctx);
+		AddContextToMenu("Linedefs",  KeyContext::line,    limit_ctx);
+		AddContextToMenu("Sectors",   KeyContext::sector,  limit_ctx);
+		AddContextToMenu("Things",    KeyContext::thing,   limit_ctx);
+		AddContextToMenu("Vertices",  KeyContext::vertex,  limit_ctx);
+		AddContextToMenu("3D View",   KeyContext::render,  limit_ctx);
+		AddContextToMenu("Browser",   KeyContext::browser, limit_ctx);
 
-		if (want_ctx != KCTX_NONE)
+		if (want_ctx != KeyContext::none)
 			SetContext(want_ctx);
 	}
 
@@ -239,7 +239,7 @@ private:
 			func_name->value("");
 	}
 
-	void Decode(key_context_e ctx, const char *str)
+	void Decode(KeyContext ctx, const char *str)
 	{
 		while (isspace(*str))
 			str++;
@@ -375,14 +375,14 @@ private:
 
 		func_name->value(cur_cmd->name);
 
-		key_context_e want_ctx = ContextFromMenu();
+		KeyContext want_ctx = ContextFromMenu();
 
-		if (cur_cmd->req_context)
+		if (cur_cmd->req_context != KeyContext::none)
 			want_ctx = cur_cmd->req_context;
 		else if (y_strnicmp(cur_cmd->name, "BR_", 3) == 0)
-			want_ctx = KCTX_Browser;
-		else if (old_cmd && old_cmd->req_context)
-			want_ctx = KCTX_General;
+			want_ctx = KeyContext::browser;
+		else if (old_cmd && old_cmd->req_context != KeyContext::none)
+			want_ctx = KeyContext::general;
 
 		PopulateContextMenu(want_ctx);
 
@@ -473,7 +473,7 @@ private:
 	}
 
 public:
-	UI_EditKey(keycode_t _key, key_context_e ctx, const char *_funcname) :
+	UI_EditKey(keycode_t _key, KeyContext ctx, const char *_funcname) :
 		UI_Escapable_Window(400, 306, "Edit Key Binding"),
 		want_close(false), cancelled(false),
 		awaiting_key(false),
@@ -481,8 +481,8 @@ public:
 	{
 		// _key may be zero (when "Add" button is used)
 
-		if (ctx == KCTX_NONE)
-			ctx = KCTX_General;
+		if (ctx == KeyContext::none)
+			ctx = KeyContext::general;
 
 		callback(close_callback, this);
 
@@ -534,15 +534,15 @@ public:
 		// parse line into function name and parameters
 		Decode(ctx, _funcname);
 
-		PopulateContextMenu(ctx == KCTX_NONE ? KCTX_General : ctx);
+		PopulateContextMenu(ctx == KeyContext::none ? KeyContext::general : ctx);
 	}
 
 
-	bool Run(keycode_t *key_v, key_context_e *ctx_v,
+	bool Run(keycode_t *key_v, KeyContext *ctx_v,
 			 SString *func_v, bool start_grabbed)
 	{
 		*key_v  = 0;
-		*ctx_v  = KCTX_NONE;
+		*ctx_v  = KeyContext::none;
 		func_v->clear();
 
 		// check the initial state
@@ -1230,7 +1230,7 @@ void UI_Preferences::edit_key_callback(Fl_Button *w, void *data)
 
 
 	keycode_t     new_key  = 0;
-	key_context_e new_context = KCTX_General;
+	KeyContext new_context = KeyContext::general;
 	SString  new_func = "Nothing";
 
 
@@ -1452,8 +1452,8 @@ void UI_Preferences::LoadValues()
 	/* Edit Tab */
 
 	edit_def_port->value(config::default_port.c_str());
-	edit_def_mode->value(CLAMP(0, config::default_edit_mode, 3));
-	edit_lineinfo->value(CLAMP(0, config::highlight_line_info, 5));
+	edit_def_mode->value(clamp(0, config::default_edit_mode, 3));
+	edit_lineinfo->value(clamp(0, config::highlight_line_info, 5));
 
 	edit_sectorsize->value(SString(config::new_sector_size).c_str());
 	edit_samemode->value(config::same_mode_clears_selection ? 1 : 0);
@@ -1500,7 +1500,7 @@ void UI_Preferences::LoadValues()
 
 	/* 3D Tab */
 
-	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
+	config::render_pixel_aspect = clamp(25, config::render_pixel_aspect, 400);
 
 	char aspect_buf[64];
 	snprintf(aspect_buf, sizeof(aspect_buf), "%1.2f", config::render_pixel_aspect / 100.0);
@@ -1604,7 +1604,7 @@ void UI_Preferences::SaveValues()
 	config::highlight_line_info = edit_lineinfo->value();
 
 	config::new_sector_size = atoi(edit_sectorsize->value());
-	config::new_sector_size = CLAMP(4, config::new_sector_size, 8192);
+	config::new_sector_size = clamp(4, config::new_sector_size, 8192);
 
 	config::same_mode_clears_selection = edit_samemode->value() ? true : false;
 	config::sidedef_add_del_buttons = !!edit_add_del->value();
@@ -1680,7 +1680,7 @@ void UI_Preferences::SaveValues()
 	/* Other Tab */
 
 	config::render_pixel_aspect = (int)(100 * atof(rend_aspect->value()) + 0.2);
-	config::render_pixel_aspect = CLAMP(25, config::render_pixel_aspect, 400);
+	config::render_pixel_aspect = clamp(25, config::render_pixel_aspect, 400);
 
 	config::render_high_detail  = rend_high_detail->value() ? true : false;
 	config::render_lock_gravity = rend_lock_grav->value() ? true : false;

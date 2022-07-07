@@ -49,9 +49,6 @@ struct v2int_t;
 class Instance
 {
 public:
-	// E_BASIS
-	fixcoord_t MakeValidCoord(double x) const;
-
 	// E_COMMANDS
 	void ACT_Click_release();
 	void ACT_Drag_release();
@@ -238,8 +235,8 @@ public:
 	// M_EVENTS
 	void ClearStickyMod();
 	void Editor_ClearNav();
-	void Editor_ScrollMap(int mode, int dx = 0, int dy = 0, keycode_t mod = 0);
-	void Editor_SetAction(editor_action_e new_action);
+	void Editor_ScrollMap(int mode, v2int_t dpos = {}, keycode_t mod = 0);
+	void Editor_SetAction(EditorAction new_action);
 	void EV_EscapeKey();
 	int EV_HandleEvent(int event);
 	void M_LoadOperationMenus();
@@ -270,7 +267,7 @@ public:
 	bool Exec_HasFlag(const char *flag) const;
 	bool ExecuteCommand(const editor_command_t *cmd, const SString &param1 = "", const SString &param2 = "", const SString &param3 = "", const SString &param4 = "");
 	bool ExecuteCommand(const SString &name, const SString &param1 = "", const SString &param2 = "", const SString &param3 = "", const SString &param4 = "");
-	bool ExecuteKey(keycode_t key, key_context_e context);
+	bool ExecuteKey(keycode_t key, KeyContext context);
 
 	// M_LOADSAVE
 	Lump_c *Load_LookupAndSeek(const Wad_file *wad, const char *name) const;
@@ -302,8 +299,8 @@ public:
 
 	// R_RENDER
 	void Render3D_CB_Copy() ;
-	void Render3D_GetCameraPos(double *x, double *y, float *angle) const;
-	void Render3D_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	void Render3D_GetCameraPos(v2double_t &pos, float *angle) const;
+	void Render3D_MouseMotion(v2int_t pos, keycode_t mod, v2int_t dpos);
 	bool Render3D_ParseUser(const std::vector<SString> &tokens);
 	void Render3D_SetCameraPos(const v2double_t &newpos);
 	void Render3D_Setup();
@@ -368,7 +365,7 @@ private:
 	void Editor_Zoom(int delta, v2int_t mid);
 	void EV_EnterWindow();
 	void EV_LeaveWindow();
-	void EV_MouseMotion(int x, int y, keycode_t mod, int dx, int dy);
+	void EV_MouseMotion(v2int_t pos, keycode_t mod, v2int_t dpos);
 	int EV_RawButton(int event);
 	int EV_RawKey(int event);
 	int EV_RawMouse(int event);
@@ -422,16 +419,16 @@ private:
 	void Grid_WriteUser(std::ostream &os) const;
 
 	// R_RENDER
-	int GrabSelectedFlat();
-	int GrabSelectedTexture();
+	StringID GrabSelectedFlat();
+	StringID GrabSelectedTexture();
 	int GrabSelectedThing();
-	int LD_GrabTex(const LineDef *L, int part) const;
+	StringID LD_GrabTex(const LineDef *L, int part) const;
 	void Render3D_CB_Cut();
 	void Render3D_CB_Paste();
 	void Render3D_Navigate();
 	void StoreDefaultedFlats();
-	void StoreSelectedFlat(int new_tex);
-	void StoreSelectedTexture(int new_tex);
+	void StoreSelectedFlat(StringID new_tex);
+	void StoreSelectedTexture(StringID new_tex);
 	void StoreSelectedThing(int new_type);
 
 public:	// will be private when we encapsulate everything
@@ -470,10 +467,8 @@ public:	// will be private when we encapsulate everything
 	// Document stuff
 	//
 	bool MadeChanges = false;
-	double Map_bound_x1 = 32767;   /* minimum X value of map */
-	double Map_bound_y1 = 32767;   /* minimum Y value of map */
-	double Map_bound_x2 = -32767;   /* maximum X value of map */
-	double Map_bound_y2 = -32767;   /* maximum Y value of map */
+	v2double_t Map_bound1 = { 32767, 32767 };	/* minimum XY value of map */
+	v2double_t Map_bound2 = { -32767, -32767 };	/* maximum XY value of map */
 	int moved_vertex_count = 0;
 	int new_vertex_minimum = 0;
 	bool recalc_map_bounds = false;
@@ -509,15 +504,13 @@ public:	// will be private when we encapsulate everything
 	//
 	nav_active_key_t cur_action_key = {};
 	bool in_operation_menu = false;
-	int mouse_last_x = 0;
-	int mouse_last_y = 0;
+	v2int_t mouse_last_pos = {};
 	nav_active_key_t nav_actives[MAX_NAV_ACTIVE_KEYS] = {};
 	unsigned nav_time = 0;
 	bool no_operation_cfg = false;
 	std::unordered_map<SString, Fl_Menu_Button *> op_all_menus;
 	// these are grabbed from FL_MOUSEWHEEL events
-	int wheel_dx = 0;
-	int wheel_dy = 0;
+	v2int_t wheel_dpos = {};
 
 	// key or mouse button pressed for command, 0 when none
 	keycode_t EXEC_CurKey = {};

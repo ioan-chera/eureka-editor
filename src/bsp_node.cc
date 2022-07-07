@@ -39,6 +39,9 @@
 
 #include "Errors.h"
 #include "Instance.h"
+#include "LineDef.h"
+#include "SideDef.h"
+#include "Vertex.h"
 #include "bsp.h"
 
 #include "w_rawdef.h"
@@ -564,12 +567,12 @@ static int EvalPartition(quadtree_c *tree, seg_t *part, int best_cost, const Doc
 	}
 
 	/* increase cost by the difference between left & right */
-	info.cost += 100 * ABS(info.real_left - info.real_right);
+	info.cost += 100 * abs(info.real_left - info.real_right);
 
 	// -AJA- allow miniseg counts to affect the outcome, but to a
 	//       lesser degree than real segs.
 
-	info.cost += 50 * ABS(info.mini_left - info.mini_right);
+	info.cost += 50 * abs(info.mini_left - info.mini_right);
 
 	// -AJA- Another little twist, here we show a slight preference for
 	//       partition lines that lie either purely horizontally or
@@ -1896,8 +1899,8 @@ void subsec_t::RoundOff()
 	for (seg=seg_list ; seg ; seg=seg->next)
 	{
 		// is the seg degenerate ?
-		if (I_ROUND(seg->start->x) == I_ROUND(seg->end->x) &&
-			I_ROUND(seg->start->y) == I_ROUND(seg->end->y))
+		if (iround(seg->start->x) == iround(seg->end->x) &&
+			iround(seg->start->y) == iround(seg->end->y))
 		{
 			seg->is_degenerate = true;
 
@@ -1936,10 +1939,10 @@ void subsec_t::RoundOff()
 
 #   if DEBUG_SUBSEC
 		gLog.debugPrintf("Degenerate after:  (%d,%d) -> (%d,%d)\n",
-				I_ROUND(last_real_degen->start->x),
-				I_ROUND(last_real_degen->start->y),
-				I_ROUND(last_real_degen->end->x),
-				I_ROUND(last_real_degen->end->y));
+						 iround(last_real_degen->start->x),
+						 iround(last_real_degen->start->y),
+						 iround(last_real_degen->end->x),
+						 iround(last_real_degen->end->y));
 #   endif
 
 		last_real_degen->is_degenerate = false;

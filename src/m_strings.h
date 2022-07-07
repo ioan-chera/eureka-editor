@@ -423,13 +423,57 @@ inline static long strtol(const SString &string, char **endptr, int radix)
 }
 
 //
+// Opaque identifier for string. Maps to an int.
+//
+class StringID
+{
+public:
+	StringID() = default;
+	explicit StringID(int num) : num(num)
+	{
+	}
+	int get() const
+	{
+		return num;
+	}
+	bool operator == (StringID other) const
+	{
+		return num == other.num;
+	}
+	bool operator != (StringID other) const
+	{
+		return num != other.num;
+	}
+	bool operator ! () const
+	{
+		return !num;
+	}
+	bool isValid() const
+	{
+		return num >= 0;
+	}
+	bool isInvalid() const
+	{
+		return num < 0;
+	}
+	bool hasContent() const
+	{
+		return num > 0;
+	}
+
+private:
+	int num = 0;
+};
+static_assert(sizeof(StringID) == sizeof(int), "StringID must be size of int");
+
+//
 // String storage table
 //
 class StringTable
 {
 public:
-	int add(const SString &str);
-	SString get(int offset) const;
+	StringID add(const SString &str);
+	SString get(StringID offset) const;
 private:
 	// Must start with an empty string, so get(0) gets "".
 	std::vector<SString> mStrings = { "" };	

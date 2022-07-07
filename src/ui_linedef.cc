@@ -30,7 +30,10 @@
 #include "e_linedef.h"
 #include "e_main.h"
 #include "e_things.h"
+#include "LineDef.h"
 #include "m_game.h"
+#include "Sector.h"
+#include "SideDef.h"
 #include "w_rawdef.h"
 #include "w_rawdef.h"
 
@@ -290,7 +293,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, int new_tex, int e_state, int parts)
+void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e_state, int parts)
 {
 	bool opposite = (e_state & FL_SHIFT);
 
@@ -413,7 +416,7 @@ void UI_LineBox::checkSidesDirtyFields()
 
 void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 {
-	int new_tex = BA_InternaliseString(tex_name);
+	StringID new_tex = BA_InternaliseString(tex_name);
 
 	// this works a bit differently than other ways, we don't modify a
 	// widget and let it update the map, instead we update the map and
@@ -506,7 +509,7 @@ void UI_LineBox::CB_Copy(int parts)
 }
 
 
-void UI_LineBox::CB_Paste(int parts, int new_tex)
+void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 {
 	// iterate over selected linedefs
 	if (inst.edit.Selected->empty())
@@ -662,7 +665,7 @@ void UI_LineBox::args_callback(Fl_Widget *w, void *data)
 	int arg_idx = l_f_c->mask;
 	int new_value = atoi(box->args[arg_idx]->value());
 
-	new_value = CLAMP(0, new_value, 255);
+	new_value = clamp(0, new_value, 255);
 
 	if (! box->inst.edit.Selected->empty())
 	{
@@ -685,7 +688,7 @@ void UI_LineBox::length_callback(Fl_Widget *w, void *data)
 	int new_len = atoi(box->length->value());
 
 	// negative values are allowed, it moves the start vertex
-	new_len = CLAMP(-32768, new_len, 32768);
+	new_len = clamp(-32768, new_len, 32768);
 
 	box->inst.level.linemod.setLinedefsLength(new_len);
 }

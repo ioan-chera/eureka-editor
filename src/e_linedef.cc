@@ -32,9 +32,13 @@
 #include "e_linedef.h"
 #include "e_main.h"
 #include "im_img.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "e_objects.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -436,14 +440,14 @@ void LinedefModule::doAlignX(EditOperation &op, const Objid& cur,
 
 	if (on_left)
 	{
-		new_offset += I_ROUND(adj_L->CalcLength(doc));
+		new_offset += iround(adj_L->CalcLength(doc));
 
 		if (new_offset > 0)
 			new_offset &= 1023;
 	}
 	else
 	{
-		new_offset -= I_ROUND(cur_L->CalcLength(doc));
+		new_offset -= iround(cur_L->CalcLength(doc));
 
 		if (new_offset < 0)
 			new_offset = - (-new_offset & 1023);
@@ -532,7 +536,7 @@ void LinedefModule::doClearOfs(EditOperation &op, const Objid& cur, int align_fl
 		// when the /right flag is used, make the texture end at the right side
 		// (whereas zero makes it begin at the left side)
 		if (align_flags & LINALIGN_Right)
-			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - I_ROUND(pointer(cur)->CalcLength(doc)));
+			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0 - iround(pointer(cur)->CalcLength(doc)));
 		else
 			op.changeSidedef(sd, SideDef::F_X_OFFSET, 0);
 	}
@@ -928,13 +932,13 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 	L2->start = new_v;
 	L2->end   = L->end;
 
-	int orig_length = I_ROUND(L->CalcLength(doc));
+	int orig_length = iround(L->CalcLength(doc));
 
 	// update vertex on original line
 	op.changeLinedef(ld, LineDef::F_END, new_v);
 
 	// compute lengths (to update sidedef X offsets)
-	int new_length  = I_ROUND(L->CalcLength(doc));
+	int new_length  = iround(L->CalcLength(doc));
 
 	// update sidedefs
 
@@ -984,7 +988,7 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 
 	Vertex * V = doc.vertices[new_v];
 
-	V->SetRawXY(inst, new_p);
+	V->SetRawXY(inst.loaded.levelFormat, new_p);
 
 	splitLinedefAtVertex(op, ld, new_v);
 
@@ -1048,7 +1052,7 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	const SideDef *other = doc.sidedefs[other_sd];
 
@@ -1085,11 +1089,11 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	// determine textures for each side
-	int  left_tex = 0;
-	int right_tex = 0;
+	StringID  left_tex;
+	StringID right_tex;
 
 	if (! is_null_tex(L->Left(doc)->MidTex()))
 		left_tex = L->Left(doc)->mid_tex;
@@ -1153,7 +1157,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 
 	const SideDef *SD = doc.sidedefs[other_sd];
 
-	int new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -1247,7 +1251,7 @@ void Instance::commandLinedefMergeTwo()
 //
 // Move coordinate into linedef
 //
-void LinedefModule::moveCoordOntoLinedef(int ld, v2double_t &v) const
+void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 {
 	const LineDef *L = doc.linedefs[ld];
 	
@@ -1339,8 +1343,8 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 	double dx = abs(new_len) * cos(angle);
 	double dy = abs(new_len) * sin(angle);
 
-	int idx = I_ROUND(dx);
-	int idy = I_ROUND(dy);
+	int idx = iround(dx);
+	int idy = iround(dy);
 
 	if (idx == 0 && idy == 0)
 	{
@@ -1353,13 +1357,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - INT_TO_COORD(idx));
-		op.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - INT_TO_COORD(idy));
+		op.changeVertex(L->start, Vertex::F_X, (L->End(doc)->raw_x - FFixedPoint(idx)).raw());
+		op.changeVertex(L->start, Vertex::F_Y, (L->End(doc)->raw_y - FFixedPoint(idy)).raw());
 	}
 	else
 	{
-		op.changeVertex(L->end, Vertex::F_X, L->Start(doc)->raw_x + INT_TO_COORD(idx));
-		op.changeVertex(L->end, Vertex::F_Y, L->Start(doc)->raw_y + INT_TO_COORD(idy));
+		op.changeVertex(L->end, Vertex::F_X, (L->Start(doc)->raw_x + FFixedPoint(idx)).raw());
+		op.changeVertex(L->end, Vertex::F_Y, (L->Start(doc)->raw_y + FFixedPoint(idy)).raw());
 	}
 }
 
@@ -1409,7 +1413,7 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 
 	SYS_ASSERT(L->Right(doc));
 
-	int tex;
+	StringID tex;
 
 	if (! is_null_tex(L->Right(doc)->LowerTex()))
 		tex = L->Right(doc)->lower_tex;
@@ -1459,26 +1463,26 @@ double LinedefModule::angleBetweenLines(int A, int B, int C) const
 }
 
 
-SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
+SString LD_RatioName(FFixedPoint idx, FFixedPoint idy, bool number_only)
 {
-	idx = abs(idx);
-	idy = abs(idy);
+	idx = idx.abs();
+	idy = idy.abs();
 
-	if (idx == 0 && idy == 0)
+	if (!idx && !idy)
 	{
 		if (number_only)
 			return "0:0";
 		else
 			return "zero-len";
 	}
-	else if (idx == 0)
+	else if (!idx)
 	{
 		if (number_only)
 			return "1:0";
 		else
 			return "vertical";
 	}
-	else if (idy == 0)
+	else if (!idy)
 	{
 		if (number_only)
 			return "0:1";
@@ -1487,8 +1491,8 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 	}
 
 	// compute the greatest common divisor
-	int a = idx;
-	int b = idy;
+	FFixedPoint a = idx;
+	FFixedPoint b = idy;
 	int gcd = 1;
 
 	for (;;)
@@ -1499,7 +1503,7 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 			b -= a;
 		else
 		{
-			gcd = a;
+			gcd = a.raw();
 			break;
 		}
 	}
@@ -1508,11 +1512,11 @@ SString LD_RatioName(fixcoord_t idx, fixcoord_t idy, bool number_only)
 	idy /= gcd;
 
 	// if ratio is really complex, it isn't worth showing
-	if (idx > 999 || idy > 999)
+	if (idx.raw() > 999 || idy.raw() > 999)
 		return SString("---");
 
 	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx, idy);
+	snprintf(buffer, sizeof(buffer), "%s%d:%d", number_only ? "" : "ratio ", idx.raw(), idy.raw());
 
 	return SString(buffer);
 }

@@ -35,32 +35,32 @@ namespace global
 	static std::vector< editor_command_t * > all_commands;
 }
 
-static key_context_e RequiredContextFromName(const char *name)
+static KeyContext RequiredContextFromName(const char *name)
 {
-	if (strncmp(name, "LIN_", 4) == 0) return KCTX_Line;
-	if (strncmp(name, "SEC_", 4) == 0) return KCTX_Sector;
-	if (strncmp(name, "TH_",  3) == 0) return KCTX_Thing;
-	if (strncmp(name, "VT_",  3) == 0) return KCTX_Vertex;
+	if (strncmp(name, "LIN_", 4) == 0) return KeyContext::line;
+	if (strncmp(name, "SEC_", 4) == 0) return KeyContext::sector;
+	if (strncmp(name, "TH_",  3) == 0) return KeyContext::thing;
+	if (strncmp(name, "VT_",  3) == 0) return KeyContext::vertex;
 
 	// we don't need anything for KCTX_Browser or KCTX_Render
 
-	return KCTX_NONE;
+	return KeyContext::none;
 }
 
 
-static const char * CalcGroupName(const char *given, key_context_e ctx)
+static const char * CalcGroupName(const char *given, KeyContext ctx)
 {
 	if (given)
 		return given;
 
 	switch (ctx)
 	{
-		case KCTX_Line:    return "Line";
-		case KCTX_Sector:  return "Sector";
-		case KCTX_Thing:   return "Thing";
-		case KCTX_Vertex:  return "Vertex";
-		case KCTX_Render:  return "3D View";
-		case KCTX_Browser: return "Browser";
+		case KeyContext::line:    return "Line";
+		case KeyContext::sector:  return "Sector";
+		case KeyContext::thing:   return "Thing";
+		case KeyContext::vertex:  return "Vertex";
+		case KeyContext::render:  return "3D View";
+		case KeyContext::browser: return "Browser";
 
 		default: return "General";
 	}
@@ -84,10 +84,9 @@ void M_RegisterCommandList(editor_command_t * list)
 }
 
 
-const editor_command_t * FindEditorCommand(const SString &namem)
+const editor_command_t * FindEditorCommand(SString name)
 {
 	// backwards compatibility
-	SString name = namem;
 	if (name.noCaseEqual("GRID_Step"))
 		name = "GRID_Bump";
 	else if (name.noCaseEqual("Check"))
@@ -99,9 +98,9 @@ const editor_command_t * FindEditorCommand(const SString &namem)
 	else if (name.noCaseEqual("OperationMenu"))
 		name = "OpMenu";
 
-	for (unsigned int i = 0 ; i < global::all_commands.size() ; i++)
-		if (name.noCaseEqual(global::all_commands[i]->name))
-			return global::all_commands[i];
+	for (const editor_command_t *command : global::all_commands)
+		if (name.noCaseEqual(command->name))
+			return command;
 
 	return NULL;
 }
@@ -372,32 +371,32 @@ int M_KeyCmp(keycode_t A, keycode_t B)
 //------------------------------------------------------------------------
 
 
-key_context_e M_ParseKeyContext(const SString &str)
+KeyContext M_ParseKeyContext(const SString &str)
 {
-	if (str.noCaseEqual("browser")) return KCTX_Browser;
-	if (str.noCaseEqual("render")) return KCTX_Render;
-	if (str.noCaseEqual("general")) return KCTX_General;
+	if (str.noCaseEqual("browser")) return KeyContext::browser;
+	if (str.noCaseEqual("render")) return KeyContext::render;
+	if (str.noCaseEqual("general")) return KeyContext::general;
 
-	if (str.noCaseEqual("line")) return KCTX_Line;
-	if (str.noCaseEqual("sector")) return KCTX_Sector;
-	if (str.noCaseEqual("thing")) return KCTX_Thing;
-	if (str.noCaseEqual("vertex")) return KCTX_Vertex;
+	if (str.noCaseEqual("line")) return KeyContext::line;
+	if (str.noCaseEqual("sector")) return KeyContext::sector;
+	if (str.noCaseEqual("thing")) return KeyContext::thing;
+	if (str.noCaseEqual("vertex")) return KeyContext::vertex;
 
-	return KCTX_NONE;
+	return KeyContext::none;
 }
 
-const char * M_KeyContextString(key_context_e context)
+const char * M_KeyContextString(KeyContext context)
 {
 	switch (context)
 	{
-		case KCTX_Browser: return "browser";
-		case KCTX_Render:  return "render";
-		case KCTX_General: return "general";
+		case KeyContext::browser: return "browser";
+		case KeyContext::render:  return "render";
+		case KeyContext::general: return "general";
 
-		case KCTX_Line:    return "line";
-		case KCTX_Sector:  return "sector";
-		case KCTX_Thing:   return "thing";
-		case KCTX_Vertex:  return "vertex";
+		case KeyContext::line:    return "line";
+		case KeyContext::sector:  return "sector";
+		case KeyContext::thing:   return "thing";
+		case KeyContext::vertex:  return "vertex";
 
 		default: break;
 	}
@@ -412,7 +411,7 @@ struct key_binding_t
 {
 	keycode_t key;
 
-	key_context_e context;
+	KeyContext context;
 
 	const editor_command_t *cmd;
 
@@ -434,7 +433,7 @@ namespace global
 struct KeyBindLookup
 {
     const keycode_t key;
-    const key_context_e context;
+    const KeyContext context;
 
     bool operator()(const key_binding_t &bind)
     {
@@ -442,14 +441,14 @@ struct KeyBindLookup
     }
 };
 
-bool M_IsKeyBound(keycode_t key, key_context_e context)
+bool M_IsKeyBound(keycode_t key, KeyContext context)
 {
     return std::any_of(global::all_bindings.begin(), global::all_bindings.end(),
                        KeyBindLookup{key, context});
 }
 
 
-void M_RemoveBinding(keycode_t key, key_context_e context)
+void M_RemoveBinding(keycode_t key, KeyContext context)
 {
     auto it = std::remove_if(global::all_bindings.begin(), global::all_bindings.end(),
                              KeyBindLookup{key, context});
@@ -465,6 +464,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 	// this ensures all parameters are NUL terminated
 	key_binding_t temp = {};
 
+	assert(tokens.size() >= 2);
 	temp.key = M_ParseKeyString(tokens[1]);
 
 	if (! temp.key)
@@ -475,7 +475,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 	temp.context = M_ParseKeyContext(tokens[0]);
 
-	if (temp.context == KCTX_NONE)
+	if (temp.context == KeyContext::none)
 	{
 		gLog.printf("bindings.cfg: unknown context: %s\n", tokens[0].c_str());
 		return;
@@ -483,6 +483,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 
 	// handle un-bound keys
+	assert(tokens.size() >= 3);
 	if (tokens[2].noCaseEqual("UNBOUND"))
 	{
 #if 0
@@ -500,7 +501,7 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 		return;
 	}
 
-	if (temp.cmd->req_context != KCTX_NONE &&
+	if (temp.cmd->req_context != KeyContext::none &&
 	    temp.context != temp.cmd->req_context)
 	{
 		gLog.printf("bindings.cfg: function '%s' in wrong context '%s'\n",
@@ -639,13 +640,13 @@ void M_SaveBindings()
 	os << "# Eureka key bindings (local)\n";
 	os << "# vi:ts=16:noexpandtab\n\n";
 
-	for (int ctx = KCTX_Browser ; ctx <= KCTX_General ; ctx++)
+	for (KeyContext ctx : validKeyContexts)
 	{
 		int count = 0;
 
 		for (const key_binding_t &bind : global::all_bindings)
 		{
-			if (bind.context != (key_context_e)ctx)
+			if (bind.context != ctx)
 				continue;
 
 			// no need to write it if unchanged from install_dir
@@ -869,7 +870,7 @@ const char * M_StringForBinding(int index, bool changing_key)
 }
 
 
-void M_GetBindingInfo(int index, keycode_t *key, key_context_e *context)
+void M_GetBindingInfo(int index, keycode_t *key, KeyContext *context)
 {
 	// hmmm... exposing key_binding_t may have been easier...
 
@@ -917,7 +918,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const SString & func
 
 	// check context is suitable
 
-	if (cmd->req_context != KCTX_NONE &&
+	if (cmd->req_context != KeyContext::none &&
 	    bind.context != cmd->req_context)
 	{
 		SString mode = SString(M_KeyContextString(cmd->req_context)).asUpper();
@@ -943,7 +944,7 @@ static const char * DoParseBindingFunc(key_binding_t& bind, const SString & func
 }
 
 // returns an error message, or NULL if OK
-const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
+const char * M_SetLocalBinding(int index, keycode_t key, KeyContext context,
 							   const SString &func_str)
 {
 	SYS_ASSERT(0 <= index && index < (int)global::pref_binds.size());
@@ -957,7 +958,7 @@ const char * M_SetLocalBinding(int index, keycode_t key, key_context_e context,
 }
 
 
-const char * M_AddLocalBinding(int after, keycode_t key, key_context_e context,
+const char * M_AddLocalBinding(int after, keycode_t key, KeyContext context,
                        const char *func_str)
 {
 	// this ensures the parameters are NUL terminated
@@ -1033,19 +1034,19 @@ int M_KeyToShortcut(keycode_t key)
 }
 
 
-key_context_e M_ModeToKeyContext(ObjType mode)
+KeyContext M_ModeToKeyContext(ObjType mode)
 {
 	switch (mode)
 	{
-		case ObjType::things:   return KCTX_Thing;
-		case ObjType::linedefs: return KCTX_Line;
-		case ObjType::sectors:  return KCTX_Sector;
-		case ObjType::vertices: return KCTX_Vertex;
+		case ObjType::things:   return KeyContext::thing;
+		case ObjType::linedefs: return KeyContext::line;
+		case ObjType::sectors:  return KeyContext::sector;
+		case ObjType::vertices: return KeyContext::vertex;
 
 		default: break;
 	}
 
-	return KCTX_NONE;  /* shouldn't happen */
+	return KeyContext::none;  /* shouldn't happen */
 }
 
 
@@ -1077,7 +1078,7 @@ void Instance::DoExecuteCommand(const editor_command_t *cmd)
 }
 
 
-static const key_binding_t *FindBinding(keycode_t key, key_context_e context, bool lax_only)
+static const key_binding_t *FindBinding(keycode_t key, KeyContext context, bool lax_only)
 {
 	for (const key_binding_t &bind : global::all_bindings)
 	{
@@ -1113,7 +1114,7 @@ static const key_binding_t *FindBinding(keycode_t key, key_context_e context, bo
 }
 
 
-bool Instance::ExecuteKey(keycode_t key, key_context_e context)
+bool Instance::ExecuteKey(keycode_t key, KeyContext context)
 {
 	for (int p = 0 ; p < MAX_EXEC_PARAM ; p++)
 	{

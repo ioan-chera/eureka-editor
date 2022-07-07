@@ -27,6 +27,7 @@
 #include "e_main.h"
 #include "m_config.h"
 #include "m_game.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 
 
@@ -538,7 +539,7 @@ void UI_ThingBox::x_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited X of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_X, box->inst.MakeValidCoord(new_x));
+			op.changeThing(*it, Thing::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x).raw());
 
 	}
 }
@@ -555,7 +556,7 @@ void UI_ThingBox::y_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Y of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_Y, box->inst.MakeValidCoord(new_y));
+			op.changeThing(*it, Thing::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y).raw());
 	}
 }
 
@@ -571,7 +572,7 @@ void UI_ThingBox::z_callback(Fl_Widget *w, void *data)
 		op.setMessageForSelection("edited Z of", *box->inst.edit.Selected);
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
-			op.changeThing(*it, Thing::F_H, INT_TO_COORD(new_h));
+			op.changeThing(*it, Thing::F_H, FFixedPoint(new_h).raw());
 	}
 }
 
@@ -646,7 +647,7 @@ void UI_ThingBox::args_callback(Fl_Widget *w, void *data)
 	int arg_idx = ocb->mask;
 	int new_value = atoi(box->args[arg_idx]->value());
 
-	new_value = CLAMP(0, new_value, 255);
+	new_value = clamp(0, new_value, 255);
 
 	if (!box->inst.edit.Selected->empty())
 	{

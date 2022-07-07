@@ -27,6 +27,7 @@
 #include "e_sector.h"
 #include "e_vertex.h"
 
+class crc32_c;
 class Instance;
 
 //

@@ -30,7 +30,10 @@
 
 #include <map>
 
+#include "LineDef.h"
 #include "m_bitvec.h"
+#include "Sector.h"
+#include "SideDef.h"
 #include "w_rawdef.h"
 #include "e_cutpaste.h"
 #include "e_hover.h"
@@ -39,6 +42,7 @@
 #include "e_objects.h"
 #include "e_sector.h"
 #include "e_vertex.h"
+#include "Vertex.h"
 
 #include "ui_window.h"
 
@@ -109,7 +113,7 @@ void Instance::CMD_SEC_Floor()
 		{
 			const Sector *S = level.sectors[*it];
 
-			int new_h = CLAMP(-32767, S->floorh + diff, S->ceilh);
+			int new_h = clamp(-32767, S->floorh + diff, S->ceilh);
 
 			op.changeSector(*it, Sector::F_FLOORH, new_h);
 		}
@@ -147,7 +151,7 @@ void Instance::CMD_SEC_Ceil()
 		{
 			const Sector *S = level.sectors[*it];
 
-			int new_h = CLAMP(S->floorh, S->ceilh + diff, 32767);
+			int new_h = clamp(S->floorh, S->ceilh + diff, 32767);
 
 			op.changeSector(*it, Sector::F_CEILH, new_h);
 		}
@@ -177,7 +181,7 @@ static int light_add_delta(int level, int delta)
 		level = (level - 1) & ~(abs(delta)-1);
 	}
 
-	return CLAMP(0, level, 255);
+	return clamp(0, level, 255);
 }
 
 
@@ -247,8 +251,8 @@ void Instance::CMD_SEC_SwapFlats()
 		{
 			const Sector *S = level.sectors[*it];
 
-			int floor_tex = S->floor_tex;
-			int  ceil_tex = S->ceil_tex;
+			StringID floor_tex = S->floor_tex;
+			StringID  ceil_tex = S->ceil_tex;
 
 			op.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
 			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
@@ -889,17 +893,17 @@ inline bool SectorModule::willBeTwoSided(int ld, Side side) const
 
 
 void SectorModule::determineNewTextures(lineloop_c& loop,
-								 std::vector<int>& lower_texs,
-								 std::vector<int>& upper_texs) const
+								 std::vector<StringID>& lower_texs,
+								 std::vector<StringID>& upper_texs) const
 {
 	unsigned int total = static_cast<unsigned>(loop.lines.size());
 
 	SYS_ASSERT(lower_texs.size() == total);
 
-	int null_tex  = BA_InternaliseString("-");
+	StringID null_tex  = BA_InternaliseString("-");
 
-	int def_lower = BA_InternaliseString(inst.conf.default_wall_tex);
-	int def_upper = def_lower;
+	StringID def_lower = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID def_upper = def_lower;
 
 	unsigned int k;
 	unsigned int pass;
@@ -954,7 +958,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 
 		if (sd < 0)
 		{
-			lower_texs[k] = upper_texs[k] = -1;
+			lower_texs[k] = upper_texs[k] = StringID(-1);
 			continue;
 		}
 
@@ -981,7 +985,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	{
 		for (k = 0 ; k < total ; k++)
 		{
-			if (lower_texs[k] >= 0)
+			if (lower_texs[k].isValid())
 				continue;
 
 			// next and previous line indices
@@ -1001,8 +1005,8 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			}
 
 			// disable p or n if there is no texture there yet
-			if (p < total && lower_texs[p] < 0) p = total;
-			if (n < total && lower_texs[n] < 0) n = total;
+			if (p < total && lower_texs[p].isInvalid()) p = total;
+			if (n < total && lower_texs[n].isInvalid()) n = total;
 
 			if (p == total && n == total)
 				continue;
@@ -1019,8 +1023,8 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	// lastly, ensure all textures are valid
 	for (k = 0 ; k < total ; k++)
 	{
-		if (lower_texs[k] < 0) lower_texs[k] = def_lower;
-		if (upper_texs[k] < 0) upper_texs[k] = def_upper;
+		if (lower_texs[k].isInvalid()) lower_texs[k] = def_lower;
+		if (upper_texs[k].isInvalid()) upper_texs[k] = def_upper;
 	}
 }
 
@@ -1030,7 +1034,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 // reference, and creating a new sidedef if necessary.
 //
 void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
-						   int new_lower, int new_upper,
+								  StringID new_lower, StringID new_upper,
 						   selection_c &flip) const
 {
 // gLog.debugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
@@ -1055,8 +1059,8 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	else
 		flip.clear(ld);
 
-	SYS_ASSERT(new_lower >= 0);
-	SYS_ASSERT(new_upper >= 0);
+	SYS_ASSERT(new_lower.isValid());
+	SYS_ASSERT(new_upper.isValid());
 
 	// create new sidedef
 	int new_sd = op.addNew(ObjType::sidedefs);
@@ -1096,8 +1100,8 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 
 void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c &flip)
 {
-	std::vector<int> lower_texs(lines.size());
-	std::vector<int> upper_texs(lines.size());
+	std::vector<StringID> lower_texs(lines.size());
+	std::vector<StringID> upper_texs(lines.size());
 
 	doc.secmod.determineNewTextures(*this, lower_texs, upper_texs);
 
@@ -1114,14 +1118,14 @@ void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c &flip)
 }
 
 
-bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop) const
+bool SectorModule::getLoopForSpace(const v2double_t &map, lineloop_c& loop) const
 {
 	selection_c seen_lines(ObjType::linedefs);
 
 	int ld;
 	Side side;
 
-	ld = doc.hover.getClosestLine_CastingHoriz({ map_x, map_y }, &side);
+	ld = hover::getClosestLine_CastingHoriz(doc, map, &side);
 
 	gLog.debugPrintf("GetLoopForSpace : hit line #%d, side %d\n", ld, (int)side);
 
@@ -1189,11 +1193,11 @@ bool SectorModule::getLoopForSpace(double map_x, double map_y, lineloop_c& loop)
 // the 'model' is what properties to use for a new sector, < 0 means
 // look for a neighboring sector to copy.
 //
-bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double map_y, int new_sec, int model) const
+bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map, int new_sec, int model) const
 {
 	lineloop_c loop(doc);
 
-	if (! getLoopForSpace(map_x, map_y, loop))
+	if (! getLoopForSpace(map, loop))
 	{
 		inst.Beep("Area is not closed");
 		return false;
@@ -1209,7 +1213,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, double map_x, double m
 			model = loop.NeighboringSector();
 
 		if (model < 0)
-			doc.sectors[new_sec]->SetDefaults(inst);
+			doc.sectors[new_sec]->SetDefaults(inst.conf);
 		else
 			*doc.sectors[new_sec] = *doc.sectors[model];
 	}

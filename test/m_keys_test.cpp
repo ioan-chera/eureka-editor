@@ -134,37 +134,37 @@ TEST_F(MKeys, MKeyToString)
 
 TEST_F(MKeys, MIsKeyBound)
 {
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KCTX_Browser));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_Browser));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_General));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KCTX_Line));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_Render));
+    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::general));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KeyContext::line));
+    ASSERT_FALSE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::render));
 }
 
 TEST_F(MKeys, MRemoveBindingAndSave)
 {
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
-    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KCTX_Vertex);
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
-    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KCTX_General);
-    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
-    M_RemoveBinding(EMOD_ALT | FL_Left, KCTX_Render);
-    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KCTX_Render));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
+    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KeyContext::vertex);
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
+    M_RemoveBinding(EMOD_SHIFT | FL_BackSpace, KeyContext::general);
+    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
+    M_RemoveBinding(EMOD_ALT | FL_Left, KeyContext::render);
+    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
     M_SaveBindings();
 
     M_LoadBindings();
 
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_Browser));
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KCTX_Browser));
-    ASSERT_TRUE(M_IsKeyBound(FL_Page_Down, KCTX_Browser));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KCTX_Render));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_ALT | FL_Right, KCTX_Render));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KCTX_Line));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_META | 'n', KCTX_General));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | ' ', KCTX_General));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_Delete, KCTX_General));
-    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KCTX_General));
-    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KCTX_General));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::browser));
+    ASSERT_TRUE(M_IsKeyBound(FL_Page_Up, KeyContext::browser));
+    ASSERT_TRUE(M_IsKeyBound(FL_Page_Down, KeyContext::browser));
+    ASSERT_FALSE(M_IsKeyBound(EMOD_ALT | FL_Left, KeyContext::render));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_ALT | FL_Right, KeyContext::render));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | 'e', KeyContext::line));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_META | 'n', KeyContext::general));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | ' ', KeyContext::general));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_SHIFT | FL_Delete, KeyContext::general));
+    ASSERT_FALSE(M_IsKeyBound(EMOD_SHIFT | FL_BackSpace, KeyContext::general));
+    ASSERT_TRUE(M_IsKeyBound(EMOD_COMMAND | 'k', KeyContext::general));
 
 }
 

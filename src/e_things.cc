@@ -31,6 +31,7 @@
 #include "e_things.h"
 #include "e_main.h"
 #include "m_bitvec.h"
+#include "Thing.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -88,8 +89,8 @@ static bool ThingsAtSameLoc(const Document &doc, int th1, int th2)
 	const Thing *T1 = doc.things[th1];
 	const Thing *T2 = doc.things[th2];
 
-	double dx = abs(T1->x() - T2->x());
-	double dy = abs(T1->y() - T2->y());
+	double dx = fabs(T1->x() - T2->x());
+	double dy = fabs(T1->y() - T2->y());
 
 	return (dx < 8 && dy < 8);
 }
@@ -116,13 +117,13 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 
 	float dist = static_cast<float>(8 + 6 * std::min(100, total));
 
-	fixcoord_t fdx = inst.MakeValidCoord(vec_x * dist);
-	fixcoord_t fdy = inst.MakeValidCoord(vec_y * dist);
+	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, vec_x * dist);
+	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, vec_y * dist);
 
 	const Thing *T = inst.level.things[th];
 
-	op.changeThing(th, Thing::F_X, T->raw_x + fdx);
-	op.changeThing(th, Thing::F_Y, T->raw_y + fdy);
+	op.changeThing(th, Thing::F_X, (T->raw_x + fdx).raw());
+	op.changeThing(th, Thing::F_Y, (T->raw_y + fdy).raw());
 }
 
 
@@ -191,8 +192,8 @@ void CMD_TH_Merge(Instance &inst)
 
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		op.changeThing(*it, Thing::F_X, inst.MakeValidCoord(mid.x));
-		op.changeThing(*it, Thing::F_Y, inst.MakeValidCoord(mid.y));
+		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, mid.x).raw());
+		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, mid.y).raw());
 	}
 }
 

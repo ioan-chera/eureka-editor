@@ -18,6 +18,11 @@
 
 #include "Document.h"
 #include "lib_adler.h"
+#include "LineDef.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 
 //
 // Get number of objects based on enum
@@ -47,8 +52,8 @@ int Document::numObjects(ObjType type) const
 
 static void ChecksumThing(crc32_c &crc, const Thing *T)
 {
-	crc += T->raw_x;
-	crc += T->raw_y;
+	crc += T->raw_x.raw();
+	crc += T->raw_y.raw();
 	crc += T->angle;
 	crc += T->type;
 	crc += T->options;
@@ -56,8 +61,8 @@ static void ChecksumThing(crc32_c &crc, const Thing *T)
 
 static void ChecksumVertex(crc32_c &crc, const Vertex *V)
 {
-	crc += V->raw_x;
-	crc += V->raw_y;
+	crc += V->raw_x.raw();
+	crc += V->raw_y.raw();
 }
 
 static void ChecksumSector(crc32_c &crc, const Sector *sector)

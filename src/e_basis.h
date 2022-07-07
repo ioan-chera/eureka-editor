@@ -28,16 +28,26 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
+#include "FixedPoint.h"
 #include "m_strings.h"
-#include "m_vector.h"
 #include "objid.h"
+#include "Sector.h"
+#include "SideDef.h"
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
-class crc32_c;
 class selection_c;
-struct Document;
+class LineDef;
+struct Thing;
+struct Vertex;
+
+namespace global
+{
+	extern int	default_floor_h;
+	extern int	default_ceil_h;
+	extern int	default_light_level;
+}
 
 //
 // DESIGN NOTES
@@ -55,304 +65,18 @@ struct Document;
 // can cause problems or crashes when playing the map in DOOM.
 //
 
-
-// a fixed-point coordinate with 12 bits of fractional part.
-typedef int fixcoord_t;
-
-#define  FROM_COORD(fx)  ((double)(fx) / 4096.0)
-#define    TO_COORD(db)  ((fixcoord_t) I_ROUND((db) * 4096.0))
-
-#define INT_TO_COORD(i)  ((fixcoord_t) ((i) * 4096))
-#define COORD_TO_INT(i)  ((int) ((i) / 4096))
-
-enum class Side
-{
-	right,
-	left,
-	neither
-};
-static const Side kSides[] = { Side::right, Side::left };
-inline static Side operator - (Side side)
-{
-	if(side == Side::right)
-		return Side::left;
-	if(side == Side::left)
-		return Side::right;
-	return side;
-}
-inline static Side operator * (Side side1, Side side2)
-{
-	if(side1 == Side::neither || side2 == Side::neither)
-		return Side::neither;
-	if(side1 != side2)
-		return Side::left;
-	return Side::right;
-}
-
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
-
-class Thing
+// E_BASIS
+enum class MapFormat
 {
-public:
-	fixcoord_t raw_x = 0;
-	fixcoord_t raw_y = 0;
-
-	int angle = 0;
-	int type = 0;
-	int options = 0;
-
-	// Hexen stuff
-	fixcoord_t raw_h = 0;
-
-	int tid = 0;
-	int special = 0;
-	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
-
-	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
-	       F_H, F_TID, F_SPECIAL,
-		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
-
-public:
-	inline double x() const
-	{
-		return FROM_COORD(raw_x);
-	}
-	inline double y() const
-	{
-		return FROM_COORD(raw_y);
-	}
-	inline double h() const
-	{
-		return FROM_COORD(raw_h);
-	}
-	inline v2double_t xy() const
-	{
-		return { x(), y() };
-	}
-
-	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(const Instance &inst, double x);
-	void SetRawY(const Instance &inst, double y);
-	void SetRawH(const Instance &inst, double h);
-
-	void SetRawXY(const Instance &inst, const v2double_t &pos)
-	{
-		SetRawX(inst, pos.x);
-		SetRawY(inst, pos.y);
-	}
-
-	int Arg(int which /* 1..5 */) const
-	{
-		if (which == 1) return arg1;
-		if (which == 2) return arg2;
-		if (which == 3) return arg3;
-		if (which == 4) return arg4;
-		if (which == 5) return arg5;
-
-		return 0;
-	}
+	invalid,
+	doom,
+	hexen,
+	udmf
 };
 
-
-class Vertex
-{
-public:
-	fixcoord_t raw_x = 0;
-	fixcoord_t raw_y = 0;
-
-	enum { F_X, F_Y };
-
-public:
-	inline double x() const
-	{
-		return FROM_COORD(raw_x);
-	}
-	inline double y() const
-	{
-		return FROM_COORD(raw_y);
-	}
-	inline v2double_t xy() const
-	{
-		return { x(), y() };
-	}
-
-	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(const Instance &inst, double x);
-	void SetRawY(const Instance &inst, double y);
-
-	void SetRawXY(const Instance &inst, const v2double_t &pos)
-	{
-		SetRawX(inst, pos.x);
-		SetRawY(inst, pos.y);
-	}
-
-	bool Matches(fixcoord_t ox, fixcoord_t oy) const
-	{
-		return (raw_x == ox) && (raw_y == oy);
-	}
-
-	bool operator == (const Vertex &other) const
-	{
-		return raw_x == other.raw_x && raw_y == other.raw_y;
-	}
-	bool operator != (const Vertex &other) const
-	{
-		return raw_x != other.raw_x || raw_y != other.raw_y;
-	}
-};
-
-
-class Sector
-{
-public:
-	int floorh = 0;
-	int ceilh = 0;
-	int floor_tex = 0;
-	int ceil_tex = 0;
-	int light = 0;
-	int type = 0;
-	int tag = 0;
-
-	enum { F_FLOORH, F_CEILH, F_FLOOR_TEX, F_CEIL_TEX, F_LIGHT, F_TYPE, F_TAG };
-
-public:
-	SString FloorTex() const;
-	SString CeilTex() const;
-
-	int HeadRoom() const
-	{
-		return ceilh - floorh;
-	}
-
-	void SetDefaults(const Instance &inst);
-};
-
-
-class SideDef
-{
-public:
-	int x_offset = 0;
-	int y_offset = 0;
-	int upper_tex = 0;
-	int mid_tex = 0;
-	int lower_tex = 0;
-	int sector = 0;
-
-	enum { F_X_OFFSET, F_Y_OFFSET, F_UPPER_TEX, F_MID_TEX, F_LOWER_TEX, F_SECTOR };
-
-public:
-
-	SString UpperTex() const;
-	SString MidTex()   const;
-	SString LowerTex() const;
-
-	Sector *SecRef(const Document &doc) const;
-
-	// use new_tex when >= 0, otherwise use default_wall_tex
-	void SetDefaults(const Instance &inst, bool two_sided, int new_tex = -1);
-};
-
-
-class LineDef
-{
-public:
-	int start = 0;
-	int end = 0;
-	int right = -1;
-	int left = -1;
-
-	int flags = 0;
-	int type = 0;
-	int tag = 0;
-
-	// Hexen stuff  [NOTE: tag is 'arg1']
-	int arg2 = 0;
-	int arg3 = 0;
-	int arg4 = 0;
-	int arg5 = 0;
-
-	enum { F_START, F_END, F_RIGHT, F_LEFT,
-	       F_FLAGS, F_TYPE, F_TAG,
-		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
-
-public:
-	Vertex *Start(const Document &doc) const;
-	Vertex *End(const Document &doc)   const;
-
-	// remember: these two can return NULL!
-	SideDef *Right(const Document &doc) const;
-	SideDef *Left(const Document &doc)  const;
-
-	bool TouchesVertex(int v_num) const
-	{
-		return (start == v_num) || (end == v_num);
-	}
-
-	//
-	// Assuming TouchesVertex(v_num), return the other one. Undefined otherwise.
-	//
-	int OtherVertex(int v_num) const
-	{
-		return start == v_num ? end : start;
-	}
-
-	bool TouchesCoord(fixcoord_t tx, fixcoord_t ty, const Document &doc) const
-	{
-		return Start(doc)->Matches(tx, ty) || End(doc)->Matches(tx, ty);
-	}
-
-	bool TouchesSector(int sec_num, const Document &doc) const;
-
-	bool NoSided() const
-	{
-		return (right < 0) && (left < 0);
-	}
-
-	bool OneSided() const
-	{
-		return (right >= 0) && (left < 0);
-	}
-
-	bool TwoSided() const
-	{
-		return (right >= 0) && (left >= 0);
-	}
-
-	// side is either SIDE_LEFT or SIDE_RIGHT
-	int WhatSector(Side side, const Document &doc) const;
-	int WhatSideDef(Side side) const;
-
-	double CalcLength(const Document &doc) const;
-
-	bool IsZeroLength(const Document &doc) const
-	{
-		return (Start(doc)->raw_x == End(doc)->raw_x) && (Start(doc)->raw_y == End(doc)->raw_y);
-	}
-
-	bool IsSelfRef(const Document &doc) const;
-
-	bool IsHorizontal(const Document &doc) const
-	{
-		return (Start(doc)->raw_y == End(doc)->raw_y);
-	}
-
-	bool IsVertical(const Document &doc) const
-	{
-		return (Start(doc)->raw_x == End(doc)->raw_x);
-	}
-
-	int Arg(int which /* 1..5 */) const
-	{
-		if (which == 1) return tag;
-		if (which == 2) return arg2;
-		if (which == 3) return arg3;
-		if (which == 4) return arg4;
-		if (which == 5) return arg5;
-
-		return 0;
-	}
-};
+FFixedPoint MakeValidCoord(MapFormat format, double x);
 
 //
 // Editor command manager, handles undo/redo
@@ -520,8 +244,10 @@ private:
 	bool change(ObjType type, int objnum, byte field, int value);
 	bool changeThing(int thing, byte field, int value);
 	bool changeVertex(int vert, byte field, int value);
-	bool changeSector(int sec, byte field, int value);
-	bool changeSidedef(int side, byte field, int value);
+	bool changeSector(int sec, Sector::IntAddress field, int value);
+	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
+	bool changeSidedef(int side, SideDef::IntAddress field, int value);
+	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
 	void del(ObjType type, int objnum);
 	void end();
@@ -544,7 +270,7 @@ private:
 class EditOperation
 {
 public:
-	EditOperation(Basis &basis) : basis(basis)
+	EditOperation(Basis &basis) : doc(basis.doc), basis(basis)
 	{
 		basis.begin();
 	}
@@ -582,12 +308,20 @@ public:
 		return basis.changeVertex(vert, field, value);
 	}
 
-	bool changeSector(int sec, byte field, int value)
+	bool changeSector(int sec, Sector::IntAddress field, int value)
+	{
+		return basis.changeSector(sec, field, value);
+	}
+	bool changeSector(int sec, Sector::StringIDAddress field, StringID value)
 	{
 		return basis.changeSector(sec, field, value);
 	}
 
-	bool changeSidedef(int side, byte field, int value)
+	bool changeSidedef(int side, SideDef::IntAddress field, int value)
+	{
+		return basis.changeSidedef(side, field, value);
+	}
+	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
 	{
 		return basis.changeSidedef(side, field, value);
 	}
@@ -608,6 +342,8 @@ public:
 		abortKeepChanges = keepChanges;
 	}
 
+	Document &doc;	// convenience reference to doc
+
 private:
 	Basis &basis;
 	bool abort = false;
@@ -620,10 +356,10 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 
 // add this string to the basis string table (if it doesn't
 // already exist) and return its integer offset.
-int BA_InternaliseString(const SString &str);
+StringID BA_InternaliseString(const SString &str);
 
 // get the string from the basis string table.
-SString BA_GetString(int offset);
+SString BA_GetString(StringID offset);
 
 #endif  /* __EUREKA_E_BASIS_H__ */
 

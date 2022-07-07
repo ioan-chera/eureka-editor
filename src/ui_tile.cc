@@ -103,7 +103,7 @@ void UI_Tile::ShowRight()
 		return;
 
 	// determine the width of the browser
-	right_W = CLAMP(MIN_BROWSER_W, right_W, w() - 32);
+	right_W = clamp(MIN_BROWSER_W, right_W, w() - 32);
 
 	add(right);
 

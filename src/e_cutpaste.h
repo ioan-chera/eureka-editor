@@ -26,9 +26,9 @@
 class EditOperation;
 class selection_c;
 class SString;
+class StringID;
 struct ConfigData;
 struct Document;
-class Instance;
 
 //
 // Edit menu command
@@ -41,7 +41,6 @@ enum class EditCommand
 	del
 };
 
-void Clipboard_Clear();
 void Clipboard_ClearLocals();
 
 void Clipboard_NotifyBegin();
@@ -64,8 +63,8 @@ void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const sele
 
 void Texboard_Clear();
 
-int Texboard_GetFlatNum(const ConfigData &config);
-int Texboard_GetTexNum(const ConfigData &config);
+StringID Texboard_GetFlatNum(const ConfigData &config);
+StringID Texboard_GetTexNum(const ConfigData &config);
 int Texboard_GetThing(const ConfigData &config);
 void Texboard_SetFlat(const SString &new_flat, const ConfigData &config);
 void Texboard_SetTex(const SString &new_tex, const ConfigData &config);

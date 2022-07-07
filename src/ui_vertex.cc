@@ -25,6 +25,7 @@
 
 #include "e_main.h"
 #include "m_game.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 
 
@@ -117,7 +118,7 @@ void UI_VertexBox::x_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeVertex(*it, Vertex::F_X, box->inst.MakeValidCoord(new_x));
+			op.changeVertex(*it, Vertex::F_X, MakeValidCoord(box->inst.loaded.levelFormat, new_x).raw());
 		}
 	}
 }
@@ -135,7 +136,7 @@ void UI_VertexBox::y_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			op.changeVertex(*it, Vertex::F_Y, box->inst.MakeValidCoord(new_y));
+			op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(box->inst.loaded.levelFormat, new_y).raw());
 		}
 	}
 }
@@ -164,8 +165,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 	if (!box->inst.edit.Selected->empty())
 	{
-		fixcoord_t fdx = box->inst.MakeValidCoord(dx * step);
-		fixcoord_t fdy = box->inst.MakeValidCoord(dy * step);
+		FFixedPoint fdx = MakeValidCoord(box->inst.loaded.levelFormat, dx * step);
+		FFixedPoint fdy = MakeValidCoord(box->inst.loaded.levelFormat, dy * step);
 
 		box->mFixUp.checkDirtyFields();
 
@@ -176,8 +177,8 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 		{
 			const Vertex *V = box->inst.level.vertices[*it];
 
-			op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-			op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+			op.changeVertex(*it, Vertex::F_X, (V->raw_x + fdx).raw());
+			op.changeVertex(*it, Vertex::F_Y, (V->raw_y + fdy).raw());
 		}
 	}
 }

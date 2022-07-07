@@ -60,6 +60,27 @@ enum class SelectHighlight
 };
 
 //
+// line drawing stuff (EditorAction::drawLine)
+//
+struct DrawLineState
+{
+	Objid from;	// the vertex we are drawing a line from
+	v2double_t to;	// target coordinate of current line
+};
+
+//
+// Navigation state
+//
+struct Navigation
+{
+	float fwd,    back;
+	float left,   right;
+	float up,     down;
+	float turn_L, turn_R;
+	bool  lax;
+};
+
+//
 // this holds some important editor state
 //
 struct Editor_State_t
@@ -72,7 +93,7 @@ struct Editor_State_t
 
 	bool render3d;     // 3D view is active
 
-	editor_action_e  action;  // an in-progress action, usually ACT_NOTHING
+	EditorAction  action;  // an in-progress action, usually EditorAction::nothing
 
 	keycode_t sticky_mod;  // if != 0, waiting for next key  (fake meta)
 
@@ -102,21 +123,17 @@ struct Editor_State_t
 	bool is_navigating;  // user is holding down a navigation key
 	bool is_panning;     // user is panning the map (turning in 3D) via RMB
 
-	float nav_fwd,    nav_back;
-	float nav_left,   nav_right;
-	float nav_up,     nav_down;
-	float nav_turn_L, nav_turn_R;
-	bool  nav_lax;
+	Navigation nav;
 
 	float panning_speed;
 	bool  panning_lax;
 
 
-	/* click stuff (ACT_CLICK) */
+	/* click stuff (EditorAction::click) */
 
 	Objid clicked;    // object under the pointer when ACT_Click occurred
 
-	int click_screen_x, click_screen_y;  // screen coord of the click
+	v2int_t click_screen_pos;	// screen coord of the click
 
 	v3double_t click_map;	// location of the click
 
@@ -125,20 +142,16 @@ struct Editor_State_t
 	bool click_force_single;
 
 
-	/* line drawing stuff (ACT_DRAW_LINE) */
+	/* line drawing stuff (EditorAction::drawLine) */
+	DrawLineState drawLine;
 
-	Objid draw_from;  // the vertex we are drawing a line from
-
-	double draw_to_x, draw_to_y;  // target coordinate of current line
-
-
-	/* selection-box stuff (ACT_SELBOX) */
+	/* selection-box stuff (EditorAction::selbox) */
 
 	v2double_t selbox1;  // map coords
 	v2double_t selbox2;
 
 
-	/* transforming state (ACT_TRANSFORM) */
+	/* transforming state (EditorAction::transform) */
 
 	v2double_t trans_start;
 
@@ -148,11 +161,11 @@ struct Editor_State_t
 	selection_c *trans_lines;
 
 
-	/* dragging state (ACT_DRAG) */
+	/* dragging state (EditorAction::drag) */
 
 	Objid dragged;    // the object we are dragging, or nil for whole selection
 
-	int drag_screen_dx, drag_screen_dy;
+	v2int_t drag_screen_dpos;
 
 	v3double_t drag_start;
 	v3double_t drag_focus;
@@ -169,7 +182,7 @@ struct Editor_State_t
 	selection_c *drag_lines;
 
 
-	/* adjusting state (ACT_ADJUST_OFS) */
+	/* adjusting state (EditorAction::adjustOfs) */
 
 	float adjust_dx, adjust_dy;
 	bool  adjust_lax;
@@ -186,7 +199,7 @@ void DumpSelection (selection_c * list);
 
 void ConvertSelection(const Document &doc, const selection_c & src, selection_c & dest);
 
-void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, double x1, double y1, double x2, double y2);
+void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype, v2double_t pos1, v2double_t pos2);
 
 //----------------------------------------------------------------------
 //  Helper for handling either the highlight or selection

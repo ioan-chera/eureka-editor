@@ -26,9 +26,12 @@
 #include "e_hover.h"	// OppositeSector
 #include "e_linedef.h"
 #include "e_main.h"
+#include "LineDef.h"
 #include "m_config.h"
 #include "m_game.h"
 #include "r_render.h"
+#include "Sector.h"
+#include "SideDef.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 
@@ -175,7 +178,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	int new_tex;
+	StringID new_tex;
 	box->mFixUp.checkDirtyFields();	// fine to do it here
 	checkLinedefDirtyFields(box->inst);
 
@@ -287,7 +290,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 		{
 			int new_sec = op.addNew(ObjType::sectors);
 
-			box->inst.level.sectors[new_sec]->SetDefaults(box->inst);
+			box->inst.level.sectors[new_sec]->SetDefaults(box->inst.conf);
 		}
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
@@ -310,7 +313,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			// create the new sidedef
 			sd = op.addNew(ObjType::sidedefs);
 
-			box->inst.level.sidedefs[sd]->SetDefaults(box->inst, other >= 0);
+			box->inst.level.sidedefs[sd]->SetDefaults(box->inst.conf, other >= 0);
 			box->inst.level.sidedefs[sd]->sector = new_sec;
 
 			op.changeLinedef(*it, static_cast<byte>(field), sd);
@@ -407,7 +410,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 	int new_sec = atoi(box->sec->value());
 
-	new_sec = CLAMP(0, new_sec, box->inst.level.numSectors() -1);
+	new_sec = clamp(0, new_sec, box->inst.level.numSectors() -1);
 
 	// iterate over selected linedefs
 	if (!box->inst.edit.Selected->empty())

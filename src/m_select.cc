@@ -26,10 +26,9 @@
 
 #include "Errors.h"
 
-#include "main.h"
+#include "sys_debug.h"
 
 #include "m_select.h"
-#include "e_objects.h"
 
 
 //#define NEED_SLOW_CLEAR
@@ -50,11 +49,8 @@ selection_c::selection_c(ObjType type, bool extended) : type(type)
 
 selection_c::~selection_c()
 {
-	if (bv)
-		delete bv;
-
-	if (extended)
-		delete[] extended;
+	delete bv;
+	delete[] extended;
 }
 
 

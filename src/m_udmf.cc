@@ -21,7 +21,12 @@
 #include "Instance.h"
 #include "main.h"
 
+#include "LineDef.h"
 #include "m_game.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
+#include "Vertex.h"
 #include "w_rawdef.h"
 #include "w_texture.h"
 #include "w_wad.h"
@@ -97,12 +102,12 @@ public:
 		return string;
 	}
 
-	fixcoord_t DecodeCoord() const
+	FFixedPoint DecodeCoord() const
 	{
-		return inst.MakeValidCoord(DecodeFloat());
+		return MakeValidCoord(inst.loaded.levelFormat, DecodeFloat());
 	}
 
-	int DecodeTexture() const
+	StringID DecodeTexture() const
 	{
 		SString buffer;
 
@@ -718,7 +723,7 @@ static void UDMF_WriteThings(const Instance &inst, Lump_c *lump)
 		lump->Printf("x = %1.3f;\n", th->x());
 		lump->Printf("y = %1.3f;\n", th->y());
 
-		if (th->raw_h != 0)
+		if (th->raw_h != FFixedPoint{})
 			lump->Printf("height = %1.3f;\n", th->h());
 
 		lump->Printf("angle = %d;\n", th->angle);
