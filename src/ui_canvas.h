@@ -23,6 +23,8 @@
 
 #ifndef NO_OPENGL
 #include <FL/Fl_Gl_Window.H>
+#else
+#include <FL/Fl_Widget.H>
 #endif
 
 #include "m_events.h"

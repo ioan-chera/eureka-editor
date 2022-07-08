@@ -16,33 +16,3 @@
 //
 //------------------------------------------------------------------------
 
-#include "Instance.h"
-#include "m_game.h"
-
-bool Instance::is_sky(const SString &flat) const
-{
-   return false;
-}
-
-bool is_null_tex(const SString &tex)
-{
-   return false;
-}
-
-const linetype_t &Instance::M_GetLineType(int type) const
-{
-   static linetype_t linetype;
-   return linetype;
-}
-
-const sectortype_t &Instance::M_GetSectorType(int type) const
-{
-   static sectortype_t sectortype;
-   return sectortype;
-}
-
-const thingtype_t &M_GetThingType(const ConfigData &config, int type)
-{
-   static thingtype_t thingtype;
-   return thingtype;
-}

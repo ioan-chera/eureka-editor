@@ -623,8 +623,8 @@ static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 	// in OpenGL mode, UI_Canvas is a window and that means the
 	// event X/Y values are relative to *it* and not the main window.
 	// hence the following is only needed in software mode.
-	int ox = main_win->canvas->x();
-	int oy = main_win->canvas->y();
+	int ox = inst.main_win->canvas->x();
+	int oy = inst.main_win->canvas->y();
 
 	sx -= ox;
 	sy -= oy;

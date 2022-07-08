@@ -339,9 +339,9 @@ void Img_c::test_make_RGB(const WadData &wad)
 
 #ifdef NO_OPENGL
 
-void Img_c::load_gl() {}
+void Img_c::load_gl(const WadData &wad) {}
 void Img_c::unload_gl(bool can_delete) {}
-void Img_c::bind_gl() {}
+void Img_c::bind_gl(const WadData &wad) {}
 
 #else
 
