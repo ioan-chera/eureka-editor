@@ -29,6 +29,7 @@
 
 #include "DocumentModule.h"
 #include "m_vector.h"
+#include "objid.h"
 
 class EditOperation;
 class selection_c;

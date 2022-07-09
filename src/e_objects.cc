@@ -735,7 +735,8 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 //
 // Move a single vertex, without depending on the user interface highlighting
 //
-static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, const v2double_t &delta, int &deletedVertexID)
+static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID,
+						 const v2double_t &delta, int &deletedVertexID)
 {
 	const Vertex &vertex = *inst.level.vertices[vertexID];
 	deletedVertexID = -1;
@@ -760,7 +761,8 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 
 	v2double_t splitPoint;
 	int splitLine = -1;
-	obj = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit, inst.grid, splitPoint, dest, vertexID);
+	obj = hover::findSplitLine(inst.level, inst.loaded.levelFormat, inst.edit, inst.grid,
+							   splitPoint, dest, vertexID);
 	if(obj.valid())
 	{
 		splitLine = obj.num;
@@ -768,28 +770,31 @@ static void doMoveVertex(EditOperation &op, Instance &inst, const int vertexID, 
 		{
 			// TODO: messaging
 			selection_c del_list;
-			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta, &del_list);
+			inst.level.objects.splitLinedefAndMergeSandwich(op, splitLine, vertexID, delta,
+															&del_list);
 			deletedVertexID = del_list.find_first();
 			return;
 		}
 		inst.level.linemod.splitLinedefAtVertex(op, splitLine, vertexID);
 	}
 
-	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat, delta.x));
-	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat, delta.y));
+	op.changeVertex(vertexID, Thing::F_X, vertex.raw_x + MakeValidCoord(inst.loaded.levelFormat,
+																		delta.x));
+	op.changeVertex(vertexID, Thing::F_Y, vertex.raw_y + MakeValidCoord(inst.loaded.levelFormat,
+																		delta.y));
 }
 
-void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, const v3double_t &delta) const
+void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list,
+								  const v3double_t &delta) const
 {
-	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, delta.x);
-	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, delta.y);
-	FFixedPoint fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
-
-
-	std::vector<int> sel;
 	switch (list.what_type())
 	{
 		case ObjType::things:
+		{
+			FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, delta.x);
+			FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, delta.y);
+			FFixedPoint fdz = MakeValidCoord(inst.loaded.levelFormat, delta.z);
+
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
 				const Thing * T = doc.things[*it];
@@ -799,10 +804,12 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz));
 			}
 			break;
+		}
 
 		case ObjType::vertices:
+		{
 			// We need the selection list as an array so we can easily modify it during iteration
-			sel = list.asArray();
+			std::vector<int> sel = list.asArray();
 			
 			for(auto it = sel.begin(); it != sel.end(); ++it)
 			{
@@ -814,7 +821,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 							-- *jt;
 			}
 			break;
-
+		}
 		case ObjType::sectors:
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
