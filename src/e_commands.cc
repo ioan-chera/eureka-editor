@@ -140,6 +140,9 @@ void Instance::CMD_SelectNeighbors()
 	
 	if (option != "height" && option != "texture")
 		return;
+
+	SelectNeighborCriterion criterion = option == "height" ? SelectNeighborCriterion::height :
+															 SelectNeighborCriterion::texture;
 		
 	if (edit.highlight.num < 0)
 		return;
@@ -156,8 +159,8 @@ void Instance::CMD_SelectNeighbors()
 		edit.Selected->set_ext(num, edit.Selected->get_ext(num) | parts);
 		if (edit.mode == ObjType::linedefs)
 		{
-			SelectNeighborLines(num, option, parts, true);
-			SelectNeighborLines(num, option, parts, false);
+			SelectNeighborLines(num, criterion, parts, true);
+			SelectNeighborLines(num, criterion, parts, false);
 		}
 		else
 		{

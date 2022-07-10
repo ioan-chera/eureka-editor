@@ -43,6 +43,15 @@ struct v2double_t;
 struct v2int_t;
 
 //
+// For SelectNeighborLines and SelectNeighborSectors
+//
+enum SelectNeighborCriterion
+{
+	height,
+	texture,
+};
+
+//
 // An instance with a document, holding all other associated data, such as the window reference, the
 // wad list.
 //
@@ -212,7 +221,7 @@ public:
 	bool RecUsed_ParseUser(const std::vector<SString> &tokens);
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
-	void SelectNeighborLines(int objnum, SString option, byte parts, bool forward);
+	void SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts, bool forward);
 	void SelectNeighborSectors(int objnum, SString option, byte parts);
 	void Selection_Clear(bool no_save = false);
 	void Selection_InvalidateLast();
