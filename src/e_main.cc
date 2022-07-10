@@ -958,7 +958,7 @@ void Instance::Selection_Clear(bool no_save)
 
 void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool forward)
 {
-	LineDef *line1 = level.linedefs[objnum];
+	const LineDef *line1 = level.linedefs[objnum];
 	bool frontside = parts < PART_LF_LOWER;
 	
 	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
@@ -966,15 +966,15 @@ void Instance::SelectNeighborLines(int objnum, SString option, byte parts, bool 
 		if (objnum == i || edit.Selected->get(i))
 			continue;
 			
-		LineDef *line2 = level.linedefs[i];		
+		const LineDef *line2 = level.linedefs[i];
 				
 		if (line1->OneSided() != line2->OneSided())
-					continue;
-				
+			continue;
+
 		if ((forward && line2->start == line1->end) || (!forward && line2->end == line1->start))
 		{
-			SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
-			SideDef *side2 = frontside ? line2->Right(level) : line2->Left(level);
+			const SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
+			const SideDef *side2 = frontside ? line2->Right(level) : line2->Left(level);
 			
 			bool match = false;
 			

@@ -145,7 +145,7 @@ void Instance::CMD_SelectNeighbors()
 		return;
 		
 	int num = edit.highlight.num;
-	byte parts = edit.highlight.parts;
+	byte parts = static_cast<byte>(edit.highlight.parts);
 		
 	if (edit.Selected->get(num) && edit.Selected->get_ext(num) & parts)
 	{
