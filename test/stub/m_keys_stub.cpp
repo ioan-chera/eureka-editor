@@ -16,16 +16,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "Vertex.h"
+#include "Instance.h"
 
-//
-// Set raw x/y/height
-//
-void Vertex::SetRawX(MapFormat format, double x)
+void Instance::Beep(const char *fmt, ...)
 {
-	raw_x = MakeValidCoord(format, x);
-}
-void Vertex::SetRawY(MapFormat format, double y)
-{
-	raw_y = MakeValidCoord(format, y);
 }

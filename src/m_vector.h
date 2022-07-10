@@ -21,6 +21,7 @@
 
 #include "sys_macro.h"
 #include <math.h>
+#include "WindowsSanitization.h"
 #include <algorithm>
 
 struct v2int_t;

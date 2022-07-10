@@ -107,7 +107,7 @@ public:
 		return MakeValidCoord(inst.loaded.levelFormat, DecodeFloat());
 	}
 
-	int DecodeTexture() const
+	StringID DecodeTexture() const
 	{
 		SString buffer;
 

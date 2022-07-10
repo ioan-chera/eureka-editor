@@ -3508,7 +3508,7 @@ static void Textures_ShowMissing(Instance &inst)
 
 static void Textures_FixMissing(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed missing textures");
@@ -3642,7 +3642,7 @@ static void Textures_FixTransparent(Instance &inst)
 			new_tex = "GRAY1";		// Doom
 	}
 
-	int new_wall = BA_InternaliseString(new_tex);
+	StringID new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed transparent textures");
@@ -3749,7 +3749,7 @@ static void Textures_ShowMedusa(Instance &inst)
 
 static void Textures_RemoveMedusa(Instance &inst)
 {
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	std::map<SString, int> names;
 
@@ -3910,9 +3910,9 @@ static void Textures_LogUnknown(bool do_flat, const Instance &inst)
 
 static void Textures_FixUnknownTex(Instance &inst)
 {
-	int new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_wall = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown textures");
@@ -3945,8 +3945,8 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 static void Textures_FixUnknownFlat(Instance &inst)
 {
-	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
+	StringID new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
+	StringID new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown flats");
@@ -4018,7 +4018,7 @@ static void Textures_ShowDupSwitches(Instance &inst)
 
 static void Textures_FixDupSwitches(Instance &inst)
 {
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	SString new_tex = inst.conf.default_wall_tex;
 
@@ -4035,7 +4035,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 			new_tex = "GRAY1";		// Doom
 	}
 
-	int new_wall = BA_InternaliseString(new_tex);
+	StringID new_wall = BA_InternaliseString(new_tex);
 
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed non-animating switches");

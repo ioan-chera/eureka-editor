@@ -16,27 +16,28 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
-#include "e_basis.h"
-#include "m_game.h"
+#include "e_hover.h"
 
-SString Sector::FloorTex() const
+void Hover::fastOpposite_begin()
 {
-	return BA_GetString(floor_tex);
 }
 
-SString Sector::CeilTex() const
+void Hover::fastOpposite_finish()
 {
-	return BA_GetString(ceil_tex);
 }
 
-void Sector::SetDefaults(const ConfigData &config)
+Objid hover::getNearbyObject(ObjType type, const Document &doc, const ConfigData &config,
+                      const Grid_State_c &grid, const v2double_t &pos)
 {
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
+   return Objid();
+}
 
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
+Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
+{
+   return Objid();
+}
 
-	light = global::default_light_level;
+int Hover::getOppositeSector(int ld, Side ld_side) const
+{
+   return 0;
 }

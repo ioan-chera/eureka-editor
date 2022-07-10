@@ -19,23 +19,35 @@
 #ifndef SECTOR_H_
 #define SECTOR_H_
 
-class SString;
+#include "m_strings.h"
+
 struct ConfigData;
 
-class Sector
+struct Sector
 {
-public:
 	int floorh = 0;
 	int ceilh = 0;
-	int floor_tex = 0;
-	int ceil_tex = 0;
+	StringID floor_tex;
+	StringID ceil_tex;
 	int light = 0;
 	int type = 0;
 	int tag = 0;
 
-	enum { F_FLOORH, F_CEILH, F_FLOOR_TEX, F_CEIL_TEX, F_LIGHT, F_TYPE, F_TAG };
+	enum IntAddress
+	{
+		F_FLOORH,
+		F_CEILH,
+		F_LIGHT = 4,
+		F_TYPE,
+		F_TAG,
+	};
 
-public:
+	enum StringIDAddress
+	{
+		F_FLOOR_TEX = 2,
+		F_CEIL_TEX = 3,
+	};
+
 	SString FloorTex() const;
 	SString CeilTex() const;
 

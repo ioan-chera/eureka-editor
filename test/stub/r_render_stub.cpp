@@ -16,27 +16,27 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
-#include "e_basis.h"
-#include "m_game.h"
+#include "objid.h"
 
-SString Sector::FloorTex() const
+class Instance;
+struct Document;
+
+void Render3D_NotifyBegin()
 {
-	return BA_GetString(floor_tex);
 }
 
-SString Sector::CeilTex() const
+void Render3D_NotifyChange(ObjType type, int objnum, int field)
 {
-	return BA_GetString(ceil_tex);
 }
 
-void Sector::SetDefaults(const ConfigData &config)
+void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
 {
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
+}
 
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
+void Render3D_NotifyEnd(Instance &inst)
+{
+}
 
-	light = global::default_light_level;
+void Render3D_NotifyInsert(ObjType type, int objnum)
+{
 }

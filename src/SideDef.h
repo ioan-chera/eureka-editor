@@ -19,24 +19,34 @@
 #ifndef SIDEDEF_H_
 #define SIDEDEF_H_
 
-class Sector;
-class SString;
+#include "m_strings.h"
+
+struct Sector;
 struct ConfigData;
 struct Document;
 
-class SideDef
+struct SideDef
 {
-public:
 	int x_offset = 0;
 	int y_offset = 0;
-	int upper_tex = 0;
-	int mid_tex = 0;
-	int lower_tex = 0;
+	StringID upper_tex;
+	StringID mid_tex;
+	StringID lower_tex;
 	int sector = 0;
 
-	enum { F_X_OFFSET, F_Y_OFFSET, F_UPPER_TEX, F_MID_TEX, F_LOWER_TEX, F_SECTOR };
+	enum IntAddress
+	{
+		F_X_OFFSET,
+		F_Y_OFFSET,
+		F_SECTOR = 5,
+	};
 
-public:
+	enum StringIDAddress
+	{
+		F_UPPER_TEX = 2,
+		F_MID_TEX,
+		F_LOWER_TEX,
+	};
 
 	SString UpperTex() const;
 	SString MidTex()   const;
@@ -45,7 +55,7 @@ public:
 	Sector *SecRef(const Document &doc) const;
 
 	// use new_tex when >= 0, otherwise use default_wall_tex
-	void SetDefaults(const ConfigData &config, bool two_sided, int new_tex = -1);
+	void SetDefaults(const ConfigData &config, bool two_sided, StringID new_tex = StringID(-1));
 };
 
 #endif

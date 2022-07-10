@@ -25,15 +25,13 @@
 
 class Instance;
 
-class Vertex
+struct Vertex
 {
-public:
 	FFixedPoint raw_x = {};
 	FFixedPoint raw_y = {};
 
 	enum { F_X, F_Y };
 
-public:
 	inline double x() const
 	{
 		return static_cast<double>(raw_x);
@@ -48,8 +46,14 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(MapFormat format, double x);
-	void SetRawY(MapFormat format, double y);
+	void SetRawX(MapFormat format, double x)
+	{
+		raw_x = MakeValidCoord(format, x);
+	}
+	void SetRawY(MapFormat format, double y)
+	{
+		raw_y = MakeValidCoord(format, y);
+	}
 
 	void SetRawXY(MapFormat format, const v2double_t &pos)
 	{

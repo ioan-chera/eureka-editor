@@ -110,8 +110,8 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	int new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
-					  (ld2_onesided) ? L2->Right(doc)->mid_tex : 0;
+	StringID new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
+			     		  (ld2_onesided) ? L2->Right(doc)->mid_tex : StringID();
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
@@ -155,7 +155,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		doc.linemod.flipLinedef(op, ld2);
 	}
 
-	if (L2->OneSided() && new_mid_tex > 0)
+	if (L2->OneSided() && new_mid_tex.hasContent())
 	{
 		op.changeSidedef(L2->right, SideDef::F_MID_TEX, new_mid_tex);
 	}
@@ -485,8 +485,8 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			}
 			else
 			{
-				op.changeVertex(v_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-				op.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+				op.changeVertex(v_num, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+				op.changeVertex(v_num, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 			}
 
 			which++;
@@ -728,7 +728,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	// fix the first line's textures
 
-	int tex = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	const SideDef * SD = doc.sidedefs[L1->right];
 
@@ -887,8 +887,8 @@ void Instance::commandSectorDisconnect()
 		{
 			const Vertex * V = level.vertices[*it];
 
-			op.changeVertex(*it, Vertex::F_X, (V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx)).raw());
-			op.changeVertex(*it, Vertex::F_Y, (V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy)).raw());
+			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
+			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
 		}
 	}
 
@@ -1093,8 +1093,8 @@ void Instance::CMD_VT_ShapeLine()
 		double nx = ax + (bx - ax) * frac;
 		double ny = ay + (by - ay) * frac;
 
-		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(loaded.levelFormat, nx).raw());
-		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(loaded.levelFormat, ny).raw());
+		op.changeVertex(along_list[i].vert_num, Thing::F_X, MakeValidCoord(loaded.levelFormat, nx));
+		op.changeVertex(along_list[i].vert_num, Thing::F_Y, MakeValidCoord(loaded.levelFormat, ny));
 	}
 }
 
@@ -1161,8 +1161,8 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 
 		if (move_vertices)
 		{
-			op->changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-			op->changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+			op->changeVertex(along_list[k].vert_num, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+			op->changeVertex(along_list[k].vert_num, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 		}
 		else
 		{

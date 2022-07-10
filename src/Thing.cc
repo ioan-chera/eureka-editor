@@ -16,27 +16,18 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
+#include "Thing.h"
 #include "e_basis.h"
-#include "m_game.h"
 
-SString Sector::FloorTex() const
+void Thing::SetRawX(MapFormat format, double x)
 {
-	return BA_GetString(floor_tex);
+	raw_x = MakeValidCoord(format, x);
 }
-
-SString Sector::CeilTex() const
+void Thing::SetRawY(MapFormat format, double y)
 {
-	return BA_GetString(ceil_tex);
+	raw_y = MakeValidCoord(format, y);
 }
-
-void Sector::SetDefaults(const ConfigData &config)
+void Thing::SetRawH(MapFormat format, double h)
 {
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
-
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
-
-	light = global::default_light_level;
+	raw_h = MakeValidCoord(format, h);
 }

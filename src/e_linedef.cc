@@ -1052,7 +1052,7 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	const SideDef *other = doc.sidedefs[other_sd];
 
@@ -1089,11 +1089,11 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	op.changeLinedef(ld, LineDef::F_FLAGS, new_flags);
 
 	// TODO: make this a global pseudo-constant
-	int null_tex = BA_InternaliseString("-");
+	StringID null_tex = BA_InternaliseString("-");
 
 	// determine textures for each side
-	int  left_tex = 0;
-	int right_tex = 0;
+	StringID  left_tex;
+	StringID right_tex;
 
 	if (! is_null_tex(L->Left(doc)->MidTex()))
 		left_tex = L->Left(doc)->mid_tex;
@@ -1157,7 +1157,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 
 	const SideDef *SD = doc.sidedefs[other_sd];
 
-	int new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
 	// grab new texture from lower or upper if possible
 	if (! is_null_tex(SD->LowerTex()))
@@ -1357,13 +1357,13 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L->start, Vertex::F_X, (L->End(doc)->raw_x - FFixedPoint(idx)).raw());
-		op.changeVertex(L->start, Vertex::F_Y, (L->End(doc)->raw_y - FFixedPoint(idy)).raw());
+		op.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - FFixedPoint(idx));
+		op.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - FFixedPoint(idy));
 	}
 	else
 	{
-		op.changeVertex(L->end, Vertex::F_X, (L->Start(doc)->raw_x + FFixedPoint(idx)).raw());
-		op.changeVertex(L->end, Vertex::F_Y, (L->Start(doc)->raw_y + FFixedPoint(idy)).raw());
+		op.changeVertex(L->end, Vertex::F_X, L->Start(doc)->raw_x + FFixedPoint(idx));
+		op.changeVertex(L->end, Vertex::F_Y, L->Start(doc)->raw_y + FFixedPoint(idy));
 	}
 }
 
@@ -1413,7 +1413,7 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 
 	SYS_ASSERT(L->Right(doc));
 
-	int tex;
+	StringID tex;
 
 	if (! is_null_tex(L->Right(doc)->LowerTex()))
 		tex = L->Right(doc)->lower_tex;

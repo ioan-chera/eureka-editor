@@ -16,27 +16,28 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
-#include "e_basis.h"
+#include "Instance.h"
 #include "m_game.h"
 
-SString Sector::FloorTex() const
+bool Instance::is_sky(const SString &flat) const
 {
-	return BA_GetString(floor_tex);
+   return false;
 }
 
-SString Sector::CeilTex() const
+const linetype_t &Instance::M_GetLineType(int type) const
 {
-	return BA_GetString(ceil_tex);
+   static linetype_t linetype;
+   return linetype;
 }
 
-void Sector::SetDefaults(const ConfigData &config)
+const sectortype_t &Instance::M_GetSectorType(int type) const
 {
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
+   static sectortype_t sectortype;
+   return sectortype;
+}
 
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
-
-	light = global::default_light_level;
+const thingtype_t &M_GetThingType(const ConfigData &config, int type)
+{
+   static thingtype_t thingtype;
+   return thingtype;
 }

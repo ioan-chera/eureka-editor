@@ -251,8 +251,8 @@ void Instance::CMD_SEC_SwapFlats()
 		{
 			const Sector *S = level.sectors[*it];
 
-			int floor_tex = S->floor_tex;
-			int  ceil_tex = S->ceil_tex;
+			StringID floor_tex = S->floor_tex;
+			StringID  ceil_tex = S->ceil_tex;
 
 			op.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
 			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
@@ -893,17 +893,17 @@ inline bool SectorModule::willBeTwoSided(int ld, Side side) const
 
 
 void SectorModule::determineNewTextures(lineloop_c& loop,
-								 std::vector<int>& lower_texs,
-								 std::vector<int>& upper_texs) const
+								 std::vector<StringID>& lower_texs,
+								 std::vector<StringID>& upper_texs) const
 {
 	unsigned int total = static_cast<unsigned>(loop.lines.size());
 
 	SYS_ASSERT(lower_texs.size() == total);
 
-	int null_tex  = BA_InternaliseString("-");
+	StringID null_tex  = BA_InternaliseString("-");
 
-	int def_lower = BA_InternaliseString(inst.conf.default_wall_tex);
-	int def_upper = def_lower;
+	StringID def_lower = BA_InternaliseString(inst.conf.default_wall_tex);
+	StringID def_upper = def_lower;
 
 	unsigned int k;
 	unsigned int pass;
@@ -958,7 +958,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 
 		if (sd < 0)
 		{
-			lower_texs[k] = upper_texs[k] = -1;
+			lower_texs[k] = upper_texs[k] = StringID(-1);
 			continue;
 		}
 
@@ -985,7 +985,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	{
 		for (k = 0 ; k < total ; k++)
 		{
-			if (lower_texs[k] >= 0)
+			if (lower_texs[k].isValid())
 				continue;
 
 			// next and previous line indices
@@ -1005,8 +1005,8 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			}
 
 			// disable p or n if there is no texture there yet
-			if (p < total && lower_texs[p] < 0) p = total;
-			if (n < total && lower_texs[n] < 0) n = total;
+			if (p < total && lower_texs[p].isInvalid()) p = total;
+			if (n < total && lower_texs[n].isInvalid()) n = total;
 
 			if (p == total && n == total)
 				continue;
@@ -1023,8 +1023,8 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	// lastly, ensure all textures are valid
 	for (k = 0 ; k < total ; k++)
 	{
-		if (lower_texs[k] < 0) lower_texs[k] = def_lower;
-		if (upper_texs[k] < 0) upper_texs[k] = def_upper;
+		if (lower_texs[k].isInvalid()) lower_texs[k] = def_lower;
+		if (upper_texs[k].isInvalid()) upper_texs[k] = def_upper;
 	}
 }
 
@@ -1034,7 +1034,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 // reference, and creating a new sidedef if necessary.
 //
 void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_sec,
-						   int new_lower, int new_upper,
+								  StringID new_lower, StringID new_upper,
 						   selection_c &flip) const
 {
 // gLog.debugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
@@ -1059,8 +1059,8 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	else
 		flip.clear(ld);
 
-	SYS_ASSERT(new_lower >= 0);
-	SYS_ASSERT(new_upper >= 0);
+	SYS_ASSERT(new_lower.isValid());
+	SYS_ASSERT(new_upper.isValid());
 
 	// create new sidedef
 	int new_sd = op.addNew(ObjType::sidedefs);
@@ -1100,8 +1100,8 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 
 void lineloop_c::AssignSector(EditOperation &op, int new_sec, selection_c &flip)
 {
-	std::vector<int> lower_texs(lines.size());
-	std::vector<int> upper_texs(lines.size());
+	std::vector<StringID> lower_texs(lines.size());
+	std::vector<StringID> upper_texs(lines.size());
 
 	doc.secmod.determineNewTextures(*this, lower_texs, upper_texs);
 

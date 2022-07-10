@@ -23,8 +23,8 @@
 #include "FixedPoint.h"
 #include "Side.h"
 
-class SideDef;
-class Vertex;
+struct SideDef;
+struct Vertex;
 struct Document;
 
 class LineDef

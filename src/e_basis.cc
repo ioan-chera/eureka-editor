@@ -42,7 +42,7 @@ int global::default_floor_h		=   0;
 int global::default_ceil_h		= 128;
 int global::default_light_level	= 176;
 
-StringTable global::basis_strtab;
+static StringTable basis_strtab;
 
 const char *NameForObjectType(ObjType type, bool plural)
 {
@@ -60,14 +60,14 @@ const char *NameForObjectType(ObjType type, bool plural)
 	}
 }
 
-int BA_InternaliseString(const SString &str)
+StringID BA_InternaliseString(const SString &str)
 {
-	return global::basis_strtab.add(str);
+	return basis_strtab.add(str);
 }
 
-SString BA_GetString(int offset)
+SString BA_GetString(StringID offset)
 {
-	return global::basis_strtab.get(offset);
+	return basis_strtab.get(offset);
 }
 
 
@@ -310,61 +310,67 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 //
 // Change thing
 //
-bool Basis::changeThing(int thing, byte field, int value)
+bool Basis::changeThing(int thing, Thing::IntAddress field, int value)
 {
 	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
-	SYS_ASSERT(field <= Thing::F_ARG5);
 
 	if(field == Thing::F_TYPE)
 		inst.recent_things.insert_number(value);
 
 	return change(ObjType::things, thing, field, value);
 }
+bool Basis::changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value)
+{
+	SYS_ASSERT(thing >= 0 && thing < doc.numThings());
+
+	return change(ObjType::things, thing, field, value.raw());
+}
 
 //
 // Change vertex
 //
-bool Basis::changeVertex(int vert, byte field, int value)
+bool Basis::changeVertex(int vert, byte field, FFixedPoint value)
 {
 	SYS_ASSERT(vert >= 0 && vert < doc.numVertices());
 	SYS_ASSERT(field <= Vertex::F_Y);
 
-	return change(ObjType::vertices, vert, field, value);
+	return change(ObjType::vertices, vert, field, value.raw());
 }
 
 //
 // Change sector
 //
-bool Basis::changeSector(int sec, byte field, int value)
+bool Basis::changeSector(int sec, Sector::IntAddress field, int value)
 {
 	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
-	SYS_ASSERT(field <= Sector::F_TAG);
-
-	if(field == Sector::F_FLOOR_TEX ||
-		field == Sector::F_CEIL_TEX)
-	{
-		inst.recent_flats.insert(BA_GetString(value));
-	}
 
 	return change(ObjType::sectors, sec, field, value);
+}
+bool Basis::changeSector(int sec, Sector::StringIDAddress field, StringID value)
+{
+	SYS_ASSERT(sec >= 0 && sec < doc.numSectors());
+
+	inst.recent_flats.insert(BA_GetString(value));
+
+	return change(ObjType::sectors, sec, field, value.get());
 }
 
 //
 // Change sidedef
 //
-bool Basis::changeSidedef(int side, byte field, int value)
+bool Basis::changeSidedef(int side, SideDef::IntAddress field, int value)
 {
 	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
-	SYS_ASSERT(field <= SideDef::F_SECTOR);
-
-	if(field == SideDef::F_LOWER_TEX ||
-		field == SideDef::F_UPPER_TEX ||
-		field == SideDef::F_MID_TEX)
-	{
-		inst.recent_textures.insert(BA_GetString(value));
-	}
 
 	return change(ObjType::sidedefs, side, field, value);
+}
+bool Basis::changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
+{
+	SYS_ASSERT(side >= 0 && side < doc.numSidedefs());
+
+	inst.recent_textures.insert(BA_GetString(value));
+
+	return change(ObjType::sidedefs, side, field, value.get());
 }
 
 //

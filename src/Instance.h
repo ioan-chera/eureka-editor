@@ -422,16 +422,16 @@ private:
 	void Grid_WriteUser(std::ostream &os) const;
 
 	// R_RENDER
-	int GrabSelectedFlat();
-	int GrabSelectedTexture();
+	StringID GrabSelectedFlat();
+	StringID GrabSelectedTexture();
 	int GrabSelectedThing();
-	int LD_GrabTex(const LineDef *L, int part) const;
+	StringID LD_GrabTex(const LineDef *L, int part) const;
 	void Render3D_CB_Cut();
 	void Render3D_CB_Paste();
 	void Render3D_Navigate();
 	void StoreDefaultedFlats();
-	void StoreSelectedFlat(int new_tex);
-	void StoreSelectedTexture(int new_tex);
+	void StoreSelectedFlat(StringID new_tex);
+	void StoreSelectedTexture(StringID new_tex);
 	void StoreSelectedThing(int new_type);
 
 public:	// will be private when we encapsulate everything
