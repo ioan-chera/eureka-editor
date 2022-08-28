@@ -16,27 +16,9 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
-#include "e_basis.h"
-#include "m_game.h"
+#include "im_img.h"
 
-SString Sector::FloorTex() const
+bool Img_c::has_transparent() const
 {
-	return BA_GetString(floor_tex);
-}
-
-SString Sector::CeilTex() const
-{
-	return BA_GetString(ceil_tex);
-}
-
-void Sector::SetDefaults(const ConfigData &config)
-{
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
-
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
-
-	light = global::default_light_level;
+   return false;
 }

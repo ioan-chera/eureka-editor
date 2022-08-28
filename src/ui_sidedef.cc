@@ -178,7 +178,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 		return;
 	}
 
-	int new_tex;
+	StringID new_tex;
 	box->mFixUp.checkDirtyFields();	// fine to do it here
 	checkLinedefDirtyFields(box->inst);
 

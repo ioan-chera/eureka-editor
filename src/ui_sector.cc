@@ -367,7 +367,7 @@ void UI_SectorBox::tex_callback(Fl_Widget *w, void *data)
 
 void UI_SectorBox::InstallFlat(const SString &name, int filter_parts)
 {
-	int tex_num = BA_InternaliseString(name);
+	StringID tex_num = BA_InternaliseString(name);
 
 	if (! inst.edit.Selected->empty())
 	{
@@ -831,7 +831,7 @@ void UI_SectorBox::CB_Copy(int parts)
 }
 
 
-void UI_SectorBox::CB_Paste(int parts, int new_tex)
+void UI_SectorBox::CB_Paste(int parts, StringID new_tex)
 {
 	if (inst.edit.Selected->empty())
 		return;
@@ -855,8 +855,8 @@ void UI_SectorBox::CB_Paste(int parts, int new_tex)
 
 void UI_SectorBox::CB_Cut(int parts)
 {
-	int new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
-	int new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
+	StringID new_floor = BA_InternaliseString(inst.conf.default_floor_tex);
+	StringID new_ceil  = BA_InternaliseString(inst.conf.default_ceil_tex);
 
 	if (! inst.edit.Selected->empty())
 	{

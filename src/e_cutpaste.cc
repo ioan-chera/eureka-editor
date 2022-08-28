@@ -236,7 +236,7 @@ void Texboard_Clear()
 	tex_clipboard::thing = 0;
 }
 
-int Texboard_GetTexNum(const ConfigData &config)
+StringID Texboard_GetTexNum(const ConfigData &config)
 {
 	if (tex_clipboard::tex.empty())
 		tex_clipboard::tex = config.default_wall_tex;
@@ -244,7 +244,7 @@ int Texboard_GetTexNum(const ConfigData &config)
 	return BA_InternaliseString(tex_clipboard::tex);
 }
 
-int Texboard_GetFlatNum(const ConfigData &config)
+StringID Texboard_GetFlatNum(const ConfigData &config)
 {
 	if (tex_clipboard::flat.empty())
 		tex_clipboard::flat = config.default_floor_tex;

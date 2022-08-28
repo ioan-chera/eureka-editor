@@ -28,15 +28,20 @@
 #define __EUREKA_X_HOVER_H__
 
 #include "DocumentModule.h"
+#include "m_vector.h"
+#include "objid.h"
+#include <vector>
 
 class bitvec_c;
 class crossing_state_c;
+class EditOperation;
 class fastopp_node_c;
 class Grid_State_c;
 class LineDef;
 class Objid;
 enum class MapFormat;
 enum class Side;
+struct ConfigData;
 struct Editor_State_t;
 struct v2double_t;
 

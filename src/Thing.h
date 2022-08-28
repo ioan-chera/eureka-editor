@@ -19,12 +19,22 @@
 #ifndef THING_H_
 #define THING_H_
 
-#include "e_basis.h"
 #include "m_vector.h"
+#include "FixedPoint.h"
 
-class Thing
+//
+// Must be here due to dependencies
+//
+enum class MapFormat
 {
-public:
+	invalid,
+	doom,
+	hexen,
+	udmf
+};
+
+struct Thing
+{
 	FFixedPoint raw_x = {};
 	FFixedPoint raw_y = {};
 
@@ -39,11 +49,23 @@ public:
 	int special = 0;
 	int arg1 = 0, arg2 = 0, arg3 = 0, arg4 = 0, arg5 = 0;
 
-	enum { F_X, F_Y, F_ANGLE, F_TYPE, F_OPTIONS,
-		   F_H, F_TID, F_SPECIAL,
-		   F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
+	enum IntAddress
+	{
+		F_ANGLE = 2,
+		F_TYPE,
+		F_OPTIONS,
+		F_TID = 6,
+		F_SPECIAL,
+		F_ARG1, F_ARG2, F_ARG3, F_ARG4, F_ARG5,
+	};
 
-public:
+	enum FixedPointAddress
+	{
+		F_X,
+		F_Y,
+		F_H = 5,
+	};
+
 	inline double x() const
 	{
 		return static_cast<double>(raw_x);
@@ -62,18 +84,9 @@ public:
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(MapFormat format, double x)
-	{
-		raw_x = MakeValidCoord(format, x);
-	}
-	void SetRawY(MapFormat format, double y)
-	{
-		raw_y = MakeValidCoord(format, y);
-	}
-	void SetRawH(MapFormat format, double h)
-	{
-		raw_h = MakeValidCoord(format, h);
-	}
+	void SetRawX(MapFormat format, double x);
+	void SetRawY(MapFormat format, double y);
+	void SetRawH(MapFormat format, double h);
 
 	void SetRawXY(MapFormat format, const v2double_t &pos)
 	{

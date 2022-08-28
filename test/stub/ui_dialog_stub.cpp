@@ -16,27 +16,13 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
-#include "e_basis.h"
-#include "m_game.h"
+#include "m_strings.h"
 
-SString Sector::FloorTex() const
+int DLG_Confirm(const std::vector<SString> &buttons, EUR_FORMAT_STRING(const char *msg), ...)
 {
-	return BA_GetString(floor_tex);
+   return 0;
 }
 
-SString Sector::CeilTex() const
+void DLG_Notify(const char *msg, ...)
 {
-	return BA_GetString(ceil_tex);
-}
-
-void Sector::SetDefaults(const ConfigData &config)
-{
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
-
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
-
-	light = global::default_light_level;
 }

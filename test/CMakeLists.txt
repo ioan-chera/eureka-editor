@@ -32,6 +32,7 @@ set(_testUtils
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
     ${src}/Errors.cc
+    ${src}/lib_adler.cc
     ${src}/lib_util.cc
     ${src}/m_strings.cc
     ${src}/sys_debug.cc
@@ -85,6 +86,12 @@ function(unit_test _name)
     add_executable(${_name} ${_sources})
     target_link_libraries(${_name} PRIVATE testutils)
 
+    if(APPLE)
+        # Need to get access to the OSXCalls.h stuff
+        target_include_directories(${_name} PRIVATE ${CMAKE_SOURCE_DIR}/osx/EurekaApp)
+        target_compile_definitions(${_name} PRIVATE GL_SILENCE_DEPRECATION)
+    endif()
+
     if(_use_fltk)
         target_link_libraries(${_name} PRIVATE ${fltk_libs})
     endif()
@@ -97,9 +104,40 @@ endfunction()
 
 # IMPORTANT: the eurekasrc files from testutils are already linked!
 
+unit_test(document
+    DocumentTest.cpp
+    stub/e_cutpaste_stub.cpp
+    stub/e_main_stub.cpp
+    stub/r_render_stub.cpp
+    stub/ui_infobar_stub.cpp
+    SectorTest.cpp
+    ThingTest.cpp
+    VertexTest.cpp
+    SRC Document.cc
+        DocumentModule.cc
+        e_basis.cc
+        LineDef.cc
+        m_bitvec.cc
+        m_select.cc
+        Sector.cc
+        SideDef.cc
+        Thing.cc
+)
+
 unit_test(e_checks
     e_checks_test.cpp
-    SRC e_basis.cc
+    stub/e_cutpaste_stub.cpp
+    stub/e_hover_stub.cpp
+    stub/e_main_stub.cpp
+    stub/e_path_stub.cpp
+    stub/im_img_stub.cpp
+    stub/m_game_stub.cpp
+    stub/m_keys_stub.cpp
+    stub/r_render_stub.cpp
+    stub/ui_dialog_stub.cpp
+    stub/ui_infobar_stub.cpp
+    SRC DocumentModule.cc
+        e_basis.cc
         e_checks.cc
         LineDef.cc
         m_bitvec.cc
@@ -137,6 +175,8 @@ unit_test(m_config_keys
     FLTK
 )
 
+
+
 unit_test(w_wad
     w_wad_test.cpp
     SRC lib_file.cc
@@ -158,7 +198,6 @@ unit_test(independent
     SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
-    ThingTest.cpp
     SRC m_bitvec.cc
         m_parse.cc
         m_select.cc

@@ -28,7 +28,7 @@
 
 class Instance;
 class Lump_c;
-class Sector;
+struct Sector;
 enum class Side;
 struct Document;
 

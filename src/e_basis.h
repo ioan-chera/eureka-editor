@@ -28,24 +28,21 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
-#include "FixedPoint.h"
 #include "m_strings.h"
 #include "objid.h"
+#include "Sector.h"
+#include "SideDef.h"
+#include "Thing.h"
 #include <stack>
 
 #define DEFAULT_UNDO_GROUP_MESSAGE "[something]"
 
-class Sector;
 class selection_c;
 class LineDef;
-class SideDef;
-class Thing;
-class Vertex;
+struct Vertex;
 
 namespace global
 {
-	extern StringTable basis_strtab;
-
 	extern int	default_floor_h;
 	extern int	default_ceil_h;
 	extern int	default_light_level;
@@ -70,13 +67,6 @@ namespace global
 // See objid.h for obj_type_e (OBJ_THINGS etc)
 
 // E_BASIS
-enum class MapFormat
-{
-	invalid,
-	doom,
-	hexen,
-	udmf
-};
 
 FFixedPoint MakeValidCoord(MapFormat format, double x);
 
@@ -244,10 +234,13 @@ private:
 	void setMessageForSelection(const char *verb, const selection_c &list, const char *suffix = "");
 	int addNew(ObjType type);
 	bool change(ObjType type, int objnum, byte field, int value);
-	bool changeThing(int thing, byte field, int value);
-	bool changeVertex(int vert, byte field, int value);
-	bool changeSector(int sec, byte field, int value);
-	bool changeSidedef(int side, byte field, int value);
+	bool changeThing(int thing, Thing::IntAddress field, int value);
+	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value);
+	bool changeVertex(int vert, byte field, FFixedPoint value);
+	bool changeSector(int sec, Sector::IntAddress field, int value);
+	bool changeSector(int sec, Sector::StringIDAddress field, StringID value);
+	bool changeSidedef(int side, SideDef::IntAddress field, int value);
+	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value);
 	bool changeLinedef(int line, byte field, int value);
 	void del(ObjType type, int objnum);
 	void end();
@@ -298,22 +291,35 @@ public:
 		return basis.change(type, objnum, field, value);
 	}
 
-	bool changeThing(int thing, byte field, int value)
+	bool changeThing(int thing, Thing::IntAddress field, int value)
 	{
 		return basis.changeThing(thing, field, value);
 	}
 
-	bool changeVertex(int vert, byte field, int value)
+	bool changeThing(int thing, Thing::FixedPointAddress field, FFixedPoint value)
+	{
+		return basis.changeThing(thing, field, value);
+	}
+
+	bool changeVertex(int vert, byte field, FFixedPoint value)
 	{
 		return basis.changeVertex(vert, field, value);
 	}
 
-	bool changeSector(int sec, byte field, int value)
+	bool changeSector(int sec, Sector::IntAddress field, int value)
+	{
+		return basis.changeSector(sec, field, value);
+	}
+	bool changeSector(int sec, Sector::StringIDAddress field, StringID value)
 	{
 		return basis.changeSector(sec, field, value);
 	}
 
-	bool changeSidedef(int side, byte field, int value)
+	bool changeSidedef(int side, SideDef::IntAddress field, int value)
+	{
+		return basis.changeSidedef(side, field, value);
+	}
+	bool changeSidedef(int side, SideDef::StringIDAddress field, StringID value)
 	{
 		return basis.changeSidedef(side, field, value);
 	}
@@ -348,10 +354,10 @@ const char *NameForObjectType(ObjType type, bool plural = false);
 
 // add this string to the basis string table (if it doesn't
 // already exist) and return its integer offset.
-int BA_InternaliseString(const SString &str);
+StringID BA_InternaliseString(const SString &str);
 
 // get the string from the basis string table.
-SString BA_GetString(int offset);
+SString BA_GetString(StringID offset);
 
 #endif  /* __EUREKA_E_BASIS_H__ */
 

@@ -293,7 +293,7 @@ void UI_LineBox::dyntype_callback(Fl_Widget *w, void *data)
 }
 
 
-void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, int new_tex, int e_state, int parts)
+void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e_state, int parts)
 {
 	bool opposite = (e_state & FL_SHIFT);
 
@@ -416,7 +416,7 @@ void UI_LineBox::checkSidesDirtyFields()
 
 void UI_LineBox::SetTexture(const char *tex_name, int e_state, int parts)
 {
-	int new_tex = BA_InternaliseString(tex_name);
+	StringID new_tex = BA_InternaliseString(tex_name);
 
 	// this works a bit differently than other ways, we don't modify a
 	// widget and let it update the map, instead we update the map and
@@ -509,7 +509,7 @@ void UI_LineBox::CB_Copy(int parts)
 }
 
 
-void UI_LineBox::CB_Paste(int parts, int new_tex)
+void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 {
 	// iterate over selected linedefs
 	if (inst.edit.Selected->empty())

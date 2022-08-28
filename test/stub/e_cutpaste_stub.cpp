@@ -16,27 +16,37 @@
 //
 //------------------------------------------------------------------------
 
-#include "Sector.h"
-#include "e_basis.h"
-#include "m_game.h"
+#include "objid.h"
 
-SString Sector::FloorTex() const
+class EditOperation;
+class selection_c;
+struct Document;
+
+void Clipboard_ClearLocals()
 {
-	return BA_GetString(floor_tex);
 }
 
-SString Sector::CeilTex() const
+void Clipboard_NotifyBegin()
 {
-	return BA_GetString(ceil_tex);
 }
 
-void Sector::SetDefaults(const ConfigData &config)
+void Clipboard_NotifyChange(ObjType type, int objnum, int field)
 {
-	floorh = global::default_floor_h;
-	 ceilh = global::default_ceil_h;
+}
 
-	floor_tex = BA_InternaliseString(config.default_floor_tex);
-	 ceil_tex = BA_InternaliseString(config.default_ceil_tex);
+void Clipboard_NotifyDelete(ObjType type, int objnum)
+{
+}
 
-	light = global::default_light_level;
+void Clipboard_NotifyEnd()
+{
+}
+
+void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
+{
+}
+
+void DeleteObjects_WithUnused(EditOperation &op, const Document &doc, const selection_c &list, bool keep_things,
+                       bool keep_verts, bool keep_lines)
+{
 }

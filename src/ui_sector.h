@@ -104,7 +104,7 @@ public:
 
 private:
 	void CB_Copy(int parts);
-	void CB_Paste(int parts, int new_tex);
+	void CB_Paste(int parts, StringID new_tex);
 	void CB_Cut(int parts);
 
 	// returns either zero or a combination of PART_FLOOR and PART_CEIL

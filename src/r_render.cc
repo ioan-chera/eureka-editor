@@ -1155,7 +1155,7 @@ void Instance::StoreSelectedThing(int new_type)
 }
 
 
-static int SEC_GrabFlat(const Sector *S, int part)
+static StringID SEC_GrabFlat(const Sector *S, int part)
 {
 	if (part & PART_CEIL)
 		return S->ceil_tex;
@@ -1169,16 +1169,16 @@ static int SEC_GrabFlat(const Sector *S, int part)
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // sectors are selected and they have different flats.
-int Instance::GrabSelectedFlat()
+StringID Instance::GrabSelectedFlat()
 {
-	int result = -1;
+	StringID result(-1);
 
 	if (edit.Selected->empty())
 	{
 		if (edit.highlight.is_nil())
 		{
 			Beep("no sectors for copy/cut flat");
-			return -1;
+			return StringID(-1);
 		}
 
 		const Sector *S = level.sectors[edit.highlight.num];
@@ -1192,26 +1192,26 @@ int Instance::GrabSelectedFlat()
 			const Sector *S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			int tex = SEC_GrabFlat(S, parts & ~1);
+			StringID tex = SEC_GrabFlat(S, parts & ~1);
 
-			if (result >= 0 && tex != result)
+			if (result.isValid() && tex != result)
 			{
 				Beep("multiple flats present");
-				return -2;
+				return StringID(-2);
 			}
 
 			result = tex;
 		}
 	}
 
-	if (result >= 0)
+	if (result.isValid())
 		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
 
 
-void Instance::StoreSelectedFlat(int new_tex)
+void Instance::StoreSelectedFlat(StringID new_tex)
 {
 	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1252,8 +1252,8 @@ void Instance::StoreDefaultedFlats()
 		return;
 	}
 
-	int floor_tex = BA_InternaliseString(conf.default_floor_tex);
-	int ceil_tex  = BA_InternaliseString(conf.default_ceil_tex);
+	StringID floor_tex = BA_InternaliseString(conf.default_floor_tex);
+	StringID ceil_tex  = BA_InternaliseString(conf.default_ceil_tex);
 
 	{
 		EditOperation op(level.basis);
@@ -1278,7 +1278,7 @@ void Instance::StoreDefaultedFlats()
 }
 
 
-int Instance::LD_GrabTex(const LineDef *L, int part) const
+StringID Instance::LD_GrabTex(const LineDef *L, int part) const
 {
 	if (L->NoSided())
 		return BA_InternaliseString(conf.default_wall_tex);
@@ -1315,16 +1315,16 @@ int Instance::LD_GrabTex(const LineDef *L, int part) const
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // linedefs are selected and they have different textures.
-int Instance::GrabSelectedTexture()
+StringID Instance::GrabSelectedTexture()
 {
-	int result = -1;
+	StringID result = StringID(-1);
 
 	if (edit.Selected->empty())
 	{
 		if (edit.highlight.is_nil())
 		{
 			Beep("no linedefs for copy/cut tex");
-			return -1;
+			return StringID(-1);
 		}
 
 		const LineDef *L = level.linedefs[edit.highlight.num];
@@ -1338,26 +1338,26 @@ int Instance::GrabSelectedTexture()
 			const LineDef *L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			int tex = LD_GrabTex(L, parts & ~1);
+			StringID tex = LD_GrabTex(L, parts & ~1);
 
-			if (result >= 0 && tex != result)
+			if (result.isValid() && tex != result)
 			{
 				Beep("multiple textures present");
-				return -2;
+				return StringID(-2);
 			}
 
 			result = tex;
 		}
 	}
 
-	if (result >= 0)
+	if (result.isValid())
 		Status_Set("copied %s", BA_GetString(result).c_str());
 
 	return result;
 }
 
 
-void Instance::StoreSelectedTexture(int new_tex)
+void Instance::StoreSelectedTexture(StringID new_tex)
 {
 	SelectHighlight unselect = edit.SelectionOrHighlight();
 	if (unselect == SelectHighlight::empty)
@@ -1416,25 +1416,26 @@ void Instance::StoreSelectedTexture(int new_tex)
 
 void Instance::Render3D_CB_Copy()
 {
-	int num;
+	StringID num;
+	int thingnum;
 
 	switch (edit.mode)
 	{
 	case ObjType::things:
-		num = GrabSelectedThing();
-		if (num >= 0)
-			Texboard_SetThing(num);
+		thingnum = GrabSelectedThing();
+		if (thingnum >= 0)
+			Texboard_SetThing(thingnum);
 		break;
 
 	case ObjType::sectors:
 		num = GrabSelectedFlat();
-		if (num >= 0)
+		if (num.isValid())
 			Texboard_SetFlat(BA_GetString(num), conf);
 		break;
 
 	case ObjType::linedefs:
 		num = GrabSelectedTexture();
-		if (num >= 0)
+		if (num.isValid())
 			Texboard_SetTex(BA_GetString(num), conf);
 		break;
 

@@ -746,9 +746,9 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const Thing * T = doc.things[*it];
 
-				op.changeThing(*it, Thing::F_X, (T->raw_x + fdx).raw());
-				op.changeThing(*it, Thing::F_Y, (T->raw_y + fdy).raw());
-				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz).raw());
+				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
+				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
+				op.changeThing(*it, Thing::F_H, std::max(FFixedPoint{}, T->raw_h + fdz));
 			}
 			break;
 
@@ -757,8 +757,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const Vertex * V = doc.vertices[*it];
 
-				op.changeVertex(*it, Vertex::F_X, (V->raw_x + fdx).raw());
-				op.changeVertex(*it, Vertex::F_Y, (V->raw_y + fdy).raw());
+				op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
+				op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
 			}
 			break;
 
@@ -993,7 +993,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 */
 		if (! L1->Left(doc))
 		{
-			int tex = L1->Right(doc)->mid_tex;
+			StringID tex = L1->Right(doc)->mid_tex;
 
 			if (! L2->Left(doc))
 			{
@@ -1019,30 +1019,30 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			const Sector *front = L1->Right(doc)->SecRef(doc);
 			const Sector *back  = L1-> Left(doc)->SecRef(doc);
 
-			int f_l = L1->Right(doc)->lower_tex;
-			int f_u = L1->Right(doc)->upper_tex;
-			int b_l = L1-> Left(doc)->lower_tex;
-			int b_u = L1-> Left(doc)->upper_tex;
+			StringID f_l = L1->Right(doc)->lower_tex;
+			StringID f_u = L1->Right(doc)->upper_tex;
+			StringID b_l = L1-> Left(doc)->lower_tex;
+			StringID b_u = L1-> Left(doc)->upper_tex;
 
 			// ignore missing textures
-			if (is_null_tex(BA_GetString(f_l))) f_l = 0;
-			if (is_null_tex(BA_GetString(f_u))) f_u = 0;
-			if (is_null_tex(BA_GetString(b_l))) b_l = 0;
-			if (is_null_tex(BA_GetString(b_u))) b_u = 0;
+			if (is_null_tex(BA_GetString(f_l))) f_l = StringID();
+			if (is_null_tex(BA_GetString(f_u))) f_u = StringID();
+			if (is_null_tex(BA_GetString(b_l))) b_l = StringID();
+			if (is_null_tex(BA_GetString(b_u))) b_u = StringID();
 
 			// try hard to find a usable texture
-			int tex = -1;
+			StringID tex = StringID(-1);
 
-				 if (front->floorh < back->floorh && f_l > 0) tex = f_l;
-			else if (front->floorh > back->floorh && b_l > 0) tex = b_l;
-			else if (front-> ceilh > back-> ceilh && f_u > 0) tex = f_u;
-			else if (front-> ceilh < back-> ceilh && b_u > 0) tex = b_u;
-			else if (f_l > 0) tex = f_l;
-			else if (b_l > 0) tex = b_l;
-			else if (f_u > 0) tex = f_u;
-			else if (b_u > 0) tex = b_u;
+				 if (front->floorh < back->floorh && f_l.hasContent()) tex = f_l;
+			else if (front->floorh > back->floorh && b_l.hasContent()) tex = b_l;
+			else if (front-> ceilh > back-> ceilh && f_u.hasContent()) tex = f_u;
+			else if (front-> ceilh < back-> ceilh && b_u.hasContent()) tex = b_u;
+			else if (f_l.hasContent()) tex = f_l;
+			else if (b_l.hasContent()) tex = b_l;
+			else if (f_u.hasContent()) tex = f_u;
+			else if (b_u.hasContent()) tex = b_u;
 
-			if (tex > 0)
+			if (tex.hasContent())
 			{
 				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
@@ -1546,14 +1546,14 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 		if (is_vert)
 		{
-			op.changeThing(*it, Thing::F_Y, (fix_my * 2 - T->raw_y).raw());
+			op.changeThing(*it, Thing::F_Y, fix_my * 2 - T->raw_y);
 
 			if (T->angle != 0)
 				op.changeThing(*it, Thing::F_ANGLE, 360 - T->angle);
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, (fix_mx * 2 - T->raw_x).raw());
+			op.changeThing(*it, Thing::F_X, fix_mx * 2 - T->raw_x);
 
 			if (T->angle > 180)
 				op.changeThing(*it, Thing::F_ANGLE, 540 - T->angle);
@@ -1577,9 +1577,9 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 		const Vertex * V = doc.vertices[*it];
 
 		if (is_vert)
-			op.changeVertex(*it, Vertex::F_Y, (fix_my * 2 - V->raw_y).raw());
+			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V->raw_y);
 		else
-			op.changeVertex(*it, Vertex::F_X, (fix_mx * 2 - V->raw_x).raw());
+			op.changeVertex(*it, Vertex::F_X, fix_mx * 2 - V->raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1666,15 +1666,15 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 
 		if (anti_clockwise)
 		{
-			op.changeThing(*it, Thing::F_X, (fix_mx - old_y + fix_my).raw());
-			op.changeThing(*it, Thing::F_Y, (fix_my + old_x - fix_mx).raw());
+			op.changeThing(*it, Thing::F_X, fix_mx - old_y + fix_my);
+			op.changeThing(*it, Thing::F_Y, fix_my + old_x - fix_mx);
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, +90));
 		}
 		else
 		{
-			op.changeThing(*it, Thing::F_X, (fix_mx + old_y - fix_my).raw());
-			op.changeThing(*it, Thing::F_Y, (fix_my - old_x + fix_mx).raw());
+			op.changeThing(*it, Thing::F_X, fix_mx + old_y - fix_my);
+			op.changeThing(*it, Thing::F_Y, fix_my - old_x + fix_mx);
 
 			op.changeThing(*it, Thing::F_ANGLE, calc_new_angle(T->angle, -90));
 		}
@@ -1736,13 +1736,13 @@ void Instance::CMD_Rotate90()
 
 				if (anti_clockwise)
 				{
-					op.changeVertex(*it, Vertex::F_X, (fix_mx - old_y + fix_my).raw());
-					op.changeVertex(*it, Vertex::F_Y, (fix_my + old_x - fix_mx).raw());
+					op.changeVertex(*it, Vertex::F_X, fix_mx - old_y + fix_my);
+					op.changeVertex(*it, Vertex::F_Y, fix_my + old_x - fix_mx);
 				}
 				else
 				{
-					op.changeVertex(*it, Vertex::F_X, (fix_mx + old_y - fix_my).raw());
-					op.changeVertex(*it, Vertex::F_Y, (fix_my - old_x + fix_mx).raw());
+					op.changeVertex(*it, Vertex::F_X, fix_mx + old_y - fix_my);
+					op.changeVertex(*it, Vertex::F_Y, fix_my - old_x + fix_mx);
 				}
 			}
 		}
@@ -1764,8 +1764,8 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+		op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+		op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 
 		float rot1 = static_cast<float>(param.rotate / (M_PI / 4));
 
@@ -1793,8 +1793,8 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 		param.Apply(&new_x, &new_y);
 
-		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+		op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+		op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 	}
 }
 
@@ -2092,8 +2092,8 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::things, new_x, new_y))
 			{
-				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+				op.changeThing(*it, Thing::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+				op.changeThing(*it, Thing::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 
 				moved.set(*it);
 				break;
@@ -2194,8 +2194,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 			if (! spotInUse(ObjType::vertices, static_cast<int>(new_x), static_cast<int>(new_y)))
 			{
-				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x).raw());
-				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y).raw());
+				op.changeVertex(*it, Vertex::F_X, MakeValidCoord(inst.loaded.levelFormat, new_x));
+				op.changeVertex(*it, Vertex::F_Y, MakeValidCoord(inst.loaded.levelFormat, new_y));
 
 				moved.set(*it);
 				break;
