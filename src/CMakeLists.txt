@@ -27,7 +27,6 @@ set(source_base
     SideDef.h
     Thing.cc
     Thing.h
-    version.h
     Vertex.h
     WadData.cc
     WadData.h
