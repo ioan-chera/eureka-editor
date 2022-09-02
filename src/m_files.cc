@@ -945,14 +945,14 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 			//now try relative to PWAD by prepending PWAD path
 
-            if (! FileExists(res))
-            {
-    			SString pwadPath = wad->PathName();
+			if (! FileExists(res))
+			{
+				SString pwadPath = wad->PathName();
 				FilenameStripBase(pwadPath);
 				pwadPath += DIR_SEP_STR;
-                res = (pwadPath += resBackup);
-                gLog.printf("  trying: %s\n", res.c_str());
-            }
+				res = (pwadPath += resBackup);
+				gLog.printf("  trying: %s\n", res.c_str());
+			}
 
 			if (! FileExists(res) && !new_iwad.empty())
 			{
