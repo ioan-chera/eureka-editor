@@ -30,6 +30,8 @@
 
 #include "ui_window.h"
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 // list of known iwads (mapping GAME name --> PATH)
 
@@ -1037,18 +1039,14 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 	if (!loaded.portName.empty())
 		lump->Printf("port %s\n", loaded.portName.c_str());
 
-	SString pwadpath = wad->PathName();
-	FilenameStripBase(pwadpath);
-	pwadpath += DIR_SEP_STR;
+	fs::path pwadPath = fs::absolute(wad->PathName().c_str()).remove_filename();
 
 	for (const SString &resource : loaded.resourceList)
 	{
-		SString relative_name = GetAbsolutePath(resource);
-		
-		size_t seppos = pwadpath.find_last_of(DIR_SEP_STR);
-		relative_name.erase(0, seppos + 1);
+		fs::path absoluteResourcePath = fs::absolute(resource.c_str());
+		fs::path relative = fs::proximate(absoluteResourcePath, pwadPath);
 
-		lump->Printf("resource %s\n", relative_name.c_str());
+		lump->Printf("resource %s\n", relative.generic_string().c_str());
 	}
 
 	wad->writeToDisk();
