@@ -341,17 +341,17 @@ SString GetAbsolutePath(const SString &path)
 //
 SString GetRelativePath(const SString &path)
 {
-        size_t sz = 64;
-        std::vector<char> stringBuffer;
+	size_t sz = 64;
+	std::vector<char> stringBuffer;
 
-        do
-        {
-                sz *= 2;
-                stringBuffer.resize(sz);
-                fl_filename_relative(stringBuffer.data(), (int)stringBuffer.size(), path.c_str());
-        } while(stringBuffer.back() == '\0' && stringBuffer[stringBuffer.size() - 2] != 0);
+	do
+	{
+		sz *= 2;
+		stringBuffer.resize(sz);
+		fl_filename_relative(stringBuffer.data(), (int)stringBuffer.size(), path.c_str());
+	} while(stringBuffer.back() == '\0' && stringBuffer[stringBuffer.size() - 2] != 0);
 
-        return stringBuffer.data();
+	return stringBuffer.data();
 }
 
 bool FileCopy(const SString &src_name, const SString &dest_name)

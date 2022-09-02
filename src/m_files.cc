@@ -943,7 +943,7 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 				gLog.printf("  trying: %s\n", res.c_str());
 			}
 
-			//now try relative to PWAD by prepending PWAD path
+			// now try relative to PWAD by prepending PWAD path
 
 			if (! FileExists(res))
 			{
