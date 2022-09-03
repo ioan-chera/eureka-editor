@@ -1576,6 +1576,7 @@ void Instance::SaveLevel(const SString &level)
 	wad.master.edit_wad->SortLevels();
 
 	loaded.writeEurekaLump(wad.master.edit_wad.get());
+	wad.master.edit_wad->writeToDisk();
 
 	M_AddRecent(wad.master.edit_wad->PathName(), loaded.levelName);
 

@@ -1043,8 +1043,6 @@ void LoadingData::writeEurekaLump(Wad_file *wad) const
 
 		lump->Printf("resource %s\n", relative.generic_string().c_str());
 	}
-
-	wad->writeToDisk();
 }
 
 
