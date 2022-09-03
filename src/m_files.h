@@ -21,6 +21,9 @@
 #ifndef __EUREKA_M_FILES_H__
 #define __EUREKA_M_FILES_H__
 
+#include "m_strings.h"
+#include "sys_type.h"
+
 class Wad_file;
 
 void M_LoadRecent();

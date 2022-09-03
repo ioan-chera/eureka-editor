@@ -250,7 +250,6 @@ public:
 	bool M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args = false);
 	SString M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
-	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
 	bool is_sky(const SString &flat) const;

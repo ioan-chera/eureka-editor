@@ -28,6 +28,7 @@
 #define __EUREKA_E_LOADSAVE_H__
 
 #include "w_wad.h"
+#include <unordered_map>
 
 //
 // Background loading data for Main_LoadResources
@@ -35,6 +36,7 @@
 struct LoadingData
 {
 	void prepareConfigVariables();
+	void writeEurekaLump(Wad_file *wad) const;
 
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
 	SString portName;	// Name of source port "vanilla", "boom", ...

@@ -1016,7 +1016,7 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 }
 
 
-void Instance::M_WriteEurekaLump(Wad_file *wad) const
+void LoadingData::writeEurekaLump(Wad_file *wad) const
 {
 	gLog.printf("Writing '%s' lump\n", EUREKA_LUMP);
 
@@ -1028,15 +1028,15 @@ void Instance::M_WriteEurekaLump(Wad_file *wad) const
 
 	lump->Printf("# Eureka project info\n");
 
-	if (!loaded.gameName.empty())
-		lump->Printf("game %s\n", loaded.gameName.c_str());
+	if (!gameName.empty())
+		lump->Printf("game %s\n", gameName.c_str());
 
-	if (!loaded.portName.empty())
-		lump->Printf("port %s\n", loaded.portName.c_str());
+	if (!portName.empty())
+		lump->Printf("port %s\n", portName.c_str());
 
 	fs::path pwadPath = fs::absolute(wad->PathName().c_str()).remove_filename();
 
-	for (const SString &resource : loaded.resourceList)
+	for (const SString &resource : resourceList)
 	{
 		fs::path absoluteResourcePath = fs::absolute(resource.c_str());
 		fs::path relative = fs::proximate(absoluteResourcePath, pwadPath);
