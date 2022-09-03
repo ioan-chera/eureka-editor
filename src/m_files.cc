@@ -932,38 +932,33 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (line == "resource")
 		{
-			SString res = value;
-            SString resBackup = res;
+			fs::path resourcePath(value.c_str());
 
-			// if not found at absolute location, try same place as PWAD
-
-			if (! FileExists(res))
+			if(resourcePath.is_relative())
 			{
-				gLog.printf("  file not found: %s\n", value.c_str());
-
-				res = FilenameReposition(value, wad->PathName());
-				gLog.printf("  trying: %s\n", res.c_str());
+				fs::path wadDirPath = fs::path(wad->PathName().c_str()).parent_path();
+				resourcePath = (wadDirPath / resourcePath).lexically_normal();
 			}
 
-			// now try relative to PWAD by prepending PWAD path
-
-			if (! FileExists(res))
+			// if not found at expected location, try same place as PWAD
+			if (!fs::exists(resourcePath))
 			{
-				SString pwadPath = wad->PathName();
-				FilenameStripBase(pwadPath);
-				pwadPath += DIR_SEP_STR;
-				res = (pwadPath += resBackup);
-				gLog.printf("  trying: %s\n", res.c_str());
+				gLog.printf("  file not found: %s\n", resourcePath.c_str());
+				fs::path wadDirPath = fs::path(wad->PathName().c_str()).parent_path();
+				resourcePath = wadDirPath / resourcePath.filename();
+
+				gLog.printf("  trying: %s\n", resourcePath.c_str());
+			}
+			// Still doesn't exist? Try IWAD path, if any
+			if (!fs::exists(resourcePath) && new_iwad.good())
+			{
+				fs::path wadDirPath = fs::path(new_iwad.c_str()).parent_path();
+				resourcePath = wadDirPath / resourcePath.filename();
+				gLog.printf("  trying: %s\n", resourcePath.c_str());
 			}
 
-			if (! FileExists(res) && !new_iwad.empty())
-			{
-				res = FilenameReposition(value, new_iwad);
-				gLog.printf("  trying: %s\n", res.c_str());
-			}
-
-			if (FileExists(res))
-				new_resources.push_back(res);
+			if (fs::exists(resourcePath))
+				new_resources.push_back(resourcePath.c_str());
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
