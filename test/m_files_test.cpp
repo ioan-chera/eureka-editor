@@ -45,9 +45,8 @@ void EurekaLumpFixture::SetUp()
 	// no writing to disk
 }
 
-TEST_F(EurekaLumpFixture, WriteEurekaLumpResourcesRelatively)
+TEST_F(EurekaLumpFixture, WriteEurekaLump)
 {
-	static const char wadpathdir[] = "first";
 	static const char wadpathbase[] = "first/wad.wad";
 	SString wadpath(getChildPath(wadpathbase));
 	// Set up a nested directory WAD so we can test relative paths to resources
@@ -61,19 +60,9 @@ TEST_F(EurekaLumpFixture, WriteEurekaLumpResourcesRelatively)
 	loaded.resourceList.push_back(getChildPath("upper.txt"));		// upper path
 	loaded.resourceList.push_back(getChildPath("second/music.mid"));	// sibling path
 
-	// Prerequisite: make directory for wad
-	bool result = FileMakeDir(getChildPath(wadpathdir));
-	ASSERT_TRUE(result);
-	mDeleteList.push(getChildPath(wadpathdir));
-
 	loaded.writeEurekaLump(wad.get());
-	mDeleteList.push(wadpath);
 
-	// Now test the result
-	std::shared_ptr<Wad_file> verify = Wad_file::Open(wadpath, WadOpenMode::read);
-	ASSERT_TRUE(wad);
-
-	Lump_c *lump = verify->FindLump(EUREKA_LUMP);
+	Lump_c *lump = wad->FindLump(EUREKA_LUMP);
 	ASSERT_TRUE(lump);
 
 	// Now read the data
@@ -89,9 +78,32 @@ TEST_F(EurekaLumpFixture, WriteEurekaLumpResourcesRelatively)
 	};
 	SString content(static_cast<const char *>(lump->getData()), lump->Length());
 	ASSERT_EQ(content, expected);
-}
 
-TEST_F(EurekaLumpFixture, OldEurekaLumpIsReplaced)
-{
-	// TODO
+	// Now make a change: remove port and resources, see that the lump is updated (not deleted).
+	// Add a couple of lumps before and after before doing it, to see how it gets updated alone.
+	wad->InsertPoint(0);
+	Lump_c *beforelump = wad->AddLump("BEFORE");
+	ASSERT_TRUE(beforelump);
+	wad->InsertPoint();
+	Lump_c *lastlump = wad->AddLump("LAST");
+	ASSERT_TRUE(lastlump);
+	ASSERT_EQ(wad->NumLumps(), 3);
+
+	loaded.portName.clear();
+	loaded.resourceList.clear();
+	loaded.writeEurekaLump(wad.get());
+
+	// Check we still have 3 lumps
+	ASSERT_EQ(wad->NumLumps(), 3);
+	ASSERT_EQ(wad->GetLump(0)->Name(), "BEFORE");
+	ASSERT_EQ(wad->GetLump(1)->Name(), "LAST");
+	ASSERT_EQ(wad->GetLump(2)->Name(), EUREKA_LUMP);	// moved to the end
+
+	static const char expected2[] = {
+		"# Eureka project info\n"
+		"game Mood\n"
+	};
+	lump = wad->GetLump(2);
+	content = SString(static_cast<const char *>(lump->getData()), lump->Length());
+	ASSERT_EQ(content, expected2);
 }
