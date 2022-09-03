@@ -91,6 +91,7 @@ function(unit_test _name)
         target_include_directories(${_name} PRIVATE ${CMAKE_SOURCE_DIR}/osx/EurekaApp)
         target_compile_definitions(${_name} PRIVATE GL_SILENCE_DEPRECATION)
     endif()
+    target_compile_definitions(${_name} PRIVATE main=mainDISABLED NO_OPENGL)
 
     if(_use_fltk)
         target_link_libraries(${_name} PRIVATE ${fltk_libs})
@@ -103,6 +104,86 @@ function(unit_test _name)
 endfunction()
 
 # IMPORTANT: the eurekasrc files from testutils are already linked!
+
+unit_test(general
+    m_files_test.cpp
+    stub/osxcalls_stub.cpp
+    SRC bsp_level.cc
+        bsp_node.cc
+        bsp_util.cc
+        Document.cc
+        DocumentModule.cc
+        e_basis.cc
+        e_checks.cc
+        e_commands.cc
+        e_cutpaste.cc
+        e_hover.cc
+        e_linedef.cc
+        e_main.cc
+        e_objects.cc
+        e_path.cc
+        e_sector.cc
+        e_things.cc
+        e_vertex.cc
+        im_color.cc
+        im_img.cc
+        Instance.cc
+        lib_file.cc
+        lib_tga.cc
+        LineDef.cc
+        m_bitvec.cc
+        m_config.cc
+        m_editlump.cc
+        m_events.cc
+        m_files.cc
+        m_keys.cc
+        m_game.cc
+        m_loadsave.cc
+        m_nodes.cc
+        m_parse.cc
+        m_select.cc
+        m_streams.cc
+        m_testmap.cc
+        m_udmf.cc
+        main.cc
+        r_grid.cc
+        r_opengl.cc
+        r_render.cc
+        r_software.cc
+        r_subdiv.cc
+        SafeOutFile.cc
+        Sector.cc
+        SideDef.cc
+        Thing.cc
+        ui_about.cc
+        ui_browser.cc
+        ui_canvas.cc
+        ui_default.cc
+        ui_dialog.cc
+        ui_editor.cc
+        ui_file.cc
+        ui_hyper.cc
+        ui_infobar.cc
+        ui_linedef.cc
+        ui_menu.cc
+        ui_misc.cc
+        ui_nombre.cc
+        ui_panelinput.cc
+        ui_pic.cc
+        ui_prefs.cc
+        ui_replace.cc
+        ui_scroll.cc
+        ui_sector.cc
+        ui_sidedef.cc
+        ui_thing.cc
+        ui_tile.cc
+        ui_vertex.cc
+        ui_window.cc
+        w_loadpic.cc
+        w_texture.cc
+        w_wad.cc
+    FLTK
+)
 
 unit_test(document
     DocumentTest.cpp

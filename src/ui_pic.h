@@ -23,6 +23,7 @@
 
 #include "ui_panelinput.h"
 #include "FL/Fl_Input.H"
+#include "FL/Fl_RGB_Image.H"
 
 class Img_c;
 
