@@ -336,24 +336,6 @@ SString GetAbsolutePath(const SString &path)
 	return stringBuffer.data();
 }
 
-// Thu 12 May 2022
-// Assuming fl_filename_relative can be safely wrapped as above
-//
-SString GetRelativePath(const SString &path)
-{
-	size_t sz = 64;
-	std::vector<char> stringBuffer;
-
-	do
-	{
-		sz *= 2;
-		stringBuffer.resize(sz);
-		fl_filename_relative(stringBuffer.data(), (int)stringBuffer.size(), path.c_str());
-	} while(stringBuffer.back() == '\0' && stringBuffer[stringBuffer.size() - 2] != 0);
-
-	return stringBuffer.data();
-}
-
 bool FileCopy(const SString &src_name, const SString &dest_name)
 {
 	char buffer[1024];

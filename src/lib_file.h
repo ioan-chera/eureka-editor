@@ -44,7 +44,6 @@ bool FilenameIsBare(const SString &filename);
 SString FilenameReposition(const SString &filename, const SString &othername);
 SString FilenameGetPath(const SString &filename);
 SString GetAbsolutePath(const SString &path);
-SString GetRelativePath(const SString &path);
 
 // file utilities
 bool FileExists(const SString &filename);
