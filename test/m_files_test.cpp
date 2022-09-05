@@ -21,6 +21,9 @@
 #include "m_files.h"
 #include "m_loadsave.h"
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 #include "gtest/gtest.h"
 
 #define WAD_NAME "EurekaLump.wad"
@@ -60,6 +63,19 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	loaded.resourceList.push_back(getChildPath("upper.txt"));		// upper path
 	loaded.resourceList.push_back(getChildPath("second/music.mid"));	// sibling path
 
+	// In case of Windows, also check different drive letter
+	fs::path wadpathobj = fs::path(wadpath.c_str());
+	char otherdriveletter = '\0';
+	if(wadpathobj.has_root_name())
+	{
+		char c = wadpathobj.u8string()[0];
+		c = toupper(c) < 'Z' ? c + 1 : 'A';
+		char otherpath[] = "C:\\other\\path";
+		otherpath[0] = c;
+		otherdriveletter = c;
+		loaded.resourceList.push_back(otherpath);
+	}
+
 	loaded.writeEurekaLump(wad.get());
 
 	Lump_c *lump = wad->FindLump(EUREKA_LUMP);
@@ -67,7 +83,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 
 	// Now read the data
 	// Expected content is:
-	static const char expected[] = {
+	SString expected = 
 		"# Eureka project info\n"
 		"game Mood\n"
 		"port Voom\n"
@@ -75,7 +91,13 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		"resource deep/call.txt\n"
 		"resource ../upper.txt\n"
 		"resource ../second/music.mid\n"
-	};
+	;
+	if(wadpathobj.has_root_name())
+	{
+		expected += "resource ";
+		expected += otherdriveletter;
+		expected += ":/other/path\n";
+	}
 	SString content(static_cast<const char *>(lump->getData()), lump->Length());
 	ASSERT_EQ(content, expected);
 
