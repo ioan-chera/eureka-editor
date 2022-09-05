@@ -107,3 +107,21 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	content = SString(static_cast<const char *>(lump->getData()), lump->Length());
 	ASSERT_EQ(content, expected2);
 }
+
+/*
+ parseEurekaLump conditions:
+ - Wad_file with written Eureka lump
+	- test without lump
+	- test with invalid syntax lines
+ - global::home_dir, global::install_dir (must reset them)
+	- test without any or both of them
+ - base/<game>.ugh, base/<port>.ugh
+	- test without that file, simulate dialog box
+ - global::known_iwads (must reset it)
+	- test without it
+ - resource paths
+	- try relative
+	- try absolute
+	- try inexistent resources
+	- check that we don't add duplicate resources (SAME NAME RULE MAY NEED FIXING)
+ */
