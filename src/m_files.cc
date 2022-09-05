@@ -844,10 +844,10 @@ SString Instance::M_PickDefaultIWAD() const
 }
 
 
-static void M_AddResource_Unique(Instance &inst, const SString & filename)
+static void M_AddResource_Unique(LoadingData &loading, const SString & filename)
 {
 	// check if base filename (without path) already exists
-	for (const SString &resource : inst.loaded.resourceList)
+	for (const SString &resource : loading.resourceList)
 	{
 		const char *A = fl_filename_name(filename.c_str());
 		const char *B = fl_filename_name(resource.c_str());
@@ -856,14 +856,14 @@ static void M_AddResource_Unique(Instance &inst, const SString & filename)
 			return;		// found it
 	}
 
-	inst.loaded.resourceList.push_back(filename);
+	loading.resourceList.push_back(filename);
 }
 
 
 //
 // returns false if user wants to cancel the load
 //
-bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
+bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -994,18 +994,18 @@ bool Instance::M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	if (!new_iwad.empty())
 	{
-		if (! (keep_cmd_line_args && !loaded.iwadName.empty()))
-			loaded.iwadName = new_iwad;
+		if (! (keep_cmd_line_args && !iwadName.empty()))
+			iwadName = new_iwad;
 	}
 
 	if (!new_port.empty())
 	{
-		if (! (keep_cmd_line_args && !loaded.portName.empty()))
-			loaded.portName = new_port;
+		if (! (keep_cmd_line_args && !portName.empty()))
+			portName = new_port;
 	}
 
 	if (! keep_cmd_line_args)
-		loaded.resourceList.clear();
+		resourceList.clear();
 
 	for (const SString &resource : new_resources)
 	{

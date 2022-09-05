@@ -1182,7 +1182,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.wad.master.edit_wad)
 		{
-			if (! gInstance.M_ParseEurekaLump(gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance.loaded.parseEurekaLump(gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.wad.master.RemoveEditWad();

@@ -36,6 +36,7 @@
 struct LoadingData
 {
 	void prepareConfigVariables();
+	bool parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args = false);
 	void writeEurekaLump(Wad_file *wad) const;
 
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
