@@ -958,7 +958,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			}
 
 			if (fs::exists(resourcePath))
-				new_resources.push_back(resourcePath.c_str());
+				new_resources.push_back(resourcePath.u8string());
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
