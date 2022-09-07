@@ -30,23 +30,14 @@ namespace fs = ghc::filesystem;
 #define IMMEDIATE_RESOURCE "Michael"
 #define NESTED_RESOURCE "Jackson/George"
 
+//
+// Writing lump fixture
+//
 class EurekaLumpFixture : public TempDirContext
 {
 protected:
-	void SetUp() override;
-
-	LoadingData loaded;
-//	std::shared_ptr<Wad_file> wad;
+	LoadingData loaded;	// keep a convenient pointer to the LoadingData
 };
-
-void EurekaLumpFixture::SetUp()
-{
-	TempDirContext::SetUp();
-
-//	wad = Wad_file::Open(getChildPath(WAD_NAME), WadOpenMode::write);
-//	ASSERT_TRUE(wad);
-	// no writing to disk
-}
 
 TEST_F(EurekaLumpFixture, WriteEurekaLump)
 {
@@ -147,3 +138,50 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	- try inexistent resources
 	- check that we don't add duplicate resources (SAME NAME RULE MAY NEED FIXING)
  */
+
+//
+// Fixture for parsing. Depends on TempDirContext due to technicalities.
+//
+class ParseEurekaLumpFixture : public TempDirContext
+{
+protected:
+	void TearDown() override;
+
+private:
+	void clearKnownIwads();
+};
+
+//
+// Clear all globals
+//
+void ParseEurekaLumpFixture::TearDown()
+{
+	global::home_dir.clear();
+	global::install_dir.clear();
+	clearKnownIwads();
+}
+
+//
+// Since global::known_iwads is static, we need to do something more complex to access and clear it.
+//
+void ParseEurekaLumpFixture::clearKnownIwads()
+{
+	// The only method to clear the structure is M_LoadRecent
+	// Prerequisites:
+	// - global::home_dir / "misc.cfg": existing empty file
+
+	// Must set home_dir temporarily for this to work
+	global::home_dir = getChildPath("");
+
+	SString miscPath = getChildPath("misc.cfg");
+	FILE *f = fopen(miscPath.c_str(), "wb");
+	ASSERT_TRUE(f);
+	mDeleteList.push(miscPath);
+
+	int result = fclose(f);
+	ASSERT_FALSE(result);
+
+	M_LoadRecent();
+
+	global::home_dir.clear();
+}

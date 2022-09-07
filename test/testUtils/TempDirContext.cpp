@@ -88,7 +88,7 @@ void TempDirContext::TearDown()
 //
 // Gets a child path
 //
-SString TempDirContext::getChildPath(const char *path)
+SString TempDirContext::getChildPath(const char *path) const
 {
 	EXPECT_TRUE(path);
 	EXPECT_TRUE(*path);
