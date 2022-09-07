@@ -121,10 +121,76 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 	ASSERT_EQ(content, expected2);
 }
 
+//
+// Fixture for parsing. Depends on TempDirContext due to technicalities.
+//
+class ParseEurekaLumpFixture : public TempDirContext
+{
+protected:
+	void SetUp() override;
+	void TearDown() override;
+	void assertEmptyLoading() const;
+
+	std::shared_ptr<Wad_file> wad;
+	LoadingData loading;
+
+private:
+	void clearKnownIwads();
+};
+
+//
+// Init WAD and other stuff
+//
+void ParseEurekaLumpFixture::SetUp()
+{
+	TempDirContext::SetUp();
+	wad = Wad_file::Open(getChildPath("wad.wad"), WadOpenMode::write);
+	ASSERT_TRUE(wad);
+}
+
+//
+// Clear all globals
+//
+void ParseEurekaLumpFixture::TearDown()
+{
+	global::home_dir.clear();
+	global::install_dir.clear();
+	clearKnownIwads();
+	DLG_Notify_Override = nullptr;
+	DLG_Confirm_Override = nullptr;
+
+	TempDirContext::TearDown();
+}
+
+//
+// Since global::known_iwads is static, we need to do something more complex to access and clear it.
+//
+void ParseEurekaLumpFixture::clearKnownIwads()
+{
+	// The only method to clear the structure is M_LoadRecent
+	// Prerequisites:
+	// - global::home_dir / "misc.cfg": existing empty file
+
+	// Must set home_dir temporarily for this to work
+	global::home_dir = mTempDir;
+
+	SString miscPath = getChildPath("misc.cfg");
+	FILE *f = fopen(miscPath.c_str(), "wb");
+	ASSERT_TRUE(f);
+	mDeleteList.push(miscPath);
+
+	int result = fclose(f);
+	ASSERT_FALSE(result);
+
+	M_LoadRecent();
+
+	global::home_dir.clear();
+}
+
 /*
  parseEurekaLump conditions:
  - Wad_file with written Eureka lump
-	- test without lump
+	# test without lump
 	- test with invalid syntax lines
  - global::home_dir, global::install_dir (must reset them)
 	- test without any or both of them
@@ -140,50 +206,33 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
  */
 
 //
-// Fixture for parsing. Depends on TempDirContext due to technicalities.
+// Common check we didn't load anything
 //
-class ParseEurekaLumpFixture : public TempDirContext
+void ParseEurekaLumpFixture::assertEmptyLoading() const
 {
-protected:
-	void TearDown() override;
-
-private:
-	void clearKnownIwads();
-};
-
-//
-// Clear all globals
-//
-void ParseEurekaLumpFixture::TearDown()
-{
-	global::home_dir.clear();
-	global::install_dir.clear();
-	clearKnownIwads();
-	DLG_Notify_Override = nullptr;
-	DLG_Confirm_Override = nullptr;
+	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.portName.empty());
+	ASSERT_TRUE(loading.iwadName.empty());
+	ASSERT_TRUE(loading.resourceList.empty());
 }
 
-//
-// Since global::known_iwads is static, we need to do something more complex to access and clear it.
-//
-void ParseEurekaLumpFixture::clearKnownIwads()
+TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 {
-	// The only method to clear the structure is M_LoadRecent
-	// Prerequisites:
-	// - global::home_dir / "misc.cfg": existing empty file
+	// Safe on empty wad
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	assertEmptyLoading();
 
-	// Must set home_dir temporarily for this to work
-	global::home_dir = getChildPath("");
+	// Safe on wad with some lumps
+	Lump_c *lump1 = wad->AddLump("LUMP1");
+	ASSERT_TRUE(lump1);
+	lump1->Printf("Data 1");
 
-	SString miscPath = getChildPath("misc.cfg");
-	FILE *f = fopen(miscPath.c_str(), "wb");
-	ASSERT_TRUE(f);
-	mDeleteList.push(miscPath);
+	Lump_c *lump2 = wad->AddLump("LUMP2");
+	ASSERT_TRUE(lump2);
+	lump2->Printf("Data 2");
 
-	int result = fclose(f);
-	ASSERT_FALSE(result);
+	ASSERT_EQ(wad->NumLumps(), 2);
 
-	M_LoadRecent();
-
-	global::home_dir.clear();
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	assertEmptyLoading();
 }
