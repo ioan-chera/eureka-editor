@@ -159,6 +159,8 @@ void ParseEurekaLumpFixture::TearDown()
 	global::home_dir.clear();
 	global::install_dir.clear();
 	clearKnownIwads();
+	DLG_Notify_Override = nullptr;
+	DLG_Confirm_Override = nullptr;
 }
 
 //

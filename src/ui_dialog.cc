@@ -277,24 +277,38 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char *msg), ...)
 					 linkURL);
 }
 
+void (*DLG_Notify_Override)(const char *msg, va_list ap);
 
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
+	if(DLG_Notify_Override)
+	{
+		DLG_Notify_Override(msg, arg_pt);
+		va_end(arg_pt);
+		return;
+	}
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 
 	DialogShowAndRun(MessageBoxIcon::information, dialog_buffer, "Eureka - Notification");
 }
 
+int (*DLG_Confirm_Override)(const std::vector<SString> &buttons, const char *msg, va_list ap);
 
 int DLG_Confirm(const std::vector<SString>& buttons, EUR_FORMAT_STRING(const char *msg), ...)
 {
 	va_list arg_pt;
 
 	va_start (arg_pt, msg);
+	if(DLG_Confirm_Override)
+	{
+		int result = DLG_Confirm_Override(buttons, msg, arg_pt);
+		va_end(arg_pt);
+		return result;
+	}
 	SString dialog_buffer = SString::vprintf(msg, arg_pt);
 	va_end (arg_pt);
 

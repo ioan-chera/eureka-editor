@@ -160,6 +160,10 @@ void DLG_ShowError(bool fatal, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRIN
 void DLG_Notify(EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(1, 2);
 int  DLG_Confirm(const std::vector<SString> &buttons, EUR_FORMAT_STRING(const char *msg), ...) EUR_PRINTF(2, 3);
 
+extern void (*DLG_Notify_Override)(const char *msg, va_list ap);
+extern int (*DLG_Confirm_Override)(const std::vector<SString> &buttons, const char *msg,
+								   va_list ap);
+
 SString GameNameFromIWAD(const SString &iwad_name);
 
 #endif  /* __EUREKA_MAIN_H__ */
