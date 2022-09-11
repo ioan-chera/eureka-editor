@@ -193,12 +193,12 @@ void ParseEurekaLumpFixture::clearKnownIwads()
  - Wad_file with written Eureka lump
 	# test without lump
 	- test with invalid syntax lines
- - global::home_dir, global::install_dir (must reset them)
-	- test without any or both of them
- - base/<game>.ugh, base/<port>.ugh
-	- test without that file, simulate dialog box
- - global::known_iwads (must reset it)
-	- test without it
+ # global::home_dir, global::install_dir (must reset them)
+	# test without any or both of them
+ # base/<game>.ugh, base/<port>.ugh
+	# test without that file, simulate dialog box
+ # global::known_iwads (must reset it)
+	# test without it
  - resource paths
 	- try relative
 	- try absolute
@@ -243,6 +243,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
 	ASSERT_TRUE(eureka);
 	eureka->Printf("game emag\n");	// have a game name there
+	eureka->Printf("invalid syntax here\n");
 	eureka->Printf("port trop\n");	// add something else to check how we go
 
 	// Situation 1: home, install dir unset
@@ -322,4 +323,24 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	ASSERT_FALSE(gameWarning);
 	ASSERT_FALSE(iwadWarning);
 	ASSERT_TRUE(portWarning);
+
+	// Situation 6: now remove the home dir to see it won't be found
+	SString goodHomeDir = global::home_dir;
+	global::home_dir.clear();
+	decision = 1;
+	gameWarning = iwadWarning = portWarning = false;
+	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
+
+	// Situation 7: set the install dir instead
+	global::install_dir = goodHomeDir;
+	decision = 0;
+	gameWarning = iwadWarning = portWarning = false;
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_EQ(loading.iwadName, iwadPath);
+	ASSERT_TRUE(loading.portName.empty());
+	ASSERT_FALSE(gameWarning);
+	ASSERT_FALSE(iwadWarning);
+	ASSERT_TRUE(portWarning);
+
+	// TODO: resources
 }
