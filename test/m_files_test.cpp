@@ -266,7 +266,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 
 	// Decide to keep trying, but nothing to get
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
-	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
 	ASSERT_FALSE(iwadWarning);
@@ -289,7 +289,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	decision = 0;	// no ignore
 	gameWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
-	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
 	ASSERT_FALSE(iwadWarning);
@@ -299,15 +299,27 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	fs::path emagDir = gamesDir / "emag.ugh";
 	FILE *f = fopen(emagDir.u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
+	fclose(f);
 	mDeleteList.push(emagDir.u8string());
 
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
-	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
 	ASSERT_TRUE(iwadWarning);
 	ASSERT_TRUE(portWarning);
 
 	// Situation 5: now add the IWAD
+	SString iwadPath = getChildPath("emag.wad");
+	M_AddKnownIWAD(iwadPath);	// NOTE: no need to add file
+
+	decision = 0;
+	gameWarning = iwadWarning = portWarning = false;
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_EQ(loading.iwadName, iwadPath);
+	ASSERT_TRUE(loading.portName.empty());
+	ASSERT_FALSE(gameWarning);
+	ASSERT_FALSE(iwadWarning);
+	ASSERT_TRUE(portWarning);
 }
