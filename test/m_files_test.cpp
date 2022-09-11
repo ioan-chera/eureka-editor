@@ -144,6 +144,7 @@ private:
 void ParseEurekaLumpFixture::SetUp()
 {
 	TempDirContext::SetUp();
+
 	wad = Wad_file::Open(getChildPath("wad.wad"), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 }
@@ -235,4 +236,78 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
 	assertEmptyLoading();
+}
+
+TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
+{
+	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	ASSERT_TRUE(eureka);
+	eureka->Printf("game emag\n");	// have a game name there
+	eureka->Printf("port trop\n");	// add something else to check how we go
+
+	// Situation 1: home, install dir unset
+	// Prerequisite: set the DLG_Confirm override
+	int decision = 0;
+	bool gameWarning = false, iwadWarning = false, portWarning = false;
+	DLG_Confirm_Override = [&decision, &gameWarning, &iwadWarning](const std::vector<SString> &,
+																   const char *message, va_list)
+	{
+		if(strstr(message, "game"))
+			gameWarning = true;
+		else if(strstr(message, "IWAD"))
+			iwadWarning = true;
+		return decision;
+	};
+	DLG_Notify_Override = [&portWarning](const char *message, va_list)
+	{
+		if(strstr(message, "port"))
+			portWarning = true;
+	};
+
+	// Decide to keep trying, but nothing to get
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.portName.empty());
+	ASSERT_TRUE(gameWarning);
+	ASSERT_FALSE(iwadWarning);
+	ASSERT_TRUE(portWarning);
+
+	// Situation 2: same, but with cancelling
+	decision = 1;
+	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
+
+	// Situation 3: add home dir
+	global::home_dir = getChildPath("home");
+	ASSERT_TRUE(FileMakeDir(global::home_dir));
+	mDeleteList.push(global::home_dir);
+
+	fs::path gamesDir = fs::path(global::home_dir.c_str()) / "games";
+	ASSERT_TRUE(FileMakeDir(gamesDir.u8string()));
+	mDeleteList.push(gamesDir.u8string());
+
+	// but no emag.ugh: same problem
+	decision = 0;	// no ignore
+	gameWarning = portWarning = false;
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.portName.empty());
+	ASSERT_TRUE(gameWarning);
+	ASSERT_FALSE(iwadWarning);
+	ASSERT_TRUE(portWarning);
+
+	// Situation 4: add emag.ugh. But no known IWAD
+	fs::path emagDir = gamesDir / "emag.ugh";
+	FILE *f = fopen(emagDir.u8string().c_str(), "wb");
+	ASSERT_TRUE(f);
+	mDeleteList.push(emagDir.u8string());
+
+	gameWarning = iwadWarning = portWarning = false;
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_TRUE(loading.gameName.empty());
+	ASSERT_TRUE(loading.portName.empty());
+	ASSERT_FALSE(gameWarning);
+	ASSERT_TRUE(iwadWarning);
+	ASSERT_TRUE(portWarning);
+
+	// Situation 5: now add the IWAD
 }
