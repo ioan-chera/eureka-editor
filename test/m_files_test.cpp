@@ -400,6 +400,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	eureka->Printf("resource bogus/subpath.wad\n");
 	eureka->Printf("resource iwadpath.wad\n");
 	eureka->Printf("resource nopath.wad\n");
+	eureka->Printf("resource %s\n", getChildPath("abs/abspath.wad").c_str());
 	eureka->Printf("resource \n");	// add something else to check how we go
 
 	auto makesubfile = [this](const char *path)
@@ -427,6 +428,12 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	// Add the resource at the IWAD path
 	makesubfile("iwad/iwadpath.wad");
 
+	// And add the absolute subpath
+	path = getChildPath("abs");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	makesubfile("abs/abspath.wad");
+
 	// Prepare the error message
 	int errorcount = 0;
 	SString errmsg;
@@ -443,11 +450,17 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	ASSERT_NE(errmsg.find("nopath.wad"), SString::npos);
 
 	// Check the resource content
-	ASSERT_EQ(loading.resourceList.size(), 3);
+	ASSERT_EQ(loading.resourceList.size(), 4);
 	const auto &res = loading.resourceList;
 
 	// Now check we have the resources, with their correct paths
 	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad")), res.end());
 	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad")), res.end());
 	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("iwad/iwadpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("abs/abspath.wad")), res.end());
+}
+
+TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
+{
+	// TODO
 }
