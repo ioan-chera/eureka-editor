@@ -131,6 +131,10 @@ protected:
 	void TearDown() override;
 	void assertEmptyLoading() const;
 
+	void prepareHomeDir();
+	fs::path makeGamesDir();
+	void makeGame(const fs::path &gamesDir, const char *ughName);
+
 	std::shared_ptr<Wad_file> wad;
 	LoadingData loading;
 
@@ -217,6 +221,39 @@ void ParseEurekaLumpFixture::assertEmptyLoading() const
 	ASSERT_TRUE(loading.resourceList.empty());
 }
 
+//
+// Prepares the home directory
+//
+void ParseEurekaLumpFixture::prepareHomeDir()
+{
+	global::home_dir = getChildPath("home");
+	ASSERT_TRUE(FileMakeDir(global::home_dir));
+	mDeleteList.push(global::home_dir);
+}
+
+//
+// Make the games directory, which it returns
+//
+fs::path ParseEurekaLumpFixture::makeGamesDir()
+{
+	fs::path gamesDir = fs::path(global::home_dir.c_str()) / "games";
+	EXPECT_TRUE(FileMakeDir(gamesDir.u8string()));
+	mDeleteList.push(gamesDir.u8string());
+	return gamesDir;
+}
+
+//
+// Make the game definition in the directory
+//
+void ParseEurekaLumpFixture::makeGame(const fs::path &gamesDir, const char *ughName)
+{
+	fs::path ughPath = gamesDir / ughName;
+	FILE *f = fopen(ughPath.u8string().c_str(), "wb");
+	ASSERT_TRUE(f);
+	fclose(f);
+	mDeleteList.push(ughPath.u8string());
+}
+
 TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 {
 	// Safe on empty wad
@@ -238,7 +275,7 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 	assertEmptyLoading();
 }
 
-TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
+TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 {
 	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
 	ASSERT_TRUE(eureka);
@@ -278,13 +315,8 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
 
 	// Situation 3: add home dir
-	global::home_dir = getChildPath("home");
-	ASSERT_TRUE(FileMakeDir(global::home_dir));
-	mDeleteList.push(global::home_dir);
-
-	fs::path gamesDir = fs::path(global::home_dir.c_str()) / "games";
-	ASSERT_TRUE(FileMakeDir(gamesDir.u8string()));
-	mDeleteList.push(gamesDir.u8string());
+	prepareHomeDir();
+	fs::path gamesDir = makeGamesDir();
 
 	// but no emag.ugh: same problem
 	decision = 0;	// no ignore
@@ -297,11 +329,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 4: add emag.ugh. But no known IWAD
-	fs::path emagDir = gamesDir / "emag.ugh";
-	FILE *f = fopen(emagDir.u8string().c_str(), "wb");
-	ASSERT_TRUE(f);
-	fclose(f);
-	mDeleteList.push(emagDir.u8string());
+	makeGame(gamesDir, "emag.ugh");
 
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
@@ -342,5 +370,84 @@ TEST_F(ParseEurekaLumpFixture, TryGameButNoDefinitions)
 	ASSERT_FALSE(iwadWarning);
 	ASSERT_TRUE(portWarning);
 
-	// TODO: resources
+	// Situation 8: add port
+	global::home_dir = global::install_dir;
+	fs::path portsDir = fs::path(global::home_dir.c_str()) / "ports";
+	ASSERT_TRUE(FileMakeDir(portsDir.u8string()));
+	mDeleteList.push(portsDir.u8string());
+	fs::path tropPath = portsDir / "trop.ugh";
+	FILE *f = fopen(tropPath.u8string().c_str(), "wb");
+	ASSERT_TRUE(f);
+	fclose(f);
+	mDeleteList.push(tropPath.u8string());
+	decision = 0;
+	gameWarning = iwadWarning = portWarning = false;
+	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
+	ASSERT_EQ(loading.iwadName, iwadPath);
+	ASSERT_EQ(loading.portName, "trop");
+	ASSERT_FALSE(gameWarning);
+	ASSERT_FALSE(iwadWarning);
+	ASSERT_FALSE(portWarning);
+}
+
+TEST_F(ParseEurekaLumpFixture, TryResources)
+{
+	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	ASSERT_TRUE(eureka);
+	eureka->Printf("game doom\n");
+	eureka->Printf("resource samepath.wad\n");
+	eureka->Printf("resource samepath.wad\n");	// repeat so we check we don't add it again
+	eureka->Printf("resource bogus/subpath.wad\n");
+	eureka->Printf("resource iwadpath.wad\n");
+	eureka->Printf("resource nopath.wad\n");
+	eureka->Printf("resource \n");	// add something else to check how we go
+
+	auto makesubfile = [this](const char *path)
+	{
+		SString filepath = getChildPath(path);
+		FILE *f = fopen(filepath.c_str(), "wb");
+		ASSERT_TRUE(f);
+		fclose(f);
+		mDeleteList.push(filepath);
+	};
+
+	makesubfile("samepath.wad");
+	makesubfile("subpath.wad");
+
+	// Prepare the IWAD
+	SString path = getChildPath("iwad");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	M_AddKnownIWAD(getChildPath("iwad/doom.wad").c_str());
+
+	// Prepare the 'game' for the IWAD
+	prepareHomeDir();
+	makeGame(makeGamesDir(), "doom.ugh");
+
+	// Add the resource at the IWAD path
+	makesubfile("iwad/iwadpath.wad");
+
+	// Prepare the error message
+	int errorcount = 0;
+	SString errmsg;
+	DLG_Notify_Override = [&errorcount, &errmsg](const char *message, va_list ap)
+	{
+		++errorcount;
+		errmsg = SString::vprintf(message, ap);
+	};
+
+	loading.parseEurekaLump(wad.get());
+
+	// Check that the sole error message we get is about nopath.wad
+	ASSERT_EQ(errorcount, 1);
+	ASSERT_NE(errmsg.find("nopath.wad"), SString::npos);
+
+	// Check the resource content
+	ASSERT_EQ(loading.resourceList.size(), 3);
+	const auto &res = loading.resourceList;
+
+	// Now check we have the resources, with their correct paths
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("iwad/iwadpath.wad")), res.end());
 }
