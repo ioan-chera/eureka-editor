@@ -462,5 +462,42 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 
 TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 {
-	// TODO
+	// Re-create wad to be from a subpath
+	ASSERT_TRUE(FileMakeDir(getChildPath("sub")));
+	mDeleteList.push(getChildPath("sub"));
+	wad = Wad_file::Open(getChildPath("sub/wad.wad"), WadOpenMode::write);
+	ASSERT_TRUE(wad);
+
+	// Create a parent path resource
+	FILE *f = fopen(getChildPath("res.wad").c_str(), "wb");
+	ASSERT_TRUE(f);
+	fclose(f);
+	mDeleteList.push(getChildPath("res.wad"));
+
+	// Prepare the lump
+	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	ASSERT_TRUE(eureka);
+
+	// Try to use just path: won't be found
+	eureka->Printf("resource res.wad\n");
+
+	int errorcount = 0;
+	DLG_Notify_Override = [&errorcount](const char *message, va_list ap)
+	{
+		++errorcount;
+	};
+
+	loading.parseEurekaLump(wad.get());
+
+	ASSERT_EQ(errorcount, 1);
+	ASSERT_TRUE(loading.resourceList.empty());
+
+	// Now change content and add a relative path
+	eureka->clearData();
+	eureka->Printf("resource ../res.wad\n");
+	loading.parseEurekaLump(wad.get());
+
+	ASSERT_EQ(errorcount, 1);
+	ASSERT_EQ(loading.resourceList.size(), 1);
+	ASSERT_EQ(loading.resourceList[0], getChildPath("res.wad"));
 }
