@@ -91,7 +91,7 @@ function(unit_test _name)
         target_include_directories(${_name} PRIVATE ${CMAKE_SOURCE_DIR}/osx/EurekaApp)
         target_compile_definitions(${_name} PRIVATE GL_SILENCE_DEPRECATION)
     endif()
-    target_compile_definitions(${_name} PRIVATE main=mainDISABLED NO_OPENGL)
+    target_compile_definitions(${_name} PRIVATE main=mainDISABLED NO_OPENGL UNIT_TESTING)
 
     if(_use_fltk)
         target_link_libraries(${_name} PRIVATE ${fltk_libs})
