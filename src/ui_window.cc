@@ -471,6 +471,7 @@ void UI_MainWindow::Maximize()
 
 #else  /* Linux + X11 */
 
+#ifndef UNIT_TESTING
 	Window xid = fl_xid(this);
 
 	Atom wm_state = XInternAtom(fl_display, "_NET_WM_STATE", False);
@@ -492,6 +493,7 @@ void UI_MainWindow::Maximize()
 			   SubstructureNotifyMask, &xev);
 
 	Delay(3);
+#endif
 #endif
 }
 
