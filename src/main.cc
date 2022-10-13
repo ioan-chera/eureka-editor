@@ -694,13 +694,11 @@ static void Main_OpenWindow(Instance &inst)
 	// read in the current window hints, then modify them to
 	// support icon transparency (make sure that transparency
 	// mask is enabled in the XPM icon)
-#ifndef UNIT_TESTING
 	XWMHints* hints = XGetWMHints(fl_display, fl_xid(inst.main_win));
 	hints->flags |= IconMaskHint;
 	hints->icon_mask = mask;
 	XSetWMHints(fl_display, fl_xid(inst.main_win), hints);
 	XFree(hints);
-#endif
 #endif
 
 	// kill the stupid bright background of the "plastic" scheme
