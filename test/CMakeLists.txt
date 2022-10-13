@@ -102,7 +102,7 @@ function(unit_test _name)
     if(UNIX AND NOT APPLE)
         find_package(ZLIB REQUIRED)
         find_package(X11 REQUIRED)
-        target_link_libraries(${_name} PRIVATE ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
+        target_link_libraries(${_name} PRIVATE ${X11_X11_LIB} ${X11_Xpm_LIB} ${ZLIB_LIBRARIES})
     endif()
 
     add_test(NAME ${_name} COMMAND $<TARGET_FILE:${_name}>)
