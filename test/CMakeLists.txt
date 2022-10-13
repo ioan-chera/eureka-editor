@@ -101,6 +101,7 @@ function(unit_test _name)
     endif()
     if(UNIX AND NOT APPLE)
         # NOTE: maybe also X11_Xpm_LIB, but then remove the UNIT_TEST macro
+        find_package(ZLIB REQUIRED)
         target_link_libraries(${_name} PRIVATE ${ZLIB_LIBRARIES})
     endif()
 
