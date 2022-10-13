@@ -138,7 +138,7 @@ public:
 
 	inline int DeltaToX(double iz, float tx)
 	{
-		int x = int(inst.r_view.aspect_sw * tx * iz);
+		int x = int(static_cast<double>(inst.r_view.aspect_sw) * tx * iz);
 
 		x = (x + inst.r_view.screen_w) / 2;
 

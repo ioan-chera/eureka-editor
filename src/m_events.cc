@@ -173,7 +173,7 @@ void Instance::Navigate2D()
 			edit.nav.up    - edit.nav.down
 		};
 
-		delta *= mod_factor * delay_ms;
+		delta *= static_cast<double>(mod_factor) * delay_ms;
 
 		grid.Scroll(delta);
 	}
