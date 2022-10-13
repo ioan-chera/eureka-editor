@@ -99,6 +99,10 @@ function(unit_test _name)
     if(WIN32 AND _windows_libs)
         target_link_libraries(${_name} PRIVATE ${_windows_libs})
     endif()
+    if(UNIX AND NOT APPLE)
+        # NOTE: maybe also X11_Xpm_LIB, but then remove the UNIT_TEST macro
+        target_link_libraries(${_name} PRIVATE ${ZLIB_LIBRARIES})
+    endif()
 
     add_test(NAME ${_name} COMMAND $<TARGET_FILE:${_name}>)
 endfunction()
