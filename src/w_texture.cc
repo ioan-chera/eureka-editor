@@ -667,17 +667,17 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 
 	Lump_c *lump = master.W_FindSpriteLump(buffer);
 
-	if (! lump)
+	//Check for PWAD replacements using a non-zero angle even if sprite is found
+	if (! lump || buffer[5] == '0')
 	{
 		if(buffer.length() >= 6)
 			buffer[5] = '1';
+			
+		Lump_c *oldLump = lump;
 		lump = master.W_FindSpriteLump(buffer);
-	}
-
-	if (! lump)
-	{
-		buffer += "D1";
-		lump = master.W_FindSpriteLump(buffer);
+		
+		if (oldLump && !lump)
+			lump = oldLump;
 	}
 
 	if (lump)
@@ -760,7 +760,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 
 			if (info.sprite.noCaseEqual("DOGS"))
 				result = IM_CreateDogSprite(palette);
-			else
+			else if (!info.sprite.noCaseEqual("TNT1"))
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
 		else

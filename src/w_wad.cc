@@ -506,12 +506,26 @@ MapFormat Wad_file::LevelFormat(int lev_num) const noexcept
 	return MapFormat::doom;
 }
 
+//Check mirrored sprites
+static bool spriteNameMatch(const SString &target, const SString &iter)
+{
+	if(target.substr(0, 4) == iter.substr(0, 4) && iter.find(target.substr(4, 2)) != std::string::npos)
+		return true;
+	return false;
+}
 
 Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) const noexcept
 {
 	for(const LumpRef &lumpRef : directory)
 	{
-		if(lumpRef.ns != group || !lumpRef.lump->name.noCaseEqual(name))
+		if(lumpRef.ns != group)
+			continue;
+		if(group == WadNamespace::Sprites)
+		{
+			if(!spriteNameMatch(name, lumpRef.lump->name))
+				continue;
+		}
+		else if(lumpRef.ns != group || !lumpRef.lump->name.noCaseEqual(name))
 			continue;
 		return lumpRef.lump.get();
 	}
