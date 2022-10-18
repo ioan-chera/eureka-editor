@@ -111,6 +111,7 @@ endfunction()
 # IMPORTANT: the eurekasrc files from testutils are already linked!
 
 unit_test(general
+    lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
     stub/osxcalls_stub.cpp
@@ -231,12 +232,6 @@ unit_test(e_checks
         m_select.cc
         Sector.cc
         SideDef.cc
-    FLTK
-)
-
-unit_test(lib_file
-    lib_file_test.cpp
-    SRC lib_file.cc
     FLTK
 )
 
