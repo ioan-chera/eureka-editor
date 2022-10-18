@@ -112,6 +112,7 @@ endfunction()
 
 unit_test(general
     m_files_test.cpp
+    m_game_test.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
@@ -236,17 +237,6 @@ unit_test(e_checks
 unit_test(lib_file
     lib_file_test.cpp
     SRC lib_file.cc
-    FLTK
-)
-
-unit_test(m_game
-    m_game_test.cpp
-    SRC e_basis.cc
-        lib_file.cc
-        m_bitvec.cc
-        m_game.cc
-        m_select.cc
-        m_streams.cc
     FLTK
 )
 
