@@ -60,6 +60,10 @@ enum class OptType
 	// List of strings (not leaking)
 	// Receptacle is of type: std::vector<SString>
 	stringList,
+
+	// List of paths
+	// Receptacle if of type: std::vector<fs::path>
+	pathList,
 };
 
 enum
@@ -813,6 +817,30 @@ static const opt_desc_t options[] =
 
 //------------------------------------------------------------------------
 
+template<typename T>
+static void populateList(SString &value, void *data_ptr)
+{
+	while(value.good())
+	{
+		size_t spacepos = value.findSpace();
+		auto list = static_cast<std::vector<T> *>(data_ptr);
+		if(spacepos == SString::npos)
+		{
+			list->push_back(T(value.get()));
+			value.clear();
+		}
+		else
+		{
+			SString word = value;
+			word.erase(spacepos, SString::npos);
+			list->push_back(T(word.get()));
+
+			value.erase(0, spacepos);
+			value.trimLeadingSpaces();
+		}
+	}
+}
+
 //
 // Parse config line from file
 //
@@ -909,27 +937,11 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			break;
 
         case OptType::stringList:
-			while(value.good())
-			{
-				size_t spacepos = value.findSpace();
-				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
-				if(spacepos == std::string::npos)
-				{
-					list->push_back(value);
-					value.clear();
-				}
-				else
-				{
-					SString word = value;
-					word.erase(spacepos, SString::npos);
-					list->push_back(word);
-
-					value.erase(0, spacepos);
-					value.trimLeadingSpaces();
-				}
-			}
+			populateList<SString>(value, opt->data_ptr);
 			break;
-
+		case OptType::pathList:
+			populateList<fs::path>(value, opt->data_ptr);
+			break;
 		default:
 			BugError("INTERNAL ERROR: unknown option type %d\n", (int) opt->opt_type);
 			return -1;
@@ -1035,6 +1047,29 @@ static void M_AddPwadName(const char *filename)
 	global::Pwad_list.push_back(filename);
 }
 
+//
+// Common function to populate a list of strings or paths
+//
+template<typename T>
+static void readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
+{
+	if(argc < 2)
+	{
+		ThrowException("missing argument after '%s'\n", argv[0]);
+		/* NOT REACHED */
+	}
+	while(argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
+	{
+		argv++;
+		argc--;
+
+		if (! ignore)
+		{
+			auto list = static_cast<std::vector<T> *>(data_ptr);
+			list->push_back(argv[0]);
+		}
+	}
+}
 
 //
 // parses the command line options
@@ -1172,22 +1207,11 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
 
 
             case OptType::stringList:
-				if (argc < 2)
-				{
-					ThrowException("missing argument after '%s'\n", argv[0]);
-					/* NOT REACHED */
-				}
-				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
-				{
-					argv++;
-					argc--;
+				readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
+				break;
 
-					if (! ignore)
-					{
-						auto list = static_cast<std::vector<SString> *>(o->data_ptr);
-						list->push_back(argv[0]);
-					}
-				}
+			case OptType::pathList:
+				readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
 				break;
 
 			default:
@@ -1255,6 +1279,7 @@ void M_PrintCommandLineOptions()
 
             case OptType::string:      printf ("<string>    "); break;
             case OptType::stringList:   printf ("<string> ..."); break;
+			case OptType::pathList: printf("<path> ..."); break;
             case OptType::end: ;  // This line is here only to silence a GCC warning.
 		}
 
@@ -1265,6 +1290,19 @@ void M_PrintCommandLineOptions()
 	}
 }
 
+//
+// Given a list of strings or paths, writes them to a config file
+//
+template<typename T>
+static void writeListToConfig(const void *data_ptr, std::ofstream &os)
+{
+	auto list = static_cast<const std::vector<T> *>(data_ptr);
+
+	if (list->empty())
+		os << "{}";
+	else for (const T &item : *list)
+		os << item << ' ';
+}
 
 int M_WriteConfigFile()
 {
@@ -1315,14 +1353,12 @@ int M_WriteConfigFile()
 				break;
 
             case OptType::stringList:
-			{
-				auto list = static_cast<std::vector<SString> *>(o->data_ptr);
+				writeListToConfig<SString>(o->data_ptr, os);
+				break;
 
-				if (list->empty())
-					os << "{}";
-				else for (const SString &item : *list)
-					os << item << ' ';
-			}
+			case OptType::pathList:
+				writeListToConfig<fs::path>(o->data_ptr, os);
+				break;
 
 			default:
 				break;

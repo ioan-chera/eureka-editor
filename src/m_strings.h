@@ -57,6 +57,10 @@ public:
 	{
 	}
 
+	SString(const std::string &cppstring) : data(cppstring)
+	{
+	}
+
     SString(const char *buffer, int length);
 
 	explicit SString(char c)
