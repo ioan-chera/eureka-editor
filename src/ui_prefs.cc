@@ -593,6 +593,8 @@ private:
 	// normally zero (not waiting for a key)
 	int awaiting_line;
 
+	const opt_desc_t *const options;
+
 	static void  close_callback(Fl_Widget *w, void *data);
 	static void  color_callback(Fl_Button *w, void *data);
 
@@ -604,7 +606,7 @@ private:
 	static void reset_callback(Fl_Button *w, void *data);
 
 public:
-	UI_Preferences();
+	UI_Preferences(const opt_desc_t *options);
 
 	void Run();
 
@@ -734,11 +736,11 @@ public:
 #define R_SPACES  "  "
 
 
-UI_Preferences::UI_Preferences() :
+UI_Preferences::UI_Preferences(const opt_desc_t *options) :
 	  Fl_Double_Window(PREF_WINDOW_W, PREF_WINDOW_H, PREF_WINDOW_TITLE),
 	  want_quit(false), want_discard(false),
 	  key_sort_mode('k'), key_sort_rev(false),
-	  awaiting_line(0)
+	  awaiting_line(0), options(options)
 {
 	if (config::gui_color_set == 2)
 		color(fl_gray_ramp(4));
@@ -1358,7 +1360,7 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 	}
 	else
 	{
-		if (M_ParseDefaultConfigFile() != 0)
+		if (M_ParseDefaultConfigFile(prefs->options) != 0)
 		{
 			DLG_Notify("Installation problem: failed to find the \"defaults.cfg\" file!");
 		}
@@ -1789,7 +1791,7 @@ int UI_Preferences::handle(int event)
 
 void Instance::CMD_Preferences()
 {
-	UI_Preferences * dialog = new UI_Preferences();
+	UI_Preferences * dialog = new UI_Preferences(options);
 
 	dialog->Run();
 

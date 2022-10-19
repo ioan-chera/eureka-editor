@@ -1114,7 +1114,7 @@ int main(int argc, char *argv[])
 
 
 		// load all the config settings
-		M_ParseConfigFile();
+		M_ParseConfigFile(options);
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();

@@ -91,7 +91,7 @@ struct opt_desc_t
 };
 
 
-static const opt_desc_t options[] =
+const opt_desc_t options[] =
 {
 	//
 	// A few options must be handled in an early pass
@@ -816,7 +816,8 @@ static const opt_desc_t options[] =
 //
 // Parse config line from file
 //
-static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum)
+static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum,
+									   const opt_desc_t *options)
 {
 	SString line(cline);
 
@@ -944,7 +945,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 //
 //  Return 0 on success, negative value on failure.
 //
-static int parse_a_config_file(std::istream &is, const SString &filename)
+static int parse_a_config_file(std::istream &is, const SString &filename, const opt_desc_t *options)
 {
 	SString basename = GetBaseName(filename);
 
@@ -952,7 +953,7 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 	SString line;
 	for(int lnum = 1; M_ReadTextLine(line, is); lnum++)
 	{
-		int ret = parse_config_line_from_file(line, basename, lnum);
+		int ret = parse_config_line_from_file(line, basename, lnum, options);
 
 		if (ret != 0)
 			return ret;
@@ -976,7 +977,7 @@ inline static SString default_config_file() noexcept(false)
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile() noexcept(false)
+int M_ParseConfigFile(const opt_desc_t *options) noexcept(false)
 {
 	if (global::config_file.empty())
 	{
@@ -993,11 +994,11 @@ int M_ParseConfigFile() noexcept(false)
 		return -1;
 	}
 
-	return parse_a_config_file(is, global::config_file);
+	return parse_a_config_file(is, global::config_file, options);
 }
 
 
-int M_ParseDefaultConfigFile()
+int M_ParseDefaultConfigFile(const opt_desc_t *options)
 {
 	SString filename = global::install_dir + "/defaults.cfg";
 
@@ -1011,7 +1012,7 @@ int M_ParseDefaultConfigFile()
 		return -1;
 	}
 
-	return parse_a_config_file(is, filename);
+	return parse_a_config_file(is, filename, options);
 }
 
 

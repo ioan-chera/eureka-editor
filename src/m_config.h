@@ -31,6 +31,8 @@
 
 /* ==== CONFIG VARIABLES ==================== */
 
+struct opt_desc_t;
+
 namespace config
 {
 extern SString default_port;
@@ -115,6 +117,8 @@ extern bool bsp_force_zdoom;
 extern bool bsp_compressed;
 }
 
+extern const opt_desc_t options[];
+
 enum class CommandLinePass
 {
 	early,
@@ -123,10 +127,10 @@ enum class CommandLinePass
 
 /* ==== FUNCTIONS ==================== */
 
-int M_ParseConfigFile() noexcept(false);
+int M_ParseConfigFile(const opt_desc_t *options) noexcept(false);
 int M_WriteConfigFile();
 
-int M_ParseDefaultConfigFile();
+int M_ParseDefaultConfigFile(const opt_desc_t *options);
 
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv,
