@@ -1066,6 +1066,19 @@ static void ShowTime()
 #endif
 }
 
+//
+// Sets up the config path before using it
+//
+static void prepareConfigPath()
+{
+	if (global::config_file.empty())
+	{
+		if(global::home_dir.empty())
+			ThrowException("Home directory not set.");
+
+		global::config_file = global::home_dir + "/config";
+	}
+}
 
 //
 //  the program starts here
@@ -1114,7 +1127,8 @@ int main(int argc, char *argv[])
 
 
 		// load all the config settings
-		M_ParseConfigFile(options);
+		prepareConfigPath();
+		M_ParseConfigFile(global::config_file, options);
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();

@@ -962,31 +962,16 @@ static int parse_a_config_file(std::istream &is, const SString &filename, const 
 	return 0;  // OK
 }
 
-
-inline static SString default_config_file() noexcept(false)
-{
-	if(global::home_dir.empty())
-		ThrowException("Home directory not set.");
-
-	return global::home_dir + "/config.cfg";
-}
-
-
 //
 //  parses the config file (either a user-specific one or the default one).
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile(const opt_desc_t *options) noexcept(false)
+int M_ParseConfigFile(const SString &path, const opt_desc_t *options) noexcept(false)
 {
-	if (global::config_file.empty())
-	{
-		global::config_file = default_config_file();
-	}
+	std::ifstream is(path.get());
 
-	std::ifstream is(global::config_file.get());
-
-	gLog.printf("Reading config file: %s\n", global::config_file.c_str());
+	gLog.printf("Reading config file: %s\n", path.c_str());
 
 	if (!is.is_open())
 	{
@@ -994,7 +979,7 @@ int M_ParseConfigFile(const opt_desc_t *options) noexcept(false)
 		return -1;
 	}
 
-	return parse_a_config_file(is, global::config_file, options);
+	return parse_a_config_file(is, path, options);
 }
 
 
