@@ -104,6 +104,11 @@ TEST(SString, Construct)
 
     SString nullStringSized(nullptr, 4);
     ASSERT_TRUE(nullStringSized.empty());
+
+	// C++ string
+	std::string jackson = "Michael Jackson";
+	SString sjackson(jackson);
+	ASSERT_EQ(sjackson, "Michael Jackson");
 }
 
 TEST(SString, FindSpace)
