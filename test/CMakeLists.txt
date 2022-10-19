@@ -111,7 +111,10 @@ endfunction()
 # IMPORTANT: the eurekasrc files from testutils are already linked!
 
 unit_test(general
+    lib_file_test.cpp
     m_files_test.cpp
+    m_game_test.cpp
+    SStringTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
@@ -233,23 +236,6 @@ unit_test(e_checks
     FLTK
 )
 
-unit_test(lib_file
-    lib_file_test.cpp
-    SRC lib_file.cc
-    FLTK
-)
-
-unit_test(m_game
-    m_game_test.cpp
-    SRC e_basis.cc
-        lib_file.cc
-        m_bitvec.cc
-        m_game.cc
-        m_select.cc
-        m_streams.cc
-    FLTK
-)
-
 unit_test(m_config_keys
     m_config_test.cpp
     m_keys_test.cpp
@@ -281,7 +267,6 @@ unit_test(independent
     m_streams_test.cpp
     SafeOutFileTest.cpp
     SideTest.cpp
-    SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
     SRC m_bitvec.cc
