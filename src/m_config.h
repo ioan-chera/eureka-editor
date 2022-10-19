@@ -130,8 +130,6 @@ enum class CommandLinePass
 int M_ParseConfigFile(const SString &path, const opt_desc_t *options) noexcept(false);
 int M_WriteConfigFile();
 
-int M_ParseDefaultConfigFile(const opt_desc_t *options);
-
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv,
 						CommandLinePass pass);

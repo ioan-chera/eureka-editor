@@ -982,25 +982,6 @@ int M_ParseConfigFile(const SString &path, const opt_desc_t *options) noexcept(f
 	return parse_a_config_file(is, path, options);
 }
 
-
-int M_ParseDefaultConfigFile(const opt_desc_t *options)
-{
-	SString filename = global::install_dir + "/defaults.cfg";
-
-	std::ifstream is(filename.get());
-
-	gLog.printf("Reading config file: %s\n", filename.c_str());
-
-	if (!is.is_open())
-	{
-		gLog.printf("--> %s\n", GetErrorMessage(errno).c_str());
-		return -1;
-	}
-
-	return parse_a_config_file(is, filename, options);
-}
-
-
 //
 // check certain environment variables...
 //
