@@ -114,6 +114,7 @@ unit_test(general
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
+    SStringTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
@@ -266,7 +267,6 @@ unit_test(independent
     m_streams_test.cpp
     SafeOutFileTest.cpp
     SideTest.cpp
-    SStringTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp
     SRC m_bitvec.cc
