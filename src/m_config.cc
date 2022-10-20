@@ -967,7 +967,7 @@ static int parse_a_config_file(std::istream &is, const SString &filename, const 
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile(const SString &path, const opt_desc_t *options) noexcept(false)
+int M_ParseConfigFile(const SString &path, const opt_desc_t *options)
 {
 	std::ifstream is(path.get());
 
