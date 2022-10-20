@@ -25,113 +25,171 @@
 #include "gtest/gtest.h"
 
 //
+// Option end
+//
+static const opt_desc_t kEnd =
+{
+	nullptr, nullptr, OptType::end, 0, nullptr, nullptr, nullptr
+};
+
+//
+// Returns an opt_desc_t using only the fields we need for config file
+//
+static opt_desc_t configOption(const char *long_name, OptType opt_type, unsigned flags,
+							   void *data_ptr)
+{
+	return {long_name, nullptr, opt_type, flags, nullptr, nullptr, data_ptr};
+}
+
+//
 // Fixture
 //
 class MConfig : public TempDirContext
 {
 protected:
-    void SetUp() override
-    {
-        TempDirContext::SetUp();
-        global::home_dir = mTempDir;
-        global::install_dir = getChildPath("install");
-    }
+	//
+	// Demo testing configuration data
+	//
+	struct Configuration
+	{
+		SString home_dir;
+		SString loadedIwadName;
+		bool show_help = false;
+		bool udmf_testing = false;
+		bool bsp_on_save = false;
+		bool bsp_gl_nodes = false;
+		bool grid_snap_indicator = false;
+		bool leave_offsets_alone = false;
+		std::vector<SString> Pwad_list;
+		int backup_max_files = 0;
+		rgb_color_t dotty_axis_col;
+	};
 
-    void TearDown() override
-    {
-        global::config_file.clear();
-        global::install_dir.clear();
-        global::home_dir.clear();
-        TempDirContext::TearDown();
-    }
+	void SetUp() override;
+	//
+	// Const getter
+	//
+	const std::vector<opt_desc_t> &options() const
+	{
+		return mOptions;
+	}
+
+	Configuration config;
+
+private:
+	void add(const opt_desc_t &option);
+
+	std::vector<opt_desc_t> mOptions = {kEnd};
 };
 
-TEST(MConfigBlank, MParseConfigFileNoPath)
+//
+// Set up
+//
+void MConfig::SetUp()
 {
-    // We don't have the location set yet? Error out
-    ASSERT_DEATH(Fatal([]{ M_ParseConfigFile(); }), "Home directory");
-    ASSERT_EQ(M_ParseDefaultConfigFile(), -1);
+	TempDirContext::SetUp();
+
+	add(configOption("home", OptType::string, OptFlag_pass1, &config.home_dir));
+	add(configOption("help", OptType::boolean, OptFlag_pass1, &config.show_help));
+	add(configOption("file", OptType::stringList, 0, &config.Pwad_list));
+	add(configOption("iwad", OptType::string, 0, &config.loadedIwadName));
+	add(configOption("udmftest", OptType::boolean, OptFlag_hide, &config.udmf_testing));
+	add(configOption("backup_max_files", OptType::integer, OptFlag_preference,
+					 &config.backup_max_files));
+	add(configOption("bsp_on_save", OptType::boolean, OptFlag_preference, &config.bsp_on_save));
+	add(configOption("bsp_gl_nodes", OptType::boolean, OptFlag_preference, &config.bsp_gl_nodes));
+	add(configOption("grid_snap_indicator", OptType::boolean, OptFlag_preference,
+					 &config.grid_snap_indicator));
+	add(configOption("leave_offsets_alone", OptType::boolean, OptFlag_preference,
+					 &config.leave_offsets_alone));
+	add(configOption("dotty_axis_col", OptType::color, OptFlag_preference, &config.dotty_axis_col));
+}
+
+//
+// Adds a new option, ensuring null termination
+//
+void MConfig::add(const opt_desc_t &option)
+{
+	mOptions.back() = option;
+	mOptions.push_back(kEnd);
 }
 
 TEST_F(MConfig, MParseConfigFileNotFound)
 {
     // Get an error result if we don't have the file itself
-    ASSERT_EQ(M_ParseConfigFile(), -1);
+    ASSERT_EQ(M_ParseConfigFile(getChildPath("nothing.cfg"), options().data()), -1);
+}
+
+TEST_F(MConfig, MParseConfigEmptyFile)
+{
+	SString path = getChildPath("something.cfg");
+	FILE *f = fopen(path.c_str(), "wb");
+	ASSERT_TRUE(f);
+	fclose(f);
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 }
 
 TEST_F(MConfig, MParseConfigFile)
 {
-    SString paths[2] = { getChildPath("config.cfg"), getChildPath("install/defaults.cfg" )};
-    int (*funcs[2])() = { M_ParseConfigFile, M_ParseDefaultConfigFile };
+    SString path = getChildPath("config.cfg");
 
-    ASSERT_TRUE(FileMakeDir(getChildPath("install")));
-    mDeleteList.push(getChildPath("install"));
+	std::ofstream os(path.get(), std::ios::trunc);
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os.close();
 
-    for(int i = 0; i < 2; ++i)
-    {
-        const SString &path = paths[i];
-        std::ofstream os(path.get(), std::ios::trunc);
-        ASSERT_TRUE(os.is_open());
-        mDeleteList.push(path);
-        os.close();
+	os.open(path.get());
+	ASSERT_TRUE(os.is_open());
+	os << "\n";
+	os << "#\n";
+	os << "   # Test comment\n";
+	os << "Single\n";   // Safe to skip
+	os << "Single \n";   // Safe to skip
+	os << "home michael\n";  // Home must NOT be changed
+	os << "help 1\n";   // Also unchanged
+	os << "file file1 file2 file3\n";
+	os << "iwad doom 3.wad\n";
+	os << "udmftest yes\n";
+	os << "backup_max_files -999\n";
+	os << "bsp_on_save off\n";  // test "off"
+	os << "bsp_gl_nodes no\n";  // test "no"
+	os << "grid_snap_indicator false\n";    // test "false"
+	os << "leave_offsets_alone 0\n";    // test 0
+	os << "dotty_axis_col 7b2d43\n"; // NOTE: # not supported
+	os.close();
 
-        // Check empty file is ok
-        ASSERT_EQ(funcs[i](), 0);
+	// Prepare some prereqs
+	config.home_dir = "jackson";
+	config.bsp_on_save = true;
+	config.bsp_gl_nodes = true;
+	config.grid_snap_indicator = true;
+	config.leave_offsets_alone = true;
 
-        os.open(path.get());
-        ASSERT_TRUE(os.is_open());
-        os << "\n";
-        os << "#\n";
-        os << "   # Test comment\n";
-        os << "Single\n";   // Safe to skip
-        os << "Single \n";   // Safe to skip
-        os << "home michael\n";  // Home must NOT be changed
-        os << "help 1\n";   // Also unchanged
-        os << "file file1 file2 file3\n";
-        os << "iwad doom 3.wad\n";
-        os << "udmftest yes\n";
-        os << "backup_max_files -999\n";
-        os << "bsp_on_save off\n";  // test "off"
-        os << "bsp_gl_nodes no\n";  // test "no"
-        os << "grid_snap_indicator false\n";    // test "false"
-        os << "leave_offsets_alone 0\n";    // test 0
-        os << "dotty_axis_col 7b2d43\n"; // NOTE: # not supported
-        os.close();
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+	ASSERT_EQ(config.home_dir, "jackson");	// unchanged
+	ASSERT_FALSE(config.show_help);	// unchanged
 
-        ASSERT_EQ(funcs[i](), 0);
-        ASSERT_EQ(global::home_dir, mTempDir);  // Not changed
-        ASSERT_FALSE(global::show_help);
+	ASSERT_EQ(config.Pwad_list.size(), 3);
+	ASSERT_EQ(config.Pwad_list[0], "file1");
+	ASSERT_EQ(config.Pwad_list[1], "file2");
+	ASSERT_EQ(config.Pwad_list[2], "file3");
 
-        ASSERT_EQ(global::Pwad_list.size(), 3);
-        ASSERT_EQ(global::Pwad_list[0], "file1");
-        ASSERT_EQ(global::Pwad_list[1], "file2");
-        ASSERT_EQ(global::Pwad_list[2], "file3");
-        global::Pwad_list.clear();
+	ASSERT_EQ(config.loadedIwadName, "doom 3.wad");   // spaces get included
 
-        ASSERT_EQ(gInstance.loaded.iwadName, "doom 3.wad");   // spaces get included
-        gInstance.loaded.iwadName.clear();
+	ASSERT_TRUE(config.udmf_testing);
 
-        ASSERT_TRUE(global::udmf_testing);
-        global::udmf_testing = false;
+	ASSERT_EQ(config.backup_max_files, -999);
+	config::backup_max_files = 30;
 
-        ASSERT_EQ(config::backup_max_files, -999);
-        config::backup_max_files = 30;
+	ASSERT_FALSE(config.bsp_on_save);
 
-        ASSERT_FALSE(config::bsp_on_save);
-        config::bsp_on_save = true;
+	ASSERT_FALSE(config.bsp_gl_nodes);
 
-        ASSERT_FALSE(config::bsp_gl_nodes);
-        config::bsp_gl_nodes = true;
+	ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(123, 45, 67));
 
-        ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(123, 45, 67));
-        config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+	ASSERT_FALSE(config.grid_snap_indicator);
 
-        ASSERT_FALSE(config::grid_snap_indicator);
-        config::grid_snap_indicator = true;
-
-        ASSERT_FALSE(config::leave_offsets_alone);
-        config::leave_offsets_alone = true;
-    }
+	ASSERT_FALSE(config.leave_offsets_alone);
 }
 
 TEST(MConfigBlank, MWriteConfigFileNotSetup)
