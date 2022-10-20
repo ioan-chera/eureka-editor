@@ -190,7 +190,7 @@ int M_WriteConfigFile(const SString &path, const opt_desc_t *options);
 
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv,
-						CommandLinePass pass);
+						CommandLinePass pass, std::vector<SString> &Pwad_list, const opt_desc_t *options);
 
 void M_PrintCommandLineOptions();
 

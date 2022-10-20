@@ -941,12 +941,6 @@ void M_ParseEnvironmentVars()
 }
 
 
-static void M_AddPwadName(const char *filename)
-{
-	global::Pwad_list.push_back(filename);
-}
-
-
 //
 // parses the command line options
 //
@@ -955,7 +949,7 @@ static void M_AddPwadName(const char *filename)
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
+void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<SString> &Pwad_list, const opt_desc_t *options)
 {
 	const opt_desc_t *o;
 
@@ -968,7 +962,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
 		{
 			// this is a loose file, handle it now
 			if (pass == CommandLinePass::normal)
-				M_AddPwadName(argv[0]);
+				Pwad_list.push_back(argv[0]);
 
 			argv++;
 			argc--;
