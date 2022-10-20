@@ -1177,14 +1177,11 @@ void M_PrintCommandLineOptions()
 }
 
 
-int M_WriteConfigFile()
+int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
 {
-	if(global::config_file.empty())
-		ThrowException("Configuration file not initialized.");
+	gLog.printf("Writing config file: %s\n", path.c_str());
 
-	gLog.printf("Writing config file: %s\n", global::config_file.c_str());
-
-	std::ofstream os(global::config_file.get(), std::ios::trunc);
+	std::ofstream os(path.get(), std::ios::trunc);
 
 	if (! os.is_open())
 	{

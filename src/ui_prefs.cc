@@ -1400,7 +1400,10 @@ void UI_Preferences::Run()
 	}
 
 	SaveValues();
-	M_WriteConfigFile();
+	if(global::config_file.empty())
+		DLG_ShowError(false, "Configuration file not initialized.");
+	else
+		M_WriteConfigFile(global::config_file, options);
 
 	M_ApplyBindings();
 	M_SaveBindings();
