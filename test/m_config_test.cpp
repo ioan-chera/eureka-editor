@@ -63,6 +63,12 @@ protected:
 		std::vector<SString> Pwad_list;
 		int backup_max_files = 0;
 		rgb_color_t dotty_axis_col;
+
+		bool auto_load_recent = false;
+		bool begin_maximized = false;
+		SString default_port;
+		SString loadedLevelName;
+		SString config_file;
 	};
 
 	void SetUp() override;
@@ -103,6 +109,15 @@ void MConfig::SetUp()
 	add(configOption("leave_offsets_alone", OptType::boolean, OptFlag_preference,
 					 &config.leave_offsets_alone));
 	add(configOption("dotty_axis_col", OptType::color, OptFlag_preference, &config.dotty_axis_col));
+	add(configOption("auto_load_recent", OptType::boolean, OptFlag_preference,
+					 &config.auto_load_recent));
+	add(configOption("begin_maximized", OptType::boolean, OptFlag_preference,
+					 &config.begin_maximized));
+	add(configOption("default_port", OptType::string, OptFlag_preference, &config.default_port));
+	add(configOption("warp", OptType::string, OptFlag_warp | OptFlag_helpNewline,
+					 &config.loadedLevelName));
+	add(configOption("config", OptType::string, OptFlag_pass1 | OptFlag_helpNewline,
+					 &config.config_file));
 }
 
 //
@@ -125,6 +140,7 @@ TEST_F(MConfig, MParseConfigEmptyFile)
 	SString path = getChildPath("something.cfg");
 	FILE *f = fopen(path.c_str(), "wb");
 	ASSERT_TRUE(f);
+	mDeleteList.push(path);
 	fclose(f);
 	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 }
@@ -192,59 +208,47 @@ TEST_F(MConfig, MParseConfigFile)
 	ASSERT_FALSE(config.leave_offsets_alone);
 }
 
-TEST(MConfigBlank, MWriteConfigFileNotSetup)
-{
-    ASSERT_DEATH(Fatal([]{ M_WriteConfigFile(); }), "Configuration file");
-}
-
 TEST_F(MConfig, MWriteConfig)
 {
-    config::auto_load_recent = true;
-    config::begin_maximized = true;
-    config::backup_max_files = 777;
-    config::default_port = "Doom \\ # Legacy    ";
-    config::dotty_axis_col = RGB_MAKE(99, 90, 80);
+    config.auto_load_recent = true;
+    config.begin_maximized = true;
+    config.backup_max_files = 777;
+    config.default_port = "Doom \\ # Legacy    ";
+    config.dotty_axis_col = RGB_MAKE(99, 90, 80);
 
-    global::udmf_testing = true;    // this one shall not be saved
-    gInstance.loaded.levelName = "NEW LEVEL";
-    global::Pwad_list = { "file1", "file2 file3" };
+    config.udmf_testing = true;    // this one shall not be saved
+    config.loadedLevelName = "NEW LEVEL";
+    config.Pwad_list = { "file1", "file2 file3" };
 
-    global::config_file = getChildPath("configx.cfg");  // pick any name
+    config.config_file = getChildPath("configx.cfg");  // pick any name
 
-    ASSERT_EQ(M_WriteConfigFile(), 0);
-    mDeleteList.push(global::config_file);
+    ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
+    mDeleteList.push(config.config_file);
 
     // Now unset them
-    config::auto_load_recent = false;
-    config::begin_maximized = false;
-    config::backup_max_files = 30;
-    config::default_port = "vanilla";
-    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+    config.auto_load_recent = false;
+    config.begin_maximized = false;
+    config.backup_max_files = 30;
+    config.default_port = "vanilla";
+    config.dotty_axis_col = RGB_MAKE(0, 128, 255);
 
-    global::udmf_testing = false;
-    gInstance.loaded.levelName.clear();
-    global::Pwad_list.clear();
+    config.udmf_testing = false;
+    config.loadedLevelName.clear();
+    config.Pwad_list.clear();
 
     // Now read config back
 
-    ASSERT_EQ(M_ParseConfigFile(), 0);
+    ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
 
-    ASSERT_TRUE(config::auto_load_recent);
-    ASSERT_TRUE(config::begin_maximized);
-    ASSERT_EQ(config::backup_max_files, 777);
-    ASSERT_EQ(config::default_port, "Doom \\ # Legacy");
-    ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(99, 90, 80));
+    ASSERT_TRUE(config.auto_load_recent);
+    ASSERT_TRUE(config.begin_maximized);
+    ASSERT_EQ(config.backup_max_files, 777);
+    ASSERT_EQ(config.default_port, "Doom \\ # Legacy");
+    ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(99, 90, 80));
 
-    ASSERT_FALSE(global::udmf_testing); // still false
-    ASSERT_TRUE(gInstance.loaded.levelName.empty());
-    ASSERT_TRUE(global::Pwad_list.empty());
-
-    // Now unset them
-    config::auto_load_recent = false;
-    config::begin_maximized = false;
-    config::backup_max_files = 30;
-    config::default_port = "vanilla";
-    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+    ASSERT_FALSE(config.udmf_testing); // still false
+    ASSERT_TRUE(config.loadedLevelName.empty());
+    ASSERT_TRUE(config.Pwad_list.empty());
 }
 
 TEST(MConfigArgs, MParseCommandLine)
