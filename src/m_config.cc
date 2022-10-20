@@ -33,62 +33,6 @@
 
 //------------------------------------------------------------------------
 
-//
-//  Structures for command line arguments and config settings
-//
-enum class OptType
-{
-	// End of the options description
-	end,
-
-	// Boolean (toggle)
-	// Receptacle is of type: bool
-	boolean,
-
-	// Integer number,
-	// Receptacle is of type: int
-	integer,
-
-	// A color value
-	// Receptacle is of type: rgb_color_t
-	color,
-
-	// String (not leaking)
-	// Receptacle is of type: SString
-	string,
-
-	// List of strings (not leaking)
-	// Receptacle is of type: std::vector<SString>
-	stringList,
-};
-
-enum
-{
-	OptFlag_pass1 = 1 << 0,
-	OptFlag_helpNewline = 1 << 1,
-	OptFlag_preference = 1 << 2,
-	OptFlag_warp = 1 << 3,
-	OptFlag_hide = 1 << 4,
-};
-
-struct opt_desc_t
-{
-	const char *long_name;  // Command line arg. or keyword
-	const char *short_name; // Abbreviated command line argument
-
-	OptType opt_type;    // Type of this option
-	unsigned flags;    // Flags for this option :
-	// '1' : process only on pass 1 of parse_command_line_options()
-	// '<' : print extra newline after this option (when dumping)
-	// 'v' : a real variable (preference setting)
-	// 'w' : warp hack -- accept two numeric args
-	// 'H' : hide option from --help display
-
-	const char *desc;   // Description of the option
-	const char *arg_desc;  // Description of the argument (NULL --> none or default)
-
-	void *data_ptr;   // Pointer to the data
-};
 
 
 const opt_desc_t options[] =
