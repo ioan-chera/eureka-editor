@@ -36,69 +36,7 @@ namespace fs = ghc::filesystem;
 
 //------------------------------------------------------------------------
 
-//
-//  Structures for command line arguments and config settings
-//
-enum class OptType
-{
-	// End of the options description
-	end,
-
-	// Boolean (toggle)
-	// Receptacle is of type: bool
-	boolean,
-
-	// Integer number,
-	// Receptacle is of type: int
-	integer,
-
-	// A color value
-	// Receptacle is of type: rgb_color_t
-	color,
-
-	// String (not leaking)
-	// Receptacle is of type: SString
-	string,
-
-	// List of strings (not leaking)
-	// Receptacle is of type: std::vector<SString>
-	stringList,
-
-	// List of paths
-	// Receptacle if of type: std::vector<fs::path>
-	pathList,
-};
-
-enum
-{
-	OptFlag_pass1 = 1 << 0,
-	OptFlag_helpNewline = 1 << 1,
-	OptFlag_preference = 1 << 2,
-	OptFlag_warp = 1 << 3,
-	OptFlag_hide = 1 << 4,
-};
-
-struct opt_desc_t
-{
-	const char *long_name;  // Command line arg. or keyword
-	const char *short_name; // Abbreviated command line argument
-
-	OptType opt_type;    // Type of this option
-	unsigned flags;    // Flags for this option :
-	// '1' : process only on pass 1 of parse_command_line_options()
-	// '<' : print extra newline after this option (when dumping)
-	// 'v' : a real variable (preference setting)
-	// 'w' : warp hack -- accept two numeric args
-	// 'H' : hide option from --help display
-
-	const char *desc;   // Description of the option
-	const char *arg_desc;  // Description of the argument (NULL --> none or default)
-
-	void *data_ptr;   // Pointer to the data
-};
-
-
-static const opt_desc_t options[] =
+const opt_desc_t options[] =
 {
 	//
 	// A few options must be handled in an early pass
@@ -847,7 +785,8 @@ static void populateList(SString &value, void *data_ptr)
 //
 // Parse config line from file
 //
-static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum)
+static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum,
+									   const opt_desc_t *options)
 {
 	SString line(cline);
 
@@ -959,7 +898,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 //
 //  Return 0 on success, negative value on failure.
 //
-static int parse_a_config_file(std::istream &is, const SString &filename)
+static int parse_a_config_file(std::istream &is, const SString &filename, const opt_desc_t *options)
 {
 	SString basename = GetBaseName(filename);
 
@@ -967,7 +906,7 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 	SString line;
 	for(int lnum = 1; M_ReadTextLine(line, is); lnum++)
 	{
-		int ret = parse_config_line_from_file(line, basename, lnum);
+		int ret = parse_config_line_from_file(line, basename, lnum, options);
 
 		if (ret != 0)
 			return ret;
@@ -976,31 +915,16 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 	return 0;  // OK
 }
 
-
-inline static SString default_config_file() noexcept(false)
-{
-	if(global::home_dir.empty())
-		ThrowException("Home directory not set.");
-
-	return global::home_dir + "/config.cfg";
-}
-
-
 //
 //  parses the config file (either a user-specific one or the default one).
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile() noexcept(false)
+int M_ParseConfigFile(const SString &path, const opt_desc_t *options)
 {
-	if (global::config_file.empty())
-	{
-		global::config_file = default_config_file();
-	}
+	std::ifstream is(path.get());
 
-	std::ifstream is(global::config_file.get());
-
-	gLog.printf("Reading config file: %s\n", global::config_file.c_str());
+	gLog.printf("Reading config file: %s\n", path.c_str());
 
 	if (!is.is_open())
 	{
@@ -1008,27 +932,8 @@ int M_ParseConfigFile() noexcept(false)
 		return -1;
 	}
 
-	return parse_a_config_file(is, global::config_file);
+	return parse_a_config_file(is, path, options);
 }
-
-
-int M_ParseDefaultConfigFile()
-{
-	SString filename = global::install_dir + "/defaults.cfg";
-
-	std::ifstream is(filename.get());
-
-	gLog.printf("Reading config file: %s\n", filename.c_str());
-
-	if (!is.is_open())
-	{
-		gLog.printf("--> %s\n", GetErrorMessage(errno).c_str());
-		return -1;
-	}
-
-	return parse_a_config_file(is, filename);
-}
-
 
 //
 // check certain environment variables...
@@ -1042,12 +947,6 @@ void M_ParseEnvironmentVars()
 	if (value != NULL)
 		Game = value;
 #endif
-}
-
-
-static void M_AddPwadName(const char *filename)
-{
-	global::Pwad_list.push_back(filename);
 }
 
 //
@@ -1082,7 +981,7 @@ static void readArgsForList(bool ignore, int &argc, const char *const *&argv, vo
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
+void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<SString> &Pwad_list, const opt_desc_t *options)
 {
 	const opt_desc_t *o;
 
@@ -1095,7 +994,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
 		{
 			// this is a loose file, handle it now
 			if (pass == CommandLinePass::normal)
-				M_AddPwadName(argv[0]);
+				Pwad_list.push_back(argv[0]);
 
 			argv++;
 			argc--;
@@ -1307,14 +1206,11 @@ static void writeListToConfig(const void *data_ptr, std::ofstream &os)
 		os << item << ' ';
 }
 
-int M_WriteConfigFile()
+int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
 {
-	if(global::config_file.empty())
-		ThrowException("Configuration file not initialized.");
+	gLog.printf("Writing config file: %s\n", path.c_str());
 
-	gLog.printf("Writing config file: %s\n", global::config_file.c_str());
-
-	std::ofstream os(global::config_file.get(), std::ios::trunc);
+	std::ofstream os(path.get(), std::ios::trunc);
 
 	if (! os.is_open())
 	{

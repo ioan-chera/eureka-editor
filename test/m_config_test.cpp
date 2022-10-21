@@ -25,349 +25,427 @@
 #include "gtest/gtest.h"
 
 //
+// Option end
+//
+static const opt_desc_t kEnd =
+{
+	nullptr, nullptr, OptType::end, 0, nullptr, nullptr, nullptr
+};
+
+//
+// Returns an opt_desc_t using only the fields we need for config file
+//
+static opt_desc_t configOption(const char *long_name, OptType opt_type, unsigned flags,
+							   void *data_ptr)
+{
+	return {long_name, nullptr, opt_type, flags, nullptr, nullptr, data_ptr};
+}
+static opt_desc_t configOption(const char *long_name, const char *shortname, OptType opt_type, unsigned flags,
+							   void *data_ptr)
+{
+	return {long_name, shortname, opt_type, flags, nullptr, nullptr, data_ptr};
+}
+
+//
 // Fixture
 //
 class MConfig : public TempDirContext
 {
 protected:
-    void SetUp() override
-    {
-        TempDirContext::SetUp();
-        global::home_dir = mTempDir;
-        global::install_dir = getChildPath("install");
-    }
+	//
+	// Demo testing configuration data
+	//
+	struct Configuration
+	{
+		SString home_dir;
+		SString loadedIwadName;
+		bool show_help = false;
+		bool udmf_testing = false;
+		bool bsp_on_save = false;
+		bool bsp_gl_nodes = false;
+		bool grid_snap_indicator = false;
+		bool leave_offsets_alone = false;
+		std::vector<SString> Pwad_list;
+		int backup_max_files = 0;
+		rgb_color_t dotty_axis_col;
 
-    void TearDown() override
-    {
-        global::config_file.clear();
-        global::install_dir.clear();
-        global::home_dir.clear();
-        TempDirContext::TearDown();
-    }
+		bool auto_load_recent = false;
+		bool begin_maximized = false;
+		SString default_port;
+		SString loadedLevelName;
+		SString config_file;
+
+		bool show_version = false;
+		std::vector<SString> loadedResourceList;
+		int usegamma = 0;
+		bool Quiet = false;
+	};
+
+	void SetUp() override;
+	//
+	// Const getter
+	//
+	const std::vector<opt_desc_t> &options() const
+	{
+		return mOptions;
+	}
+
+	Configuration config;
+
+private:
+	void add(const opt_desc_t &option);
+
+	std::vector<opt_desc_t> mOptions = {kEnd};
 };
 
-TEST(MConfigBlank, MParseConfigFileNoPath)
+//
+// Set up
+//
+void MConfig::SetUp()
 {
-    // We don't have the location set yet? Error out
-    ASSERT_DEATH(Fatal([]{ M_ParseConfigFile(); }), "Home directory");
-    ASSERT_EQ(M_ParseDefaultConfigFile(), -1);
+	TempDirContext::SetUp();
+
+	add(configOption("auto_load_recent", OptType::boolean, OptFlag_preference,
+					 &config.auto_load_recent));
+	add(configOption("backup_max_files", OptType::integer, OptFlag_preference,
+					 &config.backup_max_files));
+	add(configOption("begin_maximized", OptType::boolean, OptFlag_preference,
+					 &config.begin_maximized));
+	add(configOption("bsp_gl_nodes", OptType::boolean, OptFlag_preference, &config.bsp_gl_nodes));
+	add(configOption("bsp_on_save", OptType::boolean, OptFlag_preference, &config.bsp_on_save));
+	add(configOption("config", OptType::string, OptFlag_pass1 | OptFlag_helpNewline,
+					 &config.config_file));
+	add(configOption("default_gamma", OptType::integer, OptFlag_preference, &config.usegamma));
+	add(configOption("default_port", OptType::string, OptFlag_preference, &config.default_port));
+	add(configOption("dotty_axis_col", OptType::color, OptFlag_preference, &config.dotty_axis_col));
+	add(configOption("file", "f", OptType::stringList, 0, &config.Pwad_list));
+	add(configOption("grid_snap_indicator", OptType::boolean, OptFlag_preference,
+					 &config.grid_snap_indicator));
+	add(configOption("help", OptType::boolean, OptFlag_pass1, &config.show_help));
+	add(configOption("home", OptType::string, OptFlag_pass1, &config.home_dir));
+	add(configOption("iwad", OptType::string, 0, &config.loadedIwadName));
+	add(configOption("leave_offsets_alone", OptType::boolean, OptFlag_preference,
+					 &config.leave_offsets_alone));
+	add(configOption("merge", "m", OptType::stringList, 0, &config.loadedResourceList));
+	add(configOption("quiet", "q", OptType::boolean, OptFlag_pass1, &config.Quiet));
+	add(configOption("udmftest", OptType::boolean, OptFlag_hide, &config.udmf_testing));
+	add(configOption("version", "v", OptType::boolean, OptFlag_pass1, &config.show_version));
+	add(configOption("warp", OptType::string, OptFlag_warp | OptFlag_helpNewline,
+					 &config.loadedLevelName));
+
+}
+
+//
+// Adds a new option, ensuring null termination
+//
+void MConfig::add(const opt_desc_t &option)
+{
+	mOptions.back() = option;
+	mOptions.push_back(kEnd);
 }
 
 TEST_F(MConfig, MParseConfigFileNotFound)
 {
     // Get an error result if we don't have the file itself
-    ASSERT_EQ(M_ParseConfigFile(), -1);
+    ASSERT_EQ(M_ParseConfigFile(getChildPath("nothing.cfg"), options().data()), -1);
+}
+
+TEST_F(MConfig, MParseConfigEmptyFile)
+{
+	SString path = getChildPath("something.cfg");
+	FILE *f = fopen(path.c_str(), "wb");
+	ASSERT_TRUE(f);
+	mDeleteList.push(path);
+	fclose(f);
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 }
 
 TEST_F(MConfig, MParseConfigFile)
 {
-    SString paths[2] = { getChildPath("config.cfg"), getChildPath("install/defaults.cfg" )};
-    int (*funcs[2])() = { M_ParseConfigFile, M_ParseDefaultConfigFile };
+    SString path = getChildPath("config.cfg");
 
-    ASSERT_TRUE(FileMakeDir(getChildPath("install")));
-    mDeleteList.push(getChildPath("install"));
+	std::ofstream os(path.get(), std::ios::trunc);
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os.close();
 
-    for(int i = 0; i < 2; ++i)
-    {
-        const SString &path = paths[i];
-        std::ofstream os(path.get(), std::ios::trunc);
-        ASSERT_TRUE(os.is_open());
-        mDeleteList.push(path);
-        os.close();
+	os.open(path.get());
+	ASSERT_TRUE(os.is_open());
+	os << "\n";
+	os << "#\n";
+	os << "   # Test comment\n";
+	os << "Single\n";   // Safe to skip
+	os << "Single \n";   // Safe to skip
+	os << "home michael\n";  // Home must NOT be changed
+	os << "help 1\n";   // Also unchanged
+	os << "file file1 file2 file3\n";
+	os << "iwad doom 3.wad\n";
+	os << "udmftest yes\n";
+	os << "backup_max_files -999\n";
+	os << "bsp_on_save off\n";  // test "off"
+	os << "bsp_gl_nodes no\n";  // test "no"
+	os << "grid_snap_indicator false\n";    // test "false"
+	os << "leave_offsets_alone 0\n";    // test 0
+	os << "dotty_axis_col 7b2d43\n"; // NOTE: # not supported
+	os.close();
 
-        // Check empty file is ok
-        ASSERT_EQ(funcs[i](), 0);
+	// Prepare some prereqs
+	config.home_dir = "jackson";
+	config.bsp_on_save = true;
+	config.bsp_gl_nodes = true;
+	config.grid_snap_indicator = true;
+	config.leave_offsets_alone = true;
 
-        os.open(path.get());
-        ASSERT_TRUE(os.is_open());
-        os << "\n";
-        os << "#\n";
-        os << "   # Test comment\n";
-        os << "Single\n";   // Safe to skip
-        os << "Single \n";   // Safe to skip
-        os << "home michael\n";  // Home must NOT be changed
-        os << "help 1\n";   // Also unchanged
-        os << "file file1 file2 file3\n";
-        os << "iwad doom 3.wad\n";
-        os << "udmftest yes\n";
-        os << "backup_max_files -999\n";
-        os << "bsp_on_save off\n";  // test "off"
-        os << "bsp_gl_nodes no\n";  // test "no"
-        os << "grid_snap_indicator false\n";    // test "false"
-        os << "leave_offsets_alone 0\n";    // test 0
-        os << "dotty_axis_col 7b2d43\n"; // NOTE: # not supported
-        os.close();
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+	ASSERT_EQ(config.home_dir, "jackson");	// unchanged
+	ASSERT_FALSE(config.show_help);	// unchanged
 
-        ASSERT_EQ(funcs[i](), 0);
-        ASSERT_EQ(global::home_dir, mTempDir);  // Not changed
-        ASSERT_FALSE(global::show_help);
+	ASSERT_EQ(config.Pwad_list.size(), 3);
+	ASSERT_EQ(config.Pwad_list[0], "file1");
+	ASSERT_EQ(config.Pwad_list[1], "file2");
+	ASSERT_EQ(config.Pwad_list[2], "file3");
 
-        ASSERT_EQ(global::Pwad_list.size(), 3);
-        ASSERT_EQ(global::Pwad_list[0], "file1");
-        ASSERT_EQ(global::Pwad_list[1], "file2");
-        ASSERT_EQ(global::Pwad_list[2], "file3");
-        global::Pwad_list.clear();
+	ASSERT_EQ(config.loadedIwadName, "doom 3.wad");   // spaces get included
 
-        ASSERT_EQ(gInstance.loaded.iwadName, "doom 3.wad");   // spaces get included
-        gInstance.loaded.iwadName.clear();
+	ASSERT_TRUE(config.udmf_testing);
 
-        ASSERT_TRUE(global::udmf_testing);
-        global::udmf_testing = false;
+	ASSERT_EQ(config.backup_max_files, -999);
+	config::backup_max_files = 30;
 
-        ASSERT_EQ(config::backup_max_files, -999);
-        config::backup_max_files = 30;
+	ASSERT_FALSE(config.bsp_on_save);
 
-        ASSERT_FALSE(config::bsp_on_save);
-        config::bsp_on_save = true;
+	ASSERT_FALSE(config.bsp_gl_nodes);
 
-        ASSERT_FALSE(config::bsp_gl_nodes);
-        config::bsp_gl_nodes = true;
+	ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(123, 45, 67));
 
-        ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(123, 45, 67));
-        config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+	ASSERT_FALSE(config.grid_snap_indicator);
 
-        ASSERT_FALSE(config::grid_snap_indicator);
-        config::grid_snap_indicator = true;
-
-        ASSERT_FALSE(config::leave_offsets_alone);
-        config::leave_offsets_alone = true;
-    }
-}
-
-TEST(MConfigBlank, MWriteConfigFileNotSetup)
-{
-    ASSERT_DEATH(Fatal([]{ M_WriteConfigFile(); }), "Configuration file");
+	ASSERT_FALSE(config.leave_offsets_alone);
 }
 
 TEST_F(MConfig, MWriteConfig)
 {
-    config::auto_load_recent = true;
-    config::begin_maximized = true;
-    config::backup_max_files = 777;
-    config::default_port = "Doom \\ # Legacy    ";
-    config::dotty_axis_col = RGB_MAKE(99, 90, 80);
+    config.auto_load_recent = true;
+    config.begin_maximized = true;
+    config.backup_max_files = 777;
+    config.default_port = "Doom \\ # Legacy    ";
+    config.dotty_axis_col = RGB_MAKE(99, 90, 80);
 
-    global::udmf_testing = true;    // this one shall not be saved
-    gInstance.loaded.levelName = "NEW LEVEL";
-    global::Pwad_list = { "file1", "file2 file3" };
+    config.udmf_testing = true;    // this one shall not be saved
+    config.loadedLevelName = "NEW LEVEL";
+    config.Pwad_list = { "file1", "file2 file3" };
 
-    global::config_file = getChildPath("configx.cfg");  // pick any name
+    config.config_file = getChildPath("configx.cfg");  // pick any name
 
-    ASSERT_EQ(M_WriteConfigFile(), 0);
-    mDeleteList.push(global::config_file);
+    ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
+    mDeleteList.push(config.config_file);
 
     // Now unset them
-    config::auto_load_recent = false;
-    config::begin_maximized = false;
-    config::backup_max_files = 30;
-    config::default_port = "vanilla";
-    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+    config.auto_load_recent = false;
+    config.begin_maximized = false;
+    config.backup_max_files = 30;
+    config.default_port = "vanilla";
+    config.dotty_axis_col = RGB_MAKE(0, 128, 255);
 
-    global::udmf_testing = false;
-    gInstance.loaded.levelName.clear();
-    global::Pwad_list.clear();
+    config.udmf_testing = false;
+    config.loadedLevelName.clear();
+    config.Pwad_list.clear();
 
     // Now read config back
 
-    ASSERT_EQ(M_ParseConfigFile(), 0);
+    ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
 
-    ASSERT_TRUE(config::auto_load_recent);
-    ASSERT_TRUE(config::begin_maximized);
-    ASSERT_EQ(config::backup_max_files, 777);
-    ASSERT_EQ(config::default_port, "Doom \\ # Legacy");
-    ASSERT_EQ(config::dotty_axis_col, RGB_MAKE(99, 90, 80));
+    ASSERT_TRUE(config.auto_load_recent);
+    ASSERT_TRUE(config.begin_maximized);
+    ASSERT_EQ(config.backup_max_files, 777);
+    ASSERT_EQ(config.default_port, "Doom \\ # Legacy");
+    ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(99, 90, 80));
 
-    ASSERT_FALSE(global::udmf_testing); // still false
-    ASSERT_TRUE(gInstance.loaded.levelName.empty());
-    ASSERT_TRUE(global::Pwad_list.empty());
-
-    // Now unset them
-    config::auto_load_recent = false;
-    config::begin_maximized = false;
-    config::backup_max_files = 30;
-    config::default_port = "vanilla";
-    config::dotty_axis_col = RGB_MAKE(0, 128, 255);
+    ASSERT_FALSE(config.udmf_testing); // still false
+    ASSERT_TRUE(config.loadedLevelName.empty());
+    ASSERT_TRUE(config.Pwad_list.empty());
 }
 
-TEST(MConfigArgs, MParseCommandLine)
+TEST_F(MConfig, MParseCommandLine)
 {
 	// NOTE: check that both - and -- work and short name too
 
     // Test loose files
     std::vector<const char *> argv;
     argv = { "file1", "file 2", "" };
+	std::vector<SString> &Pwad_list = config.Pwad_list;
     // First pass doesn't use it
-    M_ParseCommandLine(3, argv.data(), CommandLinePass::early);
-    ASSERT_TRUE(global::Pwad_list.empty());
+    M_ParseCommandLine(3, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+    ASSERT_TRUE(Pwad_list.empty());
     // Second pass uses it
-    M_ParseCommandLine(3, argv.data(), CommandLinePass::normal);
-    ASSERT_EQ(global::Pwad_list.size(), 3);
-    ASSERT_EQ(global::Pwad_list[0], "file1");
-    ASSERT_EQ(global::Pwad_list[1], "file 2");
-    ASSERT_EQ(global::Pwad_list[2], "");
-    global::Pwad_list.clear();
+    M_ParseCommandLine(3, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+    ASSERT_EQ(Pwad_list.size(), 3);
+    ASSERT_EQ(Pwad_list[0], "file1");
+    ASSERT_EQ(Pwad_list[1], "file 2");
+    ASSERT_EQ(Pwad_list[2], "");
+    Pwad_list.clear();
 
     // Test illegal argument
     argv = { "file", "-unknown-abcxyz" };
 	// Both passes reject invalid settings
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
-												   CommandLinePass::early); }),
-				 "unknown option");
-    ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
-												   CommandLinePass::normal); }),
-				 "unknown option");
-    global::Pwad_list.clear();
+	ASSERT_DEATH(Fatal([&argv, &Pwad_list, this]{
+		M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	}), "unknown option");
+    ASSERT_DEATH(Fatal([&argv, &Pwad_list, this]{
+		M_ParseCommandLine(2, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	}), "unknown option");
+    Pwad_list.clear();
 
     // Test file AND valid arg
 	// Pass 1
 	argv = { "file3", "-home", "home1" };
-	M_ParseCommandLine(3, argv.data(), CommandLinePass::early);
-	ASSERT_TRUE(global::Pwad_list.empty());
-	ASSERT_EQ(global::home_dir, "home1");
-	global::home_dir.clear();
+	M_ParseCommandLine(3, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_TRUE(Pwad_list.empty());
+	ASSERT_EQ(config.home_dir, "home1");
+	config.home_dir.clear();
 	// Pass 2: ignore the -home arg but populate loose files
-	M_ParseCommandLine(3, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(global::Pwad_list.size(), 1);
-	ASSERT_EQ(global::Pwad_list[0], "file3");
-	ASSERT_TRUE(global::home_dir.empty());
-	global::Pwad_list.clear();
+	M_ParseCommandLine(3, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(Pwad_list.size(), 1);
+	ASSERT_EQ(Pwad_list[0], "file3");
+	ASSERT_TRUE(config.home_dir.empty());
+	Pwad_list.clear();
 
 	// Test that missing argument shows error
 	// First pass actively looks for -home
 	argv = { "file4", "-home" };
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
-												   CommandLinePass::early); }),
-				 "missing argument");
-	global::Pwad_list.clear();
+	ASSERT_DEATH(Fatal([&]{
+		M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	}), "missing argument");
+	Pwad_list.clear();
 	// Second pass still cares about integrity
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(2, argv.data(),
-												   CommandLinePass::normal); }),
-				 "missing argument");
-	global::Pwad_list.clear();
+	ASSERT_DEATH(Fatal([&]{
+		M_ParseCommandLine(2, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	}), "missing argument");
+	Pwad_list.clear();
 
 	// Test boolean assignment
 	argv = { "-v" };
-	M_ParseCommandLine(1, argv.data(), CommandLinePass::early);
-	ASSERT_TRUE(global::show_version);
-	global::show_version = false;
+	M_ParseCommandLine(1, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_TRUE(config.show_version);
+	config.show_version = false;
 
 	// Reject double-dash short options
 	argv = { "--v" };
-	ASSERT_DEATH(Fatal([&argv]{ M_ParseCommandLine(1, argv.data(),
-												   CommandLinePass::early); }),
-				 "unknown option");
+	ASSERT_DEATH(Fatal([&]{
+		M_ParseCommandLine(1, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	}), "unknown option");
 
 	// Test that anything means true
 	argv = { "--version", "yeah" };
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
-	ASSERT_TRUE(global::show_version);
-	global::show_version = false;
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_TRUE(config.show_version);
+	config.show_version = false;
 
 	// Test that second-pass options get ignored in pass 1.
 	// Also combine with loose stuff
 	argv = { "loose file.wad", "", "--file", "doom.wad", "landing page.wad" };
-	M_ParseCommandLine(5, argv.data(), CommandLinePass::early);
-	ASSERT_TRUE(global::Pwad_list.empty());
+	M_ParseCommandLine(5, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_TRUE(Pwad_list.empty());
 	// On pass 2, they get combined
-	M_ParseCommandLine(5, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(global::Pwad_list.size(), 4);
-	ASSERT_EQ(global::Pwad_list[0], "loose file.wad");
-	ASSERT_EQ(global::Pwad_list[1], "");
-	ASSERT_EQ(global::Pwad_list[2], "doom.wad");
-	ASSERT_EQ(global::Pwad_list[3], "landing page.wad");
-	global::Pwad_list.clear();
+	M_ParseCommandLine(5, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(Pwad_list.size(), 4);
+	ASSERT_EQ(Pwad_list[0], "loose file.wad");
+	ASSERT_EQ(Pwad_list[1], "");
+	ASSERT_EQ(Pwad_list[2], "doom.wad");
+	ASSERT_EQ(Pwad_list[3], "landing page.wad");
+	Pwad_list.clear();
 	argv = { "loose file.wad", "", "-f", "doom.wad", "landing page.wad",
 		"--merge", "res1.wad", "res2.wad"
 	};
-	M_ParseCommandLine(8, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(global::Pwad_list.size(), 4);
-	ASSERT_EQ(global::Pwad_list[0], "loose file.wad");
-	ASSERT_EQ(global::Pwad_list[1], "");
-	ASSERT_EQ(global::Pwad_list[2], "doom.wad");
-	ASSERT_EQ(global::Pwad_list[3], "landing page.wad");
-	global::Pwad_list.clear();
-	ASSERT_EQ(gInstance.loaded.resourceList.size(), 2);
-	ASSERT_EQ(gInstance.loaded.resourceList[0], "res1.wad");
-	ASSERT_EQ(gInstance.loaded.resourceList[1], "res2.wad");
-	gInstance.loaded.resourceList.clear();
+	M_ParseCommandLine(8, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(Pwad_list.size(), 4);
+	ASSERT_EQ(Pwad_list[0], "loose file.wad");
+	ASSERT_EQ(Pwad_list[1], "");
+	ASSERT_EQ(Pwad_list[2], "doom.wad");
+	ASSERT_EQ(Pwad_list[3], "landing page.wad");
+	Pwad_list.clear();
+	ASSERT_EQ(config.loadedResourceList.size(), 2);
+	ASSERT_EQ(config.loadedResourceList[0], "res1.wad");
+	ASSERT_EQ(config.loadedResourceList[1], "res2.wad");
+	config.loadedResourceList.clear();
 
 	// Test integer stuff
 	argv = { "-backup_max_files", "-23", "--default_gamma", "25" };
-	M_ParseCommandLine(4, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(config::backup_max_files, -23);
-	ASSERT_EQ(config::usegamma, 25);
-	config::backup_max_files = 30;
-	config::usegamma = 2;
+	M_ParseCommandLine(4, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(config.backup_max_files, -23);
+	ASSERT_EQ(config.usegamma, 25);
+	config.backup_max_files = 30;
+	config.usegamma = 2;
 
 	// Test the boolean off options
 	argv = { "-quiet", "off" };
-	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
-	ASSERT_FALSE(global::Quiet);
+	config.Quiet = true;
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_FALSE(config.Quiet);
 	argv = { "-q", "no" };
-	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
-	ASSERT_FALSE(global::Quiet);
+	config.Quiet = true;
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_FALSE(config.Quiet);
 	argv = { "--quiet", "false" };
-	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
-	ASSERT_FALSE(global::Quiet);
+	config.Quiet = true;
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_FALSE(config.Quiet);
 	argv = { "-quiet", "0" };
-	global::Quiet = true;
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::early);
-	ASSERT_FALSE(global::Quiet);
+	config.Quiet = true;
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::early, Pwad_list, options().data());
+	ASSERT_FALSE(config.Quiet);
 
 	// Test the special warp behaviour
 	argv = { "-warp", "map01" };
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(gInstance.loaded.levelName, "map01");	// gets uppercase
-	gInstance.loaded.levelName.clear();
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(config.loadedLevelName, "map01");	// gets uppercase
+	config.loadedLevelName.clear();
 	// Check that one argument is valid
 	argv = { "--warp", "09" };
-	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(gInstance.loaded.levelName, "09");
-	gInstance.loaded.levelName.clear();
+	M_ParseCommandLine(2, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(config.loadedLevelName, "09");
+	config.loadedLevelName.clear();
 
 	// Check that loose files can be located within
 	argv = { "file1", "-warp", "map01", "file2", "--merge", "res1", "res2" };
-	M_ParseCommandLine(7, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(global::Pwad_list.size(), 2);
-	ASSERT_EQ(global::Pwad_list[0], "file1");
-	ASSERT_EQ(global::Pwad_list[1], "file2");
-	ASSERT_EQ(gInstance.loaded.levelName, "map01");
-	ASSERT_EQ(gInstance.loaded.resourceList.size(), 2);
-	ASSERT_EQ(gInstance.loaded.resourceList[0], "res1");
-	ASSERT_EQ(gInstance.loaded.resourceList[1], "res2");
-	global::Pwad_list.clear();
-	gInstance.loaded.levelName.clear();
-	gInstance.loaded.resourceList.clear();
+	M_ParseCommandLine(7, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(Pwad_list.size(), 2);
+	ASSERT_EQ(Pwad_list[0], "file1");
+	ASSERT_EQ(Pwad_list[1], "file2");
+	ASSERT_EQ(config.loadedLevelName, "map01");
+	ASSERT_EQ(config.loadedResourceList.size(), 2);
+	ASSERT_EQ(config.loadedResourceList[0], "res1");
+	ASSERT_EQ(config.loadedResourceList[1], "res2");
+	Pwad_list.clear();
+	config.loadedLevelName.clear();
+	config.loadedResourceList.clear();
 
 	// Check that loose files can be located within and arguments can be redone
 	argv = { "file1", "--warp", "map01", "file2", "-warp", "1", "3", "file3" };
-	M_ParseCommandLine(8, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(global::Pwad_list.size(), 3);
-	ASSERT_EQ(global::Pwad_list[0], "file1");
-	ASSERT_EQ(global::Pwad_list[1], "file2");
-	ASSERT_EQ(global::Pwad_list[2], "file3");
-	ASSERT_EQ(gInstance.loaded.levelName, "13");
-	global::Pwad_list.clear();
-	gInstance.loaded.levelName.clear();
+	M_ParseCommandLine(8, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(Pwad_list.size(), 3);
+	ASSERT_EQ(Pwad_list[0], "file1");
+	ASSERT_EQ(Pwad_list[1], "file2");
+	ASSERT_EQ(Pwad_list[2], "file3");
+	ASSERT_EQ(config.loadedLevelName, "13");
+	Pwad_list.clear();
+	config.loadedLevelName.clear();
 
 	// Check that stringList options can be repeatedly argumented
 	argv = { "file1", "-file", "file2", "-merge", "res1", "--file", "file3",
 		"file4", "-merge", "res2", "res3" };
-	M_ParseCommandLine(11, argv.data(), CommandLinePass::normal);
-	ASSERT_EQ(global::Pwad_list.size(), 4);
-	ASSERT_EQ(global::Pwad_list[0], "file1");
-	ASSERT_EQ(global::Pwad_list[1], "file2");
-	ASSERT_EQ(global::Pwad_list[2], "file3");
-	ASSERT_EQ(global::Pwad_list[3], "file4");
-	ASSERT_EQ(gInstance.loaded.resourceList.size(), 3);
-	ASSERT_EQ(gInstance.loaded.resourceList[0], "res1");
-	ASSERT_EQ(gInstance.loaded.resourceList[1], "res2");
-	ASSERT_EQ(gInstance.loaded.resourceList[2], "res3");
-	global::Pwad_list.clear();
-	gInstance.loaded.resourceList.clear();
+	M_ParseCommandLine(11, argv.data(), CommandLinePass::normal, Pwad_list, options().data());
+	ASSERT_EQ(Pwad_list.size(), 4);
+	ASSERT_EQ(Pwad_list[0], "file1");
+	ASSERT_EQ(Pwad_list[1], "file2");
+	ASSERT_EQ(Pwad_list[2], "file3");
+	ASSERT_EQ(Pwad_list[3], "file4");
+	ASSERT_EQ(config.loadedResourceList.size(), 3);
+	ASSERT_EQ(config.loadedResourceList[0], "res1");
+	ASSERT_EQ(config.loadedResourceList[1], "res2");
+	ASSERT_EQ(config.loadedResourceList[2], "res3");
+	Pwad_list.clear();
+	config.loadedResourceList.clear();
 }
 
 // M_PrintCommandLineOptions is tested in system testing

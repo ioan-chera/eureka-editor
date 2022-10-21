@@ -1066,6 +1066,19 @@ static void ShowTime()
 #endif
 }
 
+//
+// Sets up the config path before using it
+//
+static void prepareConfigPath()
+{
+	if (global::config_file.empty())
+	{
+		if(global::home_dir.empty())
+			ThrowException("Home directory not set.");
+
+		global::config_file = global::home_dir + "/config";
+	}
+}
 
 //
 //  the program starts here
@@ -1079,7 +1092,7 @@ int main(int argc, char *argv[])
 
 		// a quick pass through the command line arguments
 		// to handle special options, like --help, --install, --config
-		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early);
+		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::early, global::Pwad_list, options);
 
 		if (global::show_help)
 		{
@@ -1114,13 +1127,14 @@ int main(int argc, char *argv[])
 
 
 		// load all the config settings
-		M_ParseConfigFile();
+		prepareConfigPath();
+		M_ParseConfigFile(global::config_file, options);
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();
 
 		// and command line arguments will override both
-		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal);
+		M_ParseCommandLine(argc - 1, argv + 1, CommandLinePass::normal, global::Pwad_list, options);
 
 		// TODO: create a new instance
 		gInstance.Editor_Init();
