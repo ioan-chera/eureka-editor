@@ -240,13 +240,13 @@ TEST_F(MConfig, ParsePathList)
 
 	os.open(path.get());
 	ASSERT_TRUE(os.is_open());
-	os << "path /michael/jackson . .. here/next here/../here here\n";
+	os << "path \"/michael/jack son\" . .. here/next here/../here here\n";
 	os.close();
 
 	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 
 	ASSERT_EQ(config.paths.size(), 6);
-	ASSERT_EQ(config.paths[0], fs::current_path().root_path() / "michael" / "jackson");
+	ASSERT_EQ(config.paths[0], fs::current_path().root_path() / "michael" / "jack son");
 	ASSERT_EQ(config.paths[1], fs::path("."));
 	ASSERT_EQ(config.paths[2], fs::path(".."));
 	ASSERT_EQ(config.paths[3], fs::path("here") / "next");
