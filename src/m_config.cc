@@ -758,27 +758,114 @@ const opt_desc_t options[] =
 
 //------------------------------------------------------------------------
 
-template<typename T>
-static void populateList(SString &value, void *data_ptr)
+//
+// Given a string, populates a string list for configuration. Strings must be words separated by
+// spaces.
+//
+static void populateList(SString &value, std::vector<SString> &list)
 {
 	while(value.good())
 	{
 		size_t spacepos = value.findSpace();
-		auto list = static_cast<std::vector<T> *>(data_ptr);
 		if(spacepos == SString::npos)
 		{
-			list->push_back(T(value.get()));
+			list.push_back(value);
 			value.clear();
 		}
 		else
 		{
 			SString word = value;
 			word.erase(spacepos, SString::npos);
-			list->push_back(T(word.get()));
+			list.push_back(word);
 
 			value.erase(0, spacepos);
 			value.trimLeadingSpaces();
 		}
+	}
+}
+static void populateList(SString &line, std::vector<fs::path> &list)
+{
+	// this one is more involved. We'll follow the MS-DOS prompt rule: quotes are needed for paths
+	// with spaces, and double-quotes become literal quotes.
+
+	enum class State
+	{
+		open,
+		singleWord,
+		multiWord,
+		firstQuoteInString,
+	};
+	auto state = State::open;
+	SString item;
+	for(char c : line)
+	{
+		switch(state)
+		{
+			case State::open:
+				if(isspace(c))
+					continue;
+				if(c == '"')
+				{
+					state = State::multiWord;
+					continue;
+				}
+				state = State::singleWord;
+				item.push_back(c);
+				continue;
+			case State::singleWord:
+				if(isspace(c))
+				{
+					list.push_back(item.get());
+					item.clear();
+					state = State::open;
+					continue;
+				}
+				if(c == '"')
+				{
+					list.push_back(item.get());
+					item.clear();
+					state = State::multiWord;
+					continue;
+				}
+				item.push_back(c);
+				continue;
+			case State::multiWord:
+				if(c == '"')
+				{
+					state = State::firstQuoteInString;
+					continue;
+				}
+				item.push_back(c);
+				continue;
+			case State::firstQuoteInString:
+				if(c == '"')
+				{
+					item.push_back('"');
+					state = State::multiWord;
+					continue;
+				}
+				list.push_back(item.get());
+				item.clear();
+				if(isspace(c))
+				{
+					state = State::open;
+					continue;
+				}
+				item.push_back(c);
+				state = State::singleWord;
+				continue;
+		}
+	}
+	// Now past the end
+	switch(state)
+	{
+		case State::open:
+			break;
+		case State::singleWord:
+		case State::multiWord:
+		case State::firstQuoteInString:
+			list.push_back(item.get());
+			break;
 	}
 }
 
@@ -879,10 +966,10 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			break;
 
         case OptType::stringList:
-			populateList<SString>(value, opt->data_ptr);
+			populateList(value, *static_cast<std::vector<SString> *>(opt->data_ptr));
 			break;
 		case OptType::pathList:
-			populateList<fs::path>(value, opt->data_ptr);
+			populateList(value, *static_cast<std::vector<fs::path> *>(opt->data_ptr));
 			break;
 		default:
 			BugError("INTERNAL ERROR: unknown option type %d\n", (int) opt->opt_type);
