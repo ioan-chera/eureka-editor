@@ -94,23 +94,6 @@ fs::path ReplaceExtension(const fs::path &filename, const char *extension)
 	return result;
 }
 
-static size_t FindBaseName(const SString &filename)
-{
-	// Find the base name of the file (i.e. without any path).
-	// The result always points within the given string.
-	//
-	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
-
-#ifdef WIN32
-	size_t s = filename.find_last_of("/\\");
-#else
-	size_t s = filename.rfind('/');
-#endif
-	if(s != std::string::npos)
-		return s + 1;
-	return 0;
-}
-
 //
 // Get the basename of a path
 //
@@ -216,32 +199,10 @@ static void FilenameStripBase(SString &path)
 //
 // Get path
 //
-SString FilenameGetPath(const SString &filename)
+fs::path FilenameGetPath(const fs::path &filename)
 {
-	size_t baseNamePosition = FindBaseName(filename);
-
-	SString directory = filename;
-	directory.erase(baseNamePosition, SString::npos);
-
-	if(directory.empty())
-		return ".";
-
-#ifdef _WIN32
-	directory.trimTrailingSet("/\\");
-#else
-	directory.trimTrailingSet("/");
-#endif
-	if(directory.empty())
-		return DIR_SEP_STR;
-
-#ifdef _WIN32
-	if(directory.length() == 2 && directory[1] == ':' && isalpha(directory[0]))
-	{
-		directory.push_back(DIR_SEP_CH);
-	}
-#endif
-
-	return directory;
+	fs::path parent(filename.parent_path());
+	return parent.empty() ? "." : parent;
 }
 
 //

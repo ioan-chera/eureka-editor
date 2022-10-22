@@ -778,7 +778,7 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 SString Instance::Main_FileOpFolder() const
 {
 	if (wad.master.Pwad_name.good())
-		return FilenameGetPath(wad.master.Pwad_name);
+		return FilenameGetPath(wad.master.Pwad_name.get()).u8string();
 
 	return "";
 }

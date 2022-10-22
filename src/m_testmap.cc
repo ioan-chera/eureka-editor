@@ -377,7 +377,7 @@ void Instance::CMD_TestMap()
 	}
 
 	// change working directory to be same as the executable
-	SString folder = FilenameGetPath(info->exe_filename);
+	SString folder = FilenameGetPath(info->exe_filename.get()).u8string();
 
 	gLog.printf("Changing current dir to: %s\n", folder.c_str());
 
