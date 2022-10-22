@@ -1288,15 +1288,45 @@ void M_PrintCommandLineOptions()
 //
 // Given a list of strings or paths, writes them to a config file
 //
-template<typename T>
-static void writeListToConfig(const void *data_ptr, std::ofstream &os)
+static void writeListToConfig(const std::vector<SString> &list, std::ofstream &os)
 {
-	auto list = static_cast<const std::vector<T> *>(data_ptr);
-
-	if (list->empty())
+	if (list.empty())
 		os << "{}";
-	else for (const T &item : *list)
+	else for (const SString &item : list)
 		os << item << ' ';
+}
+
+//
+// Helper to escape path for writing
+//
+static SString escape(const fs::path &path)
+{
+	std::string str = path.generic_u8string();
+	if(str.empty())
+		return "\"\"";
+	bool needsQuotes = false;
+	for(char c : str)
+		if(isspace(c) || c == '"')
+		{
+			needsQuotes = true;
+			break;
+		}
+	if(needsQuotes)
+	{
+		size_t pos = std::string::npos;
+		while((pos = str.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
+			str.insert(str.begin() + pos, '"');
+		return "\"" + str + "\"";
+	}
+	return str;
+}
+
+static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &os)
+{
+	if (list.empty())
+		os << "{}";
+	else for (const fs::path &item : list)
+		os << escape(item) << ' ';
 }
 
 int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
@@ -1345,11 +1375,11 @@ int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
 				break;
 
             case OptType::stringList:
-				writeListToConfig<SString>(o->data_ptr, os);
+				writeListToConfig(*static_cast<std::vector<SString> *>(o->data_ptr), os);
 				break;
 
 			case OptType::pathList:
-				writeListToConfig<fs::path>(o->data_ptr, os);
+				writeListToConfig(*static_cast<std::vector<fs::path> *>(o->data_ptr), os);
 				break;
 
 			default:

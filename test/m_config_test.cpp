@@ -322,7 +322,7 @@ TEST_F(MConfig, MWriteConfig)
 
 TEST_F(MConfig, MWriteConfigPathList)
 {
-	config.paths = {"", ".", "/michael/jack son", ".", "..", "here/next", "here/../here", "here"};
+	config.paths = {"", ".", "/michael/jack \"Ripper\" son", ".", "..", "here/n\"ext", "here/../here", "here", "\"\""};
 
 	config.config_file = getChildPath("configx.cfg");  // pick any name
 	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
@@ -332,15 +332,16 @@ TEST_F(MConfig, MWriteConfigPathList)
 
 	// Now read config back
 	ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
-	ASSERT_EQ(config.paths.size(), 8);
+	ASSERT_EQ(config.paths.size(), 9);
 	ASSERT_EQ(config.paths[0], fs::path(""));
 	ASSERT_EQ(config.paths[1], fs::path("."));
-	ASSERT_EQ(config.paths[2], fs::current_path().root_path() / "michael" / "jack son");
+	ASSERT_EQ(config.paths[2], fs::current_path().root_path() / "michael" / "jack \"Ripper\" son");
 	ASSERT_EQ(config.paths[3], fs::path("."));
 	ASSERT_EQ(config.paths[4], fs::path(".."));
-	ASSERT_EQ(config.paths[5], fs::path("here") / "next");
+	ASSERT_EQ(config.paths[5], fs::path("here") / "n\"ext");
 	ASSERT_EQ(config.paths[6].lexically_normal(), fs::path("here"));
 	ASSERT_EQ(config.paths[7], fs::path("here"));
+	ASSERT_EQ(config.paths[8], fs::path("\"\""));
 }
 
 TEST_F(MConfig, MParseCommandLine)
