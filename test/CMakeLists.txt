@@ -114,6 +114,7 @@ unit_test(general
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
+	SafeOutFileTest.cpp
     SStringTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
@@ -265,7 +266,6 @@ unit_test(independent
     m_parse_test.cpp
     m_select_test.cpp
     m_streams_test.cpp
-    SafeOutFileTest.cpp
     SideTest.cpp
     StringTableTest.cpp
     sys_debug_test.cpp

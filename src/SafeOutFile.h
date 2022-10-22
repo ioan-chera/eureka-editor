@@ -56,7 +56,7 @@ private:
 
 	const fs::path mPath;	// the target path
 	// the random temporary path. Only valid if mFile non-null
-	SString mRandomPath;
+	fs::path mRandomPath;
 
 	FILE *mFile = nullptr;
 	mutable std::mt19937 mRandom;

@@ -16,6 +16,7 @@
 //
 //------------------------------------------------------------------------
 
+#include "lib_file.h"
 #include "lib_util.h"
 #include "Errors.h"
 #include "SafeOutFile.h"
@@ -46,16 +47,14 @@ SafeOutFile::SafeOutFile(const fs::path &path) : mPath(path)
 ReportedResult SafeOutFile::openForWriting()
 {
 	ReportedResult result;
-	fs::path randomPath = mRandomPath.get();
-	if(!(result = makeValidRandomPath(randomPath)).success)
+	if(!(result = makeValidRandomPath(mRandomPath)).success)
 		return result;
-	mRandomPath = randomPath.u8string();
 
-	SString randomPathSave = mRandomPath;
+	fs::path randomPath = mRandomPath;
 	close();
-	mRandomPath = randomPathSave;
+	mRandomPath = randomPath;
 
-	mFile = fopen(mRandomPath.c_str(), "wb");
+	mFile = fopen(mRandomPath.u8string().c_str(), "wb");
 	if(!mFile)
 		return { false, GetErrorMessage(errno) };
 
@@ -71,15 +70,13 @@ ReportedResult SafeOutFile::commit()
 	if(!mFile)
 		return { false, "couldn't create the file." };
 	// First, to be ultra-safe, make another temp path
-	SString safeRandomPath;
+	fs::path safeRandomPath;
 	int i = 0;
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
-		fs::path safeRandomPathActual = safeRandomPath.get();
-		if(!(result = makeValidRandomPath(safeRandomPathActual)).success)
+		if(!(result = makeValidRandomPath(safeRandomPath)).success)
 			return result;
-		safeRandomPath = safeRandomPathActual.u8string();
-		if(!safeRandomPath.noCaseEqual(mRandomPath))
+		if(!FileExists(safeRandomPath) || !fs::equivalent(safeRandomPath, mRandomPath))
 		{
 			// also make sure it doesn't collide with ours
 			break;
@@ -100,13 +97,13 @@ ReportedResult SafeOutFile::commit()
 		overwriteOldFile = false;
 	}
 
-	SString writtenPath = mRandomPath;
+	fs::path writtenPath = mRandomPath;
 	if(mFile)
 	{
 		fclose(mFile);
 		mFile = nullptr;	// we can close it now
 	}
-	if(rename(writtenPath.c_str(), finalPath.c_str()))
+	if(rename(writtenPath.u8string().c_str(), finalPath.c_str()))
 		return { false, GetErrorMessage(errno) };
 	if(overwriteOldFile && remove(safeRandomPath.c_str()))
 		return { false, GetErrorMessage(errno) };
@@ -123,7 +120,7 @@ void SafeOutFile::close()
 	if(mFile)
 	{
 		fclose(mFile);
-		remove(mRandomPath.c_str());	// hopefully it works
+		remove(mRandomPath.u8string().c_str());	// hopefully it works
 	}
 	mFile = nullptr;
 	mRandomPath.clear();
