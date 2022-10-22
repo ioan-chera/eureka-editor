@@ -234,7 +234,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 static SString CalcEXEName(const port_path_info_t *info)
 {
 	// make the executable name relative, since we chdir() to its folder
-	SString basename = GetBaseName(info->exe_filename);
+	SString basename = GetBaseName(info->exe_filename.get()).u8string();
 	return SString(".") + DIR_SEP_CH + basename;
 }
 

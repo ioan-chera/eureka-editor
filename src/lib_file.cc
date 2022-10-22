@@ -114,13 +114,13 @@ static size_t FindBaseName(const SString &filename)
 //
 // Get the basename of a path
 //
-SString GetBaseName(const SString &path)
+fs::path GetBaseName(const fs::path &path)
 {
 	// Find the base name of the file (i.e. without any path).
 	// The result always points within the given string.
 	//
 	// Example:  "C:\Foo\Bar.wad"  ->  "Bar.wad"
-	return path.substr(FindBaseName(path));
+	return path.filename();
 }
 
 bool FilenameIsBare(const SString &filename)
@@ -220,7 +220,7 @@ static void FilenameStripBase(SString &path)
 //
 SString FilenameReposition(const SString &cfilename, const SString &othername)
 {
-	SString filename = GetBaseName(cfilename);
+	SString filename = GetBaseName(cfilename.get()).u8string();
 
 	size_t otherBaseNameLoc = FindBaseName(othername);
 

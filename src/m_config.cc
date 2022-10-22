@@ -993,7 +993,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 //
 static int parse_a_config_file(std::istream &is, const SString &filename, const opt_desc_t *options)
 {
-	SString basename = GetBaseName(filename);
+	SString basename = GetBaseName(filename.get()).u8string();
 
 	// handle one line on each iteration
 	SString line;

@@ -124,7 +124,9 @@ TEST(LibFile, GetBaseName)
 	ASSERT_EQ(GetBaseName("path/to///fileA.wad"), "fileA.wad");
     ASSERT_EQ(GetBaseName("path/to/fileB"), "fileB");
     ASSERT_EQ(GetBaseName("/fileC.txt"), "fileC.txt");
-    ASSERT_EQ(GetBaseName("//file"), "file");
+	ASSERT_EQ(GetBaseName("/file"), "file");
+	ASSERT_EQ(GetBaseName("//dir/file"), "file");
+    ASSERT_EQ(GetBaseName("/file"), "file");
     ASSERT_EQ(GetBaseName("fil"), "fil");
 	ASSERT_EQ(GetBaseName(""), "");
 }
