@@ -406,7 +406,7 @@ static bool DetermineIWAD(Instance &inst)
 	{
 		// if extension is missing, add ".wad"
 		if (! HasExtension(inst.loaded.iwadName.get()))
-			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
+			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName.get(), "wad").u8string();
 
 		if (! Wad_file::Validate(inst.loaded.iwadName.get()))
 			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.c_str());

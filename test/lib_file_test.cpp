@@ -71,10 +71,10 @@ TEST(LibFile, MatchExtension)
 
 TEST(LibFile, ReplaceExtension)
 {
-	ASSERT_EQ(ReplaceExtension("man/doc.", "wad"), "man/doc..wad");
-	ASSERT_EQ(ReplaceExtension("man/doc.", "WAD"), "man/doc..WAD");
-	ASSERT_EQ(ReplaceExtension("man/doc.", ""), "man/doc.");
-	ASSERT_EQ(ReplaceExtension("man/doc.", nullptr), "man/doc.");
+	ASSERT_EQ(ReplaceExtension("man/doc.", "wad"), "man/doc.wad");
+	ASSERT_EQ(ReplaceExtension("man/doc.", "WAD"), "man/doc.WAD");
+	ASSERT_EQ(ReplaceExtension("man/doc.", ""), "man/doc");
+	ASSERT_EQ(ReplaceExtension("man/doc.", nullptr), "man/doc");
 	ASSERT_EQ(ReplaceExtension("man/.doc", ""), "man/.doc");
 	ASSERT_EQ(ReplaceExtension("man/.doc", nullptr), "man/.doc");
 	ASSERT_EQ(ReplaceExtension("man/.doc", "wad"), "man/.doc.wad");
@@ -96,7 +96,7 @@ TEST(LibFile, ReplaceExtension)
 	ASSERT_EQ(ReplaceExtension(".", nullptr), ".");
 	ASSERT_EQ(ReplaceExtension("..", ""), "..");
 	ASSERT_EQ(ReplaceExtension("..", nullptr), "..");
-	ASSERT_EQ(ReplaceExtension("..", "txt"), "...txt");
+	ASSERT_EQ(ReplaceExtension("..", "txt"), "..txt");
 	ASSERT_EQ(ReplaceExtension("..txt", "wad"), "..wad");
 	ASSERT_EQ(ReplaceExtension("..txt", ""), ".");
 	ASSERT_EQ(ReplaceExtension("..txt", nullptr), ".");

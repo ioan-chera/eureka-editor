@@ -1223,7 +1223,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 			return;
 		if (! MatchExtensionNoCase(name.get(), "ugh"))
 			return;
-		temp_list.push_back(ReplaceExtension(name, NULL));
+		temp_list.push_back(ReplaceExtension(name.get(), NULL).u8string());
 	};
 	path = global::install_dir + "/" + folder;
 	ScanDirectory(path, scanner_add_file);

@@ -85,24 +85,12 @@ bool MatchExtensionNoCase(const fs::path &filename, const char *extension)
 //
 // Returned string is a COPY.
 //
-SString ReplaceExtension(const SString &filename, const SString &ext)
+fs::path ReplaceExtension(const fs::path &filename, const char *extension)
 {
-	SString actualExt;
-	if(ext.good() && ext[0] == '.')
-		actualExt = ext;
-	else
-		actualExt = "." + ext;
-	if(!HasExtension(filename.get()))
-	{
-		if(ext.good())
-			return filename + actualExt;
+	if(filename.filename() == ".." && (!extension || !*extension))
 		return filename;
-	}
-	size_t dotPos = filename.rfind('.');
-	SString result = filename;
-	result.erase(dotPos, SString::npos);
-	if(ext.good())
-		result += actualExt;
+	fs::path result(filename);
+	result.replace_extension(extension ? extension : "");
 	return result;
 }
 
