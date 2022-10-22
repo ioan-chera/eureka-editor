@@ -180,6 +180,10 @@ TEST_F(LibFileTempDir, FileExists)
 
 	// Deleted, now must be back to false
 	ASSERT_FALSE(FileExists(path));
+
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	ASSERT_FALSE(FileExists(path));
 }
 
 TEST_F(LibFileTempDir, FileCopy)

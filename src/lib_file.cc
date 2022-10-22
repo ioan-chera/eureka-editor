@@ -36,6 +36,9 @@
 #include <mach-o/dyld.h> // _NSGetExecutablePath
 #endif
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 #ifndef PATH_MAX
 #define PATH_MAX  2048
 #endif
@@ -43,16 +46,16 @@
 
 bool FileExists(const SString &filename)
 {
-	// TODO: #55 unicode
-	FILE *fp = fopen(filename.c_str(), "rb");
-
-	if (fp)
+	try
 	{
-		fclose(fp);
-		return true;
+		return fs::is_regular_file(filename.get());
 	}
-
-	return false;
+	catch(const fs::filesystem_error &e)
+	{
+		// Let's print any errors before we throw anything
+		gLog.printf("File check error: %s", e.what());
+		return false;
+	}
 }
 
 
