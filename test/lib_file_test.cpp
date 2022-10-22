@@ -138,11 +138,9 @@ TEST(LibFile, FilenameIsBare)
 	ASSERT_TRUE(FilenameIsBare("DOOM"));
 	ASSERT_TRUE(FilenameIsBare("doom"));
 	ASSERT_FALSE(FilenameIsBare("/doom"));
-	ASSERT_FALSE(FilenameIsBare(":doom"));
 	ASSERT_FALSE(FilenameIsBare("/doom.wad"));
 	ASSERT_FALSE(FilenameIsBare("doom.wad"));
 	ASSERT_FALSE(FilenameIsBare("C:\\doom"));
-	ASSERT_FALSE(FilenameIsBare("\\doom"));
 }
 
 TEST(LibFile, FilenameReposition)

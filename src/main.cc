@@ -385,7 +385,7 @@ static bool DetermineIWAD(Instance &inst)
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName))
+	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName.get()))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 

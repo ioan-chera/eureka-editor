@@ -123,9 +123,9 @@ fs::path GetBaseName(const fs::path &path)
 	return path.filename();
 }
 
-bool FilenameIsBare(const SString &filename)
+bool FilenameIsBare(const fs::path &filename)
 {
-	return filename.find_first_of("./\\:") == std::string::npos;
+	return !filename.has_extension() && filename == filename.filename();
 }
 
 
