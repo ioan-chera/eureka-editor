@@ -120,9 +120,9 @@ void SafeOutFile::close()
 	if(mFile)
 	{
 		fclose(mFile);
-		remove(mRandomPath.u8string().c_str());	// hopefully it works
+		mFile = nullptr;
+		fs::remove(mRandomPath);	// hopefully it works
 	}
-	mFile = nullptr;
 	mRandomPath.clear();
 }
 
@@ -158,10 +158,8 @@ ReportedResult SafeOutFile::makeValidRandomPath(fs::path &path) const
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
 		randomPath = generateRandomPath();
-		FILE *checkExisting = fopen(randomPath.u8string().c_str(), "rb");
-		if(!checkExisting)
+		if(!FileExists(randomPath))
 			break;
-		fclose(checkExisting);
 	}
 	if(i == RANDOM_PATH_ATTEMPTS)
 		return { false, "failed writing after several attempts." };
