@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <random>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 struct ReportedResult;
 
 //
@@ -51,7 +54,7 @@ private:
 	SString generateRandomPath() const;
 	ReportedResult makeValidRandomPath(SString &path) const;
 
-	const SString mPath;	// the target path
+	const fs::path mPath;	// the target path
 	// the random temporary path. Only valid if mFile non-null
 	SString mRandomPath;
 

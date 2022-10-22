@@ -34,7 +34,7 @@ static const char skSafeAscii[] = "123456789(0)-_=qQwWeErRtTyYuUiIoOpPaAsSdDfFg"
 //
 // Prepare the path now
 //
-SafeOutFile::SafeOutFile(const SString &path) : mPath(path)
+SafeOutFile::SafeOutFile(const SString &path) : mPath(path.get())
 {
 	auto seed = std::chrono::system_clock::now().time_since_epoch().count();
 	mRandom.seed(static_cast<std::mt19937::result_type>(seed));
@@ -85,7 +85,7 @@ ReportedResult SafeOutFile::commit()
 		return { false, "failed on several attempts." };
 
 	// Now we need to close our work. Store the paths of interest in a variable
-	SString finalPath = mPath;
+	std::string finalPath = mPath.u8string();
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
 	bool overwriteOldFile = true;
@@ -140,7 +140,7 @@ ReportedResult SafeOutFile::write(const void *data, size_t size) const
 //
 SString SafeOutFile::generateRandomPath() const
 {
-	return mPath + skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+	return mPath.lexically_normal().u8string() + skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
 		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
 		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
 		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)];
