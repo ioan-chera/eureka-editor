@@ -341,7 +341,7 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 							 global::install_dir.c_str());
 			gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
 
-			bool exists = FileExists(filename);
+			bool exists = FileExists(filename.get());
 
 			if (exists)
 				break;

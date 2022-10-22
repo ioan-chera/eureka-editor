@@ -25,6 +25,9 @@
 #include <functional>
 #include <vector>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 #ifdef WIN32
 #define DIR_SEP_CH   '\\'
 #define DIR_SEP_STR  "\\"
@@ -46,7 +49,7 @@ SString FilenameGetPath(const SString &filename);
 SString GetAbsolutePath(const SString &path);
 
 // file utilities
-bool FileExists(const SString &filename);
+bool FileExists(const fs::path &filename);
 bool FileCopy(const SString &src_name, const SString &dest_name);
 bool FileDelete(const SString &filename);
 bool FileChangeDir(const SString &dir_name);

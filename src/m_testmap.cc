@@ -71,7 +71,7 @@ public:
 		// NULL is ok here
 		exe_display->value(exe_name.c_str());
 
-		if (!exe_name.empty() && FileExists(exe_name))
+		if (!exe_name.empty() && FileExists(exe_name.get()))
 			ok_but->activate();
 		else
 			ok_but->deactivate();

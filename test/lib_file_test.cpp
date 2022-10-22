@@ -167,23 +167,23 @@ TEST(LibFile, GetAbsolutePath)
 TEST_F(LibFileTempDir, FileExists)
 {
 	SString path = getChildPath("hello");
-	ASSERT_FALSE(FileExists(path));
+	ASSERT_FALSE(FileExists(path.get()));
 	std::ofstream os(path.get());
 	ASSERT_TRUE(os.is_open());
 	os.close();
 	mDeleteList.push(path);
-	ASSERT_TRUE(FileExists(path));
+	ASSERT_TRUE(FileExists(path.get()));
 
 	int result = remove(path.c_str());
 	ASSERT_EQ(result, 0);
 	mDeleteList.pop();
 
 	// Deleted, now must be back to false
-	ASSERT_FALSE(FileExists(path));
+	ASSERT_FALSE(FileExists(path.get()));
 
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	ASSERT_FALSE(FileExists(path));
+	ASSERT_FALSE(FileExists(path.get()));
 }
 
 TEST_F(LibFileTempDir, FileCopy)

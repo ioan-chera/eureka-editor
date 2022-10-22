@@ -234,7 +234,7 @@ void Instance::CMD_NewProject()
 	   [ the file chooser should have asked for confirmation ]
 	 */
 
-	if (FileExists(filename))
+	if (FileExists(filename.get()))
 	{
 		// TODO??  M_BackupWad(wad);
 
@@ -1019,7 +1019,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	std::shared_ptr<Wad_file> wad;
 
 	// make sure file exists, as Open() with 'a' would create it otherwise
-	if (FileExists(filename))
+	if (FileExists(filename.get()))
 	{
 		wad = Wad_file::Open(filename, WadOpenMode::append);
 	}
@@ -1671,7 +1671,7 @@ bool Instance::M_ExportMap()
 
 
 	// does the file already exist?  if not, create it...
-	bool exists = FileExists(filename);
+	bool exists = FileExists(filename.get());
 
 	std::shared_ptr<Wad_file> wad;
 

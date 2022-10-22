@@ -419,7 +419,7 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 
 		gLog.debugPrintf("  trying: %s\n", filename.c_str());
 
-		if (FileExists(filename))
+		if (FileExists(filename.get()))
 			return filename;
 	}
 

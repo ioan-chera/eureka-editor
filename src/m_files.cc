@@ -163,7 +163,7 @@ bool M_IsPortPathValid(const port_path_info_t *info)
 	if(info->exe_filename.length() < 2)
 		return false;
 
-	if (! FileExists(info->exe_filename))
+	if (! FileExists(info->exe_filename.get()))
 		return false;
 
 	return true;
