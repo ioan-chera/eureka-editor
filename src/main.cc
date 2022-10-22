@@ -931,7 +931,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 
 		for(const SString &resource : loading.resourceList)
 		{
-			if(MatchExtension(resource, "ugh"))
+			if(MatchExtensionNoCase(resource.get(), "ugh"))
 			{
 				M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
 									  &config, resource);

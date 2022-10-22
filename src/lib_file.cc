@@ -67,16 +67,14 @@ bool HasExtension(const fs::path &filename)
 //
 // When ext is NULL, checks if the file has no extension.
 //
-bool MatchExtension(const SString &filename, const SString &ext)
+bool MatchExtensionNoCase(const fs::path &filename, const char *extension)
 {
-	if (ext.empty())
-		return ! HasExtension(filename.get());
-	if(!HasExtension(filename.get()))	// don't acknowledge extension if set
+	if (!extension || !*extension)
+		return ! HasExtension(filename);
+	if(!HasExtension(filename))
 		return false;
 
-	if(ext[0] == '.')
-		return filename.noCaseEndsWith(ext);
-	return filename.noCaseEndsWith("." + ext);
+	return SString(filename.extension().u8string()).noCaseEqual(extension);
 }
 
 

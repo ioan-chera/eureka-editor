@@ -42,29 +42,31 @@ TEST(LibFile, HasExtension)
 	ASSERT_FALSE(HasExtension("/."));
 	ASSERT_FALSE(HasExtension("."));
 	ASSERT_FALSE(HasExtension(".."));
+	ASSERT_FALSE(HasExtension("abc/.."));
+	ASSERT_FALSE(HasExtension("../.."));
 	ASSERT_FALSE(HasExtension(""));
 }
 
 TEST(LibFile, MatchExtension)
 {
-	ASSERT_TRUE(MatchExtension("man/doc.", nullptr));
-	ASSERT_TRUE(MatchExtension("man/doc.", ""));
-	ASSERT_FALSE(MatchExtension("man/.doc.", "doc"));
-	ASSERT_TRUE(MatchExtension("man/doc. ", " "));
-	ASSERT_TRUE(MatchExtension("man.wad/doom", nullptr));
-	ASSERT_FALSE(MatchExtension("man.wad/doom", "doom"));
-	ASSERT_TRUE(MatchExtension("man.wad/doom.wad", ".WAD"));
-	ASSERT_TRUE(MatchExtension("man.wad/doom..wad", ".WAD"));
-	ASSERT_TRUE(MatchExtension(".okay", ""));
-	ASSERT_FALSE(MatchExtension(".okay", "okay"));
-	ASSERT_TRUE(MatchExtension("man/.okay", ""));
-	ASSERT_FALSE(MatchExtension("man/.okay", "okay"));
-	ASSERT_TRUE(MatchExtension("man/.okay.WAD", "wad"));
-	ASSERT_TRUE(MatchExtension("/.", nullptr));
-	ASSERT_TRUE(MatchExtension(".", nullptr));
-	ASSERT_TRUE(MatchExtension("..", nullptr));
-	ASSERT_FALSE(MatchExtension("..", "."));
-	ASSERT_TRUE(MatchExtension("", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase("man/doc.", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase("man/doc.", ""));
+	ASSERT_FALSE(MatchExtensionNoCase("man/.doc.", ".doc"));
+	ASSERT_TRUE(MatchExtensionNoCase("man/doc. ", ". "));
+	ASSERT_TRUE(MatchExtensionNoCase("man.wad/doom", nullptr));
+	ASSERT_FALSE(MatchExtensionNoCase("man.wad/doom", "doom"));
+	ASSERT_TRUE(MatchExtensionNoCase("man.wad/doom.wad", ".WAD"));
+	ASSERT_TRUE(MatchExtensionNoCase("man.wad/doom..wad", ".WAD"));
+	ASSERT_TRUE(MatchExtensionNoCase(".okay", ""));
+	ASSERT_FALSE(MatchExtensionNoCase(".okay", ".okay"));
+	ASSERT_TRUE(MatchExtensionNoCase("man/.okay", ""));
+	ASSERT_FALSE(MatchExtensionNoCase("man/.okay", ".okay"));
+	ASSERT_TRUE(MatchExtensionNoCase("man/.okay.WAD", ".wad"));
+	ASSERT_TRUE(MatchExtensionNoCase("/.", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase(".", nullptr));
+	ASSERT_TRUE(MatchExtensionNoCase("..", nullptr));
+	ASSERT_FALSE(MatchExtensionNoCase("..", "."));
+	ASSERT_TRUE(MatchExtensionNoCase("", nullptr));
 }
 
 TEST(LibFile, ReplaceExtension)

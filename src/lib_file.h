@@ -40,7 +40,7 @@ class SString;
 
 // filename functions
 bool HasExtension(const fs::path &filename);
-bool MatchExtension(const SString &filename, const SString &ext);
+bool MatchExtensionNoCase(const fs::path &filename, const char *extension);
 SString ReplaceExtension(const SString &filename, const SString &ext);
 SString GetBaseName(const SString &path);
 bool FilenameIsBare(const SString &filename);
