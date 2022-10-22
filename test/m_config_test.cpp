@@ -138,7 +138,7 @@ void MConfig::SetUp()
 	add(configOption("warp", OptType::string, OptFlag_warp | OptFlag_helpNewline,
 					 &config.loadedLevelName));
 	// Path type
-	add(configOption("path", OptType::pathList, 0, &config.paths));
+	add(configOption("path", OptType::pathList, OptFlag_preference, &config.paths));
 }
 
 //
@@ -295,6 +295,29 @@ TEST_F(MConfig, MWriteConfig)
     ASSERT_FALSE(config.udmf_testing); // still false
     ASSERT_TRUE(config.loadedLevelName.empty());
     ASSERT_TRUE(config.Pwad_list.empty());
+}
+
+TEST_F(MConfig, MWriteConfigPathList)
+{
+	config.paths = {"", ".", "/michael/jack son", ".", "..", "here/next", "here/../here", "here"};
+
+	config.config_file = getChildPath("configx.cfg");  // pick any name
+	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
+	mDeleteList.push(config.config_file);
+
+	config.paths.clear();
+
+	// Now read config back
+	ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
+	ASSERT_EQ(config.paths.size(), 8);
+	ASSERT_EQ(config.paths[0], fs::path(""));
+	ASSERT_EQ(config.paths[1], fs::path("."));
+	ASSERT_EQ(config.paths[2], fs::current_path().root_path() / "michael" / "jack son");
+	ASSERT_EQ(config.paths[3], fs::path("."));
+	ASSERT_EQ(config.paths[4], fs::path(".."));
+	ASSERT_EQ(config.paths[5], fs::path("here") / "next");
+	ASSERT_EQ(config.paths[6].lexically_normal(), fs::path("here"));
+	ASSERT_EQ(config.paths[7], fs::path("here"));
 }
 
 TEST_F(MConfig, MParseCommandLine)
@@ -484,7 +507,7 @@ TEST_F(MConfig, MParsePathListCommandLine)
 	std::vector<const char *> argv;
 	argv = { "--path", "", "/michael/jackson", ".", "..", "here/next", "here/../here", "here" };
 	std::vector<SString> &Pwad_list = config.Pwad_list;
-	
+
 	M_ParseCommandLine((int)argv.size(), argv.data(), CommandLinePass::normal, Pwad_list,
 					   options().data());
 
