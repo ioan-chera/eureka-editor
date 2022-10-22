@@ -218,7 +218,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
 
 		// FIXME: check result??
-		info->exe_filename = GetAbsolutePath(dialog->exe_name);
+		info->exe_filename = GetAbsolutePath(dialog->exe_name.get()).u8string();
 
 		M_SaveRecent();
 	}
@@ -277,7 +277,7 @@ static SString CalcWarpString(const Instance &inst)
 
 static void AppendWadName(SString &str, const SString &name, const SString &parm = NULL)
 {
-	SString abs_name = GetAbsolutePath(name);
+	SString abs_name = GetAbsolutePath(name.get()).u8string();
 
 	if (parm.good())
 	{

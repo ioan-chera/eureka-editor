@@ -43,7 +43,7 @@ namespace global
 
 void M_AddKnownIWAD(const SString &path)
 {
-	const SString &absolute_name = GetAbsolutePath(path);
+	const SString &absolute_name = GetAbsolutePath(path.get()).u8string();
 
 	const SString &game = GameNameFromIWAD(path);
 
@@ -540,7 +540,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 void M_AddRecent(const SString &filename, const SString &map_name)
 {
-	const SString &absolute_name = GetAbsolutePath(filename);
+	const SString &absolute_name = GetAbsolutePath(filename.get()).u8string();
 
 	global::recent_files.insert(absolute_name, map_name);
 

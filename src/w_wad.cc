@@ -1128,8 +1128,8 @@ void MasterDir::MasterDir_CloseAll()
 
 static bool W_FilenameAbsEqual(const SString &A, const SString &B)
 {
-	const SString &A_path = GetAbsolutePath(A);
-	const SString &B_path = GetAbsolutePath(B);
+	const SString &A_path = GetAbsolutePath(A.get()).u8string();
+	const SString &B_path = GetAbsolutePath(B.get()).u8string();
 	return A_path.noCaseEqual(B_path);
 }
 

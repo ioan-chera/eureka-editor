@@ -208,20 +208,9 @@ fs::path FilenameGetPath(const fs::path &filename)
 //
 // Safe wrapper around fl_filename_absolute
 //
-SString GetAbsolutePath(const SString &path)
+fs::path GetAbsolutePath(const fs::path &path)
 {
-	size_t sz = 64;
-	std::vector<char> stringBuffer;
-
-	do
-	{
-		sz *= 2;
-		stringBuffer.resize(sz);
-		fl_filename_absolute(stringBuffer.data(), (int)stringBuffer.size(), path.c_str());
-	} while(stringBuffer.back() == '\0' && stringBuffer[stringBuffer.size() - 2] != 0);
-	// repeat until we know it's large enough
-
-	return stringBuffer.data();
+	return fs::absolute(path);
 }
 
 bool FileCopy(const SString &src_name, const SString &dest_name)

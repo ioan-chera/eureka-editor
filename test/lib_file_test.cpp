@@ -149,7 +149,7 @@ TEST(LibFile, GetAbsolutePath)
 	int result = fl_filename_absolute(path, sizeof(path), "Hello");
 	ASSERT_NE(result, 0);	// absolute path stays absolute
 
-	SString stringResult = GetAbsolutePath("Hello");
+	SString stringResult = GetAbsolutePath("Hello").u8string();
 	ASSERT_STREQ(stringResult.c_str(), path);
 }
 

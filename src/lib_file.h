@@ -45,7 +45,7 @@ fs::path ReplaceExtension(const fs::path &filename, const char *extension);
 fs::path GetBaseName(const fs::path &path);
 bool FilenameIsBare(const fs::path &filename);
 fs::path FilenameGetPath(const fs::path &filename);
-SString GetAbsolutePath(const SString &path);
+fs::path GetAbsolutePath(const fs::path &path);
 
 // file utilities
 bool FileExists(const fs::path &filename);
