@@ -764,6 +764,9 @@ const opt_desc_t options[] =
 //
 static void populateList(SString &value, std::vector<SString> &list)
 {
+	if(value == "{}")
+		return;	// {} means empty
+
 	while(value.good())
 	{
 		size_t spacepos = value.findSpace();
@@ -787,6 +790,9 @@ static void populateList(SString &line, std::vector<fs::path> &list)
 {
 	// this one is more involved. We'll follow the MS-DOS prompt rule: quotes are needed for paths
 	// with spaces, and double-quotes become literal quotes.
+
+	if(line == "{}")
+		return;	// {} means empty
 
 	enum class State
 	{

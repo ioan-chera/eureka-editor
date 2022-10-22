@@ -255,6 +255,28 @@ TEST_F(MConfig, ParsePathList)
 	ASSERT_EQ(config.paths[5], fs::path("here"));
 }
 
+TEST_F(MConfig, ParseEmptyList)
+{
+	SString path = getChildPath("config.cfg");
+
+	std::ofstream os(path.get(), std::ios::trunc);
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os.close();
+
+	os.open(path.get());
+	ASSERT_TRUE(os.is_open());
+	// Use a wild combo of spaces, non-spaces and quotes
+	os << "path {}\n";
+	os << "file {}\n";
+	os.close();
+
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+
+	ASSERT_TRUE(config.paths.empty());
+	ASSERT_TRUE(config.Pwad_list.empty());
+}
+
 TEST_F(MConfig, MWriteConfig)
 {
     config.auto_load_recent = true;
