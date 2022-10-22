@@ -1076,7 +1076,7 @@ static void prepareConfigPath()
 		if(global::home_dir.empty())
 			ThrowException("Home directory not set.");
 
-		global::config_file = global::home_dir + "/config";
+		global::config_file = global::home_dir + "/config.cfg";
 	}
 }
 
