@@ -226,7 +226,7 @@ TEST_F(WadFileTest, WriteRead)
 TEST_F(WadFileTest, Validate)
 {
 	// Inexistent path should fail validation
-	ASSERT_FALSE(Wad_file::Validate(getChildPath("None.wad")));
+	ASSERT_FALSE(Wad_file::Validate(getChildPath("None.wad").get()));
 
 	SString path = getChildPath("wad.wad");
 
@@ -237,7 +237,7 @@ TEST_F(WadFileTest, Validate)
 	ASSERT_EQ(fclose(f), 0);
 
 	// Will not work: no WAD signature
-	ASSERT_FALSE(Wad_file::Validate(path));
+	ASSERT_FALSE(Wad_file::Validate(path.get()));
 
 	f = fopen(path.c_str(), "r+b");
 	ASSERT_NE(f, nullptr);
@@ -246,7 +246,7 @@ TEST_F(WadFileTest, Validate)
 	ASSERT_EQ(fclose(f), 0);
 
 	// Will be validated due to the WAD signature
-	ASSERT_TRUE(Wad_file::Validate(path));
+	ASSERT_TRUE(Wad_file::Validate(path.get()));
 
 	// Now have it
 	f = fopen(path.c_str(), "wb");
@@ -255,7 +255,7 @@ TEST_F(WadFileTest, Validate)
 	ASSERT_EQ(fclose(f), 0);
 
 	// Will not be validated due to length
-	ASSERT_FALSE(Wad_file::Validate(path));
+	ASSERT_FALSE(Wad_file::Validate(path.get()));
 }
 
 //

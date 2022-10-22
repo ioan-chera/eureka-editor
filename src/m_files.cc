@@ -108,7 +108,7 @@ void M_ValidateGivenFiles()
 {
 	for (const SString &pwad : global::Pwad_list)
 	{
-		if (! Wad_file::Validate(pwad))
+		if (! Wad_file::Validate(pwad.get()))
 			ThrowException("Given pwad does not exist or is invalid: %s\n",
 						   pwad.c_str());
 	}
@@ -436,7 +436,7 @@ static void ParseMiscConfig(std::istream &is)
 		map.cutWithSpace(pos, &path);
 		if(line == "recent")
 		{
-			if(Wad_file::Validate(path))
+			if(Wad_file::Validate(path.get()))
 				global::recent_files.insert(path, map);
 			else
 				gLog.printf("  no longer exists: %s\n", path.c_str());
@@ -446,7 +446,7 @@ static void ParseMiscConfig(std::istream &is)
 			// ignore plain freedoom.wad (backwards compatibility)
 			if(map.noCaseEqual("freedoom"))
 				gLog.printf("  ignoring for compatibility: %s\n", path.c_str());
-			else if(Wad_file::Validate(path))
+			else if(Wad_file::Validate(path.get()))
 				global::known_iwads[map] = path;
 			else
 				gLog.printf("  no longer exists: %s\n", path.c_str());

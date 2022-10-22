@@ -271,9 +271,9 @@ std::shared_ptr<Wad_file> Wad_file::Create(const SString &filename,
 }
 
 
-bool Wad_file::Validate(const SString &filename)
+bool Wad_file::Validate(const fs::path &filename)
 {
-	FILE *fp = fopen(filename.c_str(), "rb");
+	FILE *fp = fopen(filename.u8string().c_str(), "rb");
 
 	if (! fp)
 		return false;

@@ -32,6 +32,9 @@
 
 #include <memory>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class Wad_file;
 
 //
@@ -194,7 +197,7 @@ public:
 										  = WadOpenMode::append);
 
 	// check the given wad file exists and is a WAD file
-	static bool Validate(const SString &filename);
+	static bool Validate(const fs::path &filename);
 
 	const SString &PathName() const noexcept
 	{

@@ -408,7 +408,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! HasExtension(inst.loaded.iwadName))
 			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
-		if (! Wad_file::Validate(inst.loaded.iwadName))
+		if (! Wad_file::Validate(inst.loaded.iwadName.get()))
 			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.c_str());
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
@@ -938,7 +938,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 				continue;
 			}
 			// Otherwise wad
-			if(!Wad_file::Validate(resource))
+			if(!Wad_file::Validate(resource.get()))
 				throw ParseException("Invalid WAD file: " + resource);
 
 			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
