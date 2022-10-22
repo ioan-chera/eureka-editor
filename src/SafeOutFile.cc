@@ -46,12 +46,14 @@ SafeOutFile::SafeOutFile(const fs::path &path) : mPath(path)
 ReportedResult SafeOutFile::openForWriting()
 {
 	ReportedResult result;
-	if(!(result = makeValidRandomPath(mRandomPath)).success)
+	fs::path randomPath = mRandomPath.get();
+	if(!(result = makeValidRandomPath(randomPath)).success)
 		return result;
+	mRandomPath = randomPath.u8string();
 
-	SString randomPath = mRandomPath;
+	SString randomPathSave = mRandomPath;
 	close();
-	mRandomPath = randomPath;
+	mRandomPath = randomPathSave;
 
 	mFile = fopen(mRandomPath.c_str(), "wb");
 	if(!mFile)
@@ -73,8 +75,10 @@ ReportedResult SafeOutFile::commit()
 	int i = 0;
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
-		if(!(result = makeValidRandomPath(safeRandomPath)).success)
+		fs::path safeRandomPathActual = safeRandomPath.get();
+		if(!(result = makeValidRandomPath(safeRandomPathActual)).success)
 			return result;
+		safeRandomPath = safeRandomPathActual.u8string();
 		if(!safeRandomPath.noCaseEqual(mRandomPath))
 		{
 			// also make sure it doesn't collide with ours
@@ -149,7 +153,7 @@ SString SafeOutFile::generateRandomPath() const
 //
 // Try to make a random path for writing
 //
-ReportedResult SafeOutFile::makeValidRandomPath(SString &path) const
+ReportedResult SafeOutFile::makeValidRandomPath(fs::path &path) const
 {
 	SString randomPath;
 	int i = 0;
@@ -163,6 +167,6 @@ ReportedResult SafeOutFile::makeValidRandomPath(SString &path) const
 	}
 	if(i == RANDOM_PATH_ATTEMPTS)
 		return { false, "failed writing after several attempts." };
-	path = std::move(randomPath);
+	path = randomPath.get();
 	return { true };
 }

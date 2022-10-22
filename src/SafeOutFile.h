@@ -52,7 +52,7 @@ public:
 
 private:
 	SString generateRandomPath() const;
-	ReportedResult makeValidRandomPath(SString &path) const;
+	ReportedResult makeValidRandomPath(fs::path &path) const;
 
 	const fs::path mPath;	// the target path
 	// the random temporary path. Only valid if mFile non-null
