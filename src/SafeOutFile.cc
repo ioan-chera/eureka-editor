@@ -86,11 +86,11 @@ ReportedResult SafeOutFile::commit()
 		return { false, "failed on several attempts." };
 
 	// Now we need to close our work. Store the paths of interest in a variable
-	std::string finalPath = mPath.u8string();
+	fs::path finalPath = mPath;
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
 	bool overwriteOldFile = true;
-	if(rename(finalPath.c_str(), safeRandomPath.c_str()))
+	if(rename(finalPath.u8string().c_str(), safeRandomPath.u8string().c_str()))
 	{
 		if(errno != ENOENT)
 			return { false, GetErrorMessage(errno) };
@@ -103,9 +103,9 @@ ReportedResult SafeOutFile::commit()
 		fclose(mFile);
 		mFile = nullptr;	// we can close it now
 	}
-	if(rename(writtenPath.u8string().c_str(), finalPath.c_str()))
+	if(rename(writtenPath.u8string().c_str(), finalPath.u8string().c_str()))
 		return { false, GetErrorMessage(errno) };
-	if(overwriteOldFile && remove(safeRandomPath.c_str()))
+	if(overwriteOldFile && remove(safeRandomPath.u8string().c_str()))
 		return { false, GetErrorMessage(errno) };
 	close();
 	return { true };
@@ -121,7 +121,7 @@ void SafeOutFile::close()
 	{
 		fclose(mFile);
 		mFile = nullptr;
-		fs::remove(mRandomPath);	// hopefully it works
+		remove(mRandomPath.u8string().c_str());	// hopefully it works
 	}
 	mRandomPath.clear();
 }
