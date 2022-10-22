@@ -24,6 +24,9 @@
 #include "m_strings.h"
 #include "gtest/gtest.h"
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 //
 // Option end
 //
@@ -79,6 +82,8 @@ protected:
 		std::vector<SString> loadedResourceList;
 		int usegamma = 0;
 		bool Quiet = false;
+
+		std::vector<fs::path> paths;
 	};
 
 	void SetUp() override;
@@ -132,7 +137,8 @@ void MConfig::SetUp()
 	add(configOption("version", "v", OptType::boolean, OptFlag_pass1, &config.show_version));
 	add(configOption("warp", OptType::string, OptFlag_warp | OptFlag_helpNewline,
 					 &config.loadedLevelName));
-
+	// Path type
+	add(configOption("path", OptType::pathList, 0, &config.paths));
 }
 
 //
@@ -221,6 +227,31 @@ TEST_F(MConfig, MParseConfigFile)
 	ASSERT_FALSE(config.grid_snap_indicator);
 
 	ASSERT_FALSE(config.leave_offsets_alone);
+}
+
+TEST_F(MConfig, ParsePathList)
+{
+	SString path = getChildPath("config.cfg");
+
+	std::ofstream os(path.get(), std::ios::trunc);
+	ASSERT_TRUE(os.is_open());
+	mDeleteList.push(path);
+	os.close();
+
+	os.open(path.get());
+	ASSERT_TRUE(os.is_open());
+	os << "path /michael/jackson . .. here/next here/../here here\n";
+	os.close();
+
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+
+	ASSERT_EQ(config.paths.size(), 6);
+	ASSERT_EQ(config.paths[0], fs::current_path().root_path() / "michael" / "jackson");
+	ASSERT_EQ(config.paths[1], fs::path("."));
+	ASSERT_EQ(config.paths[2], fs::path(".."));
+	ASSERT_EQ(config.paths[3], fs::path("here") / "next");
+	ASSERT_EQ(config.paths[4].lexically_normal(), fs::path("here"));
+	ASSERT_EQ(config.paths[5], fs::path("here"));
 }
 
 TEST_F(MConfig, MWriteConfig)
