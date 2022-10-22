@@ -479,6 +479,25 @@ TEST_F(MConfig, MParseCommandLine)
 	config.loadedResourceList.clear();
 }
 
+TEST_F(MConfig, MParsePathListCommandLine)
+{
+	std::vector<const char *> argv;
+	argv = { "--path", "", "/michael/jackson", ".", "..", "here/next", "here/../here", "here" };
+	std::vector<SString> &Pwad_list = config.Pwad_list;
+	
+	M_ParseCommandLine((int)argv.size(), argv.data(), CommandLinePass::normal, Pwad_list,
+					   options().data());
+
+	ASSERT_EQ(config.paths.size(), 7);
+	ASSERT_EQ(config.paths[0], fs::path(""));
+	ASSERT_EQ(config.paths[1], fs::current_path().root_path() / "michael" / "jackson");
+	ASSERT_EQ(config.paths[2], fs::path("."));
+	ASSERT_EQ(config.paths[3], fs::path(".."));
+	ASSERT_EQ(config.paths[4], fs::path("here") / "next");
+	ASSERT_EQ(config.paths[5].lexically_normal(), fs::path("here"));
+	ASSERT_EQ(config.paths[6], fs::path("here"));
+}
+
 // M_PrintCommandLineOptions is tested in system testing
 
 static std::unordered_map<SString, std::vector<SString>> sUnitTokens;
