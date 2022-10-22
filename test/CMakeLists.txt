@@ -273,7 +273,6 @@ unit_test(independent
         m_parse.cc
         m_select.cc
         m_streams.cc
-        SafeOutFile.cc
 )
 
 find_package(Python3)
