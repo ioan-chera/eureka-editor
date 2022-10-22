@@ -34,7 +34,7 @@ static const char skSafeAscii[] = "123456789(0)-_=qQwWeErRtTyYuUiIoOpPaAsSdDfFg"
 //
 // Prepare the path now
 //
-SafeOutFile::SafeOutFile(const SString &path) : mPath(path.get())
+SafeOutFile::SafeOutFile(const fs::path &path) : mPath(path)
 {
 	auto seed = std::chrono::system_clock::now().time_since_epoch().count();
 	mRandom.seed(static_cast<std::mt19937::result_type>(seed));

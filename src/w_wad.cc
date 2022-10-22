@@ -935,7 +935,7 @@ void Wad_file::writeToPath(const SString &path) const noexcept(false)
 			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.c_str(), result.message.c_str()));
 	};
 
-	SafeOutFile sof(path);
+	SafeOutFile sof(path.get());
 	check(sof.openForWriting());
 	// Write the header
 	if(kind == WadKind::PWAD)

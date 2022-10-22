@@ -38,7 +38,7 @@ struct ReportedResult;
 class SafeOutFile
 {
 public:
-	explicit SafeOutFile(const SString &path);
+	explicit SafeOutFile(const fs::path &path);
 	~SafeOutFile()
 	{
 		close();
