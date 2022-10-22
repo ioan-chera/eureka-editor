@@ -777,7 +777,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	// add an extension if missing
 	SString filename = chooser.filename();
 
-	if(!HasExtension(filename))
+	if(!HasExtension(filename.get()))
 		filename += ".txt";
 
 	// TODO: #55

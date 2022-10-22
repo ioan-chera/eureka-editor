@@ -39,7 +39,7 @@ namespace fs = ghc::filesystem;
 class SString;
 
 // filename functions
-bool HasExtension(const SString &filename);
+bool HasExtension(const fs::path &filename);
 bool MatchExtension(const SString &filename, const SString &ext);
 SString ReplaceExtension(const SString &filename, const SString &ext);
 SString GetBaseName(const SString &path);

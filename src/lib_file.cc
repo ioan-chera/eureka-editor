@@ -56,49 +56,10 @@ bool FileExists(const fs::path &filename)
 }
 
 
-bool HasExtension(const SString &filename)
+bool HasExtension(const fs::path &filename)
 {
-	int A = (int)filename.length() - 1;
-
-	if (A > 0 && filename[A] == '.')
-		return false;
-
-	if(filename == ".")	// must also cover this special case
-		return false;
-
-	bool foundPotentialExtension = false;
-
-	for (; A >= 0 ; A--)
-	{
-		if (filename[A] == '.')
-		{
-			if(foundPotentialExtension)	// this would be the next pass
-				return true;
-			foundPotentialExtension = true;
-			continue;
-		}
-
-		if (filename[A] == '/')
-		{
-			if(foundPotentialExtension)	// immediately before point
-				return false;
-			break;
-		}
-
-#ifdef WIN32
-		if (filename[A] == '\\' || filename[A] == ':')
-		{
-			if(foundPotentialExtension)
-				return false;
-			break;
-		}
-#endif
-		// Neither dot, / or \ (Windows)
-		if(foundPotentialExtension)
-			return true;
-	}
-
-	return false;
+	fs::path extension = filename.extension();
+	return extension != "." && !extension.empty();
 }
 
 //
@@ -109,8 +70,8 @@ bool HasExtension(const SString &filename)
 bool MatchExtension(const SString &filename, const SString &ext)
 {
 	if (ext.empty())
-		return ! HasExtension(filename);
-	if(!HasExtension(filename))	// don't acknowledge extension if set
+		return ! HasExtension(filename.get());
+	if(!HasExtension(filename.get()))	// don't acknowledge extension if set
 		return false;
 
 	if(ext[0] == '.')
@@ -133,7 +94,7 @@ SString ReplaceExtension(const SString &filename, const SString &ext)
 		actualExt = ext;
 	else
 		actualExt = "." + ext;
-	if(!HasExtension(filename))
+	if(!HasExtension(filename.get()))
 	{
 		if(ext.good())
 			return filename + actualExt;
