@@ -139,12 +139,13 @@ ReportedResult SafeOutFile::write(const void *data, size_t size) const
 //
 // Generate the random path
 //
-SString SafeOutFile::generateRandomPath() const
+fs::path SafeOutFile::generateRandomPath() const
 {
-	return mPath.lexically_normal().u8string() + skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)];
+	return mPath.parent_path() / (mPath.filename().u8string() +
+								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)]);
 }
 
 //
@@ -152,18 +153,18 @@ SString SafeOutFile::generateRandomPath() const
 //
 ReportedResult SafeOutFile::makeValidRandomPath(fs::path &path) const
 {
-	SString randomPath;
+	fs::path randomPath;
 	int i = 0;
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
 		randomPath = generateRandomPath();
-		FILE *checkExisting = fopen(randomPath.c_str(), "rb");
+		FILE *checkExisting = fopen(randomPath.u8string().c_str(), "rb");
 		if(!checkExisting)
 			break;
 		fclose(checkExisting);
 	}
 	if(i == RANDOM_PATH_ATTEMPTS)
 		return { false, "failed writing after several attempts." };
-	path = randomPath.get();
+	path = std::move(randomPath);
 	return { true };
 }

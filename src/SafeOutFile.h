@@ -51,7 +51,7 @@ public:
 	ReportedResult write(const void *data, size_t size) const;
 
 private:
-	SString generateRandomPath() const;
+	fs::path generateRandomPath() const;
 	ReportedResult makeValidRandomPath(fs::path &path) const;
 
 	const fs::path mPath;	// the target path
