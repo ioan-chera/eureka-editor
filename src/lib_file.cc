@@ -213,26 +213,6 @@ static void FilenameStripBase(SString &path)
 #endif
 }
 
-
-//
-// takes the basename in 'filename' and prepends the path from 'othername'.
-// returns a newly allocated string.
-//
-SString FilenameReposition(const SString &cfilename, const SString &othername)
-{
-	SString filename = GetBaseName(cfilename.get()).u8string();
-
-	size_t otherBaseNameLoc = FindBaseName(othername);
-
-	if (otherBaseNameLoc == 0 || otherBaseNameLoc == SString::npos)
-		return filename;
-
-	SString result = othername;
-	result.erase(otherBaseNameLoc, SString::npos);
-	result += filename;
-	return result;
-}
-
 //
 // Get path
 //

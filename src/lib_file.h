@@ -44,7 +44,6 @@ bool MatchExtensionNoCase(const fs::path &filename, const char *extension);
 fs::path ReplaceExtension(const fs::path &filename, const char *extension);
 fs::path GetBaseName(const fs::path &path);
 bool FilenameIsBare(const fs::path &filename);
-SString FilenameReposition(const SString &filename, const SString &othername);
 SString FilenameGetPath(const SString &filename);
 SString GetAbsolutePath(const SString &path);
 
