@@ -273,28 +273,27 @@ std::shared_ptr<Wad_file> Wad_file::Create(const SString &filename,
 
 bool Wad_file::Validate(const fs::path &filename)
 {
-	FILE *fp = fopen(filename.u8string().c_str(), "rb");
+	std::ifstream stream(filename, std::ios::binary);
 
-	if (! fp)
+	if (! stream.is_open())
 		return false;
 
 	raw_wad_header_t header;
 
-	if (fread(&header, sizeof(header), 1, fp) != 1)
+	if(!stream.read(reinterpret_cast<char *>(&header), sizeof(header)) ||
+	   stream.gcount() != sizeof(header))
 	{
-		fclose(fp);
 		return false;
 	}
+
+	stream.close();
 
 	if (! ( header.ident[1] == 'W' &&
 			header.ident[2] == 'A' &&
 			header.ident[3] == 'D'))
 	{
-		fclose(fp);
 		return false;
 	}
-
-	fclose(fp);
 
 	return true;  // OK
 }
