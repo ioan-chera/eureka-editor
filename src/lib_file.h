@@ -53,7 +53,7 @@ bool FileDelete(const fs::path &filename);
 bool FileChangeDir(const fs::path &dir_name);
 bool FileMakeDir(const fs::path &dir_name);
 
-bool FileLoad(const SString &filename, std::vector<uint8_t> &data);
+bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data);
 
 // miscellaneous
 SString GetExecutablePath(const char *argv0);

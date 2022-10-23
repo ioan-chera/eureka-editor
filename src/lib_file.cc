@@ -254,44 +254,39 @@ bool FileMakeDir(const fs::path &dir_name)
 	}
 }
 
-bool FileLoad(const SString &filename, std::vector<u8_t> &data)
+bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data)
 {
-	struct stat filestat = {};
-	int n = stat(filename.c_str(), &filestat);
-	if(n == -1)
-		return false;
-	if(filestat.st_mode & S_IFDIR || !(filestat.st_mode & S_IFREG))
-		return false;	// reject directories and unusual files
-
-	FILE *fp = fopen(filename.c_str(), "rb");
-
-	if(!fp)
-		return false;
-
-	long length;
-
-	// determine size of file (via seeking)
-	fseek(fp, 0, SEEK_END);
-	length = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	if(ferror(fp) || length < 0)
+	try
 	{
-		fclose(fp);
+		// Don't try to read unusual files
+		if(!fs::is_regular_file(filename))
+			return false;
+
+		uintmax_t size = fs::file_size(filename);
+
+		std::ifstream stream(filename, std::ios::binary);
+		if(!stream.is_open())
+			return false;
+
+		std::vector<uint8_t> trydata;
+		trydata.resize(size);
+
+		size_t pos = 0;
+
+		while(!stream.eof() && pos < size)
+		{
+			if(!stream.read(reinterpret_cast<char *>(trydata.data() + pos), size - pos))
+				return false;
+			pos += stream.gcount();
+		}
+
+		data = std::move(trydata);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error loading file %s: %s\n", filename.u8string().c_str(), e.what());
 		return false;
 	}
-
-	data.resize(length);
-
-	if(length > 0 && 1 != fread(data.data(), length, 1, fp))
-	{
-		data.clear();
-		fclose(fp);
-		return false;
-	}
-
-	fclose(fp);
-
 	return true;
 }
 

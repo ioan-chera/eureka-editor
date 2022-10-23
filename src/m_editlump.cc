@@ -527,7 +527,7 @@ void Instance::CMD_AddBehaviorLump()
 	SString filename = chooser.filename();
 
 	std::vector<u8_t> data;
-	bool success = FileLoad(filename, data);
+	bool success = FileLoad(filename.get(), data);
 
 	if (! success)
 	{

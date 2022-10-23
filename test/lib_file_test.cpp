@@ -221,14 +221,14 @@ TEST_F(LibFileTempDir, FileLoad)
 	os.close();
 
 	std::vector<uint8_t> result;
-	ASSERT_TRUE(FileLoad(path, result));
+	ASSERT_TRUE(FileLoad(path.get(), result));
 	ASSERT_EQ(result.size(), 40000);
 	ASSERT_EQ(memcmp(result.data(), randomData.data(), result.size()), 0);
 
 	// Mustn't read dirs
-	ASSERT_FALSE(FileLoad(mTempDir, result));
+	ASSERT_FALSE(FileLoad(mTempDir.get(), result));
 	// Mustn't read inexistent files
-	ASSERT_FALSE(FileLoad(getChildPath("file2"), result));
+	ASSERT_FALSE(FileLoad(getChildPath("file2").get(), result));
 #ifndef _WIN32
 	// Mustn't read special files
 	ASSERT_FALSE(FileLoad("/dev/null", result));
