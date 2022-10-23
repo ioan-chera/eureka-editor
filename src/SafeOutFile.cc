@@ -91,10 +91,15 @@ ReportedResult SafeOutFile::commit()
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
 	bool overwriteOldFile = true;
-	if(rename(finalPath.u8string().c_str(), safeRandomPath.u8string().c_str()))
+
+	try
 	{
-		if(errno != ENOENT)
-			return { false, GetErrorMessage(errno) };
+		fs::rename(finalPath, safeRandomPath);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		if(fs::exists(finalPath))
+			return { false, e.what() };
 		overwriteOldFile = false;
 	}
 
