@@ -71,7 +71,7 @@ protected:
         }
         global::home_dir = mTempDir;
         global::install_dir = getChildPath("install");
-        ASSERT_TRUE(FileMakeDir(global::install_dir));
+        ASSERT_TRUE(FileMakeDir(global::install_dir.get()));
         mDeleteList.push(global::install_dir);
 
         writeBindingsFile();

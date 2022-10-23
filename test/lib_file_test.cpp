@@ -170,7 +170,7 @@ TEST_F(LibFileTempDir, FileExists)
 	// Deleted, now must be back to false
 	ASSERT_FALSE(FileExists(path.get()));
 
-	ASSERT_TRUE(FileMakeDir(path));
+	ASSERT_TRUE(FileMakeDir(path.get()));
 	mDeleteList.push(path);
 	ASSERT_FALSE(FileExists(path.get()));
 }
@@ -196,12 +196,12 @@ TEST_F(LibFileTempDir, FileDelete)
 TEST_F(LibFileTempDir, FileMakeDir)
 {
 	SString path = getChildPath("dir");
-	ASSERT_TRUE(FileMakeDir(path));
+	ASSERT_TRUE(FileMakeDir(path.get()));
 	mDeleteList.push(path);
 	// Disallow overwriting
-	ASSERT_FALSE(FileMakeDir(path));
+	ASSERT_FALSE(FileMakeDir(path.get()));
 	// Disallow inexistent intermediary paths
-	ASSERT_FALSE(FileMakeDir(getChildPath("dir2/dir3")));
+	ASSERT_FALSE(FileMakeDir(getChildPath("dir2/dir3").get()));
 
 }
 
@@ -256,10 +256,10 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	os.close();
 
 	path = getChildPath("dir");
-	ASSERT_TRUE(FileMakeDir(path));
+	ASSERT_TRUE(FileMakeDir(path.get()));
 	mDeleteList.push(path);
 	path = getChildPath(".dir");
-	ASSERT_TRUE(FileMakeDir(path));
+	ASSERT_TRUE(FileMakeDir(path.get()));
 	mDeleteList.push(path);
 
 	SString dotDirPath = path;

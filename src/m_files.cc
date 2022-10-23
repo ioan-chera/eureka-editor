@@ -1124,7 +1124,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// create the directory if it doesn't already exist
 	// (this will fail if it DOES already exist, but that's OK)
-	FileMakeDir(dir_name);
+	FileMakeDir(dir_name.get());
 
 	// scan directory to determine lowest and highest numbers in use
 	backup_scan_data_t  scan_data;

@@ -241,15 +241,17 @@ bool FileChangeDir(const fs::path &dir_name)
 }
 
 
-bool FileMakeDir(const SString &dir_name)
+bool FileMakeDir(const fs::path &dir_name)
 {
-#ifdef WIN32
-	return (::CreateDirectory(dir_name.c_str(), NULL) != 0);
-
-#else // UNIX or MACOSX
-
-	return (mkdir(dir_name.c_str(), 0775) == 0);
-#endif
+	try
+	{
+		return fs::create_directory(dir_name);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error creating directory %s: %s", dir_name.u8string().c_str(), e.what());
+		return false;
+	}
 }
 
 bool FileLoad(const SString &filename, std::vector<u8_t> &data)
