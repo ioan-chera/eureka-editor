@@ -106,12 +106,19 @@ ReportedResult SafeOutFile::commit()
 	fs::path writtenPath = mRandomPath;
 	if(mStream.is_open())
 		mStream.close();
-	if(rename(writtenPath.u8string().c_str(), finalPath.u8string().c_str()))
-		return { false, GetErrorMessage(errno) };
-	if(overwriteOldFile && remove(safeRandomPath.u8string().c_str()))
-		return { false, GetErrorMessage(errno) };
-	close();
-	return { true };
+
+	try
+	{
+		fs::rename(writtenPath, finalPath);
+		if(overwriteOldFile)
+			fs::remove(safeRandomPath);
+		close();
+		return { true };
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		return { false, e.what() };
+	}
 }
 
 //
