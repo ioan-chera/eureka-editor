@@ -213,41 +213,6 @@ fs::path GetAbsolutePath(const fs::path &path)
 	return fs::absolute(path);
 }
 
-bool FileCopy(const SString &src_name, const SString &dest_name)
-{
-	char buffer[1024];
-
-	FILE *src = fopen(src_name.c_str(), "rb");
-	if (! src)
-		return false;
-
-	FILE *dest = fopen(dest_name.c_str(), "wb");
-	if (! dest)
-	{
-		fclose(src);
-		return false;
-	}
-
-	while (true)
-	{
-		size_t rlen = fread(buffer, 1, sizeof(buffer), src);
-		if (rlen == 0)
-			break;
-
-		size_t wlen = fwrite(buffer, 1, rlen, dest);
-		if (wlen != rlen)
-			break;
-	}
-
-	bool was_OK = !ferror(src) && !ferror(dest);
-
-	fclose(dest);
-	fclose(src);
-
-	return was_OK;
-}
-
-
 bool FileDelete(const SString &filename)
 {
 #ifdef WIN32

@@ -175,59 +175,6 @@ TEST_F(LibFileTempDir, FileExists)
 	ASSERT_FALSE(FileExists(path.get()));
 }
 
-TEST_F(LibFileTempDir, FileCopy)
-{
-	SString path = getChildPath("file1");
-
-	std::ofstream os(path.get());
-	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path);
-	os << "HelloWorld!";
-	os.close();
-
-	SString path2 = getChildPath("file2");
-	bool result = FileCopy(path, path2);
-	ASSERT_TRUE(result);
-	mDeleteList.push(path2);
-
-	std::ifstream is(path2.get());
-	ASSERT_TRUE(is.is_open());
-	std::string str;
-	is >> str;
-	ASSERT_TRUE(is.eof());
-	is.close();
-
-	ASSERT_EQ(str, "HelloWorld!");
-
-	// Now attempt other impossible operations
-	// Inexisting source
-	result = FileCopy(getChildPath("file3"), path2);
-	ASSERT_FALSE(result);
-	// Bad kind of destination
-	result = FileCopy(path, mTempDir);
-	ASSERT_FALSE(result);
-	// Inexistent folder
-	result = FileCopy(path, getChildPath("subpath/file"));
-	ASSERT_FALSE(result);
-
-	// Now test overwriting
-	std::ofstream os2(path.get(), std::ios::trunc);
-	ASSERT_TRUE(os2.is_open());
-	os2 << "SecondSight";
-	os2.close();
-
-	result = FileCopy(path, path2);
-	ASSERT_TRUE(result);
-
-	std::ifstream is2(path2.get());
-	ASSERT_TRUE(is2.is_open());
-	str.clear();
-	is2 >> str;
-	ASSERT_TRUE(is2.eof());
-	ASSERT_EQ(str, "SecondSight");
-	is2.close();
-}
-
 TEST_F(LibFileTempDir, FileDelete)
 {
 	SString path = getChildPath("file");

@@ -49,7 +49,6 @@ fs::path GetAbsolutePath(const fs::path &path);
 
 // file utilities
 bool FileExists(const fs::path &filename);
-bool FileCopy(const SString &src_name, const SString &dest_name);
 bool FileDelete(const SString &filename);
 bool FileChangeDir(const SString &dir_name);
 bool FileMakeDir(const SString &dir_name);
