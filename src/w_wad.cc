@@ -801,7 +801,7 @@ void Wad_file::writeToDisk() noexcept(false)
 	}
 
 	// Write to our path now
-	writeToPath(filename);
+	writeToPath(filename.get());
 
 	// reset the insertion point
 	insert_point = -1;
@@ -926,15 +926,15 @@ void Wad_file::FixLevelGroup(int index, int num_added, int num_removed)
 //
 // Writes to the given path
 //
-void Wad_file::writeToPath(const SString &path) const noexcept(false)
+void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 {
 	auto check = [&path](const ReportedResult &result)
 	{
 		if(!result.success)
-			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.c_str(), result.message.c_str()));
+			throw WadWriteException(SString::printf("Failed writing WAD to file '%s': %s", path.u8string().c_str(), result.message.c_str()));
 	};
 
-	SafeOutFile sof(path.get());
+	SafeOutFile sof(path);
 	check(sof.openForWriting());
 	// Write the header
 	if(kind == WadKind::PWAD)
