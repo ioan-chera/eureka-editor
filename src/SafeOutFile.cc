@@ -20,6 +20,7 @@
 #include "lib_util.h"
 #include "Errors.h"
 #include "SafeOutFile.h"
+#include "sys_debug.h"
 
 #include <chrono>
 
@@ -54,9 +55,9 @@ ReportedResult SafeOutFile::openForWriting()
 	close();
 	mRandomPath = randomPath;
 
-	mFile = fopen(mRandomPath.u8string().c_str(), "wb");
-	if(!mFile)
-		return { false, GetErrorMessage(errno) };
+	mStream.open(mRandomPath, std::ios::binary | std::ios::trunc);
+	if(!mStream.is_open())
+		return { false, "couldn't open the file." };
 
 	return { true };
 }
@@ -67,7 +68,7 @@ ReportedResult SafeOutFile::openForWriting()
 ReportedResult SafeOutFile::commit()
 {
 	ReportedResult result;
-	if(!mFile)
+	if(!mStream.is_open())
 		return { false, "couldn't create the file." };
 	// First, to be ultra-safe, make another temp path
 	fs::path safeRandomPath;
@@ -98,11 +99,8 @@ ReportedResult SafeOutFile::commit()
 	}
 
 	fs::path writtenPath = mRandomPath;
-	if(mFile)
-	{
-		fclose(mFile);
-		mFile = nullptr;	// we can close it now
-	}
+	if(mStream.is_open())
+		mStream.close();
 	if(rename(writtenPath.u8string().c_str(), finalPath.u8string().c_str()))
 		return { false, GetErrorMessage(errno) };
 	if(overwriteOldFile && remove(safeRandomPath.u8string().c_str()))
@@ -117,11 +115,17 @@ ReportedResult SafeOutFile::commit()
 //
 void SafeOutFile::close()
 {
-	if(mFile)
+	if(mStream.is_open())
 	{
-		fclose(mFile);
-		mFile = nullptr;
-		remove(mRandomPath.u8string().c_str());	// hopefully it works
+		mStream.close();
+		try
+		{
+			fs::remove(mRandomPath);
+		}
+		catch(const fs::filesystem_error &e)
+		{
+			gLog.printf("Error removing %s: %s\n", mRandomPath.u8string().c_str(), e.what());
+		}
 	}
 	mRandomPath.clear();
 }
@@ -129,11 +133,13 @@ void SafeOutFile::close()
 //
 // Writes data to file
 //
-ReportedResult SafeOutFile::write(const void *data, size_t size) const
+ReportedResult SafeOutFile::write(const void *data, size_t size)
 {
-	if(!mFile)
+	if(!mStream.is_open())
 		return { false, "file wasn't created." };
-	return { fwrite(data, 1, size, mFile) == size, "failed writing the entire data." };
+	if(!mStream.write(static_cast<const char *>(data), size))
+		return { false, "failed writing the entire data." };
+	return { true };
 }
 
 //

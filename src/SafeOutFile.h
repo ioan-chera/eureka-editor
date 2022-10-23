@@ -48,7 +48,7 @@ public:
 	ReportedResult commit();
 	void close();
 
-	ReportedResult write(const void *data, size_t size) const;
+	ReportedResult write(const void *data, size_t size);
 
 private:
 	fs::path generateRandomPath() const;
@@ -58,7 +58,7 @@ private:
 	// the random temporary path. Only valid if mFile non-null
 	fs::path mRandomPath;
 
-	FILE *mFile = nullptr;
+	std::ofstream mStream;
 	mutable std::mt19937 mRandom;
 };
 
