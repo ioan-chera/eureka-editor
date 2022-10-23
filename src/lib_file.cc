@@ -50,7 +50,7 @@ bool FileExists(const fs::path &filename)
 	catch(const fs::filesystem_error &e)
 	{
 		// Let's print any errors before we throw anything
-		gLog.printf("File check error: %s", e.what());
+		gLog.printf("File check error: %s\n", e.what());
 		return false;
 	}
 }
@@ -234,7 +234,7 @@ bool FileChangeDir(const fs::path &dir_name)
 	}
 	catch(const fs::filesystem_error &e)
 	{
-		gLog.printf("Error changing directory to %s: %s", dir_name.u8string().c_str(), e.what());
+		gLog.printf("Error changing directory to %s: %s\n", dir_name.u8string().c_str(), e.what());
 		return false;
 	}
 	return true;
@@ -249,7 +249,7 @@ bool FileMakeDir(const fs::path &dir_name)
 	}
 	catch(const fs::filesystem_error &e)
 	{
-		gLog.printf("Error creating directory %s: %s", dir_name.u8string().c_str(), e.what());
+		gLog.printf("Error creating directory %s: %s\n", dir_name.u8string().c_str(), e.what());
 		return false;
 	}
 }

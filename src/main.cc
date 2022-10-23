@@ -169,7 +169,7 @@ void FatalError(EUR_FORMAT_STRING(const char *fmt), ...)
 
 	if (init_progress >= ProgressStatus::early)
 	{
-		gLog.printf("\nFATAL ERROR: %s", buffer.c_str());
+		gLog.printf("\nFATAL ERROR: %s\n", buffer.c_str());
 	}
 
 	if (init_progress >= ProgressStatus::loaded)
