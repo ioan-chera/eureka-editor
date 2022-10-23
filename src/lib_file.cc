@@ -226,16 +226,18 @@ bool FileDelete(const fs::path &filename)
 }
 
 
-bool FileChangeDir(const SString &dir_name)
+bool FileChangeDir(const fs::path &dir_name)
 {
-#ifdef WIN32
-	// TODO: set wide character here
-	return (::SetCurrentDirectory(dir_name.c_str()) != 0);
-
-#else // UNIX or MACOSX
-
-	return (chdir(dir_name.c_str()) == 0);
-#endif
+	try
+	{
+		fs::current_path(dir_name);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		gLog.printf("Error changing directory to %s: %s", dir_name.u8string().c_str(), e.what());
+		return false;
+	}
+	return true;
 }
 
 

@@ -381,7 +381,7 @@ void Instance::CMD_TestMap()
 
 	gLog.printf("Changing current dir to: %s\n", folder.c_str());
 
-	if (! FileChangeDir(folder))
+	if (! FileChangeDir(folder.get()))
 	{
 		// FIXME : a notify dialog
 		Beep("chdir failed!");

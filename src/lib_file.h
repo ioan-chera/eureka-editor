@@ -50,7 +50,7 @@ fs::path GetAbsolutePath(const fs::path &path);
 // file utilities
 bool FileExists(const fs::path &filename);
 bool FileDelete(const fs::path &filename);
-bool FileChangeDir(const SString &dir_name);
+bool FileChangeDir(const fs::path &dir_name);
 bool FileMakeDir(const SString &dir_name);
 
 bool FileLoad(const SString &filename, std::vector<uint8_t> &data);
