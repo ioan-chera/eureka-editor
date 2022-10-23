@@ -238,7 +238,7 @@ void Instance::CMD_NewProject()
 	{
 		// TODO??  M_BackupWad(wad);
 
-		if (! FileDelete(filename))
+		if (! FileDelete(filename.get()))
 		{
 			DLG_Notify("Unable to delete the existing file.");
 

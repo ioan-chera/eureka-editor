@@ -213,11 +213,11 @@ fs::path GetAbsolutePath(const fs::path &path)
 	return fs::absolute(path);
 }
 
-bool FileDelete(const SString &filename)
+bool FileDelete(const fs::path &filename)
 {
 #ifdef WIN32
 	// TODO: set wide character here
-	return (::DeleteFile(filename.c_str()) != 0);
+	return (::DeleteFileW(filename.c_str()) != 0);
 
 #else // UNIX or MACOSX
 

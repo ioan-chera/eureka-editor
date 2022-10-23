@@ -49,7 +49,7 @@ fs::path GetAbsolutePath(const fs::path &path);
 
 // file utilities
 bool FileExists(const fs::path &filename);
-bool FileDelete(const SString &filename);
+bool FileDelete(const fs::path &filename);
 bool FileChangeDir(const SString &dir_name);
 bool FileMakeDir(const SString &dir_name);
 

@@ -1104,7 +1104,7 @@ static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad
 
 	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
-		FileDelete(Backup_Name(dir_name, b_low));
+		FileDelete(Backup_Name(dir_name, b_low).get());
 	}
 }
 
