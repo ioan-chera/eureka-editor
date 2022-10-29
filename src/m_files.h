@@ -45,8 +45,8 @@ public:
 	SString map;
 
 public:
-	recent_file_data_c(const SString &_file, const SString &_map) :
-		file(fs::u8path(_file.get())), map(_map)
+	recent_file_data_c(const fs::path &_file, const SString &_map) :
+		file(_file), map(_map)
 	{ }
 
 	recent_file_data_c(const recent_file_data_c &other) = default;

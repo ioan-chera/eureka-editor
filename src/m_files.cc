@@ -259,7 +259,7 @@ void RecentFiles_c::push_front(const SString &file, const SString &map)
 	{
 		list.pop_back();
 	}
-	list.emplace_front(file, map);
+	list.emplace_front(fs::u8path(file.get()), map);
 }
 
 void RecentFiles_c::insert(const SString &file, const SString &map)
