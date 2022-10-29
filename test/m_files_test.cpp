@@ -596,6 +596,13 @@ TEST(RecentFiles, InsertAndLookup)
 	SString text = files.Format(1);
 	ASSERT_EQ(text, "  &2:  Jack.wad");
 
+	// Get one data
+	recent_file_data_c *vdata = files.getData(1);
+	ASSERT_TRUE(vdata);
+	ASSERT_EQ(vdata->file, "Other/Jack.wad");
+	ASSERT_EQ(vdata->map, "H5M6");
+	delete vdata;
+
 	// Test clearing it
 	files.clear();
 	ASSERT_EQ(files.getSize(), 0);
