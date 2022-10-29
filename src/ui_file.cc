@@ -1164,7 +1164,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	// check that a game definition exists
 
-	SString game = GameNameFromIWAD(chooser.filename());
+	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
 
 	if (! M_CanLoadDefinitions(GAMES_DIR, game))
 	{

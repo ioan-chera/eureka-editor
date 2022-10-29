@@ -45,7 +45,7 @@ void M_AddKnownIWAD(const SString &path)
 {
 	const SString &absolute_name = GetAbsolutePath(path.get()).u8string();
 
-	const SString &game = GameNameFromIWAD(path);
+	const SString &game = GameNameFromIWAD(fs::u8path(path.get()));
 
 	global::known_iwads[game] = absolute_name;
 }

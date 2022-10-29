@@ -365,17 +365,9 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 }
 
 
-SString GameNameFromIWAD(const SString &iwad_name)
+SString GameNameFromIWAD(const fs::path &iwad_name)
 {
-	char game_name[FL_PATH_MAX];
-	StringCopy(game_name, sizeof(game_name),
-			   fl_filename_name(iwad_name.c_str()));
-
-	fl_filename_setext(game_name, "");
-
-	y_strlowr(game_name);
-
-	return game_name;
+	return SString(iwad_name.stem().u8string()).asLower();
 }
 
 
@@ -411,7 +403,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! Wad_file::Validate(inst.loaded.iwadName.get()))
 			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.c_str());
 
-		SString game = GameNameFromIWAD(inst.loaded.iwadName);
+		SString game = GameNameFromIWAD(fs::u8path(inst.loaded.iwadName.get()));
 
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
@@ -432,7 +424,7 @@ static bool DetermineIWAD(Instance &inst)
 		}
 	}
 
-	inst.loaded.gameName = GameNameFromIWAD(inst.loaded.iwadName);
+	inst.loaded.gameName = GameNameFromIWAD(fs::u8path(inst.loaded.iwadName.get()));
 
 	return true;
 }
@@ -848,7 +840,7 @@ bool Instance::Main_LoadIWAD()
 static void readGameInfo(LoadingData &loading, ConfigData &config)
 		noexcept(false)
 {
-	loading.gameName = GameNameFromIWAD(loading.iwadName);
+	loading.gameName = GameNameFromIWAD(fs::u8path(loading.iwadName.get()));
 
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
 	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());

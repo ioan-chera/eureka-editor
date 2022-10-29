@@ -164,7 +164,7 @@ extern std::function<void(const char *msg, va_list ap)> DLG_Notify_Override;
 extern std::function<int(const std::vector<SString> &buttons, const char *msg,
 						 va_list ap)> DLG_Confirm_Override;
 
-SString GameNameFromIWAD(const SString &iwad_name);
+SString GameNameFromIWAD(const fs::path &iwad_name);
 
 #endif  /* __EUREKA_MAIN_H__ */
 

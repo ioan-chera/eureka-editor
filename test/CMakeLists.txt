@@ -114,6 +114,7 @@ unit_test(general
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
+    main_test.cpp
 	SafeOutFileTest.cpp
     SStringTest.cpp
     stub/osxcalls_stub.cpp
