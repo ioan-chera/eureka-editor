@@ -281,7 +281,7 @@ void RecentFiles_c::WriteFile(FILE *fp) const
 
 	for(auto it = list.rbegin(); it != list.rend(); ++it)
 	{
-		fprintf(fp, "recent %s %s\n", it->map.c_str(), it->file.generic_u8string().c_str());
+		fprintf(fp, "recent %s %s\n", SString(it->map).spaceEscape().c_str(), SString(it->file.generic_u8string()).spaceEscape().c_str());
 	}
 }
 
@@ -340,6 +340,7 @@ static void ParseMiscConfig(std::istream &is)
 		map.cutWithSpace(pos, &path);
 		if(line == "recent")
 		{
+			// TODO: parse this correctly
 			if(Wad_file::Validate(path.get()))
 				global::recent_files.insert(path, map);
 			else

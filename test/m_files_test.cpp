@@ -651,9 +651,9 @@ TEST_F(RecentFilesOutput, WriteFile)
 	RecentFiles_c files;
 	files.insert("Wad1.wad", "MAP01");
 	files.insert("Sub/Doo.wad", "E3M6");
-	files.insert("SomeOther.wad", "E4M4");
+	files.insert("SomeOther.wad", "E4 M4");
 	files.insert("Jack.wad", "H5M5");
-	files.insert("Other/Jack.wad", "H5M6");	// will override previous map
+	files.insert("Oth er/Jack.wad", "H5M6");	// will override previous map
 	files.insert("Doo.wad", "MAP03");	// this will override second map
 
 	fs::path datapath = getChildPath("data.ini");
@@ -675,14 +675,12 @@ TEST_F(RecentFilesOutput, WriteFile)
 	ASSERT_EQ(keyword, "recent");
 	ASSERT_EQ(map, "MAP01");
 	ASSERT_EQ(file, "Wad1.wad");
-	stream >> keyword >> map >> file;
-	ASSERT_EQ(keyword, "recent");
-	ASSERT_EQ(map, "E4M4");
-	ASSERT_EQ(file, "SomeOther.wad");
-	stream >> keyword >> map >> file;
-	ASSERT_EQ(keyword, "recent");
-	ASSERT_EQ(map, "H5M6");
-	ASSERT_EQ(file, "Other/Jack.wad");
+	std::string line;
+	std::getline(stream, line);	// get past current line
+	std::getline(stream, line);
+	ASSERT_EQ(line, "recent \"E4 M4\" SomeOther.wad");
+	std::getline(stream, line);
+	ASSERT_EQ(line, "recent H5M6 \"Oth er/Jack.wad\"");
 	stream >> keyword >> map >> file;
 	ASSERT_EQ(keyword, "recent");
 	ASSERT_EQ(map, "MAP03");
