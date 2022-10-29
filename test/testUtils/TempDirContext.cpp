@@ -51,7 +51,7 @@ void TempDirContext::SetUp()
 	char *result = mkdtemp(pattern);
 	ASSERT_NE(result, nullptr);
 	mTempDir = result;
-	ASSERT_TRUE(mTempDir.good());
+	ASSERT_FALSE(mTempDir.empty());
 #endif
 }
 
