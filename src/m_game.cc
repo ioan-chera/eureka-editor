@@ -1221,7 +1221,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 	{
 		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
 			return;
-		if (! MatchExtensionNoCase(name.get(), "ugh"))
+		if (! MatchExtensionNoCase(name.get(), ".ugh"))
 			return;
 		temp_list.push_back(ReplaceExtension(name.get(), NULL).u8string());
 	};
