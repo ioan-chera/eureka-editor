@@ -239,12 +239,12 @@ recent_file_data_c *RecentFiles_c::getData(int index) const
 RecentFiles_c::Deque::iterator RecentFiles_c::find(const SString &file)
 {
 	// ignore the path when matching filenames
-	const char *A = fl_filename_name(file.c_str());
+	SString A = fs::u8path(file.get()).filename().u8string();
 
 	for(auto it = list.begin(); it != list.end(); ++it)
 	{
-		const char *B = fl_filename_name(it->file.c_str());
-		if(y_stricmp(A, B) != 0)
+		SString B = fs::u8path(it->file.get()).filename().u8string();
+		if(!A.noCaseEqual(B))
 			continue;
 
 		return it;
