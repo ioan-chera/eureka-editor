@@ -24,6 +24,8 @@
 #include "m_strings.h"
 #include "sys_type.h"
 
+#include <deque>
+
 class Wad_file;
 
 
@@ -47,38 +49,39 @@ public:
 		file(_file), map(_map)
 	{ }
 
-	recent_file_data_c()
-	{ }
+	recent_file_data_c(const recent_file_data_c &other) = default;
+
+	recent_file_data_c() = default;
 };
 
 
 class RecentFiles_c
 {
 private:
+	typedef std::deque<recent_file_data_c> Deque;
+
 	void push_front(const SString &file, const SString &map);
-	int find(const SString &file, const SString &map = NULL);
-	void erase(int index);
+	Deque::iterator find(const SString &file);
 
-	int size = 0;
-
-	// newest is at index [0]
-	SString filenames[MAX_RECENT];
-	SString map_names[MAX_RECENT];
+	Deque list;
 
 public:
 
 	int getSize() const
 	{
-		return size;
+		return (int)list.size();
 	}
 
 	recent_file_data_c *getData(int index) const;
-	void clear();
+	void clear()
+	{
+		list.clear();
+	}
 	
 	void insert(const SString &file, const SString &map);
-	void WriteFile(FILE *fp);
+	void WriteFile(FILE *fp) const;
 	SString Format(int index) const;
-	void Lookup(int index, SString *file_v, SString *map_v);
+	void Lookup(int index, SString *file_v, SString *map_v) const;
 };
 
 

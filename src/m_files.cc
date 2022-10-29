@@ -231,107 +231,65 @@ void M_WritePortPaths(FILE *fp)
 
 recent_file_data_c *RecentFiles_c::getData(int index) const
 {
-	SYS_ASSERT(0 <= index && index < size);
+	SYS_ASSERT(0 <= index && index < (int)list.size());
 
-	return new recent_file_data_c(filenames[index], map_names[index]);
+	return new recent_file_data_c(list[index]);
 }
 
-void RecentFiles_c::clear()
-{
-	for(int k = 0; k < size; k++)
-	{
-		filenames[k].clear();
-		map_names[k].clear();
-	}
-
-	size = 0;
-}
-
-int RecentFiles_c::find(const SString &file, const SString &map)
+RecentFiles_c::Deque::iterator RecentFiles_c::find(const SString &file)
 {
 	// ignore the path when matching filenames
 	const char *A = fl_filename_name(file.c_str());
 
-	for(int k = 0; k < size; k++)
+	for(auto it = list.begin(); it != list.end(); ++it)
 	{
-		const char *B = fl_filename_name(filenames[k].c_str());
-
+		const char *B = fl_filename_name(it->file.c_str());
 		if(y_stricmp(A, B) != 0)
 			continue;
 
-		if(map.empty() || map_names[k].noCaseEqual(map))
-			return k;
+		return it;
 	}
 
-	return -1;  // not found
-}
-
-void RecentFiles_c::erase(int index)
-{
-	SYS_ASSERT(0 <= index && index < MAX_RECENT);
-
-	size--;
-
-	SYS_ASSERT(size < MAX_RECENT);
-
-	for(; index < size; index++)
-	{
-		filenames[index] = filenames[index + 1];
-		map_names[index] = map_names[index + 1];
-	}
-
-	filenames[index].clear();
-	map_names[index].clear();
+	return list.end();	// not found
 }
 
 void RecentFiles_c::push_front(const SString &file, const SString &map)
 {
-	if(size >= MAX_RECENT)
+	if(list.size() >= MAX_RECENT)
 	{
-		erase(MAX_RECENT - 1);
+		list.pop_back();
 	}
-
-	// shift elements up
-	for(int k = size - 1; k >= 0; k--)
-	{
-		filenames[k + 1] = filenames[k];
-		map_names[k + 1] = map_names[k];
-	}
-
-	filenames[0] = file;
-	map_names[0] = map;
-
-	size++;
+	list.emplace_front(file, map);
 }
 
 void RecentFiles_c::insert(const SString &file, const SString &map)
 {
 	// ensure filename (without any path) is unique
-	int f = find(file);
+	auto it = find(file);
 
-	if(f >= 0)
-		erase(f);
+	if(it != list.end())
+		list.erase(it);
 
 	push_front(file, map);
 }
 
-void RecentFiles_c::WriteFile(FILE *fp)
+void RecentFiles_c::WriteFile(FILE *fp) const
 {
 	// file is in opposite order, newest at the end
 	// (this allows the parser to merely insert() items in the
 	//  order they are read).
 
-	for(int k = size - 1; k >= 0; k--)
+	for(auto it = list.rbegin(); it != list.rend(); ++it)
 	{
-		fprintf(fp, "recent %s %s\n", map_names[k].c_str(), filenames[k].c_str());
+		fprintf(fp, "recent %s %s\n", it->map.c_str(), it->file.c_str());
 	}
 }
 
 SString RecentFiles_c::Format(int index) const
 {
-	SYS_ASSERT(index < size);
+	SYS_ASSERT(index < (int)list.size());
 
-	const char *name = fl_filename_name(filenames[index].c_str());
+	const char *name = fl_filename_name(list[index].file.c_str());
 
 	char buffer[256];
 	snprintf(buffer, sizeof(buffer), "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
@@ -340,13 +298,13 @@ SString RecentFiles_c::Format(int index) const
 	return SString(buffer);
 }
 
-void RecentFiles_c::Lookup(int index, SString *file_v, SString *map_v)
+void RecentFiles_c::Lookup(int index, SString *file_v, SString *map_v) const
 {
 	SYS_ASSERT(index >= 0);
-	SYS_ASSERT(index < size);
+	SYS_ASSERT(index < (int)list.size());
 
-	*file_v = filenames[index];
-	*map_v = map_names[index];
+	*file_v = list[index].file;
+	*map_v = list[index].map;
 }
 
 namespace global
