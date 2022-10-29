@@ -1303,23 +1303,7 @@ static void writeListToConfig(const std::vector<SString> &list, std::ofstream &o
 static SString escape(const fs::path &path)
 {
 	std::string str = path.generic_u8string();
-	if(str.empty())
-		return "\"\"";
-	bool needsQuotes = false;
-	for(char c : str)
-		if(isspace(c) || c == '"')
-		{
-			needsQuotes = true;
-			break;
-		}
-	if(needsQuotes)
-	{
-		size_t pos = std::string::npos;
-		while((pos = str.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
-			str.insert(str.begin() + pos, '"');
-		return "\"" + str + "\"";
-	}
-	return str;
+	return SString(str).spaceEscape();
 }
 
 static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &os)

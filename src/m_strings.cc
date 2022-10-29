@@ -420,6 +420,32 @@ SString StringTable::get(StringID offset) const
 	return mStrings[offset.get()];
 }
 
+//
+// If string has spaces, surrounds it in double quotes. If there are any quotes, it doubles them (MS-DOS convention)
+//
+SString SString::spaceEscape() const
+{
+	if(empty())
+		return "\"\"";
+	bool needsQuotes = false;
+	for(char c : data)
+		if(isspace(c) || c == '"')
+		{
+			needsQuotes = true;
+			break;
+		}
+
+	SString result(*this);
+	if(needsQuotes)
+	{
+		size_t pos = std::string::npos;
+		while((pos = result.data.find('"', pos == std::string::npos ? 0 : pos + 2)) != std::string::npos)
+			result.data.insert(result.data.begin() + pos, '"');
+		return "\"" + result + "\"";
+	}
+	return result;
+}
+
 #ifdef _WIN32
 //
 // Fail safe so we avoid failures

@@ -311,3 +311,12 @@ TEST(SString, ToNumberOverloads)
 	ASSERT_EQ(strtol(fourtytwo, &endptr, 0), 42);
 	ASSERT_EQ(endptr, fourtytwo.c_str() + 2);
 }
+
+TEST(SString, Escape)
+{
+	ASSERT_EQ(SString("OneWord").spaceEscape(), "OneWord");
+	ASSERT_EQ(SString("One Word").spaceEscape(), "\"One Word\"");
+	ASSERT_EQ(SString("One\"Word").spaceEscape(), "\"One\"\"Word\"");
+	ASSERT_EQ(SString("One \"Ripper\" Word").spaceEscape(), "\"One \"\"Ripper\"\" Word\"");
+	ASSERT_EQ(SString("").spaceEscape(), "\"\"");
+}
