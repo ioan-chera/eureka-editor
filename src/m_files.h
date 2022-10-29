@@ -26,6 +26,60 @@
 
 class Wad_file;
 
+
+
+//------------------------------------------------------------------------
+//  RECENT FILE HANDLING
+//------------------------------------------------------------------------
+
+#define MAX_RECENT  24
+
+
+// this is for the "File/Recent" menu callbacks
+class recent_file_data_c
+{
+public:
+	SString file;
+	SString map;
+
+public:
+	recent_file_data_c(const SString &_file, const SString &_map) :
+		file(_file), map(_map)
+	{ }
+
+	recent_file_data_c()
+	{ }
+};
+
+
+class RecentFiles_c
+{
+private:
+	int size = 0;
+
+	// newest is at index [0]
+	SString filenames[MAX_RECENT];
+	SString map_names[MAX_RECENT];
+
+public:
+
+	int getSize() const
+	{
+		return size;
+	}
+
+	recent_file_data_c *getData(int index) const;
+	void clear();
+	int find(const SString &file, const SString &map = NULL);
+	void erase(int index);
+	void push_front(const SString &file, const SString &map);
+	void insert(const SString &file, const SString &map);
+	void WriteFile(FILE *fp);
+	SString Format(int index) const;
+	void Lookup(int index, SString *file_v, SString *map_v);
+};
+
+
 void M_LoadRecent();
 void M_SaveRecent();
 
