@@ -460,6 +460,53 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("abs") / "abspath.wad")), res.end());
 }
 
+TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
+{
+	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);
+	ASSERT_TRUE(eureka);
+	eureka->Printf("game doom\n");
+	eureka->Printf("resource samename.wad\n");
+	eureka->Printf("resource sub/SameName.Wad\n");	// repeat so we check we don't add it again
+	eureka->Printf("resource othername.wad\n");
+
+	// Make the files
+	std::ofstream stream;
+	fs::path path = getChildPath("samename.wad");
+	stream.open(path);
+	ASSERT_TRUE(stream.is_open());
+	stream.close();
+	mDeleteList.push(path);
+	path = getChildPath("sub");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	path = getChildPath("sub/SameName.Wad");
+	stream.open(path);
+	ASSERT_TRUE(stream.is_open());
+	stream.close();
+	mDeleteList.push(path);
+	path = getChildPath("othername.wad");
+	stream.open(path);
+	ASSERT_TRUE(stream.is_open());
+	stream.close();
+	mDeleteList.push(path);
+	stream.close();
+
+	// Prepare the IWAD
+	path = getChildPath("iwad");
+	ASSERT_TRUE(FileMakeDir(path));
+	mDeleteList.push(path);
+	M_AddKnownIWAD(getChildPath("iwad/doom.wad").u8string());
+
+	// Prepare the 'game' for the IWAD
+	prepareHomeDir();
+	makeGame(makeGamesDir(), "doom.ugh");
+
+	loading.parseEurekaLump(wad.get());
+	ASSERT_EQ(loading.resourceList.size(), 2);
+	ASSERT_EQ(loading.resourceList[0], getChildPath("samename.wad"));	// not the second one too
+	ASSERT_EQ(loading.resourceList[1], getChildPath("othername.wad"));
+}
+
 TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 {
 	// Re-create wad to be from a subpath
