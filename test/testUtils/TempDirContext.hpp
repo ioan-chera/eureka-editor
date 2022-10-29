@@ -35,7 +35,7 @@ protected:
 	fs::path getChildPath(const fs::path &path) const;
 
 	SString mTempDir;
-	std::stack<SString> mDeleteList;
+	std::stack<fs::path> mDeleteList;
 };
 
 #endif /* TempDirContext_hpp */

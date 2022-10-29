@@ -161,7 +161,7 @@ TEST_F(MConfig, MParseConfigEmptyFile)
 	fs::path path = getChildPath("something.cfg");
 	FILE *f = fopen(path.u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	fclose(f);
 	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
 }
@@ -172,7 +172,7 @@ TEST_F(MConfig, MParseConfigFile)
 
 	std::ofstream os(path, std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os.close();
 
 	os.open(path);
@@ -235,7 +235,7 @@ TEST_F(MConfig, ParsePathList)
 
 	std::ofstream os(path, std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os.close();
 
 	os.open(path);
@@ -261,7 +261,7 @@ TEST_F(MConfig, ParseEmptyList)
 
 	std::ofstream os(path, std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os.close();
 
 	os.open(path);
@@ -292,7 +292,7 @@ TEST_F(MConfig, MWriteConfig)
     config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
 
     ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
-    mDeleteList.push(config.config_file);
+    mDeleteList.push(config.config_file.get());
 
     // Now unset them
     config.auto_load_recent = false;
@@ -336,7 +336,7 @@ TEST_F(MConfig, MWriteConfigPathList)
 
 	config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
 	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
-	mDeleteList.push(config.config_file);
+	mDeleteList.push(config.config_file.get());
 
 	config.paths.clear();
 
@@ -567,7 +567,7 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	// crc.extra, crc.raw
 	global::cache_dir = mTempDir;
 	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
-	mDeleteList.push(getChildPath("cache").u8string());
+	mDeleteList.push(getChildPath("cache"));
 
 	// Try with no file: should fail
 	ASSERT_FALSE(inst.M_LoadUserState());
@@ -576,7 +576,7 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	std::ofstream os(getChildPath(fs::path("cache") / "0000000000000001.dat"),
 					 std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(getChildPath(fs::path("cache") / "0000000000000001.dat").u8string());
+	mDeleteList.push(getChildPath(fs::path("cache") / "0000000000000001.dat"));
 	os << " # Stuff\n";
 	os << "\n";
 	os << "editor \"hello world\" again\n";
@@ -641,10 +641,10 @@ TEST_F(MConfig, InstanceMSaveUserState)
 
 	global::cache_dir = mTempDir;
 	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
-	mDeleteList.push(getChildPath("cache").u8string());
+	mDeleteList.push(getChildPath("cache"));
 
 	ASSERT_TRUE(inst.M_SaveUserState());
-	mDeleteList.push(getChildPath(fs::path("cache") / "0000000000000001.dat").u8string());
+	mDeleteList.push(getChildPath(fs::path("cache") / "0000000000000001.dat"));
 	global::cache_dir.clear();
 
 	ASSERT_EQ(sUnitTokens["WriteUser"].size(), 6);

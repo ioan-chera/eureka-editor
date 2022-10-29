@@ -78,7 +78,7 @@ void TempDirContext::TearDown()
 		while(!mDeleteList.empty())
 		{
 			// Don't assert fatally, so we get the change to delete what we can.
-			EXPECT_TRUE(deleteFileOrFolder(mDeleteList.top().c_str()));
+			EXPECT_TRUE(deleteFileOrFolder(mDeleteList.top().u8string().c_str()));
 			mDeleteList.pop();
 		}
 		ASSERT_TRUE(deleteFileOrFolder(mTempDir.c_str()));

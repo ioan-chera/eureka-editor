@@ -160,7 +160,7 @@ TEST_F(LibFileTempDir, FileExists)
 	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
 	os.close();
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	ASSERT_TRUE(FileExists(path));
 
 	fs::remove(path);
@@ -170,7 +170,7 @@ TEST_F(LibFileTempDir, FileExists)
 	ASSERT_FALSE(FileExists(path));
 
 	ASSERT_TRUE(FileMakeDir(path));
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	ASSERT_FALSE(FileExists(path));
 }
 
@@ -181,7 +181,7 @@ TEST_F(LibFileTempDir, FileDelete)
 
 	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os << "Hello";
 	os.close();
 
@@ -196,7 +196,7 @@ TEST_F(LibFileTempDir, FileMakeDir)
 {
 	fs::path path = getChildPath("dir");
 	ASSERT_TRUE(FileMakeDir(path));
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	// Disallow overwriting
 	ASSERT_FALSE(FileMakeDir(path));
 	// Disallow inexistent intermediary paths
@@ -215,7 +215,7 @@ TEST_F(LibFileTempDir, FileLoad)
 	fs::path path = getChildPath("file");
 	std::ofstream os(path, std::ios::binary);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os.write(randomData.data(), randomData.size());
 	os.close();
 
@@ -241,7 +241,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	fs::path path = getChildPath("file");
 	std::ofstream os(path);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os << "hello";
 	os.close();
 
@@ -250,16 +250,16 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	path = getChildPath(".file");
 	os.open(path);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os << "shadow";
 	os.close();
 
 	path = getChildPath("dir");
 	ASSERT_TRUE(FileMakeDir(path));
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	path = getChildPath(".dir");
 	ASSERT_TRUE(FileMakeDir(path));
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 
 	fs::path dotDirPath = path;
 
@@ -267,7 +267,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	path = getChildPath(fs::path("dir") / "file2");
 	os.open(path);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	os << "shadow2";
 	os.close();
 

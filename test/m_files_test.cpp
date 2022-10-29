@@ -182,7 +182,7 @@ void ParseEurekaLumpFixture::clearKnownIwads()
 	fs::path miscPath = getChildPath("misc.cfg");
 	FILE *f = fopen(miscPath.u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
-	mDeleteList.push(miscPath.u8string());
+	mDeleteList.push(miscPath);
 
 	int result = fclose(f);
 	ASSERT_FALSE(result);
@@ -228,7 +228,7 @@ void ParseEurekaLumpFixture::prepareHomeDir()
 {
 	global::home_dir = getChildPath("home").u8string();
 	ASSERT_TRUE(FileMakeDir(global::home_dir.get()));
-	mDeleteList.push(global::home_dir);
+	mDeleteList.push(global::home_dir.get());
 }
 
 //
@@ -238,7 +238,7 @@ fs::path ParseEurekaLumpFixture::makeGamesDir()
 {
 	fs::path gamesDir = fs::path(global::home_dir.c_str()) / "games";
 	EXPECT_TRUE(FileMakeDir(gamesDir));
-	mDeleteList.push(gamesDir.u8string());
+	mDeleteList.push(gamesDir);
 	return gamesDir;
 }
 
@@ -251,7 +251,7 @@ void ParseEurekaLumpFixture::makeGame(const fs::path &gamesDir, const char *ughN
 	FILE *f = fopen(ughPath.u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
-	mDeleteList.push(ughPath.u8string());
+	mDeleteList.push(ughPath);
 }
 
 TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
@@ -374,12 +374,12 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	global::home_dir = global::install_dir;
 	fs::path portsDir = fs::path(global::home_dir.c_str()) / "ports";
 	ASSERT_TRUE(FileMakeDir(portsDir));
-	mDeleteList.push(portsDir.u8string());
+	mDeleteList.push(portsDir);
 	fs::path tropPath = portsDir / "trop.ugh";
 	FILE *f = fopen(tropPath.u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
-	mDeleteList.push(tropPath.u8string());
+	mDeleteList.push(tropPath);
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
@@ -409,7 +409,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 		FILE *f = fopen(filepath.u8string().c_str(), "wb");
 		ASSERT_TRUE(f);
 		fclose(f);
-		mDeleteList.push(filepath.u8string());
+		mDeleteList.push(filepath);
 	};
 
 	makesubfile("samepath.wad");
@@ -418,7 +418,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	// Prepare the IWAD
 	fs::path path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad").u8string());
 
 	// Prepare the 'game' for the IWAD
@@ -431,7 +431,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	// And add the absolute subpath
 	path = getChildPath("abs");
 	ASSERT_TRUE(FileMakeDir(path));
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	makesubfile("abs/abspath.wad");
 
 	// Prepare the error message
@@ -464,7 +464,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 {
 	// Re-create wad to be from a subpath
 	ASSERT_TRUE(FileMakeDir(getChildPath("sub")));
-	mDeleteList.push(getChildPath("sub").u8string());
+	mDeleteList.push(getChildPath("sub"));
 	wad = Wad_file::Open(getChildPath(fs::path("sub") / "wad.wad").u8string(), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
@@ -472,7 +472,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	FILE *f = fopen(getChildPath("res.wad").u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
 	fclose(f);
-	mDeleteList.push(getChildPath("res.wad").u8string());
+	mDeleteList.push(getChildPath("res.wad"));
 
 	// Prepare the lump
 	Lump_c *eureka = wad->AddLump(EUREKA_LUMP);

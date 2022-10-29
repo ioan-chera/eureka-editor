@@ -72,7 +72,7 @@ protected:
         global::home_dir = mTempDir;
         global::install_dir = getChildPath("install").u8string();
         ASSERT_TRUE(FileMakeDir(global::install_dir.get()));
-        mDeleteList.push(global::install_dir);
+        mDeleteList.push(global::install_dir.get());
 
         writeBindingsFile();
         M_LoadBindings();
@@ -98,7 +98,7 @@ void MKeys::writeBindingsFile()
 {
     FILE *f = fopen((global::install_dir + "/bindings.cfg").c_str(), "wt");
     ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::install_dir + "/bindings.cfg");
+    mDeleteList.push(global::install_dir.get() + "/bindings.cfg");
 
     fprintf(f, "browser    CMD-k    BR_ClearSearch\n");
     fprintf(f, "browser    PGUP    BR_Scroll    -3\n");
@@ -114,7 +114,7 @@ void MKeys::writeBindingsFile()
 
     f = fopen((global::home_dir + "/bindings.cfg").c_str(), "wt");
     ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::home_dir + "/bindings.cfg");
+    mDeleteList.push(global::home_dir.get() + "/bindings.cfg");
 
     fprintf(f, "general SHIFT-DEL    Delete    /keep\n");
     fprintf(f, "general    SHIFT-BS    Delete    /keep\n");

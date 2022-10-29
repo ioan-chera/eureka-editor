@@ -75,7 +75,7 @@ TEST_F(SafeOutFileTest, Stuff)
 		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
 		ASSERT_TRUE(sof.commit().success);
 	}
-	mDeleteList.push(path.u8string());	// the delete list
+	mDeleteList.push(path);	// the delete list
 
 	// Now check it
 	checkFileContent(path.u8string().c_str(), "Hello, world2! more.");

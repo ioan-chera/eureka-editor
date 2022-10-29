@@ -99,7 +99,7 @@ TEST_F(WadFileTest, WriteRead)
 
 	// Write it lumpless
 	wad->writeToDisk();
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 
 	// Right now add some data to it. Since writeToDisk won't be called yet,
 	// the lump should only be there in memory.
@@ -232,7 +232,7 @@ TEST_F(WadFileTest, Validate)
 
 	FILE *f = fopen(path.u8string().c_str(), "wb");
 	ASSERT_NE(f, nullptr);
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 	fprintf(f, "abcdefghijklmnopq");
 	ASSERT_EQ(fclose(f), 0);
 
@@ -356,7 +356,7 @@ TEST_F(WadFileTest, LevelQuery)
 	ASSERT_EQ(wad->LevelHeader(1), 0);
 
 	wad->writeToDisk();
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 
 	// For this test, let's assume UDMF is active
 	global::udmf_testing = true;
@@ -448,9 +448,9 @@ TEST_F(WadFileTest, Backup)
 	wad->GetLump(wad->NumLumps() - 1)->Printf("Goodbye!");
 
 	ASSERT_TRUE(wad->Backup(path2.u8string().c_str()));
-	mDeleteList.push(path2.u8string());
+	mDeleteList.push(path2);
 	wad->writeToDisk();
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 
 	// Test it now
 	std::vector<uint8_t> data, data2;
@@ -503,7 +503,7 @@ TEST_F(WadFileTest, LumpFromFile)
 	auto wad = Wad_file::Open(path.u8string(), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 	wad->writeToDisk();
-	mDeleteList.push(path.u8string());
+	mDeleteList.push(path);
 
 	Lump_c *lump = wad->AddLump("Test");
 	ASSERT_TRUE(lump);

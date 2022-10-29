@@ -42,13 +42,13 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.printf("Here it goes\n");
     log.debugPrintf("No text\n");
     ASSERT_TRUE(log.openFile(path.u8string()));
-    mDeleteList.push(path.u8string());
+    mDeleteList.push(path);
     log.printf("One more message\n");
 
     fs::path savedPath = getChildPath("log2.txt");
     std::ofstream os(savedPath, std::ios::trunc);
     ASSERT_TRUE(os.is_open());
-    mDeleteList.push(savedPath.u8string());
+    mDeleteList.push(savedPath);
     log.saveTo(os);
     os.close();
 
