@@ -55,22 +55,6 @@ void TempDirContext::SetUp()
 #endif
 }
 
-//
-// Portable way to delete file or folder. Under Windows it seems that remove can't delete folders.
-//
-static bool deleteFileOrFolder(const char *path)
-{
-#ifdef _WIN32
-	DWORD attributes = GetFileAttributesA(path);
-	EXPECT_NE(attributes, INVALID_FILE_ATTRIBUTES);
-	if(attributes != INVALID_FILE_ATTRIBUTES && attributes & FILE_ATTRIBUTE_DIRECTORY)
-		return RemoveDirectoryA(path) != FALSE;
-	return remove(path) == 0;
-#else
-	return remove(path) == 0;
-#endif
-}
-
 void TempDirContext::TearDown()
 {
 	if(!mTempDir.empty())
@@ -78,10 +62,10 @@ void TempDirContext::TearDown()
 		while(!mDeleteList.empty())
 		{
 			// Don't assert fatally, so we get the change to delete what we can.
-			EXPECT_TRUE(deleteFileOrFolder(mDeleteList.top().u8string().c_str()));
+			fs::remove(mDeleteList.top());
 			mDeleteList.pop();
 		}
-		ASSERT_TRUE(deleteFileOrFolder(mTempDir.u8string().c_str()));
+		fs::remove(mTempDir);
 	}
 }
 
