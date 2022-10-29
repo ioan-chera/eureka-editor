@@ -289,13 +289,10 @@ SString RecentFiles_c::Format(int index) const
 {
 	SYS_ASSERT(index < (int)list.size());
 
-	const char *name = fl_filename_name(list[index].file.c_str());
+	SString name = fs::u8path(list[index].file.get()).filename().u8string();
 
-	char buffer[256];
-	snprintf(buffer, sizeof(buffer), "%s%s%d:  %-.42s", (index < 9) ? "  " : "",
-		(index < 9) ? "&" : "", 1 + index, name);
-
-	return SString(buffer);
+	return SString::printf("%s%s%d:  %-.42s", (index < 9) ? "  " : "",
+		(index < 9) ? "&" : "", 1 + index, name.c_str());
 }
 
 void RecentFiles_c::Lookup(int index, SString *file_v, SString *map_v) const
