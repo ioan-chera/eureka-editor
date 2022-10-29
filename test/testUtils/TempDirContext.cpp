@@ -33,11 +33,7 @@
 void TempDirContext::SetUp()
 {
 #ifdef _WIN32
-	char tempPath[MAX_PATH] = {};
-	DWORD result = GetTempPathA(sizeof(tempPath), tempPath);
-	
-	ASSERT_GT(result, 0u);
-	ASSERT_EQ(result, strlen(tempPath));
+	fs::path tempPath = fs::temp_directory_path();
 
 	UUID uuid = {};
 	RPC_STATUS status = UuidCreate(&uuid);
@@ -45,9 +41,11 @@ void TempDirContext::SetUp()
 
 	ASSERT_NE(uuid.Data1, 0);
 
-	mTempDir = SString::printf("%sEurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", tempPath, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]).get();
+	mTempDir = tempPath / SString::printf("EurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", 
+		uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], 
+		uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]).get();
 
-	ASSERT_TRUE(CreateDirectoryA(mTempDir.u8string().c_str(), nullptr));
+	fs::create_directory(mTempDir);
 #else
 	char pattern[] = "/tmp/tempdirXXXXXX";
 	char *result = mkdtemp(pattern);
