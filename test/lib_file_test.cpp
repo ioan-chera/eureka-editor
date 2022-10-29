@@ -200,7 +200,7 @@ TEST_F(LibFileTempDir, FileMakeDir)
 	// Disallow overwriting
 	ASSERT_FALSE(FileMakeDir(path));
 	// Disallow inexistent intermediary paths
-	ASSERT_FALSE(FileMakeDir(getChildPath("dir2/dir3")));
+	ASSERT_FALSE(FileMakeDir(getChildPath(fs::path("dir2") / "dir3")));
 
 }
 
@@ -264,7 +264,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	fs::path dotDirPath = path;
 
 	// Also nest another file, to check it doesn't get listed
-	path = getChildPath("dir/file2");
+	path = getChildPath(fs::path("dir") / "file2");
 	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(path.u8string());

@@ -88,11 +88,9 @@ void TempDirContext::TearDown()
 //
 // Gets a child path
 //
-fs::path TempDirContext::getChildPath(const char *path) const
+fs::path TempDirContext::getChildPath(const fs::path &path) const
 {
-	EXPECT_TRUE(path);
-	EXPECT_TRUE(*path);
-	return fs::u8path(mTempDir.get()) / fs::u8path(path);
+	return fs::u8path(mTempDir.get()) / path;
 }
 
 TEST_F(TempDirContext, Test)

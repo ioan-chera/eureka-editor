@@ -573,10 +573,10 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	ASSERT_FALSE(inst.M_LoadUserState());
 
 	// Prepare cache file
-	std::ofstream os(getChildPath("cache/0000000000000001.dat"),
+	std::ofstream os(getChildPath(fs::path("cache") / "0000000000000001.dat"),
 					 std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(getChildPath("cache/0000000000000001.dat").u8string());
+	mDeleteList.push(getChildPath(fs::path("cache") / "0000000000000001.dat").u8string());
 	os << " # Stuff\n";
 	os << "\n";
 	os << "editor \"hello world\" again\n";
@@ -644,7 +644,7 @@ TEST_F(MConfig, InstanceMSaveUserState)
 	mDeleteList.push(getChildPath("cache").u8string());
 
 	ASSERT_TRUE(inst.M_SaveUserState());
-	mDeleteList.push(getChildPath("cache/0000000000000001.dat").u8string());
+	mDeleteList.push(getChildPath(fs::path("cache") / "0000000000000001.dat").u8string());
 	global::cache_dir.clear();
 
 	ASSERT_EQ(sUnitTokens["WriteUser"].size(), 6);

@@ -49,10 +49,10 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 
 	loaded.gameName = "Mood";	// just pick two random names
 	loaded.portName = "Voom";
-	loaded.resourceList.push_back(getChildPath("first/res.png").u8string());	// same path
-	loaded.resourceList.push_back(getChildPath("first/deep/call.txt").u8string());	// child path
+	loaded.resourceList.push_back(getChildPath(fs::path("first") / "res.png").u8string());	// same path
+	loaded.resourceList.push_back(getChildPath(fs::path("first") / "deep" / "call.txt").u8string());	// child path
 	loaded.resourceList.push_back(getChildPath("upper.txt").u8string());		// upper path
-	loaded.resourceList.push_back(getChildPath("second/music.mid").u8string());	// sibling path
+	loaded.resourceList.push_back(getChildPath(fs::path("second") / "music.mid").u8string());	// sibling path
 
 	// In case of Windows, also check different drive letter
 	fs::path wadpathobj = fs::path(wadpath.c_str());
@@ -400,7 +400,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	eureka->Printf("resource bogus/subpath.wad\n");
 	eureka->Printf("resource iwadpath.wad\n");
 	eureka->Printf("resource nopath.wad\n");
-	eureka->Printf("resource %s\n", getChildPath("abs/abspath.wad").u8string().c_str());
+	eureka->Printf("resource %s\n", getChildPath(fs::path("abs") / "abspath.wad").u8string().c_str());
 	eureka->Printf("resource \n");	// add something else to check how we go
 
 	auto makesubfile = [this](const char *path)
@@ -419,7 +419,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	fs::path path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path.u8string());
-	M_AddKnownIWAD(getChildPath("iwad/doom.wad").u8string());
+	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad").u8string());
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -456,8 +456,8 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	// Now check we have the resources, with their correct paths
 	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad").u8string()), res.end());
 	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad").u8string()), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("iwad/iwadpath.wad").u8string()), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("abs/abspath.wad").u8string()), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("iwad") / "iwadpath.wad").u8string()), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("abs") / "abspath.wad").u8string()), res.end());
 }
 
 TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
@@ -465,7 +465,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	// Re-create wad to be from a subpath
 	ASSERT_TRUE(FileMakeDir(getChildPath("sub")));
 	mDeleteList.push(getChildPath("sub").u8string());
-	wad = Wad_file::Open(getChildPath("sub/wad.wad").u8string(), WadOpenMode::write);
+	wad = Wad_file::Open(getChildPath(fs::path("sub") / "wad.wad").u8string(), WadOpenMode::write);
 	ASSERT_TRUE(wad);
 
 	// Create a parent path resource
