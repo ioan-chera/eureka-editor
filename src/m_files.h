@@ -55,6 +55,10 @@ public:
 class RecentFiles_c
 {
 private:
+	void push_front(const SString &file, const SString &map);
+	int find(const SString &file, const SString &map = NULL);
+	void erase(int index);
+
 	int size = 0;
 
 	// newest is at index [0]
@@ -70,9 +74,7 @@ public:
 
 	recent_file_data_c *getData(int index) const;
 	void clear();
-	int find(const SString &file, const SString &map = NULL);
-	void erase(int index);
-	void push_front(const SString &file, const SString &map);
+	
 	void insert(const SString &file, const SString &map);
 	void WriteFile(FILE *fp);
 	SString Format(int index) const;

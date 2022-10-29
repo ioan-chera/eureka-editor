@@ -548,3 +548,142 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	ASSERT_EQ(loading.resourceList.size(), 1);
 	ASSERT_EQ(loading.resourceList[0], getChildPath("res.wad"));
 }
+
+// Recent files
+
+TEST(RecentFiles, StartEmpty)
+{
+	RecentFiles_c files;
+	ASSERT_EQ(files.getSize(), 0);
+
+	// Clear it: still empty
+	files.clear();
+	ASSERT_EQ(files.getSize(), 0);
+}
+
+TEST(RecentFiles, InsertAndLookup)
+{
+	RecentFiles_c files;
+	files.insert("Wad1.wad", "MAP01");
+	files.insert("Sub/Doo.wad", "E3M6");
+	files.insert("SomeOther.wad", "E4M4");
+	files.insert("Jack.wad", "H5M5");
+	files.insert("Other/Jack.wad", "H5M6");	// will override previous map
+	files.insert("Doo.wad", "MAP03");	// this will override second map
+
+	// Size must be 3
+	ASSERT_EQ(files.getSize(), 4);	// Five made it
+
+	SString file, map;
+
+	files.Lookup(0, &file, &map);
+	ASSERT_EQ(file, "Doo.wad");
+	ASSERT_EQ(map, "MAP03");
+
+	files.Lookup(1, &file, &map);
+	ASSERT_EQ(file, "Other/Jack.wad");
+	ASSERT_EQ(map, "H5M6");
+
+	files.Lookup(2, &file, &map);
+	ASSERT_EQ(file, "SomeOther.wad");
+	ASSERT_EQ(map, "E4M4");
+
+	files.Lookup(3, &file, &map);
+	ASSERT_EQ(file, "Wad1.wad");
+	ASSERT_EQ(map, "MAP01");
+
+	// See one format
+	SString text = files.Format(1);
+	ASSERT_EQ(text, "  &2:  Jack.wad");
+
+	// Test clearing it
+	files.clear();
+	ASSERT_EQ(files.getSize(), 0);
+}
+
+TEST(RecentFiles, InsertPastCap)
+{
+	RecentFiles_c files;
+	for(int i = 0; i < MAX_RECENT + 3; ++i)
+	{
+		files.insert(SString::printf("sub/Wad%d.wad", i), SString::printf("MAP%d", i));
+	}
+
+	// Still max recent entries
+	ASSERT_EQ(files.getSize(), MAX_RECENT);
+
+	// Check that the latest recent are there
+	SString file, map;
+	for(int i = 0; i < MAX_RECENT; ++i)
+	{
+		files.Lookup(i, &file, &map);
+		ASSERT_EQ(file, SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
+		ASSERT_EQ(map, SString::printf("MAP%d", MAX_RECENT + 3 - i - 1));
+	}
+
+	// Test formatting when larger than 9
+	SString text;
+	for(int i = 0; i < 9; ++i)
+	{
+		text = files.Format(i);
+		ASSERT_EQ(text, SString::printf("  &%d:  Wad%d.wad", i + 1, MAX_RECENT + 3 - i - 1));
+	}
+	for(int i = 9; i < MAX_RECENT; ++i)
+	{
+		text = files.Format(i);
+		ASSERT_EQ(text, SString::printf("%d:  Wad%d.wad", i + 1, MAX_RECENT + 3 - i - 1));
+	}
+}
+
+class RecentFilesOutput : public TempDirContext
+{
+};
+
+TEST_F(RecentFilesOutput, WriteFile)
+{
+	RecentFiles_c files;
+	files.insert("Wad1.wad", "MAP01");
+	files.insert("Sub/Doo.wad", "E3M6");
+	files.insert("SomeOther.wad", "E4M4");
+	files.insert("Jack.wad", "H5M5");
+	files.insert("Other/Jack.wad", "H5M6");	// will override previous map
+	files.insert("Doo.wad", "MAP03");	// this will override second map
+
+	fs::path datapath = getChildPath("data.ini");
+
+	FILE *f = fopen(datapath.u8string().c_str(), "wt");
+	ASSERT_TRUE(f);
+	mDeleteList.push(datapath);
+
+	files.WriteFile(f);
+
+	int r = fclose(f);
+	ASSERT_EQ(r, 0);
+
+	std::ifstream stream(datapath);
+	ASSERT_TRUE(stream.is_open());
+	
+	std::string keyword, map, file;
+	stream >> keyword >> map >> file;
+	ASSERT_EQ(keyword, "recent");
+	ASSERT_EQ(map, "MAP01");
+	ASSERT_EQ(file, "Wad1.wad");
+	stream >> keyword >> map >> file;
+	ASSERT_EQ(keyword, "recent");
+	ASSERT_EQ(map, "E4M4");
+	ASSERT_EQ(file, "SomeOther.wad");
+	stream >> keyword >> map >> file;
+	ASSERT_EQ(keyword, "recent");
+	ASSERT_EQ(map, "H5M6");
+	ASSERT_EQ(file, "Other/Jack.wad");
+	stream >> keyword >> map >> file;
+	ASSERT_EQ(keyword, "recent");
+	ASSERT_EQ(map, "MAP03");
+	ASSERT_EQ(file, "Doo.wad");
+
+	ASSERT_FALSE(stream.eof());
+	stream >> keyword;
+	ASSERT_TRUE(stream.eof());
+
+	stream.close();
+}
