@@ -60,8 +60,8 @@ class RecentFiles_c
 private:
 	typedef std::deque<recent_file_data_c> Deque;
 
-	void push_front(const SString &file, const SString &map);
-	Deque::iterator find(const SString &file);
+	void push_front(const fs::path &file, const SString &map);
+	Deque::iterator find(const fs::path &file);
 
 	Deque list;
 
@@ -78,10 +78,10 @@ public:
 		list.clear();
 	}
 	
-	void insert(const SString &file, const SString &map);
+	void insert(const fs::path &file, const SString &map);
 	void WriteFile(FILE *fp) const;
 	SString Format(int index) const;
-	void Lookup(int index, SString *file_v, SString *map_v) const;
+	void Lookup(int index, fs::path *file_v, SString *map_v) const;
 };
 
 

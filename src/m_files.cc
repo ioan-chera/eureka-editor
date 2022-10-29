@@ -236,10 +236,10 @@ recent_file_data_c *RecentFiles_c::getData(int index) const
 	return new recent_file_data_c(list[index]);
 }
 
-RecentFiles_c::Deque::iterator RecentFiles_c::find(const SString &file)
+RecentFiles_c::Deque::iterator RecentFiles_c::find(const fs::path &file)
 {
 	// ignore the path when matching filenames
-	SString A = fs::u8path(file.get()).filename().u8string();
+	SString A = file.filename().u8string();
 
 	for(auto it = list.begin(); it != list.end(); ++it)
 	{
@@ -253,16 +253,16 @@ RecentFiles_c::Deque::iterator RecentFiles_c::find(const SString &file)
 	return list.end();	// not found
 }
 
-void RecentFiles_c::push_front(const SString &file, const SString &map)
+void RecentFiles_c::push_front(const fs::path &file, const SString &map)
 {
 	if(list.size() >= MAX_RECENT)
 	{
 		list.pop_back();
 	}
-	list.emplace_front(fs::u8path(file.get()), map);
+	list.emplace_front(file, map);
 }
 
-void RecentFiles_c::insert(const SString &file, const SString &map)
+void RecentFiles_c::insert(const fs::path &file, const SString &map)
 {
 	// ensure filename (without any path) is unique
 	auto it = find(file);
@@ -295,12 +295,12 @@ SString RecentFiles_c::Format(int index) const
 		(index < 9) ? "&" : "", 1 + index, name.c_str());
 }
 
-void RecentFiles_c::Lookup(int index, SString *file_v, SString *map_v) const
+void RecentFiles_c::Lookup(int index, fs::path *file_v, SString *map_v) const
 {
 	SYS_ASSERT(index >= 0);
 	SYS_ASSERT(index < (int)list.size());
 
-	*file_v = list[index].file.generic_u8string();
+	*file_v = list[index].file;
 	*map_v = list[index].map;
 }
 
@@ -342,7 +342,7 @@ static void ParseMiscConfig(std::istream &is)
 		{
 			// TODO: parse this correctly
 			if(Wad_file::Validate(path.get()))
-				global::recent_files.insert(path, map);
+				global::recent_files.insert(fs::u8path(path.get()), map);
 			else
 				gLog.printf("  no longer exists: %s\n", path.c_str());
 		}
@@ -445,9 +445,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 void M_AddRecent(const SString &filename, const SString &map_name)
 {
-	const SString &absolute_name = GetAbsolutePath(filename.get()).u8string();
-
-	global::recent_files.insert(absolute_name, map_name);
+	global::recent_files.insert(GetAbsolutePath(filename.get()), map_name);
 
 	M_SaveRecent();  // why wait?
 }
@@ -461,7 +459,9 @@ bool Instance::M_TryOpenMostRecent()
 	SString filename;
 	SString map_name;
 
-	global::recent_files.Lookup(0, &filename, &map_name);
+	fs::path filepath;
+	global::recent_files.Lookup(0, &filepath, &map_name);
+	filename = filepath.generic_u8string();
 
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.

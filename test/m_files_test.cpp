@@ -574,7 +574,8 @@ TEST(RecentFiles, InsertAndLookup)
 	// Size must be 3
 	ASSERT_EQ(files.getSize(), 4);	// Five made it
 
-	SString file, map;
+	fs::path file;
+	SString map;
 
 	files.Lookup(0, &file, &map);
 	ASSERT_EQ(file, "Doo.wad");
@@ -613,18 +614,19 @@ TEST(RecentFiles, InsertPastCap)
 	RecentFiles_c files;
 	for(int i = 0; i < MAX_RECENT + 3; ++i)
 	{
-		files.insert(SString::printf("sub/Wad%d.wad", i), SString::printf("MAP%d", i));
+		files.insert(fs::path("sub") / SString::printf("Wad%d.wad", i).get(), SString::printf("MAP%d", i));
 	}
 
 	// Still max recent entries
 	ASSERT_EQ(files.getSize(), MAX_RECENT);
 
 	// Check that the latest recent are there
-	SString file, map;
+	fs::path file;
+	SString map;
 	for(int i = 0; i < MAX_RECENT; ++i)
 	{
 		files.Lookup(i, &file, &map);
-		ASSERT_EQ(file, SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
+		ASSERT_EQ(SString(file.generic_u8string()), SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
 		ASSERT_EQ(map, SString::printf("MAP%d", MAX_RECENT + 3 - i - 1));
 	}
 
