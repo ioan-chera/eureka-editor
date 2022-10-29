@@ -129,7 +129,7 @@ const opt_desc_t options[] =
 
 	{	"merge",
 		"m",
-		OptType::stringList,
+		OptType::pathList,
 		0,
 		"Resource file(s) to load",
 		"<file>...",

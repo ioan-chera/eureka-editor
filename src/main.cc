@@ -929,22 +929,22 @@ void Instance::Main_LoadResources(LoadingData &loading)
 		readGameInfo(loading, config);
 		readPortInfo(loading, config);
 
-		for(const SString &resource : loading.resourceList)
+		for(const fs::path &resource : loading.resourceList)
 		{
-			if(MatchExtensionNoCase(resource.get(), ".ugh"))
+			if(MatchExtensionNoCase(resource, ".ugh"))
 			{
 				M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
-									  &config, resource);
+									  &config, resource.u8string());
 				continue;
 			}
 			// Otherwise wad
-			if(!Wad_file::Validate(resource.get()))
-				throw ParseException("Invalid WAD file: " + resource);
+			if(!Wad_file::Validate(resource))
+				throw ParseException(SString("Invalid WAD file: ") + resource.u8string());
 
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource.u8string(),
 														   WadOpenMode::read);
 			if(!wad)
-				throw ParseException("Cannot load resource: " + resource);
+				throw ParseException(SString("Cannot load resource: ") + resource.u8string());
 
 			resourceWads.push_back(wad);
 		}

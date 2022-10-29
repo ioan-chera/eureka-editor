@@ -49,10 +49,10 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 
 	loaded.gameName = "Mood";	// just pick two random names
 	loaded.portName = "Voom";
-	loaded.resourceList.push_back(getChildPath(fs::path("first") / "res.png").u8string());	// same path
-	loaded.resourceList.push_back(getChildPath(fs::path("first") / "deep" / "call.txt").u8string());	// child path
-	loaded.resourceList.push_back(getChildPath("upper.txt").u8string());		// upper path
-	loaded.resourceList.push_back(getChildPath(fs::path("second") / "music.mid").u8string());	// sibling path
+	loaded.resourceList.push_back(getChildPath(fs::path("first") / "res.png"));	// same path
+	loaded.resourceList.push_back(getChildPath(fs::path("first") / "deep" / "call.txt"));	// child path
+	loaded.resourceList.push_back(getChildPath("upper.txt"));		// upper path
+	loaded.resourceList.push_back(getChildPath(fs::path("second") / "music.mid"));	// sibling path
 
 	// In case of Windows, also check different drive letter
 	fs::path wadpathobj = fs::path(wadpath.c_str());
@@ -454,10 +454,10 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	const auto &res = loading.resourceList;
 
 	// Now check we have the resources, with their correct paths
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad").u8string()), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad").u8string()), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("iwad") / "iwadpath.wad").u8string()), res.end());
-	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("abs") / "abspath.wad").u8string()), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("samepath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath("subpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("iwad") / "iwadpath.wad")), res.end());
+	ASSERT_NE(std::find(res.begin(), res.end(), getChildPath(fs::path("abs") / "abspath.wad")), res.end());
 }
 
 TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
@@ -499,5 +499,5 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_EQ(loading.resourceList.size(), 1);
-	ASSERT_EQ(loading.resourceList[0], getChildPath("res.wad").u8string());
+	ASSERT_EQ(loading.resourceList[0], getChildPath("res.wad"));
 }

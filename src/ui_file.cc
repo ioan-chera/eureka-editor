@@ -823,7 +823,7 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
 
 	for(int i = 0; i < RES_NUM; ++i)
 		if(res[i].good())
-            loading.resourceList.push_back(res[i]);
+            loading.resourceList.push_back(fs::u8path(res[i].get()));
 }
 
 void UI_ProjectSetup::PopulateIWADs()
@@ -1055,7 +1055,7 @@ void UI_ProjectSetup::PopulateResources()
 
 		if (r < (int)inst.loaded.resourceList.size())
 		{
-			res[r] = inst.loaded.resourceList[r];
+			res[r] = inst.loaded.resourceList[r].u8string();
 
 			res_name[r]->value(fl_filename_name(res[r].c_str()));
 		}

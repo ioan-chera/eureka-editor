@@ -44,7 +44,7 @@ struct LoadingData
 	SString iwadName;	// Filename of the iwad
 	SString levelName;	// Name of map lump we are editing
 	SString udmfNamespace;	// for UDMF, the current namespace
-	std::vector<SString> resourceList;
+	std::vector<fs::path> resourceList;
 	MapFormat levelFormat = {};	// format of current map
 
 	std::unordered_map<SString, SString> parse_vars;

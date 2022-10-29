@@ -847,16 +847,16 @@ SString Instance::M_PickDefaultIWAD() const
 static void M_AddResource_Unique(LoadingData &loading, const SString & filename)
 {
 	// check if base filename (without path) already exists
-	for (const SString &resource : loading.resourceList)
+	for (const fs::path &resource : loading.resourceList)
 	{
-		const char *A = fl_filename_name(filename.c_str());
-		const char *B = fl_filename_name(resource.c_str());
+		SString A = fs::u8path(filename.get()).filename().u8string();
+		SString B = resource.filename().u8string();
 
-		if (y_stricmp(A, B) == 0)
+		if(A.noCaseEqual(B))
 			return;		// found it
 	}
 
-	loading.resourceList.push_back(filename);
+	loading.resourceList.push_back(fs::u8path(filename.get()));
 }
 
 
@@ -932,7 +932,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (line == "resource")
 		{
-			fs::path resourcePath(value.c_str());
+			fs::path resourcePath = fs::u8path(value.get());
 
 			if(resourcePath.is_relative())
 			{
@@ -1036,12 +1036,12 @@ void LoadingData::writeEurekaLump(Wad_file *wad) const
 
 	fs::path pwadPath = fs::absolute(wad->PathName().c_str()).remove_filename();
 
-	for (const SString &resource : resourceList)
+	for (const fs::path &resource : resourceList)
 	{
-		fs::path absoluteResourcePath = fs::absolute(resource.c_str());
+		fs::path absoluteResourcePath = fs::absolute(resource);
 		fs::path relative = fs::proximate(absoluteResourcePath, pwadPath);
 
-		lump->Printf("resource %s\n", relative.generic_string().c_str());
+		lump->Printf("resource %s\n", relative.generic_u8string().c_str());
 	}
 }
 
