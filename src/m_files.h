@@ -41,12 +41,12 @@ class Wad_file;
 class recent_file_data_c
 {
 public:
-	SString file;
+	fs::path file;
 	SString map;
 
 public:
 	recent_file_data_c(const SString &_file, const SString &_map) :
-		file(_file), map(_map)
+		file(fs::u8path(_file.get())), map(_map)
 	{ }
 
 	recent_file_data_c(const recent_file_data_c &other) = default;

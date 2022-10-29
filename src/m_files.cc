@@ -243,7 +243,7 @@ RecentFiles_c::Deque::iterator RecentFiles_c::find(const SString &file)
 
 	for(auto it = list.begin(); it != list.end(); ++it)
 	{
-		SString B = fs::u8path(it->file.get()).filename().u8string();
+		SString B = it->file.filename().u8string();
 		if(!A.noCaseEqual(B))
 			continue;
 
@@ -281,7 +281,7 @@ void RecentFiles_c::WriteFile(FILE *fp) const
 
 	for(auto it = list.rbegin(); it != list.rend(); ++it)
 	{
-		fprintf(fp, "recent %s %s\n", it->map.c_str(), it->file.c_str());
+		fprintf(fp, "recent %s %s\n", it->map.c_str(), it->file.generic_u8string().c_str());
 	}
 }
 
@@ -289,7 +289,7 @@ SString RecentFiles_c::Format(int index) const
 {
 	SYS_ASSERT(index < (int)list.size());
 
-	SString name = fs::u8path(list[index].file.get()).filename().u8string();
+	SString name = list[index].file.filename().u8string();
 
 	return SString::printf("%s%s%d:  %-.42s", (index < 9) ? "  " : "",
 		(index < 9) ? "&" : "", 1 + index, name.c_str());
@@ -300,7 +300,7 @@ void RecentFiles_c::Lookup(int index, SString *file_v, SString *map_v) const
 	SYS_ASSERT(index >= 0);
 	SYS_ASSERT(index < (int)list.size());
 
-	*file_v = list[index].file;
+	*file_v = list[index].file.generic_u8string();
 	*map_v = list[index].map;
 }
 
@@ -438,7 +438,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 	recent_file_data_c *data = (recent_file_data_c *)priv_data;
 
-	OpenFileMap(data->file, data->map);
+	OpenFileMap(data->file.u8string(), data->map);
 }
 
 
@@ -847,18 +847,18 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			// if not found at expected location, try same place as PWAD
 			if (!fs::exists(resourcePath))
 			{
-				gLog.printf("  file not found: %s\n", resourcePath.c_str());
+				gLog.printf("  file not found: %s\n", resourcePath.u8string().c_str());
 				fs::path wadDirPath = fs::path(wad->PathName().c_str()).parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
 
-				gLog.printf("  trying: %s\n", resourcePath.c_str());
+				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
 			}
 			// Still doesn't exist? Try IWAD path, if any
 			if (!fs::exists(resourcePath) && new_iwad.good())
 			{
 				fs::path wadDirPath = fs::path(new_iwad.c_str()).parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
-				gLog.printf("  trying: %s\n", resourcePath.c_str());
+				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
 			}
 
 			if (fs::exists(resourcePath))
