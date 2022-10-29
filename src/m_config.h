@@ -28,6 +28,7 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
+#include <vector>
 
 /* ==== CONFIG VARIABLES ==================== */
 
