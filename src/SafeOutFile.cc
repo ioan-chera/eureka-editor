@@ -159,11 +159,12 @@ ReportedResult SafeOutFile::write(const void *data, size_t size)
 //
 fs::path SafeOutFile::generateRandomPath() const
 {
-	return mPath.parent_path() / (mPath.filename().u8string() +
-								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-								  skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)]);
+	fs::path randomname = fs::u8path(mPath.filename().u8string() +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)]);
+	return mPath.parent_path() / randomname;
 }
 
 //
