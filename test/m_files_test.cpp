@@ -177,7 +177,7 @@ void ParseEurekaLumpFixture::clearKnownIwads()
 	// - global::home_dir / "misc.cfg": existing empty file
 
 	// Must set home_dir temporarily for this to work
-	global::home_dir = mTempDir;
+	global::home_dir = mTempDir.u8string();
 
 	fs::path miscPath = getChildPath("misc.cfg");
 	FILE *f = fopen(miscPath.u8string().c_str(), "wb");

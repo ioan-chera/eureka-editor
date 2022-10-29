@@ -565,7 +565,7 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	// crc32_c raw=1 extra=0
 	// Resulted filenme is cache_dir + "/cache/%08X%08X.dat"
 	// crc.extra, crc.raw
-	global::cache_dir = mTempDir;
+	global::cache_dir = mTempDir.u8string();
 	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
 	mDeleteList.push(getChildPath("cache"));
 
@@ -639,7 +639,7 @@ TEST_F(MConfig, InstanceMSaveUserState)
 	ASSERT_FALSE(inst.M_SaveUserState());	// can't save if no location
 	sUnitTokens.clear();
 
-	global::cache_dir = mTempDir;
+	global::cache_dir = mTempDir.u8string();
 	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
 	mDeleteList.push(getChildPath("cache"));
 

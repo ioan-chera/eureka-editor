@@ -34,7 +34,7 @@ protected:
 	void TearDown() override;
 	fs::path getChildPath(const fs::path &path) const;
 
-	SString mTempDir;
+	fs::path mTempDir;
 	std::stack<fs::path> mDeleteList;
 };
 

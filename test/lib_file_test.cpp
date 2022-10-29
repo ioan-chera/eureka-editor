@@ -225,7 +225,7 @@ TEST_F(LibFileTempDir, FileLoad)
 	ASSERT_EQ(memcmp(result.data(), randomData.data(), result.size()), 0);
 
 	// Mustn't read dirs
-	ASSERT_FALSE(FileLoad(mTempDir.get(), result));
+	ASSERT_FALSE(FileLoad(mTempDir, result));
 	// Mustn't read inexistent files
 	ASSERT_FALSE(FileLoad(getChildPath("file2"), result));
 #ifndef _WIN32
@@ -271,7 +271,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	os << "shadow2";
 	os.close();
 
-	int result = ScanDirectory(mTempDir, [](const SString &name, int flags)
+	int result = ScanDirectory(mTempDir.u8string(), [](const SString &name, int flags)
 		{
 			if(name == "file")
 				ASSERT_EQ(flags, 0);

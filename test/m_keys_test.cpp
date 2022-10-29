@@ -69,7 +69,7 @@ protected:
             M_RegisterCommandList(commands);
             loaded = true;
         }
-        global::home_dir = mTempDir;
+        global::home_dir = mTempDir.u8string();
         global::install_dir = getChildPath("install").u8string();
         ASSERT_TRUE(FileMakeDir(global::install_dir.get()));
         mDeleteList.push(global::install_dir.get());

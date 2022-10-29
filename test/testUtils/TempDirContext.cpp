@@ -43,9 +43,9 @@ void TempDirContext::SetUp()
 
 	ASSERT_NE(uuid.Data1, 0);
 
-	mTempDir = SString::printf("%sEurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", tempPath, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
+	mTempDir = SString::printf("%sEurekaTest%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x", tempPath, uuid.Data1, uuid.Data2, uuid.Data3, uuid.Data4[0], uuid.Data4[1], uuid.Data4[2], uuid.Data4[3], uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]).get();
 
-	ASSERT_TRUE(CreateDirectoryA(mTempDir.c_str(), nullptr));
+	ASSERT_TRUE(CreateDirectoryA(mTempDir.u8string().c_str(), nullptr));
 #else
 	char pattern[] = "/tmp/tempdirXXXXXX";
 	char *result = mkdtemp(pattern);
@@ -73,7 +73,7 @@ static bool deleteFileOrFolder(const char *path)
 
 void TempDirContext::TearDown()
 {
-	if(mTempDir.good())
+	if(!mTempDir.empty())
 	{
 		while(!mDeleteList.empty())
 		{
@@ -81,7 +81,7 @@ void TempDirContext::TearDown()
 			EXPECT_TRUE(deleteFileOrFolder(mDeleteList.top().u8string().c_str()));
 			mDeleteList.pop();
 		}
-		ASSERT_TRUE(deleteFileOrFolder(mTempDir.c_str()));
+		ASSERT_TRUE(deleteFileOrFolder(mTempDir.u8string().c_str()));
 	}
 }
 
@@ -90,10 +90,10 @@ void TempDirContext::TearDown()
 //
 fs::path TempDirContext::getChildPath(const fs::path &path) const
 {
-	return fs::u8path(mTempDir.get()) / path;
+	return mTempDir / path;
 }
 
 TEST_F(TempDirContext, Test)
 {
-	ASSERT_TRUE(mTempDir.good());
+	ASSERT_FALSE(mTempDir.empty());
 }
