@@ -37,18 +37,18 @@ TEST_F(SysDebugTempDir, LifeCycle)
 
     Log log;
 
-    SString path = getChildPath("log.txt");
+    fs::path path = getChildPath("log.txt");
     log.printf("Test message\n");
     log.printf("Here it goes\n");
     log.debugPrintf("No text\n");
-    ASSERT_TRUE(log.openFile(path.c_str()));
-    mDeleteList.push(path);
+    ASSERT_TRUE(log.openFile(path.u8string()));
+    mDeleteList.push(path.u8string());
     log.printf("One more message\n");
 
-    SString savedPath = getChildPath("log2.txt");
-    std::ofstream os(savedPath.c_str(), std::ios::trunc);
+    fs::path savedPath = getChildPath("log2.txt");
+    std::ofstream os(savedPath, std::ios::trunc);
     ASSERT_TRUE(os.is_open());
-    mDeleteList.push(savedPath);
+    mDeleteList.push(savedPath.u8string());
     log.saveTo(os);
     os.close();
 
@@ -85,7 +85,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     };
 
     {
-        LineFile file(path);
+        LineFile file(path.u8string());
         checkFileLines(file);
         SString line;
         ASSERT_TRUE(file.readLine(line));
@@ -96,7 +96,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     // Now check
     {
         SString line;
-        LineFile file(savedPath);
+        LineFile file(savedPath.u8string());
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "======= START OF LOGS =======");
         ASSERT_TRUE(file.readLine(line));
@@ -131,13 +131,13 @@ TEST_F(SysDebugTempDir, LifeCycle)
     ASSERT_EQ(localWindowMessages.size(), 2);    // it didn't get added to missing window
 
     // Now check saving current status works
-    os.open(savedPath.get(), std::ios::trunc);
+    os.open(savedPath, std::ios::trunc);
     ASSERT_TRUE(os.is_open());
     log.saveTo(os);
     os.close();
 
 
-    log.openFile(path.c_str());
+    log.openFile(path.u8string());
     log.debugPrintf("Debug writeout\n");
     log.printf("Extra stuff four\n");
     log.debugPrintf("Debug\nwriteout2\n");
@@ -149,7 +149,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.close();
 
     {
-        LineFile file(path);
+        LineFile file(path.u8string());
         SString line;
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "======= START OF LOGS =======");
@@ -181,7 +181,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     }
 
     {
-        LineFile file(savedPath);
+        LineFile file(savedPath.u8string());
         SString line;
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "======= START OF LOGS =======");

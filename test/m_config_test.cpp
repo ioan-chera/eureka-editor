@@ -153,29 +153,29 @@ void MConfig::add(const opt_desc_t &option)
 TEST_F(MConfig, MParseConfigFileNotFound)
 {
     // Get an error result if we don't have the file itself
-    ASSERT_EQ(M_ParseConfigFile(getChildPath("nothing.cfg"), options().data()), -1);
+    ASSERT_EQ(M_ParseConfigFile(getChildPath("nothing.cfg").u8string(), options().data()), -1);
 }
 
 TEST_F(MConfig, MParseConfigEmptyFile)
 {
-	SString path = getChildPath("something.cfg");
-	FILE *f = fopen(path.c_str(), "wb");
+	fs::path path = getChildPath("something.cfg");
+	FILE *f = fopen(path.u8string().c_str(), "wb");
 	ASSERT_TRUE(f);
-	mDeleteList.push(path);
+	mDeleteList.push(path.u8string());
 	fclose(f);
-	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
 }
 
 TEST_F(MConfig, MParseConfigFile)
 {
-    SString path = getChildPath("config.cfg");
+    fs::path path = getChildPath("config.cfg");
 
-	std::ofstream os(path.get(), std::ios::trunc);
+	std::ofstream os(path, std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path);
+	mDeleteList.push(path.u8string());
 	os.close();
 
-	os.open(path.get());
+	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	os << "\n";
 	os << "#\n";
@@ -202,7 +202,7 @@ TEST_F(MConfig, MParseConfigFile)
 	config.grid_snap_indicator = true;
 	config.leave_offsets_alone = true;
 
-	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
 	ASSERT_EQ(config.home_dir, "jackson");	// unchanged
 	ASSERT_FALSE(config.show_help);	// unchanged
 
@@ -231,23 +231,23 @@ TEST_F(MConfig, MParseConfigFile)
 
 TEST_F(MConfig, ParsePathList)
 {
-	SString path = getChildPath("config.cfg");
+	fs::path path = getChildPath("config.cfg");
 
-	std::ofstream os(path.get(), std::ios::trunc);
+	std::ofstream os(path, std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path);
+	mDeleteList.push(path.u8string());
 	os.close();
 
-	os.open(path.get());
+	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	// Use a wild combo of spaces, non-spaces and quotes
 	os << "path \"/michael/jack \"\"Ripper\"\" son\". .. here/next\"here/../here\"here\n";
 	os.close();
 
-	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
 
 	ASSERT_EQ(config.paths.size(), 6);
-	ASSERT_EQ(config.paths[0], fs::current_path().root_path() / "michael" / "jack \"Ripper\" son");
+	ASSERT_EQ(config.paths[0], fs::path("/") / "michael" / "jack \"Ripper\" son");
 	ASSERT_EQ(config.paths[1], fs::path("."));
 	ASSERT_EQ(config.paths[2], fs::path(".."));
 	ASSERT_EQ(config.paths[3], fs::path("here") / "next");
@@ -257,21 +257,21 @@ TEST_F(MConfig, ParsePathList)
 
 TEST_F(MConfig, ParseEmptyList)
 {
-	SString path = getChildPath("config.cfg");
+	fs::path path = getChildPath("config.cfg");
 
-	std::ofstream os(path.get(), std::ios::trunc);
+	std::ofstream os(path, std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(path);
+	mDeleteList.push(path.u8string());
 	os.close();
 
-	os.open(path.get());
+	os.open(path);
 	ASSERT_TRUE(os.is_open());
 	// Use a wild combo of spaces, non-spaces and quotes
 	os << "path {}\n";
 	os << "file {}\n";
 	os.close();
 
-	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
 
 	ASSERT_TRUE(config.paths.empty());
 	ASSERT_TRUE(config.Pwad_list.empty());
@@ -289,7 +289,7 @@ TEST_F(MConfig, MWriteConfig)
     config.loadedLevelName = "NEW LEVEL";
     config.Pwad_list = { "file1", "file2 file3" };
 
-    config.config_file = getChildPath("configx.cfg");  // pick any name
+    config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
 
     ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
     mDeleteList.push(config.config_file);
@@ -322,9 +322,19 @@ TEST_F(MConfig, MWriteConfig)
 
 TEST_F(MConfig, MWriteConfigPathList)
 {
-	config.paths = {"", ".", "/michael/jack \"Ripper\" son", ".", "..", "here/n\"ext", "here/../here", "here", "\"\""};
+	config.paths = {
+		"", 
+		".", 
+		"/michael/jack \"Ripper\" son", 
+		".", 
+		"..", 
+		"here/n\"ext", 
+		"here/../here", 
+		"here", 
+		"\"\""
+	};
 
-	config.config_file = getChildPath("configx.cfg");  // pick any name
+	config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
 	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
 	mDeleteList.push(config.config_file);
 
@@ -335,7 +345,7 @@ TEST_F(MConfig, MWriteConfigPathList)
 	ASSERT_EQ(config.paths.size(), 9);
 	ASSERT_EQ(config.paths[0], fs::path(""));
 	ASSERT_EQ(config.paths[1], fs::path("."));
-	ASSERT_EQ(config.paths[2], fs::current_path().root_path() / "michael" / "jack \"Ripper\" son");
+	ASSERT_EQ(config.paths[2], fs::path("/") / "michael" / "jack \"Ripper\" son");
 	ASSERT_EQ(config.paths[3], fs::path("."));
 	ASSERT_EQ(config.paths[4], fs::path(".."));
 	ASSERT_EQ(config.paths[5], fs::path("here") / "n\"ext");
@@ -537,7 +547,7 @@ TEST_F(MConfig, MParsePathListCommandLine)
 
 	ASSERT_EQ(config.paths.size(), 7);
 	ASSERT_EQ(config.paths[0], fs::path(""));
-	ASSERT_EQ(config.paths[1], fs::current_path().root_path() / "michael" / "jackson");
+	ASSERT_EQ(config.paths[1], fs::path("/") / "michael" / "jackson");
 	ASSERT_EQ(config.paths[2], fs::path("."));
 	ASSERT_EQ(config.paths[3], fs::path(".."));
 	ASSERT_EQ(config.paths[4], fs::path("here") / "next");
@@ -556,17 +566,17 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	// Resulted filenme is cache_dir + "/cache/%08X%08X.dat"
 	// crc.extra, crc.raw
 	global::cache_dir = mTempDir;
-	ASSERT_TRUE(FileMakeDir(getChildPath("cache").get()));
-	mDeleteList.push(getChildPath("cache"));
+	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
+	mDeleteList.push(getChildPath("cache").u8string());
 
 	// Try with no file: should fail
 	ASSERT_FALSE(inst.M_LoadUserState());
 
 	// Prepare cache file
-	std::ofstream os(getChildPath("cache/0000000000000001.dat").get(),
+	std::ofstream os(getChildPath("cache/0000000000000001.dat"),
 					 std::ios::trunc);
 	ASSERT_TRUE(os.is_open());
-	mDeleteList.push(getChildPath("cache/0000000000000001.dat"));
+	mDeleteList.push(getChildPath("cache/0000000000000001.dat").u8string());
 	os << " # Stuff\n";
 	os << "\n";
 	os << "editor \"hello world\" again\n";
@@ -630,11 +640,11 @@ TEST_F(MConfig, InstanceMSaveUserState)
 	sUnitTokens.clear();
 
 	global::cache_dir = mTempDir;
-	ASSERT_TRUE(FileMakeDir(getChildPath("cache").get()));
-	mDeleteList.push(getChildPath("cache"));
+	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
+	mDeleteList.push(getChildPath("cache").u8string());
 
 	ASSERT_TRUE(inst.M_SaveUserState());
-	mDeleteList.push(getChildPath("cache/0000000000000001.dat"));
+	mDeleteList.push(getChildPath("cache/0000000000000001.dat").u8string());
 	global::cache_dir.clear();
 
 	ASSERT_EQ(sUnitTokens["WriteUser"].size(), 6);

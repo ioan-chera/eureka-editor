@@ -24,12 +24,15 @@
 
 #include <stack>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class TempDirContext : public ::testing::Test
 {
 protected:
 	void SetUp() override;
 	void TearDown() override;
-	SString getChildPath(const char *path) const;
+	fs::path getChildPath(const char *path) const;
 
 	SString mTempDir;
 	std::stack<SString> mDeleteList;

@@ -39,15 +39,15 @@ static void checkFileContent(const char *path, const char *content)
 
 TEST_F(SafeOutFileTest, Stuff)
 {
-	SString path = getChildPath("somefile.txt");
+	fs::path path = getChildPath("somefile.txt");
 
 	// Assert no file if merely created (will fail when tearing down)
 	{
-		SafeOutFile sof(path.get());
+		SafeOutFile sof(path);
 	}
 
 	{
-		SafeOutFile sof(path.get());
+		SafeOutFile sof(path);
 		ASSERT_TRUE(sof.openForWriting().success);	// opening should work
 		ASSERT_TRUE(sof.write("Hello, world!", 13).success);	// and this
 		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
@@ -63,41 +63,41 @@ TEST_F(SafeOutFileTest, Stuff)
 
 	{
 		// Check that writing to an unopen file will fail
-		SafeOutFile sof(path.get());
+		SafeOutFile sof(path);
 		ASSERT_FALSE(sof.write("Hello, world2!", 14).success);	// and this
 		ASSERT_FALSE(sof.commit().success);
 	}
 	{
 		// Now it will work
-		SafeOutFile sof(path.get());
+		SafeOutFile sof(path);
 		ASSERT_TRUE(sof.openForWriting().success);
 		ASSERT_TRUE(sof.write("Hello, world2!", 14).success);	// and this
 		ASSERT_TRUE(sof.write(" more.", 6).success);	// and this
 		ASSERT_TRUE(sof.commit().success);
 	}
-	mDeleteList.push(path);	// the delete list
+	mDeleteList.push(path.u8string());	// the delete list
 
 	// Now check it
-	checkFileContent(path.c_str(), "Hello, world2! more.");
+	checkFileContent(path.u8string().c_str(), "Hello, world2! more.");
 
 	{
 		// Check that forgetting to commit won't overwrite the original
-		SafeOutFile sof(path.get());
+		SafeOutFile sof(path);
 		ASSERT_TRUE(sof.openForWriting().success);
 		ASSERT_TRUE(sof.write("New stuff!", 10).success);
 		sof.close();	// no commit
 	}
 
-	checkFileContent(path.c_str(), "Hello, world2! more.");
+	checkFileContent(path.u8string().c_str(), "Hello, world2! more.");
 
 	{
 		// Check that we can overwrite an old file
-		SafeOutFile sof(path.get());
+		SafeOutFile sof(path);
 		ASSERT_TRUE(sof.openForWriting().success);
 		ASSERT_TRUE(sof.write("New stuff!", 10).success);
 		ASSERT_TRUE(sof.commit().success);
 		sof.close();	// no commit
 	}
 
-	checkFileContent(path.c_str(), "New stuff!");
+	checkFileContent(path.u8string().c_str(), "New stuff!");
 }
