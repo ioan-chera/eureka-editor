@@ -19,6 +19,7 @@
 #include "sys_debug.h"
 
 #include "m_streams.h"
+#include "m_strings.h"
 #include "testUtils/TempDirContext.hpp"
 #include "gtest/gtest.h"
 

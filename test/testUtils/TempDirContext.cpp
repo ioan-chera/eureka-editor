@@ -18,6 +18,8 @@
 
 #include "TempDirContext.hpp"
 
+#include "m_strings.h"
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <rpc.h>

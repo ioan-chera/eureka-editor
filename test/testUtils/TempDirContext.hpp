@@ -19,7 +19,6 @@
 #ifndef TempDirContext_hpp
 #define TempDirContext_hpp
 
-#include "m_strings.h"
 #include "gtest/gtest.h"
 
 #include <stack>
