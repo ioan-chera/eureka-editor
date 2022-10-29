@@ -1200,7 +1200,7 @@ void Instance::CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(global::Pwad_list[index], NULL);
+	OpenFileMap(global::Pwad_list[index].u8string(), NULL);
 }
 
 

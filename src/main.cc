@@ -87,7 +87,7 @@ SString global::install_dir;
 SString global::home_dir;
 SString global::cache_dir;
 
-std::vector<SString> global::Pwad_list;
+std::vector<fs::path> global::Pwad_list;
 
 //
 // config items
@@ -1165,7 +1165,7 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			gInstance.wad.master.Pwad_name = global::Pwad_list[0];
+			gInstance.wad.master.Pwad_name = global::Pwad_list[0].u8string();
 
 			// TODO: main instance
 			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,

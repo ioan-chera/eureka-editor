@@ -817,14 +817,14 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString short_name = fl_filename_name(global::Pwad_list[k].c_str());
+		SString short_name = fl_filename_name(global::Pwad_list[k].u8string().c_str());
 
 		short_name = SString::printf("%s%s%d:  %s", (k < 9) ? "  " : "",
 									 (k < 9) ? "&" : "", 1+k, short_name.c_str());
 
 		Menu_AddItem(pos, short_name.c_str(),
 					 FCAL file_do_load_given,
-					 (void *)global::Pwad_list[k].c_str(), 0);
+					 (void *)global::Pwad_list[k].u8string().c_str(), 0);
 	}
 
 	for ( ; menu_pos < total ; menu_pos++)

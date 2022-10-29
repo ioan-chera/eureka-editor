@@ -139,7 +139,7 @@ namespace global
 
 namespace global
 {
-	extern std::vector<SString> Pwad_list;
+	extern std::vector<fs::path> Pwad_list;
 }
 
 namespace global

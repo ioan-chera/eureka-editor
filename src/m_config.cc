@@ -120,7 +120,7 @@ const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-        OptType::stringList,
+        OptType::pathList,
 		0,
 		"Wad file(s) to edit",
 		"<file>...",
@@ -1074,7 +1074,7 @@ static void readArgsForList(bool ignore, int &argc, const char *const *&argv, vo
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<SString> &Pwad_list, const opt_desc_t *options)
+void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options)
 {
 	const opt_desc_t *o;
 
@@ -1087,7 +1087,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 		{
 			// this is a loose file, handle it now
 			if (pass == CommandLinePass::normal)
-				Pwad_list.push_back(argv[0]);
+				Pwad_list.push_back(fs::u8path(argv[0]));
 
 			argv++;
 			argc--;

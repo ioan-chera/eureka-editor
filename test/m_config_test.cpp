@@ -68,7 +68,7 @@ protected:
 		bool bsp_gl_nodes = false;
 		bool grid_snap_indicator = false;
 		bool leave_offsets_alone = false;
-		std::vector<SString> Pwad_list;
+		std::vector<fs::path> Pwad_list;
 		int backup_max_files = 0;
 		rgb_color_t dotty_axis_col;
 
@@ -123,7 +123,7 @@ void MConfig::SetUp()
 	add(configOption("default_gamma", OptType::integer, OptFlag_preference, &config.usegamma));
 	add(configOption("default_port", OptType::string, OptFlag_preference, &config.default_port));
 	add(configOption("dotty_axis_col", OptType::color, OptFlag_preference, &config.dotty_axis_col));
-	add(configOption("file", "f", OptType::stringList, 0, &config.Pwad_list));
+	add(configOption("file", "f", OptType::pathList, 0, &config.Pwad_list));
 	add(configOption("grid_snap_indicator", OptType::boolean, OptFlag_preference,
 					 &config.grid_snap_indicator));
 	add(configOption("help", OptType::boolean, OptFlag_pass1, &config.show_help));
@@ -361,7 +361,7 @@ TEST_F(MConfig, MParseCommandLine)
     // Test loose files
     std::vector<const char *> argv;
     argv = { "file1", "file 2", "" };
-	std::vector<SString> &Pwad_list = config.Pwad_list;
+	std::vector<fs::path> &Pwad_list = config.Pwad_list;
     // First pass doesn't use it
     M_ParseCommandLine(3, argv.data(), CommandLinePass::early, Pwad_list, options().data());
     ASSERT_TRUE(Pwad_list.empty());
@@ -540,7 +540,7 @@ TEST_F(MConfig, MParsePathListCommandLine)
 {
 	std::vector<const char *> argv;
 	argv = { "--path", "", "/michael/jackson", ".", "..", "here/next", "here/../here", "here" };
-	std::vector<SString> &Pwad_list = config.Pwad_list;
+	std::vector<fs::path> &Pwad_list = config.Pwad_list;
 
 	M_ParseCommandLine((int)argv.size(), argv.data(), CommandLinePass::normal, Pwad_list,
 					   options().data());
@@ -748,7 +748,7 @@ int global::show_version  = 0;
 bool global::udmf_testing = false;
 SString global::home_dir;
 SString global::log_file;
-std::vector<SString> global::Pwad_list;
+std::vector<fs::path> global::Pwad_list;
 SString global::cache_dir;
 int global::show_help     = 0;
 
