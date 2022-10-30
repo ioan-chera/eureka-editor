@@ -137,9 +137,6 @@ protected:
 
 	std::shared_ptr<Wad_file> wad;
 	LoadingData loading;
-
-private:
-	void clearKnownIwads();
 };
 
 //
@@ -160,36 +157,11 @@ void ParseEurekaLumpFixture::TearDown()
 {
 	global::home_dir.clear();
 	global::install_dir.clear();
-	clearKnownIwads();
+	global::known_iwads.clear();
 	DLG_Notify_Override = nullptr;
 	DLG_Confirm_Override = nullptr;
 
 	TempDirContext::TearDown();
-}
-
-//
-// Since global::known_iwads is static, we need to do something more complex to access and clear it.
-//
-void ParseEurekaLumpFixture::clearKnownIwads()
-{
-	// The only method to clear the structure is M_LoadRecent
-	// Prerequisites:
-	// - global::home_dir / "misc.cfg": existing empty file
-
-	// Must set home_dir temporarily for this to work
-	global::home_dir = mTempDir.u8string();
-
-	fs::path miscPath = getChildPath("misc.cfg");
-	FILE *f = fopen(miscPath.u8string().c_str(), "wb");
-	ASSERT_TRUE(f);
-	mDeleteList.push(miscPath);
-
-	int result = fclose(f);
-	ASSERT_FALSE(result);
-
-	M_LoadRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
-
-	global::home_dir.clear();
 }
 
 /*
