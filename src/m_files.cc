@@ -37,7 +37,7 @@ namespace fs = ghc::filesystem;
 
 namespace global
 {
-	static std::map<SString, SString> known_iwads;
+	std::map<SString, SString> known_iwads;
 }
 
 
@@ -306,7 +306,7 @@ void RecentFiles_c::Lookup(int index, fs::path *file_v, SString *map_v) const
 
 namespace global
 {
-	static RecentFiles_c  recent_files;
+	RecentFiles_c  recent_files;
 }
 
 //
@@ -369,9 +369,9 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::
 }
 
 
-void M_LoadRecent()
+void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
 {
-	SString filename = global::home_dir + "/misc.cfg";
+	SString filename = home_dir + "/misc.cfg";
 
 	std::ifstream is(filename.get());
 	if(!is.is_open())
@@ -382,11 +382,11 @@ void M_LoadRecent()
 
 	gLog.printf("Reading recent list from: %s\n", filename.c_str());
 
-	global::recent_files.clear();
-	global::known_iwads.clear();
-	global::port_paths.clear();
+	recent_files.clear();
+	known_iwads.clear();
+	port_paths.clear();
 
-	ParseMiscConfig(is, global::recent_files, global::known_iwads, global::port_paths);
+	ParseMiscConfig(is, recent_files, known_iwads, port_paths);
 }
 
 

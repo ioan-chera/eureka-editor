@@ -84,8 +84,13 @@ public:
 	void Lookup(int index, fs::path *file_v, SString *map_v) const;
 };
 
+struct port_path_info_t
+{
+	SString exe_filename;
+};
 
-void M_LoadRecent();
+
+void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads, std::map<SString, port_path_info_t> &port_paths);
 void M_SaveRecent();
 
 void M_AddRecent(const SString &filename, const SString &map_name);
@@ -107,14 +112,10 @@ int  M_FindGivenFile(const char *filename);
 
 void M_BackupWad(Wad_file *wad);
 
-
-struct port_path_info_t
-{
-	SString exe_filename;
-};
-
 namespace global
 {
+	extern RecentFiles_c  recent_files;
+	extern std::map<SString, SString> known_iwads;
 	extern std::map<SString, port_path_info_t> port_paths;
 }
 

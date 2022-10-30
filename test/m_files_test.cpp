@@ -187,7 +187,7 @@ void ParseEurekaLumpFixture::clearKnownIwads()
 	int result = fclose(f);
 	ASSERT_FALSE(result);
 
-	M_LoadRecent();
+	M_LoadRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
 
 	global::home_dir.clear();
 }
