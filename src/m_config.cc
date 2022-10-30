@@ -786,7 +786,7 @@ static void populateList(SString &value, std::vector<SString> &list)
 		}
 	}
 }
-static void populateList(SString &line, std::vector<fs::path> &list)
+static void populateList(const SString &line, std::vector<fs::path> &list)
 {
 	// this one is more involved. We'll follow the MS-DOS prompt rule: quotes are needed for paths
 	// with spaces, and double-quotes become literal quotes.
@@ -794,85 +794,10 @@ static void populateList(SString &line, std::vector<fs::path> &list)
 	if(line == "{}")
 		return;	// {} means empty
 
-	enum class State
-	{
-		open,
-		singleWord,
-		multiWord,
-		firstQuoteInString,
-	};
-	auto state = State::open;
-	SString item;
-	for(char c : line)
-	{
-		switch(state)
-		{
-			case State::open:
-				if(isspace(c))
-					continue;
-				if(c == '"')
-				{
-					state = State::multiWord;
-					continue;
-				}
-				state = State::singleWord;
-				item.push_back(c);
-				continue;
-			case State::singleWord:
-				if(isspace(c))
-				{
-					list.push_back(item.get());
-					item.clear();
-					state = State::open;
-					continue;
-				}
-				if(c == '"')
-				{
-					list.push_back(item.get());
-					item.clear();
-					state = State::multiWord;
-					continue;
-				}
-				item.push_back(c);
-				continue;
-			case State::multiWord:
-				if(c == '"')
-				{
-					state = State::firstQuoteInString;
-					continue;
-				}
-				item.push_back(c);
-				continue;
-			case State::firstQuoteInString:
-				if(c == '"')
-				{
-					item.push_back('"');
-					state = State::multiWord;
-					continue;
-				}
-				list.push_back(item.get());
-				item.clear();
-				if(isspace(c))
-				{
-					state = State::open;
-					continue;
-				}
-				item.push_back(c);
-				state = State::singleWord;
-				continue;
-		}
-	}
-	// Now past the end
-	switch(state)
-	{
-		case State::open:
-			break;
-		case State::singleWord:
-		case State::multiWord:
-		case State::firstQuoteInString:
-			list.push_back(item.get());
-			break;
-	}
+	TokenWordParse parse(line);
+	SString word;
+	while(parse.getNext(word))
+		list.push_back(fs::u8path(word.get()));
 }
 
 //
