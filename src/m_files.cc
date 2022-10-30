@@ -312,7 +312,7 @@ namespace global
 //
 // Parse miscellaneous config
 //
-static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads)
+static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
 {
 	SString line;
 	while(M_ReadTextLine(line, is))
@@ -358,7 +358,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::
 		}
 		else if(line == "port_path")
 		{
-			M_ParsePortPath(map, path, global::port_paths);
+			M_ParsePortPath(map, path, port_paths);
 		}
 		else
 		{
@@ -386,7 +386,7 @@ void M_LoadRecent()
 	global::known_iwads.clear();
 	global::port_paths.clear();
 
-	ParseMiscConfig(is, global::recent_files, global::known_iwads);
+	ParseMiscConfig(is, global::recent_files, global::known_iwads, global::port_paths);
 }
 
 
