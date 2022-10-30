@@ -671,7 +671,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 {
 	SString home_dir = mTempDir.u8string();
 	RecentFiles_c files;
-	std::map<SString, SString> known_iwads;
+	std::map<SString, fs::path> known_iwads;
 	std::map<SString, port_path_info_t> port_paths;
 
 	// TODO: write the files
@@ -747,8 +747,8 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 
 	// Check the known IWADs map
 	ASSERT_EQ(known_iwads.size(), 2);
-	ASSERT_EQ(known_iwads["heretic"], hereticPath.generic_u8string());
-	ASSERT_EQ(known_iwads["doom3"], doom3Path.generic_u8string());
+	ASSERT_EQ(known_iwads["heretic"], hereticPath);
+	ASSERT_EQ(known_iwads["doom3"], doom3Path);
 
 	// Check the port paths
 	ASSERT_EQ(port_paths.size(), 2);

@@ -37,13 +37,13 @@ namespace fs = ghc::filesystem;
 
 namespace global
 {
-	std::map<SString, SString> known_iwads;
+	std::map<SString, fs::path> known_iwads;
 }
 
 
 void M_AddKnownIWAD(const SString &path)
 {
-	const SString &absolute_name = GetAbsolutePath(path.get()).u8string();
+	fs::path absolute_name = fs::absolute(path.get());
 
 	const SString &game = GameNameFromIWAD(fs::u8path(path.get()));
 
@@ -53,12 +53,12 @@ void M_AddKnownIWAD(const SString &path)
 
 SString M_QueryKnownIWAD(const SString &game)
 {
-	std::map<SString, SString>::iterator KI;
+	std::map<SString, fs::path>::iterator KI;
 
 	KI = global::known_iwads.find(game);
 
 	if (KI != global::known_iwads.end())
-		return KI->second;
+		return KI->second.u8string();
 	else
 		return "";
 }
@@ -69,7 +69,7 @@ SString M_QueryKnownIWAD(const SString &game)
 //
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 {
-	std::map<SString, SString>::iterator KI;
+	std::map<SString, fs::path>::iterator KI;
 
 	SString result;
 	result.reserve(2000);
@@ -95,11 +95,11 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 
 static void M_WriteKnownIWADs(FILE *fp)
 {
-	std::map<SString, SString>::iterator KI;
+	std::map<SString, fs::path>::iterator KI;
 
 	for (KI = global::known_iwads.begin() ; KI != global::known_iwads.end() ; KI++)
 	{
-		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.c_str());
+		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.generic_u8string().c_str());
 	}
 }
 
@@ -312,7 +312,7 @@ namespace global
 //
 // Parse miscellaneous config
 //
-static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
+static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::map<SString, fs::path> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
 {
 	SString line;
 	while(M_ReadTextLine(line, is))
@@ -352,7 +352,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::
 			if(map.noCaseEqual("freedoom"))
 				gLog.printf("  ignoring for compatibility: %s\n", path.c_str());
 			else if(Wad_file::Validate(path.get()))
-				known_iwads[map] = path;
+				known_iwads[map] = fs::u8path(path.get());
 			else
 				gLog.printf("  no longer exists: %s\n", path.c_str());
 		}
@@ -369,7 +369,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::
 }
 
 
-void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
+void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, fs::path> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
 {
 	SString filename = home_dir + "/misc.cfg";
 
@@ -735,12 +735,12 @@ SString Instance::M_PickDefaultIWAD() const
 
 	gLog.debugPrintf("pick default iwad, trying first known iwad...\n");
 
-	std::map<SString, SString>::iterator KI;
+	std::map<SString, fs::path>::iterator KI;
 
 	KI = global::known_iwads.begin();
 
 	if (KI != global::known_iwads.end())
-		return KI->second;
+		return KI->second.u8string();
 
 	// nothing left to try
 	gLog.debugPrintf("pick default iwad failed.\n");

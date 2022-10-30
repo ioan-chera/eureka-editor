@@ -90,7 +90,7 @@ struct port_path_info_t
 };
 
 
-void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads, std::map<SString, port_path_info_t> &port_paths);
+void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, fs::path> &known_iwads, std::map<SString, port_path_info_t> &port_paths);
 void M_SaveRecent();
 
 void M_AddRecent(const SString &filename, const SString &map_name);
@@ -115,7 +115,7 @@ void M_BackupWad(Wad_file *wad);
 namespace global
 {
 	extern RecentFiles_c  recent_files;
-	extern std::map<SString, SString> known_iwads;
+	extern std::map<SString, fs::path> known_iwads;
 	extern std::map<SString, port_path_info_t> port_paths;
 }
 
