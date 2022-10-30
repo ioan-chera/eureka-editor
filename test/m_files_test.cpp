@@ -616,11 +616,11 @@ TEST(RecentFiles, InsertPastCap)
 	}
 }
 
-class RecentFilesOutput : public TempDirContext
+class RecentFilesFixture : public TempDirContext
 {
 };
 
-TEST_F(RecentFilesOutput, WriteFile)
+TEST_F(RecentFilesFixture, WriteFile)
 {
 	RecentFiles_c files;
 	files.insert("Wad1.wad", "MAP01");
@@ -665,4 +665,93 @@ TEST_F(RecentFilesOutput, WriteFile)
 	ASSERT_TRUE(stream.eof());
 
 	stream.close();
+}
+
+TEST_F(RecentFilesFixture, MLoadRecent)
+{
+	SString home_dir = mTempDir.u8string();
+	RecentFiles_c files;
+	std::map<SString, SString> known_iwads;
+	std::map<SString, port_path_info_t> port_paths;
+
+	// TODO: write the files
+	// TODO: write the necessary IWADs
+	fs::path path = getChildPath("misc.cfg");
+	std::ofstream stream(path);
+	ASSERT_TRUE(stream.is_open());
+	mDeleteList.push(path);
+
+	stream << "# Misc.cfg file" << std::endl;
+	stream << "# recent E1M1 doom.wad" << std::endl;	// ignore comment
+	stream << " " << std::endl;	// ignore blank line
+
+	fs::path hticPath = getChildPath("htic.wad");
+	fs::path doom3Path = getChildPath("doom3.wad");
+	fs::path freedoomPath = getChildPath("freedoom.wad");
+	fs::path deletedPath = getChildPath("deleted.wad");
+	fs::path badPath = getChildPath("bad.wad");
+	fs::path hereticPath = getChildPath("heretic.wad");
+
+	stream << "recent MAP02 " << doom3Path.generic_u8string() << std::endl;
+	stream << "recent H5M6 " << std::endl;	// malformed
+	stream << "recent E1M1 " << badPath.generic_u8string() << std::endl;	// invalid wad
+	stream << "recent E3M5 " << hereticPath.generic_u8string() << std::endl;
+	stream << "recent E3M5 " << hticPath.generic_u8string() << std::endl;
+	stream << "recent E7M7 " << deletedPath.generic_u8string() << std::endl;	// missing wad
+	stream << "recent MAP03 " << doom3Path.generic_u8string() << std::endl;	// should overwrite the other Doom3 wad recent
+	
+	stream << "known_iwad heretic " << hticPath.generic_u8string() << std::endl;
+	stream << "known_iwad mood " << std::endl;	// malformed
+	stream << "known_iwad doom3 " << doom3Path.generic_u8string() << std::endl;
+	stream << "known_iwad FreeDoom " << freedoomPath.generic_u8string() << std::endl;	// ignore freedoom
+	stream << "known_iwad inexistent " << deletedPath.generic_u8string() << std::endl;	// file not found
+	stream << "known_iwad malformed " << badPath.generic_u8string() << std::endl;	// bad file (both cases should be "invalid"
+	stream << "known_iwad heretic " << hereticPath.generic_u8string() << std::endl;	// overwrite
+	
+	stream << "port_path boom |/home/jillson/boom.wad" << std::endl;
+	stream << "port_path zdoom |/home/jillson/zdoom.wad" << std::endl;
+	stream << "port_path goom /home/jillson/goom.wad" << std::endl;	// malformed
+	stream << "port_path zdoom |/home/jackson/zdoom.wad" << std::endl;	// overwrite
+
+	stream.close();
+
+	// Prepare the IWAD files
+	for(const fs::path &path : { hticPath, doom3Path, freedoomPath, badPath, hereticPath })
+	{
+		std::ofstream wadstream(path, std::ios::binary);
+		ASSERT_TRUE(wadstream.is_open());
+		mDeleteList.push(path);
+		if(path != badPath)
+			wadstream.write("PWAD\0\0\0\0\x0c\0\0\0", 12);
+		ASSERT_FALSE(wadstream.fail());
+		wadstream.close();
+	}
+
+	M_LoadRecent(home_dir, files, known_iwads, port_paths);
+
+	// Check the recent files
+	ASSERT_EQ(files.getSize(), 3);
+	SString map;
+
+	files.Lookup(0, &path, &map);
+	ASSERT_EQ(path, doom3Path);
+	ASSERT_EQ(map, "MAP03");
+
+	files.Lookup(1, &path, &map);
+	ASSERT_EQ(path, hticPath);
+	ASSERT_EQ(map, "E3M5");
+
+	files.Lookup(2, &path, &map);
+	ASSERT_EQ(path, hereticPath);
+	ASSERT_EQ(map, "E3M5");
+
+	// Check the known IWADs map
+	ASSERT_EQ(known_iwads.size(), 2);
+	ASSERT_EQ(known_iwads["heretic"], hereticPath.generic_u8string());
+	ASSERT_EQ(known_iwads["doom3"], doom3Path.generic_u8string());
+
+	// Check the port paths
+	ASSERT_EQ(port_paths.size(), 2);
+	ASSERT_EQ(port_paths["zdoom"].exe_filename, "/home/jackson/zdoom.wad");
+	ASSERT_EQ(port_paths["boom"].exe_filename, "/home/jillson/boom.wad");
 }
