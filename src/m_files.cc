@@ -190,7 +190,7 @@ bool readBuffer(FILE* f, size_t size, std::vector<byte>& target)
 //
 // Parse port path
 //
-static void M_ParsePortPath(const SString &name, const SString &cpath)
+static void M_ParsePortPath(const SString &name, const SString &cpath, std::map<SString, port_path_info_t> &port_paths)
 {
 	SString path(cpath);
 	path.trimLeadingSpaces();
@@ -204,7 +204,7 @@ static void M_ParsePortPath(const SString &name, const SString &cpath)
 	// terminate arguments
 	path.erase(0, pos + 1);
 
-	port_path_info_t *info = M_QueryPortPath(name, global::port_paths, true);
+	port_path_info_t *info = M_QueryPortPath(name, port_paths, true);
 	if (! info)	// should not fail!
 		return;
 
@@ -358,7 +358,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::
 		}
 		else if(line == "port_path")
 		{
-			M_ParsePortPath(map, path);
+			M_ParsePortPath(map, path, global::port_paths);
 		}
 		else
 		{
