@@ -113,7 +113,12 @@ struct port_path_info_t
 	SString exe_filename;
 };
 
-port_path_info_t * M_QueryPortPath(const SString &name, bool create_it = false);
+namespace global
+{
+	extern std::map<SString, port_path_info_t> port_paths;
+}
+
+port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_path_info_t> &port_paths, bool create_it = false);
 
 bool M_IsPortPathValid(const port_path_info_t *info);
 

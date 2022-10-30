@@ -133,25 +133,25 @@ int M_FindGivenFile(const char *filename)
 
 namespace global
 {
-	static std::map<SString, port_path_info_t> port_paths;
+	std::map<SString, port_path_info_t> port_paths;
 }
 
 
-port_path_info_t * M_QueryPortPath(const SString &name, bool create_it)
+port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_path_info_t> &port_paths, bool create_it)
 {
 	std::map<SString, port_path_info_t>::iterator IT;
 
-	IT = global::port_paths.find(name);
+	IT = port_paths.find(name);
 
-	if (IT != global::port_paths.end())
+	if (IT != port_paths.end())
 		return &IT->second;
 
 	if (create_it)
 	{
 		port_path_info_t info;
-		global::port_paths[name] = info;
+		port_paths[name] = info;
 
-		return M_QueryPortPath(name);
+		return M_QueryPortPath(name, port_paths);
 	}
 
 	return NULL;
@@ -204,7 +204,7 @@ static void M_ParsePortPath(const SString &name, const SString &cpath)
 	// terminate arguments
 	path.erase(0, pos + 1);
 
-	port_path_info_t *info = M_QueryPortPath(name, true);
+	port_path_info_t *info = M_QueryPortPath(name, global::port_paths, true);
 	if (! info)	// should not fail!
 		return;
 
