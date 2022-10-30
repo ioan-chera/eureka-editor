@@ -312,7 +312,7 @@ namespace global
 //
 // Parse miscellaneous config
 //
-static void ParseMiscConfig(std::istream &is)
+static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::map<SString, SString> &known_iwads)
 {
 	SString line;
 	while(M_ReadTextLine(line, is))
@@ -342,7 +342,7 @@ static void ParseMiscConfig(std::istream &is)
 		{
 			// TODO: parse this correctly
 			if(Wad_file::Validate(path.get()))
-				global::recent_files.insert(fs::u8path(path.get()), map);
+				recent_files.insert(fs::u8path(path.get()), map);
 			else
 				gLog.printf("  no longer exists: %s\n", path.c_str());
 		}
@@ -352,7 +352,7 @@ static void ParseMiscConfig(std::istream &is)
 			if(map.noCaseEqual("freedoom"))
 				gLog.printf("  ignoring for compatibility: %s\n", path.c_str());
 			else if(Wad_file::Validate(path.get()))
-				global::known_iwads[map] = path;
+				known_iwads[map] = path;
 			else
 				gLog.printf("  no longer exists: %s\n", path.c_str());
 		}
@@ -386,7 +386,7 @@ void M_LoadRecent()
 	global::known_iwads.clear();
 	global::port_paths.clear();
 
-	ParseMiscConfig(is);
+	ParseMiscConfig(is, global::recent_files, global::known_iwads);
 }
 
 
