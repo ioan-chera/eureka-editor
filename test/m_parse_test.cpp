@@ -132,3 +132,65 @@ TEST(MParse, MParseLine)
         ASSERT_EQ(M_ParseLine("\"\"\"", tokens, option), ParseLine_stringError);
     }
 }
+
+TEST(MParse, TokenWordParse)
+{
+	TokenWordParse parse("word1 w2 ...g3+gh-\\ \"\" \"have\"\"double word\" \"\"\"\"");
+	std::vector<SString> words;
+	SString word;
+	while(parse.getNext(word))
+		words.push_back(word);
+
+	ASSERT_EQ(words.size(), 6);
+	ASSERT_EQ(words[0], "word1");
+	ASSERT_EQ(words[1], "w2");
+	ASSERT_EQ(words[2], "...g3+gh-\\");
+	ASSERT_EQ(words[3], "");
+	ASSERT_EQ(words[4], "have\"double word");
+	ASSERT_EQ(words[5], "\"");
+}
+
+TEST(MParse, TokenWordParseEmpty)
+{
+	TokenWordParse parse(" \t\t\r\n");
+	SString word;
+	ASSERT_FALSE(parse.getNext(word));
+
+	TokenWordParse parse2("");
+	ASSERT_FALSE(parse2.getNext(word));
+}
+
+TEST(MParse, TokenWordParseUnendedQuote)
+{
+	SString word;
+
+	TokenWordParse parse3("\"");
+	ASSERT_TRUE(parse3.getNext(word));
+	ASSERT_EQ(word, "");
+	ASSERT_FALSE(parse3.getNext(word));
+
+	TokenWordParse parse4("\"jackson");
+	ASSERT_TRUE(parse4.getNext(word));
+	ASSERT_EQ(word, "jackson");
+	ASSERT_FALSE(parse4.getNext(word));
+}
+
+TEST(MParse, TokenWordParseImmediateQuotes)
+{
+	SString word;
+
+	TokenWordParse parse("Michael\"Rogers\"Jack\"\"son\"NoEnd");
+
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "Michael");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "Rogers");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "Jack");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "son");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "NoEnd");
+}
