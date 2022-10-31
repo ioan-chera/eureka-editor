@@ -114,6 +114,7 @@ unit_test(general
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
+    m_parse_test.cpp
     main_test.cpp
 	SafeOutFileTest.cpp
     SStringTest.cpp
@@ -264,7 +265,6 @@ unit_test(independent
     FixedPointTest.cpp
     lib_util_test.cpp
     m_bitvec_test.cpp
-    m_parse_test.cpp
     m_select_test.cpp
     m_streams_test.cpp
     SideTest.cpp
