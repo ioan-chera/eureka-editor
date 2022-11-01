@@ -704,7 +704,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	
 	stream << "known_iwad heretic " << escape(hticPath) << std::endl;
 	stream << "known_iwad mood " << std::endl;	// malformed
-	stream << "known_iwad doom3 " << escape(doom3Path) << std::endl;
+	stream << "known_iwad \"doom \"\"3\"\"\" " << escape(doom3Path) << std::endl;
 	stream << "known_iwad FreeDoom " << escape(freedoomPath) << std::endl;	// ignore freedoom
 	stream << "known_iwad inexistent " << escape(deletedPath) << std::endl;	// file not found
 	stream << "known_iwad malformed " << escape(badPath) << std::endl;	// bad file (both cases should be "invalid"
@@ -750,7 +750,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	// Check the known IWADs map
 	ASSERT_EQ(known_iwads.size(), 2);
 	ASSERT_EQ(known_iwads["heretic"], hereticPath);
-	ASSERT_EQ(known_iwads["doom3"], doom3Path);
+	ASSERT_EQ(known_iwads["doom \"3\""], doom3Path);
 
 	// Check the port paths
 	ASSERT_EQ(port_paths.size(), 2);
