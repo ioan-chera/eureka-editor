@@ -485,5 +485,15 @@ SString GetExecutablePath(const char *argv0)
 	return path;
 }
 
+//
+// Helper to escape path for writing. It adds quotes if needed, and any internal quotes are doubled
+// (like in MS-DOS)
+//
+SString escape(const fs::path &path)
+{
+	std::string str = path.generic_u8string();
+	return SString(str).spaceEscape();
+}
+
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

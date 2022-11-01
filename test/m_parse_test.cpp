@@ -150,6 +150,20 @@ TEST(MParse, TokenWordParse)
 	ASSERT_EQ(words[5], "\"");
 }
 
+TEST(MParse, TokenWordParsePath)
+{
+	TokenWordParse parse("word1 w2/w3 word3");
+	SString word;
+	fs::path path;
+
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "word1");
+	ASSERT_TRUE(parse.getNext(path));
+	ASSERT_EQ(path, fs::path("w2") / "w3");
+	ASSERT_TRUE(parse.getNext(word));
+	ASSERT_EQ(word, "word3");
+}
+
 TEST(MParse, TokenWordParseEmpty)
 {
 	TokenWordParse parse(" \t\t\r\n");

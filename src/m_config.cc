@@ -1221,16 +1221,6 @@ static void writeListToConfig(const std::vector<SString> &list, std::ofstream &o
 		os << item << ' ';
 }
 
-//
-// Helper to escape path for writing. It adds quotes if needed, and any internal quotes are doubled
-// (like in MS-DOS)
-//
-static SString escape(const fs::path &path)
-{
-	std::string str = path.generic_u8string();
-	return SString(str).spaceEscape();
-}
-
 static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &os)
 {
 	if (list.empty())

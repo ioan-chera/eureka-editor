@@ -84,6 +84,8 @@ int ScanDirectory(const SString &path, const std::function<void(const SString &,
 // entry in the directory.  Returns the total number of entries,
 // or a negative value on error (SCAN_ERR_xx value).
 
+SString escape(const fs::path &path);
+
 #endif /* __LIB_FILE_H__ */
 
 //--- editor settings ---

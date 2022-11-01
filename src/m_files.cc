@@ -25,6 +25,7 @@
 #include "m_files.h"
 #include "m_game.h"
 #include "m_loadsave.h"
+#include "m_parse.h"
 #include "m_streams.h"
 #include "w_wad.h"
 
@@ -312,64 +313,84 @@ namespace global
 //
 // Parse miscellaneous config
 //
-static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files, std::map<SString, fs::path> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
+static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files,
+							std::map<SString, fs::path> &known_iwads,
+							std::map<SString, port_path_info_t> &port_paths)
 {
 	SString line;
 	while(M_ReadTextLine(line, is))
 	{
-		// comment?
-		if (line[0] == '#')
-			continue;
-
-		size_t pos = line.find(' ');
-		if(pos == std::string::npos)
+		SString keyword;
+		TokenWordParse parse(line);
+		if(!parse.getNext(keyword))
+			continue;	// blank line
+		if(keyword == "recent")
 		{
-			// FIXME warning
-			continue;
-		}
-		SString map;
-		line.cutWithSpace(pos, &map);
-		pos = map.find(' ');
-		if(pos == std::string::npos)
-		{
-			// FIXME warning
-			continue;
-		}
-
-		SString path;
-		map.cutWithSpace(pos, &path);
-		if(line == "recent")
-		{
-			// TODO: parse this correctly
-			if(Wad_file::Validate(path.get()))
-				recent_files.insert(fs::u8path(path.get()), map);
+			SString map;
+			fs::path path;
+			if(!parse.getNext(map))
+			{
+				gLog.printf("Expected map name after 'recent' in recents config\n");
+				continue;
+			}
+			if(!parse.getNext(path))
+			{
+				gLog.printf("Expected WAD path as second arg in 'recent' in recents config\n");
+				continue;
+			}
+			if(Wad_file::Validate(path))
+				recent_files.insert(path, map);
 			else
-				gLog.printf("  no longer exists: %s\n", path.c_str());
+				gLog.printf("  no longer exists: %s\n", path.u8string().c_str());
 		}
-		else if(line == "known_iwad")
+		else if(keyword == "known_iwad")
 		{
+			SString name;
+			fs::path path;
+			if(!parse.getNext(name))
+			{
+				gLog.printf("Expected IWAD name after 'known_iwad' in recents config\n");
+				continue;
+			}
+			if(!parse.getNext(path))
+			{
+				gLog.printf("Expected WAD path as second arg in 'known_iwad' in recents config\n");
+				continue;
+			}
 			// ignore plain freedoom.wad (backwards compatibility)
-			if(map.noCaseEqual("freedoom"))
-				gLog.printf("  ignoring for compatibility: %s\n", path.c_str());
-			else if(Wad_file::Validate(path.get()))
-				known_iwads[map] = fs::u8path(path.get());
+			if(name.noCaseEqual("freedoom"))
+				gLog.printf("  ignoring for compatibility: %s\n", path.u8string().c_str());
+			else if(Wad_file::Validate(path))
+				known_iwads[name] = path;
 			else
-				gLog.printf("  no longer exists: %s\n", path.c_str());
+				gLog.printf("  no longer exists: %s\n", path.u8string().c_str());
 		}
-		else if(line == "port_path")
+		else if(keyword == "port_path")
 		{
-			M_ParsePortPath(map, path, port_paths);
+			SString name, barpath, path;
+			if(!parse.getNext(name))
+			{
+				gLog.printf("Expected port name after 'port_path' in recents config\n");
+				continue;
+			}
+			if(!parse.getNext(barpath))
+			{
+				gLog.printf("Expected | followed by port path after port name\n");
+				continue;
+			}
+			if(parse.getNext(path))	// allow space after |
+				barpath += path;
+			M_ParsePortPath(name, barpath, port_paths);
 		}
 		else
-		{
-			// FIXME: warning
-			continue;
-		}
+			gLog.printf("Unknown keyword '%s' in recents config\n", keyword.c_str());
 	}
 }
 
 
-void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files, std::map<SString, fs::path> &known_iwads, std::map<SString, port_path_info_t> &port_paths)
+void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files,
+				  std::map<SString, fs::path> &known_iwads,
+				  std::map<SString, port_path_info_t> &port_paths)
 {
 	SString filename = home_dir + "/misc.cfg";
 

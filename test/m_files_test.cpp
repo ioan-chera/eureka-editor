@@ -684,34 +684,36 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	stream << "# Misc.cfg file" << std::endl;
 	stream << "# recent E1M1 doom.wad" << std::endl;	// ignore comment
 	stream << " " << std::endl;	// ignore blank line
+	stream << "  # comment after line" << std::endl;	// ignore comment after space
+
 
 	fs::path hticPath = getChildPath("htic.wad");
 	fs::path doom3Path = getChildPath("doom3.wad");
 	fs::path freedoomPath = getChildPath("freedoom.wad");
 	fs::path deletedPath = getChildPath("deleted.wad");
 	fs::path badPath = getChildPath("bad.wad");
-	fs::path hereticPath = getChildPath("heretic.wad");
+	fs::path hereticPath = getChildPath("here tic.wad");
 
-	stream << "recent MAP02 " << doom3Path.generic_u8string() << std::endl;
+	stream << "recent MAP02 " << escape(doom3Path) << " # recent" << std::endl;
 	stream << "recent H5M6 " << std::endl;	// malformed
-	stream << "recent E1M1 " << badPath.generic_u8string() << std::endl;	// invalid wad
-	stream << "recent E3M5 " << hereticPath.generic_u8string() << std::endl;
-	stream << "recent E3M5 " << hticPath.generic_u8string() << std::endl;
-	stream << "recent E7M7 " << deletedPath.generic_u8string() << std::endl;	// missing wad
-	stream << "recent MAP03 " << doom3Path.generic_u8string() << std::endl;	// should overwrite the other Doom3 wad recent
+	stream << "recent E1M1 " << escape(badPath) << std::endl;	// invalid wad
+	stream << "recent E3M5 " << escape(hereticPath) << std::endl;
+	stream << "recent \"E3 M5\" " << escape(hticPath) << std::endl;
+	stream << "recent E7M7 " << escape(deletedPath) << std::endl;	// missing wad
+	stream << "recent MAP03 " << escape(doom3Path) << std::endl;	// should overwrite the other Doom3 wad recent
 	
-	stream << "known_iwad heretic " << hticPath.generic_u8string() << std::endl;
+	stream << "known_iwad heretic " << escape(hticPath) << std::endl;
 	stream << "known_iwad mood " << std::endl;	// malformed
-	stream << "known_iwad doom3 " << doom3Path.generic_u8string() << std::endl;
-	stream << "known_iwad FreeDoom " << freedoomPath.generic_u8string() << std::endl;	// ignore freedoom
-	stream << "known_iwad inexistent " << deletedPath.generic_u8string() << std::endl;	// file not found
-	stream << "known_iwad malformed " << badPath.generic_u8string() << std::endl;	// bad file (both cases should be "invalid"
-	stream << "known_iwad heretic " << hereticPath.generic_u8string() << std::endl;	// overwrite
+	stream << "known_iwad doom3 " << escape(doom3Path) << std::endl;
+	stream << "known_iwad FreeDoom " << escape(freedoomPath) << std::endl;	// ignore freedoom
+	stream << "known_iwad inexistent " << escape(deletedPath) << std::endl;	// file not found
+	stream << "known_iwad malformed " << escape(badPath) << std::endl;	// bad file (both cases should be "invalid"
+	stream << "known_iwad heretic " << escape(hereticPath) << std::endl;	// overwrite
 	
 	stream << "port_path boom |/home/jillson/boom.wad" << std::endl;
 	stream << "port_path zdoom |/home/jillson/zdoom.wad" << std::endl;
 	stream << "port_path goom /home/jillson/goom.wad" << std::endl;	// malformed
-	stream << "port_path zdoom |/home/jackson/zdoom.wad" << std::endl;	// overwrite
+	stream << "port_path zdoom | /home/jackson/zdoom.wad" << std::endl;	// overwrite
 
 	stream.close();
 
@@ -739,7 +741,7 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 
 	files.Lookup(1, &path, &map);
 	ASSERT_EQ(path, hticPath);
-	ASSERT_EQ(map, "E3M5");
+	ASSERT_EQ(map, "E3 M5");
 
 	files.Lookup(2, &path, &map);
 	ASSERT_EQ(path, hereticPath);

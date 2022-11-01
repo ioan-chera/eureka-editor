@@ -153,6 +153,11 @@ TEST(LibFile, GetAbsolutePath)
 	ASSERT_STREQ(stringResult.c_str(), path);
 }
 
+TEST(LibFile, Escape)
+{
+	ASSERT_EQ(escape("/path with spaces and a quote\"/ okay"), "\"/path with spaces and a quote\"\"/ okay\"");
+}
+
 TEST_F(LibFileTempDir, FileExists)
 {
 	fs::path path = getChildPath("hello");

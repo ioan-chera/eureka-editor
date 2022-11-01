@@ -136,6 +136,11 @@ bool TokenWordParse::getNext(SString &word)
 				mState = State::multiWord;
 				continue;
 			}
+			if(c == '#')
+			{
+				mState = State::comment;
+				return false;
+			}
 			mState = State::singleWord;
 			item.push_back(c);
 			continue;
@@ -151,6 +156,12 @@ bool TokenWordParse::getNext(SString &word)
 			{
 				mState = State::multiWord;
 				++mPos;
+				word = std::move(item);
+				return true;
+			}
+			if(c == '#')
+			{
+				mState = State::comment;
 				word = std::move(item);
 				return true;
 			}
@@ -171,10 +182,18 @@ bool TokenWordParse::getNext(SString &word)
 				mState = State::multiWord;
 				continue;
 			}
+			if(c == '#')
+			{
+				mState = State::comment;
+				word = std::move(item);
+				return true;
+			}
 			
 			mState = State::open;
 			word = std::move(item);
 			return true;
+		case State::comment:
+			return false;
 		}
 	}
 
@@ -182,6 +201,7 @@ bool TokenWordParse::getNext(SString &word)
 	switch(mState)
 	{
 	case State::open:
+	case State::comment:
 		break;
 	case State::singleWord:
 	case State::multiWord:
@@ -194,93 +214,11 @@ bool TokenWordParse::getNext(SString &word)
 	return false;
 }
 
-//
-// Standardized way to get words from a line. All tokens are space separated. A token is either a single word or a quoted
-// text. A single word can't contain quotes or spaces. A quoted text is always surrounded by quotes and can contain spaces.
-// Any literal quotes within it appear doubled.
-//
-std::vector<SString> getTokenWords(const SString &line)
+bool TokenWordParse::getNext(fs::path &path)
 {
-	enum class State
-	{
-		open,
-		singleWord,
-		multiWord,
-		firstQuoteInString,
-	};
-	auto state = State::open;
-	SString item;
-	std::vector<SString> list;
-	for(char c : line)
-	{
-		switch(state)
-		{
-		case State::open:
-			if(isspace(c))
-				continue;
-			if(c == '"')
-			{
-				state = State::multiWord;
-				continue;
-			}
-			state = State::singleWord;
-			item.push_back(c);
-			continue;
-		case State::singleWord:
-			if(isspace(c))
-			{
-				list.push_back(item);
-				item.clear();
-				state = State::open;
-				continue;
-			}
-			if(c == '"')
-			{
-				list.push_back(item);
-				item.clear();
-				state = State::multiWord;
-				continue;
-			}
-			item.push_back(c);
-			continue;
-		case State::multiWord:
-			if(c == '"')
-			{
-				state = State::firstQuoteInString;
-				continue;
-			}
-			item.push_back(c);
-			continue;
-		case State::firstQuoteInString:
-			if(c == '"')
-			{
-				item.push_back('"');
-				state = State::multiWord;
-				continue;
-			}
-			list.push_back(item);
-			item.clear();
-			if(isspace(c))
-			{
-				state = State::open;
-				continue;
-			}
-			item.push_back(c);
-			state = State::singleWord;
-			continue;
-		}
-	}
-	// Now past the end
-	switch(state)
-	{
-	case State::open:
-		break;
-	case State::singleWord:
-	case State::multiWord:
-	case State::firstQuoteInString:
-		list.push_back(item);
-		break;
-	}
-
-	return list;
+	SString word;
+	bool result = getNext(word);
+	if(result)
+		path = fs::u8path(word.get());
+	return result;
 }

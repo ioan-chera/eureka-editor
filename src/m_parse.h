@@ -21,6 +21,9 @@
 #include "m_strings.h"
 #include <vector>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class SString;
 
 //
@@ -55,6 +58,7 @@ public:
 	}
 
 	bool getNext(SString &word);
+	bool getNext(fs::path &path);
 private:
 	enum class State
 	{
@@ -62,11 +66,10 @@ private:
 		singleWord,
 		multiWord,
 		firstQuoteInString,
+		comment,
 	};
 
 	const SString mLine;
 	int mPos = 0;
 	State mState = State::open;	// state can be left in other states
 };
-
-std::vector<SString> getTokenWords(const SString &line);
