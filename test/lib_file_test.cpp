@@ -276,7 +276,7 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	os << "shadow2";
 	os.close();
 
-	int result = ScanDirectory(mTempDir.u8string(), [](const SString &name, int flags)
+	int result = ScanDirectory(mTempDir, [](const SString &name, int flags)
 		{
 			if(name == "file")
 				ASSERT_EQ(flags, 0);
@@ -292,20 +292,20 @@ TEST_F(LibFileTempDir, ScanDirectory)
 	ASSERT_EQ(result, 4);	// scan no more
 
 	// Now also try on some non-folder files
-	result = ScanDirectory(filePath.u8string(), [](const SString &name, int flags)
+	result = ScanDirectory(filePath, [](const SString &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});
 	ASSERT_EQ(result, SCAN_ERR_NotDir);
 
-	result = ScanDirectory(getChildPath("illegal").u8string(), [](const SString &name, int flags)
+	result = ScanDirectory(getChildPath("illegal"), [](const SString &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});
 	ASSERT_EQ(result, SCAN_ERR_NoExist);
 
 	// Also scan an empty dir
-	result = ScanDirectory(dotDirPath.u8string(), [](const SString &name, int flags)
+	result = ScanDirectory(dotDirPath, [](const SString &name, int flags)
 		{
 			ASSERT_FALSE(true);	// should not get here
 		});

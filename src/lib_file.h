@@ -77,8 +77,8 @@ enum scan_error_e
 
 typedef void (* directory_iter_f)(const SString &name, int flags, void *priv_dat);
 
-int ScanDirectory(const SString &path, directory_iter_f func, void *priv_dat);
-int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func);
+int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat);
+int ScanDirectory(const fs::path &path, const std::function<void(const SString &, int)> &func);
 // scan the directory with the given path and call the given
 // function (passing the private data pointer to it) for each
 // entry in the directory.  Returns the total number of entries,

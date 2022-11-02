@@ -1058,7 +1058,7 @@ void M_BackupWad(Wad_file *wad)
 	scan_data.low  = (1 << 30);
 	scan_data.high = 0;
 
-	if (ScanDirectory(dir_name, backup_scan_file, &scan_data) < 0)
+	if (ScanDirectory(fs::u8path(dir_name.get()), backup_scan_file, &scan_data) < 0)
 	{
 		// Hmmm, show a dialog ??
 		gLog.printf("WARNING: backup failed (cannot scan dir)\n");

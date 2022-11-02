@@ -295,120 +295,43 @@ bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data)
 //
 // Scan a directory
 //
-int ScanDirectory(const SString &path, const std::function<void(const SString &, int)> &func)
+int ScanDirectory(const fs::path &path, const std::function<void(const SString &, int)> &func)
 {
-	SString actualPath = path;
-	if(actualPath.empty())
-		actualPath = ".";
-	int count = 0;
-
-#ifdef WIN32
-
-	DWORD attributes = GetFileAttributesA(path.c_str());
-	if(attributes == INVALID_FILE_ATTRIBUTES)
-		return SCAN_ERR_NoExist;
-	if(!(attributes & FILE_ATTRIBUTE_DIRECTORY))
-		return SCAN_ERR_NotDir;
-	SString pattern;
-	if(actualPath.back() == '/' || actualPath.back() == DIR_SEP_CH)
-		pattern = actualPath + "*";
-	else
-		pattern = actualPath + DIR_SEP_STR "*";
-
-	WIN32_FIND_DATA fdata;
-
-	HANDLE handle = FindFirstFile(pattern.c_str(), &fdata);
-	if (handle == INVALID_HANDLE_VALUE)
-		return 0;  //??? (GetLastError() == ERROR_FILE_NOT_FOUND) ? 0 : SCAN_ERROR;
-
-	do
+	try
 	{
-		int flags = 0;
-
-		if (fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			flags |= SCAN_F_IsDir;
-
-		if (fdata.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
-			flags |= SCAN_F_ReadOnly;
-
-		if (fdata.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
-			flags |= SCAN_F_Hidden;
-
-		// minor kludge for consistency with Unix
-		if (fdata.cFileName[0] == '.' && isalpha(fdata.cFileName[1]))
-			flags |= SCAN_F_Hidden;
-
-		if (strcmp(fdata.cFileName, ".")  == 0 ||
-				strcmp(fdata.cFileName, "..") == 0)
+		int count = 0;
+		for(const auto &dir_entry : fs::directory_iterator(path))
 		{
-			// skip the funky "." and ".." dirs
-		}
-		else
-		{
-			func(fdata.cFileName, flags);
+			int flags = 0;
+			if(fs::is_directory(dir_entry))
+				flags |= SCAN_F_IsDir;
+			if((fs::status(dir_entry).permissions() & (fs::perms::owner_write | fs::perms::group_write | fs::perms::others_write)) == fs::perms::none)
+			{
+				flags |= SCAN_F_ReadOnly;
+			}
+			const SString entry_name = dir_entry.path().filename().u8string();
+			if(entry_name.length() >= 2 && entry_name[0] == '.' && isalnum(entry_name[1]))
+			{
+				flags |= SCAN_F_Hidden;
+			}
 
-			count++;
+			func(entry_name, flags);
+			++count;
 		}
+		return count;
 	}
-	while (FindNextFile(handle, &fdata) != FALSE);
-
-	FindClose(handle);
-
-
-#else // ---- UNIX ------------------------------------------------
-
-	DIR *handle = opendir(path.c_str());
-	if (handle == NULL)
-		return errno == ENOTDIR ? SCAN_ERR_NotDir : SCAN_ERR_NoExist;
-
-	for (;;)
+	catch(const fs::filesystem_error &e)
 	{
-		const struct dirent *fdata = readdir(handle);
-		if (fdata == NULL)
-			break;
-
-		if (strlen(fdata->d_name) == 0)
-			continue;
-
-		// skip the funky "." and ".." dirs
-		if (strcmp(fdata->d_name, ".")  == 0 ||
-				strcmp(fdata->d_name, "..") == 0)
-			continue;
-
-		SString full_name = path + "/" + fdata->d_name;
-
-		struct stat finfo;
-
-		if (stat(full_name.c_str(), &finfo) != 0)
-		{
-			gLog.debugPrintf(".... stat failed: %s\n", GetErrorMessage(errno).c_str());
-			continue;
-		}
-
-
-		int flags = 0;
-
-		if (S_ISDIR(finfo.st_mode))
-			flags |= SCAN_F_IsDir;
-
-		if ((finfo.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH)) == 0)
-			flags |= SCAN_F_ReadOnly;
-
-		if (fdata->d_name[0] == '.' && isalpha(fdata->d_name[1]))
-			flags |= SCAN_F_Hidden;
-
-		func(fdata->d_name, flags);
-
-		count++;
+		gLog.printf("%s (%d)\n", e.what(), e.code().value());
+		if(!fs::exists(path))
+			return SCAN_ERR_NoExist;
+		if(!fs::is_directory(path))
+			return SCAN_ERR_NotDir;
+		return SCAN_ERROR;
 	}
-
-	closedir(handle);
-#endif
-
-	return count;
 }
 
-int ScanDirectory(const SString &path, directory_iter_f func, void *priv_dat)
+int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat)
 {
 	return ScanDirectory(path, [func, priv_dat](const SString &name, int flags)
 						 {

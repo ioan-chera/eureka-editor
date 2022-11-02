@@ -1226,9 +1226,9 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 		temp_list.push_back(ReplaceExtension(name.get(), NULL).u8string());
 	};
 	path = global::install_dir + "/" + folder;
-	ScanDirectory(path, scanner_add_file);
+	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
 	path = global::home_dir + "/" + folder;
-	ScanDirectory(path, scanner_add_file);
+	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
