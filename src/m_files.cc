@@ -989,7 +989,7 @@ struct backup_scan_data_t
 };
 
 
-static void backup_scan_file(const SString &name, int flags, void *priv_dat)
+static void backup_scan_file(const fs::path &name, int flags, void *priv_dat)
 {
 	backup_scan_data_t * data = (backup_scan_data_t *)priv_dat;
 
@@ -999,10 +999,10 @@ static void backup_scan_file(const SString &name, int flags, void *priv_dat)
 	if (flags & SCAN_F_IsDir)
 		return;
 
-	if (! isdigit(name[0]))
+	if (! isdigit(name.u8string()[0]))
 		return;
 
-	int num = atoi(name);
+	int num = atoi(name.u8string());
 
 	data->low  = std::min(data->low,  num);
 	data->high = std::max(data->high, num);

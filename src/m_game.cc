@@ -1217,13 +1217,13 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 	SString path;
 
 	//	gLog.debugPrintf("M_CollectKnownDefs for: %d\n", folder);
-	auto scanner_add_file = [&temp_list](const SString &name, int flags)
+	auto scanner_add_file = [&temp_list](const fs::path &name, int flags)
 	{
 		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
 			return;
-		if (! MatchExtensionNoCase(name.get(), ".ugh"))
+		if (! MatchExtensionNoCase(name, ".ugh"))
 			return;
-		temp_list.push_back(ReplaceExtension(name.get(), NULL).u8string());
+		temp_list.push_back(ReplaceExtension(name, NULL).u8string());
 	};
 	path = global::install_dir + "/" + folder;
 	ScanDirectory(fs::u8path(path.get()), scanner_add_file);

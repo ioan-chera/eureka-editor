@@ -295,7 +295,7 @@ bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data)
 //
 // Scan a directory
 //
-int ScanDirectory(const fs::path &path, const std::function<void(const SString &, int)> &func)
+int ScanDirectory(const fs::path &path, const std::function<void(const fs::path &, int)> &func)
 {
 	try
 	{
@@ -309,8 +309,9 @@ int ScanDirectory(const fs::path &path, const std::function<void(const SString &
 			{
 				flags |= SCAN_F_ReadOnly;
 			}
-			const SString entry_name = dir_entry.path().filename().u8string();
-			if(entry_name.length() >= 2 && entry_name[0] == '.' && isalnum(entry_name[1]))
+			fs::path entry_name = dir_entry.path().filename().u8string();
+			SString entry_string = entry_name.u8string();
+			if(entry_string.length() >= 2 && entry_string[0] == '.' && isalnum(entry_string[1]))
 			{
 				flags |= SCAN_F_Hidden;
 			}
@@ -333,7 +334,7 @@ int ScanDirectory(const fs::path &path, const std::function<void(const SString &
 
 int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat)
 {
-	return ScanDirectory(path, [func, priv_dat](const SString &name, int flags)
+	return ScanDirectory(path, [func, priv_dat](const fs::path &name, int flags)
 						 {
 		func(name, flags, priv_dat);
 	});
