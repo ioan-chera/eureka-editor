@@ -759,94 +759,26 @@ const opt_desc_t options[] =
 //------------------------------------------------------------------------
 
 //
-// Given a string, populates a string list for configuration. Strings must be words separated by
-// spaces.
-//
-static void populateList(SString &value, std::vector<SString> &list)
-{
-	if(value == "{}")
-		return;	// {} means empty
-
-	while(value.good())
-	{
-		size_t spacepos = value.findSpace();
-		if(spacepos == SString::npos)
-		{
-			list.push_back(value);
-			value.clear();
-		}
-		else
-		{
-			SString word = value;
-			word.erase(spacepos, SString::npos);
-			list.push_back(word);
-
-			value.erase(0, spacepos);
-			value.trimLeadingSpaces();
-		}
-	}
-}
-static void populateList(const SString &line, std::vector<fs::path> &list)
-{
-	// this one is more involved. We'll follow the MS-DOS prompt rule: quotes are needed for paths
-	// with spaces, and double-quotes become literal quotes.
-
-	if(line == "{}")
-		return;	// {} means empty
-
-	TokenWordParse parse(line);
-	SString word;
-	while(parse.getNext(word))
-		list.push_back(fs::u8path(word.get()));
-}
-
-//
 // Parse config line from file
 //
-static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum,
+static int parse_config_line_from_file(const SString &line, const SString &basename, int lnum,
 									   const opt_desc_t *options)
 {
-	SString line(cline);
-
-	// skip leading whitespace
-	line.trimLeadingSpaces();
-
-	// skip comments
-	if(line[0] == '#')
+	TokenWordParse parse(line);
+	SString key;
+	if(!parse.getNext(key))	// empty line
 		return 0;
-
-	// remove trailing newline and whitespace
-	line.trimTrailingSpaces();
-
-	// skip empty lines
-	if(line.empty())
-		return 0;
-
-	// grab the name
-	size_t pos = line.find_first_not_of(IDENT_SET);
-	if(pos == std::string::npos || !isspace(line[pos]))
-	{
-		gLog.printf("WARNING: %s(%u): bad line, no space after keyword.\n",
-					basename.c_str(), lnum);
-		return 0;
-	}
 
 	SString value;
-	line.cutWithSpace(pos, &value);
-
-	// find the option value (occupies rest of the line)
-	value.trimLeadingSpaces();
-	if(value.empty())
+	if(!parse.getNext(value))
 	{
 		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n",
 					basename.c_str(), lnum);
 		return 0;
 	}
 
-	// find the option keyword
-	const opt_desc_t * opt;
-
-	for (opt = options ; ; opt++)
+	const opt_desc_t *opt;
+	for(opt = options;; opt++)
 	{
 		if (opt->opt_type == OptType::end)
 		{
@@ -855,7 +787,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			return 0;
 		}
 
-		if(!opt->long_name || line != opt->long_name)
+		if(!opt->long_name || key != opt->long_name)
 			continue;
 
 		// pre-pass options (like --help) don't make sense in a config file
@@ -872,7 +804,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 
 	switch (opt->opt_type)
 	{
-        case OptType::boolean:
+		case OptType::boolean:
 			if(value.noCaseEqual("no") || value.noCaseEqual("false") ||
 			   value.noCaseEqual("off") || value.noCaseEqual("0"))
 			{
@@ -884,23 +816,40 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			}
 			break;
 
-        case OptType::integer:
+		case OptType::integer:
 			*((int *) opt->data_ptr) = atoi(value);
 			break;
 
-        case OptType::color:
+		case OptType::color:
 			*((rgb_color_t *) opt->data_ptr) = ParseColor(value);
 			break;
 
-        case OptType::string:
+		case OptType::string:
 			*static_cast<SString *>(opt->data_ptr) = value;
 			break;
 
-        case OptType::stringList:
-			populateList(value, *static_cast<std::vector<SString> *>(opt->data_ptr));
+		case OptType::path:
+			*static_cast<fs::path *>(opt->data_ptr) = fs::u8path(value.get());
+			break;
+
+		case OptType::stringList:
+			if(value != "{}")
+			{
+				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
+				do
+					list->push_back(value);
+				while(parse.getNext(value));
+			}
 			break;
 		case OptType::pathList:
-			populateList(value, *static_cast<std::vector<fs::path> *>(opt->data_ptr));
+			if(value != "{}")
+			{
+				auto list = static_cast<std::vector<fs::path> *>(opt->data_ptr);
+				fs::path pathvalue = fs::u8path(value.get());
+				do
+					list->push_back(pathvalue);
+				while(parse.getNext(pathvalue));
+			}
 			break;
 		default:
 			BugError("INTERNAL ERROR: unknown option type %d\n", (int) opt->opt_type);
@@ -1125,6 +1074,17 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass,
 
 				break;
 
+			case OptType::path:
+				if(argc < 2)
+				{
+					ThrowException("missing argument after '%s'\n", argv[0]);
+				}
+				++argv;
+				--argc;
+				if(!ignore)
+					*static_cast<fs::path *>(o->data_ptr) = fs::u8path(argv[0]);
+				break;
+
 
             case OptType::stringList:
 				readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
@@ -1198,6 +1158,7 @@ void M_PrintCommandLineOptions()
             case OptType::color:         printf ("<color>     "); break;
 
             case OptType::string:      printf ("<string>    "); break;
+			case OptType::path:         printf("<path>    "); break;
             case OptType::stringList:   printf ("<string> ..."); break;
 			case OptType::pathList: printf("<path> ..."); break;
             case OptType::end: ;  // This line is here only to silence a GCC warning.
@@ -1218,7 +1179,7 @@ static void writeListToConfig(const std::vector<SString> &list, std::ofstream &o
 	if (list.empty())
 		os << "{}";
 	else for (const SString &item : list)
-		os << item << ' ';
+		os << item.spaceEscape() << ' ';
 }
 
 static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &os)
@@ -1263,7 +1224,13 @@ int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
             case OptType::string:
 			{
 				const SString *str = static_cast<SString *>(o->data_ptr);
-				os << (str ? *str : "''");
+				os << str->spaceEscape();
+				break;
+			}
+			case OptType::path:
+			{
+				const fs::path *path = static_cast<fs::path *>(o->data_ptr);
+				os << escape(*path);
 				break;
 			}
             case OptType::integer:

@@ -60,6 +60,10 @@ enum class OptType
 	// Receptacle is of type: SString
 	string,
 
+	// Path (similar to string)
+	// Receptacle is of type: fs::path
+	path,
+
 	// List of strings (not leaking)
 	// Receptacle is of type: std::vector<SString>
 	stringList,

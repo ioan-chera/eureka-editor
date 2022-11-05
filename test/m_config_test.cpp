@@ -84,6 +84,7 @@ protected:
 		bool Quiet = false;
 
 		std::vector<fs::path> paths;
+		fs::path onepath;
 	};
 
 	void SetUp() override;
@@ -139,6 +140,7 @@ void MConfig::SetUp()
 					 &config.loadedLevelName));
 	// Path type
 	add(configOption("path", OptType::pathList, OptFlag_preference, &config.paths));
+	add(configOption("onepath", OptType::path, OptFlag_preference, &config.onepath));
 }
 
 //
@@ -184,8 +186,8 @@ TEST_F(MConfig, MParseConfigFile)
 	os << "Single \n";   // Safe to skip
 	os << "home michael\n";  // Home must NOT be changed
 	os << "help 1\n";   // Also unchanged
-	os << "file file1 file2 file3\n";
-	os << "iwad doom 3.wad\n";
+	os << "file file1 \"file 2\" file3\n";
+	os << "iwad \"doom 3.wad\"\n";
 	os << "udmftest yes\n";
 	os << "backup_max_files -999\n";
 	os << "bsp_on_save off\n";  // test "off"
@@ -208,7 +210,7 @@ TEST_F(MConfig, MParseConfigFile)
 
 	ASSERT_EQ(config.Pwad_list.size(), 3);
 	ASSERT_EQ(config.Pwad_list[0], "file1");
-	ASSERT_EQ(config.Pwad_list[1], "file2");
+	ASSERT_EQ(config.Pwad_list[1], "file 2");
 	ASSERT_EQ(config.Pwad_list[2], "file3");
 
 	ASSERT_EQ(config.loadedIwadName, "doom 3.wad");   // spaces get included
@@ -242,6 +244,7 @@ TEST_F(MConfig, ParsePathList)
 	ASSERT_TRUE(os.is_open());
 	// Use a wild combo of spaces, non-spaces and quotes
 	os << "path \"/michael/jack \"\"Ripper\"\" son\". .. here/next\"here/../here\"here\n";
+	os << "onepath \"jacob's \"\"ladder\"\"/norg.txt\"";
 	os.close();
 
 	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
@@ -253,6 +256,8 @@ TEST_F(MConfig, ParsePathList)
 	ASSERT_EQ(config.paths[3], fs::path("here") / "next");
 	ASSERT_EQ(config.paths[4].lexically_normal(), fs::path("here"));
 	ASSERT_EQ(config.paths[5], fs::path("here"));
+
+	ASSERT_EQ(config.onepath, fs::path("jacob's \"ladder\"") / "norg.txt");
 }
 
 TEST_F(MConfig, ParseEmptyList)
@@ -312,7 +317,7 @@ TEST_F(MConfig, MWriteConfig)
     ASSERT_TRUE(config.auto_load_recent);
     ASSERT_TRUE(config.begin_maximized);
     ASSERT_EQ(config.backup_max_files, 777);
-    ASSERT_EQ(config.default_port, "Doom \\ # Legacy");
+    ASSERT_EQ(config.default_port, "Doom \\ # Legacy    ");
     ASSERT_EQ(config.dotty_axis_col, RGB_MAKE(99, 90, 80));
 
     ASSERT_FALSE(config.udmf_testing); // still false
@@ -333,6 +338,7 @@ TEST_F(MConfig, MWriteConfigPathList)
 		"here", 
 		"\"\""
 	};
+	config.onepath = "bi\"g\"/dog";
 
 	config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
 	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
@@ -352,6 +358,8 @@ TEST_F(MConfig, MWriteConfigPathList)
 	ASSERT_EQ(config.paths[6].lexically_normal(), fs::path("here"));
 	ASSERT_EQ(config.paths[7], fs::path("here"));
 	ASSERT_EQ(config.paths[8], fs::path("\"\""));
+
+	ASSERT_EQ(config.onepath, "bi\"g\"/dog");
 }
 
 TEST_F(MConfig, MParseCommandLine)
@@ -539,7 +547,7 @@ TEST_F(MConfig, MParseCommandLine)
 TEST_F(MConfig, MParsePathListCommandLine)
 {
 	std::vector<const char *> argv;
-	argv = { "--path", "", "/michael/jackson", ".", "..", "here/next", "here/../here", "here" };
+	argv = { "--path", "", "/michael/jackson", ".", "..", "here/next", "here/../here", "here", "--onepath", "big guy" };
 	std::vector<fs::path> &Pwad_list = config.Pwad_list;
 
 	M_ParseCommandLine((int)argv.size(), argv.data(), CommandLinePass::normal, Pwad_list,
@@ -553,6 +561,8 @@ TEST_F(MConfig, MParsePathListCommandLine)
 	ASSERT_EQ(config.paths[4], fs::path("here") / "next");
 	ASSERT_EQ(config.paths[5].lexically_normal(), fs::path("here"));
 	ASSERT_EQ(config.paths[6], fs::path("here"));
+
+	ASSERT_EQ(config.onepath, fs::path("big guy"));
 }
 
 // M_PrintCommandLineOptions is tested in system testing
