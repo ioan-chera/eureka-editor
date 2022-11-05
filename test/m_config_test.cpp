@@ -565,7 +565,7 @@ TEST_F(MConfig, InstanceMLoadUserState)
 	// crc32_c raw=1 extra=0
 	// Resulted filenme is cache_dir + "/cache/%08X%08X.dat"
 	// crc.extra, crc.raw
-	global::cache_dir = mTempDir.u8string();
+	global::cache_dir = mTempDir;
 	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
 	mDeleteList.push(getChildPath("cache"));
 
@@ -639,7 +639,7 @@ TEST_F(MConfig, InstanceMSaveUserState)
 	ASSERT_FALSE(inst.M_SaveUserState());	// can't save if no location
 	sUnitTokens.clear();
 
-	global::cache_dir = mTempDir.u8string();
+	global::cache_dir = mTempDir;
 	ASSERT_TRUE(FileMakeDir(getChildPath("cache")));
 	mDeleteList.push(getChildPath("cache"));
 
@@ -749,7 +749,7 @@ bool global::udmf_testing = false;
 SString global::home_dir;
 SString global::log_file;
 std::vector<fs::path> global::Pwad_list;
-SString global::cache_dir;
+fs::path global::cache_dir;
 int global::show_help     = 0;
 
 Instance gInstance;

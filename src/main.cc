@@ -85,7 +85,7 @@ SString global::log_file;
 
 SString global::install_dir;
 SString global::home_dir;
-SString global::cache_dir;
+fs::path global::cache_dir;
 
 std::vector<fs::path> global::Pwad_list;
 
@@ -224,7 +224,7 @@ static void CreateHomeDirs()
 
 	// try to create home_dir (doesn't matter if it already exists)
 	FileMakeDir(global::home_dir.get());
-	FileMakeDir(global::cache_dir.get());
+	FileMakeDir(global::cache_dir);
 
 	static const char *const subdirs[] =
 	{
@@ -239,7 +239,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.c_str() : global::home_dir.c_str(), subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.u8string().c_str() : global::home_dir.c_str(), subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -301,10 +301,10 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 		ThrowException("Unable to find home directory!\n");
 
 	if (global::cache_dir.empty())
-		global::cache_dir = global::home_dir;
+		global::cache_dir = global::home_dir.get();
 
 	gLog.printf("Home  dir: %s\n", global::home_dir.c_str());
-	gLog.printf("Cache dir: %s\n", global::cache_dir.c_str());
+	gLog.printf("Cache dir: %s\n", global::cache_dir.u8string().c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();

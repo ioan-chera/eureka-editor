@@ -1043,7 +1043,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	SString filename = global::cache_dir + "/backups/" + fl_filename_name(wad->PathName().c_str());
+	SString filename = (global::cache_dir / "backups" / fs::u8path(wad->PathName().get()).filename()).u8string();
 	SString dir_name = ReplaceExtension(filename.get(), NULL).u8string();
 
 	gLog.debugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());

@@ -1299,7 +1299,7 @@ int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
 
 static SString PersistFilename(const crc32_c& crc)
 {
-	return SString::printf("%s/cache/%08X%08X.dat", global::cache_dir.c_str(), crc.extra, crc.raw);
+	return SString::printf("%s/cache/%08X%08X.dat", global::cache_dir.u8string().c_str(), crc.extra, crc.raw);
 }
 
 
