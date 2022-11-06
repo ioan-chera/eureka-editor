@@ -93,14 +93,13 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 	return result;
 }
 
-
-static void M_WriteKnownIWADs(FILE *fp)
+static void M_WriteKnownIWADs(std::ostream &os)
 {
 	std::map<SString, fs::path>::iterator KI;
 
 	for (KI = global::known_iwads.begin() ; KI != global::known_iwads.end() ; KI++)
 	{
-		fprintf(fp, "known_iwad %s %s\n", KI->first.c_str(), KI->second.generic_u8string().c_str());
+		os << "known_iwad " << KI->first.spaceEscape() << " " << escape(KI->second) << std::endl;
 	}
 }
 
@@ -215,16 +214,14 @@ static void M_ParsePortPath(const SString &name, const SString &cpath, std::map<
 	// [ none needed atm.... ]
 }
 
-
-void M_WritePortPaths(FILE *fp)
+static void M_WritePortPaths(std::ostream &os)
 {
 	std::map<SString, port_path_info_t>::iterator IT;
 
 	for (IT = global::port_paths.begin() ; IT != global::port_paths.end() ; IT++)
 	{
 		port_path_info_t& info = IT->second;
-
-		fprintf(fp, "port_path %s |%s\n", IT->first.c_str(), info.exe_filename.c_str());
+		os << "port_path " << IT->first.spaceEscape() << " |" << info.exe_filename.spaceEscape() << std::endl;
 	}
 }
 
@@ -272,18 +269,6 @@ void RecentFiles_c::insert(const fs::path &file, const SString &map)
 		list.erase(it);
 
 	push_front(file, map);
-}
-
-void RecentFiles_c::WriteFile(FILE *fp) const
-{
-	// file is in opposite order, newest at the end
-	// (this allows the parser to merely insert() items in the
-	//  order they are read).
-
-	for(auto it = list.rbegin(); it != list.rend(); ++it)
-	{
-		fprintf(fp, "recent %s %s\n", SString(it->map).spaceEscape().c_str(), SString(it->file.generic_u8string()).spaceEscape().c_str());
-	}
 }
 
 void RecentFiles_c::Write(std::ostream &stream) const
@@ -423,28 +408,23 @@ void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files,
 
 void M_SaveRecent()
 {
-	SString filename = (global::home_dir / "misc.cfg").u8string();
+	fs::path filename = global::home_dir / "misc.cfg";
 
-	FILE *fp = fopen(filename.c_str(), "w");
-
-	if (! fp)
+	std::ofstream os(filename, std::ios::trunc);
+	if(!os.is_open())
 	{
-		gLog.printf("Failed to save recent list to: %s\n", filename.c_str());
+		gLog.printf("Failed to save recent list to: %s\n", filename.u8string().c_str());
 		return;
 	}
 
-	gLog.printf("Writing recent list to: %s\n", filename.c_str());
+	gLog.printf("Writing recent list to: %s\n", filename.u8string().c_str());
+	os << "# Eureka miscellaneous stuff" << std::endl;
 
-	fprintf(fp, "# Eureka miscellaneous stuff\n");
+	global::recent_files.Write(os);
 
-	global::recent_files.WriteFile(fp);
+	M_WriteKnownIWADs(os);
 
-	M_WriteKnownIWADs(fp);
-
-	M_WritePortPaths(fp);
-
-
-	fclose(fp);
+	M_WritePortPaths(os);
 }
 
 
