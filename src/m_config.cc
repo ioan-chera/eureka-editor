@@ -138,7 +138,7 @@ const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-        OptType::string,
+        OptType::path,
 		0,
 		"The name of the IWAD (game data)",
 		"<file>",

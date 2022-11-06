@@ -41,7 +41,7 @@ struct LoadingData
 
 	SString gameName;	// Name of game "doom", "doom2", "heretic", ...
 	SString portName;	// Name of source port "vanilla", "boom", ...
-	SString iwadName;	// Filename of the iwad
+	fs::path iwadName;	// Filename of the iwad
 	SString levelName;	// Name of map lump we are editing
 	SString udmfNamespace;	// for UDMF, the current namespace
 	std::vector<fs::path> resourceList;

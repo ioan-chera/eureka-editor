@@ -921,7 +921,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 	if (!new_iwad.empty())
 	{
 		if (! (keep_cmd_line_args && !iwadName.empty()))
-			iwadName = new_iwad;
+			iwadName = fs::u8path(new_iwad.get());
 	}
 
 	if (!new_port.empty())

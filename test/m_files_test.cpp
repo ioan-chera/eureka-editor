@@ -318,7 +318,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
-	ASSERT_EQ(loading.iwadName, iwadPath.u8string());
+	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
 	ASSERT_FALSE(iwadWarning);
@@ -336,7 +336,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
-	ASSERT_EQ(loading.iwadName, iwadPath.u8string());
+	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
 	ASSERT_FALSE(iwadWarning);
@@ -355,7 +355,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
-	ASSERT_EQ(loading.iwadName, iwadPath.u8string());
+	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_EQ(loading.portName, "trop");
 	ASSERT_FALSE(gameWarning);
 	ASSERT_FALSE(iwadWarning);

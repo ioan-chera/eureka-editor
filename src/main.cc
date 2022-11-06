@@ -377,43 +377,43 @@ static bool DetermineIWAD(Instance &inst)
 	// since values in a EUREKA_LUMP are already vetted.  Hence
 	// producing a fatal error here is OK.
 
-	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName.get()))
+	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
 
 		// make lowercase
-		inst.loaded.iwadName = inst.loaded.iwadName.asLower();
+		inst.loaded.iwadName = fs::u8path(SString(inst.loaded.iwadName.u8string()).asLower().get());
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, inst.loaded.iwadName))
+		if (! M_CanLoadDefinitions(GAMES_DIR, inst.loaded.iwadName.u8string()))
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
 
-		SString path = M_QueryKnownIWAD(inst.loaded.iwadName);
+		SString path = M_QueryKnownIWAD(inst.loaded.iwadName.u8string());
 
 		if (path.empty())
-			ThrowException("Cannot find IWAD for game '%s'\n", inst.loaded.iwadName.c_str());
+			ThrowException("Cannot find IWAD for game '%s'\n", inst.loaded.iwadName.u8string().c_str());
 
-		inst.loaded.iwadName = path;
+		inst.loaded.iwadName = fs::u8path(path.get());
 	}
 	else if (!inst.loaded.iwadName.empty())
 	{
 		// if extension is missing, add ".wad"
-		if (! HasExtension(inst.loaded.iwadName.get()))
-			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName.get(), "wad").u8string();
+		if (! HasExtension(inst.loaded.iwadName))
+			inst.loaded.iwadName = ReplaceExtension(inst.loaded.iwadName, "wad");
 
-		if (! Wad_file::Validate(inst.loaded.iwadName.get()))
-			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.c_str());
+		if (! Wad_file::Validate(inst.loaded.iwadName))
+			FatalError("IWAD does not exist or is invalid: %s\n", inst.loaded.iwadName.u8string().c_str());
 
-		SString game = GameNameFromIWAD(fs::u8path(inst.loaded.iwadName.get()));
+		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
+			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
 
-		M_AddKnownIWAD(inst.loaded.iwadName);
+		M_AddKnownIWAD(inst.loaded.iwadName.u8string());
 		M_SaveRecent();
 	}
 	else
 	{
-		inst.loaded.iwadName = inst.M_PickDefaultIWAD();
+		inst.loaded.iwadName = fs::u8path(inst.M_PickDefaultIWAD().get());
 
 		if (inst.loaded.iwadName.empty())
 		{
@@ -424,7 +424,7 @@ static bool DetermineIWAD(Instance &inst)
 		}
 	}
 
-	inst.loaded.gameName = GameNameFromIWAD(fs::u8path(inst.loaded.iwadName.get()));
+	inst.loaded.gameName = GameNameFromIWAD(inst.loaded.iwadName);
 
 	return true;
 }
@@ -823,11 +823,11 @@ bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName,
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName.u8string(),
 												   WadOpenMode::read);
 	if (!wad)
 	{
-		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.c_str());
+		gLog.printf("Failed to open game IWAD: %s\n", loaded.iwadName.u8string().c_str());
 		return false;
 	}
 	this->wad.master.game_wad = wad;
@@ -840,10 +840,10 @@ bool Instance::Main_LoadIWAD()
 static void readGameInfo(LoadingData &loading, ConfigData &config)
 		noexcept(false)
 {
-	loading.gameName = GameNameFromIWAD(fs::u8path(loading.iwadName.get()));
+	loading.gameName = GameNameFromIWAD(loading.iwadName);
 
 	gLog.printf("Game name: '%s'\n", loading.gameName.c_str());
-	gLog.printf("IWAD file: '%s'\n", loading.iwadName.c_str());
+	gLog.printf("IWAD file: '%s'\n", loading.iwadName.u8string().c_str());
 
 	readConfiguration(loading.parse_vars, "games", loading.gameName, config);
 }
