@@ -220,7 +220,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 		// FIXME: check result??
 		info->exe_filename = GetAbsolutePath(fs::u8path(dialog->exe_name.get()));
 
-		M_SaveRecent(global::home_dir, global::recent_files);
+		M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
 	}
 
 	delete dialog;

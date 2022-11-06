@@ -93,11 +93,11 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
 	return result;
 }
 
-static void M_WriteKnownIWADs(std::ostream &os)
+static void M_WriteKnownIWADs(std::ostream &os, const std::map<SString, fs::path> &known_iwads)
 {
-	std::map<SString, fs::path>::iterator KI;
+	std::map<SString, fs::path>::const_iterator KI;
 
-	for (KI = global::known_iwads.begin() ; KI != global::known_iwads.end() ; KI++)
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++)
 	{
 		os << "known_iwad " << KI->first.spaceEscape() << " " << escape(KI->second) << std::endl;
 	}
@@ -214,13 +214,13 @@ static void M_ParsePortPath(const SString &name, const SString &cpath, std::map<
 	// [ none needed atm.... ]
 }
 
-static void M_WritePortPaths(std::ostream &os)
+static void M_WritePortPaths(std::ostream &os, const std::map<SString, port_path_info_t> &port_paths)
 {
-	std::map<SString, port_path_info_t>::iterator IT;
+	std::map<SString, port_path_info_t>::const_iterator IT;
 
-	for (IT = global::port_paths.begin() ; IT != global::port_paths.end() ; IT++)
+	for (IT = port_paths.begin() ; IT != port_paths.end() ; IT++)
 	{
-		port_path_info_t& info = IT->second;
+		const port_path_info_t& info = IT->second;
 		os << "port_path " << IT->first.spaceEscape() << " |" << escape(info.exe_filename) << std::endl;
 	}
 }
@@ -406,7 +406,7 @@ void M_LoadRecent(const fs::path &home_dir, RecentFiles_c &recent_files,
 }
 
 
-void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files)
+void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths)
 {
 	fs::path filename = home_dir / "misc.cfg";
 
@@ -422,9 +422,9 @@ void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files)
 
 	recent_files.Write(os);
 
-	M_WriteKnownIWADs(os);
+	M_WriteKnownIWADs(os, known_iwads);
 
-	M_WritePortPaths(os);
+	M_WritePortPaths(os, port_paths);
 }
 
 
@@ -458,7 +458,7 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 {
 	global::recent_files.insert(GetAbsolutePath(filename.get()), map_name);
 
-	M_SaveRecent(global::home_dir, global::recent_files);  // why wait?
+	M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);  // why wait?
 }
 
 
@@ -694,7 +694,7 @@ void M_LookForIWADs()
 		}
 	}
 
-	M_SaveRecent(global::home_dir, global::recent_files);
+	M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
 }
 
 
