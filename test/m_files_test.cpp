@@ -159,7 +159,7 @@ void ParseEurekaLumpFixture::TearDown()
 {
 	global::home_dir.clear();
 	global::install_dir.clear();
-	global::known_iwads.clear();
+	global::recent.known_iwads.clear();
 	DLG_Notify_Override = nullptr;
 	DLG_Confirm_Override = nullptr;
 
@@ -315,7 +315,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	// Situation 5: now add the IWAD
 	fs::path iwadPath = getChildPath("emag.wad");
-	M_AddKnownIWAD(iwadPath, global::known_iwads);	// NOTE: no need to add file
+	M_AddKnownIWAD(iwadPath, global::recent.known_iwads);	// NOTE: no need to add file
 
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
@@ -393,7 +393,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	fs::path path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad"), global::known_iwads);
+	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad"), global::recent.known_iwads);
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -469,7 +469,7 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 	path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath("iwad/doom.wad"), global::known_iwads);
+	M_AddKnownIWAD(getChildPath("iwad/doom.wad"), global::recent.known_iwads);
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -671,9 +671,7 @@ TEST_F(RecentFilesFixture, WriteFile)
 TEST_F(RecentFilesFixture, MLoadRecent)
 {
 	fs::path home_dir = mTempDir;
-	RecentFiles_c files;
-	std::map<SString, fs::path> known_iwads;
-	std::map<SString, port_path_info_t> port_paths;
+	RecentKnowledge recent;
 
 	// TODO: write the files
 	// TODO: write the necessary IWADs
@@ -730,51 +728,49 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 		wadstream.close();
 	}
 
-	M_LoadRecent(home_dir, files, known_iwads, port_paths);
+	recent.load(home_dir);
 
 	// Check the recent files
-	ASSERT_EQ(files.getSize(), 3);
+	ASSERT_EQ(recent.files.getSize(), 3);
 	SString map;
 
-	files.Lookup(0, &path, &map);
+	recent.files.Lookup(0, &path, &map);
 	ASSERT_EQ(path, doom3Path);
 	ASSERT_EQ(map, "MAP03");
 
-	files.Lookup(1, &path, &map);
+	recent.files.Lookup(1, &path, &map);
 	ASSERT_EQ(path, hticPath);
 	ASSERT_EQ(map, "E3 M5");
 
-	files.Lookup(2, &path, &map);
+	recent.files.Lookup(2, &path, &map);
 	ASSERT_EQ(path, hereticPath);
 	ASSERT_EQ(map, "E3M5");
 
 	// Check the known IWADs map
-	ASSERT_EQ(known_iwads.size(), 2);
-	ASSERT_EQ(known_iwads["heretic"], hereticPath);
-	ASSERT_EQ(known_iwads["doom \"3\""], doom3Path);
+	ASSERT_EQ(recent.known_iwads.size(), 2);
+	ASSERT_EQ(recent.known_iwads["heretic"], hereticPath);
+	ASSERT_EQ(recent.known_iwads["doom \"3\""], doom3Path);
 
 	// Check the port paths
-	ASSERT_EQ(port_paths.size(), 2);
-	ASSERT_EQ(port_paths["zdoom"].exe_filename, "/home/jackson/zdoom.wad");
-	ASSERT_EQ(port_paths["boom"].exe_filename, "/home/jillson/boom.wad");
+	ASSERT_EQ(recent.port_paths.size(), 2);
+	ASSERT_EQ(recent.port_paths["zdoom"].exe_filename, "/home/jackson/zdoom.wad");
+	ASSERT_EQ(recent.port_paths["boom"].exe_filename, "/home/jillson/boom.wad");
 }
 
 TEST_F(RecentFilesFixture, MSaveRecent)
 {
-	RecentFiles_c recent_files;
-	recent_files.insert("file1", "map1");
-	recent_files.insert("file2", "map 2");
-	recent_files.insert("file1/file 4", "map #");
+	RecentKnowledge recent;
+	recent.files.insert("file1", "map1");
+	recent.files.insert("file2", "map 2");
+	recent.files.insert("file1/file 4", "map #");
 
-	std::map<SString, fs::path> known_iwads;
-	known_iwads["doom1"] = "path/doom1.wad";
-	known_iwads["doom#"] = "path/doom 2.wad";
+	recent.known_iwads["doom1"] = "path/doom1.wad";
+	recent.known_iwads["doom#"] = "path/doom 2.wad";
 
-	std::map<SString, port_path_info_t> port_paths;
-	port_paths["foom"].exe_filename = "port/foom.exe";
-	port_paths["joom generation"].exe_filename = "port/joom generation.exe";
+	recent.port_paths["foom"].exe_filename = "port/foom.exe";
+	recent.port_paths["joom generation"].exe_filename = "port/joom generation.exe";
 
-	M_SaveRecent(mTempDir, recent_files, known_iwads, port_paths);
+	recent.save(mTempDir);
 	mDeleteList.push(mTempDir / "misc.cfg");
 
 	// Now check
@@ -817,15 +813,15 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	{
 		SString myMap, readMap;
 		fs::path myPath, readPath;
-		recent_files.Lookup(i, &myPath, &myMap);
+		recent.files.Lookup(i, &myPath, &myMap);
 		readRecentFiles.Lookup(i, &readPath, &readMap);
 		ASSERT_EQ(myMap, readMap);
 		ASSERT_EQ(myPath, readPath);
 	}
-	ASSERT_EQ(known_iwads, readKnownIwads);
-	ASSERT_EQ(port_paths.size(), readPortPaths.size());
-	for(const auto &item : port_paths)
+	ASSERT_EQ(recent.known_iwads, readKnownIwads);
+	ASSERT_EQ(recent.port_paths.size(), readPortPaths.size());
+	for(const auto &item : recent.port_paths)
 	{
-		ASSERT_EQ(port_paths[item.first].exe_filename, item.second.exe_filename);
+		ASSERT_EQ(recent.port_paths[item.first].exe_filename, item.second.exe_filename);
 	}
 }

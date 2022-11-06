@@ -205,7 +205,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf, *this);
 
 	// populate the EXE name from existing info, if exists
-	port_path_info_t *info = M_QueryPortPath(QueryName(port, game), global::port_paths);
+	port_path_info_t *info = M_QueryPortPath(QueryName(port, game), global::recent.port_paths);
 
 	if (info && !info->exe_filename.empty())
 		dialog->SetEXE(info->exe_filename.u8string());
@@ -215,12 +215,12 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	if (ok)
 	{
 		// persist the new port settings
-		info = M_QueryPortPath(QueryName(port, game), global::port_paths, true /* create_it */);
+		info = M_QueryPortPath(QueryName(port, game), global::recent.port_paths, true /* create_it */);
 
 		// FIXME: check result??
 		info->exe_filename = GetAbsolutePath(fs::u8path(dialog->exe_name.get()));
 
-		M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
+		global::recent.save(global::home_dir);
 	}
 
 	delete dialog;
@@ -350,14 +350,14 @@ void Instance::CMD_TestMap()
 
 	// check if we know the executable path, if not then ask
 	port_path_info_t *info = M_QueryPortPath(QueryName(loaded.portName,
-													   loaded.gameName), global::port_paths);
+													   loaded.gameName), global::recent.port_paths);
 
 	if (! (info && M_IsPortPathValid(info)))
 	{
 		if (! M_PortSetupDialog(loaded.portName, loaded.gameName))
 			return;
 
-		info = M_QueryPortPath(QueryName(loaded.portName, loaded.gameName), global::port_paths);
+		info = M_QueryPortPath(QueryName(loaded.portName, loaded.gameName), global::recent.port_paths);
 	}
 
 	// this generally can't happen, but we check anyway...

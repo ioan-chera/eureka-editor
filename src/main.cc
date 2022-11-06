@@ -373,7 +373,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
 
-		fs::path path = M_QueryKnownIWAD(game, global::known_iwads);
+		fs::path path = M_QueryKnownIWAD(game, global::recent.known_iwads);
 
 		if (path.empty())
 			ThrowException("Cannot find IWAD for game '%s'\n", game.c_str());
@@ -394,8 +394,8 @@ static bool DetermineIWAD(Instance &inst)
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
 
-		M_AddKnownIWAD(inst.loaded.iwadName, global::known_iwads);
-		M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
+		M_AddKnownIWAD(inst.loaded.iwadName, global::recent.known_iwads);
+		global::recent.save(global::home_dir);
 	}
 	else
 	{
@@ -1121,8 +1121,8 @@ int main(int argc, char *argv[])
 
 		init_progress = ProgressStatus::loaded;
 
+		global::recent.load(global::home_dir);
 
-		M_LoadRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
 		M_LoadBindings();
 
 		M_LookForIWADs();

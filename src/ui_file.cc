@@ -813,7 +813,7 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
     loading.gameName = game;
     loading.portName = port;
 
-    loading.iwadName = M_QueryKnownIWAD(game, global::known_iwads);
+    loading.iwadName = M_QueryKnownIWAD(game, global::recent.known_iwads);
 	SYS_ASSERT(!loading.iwadName.empty());
 
     loading.levelFormat = map_format;
@@ -847,7 +847,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str(), global::known_iwads);
+	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str(), global::recent.known_iwads);
 
 	if (!menu_string.empty())
 	{
@@ -1085,7 +1085,7 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	if (!M_QueryKnownIWAD(name, global::known_iwads).empty())
+	if (!M_QueryKnownIWAD(name, global::recent.known_iwads).empty())
 	{
 		that->game = name;
 		that->ok_but->activate();
@@ -1174,8 +1174,8 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 	}
 
 
-	M_AddKnownIWAD(fs::u8path(chooser.filename()), global::known_iwads);
-	M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
+	M_AddKnownIWAD(fs::u8path(chooser.filename()), global::recent.known_iwads);
+	global::recent.save(global::home_dir);
 
 	that->game = game;
 

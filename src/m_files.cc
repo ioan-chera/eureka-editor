@@ -36,12 +36,6 @@ namespace fs = ghc::filesystem;
 
 // list of known iwads (mapping GAME name --> PATH)
 
-namespace global
-{
-	std::map<SString, fs::path> known_iwads;
-}
-
-
 void M_AddKnownIWAD(const fs::path &path, std::map<SString, fs::path> &known_iwads)
 {
 	fs::path absolute_name = fs::absolute(path);
@@ -128,14 +122,6 @@ int M_FindGivenFile(const char *filename)
 //------------------------------------------------------------------------
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
-
-// the set of all known source port paths
-
-namespace global
-{
-	std::map<SString, port_path_info_t> port_paths;
-}
-
 
 port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_path_info_t> &port_paths, bool create_it)
 {
@@ -302,7 +288,7 @@ void RecentFiles_c::Lookup(int index, fs::path *file_v, SString *map_v) const
 
 namespace global
 {
-	RecentFiles_c  recent_files;
+RecentKnowledge recent;
 }
 
 //
@@ -383,9 +369,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files,
 }
 
 
-void M_LoadRecent(const fs::path &home_dir, RecentFiles_c &recent_files,
-				  std::map<SString, fs::path> &known_iwads,
-				  std::map<SString, port_path_info_t> &port_paths)
+void RecentKnowledge::load(const fs::path &home_dir)
 {
 	fs::path filename = home_dir / "misc.cfg";
 
@@ -398,15 +382,14 @@ void M_LoadRecent(const fs::path &home_dir, RecentFiles_c &recent_files,
 
 	gLog.printf("Reading recent list from: %s\n", filename.u8string().c_str());
 
-	recent_files.clear();
+	files.clear();
 	known_iwads.clear();
 	port_paths.clear();
 
-	ParseMiscConfig(is, recent_files, known_iwads, port_paths);
+	ParseMiscConfig(is, files, known_iwads, port_paths);
 }
 
-
-void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths)
+void RecentKnowledge::save(const fs::path &home_dir) const
 {
 	fs::path filename = home_dir / "misc.cfg";
 
@@ -420,7 +403,7 @@ void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files, c
 	gLog.printf("Writing recent list to: %s\n", filename.u8string().c_str());
 	os << "# Eureka miscellaneous stuff" << std::endl;
 
-	recent_files.Write(os);
+	files.Write(os);
 
 	M_WriteKnownIWADs(os, known_iwads);
 
@@ -436,25 +419,24 @@ void M_OpenRecentFromMenu(void *priv_data)
 	OpenFileMap(data->file.u8string(), data->map);
 }
 
-
-void M_AddRecent(const fs::path &filename, const SString &map_name, RecentFiles_c &recent_files, const fs::path &home_dir, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths)
+void RecentKnowledge::addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir)
 {
-	recent_files.insert(GetAbsolutePath(filename), map_name);
+	files.insert(GetAbsolutePath(filename), map_name);
 
-	M_SaveRecent(home_dir, recent_files, known_iwads, port_paths);  // why wait?
+	save(home_dir);  // why wait?
 }
 
 
 bool Instance::M_TryOpenMostRecent()
 {
-	if (global::recent_files.getSize() == 0)
+	if (global::recent.files.getSize() == 0)
 		return false;
 
 	SString filename;
 	SString map_name;
 
 	fs::path filepath;
-	global::recent_files.Lookup(0, &filepath, &map_name);
+	global::recent.files.Lookup(0, &filepath, &map_name);
 	filename = filepath.generic_u8string();
 
 	// M_LoadRecent has already validated the filename, so this should
@@ -664,7 +646,7 @@ void M_LookForIWADs()
 	for (const SString &game : game_list)
 	{
 		// already have it?
-		if (!M_QueryKnownIWAD(game, global::known_iwads).empty())
+		if (!M_QueryKnownIWAD(game, global::recent.known_iwads).empty())
 			continue;
 
 		SString path = SearchForIWAD(game);
@@ -673,11 +655,11 @@ void M_LookForIWADs()
 		{
 			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
 
-			M_AddKnownIWAD(fs::u8path(path.get()), global::known_iwads);
+			M_AddKnownIWAD(fs::u8path(path.get()), global::recent.known_iwads);
 		}
 	}
 
-	M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
+	global::recent.save(global::home_dir);
 }
 
 
@@ -708,7 +690,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	fs::path result;
 
-	result = M_QueryKnownIWAD(default_game, global::known_iwads);
+	result = M_QueryKnownIWAD(default_game, global::recent.known_iwads);
 	if (!result.empty())
 		return result.u8string();
 
@@ -721,7 +703,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	result = M_QueryKnownIWAD(default_game, global::known_iwads);
+	result = M_QueryKnownIWAD(default_game, global::recent.known_iwads);
 	if (!result.empty())
 		return result.u8string();
 
@@ -731,9 +713,9 @@ SString Instance::M_PickDefaultIWAD() const
 
 	std::map<SString, fs::path>::iterator KI;
 
-	KI = global::known_iwads.begin();
+	KI = global::recent.known_iwads.begin();
 
-	if (KI != global::known_iwads.end())
+	if (KI != global::recent.known_iwads.end())
 		return KI->second.u8string();
 
 	// nothing left to try
@@ -816,7 +798,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			}
 			else
 			{
-				new_iwad = M_QueryKnownIWAD(value, global::known_iwads);
+				new_iwad = M_QueryKnownIWAD(value, global::recent.known_iwads);
 
 				if (new_iwad.empty())
 				{

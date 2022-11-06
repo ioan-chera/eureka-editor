@@ -305,7 +305,7 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.gameName = dialog->game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
-		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName, global::known_iwads);
+		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName, global::recent.known_iwads);
 		SYS_ASSERT(!loaded.iwadName.empty());
 	}
 
@@ -1578,7 +1578,7 @@ void Instance::SaveLevel(const SString &level)
 	loaded.writeEurekaLump(wad.master.edit_wad.get());
 	wad.master.edit_wad->writeToDisk();
 
-	M_AddRecent(fs::u8path(wad.master.edit_wad->PathName().get()), loaded.levelName, global::recent_files, global::home_dir, global::known_iwads, global::port_paths);
+	global::recent.addRecent(fs::u8path(wad.master.edit_wad->PathName().get()), loaded.levelName, global::home_dir);
 
 	Status_Set("Saved %s", loaded.levelName.c_str());
 

@@ -93,13 +93,20 @@ struct port_path_info_t
 	fs::path exe_filename;
 };
 
+//
+// Holds recently collected knowledge
+//
+struct RecentKnowledge
+{
+	void load(const fs::path &home_dir);
+	void save(const fs::path &home_dir) const;
+	void addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir);
 
-void M_LoadRecent(const fs::path &home_dir, RecentFiles_c &recent_files,
-				  std::map<SString, fs::path> &known_iwads,
-				  std::map<SString, port_path_info_t> &port_paths);
-void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths);
+	RecentFiles_c files;
+	std::map<SString, fs::path> known_iwads;
+	std::map<SString, port_path_info_t> port_paths;
+};
 
-void M_AddRecent(const fs::path &filename, const SString &map_name, RecentFiles_c &recent_files, const fs::path &home_dir, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths);
 void M_OpenRecentFromMenu(void *priv_data);
 
 void M_LookForIWADs();
@@ -114,9 +121,7 @@ void M_BackupWad(Wad_file *wad);
 
 namespace global
 {
-	extern RecentFiles_c  recent_files;
-	extern std::map<SString, fs::path> known_iwads;
-	extern std::map<SString, port_path_info_t> port_paths;
+	extern RecentKnowledge recent;
 }
 
 port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_path_info_t> &port_paths, bool create_it = false);
