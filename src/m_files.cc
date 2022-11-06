@@ -160,10 +160,10 @@ port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_p
 
 bool M_IsPortPathValid(const port_path_info_t *info)
 {
-	if(info->exe_filename.length() < 2)
+	if(info->exe_filename.u8string().length() < 2)
 		return false;
 
-	if (! FileExists(info->exe_filename.get()))
+	if (! FileExists(info->exe_filename))
 		return false;
 
 	return true;
@@ -208,7 +208,7 @@ static void M_ParsePortPath(const SString &name, const SString &cpath, std::map<
 	if (! info)	// should not fail!
 		return;
 
-	info->exe_filename = path;
+	info->exe_filename = fs::u8path(path.get());
 
 	// parse any other arguments
 	// [ none needed atm.... ]
@@ -221,7 +221,7 @@ static void M_WritePortPaths(std::ostream &os)
 	for (IT = global::port_paths.begin() ; IT != global::port_paths.end() ; IT++)
 	{
 		port_path_info_t& info = IT->second;
-		os << "port_path " << IT->first.spaceEscape() << " |" << info.exe_filename.spaceEscape() << std::endl;
+		os << "port_path " << IT->first.spaceEscape() << " |" << escape(info.exe_filename) << std::endl;
 	}
 }
 

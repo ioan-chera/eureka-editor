@@ -207,8 +207,8 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	// populate the EXE name from existing info, if exists
 	port_path_info_t *info = M_QueryPortPath(QueryName(port, game), global::port_paths);
 
-	if (info && info->exe_filename.good())
-		dialog->SetEXE(info->exe_filename);
+	if (info && !info->exe_filename.empty())
+		dialog->SetEXE(info->exe_filename.u8string());
 
 	bool ok = dialog->Run();
 
@@ -218,7 +218,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 		info = M_QueryPortPath(QueryName(port, game), global::port_paths, true /* create_it */);
 
 		// FIXME: check result??
-		info->exe_filename = GetAbsolutePath(dialog->exe_name.get()).u8string();
+		info->exe_filename = GetAbsolutePath(fs::u8path(dialog->exe_name.get()));
 
 		M_SaveRecent();
 	}
@@ -234,7 +234,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 static SString CalcEXEName(const port_path_info_t *info)
 {
 	// make the executable name relative, since we chdir() to its folder
-	SString basename = GetBaseName(info->exe_filename.get()).u8string();
+	SString basename = GetBaseName(info->exe_filename).u8string();
 	return SString(".") + DIR_SEP_CH + basename;
 }
 
@@ -377,7 +377,7 @@ void Instance::CMD_TestMap()
 	}
 
 	// change working directory to be same as the executable
-	SString folder = FilenameGetPath(info->exe_filename.get()).u8string();
+	SString folder = FilenameGetPath(info->exe_filename).u8string();
 
 	gLog.printf("Changing current dir to: %s\n", folder.c_str());
 

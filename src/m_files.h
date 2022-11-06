@@ -87,7 +87,7 @@ public:
 
 struct port_path_info_t
 {
-	SString exe_filename;
+	fs::path exe_filename;
 };
 
 
