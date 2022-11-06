@@ -68,16 +68,16 @@ fs::path M_QueryKnownIWAD(const SString &game, const std::map<SString, fs::path>
 // returns a string, with each name separated by a '|' character,
 // hence directly usable with the FL_Choice::add() method.
 //
-SString M_CollectGamesForMenu(int *exist_val, const char *exist_name)
+SString M_CollectGamesForMenu(int *exist_val, const char *exist_name, const std::map<SString, fs::path> &known_iwads)
 {
-	std::map<SString, fs::path>::iterator KI;
+	std::map<SString, fs::path>::const_iterator KI;
 
 	SString result;
 	result.reserve(2000);
 
 	int index = 0;
 
-	for (KI = global::known_iwads.begin() ; KI != global::known_iwads.end() ; KI++, index++)
+	for (KI = known_iwads.begin() ; KI != known_iwads.end() ; KI++, index++)
 	{
 		const SString &name = KI->first;
 
