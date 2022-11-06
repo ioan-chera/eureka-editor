@@ -406,20 +406,20 @@ static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
 // Both strings are required
 // Returns "" if not found.
 //
-static SString FindDefinitionFile(const SString &folder, const SString &name)
+static fs::path FindDefinitionFile(const fs::path &folder, const SString &name)
 {
-	SYS_ASSERT(folder.good() && name.good());
-	const SString lookupDirs[] = { global::home_dir.u8string(), global::install_dir.u8string() };
-	for (const SString &base_dir : lookupDirs)
+	SYS_ASSERT(!folder.empty() && name.good());
+	const fs::path lookupDirs[] = { global::home_dir, global::install_dir };
+	for (const fs::path &base_dir : lookupDirs)
 	{
 		if (base_dir.empty())
 			continue;
 
-		SString filename = base_dir + "/" + folder + "/" + name + ".ugh";
+		fs::path filename = base_dir / folder / (name + ".ugh").get();
 
-		gLog.debugPrintf("  trying: %s\n", filename.c_str());
+		gLog.debugPrintf("  trying: %s\n", filename.u8string().c_str());
 
-		if (FileExists(filename.get()))
+		if (FileExists(filename))
 			return filename;
 	}
 
@@ -429,7 +429,7 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 
 bool M_CanLoadDefinitions(const SString &folder, const SString &name)
 {
-	SString filename = FindDefinitionFile(folder, name);
+	fs::path filename = FindDefinitionFile(fs::u8path(folder.get()), name);
 
 	return !filename.empty();
 }
@@ -462,7 +462,7 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 
 	gLog.printf("Loading Definitions : %s\n", prettyname.c_str());
 
-	SString filename = FindDefinitionFile(folder, name);
+	fs::path filename = FindDefinitionFile(fs::u8path(folder.get()), name);
 
 	if (filename.empty())
 	{
@@ -470,9 +470,9 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 											 prettyname.c_str()));
 	}
 
-	gLog.debugPrintf("  found at: %s\n", filename.c_str());
+	gLog.debugPrintf("  found at: %s\n", filename.u8string().c_str());
 
-	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename,
+	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename.u8string(),
 						  folder, prettyname);
 }
 
@@ -1107,19 +1107,19 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 				pst->fail("Too many includes (check for a loop)");
 
 			SString new_folder = folder;
-			SString new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+			fs::path new_name = FindDefinitionFile(fs::u8path(new_folder.get()), pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (new_name.empty() && folder != "common")
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+				new_name = FindDefinitionFile(fs::u8path(new_folder.get()), pst->argv[1]);
 			}
 
 			if (new_name.empty())
 				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
-			M_ParseDefinitionFile(parse_vars, purpose, target, new_name, new_folder,
+			M_ParseDefinitionFile(parse_vars, purpose, target, new_name.u8string(), new_folder,
 								  NULL /* prettyname */,
 								  include_level + 1);
 			continue;
@@ -1157,13 +1157,13 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	SString filename = FindDefinitionFile(GAMES_DIR, game);
+	fs::path filename = FindDefinitionFile(GAMES_DIR, game);
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::gameInfo, &loadingGame,
-						  filename, "games", nullptr);
+						  filename.u8string(), "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
 											 "not set base_game\n",
@@ -1182,7 +1182,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 	if (IT != global::loaded_port_defs.end())
 		return &IT->second;
 
-	SString filename = FindDefinitionFile(PORTS_DIR, port);
+	fs::path filename = FindDefinitionFile(PORTS_DIR, port);
 	if (filename.empty())
 		return NULL;
 
@@ -1190,7 +1190,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::portInfo, &global::loading_Port,
-						  filename, "ports", NULL);
+						  filename.u8string(), "ports", NULL);
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port.supported_games.empty())
