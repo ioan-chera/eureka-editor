@@ -320,13 +320,13 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 		{
 			global::install_dir = fs::u8path(prefixes[i]) / "share" / "eureka";
 
-			SString filename = (global::install_dir / "games" / "doom2.ugh").u8string();
+			fs::path filename = global::install_dir / "games" / "doom2.ugh";
 
 			gLog.debugPrintf("Trying install path: %s\n",
 							 global::install_dir.u8string().c_str());
-			gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
+			gLog.debugPrintf("   looking for file: %s\n", filename.u8string().c_str());
 
-			bool exists = FileExists(filename.get());
+			bool exists = FileExists(filename);
 
 			if (exists)
 				break;
