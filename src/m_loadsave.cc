@@ -305,7 +305,7 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.gameName = dialog->game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
-		loaded.iwadName = fs::u8path(M_QueryKnownIWAD(loaded.gameName).get());
+		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
 		SYS_ASSERT(!loaded.iwadName.empty());
 	}
 

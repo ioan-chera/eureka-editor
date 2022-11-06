@@ -813,7 +813,7 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
     loading.gameName = game;
     loading.portName = port;
 
-    loading.iwadName = fs::u8path(M_QueryKnownIWAD(game).get());
+    loading.iwadName = M_QueryKnownIWAD(game);
 	SYS_ASSERT(!loading.iwadName.empty());
 
     loading.levelFormat = map_format;

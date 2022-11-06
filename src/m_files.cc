@@ -52,14 +52,14 @@ void M_AddKnownIWAD(const SString &path)
 }
 
 
-SString M_QueryKnownIWAD(const SString &game)
+fs::path M_QueryKnownIWAD(const SString &game)
 {
 	std::map<SString, fs::path>::iterator KI;
 
 	KI = global::known_iwads.find(game);
 
 	if (KI != global::known_iwads.end())
-		return KI->second.u8string();
+		return KI->second;
 	else
 		return "";
 }
@@ -733,11 +733,11 @@ SString Instance::M_PickDefaultIWAD() const
 
 	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	SString result;
+	fs::path result;
 
 	result = M_QueryKnownIWAD(default_game);
 	if (!result.empty())
-		return result;
+		return result.u8string();
 
 	// try FreeDoom
 
@@ -750,7 +750,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	result = M_QueryKnownIWAD(default_game);
 	if (!result.empty())
-		return result;
+		return result.u8string();
 
 	// try any known iwad
 
@@ -803,7 +803,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	lump->Seek();
 
-	SString new_iwad;
+	fs::path new_iwad;
 	SString new_port;
 
 	std::vector<SString> new_resources;
@@ -876,9 +876,9 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
 			}
 			// Still doesn't exist? Try IWAD path, if any
-			if (!fs::exists(resourcePath) && new_iwad.good())
+			if (!fs::exists(resourcePath) && !new_iwad.empty())
 			{
-				fs::path wadDirPath = fs::path(new_iwad.c_str()).parent_path();
+				fs::path wadDirPath = new_iwad.parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
 				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
 			}
@@ -921,7 +921,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 	if (!new_iwad.empty())
 	{
 		if (! (keep_cmd_line_args && !iwadName.empty()))
-			iwadName = fs::u8path(new_iwad.get());
+			iwadName = new_iwad;
 	}
 
 	if (!new_port.empty())
