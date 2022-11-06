@@ -836,7 +836,7 @@ static Fl_Menu_Item * Menu_PopulateGivenFiles(Fl_Menu_Item *items)
 
 static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback *cb)
 {
-	int count = M_RecentCount();
+	int count = global::recent_files.getSize();
 
 	if (count < 1)
 		return items;
@@ -862,9 +862,9 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString name = M_RecentShortName(k);
+		SString name = global::recent_files.Format(k);
 
-		void *data = M_RecentData(k);
+		void *data = global::recent_files.getData(k);
 
 		Menu_AddItem(pos, name.c_str(), cb, data, 0);
 	}

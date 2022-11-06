@@ -427,23 +427,6 @@ void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files, c
 	M_WritePortPaths(os, port_paths);
 }
 
-
-int M_RecentCount()
-{
-	return global::recent_files.getSize();
-}
-
-SString M_RecentShortName(int index)
-{
-	return global::recent_files.Format(index);
-}
-
-void * M_RecentData(int index)
-{
-	return global::recent_files.getData(index);
-}
-
-
 void M_OpenRecentFromMenu(void *priv_data)
 {
 	SYS_ASSERT(priv_data);

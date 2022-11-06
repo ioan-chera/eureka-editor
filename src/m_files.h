@@ -102,12 +102,6 @@ void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files, c
 void M_AddRecent(const fs::path &filename, const SString &map_name, RecentFiles_c &recent_files, const fs::path &home_dir, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths);
 void M_OpenRecentFromMenu(void *priv_data);
 
-// these three only for menu code
-int M_RecentCount();
-SString M_RecentShortName(int index);
-void * M_RecentData(int index);
-
-
 void M_LookForIWADs();
 void M_AddKnownIWAD(const fs::path &path);
 fs::path M_QueryKnownIWAD(const SString &game);
