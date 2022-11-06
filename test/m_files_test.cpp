@@ -20,6 +20,8 @@
 
 #include "m_files.h"
 #include "m_loadsave.h"
+#include "m_parse.h"
+#include "m_streams.h"
 
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
@@ -755,4 +757,75 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	ASSERT_EQ(port_paths.size(), 2);
 	ASSERT_EQ(port_paths["zdoom"].exe_filename, "/home/jackson/zdoom.wad");
 	ASSERT_EQ(port_paths["boom"].exe_filename, "/home/jillson/boom.wad");
+}
+
+TEST_F(RecentFilesFixture, MSaveRecent)
+{
+	RecentFiles_c recent_files;
+	recent_files.insert("file1", "map1");
+	recent_files.insert("file2", "map 2");
+	recent_files.insert("file1/file 4", "map #");
+
+	std::map<SString, fs::path> known_iwads;
+	known_iwads["doom1"] = "path/doom1.wad";
+	known_iwads["doom#"] = "path/doom 2.wad";
+
+	std::map<SString, port_path_info_t> port_paths;
+	port_paths["foom"].exe_filename = "port/foom.exe";
+	port_paths["joom generation"].exe_filename = "port/joom generation.exe";
+
+	M_SaveRecent(mTempDir, recent_files, known_iwads, port_paths);
+	mDeleteList.push(mTempDir / "misc.cfg");
+
+	// Now check
+	std::ifstream is(mTempDir / "misc.cfg");
+	ASSERT_TRUE(is.is_open());
+
+	SString line;
+	RecentFiles_c readRecentFiles;
+	std::map<SString, fs::path> readKnownIwads;
+	std::map<SString, port_path_info_t> readPortPaths;
+	while(M_ReadTextLine(line, is))
+	{
+		TokenWordParse parse(line);
+		SString keyword;
+		if(!parse.getNext(keyword))
+			continue;
+		SString name;
+		fs::path path;
+		ASSERT_TRUE(parse.getNext(name));
+		ASSERT_TRUE(parse.getNext(path));
+		if(keyword == "recent")
+		{
+			readRecentFiles.insert(path, name);
+			continue;
+		}
+		if(keyword == "known_iwad")
+		{
+			readKnownIwads[name] = path;
+			continue;
+		}
+		if(keyword == "port_path")
+		{
+			readPortPaths[name].exe_filename = path;
+			continue;
+		}
+	}
+	// Now check content
+	ASSERT_EQ(readRecentFiles.getSize(), 3);
+	for(int i = 0; i < readRecentFiles.getSize(); ++i)
+	{
+		SString myMap, readMap;
+		fs::path myPath, readPath;
+		recent_files.Lookup(i, &myPath, &myMap);
+		readRecentFiles.Lookup(i, &readPath, &readMap);
+		ASSERT_EQ(myMap, readMap);
+		ASSERT_EQ(myPath, readPath);
+	}
+	ASSERT_EQ(known_iwads, readKnownIwads);
+	ASSERT_EQ(port_paths.size(), readPortPaths.size());
+	for(const auto &item : port_paths)
+	{
+		ASSERT_EQ(port_paths[item.first].exe_filename, item.second.exe_filename);
+	}
 }
