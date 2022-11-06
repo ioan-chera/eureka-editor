@@ -286,6 +286,16 @@ void RecentFiles_c::WriteFile(FILE *fp) const
 	}
 }
 
+void RecentFiles_c::Write(std::ostream &stream) const
+{
+	// file is in opposite order, newest at the end
+	// (this allows the parser to merely insert() items in the
+	//  order they are read).
+
+	for(auto it = list.rbegin(); it != list.rend(); ++it)
+		stream << "recent " << it->map.spaceEscape() << " " << escape(it->file) << std::endl;
+}
+
 SString RecentFiles_c::Format(int index) const
 {
 	SYS_ASSERT(index < (int)list.size());

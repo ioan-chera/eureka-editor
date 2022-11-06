@@ -25,6 +25,7 @@
 #include "sys_type.h"
 
 #include <deque>
+#include <ostream>
 
 class Wad_file;
 
@@ -80,6 +81,7 @@ public:
 	
 	void insert(const fs::path &file, const SString &map);
 	void WriteFile(FILE *fp) const;
+	void Write(std::ostream &stream) const;
 	SString Format(int index) const;
 	void Lookup(int index, fs::path *file_v, SString *map_v) const;
 };

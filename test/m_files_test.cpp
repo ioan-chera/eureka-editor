@@ -632,14 +632,13 @@ TEST_F(RecentFilesFixture, WriteFile)
 
 	fs::path datapath = getChildPath("data.ini");
 
-	FILE *f = fopen(datapath.u8string().c_str(), "wt");
-	ASSERT_TRUE(f);
+	std::ofstream os(datapath);
+	ASSERT_TRUE(os.is_open());
 	mDeleteList.push(datapath);
 
-	files.WriteFile(f);
+	files.Write(os);
 
-	int r = fclose(f);
-	ASSERT_EQ(r, 0);
+	os.close();
 
 	std::ifstream stream(datapath);
 	ASSERT_TRUE(stream.is_open());
