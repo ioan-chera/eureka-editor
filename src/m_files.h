@@ -27,6 +27,9 @@
 #include <deque>
 #include <ostream>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class Wad_file;
 
 
@@ -94,7 +97,7 @@ struct port_path_info_t
 void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files,
 				  std::map<SString, fs::path> &known_iwads,
 				  std::map<SString, port_path_info_t> &port_paths);
-void M_SaveRecent(const RecentFiles_c &recent_files);
+void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files);
 
 void M_AddRecent(const SString &filename, const SString &map_name);
 void M_OpenRecentFromMenu(void *priv_data);

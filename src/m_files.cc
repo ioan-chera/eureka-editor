@@ -406,9 +406,9 @@ void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files,
 }
 
 
-void M_SaveRecent(const RecentFiles_c &recent_files)
+void M_SaveRecent(const fs::path &home_dir, const RecentFiles_c &recent_files)
 {
-	fs::path filename = global::home_dir / "misc.cfg";
+	fs::path filename = home_dir / "misc.cfg";
 
 	std::ofstream os(filename, std::ios::trunc);
 	if(!os.is_open())
@@ -458,7 +458,7 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 {
 	global::recent_files.insert(GetAbsolutePath(filename.get()), map_name);
 
-	M_SaveRecent(global::recent_files);  // why wait?
+	M_SaveRecent(global::home_dir, global::recent_files);  // why wait?
 }
 
 
@@ -694,7 +694,7 @@ void M_LookForIWADs()
 		}
 	}
 
-	M_SaveRecent(global::recent_files);
+	M_SaveRecent(global::home_dir, global::recent_files);
 }
 
 
