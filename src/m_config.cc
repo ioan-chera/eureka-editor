@@ -53,7 +53,7 @@ const opt_desc_t options[] =
 
 	{	"install",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1,
 		"Installation directory",
 		"<dir>",

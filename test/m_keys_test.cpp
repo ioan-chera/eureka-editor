@@ -70,9 +70,9 @@ protected:
             loaded = true;
         }
         global::home_dir = mTempDir;
-        global::install_dir = getChildPath("install").u8string();
-        ASSERT_TRUE(FileMakeDir(global::install_dir.get()));
-        mDeleteList.push(global::install_dir.get());
+        global::install_dir = getChildPath("install");
+        ASSERT_TRUE(FileMakeDir(global::install_dir));
+        mDeleteList.push(global::install_dir);
 
         writeBindingsFile();
         M_LoadBindings();
@@ -96,9 +96,9 @@ private:
 //
 void MKeys::writeBindingsFile()
 {
-    FILE *f = fopen((global::install_dir + "/bindings.cfg").c_str(), "wt");
+    FILE *f = fopen((global::install_dir / "bindings.cfg").u8string().c_str(), "wt");
     ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::install_dir.get() + "/bindings.cfg");
+    mDeleteList.push(global::install_dir / "bindings.cfg");
 
     fprintf(f, "browser    CMD-k    BR_ClearSearch\n");
     fprintf(f, "browser    PGUP    BR_Scroll    -3\n");

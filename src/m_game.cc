@@ -409,7 +409,7 @@ static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
 static SString FindDefinitionFile(const SString &folder, const SString &name)
 {
 	SYS_ASSERT(folder.good() && name.good());
-	const SString lookupDirs[] = { global::home_dir.u8string(), global::install_dir };
+	const SString lookupDirs[] = { global::home_dir.u8string(), global::install_dir.u8string() };
 	for (const SString &base_dir : lookupDirs)
 	{
 		if (base_dir.empty())
@@ -1225,7 +1225,7 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 			return;
 		temp_list.push_back(ReplaceExtension(name, NULL).u8string());
 	};
-	path = global::install_dir + "/" + folder;
+	path = (global::install_dir / folder).u8string();
 	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
 	path = (global::home_dir / folder).u8string();
 	ScanDirectory(fs::u8path(path.get()), scanner_add_file);

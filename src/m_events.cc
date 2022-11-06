@@ -852,7 +852,7 @@ bool Instance::M_ParseOperationFile()
 	// otherwise load it from the installation directory
 	if (! file.isOpen())
 	{
-		filename = global::install_dir + "/operations.cfg";
+		filename = (global::install_dir / "operations.cfg").u8string();
 
 		file.open(filename);
 	}

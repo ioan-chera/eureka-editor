@@ -83,7 +83,7 @@ bool global::app_has_focus = false;
 SString global::config_file;
 SString global::log_file;
 
-SString global::install_dir;
+fs::path global::install_dir;
 fs::path global::home_dir;
 fs::path global::cache_dir;
 
@@ -333,12 +333,12 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 
 		for (int i = 0 ; prefixes[i] ; i++)
 		{
-			global::install_dir = SString(prefixes[i]) + "/share/eureka";
+			global::install_dir = fs::u8path(prefixes[i]) / "share" / "eureka";
 
-			SString filename = global::install_dir + "/games/doom2.ugh";
+			SString filename = (global::install_dir / "games" / "doom2.ugh").u8string();
 
 			gLog.debugPrintf("Trying install path: %s\n",
-							 global::install_dir.c_str());
+							 global::install_dir.u8string().c_str());
 			gLog.debugPrintf("   looking for file: %s\n", filename.c_str());
 
 			bool exists = FileExists(filename.get());
@@ -361,7 +361,7 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 	if (global::install_dir.empty())
 		ThrowException("Unable to find install directory!\n");
 
-	gLog.printf("Install dir: %s\n", global::install_dir.c_str());
+	gLog.printf("Install dir: %s\n", global::install_dir.u8string().c_str());
 }
 
 

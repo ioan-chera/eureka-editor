@@ -610,7 +610,7 @@ void M_LoadBindings()
 {
 	global::all_bindings.clear();
 
-	LoadBindingsFromPath(global::install_dir, true /* required */);
+	LoadBindingsFromPath(global::install_dir.u8string(), true /* required */);
 
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();

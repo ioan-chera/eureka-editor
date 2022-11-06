@@ -753,7 +753,7 @@ bool config::same_mode_clears_selection = false;
 bool config::bsp_fast        = false;
 int config::usegamma = 2;
 SString global::config_file;
-SString global::install_dir;
+fs::path global::install_dir;
 int global::show_version  = 0;
 bool global::udmf_testing = false;
 fs::path global::home_dir;

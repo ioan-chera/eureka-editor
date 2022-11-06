@@ -332,7 +332,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
 
 	// Situation 7: set the install dir instead
-	global::install_dir = goodHomeDir.u8string();
+	global::install_dir = goodHomeDir;
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
@@ -343,7 +343,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 8: add port
-	global::home_dir = global::install_dir.get();
+	global::home_dir = global::install_dir;
 	fs::path portsDir = global::home_dir / "ports";
 	ASSERT_TRUE(FileMakeDir(portsDir));
 	mDeleteList.push(portsDir);
