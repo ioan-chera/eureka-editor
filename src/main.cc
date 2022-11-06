@@ -1122,7 +1122,7 @@ int main(int argc, char *argv[])
 		init_progress = ProgressStatus::loaded;
 
 
-		M_LoadRecent(global::home_dir.u8string(), global::recent_files, global::known_iwads, global::port_paths);
+		M_LoadRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
 		M_LoadBindings();
 
 		M_LookForIWADs();

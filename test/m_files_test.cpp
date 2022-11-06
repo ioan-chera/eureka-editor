@@ -668,7 +668,7 @@ TEST_F(RecentFilesFixture, WriteFile)
 
 TEST_F(RecentFilesFixture, MLoadRecent)
 {
-	SString home_dir = mTempDir.u8string();
+	fs::path home_dir = mTempDir;
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
 	std::map<SString, port_path_info_t> port_paths;
