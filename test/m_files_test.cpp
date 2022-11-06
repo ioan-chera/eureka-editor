@@ -313,7 +313,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	// Situation 5: now add the IWAD
 	fs::path iwadPath = getChildPath("emag.wad");
-	M_AddKnownIWAD(iwadPath.u8string());	// NOTE: no need to add file
+	M_AddKnownIWAD(iwadPath);	// NOTE: no need to add file
 
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
@@ -391,7 +391,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	fs::path path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad").u8string());
+	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad"));
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -467,7 +467,7 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 	path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath("iwad/doom.wad").u8string());
+	M_AddKnownIWAD(getChildPath("iwad/doom.wad"));
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();

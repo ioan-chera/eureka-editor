@@ -42,11 +42,11 @@ namespace global
 }
 
 
-void M_AddKnownIWAD(const SString &path)
+void M_AddKnownIWAD(const fs::path &path)
 {
-	fs::path absolute_name = fs::absolute(path.get());
+	fs::path absolute_name = fs::absolute(path);
 
-	const SString &game = GameNameFromIWAD(fs::u8path(path.get()));
+	const SString &game = GameNameFromIWAD(path);
 
 	global::known_iwads[game] = absolute_name;
 }
@@ -700,7 +700,7 @@ void M_LookForIWADs()
 		{
 			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
 
-			M_AddKnownIWAD(path);
+			M_AddKnownIWAD(fs::u8path(path.get()));
 		}
 	}
 

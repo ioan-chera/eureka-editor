@@ -105,7 +105,7 @@ void * M_RecentData(int index);
 
 
 void M_LookForIWADs();
-void M_AddKnownIWAD(const SString &path);
+void M_AddKnownIWAD(const fs::path &path);
 fs::path M_QueryKnownIWAD(const SString &game);
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
 

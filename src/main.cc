@@ -394,7 +394,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
 
-		M_AddKnownIWAD(inst.loaded.iwadName.u8string());
+		M_AddKnownIWAD(inst.loaded.iwadName);
 		M_SaveRecent();
 	}
 	else
