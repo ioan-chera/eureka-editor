@@ -1578,7 +1578,7 @@ void Instance::SaveLevel(const SString &level)
 	loaded.writeEurekaLump(wad.master.edit_wad.get());
 	wad.master.edit_wad->writeToDisk();
 
-	M_AddRecent(wad.master.edit_wad->PathName(), loaded.levelName);
+	M_AddRecent(fs::u8path(wad.master.edit_wad->PathName().get()), loaded.levelName, global::recent_files, global::home_dir, global::known_iwads, global::port_paths);
 
 	Status_Set("Saved %s", loaded.levelName.c_str());
 

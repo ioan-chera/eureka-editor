@@ -454,11 +454,11 @@ void M_OpenRecentFromMenu(void *priv_data)
 }
 
 
-void M_AddRecent(const SString &filename, const SString &map_name)
+void M_AddRecent(const fs::path &filename, const SString &map_name, RecentFiles_c &recent_files, const fs::path &home_dir, const std::map<SString, fs::path> &known_iwads, const std::map<SString, port_path_info_t> &port_paths)
 {
-	global::recent_files.insert(GetAbsolutePath(filename.get()), map_name);
+	recent_files.insert(GetAbsolutePath(filename), map_name);
 
-	M_SaveRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);  // why wait?
+	M_SaveRecent(home_dir, recent_files, known_iwads, port_paths);  // why wait?
 }
 
 
