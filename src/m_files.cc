@@ -52,13 +52,13 @@ void M_AddKnownIWAD(const fs::path &path, std::map<SString, fs::path> &known_iwa
 }
 
 
-fs::path M_QueryKnownIWAD(const SString &game)
+fs::path M_QueryKnownIWAD(const SString &game, const std::map<SString, fs::path> &known_iwads)
 {
-	std::map<SString, fs::path>::iterator KI;
+	std::map<SString, fs::path>::const_iterator KI;
 
-	KI = global::known_iwads.find(game);
+	KI = known_iwads.find(game);
 
-	if (KI != global::known_iwads.end())
+	if (KI != known_iwads.end())
 		return KI->second;
 	else
 		return "";
@@ -664,7 +664,7 @@ void M_LookForIWADs()
 	for (const SString &game : game_list)
 	{
 		// already have it?
-		if (!M_QueryKnownIWAD(game).empty())
+		if (!M_QueryKnownIWAD(game, global::known_iwads).empty())
 			continue;
 
 		SString path = SearchForIWAD(game);
@@ -708,7 +708,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	fs::path result;
 
-	result = M_QueryKnownIWAD(default_game);
+	result = M_QueryKnownIWAD(default_game, global::known_iwads);
 	if (!result.empty())
 		return result.u8string();
 
@@ -721,7 +721,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	result = M_QueryKnownIWAD(default_game);
+	result = M_QueryKnownIWAD(default_game, global::known_iwads);
 	if (!result.empty())
 		return result.u8string();
 
@@ -816,7 +816,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			}
 			else
 			{
-				new_iwad = M_QueryKnownIWAD(value);
+				new_iwad = M_QueryKnownIWAD(value, global::known_iwads);
 
 				if (new_iwad.empty())
 				{

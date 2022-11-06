@@ -104,7 +104,7 @@ void M_OpenRecentFromMenu(void *priv_data);
 
 void M_LookForIWADs();
 void M_AddKnownIWAD(const fs::path &path, std::map<SString, fs::path> &known_iwads);
-fs::path M_QueryKnownIWAD(const SString &game);
+fs::path M_QueryKnownIWAD(const SString &game, const std::map<SString, fs::path> &known_iwads);
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name);
 
 void M_ValidateGivenFiles();
