@@ -406,7 +406,7 @@ void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files,
 }
 
 
-void M_SaveRecent()
+void M_SaveRecent(const RecentFiles_c &recent_files)
 {
 	fs::path filename = global::home_dir / "misc.cfg";
 
@@ -420,7 +420,7 @@ void M_SaveRecent()
 	gLog.printf("Writing recent list to: %s\n", filename.u8string().c_str());
 	os << "# Eureka miscellaneous stuff" << std::endl;
 
-	global::recent_files.Write(os);
+	recent_files.Write(os);
 
 	M_WriteKnownIWADs(os);
 
@@ -458,7 +458,7 @@ void M_AddRecent(const SString &filename, const SString &map_name)
 {
 	global::recent_files.insert(GetAbsolutePath(filename.get()), map_name);
 
-	M_SaveRecent();  // why wait?
+	M_SaveRecent(global::recent_files);  // why wait?
 }
 
 
@@ -694,7 +694,7 @@ void M_LookForIWADs()
 		}
 	}
 
-	M_SaveRecent();
+	M_SaveRecent(global::recent_files);
 }
 
 
