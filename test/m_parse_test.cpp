@@ -135,19 +135,20 @@ TEST(MParse, MParseLine)
 
 TEST(MParse, TokenWordParse)
 {
-	TokenWordParse parse("word1 w2 ...g3+gh-\\ \"\" \"have\"\"double word\" \"\"\"\"");
+	TokenWordParse parse("word1 w2 ...g3+gh-\\ \"\" \"have\"\"double word\" \"\"\"\" \"Veac#caev\"#Jackson");
 	std::vector<SString> words;
 	SString word;
 	while(parse.getNext(word))
 		words.push_back(word);
 
-	ASSERT_EQ(words.size(), 6);
+	ASSERT_EQ(words.size(), 7);
 	ASSERT_EQ(words[0], "word1");
 	ASSERT_EQ(words[1], "w2");
 	ASSERT_EQ(words[2], "...g3+gh-\\");
 	ASSERT_EQ(words[3], "");
 	ASSERT_EQ(words[4], "have\"double word");
 	ASSERT_EQ(words[5], "\"");
+	ASSERT_EQ(words[6], "Veac#caev");
 }
 
 TEST(MParse, TokenWordParsePath)

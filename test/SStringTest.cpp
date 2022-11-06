@@ -319,4 +319,6 @@ TEST(SString, Escape)
 	ASSERT_EQ(SString("One\"Word").spaceEscape(), "\"One\"\"Word\"");
 	ASSERT_EQ(SString("One \"Ripper\" Word").spaceEscape(), "\"One \"\"Ripper\"\" Word\"");
 	ASSERT_EQ(SString("").spaceEscape(), "\"\"");
+
+	ASSERT_EQ(SString("LA#SEC").spaceEscape(), "\"LA#SEC\"");
 }

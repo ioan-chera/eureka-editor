@@ -429,7 +429,7 @@ SString SString::spaceEscape() const
 		return "\"\"";
 	bool needsQuotes = false;
 	for(char c : data)
-		if(isspace(c) || c == '"')
+		if(isspace(c) || c == '"' || c == '#')
 		{
 			needsQuotes = true;
 			break;
