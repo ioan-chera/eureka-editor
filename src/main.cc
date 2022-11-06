@@ -1106,7 +1106,7 @@ int main(int argc, char *argv[])
 
 		// load all the config settings
 		prepareConfigPath();
-		M_ParseConfigFile(global::config_file.u8string(), options);
+		M_ParseConfigFile(global::config_file, options);
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();

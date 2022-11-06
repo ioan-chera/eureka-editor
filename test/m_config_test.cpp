@@ -155,7 +155,7 @@ void MConfig::add(const opt_desc_t &option)
 TEST_F(MConfig, MParseConfigFileNotFound)
 {
     // Get an error result if we don't have the file itself
-    ASSERT_EQ(M_ParseConfigFile(getChildPath("nothing.cfg").u8string(), options().data()), -1);
+    ASSERT_EQ(M_ParseConfigFile(getChildPath("nothing.cfg"), options().data()), -1);
 }
 
 TEST_F(MConfig, MParseConfigEmptyFile)
@@ -165,7 +165,7 @@ TEST_F(MConfig, MParseConfigEmptyFile)
 	ASSERT_TRUE(f);
 	mDeleteList.push(path);
 	fclose(f);
-	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 }
 
 TEST_F(MConfig, MParseConfigFile)
@@ -204,7 +204,7 @@ TEST_F(MConfig, MParseConfigFile)
 	config.grid_snap_indicator = true;
 	config.leave_offsets_alone = true;
 
-	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 	ASSERT_EQ(config.home_dir, "jackson");	// unchanged
 	ASSERT_FALSE(config.show_help);	// unchanged
 
@@ -247,7 +247,7 @@ TEST_F(MConfig, ParsePathList)
 	os << "onepath \"jacob's \"\"ladder\"\"/norg.txt\"";
 	os.close();
 
-	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 
 	ASSERT_EQ(config.paths.size(), 6);
 	ASSERT_EQ(config.paths[0], fs::path("/") / "michael" / "jack \"Ripper\" son");
@@ -276,7 +276,7 @@ TEST_F(MConfig, ParseEmptyList)
 	os << "file {}\n";
 	os.close();
 
-	ASSERT_EQ(M_ParseConfigFile(path.u8string(), options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(path, options().data()), 0);
 
 	ASSERT_TRUE(config.paths.empty());
 	ASSERT_TRUE(config.Pwad_list.empty());
@@ -312,7 +312,7 @@ TEST_F(MConfig, MWriteConfig)
 
     // Now read config back
 
-    ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
+    ASSERT_EQ(M_ParseConfigFile(fs::u8path(config.config_file.get()), options().data()), 0);
 
     ASSERT_TRUE(config.auto_load_recent);
     ASSERT_TRUE(config.begin_maximized);
@@ -347,7 +347,7 @@ TEST_F(MConfig, MWriteConfigPathList)
 	config.paths.clear();
 
 	// Now read config back
-	ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(fs::u8path(config.config_file.get()), options().data()), 0);
 	ASSERT_EQ(config.paths.size(), 9);
 	ASSERT_EQ(config.paths[0], fs::path(""));
 	ASSERT_EQ(config.paths[1], fs::path("."));

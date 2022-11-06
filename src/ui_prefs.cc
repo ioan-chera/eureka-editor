@@ -1360,7 +1360,7 @@ void UI_Preferences::reset_callback(Fl_Button *w, void *data)
 	}
 	else
 	{
-		if (M_ParseConfigFile((global::install_dir / "defaults.cfg").u8string(), prefs->options) != 0)
+		if (M_ParseConfigFile(global::install_dir / "defaults.cfg", prefs->options) != 0)
 		{
 			DLG_Notify("Installation problem: failed to find the \"defaults.cfg\" file!");
 		}

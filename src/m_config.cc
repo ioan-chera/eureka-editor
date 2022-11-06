@@ -761,7 +761,7 @@ const opt_desc_t options[] =
 //
 // Parse config line from file
 //
-static int parse_config_line_from_file(const SString &line, const SString &basename, int lnum,
+static int parse_config_line_from_file(const SString &line, const fs::path &basename, int lnum,
 									   const opt_desc_t *options)
 {
 	TokenWordParse parse(line);
@@ -773,7 +773,7 @@ static int parse_config_line_from_file(const SString &line, const SString &basen
 	if(!parse.getNext(value))
 	{
 		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n",
-					basename.c_str(), lnum);
+					basename.u8string().c_str(), lnum);
 		return 0;
 	}
 
@@ -783,7 +783,7 @@ static int parse_config_line_from_file(const SString &line, const SString &basen
 		if (opt->opt_type == OptType::end)
 		{
 			gLog.printf("WARNING: %s(%u): invalid option '%s', skipping\n",
-						basename.c_str(), lnum, line.c_str());
+						basename.u8string().c_str(), lnum, line.c_str());
 			return 0;
 		}
 
@@ -794,7 +794,7 @@ static int parse_config_line_from_file(const SString &line, const SString &basen
 		if (opt->flags & OptFlag_pass1)
 		{
 			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config "
-						"files.\n", basename.c_str(), lnum, line.c_str());
+						"files.\n", basename.u8string().c_str(), lnum, line.c_str());
 			return 0;
 		}
 
@@ -865,15 +865,15 @@ static int parse_config_line_from_file(const SString &line, const SString &basen
 //
 //  Return 0 on success, negative value on failure.
 //
-static int parse_a_config_file(std::istream &is, const SString &filename, const opt_desc_t *options)
+static int parse_a_config_file(std::istream &is, const fs::path &filename, const opt_desc_t *options)
 {
-	fs::path basename = fs::u8path(filename.get()).filename();
+	fs::path basename = filename.filename();
 
 	// handle one line on each iteration
 	SString line;
 	for(int lnum = 1; M_ReadTextLine(line, is); lnum++)
 	{
-		int ret = parse_config_line_from_file(line, basename.u8string(), lnum, options);
+		int ret = parse_config_line_from_file(line, basename, lnum, options);
 
 		if (ret != 0)
 			return ret;
@@ -887,11 +887,11 @@ static int parse_a_config_file(std::istream &is, const SString &filename, const 
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile(const SString &path, const opt_desc_t *options)
+int M_ParseConfigFile(const fs::path &path, const opt_desc_t *options)
 {
-	std::ifstream is(path.get());
+	std::ifstream is(path);
 
-	gLog.printf("Reading config file: %s\n", path.c_str());
+	gLog.printf("Reading config file: %s\n", path.u8string().c_str());
 
 	if (!is.is_open())
 	{
