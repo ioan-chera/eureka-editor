@@ -365,17 +365,18 @@ static bool DetermineIWAD(Instance &inst)
 	if (!inst.loaded.iwadName.empty() && FilenameIsBare(inst.loaded.iwadName))
 	{
 		// a bare name (e.g. "heretic") is treated as a game name
+		SString game = SString(inst.loaded.iwadName.u8string()).asLower();
 
 		// make lowercase
-		inst.loaded.iwadName = fs::u8path(SString(inst.loaded.iwadName.u8string()).asLower().get());
+		inst.loaded.iwadName = fs::u8path(game.get());
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, inst.loaded.iwadName.u8string()))
-			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.c_str());
+		if (! M_CanLoadDefinitions(GAMES_DIR, game))
+			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
 
-		fs::path path = M_QueryKnownIWAD(inst.loaded.iwadName.u8string());
+		fs::path path = M_QueryKnownIWAD(game);
 
 		if (path.empty())
-			ThrowException("Cannot find IWAD for game '%s'\n", inst.loaded.iwadName.u8string().c_str());
+			ThrowException("Cannot find IWAD for game '%s'\n", game.c_str());
 
 		inst.loaded.iwadName = path;
 	}
