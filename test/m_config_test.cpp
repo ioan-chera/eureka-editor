@@ -756,7 +756,7 @@ SString global::config_file;
 SString global::install_dir;
 int global::show_version  = 0;
 bool global::udmf_testing = false;
-SString global::home_dir;
+fs::path global::home_dir;
 SString global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;

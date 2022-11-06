@@ -845,7 +845,7 @@ bool Instance::M_ParseOperationFile()
 	// open the file and build all the menus it contains.
 
 	// look in user's $HOME directory first
-	SString filename = global::home_dir + "/operations.cfg";
+	SString filename = (global::home_dir / "operations.cfg").u8string();
 
 	LineFile file(filename);
 

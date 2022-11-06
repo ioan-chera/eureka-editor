@@ -413,7 +413,7 @@ void M_LoadRecent(const SString &home_dir, RecentFiles_c &recent_files,
 
 void M_SaveRecent()
 {
-	SString filename = global::home_dir + "/misc.cfg";
+	SString filename = (global::home_dir / "misc.cfg").u8string();
 
 	FILE *fp = fopen(filename.c_str(), "w");
 
@@ -610,7 +610,7 @@ static SString SearchForIWAD(const SString &game)
 
 	// 1. look in ~/.eureka/iwads first
 
-	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", global::home_dir.c_str());
+	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", global::home_dir.u8string().c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
 	SString path = SearchDirForIWAD(dir_name, game);

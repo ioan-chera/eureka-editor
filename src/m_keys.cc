@@ -615,7 +615,7 @@ void M_LoadBindings()
 	// keep a copy of the install_dir bindings
 	CopyInstallBindings();
 
-	LoadBindingsFromPath(global::home_dir, false);
+	LoadBindingsFromPath(global::home_dir.u8string(), false);
 
 	updateMenuBindings();
 }
@@ -623,7 +623,7 @@ void M_LoadBindings()
 
 void M_SaveBindings()
 {
-	SString filename = global::home_dir + "/bindings.cfg";
+	SString filename = (global::home_dir / "bindings.cfg").u8string();
 
 	std::ofstream os(filename.get(), std::ios::trunc);
 	if (! os.is_open())

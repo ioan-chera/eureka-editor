@@ -127,7 +127,7 @@ namespace global
 	extern bool app_has_focus;
 	
 	extern SString install_dir;  // install dir (e.g. /usr/share/eureka)
-	extern SString home_dir;      // home dir (e.g. $HOME/.eureka)
+	extern fs::path home_dir;      // home dir (e.g. $HOME/.eureka)
 	extern fs::path cache_dir;    // for caches and backups, can be same as home_dir
 }
 

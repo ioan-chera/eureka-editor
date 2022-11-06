@@ -198,9 +198,9 @@ void ParseEurekaLumpFixture::assertEmptyLoading() const
 //
 void ParseEurekaLumpFixture::prepareHomeDir()
 {
-	global::home_dir = getChildPath("home").u8string();
-	ASSERT_TRUE(FileMakeDir(global::home_dir.get()));
-	mDeleteList.push(global::home_dir.get());
+	global::home_dir = getChildPath("home");
+	ASSERT_TRUE(FileMakeDir(global::home_dir));
+	mDeleteList.push(global::home_dir);
 }
 
 //
@@ -208,7 +208,7 @@ void ParseEurekaLumpFixture::prepareHomeDir()
 //
 fs::path ParseEurekaLumpFixture::makeGamesDir()
 {
-	fs::path gamesDir = fs::path(global::home_dir.c_str()) / "games";
+	fs::path gamesDir = global::home_dir / "games";
 	EXPECT_TRUE(FileMakeDir(gamesDir));
 	mDeleteList.push(gamesDir);
 	return gamesDir;
@@ -325,14 +325,14 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 6: now remove the home dir to see it won't be found
-	SString goodHomeDir = global::home_dir;
+	fs::path goodHomeDir = global::home_dir;
 	global::home_dir.clear();
 	decision = 1;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_FALSE(loading.parseEurekaLump(wad.get()));
 
 	// Situation 7: set the install dir instead
-	global::install_dir = goodHomeDir;
+	global::install_dir = goodHomeDir.u8string();
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
 	ASSERT_TRUE(loading.parseEurekaLump(wad.get()));
@@ -343,8 +343,8 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	ASSERT_TRUE(portWarning);
 
 	// Situation 8: add port
-	global::home_dir = global::install_dir;
-	fs::path portsDir = fs::path(global::home_dir.c_str()) / "ports";
+	global::home_dir = global::install_dir.get();
+	fs::path portsDir = global::home_dir / "ports";
 	ASSERT_TRUE(FileMakeDir(portsDir));
 	mDeleteList.push(portsDir);
 	fs::path tropPath = portsDir / "trop.ugh";

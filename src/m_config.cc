@@ -44,7 +44,7 @@ const opt_desc_t options[] =
 
 	{	"home",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1,
 		"Home directory",
 		"<dir>",

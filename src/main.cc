@@ -84,7 +84,7 @@ SString global::config_file;
 SString global::log_file;
 
 SString global::install_dir;
-SString global::home_dir;
+fs::path global::home_dir;
 fs::path global::cache_dir;
 
 std::vector<fs::path> global::Pwad_list;
@@ -223,7 +223,7 @@ static void CreateHomeDirs()
 #endif
 
 	// try to create home_dir (doesn't matter if it already exists)
-	FileMakeDir(global::home_dir.get());
+	FileMakeDir(global::home_dir);
 	FileMakeDir(global::cache_dir);
 
 	static const char *const subdirs[] =
@@ -239,7 +239,7 @@ static void CreateHomeDirs()
 
 	for (int i = 0 ; subdirs[i] ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.u8string().c_str() : global::home_dir.c_str(), subdirs[i]);
+		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.u8string().c_str() : global::home_dir.u8string().c_str(), subdirs[i]);
 		dir_name[FL_PATH_MAX-1] = 0;
 
 		FileMakeDir(dir_name);
@@ -301,16 +301,16 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 		ThrowException("Unable to find home directory!\n");
 
 	if (global::cache_dir.empty())
-		global::cache_dir = global::home_dir.get();
+		global::cache_dir = global::home_dir;
 
-	gLog.printf("Home  dir: %s\n", global::home_dir.c_str());
+	gLog.printf("Home  dir: %s\n", global::home_dir.u8string().c_str());
 	gLog.printf("Cache dir: %s\n", global::cache_dir.u8string().c_str());
 
 	// create cache directory (etc)
 	CreateHomeDirs();
 
 	// determine log filename
-	global::log_file = global::home_dir + "/logs.txt";
+	global::log_file = (global::home_dir / "logs.txt").u8string();
 }
 
 
@@ -1068,7 +1068,7 @@ static void prepareConfigPath()
 		if(global::home_dir.empty())
 			ThrowException("Home directory not set.");
 
-		global::config_file = global::home_dir + "/config.cfg";
+		global::config_file = (global::home_dir / "config.cfg").u8string();
 	}
 }
 
@@ -1136,7 +1136,7 @@ int main(int argc, char *argv[])
 		init_progress = ProgressStatus::loaded;
 
 
-		M_LoadRecent(global::home_dir, global::recent_files, global::known_iwads, global::port_paths);
+		M_LoadRecent(global::home_dir.u8string(), global::recent_files, global::known_iwads, global::port_paths);
 		M_LoadBindings();
 
 		M_LookForIWADs();

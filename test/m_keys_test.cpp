@@ -69,7 +69,7 @@ protected:
             M_RegisterCommandList(commands);
             loaded = true;
         }
-        global::home_dir = mTempDir.u8string();
+        global::home_dir = mTempDir;
         global::install_dir = getChildPath("install").u8string();
         ASSERT_TRUE(FileMakeDir(global::install_dir.get()));
         mDeleteList.push(global::install_dir.get());
@@ -112,9 +112,9 @@ void MKeys::writeBindingsFile()
     int n = fclose(f);
     ASSERT_EQ(n, 0);
 
-    f = fopen((global::home_dir + "/bindings.cfg").c_str(), "wt");
+    f = fopen((global::home_dir / "bindings.cfg").u8string().c_str(), "wt");
     ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::home_dir.get() + "/bindings.cfg");
+    mDeleteList.push(global::home_dir / "bindings.cfg");
 
     fprintf(f, "general SHIFT-DEL    Delete    /keep\n");
     fprintf(f, "general    SHIFT-BS    Delete    /keep\n");
