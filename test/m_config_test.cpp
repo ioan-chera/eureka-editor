@@ -752,7 +752,7 @@ bool config::sidedef_add_del_buttons = false;
 bool config::same_mode_clears_selection = false;
 bool config::bsp_fast        = false;
 int config::usegamma = 2;
-SString global::config_file;
+fs::path global::config_file;
 fs::path global::install_dir;
 int global::show_version  = 0;
 bool global::udmf_testing = false;

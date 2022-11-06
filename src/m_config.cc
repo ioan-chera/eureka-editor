@@ -71,7 +71,7 @@ const opt_desc_t options[] =
 
 	{	"config",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1 | OptFlag_helpNewline,
 		"Config file to load / save",
 		"<file>",

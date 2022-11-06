@@ -80,7 +80,7 @@
 bool global::want_quit = false;
 bool global::app_has_focus = false;
 
-SString global::config_file;
+fs::path global::config_file;
 fs::path global::log_file;
 
 fs::path global::install_dir;
@@ -1068,7 +1068,7 @@ static void prepareConfigPath()
 		if(global::home_dir.empty())
 			ThrowException("Home directory not set.");
 
-		global::config_file = (global::home_dir / "config.cfg").u8string();
+		global::config_file = global::home_dir / "config.cfg";
 	}
 }
 
@@ -1120,7 +1120,7 @@ int main(int argc, char *argv[])
 
 		// load all the config settings
 		prepareConfigPath();
-		M_ParseConfigFile(global::config_file, options);
+		M_ParseConfigFile(global::config_file.u8string(), options);
 
 		// environment variables can override them
 		M_ParseEnvironmentVars();

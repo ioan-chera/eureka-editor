@@ -133,7 +133,7 @@ namespace global
 
 namespace global
 {
-	extern SString config_file; // Name of the configuration file, or NULL
+	extern fs::path config_file; // Name of the configuration file, or NULL
 	extern fs::path log_file;    // Name of log file, or NULL
 }
 
