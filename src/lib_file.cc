@@ -309,7 +309,7 @@ int ScanDirectory(const fs::path &path, const std::function<void(const fs::path 
 			{
 				flags |= SCAN_F_ReadOnly;
 			}
-			fs::path entry_name = dir_entry.path().filename().u8string();
+			fs::path entry_name = dir_entry.path().filename();
 			SString entry_string = entry_name.u8string();
 			if(entry_string.length() >= 2 && entry_string[0] == '.' && isalnum(entry_string[1]))
 			{

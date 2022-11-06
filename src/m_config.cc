@@ -867,13 +867,13 @@ static int parse_config_line_from_file(const SString &line, const SString &basen
 //
 static int parse_a_config_file(std::istream &is, const SString &filename, const opt_desc_t *options)
 {
-	SString basename = GetBaseName(filename.get()).u8string();
+	fs::path basename = fs::u8path(filename.get()).filename();
 
 	// handle one line on each iteration
 	SString line;
 	for(int lnum = 1; M_ReadTextLine(line, is); lnum++)
 	{
-		int ret = parse_config_line_from_file(line, basename, lnum, options);
+		int ret = parse_config_line_from_file(line, basename.u8string(), lnum, options);
 
 		if (ret != 0)
 			return ret;
