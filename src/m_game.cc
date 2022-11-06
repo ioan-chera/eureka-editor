@@ -427,9 +427,9 @@ static fs::path FindDefinitionFile(const fs::path &folder, const SString &name)
 }
 
 
-bool M_CanLoadDefinitions(const SString &folder, const SString &name)
+bool M_CanLoadDefinitions(const fs::path &folder, const SString &name)
 {
-	fs::path filename = FindDefinitionFile(fs::u8path(folder.get()), name);
+	fs::path filename = FindDefinitionFile(folder, name);
 
 	return !filename.empty();
 }
