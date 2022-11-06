@@ -25,15 +25,15 @@ class SafeOutFileTest : public TempDirContext
 {
 };
 
-static void checkFileContent(const char *path, const char *content)
+static void checkFileContent(const fs::path &path, const char *content)
 {
-	FILE *f = fopen(path, "rt");
-	ASSERT_NE(f, nullptr);
+	std::ifstream stream(path);
+	ASSERT_TRUE(stream.is_open());
 	char msg[128] = {};
-	ASSERT_EQ(fgets(msg, sizeof(msg) - 1, f), msg);
-	ASSERT_TRUE(feof(f));
-	ASSERT_FALSE(ferror(f));
-	ASSERT_EQ(fclose(f), 0);
+	ASSERT_TRUE(stream.get(msg, sizeof(msg)));
+	ASSERT_TRUE(stream.eof());
+	ASSERT_FALSE(stream.fail());
+	stream.close();
 	ASSERT_STREQ(msg, content);
 }
 
@@ -78,7 +78,7 @@ TEST_F(SafeOutFileTest, Stuff)
 	mDeleteList.push(path);	// the delete list
 
 	// Now check it
-	checkFileContent(path.u8string().c_str(), "Hello, world2! more.");
+	checkFileContent(path, "Hello, world2! more.");
 
 	{
 		// Check that forgetting to commit won't overwrite the original
@@ -88,7 +88,7 @@ TEST_F(SafeOutFileTest, Stuff)
 		sof.close();	// no commit
 	}
 
-	checkFileContent(path.u8string().c_str(), "Hello, world2! more.");
+	checkFileContent(path, "Hello, world2! more.");
 
 	{
 		// Check that we can overwrite an old file
@@ -99,5 +99,5 @@ TEST_F(SafeOutFileTest, Stuff)
 		sof.close();	// no commit
 	}
 
-	checkFileContent(path.u8string().c_str(), "New stuff!");
+	checkFileContent(path, "New stuff!");
 }
