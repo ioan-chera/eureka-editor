@@ -16,7 +16,8 @@
 //
 //------------------------------------------------------------------------
 
-#include "m_strings.h"
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 enum class macOSDirType
 {
@@ -25,7 +26,7 @@ enum class macOSDirType
 	libraryCache
 };
 
-SString OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
+fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
 {
-    return SString();
+    return fs::path();
 }

@@ -203,22 +203,17 @@ static void CreateHomeDirs()
 {
 	SYS_ASSERT(!global::home_dir.empty());
 
-	char dir_name[FL_PATH_MAX];
+	fs::path dir_name;
 
 #ifdef __APPLE__
    // IOANCH 20130825: modified to use name-independent calls
-	fl_filename_expand(dir_name, OSX_UserDomainDirectory(macOSDirType::library,
-														 nullptr).c_str());
+	dir_name = OSX_UserDomainDirectory(macOSDirType::library, nullptr);
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name,
-					   OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
-											   nullptr).c_str());
+	dir_name = OSX_UserDomainDirectory(macOSDirType::libraryAppSupport, nullptr);
 	FileMakeDir(dir_name);
 
-	fl_filename_expand(dir_name,
-					   OSX_UserDomainDirectory(macOSDirType::libraryCache,
-											   nullptr).c_str());
+	dir_name = OSX_UserDomainDirectory(macOSDirType::libraryCache, nullptr);
 	FileMakeDir(dir_name);
 #endif
 
@@ -226,22 +221,18 @@ static void CreateHomeDirs()
 	FileMakeDir(global::home_dir);
 	FileMakeDir(global::cache_dir);
 
-	static const char *const subdirs[] =
+	static const fs::path subdirs[] =
 	{
 		// these under $cache_dir
 		"cache", "backups",
 
 		// these under $home_dir
-		"iwads", "games", "ports",
-
-		NULL	// end of list
+		"iwads", "games", "ports"
 	};
 
-	for (int i = 0 ; subdirs[i] ; i++)
+	for (int i = 0 ; i < (int)lengthof(subdirs) ; i++)
 	{
-		snprintf(dir_name, FL_PATH_MAX, "%s/%s", (i < 2) ? global::cache_dir.u8string().c_str() : global::home_dir.u8string().c_str(), subdirs[i]);
-		dir_name[FL_PATH_MAX-1] = 0;
-
+		dir_name = (i < 2 ? global::cache_dir : global::home_dir) / subdirs[i];
 		FileMakeDir(dir_name);
 	}
 }
@@ -277,16 +268,10 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 		}
 
 #elif defined(__APPLE__)
-		char path[FL_PATH_MAX + 4];
-
-		fl_filename_expand(path,
-						OSX_UserDomainDirectory(macOSDirType::libraryAppSupport,
-												"eureka-editor").c_str());
+		fs::path path = OSX_UserDomainDirectory(macOSDirType::libraryAppSupport, "eureka-editor");
 		global::home_dir = path;
 
-		fl_filename_expand(path,
-						   OSX_UserDomainDirectory(macOSDirType::libraryCache,
-												   "eureka-editor").c_str());
+		path = OSX_UserDomainDirectory(macOSDirType::libraryCache, "eureka-editor");
 		global::cache_dir = path;
 
 #else  // UNIX
