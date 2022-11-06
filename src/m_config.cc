@@ -62,7 +62,7 @@ const opt_desc_t options[] =
 
 	{	"log",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1,
 		"Log messages to specified file",
 		"<file>",

@@ -757,7 +757,7 @@ fs::path global::install_dir;
 int global::show_version  = 0;
 bool global::udmf_testing = false;
 fs::path global::home_dir;
-SString global::log_file;
+fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;
 int global::show_help     = 0;

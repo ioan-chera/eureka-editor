@@ -81,7 +81,7 @@ bool global::want_quit = false;
 bool global::app_has_focus = false;
 
 SString global::config_file;
-SString global::log_file;
+fs::path global::log_file;
 
 fs::path global::install_dir;
 fs::path global::home_dir;
@@ -310,7 +310,7 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 	CreateHomeDirs();
 
 	// determine log filename
-	global::log_file = (global::home_dir / "logs.txt").u8string();
+	global::log_file = global::home_dir / "logs.txt";
 }
 
 
@@ -1113,9 +1113,9 @@ int main(int argc, char *argv[])
 		Determine_InstallPath(argv[0]);
 		Determine_HomeDir(argv[0]);
 
-		if(!gLog.openFile(global::log_file))
+		if(!gLog.openFile(global::log_file.u8string()))
 			gLog.printf("WARNING: failed opening log file '%s'\n",
-						global::log_file.c_str());
+						global::log_file.u8string().c_str());
 
 
 		// load all the config settings
