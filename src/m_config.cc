@@ -1264,9 +1264,10 @@ int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
 //   USER STATE HANDLING
 //------------------------------------------------------------------------
 
-static SString PersistFilename(const crc32_c& crc)
+static fs::path PersistFilename(const crc32_c& crc)
 {
-	return SString::printf("%s/cache/%08X%08X.dat", global::cache_dir.u8string().c_str(), crc.extra, crc.raw);
+	fs::path filename = fs::u8path(SString::printf("%08X%08X.dat", crc.extra, crc.raw).get());
+	return global::cache_dir / "cache" / filename;
 }
 
 
@@ -1279,13 +1280,13 @@ bool Instance::M_LoadUserState()
 
 	level.getLevelChecksum(crc);
 
-	SString filename = PersistFilename(crc);
+	fs::path filename = PersistFilename(crc);
 
 	LineFile file(filename);
 	if (! file.isOpen())
 		return false;
 
-	gLog.printf("Loading user state from: %s\n", filename.c_str());
+	gLog.printf("Loading user state from: %s\n", filename.u8string().c_str());
 
 	SString line;
 
@@ -1335,11 +1336,11 @@ bool Instance::M_SaveUserState() const
 
 	level.getLevelChecksum(crc);
 
-	SString filename = PersistFilename(crc);
+	fs::path filename = PersistFilename(crc);
 
-	gLog.printf("Save user state to: %s\n", filename.c_str());
+	gLog.printf("Save user state to: %s\n", filename.u8string().c_str());
 
-	std::ofstream os(filename.get(), std::ios::trunc);
+	std::ofstream os(filename, std::ios::trunc);
 
 	if (! os.is_open())
 	{

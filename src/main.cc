@@ -912,7 +912,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(MatchExtensionNoCase(resource, ".ugh"))
 			{
 				M_ParseDefinitionFile(loading.parse_vars, ParsePurpose::resource,
-									  &config, resource.u8string());
+									  &config, resource);
 				continue;
 			}
 			// Otherwise wad

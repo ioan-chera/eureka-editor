@@ -612,7 +612,7 @@ void UI_TextEditor::InsertFile()
 
 	SString line;
 
-	const char *filename = chooser.filename();
+	fs::path filename = fs::u8path(chooser.filename());
 
 	// TODO: for WIN32, ideally examine the file and determine
 	//       whether the charset is UTF-8 or CP-1252, based on
@@ -628,7 +628,7 @@ void UI_TextEditor::InsertFile()
 		return;
 	}
 
-	gLog.printf("Reading text from file: %s\n", filename);
+	gLog.printf("Reading text from file: %s\n", filename.u8string().c_str());
 
 	int pos = ted->insert_position();
 

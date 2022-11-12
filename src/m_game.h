@@ -393,7 +393,7 @@ union ParseTarget
 void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   ParsePurpose purpose,
 						   ParseTarget target,
-						   const SString &filename,
+						   const fs::path &filename,
 						   const SString &folder = NULL,
 						   const SString &prettyname = NULL,
                            int include_level = 0);

@@ -472,7 +472,7 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 
 	gLog.debugPrintf("  found at: %s\n", filename.u8string().c_str());
 
-	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename.u8string(),
+	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename,
 						  folder, prettyname);
 }
 
@@ -1016,12 +1016,12 @@ static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, pars
 void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   const ParsePurpose purpose,
 						   ParseTarget target,
-						   const SString &filename,
+						   const fs::path &filename,
 						   const SString &cfolder,
 						   const SString &cprettyname,
 						   int include_level)
 {
-	SYS_ASSERT(filename.good());
+	SYS_ASSERT(!filename.empty());
 
 	SString folder = cfolder;
 	if (folder.empty())
@@ -1029,7 +1029,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 
 	SString prettyname = cprettyname;
 	if (prettyname.empty())
-		prettyname = fl_filename_name(filename.c_str());
+		prettyname = filename.filename().u8string();
 
 	parser_state_c parser_state(prettyname);
 
@@ -1040,7 +1040,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 
 	LineFile file(filename);
 	if (! file.isOpen())
-		throw ParseException(SString::printf("Cannot open %s: %s", filename.c_str(), GetErrorMessage(errno).c_str()));
+		throw ParseException(SString::printf("Cannot open %s: %s", filename.u8string().c_str(), GetErrorMessage(errno).c_str()));
 
 	while (pst->readLine(file))
 	{
@@ -1119,7 +1119,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 			if (new_name.empty())
 				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
-			M_ParseDefinitionFile(parse_vars, purpose, target, new_name.u8string(), new_folder,
+			M_ParseDefinitionFile(parse_vars, purpose, target, new_name, new_folder,
 								  NULL /* prettyname */,
 								  include_level + 1);
 			continue;
@@ -1163,7 +1163,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	GameInfo loadingGame = GameInfo(game);
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::gameInfo, &loadingGame,
-						  filename.u8string(), "games", nullptr);
+						  filename, "games", nullptr);
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
 											 "not set base_game\n",
@@ -1190,7 +1190,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::portInfo, &global::loading_Port,
-						  filename.u8string(), "ports", NULL);
+						  filename, "ports", NULL);
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port.supported_games.empty())

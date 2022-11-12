@@ -86,7 +86,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     };
 
     {
-        LineFile file(path.u8string());
+        LineFile file(path);
         checkFileLines(file);
         SString line;
         ASSERT_TRUE(file.readLine(line));
@@ -97,7 +97,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     // Now check
     {
         SString line;
-        LineFile file(savedPath.u8string());
+        LineFile file(savedPath);
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "======= START OF LOGS =======");
         ASSERT_TRUE(file.readLine(line));
@@ -150,7 +150,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.close();
 
     {
-        LineFile file(path.u8string());
+        LineFile file(path);
         SString line;
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "======= START OF LOGS =======");
@@ -182,7 +182,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     }
 
     {
-        LineFile file(savedPath.u8string());
+        LineFile file(savedPath);
         SString line;
         ASSERT_TRUE(file.readLine(line));
         ASSERT_EQ(line, "======= START OF LOGS =======");
