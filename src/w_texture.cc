@@ -680,6 +680,12 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 		lump = master.W_FindSpriteLump(buffer);
 	}
 
+	if (! lump)
+	{
+		buffer[6] = 'C';
+		lump = master.W_FindSpriteLump(buffer);
+	}
+
 	if (lump)
 		return lump;
 
