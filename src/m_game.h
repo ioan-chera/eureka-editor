@@ -343,6 +343,8 @@ public:
 //
 struct ConfigData
 {
+	const thingtype_t &getThingType(int type) const;
+
 	misc_info_t miscInfo = {};
 	port_features_t features = {};
 
@@ -414,8 +416,6 @@ map_format_bitset_t M_DetermineMapFormats(Instance &inst, const char *game,
 
 bool is_null_tex(const SString &tex);		// the "-" texture
 bool is_special_tex(const SString &tex);	// begins with "#"
-
-const thingtype_t &M_GetThingType(const ConfigData &config, int type);
 
 #endif  /* __EUREKA_M_GAME_H__ */
 

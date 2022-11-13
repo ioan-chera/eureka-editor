@@ -729,7 +729,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 
 	// sprite not in the list yet.  Add it.
 
-	const thingtype_t &info = M_GetThingType(config, type);
+	const thingtype_t &info = config.getThingType(type);
 
 	Img_c *result = NULL;
 

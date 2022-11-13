@@ -1492,7 +1492,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 				double Tx = T->x();
 				double Ty = T->y();
 
-				const thingtype_t &info = M_GetThingType(inst.conf, T->type);
+				const thingtype_t &info = inst.conf.getThingType(T->type);
 				int r = info.radius;
 
 				if (Tx - r < pos1.x) pos1.x = Tx - r;
