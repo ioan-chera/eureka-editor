@@ -256,7 +256,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 	// load TEXTUREx data into memory for easier processing
 	std::vector<byte> tex_data;
 
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	int tex_length = lump->loadData(tex_data);
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	s32_t *tex_data_s32 = (s32_t *)tex_data.data();
@@ -367,7 +367,7 @@ void WadData::W_LoadTextures(const ConfigData &config)
 		if (pnames)
 		{
 			std::vector<byte> pname_data;
-			int pname_size = W_LoadLumpData(pnames, pname_data);
+			int pname_size = pnames->loadData(pname_data);
 
 			if (texture1)
 				LoadTexturesLump(*this, config, texture1, pname_data.data(), pname_size, true);

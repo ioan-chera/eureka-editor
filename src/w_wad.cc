@@ -1080,22 +1080,24 @@ Lump_c *MasterDir::findSpriteLump(const SString &name) const
 	return NULL;  // not found
 }
 
-
-int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
+//
+// load the lump into memory, returning the size
+//
+int Lump_c::loadData(std::vector<byte> &buffer)
 {
 	// include an extra byte, used to NUL-terminate a text buffer
-	buffer.resize(lump->Length() + 1);
+	buffer.resize(Length() + 1);
 
-	if (lump->Length() > 0)
+	if (Length() > 0)
 	{
-		lump->Seek();
-		if (! lump->Read(buffer.data(), lump->Length()))
+		Seek();
+		if (! Read(buffer.data(), Length()))
 			ThrowException("W_LoadLumpData: read error loading lump.\n");
 	}
 
-	buffer[lump->Length()] = 0;
+	buffer[Length()] = 0;
 
-	return lump->Length();
+	return Length();
 }
 
 

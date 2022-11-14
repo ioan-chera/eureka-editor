@@ -110,6 +110,8 @@ public:
 	// read a line of text, returns true if OK, false on EOF
 	bool GetLine(SString &string) noexcept;
 
+	int loadData(std::vector<byte> &buffer);
+
 	// write some data to the lump.  Only the lump which had just
 	// been created with Wad_file::AddLump() or RecreateLump() can be
 	// written to.
@@ -330,9 +332,6 @@ private:
 		}
 	};
 };
-
-// load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
 

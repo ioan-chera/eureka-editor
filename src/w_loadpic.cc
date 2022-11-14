@@ -109,7 +109,7 @@ Img_c *LoadImage_PNG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	int tex_length = lump->loadData(tex_data);
 
 	// pass it to FLTK for decoding
 	Fl_PNG_Image fltk_img(NULL, tex_data.data(), tex_length);
@@ -132,7 +132,7 @@ Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	int tex_length = lump->loadData(tex_data);
 
 	(void) tex_length;
 
@@ -157,7 +157,7 @@ Img_c *LoadImage_TGA(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	int tex_length = lump->loadData(tex_data);
 
 	// decode it
 	int width;
@@ -263,7 +263,7 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 	/* DOOM format */
 
 	std::vector<byte> raw_data;
-	W_LoadLumpData(lump, raw_data);
+	lump->loadData(raw_data);
 
 	const patch_t *pat = (patch_t *) raw_data.data();
 

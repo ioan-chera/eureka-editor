@@ -153,7 +153,7 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->NumLumps(), 1);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
 	ASSERT_EQ(read->GetLump(0)->Length(), 13);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	ASSERT_EQ(read->GetLump(0)->loadData(wadReadData), 13);
 	assertVecString(wadReadData, "Hello, world!");
 
 	// Now add yet another lump at the end
@@ -188,15 +188,15 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->NumLumps(), 3);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
 	ASSERT_EQ(read->GetLump(0)->Length(), 13);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	ASSERT_EQ(read->GetLump(0)->loadData(wadReadData), 13);
 	assertVecString(wadReadData, "Hello, world!");
 	ASSERT_EQ(read->GetLump(1)->Name(), "MIDLUMP");
 	ASSERT_EQ(read->GetLump(1)->Length(), 4);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(1), wadReadData), 4);
+	ASSERT_EQ(read->GetLump(1)->loadData(wadReadData), 4);
 	assertVecString(wadReadData, "Doom");
 	ASSERT_EQ(read->GetLump(2)->Name(), "LUMPLUMP");
 	ASSERT_EQ(read->GetLump(2)->Length(), 2);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(2), wadReadData), 2);
+	ASSERT_EQ(read->GetLump(2)->loadData(wadReadData), 2);
 	ASSERT_EQ(read->TotalSize(), 12 + 13 + 4 + 2 + 48);
 	assertVecString(wadReadData, "Ah");
 
