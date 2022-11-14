@@ -1068,7 +1068,7 @@ Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
 //
-Lump_c *MasterDir::W_FindSpriteLump(const SString &name) const
+Lump_c *MasterDir::findSpriteLump(const SString &name) const
 {
 	for (int i = (int)dir.size()-1 ; i >= 0 ; i--)
 	{

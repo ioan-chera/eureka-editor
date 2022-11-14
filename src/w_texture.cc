@@ -665,19 +665,19 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 	if(buffer.length() == 5)
 		buffer += '0';
 
-	Lump_c *lump = master.W_FindSpriteLump(buffer);
+	Lump_c *lump = master.findSpriteLump(buffer);
 
 	if (! lump)
 	{
 		if(buffer.length() >= 6)
 			buffer[5] = '1';
-		lump = master.W_FindSpriteLump(buffer);
+		lump = master.findSpriteLump(buffer);
 	}
 
 	if (! lump)
 	{
 		buffer += "D1";
-		lump = master.W_FindSpriteLump(buffer);
+		lump = master.findSpriteLump(buffer);
 	}
 
 	if (lump)

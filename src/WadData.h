@@ -163,7 +163,7 @@ public:
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
 	Lump_c *W_FindGlobalLump(const SString &name) const;
-	Lump_c *W_FindSpriteLump(const SString &name) const;
+	Lump_c *findSpriteLump(const SString &name) const;
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
