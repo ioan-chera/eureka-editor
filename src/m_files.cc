@@ -817,7 +817,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 			if(resourcePath.is_relative())
 			{
-				fs::path wadDirPath = fs::path(wad->PathName().c_str()).parent_path();
+				fs::path wadDirPath = wad->PathName().parent_path();
 				resourcePath = (wadDirPath / resourcePath).lexically_normal();
 			}
 
@@ -825,7 +825,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			if (!fs::exists(resourcePath))
 			{
 				gLog.printf("  file not found: %s\n", resourcePath.u8string().c_str());
-				fs::path wadDirPath = fs::path(wad->PathName().c_str()).parent_path();
+				fs::path wadDirPath = wad->PathName().parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
 
 				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
@@ -915,7 +915,7 @@ void LoadingData::writeEurekaLump(Wad_file *wad) const
 	if (!portName.empty())
 		lump->Printf("port %s\n", portName.c_str());
 
-	fs::path pwadPath = fs::absolute(wad->PathName().c_str()).remove_filename();
+	fs::path pwadPath = fs::absolute(wad->PathName()).remove_filename();
 
 	for (const fs::path &resource : resourceList)
 	{
@@ -998,7 +998,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	SString filename = (global::cache_dir / "backups" / fs::u8path(wad->PathName().get()).filename()).u8string();
+	SString filename = (global::cache_dir / "backups" / wad->PathName().filename()).u8string();
 	SString dir_name = ReplaceExtension(filename.get(), NULL).u8string();
 
 	gLog.debugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());

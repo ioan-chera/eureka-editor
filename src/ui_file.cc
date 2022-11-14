@@ -327,7 +327,7 @@ std::shared_ptr<Wad_file> UI_OpenMap::Run(SString* map_v, bool * did_load)
 	*did_load = false;
 
 	if (inst.wad.master.edit_wad)
-		SetPWAD(inst.wad.master.edit_wad->PathName());
+		SetPWAD(inst.wad.master.edit_wad->PathName().u8string());
 
 	Populate();
 
@@ -638,7 +638,7 @@ void UI_OpenMap::LoadFile()
 
 	loaded_wad = wad;
 
-	SetPWAD(loaded_wad->PathName());
+	SetPWAD(loaded_wad->PathName().u8string());
 
 	if (using_wad == loaded_wad)
 		using_wad = wad;

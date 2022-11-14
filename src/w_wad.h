@@ -201,9 +201,9 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const fs::path &filename);
 
-	const SString PathName() const noexcept
+	const fs::path &PathName() const noexcept
 	{
-		return filename.u8string();
+		return filename;
 	}
 	bool IsReadOnly() const noexcept
 	{

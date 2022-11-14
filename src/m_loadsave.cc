@@ -76,7 +76,7 @@ void Instance::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 
 	wad.master.edit_wad = new_wad;
 
-	wad.master.Pwad_name = wad.master.edit_wad->PathName();
+	wad.master.Pwad_name = wad.master.edit_wad->PathName().u8string();
 
 	wad.master.MasterDir_Add(wad.master.edit_wad);
 }
@@ -282,7 +282,7 @@ void Instance::CMD_NewProject()
 	}
 
 	this->wad.master.edit_wad = wad;
-	this->wad.master.Pwad_name = this->wad.master.edit_wad->PathName();
+	this->wad.master.Pwad_name = this->wad.master.edit_wad->PathName().u8string();
 
 	this->wad.master.MasterDir_Add(this->wad.master.edit_wad);
 
@@ -923,7 +923,7 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		main_win->SetTitle(wad->PathName().u8string(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -1077,7 +1077,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		map_name  = gInstance.wad.master.edit_wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().u8string().c_str());
 
 	// TODO: new instance
 	gInstance.LoadLevel(gInstance.wad.master.edit_wad.get(), map_name);
@@ -1143,7 +1143,7 @@ void Instance::CMD_OpenMap()
 		new_resources = true;
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
 	LoadLevel(wad.get(), map_name);
@@ -1578,13 +1578,13 @@ void Instance::SaveLevel(const SString &level)
 	loaded.writeEurekaLump(wad.master.edit_wad.get());
 	wad.master.edit_wad->writeToDisk();
 
-	global::recent.addRecent(fs::u8path(wad.master.edit_wad->PathName().get()), loaded.levelName, global::home_dir);
+	global::recent.addRecent(wad.master.edit_wad->PathName(), loaded.levelName, global::home_dir);
 
 	Status_Set("Saved %s", loaded.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad.master.edit_wad->PathName(), loaded.levelName, false);
+		main_win->SetTitle(wad.master.edit_wad->PathName().u8string(), loaded.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1619,7 +1619,7 @@ bool Instance::M_SaveMap()
 
 	M_BackupWad(wad.master.edit_wad.get());
 
-	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.edit_wad->PathName().c_str());
+	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.edit_wad->PathName().u8string().c_str());
 
 	SaveLevel(loaded.levelName);
 
@@ -1744,7 +1744,7 @@ bool Instance::M_ExportMap()
 	}
 
 
-	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
@@ -1894,7 +1894,7 @@ void Instance::CMD_RenameMap()
 
 	loaded.levelName = new_name.asUpper();
 
-	main_win->SetTitle(wad.master.edit_wad->PathName(), loaded.levelName, false);
+	main_win->SetTitle(wad.master.edit_wad->PathName().u8string(), loaded.levelName, false);
 
 	Status_Set("Renamed to %s", loaded.levelName.c_str());
 }
