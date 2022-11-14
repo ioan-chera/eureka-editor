@@ -161,7 +161,7 @@ struct LumpRef
 class Wad_file
 {
 private:
-	const SString filename;
+	const fs::path filename;
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
@@ -177,7 +177,7 @@ private:
 
 	// constructor is private
 	Wad_file(const SString &_name, WadOpenMode _mode) :
-	   filename(_name), mode(_mode)
+	   filename(fs::u8path(_name.get())), mode(_mode)
 	{
 	}
 
@@ -201,9 +201,9 @@ public:
 	// check the given wad file exists and is a WAD file
 	static bool Validate(const fs::path &filename);
 
-	const SString &PathName() const noexcept
+	const SString PathName() const noexcept
 	{
-		return filename;
+		return filename.u8string();
 	}
 	bool IsReadOnly() const noexcept
 	{
