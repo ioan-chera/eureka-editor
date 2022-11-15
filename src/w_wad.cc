@@ -190,27 +190,27 @@ Wad_file::~Wad_file()
 }
 
 
-std::shared_ptr<Wad_file> Wad_file::Open(const SString &filename,
+std::shared_ptr<Wad_file> Wad_file::Open(const fs::path &filename,
 										 WadOpenMode mode)
 {
 	SYS_ASSERT(mode == WadOpenMode::read || mode == WadOpenMode::write || mode == WadOpenMode::append);
 
 	if (mode == WadOpenMode::write)
-		return Create(fs::u8path(filename.get()), mode);
+		return Create(filename, mode);
 
-	gLog.printf("Opening WAD file: %s\n", filename.c_str());
+	gLog.printf("Opening WAD file: %s\n", filename.u8string().c_str());
 
 	FILE *fp = NULL;
 
 retry:
 	// TODO: #55 unicode
-	fp = fopen(filename.c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
+	fp = fopen(filename.u8string().c_str(), (mode == WadOpenMode::read ? "rb" : "r+b"));
 
 	if (! fp)
 	{
 		// mimic the fopen() semantics
 		if (mode == WadOpenMode::append && errno == ENOENT)
-			return Create(fs::u8path(filename.get()), mode);
+			return Create(filename, mode);
 
 		// if file is read-only, open in 'r' mode instead
 		if (mode == WadOpenMode::append && (errno == EACCES || errno == EROFS))
@@ -225,7 +225,7 @@ retry:
 		return NULL;
 	}
 
-	auto wraw = new Wad_file(fs::u8path(filename.get()), mode);
+	auto wraw = new Wad_file(filename, mode);
 
 	auto w = std::shared_ptr<Wad_file>(wraw);
 

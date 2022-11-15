@@ -442,7 +442,7 @@ bool Instance::M_TryOpenMostRecent()
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(filename.get()),
 												   WadOpenMode::append);
 
 	if (! wad)

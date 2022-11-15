@@ -194,7 +194,7 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static std::shared_ptr<Wad_file> Open(const SString &filename,
+	static std::shared_ptr<Wad_file> Open(const fs::path &filename,
 										  WadOpenMode mode
 										  = WadOpenMode::append);
 
