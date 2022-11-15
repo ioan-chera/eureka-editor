@@ -196,7 +196,7 @@ std::shared_ptr<Wad_file> Wad_file::Open(const SString &filename,
 	SYS_ASSERT(mode == WadOpenMode::read || mode == WadOpenMode::write || mode == WadOpenMode::append);
 
 	if (mode == WadOpenMode::write)
-		return Create(filename, mode);
+		return Create(fs::u8path(filename.get()), mode);
 
 	gLog.printf("Opening WAD file: %s\n", filename.c_str());
 
@@ -210,7 +210,7 @@ retry:
 	{
 		// mimic the fopen() semantics
 		if (mode == WadOpenMode::append && errno == ENOENT)
-			return Create(filename, mode);
+			return Create(fs::u8path(filename.get()), mode);
 
 		// if file is read-only, open in 'r' mode instead
 		if (mode == WadOpenMode::append && (errno == EACCES || errno == EROFS))
@@ -262,12 +262,12 @@ retry:
 }
 
 
-std::shared_ptr<Wad_file> Wad_file::Create(const SString &filename,
+std::shared_ptr<Wad_file> Wad_file::Create(const fs::path &filename,
 										   WadOpenMode mode)
 {
-	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
+	gLog.printf("Creating new WAD file: %s\n", filename.u8string().c_str());
 
-	return std::shared_ptr<Wad_file>(new Wad_file(fs::u8path(filename.get()), mode));
+	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
 }
 
 

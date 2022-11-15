@@ -294,7 +294,7 @@ public:
 	}
 
 private:
-	static std::shared_ptr<Wad_file> Create(const SString &filename,
+	static std::shared_ptr<Wad_file> Create(const fs::path &filename,
 											WadOpenMode mode);
 
 	// read the existing directory.
