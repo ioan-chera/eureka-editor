@@ -176,8 +176,8 @@ private:
 	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const SString &_name, WadOpenMode _mode) :
-	   filename(fs::u8path(_name.get())), mode(_mode)
+	Wad_file(const fs::path &_name, WadOpenMode _mode) :
+	   filename(_name), mode(_mode)
 	{
 	}
 

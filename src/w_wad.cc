@@ -225,7 +225,7 @@ retry:
 		return NULL;
 	}
 
-	auto wraw = new Wad_file(filename, mode);
+	auto wraw = new Wad_file(fs::u8path(filename.get()), mode);
 
 	auto w = std::shared_ptr<Wad_file>(wraw);
 
@@ -267,7 +267,7 @@ std::shared_ptr<Wad_file> Wad_file::Create(const SString &filename,
 {
 	gLog.printf("Creating new WAD file: %s\n", filename.c_str());
 
-	return std::shared_ptr<Wad_file>(new Wad_file(filename, mode));
+	return std::shared_ptr<Wad_file>(new Wad_file(fs::u8path(filename.get()), mode));
 }
 
 
