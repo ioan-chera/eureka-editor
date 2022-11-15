@@ -162,7 +162,7 @@ public:
 	void MasterDir_CloseAll();
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
-	Lump_c *W_FindGlobalLump(const SString &name) const;
+	Lump_c *findGlobalLump(const SString &name) const;
 	Lump_c *findSpriteLump(const SString &name) const;
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
@@ -186,13 +186,13 @@ struct WadData
 	
 	void W_LoadPalette()
 	{
-		palette.loadPalette(master.W_FindGlobalLump("PLAYPAL"));
+		palette.loadPalette(master.findGlobalLump("PLAYPAL"));
 		images.IM_ResetDummyTextures();
 	}
 
 	void W_LoadColormap()
 	{
-		palette.loadColormap(master.W_FindGlobalLump("COLORMAP"));
+		palette.loadColormap(master.findGlobalLump("COLORMAP"));
 	}
 
 	ImageSet images;

@@ -158,7 +158,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 		memcpy(picname, pnames + 8*pname_idx, 8);
 		picname[8] = 0;
 
-		Lump_c *lump = wad.master.W_FindGlobalLump(picname);
+		Lump_c *lump = wad.master.findGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(wad.palette, config, *img, lump, picname, xofs, yofs))
@@ -225,7 +225,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 		picname[8] = 0;
 
 //gLog.debugPrintf("-- %d patch [%s]\n", j, picname);
-		Lump_c *lump = wad.master.W_FindGlobalLump(picname);
+		Lump_c *lump = wad.master.findGlobalLump(picname);
 
 		if (! lump ||
 			! LoadPicture(wad.palette, config, *img, lump, picname, xofs, yofs))
@@ -693,13 +693,13 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 		if(buffer.length() == 5)
 			buffer += '0';
 
-		lump = master.W_FindGlobalLump(buffer);
+		lump = master.findGlobalLump(buffer);
 
 		if (! lump)
 		{
 			if(buffer.length() >= 6)
 				buffer[5] = '1';
-			lump = master.W_FindGlobalLump(buffer);
+			lump = master.findGlobalLump(buffer);
 		}
 
 		// TODO: verify lump is OK (size etc)
@@ -713,7 +713,7 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 	{
 		// Still no lump? Try direct lookup
 		// TODO: verify lump is OK (size etc)
-		lump = master.W_FindGlobalLump(name);
+		lump = master.findGlobalLump(name);
 	}
 
 	return lump;
