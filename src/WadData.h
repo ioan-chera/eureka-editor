@@ -157,6 +157,8 @@ class MasterDir
 {
 public:
 	void RemoveEditWad();
+	void replaceEditWad(const std::shared_ptr<Wad_file> &new_wad);
+
 	void MasterDir_Add(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_Remove(const std::shared_ptr<Wad_file> &wad);
 	void MasterDir_CloseAll();
