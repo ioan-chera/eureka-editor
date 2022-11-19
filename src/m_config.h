@@ -84,21 +84,76 @@ enum
 
 struct opt_desc_t
 {
-	const char *long_name;  // Command line arg. or keyword
-	const char *short_name; // Abbreviated command line argument
+	opt_desc_t() :
+	long_name(nullptr), short_name(nullptr), opt_type(OptType::end), flags(0),
+	desc(nullptr), arg_desc(nullptr), data_ptr(nullptr)
+	{
+	}
 
-	OptType opt_type;    // Type of this option
-	unsigned flags;    // Flags for this option :
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, bool *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::boolean), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, int *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::integer), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, rgb_color_t *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::color), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, SString *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::string), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, fs::path *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::path), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, std::vector<SString> *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::stringList), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	opt_desc_t(const char *long_name, const char *short_name, unsigned flags, const char *desc,
+			   const char *arg_desc, std::vector<fs::path> *data_ptr) :
+	long_name(long_name), short_name(short_name), opt_type(OptType::pathList), flags(flags),
+	desc(desc), arg_desc(arg_desc), data_ptr(data_ptr)
+	{
+	}
+
+	const char *const long_name;  // Command line arg. or keyword
+	const char *const short_name; // Abbreviated command line argument
+
+	const OptType opt_type;    // Type of this option
+	const unsigned flags;    // Flags for this option :
 	// '1' : process only on pass 1 of parse_command_line_options()
 	// '<' : print extra newline after this option (when dumping)
 	// 'v' : a real variable (preference setting)
 	// 'w' : warp hack -- accept two numeric args
 	// 'H' : hide option from --help display
 
-	const char *desc;   // Description of the option
-	const char *arg_desc;  // Description of the argument (NULL --> none or default)
+	const char *const desc;   // Description of the option
+	const char *const arg_desc;  // Description of the argument (NULL --> none or default)
 
-	void *data_ptr;   // Pointer to the data
+	void *const data_ptr;   // Pointer to the data
 };
 
 

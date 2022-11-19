@@ -44,7 +44,6 @@ const opt_desc_t options[] =
 
 	{	"home",
 		0,
-        OptType::path,
 		OptFlag_pass1,
 		"Home directory",
 		"<dir>",
@@ -53,7 +52,6 @@ const opt_desc_t options[] =
 
 	{	"install",
 		0,
-        OptType::path,
 		OptFlag_pass1,
 		"Installation directory",
 		"<dir>",
@@ -62,7 +60,6 @@ const opt_desc_t options[] =
 
 	{	"log",
 		0,
-        OptType::path,
 		OptFlag_pass1,
 		"Log messages to specified file",
 		"<file>",
@@ -71,7 +68,6 @@ const opt_desc_t options[] =
 
 	{	"config",
 		0,
-        OptType::path,
 		OptFlag_pass1 | OptFlag_helpNewline,
 		"Config file to load / save",
 		"<file>",
@@ -80,7 +76,6 @@ const opt_desc_t options[] =
 
 	{	"help",
 		"h",
-        OptType::boolean,
 		OptFlag_pass1,
 		"Show usage summary",
 		NULL,
@@ -89,7 +84,6 @@ const opt_desc_t options[] =
 
 	{	"version",
 		"v",
-        OptType::boolean,
 		OptFlag_pass1,
 		"Show the version",
 		NULL,
@@ -98,7 +92,6 @@ const opt_desc_t options[] =
 
 	{	"debug",
 		"d",
-        OptType::boolean,
 		OptFlag_pass1,
 		"Enable debugging messages",
 		NULL,
@@ -107,7 +100,6 @@ const opt_desc_t options[] =
 
 	{	"quiet",
 		"q",
-        OptType::boolean,
 		OptFlag_pass1,
 		"Quiet mode (no messages on stdout)",
 		NULL,
@@ -120,7 +112,6 @@ const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-        OptType::pathList,
 		0,
 		"Wad file(s) to edit",
 		"<file>...",
@@ -129,7 +120,6 @@ const opt_desc_t options[] =
 
 	{	"merge",
 		"m",
-		OptType::pathList,
 		0,
 		"Resource file(s) to load",
 		"<file>...",
@@ -138,7 +128,6 @@ const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-        OptType::path,
 		0,
 		"The name of the IWAD (game data)",
 		"<file>",
@@ -147,7 +136,6 @@ const opt_desc_t options[] =
 
 	{	"port",
 		"p",
-        OptType::string,
 		0,
 		"Port (engine) name",
 		"<name>",
@@ -156,7 +144,6 @@ const opt_desc_t options[] =
 
 	{	"warp",
 		"w",
-        OptType::string,
 		OptFlag_warp | OptFlag_helpNewline,
 		"Select level to edit",
 		"<map>",
@@ -165,7 +152,6 @@ const opt_desc_t options[] =
 
 	{	"udmftest",
 		0,
-        OptType::boolean,
 		OptFlag_hide,
 		"Enable the unfinished UDMF support",
 		NULL,
@@ -176,7 +162,6 @@ const opt_desc_t options[] =
 
 	{	"auto_load_recent",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"When no given files, load the most recent one saved",
 		NULL,
@@ -185,7 +170,6 @@ const opt_desc_t options[] =
 
 	{	"begin_maximized",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Maximize the window when Eureka starts",
 		NULL,
@@ -194,7 +178,6 @@ const opt_desc_t options[] =
 
 	{	"backup_max_files",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Maximum copies to make when backing up a wad",
 		NULL,
@@ -203,7 +186,6 @@ const opt_desc_t options[] =
 
 	{	"backup_max_space",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Maximum space to use (in MB) when backing up a wad",
 		NULL,
@@ -212,7 +194,6 @@ const opt_desc_t options[] =
 
 	{	"browser_combine_tex",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Combine flats and textures in a single browser",
 		NULL,
@@ -221,7 +202,6 @@ const opt_desc_t options[] =
 
 	{	"browser_small_tex",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Show smaller (more compact) textures in the browser",
 		NULL,
@@ -230,7 +210,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_on_save",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: always build the nodes after saving",
 		NULL,
@@ -239,7 +218,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_fast",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: enable fast mode (may be lower quality)",
 		NULL,
@@ -248,7 +226,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_warnings",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: show all warning messages",
 		NULL,
@@ -257,7 +234,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_split_factor",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Node building: seg splitting factor",
 		NULL,
@@ -266,7 +242,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_gl_nodes",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: build GL-Nodes",
 		NULL,
@@ -275,7 +250,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_force_v5",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: force V5 of GL-Nodes",
 		NULL,
@@ -284,7 +258,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_force_zdoom",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: force ZDoom format for normal nodes",
 		NULL,
@@ -293,7 +266,6 @@ const opt_desc_t options[] =
 
 	{	"bsp_compressed",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Node building: force zlib compression of ZDoom nodes",
 		NULL,
@@ -302,7 +274,6 @@ const opt_desc_t options[] =
 
 	{	"default_gamma",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Default gamma for images and 3D view (0..4)",
 		NULL,
@@ -311,7 +282,6 @@ const opt_desc_t options[] =
 
 	{	"default_edit_mode",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Default editing mode: 0..3 = Th / Lin / Sec / Vt",
 		NULL,
@@ -320,7 +290,6 @@ const opt_desc_t options[] =
 
 	{	"default_port",
 		0,
-        OptType::string,
 		OptFlag_preference,
 		"Default port (engine) name",
 		NULL,
@@ -329,7 +298,6 @@ const opt_desc_t options[] =
 
 	{	"dotty_axis_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"axis color for the dotty style grid",
 		NULL,
@@ -338,7 +306,6 @@ const opt_desc_t options[] =
 
 	{	"dotty_major_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"major color for the dotty style grid",
 		NULL,
@@ -347,7 +314,6 @@ const opt_desc_t options[] =
 
 	{	"dotty_minor_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"minor color for the dotty style grid",
 		NULL,
@@ -356,7 +322,6 @@ const opt_desc_t options[] =
 
 	{	"dotty_point_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"point color for the dotty style grid",
 		NULL,
@@ -365,7 +330,6 @@ const opt_desc_t options[] =
 
 	{	"floor_bump_small",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"distance for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
@@ -374,7 +338,6 @@ const opt_desc_t options[] =
 
 	{	"floor_bump_medium",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"distance for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
@@ -383,7 +346,6 @@ const opt_desc_t options[] =
 
 	{	"floor_bump_large",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"distance for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
@@ -392,7 +354,6 @@ const opt_desc_t options[] =
 
 	{	"grid_default_mode",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Default grid mode: 0 = OFF, 1 = dotty, 2 = normal",
 		NULL,
@@ -401,7 +362,6 @@ const opt_desc_t options[] =
 
 	{	"grid_default_size",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Default grid size",
 		NULL,
@@ -410,7 +370,6 @@ const opt_desc_t options[] =
 
 	{	"grid_default_snap",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Default grid snapping",
 		NULL,
@@ -419,7 +378,6 @@ const opt_desc_t options[] =
 
 	{	"grid_hide_in_free_mode",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"hide the grid in FREE mode",
 		NULL,
@@ -428,7 +386,6 @@ const opt_desc_t options[] =
 
 	{	"grid_ratio_high",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"custom grid ratio : high value (numerator)",
 		NULL,
@@ -437,7 +394,6 @@ const opt_desc_t options[] =
 
 	{	"grid_ratio_low",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"custom grid ratio : low value (denominator)",
 		NULL,
@@ -446,7 +402,6 @@ const opt_desc_t options[] =
 
 	{	"grid_snap_indicator",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"show a cross at the grid-snapped location",
 		NULL,
@@ -455,7 +410,6 @@ const opt_desc_t options[] =
 
 	{	"grid_style",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"grid style : 0 = squares, 1 = dotty",
 		NULL,
@@ -464,7 +418,6 @@ const opt_desc_t options[] =
 
 	{	"gui_theme",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"GUI widget theme: 0 = fltk, 1 = gtk+, 2 = plastic",
 		NULL,
@@ -473,7 +426,6 @@ const opt_desc_t options[] =
 
 	{	"gui_color_set",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"GUI color set: 0 = fltk default, 1 = bright, 2 = custom",
 		NULL,
@@ -482,7 +434,6 @@ const opt_desc_t options[] =
 
 	{	"gui_custom_bg",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"GUI custom background color",
 		NULL,
@@ -491,7 +442,6 @@ const opt_desc_t options[] =
 
 	{	"gui_custom_ig",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"GUI custom input color",
 		NULL,
@@ -500,7 +450,6 @@ const opt_desc_t options[] =
 
 	{	"gui_custom_fg",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"GUI custom foreground (text) color",
 		NULL,
@@ -509,7 +458,6 @@ const opt_desc_t options[] =
 
 	{	"highlight_line_info",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Info drawn near a highlighted line (0 = nothing)",
 		NULL,
@@ -518,7 +466,6 @@ const opt_desc_t options[] =
 
 	{	"leave_offsets_alone",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Do not adjust offsets when splitting lines (etc)",
 		NULL,
@@ -527,7 +474,6 @@ const opt_desc_t options[] =
 
 	{	"light_bump_small",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"light step for '+' and '-' buttons in sector panel while SHIFT is pressed",
 		NULL,
@@ -536,7 +482,6 @@ const opt_desc_t options[] =
 
 	{	"light_bump_medium",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"light step for '+' and '-' buttons in sector panel without any modifier keys",
 		NULL,
@@ -545,7 +490,6 @@ const opt_desc_t options[] =
 
 	{	"light_bump_large",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"light step for '+' and '-' buttons in sector panel while CTRL is pressed",
 		NULL,
@@ -554,7 +498,6 @@ const opt_desc_t options[] =
 
 	{	"map_scroll_bars",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Enable scroll-bars for the map view",
 		NULL,
@@ -563,7 +506,6 @@ const opt_desc_t options[] =
 
 	{	"minimum_drag_pixels",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Minimum distance to move mouse to drag an object (in pixels)",
 		NULL,
@@ -572,7 +514,6 @@ const opt_desc_t options[] =
 
 	{	"new_sector_size",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Size of sector rectangles created outside of the map",
 		NULL,
@@ -581,7 +522,6 @@ const opt_desc_t options[] =
 
 	{	"normal_axis_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"axis color for the normal grid",
 		NULL,
@@ -590,7 +530,6 @@ const opt_desc_t options[] =
 
 	{	"normal_main_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"main color for the normal grid",
 		NULL,
@@ -599,7 +538,6 @@ const opt_desc_t options[] =
 
 	{	"normal_flat_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"flat color for the normal grid",
 		NULL,
@@ -608,7 +546,6 @@ const opt_desc_t options[] =
 
 	{	"normal_small_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"small color for the normal grid",
 		NULL,
@@ -617,7 +554,6 @@ const opt_desc_t options[] =
 
 	{	"panel_gamma",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Gamma for images in the panels and the browser (0..4)",
 		NULL,
@@ -626,7 +562,6 @@ const opt_desc_t options[] =
 
 	{	"render_pix_aspect",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Aspect ratio of pixels for 3D view (100 * width / height)",
 		NULL,
@@ -635,7 +570,6 @@ const opt_desc_t options[] =
 
 	{	"render_far_clip",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Distance of far clip plane for 3D rendering",
 		NULL,
@@ -644,7 +578,6 @@ const opt_desc_t options[] =
 
 	{	"render_high_detail",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Use highest detail when rendering 3D view (software mode)",
 		NULL,
@@ -653,7 +586,6 @@ const opt_desc_t options[] =
 
 	{	"render_lock_gravity",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Locked gravity in 3D view -- cannot move up or down",
 		NULL,
@@ -662,7 +594,6 @@ const opt_desc_t options[] =
 
 	{	"render_missing_bright",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Render the missing texture as fullbright",
 		NULL,
@@ -671,7 +602,6 @@ const opt_desc_t options[] =
 
 	{	"render_unknown_bright",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Render the unknown texture as fullbright",
 		NULL,
@@ -680,7 +610,6 @@ const opt_desc_t options[] =
 
 	{	"same_mode_clears_selection",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Clear the selection when entering the same mode",
 		NULL,
@@ -689,7 +618,6 @@ const opt_desc_t options[] =
 
 	{	"sector_render_default",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Default sector rendering mode: 0 = NONE, 1 = floor, 2 = ceiling",
 		NULL,
@@ -698,7 +626,6 @@ const opt_desc_t options[] =
 
 	{	"show_full_one_sided",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Show all textures on one-sided lines in the Linedef panel",
 		NULL,
@@ -707,7 +634,6 @@ const opt_desc_t options[] =
 
 	{	"sidedef_add_del_buttons",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Show the ADD and DEL buttons in Sidedef panels",
 		NULL,
@@ -716,7 +642,6 @@ const opt_desc_t options[] =
 
 	{	"thing_render_default",
 		0,
-        OptType::integer,
 		OptFlag_preference,
 		"Default thing rendering mode: 0 = boxes, 1 = sprites",
 		NULL,
@@ -725,7 +650,6 @@ const opt_desc_t options[] =
 
 	{	"transparent_col",
 		0,
-        OptType::color,
 		OptFlag_preference,
 		"color used to represent transparent pixels in textures",
 		NULL,
@@ -734,7 +658,6 @@ const opt_desc_t options[] =
 
 	{	"swap_sidedefs",
 		0,
-        OptType::boolean,
 		OptFlag_preference,
 		"Swap upper and lower sidedefs in the Linedef panel",
 		NULL,
@@ -745,14 +668,7 @@ const opt_desc_t options[] =
 	// That's all there is
 	//
 
-	{	0,
-		0,
-        OptType::end,
-		0,
-		0,
-		0,
-		0
-	}
+	{}	// mandatory terminator
 };
 
 
