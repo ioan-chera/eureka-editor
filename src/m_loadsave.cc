@@ -1005,11 +1005,11 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const SString &filename, const SString &map_namem)
+void OpenFileMap(Instance &inst, const SString &filename, const SString &map_namem)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
-	if (! gInstance.Main_ConfirmQuit("open another map"))
+	if (! inst.Main_ConfirmQuit("open another map"))
 		return;
 
 
@@ -1052,7 +1052,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! gInstance.loaded.parseEurekaLump(wad.get()))
+		if (! inst.loaded.parseEurekaLump(wad.get()))
 		{
 			return;
 		}
@@ -1063,25 +1063,26 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 
 	// this wad replaces the current PWAD
-	gInstance.wad.master.replaceEditWad(wad);
+	inst.wad.master.replaceEditWad(wad);
 
-	SYS_ASSERT(gInstance.wad.master.edit_wad == wad);
+	SYS_ASSERT(inst.wad.master.edit_wad == wad);
 
 
 	// always grab map_name from the actual level
 	{
-		int idx = gInstance.wad.master.edit_wad->LevelHeader(lev_num);
-		map_name  = gInstance.wad.master.edit_wad->GetLump(idx)->Name();
+		int idx = inst.wad.master.edit_wad->LevelHeader(lev_num);
+		map_name  = inst.wad.master.edit_wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().u8string().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(),
+				inst.wad.master.edit_wad->PathName().u8string().c_str());
 
 	// TODO: new instance
-	gInstance.LoadLevel(gInstance.wad.master.edit_wad.get(), map_name);
+	inst.LoadLevel(inst.wad.master.edit_wad.get(), map_name);
 
 	// must be after LoadLevel as we need the Level_format
 	// TODO: same here
-	gInstance.Main_LoadResources(gInstance.loaded);
+	inst.Main_LoadResources(inst.loaded);
 }
 
 
@@ -1197,7 +1198,7 @@ void Instance::CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(global::Pwad_list[index].u8string(), NULL);
+	OpenFileMap(*this, global::Pwad_list[index].u8string(), NULL);
 }
 
 
