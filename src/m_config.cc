@@ -1041,9 +1041,6 @@ void M_PrintCommandLineOptions()
 			len = (int)strlen (o->long_name);
 			name_maxlen = std::max(name_maxlen, len);
 		}
-
-		if (o->arg_desc)
-			len = (int)strlen (o->arg_desc);
 	}
 
 	for (int pass = 0 ; pass < 2 ; pass++)
