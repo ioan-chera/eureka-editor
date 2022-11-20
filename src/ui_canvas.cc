@@ -70,6 +70,18 @@ typedef enum
 
 } line_info_mode_e;
 
+// The level of highlighting.
+typedef enum
+{
+	HIGHLIGHT_Min = 0,
+	HIGHLIGHT_Normal,
+	HIGHLIGHT_Max
+} highlight_amount_e;
+highlight_amount_e highlight_amount = HIGHLIGHT_Normal;
+
+// Whether the following keys are pressed, updtaed by down and up events.
+bool shift_pressed   = false;
+bool control_pressed = false;
 
 // config items
 rgb_color_t config::dotty_axis_col  = RGB_MAKE(0, 128, 255);
@@ -210,6 +222,49 @@ void UI_Canvas::draw()
 
 int UI_Canvas::handle(int event)
 {
+	const bool key_down = event == FL_KEYDOWN;
+	const bool key_up   = event == FL_KEYUP;
+	if (key_down || key_up)
+	{
+		const int ekey = Fl::event_key();
+		const bool shift_change   = ekey == FL_Shift_L   || ekey == FL_Shift_R;
+		const bool control_change = ekey == FL_Control_L || ekey == FL_Control_R;
+		if (shift_change || control_change)
+		{
+			if (shift_change)
+			{
+				shift_pressed = key_down;
+			}
+			else if (control_change)
+			{
+				control_pressed = key_down;
+			}
+			
+			// This section assumes that highlight_amount_e consists of consecutive
+			// integers. Similar to the 3D view shift and control cancel each other
+			// out.
+			int highlight_amount_int = static_cast<int>(HIGHLIGHT_Normal);
+			if (shift_pressed)
+			{
+				// Decrease highlighting.
+				highlight_amount_int--;
+			}
+			if (control_pressed)
+			{
+				// Decrease highlighting.
+				highlight_amount_int++;
+			}
+			
+			highlight_amount_e new_highlight_amount =
+				static_cast<highlight_amount_e>(highlight_amount_int);
+			if (new_highlight_amount != highlight_amount)
+			{
+				highlight_amount = new_highlight_amount;
+				redraw();
+			}
+		}
+	}
+
 	if (inst.EV_HandleEvent(event))
 		return 1;
 
@@ -1345,6 +1400,12 @@ void UI_Canvas::UpdateHighlight()
 void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 							  double dx, double dy)
 {
+	// Do nothing if minimal highlighting.
+	if (highlight_amount == HIGHLIGHT_Min)
+	{
+		return;
+	}
+
 	// color and line thickness have been set by caller
 
 	// fprintf(stderr, "DrawHighlight: %d\n", objnum);
@@ -1459,6 +1520,12 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 {
+	// Do nothing if minimal highlighting.
+	if (highlight_amount == HIGHLIGHT_Min)
+	{
+		return;
+	}
+
 	// color and line thickness have been set by caller
 
 	switch (objtype)
@@ -1554,6 +1621,69 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 	}
 }
 
+
+// TODO: Maybe this should be in another file since it doesn't draw anything,
+// but it's not obvious where.
+v2double_t UI_Canvas::GetMidpoint(const ObjType objtype, const int objnum)
+{
+	double minX =  1000000.0;
+	double maxX = -1000000.0;
+	double minY =  1000000.0;
+	double maxY = -1000000.0;
+	
+	if (objtype == ObjType::sectors)
+	{
+		for (const LineDef *sLineDef : inst.level.linedefs)
+		{
+			if (!sLineDef->TouchesSector(objnum, inst.level))
+				continue;
+				
+			if (sLineDef->Start(inst.level)->x() < minX)
+				minX = sLineDef->Start(inst.level)->x();
+			if (sLineDef->Start(inst.level)->x() > maxX)
+				maxX = sLineDef->Start(inst.level)->x();
+			if (sLineDef->Start(inst.level)->y() < minY)
+				minY = sLineDef->Start(inst.level)->y();
+			if (sLineDef->Start(inst.level)->y() > maxY)
+				maxY = sLineDef->Start(inst.level)->y();
+		}
+	}
+	else if (objtype == ObjType::things)
+	{
+		// There is nothing to calculate for things.
+		return inst.level.things[objnum]->xy();
+	}
+	else if (objtype == ObjType::linedefs)
+	{
+		const LineDef *lineDef = inst.level.linedefs[objnum];
+
+		// For linedefs the bounding box is just the vertexes on either end.
+		minX = std::min(lineDef->Start(inst.level)->x(), lineDef->End(inst.level)->x());
+		maxX = std::max(lineDef->Start(inst.level)->x(), lineDef->End(inst.level)->x());
+		minY = std::min(lineDef->Start(inst.level)->y(), lineDef->End(inst.level)->y());
+		maxY = std::max(lineDef->Start(inst.level)->y(), lineDef->End(inst.level)->y());
+	}
+
+	// The midpoint in the middlle of the min and max determined.
+	return {(minX + maxX) / 2.0, (minY + maxY) / 2.0};
+}
+
+
+void UI_Canvas::DrawConnection(const ObjType objtypeCause , const int objnumCause,
+							   const ObjType objtypeEffect, const int objnumEffect)
+{
+	// Only do this for maximum highlighting.
+	if (highlight_amount != HIGHLIGHT_Max)
+		return;
+
+	const v2double_t midCause  = GetMidpoint(objtypeCause,  objnumCause);
+	const v2double_t midEffect = GetMidpoint(objtypeEffect, objnumEffect);
+
+	// TODO: Consider visibility testing prior to drawing this line.
+	DrawMapLine(midCause.x, midCause.y, midEffect.x, midEffect.y);
+}
+
+
 void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 {
 	// color has been set by caller
@@ -1565,12 +1695,20 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     //
     auto highlightTaggedItems = [this](const SpecialTagInfo &info)
     {
+		// TODO: Consider calling DrawConnection() in additional places after
+		// the DrawHighlight() call. For now only linedef and sector connections
+		// are drawn.
+
         if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
                 if(inst.level.sectors[m]->tag > 0)
                     for(int i = 0; i < info.numtags; ++i)
                         if (inst.level.sectors[m]->tag == info.tags[i])
+                        {
                             DrawHighlight(ObjType::sectors, m);
+							DrawConnection(info.type, info.objnum,
+										  ObjType::sectors, m);
+                        }
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
                 if(inst.level.things[m]->tid > 0)
@@ -1595,7 +1733,11 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                     {
                         for(int i = 0; i < info.numlineids; ++i)
                             if(line.tag == info.lineids[i])
+                            {
                                 DrawHighlight(ObjType::linedefs, m);
+								DrawConnection(info.type, info.objnum,
+											  ObjType::linedefs, m);
+                            }
                     }
                 }
                 else if(inst.loaded.levelFormat == MapFormat::hexen)
@@ -1631,7 +1773,8 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     // Look for all the tagging things
     //
     auto highlightTaggingTriggers = [this, objnum, objtype](int tag, int (SpecialTagInfo::*tags)[5],
-                                                            int SpecialTagInfo::*numtags)
+                                                            int SpecialTagInfo::*numtags,
+                                                            const ObjType objtypeCause, const int objnumCause)
     {
         if(tag <= 0)
             return;
@@ -1649,6 +1792,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 if((info.*tags)[i] == tag)
                 {
                     DrawHighlight(ObjType::linedefs, m);
+					DrawConnection(objtypeCause, objnumCause,
+								  ObjType::linedefs, m);
+
                     break;
                 }
         }
@@ -1668,6 +1814,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
                 if((info.*tags)[i] == tag)
                 {
                     DrawHighlight(ObjType::things, m);
+					DrawConnection(objtypeCause, objnumCause,
+								  ObjType::things, m);
+
                     break;
                 }
         }
@@ -1683,7 +1832,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
             highlightTaggingTriggers(line->tag, &SpecialTagInfo::lineids,
-                                     &SpecialTagInfo::numlineids);
+                                     &SpecialTagInfo::numlineids, objtype, objnum);
         }
         else
         {
@@ -1694,7 +1843,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
             if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
             {
                 highlightTaggingTriggers(linfo.selflineid, &SpecialTagInfo::lineids,
-                                         &SpecialTagInfo::numlineids);
+                                         &SpecialTagInfo::numlineids, objtype, objnum);
             }
         }
     }
@@ -1705,15 +1854,17 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         SpecialTagInfo info;
         if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
             highlightTaggedItems(info);
-        highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
+        highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids,
+			objtype, objnum);
         const thingtype_t *type = get(inst.conf.thing_types, thing->type);
         if(type && type->flags & THINGDEF_POLYSPOT)
-            highlightTaggingTriggers(thing->angle, &SpecialTagInfo::po, &SpecialTagInfo::numpo);
+            highlightTaggingTriggers(thing->angle, &SpecialTagInfo::po, &SpecialTagInfo::numpo,
+            objtype, objnum);
     }
 	else if (objtype == ObjType::sectors)
     {
         highlightTaggingTriggers(inst.level.sectors[objnum]->tag, &SpecialTagInfo::tags,
-                                 &SpecialTagInfo::numtags);
+                                 &SpecialTagInfo::numtags, objtype, objnum);
     }
 }
 

@@ -47,8 +47,8 @@ TEST(BitVec, SetClearToggle)
     vec.set(100);
 	ASSERT_GE(vec.size(), 100);
 	int lastSize = vec.size();
-    for(int i = 0; i < vec.size(); ++i)
-        ASSERT_EQ(vec.get(i), i == 100);
+	for(int i = 0; i < vec.size(); ++i)
+		ASSERT_EQ(vec.get(i), i == 100);
 
 	vec.set(50);
 	ASSERT_EQ(vec.size(), lastSize);
