@@ -36,7 +36,7 @@ const sectortype_t &Instance::M_GetSectorType(int type) const
    return sectortype;
 }
 
-const thingtype_t &ConfigData::getThingType(int type)
+const thingtype_t &ConfigData::getThingType(int type) const
 {
    static thingtype_t thingtype;
    return thingtype;
