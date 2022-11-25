@@ -120,7 +120,7 @@ enum class ProgressStatus
 };
 static ProgressStatus init_progress;
 
-int global::show_help     = 0;
+bool global::show_help;
 int global::show_version  = 0;
 
 
