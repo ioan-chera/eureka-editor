@@ -305,7 +305,7 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 	if (global::install_dir.empty())
 	{
 #ifdef WIN32
-		global::install_dir = fs::u8path(GetExecutablePath(argv0).get());
+		global::install_dir = GetExecutablePath(argv0);
 
 #else
 		static const char *prefixes[] =

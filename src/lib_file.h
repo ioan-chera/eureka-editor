@@ -56,7 +56,7 @@ bool FileMakeDir(const fs::path &dir_name);
 bool FileLoad(const fs::path &filename, std::vector<uint8_t> &data);
 
 // miscellaneous
-SString GetExecutablePath(const char *argv0);
+fs::path GetExecutablePath(const char *argv0);
 
 //------------------------------------------------------------------------
 

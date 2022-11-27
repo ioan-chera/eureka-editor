@@ -342,7 +342,7 @@ int ScanDirectory(const fs::path &path, directory_iter_f func, void *priv_dat)
 
 //------------------------------------------------------------------------
 
-SString GetExecutablePath(const char *argv0)
+fs::path GetExecutablePath(const char *argv0)
 {
 	SString path;
 
@@ -355,7 +355,7 @@ SString GetExecutablePath(const char *argv0)
 		{
 			SString retpath = WideToUTF8(wpath);
 			FilenameStripBase(retpath);
-			return retpath;
+			return fs::u8path(retpath.get());
 		}
 	}
 
@@ -371,7 +371,7 @@ SString GetExecutablePath(const char *argv0)
 		if (access(rawpath, 0) == 0)  // sanity check
 		{
 			FilenameStripBase(rawpath);
-			return rawpath;
+			return fs::u8path(rawpath);
 		}
 	}
 
@@ -394,7 +394,7 @@ SString GetExecutablePath(const char *argv0)
 	{
 		// FIXME: will this be _inside_ the .app folder???
 		FilenameStripBase(rawpath);
-		return rawpath;
+		return fs::u8path(rawpath);
 	}
 #endif
 
@@ -406,7 +406,7 @@ SString GetExecutablePath(const char *argv0)
 #endif
 
 	FilenameStripBase(path);
-	return path;
+	return fs::u8path(path.get());
 }
 
 //
