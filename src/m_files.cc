@@ -432,29 +432,29 @@ bool Instance::M_TryOpenMostRecent()
 	if (global::recent.files.getSize() == 0)
 		return false;
 
-	SString filename;
+	fs::path filename;
 	SString map_name;
 
 	fs::path filepath;
 	global::recent.files.Lookup(0, &filepath, &map_name);
-	filename = filepath.generic_u8string();
+	filename = filepath;
 
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(filename.get()),
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
 												   WadOpenMode::append);
 
 	if (! wad)
 	{
-		gLog.printf("Failed to load most recent pwad: %s\n", filename.c_str());
+		gLog.printf("Failed to load most recent pwad: %s\n", filename.u8string().c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
 	if (wad->LevelCount() == 0)
 	{
-		gLog.printf("No levels in most recent pwad: %s\n", filename.c_str());
+		gLog.printf("No levels in most recent pwad: %s\n", filename.u8string().c_str());
 
 		return false;
 	}
@@ -466,7 +466,7 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	this->wad.master.Pwad_name = fs::u8path(filename.get());
+	this->wad.master.Pwad_name = filename;
 
 	this->wad.master.edit_wad = wad;
 
