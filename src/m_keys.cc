@@ -525,20 +525,20 @@ static void ParseKeyBinding(const std::vector<SString> &tokens)
 
 #define MAX_TOKENS  (MAX_EXEC_PARAM + 8)
 
-static bool LoadBindingsFromPath(const SString &path, bool required)
+static bool LoadBindingsFromPath(const fs::path &path, bool required)
 {
-	SString filename = path + "/bindings.cfg";
+	fs::path filename = path / "bindings.cfg";
 
-	std::ifstream fp(filename.c_str());
+	std::ifstream fp(filename);
 	if(!fp.is_open())
 	{
 		if (! required)
 			return false;
 
-		ThrowException("Missing key bindings file:\n\n%s\n", filename.c_str());
+		ThrowException("Missing key bindings file:\n\n%s\n", filename.u8string().c_str());
 	}
 
-	gLog.printf("Reading key bindings from: %s\n", filename.c_str());
+	gLog.printf("Reading key bindings from: %s\n", filename.u8string().c_str());
 
 	while (! fp.eof())
 	{
