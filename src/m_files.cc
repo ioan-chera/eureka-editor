@@ -758,7 +758,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 	fs::path new_iwad;
 	SString new_port;
 
-	std::vector<SString> new_resources;
+	std::vector<fs::path> new_resources;
 
 	SString line;
 
@@ -836,7 +836,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			}
 
 			if (fs::exists(resourcePath))
-				new_resources.push_back(resourcePath.u8string());
+				new_resources.push_back(resourcePath);
 			else
 			{
 				DLG_Notify("Warning: the pwad specifies a resource "
@@ -885,9 +885,9 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 	if (! keep_cmd_line_args)
 		resourceList.clear();
 
-	for (const SString &resource : new_resources)
+	for (const fs::path &resource : new_resources)
 	{
-		M_AddResource_Unique(*this, fs::u8path(resource.get()));
+		M_AddResource_Unique(*this, resource);
 	}
 
 	return true;
