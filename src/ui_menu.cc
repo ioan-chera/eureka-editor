@@ -83,7 +83,7 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 {
 	const char *filename = (const char *) data;
 
-	int given_idx = M_FindGivenFile(filename);
+	int given_idx = M_FindGivenFile(fs::u8path(filename));
 
 	// TODO: think up the right instance to get this
 	if (given_idx >= 0)

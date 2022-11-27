@@ -115,7 +115,7 @@ fs::path M_QueryKnownIWAD(const SString &game, const std::map<SString, fs::path>
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name, const std::map<SString, fs::path> &known_iwads);
 
 void M_ValidateGivenFiles();
-int  M_FindGivenFile(const char *filename);
+int  M_FindGivenFile(const fs::path &filename);
 
 void M_BackupWad(Wad_file *wad);
 

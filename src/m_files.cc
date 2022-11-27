@@ -109,10 +109,10 @@ void M_ValidateGivenFiles()
 }
 
 
-int M_FindGivenFile(const char *filename)
+int M_FindGivenFile(const fs::path &filename)
 {
 	for (int i = 0 ; i < (int)global::Pwad_list.size() ; i++)
-		if (global::Pwad_list[i] == fs::u8path(filename))
+		if (global::Pwad_list[i] == filename)
 			return i;
 
 	return -1;  // Not Found
