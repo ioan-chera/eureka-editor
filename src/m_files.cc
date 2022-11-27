@@ -1029,16 +1029,16 @@ void M_BackupWad(Wad_file *wad)
 
 	// actually back-up the file
 
-	SString dest_name = Backup_Name(dir_name, b_high + 1).u8string();
+	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
 
-	if (! wad->Backup(dest_name.c_str()))
+	if (! wad->Backup(dest_name.u8string().c_str()))
 	{
 		// Hmmm, show a dialog ??
 		gLog.printf("WARNING: backup failed (cannot copy file)\n");
 		return;
 	}
 
-	gLog.printf("Backed up wad to: %s\n", dest_name.c_str());
+	gLog.printf("Backed up wad to: %s\n", dest_name.u8string().c_str());
 }
 
 //--- editor settings ---
