@@ -76,7 +76,7 @@ protected:
 		bool begin_maximized = false;
 		SString default_port;
 		SString loadedLevelName;
-		SString config_file;
+		fs::path config_file;
 
 		bool show_version = false;
 		std::vector<SString> loadedResourceList;
@@ -119,7 +119,7 @@ void MConfig::SetUp()
 					 &config.begin_maximized));
 	add(configOption("bsp_gl_nodes", OptType::boolean, OptFlag_preference, &config.bsp_gl_nodes));
 	add(configOption("bsp_on_save", OptType::boolean, OptFlag_preference, &config.bsp_on_save));
-	add(configOption("config", OptType::string, OptFlag_pass1 | OptFlag_helpNewline,
+	add(configOption("config", OptType::path, OptFlag_pass1 | OptFlag_helpNewline,
 					 &config.config_file));
 	add(configOption("default_gamma", OptType::integer, OptFlag_preference, &config.usegamma));
 	add(configOption("default_port", OptType::string, OptFlag_preference, &config.default_port));
@@ -294,10 +294,10 @@ TEST_F(MConfig, MWriteConfig)
     config.loadedLevelName = "NEW LEVEL";
     config.Pwad_list = { "file1", "file2 file3" };
 
-    config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
+    config.config_file = getChildPath("configx.cfg");  // pick any name
 
-    ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
-    mDeleteList.push(config.config_file.get());
+    ASSERT_EQ(M_WriteConfigFile(config.config_file.u8string(), options().data()), 0);
+    mDeleteList.push(config.config_file);
 
     // Now unset them
     config.auto_load_recent = false;
@@ -312,7 +312,7 @@ TEST_F(MConfig, MWriteConfig)
 
     // Now read config back
 
-    ASSERT_EQ(M_ParseConfigFile(fs::u8path(config.config_file.get()), options().data()), 0);
+    ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
 
     ASSERT_TRUE(config.auto_load_recent);
     ASSERT_TRUE(config.begin_maximized);
@@ -340,14 +340,14 @@ TEST_F(MConfig, MWriteConfigPathList)
 	};
 	config.onepath = "bi\"g\"/dog";
 
-	config.config_file = getChildPath("configx.cfg").u8string();  // pick any name
-	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
-	mDeleteList.push(config.config_file.get());
+	config.config_file = getChildPath("configx.cfg");  // pick any name
+	ASSERT_EQ(M_WriteConfigFile(config.config_file.u8string(), options().data()), 0);
+	mDeleteList.push(config.config_file);
 
 	config.paths.clear();
 
 	// Now read config back
-	ASSERT_EQ(M_ParseConfigFile(fs::u8path(config.config_file.get()), options().data()), 0);
+	ASSERT_EQ(M_ParseConfigFile(config.config_file, options().data()), 0);
 	ASSERT_EQ(config.paths.size(), 9);
 	ASSERT_EQ(config.paths[0], fs::path(""));
 	ASSERT_EQ(config.paths[1], fs::path("."));
