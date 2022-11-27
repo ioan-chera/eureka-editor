@@ -590,7 +590,7 @@ void UI_TextEditor::InsertFile()
 
 	chooser.title("Pick file to insert");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_FILE);
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{
@@ -650,7 +650,7 @@ void UI_TextEditor::ExportToFile()
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
-	chooser.directory(inst.Main_FileOpFolder().c_str());
+	chooser.directory(inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{

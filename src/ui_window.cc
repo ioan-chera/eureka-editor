@@ -756,7 +756,7 @@ void UI_LogViewer::save_callback(Fl_Widget *w, void *data)
 	chooser.title("Pick file to save to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Text files\t*.txt");
-	chooser.directory(viewer->inst.Main_FileOpFolder().c_str());
+	chooser.directory(viewer->inst.Main_FileOpFolder().u8string().c_str());
 
 	switch (chooser.show())
 	{

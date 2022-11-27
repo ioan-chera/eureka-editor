@@ -143,7 +143,7 @@ bool Instance::Project_AskFile(SString &filename) const
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -1634,7 +1634,7 @@ bool Instance::M_ExportMap()
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())

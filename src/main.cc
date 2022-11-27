@@ -753,10 +753,10 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 // the directory we should use for a file open/save operation.
 // returns NULL when not sure.
 //
-SString Instance::Main_FileOpFolder() const
+fs::path Instance::Main_FileOpFolder() const
 {
 	if (!wad.master.Pwad_name.empty())
-		return FilenameGetPath(wad.master.Pwad_name).u8string();
+		return FilenameGetPath(wad.master.Pwad_name);
 
 	return "";
 }
