@@ -558,14 +558,13 @@ static fs::path SearchForIWAD(const SString &game)
 {
 	gLog.debugPrintf("Searching for '%s' IWAD\n", game.c_str());
 
-	static char dir_name[FL_PATH_MAX];
+	fs::path dir_name;
 
 	// 1. look in ~/.eureka/iwads first
 
-	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", global::home_dir.u8string().c_str());
-	dir_name[FL_PATH_MAX-1] = 0;
+	dir_name = global::home_dir / "iwads";
 
-	fs::path path = SearchDirForIWAD(fs::u8path(dir_name), game);
+	fs::path path = SearchDirForIWAD(dir_name, game);
 	if (!path.empty())
 		return path;
 
@@ -576,10 +575,11 @@ static fs::path SearchForIWAD(const SString &game)
 	{
 		for (int i = 0 ; i < 999 ; i++)
 		{
-			if (! ExtractOnePath(doomwadpath, dir_name, i))
+			char dir_tmp[FL_PATH_MAX] = {};
+			if (! ExtractOnePath(doomwadpath, dir_tmp, i))
 				break;
 
-			path = SearchDirForIWAD(fs::u8path(dir_name), game);
+			path = SearchDirForIWAD(fs::u8path(dir_tmp), game);
 			if (!path.empty())
 				return path;
 		}
@@ -590,7 +590,7 @@ static fs::path SearchForIWAD(const SString &game)
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(fs::u8path(SString(doomwaddir).get()), game);
+		path = SearchDirForIWAD(fs::u8path(doomwaddir), game);
 		if (!path.empty())
 			return path;
 	}
