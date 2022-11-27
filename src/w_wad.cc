@@ -186,7 +186,7 @@ int64_t Lump_c::getName8() const noexcept
 
 Wad_file::~Wad_file()
 {
-	gLog.printf("Closing WAD file: %s\n", filename.c_str());
+	gLog.printf("Closing WAD file: %s\n", filename.u8string().c_str());
 }
 
 
@@ -797,11 +797,11 @@ void Wad_file::writeToDisk() noexcept(false)
 	if(IsReadOnly())
 	{
 		ThrowException("Cannot overwrite a read-only file (%s)!",
-					   filename.c_str());
+					   filename.u8string().c_str());
 	}
 
 	// Write to our path now
-	writeToPath(filename.get());
+	writeToPath(filename);
 
 	// reset the insertion point
 	insert_point = -1;
