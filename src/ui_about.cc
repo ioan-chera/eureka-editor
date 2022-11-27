@@ -47,7 +47,7 @@ private:
 
 		// FIXME : use this location for all platforms
 #ifdef WIN32
-		snprintf(filename, sizeof(filename), "%s/common/about_logo.png", global::install_dir.c_str());
+		snprintf(filename, sizeof(filename), "%s/common/about_logo.png", global::install_dir.u8string().c_str());
 #else
 		snprintf(filename, sizeof(filename), "%s/about_logo.png", global::install_dir.u8string().c_str());
 #endif
