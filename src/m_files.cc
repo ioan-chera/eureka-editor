@@ -535,23 +535,20 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 
 static fs::path SearchDirForIWAD(const fs::path &dir_name, const SString &game)
 {
-	char name_buf[FL_PATH_MAX];
+	fs::path name = dir_name / fs::u8path((game + ".wad").get());
 
-	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name.u8string().c_str(), game.c_str());
+	gLog.debugPrintf("  trying: %s\n", name.u8string().c_str());
 
-	gLog.debugPrintf("  trying: %s\n", name_buf);
-
-	if (Wad_file::Validate(name_buf))
-		return fs::u8path(name_buf);
+	if (Wad_file::Validate(name))
+		return name;
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
+	name = dir_name / fs::u8path((game.asUpper() + ".WAD").get());
 
-	y_strupr(name_buf + dir_name.u8string().length() + 1);
+	gLog.debugPrintf("  trying: %s\n", name.u8string().c_str());
 
-	gLog.debugPrintf("  trying: %s\n", name_buf);
-
-	if (Wad_file::Validate(name_buf))
-		return fs::u8path(name_buf);
+	if (Wad_file::Validate(name))
+		return name;
 
 	return "";
 }
