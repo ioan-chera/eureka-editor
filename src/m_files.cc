@@ -533,11 +533,11 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 }
 
 
-static fs::path SearchDirForIWAD(const SString &dir_name, const SString &game)
+static fs::path SearchDirForIWAD(const fs::path &dir_name, const SString &game)
 {
 	char name_buf[FL_PATH_MAX];
 
-	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name.c_str(), game.c_str());
+	snprintf(name_buf, sizeof(name_buf), "%s/%s.wad", dir_name.u8string().c_str(), game.c_str());
 
 	gLog.debugPrintf("  trying: %s\n", name_buf);
 
@@ -546,7 +546,7 @@ static fs::path SearchDirForIWAD(const SString &dir_name, const SString &game)
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
 
-	y_strupr(name_buf + dir_name.length() + 1);
+	y_strupr(name_buf + dir_name.u8string().length() + 1);
 
 	gLog.debugPrintf("  trying: %s\n", name_buf);
 
@@ -568,7 +568,7 @@ static fs::path SearchForIWAD(const SString &game)
 	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", global::home_dir.u8string().c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
-	fs::path path = SearchDirForIWAD(dir_name, game);
+	fs::path path = SearchDirForIWAD(fs::u8path(dir_name), game);
 	if (!path.empty())
 		return path;
 
@@ -582,7 +582,7 @@ static fs::path SearchForIWAD(const SString &game)
 			if (! ExtractOnePath(doomwadpath, dir_name, i))
 				break;
 
-			path = SearchDirForIWAD(dir_name, game);
+			path = SearchDirForIWAD(fs::u8path(dir_name), game);
 			if (!path.empty())
 				return path;
 		}
@@ -593,7 +593,7 @@ static fs::path SearchForIWAD(const SString &game)
 	const char *doomwaddir = getenv("DOOMWADDIR");
 	if (doomwaddir)
 	{
-		path = SearchDirForIWAD(SString(doomwaddir), game);
+		path = SearchDirForIWAD(fs::u8path(SString(doomwaddir).get()), game);
 		if (!path.empty())
 			return path;
 	}
