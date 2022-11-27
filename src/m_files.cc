@@ -557,7 +557,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 }
 
 
-static SString SearchForIWAD(const SString &game)
+static fs::path SearchForIWAD(const SString &game)
 {
 	gLog.debugPrintf("Searching for '%s' IWAD\n", game.c_str());
 
@@ -570,7 +570,7 @@ static SString SearchForIWAD(const SString &game)
 
 	SString path = SearchDirForIWAD(dir_name, game);
 	if (!path.empty())
-		return path;
+		return fs::u8path(path.get());
 
 	// 2. look in $DOOMWADPATH
 
@@ -584,7 +584,7 @@ static SString SearchForIWAD(const SString &game)
 
 			path = SearchDirForIWAD(dir_name, game);
 			if (!path.empty())
-				return path;
+				return fs::u8path(path.get());
 		}
 	}
 
@@ -595,7 +595,7 @@ static SString SearchForIWAD(const SString &game)
 	{
 		path = SearchDirForIWAD(SString(doomwaddir), game);
 		if (!path.empty())
-			return path;
+			return fs::u8path(path.get());
 	}
 
 	// 4. look in various standard places
@@ -621,14 +621,14 @@ static SString SearchForIWAD(const SString &game)
 	{
 		path = SearchDirForIWAD(standard_iwad_places[i], game);
 		if (!path.empty())
-			return path;
+			return fs::u8path(path.get());
 	}
 
 	// 5. last resort : the current directory
 
 	path = SearchDirForIWAD(".", game);
 	if (!path.empty())
-		return path;
+		return fs::u8path(path.get());
 
 	return "";  // not found
 }
@@ -649,7 +649,7 @@ void M_LookForIWADs()
 		if (!M_QueryKnownIWAD(game, global::recent.known_iwads).empty())
 			continue;
 
-		fs::path path = fs::u8path(SearchForIWAD(game).get());
+		fs::path path = SearchForIWAD(game);
 
 		if (!path.empty())
 		{
