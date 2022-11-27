@@ -399,7 +399,7 @@ static bool DetermineIWAD(Instance &inst)
 	}
 	else
 	{
-		inst.loaded.iwadName = fs::u8path(inst.M_PickDefaultIWAD().get());
+		inst.loaded.iwadName = inst.M_PickDefaultIWAD();
 
 		if (inst.loaded.iwadName.empty())
 		{

@@ -247,7 +247,7 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	SString M_PickDefaultIWAD() const;
+	fs::path M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
 
 	// M_GAME

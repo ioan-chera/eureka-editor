@@ -663,7 +663,7 @@ void M_LookForIWADs()
 }
 
 
-SString Instance::M_PickDefaultIWAD() const
+fs::path Instance::M_PickDefaultIWAD() const
 {
 	// guess either DOOM or DOOM 2 based on level names
 	const char *default_game = "doom2";
@@ -692,7 +692,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	result = M_QueryKnownIWAD(default_game, global::recent.known_iwads);
 	if (!result.empty())
-		return result.u8string();
+		return result;
 
 	// try FreeDoom
 
@@ -705,7 +705,7 @@ SString Instance::M_PickDefaultIWAD() const
 
 	result = M_QueryKnownIWAD(default_game, global::recent.known_iwads);
 	if (!result.empty())
-		return result.u8string();
+		return result;
 
 	// try any known iwad
 
@@ -716,7 +716,7 @@ SString Instance::M_PickDefaultIWAD() const
 	KI = global::recent.known_iwads.begin();
 
 	if (KI != global::recent.known_iwads.end())
-		return KI->second.u8string();
+		return KI->second;
 
 	// nothing left to try
 	gLog.debugPrintf("pick default iwad failed.\n");
