@@ -296,7 +296,7 @@ TEST_F(MConfig, MWriteConfig)
 
     config.config_file = getChildPath("configx.cfg");  // pick any name
 
-    ASSERT_EQ(M_WriteConfigFile(config.config_file.u8string(), options().data()), 0);
+    ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
     mDeleteList.push(config.config_file);
 
     // Now unset them
@@ -341,7 +341,7 @@ TEST_F(MConfig, MWriteConfigPathList)
 	config.onepath = "bi\"g\"/dog";
 
 	config.config_file = getChildPath("configx.cfg");  // pick any name
-	ASSERT_EQ(M_WriteConfigFile(config.config_file.u8string(), options().data()), 0);
+	ASSERT_EQ(M_WriteConfigFile(config.config_file, options().data()), 0);
 	mDeleteList.push(config.config_file);
 
 	config.paths.clear();

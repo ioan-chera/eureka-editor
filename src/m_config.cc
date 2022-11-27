@@ -1190,11 +1190,11 @@ static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &
 		os << escape(item) << ' ';
 }
 
-int M_WriteConfigFile(const SString &path, const opt_desc_t *options)
+int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
 {
-	gLog.printf("Writing config file: %s\n", path.c_str());
+	gLog.printf("Writing config file: %s\n", path.u8string().c_str());
 
-	std::ofstream os(path.get(), std::ios::trunc);
+	std::ofstream os(path, std::ios::trunc);
 
 	if (! os.is_open())
 	{
