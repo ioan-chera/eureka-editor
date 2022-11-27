@@ -961,9 +961,9 @@ static void backup_scan_file(const fs::path &name, int flags, void *priv_dat)
 }
 
 
-inline static SString Backup_Name(const fs::path &dir_name, int slot)
+inline static fs::path Backup_Name(const fs::path &dir_name, int slot)
 {
-	return SString::printf("%s/%d.wad", dir_name.u8string().c_str(), slot);
+	return dir_name / fs::u8path(SString::printf("%d.wad", slot).get());
 }
 
 
@@ -982,7 +982,7 @@ static void Backup_Prune(const fs::path &dir_name, int b_low, int b_high, int wa
 
 	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
-		FileDelete(Backup_Name(dir_name, b_low).get());
+		FileDelete(Backup_Name(dir_name, b_low));
 	}
 }
 
@@ -1029,7 +1029,7 @@ void M_BackupWad(Wad_file *wad)
 
 	// actually back-up the file
 
-	SString dest_name = Backup_Name(dir_name, b_high + 1);
+	SString dest_name = Backup_Name(dir_name, b_high + 1).u8string();
 
 	if (! wad->Backup(dest_name.c_str()))
 	{
