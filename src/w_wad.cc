@@ -1103,7 +1103,7 @@ int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
 
 void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
-	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().c_str());
+	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().u8string().c_str());
 
 	dir.push_back(wad);
 }
@@ -1111,7 +1111,7 @@ void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 
 void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
-	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().c_str());
+	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().u8string().c_str());
 
 	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
 
@@ -1145,7 +1145,7 @@ bool MasterDir::MasterDir_HaveFilename(const SString &chk_path) const
 {
 	for (unsigned int k = 0 ; k < dir.size() ; k++)
 	{
-		const SString &wad_path = dir[k]->PathName();
+		SString wad_path = dir[k]->PathName().u8string();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

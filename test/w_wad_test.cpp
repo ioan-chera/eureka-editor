@@ -92,7 +92,7 @@ TEST_F(WadFileTest, WriteRead)
 	// Prepare the test path
 	fs::path path = getChildPath("newwad.wad");
 	wad = Wad_file::Open(path, WadOpenMode::write);
-	ASSERT_EQ(wad->PathName(), path.u8string());
+	ASSERT_EQ(wad->PathName(), path);
 	ASSERT_FALSE(wad->IsReadOnly());
 	ASSERT_FALSE(wad->IsIWAD());
 	ASSERT_TRUE(wad);
