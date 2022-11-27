@@ -1008,7 +1008,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const SString &filename, const SString &map_namem)
+void OpenFileMap(const fs::path &filename, const SString &map_namem)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
@@ -1019,9 +1019,9 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 	std::shared_ptr<Wad_file> wad;
 
 	// make sure file exists, as Open() with 'a' would create it otherwise
-	if (FileExists(filename.get()))
+	if (FileExists(filename))
 	{
-		wad = Wad_file::Open(filename, WadOpenMode::append);
+		wad = Wad_file::Open(filename.u8string(), WadOpenMode::append);
 	}
 
 	if (! wad)
@@ -1200,7 +1200,7 @@ void Instance::CMD_GivenFile()
 
 	// TODO: remember last map visited in this wad
 
-	OpenFileMap(global::Pwad_list[index].u8string(), NULL);
+	OpenFileMap(global::Pwad_list[index], NULL);
 }
 
 

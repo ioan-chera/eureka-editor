@@ -90,7 +90,7 @@ static void file_do_load_given(Fl_Widget *w, void *data)
 	if (given_idx >= 0)
 		gInstance.last_given_file = given_idx;
 
-	OpenFileMap(filename->u8string());
+	OpenFileMap(*filename);
 }
 
 static void file_do_load_recent(Fl_Widget *w, void *data)

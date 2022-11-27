@@ -50,7 +50,7 @@ struct LoadingData
 	std::unordered_map<SString, SString> parse_vars;
 };
 
-void OpenFileMap(const SString &filename, const SString &map_name = "");
+void OpenFileMap(const fs::path &filename, const SString &map_name = "");
 
 #endif  /* __EUREKA_E_LOADSAVE_H__ */
 

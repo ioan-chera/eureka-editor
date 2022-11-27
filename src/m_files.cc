@@ -416,7 +416,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 
 	recent_file_data_c *data = (recent_file_data_c *)priv_data;
 
-	OpenFileMap(data->file.u8string(), data->map);
+	OpenFileMap(data->file, data->map);
 }
 
 void RecentKnowledge::addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir)
