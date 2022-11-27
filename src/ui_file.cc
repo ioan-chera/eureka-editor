@@ -614,7 +614,7 @@ void UI_OpenMap::LoadFile()
 	}
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(chooser.filename(),
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(chooser.filename()),
 												   WadOpenMode::append);
 
 	if (! wad)

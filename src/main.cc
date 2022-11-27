@@ -809,7 +809,7 @@ bool Instance::Main_LoadIWAD()
 {
 	// Load the IWAD (read only).
 	// The filename has been checked in DetermineIWAD().
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName.u8string(),
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(loaded.iwadName,
 												   WadOpenMode::read);
 	if (!wad)
 	{
@@ -919,7 +919,7 @@ void Instance::Main_LoadResources(LoadingData &loading)
 			if(!Wad_file::Validate(resource))
 				throw ParseException(SString("Invalid WAD file: ") + resource.u8string());
 
-			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource.u8string(),
+			std::shared_ptr<Wad_file> wad = Wad_file::Open(resource,
 														   WadOpenMode::read);
 			if(!wad)
 				throw ParseException(SString("Cannot load resource: ") + resource.u8string());
@@ -1146,7 +1146,7 @@ int main(int argc, char *argv[])
 			gInstance.wad.master.Pwad_name = global::Pwad_list[0].u8string();
 
 			// TODO: main instance
-			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,
+			gInstance.wad.master.edit_wad = Wad_file::Open(fs::u8path(gInstance.wad.master.Pwad_name.get()),
 												WadOpenMode::append);
 			if (!gInstance.wad.master.edit_wad)
 				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.c_str());

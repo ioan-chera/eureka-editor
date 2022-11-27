@@ -272,7 +272,7 @@ void Instance::CMD_NewProject()
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(filename.get()),
 												   WadOpenMode::write);
 
 	if (! wad)
@@ -1021,7 +1021,7 @@ void OpenFileMap(const fs::path &filename, const SString &map_namem)
 	// make sure file exists, as Open() with 'a' would create it otherwise
 	if (FileExists(filename))
 	{
-		wad = Wad_file::Open(filename.u8string(), WadOpenMode::append);
+		wad = Wad_file::Open(filename, WadOpenMode::append);
 	}
 
 	if (! wad)
@@ -1677,7 +1677,7 @@ bool Instance::M_ExportMap()
 
 	if (exists)
 	{
-		wad = Wad_file::Open(filename, WadOpenMode::append);
+		wad = Wad_file::Open(fs::u8path(filename.get()), WadOpenMode::append);
 
 		if (wad && wad->IsReadOnly())
 		{
@@ -1695,7 +1695,7 @@ bool Instance::M_ExportMap()
 	}
 	else
 	{
-		wad = Wad_file::Open(filename, WadOpenMode::write);
+		wad = Wad_file::Open(fs::u8path(filename.get()), WadOpenMode::write);
 	}
 
 	if (! wad)
