@@ -995,14 +995,14 @@ void M_BackupWad(Wad_file *wad)
 
 	// convert wad filename to a directory name in $cache_dir/backups
 
-	SString filename = (global::cache_dir / "backups" / wad->PathName().filename()).u8string();
-	SString dir_name = ReplaceExtension(filename.get(), NULL).u8string();
+	fs::path filename = global::cache_dir / "backups" / wad->PathName().filename();
+	fs::path dir_name = ReplaceExtension(filename, NULL);
 
-	gLog.debugPrintf("dir_name for backup: '%s'\n", dir_name.c_str());
+	gLog.debugPrintf("dir_name for backup: '%s'\n", dir_name.u8string().c_str());
 
 	// create the directory if it doesn't already exist
 	// (this will fail if it DOES already exist, but that's OK)
-	FileMakeDir(dir_name.get());
+	FileMakeDir(dir_name);
 
 	// scan directory to determine lowest and highest numbers in use
 	backup_scan_data_t  scan_data;
@@ -1010,7 +1010,7 @@ void M_BackupWad(Wad_file *wad)
 	scan_data.low  = (1 << 30);
 	scan_data.high = 0;
 
-	if (ScanDirectory(fs::u8path(dir_name.get()), backup_scan_file, &scan_data) < 0)
+	if (ScanDirectory(dir_name, backup_scan_file, &scan_data) < 0)
 	{
 		// Hmmm, show a dialog ??
 		gLog.printf("WARNING: backup failed (cannot scan dir)\n");
@@ -1024,12 +1024,12 @@ void M_BackupWad(Wad_file *wad)
 	{
 		int wad_size = wad->TotalSize();
 
-		Backup_Prune(dir_name, b_low, b_high, wad_size);
+		Backup_Prune(dir_name.u8string(), b_low, b_high, wad_size);
 	}
 
 	// actually back-up the file
 
-	SString dest_name = Backup_Name(dir_name, b_high + 1);
+	SString dest_name = Backup_Name(dir_name.u8string(), b_high + 1);
 
 	if (! wad->Backup(dest_name.c_str()))
 	{
