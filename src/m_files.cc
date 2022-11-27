@@ -533,7 +533,7 @@ static bool ExtractOnePath(const char *paths, char *dir, int index)
 }
 
 
-static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
+static fs::path SearchDirForIWAD(const SString &dir_name, const SString &game)
 {
 	char name_buf[FL_PATH_MAX];
 
@@ -542,7 +542,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 	gLog.debugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
-		return name_buf;
+		return fs::u8path(name_buf);
 
 	// try uppercasing the name, to find e.g. DOOM2.WAD
 
@@ -551,7 +551,7 @@ static SString SearchDirForIWAD(const SString &dir_name, const SString &game)
 	gLog.debugPrintf("  trying: %s\n", name_buf);
 
 	if (Wad_file::Validate(name_buf))
-		return name_buf;
+		return fs::u8path(name_buf);
 
 	return "";
 }
@@ -568,9 +568,9 @@ static fs::path SearchForIWAD(const SString &game)
 	snprintf(dir_name, FL_PATH_MAX, "%s/iwads", global::home_dir.u8string().c_str());
 	dir_name[FL_PATH_MAX-1] = 0;
 
-	SString path = SearchDirForIWAD(dir_name, game);
+	fs::path path = SearchDirForIWAD(dir_name, game);
 	if (!path.empty())
-		return fs::u8path(path.get());
+		return path;
 
 	// 2. look in $DOOMWADPATH
 
@@ -584,7 +584,7 @@ static fs::path SearchForIWAD(const SString &game)
 
 			path = SearchDirForIWAD(dir_name, game);
 			if (!path.empty())
-				return fs::u8path(path.get());
+				return path;
 		}
 	}
 
@@ -595,7 +595,7 @@ static fs::path SearchForIWAD(const SString &game)
 	{
 		path = SearchDirForIWAD(SString(doomwaddir), game);
 		if (!path.empty())
-			return fs::u8path(path.get());
+			return path;
 	}
 
 	// 4. look in various standard places
@@ -621,14 +621,14 @@ static fs::path SearchForIWAD(const SString &game)
 	{
 		path = SearchDirForIWAD(standard_iwad_places[i], game);
 		if (!path.empty())
-			return fs::u8path(path.get());
+			return path;
 	}
 
 	// 5. last resort : the current directory
 
 	path = SearchDirForIWAD(".", game);
 	if (!path.empty())
-		return fs::u8path(path.get());
+		return path;
 
 	return "";  // not found
 }
