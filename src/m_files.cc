@@ -649,13 +649,13 @@ void M_LookForIWADs()
 		if (!M_QueryKnownIWAD(game, global::recent.known_iwads).empty())
 			continue;
 
-		SString path = SearchForIWAD(game);
+		fs::path path = fs::u8path(SearchForIWAD(game).get());
 
 		if (!path.empty())
 		{
-			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.c_str());
+			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.u8string().c_str());
 
-			M_AddKnownIWAD(fs::u8path(path.get()), global::recent.known_iwads);
+			M_AddKnownIWAD(path, global::recent.known_iwads);
 		}
 	}
 
