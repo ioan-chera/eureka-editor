@@ -722,19 +722,19 @@ fs::path Instance::M_PickDefaultIWAD() const
 }
 
 
-static void M_AddResource_Unique(LoadingData &loading, const SString & filename)
+static void M_AddResource_Unique(LoadingData &loading, const fs::path & filename)
 {
 	// check if base filename (without path) already exists
 	for (const fs::path &resource : loading.resourceList)
 	{
-		SString A = fs::u8path(filename.get()).filename().u8string();
+		SString A = filename.filename().u8string();
 		SString B = resource.filename().u8string();
 
 		if(A.noCaseEqual(B))
 			return;		// found it
 	}
 
-	loading.resourceList.push_back(fs::u8path(filename.get()));
+	loading.resourceList.push_back(filename);
 }
 
 
@@ -887,7 +887,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	for (const SString &resource : new_resources)
 	{
-		M_AddResource_Unique(*this, resource);
+		M_AddResource_Unique(*this, fs::u8path(resource.get()));
 	}
 
 	return true;
