@@ -246,7 +246,7 @@ public:
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
-	bool Backup(const char *new_filename);
+	bool Backup(const fs::path &new_filename);
 
 	void writeToDisk() noexcept(false);
 

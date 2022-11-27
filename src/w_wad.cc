@@ -1030,7 +1030,7 @@ void Wad_file::InsertPoint(int index)
 //
 // This one merely saves it as a new filename
 //
-bool Wad_file::Backup(const char *new_filename)
+bool Wad_file::Backup(const fs::path &new_filename)
 {
 	try
 	{

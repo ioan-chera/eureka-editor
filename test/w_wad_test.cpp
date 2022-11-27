@@ -33,9 +33,9 @@ class WadFileTest : public TempDirContext
 // NOTE: Google Test doesn't allow its assertion macros to be called in non-void
 // functions.
 //
-static void readFromPath(const SString &path, std::vector<uint8_t> &data)
+static void readFromPath(const fs::path &path, std::vector<uint8_t> &data)
 {
-	FILE *f = fopen(path.c_str(), "rb");
+	FILE *f = fopen(path.u8string().c_str(), "rb");
 	ASSERT_NE(f, nullptr);
 	uint8_t buffer[4096];
 	data.clear();
@@ -113,7 +113,7 @@ TEST_F(WadFileTest, WriteRead)
 	// Check the lump-less wad content
 	std::vector<uint8_t> data;
 	std::vector<uint8_t> wadReadData;	// this is when loading a Wad_file
-	readFromPath(path.u8string(), data);
+	readFromPath(path, data);
 	ASSERT_EQ(data.size(), 12);
 	assertVecString(data, "PWAD\0\0\0\0\x0c\0\0\0");
 
@@ -124,7 +124,7 @@ TEST_F(WadFileTest, WriteRead)
 
 	// Now write it with the new lump.
 	wad->writeToDisk();
-	readFromPath(path.u8string(), data);
+	readFromPath(path, data);
 	ASSERT_EQ(data.size(), 12 + 16);	// header and one dir entry
 	assertVecString(data, "PWAD\x01\0\0\0\x0c\0\0\0"
 					"\x0c\0\0\0\0\0\0\0HELLOWOR");
@@ -140,7 +140,7 @@ TEST_F(WadFileTest, WriteRead)
 	wad->writeToDisk();	// and update the disk entry
 
 	// Check again
-	readFromPath(path.u8string(), data);
+	readFromPath(path, data);
 	ASSERT_EQ(data.size(), 12 + 16 + 13);	// header, dir entry and content
 	// Info table ofs: 12 + 13 = 25 (0x19)
 	assertVecString(data, "PWAD\x01\0\0\0\x19\0\0\0"
@@ -171,7 +171,7 @@ TEST_F(WadFileTest, WriteRead)
 	wad->writeToDisk();
 
 	// Check
-	readFromPath(path.u8string(), data);
+	readFromPath(path, data);
 	ASSERT_EQ(data.size(), 12 + 13 + 4 + 2 + 48);
 	// Info table ofs: 12 + 13 + 4 + 2 = 25 + 6 = 31 = 0x1f
 	assertVecString(data, "PWAD\x03\0\0\0\x1f\0\0\0"
@@ -447,15 +447,15 @@ TEST_F(WadFileTest, Backup)
 	ASSERT_TRUE(wad->AddLump("LUMP2"));
 	wad->GetLump(wad->NumLumps() - 1)->Printf("Goodbye!");
 
-	ASSERT_TRUE(wad->Backup(path2.u8string().c_str()));
+	ASSERT_TRUE(wad->Backup(path2));
 	mDeleteList.push(path2);
 	wad->writeToDisk();
 	mDeleteList.push(path);
 
 	// Test it now
 	std::vector<uint8_t> data, data2;
-	readFromPath(path.u8string(), data);
-	readFromPath(path2.u8string(), data2);
+	readFromPath(path, data);
+	readFromPath(path2, data2);
 	ASSERT_FALSE(data.empty());
 	ASSERT_EQ(data, data2);
 }

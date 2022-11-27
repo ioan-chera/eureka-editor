@@ -1031,7 +1031,7 @@ void M_BackupWad(Wad_file *wad)
 
 	fs::path dest_name = Backup_Name(dir_name, b_high + 1);
 
-	if (! wad->Backup(dest_name.u8string().c_str()))
+	if (! wad->Backup(dest_name))
 	{
 		// Hmmm, show a dialog ??
 		gLog.printf("WARNING: backup failed (cannot copy file)\n");
