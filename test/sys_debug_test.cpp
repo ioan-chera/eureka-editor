@@ -42,7 +42,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     log.printf("Test message\n");
     log.printf("Here it goes\n");
     log.debugPrintf("No text\n");
-    ASSERT_TRUE(log.openFile(path.u8string()));
+    ASSERT_TRUE(log.openFile(path));
     mDeleteList.push(path);
     log.printf("One more message\n");
 
@@ -138,7 +138,7 @@ TEST_F(SysDebugTempDir, LifeCycle)
     os.close();
 
 
-    log.openFile(path.u8string());
+    log.openFile(path);
     log.debugPrintf("Debug writeout\n");
     log.printf("Extra stuff four\n");
     log.debugPrintf("Debug\nwriteout2\n");

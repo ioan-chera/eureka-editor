@@ -1099,7 +1099,7 @@ int main(int argc, char *argv[])
 		Determine_InstallPath(argv[0]);
 		Determine_HomeDir(argv[0]);
 
-		if(!gLog.openFile(global::log_file.u8string()))
+		if(!gLog.openFile(global::log_file))
 			gLog.printf("WARNING: failed opening log file '%s'\n",
 						global::log_file.u8string().c_str());
 
