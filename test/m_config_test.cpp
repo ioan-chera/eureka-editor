@@ -760,7 +760,7 @@ fs::path global::home_dir;
 fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
 fs::path global::cache_dir;
-int global::show_help     = 0;
+bool global::show_help;
 
 Instance gInstance;
 

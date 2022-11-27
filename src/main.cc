@@ -120,7 +120,7 @@ enum class ProgressStatus
 };
 static ProgressStatus init_progress;
 
-int global::show_help     = 0;
+bool global::show_help;
 int global::show_version  = 0;
 
 
@@ -251,19 +251,19 @@ static void Determine_HomeDir(const char *argv0) noexcept(false)
 		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr,
 										  &wpath)))
 		{
-			global::home_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			global::home_dir = fs::path(wpath) / "EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 		else
 		{
-			SYS_ASSERT(global::install_dir.good());
-			global::home_dir = global::install_dir + "\\app_data";
+			SYS_ASSERT(!global::install_dir.empty());
+			global::home_dir = global::install_dir / "app_data";
 		}
 		wpath = nullptr;
 		if(SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr,
 										  &wpath)))
 		{
-			global::cache_dir = WideToUTF8(wpath) + "\\EurekaEditor";
+			global::cache_dir = fs::path(wpath) / "EurekaEditor";
 			CoTaskMemFree(wpath);
 		}
 
@@ -305,7 +305,7 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 	if (global::install_dir.empty())
 	{
 #ifdef WIN32
-		global::install_dir = GetExecutablePath(argv0);
+		global::install_dir = fs::u8path(GetExecutablePath(argv0).get());
 
 #else
 		static const char *prefixes[] =
