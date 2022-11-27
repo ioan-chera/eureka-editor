@@ -76,7 +76,7 @@ void Instance::ReplaceEditWad(const std::shared_ptr<Wad_file> &new_wad)
 
 	wad.master.edit_wad = new_wad;
 
-	wad.master.Pwad_name = wad.master.edit_wad->PathName();
+	wad.master.Pwad_name = fs::u8path(wad.master.edit_wad->PathName().get());
 
 	wad.master.MasterDir_Add(wad.master.edit_wad);
 }
@@ -282,7 +282,7 @@ void Instance::CMD_NewProject()
 	}
 
 	this->wad.master.edit_wad = wad;
-	this->wad.master.Pwad_name = this->wad.master.edit_wad->PathName();
+	this->wad.master.Pwad_name = fs::u8path(this->wad.master.edit_wad->PathName().get());
 
 	this->wad.master.MasterDir_Add(this->wad.master.edit_wad);
 

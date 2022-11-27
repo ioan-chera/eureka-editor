@@ -466,7 +466,7 @@ bool Instance::M_TryOpenMostRecent()
 	else
 		loaded.levelName.clear();
 
-	this->wad.master.Pwad_name = filename;
+	this->wad.master.Pwad_name = fs::u8path(filename.get());
 
 	this->wad.master.edit_wad = wad;
 

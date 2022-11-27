@@ -755,8 +755,8 @@ bool Instance::Main_ConfirmQuit(const char *action) const
 //
 SString Instance::Main_FileOpFolder() const
 {
-	if (wad.master.Pwad_name.good())
-		return FilenameGetPath(wad.master.Pwad_name.get()).u8string();
+	if (!wad.master.Pwad_name.empty())
+		return FilenameGetPath(wad.master.Pwad_name).u8string();
 
 	return "";
 }
@@ -1143,13 +1143,13 @@ int main(int argc, char *argv[])
 			// [ hence the Open() below is very unlikely to fail ]
 			M_ValidateGivenFiles();
 
-			gInstance.wad.master.Pwad_name = global::Pwad_list[0].u8string();
+			gInstance.wad.master.Pwad_name = global::Pwad_list[0];
 
 			// TODO: main instance
-			gInstance.wad.master.edit_wad = Wad_file::Open(fs::u8path(gInstance.wad.master.Pwad_name.get()),
+			gInstance.wad.master.edit_wad = Wad_file::Open(gInstance.wad.master.Pwad_name,
 												WadOpenMode::append);
 			if (!gInstance.wad.master.edit_wad)
-				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.c_str());
+				ThrowException("Cannot load pwad: %s\n", gInstance.wad.master.Pwad_name.u8string().c_str());
 
 			// Note: the Main_LoadResources() call will ensure this gets
 			//       placed at the correct spot (at the end)
