@@ -967,7 +967,7 @@ inline static SString Backup_Name(const SString &dir_name, int slot)
 }
 
 
-static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad_size)
+static void Backup_Prune(const fs::path &dir_name, int b_low, int b_high, int wad_size)
 {
 	// Note: the logic here for checking space is very crude, it assumes
 	//       all existing backups have the same size as the currrent wad.
@@ -982,7 +982,7 @@ static void Backup_Prune(const SString &dir_name, int b_low, int b_high, int wad
 
 	for ( ; b_low <= b_high - backup_num + 1 ; b_low++)
 	{
-		FileDelete(Backup_Name(dir_name, b_low).get());
+		FileDelete(Backup_Name(dir_name.u8string(), b_low).get());
 	}
 }
 
@@ -1024,7 +1024,7 @@ void M_BackupWad(Wad_file *wad)
 	{
 		int wad_size = wad->TotalSize();
 
-		Backup_Prune(dir_name.u8string(), b_low, b_high, wad_size);
+		Backup_Prune(dir_name, b_low, b_high, wad_size);
 	}
 
 	// actually back-up the file
