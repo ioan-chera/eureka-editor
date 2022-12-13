@@ -308,17 +308,16 @@ static void Determine_InstallPath(const char *argv0) noexcept(false)
 		global::install_dir = GetExecutablePath(argv0);
 
 #else
-		static const char *prefixes[] =
+		static const fs::path prefixes[] =
 		{
 			"/usr/local",
 			"/usr",
 			"/opt",
-			NULL
 		};
 
-		for (int i = 0 ; prefixes[i] ; i++)
+		for (const fs::path &prefix : prefixes)
 		{
-			global::install_dir = fs::u8path(prefixes[i]) / "share" / "eureka";
+			global::install_dir = prefix / "share" / "eureka";
 
 			fs::path filename = global::install_dir / "games" / "doom2.ugh";
 
