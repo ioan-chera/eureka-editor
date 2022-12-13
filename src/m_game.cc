@@ -1209,12 +1209,10 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 //
 // Collect known definitions from folder
 //
-std::vector<SString> M_CollectKnownDefs(const char *folder)
+std::vector<SString> M_CollectKnownDefs(const fs::path &install_dir, const fs::path &home_dir, const fs::path &folder)
 {
-	SYS_ASSERT(!!folder);
-
 	std::vector<SString> temp_list;
-	SString path;
+	fs::path path;
 
 	//	gLog.debugPrintf("M_CollectKnownDefs for: %d\n", folder);
 	auto scanner_add_file = [&temp_list](const fs::path &name, int flags)
@@ -1225,10 +1223,10 @@ std::vector<SString> M_CollectKnownDefs(const char *folder)
 			return;
 		temp_list.push_back(ReplaceExtension(name, NULL).u8string());
 	};
-	path = (global::install_dir / folder).u8string();
-	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
-	path = (global::home_dir / folder).u8string();
-	ScanDirectory(fs::u8path(path.get()), scanner_add_file);
+	path = install_dir / folder;
+	ScanDirectory(path, scanner_add_file);
+	path = home_dir / folder;
+	ScanDirectory(path, scanner_add_file);
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
@@ -1308,7 +1306,7 @@ bool M_CheckPortSupportsGame(const SString &base_game,
 SString M_CollectPortsForMenu(const char *base_game,
 							  int *exist_val, const char *exist_name) noexcept(false)
 {
-	std::vector<SString> list = M_CollectKnownDefs("ports");
+	std::vector<SString> list = M_CollectKnownDefs(global::install_dir, global::home_dir, "ports");
 
 	if (list.empty())
 		return "";

@@ -400,7 +400,8 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 
 const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false);
 
-std::vector<SString> M_CollectKnownDefs(const char *folder);
+std::vector<SString> M_CollectKnownDefs(const fs::path &install_dir, const fs::path &home_dir,
+										const fs::path &folder);
 
 bool M_CheckPortSupportsGame(const SString &base_game,
 							 const SString &port) noexcept(false);
