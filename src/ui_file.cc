@@ -813,8 +813,10 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
     loading.gameName = game;
     loading.portName = port;
 
-    loading.iwadName = global::recent.queryIWAD(game);
-	SYS_ASSERT(!loading.iwadName.empty());
+	const fs::path *iwad = global::recent.queryIWAD(game);
+
+	SYS_ASSERT(!!iwad);
+	loading.iwadName = *iwad;
 
     loading.levelFormat = map_format;
     loading.udmfNamespace = name_space;
@@ -1085,7 +1087,7 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	if (!global::recent.queryIWAD(name).empty())
+	if (global::recent.queryIWAD(name))
 	{
 		that->game = name;
 		that->ok_but->activate();

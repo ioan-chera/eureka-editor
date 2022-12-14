@@ -102,7 +102,10 @@ struct RecentKnowledge
 	void save(const fs::path &home_dir) const;
 	void addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir);
 
-	fs::path queryIWAD(const SString &game) const;
+	const fs::path *queryIWAD(const SString &game) const
+	{
+		return get(known_iwads, game);
+	}
 
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;

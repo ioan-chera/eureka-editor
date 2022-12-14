@@ -45,20 +45,6 @@ void M_AddKnownIWAD(const fs::path &path, std::map<SString, fs::path> &known_iwa
 	known_iwads[game] = absolute_name;
 }
 
-
-fs::path RecentKnowledge::queryIWAD(const SString &game) const
-{
-	std::map<SString, fs::path>::const_iterator KI;
-
-	KI = known_iwads.find(game);
-
-	if (KI != known_iwads.end())
-		return KI->second;
-	else
-		return "";
-}
-
-
 // returns a string, with each name separated by a '|' character,
 // hence directly usable with the FL_Choice::add() method.
 //
@@ -644,7 +630,7 @@ void M_LookForIWADs()
 	for (const SString &game : game_list)
 	{
 		// already have it?
-		if (!global::recent.queryIWAD(game).empty())
+		if (global::recent.queryIWAD(game))
 			continue;
 
 		fs::path path = SearchForIWAD(game);
@@ -686,11 +672,11 @@ fs::path Instance::M_PickDefaultIWAD() const
 
 	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
-	fs::path result;
+	const fs::path *result;
 
 	result = global::recent.queryIWAD(default_game);
-	if (!result.empty())
-		return result;
+	if (result)
+		return *result;
 
 	// try FreeDoom
 
@@ -702,8 +688,8 @@ fs::path Instance::M_PickDefaultIWAD() const
 	gLog.debugPrintf("pick default iwad, trying: '%s'\n", default_game);
 
 	result = global::recent.queryIWAD(default_game);
-	if (!result.empty())
-		return result;
+	if (result)
+		return *result;
 
 	// try any known iwad
 
@@ -756,7 +742,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	lump->Seek();
 
-	fs::path new_iwad;
+	const fs::path *new_iwad;
 	SString new_port;
 
 	std::vector<fs::path> new_resources;
@@ -798,7 +784,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 			{
 				new_iwad = global::recent.queryIWAD(value);
 
-				if (new_iwad.empty())
+				if (!new_iwad)
 				{
 					int res = DLG_Confirm({ "&Ignore", "&Cancel Load" },
 					                      "Warning: the pwad specifies an IWAD "
@@ -829,9 +815,9 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
 			}
 			// Still doesn't exist? Try IWAD path, if any
-			if (!fs::exists(resourcePath) && !new_iwad.empty())
+			if (!fs::exists(resourcePath) && new_iwad)
 			{
-				fs::path wadDirPath = new_iwad.parent_path();
+				fs::path wadDirPath = new_iwad->parent_path();
 				resourcePath = wadDirPath / resourcePath.filename();
 				gLog.printf("  trying: %s\n", resourcePath.u8string().c_str());
 			}
@@ -871,10 +857,10 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 	// Resources are trickier, we merge the EUREKA_LUMP resources into the ones
 	// supplied on the command line, ensuring that we don't get any duplicates.
 
-	if (!new_iwad.empty())
+	if (new_iwad)
 	{
 		if (! (keep_cmd_line_args && !iwadName.empty()))
-			iwadName = new_iwad;
+			iwadName = *new_iwad;
 	}
 
 	if (!new_port.empty())

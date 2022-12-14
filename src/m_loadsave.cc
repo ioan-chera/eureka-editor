@@ -305,8 +305,9 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.gameName = dialog->game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
-		loaded.iwadName = global::recent.queryIWAD(loaded.gameName);
-		SYS_ASSERT(!loaded.iwadName.empty());
+		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
+		SYS_ASSERT(!!iwad);
+		loaded.iwadName = *iwad;
 	}
 
 	delete dialog;
