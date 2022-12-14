@@ -102,6 +102,8 @@ struct RecentKnowledge
 	void save(const fs::path &home_dir) const;
 	void addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir);
 
+	fs::path queryIWAD(const SString &game) const;
+
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
 	std::map<SString, port_path_info_t> port_paths;
@@ -111,7 +113,6 @@ void M_OpenRecentFromMenu(void *priv_data);
 
 void M_LookForIWADs();
 void M_AddKnownIWAD(const fs::path &path, std::map<SString, fs::path> &known_iwads);
-fs::path M_QueryKnownIWAD(const SString &game, const std::map<SString, fs::path> &known_iwads);
 SString M_CollectGamesForMenu(int *exist_val, const char *exist_name, const std::map<SString, fs::path> &known_iwads);
 
 void M_ValidateGivenFiles();

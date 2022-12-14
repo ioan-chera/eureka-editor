@@ -372,7 +372,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! M_CanLoadDefinitions(GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
 
-		fs::path path = M_QueryKnownIWAD(game, global::recent.known_iwads);
+		fs::path path = global::recent.queryIWAD(game);
 
 		if (path.empty())
 			ThrowException("Cannot find IWAD for game '%s'\n", game.c_str());

@@ -813,7 +813,7 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
     loading.gameName = game;
     loading.portName = port;
 
-    loading.iwadName = M_QueryKnownIWAD(game, global::recent.known_iwads);
+    loading.iwadName = global::recent.queryIWAD(game);
 	SYS_ASSERT(!loading.iwadName.empty());
 
     loading.levelFormat = map_format;
@@ -1085,7 +1085,7 @@ void UI_ProjectSetup::game_callback(Fl_Choice *w, void *data)
 
 	const char * name = w->mvalue()->text;
 
-	if (!M_QueryKnownIWAD(name, global::recent.known_iwads).empty())
+	if (!global::recent.queryIWAD(name).empty())
 	{
 		that->game = name;
 		that->ok_but->activate();
