@@ -742,7 +742,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 	lump->Seek();
 
-	const fs::path *new_iwad;
+	const fs::path *new_iwad = nullptr;
 	SString new_port;
 
 	std::vector<fs::path> new_resources;
