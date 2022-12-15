@@ -369,7 +369,7 @@ static bool DetermineIWAD(Instance &inst)
 		// make lowercase
 		inst.loaded.iwadName = fs::u8path(game.get());
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, game))
+		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", game.c_str());
 
 		const fs::path *path = global::recent.queryIWAD(game);
@@ -390,7 +390,7 @@ static bool DetermineIWAD(Instance &inst)
 
 		SString game = GameNameFromIWAD(inst.loaded.iwadName);
 
-		if (! M_CanLoadDefinitions(GAMES_DIR, game))
+		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
 
 		M_AddKnownIWAD(inst.loaded.iwadName, global::recent.known_iwads);
@@ -421,7 +421,7 @@ static void DeterminePort(Instance &inst)
 	// NOTE: values from the EUREKA_LUMP are already verified.
 	if (!inst.loaded.portName.empty())
 	{
-		if (! M_CanLoadDefinitions(PORTS_DIR, inst.loaded.portName))
+		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, PORTS_DIR, inst.loaded.portName))
 			ThrowException("Unknown port '%s' (no definition file)\n",
 						   inst.loaded.portName.c_str());
 
@@ -436,7 +436,7 @@ static void DeterminePort(Instance &inst)
 		gLog.printf("WARNING: Default port is empty, using vanilla.\n");
 		config::default_port = "vanilla";
 	}
-	else if (! M_CanLoadDefinitions(PORTS_DIR, config::default_port))
+	else if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, PORTS_DIR, config::default_port))
 	{
 		gLog.printf("WARNING: Default port '%s' is unknown, using vanilla.\n",
 				  config::default_port.c_str());
@@ -1173,7 +1173,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.wad.master.edit_wad)
 		{
-			if (! gInstance.loaded.parseEurekaLump(gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.wad.master.RemoveEditWad();

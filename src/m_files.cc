@@ -728,7 +728,7 @@ static void M_AddResource_Unique(LoadingData &loading, const fs::path & filename
 //
 // returns false if user wants to cancel the load
 //
-bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
+bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &install_dir, const Wad_file *wad, bool keep_cmd_line_args)
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -770,7 +770,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 
 		if (line == "game")
 		{
-			if (! M_CanLoadDefinitions(GAMES_DIR, value))
+			if (! M_CanLoadDefinitions(home_dir, install_dir, GAMES_DIR, value))
 			{
 				gLog.printf("  unknown game: %s\n", value.c_str() /* show full path */);
 
@@ -832,7 +832,7 @@ bool LoadingData::parseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args)
 		}
 		else if (line == "port")
 		{
-			if (M_CanLoadDefinitions(PORTS_DIR, value))
+			if (M_CanLoadDefinitions(home_dir, install_dir, PORTS_DIR, value))
 				new_port = value;
 			else
 			{

@@ -313,7 +313,7 @@ struct generalized_linetype_t
 static const char GAMES_DIR[] = "games";
 static const char PORTS_DIR[] = "ports";
 
-bool M_CanLoadDefinitions(const fs::path &folder, const SString &name);
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name);
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 					   const SString &folder, const SString &name,
 					   ConfigData &config) noexcept(false);

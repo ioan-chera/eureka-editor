@@ -202,7 +202,7 @@ void LoadingData::prepareConfigVariables()
 	{
 		parse_vars["$GAME_NAME"] = gameName;
 
-		if (M_CanLoadDefinitions(GAMES_DIR, gameName))
+		if (M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, gameName))
 		{
 			SString base_game = M_GetBaseGame(gameName);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -406,10 +406,10 @@ static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
 // Both strings are required
 // Returns "" if not found.
 //
-static fs::path FindDefinitionFile(const fs::path &folder, const SString &name)
+static fs::path FindDefinitionFile(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
 	SYS_ASSERT(!folder.empty() && name.good());
-	const fs::path lookupDirs[] = { global::home_dir, global::install_dir };
+	const fs::path lookupDirs[] = { home_dir, install_dir };
 	for (const fs::path &base_dir : lookupDirs)
 	{
 		if (base_dir.empty())
@@ -427,9 +427,9 @@ static fs::path FindDefinitionFile(const fs::path &folder, const SString &name)
 }
 
 
-bool M_CanLoadDefinitions(const fs::path &folder, const SString &name)
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
-	fs::path filename = FindDefinitionFile(folder, name);
+	fs::path filename = FindDefinitionFile(home_dir, install_dir, folder, name);
 
 	return !filename.empty();
 }
@@ -462,7 +462,7 @@ void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
 
 	gLog.printf("Loading Definitions : %s\n", prettyname.c_str());
 
-	fs::path filename = FindDefinitionFile(fs::u8path(folder.get()), name);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, fs::u8path(folder.get()), name);
 
 	if (filename.empty())
 	{
@@ -1107,13 +1107,13 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 				pst->fail("Too many includes (check for a loop)");
 
 			SString new_folder = folder;
-			fs::path new_name = FindDefinitionFile(fs::u8path(new_folder.get()), pst->argv[1]);
+			fs::path new_name = FindDefinitionFile(global::home_dir, global::install_dir, fs::u8path(new_folder.get()), pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (new_name.empty() && folder != "common")
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(fs::u8path(new_folder.get()), pst->argv[1]);
+				new_name = FindDefinitionFile(global::home_dir, global::install_dir, fs::u8path(new_folder.get()), pst->argv[1]);
 			}
 
 			if (new_name.empty())
@@ -1157,7 +1157,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	fs::path filename = FindDefinitionFile(GAMES_DIR, game);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, GAMES_DIR, game);
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
@@ -1182,7 +1182,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 	if (IT != global::loaded_port_defs.end())
 		return &IT->second;
 
-	fs::path filename = FindDefinitionFile(PORTS_DIR, port);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, PORTS_DIR, port);
 	if (filename.empty())
 		return NULL;
 

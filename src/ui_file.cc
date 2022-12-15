@@ -1168,7 +1168,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 
 	SString game = GameNameFromIWAD(fs::u8path(chooser.filename()));
 
-	if (! M_CanLoadDefinitions(GAMES_DIR, game))
+	if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
 	{
 		DLG_Notify("That game is not supported (no definition file).\n\n"
 		           "Please try again.");
