@@ -1173,7 +1173,7 @@ int main(int argc, char *argv[])
 
 		if (gInstance.wad.master.edit_wad)
 		{
-			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
+			if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, gInstance.wad.master.edit_wad.get(), true /* keep_cmd_line_args */))
 			{
 				// user cancelled the load
 				gInstance.wad.master.RemoveEditWad();

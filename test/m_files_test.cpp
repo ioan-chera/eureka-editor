@@ -141,6 +141,7 @@ protected:
 	LoadingData loading;
 
 	fs::path home_dir, install_dir;
+	RecentKnowledge recent;
 };
 
 //
@@ -159,7 +160,6 @@ void ParseEurekaLumpFixture::SetUp()
 //
 void ParseEurekaLumpFixture::TearDown()
 {
-	global::recent.known_iwads.clear();
 	DLG_Notify_Override = nullptr;
 	DLG_Confirm_Override = nullptr;
 
@@ -231,7 +231,7 @@ void ParseEurekaLumpFixture::makeGame(const fs::path &gamesDir, const char *ughN
 TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 {
 	// Safe on empty wad
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	assertEmptyLoading();
 
 	// Safe on wad with some lumps
@@ -245,7 +245,7 @@ TEST_F(ParseEurekaLumpFixture, TryWithoutLump)
 
 	ASSERT_EQ(wad->NumLumps(), 2);
 
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	assertEmptyLoading();
 }
 
@@ -277,7 +277,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	};
 
 	// Decide to keep trying, but nothing to get
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
@@ -286,7 +286,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	// Situation 2: same, but with cancelling
 	decision = 1;
-	ASSERT_FALSE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_FALSE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 
 	// Situation 3: add home dir
 	prepareHomeDir();
@@ -295,7 +295,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	// but no emag.ugh: same problem
 	decision = 0;	// no ignore
 	gameWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_TRUE(gameWarning);
@@ -306,7 +306,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	makeGame(gamesDir, "emag.ugh");
 
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	ASSERT_TRUE(loading.iwadName.empty());
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -315,11 +315,11 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 
 	// Situation 5: now add the IWAD
 	fs::path iwadPath = getChildPath("emag.wad");
-	M_AddKnownIWAD(iwadPath, global::recent.known_iwads);	// NOTE: no need to add file
+	M_AddKnownIWAD(iwadPath, recent.known_iwads);	// NOTE: no need to add file
 
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -331,13 +331,13 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	home_dir.clear();
 	decision = 1;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_FALSE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_FALSE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 
 	// Situation 7: set the install dir instead
 	install_dir = goodHomeDir;
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_TRUE(loading.portName.empty());
 	ASSERT_FALSE(gameWarning);
@@ -356,7 +356,7 @@ TEST_F(ParseEurekaLumpFixture, TryGameAndPort)
 	mDeleteList.push(tropPath);
 	decision = 0;
 	gameWarning = iwadWarning = portWarning = false;
-	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, wad.get()));
+	ASSERT_TRUE(loading.parseEurekaLump(home_dir, install_dir, recent, wad.get()));
 	ASSERT_EQ(loading.iwadName, iwadPath);
 	ASSERT_EQ(loading.portName, "trop");
 	ASSERT_FALSE(gameWarning);
@@ -393,7 +393,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 	fs::path path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad"), global::recent.known_iwads);
+	M_AddKnownIWAD(getChildPath(fs::path("iwad") / "doom.wad"), recent.known_iwads);
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
@@ -417,7 +417,7 @@ TEST_F(ParseEurekaLumpFixture, TryResources)
 		errmsg = SString::vprintf(message, ap);
 	};
 
-	loading.parseEurekaLump(home_dir, install_dir, wad.get());
+	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
 
 	// Check that the sole error message we get is about nopath.wad
 	ASSERT_EQ(errorcount, 1);
@@ -469,13 +469,13 @@ TEST_F(ParseEurekaLumpFixture, ResourcesAreUniqueByFileNameNoCase)
 	path = getChildPath("iwad");
 	ASSERT_TRUE(FileMakeDir(path));
 	mDeleteList.push(path);
-	M_AddKnownIWAD(getChildPath("iwad/doom.wad"), global::recent.known_iwads);
+	M_AddKnownIWAD(getChildPath("iwad/doom.wad"), recent.known_iwads);
 
 	// Prepare the 'game' for the IWAD
 	prepareHomeDir();
 	makeGame(makeGamesDir(), "doom.ugh");
 
-	loading.parseEurekaLump(home_dir, install_dir, wad.get());
+	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
 	ASSERT_EQ(loading.resourceList.size(), 2);
 	ASSERT_EQ(loading.resourceList[0], getChildPath("samename.wad"));	// not the second one too
 	ASSERT_EQ(loading.resourceList[1], getChildPath("othername.wad"));
@@ -508,7 +508,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 		++errorcount;
 	};
 
-	loading.parseEurekaLump(home_dir, install_dir, wad.get());
+	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_TRUE(loading.resourceList.empty());
@@ -516,7 +516,7 @@ TEST_F(ParseEurekaLumpFixture, TryResourcesParentPath)
 	// Now change content and add a relative path
 	eureka->clearData();
 	eureka->Printf("resource ../res.wad\n");
-	loading.parseEurekaLump(home_dir, install_dir, wad.get());
+	loading.parseEurekaLump(home_dir, install_dir, recent, wad.get());
 
 	ASSERT_EQ(errorcount, 1);
 	ASSERT_EQ(loading.resourceList.size(), 1);

@@ -728,7 +728,7 @@ static void M_AddResource_Unique(LoadingData &loading, const fs::path & filename
 //
 // returns false if user wants to cancel the load
 //
-bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &install_dir, const Wad_file *wad, bool keep_cmd_line_args)
+bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &install_dir, const RecentKnowledge &recent, const Wad_file *wad, bool keep_cmd_line_args)
 {
 	gLog.printf("Parsing '%s' lump\n", EUREKA_LUMP);
 
@@ -775,7 +775,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 			}
 			else
 			{
-				new_iwad = global::recent.queryIWAD(value);
+				new_iwad = recent.queryIWAD(value);
 
 				if (!new_iwad)
 				{
