@@ -751,24 +751,17 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 
 	while (lump->GetLine(line))
 	{
-		// comment?
-		if (line[0] == '#')
-			continue;
-
-		line.trimTrailingSpaces();
-
-		size_t pos = line.find(' ');
-
-		if(pos == std::string::npos || !pos)
+		TokenWordParse parse(line);
+		SString key, value;
+		if(!parse.getNext(key))
+			continue;	// empty line
+		if(!parse.getNext(value))
 		{
 			gLog.printf("WARNING: bad syntax in %s lump\n", EUREKA_LUMP);
 			continue;
 		}
 
-		SString value;
-		line.cutWithSpace(pos, &value);
-
-		if (line == "game")
+		if (key == "game")
 		{
 			if (! M_CanLoadDefinitions(home_dir, install_dir, GAMES_DIR, value))
 			{
@@ -795,7 +788,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 				}
 			}
 		}
-		else if (line == "resource")
+		else if (key == "resource")
 		{
 			fs::path resourcePath = fs::u8path(value.get());
 
@@ -830,7 +823,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 				           "which cannot be found:\n\n%s", value.c_str());
 			}
 		}
-		else if (line == "port")
+		else if (key == "port")
 		{
 			if (M_CanLoadDefinitions(home_dir, install_dir, PORTS_DIR, value))
 				new_port = value;
@@ -843,7 +836,7 @@ bool LoadingData::parseEurekaLump(const fs::path &home_dir, const fs::path &inst
 		}
 		else
 		{
-			gLog.printf("WARNING: unknown keyword '%s' in %s lump\n", line.c_str(), EUREKA_LUMP);
+			gLog.printf("WARNING: unknown keyword '%s' in %s lump\n", key.c_str(), EUREKA_LUMP);
 			continue;
 		}
 	}
