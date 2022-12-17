@@ -161,7 +161,7 @@ void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 	// [ none needed atm.... ]
 }
 
-static void M_WritePortPaths(std::ostream &os, const std::map<SString, fs::path> &port_paths)
+void RecentKnowledge::writePortPaths(std::ostream &os) const
 {
 	std::map<SString, fs::path>::const_iterator IT;
 
@@ -366,7 +366,7 @@ void RecentKnowledge::save(const fs::path &home_dir) const
 
 	M_WriteKnownIWADs(os, known_iwads);
 
-	M_WritePortPaths(os, port_paths);
+	writePortPaths(os);
 }
 
 void M_OpenRecentFromMenu(void *priv_data)

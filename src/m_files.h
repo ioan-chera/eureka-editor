@@ -120,11 +120,13 @@ struct RecentKnowledge
 
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
-	std::map<SString, fs::path> port_paths;
 
 private:
 	void parseMiscConfig(std::istream &is);
 	void parsePortPath(const SString &name, const SString &cpath);
+	void writePortPaths(std::ostream &os) const;
+
+	std::map<SString, fs::path> port_paths;
 };
 
 void M_OpenRecentFromMenu(void *priv_data);
