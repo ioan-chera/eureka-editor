@@ -43,20 +43,10 @@ class Wad_file;
 
 
 // this is for the "File/Recent" menu callbacks
-class recent_file_data_c
+struct recent_file_data_c
 {
-public:
 	fs::path file;
 	SString map;
-
-public:
-	recent_file_data_c(const fs::path &_file, const SString &_map) :
-		file(_file), map(_map)
-	{ }
-
-	recent_file_data_c(const recent_file_data_c &other) = default;
-
-	recent_file_data_c() = default;
 };
 
 

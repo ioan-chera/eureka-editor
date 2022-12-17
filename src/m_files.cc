@@ -204,7 +204,7 @@ void RecentFiles_c::push_front(const fs::path &file, const SString &map)
 	{
 		list.pop_back();
 	}
-	list.emplace_front(file, map);
+	list.push_front({file, map});
 }
 
 void RecentFiles_c::insert(const fs::path &file, const SString &map)
