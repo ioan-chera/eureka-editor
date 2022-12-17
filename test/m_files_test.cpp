@@ -780,7 +780,7 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	SString line;
 	RecentFiles_c readRecentFiles;
 	std::map<SString, fs::path> readKnownIwads;
-	std::map<SString, port_path_info_t> readPortPaths;
+	std::map<SString, fs::path> readPortPaths;
 	while(M_ReadTextLine(line, is))
 	{
 		TokenWordParse parse(line);

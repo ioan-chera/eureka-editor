@@ -89,11 +89,6 @@ public:
 	void Lookup(int index, fs::path *file_v, SString *map_v) const;
 };
 
-struct port_path_info_t
-{
-	fs::path exe_filename;
-};
-
 //
 // Holds recently collected knowledge
 //
@@ -110,11 +105,11 @@ struct RecentKnowledge
 
 	void addIWAD(const fs::path &path);
 
-	port_path_info_t *queryPortPath(const SString &name, bool create_it);
+	fs::path *queryPortPath(const SString &name, bool create_it);
 
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
-	std::map<SString, port_path_info_t> port_paths;
+	std::map<SString, fs::path> port_paths;
 
 private:
 	void parseMiscConfig(std::istream &is);
@@ -136,7 +131,7 @@ namespace global
 	extern RecentKnowledge recent;
 }
 
-bool M_IsPortPathValid(const port_path_info_t *info);
+bool M_IsPortPathValid(const fs::path *info);
 
 bool readBuffer(FILE* f, size_t size, std::vector<byte>& target);
 

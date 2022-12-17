@@ -109,9 +109,9 @@ int M_FindGivenFile(const fs::path &filename)
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
 
-port_path_info_t * RecentKnowledge::queryPortPath(const SString &name, bool create_it)
+fs::path * RecentKnowledge::queryPortPath(const SString &name, bool create_it)
 {
-	std::map<SString, port_path_info_t>::iterator IT;
+	std::map<SString, fs::path>::iterator IT;
 
 	IT = port_paths.find(name);
 
@@ -120,7 +120,7 @@ port_path_info_t * RecentKnowledge::queryPortPath(const SString &name, bool crea
 
 	if (create_it)
 	{
-		port_path_info_t info;
+		fs::path info;
 		port_paths[name] = info;
 
 		return queryPortPath(name, false);
@@ -130,12 +130,12 @@ port_path_info_t * RecentKnowledge::queryPortPath(const SString &name, bool crea
 }
 
 
-bool M_IsPortPathValid(const port_path_info_t *info)
+bool M_IsPortPathValid(const fs::path *info)
 {
-	if(info->exe_filename.u8string().length() < 2)
+	if(info->u8string().length() < 2)
 		return false;
 
-	if (! FileExists(info->exe_filename))
+	if (! FileExists(*info))
 		return false;
 
 	return true;
@@ -176,24 +176,24 @@ void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 	// terminate arguments
 	path.erase(0, pos + 1);
 
-	port_path_info_t *info = queryPortPath(name, true);
+	fs::path *info = queryPortPath(name, true);
 	if (! info)	// should not fail!
 		return;
 
-	info->exe_filename = fs::u8path(path.get());
+	*info = fs::u8path(path.get());
 
 	// parse any other arguments
 	// [ none needed atm.... ]
 }
 
-static void M_WritePortPaths(std::ostream &os, const std::map<SString, port_path_info_t> &port_paths)
+static void M_WritePortPaths(std::ostream &os, const std::map<SString, fs::path> &port_paths)
 {
-	std::map<SString, port_path_info_t>::const_iterator IT;
+	std::map<SString, fs::path>::const_iterator IT;
 
 	for (IT = port_paths.begin() ; IT != port_paths.end() ; IT++)
 	{
-		const port_path_info_t& info = IT->second;
-		os << "port_path " << IT->first.spaceEscape() << " |" << escape(info.exe_filename) << std::endl;
+		const fs::path& info = IT->second;
+		os << "port_path " << IT->first.spaceEscape() << " |" << escape(info) << std::endl;
 	}
 }
 

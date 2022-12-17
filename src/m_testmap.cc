@@ -205,10 +205,10 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf, *this);
 
 	// populate the EXE name from existing info, if exists
-	port_path_info_t *info = global::recent.queryPortPath(QueryName(port, game), false);
+	fs::path *info = global::recent.queryPortPath(QueryName(port, game), false);
 
-	if (info && !info->exe_filename.empty())
-		dialog->SetEXE(info->exe_filename.u8string());
+	if (info && !info->empty())
+		dialog->SetEXE(info->u8string());
 
 	bool ok = dialog->Run();
 
@@ -218,7 +218,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 		info = global::recent.queryPortPath(QueryName(port, game), true /* create_it */);
 
 		// FIXME: check result??
-		info->exe_filename = GetAbsolutePath(fs::u8path(dialog->exe_name.get()));
+		*info = GetAbsolutePath(fs::u8path(dialog->exe_name.get()));
 
 		global::recent.save(global::home_dir);
 	}
@@ -231,10 +231,10 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 //------------------------------------------------------------------------
 
 
-static SString CalcEXEName(const port_path_info_t *info)
+static SString CalcEXEName(const fs::path *info)
 {
 	// make the executable name relative, since we chdir() to its folder
-	SString basename = GetBaseName(info->exe_filename).u8string();
+	SString basename = GetBaseName(*info).u8string();
 	return SString(".") + DIR_SEP_CH + basename;
 }
 
@@ -290,7 +290,7 @@ static void AppendWadName(SString &str, const SString &name, const SString &parm
 }
 
 
-static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
+static SString GrabWadNames(const Instance &inst, const fs::path *info)
 {
 	SString wad_names;
 
@@ -349,7 +349,7 @@ void Instance::CMD_TestMap()
 
 
 	// check if we know the executable path, if not then ask
-	port_path_info_t *info = global::recent.queryPortPath(QueryName(loaded.portName,
+	fs::path *info = global::recent.queryPortPath(QueryName(loaded.portName,
 																	loaded.gameName), false);
 
 	if (! (info && M_IsPortPathValid(info)))
@@ -377,7 +377,7 @@ void Instance::CMD_TestMap()
 	}
 
 	// change working directory to be same as the executable
-	SString folder = FilenameGetPath(info->exe_filename).u8string();
+	SString folder = FilenameGetPath(*info).u8string();
 
 	gLog.printf("Changing current dir to: %s\n", folder.c_str());
 
