@@ -1175,8 +1175,7 @@ void UI_ProjectSetup::find_callback(Fl_Button *w, void *data)
 		return;
 	}
 
-
-	M_AddKnownIWAD(fs::u8path(chooser.filename()), global::recent.known_iwads);
+	global::recent.addIWAD(fs::u8path(chooser.filename()));
 	global::recent.save(global::home_dir);
 
 	that->game = game;

@@ -393,7 +393,7 @@ static bool DetermineIWAD(Instance &inst)
 		if (! M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, game))
 			ThrowException("Unknown game '%s' (no definition file)\n", inst.loaded.iwadName.u8string().c_str());
 
-		M_AddKnownIWAD(inst.loaded.iwadName, global::recent.known_iwads);
+		global::recent.addIWAD(inst.loaded.iwadName);
 		global::recent.save(global::home_dir);
 	}
 	else

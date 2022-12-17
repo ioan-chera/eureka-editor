@@ -36,7 +36,7 @@ namespace fs = ghc::filesystem;
 
 // list of known iwads (mapping GAME name --> PATH)
 
-void M_AddKnownIWAD(const fs::path &path, std::map<SString, fs::path> &known_iwads)
+void RecentKnowledge::addIWAD(const fs::path &path)
 {
 	fs::path absolute_name = fs::absolute(path);
 
@@ -639,7 +639,7 @@ void M_LookForIWADs()
 		{
 			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.u8string().c_str());
 
-			M_AddKnownIWAD(path, global::recent.known_iwads);
+			global::recent.addIWAD(path);
 		}
 	}
 
