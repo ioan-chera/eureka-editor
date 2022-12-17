@@ -380,10 +380,10 @@ void RecentKnowledge::addRecent(const fs::path &filename, const SString &map_nam
 
 bool Instance::M_TryOpenMostRecent()
 {
-	if (global::recent.files.getSize() == 0)
+	if (global::recent.getFiles().getSize() == 0)
 		return false;
 
-	RecentMap recentMap = global::recent.files.Lookup(0);
+	RecentMap recentMap = global::recent.getFiles().Lookup(0);
 
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.

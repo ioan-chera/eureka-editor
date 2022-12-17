@@ -99,6 +99,9 @@ struct RecentKnowledge
 		return known_iwads.empty() ? nullptr : &known_iwads.begin()->second;
 	}
 
+	//
+	// Query port path
+	//
 	const fs::path *queryPortPath(const SString &name) const
 	{
 		return get(port_paths, name);
@@ -112,7 +115,13 @@ struct RecentKnowledge
 		port_paths[name] = path;
 	}
 
-	RecentFiles_c files;
+	//
+	// Constant getter of recent files
+	//
+	const RecentFiles_c &getFiles() const
+	{
+		return files;
+	}
 
 private:
 	void parseMiscConfig(std::istream &is);
@@ -120,6 +129,7 @@ private:
 	void parsePortPath(const SString &name, const SString &cpath);
 	void writePortPaths(std::ostream &os) const;
 
+	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
 	std::map<SString, fs::path> port_paths;
 };

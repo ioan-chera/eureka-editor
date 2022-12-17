@@ -726,18 +726,18 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	recent.load(home_dir);
 
 	// Check the recent files
-	ASSERT_EQ(recent.files.getSize(), 3);
+	ASSERT_EQ(recent.getFiles().getSize(), 3);
 	RecentMap recentMap;
 
-	recentMap = recent.files.Lookup(0);
+	recentMap = recent.getFiles().Lookup(0);
 	ASSERT_EQ(recentMap.file, doom3Path);
 	ASSERT_EQ(recentMap.map, "MAP03");
 
-	recentMap = recent.files.Lookup(1);
+	recentMap = recent.getFiles().Lookup(1);
 	ASSERT_EQ(recentMap.file, hticPath);
 	ASSERT_EQ(recentMap.map, "E3 M5");
 
-	recentMap = recent.files.Lookup(2);
+	recentMap = recent.getFiles().Lookup(2);
 	ASSERT_EQ(recentMap.file, hereticPath);
 	ASSERT_EQ(recentMap.map, "E3M5");
 
@@ -757,9 +757,9 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 TEST_F(RecentFilesFixture, MSaveRecent)
 {
 	RecentKnowledge recent;
-	recent.files.insert("file1", "map1");
-	recent.files.insert("file2", "map 2");
-	recent.files.insert("file1/file 4", "map #");
+	recent.addRecent("file1", "map1", mTempDir);
+	recent.addRecent("file2", "map 2", mTempDir);
+	recent.addRecent("file1/file 4", "map #", mTempDir);
 
 	recent.addIWAD("path/doom1.wad");
 	recent.addIWAD("path/doom #.wad");
@@ -817,7 +817,7 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	{
 		SString readMap;
 		fs::path readPath;
-		RecentMap myRecentMap = recent.files.Lookup(i);
+		RecentMap myRecentMap = recent.getFiles().Lookup(i);
 		RecentMap readRecentMap = readRecentFiles.Lookup(i);
 		ASSERT_EQ(myRecentMap.map, readRecentMap.map);
 		ASSERT_EQ(myRecentMap.file, readRecentMap.file);
