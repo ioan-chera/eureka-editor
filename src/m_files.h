@@ -43,7 +43,7 @@ class Wad_file;
 
 
 // this is for the "File/Recent" menu callbacks
-struct recent_file_data_c
+struct RecentMap
 {
 	fs::path file;
 	SString map;
@@ -53,7 +53,7 @@ struct recent_file_data_c
 class RecentFiles_c
 {
 private:
-	typedef std::deque<recent_file_data_c> Deque;
+	typedef std::deque<RecentMap> Deque;
 
 	void push_front(const fs::path &file, const SString &map);
 	Deque::iterator find(const fs::path &file);
@@ -67,7 +67,7 @@ public:
 		return (int)list.size();
 	}
 
-	recent_file_data_c *getData(int index) const;
+	RecentMap *getData(int index) const;
 	void clear()
 	{
 		list.clear();

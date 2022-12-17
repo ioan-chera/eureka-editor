@@ -174,11 +174,11 @@ void RecentKnowledge::writePortPaths(std::ostream &os) const
 
 // Recent files
 
-recent_file_data_c *RecentFiles_c::getData(int index) const
+RecentMap *RecentFiles_c::getData(int index) const
 {
 	SYS_ASSERT(0 <= index && index < (int)list.size());
 
-	return new recent_file_data_c(list[index]);
+	return new RecentMap(list[index]);
 }
 
 RecentFiles_c::Deque::iterator RecentFiles_c::find(const fs::path &file)
@@ -373,7 +373,7 @@ void M_OpenRecentFromMenu(void *priv_data)
 {
 	SYS_ASSERT(priv_data);
 
-	recent_file_data_c *data = (recent_file_data_c *)priv_data;
+	RecentMap *data = (RecentMap *)priv_data;
 
 	OpenFileMap(data->file, data->map);
 }
