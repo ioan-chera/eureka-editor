@@ -81,8 +81,9 @@ public:
 //
 // Holds recently collected knowledge
 //
-struct RecentKnowledge
+class RecentKnowledge
 {
+public:
 	void load(const fs::path &home_dir);
 	void save(const fs::path &home_dir) const;
 	void addRecent(const fs::path &filename, const SString &map_name, const fs::path &home_dir);

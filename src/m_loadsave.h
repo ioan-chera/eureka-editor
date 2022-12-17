@@ -30,7 +30,7 @@
 #include "w_wad.h"
 #include <unordered_map>
 
-struct RecentKnowledge;
+class RecentKnowledge;
 
 //
 // Background loading data for Main_LoadResources
