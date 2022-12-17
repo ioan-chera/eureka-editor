@@ -109,7 +109,7 @@ int M_FindGivenFile(const fs::path &filename)
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
 
-port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_path_info_t> &port_paths, bool create_it)
+port_path_info_t * RecentKnowledge::queryPortPath(const SString &name, bool create_it)
 {
 	std::map<SString, port_path_info_t>::iterator IT;
 
@@ -123,7 +123,7 @@ port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_p
 		port_path_info_t info;
 		port_paths[name] = info;
 
-		return M_QueryPortPath(name, port_paths);
+		return queryPortPath(name, false);
 	}
 
 	return NULL;
@@ -162,7 +162,7 @@ bool readBuffer(FILE* f, size_t size, std::vector<byte>& target)
 //
 // Parse port path
 //
-static void M_ParsePortPath(const SString &name, const SString &cpath, std::map<SString, port_path_info_t> &port_paths)
+void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 {
 	SString path(cpath);
 	path.trimLeadingSpaces();
@@ -176,7 +176,7 @@ static void M_ParsePortPath(const SString &name, const SString &cpath, std::map<
 	// terminate arguments
 	path.erase(0, pos + 1);
 
-	port_path_info_t *info = M_QueryPortPath(name, port_paths, true);
+	port_path_info_t *info = queryPortPath(name, true);
 	if (! info)	// should not fail!
 		return;
 
@@ -280,9 +280,7 @@ RecentKnowledge recent;
 //
 // Parse miscellaneous config
 //
-static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files,
-							std::map<SString, fs::path> &known_iwads,
-							std::map<SString, port_path_info_t> &port_paths)
+void RecentKnowledge::parseMiscConfig(std::istream &is)
 {
 	SString line;
 	while(M_ReadTextLine(line, is))
@@ -306,7 +304,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files,
 				continue;
 			}
 			if(Wad_file::Validate(path))
-				recent_files.insert(path, map);
+				files.insert(path, map);
 			else
 				gLog.printf("  no longer exists: %s\n", path.u8string().c_str());
 		}
@@ -347,7 +345,7 @@ static void ParseMiscConfig(std::istream &is, RecentFiles_c &recent_files,
 			}
 			if(parse.getNext(path))	// allow space after |
 				barpath += path;
-			M_ParsePortPath(name, barpath, port_paths);
+			parsePortPath(name, barpath);
 		}
 		else
 			gLog.printf("Unknown keyword '%s' in recents config\n", keyword.c_str());
@@ -372,7 +370,7 @@ void RecentKnowledge::load(const fs::path &home_dir)
 	known_iwads.clear();
 	port_paths.clear();
 
-	ParseMiscConfig(is, files, known_iwads, port_paths);
+	parseMiscConfig(is);
 }
 
 void RecentKnowledge::save(const fs::path &home_dir) const

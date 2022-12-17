@@ -110,9 +110,15 @@ struct RecentKnowledge
 
 	void addIWAD(const fs::path &path);
 
+	port_path_info_t *queryPortPath(const SString &name, bool create_it);
+
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
 	std::map<SString, port_path_info_t> port_paths;
+
+private:
+	void parseMiscConfig(std::istream &is);
+	void parsePortPath(const SString &name, const SString &cpath);
 };
 
 void M_OpenRecentFromMenu(void *priv_data);
@@ -129,8 +135,6 @@ namespace global
 {
 	extern RecentKnowledge recent;
 }
-
-port_path_info_t * M_QueryPortPath(const SString &name, std::map<SString, port_path_info_t> &port_paths, bool create_it = false);
 
 bool M_IsPortPathValid(const port_path_info_t *info);
 
