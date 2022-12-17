@@ -865,7 +865,7 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 	{
 		SString name = global::recent.files.Format(k);
 
-		void *data = global::recent.files.getData(k);
+		auto data = new RecentMap(global::recent.files.Lookup(k));
 
 		Menu_AddItem(pos, name.c_str(), cb, data, 0);
 	}

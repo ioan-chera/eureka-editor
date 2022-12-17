@@ -67,7 +67,6 @@ public:
 		return (int)list.size();
 	}
 
-	RecentMap *getData(int index) const;
 	void clear()
 	{
 		list.clear();
@@ -76,7 +75,7 @@ public:
 	void insert(const fs::path &file, const SString &map);
 	void Write(std::ostream &stream) const;
 	SString Format(int index) const;
-	void Lookup(int index, fs::path *file_v, SString *map_v) const;
+	const RecentMap &Lookup(int index) const;
 };
 
 //

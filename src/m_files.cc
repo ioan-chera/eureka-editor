@@ -174,13 +174,6 @@ void RecentKnowledge::writePortPaths(std::ostream &os) const
 
 // Recent files
 
-RecentMap *RecentFiles_c::getData(int index) const
-{
-	SYS_ASSERT(0 <= index && index < (int)list.size());
-
-	return new RecentMap(list[index]);
-}
-
 RecentFiles_c::Deque::iterator RecentFiles_c::find(const fs::path &file)
 {
 	// ignore the path when matching filenames
@@ -238,13 +231,12 @@ SString RecentFiles_c::Format(int index) const
 		(index < 9) ? "&" : "", 1 + index, name.c_str());
 }
 
-void RecentFiles_c::Lookup(int index, fs::path *file_v, SString *map_v) const
+const RecentMap &RecentFiles_c::Lookup(int index) const
 {
 	SYS_ASSERT(index >= 0);
 	SYS_ASSERT(index < (int)list.size());
 
-	*file_v = list[index].file;
-	*map_v = list[index].map;
+	return list[index];
 }
 
 namespace global
@@ -391,41 +383,35 @@ bool Instance::M_TryOpenMostRecent()
 	if (global::recent.files.getSize() == 0)
 		return false;
 
-	fs::path filename;
-	SString map_name;
-
-	fs::path filepath;
-	global::recent.files.Lookup(0, &filepath, &map_name);
-	filename = filepath;
+	RecentMap recentMap = global::recent.files.Lookup(0);
 
 	// M_LoadRecent has already validated the filename, so this should
 	// normally work.
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
-												   WadOpenMode::append);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(recentMap.file, WadOpenMode::append);
 
 	if (! wad)
 	{
-		gLog.printf("Failed to load most recent pwad: %s\n", filename.u8string().c_str());
+		gLog.printf("Failed to load most recent pwad: %s\n", recentMap.file.u8string().c_str());
 		return false;
 	}
 
 	// make sure at least one level can be loaded
 	if (wad->LevelCount() == 0)
 	{
-		gLog.printf("No levels in most recent pwad: %s\n", filename.u8string().c_str());
+		gLog.printf("No levels in most recent pwad: %s\n", recentMap.file.u8string().c_str());
 
 		return false;
 	}
 
 	/* -- OK -- */
 
-	if (wad->LevelFind(map_name) >= 0)
-		loaded.levelName = map_name;
+	if (wad->LevelFind(recentMap.map) >= 0)
+		loaded.levelName = recentMap.map;
 	else
 		loaded.levelName.clear();
 
-	this->wad.master.Pwad_name = filename;
+	this->wad.master.Pwad_name = recentMap.file;
 
 	this->wad.master.edit_wad = wad;
 

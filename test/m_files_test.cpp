@@ -548,35 +548,32 @@ TEST(RecentFiles, InsertAndLookup)
 	// Size must be 3
 	ASSERT_EQ(files.getSize(), 4);	// Five made it
 
-	fs::path file;
-	SString map;
+	RecentMap recentMap;
 
-	files.Lookup(0, &file, &map);
-	ASSERT_EQ(file, "Doo.wad");
-	ASSERT_EQ(map, "MAP03");
+	recentMap = files.Lookup(0);
+	ASSERT_EQ(recentMap.file, "Doo.wad");
+	ASSERT_EQ(recentMap.map, "MAP03");
 
-	files.Lookup(1, &file, &map);
-	ASSERT_EQ(file, "Other/Jack.wad");
-	ASSERT_EQ(map, "H5M6");
+	recentMap = files.Lookup(1);
+	ASSERT_EQ(recentMap.file, "Other/Jack.wad");
+	ASSERT_EQ(recentMap.map, "H5M6");
 
-	files.Lookup(2, &file, &map);
-	ASSERT_EQ(file, "SomeOther.wad");
-	ASSERT_EQ(map, "E4M4");
+	recentMap = files.Lookup(2);
+	ASSERT_EQ(recentMap.file, "SomeOther.wad");
+	ASSERT_EQ(recentMap.map, "E4M4");
 
-	files.Lookup(3, &file, &map);
-	ASSERT_EQ(file, "Wad1.wad");
-	ASSERT_EQ(map, "MAP01");
+	recentMap = files.Lookup(3);
+	ASSERT_EQ(recentMap.file, "Wad1.wad");
+	ASSERT_EQ(recentMap.map, "MAP01");
 
 	// See one format
 	SString text = files.Format(1);
 	ASSERT_EQ(text, "  &2:  Jack.wad");
 
 	// Get one data
-	RecentMap *vdata = files.getData(1);
-	ASSERT_TRUE(vdata);
-	ASSERT_EQ(vdata->file, "Other/Jack.wad");
-	ASSERT_EQ(vdata->map, "H5M6");
-	delete vdata;
+	RecentMap vdata = files.Lookup(1);
+	ASSERT_EQ(vdata.file, "Other/Jack.wad");
+	ASSERT_EQ(vdata.map, "H5M6");
 
 	// Test clearing it
 	files.clear();
@@ -595,13 +592,11 @@ TEST(RecentFiles, InsertPastCap)
 	ASSERT_EQ(files.getSize(), MAX_RECENT);
 
 	// Check that the latest recent are there
-	fs::path file;
-	SString map;
 	for(int i = 0; i < MAX_RECENT; ++i)
 	{
-		files.Lookup(i, &file, &map);
-		ASSERT_EQ(SString(file.generic_u8string()), SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
-		ASSERT_EQ(map, SString::printf("MAP%d", MAX_RECENT + 3 - i - 1));
+		RecentMap recentMap = files.Lookup(i);
+		ASSERT_EQ(SString(recentMap.file.generic_u8string()), SString::printf("sub/Wad%d.wad", MAX_RECENT + 3 - i - 1));
+		ASSERT_EQ(recentMap.map, SString::printf("MAP%d", MAX_RECENT + 3 - i - 1));
 	}
 
 	// Test formatting when larger than 9
@@ -732,19 +727,19 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 
 	// Check the recent files
 	ASSERT_EQ(recent.files.getSize(), 3);
-	SString map;
+	RecentMap recentMap;
 
-	recent.files.Lookup(0, &path, &map);
-	ASSERT_EQ(path, doom3Path);
-	ASSERT_EQ(map, "MAP03");
+	recentMap = recent.files.Lookup(0);
+	ASSERT_EQ(recentMap.file, doom3Path);
+	ASSERT_EQ(recentMap.map, "MAP03");
 
-	recent.files.Lookup(1, &path, &map);
-	ASSERT_EQ(path, hticPath);
-	ASSERT_EQ(map, "E3 M5");
+	recentMap = recent.files.Lookup(1);
+	ASSERT_EQ(recentMap.file, hticPath);
+	ASSERT_EQ(recentMap.map, "E3 M5");
 
-	recent.files.Lookup(2, &path, &map);
-	ASSERT_EQ(path, hereticPath);
-	ASSERT_EQ(map, "E3M5");
+	recentMap = recent.files.Lookup(2);
+	ASSERT_EQ(recentMap.file, hereticPath);
+	ASSERT_EQ(recentMap.map, "E3M5");
 
 	// Check the known IWADs map
 	ASSERT_TRUE(recent.queryIWAD("heretic"));
@@ -820,12 +815,12 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	ASSERT_EQ(readRecentFiles.getSize(), 3);
 	for(int i = 0; i < readRecentFiles.getSize(); ++i)
 	{
-		SString myMap, readMap;
-		fs::path myPath, readPath;
-		recent.files.Lookup(i, &myPath, &myMap);
-		readRecentFiles.Lookup(i, &readPath, &readMap);
-		ASSERT_EQ(myMap, readMap);
-		ASSERT_EQ(myPath, readPath);
+		SString readMap;
+		fs::path readPath;
+		RecentMap myRecentMap = recent.files.Lookup(i);
+		RecentMap readRecentMap = readRecentFiles.Lookup(i);
+		ASSERT_EQ(myRecentMap.map, readRecentMap.map);
+		ASSERT_EQ(myRecentMap.file, readRecentMap.file);
 	}
 	for(const auto &item : readKnownIwads)
 	{
@@ -838,3 +833,4 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 		ASSERT_EQ(*recent.queryPortPath(item.first), item.second);
 	}
 }
+
