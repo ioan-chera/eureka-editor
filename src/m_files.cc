@@ -583,7 +583,7 @@ void M_LookForIWADs()
 {
 	gLog.printf("Looking for IWADs....\n");
 
-	std::vector<SString> game_list = M_CollectKnownDefs(global::install_dir, global::home_dir,
+	std::vector<SString> game_list = M_CollectKnownDefs({global::install_dir, global::home_dir},
 														"games");
 
 	for (const SString &game : game_list)

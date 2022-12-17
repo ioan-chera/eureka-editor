@@ -863,7 +863,7 @@ static Fl_Menu_Item * Menu_PopulateRecentFiles(Fl_Menu_Item *items, Fl_Callback 
 
 	for (int k = 0 ; k < count ; k++)
 	{
-		SString name = global::recent.getFiles().Format(k);    
+		SString name = global::recent.getFiles().Format(k);
 
 		auto data = new RecentMap(global::recent.getFiles().Lookup(k));
 

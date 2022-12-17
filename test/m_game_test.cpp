@@ -212,5 +212,5 @@ TEST_F(MGameFixture, MCollectKnownDefs)
 	// Requirement: the last entry takes precedence and it's sorted.
 	// Hidden and dirs are skipped
 	auto expected = std::vector<SString>{"doom", "Extra", "hasugh", "Heretic", "MooD"};
-	ASSERT_EQ(M_CollectKnownDefs(install_dir, home_dir, folder), expected);
+	ASSERT_EQ(M_CollectKnownDefs({install_dir, home_dir}, folder), expected);
 }
