@@ -104,6 +104,11 @@ struct RecentKnowledge
 	}
 
 	void addIWAD(const fs::path &path);
+	SString collectGamesForMenu(int *exist_val, const char *exist_name) const;
+	const fs::path *getFirstIWAD() const
+	{
+		return known_iwads.empty() ? nullptr : &known_iwads.begin()->second;
+	}
 
 	const fs::path *queryPortPath(const SString &name) const
 	{
@@ -119,20 +124,20 @@ struct RecentKnowledge
 	}
 
 	RecentFiles_c files;
-	std::map<SString, fs::path> known_iwads;
 
 private:
 	void parseMiscConfig(std::istream &is);
+	void writeKnownIWADs(std::ostream &os) const;
 	void parsePortPath(const SString &name, const SString &cpath);
 	void writePortPaths(std::ostream &os) const;
 
+	std::map<SString, fs::path> known_iwads;
 	std::map<SString, fs::path> port_paths;
 };
 
 void M_OpenRecentFromMenu(void *priv_data);
 
 void M_LookForIWADs();
-SString M_CollectGamesForMenu(int *exist_val, const char *exist_name, const std::map<SString, fs::path> &known_iwads);
 
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const fs::path &filename);

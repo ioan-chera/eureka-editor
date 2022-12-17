@@ -48,7 +48,7 @@ void RecentKnowledge::addIWAD(const fs::path &path)
 // returns a string, with each name separated by a '|' character,
 // hence directly usable with the FL_Choice::add() method.
 //
-SString M_CollectGamesForMenu(int *exist_val, const char *exist_name, const std::map<SString, fs::path> &known_iwads)
+SString RecentKnowledge::collectGamesForMenu(int *exist_val, const char *exist_name) const
 {
 	std::map<SString, fs::path>::const_iterator KI;
 
@@ -73,7 +73,7 @@ SString M_CollectGamesForMenu(int *exist_val, const char *exist_name, const std:
 	return result;
 }
 
-static void M_WriteKnownIWADs(std::ostream &os, const std::map<SString, fs::path> &known_iwads)
+void RecentKnowledge::writeKnownIWADs(std::ostream &os) const
 {
 	std::map<SString, fs::path>::const_iterator KI;
 
@@ -364,7 +364,7 @@ void RecentKnowledge::save(const fs::path &home_dir) const
 
 	files.Write(os);
 
-	M_WriteKnownIWADs(os, known_iwads);
+	writeKnownIWADs(os);
 
 	writePortPaths(os);
 }
@@ -668,12 +668,9 @@ fs::path Instance::M_PickDefaultIWAD() const
 
 	gLog.debugPrintf("pick default iwad, trying first known iwad...\n");
 
-	std::map<SString, fs::path>::iterator KI;
-
-	KI = global::recent.known_iwads.begin();
-
-	if (KI != global::recent.known_iwads.end())
-		return KI->second;
+	result = global::recent.getFirstIWAD();
+	if (result)
+		return *result;
 
 	// nothing left to try
 	gLog.debugPrintf("pick default iwad failed.\n");

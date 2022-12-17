@@ -849,7 +849,7 @@ void UI_ProjectSetup::PopulateIWADs()
 	SString menu_string;
 	int menu_value = 0;
 
-	menu_string = M_CollectGamesForMenu(&menu_value, prev_game.c_str(), global::recent.known_iwads);
+	menu_string = global::recent.collectGamesForMenu(&menu_value, prev_game.c_str());
 
 	if (!menu_string.empty())
 	{

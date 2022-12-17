@@ -747,9 +747,10 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 	ASSERT_EQ(map, "E3M5");
 
 	// Check the known IWADs map
-	ASSERT_EQ(recent.known_iwads.size(), 2);
-	ASSERT_EQ(recent.known_iwads["heretic"], hereticPath);
-	ASSERT_EQ(recent.known_iwads["doom \"3\""], doom3Path);
+	ASSERT_TRUE(recent.queryIWAD("heretic"));
+	ASSERT_EQ(*recent.queryIWAD("heretic"), hereticPath);
+	ASSERT_TRUE(recent.queryIWAD("doom \"3\""));
+	ASSERT_EQ(*recent.queryIWAD("doom \"3\""), doom3Path);
 
 	// Check the port paths
 	ASSERT_TRUE(recent.queryPortPath("zdoom"));
@@ -765,8 +766,8 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	recent.files.insert("file2", "map 2");
 	recent.files.insert("file1/file 4", "map #");
 
-	recent.known_iwads["doom1"] = "path/doom1.wad";
-	recent.known_iwads["doom#"] = "path/doom 2.wad";
+	recent.addIWAD("path/doom1.wad");
+	recent.addIWAD("path/doom #.wad");
 
 	recent.setPortPath("foom", "port/foom.exe");
 	recent.setPortPath("joom generation", "port/joom generation.exe");
@@ -826,7 +827,11 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 		ASSERT_EQ(myMap, readMap);
 		ASSERT_EQ(myPath, readPath);
 	}
-	ASSERT_EQ(recent.known_iwads, readKnownIwads);
+	for(const auto &item : readKnownIwads)
+	{
+		ASSERT_TRUE(recent.queryIWAD(item.first));
+		ASSERT_EQ(*recent.queryIWAD(item.first), item.second);
+	}
 	for(const auto &item : readPortPaths)
 	{
 		ASSERT_TRUE(recent.queryPortPath(item.first));
