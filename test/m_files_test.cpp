@@ -753,8 +753,8 @@ TEST_F(RecentFilesFixture, MLoadRecent)
 
 	// Check the port paths
 	ASSERT_EQ(recent.port_paths.size(), 2);
-	ASSERT_EQ(recent.port_paths["zdoom"].exe_filename, "/home/jackson/zdoom.wad");
-	ASSERT_EQ(recent.port_paths["boom"].exe_filename, "/home/jillson/boom.wad");
+	ASSERT_EQ(recent.port_paths["zdoom"], "/home/jackson/zdoom.wad");
+	ASSERT_EQ(recent.port_paths["boom"], "/home/jillson/boom.wad");
 }
 
 TEST_F(RecentFilesFixture, MSaveRecent)
@@ -767,8 +767,8 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	recent.known_iwads["doom1"] = "path/doom1.wad";
 	recent.known_iwads["doom#"] = "path/doom 2.wad";
 
-	recent.port_paths["foom"].exe_filename = "port/foom.exe";
-	recent.port_paths["joom generation"].exe_filename = "port/joom generation.exe";
+	recent.port_paths["foom"] = "port/foom.exe";
+	recent.port_paths["joom generation"] = "port/joom generation.exe";
 
 	recent.save(mTempDir);
 	mDeleteList.push(mTempDir / "misc.cfg");
@@ -803,7 +803,7 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 		}
 		if(keyword == "port_path")
 		{
-			readPortPaths[name].exe_filename = path;
+			readPortPaths[name] = path;
 			continue;
 		}
 	}
@@ -822,6 +822,6 @@ TEST_F(RecentFilesFixture, MSaveRecent)
 	ASSERT_EQ(recent.port_paths.size(), readPortPaths.size());
 	for(const auto &item : recent.port_paths)
 	{
-		ASSERT_EQ(recent.port_paths[item.first].exe_filename, item.second.exe_filename);
+		ASSERT_EQ(recent.port_paths[item.first], item.second);
 	}
 }

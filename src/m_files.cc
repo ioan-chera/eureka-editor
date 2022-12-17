@@ -109,27 +109,6 @@ int M_FindGivenFile(const fs::path &filename)
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
 
-fs::path * RecentKnowledge::queryPortPath(const SString &name, bool create_it)
-{
-	std::map<SString, fs::path>::iterator IT;
-
-	IT = port_paths.find(name);
-
-	if (IT != port_paths.end())
-		return &IT->second;
-
-	if (create_it)
-	{
-		fs::path info;
-		port_paths[name] = info;
-
-		return queryPortPath(name, false);
-	}
-
-	return NULL;
-}
-
-
 bool M_IsPortPathValid(const fs::path *info)
 {
 	if(info->u8string().length() < 2)
@@ -176,11 +155,7 @@ void RecentKnowledge::parsePortPath(const SString &name, const SString &cpath)
 	// terminate arguments
 	path.erase(0, pos + 1);
 
-	fs::path *info = queryPortPath(name, true);
-	if (! info)	// should not fail!
-		return;
-
-	*info = fs::u8path(path.get());
+	setPortPath(name, fs::u8path(path.get()));
 
 	// parse any other arguments
 	// [ none needed atm.... ]

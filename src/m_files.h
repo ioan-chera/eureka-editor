@@ -105,7 +105,18 @@ struct RecentKnowledge
 
 	void addIWAD(const fs::path &path);
 
-	fs::path *queryPortPath(const SString &name, bool create_it);
+	const fs::path *queryPortPath(const SString &name) const
+	{
+		return get(port_paths, name);
+	}
+
+	//
+	// Changes the port path from name
+	//
+	void setPortPath(const SString &name, const fs::path &path)
+	{
+		port_paths[name] = path;
+	}
 
 	RecentFiles_c files;
 	std::map<SString, fs::path> known_iwads;
