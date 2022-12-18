@@ -350,7 +350,7 @@ void Instance::CMD_TestMap()
 	const fs::path *info = global::recent.queryPortPath(QueryName(loaded.portName,
 																  loaded.gameName));
 
-	if (! (info && M_IsPortPathValid(info)))
+	if (! (info && M_IsPortPathValid(*info)))
 	{
 		if (! M_PortSetupDialog(loaded.portName, loaded.gameName))
 			return;
@@ -359,7 +359,7 @@ void Instance::CMD_TestMap()
 	}
 
 	// this generally can't happen, but we check anyway...
-	if (! (info && M_IsPortPathValid(info)))
+	if (! (info && M_IsPortPathValid(*info)))
 	{
 		Beep("invalid path to executable");
 		return;

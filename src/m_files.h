@@ -148,9 +148,7 @@ namespace global
 	extern RecentKnowledge recent;
 }
 
-bool M_IsPortPathValid(const fs::path *info);
-
-bool readBuffer(FILE* f, size_t size, std::vector<byte>& target);
+bool M_IsPortPathValid(const fs::path &path);
 
 #endif  /* __EUREKA_M_FILES_H__ */
 

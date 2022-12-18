@@ -109,34 +109,16 @@ int M_FindGivenFile(const fs::path &filename)
 //  PORT PATH HANDLING
 //------------------------------------------------------------------------
 
-bool M_IsPortPathValid(const fs::path *info)
+bool M_IsPortPathValid(const fs::path &path)
 {
-	if(info->u8string().length() < 2)
+	if(path.u8string().length() < 2)
 		return false;
 
-	if (! FileExists(*info))
+	if (! FileExists(path))
 		return false;
 
 	return true;
 }
-
-//
-// Reads an entire buffer from file
-//
-bool readBuffer(FILE* f, size_t size, std::vector<byte>& target)
-{
-	target.resize(size);
-	size_t toRead = size;
-	while (toRead > 0)
-	{
-		size_t r = fread(target.data() + size - toRead, 1, toRead, f);
-		if (!r)
-			return false;
-		toRead -= r;
-	}
-	return true;
-}
-
 
 //
 // Parse port path
