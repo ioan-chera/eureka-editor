@@ -1124,7 +1124,7 @@ int main(int argc, char *argv[])
 
 		M_LoadBindings();
 
-		M_LookForIWADs();
+		global::recent.lookForIWADs(global::install_dir, global::home_dir);
 
 		Main_OpenWindow(gInstance);
 

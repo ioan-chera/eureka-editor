@@ -429,54 +429,31 @@ bool Instance::M_TryOpenMostRecent()
 #define PATH_SEPARATOR  ':'
 #endif
 
-static bool ExtractOnePath(const char *paths, char *dir, int index)
+//
+// Parses the DOOMWADPATH environment variable content. In it, the ; or : path separator (depending
+// on system) acts as a strict separator. Everything between two successive ; or : signs is a path.
+// Beware that this means you can't have a path containing those special characters.
+//
+static std::vector<fs::path> parseDoomWadPathEnvVar(const SString &doomwadpath)
 {
-	for (; index > 0 ; index--)
+	std::vector<fs::path> result;
+	size_t pos = 0, curpos = 0;
+	do
 	{
-		paths = strchr(paths, PATH_SEPARATOR);
+		pos = doomwadpath.find(PATH_SEPARATOR);
+		SString entry;
+		if(pos != std::string::npos)
+		{
+			entry = doomwadpath.substr(curpos, pos - curpos);
+			curpos = pos + 1;
+		}
+		else
+			entry = doomwadpath.substr(curpos);
+		result.push_back(fs::u8path(entry.get()));
 
-		if (! paths)
-			return false;
-
-		paths++;
-	}
-
-	// handle a trailing separator
-	if (! paths[0])
-		return false;
-
-
-	int len;
-
-	const char * sep_pos = strchr(paths, PATH_SEPARATOR);
-
-	if (sep_pos)
-		len = (int)(sep_pos - paths);
-	else
-		len = (int)strlen(paths);
-
-	if (len > FL_PATH_MAX - 2)
-		len = FL_PATH_MAX - 2;
-
-
-	if (len == 0)  // ouch
-    {
-        dir[0] = '.';
-        dir[1] = '\0';
-		return true;
-    }
-
-	// remove trailing slash
-	while (len > 1 && paths[len - 1] == DIR_SEP_CH)
-		len--;
-
-	memcpy(dir, paths, len);
-
-	dir[len] = 0;
-
-	return true;
+	} while(pos != std::string::npos);
+	return result;
 }
-
 
 static fs::path SearchDirForIWAD(const fs::path &dir_name, const SString &game)
 {
@@ -499,7 +476,7 @@ static fs::path SearchDirForIWAD(const fs::path &dir_name, const SString &game)
 }
 
 
-static fs::path SearchForIWAD(const SString &game)
+static fs::path SearchForIWAD(const fs::path &home_dir, const SString &game)
 {
 	gLog.debugPrintf("Searching for '%s' IWAD\n", game.c_str());
 
@@ -507,7 +484,7 @@ static fs::path SearchForIWAD(const SString &game)
 
 	// 1. look in ~/.eureka/iwads first
 
-	dir_name = global::home_dir / "iwads";
+	dir_name = home_dir / "iwads";
 
 	fs::path path = SearchDirForIWAD(dir_name, game);
 	if (!path.empty())
@@ -518,14 +495,11 @@ static fs::path SearchForIWAD(const SString &game)
 	const char *doomwadpath = getenv("DOOMWADPATH");
 	if (doomwadpath)
 	{
-		for (int i = 0 ; i < 999 ; i++)
+		std::vector<fs::path> paths = parseDoomWadPathEnvVar(doomwadpath);
+		for(const fs::path &wadpath : paths)
 		{
-			char dir_tmp[FL_PATH_MAX] = {};
-			if (! ExtractOnePath(doomwadpath, dir_tmp, i))
-				break;
-
-			path = SearchDirForIWAD(fs::u8path(dir_tmp), game);
-			if (!path.empty())
+			path = SearchDirForIWAD(wadpath, game);
+			if(!path.empty())
 				return path;
 		}
 	}
@@ -579,30 +553,29 @@ static fs::path SearchForIWAD(const SString &game)
 //
 // search for iwads in various places
 //
-void M_LookForIWADs()
+void RecentKnowledge::lookForIWADs(const fs::path &install_dir, const fs::path &home_dir)
 {
 	gLog.printf("Looking for IWADs....\n");
 
-	std::vector<SString> game_list = M_CollectKnownDefs({global::install_dir, global::home_dir},
-														"games");
+	std::vector<SString> game_list = M_CollectKnownDefs({install_dir, home_dir}, "games");
 
 	for (const SString &game : game_list)
 	{
 		// already have it?
-		if (global::recent.queryIWAD(game))
+		if (queryIWAD(game))
 			continue;
 
-		fs::path path = SearchForIWAD(game);
+		fs::path path = SearchForIWAD(home_dir, game);
 
 		if (!path.empty())
 		{
 			gLog.printf("Found '%s' IWAD file: %s\n", game.c_str(), path.u8string().c_str());
 
-			global::recent.addIWAD(path);
+			addIWAD(path);
 		}
 	}
 
-	global::recent.save(global::home_dir);
+	save(home_dir);
 }
 
 

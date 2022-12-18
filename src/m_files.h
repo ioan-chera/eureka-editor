@@ -93,6 +93,7 @@ public:
 		return get(known_iwads, game);
 	}
 
+	void lookForIWADs(const fs::path &install_dir, const fs::path &home_dir);
 	void addIWAD(const fs::path &path);
 	SString collectGamesForMenu(int *exist_val, const char *exist_name) const;
 	const fs::path *getFirstIWAD() const
@@ -136,8 +137,6 @@ private:
 };
 
 void M_OpenRecentFromMenu(void *priv_data);
-
-void M_LookForIWADs();
 
 void M_ValidateGivenFiles();
 int  M_FindGivenFile(const fs::path &filename);
