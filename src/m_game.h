@@ -316,7 +316,7 @@ static const char PORTS_DIR[] = "ports";
 
 bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name);
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
-					   const SString &folder, const SString &name,
+					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false);
 
 enum class ParsePurpose
@@ -395,8 +395,8 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   ParsePurpose purpose,
 						   ParseTarget target,
 						   const fs::path &filename,
-						   const SString &folder = NULL,
-						   const SString &prettyname = NULL,
+						   const fs::path &folder = "",
+						   const fs::path &prettyname = "",
                            int include_level = 0);
 
 const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false);

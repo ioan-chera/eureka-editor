@@ -76,7 +76,7 @@ public:
 	// BOOM generalized linedef stuff
 	int current_gen_line = -1;
 
-	explicit parser_state_c(const SString &filename) : fname(filename)
+	explicit parser_state_c(const fs::path &filename) : fname(filename)
 	{
 	}
 
@@ -89,9 +89,9 @@ public:
 		return false;
 	}
 
-	const char *file() const
+	const fs::path &file() const
 	{
-		return fname.c_str();
+		return fname;
 	}
 
 	bool readLine(LineFile &file)
@@ -113,7 +113,7 @@ public:
 
 private:
 	// filename for error messages (lacks the directory)
-	SString fname = nullptr;
+	fs::path fname;
 
 	// buffer containing the raw line
 	SString readstring;
@@ -454,20 +454,20 @@ bool linetype_t::isPolyObjectSpecial() const
 //           "ports" + "edge"
 //
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
-					   const SString &folder, const SString &name,
+					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false)
 {
 	// this is for error messages & debugging
-	SString prettyname = folder + "/" + name + ".ugh";
+	fs::path prettyname = folder / fs::u8path((name + ".ugh").get());
 
-	gLog.printf("Loading Definitions : %s\n", prettyname.c_str());
+	gLog.printf("Loading Definitions : %s\n", prettyname.u8string().c_str());
 
-	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, fs::u8path(folder.get()), name);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, folder, name);
 
 	if (filename.empty())
 	{
 		throw ParseException(SString::printf("Cannot find definition file: %s",
-											 prettyname.c_str()));
+											 prettyname.u8string().c_str()));
 	}
 
 	gLog.debugPrintf("  found at: %s\n", filename.u8string().c_str());
@@ -488,7 +488,7 @@ void parser_state_c::fail(EUR_FORMAT_STRING(const char *format), ...) const
 	SString ss = SString::vprintf(format, ap);
 	va_end(ap);
 
-	SString prefix = SString::printf("%s(%d): ", file(), line());
+	SString prefix = SString::printf("%s(%d): ", file().u8string().c_str(), line());
 	throw ParseException(prefix + ss);
 }
 
@@ -703,7 +703,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.line_groups.find( info.group) == config.line_groups.end())
 		{
 			gLog.printf("%s(%d): unknown line group '%c'\n",
-					  pst->file(), pst->line(),  info.group);
+					  pst->file().u8string().c_str(), pst->line(),  info.group);
 		}
 		else
 			config.line_types[number] = info;
@@ -763,7 +763,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.thing_groups.find(info.group) == config.thing_groups.end())
 		{
 			gLog.printf("%s(%d): unknown thing group '%c'\n",
-					  pst->file(), pst->line(), info.group);
+					  pst->file().u8string().c_str(), pst->line(), info.group);
 		}
 		else
 		{
@@ -797,7 +797,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file(), pst->line(), group);
+					  pst->file().u8string().c_str(), pst->line(), group);
 		}
 		else
 			config.texture_categories[name] = group;
@@ -814,7 +814,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file(), pst->line(), group);
+					  pst->file().u8string().c_str(), pst->line(), group);
 		}
 		else
 			config.flat_categories[name] = group;
@@ -1017,19 +1017,19 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   const ParsePurpose purpose,
 						   ParseTarget target,
 						   const fs::path &filename,
-						   const SString &cfolder,
-						   const SString &cprettyname,
+						   const fs::path &cfolder,
+						   const fs::path &cprettyname,
 						   int include_level)
 {
 	SYS_ASSERT(!filename.empty());
 
-	SString folder = cfolder;
+	fs::path folder = cfolder;
 	if (folder.empty())
 		folder = "common";
 
-	SString prettyname = cprettyname;
+	fs::path prettyname = cprettyname;
 	if (prettyname.empty())
-		prettyname = filename.filename().u8string();
+		prettyname = filename.filename();
 
 	parser_state_c parser_state(prettyname);
 
@@ -1106,21 +1106,21 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 			if (include_level >= MAX_INCLUDE_LEVEL)
 				pst->fail("Too many includes (check for a loop)");
 
-			SString new_folder = folder;
-			fs::path new_name = FindDefinitionFile(global::home_dir, global::install_dir, fs::u8path(new_folder.get()), pst->argv[1]);
+			fs::path new_folder = folder;
+			fs::path new_name = FindDefinitionFile(global::home_dir, global::install_dir, new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (new_name.empty() && folder != "common")
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(global::home_dir, global::install_dir, fs::u8path(new_folder.get()), pst->argv[1]);
+				new_name = FindDefinitionFile(global::home_dir, global::install_dir, new_folder, pst->argv[1]);
 			}
 
 			if (new_name.empty())
 				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
 			M_ParseDefinitionFile(parse_vars, purpose, target, new_name, new_folder,
-								  NULL /* prettyname */,
+								  "" /* prettyname */,
 								  include_level + 1);
 			continue;
 		}
@@ -1163,7 +1163,7 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	GameInfo loadingGame = GameInfo(game);
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::gameInfo, &loadingGame,
-						  filename, "games", nullptr);
+						  filename, "games", "");
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
 											 "not set base_game\n",
@@ -1190,7 +1190,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::portInfo, &global::loading_Port,
-						  filename, "ports", NULL);
+						  filename, "ports", "");
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port.supported_games.empty())
