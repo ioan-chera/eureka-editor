@@ -133,7 +133,7 @@ void Instance::FreshLevel()
 }
 
 
-bool Instance::Project_AskFile(SString &filename) const
+bool Instance::Project_AskFile(fs::path &filename) const
 {
 	// this returns false if user cancelled
 
@@ -164,11 +164,11 @@ bool Instance::Project_AskFile(SString &filename) const
 	}
 
 	// if extension is missing, add ".wad"
-	filename = chooser.filename();
+	filename = fs::u8path(chooser.filename());
 
-	const char *pos = fl_filename_ext(filename.c_str());
-	if(!*pos)
-		filename += ".wad";
+	fs::path extension = filename.extension();
+	if(extension.empty())
+		filename = fs::u8path(filename.u8string() + ".wad");
 
 	return true;
 }
@@ -212,7 +212,7 @@ void Instance::CMD_NewProject()
 
 	/* first, ask for the output file */
 
-	SString filename;
+	fs::path filename;
 
 	if (! Project_AskFile(filename))
 		return;
@@ -234,11 +234,11 @@ void Instance::CMD_NewProject()
 	   [ the file chooser should have asked for confirmation ]
 	 */
 
-	if (FileExists(filename.get()))
+	if (FileExists(filename))
 	{
 		// TODO??  M_BackupWad(wad);
 
-		if (! FileDelete(filename.get()))
+		if (! FileDelete(filename))
 		{
 			DLG_Notify("Unable to delete the existing file.");
 
@@ -272,8 +272,7 @@ void Instance::CMD_NewProject()
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(fs::u8path(filename.get()),
-												   WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename, WadOpenMode::write);
 
 	if (! wad)
 	{
@@ -1656,15 +1655,14 @@ bool Instance::M_ExportMap()
 	}
 
 	// if extension is missing then add ".wad"
-	SString filename = chooser.filename();
+	fs::path filename = fs::u8path(chooser.filename());
 
-	const char *pos = fl_filename_ext(filename.c_str());
-	if(!*pos)
-		filename += ".wad";
-
+	fs::path extension = filename.extension();
+	if(extension.empty())
+		filename = fs::u8path(filename.u8string() + ".wad");
 
 	// don't export into a file we currently have open
-	if (wad.master.MasterDir_HaveFilename(filename))
+	if (wad.master.MasterDir_HaveFilename(filename.u8string()))
 	{
 		DLG_Notify("Unable to export the map:\n\nFile already in use");
 		return false;
@@ -1672,13 +1670,13 @@ bool Instance::M_ExportMap()
 
 
 	// does the file already exist?  if not, create it...
-	bool exists = FileExists(filename.get());
+	bool exists = FileExists(filename);
 
 	std::shared_ptr<Wad_file> wad;
 
 	if (exists)
 	{
-		wad = Wad_file::Open(fs::u8path(filename.get()), WadOpenMode::append);
+		wad = Wad_file::Open(filename, WadOpenMode::append);
 
 		if (wad && wad->IsReadOnly())
 		{
@@ -1696,7 +1694,7 @@ bool Instance::M_ExportMap()
 	}
 	else
 	{
-		wad = Wad_file::Open(fs::u8path(filename.get()), WadOpenMode::write);
+		wad = Wad_file::Open(filename, WadOpenMode::write);
 	}
 
 	if (! wad)

@@ -824,8 +824,8 @@ void UI_ProjectSetup::prepareLoadingData(LoadingData &loading) const
 	SYS_ASSERT(loading.levelFormat != MapFormat::invalid);
 
 	for(int i = 0; i < RES_NUM; ++i)
-		if(res[i].good())
-            loading.resourceList.push_back(fs::u8path(res[i].get()));
+		if(!res[i].empty())
+            loading.resourceList.push_back(res[i]);
 }
 
 void UI_ProjectSetup::PopulateIWADs()
@@ -1057,9 +1057,9 @@ void UI_ProjectSetup::PopulateResources()
 
 		if (r < (int)inst.loaded.resourceList.size())
 		{
-			res[r] = inst.loaded.resourceList[r].u8string();
+			res[r] = inst.loaded.resourceList[r];
 
-			res_name[r]->value(fl_filename_name(res[r].c_str()));
+			res_name[r]->value(res[r].filename().u8string().c_str());
 		}
 	}
 }
@@ -1231,9 +1231,9 @@ void UI_ProjectSetup::load_callback(Fl_Button *w, void *data)
 			break;  // OK
 	}
 
-	that->res[r] = chooser.filename();
+	that->res[r] = fs::u8path(chooser.filename());
 
-	that->res_name[r]->value(fl_filename_name(that->res[r].c_str()));
+	that->res_name[r]->value(that->res[r].filename().u8string().c_str());
 }
 
 

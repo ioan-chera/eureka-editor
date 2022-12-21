@@ -392,7 +392,7 @@ private:
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
-	bool Project_AskFile(SString& filename) const;
+	bool Project_AskFile(fs::path& filename) const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
 	void SaveLevel(const SString &level);

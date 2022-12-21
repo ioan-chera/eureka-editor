@@ -57,21 +57,21 @@ public:
 	Fl_Button *cancel_but;
 
 	// the chosen EXE name, or NULL if cancelled
-	SString exe_name;
+	fs::path exe_name;
 
 	bool want_close;
 
 	Instance& inst;
 
 public:
-	void SetEXE(const SString &newbie)
+	void SetEXE(const fs::path &newbie)
 	{
 		exe_name = newbie;
 
 		// NULL is ok here
-		exe_display->value(exe_name.c_str());
+		exe_display->value(exe_name.u8string().c_str());
 
-		if (!exe_name.empty() && FileExists(exe_name.get()))
+		if (!exe_name.empty() && FileExists(exe_name))
 			ok_but->activate();
 		else
 			ok_but->deactivate();
@@ -124,7 +124,7 @@ public:
 
 		// we assume the chosen file exists
 
-		that->SetEXE(chooser.filename());
+		that->SetEXE(fs::u8path(chooser.filename()));
 	}
 
 public:
@@ -208,7 +208,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	const fs::path *info = global::recent.queryPortPath(QueryName(port, game));
 
 	if (info && !info->empty())
-		dialog->SetEXE(info->u8string());
+		dialog->SetEXE(*info);
 
 	bool ok = dialog->Run();
 
@@ -216,7 +216,7 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	{
 		// persist the new port settings
 		global::recent.setPortPath(QueryName(port, game),
-								   GetAbsolutePath(fs::u8path(dialog->exe_name.get())));
+								   GetAbsolutePath(dialog->exe_name));
 
 		global::recent.save(global::home_dir);
 	}
