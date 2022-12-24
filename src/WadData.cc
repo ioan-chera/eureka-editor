@@ -26,3 +26,12 @@ bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
 {
 	return lump1.Name() < lump2.Name();
 }
+
+//
+// Aggregate's remove call
+//
+void WadAggregate::remove(const std::shared_ptr<Wad_file> &wad)
+{
+	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
+	dir.erase(ENDP, dir.end());
+}

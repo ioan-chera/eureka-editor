@@ -35,6 +35,8 @@ typedef unsigned int GLuint;
 #include "FL/gl.h"
 #endif
 
+#include <memory>
+
 // this is a 16-bit value:
 //   - when high bit is clear, it is a palette index 0-255
 //     (value 255 is used to represent fully transparent).
