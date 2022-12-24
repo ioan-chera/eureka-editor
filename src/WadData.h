@@ -167,13 +167,23 @@ public:
 
 	Lump_c *W_FindGlobalLump(const SString &name) const;
 	Lump_c *W_FindSpriteLump(const SString &name) const;
+
+	//
+	// Const getter
+	//
+	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
+	{
+		return dir;
+	}
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	std::shared_ptr<Wad_file> edit_wad;
 	std::shared_ptr<Wad_file> game_wad;
-	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
 	fs::path Pwad_name;	// Filename of current wad
+
+private:
+	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
 };
 
 //
