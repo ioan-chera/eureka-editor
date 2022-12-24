@@ -161,37 +161,6 @@ struct LumpNameCompare
 };
 
 //
-// Maintains the list of wads and updates secondary data structures
-//
-class WadAggregate
-{
-public:
-	void add(const std::shared_ptr<Wad_file> &wad);
-	void remove(const std::shared_ptr<Wad_file> &wad);
-	void clear()
-	{
-		dir.clear();
-	}
-
-	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
-	{
-		return dir;
-	}
-private:
-	//
-	// Pairing of a wad with its lump set. Done this way to ensure correct ordering
-	//
-	struct WadSpritesBinding
-	{
-		std::shared_ptr<Wad_file> wad;
-		std::set<std::reference_wrapper<Lump_c>, LumpNameCompare> lumps;
-	};
-
-	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
-	std::vector<WadSpritesBinding> mSpriteLumps;
-};
-
-//
 // Manages the WAD loading
 //
 class MasterDir
@@ -211,7 +180,7 @@ public:
 	//
 	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
 	{
-		return mAggregate.getDir();
+		return dir;
 	}
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
@@ -221,7 +190,7 @@ public:	// TODO: make private
 	fs::path Pwad_name;	// Filename of current wad
 
 private:
-	WadAggregate mAggregate;
+	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
 };
 
 //

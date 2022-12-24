@@ -26,26 +26,3 @@ bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
 {
 	return lump1.Name() < lump2.Name();
 }
-
-//
-// Add wad to list and take note of all its lumps
-//
-void WadAggregate::add(const std::shared_ptr<Wad_file> &wad)
-{
-	dir.push_back(wad);
-	for(const LumpRef &ref : wad->getDir())
-	{
-		if(ref.ns != WadNamespace::Sprites)
-			continue;
-//		mSpriteLumps.insert(*ref.lump);
-	}
-}
-
-//
-// Aggregate's remove call
-//
-void WadAggregate::remove(const std::shared_ptr<Wad_file> &wad)
-{
-	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
-	dir.erase(ENDP, dir.end());
-}

@@ -305,12 +305,10 @@ private:
 
 	void writeToPath(const fs::path &path) const noexcept(false);
 
-private:
 	// deliberately don't implement these
 	Wad_file(const Wad_file& other);
 	Wad_file& operator= (const Wad_file& other);
 
-private:
 	// predicate for sorting the levels[] vector
 	struct level_name_CMP_pred
 	{

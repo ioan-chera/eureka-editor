@@ -692,7 +692,6 @@ static const int LINFO_Length = 1;
 int  config::grid_style;  // 0 = squares, 1 = dotty
 int config::gui_scheme    = 1;  // gtk+
 bool config::bsp_on_save    = true;
-int config::panel_gamma = 2;
 bool config::bsp_force_v5        = false;
 bool config::bsp_gl_nodes        = true;
 bool config::bsp_warnings    = false;
@@ -751,11 +750,9 @@ bool config::grid_hide_in_free_mode = false;
 bool config::sidedef_add_del_buttons = false;
 bool config::same_mode_clears_selection = false;
 bool config::bsp_fast        = false;
-int config::usegamma = 2;
 fs::path global::config_file;
 fs::path global::install_dir;
 int global::show_version  = 0;
-bool global::udmf_testing = false;
 fs::path global::home_dir;
 fs::path global::log_file;
 std::vector<fs::path> global::Pwad_list;
@@ -790,15 +787,6 @@ bool Props_ParseUser(Instance &inst, const std::vector<SString> &tokens)
 void Props_LoadValues(const Instance &inst)
 {
 	sUnitTokens["props"].push_back("LoadValues");
-}
-
-//
-// Parse color mockup
-//
-rgb_color_t ParseColor(const SString &cstr)
-{
-    // Use some independent example
-    return (rgb_color_t)strtol(cstr.c_str(), nullptr, 16) << 8;
 }
 
 void Instance::ZoomWholeMap()

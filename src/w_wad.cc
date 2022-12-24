@@ -1105,20 +1105,21 @@ void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().u8string().c_str());
 
-	mAggregate.add(wad);
+	dir.push_back(wad);
 }
 
 void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().u8string().c_str());
 
-	mAggregate.remove(wad);
+	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
+	dir.erase(ENDP, dir.end());
 }
 
 
 void MasterDir::MasterDir_CloseAll()
 {
-	mAggregate.clear();
+	dir.clear();
 }
 
 
