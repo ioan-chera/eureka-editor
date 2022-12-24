@@ -26,3 +26,24 @@ bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
 {
 	return lump1.Name() < lump2.Name();
 }
+
+//
+// Locates the first four-stem sprite from the master dir
+//
+Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
+{
+	SString firstName;
+	Lump_c *result = nullptr;
+	for(auto it = getDir().rbegin(); it != getDir().rend(); ++it)
+	{
+		Lump_c *lump = (*it)->findFirstSpriteLump(stem);
+		if(!lump)
+			continue;
+		if(firstName.empty() || firstName.get() > lump->Name().get())
+		{
+			firstName = lump->Name();
+			result = lump;
+		}
+	}
+	return result;
+}

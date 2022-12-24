@@ -518,6 +518,65 @@ Lump_c * Wad_file::FindLumpInNamespace(const SString &name, WadNamespace group) 
 	return nullptr; // not found!
 }
 
+//
+// Searches for the 
+//
+Lump_c *Wad_file::findFirstSpriteLump(const SString &stem) const
+{
+	SString firstName;
+	Lump_c *result = nullptr;
+	for(const LumpRef &lumpRef : directory)
+	{
+		if(lumpRef.ns != WadNamespace::Sprites)
+			continue;
+		const SString &name = lumpRef.lump->name;
+		if(name.length() != 6 && name.length() != 8)
+			continue;
+		if(stem.length() <= 4)
+		{
+			if(!name.startsWith(stem.c_str()))
+				continue;
+		}
+		else
+		{
+			if(!name.startsWith(stem.substr(0, 4).c_str()))
+				continue;
+			if(stem.length() == 5)
+			{
+				char letter = stem[4];
+				if(name[4] != letter && (name.length() != 8 || name[6] != letter))
+					continue;
+			}
+			else if(stem.length() == 6)
+			{
+				const char *pair = stem.c_str() + 4;
+				if((name[4] != pair[0] || name[5] != pair[1]) &&
+				   (name.length() != 8 || name[6] != pair[0] || name[7] != pair[1]))
+				{
+					continue;
+				}
+			}
+			else if(stem.length() == 7)
+			{
+				if(name.startsWith(stem.c_str()))
+				{
+					return lumpRef.lump.get();
+				}
+			}
+			else if(stem.length() == 8)
+			{
+				if(name == stem)
+					return lumpRef.lump.get();
+			}
+		}
+		if(firstName.empty() || firstName.get() > name.get())
+		{
+			firstName = name;
+			result = lumpRef.lump.get();
+		}
+	}
+	return result;
+}
 
 bool Wad_file::ReadDirectory(FILE *fp, int total_size)
 {
@@ -1068,7 +1127,7 @@ Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
 // find a lump that only exists in a certain namespace (sprite,
 // or patch) of a loaded wad (later ones tried first).
 //
-Lump_c *MasterDir::W_FindSpriteLump(const SString &name) const
+Lump_c *MasterDir::findSpriteLump(const SString &name) const
 {
 	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
 	{

@@ -173,7 +173,8 @@ public:
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
 	Lump_c *W_FindGlobalLump(const SString &name) const;
-	Lump_c *W_FindSpriteLump(const SString &name) const;
+	Lump_c *findSpriteLump(const SString &name) const;
+	Lump_c *findFirstSpriteLump(const SString &stem) const;
 
 	//
 	// Const getter

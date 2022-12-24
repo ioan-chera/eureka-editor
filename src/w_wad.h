@@ -224,6 +224,7 @@ public:
 
 	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
 			const noexcept;
+	Lump_c *findFirstSpriteLump(const SString &stem) const;
 
 	int LevelCount() const noexcept
 	{
