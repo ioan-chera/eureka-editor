@@ -112,6 +112,7 @@ endfunction()
 
 unit_test(general
     DocumentTest.cpp
+    e_checks_test.cpp
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
@@ -198,29 +199,6 @@ unit_test(general
         w_texture.cc
         w_wad.cc
         WadData.cc
-    FLTK
-)
-
-unit_test(e_checks
-    e_checks_test.cpp
-    stub/e_cutpaste_stub.cpp
-    stub/e_hover_stub.cpp
-    stub/e_main_stub.cpp
-    stub/e_path_stub.cpp
-    stub/im_img_stub.cpp
-    stub/m_game_stub.cpp
-    stub/m_keys_stub.cpp
-    stub/r_render_stub.cpp
-    stub/ui_dialog_stub.cpp
-    stub/ui_infobar_stub.cpp
-    SRC DocumentModule.cc
-        e_basis.cc
-        e_checks.cc
-        LineDef.cc
-        m_bitvec.cc
-        m_select.cc
-        Sector.cc
-        SideDef.cc
     FLTK
 )
 

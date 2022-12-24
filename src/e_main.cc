@@ -519,7 +519,7 @@ void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
 
 void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
 {
-	if (type != edit.mode)
+	if (type != edit.mode || !main_win)
 		return;
 
 	if (objnum != main_win->GetPanelObjNum())

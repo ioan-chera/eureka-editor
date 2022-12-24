@@ -37,7 +37,7 @@ void WadAggregate::add(const std::shared_ptr<Wad_file> &wad)
 	{
 		if(ref.ns != WadNamespace::Sprites)
 			continue;
-		mSpriteLumps.insert(*ref.lump);
+//		mSpriteLumps.insert(*ref.lump);
 	}
 }
 

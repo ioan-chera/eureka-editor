@@ -30,64 +30,6 @@
 
 //==============================================================================
 //
-// Mock-ups
-//
-//==============================================================================
-
-bool ImageSet::W_FlatIsKnown(const ConfigData &config, const SString &name) const
-{
-	return false;
-}
-
-Img_c * ImageSet::getTexture(const ConfigData &config, const SString &name, bool try_uppercase) const
-{
-	return nullptr;
-}
-
-bool ImageSet::W_TextureCausesMedusa(const SString &name) const
-{
-	return false;
-}
-
-bool ImageSet::W_TextureIsKnown(const ConfigData &config, const SString &name) const
-{
-	return false;
-}
-
-bool is_null_tex(const SString &tex)
-{
-	return false;
-}
-
-bool is_special_tex(const SString &tex)
-{
-	return false;
-}
-
-void LogViewer_Open()
-{
-}
-
-void ObjectsModule::del(EditOperation &op, const selection_c &list) const
-{
-}
-
-bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
-{
-	return false;
-}
-
-int UI_Escapable_Window::handle(int event)
-{
-	return 0;
-}
-
-void UnusedVertices(const Document &doc, const selection_c &lines, selection_c &result)
-{
-}
-
-//==============================================================================
-//
 // Tests
 //
 //==============================================================================

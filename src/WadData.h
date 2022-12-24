@@ -178,8 +178,17 @@ public:
 		return dir;
 	}
 private:
+	//
+	// Pairing of a wad with its lump set. Done this way to ensure correct ordering
+	//
+	struct WadSpritesBinding
+	{
+		std::shared_ptr<Wad_file> wad;
+		std::set<std::reference_wrapper<Lump_c>, LumpNameCompare> lumps;
+	};
+
 	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
-	std::set<std::reference_wrapper<Lump_c>, LumpNameCompare> mSpriteLumps;
+	std::vector<WadSpritesBinding> mSpriteLumps;
 };
 
 //
