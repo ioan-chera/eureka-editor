@@ -166,10 +166,7 @@ struct LumpNameCompare
 class WadAggregate
 {
 public:
-	void add(const std::shared_ptr<Wad_file> &wad)
-	{
-		dir.push_back(wad);
-	}
+	void add(const std::shared_ptr<Wad_file> &wad);
 	void remove(const std::shared_ptr<Wad_file> &wad);
 	void clear()
 	{

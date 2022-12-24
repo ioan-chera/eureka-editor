@@ -111,13 +111,17 @@ endfunction()
 # IMPORTANT: the eurekasrc files from testutils are already linked!
 
 unit_test(general
+    DocumentTest.cpp
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp
     m_parse_test.cpp
     main_test.cpp
 	SafeOutFileTest.cpp
+    SectorTest.cpp
     SStringTest.cpp
+    ThingTest.cpp
+    VertexTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
@@ -193,27 +197,8 @@ unit_test(general
         w_loadpic.cc
         w_texture.cc
         w_wad.cc
+        WadData.cc
     FLTK
-)
-
-unit_test(document
-    DocumentTest.cpp
-    stub/e_cutpaste_stub.cpp
-    stub/e_main_stub.cpp
-    stub/r_render_stub.cpp
-    stub/ui_infobar_stub.cpp
-    SectorTest.cpp
-    ThingTest.cpp
-    VertexTest.cpp
-    SRC Document.cc
-        DocumentModule.cc
-        e_basis.cc
-        LineDef.cc
-        m_bitvec.cc
-        m_select.cc
-        Sector.cc
-        SideDef.cc
-        Thing.cc
 )
 
 unit_test(e_checks
