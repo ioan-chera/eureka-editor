@@ -1054,9 +1054,9 @@ bool Wad_file::Backup(const fs::path &new_filename)
 //
 Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
 {
-	for (int i = (int)dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = dir[i]->FindLumpInNamespace(name, WadNamespace::Global);
+		Lump_c *L = getDir()[i]->FindLumpInNamespace(name, WadNamespace::Global);
 		if (L)
 			return L;
 	}
@@ -1070,9 +1070,9 @@ Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
 //
 Lump_c *MasterDir::W_FindSpriteLump(const SString &name) const
 {
-	for (int i = (int)dir.size()-1 ; i >= 0 ; i--)
+	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
 	{
-		Lump_c *L = dir[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
+		Lump_c *L = getDir()[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
 		if (L)
 			return L;
 	}
@@ -1105,23 +1105,26 @@ void MasterDir::MasterDir_Add(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: adding '%s'\n", wad->PathName().u8string().c_str());
 
-	dir.push_back(wad);
+	mAggregate.add(wad);
 }
 
+void WadAggregate::remove(const std::shared_ptr<Wad_file> &wad)
+{
+	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
+	dir.erase(ENDP, dir.end());
+}
 
 void MasterDir::MasterDir_Remove(const std::shared_ptr<Wad_file> &wad)
 {
 	gLog.debugPrintf("MasterDir: removing '%s'\n", wad->PathName().u8string().c_str());
 
-	auto ENDP = std::remove(dir.begin(), dir.end(), wad);
-
-	dir.erase(ENDP, dir.end());
+	mAggregate.remove(wad);
 }
 
 
 void MasterDir::MasterDir_CloseAll()
 {
-	dir.clear();
+	mAggregate.clear();
 }
 
 
@@ -1143,9 +1146,9 @@ void W_StoreString(char *buf, const SString &str, size_t buflen)
 
 bool MasterDir::MasterDir_HaveFilename(const SString &chk_path) const
 {
-	for (unsigned int k = 0 ; k < dir.size() ; k++)
+	for (unsigned int k = 0 ; k < getDir().size() ; k++)
 	{
-		SString wad_path = dir[k]->PathName().u8string();
+		SString wad_path = getDir()[k]->PathName().u8string();
 
 		if (W_FilenameAbsEqual(wad_path, chk_path))
 			return true;

@@ -17,3 +17,12 @@
 //------------------------------------------------------------------------
 
 #include "WadData.h"
+#include "w_wad.h"
+
+//
+// Comparator for the master directory lumps
+//
+bool LumpNameCompare::operator()(const Lump_c &lump1, const Lump_c &lump2) const
+{
+	return lump1.Name() < lump2.Name();
+}

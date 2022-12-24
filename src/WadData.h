@@ -27,8 +27,10 @@
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
 
+#include <functional>
 #include <map>
 #include <memory>
+#include <set>
 #include <vector>
 
 class Img_c;
@@ -153,6 +155,36 @@ private:
 
 };
 
+struct LumpNameCompare
+{
+	bool operator()(const Lump_c &lump1, const Lump_c &lump2) const;
+};
+
+//
+// Maintains the list of wads and updates secondary data structures
+//
+class WadAggregate
+{
+public:
+	void add(const std::shared_ptr<Wad_file> &wad)
+	{
+		dir.push_back(wad);
+	}
+	void remove(const std::shared_ptr<Wad_file> &wad);
+	void clear()
+	{
+		dir.clear();
+	}
+
+	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
+	{
+		return dir;
+	}
+private:
+	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
+	std::set<std::reference_wrapper<Lump_c>, LumpNameCompare> mSpriteLumps;
+};
+
 //
 // Manages the WAD loading
 //
@@ -173,7 +205,7 @@ public:
 	//
 	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
 	{
-		return dir;
+		return mAggregate.getDir();
 	}
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
@@ -183,7 +215,7 @@ public:	// TODO: make private
 	fs::path Pwad_name;	// Filename of current wad
 
 private:
-	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
+	WadAggregate mAggregate;
 };
 
 //
