@@ -65,6 +65,7 @@ protected:
                 { "Insert",    "Edit", nullptr },
                 { "Delete",    "Edit", nullptr },
                 { "Mirror",    "General", nullptr },
+                { nullptr, nullptr, nullptr },
             };
             M_RegisterCommandList(commands);
             loaded = true;
