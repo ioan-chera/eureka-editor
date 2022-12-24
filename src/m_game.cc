@@ -1403,10 +1403,9 @@ const linetype_t &Instance::M_GetLineType(int type) const
 
 const thingtype_t &M_GetThingType(const ConfigData &config, int type)
 {
-	auto TI = config.thing_types.find(type);
-
-	if (TI != config.thing_types.end())
-		return TI->second;
+	const thingtype_t *existing = get(config.thing_types, type);
+	if(existing)
+		return *existing;
 
 	static thingtype_t dummy_type =
 	{

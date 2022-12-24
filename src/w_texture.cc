@@ -636,17 +636,8 @@ bool ImageSet::W_FlatIsKnown(const ConfigData &config, const SString &name) cons
 //----------------------------------------------------------------------
 //    SPRITE HANDLING
 //----------------------------------------------------------------------
-
-static void DeleteSprite(const sprite_map_t::value_type& P)
-{
-	// Note that P.second can be NULL here
-	delete P.second;
-}
-
 void ImageSet::W_ClearSprites()
 {
-	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
-
 	sprites.clear();
 }
 
@@ -722,16 +713,15 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 
 Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 {
-	sprite_map_t::const_iterator P = images.sprites.find(type);
-
-	if (P != images.sprites.end())
-		return P->second;
+	const std::unique_ptr<Img_c> *existing = get(images.sprites, type);
+	if(existing)
+		return existing->get();
 
 	// sprite not in the list yet.  Add it.
 
 	const thingtype_t &info = M_GetThingType(config, type);
 
-	Img_c *result = NULL;
+	std::unique_ptr<Img_c> result;
 
 	if (info.desc.startsWith("UNKNOWN"))
 	{
@@ -765,12 +755,11 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 		}
 		else
 		{
-			result = new Img_c;
+			result = std::make_unique<Img_c>();
 
 			if (! LoadPicture(palette, config, *result, lump, info.sprite, 0, 0))
 			{
-				delete result;
-				result = NULL;
+				result.reset();
 			}
 		}
 	}
@@ -779,7 +768,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 	// [ FIXME : put colors into game definition file ]
 	if (result && info.group == 'p')
 	{
-		Img_c *new_img = NULL;
+		std::unique_ptr<Img_c> new_img;
 
 		switch (type)
 		{
@@ -810,16 +799,15 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 
 		if (new_img)
 		{
-			std::swap(result, new_img);
-			delete new_img;
+			result = std::move(new_img);
 		}
 	}
 
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
-	images.sprites[type] = result;
-	return result;
+	images.sprites[type] = std::move(result);
+	return images.sprites[type].get();
 }
 
 

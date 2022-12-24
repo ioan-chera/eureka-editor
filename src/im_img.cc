@@ -260,12 +260,12 @@ Img_c * Img_c::scale_img(double scale) const
 //
 // TODO : make it work with RGB pixels (find nearest in palette).
 //
-Img_c * Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
+std::unique_ptr<Img_c> Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	Img_c *omg = new Img_c(width(), height());
+	auto omg = std::make_unique<Img_c>(width(), height());
 
 	int W = width();
 	int H = height();
@@ -635,9 +635,9 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 }
 
 
-static Img_c * IM_CreateFromText(const Palette &pal, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+static std::unique_ptr<Img_c> IM_CreateFromText(const Palette &pal, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
 {
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 
@@ -989,7 +989,7 @@ static const char *const dog_image_text[] =
 };
 
 
-Img_c *IM_CreateDogSprite(const Palette &pal)
+std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal)
 {
 	return IM_CreateFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
 }
@@ -997,12 +997,12 @@ Img_c *IM_CreateDogSprite(const Palette &pal)
 
 //------------------------------------------------------------------------
 
-Img_c *IM_CreateLightSprite(const Palette &palette)
+std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette)
 {
 	int W = 11;
 	int H = 11;
 
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 
@@ -1039,12 +1039,12 @@ Img_c *IM_CreateLightSprite(const Palette &palette)
 }
 
 
-Img_c *IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b)
+std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b)
 {
 	int W = 32;
 	int H = 32;
 
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 

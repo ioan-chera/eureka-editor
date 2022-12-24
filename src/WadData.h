@@ -38,7 +38,7 @@ class Wad_file;
 struct ConfigData;
 
 // maps type number to an image
-typedef std::map<int, Img_c *> sprite_map_t;
+typedef std::map<int, std::unique_ptr<Img_c>> sprite_map_t;
 
 //
 // Wad image set
