@@ -123,6 +123,7 @@ unit_test(general
     SStringTest.cpp
     ThingTest.cpp
     VertexTest.cpp
+    w_wad_test.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
@@ -212,16 +213,6 @@ unit_test(m_config_keys
         m_keys.cc
         m_parse.cc
         m_streams.cc
-        SafeOutFile.cc
-        w_wad.cc
-    FLTK
-)
-
-
-
-unit_test(w_wad
-    w_wad_test.cpp
-    SRC lib_file.cc
         SafeOutFile.cc
         w_wad.cc
     FLTK
