@@ -65,6 +65,7 @@ protected:
                 { "Insert",    "Edit", nullptr },
                 { "Delete",    "Edit", nullptr },
                 { "Mirror",    "General", nullptr },
+                { nullptr, nullptr, nullptr },
             };
             M_RegisterCommandList(commands);
             loaded = true;
@@ -96,9 +97,9 @@ private:
 //
 void MKeys::writeBindingsFile()
 {
-    FILE *f = fopen((global::install_dir + "/bindings.cfg").c_str(), "wt");
+    FILE *f = fopen((global::install_dir / "bindings.cfg").u8string().c_str(), "wt");
     ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::install_dir + "/bindings.cfg");
+    mDeleteList.push(global::install_dir / "bindings.cfg");
 
     fprintf(f, "browser    CMD-k    BR_ClearSearch\n");
     fprintf(f, "browser    PGUP    BR_Scroll    -3\n");
@@ -112,9 +113,9 @@ void MKeys::writeBindingsFile()
     int n = fclose(f);
     ASSERT_EQ(n, 0);
 
-    f = fopen((global::home_dir + "/bindings.cfg").c_str(), "wt");
+    f = fopen((global::home_dir / "bindings.cfg").u8string().c_str(), "wt");
     ASSERT_NE(f, nullptr);
-    mDeleteList.push(global::home_dir + "/bindings.cfg");
+    mDeleteList.push(global::home_dir / "bindings.cfg");
 
     fprintf(f, "general SHIFT-DEL    Delete    /keep\n");
     fprintf(f, "general    SHIFT-BS    Delete    /keep\n");

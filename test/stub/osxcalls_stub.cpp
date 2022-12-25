@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2020 Ioan Chera
+//  Copyright (C) 2022 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,25 +16,17 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef TempDirContext_hpp
-#define TempDirContext_hpp
-
-#include "gtest/gtest.h"
-
-#include <stack>
-
 #include "filesystem.hpp"
 namespace fs = ghc::filesystem;
 
-class TempDirContext : public ::testing::Test
+enum class macOSDirType
 {
-protected:
-	void SetUp() override;
-	void TearDown() override;
-	fs::path getChildPath(const fs::path &path) const;
-
-	fs::path mTempDir;
-	std::stack<fs::path> mDeleteList;
+	library,
+	libraryAppSupport,
+	libraryCache
 };
 
-#endif /* TempDirContext_hpp */
+fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
+{
+    return fs::path();
+}

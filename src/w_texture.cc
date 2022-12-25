@@ -349,13 +349,13 @@ void WadData::W_LoadTextures(const ConfigData &config)
 {
 	images.W_ClearTextures();
 
-	for (int i = 0 ; i < (int)master.dir.size() ; i++)
+	for (int i = 0 ; i < (int)master.getDir().size() ; i++)
 	{
 		gLog.printf("Loading Textures from WAD #%d\n", i+1);
 
-		Lump_c *pnames   = master.dir[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
-		Lump_c *texture1 = master.dir[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
-		Lump_c *texture2 = master.dir[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
+		Lump_c *pnames   = master.getDir()[i]->FindLumpInNamespace("PNAMES", WadNamespace::Global);
+		Lump_c *texture1 = master.getDir()[i]->FindLumpInNamespace("TEXTURE1", WadNamespace::Global);
+		Lump_c *texture2 = master.getDir()[i]->FindLumpInNamespace("TEXTURE2", WadNamespace::Global);
 
 		// Note that we _require_ the PNAMES lump to exist along
 		// with the TEXTURE1/2 lump which uses it.  Probably a
@@ -378,7 +378,7 @@ void WadData::W_LoadTextures(const ConfigData &config)
 
 		if (config.features.tx_start)
 		{
-			W_LoadTextures_TX_START(*this, config, master.dir[i].get());
+			W_LoadTextures_TX_START(*this, config, master.getDir()[i].get());
 		}
 	}
 }
@@ -562,11 +562,11 @@ void WadData::W_LoadFlats()
 {
 	images.W_ClearFlats();
 
-	for (int i = 0 ; i < (int)master.dir.size() ; i++)
+	for (int i = 0 ; i < (int)master.getDir().size() ; i++)
 	{
 		gLog.printf("Loading Flats from WAD #%d\n", i+1);
 
-		const Wad_file *wf = master.dir[i].get();
+		const Wad_file *wf = master.getDir()[i].get();
 
 		for(const LumpRef &lumpRef : wf->getDir())
 		{
@@ -636,17 +636,8 @@ bool ImageSet::W_FlatIsKnown(const ConfigData &config, const SString &name) cons
 //----------------------------------------------------------------------
 //    SPRITE HANDLING
 //----------------------------------------------------------------------
-
-static void DeleteSprite(const sprite_map_t::value_type& P)
-{
-	// Note that P.second can be NULL here
-	delete P.second;
-}
-
 void ImageSet::W_ClearSprites()
 {
-	std::for_each(sprites.begin(), sprites.end(), DeleteSprite);
-
 	sprites.clear();
 }
 
@@ -660,25 +651,8 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 	SString buffer;
 	buffer.reserve(16);
 	buffer = name;
-	if(buffer.length() == 4)
-		buffer += 'A';
-	if(buffer.length() == 5)
-		buffer += '0';
-
-	Lump_c *lump = master.W_FindSpriteLump(buffer);
-
-	if (! lump)
-	{
-		if(buffer.length() >= 6)
-			buffer[5] = '1';
-		lump = master.W_FindSpriteLump(buffer);
-	}
-
-	if (! lump)
-	{
-		buffer += "D1";
-		lump = master.W_FindSpriteLump(buffer);
-	}
+	Lump_c *lump = nullptr;
+	lump = master.findFirstSpriteLump(buffer);
 
 	if (lump)
 		return lump;
@@ -722,16 +696,15 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 
 Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 {
-	sprite_map_t::const_iterator P = images.sprites.find(type);
-
-	if (P != images.sprites.end())
-		return P->second;
+	const std::unique_ptr<Img_c> *existing = get(images.sprites, type);
+	if(existing)
+		return existing->get();
 
 	// sprite not in the list yet.  Add it.
 
 	const thingtype_t &info = M_GetThingType(config, type);
 
-	Img_c *result = NULL;
+	std::unique_ptr<Img_c> result;
 
 	if (info.desc.startsWith("UNKNOWN"))
 	{
@@ -765,12 +738,11 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 		}
 		else
 		{
-			result = new Img_c;
+			result = std::make_unique<Img_c>();
 
 			if (! LoadPicture(palette, config, *result, lump, info.sprite, 0, 0))
 			{
-				delete result;
-				result = NULL;
+				result.reset();
 			}
 		}
 	}
@@ -779,7 +751,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 	// [ FIXME : put colors into game definition file ]
 	if (result && info.group == 'p')
 	{
-		Img_c *new_img = NULL;
+		std::unique_ptr<Img_c> new_img;
 
 		switch (type)
 		{
@@ -810,16 +782,15 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 
 		if (new_img)
 		{
-			std::swap(result, new_img);
-			delete new_img;
+			result = std::move(new_img);
 		}
 	}
 
 	// note that a NULL image is OK.  Our renderer will just ignore the
 	// missing sprite.
 
-	images.sprites[type] = result;
-	return result;
+	images.sprites[type] = std::move(result);
+	return images.sprites[type].get();
 }
 
 

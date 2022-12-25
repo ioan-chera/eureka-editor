@@ -32,6 +32,9 @@
 
 #include <memory>
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class Wad_file;
 
 //
@@ -156,7 +159,7 @@ struct LumpRef
 class Wad_file
 {
 private:
-	const SString filename;
+	const fs::path filename;
 
 	WadOpenMode mode;  // mode value passed to ::Open()
 
@@ -171,7 +174,7 @@ private:
 	int insert_point = -1;
 
 	// constructor is private
-	Wad_file(const SString &_name, WadOpenMode _mode) :
+	Wad_file(const fs::path &_name, WadOpenMode _mode) :
 	   filename(_name), mode(_mode)
 	{
 	}
@@ -189,14 +192,14 @@ public:
 	// Note: if 'a' is used and the file is read-only, it will be
 	//       silently opened in 'r' mode instead.
 	//
-	static std::shared_ptr<Wad_file> Open(const SString &filename,
+	static std::shared_ptr<Wad_file> Open(const fs::path &filename,
 										  WadOpenMode mode
 										  = WadOpenMode::append);
 
 	// check the given wad file exists and is a WAD file
-	static bool Validate(const SString &filename);
+	static bool Validate(const fs::path &filename);
 
-	const SString &PathName() const noexcept
+	const fs::path &PathName() const noexcept
 	{
 		return filename;
 	}
@@ -221,6 +224,7 @@ public:
 
 	Lump_c * FindLumpInNamespace(const SString &name, WadNamespace group)
 			const noexcept;
+	Lump_c *findFirstSpriteLump(const SString &stem) const;
 
 	int LevelCount() const noexcept
 	{
@@ -243,7 +247,7 @@ public:
 
 	// backup the current wad into the given filename.
 	// returns true if successful, false on error.
-	bool Backup(const char *new_filename);
+	bool Backup(const fs::path &new_filename);
 
 	void writeToDisk() noexcept(false);
 
@@ -289,7 +293,7 @@ public:
 	}
 
 private:
-	static std::shared_ptr<Wad_file> Create(const SString &filename,
+	static std::shared_ptr<Wad_file> Create(const fs::path &filename,
 											WadOpenMode mode);
 
 	// read the existing directory.
@@ -300,14 +304,12 @@ private:
 
 	void FixLevelGroup(int index, int num_added, int num_removed);
 
-	void writeToPath(const SString &path) const noexcept(false);
+	void writeToPath(const fs::path &path) const noexcept(false);
 
-private:
 	// deliberately don't implement these
 	Wad_file(const Wad_file& other);
 	Wad_file& operator= (const Wad_file& other);
 
-private:
 	// predicate for sorting the levels[] vector
 	struct level_name_CMP_pred
 	{

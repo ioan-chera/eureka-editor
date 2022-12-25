@@ -35,6 +35,8 @@ typedef unsigned int GLuint;
 #include "FL/gl.h"
 #endif
 
+#include <memory>
+
 // this is a 16-bit value:
 //   - when high bit is clear, it is a palette index 0-255
 //     (value 255 is used to represent fully transparent).
@@ -115,7 +117,7 @@ public:
 
 	Img_c * scale_img(double scale) const;
 
-	Img_c * color_remap(int src1, int src2, int targ1, int targ2) const;
+	std::unique_ptr<Img_c> color_remap(int src1, int src2, int targ1, int targ2) const;
 
 	bool has_transparent() const;
 
@@ -135,9 +137,9 @@ private:
 	Img_c& operator= (const Img_c&);  // No need to implement it
 };
 
-Img_c *IM_CreateDogSprite(const Palette &pal);
-Img_c *IM_CreateLightSprite(const Palette &palette);
-Img_c *IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b);
+std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal);
+std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette);
+std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b);
 Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 

@@ -133,7 +133,7 @@ void Instance::FreshLevel()
 }
 
 
-bool Instance::Project_AskFile(SString &filename) const
+bool Instance::Project_AskFile(fs::path &filename) const
 {
 	// this returns false if user cancelled
 
@@ -143,7 +143,7 @@ bool Instance::Project_AskFile(SString &filename) const
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -164,11 +164,11 @@ bool Instance::Project_AskFile(SString &filename) const
 	}
 
 	// if extension is missing, add ".wad"
-	filename = chooser.filename();
+	filename = fs::u8path(chooser.filename());
 
-	const char *pos = fl_filename_ext(filename.c_str());
-	if(!*pos)
-		filename += ".wad";
+	fs::path extension = filename.extension();
+	if(extension.empty())
+		filename = fs::u8path(filename.u8string() + ".wad");
 
 	return true;
 }
@@ -212,7 +212,7 @@ void Instance::CMD_NewProject()
 
 	/* first, ask for the output file */
 
-	SString filename;
+	fs::path filename;
 
 	if (! Project_AskFile(filename))
 		return;
@@ -272,8 +272,7 @@ void Instance::CMD_NewProject()
 	gLog.printf("Creating New File : %s in %s\n", map_name.c_str(), filename.c_str());
 
 
-	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename,
-												   WadOpenMode::write);
+	std::shared_ptr<Wad_file> wad = Wad_file::Open(filename, WadOpenMode::write);
 
 	if (! wad)
 	{
@@ -305,8 +304,9 @@ bool Instance::MissingIWAD_Dialog()
 		loaded.gameName = dialog->game;
 		SYS_ASSERT(!loaded.gameName.empty());
 
-		loaded.iwadName = M_QueryKnownIWAD(loaded.gameName);
-		SYS_ASSERT(!loaded.iwadName.empty());
+		const fs::path *iwad = global::recent.queryIWAD(loaded.gameName);
+		SYS_ASSERT(!!iwad);
+		loaded.iwadName = *iwad;
 	}
 
 	delete dialog;
@@ -923,7 +923,7 @@ void Instance::LoadLevel(Wad_file *wad, const SString &level)
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad->PathName(), level, wad->IsReadOnly());
+		main_win->SetTitle(wad->PathName().u8string(), level, wad->IsReadOnly());
 
 		// load the user state associated with this map
 		crc32_c adler_crc;
@@ -1008,7 +1008,7 @@ void Instance::LoadLevelNum(Wad_file *wad, int lev_num)
 // open a new wad file.
 // when 'map_name' is not NULL, try to open that map.
 //
-void OpenFileMap(const SString &filename, const SString &map_namem)
+void OpenFileMap(const fs::path &filename, const SString &map_namem)
 {
 	// TODO: change this to start a new instance
 	SString map_name = map_namem;
@@ -1055,7 +1055,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 
 	if (wad->FindLump(EUREKA_LUMP))
 	{
-		if (! gInstance.M_ParseEurekaLump(wad.get()))
+		if (! gInstance.loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 		{
 			return;
 		}
@@ -1077,7 +1077,7 @@ void OpenFileMap(const SString &filename, const SString &map_namem)
 		map_name  = gInstance.wad.master.edit_wad->GetLump(idx)->Name();
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), gInstance.wad.master.edit_wad->PathName().u8string().c_str());
 
 	// TODO: new instance
 	gInstance.LoadLevel(gInstance.wad.master.edit_wad.get(), map_name);
@@ -1118,7 +1118,7 @@ void Instance::CMD_OpenMap()
 
 	if (did_load && wad->FindLump(EUREKA_LUMP))
 	{
-		if (! M_ParseEurekaLump(wad.get()))
+		if (! loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 			return;
 	}
 
@@ -1143,7 +1143,7 @@ void Instance::CMD_OpenMap()
 		new_resources = true;
 	}
 
-	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Loading Map : %s of %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// TODO: overhaul the interface to select map from the same wad
 	LoadLevel(wad.get(), map_name);
@@ -1575,15 +1575,16 @@ void Instance::SaveLevel(const SString &level)
 	// [ it doesn't change the on-disk wad file at all ]
 	wad.master.edit_wad->SortLevels();
 
-	M_WriteEurekaLump(wad.master.edit_wad.get());
+	loaded.writeEurekaLump(wad.master.edit_wad.get());
+	wad.master.edit_wad->writeToDisk();
 
-	M_AddRecent(wad.master.edit_wad->PathName(), loaded.levelName);
+	global::recent.addRecent(wad.master.edit_wad->PathName(), loaded.levelName, global::home_dir);
 
 	Status_Set("Saved %s", loaded.levelName.c_str());
 
 	if (main_win)
 	{
-		main_win->SetTitle(wad.master.edit_wad->PathName(), loaded.levelName, false);
+		main_win->SetTitle(wad.master.edit_wad->PathName().u8string(), loaded.levelName, false);
 
 		// save the user state associated with this map
 		M_SaveUserState();
@@ -1618,7 +1619,7 @@ bool Instance::M_SaveMap()
 
 	M_BackupWad(wad.master.edit_wad.get());
 
-	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.edit_wad->PathName().c_str());
+	gLog.printf("Saving Map : %s in %s\n", loaded.levelName.c_str(), wad.master.edit_wad->PathName().u8string().c_str());
 
 	SaveLevel(loaded.levelName);
 
@@ -1633,7 +1634,7 @@ bool Instance::M_ExportMap()
 	chooser.title("Pick file to export to");
 	chooser.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	chooser.filter("Wads\t*.wad");
-	chooser.directory(Main_FileOpFolder().c_str());
+	chooser.directory(Main_FileOpFolder().u8string().c_str());
 
 	// Show native chooser
 	switch (chooser.show())
@@ -1654,15 +1655,14 @@ bool Instance::M_ExportMap()
 	}
 
 	// if extension is missing then add ".wad"
-	SString filename = chooser.filename();
+	fs::path filename = fs::u8path(chooser.filename());
 
-	const char *pos = fl_filename_ext(filename.c_str());
-	if(!*pos)
-		filename += ".wad";
-
+	fs::path extension = filename.extension();
+	if(extension.empty())
+		filename = fs::u8path(filename.u8string() + ".wad");
 
 	// don't export into a file we currently have open
-	if (wad.master.MasterDir_HaveFilename(filename))
+	if (wad.master.MasterDir_HaveFilename(filename.u8string()))
 	{
 		DLG_Notify("Unable to export the map:\n\nFile already in use");
 		return false;
@@ -1688,7 +1688,7 @@ bool Instance::M_ExportMap()
 		// adopt iwad/port/resources of the target wad
 		if (wad->FindLump(EUREKA_LUMP))
 		{
-			if (! M_ParseEurekaLump(wad.get()))
+			if (! loaded.parseEurekaLump(global::home_dir, global::install_dir, global::recent, wad.get()))
 				return false;
 		}
 	}
@@ -1743,7 +1743,7 @@ bool Instance::M_ExportMap()
 	}
 
 
-	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().c_str());
+	gLog.printf("Exporting Map : %s in %s\n", map_name.c_str(), wad->PathName().u8string().c_str());
 
 	// the new wad replaces the current PWAD
 	ReplaceEditWad(wad);
@@ -1893,7 +1893,7 @@ void Instance::CMD_RenameMap()
 
 	loaded.levelName = new_name.asUpper();
 
-	main_win->SetTitle(wad.master.edit_wad->PathName(), loaded.levelName, false);
+	main_win->SetTitle(wad.master.edit_wad->PathName().u8string(), loaded.levelName, false);
 
 	Status_Set("Renamed to %s", loaded.levelName.c_str());
 }

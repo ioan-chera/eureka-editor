@@ -24,8 +24,13 @@
 #include "m_strings.h"
 #include "sys_type.h"
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
+#include <functional>
 #include <map>
 #include <memory>
+#include <set>
 #include <vector>
 
 class Img_c;
@@ -35,7 +40,7 @@ class Wad_file;
 struct ConfigData;
 
 // maps type number to an image
-typedef std::map<int, Img_c *> sprite_map_t;
+typedef std::map<int, std::unique_ptr<Img_c>> sprite_map_t;
 
 //
 // Wad image set
@@ -150,6 +155,11 @@ private:
 
 };
 
+struct LumpNameCompare
+{
+	bool operator()(const Lump_c &lump1, const Lump_c &lump2) const;
+};
+
 //
 // Manages the WAD loading
 //
@@ -163,14 +173,25 @@ public:
 	bool MasterDir_HaveFilename(const SString &chk_path) const;
 
 	Lump_c *W_FindGlobalLump(const SString &name) const;
-	Lump_c *W_FindSpriteLump(const SString &name) const;
+	Lump_c *findSpriteLump(const SString &name) const;
+	Lump_c *findFirstSpriteLump(const SString &stem) const;
+
+	//
+	// Const getter
+	//
+	const std::vector<std::shared_ptr<Wad_file>> &getDir() const
+	{
+		return dir;
+	}
 public:	// TODO: make private
 	// the current PWAD, or NULL for none.
 	// when present it is also at master_dir.back()
 	std::shared_ptr<Wad_file> edit_wad;
 	std::shared_ptr<Wad_file> game_wad;
+	fs::path Pwad_name;	// Filename of current wad
+
+private:
 	std::vector<std::shared_ptr<Wad_file>> dir;	// the IWAD, never NULL, always at master_dir.front()
-	SString Pwad_name;	// Filename of current wad
 };
 
 //

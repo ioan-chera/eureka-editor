@@ -79,6 +79,7 @@ public:
 	{
 	}
 	Objid(const Objid &other) = default;
+	Objid &operator = (const Objid &other) = default;
 
 	void clear()
 	{

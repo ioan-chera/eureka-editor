@@ -28,8 +28,79 @@
 #define __EUREKA_M_CONFIG_H__
 
 #include "im_color.h"
+#include <vector>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 /* ==== CONFIG VARIABLES ==================== */
+
+
+//
+//  Structures for command line arguments and config settings
+//
+enum class OptType
+{
+	// End of the options description
+	end,
+
+	// Boolean (toggle)
+	// Receptacle is of type: bool
+	boolean,
+
+	// Integer number,
+	// Receptacle is of type: int
+	integer,
+
+	// A color value
+	// Receptacle is of type: rgb_color_t
+	color,
+
+	// String (not leaking)
+	// Receptacle is of type: SString
+	string,
+
+	// Path (similar to string)
+	// Receptacle is of type: fs::path
+	path,
+
+	// List of strings (not leaking)
+	// Receptacle is of type: std::vector<SString>
+	stringList,
+
+	// List of paths
+	// Receptacle if of type: std::vector<fs::path>
+	pathList,
+};
+
+enum
+{
+	OptFlag_pass1 = 1 << 0,
+	OptFlag_helpNewline = 1 << 1,
+	OptFlag_preference = 1 << 2,
+	OptFlag_warp = 1 << 3,
+	OptFlag_hide = 1 << 4,
+};
+
+struct opt_desc_t
+{
+	const char *long_name;  // Command line arg. or keyword
+	const char *short_name; // Abbreviated command line argument
+
+	OptType opt_type;    // Type of this option
+	unsigned flags;    // Flags for this option :
+	// '1' : process only on pass 1 of parse_command_line_options()
+	// '<' : print extra newline after this option (when dumping)
+	// 'v' : a real variable (preference setting)
+	// 'w' : warp hack -- accept two numeric args
+	// 'H' : hide option from --help display
+
+	const char *desc;   // Description of the option
+	const char *arg_desc;  // Description of the argument (NULL --> none or default)
+
+	void *data_ptr;   // Pointer to the data
+};
+
 
 namespace config
 {
@@ -115,22 +186,23 @@ extern bool bsp_force_zdoom;
 extern bool bsp_compressed;
 }
 
+extern const opt_desc_t options[];
+
 enum class CommandLinePass
 {
 	early,
 	normal
 };
 
+
 /* ==== FUNCTIONS ==================== */
 
-int M_ParseConfigFile() noexcept(false);
-int M_WriteConfigFile();
-
-int M_ParseDefaultConfigFile();
+int M_ParseConfigFile(const fs::path &path, const opt_desc_t *options);
+int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options);
 
 void M_ParseEnvironmentVars();
 void M_ParseCommandLine(int argc, const char *const *argv,
-						CommandLinePass pass);
+						CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options);
 
 void M_PrintCommandLineOptions();
 

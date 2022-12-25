@@ -31,67 +31,12 @@
 #include "m_parse.h"
 #include "m_streams.h"
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 //------------------------------------------------------------------------
 
-//
-//  Structures for command line arguments and config settings
-//
-enum class OptType
-{
-	// End of the options description
-	end,
-
-	// Boolean (toggle)
-	// Receptacle is of type: bool
-	boolean,
-
-	// Integer number,
-	// Receptacle is of type: int
-	integer,
-
-	// A color value
-	// Receptacle is of type: rgb_color_t
-	color,
-
-	// String (not leaking)
-	// Receptacle is of type: SString
-	string,
-
-	// List of strings (not leaking)
-	// Receptacle is of type: std::vector<SString>
-	stringList,
-};
-
-enum
-{
-	OptFlag_pass1 = 1 << 0,
-	OptFlag_helpNewline = 1 << 1,
-	OptFlag_preference = 1 << 2,
-	OptFlag_warp = 1 << 3,
-	OptFlag_hide = 1 << 4,
-};
-
-struct opt_desc_t
-{
-	const char *long_name;  // Command line arg. or keyword
-	const char *short_name; // Abbreviated command line argument
-
-	OptType opt_type;    // Type of this option
-	unsigned flags;    // Flags for this option :
-	// '1' : process only on pass 1 of parse_command_line_options()
-	// '<' : print extra newline after this option (when dumping)
-	// 'v' : a real variable (preference setting)
-	// 'w' : warp hack -- accept two numeric args
-	// 'H' : hide option from --help display
-
-	const char *desc;   // Description of the option
-	const char *arg_desc;  // Description of the argument (NULL --> none or default)
-
-	void *data_ptr;   // Pointer to the data
-};
-
-
-static const opt_desc_t options[] =
+const opt_desc_t options[] =
 {
 	//
 	// A few options must be handled in an early pass
@@ -99,7 +44,7 @@ static const opt_desc_t options[] =
 
 	{	"home",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1,
 		"Home directory",
 		"<dir>",
@@ -108,7 +53,7 @@ static const opt_desc_t options[] =
 
 	{	"install",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1,
 		"Installation directory",
 		"<dir>",
@@ -117,7 +62,7 @@ static const opt_desc_t options[] =
 
 	{	"log",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1,
 		"Log messages to specified file",
 		"<file>",
@@ -126,7 +71,7 @@ static const opt_desc_t options[] =
 
 	{	"config",
 		0,
-        OptType::string,
+        OptType::path,
 		OptFlag_pass1 | OptFlag_helpNewline,
 		"Config file to load / save",
 		"<file>",
@@ -175,7 +120,7 @@ static const opt_desc_t options[] =
 
 	{	"file",
 		"f",
-        OptType::stringList,
+        OptType::pathList,
 		0,
 		"Wad file(s) to edit",
 		"<file>...",
@@ -184,7 +129,7 @@ static const opt_desc_t options[] =
 
 	{	"merge",
 		"m",
-		OptType::stringList,
+		OptType::pathList,
 		0,
 		"Resource file(s) to load",
 		"<file>...",
@@ -193,7 +138,7 @@ static const opt_desc_t options[] =
 
 	{	"iwad",
 		"i",
-        OptType::string,
+        OptType::path,
 		0,
 		"The name of the IWAD (game data)",
 		"<file>",
@@ -816,65 +761,40 @@ static const opt_desc_t options[] =
 //
 // Parse config line from file
 //
-static int parse_config_line_from_file(const SString &cline, const SString &basename, int lnum)
+static int parse_config_line_from_file(const SString &line, const fs::path &basename, int lnum,
+									   const opt_desc_t *options)
 {
-	SString line(cline);
-
-	// skip leading whitespace
-	line.trimLeadingSpaces();
-
-	// skip comments
-	if(line[0] == '#')
+	TokenWordParse parse(line);
+	SString key;
+	if(!parse.getNext(key))	// empty line
 		return 0;
-
-	// remove trailing newline and whitespace
-	line.trimTrailingSpaces();
-
-	// skip empty lines
-	if(line.empty())
-		return 0;
-
-	// grab the name
-	size_t pos = line.find_first_not_of(IDENT_SET);
-	if(pos == std::string::npos || !isspace(line[pos]))
-	{
-		gLog.printf("WARNING: %s(%u): bad line, no space after keyword.\n",
-					basename.c_str(), lnum);
-		return 0;
-	}
 
 	SString value;
-	line.cutWithSpace(pos, &value);
-
-	// find the option value (occupies rest of the line)
-	value.trimLeadingSpaces();
-	if(value.empty())
+	if(!parse.getNext(value))
 	{
 		gLog.printf("WARNING: %s(%u): bad line, missing option value.\n",
-					basename.c_str(), lnum);
+					basename.u8string().c_str(), lnum);
 		return 0;
 	}
 
-	// find the option keyword
-	const opt_desc_t * opt;
-
-	for (opt = options ; ; opt++)
+	const opt_desc_t *opt;
+	for(opt = options;; opt++)
 	{
 		if (opt->opt_type == OptType::end)
 		{
 			gLog.printf("WARNING: %s(%u): invalid option '%s', skipping\n",
-						basename.c_str(), lnum, line.c_str());
+						basename.u8string().c_str(), lnum, line.c_str());
 			return 0;
 		}
 
-		if(!opt->long_name || line != opt->long_name)
+		if(!opt->long_name || key != opt->long_name)
 			continue;
 
 		// pre-pass options (like --help) don't make sense in a config file
 		if (opt->flags & OptFlag_pass1)
 		{
 			gLog.printf("WARNING: %s(%u): cannot use option '%s' in config "
-						"files.\n", basename.c_str(), lnum, line.c_str());
+						"files.\n", basename.u8string().c_str(), lnum, line.c_str());
 			return 0;
 		}
 
@@ -884,7 +804,7 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 
 	switch (opt->opt_type)
 	{
-        case OptType::boolean:
+		case OptType::boolean:
 			if(value.noCaseEqual("no") || value.noCaseEqual("false") ||
 			   value.noCaseEqual("off") || value.noCaseEqual("0"))
 			{
@@ -896,40 +816,41 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 			}
 			break;
 
-        case OptType::integer:
+		case OptType::integer:
 			*((int *) opt->data_ptr) = atoi(value);
 			break;
 
-        case OptType::color:
+		case OptType::color:
 			*((rgb_color_t *) opt->data_ptr) = ParseColor(value);
 			break;
 
-        case OptType::string:
+		case OptType::string:
 			*static_cast<SString *>(opt->data_ptr) = value;
 			break;
 
-        case OptType::stringList:
-			while(value.good())
-			{
-				size_t spacepos = value.findSpace();
-				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
-				if(spacepos == std::string::npos)
-				{
-					list->push_back(value);
-					value.clear();
-				}
-				else
-				{
-					SString word = value;
-					word.erase(spacepos, SString::npos);
-					list->push_back(word);
-
-					value.erase(0, spacepos);
-					value.trimLeadingSpaces();
-				}
-			}
+		case OptType::path:
+			*static_cast<fs::path *>(opt->data_ptr) = fs::u8path(value.get());
 			break;
 
+		case OptType::stringList:
+			if(value != "{}")
+			{
+				auto list = static_cast<std::vector<SString> *>(opt->data_ptr);
+				do
+					list->push_back(value);
+				while(parse.getNext(value));
+			}
+			break;
+		case OptType::pathList:
+			if(value != "{}")
+			{
+				auto list = static_cast<std::vector<fs::path> *>(opt->data_ptr);
+				fs::path pathvalue = fs::u8path(value.get());
+				do
+					list->push_back(pathvalue);
+				while(parse.getNext(pathvalue));
+			}
+			break;
 		default:
 			BugError("INTERNAL ERROR: unknown option type %d\n", (int) opt->opt_type);
 			return -1;
@@ -944,15 +865,15 @@ static int parse_config_line_from_file(const SString &cline, const SString &base
 //
 //  Return 0 on success, negative value on failure.
 //
-static int parse_a_config_file(std::istream &is, const SString &filename)
+static int parse_a_config_file(std::istream &is, const fs::path &filename, const opt_desc_t *options)
 {
-	SString basename = GetBaseName(filename);
+	fs::path basename = filename.filename();
 
 	// handle one line on each iteration
 	SString line;
 	for(int lnum = 1; M_ReadTextLine(line, is); lnum++)
 	{
-		int ret = parse_config_line_from_file(line, basename, lnum);
+		int ret = parse_config_line_from_file(line, basename, lnum, options);
 
 		if (ret != 0)
 			return ret;
@@ -961,31 +882,16 @@ static int parse_a_config_file(std::istream &is, const SString &filename)
 	return 0;  // OK
 }
 
-
-inline static SString default_config_file() noexcept(false)
-{
-	if(global::home_dir.empty())
-		ThrowException("Home directory not set.");
-
-	return global::home_dir + "/config.cfg";
-}
-
-
 //
 //  parses the config file (either a user-specific one or the default one).
 //
 //  return 0 on success, negative value on error.
 //
-int M_ParseConfigFile() noexcept(false)
+int M_ParseConfigFile(const fs::path &path, const opt_desc_t *options)
 {
-	if (global::config_file.empty())
-	{
-		global::config_file = default_config_file();
-	}
+	std::ifstream is(path);
 
-	std::ifstream is(global::config_file.get());
-
-	gLog.printf("Reading config file: %s\n", global::config_file.c_str());
+	gLog.printf("Reading config file: %s\n", path.u8string().c_str());
 
 	if (!is.is_open())
 	{
@@ -993,27 +899,8 @@ int M_ParseConfigFile() noexcept(false)
 		return -1;
 	}
 
-	return parse_a_config_file(is, global::config_file);
+	return parse_a_config_file(is, path, options);
 }
-
-
-int M_ParseDefaultConfigFile()
-{
-	SString filename = global::install_dir + "/defaults.cfg";
-
-	std::ifstream is(filename.get());
-
-	gLog.printf("Reading config file: %s\n", filename.c_str());
-
-	if (!is.is_open())
-	{
-		gLog.printf("--> %s\n", GetErrorMessage(errno).c_str());
-		return -1;
-	}
-
-	return parse_a_config_file(is, filename);
-}
-
 
 //
 // check certain environment variables...
@@ -1029,12 +916,29 @@ void M_ParseEnvironmentVars()
 #endif
 }
 
-
-static void M_AddPwadName(const char *filename)
+//
+// Common function to populate a list of strings or paths
+//
+template<typename T>
+static void readArgsForList(bool ignore, int &argc, const char *const *&argv, void *data_ptr)
 {
-	global::Pwad_list.push_back(filename);
-}
+	if(argc < 2)
+	{
+		ThrowException("missing argument after '%s'\n", argv[0]);
+		/* NOT REACHED */
+	}
+	while(argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
+	{
+		argv++;
+		argc--;
 
+		if (! ignore)
+		{
+			auto list = static_cast<std::vector<T> *>(data_ptr);
+			list->push_back(argv[0]);
+		}
+	}
+}
 
 //
 // parses the command line options
@@ -1044,7 +948,7 @@ static void M_AddPwadName(const char *filename)
 //
 // Otherwise, ignores all options that have the "1" flag.
 //
-void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
+void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass, std::vector<fs::path> &Pwad_list, const opt_desc_t *options)
 {
 	const opt_desc_t *o;
 
@@ -1057,7 +961,7 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
 		{
 			// this is a loose file, handle it now
 			if (pass == CommandLinePass::normal)
-				M_AddPwadName(argv[0]);
+				Pwad_list.push_back(fs::u8path(argv[0]));
 
 			argv++;
 			argc--;
@@ -1170,24 +1074,24 @@ void M_ParseCommandLine(int argc, const char *const *argv, CommandLinePass pass)
 
 				break;
 
-
-            case OptType::stringList:
-				if (argc < 2)
+			case OptType::path:
+				if(argc < 2)
 				{
 					ThrowException("missing argument after '%s'\n", argv[0]);
-					/* NOT REACHED */
 				}
-				while (argc > 1 && argv[1][0] != '-' && argv[1][0] != '+')
-				{
-					argv++;
-					argc--;
+				++argv;
+				--argc;
+				if(!ignore)
+					*static_cast<fs::path *>(o->data_ptr) = fs::u8path(argv[0]);
+				break;
 
-					if (! ignore)
-					{
-						auto list = static_cast<std::vector<SString> *>(o->data_ptr);
-						list->push_back(argv[0]);
-					}
-				}
+
+            case OptType::stringList:
+				readArgsForList<SString>(ignore, argc, argv, o->data_ptr);
+				break;
+
+			case OptType::pathList:
+				readArgsForList<fs::path>(ignore, argc, argv, o->data_ptr);
 				break;
 
 			default:
@@ -1254,7 +1158,9 @@ void M_PrintCommandLineOptions()
             case OptType::color:         printf ("<color>     "); break;
 
             case OptType::string:      printf ("<string>    "); break;
+			case OptType::path:         printf("<path>    "); break;
             case OptType::stringList:   printf ("<string> ..."); break;
+			case OptType::pathList: printf("<path> ..."); break;
             case OptType::end: ;  // This line is here only to silence a GCC warning.
 		}
 
@@ -1265,15 +1171,30 @@ void M_PrintCommandLineOptions()
 	}
 }
 
-
-int M_WriteConfigFile()
+//
+// Given a list of strings or paths, writes them to a config file
+//
+static void writeListToConfig(const std::vector<SString> &list, std::ofstream &os)
 {
-	if(global::config_file.empty())
-		ThrowException("Configuration file not initialized.");
+	if (list.empty())
+		os << "{}";
+	else for (const SString &item : list)
+		os << item.spaceEscape() << ' ';
+}
 
-	gLog.printf("Writing config file: %s\n", global::config_file.c_str());
+static void writeListToConfig(const std::vector<fs::path> &list, std::ofstream &os)
+{
+	if (list.empty())
+		os << "{}";
+	else for (const fs::path &item : list)
+		os << escape(item) << ' ';
+}
 
-	std::ofstream os(global::config_file.get(), std::ios::trunc);
+int M_WriteConfigFile(const fs::path &path, const opt_desc_t *options)
+{
+	gLog.printf("Writing config file: %s\n", path.u8string().c_str());
+
+	std::ofstream os(path, std::ios::trunc);
 
 	if (! os.is_open())
 	{
@@ -1303,7 +1224,13 @@ int M_WriteConfigFile()
             case OptType::string:
 			{
 				const SString *str = static_cast<SString *>(o->data_ptr);
-				os << (str ? *str : "''");
+				os << str->spaceEscape();
+				break;
+			}
+			case OptType::path:
+			{
+				const fs::path *path = static_cast<fs::path *>(o->data_ptr);
+				os << escape(*path);
 				break;
 			}
             case OptType::integer:
@@ -1315,14 +1242,12 @@ int M_WriteConfigFile()
 				break;
 
             case OptType::stringList:
-			{
-				auto list = static_cast<std::vector<SString> *>(o->data_ptr);
+				writeListToConfig(*static_cast<std::vector<SString> *>(o->data_ptr), os);
+				break;
 
-				if (list->empty())
-					os << "{}";
-				else for (const SString &item : *list)
-					os << item << ' ';
-			}
+			case OptType::pathList:
+				writeListToConfig(*static_cast<std::vector<fs::path> *>(o->data_ptr), os);
+				break;
 
 			default:
 				break;
@@ -1339,9 +1264,10 @@ int M_WriteConfigFile()
 //   USER STATE HANDLING
 //------------------------------------------------------------------------
 
-static SString PersistFilename(const crc32_c& crc)
+static fs::path PersistFilename(const crc32_c& crc)
 {
-	return SString::printf("%s/cache/%08X%08X.dat", global::cache_dir.c_str(), crc.extra, crc.raw);
+	fs::path filename = fs::u8path(SString::printf("%08X%08X.dat", crc.extra, crc.raw).get());
+	return global::cache_dir / "cache" / filename;
 }
 
 
@@ -1354,13 +1280,13 @@ bool Instance::M_LoadUserState()
 
 	level.getLevelChecksum(crc);
 
-	SString filename = PersistFilename(crc);
+	fs::path filename = PersistFilename(crc);
 
 	LineFile file(filename);
 	if (! file.isOpen())
 		return false;
 
-	gLog.printf("Loading user state from: %s\n", filename.c_str());
+	gLog.printf("Loading user state from: %s\n", filename.u8string().c_str());
 
 	SString line;
 
@@ -1410,11 +1336,11 @@ bool Instance::M_SaveUserState() const
 
 	level.getLevelChecksum(crc);
 
-	SString filename = PersistFilename(crc);
+	fs::path filename = PersistFilename(crc);
 
-	gLog.printf("Save user state to: %s\n", filename.c_str());
+	gLog.printf("Save user state to: %s\n", filename.u8string().c_str());
 
-	std::ofstream os(filename.get(), std::ios::trunc);
+	std::ofstream os(filename, std::ios::trunc);
 
 	if (! os.is_open())
 	{

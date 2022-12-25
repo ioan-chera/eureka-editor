@@ -623,8 +623,8 @@ static bool Render3D_Query(Instance &inst, Objid& hl, int sx, int sy)
 	// in OpenGL mode, UI_Canvas is a window and that means the
 	// event X/Y values are relative to *it* and not the main window.
 	// hence the following is only needed in software mode.
-	int ox = main_win->canvas->x();
-	int oy = main_win->canvas->y();
+	int ox = inst.main_win->canvas->x();
+	int oy = inst.main_win->canvas->y();
 
 	sx -= ox;
 	sy -= oy;
@@ -870,7 +870,7 @@ static void DragThings_Update(Instance &inst)
 	double side_vx =  fwd_vy;
 	double side_vy = -fwd_vx;
 
-	double dx =  inst.edit.drag_screen_dpos.x * x_factor;
+	double dx =  inst.edit.drag_screen_dpos.x * static_cast<double>(x_factor);
 	double dy = -inst.edit.drag_screen_dpos.y * y_factor * 2.0;
 
 	// this usually won't happen, but is a reasonable fallback...
@@ -1063,15 +1063,15 @@ void Instance::Render3D_Navigate()
 		dx = dx * mod_factor * mod_factor;
 		dy = dy * mod_factor * mod_factor;
 
-		r_view.x += dx * delay_ms;
-		r_view.y += dy * delay_ms;
+		r_view.x += static_cast<double>(dx) * delay_ms;
+		r_view.y += static_cast<double>(dy) * delay_ms;
 	}
 
 	if (edit.nav.up || edit.nav.down)
 	{
 		float dz = (edit.nav.up - edit.nav.down);
 
-		r_view.z += dz * mod_factor * delay_ms;
+		r_view.z += static_cast<double>(dz) * mod_factor * delay_ms;
 	}
 
 	if (edit.nav.turn_L || edit.nav.turn_R)

@@ -669,7 +669,7 @@ public:
 
 	inline int DeltaToX(double iz, float tx)
 	{
-		int x = int(inst.r_view.aspect_sw * tx * iz);
+		int x = int(static_cast<double>(inst.r_view.aspect_sw) * tx * iz);
 
 		x = (x + inst.r_view.screen_w) / 2;
 
@@ -1017,8 +1017,8 @@ public:
 		float t_cos = static_cast<float>(cos(M_PI + -inst.r_view.angle + ang) / modv);
 		float t_sin = static_cast<float>(sin(M_PI + -inst.r_view.angle + ang) / modv);
 
-		query_map_x = static_cast<float>(inst.r_view.x - t_sin * dist);
-		query_map_y = static_cast<float>(inst.r_view.y - t_cos * dist);
+		query_map_x = static_cast<float>(inst.r_view.x - static_cast<double>(t_sin) * dist);
+		query_map_y = static_cast<float>(inst.r_view.y - static_cast<double>(t_cos) * dist);
 		query_map_z = YToSecH(query_sy, 1.0 / dist);
 
 		// ensure we never produce X == 0
@@ -1460,8 +1460,8 @@ public:
 		{
 			float dist = YToDist(y1, surf.tex_h);
 
-			int tx = int( inst.r_view.x - t_sin * dist) & (tw - 1);
-			int ty = int(-inst.r_view.y + t_cos * dist) & (th - 1);
+			int tx = int( inst.r_view.x - static_cast<double>(t_sin) * dist) & (tw - 1);
+			int ty = int(-inst.r_view.y + static_cast<double>(t_cos) * dist) & (th - 1);
 
 			*dest = src[ty * tw + tx];
 
@@ -2003,7 +2003,7 @@ public:
 		// [ other colors won't work here, since img_pixel_t is 16 bits ]
 		byte COLOR = 0;
 
-		size_t total = inst.r_view.screen_w * inst.r_view.screen_h;
+		size_t total = static_cast<size_t>(inst.r_view.screen_w) * inst.r_view.screen_h;
 
 		memset(inst.r_view.screen, COLOR, total * sizeof(inst.r_view.screen[0]));
 	}

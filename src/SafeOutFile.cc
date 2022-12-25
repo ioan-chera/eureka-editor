@@ -16,9 +16,11 @@
 //
 //------------------------------------------------------------------------
 
+#include "lib_file.h"
 #include "lib_util.h"
 #include "Errors.h"
 #include "SafeOutFile.h"
+#include "sys_debug.h"
 
 #include <chrono>
 
@@ -34,7 +36,7 @@ static const char skSafeAscii[] = "123456789(0)-_=qQwWeErRtTyYuUiIoOpPaAsSdDfFg"
 //
 // Prepare the path now
 //
-SafeOutFile::SafeOutFile(const SString &path) : mPath(path)
+SafeOutFile::SafeOutFile(const fs::path &path) : mPath(path)
 {
 	auto seed = std::chrono::system_clock::now().time_since_epoch().count();
 	mRandom.seed(static_cast<std::mt19937::result_type>(seed));
@@ -49,13 +51,13 @@ ReportedResult SafeOutFile::openForWriting()
 	if(!(result = makeValidRandomPath(mRandomPath)).success)
 		return result;
 
-	SString randomPath = mRandomPath;
+	fs::path randomPath = mRandomPath;
 	close();
 	mRandomPath = randomPath;
 
-	mFile = fopen(mRandomPath.c_str(), "wb");
-	if(!mFile)
-		return { false, GetErrorMessage(errno) };
+	mStream.open(mRandomPath, std::ios::binary | std::ios::trunc);
+	if(!mStream.is_open())
+		return { false, "couldn't open the file." };
 
 	return { true };
 }
@@ -66,16 +68,16 @@ ReportedResult SafeOutFile::openForWriting()
 ReportedResult SafeOutFile::commit()
 {
 	ReportedResult result;
-	if(!mFile)
+	if(!mStream.is_open())
 		return { false, "couldn't create the file." };
 	// First, to be ultra-safe, make another temp path
-	SString safeRandomPath;
+	fs::path safeRandomPath;
 	int i = 0;
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
 		if(!(result = makeValidRandomPath(safeRandomPath)).success)
 			return result;
-		if(!safeRandomPath.noCaseEqual(mRandomPath))
+		if(!FileExists(safeRandomPath) || !fs::equivalent(safeRandomPath, mRandomPath))
 		{
 			// also make sure it doesn't collide with ours
 			break;
@@ -85,29 +87,38 @@ ReportedResult SafeOutFile::commit()
 		return { false, "failed on several attempts." };
 
 	// Now we need to close our work. Store the paths of interest in a variable
-	SString finalPath = mPath;
+	fs::path finalPath = mPath;
 	// Rename the old file, if any, to a safe random path. It may fail if the
 	// file doesn't exist
 	bool overwriteOldFile = true;
-	if(rename(finalPath.c_str(), safeRandomPath.c_str()))
+
+	try
 	{
-		if(errno != ENOENT)
-			return { false, GetErrorMessage(errno) };
+		fs::rename(finalPath, safeRandomPath);
+	}
+	catch(const fs::filesystem_error &e)
+	{
+		if(fs::exists(finalPath))
+			return { false, e.what() };
 		overwriteOldFile = false;
 	}
 
-	SString writtenPath = mRandomPath;
-	if(mFile)
+	fs::path writtenPath = mRandomPath;
+	if(mStream.is_open())
+		mStream.close();
+
+	try
 	{
-		fclose(mFile);
-		mFile = nullptr;	// we can close it now
+		fs::rename(writtenPath, finalPath);
+		if(overwriteOldFile)
+			fs::remove(safeRandomPath);
+		close();
+		return { true };
 	}
-	if(rename(writtenPath.c_str(), finalPath.c_str()))
-		return { false, GetErrorMessage(errno) };
-	if(overwriteOldFile && remove(safeRandomPath.c_str()))
-		return { false, GetErrorMessage(errno) };
-	close();
-	return { true };
+	catch(const fs::filesystem_error &e)
+	{
+		return { false, e.what() };
+	}
 }
 
 //
@@ -116,50 +127,58 @@ ReportedResult SafeOutFile::commit()
 //
 void SafeOutFile::close()
 {
-	if(mFile)
+	if(mStream.is_open())
 	{
-		fclose(mFile);
-		remove(mRandomPath.c_str());	// hopefully it works
+		mStream.close();
+		try
+		{
+			fs::remove(mRandomPath);
+		}
+		catch(const fs::filesystem_error &e)
+		{
+			gLog.printf("Error removing %s: %s\n", mRandomPath.u8string().c_str(), e.what());
+		}
 	}
-	mFile = nullptr;
 	mRandomPath.clear();
 }
 
 //
 // Writes data to file
 //
-ReportedResult SafeOutFile::write(const void *data, size_t size) const
+ReportedResult SafeOutFile::write(const void *data, size_t size)
 {
-	if(!mFile)
+	if(!mStream.is_open())
 		return { false, "file wasn't created." };
-	return { fwrite(data, 1, size, mFile) == size, "failed writing the entire data." };
+	if(!mStream.write(static_cast<const char *>(data), size))
+		return { false, "failed writing the entire data." };
+	return { true };
 }
 
 //
 // Generate the random path
 //
-SString SafeOutFile::generateRandomPath() const
+fs::path SafeOutFile::generateRandomPath() const
 {
-	return mPath + skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
-		skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)];
+	fs::path randomname = fs::u8path(mPath.filename().u8string() +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)] +
+									 skSafeAscii[mRandom() % (sizeof(skSafeAscii) - 1)]);
+	return mPath.parent_path() / randomname;
 }
 
 //
 // Try to make a random path for writing
 //
-ReportedResult SafeOutFile::makeValidRandomPath(SString &path) const
+ReportedResult SafeOutFile::makeValidRandomPath(fs::path &path) const
 {
-	SString randomPath;
+	fs::path randomPath;
 	int i = 0;
 	for(; i < RANDOM_PATH_ATTEMPTS; ++i)
 	{
 		randomPath = generateRandomPath();
-		FILE *checkExisting = fopen(randomPath.c_str(), "rb");
-		if(!checkExisting)
+		if(!FileExists(randomPath))
 			break;
-		fclose(checkExisting);
 	}
 	if(i == RANDOM_PATH_ATTEMPTS)
 		return { false, "failed writing after several attempts." };

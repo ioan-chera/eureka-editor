@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2020 Ioan Chera
+//  Copyright (C) 2022 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,25 +16,15 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef TempDirContext_hpp
-#define TempDirContext_hpp
-
+#include "main.h"
 #include "gtest/gtest.h"
 
-#include <stack>
-
-#include "filesystem.hpp"
-namespace fs = ghc::filesystem;
-
-class TempDirContext : public ::testing::Test
+TEST(Main, GameNameFromIWAD)
 {
-protected:
-	void SetUp() override;
-	void TearDown() override;
-	fs::path getChildPath(const fs::path &path) const;
-
-	fs::path mTempDir;
-	std::stack<fs::path> mDeleteList;
-};
-
-#endif /* TempDirContext_hpp */
+	ASSERT_EQ(GameNameFromIWAD("/michael/jackson/JACKson.wad"), "jackson");
+	ASSERT_EQ(GameNameFromIWAD(""), "");
+	ASSERT_EQ(GameNameFromIWAD("Games/Doom.wad/"), "");
+	ASSERT_EQ(GameNameFromIWAD("Games/Doom.wad/ "), " ");
+	ASSERT_EQ(GameNameFromIWAD("Games/ Do om.wad "), " do om");
+	ASSERT_EQ(GameNameFromIWAD("Games/Doom .wad "), "doom ");
+}

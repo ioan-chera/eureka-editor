@@ -173,7 +173,7 @@ void Instance::Navigate2D()
 			edit.nav.up    - edit.nav.down
 		};
 
-		delta *= mod_factor * delay_ms;
+		delta *= static_cast<double>(mod_factor) * delay_ms;
 
 		grid.Scroll(delta);
 	}
@@ -845,14 +845,14 @@ bool Instance::M_ParseOperationFile()
 	// open the file and build all the menus it contains.
 
 	// look in user's $HOME directory first
-	SString filename = global::home_dir + "/operations.cfg";
+	fs::path filename = global::home_dir / "operations.cfg";
 
 	LineFile file(filename);
 
 	// otherwise load it from the installation directory
 	if (! file.isOpen())
 	{
-		filename = global::install_dir + "/operations.cfg";
+		filename = global::install_dir / "operations.cfg";
 
 		file.open(filename);
 	}

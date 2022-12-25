@@ -57,19 +57,19 @@ public:
 	Fl_Button *cancel_but;
 
 	// the chosen EXE name, or NULL if cancelled
-	SString exe_name;
+	fs::path exe_name;
 
 	bool want_close;
 
 	Instance& inst;
 
 public:
-	void SetEXE(const SString &newbie)
+	void SetEXE(const fs::path &newbie)
 	{
 		exe_name = newbie;
 
 		// NULL is ok here
-		exe_display->value(exe_name.c_str());
+		exe_display->value(exe_name.u8string().c_str());
 
 		if (!exe_name.empty() && FileExists(exe_name))
 			ok_but->activate();
@@ -107,7 +107,7 @@ public:
 
 		// FIXME : if we have an exe_filename already, and folder exists, go there
 		//         [ especially for vanilla -- look in path of Iwad_name ]
-		chooser.directory(that->inst.Main_FileOpFolder().c_str());
+		chooser.directory(that->inst.Main_FileOpFolder().u8string().c_str());
 
 		switch (chooser.show())
 		{
@@ -124,7 +124,7 @@ public:
 
 		// we assume the chosen file exists
 
-		that->SetEXE(chooser.filename());
+		that->SetEXE(fs::u8path(chooser.filename()));
 	}
 
 public:
@@ -205,22 +205,20 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 	UI_PortPathDialog *dialog = new UI_PortPathDialog(name_buf, *this);
 
 	// populate the EXE name from existing info, if exists
-	port_path_info_t *info = M_QueryPortPath(QueryName(port, game));
+	const fs::path *info = global::recent.queryPortPath(QueryName(port, game));
 
-	if (info && info->exe_filename.good())
-		dialog->SetEXE(info->exe_filename);
+	if (info && !info->empty())
+		dialog->SetEXE(*info);
 
 	bool ok = dialog->Run();
 
 	if (ok)
 	{
 		// persist the new port settings
-		info = M_QueryPortPath(QueryName(port, game), true /* create_it */);
+		global::recent.setPortPath(QueryName(port, game),
+								   GetAbsolutePath(dialog->exe_name));
 
-		// FIXME: check result??
-		info->exe_filename = GetAbsolutePath(dialog->exe_name);
-
-		M_SaveRecent();
+		global::recent.save(global::home_dir);
 	}
 
 	delete dialog;
@@ -231,10 +229,10 @@ bool Instance::M_PortSetupDialog(const SString &port, const SString &game)
 //------------------------------------------------------------------------
 
 
-static SString CalcEXEName(const port_path_info_t *info)
+static SString CalcEXEName(const fs::path *info)
 {
 	// make the executable name relative, since we chdir() to its folder
-	SString basename = GetBaseName(info->exe_filename);
+	SString basename = GetBaseName(*info).u8string();
 	return SString(".") + DIR_SEP_CH + basename;
 }
 
@@ -277,7 +275,7 @@ static SString CalcWarpString(const Instance &inst)
 
 static void AppendWadName(SString &str, const SString &name, const SString &parm = NULL)
 {
-	SString abs_name = GetAbsolutePath(name);
+	SString abs_name = GetAbsolutePath(name.get()).u8string();
 
 	if (parm.good())
 	{
@@ -290,7 +288,7 @@ static void AppendWadName(SString &str, const SString &name, const SString &parm
 }
 
 
-static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
+static SString GrabWadNames(const Instance &inst, const fs::path *info)
 {
 	SString wad_names;
 
@@ -307,15 +305,15 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 	}
 
 	// always specify the iwad
-	AppendWadName(wad_names, inst.wad.master.game_wad->PathName(), "-iwad");
+	AppendWadName(wad_names, inst.wad.master.game_wad->PathName().u8string(), "-iwad");
 
 	// add any resource wads
-	for (const std::shared_ptr<Wad_file> &wad : inst.wad.master.dir)
+	for (const std::shared_ptr<Wad_file> &wad : inst.wad.master.getDir())
 	{
 		if (wad == inst.wad.master.game_wad || wad == inst.wad.master.edit_wad)
 			continue;
 
-		AppendWadName(wad_names, wad->PathName(),
+		AppendWadName(wad_names, wad->PathName().u8string(),
 					  (use_merge == 1) ? "-merge" : (use_merge == 0 && !has_file) ? "-file" : NULL);
 
 		if (use_merge)
@@ -326,7 +324,7 @@ static SString GrabWadNames(const Instance &inst, const port_path_info_t *info)
 
 	// the current PWAD, if exists, must be last
 	if (inst.wad.master.edit_wad)
-		AppendWadName(wad_names, inst.wad.master.edit_wad->PathName(), !has_file ? "-file" : NULL);
+		AppendWadName(wad_names, inst.wad.master.edit_wad->PathName().u8string(), !has_file ? "-file" : NULL);
 
 	return wad_names;
 }
@@ -349,19 +347,19 @@ void Instance::CMD_TestMap()
 
 
 	// check if we know the executable path, if not then ask
-	port_path_info_t *info = M_QueryPortPath(QueryName(loaded.portName,
-													   loaded.gameName));
+	const fs::path *info = global::recent.queryPortPath(QueryName(loaded.portName,
+																  loaded.gameName));
 
-	if (! (info && M_IsPortPathValid(info)))
+	if (! (info && M_IsPortPathValid(*info)))
 	{
 		if (! M_PortSetupDialog(loaded.portName, loaded.gameName))
 			return;
 
-		info = M_QueryPortPath(QueryName(loaded.portName, loaded.gameName));
+		info = global::recent.queryPortPath(QueryName(loaded.portName, loaded.gameName));
 	}
 
 	// this generally can't happen, but we check anyway...
-	if (! (info && M_IsPortPathValid(info)))
+	if (! (info && M_IsPortPathValid(*info)))
 	{
 		Beep("invalid path to executable");
 		return;
@@ -377,11 +375,11 @@ void Instance::CMD_TestMap()
 	}
 
 	// change working directory to be same as the executable
-	SString folder = FilenameGetPath(info->exe_filename);
+	SString folder = FilenameGetPath(*info).u8string();
 
 	gLog.printf("Changing current dir to: %s\n", folder.c_str());
 
-	if (! FileChangeDir(folder))
+	if (! FileChangeDir(folder.get()))
 	{
 		// FIXME : a notify dialog
 		Beep("chdir failed!");

@@ -259,10 +259,8 @@ public:
 	unsigned Nav_TimeDiff();
 
 	// M_FILES
-	bool M_ParseEurekaLump(const Wad_file *wad, bool keep_cmd_line_args = false);
-	SString M_PickDefaultIWAD() const;
+	fs::path M_PickDefaultIWAD() const;
 	bool M_TryOpenMostRecent();
-	void M_WriteEurekaLump(Wad_file *wad) const;
 
 	// M_GAME
 	bool is_sky(const SString &flat) const;
@@ -305,7 +303,7 @@ public:
 
 	// MAIN
 	bool Main_ConfirmQuit(const char *action) const;
-	SString Main_FileOpFolder() const;
+	fs::path Main_FileOpFolder() const;
 	bool Main_LoadIWAD();
 	void Main_LoadResources(LoadingData &loading);
 
@@ -406,7 +404,7 @@ private:
 	bool M_ExportMap();
 	void Navigate2D();
 	void Project_ApplyChanges(UI_ProjectSetup *dialog);
-	bool Project_AskFile(SString& filename) const;
+	bool Project_AskFile(fs::path& filename) const;
 	void SaveBehavior();
 	void SaveHeader(const SString &level);
 	void SaveLevel(const SString &level);

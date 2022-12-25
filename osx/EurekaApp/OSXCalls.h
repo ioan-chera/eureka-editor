@@ -33,6 +33,9 @@
 #ifndef __Eureka_Doom_Editor__OSXCalls__
 #define __Eureka_Doom_Editor__OSXCalls__
 
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
+
 class SString;
 
 // Currently used paths
@@ -43,7 +46,7 @@ enum class macOSDirType
 	libraryCache
 };
    
-SString OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir);
+fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir);
 
 #endif /* defined(__Eureka_Doom_Editor__OSXCalls__) */
 

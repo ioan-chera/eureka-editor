@@ -16,157 +16,16 @@
 //
 //------------------------------------------------------------------------
 
+#include "testUtils/TempDirContext.hpp"
+
 #include "gtest/gtest.h"
 
 #include "Instance.h"
 #include "m_game.h"
 
-//=============================================================================
-//
-// MOCKUPS
-//
-//=============================================================================
-namespace global
+class MGameFixture : public TempDirContext
 {
-    SString install_dir;
-    SString home_dir;
-}
-
-void Clipboard_ClearLocals()
-{
-}
-
-void Clipboard_NotifyBegin()
-{
-}
-
-void Clipboard_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Clipboard_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Clipboard_NotifyEnd()
-{
-}
-
-void Clipboard_NotifyInsert(const Document &doc, ObjType type, int objnum)
-{
-}
-
-DocumentModule::DocumentModule(Document &doc) : inst(doc.inst), doc(doc)
-{
-}
-
-void Instance::MapStuff_NotifyBegin()
-{
-}
-
-void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Instance::MapStuff_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Instance::MapStuff_NotifyEnd()
-{
-}
-
-void Instance::MapStuff_NotifyInsert(ObjType type, int objnum)
-{
-}
-
-void Instance::ObjectBox_NotifyBegin()
-{
-}
-
-void Instance::ObjectBox_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Instance::ObjectBox_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Instance::ObjectBox_NotifyEnd() const
-{
-}
-
-void Instance::ObjectBox_NotifyInsert(ObjType type, int objnum)
-{
-}
-
-void Instance::RedrawMap()
-{
-}
-
-rgb_color_t ParseColor(const SString &cstr)
-{
-    // Use some independent example
-    return (rgb_color_t)strtol(cstr.c_str(), nullptr, 16) << 8;
-}
-
-void Render3D_NotifyBegin()
-{
-}
-
-void Render3D_NotifyChange(ObjType type, int objnum, int field)
-{
-}
-
-void Render3D_NotifyDelete(const Document &doc, ObjType type, int objnum)
-{
-}
-
-void Render3D_NotifyEnd(Instance &inst)
-{
-}
-
-void Render3D_NotifyInsert(ObjType type, int objnum)
-{
-}
-
-
-void Instance::Selection_Clear(bool no_save)
-{
-}
-
-void Instance::Selection_NotifyBegin()
-{
-}
-
-void Selection_NotifyChange(ObjType type, int objnum, int field)
-{
-    // field changes never affect the current selection
-}
-
-void Instance::Selection_NotifyDelete(ObjType type, int objnum)
-{
-}
-
-void Instance::Selection_NotifyEnd()
-{
-}
-
-void Instance::Selection_NotifyInsert(ObjType type, int objnum)
-{
-}
-
-void Recently_used::insert(const SString &name)
-{
-}
-
-void Recently_used::insert_number(int val)
-{
-}
-
-void Instance::Status_Set(const char *fmt, ...) const
-{
-}
+};
 
 //=============================================================================
 //
@@ -287,4 +146,71 @@ TEST(MGame, MClearAllDefinitions)
     ASSERT_EQ(instance.conf.gen_linetypes[0].base, 0);
 
     ASSERT_EQ(instance.conf.num_gen_linetypes, 0);
+}
+
+TEST_F(MGameFixture, MCollectKnownDefs)
+{
+	//
+	// Helper to make dir and put it to stack
+	//
+	auto makeDir = [this](const fs::path &path)
+	{
+		ASSERT_TRUE(FileMakeDir(path));
+		mDeleteList.push(path);
+	};
+
+	//
+	// Helper to create empty file, complete with check
+	//
+	auto makeFile = [this](const fs::path &path)
+	{
+		std::ofstream os(path);
+		ASSERT_TRUE(os.is_open());
+		mDeleteList.push(path);
+	};
+
+	// We need the install and home dirs for this test
+	const fs::path install_dir = getChildPath("install");
+	makeDir(install_dir);
+
+	const fs::path home_dir = getChildPath("home");
+	makeDir(home_dir);
+
+	// Now add some other folder inside both of them
+	const fs::path folder = "conf";
+	const fs::path home = home_dir / folder;
+	const fs::path install = install_dir / folder;
+	makeDir(install);
+	makeDir(home);
+
+	// Now add unrelated folders in each
+	fs::path unrelated[2] = {install_dir / "unrel", home_dir / "ated"};
+	for(const fs::path &unrel : unrelated)
+		makeDir(unrel);
+
+	// Now produce all sorts of files
+	makeFile(install / "empty");
+	makeFile(install / "hasugh.ugh");
+	makeFile(install / "DOOM.ugh");
+	makeFile(install / "Config.cfg");
+	makeFile(install / "MooD.uGH");
+	makeFile(home / "doom.UGH");
+	makeFile(home / "Heretic.Ugh");
+	makeFile(home / "Junk");
+	makeFile(home / "extra.cfg");
+	makeFile(home / ".hidden.ugh");	// skip for being hidden
+	makeDir(home / "directory.ugh");	// skip for being dir
+	makeFile(home / "directory.ugh" / "subfile.ugh");	// skip for being under dir
+	makeDir(home / "folder");
+	makeFile(home / "folder" / "subfile2.ugh");	// make sure to always skip subdir
+	makeFile(home / "Extra.ugh");
+	makeFile(unrelated[0] / "bandit.ugh");
+	makeFile(unrelated[0] / "brigand.ugh");
+	makeFile(unrelated[1] / "jackson.ugh");
+	makeFile(unrelated[1] / "jordan.cfg");
+
+	// Requirement: the last entry takes precedence and it's sorted.
+	// Hidden and dirs are skipped
+	auto expected = std::vector<SString>{"doom", "Extra", "hasugh", "Heretic", "MooD"};
+	ASSERT_EQ(M_CollectKnownDefs({install_dir, home_dir}, folder), expected);
 }

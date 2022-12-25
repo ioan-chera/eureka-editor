@@ -57,6 +57,10 @@ public:
 	{
 	}
 
+	SString(const std::string &cppstring) : data(cppstring)
+	{
+	}
+
     SString(const char *buffer, int length);
 
 	explicit SString(char c)
@@ -358,6 +362,8 @@ public:
 
 	size_t findSpace() const;
 	size_t findDigit() const;
+
+	SString spaceEscape() const;
 
 private:
 	std::string data;

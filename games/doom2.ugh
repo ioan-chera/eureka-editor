@@ -49,7 +49,7 @@ thing   83 h nl 20 MEGA   "Megasphere"
 
 thing   84 m -  20 SSWV   "Wolf-SS"
 thing   65 m -  20 CPOS   "Chaingunner"
-thing   69 m -  24 BOS2A1C1 "Hell knight"
+thing   69 m -  24 BOS2   "Hell knight"
 thing   68 m -  64 BSPI   "Arachnotron"
 thing   71 m -  31 PAIN   "Pain elemental"
 thing   66 m -  20 SKEL   "Revenant"

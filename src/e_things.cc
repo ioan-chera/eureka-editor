@@ -117,8 +117,8 @@ static void MoveOverlapThing(EditOperation &op, Instance &inst, int th, int mid_
 
 	float dist = static_cast<float>(8 + 6 * std::min(100, total));
 
-	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, vec_x * dist);
-	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, vec_y * dist);
+	FFixedPoint fdx = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_x) * dist);
+	FFixedPoint fdy = MakeValidCoord(inst.loaded.levelFormat, static_cast<double>(vec_y) * dist);
 
 	const Thing *T = inst.level.things[th];
 

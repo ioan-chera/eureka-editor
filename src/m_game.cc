@@ -76,7 +76,7 @@ public:
 	// BOOM generalized linedef stuff
 	int current_gen_line = -1;
 
-	explicit parser_state_c(const SString &filename) : fname(filename)
+	explicit parser_state_c(const fs::path &filename) : fname(filename)
 	{
 	}
 
@@ -89,9 +89,9 @@ public:
 		return false;
 	}
 
-	const char *file() const
+	const fs::path &file() const
 	{
-		return fname.c_str();
+		return fname;
 	}
 
 	bool readLine(LineFile &file)
@@ -113,7 +113,7 @@ public:
 
 private:
 	// filename for error messages (lacks the directory)
-	SString fname = nullptr;
+	fs::path fname;
 
 	// buffer containing the raw line
 	SString readstring;
@@ -202,7 +202,7 @@ void LoadingData::prepareConfigVariables()
 	{
 		parse_vars["$GAME_NAME"] = gameName;
 
-		if (M_CanLoadDefinitions(GAMES_DIR, gameName))
+		if (M_CanLoadDefinitions(global::home_dir, global::install_dir, GAMES_DIR, gameName))
 		{
 			SString base_game = M_GetBaseGame(gameName);
 			parse_vars["$BASE_GAME"] = base_game;
@@ -406,18 +406,18 @@ static void ParseFeatureDef(ConfigData &config, char **argv, int argc)
 // Both strings are required
 // Returns "" if not found.
 //
-static SString FindDefinitionFile(const SString &folder, const SString &name)
+static fs::path FindDefinitionFile(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
-	SYS_ASSERT(folder.good() && name.good());
-	static const SString *const lookupDirs[] = { &global::home_dir, &global::install_dir };
-	for (const SString *base_dir : lookupDirs)
+	SYS_ASSERT(!folder.empty() && name.good());
+	const fs::path lookupDirs[] = { home_dir, install_dir };
+	for (const fs::path &base_dir : lookupDirs)
 	{
-		if (base_dir->empty())
+		if (base_dir.empty())
 			continue;
 
-		SString filename = *base_dir + "/" + folder + "/" + name + ".ugh";
+		fs::path filename = base_dir / folder / (name + ".ugh").get();
 
-		gLog.debugPrintf("  trying: %s\n", filename.c_str());
+		gLog.debugPrintf("  trying: %s\n", filename.u8string().c_str());
 
 		if (FileExists(filename))
 			return filename;
@@ -427,9 +427,9 @@ static SString FindDefinitionFile(const SString &folder, const SString &name)
 }
 
 
-bool M_CanLoadDefinitions(const SString &folder, const SString &name)
+bool M_CanLoadDefinitions(const fs::path &home_dir, const fs::path &install_dir, const fs::path &folder, const SString &name)
 {
-	SString filename = FindDefinitionFile(folder, name);
+	fs::path filename = FindDefinitionFile(home_dir, install_dir, folder, name);
 
 	return !filename.empty();
 }
@@ -454,23 +454,23 @@ bool linetype_t::isPolyObjectSpecial() const
 //           "ports" + "edge"
 //
 void readConfiguration(std::unordered_map<SString, SString> &parse_vars,
-					   const SString &folder, const SString &name,
+					   const fs::path &folder, const SString &name,
 					   ConfigData &config) noexcept(false)
 {
 	// this is for error messages & debugging
-	SString prettyname = folder + "/" + name + ".ugh";
+	fs::path prettyname = folder / fs::u8path((name + ".ugh").get());
 
-	gLog.printf("Loading Definitions : %s\n", prettyname.c_str());
+	gLog.printf("Loading Definitions : %s\n", prettyname.u8string().c_str());
 
-	SString filename = FindDefinitionFile(folder, name);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, folder, name);
 
 	if (filename.empty())
 	{
 		throw ParseException(SString::printf("Cannot find definition file: %s",
-											 prettyname.c_str()));
+											 prettyname.u8string().c_str()));
 	}
 
-	gLog.debugPrintf("  found at: %s\n", filename.c_str());
+	gLog.debugPrintf("  found at: %s\n", filename.u8string().c_str());
 
 	M_ParseDefinitionFile(parse_vars, ParsePurpose::normal, &config, filename,
 						  folder, prettyname);
@@ -488,7 +488,7 @@ void parser_state_c::fail(EUR_FORMAT_STRING(const char *format), ...) const
 	SString ss = SString::vprintf(format, ap);
 	va_end(ap);
 
-	SString prefix = SString::printf("%s(%d): ", file(), line());
+	SString prefix = SString::printf("%s(%d): ", file().u8string().c_str(), line());
 	throw ParseException(prefix + ss);
 }
 
@@ -703,7 +703,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.line_groups.find( info.group) == config.line_groups.end())
 		{
 			gLog.printf("%s(%d): unknown line group '%c'\n",
-					  pst->file(), pst->line(),  info.group);
+					  pst->file().u8string().c_str(), pst->line(),  info.group);
 		}
 		else
 			config.line_types[number] = info;
@@ -763,7 +763,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.thing_groups.find(info.group) == config.thing_groups.end())
 		{
 			gLog.printf("%s(%d): unknown thing group '%c'\n",
-					  pst->file(), pst->line(), info.group);
+					  pst->file().u8string().c_str(), pst->line(), info.group);
 		}
 		else
 		{
@@ -797,7 +797,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file(), pst->line(), group);
+					  pst->file().u8string().c_str(), pst->line(), group);
 		}
 		else
 			config.texture_categories[name] = group;
@@ -814,7 +814,7 @@ static void M_ParseNormalLine(parser_state_c *pst, ConfigData &config)
 		if (config.texture_groups.find((char)tolower(group)) == config.texture_groups.end())
 		{
 			gLog.printf("%s(%d): unknown texture group '%c'\n",
-					  pst->file(), pst->line(), group);
+					  pst->file().u8string().c_str(), pst->line(), group);
 		}
 		else
 			config.flat_categories[name] = group;
@@ -1016,20 +1016,20 @@ static void M_ParseSetVar(std::unordered_map<SString, SString> &parse_vars, pars
 void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 						   const ParsePurpose purpose,
 						   ParseTarget target,
-						   const SString &filename,
-						   const SString &cfolder,
-						   const SString &cprettyname,
+						   const fs::path &filename,
+						   const fs::path &cfolder,
+						   const fs::path &cprettyname,
 						   int include_level)
 {
-	SYS_ASSERT(filename.good());
+	SYS_ASSERT(!filename.empty());
 
-	SString folder = cfolder;
+	fs::path folder = cfolder;
 	if (folder.empty())
 		folder = "common";
 
-	SString prettyname = cprettyname;
+	fs::path prettyname = cprettyname;
 	if (prettyname.empty())
-		prettyname = fl_filename_name(filename.c_str());
+		prettyname = filename.filename();
 
 	parser_state_c parser_state(prettyname);
 
@@ -1040,7 +1040,7 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 
 	LineFile file(filename);
 	if (! file.isOpen())
-		throw ParseException(SString::printf("Cannot open %s: %s", filename.c_str(), GetErrorMessage(errno).c_str()));
+		throw ParseException(SString::printf("Cannot open %s: %s", filename.u8string().c_str(), GetErrorMessage(errno).c_str()));
 
 	while (pst->readLine(file))
 	{
@@ -1106,21 +1106,21 @@ void M_ParseDefinitionFile(std::unordered_map<SString, SString> &parse_vars,
 			if (include_level >= MAX_INCLUDE_LEVEL)
 				pst->fail("Too many includes (check for a loop)");
 
-			SString new_folder = folder;
-			SString new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+			fs::path new_folder = folder;
+			fs::path new_name = FindDefinitionFile(global::home_dir, global::install_dir, new_folder, pst->argv[1]);
 
 			// if not found, check the common/ folder
 			if (new_name.empty() && folder != "common")
 			{
 				new_folder = "common";
-				new_name = FindDefinitionFile(new_folder, pst->argv[1]);
+				new_name = FindDefinitionFile(global::home_dir, global::install_dir, new_folder, pst->argv[1]);
 			}
 
 			if (new_name.empty())
 				pst->fail("Cannot find include file: %s.ugh", pst->argv[1]);
 
 			M_ParseDefinitionFile(parse_vars, purpose, target, new_name, new_folder,
-								  NULL /* prettyname */,
+								  "" /* prettyname */,
 								  include_level + 1);
 			continue;
 		}
@@ -1157,13 +1157,13 @@ static GameInfo M_LoadGameInfo(const SString &game)
 	if(it != global::sLoadedGameDefs.end())
 		return it->second;
 
-	SString filename = FindDefinitionFile(GAMES_DIR, game);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, GAMES_DIR, game);
 	if(filename.empty())
 		return {};
 	GameInfo loadingGame = GameInfo(game);
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::gameInfo, &loadingGame,
-						  filename, "games", nullptr);
+						  filename, "games", "");
 	if(loadingGame.baseGame.empty())
 		throw ParseException(SString::printf("Game definition for '%s' does "
 											 "not set base_game\n",
@@ -1182,7 +1182,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 	if (IT != global::loaded_port_defs.end())
 		return &IT->second;
 
-	SString filename = FindDefinitionFile(PORTS_DIR, port);
+	fs::path filename = FindDefinitionFile(global::home_dir, global::install_dir, PORTS_DIR, port);
 	if (filename.empty())
 		return NULL;
 
@@ -1190,7 +1190,7 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 
 	std::unordered_map<SString, SString> empty_vars;
 	M_ParseDefinitionFile(empty_vars, ParsePurpose::portInfo, &global::loading_Port,
-						  filename, "ports", NULL);
+						  filename, "ports", "");
 
 	// default is to support both Doom and Doom2
 	if (global::loading_Port.supported_games.empty())
@@ -1209,26 +1209,25 @@ const PortInfo_c * M_LoadPortInfo(const SString &port) noexcept(false)
 //
 // Collect known definitions from folder
 //
-std::vector<SString> M_CollectKnownDefs(const char *folder)
+std::vector<SString> M_CollectKnownDefs(const std::initializer_list<fs::path> &dirList,
+										const fs::path &folder)
 {
-	SYS_ASSERT(!!folder);
-
 	std::vector<SString> temp_list;
-	SString path;
 
 	//	gLog.debugPrintf("M_CollectKnownDefs for: %d\n", folder);
-	auto scanner_add_file = [&temp_list](const SString &name, int flags)
+	auto scanner_add_file = [&temp_list](const fs::path &name, int flags)
 	{
 		if (flags & (SCAN_F_IsDir | SCAN_F_Hidden))
 			return;
-		if (! MatchExtension(name, "ugh"))
+		if (! MatchExtensionNoCase(name, ".ugh"))
 			return;
-		temp_list.push_back(ReplaceExtension(name, NULL));
+		temp_list.push_back(ReplaceExtension(name, NULL).u8string());
 	};
-	path = global::install_dir + "/" + folder;
-	ScanDirectory(path, scanner_add_file);
-	path = global::home_dir + "/" + folder;
-	ScanDirectory(path, scanner_add_file);
+	for(const fs::path &parentPath : dirList)
+	{
+		fs::path path = parentPath / folder;
+		ScanDirectory(path, scanner_add_file);
+	}
 
 	std::sort(temp_list.begin(), temp_list.end(), [](const SString &a, const SString &b)
 			  {
@@ -1308,7 +1307,7 @@ bool M_CheckPortSupportsGame(const SString &base_game,
 SString M_CollectPortsForMenu(const char *base_game,
 							  int *exist_val, const char *exist_name) noexcept(false)
 {
-	std::vector<SString> list = M_CollectKnownDefs("ports");
+	std::vector<SString> list = M_CollectKnownDefs({global::install_dir, global::home_dir}, "ports");
 
 	if (list.empty())
 		return "";
@@ -1404,10 +1403,9 @@ const linetype_t &Instance::M_GetLineType(int type) const
 
 const thingtype_t &M_GetThingType(const ConfigData &config, int type)
 {
-	auto TI = config.thing_types.find(type);
-
-	if (TI != config.thing_types.end())
-		return TI->second;
+	const thingtype_t *existing = get(config.thing_types, type);
+	if(existing)
+		return *existing;
 
 	static thingtype_t dummy_type =
 	{

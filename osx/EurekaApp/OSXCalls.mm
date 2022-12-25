@@ -40,7 +40,7 @@
 //
 // Returns the directory where to save configs
 //
-SString OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
+fs::path OSX_UserDomainDirectory(macOSDirType dirtype, const char *subdir)
 {
    NSSearchPathDirectory spd;
    switch (dirtype)

@@ -18,7 +18,11 @@
 //
 //------------------------------------------------------------------------
 
+#include "m_strings.h"
 #include <vector>
+
+#include "filesystem.hpp"
+namespace fs = ghc::filesystem;
 
 class SString;
 
@@ -39,3 +43,33 @@ enum
 
 int M_ParseLine(const SString &cline, std::vector<SString> &tokens,
 				ParseOptions options);
+
+//
+// Line of token words. A token word if it has spaces will be surrounded by 
+// quotes. Any literal quotes within it will be doubled. A word without spaces
+// but with a literal quote will have that quote doubled and the word itself 
+// within quotes.
+//
+class TokenWordParse
+{
+public:
+	explicit TokenWordParse(const SString &line) : mLine(line)
+	{
+	}
+
+	bool getNext(SString &word);
+	bool getNext(fs::path &path);
+private:
+	enum class State
+	{
+		open,
+		singleWord,
+		multiWord,
+		firstQuoteInString,
+		comment,
+	};
+
+	const SString mLine;
+	int mPos = 0;
+	State mState = State::open;	// state can be left in other states
+};

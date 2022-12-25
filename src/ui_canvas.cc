@@ -249,12 +249,12 @@ int UI_Canvas::NORMALY(int len, double dx, double dy)
 
 #ifdef NO_OPENGL
 // convert screen coordinates to map coordinates
-inline double UI_Canvas::MAPX(int sx) const { return grid.orig_x + (sx - w() / 2 - x()) / grid.Scale; }
-inline double UI_Canvas::MAPY(int sy) const { return grid.orig_y + (h() / 2 - sy + y()) / grid.Scale; }
+inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2 - x()) / inst.grid.Scale; }
+inline double UI_Canvas::MAPY(int sy) const { return inst.grid.orig.y + (h() / 2 - sy + y()) / inst.grid.Scale; }
 
 // convert map coordinates to screen coordinates
-inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - grid.orig_x) * grid.Scale)); }
-inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((grid.orig_y - my) * grid.Scale)); }
+inline int UI_Canvas::SCREENX(double mx) const { return (x() + w() / 2 + iround((mx - inst.grid.orig.x) * inst.grid.Scale)); }
+inline int UI_Canvas::SCREENY(double my) const { return (y() + h() / 2 + iround((inst.grid.orig.y - my) * inst.grid.Scale)); }
 #else
 // convert GL coordinates to map coordinates
 inline double UI_Canvas::MAPX(int sx) const { return inst.grid.orig.x + (sx - w() / 2) / inst.grid.Scale; }
@@ -275,11 +275,11 @@ void UI_Canvas::PointerPos(bool in_event)
 	Fl::get_mouse(raw_x, raw_y);
 
 #ifdef NO_OPENGL
-	raw_x -= main_win->x_root();
-	raw_y -= main_win->y_root();
+	raw_x -= inst.main_win->x_root();
+	raw_y -= inst.main_win->y_root();
 
-	inst.edit.map_x = MAPX(raw_x);
-	inst.edit.map_y = MAPY(raw_y);
+	inst.edit.map.x = MAPX(raw_x);
+	inst.edit.map.y = MAPY(raw_y);
 
 #else // OpenGL
 	raw_x -= x_root();
@@ -1063,11 +1063,11 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 	if (by2 <= by1) by2 = by1 + 1;
 
 	// clip to screen
-	int rx1 = MAX(bx1, 0);
-	int ry1 = MAX(by1, 0);
+	int rx1 = std::max(bx1, 0);
+	int ry1 = std::max(by1, 0);
 
-	int rx2 = MIN(bx2, rgb_w) - 1;
-	int ry2 = MIN(by2, rgb_h) - 1;
+	int rx2 = std::min(bx2, rgb_w) - 1;
+	int ry2 = std::min(by2, rgb_h) - 1;
 
 	if (rx1 >= rx2 || ry1 >= ry2)
 		return;
@@ -1088,7 +1088,7 @@ void UI_Canvas::RenderSprite(int sx, int sy, float scale, Img_c *img)
 
 			if (pix != TRANS_PIXEL)
 			{
-				inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+				inst.wad.palette.decodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 		}
 	}
@@ -2277,8 +2277,8 @@ void UI_Canvas::RenderSector(int num)
 		int sy2 = SCREENY(py2);
 
 		// clip range to screen
-		sy1 = MAX(sy1, y());
-		sy2 = MIN(sy2, y() + h() - 1);
+		sy1 = std::max(sy1, y());
+		sy2 = std::min(sy2, y() + h() - 1);
 
 		// reject polygons vertically off the screen
 		if (sy1 > sy2)
@@ -2308,7 +2308,7 @@ void UI_Canvas::RenderSector(int num)
 		for (short y = (short)sy1 ; y <= (short)sy2 ; y++)
 		{
 			// compute horizontal span
-			float map_y = MAPY(y);
+			float map_y = (float)MAPY(y);
 
 			float lx = lx1 + (lx2 - lx1) * (map_y - py1) / (py2 - py1);
 			float rx = rx1 + (rx2 - rx1) * (map_y - py1) / (py2 - py1);
@@ -2317,8 +2317,8 @@ void UI_Canvas::RenderSector(int num)
 			int sx2 = SCREENX(rx);
 
 			// clip span to screen
-			sx1 = MAX(sx1, x());
-			sx2 = MIN(sx2, x() + w() - 1);
+			sx1 = std::max(sx1, x());
+			sx2 = std::min(sx2, x() + w() - 1);
 
 			// reject spans completely off the screen
 			if (sx2 < sx1)
@@ -2355,11 +2355,11 @@ void UI_Canvas::RenderSector(int num)
 
 					img_pixel_t pix = src_pix[ty * tw + tx];
 
-					inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+					inst.wad.palette.decodePixel(pix, dest[0], dest[1], dest[2]);
 
-					dest[0] = ((int)dest[0] * r) >> 16;
-					dest[1] = ((int)dest[1] * g) >> 16;
-					dest[2] = ((int)dest[2] * b) >> 16;
+					dest[0] = (u8_t)(((int)dest[0] * r) >> 16);
+					dest[1] = (u8_t)(((int)dest[1] * g) >> 16);
+					dest[2] = (u8_t)(((int)dest[2] * b) >> 16);
 				}
 			}
 			else  // fullbright version
@@ -2370,7 +2370,7 @@ void UI_Canvas::RenderSector(int num)
 
 					img_pixel_t pix = src_pix[ty * tw + tx];
 
-					inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+					inst.wad.palette.decodePixel(pix, dest[0], dest[1], dest[2]);
 				}
 			}
 		}
@@ -2816,11 +2816,11 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 	ry -= rgb_y;
 
 	// clip to screen
-	int sx1 = MAX(rx, 0);
-	int sy1 = MAX(ry, 0);
+	int sx1 = std::max(rx, 0);
+	int sy1 = std::max(ry, 0);
 
-	int sx2 = MIN(rx + iw, rgb_w) - 1;
-	int sy2 = MIN(ry + ih, rgb_h) - 1;
+	int sx2 = std::min(rx + iw, rgb_w) - 1;
+	int sy2 = std::min(ry + ih, rgb_h) - 1;
 
 	if (sx1 >= sx2 || sy1 >= sy2)
 		return;
@@ -2837,7 +2837,7 @@ void UI_Canvas::RenderFontChar(int rx, int ry, Img_c *img, int ix, int iy, int i
 
 			if (pix != TRANS_PIXEL)
 			{
-				inst.IM_DecodePixel(pix, dest[0], dest[1], dest[2]);
+				inst.wad.palette.decodePixel(pix, dest[0], dest[1], dest[2]);
 			}
 		}
 	}
