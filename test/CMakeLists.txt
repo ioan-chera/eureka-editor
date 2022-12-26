@@ -113,6 +113,7 @@ endfunction()
 unit_test(general
     DocumentTest.cpp
     e_checks_test.cpp
+    im_color_test.cpp
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp

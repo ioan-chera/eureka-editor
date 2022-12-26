@@ -98,7 +98,7 @@ typedef unsigned short  img_pixel_t;
 class Palette
 {
 public:
-	void updateGamma(int usegamma, int panel_gamma);
+	bool updateGamma(int usegamma, int panel_gamma);
 	void decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
 	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const;
 	void createBrightMap();

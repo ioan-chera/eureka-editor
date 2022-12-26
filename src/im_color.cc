@@ -39,8 +39,13 @@ int config::usegamma = 2;
 
 int config::panel_gamma = 2;
 
-void Palette::updateGamma(int usegamma, int panel_gamma)
+bool Palette::updateGamma(int usegamma, int panel_gamma)
 {
+	if(usegamma < 0 || panel_gamma < 0 || usegamma >= (int)lengthof(gammatable) ||
+	   panel_gamma >= (int)lengthof(gammatable))
+	{
+		return false;
+	}
 	for (int c = 0 ; c < 256 ; c++)
 	{
 		byte r = raw_palette[c][0];
@@ -67,6 +72,7 @@ void Palette::updateGamma(int usegamma, int panel_gamma)
 		rgb555_gamma [d] = static_cast<byte>(gammatable[usegamma][i]);
 		rgb555_medium[d] = static_cast<byte>(gammatable[panel_gamma][i]);
 	}
+	return true;
 }
 
 bool Palette::loadPalette(Lump_c &lump, int usegamma, int panel_gamma)
@@ -85,7 +91,8 @@ bool Palette::loadPalette(Lump_c &lump, int usegamma, int panel_gamma)
 
 	trans_replace = findPaletteColor(tr, tg, tb);
 
-	updateGamma(usegamma, panel_gamma);
+	if(!updateGamma(usegamma, panel_gamma))
+		return false;
 
 	createBrightMap();
 
