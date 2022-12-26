@@ -41,8 +41,13 @@ typedef u32_t rgb_color_t;
 #define RGB_GREEN(col)  ((col >> 16) & 255)
 #define RGB_BLUE(col)   ((col >>  8) & 255)
 
-#define RGB_MAKE(r, g, b)  (((r) << 24) | ((g) << 16) | ((b) << 8))
-
+//
+// Constexpr maker
+//
+static constexpr rgb_color_t rgbMake(int r, int g, int b)
+{
+	return static_cast<rgb_color_t>(r << 24 | g << 16 | b << 8);
+}
 
 // this is a version of rgb_color_t with an alpha channel
 // [ currently only used by the TGA loading code ]

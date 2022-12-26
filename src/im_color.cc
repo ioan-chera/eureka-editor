@@ -247,7 +247,7 @@ rgb_color_t SectorLightColor(int light)
 	if (config::usegamma > 0)
 		lt = gammatable[config::usegamma][lt];
 
-	return RGB_MAKE(lt, lt, lt);
+	return rgbMake(lt, lt, lt);
 }
 
 

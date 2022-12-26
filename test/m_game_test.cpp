@@ -170,7 +170,7 @@ TEST(MGame, ConfigDataGetThingType)
 	type.scale = 1.0f;
 	type.desc = "Bright spot";
 	type.sprite = "BRIG";
-	type.color = RGB_MAKE(128, 0, 0);
+	type.color = rgbMake(128, 0, 0);
 
 	config.thing_types[111] = type;
 
@@ -182,7 +182,7 @@ TEST(MGame, ConfigDataGetThingType)
 	type2.scale = 1.0f;
 	type2.desc = "Dark spot";
 	type2.sprite = "DARK";
-	type2.color = RGB_MAKE(0, 0, 128);
+	type2.color = rgbMake(0, 0, 128);
 
 	config.thing_types[222] = type2;
 

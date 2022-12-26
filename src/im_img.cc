@@ -40,7 +40,7 @@
 #endif
 #endif
 
-#define DIGIT_FONT_COLOR   RGB_MAKE(68, 221, 255)
+#define DIGIT_FONT_COLOR   rgbMake(68, 221, 255)
 
 
 rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
@@ -51,7 +51,7 @@ rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
 		byte g = static_cast<byte>(IMG_PIXEL_GREEN(p) << 3);
 		byte b = static_cast<byte>(IMG_PIXEL_BLUE(p)  << 3);
 
-		return RGB_MAKE(r, g, b);
+		return rgbMake(r, g, b);
 	}
 	else
 	{
@@ -59,7 +59,7 @@ rgb_color_t Palette::pixelToRGB(img_pixel_t p) const
 		byte g = raw_palette[p][1];
 		byte b = raw_palette[p][2];
 
-		return RGB_MAKE(r, g, b);
+		return rgbMake(r, g, b);
 	}
 }
 

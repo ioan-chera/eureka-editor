@@ -52,7 +52,7 @@
 
 
 // config items
-rgb_color_t config::transparent_col = RGB_MAKE(0, 255, 255);
+rgb_color_t config::transparent_col = rgbMake(0, 255, 255);
 
 bool config::render_high_detail    = false;
 bool config::render_lock_gravity   = false;

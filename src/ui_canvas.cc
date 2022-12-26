@@ -72,15 +72,15 @@ typedef enum
 
 
 // config items
-rgb_color_t config::dotty_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t config::dotty_major_col = RGB_MAKE(0, 0, 238);
-rgb_color_t config::dotty_minor_col = RGB_MAKE(0, 0, 187);
-rgb_color_t config::dotty_point_col = RGB_MAKE(0, 0, 255);
+rgb_color_t config::dotty_axis_col  = rgbMake(0, 128, 255);
+rgb_color_t config::dotty_major_col = rgbMake(0, 0, 238);
+rgb_color_t config::dotty_minor_col = rgbMake(0, 0, 187);
+rgb_color_t config::dotty_point_col = rgbMake(0, 0, 255);
 
-rgb_color_t config::normal_axis_col  = RGB_MAKE(0, 128, 255);
-rgb_color_t config::normal_main_col  = RGB_MAKE(0, 0, 238);
-rgb_color_t config::normal_flat_col  = RGB_MAKE(60, 60, 120);
-rgb_color_t config::normal_small_col = RGB_MAKE(60, 60, 120);
+rgb_color_t config::normal_axis_col  = rgbMake(0, 128, 255);
+rgb_color_t config::normal_main_col  = rgbMake(0, 0, 238);
+rgb_color_t config::normal_flat_col  = rgbMake(60, 60, 120);
+rgb_color_t config::normal_small_col = rgbMake(60, 60, 120);
 
 int config::highlight_line_info = (int)LINFO_Length;
 
