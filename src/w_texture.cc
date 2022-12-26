@@ -712,15 +712,15 @@ Img_c *WadData::getSprite(const ConfigData &config, int type)
 	}
 	else if (info.sprite.noCaseEqual("_LYT"))
 	{
-		result = IM_CreateLightSprite(palette);
+		result = Img_c::createLightSprite(palette);
 	}
 	else if (info.sprite.noCaseEqual("_MSP"))
 	{
-		result = IM_CreateMapSpotSprite(palette, 0, 255, 0);
+		result = Img_c::createMapSpotSprite(palette, 0, 255, 0);
 	}
 	else if (info.sprite.noCaseEqual("NULL"))
 	{
-		result = IM_CreateMapSpotSprite(palette, 70, 70, 255);
+		result = Img_c::createMapSpotSprite(palette, 70, 70, 255);
 	}
 	else
 	{

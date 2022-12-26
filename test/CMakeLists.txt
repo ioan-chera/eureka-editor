@@ -31,6 +31,8 @@ set(_testUtils
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
+    testUtils/Utility.cpp
+    testUtils/Utility.hpp
     ${src}/Errors.cc
     ${src}/lib_adler.cc
     ${src}/lib_util.cc
@@ -114,6 +116,7 @@ unit_test(general
     DocumentTest.cpp
     e_checks_test.cpp
     im_color_test.cpp
+    im_img_test.cpp
     lib_file_test.cpp
     m_files_test.cpp
     m_game_test.cpp

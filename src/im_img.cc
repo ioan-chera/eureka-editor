@@ -997,10 +997,10 @@ std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal)
 
 //------------------------------------------------------------------------
 
-std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette)
+std::unique_ptr<Img_c> Img_c::createLightSprite(const Palette &palette)
 {
-	int W = 11;
-	int H = 11;
+	static const int W = 11;
+	static const int H = 11;
 
 	auto result = std::make_unique<Img_c>(W, H);
 
@@ -1011,26 +1011,23 @@ std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette)
 	{
 		byte pix = TRANS_PIXEL;
 
-		if (true) // x > 0 && x < W-1 && y > 0 && y < H-1)
-		{
-			float dx = (W - 2*x) / (float)W;
-			float dy = (H - 2*y) / (float)H;
+		float dx = (W - 2*x) / (float)W;
+		float dy = (H - 2*y) / (float)H;
 
-			float dist = sqrt((dx) * (dx) + (dy) * (dy));
+		float dist = sqrt((dx) * (dx) + (dy) * (dy));
 
-			float ity = 1.0f / (dist + 0.5f) / (dist + 0.5f);
+		float ity = 1.0f / (dist + 0.5f) / (dist + 0.5f);
 
-			if (ity < 0.5)
-				continue;
+		if (ity < 0.5)
+			continue;
 
-			ity = (ity - 0.4f) / (1.0f - 0.4f);
+		ity = (ity - 0.4f) / (1.0f - 0.4f);
 
-			int r = static_cast<int>(255 * ity);
-			int g = static_cast<int>(235 * ity);
-			int b = static_cast<int>(90  * ity);
+		int r = static_cast<int>(255 * ity);
+		int g = static_cast<int>(235 * ity);
+		int b = static_cast<int>(90  * ity);
 
-			pix = palette.findPaletteColor(r, g, b);
-		}
+		pix = palette.findPaletteColor(r, g, b);
 
 		result->wbuf() [ y * W + x ] = pix;
 	}
@@ -1039,7 +1036,8 @@ std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette)
 }
 
 
-std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b)
+std::unique_ptr<Img_c> Img_c::createMapSpotSprite(const Palette &pal, int base_r, int base_g,
+												  int base_b)
 {
 	int W = 32;
 	int H = 32;

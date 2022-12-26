@@ -71,6 +71,10 @@ public:
 	 Img_c(int width, int height, bool _dummy = false);
 	~Img_c();
 
+	static std::unique_ptr<Img_c> createLightSprite(const Palette &palette);
+	static std::unique_ptr<Img_c> createMapSpotSprite(const Palette &pal, int base_r, int base_g,
+													  int base_b);
+
 	inline bool is_null() const
 	{
 		return (! pixels);
@@ -97,7 +101,6 @@ public:
 	// read/write access
 	img_pixel_t *wbuf();
 
-public:
 	// set all pixels to TRANS_PIXEL
 	void clear();
 
@@ -132,8 +135,6 @@ private:
 };
 
 std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal);
-std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette);
-std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b);
 Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 

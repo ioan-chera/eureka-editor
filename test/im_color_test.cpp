@@ -18,23 +18,10 @@
 
 #include "im_color.h"
 #include "w_wad.h"
+#include "testUtils/Utility.hpp"
 #include "gtest/gtest.h"
 #include <vector>
 #include <stdint.h>
-
-static std::vector<byte> makeGrayscale()
-{
-	std::vector<byte> data;
-	data.reserve(768);
-	for(int i = 0; i < 256; ++i)
-	{
-		// Make a simple f(x) = [x, x, x] data
-		data.push_back((byte)i);
-		data.push_back((byte)i);
-		data.push_back((byte)i);
-	}
-	return data;
-}
 
 TEST(Palette, LoadPalette)
 {
