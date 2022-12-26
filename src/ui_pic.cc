@@ -152,7 +152,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 {
 	Clear();
 
-	Img_c *img = inst.wad.W_GetSprite(inst.conf, type);
+	Img_c *img = inst.wad.getSprite(inst.conf, type);
 
 	if (! img || img->width() < 1 || img->height() < 1)
 	{
@@ -160,7 +160,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		return;
 	}
 
-	const thingtype_t &info = M_GetThingType(inst.conf, type);
+	const thingtype_t &info = inst.conf.getThingType(type);
 
 	bool new_img = false;
 

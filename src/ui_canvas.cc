@@ -933,7 +933,7 @@ void UI_Canvas::DrawThings()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing->type);
 
 		if (inst.edit.mode == ObjType::things && !inst.edit.error_mode)
 		{
@@ -957,7 +957,7 @@ void UI_Canvas::DrawThings()
 			if (! Vis(x, y, MAX_RADIUS))
 				continue;
 
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[n]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[n]->type);
 
 			x += info.radius + 8;
 			y += info.radius + 8;
@@ -984,7 +984,7 @@ void UI_Canvas::DrawThingBodies()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing->type);
 
 		Fl_Color col = (Fl_Color)info.color;
 		RenderColor(DarkerColor(DarkerColor(col)));
@@ -1018,10 +1018,10 @@ void UI_Canvas::DrawThingSprites()
 		if (! Vis(x, y, MAX_RADIUS))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(inst.conf, thing->type);
+		const thingtype_t &info = inst.conf.getThingType(thing->type);
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.W_GetSprite(inst.conf, thing->type);
+		Img_c *sprite = inst.wad.getSprite(inst.conf, thing->type);
 
 		if (! sprite)
 		{
@@ -1359,7 +1359,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum]->type);
 
 			int r = info.radius;
 
@@ -1473,7 +1473,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 			if (! Vis(x, y, MAX_RADIUS))
 				break;
 
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[objnum]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[objnum]->type);
 
 			int r = info.radius;
 

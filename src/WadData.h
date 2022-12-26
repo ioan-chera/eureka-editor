@@ -202,7 +202,7 @@ struct WadData
 
 	void W_LoadFlats();
 
-	Img_c *W_GetSprite(const ConfigData &config, int type);
+	Img_c *getSprite(const ConfigData &config, int type);
 	
 	void W_LoadPalette()
 	{

@@ -1401,9 +1401,9 @@ const linetype_t &Instance::M_GetLineType(int type) const
 }
 
 
-const thingtype_t &M_GetThingType(const ConfigData &config, int type)
+const thingtype_t &ConfigData::getThingType(int type) const
 {
-	const thingtype_t *existing = get(config.thing_types, type);
+	const thingtype_t *existing = get(thing_types, type);
 	if(existing)
 		return *existing;
 

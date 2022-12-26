@@ -694,7 +694,7 @@ static Lump_c * Sprite_loc_by_root (const MasterDir &master, const ConfigData &c
 }
 
 
-Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
+Img_c *WadData::getSprite(const ConfigData &config, int type)
 {
 	const std::unique_ptr<Img_c> *existing = get(images.sprites, type);
 	if(existing)
@@ -702,7 +702,7 @@ Img_c *WadData::W_GetSprite(const ConfigData &config, int type)
 
 	// sprite not in the list yet.  Add it.
 
-	const thingtype_t &info = M_GetThingType(config, type);
+	const thingtype_t &info = config.getThingType(type);
 
 	std::unique_ptr<Img_c> result;
 
