@@ -37,12 +37,6 @@ typedef unsigned int GLuint;
 
 #include <memory>
 
-// this is a 16-bit value:
-//   - when high bit is clear, it is a palette index 0-255
-//     (value 255 is used to represent fully transparent).
-//   - when high bit is set, the remainder is 5:5:5 RGB
-typedef unsigned short  img_pixel_t;
-
 const img_pixel_t IS_RGB_PIXEL = 0x8000;
 
 #define IMG_PIXEL_RED(col)    (((col) >> 10) & 31)

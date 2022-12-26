@@ -110,50 +110,6 @@ public:	// TODO: make private
 	Img_c *digit_font_14x19 = nullptr;
 };
 
-//
-// Wad palette info
-//
-class Palette
-{
-public:
-	void updateGamma();
-	void decodePixel(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void decodePixelMedium(img_pixel_t p, byte &r, byte &g, byte &b) const;
-	void createBrightMap();
-
-	rgb_color_t getPaletteColor(int index) const
-	{
-		return palette[index];
-	}
-
-	bool loadPalette(Lump_c &lump);
-	void loadColormap(Lump_c *lump);
-	
-	byte findPaletteColor(int r, int g, int b) const;
-	rgb_color_t pixelToRGB(img_pixel_t p) const;
-	byte getColormapIndex(int cmap, int pos) const
-	{
-		return raw_colormap[cmap][pos];
-	}
-
-	int getTransReplace() const
-	{
-		return trans_replace;
-	}
-
-private:
-	// this palette has the gamma setting applied
-	rgb_color_t palette[256] = {};
-	rgb_color_t palette_medium[256] = {};
-	byte rgb555_gamma[32];
-	byte rgb555_medium[32];
-	byte bright_map[256] = {};
-	byte raw_palette[256][3] = {};
-	byte raw_colormap[32][256] = {};
-	// the palette color closest to what TRANS_PIXEL really is
-	int trans_replace = 0;
-
-};
 
 struct LumpNameCompare
 {
