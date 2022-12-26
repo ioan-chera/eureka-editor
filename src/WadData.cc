@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "WadData.h"
+#include "m_config.h"
 #include "w_wad.h"
 
 //
@@ -55,6 +56,6 @@ void WadData::W_LoadPalette()
 	{
 		ThrowException("PLAYPAL lump not found.\n");
 	}
-	palette.loadPalette(*lump);
+	palette.loadPalette(*lump, config::usegamma, config::panel_gamma);
 	images.IM_ResetDummyTextures();
 }

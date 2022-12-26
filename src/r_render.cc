@@ -1547,7 +1547,7 @@ bool Instance::Render3D_ParseUser(const std::vector<SString> &tokens)
 	{
 		config::usegamma = std::max(0, atoi(tokens[1])) % 5;
 
-		wad.palette.updateGamma();
+		wad.palette.updateGamma(config::usegamma, config::panel_gamma);
 		return true;
 	}
 
