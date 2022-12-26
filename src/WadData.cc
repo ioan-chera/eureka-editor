@@ -47,3 +47,14 @@ Lump_c *MasterDir::findFirstSpriteLump(const SString &stem) const
 	}
 	return result;
 }
+
+void WadData::W_LoadPalette()
+{
+	Lump_c *lump = master.findGlobalLump("PLAYPAL");
+	if(!lump)
+	{
+		ThrowException("PLAYPAL lump not found.\n");
+	}
+	palette.loadPalette(*lump);
+	images.IM_ResetDummyTextures();
+}

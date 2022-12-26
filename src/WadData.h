@@ -126,7 +126,7 @@ public:
 		return palette[index];
 	}
 
-	void loadPalette(Lump_c *lump);
+	bool loadPalette(Lump_c &lump);
 	void loadColormap(Lump_c *lump);
 	
 	byte findPaletteColor(int r, int g, int b) const;
@@ -204,11 +204,7 @@ struct WadData
 
 	Img_c *getSprite(const ConfigData &config, int type);
 	
-	void W_LoadPalette()
-	{
-		palette.loadPalette(master.findGlobalLump("PLAYPAL"));
-		images.IM_ResetDummyTextures();
-	}
+	void W_LoadPalette();
 
 	void W_LoadColormap()
 	{

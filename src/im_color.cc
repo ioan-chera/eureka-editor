@@ -69,19 +69,13 @@ void Palette::updateGamma()
 	}
 }
 
-void Palette::loadPalette(Lump_c *lump)
+bool Palette::loadPalette(Lump_c &lump)
 {
-	if (! lump)
-	{
-		ThrowException("PLAYPAL lump not found.\n");
-		return;
-	}
-
-	lump->Seek();
-	if (! lump->Read(raw_palette, sizeof(raw_palette)))
+	lump.Seek();
+	if (! lump.Read(raw_palette, sizeof(raw_palette)))
 	{
 		gLog.printf("PLAYPAL: read error\n");
-		return;
+		return false;
 	}
 
 	// find the colour closest to TRANS_PIXEL
@@ -94,6 +88,8 @@ void Palette::loadPalette(Lump_c *lump)
 	updateGamma();
 
 	createBrightMap();
+
+	return true;
 }
 
 
