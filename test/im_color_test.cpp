@@ -22,6 +22,20 @@
 #include <vector>
 #include <stdint.h>
 
+static std::vector<byte> makeGrayscale()
+{
+	std::vector<byte> data;
+	data.reserve(768);
+	for(int i = 0; i < 256; ++i)
+	{
+		// Make a simple f(x) = [x, x, x] data
+		data.push_back((byte)i);
+		data.push_back((byte)i);
+		data.push_back((byte)i);
+	}
+	return data;
+}
+
 TEST(Palette, LoadPalette)
 {
 	Palette palette;
@@ -41,14 +55,7 @@ TEST(Palette, LoadPalette)
 	ASSERT_FALSE(palette.loadPalette(*lump, 2, 2));
 
 	// Repopulate lump, this time valid
-	data.resize(768);
-	for(int i = 0; i < 256; ++i)
-	{
-		// Make a simple f(x) = [x, x, x] data
-		data.push_back(0);
-		data.push_back(0);
-		data.push_back(0);
-	}
+	data = makeGrayscale();
 	lump->clearData();
 	lump->Write(data.data(), (int)data.size());
 	ASSERT_TRUE(palette.loadPalette(*lump, 2, 2));
@@ -58,4 +65,21 @@ TEST(Palette, LoadPalette)
 	ASSERT_TRUE(palette.loadPalette(*lump, 4, 4));
 	ASSERT_FALSE(palette.loadPalette(*lump, 4, 5));
 	ASSERT_FALSE(palette.loadPalette(*lump, 5, 4));
+}
+
+TEST(Palette, FindPaletteColor)
+{
+	Palette palette;
+	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
+	ASSERT_TRUE(wad);
+	Lump_c *lump = wad->AddLump("PALETTE");
+	ASSERT_TRUE(lump);
+	std::vector<uint8_t> data = makeGrayscale();
+	lump->Write(data.data(), (int)data.size());
+
+	ASSERT_TRUE(palette.loadPalette(*lump, 2, 2));
+	// Now look for some
+	ASSERT_EQ(palette.findPaletteColor(100, 100, 98), 99);
+	ASSERT_EQ(palette.findPaletteColor(63, 64, 65), 64);
+	ASSERT_EQ(palette.findPaletteColor(255, 255, 255), 254);	// not the trans pixel
 }
