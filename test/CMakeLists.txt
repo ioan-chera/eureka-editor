@@ -124,6 +124,7 @@ unit_test(general
     ThingTest.cpp
     VertexTest.cpp
     w_wad_test.cpp
+    WadDataTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc
