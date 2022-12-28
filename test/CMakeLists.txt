@@ -31,8 +31,8 @@ set(_testUtils
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
-    testUtils/Utility.cpp
-    testUtils/Utility.hpp
+    testUtils/Palette.cpp
+    testUtils/Palette.hpp
     ${src}/Errors.cc
     ${src}/lib_adler.cc
     ${src}/lib_util.cc

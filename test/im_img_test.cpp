@@ -18,7 +18,7 @@
 
 #include "im_img.h"
 #include "w_wad.h"
-#include "testUtils/Utility.hpp"
+#include "testUtils/Palette.hpp"
 #include "gtest/gtest.h"
 
 class ImageFixture : public ::testing::Test
@@ -31,13 +31,7 @@ protected:
 
 void ImageFixture::SetUp()
 {
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
-	ASSERT_TRUE(wad);
-	Lump_c *lump = wad->AddLump("PALETTE");
-	ASSERT_TRUE(lump);
-	std::vector<uint8_t> data = makeGrayscale();
-	lump->Write(data.data(), (int)data.size());
-	palette.loadPalette(*lump, 2, 2);
+	getCommonPalette(palette);
 }
 
 TEST_F(ImageFixture, CreateLightSprite)
@@ -47,56 +41,21 @@ TEST_F(ImageFixture, CreateLightSprite)
 	ASSERT_EQ(image->width(), 11);
 	ASSERT_EQ(image->height(), 11);
 
-	// All images must rise in intensity, then go down
-	int mode = 0;
-	img_pixel_t prevpix = TRANS_PIXEL;
-	for(int i = 0; i < 11; ++i)
-	{
-		img_pixel_t pix = image->buf()[i + 5 * 11];
-		byte r, g, b;
-		byte pr, pg, pb;
-		switch(mode)
-		{
-			case 0:	// trans edge
-				if(pix == TRANS_PIXEL)
-					continue;
-				mode = 1;
-				break;
-			case 3:
-				ASSERT_EQ(pix, TRANS_PIXEL);
-				break;
-			case 1:		// start to visit
-			case 2:		// start to fade
-				palette.decodePixel(pix, r, g, b);
-				if(i > 5)
-					mode = 2;
-				if(prevpix != TRANS_PIXEL)
-				{
-					if(mode == 1)
-					{
-						ASSERT_GE(r, pr);
-						ASSERT_GE(g, pg);
-						ASSERT_GE(b, pb);
-					}
-					else
-					{
-						if(pix != TRANS_PIXEL)
-						{
-							ASSERT_LE(r, pr);
-							ASSERT_LE(g, pg);
-							ASSERT_LE(b, pb);
-						}
-						else
-							mode = 3;
-					}
-				}
-				prevpix = pix;
-				pr = r;
-				pg = g;
-				pb = b;
-				break;
-		}
-	}
+	static const img_pixel_t expected[11 * 11] = {
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0x2d, 0x32, 0x32, 0x2d, 0xff, 0xff, 0xff,
+		0xff, 0xff, 0x2d, 0x5a, 0x88, 0x8d, 0x8d, 0x88, 0x5a, 0x2d, 0xff,
+		0xff, 0xff, 0x5a, 0x8d, 0xe7, 0xed, 0xed, 0xe7, 0x8d, 0x5a, 0xff,
+		0xff, 0x2d, 0x88, 0xe7, 0xed, 0xee, 0xee, 0xed, 0xe7, 0x88, 0x2d,
+		0xff, 0x32, 0x8d, 0xed, 0xee, 0xef, 0xef, 0xee, 0xed, 0x8d, 0x32,
+		0xff, 0x32, 0x8d, 0xed, 0xee, 0xef, 0xef, 0xee, 0xed, 0x8d, 0x32,
+		0xff, 0x2d, 0x88, 0xe7, 0xed, 0xee, 0xee, 0xed, 0xe7, 0x88, 0x2d,
+		0xff, 0xff, 0x5a, 0x8d, 0xe7, 0xed, 0xed, 0xe7, 0x8d, 0x5a, 0xff,
+		0xff, 0xff, 0x2d, 0x5a, 0x88, 0x8d, 0x8d, 0x88, 0x5a, 0x2d, 0xff,
+		0xff, 0xff, 0xff, 0xff, 0x2d, 0x32, 0x32, 0x2d, 0xff, 0xff, 0xff,
+	};
 
-
+	ASSERT_EQ(memcmp(image->buf(), expected, sizeof(expected)), 0);
 }
+
+// TODO: test createMapSpotSprite.

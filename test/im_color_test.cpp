@@ -18,7 +18,7 @@
 
 #include "im_color.h"
 #include "w_wad.h"
-#include "testUtils/Utility.hpp"
+#include "testUtils/Palette.hpp"
 #include "gtest/gtest.h"
 #include <vector>
 #include <stdint.h>
