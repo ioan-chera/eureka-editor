@@ -74,6 +74,7 @@ public:
 	static std::unique_ptr<Img_c> createLightSprite(const Palette &palette);
 	static std::unique_ptr<Img_c> createMapSpotSprite(const Palette &pal, int base_r, int base_g,
 													  int base_b);
+	static std::unique_ptr<Img_c> createDogSprite(const Palette &pal);
 
 	inline bool is_null() const
 	{
@@ -134,7 +135,6 @@ private:
 	Img_c& operator= (const Img_c&);  // No need to implement it
 };
 
-std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal);
 Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
 Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 

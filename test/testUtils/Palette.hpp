@@ -24,7 +24,7 @@
 
 class Palette;
 
-void getCommonPalette(Palette &palette);
+void makeCommonPalette(Palette &palette);
 std::vector<uint8_t> makeGrayscale();
 
 #endif

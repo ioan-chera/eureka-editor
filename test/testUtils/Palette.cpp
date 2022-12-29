@@ -25,7 +25,7 @@
 //
 // Uses a common palette generated from 3:3:2 RGB (thus no grays)
 //
-void getCommonPalette(Palette &palette)
+void makeCommonPalette(Palette &palette)
 {
 	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
 	EXPECT_TRUE(wad);
@@ -72,3 +72,4 @@ std::vector<uint8_t> makeGrayscale()
 	}
 	return data;
 }
+

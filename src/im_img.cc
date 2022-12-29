@@ -989,7 +989,7 @@ static const char *const dog_image_text[] =
 };
 
 
-std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal)
+std::unique_ptr<Img_c> Img_c::createDogSprite(const Palette &pal)
 {
 	return IM_CreateFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
 }

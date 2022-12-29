@@ -732,7 +732,7 @@ Img_c *WadData::getSprite(const ConfigData &config, int type)
 			// missing sprite looks ugly in the thing browser.
 
 			if (info.sprite.noCaseEqual("DOGS"))
-				result = IM_CreateDogSprite(palette);
+				result = Img_c::createDogSprite(palette);
 			else
 				gLog.printf("Sprite not found: '%s'\n", info.sprite.c_str());
 		}
