@@ -300,13 +300,13 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 			continue;
 		Lump_c *lump = lumpRef.lump.get();
 
-		char img_fmt = W_DetectImageFormat(lump);
+		ImageFormat img_fmt = W_DetectImageFormat(lump);
 		const SString &name = lump->Name();
 		Img_c *img = NULL;
 
 		switch (img_fmt)
 		{
-			case 'd': /* Doom patch */
+			case ImageFormat::doom: /* Doom patch */
 				img = new Img_c;
 				if (! LoadPicture(wad.palette, config, *img, lump, name, 0, 0))
 				{
@@ -315,19 +315,19 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 				}
 				break;
 
-			case 'p': /* PNG */
+			case ImageFormat::png: /* PNG */
 				img = LoadImage_PNG(lump, name);
 				break;
 
-			case 't': /* TGA */
+			case ImageFormat::tga: /* TGA */
 				img = LoadImage_TGA(lump, name);
 				break;
 
-			case 'j': /* JPEG */
+			case ImageFormat::jpeg: /* JPEG */
 				img = LoadImage_JPEG(lump, name);
 				break;
 
-			case 0:
+			case ImageFormat::unrecognized:
 				gLog.printf("Unknown texture format in '%s' lump\n", name.c_str());
 				break;
 

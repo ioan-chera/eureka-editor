@@ -44,7 +44,19 @@
 //
 //    NUL  : unrecognized
 //
-char W_DetectImageFormat(Lump_c *lump);
+enum class ImageFormat
+{
+	unrecognized,
+
+	png,
+	tga,
+	doom,
+
+	jpeg,
+	gif,
+	dds,
+};
+ImageFormat W_DetectImageFormat(Lump_c *lump);
 
 Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name);
 Img_c *LoadImage_PNG(Lump_c *lump, const SString &name);

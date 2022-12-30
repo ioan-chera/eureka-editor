@@ -230,28 +230,28 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 	int *pic_width,    // To return the size of the picture
 	int *pic_height)   // (can be NULL)
 {
-	char img_fmt = W_DetectImageFormat(lump);
+	ImageFormat img_fmt = W_DetectImageFormat(lump);
 	Img_c *sub;
 
 	switch (img_fmt)
 	{
-	case 'd':
+	case ImageFormat::doom:
 		// use the code below to load/compose the DOOM format
 		break;
 
-	case 'p':
+	case ImageFormat::png:
 		sub = LoadImage_PNG(lump, pic_name);
 		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
-	case 'j':
+	case ImageFormat::jpeg:
 		sub = LoadImage_JPEG(lump, pic_name);
 		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
-	case 't':
+	case ImageFormat::tga:
 		sub = LoadImage_TGA(lump, pic_name);
 		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
-	case 0:
+	case ImageFormat::unrecognized:
 		gLog.printf("Unknown image format in '%s' lump\n", pic_name.c_str());
 		return false;
 
@@ -303,19 +303,19 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 }
 
 
-char W_DetectImageFormat(Lump_c *lump)
+ImageFormat W_DetectImageFormat(Lump_c *lump)
 {
 	byte header[20];
 
 	int length = lump->Length();
 
 	if (length < (int)sizeof(header))
-		return 0;
+		return ImageFormat::unrecognized;
 
 	lump->Seek();
 
 	if (! lump->Read(header, (int)sizeof(header)))
-		return 0;
+		return ImageFormat::unrecognized;
 
 	// PNG is clearly marked in the header, so check it first.
 
@@ -323,7 +323,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[2] == 'N'  && header[3] == 'G' &&
 		header[4] == 0x0D && header[5] == 0x0A)
 	{
-		return 'p'; /* PNG */
+		return ImageFormat::png; /* PNG */
 	}
 
 	// check some other common image formats....
@@ -333,7 +333,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		((header[6] == 'J' && header[7] == 'F') ||
 		 (header[6] == 'E' && header[7] == 'x')))
 	{
-		return 'j'; /* JPEG */
+		return ImageFormat::jpeg; /* JPEG */
 	}
 
 	if (header[0] == 'G' && header[1] == 'I' &&
@@ -341,7 +341,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[4] >= '7' && header[4] <= '9' &&
 		header[5] == 'a')
 	{
-		return 'g'; /* GIF */
+		return ImageFormat::gif; /* GIF */
 	}
 
 	if (header[0] == 'D' && header[1] == 'D'  &&
@@ -349,7 +349,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[4] == 124 && header[5] == 0    &&
 		header[6] == 0)
 	{
-		return 's'; /* DDS (DirectDraw Surface) */
+		return ImageFormat::dds; /* DDS (DirectDraw Surface) */
 	}
 
 	// TGA (Targa) is not clearly marked, but better than Doom patches,
@@ -368,7 +368,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
 		(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
 	{
-		return 't'; /* TGA */
+		return ImageFormat::tga; /* TGA */
 	}
 
 	// check for raw patches last
@@ -383,10 +383,10 @@ char W_DetectImageFormat(Lump_c *lump)
 		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
 		length > width * 4 /* columnofs */)
 	{
-		return 'd'; /* Doom patch */
+		return ImageFormat::doom; /* Doom patch */
 	}
 
-	return 0;	// unknown!
+	return ImageFormat::unrecognized;	// unknown!
 }
 
 
