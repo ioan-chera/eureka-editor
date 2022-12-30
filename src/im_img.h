@@ -133,6 +133,10 @@ public:
 private:
 	Img_c            (const Img_c&);  // No need to implement it
 	Img_c& operator= (const Img_c&);  // No need to implement it
+
+	static std::unique_ptr<Img_c> createFromText(const Palette &pal, int W, int H,
+												 const char * const*text,
+												 const rgb_color_t *palette, int pal_size);
 };
 
 Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);

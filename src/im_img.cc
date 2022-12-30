@@ -635,17 +635,23 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 }
 
 
-static std::unique_ptr<Img_c> IM_CreateFromText(const Palette &pal, int W, int H, const char * const*text, const rgb_color_t *palette, int pal_size)
+std::unique_ptr<Img_c> Img_c::createFromText(const Palette &pal, int W, int H,
+											 const char * const*text, const rgb_color_t *palette,
+											 int pal_size)
 {
 	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 
 	// translate colors to current palette
-	byte *conv_palette = new byte[pal_size];
+	std::vector<byte> conv_palette;
+	conv_palette.reserve(pal_size);
 
 	for (int c = 0 ; c < pal_size ; c++)
-		conv_palette[c] = pal.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]), RGB_BLUE(palette[c]));
+	{
+		conv_palette.push_back(pal.findPaletteColor(RGB_RED(palette[c]), RGB_GREEN(palette[c]),
+													RGB_BLUE(palette[c])));
+	}
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -660,8 +666,6 @@ static std::unique_ptr<Img_c> IM_CreateFromText(const Palette &pal, int W, int H
 
 		result->wbuf() [y * W + x] = conv_palette[ch - 'a'];
 	}
-
-	delete[] conv_palette;
 
 	return result;
 }
@@ -991,7 +995,7 @@ static const char *const dog_image_text[] =
 
 std::unique_ptr<Img_c> Img_c::createDogSprite(const Palette &pal)
 {
-	return IM_CreateFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
+	return createFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
 }
 
 
