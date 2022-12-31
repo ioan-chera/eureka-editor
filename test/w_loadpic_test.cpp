@@ -109,5 +109,38 @@ TEST_F(DetectImageFormat, DDS)
 
 TEST_F(DetectImageFormat, TGA)
 {
-	// TODO: targa
+	int width = 512;
+	int height = 1024;
+	header[12] = (byte)(width & 0xff);
+	header[13] = (byte)((width >> 8) & 0xff);
+	header[14] = (byte)(height & 0xff);
+	header[15] = (byte)((height >> 8) & 0xff);
+	int cmap_type = 1;
+	header[1] = (byte)cmap_type;
+	int img_type = 10;
+	header[2] = (byte)img_type;
+	int depth = 24;
+	header[16] = (byte)depth;
+	lump->Write(header, (int)sizeof(header));
+	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::tga);
+}
+
+TEST_F(DetectImageFormat, doom)
+{
+	int width = 64;
+	int height = 128;
+	header[0] = (byte)(width & 0xff);
+	header[1] = (byte)((width >> 8) & 0xff);
+	header[2] = (byte)(height & 0xff);
+	header[3] = (byte)((height >> 8) & 0xff);
+	int ofs_x = 32;
+	int ofs_y = -32;
+	header[4] = (byte)ofs_x;
+	header[5] = 0;
+	header[6] = (byte)ofs_y;
+	lump->Write(header, (int)sizeof(header));
+	std::vector<byte> padding;
+	padding.resize(4 * width);
+	lump->Write(padding.data(), (int)padding.size());
+	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::doom);
 }
