@@ -422,7 +422,7 @@ static std::vector<fs::path> parseDoomWadPathEnvVar(const SString &doomwadpath)
 	size_t pos = 0, curpos = 0;
 	do
 	{
-		pos = doomwadpath.find(PATH_SEPARATOR);
+		pos = doomwadpath.find(PATH_SEPARATOR, curpos);
 		SString entry;
 		if(pos != std::string::npos)
 		{
