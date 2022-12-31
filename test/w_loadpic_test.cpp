@@ -63,7 +63,7 @@ TEST_F(DetectImageFormat, ShortFile)
 TEST_F(DetectImageFormat, PNG)
 {
 	header[0] = 0x89;
-	strncpy(reinterpret_cast<char *>(header + 1), "PNG\r\n", 5);
+	memcpy(header + 1, "PNG\r\n", 5);
 	lump->Write(header, (int)sizeof(header));
 	ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::png);
 }
@@ -79,7 +79,7 @@ TEST_F(DetectImageFormat, JPEG)
 		header[3] = (byte)value;
 		for(const char *tag : tags)
 		{
-			strncpy(reinterpret_cast<char *>(header + 6), tag, 2);
+			memcpy(header + 6, tag, 2);
 			lump->clearData();
 			lump->Write(header, (int)sizeof(header));
 			ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::jpeg);
@@ -92,7 +92,7 @@ TEST_F(DetectImageFormat, GIF)
 	const char *tags[] = { "GIF87a", "GIF88a", "GIF89a" };
 	for(const char *tag : tags)
 	{
-		strncpy(reinterpret_cast<char *>(header), tag, 6);
+		memcpy(header, tag, 6);
 		lump->clearData();
 		lump->Write(header, (int)sizeof(header));
 		ASSERT_EQ(W_DetectImageFormat(lump), ImageFormat::gif);
