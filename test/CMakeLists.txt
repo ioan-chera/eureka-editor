@@ -127,6 +127,7 @@ unit_test(general
     SStringTest.cpp
     ThingTest.cpp
     VertexTest.cpp
+    w_loadpic_test.cpp
     w_wad_test.cpp
     WadDataTest.cpp
     stub/osxcalls_stub.cpp
