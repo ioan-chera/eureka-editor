@@ -22,6 +22,7 @@
 #define __EUREKA_UI_BROWSER_H__
 
 #include <map>
+#include <memory>
 #include <string>
 
 
