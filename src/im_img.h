@@ -109,7 +109,7 @@ public:
 
 	// paste a copy of another image into this one, but skip any
 	// transparent pixels.
-	void compose(Img_c *other, int x, int y);
+	void compose(const Img_c *other, int x, int y);
 
 	Img_c * spectrify(const ConfigData &config) const;
 
@@ -139,8 +139,8 @@ private:
 												 const rgb_color_t *palette, int pal_size);
 };
 
-Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
-Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
+std::unique_ptr<Img_c> IM_ConvertRGBImage(Fl_RGB_Image *src);
+std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

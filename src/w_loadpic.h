@@ -58,9 +58,9 @@ enum class ImageFormat
 };
 ImageFormat W_DetectImageFormat(Lump_c *lump);
 
-Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name);
-Img_c *LoadImage_PNG(Lump_c *lump, const SString &name);
-Img_c *LoadImage_TGA(Lump_c *lump, const SString &name);
+std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name);
+std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name);
+std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name);
 bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c &dest, Lump_c *lump, const SString &pic_name, int pic_x_offset, int pic_y_offset, int *pic_width = nullptr, int *pic_height = nullptr);
 
 #endif  /* __EUREKA_W_LOADPIC_H__ */

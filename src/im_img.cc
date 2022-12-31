@@ -150,7 +150,7 @@ void Img_c::resize(int new_width, int new_height)
 }
 
 
-void Img_c::compose(Img_c *other, int x, int y)
+void Img_c::compose(const Img_c *other, int x, int y)
 {
 	int W = width();
 	int H = height();
@@ -527,9 +527,9 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static Img_c * IM_CreateDummyTex(const byte *data, int bg, int fg)
+static std::unique_ptr<Img_c> IM_CreateDummyTex(const byte *data, int bg, int fg)
 {
-	Img_c *omg = new Img_c(64, 64, true);
+	auto omg = std::make_unique<Img_c>(64, 64, true);
 
 	img_pixel_t *obuf = omg->wbuf();
 
@@ -550,12 +550,10 @@ Img_c *ImageSet::IM_MissingTex(const ConfigData &config)
 	{
 		missing_tex_color = config.miscInfo.missing_color;
 
-		delete missing_tex_image;
-
 		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
 	}
 
-	return missing_tex_image;
+	return missing_tex_image.get();
 }
 
 
@@ -565,12 +563,10 @@ Img_c *ImageSet::IM_UnknownTex(const ConfigData &config)
 	{
 		unknown_tex_color = config.miscInfo.unknown_tex;
 
-		delete unknown_tex_image;
-
 		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
 	}
 
-	return unknown_tex_image;
+	return unknown_tex_image.get();
 }
 
 
@@ -580,7 +576,6 @@ Img_c *ImageSet::IM_SpecialTex(const Palette &palette)
 	{
 		special_tex_color = palette.findPaletteColor(192, 0, 192);
 
-		delete special_tex_image;
 		special_tex_image = NULL;
 	}
 
@@ -588,7 +583,7 @@ Img_c *ImageSet::IM_SpecialTex(const Palette &palette)
 		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
 			palette.findPaletteColor(255, 255, 255));
 
-	return special_tex_image;
+	return special_tex_image.get();
 }
 
 
@@ -598,12 +593,10 @@ Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
 	{
 		unknown_flat_color = config.miscInfo.unknown_flat;
 
-		delete unknown_flat_image;
-
 		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
 	}
 
-	return unknown_flat_image;
+	return unknown_flat_image.get();
 }
 
 
@@ -617,9 +610,7 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 	{
 		unknown_sprite_color = unk_col;
 
-		delete unknown_sprite_image;
-
-		unknown_sprite_image = new Img_c(64, 64, true);
+		unknown_sprite_image = std::make_unique<Img_c>(64, 64, true);
 
 		img_pixel_t *obuf = unknown_sprite_image->wbuf();
 
@@ -631,7 +622,7 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 		}
 	}
 
-	return unknown_sprite_image;
+	return unknown_sprite_image.get();
 }
 
 
@@ -671,11 +662,11 @@ std::unique_ptr<Img_c> Img_c::createFromText(const Palette &pal, int W, int H,
 }
 
 
-static Img_c * IM_CreateFont(int W, int H, const char *const *text,
+static std::unique_ptr<Img_c> IM_CreateFont(int W, int H, const char *const *text,
 							 const int *intensities, int ity_size,
 							 rgb_color_t color)
 {
-	Img_c *result = new Img_c(W, H);
+	auto result = std::make_unique<Img_c>(W, H);
 
 	result->clear();
 
@@ -703,7 +694,7 @@ static Img_c * IM_CreateFont(int W, int H, const char *const *text,
 }
 
 
-Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src)
+std::unique_ptr<Img_c> IM_ConvertRGBImage(Fl_RGB_Image *src)
 {
 	int W  = src->w();
 	int H  = src->h();
@@ -720,7 +711,7 @@ Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src)
 	if (! (D == 3 || D == 4))
 		return NULL;
 
-	Img_c *img = new Img_c(W, H);
+	auto img = std::make_unique<Img_c>(W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -749,9 +740,9 @@ Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src)
 }
 
 
-Img_c * IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
+std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 {
-	Img_c *img = new Img_c(W, H);
+	auto img = std::make_unique<Img_c>(W, H);
 
 	img_pixel_t *dest = img->wbuf();
 
@@ -1144,7 +1135,7 @@ Img_c *ImageSet::IM_DigitFont_11x14()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_11x14;
+	return digit_font_11x14.get();
 }
 
 Img_c *ImageSet::IM_DigitFont_14x19()
@@ -1155,7 +1146,7 @@ Img_c *ImageSet::IM_DigitFont_14x19()
 										 digit_font_intensities, 20,
 										 DIGIT_FONT_COLOR);
 	}
-	return digit_font_14x19;
+	return digit_font_14x19.get();
 }
 
 // this one applies the current gamma.

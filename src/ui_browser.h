@@ -157,7 +157,7 @@ private:
 
 	bool SearchMatch(Browser_Item *item) const;
 
-	void Populate_Images(BrowserMode imkind, const std::map<SString, Img_c *> & img_list);
+	void Populate_Images(BrowserMode imkind, const std::map<SString, std::unique_ptr<Img_c>> & img_list);
 	void Populate_Sprites();
 
 	void Populate_ThingTypes();

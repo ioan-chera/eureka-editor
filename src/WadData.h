@@ -60,22 +60,22 @@ public:
 	void IM_UnloadDummyTextures() const;
 	void IM_ResetDummyTextures();
 
-	void W_AddTexture(const SString &name, Img_c *img, bool is_medusa);
+	void W_AddTexture(const SString &name, std::unique_ptr<Img_c> &&img, bool is_medusa);
 	Img_c *getTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
 	bool W_TextureCausesMedusa(const SString &name) const;
 	bool W_TextureIsKnown(const ConfigData &config, const SString &name) const;
 	void W_ClearTextures();
-	const std::map<SString, Img_c *> &getTextures() const
+	const std::map<SString, std::unique_ptr<Img_c>> &getTextures() const
 	{
 		return textures;
 	}
 
-	void W_AddFlat(const SString &name, Img_c *img);
+	void W_AddFlat(const SString &name, std::unique_ptr<Img_c> &&img);
 	Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
 	bool W_FlatIsKnown(const ConfigData &config, const SString &name) const;
 	void W_ClearFlats();
-	const std::map<SString, Img_c *> &getFlats() const
+	const std::map<SString, std::unique_ptr<Img_c>> &getFlats() const
 	{
 		return flats;
 	}
@@ -84,30 +84,33 @@ public:
 
 	void W_UnloadAllTextures() const;
 
-public:	// TODO: make private
-	std::map<SString, Img_c *> textures;
-	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
-	std::map<SString, int> medusa_textures;
-	std::map<SString, Img_c *> flats;
+public: // TODO: make private
 	sprite_map_t sprites;
 
+private:	
+	std::map<SString, std::unique_ptr<Img_c>> textures;
+	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
+	std::map<SString, int> medusa_textures;
+	std::map<SString, std::unique_ptr<Img_c>> flats;
+	
+
 	int missing_tex_color = 0;
-	Img_c *missing_tex_image = nullptr;
+	std::unique_ptr<Img_c> missing_tex_image;
 
 	int unknown_tex_color = 0;
-	Img_c *unknown_tex_image = nullptr;
+	std::unique_ptr<Img_c> unknown_tex_image;
 
 	int special_tex_color = 0;
-	Img_c *special_tex_image = nullptr;
+	std::unique_ptr<Img_c> special_tex_image;
 
 	int unknown_flat_color = 0;
-	Img_c *unknown_flat_image = nullptr;
+	std::unique_ptr<Img_c> unknown_flat_image;
 
 	int unknown_sprite_color = 0;
-	Img_c *unknown_sprite_image = nullptr;
+	std::unique_ptr<Img_c> unknown_sprite_image;
 
-	Img_c *digit_font_11x14 = nullptr;
-	Img_c *digit_font_14x19 = nullptr;
+	std::unique_ptr<Img_c> digit_font_11x14;
+	std::unique_ptr<Img_c> digit_font_14x19;
 };
 
 

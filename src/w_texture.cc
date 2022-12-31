@@ -42,42 +42,20 @@
 //    TEXTURE HANDLING
 //----------------------------------------------------------------------
 
-
-static void DeleteTex(const std::map<SString, Img_c *>::value_type& P)
-{
-	delete P.second;
-}
-
 void ImageSet::W_ClearTextures()
 {
-	std::for_each(textures.begin(), textures.end(), DeleteTex);
-
 	textures.clear();
 
 	medusa_textures.clear();
 }
 
 
-void ImageSet::W_AddTexture(const SString &name, Img_c *img, bool is_medusa)
+void ImageSet::W_AddTexture(const SString &name, std::unique_ptr<Img_c> &&img, bool is_medusa)
 {
 	// free any existing one with the same name
 
-	SString tex_str = name;
-
-	std::map<SString, Img_c *>::iterator P = textures.find(tex_str);
-
-	if (P != textures.end())
-	{
-		delete P->second;
-
-		P->second = img;
-	}
-	else
-	{
-		textures[tex_str] = img;
-	}
-
-	medusa_textures[tex_str] = is_medusa ? 1 : 0;
+	textures[name] = std::move(img);
+	medusa_textures[name] = is_medusa ? 1 : 0;
 }
 
 
@@ -125,7 +103,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 	if (width == 0 || height == 0)
 		FatalError("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(width, height, false);
+	auto img = std::make_unique<Img_c>(width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -172,7 +150,7 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.images.W_AddTexture(namebuf, img, is_medusa);
+	wad.images.W_AddTexture(namebuf, std::move(img), is_medusa);
 }
 
 
@@ -190,7 +168,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 	if (width == 0 || height == 0)
 		ThrowException("W_LoadTextures: Texture '%.8s' has zero size\n", raw->name);
 
-	Img_c *img = new Img_c(width, height, false);
+	auto img = std::make_unique<Img_c>(width, height, false);
 	bool is_medusa = false;
 
 	// apply all the patches
@@ -239,7 +217,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 	memcpy(namebuf, raw->name, 8);
 	namebuf[8] = 0;
 
-	wad.images.W_AddTexture(namebuf, img, is_medusa);
+	wad.images.W_AddTexture(namebuf, std::move(img), is_medusa);
 }
 
 
@@ -302,15 +280,14 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 
 		ImageFormat img_fmt = W_DetectImageFormat(lump);
 		const SString &name = lump->Name();
-		Img_c *img = NULL;
+		std::unique_ptr<Img_c> img;
 
 		switch (img_fmt)
 		{
 			case ImageFormat::doom: /* Doom patch */
-				img = new Img_c;
+				img = std::make_unique<Img_c>();
 				if (! LoadPicture(wad.palette, config, *img, lump, name, 0, 0))
 				{
-					delete img;
 					img = NULL;
 				}
 				break;
@@ -339,7 +316,7 @@ static void W_LoadTextures_TX_START(WadData &wad, const ConfigData &config, cons
 		// if we successfully loaded the texture, add it
 		if (img)
 		{
-			wad.images.W_AddTexture(name, img, false /* is_medusa */);
+			wad.images.W_AddTexture(name, std::move(img), false /* is_medusa */);
 		}
 	}
 }
@@ -393,10 +370,10 @@ Img_c * ImageSet::getTexture(const ConfigData &config, const SString &name, bool
 		return NULL;
 
 	SString t_str = name;
-	std::map<SString, Img_c *>::const_iterator P = textures.find(t_str);
+	std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = textures.find(t_str);
 
 	if (P != textures.end())
-		return P->second;
+		return P->second.get();
 
 	if (try_uppercase)
 	{
@@ -405,10 +382,10 @@ Img_c * ImageSet::getTexture(const ConfigData &config, const SString &name, bool
 
 	if (config.features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::const_iterator P = flats.find(t_str);
+		std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = flats.find(t_str);
 
 		if (P != flats.end())
-			return P->second;
+			return P->second.get();
 	}
 
 	return NULL;
@@ -434,14 +411,14 @@ bool ImageSet::W_TextureIsKnown(const ConfigData &config, const SString &name) c
 	if (name.empty())
 		return false;
 
-	std::map<SString, Img_c *>::const_iterator P = textures.find(name);
+	std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = textures.find(name);
 
 	if (P != textures.end())
 		return true;
 
 	if (config.features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::const_iterator P = flats.find(name);
+		std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = flats.find(name);
 
 		if (P != flats.end())
 			return true;
@@ -485,46 +462,24 @@ SString NormalizeTex(const SString &name)
 //    FLAT HANDLING
 //----------------------------------------------------------------------
 
-static void DeleteFlat(const std::map<SString, Img_c *>::value_type& P)
-{
-	delete P.second;
-}
-
-
 void ImageSet::W_ClearFlats()
 {
-	std::for_each(flats.begin(), flats.end(), DeleteFlat);
-
 	flats.clear();
 }
 
 
-void ImageSet::W_AddFlat(const SString &name, Img_c *img)
+void ImageSet::W_AddFlat(const SString &name, std::unique_ptr<Img_c> &&img)
 {
 	// find any existing one with same name, and free it
-
-	SString flat_str = name;
-
-	std::map<SString, Img_c *>::iterator P = flats.find(flat_str);
-
-	if (P != flats.end())
-	{
-		delete P->second;
-
-		P->second = img;
-	}
-	else
-	{
-		flats[flat_str] = img;
-	}
+	flats[name] = std::move(img);
 }
 
 
-static Img_c * LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lump)
+static std::unique_ptr<Img_c> LoadFlatImage(const WadData &wad, const SString &name, Lump_c *lump)
 {
 	// TODO: check size == 64*64
 
-	Img_c *img = new Img_c(64, 64, false);
+	auto img = std::make_unique<Img_c>(64, 64, false);
 
 	int size = 64 * 64;
 
@@ -574,10 +529,10 @@ void WadData::W_LoadFlats()
 				continue;
 			Lump_c *lump = lumpRef.lump.get();
 
-			Img_c * img = LoadFlatImage(*this, lump->Name(), lump);
+			std::unique_ptr<Img_c> img = LoadFlatImage(*this, lump->Name(), lump);
 
 			if (img)
-				images.W_AddFlat(lump->Name(), img);
+				images.W_AddFlat(lump->Name(), std::move(img));
 		}
 	}
 }
@@ -585,17 +540,17 @@ void WadData::W_LoadFlats()
 
 Img_c * ImageSet::W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase) const
 {
-	std::map<SString, Img_c *>::const_iterator P = flats.find(name);
+	std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = flats.find(name);
 
 	if (P != flats.end())
-		return P->second;
+		return P->second.get();
 
 	if (config.features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::const_iterator P = textures.find(name);
+		std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = textures.find(name);
 
 		if (P != textures.end())
-			return P->second;
+			return P->second.get();
 	}
 
 	if (try_uppercase)
@@ -616,14 +571,14 @@ bool ImageSet::W_FlatIsKnown(const ConfigData &config, const SString &name) cons
 	if (name.empty())
 		return false;
 
-	std::map<SString, Img_c *>::const_iterator P = flats.find(name);
+	std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = flats.find(name);
 
 	if (P != flats.end())
 		return true;
 
 	if (config.features.mix_textures_flats)
 	{
-		std::map<SString, Img_c *>::const_iterator P = textures.find(name);
+		std::map<SString, std::unique_ptr<Img_c>>::const_iterator P = textures.find(name);
 
 		if (P != textures.end())
 			return true;
@@ -796,13 +751,13 @@ Img_c *WadData::getSprite(const ConfigData &config, int type)
 
 //----------------------------------------------------------------------
 
-static void UnloadTex(const std::map<SString, Img_c *>::value_type& P)
+static void UnloadTex(const std::map<SString, std::unique_ptr<Img_c>>::value_type& P)
 {
 	if (P.second != NULL)
 		P.second->unload_gl(false);
 }
 
-static void UnloadFlat(const std::map<SString, Img_c *>::value_type& P)
+static void UnloadFlat(const std::map<SString, std::unique_ptr<Img_c>>::value_type& P)
 {
 	if (P.second != NULL)
 		P.second->unload_gl(false);
