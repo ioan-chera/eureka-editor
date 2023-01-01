@@ -24,6 +24,7 @@
 #include "ui_panelinput.h"
 #include "FL/Fl_Input.H"
 #include "FL/Fl_RGB_Image.H"
+#include <memory>
 
 class Img_c;
 
@@ -34,23 +35,13 @@ private:
 	std::unique_ptr<Fl_RGB_Image> rgb;
 	std::vector<byte> rgbBuffer;
 
-	enum class Special
-	{
-		none,
-		unknown,   // texture name is not found
-		missing,   // texture is '-' but should be present
-		special,   // texture begins with '#'
-	};
+	bool allow_hl = false;
 
-	Special special = Special::none;
-
-	bool allow_hl;
-
-	bool highlighted;
-	bool selected;
+	bool highlighted = false;
+	bool selected = false;
 
 	SString what_text;
-	Fl_Color    what_color;
+	Fl_Color    what_color = {};
 
 	Instance &inst;
 

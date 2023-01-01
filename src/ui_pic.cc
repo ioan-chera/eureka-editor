@@ -38,9 +38,7 @@
 //
 UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 	Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-	allow_hl(false),
-	highlighted(false),
-	selected(false), inst(inst)
+	inst(inst)
 {
 	color(FL_DARK2);
 
@@ -57,8 +55,6 @@ UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 
 void UI_Pic::Clear()
 {
-	special = Special::none;
-
 	color(FL_DARK2);
 	labelcolor(what_color);
 	labelsize(16);
@@ -75,8 +71,6 @@ void UI_Pic::MarkUnknown()
 {
 	Clear();
 
-	special = Special::unknown;
-
 	color(FL_CYAN);
 	labelcolor(FL_BLACK);
 	labelsize(40);
@@ -90,8 +84,6 @@ void UI_Pic::MarkMissing()
 {
 	Clear();
 
-	special = Special::missing;
-
 	color(fl_rgb_color(255, 128, 0));
 	labelcolor(FL_BLACK);
 	labelsize(40);
@@ -104,8 +96,6 @@ void UI_Pic::MarkMissing()
 void UI_Pic::MarkSpecial()
 {
 	Clear();
-
-	special = Special::special;
 
 	color(fl_rgb_color(192, 0, 192));
 	labelcolor(FL_WHITE);
@@ -295,8 +285,6 @@ void UI_Pic::UploadRGB(std::vector<byte> &&buf, int depth)
 
 	// remove label
 	label("");
-
-	special = Special::none;
 
 	redraw();
 }
