@@ -71,23 +71,13 @@ Img_c::Img_c(int width, int height, bool _dummy)
 	resize(width, height);
 }
 
-
-//
-// destructor
-//
-Img_c::~Img_c()
-{
-	delete []pixels;
-}
-
-
 //
 //  return a const pointer on the buffer.
 //  if the image is null, return a NULL pointer.
 //
 const img_pixel_t *Img_c::buf() const
 {
-	return pixels;
+	return pixels.data();
 }
 
 
@@ -97,7 +87,7 @@ const img_pixel_t *Img_c::buf() const
 //
 img_pixel_t *Img_c::wbuf()
 {
-	return pixels;
+	return pixels.data();
 }
 
 
@@ -106,14 +96,11 @@ img_pixel_t *Img_c::wbuf()
 //
 void Img_c::clear()
 {
-	if (pixels)
-	{
-		img_pixel_t *dest = pixels;
-		img_pixel_t *dest_end = dest + (w * h);
+	img_pixel_t *dest = pixels.data();
+	img_pixel_t *dest_end = dest + (w * h);
 
-		for ( ; dest < dest_end ; dest++)
-			*dest = TRANS_PIXEL;
-	}
+	for ( ; dest < dest_end ; dest++)
+		*dest = TRANS_PIXEL;
 }
 
 
@@ -127,11 +114,7 @@ void Img_c::resize(int new_width, int new_height)
 		return;
 
 	// unallocate old buffer
-	if (pixels)
-	{
-		delete[] pixels;
-		pixels = NULL;
-	}
+	pixels.clear();
 
 	// Is it a null image ?
 	if (new_width == 0 || new_height == 0)
@@ -144,7 +127,7 @@ void Img_c::resize(int new_width, int new_height)
 	w = new_width;
 	h = new_height;
 
-	pixels = new img_pixel_t[w * h + 10];  // Some slack
+	pixels.resize(w * h + 10);  // Some slack
 
 	clear();
 }

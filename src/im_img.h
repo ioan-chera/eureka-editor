@@ -36,6 +36,7 @@ typedef unsigned int GLuint;
 #endif
 
 #include <memory>
+#include <vector>
 
 static constexpr img_pixel_t IS_RGB_PIXEL = 0x8000;
 
@@ -61,7 +62,7 @@ struct WadData;
 class Img_c
 {
 private:
-	img_pixel_t *pixels = nullptr;
+	std::vector<img_pixel_t> pixels;
 
 	int  w = 0;  // Width
 	int  h = 0;  // Height
@@ -72,7 +73,6 @@ private:
 public:
 	 Img_c() = default;
 	 Img_c(int width, int height, bool _dummy = false);
-	~Img_c();
 
 	static std::unique_ptr<Img_c> createLightSprite(const Palette &palette);
 	static std::unique_ptr<Img_c> createMapSpotSprite(const Palette &pal, int base_r, int base_g,
@@ -81,7 +81,7 @@ public:
 
 	inline bool is_null() const
 	{
-		return (! pixels);
+		return pixels.empty();
 	}
 
 	inline int width() const
@@ -128,10 +128,13 @@ public:
 
 	void bind_gl(const WadData &wad);
 
-private:
-	Img_c            (const Img_c&);  // No need to implement it
-	Img_c& operator= (const Img_c&);  // No need to implement it
 
+	Img_c            (const Img_c&) = delete;  // No need to implement it
+	Img_c& operator= (const Img_c&) = delete;  // No need to implement it
+	Img_c(Img_c &&) = default;
+	Img_c &operator= (Img_c &&) = default;
+
+private:
 	static std::unique_ptr<Img_c> createFromText(const Palette &pal, int W, int H,
 												 const char * const*text,
 												 const rgb_color_t *palette, int pal_size);
