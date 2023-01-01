@@ -150,13 +150,13 @@ void Img_c::resize(int new_width, int new_height)
 }
 
 
-void Img_c::compose(const Img_c *other, int x, int y)
+void Img_c::compose(const Img_c &other, int x, int y)
 {
 	int W = width();
 	int H = height();
 
-	int OW = other->width();
-	int OH = other->height();
+	int OW = other.width();
+	int OH = other.height();
 
 	for (int oy = 0 ; oy < OH ; oy++)
 	{
@@ -164,7 +164,7 @@ void Img_c::compose(const Img_c *other, int x, int y)
 		if (iy < 0 || iy >= H)
 			continue;
 
-		const img_pixel_t *src = other->buf() + oy * OW;
+		const img_pixel_t *src = other.buf() + oy * OW;
 		img_pixel_t *dest = wbuf() + iy * W;
 
 		for (int ox = 0 ; ox < OW ; ox++, src++)
@@ -183,9 +183,9 @@ void Img_c::compose(const Img_c *other, int x, int y)
 //
 // make a game image look vaguely like a spectre
 //
-Img_c * Img_c::spectrify(const ConfigData &config) const
+std::unique_ptr<Img_c> Img_c::spectrify(const ConfigData &config) const
 {
-	Img_c *omg = new Img_c(width(), height());
+	auto omg = std::make_unique<Img_c>(width(), height());
 
 	int invis_start = config.miscInfo.invis_colors[0];
 	int invis_len   = config.miscInfo.invis_colors[1] - invis_start + 1;
@@ -209,45 +209,6 @@ Img_c * Img_c::spectrify(const ConfigData &config) const
 			pix = static_cast<img_pixel_t>(invis_start + (rand() >> 4) % invis_len);
 
 		dest[y * W + x] = pix;
-	}
-
-	return omg;
-}
-
-
-//
-//  scale a game image, returning a new one.
-//
-//  the implementation is very simplistic and not optimized.
-//
-//  andrewj: turned into a method, but untested...
-//
-Img_c * Img_c::scale_img(double scale) const
-{
-	int iwidth  = width();
-	int owidth  = (int) (width()  * scale + 0.5);
-	int oheight = (int) (height() * scale + 0.5);
-
-	Img_c *omg = new Img_c(owidth, oheight);
-
-	const img_pixel_t *const ibuf = buf();
-	img_pixel_t       *const obuf = omg->wbuf();
-
-	if (true)
-	{
-		img_pixel_t *orow = obuf;
-		int *ix = new int[owidth];
-		for (int ox = 0; ox < owidth; ox++)
-			ix[ox] = (int) (ox / scale);
-		const int *const ix_end = ix + owidth;
-		for (int oy = 0; oy < oheight; oy++)
-		{
-			int iy = (int) (oy / scale);
-			const img_pixel_t *const irow = ibuf + iwidth * iy;
-			for (const int *i = ix; i < ix_end; i++)
-				*orow++ = irow[*i];
-		}
-		delete[] ix;
 	}
 
 	return omg;
@@ -308,32 +269,6 @@ bool Img_c::has_transparent() const
 	}
 
 	return false;
-}
-
-
-void Img_c::test_make_RGB(const WadData &wad)
-{
-	int W = width();
-	int H = height();
-
-	img_pixel_t *src = wbuf();
-
-	for (int y = 0 ; y < H ; y++)
-	for (int x = 0 ; x < W ; x++)
-	{
-		img_pixel_t pix = src[y * W + x];
-
-		if (pix != TRANS_PIXEL && ! (pix & IS_RGB_PIXEL))
-		{
-			const rgb_color_t col = wad.palette.pixelToRGB(pix);
-
-			byte r = RGB_RED(col)   >> 3;
-			byte g = RGB_GREEN(col) >> 3;
-			byte b = RGB_BLUE(col)  >> 3;
-
-			src[y * W + x] = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
-		}
-	}
 }
 
 

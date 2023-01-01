@@ -3556,7 +3556,7 @@ static bool is_transparent(const Instance &inst, const SString &tex)
 	if (is_null_tex(tex))
 		return false;
 
-	Img_c *img = inst.wad.images.getTexture(inst.conf, tex);
+	const Img_c *img = inst.wad.images.getTexture(inst.conf, tex);
 	if (! img)
 		return false;
 

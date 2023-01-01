@@ -199,7 +199,7 @@ static bool ComposePicture(Img_c& dest, const Img_c *sub,
 		dest.resize (width, height);
 	}
 
-	dest.compose(sub, pic_x_offset, pic_y_offset);
+	dest.compose(*sub, pic_x_offset, pic_y_offset);
 
 	return true;
 }

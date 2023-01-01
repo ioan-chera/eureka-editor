@@ -32,6 +32,7 @@ class UI_Pic : public Fl_Box
 {
 private:
 	Fl_RGB_Image *rgb;
+	std::vector<byte> rgbBuffer;
 
 	enum
 	{
@@ -84,9 +85,9 @@ private:
 	void draw_highlighted();
 	void draw_selected();
 
-	void UploadRGB(const byte *buf, int depth);
+	void UploadRGB(std::vector<byte> &&buf, int depth);
 
-	void TiledImg(Img_c *img);
+	void TiledImg(const Img_c *img);
 };
 
 

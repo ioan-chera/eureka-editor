@@ -109,11 +109,9 @@ public:
 
 	// paste a copy of another image into this one, but skip any
 	// transparent pixels.
-	void compose(const Img_c *other, int x, int y);
+	void compose(const Img_c &other, int x, int y);
 
-	Img_c * spectrify(const ConfigData &config) const;
-
-	Img_c * scale_img(double scale) const;
+	std::unique_ptr<Img_c> spectrify(const ConfigData &config) const;
 
 	std::unique_ptr<Img_c> color_remap(int src1, int src2, int targ1, int targ2) const;
 
@@ -126,9 +124,6 @@ public:
 	void unload_gl(bool can_delete);
 
 	void bind_gl(const WadData &wad);
-
-	// convert pixels to RGB mode, for testing other code
-	void test_make_RGB(const WadData &wad);
 
 private:
 	Img_c            (const Img_c&);  // No need to implement it
