@@ -38,7 +38,6 @@
 //
 UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 	Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-	rgb(NULL), special(SP_None),
 	allow_hl(false),
 	highlighted(false),
 	selected(false), inst(inst)
@@ -58,7 +57,7 @@ UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 
 void UI_Pic::Clear()
 {
-	special = SP_None;
+	special = Special::none;
 
 	color(FL_DARK2);
 	labelcolor(what_color);
@@ -66,10 +65,7 @@ void UI_Pic::Clear()
 
 	label(what_text.c_str());
 
-	if (rgb)
-	{
-		delete rgb; rgb = NULL;
-	}
+	rgb.reset();
 
 	redraw();
 }
@@ -79,7 +75,7 @@ void UI_Pic::MarkUnknown()
 {
 	Clear();
 
-	special = SP_Unknown;
+	special = Special::unknown;
 
 	color(FL_CYAN);
 	labelcolor(FL_BLACK);
@@ -94,7 +90,7 @@ void UI_Pic::MarkMissing()
 {
 	Clear();
 
-	special = SP_Missing;
+	special = Special::missing;
 
 	color(fl_rgb_color(255, 128, 0));
 	labelcolor(FL_BLACK);
@@ -109,7 +105,7 @@ void UI_Pic::MarkSpecial()
 {
 	Clear();
 
-	special = SP_Special;
+	special = Special::special;
 
 	color(fl_rgb_color(192, 0, 192));
 	labelcolor(FL_WHITE);
@@ -295,12 +291,12 @@ void UI_Pic::TiledImg(const Img_c *img)
 void UI_Pic::UploadRGB(std::vector<byte> &&buf, int depth)
 {
 	rgbBuffer = std::move(buf);
-	rgb = new Fl_RGB_Image(rgbBuffer.data(), w(), h(), depth, 0);
+	rgb = std::make_unique<Fl_RGB_Image>(rgbBuffer.data(), w(), h(), depth, 0);
 
 	// remove label
 	label("");
 
-	special = SP_None;
+	special = Special::none;
 
 	redraw();
 }

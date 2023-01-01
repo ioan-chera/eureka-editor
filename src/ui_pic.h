@@ -31,18 +31,18 @@ class Img_c;
 class UI_Pic : public Fl_Box
 {
 private:
-	Fl_RGB_Image *rgb;
+	std::unique_ptr<Fl_RGB_Image> rgb;
 	std::vector<byte> rgbBuffer;
 
-	enum
+	enum class Special
 	{
-		SP_None = 0,
-		SP_Unknown,   // texture name is not found
-		SP_Missing,   // texture is '-' but should be present
-		SP_Special,   // texture begins with '#'
+		none,
+		unknown,   // texture name is not found
+		missing,   // texture is '-' but should be present
+		special,   // texture begins with '#'
 	};
 
-	int special;
+	Special special = Special::none;
 
 	bool allow_hl;
 
