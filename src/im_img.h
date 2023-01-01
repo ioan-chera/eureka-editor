@@ -37,13 +37,16 @@ typedef unsigned int GLuint;
 
 #include <memory>
 
-const img_pixel_t IS_RGB_PIXEL = 0x8000;
+static constexpr img_pixel_t IS_RGB_PIXEL = 0x8000;
 
 #define IMG_PIXEL_RED(col)    (((col) >> 10) & 31)
 #define IMG_PIXEL_GREEN(col)  (((col) >>  5) & 31)
 #define IMG_PIXEL_BLUE(col)   (((col)      ) & 31)
 
-#define IMG_PIXEL_MAKE_RGB(r, g, b)  (IS_RGB_PIXEL | ((r) << 10) | ((g) << 5) | (b))
+static constexpr img_pixel_t pixelMakeRGB(int r, int g, int b)
+{
+	return static_cast<img_pixel_t>(IS_RGB_PIXEL | r << 10 | g << 5 | b);
+}
 
 
 // the color number used to represent transparent pixels in an Img_c.
@@ -134,7 +137,7 @@ private:
 												 const rgb_color_t *palette, int pal_size);
 };
 
-std::unique_ptr<Img_c> IM_ConvertRGBImage(Fl_RGB_Image *src);
+std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src);
 std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 
 #endif  /* __EUREKA_IM_IMG_H__*/

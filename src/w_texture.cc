@@ -59,7 +59,7 @@ void ImageSet::W_AddTexture(const SString &name, std::unique_ptr<Img_c> &&img, b
 }
 
 
-static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
+static bool CheckTexturesAreStrife(const byte *tex_data, int tex_length, int num_tex,
 								   bool skip_first)
 {
 	// we follow the ZDoom logic here: check ALL the texture entries
@@ -89,8 +89,8 @@ static bool CheckTexturesAreStrife(byte *tex_data, int tex_length, int num_tex,
 }
 
 
-static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte *tex_data, int tex_length, int offset,
-									byte *pnames, int pname_size, bool skip_first)
+static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
+									const byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_strife_texture_t *raw = (const raw_strife_texture_t *)(tex_data + offset);
 
@@ -154,8 +154,8 @@ static void LoadTextureEntry_Strife(WadData &wad, const ConfigData &config, byte
 }
 
 
-static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *tex_data, int tex_length, int offset,
-									byte *pnames, int pname_size, bool skip_first)
+static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, const byte *tex_data, int tex_length, int offset,
+									const byte *pnames, int pname_size, bool skip_first)
 {
 	const raw_texture_t *raw = (const raw_texture_t *)(tex_data + offset);
 
@@ -221,7 +221,7 @@ static void LoadTextureEntry_DOOM(WadData &wad, const ConfigData &config, byte *
 }
 
 
-static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lump, byte *pnames, int pname_size,
+static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lump, const byte *pnames, int pname_size,
                              bool skip_first)
 {
 	// TODO : verify size word at front of PNAMES ??
@@ -232,9 +232,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 	pname_size /= 8;
 
 	// load TEXTUREx data into memory for easier processing
-	std::vector<byte> tex_data;
-
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// at the front of the TEXTUREx lump are some 4-byte integers
 	s32_t *tex_data_s32 = (s32_t *)tex_data.data();
@@ -250,7 +248,7 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 	if (num_tex < 0 || num_tex > (1<<20))
 		FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad count.\n");
 
-	bool is_strife = CheckTexturesAreStrife(tex_data.data(), tex_length, num_tex, skip_first);
+	bool is_strife = CheckTexturesAreStrife(tex_data.data(), (int)tex_data.size(), num_tex, skip_first);
 
 	// Note: we skip the first entry (e.g. AASHITTY) which is not really
     //       usable (in the DOOM engine the #0 texture means "do not draw").
@@ -259,13 +257,13 @@ static void LoadTexturesLump(WadData &wad, const ConfigData &config, Lump_c *lum
 	{
 		int offset = LE_S32(tex_data_s32[1 + n]);
 
-		if (offset < 4 * num_tex || offset >= tex_length)
+		if (offset < 4 * num_tex || offset >= (int)tex_data.size())
 			FatalError("W_LoadTextures: TEXTURE1/2 lump is corrupt, bad offset.\n");
 
 		if (is_strife)
-			LoadTextureEntry_Strife(wad, config, tex_data.data(), tex_length, offset, pnames, pname_size, skip_first);
+			LoadTextureEntry_Strife(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
 		else
-			LoadTextureEntry_DOOM(wad, config, tex_data.data(), tex_length, offset, pnames, pname_size, skip_first);
+			LoadTextureEntry_DOOM(wad, config, tex_data.data(), (int)tex_data.size(), offset, pnames, pname_size, skip_first);
 	}
 }
 
@@ -343,14 +341,13 @@ void WadData::W_LoadTextures(const ConfigData &config)
 
 		if (pnames)
 		{
-			std::vector<byte> pname_data;
-			int pname_size = W_LoadLumpData(pnames, pname_data);
+			const std::vector<byte> &pname_data = pnames->getData();
 
 			if (texture1)
-				LoadTexturesLump(*this, config, texture1, pname_data.data(), pname_size, true);
+				LoadTexturesLump(*this, config, texture1, pname_data.data(), (int)pname_data.size(), true);
 
 			if (texture2)
-				LoadTexturesLump(*this, config, texture2, pname_data.data(), pname_size, false);
+				LoadTexturesLump(*this, config, texture2, pname_data.data(), (int)pname_data.size(), false);
 		}
 
 		if (config.features.tx_start)

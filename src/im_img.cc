@@ -622,23 +622,23 @@ static std::unique_ptr<Img_c> IM_CreateFont(int W, int H, const char *const *tex
 		int g = (RGB_GREEN(color) * ity) >> 11;
 		int b = (RGB_BLUE(color)  * ity) >> 11;
 
-		result->wbuf() [y * W + x] = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+		result->wbuf() [y * W + x] = pixelMakeRGB(r, g, b);
 	}
 
 	return result;
 }
 
 
-std::unique_ptr<Img_c> IM_ConvertRGBImage(Fl_RGB_Image *src)
+std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
 {
-	int W  = src->w();
-	int H  = src->h();
-	int D  = src->d();
-	int LD = src->ld();
+	int W  = src.w();
+	int H  = src.h();
+	int D  = src.d();
+	int LD = src.ld();
 
 	LD += W;
 
-	const byte * data = (const byte *) src->array;
+	auto data = static_cast<const byte *>(src.array);
 
 	if (! data)
 		return NULL;
@@ -665,7 +665,7 @@ std::unique_ptr<Img_c> IM_ConvertRGBImage(Fl_RGB_Image *src)
 			// TODO : a preference to palettize it
 			// dest_pix = W_FindPaletteColor(r, g, b);
 
-			dest_pix = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r >> 3, g >> 3, b >> 3));
+			dest_pix = pixelMakeRGB(r >> 3, g >> 3, b >> 3);
 		}
 
 		img->wbuf() [ y * W + x ] = dest_pix;
@@ -689,7 +689,7 @@ std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t * data, int W, int 
 			byte g = RGB_GREEN(*data) >> 3;
 			byte b = RGB_BLUE( *data) >> 3;
 
-			*dest = static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+			*dest = pixelMakeRGB(r, g, b);
 		}
 		else
 		{

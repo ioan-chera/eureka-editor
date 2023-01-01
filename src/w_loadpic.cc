@@ -108,11 +108,10 @@ static void DrawColumn(const Palette &pal, const ConfigData &config,Img_c& img, 
 std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
-	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// pass it to FLTK for decoding
-	Fl_PNG_Image fltk_img(NULL, tex_data.data(), tex_length);
+	Fl_PNG_Image fltk_img(NULL, tex_data.data(), (int)tex_data.size());
 
 	if (fltk_img.w() <= 0)
 	{
@@ -123,17 +122,14 @@ std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 
 	// convert it
 
-	return IM_ConvertRGBImage(&fltk_img);
+	return IM_ConvertRGBImage(fltk_img);
 }
 
 
 std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
-	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
-
-	(void) tex_length;
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// pass it to FLTK for decoding
 	Fl_JPEG_Image fltk_img(NULL, tex_data.data());
@@ -147,22 +143,20 @@ std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 
 	// convert it
 
-	return IM_ConvertRGBImage(&fltk_img);
+	return IM_ConvertRGBImage(fltk_img);
 }
 
 
 std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
 {
 	// load the raw data
-	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// decode it
 	int width;
 	int height;
 
-	rgba_color_t * rgba = TGA_DecodeImage(tex_data.data(), (size_t)tex_length,
-										  width, height);
+	rgba_color_t * rgba = TGA_DecodeImage(tex_data.data(), tex_data.size(),  width, height);
 
 	if (! rgba)
 	{
@@ -260,10 +254,9 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 
 	/* DOOM format */
 
-	std::vector<byte> raw_data;
-	W_LoadLumpData(lump, raw_data);
+	const std::vector<byte> &raw_data = lump->getData();
 
-	const patch_t *pat = (patch_t *) raw_data.data();
+	auto pat = reinterpret_cast<const patch_t *>(raw_data.data());
 
 	int width    = LE_S16(pat->width);
 	int height   = LE_S16(pat->height);

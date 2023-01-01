@@ -133,9 +133,9 @@ public:
 	//
 	// Gets the data from lump without moving the insertion point.
 	//
-	const void *getData() const noexcept
+	const std::vector<byte> &getData() const noexcept
 	{
-		return mData.data();
+		return mData;
 	}
 
 	int64_t getName8() const noexcept;
@@ -329,9 +329,6 @@ private:
 		}
 	};
 };
-
-// load the lump into memory, returning the size
-int  W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer);
 
 void W_StoreString(char *buf, const SString &str, size_t buflen);
 

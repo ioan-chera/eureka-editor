@@ -1013,7 +1013,7 @@ void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 	{
 		assert(ref.lump.get() != nullptr);
 		const Lump_c &lump = *ref.lump;
-		check(sof.write(lump.getData(), lump.Length()));
+		check(sof.write(lump.getData().data(), lump.Length()));
 	}
 	infotableofs = 12;
 	for(const LumpRef &ref : directory)
@@ -1122,24 +1122,6 @@ Lump_c *MasterDir::findGlobalLump(const SString &name) const
 
 	return NULL;  // not found
 }
-
-int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
-{
-	// include an extra byte, used to NUL-terminate a text buffer
-	buffer.resize(lump->Length() + 1);
-
-	if (lump->Length() > 0)
-	{
-		lump->Seek();
-		if (! lump->Read(buffer.data(), lump->Length()))
-			ThrowException("W_LoadLumpData: read error loading lump.\n");
-	}
-
-	buffer[lump->Length()] = 0;
-
-	return lump->Length();
-}
-
 
 //------------------------------------------------------------------------
 

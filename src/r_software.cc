@@ -64,7 +64,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 		g = (g * map) >> 5;
 		b = (b * map) >> 5;
 
-		return static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+		return pixelMakeRGB(r, g, b);
 	}
 	else
 	{
