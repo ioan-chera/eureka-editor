@@ -109,7 +109,7 @@ void UI_Pic::MarkSpecial()
 
 void UI_Pic::GetFlat(const SString & fname)
 {
-	Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname, true /* try_uppercase */);
+	const Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname, true /* try_uppercase */);
 
 	TiledImg(img);
 }
@@ -128,7 +128,7 @@ void UI_Pic::GetTex(const SString & tname)
 		return;
 	}
 
-	Img_c *img = inst.wad.images.getTexture(inst.conf, tname, true /* try_uppercase */);
+	const Img_c *img = inst.wad.images.getTexture(inst.conf, tname, true /* try_uppercase */);
 
 	TiledImg(img);
 }
@@ -138,8 +138,8 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 {
 	Clear();
 
-	Img_c *img = inst.wad.getSprite(inst.conf, type);
-	std::unique_ptr<Img_c> new_img;
+	const Img_c *img = inst.wad.getSprite(inst.conf, type);
+	tl::optional<Img_c> new_img;
 
 	if (! img || img->width() < 1 || img->height() < 1)
 	{
@@ -152,7 +152,7 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 	if (info.flags & THINGDEF_INVIS)
 	{
 		new_img = img->spectrify(inst.conf);
-		img = new_img.get();
+		img = &new_img.value();
 	}
 
 

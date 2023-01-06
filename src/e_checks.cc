@@ -3578,7 +3578,7 @@ static int check_transparent(const Instance &inst, const SString &tex,
 }
 
 
-static void Textures_FindTransparent(const Instance &inst, selection_c& lines,
+static void Textures_FindTransparent(Instance &inst, selection_c& lines,
                               std::map<SString, int>& names)
 {
 	lines.change_type(ObjType::linedefs);
@@ -3675,7 +3675,7 @@ static void Textures_FixTransparent(Instance &inst)
 }
 
 
-static void Textures_LogTransparent(const Instance &inst)
+static void Textures_LogTransparent(Instance &inst)
 {
 	selection_c sel;
 

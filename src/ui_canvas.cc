@@ -1021,7 +1021,7 @@ void UI_Canvas::DrawThingSprites()
 		const thingtype_t &info = inst.conf.getThingType(thing->type);
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.getSprite(inst.conf, thing->type);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, thing->type);
 
 		if (! sprite)
 		{
@@ -2251,11 +2251,11 @@ void UI_Canvas::RenderSector(int num)
 		}
 		else
 		{
-			img = inst.wad.images.W_GetFlat(inst.conf, tex_name);
+			img = inst.wad.images.getMutableFlat(inst.conf, tex_name);
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownTex(inst.conf);
+				img = &inst.wad.images.getMutableUnknownTexture(inst.conf);
 			}
 		}
 	}

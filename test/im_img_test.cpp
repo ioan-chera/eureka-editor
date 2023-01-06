@@ -58,10 +58,9 @@ void ImageFixture::SetUp()
 
 TEST_F(ImageFixture, CreateLightSprite)
 {
-	std::unique_ptr<Img_c> image = Img_c::createLightSprite(palette);
-	ASSERT_TRUE(image);
-	ASSERT_EQ(image->width(), 11);
-	ASSERT_EQ(image->height(), 11);
+	Img_c image = Img_c::createLightSprite(palette);
+	ASSERT_EQ(image.width(), 11);
+	ASSERT_EQ(image.height(), 11);
 
 	static const img_pixel_t expected[11 * 11] = {
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -77,7 +76,7 @@ TEST_F(ImageFixture, CreateLightSprite)
 		0xff, 0xff, 0xff, 0xff, 0x2d, 0x32, 0x32, 0x2d, 0xff, 0xff, 0xff,
 	};
 
-	ASSERT_EQ(memcmp(image->buf(), expected, sizeof(expected)), 0);
+	ASSERT_EQ(memcmp(image.buf(), expected, sizeof(expected)), 0);
 }
 
 TEST_F(ImageFixture, CreateMapSpotSprite)
@@ -193,20 +192,19 @@ TEST_F(ImageFixture, CreateMapSpotSprite)
 	};
 	for(const Case &caze : cases)
 	{
-		std::unique_ptr<Img_c> image = Img_c::createMapSpotSprite(palette, caze.r, caze.g, caze.b);
-		ASSERT_TRUE(image);
-		ASSERT_EQ(image->width(), 32);
-		ASSERT_EQ(image->height(), 32);
+		Img_c image = Img_c::createMapSpotSprite(palette, caze.r, caze.g, caze.b);
+		ASSERT_EQ(image.width(), 32);
+		ASSERT_EQ(image.height(), 32);
 
-		ASSERT_EQ(memcmp(image->buf(), caze.data, sizeof(caze.data)), 0);
+		ASSERT_EQ(memcmp(image.buf(), caze.data, sizeof(caze.data)), 0);
 	}
 }
 
 TEST_F(ImageFixture, CreateDogSprite)
 {
-	std::unique_ptr<Img_c> image = Img_c::createDogSprite(palette);
-	ASSERT_EQ(image->width(), 44);
-	ASSERT_EQ(image->height(), 26);
+	Img_c image = Img_c::createDogSprite(palette);
+	ASSERT_EQ(image.width(), 44);
+	ASSERT_EQ(image.height(), 26);
 
 	static const img_pixel_t expected[44 * 26] = {
 		255, 255, 255, 255, 255, 255, 255, 242, 242, 242, 242, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,

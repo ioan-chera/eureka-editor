@@ -35,6 +35,8 @@ typedef unsigned int GLuint;
 #include "FL/gl.h"
 #endif
 
+#include "tl/optional.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -74,10 +76,10 @@ public:
 	 Img_c() = default;
 	 Img_c(int width, int height, bool _dummy = false);
 
-	static std::unique_ptr<Img_c> createLightSprite(const Palette &palette);
-	static std::unique_ptr<Img_c> createMapSpotSprite(const Palette &pal, int base_r, int base_g,
+	static Img_c createLightSprite(const Palette &palette);
+	static Img_c createMapSpotSprite(const Palette &pal, int base_r, int base_g,
 													  int base_b);
-	static std::unique_ptr<Img_c> createDogSprite(const Palette &pal);
+	static Img_c createDogSprite(const Palette &pal);
 
 	inline bool is_null() const
 	{
@@ -114,9 +116,9 @@ public:
 	// transparent pixels.
 	void compose(const Img_c &other, int x, int y);
 
-	std::unique_ptr<Img_c> spectrify(const ConfigData &config) const;
+	Img_c spectrify(const ConfigData &config) const;
 
-	std::unique_ptr<Img_c> color_remap(int src1, int src2, int targ1, int targ2) const;
+	Img_c color_remap(int src1, int src2, int targ1, int targ2) const;
 
 	bool has_transparent() const;
 
@@ -135,13 +137,13 @@ public:
 	Img_c &operator= (Img_c &&) = default;
 
 private:
-	static std::unique_ptr<Img_c> createFromText(const Palette &pal, int W, int H,
+	static Img_c createFromText(const Palette &pal, int W, int H,
 												 const char * const*text,
 												 const rgb_color_t *palette, int pal_size);
 };
 
-std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src);
-std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
+tl::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src);
+Img_c IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

@@ -87,7 +87,7 @@ public:
 	// heights for the surface (h1 is below h2)
 	int h1, h2, tex_h;
 
-	Img_c *img;
+	const Img_c *img;
 	img_pixel_t col;  /* used when no image */
 
 	enum
@@ -149,7 +149,7 @@ public:
 		{
 			if (is_null_tex(tname))
 			{
-				img = inst.wad.images.IM_MissingTex(inst.conf);
+				img = &inst.wad.images.IM_MissingTex(inst.conf);
 				fullbright = config::render_missing_bright;
 				return;
 			}
@@ -163,7 +163,7 @@ public:
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownTex(inst.conf);
+				img = &inst.wad.images.IM_UnknownTex(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -888,7 +888,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.getSprite(inst.conf, th->type);
+		const Img_c *sprite = inst.wad.getSprite(inst.conf, th->type);
 		if (! sprite)
 		{
 			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -1294,7 +1294,7 @@ public:
 				if (ty < 1) ty = 1;
 
 				float scale   = dw->normal;
-				Img_c *sprite = dw->ceil.img;
+				const Img_c *sprite = dw->ceil.img;
 
 				float tx1 = static_cast<float>(tx - sprite->width() * scale / 2.0);
 				float tx2 = static_cast<float>(tx + sprite->width() * scale / 2.0);

@@ -105,7 +105,7 @@ static void DrawColumn(const Palette &pal, const ConfigData &config,Img_c& img, 
 }
 
 
-std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
+tl::optional<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	const std::vector<byte> &tex_data = lump->getData();
@@ -117,7 +117,7 @@ std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 	{
 		// failed to decode
 		gLog.printf("Failed to decode PNG image in '%s' lump.\n", name.c_str());
-		return NULL;
+		return {};
 	}
 
 	// convert it
@@ -126,7 +126,7 @@ std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 }
 
 
-std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
+tl::optional<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	const std::vector<byte> &tex_data = lump->getData();
@@ -138,7 +138,7 @@ std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 	{
 		// failed to decode
 		gLog.printf("Failed to decode JPEG image in '%s' lump.\n", name.c_str());
-		return NULL;
+		return {};
 	}
 
 	// convert it
@@ -147,7 +147,7 @@ std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 }
 
 
-std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
+tl::optional<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
 {
 	// load the raw data
 	const std::vector<byte> &tex_data = lump->getData();
@@ -162,11 +162,11 @@ std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
 	{
 		// failed to decode
 		gLog.printf("Failed to decode TGA image in '%s' lump.\n", name.c_str());
-		return NULL;
+		return {};
 	}
 
 	// convert it
-	std::unique_ptr<Img_c> img = IM_ConvertTGAImage(rgba, width, height);
+	Img_c img = IM_ConvertTGAImage(rgba, width, height);
 
 	TGA_FreeImage(rgba);
 
@@ -174,11 +174,11 @@ std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
 }
 
 
-static bool ComposePicture(Img_c& dest, const Img_c *sub,
+static bool ComposePicture(Img_c& dest, const tl::optional<Img_c> &sub,
 	int pic_x_offset, int pic_y_offset,
 	int *pic_width, int *pic_height)
 {
-	if (sub == NULL)
+	if (!sub)
 		return false;
 
 	int width  = sub->width();
@@ -223,7 +223,7 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 	int *pic_height)   // (can be NULL)
 {
 	ImageFormat img_fmt = W_DetectImageFormat(lump);
-	std::unique_ptr<Img_c> sub;
+	tl::optional<Img_c> sub;
 
 	switch (img_fmt)
 	{
@@ -233,15 +233,15 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 
 	case ImageFormat::png:
 		sub = LoadImage_PNG(lump, pic_name);
-		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
 	case ImageFormat::jpeg:
 		sub = LoadImage_JPEG(lump, pic_name);
-		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
 	case ImageFormat::tga:
 		sub = LoadImage_TGA(lump, pic_name);
-		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
 
 	case ImageFormat::unrecognized:
 		gLog.printf("Unknown image format in '%s' lump\n", pic_name.c_str());
