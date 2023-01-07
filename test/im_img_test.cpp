@@ -37,6 +37,17 @@ void outputPixels(const Img_c &image)
 	}
 }
 
+TEST(ImageBasic, PixelMakeRGB)
+{
+	img_pixel_t pixel = pixelMakeRGB(23, 15, 27);
+	ASSERT_EQ(pixel, img_pixel_t(IS_RGB_PIXEL | 23 << 10 | 15 << 5 | 27));
+
+	pixel = pixelMakeRGB(0, 0, 0);
+	ASSERT_EQ(pixel, img_pixel_t(IS_RGB_PIXEL));
+}
+
+//==================================================================================================
+
 //
 // Fixture with a palette
 //
