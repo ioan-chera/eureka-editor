@@ -38,10 +38,7 @@
 //
 UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 	Fl_Box(FL_BORDER_BOX, X, Y, W, H, ""),
-	rgb(NULL), special(SP_None),
-	allow_hl(false),
-	highlighted(false),
-	selected(false), inst(inst)
+	inst(inst)
 {
 	color(FL_DARK2);
 
@@ -58,18 +55,13 @@ UI_Pic::UI_Pic(Instance &inst, int X, int Y, int W, int H, const char *L) :
 
 void UI_Pic::Clear()
 {
-	special = SP_None;
-
 	color(FL_DARK2);
 	labelcolor(what_color);
 	labelsize(16);
 
 	label(what_text.c_str());
 
-	if (rgb)
-	{
-		delete rgb; rgb = NULL;
-	}
+	rgb.reset();
 
 	redraw();
 }
@@ -78,8 +70,6 @@ void UI_Pic::Clear()
 void UI_Pic::MarkUnknown()
 {
 	Clear();
-
-	special = SP_Unknown;
 
 	color(FL_CYAN);
 	labelcolor(FL_BLACK);
@@ -94,8 +84,6 @@ void UI_Pic::MarkMissing()
 {
 	Clear();
 
-	special = SP_Missing;
-
 	color(fl_rgb_color(255, 128, 0));
 	labelcolor(FL_BLACK);
 	labelsize(40);
@@ -108,8 +96,6 @@ void UI_Pic::MarkMissing()
 void UI_Pic::MarkSpecial()
 {
 	Clear();
-
-	special = SP_Special;
 
 	color(fl_rgb_color(192, 0, 192));
 	labelcolor(FL_WHITE);
@@ -152,7 +138,8 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 {
 	Clear();
 
-	Img_c *img = inst.wad.W_GetSprite(inst.conf, type);
+	Img_c *img = inst.wad.getSprite(inst.conf, type);
+	std::unique_ptr<Img_c> new_img;
 
 	if (! img || img->width() < 1 || img->height() < 1)
 	{
@@ -160,14 +147,12 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		return;
 	}
 
-	const thingtype_t &info = M_GetThingType(inst.conf, type);
-
-	bool new_img = false;
+	const thingtype_t &info = inst.conf.getThingType(type);
 
 	if (info.flags & THINGDEF_INVIS)
 	{
-		img = img->spectrify(inst.conf);
-		new_img = true;
+		new_img = img->spectrify(inst.conf);
+		img = new_img.get();
 	}
 
 
@@ -193,12 +178,13 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		scale = scale / (2.5f * std::max(fit_x, fit_y));
 
 
-	uchar *buf = new uchar[nw * nh * 3];
+	std::vector<uchar> buf;
+	buf.resize(nw * nh * 3);
 
 	for (int y = 0 ; y < nh ; y++)
 	for (int x = 0 ; x < nw ; x++)
 	{
-		byte *dest = buf + ((y * nw + x) * 3);
+		byte *dest = buf.data() + ((y * nw + x) * 3);
 
 		// black border
 		if (x == 0 || x == nw-1 || y == 0 || y == nh-1)
@@ -231,14 +217,11 @@ void UI_Pic::GetSprite(int type, Fl_Color back_color)
 		}
 	}
 
-	UploadRGB(buf, 3);
-
-	if (new_img)
-		delete img;
+	UploadRGB(std::move(buf), 3);
 }
 
 
-void UI_Pic::TiledImg(Img_c *img)
+void UI_Pic::TiledImg(const Img_c *img)
 {
 	color(FL_DARK2);
 
@@ -266,7 +249,8 @@ void UI_Pic::TiledImg(Img_c *img)
 	const u32_t back = config::transparent_col;
 
 
-	uchar *buf = new uchar[nw * nh * 3];
+	std::vector<uchar> buf;
+	buf.resize(nw * nh * 3);
 
 	for (int y = 0 ; y < nh ; y++)
 	for (int x = 0 ; x < nw ; x++)
@@ -276,7 +260,7 @@ void UI_Pic::TiledImg(Img_c *img)
 
 		img_pixel_t pix = img->buf() [iy*iw+ix];
 
-		byte *dest = buf + ((y * nw + x) * 3);
+		byte *dest = buf.data() + ((y * nw + x) * 3);
 
 		if (pix == TRANS_PIXEL)
 		{
@@ -290,23 +274,17 @@ void UI_Pic::TiledImg(Img_c *img)
 		}
 	}
 
-	UploadRGB(buf, 3);
+	UploadRGB(std::move(buf), 3);
 }
 
 
-void UI_Pic::UploadRGB(const byte *buf, int depth)
+void UI_Pic::UploadRGB(std::vector<byte> &&buf, int depth)
 {
-	rgb = new Fl_RGB_Image(buf, w(), h(), depth, 0);
-
-	// HACK ALERT: make the Fl_RGB_Image class think it allocated
-	//             the buffer, so that it will get freed properly
-	//             by the Fl_RGB_Image destructor.
-	rgb->alloc_array = true;
+	rgbBuffer = std::move(buf);
+	rgb = std::make_unique<Fl_RGB_Image>(rgbBuffer.data(), w(), h(), depth, 0);
 
 	// remove label
 	label("");
-
-	special = SP_None;
 
 	redraw();
 }

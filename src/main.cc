@@ -101,9 +101,9 @@ SString config::default_port = "vanilla";
 int config::gui_scheme    = 1;  // gtk+
 int config::gui_color_set = 1;  // bright
 
-rgb_color_t config::gui_custom_bg = RGB_MAKE(0xCC, 0xD5, 0xDD);
-rgb_color_t config::gui_custom_ig = RGB_MAKE(255, 255, 255);
-rgb_color_t config::gui_custom_fg = RGB_MAKE(0, 0, 0);
+rgb_color_t config::gui_custom_bg = rgbMake(0xCC, 0xD5, 0xDD);
+rgb_color_t config::gui_custom_ig = rgbMake(255, 255, 255);
+rgb_color_t config::gui_custom_fg = rgbMake(0, 0, 0);
 
 
 // Progress during initialisation:

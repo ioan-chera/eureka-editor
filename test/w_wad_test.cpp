@@ -154,7 +154,7 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->NumLumps(), 1);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
 	ASSERT_EQ(read->GetLump(0)->Length(), 13);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	wadReadData = read->GetLump(0)->getData();
 	assertVecString(wadReadData, "Hello, world!");
 
 	// Now add yet another lump at the end
@@ -189,15 +189,15 @@ TEST_F(WadFileTest, WriteRead)
 	ASSERT_EQ(read->NumLumps(), 3);
 	ASSERT_EQ(read->GetLump(0)->Name(), "HELLOWOR");
 	ASSERT_EQ(read->GetLump(0)->Length(), 13);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(0), wadReadData), 13);
+	wadReadData = read->GetLump(0)->getData();
 	assertVecString(wadReadData, "Hello, world!");
 	ASSERT_EQ(read->GetLump(1)->Name(), "MIDLUMP");
 	ASSERT_EQ(read->GetLump(1)->Length(), 4);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(1), wadReadData), 4);
+	wadReadData = read->GetLump(1)->getData();
 	assertVecString(wadReadData, "Doom");
 	ASSERT_EQ(read->GetLump(2)->Name(), "LUMPLUMP");
 	ASSERT_EQ(read->GetLump(2)->Length(), 2);
-	ASSERT_EQ(W_LoadLumpData(read->GetLump(2), wadReadData), 2);
+	wadReadData = read->GetLump(2)->getData();
 	ASSERT_EQ(read->TotalSize(), 12 + 13 + 4 + 2 + 48);
 	assertVecString(wadReadData, "Ah");
 
@@ -516,7 +516,7 @@ TEST_F(WadFileTest, LumpFromFile)
 
 	ASSERT_EQ(lump->Length(), 12);
 	// Test getData
-	ASSERT_FALSE(memcmp(lump->getData(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
+	ASSERT_FALSE(memcmp(lump->getData().data(), "PWAD\0\0\0\0\x0c\0\0\0", 12));
 }
 
 TEST_F(WadFileTest, FindFirstSpriteLump)
@@ -548,36 +548,4 @@ TEST_F(WadFileTest, FindFirstSpriteLump)
 	ASSERT_EQ(wad->findFirstSpriteLump("POSSA3"), possa3d2);
 	ASSERT_EQ(wad->findFirstSpriteLump("TROO"), troob1);
 	ASSERT_EQ(wad->findFirstSpriteLump("POSSD4"), nullptr);
-}
-
-TEST_F(WadFileTest, MasterDirFindFirstSpriteLump)
-{
-	MasterDir master;
-
-	auto wad = Wad_file::Open("dummy.wad", WadOpenMode::write);
-	ASSERT_TRUE(wad);
-	wad->AddLump("S_START");
-	Lump_c *wad1possa1 = wad->AddLump("POSSA1");
-	wad1possa1->Printf("a");	// need to have content to be considered
-	wad->AddLump("TROOC1")->Printf("a");
-	Lump_c *wad1troob1 = wad->AddLump("TROOB1");
-	wad1troob1->Printf("a");
-	wad->AddLump("TROOD1")->Printf("a");
-	wad->AddLump("S_END");
-
-	master.MasterDir_Add(wad);
-
-	auto wad2 = Wad_file::Open("dummy2.wad", WadOpenMode::write);
-	ASSERT_TRUE(wad2);
-
-	wad2->AddLump("S_START");
-	Lump_c *wad2possa1 = wad2->AddLump("POSSA1");
-	wad2possa1->Printf("a");
-	wad2->AddLump("TROOE1")->Printf("a");
-	wad2->AddLump("S_END");
-
-	master.MasterDir_Add(wad2);
-
-	ASSERT_EQ(master.findFirstSpriteLump("POSS"), wad2possa1);
-	ASSERT_EQ(master.findFirstSpriteLump("TROO"), wad1troob1);
 }

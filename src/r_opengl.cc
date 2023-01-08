@@ -1218,7 +1218,7 @@ public:
 	{
 		Thing *th = inst.level.things[th_index];
 
-		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
+		const thingtype_t &info = inst.conf.getThingType(th->type);
 
 		// project sprite to check if it is off-screen
 
@@ -1241,7 +1241,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -1454,11 +1454,11 @@ public:
 			drag_dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 		}
 
-		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
+		const thingtype_t &info = inst.conf.getThingType(th->type);
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.W_GetSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);

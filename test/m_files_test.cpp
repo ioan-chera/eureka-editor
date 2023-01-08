@@ -91,7 +91,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		expected += otherdriveletter;
 		expected += ":/other/path\n";
 	}
-	SString content(static_cast<const char *>(lump->getData()), lump->Length());
+	SString content(reinterpret_cast<const char *>(lump->getData().data()), lump->Length());
 	ASSERT_EQ(content, expected);
 
 	// Now make a change: remove port and resources, see that the lump is updated (not deleted).
@@ -119,7 +119,7 @@ TEST_F(EurekaLumpFixture, WriteEurekaLump)
 		"game Mood\n"
 	};
 	lump = wad->GetLump(2);
-	content = SString(static_cast<const char *>(lump->getData()), lump->Length());
+	content = SString(reinterpret_cast<const char *>(lump->getData().data()), lump->Length());
 	ASSERT_EQ(content, expected2);
 }
 

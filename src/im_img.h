@@ -36,20 +36,18 @@ typedef unsigned int GLuint;
 #endif
 
 #include <memory>
+#include <vector>
 
-// this is a 16-bit value:
-//   - when high bit is clear, it is a palette index 0-255
-//     (value 255 is used to represent fully transparent).
-//   - when high bit is set, the remainder is 5:5:5 RGB
-typedef unsigned short  img_pixel_t;
-
-const img_pixel_t IS_RGB_PIXEL = 0x8000;
+static constexpr img_pixel_t IS_RGB_PIXEL = 0x8000;
 
 #define IMG_PIXEL_RED(col)    (((col) >> 10) & 31)
 #define IMG_PIXEL_GREEN(col)  (((col) >>  5) & 31)
 #define IMG_PIXEL_BLUE(col)   (((col)      ) & 31)
 
-#define IMG_PIXEL_MAKE_RGB(r, g, b)  (IS_RGB_PIXEL | ((r) << 10) | ((g) << 5) | (b))
+static constexpr img_pixel_t pixelMakeRGB(int r, int g, int b)
+{
+	return static_cast<img_pixel_t>(IS_RGB_PIXEL | r << 10 | g << 5 | b);
+}
 
 
 // the color number used to represent transparent pixels in an Img_c.
@@ -64,7 +62,7 @@ struct WadData;
 class Img_c
 {
 private:
-	img_pixel_t *pixels = nullptr;
+	std::vector<img_pixel_t> pixels;
 
 	int  w = 0;  // Width
 	int  h = 0;  // Height
@@ -75,11 +73,15 @@ private:
 public:
 	 Img_c() = default;
 	 Img_c(int width, int height, bool _dummy = false);
-	~Img_c();
+
+	static std::unique_ptr<Img_c> createLightSprite(const Palette &palette);
+	static std::unique_ptr<Img_c> createMapSpotSprite(const Palette &pal, int base_r, int base_g,
+													  int base_b);
+	static std::unique_ptr<Img_c> createDogSprite(const Palette &pal);
 
 	inline bool is_null() const
 	{
-		return (! pixels);
+		return pixels.empty();
 	}
 
 	inline int width() const
@@ -103,7 +105,6 @@ public:
 	// read/write access
 	img_pixel_t *wbuf();
 
-public:
 	// set all pixels to TRANS_PIXEL
 	void clear();
 
@@ -111,11 +112,9 @@ public:
 
 	// paste a copy of another image into this one, but skip any
 	// transparent pixels.
-	void compose(Img_c *other, int x, int y);
+	void compose(const Img_c &other, int x, int y);
 
-	Img_c * spectrify(const ConfigData &config) const;
-
-	Img_c * scale_img(double scale) const;
+	std::unique_ptr<Img_c> spectrify(const ConfigData &config) const;
 
 	std::unique_ptr<Img_c> color_remap(int src1, int src2, int targ1, int targ2) const;
 
@@ -129,19 +128,20 @@ public:
 
 	void bind_gl(const WadData &wad);
 
-	// convert pixels to RGB mode, for testing other code
-	void test_make_RGB(const WadData &wad);
+
+	Img_c            (const Img_c&) = delete;  // No need to implement it
+	Img_c& operator= (const Img_c&) = delete;  // No need to implement it
+	Img_c(Img_c &&) = default;
+	Img_c &operator= (Img_c &&) = default;
 
 private:
-	Img_c            (const Img_c&);  // No need to implement it
-	Img_c& operator= (const Img_c&);  // No need to implement it
+	static std::unique_ptr<Img_c> createFromText(const Palette &pal, int W, int H,
+												 const char * const*text,
+												 const rgb_color_t *palette, int pal_size);
 };
 
-std::unique_ptr<Img_c> IM_CreateDogSprite(const Palette &pal);
-std::unique_ptr<Img_c> IM_CreateLightSprite(const Palette &palette);
-std::unique_ptr<Img_c> IM_CreateMapSpotSprite(const Palette &pal, int base_r, int base_g, int base_b);
-Img_c *IM_ConvertRGBImage(Fl_RGB_Image *src);
-Img_c *IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
+std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src);
+std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t *data, int W, int H);
 
 #endif  /* __EUREKA_IM_IMG_H__*/
 

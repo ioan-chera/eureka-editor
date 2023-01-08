@@ -821,7 +821,7 @@ static Objid getNearestThing(const Document &doc, const ConfigData &config,
 		if(!tpos.inbounds(lpos, hpos))
 			continue;
 
-		const thingtype_t &info = M_GetThingType(config, thing->type);
+		const thingtype_t &info = config.getThingType(thing->type);
 
 		// more accurate bbox test using the real radius
 		double r = info.radius + mapslack;

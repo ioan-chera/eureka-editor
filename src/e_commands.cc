@@ -230,7 +230,7 @@ static void SetGamma(Instance &inst, int new_val)
 {
 	config::usegamma = clamp(0, new_val, 4);
 
-	inst.wad.palette.updateGamma();
+	inst.wad.palette.updateGamma(config::usegamma, config::panel_gamma);
 
 	// for OpenGL, need to reload all images
 	if (inst.main_win && inst.main_win->canvas)

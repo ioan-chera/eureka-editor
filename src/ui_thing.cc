@@ -359,7 +359,7 @@ void UI_ThingBox::type_callback(Fl_Widget *w, void *data)
 
 	int new_type = atoi(box->type->value());
 
-	const thingtype_t &info = M_GetThingType(box->inst.conf, new_type);
+	const thingtype_t &info = box->inst.conf.getThingType(new_type);
 
 	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(new_type, FL_DARK2);
@@ -386,7 +386,7 @@ void UI_ThingBox::dyntype_callback(Fl_Widget *w, void *data)
 
 	int value = atoi(box->type->value());
 
-	const thingtype_t &info = M_GetThingType(box->inst.conf, value);
+	const thingtype_t &info = box->inst.conf.getThingType(value);
 
 	box->desc->value(info.desc.c_str());
 	box->sprite->GetSprite(value, FL_DARK2);
@@ -843,7 +843,7 @@ void UI_ThingBox::UpdateField(int field)
 	{
 		if (inst.level.isThing(obj))
 		{
-			const thingtype_t &info = M_GetThingType(inst.conf, inst.level.things[obj]->type);
+			const thingtype_t &info = inst.conf.getThingType(inst.level.things[obj]->type);
 			desc->value(info.desc.c_str());
 			mFixUp.setInputValue(type, SString(inst.level.things[obj]->type).c_str());
 			sprite->GetSprite(inst.level.things[obj]->type, FL_DARK2);
@@ -895,7 +895,7 @@ void UI_ThingBox::UpdateField(int field)
 		{
 			const Thing *T = inst.level.things[obj];
 
-			const thingtype_t &info = M_GetThingType(inst.conf, T->type);
+			const thingtype_t &info = inst.conf.getThingType(T->type);
 			const linetype_t  &spec = inst.M_GetLineType (T->special);
 
 			// set argument values and tooltips

@@ -64,7 +64,7 @@ static img_pixel_t DoomLightRemap(const Instance &inst, int light, float dist, i
 		g = (g * map) >> 5;
 		b = (b * map) >> 5;
 
-		return static_cast<img_pixel_t>(IMG_PIXEL_MAKE_RGB(r, g, b));
+		return pixelMakeRGB(r, g, b);
 	}
 	else
 	{
@@ -872,7 +872,7 @@ public:
 	{
 		Thing *th = inst.level.things[th_index];
 
-		const thingtype_t &info = M_GetThingType(inst.conf, th->type);
+		const thingtype_t &info = inst.conf.getThingType(th->type);
 
 		float x = static_cast<float>(th->x() - inst.r_view.x);
 		float y = static_cast<float>(th->y() - inst.r_view.y);
@@ -888,7 +888,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *sprite = inst.wad.W_GetSprite(inst.conf, th->type);
+		Img_c *sprite = inst.wad.getSprite(inst.conf, th->type);
 		if (! sprite)
 		{
 			sprite = inst.wad.images.IM_UnknownSprite(inst.conf);

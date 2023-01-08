@@ -105,14 +105,13 @@ static void DrawColumn(const Palette &pal, const ConfigData &config,Img_c& img, 
 }
 
 
-Img_c *LoadImage_PNG(Lump_c *lump, const SString &name)
+std::unique_ptr<Img_c> LoadImage_PNG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
-	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// pass it to FLTK for decoding
-	Fl_PNG_Image fltk_img(NULL, tex_data.data(), tex_length);
+	Fl_PNG_Image fltk_img(NULL, tex_data.data(), (int)tex_data.size());
 
 	if (fltk_img.w() <= 0)
 	{
@@ -122,19 +121,15 @@ Img_c *LoadImage_PNG(Lump_c *lump, const SString &name)
 	}
 
 	// convert it
-	Img_c *img = IM_ConvertRGBImage(&fltk_img);
 
-	return img;
+	return IM_ConvertRGBImage(fltk_img);
 }
 
 
-Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name)
+std::unique_ptr<Img_c> LoadImage_JPEG(Lump_c *lump, const SString &name)
 {
 	// load the raw data
-	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
-
-	(void) tex_length;
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// pass it to FLTK for decoding
 	Fl_JPEG_Image fltk_img(NULL, tex_data.data());
@@ -147,24 +142,21 @@ Img_c *LoadImage_JPEG(Lump_c *lump, const SString &name)
 	}
 
 	// convert it
-	Img_c *img = IM_ConvertRGBImage(&fltk_img);
 
-	return img;
+	return IM_ConvertRGBImage(fltk_img);
 }
 
 
-Img_c *LoadImage_TGA(Lump_c *lump, const SString &name)
+std::unique_ptr<Img_c> LoadImage_TGA(Lump_c *lump, const SString &name)
 {
 	// load the raw data
-	std::vector<byte> tex_data;
-	int tex_length = W_LoadLumpData(lump, tex_data);
+	const std::vector<byte> &tex_data = lump->getData();
 
 	// decode it
 	int width;
 	int height;
 
-	rgba_color_t * rgba = TGA_DecodeImage(tex_data.data(), (size_t)tex_length,
-										  width, height);
+	rgba_color_t * rgba = TGA_DecodeImage(tex_data.data(), tex_data.size(),  width, height);
 
 	if (! rgba)
 	{
@@ -174,7 +166,7 @@ Img_c *LoadImage_TGA(Lump_c *lump, const SString &name)
 	}
 
 	// convert it
-	Img_c *img = IM_ConvertTGAImage(rgba, width, height);
+	std::unique_ptr<Img_c> img = IM_ConvertTGAImage(rgba, width, height);
 
 	TGA_FreeImage(rgba);
 
@@ -182,7 +174,7 @@ Img_c *LoadImage_TGA(Lump_c *lump, const SString &name)
 }
 
 
-static bool ComposePicture(Img_c& dest, Img_c *sub,
+static bool ComposePicture(Img_c& dest, const Img_c *sub,
 	int pic_x_offset, int pic_y_offset,
 	int *pic_width, int *pic_height)
 {
@@ -201,7 +193,7 @@ static bool ComposePicture(Img_c& dest, Img_c *sub,
 		dest.resize (width, height);
 	}
 
-	dest.compose(sub, pic_x_offset, pic_y_offset);
+	dest.compose(*sub, pic_x_offset, pic_y_offset);
 
 	return true;
 }
@@ -230,28 +222,28 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 	int *pic_width,    // To return the size of the picture
 	int *pic_height)   // (can be NULL)
 {
-	char img_fmt = W_DetectImageFormat(lump);
-	Img_c *sub;
+	ImageFormat img_fmt = W_DetectImageFormat(lump);
+	std::unique_ptr<Img_c> sub;
 
 	switch (img_fmt)
 	{
-	case 'd':
+	case ImageFormat::doom:
 		// use the code below to load/compose the DOOM format
 		break;
 
-	case 'p':
+	case ImageFormat::png:
 		sub = LoadImage_PNG(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset, pic_width, pic_height);
 
-	case 'j':
+	case ImageFormat::jpeg:
 		sub = LoadImage_JPEG(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset, pic_width, pic_height);
 
-	case 't':
+	case ImageFormat::tga:
 		sub = LoadImage_TGA(lump, pic_name);
-		return ComposePicture(dest, sub, pic_x_offset, pic_y_offset, pic_width, pic_height);
+		return ComposePicture(dest, sub.get(), pic_x_offset, pic_y_offset, pic_width, pic_height);
 
-	case 0:
+	case ImageFormat::unrecognized:
 		gLog.printf("Unknown image format in '%s' lump\n", pic_name.c_str());
 		return false;
 
@@ -262,10 +254,9 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 
 	/* DOOM format */
 
-	std::vector<byte> raw_data;
-	W_LoadLumpData(lump, raw_data);
+	const std::vector<byte> &raw_data = lump->getData();
 
-	const patch_t *pat = (patch_t *) raw_data.data();
+	auto pat = reinterpret_cast<const patch_t *>(raw_data.data());
 
 	int width    = LE_S16(pat->width);
 	int height   = LE_S16(pat->height);
@@ -303,19 +294,19 @@ bool LoadPicture(const Palette &pal, const ConfigData &config, Img_c& dest,     
 }
 
 
-char W_DetectImageFormat(Lump_c *lump)
+ImageFormat W_DetectImageFormat(Lump_c *lump)
 {
 	byte header[20];
 
 	int length = lump->Length();
 
 	if (length < (int)sizeof(header))
-		return 0;
+		return ImageFormat::unrecognized;
 
 	lump->Seek();
 
 	if (! lump->Read(header, (int)sizeof(header)))
-		return 0;
+		return ImageFormat::unrecognized;
 
 	// PNG is clearly marked in the header, so check it first.
 
@@ -323,7 +314,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[2] == 'N'  && header[3] == 'G' &&
 		header[4] == 0x0D && header[5] == 0x0A)
 	{
-		return 'p'; /* PNG */
+		return ImageFormat::png; /* PNG */
 	}
 
 	// check some other common image formats....
@@ -333,7 +324,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		((header[6] == 'J' && header[7] == 'F') ||
 		 (header[6] == 'E' && header[7] == 'x')))
 	{
-		return 'j'; /* JPEG */
+		return ImageFormat::jpeg; /* JPEG */
 	}
 
 	if (header[0] == 'G' && header[1] == 'I' &&
@@ -341,7 +332,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[4] >= '7' && header[4] <= '9' &&
 		header[5] == 'a')
 	{
-		return 'g'; /* GIF */
+		return ImageFormat::gif; /* GIF */
 	}
 
 	if (header[0] == 'D' && header[1] == 'D'  &&
@@ -349,7 +340,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		header[4] == 124 && header[5] == 0    &&
 		header[6] == 0)
 	{
-		return 's'; /* DDS (DirectDraw Surface) */
+		return ImageFormat::dds; /* DDS (DirectDraw Surface) */
 	}
 
 	// TGA (Targa) is not clearly marked, but better than Doom patches,
@@ -368,7 +359,7 @@ char W_DetectImageFormat(Lump_c *lump)
 		((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
 		(depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
 	{
-		return 't'; /* TGA */
+		return ImageFormat::tga; /* TGA */
 	}
 
 	// check for raw patches last
@@ -383,10 +374,10 @@ char W_DetectImageFormat(Lump_c *lump)
 		height > 0 && height <=  512 && abs(ofs_y) <=  512 &&
 		length > width * 4 /* columnofs */)
 	{
-		return 'd'; /* Doom patch */
+		return ImageFormat::doom; /* Doom patch */
 	}
 
-	return 0;	// unknown!
+	return ImageFormat::unrecognized;	// unknown!
 }
 
 

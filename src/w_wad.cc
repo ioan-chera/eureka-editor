@@ -1013,7 +1013,7 @@ void Wad_file::writeToPath(const fs::path &path) const noexcept(false)
 	{
 		assert(ref.lump.get() != nullptr);
 		const Lump_c &lump = *ref.lump;
-		check(sof.write(lump.getData(), lump.Length()));
+		check(sof.write(lump.getData().data(), lump.Length()));
 	}
 	infotableofs = 12;
 	for(const LumpRef &ref : directory)
@@ -1111,7 +1111,7 @@ bool Wad_file::Backup(const fs::path &new_filename)
 // find a lump in any loaded wad (later ones tried first),
 // returning NULL if not found.
 //
-Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
+Lump_c *MasterDir::findGlobalLump(const SString &name) const
 {
 	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
 	{
@@ -1122,41 +1122,6 @@ Lump_c *MasterDir::W_FindGlobalLump(const SString &name) const
 
 	return NULL;  // not found
 }
-
-//
-// find a lump that only exists in a certain namespace (sprite,
-// or patch) of a loaded wad (later ones tried first).
-//
-Lump_c *MasterDir::findSpriteLump(const SString &name) const
-{
-	for (int i = (int)getDir().size()-1 ; i >= 0 ; i--)
-	{
-		Lump_c *L = getDir()[i]->FindLumpInNamespace(name, WadNamespace::Sprites);
-		if (L)
-			return L;
-	}
-
-	return NULL;  // not found
-}
-
-
-int W_LoadLumpData(Lump_c *lump, std::vector<byte> &buffer)
-{
-	// include an extra byte, used to NUL-terminate a text buffer
-	buffer.resize(lump->Length() + 1);
-
-	if (lump->Length() > 0)
-	{
-		lump->Seek();
-		if (! lump->Read(buffer.data(), lump->Length()))
-			ThrowException("W_LoadLumpData: read error loading lump.\n");
-	}
-
-	buffer[lump->Length()] = 0;
-
-	return lump->Length();
-}
-
 
 //------------------------------------------------------------------------
 

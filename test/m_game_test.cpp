@@ -148,6 +148,51 @@ TEST(MGame, MClearAllDefinitions)
     ASSERT_EQ(instance.conf.num_gen_linetypes, 0);
 }
 
+//
+// Convenience operator
+//
+static bool operator == (const thingtype_t &type1, const thingtype_t &type2)
+{
+	return type1.group == type2.group && type1.flags == type2.flags &&
+	type1.radius == type2.radius && type1.scale == type2.scale && type1.desc == type2.desc &&
+	type1.sprite == type2.sprite && type1.color == type2.color && type1.args[0] == type2.args[0] &&
+	type1.args[1] == type2.args[1] && type1.args[2] == type2.args[2] &&
+	type1.args[3] == type2.args[3] && type1.args[4] == type2.args[4];
+}
+
+TEST(MGame, ConfigDataGetThingType)
+{
+	ConfigData config = {};
+	thingtype_t type = {};
+	type.group = 'a';
+	type.flags = THINGDEF_LIT;
+	type.radius = 16;
+	type.scale = 1.0f;
+	type.desc = "Bright spot";
+	type.sprite = "BRIG";
+	type.color = rgbMake(128, 0, 0);
+
+	config.thing_types[111] = type;
+
+	thingtype_t type2 = {};
+
+	type2.group = 'b';
+	type2.flags = 0;
+	type2.radius = 16;
+	type2.scale = 1.0f;
+	type2.desc = "Dark spot";
+	type2.sprite = "DARK";
+	type2.color = rgbMake(0, 0, 128);
+
+	config.thing_types[222] = type2;
+
+	ASSERT_EQ(config.getThingType(111), type);
+	ASSERT_EQ(config.getThingType(222), type2);
+	ASSERT_EQ(config.getThingType(1).desc, "UNKNOWN TYPE");
+	ASSERT_EQ(config.getThingType(0).desc, "UNKNOWN TYPE");
+	ASSERT_EQ(config.getThingType(-1).desc, "UNKNOWN TYPE");
+}
+
 TEST_F(MGameFixture, MCollectKnownDefs)
 {
 	//

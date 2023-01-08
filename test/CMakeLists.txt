@@ -31,6 +31,8 @@ set(_testUtils
     testUtils/FatalHandler.hpp
     testUtils/TempDirContext.cpp
     testUtils/TempDirContext.hpp
+    testUtils/Palette.cpp
+    testUtils/Palette.hpp
     ${src}/Errors.cc
     ${src}/lib_adler.cc
     ${src}/lib_util.cc
@@ -113,7 +115,10 @@ endfunction()
 unit_test(general
     DocumentTest.cpp
     e_checks_test.cpp
+    im_color_test.cpp
+    im_img_test.cpp
     lib_file_test.cpp
+    lib_tga_test.cpp
     m_files_test.cpp
     m_game_test.cpp
     m_parse_test.cpp
@@ -123,7 +128,10 @@ unit_test(general
     SStringTest.cpp
     ThingTest.cpp
     VertexTest.cpp
+    w_loadpic_test.cpp
+    w_texture_test.cpp
     w_wad_test.cpp
+    WadDataTest.cpp
     stub/osxcalls_stub.cpp
     SRC bsp_level.cc
         bsp_node.cc

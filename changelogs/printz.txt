@@ -4,6 +4,11 @@ Changes for 2.0
 dd.mm.yyyy
 
 ----------
+24.10.2022
+* Thing definition sprite lookup is now smarter and doesn't need full names for certain frames (e.g.
+  BOSA1C1). In consequence, mods which change the rotation distributions won't be affected.
+
+----------
 12.10.2022
 * Fixed the EUREKA lump to store relative paths so that the user settings are portable between
   computers.
