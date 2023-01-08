@@ -37,7 +37,7 @@ TEST(TGA, DecodeImage)
     ASSERT_EQ(width, 4);
     ASSERT_EQ(height, 3);
 
-    delete[] rgba;
+    TGA_FreeImage(rgba);
 }
 
 TEST(TGA, DecodeImageBroken)
