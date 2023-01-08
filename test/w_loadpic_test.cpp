@@ -249,3 +249,17 @@ TEST(LoadImage, JPEGBroken)
 	auto image = LoadImage_JPEG(data.second, "our jpg");
 	ASSERT_FALSE(image);
 }
+
+TEST(LoadImage, TGA)
+{
+	std::vector<uint8_t> tgaData = {
+		17, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 3, 0, 32, 8, 16, 67, 114, 101, 97, 116, 101, 100,
+        32, 98, 121, 32, 80, 105, 110, 116, 97, 255, 255, 127, 255, 255, 255, 199, 255, 255, 160,
+        143, 255, 255, 38, 0, 255, 192, 192, 199, 255, 238, 238, 246, 255, 254, 232, 238, 255, 247,
+        146, 192, 255, 0, 0, 255, 255, 143, 143, 255, 255, 247, 199, 255, 255, 237, 127, 255, 255,
+	};
+
+	auto data = prepareData(tgaData);
+	auto image = LoadImage_TGA(data.second, "our tga");
+	assertImageValid(image.get());
+}
