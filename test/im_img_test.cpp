@@ -120,6 +120,29 @@ TEST(ImageBasic, ConvertRGBImageInvalidDepth2)
 	ASSERT_FALSE(image);
 }
 
+TEST(ImageBasic, ConvertTGAImage)
+{
+	static const rgba_color_t rgba[] = {
+		0xff0080ff, 0x7799aa22, 0x337744ff, 0x12469911,
+		0xffffffff, 0x00000000, 0x246732ff, 0x12345678,
+	};
+	auto image = IM_ConvertTGAImage(rgba, 4, 2);
+	ASSERT_TRUE(image);
+	ASSERT_FALSE(image->is_null());
+	ASSERT_TRUE(image->has_transparent());
+	ASSERT_EQ(image->width(), 4);
+	ASSERT_EQ(image->height(), 2);
+	const auto buf = image->buf();
+	ASSERT_NE(buf[0], TRANS_PIXEL);
+	ASSERT_EQ(buf[1], TRANS_PIXEL);
+	ASSERT_NE(buf[2], TRANS_PIXEL);
+	ASSERT_EQ(buf[3], TRANS_PIXEL);
+	ASSERT_NE(buf[4], TRANS_PIXEL);
+	ASSERT_EQ(buf[5], TRANS_PIXEL);
+	ASSERT_NE(buf[6], TRANS_PIXEL);
+	ASSERT_EQ(buf[7], TRANS_PIXEL);
+}
+
 //==================================================================================================
 
 //
