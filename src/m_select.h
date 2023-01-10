@@ -29,6 +29,7 @@
 
 #include "m_bitvec.h"
 #include "objid.h"
+#include "tl/optional.hpp"
 
 class sel_iter_c;
 
@@ -48,11 +49,10 @@ private:
 	int objs[MAX_STORE_SEL] = {};
 
 	// use a bit vector when needed, NULL otherwise
-	bitvec_c * bv = nullptr;
+	tl::optional<bitvec_c> bv;
 
 	// an extended mode selection can access 8-bits per object
-	byte * extended = nullptr;
-	int    ext_size = 0;
+	tl::optional<std::vector<byte>> extended;
 
 	// the highest object in the selection, or -1
 	int maxobj = -1;
