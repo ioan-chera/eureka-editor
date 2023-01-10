@@ -174,10 +174,10 @@ public:
 			return NULL;
 		}
 
-		Img_c *img = inst.wad.images.W_GetFlat(inst.conf, fname);
+		Img_c *img = inst.wad.images.getMutableFlat(inst.conf, fname);
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownFlat(inst.conf);
+			img = &inst.wad.images.getMutableUnknownFlat(inst.conf);
 			fullbright = config::render_unknown_bright;
 		}
 
@@ -211,20 +211,20 @@ public:
 
 		if (is_null_tex(tname))
 		{
-			img = inst.wad.images.IM_MissingTex(inst.conf);
+			img = &inst.wad.images.getMutableMissingTexture(inst.conf);
 			fullbright = config::render_missing_bright;
 		}
 		else if (is_special_tex(tname))
 		{
-			img = inst.wad.images.IM_SpecialTex(inst.wad.palette);
+			img = &inst.wad.images.getMutableSpecialTexture(inst.wad.palette);
 		}
 		else
 		{
-			img = inst.wad.images.getTexture(inst.conf, tname);
+			img = inst.wad.images.getMutableTexture(inst.conf, tname);
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownTex(inst.conf);
+				img = &inst.wad.images.getMutableUnknownTexture(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 		}
@@ -1241,7 +1241,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.getSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);
@@ -1458,7 +1458,7 @@ public:
 
 		float scale = info.scale;
 
-		Img_c *img = inst.wad.getSprite(inst.conf, th->type);
+		const Img_c *img = inst.wad.getSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);

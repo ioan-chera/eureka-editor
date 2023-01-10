@@ -30,6 +30,7 @@
 
 #include "im_img.h"
 #include "m_game.h"
+#include "tl/optional.hpp"
 
 #ifndef NO_OPENGL
 // need this for GL_UNSIGNED_INT_8_8_8_8_REV
@@ -166,9 +167,9 @@ void Img_c::compose(const Img_c &other, int x, int y)
 //
 // make a game image look vaguely like a spectre
 //
-std::unique_ptr<Img_c> Img_c::spectrify(const ConfigData &config) const
+Img_c Img_c::spectrify(const ConfigData &config) const
 {
-	auto omg = std::make_unique<Img_c>(width(), height());
+	Img_c omg(width(), height());
 
 	int invis_start = config.miscInfo.invis_colors[0];
 	int invis_len   = config.miscInfo.invis_colors[1] - invis_start + 1;
@@ -181,7 +182,7 @@ std::unique_ptr<Img_c> Img_c::spectrify(const ConfigData &config) const
 
 	const img_pixel_t *src = buf();
 
-	img_pixel_t *dest = omg->wbuf();
+	img_pixel_t *dest = omg.wbuf();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -204,19 +205,19 @@ std::unique_ptr<Img_c> Img_c::spectrify(const ConfigData &config) const
 //
 // TODO : make it work with RGB pixels (find nearest in palette).
 //
-std::unique_ptr<Img_c> Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
+Img_c Img_c::color_remap(int src1, int src2, int targ1, int targ2) const
 {
 	SYS_ASSERT( src1 <=  src2);
 	SYS_ASSERT(targ1 <= targ2);
 
-	auto omg = std::make_unique<Img_c>(width(), height());
+	Img_c omg(width(), height());
 
 	int W = width();
 	int H = height();
 
 	const img_pixel_t *src = buf();
 
-	img_pixel_t *dest = omg->wbuf();
+	img_pixel_t *dest = omg.wbuf();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -376,7 +377,7 @@ void ImageSet::IM_ResetDummyTextures()
 }
 
 
-void ImageSet::IM_UnloadDummyTextures() const
+void ImageSet::IM_UnloadDummyTextures()
 {
 	bool can_delete = false;
 
@@ -445,11 +446,11 @@ static const byte missing_graphic[16 * 16] =
 };
 
 
-static std::unique_ptr<Img_c> IM_CreateDummyTex(const byte *data, int bg, int fg)
+static Img_c IM_CreateDummyTex(const byte *data, int bg, int fg)
 {
-	auto omg = std::make_unique<Img_c>(64, 64, true);
+	Img_c omg(64, 64, true);
 
-	img_pixel_t *obuf = omg->wbuf();
+	img_pixel_t *obuf = omg.wbuf();
 
 	for (int y = 0 ; y < 64 ; y++)
 	for (int x = 0 ; x < 64 ; x++)
@@ -462,7 +463,7 @@ static std::unique_ptr<Img_c> IM_CreateDummyTex(const byte *data, int bg, int fg
 }
 
 
-Img_c *ImageSet::IM_MissingTex(const ConfigData &config)
+const Img_c &ImageSet::IM_MissingTex(const ConfigData &config)
 {
 	if (!missing_tex_image || missing_tex_color != config.miscInfo.missing_color)
 	{
@@ -471,11 +472,11 @@ Img_c *ImageSet::IM_MissingTex(const ConfigData &config)
 		missing_tex_image = IM_CreateDummyTex(missing_graphic, missing_tex_color, 0);
 	}
 
-	return missing_tex_image.get();
+	return missing_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_UnknownTex(const ConfigData &config)
+const Img_c &ImageSet::IM_UnknownTex(const ConfigData &config)
 {
 	if (!unknown_tex_image || unknown_tex_color != config.miscInfo.unknown_tex)
 	{
@@ -484,28 +485,28 @@ Img_c *ImageSet::IM_UnknownTex(const ConfigData &config)
 		unknown_tex_image = IM_CreateDummyTex(unknown_graphic, unknown_tex_color, 0);
 	}
 
-	return unknown_tex_image.get();
+	return unknown_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_SpecialTex(const Palette &palette)
+const Img_c &ImageSet::IM_SpecialTex(const Palette &palette)
 {
 	if (special_tex_color < 0)
 	{
 		special_tex_color = palette.findPaletteColor(192, 0, 192);
 
-		special_tex_image = NULL;
+		special_tex_image.reset();
 	}
 
 	if (!special_tex_image)
 		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
 			palette.findPaletteColor(255, 255, 255));
 
-	return special_tex_image.get();
+	return special_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
+const Img_c &ImageSet::IM_UnknownFlat(const ConfigData &config)
 {
 	if (!unknown_flat_image || unknown_flat_color != config.miscInfo.unknown_flat)
 	{
@@ -514,7 +515,7 @@ Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
 		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
 	}
 
-	return unknown_flat_image.get();
+	return unknown_flat_image.value();
 }
 
 
@@ -544,13 +545,13 @@ Img_c *ImageSet::IM_UnknownSprite(const ConfigData &config)
 }
 
 
-std::unique_ptr<Img_c> Img_c::createFromText(const Palette &pal, int W, int H,
+Img_c Img_c::createFromText(const Palette &pal, int W, int H,
 											 const char * const*text, const rgb_color_t *palette,
 											 int pal_size)
 {
-	auto result = std::make_unique<Img_c>(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	// translate colors to current palette
 	std::vector<byte> conv_palette;
@@ -573,7 +574,7 @@ std::unique_ptr<Img_c> Img_c::createFromText(const Palette &pal, int W, int H,
 		if (ch < 'a' || ch >= 'a' + pal_size)
 			BugError("Bad character (dec #%d) in built-in image.\n", ch);
 
-		result->wbuf() [y * W + x] = conv_palette[ch - 'a'];
+		result.wbuf() [y * W + x] = conv_palette[ch - 'a'];
 	}
 
 	return result;
@@ -612,7 +613,7 @@ static std::unique_ptr<Img_c> IM_CreateFont(int W, int H, const char *const *tex
 }
 
 
-std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
+tl::optional<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
 {
 	int W  = src.w();
 	int H  = src.h();
@@ -624,12 +625,12 @@ std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
 	auto data = static_cast<const byte *>(src.array);
 
 	if (! data)
-		return NULL;
+		return {};
 
 	if (! (D == 3 || D == 4))
-		return NULL;
+		return {};
 
-	auto img = std::make_unique<Img_c>(W, H);
+	Img_c img(W, H);
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -651,18 +652,18 @@ std::unique_ptr<Img_c> IM_ConvertRGBImage(const Fl_RGB_Image &src)
 			dest_pix = pixelMakeRGB(r >> 3, g >> 3, b >> 3);
 		}
 
-		img->wbuf() [ y * W + x ] = dest_pix;
+		img.wbuf() [ y * W + x ] = dest_pix;
 	}
 
 	return img;
 }
 
 
-std::unique_ptr<Img_c> IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
+Img_c IM_ConvertTGAImage(const rgba_color_t * data, int W, int H)
 {
-	auto img = std::make_unique<Img_c>(W, H);
+	Img_c img(W, H);
 
-	img_pixel_t *dest = img->wbuf();
+	img_pixel_t *dest = img.wbuf();
 
 	for (int i = W * H ; i > 0 ; i--, data++, dest++)
 	{
@@ -902,7 +903,7 @@ static const char *const dog_image_text[] =
 };
 
 
-std::unique_ptr<Img_c> Img_c::createDogSprite(const Palette &pal)
+Img_c Img_c::createDogSprite(const Palette &pal)
 {
 	return createFromText(pal, 44, 26, dog_image_text, dog_palette, 7);
 }
@@ -910,14 +911,14 @@ std::unique_ptr<Img_c> Img_c::createDogSprite(const Palette &pal)
 
 //------------------------------------------------------------------------
 
-std::unique_ptr<Img_c> Img_c::createLightSprite(const Palette &palette)
+Img_c Img_c::createLightSprite(const Palette &palette)
 {
 	static const int W = 11;
 	static const int H = 11;
 
-	auto result = std::make_unique<Img_c>(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	for (int y = 0 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -942,22 +943,22 @@ std::unique_ptr<Img_c> Img_c::createLightSprite(const Palette &palette)
 
 		pix = palette.findPaletteColor(r, g, b);
 
-		result->wbuf() [ y * W + x ] = pix;
+		result.wbuf() [ y * W + x ] = pix;
 	}
 
 	return result;
 }
 
 
-std::unique_ptr<Img_c> Img_c::createMapSpotSprite(const Palette &pal, int base_r, int base_g,
+Img_c Img_c::createMapSpotSprite(const Palette &pal, int base_r, int base_g,
 												  int base_b)
 {
 	int W = 32;
 	int H = 32;
 
-	auto result = std::make_unique<Img_c>(W, H);
+	Img_c result(W, H);
 
-	result->clear();
+	result.clear();
 
 	for (int y = 4 ; y < H ; y++)
 	for (int x = 0 ; x < W ; x++)
@@ -982,7 +983,7 @@ std::unique_ptr<Img_c> Img_c::createMapSpotSprite(const Palette &pal, int base_r
 			pix = pal.findPaletteColor(r, g, b);
 		}
 
-		result->wbuf() [ y * W + x ] = pix;
+		result.wbuf() [ y * W + x ] = pix;
 	}
 
 	return result;

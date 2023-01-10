@@ -159,7 +159,7 @@ static auto prepareData(const std::vector<uint8_t> &data)
 	return std::make_pair(wad, lump);
 }
 
-static void assertImageValid(const Img_c *image)
+static void assertImageValid(const tl::optional<Img_c> &image)
 {
 	ASSERT_TRUE(image);
 	ASSERT_FALSE(image->is_null());
@@ -183,7 +183,7 @@ TEST(LoadImage, PNG)
 	auto data = prepareData(pngData);
 
 	auto image = LoadImage_PNG(data.second, "our image");
-	assertImageValid(image.get());
+	assertImageValid(image);
 }
 
 TEST(LoadImage, PNGBroken)
@@ -238,7 +238,7 @@ TEST(LoadImage, JPEG)
 {
 	auto data = prepareData(jpgData);
 	auto image = LoadImage_JPEG(data.second, "our jpg");
-	assertImageValid(image.get());
+	assertImageValid(image);
 }
 
 TEST(LoadImage, JPEGBroken)
@@ -261,5 +261,5 @@ TEST(LoadImage, TGA)
 
 	auto data = prepareData(tgaData);
 	auto image = LoadImage_TGA(data.second, "our tga");
-	assertImageValid(image.get());
+	assertImageValid(image);
 }

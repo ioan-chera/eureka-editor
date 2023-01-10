@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "im_img.h"
+#include "m_game.h"
 #include "w_wad.h"
 #include "testUtils/Palette.hpp"
 #include "gtest/gtest.h"
@@ -127,12 +128,11 @@ TEST(ImageBasic, ConvertTGAImage)
 		0xffffffff, 0x00000000, 0x246732ff, 0x12345678,
 	};
 	auto image = IM_ConvertTGAImage(rgba, 4, 2);
-	ASSERT_TRUE(image);
-	ASSERT_FALSE(image->is_null());
-	ASSERT_TRUE(image->has_transparent());
-	ASSERT_EQ(image->width(), 4);
-	ASSERT_EQ(image->height(), 2);
-	const auto buf = image->buf();
+	ASSERT_FALSE(image.is_null());
+	ASSERT_TRUE(image.has_transparent());
+	ASSERT_EQ(image.width(), 4);
+	ASSERT_EQ(image.height(), 2);
+	const auto buf = image.buf();
 	ASSERT_NE(buf[0], TRANS_PIXEL);
 	ASSERT_EQ(buf[1], TRANS_PIXEL);
 	ASSERT_NE(buf[2], TRANS_PIXEL);
@@ -141,6 +141,73 @@ TEST(ImageBasic, ConvertTGAImage)
 	ASSERT_EQ(buf[5], TRANS_PIXEL);
 	ASSERT_NE(buf[6], TRANS_PIXEL);
 	ASSERT_EQ(buf[7], TRANS_PIXEL);
+}
+
+static Img_c getCrossImage()
+{
+	Img_c image(3, 3);
+	img_pixel_t *buf = image.wbuf();
+	buf[1] = buf[3] = buf[4] = buf[5] = buf[7] = 200;	// +
+	EXPECT_TRUE(image.has_transparent());
+
+	return image;
+}
+
+TEST(ImageBasic, Spectrify)
+{
+	ConfigData config = {};
+
+	config.miscInfo.invis_colors[0] = 2;
+	config.miscInfo.invis_colors[1] = 10;
+	
+	Img_c image = getCrossImage();
+
+	Img_c specter = image.spectrify(config);
+	ASSERT_FALSE(specter.is_null());
+	ASSERT_TRUE(specter.has_transparent());
+	ASSERT_EQ(specter.width(), 3);
+	ASSERT_EQ(specter.height(), 3);
+	const img_pixel_t *sbuf = specter.buf();
+	ASSERT_EQ(sbuf[0], TRANS_PIXEL);
+	ASSERT_GE(sbuf[1], 2);
+	ASSERT_LE(sbuf[1], 10);
+	ASSERT_EQ(sbuf[2], TRANS_PIXEL);
+	ASSERT_GE(sbuf[3], 2);
+	ASSERT_LE(sbuf[3], 10);
+	ASSERT_GE(sbuf[4], 2);
+	ASSERT_LE(sbuf[4], 10);
+	ASSERT_GE(sbuf[5], 2);
+	ASSERT_LE(sbuf[5], 10);
+	ASSERT_EQ(sbuf[6], TRANS_PIXEL);
+	ASSERT_GE(sbuf[7], 2);
+	ASSERT_LE(sbuf[7], 10);
+	ASSERT_EQ(sbuf[8], TRANS_PIXEL);
+}
+
+TEST(ImageBasic, SpectrifySingleColor)
+{
+	ConfigData config = {};
+
+	config.miscInfo.invis_colors[0] = 2;
+	config.miscInfo.invis_colors[1] = 0;
+
+	Img_c image = getCrossImage();
+
+	Img_c specter = image.spectrify(config);
+	ASSERT_FALSE(specter.is_null());
+	ASSERT_TRUE(specter.has_transparent());
+	ASSERT_EQ(specter.width(), 3);
+	ASSERT_EQ(specter.height(), 3);
+	const img_pixel_t *sbuf = specter.buf();
+	ASSERT_EQ(sbuf[0], TRANS_PIXEL);
+	ASSERT_EQ(sbuf[1], 2);
+	ASSERT_EQ(sbuf[2], TRANS_PIXEL);
+	ASSERT_EQ(sbuf[3], 2);
+	ASSERT_EQ(sbuf[4], 2);
+	ASSERT_EQ(sbuf[5], 2);
+	ASSERT_EQ(sbuf[6], TRANS_PIXEL);
+	ASSERT_EQ(sbuf[7], 2);
+	ASSERT_EQ(sbuf[8], TRANS_PIXEL);
 }
 
 //==================================================================================================
@@ -166,10 +233,9 @@ void ImageFixture::SetUp()
 
 TEST_F(ImageFixture, CreateLightSprite)
 {
-	std::unique_ptr<Img_c> image = Img_c::createLightSprite(palette);
-	ASSERT_TRUE(image);
-	ASSERT_EQ(image->width(), 11);
-	ASSERT_EQ(image->height(), 11);
+	Img_c image = Img_c::createLightSprite(palette);
+	ASSERT_EQ(image.width(), 11);
+	ASSERT_EQ(image.height(), 11);
 
 	static const img_pixel_t expected[11 * 11] = {
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -185,7 +251,7 @@ TEST_F(ImageFixture, CreateLightSprite)
 		0xff, 0xff, 0xff, 0xff, 0x2d, 0x32, 0x32, 0x2d, 0xff, 0xff, 0xff,
 	};
 
-	ASSERT_EQ(memcmp(image->buf(), expected, sizeof(expected)), 0);
+	ASSERT_EQ(memcmp(image.buf(), expected, sizeof(expected)), 0);
 }
 
 TEST_F(ImageFixture, CreateMapSpotSprite)
@@ -301,20 +367,19 @@ TEST_F(ImageFixture, CreateMapSpotSprite)
 	};
 	for(const Case &caze : cases)
 	{
-		std::unique_ptr<Img_c> image = Img_c::createMapSpotSprite(palette, caze.r, caze.g, caze.b);
-		ASSERT_TRUE(image);
-		ASSERT_EQ(image->width(), 32);
-		ASSERT_EQ(image->height(), 32);
+		Img_c image = Img_c::createMapSpotSprite(palette, caze.r, caze.g, caze.b);
+		ASSERT_EQ(image.width(), 32);
+		ASSERT_EQ(image.height(), 32);
 
-		ASSERT_EQ(memcmp(image->buf(), caze.data, sizeof(caze.data)), 0);
+		ASSERT_EQ(memcmp(image.buf(), caze.data, sizeof(caze.data)), 0);
 	}
 }
 
 TEST_F(ImageFixture, CreateDogSprite)
 {
-	std::unique_ptr<Img_c> image = Img_c::createDogSprite(palette);
-	ASSERT_EQ(image->width(), 44);
-	ASSERT_EQ(image->height(), 26);
+	Img_c image = Img_c::createDogSprite(palette);
+	ASSERT_EQ(image.width(), 44);
+	ASSERT_EQ(image.height(), 26);
 
 	static const img_pixel_t expected[44 * 26] = {
 		255, 255, 255, 255, 255, 255, 255, 242, 242, 242, 242, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -345,5 +410,5 @@ TEST_F(ImageFixture, CreateDogSprite)
 		255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 242, 242, 242, 255, 255, 255, 255, 255, 242, 242, 242, 255, 255, 255, 255, 255, 255, 255,
 	};
 
-	ASSERT_EQ(memcmp(image->buf(), expected, sizeof(expected)), 0);
+	ASSERT_EQ(memcmp(image.buf(), expected, sizeof(expected)), 0);
 }

@@ -40,7 +40,7 @@ class Wad_file;
 struct ConfigData;
 
 // maps type number to an image
-typedef std::map<int, std::unique_ptr<Img_c>> sprite_map_t;
+typedef std::map<int, tl::optional<Img_c>> sprite_map_t;
 
 //
 // Wad image set
@@ -48,63 +48,87 @@ typedef std::map<int, std::unique_ptr<Img_c>> sprite_map_t;
 class ImageSet
 {
 public:
-	Img_c *IM_SpecialTex(const Palette &palette);
-	Img_c *IM_MissingTex(const ConfigData &config);
-	Img_c *IM_UnknownTex(const ConfigData &config);
-	Img_c *IM_UnknownFlat(const ConfigData &config);
+	const Img_c &IM_SpecialTex(const Palette &palette);
+	Img_c &getMutableSpecialTexture(const Palette &palette)
+	{
+		return const_cast<Img_c &>(IM_SpecialTex(palette));
+	}
+	const Img_c &IM_MissingTex(const ConfigData &config);
+	Img_c &getMutableMissingTexture(const ConfigData &config)
+	{
+		return const_cast<Img_c &>(IM_MissingTex(config));
+	}
+	const Img_c &IM_UnknownTex(const ConfigData &config);
+	Img_c &getMutableUnknownTexture(const ConfigData &config)
+	{
+		return const_cast<Img_c &>(IM_UnknownTex(config));
+	}
+	const Img_c &IM_UnknownFlat(const ConfigData &config);
+	Img_c &getMutableUnknownFlat(const ConfigData &config)
+	{
+		return const_cast<Img_c &>(IM_UnknownFlat(config));
+	}
 	Img_c *IM_UnknownSprite(const ConfigData &config);
 
 	Img_c *IM_DigitFont_11x14();
 	Img_c *IM_DigitFont_14x19();
 
-	void IM_UnloadDummyTextures() const;
+	void IM_UnloadDummyTextures();
 	void IM_ResetDummyTextures();
 
-	void W_AddTexture(const SString &name, std::unique_ptr<Img_c> &&img, bool is_medusa);
-	Img_c *getTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	void W_AddTexture(const SString &name, Img_c &&img, bool is_medusa);
+	const Img_c *getTexture(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	Img_c *getMutableTexture(const ConfigData &config, const SString &name, bool try_uppercase = false)
+	{
+		return const_cast<Img_c *>(getTexture(config, name, try_uppercase));
+	}
 	int W_GetTextureHeight(const ConfigData &config, const SString &name) const;
 	bool W_TextureCausesMedusa(const SString &name) const;
 	bool W_TextureIsKnown(const ConfigData &config, const SString &name) const;
 	void W_ClearTextures();
-	const std::map<SString, std::unique_ptr<Img_c>> &getTextures() const
+	const std::map<SString, Img_c> &getTextures() const
 	{
 		return textures;
 	}
 
-	void W_AddFlat(const SString &name, std::unique_ptr<Img_c> &&img);
-	Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	void W_AddFlat(const SString &name, Img_c &&img);
+	const Img_c *W_GetFlat(const ConfigData &config, const SString &name, bool try_uppercase = false) const;
+	Img_c *getMutableFlat(const ConfigData &config, const SString &name, bool try_uppercase = false)
+	{
+		return const_cast<Img_c *>(W_GetFlat(config, name, try_uppercase));
+	}
 	bool W_FlatIsKnown(const ConfigData &config, const SString &name) const;
 	void W_ClearFlats();
-	const std::map<SString, std::unique_ptr<Img_c>> &getFlats() const
+	const std::map<SString, Img_c> &getFlats() const
 	{
 		return flats;
 	}
 
 	void W_ClearSprites();
 
-	void W_UnloadAllTextures() const;
+	void W_UnloadAllTextures();
 
 public: // TODO: make private
 	sprite_map_t sprites;
 
 private:	
-	std::map<SString, std::unique_ptr<Img_c>> textures;
+	std::map<SString, Img_c> textures;
 	// textures which can cause the Medusa Effect in vanilla/chocolate DOOM
 	std::map<SString, int> medusa_textures;
-	std::map<SString, std::unique_ptr<Img_c>> flats;
+	std::map<SString, Img_c> flats;
 	
 
 	int missing_tex_color = 0;
-	std::unique_ptr<Img_c> missing_tex_image;
+	tl::optional<Img_c> missing_tex_image;
 
 	int unknown_tex_color = 0;
-	std::unique_ptr<Img_c> unknown_tex_image;
+	tl::optional<Img_c> unknown_tex_image;
 
 	int special_tex_color = 0;
-	std::unique_ptr<Img_c> special_tex_image;
+	tl::optional<Img_c> special_tex_image;
 
 	int unknown_flat_color = 0;
-	std::unique_ptr<Img_c> unknown_flat_image;
+	tl::optional<Img_c> unknown_flat_image;
 
 	int unknown_sprite_color = 0;
 	std::unique_ptr<Img_c> unknown_sprite_image;
@@ -161,7 +185,11 @@ struct WadData
 
 	void W_LoadFlats();
 
-	Img_c *getSprite(const ConfigData &config, int type);
+	const Img_c *getSprite(const ConfigData &config, int type);
+	Img_c *getMutableSprite(const ConfigData &config, int type)
+	{
+		return const_cast<Img_c *>(getSprite(config, type));
+	}
 	
 	void W_LoadPalette();
 
