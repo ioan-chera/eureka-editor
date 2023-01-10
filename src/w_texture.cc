@@ -761,7 +761,7 @@ static void UnloadSprite(sprite_map_t::value_type& P)
 		P.second->unload_gl(false);
 }
 
-void ImageSet::W_UnloadAllTextures() const
+void ImageSet::W_UnloadAllTextures()
 {
 	std::for_each(textures.begin(), textures.end(), UnloadTex);
 	std::for_each(flats.begin(),    flats.end(), UnloadFlat);

@@ -1021,7 +1021,7 @@ void UI_Canvas::DrawThingSprites()
 		const thingtype_t &info = inst.conf.getThingType(thing->type);
 		float scale = info.scale;
 
-		const Img_c *sprite = inst.wad.getSprite(inst.conf, thing->type);
+		Img_c *sprite = inst.wad.getMutableSprite(inst.conf, thing->type);
 
 		if (! sprite)
 		{

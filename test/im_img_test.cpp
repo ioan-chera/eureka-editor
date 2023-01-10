@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "im_img.h"
+#include "m_game.h"
 #include "w_wad.h"
 #include "testUtils/Palette.hpp"
 #include "gtest/gtest.h"
@@ -127,12 +128,11 @@ TEST(ImageBasic, ConvertTGAImage)
 		0xffffffff, 0x00000000, 0x246732ff, 0x12345678,
 	};
 	auto image = IM_ConvertTGAImage(rgba, 4, 2);
-	ASSERT_TRUE(image);
-	ASSERT_FALSE(image->is_null());
-	ASSERT_TRUE(image->has_transparent());
-	ASSERT_EQ(image->width(), 4);
-	ASSERT_EQ(image->height(), 2);
-	const auto buf = image->buf();
+	ASSERT_FALSE(image.is_null());
+	ASSERT_TRUE(image.has_transparent());
+	ASSERT_EQ(image.width(), 4);
+	ASSERT_EQ(image.height(), 2);
+	const auto buf = image.buf();
 	ASSERT_NE(buf[0], TRANS_PIXEL);
 	ASSERT_EQ(buf[1], TRANS_PIXEL);
 	ASSERT_NE(buf[2], TRANS_PIXEL);
@@ -141,6 +141,12 @@ TEST(ImageBasic, ConvertTGAImage)
 	ASSERT_EQ(buf[5], TRANS_PIXEL);
 	ASSERT_NE(buf[6], TRANS_PIXEL);
 	ASSERT_EQ(buf[7], TRANS_PIXEL);
+}
+
+TEST(ImageBasic, Spectrify)
+{
+	ConfigData config = {};
+	
 }
 
 //==================================================================================================
@@ -343,5 +349,5 @@ TEST_F(ImageFixture, CreateDogSprite)
 		255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 242, 242, 242, 255, 255, 255, 255, 255, 242, 242, 242, 255, 255, 255, 255, 255, 255, 255,
 	};
 
-	ASSERT_EQ(memcmp(image->buf(), expected, sizeof(expected)), 0);
+	ASSERT_EQ(memcmp(image.buf(), expected, sizeof(expected)), 0);
 }

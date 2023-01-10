@@ -177,7 +177,7 @@ public:
 		Img_c *img = inst.wad.images.getMutableFlat(inst.conf, fname);
 		if (! img)
 		{
-			img = inst.wad.images.IM_UnknownFlat(inst.conf);
+			img = &inst.wad.images.getMutableUnknownFlat(inst.conf);
 			fullbright = config::render_unknown_bright;
 		}
 
@@ -216,7 +216,7 @@ public:
 		}
 		else if (is_special_tex(tname))
 		{
-			img = inst.wad.images.IM_SpecialTex(inst.wad.palette);
+			img = &inst.wad.images.getMutableSpecialTexture(inst.wad.palette);
 		}
 		else
 		{
@@ -1241,7 +1241,7 @@ public:
 
 		float scale = info.scale;
 
-		const Img_c *img = inst.wad.getSprite(inst.conf, th->type);
+		Img_c *img = inst.wad.getMutableSprite(inst.conf, th->type);
 		if (! img)
 		{
 			img = inst.wad.images.IM_UnknownSprite(inst.conf);

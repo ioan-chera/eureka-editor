@@ -127,7 +127,7 @@ public:
 
 			if (! img)
 			{
-				img = inst.wad.images.IM_UnknownFlat(inst.conf);
+				img = &inst.wad.images.IM_UnknownFlat(inst.conf);
 				fullbright = config::render_unknown_bright;
 			}
 
@@ -155,7 +155,7 @@ public:
 			}
 			else if (is_special_tex(tname))
 			{
-				img = inst.wad.images.IM_SpecialTex(inst.wad.palette);
+				img = &inst.wad.images.IM_SpecialTex(inst.wad.palette);
 				return;
 			}
 

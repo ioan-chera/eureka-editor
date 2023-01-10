@@ -48,7 +48,11 @@ typedef std::map<int, tl::optional<Img_c>> sprite_map_t;
 class ImageSet
 {
 public:
-	Img_c *IM_SpecialTex(const Palette &palette);
+	const Img_c &IM_SpecialTex(const Palette &palette);
+	Img_c &getMutableSpecialTexture(const Palette &palette)
+	{
+		return const_cast<Img_c &>(IM_SpecialTex(palette));
+	}
 	const Img_c &IM_MissingTex(const ConfigData &config);
 	Img_c &getMutableMissingTexture(const ConfigData &config)
 	{
@@ -59,7 +63,11 @@ public:
 	{
 		return const_cast<Img_c &>(IM_UnknownTex(config));
 	}
-	Img_c *IM_UnknownFlat(const ConfigData &config);
+	const Img_c &IM_UnknownFlat(const ConfigData &config);
+	Img_c &getMutableUnknownFlat(const ConfigData &config)
+	{
+		return const_cast<Img_c &>(IM_UnknownFlat(config));
+	}
 	Img_c *IM_UnknownSprite(const ConfigData &config);
 
 	Img_c *IM_DigitFont_11x14();
@@ -98,7 +106,7 @@ public:
 
 	void W_ClearSprites();
 
-	void W_UnloadAllTextures() const;
+	void W_UnloadAllTextures();
 
 public: // TODO: make private
 	sprite_map_t sprites;
@@ -117,10 +125,10 @@ private:
 	tl::optional<Img_c> unknown_tex_image;
 
 	int special_tex_color = 0;
-	std::unique_ptr<Img_c> special_tex_image;
+	tl::optional<Img_c> special_tex_image;
 
 	int unknown_flat_color = 0;
-	std::unique_ptr<Img_c> unknown_flat_image;
+	tl::optional<Img_c> unknown_flat_image;
 
 	int unknown_sprite_color = 0;
 	std::unique_ptr<Img_c> unknown_sprite_image;
@@ -178,6 +186,10 @@ struct WadData
 	void W_LoadFlats();
 
 	const Img_c *getSprite(const ConfigData &config, int type);
+	Img_c *getMutableSprite(const ConfigData &config, int type)
+	{
+		return const_cast<Img_c *>(getSprite(config, type));
+	}
 	
 	void W_LoadPalette();
 

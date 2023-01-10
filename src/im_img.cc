@@ -489,24 +489,24 @@ const Img_c &ImageSet::IM_UnknownTex(const ConfigData &config)
 }
 
 
-Img_c *ImageSet::IM_SpecialTex(const Palette &palette)
+const Img_c &ImageSet::IM_SpecialTex(const Palette &palette)
 {
 	if (special_tex_color < 0)
 	{
 		special_tex_color = palette.findPaletteColor(192, 0, 192);
 
-		special_tex_image = NULL;
+		special_tex_image.reset();
 	}
 
 	if (!special_tex_image)
 		special_tex_image = IM_CreateDummyTex(unknown_graphic, special_tex_color,
 			palette.findPaletteColor(255, 255, 255));
 
-	return special_tex_image.get();
+	return special_tex_image.value();
 }
 
 
-Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
+const Img_c &ImageSet::IM_UnknownFlat(const ConfigData &config)
 {
 	if (!unknown_flat_image || unknown_flat_color != config.miscInfo.unknown_flat)
 	{
@@ -515,7 +515,7 @@ Img_c *ImageSet::IM_UnknownFlat(const ConfigData &config)
 		unknown_flat_image = IM_CreateDummyTex(unknown_graphic, unknown_flat_color, 0);
 	}
 
-	return unknown_flat_image.get();
+	return unknown_flat_image.value();
 }
 
 
