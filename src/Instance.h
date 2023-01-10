@@ -221,8 +221,6 @@ public:
 	bool RecUsed_ParseUser(const std::vector<SString> &tokens);
 	void RecUsed_WriteUser(std::ostream &os) const;
 	void RedrawMap();
-	void SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts, bool forward);
-	void SelectNeighborSectors(int objnum, SString option, byte parts);
 	void Selection_Clear(bool no_save = false);
 	void Selection_InvalidateLast();
 	void Selection_NotifyBegin();
@@ -361,6 +359,8 @@ private:
 	void Editor_ClearErrorMode();
 	void UpdateDrawLine();
 	void zoom_fit();
+	void SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts, bool forward);
+	void SelectNeighborSectors(int objnum, SString option, byte parts);
 
 	// E_SECTOR
 	void commandSectorMerge();
