@@ -20,6 +20,7 @@
 #include "w_wad.h"
 #include "testUtils/Palette.hpp"
 #include "gtest/gtest.h"
+#include <FL/Fl_RGB_Image.H>
 
 //
 // Development helper function to generate the code for the expected image.
@@ -36,6 +37,113 @@ void outputPixels(const Img_c &image)
 		puts("");
 	}
 }
+
+//==================================================================================================
+
+TEST(ImageBasic, PixelMakeRGB)
+{
+	img_pixel_t pixel = pixelMakeRGB(23, 15, 27);
+	ASSERT_EQ(pixel, img_pixel_t(IS_RGB_PIXEL | 23 << 10 | 15 << 5 | 27));
+
+	pixel = pixelMakeRGB(0, 0, 0);
+	ASSERT_EQ(pixel, img_pixel_t(IS_RGB_PIXEL));
+}
+
+TEST(ImageBasic, ConvertRGBImageNoAlpha)
+{
+	std::vector<uchar> bits = {
+		12, 34, 56,  0,  80,   0, 56, 77,  22,
+		98,  0, 98, 22, 255, 200,  0, 99, 255
+	};
+
+
+	Fl_RGB_Image flImage(bits.data(), 3, 2, 3);
+
+	auto image = IM_ConvertRGBImage(flImage);
+	ASSERT_FALSE(image->is_null());
+	ASSERT_EQ(image->width(), 3);
+	ASSERT_EQ(image->height(), 2);
+	ASSERT_FALSE(image->has_transparent());
+	const img_pixel_t *buf = image->buf();
+	ASSERT_EQ(buf[0], pixelMakeRGB(1, 4, 7));
+	ASSERT_EQ(buf[1], pixelMakeRGB(0, 10, 0));
+	ASSERT_EQ(buf[2], pixelMakeRGB(7, 9, 2));
+	ASSERT_EQ(buf[3], pixelMakeRGB(12, 0, 12));
+	ASSERT_EQ(buf[4], pixelMakeRGB(2, 31, 25));
+	ASSERT_EQ(buf[5], pixelMakeRGB(0, 12, 31));
+}
+
+TEST(ImageBasic, ConvertRGBImageWithAlpha)
+{
+	std::vector<uchar> bits = {
+		12, 34, 56, 255,   0,  80,   0, 64,   56, 77,  22, 192,
+		98,  0, 98, 200,  22, 255, 200, 255,   0, 99, 255, 32
+	};
+
+	Fl_RGB_Image flImage(bits.data(), 3, 2, 4);
+
+	auto image = IM_ConvertRGBImage(flImage);
+	ASSERT_FALSE(image->is_null());
+	ASSERT_EQ(image->width(), 3);
+	ASSERT_EQ(image->height(), 2);
+	ASSERT_TRUE(image->has_transparent());
+	const img_pixel_t *buf = image->buf();
+	ASSERT_EQ(buf[0], pixelMakeRGB(1, 4, 7));
+	ASSERT_EQ(buf[1], TRANS_PIXEL);
+	ASSERT_EQ(buf[2], pixelMakeRGB(7, 9, 2));
+	ASSERT_EQ(buf[3], pixelMakeRGB(12, 0, 12));
+	ASSERT_EQ(buf[4], pixelMakeRGB(2, 31, 25));
+	ASSERT_EQ(buf[5], TRANS_PIXEL);
+}
+
+TEST(ImageBasic, ConvertRGBImageInvalidDepth1)
+{
+	std::vector<uchar> bits = {
+		12, 34, 56,
+		98,  0, 98,
+	};
+
+	Fl_RGB_Image flImage(bits.data(), 3, 2, 1);
+	auto image = IM_ConvertRGBImage(flImage);
+	ASSERT_FALSE(image);
+}
+
+TEST(ImageBasic, ConvertRGBImageInvalidDepth2)
+{
+	std::vector<uchar> bits = {
+		12, 255, 34, 255, 56, 255,
+		98, 255, 0, 0, 98, 255
+	};
+
+	Fl_RGB_Image flImage(bits.data(), 3, 2, 2);
+	auto image = IM_ConvertRGBImage(flImage);
+	ASSERT_FALSE(image);
+}
+
+TEST(ImageBasic, ConvertTGAImage)
+{
+	static const rgba_color_t rgba[] = {
+		0xff0080ff, 0x7799aa22, 0x337744ff, 0x12469911,
+		0xffffffff, 0x00000000, 0x246732ff, 0x12345678,
+	};
+	auto image = IM_ConvertTGAImage(rgba, 4, 2);
+	ASSERT_TRUE(image);
+	ASSERT_FALSE(image->is_null());
+	ASSERT_TRUE(image->has_transparent());
+	ASSERT_EQ(image->width(), 4);
+	ASSERT_EQ(image->height(), 2);
+	const auto buf = image->buf();
+	ASSERT_NE(buf[0], TRANS_PIXEL);
+	ASSERT_EQ(buf[1], TRANS_PIXEL);
+	ASSERT_NE(buf[2], TRANS_PIXEL);
+	ASSERT_EQ(buf[3], TRANS_PIXEL);
+	ASSERT_NE(buf[4], TRANS_PIXEL);
+	ASSERT_EQ(buf[5], TRANS_PIXEL);
+	ASSERT_NE(buf[6], TRANS_PIXEL);
+	ASSERT_EQ(buf[7], TRANS_PIXEL);
+}
+
+//==================================================================================================
 
 //
 // Fixture with a palette

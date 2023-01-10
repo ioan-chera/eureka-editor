@@ -118,6 +118,7 @@ unit_test(general
     im_color_test.cpp
     im_img_test.cpp
     lib_file_test.cpp
+    lib_tga_test.cpp
     m_files_test.cpp
     m_game_test.cpp
     m_parse_test.cpp
@@ -128,6 +129,7 @@ unit_test(general
     ThingTest.cpp
     VertexTest.cpp
     w_loadpic_test.cpp
+    w_texture_test.cpp
     w_wad_test.cpp
     WadDataTest.cpp
     stub/osxcalls_stub.cpp
