@@ -143,10 +143,71 @@ TEST(ImageBasic, ConvertTGAImage)
 	ASSERT_EQ(buf[7], TRANS_PIXEL);
 }
 
+static Img_c getCrossImage()
+{
+	Img_c image(3, 3);
+	img_pixel_t *buf = image.wbuf();
+	buf[1] = buf[3] = buf[4] = buf[5] = buf[7] = 200;	// +
+	EXPECT_TRUE(image.has_transparent());
+
+	return image;
+}
+
 TEST(ImageBasic, Spectrify)
 {
 	ConfigData config = {};
+
+	config.miscInfo.invis_colors[0] = 2;
+	config.miscInfo.invis_colors[1] = 10;
 	
+	Img_c image = getCrossImage();
+
+	Img_c specter = image.spectrify(config);
+	ASSERT_FALSE(specter.is_null());
+	ASSERT_TRUE(specter.has_transparent());
+	ASSERT_EQ(specter.width(), 3);
+	ASSERT_EQ(specter.height(), 3);
+	const img_pixel_t *sbuf = specter.buf();
+	ASSERT_EQ(sbuf[0], TRANS_PIXEL);
+	ASSERT_GE(sbuf[1], 2);
+	ASSERT_LE(sbuf[1], 10);
+	ASSERT_EQ(sbuf[2], TRANS_PIXEL);
+	ASSERT_GE(sbuf[3], 2);
+	ASSERT_LE(sbuf[3], 10);
+	ASSERT_GE(sbuf[4], 2);
+	ASSERT_LE(sbuf[4], 10);
+	ASSERT_GE(sbuf[5], 2);
+	ASSERT_LE(sbuf[5], 10);
+	ASSERT_EQ(sbuf[6], TRANS_PIXEL);
+	ASSERT_GE(sbuf[7], 2);
+	ASSERT_LE(sbuf[7], 10);
+	ASSERT_EQ(sbuf[8], TRANS_PIXEL);
+}
+
+TEST(ImageBasic, SpectrifySingleColor)
+{
+	ConfigData config = {};
+
+	config.miscInfo.invis_colors[0] = 2;
+	config.miscInfo.invis_colors[1] = 0;
+
+	Img_c image = getCrossImage();
+
+	Img_c specter = image.spectrify(config);
+	ASSERT_FALSE(specter.is_null());
+	ASSERT_TRUE(specter.has_transparent());
+	ASSERT_EQ(specter.width(), 3);
+	ASSERT_EQ(specter.height(), 3);
+	const img_pixel_t *sbuf = specter.buf();
+	ASSERT_EQ(sbuf[0], TRANS_PIXEL);
+	ASSERT_EQ(sbuf[1], 2);
+	ASSERT_EQ(sbuf[2], TRANS_PIXEL);
+	ASSERT_EQ(sbuf[3], 2);
+	ASSERT_EQ(sbuf[4], 2);
+	ASSERT_EQ(sbuf[5], 2);
+	ASSERT_EQ(sbuf[6], TRANS_PIXEL);
+	ASSERT_EQ(sbuf[7], 2);
+	ASSERT_EQ(sbuf[8], TRANS_PIXEL);
 }
 
 //==================================================================================================
