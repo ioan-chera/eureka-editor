@@ -58,3 +58,18 @@ TEST(Texture, WadDataGetSpriteDetectsNonstandardRotations)
     auto image = wadData.getSprite(config, 3004);
     ASSERT_TRUE(image);
 }
+
+TEST(Texture, WadDataGetNullSprite)
+{
+    ConfigData config;
+    thingtype_t type = {};
+    type.desc = "UNKNOWN";
+    config.thing_types[1234] = type;
+
+    WadData wadData;
+    auto image = wadData.getSprite(config, 1234);
+    ASSERT_FALSE(image);
+    // Try twice to make sure we don't crash (happened before)
+    image = wadData.getSprite(config, 1234);
+    ASSERT_FALSE(image);
+}
