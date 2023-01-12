@@ -647,7 +647,7 @@ const Img_c *WadData::getSprite(const ConfigData &config, int type)
 {
 	const tl::optional<Img_c> *existing = get(images.sprites, type);
 	if(existing)
-		return &existing->value();
+		return *existing ? &existing->value() : nullptr;
 
 	// sprite not in the list yet.  Add it.
 
