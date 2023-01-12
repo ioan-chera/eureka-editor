@@ -956,18 +956,19 @@ void Instance::Selection_Clear(bool no_save)
 	RedrawMap();
 }
 
-void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts, bool forward)
+void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
+								   bool forward)
 {
 	const LineDef *line1 = level.linedefs[objnum];
 	bool frontside = parts < PART_LF_LOWER;
-	
+
 	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
 	{
 		if (objnum == i || edit.Selected->get(i))
 			continue;
-			
+
 		const LineDef *line2 = level.linedefs[i];
-				
+
 		if (line1->OneSided() != line2->OneSided())
 			continue;
 
@@ -975,9 +976,9 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 		{
 			const SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
 			const SideDef *side2 = frontside ? line2->Right(level) : line2->Left(level);
-			
+
 			bool match = false;
-			
+
 			if (option == SelectNeighborCriterion::texture)
 			{
 				if (line1->OneSided() || (parts & PART_RT_RAIL || parts & PART_LF_RAIL))
@@ -995,7 +996,7 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 				Sector *l1front = line1->Right(level)->SecRef(level);
 				Sector *l2front = line2->Right(level)->SecRef(level);
 				Sector *l1back = NULL, *l2back = NULL;
-				
+
 				if (!line1->OneSided())
 				{
 					l1back = line1->Left(level)->SecRef(level);
@@ -1015,16 +1016,16 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 					int lowestceil1 = std::min(l1front->ceilh, l1back->ceilh);
 					int highestfloor1 = std::max(l1front->floorh, l1back->floorh);
 					int midheight1 = lowestceil1 - highestfloor1;
-					
+
 					int lowestceil2 = std::min(l2front->ceilh, l2back->ceilh);
 					int highestfloor2 = std::max(l2front->floorh, l2back->floorh);
 					int midheight2 = lowestceil2 - highestfloor2;
-					
+
 					int texheight1 = wad.images.W_GetTextureHeight(conf, side1->MidTex());
 					int texheight2 = wad.images.W_GetTextureHeight(conf, side2->MidTex());
-					
+
 					if (midheight1 == midheight2 && midheight1 < std::min(texheight1, texheight2)
-						&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2) 
+						&& lowestceil1 == lowestceil2 && highestfloor1 == highestfloor2)
 					{
 						match = true;
 					}
@@ -1035,7 +1036,7 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 					}
 				}
 			}
-			
+
 			if (match)
 			{
 				edit.Selected->set_ext(i, parts);
@@ -1047,23 +1048,23 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 }
 
 void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
-{	
+{
 	Sector *sector1 = level.sectors[objnum];
-	
+
 	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
 	{
 		LineDef *line = level.linedefs[i];
-		
+
 		if (line->OneSided())
 			continue;
-			
+
 		if (line->Right(level)->sector == objnum || line->Left(level)->sector == objnum)
 		{
 			Sector *sector2;
 			int sectornum;
-			
+
 			bool match = false;
-			
+
 			if (line->Right(level)->sector == objnum)
 			{
 				sector2 = line->Left(level)->SecRef(level);
@@ -1074,10 +1075,10 @@ void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 				sector2 = line->Right(level)->SecRef(level);
 				sectornum = line->Right(level)->sector;
 			}
-			
+
 			if (edit.Selected->get(sectornum))
 				continue;
-				
+
 			if (option == "texture")
 			{
 				if (parts & PART_FLOOR)
@@ -1092,7 +1093,7 @@ void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 				else
 					match = (sector1->ceilh == sector2->ceilh);
 			}
-			
+
 			if (match)
 			{
 				edit.Selected->set_ext(sectornum, parts);
@@ -1320,7 +1321,7 @@ void Recently_used::WriteUser(std::ostream &os, char letter) const
 void Instance::RecUsed_WriteUser(std::ostream &os) const
 {
 	os << "\nrecent_used clear\n";
-	
+
 	recent_textures.WriteUser(os, 'T');
 	recent_flats.WriteUser(os, 'F');
 	recent_things.WriteUser(os, 'O');

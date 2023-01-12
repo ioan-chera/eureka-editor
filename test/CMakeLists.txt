@@ -115,6 +115,7 @@ endfunction()
 unit_test(general
     DocumentTest.cpp
     e_checks_test.cpp
+    e_commands_test.cpp
     im_color_test.cpp
     im_img_test.cpp
     lib_file_test.cpp
