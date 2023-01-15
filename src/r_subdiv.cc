@@ -223,7 +223,7 @@ void sector_info_cache_c::CheckBoom242(const LineDef *L)
 	if (L->tag <= 0 || L->right < 0)
 		return;
 
-	int dummy_sec = L->Right(inst.level)->sector;
+	int dummy_sec = inst.level.getRight(*L)->sector;
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
@@ -510,14 +510,14 @@ void sector_info_cache_c::PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, in
 {
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && L->Right(inst.level))
+		if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && inst.level.getRight(*L))
 		{
-			infos[L->Right(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+			infos[inst.level.getRight(*L)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 			f1_tag = 0;
 		}
-		if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && L->Right(inst.level))
+		if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && inst.level.getRight(*L))
 		{
-			infos[L->Right(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+			infos[inst.level.getRight(*L)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 			c1_tag = 0;
 		}
 
@@ -535,7 +535,7 @@ void sector_info_cache_c::PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, in
 
 	if (L->left >= 0 && L->right >= 0)
 	{
-		int front_sec = L->Right(inst.level)->sector;
+		int front_sec = inst.level.getRight(*L)->sector;
 		int  back_sec = L->Left(inst.level)->sector;
 
 		switch (share & 3)

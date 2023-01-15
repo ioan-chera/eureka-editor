@@ -377,7 +377,7 @@ public:
 		const Sector *front = sec;
 		const Sector *back  = NULL;
 
-		SideDef *back_sd = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
+		SideDef *back_sd = (side == Side::left) ? inst.level.getRight(*ld) : ld->Left(inst.level);
 		if (back_sd)
 			back = inst.level.sectors[back_sd->sector].get();
 
@@ -722,7 +722,7 @@ public:
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
 
-		if (! ld->Right(inst.level))
+		if (! inst.level.getRight(*ld))
 			return;
 
 		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
@@ -752,7 +752,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : ld->Right(inst.level);
+		SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : inst.level.getRight(*ld);
 
 		if (! sd)
 			return;
@@ -1037,7 +1037,7 @@ public:
 
 		if (dw->ld->TwoSided())
 		{
-			const Sector &front = inst.level.getSector(*dw->ld->Right(inst.level));
+			const Sector &front = inst.level.getSector(*inst.level.getRight(*dw->ld));
 			const Sector &back  = inst.level.getSector(*dw->ld-> Left(inst.level));
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
@@ -1208,7 +1208,7 @@ public:
 
 			for (int what_side = 0 ; what_side < 2 ; what_side++)
 			{
-				const SideDef *sd_front = dw->ld->Right(inst.level);
+				const SideDef *sd_front = inst.level.getRight(*dw->ld);
 				const SideDef *sd_back  = dw->ld->Left(inst.level);
 
 				if (sd_front && sd_back && sd_front == sd_back)

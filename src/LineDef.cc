@@ -23,11 +23,6 @@
 #include "SideDef.h"
 #include "Vertex.h"
 
-SideDef * LineDef::Right(const Document &doc) const
-{
-	return (right >= 0) ? doc.sidedefs[right].get() : nullptr;
-}
-
 SideDef * LineDef::Left(const Document &doc) const
 {
 	return (left >= 0) ? doc.sidedefs[left].get() : nullptr;
@@ -58,7 +53,7 @@ int LineDef::WhatSector(Side side, const Document &doc) const
 			return Left(doc) ? Left(doc)->sector : -1;
 
 		case Side::right:
-			return Right(doc) ? Right(doc)->sector : -1;
+			return doc.getRight(*this) ? doc.getRight(*this)->sector : -1;
 
 		default:
 			BugError("bad side : %d\n", (int)side);

@@ -629,7 +629,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 		if (hl.parts & PART_LF_ALL)
 			SD = L->Left(inst.level);
 		else
-			SD = L->Right(inst.level);
+			SD = inst.level.getRight(*L);
 
 		if (SD != NULL)
 		{

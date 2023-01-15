@@ -60,44 +60,44 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 	const auto &L2 = doc.linedefs[index2];
 
 	// lines with no sidedefs only match each other
-	if (! L1->Right(doc) || ! L2->Right(doc))
-		return L1->Right(doc) == L2->Right(doc);
+	if (! doc.getRight(*L1) || ! doc.getRight(*L2))
+		return doc.getRight(*L1) == doc.getRight(*L2);
 
 	// determine texture to match from first line
 	StringID texture;
 
 	if (! L1->TwoSided())
 	{
-		texture = L1->Right(doc)->mid_tex;
+		texture = doc.getRight(*L1)->mid_tex;
 	}
 	else
 	{
-		int f_diff = doc.getSector(*L1->Left(doc)).floorh - doc.getSector(*L1->Right(doc)).floorh;
-		int c_diff = doc.getSector(*L1->Left(doc)).ceilh  - doc.getSector(*L1->Right(doc)).ceilh;
+		int f_diff = doc.getSector(*L1->Left(doc)).floorh - doc.getSector(*doc.getRight(*L1)).floorh;
+		int c_diff = doc.getSector(*L1->Left(doc)).ceilh  - doc.getSector(*doc.getRight(*L1)).ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
-			texture = (c_diff > 0) ? L1->Left(doc)->upper_tex : L1->Right(doc)->upper_tex;
+			texture = (c_diff > 0) ? L1->Left(doc)->upper_tex : doc.getRight(*L1)->upper_tex;
 		else
-			texture = (f_diff < 0) ? L1->Left(doc)->lower_tex : L1->Right(doc)->lower_tex;
+			texture = (f_diff < 0) ? L1->Left(doc)->lower_tex : doc.getRight(*L1)->lower_tex;
 	}
 
 	// match texture with other line
 
 	if (! L2->TwoSided())
 	{
-		return (L2->Right(doc)->mid_tex == texture);
+		return (doc.getRight(*L2)->mid_tex == texture);
 	}
 	else
 	{
-		int f_diff = doc.getSector(*L2->Left(doc)).floorh - doc.getSector(*L2->Right(doc)).floorh;
-		int c_diff = doc.getSector(*L2->Left(doc)).ceilh  - doc.getSector(*L2->Right(doc)).ceilh;
+		int f_diff = doc.getSector(*L2->Left(doc)).floorh - doc.getSector(*doc.getRight(*L2)).floorh;
+		int c_diff = doc.getSector(*L2->Left(doc)).ceilh  - doc.getSector(*doc.getRight(*L2)).ceilh;
 
 		if (c_diff != 0)
-			if (texture == ((c_diff > 0) ? L2->Left(doc)->upper_tex : L2->Right(doc)->upper_tex))
+			if (texture == ((c_diff > 0) ? L2->Left(doc)->upper_tex : doc.getRight(*L2)->upper_tex))
 				return true;
 
 		if (f_diff != 0)
-			if (texture == ((f_diff < 0) ? L2->Left(doc)->lower_tex : L2->Right(doc)->lower_tex))
+			if (texture == ((f_diff < 0) ? L2->Left(doc)->lower_tex : doc.getRight(*L2)->lower_tex))
 				return true;
 
 		return false;
@@ -253,7 +253,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 		if (! L->TwoSided())
 			continue;
 
-		int sec1 = L->Right(inst.level)->sector;
+		int sec1 = inst.level.getRight(*L)->sector;
 		int sec2 = L-> Left(inst.level)->sector;
 
 		if (sec1 == sec2)
@@ -483,7 +483,7 @@ void Instance::CMD_PruneUnused()
 		if (L->right >= 0)
 		{
 			used_sides.set(L->right);
-			used_secs.set(L->Right(level)->sector);
+			used_secs.set(level.getRight(*L)->sector);
 		}
 	}
 

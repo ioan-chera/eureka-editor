@@ -115,6 +115,11 @@ public:
 	const Sector &getSector(const SideDef &side) const;
 	const Vertex &getStart(const LineDef &line) const;
 	const Vertex &getEnd(const LineDef &line) const;
+	const SideDef *getRight(const LineDef &line) const;
+	SideDef *getRight(const LineDef &line)
+	{
+		return const_cast<SideDef *>(static_cast<const Document *>(this)->getRight(line));
+	}
 
 private:
 	friend class DocumentModule;

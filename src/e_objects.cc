@@ -977,7 +977,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1->flags & ~LINEDEF_FLAG_KEEP);
 
 	// handle textures
-	if (do_tex && L1->Right(doc) && L2->Right(doc))
+	if (do_tex && doc.getRight(*L1) && doc.getRight(*L2))
 	{
 		/* There are four cases, depending on number of sides:
 		 *
@@ -993,7 +993,7 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 */
 		if (! L1->Left(doc))
 		{
-			StringID tex = L1->Right(doc)->mid_tex;
+			StringID tex = doc.getRight(*L1)->mid_tex;
 
 			if (! L2->Left(doc))
 			{
@@ -1016,11 +1016,11 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		{
 			/* pick which texture to copy */
 
-			const Sector &front = doc.getSector(*L1->Right(doc));
+			const Sector &front = doc.getSector(*doc.getRight(*L1));
 			const Sector &back  = doc.getSector(*L1-> Left(doc));
 
-			StringID f_l = L1->Right(doc)->lower_tex;
-			StringID f_u = L1->Right(doc)->upper_tex;
+			StringID f_l = doc.getRight(*L1)->lower_tex;
+			StringID f_u = doc.getRight(*L1)->upper_tex;
 			StringID b_l = L1-> Left(doc)->lower_tex;
 			StringID b_u = L1-> Left(doc)->upper_tex;
 
@@ -1049,12 +1049,12 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		}
 		else
 		{
-			const SideDef *RS = L1->Right(doc);
+			const SideDef *RS = doc.getRight(*L1);
 			const SideDef *LS = L1->Left(doc);
 
-			const Sector *F1 = &doc.getSector(*L1->Right(doc));
+			const Sector *F1 = &doc.getSector(*doc.getRight(*L1));
 			const Sector *B1 = &doc.getSector(*L1-> Left(doc));
-			const Sector *F2 = &doc.getSector(*L2->Right(doc));
+			const Sector *F2 = &doc.getSector(*doc.getRight(*L2));
 			const Sector *B2 = &doc.getSector(*L2-> Left(doc));
 
 			// logic to determine which sides we copy

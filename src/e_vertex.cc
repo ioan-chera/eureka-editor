@@ -110,8 +110,8 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
 
-	StringID new_mid_tex = (ld1_onesided) ? L1->Right(doc)->mid_tex :
-			     		  (ld2_onesided) ? L2->Right(doc)->mid_tex : StringID();
+	StringID new_mid_tex = (ld1_onesided) ? doc.getRight(*L1)->mid_tex :
+			     		  (ld2_onesided) ? doc.getRight(*L2)->mid_tex : StringID();
 
 	// flip L1 so it would be parallel with L2 (after merging the other
 	// endpoint) but going the opposite direction.
@@ -150,7 +150,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 
 	// fix orientation of remaining linedef if needed
-	if (L2->Left(doc) && ! L2->Right(doc))
+	if (L2->Left(doc) && ! doc.getRight(*L2))
 	{
 		doc.linemod.flipLinedef(op, ld2);
 	}
@@ -638,7 +638,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 
 		// only process lines which touch a selected sector
 		bool  left_in = L->Left(doc)  && inst.edit.Selected->get(L->Left(doc)->sector);
-		bool right_in = L->Right(doc) && inst.edit.Selected->get(L->Right(doc)->sector);
+		bool right_in = doc.getRight(*L) && inst.edit.Selected->get(doc.getRight(*L)->sector);
 
 		if (! (left_in || right_in))
 			continue;
@@ -646,7 +646,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 		bool innie = false;
 		bool outie = false;
 
-		if (L->Right(doc))
+		if (doc.getRight(*L))
 		{
 			if (right_in)
 				innie = true;
@@ -851,7 +851,7 @@ void Instance::commandSectorDisconnect()
 
 			// only process lines which touch a selected sector
 			bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
-			bool right_in = L->Right(level) && edit.Selected->get(L->Right(level)->sector);
+			bool right_in = level.getRight(*L) && edit.Selected->get(level.getRight(*L)->sector);
 
 			if (! (left_in || right_in))
 				continue;

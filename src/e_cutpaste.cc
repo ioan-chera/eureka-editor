@@ -525,7 +525,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		L->end   = vert_map[L->end  ];
 
 		// adjust sidedef references
-		if (L->Right(op.doc))
+		if (op.doc.getRight(*L))
 		{
 			SYS_ASSERT(side_map.find(L->right) != side_map.end());
 			L->right = side_map[L->right];
@@ -538,13 +538,13 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		}
 
 		// flip linedef if necessary
-		if (L->Left(op.doc) && ! L->Right(op.doc))
+		if (L->Left(op.doc) && ! op.doc.getRight(*L))
 		{
 			op.doc.linemod.flipLinedef(op, new_l);
 		}
 
 		// if the linedef lost a side, fix texturing
-		if (L->OneSided() && is_null_tex(L->Right(op.doc)->MidTex()))
+		if (L->OneSided() && is_null_tex(op.doc.getRight(*L)->MidTex()))
 			op.doc.linemod.fixForLostSide(op, new_l);
 	}
 
@@ -818,7 +818,7 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 
 		const auto &L = doc.linedefs[n];
 
-		if (L->Right(doc)) result.clear(L->right);
+		if (doc.getRight(*L)) result.clear(L->right);
 		if (L->Left(doc))  result.clear(L->left);
 	}
 
@@ -844,7 +844,7 @@ static void UnusedLineDefs(const Document &doc, const selection_c &sectors, sele
 		//    -1 : no side
 		//     0 : deleted side
 		//    +1 : kept side
-		int right_m = (L->right < 0) ? -1 : sectors.get(L->Right(doc)->sector) ? 0 : 1;
+		int right_m = (L->right < 0) ? -1 : sectors.get(doc.getRight(*L)->sector) ? 0 : 1;
 		int  left_m = (L->left  < 0) ? -1 : sectors.get(L->Left(doc) ->sector) ? 0 : 1;
 
 		if (std::max(right_m, left_m) == 0)
@@ -932,7 +932,7 @@ static void FixupLineDefs(EditOperation &op, const Document &doc, selection_c *l
 		// the logic is ugly here mainly to handle flipping (in particular,
 		// not to flip the line when _both_ sides are unlinked).
 
-		bool do_right = L->Right(doc) ? sectors->get(L->Right(doc)->sector) : false;
+		bool do_right = doc.getRight(*L) ? sectors->get(doc.getRight(*L)->sector) : false;
 		bool do_left  = L->Left(doc)  ? sectors->get(L->Left(doc) ->sector) : false;
 
 		// line shouldn't be in list unless it touches the sector

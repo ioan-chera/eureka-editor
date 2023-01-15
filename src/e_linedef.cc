@@ -121,7 +121,7 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 	if (! L->TwoSided())
 		return (part == 'l');
 
-	const Sector *front = &doc.getSector(*L->Right(doc));
+	const Sector *front = &doc.getSector(*doc.getRight(*L));
 	const Sector *back  = &doc.getSector(*L->Left (doc));
 
 	if (obj.parts & PART_LF_ALL)
@@ -182,7 +182,7 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 			part = 'l';
 	}
 
-	const Sector *front = &doc.getSector(*L->Right(doc));
+	const Sector *front = &doc.getSector(*doc.getRight(*L));
 	const Sector *back  = &doc.getSector(*L->Left (doc));
 
 	if (obj.parts & PART_LF_ALL)
@@ -398,7 +398,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 	}
 
 
-	const Sector *front = &doc.getSector(*L->Right(doc));
+	const Sector *front = &doc.getSector(*doc.getRight(*L));
 	const Sector *back  = &doc.getSector(*L->Left (doc));
 
 	if (obj.parts & PART_LF_ALL)
@@ -942,16 +942,16 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 
 	// update sidedefs
 
-	if (L->Right(doc))
+	if (doc.getRight(*L))
 	{
 		L2->right = op.addNew(ObjType::sidedefs);
-		*L2->Right(doc) = *L->Right(doc);
+		*doc.getRight(*L2) = *doc.getRight(*L);
 
 		if (! config::leave_offsets_alone)
 		{
-			L2->Right(doc)->x_offset += new_length;
-			int width = getTileWidth(*L2->Right(doc), inst.wad.images, inst.conf);
-			L2->Right(doc)->x_offset %= width;
+			doc.getRight(*L2)->x_offset += new_length;
+			int width = getTileWidth(*doc.getRight(*L2), inst.wad.images, inst.conf);
+			doc.getRight(*L2)->x_offset %= width;
 		}
 	}
 
@@ -1098,8 +1098,8 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	if (! is_null_tex(L->Left(doc)->MidTex()))
 		left_tex = L->Left(doc)->mid_tex;
 
-	if (! is_null_tex(L->Right(doc)->MidTex()))
-		right_tex = L->Right(doc)->mid_tex;
+	if (! is_null_tex(doc.getRight(*L)->MidTex()))
+		right_tex = doc.getRight(*L)->mid_tex;
 
 	if (! left_tex)  left_tex = right_tex;
 	if (! right_tex) right_tex = left_tex;
@@ -1411,14 +1411,14 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 {
 	const auto &L = doc.linedefs[ld];
 
-	SYS_ASSERT(L->Right(doc));
+	SYS_ASSERT(doc.getRight(*L));
 
 	StringID tex;
 
-	if (! is_null_tex(L->Right(doc)->LowerTex()))
-		tex = L->Right(doc)->lower_tex;
-	else if (! is_null_tex(L->Right(doc)->UpperTex()))
-		tex = L->Right(doc)->upper_tex;
+	if (! is_null_tex(doc.getRight(*L)->LowerTex()))
+		tex = doc.getRight(*L)->lower_tex;
+	else if (! is_null_tex(doc.getRight(*L)->UpperTex()))
+		tex = doc.getRight(*L)->upper_tex;
 	else
 		tex = BA_InternaliseString(inst.conf.default_wall_tex);
 

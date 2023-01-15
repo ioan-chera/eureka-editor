@@ -766,7 +766,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (inst.edit.error_mode)
 					col = LIGHTGREY;
-				else if (! L->Right(inst.level)) // no first sidedef?
+				else if (! inst.level.getRight(*L)) // no first sidedef?
 					col = RED;
 				else if (L->type != 0)
 				{
@@ -1424,7 +1424,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 				// skip lines if both sides are in the selection
 				if (skip_lines && L->TwoSided())
 				{
-					int sec1 = L->Right(inst.level)->sector;
+					int sec1 = inst.level.getRight(*L)->sector;
 					int sec2 = L->Left (inst.level)->sector;
 
 					if ((sec1 == objnum || inst.edit.Selected->get(sec1)) &&
@@ -1738,7 +1738,7 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 		int sec1 = -1;
 		int sec2 = -1;
 
-		if (L->right >= 0) sec1 = L->Right(inst.level)->sector;
+		if (L->right >= 0) sec1 = inst.level.getRight(*L)->sector;
 		if (L->left  >= 0) sec2 = L->Left(inst.level) ->sector;
 
 		bool touches1 = (sec1 >= 0) && list->get(sec1);

@@ -658,7 +658,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &L = doc.linedefs[l];
 
-			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
+			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
 				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
 			{
 				dest.set(l);
@@ -672,7 +672,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (const auto &L : doc.linedefs)
 		{
-			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
+			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
 				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
 			{
 				dest.set(L->start);
@@ -689,7 +689,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &L = doc.linedefs[*it];
 
-			if (L->Right(doc)) dest.set(L->right);
+			if (doc.getRight(*L)) dest.set(L->right);
 			if (L->Left(doc))  dest.set(L->left);
 		}
 		return;
@@ -752,7 +752,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		const auto &L = doc.linedefs[l];
 
-		if (L->Right(doc)) dest.set(L->Right(doc)->sector);
+		if (doc.getRight(*L)) dest.set(doc.getRight(*L)->sector);
 		if (L->Left(doc))  dest.set(L->Left(doc)->sector);
 	}
 
@@ -773,7 +773,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 				continue;
 		}
 
-		if (L->Right(doc)) dest.clear(L->Right(doc)->sector);
+		if (doc.getRight(*L)) dest.clear(doc.getRight(*L)->sector);
 		if (L->Left(doc))  dest.clear(L->Left(doc)->sector);
 	}
 }
@@ -882,7 +882,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				const auto &L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
-				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
+				int s1 = doc.getRight(*L) ? doc.getRight(*L)->sector : -1;
 				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
 
 				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&

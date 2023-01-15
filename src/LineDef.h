@@ -51,7 +51,6 @@ public:
 
 public:
 	// remember: these two can return NULL!
-	SideDef *Right(const Document &doc) const;
 	SideDef *Left(const Document &doc)  const;
 
 	bool TouchesVertex(int v_num) const

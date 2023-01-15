@@ -1284,32 +1284,32 @@ StringID Instance::LD_GrabTex(const LineDef *L, int part) const
 		return BA_InternaliseString(conf.default_wall_tex);
 
 	if (L->OneSided())
-		return L->Right(level)->mid_tex;
+		return level.getRight(*L)->mid_tex;
 
-	if (part & PART_RT_LOWER) return L->Right(level)->lower_tex;
-	if (part & PART_RT_UPPER) return L->Right(level)->upper_tex;
+	if (part & PART_RT_LOWER) return level.getRight(*L)->lower_tex;
+	if (part & PART_RT_UPPER) return level.getRight(*L)->upper_tex;
 
 	if (part & PART_LF_LOWER) return L->Left(level)->lower_tex;
 	if (part & PART_LF_UPPER) return L->Left(level)->upper_tex;
 
-	if (part & PART_RT_RAIL)  return L->Right(level)->mid_tex;
+	if (part & PART_RT_RAIL)  return level.getRight(*L)->mid_tex;
 	if (part & PART_LF_RAIL)  return L->Left(level) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (level.getSector(*L->Left(level)).floorh > level.getSector(*L->Right(level)).floorh)
-		return L->Right(level)->lower_tex;
+	if (level.getSector(*L->Left(level)).floorh > level.getSector(*level.getRight(*L)).floorh)
+		return level.getRight(*L)->lower_tex;
 
-	if (level.getSector(*L->Left(level)).ceilh < level.getSector(*L->Right(level)).ceilh)
-		return L->Right(level)->upper_tex;
+	if (level.getSector(*L->Left(level)).ceilh < level.getSector(*level.getRight(*L)).ceilh)
+		return level.getRight(*L)->upper_tex;
 
-	if (level.getSector(*L->Left(level)).floorh < level.getSector(*L->Right(level)).floorh)
+	if (level.getSector(*L->Left(level)).floorh < level.getSector(*level.getRight(*L)).floorh)
 		return L->Left(level)->lower_tex;
 
-	if (level.getSector(*L->Left(level)).ceilh > level.getSector(*L->Right(level)).ceilh)
+	if (level.getSector(*L->Left(level)).ceilh > level.getSector(*level.getRight(*L)).ceilh)
 		return L->Left(level)->upper_tex;
 
 	// emergency fallback
-	return L->Right(level)->lower_tex;
+	return level.getRight(*L)->lower_tex;
 }
 
 

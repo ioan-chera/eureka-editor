@@ -98,8 +98,8 @@ static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 	ChecksumVertex(crc, &doc.getStart(*L));
 	ChecksumVertex(crc, &doc.getEnd(*L));
 
-	if(L->Right(doc))
-		ChecksumSideDef(crc, L->Right(doc), doc);
+	if(doc.getRight(*L))
+		ChecksumSideDef(crc, doc.getRight(*L), doc);
 
 	if(L->Left(doc))
 		ChecksumSideDef(crc, L->Left(doc), doc);
@@ -137,4 +137,9 @@ const Vertex &Document::getStart(const LineDef &line) const
 const Vertex &Document::getEnd(const LineDef &line) const
 {
 	return *vertices[line.end];
+}
+
+const SideDef *Document::getRight(const LineDef &line) const
+{
+	return line.right >= 0 ? sidedefs[line.right].get() : nullptr;
 }
