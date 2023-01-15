@@ -396,7 +396,7 @@ void UI_Canvas::DrawEverything()
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
 			const auto &L = inst.level.linedefs[inst.edit.highlight.num];
-			DrawLineInfo(L->Start(inst.level)->x(), L->Start(inst.level)->y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
+			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
 		}
 
 		RenderThickness(1);
@@ -720,8 +720,8 @@ void UI_Canvas::DrawLinedefs()
 	{
 		const auto &L = inst.level.linedefs[n];
 
-		double x1 = L->Start(inst.level)->x();
-		double y1 = L->Start(inst.level)->y();
+		double x1 = inst.level.getStart(*L).x();
+		double y1 = inst.level.getStart(*L).y();
 		double x2 = L->End  (inst.level)->x();
 		double y2 = L->End  (inst.level)->y();
 
@@ -875,8 +875,8 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 		{
-			double x1 = inst.level.linedefs[n]->Start(inst.level)->x();
-			double y1 = inst.level.linedefs[n]->Start(inst.level)->y();
+			double x1 = inst.level.getStart(*inst.level.linedefs[n]).x();
+			double y1 = inst.level.getStart(*inst.level.linedefs[n]).y();
 			double x2 = inst.level.linedefs[n]->End  (inst.level)->x();
 			double y2 = inst.level.linedefs[n]->End  (inst.level)->y();
 
@@ -1374,8 +1374,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::linedefs:
 		{
-			double x1 = dx + inst.level.linedefs[objnum]->Start(inst.level)->x();
-			double y1 = dy + inst.level.linedefs[objnum]->Start(inst.level)->y();
+			double x1 = dx + inst.level.getStart(*inst.level.linedefs[objnum]).x();
+			double y1 = dy + inst.level.getStart(*inst.level.linedefs[objnum]).y();
 			double x2 = dx + inst.level.linedefs[objnum]->End  (inst.level)->x();
 			double y2 = dy + inst.level.linedefs[objnum]->End  (inst.level)->y();
 
@@ -1435,8 +1435,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 						reverse = true;
 				}
 
-				double x1 = dx + L->Start(inst.level)->x();
-				double y1 = dy + L->Start(inst.level)->y();
+				double x1 = dx + inst.level.getStart(*L).x();
+				double y1 = dy + inst.level.getStart(*L).y();
 				double x2 = dx + L->End  (inst.level)->x();
 				double y2 = dy + L->End  (inst.level)->y();
 
@@ -1511,8 +1511,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::linedefs:
 		{
-			double x1 = inst.level.linedefs[objnum]->Start(inst.level)->x();
-			double y1 = inst.level.linedefs[objnum]->Start(inst.level)->y();
+			double x1 = inst.level.getStart(*inst.level.linedefs[objnum]).x();
+			double y1 = inst.level.getStart(*inst.level.linedefs[objnum]).y();
 			double x2 = inst.level.linedefs[objnum]->End  (inst.level)->x();
 			double y2 = inst.level.linedefs[objnum]->End  (inst.level)->y();
 
@@ -1533,8 +1533,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 				if (!linedef->TouchesSector(objnum, inst.level))
 					continue;
 
-				double x1 = linedef->Start(inst.level)->x();
-				double y1 = linedef->Start(inst.level)->y();
+				double x1 = inst.level.getStart(*linedef).x();
+				double y1 = inst.level.getStart(*linedef).y();
 				double x2 = linedef->End  (inst.level)->x();
 				double y2 = linedef->End  (inst.level)->y();
 
@@ -1724,8 +1724,8 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 
 	for (const auto &L : inst.level.linedefs)
 	{
-		double x1 = dx + L->Start(inst.level)->x();
-		double y1 = dy + L->Start(inst.level)->y();
+		double x1 = dx + inst.level.getStart(*L).x();
+		double y1 = dy + inst.level.getStart(*L).y();
 		double x2 = dx + L->End  (inst.level)->x();
 		double y2 = dy + L->End  (inst.level)->y();
 

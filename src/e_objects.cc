@@ -688,8 +688,8 @@ void Instance::CMD_ObjectInsert()
 //
 bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
-	double lx0 = doc.linedefs[ld]->Start(doc)->x();
-	double ly0 = doc.linedefs[ld]->Start(doc)->y();
+	double lx0 = doc.getStart(*doc.linedefs[ld]).x();
+	double ly0 = doc.getStart(*doc.linedefs[ld]).y();
 	double lx1 = doc.linedefs[ld]->End(doc)->x();
 	double ly1 = doc.linedefs[ld]->End(doc)->y();
 
@@ -2132,8 +2132,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 			continue;
 
 		// IDEA: make this a method of LineDef
-		double x1 = L->Start(doc)->x();
-		double y1 = L->Start(doc)->y();
+		double x1 = doc.getStart(*L).x();
+		double y1 = doc.getStart(*L).y();
 		double x2 = L->End(doc)->x();
 		double y2 = L->End(doc)->y();
 

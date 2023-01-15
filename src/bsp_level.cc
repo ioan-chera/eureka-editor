@@ -187,8 +187,8 @@ static void BlockAddLine(int line_index, const Document &doc)
 {
 	const auto &L = doc.linedefs[line_index];
 
-	int x1 = (int) L->Start(doc)->x();
-	int y1 = (int) L->Start(doc)->y();
+	int x1 = (int) doc.getStart(*L).x();
+	int y1 = (int) doc.getStart(*L).y();
 	int x2 = (int) L->End(doc)->x();
 	int y2 = (int) L->End(doc)->y();
 
@@ -473,8 +473,8 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 
 		if (! L->IsZeroLength(doc))
 		{
-			double x1 = L->Start(doc)->x();
-			double y1 = L->Start(doc)->y();
+			double x1 = doc.getStart(*L).x();
+			double y1 = doc.getStart(*L).y();
 			double x2 = L->End(doc)->x();
 			double y2 = L->End(doc)->y();
 
@@ -886,8 +886,8 @@ static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
 	const auto &L = doc.linedefs[seg->linedef];
 
-	double lx = seg->side ? L->End(doc)->x() : L->Start(doc)->x();
-	double ly = seg->side ? L->End(doc)->y() : L->Start(doc)->y();
+	double lx = seg->side ? L->End(doc)->x() : doc.getStart(*L).x();
+	double ly = seg->side ? L->End(doc)->y() : doc.getStart(*L).y();
 
 	// use the "true" starting coord (as stored in the wad)
 	double sx = round(seg->start->x);

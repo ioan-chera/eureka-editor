@@ -864,7 +864,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				const auto &L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
+				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
 				   L->End(doc)->xy().inbounds(pos1, pos2))
 				{
 					list->toggle(n);
@@ -885,7 +885,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
 				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
 
-				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
+				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
 				   L->End(doc)->xy().inbounds(pos1, pos2))
 				{
 					if (s1 >= 0) in_sectors.set(s1);

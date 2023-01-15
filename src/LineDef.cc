@@ -23,11 +23,6 @@
 #include "SideDef.h"
 #include "Vertex.h"
 
-Vertex * LineDef::Start(const Document &doc) const
-{
-	return doc.vertices[start].get();
-}
-
 Vertex * LineDef::End(const Document &doc) const
 {
 	return doc.vertices[end].get();
@@ -45,7 +40,7 @@ SideDef * LineDef::Left(const Document &doc) const
 
 bool LineDef::TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const
 {
-	return Start(doc)->Matches(tx, ty) || End(doc)->Matches(tx, ty);
+	return doc.getStart(*this).Matches(tx, ty) || End(doc)->Matches(tx, ty);
 }
 
 bool LineDef::TouchesSector(int sec_num, const Document &doc) const
@@ -100,23 +95,23 @@ bool LineDef::IsSelfRef(const Document &doc) const
 
 bool LineDef::IsHorizontal(const Document &doc) const
 {
-	return (Start(doc)->raw_y == End(doc)->raw_y);
+	return (doc.getStart(*this).raw_y == End(doc)->raw_y);
 }
 
 bool LineDef::IsVertical(const Document &doc) const
 {
-	return (Start(doc)->raw_x == End(doc)->raw_x);
+	return (doc.getStart(*this).raw_x == End(doc)->raw_x);
 }
 
 double LineDef::CalcLength(const Document &doc) const
 {
-	double dx = Start(doc)->x() - End(doc)->x();
-	double dy = Start(doc)->y() - End(doc)->y();
+	double dx = doc.getStart(*this).x() - End(doc)->x();
+	double dy = doc.getStart(*this).y() - End(doc)->y();
 
 	return hypot(dx, dy);
 }
 
 bool LineDef::IsZeroLength(const Document &doc) const
 {
-	return (Start(doc)->raw_x == End(doc)->raw_x) && (Start(doc)->raw_y == End(doc)->raw_y);
+	return (doc.getStart(*this).raw_x == End(doc)->raw_x) && (doc.getStart(*this).raw_y == End(doc)->raw_y);
 }

@@ -883,8 +883,8 @@ public:
 		if (! ld->Right(inst.level))
 			return;
 
-		float x1 = static_cast<float>(ld->Start(inst.level)->x() - inst.r_view.x);
-		float y1 = static_cast<float>(ld->Start(inst.level)->y() - inst.r_view.y);
+		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
+		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
 		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
 		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
 
@@ -989,8 +989,8 @@ public:
 
 		/* actually draw it... */
 
-		x1 = static_cast<float>(ld->Start(inst.level)->x());
-		y1 = static_cast<float>(ld->Start(inst.level)->y());
+		x1 = static_cast<float>(inst.level.getStart(*ld).x());
+		y1 = static_cast<float>(inst.level.getStart(*ld).y());
 		x2 = static_cast<float>(ld->End(inst.level)->x());
 		y2 = static_cast<float>(ld->End(inst.level)->y());
 
@@ -1337,8 +1337,8 @@ public:
 		if (sd == NULL)
 			return;
 
-		float x1 = static_cast<float>(L->Start(inst.level)->x());
-		float y1 = static_cast<float>(L->Start(inst.level)->y());
+		float x1 = static_cast<float>(inst.level.getStart(*L).x());
+		float y1 = static_cast<float>(inst.level.getStart(*L).y());
 		float x2 = static_cast<float>(L->End(inst.level)->x());
 		float y2 = static_cast<float>(L->End(inst.level)->y());
 
@@ -1422,8 +1422,8 @@ public:
 		{
 			if (L->TouchesSector(sec_index, inst.level))
 			{
-				float x1 = static_cast<float>(L->Start(inst.level)->x());
-				float y1 = static_cast<float>(L->Start(inst.level)->y());
+				float x1 = static_cast<float>(inst.level.getStart(*L).x());
+				float y1 = static_cast<float>(inst.level.getStart(*L).y());
 				float x2 = static_cast<float>(L->End(inst.level)->x());
 				float y2 = static_cast<float>(L->End(inst.level)->y());
 

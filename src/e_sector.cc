@@ -572,11 +572,11 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 	{
 		const auto &L = doc.linedefs[lines[i]];
 
-		*x1 = std::min(*x1, std::min(L->Start(doc)->x(), L->End(doc)->x()));
-		*y1 = std::min(*y1, std::min(L->Start(doc)->y(), L->End(doc)->y()));
+		*x1 = std::min(*x1, std::min(doc.getStart(*L).x(), L->End(doc)->x()));
+		*y1 = std::min(*y1, std::min(doc.getStart(*L).y(), L->End(doc)->y()));
 
-		*x2 = std::max(*x2, std::max(L->Start(doc)->x(), L->End(doc)->x()));
-		*y2 = std::max(*y2, std::max(L->Start(doc)->y(), L->End(doc)->y()));
+		*x2 = std::max(*x2, std::max(doc.getStart(*L).x(), L->End(doc)->x()));
+		*y2 = std::max(*y2, std::max(doc.getStart(*L).y(), L->End(doc)->y()));
 	}
 }
 
@@ -767,8 +767,8 @@ bool lineloop_c::LookForIsland()
 	{
 		const auto &L = doc.linedefs[ld];
 
-		double x1 = L->Start(doc)->x();
-		double y1 = L->Start(doc)->y();
+		double x1 = doc.getStart(*L).x();
+		double y1 = doc.getStart(*L).y();
 		double x2 = L->End(doc)->x();
 		double y2 = L->End(doc)->y();
 
@@ -873,7 +873,7 @@ void lineloop_c::Dump() const
 		gLog.debugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
 					lines[i],
-					L->Start(doc)->x(), L->Start(doc)->y(),
+					doc.getStart(*L).x(), doc.getStart(*L).y(),
 					L->End  (doc)->x(), L->End  (doc)->y());
 	}
 }

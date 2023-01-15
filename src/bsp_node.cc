@@ -1158,8 +1158,8 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = part_L->Start(inst.level)->x();
-		y  = part_L->Start(inst.level)->y();
+		x  = inst.level.getStart(*part_L).x();
+		y  = inst.level.getStart(*part_L).y();
 		dx = part_L->End(inst.level)->x() - x;
 		dy = part_L->End(inst.level)->y() - y;
 	}
@@ -1167,8 +1167,8 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 	{
 		x  = part_L->End(inst.level)->x();
 		y  = part_L->End(inst.level)->y();
-		dx = part_L->Start(inst.level)->x() - x;
-		dy = part_L->Start(inst.level)->y() - y;
+		dx = inst.level.getStart(*part_L).x() - x;
+		dy = inst.level.getStart(*part_L).y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */

@@ -50,7 +50,6 @@ public:
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	Vertex *Start(const Document &doc) const;
 	Vertex *End(const Document &doc)   const;
 
 	// remember: these two can return NULL!

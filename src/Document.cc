@@ -95,7 +95,7 @@ static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 	crc += L->type;
 	crc += L->tag;
 
-	ChecksumVertex(crc, L->Start(doc));
+	ChecksumVertex(crc, &doc.getStart(*L));
 	ChecksumVertex(crc, L->End(doc));
 
 	if(L->Right(doc))
@@ -127,4 +127,9 @@ void Document::getLevelChecksum(crc32_c &crc) const
 const Sector &Document::getSector(const SideDef &side) const
 {
 	return *sectors[side.sector];
+}
+
+const Vertex &Document::getStart(const LineDef &line) const
+{
+	return *vertices[line.start];
 }

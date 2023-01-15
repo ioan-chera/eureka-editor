@@ -391,8 +391,8 @@ static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
 	const auto &L = inst.level.linedefs[ld_num];
 
-	float lx1 = static_cast<float>(L->Start(inst.level)->x());
-	float ly1 = static_cast<float>(L->Start(inst.level)->y());
+	float lx1 = static_cast<float>(inst.level.getStart(*L).x());
+	float ly1 = static_cast<float>(inst.level.getStart(*L).y());
 	float lx2 = static_cast<float>(L->End(inst.level)->x());
 	float ly2 = static_cast<float>(L->End(inst.level)->y());
 
