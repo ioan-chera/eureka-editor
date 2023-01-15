@@ -304,9 +304,9 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	{
 		if (L->OneSided())
 		{
-			if (parts & PART_RT_RAIL) 
+			if (parts & PART_RT_RAIL)
 				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
-			if (parts & PART_RT_UPPER) 
+			if (parts & PART_RT_UPPER)
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
 
 			return;
@@ -314,21 +314,21 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 
 		if (L->Right(inst.level))
 		{
-			if (parts & PART_RT_LOWER) 
+			if (parts & PART_RT_LOWER)
 				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_RT_UPPER) 
+			if (parts & PART_RT_UPPER)
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_RT_RAIL)  
+			if (parts & PART_RT_RAIL)
 				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
 		if (L->Left(inst.level))
 		{
-			if (parts & PART_LF_LOWER) 
+			if (parts & PART_LF_LOWER)
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
-			if (parts & PART_LF_UPPER) 
+			if (parts & PART_LF_UPPER)
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_tex);
-			if (parts & PART_LF_RAIL)  
+			if (parts & PART_LF_RAIL)
 				op.changeSidedef(L->left, SideDef::F_MID_TEX,   new_tex);
 		}
 		return;
@@ -390,7 +390,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		if (opposite)
 			std::swap(sd1, sd2);
 
-		SideDef *S = inst.level.sidedefs[sd1];
+		const auto &S = inst.level.sidedefs[sd1];
 
 		// change BOTH upper and lower when they are the same
 		// (which is great for windows).

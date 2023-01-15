@@ -40,8 +40,6 @@ protected:
 // Cleanup objects
 DocumentFixture::~DocumentFixture()
 {
-	for(SideDef *sidedef : doc.sidedefs)
-		delete sidedef;
 	for(LineDef *linedef : doc.linedefs)
 		delete linedef;
 }
@@ -64,8 +62,8 @@ TEST_F(DocumentFixture, CheckObjects)
 	doc.vertices.push_back(std::make_unique<Vertex>());
 	doc.vertices.push_back(std::make_unique<Vertex>());
 	// no sectors
-	doc.sidedefs.push_back(new SideDef);
-	doc.sidedefs.push_back(new SideDef);
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
 	doc.linedefs.push_back(new LineDef);
 
 	ASSERT_EQ(doc.numThings(), 3);
@@ -116,8 +114,8 @@ TEST_F(DocumentFixture, CRC)
 	doc.vertices.push_back(std::make_unique<Vertex>());
 	doc.vertices.push_back(std::make_unique<Vertex>());
 	// no sectors
-	doc.sidedefs.push_back(new SideDef);
-	doc.sidedefs.push_back(new SideDef);
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.sidedefs.push_back(std::make_unique<SideDef>());
 	doc.linedefs.push_back(new LineDef);
 
 	crc32_c crc;

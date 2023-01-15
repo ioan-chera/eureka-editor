@@ -362,7 +362,7 @@ private:
 				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());
 
 			case ObjType::sidedefs:
-				return reinterpret_cast<int *>(inst.level.sidedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
 
 			case ObjType::linedefs:
 				return reinterpret_cast<int *>(inst.level.linedefs[objnum]);

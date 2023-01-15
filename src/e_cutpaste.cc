@@ -496,7 +496,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 		}
 
 		int new_sd = op.addNew(ObjType::sidedefs);
-		SideDef * SD = op.doc.sidedefs[new_sd];
+		auto &SD = op.doc.sidedefs[new_sd];
 
 		side_map[i] = new_sd;
 
@@ -824,7 +824,7 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
 	{
-		const SideDef *SD = doc.sidedefs[i];
+		const auto &SD = doc.sidedefs[i];
 
 		if (secs && secs->get(SD->sector))
 			result.set(i);

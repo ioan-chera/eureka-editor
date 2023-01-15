@@ -35,12 +35,12 @@ Vertex * LineDef::End(const Document &doc) const
 
 SideDef * LineDef::Right(const Document &doc) const
 {
-	return (right >= 0) ? doc.sidedefs[right] : nullptr;
+	return (right >= 0) ? doc.sidedefs[right].get() : nullptr;
 }
 
 SideDef * LineDef::Left(const Document &doc) const
 {
-	return (left >= 0) ? doc.sidedefs[left] : nullptr;
+	return (left >= 0) ? doc.sidedefs[left].get() : nullptr;
 }
 
 bool LineDef::TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const

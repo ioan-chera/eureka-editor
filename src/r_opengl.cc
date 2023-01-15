@@ -1069,7 +1069,7 @@ public:
 				for (size_t k = 0 ; k < b_ex->floors.size() ; k++)
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
-					const SideDef *ef_sd = inst.level.sidedefs[EF.sd];
+					const auto &ef_sd = inst.level.sidedefs[EF.sd];
 					const auto &dummy = inst.level.sectors[ef_sd->sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))

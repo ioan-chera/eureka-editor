@@ -207,7 +207,7 @@ int Basis::addNew(ObjType type)
 
 	case ObjType::sidedefs:
 		op.objnum = doc.numSidedefs();
-		op.sidedef = new SideDef;
+		op.sidedef = std::make_unique<SideDef>();
 		break;
 
 	case ObjType::linedefs:
@@ -438,8 +438,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(SideDef *sidedef : doc.sidedefs)
-		delete sidedef;
 	for(LineDef *linedef : doc.linedefs)
 		delete linedef;
 
@@ -527,7 +525,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::sidedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
@@ -649,7 +647,7 @@ std::unique_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
 	{
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = doc.sidedefs[n];
+			auto &S = doc.sidedefs[n];
 
 			if(S->sector > objnum)
 				S->sector--;
@@ -662,11 +660,11 @@ std::unique_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
 //
 // Delete sidedef (and update linedef references)
 //
-SideDef *Basis::EditUnit::rawDeleteSidedef(Document &doc) const
+std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSidedefs());
 
-	SideDef *result = doc.sidedefs[objnum];
+	auto result = std::move(doc.sidedefs[objnum]);
 	doc.sidedefs.erase(doc.sidedefs.begin() + objnum);
 
 	// fix the linedefs references
@@ -795,7 +793,7 @@ void Basis::EditUnit::rawInsertSector(Document &doc)
 	{
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
 		{
-			SideDef *S = doc.sidedefs[n];
+			auto &S = doc.sidedefs[n];
 
 			if(S->sector >= objnum)
 				S->sector++;
@@ -806,10 +804,10 @@ void Basis::EditUnit::rawInsertSector(Document &doc)
 //
 // Sidedef insertion
 //
-void Basis::EditUnit::rawInsertSidedef(Document &doc) const
+void Basis::EditUnit::rawInsertSidedef(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSidedefs());
-	doc.sidedefs.insert(doc.sidedefs.begin() + objnum, sidedef);
+	doc.sidedefs.insert(doc.sidedefs.begin() + objnum, std::move(sidedef));
 
 	// fix the linedefs references
 
@@ -847,7 +845,7 @@ void Basis::EditUnit::deleteFinally()
 	case ObjType::things:   thing.reset(); break;
 	case ObjType::vertices: vertex.reset(); break;
 	case ObjType::sectors:  sector.reset(); break;
-	case ObjType::sidedefs: delete sidedef; break;
+	case ObjType::sidedefs: sidedef.reset(); break;
 	case ObjType::linedefs: delete linedef; break;
 
 	default:

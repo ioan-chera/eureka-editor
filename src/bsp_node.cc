@@ -1321,9 +1321,9 @@ void quadtree_c::ConvertToList(seg_t **_list)
 static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 		int sidedef, int what_side /* 0 or 1 */, const Instance &inst)
 {
-	SideDef *sd = NULL;
+	const SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = inst.level.sidedefs[sidedef];
+		sd = inst.level.sidedefs[sidedef].get();
 
 	// check for bad sidedef
 	if (sd && !inst.level.isSector(sd->sector))

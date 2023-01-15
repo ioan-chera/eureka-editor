@@ -44,7 +44,7 @@ public:
 	std::vector<std::unique_ptr<Thing>> things;
 	std::vector<std::unique_ptr<Vertex>> vertices;
 	std::vector<std::unique_ptr<Sector>> sectors;
-	std::vector<SideDef *> sidedefs;
+	std::vector<std::unique_ptr<SideDef>> sidedefs;
 	std::vector<LineDef *> linedefs;
 
 	std::vector<byte> headerData;

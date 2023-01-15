@@ -84,7 +84,7 @@ inline const SideDef * LinedefModule::sidedefPointer(const Objid& obj) const
 
 	int sd = pointer(obj)->WhatSideDef(where);
 
-	return (sd >= 0) ? doc.sidedefs[sd] : nullptr;
+	return (sd >= 0) ? doc.sidedefs[sd].get() : nullptr;
 }
 
 
@@ -1042,7 +1042,7 @@ void Instance::CMD_LIN_SplitHalf()
 void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int other_sd) const
 {
 	const LineDef * L  = doc.linedefs[ld];
-	SideDef * SD = doc.sidedefs[new_sd];
+	auto &SD = doc.sidedefs[new_sd];
 
 	int new_flags = L->flags;
 
@@ -1054,7 +1054,7 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 	// TODO: make this a global pseudo-constant
 	StringID null_tex = BA_InternaliseString("-");
 
-	const SideDef *other = doc.sidedefs[other_sd];
+	const auto &other = doc.sidedefs[other_sd];
 
 	if (! is_null_tex(other->MidTex()))
 	{
@@ -1155,7 +1155,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 
 	// FIXME: if sidedef is shared, either don't modify it _OR_ duplicate it
 
-	const SideDef *SD = doc.sidedefs[other_sd];
+	const SideDef *SD = doc.sidedefs[other_sd].get();
 
 	StringID new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
@@ -1166,7 +1166,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 		new_tex = SD->upper_tex;
 	else if (gone_sd >= 0)
 	{
-		SD = doc.sidedefs[gone_sd];
+		SD = doc.sidedefs[gone_sd].get();
 
 		if (! is_null_tex(SD->LowerTex()))
 			new_tex = SD->lower_tex;

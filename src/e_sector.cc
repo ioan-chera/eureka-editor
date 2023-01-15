@@ -289,7 +289,7 @@ void SectorModule::replaceSectorRefs(EditOperation &op, int old_sec, int new_sec
 {
 	for (int i = 0 ; i < doc.numSidedefs() ; i++)
 	{
-		SideDef * sd = doc.sidedefs[i];
+		const auto &sd = doc.sidedefs[i];
 
 		if (sd->sector == old_sec)
 		{
@@ -925,7 +925,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			if (sd < 0)
 				continue;
 
-			const SideDef *SD = doc.sidedefs[sd];
+			const auto &SD = doc.sidedefs[sd];
 
 			if (doc.linedefs[ld]->TwoSided())
 			{
@@ -962,7 +962,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			continue;
 		}
 
-		const SideDef *SD = doc.sidedefs[sd];
+		const auto &SD = doc.sidedefs[sd];
 
 		if (doc.linedefs[ld]->TwoSided())
 		{
@@ -1065,7 +1065,7 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	// create new sidedef
 	int new_sd = op.addNew(ObjType::sidedefs);
 
-	SideDef * SD = doc.sidedefs[new_sd];
+	auto &SD = doc.sidedefs[new_sd];
 
 	if (other_sd >= 0)
 	{

@@ -568,11 +568,12 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("sidedef"))
 	{
 		kind = Objid(ObjType::sidedefs, 1);
-		new_SD = new SideDef;
-		new_SD->mid_tex = BA_InternaliseString("-");
-		new_SD->lower_tex = new_SD->mid_tex;
-		new_SD->upper_tex = new_SD->mid_tex;
-		doc.sidedefs.push_back(new_SD);
+		auto addedSide = std::make_unique<SideDef>();
+		addedSide->mid_tex = BA_InternaliseString("-");
+		addedSide->lower_tex = addedSide->mid_tex;
+		addedSide->upper_tex = addedSide->mid_tex;
+		doc.sidedefs.push_back(std::move(addedSide));
+		new_SD = doc.sidedefs.back().get();
 	}
 	else if (name.Match("sector"))
 	{
@@ -638,7 +639,7 @@ void Instance::ValidateLevel_UDMF()
 {
 	for (int n = 0 ; n < level.numSidedefs() ; n++)
 	{
-		ValidateSectorRef(level.sidedefs[n], n);
+		ValidateSectorRef(level.sidedefs[n].get(), n);
 	}
 
 	for (int n = 0 ; n < level.numLinedefs(); n++)
@@ -839,7 +840,7 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 		lump->Printf("sidedef // %d\n", i);
 		lump->Printf("{\n");
 
-		const SideDef *side = doc.sidedefs[i];
+		const auto &side = doc.sidedefs[i];
 
 		lump->Printf("sector = %d;\n", side->sector);
 
