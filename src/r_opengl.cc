@@ -885,8 +885,8 @@ public:
 
 		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
 		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
-		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
-		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
+		float x2 = static_cast<float>(inst.level.getEnd(*ld).x() - inst.r_view.x);
+		float y2 = static_cast<float>(inst.level.getEnd(*ld).y() - inst.r_view.y);
 
 		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
 		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);
@@ -991,8 +991,8 @@ public:
 
 		x1 = static_cast<float>(inst.level.getStart(*ld).x());
 		y1 = static_cast<float>(inst.level.getStart(*ld).y());
-		x2 = static_cast<float>(ld->End(inst.level)->x());
-		y2 = static_cast<float>(ld->End(inst.level)->y());
+		x2 = static_cast<float>(inst.level.getEnd(*ld).x());
+		y2 = static_cast<float>(inst.level.getEnd(*ld).y());
 
 		if (side == Side::left)
 		{
@@ -1339,8 +1339,8 @@ public:
 
 		float x1 = static_cast<float>(inst.level.getStart(*L).x());
 		float y1 = static_cast<float>(inst.level.getStart(*L).y());
-		float x2 = static_cast<float>(L->End(inst.level)->x());
-		float y2 = static_cast<float>(L->End(inst.level)->y());
+		float x2 = static_cast<float>(inst.level.getEnd(*L).x());
+		float y2 = static_cast<float>(inst.level.getEnd(*L).y());
 
 		// check that this side is facing the camera
 		Side cam_side = PointOnLineSide(inst.r_view.x, inst.r_view.y, x1,y1,x2,y2);
@@ -1424,8 +1424,8 @@ public:
 			{
 				float x1 = static_cast<float>(inst.level.getStart(*L).x());
 				float y1 = static_cast<float>(inst.level.getStart(*L).y());
-				float x2 = static_cast<float>(L->End(inst.level)->x());
-				float y2 = static_cast<float>(L->End(inst.level)->y());
+				float x2 = static_cast<float>(inst.level.getEnd(*L).x());
+				float y2 = static_cast<float>(inst.level.getEnd(*L).y());
 
 				glBegin(GL_LINE_STRIP);
 				glVertex3f(x1, y1, z);

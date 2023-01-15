@@ -1160,13 +1160,13 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 	{
 		x  = inst.level.getStart(*part_L).x();
 		y  = inst.level.getStart(*part_L).y();
-		dx = part_L->End(inst.level)->x() - x;
-		dy = part_L->End(inst.level)->y() - y;
+		dx = inst.level.getEnd(*part_L).x() - x;
+		dy = inst.level.getEnd(*part_L).y() - y;
 	}
 	else  /* left side */
 	{
-		x  = part_L->End(inst.level)->x();
-		y  = part_L->End(inst.level)->y();
+		x  = inst.level.getEnd(*part_L).x();
+		y  = inst.level.getEnd(*part_L).y();
 		dx = inst.level.getStart(*part_L).x() - x;
 		dy = inst.level.getStart(*part_L).y() - y;
 	}

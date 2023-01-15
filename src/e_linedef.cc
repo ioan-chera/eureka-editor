@@ -978,11 +978,11 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 	const auto &L = doc.linedefs[ld];
 
 	// prevent creating tiny lines (especially zero-length)
-	if (fabs(doc.getStart(*L).x() - L->End(doc)->x()) < 4 &&
-		fabs(doc.getStart(*L).y() - L->End(doc)->y()) < 4)
+	if (fabs(doc.getStart(*L).x() - doc.getEnd(*L).x()) < 4 &&
+		fabs(doc.getStart(*L).y() - doc.getEnd(*L).y()) < 4)
 		return false;
 
-	v2double_t new_p = (doc.getStart(*L).xy() + L->End(doc)->xy()) / 2;
+	v2double_t new_p = (doc.getStart(*L).xy() + doc.getEnd(*L).xy()) / 2;
 
 	int new_v = op.addNew(ObjType::vertices);
 
@@ -1256,7 +1256,7 @@ void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 	const auto &L = doc.linedefs[ld];
 
 	v2double_t v1 = doc.getStart(*L).xy();
-	v2double_t v2 = L->End(doc)->xy();
+	v2double_t v2 = doc.getEnd(*L).xy();
 
 	v2double_t dv = v2 - v1;
 
@@ -1357,8 +1357,8 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 
 	if (new_len < 0)
 	{
-		op.changeVertex(L->start, Vertex::F_X, L->End(doc)->raw_x - FFixedPoint(idx));
-		op.changeVertex(L->start, Vertex::F_Y, L->End(doc)->raw_y - FFixedPoint(idy));
+		op.changeVertex(L->start, Vertex::F_X, doc.getEnd(*L).raw_x - FFixedPoint(idx));
+		op.changeVertex(L->start, Vertex::F_Y, doc.getEnd(*L).raw_y - FFixedPoint(idy));
 	}
 	else
 	{
@@ -1388,7 +1388,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 	{
 		const auto &L = doc.linedefs[n];
 
-		angles[n] = atan2(L->End(doc)->y() - doc.getStart(*L).y(), L->End(doc)->x() - doc.getStart(*L).x());
+		angles[n] = atan2(doc.getEnd(*L).y() - doc.getStart(*L).y(), doc.getEnd(*L).x() - doc.getStart(*L).x());
 	}
 
 	EditOperation op(doc.basis);

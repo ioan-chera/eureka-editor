@@ -189,8 +189,8 @@ static void BlockAddLine(int line_index, const Document &doc)
 
 	int x1 = (int) doc.getStart(*L).x();
 	int y1 = (int) doc.getStart(*L).y();
-	int x2 = (int) L->End(doc)->x();
-	int y2 = (int) L->End(doc)->y();
+	int x2 = (int) doc.getEnd(*L).x();
+	int y2 = (int) doc.getEnd(*L).y();
 
 	int bx1 = (std::min(x1,x2) - block_x) / 128;
 	int by1 = (std::min(y1,y2) - block_y) / 128;
@@ -475,8 +475,8 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 		{
 			double x1 = doc.getStart(*L).x();
 			double y1 = doc.getStart(*L).y();
-			double x2 = L->End(doc)->x();
-			double y2 = L->End(doc)->y();
+			double x2 = doc.getEnd(*L).x();
+			double y2 = doc.getEnd(*L).y();
 
 			int lx = (int)floor(std::min(x1, x2));
 			int ly = (int)floor(std::min(y1, y2));
@@ -886,8 +886,8 @@ static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
 	const auto &L = doc.linedefs[seg->linedef];
 
-	double lx = seg->side ? L->End(doc)->x() : doc.getStart(*L).x();
-	double ly = seg->side ? L->End(doc)->y() : doc.getStart(*L).y();
+	double lx = seg->side ? doc.getEnd(*L).x() : doc.getStart(*L).x();
+	double ly = seg->side ? doc.getEnd(*L).y() : doc.getStart(*L).y();
 
 	// use the "true" starting coord (as stored in the wad)
 	double sx = round(seg->start->x);

@@ -192,7 +192,7 @@ void sector_info_cache_c::Rebuild()
 			info.AddLine(n);
 
 			info.AddVertex(&inst.level.getStart(*L));
-			info.AddVertex(L->End(inst.level));
+			info.AddVertex(&inst.level.getEnd(*L));
 		}
 	}
 
@@ -456,8 +456,8 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 
 	double lx1 = inst.level.getStart(*L).x();
 	double ly1 = inst.level.getStart(*L).y();
-	double lx2 = L->End(inst.level)->x();
-	double ly2 = L->End(inst.level)->y();
+	double lx2 = inst.level.getEnd(*L).x();
+	double ly2 = inst.level.getEnd(*L).y();
 
 	if (side == Side::left)
 	{
@@ -471,7 +471,7 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 		{
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
-				const Vertex *v2 = pass ? L2->End(inst.level) : &inst.level.getStart(*L2);
+				const Vertex *v2 = pass ? &inst.level.getEnd(*L2) : &inst.level.getStart(*L2);
 				double dist = PerpDist(v2->xy(), v2double_t{ lx1,ly1 }, v2double_t{ lx2, ly2 });
 
 				if (dist > best_dist)
@@ -693,8 +693,8 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 		edge.x1 = static_cast<int>(inst.level.getStart(*L).x());
 		edge.y1 = static_cast<int>(inst.level.getStart(*L).y());
-		edge.x2 = static_cast<int>(L->End(inst.level)->x());
-		edge.y2 = static_cast<int>(L->End(inst.level)->y());
+		edge.x2 = static_cast<int>(inst.level.getEnd(*L).x());
+		edge.y2 = static_cast<int>(inst.level.getEnd(*L).y());
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)

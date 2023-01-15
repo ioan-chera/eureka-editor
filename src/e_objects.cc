@@ -690,8 +690,8 @@ bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, doub
 {
 	double lx0 = doc.getStart(*doc.linedefs[ld]).x();
 	double ly0 = doc.getStart(*doc.linedefs[ld]).y();
-	double lx1 = doc.linedefs[ld]->End(doc)->x();
-	double ly1 = doc.linedefs[ld]->End(doc)->y();
+	double lx1 = doc.getEnd(*doc.linedefs[ld]).x();
+	double ly1 = doc.getEnd(*doc.linedefs[ld]).y();
 
 	double i;
 
@@ -2134,8 +2134,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 		// IDEA: make this a method of LineDef
 		double x1 = doc.getStart(*L).x();
 		double y1 = doc.getStart(*L).y();
-		double x2 = L->End(doc)->x();
-		double y2 = L->End(doc)->y();
+		double x2 = doc.getEnd(*L).x();
+		double y2 = doc.getEnd(*L).y();
 
 		if (L->IsHorizontal(doc))
 		{

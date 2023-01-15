@@ -422,8 +422,8 @@ void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, d
 {
 	const auto &V = doc.vertices[v_num];
 
-	double dx = L->End(doc)->x() - doc.getStart(*L).x();
-	double dy = L->End(doc)->y() - doc.getStart(*L).y();
+	double dx = doc.getEnd(*L).x() - doc.getStart(*L).x();
+	double dy = doc.getEnd(*L).y() - doc.getStart(*L).y();
 
 	if (L->end == v_num)
 	{

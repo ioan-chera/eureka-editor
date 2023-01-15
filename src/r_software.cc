@@ -272,8 +272,8 @@ public:
 
 				int bx1 = static_cast<int>(inst.level.getStart(*B->ld).x());
 				int by1 = static_cast<int>(inst.level.getStart(*B->ld).y());
-				int bx2 = static_cast<int>(B->ld->End(inst.level)->x());
-				int by2 = static_cast<int>(B->ld->End(inst.level)->y());
+				int bx2 = static_cast<int>(inst.level.getEnd(*B->ld).x());
+				int by2 = static_cast<int>(inst.level.getEnd(*B->ld).y());
 
 				int cx = (int)inst.r_view.x;  // camera
 				int cy = (int)inst.r_view.y;
@@ -727,8 +727,8 @@ public:
 
 		float x1 = static_cast<float>(inst.level.getStart(*ld).x() - inst.r_view.x);
 		float y1 = static_cast<float>(inst.level.getStart(*ld).y() - inst.r_view.y);
-		float x2 = static_cast<float>(ld->End(inst.level)->x() - inst.r_view.x);
-		float y2 = static_cast<float>(ld->End(inst.level)->y() - inst.r_view.y);
+		float x2 = static_cast<float>(inst.level.getEnd(*ld).x() - inst.r_view.x);
+		float y2 = static_cast<float>(inst.level.getEnd(*ld).y() - inst.r_view.y);
 
 		float tx1 = static_cast<float>(x1 * inst.r_view.Sin - y1 * inst.r_view.Cos);
 		float ty1 = static_cast<float>(x1 * inst.r_view.Cos + y1 * inst.r_view.Sin);

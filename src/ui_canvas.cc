@@ -396,7 +396,7 @@ void UI_Canvas::DrawEverything()
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
 			const auto &L = inst.level.linedefs[inst.edit.highlight.num];
-			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
+			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), inst.level.getEnd(*L).x(), inst.level.getEnd(*L).y(), false);
 		}
 
 		RenderThickness(1);
@@ -722,8 +722,8 @@ void UI_Canvas::DrawLinedefs()
 
 		double x1 = inst.level.getStart(*L).x();
 		double y1 = inst.level.getStart(*L).y();
-		double x2 = L->End  (inst.level)->x();
-		double y2 = L->End  (inst.level)->y();
+		double x2 = inst.level.getEnd(*L).x();
+		double y2 = inst.level.getEnd(*L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
@@ -877,8 +877,8 @@ void UI_Canvas::DrawLinedefs()
 		{
 			double x1 = inst.level.getStart(*inst.level.linedefs[n]).x();
 			double y1 = inst.level.getStart(*inst.level.linedefs[n]).y();
-			double x2 = inst.level.linedefs[n]->End  (inst.level)->x();
-			double y2 = inst.level.linedefs[n]->End  (inst.level)->y();
+			double x2 = inst.level.getEnd(*inst.level.linedefs[n]).x();
+			double y2 = inst.level.getEnd(*inst.level.linedefs[n]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				continue;
@@ -1376,8 +1376,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 		{
 			double x1 = dx + inst.level.getStart(*inst.level.linedefs[objnum]).x();
 			double y1 = dy + inst.level.getStart(*inst.level.linedefs[objnum]).y();
-			double x2 = dx + inst.level.linedefs[objnum]->End  (inst.level)->x();
-			double y2 = dy + inst.level.linedefs[objnum]->End  (inst.level)->y();
+			double x2 = dx + inst.level.getEnd(*inst.level.linedefs[objnum]).x();
+			double y2 = dy + inst.level.getEnd(*inst.level.linedefs[objnum]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				break;
@@ -1437,8 +1437,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 				double x1 = dx + inst.level.getStart(*L).x();
 				double y1 = dy + inst.level.getStart(*L).y();
-				double x2 = dx + L->End  (inst.level)->x();
-				double y2 = dy + L->End  (inst.level)->y();
+				double x2 = dx + inst.level.getEnd(*L).x();
+				double y2 = dy + inst.level.getEnd(*L).y();
 
 				if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 					continue;
@@ -1513,8 +1513,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 		{
 			double x1 = inst.level.getStart(*inst.level.linedefs[objnum]).x();
 			double y1 = inst.level.getStart(*inst.level.linedefs[objnum]).y();
-			double x2 = inst.level.linedefs[objnum]->End  (inst.level)->x();
-			double y2 = inst.level.linedefs[objnum]->End  (inst.level)->y();
+			double x2 = inst.level.getEnd(*inst.level.linedefs[objnum]).x();
+			double y2 = inst.level.getEnd(*inst.level.linedefs[objnum]).y();
 
 			inst.edit.trans_param.Apply(&x1, &y1);
 			inst.edit.trans_param.Apply(&x2, &y2);
@@ -1535,8 +1535,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 				double x1 = inst.level.getStart(*linedef).x();
 				double y1 = inst.level.getStart(*linedef).y();
-				double x2 = linedef->End  (inst.level)->x();
-				double y2 = linedef->End  (inst.level)->y();
+				double x2 = inst.level.getEnd(*linedef).x();
+				double y2 = inst.level.getEnd(*linedef).y();
 
 				inst.edit.trans_param.Apply(&x1, &y1);
 				inst.edit.trans_param.Apply(&x2, &y2);
@@ -1726,8 +1726,8 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 	{
 		double x1 = dx + inst.level.getStart(*L).x();
 		double y1 = dy + inst.level.getStart(*L).y();
-		double x2 = dx + L->End  (inst.level)->x();
-		double y2 = dy + L->End  (inst.level)->y();
+		double x2 = dx + inst.level.getEnd(*L).x();
+		double y2 = dy + inst.level.getEnd(*L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;

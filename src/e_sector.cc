@@ -572,11 +572,11 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 	{
 		const auto &L = doc.linedefs[lines[i]];
 
-		*x1 = std::min(*x1, std::min(doc.getStart(*L).x(), L->End(doc)->x()));
-		*y1 = std::min(*y1, std::min(doc.getStart(*L).y(), L->End(doc)->y()));
+		*x1 = std::min(*x1, std::min(doc.getStart(*L).x(), doc.getEnd(*L).x()));
+		*y1 = std::min(*y1, std::min(doc.getStart(*L).y(), doc.getEnd(*L).y()));
 
-		*x2 = std::max(*x2, std::max(doc.getStart(*L).x(), L->End(doc)->x()));
-		*y2 = std::max(*y2, std::max(doc.getStart(*L).y(), L->End(doc)->y()));
+		*x2 = std::max(*x2, std::max(doc.getStart(*L).x(), doc.getEnd(*L).x()));
+		*y2 = std::max(*y2, std::max(doc.getStart(*L).y(), doc.getEnd(*L).y()));
 	}
 }
 
@@ -769,8 +769,8 @@ bool lineloop_c::LookForIsland()
 
 		double x1 = doc.getStart(*L).x();
 		double y1 = doc.getStart(*L).y();
-		double x2 = L->End(doc)->x();
-		double y2 = L->End(doc)->y();
+		double x2 = doc.getEnd(*L).x();
+		double y2 = doc.getEnd(*L).y();
 
 		if (std::max(x1, x2) < bbox_x1 || std::min(x1, x2) > bbox_x2 ||
 			std::max(y1, y2) < bbox_y1 || std::min(y1, y2) > bbox_y2)
@@ -874,7 +874,7 @@ void lineloop_c::Dump() const
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
 					lines[i],
 					doc.getStart(*L).x(), doc.getStart(*L).y(),
-					L->End  (doc)->x(), L->End  (doc)->y());
+					doc.getEnd(*L).x(), doc.getEnd(*L).y());
 	}
 }
 

@@ -114,6 +114,7 @@ public:
 
 	const Sector &getSector(const SideDef &side) const;
 	const Vertex &getStart(const LineDef &line) const;
+	const Vertex &getEnd(const LineDef &line) const;
 
 private:
 	friend class DocumentModule;

@@ -277,7 +277,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
 					(int) inst.level.getStart(*L).x(), (int) inst.level.getStart(*L).y(),
-					(int) L->End(inst.level)->x(),   (int) L->End(inst.level)->y()))
+					(int) inst.level.getEnd(*L).x(),   (int) inst.level.getEnd(*L).y()))
 		{
 #     if DEBUG_POLYOBJ
 			gLog.debugPrintf("  Touching line was %d\n", L->index);
@@ -310,8 +310,8 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 
 		x1 = inst.level.getStart(*L).x();
 		y1 = inst.level.getStart(*L).y();
-		x2 = L->End(inst.level)->x();
-		y2 = L->End(inst.level)->y();
+		x2 = inst.level.getEnd(*L).x();
+		y2 = inst.level.getEnd(*L).y();
 
 		/* check vertical range */
 		if (fabs(y2 - y1) < EPSILON)
@@ -341,7 +341,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 	const auto &best_ld = inst.level.linedefs[best_match];
 
 	y1 = inst.level.getStart(*best_ld).y();
-	y2 = best_ld->End(inst.level)->y();
+	y2 = inst.level.getEnd(*best_ld).y();
 
 # if DEBUG_POLYOBJ
 	gLog.debugPrintf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
@@ -494,9 +494,9 @@ static inline int LineVertexLowest(const Document &doc, const LineDef *L)
 	// returns the "lowest" vertex (normally the left-most, but if the
 	// line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
-	return ( doc.getStart(*L).raw_x <  L->End(doc)->raw_x ||
-			(doc.getStart(*L).raw_x == L->End(doc)->raw_x &&
-			 doc.getStart(*L).raw_y <  L->End(doc)->raw_y)) ? 0 : 1;
+	return ( doc.getStart(*L).raw_x <  doc.getEnd(*L).raw_x ||
+			(doc.getStart(*L).raw_x == doc.getEnd(*L).raw_x &&
+			 doc.getStart(*L).raw_y <  doc.getEnd(*L).raw_y)) ? 0 : 1;
 }
 
 static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const void *p2)
@@ -511,8 +511,8 @@ static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const v
 	const auto &B = doc.linedefs[line2];
 
 	// determine left-most vertex of each line
-	const Vertex *C = LineVertexLowest(doc, A.get()) ? A->End(doc) : &doc.getStart(*A);
-	const Vertex *D = LineVertexLowest(doc, B.get()) ? B->End(doc) : &doc.getStart(*B);
+	const Vertex *C = LineVertexLowest(doc, A.get()) ? &doc.getEnd(*A) : &doc.getStart(*A);
+	const Vertex *D = LineVertexLowest(doc, B.get()) ? &doc.getEnd(*B) : &doc.getStart(*B);
 
 	if (C->raw_x != D->raw_x)
 		return C->raw_x - D->raw_x;
@@ -532,8 +532,8 @@ static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const voi
 	const auto &B = doc.linedefs[line2];
 
 	// determine right-most vertex of each line
-	const Vertex * C = LineVertexLowest(doc, A.get()) ? &doc.getStart(*A) : A->End(doc);
-	const Vertex * D = LineVertexLowest(doc, B.get()) ? &doc.getStart(*B) : B->End(doc);
+	const Vertex * C = LineVertexLowest(doc, A.get()) ? &doc.getStart(*A) : &doc.getEnd(*A);
+	const Vertex * D = LineVertexLowest(doc, B.get()) ? &doc.getStart(*B) : &doc.getEnd(*B);
 
 	if (C->raw_x != D->raw_x)
 		return C->raw_x - D->raw_x;
@@ -650,8 +650,8 @@ void CalculateWallTips(const Document &doc)
 
 		double x1 = doc.getStart(*L).x();
 		double y1 = doc.getStart(*L).y();
-		double x2 = L->End(doc)->x();
-		double y2 = L->End(doc)->y();
+		double x2 = doc.getEnd(*L).x();
+		double y2 = doc.getEnd(*L).y();
 
 		bool left  = (L->left  >= 0) && doc.isSector(L->Left(doc)->sector);
 		bool right = (L->right >= 0) && doc.isSector(L->Right(doc)->sector);
