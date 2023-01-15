@@ -110,7 +110,7 @@ public:
 	~DrawSurf()
 	{ }
 
-	void FindFlat(const SString & fname, Sector *sec)
+	void FindFlat(const SString & fname)
 	{
 		fullbright = false;
 
@@ -190,7 +190,7 @@ public:
 
 	LineDef *ld;
 	SideDef *sd;
-	Sector *sec;
+	const Sector *sec;
 
 	// which side this wall faces (SIDE_LEFT or SIDE_RIGHT)
 	// for sprites: a copy of the thinginfo flags
@@ -339,7 +339,7 @@ public:
 
 	/* methods */
 
-	Sector *Boom242Sector(const Sector *real, Sector *temp, const Sector *dummy)
+	const Sector *Boom242Sector(const Sector *real, Sector *temp, const Sector *dummy)
 	{
 		*temp = *real;
 
@@ -374,7 +374,7 @@ public:
 
 	void ComputeWallSurface()
 	{
-		Sector *front = sec;
+		const Sector *front = sec;
 		const Sector *back  = NULL;
 
 		SideDef *back_sd = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
@@ -414,7 +414,7 @@ public:
 			ceil.tex_h = ceil.h1;
 			ceil.y_clip = DrawSurf::SOLID_ABOVE;
 
-			ceil.FindFlat(front->CeilTex(), front);
+			ceil.FindFlat(front->CeilTex());
 		}
 
 		if (front->floorh < inst.r_view.z && ! self_ref)
@@ -425,7 +425,7 @@ public:
 			floor.tex_h = floor.h2;
 			floor.y_clip = DrawSurf::SOLID_BELOW;
 
-			floor.FindFlat(front->FloorTex(), front);
+			floor.FindFlat(front->FloorTex());
 		}
 
 		if (! back)
@@ -839,7 +839,7 @@ public:
 		dw->ld_index = ld_index;
 
 		dw->sd = sd;
-		dw->sec = sd->SecRef(inst.level);
+		dw->sec = &inst.level.getSector(*sd);
 		dw->side = side;
 		dw->thingFlags = 0;
 
@@ -1037,22 +1037,22 @@ public:
 
 		if (dw->ld->TwoSided())
 		{
-			const Sector *front = dw->ld->Right(inst.level)->SecRef(inst.level);
-			const Sector *back  = dw->ld-> Left(inst.level)->SecRef(inst.level);
+			const Sector &front = inst.level.getSector(*dw->ld->Right(inst.level));
+			const Sector &back  = inst.level.getSector(*dw->ld-> Left(inst.level));
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
-				z1 = std::min(front->floorh, back->floorh);
-				z2 = std::max(front->floorh, back->floorh);
+				z1 = std::min(front.floorh, back.floorh);
+				z2 = std::max(front.floorh, back.floorh);
 			}
 			else if (part & (PART_RT_UPPER | PART_LF_UPPER))
 			{
-				z1 = std::min(front->ceilh, back->ceilh);
-				z2 = std::max(front->ceilh, back->ceilh);
+				z1 = std::min(front.ceilh, back.ceilh);
+				z2 = std::max(front.ceilh, back.ceilh);
 			}
 			else
 			{
-				if (! inst.LD_RailHeights(z1, z2, dw->ld, dw->sd, front, back))
+				if (! inst.LD_RailHeights(z1, z2, dw->ld, dw->sd, &front, &back))
 					return;
 			}
 		}
@@ -1061,8 +1061,8 @@ public:
 			if (0 == (part & (PART_RT_LOWER | PART_LF_LOWER)))
 				return;
 
-			z1 = dw->sd->SecRef(inst.level)->floorh;
-			z2 = dw->sd->SecRef(inst.level)->ceilh;
+			z1 = inst.level.getSector(*dw->sd).floorh;
+			z2 = inst.level.getSector(*dw->sd).ceilh;
 		}
 
 		int x1 = dw->sx1;

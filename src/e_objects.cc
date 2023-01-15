@@ -1016,8 +1016,8 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		{
 			/* pick which texture to copy */
 
-			const Sector *front = L1->Right(doc)->SecRef(doc);
-			const Sector *back  = L1-> Left(doc)->SecRef(doc);
+			const Sector &front = doc.getSector(*L1->Right(doc));
+			const Sector &back  = doc.getSector(*L1-> Left(doc));
 
 			StringID f_l = L1->Right(doc)->lower_tex;
 			StringID f_u = L1->Right(doc)->upper_tex;
@@ -1033,10 +1033,10 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			// try hard to find a usable texture
 			StringID tex = StringID(-1);
 
-				 if (front->floorh < back->floorh && f_l.hasContent()) tex = f_l;
-			else if (front->floorh > back->floorh && b_l.hasContent()) tex = b_l;
-			else if (front-> ceilh > back-> ceilh && f_u.hasContent()) tex = f_u;
-			else if (front-> ceilh < back-> ceilh && b_u.hasContent()) tex = b_u;
+				 if (front.floorh < back.floorh && f_l.hasContent()) tex = f_l;
+			else if (front.floorh > back.floorh && b_l.hasContent()) tex = b_l;
+			else if (front. ceilh > back. ceilh && f_u.hasContent()) tex = f_u;
+			else if (front. ceilh < back. ceilh && b_u.hasContent()) tex = b_u;
 			else if (f_l.hasContent()) tex = f_l;
 			else if (b_l.hasContent()) tex = b_l;
 			else if (f_u.hasContent()) tex = f_u;
@@ -1052,10 +1052,10 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 			const SideDef *RS = L1->Right(doc);
 			const SideDef *LS = L1->Left(doc);
 
-			const Sector *F1 = L1->Right(doc)->SecRef(doc);
-			const Sector *B1 = L1-> Left(doc)->SecRef(doc);
-			const Sector *F2 = L2->Right(doc)->SecRef(doc);
-			const Sector *B2 = L2-> Left(doc)->SecRef(doc);
+			const Sector *F1 = &doc.getSector(*L1->Right(doc));
+			const Sector *B1 = &doc.getSector(*L1-> Left(doc));
+			const Sector *F2 = &doc.getSector(*L2->Right(doc));
+			const Sector *B2 = &doc.getSector(*L2-> Left(doc));
 
 			// logic to determine which sides we copy
 

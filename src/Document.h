@@ -112,6 +112,8 @@ public:
 	int numObjects(ObjType type) const;
 	void getLevelChecksum(crc32_c &crc) const;
 
+	const Sector &getSector(const SideDef &side) const;
+
 private:
 	friend class DocumentModule;
 };

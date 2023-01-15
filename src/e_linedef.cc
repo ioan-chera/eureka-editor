@@ -121,8 +121,8 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 	if (! L->TwoSided())
 		return (part == 'l');
 
-	const Sector *front = L->Right(doc)->SecRef(doc);
-	const Sector *back  = L->Left (doc)->SecRef(doc);
+	const Sector *front = &doc.getSector(*L->Right(doc));
+	const Sector *back  = &doc.getSector(*L->Left (doc));
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -161,8 +161,8 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 	{
 		if (SD)
 		{
-			*z1 = SD->SecRef(doc)->floorh;
-			*z2 = SD->SecRef(doc)->ceilh;
+			*z1 = doc.getSector(*SD).floorh;
+			*z2 = doc.getSector(*SD).ceilh;
 		}
 		else
 		{
@@ -182,8 +182,8 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 			part = 'l';
 	}
 
-	const Sector *front = L->Right(doc)->SecRef(doc);
-	const Sector *back  = L->Left (doc)->SecRef(doc);
+	const Sector *front = &doc.getSector(*L->Right(doc));
+	const Sector *back  = &doc.getSector(*L->Left (doc));
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -389,17 +389,17 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 		if (! SD)
 			return 256;
 
-		const Sector *front = SD->SecRef(doc);
+		const Sector &front = doc.getSector(*SD);
 
 		if (L->flags & MLF_LowerUnpegged)
-			return front->floorh + inst.wad.images.W_GetTextureHeight(inst.conf, SD->MidTex());
+			return front.floorh + inst.wad.images.W_GetTextureHeight(inst.conf, SD->MidTex());
 
-		return front->ceilh;
+		return front.ceilh;
 	}
 
 
-	const Sector *front = L->Right(doc)->SecRef(doc);
-	const Sector *back  = L->Left (doc)->SecRef(doc);
+	const Sector *front = &doc.getSector(*L->Right(doc));
+	const Sector *back  = &doc.getSector(*L->Left (doc));
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);

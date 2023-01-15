@@ -1296,16 +1296,16 @@ StringID Instance::LD_GrabTex(const LineDef *L, int part) const
 	if (part & PART_LF_RAIL)  return L->Left(level) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (L->Left(level)->SecRef(level)->floorh > L->Right(level)->SecRef(level)->floorh)
+	if (level.getSector(*L->Left(level)).floorh > level.getSector(*L->Right(level)).floorh)
 		return L->Right(level)->lower_tex;
 
-	if (L->Left(level)->SecRef(level)->ceilh < L->Right(level)->SecRef(level)->ceilh)
+	if (level.getSector(*L->Left(level)).ceilh < level.getSector(*L->Right(level)).ceilh)
 		return L->Right(level)->upper_tex;
 
-	if (L->Left(level)->SecRef(level)->floorh < L->Right(level)->SecRef(level)->floorh)
+	if (level.getSector(*L->Left(level)).floorh < level.getSector(*L->Right(level)).floorh)
 		return L->Left(level)->lower_tex;
 
-	if (L->Left(level)->SecRef(level)->ceilh > L->Right(level)->SecRef(level)->ceilh)
+	if (level.getSector(*L->Left(level)).ceilh > level.getSector(*L->Right(level)).ceilh)
 		return L->Left(level)->upper_tex;
 
 	// emergency fallback

@@ -1752,11 +1752,11 @@ static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
 	if (L->right < 0 || L->left < 0)
 		return true;
 
-	const Sector *S1 = L->Right(doc)->SecRef(doc);
-	const Sector *S2 = L-> Left(doc)->SecRef(doc);
+	const auto &S1 = doc.getSector(*L->Right(doc));
+	const auto &S2 = doc.getSector(*L->Left(doc));
 
-	int f_max = std::max(S1->floorh, S2->floorh);
-	int c_min = std::min(S1-> ceilh, S2-> ceilh);
+	int f_max = std::max(S1.floorh, S2.floorh);
+	int c_min = std::min(S1.ceilh, S2.ceilh);
 
 	return (c_min < f_max + MONSTER_HEIGHT);
 }
@@ -3472,23 +3472,23 @@ static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(inst.level)->SecRef(inst.level);
-			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
+			const Sector &front = inst.level.getSector(*L->Right(inst.level));
+			const Sector &back  = inst.level.getSector(*L->Left(inst.level));
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
+			if (front.floorh < back.floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
 				lines.set(n);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+			if (back.floorh < front.floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
-			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+			if (inst.is_sky(front.CeilTex()) && inst.is_sky(back.CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
+			if (front.ceilh > back.ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
 				lines.set(n);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+			if (back.ceilh > front.ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
 				lines.set(n);
 		}
 	}
@@ -3525,23 +3525,23 @@ static void Textures_FixMissing(Instance &inst)
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(inst.level)->SecRef(inst.level);
-			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
+			const Sector &front = inst.level.getSector(*L->Right(inst.level));
+			const Sector &back  = inst.level.getSector(*L->Left(inst.level));
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
+			if (front.floorh < back.floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
 				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+			if (back.floorh < front.floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
-			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+			if (inst.is_sky(front.CeilTex()) && inst.is_sky(back.CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
+			if (front.ceilh > back.ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+			if (back.ceilh > front.ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -4069,11 +4069,11 @@ static void Textures_FixDupSwitches(Instance &inst)
 			continue;
 		}
 
-		const Sector *front = L->Right(inst.level)->SecRef(inst.level);
-		const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
+		const Sector &front = inst.level.getSector(*L->Right(inst.level));
+		const Sector &back  = inst.level.getSector(*L->Left(inst.level));
 
-		bool lower_vis = (front->floorh < back->floorh);
-		bool upper_vis = (front->ceilh > back->ceilh);
+		bool lower_vis = (front.floorh < back.floorh);
+		bool upper_vis = (front.ceilh > back.ceilh);
 
 		if (count >= 2 && upper && !upper_vis)
 		{

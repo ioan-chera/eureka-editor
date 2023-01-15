@@ -86,7 +86,7 @@ static void ChecksumSideDef(crc32_c &crc, const SideDef *S, const Document &doc)
 	crc += S->MidTex();
 	crc += S->UpperTex();
 
-	ChecksumSector(crc, S->SecRef(doc));
+	ChecksumSector(crc, &doc.getSector(*S));
 }
 
 static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
@@ -122,4 +122,9 @@ void Document::getLevelChecksum(crc32_c &crc) const
 
 	for(i = 0; i < numLinedefs(); i++)
 		ChecksumLineDef(crc, linedefs[i].get(), *this);
+}
+
+const Sector &Document::getSector(const SideDef &side) const
+{
+	return *sectors[side.sector];
 }

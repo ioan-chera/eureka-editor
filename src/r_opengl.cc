@@ -855,7 +855,7 @@ public:
 
 		if (inst.r_view.lighting && !fullbright)
 		{
-			int light = sd->SecRef(inst.level)->light;
+			int light = inst.level.getSector(*sd).light;
 
 			// add "fake constrast" for axis-aligned walls
 			if (ld->IsVertical(inst.level))
@@ -1002,7 +1002,7 @@ public:
 
 		float ld_len = hypotf(x2 - x1, y2 - y1);
 
-		const Sector *front = sd ? sd->SecRef(inst.level) : NULL;
+		const Sector *front = sd ? &inst.level.getSector(*sd) : NULL;
 
 		bool sky_front = inst.is_sky(front->CeilTex());
 		bool sky_upper = false;
@@ -1017,7 +1017,7 @@ public:
 		else
 		{
 			const SideDef *sd_back = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
-			const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
+			const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 			sky_upper = sky_front && inst.is_sky(back->CeilTex());
 
@@ -1349,8 +1349,8 @@ public:
 
 		const SideDef *sd_back = (side == Side::left) ? L->Right(inst.level) : L->Left(inst.level);
 
-		const Sector *front = sd->SecRef(inst.level);
-		const Sector *back  = sd_back ? sd_back->SecRef(inst.level) : NULL;
+		const Sector *front = &inst.level.getSector(*sd);
+		const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 		float z1, z2;
 

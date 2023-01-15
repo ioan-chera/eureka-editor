@@ -37,7 +37,6 @@
 #include "r_grid.h"
 #include "r_render.h"
 #include "Sector.h"
-#include "SideDef.h"
 #include "w_rawdef.h"
 
 #include "ui_window.h"
@@ -73,8 +72,8 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 	}
 	else
 	{
-		int f_diff = L1->Left(doc)->SecRef(doc)->floorh - L1->Right(doc)->SecRef(doc)->floorh;
-		int c_diff = L1->Left(doc)->SecRef(doc)->ceilh  - L1->Right(doc)->SecRef(doc)->ceilh;
+		int f_diff = doc.getSector(*L1->Left(doc)).floorh - doc.getSector(*L1->Right(doc)).floorh;
+		int c_diff = doc.getSector(*L1->Left(doc)).ceilh  - doc.getSector(*L1->Right(doc)).ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
 			texture = (c_diff > 0) ? L1->Left(doc)->upper_tex : L1->Right(doc)->upper_tex;
@@ -90,8 +89,8 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 	}
 	else
 	{
-		int f_diff = L2->Left(doc)->SecRef(doc)->floorh - L2->Right(doc)->SecRef(doc)->floorh;
-		int c_diff = L2->Left(doc)->SecRef(doc)->ceilh  - L2->Right(doc)->SecRef(doc)->ceilh;
+		int f_diff = doc.getSector(*L2->Left(doc)).floorh - doc.getSector(*L2->Right(doc)).floorh;
+		int c_diff = doc.getSector(*L2->Left(doc)).ceilh  - doc.getSector(*L2->Right(doc)).ceilh;
 
 		if (c_diff != 0)
 			if (texture == ((c_diff > 0) ? L2->Left(doc)->upper_tex : L2->Right(doc)->upper_tex))

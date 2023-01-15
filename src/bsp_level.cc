@@ -23,7 +23,6 @@
 #include "LineDef.h"
 #include "main.h"
 #include "bsp.h"
-#include "SideDef.h"
 #include "Vertex.h"
 
 #include "w_rawdef.h"
