@@ -40,8 +40,6 @@ protected:
 // Cleanup objects
 DocumentFixture::~DocumentFixture()
 {
-	for(Sector *sector : doc.sectors)
-		delete sector;
 	for(SideDef *sidedef : doc.sidedefs)
 		delete sidedef;
 	for(LineDef *linedef : doc.linedefs)

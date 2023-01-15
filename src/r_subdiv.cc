@@ -164,7 +164,7 @@ void sector_info_cache_c::Rebuild()
 
 	for (sec = 0 ; sec < total ; sec++)
 	{
-		const Sector *S = inst.level.sectors[sec];
+		const auto &S = inst.level.sectors[sec];
 
 		infos[sec].Clear();
 		infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
@@ -447,8 +447,8 @@ void sector_info_cache_c::PlaneAlign(const LineDef *L, int floor_mode, int ceil_
 void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 {
 	int sec_num = L->WhatSector(side, inst.level);
-	const Sector *front = inst.level.sectors[L->WhatSector(side, inst.level)];
-	const Sector *back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
+	const auto &front = inst.level.sectors[L->WhatSector(side, inst.level)];
+	const auto &back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
 
 	// find a vertex belonging to sector and is far from the line
 	const Vertex *v = NULL;

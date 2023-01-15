@@ -1023,11 +1023,10 @@ public:
 
 			// check for BOOM 242 invisible platforms
 			bool invis_back = false;
-			const Sector *dummy = NULL;
 			sector_3dfloors_c *b_ex = inst.Subdiv_3DFloorsForSector(sd_back->sector);
 			if (b_ex->heightsec >= 0)
 			{
-				dummy = inst.level.sectors[b_ex->heightsec];
+				const auto &dummy = inst.level.sectors[b_ex->heightsec];
 				if (dummy->floorh < back->floorh)
 					invis_back = true;
 			}
@@ -1037,7 +1036,7 @@ public:
 			slope_plane_c dummy_fp;
 			if (f_ex->heightsec >= 0)
 			{
-				dummy = inst.level.sectors[f_ex->heightsec];
+				const auto &dummy = inst.level.sectors[f_ex->heightsec];
 				if (dummy->floorh < front->floorh)
 				{
 					dummy_fp.Init(static_cast<float>(dummy->floorh));
@@ -1071,7 +1070,7 @@ public:
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
 					const SideDef *ef_sd = inst.level.sidedefs[EF.sd];
-					const Sector *dummy = inst.level.sectors[ef_sd->sector];
+					const auto &dummy = inst.level.sectors[ef_sd->sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1126,8 +1125,7 @@ public:
 		if (! subdiv)
 			return;
 
-		const Sector *sec = inst.level.sectors[sec_index];
-		const Sector *dummy = NULL;
+		const auto &sec = inst.level.sectors[sec_index];
 
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sec_index);
 
@@ -1136,57 +1134,57 @@ public:
 		// support for BOOM's 242 "transfer heights" line type
 		if (exfloor->heightsec >= 0)
 		{
-			dummy = inst.level.sectors[exfloor->heightsec];
+			const auto &dummy = inst.level.sectors[exfloor->heightsec];
 
 			if (dummy->floorh > sec->floorh && inst.r_view.z < dummy->floorh)
 			{
 				// space C : underwater
-				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
-				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(sec->floorh), dummy->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(sec->floorh), dummy->FloorTex());
 
 				// this helps the view to not look weird when clipping around
 				if (dummy->ceilh > sec->floorh)
-					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else if (dummy->ceilh < sec->ceilh && inst.r_view.z > dummy->ceilh)
 			{
 				// space A : head over ceiling
-				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
-				DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(sec->ceilh), dummy->CeilTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(sec->ceilh), dummy->CeilTex());
 
 				if (dummy->floorh < sec->ceilh)
-					DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 			}
 			else if (dummy->floorh < sec->floorh)
 			{
 				// invisible platform
-				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
 				if (!inst.is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 			else
 			{
 				// space B : normal
-				DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
 
 				if (!inst.is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
 			}
 		} else {
 
 			// normal sector
-			DrawSectorPolygons(sec, subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
+			DrawSectorPolygons(sec.get(), subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
 
 			if (!inst.is_sky(sec->CeilTex()))
-				DrawSectorPolygons(sec, subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
+				DrawSectorPolygons(sec.get(), subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
 		}
 
 		// draw planes of 3D floors
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const Sector *dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
+			const auto &dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.
@@ -1209,8 +1207,8 @@ public:
 				std::swap(top_tex, bottom_tex);
 			}
 
-			DrawSectorPolygons(sec, subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
-			DrawSectorPolygons(sec, subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
+			DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
+			DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
 		}
 	}
 
@@ -1399,7 +1397,7 @@ public:
 
 	void HighlightSector(int sec_index, int part)
 	{
-		const Sector *sec = inst.level.sectors[sec_index];
+		const auto &sec = inst.level.sectors[sec_index];
 
 		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
 

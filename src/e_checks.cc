@@ -3091,7 +3091,7 @@ static bool LD_tag_exists(int tag, const Document &doc)
 
 static bool SEC_tag_exists(int tag, const Document &doc)
 {
-	for (const Sector *sector : doc.sectors)
+	for (const auto &sector : doc.sectors)
 		if (sector->tag == tag)
 			return true;
 
@@ -3840,7 +3840,7 @@ static void Textures_FindUnknownFlat(selection_c& secs,
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		const Sector *S = inst.level.sectors[s];
+		const auto &S = inst.level.sectors[s];
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
@@ -3953,7 +3953,7 @@ static void Textures_FixUnknownFlat(Instance &inst)
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		const Sector *S = inst.level.sectors[s];
+		const auto &S = inst.level.sectors[s];
 
 		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S->FloorTex()))
 			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);

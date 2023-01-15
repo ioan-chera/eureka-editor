@@ -43,7 +43,7 @@ public:
 
 	std::vector<std::unique_ptr<Thing>> things;
 	std::vector<std::unique_ptr<Vertex>> vertices;
-	std::vector<Sector *> sectors;
+	std::vector<std::unique_ptr<Sector>> sectors;
 	std::vector<SideDef *> sidedefs;
 	std::vector<LineDef *> linedefs;
 

@@ -359,7 +359,7 @@ private:
 				return reinterpret_cast<int *>(inst.level.vertices[objnum].get());
 
 			case ObjType::sectors:
-				return reinterpret_cast<int *>(inst.level.sectors[objnum]);
+				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());
 
 			case ObjType::sidedefs:
 				return reinterpret_cast<int *>(inst.level.sidedefs[objnum]);
@@ -1181,18 +1181,18 @@ StringID Instance::GrabSelectedFlat()
 			return StringID(-1);
 		}
 
-		const Sector *S = level.sectors[edit.highlight.num];
+		const auto &S = level.sectors[edit.highlight.num];
 
-		result = SEC_GrabFlat(S, edit.highlight.parts);
+		result = SEC_GrabFlat(S.get(), edit.highlight.parts);
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = level.sectors[*it];
+			const auto &S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = SEC_GrabFlat(S, parts & ~1);
+			StringID tex = SEC_GrabFlat(S.get(), parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{

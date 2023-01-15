@@ -766,7 +766,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			// apply the Z delta first
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Sector * S = doc.sectors[*it];
+				const auto & S = doc.sectors[*it];
 
 				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta.z);
 				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta.z);
@@ -952,7 +952,7 @@ void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, in
 
 void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int dest_sec) const
 {
-	const Sector * sector = doc.sectors[src_sec];
+	const auto & sector = doc.sectors[src_sec];
 
 	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
 	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
@@ -1907,7 +1907,7 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Sector * S = doc.sectors[*it];
+		const auto & S = doc.sectors[*it];
 
 		lz = std::min(lz, S->floorh);
 		hz = std::max(hz, S->ceilh);
@@ -1926,7 +1926,7 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Sector * S = doc.sectors[*it];
+		const auto & S = doc.sectors[*it];
 
 		int new_f = mid_z + iround((S->floorh - mid_z) * scale_z);
 		int new_c = mid_z + iround((S-> ceilh - mid_z) * scale_z);

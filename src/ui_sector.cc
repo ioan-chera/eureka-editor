@@ -286,7 +286,7 @@ void UI_SectorBox::height_callback(Fl_Widget *w, void *data)
 void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 {
 	UI_SectorBox *box = (UI_SectorBox *)data;
-	
+
 	int room = atoi(box->headroom->value());
 
 	// handle the shortcut buttons
@@ -701,7 +701,7 @@ void UI_SectorBox::SetObj(int _index, int _count)
 
 void UI_SectorBox::UpdateField(int field)
 {
-	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj] : nullptr;
+	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj].get() : nullptr;
 	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
 	{
 		if (inst.level.isSector(obj))

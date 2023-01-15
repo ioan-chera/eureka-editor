@@ -111,7 +111,7 @@ void Instance::CMD_SEC_Floor()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = level.sectors[*it];
+			const auto &S = level.sectors[*it];
 
 			int new_h = clamp(-32767, S->floorh + diff, S->ceilh);
 
@@ -149,7 +149,7 @@ void Instance::CMD_SEC_Ceil()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = level.sectors[*it];
+			const auto &S = level.sectors[*it];
 
 			int new_h = clamp(S->floorh, S->ceilh + diff, 32767);
 
@@ -198,7 +198,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = doc.sectors[*it];
+			const auto &S = doc.sectors[*it];
 
 			int new_lt = light_add_delta(S->light, delta);
 
@@ -249,7 +249,7 @@ void Instance::CMD_SEC_SwapFlats()
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = level.sectors[*it];
+			const auto &S = level.sectors[*it];
 
 			StringID floor_tex = S->floor_tex;
 			StringID  ceil_tex = S->ceil_tex;
@@ -336,7 +336,7 @@ void Instance::commandSectorMerge()
 		// keep the properties of the first selected sector
 		if (new_sec != first)
 		{
-			const Sector *ref = level.sectors[first];
+			const auto &ref = level.sectors[first];
 
 			op.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
 			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);

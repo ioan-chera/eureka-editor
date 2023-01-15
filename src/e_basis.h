@@ -109,12 +109,12 @@ private:
 		int objnum = 0;
 		union
 		{
-			Sector *sector;
 			SideDef *sidedef;
 			LineDef *linedef;
 		};
 		std::unique_ptr<Thing> thing;
 		std::unique_ptr<Vertex> vertex;
+		std::unique_ptr<Sector> sector;
 		int value = 0;
 
 		void apply(Basis &basis);
@@ -126,14 +126,14 @@ private:
 		void rawDelete(Basis &basis);
 		std::unique_ptr<Thing> rawDeleteThing(Document &doc) const;
 		std::unique_ptr<Vertex> rawDeleteVertex(Document &doc) const;
-		Sector *rawDeleteSector(Document &doc) const;
+		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
 		SideDef *rawDeleteSidedef(Document &doc) const;
 		LineDef *rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis);
 		void rawInsertThing(Document &doc);
 		void rawInsertVertex(Document &doc);
-		void rawInsertSector(Document &doc) const;
+		void rawInsertSector(Document &doc);
 		void rawInsertSidedef(Document &doc) const;
 		void rawInsertLinedef(Document &doc) const;
 

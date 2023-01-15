@@ -54,5 +54,5 @@ void SideDef::SetDefaults(const ConfigData &config, bool two_sided, StringID new
 
 Sector * SideDef::SecRef(const Document &doc) const
 {
-	return doc.sectors[sector];
+	return doc.sectors[sector].get();
 }

@@ -479,7 +479,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
 	{
 		int new_s = op.addNew(ObjType::sectors);
-		Sector * S = op.doc.sectors[new_s];
+		auto & S = op.doc.sectors[new_s];
 
 		sector_map[i] = new_s;
 

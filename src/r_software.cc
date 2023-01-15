@@ -339,7 +339,7 @@ public:
 
 	/* methods */
 
-	Sector *Boom242Sector(Sector *real, Sector *temp, const Sector *dummy)
+	Sector *Boom242Sector(const Sector *real, Sector *temp, const Sector *dummy)
 	{
 		*temp = *real;
 
@@ -375,11 +375,11 @@ public:
 	void ComputeWallSurface()
 	{
 		Sector *front = sec;
-		Sector *back  = NULL;
+		const Sector *back  = NULL;
 
 		SideDef *back_sd = (side == Side::left) ? ld->Right(inst.level) : ld->Left(inst.level);
 		if (back_sd)
-			back = inst.level.sectors[back_sd->sector];
+			back = inst.level.sectors[back_sd->sector].get();
 
 		// support for BOOM's 242 "transfer heights" line type
 		Sector temp_front;
@@ -388,8 +388,8 @@ public:
 		sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(sd->sector);
 		if (exfloor->heightsec >= 0)
 		{
-			const Sector *dummy = inst.level.sectors[exfloor->heightsec];
-			front = Boom242Sector(front, &temp_front, dummy);
+			const auto &dummy = inst.level.sectors[exfloor->heightsec];
+			front = Boom242Sector(front, &temp_front, dummy.get());
 		}
 
 		if (back != NULL)
@@ -397,8 +397,8 @@ public:
 			exfloor = inst.Subdiv_3DFloorsForSector(back_sd->sector);
 			if (exfloor->heightsec >= 0)
 			{
-				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
-				back = Boom242Sector(back, &temp_back, dummy);
+				const auto &dummy = inst.level.sectors[exfloor->heightsec];
+				back = Boom242Sector(back, &temp_back, dummy.get());
 			}
 		}
 
@@ -498,7 +498,7 @@ public:
 			return;
 
 		front = sec;
-		back  = inst.level.sectors[back_sd->sector];
+		back  = inst.level.sectors[back_sd->sector].get();
 
 		int c_h = std::min(front->ceilh,  back->ceilh);
 		int f_h = std::max(front->floorh, back->floorh);
@@ -925,8 +925,8 @@ public:
 			sector_3dfloors_c *exfloor = inst.Subdiv_3DFloorsForSector(thsec);
 			if (inst.level.isSector(exfloor->heightsec))
 			{
-				const Sector *real  = inst.level.sectors[thsec];
-				const Sector *dummy = inst.level.sectors[exfloor->heightsec];
+				const auto &real  = inst.level.sectors[thsec];
+				const auto &dummy = inst.level.sectors[exfloor->heightsec];
 
 				if (dummy->floorh > real->floorh &&
 					inst.r_view.z > dummy->floorh &&
@@ -1146,7 +1146,7 @@ public:
 
 	void HighlightSectorBit(const DrawWall *dw, int sec_index, int part)
 	{
-		const Sector *S = inst.level.sectors[sec_index];
+		const auto &S = inst.level.sectors[sec_index];
 
 		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
 

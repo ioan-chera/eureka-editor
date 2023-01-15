@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2016 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -260,8 +260,8 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 		if (sec1 == sec2)
 			continue;
 
-		Sector *S1 = inst.level.sectors[sec1];
-		Sector *S2 = inst.level.sectors[sec2];
+		const auto &S1 = inst.level.sectors[sec1];
+		const auto &S2 = inst.level.sectors[sec2];
 
 		// skip closed doors
 		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
