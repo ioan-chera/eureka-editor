@@ -121,5 +121,5 @@ void Document::getLevelChecksum(crc32_c &crc) const
 		ChecksumThing(crc, things[i].get());
 
 	for(i = 0; i < numLinedefs(); i++)
-		ChecksumLineDef(crc, linedefs[i], *this);
+		ChecksumLineDef(crc, linedefs[i].get(), *this);
 }

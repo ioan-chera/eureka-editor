@@ -656,7 +656,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = doc.linedefs[l];
+			const auto &L = doc.linedefs[l];
 
 			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
 				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
@@ -670,7 +670,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::vertices)
 	{
-		for (const LineDef *L : doc.linedefs)
+		for (const auto &L : doc.linedefs)
 		{
 			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
 				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
@@ -687,7 +687,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = doc.linedefs[*it];
+			const auto &L = doc.linedefs[*it];
 
 			if (L->Right(doc)) dest.set(L->right);
 			if (L->Left(doc))  dest.set(L->left);
@@ -712,7 +712,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = doc.linedefs[*it];
+			const auto &L = doc.linedefs[*it];
 
 			dest.set(L->start);
 			dest.set(L->end);
@@ -726,7 +726,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = doc.linedefs[l];
+			const auto &L = doc.linedefs[l];
 
 			if (src.get(L->start) && src.get(L->end))
 			{
@@ -750,7 +750,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs() ; l++)
 	{
-		const LineDef *L = doc.linedefs[l];
+		const auto &L = doc.linedefs[l];
 
 		if (L->Right(doc)) dest.set(L->Right(doc)->sector);
 		if (L->Left(doc))  dest.set(L->Left(doc)->sector);
@@ -760,7 +760,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs(); l++)
 	{
-		const LineDef *L = doc.linedefs[l];
+		const auto &L = doc.linedefs[l];
 
 		if (src.what_type() == ObjType::vertices)
 		{
@@ -790,7 +790,7 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const LineDef *L = doc.linedefs[*it];
+		const auto &L = doc.linedefs[*it];
 
 		if (L->TwoSided())
 			return *it;
@@ -861,7 +861,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::linedefs:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
 				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
@@ -879,7 +879,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
 				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;

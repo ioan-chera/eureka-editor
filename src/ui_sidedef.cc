@@ -209,7 +209,7 @@ void UI_SideBox::tex_callback(Fl_Widget *w, void *data)
 
 			for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 			{
-				const LineDef *L = box->inst.level.linedefs[*it];
+				const auto &L = box->inst.level.linedefs[*it];
 
 				int sd = box->is_front ? L->right : L->left;
 
@@ -295,7 +295,7 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto &L = box->inst.level.linedefs[*it];
 
 			int sd    = box->is_front ? L->right : L->left;
 			int other = box->is_front ? L->left : L->right;
@@ -349,7 +349,7 @@ void UI_SideBox::delete_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto &L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -388,7 +388,7 @@ void UI_SideBox::offset_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto &L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 
@@ -420,7 +420,7 @@ void UI_SideBox::sector_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const LineDef *L = box->inst.level.linedefs[*it];
+			const auto &L = box->inst.level.linedefs[*it];
 
 			int sd = box->is_front ? L->right : L->left;
 

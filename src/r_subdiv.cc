@@ -173,11 +173,11 @@ void sector_info_cache_c::Rebuild()
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
-		CheckBoom242(L);
-		CheckExtraFloor(L, n);
-		CheckLineSlope(L);
+		CheckBoom242(L.get());
+		CheckExtraFloor(L.get(), n);
+		CheckLineSlope(L.get());
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
@@ -205,9 +205,9 @@ void sector_info_cache_c::Rebuild()
 		CheckSlopeCopyThing(thing.get());
 	}
 
-	for (const LineDef *linedef : inst.level.linedefs)
+	for (const auto &linedef : inst.level.linedefs)
 	{
-		CheckPlaneCopy(linedef);
+		CheckPlaneCopy(linedef.get());
 	}
 }
 
@@ -465,7 +465,7 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 		std::swap(ly1, ly2);
 	}
 
-	for (const LineDef *L2 : inst.level.linedefs)
+	for (const auto &L2 : inst.level.linedefs)
 	{
 		if (L2->TouchesSector(sec_num, inst.level))
 		{
@@ -680,7 +680,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (! L->TouchesSector(num, inst.level))
 			continue;
@@ -700,7 +700,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		if (edge.y1 == edge.y2)
 			continue;
 
-		edge.line = L;
+		edge.line = L.get();
 		edge.flipped = 0;
 
 		if (edge.y1 > edge.y2)

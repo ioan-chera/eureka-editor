@@ -365,7 +365,7 @@ private:
 				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
 
 			case ObjType::linedefs:
-				return reinterpret_cast<int *>(inst.level.linedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.linedefs[objnum].get());
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -389,7 +389,7 @@ private:
 
 static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
-	const LineDef *L = inst.level.linedefs[ld_num];
+	const auto &L = inst.level.linedefs[ld_num];
 
 	float lx1 = static_cast<float>(L->Start(inst.level)->x());
 	float ly1 = static_cast<float>(L->Start(inst.level)->y());
@@ -432,7 +432,7 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 	if (! inst.edit.adjust_bucket)
 		return;
 
-	const LineDef *L = inst.level.linedefs[ld_num];
+	const auto &L = inst.level.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
 	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
@@ -1327,18 +1327,18 @@ StringID Instance::GrabSelectedTexture()
 			return StringID(-1);
 		}
 
-		const LineDef *L = level.linedefs[edit.highlight.num];
+		const auto &L = level.linedefs[edit.highlight.num];
 
-		result = LD_GrabTex(L, edit.highlight.parts);
+		result = LD_GrabTex(L.get(), edit.highlight.parts);
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = level.linedefs[*it];
+			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = LD_GrabTex(L, parts & ~1);
+			StringID tex = LD_GrabTex(L.get(), parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{
@@ -1372,7 +1372,7 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = level.linedefs[*it];
+			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (L->NoSided())

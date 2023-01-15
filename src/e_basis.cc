@@ -212,7 +212,7 @@ int Basis::addNew(ObjType type)
 
 	case ObjType::linedefs:
 		op.objnum = doc.numLinedefs();
-		op.linedef = new LineDef;
+		op.linedef = std::make_unique<LineDef>();
 		break;
 
 	case ObjType::sectors:
@@ -252,7 +252,7 @@ void Basis::del(ObjType type, int objnum)
 		// unbind sidedef from any linedefs using it
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			const auto &L = doc.linedefs[n];
 
 			if(L->right == objnum)
 				changeLinedef(n, LineDef::F_RIGHT, -1);
@@ -266,7 +266,7 @@ void Basis::del(ObjType type, int objnum)
 		// delete any linedefs bound to this vertex
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			const auto &L = doc.linedefs[n];
 
 			if(L->start == objnum || L->end == objnum)
 				del(ObjType::linedefs, n);
@@ -438,9 +438,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(LineDef *linedef : doc.linedefs)
-		delete linedef;
-
 	doc.things.clear();
 	doc.vertices.clear();
 	doc.sectors.clear();
@@ -529,7 +526,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
-		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.linedefs[objnum].get());
 		break;
 	default:
 		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
@@ -618,7 +615,7 @@ std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			auto &L = doc.linedefs[n];
 
 			if(L->start > objnum)
 				L->start--;
@@ -673,7 +670,7 @@ std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			auto &L = doc.linedefs[n];
 
 			if(L->right > objnum)
 				L->right--;
@@ -689,11 +686,11 @@ std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 //
 // Raw delete linedef
 //
-LineDef *Basis::EditUnit::rawDeleteLinedef(Document &doc) const
+std::unique_ptr<LineDef> Basis::EditUnit::rawDeleteLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numLinedefs());
 
-	LineDef *result = doc.linedefs[objnum];
+	auto result = std::move(doc.linedefs[objnum]);
 	doc.linedefs.erase(doc.linedefs.begin() + objnum);
 
 	return result;
@@ -722,22 +719,22 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 
 	case ObjType::vertices:
 		rawInsertVertex(basis.doc);
-		vertex = nullptr;
+		vertex.reset();
 		break;
 
 	case ObjType::sidedefs:
 		rawInsertSidedef(basis.doc);
-		sidedef = nullptr;
+		sidedef.reset();
 		break;
 
 	case ObjType::sectors:
 		rawInsertSector(basis.doc);
-		sector = nullptr;
+		sector.reset();
 		break;
 
 	case ObjType::linedefs:
 		rawInsertLinedef(basis.doc);
-		linedef = nullptr;
+		linedef.reset();
 		break;
 
 	default:
@@ -768,7 +765,7 @@ void Basis::EditUnit::rawInsertVertex(Document &doc)
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			auto &L = doc.linedefs[n];
 
 			if(L->start >= objnum)
 				L->start++;
@@ -815,7 +812,7 @@ void Basis::EditUnit::rawInsertSidedef(Document &doc)
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			LineDef *L = doc.linedefs[n];
+			auto &L = doc.linedefs[n];
 
 			if(L->right >= objnum)
 				L->right++;
@@ -829,10 +826,10 @@ void Basis::EditUnit::rawInsertSidedef(Document &doc)
 //
 // Linedef insertion
 //
-void Basis::EditUnit::rawInsertLinedef(Document &doc) const
+void Basis::EditUnit::rawInsertLinedef(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
-	doc.linedefs.insert(doc.linedefs.begin() + objnum, linedef);
+	doc.linedefs.insert(doc.linedefs.begin() + objnum, std::move(linedef));
 }
 
 //
@@ -846,7 +843,7 @@ void Basis::EditUnit::deleteFinally()
 	case ObjType::vertices: vertex.reset(); break;
 	case ObjType::sectors:  sector.reset(); break;
 	case ObjType::sidedefs: sidedef.reset(); break;
-	case ObjType::linedefs: delete linedef; break;
+	case ObjType::linedefs: linedef.reset(); break;
 
 	default:
 		BugError("DeleteFinally: bad objtype %d\n", (int)objtype);

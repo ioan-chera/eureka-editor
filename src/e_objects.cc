@@ -112,7 +112,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 
 		int new_ld = op.addNew(ObjType::linedefs);
 
-		LineDef * L = doc.linedefs[new_ld];
+		auto &L = doc.linedefs[new_ld];
 
 		L->start = new_v;
 		L->end   = (i == 3) ? (new_v - 3) : new_v + 1;
@@ -342,7 +342,7 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 
 	int new_ld = op.addNew(ObjType::linedefs);
 
-	LineDef * L = doc.linedefs[new_ld];
+	auto &L = doc.linedefs[new_ld];
 
 	L->start = v1;
 	L->end   = v2;
@@ -822,7 +822,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 {
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
-		const LineDef *otherLine = doc.linedefs[i];
+		const auto &otherLine = doc.linedefs[i];
 		if(!otherLine->TouchesVertex(vertID) || i == lineID)
 			continue;
 
@@ -969,8 +969,8 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 
 void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const
 {
-	const LineDef * L1 = doc.linedefs[src_line];
-	const LineDef * L2 = doc.linedefs[dest_line];
+	const auto &L1 = doc.linedefs[src_line];
+	const auto &L2 = doc.linedefs[dest_line];
 
 	// don't transfer certain flags
 	int flags = doc.linedefs[dest_line]->flags;
@@ -1224,7 +1224,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 		case ObjType::sectors:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
 				if (! L->TouchesSector(objnum, doc))
 					continue;
@@ -1271,7 +1271,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 		case ObjType::linedefs:
 			{
-				LineDef *L = doc.linedefs[objnum];
+				const auto &L = doc.linedefs[objnum];
 
 				dragUpdateCurrentDist(ObjType::vertices, L->start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
@@ -1288,7 +1288,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
 				if (! L->TouchesSector(objnum, doc))
 					continue;
@@ -1588,7 +1588,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		LineDef * L = doc.linedefs[*it];
+		const auto &L = doc.linedefs[*it];
 
 		int start = L->start;
 		int end   = L->end;
@@ -2125,7 +2125,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	byte * vert_modes = new byte[doc.numVertices()];
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		// require both vertices of the linedef to be in the selection
 		if (! (list.get(L->start) && list.get(L->end)))

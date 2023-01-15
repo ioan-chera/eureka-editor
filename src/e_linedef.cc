@@ -54,7 +54,7 @@ bool LinedefModule::linedefAlreadyExists(int v1, int v2) const
 {
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->start == v1 && L->end == v2) return true;
 		if (L->start == v2 && L->end == v1) return true;
@@ -72,7 +72,7 @@ bool LinedefModule::linedefAlreadyExists(int v1, int v2) const
 //
 inline const LineDef * LinedefModule::pointer(const Objid& obj) const
 {
-	return doc.linedefs[obj.num];
+	return doc.linedefs[obj.num].get();
 }
 
 //
@@ -341,9 +341,9 @@ void LinedefModule::determineAdjoiner(Objid& result,
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *N = doc.linedefs[n];
+		const auto &N = doc.linedefs[n];
 
-		if (N == L)
+		if (N.get() == L)
 			continue;
 
 		if (N->IsZeroLength(doc))
@@ -717,7 +717,7 @@ void Instance::CMD_LIN_Align()
 		int parts = edit.Selected->get_ext(*it);
 		parts &= ~1;
 
-		const LineDef *L = level.linedefs[*it];
+		const auto &L = level.linedefs[*it];
 
 		// safety check
 		if (L->left  < 0) parts &= ~PART_LF_ALL;
@@ -919,12 +919,12 @@ static int getTileWidth(const SideDef &side, const ImageSet &images, const Confi
 //
 int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) const
 {
-	const LineDef * L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	// create new linedef
 	int new_l = op.addNew(ObjType::linedefs);
 
-	LineDef * L2 = doc.linedefs[new_l];
+	auto &L2 = doc.linedefs[new_l];
 
 	// it is OK to directly set fields of newly created objects
 	*L2 = *L;
@@ -975,7 +975,7 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 
 bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 {
-	LineDef * L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	// prevent creating tiny lines (especially zero-length)
 	if (fabs(L->Start(doc)->x() - L->End(doc)->x()) < 4 &&
@@ -1041,7 +1041,7 @@ void Instance::CMD_LIN_SplitHalf()
 //
 void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int other_sd) const
 {
-	const LineDef * L  = doc.linedefs[ld];
+	const auto &L  = doc.linedefs[ld];
 	auto &SD = doc.sidedefs[new_sd];
 
 	int new_flags = L->flags;
@@ -1077,7 +1077,7 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 {
 	// similar to above, but with existing sidedefs
 
-	LineDef * L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	SYS_ASSERT(L->TwoSided());
 
@@ -1126,7 +1126,7 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 //
 void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 {
-	const LineDef *L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	int gone_sd  = (ld_side == Side::right) ? L->right : L->left;
 	int other_sd = (ld_side == Side::right) ? L->left : L->right;
@@ -1196,8 +1196,8 @@ void Instance::commandLinedefMergeTwo()
 	int ld2 = edit.Selected->find_first();
 	int ld1 = edit.Selected->find_second();
 
-	const LineDef * L1 = level.linedefs[ld1];
-	const LineDef * L2 = level.linedefs[ld2];
+	const auto & L1 = level.linedefs[ld1];
+	const auto & L2 = level.linedefs[ld2];
 
 	if (! (L1->OneSided() && L2->OneSided()))
 	{
@@ -1224,7 +1224,7 @@ void Instance::commandLinedefMergeTwo()
 		if (n == ld1 || n == ld2)
 			continue;
 
-		const LineDef * L = level.linedefs[n];
+		const auto & L = level.linedefs[n];
 
 		if (L->start == L1->start)
 			op.changeLinedef(n, LineDef::F_START, L2->end);
@@ -1253,7 +1253,7 @@ void Instance::commandLinedefMergeTwo()
 //
 void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 {
-	const LineDef *L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	v2double_t v1 = L->Start(doc)->xy();
 	v2double_t v2 = L->End(doc)->xy();
@@ -1278,7 +1278,7 @@ bool LinedefModule::linedefStartWillBeMoved(int ld, selection_c &list) const
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const LineDef *L = doc.linedefs[*it];
+		const auto &L = doc.linedefs[*it];
 
 		if (*it != ld && L->end == doc.linedefs[ld]->start)
 			return true;
@@ -1294,7 +1294,7 @@ bool LinedefModule::linedefEndWillBeMoved(int ld, selection_c &list) const
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const LineDef *L = doc.linedefs[*it];
+		const auto &L = doc.linedefs[*it];
 
 		if (*it != ld && L->start == doc.linedefs[ld]->end)
 			return true;
@@ -1338,7 +1338,7 @@ void LinedefModule::linedefSetLength(EditOperation &op, int ld, int new_len, dou
 	// the 'new_len' parameter can be negative, which means move
 	// the start vertex instead of the end vertex.
 
-	const LineDef *L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	double dx = abs(new_len) * cos(angle);
 	double dy = abs(new_len) * sin(angle);
@@ -1386,7 +1386,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		angles[n] = atan2(L->End(doc)->y() - L->Start(doc)->y(), L->End(doc)->x() - L->Start(doc)->x());
 	}
@@ -1409,7 +1409,7 @@ void LinedefModule::setLinedefsLength(int new_len) const
 //
 void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 {
-	LineDef * L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	SYS_ASSERT(L->Right(doc));
 

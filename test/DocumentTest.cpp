@@ -31,18 +31,9 @@ protected:
 	{
 	}
 
-	~DocumentFixture();
-
 	Instance inst;
 	Document doc;
 };
-
-// Cleanup objects
-DocumentFixture::~DocumentFixture()
-{
-	for(LineDef *linedef : doc.linedefs)
-		delete linedef;
-}
 
 TEST_F(DocumentFixture, CheckObjects)
 {
@@ -64,7 +55,7 @@ TEST_F(DocumentFixture, CheckObjects)
 	// no sectors
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.linedefs.push_back(new LineDef);
+	doc.linedefs.push_back(std::make_unique<LineDef>());
 
 	ASSERT_EQ(doc.numThings(), 3);
 	ASSERT_EQ(doc.numVertices(), 4);
@@ -116,7 +107,7 @@ TEST_F(DocumentFixture, CRC)
 	// no sectors
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.linedefs.push_back(new LineDef);
+	doc.linedefs.push_back(std::make_unique<LineDef>());
 
 	crc32_c crc;
 	doc.getLevelChecksum(crc);

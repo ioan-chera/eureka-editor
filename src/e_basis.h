@@ -28,6 +28,7 @@
 #define __EUREKA_E_BASIS_H__
 
 #include "DocumentModule.h"
+#include "LineDef.h"
 #include "m_strings.h"
 #include "objid.h"
 #include "Sector.h"
@@ -107,14 +108,11 @@ private:
 		ObjType objtype = ObjType::things;
 		byte field = 0;
 		int objnum = 0;
-		union
-		{
-			LineDef *linedef;
-		};
 		std::unique_ptr<Thing> thing;
 		std::unique_ptr<Vertex> vertex;
 		std::unique_ptr<Sector> sector;
 		std::unique_ptr<SideDef> sidedef;
+		std::unique_ptr<LineDef> linedef;
 		int value = 0;
 
 		void apply(Basis &basis);
@@ -128,14 +126,14 @@ private:
 		std::unique_ptr<Vertex> rawDeleteVertex(Document &doc) const;
 		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
 		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
-		LineDef *rawDeleteLinedef(Document &doc) const;
+		std::unique_ptr<LineDef> rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis);
 		void rawInsertThing(Document &doc);
 		void rawInsertVertex(Document &doc);
 		void rawInsertSector(Document &doc);
 		void rawInsertSidedef(Document &doc);
-		void rawInsertLinedef(Document &doc) const;
+		void rawInsertLinedef(Document &doc);
 
 		void deleteFinally();
 	};

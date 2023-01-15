@@ -1478,9 +1478,9 @@ bool UI_FindAndReplace::Match_Thing(int idx)
 
 bool UI_FindAndReplace::Match_LineDef(int idx)
 {
-	const LineDef *L = inst.level.linedefs[idx];
+	const auto &L = inst.level.linedefs[idx];
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
+	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
 		return false;
 
 	const char *pattern = find_match->value();
@@ -1545,12 +1545,12 @@ bool UI_FindAndReplace::Match_Sector(int idx)
 
 bool UI_FindAndReplace::Match_LineType(int idx)
 {
-	const LineDef *L = inst.level.linedefs[idx];
+	const auto &L = inst.level.linedefs[idx];
 
 	if (! find_numbers->get(L->type))
 		return false;
 
-	if (! Filter_Tag(L->tag) || ! Filter_Sides(L))
+	if (! Filter_Tag(L->tag) || ! Filter_Sides(L.get()))
 		return false;
 
 	return true;
@@ -1707,7 +1707,7 @@ void UI_FindAndReplace::Replace_Thing(EditOperation &op, int idx)
 
 void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new_tex)
 {
-	const LineDef *L = inst.level.linedefs[idx];
+	const auto &L = inst.level.linedefs[idx];
 
 	const char *pattern = find_match->value();
 

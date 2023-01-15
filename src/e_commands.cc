@@ -747,7 +747,7 @@ void Instance::CMD_ACT_Click()
 
 		// check if both ends are in selection, if so (and only then)
 		// shall we select the new vertex
-		const LineDef *L = level.linedefs[split_ld];
+		const auto &L = level.linedefs[split_ld];
 
 		bool want_select = edit.Selected->get(L->start) && edit.Selected->get(L->end);
 		int new_vert;

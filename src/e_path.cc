@@ -57,8 +57,8 @@ select_lines_in_path_flag_e;
 
 static bool MatchingTextures(const Document &doc, int index1, int index2)
 {
-	LineDef *L1 = doc.linedefs[index1];
-	LineDef *L2 = doc.linedefs[index2];
+	const auto &L1 = doc.linedefs[index1];
+	const auto &L2 = doc.linedefs[index2];
 
 	// lines with no sidedefs only match each other
 	if (! L1->Right(doc) || ! L2->Right(doc))
@@ -249,7 +249,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 	bool do_tag     = inst.Exec_HasFlag("/tag");
 	bool do_special = inst.Exec_HasFlag("/special");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (! L->TwoSided())
 			continue;
@@ -470,7 +470,7 @@ void Instance::CMD_PruneUnused()
 	selection_c used_sides(ObjType::sidedefs);
 	selection_c used_verts(ObjType::vertices);
 
-	for (const LineDef *L : level.linedefs)
+	for (const auto &L : level.linedefs)
 	{
 		used_verts.set(L->start);
 		used_verts.set(L->end);
@@ -526,7 +526,7 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 	{
 		changes = false;
 
-		for (const LineDef *L : inst.level.linedefs)
+		for (const auto &L : inst.level.linedefs)
 		{
 			if (! L->TwoSided())
 				continue;

@@ -875,7 +875,7 @@ public:
 
 	void DrawLine(int ld_index)
 	{
-		const LineDef *ld = inst.level.linedefs[ld_index];
+		const auto &ld = inst.level.linedefs[ld_index];
 
 		if (!inst.level.isVertex(ld->start) || !inst.level.isVertex(ld->end))
 			return;
@@ -1011,7 +1011,7 @@ public:
 		{
 			sector_3dfloors_c *ex = inst.Subdiv_3DFloorsForSector(sd->sector);
 
-			DrawSide('W', ld, sd, sd->MidTex(), front, NULL, false,
+			DrawSide('W', ld.get(), sd, sd->MidTex(), front, NULL, false,
 				ld_len, x1, y1, &ex->f_plane, x2, y2, &ex->c_plane);
 		}
 		else
@@ -1050,17 +1050,17 @@ public:
 
 			// lower part
 			if ((back->floorh > front->floorh || f_sloped) && !self_ref && !invis_back)
-				DrawSide('L', ld, sd, sd->LowerTex(), front, back, sky_upper,
+				DrawSide('L', ld.get(), sd, sd->LowerTex(), front, back, sky_upper,
 					ld_len, x1, y1, f_floorp, x2, y2, &b_ex->f_plane);
 
 			// upper part
 			if ((back->ceilh < front->ceilh || c_sloped) && !self_ref && !sky_upper)
-				DrawSide('U', ld, sd, sd->UpperTex(), front, back, sky_upper,
+				DrawSide('U', ld.get(), sd, sd->UpperTex(), front, back, sky_upper,
 					ld_len, x1, y1, &b_ex->c_plane, x2, y2, &f_ex->c_plane);
 
 			// railing tex
 			if (!is_null_tex(sd->MidTex()) && inst.r_view.texturing)
-				DrawMidMasker(ld, sd, front, back, sky_upper,
+				DrawMidMasker(ld.get(), sd, front, back, sky_upper,
 					ld_len, x1, y1, x2, y2);
 
 			// draw sides of extrafloors
@@ -1095,7 +1095,7 @@ public:
 					slope_plane_c p1; p1.Init(static_cast<float>(bottom_h));
 					slope_plane_c p2; p2.Init(static_cast<float>(top_h));
 
-					DrawSide('E', ld, sd, tex, front, back, false,
+					DrawSide('E', ld.get(), sd, tex, front, back, false,
 						ld_len, x1, y1, &p1, x2, y2, &p2);
 				}
 			}
@@ -1113,7 +1113,7 @@ public:
 			slope_plane_c p1; p1.Init(static_cast<float>(front->ceilh));
 			slope_plane_c p2; p2.Init(static_cast<float>(front->ceilh + 16384.0));
 
-			DrawSide('U', ld, sd, "-", front, NULL, true /* sky_upper */,
+			DrawSide('U', ld.get(), sd, "-", front, NULL, true /* sky_upper */,
 				ld_len, x1, y1, &p1, x2, y2, &p2);
 		}
 	}
@@ -1329,7 +1329,7 @@ public:
 
 	void HighlightLine(int ld_index, int part)
 	{
-		const LineDef *L = inst.level.linedefs[ld_index];
+		const auto &L = inst.level.linedefs[ld_index];
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
@@ -1370,7 +1370,7 @@ public:
 			{
 				int zi1, zi2;
 
-				if (! inst.LD_RailHeights(zi1, zi2, L, sd, front, back))
+				if (! inst.LD_RailHeights(zi1, zi2, L.get(), sd, front, back))
 					return;
 
 				z1 = static_cast<float>(zi1); z2 = static_cast<float>(zi2);
@@ -1418,7 +1418,7 @@ public:
 				return;
 		}
 
-		for (const LineDef *L : inst.level.linedefs)
+		for (const auto &L : inst.level.linedefs)
 		{
 			if (L->TouchesSector(sec_index, inst.level))
 			{

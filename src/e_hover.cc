@@ -80,7 +80,7 @@ public:
 		// sure the casting line is not integral (i.e. lies between two lines
 		// on the unit grid) so that we never directly hit a vertex.
 
-		const LineDef * L = doc.linedefs[ld];
+		const auto &L = doc.linedefs[ld];
 
 		dx = L->End(doc)->x() - L->Start(doc)->x();
 		dy = L->End(doc)->y() - L->Start(doc)->y();
@@ -236,7 +236,7 @@ public:
 
 	void AddLine_X(int ld)
 	{
-		const LineDef *L = doc.linedefs[ld];
+		const auto &L = doc.linedefs[ld];
 
 		// can ignore purely vertical lines
 		if (L->IsVertical(doc))
@@ -271,7 +271,7 @@ public:
 
 	void AddLine_Y(int ld)
 	{
-		const LineDef *L = doc.linedefs[ld];
+		const auto &L = doc.linedefs[ld];
 
 		// can ignore purely horizonal lines
 		if (L->IsHorizontal(doc))
@@ -492,7 +492,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 	if(!out.valid())
 		return Objid();
 
-	const LineDef *L = doc.linedefs[out.num];
+	const auto &L = doc.linedefs[out.num];
 
 	v2double_t v1 = L->Start(doc)->xy();
 	v2double_t v2 = L->End(doc)->xy();
@@ -1054,7 +1054,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if(L->start == ignore_vert || L->end == ignore_vert)
 			continue;
@@ -1120,7 +1120,7 @@ void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, i
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
-		const LineDef * L = doc.linedefs[ld];
+		const auto &L = doc.linedefs[ld];
 
 		v2double_t lpos1 = L->Start(doc)->xy();
 		v2double_t lpos2 = L->End(doc)->xy();

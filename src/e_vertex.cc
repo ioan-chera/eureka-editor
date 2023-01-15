@@ -68,7 +68,7 @@ int VertexModule::findDragOther(int v_num) const
 
 	for (int i = 0 ; i < doc.numLinedefs() ; i++)
 	{
-		const LineDef *L = doc.linedefs[i];
+		const auto &L = doc.linedefs[i];
 
 		if (L->end == v_num)
 			return L->start;
@@ -87,7 +87,7 @@ int VertexModule::howManyLinedefs(int v_num) const
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 			count++;
@@ -104,8 +104,8 @@ int VertexModule::howManyLinedefs(int v_num) const
 //
 void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v, selection_c& del_lines) const
 {
-	LineDef *L1 = doc.linedefs[ld1];
-	LineDef *L2 = doc.linedefs[ld2];
+	const auto &L1 = doc.linedefs[ld1];
+	const auto &L2 = doc.linedefs[ld2];
 
 	bool ld1_onesided = L1->OneSided();
 	bool ld2_onesided = L2->OneSided();
@@ -192,7 +192,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 	int sandwichesMerged = 0;
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (! L->TouchesVertex(v1))
 			continue;
@@ -209,7 +209,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 			if (k == n)
 				continue;
 
-			const LineDef *K = doc.linedefs[k];
+			const auto &K = doc.linedefs[k];
 
 			if ((K->start == v3 && K->end == v2) ||
 				(K->start == v2 && K->end == v3))
@@ -232,7 +232,7 @@ void VertexModule::doMergeVertex(EditOperation &op, int v1, int v2, selection_c&
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		// change *ALL* references, this is critical
 		// [ to-be-deleted lines will get start == end, that is OK ]
@@ -463,12 +463,12 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->start == v_num || L->end == v_num)
 		{
 			double new_x, new_y;
-			calcDisconnectCoord(L, v_num, &new_x, &new_y);
+			calcDisconnectCoord(L.get(), v_num, &new_x, &new_y);
 
 			// the _LAST_ linedef keeps the current vertex, the rest
 			// need a new one.
@@ -539,7 +539,7 @@ void Instance::commandVertexDisconnect()
 
 void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert, bool *seen_one) const
 {
-	const LineDef *L = doc.linedefs[ld];
+	const auto &L = doc.linedefs[ld];
 
 	int v_num = which_vert ? L->end : L->start;
 
@@ -553,7 +553,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		if (inst.edit.Selected->get(n))
 			continue;
 
-		LineDef *N = doc.linedefs[n];
+		const auto &N = doc.linedefs[n];
 
 		if (N->start == v_num || N->end == v_num)
 		{
@@ -566,7 +566,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 		return;
 
 	double new_x, new_y;
-	calcDisconnectCoord(doc.linedefs[ld], v_num, &new_x, &new_y);
+	calcDisconnectCoord(doc.linedefs[ld].get(), v_num, &new_x, &new_y);
 
 	int new_v = op.addNew(ObjType::vertices);
 
@@ -575,7 +575,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 	{
-		LineDef *L2 = doc.linedefs[*it];
+		const auto &L2 = doc.linedefs[*it];
 
 		if (L2->start == v_num)
 			op.changeLinedef(*it, LineDef::F_START, new_v);
@@ -634,7 +634,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const LineDef * L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		// only process lines which touch a selected sector
 		bool  left_in = L->Left(doc)  && inst.edit.Selected->get(L->Left(doc)->sector);
@@ -685,12 +685,12 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 
 void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2, int end2, Side in_side) const
 {
-	const LineDef * L1 = doc.linedefs[ld_num];
+	const auto &L1 = doc.linedefs[ld_num];
 
 	int new_ld = op.addNew(ObjType::linedefs);
 	int lost_sd;
 
-	LineDef * L2 = doc.linedefs[new_ld];
+	const auto &L2 = doc.linedefs[new_ld];
 
 	if (in_side == Side::left)
 	{
@@ -847,7 +847,7 @@ void Instance::commandSectorDisconnect()
 
 		for (n = level.numLinedefs() -1 ; n >= 0 ; n--)
 		{
-			const LineDef * L = level.linedefs[n];
+			const auto &L = level.linedefs[n];
 
 			// only process lines which touch a selected sector
 			bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
