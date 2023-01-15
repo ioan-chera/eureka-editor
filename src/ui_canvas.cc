@@ -925,7 +925,7 @@ void UI_Canvas::DrawThings()
 	else if (inst.edit.error_mode)
 		RenderColor(LIGHTGREY);
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -976,7 +976,7 @@ void UI_Canvas::DrawThingBodies()
 	if (inst.edit.error_mode)
 		return;
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -1010,7 +1010,7 @@ void UI_Canvas::DrawThingSprites()
 	glAlphaFunc(GL_GREATER, 0.5);
 #endif
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -1658,10 +1658,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::things && m == objnum)
                 continue;
-            const Thing *thing = inst.level.things[m];
+            const auto &thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing.get(), inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1700,10 +1700,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
-        const Thing *thing = inst.level.things[objnum];
+        const auto &thing = inst.level.things[objnum];
         assert(thing);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, thing->special, thing.get(), inst.conf, info))
             highlightTaggedItems(info);
         highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
         const thingtype_t *type = get(inst.conf.thing_types, thing->type);

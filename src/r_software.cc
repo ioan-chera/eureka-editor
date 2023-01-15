@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 Andr Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -287,8 +287,8 @@ public:
 		else if (A->th >= 0 && B->th >= 0)
 		{
 			// prevent two things at same location from flickering
-			const Thing *const TA = inst.level.things[A->th];
-			const Thing *const TB = inst.level.things[B->th];
+			const auto &TA = inst.level.things[A->th];
+			const auto &TB = inst.level.things[B->th];
 
 			if (TA->raw_x == TB->raw_x && TA->raw_y == TB->raw_y)
 				return A->th > B->th;
@@ -870,7 +870,7 @@ public:
 
 	void AddThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		const auto &th = inst.level.things[th_index];
 
 		const thingtype_t &info = inst.conf.getThingType(th->type);
 
@@ -1283,7 +1283,7 @@ public:
 				float dy = static_cast<float>(inst.edit.drag_cur.y - inst.edit.drag_start.y);
 				float dz = static_cast<float>(inst.edit.drag_cur.z - inst.edit.drag_start.z);
 
-				const Thing *T = inst.level.things[dw->th];
+				const auto &T = inst.level.things[dw->th];
 
 				float x = static_cast<float>(T->x() + dx - inst.r_view.x);
 				float y = static_cast<float>(T->y() + dy - inst.r_view.y);

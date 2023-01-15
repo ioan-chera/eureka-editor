@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2018 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -553,7 +553,7 @@ void Instance::DoBeginDrag()
 			// get thing's floor
 			if (edit.drag_thing_num >= 0)
 			{
-				const Thing *T = level.things[edit.drag_thing_num];
+				const auto &T = level.things[edit.drag_thing_num];
 
 				Objid sec = hover::getNearestSector(level, T->xy());
 
@@ -721,7 +721,7 @@ void Instance::CMD_ACT_Click()
 	{
 		if (edit.highlight.type == ObjType::things)
 		{
-			const Thing *T = level.things[edit.highlight.num];
+			const auto &T = level.things[edit.highlight.num];
 			edit.drag_point_dist = static_cast<float>(r_view.DistToViewPlane(T->xy()));
 		}
 		else
@@ -863,7 +863,7 @@ void Instance::Transform_Update()
 		case TRANS_K_Stretch:
 			if (dv0.x)
 				edit.trans_param.scale.x = dv1.x / dv0.x;
-			if (dv0.y) 
+			if (dv0.y)
 				edit.trans_param.scale.y = dv1.y / dv0.y;
 			break;
 

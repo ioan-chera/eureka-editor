@@ -1460,7 +1460,7 @@ void UI_FindAndReplace::DoAll(bool replace)
 
 bool UI_FindAndReplace::Match_Thing(int idx)
 {
-	const Thing *T = inst.level.things[idx];
+	const auto &T = inst.level.things[idx];
 
 	if (! find_numbers->get(T->type))
 		return false;

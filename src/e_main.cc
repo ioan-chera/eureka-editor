@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 André Majorel et al
+//  Copyright (C) 1997-2003 Andr√© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Raphaël Quinet and Brendon Wyber.
+//  in the public domain in 1994 by Rapha√´l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -639,7 +639,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
-			const Thing *T = doc.things[t];
+			const auto &T = doc.things[t];
 
 			Objid obj = hover::getNearestSector(doc, T->xy());
 
@@ -837,7 +837,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::things:
 			for (int n = 0 ; n < doc.numThings() ; n++)
 			{
-				const Thing *T = doc.things[n];
+				const auto &T = doc.things[n];
 
 				v2double_t tpos = T->xy();
 
@@ -1171,7 +1171,7 @@ void Recently_used::WriteUser(std::ostream &os, char letter) const
 void Instance::RecUsed_WriteUser(std::ostream &os) const
 {
 	os << "\nrecent_used clear\n";
-	
+
 	recent_textures.WriteUser(os, 'T');
 	recent_flats.WriteUser(os, 'F');
 	recent_things.WriteUser(os, 'O');

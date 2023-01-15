@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -139,7 +139,7 @@ void ObjectsModule::insertThing() const
 		EditOperation op(doc.basis);
 
 		new_t = op.addNew(ObjType::things);
-		Thing *T = doc.things[new_t];
+		auto &T = doc.things[new_t];
 
 		if(model >= 0)
 			*T = *doc.things[model];
@@ -744,7 +744,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 		case ObjType::things:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing * T = doc.things[*it];
+				const auto &T = doc.things[*it];
 
 				op.changeThing(*it, Thing::F_X, T->raw_x + fdx);
 				op.changeThing(*it, Thing::F_Y, T->raw_y + fdy);
@@ -815,7 +815,7 @@ void ObjectsModule::move(const selection_c &list, const v3double_t &delta) const
 // Returns, if found, a linedef ID between a given line and vertex, if existing.
 // Only returns the first one found, if multiple available.
 // Normally only 2 can exist, when there's a triangle between lineID and vertID.
-// 
+//
 // Returns -1 if none found
 //
 int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
@@ -826,7 +826,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 		if(!otherLine->TouchesVertex(vertID) || i == lineID)
 			continue;
 
-		// We have a linedef that is going to overlap the other one to be 
+		// We have a linedef that is going to overlap the other one to be
 		// split. We need to handle it like above, with merging vertices
 
 		// Identify the hinge, common vertex
@@ -903,7 +903,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 	if (inst.edit.split_line.valid())
 	{
 		did_split_line = inst.edit.split_line.num;
-		
+
 		// Check if it's actually a case of splitting a neighbouring linedef
 		if(findLineBetweenLineAndVertex(did_split_line, obj.num) >= 0)
 		{
@@ -933,7 +933,7 @@ void ObjectsModule::singleDrag(const Objid &obj, const v3double_t &delta) const
 
 void ObjectsModule::transferThingProperties(EditOperation &op, int src_thing, int dest_thing) const
 {
-	const Thing * T = doc.things[src_thing];
+	const auto &T = doc.things[src_thing];
 
 	op.changeThing(dest_thing, Thing::F_TYPE,    T->type);
 	op.changeThing(dest_thing, Thing::F_OPTIONS, T->options);
@@ -1488,7 +1488,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Thing *T = doc.things[*it];
+				const auto &T = doc.things[*it];
 				double Tx = T->x();
 				double Ty = T->y();
 
@@ -1542,7 +1542,7 @@ void ObjectsModule::doMirrorThings(EditOperation &op, const selection_c &list, b
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		if (is_vert)
 		{
@@ -1659,7 +1659,7 @@ void ObjectsModule::doRotate90Things(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		FFixedPoint old_x = T->raw_x;
 		FFixedPoint old_y = T->raw_y;
@@ -1757,7 +1757,7 @@ void ObjectsModule::doScaleTwoThings(EditOperation &op, const selection_c &list,
 {
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		double new_x = T->x();
 		double new_y = T->y();
@@ -1847,7 +1847,7 @@ void ObjectsModule::transform(transform_t& param) const
 }
 
 
-void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos_y) const 
+void ObjectsModule::determineOrigin(transform_t& param, double pos_x, double pos_y) const
 {
 	if (pos_x == 0 && pos_y == 0)
 	{
@@ -1982,7 +1982,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 	switch (obj_type)
 	{
 		case ObjType::things:
-			for (const Thing *thing : doc.things)
+			for (const auto &thing : doc.things)
 				if (iround(thing->x()) == x && iround(thing->y()) == y)
 					return true;
 			return false;
@@ -2077,7 +2077,7 @@ void ObjectsModule::quantizeThings(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Thing * T = doc.things[*it];
+		const auto &T = doc.things[*it];
 
 		if (inst.grid.OnGrid(T->x(), T->y()))
 		{

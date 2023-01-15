@@ -551,7 +551,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->things.size() ; i++)
 	{
 		int new_t = op.addNew(ObjType::things);
-		Thing * T = op.doc.things[new_t];
+		auto & T = op.doc.things[new_t];
 
 		*T = clip_board->things[i];
 
@@ -655,7 +655,7 @@ bool Instance::Clipboard_DoPaste()
 				for (unsigned int i = 0 ; i < clip_board->things.size() ; i++)
 				{
 					int new_t = op.addNew(ObjType::things);
-					Thing * T = level.things[new_t];
+					auto &T = level.things[new_t];
 
 					*T = clip_board->things[i];
 

@@ -196,13 +196,13 @@ void sector_info_cache_c::Rebuild()
 		}
 	}
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
-		CheckSlopeThing(thing);
+		CheckSlopeThing(thing.get());
 	}
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
-		CheckSlopeCopyThing(thing);
+		CheckSlopeCopyThing(thing.get());
 	}
 
 	for (const LineDef *linedef : inst.level.linedefs)
@@ -781,9 +781,9 @@ fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%
 			{
 				active_num++;
 
-				if (A->y1 > low_y) 
+				if (A->y1 > low_y)
 					high_y = std::min(high_y, A->y1);
-				if (A->y2 > low_y) 
+				if (A->y2 > low_y)
 					high_y = std::min(high_y, A->y2);
 			}
 		}

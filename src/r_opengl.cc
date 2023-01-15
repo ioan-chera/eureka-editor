@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2020 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -1216,7 +1216,7 @@ public:
 
 	void DrawThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		const auto &th = inst.level.things[th_index];
 
 		const thingtype_t &info = inst.conf.getThingType(th->type);
 
@@ -1439,7 +1439,7 @@ public:
 
 	void HighlightThing(int th_index)
 	{
-		Thing *th = inst.level.things[th_index];
+		const auto &th = inst.level.things[th_index];
 		float tx = static_cast<float>(th->x());
 		float ty = static_cast<float>(th->y());
 

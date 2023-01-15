@@ -1415,7 +1415,7 @@ static int Things_FindStarts(int *dm_num, const Document &doc)
 
 	int mask = 0;
 
-	for(const Thing *T : doc.things)
+	for(const auto &T : doc.things)
 	{
 		// ideally, these type numbers would not be hard-coded....
 
@@ -1531,7 +1531,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		if (T->type == CAMERA_PEST)
 			continue;
@@ -1581,7 +1581,7 @@ void Things_FixDuds(Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
@@ -1636,7 +1636,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 {
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 
@@ -1806,20 +1806,20 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const Thing *T = inst.level.things[blockers[n]];
+		const auto &T = inst.level.things[blockers[n]];
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 
-		if (ThingStuckInWall(T, info.radius, info.group, inst.level))
+		if (ThingStuckInWall(T.get(), info.radius, info.group, inst.level))
 			list.set(blockers[n]);
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const Thing *T2 = inst.level.things[blockers[n2]];
+			const auto &T2 = inst.level.things[blockers[n2]];
 
 			const thingtype_t &info2 = inst.conf.getThingType(T2->type);
 
-			if (ThingStuckInThing(inst, T, &info, T2, &info2))
+			if (ThingStuckInThing(inst, T.get(), &info, T2.get(), &info2))
 				list.set(blockers[n]);
 		}
 	}
@@ -3236,7 +3236,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 			return true;
 		}
 
-		for (const Thing *thing : inst.level.things)
+		for (const auto &thing : inst.level.things)
 		{
 			const thingtype_t &info = inst.conf.getThingType(thing->type);
 

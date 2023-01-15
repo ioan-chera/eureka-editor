@@ -197,7 +197,7 @@ int Basis::addNew(ObjType type)
 	{
 	case ObjType::things:
 		op.objnum = doc.numThings();
-		op.thing = new Thing;
+		op.thing = std::make_unique<Thing>();
 		break;
 
 	case ObjType::vertices:
@@ -224,9 +224,10 @@ int Basis::addNew(ObjType type)
 		BugError("Basis::addNew: unknown type\n");
 	}
 
-	mCurrentGroup.addApply(op, *this);
+	int objnum = op.objnum;
+	mCurrentGroup.addApply(std::move(op), *this);
 
-	return op.objnum;
+	return objnum;
 }
 
 //
@@ -281,7 +282,7 @@ void Basis::del(ObjType type, int objnum)
 
 	SYS_ASSERT(mCurrentGroup.isActive());
 
-	mCurrentGroup.addApply(op, *this);
+	mCurrentGroup.addApply(std::move(op), *this);
 }
 
 //
@@ -303,7 +304,7 @@ bool Basis::change(ObjType type, int objnum, byte field, int value)
 
 	SYS_ASSERT(mCurrentGroup.isActive());
 
-	mCurrentGroup.addApply(op, *this);
+	mCurrentGroup.addApply(std::move(op), *this);
 	return true;
 }
 
@@ -437,8 +438,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(Thing *thing : doc.things)
-		delete thing;
 	for(Vertex *vertex : doc.vertices)
 		delete vertex;
 	for(Sector *sector : doc.sectors)
@@ -481,12 +480,11 @@ void Basis::EditUnit::apply(Basis &basis)
 		rawChange(basis);
 		return;
 	case EditType::del:
-		ptr = static_cast<int *>(rawDelete(basis));
+		rawDelete(basis);
 		action = EditType::insert;	// reverse the operation
 		return;
 	case EditType::insert:
 		rawInsert(basis);
-		ptr = nullptr;
 		action = EditType::del;	// reverse the operation
 		return;
 	default:
@@ -502,11 +500,9 @@ void Basis::EditUnit::destroy()
 	switch(action)
 	{
 	case EditType::insert:
-		SYS_ASSERT(ptr);
 		deleteFinally();
 		break;
 	case EditType::del:
-		SYS_ASSERT(!ptr);
 		break;
 	default:
 		break;
@@ -523,7 +519,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 	{
 	case ObjType::things:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numThings());
-		pos = reinterpret_cast<int *>(basis.doc.things[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.things[objnum].get());
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
@@ -560,7 +556,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 //
 // Deletion operation
 //
-void *Basis::EditUnit::rawDelete(Basis &basis) const
+void Basis::EditUnit::rawDelete(Basis &basis)
 {
 	basis.mDidMakeChanges = true;
 
@@ -574,34 +570,39 @@ void *Basis::EditUnit::rawDelete(Basis &basis) const
 	switch(objtype)
 	{
 	case ObjType::things:
-		return rawDeleteThing(basis.doc);
+		thing = rawDeleteThing(basis.doc);
+		return;
 
 	case ObjType::vertices:
-		return rawDeleteVertex(basis.doc);
+		vertex = rawDeleteVertex(basis.doc);
+		return;
 
 	case ObjType::sectors:
-		return rawDeleteSector(basis.doc);
+		sector = rawDeleteSector(basis.doc);
+		return;
 
 	case ObjType::sidedefs:
-		return rawDeleteSidedef(basis.doc);
+		sidedef = rawDeleteSidedef(basis.doc);
+		return;
 
 	case ObjType::linedefs:
-		return rawDeleteLinedef(basis.doc);
+		linedef = rawDeleteLinedef(basis.doc);
+		return;
 
 	default:
 		BugError("Basis::EditOperation::rawDelete: bad objtype %u\n", (unsigned)objtype);
-		return NULL; /* NOT REACHED */
+		return; /* NOT REACHED */
 	}
 }
 
 //
 // Thing deletion
 //
-Thing *Basis::EditUnit::rawDeleteThing(Document &doc) const
+std::unique_ptr<Thing> Basis::EditUnit::rawDeleteThing(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numThings());
 
-	Thing *result = doc.things[objnum];
+	auto result = std::move(doc.things[objnum]);
 	doc.things.erase(doc.things.begin() + objnum);
 
 	return result;
@@ -707,7 +708,7 @@ LineDef *Basis::EditUnit::rawDeleteLinedef(Document &doc) const
 //
 // Insert operation
 //
-void Basis::EditUnit::rawInsert(Basis &basis) const
+void Basis::EditUnit::rawInsert(Basis &basis)
 {
 	basis.mDidMakeChanges = true;
 
@@ -722,22 +723,27 @@ void Basis::EditUnit::rawInsert(Basis &basis) const
 	{
 	case ObjType::things:
 		rawInsertThing(basis.doc);
+		thing.reset();	// normally already reset
 		break;
 
 	case ObjType::vertices:
 		rawInsertVertex(basis.doc);
+		vertex = nullptr;
 		break;
 
 	case ObjType::sidedefs:
 		rawInsertSidedef(basis.doc);
+		sidedef = nullptr;
 		break;
 
 	case ObjType::sectors:
 		rawInsertSector(basis.doc);
+		sector = nullptr;
 		break;
 
 	case ObjType::linedefs:
 		rawInsertLinedef(basis.doc);
+		linedef = nullptr;
 		break;
 
 	default:
@@ -748,10 +754,10 @@ void Basis::EditUnit::rawInsert(Basis &basis) const
 //
 // Thing insertion
 //
-void Basis::EditUnit::rawInsertThing(Document &doc) const
+void Basis::EditUnit::rawInsertThing(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numThings());
-	doc.things.insert(doc.things.begin() + objnum, thing);
+	doc.things.insert(doc.things.begin() + objnum, std::move(thing));
 }
 
 //
@@ -842,7 +848,7 @@ void Basis::EditUnit::deleteFinally()
 {
 	switch(objtype)
 	{
-	case ObjType::things:   delete thing; break;
+	case ObjType::things:   thing.reset(); break;
 	case ObjType::vertices: delete vertex; break;
 	case ObjType::sectors:  delete sector; break;
 	case ObjType::sidedefs: delete sidedef; break;
@@ -879,9 +885,9 @@ void Basis::UndoGroup::reset()
 //
 // Add and apply
 //
-void Basis::UndoGroup::addApply(const EditUnit &op, Basis &basis)
+void Basis::UndoGroup::addApply(EditUnit &&op, Basis &basis)
 {
-	mOps.push_back(op);
+	mOps.push_back(std::move(op));
 	mOps.back().apply(basis);
 }
 
