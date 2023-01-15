@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2016 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -420,7 +420,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const
 {
-	const Vertex * V = doc.vertices[v_num];
+	const auto &V = doc.vertices[v_num];
 
 	double dx = L->End(doc)->x() - L->Start(doc)->x();
 	double dy = L->End(doc)->y() - L->Start(doc)->y();
@@ -837,7 +837,7 @@ void Instance::commandSectorDisconnect()
 
 			mapping[*it] = new_v;
 
-			Vertex *newbie = level.vertices[new_v];
+			auto &newbie = level.vertices[new_v];
 
 			*newbie = *level.vertices[*it];
 		}
@@ -885,7 +885,7 @@ void Instance::commandSectorDisconnect()
 
 		for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 		{
-			const Vertex * V = level.vertices[*it];
+			const auto &V = level.vertices[*it];
 
 			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
 			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
@@ -986,9 +986,9 @@ void Instance::CMD_VT_ShapeLine()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = level.vertices[*it];
+		const auto &V = level.vertices[*it];
 
-		double weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
+		double weight = WeightForVertex(V.get(), pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
 
 		if (weight > 0)
 		{
@@ -998,7 +998,7 @@ void Instance::CMD_VT_ShapeLine()
 			a_total += weight;
 		}
 
-		weight = WeightForVertex(V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
+		weight = WeightForVertex(V.get(), pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
 
 		if (weight > 0)
 		{
@@ -1042,7 +1042,7 @@ void Instance::CMD_VT_ShapeLine()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = level.vertices[*it];
+		const auto &V = level.vertices[*it];
 
 		vert_along_t ALONG(*it, AlongDist(V->xy(), { ax,ay }, { bx, by }));
 
@@ -1053,8 +1053,8 @@ void Instance::CMD_VT_ShapeLine()
 
 
 	// compute proper positions for start and end of the line
-	const Vertex *V1 = level.vertices[along_list.front().vert_num];
-	const Vertex *V2 = level.vertices[along_list. back().vert_num];
+	const auto &V1 = level.vertices[along_list.front().vert_num];
+	const auto &V2 = level.vertices[along_list. back().vert_num];
 
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
@@ -1150,7 +1150,7 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 	{
 		unsigned int k = (start_idx + i) % along_list.size();
 
-		const Vertex *V = doc.vertices[along_list[k].vert_num];
+		const auto &V = doc.vertices[along_list[k].vert_num];
 
 		double frac = i / (double)(along_list.size() - (partial_circle ? 1 : 0));
 
@@ -1230,7 +1230,7 @@ void Instance::CMD_VT_ShapeArc()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const Vertex *V = level.vertices[*it];
+		const auto &V = level.vertices[*it];
 
 		double dx = V->x() - mid.x;
 		double dy = V->y() - mid.y;
@@ -1272,8 +1272,8 @@ void Instance::CMD_VT_ShapeArc()
 	else
 		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
-	const Vertex * start_V = level.vertices[along_list[start_idx].vert_num];
-	const Vertex * end_V   = level.vertices[along_list[  end_idx].vert_num];
+	const auto & start_V = level.vertices[along_list[start_idx].vert_num];
+	const auto & end_V   = level.vertices[along_list[  end_idx].vert_num];
 
 	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
 

@@ -757,7 +757,7 @@ void Instance::CMD_ACT_Click()
 
 			new_vert = op.addNew(ObjType::vertices);
 
-			Vertex *V = level.vertices[new_vert];
+			auto &V = level.vertices[new_vert];
 
 			V->SetRawXY(loaded.levelFormat, edit.split);
 

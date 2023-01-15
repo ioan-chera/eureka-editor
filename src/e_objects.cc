@@ -100,7 +100,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		Vertex *V = doc.vertices[new_v];
+		auto &V = doc.vertices[new_v];
 
 		V->SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
 		V->SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
@@ -505,7 +505,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		{
 			new_vert = op.addNew(ObjType::vertices);
 
-			Vertex *V = doc.vertices[new_vert];
+			auto &V = doc.vertices[new_vert];
 
 			V->SetRawXY(inst.loaded.levelFormat, newpos);
 
@@ -755,7 +755,7 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 		case ObjType::vertices:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex * V = doc.vertices[*it];
+				const auto &V = doc.vertices[*it];
 
 				op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
 				op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
@@ -849,7 +849,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
-	Vertex *newV = doc.vertices[newVID];
+	auto &newV = doc.vertices[newVID];
 	*newV = *doc.vertices[vertID];
 
 	// Move it to the actual destination
@@ -1507,7 +1507,7 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const Vertex *V = doc.vertices[*it];
+				const auto &V = doc.vertices[*it];
 				double Vx = V->x();
 				double Vy = V->y();
 
@@ -1574,7 +1574,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const auto &V = doc.vertices[*it];
 
 		if (is_vert)
 			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V->raw_y);
@@ -1729,7 +1729,7 @@ void Instance::CMD_Rotate90()
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
-				const Vertex * V = level.vertices[*it];
+				const auto &V = level.vertices[*it];
 
 				FFixedPoint old_x = V->raw_x;
 				FFixedPoint old_y = V->raw_y;
@@ -1786,7 +1786,7 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const auto &V = doc.vertices[*it];
 
 		double new_x = V->x();
 		double new_y = V->y();
@@ -1988,7 +1988,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 			return false;
 
 		case ObjType::vertices:
-			for (const Vertex *vertex : doc.vertices)
+			for (const auto &vertex : doc.vertices)
 				if (iround(vertex->x()) == x && iround(vertex->y()) == y)
 					return true;
 			return false;
@@ -2165,7 +2165,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const Vertex * V = doc.vertices[*it];
+		const auto &V = doc.vertices[*it];
 
 		if (inst.grid.OnGrid(V->x(), V->y()))
 		{

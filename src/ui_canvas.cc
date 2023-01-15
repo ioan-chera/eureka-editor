@@ -366,8 +366,8 @@ void UI_Canvas::DrawEverything()
 		// when ratio lock is on, want to see the new line
 		if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
 		{
-			const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
-			const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
+			const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
+			const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y);
@@ -681,7 +681,7 @@ void UI_Canvas::DrawVertices()
 
 	RenderColor(FL_GREEN);
 
-	for (const Vertex *vertex : inst.level.vertices)
+	for (const auto &vertex : inst.level.vertices)
 	{
 		double x = vertex->x();
 		double y = vertex->y();
@@ -2072,7 +2072,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex * V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t newpos = inst.edit.drawLine.to;
 
@@ -2164,8 +2164,8 @@ v2double_t UI_Canvas::DragDelta()
 	if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 &&
 		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
-		const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
-		const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
+		const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
+		const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
 
 		v2double_t newpos = inst.edit.drag_cur.xy;
 

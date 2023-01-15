@@ -26,6 +26,7 @@
 #include "e_objects.h"
 #include "e_sector.h"
 #include "e_vertex.h"
+#include "Vertex.h"
 #include <memory>
 
 class crc32_c;
@@ -41,7 +42,7 @@ private:
 public:
 
 	std::vector<std::unique_ptr<Thing>> things;
-	std::vector<Vertex *> vertices;
+	std::vector<std::unique_ptr<Vertex>> vertices;
 	std::vector<Sector *> sectors;
 	std::vector<SideDef *> sidedefs;
 	std::vector<LineDef *> linedefs;

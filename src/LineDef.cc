@@ -25,12 +25,12 @@
 
 Vertex * LineDef::Start(const Document &doc) const
 {
-	return doc.vertices[start];
+	return doc.vertices[start].get();
 }
 
 Vertex * LineDef::End(const Document &doc) const
 {
-	return doc.vertices[end];
+	return doc.vertices[end].get();
 }
 
 SideDef * LineDef::Right(const Document &doc) const

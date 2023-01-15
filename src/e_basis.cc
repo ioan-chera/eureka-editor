@@ -202,7 +202,7 @@ int Basis::addNew(ObjType type)
 
 	case ObjType::vertices:
 		op.objnum = doc.numVertices();
-		op.vertex = new Vertex;
+		op.vertex = std::make_unique<Vertex>();
 		break;
 
 	case ObjType::sidedefs:
@@ -438,8 +438,6 @@ bool Basis::redo()
 //
 void Basis::clearAll()
 {
-	for(Vertex *vertex : doc.vertices)
-		delete vertex;
 	for(Sector *sector : doc.sectors)
 		delete sector;
 	for(SideDef *sidedef : doc.sidedefs)
@@ -523,7 +521,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
-		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum]);
+		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
 		break;
 	case ObjType::sectors:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
@@ -611,11 +609,11 @@ std::unique_ptr<Thing> Basis::EditUnit::rawDeleteThing(Document &doc) const
 //
 // Vertex deletion (and update linedef refs)
 //
-Vertex *Basis::EditUnit::rawDeleteVertex(Document &doc) const
+std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
-	Vertex *result = doc.vertices[objnum];
+	auto result = std::move(doc.vertices[objnum]);
 	doc.vertices.erase(doc.vertices.begin() + objnum);
 
 	// fix the linedef references
@@ -763,10 +761,10 @@ void Basis::EditUnit::rawInsertThing(Document &doc)
 //
 // Vertex insertion
 //
-void Basis::EditUnit::rawInsertVertex(Document &doc) const
+void Basis::EditUnit::rawInsertVertex(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
-	doc.vertices.insert(doc.vertices.begin() + objnum, vertex);
+	doc.vertices.insert(doc.vertices.begin() + objnum, std::move(vertex));
 
 	// fix references in linedefs
 
@@ -849,7 +847,7 @@ void Basis::EditUnit::deleteFinally()
 	switch(objtype)
 	{
 	case ObjType::things:   thing.reset(); break;
-	case ObjType::vertices: delete vertex; break;
+	case ObjType::vertices: vertex.reset(); break;
 	case ObjType::sectors:  delete sector; break;
 	case ObjType::sidedefs: delete sidedef; break;
 	case ObjType::linedefs: delete linedef; break;

@@ -221,8 +221,8 @@ void UI_InfoBar::rend_callback(Fl_Widget *w, void *data)
 	// need sectors mode for sound propagation display
 	if (bar->inst.edit.sector_render_mode == SREND_SoundProp && bar->inst.edit.mode != ObjType::sectors)
 		bar->inst.Editor_ChangeMode('s');
-	
-	bar->inst.RedrawMap(); 
+
+	bar->inst.RedrawMap();
 }
 
 
@@ -651,7 +651,7 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! inst.edit.drawLine.from.valid())
 		return;
 
-	const Vertex *V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t dv = inst.edit.drawLine.to - V->xy();
 

@@ -40,8 +40,6 @@ protected:
 // Cleanup objects
 DocumentFixture::~DocumentFixture()
 {
-	for(Vertex *vertex : doc.vertices)
-		delete vertex;
 	for(Sector *sector : doc.sectors)
 		delete sector;
 	for(SideDef *sidedef : doc.sidedefs)
@@ -63,10 +61,10 @@ TEST_F(DocumentFixture, CheckObjects)
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
 	// no sectors
 	doc.sidedefs.push_back(new SideDef);
 	doc.sidedefs.push_back(new SideDef);
@@ -115,10 +113,10 @@ TEST_F(DocumentFixture, CRC)
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
-	doc.vertices.push_back(new Vertex);
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
+	doc.vertices.push_back(std::make_unique<Vertex>());
 	// no sectors
 	doc.sidedefs.push_back(new SideDef);
 	doc.sidedefs.push_back(new SideDef);

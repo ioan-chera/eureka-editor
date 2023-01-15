@@ -204,6 +204,7 @@ unit_test(general
         ui_tile.cc
         ui_vertex.cc
         ui_window.cc
+        Vertex.cc
         w_loadpic.cc
         w_texture.cc
         w_wad.cc

@@ -171,7 +171,7 @@ void Instance::UpdateDrawLine()
 	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex *V = level.vertices[edit.drawLine.from.num];
+	const auto &V = level.vertices[edit.drawLine.from.num];
 
 	v2double_t newpos = edit.map.xy;
 
@@ -271,8 +271,8 @@ void Instance::UpdateHighlight()
 		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = level.vertices[edit.highlight.num];
-			const Vertex *S = level.vertices[edit.drawLine.from.num];
+			const auto &V = level.vertices[edit.highlight.num];
+			const auto &S = level.vertices[edit.drawLine.from.num];
 
 			v2double_t vpos = V->xy();
 
@@ -374,7 +374,7 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 {
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
-		const Vertex * V = inst.level.vertices[i];
+		const auto &V = inst.level.vertices[i];
 
 		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
 		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
@@ -440,7 +440,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = level.vertices[objnum];
+		const auto &V = level.vertices[objnum];
 
 		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
 		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
@@ -849,7 +849,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::vertices:
 			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const Vertex *V = doc.vertices[n];
+				const auto &V = doc.vertices[n];
 
 				v2double_t vpos = V->xy();
 

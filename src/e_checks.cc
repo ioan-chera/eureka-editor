@@ -315,8 +315,8 @@ struct vertex_X_CMP_pred
 
 	inline bool operator() (int A, int B) const
 	{
-		const Vertex *V1 = doc.vertices[A];
-		const Vertex *V2 = doc.vertices[B];
+		const auto &V1 = doc.vertices[A];
+		const auto &V2 = doc.vertices[B];
 
 		return V1->raw_x < V2->raw_x;
 	}
@@ -364,7 +364,7 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 
 static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts, Document &doc)
 {
-	const Vertex *V = doc.vertices[idx];
+	const auto &V = doc.vertices[idx];
 
 	// find the base vertex (the one V is sitting on)
 	for (int n = 0 ; n < doc.numVertices(); n++)
@@ -376,7 +376,7 @@ static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts
 		if (merge_verts.get(n))
 			continue;
 
-		const Vertex *N = doc.vertices[n];
+		const auto &N = doc.vertices[n];
 
 		if (*N != *V)
 			continue;

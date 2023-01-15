@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -986,7 +986,7 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	Vertex * V = doc.vertices[new_v];
+	auto &V = doc.vertices[new_v];
 
 	V->SetRawXY(inst.loaded.levelFormat, new_p);
 
@@ -1254,7 +1254,7 @@ void Instance::commandLinedefMergeTwo()
 void linemod::moveCoordOntoLinedef(const Document &doc, int ld, v2double_t &v)
 {
 	const LineDef *L = doc.linedefs[ld];
-	
+
 	v2double_t v1 = L->Start(doc)->xy();
 	v2double_t v2 = L->End(doc)->xy();
 
