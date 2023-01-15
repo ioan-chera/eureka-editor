@@ -72,13 +72,13 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 	}
 	else
 	{
-		int f_diff = doc.getSector(*L1->Left(doc)).floorh - doc.getSector(*doc.getRight(*L1)).floorh;
-		int c_diff = doc.getSector(*L1->Left(doc)).ceilh  - doc.getSector(*doc.getRight(*L1)).ceilh;
+		int f_diff = doc.getSector(*doc.getLeft(*L1)).floorh - doc.getSector(*doc.getRight(*L1)).floorh;
+		int c_diff = doc.getSector(*doc.getLeft(*L1)).ceilh  - doc.getSector(*doc.getRight(*L1)).ceilh;
 
 		if (f_diff == 0 && c_diff != 0)
-			texture = (c_diff > 0) ? L1->Left(doc)->upper_tex : doc.getRight(*L1)->upper_tex;
+			texture = (c_diff > 0) ? doc.getLeft(*L1)->upper_tex : doc.getRight(*L1)->upper_tex;
 		else
-			texture = (f_diff < 0) ? L1->Left(doc)->lower_tex : doc.getRight(*L1)->lower_tex;
+			texture = (f_diff < 0) ? doc.getLeft(*L1)->lower_tex : doc.getRight(*L1)->lower_tex;
 	}
 
 	// match texture with other line
@@ -89,15 +89,15 @@ static bool MatchingTextures(const Document &doc, int index1, int index2)
 	}
 	else
 	{
-		int f_diff = doc.getSector(*L2->Left(doc)).floorh - doc.getSector(*doc.getRight(*L2)).floorh;
-		int c_diff = doc.getSector(*L2->Left(doc)).ceilh  - doc.getSector(*doc.getRight(*L2)).ceilh;
+		int f_diff = doc.getSector(*doc.getLeft(*L2)).floorh - doc.getSector(*doc.getRight(*L2)).floorh;
+		int c_diff = doc.getSector(*doc.getLeft(*L2)).ceilh  - doc.getSector(*doc.getRight(*L2)).ceilh;
 
 		if (c_diff != 0)
-			if (texture == ((c_diff > 0) ? L2->Left(doc)->upper_tex : doc.getRight(*L2)->upper_tex))
+			if (texture == ((c_diff > 0) ? doc.getLeft(*L2)->upper_tex : doc.getRight(*L2)->upper_tex))
 				return true;
 
 		if (f_diff != 0)
-			if (texture == ((f_diff < 0) ? L2->Left(doc)->lower_tex : doc.getRight(*L2)->lower_tex))
+			if (texture == ((f_diff < 0) ? doc.getLeft(*L2)->lower_tex : doc.getRight(*L2)->lower_tex))
 				return true;
 
 		return false;
@@ -254,7 +254,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 			continue;
 
 		int sec1 = inst.level.getRight(*L)->sector;
-		int sec2 = L-> Left(inst.level)->sector;
+		int sec2 = inst.level.getLeft(*L)->sector;
 
 		if (sec1 == sec2)
 			continue;
@@ -477,7 +477,7 @@ void Instance::CMD_PruneUnused()
 		if (L->left >= 0)
 		{
 			used_sides.set(L->left);
-			used_secs.set(L->Left(level)->sector);
+			used_secs.set(level.getLeft(*L)->sector);
 		}
 
 		if (L->right >= 0)

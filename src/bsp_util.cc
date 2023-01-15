@@ -241,7 +241,7 @@ static void MarkPolyobjSector(int sector, const Document &doc)
 		auto &L = doc.linedefs[i];
 
 		if ((L->right >= 0 && doc.getRight(*L)->sector == sector) ||
-			(L->left  >= 0 && L->Left(doc)->sector  == sector))
+			(L->left  >= 0 && doc.getLeft(*L)->sector  == sector))
 		{
 			L->flags |= MLF_IS_PRECIOUS;
 		}
@@ -284,7 +284,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 #     endif
 
 			if (L->left >= 0)
-				MarkPolyobjSector(L->Left(inst.level)->sector, inst.level);
+				MarkPolyobjSector(inst.level.getLeft(*L)->sector, inst.level);
 
 			if (L->right >= 0)
 				MarkPolyobjSector(inst.level.getRight(*L)->sector, inst.level);
@@ -362,7 +362,7 @@ static void MarkPolyobjPoint(double x, double y, const Instance &inst)
 	if ((y1 > y2) == (best_dist > 0))
 		sector = (best_ld->right >= 0) ? inst.level.getRight(*best_ld)->sector : -1;
 	else
-		sector = (best_ld->left >= 0) ? best_ld->Left(inst.level)->sector : -1;
+		sector = (best_ld->left >= 0) ? inst.level.getLeft(*best_ld)->sector : -1;
 
 # if DEBUG_POLYOBJ
 	gLog.debugPrintf("  Sector %d contains the polyobj.\n", sector);
@@ -653,7 +653,7 @@ void CalculateWallTips(const Document &doc)
 		double x2 = doc.getEnd(*L).x();
 		double y2 = doc.getEnd(*L).y();
 
-		bool left  = (L->left  >= 0) && doc.isSector(L->Left(doc)->sector);
+		bool left  = (L->left  >= 0) && doc.isSector(doc.getLeft(*L)->sector);
 		bool right = (L->right >= 0) && doc.isSector(doc.getRight(*L)->sector);
 
 		VertexAddWallTip(lev_vertices[L->start], x2-x1, y2-y1, left, right);

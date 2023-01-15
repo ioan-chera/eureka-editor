@@ -627,7 +627,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 		const SideDef *SD = NULL;
 
 		if (hl.parts & PART_LF_ALL)
-			SD = L->Left(inst.level);
+			SD = inst.level.getLeft(*L);
 		else
 			SD = inst.level.getRight(*L);
 

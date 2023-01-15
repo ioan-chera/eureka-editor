@@ -50,9 +50,6 @@ public:
 		   F_ARG2, F_ARG3, F_ARG4, F_ARG5 };
 
 public:
-	// remember: these two can return NULL!
-	SideDef *Left(const Document &doc)  const;
-
 	bool TouchesVertex(int v_num) const
 	{
 		return (start == v_num) || (end == v_num);

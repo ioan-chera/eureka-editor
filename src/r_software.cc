@@ -377,7 +377,7 @@ public:
 		const Sector *front = sec;
 		const Sector *back  = NULL;
 
-		SideDef *back_sd = (side == Side::left) ? inst.level.getRight(*ld) : ld->Left(inst.level);
+		SideDef *back_sd = (side == Side::left) ? inst.level.getRight(*ld) : inst.level.getLeft(*ld);
 		if (back_sd)
 			back = inst.level.sectors[back_sd->sector].get();
 
@@ -752,7 +752,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : inst.level.getRight(*ld);
+		SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
 
 		if (! sd)
 			return;
@@ -1038,7 +1038,7 @@ public:
 		if (dw->ld->TwoSided())
 		{
 			const Sector &front = inst.level.getSector(*inst.level.getRight(*dw->ld));
-			const Sector &back  = inst.level.getSector(*dw->ld-> Left(inst.level));
+			const Sector &back  = inst.level.getSector(*inst.level.getLeft(*dw->ld));
 
 			if (part & (PART_RT_LOWER | PART_LF_LOWER))
 			{
@@ -1209,7 +1209,7 @@ public:
 			for (int what_side = 0 ; what_side < 2 ; what_side++)
 			{
 				const SideDef *sd_front = inst.level.getRight(*dw->ld);
-				const SideDef *sd_back  = dw->ld->Left(inst.level);
+				const SideDef *sd_back  = inst.level.getLeft(*dw->ld);
 
 				if (sd_front && sd_back && sd_front == sd_back)
 					break;
@@ -1409,7 +1409,7 @@ public:
 			if (! dw)
 				continue;
 
-			int one_sided = dw->ld && ! dw->ld->Left(inst.level);
+			int one_sided = dw->ld && ! inst.level.getLeft(*dw->ld);
 			int vis_count = dw->sx2 - dw->sx1 + 1;
 
 			for (int x = dw->sx1 ; x <= dw->sx2 ; x++)

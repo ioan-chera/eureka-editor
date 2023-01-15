@@ -150,7 +150,7 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 
 
 	// fix orientation of remaining linedef if needed
-	if (L2->Left(doc) && ! doc.getRight(*L2))
+	if (doc.getLeft(*L2) && ! doc.getRight(*L2))
 	{
 		doc.linemod.flipLinedef(op, ld2);
 	}
@@ -637,7 +637,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 		const auto &L = doc.linedefs[n];
 
 		// only process lines which touch a selected sector
-		bool  left_in = L->Left(doc)  && inst.edit.Selected->get(L->Left(doc)->sector);
+		bool  left_in = doc.getLeft(*L)  && inst.edit.Selected->get(doc.getLeft(*L)->sector);
 		bool right_in = doc.getRight(*L) && inst.edit.Selected->get(doc.getRight(*L)->sector);
 
 		if (! (left_in || right_in))
@@ -654,7 +654,7 @@ void VertexModule::verticesOfDetachableSectors(selection_c &verts) const
 				outie = true;
 		}
 
-		if (L->Left(doc))
+		if (doc.getLeft(*L))
 		{
 			if (left_in)
 				innie = true;
@@ -850,7 +850,7 @@ void Instance::commandSectorDisconnect()
 			const auto &L = level.linedefs[n];
 
 			// only process lines which touch a selected sector
-			bool  left_in = L->Left(level)  && edit.Selected->get(L->Left(level)->sector);
+			bool  left_in = level.getLeft(*L)  && edit.Selected->get(level.getLeft(*L)->sector);
 			bool right_in = level.getRight(*L) && edit.Selected->get(level.getRight(*L)->sector);
 
 			if (! (left_in || right_in))

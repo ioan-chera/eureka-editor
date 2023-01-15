@@ -23,11 +23,6 @@
 #include "SideDef.h"
 #include "Vertex.h"
 
-SideDef * LineDef::Left(const Document &doc) const
-{
-	return (left >= 0) ? doc.sidedefs[left].get() : nullptr;
-}
-
 bool LineDef::TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const
 {
 	return doc.getStart(*this).Matches(tx, ty) || doc.getEnd(*this).Matches(tx, ty);
@@ -50,7 +45,7 @@ int LineDef::WhatSector(Side side, const Document &doc) const
 	switch (side)
 	{
 		case Side::left:
-			return Left(doc) ? Left(doc)->sector : -1;
+			return doc.getLeft(*this) ? doc.getLeft(*this)->sector : -1;
 
 		case Side::right:
 			return doc.getRight(*this) ? doc.getRight(*this)->sector : -1;

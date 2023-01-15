@@ -120,7 +120,11 @@ public:
 	{
 		return const_cast<SideDef *>(static_cast<const Document *>(this)->getRight(line));
 	}
-
+	const SideDef *getLeft(const LineDef &line) const;
+	SideDef *getLeft(const LineDef &line)
+	{
+		return const_cast<SideDef *>(static_cast<const Document *>(this)->getLeft(line));
+	}
 private:
 	friend class DocumentModule;
 };

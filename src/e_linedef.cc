@@ -122,7 +122,7 @@ bool LinedefModule::partIsVisible(const Objid& obj, char part) const
 		return (part == 'l');
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
-	const Sector *back  = &doc.getSector(*L->Left (doc));
+	const Sector *back  = &doc.getSector(*doc.getLeft(*L));
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -183,7 +183,7 @@ void LinedefModule::partCalcExtent(const Objid& obj, char part, int *z1, int *z2
 	}
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
-	const Sector *back  = &doc.getSector(*L->Left (doc));
+	const Sector *back  = &doc.getSector(*doc.getLeft(*L));
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -399,7 +399,7 @@ int LinedefModule::calcReferenceH(const Objid& obj) const
 
 
 	const Sector *front = &doc.getSector(*doc.getRight(*L));
-	const Sector *back  = &doc.getSector(*L->Left (doc));
+	const Sector *back  = &doc.getSector(*doc.getLeft(*L));
 
 	if (obj.parts & PART_LF_ALL)
 		std::swap(front, back);
@@ -955,15 +955,15 @@ int LinedefModule::splitLinedefAtVertex(EditOperation &op, int ld, int new_v) co
 		}
 	}
 
-	if (L->Left(doc))
+	if (doc.getLeft(*L))
 	{
 		L2->left = op.addNew(ObjType::sidedefs);
-		*L2->Left(doc) = *L->Left(doc);
+		*doc.getLeft(*L2) = *doc.getLeft(*L);
 
 		if (! config::leave_offsets_alone)
 		{
-			int new_x_ofs = L->Left(doc)->x_offset + orig_length - new_length;
-			int width = getTileWidth(*L->Left(doc), inst.wad.images, inst.conf);
+			int new_x_ofs = doc.getLeft(*L)->x_offset + orig_length - new_length;
+			int width = getTileWidth(*doc.getLeft(*L), inst.wad.images, inst.conf);
 			new_x_ofs %= width;
 
 			op.changeSidedef(L->left, SideDef::F_X_OFFSET, new_x_ofs);
@@ -1095,8 +1095,8 @@ void LinedefModule::mergedSecondSidedef(EditOperation &op, int ld) const
 	StringID  left_tex;
 	StringID right_tex;
 
-	if (! is_null_tex(L->Left(doc)->MidTex()))
-		left_tex = L->Left(doc)->mid_tex;
+	if (! is_null_tex(doc.getLeft(*L)->MidTex()))
+		left_tex = doc.getLeft(*L)->mid_tex;
 
 	if (! is_null_tex(doc.getRight(*L)->MidTex()))
 		right_tex = doc.getRight(*L)->mid_tex;

@@ -991,11 +991,11 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		 * (d) double --> double : copy each side, but possibly flip the
 		 *                         second linedef based on floor or ceil diff.
 		 */
-		if (! L1->Left(doc))
+		if (! doc.getLeft(*L1))
 		{
 			StringID tex = doc.getRight(*L1)->mid_tex;
 
-			if (! L2->Left(doc))
+			if (! doc.getLeft(*L2))
 			{
 				op.changeSidedef(L2->right, SideDef::F_MID_TEX, tex);
 			}
@@ -1012,17 +1012,17 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 				flags |= MLF_UpperUnpegged;
 			}
 		}
-		else if (! L2->Left(doc))
+		else if (! doc.getLeft(*L2))
 		{
 			/* pick which texture to copy */
 
 			const Sector &front = doc.getSector(*doc.getRight(*L1));
-			const Sector &back  = doc.getSector(*L1-> Left(doc));
+			const Sector &back  = doc.getSector(*doc.getLeft(*L1));
 
 			StringID f_l = doc.getRight(*L1)->lower_tex;
 			StringID f_u = doc.getRight(*L1)->upper_tex;
-			StringID b_l = L1-> Left(doc)->lower_tex;
-			StringID b_u = L1-> Left(doc)->upper_tex;
+			StringID b_l = doc.getLeft(*L1)->lower_tex;
+			StringID b_u = doc.getLeft(*L1)->upper_tex;
 
 			// ignore missing textures
 			if (is_null_tex(BA_GetString(f_l))) f_l = StringID();
@@ -1050,12 +1050,12 @@ void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, i
 		else
 		{
 			const SideDef *RS = doc.getRight(*L1);
-			const SideDef *LS = L1->Left(doc);
+			const SideDef *LS = doc.getLeft(*L1);
 
 			const Sector *F1 = &doc.getSector(*doc.getRight(*L1));
-			const Sector *B1 = &doc.getSector(*L1-> Left(doc));
+			const Sector *B1 = &doc.getSector(*doc.getLeft(*L1));
 			const Sector *F2 = &doc.getSector(*doc.getRight(*L2));
-			const Sector *B2 = &doc.getSector(*L2-> Left(doc));
+			const Sector *B2 = &doc.getSector(*doc.getLeft(*L2));
 
 			// logic to determine which sides we copy
 

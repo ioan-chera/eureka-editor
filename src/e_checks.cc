@@ -628,7 +628,7 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 
 			// ignore lines with same sector on both sides
 			if (L->left >= 0 && L->right >= 0 &&
-			    L->Left(doc)->sector == doc.getRight(*L)->sector)
+			    doc.getLeft(*L)->sector == doc.getRight(*L)->sector)
 				continue;
 
 			if (L->right >= 0 && doc.getRight(*L)->sector == s)
@@ -637,7 +637,7 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 				ends[L->end]   |= 2;
 			}
 
-			if (L->left >= 0 && L->Left(doc)->sector == s)
+			if (L->left >= 0 && doc.getLeft(*L)->sector == s)
 			{
 				ends[L->start] |= 2;
 				ends[L->end]   |= 1;
@@ -721,9 +721,9 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 		{
 			int s = doc.hover.getOppositeSector(n, Side::left);
 
-			if (s < 0 || L->Left(doc)->sector != s)
+			if (s < 0 || doc.getLeft(*L)->sector != s)
 			{
-				 secs.set(L->Left(doc)->sector);
+				 secs.set(doc.getLeft(*L)->sector);
 				lines.set(n);
 			}
 		}
@@ -860,7 +860,7 @@ void Sectors_FindUnused(selection_c& sel, const Document &doc)
 	for (const auto &L : doc.linedefs)
 	{
 		if (L->left >= 0)
-			sel.set(L->Left(doc)->sector);
+			sel.set(doc.getLeft(*L)->sector);
 
 		if (L->right >= 0)
 			sel.set(doc.getRight(*L)->sector);
@@ -1753,7 +1753,7 @@ static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
 		return true;
 
 	const auto &S1 = doc.getSector(*doc.getRight(*L));
-	const auto &S2 = doc.getSector(*L->Left(doc));
+	const auto &S2 = doc.getSector(*doc.getLeft(*L));
 
 	int f_max = std::max(S1.floorh, S2.floorh);
 	int c_min = std::min(S1.ceilh, S2.ceilh);
@@ -3473,12 +3473,12 @@ static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 		else  // Two Sided
 		{
 			const Sector &front = inst.level.getSector(*inst.level.getRight(*L));
-			const Sector &back  = inst.level.getSector(*L->Left(inst.level));
+			const Sector &back  = inst.level.getSector(*inst.level.getLeft(*L));
 
 			if (front.floorh < back.floorh && is_null_tex(inst.level.getRight(*L)->LowerTex()))
 				lines.set(n);
 
-			if (back.floorh < front.floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+			if (back.floorh < front.floorh && is_null_tex(inst.level.getLeft(*L)->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
@@ -3488,7 +3488,7 @@ static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 			if (front.ceilh > back.ceilh && is_null_tex(inst.level.getRight(*L)->UpperTex()))
 				lines.set(n);
 
-			if (back.ceilh > front.ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+			if (back.ceilh > front.ceilh && is_null_tex(inst.level.getLeft(*L)->UpperTex()))
 				lines.set(n);
 		}
 	}
@@ -3526,12 +3526,12 @@ static void Textures_FixMissing(Instance &inst)
 		else  // Two Sided
 		{
 			const Sector &front = inst.level.getSector(*inst.level.getRight(*L));
-			const Sector &back  = inst.level.getSector(*L->Left(inst.level));
+			const Sector &back  = inst.level.getSector(*inst.level.getLeft(*L));
 
 			if (front.floorh < back.floorh && is_null_tex(inst.level.getRight(*L)->LowerTex()))
 				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back.floorh < front.floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+			if (back.floorh < front.floorh && is_null_tex(inst.level.getLeft(*L)->LowerTex()))
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
@@ -3541,7 +3541,7 @@ static void Textures_FixMissing(Instance &inst)
 			if (front.ceilh > back.ceilh && is_null_tex(inst.level.getRight(*L)->UpperTex()))
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back.ceilh > front.ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+			if (back.ceilh > front.ceilh && is_null_tex(inst.level.getLeft(*L)->UpperTex()))
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -3602,8 +3602,8 @@ static void Textures_FindTransparent(Instance &inst, selection_c& lines,
 			// note : plain OR operator here to check all parts (do NOT want short-circuit)
 			if (check_transparent(inst, inst.level.getRight(*L)->LowerTex(), names) |
 				check_transparent(inst, inst.level.getRight(*L)->UpperTex(), names) |
-				check_transparent(inst, L-> Left(inst.level)->LowerTex(), names) |
-				check_transparent(inst, L-> Left(inst.level)->UpperTex(), names))
+				check_transparent(inst, inst.level.getLeft(*L)->LowerTex(), names) |
+				check_transparent(inst, inst.level.getLeft(*L)->UpperTex(), names))
 			{
 				lines.set(n);
 			}
@@ -3659,10 +3659,10 @@ static void Textures_FixTransparent(Instance &inst)
 		}
 		else  // Two Sided
 		{
-			if (is_transparent(inst, L->Left(inst.level)->LowerTex()))
+			if (is_transparent(inst, inst.level.getLeft(*L)->LowerTex()))
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(inst, L->Left(inst.level)->UpperTex()))
+			if (is_transparent(inst, inst.level.getLeft(*L)->UpperTex()))
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
 			if (is_transparent(inst, inst.level.getRight(*L)->LowerTex()))
@@ -3726,7 +3726,7 @@ static void Textures_FindMedusa(selection_c& lines,
 			continue;
 
 		if (check_medusa(inst.wad, inst.level.getRight(*L)->MidTex(), names) |  /* plain OR */
-			check_medusa(inst.wad, L-> Left(inst.level)->MidTex(), names))
+			check_medusa(inst.wad, inst.level.getLeft(*L)->MidTex(), names))
 		{
 			lines.set(n);
 		}
@@ -3766,7 +3766,7 @@ static void Textures_RemoveMedusa(Instance &inst)
 			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
-		if (check_medusa(inst.wad, L-> Left(inst.level)->MidTex(), names))
+		if (check_medusa(inst.wad, inst.level.getLeft(*L)->MidTex(), names))
 		{
 			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
@@ -3809,7 +3809,7 @@ static void Textures_FindUnknownTex(selection_c& lines,
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
-			const SideDef *SD = side ? L->Left(inst.level) : inst.level.getRight(*L);
+			const SideDef *SD = side ? inst.level.getLeft(*L) : inst.level.getRight(*L);
 
 			if (! SD)
 				continue;
@@ -4070,7 +4070,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 		}
 
 		const Sector &front = inst.level.getSector(*inst.level.getRight(*L));
-		const Sector &back  = inst.level.getSector(*L->Left(inst.level));
+		const Sector &back  = inst.level.getSector(*inst.level.getLeft(*L));
 
 		bool lower_vis = (front.floorh < back.floorh);
 		bool upper_vis = (front.ceilh > back.ceilh);

@@ -626,7 +626,7 @@ static void Reject_GroupSectors(const Document &doc)
 			continue;
 
 		int sec1 = doc.getRight(*L)->sector;
-		int sec2 = L->Left(doc) ->sector;
+		int sec2 = doc.getLeft(*L) ->sector;
 
 		if (sec1 < 0 || sec2 < 0 || sec1 == sec2)
 			continue;

@@ -273,11 +273,11 @@ void SectorModule::linedefsBetweenSectors(selection_c *list, int sec1, int sec2)
 	{
 		const auto &L = doc.linedefs[i];
 
-		if (! (L->Left(doc) && doc.getRight(*L)))
+		if (! (doc.getLeft(*L) && doc.getRight(*L)))
 			continue;
 
-		if ((L->Left(doc)->sector == sec1 && doc.getRight(*L)->sector == sec2) ||
-		    (L->Left(doc)->sector == sec2 && doc.getRight(*L)->sector == sec1))
+		if ((doc.getLeft(*L)->sector == sec1 && doc.getRight(*L)->sector == sec2) ||
+		    (doc.getLeft(*L)->sector == sec2 && doc.getRight(*L)->sector == sec1))
 		{
 			list->set(i);
 		}
@@ -665,7 +665,7 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 			if (! N->TouchesVertex(cur_vert))
 				continue;
 
-			if (ignore_bare && !N->Left(doc) && !doc.getRight(*N))
+			if (ignore_bare && !doc.getLeft(*N) && !doc.getRight(*N))
 				continue;
 
 			int other_vert;

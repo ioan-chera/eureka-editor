@@ -1289,24 +1289,24 @@ StringID Instance::LD_GrabTex(const LineDef *L, int part) const
 	if (part & PART_RT_LOWER) return level.getRight(*L)->lower_tex;
 	if (part & PART_RT_UPPER) return level.getRight(*L)->upper_tex;
 
-	if (part & PART_LF_LOWER) return L->Left(level)->lower_tex;
-	if (part & PART_LF_UPPER) return L->Left(level)->upper_tex;
+	if (part & PART_LF_LOWER) return level.getLeft(*L)->lower_tex;
+	if (part & PART_LF_UPPER) return level.getLeft(*L)->upper_tex;
 
 	if (part & PART_RT_RAIL)  return level.getRight(*L)->mid_tex;
-	if (part & PART_LF_RAIL)  return L->Left(level) ->mid_tex;
+	if (part & PART_LF_RAIL)  return level.getLeft(*L) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (level.getSector(*L->Left(level)).floorh > level.getSector(*level.getRight(*L)).floorh)
+	if (level.getSector(*level.getLeft(*L)).floorh > level.getSector(*level.getRight(*L)).floorh)
 		return level.getRight(*L)->lower_tex;
 
-	if (level.getSector(*L->Left(level)).ceilh < level.getSector(*level.getRight(*L)).ceilh)
+	if (level.getSector(*level.getLeft(*L)).ceilh < level.getSector(*level.getRight(*L)).ceilh)
 		return level.getRight(*L)->upper_tex;
 
-	if (level.getSector(*L->Left(level)).floorh < level.getSector(*level.getRight(*L)).floorh)
-		return L->Left(level)->lower_tex;
+	if (level.getSector(*level.getLeft(*L)).floorh < level.getSector(*level.getRight(*L)).floorh)
+		return level.getLeft(*L)->lower_tex;
 
-	if (level.getSector(*L->Left(level)).ceilh > level.getSector(*level.getRight(*L)).ceilh)
-		return L->Left(level)->upper_tex;
+	if (level.getSector(*level.getLeft(*L)).ceilh > level.getSector(*level.getRight(*L)).ceilh)
+		return level.getLeft(*L)->upper_tex;
 
 	// emergency fallback
 	return level.getRight(*L)->lower_tex;

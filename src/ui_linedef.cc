@@ -322,7 +322,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 				op.changeSidedef(L->right, SideDef::F_MID_TEX,   new_tex);
 		}
 
-		if (L->Left(inst.level))
+		if (inst.level.getLeft(*L))
 		{
 			if (parts & PART_LF_LOWER)
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_tex);
@@ -343,7 +343,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		// convenience: set lower unpeg on first change
 		if (! (L->flags & MLF_LowerUnpegged)  &&
 		    is_null_tex(inst.level.getRight(*L)->MidTex()) &&
-		    is_null_tex(L-> Left(inst.level)->MidTex()) )
+		    is_null_tex(inst.level.getLeft(*L)->MidTex()) )
 		{
 			op.changeLinedef(ld, LineDef::F_FLAGS, L->flags | MLF_LowerUnpegged);
 		}
@@ -372,7 +372,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	if (e_state & FL_BUTTON3)
 	{
 		// back ceiling is higher?
-		if (inst.level.getSector(*L->Left(inst.level)).ceilh > inst.level.getSector(*inst.level.getRight(*L)).ceilh)
+		if (inst.level.getSector(*inst.level.getLeft(*L)).ceilh > inst.level.getSector(*inst.level.getRight(*L)).ceilh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -384,7 +384,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 	else
 	{
 		// back floor is lower?
-		if (inst.level.getSector(*L->Left(inst.level)).floorh < inst.level.getSector(*inst.level.getRight(*L)).floorh)
+		if (inst.level.getSector(*inst.level.getLeft(*L)).floorh < inst.level.getSector(*inst.level.getRight(*L)).floorh)
 			std::swap(sd1, sd2);
 
 		if (opposite)
@@ -995,7 +995,7 @@ int UI_LineBox::SolidMask(const LineDef *L, Side side) const
 		return SOLID_MID;
 
 	const Sector *right = &inst.level.getSector(*inst.level.getRight(*L));
-	const Sector * left = &inst.level.getSector(*L->Left (inst.level));
+	const Sector * left = &inst.level.getSector(*inst.level.getLeft(*L));
 
 	if (side == Side::left)
 		std::swap(left, right);

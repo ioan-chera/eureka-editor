@@ -531,14 +531,14 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 			L->right = side_map[L->right];
 		}
 
-		if (L->Left(op.doc))
+		if (op.doc.getLeft(*L))
 		{
 			SYS_ASSERT(side_map.find(L->left) != side_map.end());
 			L->left = side_map[L->left];
 		}
 
 		// flip linedef if necessary
-		if (L->Left(op.doc) && ! op.doc.getRight(*L))
+		if (op.doc.getLeft(*L) && ! op.doc.getRight(*L))
 		{
 			op.doc.linemod.flipLinedef(op, new_l);
 		}
@@ -819,7 +819,7 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 		const auto &L = doc.linedefs[n];
 
 		if (doc.getRight(*L)) result.clear(L->right);
-		if (L->Left(doc))  result.clear(L->left);
+		if (doc.getLeft(*L))  result.clear(L->left);
 	}
 
 	for (int i = 0 ; i < doc.numSidedefs(); i++)
@@ -845,7 +845,7 @@ static void UnusedLineDefs(const Document &doc, const selection_c &sectors, sele
 		//     0 : deleted side
 		//    +1 : kept side
 		int right_m = (L->right < 0) ? -1 : sectors.get(doc.getRight(*L)->sector) ? 0 : 1;
-		int  left_m = (L->left  < 0) ? -1 : sectors.get(L->Left(doc) ->sector) ? 0 : 1;
+		int  left_m = (L->left  < 0) ? -1 : sectors.get(doc.getLeft(*L) ->sector) ? 0 : 1;
 
 		if (std::max(right_m, left_m) == 0)
 		{
@@ -933,7 +933,7 @@ static void FixupLineDefs(EditOperation &op, const Document &doc, selection_c *l
 		// not to flip the line when _both_ sides are unlinked).
 
 		bool do_right = doc.getRight(*L) ? sectors->get(doc.getRight(*L)->sector) : false;
-		bool do_left  = L->Left(doc)  ? sectors->get(L->Left(doc) ->sector) : false;
+		bool do_left  = doc.getLeft(*L)  ? sectors->get(doc.getLeft(*L) ->sector) : false;
 
 		// line shouldn't be in list unless it touches the sector
 		SYS_ASSERT(do_right || do_left);

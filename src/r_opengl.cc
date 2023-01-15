@@ -914,7 +914,7 @@ public:
 			side = Side::left;
 
 		// ignore the line when there is no facing sidedef
-		const SideDef *sd = (side == Side::left) ? ld->Left(inst.level) : inst.level.getRight(*ld);
+		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*ld) : inst.level.getRight(*ld);
 
 		if (! sd)
 			return;
@@ -973,15 +973,15 @@ public:
 			return;
 
 		bool self_ref = false;
-		if (ld->Left(inst.level) && inst.level.getRight(*ld) && ld->Left(inst.level)->sector == inst.level.getRight(*ld)->sector)
+		if (inst.level.getLeft(*ld) && inst.level.getRight(*ld) && inst.level.getLeft(*ld)->sector == inst.level.getRight(*ld)->sector)
 			self_ref = true;
 
 		// mark sectors to be drawn
 		// [ this method means we don't need to check visibility of sectors ]
 		if (! self_ref)
 		{
-			if (ld->Left(inst.level) && inst.level.isSector(ld->Left(inst.level)->sector))
-				seen_sectors.set(ld->Left(inst.level)->sector);
+			if (inst.level.getLeft(*ld) && inst.level.isSector(inst.level.getLeft(*ld)->sector))
+				seen_sectors.set(inst.level.getLeft(*ld)->sector);
 
 			if (inst.level.getRight(*ld) && inst.level.isSector(inst.level.getRight(*ld)->sector))
 				seen_sectors.set(inst.level.getRight(*ld)->sector);
@@ -1016,7 +1016,7 @@ public:
 		}
 		else
 		{
-			const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*ld) : ld->Left(inst.level);
+			const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*ld) : inst.level.getLeft(*ld);
 			const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;
 
 			sky_upper = sky_front && inst.is_sky(back->CeilTex());
@@ -1333,7 +1333,7 @@ public:
 
 		Side side = (part & PART_LF_ALL) ? Side::left : Side::right;
 
-		const SideDef *sd = (side == Side::left) ? L->Left(inst.level) : inst.level.getRight(*L);
+		const SideDef *sd = (side == Side::left) ? inst.level.getLeft(*L) : inst.level.getRight(*L);
 		if (sd == NULL)
 			return;
 
@@ -1347,7 +1347,7 @@ public:
 		if (cam_side != side)
 			return;
 
-		const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*L) : L->Left(inst.level);
+		const SideDef *sd_back = (side == Side::left) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
 
 		const Sector *front = &inst.level.getSector(*sd);
 		const Sector *back  = sd_back ? &inst.level.getSector(*sd_back) : NULL;

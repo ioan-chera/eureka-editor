@@ -728,7 +728,7 @@ void UI_Canvas::DrawLinedefs()
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
-		bool one_sided = (! L->Left(inst.level));
+		bool one_sided = (! inst.level.getLeft(*L));
 
 		Fl_Color col = LIGHTGREY;
 
@@ -1425,7 +1425,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 				if (skip_lines && L->TwoSided())
 				{
 					int sec1 = inst.level.getRight(*L)->sector;
-					int sec2 = L->Left (inst.level)->sector;
+					int sec2 = inst.level.getLeft(*L)->sector;
 
 					if ((sec1 == objnum || inst.edit.Selected->get(sec1)) &&
 					    (sec2 == objnum || inst.edit.Selected->get(sec2)))
@@ -1739,7 +1739,7 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 		int sec2 = -1;
 
 		if (L->right >= 0) sec1 = inst.level.getRight(*L)->sector;
-		if (L->left  >= 0) sec2 = L->Left(inst.level) ->sector;
+		if (L->left  >= 0) sec2 = inst.level.getLeft(*L) ->sector;
 
 		bool touches1 = (sec1 >= 0) && list->get(sec1);
 		bool touches2 = (sec2 >= 0) && list->get(sec2);

@@ -659,7 +659,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 			const auto &L = doc.linedefs[l];
 
 			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
-				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
+				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
 			{
 				dest.set(l);
 			}
@@ -673,7 +673,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		for (const auto &L : doc.linedefs)
 		{
 			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
-				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
+				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
 			{
 				dest.set(L->start);
 				dest.set(L->end);
@@ -690,7 +690,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 			const auto &L = doc.linedefs[*it];
 
 			if (doc.getRight(*L)) dest.set(L->right);
-			if (L->Left(doc))  dest.set(L->left);
+			if (doc.getLeft(*L))  dest.set(L->left);
 		}
 		return;
 	}
@@ -753,7 +753,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		const auto &L = doc.linedefs[l];
 
 		if (doc.getRight(*L)) dest.set(doc.getRight(*L)->sector);
-		if (L->Left(doc))  dest.set(L->Left(doc)->sector);
+		if (doc.getLeft(*L))  dest.set(doc.getLeft(*L)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
@@ -774,7 +774,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		}
 
 		if (doc.getRight(*L)) dest.clear(doc.getRight(*L)->sector);
-		if (L->Left(doc))  dest.clear(L->Left(doc)->sector);
+		if (doc.getLeft(*L))  dest.clear(doc.getLeft(*L)->sector);
 	}
 }
 
@@ -883,7 +883,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 				// Get the numbers of the sectors on both sides of the linedef
 				int s1 = doc.getRight(*L) ? doc.getRight(*L)->sector : -1;
-				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
+				int s2 = doc.getLeft(*L) ? doc.getLeft(*L) ->sector : -1;
 
 				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
 				   doc.getEnd(*L).xy().inbounds(pos1, pos2))

@@ -1487,7 +1487,7 @@ bool UI_FindAndReplace::Match_LineDef(int idx)
 
 	for (int pass = 0 ; pass < 2 ; pass++)
 	{
-		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : L->Left(inst.level);
+		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
 
 		if (! SD)
 			continue;
@@ -1715,7 +1715,7 @@ void UI_FindAndReplace::Replace_LineDef(EditOperation &op, int idx, StringID new
 	{
 		int sd_num = (pass == 0) ? L->right : L->left;
 
-		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : L->Left(inst.level);
+		const SideDef *SD = (pass == 0) ? inst.level.getRight(*L) : inst.level.getLeft(*L);
 
 		if (! SD)
 			continue;
