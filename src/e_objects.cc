@@ -1226,7 +1226,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 			{
 				const auto &L = doc.linedefs[n];
 
-				if (! L->TouchesSector(objnum, doc))
+				if (! doc.touchesSector(*L, objnum))
 					continue;
 
 				dragCountOnGridWorker(ObjType::linedefs, n, count, total);
@@ -1290,7 +1290,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 			{
 				const auto &L = doc.linedefs[n];
 
-				if (! L->TouchesSector(objnum, doc))
+				if (! doc.touchesSector(*L, objnum))
 					continue;
 
 				dragUpdateCurrentDist(ObjType::linedefs, n, x, y, best_dist,

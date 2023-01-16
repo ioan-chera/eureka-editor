@@ -63,10 +63,6 @@ public:
 		return start == v_num ? end : start;
 	}
 
-	bool TouchesCoord(FFixedPoint tx, FFixedPoint ty, const Document &doc) const;
-
-	bool TouchesSector(int sec_num, const Document &doc) const;
-
 	bool NoSided() const
 	{
 		return (right < 0) && (left < 0);

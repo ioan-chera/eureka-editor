@@ -534,7 +534,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 		out_pos = v2double_t(grid.ForceSnap(ptr));
 
 		// snapped onto an end point?
-		if(L->TouchesCoord(FFixedPoint(out_pos.x), FFixedPoint(out_pos.y), doc))
+		if(doc.touchesCoord(*L, FFixedPoint(out_pos.x), FFixedPoint(out_pos.y)))
 			return Objid();
 
 		// require snap coordinate be not TOO FAR from the line

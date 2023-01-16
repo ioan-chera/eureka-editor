@@ -1190,7 +1190,7 @@ public:
 
 			if (sec_index >= 0)
 			{
-				if (! dw->ld->TouchesSector(sec_index, inst.level))
+				if (! inst.level.touchesSector(*dw->ld, sec_index))
 					continue;
 
 				// Note: hl_color already set by caller

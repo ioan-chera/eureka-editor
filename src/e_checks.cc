@@ -623,7 +623,7 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 		// array for its starting vertex, and a "2" for its ending vertex.
 		for (const auto &L : doc.linedefs)
 		{
-			if (! L->TouchesSector(s, doc))
+			if (! doc.touchesSector(*L, s))
 				continue;
 
 			// ignore lines with same sector on both sides

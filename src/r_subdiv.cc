@@ -467,7 +467,7 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 
 	for (const auto &L2 : inst.level.linedefs)
 	{
-		if (L2->TouchesSector(sec_num, inst.level))
+		if (inst.level.touchesSector(*L2, sec_num))
 		{
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
@@ -682,7 +682,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 	{
 		const auto &L = inst.level.linedefs[n];
 
-		if (! L->TouchesSector(num, inst.level))
+		if (! inst.level.touchesSector(*L, num))
 			continue;
 
 		// ignore 2S lines with same sector on both sides

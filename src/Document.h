@@ -126,6 +126,8 @@ public:
 		return const_cast<SideDef *>(static_cast<const Document *>(this)->getLeft(line));
 	}
 	double calcLength(const LineDef &line) const;
+	bool touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const;
+	bool touchesSector(const LineDef &line, int secNum) const;
 private:
 	friend class DocumentModule;
 };

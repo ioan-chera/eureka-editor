@@ -155,3 +155,17 @@ double Document::calcLength(const LineDef &line) const
 	double dy = getStart(line).y() - getEnd(line).y();
 	return hypot(dx, dy);
 }
+
+bool Document::touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const
+{
+	return getStart(line).Matches(tx, ty) || getEnd(line).Matches(tx, ty);
+}
+
+bool Document::touchesSector(const LineDef &line, int secNum) const
+{
+	if(line.right >= 0 && sidedefs[line.right]->sector == secNum)
+		return true;
+	if(line.left >= 0 && sidedefs[line.left]->sector == secNum)
+		return true;
+	return false;
+}

@@ -1420,7 +1420,7 @@ public:
 
 		for (const auto &L : inst.level.linedefs)
 		{
-			if (L->TouchesSector(sec_index, inst.level))
+			if (inst.level.touchesSector(*L, sec_index))
 			{
 				float x1 = static_cast<float>(inst.level.getStart(*L).x());
 				float y1 = static_cast<float>(inst.level.getStart(*L).y());

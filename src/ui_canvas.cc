@@ -1416,7 +1416,7 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 		{
 			for (const auto &L : inst.level.linedefs)
 			{
-				if (! L->TouchesSector(objnum, inst.level))
+				if (! inst.level.touchesSector(*L, objnum))
 					continue;
 
 				bool reverse = false;
@@ -1530,7 +1530,7 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 		{
 			for (const auto &linedef : inst.level.linedefs)
 			{
-				if (!linedef->TouchesSector(objnum, inst.level))
+				if (! inst.level.touchesSector(*linedef, objnum))
 					continue;
 
 				double x1 = inst.level.getStart(*linedef).x();
