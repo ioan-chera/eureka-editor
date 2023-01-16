@@ -530,8 +530,8 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 			if (! L->TwoSided())
 				continue;
 
-			int sec1 = L->WhatSector(Side::right, inst.level);
-			int sec2 = L->WhatSector(Side::left, inst.level);
+			int sec1 = inst.level.getSectorID(*L, Side::right);
+			int sec2 = inst.level.getSectorID(*L, Side::left);
 
 			SYS_ASSERT(sec1 >= 0);
 			SYS_ASSERT(sec2 >= 0);

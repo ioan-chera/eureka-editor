@@ -645,7 +645,7 @@ void CalculateWallTips(const Document &doc)
 	{
 		const auto &L = doc.linedefs[i];
 
-		if ((L->flags & MLF_IS_OVERLAP) || L->IsZeroLength(doc))
+		if ((L->flags & MLF_IS_OVERLAP) || doc.isZeroLength(*L))
 			continue;
 
 		double x1 = doc.getStart(*L).x();

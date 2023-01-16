@@ -846,9 +846,9 @@ public:
 		dw->wall_light = dw->sec->light;
 
 		// add "fake constrast" for axis-aligned walls
-		if (ld->IsVertical(inst.level))
+		if (inst.level.isVertical(*ld))
 			dw->wall_light += 16;
-		else if (ld->IsHorizontal(inst.level))
+		else if (inst.level.isHorizontal(*ld))
 			dw->wall_light -= 16;
 
 		dw->delta_ang = angle1 + XToAngle(sx1) - normal;

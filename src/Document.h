@@ -113,6 +113,7 @@ public:
 	void getLevelChecksum(crc32_c &crc) const;
 
 	const Sector &getSector(const SideDef &side) const;
+	int getSectorID(const LineDef &line, Side side) const;
 	const Vertex &getStart(const LineDef &line) const;
 	const Vertex &getEnd(const LineDef &line) const;
 	const SideDef *getRight(const LineDef &line) const;
@@ -128,6 +129,10 @@ public:
 	double calcLength(const LineDef &line) const;
 	bool touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const;
 	bool touchesSector(const LineDef &line, int secNum) const;
+	bool isZeroLength(const LineDef &line) const;
+	bool isSelfRef(const LineDef &line) const;
+	bool isHorizontal(const LineDef &line) const;
+	bool isVertical(const LineDef &line) const;
 private:
 	friend class DocumentModule;
 };

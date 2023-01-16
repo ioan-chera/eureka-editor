@@ -872,10 +872,10 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 		{
 			del_lines.set(n);
 
-			if (linedef->WhatSector(Side::left, doc) >= 0)
-				result.set(linedef->WhatSector(Side::left, doc));
-			if (linedef->WhatSector(Side::right, doc) >= 0)
-				result.set(linedef->WhatSector(Side::right, doc));
+			if (doc.getSectorID(*linedef, Side::left) >= 0)
+				result.set(doc.getSectorID(*linedef, Side::left));
+			if (doc.getSectorID(*linedef, Side::right) >= 0)
+				result.set(doc.getSectorID(*linedef, Side::right));
 		}
 	}
 
@@ -894,7 +894,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 		for (Side what_side : kSides)
 		{
-			int sec_num = linedef->WhatSector(what_side, doc);
+			int sec_num = doc.getSectorID(*linedef, what_side);
 
 			if (sec_num < 0)
 				continue;
@@ -916,7 +916,7 @@ static void DuddedSectors(const Document &doc, const selection_c &verts, const s
 
 			const auto &oppositeLinedef = doc.linedefs[opp_ld];
 
-			if (oppositeLinedef->WhatSector(opp_side, doc) == sec_num)
+			if (doc.getSectorID(*oppositeLinedef, opp_side) == sec_num)
 				result.clear(sec_num);
 		}
 	}

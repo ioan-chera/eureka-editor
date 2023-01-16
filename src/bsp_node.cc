@@ -812,7 +812,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? doc.linedefs[seg->linedef]->IsSelfRef(doc) : false;
+	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(*doc.linedefs[seg->linedef]) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1368,7 +1368,7 @@ seg_t *CreateSegs(const Instance &inst)
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (line->IsZeroLength(inst.level))
+		if (inst.level.isZeroLength(*line))
 			continue;
 
 		// ignore overlapping lines
@@ -1526,7 +1526,7 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (doc.linedefs[array[i]->linedef]->IsSelfRef(doc))
+		else if (doc.isSelfRef(*doc.linedefs[array[i]->linedef]))
 			cur_score = 2;
 
 		if (cur_score > best_score)

@@ -18,28 +18,7 @@
 
 #include "LineDef.h"
 
-#include "Document.h"
 #include "Errors.h"
-#include "SideDef.h"
-#include "Vertex.h"
-
-
-int LineDef::WhatSector(Side side, const Document &doc) const
-{
-	switch (side)
-	{
-		case Side::left:
-			return doc.getLeft(*this) ? doc.getLeft(*this)->sector : -1;
-
-		case Side::right:
-			return doc.getRight(*this) ? doc.getRight(*this)->sector : -1;
-
-		default:
-			BugError("bad side : %d\n", (int)side);
-			return -1;
-	}
-}
-
 
 int LineDef::WhatSideDef(Side side) const
 {
@@ -54,25 +33,4 @@ int LineDef::WhatSideDef(Side side) const
 			BugError("bad side : %d\n", (int)side);
 			return -1;
 	}
-}
-
-bool LineDef::IsSelfRef(const Document &doc) const
-{
-	return (left >= 0) && (right >= 0) &&
-		doc.sidedefs[left]->sector == doc.sidedefs[right]->sector;
-}
-
-bool LineDef::IsHorizontal(const Document &doc) const
-{
-	return (doc.getStart(*this).raw_y == doc.getEnd(*this).raw_y);
-}
-
-bool LineDef::IsVertical(const Document &doc) const
-{
-	return (doc.getStart(*this).raw_x == doc.getEnd(*this).raw_x);
-}
-
-bool LineDef::IsZeroLength(const Document &doc) const
-{
-	return (doc.getStart(*this).raw_x == doc.getEnd(*this).raw_x) && (doc.getStart(*this).raw_y == doc.getEnd(*this).raw_y);
 }

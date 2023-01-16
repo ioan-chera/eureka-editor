@@ -455,11 +455,11 @@ bool lineloop_c::SameSector(int *sec_num) const
 
 	SYS_ASSERT(lines.size() > 0);
 
-	int sec = doc.linedefs[lines[0]]->WhatSector(sides[0], doc);
+	int sec = doc.getSectorID(*doc.linedefs[lines[0]], sides[0]);
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		if (sec != doc.linedefs[lines[k]]->WhatSector(sides[k], doc))
+		if (sec != doc.getSectorID(*doc.linedefs[lines[k]], sides[k]))
 			return false;
 	}
 
@@ -495,7 +495,7 @@ int lineloop_c::NeighboringSector() const
 		const auto &L = doc.linedefs[lines[i]];
 
 		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
-		int sec = doc.linedefs[lines[i]]->WhatSector(- sides[i], doc);
+		int sec = doc.getSectorID(*doc.linedefs[lines[i]], - sides[i]);
 
 		if (sec < 0)
 			continue;
@@ -537,7 +537,7 @@ int lineloop_c::IslandSector() const
 		if (get_just_line(opp_ld))
 			continue;
 
-		return doc.linedefs[opp_ld]->WhatSector(opp_side, doc);
+		return doc.getSectorID(*doc.linedefs[opp_ld], opp_side);
 	}
 
 	return -1;
@@ -551,7 +551,7 @@ int lineloop_c::DetermineSector() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = doc.linedefs[lines[k]]->WhatSector(sides[k], doc);
+		int sec = doc.getSectorID(*doc.linedefs[lines[k]], sides[k]);
 
 		if (sec >= 0)
 			return sec;
@@ -587,7 +587,7 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = doc.linedefs[lines[k]]->WhatSector(sides[k], doc);
+		int sec = doc.getSectorID(*doc.linedefs[lines[k]], sides[k]);
 
 		if (sec >= 0)
 			list->set(sec);
@@ -1232,10 +1232,10 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map,
 	{
 		const auto &L = doc.linedefs[n];
 
-		if (L->WhatSector(Side::left, doc) >= 0)
-			unused.clear(L->WhatSector(Side::left, doc));
-		if (L->WhatSector(Side::right, doc) >= 0)
-			unused.clear(L->WhatSector(Side::right, doc));
+		if (doc.getSectorID(*L, Side::left) >= 0)
+			unused.clear(doc.getSectorID(*L, Side::left));
+		if (doc.getSectorID(*L, Side::right) >= 0)
+			unused.clear(doc.getSectorID(*L, Side::right));
 	}
 
 	doc.objects.del(op, unused);

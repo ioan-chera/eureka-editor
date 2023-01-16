@@ -446,9 +446,9 @@ void sector_info_cache_c::PlaneAlign(const LineDef *L, int floor_mode, int ceil_
 
 void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 {
-	int sec_num = L->WhatSector(side, inst.level);
-	const auto &front = inst.level.sectors[L->WhatSector(side, inst.level)];
-	const auto &back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
+	int sec_num = inst.level.getSectorID(*L, side);
+	const auto &front = inst.level.sectors[inst.level.getSectorID(*L, side)];
+	const auto &back  = inst.level.sectors[inst.level.getSectorID(*L, -side)];
 
 	// find a vertex belonging to sector and is far from the line
 	const Vertex *v = NULL;
@@ -686,7 +686,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 			continue;
 
 		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(Side::left, inst.level) == L->WhatSector(Side::right, inst.level))
+		if (inst.level.getSectorID(*L, Side::left) == inst.level.getSectorID(*L, Side::right))
 			continue;
 
 		sector_edge_t edge;
@@ -712,7 +712,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		}
 
 		// compute side
-		bool is_right = (L->WhatSector(Side::right, inst.level) == num);
+		bool is_right = (inst.level.getSectorID(*L, Side::right) == num);
 
 		if (edge.flipped)
 			is_right = !is_right;

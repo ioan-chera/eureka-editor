@@ -238,7 +238,7 @@ public:
 		const auto &L = doc.linedefs[ld];
 
 		// can ignore purely vertical lines
-		if (L->IsVertical(doc))
+		if (doc.isVertical(*L))
 			return;
 
 		double x1 = std::min(doc.getStart(*L).x(), doc.getEnd(*L).x());
@@ -273,7 +273,7 @@ public:
 		const auto &L = doc.linedefs[ld];
 
 		// can ignore purely horizonal lines
-		if (L->IsHorizontal(doc))
+		if (doc.isHorizontal(*L))
 			return;
 
 		double y1 = std::min(doc.getStart(*L).y(), doc.getEnd(*L).y());
@@ -632,7 +632,7 @@ int Hover::getOppositeSector(int ld, Side ld_side) const
 	if(opp < 0)
 		return -1;
 
-	return doc.linedefs[opp]->WhatSector(opp_side, doc);
+	return doc.getSectorID(*doc.linedefs[opp], opp_side);
 }
 
 //
@@ -1131,7 +1131,7 @@ void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, i
 			continue;
 		}
 
-		if (L->IsZeroLength(doc))
+		if (doc.isZeroLength(*L))
 			continue;
 
 		if (cross.HasLine(ld))

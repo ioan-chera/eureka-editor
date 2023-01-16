@@ -129,6 +129,21 @@ const Sector &Document::getSector(const SideDef &side) const
 	return *sectors[side.sector];
 }
 
+int Document::getSectorID(const LineDef &line, Side side) const
+{
+	switch(side)
+	{
+	case Side::left:
+		return getLeft(line) ? getLeft(line)->sector : -1;
+
+	case Side::right:
+		return getRight(line) ? getRight(line)->sector : -1;
+
+	default:
+		return -1;
+	}
+}
+
 const Vertex &Document::getStart(const LineDef &line) const
 {
 	return *vertices[line.start];
@@ -168,4 +183,25 @@ bool Document::touchesSector(const LineDef &line, int secNum) const
 	if(line.left >= 0 && sidedefs[line.left]->sector == secNum)
 		return true;
 	return false;
+}
+
+bool Document::isZeroLength(const LineDef &line) const
+{
+	return (getStart(line).raw_x == getEnd(line).raw_x) && (getStart(line).raw_y == getEnd(line).raw_y);
+}
+
+bool Document::isSelfRef(const LineDef &line) const
+{
+	return (line.left >= 0) && (line.right >= 0) &&
+		sidedefs[line.left]->sector == sidedefs[line.right]->sector;
+}
+
+bool Document::isHorizontal(const LineDef &line) const
+{
+	return (getStart(line).raw_y == getEnd(line).raw_y);
+}
+
+bool Document::isVertical(const LineDef &line) const
+{
+	return (getStart(line).raw_x == getEnd(line).raw_x);
 }

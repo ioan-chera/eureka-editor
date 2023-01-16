@@ -120,8 +120,8 @@ void VertexModule::mergeSandwichLines(EditOperation &op, int ld1, int ld2, int v
 		doc.linemod.flipLinedef(op, ld1);
 	}
 
-	bool same_left  = (L2->WhatSector(Side::left, doc)  == L1->WhatSector(Side::left, doc));
-	bool same_right = (L2->WhatSector(Side::right, doc) == L1->WhatSector(Side::right, doc));
+	bool same_left  = (doc.getSectorID(*L2, Side::left)  == doc.getSectorID(*L1, Side::left));
+	bool same_right = (doc.getSectorID(*L2, Side::right) == doc.getSectorID(*L1, Side::right));
 
 	if (same_left && same_right)
 	{

@@ -262,7 +262,7 @@ static void CreateBlockmap(const Document &doc)
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
 		// ignore zero-length lines
-		if (doc.linedefs[i]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[i]))
 			continue;
 
 		BlockAddLine(i, doc);
@@ -471,7 +471,7 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 	{
 		const auto &L = doc.linedefs[i];
 
-		if (! L->IsZeroLength(doc))
+		if (!doc.isZeroLength(*L))
 		{
 			double x1 = doc.getStart(*L).x();
 			double y1 = doc.getStart(*L).y();

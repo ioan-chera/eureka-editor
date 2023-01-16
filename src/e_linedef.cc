@@ -346,7 +346,7 @@ void LinedefModule::determineAdjoiner(Objid& result,
 		if (N.get() == L)
 			continue;
 
-		if (N->IsZeroLength(doc))
+		if (doc.isZeroLength(*N))
 			continue;
 
 		if (! (N->TouchesVertex(L->start) || N->TouchesVertex(L->end)))

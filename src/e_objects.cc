@@ -2137,12 +2137,12 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 		double x2 = doc.getEnd(*L).x();
 		double y2 = doc.getEnd(*L).y();
 
-		if (L->IsHorizontal(doc))
+		if (doc.isHorizontal(*L))
 		{
 			vert_modes[L->start] |= V_HORIZ;
 			vert_modes[L->end]   |= V_HORIZ;
 		}
-		else if (L->IsVertical(doc))
+		else if (doc.isVertical(*L))
 		{
 			vert_modes[L->start] |= V_VERT;
 			vert_modes[L->end]   |= V_VERT;

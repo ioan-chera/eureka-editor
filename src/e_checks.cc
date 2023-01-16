@@ -275,7 +275,7 @@ static void Vertex_FindDanglers(selection_c& sel, const Document &doc)
 
 		// dangling vertices are fine for lines setting inside a sector
 		// (i.e. with same sector on both sides)
-		if (L->TwoSided() && (L->WhatSector(Side::left, doc) == L->WhatSector(Side::right, doc)))
+		if (L->TwoSided() && (doc.getSectorID(*L, Side::left) == doc.getSectorID(*L, Side::right)))
 		{
 			line_counts[v1] = line_counts[v2] = 2;
 			continue;
@@ -2055,7 +2055,7 @@ static void LineDefs_FindZeroLen(selection_c& lines, const Document &doc)
 	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
-		if (doc.linedefs[n]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[n]))
 			lines.set(n);
 }
 
@@ -2066,7 +2066,7 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		if (doc.linedefs[n]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[n]))
 			lines.set(n);
 	}
 
@@ -2456,7 +2456,7 @@ static void LineDefs_FindOverlaps(selection_c& lines, const Document &doc)
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (doc.linedefs[ld2]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[ld2]))
 			continue;
 
 		// only the second (or third, etc) linedef is stored
@@ -2511,7 +2511,7 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 	const auto &BL = doc.linedefs[B];
 
 	// ignore zero-length lines
-	if (AL->IsZeroLength(doc) || BL->IsZeroLength(doc))
+	if (doc.isZeroLength(*AL) || doc.isZeroLength(*BL))
 		return 0;
 
 	// ignore directly overlapping here

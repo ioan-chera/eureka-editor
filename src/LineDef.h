@@ -20,12 +20,7 @@
 #ifndef LINEDEF_H_
 #define LINEDEF_H_
 
-#include "FixedPoint.h"
 #include "Side.h"
-
-struct SideDef;
-struct Vertex;
-struct Document;
 
 class LineDef
 {
@@ -79,16 +74,7 @@ public:
 	}
 
 	// side is either SIDE_LEFT or SIDE_RIGHT
-	int WhatSector(Side side, const Document &doc) const;
 	int WhatSideDef(Side side) const;
-
-	bool IsZeroLength(const Document &doc) const;
-
-	bool IsSelfRef(const Document &doc) const;
-
-	bool IsHorizontal(const Document &doc) const;
-
-	bool IsVertical(const Document &doc) const;
 
 	int Arg(int which /* 1..5 */) const
 	{

@@ -775,9 +775,9 @@ public:
 			int light = front->light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical(inst.level))
+			if (inst.level.isVertical(*ld))
 				light += 16;
-			else if (ld->IsHorizontal(inst.level))
+			else if (inst.level.isHorizontal(*ld))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,p1, x2,y2,p2, tx1,tx2,tex_top,tex_scale,
@@ -858,9 +858,9 @@ public:
 			int light = inst.level.getSector(*sd).light;
 
 			// add "fake constrast" for axis-aligned walls
-			if (ld->IsVertical(inst.level))
+			if (inst.level.isVertical(*ld))
 				light += 16;
-			else if (ld->IsHorizontal(inst.level))
+			else if (inst.level.isHorizontal(*ld))
 				light -= 16;
 
 			LightClippedQuad(x1,y1,&p1, x2,y2,&p2, tx1,tx2,z1,tex_scale,
