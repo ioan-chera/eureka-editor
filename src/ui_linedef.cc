@@ -875,7 +875,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(inst.level.linedefs[n]->CalcLength(inst.level));
+	float len_f = static_cast<float>(inst.level.calcLength(*inst.level.linedefs[n]));
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);

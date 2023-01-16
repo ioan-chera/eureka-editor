@@ -2579,7 +2579,7 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 		(e_side == 0 && f_side == 0))
 	{
 		// choose longest line as the measuring stick
-		if (AL->CalcLength(doc) < BL->CalcLength(doc))
+		if (doc.calcLength(*AL) < doc.calcLength(*BL))
 		{
 			std::swap(av1, bv1);
 			std::swap(av2, bv2);

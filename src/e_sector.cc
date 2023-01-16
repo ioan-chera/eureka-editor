@@ -442,7 +442,7 @@ double lineloop_c::TotalLength() const
 	{
 		const auto &L = doc.linedefs[lines[k]];
 
-		result += L->CalcLength(doc);
+		result += doc.calcLength(*L);
 	}
 
 	return result;
@@ -500,7 +500,7 @@ int lineloop_c::NeighboringSector() const
 		if (sec < 0)
 			continue;
 
-		double len = L->CalcLength(doc);
+		double len = doc.calcLength(*L);
 
 		if (len > best_len)
 		{

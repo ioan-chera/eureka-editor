@@ -148,3 +148,10 @@ const SideDef *Document::getLeft(const LineDef &line) const
 {
 	return line.left >= 0 ? sidedefs[line.left].get() : nullptr;
 }
+
+double Document::calcLength(const LineDef &line) const
+{
+	double dx = getStart(line).x() - getEnd(line).x();
+	double dy = getStart(line).y() - getEnd(line).y();
+	return hypot(dx, dy);
+}

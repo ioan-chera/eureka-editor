@@ -86,8 +86,6 @@ public:
 	int WhatSector(Side side, const Document &doc) const;
 	int WhatSideDef(Side side) const;
 
-	double CalcLength(const Document &doc) const;
-
 	bool IsZeroLength(const Document &doc) const;
 
 	bool IsSelfRef(const Document &doc) const;

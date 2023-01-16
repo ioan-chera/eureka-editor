@@ -88,14 +88,6 @@ bool LineDef::IsVertical(const Document &doc) const
 	return (doc.getStart(*this).raw_x == doc.getEnd(*this).raw_x);
 }
 
-double LineDef::CalcLength(const Document &doc) const
-{
-	double dx = doc.getStart(*this).x() - doc.getEnd(*this).x();
-	double dy = doc.getStart(*this).y() - doc.getEnd(*this).y();
-
-	return hypot(dx, dy);
-}
-
 bool LineDef::IsZeroLength(const Document &doc) const
 {
 	return (doc.getStart(*this).raw_x == doc.getEnd(*this).raw_x) && (doc.getStart(*this).raw_y == doc.getEnd(*this).raw_y);

@@ -987,7 +987,7 @@ static bool DeleteVertex_MergeLineDefs(Document &doc, int v_num)
 	const LineDef *L2 = doc.linedefs[ld2].get();
 
 	// we merge L2 into L1, unless L1 is significantly shorter
-	if (L1->CalcLength(doc) < L2->CalcLength(doc) * 0.7)
+	if (doc.calcLength(*L1) < doc.calcLength(*L2) * 0.7)
 	{
 		std::swap(ld1, ld2);
 		std::swap(L1,  L2);

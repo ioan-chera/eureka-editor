@@ -1376,7 +1376,7 @@ seg_t *CreateSegs(const Instance &inst)
 			continue;
 
 		// check for extremely long lines
-		if (line->CalcLength(inst.level) >= 30000)
+		if (inst.level.calcLength(*line) >= 30000)
 			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)

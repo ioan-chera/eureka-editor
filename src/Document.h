@@ -125,6 +125,7 @@ public:
 	{
 		return const_cast<SideDef *>(static_cast<const Document *>(this)->getLeft(line));
 	}
+	double calcLength(const LineDef &line) const;
 private:
 	friend class DocumentModule;
 };
