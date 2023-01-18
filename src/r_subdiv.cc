@@ -164,7 +164,7 @@ void sector_info_cache_c::Rebuild()
 
 	for (sec = 0 ; sec < total ; sec++)
 	{
-		const Sector *S = inst.level.sectors[sec];
+		const auto &S = inst.level.sectors[sec];
 
 		infos[sec].Clear();
 		infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
@@ -173,11 +173,11 @@ void sector_info_cache_c::Rebuild()
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
-		CheckBoom242(L);
-		CheckExtraFloor(L, n);
-		CheckLineSlope(L);
+		CheckBoom242(L.get());
+		CheckExtraFloor(L.get(), n);
+		CheckLineSlope(L.get());
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
@@ -191,23 +191,23 @@ void sector_info_cache_c::Rebuild()
 
 			info.AddLine(n);
 
-			info.AddVertex(L->Start(inst.level));
-			info.AddVertex(L->End(inst.level));
+			info.AddVertex(&inst.level.getStart(*L));
+			info.AddVertex(&inst.level.getEnd(*L));
 		}
 	}
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
-		CheckSlopeThing(thing);
+		CheckSlopeThing(thing.get());
 	}
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
-		CheckSlopeCopyThing(thing);
+		CheckSlopeCopyThing(thing.get());
 	}
 
-	for (const LineDef *linedef : inst.level.linedefs)
+	for (const auto &linedef : inst.level.linedefs)
 	{
-		CheckPlaneCopy(linedef);
+		CheckPlaneCopy(linedef.get());
 	}
 }
 
@@ -223,7 +223,7 @@ void sector_info_cache_c::CheckBoom242(const LineDef *L)
 	if (L->tag <= 0 || L->right < 0)
 		return;
 
-	int dummy_sec = L->Right(inst.level)->sector;
+	int dummy_sec = inst.level.getRight(*L)->sector;
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
@@ -446,18 +446,18 @@ void sector_info_cache_c::PlaneAlign(const LineDef *L, int floor_mode, int ceil_
 
 void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 {
-	int sec_num = L->WhatSector(side, inst.level);
-	const Sector *front = inst.level.sectors[L->WhatSector(side, inst.level)];
-	const Sector *back  = inst.level.sectors[L->WhatSector(-side, inst.level)];
+	int sec_num = inst.level.getSectorID(*L, side);
+	const auto &front = inst.level.sectors[inst.level.getSectorID(*L, side)];
+	const auto &back  = inst.level.sectors[inst.level.getSectorID(*L, -side)];
 
 	// find a vertex belonging to sector and is far from the line
 	const Vertex *v = NULL;
 	double best_dist = 0.1;
 
-	double lx1 = L->Start(inst.level)->x();
-	double ly1 = L->Start(inst.level)->y();
-	double lx2 = L->End(inst.level)->x();
-	double ly2 = L->End(inst.level)->y();
+	double lx1 = inst.level.getStart(*L).x();
+	double ly1 = inst.level.getStart(*L).y();
+	double lx2 = inst.level.getEnd(*L).x();
+	double ly2 = inst.level.getEnd(*L).y();
 
 	if (side == Side::left)
 	{
@@ -465,13 +465,13 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 		std::swap(ly1, ly2);
 	}
 
-	for (const LineDef *L2 : inst.level.linedefs)
+	for (const auto &L2 : inst.level.linedefs)
 	{
-		if (L2->TouchesSector(sec_num, inst.level))
+		if (inst.level.touchesSector(*L2, sec_num))
 		{
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
-				const Vertex *v2 = pass ? L2->End(inst.level) : L2->Start(inst.level);
+				const Vertex *v2 = pass ? &inst.level.getEnd(*L2) : &inst.level.getStart(*L2);
 				double dist = PerpDist(v2->xy(), v2double_t{ lx1,ly1 }, v2double_t{ lx2, ly2 });
 
 				if (dist > best_dist)
@@ -510,33 +510,33 @@ void sector_info_cache_c::PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, in
 {
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && L->Right(inst.level))
+		if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && inst.level.getRight(*L))
 		{
-			infos[L->Right(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+			infos[inst.level.getRight(*L)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 			f1_tag = 0;
 		}
-		if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && L->Right(inst.level))
+		if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && inst.level.getRight(*L))
 		{
-			infos[L->Right(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+			infos[inst.level.getRight(*L)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 			c1_tag = 0;
 		}
 
-		if (f2_tag > 0 && inst.level.sectors[n]->tag == f2_tag && L->Left(inst.level))
+		if (f2_tag > 0 && inst.level.sectors[n]->tag == f2_tag && inst.level.getLeft(*L))
 		{
-			infos[L->Left(inst.level)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
+			infos[inst.level.getLeft(*L)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 			f2_tag = 0;
 		}
-		if (c2_tag > 0 && inst.level.sectors[n]->tag == c2_tag && L->Left(inst.level))
+		if (c2_tag > 0 && inst.level.sectors[n]->tag == c2_tag && inst.level.getLeft(*L))
 		{
-			infos[L->Left(inst.level)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
+			infos[inst.level.getLeft(*L)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 			c2_tag = 0;
 		}
 	}
 
 	if (L->left >= 0 && L->right >= 0)
 	{
-		int front_sec = L->Right(inst.level)->sector;
-		int  back_sec = L->Left(inst.level)->sector;
+		int front_sec = inst.level.getRight(*L)->sector;
+		int  back_sec = inst.level.getLeft(*L)->sector;
 
 		switch (share & 3)
 		{
@@ -680,27 +680,27 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
-		if (! L->TouchesSector(num, inst.level))
+		if (! inst.level.touchesSector(*L, num))
 			continue;
 
 		// ignore 2S lines with same sector on both sides
-		if (L->WhatSector(Side::left, inst.level) == L->WhatSector(Side::right, inst.level))
+		if (inst.level.getSectorID(*L, Side::left) == inst.level.getSectorID(*L, Side::right))
 			continue;
 
 		sector_edge_t edge;
 
-		edge.x1 = static_cast<int>(L->Start(inst.level)->x());
-		edge.y1 = static_cast<int>(L->Start(inst.level)->y());
-		edge.x2 = static_cast<int>(L->End(inst.level)->x());
-		edge.y2 = static_cast<int>(L->End(inst.level)->y());
+		edge.x1 = static_cast<int>(inst.level.getStart(*L).x());
+		edge.y1 = static_cast<int>(inst.level.getStart(*L).y());
+		edge.x2 = static_cast<int>(inst.level.getEnd(*L).x());
+		edge.y2 = static_cast<int>(inst.level.getEnd(*L).y());
 
 		// skip purely horizontal lines
 		if (edge.y1 == edge.y2)
 			continue;
 
-		edge.line = L;
+		edge.line = L.get();
 		edge.flipped = 0;
 
 		if (edge.y1 > edge.y2)
@@ -712,7 +712,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 		}
 
 		// compute side
-		bool is_right = (L->WhatSector(Side::right, inst.level) == num);
+		bool is_right = (inst.level.getSectorID(*L, Side::right) == num);
 
 		if (edge.flipped)
 			is_right = !is_right;
@@ -781,9 +781,9 @@ fprintf(stderr, "Line %d  mapped coords (%d %d) .. (%d %d)  flipped:%d  sec:%d/%
 			{
 				active_num++;
 
-				if (A->y1 > low_y) 
+				if (A->y1 > low_y)
 					high_y = std::min(high_y, A->y1);
-				if (A->y2 > low_y) 
+				if (A->y2 > low_y)
 					high_y = std::min(high_y, A->y2);
 			}
 		}

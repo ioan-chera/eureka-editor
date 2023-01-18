@@ -46,14 +46,8 @@ struct Vertex
 	}
 
 	// these handle rounding to integer in non-UDMF mode
-	void SetRawX(MapFormat format, double x)
-	{
-		raw_x = MakeValidCoord(format, x);
-	}
-	void SetRawY(MapFormat format, double y)
-	{
-		raw_y = MakeValidCoord(format, y);
-	}
+	void SetRawX(MapFormat format, double x);
+	void SetRawY(MapFormat format, double y);
 
 	void SetRawXY(MapFormat format, const v2double_t &pos)
 	{

@@ -366,8 +366,8 @@ void UI_Canvas::DrawEverything()
 		// when ratio lock is on, want to see the new line
 		if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
 		{
-			const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
-			const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
+			const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
+			const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
 
 			RenderColor(RED);
 			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y);
@@ -395,8 +395,8 @@ void UI_Canvas::DrawEverything()
 
 		if (inst.edit.mode == ObjType::linedefs && !inst.edit.show_object_numbers)
 		{
-			const LineDef *L = inst.level.linedefs[inst.edit.highlight.num];
-			DrawLineInfo(L->Start(inst.level)->x(), L->Start(inst.level)->y(), L->End(inst.level)->x(), L->End(inst.level)->y(), false);
+			const auto &L = inst.level.linedefs[inst.edit.highlight.num];
+			DrawLineInfo(inst.level.getStart(*L).x(), inst.level.getStart(*L).y(), inst.level.getEnd(*L).x(), inst.level.getEnd(*L).y(), false);
 		}
 
 		RenderThickness(1);
@@ -681,7 +681,7 @@ void UI_Canvas::DrawVertices()
 
 	RenderColor(FL_GREEN);
 
-	for (const Vertex *vertex : inst.level.vertices)
+	for (const auto &vertex : inst.level.vertices)
 	{
 		double x = vertex->x();
 		double y = vertex->y();
@@ -718,17 +718,17 @@ void UI_Canvas::DrawLinedefs()
 {
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
-		double x1 = L->Start(inst.level)->x();
-		double y1 = L->Start(inst.level)->y();
-		double x2 = L->End  (inst.level)->x();
-		double y2 = L->End  (inst.level)->y();
+		double x1 = inst.level.getStart(*L).x();
+		double y1 = inst.level.getStart(*L).y();
+		double x2 = inst.level.getEnd(*L).x();
+		double y2 = inst.level.getEnd(*L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
 
-		bool one_sided = (! L->Left(inst.level));
+		bool one_sided = (! inst.level.getLeft(*L));
 
 		Fl_Color col = LIGHTGREY;
 
@@ -766,7 +766,7 @@ void UI_Canvas::DrawLinedefs()
 			{
 				if (inst.edit.error_mode)
 					col = LIGHTGREY;
-				else if (! L->Right(inst.level)) // no first sidedef?
+				else if (! inst.level.getRight(*L)) // no first sidedef?
 					col = RED;
 				else if (L->type != 0)
 				{
@@ -875,10 +875,10 @@ void UI_Canvas::DrawLinedefs()
 	{
 		for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 		{
-			double x1 = inst.level.linedefs[n]->Start(inst.level)->x();
-			double y1 = inst.level.linedefs[n]->Start(inst.level)->y();
-			double x2 = inst.level.linedefs[n]->End  (inst.level)->x();
-			double y2 = inst.level.linedefs[n]->End  (inst.level)->y();
+			double x1 = inst.level.getStart(*inst.level.linedefs[n]).x();
+			double y1 = inst.level.getStart(*inst.level.linedefs[n]).y();
+			double x2 = inst.level.getEnd(*inst.level.linedefs[n]).x();
+			double y2 = inst.level.getEnd(*inst.level.linedefs[n]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				continue;
@@ -925,7 +925,7 @@ void UI_Canvas::DrawThings()
 	else if (inst.edit.error_mode)
 		RenderColor(LIGHTGREY);
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -976,7 +976,7 @@ void UI_Canvas::DrawThingBodies()
 	if (inst.edit.error_mode)
 		return;
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -1010,7 +1010,7 @@ void UI_Canvas::DrawThingSprites()
 	glAlphaFunc(GL_GREATER, 0.5);
 #endif
 
-	for (const Thing *thing : inst.level.things)
+	for (const auto &thing : inst.level.things)
 	{
 		double x = thing->x();
 		double y = thing->y();
@@ -1374,10 +1374,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::linedefs:
 		{
-			double x1 = dx + inst.level.linedefs[objnum]->Start(inst.level)->x();
-			double y1 = dy + inst.level.linedefs[objnum]->Start(inst.level)->y();
-			double x2 = dx + inst.level.linedefs[objnum]->End  (inst.level)->x();
-			double y2 = dy + inst.level.linedefs[objnum]->End  (inst.level)->y();
+			double x1 = dx + inst.level.getStart(*inst.level.linedefs[objnum]).x();
+			double y1 = dy + inst.level.getStart(*inst.level.linedefs[objnum]).y();
+			double x2 = dx + inst.level.getEnd(*inst.level.linedefs[objnum]).x();
+			double y2 = dy + inst.level.getEnd(*inst.level.linedefs[objnum]).y();
 
 			if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 				break;
@@ -1414,9 +1414,9 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::sectors:
 		{
-			for (const LineDef *L : inst.level.linedefs)
+			for (const auto &L : inst.level.linedefs)
 			{
-				if (! L->TouchesSector(objnum, inst.level))
+				if (! inst.level.touchesSector(*L, objnum))
 					continue;
 
 				bool reverse = false;
@@ -1424,8 +1424,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 				// skip lines if both sides are in the selection
 				if (skip_lines && L->TwoSided())
 				{
-					int sec1 = L->Right(inst.level)->sector;
-					int sec2 = L->Left (inst.level)->sector;
+					int sec1 = inst.level.getRight(*L)->sector;
+					int sec2 = inst.level.getLeft(*L)->sector;
 
 					if ((sec1 == objnum || inst.edit.Selected->get(sec1)) &&
 					    (sec2 == objnum || inst.edit.Selected->get(sec2)))
@@ -1435,10 +1435,10 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 						reverse = true;
 				}
 
-				double x1 = dx + L->Start(inst.level)->x();
-				double y1 = dy + L->Start(inst.level)->y();
-				double x2 = dx + L->End  (inst.level)->x();
-				double y2 = dy + L->End  (inst.level)->y();
+				double x1 = dx + inst.level.getStart(*L).x();
+				double y1 = dy + inst.level.getStart(*L).y();
+				double x2 = dx + inst.level.getEnd(*L).x();
+				double y2 = dy + inst.level.getEnd(*L).y();
 
 				if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 					continue;
@@ -1511,10 +1511,10 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::linedefs:
 		{
-			double x1 = inst.level.linedefs[objnum]->Start(inst.level)->x();
-			double y1 = inst.level.linedefs[objnum]->Start(inst.level)->y();
-			double x2 = inst.level.linedefs[objnum]->End  (inst.level)->x();
-			double y2 = inst.level.linedefs[objnum]->End  (inst.level)->y();
+			double x1 = inst.level.getStart(*inst.level.linedefs[objnum]).x();
+			double y1 = inst.level.getStart(*inst.level.linedefs[objnum]).y();
+			double x2 = inst.level.getEnd(*inst.level.linedefs[objnum]).x();
+			double y2 = inst.level.getEnd(*inst.level.linedefs[objnum]).y();
 
 			inst.edit.trans_param.Apply(&x1, &y1);
 			inst.edit.trans_param.Apply(&x2, &y2);
@@ -1528,15 +1528,15 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::sectors:
 		{
-			for (const LineDef *linedef : inst.level.linedefs)
+			for (const auto &linedef : inst.level.linedefs)
 			{
-				if (!linedef->TouchesSector(objnum, inst.level))
+				if (! inst.level.touchesSector(*linedef, objnum))
 					continue;
 
-				double x1 = linedef->Start(inst.level)->x();
-				double y1 = linedef->Start(inst.level)->y();
-				double x2 = linedef->End  (inst.level)->x();
-				double y2 = linedef->End  (inst.level)->y();
+				double x1 = inst.level.getStart(*linedef).x();
+				double y1 = inst.level.getStart(*linedef).y();
+				double x2 = inst.level.getEnd(*linedef).x();
+				double y2 = inst.level.getEnd(*linedef).y();
 
 				inst.edit.trans_param.Apply(&x1, &y1);
 				inst.edit.trans_param.Apply(&x2, &y2);
@@ -1639,10 +1639,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::linedefs && m == objnum)
                 continue;
-            const LineDef *line = inst.level.linedefs[m];
+            const auto &line = inst.level.linedefs[m];
             assert(line);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::linedefs, m, line->type, line.get(), inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1658,10 +1658,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         {
             if(objtype == ObjType::things && m == objnum)
                 continue;
-            const Thing *thing = inst.level.things[m];
+            const auto &thing = inst.level.things[m];
             assert(thing);
             SpecialTagInfo info;
-            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing, inst.conf, info))
+            if(!getSpecialTagInfo(ObjType::things, m, thing->special, thing.get(), inst.conf, info))
                 continue;
 
             for(int i = 0; i < info.*numtags; ++i)
@@ -1675,10 +1675,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
 
 	if (objtype == ObjType::linedefs)
     {
-        const LineDef *line = inst.level.linedefs[objnum];
+        const auto &line = inst.level.linedefs[objnum];
         assert(line);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, info))
             highlightTaggedItems(info);
         if(inst.loaded.levelFormat == MapFormat::doom)
         {
@@ -1688,7 +1688,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
         else
         {
             SpecialTagInfo linfo;
-            if(!getSpecialTagInfo(objtype, objnum, line->type, line, inst.conf, linfo))
+            if(!getSpecialTagInfo(objtype, objnum, line->type, line.get(), inst.conf, linfo))
                 return;
             // TODO: also UDMF line ID
             if(inst.loaded.levelFormat == MapFormat::hexen && linfo.selflineid > 0)
@@ -1700,10 +1700,10 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     }
     else if(inst.loaded.levelFormat != MapFormat::doom && objtype == ObjType::things)
     {
-        const Thing *thing = inst.level.things[objnum];
+        const auto &thing = inst.level.things[objnum];
         assert(thing);
         SpecialTagInfo info;
-        if(getSpecialTagInfo(objtype, objnum, thing->special, thing, inst.conf, info))
+        if(getSpecialTagInfo(objtype, objnum, thing->special, thing.get(), inst.conf, info))
             highlightTaggedItems(info);
         highlightTaggingTriggers(thing->tid, &SpecialTagInfo::tids, &SpecialTagInfo::numtids);
         const thingtype_t *type = get(inst.conf.thing_types, thing->type);
@@ -1722,12 +1722,12 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 {
 	// color and line thickness have been set by caller
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
-		double x1 = dx + L->Start(inst.level)->x();
-		double y1 = dy + L->Start(inst.level)->y();
-		double x2 = dx + L->End  (inst.level)->x();
-		double y2 = dy + L->End  (inst.level)->y();
+		double x1 = dx + inst.level.getStart(*L).x();
+		double y1 = dy + inst.level.getStart(*L).y();
+		double x2 = dx + inst.level.getEnd(*L).x();
+		double y2 = dy + inst.level.getEnd(*L).y();
 
 		if (! Vis(std::min(x1,x2), std::min(y1,y2), std::max(x1,x2), std::max(y1,y2)))
 			continue;
@@ -1738,8 +1738,8 @@ void UI_Canvas::DrawSectorSelection(selection_c *list, double dx, double dy)
 		int sec1 = -1;
 		int sec2 = -1;
 
-		if (L->right >= 0) sec1 = L->Right(inst.level)->sector;
-		if (L->left  >= 0) sec2 = L->Left(inst.level) ->sector;
+		if (L->right >= 0) sec1 = inst.level.getRight(*L)->sector;
+		if (L->left  >= 0) sec2 = inst.level.getLeft(*L) ->sector;
 
 		bool touches1 = (sec1 >= 0) && list->get(sec1);
 		bool touches2 = (sec2 >= 0) && list->get(sec2);
@@ -2072,7 +2072,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex * V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
 
 	v2double_t newpos = inst.edit.drawLine.to;
 
@@ -2164,8 +2164,8 @@ v2double_t UI_Canvas::DragDelta()
 	if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 &&
 		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
-		const Vertex *v0 = inst.level.vertices[inst.edit.drag_other_vert];
-		const Vertex *v1 = inst.level.vertices[inst.edit.dragged.num];
+		const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
+		const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
 
 		v2double_t newpos = inst.edit.drag_cur.xy;
 

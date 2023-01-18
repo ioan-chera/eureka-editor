@@ -268,14 +268,14 @@ static void Vertex_FindDanglers(selection_c& sel, const Document &doc)
 
 	memset(line_counts, 0, doc.numVertices());
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		int v1 = L->start;
 		int v2 = L->end;
 
 		// dangling vertices are fine for lines setting inside a sector
 		// (i.e. with same sector on both sides)
-		if (L->TwoSided() && (L->WhatSector(Side::left, doc) == L->WhatSector(Side::right, doc)))
+		if (L->TwoSided() && (doc.getSectorID(*L, Side::left) == doc.getSectorID(*L, Side::right)))
 		{
 			line_counts[v1] = line_counts[v2] = 2;
 			continue;
@@ -315,8 +315,8 @@ struct vertex_X_CMP_pred
 
 	inline bool operator() (int A, int B) const
 	{
-		const Vertex *V1 = doc.vertices[A];
-		const Vertex *V2 = doc.vertices[B];
+		const auto &V1 = doc.vertices[A];
+		const auto &V2 = doc.vertices[B];
 
 		return V1->raw_x < V2->raw_x;
 	}
@@ -364,7 +364,7 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 
 static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts, Document &doc)
 {
-	const Vertex *V = doc.vertices[idx];
+	const auto &V = doc.vertices[idx];
 
 	// find the base vertex (the one V is sitting on)
 	for (int n = 0 ; n < doc.numVertices(); n++)
@@ -376,7 +376,7 @@ static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts
 		if (merge_verts.get(n))
 			continue;
 
-		const Vertex *N = doc.vertices[n];
+		const auto &N = doc.vertices[n];
 
 		if (*N != *V)
 			continue;
@@ -385,7 +385,7 @@ static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts
 
 		for (int ld = 0 ; ld < doc.numLinedefs(); ld++)
 		{
-			LineDef *L = doc.linedefs[ld];
+			const auto &L = doc.linedefs[ld];
 
 			if (L->start == idx)
 				op.changeLinedef(ld, LineDef::F_START, n);
@@ -442,7 +442,7 @@ static void Vertex_FindUnused(selection_c& sel, const Document &doc)
 	if (doc.numVertices() == 0)
 		return;
 
-	for (const LineDef *linedef : doc.linedefs)
+	for (const auto &linedef : doc.linedefs)
 	{
 		sel.set(linedef->start);
 		sel.set(linedef->end);
@@ -621,23 +621,23 @@ static void Sectors_FindUnclosed(selection_c& secs, selection_c& verts, const Do
 
 		// for each sidedef bound to the Sector, store a "1" in the "ends"
 		// array for its starting vertex, and a "2" for its ending vertex.
-		for (const LineDef *L : doc.linedefs)
+		for (const auto &L : doc.linedefs)
 		{
-			if (! L->TouchesSector(s, doc))
+			if (! doc.touchesSector(*L, s))
 				continue;
 
 			// ignore lines with same sector on both sides
 			if (L->left >= 0 && L->right >= 0 &&
-			    L->Left(doc)->sector == L->Right(doc)->sector)
+			    doc.getLeft(*L)->sector == doc.getRight(*L)->sector)
 				continue;
 
-			if (L->right >= 0 && L->Right(doc)->sector == s)
+			if (L->right >= 0 && doc.getRight(*L)->sector == s)
 			{
 				ends[L->start] |= 1;
 				ends[L->end]   |= 2;
 			}
 
-			if (L->left >= 0 && L->Left(doc)->sector == s)
+			if (L->left >= 0 && doc.getLeft(*L)->sector == s)
 			{
 				ends[L->start] |= 2;
 				ends[L->end]   |= 1;
@@ -704,15 +704,15 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->right >= 0)
 		{
 			int s = doc.hover.getOppositeSector(n, Side::right);
 
-			if (s < 0 || L->Right(doc)->sector != s)
+			if (s < 0 || doc.getRight(*L)->sector != s)
 			{
-				 secs.set(L->Right(doc)->sector);
+				 secs.set(doc.getRight(*L)->sector);
 				lines.set(n);
 			}
 		}
@@ -721,9 +721,9 @@ static void Sectors_FindMismatches(selection_c& secs, selection_c& lines, Docume
 		{
 			int s = doc.hover.getOppositeSector(n, Side::left);
 
-			if (s < 0 || L->Left(doc)->sector != s)
+			if (s < 0 || doc.getLeft(*L)->sector != s)
 			{
-				 secs.set(L->Left(doc)->sector);
+				 secs.set(doc.getLeft(*L)->sector);
 				lines.set(n);
 			}
 		}
@@ -857,13 +857,13 @@ void Sectors_FindUnused(selection_c& sel, const Document &doc)
 	if (doc.numSectors() == 0)
 		return;
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		if (L->left >= 0)
-			sel.set(L->Left(doc)->sector);
+			sel.set(doc.getLeft(*L)->sector);
 
 		if (L->right >= 0)
-			sel.set(L->Right(doc)->sector);
+			sel.set(doc.getRight(*L)->sector);
 	}
 
 	sel.frob_range(0, doc.numSectors() - 1, BitOp::toggle);
@@ -935,7 +935,7 @@ static void SideDefs_FindUnused(selection_c& sel, const Document &doc)
 	if (doc.numSidedefs() == 0)
 		return;
 
-	for (const LineDef *L : doc.linedefs)
+	for (const auto &L : doc.linedefs)
 	{
 		if (L->left  >= 0) sel.set(L->left);
 		if (L->right >= 0) sel.set(L->right);
@@ -966,8 +966,8 @@ static void SideDefs_FindPacking(selection_c& sides, selection_c& lines, const D
 	for (int i = 0 ; i < doc.numLinedefs(); i++)
 	for (int k = 0 ; k < i ; k++)
 	{
-		const LineDef * A = doc.linedefs[i];
-		const LineDef * B = doc.linedefs[k];
+		const auto &A = doc.linedefs[i];
+		const auto &B = doc.linedefs[k];
 
 		bool AA = (A->left  >= 0 && A->left == A->right);
 
@@ -1049,7 +1049,7 @@ void ChecksModule::sidedefsUnpack(bool is_after_load) const
 
 			for (first = 0 ; first < doc.numLinedefs(); first++)
 			{
-				const LineDef *F = doc.linedefs[first];
+				const auto &F = doc.linedefs[first];
 
 				if (F->left == sd || F->right == sd)
 					break;
@@ -1415,7 +1415,7 @@ static int Things_FindStarts(int *dm_num, const Document &doc)
 
 	int mask = 0;
 
-	for(const Thing *T : doc.things)
+	for(const auto &T : doc.things)
 	{
 		// ideally, these type numbers would not be hard-coded....
 
@@ -1531,7 +1531,7 @@ static void Things_FindDuds(const Instance &inst, selection_c& list)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		if (T->type == CAMERA_PEST)
 			continue;
@@ -1581,7 +1581,7 @@ void Things_FixDuds(Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		// NOTE: we also "fix" things that are always spawned
 		////   if (TH_always_spawned(T->type)) continue;
@@ -1636,7 +1636,7 @@ static void CollectBlockingThings(std::vector<int>& list,
 {
 	for (int n = 0 ; n < inst.level.numThings() ; n++)
 	{
-		const Thing *T = inst.level.things[n];
+		const auto &T = inst.level.things[n];
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 
@@ -1752,11 +1752,11 @@ static inline bool LD_is_blocking(const LineDef *L, const Document &doc)
 	if (L->right < 0 || L->left < 0)
 		return true;
 
-	const Sector *S1 = L->Right(doc)->SecRef(doc);
-	const Sector *S2 = L-> Left(doc)->SecRef(doc);
+	const auto &S1 = doc.getSector(*doc.getRight(*L));
+	const auto &S2 = doc.getSector(*doc.getLeft(*L));
 
-	int f_max = std::max(S1->floorh, S2->floorh);
-	int c_min = std::min(S1-> ceilh, S2-> ceilh);
+	int f_max = std::max(S1.floorh, S2.floorh);
+	int c_min = std::min(S1.ceilh, S2.ceilh);
 
 	return (c_min < f_max + MONSTER_HEIGHT);
 }
@@ -1782,9 +1782,9 @@ static bool ThingStuckInWall(const Thing *T, int r, char group, const Document &
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
-		if (! LD_is_blocking(L, doc))
+		if (! LD_is_blocking(L.get(), doc))
 			continue;
 
 		if (doc.objects.lineTouchesBox(n, x1, y1, x2, y2))
@@ -1806,20 +1806,20 @@ static void Things_FindStuckies(selection_c& list, const Instance &inst)
 
 	for (int n = 0 ; n < (int)blockers.size() ; n++)
 	{
-		const Thing *T = inst.level.things[blockers[n]];
+		const auto &T = inst.level.things[blockers[n]];
 
 		const thingtype_t &info = inst.conf.getThingType(T->type);
 
-		if (ThingStuckInWall(T, info.radius, info.group, inst.level))
+		if (ThingStuckInWall(T.get(), info.radius, info.group, inst.level))
 			list.set(blockers[n]);
 
 		for (int n2 = n + 1 ; n2 < (int)blockers.size() ; n2++)
 		{
-			const Thing *T2 = inst.level.things[blockers[n2]];
+			const auto &T2 = inst.level.things[blockers[n2]];
 
 			const thingtype_t &info2 = inst.conf.getThingType(T2->type);
 
-			if (ThingStuckInThing(inst, T, &info, T2, &info2))
+			if (ThingStuckInThing(inst, T.get(), &info, T2.get(), &info2))
 				list.set(blockers[n]);
 		}
 	}
@@ -2055,7 +2055,7 @@ static void LineDefs_FindZeroLen(selection_c& lines, const Document &doc)
 	lines.change_type(ObjType::linedefs);
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
-		if (doc.linedefs[n]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[n]))
 			lines.set(n);
 }
 
@@ -2066,7 +2066,7 @@ static void LineDefs_RemoveZeroLen(Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		if (doc.linedefs[n]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[n]))
 			lines.set(n);
 	}
 
@@ -2125,7 +2125,7 @@ static void LineDefs_FindManualDoors(selection_c& lines, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -2162,7 +2162,7 @@ static void LineDefs_FixManualDoors(Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0 || L->left >= 0)
 			continue;
@@ -2184,7 +2184,7 @@ static void LineDefs_FindLackImpass(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 			lines.set(n);
@@ -2210,7 +2210,7 @@ static void LineDefs_FixLackImpass(Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_Blocking) == 0)
 		{
@@ -2228,7 +2228,7 @@ static void LineDefs_FindBad2SFlag(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			lines.set(n);
@@ -2257,7 +2257,7 @@ static void LineDefs_FixBad2SFlag(Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->OneSided() && (L->flags & MLF_TwoSided))
 			op.changeLinedef(n, LineDef::F_FLAGS, L->flags & ~MLF_TwoSided);
@@ -2364,18 +2364,18 @@ static void LineDefs_ClearUnknown(Instance &inst)
 
 static int linedef_pos_cmp(int A, int B, const Document &doc)
 {
-	const LineDef *AL = doc.linedefs[A];
-	const LineDef *BL = doc.linedefs[B];
+	const auto &AL = doc.linedefs[A];
+	const auto &BL = doc.linedefs[B];
 
-	int A_x1 = static_cast<int>(AL->Start(doc)->x());
-	int A_y1 = static_cast<int>(AL->Start(doc)->y());
-	int A_x2 = static_cast<int>(AL->End(doc)->x());
-	int A_y2 = static_cast<int>(AL->End(doc)->y());
+	int A_x1 = static_cast<int>(doc.getStart(*AL).x());
+	int A_y1 = static_cast<int>(doc.getStart(*AL).y());
+	int A_x2 = static_cast<int>(doc.getEnd(*AL).x());
+	int A_y2 = static_cast<int>(doc.getEnd(*AL).y());
 
-	int B_x1 = static_cast<int>(BL->Start(doc)->x());
-	int B_y1 = static_cast<int>(BL->Start(doc)->y());
-	int B_x2 = static_cast<int>(BL->End(doc)->x());
-	int B_y2 = static_cast<int>(BL->End(doc)->y());
+	int B_x1 = static_cast<int>(doc.getStart(*BL).x());
+	int B_y1 = static_cast<int>(doc.getStart(*BL).y());
+	int B_x2 = static_cast<int>(doc.getEnd(*BL).x());
+	int B_y2 = static_cast<int>(doc.getEnd(*BL).y());
 
 	if (A_x1 > A_x2 || (A_x1 == A_x2 && A_y1 > A_y2))
 	{
@@ -2419,11 +2419,11 @@ struct linedef_minx_CMP_pred
 
 	inline bool operator() (int A, int B) const
 	{
-		const LineDef *AL = doc.linedefs[A];
-		const LineDef *BL = doc.linedefs[B];
+		const auto &AL = doc.linedefs[A];
+		const auto &BL = doc.linedefs[B];
 
-		FFixedPoint A_x = std::min(AL->Start(doc)->raw_x, AL->End(doc)->raw_x);
-		FFixedPoint B_x = std::min(BL->Start(doc)->raw_x, BL->End(doc)->raw_x);
+		FFixedPoint A_x = std::min(doc.getStart(*AL).raw_x, doc.getEnd(*AL).raw_x);
+		FFixedPoint B_x = std::min(doc.getStart(*BL).raw_x, doc.getEnd(*BL).raw_x);
 
 		return A_x < B_x;
 	}
@@ -2456,7 +2456,7 @@ static void LineDefs_FindOverlaps(selection_c& lines, const Document &doc)
 		int ld2 = sorted_list[n + 1];
 
 		// ignore zero-length lines
-		if (doc.linedefs[ld2]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[ld2]))
 			continue;
 
 		// only the second (or third, etc) linedef is stored
@@ -2507,11 +2507,11 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 
 	SYS_ASSERT(A != B);
 
-	const LineDef *AL = doc.linedefs[A];
-	const LineDef *BL = doc.linedefs[B];
+	const auto &AL = doc.linedefs[A];
+	const auto &BL = doc.linedefs[B];
 
 	// ignore zero-length lines
-	if (AL->IsZeroLength(doc) || BL->IsZeroLength(doc))
+	if (doc.isZeroLength(*AL) || doc.isZeroLength(*BL))
 		return 0;
 
 	// ignore directly overlapping here
@@ -2524,14 +2524,14 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 	// the algorithm in LineDefs_FindCrossings() ensures that A and B
 	// already overlap on the X axis.  hence only check Y axis here.
 
-	if (std::min(AL->Start(doc)->raw_y, AL->End(doc)->raw_y) >
-		std::max(BL->Start(doc)->raw_y, BL->End(doc)->raw_y))
+	if (std::min(doc.getStart(*AL).raw_y, doc.getEnd(*AL).raw_y) >
+		std::max(doc.getStart(*BL).raw_y, doc.getEnd(*BL).raw_y))
 	{
 		return 0;
 	}
 
-	if (std::min(BL->Start(doc)->raw_y, BL->End(doc)->raw_y) >
-		std::max(AL->Start(doc)->raw_y, AL->End(doc)->raw_y))
+	if (std::min(doc.getStart(*BL).raw_y, doc.getEnd(*BL).raw_y) >
+		std::max(doc.getStart(*AL).raw_y, doc.getEnd(*AL).raw_y))
 	{
 		return 0;
 	}
@@ -2539,11 +2539,11 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 
 	// precise (but slower) intersection test
 
-	v2double_t av1 = AL->Start(doc)->xy();
-	v2double_t av2 = AL->End(doc)->xy();
+	v2double_t av1 = doc.getStart(*AL).xy();
+	v2double_t av2 = doc.getEnd(*AL).xy();
 
-	v2double_t bv1 = BL->Start(doc)->xy();
-	v2double_t bv2 = BL->End(doc)->xy();
+	v2double_t bv1 = doc.getStart(*BL).xy();
+	v2double_t bv2 = doc.getEnd(*BL).xy();
 
 	double c = PerpDist(bv1,  av1, av2);
 	double d = PerpDist(bv2,  av1, av2);
@@ -2579,7 +2579,7 @@ static int CheckLinesCross(int A, int B, const Document &doc)
 		(e_side == 0 && f_side == 0))
 	{
 		// choose longest line as the measuring stick
-		if (AL->CalcLength(doc) < BL->CalcLength(doc))
+		if (doc.calcLength(*AL) < doc.calcLength(*BL))
 		{
 			std::swap(av1, bv1);
 			std::swap(av2, bv2);
@@ -2636,17 +2636,17 @@ static void LineDefs_FindCrossings(selection_c& lines, const Document &doc)
 	{
 		int n2 = sorted_list[n];
 
-		const LineDef *L1 = doc.linedefs[n2];
+		const auto &L1 = doc.linedefs[n2];
 
-		FFixedPoint max_x = std::max(L1->Start(doc)->raw_x, L1->End(doc)->raw_x);
+		FFixedPoint max_x = std::max(doc.getStart(*L1).raw_x, doc.getEnd(*L1).raw_x);
 
 		for (int k = n + 1 ; k < doc.numLinedefs(); k++)
 		{
 			int k2 = sorted_list[k];
 
-			const LineDef *L2 = doc.linedefs[k2];
+			const auto &L2 = doc.linedefs[k2];
 
-			FFixedPoint min_x = std::min(L2->Start(doc)->raw_x, L2->End(doc)->raw_x);
+			FFixedPoint min_x = std::min(doc.getStart(*L2).raw_x, doc.getEnd(*L2).raw_x);
 
 			// stop when all remaining linedefs are to the right of L1
 			if (min_x > max_x)
@@ -3081,7 +3081,7 @@ void Instance::CMD_ApplyTag()
 
 static bool LD_tag_exists(int tag, const Document &doc)
 {
-	for (const LineDef *linedef : doc.linedefs)
+	for (const auto &linedef : doc.linedefs)
 		if (linedef->tag == tag)
 			return true;
 
@@ -3091,7 +3091,7 @@ static bool LD_tag_exists(int tag, const Document &doc)
 
 static bool SEC_tag_exists(int tag, const Document &doc)
 {
-	for (const Sector *sector : doc.sectors)
+	for (const auto &sector : doc.sectors)
 		if (sector->tag == tag)
 			return true;
 
@@ -3127,7 +3127,7 @@ static void Tags_FindUnmatchedLineDefs(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		if (L->tag <= 0)
 			continue;
@@ -3171,7 +3171,7 @@ static void Tags_FindMissingTags(selection_c& lines, const Instance &inst)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->type <= 0)
 			continue;
@@ -3236,7 +3236,7 @@ static bool SEC_check_beast_mark(int tag, const Instance &inst)
 			return true;
 		}
 
-		for (const Thing *thing : inst.level.things)
+		for (const auto &thing : inst.level.things)
 		{
 			const thingtype_t &info = inst.conf.getThingType(thing->type);
 
@@ -3460,35 +3460,35 @@ static void Textures_FindMissing(const Instance &inst, selection_c& lines)
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right(inst.level)->MidTex()))
+			if (is_null_tex(inst.level.getRight(*L)->MidTex()))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(inst.level)->SecRef(inst.level);
-			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
+			const Sector &front = inst.level.getSector(*inst.level.getRight(*L));
+			const Sector &back  = inst.level.getSector(*inst.level.getLeft(*L));
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
+			if (front.floorh < back.floorh && is_null_tex(inst.level.getRight(*L)->LowerTex()))
 				lines.set(n);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+			if (back.floorh < front.floorh && is_null_tex(inst.level.getLeft(*L)->LowerTex()))
 				lines.set(n);
 
 			// missing uppers are OK when between two sky ceilings
-			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+			if (inst.is_sky(front.CeilTex()) && inst.is_sky(back.CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
+			if (front.ceilh > back.ceilh && is_null_tex(inst.level.getRight(*L)->UpperTex()))
 				lines.set(n);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+			if (back.ceilh > front.ceilh && is_null_tex(inst.level.getLeft(*L)->UpperTex()))
 				lines.set(n);
 		}
 	}
@@ -3513,35 +3513,35 @@ static void Textures_FixMissing(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed missing textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_null_tex(L->Right(inst.level)->MidTex()))
+			if (is_null_tex(inst.level.getRight(*L)->MidTex()))
 				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			const Sector *front = L->Right(inst.level)->SecRef(inst.level);
-			const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
+			const Sector &front = inst.level.getSector(*inst.level.getRight(*L));
+			const Sector &back  = inst.level.getSector(*inst.level.getLeft(*L));
 
-			if (front->floorh < back->floorh && is_null_tex(L->Right(inst.level)->LowerTex()))
+			if (front.floorh < back.floorh && is_null_tex(inst.level.getRight(*L)->LowerTex()))
 				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (back->floorh < front->floorh && is_null_tex(L->Left(inst.level)->LowerTex()))
+			if (back.floorh < front.floorh && is_null_tex(inst.level.getLeft(*L)->LowerTex()))
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
 			// missing uppers are OK when between two sky ceilings
-			if (inst.is_sky(front->CeilTex()) && inst.is_sky(back->CeilTex()))
+			if (inst.is_sky(front.CeilTex()) && inst.is_sky(back.CeilTex()))
 				continue;
 
-			if (front->ceilh > back->ceilh && is_null_tex(L->Right(inst.level)->UpperTex()))
+			if (front.ceilh > back.ceilh && is_null_tex(inst.level.getRight(*L)->UpperTex()))
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 
-			if (back->ceilh > front->ceilh && is_null_tex(L->Left(inst.level)->UpperTex()))
+			if (back.ceilh > front.ceilh && is_null_tex(inst.level.getLeft(*L)->UpperTex()))
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -3587,23 +3587,23 @@ static void Textures_FindTransparent(Instance &inst, selection_c& lines,
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (check_transparent(inst, L->Right(inst.level)->MidTex(), names))
+			if (check_transparent(inst, inst.level.getRight(*L)->MidTex(), names))
 				lines.set(n);
 		}
 		else  // Two Sided
 		{
 			// note : plain OR operator here to check all parts (do NOT want short-circuit)
-			if (check_transparent(inst, L->Right(inst.level)->LowerTex(), names) |
-				check_transparent(inst, L->Right(inst.level)->UpperTex(), names) |
-				check_transparent(inst, L-> Left(inst.level)->LowerTex(), names) |
-				check_transparent(inst, L-> Left(inst.level)->UpperTex(), names))
+			if (check_transparent(inst, inst.level.getRight(*L)->LowerTex(), names) |
+				check_transparent(inst, inst.level.getRight(*L)->UpperTex(), names) |
+				check_transparent(inst, inst.level.getLeft(*L)->LowerTex(), names) |
+				check_transparent(inst, inst.level.getLeft(*L)->UpperTex(), names))
 			{
 				lines.set(n);
 			}
@@ -3647,28 +3647,28 @@ static void Textures_FixTransparent(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed transparent textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (L->right < 0)
 			continue;
 
 		if (L->OneSided())
 		{
-			if (is_transparent(inst, L->Right(inst.level)->MidTex()))
+			if (is_transparent(inst, inst.level.getRight(*L)->MidTex()))
 				op.changeSidedef(L->right, SideDef::F_MID_TEX, new_wall);
 		}
 		else  // Two Sided
 		{
-			if (is_transparent(inst, L->Left(inst.level)->LowerTex()))
+			if (is_transparent(inst, inst.level.getLeft(*L)->LowerTex()))
 				op.changeSidedef(L->left, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(inst, L->Left(inst.level)->UpperTex()))
+			if (is_transparent(inst, inst.level.getLeft(*L)->UpperTex()))
 				op.changeSidedef(L->left, SideDef::F_UPPER_TEX, new_wall);
 
-			if (is_transparent(inst, L->Right(inst.level)->LowerTex()))
+			if (is_transparent(inst, inst.level.getRight(*L)->LowerTex()))
 				op.changeSidedef(L->right, SideDef::F_LOWER_TEX, new_wall);
 
-			if (is_transparent(inst, L->Right(inst.level)->UpperTex()))
+			if (is_transparent(inst, inst.level.getRight(*L)->UpperTex()))
 				op.changeSidedef(L->right, SideDef::F_UPPER_TEX, new_wall);
 		}
 	}
@@ -3720,13 +3720,13 @@ static void Textures_FindMedusa(selection_c& lines,
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(inst.wad, L->Right(inst.level)->MidTex(), names) |  /* plain OR */
-			check_medusa(inst.wad, L-> Left(inst.level)->MidTex(), names))
+		if (check_medusa(inst.wad, inst.level.getRight(*L)->MidTex(), names) |  /* plain OR */
+			check_medusa(inst.wad, inst.level.getLeft(*L)->MidTex(), names))
 		{
 			lines.set(n);
 		}
@@ -3756,17 +3756,17 @@ static void Textures_RemoveMedusa(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed medusa textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		if (check_medusa(inst.wad, L->Right(inst.level)->MidTex(), names))
+		if (check_medusa(inst.wad, inst.level.getRight(*L)->MidTex(), names))
 		{
 			op.changeSidedef(L->right, SideDef::F_MID_TEX, null_tex);
 		}
 
-		if (check_medusa(inst.wad, L-> Left(inst.level)->MidTex(), names))
+		if (check_medusa(inst.wad, inst.level.getLeft(*L)->MidTex(), names))
 		{
 			op.changeSidedef(L->left, SideDef::F_MID_TEX, null_tex);
 		}
@@ -3805,11 +3805,11 @@ static void Textures_FindUnknownTex(selection_c& lines,
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const LineDef *L = inst.level.linedefs[n];
+		const auto &L = inst.level.linedefs[n];
 
 		for (int side = 0 ; side < 2 ; side++)
 		{
-			const SideDef *SD = side ? L->Left(inst.level) : L->Right(inst.level);
+			const SideDef *SD = side ? inst.level.getLeft(*L) : inst.level.getRight(*L);
 
 			if (! SD)
 				continue;
@@ -3840,7 +3840,7 @@ static void Textures_FindUnknownFlat(selection_c& secs,
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		const Sector *S = inst.level.sectors[s];
+		const auto &S = inst.level.sectors[s];
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
@@ -3917,7 +3917,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed unknown textures");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		bool two_sided = L->TwoSided();
 
@@ -3928,7 +3928,7 @@ static void Textures_FixUnknownTex(Instance &inst)
 			if (sd_num < 0)
 				continue;
 
-			const SideDef *SD = inst.level.sidedefs[sd_num];
+			const auto &SD = inst.level.sidedefs[sd_num];
 
 			if (! inst.wad.images.W_TextureIsKnown(inst.conf, SD->LowerTex()))
 				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
@@ -3953,7 +3953,7 @@ static void Textures_FixUnknownFlat(Instance &inst)
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		const Sector *S = inst.level.sectors[s];
+		const auto &S = inst.level.sectors[s];
 
 		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S->FloorTex()))
 			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
@@ -3981,7 +3981,7 @@ static void Textures_FindDupSwitches(selection_c& lines, const Document &doc)
 
 	for (int n = 0 ; n < doc.numLinedefs(); n++)
 	{
-		const LineDef *L = doc.linedefs[n];
+		const auto &L = doc.linedefs[n];
 
 		// only check lines with a special
 		if (! L->type)
@@ -3993,9 +3993,9 @@ static void Textures_FindDupSwitches(selection_c& lines, const Document &doc)
 		// switch textures only work on the front side
 		// (no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right(doc)->LowerTex());
-		bool upper = is_switch_tex(L->Right(doc)->UpperTex());
-		bool mid   = is_switch_tex(L->Right(doc)->MidTex());
+		bool lower = is_switch_tex(doc.getRight(*L)->LowerTex());
+		bool upper = is_switch_tex(doc.getRight(*L)->UpperTex());
+		bool mid   = is_switch_tex(doc.getRight(*L)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -4040,7 +4040,7 @@ static void Textures_FixDupSwitches(Instance &inst)
 	EditOperation op(inst.level.basis);
 	op.setMessage("fixed non-animating switches");
 
-	for (const LineDef *L : inst.level.linedefs)
+	for (const auto &L : inst.level.linedefs)
 	{
 		// only check lines with a special
 		if (! L->type)
@@ -4052,9 +4052,9 @@ static void Textures_FixDupSwitches(Instance &inst)
 		// switch textures only work on the front side
 		// (hence no need to look at the back side)
 
-		bool lower = is_switch_tex(L->Right(inst.level)->LowerTex());
-		bool upper = is_switch_tex(L->Right(inst.level)->UpperTex());
-		bool mid   = is_switch_tex(L->Right(inst.level)->MidTex());
+		bool lower = is_switch_tex(inst.level.getRight(*L)->LowerTex());
+		bool upper = is_switch_tex(inst.level.getRight(*L)->UpperTex());
+		bool mid   = is_switch_tex(inst.level.getRight(*L)->MidTex());
 
 		int count = (lower ? 1:0) + (upper ? 1:0) + (mid ? 1:0);
 
@@ -4069,11 +4069,11 @@ static void Textures_FixDupSwitches(Instance &inst)
 			continue;
 		}
 
-		const Sector *front = L->Right(inst.level)->SecRef(inst.level);
-		const Sector *back  = L->Left(inst.level) ->SecRef(inst.level);
+		const Sector &front = inst.level.getSector(*inst.level.getRight(*L));
+		const Sector &back  = inst.level.getSector(*inst.level.getLeft(*L));
 
-		bool lower_vis = (front->floorh < back->floorh);
-		bool upper_vis = (front->ceilh > back->ceilh);
+		bool lower_vis = (front.floorh < back.floorh);
+		bool upper_vis = (front.ceilh > back.ceilh);
 
 		if (count >= 2 && upper && !upper_vis)
 		{

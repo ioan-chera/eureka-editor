@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------------
 //
 //  Based on Yadex which incorporated code from DEU 5.21 that was put
-//  in the public domain in 1994 by Rapha‘l Quinet and Brendon Wyber.
+//  in the public domain in 1994 by RaphaÃ«l Quinet and Brendon Wyber.
 //
 //------------------------------------------------------------------------
 
@@ -174,7 +174,7 @@ void Instance::UpdateDrawLine()
 	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const Vertex *V = level.vertices[edit.drawLine.from.num];
+	const auto &V = level.vertices[edit.drawLine.from.num];
 
 	v2double_t newpos = edit.map.xy;
 
@@ -274,8 +274,8 @@ void Instance::UpdateHighlight()
 		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const Vertex *V = level.vertices[edit.highlight.num];
-			const Vertex *S = level.vertices[edit.drawLine.from.num];
+			const auto &V = level.vertices[edit.highlight.num];
+			const auto &S = level.vertices[edit.drawLine.from.num];
 
 			v2double_t vpos = V->xy();
 
@@ -377,7 +377,7 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 {
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
-		const Vertex * V = inst.level.vertices[i];
+		const auto &V = inst.level.vertices[i];
 
 		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
 		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
@@ -443,7 +443,7 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const Vertex * V = level.vertices[objnum];
+		const auto &V = level.vertices[objnum];
 
 		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
 		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
@@ -642,7 +642,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int t = 0 ; t < doc.numThings() ; t++)
 		{
-			const Thing *T = doc.things[t];
+			const auto &T = doc.things[t];
 
 			Objid obj = hover::getNearestSector(doc, T->xy());
 
@@ -659,10 +659,10 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = doc.linedefs[l];
+			const auto &L = doc.linedefs[l];
 
-			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
-				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
+			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
+				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
 			{
 				dest.set(l);
 			}
@@ -673,10 +673,10 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::vertices)
 	{
-		for (const LineDef *L : doc.linedefs)
+		for (const auto &L : doc.linedefs)
 		{
-			if ( (L->Right(doc) && src.get(L->Right(doc)->sector)) ||
-				 (L->Left(doc)  && src.get(L->Left(doc)->sector)) )
+			if ( (doc.getRight(*L) && src.get(doc.getRight(*L)->sector)) ||
+				 (doc.getLeft(*L)  && src.get(doc.getLeft(*L)->sector)) )
 			{
 				dest.set(L->start);
 				dest.set(L->end);
@@ -690,10 +690,10 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = doc.linedefs[*it];
+			const auto &L = doc.linedefs[*it];
 
-			if (L->Right(doc)) dest.set(L->right);
-			if (L->Left(doc))  dest.set(L->left);
+			if (doc.getRight(*L)) dest.set(L->right);
+			if (doc.getLeft(*L))  dest.set(L->left);
 		}
 		return;
 	}
@@ -702,7 +702,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int n = 0 ; n < doc.numSidedefs(); n++)
 		{
-			const SideDef * SD = doc.sidedefs[n];
+			const auto &SD = doc.sidedefs[n];
 
 			if (src.get(SD->sector))
 				dest.set(n);
@@ -715,7 +715,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const LineDef *L = doc.linedefs[*it];
+			const auto &L = doc.linedefs[*it];
 
 			dest.set(L->start);
 			dest.set(L->end);
@@ -729,7 +729,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const LineDef *L = doc.linedefs[l];
+			const auto &L = doc.linedefs[l];
 
 			if (src.get(L->start) && src.get(L->end))
 			{
@@ -753,17 +753,17 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs() ; l++)
 	{
-		const LineDef *L = doc.linedefs[l];
+		const auto &L = doc.linedefs[l];
 
-		if (L->Right(doc)) dest.set(L->Right(doc)->sector);
-		if (L->Left(doc))  dest.set(L->Left(doc)->sector);
+		if (doc.getRight(*L)) dest.set(doc.getRight(*L)->sector);
+		if (doc.getLeft(*L))  dest.set(doc.getLeft(*L)->sector);
 	}
 
 	// step 2: unselect any sectors if a component is not selected
 
 	for (l = 0 ; l < doc.numLinedefs(); l++)
 	{
-		const LineDef *L = doc.linedefs[l];
+		const auto &L = doc.linedefs[l];
 
 		if (src.what_type() == ObjType::vertices)
 		{
@@ -776,8 +776,8 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 				continue;
 		}
 
-		if (L->Right(doc)) dest.clear(L->Right(doc)->sector);
-		if (L->Left(doc))  dest.clear(L->Left(doc)->sector);
+		if (doc.getRight(*L)) dest.clear(doc.getRight(*L)->sector);
+		if (doc.getLeft(*L))  dest.clear(doc.getLeft(*L)->sector);
 	}
 }
 
@@ -793,7 +793,7 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const LineDef *L = doc.linedefs[*it];
+		const auto &L = doc.linedefs[*it];
 
 		if (L->TwoSided())
 			return *it;
@@ -840,7 +840,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::things:
 			for (int n = 0 ; n < doc.numThings() ; n++)
 			{
-				const Thing *T = doc.things[n];
+				const auto &T = doc.things[n];
 
 				v2double_t tpos = T->xy();
 
@@ -852,7 +852,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::vertices:
 			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const Vertex *V = doc.vertices[n];
+				const auto &V = doc.vertices[n];
 
 				v2double_t vpos = V->xy();
 
@@ -864,11 +864,11 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::linedefs:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
 				/* the two ends of the line must be in the box */
-				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
-				   L->End(doc)->xy().inbounds(pos1, pos2))
+				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
+				   doc.getEnd(*L).xy().inbounds(pos1, pos2))
 				{
 					list->toggle(n);
 				}
@@ -882,14 +882,14 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const LineDef *L = doc.linedefs[n];
+				const auto &L = doc.linedefs[n];
 
 				// Get the numbers of the sectors on both sides of the linedef
-				int s1 = L->Right(doc) ? L->Right(doc)->sector : -1;
-				int s2 = L->Left(doc) ? L->Left(doc) ->sector : -1;
+				int s1 = doc.getRight(*L) ? doc.getRight(*L)->sector : -1;
+				int s2 = doc.getLeft(*L) ? doc.getLeft(*L) ->sector : -1;
 
-				if(L->Start(doc)->xy().inbounds(pos1, pos2) &&
-				   L->End(doc)->xy().inbounds(pos1, pos2))
+				if(doc.getStart(*L).xy().inbounds(pos1, pos2) &&
+				   doc.getEnd(*L).xy().inbounds(pos1, pos2))
 				{
 					if (s1 >= 0) in_sectors.set(s1);
 					if (s2 >= 0) in_sectors.set(s2);

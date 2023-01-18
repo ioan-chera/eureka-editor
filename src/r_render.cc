@@ -5,7 +5,7 @@
 //  Eureka DOOM Editor
 //
 //  Copyright (C) 2001-2019 Andrew Apted
-//  Copyright (C) 1997-2003 AndrŽ Majorel et al
+//  Copyright (C) 1997-2003 AndrÃ© Majorel et al
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -194,15 +194,15 @@ void Render_View_t::PrepareToRender(int ow, int oh)
 }
 
 
-static Thing *FindPlayer(const Document &doc, int typenum)
+static const Thing *FindPlayer(const Document &doc, int typenum)
 {
 	// need to search backwards (to handle Voodoo dolls properly)
 
 	for ( int i = doc.numThings()-1 ; i >= 0 ; i--)
 		if (doc.things[i]->type == typenum)
-			return doc.things[i];
+			return doc.things[i].get();
 
-	return NULL;  // not found
+	return nullptr;  // not found
 }
 
 
@@ -353,19 +353,19 @@ private:
 		switch (type)
 		{
 			case ObjType::things:
-				return reinterpret_cast<int*>(inst.level.things[objnum]);
+				return reinterpret_cast<int*>(inst.level.things[objnum].get());
 
 			case ObjType::vertices:
-				return reinterpret_cast<int *>(inst.level.vertices[objnum]);
+				return reinterpret_cast<int *>(inst.level.vertices[objnum].get());
 
 			case ObjType::sectors:
-				return reinterpret_cast<int *>(inst.level.sectors[objnum]);
+				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());
 
 			case ObjType::sidedefs:
-				return reinterpret_cast<int *>(inst.level.sidedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
 
 			case ObjType::linedefs:
-				return reinterpret_cast<int *>(inst.level.linedefs[objnum]);
+				return reinterpret_cast<int *>(inst.level.linedefs[objnum].get());
 
 			default:
 				BugError("SaveBucket with bad mode\n");
@@ -389,12 +389,12 @@ private:
 
 static void AdjustOfs_UpdateBBox(Instance &inst, int ld_num)
 {
-	const LineDef *L = inst.level.linedefs[ld_num];
+	const auto &L = inst.level.linedefs[ld_num];
 
-	float lx1 = static_cast<float>(L->Start(inst.level)->x());
-	float ly1 = static_cast<float>(L->Start(inst.level)->y());
-	float lx2 = static_cast<float>(L->End(inst.level)->x());
-	float ly2 = static_cast<float>(L->End(inst.level)->y());
+	float lx1 = static_cast<float>(inst.level.getStart(*L).x());
+	float ly1 = static_cast<float>(inst.level.getStart(*L).y());
+	float lx2 = static_cast<float>(inst.level.getEnd(*L).x());
+	float ly2 = static_cast<float>(inst.level.getEnd(*L).y());
 
 	if (lx1 > lx2) std::swap(lx1, lx2);
 	if (ly1 > ly2) std::swap(ly1, ly2);
@@ -432,7 +432,7 @@ static void AdjustOfs_Add(Instance &inst, int ld_num, int part)
 	if (! inst.edit.adjust_bucket)
 		return;
 
-	const LineDef *L = inst.level.linedefs[ld_num];
+	const auto &L = inst.level.linedefs[ld_num];
 
 	// ignore invalid sides (sanity check)
 	int sd_num = (part & PART_LF_ALL) ? L->left : L->right;
@@ -658,7 +658,7 @@ void Instance::Render3D_Setup()
 		r_view.px = 99999;
 	}
 
-	Thing *player = FindPlayer(level, r_view.p_type);
+	const Thing *player = FindPlayer(level, r_view.p_type);
 
 	if (! player)
 	{
@@ -899,7 +899,7 @@ static void DragThings_Update(Instance &inst)
 	}
 #endif
 
-	const Thing *T = inst.level.things[inst.edit.drag_thing_num];
+	const auto &T = inst.level.things[inst.edit.drag_thing_num];
 
 	float old_x = static_cast<float>(T->x());
 	float old_y = static_cast<float>(T->y());
@@ -922,7 +922,7 @@ static void DragThings_Update(Instance &inst)
 	Objid old_sec = hover::getNearestSector(inst.level, { old_x, old_y });
 
 	Objid new_sec = hover::getNearestSector(inst.level, { new_x, new_y });
-	
+
 	if (old_sec.valid() && new_sec.valid())
 	{
 		float old_z = static_cast<float>(inst.level.sectors[old_sec.num]->floorh);
@@ -1091,7 +1091,7 @@ void Instance::Render3D_Navigate()
 
 // returns -1 if nothing in selection or highlight, -2 if multiple
 // things are selected and they have different types.
-int Instance::GrabSelectedThing() 
+int Instance::GrabSelectedThing()
 {
 	int result = -1;
 
@@ -1109,7 +1109,7 @@ int Instance::GrabSelectedThing()
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Thing *T = level.things[*it];
+			const auto &T = level.things[*it];
 			if (result >= 0 && T->type != result)
 			{
 				Beep("multiple thing types");
@@ -1181,18 +1181,18 @@ StringID Instance::GrabSelectedFlat()
 			return StringID(-1);
 		}
 
-		const Sector *S = level.sectors[edit.highlight.num];
+		const auto &S = level.sectors[edit.highlight.num];
 
-		result = SEC_GrabFlat(S, edit.highlight.parts);
+		result = SEC_GrabFlat(S.get(), edit.highlight.parts);
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const Sector *S = level.sectors[*it];
+			const auto &S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = SEC_GrabFlat(S, parts & ~1);
+			StringID tex = SEC_GrabFlat(S.get(), parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{
@@ -1284,32 +1284,32 @@ StringID Instance::LD_GrabTex(const LineDef *L, int part) const
 		return BA_InternaliseString(conf.default_wall_tex);
 
 	if (L->OneSided())
-		return L->Right(level)->mid_tex;
+		return level.getRight(*L)->mid_tex;
 
-	if (part & PART_RT_LOWER) return L->Right(level)->lower_tex;
-	if (part & PART_RT_UPPER) return L->Right(level)->upper_tex;
+	if (part & PART_RT_LOWER) return level.getRight(*L)->lower_tex;
+	if (part & PART_RT_UPPER) return level.getRight(*L)->upper_tex;
 
-	if (part & PART_LF_LOWER) return L->Left(level)->lower_tex;
-	if (part & PART_LF_UPPER) return L->Left(level)->upper_tex;
+	if (part & PART_LF_LOWER) return level.getLeft(*L)->lower_tex;
+	if (part & PART_LF_UPPER) return level.getLeft(*L)->upper_tex;
 
-	if (part & PART_RT_RAIL)  return L->Right(level)->mid_tex;
-	if (part & PART_LF_RAIL)  return L->Left(level) ->mid_tex;
+	if (part & PART_RT_RAIL)  return level.getRight(*L)->mid_tex;
+	if (part & PART_LF_RAIL)  return level.getLeft(*L) ->mid_tex;
 
 	// pick something reasonable for a simply selected line
-	if (L->Left(level)->SecRef(level)->floorh > L->Right(level)->SecRef(level)->floorh)
-		return L->Right(level)->lower_tex;
+	if (level.getSector(*level.getLeft(*L)).floorh > level.getSector(*level.getRight(*L)).floorh)
+		return level.getRight(*L)->lower_tex;
 
-	if (L->Left(level)->SecRef(level)->ceilh < L->Right(level)->SecRef(level)->ceilh)
-		return L->Right(level)->upper_tex;
+	if (level.getSector(*level.getLeft(*L)).ceilh < level.getSector(*level.getRight(*L)).ceilh)
+		return level.getRight(*L)->upper_tex;
 
-	if (L->Left(level)->SecRef(level)->floorh < L->Right(level)->SecRef(level)->floorh)
-		return L->Left(level)->lower_tex;
+	if (level.getSector(*level.getLeft(*L)).floorh < level.getSector(*level.getRight(*L)).floorh)
+		return level.getLeft(*L)->lower_tex;
 
-	if (L->Left(level)->SecRef(level)->ceilh > L->Right(level)->SecRef(level)->ceilh)
-		return L->Left(level)->upper_tex;
+	if (level.getSector(*level.getLeft(*L)).ceilh > level.getSector(*level.getRight(*L)).ceilh)
+		return level.getLeft(*L)->upper_tex;
 
 	// emergency fallback
-	return L->Right(level)->lower_tex;
+	return level.getRight(*L)->lower_tex;
 }
 
 
@@ -1327,18 +1327,18 @@ StringID Instance::GrabSelectedTexture()
 			return StringID(-1);
 		}
 
-		const LineDef *L = level.linedefs[edit.highlight.num];
+		const auto &L = level.linedefs[edit.highlight.num];
 
-		result = LD_GrabTex(L, edit.highlight.parts);
+		result = LD_GrabTex(L.get(), edit.highlight.parts);
 	}
 	else
 	{
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = level.linedefs[*it];
+			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = LD_GrabTex(L, parts & ~1);
+			StringID tex = LD_GrabTex(L.get(), parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{
@@ -1372,7 +1372,7 @@ void Instance::StoreSelectedTexture(StringID new_tex)
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 		{
-			const LineDef *L = level.linedefs[*it];
+			const auto &L = level.linedefs[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
 			if (L->NoSided())

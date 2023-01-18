@@ -2,7 +2,7 @@
 //
 //  Eureka DOOM Editor
 //
-//  Copyright (C) 2022 Ioan Chera
+//  Copyright (C) 2023 Ioan Chera
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,21 +16,14 @@
 //
 //------------------------------------------------------------------------
 
-#include "LineDef.h"
+#include "Vertex.h"
 
-#include "Errors.h"
-
-int LineDef::WhatSideDef(Side side) const
+// these handle rounding to integer in non-UDMF mode
+void Vertex::SetRawX(MapFormat format, double x)
 {
-	switch (side)
-	{
-		case Side::left:
-			return left;
-		case Side::right:
-			return right;
-
-		default:
-			BugError("bad side : %d\n", (int)side);
-			return -1;
-	}
+    raw_x = MakeValidCoord(format, x);
+}
+void Vertex::SetRawY(MapFormat format, double y)
+{
+    raw_y = MakeValidCoord(format, y);
 }

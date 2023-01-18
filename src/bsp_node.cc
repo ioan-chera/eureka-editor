@@ -812,7 +812,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? doc.linedefs[seg->linedef]->IsSelfRef(doc) : false;
+	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(*doc.linedefs[seg->linedef]) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1154,21 +1154,21 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const LineDef *part_L = inst.level.linedefs[part->linedef];
+	const auto &part_L = inst.level.linedefs[part->linedef];
 
 	if (part->side == 0)  /* right side */
 	{
-		x  = part_L->Start(inst.level)->x();
-		y  = part_L->Start(inst.level)->y();
-		dx = part_L->End(inst.level)->x() - x;
-		dy = part_L->End(inst.level)->y() - y;
+		x  = inst.level.getStart(*part_L).x();
+		y  = inst.level.getStart(*part_L).y();
+		dx = inst.level.getEnd(*part_L).x() - x;
+		dy = inst.level.getEnd(*part_L).y() - y;
 	}
 	else  /* left side */
 	{
-		x  = part_L->End(inst.level)->x();
-		y  = part_L->End(inst.level)->y();
-		dx = part_L->Start(inst.level)->x() - x;
-		dy = part_L->Start(inst.level)->y() - y;
+		x  = inst.level.getEnd(*part_L).x();
+		y  = inst.level.getEnd(*part_L).y();
+		dx = inst.level.getStart(*part_L).x() - x;
+		dy = inst.level.getStart(*part_L).y() - y;
 	}
 
 	/* check for very long partition (overflow of dx,dy in NODES) */
@@ -1321,9 +1321,9 @@ void quadtree_c::ConvertToList(seg_t **_list)
 static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 		int sidedef, int what_side /* 0 or 1 */, const Instance &inst)
 {
-	SideDef *sd = NULL;
+	const SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = inst.level.sidedefs[sidedef];
+		sd = inst.level.sidedefs[sidedef].get();
 
 	// check for bad sidedef
 	if (sd && !inst.level.isSector(sd->sector))
@@ -1362,13 +1362,13 @@ seg_t *CreateSegs(const Instance &inst)
 
 	for (int i=0 ; i < inst.level.numLinedefs() ; i++)
 	{
-		const LineDef *line = inst.level.linedefs[i];
+		const auto &line = inst.level.linedefs[i];
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
 
 		// ignore zero-length lines
-		if (line->IsZeroLength(inst.level))
+		if (inst.level.isZeroLength(*line))
 			continue;
 
 		// ignore overlapping lines
@@ -1376,7 +1376,7 @@ seg_t *CreateSegs(const Instance &inst)
 			continue;
 
 		// check for extremely long lines
-		if (line->CalcLength(inst.level) >= 30000)
+		if (inst.level.calcLength(*line) >= 30000)
 			Warning(inst, "Linedef #%d is VERY long, it may cause problems\n", i);
 
 		if (line->right >= 0)
@@ -1526,7 +1526,7 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (doc.linedefs[array[i]->linedef]->IsSelfRef(doc))
+		else if (doc.isSelfRef(*doc.linedefs[array[i]->linedef]))
 			cur_score = 2;
 
 		if (cur_score > best_score)

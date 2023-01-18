@@ -26,6 +26,9 @@
 #include "e_objects.h"
 #include "e_sector.h"
 #include "e_vertex.h"
+#include "LineDef.h"
+#include "Vertex.h"
+#include <memory>
 
 class crc32_c;
 class Instance;
@@ -39,11 +42,11 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
-	std::vector<Thing *> things;
-	std::vector<Vertex *> vertices;
-	std::vector<Sector *> sectors;
-	std::vector<SideDef *> sidedefs;
-	std::vector<LineDef *> linedefs;
+	std::vector<std::unique_ptr<Thing>> things;
+	std::vector<std::unique_ptr<Vertex>> vertices;
+	std::vector<std::unique_ptr<Sector>> sectors;
+	std::vector<std::unique_ptr<SideDef>> sidedefs;
+	std::vector<std::unique_ptr<LineDef>> linedefs;
 
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;
@@ -109,6 +112,27 @@ public:
 	int numObjects(ObjType type) const;
 	void getLevelChecksum(crc32_c &crc) const;
 
+	const Sector &getSector(const SideDef &side) const;
+	int getSectorID(const LineDef &line, Side side) const;
+	const Vertex &getStart(const LineDef &line) const;
+	const Vertex &getEnd(const LineDef &line) const;
+	const SideDef *getRight(const LineDef &line) const;
+	SideDef *getRight(const LineDef &line)
+	{
+		return const_cast<SideDef *>(static_cast<const Document *>(this)->getRight(line));
+	}
+	const SideDef *getLeft(const LineDef &line) const;
+	SideDef *getLeft(const LineDef &line)
+	{
+		return const_cast<SideDef *>(static_cast<const Document *>(this)->getLeft(line));
+	}
+	double calcLength(const LineDef &line) const;
+	bool touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty) const;
+	bool touchesSector(const LineDef &line, int secNum) const;
+	bool isZeroLength(const LineDef &line) const;
+	bool isSelfRef(const LineDef &line) const;
+	bool isHorizontal(const LineDef &line) const;
+	bool isVertical(const LineDef &line) const;
 private:
 	friend class DocumentModule;
 };

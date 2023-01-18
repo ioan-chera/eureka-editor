@@ -23,7 +23,6 @@
 #include "LineDef.h"
 #include "main.h"
 #include "bsp.h"
-#include "SideDef.h"
 #include "Vertex.h"
 
 #include "w_rawdef.h"
@@ -186,12 +185,12 @@ static void BlockAdd(int blk_num, int line_index)
 
 static void BlockAddLine(int line_index, const Document &doc)
 {
-	const LineDef *L = doc.linedefs[line_index];
+	const auto &L = doc.linedefs[line_index];
 
-	int x1 = (int) L->Start(doc)->x();
-	int y1 = (int) L->Start(doc)->y();
-	int x2 = (int) L->End(doc)->x();
-	int y2 = (int) L->End(doc)->y();
+	int x1 = (int) doc.getStart(*L).x();
+	int y1 = (int) doc.getStart(*L).y();
+	int x2 = (int) doc.getEnd(*L).x();
+	int y2 = (int) doc.getEnd(*L).y();
 
 	int bx1 = (std::min(x1,x2) - block_x) / 128;
 	int by1 = (std::min(y1,y2) - block_y) / 128;
@@ -263,7 +262,7 @@ static void CreateBlockmap(const Document &doc)
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
 		// ignore zero-length lines
-		if (doc.linedefs[i]->IsZeroLength(doc))
+		if (doc.isZeroLength(*doc.linedefs[i]))
 			continue;
 
 		BlockAddLine(i, doc);
@@ -470,14 +469,14 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const LineDef *L = doc.linedefs[i];
+		const auto &L = doc.linedefs[i];
 
-		if (! L->IsZeroLength(doc))
+		if (!doc.isZeroLength(*L))
 		{
-			double x1 = L->Start(doc)->x();
-			double y1 = L->Start(doc)->y();
-			double x2 = L->End(doc)->x();
-			double y2 = L->End(doc)->y();
+			double x1 = doc.getStart(*L).x();
+			double y1 = doc.getStart(*L).y();
+			double x2 = doc.getEnd(*L).x();
+			double y2 = doc.getEnd(*L).y();
 
 			int lx = (int)floor(std::min(x1, x2));
 			int ly = (int)floor(std::min(y1, y2));
@@ -621,13 +620,13 @@ static void Reject_Free()
 //
 static void Reject_GroupSectors(const Document &doc)
 {
-	for(const LineDef *L : doc.linedefs)
+	for(const auto &L : doc.linedefs)
 	{
 		if (L->right < 0 || L->left < 0)
 			continue;
 
-		int sec1 = L->Right(doc)->sector;
-		int sec2 = L->Left(doc) ->sector;
+		int sec1 = doc.getRight(*L)->sector;
+		int sec2 = doc.getLeft(*L) ->sector;
 
 		if (sec1 < 0 || sec2 < 0 || sec1 == sec2)
 			continue;
@@ -885,10 +884,10 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 
 static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
-	const LineDef *L = doc.linedefs[seg->linedef];
+	const auto &L = doc.linedefs[seg->linedef];
 
-	double lx = seg->side ? L->End(doc)->x() : L->Start(doc)->x();
-	double ly = seg->side ? L->End(doc)->y() : L->Start(doc)->y();
+	double lx = seg->side ? doc.getEnd(*L).x() : doc.getStart(*L).x();
+	double ly = seg->side ? doc.getEnd(*L).y() : doc.getStart(*L).y();
 
 	// use the "true" starting coord (as stored in the wad)
 	double sx = round(seg->start->x);
@@ -1729,7 +1728,7 @@ static void LoadLevel(const Instance &inst)
 
 	GetVertices(inst.level);
 
-	for(LineDef *L : inst.level.linedefs)
+	for(auto &L : inst.level.linedefs)
 	{
 		if (L->right >= 0 || L->left >= 0)
 			num_real_lines++;
@@ -2222,7 +2221,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, const Insta
 	FreeQuickAllocCuts();
 
 	// clear some fake line flags
-	for(LineDef *linedef : inst.level.linedefs)
+	for(auto &linedef : inst.level.linedefs)
 		linedef->flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
