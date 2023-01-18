@@ -63,7 +63,7 @@ TEST(Commands, SelectNeighborLinesByTexture)
     {
         Vertex *vertex = new Vertex;
         vertex->SetRawXY(MapFormat::doom, v2double_t{(double)x, (double)y});
-        doc.vertices.push_back(vertex);
+        doc.vertices.emplace_back(vertex);
     };
     auto addSector = [&doc](int floorh, int ceilh)
     {
@@ -74,7 +74,7 @@ TEST(Commands, SelectNeighborLinesByTexture)
         sector->ceil_tex = BA_InternaliseString("CEIL");
         sector->light = 160;
         sector->type = sector->tag = 0;
-        doc.sectors.push_back(sector);
+        doc.sectors.emplace_back(sector);
     };
     auto addSide = [&doc](const SString &upper, const SString &middle, const SString &lower,
                           int sector)
@@ -84,7 +84,7 @@ TEST(Commands, SelectNeighborLinesByTexture)
         side->mid_tex = BA_InternaliseString(middle);
         side->lower_tex = BA_InternaliseString(lower);
         side->sector = sector;
-        doc.sidedefs.push_back(side);
+        doc.sidedefs.emplace_back(side);
     };
     auto addLine = [&doc](int v1, int v2, int s1, int s2)
     {
@@ -93,7 +93,7 @@ TEST(Commands, SelectNeighborLinesByTexture)
         line->end = v2;
         line->right = s1;
         line->left = s2;
-        doc.linedefs.push_back(line);
+        doc.linedefs.emplace_back(line);
     };
 
     addVertex(0, 0);
@@ -133,13 +133,5 @@ TEST(Commands, SelectNeighborLinesByTexture)
     ASSERT_EQ(inst.edit.Selected->get_ext(2), PART_RT_LOWER | PART_RT_UPPER);
 
     // Cleanup
-    for(auto obj : doc.vertices)
-        delete obj;
-    for(auto obj : doc.sectors)
-        delete obj;
-    for(auto obj : doc.sidedefs)
-        delete obj;
-    for(auto obj : doc.linedefs)
-        delete obj;
     delete inst.edit.Selected;
 }

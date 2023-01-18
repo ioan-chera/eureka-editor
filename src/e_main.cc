@@ -959,7 +959,7 @@ void Instance::Selection_Clear(bool no_save)
 void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
 								   bool forward)
 {
-	const LineDef *line1 = level.linedefs[objnum];
+	const auto &line1 = level.linedefs[objnum];
 	bool frontside = parts < PART_LF_LOWER;
 
 	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
@@ -967,15 +967,15 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 		if (objnum == i || edit.Selected->get(i))
 			continue;
 
-		const LineDef *line2 = level.linedefs[i];
+		const auto &line2 = level.linedefs[i];
 
 		if (line1->OneSided() != line2->OneSided())
 			continue;
 
 		if ((forward && line2->start == line1->end) || (!forward && line2->end == line1->start))
 		{
-			const SideDef *side1 = frontside ? line1->Right(level) : line1->Left(level);
-			const SideDef *side2 = frontside ? line2->Right(level) : line2->Left(level);
+			const SideDef *side1 = frontside ? level.getRight(*line1) : level.getLeft(*line1);
+			const SideDef *side2 = frontside ? level.getRight(*line2) : level.getLeft(*line2);
 
 			bool match = false;
 
@@ -993,32 +993,32 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 			}
 			else
 			{
-				Sector *l1front = line1->Right(level)->SecRef(level);
-				Sector *l2front = line2->Right(level)->SecRef(level);
-				Sector *l1back = NULL, *l2back = NULL;
+				const Sector &l1front = level.getSector(*level.getRight(*line1));
+				const Sector &l2front = level.getSector(*level.getRight(*line2));
+				const Sector *l1back = NULL, *l2back = NULL;
 
 				if (!line1->OneSided())
 				{
-					l1back = line1->Left(level)->SecRef(level);
-					l2back = line2->Left(level)->SecRef(level);
+					l1back = &level.getSector(*level.getLeft(*line1));
+					l2back = &level.getSector(*level.getLeft(*line2));
 				}
 				if (line1->OneSided())
-					match = (l1front->floorh == l2front->floorh && l1front->ceilh == l2front->ceilh);
+					match = (l1front.floorh == l2front.floorh && l1front.ceilh == l2front.ceilh);
 
 				else if (parts & PART_RT_LOWER || parts & PART_LF_LOWER)
-					match = (l1front->floorh == l2front->floorh && l1back->floorh == l2back->floorh);
+					match = (l1front.floorh == l2front.floorh && l1back->floorh == l2back->floorh);
 
 				else if (parts & PART_RT_UPPER || parts & PART_LF_UPPER)
-					match = (l1front->ceilh == l2front->ceilh && l1back->ceilh == l2back->ceilh);
+					match = (l1front.ceilh == l2front.ceilh && l1back->ceilh == l2back->ceilh);
 
 				else
 				{
-					int lowestceil1 = std::min(l1front->ceilh, l1back->ceilh);
-					int highestfloor1 = std::max(l1front->floorh, l1back->floorh);
+					int lowestceil1 = std::min(l1front.ceilh, l1back->ceilh);
+					int highestfloor1 = std::max(l1front.floorh, l1back->floorh);
 					int midheight1 = lowestceil1 - highestfloor1;
 
-					int lowestceil2 = std::min(l2front->ceilh, l2back->ceilh);
-					int highestfloor2 = std::max(l2front->floorh, l2back->floorh);
+					int lowestceil2 = std::min(l2front.ceilh, l2back->ceilh);
+					int highestfloor2 = std::max(l2front.floorh, l2back->floorh);
 					int midheight2 = lowestceil2 - highestfloor2;
 
 					int texheight1 = wad.images.W_GetTextureHeight(conf, side1->MidTex());
@@ -1049,31 +1049,31 @@ void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, b
 
 void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 {
-	Sector *sector1 = level.sectors[objnum];
+	const auto &sector1 = level.sectors[objnum];
 
 	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
 	{
-		LineDef *line = level.linedefs[i];
+		const auto &line = level.linedefs[i];
 
 		if (line->OneSided())
 			continue;
 
-		if (line->Right(level)->sector == objnum || line->Left(level)->sector == objnum)
+		if (level.getRight(*line)->sector == objnum || level.getLeft(*line)->sector == objnum)
 		{
-			Sector *sector2;
+			const Sector *sector2;
 			int sectornum;
 
 			bool match = false;
 
-			if (line->Right(level)->sector == objnum)
+			if (level.getRight(*line)->sector == objnum)
 			{
-				sector2 = line->Left(level)->SecRef(level);
-				sectornum = line->Left(level)->sector;
+				sector2 = &level.getSector(*level.getLeft(*line));
+				sectornum = level.getLeft(*line)->sector;
 			}
 			else
 			{
-				sector2 = line->Right(level)->SecRef(level);
-				sectornum = line->Right(level)->sector;
+				sector2 = &level.getSector(*level.getRight(*line));
+				sectornum = level.getRight(*line)->sector;
 			}
 
 			if (edit.Selected->get(sectornum))
