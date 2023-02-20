@@ -255,6 +255,13 @@ if(APPLE OR WIN32)
             COMMAND "${CMAKE_COMMAND}" -E tar xzf "${LOCAL_FLTK_ARCHIVE}"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         )
+        # Patch needed to prevent optimization bug
+        if(APPLE)
+            execute_process(
+                COMMAND patch "${LOCAL_FLTK_SOURCE}/src/Fl_JPEG_Image.cxx" 
+                              "${CMAKE_CURRENT_SOURCE_DIR}/fltk-patch/Fl_JPEG_Image-fltk1.3.8-macos.diff"
+            )
+        endif()
     endif()
     if(NOT EXISTS "${LOCAL_FLTK_BUILD}/lib")
 

@@ -1,0 +1,24 @@
+131a132,134
+> 
+>    volatile char *volatile_max_finish_decompress_err = max_finish_decompress_err;
+>    volatile char *volatile_max_destroy_decompress_err = max_destroy_decompress_err;
+139c142
+<     if ( ((*max_finish_decompress_err)-- > 0) && array)
+---
+>     if ( ((*volatile_max_finish_decompress_err)-- > 0) && array)
+141c144
+<     if ( (*max_destroy_decompress_err)-- > 0)
+---
+>     if ( (*volatile_max_destroy_decompress_err)-- > 0)
+319a323,325
+> 
+>    volatile char *volatile_max_finish_decompress_err = max_finish_decompress_err;
+>    volatile char *volatile_max_destroy_decompress_err = max_destroy_decompress_err;
+327c333
+<     if ( ((*max_finish_decompress_err)-- > 0) && array)
+---
+>     if ( ((*volatile_max_finish_decompress_err)-- > 0) && array)
+329c335
+<     if ( (*max_destroy_decompress_err)-- > 0)
+---
+>     if ( (*volatile_max_destroy_decompress_err)-- > 0)
