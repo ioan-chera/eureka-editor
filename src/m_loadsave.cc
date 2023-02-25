@@ -98,7 +98,7 @@ void Instance::FreshLevel()
 
 		v->SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
 		v->SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
-		level.vertices.push_back(std::move(v));
+		level.addVertex(std::move(v));
 
 		auto sd = std::make_unique<SideDef>();
 		sd->SetDefaults(conf, false);
@@ -408,7 +408,7 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 	PrintDebug("GetVertices: num = %d\n", count);
 # endif
 
-	level.vertices.reserve(count);
+	level.reserveVertexArray(count);
 
 	for (int i = 0 ; i < count ; i++)
 	{
@@ -422,7 +422,7 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 		vert->raw_x = FFixedPoint(LE_S16(raw.x));
 		vert->raw_y = FFixedPoint(LE_S16(raw.y));
 
-		level.vertices.push_back(std::move(vert));
+		level.addVertex(std::move(vert));
 	}
 }
 
@@ -507,8 +507,8 @@ static void CreateFallbackVertices(Document &doc)
 	v2->raw_x = FFixedPoint(555);
 	v2->raw_y = FFixedPoint(555);
 
-	doc.vertices.push_back(std::move(v1));
-	doc.vertices.push_back(std::move(v2));
+	doc.addVertex(std::move(v1));
+	doc.addVertex(std::move(v2));
 }
 
 
@@ -862,7 +862,7 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 	{
 		gLog.printf("Removing %d unused vertices at end\n", doc.numVertices() - new_count);
 
-		doc.vertices.resize(new_count);
+		doc.trimVertexArray(new_count);
 	}
 }
 
@@ -1329,7 +1329,7 @@ void Instance::SaveVertices()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("VERTEXES");
 
-	for (const auto &vert : level.vertices)
+	for (const auto &vert : level.getVertices())
 	{
 		raw_vertex_t raw;
 

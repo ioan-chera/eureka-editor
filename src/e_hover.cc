@@ -500,10 +500,10 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 
 	if(grid.ratio > 0 && edit.action == EditorAction::drawLine)
 	{
-		const auto &V = doc.vertices[edit.drawLine.from.num];
+		const auto &V = doc.getVertex(edit.drawLine.from.num);
 
 		// convert ratio into a vector, use it to intersect the linedef
-		v2double_t ppos1 = V->xy();
+		v2double_t ppos1 = V.xy();
 		v2double_t ppos2 = ptr;
 
 		grid.RatioSnapXY(ppos2, ppos1);
@@ -566,7 +566,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 Objid hover::findSplitLineForDangler(const Document &doc, MapFormat format,
 									 const Grid_State_c &grid, int v_num)
 {
-	return getNearestSplitLine(doc, format, grid, doc.vertices[v_num]->xy(), v_num);
+	return getNearestSplitLine(doc, format, grid, doc.getVertex(v_num).xy(), v_num);
 }
 
 //
@@ -744,20 +744,20 @@ void Hover::findCrossingPoints(crossing_state_c &cross,
 		if(v == possible_v1 || v == possible_v2)
 			continue;
 
-		const auto &VC = doc.vertices[v];
+		const auto &VC = doc.getVertex(v);
 
 		// ignore vertices at same coordinates as v1 or v2
-		if(VC->Matches(FFixedPoint(p1.x), FFixedPoint(p1.y)) ||
-			VC->Matches(FFixedPoint(p2.x), FFixedPoint(p2.y)))
+		if(VC.Matches(FFixedPoint(p1.x), FFixedPoint(p1.y)) ||
+			VC.Matches(FFixedPoint(p2.x), FFixedPoint(p2.y)))
 			continue;
 
 		// is this vertex sitting on the line?
-		double perp = PerpDist(VC->xy(), p1, p2);
+		double perp = PerpDist(VC.xy(), p1, p2);
 
 		if(fabs(perp) > close_dist)
 			continue;
 
-		double along = AlongDist(VC->xy(), p1, p2);
+		double along = AlongDist(VC.xy(), p1, p2);
 
 		if(along > ALONG_EPSILON && along < length - ALONG_EPSILON)
 		{
@@ -869,7 +869,7 @@ static Objid getNearestVertex(const Document &doc, const Grid_State_c &grid, con
 
 	for(int n = 0; n < doc.numVertices(); n++)
 	{
-		v2double_t vpos = doc.vertices[n]->xy();
+		v2double_t vpos = doc.getVertex(n).xy();
 
 		// filter out vertices that are outside the search bbox
 		if(!vpos.inbounds(lpos, hpos))
@@ -1183,7 +1183,7 @@ void crossing_state_c::add_vert(int v, double dist)
 
 	pt.vert = v;
 	pt.ld   = -1;
-	pt.pos  = inst.level.vertices[v]->xy();
+	pt.pos  = inst.level.getVertex(v).xy();
 	pt.dist = dist;
 
 	points.push_back(pt);
@@ -1235,9 +1235,9 @@ void crossing_state_c::SplitAllLines(EditOperation &op)
 		{
 			points[i].vert = op.addNew(ObjType::vertices);
 
-			auto &V = inst.level.vertices[points[i].vert];
+			auto &V = inst.level.getVertex(points[i].vert);
 
-			V->SetRawXY(inst.loaded.levelFormat, points[i].pos);
+			V.SetRawXY(inst.loaded.levelFormat, points[i].pos);
 
 			inst.level.linemod.splitLinedefAtVertex(op, points[i].ld, points[i].vert);
 		}

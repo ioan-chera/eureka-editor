@@ -315,10 +315,10 @@ struct vertex_X_CMP_pred
 
 	inline bool operator() (int A, int B) const
 	{
-		const auto &V1 = doc.vertices[A];
-		const auto &V2 = doc.vertices[B];
+		const auto &V1 = doc.getVertex(A);
+		const auto &V2 = doc.getVertex(B);
 
-		return V1->raw_x < V2->raw_x;
+		return V1.raw_x < V2.raw_x;
 	}
 };
 
@@ -343,14 +343,14 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 
 	std::sort(sorted_list.begin(), sorted_list.end(), vertex_X_CMP_pred(doc));
 
-#define VERT_K  doc.vertices[sorted_list[k]]
-#define VERT_N  doc.vertices[sorted_list[n]]
+#define VERT_K  doc.getVertex(sorted_list[k])
+#define VERT_N  doc.getVertex(sorted_list[n])
 
 	for (int k = 0 ; k < doc.numVertices(); k++)
 	{
-		for (int n = k + 1 ; n < doc.numVertices() && VERT_N->raw_x == VERT_K->raw_x ; n++)
+		for (int n = k + 1 ; n < doc.numVertices() && VERT_N.raw_x == VERT_K.raw_x ; n++)
 		{
-			if (VERT_N->raw_y == VERT_K->raw_y)
+			if (VERT_N.raw_y == VERT_K.raw_y)
 			{
 				sel.set(sorted_list[k]);
 			}
@@ -364,7 +364,7 @@ void Vertex_FindOverlaps(selection_c& sel, const Document &doc)
 
 static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts, Document &doc)
 {
-	const auto &V = doc.vertices[idx];
+	const auto &V = doc.getVertex(idx);
 
 	// find the base vertex (the one V is sitting on)
 	for (int n = 0 ; n < doc.numVertices(); n++)
@@ -376,9 +376,9 @@ static void Vertex_MergeOne(EditOperation &op, int idx, selection_c& merge_verts
 		if (merge_verts.get(n))
 			continue;
 
-		const auto &N = doc.vertices[n];
+		const auto &N = doc.getVertex(n);
 
-		if (*N != *V)
+		if (N != V)
 			continue;
 
 		// Ok, found it, so update linedefs

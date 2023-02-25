@@ -174,17 +174,17 @@ void Instance::UpdateDrawLine()
 	if (edit.action != EditorAction::drawLine || edit.drawLine.from.is_nil())
 		return;
 
-	const auto &V = level.vertices[edit.drawLine.from.num];
+	const auto &V = level.getVertex(edit.drawLine.from.num);
 
 	v2double_t newpos = edit.map.xy;
 
 	if (grid.ratio > 0)
 	{
-		grid.RatioSnapXY(newpos, V->xy());
+		grid.RatioSnapXY(newpos, V.xy());
 	}
 	else if (edit.highlight.valid())
 	{
-		newpos = level.vertices[edit.highlight.num]->xy();
+		newpos = level.getVertex(edit.highlight.num).xy();
 	}
 	else if (edit.split_line.valid())
 	{
@@ -274,15 +274,15 @@ void Instance::UpdateHighlight()
 		if (grid.ratio > 0 && edit.action == EditorAction::drawLine &&
 			edit.mode == ObjType::vertices && edit.highlight.valid())
 		{
-			const auto &V = level.vertices[edit.highlight.num];
-			const auto &S = level.vertices[edit.drawLine.from.num];
+			const auto &V = level.getVertex(edit.highlight.num);
+			const auto &S = level.getVertex(edit.drawLine.from.num);
 
-			v2double_t vpos = V->xy();
+			v2double_t vpos = V.xy();
 
-			grid.RatioSnapXY(vpos, S->xy());
+			grid.RatioSnapXY(vpos, S.xy());
 
-			if (MakeValidCoord(loaded.levelFormat, vpos.x) != V->raw_x ||
-				MakeValidCoord(loaded.levelFormat, vpos.y) != V->raw_y)
+			if (MakeValidCoord(loaded.levelFormat, vpos.x) != V.raw_x ||
+				MakeValidCoord(loaded.levelFormat, vpos.y) != V.raw_y)
 			{
 				edit.highlight.clear();
 			}
@@ -377,13 +377,13 @@ static void UpdateLevelBounds(Instance &inst, int start_vert)
 {
 	for(int i = start_vert; i < inst.level.numVertices(); i++)
 	{
-		const auto &V = inst.level.vertices[i];
+		const auto &V = inst.level.getVertex(i);
 
-		if (V->x() < inst.Map_bound1.x) inst.Map_bound1.x = V->x();
-		if (V->y() < inst.Map_bound1.y) inst.Map_bound1.y = V->y();
+		if (V.x() < inst.Map_bound1.x) inst.Map_bound1.x = V.x();
+		if (V.y() < inst.Map_bound1.y) inst.Map_bound1.y = V.y();
 
-		if (V->x() > inst.Map_bound2.x) inst.Map_bound2.x = V->x();
-		if (V->y() > inst.Map_bound2.y) inst.Map_bound2.y = V->y();
+		if (V.x() > inst.Map_bound2.x) inst.Map_bound2.x = V.x();
+		if (V.y() > inst.Map_bound2.y) inst.Map_bound2.y = V.y();
 	}
 }
 
@@ -443,13 +443,13 @@ void Instance::MapStuff_NotifyChange(ObjType type, int objnum, int field)
 		//       map bounds when only moving a few vertices.
 		moved_vertex_count++;
 
-		const auto &V = level.vertices[objnum];
+		const auto &V = level.getVertex(objnum);
 
-		if (V->x() < Map_bound1.x) Map_bound1.x = V->x();
-		if (V->y() < Map_bound1.y) Map_bound1.y = V->y();
+		if (V.x() < Map_bound1.x) Map_bound1.x = V.x();
+		if (V.y() < Map_bound1.y) Map_bound1.y = V.y();
 
-		if (V->x() > Map_bound2.x) Map_bound2.x = V->x();
-		if (V->y() > Map_bound2.y) Map_bound2.y = V->y();
+		if (V.x() > Map_bound2.x) Map_bound2.x = V.x();
+		if (V.y() > Map_bound2.y) Map_bound2.y = V.y();
 
 		// TODO: only invalidate sectors touching vertex
 		Subdiv_InvalidateAll();
@@ -852,9 +852,9 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::vertices:
 			for (int n = 0 ; n < doc.numVertices(); n++)
 			{
-				const auto &V = doc.vertices[n];
+				const auto &V = doc.getVertex(n);
 
-				v2double_t vpos = V->xy();
+				v2double_t vpos = V.xy();
 
 				if(vpos.inbounds(pos1, pos2))
 					list->toggle(n);

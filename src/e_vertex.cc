@@ -51,7 +51,7 @@ int VertexModule::findExact(FFixedPoint fx, FFixedPoint fy) const
 {
 	for (int i = 0 ; i < doc.numVertices() ; i++)
 	{
-		if (doc.vertices[i]->Matches(fx, fy))
+		if (doc.getVertex(i).Matches(fx, fy))
 			return i;
 	}
 
@@ -327,8 +327,8 @@ bool VertexModule::tryFixDangler(int v_num) const
 		if (i == v_num)
 			continue;
 
-		double dx = doc.vertices[v_num]->x() - doc.vertices[i]->x();
-		double dy = doc.vertices[v_num]->y() - doc.vertices[i]->y();
+		double dx = doc.getVertex(v_num).x() - doc.getVertex(i).x();
+		double dy = doc.getVertex(v_num).y() - doc.getVertex(i).y();
 
 		if (fabs(dx) <= max_dist && fabs(dy) <= max_dist &&
 			!doc.linemod.linedefAlreadyExists(v_num, v_other))
@@ -420,7 +420,7 @@ bool VertexModule::tryFixDangler(int v_num) const
 
 void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, double *y) const
 {
-	const auto &V = doc.vertices[v_num];
+	const auto &V = doc.getVertex(v_num);
 
 	double dx = doc.getEnd(*L).x() - doc.getStart(*L).x();
 	double dy = doc.getEnd(*L).y() - doc.getStart(*L).y();
@@ -452,8 +452,8 @@ void VertexModule::calcDisconnectCoord(const LineDef *L, int v_num, double *x, d
 		dy = (dy < 0) ? -8 : 8;
 	}
 
-	*x = V->x() + dx;
-	*y = V->y() + dy;
+	*x = V.x() + dx;
+	*y = V.y() + dy;
 }
 
 
@@ -476,7 +476,7 @@ void VertexModule::doDisconnectVertex(EditOperation &op, int v_num, int num_line
 			{
 				int new_v = op.addNew(ObjType::vertices);
 
-				doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
+				doc.getVertex(new_v).SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 				if (L->start == v_num)
 					op.changeLinedef(n, LineDef::F_START, new_v);
@@ -570,7 +570,7 @@ void VertexModule::doDisconnectLinedef(EditOperation &op, int ld, int which_vert
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	doc.vertices[new_v]->SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
+	doc.getVertex(new_v).SetRawXY(inst.loaded.levelFormat, { new_x, new_y });
 
 	// fix all linedefs in the selection to use this new vertex
 	for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
@@ -837,9 +837,9 @@ void Instance::commandSectorDisconnect()
 
 			mapping[*it] = new_v;
 
-			auto &newbie = level.vertices[new_v];
+			auto &newbie = level.getVertex(new_v);
 
-			*newbie = *level.vertices[*it];
+			newbie = level.getVertex(*it);
 		}
 
 		// update linedefs, creating new ones where necessary
@@ -885,10 +885,10 @@ void Instance::commandSectorDisconnect()
 
 		for (sel_iter_c it(all_verts) ; !it.done() ; it.next())
 		{
-			const auto &V = level.vertices[*it];
+			const auto &V = level.getVertex(*it);
 
-			op.changeVertex(*it, Vertex::F_X, V->raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
-			op.changeVertex(*it, Vertex::F_Y, V->raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
+			op.changeVertex(*it, Vertex::F_X, V.raw_x + MakeValidCoord(loaded.levelFormat, move_dx));
+			op.changeVertex(*it, Vertex::F_Y, V.raw_y + MakeValidCoord(loaded.levelFormat, move_dy));
 		}
 	}
 
@@ -986,24 +986,24 @@ void Instance::CMD_VT_ShapeLine()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const auto &V = level.vertices[*it];
+		const auto &V = level.getVertex(*it);
 
-		double weight = WeightForVertex(V.get(), pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
+		double weight = WeightForVertex(&V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, -1);
 
 		if (weight > 0)
 		{
-			ax += V->x() * weight;
-			ay += V->y() * weight;
+			ax += V.x() * weight;
+			ay += V.y() * weight;
 
 			a_total += weight;
 		}
 
-		weight = WeightForVertex(V.get(), pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
+		weight = WeightForVertex(&V, pos1.x,pos1.y, pos2.x,pos2.y, width,height, +1);
 
 		if (weight > 0)
 		{
-			bx += V->x() * weight;
-			by += V->y() * weight;
+			bx += V.x() * weight;
+			by += V.y() * weight;
 
 			b_total += weight;
 		}
@@ -1042,9 +1042,9 @@ void Instance::CMD_VT_ShapeLine()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const auto &V = level.vertices[*it];
+		const auto &V = level.getVertex(*it);
 
-		vert_along_t ALONG(*it, AlongDist(V->xy(), { ax,ay }, { bx, by }));
+		vert_along_t ALONG(*it, AlongDist(V.xy(), { ax,ay }, { bx, by }));
 
 		along_list.push_back(ALONG);
 	}
@@ -1053,19 +1053,19 @@ void Instance::CMD_VT_ShapeLine()
 
 
 	// compute proper positions for start and end of the line
-	const auto &V1 = level.vertices[along_list.front().vert_num];
-	const auto &V2 = level.vertices[along_list. back().vert_num];
+	const auto &V1 = level.getVertex(along_list.front().vert_num);
+	const auto &V2 = level.getVertex(along_list. back().vert_num);
 
 	double along1 = along_list.front().along;
 	double along2 = along_list. back().along;
 
 	if ((true) /* don't move first and last vertices */)
 	{
-		ax = V1->x();
-		ay = V1->y();
+		ax = V1.x();
+		ay = V1.y();
 
-		bx = V2->x();
-		by = V2->y();
+		bx = V2.x();
+		by = V2.y();
 	}
 	else
 	{
@@ -1150,7 +1150,7 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 	{
 		unsigned int k = (start_idx + i) % along_list.size();
 
-		const auto &V = doc.vertices[along_list[k].vert_num];
+		const auto &V = doc.getVertex(along_list[k].vert_num);
 
 		double frac = i / (double)(along_list.size() - (partial_circle ? 1 : 0));
 
@@ -1166,8 +1166,8 @@ double VertexModule::evaluateCircle(EditOperation *op, double mid_x, double mid_
 		}
 		else
 		{
-			double dx = new_x - V->x();
-			double dy = new_y - V->y();
+			double dx = new_x - V.x();
+			double dy = new_y - V.y();
 
 			cost = cost + (dx*dx + dy*dy);
 		}
@@ -1230,10 +1230,10 @@ void Instance::CMD_VT_ShapeArc()
 
 	for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
 	{
-		const auto &V = level.vertices[*it];
+		const auto &V = level.getVertex(*it);
 
-		double dx = V->x() - mid.x;
-		double dy = V->y() - mid.y;
+		double dx = V.x() - mid.x;
+		double dy = V.y() - mid.y;
 
 		double dist = hypot(dx, dy);
 
@@ -1272,10 +1272,10 @@ void Instance::CMD_VT_ShapeArc()
 	else
 		end_idx = static_cast<unsigned>(along_list.size() - 1);
 
-	const auto & start_V = level.vertices[along_list[start_idx].vert_num];
-	const auto & end_V   = level.vertices[along_list[  end_idx].vert_num];
+	const auto & start_V = level.getVertex(along_list[start_idx].vert_num);
+	const auto & end_V   = level.getVertex(along_list[  end_idx].vert_num);
 
-	double start_end_dist = hypot(end_V->x() - start_V->x(), end_V->y() - start_V->y());
+	double start_end_dist = hypot(end_V.x() - start_V.x(), end_V.y() - start_V.y());
 
 
 	// compute new mid-point and radius (except for a full circle)
@@ -1286,7 +1286,7 @@ void Instance::CMD_VT_ShapeArc()
 
 	if (arc_deg < 360)
 	{
-		mid = (start_V->xy() + end_V->xy()) * 0.5;
+		mid = (start_V.xy() + end_V.xy()) * 0.5;
 
 		r = start_end_dist * 0.5;
 
@@ -1308,7 +1308,7 @@ void Instance::CMD_VT_ShapeArc()
 
 		r = hypot(r, away);
 
-		best_offset = atan2(start_V->y() - mid.y, start_V->x() - mid.x);
+		best_offset = atan2(start_V.y() - mid.y, start_V.x() - mid.x);
 	}
 	else
 	{

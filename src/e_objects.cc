@@ -100,10 +100,10 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		auto &V = doc.vertices[new_v];
+		auto &V = doc.getVertex(new_v);
 
-		V->SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
-		V->SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
+		V.SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
+		V.SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
 
 		int new_sd = op.addNew(ObjType::sidedefs);
 
@@ -373,7 +373,7 @@ void ObjectsModule::insertLinedefAutosplit(EditOperation &op, int v1, int v2, bo
 
 	crossing_state_c cross(inst);
 
-	doc.hover.findCrossingPoints(cross, doc.vertices[v1]->xy(), v1, doc.vertices[v2]->xy(), v2);
+	doc.hover.findCrossingPoints(cross, doc.getVertex(v1).xy(), v1, doc.getVertex(v2).xy(), v2);
 
 	cross.SplitAllLines(op);
 
@@ -449,7 +449,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		if (new_vert >= 0)
 		{
 			// just ignore when highlight is same as drawing-start
-			if (old_vert >= 0 && *doc.vertices[old_vert] == *doc.vertices[new_vert])
+			if (old_vert >= 0 && doc.getVertex(old_vert) == doc.getVertex(new_vert))
 			{
 				inst.edit.Selected->set(old_vert);
 				return;
@@ -491,7 +491,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 	// would we create a new vertex on top of an existing one?
 	if (new_vert < 0 && old_vert >= 0 &&
-		doc.vertices[old_vert]->Matches(MakeValidCoord(inst.loaded.levelFormat, newpos.x), MakeValidCoord(inst.loaded.levelFormat, newpos.y)))
+		doc.getVertex(old_vert).Matches(MakeValidCoord(inst.loaded.levelFormat, newpos.x), MakeValidCoord(inst.loaded.levelFormat, newpos.y)))
 	{
 		inst.edit.Selected->set(old_vert);
 		return;
@@ -505,9 +505,9 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		{
 			new_vert = op.addNew(ObjType::vertices);
 
-			auto &V = doc.vertices[new_vert];
+			auto &V = doc.getVertex(new_vert);
 
-			V->SetRawXY(inst.loaded.levelFormat, newpos);
+			V.SetRawXY(inst.loaded.levelFormat, newpos);
 
 			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
@@ -565,7 +565,7 @@ begin_drawing:
 		inst.edit.drawLine.from = Objid(ObjType::vertices, old_vert);
 		inst.edit.Selected->set(old_vert);
 
-		inst.edit.drawLine.to = doc.vertices[old_vert]->xy();
+		inst.edit.drawLine.to = doc.getVertex(old_vert).xy();
 
 		inst.Editor_SetAction(EditorAction::drawLine);
 	}
@@ -755,10 +755,10 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 		case ObjType::vertices:
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &V = doc.vertices[*it];
+				const auto &V = doc.getVertex(*it);
 
-				op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-				op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+				op.changeVertex(*it, Vertex::F_X, V.raw_x + fdx);
+				op.changeVertex(*it, Vertex::F_Y, V.raw_y + fdy);
 			}
 			break;
 
@@ -849,12 +849,12 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
-	auto &newV = doc.vertices[newVID];
-	*newV = *doc.vertices[vertID];
+	auto &newV = doc.getVertex(newVID);
+	newV = doc.getVertex(vertID);
 
 	// Move it to the actual destination
-	newV->raw_x += MakeValidCoord(inst.loaded.levelFormat, delta.x);
-	newV->raw_y += MakeValidCoord(inst.loaded.levelFormat, delta.y);
+	newV.raw_x += MakeValidCoord(inst.loaded.levelFormat, delta.x);
+	newV.raw_y += MakeValidCoord(inst.loaded.levelFormat, delta.y);
 
 	doc.linemod.splitLinedefAtVertex(op, splitLineID, newVID);
 
@@ -1212,7 +1212,7 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 
 		case ObjType::vertices:
 			*total += 1;
-			if (inst.grid.OnGrid(doc.vertices[objnum]->x(), doc.vertices[objnum]->y()))
+			if (inst.grid.OnGrid(doc.getVertex(objnum).x(), doc.getVertex(objnum).y()))
 				*count += 1;
 			break;
 
@@ -1265,8 +1265,8 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 			break;
 
 		case ObjType::vertices:
-			x2 = doc.vertices[objnum]->x();
-			y2 = doc.vertices[objnum]->y();
+			x2 = doc.getVertex(objnum).x();
+			y2 = doc.getVertex(objnum).y();
 			break;
 
 		case ObjType::linedefs:
@@ -1442,8 +1442,8 @@ v2double_t ObjectsModule::calcMiddle(const selection_c & list) const
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next(), ++count)
 			{
-				sum_x += doc.vertices[*it]->x();
-				sum_y += doc.vertices[*it]->y();
+				sum_x += doc.getVertex(*it).x();
+				sum_y += doc.getVertex(*it).y();
 			}
 			break;
 		}
@@ -1507,9 +1507,9 @@ void ObjectsModule::calcBBox(const selection_c & list, v2double_t &pos1, v2doubl
 		{
 			for (sel_iter_c it(list) ; !it.done() ; it.next())
 			{
-				const auto &V = doc.vertices[*it];
-				double Vx = V->x();
-				double Vy = V->y();
+				const auto &V = doc.getVertex(*it);
+				double Vx = V.x();
+				double Vy = V.y();
 
 				if (Vx < pos1.x) pos1.x = Vx;
 				if (Vy < pos1.y) pos1.y = Vy;
@@ -1574,12 +1574,12 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const auto &V = doc.vertices[*it];
+		const auto &V = doc.getVertex(*it);
 
 		if (is_vert)
-			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V->raw_y);
+			op.changeVertex(*it, Vertex::F_Y, fix_my * 2 - V.raw_y);
 		else
-			op.changeVertex(*it, Vertex::F_X, fix_mx * 2 - V->raw_x);
+			op.changeVertex(*it, Vertex::F_X, fix_mx * 2 - V.raw_x);
 	}
 
 	// flip linedefs too !!
@@ -1729,10 +1729,10 @@ void Instance::CMD_Rotate90()
 
 			for (sel_iter_c it(verts) ; !it.done() ; it.next())
 			{
-				const auto &V = level.vertices[*it];
+				const auto &V = level.getVertex(*it);
 
-				FFixedPoint old_x = V->raw_x;
-				FFixedPoint old_y = V->raw_y;
+				FFixedPoint old_x = V.raw_x;
+				FFixedPoint old_y = V.raw_y;
 
 				if (anti_clockwise)
 				{
@@ -1786,10 +1786,10 @@ void ObjectsModule::doScaleTwoVertices(EditOperation &op, const selection_c &lis
 
 	for (sel_iter_c it(verts) ; !it.done() ; it.next())
 	{
-		const auto &V = doc.vertices[*it];
+		const auto &V = doc.getVertex(*it);
 
-		double new_x = V->x();
-		double new_y = V->y();
+		double new_x = V.x();
+		double new_y = V.y();
 
 		param.Apply(&new_x, &new_y);
 
@@ -1988,7 +1988,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 			return false;
 
 		case ObjType::vertices:
-			for (const auto &vertex : doc.vertices)
+			for (const auto &vertex : doc.getVertices())
 				if (iround(vertex->x()) == x && iround(vertex->y()) == y)
 					return true;
 			return false;
@@ -2165,9 +2165,9 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	for (sel_iter_c it(list) ; !it.done() ; it.next())
 	{
-		const auto &V = doc.vertices[*it];
+		const auto &V = doc.getVertex(*it);
 
-		if (inst.grid.OnGrid(V->x(), V->y()))
+		if (inst.grid.OnGrid(V.x(), V.y()))
 		{
 			moved.set(*it);
 			continue;
@@ -2179,8 +2179,8 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 		{
 			int x_dir, y_dir;
 
-			double new_x = inst.grid.QuantSnapX(V->x(), pass & 1, &x_dir);
-			double new_y = inst.grid.QuantSnapY(V->y(), pass & 2, &y_dir);
+			double new_x = inst.grid.QuantSnapX(V.x(), pass & 1, &x_dir);
+			double new_y = inst.grid.QuantSnapY(V.y(), pass & 2, &y_dir);
 
 			// keep horizontal lines horizontal
 			if ((mode & V_HORIZ) && (pass & 2))

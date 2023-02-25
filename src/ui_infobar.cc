@@ -651,9 +651,9 @@ void UI_StatusBar::IB_ShowDrawLine(int cx, int cy)
 	if (! inst.edit.drawLine.from.valid())
 		return;
 
-	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto &V = inst.level.getVertex(inst.edit.drawLine.from.num);
 
-	v2double_t dv = inst.edit.drawLine.to - V->xy();
+	v2double_t dv = inst.edit.drawLine.to - V.xy();
 
 	// show a ratio value
 	FFixedPoint fdx = FFixedPoint(dv.x);

@@ -439,7 +439,7 @@ bool Basis::redo()
 void Basis::clearAll()
 {
 	doc.things.clear();
-	doc.vertices.clear();
+	doc.deleteAllVertices();
 	doc.sectors.clear();
 	doc.sidedefs.clear();
 	doc.linedefs.clear();
@@ -514,7 +514,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::vertices:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numVertices());
-		pos = reinterpret_cast<int *>(basis.doc.vertices[objnum].get());
+		pos = reinterpret_cast<int *>(basis.doc.getVertices()[objnum].get());
 		break;
 	case ObjType::sectors:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
@@ -606,8 +606,7 @@ std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
-	auto result = std::move(doc.vertices[objnum]);
-	doc.vertices.erase(doc.vertices.begin() + objnum);
+	auto result = doc.removeVertex(objnum);
 
 	// fix the linedef references
 
@@ -757,7 +756,7 @@ void Basis::EditUnit::rawInsertThing(Document &doc)
 void Basis::EditUnit::rawInsertVertex(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numVertices());
-	doc.vertices.insert(doc.vertices.begin() + objnum, std::move(vertex));
+	doc.insertVertex(std::move(vertex), objnum);
 
 	// fix references in linedefs
 

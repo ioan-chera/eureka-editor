@@ -61,9 +61,9 @@ TEST(Commands, SelectNeighborLinesByTexture)
 
     auto addVertex = [&doc](int x, int y)
     {
-        Vertex *vertex = new Vertex;
+		auto vertex = std::make_unique<Vertex>();
         vertex->SetRawXY(MapFormat::doom, v2double_t{(double)x, (double)y});
-        doc.vertices.emplace_back(vertex);
+        doc.addVertex(std::move(vertex));
     };
     auto addSector = [&doc](int floorh, int ceilh)
     {

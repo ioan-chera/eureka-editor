@@ -858,8 +858,8 @@ static void GetVertices(const Document &doc)
 	{
 		vertex_t *vert = NewVertex();
 
-		vert->x = doc.vertices[i]->x();
-		vert->y = doc.vertices[i]->y();
+		vert->x = doc.getVertex(i).x();
+		vert->y = doc.getVertex(i).y();
 
 		vert->index = i;
 	}

@@ -445,13 +445,13 @@ static FFixedPoint VertexCompare(const Document &doc, const void *p1, const void
 	if (vert1 == vert2)
 		return FFixedPoint{};
 
-	const auto &A = doc.vertices[vert1];
-	const auto &B = doc.vertices[vert2];
+	const auto &A = doc.getVertex(vert1);
+	const auto &B = doc.getVertex(vert2);
 
-	if (A->raw_x != B->raw_x)
-		return A->raw_x - B->raw_x;
+	if (A.raw_x != B.raw_x)
+		return A.raw_x - B.raw_x;
 
-	return A->raw_y - B->raw_y;
+	return A.raw_y - B.raw_y;
 }
 
 

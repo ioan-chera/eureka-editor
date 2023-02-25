@@ -175,10 +175,10 @@ void UI_VertexBox::button_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const auto &V = box->inst.level.vertices[*it];
+			const auto &V = box->inst.level.getVertex(*it);
 
-			op.changeVertex(*it, Vertex::F_X, V->raw_x + fdx);
-			op.changeVertex(*it, Vertex::F_Y, V->raw_y + fdy);
+			op.changeVertex(*it, Vertex::F_X, V.raw_x + fdx);
+			op.changeVertex(*it, Vertex::F_Y, V.raw_y + fdy);
 		}
 	}
 }
@@ -207,8 +207,8 @@ void UI_VertexBox::UpdateField()
 	if (inst.level.isVertex(obj))
 	{
 		// @@ FIXME show decimals in UDMF
-		mFixUp.setInputValue(pos_x, SString(static_cast<int>(inst.level.vertices[obj]->x())).c_str());
-		mFixUp.setInputValue(pos_y, SString(static_cast<int>(inst.level.vertices[obj]->y())).c_str());
+		mFixUp.setInputValue(pos_x, SString(static_cast<int>(inst.level.getVertex(obj).x())).c_str());
+		mFixUp.setInputValue(pos_y, SString(static_cast<int>(inst.level.getVertex(obj).y())).c_str());
 	}
 	else
 	{

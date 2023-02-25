@@ -267,8 +267,8 @@ public:
 
 			if (A_other >= 0)
 			{
-				int ax = static_cast<int>(inst.level.vertices[A_other]->x());
-				int ay = static_cast<int>(inst.level.vertices[A_other]->y());
+				int ax = static_cast<int>(inst.level.getVertex(A_other).x());
+				int ay = static_cast<int>(inst.level.getVertex(A_other).y());
 
 				int bx1 = static_cast<int>(inst.level.getStart(*B->ld).x());
 				int by1 = static_cast<int>(inst.level.getStart(*B->ld).y());

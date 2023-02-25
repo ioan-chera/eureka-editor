@@ -29,6 +29,7 @@
 #include "LineDef.h"
 #include "Vertex.h"
 #include <memory>
+#include <vector>
 
 class crc32_c;
 class Instance;
@@ -42,8 +43,50 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
+	const std::vector<std::unique_ptr<Vertex>> &getVertices() const
+	{
+		return vertices;
+	}
+
+	void reserveVertexArray(int count)
+	{
+		vertices.reserve(count);
+	}
+
+	void trimVertexArray(int count)
+	{
+		if(count < (int)vertices.size())
+			vertices.resize(count);
+	}
+
+	void addVertex(std::unique_ptr<Vertex> &&vertex)
+	{
+		vertices.push_back(std::move(vertex));
+	}
+
+	void insertVertex(std::unique_ptr<Vertex> &&vertex, int index)
+	{
+		vertices.insert(vertices.begin() + index, std::move(vertex));
+	}
+
+	void deleteAllVertices()
+	{
+		vertices.clear();
+	}
+
+	std::unique_ptr<Vertex> removeVertex(int index)
+	{
+		auto result = std::move(vertices[index]);
+		vertices.erase(vertices.begin() + index);
+		return result;
+	}
+
+	Vertex &getVertex(int index) const
+	{
+		return *vertices[index];
+	}
+
 	std::vector<std::unique_ptr<Thing>> things;
-	std::vector<std::unique_ptr<Vertex>> vertices;
 	std::vector<std::unique_ptr<Sector>> sectors;
 	std::vector<std::unique_ptr<SideDef>> sidedefs;
 	std::vector<std::unique_ptr<LineDef>> linedefs;
@@ -135,6 +178,8 @@ public:
 	bool isVertical(const LineDef &line) const;
 private:
 	friend class DocumentModule;
+
+	std::vector<std::unique_ptr<Vertex>> vertices;
 };
 
 #endif /* Document_hpp */

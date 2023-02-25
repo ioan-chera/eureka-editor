@@ -986,9 +986,9 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	auto &V = doc.vertices[new_v];
+	auto &V = doc.getVertex(new_v);
 
-	V->SetRawXY(inst.loaded.levelFormat, new_p);
+	V.SetRawXY(inst.loaded.levelFormat, new_p);
 
 	splitLinedefAtVertex(op, ld, new_v);
 
@@ -1435,11 +1435,11 @@ void LinedefModule::fixForLostSide(EditOperation &op, int ld) const
 //
 double LinedefModule::angleBetweenLines(int A, int B, int C) const
 {
-	double a_dx = doc.vertices[B]->x() - doc.vertices[A]->x();
-	double a_dy = doc.vertices[B]->y() - doc.vertices[A]->y();
+	double a_dx = doc.getVertex(B).x() - doc.getVertex(A).x();
+	double a_dy = doc.getVertex(B).y() - doc.getVertex(A).y();
 
-	double c_dx = doc.vertices[B]->x() - doc.vertices[C]->x();
-	double c_dy = doc.vertices[B]->y() - doc.vertices[C]->y();
+	double c_dx = doc.getVertex(B).x() - doc.getVertex(C).x();
+	double c_dy = doc.getVertex(B).y() - doc.getVertex(C).y();
 
 	double AB_angle = (a_dx == 0) ? (a_dy >= 0 ? 90 : -90) : atan2(a_dy, a_dx) * 180 / M_PI;
 	double CB_angle = (c_dx == 0) ? (c_dy >= 0 ? 90 : -90) : atan2(c_dy, c_dx) * 180 / M_PI;

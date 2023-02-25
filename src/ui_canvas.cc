@@ -366,13 +366,13 @@ void UI_Canvas::DrawEverything()
 		// when ratio lock is on, want to see the new line
 		if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 && inst.edit.drag_other_vert >= 0)
 		{
-			const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
-			const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
+			const auto &v0 = inst.level.getVertex(inst.edit.drag_other_vert);
+			const auto &v1 = inst.level.getVertex(inst.edit.dragged.num);
 
 			RenderColor(RED);
-			DrawKnobbyLine(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y);
+			DrawKnobbyLine(v0.x(), v0.y(), v1.x() + delta.x, v1.y() + delta.y);
 
-			DrawLineInfo(v0->x(), v0->y(), v1->x() + delta.x, v1->y() + delta.y, true);
+			DrawLineInfo(v0.x(), v0.y(), v1.x() + delta.x, v1.y() + delta.y, true);
 		}
 	}
 	else if (inst.edit.highlight.valid())
@@ -681,7 +681,7 @@ void UI_Canvas::DrawVertices()
 
 	RenderColor(FL_GREEN);
 
-	for (const auto &vertex : inst.level.vertices)
+	for (const auto &vertex : inst.level.getVertices())
 	{
 		double x = vertex->x();
 		double y = vertex->y();
@@ -696,8 +696,8 @@ void UI_Canvas::DrawVertices()
 	{
 		for (int n = 0 ; n < inst.level.numVertices(); n++)
 		{
-			double x = inst.level.vertices[n]->x();
-			double y = inst.level.vertices[n]->y();
+			double x = inst.level.getVertex(n).x();
+			double y = inst.level.getVertex(n).y();
 
 			if (! Vis(x, y, r))
 				continue;
@@ -1388,8 +1388,8 @@ void UI_Canvas::DrawHighlight(ObjType objtype, int objnum, bool skip_lines,
 
 		case ObjType::vertices:
 		{
-			double x = dx + inst.level.vertices[objnum]->x();
-			double y = dy + inst.level.vertices[objnum]->y();
+			double x = dx + inst.level.getVertex(objnum).x();
+			double y = dy + inst.level.getVertex(objnum).y();
 
 			int vert_r = vertex_radius(inst.grid.Scale);
 
@@ -1483,8 +1483,8 @@ void UI_Canvas::DrawHighlightTransform(ObjType objtype, int objnum)
 
 		case ObjType::vertices:
 		{
-			double x = inst.level.vertices[objnum]->x();
-			double y = inst.level.vertices[objnum]->y();
+			double x = inst.level.getVertex(objnum).x();
+			double y = inst.level.getVertex(objnum).y();
 
 			int vert_r = vertex_radius(inst.grid.Scale);
 
@@ -2072,7 +2072,7 @@ void UI_Canvas::DrawCurrentLine()
 	if (inst.edit.drawLine.from.is_nil())
 		return;
 
-	const auto &V = inst.level.vertices[inst.edit.drawLine.from.num];
+	const auto &V = inst.level.getVertex(inst.edit.drawLine.from.num);
 
 	v2double_t newpos = inst.edit.drawLine.to;
 
@@ -2084,15 +2084,15 @@ void UI_Canvas::DrawCurrentLine()
 	}
 
 	RenderColor(RED);
-	DrawKnobbyLine(V->x(), V->y(), newpos.x, newpos.y);
+	DrawKnobbyLine(V.x(), V.y(), newpos.x, newpos.y);
 
-	DrawLineInfo(V->x(), V->y(), newpos.x, newpos.y, inst.grid.ratio > 0);
+	DrawLineInfo(V.x(), V.y(), newpos.x, newpos.y, inst.grid.ratio > 0);
 
 	// draw all the crossing points
 	crossing_state_c cross(inst);
 
 	inst.level.hover.findCrossingPoints(cross,
-					   V->xy(), inst.edit.drawLine.from.num,
+					   V.xy(), inst.edit.drawLine.from.num,
 		newpos, inst.edit.highlight.valid() ? inst.edit.highlight.num : -1);
 
 	for (unsigned int k = 0 ; k < cross.points.size() ; k++)
@@ -2164,14 +2164,14 @@ v2double_t UI_Canvas::DragDelta()
 	if (inst.edit.mode == ObjType::vertices && inst.grid.ratio > 0 &&
 		inst.edit.dragged.num >= 0 && inst.edit.drag_other_vert >= 0)
 	{
-		const auto &v0 = inst.level.vertices[inst.edit.drag_other_vert];
-		const auto &v1 = inst.level.vertices[inst.edit.dragged.num];
+		const auto &v0 = inst.level.getVertex(inst.edit.drag_other_vert);
+		const auto &v1 = inst.level.getVertex(inst.edit.dragged.num);
 
 		v2double_t newpos = inst.edit.drag_cur.xy;
 
-		inst.grid.RatioSnapXY(newpos, v0->xy());
+		inst.grid.RatioSnapXY(newpos, v0.xy());
 
-		return newpos - v1->xy();
+		return newpos - v1.xy();
 	}
 
 	if (inst.grid.ratio > 0)

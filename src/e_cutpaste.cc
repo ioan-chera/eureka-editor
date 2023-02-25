@@ -318,7 +318,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	{
 		vert_map[*it] = (int)clip_board->verts.size();
 
-		clip_board->verts.push_back(*doc.vertices[*it]);
+		clip_board->verts.push_back(doc.getVertex(*it));
 	}
 
 	if (is_sectors)
@@ -408,7 +408,7 @@ bool Instance::Clipboard_DoCopy()
 
 		case ObjType::vertices:
 			for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
-				clip_board->verts.push_back(*level.vertices[*it]);
+				clip_board->verts.push_back(level.getVertex(*it));
 			break;
 
 		case ObjType::linedefs:
@@ -467,13 +467,13 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		auto & V = op.doc.vertices[new_v];
+		auto & V = op.doc.getVertex(new_v);
 
 		vert_map[i] = new_v;
 
-		*V = clip_board->verts[i];
+		V = clip_board->verts[i];
 
-		V->SetRawXY(format, V->xy() + pos - cpos);
+		V.SetRawXY(format, V.xy() + pos - cpos);
 	}
 
 	for (i = 0 ; i < clip_board->sectors.size() ; i++)
@@ -673,11 +673,11 @@ bool Instance::Clipboard_DoPaste()
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
 					int new_v = op.addNew(ObjType::vertices);
-					auto & V = level.vertices[new_v];
+					auto & V = level.getVertex(new_v);
 
-					*V = clip_board->verts[i];
+					V = clip_board->verts[i];
 
-					V->SetRawXY(loaded.levelFormat, V->xy() + pos - cpos);
+					V.SetRawXY(loaded.levelFormat, V.xy() + pos - cpos);
 				}
 				break;
 			}
