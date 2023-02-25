@@ -555,8 +555,8 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("vertex"))
 	{
 		kind = Objid(ObjType::vertices, 1);
-		auto addedVertex = std::make_unique<Vertex>();
-		doc.addVertex(std::move(addedVertex));
+		Vertex addedVertex{};
+		doc.addVertex(addedVertex);
 		new_V = doc.getVertices().back().get();
 	}
 	else if (name.Match("linedef"))

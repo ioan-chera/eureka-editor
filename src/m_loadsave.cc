@@ -94,11 +94,11 @@ void Instance::FreshLevel()
 
 	for (int i = 0 ; i < 4 ; i++)
 	{
-		auto v = std::make_unique<Vertex>();
+		Vertex v{};
 
-		v->SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
-		v->SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
-		level.addVertex(std::move(v));
+		v.SetRawX(loaded.levelFormat, (i >= 2) ? 256 : -256);
+		v.SetRawY(loaded.levelFormat, (i==1 || i==2) ? 256 :-256);
+		level.addVertex(v);
 
 		auto sd = std::make_unique<SideDef>();
 		sd->SetDefaults(conf, false);
@@ -417,12 +417,12 @@ void Instance::LoadVertices(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading vertices.\n");
 
-		auto vert = std::make_unique<Vertex>();
+		Vertex vert{};
 
-		vert->raw_x = FFixedPoint(LE_S16(raw.x));
-		vert->raw_y = FFixedPoint(LE_S16(raw.y));
+		vert.raw_x = FFixedPoint(LE_S16(raw.x));
+		vert.raw_y = FFixedPoint(LE_S16(raw.y));
 
-		level.addVertex(std::move(vert));
+		level.addVertex(vert);
 	}
 }
 
@@ -498,17 +498,17 @@ static void CreateFallbackVertices(Document &doc)
 {
 	gLog.printf("Creating two fallback vertices.\n");
 
-	auto v1 = std::make_unique<Vertex>();
-	auto v2 = std::make_unique<Vertex>();
+	Vertex v1{};
+	Vertex v2{};
 
-	v1->raw_x = FFixedPoint(-777);
-	v1->raw_y = FFixedPoint(-777);
+	v1.raw_x = FFixedPoint(-777);
+	v1.raw_y = FFixedPoint(-777);
 
-	v2->raw_x = FFixedPoint(555);
-	v2->raw_y = FFixedPoint(555);
+	v2.raw_x = FFixedPoint(555);
+	v2.raw_y = FFixedPoint(555);
 
-	doc.addVertex(std::move(v1));
-	doc.addVertex(std::move(v2));
+	doc.addVertex(v1);
+	doc.addVertex(v2);
 }
 
 

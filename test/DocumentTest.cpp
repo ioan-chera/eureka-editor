@@ -48,10 +48,10 @@ TEST_F(DocumentFixture, CheckObjects)
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
-	doc.addVertex(std::make_unique<Vertex>());
-	doc.addVertex(std::make_unique<Vertex>());
-	doc.addVertex(std::make_unique<Vertex>());
-	doc.addVertex(std::make_unique<Vertex>());
+	doc.addVertex(Vertex());
+	doc.addVertex(Vertex());
+	doc.addVertex(Vertex());
+	doc.addVertex(Vertex());
 	// no sectors
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
@@ -100,10 +100,10 @@ TEST_F(DocumentFixture, CRC)
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
 	doc.things.push_back(std::make_unique<Thing>());
-	doc.addVertex(std::make_unique<Vertex>());
-	doc.addVertex(std::make_unique<Vertex>());
-	doc.addVertex(std::make_unique<Vertex>());
-	doc.addVertex(std::make_unique<Vertex>());
+	doc.addVertex(Vertex());
+	doc.addVertex(Vertex());
+	doc.addVertex(Vertex());
+	doc.addVertex(Vertex());
 	// no sectors
 	doc.sidedefs.push_back(std::make_unique<SideDef>());
 	doc.sidedefs.push_back(std::make_unique<SideDef>());

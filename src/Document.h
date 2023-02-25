@@ -59,9 +59,9 @@ public:
 			vertices.resize(count);
 	}
 
-	void addVertex(std::unique_ptr<Vertex> &&vertex)
+	void addVertex(const Vertex &vertex)
 	{
-		vertices.push_back(std::move(vertex));
+		vertices.emplace_back(new Vertex(vertex));
 	}
 
 	void insertVertex(std::unique_ptr<Vertex> &&vertex, int index)
