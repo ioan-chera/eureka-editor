@@ -1235,9 +1235,7 @@ void crossing_state_c::SplitAllLines(EditOperation &op)
 		{
 			points[i].vert = op.addNew(ObjType::vertices);
 
-			auto &V = inst.level.getVertex(points[i].vert);
-
-			V.SetRawXY(inst.loaded.levelFormat, points[i].pos);
+			inst.level.getMutableVertex(points[i].vert).SetRawXY(inst.loaded.levelFormat, points[i].pos);
 
 			inst.level.linemod.splitLinedefAtVertex(op, points[i].ld, points[i].vert);
 		}

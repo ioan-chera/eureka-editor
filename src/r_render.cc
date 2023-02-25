@@ -356,7 +356,7 @@ private:
 				return reinterpret_cast<int*>(inst.level.things[objnum].get());
 
 			case ObjType::vertices:
-				return reinterpret_cast<int *>(inst.level.getVertices()[objnum].get());
+				return reinterpret_cast<int *>(&inst.level.getMutableVertex(objnum));
 
 			case ObjType::sectors:
 				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());

@@ -100,7 +100,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	for (int i = 0 ; i < 4 ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		auto &V = doc.getVertex(new_v);
+		auto &V = doc.getMutableVertex(new_v);
 
 		V.SetRawX(inst.loaded.levelFormat, (i >= 2) ? x2 : x1);
 		V.SetRawY(inst.loaded.levelFormat, (i==1 || i==2) ? y2 : y1);
@@ -505,9 +505,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 		{
 			new_vert = op.addNew(ObjType::vertices);
 
-			auto &V = doc.getVertex(new_vert);
-
-			V.SetRawXY(inst.loaded.levelFormat, newpos);
+			doc.getMutableVertex(new_vert).SetRawXY(inst.loaded.levelFormat, newpos);
 
 			inst.edit.drawLine.from = Objid(ObjType::vertices, new_vert);
 			inst.edit.Selected->set(new_vert);
@@ -849,7 +847,7 @@ void ObjectsModule::splitLinedefAndMergeSandwich(EditOperation &op, int splitLin
 {
 	// Add a vertex there and do the split
 	int newVID = op.addNew(ObjType::vertices);
-	auto &newV = doc.getVertex(newVID);
+	auto &newV = doc.getMutableVertex(newVID);
 	newV = doc.getVertex(vertID);
 
 	// Move it to the actual destination
@@ -1989,7 +1987,7 @@ bool ObjectsModule::spotInUse(ObjType obj_type, int x, int y) const
 
 		case ObjType::vertices:
 			for (const auto &vertex : doc.getVertices())
-				if (iround(vertex->x()) == x && iround(vertex->y()) == y)
+				if (iround(vertex.x()) == x && iround(vertex.y()) == y)
 					return true;
 			return false;
 

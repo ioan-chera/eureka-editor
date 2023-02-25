@@ -1333,8 +1333,8 @@ void Instance::SaveVertices()
 	{
 		raw_vertex_t raw;
 
-		raw.x = LE_S16(static_cast<int>(vert->raw_x));
-		raw.y = LE_S16(static_cast<int>(vert->raw_y));
+		raw.x = LE_S16(static_cast<int>(vert.raw_x));
+		raw.y = LE_S16(static_cast<int>(vert.raw_y));
 
 		lump->Write(&raw, sizeof(raw));
 	}

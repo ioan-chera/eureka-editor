@@ -467,7 +467,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 	for (i = 0 ; i < clip_board->verts.size() ; i++)
 	{
 		int new_v = op.addNew(ObjType::vertices);
-		auto & V = op.doc.getVertex(new_v);
+		auto & V = op.doc.getMutableVertex(new_v);
 
 		vert_map[i] = new_v;
 
@@ -673,7 +673,7 @@ bool Instance::Clipboard_DoPaste()
 				for (i = 0 ; i < clip_board->verts.size() ; i++)
 				{
 					int new_v = op.addNew(ObjType::vertices);
-					auto & V = level.getVertex(new_v);
+					auto & V = level.getMutableVertex(new_v);
 
 					V = clip_board->verts[i];
 

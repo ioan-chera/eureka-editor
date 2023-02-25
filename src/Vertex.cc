@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------
 
 #include "Vertex.h"
+#include "e_basis.h"
 
 // these handle rounding to integer in non-UDMF mode
 void Vertex::SetRawX(MapFormat format, double x)

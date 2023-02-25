@@ -511,13 +511,13 @@ static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const v
 	const auto &B = doc.linedefs[line2];
 
 	// determine left-most vertex of each line
-	const Vertex *C = LineVertexLowest(doc, A.get()) ? &doc.getEnd(*A) : &doc.getStart(*A);
-	const Vertex *D = LineVertexLowest(doc, B.get()) ? &doc.getEnd(*B) : &doc.getStart(*B);
+	const Vertex &C = LineVertexLowest(doc, A.get()) ? doc.getEnd(*A) : doc.getStart(*A);
+	const Vertex &D = LineVertexLowest(doc, B.get()) ? doc.getEnd(*B) : doc.getStart(*B);
 
-	if (C->raw_x != D->raw_x)
-		return C->raw_x - D->raw_x;
+	if (C.raw_x != D.raw_x)
+		return C.raw_x - D.raw_x;
 
-	return C->raw_y - D->raw_y;
+	return C.raw_y - D.raw_y;
 }
 
 static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const void *p2)
@@ -532,13 +532,13 @@ static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const voi
 	const auto &B = doc.linedefs[line2];
 
 	// determine right-most vertex of each line
-	const Vertex * C = LineVertexLowest(doc, A.get()) ? &doc.getStart(*A) : &doc.getEnd(*A);
-	const Vertex * D = LineVertexLowest(doc, B.get()) ? &doc.getStart(*B) : &doc.getEnd(*B);
+	const Vertex &C = LineVertexLowest(doc, A.get()) ? doc.getStart(*A) : doc.getEnd(*A);
+	const Vertex &D = LineVertexLowest(doc, B.get()) ? doc.getStart(*B) : doc.getEnd(*B);
 
-	if (C->raw_x != D->raw_x)
-		return C->raw_x - D->raw_x;
+	if (C.raw_x != D.raw_x)
+		return C.raw_x - D.raw_x;
 
-	return C->raw_y - D->raw_y;
+	return C.raw_y - D.raw_y;
 }
 
 

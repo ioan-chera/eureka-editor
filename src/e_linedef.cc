@@ -986,9 +986,7 @@ bool LinedefModule::doSplitLineDef(EditOperation &op, int ld) const
 
 	int new_v = op.addNew(ObjType::vertices);
 
-	auto &V = doc.getVertex(new_v);
-
-	V.SetRawXY(inst.loaded.levelFormat, new_p);
+	doc.getMutableVertex(new_v).SetRawXY(inst.loaded.levelFormat, new_p);
 
 	splitLinedefAtVertex(op, ld, new_v);
 

@@ -796,9 +796,7 @@ void Instance::CMD_ACT_Click()
 
 			new_vert = op.addNew(ObjType::vertices);
 
-			auto &V = level.getVertex(new_vert);
-
-			V.SetRawXY(loaded.levelFormat, edit.split);
+			level.getMutableVertex(new_vert).SetRawXY(loaded.levelFormat, edit.split);
 
 			level.linemod.splitLinedefAtVertex(op, split_ld, new_vert);
 		}

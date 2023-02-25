@@ -43,7 +43,7 @@ private:
 	Instance &inst;	// make this private because we don't want to access it from Document
 public:
 
-	const std::vector<std::unique_ptr<Vertex>> &getVertices() const
+	const std::vector<Vertex> &getVertices() const
 	{
 		return vertices;
 	}
@@ -61,12 +61,12 @@ public:
 
 	void addVertex(const Vertex &vertex)
 	{
-		vertices.emplace_back(new Vertex(vertex));
+		vertices.push_back(vertex);
 	}
 
-	void insertVertex(std::unique_ptr<Vertex> &&vertex, int index)
+	void insertVertex(const Vertex &vertex, int index)
 	{
-		vertices.insert(vertices.begin() + index, std::move(vertex));
+		vertices.insert(vertices.begin() + index, vertex);
 	}
 
 	void deleteAllVertices()
@@ -74,11 +74,19 @@ public:
 		vertices.clear();
 	}
 
-	std::unique_ptr<Vertex> removeVertex(int index);
+	Vertex removeVertex(int index);
 
-	Vertex &getVertex(int index) const
+	Vertex &getMutableVertex(int index)
 	{
-		return *vertices[index];
+		return vertices[index];
+	}
+	Vertex &getLastMutableVertex()
+	{
+		return vertices.back();
+	}
+	const Vertex &getVertex(int index) const
+	{
+		return vertices[index];
 	}
 
 	std::vector<std::unique_ptr<Thing>> things;
@@ -174,7 +182,7 @@ public:
 private:
 	friend class DocumentModule;
 
-	std::vector<std::unique_ptr<Vertex>> vertices;
+	std::vector<Vertex> vertices;
 };
 
 #endif /* Document_hpp */

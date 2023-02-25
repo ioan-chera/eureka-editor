@@ -683,8 +683,8 @@ void UI_Canvas::DrawVertices()
 
 	for (const auto &vertex : inst.level.getVertices())
 	{
-		double x = vertex->x();
-		double y = vertex->y();
+		double x = vertex.x();
+		double y = vertex.y();
 
 		if (Vis(x, y, r))
 		{

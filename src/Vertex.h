@@ -19,8 +19,9 @@
 #ifndef VERTEX_H_
 #define VERTEX_H_
 
-#include "e_basis.h"
+//#include "e_basis.h"
 #include "FixedPoint.h"
+#include "Thing.h"
 #include "m_vector.h"
 
 class Instance;

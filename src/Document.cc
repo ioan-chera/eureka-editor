@@ -24,9 +24,9 @@
 #include "Thing.h"
 #include "Vertex.h"
 
-std::unique_ptr<Vertex> Document::removeVertex(int index)
+Vertex Document::removeVertex(int index)
 {
-	auto result = std::move(vertices[index]);
+	auto result = vertices[index];
 	vertices.erase(vertices.begin() + index);
 
 	// fix the linedef references
@@ -78,10 +78,10 @@ static void ChecksumThing(crc32_c &crc, const Thing *T)
 	crc += T->options;
 }
 
-static void ChecksumVertex(crc32_c &crc, const Vertex *V)
+static void ChecksumVertex(crc32_c &crc, const Vertex &V)
 {
-	crc += V->raw_x.raw();
-	crc += V->raw_y.raw();
+	crc += V.raw_x.raw();
+	crc += V.raw_y.raw();
 }
 
 static void ChecksumSector(crc32_c &crc, const Sector *sector)
@@ -114,8 +114,8 @@ static void ChecksumLineDef(crc32_c &crc, const LineDef *L, const Document &doc)
 	crc += L->type;
 	crc += L->tag;
 
-	ChecksumVertex(crc, &doc.getStart(*L));
-	ChecksumVertex(crc, &doc.getEnd(*L));
+	ChecksumVertex(crc, doc.getStart(*L));
+	ChecksumVertex(crc, doc.getEnd(*L));
 
 	if(doc.getRight(*L))
 		ChecksumSideDef(crc, doc.getRight(*L), doc);
@@ -165,12 +165,12 @@ int Document::getSectorID(const LineDef &line, Side side) const
 
 const Vertex &Document::getStart(const LineDef &line) const
 {
-	return *vertices[line.start];
+	return vertices[line.start];
 }
 
 const Vertex &Document::getEnd(const LineDef &line) const
 {
-	return *vertices[line.end];
+	return vertices[line.end];
 }
 
 const SideDef *Document::getRight(const LineDef &line) const

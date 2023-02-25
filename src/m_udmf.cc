@@ -413,12 +413,12 @@ static void UDMF_ParseThingField(const Document &doc, Thing *T, Udmf_Token& fiel
 	}
 }
 
-static void UDMF_ParseVertexField(const Document &doc, Vertex *V, Udmf_Token& field, Udmf_Token& value)
+static void UDMF_ParseVertexField(const Document &doc, Vertex &V, Udmf_Token& field, Udmf_Token& value)
 {
 	if (field.Match("x"))
-		V->raw_x = value.DecodeCoord();
+		V.raw_x = value.DecodeCoord();
 	else if (field.Match("y"))
-		V->raw_y = value.DecodeCoord();
+		V.raw_y = value.DecodeCoord();
 	else
 	{
 		gLog.debugPrintf("vertex #%d: unknown field '%s'\n", doc.numVertices()-1, field.c_str());
@@ -557,7 +557,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 		kind = Objid(ObjType::vertices, 1);
 		Vertex addedVertex{};
 		doc.addVertex(addedVertex);
-		new_V = doc.getVertices().back().get();
+		new_V = &doc.getLastMutableVertex();
 	}
 	else if (name.Match("linedef"))
 	{
@@ -622,7 +622,7 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 			UDMF_ParseThingField(doc, new_T, tok, value);
 
 		if (new_V)
-			UDMF_ParseVertexField(doc, new_V, tok, value);
+			UDMF_ParseVertexField(doc, *new_V, tok, value);
 
 		if (new_LD)
 			UDMF_ParseLinedefField(doc, new_LD, tok, value);
