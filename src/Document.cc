@@ -24,6 +24,25 @@
 #include "Thing.h"
 #include "Vertex.h"
 
+std::unique_ptr<Vertex> Document::removeVertex(int index)
+{
+	auto result = std::move(vertices[index]);
+	vertices.erase(vertices.begin() + index);
+
+	// fix the linedef references
+	if(index < numVertices())
+		for(auto it = linedefs.rbegin(); it != linedefs.rend(); ++it)
+		{
+			auto &L = *it;
+			if(L->start > index)
+				L->start--;
+			if(L->end > index)
+				L->end--;
+		}
+
+	return result;
+}
+
 //
 // Get number of objects based on enum
 //

@@ -606,25 +606,7 @@ std::unique_ptr<Vertex> Basis::EditUnit::rawDeleteVertex(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numVertices());
 
-	auto result = doc.removeVertex(objnum);
-
-	// fix the linedef references
-
-	if(objnum < doc.numVertices())
-	{
-		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
-		{
-			auto &L = doc.linedefs[n];
-
-			if(L->start > objnum)
-				L->start--;
-
-			if(L->end > objnum)
-				L->end--;
-		}
-	}
-
-	return result;
+	return doc.removeVertex(objnum);
 }
 
 //

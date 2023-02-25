@@ -74,12 +74,7 @@ public:
 		vertices.clear();
 	}
 
-	std::unique_ptr<Vertex> removeVertex(int index)
-	{
-		auto result = std::move(vertices[index]);
-		vertices.erase(vertices.begin() + index);
-		return result;
-	}
+	std::unique_ptr<Vertex> removeVertex(int index);
 
 	Vertex &getVertex(int index) const
 	{
