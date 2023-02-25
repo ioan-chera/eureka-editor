@@ -659,7 +659,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const auto &L = doc.linedefs[l];
+			const auto &L = doc.getLinedef(l);
 
 			if ( (doc.getRight(L) && src.get(doc.getRight(L)->sector)) ||
 				 (doc.getLeft(L)  && src.get(doc.getLeft(L)->sector)) )
@@ -673,7 +673,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	if (src.what_type() == ObjType::sectors && dest.what_type() == ObjType::vertices)
 	{
-		for (const auto &L : doc.linedefs)
+		for (const auto &L : doc.getLinedefs())
 		{
 			if ( (doc.getRight(L) && src.get(doc.getRight(L)->sector)) ||
 				 (doc.getLeft(L)  && src.get(doc.getLeft(L)->sector)) )
@@ -690,7 +690,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const auto &L = doc.linedefs[*it];
+			const auto &L = doc.getLinedef(*it);
 
 			if (doc.getRight(L)) dest.set(L.right);
 			if (doc.getLeft(L))  dest.set(L.left);
@@ -715,7 +715,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 	{
 		for (sel_iter_c it(src); ! it.done(); it.next())
 		{
-			const auto &L = doc.linedefs[*it];
+			const auto &L = doc.getLinedef(*it);
 
 			dest.set(L.start);
 			dest.set(L.end);
@@ -729,7 +729,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		// select all linedefs that have both ends selected
 		for (int l = 0 ; l < doc.numLinedefs(); l++)
 		{
-			const auto &L = doc.linedefs[l];
+			const auto &L = doc.getLinedef(l);
 
 			if (src.get(L.start) && src.get(L.end))
 			{
@@ -753,7 +753,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs() ; l++)
 	{
-		const auto &L = doc.linedefs[l];
+		const auto &L = doc.getLinedef(l);
 
 		if (doc.getRight(L)) dest.set(doc.getRight(L)->sector);
 		if (doc.getLeft(L))  dest.set(doc.getLeft(L)->sector);
@@ -763,7 +763,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 
 	for (l = 0 ; l < doc.numLinedefs(); l++)
 	{
-		const auto &L = doc.linedefs[l];
+		const auto &L = doc.getLinedef(l);
 
 		if (src.what_type() == ObjType::vertices)
 		{
@@ -793,7 +793,7 @@ static int Selection_FirstLine(const Document &doc, selection_c *list)
 {
 	for (sel_iter_c it(list); ! it.done(); it.next())
 	{
-		const auto &L = doc.linedefs[*it];
+		const auto &L = doc.getLinedef(*it);
 
 		if (L.TwoSided())
 			return *it;
@@ -864,7 +864,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 		case ObjType::linedefs:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto &L = doc.getLinedef(n);
 
 				/* the two ends of the line must be in the box */
 				if(doc.getStart(L).xy().inbounds(pos1, pos2) &&
@@ -882,7 +882,7 @@ void SelectObjectsInBox(const Document &doc, selection_c *list, ObjType objtype,
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto &L = doc.getLinedef(n);
 
 				// Get the numbers of the sectors on both sides of the linedef
 				int s1 = doc.getRight(L) ? doc.getRight(L)->sector : -1;
@@ -959,15 +959,15 @@ void Instance::Selection_Clear(bool no_save)
 void Instance::SelectNeighborLines(int objnum, SelectNeighborCriterion option, byte parts,
 								   bool forward)
 {
-	const auto &line1 = level.linedefs[objnum];
+	const auto &line1 = level.getLinedef(objnum);
 	bool frontside = parts < PART_LF_LOWER;
 
-	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
+	for (int i = 0; i < level.numLinedefs(); i++)
 	{
 		if (objnum == i || edit.Selected->get(i))
 			continue;
 
-		const auto &line2 = level.linedefs[i];
+		const auto &line2 = level.getLinedef(i);
 
 		if (line1.OneSided() != line2.OneSided())
 			continue;
@@ -1051,9 +1051,9 @@ void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 {
 	const auto &sector1 = level.sectors[objnum];
 
-	for (int i = 0; (long unsigned int)i < level.linedefs.size(); i++)
+	for (int i = 0; i < level.numLinedefs(); i++)
 	{
-		const auto &line = level.linedefs[i];
+		const auto &line = level.getLinedef(i);
 
 		if (line.OneSided())
 			continue;

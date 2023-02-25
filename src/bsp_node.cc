@@ -425,7 +425,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 
 		if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
 		{
-			if (check->linedef >= 0 && (doc.linedefs[check->linedef].flags & MLF_IS_PRECIOUS))
+			if (check->linedef >= 0 && (doc.getLinedef(check->linedef).flags & MLF_IS_PRECIOUS))
 				info->cost += 40 * factor * PRECIOUS_MULTIPLY;
 		}
 
@@ -493,7 +493,7 @@ static int EvalPartitionWorker(quadtree_c *tree, seg_t *part,
 		// are exhausted.  This is used to protect deep water and invisible
 		// lifts/stairs from being messed up accidentally by splits.
 
-		if (check->linedef >= 0 && (doc.linedefs[check->linedef].flags & MLF_IS_PRECIOUS))
+		if (check->linedef >= 0 && (doc.getLinedef(check->linedef).flags & MLF_IS_PRECIOUS))
 			info->cost += 100 * factor * PRECIOUS_MULTIPLY;
 		else
 			info->cost += 100 * factor;
@@ -812,7 +812,7 @@ static void DivideOneSeg(seg_t *seg, seg_t *part,
 	double a = part->PerpDist(seg->psx, seg->psy);
 	double b = part->PerpDist(seg->pex, seg->pey);
 
-	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(doc.linedefs[seg->linedef]) : false;
+	bool self_ref = (seg->linedef >= 0) ? doc.isSelfRef(doc.getLinedef(seg->linedef)) : false;
 
 	if (seg->source_line == part->source_line)
 		a = b = 0;
@@ -1154,7 +1154,7 @@ void node_t::SetPartition(const seg_t *part, const Instance &inst)
 {
 	SYS_ASSERT(part->linedef >= 0);
 
-	const auto &part_L = inst.level.linedefs[part->linedef];
+	const auto &part_L = inst.level.getLinedef(part->linedef);
 
 	if (part->side == 0)  /* right side */
 	{
@@ -1362,7 +1362,7 @@ seg_t *CreateSegs(const Instance &inst)
 
 	for (int i=0 ; i < inst.level.numLinedefs() ; i++)
 	{
-		const auto &line = inst.level.linedefs[i];
+		const auto &line = inst.level.getLinedef(i);
 
 		seg_t *left  = NULL;
 		seg_t *right = NULL;
@@ -1526,7 +1526,7 @@ void subsec_t::ClockwiseOrder(const Document &doc)
 		// miniseg?
 		if (array[i]->linedef < 0)
 			cur_score = 0;
-		else if (doc.isSelfRef(doc.linedefs[array[i]->linedef]))
+		else if (doc.isSelfRef(doc.getLinedef(array[i]->linedef)))
 			cur_score = 2;
 
 		if (cur_score > best_score)

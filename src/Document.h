@@ -86,10 +86,48 @@ public:
 		return vertices[index];
 	}
 
+	const LineDef &getLinedef(int index) const
+	{
+		return linedefs[index];
+	}
+	LineDef &getMutableLinedef(int index)
+	{
+		return linedefs[index];
+	}
+	const std::vector<LineDef> &getLinedefs() const
+	{
+		return linedefs;
+	}
+	std::vector<LineDef> &getMutableLinedefs()
+	{
+		return linedefs;
+	}
+	void deleteAllLinedefs()
+	{
+		linedefs.clear();
+	}
+	LineDef removeLinedef(int index)
+	{
+		auto result = linedefs[index];
+		linedefs.erase(linedefs.begin() + index);
+		return result;
+	}
+	void insertLinedef(const LineDef &linedef, int index)
+	{
+		linedefs.insert(linedefs.begin() + index, linedef);
+	}
+	void addLinedef(const LineDef &linedef)
+	{
+		linedefs.push_back(linedef);
+	}
+	LineDef &getLastMutableLinedef()
+	{
+		return linedefs.back();
+	}
+
 	std::vector<Thing> things;
 	std::vector<Sector> sectors;
 	std::vector<SideDef> sidedefs;
-	std::vector<LineDef> linedefs;
 
 	std::vector<byte> headerData;
 	std::vector<byte> behaviorData;
@@ -180,6 +218,7 @@ private:
 	friend class DocumentModule;
 
 	std::vector<Vertex> vertices;
+	std::vector<LineDef> linedefs;
 };
 
 #endif /* Document_hpp */

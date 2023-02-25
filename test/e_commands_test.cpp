@@ -93,7 +93,7 @@ TEST(Commands, SelectNeighborLinesByTexture)
         line.end = v2;
         line.right = s1;
         line.left = s2;
-        doc.linedefs.push_back(line);
+        doc.addLinedef(line);
     };
 
     addVertex(0, 0);

@@ -49,7 +49,11 @@ TEST(EChecks, FindFreeTag)
 	std::vector<LineDef> lines;
 	auto assignLines = [&inst, &lines]()
 	{
-		inst.level.linedefs = lines;
+		inst.level.deleteAllLinedefs();
+		for(const auto &line : lines)
+		{
+			inst.level.addLinedef(line);
+		}
 	};
 	std::vector<Sector> sectors;
 	auto assignSectors = [&inst, &sectors]()
@@ -92,7 +96,7 @@ TEST(EChecks, FindFreeTag)
 	sectors.push_back(Sector());
 	assignLines();
 	assignSectors();
-	inst.level.linedefs[1].tag = 1;
+	inst.level.getMutableLinedef(1).tag = 1;
 	ASSERT_EQ(findFreeTag(inst, false), 2);
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
@@ -102,14 +106,14 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
 	// Tag all of them 1: result should be 0 by now
-	inst.level.linedefs[0].tag = inst.level.linedefs[2].tag = 1;
+	inst.level.getMutableLinedef(0).tag = inst.level.getMutableLinedef(2).tag = 1;
 	inst.level.sectors[0].tag = inst.level.sectors[1].tag = 1;
 	ASSERT_EQ(findFreeTag(inst, false), 0);
 	ASSERT_EQ(findFreeTag(inst, true), 0);
 
 	// Restore their tags but tag one by a bigger amount
-	inst.level.linedefs[0].tag = inst.level.linedefs[2].tag = 0;
-	inst.level.linedefs[2].tag = 4;
+	inst.level.getMutableLinedef(0).tag = inst.level.getMutableLinedef(2).tag = 0;
+	inst.level.getMutableLinedef(2).tag = 4;
 	inst.level.sectors[0].tag = inst.level.sectors[1].tag = 0;
 	ASSERT_EQ(findFreeTag(inst, false), 2);
 	ASSERT_EQ(findFreeTag(inst, true), 2);
@@ -120,7 +124,7 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, true), 3);
 
 	// Finally no more space
-	inst.level.linedefs[0].tag = 3;
+	inst.level.getMutableLinedef(0).tag = 3;
 	ASSERT_EQ(findFreeTag(inst, false), 5);
 	ASSERT_EQ(findFreeTag(inst, true), 5);
 
@@ -157,7 +161,7 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, false), 666);
 	ASSERT_EQ(findFreeTag(inst, true), 666);
 	// Add one more and re-test
-	inst.level.linedefs[666].tag = 666;
+	inst.level.getMutableLinedef(666).tag = 666;
 	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 667);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
@@ -194,7 +198,7 @@ TEST(EChecks, TagsApplyNewValue)
 
 	for(LineDef &line : lines)
 	{
-		inst.level.linedefs.push_back(line);
+		inst.level.addLinedef(line);
 	}
 	for(Sector &sector : sectors)
 	{
@@ -211,7 +215,7 @@ TEST(EChecks, TagsApplyNewValue)
 
 	// Nothing selected: check that nothing happens
 	inst.level.checks.tagsApplyNewValue(1);
-	for(const auto &line : inst.level.linedefs)
+	for(const auto &line : inst.level.getLinedefs())
 		ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
 		ASSERT_EQ(sector.tag, 0);
@@ -221,8 +225,8 @@ TEST(EChecks, TagsApplyNewValue)
 	inst.edit.Selected->set(1);
 	inst.edit.Selected->set(2);
 	inst.level.checks.tagsApplyNewValue(1);
-	for(const auto &line : inst.level.linedefs)
-		if(&line == &inst.level.linedefs[1] || &line == &inst.level.linedefs[2])
+	for(const auto &line : inst.level.getLinedefs())
+		if(&line == &inst.level.getLinedef(1) || &line == &inst.level.getLinedef(2))
 			ASSERT_EQ(line.tag, 1);
 		else
 			ASSERT_EQ(line.tag, 0);
@@ -236,8 +240,8 @@ TEST(EChecks, TagsApplyNewValue)
 	inst.edit.Selected->set(2);
 	inst.edit.Selected->set(4);
 	inst.level.checks.tagsApplyNewValue(2);
-	for(const auto &line : inst.level.linedefs)
-		if(&line == &inst.level.linedefs[1] || &line == &inst.level.linedefs[2])
+	for(const auto &line : inst.level.getLinedefs())
+		if(&line == &inst.level.getLinedef(1) || &line == &inst.level.getLinedef(2))
 			ASSERT_EQ(line.tag, 1);
 		else
 			ASSERT_EQ(line.tag, 0);
@@ -250,8 +254,8 @@ TEST(EChecks, TagsApplyNewValue)
 
 	inst.edit.Selected->clear(4);
 	inst.level.checks.tagsApplyNewValue(1);
-	for(const auto &line : inst.level.linedefs)
-		if(&line == &inst.level.linedefs[1] || &line == &inst.level.linedefs[2])
+	for(const auto &line : inst.level.getLinedefs())
+		if(&line == &inst.level.getLinedef(1) || &line == &inst.level.getLinedef(2))
 			ASSERT_EQ(line.tag, 1);
 		else
 			ASSERT_EQ(line.tag, 0);

@@ -109,7 +109,7 @@ void Instance::FreshLevel()
 		ld.end   = (i+1) % 4;
 		ld.flags = MLF_Blocking;
 		ld.right = i;
-		level.linedefs.push_back(ld);
+		level.addLinedef(ld);
 	}
 
 	for (int pl = 1 ; pl <= 4 ; pl++)
@@ -783,7 +783,7 @@ void Instance::LoadLineDefs(const Wad_file *load_wad)
 		ValidateVertexRefs(&ld, i);
 		ValidateSidedefRefs(&ld, i);
 
-		level.linedefs.push_back(ld);
+		level.addLinedef(ld);
 	}
 }
 
@@ -833,7 +833,7 @@ void Instance::LoadLineDefs_Hexen(const Wad_file *load_wad)
 		ValidateVertexRefs(&ld, i);
 		ValidateSidedefRefs(&ld, i);
 
-		level.linedefs.push_back(ld);
+		level.addLinedef(ld);
 	}
 }
 
@@ -845,7 +845,7 @@ static void RemoveUnusedVerticesAtEnd(Document &doc)
 
 	bitvec_c used_verts(doc.numVertices());
 
-	for (const auto &linedef : doc.linedefs)
+	for (const auto &linedef : doc.getLinedefs())
 	{
 		used_verts.set(linedef.start);
 		used_verts.set(linedef.end);
@@ -1441,7 +1441,7 @@ void Instance::SaveLineDefs()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("LINEDEFS");
 
-	for (const auto &ld : level.linedefs)
+	for (const auto &ld : level.getLinedefs())
 	{
 		raw_linedef_t raw;
 
@@ -1465,7 +1465,7 @@ void Instance::SaveLineDefs_Hexen()
 {
 	Lump_c *lump = wad.master.edit_wad->AddLump("LINEDEFS");
 
-	for (const auto &ld : level.linedefs)
+	for (const auto &ld : level.getLinedefs())
 	{
 		raw_hexen_linedef_t raw;
 

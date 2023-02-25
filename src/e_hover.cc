@@ -79,7 +79,7 @@ public:
 		// sure the casting line is not integral (i.e. lies between two lines
 		// on the unit grid) so that we never directly hit a vertex.
 
-		const auto &L = doc.linedefs[ld];
+		const auto &L = doc.getLinedef(ld);
 
 		dx = doc.getEnd(L).x() - doc.getStart(L).x();
 		dy = doc.getEnd(L).y() - doc.getStart(L).y();
@@ -111,10 +111,10 @@ public:
 		if (ld == n)  // ignore input line
 			return;
 
-		double nx1 = doc.getStart(doc.linedefs[n]).x();
-		double ny1 = doc.getStart(doc.linedefs[n]).y();
-		double nx2 = doc.getEnd(doc.linedefs[n]).x();
-		double ny2 = doc.getEnd(doc.linedefs[n]).y();
+		double nx1 = doc.getStart(doc.getLinedef(n)).x();
+		double ny1 = doc.getStart(doc.getLinedef(n)).y();
+		double nx2 = doc.getEnd(doc.getLinedef(n)).x();
+		double ny2 = doc.getEnd(doc.getLinedef(n)).y();
 
 		if (cast_horizontal)
 		{
@@ -235,7 +235,7 @@ public:
 
 	void AddLine_X(int ld)
 	{
-		const auto &L = doc.linedefs[ld];
+		const auto &L = doc.getLinedef(ld);
 
 		// can ignore purely vertical lines
 		if (doc.isVertical(L))
@@ -270,7 +270,7 @@ public:
 
 	void AddLine_Y(int ld)
 	{
-		const auto &L = doc.linedefs[ld];
+		const auto &L = doc.getLinedef(ld);
 
 		// can ignore purely horizonal lines
 		if (doc.isHorizontal(L))
@@ -387,8 +387,8 @@ int hover::getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
 		v2double_t lpos1, lpos2;
-		lpos1.y = doc.getStart(doc.linedefs[n]).y();
-		lpos2.y = doc.getEnd(doc.linedefs[n]).y();
+		lpos1.y = doc.getStart(doc.getLinedef(n)).y();
+		lpos2.y = doc.getEnd(doc.getLinedef(n)).y();
 
 		// ignore purely horizontal lines
 		if(lpos1.y == lpos2.y)
@@ -398,8 +398,8 @@ int hover::getClosestLine_CastingHoriz(const Document &doc, v2double_t pos, Side
 		if(std::min(lpos1.y, lpos2.y) >= pos.y || std::max(lpos1.y, lpos2.y) <= pos.y)
 			continue;
 
-		lpos1.x = doc.getStart(doc.linedefs[n]).x();
-		lpos2.x = doc.getEnd(doc.linedefs[n]).x();
+		lpos1.x = doc.getStart(doc.getLinedef(n)).x();
+		lpos2.x = doc.getEnd(doc.getLinedef(n)).x();
 
 		double dist = lpos1.x - pos.x + (lpos2.x - lpos1.x) * (pos.y - lpos1.y) / (lpos2.y - lpos1.y);
 
@@ -438,8 +438,8 @@ static int getClosestLine_CastingVert(const Document &doc, v2double_t pos, Side 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
 		v2double_t lpos1, lpos2;
-		lpos1.x = doc.getStart(doc.linedefs[n]).x();
-		lpos2.x = doc.getEnd(doc.linedefs[n]).x();
+		lpos1.x = doc.getStart(doc.getLinedef(n)).x();
+		lpos2.x = doc.getEnd(doc.getLinedef(n)).x();
 
 		// ignore purely vertical lines
 		if(lpos1.x == lpos2.x)
@@ -449,8 +449,8 @@ static int getClosestLine_CastingVert(const Document &doc, v2double_t pos, Side 
 		if(std::min(lpos1.x, lpos2.x) >= pos.x || std::max(lpos1.x, lpos2.x) <= pos.x)
 			continue;
 
-		lpos1.y = doc.getStart(doc.linedefs[n]).y();
-		lpos2.y = doc.getEnd(doc.linedefs[n]).y();
+		lpos1.y = doc.getStart(doc.getLinedef(n)).y();
+		lpos2.y = doc.getEnd(doc.getLinedef(n)).y();
 
 		double dist = lpos1.y - pos.y + (lpos2.y - lpos1.y) * (pos.x - lpos1.x) / (lpos2.x - lpos1.x);
 
@@ -491,7 +491,7 @@ Objid hover::findSplitLine(const Document &doc, MapFormat format, const Editor_S
 	if(!out.valid())
 		return Objid();
 
-	const auto &L = doc.linedefs[out.num];
+	const auto &L = doc.getLinedef(out.num);
 
 	v2double_t v1 = doc.getStart(L).xy();
 	v2double_t v2 = doc.getEnd(L).xy();
@@ -632,7 +632,7 @@ int Hover::getOppositeSector(int ld, Side ld_side) const
 	if(opp < 0)
 		return -1;
 
-	return doc.getSectorID(doc.linedefs[opp], opp_side);
+	return doc.getSectorID(doc.getLinedef(opp), opp_side);
 }
 
 //
@@ -679,8 +679,8 @@ bool hover::isPointOutsideOfMap(const Document &doc, const v2double_t &v)
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		v2double_t lv1 = doc.getStart(doc.linedefs[n]).xy();
-		v2double_t lv2 = doc.getEnd(doc.linedefs[n]).xy();
+		v2double_t lv1 = doc.getStart(doc.getLinedef(n)).xy();
+		v2double_t lv2 = doc.getEnd(doc.getLinedef(n)).xy();
 
 		// does the linedef cross the horizontal ray?
 		if(std::min(lv1.y, lv2.y) < v2.y && std::max(lv1.y, lv2.y) > v2.y)
@@ -914,8 +914,8 @@ static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, co
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		v2double_t pos1 = doc.getStart(doc.linedefs[n]).xy();
-		v2double_t pos2 = doc.getEnd(doc.linedefs[n]).xy();
+		v2double_t pos1 = doc.getStart(doc.getLinedef(n)).xy();
+		v2double_t pos2 = doc.getEnd(doc.getLinedef(n)).xy();
 
 		// Skip all lines of which all points are more than <mapslack>
 		// units away from (x,y).  In a typical level, this test will
@@ -924,7 +924,7 @@ static Objid getNearestLinedef(const Document &doc, const Grid_State_c &grid, co
 		   std::max(pos1.y, pos2.y) < lpos.y || std::min(pos1.y, pos2.y) > hpos.y)
 			continue;
 
-		double dist = getApproximateDistanceToLinedef(doc, doc.linedefs[n], pos);
+		double dist = getApproximateDistanceToLinedef(doc, doc.getLinedef(n), pos);
 
 		if(dist > mapslack)
 			continue;
@@ -967,8 +967,8 @@ Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
 		/* nothing needed */
 	}
 	else if(line1 < 0 ||
-		getApproximateDistanceToLinedef(doc, doc.linedefs[line2], pos) <
-		getApproximateDistanceToLinedef(doc, doc.linedefs[line1], pos))
+		getApproximateDistanceToLinedef(doc, doc.getLinedef(line2), pos) <
+		getApproximateDistanceToLinedef(doc, doc.getLinedef(line1), pos))
 	{
 		line1 = line2;
 		side1 = side2;
@@ -978,7 +978,7 @@ Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
 	// (Note that side1 = +1 for right, -1 for left, 0 for "on").
 	if(line1 >= 0)
 	{
-		int sd_num = (side1 == Side::left) ? doc.linedefs[line1].left : doc.linedefs[line1].right;
+		int sd_num = (side1 == Side::left) ? doc.getLinedef(line1).left : doc.getLinedef(line1).right;
 
 		if(sd_num >= 0)
 			return Objid(ObjType::sectors, doc.sidedefs[sd_num].sector);
@@ -1053,7 +1053,7 @@ static Objid getNearestSplitLine(const Document &doc, MapFormat format, const Gr
 
 	for(int n = 0; n < doc.numLinedefs(); n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto &L = doc.getLinedef(n);
 
 		if(L.start == ignore_vert || L.end == ignore_vert)
 			continue;
@@ -1119,7 +1119,7 @@ void Hover::findCrossingLines(crossing_state_c &cross, const v2double_t &pos1, i
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
-		const auto &L = doc.linedefs[ld];
+		const auto &L = doc.getLinedef(ld);
 
 		v2double_t lpos1 = doc.getStart(L).xy();
 		v2double_t lpos2 = doc.getEnd(L).xy();

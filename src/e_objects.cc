@@ -112,7 +112,7 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 
 		int new_ld = op.addNew(ObjType::linedefs);
 
-		auto &L = doc.linedefs[new_ld];
+		auto &L = doc.getMutableLinedef(new_ld);
 
 		L.start = new_v;
 		L.end   = (i == 3) ? (new_v - 3) : new_v + 1;
@@ -342,7 +342,7 @@ void ObjectsModule::insertLinedef(EditOperation &op, int v1, int v2, bool no_fil
 
 	int new_ld = op.addNew(ObjType::linedefs);
 
-	auto &L = doc.linedefs[new_ld];
+	auto &L = doc.getMutableLinedef(new_ld);
 
 	L.start = v1;
 	L.end   = v2;
@@ -425,7 +425,7 @@ void ObjectsModule::insertVertex(bool force_continue, bool no_fill) const
 
 		// prevent creating an overlapping line when splitting
 		if (old_vert >= 0 &&
-			doc.linedefs[split_ld].TouchesVertex(old_vert))
+			doc.getLinedef(split_ld).TouchesVertex(old_vert))
 		{
 			old_vert = -1;
 		}
@@ -686,10 +686,10 @@ void Instance::CMD_ObjectInsert()
 //
 bool ObjectsModule::lineTouchesBox(int ld, double x0, double y0, double x1, double y1) const
 {
-	double lx0 = doc.getStart(doc.linedefs[ld]).x();
-	double ly0 = doc.getStart(doc.linedefs[ld]).y();
-	double lx1 = doc.getEnd(doc.linedefs[ld]).x();
-	double ly1 = doc.getEnd(doc.linedefs[ld]).y();
+	double lx0 = doc.getStart(doc.getLinedef(ld)).x();
+	double ly0 = doc.getStart(doc.getLinedef(ld)).y();
+	double lx1 = doc.getEnd(doc.getLinedef(ld)).x();
+	double ly1 = doc.getEnd(doc.getLinedef(ld)).y();
 
 	double i;
 
@@ -820,7 +820,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 {
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 	{
-		const auto &otherLine = doc.linedefs[i];
+		const auto &otherLine = doc.getLinedef(i);
 		if(!otherLine.TouchesVertex(vertID) || i == lineID)
 			continue;
 
@@ -829,7 +829,7 @@ int ObjectsModule::findLineBetweenLineAndVertex(int lineID, int vertID) const
 
 		// Identify the hinge, common vertex
 		int otherLineOtherVertexID = otherLine.OtherVertex(vertID);
-		if(!doc.linedefs[lineID].TouchesVertex(otherLineOtherVertexID))
+		if(!doc.getLinedef(lineID).TouchesVertex(otherLineOtherVertexID))
 			continue;	// not a hinge between them
 
 		return i;
@@ -967,11 +967,11 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 
 void ObjectsModule::transferLinedefProperties(EditOperation &op, int src_line, int dest_line, bool do_tex) const
 {
-	const auto &L1 = doc.linedefs[src_line];
-	const auto &L2 = doc.linedefs[dest_line];
+	const auto &L1 = doc.getLinedef(src_line);
+	const auto &L2 = doc.getLinedef(dest_line);
 
 	// don't transfer certain flags
-	int flags = doc.linedefs[dest_line].flags;
+	int flags = doc.getLinedef(dest_line).flags;
 	flags = (flags & LINEDEF_FLAG_KEEP) | (L1.flags & ~LINEDEF_FLAG_KEEP);
 
 	// handle textures
@@ -1215,14 +1215,14 @@ void ObjectsModule::dragCountOnGridWorker(ObjType obj_type, int objnum, int *cou
 			break;
 
 		case ObjType::linedefs:
-			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum].start, count, total);
-			dragCountOnGridWorker(ObjType::vertices, doc.linedefs[objnum].end,   count, total);
+			dragCountOnGridWorker(ObjType::vertices, doc.getLinedef(objnum).start, count, total);
+			dragCountOnGridWorker(ObjType::vertices, doc.getLinedef(objnum).end,   count, total);
 			break;
 
 		case ObjType::sectors:
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto &L = doc.getLinedef(n);
 
 				if (! doc.touchesSector(L, objnum))
 					continue;
@@ -1269,7 +1269,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 		case ObjType::linedefs:
 			{
-				const auto &L = doc.linedefs[objnum];
+				const auto &L = doc.getLinedef(objnum);
 
 				dragUpdateCurrentDist(ObjType::vertices, L.start, x, y, best_dist,
 									   ptr_x, ptr_y, only_grid);
@@ -1286,7 +1286,7 @@ void ObjectsModule::dragUpdateCurrentDist(ObjType obj_type, int objnum, double *
 
 			for (int n = 0 ; n < doc.numLinedefs(); n++)
 			{
-				const auto &L = doc.linedefs[n];
+				const auto &L = doc.getLinedef(n);
 
 				if (! doc.touchesSector(L, objnum))
 					continue;
@@ -1586,7 +1586,7 @@ void ObjectsModule::doMirrorVertices(EditOperation &op, const selection_c &list,
 
 	for (sel_iter_c it(lines) ; !it.done() ; it.next())
 	{
-		const auto &L = doc.linedefs[*it];
+		const auto &L = doc.getLinedef(*it);
 
 		int start = L.start;
 		int end   = L.end;
@@ -2123,7 +2123,7 @@ void ObjectsModule::quantizeVertices(EditOperation &op, selection_c &list) const
 
 	byte * vert_modes = new byte[doc.numVertices()];
 
-	for (const auto &L : doc.linedefs)
+	for (const auto &L : doc.getLinedefs())
 	{
 		// require both vertices of the linedef to be in the selection
 		if (! (list.get(L.start) && list.get(L.end)))

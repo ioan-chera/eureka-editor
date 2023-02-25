@@ -271,7 +271,7 @@ void SectorModule::linedefsBetweenSectors(selection_c *list, int sec1, int sec2)
 {
 	for (int i = 0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto &L = doc.getLinedef(i);
 
 		if (! (doc.getLeft(L) && doc.getRight(L)))
 			continue;
@@ -440,7 +440,7 @@ double lineloop_c::TotalLength() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		const auto &L = doc.linedefs[lines[k]];
+		const auto &L = doc.getLinedef(lines[k]);
 
 		result += doc.calcLength(L);
 	}
@@ -455,11 +455,11 @@ bool lineloop_c::SameSector(int *sec_num) const
 
 	SYS_ASSERT(lines.size() > 0);
 
-	int sec = doc.getSectorID(doc.linedefs[lines[0]], sides[0]);
+	int sec = doc.getSectorID(doc.getLinedef(lines[0]), sides[0]);
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		if (sec != doc.getSectorID(doc.linedefs[lines[k]], sides[k]))
+		if (sec != doc.getSectorID(doc.getLinedef(lines[k]), sides[k]))
 			return false;
 	}
 
@@ -492,10 +492,10 @@ int lineloop_c::NeighboringSector() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const auto &L = doc.linedefs[lines[i]];
+		const auto &L = doc.getLinedef(lines[i]);
 
 		// we assume here that SIDE_RIGHT == 0 - SIDE_LEFT
-		int sec = doc.getSectorID(doc.linedefs[lines[i]], - sides[i]);
+		int sec = doc.getSectorID(doc.getLinedef(lines[i]), - sides[i]);
 
 		if (sec < 0)
 			continue;
@@ -537,7 +537,7 @@ int lineloop_c::IslandSector() const
 		if (get_just_line(opp_ld))
 			continue;
 
-		return doc.getSectorID(doc.linedefs[opp_ld], opp_side);
+		return doc.getSectorID(doc.getLinedef(opp_ld), opp_side);
 	}
 
 	return -1;
@@ -551,7 +551,7 @@ int lineloop_c::DetermineSector() const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = doc.getSectorID(doc.linedefs[lines[k]], sides[k]);
+		int sec = doc.getSectorID(doc.getLinedef(lines[k]), sides[k]);
 
 		if (sec >= 0)
 			return sec;
@@ -570,7 +570,7 @@ void lineloop_c::CalcBounds(double *x1, double *y1, double *x2, double *y2) cons
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const auto &L = doc.linedefs[lines[i]];
+		const auto &L = doc.getLinedef(lines[i]);
 
 		*x1 = std::min(*x1, std::min(doc.getStart(L).x(), doc.getEnd(L).x()));
 		*y1 = std::min(*y1, std::min(doc.getStart(L).y(), doc.getEnd(L).y()));
@@ -587,7 +587,7 @@ void lineloop_c::GetAllSectors(selection_c *list) const
 
 	for (unsigned int k = 0 ; k < lines.size() ; k++)
 	{
-		int sec = doc.getSectorID(doc.linedefs[lines[k]], sides[k]);
+		int sec = doc.getSectorID(doc.getLinedef(lines[k]), sides[k]);
 
 		if (sec >= 0)
 			list->set(sec);
@@ -622,13 +622,13 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 
 	if (side == Side::right)
 	{
-		cur_vert  = doc.linedefs[ld].end;
-		prev_vert = doc.linedefs[ld].start;
+		cur_vert  = doc.getLinedef(ld).end;
+		prev_vert = doc.getLinedef(ld).start;
 	}
 	else
 	{
-		cur_vert  = doc.linedefs[ld].start;
-		prev_vert = doc.linedefs[ld].end;
+		cur_vert  = doc.getLinedef(ld).start;
+		prev_vert = doc.getLinedef(ld).end;
 	}
 
 #ifdef DEBUG_LINELOOP
@@ -660,7 +660,7 @@ bool SectorModule::traceLineLoop(int ld, Side side, lineloop_c& loop, bool ignor
 
 		for (int n = 0 ; n < doc.numLinedefs() ; n++)
 		{
-			const auto &N = doc.linedefs[n];
+			const auto &N = doc.getLinedef(n);
 
 			if (! N.TouchesVertex(cur_vert))
 				continue;
@@ -765,7 +765,7 @@ bool lineloop_c::LookForIsland()
 
 	for (int ld = 0 ; ld < doc.numLinedefs() ; ld++)
 	{
-		const auto &L = doc.linedefs[ld];
+		const auto &L = doc.getLinedef(ld);
 
 		double x1 = doc.getStart(L).x();
 		double y1 = doc.getStart(L).y();
@@ -804,8 +804,8 @@ ld, ld_side, opp, opp_side, ld_in_path?1:0, opp_in_path?1:0);
 
 			// treat isolated linedefs like islands
 			if (! ld_in_path &&
-				doc.vertmod.howManyLinedefs(doc.linedefs[ld].start) == 1 &&
-				doc.vertmod.howManyLinedefs(doc.linedefs[ld].end)   == 1)
+				doc.vertmod.howManyLinedefs(doc.getLinedef(ld).start) == 1 &&
+				doc.vertmod.howManyLinedefs(doc.getLinedef(ld).end)   == 1)
 			{
 				island->push_back(ld, Side::right);
 				island->push_back(ld, Side::left);
@@ -868,7 +868,7 @@ void lineloop_c::Dump() const
 
 	for (unsigned int i = 0 ; i < lines.size() ; i++)
 	{
-		const auto &L = doc.linedefs[lines[i]];
+		const auto &L = doc.getLinedef(lines[i]);
 
 		gLog.debugPrintf("  %s of line #%d : (%f %f) --> (%f %f)\n",
 		            sides[i] == Side::left ? " LEFT" : "RIGHT",
@@ -881,7 +881,7 @@ void lineloop_c::Dump() const
 
 inline bool SectorModule::willBeTwoSided(int ld, Side side) const
 {
-	const auto &L = doc.linedefs[ld];
+	const auto &L = doc.getLinedef(ld);
 
 	if (L.WhatSideDef(side) < 0)
 	{
@@ -921,13 +921,13 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 			if (pass == 0)
 				side = -side;
 
-			int sd = doc.linedefs[ld].WhatSideDef(side);
+			int sd = doc.getLinedef(ld).WhatSideDef(side);
 			if (sd < 0)
 				continue;
 
 			const auto &SD = doc.sidedefs[sd];
 
-			if (doc.linedefs[ld].TwoSided())
+			if (doc.getLinedef(ld).TwoSided())
 			{
 				if (SD.lower_tex == null_tex) continue;
 				if (SD.upper_tex == null_tex) continue;
@@ -954,7 +954,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 	for (k = 0 ; k < total ; k++)
 	{
 		int ld = loop.lines[k];
-		int sd = doc.linedefs[ld].WhatSideDef(loop.sides[k]);
+		int sd = doc.getLinedef(ld).WhatSideDef(loop.sides[k]);
 
 		if (sd < 0)
 		{
@@ -964,7 +964,7 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 
 		const auto &SD = doc.sidedefs[sd];
 
-		if (doc.linedefs[ld].TwoSided())
+		if (doc.getLinedef(ld).TwoSided())
 		{
 			lower_texs[k] = SD.lower_tex;
 			upper_texs[k] = SD.upper_tex;
@@ -1038,7 +1038,7 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 						   selection_c &flip) const
 {
 // gLog.debugPrintf("DoAssignSector %d ---> line #%d, side %d\n", new_sec, ld, side);
-	const auto &L = doc.linedefs[ld];
+	const auto &L = doc.getLinedef(ld);
 
 	int sd_num   = (side == Side::right) ? L.right : L.left;
 	int other_sd = (side == Side::right) ? L.left  : L.right;
@@ -1230,7 +1230,7 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map,
 	// detect any sectors which have become unused, and delete them
 	for (int n = 0 ; n < doc.numLinedefs() ; n++)
 	{
-		const auto &L = doc.linedefs[n];
+		const auto &L = doc.getLinedef(n);
 
 		if (doc.getSectorID(L, Side::left) >= 0)
 			unused.clear(doc.getSectorID(L, Side::left));

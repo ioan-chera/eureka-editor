@@ -619,7 +619,7 @@ void UI_StatusBar::IB_ShowOffsets(int cx, int cy)
 
 	if (hl.valid() && hl.parts >= 2)
 	{
-		const auto &L = inst.level.linedefs[hl.num];
+		const auto &L = inst.level.getLinedef(hl.num);
 
 		int x_offset = 0;
 		int y_offset = 0;

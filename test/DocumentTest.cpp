@@ -55,7 +55,7 @@ TEST_F(DocumentFixture, CheckObjects)
 	// no sectors
 	doc.sidedefs.push_back(SideDef());
 	doc.sidedefs.push_back(SideDef());
-	doc.linedefs.push_back(LineDef());
+	doc.addLinedef(LineDef());
 
 	ASSERT_EQ(doc.numThings(), 3);
 	ASSERT_EQ(doc.numVertices(), 4);
@@ -107,7 +107,7 @@ TEST_F(DocumentFixture, CRC)
 	// no sectors
 	doc.sidedefs.push_back(SideDef());
 	doc.sidedefs.push_back(SideDef());
-	doc.linedefs.push_back(LineDef());
+	doc.addLinedef(LineDef());
 
 	crc32_c crc;
 	doc.getLevelChecksum(crc);

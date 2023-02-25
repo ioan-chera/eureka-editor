@@ -252,7 +252,7 @@ void Basis::del(ObjType type, int objnum)
 		// unbind sidedef from any linedefs using it
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			const auto &L = doc.linedefs[n];
+			const auto &L = doc.getLinedef(n);
 
 			if(L.right == objnum)
 				changeLinedef(n, LineDef::F_RIGHT, -1);
@@ -266,7 +266,7 @@ void Basis::del(ObjType type, int objnum)
 		// delete any linedefs bound to this vertex
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			const auto &L = doc.linedefs[n];
+			const auto &L = doc.getLinedef(n);
 
 			if(L.start == objnum || L.end == objnum)
 				del(ObjType::linedefs, n);
@@ -442,7 +442,7 @@ void Basis::clearAll()
 	doc.deleteAllVertices();
 	doc.sectors.clear();
 	doc.sidedefs.clear();
-	doc.linedefs.clear();
+	doc.deleteAllLinedefs();
 
 	doc.headerData.clear();
 	doc.behaviorData.clear();
@@ -526,7 +526,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
-		pos = reinterpret_cast<int *>(&basis.doc.linedefs[objnum]);
+		pos = reinterpret_cast<int *>(&basis.doc.getMutableLinedef(objnum));
 		break;
 	default:
 		BugError("Basis::EditOperation::rawChange: bad objtype %u\n", (unsigned)objtype);
@@ -641,7 +641,7 @@ SideDef Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			auto &L = doc.linedefs[n];
+			auto &L = doc.getMutableLinedef(n);
 
 			if(L.right > objnum)
 				L.right--;
@@ -661,10 +661,7 @@ LineDef Basis::EditUnit::rawDeleteLinedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numLinedefs());
 
-	auto result = doc.linedefs[objnum];
-	doc.linedefs.erase(doc.linedefs.begin() + objnum);
-
-	return result;
+	return doc.removeLinedef(objnum);
 }
 
 //
@@ -758,7 +755,7 @@ void Basis::EditUnit::rawInsertSidedef(Document &doc)
 	{
 		for(int n = doc.numLinedefs() - 1; n >= 0; n--)
 		{
-			auto &L = doc.linedefs[n];
+			auto &L = doc.getMutableLinedef(n);
 
 			if(L.right >= objnum)
 				L.right++;
@@ -775,7 +772,7 @@ void Basis::EditUnit::rawInsertSidedef(Document &doc)
 void Basis::EditUnit::rawInsertLinedef(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numLinedefs());
-	doc.linedefs.insert(doc.linedefs.begin() + objnum, linedef);
+	doc.insertLinedef(linedef, objnum);
 }
 
 //

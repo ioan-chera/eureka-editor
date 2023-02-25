@@ -297,7 +297,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 {
 	bool opposite = (e_state & FL_SHIFT);
 
-	const auto &L = inst.level.linedefs[ld];
+	const auto &L = inst.level.getLinedef(ld);
 
 	// handle the selected texture boxes
 	if (parts != 0)
@@ -524,7 +524,7 @@ void UI_LineBox::CB_Paste(int parts, StringID new_tex)
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			const auto &L = inst.level.linedefs[*it];
+			const auto &L = inst.level.getLinedef(*it);
 
 			for (int pass = 0 ; pass < 2 ; pass++)
 			{
@@ -646,7 +646,7 @@ void UI_LineBox::flags_callback(Fl_Widget *w, void *data)
 
 		for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 		{
-			const auto &L = box->inst.level.linedefs[*it];
+			const auto &L = box->inst.level.getLinedef(*it);
 
 			// only change the bits specified in 'mask'.
 			// this is important when multiple linedefs are selected.
@@ -755,9 +755,9 @@ void UI_LineBox::UpdateField(int field)
 
 		if (inst.level.isLinedef(obj))
 		{
-			const auto &L = inst.level.linedefs[obj];
+			const auto &L = inst.level.getLinedef(obj);
 
-			mFixUp.setInputValue(tag, SString(inst.level.linedefs[obj].tag).c_str());
+			mFixUp.setInputValue(tag, SString(inst.level.getLinedef(obj).tag).c_str());
 
 			const linetype_t &info = inst.M_GetLineType(L.type);
 
@@ -789,7 +789,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (inst.level.isLinedef(obj))
 		{
-			const auto &L = inst.level.linedefs[obj];
+			const auto &L = inst.level.getLinedef(obj);
 
 			int right_mask = SolidMask(&L, Side::right);
 			int  left_mask = SolidMask(&L, Side::left);
@@ -808,7 +808,7 @@ void UI_LineBox::UpdateField(int field)
 	{
 		if (inst.level.isLinedef(obj))
 		{
-			int type_num = inst.level.linedefs[obj].type;
+			int type_num = inst.level.getLinedef(obj).type;
 
 			mFixUp.setInputValue(type, SString(type_num).c_str());
 
@@ -842,7 +842,7 @@ void UI_LineBox::UpdateField(int field)
 		{
 			actkind->activate();
 
-			FlagsFromInt(inst.level.linedefs[obj].flags);
+			FlagsFromInt(inst.level.getLinedef(obj).flags);
 		}
 		else
 		{
@@ -875,7 +875,7 @@ void UI_LineBox::CalcLength()
 
 	int n = obj;
 
-	float len_f = static_cast<float>(inst.level.calcLength(inst.level.linedefs[n]));
+	float len_f = static_cast<float>(inst.level.calcLength(inst.level.getLinedef(n)));
 
 	char buffer[128];
 	snprintf(buffer, sizeof(buffer), "%1.0f", len_f);

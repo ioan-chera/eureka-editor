@@ -717,7 +717,7 @@ public:
 
 	void AddLine(int ld_index)
 	{
-		const auto &ld = inst.level.linedefs[ld_index];
+		const auto &ld = inst.level.getLinedef(ld_index);
 
 		if (!inst.level.isVertex(ld.start) || !inst.level.isVertex(ld.end))
 			return;

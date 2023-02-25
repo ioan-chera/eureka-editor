@@ -238,7 +238,7 @@ static void MarkPolyobjSector(int sector, Document &doc)
 
 	for (i = 0 ; i < doc.numLinedefs(); i++)
 	{
-		auto &L = doc.linedefs[i];
+		auto &L = doc.getMutableLinedef(i);
 
 		if ((L.right >= 0 && doc.getRight(L)->sector == sector) ||
 			(L.left  >= 0 && doc.getLeft(L)->sector  == sector))
@@ -273,7 +273,7 @@ static void MarkPolyobjPoint(double x, double y, Instance &inst)
 
 	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		const auto &L = inst.level.linedefs[i];
+		const auto &L = inst.level.getLinedef(i);
 
 		if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy,
 					(int) inst.level.getStart(L).x(), (int) inst.level.getStart(L).y(),
@@ -304,7 +304,7 @@ static void MarkPolyobjPoint(double x, double y, Instance &inst)
 
 	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		const auto &L = inst.level.linedefs[i];
+		const auto &L = inst.level.getLinedef(i);
 
 		double x_cut;
 
@@ -338,7 +338,7 @@ static void MarkPolyobjPoint(double x, double y, Instance &inst)
 		return;
 	}
 
-	const auto &best_ld = inst.level.linedefs[best_match];
+	const auto &best_ld = inst.level.getLinedef(best_match);
 
 	y1 = inst.level.getStart(best_ld).y();
 	y2 = inst.level.getEnd(best_ld).y();
@@ -397,7 +397,7 @@ void DetectPolyobjSectors(Instance &inst)
 	// -JL- First go through all lines to see if level contains any polyobjs
 	for (i = 0 ; i < inst.level.numLinedefs(); i++)
 	{
-		const auto &L = inst.level.linedefs[i];
+		const auto &L = inst.level.getLinedef(i);
         const linetype_t *type = get(inst.conf.line_types, L.type);
         if(type && type->isPolyObjectSpecial())
 			break;
@@ -507,8 +507,8 @@ static FFixedPoint LineStartCompare(const Document &doc, const void *p1, const v
 	if (line1 == line2)
 		return FFixedPoint();
 
-	const auto &A = doc.linedefs[line1];
-	const auto &B = doc.linedefs[line2];
+	const auto &A = doc.getLinedef(line1);
+	const auto &B = doc.getLinedef(line2);
 
 	// determine left-most vertex of each line
 	const Vertex &C = LineVertexLowest(doc, &A) ? doc.getEnd(A) : doc.getStart(A);
@@ -528,8 +528,8 @@ static FFixedPoint LineEndCompare(const Document &doc, const void *p1, const voi
 	if (line1 == line2)
 		return FFixedPoint{};
 
-	const auto &A = doc.linedefs[line1];
-	const auto &B = doc.linedefs[line2];
+	const auto &A = doc.getLinedef(line1);
+	const auto &B = doc.getLinedef(line2);
 
 	// determine right-most vertex of each line
 	const Vertex &C = LineVertexLowest(doc, &A) ? doc.getStart(A) : doc.getEnd(A);
@@ -575,7 +575,7 @@ void DetectOverlappingLines(Document &doc)
 			{
 				// found an overlap !
 
-				auto &L = doc.linedefs[array[j]];
+				auto &L = doc.getMutableLinedef(array[j]);
 				L.flags |= MLF_IS_OVERLAP;
 				count++;
 			}
@@ -643,7 +643,7 @@ void CalculateWallTips(const Document &doc)
 
 	for (i=0 ; i < doc.numLinedefs(); i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto &L = doc.getLinedef(i);
 
 		if ((L.flags & MLF_IS_OVERLAP) || doc.isZeroLength(L))
 			continue;
@@ -689,14 +689,14 @@ vertex_t *NewVertexFromSplitSeg(seg_t *seg, double x, double y, const Document &
 	num_new_vert++;
 
 	// compute wall-tip info
-	if (seg->linedef < 0 || doc.linedefs[seg->linedef].TwoSided())
+	if (seg->linedef < 0 || doc.getLinedef(seg->linedef).TwoSided())
 	{
 		VertexAddWallTip(vert, -seg->pdx, -seg->pdy, true, true);
 		VertexAddWallTip(vert,  seg->pdx,  seg->pdy, true, true);
 	}
 	else
 	{
-		const auto &L = doc.linedefs[seg->linedef];
+		const auto &L = doc.getLinedef(seg->linedef);
 
 		bool front_open = ((seg->side ? L.left : L.right) >= 0);
 

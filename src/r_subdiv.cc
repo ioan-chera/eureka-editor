@@ -173,7 +173,7 @@ void sector_info_cache_c::Rebuild()
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
 	{
-		const auto &L = inst.level.linedefs[n];
+		const auto &L = inst.level.getLinedef(n);
 
 		CheckBoom242(&L);
 		CheckExtraFloor(&L, n);
@@ -205,7 +205,7 @@ void sector_info_cache_c::Rebuild()
 		CheckSlopeCopyThing(&thing);
 	}
 
-	for (const auto &linedef : inst.level.linedefs)
+	for (const auto &linedef : inst.level.getLinedefs())
 	{
 		CheckPlaneCopy(&linedef);
 	}
@@ -465,7 +465,7 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 		std::swap(ly1, ly2);
 	}
 
-	for (const auto &L2 : inst.level.linedefs)
+	for (const auto &L2 : inst.level.getLinedefs())
 	{
 		if (inst.level.touchesSector(L2, sec_num))
 		{
@@ -680,7 +680,7 @@ fprintf(stderr, "R_SubdivideSector %d\n", num);
 
 	for (int n = exinfo.first_line ; n <= exinfo.last_line ; n++)
 	{
-		const auto &L = inst.level.linedefs[n];
+		const auto &L = inst.level.getLinedef(n);
 
 		if (! inst.level.touchesSector(L, num))
 			continue;

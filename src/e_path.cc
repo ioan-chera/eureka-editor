@@ -56,8 +56,8 @@ select_lines_in_path_flag_e;
 
 static bool MatchingTextures(const Document &doc, int index1, int index2)
 {
-	const auto &L1 = doc.linedefs[index1];
-	const auto &L2 = doc.linedefs[index2];
+	const auto &L1 = doc.getLinedef(index1);
+	const auto &L2 = doc.getLinedef(index2);
 
 	// lines with no sidedefs only match each other
 	if (! doc.getRight(L1) || ! doc.getRight(L2))
@@ -116,13 +116,13 @@ static bool OtherLineDef(const Document &doc, int L, int V, int *L_other, int *V
 		if (n == L)
 			continue;
 
-		if ((match & SLP_OneSided) && !doc.linedefs[n].OneSided())
+		if ((match & SLP_OneSided) && !doc.getLinedef(n).OneSided())
 			continue;
 
 		for (int k = 0 ; k < 2 ; k++)
 		{
-			int v1 = doc.linedefs[n].start;
-			int v2 = doc.linedefs[n].end;
+			int v1 = doc.getLinedef(n).start;
+			int v2 = doc.getLinedef(n).end;
 
 			if (k == 1)
 				std::swap(v1, v2);
@@ -197,7 +197,7 @@ void Instance::CMD_LIN_SelectPath()
 
 	int start_L = edit.highlight.num;
 
-	if ((match & SLP_OneSided) && !level.linedefs[start_L].OneSided())
+	if ((match & SLP_OneSided) && !level.getLinedef(start_L).OneSided())
 		return;
 
 	bool unset_them = false;
@@ -209,8 +209,8 @@ void Instance::CMD_LIN_SelectPath()
 
 	seen.set(start_L);
 
-	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L].start, seen, match);
-	SelectLinesInHalfPath(level, start_L, level.linedefs[start_L].end,   seen, match);
+	SelectLinesInHalfPath(level, start_L, level.getLinedef(start_L).start, seen, match);
+	SelectLinesInHalfPath(level, start_L, level.getLinedef(start_L).end,   seen, match);
 
 	Editor_ClearErrorMode();
 
@@ -248,7 +248,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 	bool do_tag     = inst.Exec_HasFlag("/tag");
 	bool do_special = inst.Exec_HasFlag("/special");
 
-	for (const auto &L : inst.level.linedefs)
+	for (const auto &L : inst.level.getLinedefs())
 	{
 		if (! L.TwoSided())
 			continue;
@@ -469,7 +469,7 @@ void Instance::CMD_PruneUnused()
 	selection_c used_sides(ObjType::sidedefs);
 	selection_c used_verts(ObjType::vertices);
 
-	for (const auto &L : level.linedefs)
+	for (const auto &L : level.getLinedefs())
 	{
 		used_verts.set(L.start);
 		used_verts.set(L.end);
@@ -525,7 +525,7 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 	{
 		changes = false;
 
-		for (const auto &L : inst.level.linedefs)
+		for (const auto &L : inst.level.getLinedefs())
 		{
 			if (! L.TwoSided())
 				continue;

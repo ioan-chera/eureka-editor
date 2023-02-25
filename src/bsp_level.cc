@@ -185,7 +185,7 @@ static void BlockAdd(int blk_num, int line_index)
 
 static void BlockAddLine(int line_index, const Document &doc)
 {
-	const auto &L = doc.linedefs[line_index];
+	const auto &L = doc.getLinedef(line_index);
 
 	int x1 = (int) doc.getStart(L).x();
 	int y1 = (int) doc.getStart(L).y();
@@ -262,7 +262,7 @@ static void CreateBlockmap(const Document &doc)
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
 		// ignore zero-length lines
-		if (doc.isZeroLength(doc.linedefs[i]))
+		if (doc.isZeroLength(doc.getLinedef(i)))
 			continue;
 
 		BlockAddLine(i, doc);
@@ -469,7 +469,7 @@ static void FindBlockmapLimits(bbox_t *bbox, const Document &doc)
 
 	for (int i=0 ; i < doc.numLinedefs() ; i++)
 	{
-		const auto &L = doc.linedefs[i];
+		const auto &L = doc.getLinedef(i);
 
 		if (!doc.isZeroLength(L))
 		{
@@ -620,7 +620,7 @@ static void Reject_Free()
 //
 static void Reject_GroupSectors(const Document &doc)
 {
-	for(const auto &L : doc.linedefs)
+	for(const auto &L : doc.getLinedefs())
 	{
 		if (L.right < 0 || L.left < 0)
 			continue;
@@ -884,7 +884,7 @@ static inline SideDef *SafeLookupSidedef(u16_t num)
 
 static inline int VanillaSegDist(const seg_t *seg, const Document &doc)
 {
-	const auto &L = doc.linedefs[seg->linedef];
+	const auto &L = doc.getLinedef(seg->linedef);
 
 	double lx = seg->side ? doc.getEnd(L).x() : doc.getStart(L).x();
 	double ly = seg->side ? doc.getEnd(L).y() : doc.getStart(L).y();
@@ -1728,7 +1728,7 @@ static void LoadLevel(Instance &inst)
 
 	GetVertices(inst.level);
 
-	for(auto &L : inst.level.linedefs)
+	for(auto &L : inst.level.getMutableLinedefs())
 	{
 		if (L.right >= 0 || L.left >= 0)
 			num_real_lines++;
@@ -2221,7 +2221,7 @@ static build_result_e BuildLevel(nodebuildinfo_t *info, int lev_idx, Instance &i
 	FreeQuickAllocCuts();
 
 	// clear some fake line flags
-	for(auto &linedef : inst.level.linedefs)
+	for(auto &linedef : inst.level.getMutableLinedefs())
 		linedef.flags &= ~(MLF_IS_PRECIOUS | MLF_IS_OVERLAP);
 
 	return ret;
