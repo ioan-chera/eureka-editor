@@ -597,7 +597,7 @@ void Instance::DoBeginDrag()
 				Objid sec = hover::getNearestSector(level, T.xy());
 
 				if (sec.valid())
-					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num]->floorh);
+					edit.drag_thing_floorh = static_cast<float>(level.sectors[sec.num].floorh);
 			}
 		}
 	}

@@ -54,13 +54,7 @@ TEST(EChecks, FindFreeTag)
 	std::vector<Sector> sectors;
 	auto assignSectors = [&inst, &sectors]()
 	{
-		inst.level.sectors.clear();
-		for(Sector &sector : sectors)
-		{
-			auto newSector = std::make_unique<Sector>();
-			*newSector = sector;
-			inst.level.sectors.push_back(std::move(newSector));
-		}
+		inst.level.sectors = sectors;
 	};
 
 	// Check a level just with lines
@@ -103,25 +97,25 @@ TEST(EChecks, FindFreeTag)
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
 	// Also tag one sector 1
-	inst.level.sectors[2]->tag = 1;
+	inst.level.sectors[2].tag = 1;
 	ASSERT_EQ(findFreeTag(inst, false), 2);
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
 	// Tag all of them 1: result should be 0 by now
 	inst.level.linedefs[0].tag = inst.level.linedefs[2].tag = 1;
-	inst.level.sectors[0]->tag = inst.level.sectors[1]->tag = 1;
+	inst.level.sectors[0].tag = inst.level.sectors[1].tag = 1;
 	ASSERT_EQ(findFreeTag(inst, false), 0);
 	ASSERT_EQ(findFreeTag(inst, true), 0);
 
 	// Restore their tags but tag one by a bigger amount
 	inst.level.linedefs[0].tag = inst.level.linedefs[2].tag = 0;
 	inst.level.linedefs[2].tag = 4;
-	inst.level.sectors[0]->tag = inst.level.sectors[1]->tag = 0;
+	inst.level.sectors[0].tag = inst.level.sectors[1].tag = 0;
 	ASSERT_EQ(findFreeTag(inst, false), 2);
 	ASSERT_EQ(findFreeTag(inst, true), 2);
 
 	// Tag one sector by the remaining gap
-	inst.level.sectors[1]->tag = 2;
+	inst.level.sectors[1].tag = 2;
 	ASSERT_EQ(findFreeTag(inst, false), 3);
 	ASSERT_EQ(findFreeTag(inst, true), 3);
 
@@ -151,7 +145,7 @@ TEST(EChecks, FindFreeTag)
 	for(int i = 0; i < 666; ++i)
 	{
 		lines[i].tag = i;
-		inst.level.sectors[i]->tag = i;
+		inst.level.sectors[i].tag = i;
 	}
 	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 666);
@@ -173,7 +167,7 @@ TEST(EChecks, FindFreeTag)
 	inst.conf.features.tag_666 = Tag666Rules::disabled;	// essentially the same
 	ASSERT_EQ(findFreeTag(inst, false), 667);
 	ASSERT_EQ(findFreeTag(inst, true), 667);
-	inst.level.sectors[667]->tag = 667;
+	inst.level.sectors[667].tag = 667;
 	inst.conf.features.tag_666 = Tag666Rules::doom;	// enable it
 	ASSERT_EQ(findFreeTag(inst, false), 668);
 	ASSERT_EQ(findFreeTag(inst, true), 668);
@@ -204,9 +198,7 @@ TEST(EChecks, TagsApplyNewValue)
 	}
 	for(Sector &sector : sectors)
 	{
-		auto newSector = std::make_unique<Sector>();
-		*newSector = sector;
-		inst.level.sectors.push_back(std::move(newSector));
+		inst.level.sectors.push_back(sector);
 	}
 
 	// Prepare the selection lists
@@ -222,7 +214,7 @@ TEST(EChecks, TagsApplyNewValue)
 	for(const auto &line : inst.level.linedefs)
 		ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
-		ASSERT_EQ(sector->tag, 0);
+		ASSERT_EQ(sector.tag, 0);
 	ASSERT_EQ(inst.level.checks.mLastTag, 0);	// didn't change
 
 	// Select a couple of lines
@@ -235,7 +227,7 @@ TEST(EChecks, TagsApplyNewValue)
 		else
 			ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
-		ASSERT_EQ(sector->tag, 0);
+		ASSERT_EQ(sector.tag, 0);
 	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed
 
 	// Now select a couple of sectors
@@ -250,10 +242,10 @@ TEST(EChecks, TagsApplyNewValue)
 		else
 			ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
-		if(sector.get() == inst.level.sectors[2].get() || sector.get() == inst.level.sectors[4].get())
-			ASSERT_EQ(sector->tag, 2);
+		if(&sector == &inst.level.sectors[2] || &sector == &inst.level.sectors[4])
+			ASSERT_EQ(sector.tag, 2);
 		else
-			ASSERT_EQ(sector->tag, 0);
+			ASSERT_EQ(sector.tag, 0);
 	ASSERT_EQ(inst.level.checks.mLastTag, 2);	// changed
 
 	inst.edit.Selected->clear(4);
@@ -264,12 +256,12 @@ TEST(EChecks, TagsApplyNewValue)
 		else
 			ASSERT_EQ(line.tag, 0);
 	for(const auto &sector : inst.level.sectors)
-		if(sector.get() == inst.level.sectors[2].get())
-			ASSERT_EQ(sector->tag, 1);
-		else if(sector == inst.level.sectors[4])
-			ASSERT_EQ(sector->tag, 2);
+		if(&sector == &inst.level.sectors[2])
+			ASSERT_EQ(sector.tag, 1);
+		else if(&sector == &inst.level.sectors[4])
+			ASSERT_EQ(sector.tag, 2);
 		else
-			ASSERT_EQ(sector->tag, 0);
+			ASSERT_EQ(sector.tag, 0);
 
 	ASSERT_EQ(inst.level.checks.mLastTag, 1);	// changed again
 }

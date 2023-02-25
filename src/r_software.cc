@@ -379,7 +379,7 @@ public:
 
 		SideDef *back_sd = (side == Side::left) ? inst.level.getRight(*ld) : inst.level.getLeft(*ld);
 		if (back_sd)
-			back = inst.level.sectors[back_sd->sector].get();
+			back = &inst.level.sectors[back_sd->sector];
 
 		// support for BOOM's 242 "transfer heights" line type
 		Sector temp_front;
@@ -389,7 +389,7 @@ public:
 		if (exfloor->heightsec >= 0)
 		{
 			const auto &dummy = inst.level.sectors[exfloor->heightsec];
-			front = Boom242Sector(front, &temp_front, dummy.get());
+			front = Boom242Sector(front, &temp_front, &dummy);
 		}
 
 		if (back != NULL)
@@ -398,7 +398,7 @@ public:
 			if (exfloor->heightsec >= 0)
 			{
 				const auto &dummy = inst.level.sectors[exfloor->heightsec];
-				back = Boom242Sector(back, &temp_back, dummy.get());
+				back = Boom242Sector(back, &temp_back, &dummy);
 			}
 		}
 
@@ -498,7 +498,7 @@ public:
 			return;
 
 		front = sec;
-		back  = inst.level.sectors[back_sd->sector].get();
+		back  = &inst.level.sectors[back_sd->sector];
 
 		int c_h = std::min(front->ceilh,  back->ceilh);
 		int f_h = std::max(front->floorh, back->floorh);
@@ -928,8 +928,8 @@ public:
 				const auto &real  = inst.level.sectors[thsec];
 				const auto &dummy = inst.level.sectors[exfloor->heightsec];
 
-				if (dummy->floorh > real->floorh &&
-					inst.r_view.z > dummy->floorh &&
+				if (dummy.floorh > real.floorh &&
+					inst.r_view.z > dummy.floorh &&
 					!(info.flags & THINGDEF_CEIL))
 				{
 					return;
@@ -942,12 +942,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: also add z
-			h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - th.h());
+			h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec].ceilh : 192) - th.h());
 			h1 = static_cast<int>(h2 - sprite->height() * scale);
 		}
 		else
 		{
-			h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + th.h());
+			h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec].floorh : 0) + th.h());
 			h2 = static_cast<int>(h1 + sprite->height() * scale);
 		}
 
@@ -1148,7 +1148,7 @@ public:
 	{
 		const auto &S = inst.level.sectors[sec_index];
 
-		int z = (part == PART_CEIL) ? S->ceilh : S->floorh;
+		int z = (part == PART_CEIL) ? S.ceilh : S.floorh;
 
 		// are we dragging this surface?
 		if (inst.edit.action == EditorAction::drag &&
@@ -1308,12 +1308,12 @@ public:
 
 				if (dw->thingFlags & THINGDEF_CEIL)
 				{
-					h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->ceilh : 192) - T.h());
+					h2 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec].ceilh : 192) - T.h());
 					h1 = static_cast<int>(h2 - sprite->height() * scale);
 				}
 				else
 				{
-					h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec]->floorh : 0) + T.h());
+					h1 = static_cast<int>((inst.level.isSector(thsec) ? inst.level.sectors[thsec].floorh : 0) + T.h());
 					h2 = static_cast<int>(h1 + sprite->height() * scale);
 				}
 
@@ -1666,7 +1666,7 @@ public:
 		dh = (dh - hh) / std::max(1, y2 - y1);
 
 		int thsec = inst.r_view.thing_sectors[dw->th];
-		int light = inst.level.isSector(thsec) ? inst.level.sectors[thsec]->light : 255;
+		int light = inst.level.isSector(thsec) ? inst.level.sectors[thsec].light : 255;
 		float dist = static_cast<float>(1.0 / dw->cur_iz);
 
 		/* fill pixels */

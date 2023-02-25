@@ -90,7 +90,7 @@ public:
 	}
 
 	std::vector<Thing> things;
-	std::vector<std::unique_ptr<Sector>> sectors;
+	std::vector<Sector> sectors;
 	std::vector<std::unique_ptr<SideDef>> sidedefs;
 	std::vector<LineDef> linedefs;
 

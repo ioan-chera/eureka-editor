@@ -167,8 +167,8 @@ void sector_info_cache_c::Rebuild()
 		const auto &S = inst.level.sectors[sec];
 
 		infos[sec].Clear();
-		infos[sec].floors.f_plane.Init(static_cast<float>(S->floorh));
-		infos[sec].floors.c_plane.Init(static_cast<float>(S->ceilh));
+		infos[sec].floors.f_plane.Init(static_cast<float>(S.floorh));
+		infos[sec].floors.c_plane.Init(static_cast<float>(S.ceilh));
 	}
 
 	for (int n = 0 ; n < inst.level.numLinedefs(); n++)
@@ -227,7 +227,7 @@ void sector_info_cache_c::CheckBoom242(const LineDef *L)
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (inst.level.sectors[n]->tag == L->tag)
+		if (inst.level.sectors[n].tag == L->tag)
 			infos[n].floors.heightsec = dummy_sec;
 	}
 }
@@ -307,7 +307,7 @@ void sector_info_cache_c::CheckExtraFloor(const LineDef *L, int ld_num)
 	// find all matching sectors
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (inst.level.sectors[n]->tag == sec_tag)
+		if (inst.level.sectors[n].tag == sec_tag)
 			infos[n].floors.floors.push_back(EF);
 	}
 }
@@ -497,12 +497,12 @@ void sector_info_cache_c::PlaneAlignPart(const LineDef *L, Side side, int plane)
 	if (plane > 0)
 	{   // ceiling
 		SlopeFromLine(infos[sec_num].floors.c_plane,
-			lx1, ly1, back->ceilh, vx, vy, front->ceilh);
+			lx1, ly1, back.ceilh, vx, vy, front.ceilh);
 	}
 	else
 	{   // floor
 		SlopeFromLine(infos[sec_num].floors.f_plane,
-			lx1, ly1, back->floorh, vx, vy, front->floorh);
+			lx1, ly1, back.floorh, vx, vy, front.floorh);
 	}
 }
 
@@ -510,23 +510,23 @@ void sector_info_cache_c::PlaneCopy(const LineDef *L, int f1_tag, int c1_tag, in
 {
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (f1_tag > 0 && inst.level.sectors[n]->tag == f1_tag && inst.level.getRight(*L))
+		if (f1_tag > 0 && inst.level.sectors[n].tag == f1_tag && inst.level.getRight(*L))
 		{
 			infos[inst.level.getRight(*L)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 			f1_tag = 0;
 		}
-		if (c1_tag > 0 && inst.level.sectors[n]->tag == c1_tag && inst.level.getRight(*L))
+		if (c1_tag > 0 && inst.level.sectors[n].tag == c1_tag && inst.level.getRight(*L))
 		{
 			infos[inst.level.getRight(*L)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 			c1_tag = 0;
 		}
 
-		if (f2_tag > 0 && inst.level.sectors[n]->tag == f2_tag && inst.level.getLeft(*L))
+		if (f2_tag > 0 && inst.level.sectors[n].tag == f2_tag && inst.level.getLeft(*L))
 		{
 			infos[inst.level.getLeft(*L)->sector].floors.f_plane.Copy(infos[n].floors.f_plane);
 			f2_tag = 0;
 		}
-		if (c2_tag > 0 && inst.level.sectors[n]->tag == c2_tag && inst.level.getLeft(*L))
+		if (c2_tag > 0 && inst.level.sectors[n].tag == c2_tag && inst.level.getLeft(*L))
 		{
 			infos[inst.level.getLeft(*L)->sector].floors.c_plane.Copy(infos[n].floors.c_plane);
 			c2_tag = 0;
@@ -567,7 +567,7 @@ void sector_info_cache_c::PlaneCopyFromThing(const Thing *T, int plane)
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		if (inst.level.sectors[n]->tag == T->arg1)
+		if (inst.level.sectors[n].tag == T->arg1)
 		{
 			if (plane > 0)
 				infos[o.num].floors.c_plane.Copy(infos[n].floors.c_plane);

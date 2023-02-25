@@ -86,11 +86,11 @@ void Instance::FreshLevel()
 {
 	level.basis.clearAll();
 
-	auto sec = std::make_unique<Sector>();
+	Sector sec{};
 
 
-	sec->SetDefaults(conf);
-	level.sectors.push_back(std::move(sec));
+	sec.SetDefaults(conf);
+	level.sectors.push_back(sec);
 
 	for(int i = 0; i < 4; i++)
 	{
@@ -448,22 +448,22 @@ void Instance::LoadSectors(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading sectors.\n");
 
-		auto sec = std::make_unique<Sector>();
+		Sector sec{};
 
-		sec->floorh = LE_S16(raw.floorh);
-		sec->ceilh  = LE_S16(raw.ceilh);
+		sec.floorh = LE_S16(raw.floorh);
+		sec.ceilh  = LE_S16(raw.ceilh);
 
 		UpperCaseShortStr(raw.floor_tex, 8);
 		UpperCaseShortStr(raw. ceil_tex, 8);
 
-		sec->floor_tex = BA_InternaliseString(SString(raw.floor_tex, 8));
-		sec->ceil_tex  = BA_InternaliseString(SString(raw.ceil_tex,  8));
+		sec.floor_tex = BA_InternaliseString(SString(raw.floor_tex, 8));
+		sec.ceil_tex  = BA_InternaliseString(SString(raw.ceil_tex,  8));
 
-		sec->light = LE_U16(raw.light);
-		sec->type  = LE_U16(raw.type);
-		sec->tag   = LE_S16(raw.tag);
+		sec.light = LE_U16(raw.light);
+		sec.type  = LE_U16(raw.type);
+		sec.tag   = LE_S16(raw.tag);
 
-		level.sectors.push_back(std::move(sec));
+		level.sectors.push_back(sec);
 	}
 }
 
@@ -472,11 +472,11 @@ void Instance::CreateFallbackSector()
 {
 	gLog.printf("Creating a fallback sector.\n");
 
-	auto sec = std::make_unique<Sector>();
+	Sector sec{};
 
-	sec->SetDefaults(conf);
+	sec.SetDefaults(conf);
 
-	level.sectors.push_back(std::move(sec));
+	level.sectors.push_back(sec);
 }
 
 void Instance::CreateFallbackSideDef()
@@ -1349,15 +1349,15 @@ void Instance::SaveSectors()
 	{
 		raw_sector_t raw;
 
-		raw.floorh = LE_S16(sec->floorh);
-		raw.ceilh  = LE_S16(sec->ceilh);
+		raw.floorh = LE_S16(sec.floorh);
+		raw.ceilh  = LE_S16(sec.ceilh);
 
-		W_StoreString(raw.floor_tex, sec->FloorTex(), sizeof(raw.floor_tex));
-		W_StoreString(raw.ceil_tex,  sec->CeilTex(),  sizeof(raw.ceil_tex));
+		W_StoreString(raw.floor_tex, sec.FloorTex(), sizeof(raw.floor_tex));
+		W_StoreString(raw.ceil_tex,  sec.CeilTex(),  sizeof(raw.ceil_tex));
 
-		raw.light = LE_U16(sec->light);
-		raw.type  = LE_U16(sec->type);
-		raw.tag   = LE_U16(sec->tag);
+		raw.light = LE_U16(sec.light);
+		raw.type  = LE_U16(sec.type);
+		raw.tag   = LE_U16(sec.tag);
 
 		lump->Write(&raw, sizeof(raw));
 	}

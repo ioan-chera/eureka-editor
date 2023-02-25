@@ -1027,7 +1027,7 @@ public:
 			if (b_ex->heightsec >= 0)
 			{
 				const auto &dummy = inst.level.sectors[b_ex->heightsec];
-				if (dummy->floorh < back->floorh)
+				if (dummy.floorh < back->floorh)
 					invis_back = true;
 			}
 
@@ -1037,9 +1037,9 @@ public:
 			if (f_ex->heightsec >= 0)
 			{
 				const auto &dummy = inst.level.sectors[f_ex->heightsec];
-				if (dummy->floorh < front->floorh)
+				if (dummy.floorh < front->floorh)
 				{
-					dummy_fp.Init(static_cast<float>(dummy->floorh));
+					dummy_fp.Init(static_cast<float>(dummy.floorh));
 					f_floorp = &dummy_fp;
 				}
 			}
@@ -1075,8 +1075,8 @@ public:
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
 
-					int top_h = dummy->ceilh;
-					int bottom_h = dummy->floorh;
+					int top_h = dummy.ceilh;
+					int bottom_h = dummy.floorh;
 
 					if (EF.flags & EXFL_VAVOOM)
 						std::swap(top_h, bottom_h);
@@ -1136,48 +1136,48 @@ public:
 		{
 			const auto &dummy = inst.level.sectors[exfloor->heightsec];
 
-			if (dummy->floorh > sec->floorh && inst.r_view.z < dummy->floorh)
+			if (dummy.floorh > sec.floorh && inst.r_view.z < dummy.floorh)
 			{
 				// space C : underwater
-				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->floorh), dummy->CeilTex());
-				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(sec->floorh), dummy->FloorTex());
+				DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(dummy.floorh), dummy.CeilTex());
+				DrawSectorPolygons(&sec, subdiv, NULL, +1, static_cast<float>(sec.floorh), dummy.FloorTex());
 
 				// this helps the view to not look weird when clipping around
-				if (dummy->ceilh > sec->floorh)
-					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+				if (dummy.ceilh > sec.floorh)
+					DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(dummy.ceilh), sec.CeilTex());
 			}
-			else if (dummy->ceilh < sec->ceilh && inst.r_view.z > dummy->ceilh)
+			else if (dummy.ceilh < sec.ceilh && inst.r_view.z > dummy.ceilh)
 			{
 				// space A : head over ceiling
-				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), dummy->FloorTex());
-				DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(sec->ceilh), dummy->CeilTex());
+				DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(dummy.ceilh), dummy.FloorTex());
+				DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(sec.ceilh), dummy.CeilTex());
 
-				if (dummy->floorh < sec->ceilh)
-					DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				if (dummy.floorh < sec.ceilh)
+					DrawSectorPolygons(&sec, subdiv, NULL, +1, static_cast<float>(dummy.floorh), sec.FloorTex());
 			}
-			else if (dummy->floorh < sec->floorh)
+			else if (dummy.floorh < sec.floorh)
 			{
 				// invisible platform
-				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				DrawSectorPolygons(&sec, subdiv, NULL, +1, static_cast<float>(dummy.floorh), sec.FloorTex());
 
-				if (!inst.is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+				if (!inst.is_sky(sec.CeilTex()))
+					DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(dummy.ceilh), sec.CeilTex());
 			}
 			else
 			{
 				// space B : normal
-				DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(dummy->floorh), sec->FloorTex());
+				DrawSectorPolygons(&sec, subdiv, NULL, +1, static_cast<float>(dummy.floorh), sec.FloorTex());
 
-				if (!inst.is_sky(sec->CeilTex()))
-					DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(dummy->ceilh), sec->CeilTex());
+				if (!inst.is_sky(sec.CeilTex()))
+					DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(dummy.ceilh), sec.CeilTex());
 			}
 		} else {
 
 			// normal sector
-			DrawSectorPolygons(sec.get(), subdiv, &exfloor->f_plane, +1, static_cast<float>(sec->floorh), sec->FloorTex());
+			DrawSectorPolygons(&sec, subdiv, &exfloor->f_plane, +1, static_cast<float>(sec.floorh), sec.FloorTex());
 
-			if (!inst.is_sky(sec->CeilTex()))
-				DrawSectorPolygons(sec.get(), subdiv, &exfloor->c_plane, -1, static_cast<float>(sec->ceilh), sec->CeilTex());
+			if (!inst.is_sky(sec.CeilTex()))
+				DrawSectorPolygons(&sec, subdiv, &exfloor->c_plane, -1, static_cast<float>(sec.ceilh), sec.CeilTex());
 		}
 
 		// draw planes of 3D floors
@@ -1191,11 +1191,11 @@ public:
 			bool is_trans = (EF.flags & EXFL_TRANSLUC) != 0;
 			(void) is_trans;
 
-			int top_h = dummy->ceilh;
-			int bottom_h = dummy->floorh;
+			int top_h = dummy.ceilh;
+			int bottom_h = dummy.floorh;
 
-			SString top_tex = dummy->CeilTex();
-			SString bottom_tex = dummy->FloorTex();
+			SString top_tex = dummy.CeilTex();
+			SString bottom_tex = dummy.FloorTex();
 
 			if (EF.flags & EXFL_TOP)
 				bottom_h = top_h;
@@ -1207,8 +1207,8 @@ public:
 				std::swap(top_tex, bottom_tex);
 			}
 
-			DrawSectorPolygons(sec.get(), subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
-			DrawSectorPolygons(sec.get(), subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
+			DrawSectorPolygons(&sec, subdiv, NULL, +1, static_cast<float>(top_h), top_tex);
+			DrawSectorPolygons(&sec, subdiv, NULL, -1, static_cast<float>(bottom_h), bottom_tex);
 		}
 	}
 
@@ -1278,12 +1278,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th.h());
+			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num].ceilh : 192) - th.h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th.h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num].floorh : 0) + th.h());
 			z2 = z1 + scale_h;
 		}
 
@@ -1310,7 +1310,7 @@ public:
 
 		if (inst.r_view.lighting && !fullbright)
 		{
-			int light = inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->light : 255;
+			int light = inst.level.isSector(sec_num) ? inst.level.sectors[sec_num].light : 255;
 
 			L = DoomLightToFloat(light, ty /* dist */);
 		}
@@ -1399,7 +1399,7 @@ public:
 	{
 		const auto &sec = inst.level.sectors[sec_index];
 
-		float z = static_cast<float>((part == PART_CEIL) ? sec->ceilh : sec->floorh);
+		float z = static_cast<float>((part == PART_CEIL) ? sec.ceilh : sec.floorh);
 
 		// are we dragging this surface?
 		if (inst.edit.action == EditorAction::drag &&
@@ -1479,12 +1479,12 @@ public:
 		if (info.flags & THINGDEF_CEIL)
 		{
 			// IOANCH 9/2015: add thing z (for Hexen format)
-			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->ceilh : 192) - th.h());
+			z2 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num].ceilh : 192) - th.h());
 			z1 = z2 - scale_h;
 		}
 		else
 		{
-			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num]->floorh : 0) + th.h());
+			z1 = static_cast<float>((inst.level.isSector(sec_num) ? inst.level.sectors[sec_num].floorh : 0) + th.h());
 			z2 = z1 + scale_h;
 		}
 

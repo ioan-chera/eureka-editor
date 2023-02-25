@@ -770,7 +770,7 @@ static void Sectors_FindUnknown(selection_c& list, std::map<int, int>& types, co
 
 	for (int n = 0 ; n < inst.level.numSectors(); n++)
 	{
-		int type_num = inst.level.sectors[n]->type;
+		int type_num = inst.level.sectors[n].type;
 
 		// always ignore type #0
 		if (type_num == 0)
@@ -892,7 +892,7 @@ static void Sectors_FindBadCeil(selection_c& sel, const Document &doc)
 
 	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
-		if (doc.sectors[i]->ceilh < doc.sectors[i]->floorh)
+		if (doc.sectors[i].ceilh < doc.sectors[i].floorh)
 			sel.set(i);
 	}
 }
@@ -909,9 +909,9 @@ static void Sectors_FixBadCeil(Document &doc)
 
 	for (int i = 0 ; i < doc.numSectors(); i++)
 	{
-		if (doc.sectors[i]->ceilh < doc.sectors[i]->floorh)
+		if (doc.sectors[i].ceilh < doc.sectors[i].floorh)
 		{
-			op.changeSector(i, Sector::F_CEILH, doc.sectors[i]->floorh);
+			op.changeSector(i, Sector::F_CEILH, doc.sectors[i].floorh);
 		}
 	}
 }
@@ -2972,7 +2972,7 @@ void ChecksModule::tagsUsedRange(int *min_tag, int *max_tag) const
 
 	for (i = 0 ; i < doc.numSectors() ; i++)
 	{
-		int tag = doc.sectors[i]->tag;
+		int tag = doc.sectors[i].tag;
 
 		// ignore special tags
 		if (inst.conf.features.tag_666 != Tag666Rules::disabled && (tag == 666 || tag == 667))
@@ -3092,7 +3092,7 @@ static bool LD_tag_exists(int tag, const Document &doc)
 static bool SEC_tag_exists(int tag, const Document &doc)
 {
 	for (const auto &sector : doc.sectors)
-		if (sector->tag == tag)
+		if (sector.tag == tag)
 			return true;
 
 	return false;
@@ -3105,7 +3105,7 @@ static void Tags_FindUnmatchedSectors(selection_c& secs, const Instance &inst)
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		int tag = inst.level.sectors[s]->tag;
+		int tag = inst.level.sectors[s].tag;
 
 		if (tag <= 0)
 			continue;
@@ -3257,7 +3257,7 @@ static void Tags_FindBeastMarks(selection_c& secs, const Instance &inst)
 
 	for (int s = 0 ; s < inst.level.numSectors(); s++)
 	{
-		int tag = inst.level.sectors[s]->tag;
+		int tag = inst.level.sectors[s].tag;
 
 		if (! SEC_check_beast_mark(tag, inst))
 			secs.set(s);
@@ -3844,7 +3844,7 @@ static void Textures_FindUnknownFlat(selection_c& secs,
 
 		for (int part = 0 ; part < 2 ; part++)
 		{
-			SString flat = part ? S->CeilTex() : S->FloorTex();
+			SString flat = part ? S.CeilTex() : S.FloorTex();
 
 			if (! inst.wad.images.W_FlatIsKnown(inst.conf, flat))
 			{
@@ -3955,10 +3955,10 @@ static void Textures_FixUnknownFlat(Instance &inst)
 	{
 		const auto &S = inst.level.sectors[s];
 
-		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S->FloorTex()))
+		if (! inst.wad.images.W_FlatIsKnown(inst.conf, S.FloorTex()))
 			op.changeSector(s, Sector::F_FLOOR_TEX, new_floor);
 
-		if (!inst.wad.images.W_FlatIsKnown(inst.conf, S->CeilTex()))
+		if (!inst.wad.images.W_FlatIsKnown(inst.conf, S.CeilTex()))
 			op.changeSector(s, Sector::F_CEIL_TEX, new_ceil);
 	}
 }
@@ -4534,7 +4534,7 @@ int findFreeTag(const Instance &inst, bool forsector)
 	for(int i = 0; i < doc.numLinedefs(); ++i)
 		addtag(doc.linedefs[i].tag);
 	for(int i = 0; i < doc.numSectors(); ++i)
-		addtag(doc.sectors[i]->tag);
+		addtag(doc.sectors[i].tag);
 
 	while(tags.count(freetag) || (forsector &&
 								  inst.conf.features.tag_666 != Tag666Rules::disabled &&

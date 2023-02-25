@@ -327,7 +327,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 		{
 			sector_map[*it] = (int)clip_board->sectors.size();
 
-			clip_board->sectors.push_back(*doc.sectors[*it]);
+			clip_board->sectors.push_back(doc.sectors[*it]);
 		}
 	}
 
@@ -483,7 +483,7 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 
 		sector_map[i] = new_s;
 
-		*S = clip_board->sectors[i];
+		S = clip_board->sectors[i];
 	}
 
 	for (i = 0 ; i < clip_board->sides.size() ; i++)

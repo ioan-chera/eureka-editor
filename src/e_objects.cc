@@ -87,9 +87,9 @@ void ObjectsModule::createSquare(EditOperation &op, int model) const
 	int new_sec = op.addNew(ObjType::sectors);
 
 	if (model >= 0)
-		*doc.sectors[new_sec] = *doc.sectors[model];
+		doc.sectors[new_sec] = doc.sectors[model];
 	else
-		doc.sectors[new_sec]->SetDefaults(inst.conf);
+		doc.sectors[new_sec].SetDefaults(inst.conf);
 
 	double x1 = inst.grid.QuantSnapX(inst.edit.map.x, false);
 	double y1 = inst.grid.QuantSnapX(inst.edit.map.y, false);
@@ -179,9 +179,9 @@ int ObjectsModule::sectorNew(EditOperation &op, int model, int model2, int model
 	if (model < 0) model = model3;
 
 	if (model < 0)
-		doc.sectors[new_sec]->SetDefaults(inst.conf);
+		doc.sectors[new_sec].SetDefaults(inst.conf);
 	else
-		*doc.sectors[new_sec] = *doc.sectors[model];
+		doc.sectors[new_sec] = doc.sectors[model];
 
 	return new_sec;
 }
@@ -766,8 +766,8 @@ void ObjectsModule::doMoveObjects(EditOperation &op, const selection_c &list, co
 			{
 				const auto & S = doc.sectors[*it];
 
-				op.changeSector(*it, Sector::F_FLOORH, S->floorh + (int)delta.z);
-				op.changeSector(*it, Sector::F_CEILH,  S->ceilh  + (int)delta.z);
+				op.changeSector(*it, Sector::F_FLOORH, S.floorh + (int)delta.z);
+				op.changeSector(*it, Sector::F_CEILH,  S.ceilh  + (int)delta.z);
 			}
 
 			/* FALL-THROUGH !! */
@@ -952,14 +952,14 @@ void ObjectsModule::transferSectorProperties(EditOperation &op, int src_sec, int
 {
 	const auto & sector = doc.sectors[src_sec];
 
-	op.changeSector(dest_sec, Sector::F_FLOORH,    sector->floorh);
-	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector->floor_tex);
-	op.changeSector(dest_sec, Sector::F_CEILH,     sector->ceilh);
-	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector->ceil_tex);
+	op.changeSector(dest_sec, Sector::F_FLOORH,    sector.floorh);
+	op.changeSector(dest_sec, Sector::F_FLOOR_TEX, sector.floor_tex);
+	op.changeSector(dest_sec, Sector::F_CEILH,     sector.ceilh);
+	op.changeSector(dest_sec, Sector::F_CEIL_TEX,  sector.ceil_tex);
 
-	op.changeSector(dest_sec, Sector::F_LIGHT,  sector->light);
-	op.changeSector(dest_sec, Sector::F_TYPE,   sector->type);
-	op.changeSector(dest_sec, Sector::F_TAG,    sector->tag);
+	op.changeSector(dest_sec, Sector::F_LIGHT,  sector.light);
+	op.changeSector(dest_sec, Sector::F_TYPE,   sector.type);
+	op.changeSector(dest_sec, Sector::F_TAG,    sector.tag);
 }
 
 
@@ -1907,8 +1907,8 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 	{
 		const auto & S = doc.sectors[*it];
 
-		lz = std::min(lz, S->floorh);
-		hz = std::max(hz, S->ceilh);
+		lz = std::min(lz, S.floorh);
+		hz = std::max(hz, S.ceilh);
 	}
 
 	int mid_z;
@@ -1926,8 +1926,8 @@ void ObjectsModule::doScaleSectorHeights(EditOperation &op, const selection_c &l
 	{
 		const auto & S = doc.sectors[*it];
 
-		int new_f = mid_z + iround((S->floorh - mid_z) * scale_z);
-		int new_c = mid_z + iround((S-> ceilh - mid_z) * scale_z);
+		int new_f = mid_z + iround((S.floorh - mid_z) * scale_z);
+		int new_c = mid_z + iround((S. ceilh - mid_z) * scale_z);
 
 		op.changeSector(*it, Sector::F_FLOORH, new_f);
 		op.changeSector(*it, Sector::F_CEILH,  new_c);

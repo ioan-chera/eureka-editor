@@ -217,7 +217,7 @@ int Basis::addNew(ObjType type)
 
 	case ObjType::sectors:
 		op.objnum = doc.numSectors();
-		op.sector = std::make_unique<Sector>();
+		op.sector = Sector();
 		break;
 
 	default:
@@ -518,7 +518,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::sectors:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSectors());
-		pos = reinterpret_cast<int *>(basis.doc.sectors[objnum].get());
+		pos = reinterpret_cast<int *>(&basis.doc.sectors[objnum]);
 		break;
 	case ObjType::sidedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
@@ -612,11 +612,11 @@ Vertex Basis::EditUnit::rawDeleteVertex(Document &doc) const
 //
 // Raw delete sector (and update sidedef refs)
 //
-std::unique_ptr<Sector> Basis::EditUnit::rawDeleteSector(Document &doc) const
+Sector Basis::EditUnit::rawDeleteSector(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSectors());
 
-	auto result = std::move(doc.sectors[objnum]);
+	auto result = doc.sectors[objnum];
 	doc.sectors.erase(doc.sectors.begin() + objnum);
 
 	// fix sidedef references
@@ -710,7 +710,7 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 
 	case ObjType::sectors:
 		rawInsertSector(basis.doc);
-		sector.reset();
+		sector = {};
 		break;
 
 	case ObjType::linedefs:
@@ -763,7 +763,7 @@ void Basis::EditUnit::rawInsertVertex(Document &doc)
 void Basis::EditUnit::rawInsertSector(Document &doc)
 {
 	SYS_ASSERT(0 <= objnum && objnum <= doc.numSectors());
-	doc.sectors.insert(doc.sectors.begin() + objnum, std::move(sector));
+	doc.sectors.insert(doc.sectors.begin() + objnum, sector);
 
 	// fix all sidedef references
 
@@ -822,7 +822,7 @@ void Basis::EditUnit::deleteFinally()
 	{
 	case ObjType::things:   thing = {}; break;
 	case ObjType::vertices: vertex = {}; break;
-	case ObjType::sectors:  sector.reset(); break;
+	case ObjType::sectors:  sector = {}; break;
 	case ObjType::sidedefs: sidedef.reset(); break;
 	case ObjType::linedefs: linedef = {}; break;
 

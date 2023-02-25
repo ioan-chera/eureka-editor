@@ -308,7 +308,7 @@ void UI_SectorBox::headroom_callback(Fl_Widget *w, void *data)
 
 			for (sel_iter_c it(box->inst.edit.Selected); !it.done(); it.next())
 			{
-				int new_h = box->inst.level.sectors[*it]->floorh + room;
+				int new_h = box->inst.level.sectors[*it].floorh + room;
 
 				new_h = clamp(-32767, new_h, 32767);
 
@@ -500,7 +500,7 @@ void UI_SectorBox::InstallSectorType(int mask, int value)
 
 		for (sel_iter_c it(inst.edit.Selected) ; !it.done() ; it.next())
 		{
-			int old_type = inst.level.sectors[*it]->type;
+			int old_type = inst.level.sectors[*it].type;
 
 			op.changeSector(*it, Sector::F_TYPE, (old_type & ~mask) | value);
 		}
@@ -701,7 +701,7 @@ void UI_SectorBox::SetObj(int _index, int _count)
 
 void UI_SectorBox::UpdateField(int field)
 {
-	const Sector *sector = inst.level.isSector(obj) ? inst.level.sectors[obj].get() : nullptr;
+	const Sector *sector = inst.level.isSector(obj) ? &inst.level.sectors[obj] : nullptr;
 	if (field < 0 || field == Sector::F_FLOORH || field == Sector::F_CEILH)
 	{
 		if (inst.level.isSector(obj))

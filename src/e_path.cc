@@ -263,7 +263,7 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 		const auto &S2 = inst.level.sectors[sec2];
 
 		// skip closed doors
-		if (! allow_doors && (S1->floorh >= S1->ceilh || S2->floorh >= S2->ceilh))
+		if (! allow_doors && (S1.floorh >= S1.ceilh || S2.floorh >= S2.ceilh))
 			continue;
 
 		if (can_walk)
@@ -272,32 +272,32 @@ static bool GrowContiguousSectors(const Instance &inst, selection_c &seen)
 				continue;
 
 			// too big a step?
-			if (abs(S1->floorh - S2->floorh) > PLAYER_STEP_H)
+			if (abs(S1.floorh - S2.floorh) > PLAYER_STEP_H)
 				continue;
 
 			// player wouldn't fit vertically?
-			int f_max = std::max(S1->floorh, S2->floorh);
-			int c_min = std::min(S1-> ceilh, S2-> ceilh);
+			int f_max = std::max(S1.floorh, S2.floorh);
+			int c_min = std::min(S1. ceilh, S2. ceilh);
 
 			if (c_min - f_max < inst.conf.miscInfo.player_h)
 			{
 				// ... but allow doors
-				if (! (allow_doors && (S1->floorh == S1->ceilh || S2->floorh == S2->ceilh)))
+				if (! (allow_doors && (S1.floorh == S1.ceilh || S2.floorh == S2.ceilh)))
 					continue;
 			}
 		}
 
 		/* perform match */
 
-		if (do_floor_h && (S1->floorh != S2->floorh)) continue;
-		if (do_ceil_h  && (S1->ceilh  != S2->ceilh))  continue;
+		if (do_floor_h && (S1.floorh != S2.floorh)) continue;
+		if (do_ceil_h  && (S1.ceilh  != S2.ceilh))  continue;
 
-		if (do_floor_tex && (S1->floor_tex != S2->floor_tex)) continue;
-		if (do_ceil_tex  && (S1->ceil_tex  != S2->ceil_tex))  continue;
+		if (do_floor_tex && (S1.floor_tex != S2.floor_tex)) continue;
+		if (do_ceil_tex  && (S1.ceil_tex  != S2.ceil_tex))  continue;
 
-		if (do_light   && (S1->light != S2->light)) continue;
-		if (do_tag     && (S1->tag   != S2->tag  )) continue;
-		if (do_special && (S1->type  != S2->type))  continue;
+		if (do_light   && (S1.light != S2.light)) continue;
+		if (do_tag     && (S1.tag   != S2.tag  )) continue;
+		if (do_special && (S1.type  != S2.type))  continue;
 
 		// check if only one of the sectors is part of current set
 		// (doing this _AFTER_ the matches since this can be a bit slow)
@@ -538,8 +538,8 @@ static void CalcPropagation(const Instance &inst, std::vector<byte>& vec, bool i
 
 			// check for doors
 			if (!ignore_doors &&
-				(std::min(inst.level.sectors[sec1]->ceilh, inst.level.sectors[sec2]->ceilh) <=
-				 std::max(inst.level.sectors[sec1]->floorh, inst.level.sectors[sec2]->floorh)))
+				(std::min(inst.level.sectors[sec1].ceilh, inst.level.sectors[sec2].ceilh) <=
+				 std::max(inst.level.sectors[sec1].floorh, inst.level.sectors[sec2].floorh)))
 			{
 				continue;
 			}

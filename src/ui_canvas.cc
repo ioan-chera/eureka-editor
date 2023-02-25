@@ -808,17 +808,17 @@ void UI_Canvas::DrawLinedefs()
 					bool have_tag  = false;
 					bool have_type = false;
 
-					if (inst.level.sectors[s1]->tag != 0)
+					if (inst.level.sectors[s1].tag != 0)
 						have_tag = true;
-					if (inst.level.sectors[s1]->type != 0)
+					if (inst.level.sectors[s1].type != 0)
 						have_type = true;
 
 					if (s2 >= 0)
 					{
-						if (inst.level.sectors[s2]->tag != 0)
+						if (inst.level.sectors[s2].tag != 0)
 							have_tag = true;
 
-						if (inst.level.sectors[s2]->type != 0)
+						if (inst.level.sectors[s2].type != 0)
 							have_type = true;
 					}
 
@@ -1567,9 +1567,9 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     {
         if(info.numtags)
             for (int m = 0 ; m < inst.level.numSectors(); m++)
-                if(inst.level.sectors[m]->tag > 0)
+                if(inst.level.sectors[m].tag > 0)
                     for(int i = 0; i < info.numtags; ++i)
-                        if (inst.level.sectors[m]->tag == info.tags[i])
+                        if (inst.level.sectors[m].tag == info.tags[i])
                             DrawHighlight(ObjType::sectors, m);
         if(info.numtids)
             for(int m = 0; m < inst.level.numThings(); m++)
@@ -1708,7 +1708,7 @@ void UI_Canvas::DrawTagged(ObjType objtype, int objnum)
     }
 	else if (objtype == ObjType::sectors)
     {
-        highlightTaggingTriggers(inst.level.sectors[objnum]->tag, &SpecialTagInfo::tags,
+        highlightTaggingTriggers(inst.level.sectors[objnum].tag, &SpecialTagInfo::tags,
                                  &SpecialTagInfo::numtags);
     }
 }
@@ -2204,7 +2204,7 @@ void UI_Canvas::RenderSector(int num)
 
 ///  fprintf(stderr, "RenderSector %d\n", num);
 
-	rgb_color_t light_col = SectorLightColor(inst.level.sectors[num]->light);
+	rgb_color_t light_col = SectorLightColor(inst.level.sectors[num].light);
 	bool light_and_tex = false;
 
 	SString tex_name;
@@ -2237,9 +2237,9 @@ void UI_Canvas::RenderSector(int num)
 
 		if (inst.edit.sector_render_mode == SREND_Ceiling ||
 			inst.edit.sector_render_mode == SREND_CeilBright)
-			tex_name = inst.level.sectors[num]->CeilTex();
+			tex_name = inst.level.sectors[num].CeilTex();
 		else
-			tex_name = inst.level.sectors[num]->FloorTex();
+			tex_name = inst.level.sectors[num].FloorTex();
 
 		if (inst.is_sky(tex_name))
 		{

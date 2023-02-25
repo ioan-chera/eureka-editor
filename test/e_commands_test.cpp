@@ -67,14 +67,14 @@ TEST(Commands, SelectNeighborLinesByTexture)
     };
     auto addSector = [&doc](int floorh, int ceilh)
     {
-        Sector *sector = new Sector;
-        sector->floorh = floorh;
-        sector->ceilh = ceilh;
-        sector->floor_tex = BA_InternaliseString("FLOOR");
-        sector->ceil_tex = BA_InternaliseString("CEIL");
-        sector->light = 160;
-        sector->type = sector->tag = 0;
-        doc.sectors.emplace_back(sector);
+        Sector sector{};
+        sector.floorh = floorh;
+        sector.ceilh = ceilh;
+        sector.floor_tex = BA_InternaliseString("FLOOR");
+        sector.ceil_tex = BA_InternaliseString("CEIL");
+        sector.light = 160;
+        sector.type = sector.tag = 0;
+        doc.sectors.push_back(sector);
     };
     auto addSide = [&doc](const SString &upper, const SString &middle, const SString &lower,
                           int sector)

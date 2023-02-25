@@ -579,10 +579,10 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("sector"))
 	{
 		kind = Objid(ObjType::sectors, 1);
-		auto addedSector = std::make_unique<Sector>();
-		addedSector->light = 160;
+		Sector addedSector{};
+		addedSector.light = 160;
 		doc.sectors.push_back(std::move(addedSector));
-		new_S = doc.sectors.back().get();
+		new_S = &doc.sectors.back();
 	}
 
 	if (!kind.valid())
@@ -872,19 +872,19 @@ static void UDMF_WriteSectors(const Document &doc, Lump_c *lump)
 
 		const auto &sec = doc.sectors[i];
 
-		lump->Printf("heightfloor = %d;\n", sec->floorh);
-		lump->Printf("heightceiling = %d;\n", sec->ceilh);
+		lump->Printf("heightfloor = %d;\n", sec.floorh);
+		lump->Printf("heightceiling = %d;\n", sec.ceilh);
 
 		// use NormalizeTex to ensure no double quote
 
-		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec->FloorTex()).c_str());
-		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec->CeilTex()).c_str());
+		lump->Printf("texturefloor = \"%s\";\n", NormalizeTex(sec.FloorTex()).c_str());
+		lump->Printf("textureceiling = \"%s\";\n", NormalizeTex(sec.CeilTex()).c_str());
 
-		lump->Printf("lightlevel = %d;\n", sec->light);
-		if (sec->type != 0)
-			lump->Printf("special = %d;\n", sec->type);
-		if (sec->tag != 0)
-			lump->Printf("id = %d;\n", sec->tag);
+		lump->Printf("lightlevel = %d;\n", sec.light);
+		if (sec.type != 0)
+			lump->Printf("special = %d;\n", sec.type);
+		if (sec.tag != 0)
+			lump->Printf("id = %d;\n", sec.tag);
 
 		lump->Printf("}\n\n");
 	}

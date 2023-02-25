@@ -145,7 +145,7 @@ void Document::getLevelChecksum(crc32_c &crc) const
 
 const Sector &Document::getSector(const SideDef &side) const
 {
-	return *sectors[side.sector];
+	return sectors[side.sector];
 }
 
 int Document::getSectorID(const LineDef &line, Side side) const

@@ -1082,16 +1082,16 @@ void Instance::SelectNeighborSectors(int objnum, SString option, byte parts)
 			if (option == "texture")
 			{
 				if (parts & PART_FLOOR)
-					match = (sector1->FloorTex() == sector2->FloorTex());
+					match = (sector1.FloorTex() == sector2->FloorTex());
 				else
-					match = (sector1->CeilTex() == sector2->CeilTex());
+					match = (sector1.CeilTex() == sector2->CeilTex());
 			}
 			else
 			{
 				if (parts & PART_FLOOR)
-					match = (sector1->floorh == sector2->floorh);
+					match = (sector1.floorh == sector2->floorh);
 				else
-					match = (sector1->ceilh == sector2->ceilh);
+					match = (sector1.ceilh == sector2->ceilh);
 			}
 
 			if (match)

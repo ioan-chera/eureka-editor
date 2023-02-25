@@ -123,7 +123,7 @@ void Render_View_t::FindGroundZ()
 
 		if (o.num >= 0)
 		{
-			double z = inst.level.sectors[o.num]->floorh;
+			double z = inst.level.sectors[o.num].floorh;
 			{
 				sector_3dfloors_c *ex = inst.Subdiv_3DFloorsForSector(o.num);
 				if (ex->f_plane.sloped)
@@ -359,7 +359,7 @@ private:
 				return reinterpret_cast<int *>(&inst.level.getMutableVertex(objnum));
 
 			case ObjType::sectors:
-				return reinterpret_cast<int *>(inst.level.sectors[objnum].get());
+				return reinterpret_cast<int *>(&inst.level.sectors[objnum]);
 
 			case ObjType::sidedefs:
 				return reinterpret_cast<int *>(inst.level.sidedefs[objnum].get());
@@ -925,8 +925,8 @@ static void DragThings_Update(Instance &inst)
 
 	if (old_sec.valid() && new_sec.valid())
 	{
-		float old_z = static_cast<float>(inst.level.sectors[old_sec.num]->floorh);
-		float new_z = static_cast<float>(inst.level.sectors[new_sec.num]->floorh);
+		float old_z = static_cast<float>(inst.level.sectors[old_sec.num].floorh);
+		float new_z = static_cast<float>(inst.level.sectors[new_sec.num].floorh);
 
 		// intent here is to show proper position, NOT raise/lower things.
 		// [ perhaps add a new variable? ]
@@ -1183,7 +1183,7 @@ StringID Instance::GrabSelectedFlat()
 
 		const auto &S = level.sectors[edit.highlight.num];
 
-		result = SEC_GrabFlat(S.get(), edit.highlight.parts);
+		result = SEC_GrabFlat(&S, edit.highlight.parts);
 	}
 	else
 	{
@@ -1192,7 +1192,7 @@ StringID Instance::GrabSelectedFlat()
 			const auto &S = level.sectors[*it];
 			byte parts = edit.Selected->get_ext(*it);
 
-			StringID tex = SEC_GrabFlat(S.get(), parts & ~1);
+			StringID tex = SEC_GrabFlat(&S, parts & ~1);
 
 			if (result.isValid() && tex != result)
 			{

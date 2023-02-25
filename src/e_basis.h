@@ -110,7 +110,7 @@ private:
 		int objnum = 0;
 		Thing thing = {};
 		Vertex vertex = {};
-		std::unique_ptr<Sector> sector;
+		Sector sector;
 		std::unique_ptr<SideDef> sidedef;
 		LineDef linedef;
 		int value = 0;
@@ -124,7 +124,7 @@ private:
 		void rawDelete(Basis &basis);
 		Thing rawDeleteThing(Document &doc) const;
 		Vertex rawDeleteVertex(Document &doc) const;
-		std::unique_ptr<Sector> rawDeleteSector(Document &doc) const;
+		Sector rawDeleteSector(Document &doc) const;
 		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
 		LineDef rawDeleteLinedef(Document &doc) const;
 

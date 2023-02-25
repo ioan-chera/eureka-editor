@@ -53,8 +53,8 @@ void SectorModule::safeRaiseLower(EditOperation &op, int sec, int parts, int dz)
 	if (parts == 0)
 		parts = PART_FLOOR | PART_CEIL;
 
-	int f = doc.sectors[sec]->floorh;
-	int c = doc.sectors[sec]->ceilh;
+	int f = doc.sectors[sec].floorh;
+	int c = doc.sectors[sec].ceilh;
 
 	if ((parts & PART_FLOOR) != 0 && (parts & PART_CEIL) != 0)
 	{
@@ -113,7 +113,7 @@ void Instance::CMD_SEC_Floor()
 		{
 			const auto &S = level.sectors[*it];
 
-			int new_h = clamp(-32767, S->floorh + diff, S->ceilh);
+			int new_h = clamp(-32767, S.floorh + diff, S.ceilh);
 
 			op.changeSector(*it, Sector::F_FLOORH, new_h);
 		}
@@ -151,7 +151,7 @@ void Instance::CMD_SEC_Ceil()
 		{
 			const auto &S = level.sectors[*it];
 
-			int new_h = clamp(S->floorh, S->ceilh + diff, 32767);
+			int new_h = clamp(S.floorh, S.ceilh + diff, 32767);
 
 			op.changeSector(*it, Sector::F_CEILH, new_h);
 		}
@@ -200,7 +200,7 @@ void SectorModule::sectorsAdjustLight(int delta) const
 		{
 			const auto &S = doc.sectors[*it];
 
-			int new_lt = light_add_delta(S->light, delta);
+			int new_lt = light_add_delta(S.light, delta);
 
 			op.changeSector(*it, Sector::F_LIGHT, new_lt);
 		}
@@ -251,8 +251,8 @@ void Instance::CMD_SEC_SwapFlats()
 		{
 			const auto &S = level.sectors[*it];
 
-			StringID floor_tex = S->floor_tex;
-			StringID  ceil_tex = S->ceil_tex;
+			StringID floor_tex = S.floor_tex;
+			StringID  ceil_tex = S.ceil_tex;
 
 			op.changeSector(*it, Sector::F_FLOOR_TEX, ceil_tex);
 			op.changeSector(*it, Sector::F_CEIL_TEX, floor_tex);
@@ -338,14 +338,14 @@ void Instance::commandSectorMerge()
 		{
 			const auto &ref = level.sectors[first];
 
-			op.changeSector(new_sec, Sector::F_FLOORH,    ref->floorh);
-			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref->floor_tex);
-			op.changeSector(new_sec, Sector::F_CEILH,     ref->ceilh);
-			op.changeSector(new_sec, Sector::F_CEIL_TEX,  ref->ceil_tex);
+			op.changeSector(new_sec, Sector::F_FLOORH,    ref.floorh);
+			op.changeSector(new_sec, Sector::F_FLOOR_TEX, ref.floor_tex);
+			op.changeSector(new_sec, Sector::F_CEILH,     ref.ceilh);
+			op.changeSector(new_sec, Sector::F_CEIL_TEX,  ref.ceil_tex);
 
-			op.changeSector(new_sec, Sector::F_LIGHT, ref->light);
-			op.changeSector(new_sec, Sector::F_TYPE,  ref->type);
-			op.changeSector(new_sec, Sector::F_TAG,   ref->tag);
+			op.changeSector(new_sec, Sector::F_LIGHT, ref.light);
+			op.changeSector(new_sec, Sector::F_TYPE,  ref.type);
+			op.changeSector(new_sec, Sector::F_TAG,   ref.tag);
 		}
 
 		for (sel_iter_c it(edit.Selected) ; !it.done() ; it.next())
@@ -1213,9 +1213,9 @@ bool SectorModule::assignSectorToSpace(EditOperation &op, const v2double_t &map,
 			model = loop.NeighboringSector();
 
 		if (model < 0)
-			doc.sectors[new_sec]->SetDefaults(inst.conf);
+			doc.sectors[new_sec].SetDefaults(inst.conf);
 		else
-			*doc.sectors[new_sec] = *doc.sectors[model];
+			doc.sectors[new_sec] = doc.sectors[model];
 	}
 
 	selection_c   flip(ObjType::linedefs);
