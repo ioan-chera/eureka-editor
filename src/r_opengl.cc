@@ -1070,7 +1070,7 @@ public:
 				{
 					const extrafloor_c& EF = b_ex->floors[k];
 					const auto &ef_sd = inst.level.sidedefs[EF.sd];
-					const auto &dummy = inst.level.sectors[ef_sd->sector];
+					const auto &dummy = inst.level.sectors[ef_sd.sector];
 
 					if (EF.flags & (EXFL_TOP | EXFL_BOTTOM))
 						continue;
@@ -1090,7 +1090,7 @@ public:
 					else if (EF.flags & EXFL_LOWER)
 						tex = sd->LowerTex();
 					else
-						tex = ef_sd->MidTex();
+						tex = ef_sd.MidTex();
 
 					slope_plane_c p1; p1.Init(static_cast<float>(bottom_h));
 					slope_plane_c p2; p2.Init(static_cast<float>(top_h));
@@ -1184,7 +1184,7 @@ public:
 		for (size_t k = 0 ; k < exfloor->floors.size() ; k++)
 		{
 			const extrafloor_c& EF = exfloor->floors[k];
-			const auto &dummy = inst.level.sectors[inst.level.sidedefs[EF.sd]->sector];
+			const auto &dummy = inst.level.sectors[inst.level.sidedefs[EF.sd].sector];
 
 			// TODO: supporting translucent surfaces is non-trivial and needs
 			//       to be done in separate pass with a depth sort.

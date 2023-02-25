@@ -175,12 +175,12 @@ const Vertex &Document::getEnd(const LineDef &line) const
 
 const SideDef *Document::getRight(const LineDef &line) const
 {
-	return line.right >= 0 ? sidedefs[line.right].get() : nullptr;
+	return line.right >= 0 ? &sidedefs[line.right] : nullptr;
 }
 
 const SideDef *Document::getLeft(const LineDef &line) const
 {
-	return line.left >= 0 ? sidedefs[line.left].get() : nullptr;
+	return line.left >= 0 ? &sidedefs[line.left] : nullptr;
 }
 
 double Document::calcLength(const LineDef &line) const
@@ -197,9 +197,9 @@ bool Document::touchesCoord(const LineDef &line, FFixedPoint tx, FFixedPoint ty)
 
 bool Document::touchesSector(const LineDef &line, int secNum) const
 {
-	if(line.right >= 0 && sidedefs[line.right]->sector == secNum)
+	if(line.right >= 0 && sidedefs[line.right].sector == secNum)
 		return true;
-	if(line.left >= 0 && sidedefs[line.left]->sector == secNum)
+	if(line.left >= 0 && sidedefs[line.left].sector == secNum)
 		return true;
 	return false;
 }
@@ -212,7 +212,7 @@ bool Document::isZeroLength(const LineDef &line) const
 bool Document::isSelfRef(const LineDef &line) const
 {
 	return (line.left >= 0) && (line.right >= 0) &&
-		sidedefs[line.left]->sector == sidedefs[line.right]->sector;
+		sidedefs[line.left].sector == sidedefs[line.right].sector;
 }
 
 bool Document::isHorizontal(const LineDef &line) const

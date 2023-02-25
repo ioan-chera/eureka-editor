@@ -111,7 +111,7 @@ private:
 		Thing thing = {};
 		Vertex vertex = {};
 		Sector sector;
-		std::unique_ptr<SideDef> sidedef;
+		SideDef sidedef;
 		LineDef linedef;
 		int value = 0;
 
@@ -125,7 +125,7 @@ private:
 		Thing rawDeleteThing(Document &doc) const;
 		Vertex rawDeleteVertex(Document &doc) const;
 		Sector rawDeleteSector(Document &doc) const;
-		std::unique_ptr<SideDef> rawDeleteSidedef(Document &doc) const;
+		SideDef rawDeleteSidedef(Document &doc) const;
 		LineDef rawDeleteLinedef(Document &doc) const;
 
 		void rawInsert(Basis &basis);

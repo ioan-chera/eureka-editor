@@ -569,12 +569,12 @@ static void UDMF_ParseObject(Document &doc, Udmf_Parser& parser, Udmf_Token& nam
 	else if (name.Match("sidedef"))
 	{
 		kind = Objid(ObjType::sidedefs, 1);
-		auto addedSide = std::make_unique<SideDef>();
-		addedSide->mid_tex = BA_InternaliseString("-");
-		addedSide->lower_tex = addedSide->mid_tex;
-		addedSide->upper_tex = addedSide->mid_tex;
+		SideDef addedSide{};
+		addedSide.mid_tex = BA_InternaliseString("-");
+		addedSide.lower_tex = addedSide.mid_tex;
+		addedSide.upper_tex = addedSide.mid_tex;
 		doc.sidedefs.push_back(std::move(addedSide));
-		new_SD = doc.sidedefs.back().get();
+		new_SD = &doc.sidedefs.back();
 	}
 	else if (name.Match("sector"))
 	{
@@ -640,7 +640,7 @@ void Instance::ValidateLevel_UDMF()
 {
 	for (int n = 0 ; n < level.numSidedefs() ; n++)
 	{
-		ValidateSectorRef(level.sidedefs[n].get(), n);
+		ValidateSectorRef(&level.sidedefs[n], n);
 	}
 
 	for (int n = 0 ; n < level.numLinedefs(); n++)
@@ -843,21 +843,21 @@ static void UDMF_WriteSideDefs(const Document &doc, Lump_c *lump)
 
 		const auto &side = doc.sidedefs[i];
 
-		lump->Printf("sector = %d;\n", side->sector);
+		lump->Printf("sector = %d;\n", side.sector);
 
-		if (side->x_offset != 0)
-			lump->Printf("offsetx = %d;\n", side->x_offset);
-		if (side->y_offset != 0)
-			lump->Printf("offsety = %d;\n", side->y_offset);
+		if (side.x_offset != 0)
+			lump->Printf("offsetx = %d;\n", side.x_offset);
+		if (side.y_offset != 0)
+			lump->Printf("offsety = %d;\n", side.y_offset);
 
 		// use NormalizeTex to ensure no double quote
 
-		if (side->UpperTex() != "-")
-			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side->UpperTex()).c_str());
-		if (side->LowerTex() != "-")
-			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side->LowerTex()).c_str());
-		if (side->MidTex() != "-")
-			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side->MidTex()).c_str());
+		if (side.UpperTex() != "-")
+			lump->Printf("texturetop = \"%s\";\n", NormalizeTex(side.UpperTex()).c_str());
+		if (side.LowerTex() != "-")
+			lump->Printf("texturebottom = \"%s\";\n", NormalizeTex(side.LowerTex()).c_str());
+		if (side.MidTex() != "-")
+			lump->Printf("texturemiddle = \"%s\";\n", NormalizeTex(side.MidTex()).c_str());
 
 		lump->Printf("}\n\n");
 	}

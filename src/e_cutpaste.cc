@@ -335,7 +335,7 @@ static void CopyGroupOfObjects(const Document &doc, const selection_c &list)
 	{
 		side_map[*it] = (int)clip_board->sides.size();
 
-		clip_board->sides.push_back(*doc.sidedefs[*it]);
+		clip_board->sides.push_back(doc.sidedefs[*it]);
 		SideDef &SD = clip_board->sides.back();
 
 		// adjust sector references, if needed
@@ -500,13 +500,13 @@ static void PasteGroupOfObjects(EditOperation &op, MapFormat format, const v2dou
 
 		side_map[i] = new_sd;
 
-		*SD = clip_board->sides[i];
+		SD = clip_board->sides[i];
 
-		if (SD->sector < 0)
+		if (SD.sector < 0)
 		{
-			int local = -1 - SD->sector;
+			int local = -1 - SD.sector;
 			SYS_ASSERT(sector_map.find(local) != sector_map.end());
-			SD->sector = sector_map[local];
+			SD.sector = sector_map[local];
 		}
 	}
 
@@ -826,7 +826,7 @@ void UnusedSideDefs(const Document &doc, const selection_c &lines, const selecti
 	{
 		const auto &SD = doc.sidedefs[i];
 
-		if (secs && secs->get(SD->sector))
+		if (secs && secs->get(SD.sector))
 			result.set(i);
 	}
 }

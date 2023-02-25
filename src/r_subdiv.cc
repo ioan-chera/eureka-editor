@@ -185,7 +185,7 @@ void sector_info_cache_c::Rebuild()
 			if (sd_num < 0)
 				continue;
 
-			sec = inst.level.sidedefs[sd_num]->sector;
+			sec = inst.level.sidedefs[sd_num].sector;
 
 			sector_extra_info_t& info = infos[sec];
 

@@ -704,7 +704,7 @@ void ConvertSelection(const Document &doc, const selection_c & src, selection_c 
 		{
 			const auto &SD = doc.sidedefs[n];
 
-			if (src.get(SD->sector))
+			if (src.get(SD.sector))
 				dest.set(n);
 		}
 		return;

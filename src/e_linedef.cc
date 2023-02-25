@@ -84,7 +84,7 @@ inline const SideDef * LinedefModule::sidedefPointer(const Objid& obj) const
 
 	int sd = pointer(obj)->WhatSideDef(where);
 
-	return (sd >= 0) ? doc.sidedefs[sd].get() : nullptr;
+	return (sd >= 0) ? &doc.sidedefs[sd] : nullptr;
 }
 
 
@@ -1054,20 +1054,20 @@ void LinedefModule::addSecondSidedef(EditOperation &op, int ld, int new_sd, int 
 
 	const auto &other = doc.sidedefs[other_sd];
 
-	if (! is_null_tex(other->MidTex()))
+	if (! is_null_tex(other.MidTex()))
 	{
-		SD->lower_tex = other->mid_tex;
-		SD->upper_tex = other->mid_tex;
+		SD.lower_tex = other.mid_tex;
+		SD.upper_tex = other.mid_tex;
 
-		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other->mid_tex);
-		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other->mid_tex);
+		op.changeSidedef(other_sd, SideDef::F_LOWER_TEX, other.mid_tex);
+		op.changeSidedef(other_sd, SideDef::F_UPPER_TEX, other.mid_tex);
 
 		op.changeSidedef(other_sd, SideDef::F_MID_TEX, null_tex);
 	}
 	else
 	{
-		SD->lower_tex = other->lower_tex;
-		SD->upper_tex = other->upper_tex;
+		SD.lower_tex = other.lower_tex;
+		SD.upper_tex = other.upper_tex;
 	}
 }
 
@@ -1153,7 +1153,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 
 	// FIXME: if sidedef is shared, either don't modify it _OR_ duplicate it
 
-	const SideDef *SD = doc.sidedefs[other_sd].get();
+	const SideDef *SD = &doc.sidedefs[other_sd];
 
 	StringID new_tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
@@ -1164,7 +1164,7 @@ void LinedefModule::removeSidedef(EditOperation &op, int ld, Side ld_side) const
 		new_tex = SD->upper_tex;
 	else if (gone_sd >= 0)
 	{
-		SD = doc.sidedefs[gone_sd].get();
+		SD = &doc.sidedefs[gone_sd];
 
 		if (! is_null_tex(SD->LowerTex()))
 			new_tex = SD->lower_tex;

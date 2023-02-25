@@ -79,12 +79,12 @@ TEST(Commands, SelectNeighborLinesByTexture)
     auto addSide = [&doc](const SString &upper, const SString &middle, const SString &lower,
                           int sector)
     {
-        SideDef *side = new SideDef{};
-        side->upper_tex = BA_InternaliseString(upper);
-        side->mid_tex = BA_InternaliseString(middle);
-        side->lower_tex = BA_InternaliseString(lower);
-        side->sector = sector;
-        doc.sidedefs.emplace_back(side);
+        SideDef side{};
+        side.upper_tex = BA_InternaliseString(upper);
+        side.mid_tex = BA_InternaliseString(middle);
+        side.lower_tex = BA_InternaliseString(lower);
+        side.sector = sector;
+        doc.sidedefs.push_back(side);
     };
     auto addLine = [&doc](int v1, int v2, int s1, int s2)
     {

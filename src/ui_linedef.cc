@@ -398,7 +398,7 @@ void UI_LineBox::SetTexOnLine(EditOperation &op, int ld, StringID new_tex, int e
 		// Note: we only do this for LOWERS (otherwise it'd be
 		// impossible to set them to different textures).
 
-		if (S->lower_tex == S->upper_tex)
+		if (S.lower_tex == S.upper_tex)
 			op.changeSidedef(sd1, SideDef::F_UPPER_TEX, new_tex);
 
 		op.changeSidedef(sd1, SideDef::F_LOWER_TEX, new_tex);

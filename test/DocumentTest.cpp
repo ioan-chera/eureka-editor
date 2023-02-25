@@ -53,8 +53,8 @@ TEST_F(DocumentFixture, CheckObjects)
 	doc.addVertex(Vertex());
 	doc.addVertex(Vertex());
 	// no sectors
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.sidedefs.push_back(SideDef());
+	doc.sidedefs.push_back(SideDef());
 	doc.linedefs.push_back(LineDef());
 
 	ASSERT_EQ(doc.numThings(), 3);
@@ -105,8 +105,8 @@ TEST_F(DocumentFixture, CRC)
 	doc.addVertex(Vertex());
 	doc.addVertex(Vertex());
 	// no sectors
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
-	doc.sidedefs.push_back(std::make_unique<SideDef>());
+	doc.sidedefs.push_back(SideDef());
+	doc.sidedefs.push_back(SideDef());
 	doc.linedefs.push_back(LineDef());
 
 	crc32_c crc;

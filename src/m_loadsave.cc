@@ -100,9 +100,9 @@ void Instance::FreshLevel()
 		v.SetRawY(loaded.levelFormat, (i == 1 || i == 2) ? 256 : -256);
 		level.addVertex(v);
 
-		auto sd = std::make_unique<SideDef>();
-		sd->SetDefaults(conf, false);
-		level.sidedefs.push_back(std::move(sd));
+		SideDef sd{};
+		sd.SetDefaults(conf, false);
+		level.sidedefs.push_back(sd);
 
 		LineDef ld{};
 		ld.start = i;
@@ -487,11 +487,11 @@ void Instance::CreateFallbackSideDef()
 
 	gLog.printf("Creating a fallback sidedef.\n");
 
-	auto sd = std::make_unique<SideDef>();
+	SideDef sd{};
 
-	sd->SetDefaults(conf, false);
+	sd.SetDefaults(conf, false);
 
-	level.sidedefs.push_back(std::move(sd));
+	level.sidedefs.push_back(sd);
 }
 
 static void CreateFallbackVertices(Document &doc)
@@ -721,24 +721,24 @@ void Instance::LoadSideDefs(const Wad_file *load_wad)
 		if (! lump->Read(&raw, sizeof(raw)))
 			ThrowException("Error reading sidedefs.\n");
 
-		auto sd = std::make_unique<SideDef>();
+		SideDef sd{};
 
-		sd->x_offset = LE_S16(raw.x_offset);
-		sd->y_offset = LE_S16(raw.y_offset);
+		sd.x_offset = LE_S16(raw.x_offset);
+		sd.y_offset = LE_S16(raw.y_offset);
 
 		UpperCaseShortStr(raw.upper_tex, 8);
 		UpperCaseShortStr(raw.lower_tex, 8);
 		UpperCaseShortStr(raw.  mid_tex, 8);
 
-		sd->upper_tex = BA_InternaliseString(SString(raw.upper_tex, 8));
-		sd->lower_tex = BA_InternaliseString(SString(raw.lower_tex, 8));
-		sd->  mid_tex = BA_InternaliseString(SString(raw.  mid_tex, 8));
+		sd.upper_tex = BA_InternaliseString(SString(raw.upper_tex, 8));
+		sd.lower_tex = BA_InternaliseString(SString(raw.lower_tex, 8));
+		sd.  mid_tex = BA_InternaliseString(SString(raw.  mid_tex, 8));
 
-		sd->sector = LE_U16(raw.sector);
+		sd.sector = LE_U16(raw.sector);
 
-		ValidateSectorRef(sd.get(), i);
+		ValidateSectorRef(&sd, i);
 
-		level.sidedefs.push_back(std::move(sd));
+		level.sidedefs.push_back(sd);
 	}
 }
 
@@ -1423,14 +1423,14 @@ void Instance::SaveSideDefs()
 	{
 		raw_sidedef_t raw;
 
-		raw.x_offset = LE_S16(side->x_offset);
-		raw.y_offset = LE_S16(side->y_offset);
+		raw.x_offset = LE_S16(side.x_offset);
+		raw.y_offset = LE_S16(side.y_offset);
 
-		W_StoreString(raw.upper_tex, side->UpperTex(), sizeof(raw.upper_tex));
-		W_StoreString(raw.lower_tex, side->LowerTex(), sizeof(raw.lower_tex));
-		W_StoreString(raw.mid_tex,   side->MidTex(),   sizeof(raw.mid_tex));
+		W_StoreString(raw.upper_tex, side.UpperTex(), sizeof(raw.upper_tex));
+		W_StoreString(raw.lower_tex, side.LowerTex(), sizeof(raw.lower_tex));
+		W_StoreString(raw.mid_tex,   side.MidTex(),   sizeof(raw.mid_tex));
 
-		raw.sector = LE_U16(side->sector);
+		raw.sector = LE_U16(side.sector);
 
 		lump->Write(&raw, sizeof(raw));
 	}

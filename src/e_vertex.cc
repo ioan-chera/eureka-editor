@@ -730,7 +730,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	StringID tex = BA_InternaliseString(inst.conf.default_wall_tex);
 
-	const SideDef * SD = doc.sidedefs[L1.right].get();
+	const SideDef * SD = &doc.sidedefs[L1.right];
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;
@@ -742,7 +742,7 @@ void VertexModule::DETSEC_SeparateLine(EditOperation &op, int ld_num, int start2
 
 	// now fix the second line's textures
 
-	SD = doc.sidedefs[lost_sd].get();
+	SD = &doc.sidedefs[lost_sd];
 
 	if (! is_null_tex(SD->LowerTex()))
 		tex = SD->lower_tex;

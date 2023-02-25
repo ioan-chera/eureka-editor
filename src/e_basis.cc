@@ -207,7 +207,7 @@ int Basis::addNew(ObjType type)
 
 	case ObjType::sidedefs:
 		op.objnum = doc.numSidedefs();
-		op.sidedef = std::make_unique<SideDef>();
+		op.sidedef = SideDef();
 		break;
 
 	case ObjType::linedefs:
@@ -276,7 +276,7 @@ void Basis::del(ObjType type, int objnum)
 	{
 		// delete the sidedefs bound to this sector
 		for(int n = doc.numSidedefs() - 1; n >= 0; n--)
-			if(doc.sidedefs[n]->sector == objnum)
+			if(doc.sidedefs[n].sector == objnum)
 				del(ObjType::sidedefs, n);
 	}
 
@@ -522,7 +522,7 @@ void Basis::EditUnit::rawChange(Basis &basis)
 		break;
 	case ObjType::sidedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numSidedefs());
-		pos = reinterpret_cast<int *>(basis.doc.sidedefs[objnum].get());
+		pos = reinterpret_cast<int *>(&basis.doc.sidedefs[objnum]);
 		break;
 	case ObjType::linedefs:
 		SYS_ASSERT(0 <= objnum && objnum < basis.doc.numLinedefs());
@@ -627,8 +627,8 @@ Sector Basis::EditUnit::rawDeleteSector(Document &doc) const
 		{
 			auto &S = doc.sidedefs[n];
 
-			if(S->sector > objnum)
-				S->sector--;
+			if(S.sector > objnum)
+				S.sector--;
 		}
 	}
 
@@ -638,11 +638,11 @@ Sector Basis::EditUnit::rawDeleteSector(Document &doc) const
 //
 // Delete sidedef (and update linedef references)
 //
-std::unique_ptr<SideDef> Basis::EditUnit::rawDeleteSidedef(Document &doc) const
+SideDef Basis::EditUnit::rawDeleteSidedef(Document &doc) const
 {
 	SYS_ASSERT(0 <= objnum && objnum < doc.numSidedefs());
 
-	auto result = std::move(doc.sidedefs[objnum]);
+	auto result = doc.sidedefs[objnum];
 	doc.sidedefs.erase(doc.sidedefs.begin() + objnum);
 
 	// fix the linedefs references
@@ -705,7 +705,7 @@ void Basis::EditUnit::rawInsert(Basis &basis)
 
 	case ObjType::sidedefs:
 		rawInsertSidedef(basis.doc);
-		sidedef.reset();
+		sidedef = {};
 		break;
 
 	case ObjType::sectors:
@@ -773,8 +773,8 @@ void Basis::EditUnit::rawInsertSector(Document &doc)
 		{
 			auto &S = doc.sidedefs[n];
 
-			if(S->sector >= objnum)
-				S->sector++;
+			if(S.sector >= objnum)
+				S.sector++;
 		}
 	}
 }
@@ -823,7 +823,7 @@ void Basis::EditUnit::deleteFinally()
 	case ObjType::things:   thing = {}; break;
 	case ObjType::vertices: vertex = {}; break;
 	case ObjType::sectors:  sector = {}; break;
-	case ObjType::sidedefs: sidedef.reset(); break;
+	case ObjType::sidedefs: sidedef = {}; break;
 	case ObjType::linedefs: linedef = {}; break;
 
 	default:

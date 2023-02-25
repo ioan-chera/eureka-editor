@@ -1007,7 +1007,7 @@ int ChecksModule::copySidedef(EditOperation &op, int num) const
 {
 	int sd = op.addNew(ObjType::sidedefs);
 
-	*doc.sidedefs[sd] = *doc.sidedefs[num];
+	doc.sidedefs[sd] = doc.sidedefs[num];
 
 	return sd;
 }
@@ -3930,13 +3930,13 @@ static void Textures_FixUnknownTex(Instance &inst)
 
 			const auto &SD = inst.level.sidedefs[sd_num];
 
-			if (! inst.wad.images.W_TextureIsKnown(inst.conf, SD->LowerTex()))
+			if (! inst.wad.images.W_TextureIsKnown(inst.conf, SD.LowerTex()))
 				op.changeSidedef(sd_num, SideDef::F_LOWER_TEX, new_wall);
 
-			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->UpperTex()))
+			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD.UpperTex()))
 				op.changeSidedef(sd_num, SideDef::F_UPPER_TEX, new_wall);
 
-			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD->MidTex()))
+			if (!inst.wad.images.W_TextureIsKnown(inst.conf, SD.MidTex()))
 				op.changeSidedef(sd_num, SideDef::F_MID_TEX, two_sided ? null_tex : new_wall);
 		}
 	}

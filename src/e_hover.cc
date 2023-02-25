@@ -981,7 +981,7 @@ Objid hover::getNearestSector(const Document &doc, const v2double_t &pos)
 		int sd_num = (side1 == Side::left) ? doc.linedefs[line1].left : doc.linedefs[line1].right;
 
 		if(sd_num >= 0)
-			return Objid(ObjType::sectors, doc.sidedefs[sd_num]->sector);
+			return Objid(ObjType::sectors, doc.sidedefs[sd_num].sector);
 	}
 
 	// none found

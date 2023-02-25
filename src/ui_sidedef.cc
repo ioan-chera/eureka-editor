@@ -313,8 +313,8 @@ void UI_SideBox::add_callback(Fl_Widget *w, void *data)
 			// create the new sidedef
 			sd = op.addNew(ObjType::sidedefs);
 
-			box->inst.level.sidedefs[sd]->SetDefaults(box->inst.conf, other >= 0);
-			box->inst.level.sidedefs[sd]->sector = new_sec;
+			box->inst.level.sidedefs[sd].SetDefaults(box->inst.conf, other >= 0);
+			box->inst.level.sidedefs[sd].sector = new_sec;
 
 			op.changeLinedef(*it, static_cast<byte>(field), sd);
 
@@ -465,13 +465,13 @@ void UI_SideBox::UpdateField()
 	{
 		const auto &sd = inst.level.sidedefs[obj];
 
-		mFixUp.setInputValue(x_ofs, SString(sd->x_offset).c_str());
-		mFixUp.setInputValue(y_ofs, SString(sd->y_offset).c_str());
-		mFixUp.setInputValue(sec, SString(sd->sector).c_str());
+		mFixUp.setInputValue(x_ofs, SString(sd.x_offset).c_str());
+		mFixUp.setInputValue(y_ofs, SString(sd.y_offset).c_str());
+		mFixUp.setInputValue(sec, SString(sd.sector).c_str());
 
-		SString lower = sd->LowerTex();
-		SString rail  = sd->MidTex();
-		SString upper = sd->UpperTex();
+		SString lower = sd.LowerTex();
+		SString rail  = sd.MidTex();
+		SString upper = sd.UpperTex();
 
 		mFixUp.setInputValue(l_tex, lower.c_str());
 		mFixUp.setInputValue(u_tex, upper.c_str());

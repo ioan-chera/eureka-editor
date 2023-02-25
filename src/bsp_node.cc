@@ -1323,7 +1323,7 @@ static seg_t *CreateOneSeg(int line, vertex_t *start, vertex_t *end,
 {
 	const SideDef *sd = NULL;
 	if (sidedef >= 0)
-		sd = inst.level.sidedefs[sidedef].get();
+		sd = &inst.level.sidedefs[sidedef];
 
 	// check for bad sidedef
 	if (sd && !inst.level.isSector(sd->sector))

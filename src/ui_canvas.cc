@@ -789,8 +789,8 @@ void UI_Canvas::DrawLinedefs()
 				int sd1 = L.right;
 				int sd2 = L.left;
 
-				int s1  = (sd1 < 0) ? NIL_OBJ : inst.level.sidedefs[sd1]->sector;
-				int s2  = (sd2 < 0) ? NIL_OBJ : inst.level.sidedefs[sd2]->sector;
+				int s1  = (sd1 < 0) ? NIL_OBJ : inst.level.sidedefs[sd1].sector;
+				int s2  = (sd2 < 0) ? NIL_OBJ : inst.level.sidedefs[sd2].sector;
 
 				if (inst.edit.error_mode)
 					col = LIGHTGREY;

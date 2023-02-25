@@ -291,7 +291,7 @@ void SectorModule::replaceSectorRefs(EditOperation &op, int old_sec, int new_sec
 	{
 		const auto &sd = doc.sidedefs[i];
 
-		if (sd->sector == old_sec)
+		if (sd.sector == old_sec)
 		{
 			op.changeSidedef(i, SideDef::F_SECTOR, new_sec);
 		}
@@ -929,18 +929,18 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 
 			if (doc.linedefs[ld].TwoSided())
 			{
-				if (SD->lower_tex == null_tex) continue;
-				if (SD->upper_tex == null_tex) continue;
+				if (SD.lower_tex == null_tex) continue;
+				if (SD.upper_tex == null_tex) continue;
 
-				def_lower = SD->lower_tex;
-				def_upper = SD->upper_tex;
+				def_lower = SD.lower_tex;
+				def_upper = SD.upper_tex;
 			}
 			else
 			{
-				if (SD->mid_tex == null_tex) continue;
+				if (SD.mid_tex == null_tex) continue;
 
-				def_lower = SD->mid_tex;
-				def_upper = SD->mid_tex;
+				def_lower = SD.mid_tex;
+				def_upper = SD.mid_tex;
 			}
 
 			// stop once we found something
@@ -966,12 +966,12 @@ void SectorModule::determineNewTextures(lineloop_c& loop,
 
 		if (doc.linedefs[ld].TwoSided())
 		{
-			lower_texs[k] = SD->lower_tex;
-			upper_texs[k] = SD->upper_tex;
+			lower_texs[k] = SD.lower_tex;
+			upper_texs[k] = SD.upper_tex;
 		}
 		else
 		{
-			lower_texs[k] = upper_texs[k] = SD->mid_tex;
+			lower_texs[k] = upper_texs[k] = SD.mid_tex;
 		}
 
 		// prevent the "-" null texture
@@ -1070,19 +1070,19 @@ void SectorModule::doAssignSector(EditOperation &op, int ld, Side side, int new_
 	if (other_sd >= 0)
 	{
 		// linedef will be two-sided
-		SD->lower_tex = new_lower;
-		SD->upper_tex = new_upper;
-		SD->  mid_tex = BA_InternaliseString("-");
+		SD.lower_tex = new_lower;
+		SD.upper_tex = new_upper;
+		SD.  mid_tex = BA_InternaliseString("-");
 	}
 	else
 	{
 		// linedef will be one-sided
-		SD->lower_tex = new_lower;
-		SD->upper_tex = new_lower;
-		SD->  mid_tex = new_lower;
+		SD.lower_tex = new_lower;
+		SD.upper_tex = new_lower;
+		SD.  mid_tex = new_lower;
 	}
 
-	SD->sector = new_sec;
+	SD.sector = new_sec;
 
 	if (side == Side::right)
 		op.changeLinedef(ld, LineDef::F_RIGHT, new_sd);
